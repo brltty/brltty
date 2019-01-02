@@ -1493,7 +1493,6 @@ initializeBrailleDriver (const char *code, int verify) {
         if (oldPreferencesFile) {
           logMessage(LOG_INFO, "%s: %s", gettext("Old Preferences File"), oldPreferencesFile);
 
-          startApiServer();
           api.link();
 
           return 1;
@@ -2778,6 +2777,8 @@ brlttyStart (void) {
     }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+  startApiServer();
 
   if (!opt_verify) notifyServiceReady();
 
