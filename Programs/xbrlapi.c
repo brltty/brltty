@@ -199,6 +199,13 @@ static int tobrltty_init(char *auth, char *host) {
     return 0;
   }
 
+  if (x == 0)
+  {
+    /* Braille device not initialized yet */
+    api_cleanExit();
+    return 0;
+  }
+
   brlapi_setExceptionHandler(exception_handler);
   return 1;
 }
