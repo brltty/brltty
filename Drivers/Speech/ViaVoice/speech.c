@@ -434,12 +434,12 @@ reportParameter (const char *type, const char *description, int setting, const v
 }
 
 static int
-getGeneralParameter (volatile SpeechSynthesizer *spk, enum ECIParam parameter) {
+getEnvironmentParameter (volatile SpeechSynthesizer *spk, enum ECIParam parameter) {
    return eciGetParam(spk->driver.data->eci.handle, parameter);
 }
 
 static const char *
-getGeneralParameterUnit (enum ECIParam parameter) {
+getEnvironmentParameterUnit (enum ECIParam parameter) {
    switch (parameter) {
       default:
          return "";
@@ -447,13 +447,13 @@ getGeneralParameterUnit (enum ECIParam parameter) {
 }
 
 static void
-reportGeneralParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting, const void *choices, size_t size, MapFunction *map) {
-   if (parameter != eciNumParams) setting = getGeneralParameter(spk, parameter);
-   reportParameter("general", description, setting, choices, size, map, getGeneralParameterUnit(parameter));
+reportEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting, const void *choices, size_t size, MapFunction *map) {
+   if (parameter != eciNumParams) setting = getEnvironmentParameter(spk, parameter);
+   reportParameter("environment", description, setting, choices, size, map, getEnvironmentParameterUnit(parameter));
 }
 
 static int
-setGeneralParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting) {
+setEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting) {
    if (parameter == eciNumParams) {
       logMessage(LOG_CATEGORY(SPEECH_DRIVER), "copy voice: %d", setting);
       int ok = eciCopyVoice(spk->driver.data->eci.handle, setting, 0);
@@ -461,12 +461,12 @@ setGeneralParameter (volatile SpeechSynthesizer *spk, const char *description, e
       return ok;
    }
 
-   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set general parameter: %s: %d=%d", description, parameter, setting);
+   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set environment parameter: %s: %d=%d", description, parameter, setting);
    return eciSetParam(spk->driver.data->eci.handle, parameter, setting) >= 0;
 }
 
 static int
-choiceGeneralParameter (volatile SpeechSynthesizer *spk, const char *description, const char *value, enum ECIParam parameter, const void *choices, size_t size, MapFunction *map) {
+choiceEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *description, const char *value, enum ECIParam parameter, const void *choices, size_t size, MapFunction *map) {
    int ok = !*value;
    int assume = 1;
 
@@ -476,7 +476,7 @@ choiceGeneralParameter (volatile SpeechSynthesizer *spk, const char *description
       if (validateChoiceEx(&setting, value, choices, size)) {
 	 if (map) setting = map(setting);
 
-         if (setGeneralParameter(spk, description, parameter, setting)) {
+         if (setEnvironmentParameter(spk, description, parameter, setting)) {
 	    ok = 1;
 	    assume = setting;
          } else {
@@ -487,14 +487,14 @@ choiceGeneralParameter (volatile SpeechSynthesizer *spk, const char *description
       }
    }
 
-   reportGeneralParameter(spk, description, parameter, assume, choices, size, map);
+   reportEnvironmentParameter(spk, description, parameter, assume, choices, size, map);
    return ok;
 }
 
 static int
 setUnits (volatile SpeechSynthesizer *spk, int newUnits) {
    if (newUnits != spk->driver.data->eci.units) {
-      if (!setGeneralParameter(spk, "real world units", eciRealWorldUnits, newUnits)) return 0;
+      if (!setEnvironmentParameter(spk, "real world units", eciRealWorldUnits, newUnits)) return 0;
       spk->driver.data->eci.units = newUnits;
    }
 
@@ -636,7 +636,7 @@ spk_mute (volatile SpeechSynthesizer *spk) {
 
 static int
 pcmMakeCommand (volatile SpeechSynthesizer *spk) {
-   int rate = getGeneralParameter(spk, eciSampleRate);
+   int rate = getEnvironmentParameter(spk, eciSampleRate);
    char buffer[0X100];
 
    snprintf(
@@ -722,7 +722,7 @@ insertIndex (volatile SpeechSynthesizer *spk, int index) {
 static int
 setInputType (volatile SpeechSynthesizer *spk, int newInputType) {
    if (newInputType != spk->driver.data->eci.inputType) {
-      if (!setGeneralParameter(spk, "input type", eciInputType, newInputType)) return 0;
+      if (!setEnvironmentParameter(spk, "input type", eciInputType, newInputType)) return 0;
       spk->driver.data->eci.inputType = newInputType;
    }
 
@@ -753,7 +753,7 @@ static int
 prepareTextConversion (volatile SpeechSynthesizer *spk) {
    spk->driver.data->iconv.handle = ICONV_NULL;
 
-   int identifier = getGeneralParameter(spk, eciLanguageDialect);
+   int identifier = getEnvironmentParameter(spk, eciLanguageDialect);
    const LanguageChoice *choice = languageChoices;
 
    while (choice->name) {
@@ -968,13 +968,13 @@ isSet:
 
 static void
 setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
-   choiceGeneralParameter(spk, "quality (sample rate)", parameters[PARM_Quality], eciSampleRate, qualityChoices, sizeof(*qualityChoices), NULL);
-   choiceGeneralParameter(spk, "mode (text mode)", parameters[PARM_Mode], eciTextMode, modeChoices, sizeof(*modeChoices), NULL);
-   choiceGeneralParameter(spk, "synthesize (synth mode)", parameters[PARM_Synthesize], eciSynthMode, synthesizeChoices, sizeof(*synthesizeChoices), NULL);
-   choiceGeneralParameter(spk, "abbreviations (dictionary)", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), NULL);
-   choiceGeneralParameter(spk, "years (number mode)", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), NULL);
-   choiceGeneralParameter(spk, "language", parameters[PARM_Language], eciLanguageDialect, languageChoices, sizeof(*languageChoices), mapLanguage);
-   choiceGeneralParameter(spk, "voice name", parameters[PARM_Voice], eciNumParams, voiceChoices, sizeof(*voiceChoices), NULL);
+   choiceEnvironmentParameter(spk, "quality (sample rate)", parameters[PARM_Quality], eciSampleRate, qualityChoices, sizeof(*qualityChoices), NULL);
+   choiceEnvironmentParameter(spk, "mode (text mode)", parameters[PARM_Mode], eciTextMode, modeChoices, sizeof(*modeChoices), NULL);
+   choiceEnvironmentParameter(spk, "synthesize (synth mode)", parameters[PARM_Synthesize], eciSynthMode, synthesizeChoices, sizeof(*synthesizeChoices), NULL);
+   choiceEnvironmentParameter(spk, "abbreviations (dictionary)", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), NULL);
+   choiceEnvironmentParameter(spk, "years (number mode)", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), NULL);
+   choiceEnvironmentParameter(spk, "language", parameters[PARM_Language], eciLanguageDialect, languageChoices, sizeof(*languageChoices), mapLanguage);
+   choiceEnvironmentParameter(spk, "voice name", parameters[PARM_Voice], eciNumParams, voiceChoices, sizeof(*voiceChoices), NULL);
 
    choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderChoices, NULL);
    rangeVoiceParameter(spk, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
@@ -1033,8 +1033,8 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
          if ((spk->driver.data->eci.handle = eciNew()) != NULL_ECI_HAND) {
             eciRegisterCallback(spk->driver.data->eci.handle, clientCallback, (void *)spk);
 
-            spk->driver.data->eci.units = getGeneralParameter(spk, eciRealWorldUnits);
-            spk->driver.data->eci.inputType = getGeneralParameter(spk, eciInputType);
+            spk->driver.data->eci.units = getEnvironmentParameter(spk, eciRealWorldUnits);
+            spk->driver.data->eci.inputType = getEnvironmentParameter(spk, eciInputType);
 
             if ((spk->driver.data->pcm.buffer = calloc(MAXIMUM_SAMPLES, sizeof(*spk->driver.data->pcm.buffer)))) {
                if (eciSetOutputBuffer(spk->driver.data->eci.handle, MAXIMUM_SAMPLES, spk->driver.data->pcm.buffer)) {
