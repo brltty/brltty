@@ -847,9 +847,9 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
 
 UinputObject *
 newUinputObject (const char *name) {
+#ifdef HAVE_LINUX_UINPUT_H
   UinputObject *uinput = NULL;
 
-#ifdef HAVE_LINUX_UINPUT_H
   if ((uinput = malloc(sizeof(*uinput)))) {
     const char *device;
 
@@ -913,9 +913,12 @@ newUinputObject (const char *name) {
   } else {
     logMallocError();
   }
+#else /* HAVE_LINUX_UINPUT_H */
+  logMessage(LOG_WARNING, "uinput support not available");
+  errno = ENOSYS;
 #endif /* HAVE_LINUX_UINPUT_H */
 
-  return uinput;
+  return NULL;
 }
 
 void
