@@ -189,66 +189,52 @@ static const LanguageChoice languageChoices[] = {
    },
 
    {  .identifier = eciMandarinChinese,
-      .name = "Standard-Mandarin",
-      .language = "zh",
-      .territory = "CN",
-      .encoding = "GBK"
-   },
-
-   {  .identifier = eciMandarinChineseGB,
       .name = "Standard-Mandarin-GB",
       .language = "zh",
-      .territory = "CN_GB",
+      .territory = "CN",
       .encoding = "GBK"
    },
 
    {  .identifier = eciMandarinChinesePinYin,
       .name = "Standard-Mandarin-PinYin",
       .language = "zh",
-      .territory = "CN_PinYin",
+      .territory = "CN",
       .encoding = "GBK"
    },
 
    {  .identifier = eciMandarinChineseUCS,
       .name = "Standard-Mandarin-UCS",
       .language = "zh",
-      .territory = "CN_UCS",
-      .encoding = "UCS2"
+      .territory = "CN",
+      .encoding = "UCS-2"
    },
 
    {  .identifier = eciTaiwaneseMandarin,
-      .name = "Taiwanese-Mandarin",
-      .language = "zh",
-      .territory = "TW",
-      .encoding = "BIG5"
-   },
-
-   {  .identifier = eciTaiwaneseMandarinBig5,
       .name = "Taiwanese-Mandarin-Big5",
       .language = "zh",
-      .territory = "TW_Big5",
+      .territory = "TW",
       .encoding = "BIG5"
    },
 
    {  .identifier = eciTaiwaneseMandarinZhuYin,
       .name = "Taiwanese-Mandarin-ZhuYin",
       .language = "zh",
-      .territory = "TW_ZhuYin",
+      .territory = "TW",
       .encoding = "BIG5"
    },
 
    {  .identifier = eciTaiwaneseMandarinPinYin,
       .name = "Taiwanese-Mandarin-PinYin",
       .language = "zh",
-      .territory = "TW_PinYin",
+      .territory = "TW",
       .encoding = "BIG5"
    },
 
    {  .identifier = eciTaiwaneseMandarinUCS,
       .name = "Taiwanese-Mandarin-UCS",
       .language = "zh",
-      .territory = "TW_UCS",
-      .encoding = "UCS2"
+      .territory = "TW",
+      .encoding = "UCS-2"
    },
 
    {  .identifier = eciBrazilianPortuguese,
@@ -259,24 +245,17 @@ static const LanguageChoice languageChoices[] = {
    },
 
    {  .identifier = eciStandardJapanese,
-      .name = "Standard-Japanese",
-      .language = "ja",
-      .territory = "JP",
-      .encoding = "SJIS"
-   },
-
-   {  .identifier = eciStandardJapaneseSJIS,
       .name = "Standard-Japanese-SJIS",
       .language = "ja",
-      .territory = "JP_SJIS",
+      .territory = "JP",
       .encoding = "SJIS"
    },
 
    {  .identifier = eciStandardJapaneseUCS,
       .name = "Standard-Japanese-UCS",
       .language = "ja",
-      .territory = "JP_UCS",
-      .encoding = "UCS2"
+      .territory = "JP",
+      .encoding = "UCS-2"
    },
 
    {  .identifier = eciStandardFinnish,
@@ -287,65 +266,44 @@ static const LanguageChoice languageChoices[] = {
    },
 
    {  .identifier = eciStandardKorean,
-      .name = "Standard-Korean",
-      .language = "ko",
-      .territory = "KR",
-      .encoding = "UHC"
-   },
-
-   {  .identifier = eciStandardKoreanUHC,
       .name = "Standard-Korean-UHC",
       .language = "ko",
-      .territory = "KR_UHC",
+      .territory = "KR",
       .encoding = "UHC"
    },
 
    {  .identifier = eciStandardKoreanUCS,
       .name = "Standard-Korean-UCS",
       .language = "ko",
-      .territory = "KR_UCS",
-      .encoding = "UCS2"
+      .territory = "KR",
+      .encoding = "UCS-2"
    },
 
    {  .identifier = eciStandardCantonese,
-      .name = "Standard-Cantonese",
-      .language = "zh",
-      .territory = "HK",
-      .encoding = "GBK"
-   },
-
-   {  .identifier = eciStandardCantoneseGB,
       .name = "Standard-Cantonese-GB",
       .language = "zh",
-      .territory = "HK_GB",
+      .territory = "HK",
       .encoding = "GBK"
    },
 
    {  .identifier = eciStandardCantoneseUCS,
       .name = "Standard-Cantonese-UCS",
       .language = "zh",
-      .territory = "HK_UCS",
-      .encoding = "UCS2"
+      .territory = "HK",
+      .encoding = "UCS-2"
    },
 
    {  .identifier = eciHongKongCantonese,
-      .name = "HongKong-Cantonese",
-      .language = "zh",
-      .territory = "HK",
-      .encoding = "BIG5"
-   },
-
-   {  .identifier = eciHongKongCantoneseBig5,
       .name = "HongKong-Cantonese-Big5",
       .language = "zh",
-      .territory = "HK_BIG5",
+      .territory = "HK",
       .encoding = "BIG5"
    },
 
    {  .identifier = eciHongKongCantoneseUCS,
       .name = "HongKong-Cantonese-UCS",
       .language = "zh",
-      .territory = "HK_UCS",
+      .territory = "HK",
       .encoding = "UCS-2"
    },
 
@@ -378,16 +336,9 @@ static const LanguageChoice languageChoices[] = {
    },
 
    {  .identifier = eciStandardThai,
-      .name = "Standard-Thai",
-      .language = "th",
-      .territory = "TH",
-      .encoding = "TIS-620"
-   },
-
-   {  .identifier = eciStandardThaiTIS,
       .name = "Standard-Thai-TIS",
       .language = "th",
-      .territory = "TH_TIS",
+      .territory = "TH",
       .encoding = "TIS-620"
    },
 
