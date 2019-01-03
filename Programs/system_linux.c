@@ -848,11 +848,9 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
 UinputObject *
 newUinputObject (const char *name) {
 #ifdef HAVE_LINUX_UINPUT_H
-  UinputObject *uinput = NULL;
+  UinputObject *uinput;
 
   if ((uinput = malloc(sizeof(*uinput)))) {
-    const char *device;
-
     memset(uinput, 0, sizeof(*uinput));
 
     {
@@ -863,9 +861,9 @@ newUinputObject (const char *name) {
       if (wait) asyncWait(500);
     }
 
+    const char *device;
     {
       static const char *const names[] = {"uinput", "input/uinput", NULL};
-
       device = resolveDeviceName(names, "uinput");
     }
 
