@@ -188,7 +188,7 @@ static const LanguageChoice languageChoices[] = {
       .encoding = "ISO-8859-1"
    },
 
-   {  .identifier = eciMandarinChinese,
+   {  .identifier = eciMandarinChineseGB,
       .name = "Standard-Mandarin-GB",
       .language = "zh",
       .territory = "CN",
@@ -209,7 +209,7 @@ static const LanguageChoice languageChoices[] = {
       .encoding = "UCS-2"
    },
 
-   {  .identifier = eciTaiwaneseMandarin,
+   {  .identifier = eciTaiwaneseMandarinBig5,
       .name = "Taiwanese-Mandarin-Big5",
       .language = "zh",
       .territory = "TW",
@@ -244,7 +244,7 @@ static const LanguageChoice languageChoices[] = {
       .encoding = "ISO-8859-1"
    },
 
-   {  .identifier = eciStandardJapanese,
+   {  .identifier = eciStandardJapaneseSJIS,
       .name = "Standard-Japanese-SJIS",
       .language = "ja",
       .territory = "JP",
@@ -265,7 +265,7 @@ static const LanguageChoice languageChoices[] = {
       .encoding = "ISO-8859-1"
    },
 
-   {  .identifier = eciStandardKorean,
+   {  .identifier = eciStandardKoreanUHC,
       .name = "Standard-Korean-UHC",
       .language = "ko",
       .territory = "KR",
@@ -279,7 +279,7 @@ static const LanguageChoice languageChoices[] = {
       .encoding = "UCS-2"
    },
 
-   {  .identifier = eciStandardCantonese,
+   {  .identifier = eciStandardCantoneseGB,
       .name = "Standard-Cantonese-GB",
       .language = "zh",
       .territory = "HK",
@@ -293,7 +293,7 @@ static const LanguageChoice languageChoices[] = {
       .encoding = "UCS-2"
    },
 
-   {  .identifier = eciHongKongCantonese,
+   {  .identifier = eciHongKongCantoneseBig5,
       .name = "HongKong-Cantonese-Big5",
       .language = "zh",
       .territory = "HK",
@@ -335,7 +335,7 @@ static const LanguageChoice languageChoices[] = {
       .encoding = "ISO-8859-1"
    },
 
-   {  .identifier = eciStandardThai,
+   {  .identifier = eciStandardThaiTIS,
       .name = "Standard-Thai-TIS",
       .language = "th",
       .territory = "TH",
