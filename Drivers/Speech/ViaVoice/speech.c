@@ -324,7 +324,7 @@ useParameterUnit (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter)
 static int
 getVoiceParameter (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter) {
    if (!useParameterUnit(spk, parameter)) return 0;
-   return eciGetVoiceParam(spk->driver.data->eci.handle, 0, parameter);
+   return eciGetVoiceParam(spk->driver.data->eci.handle, VOICE_TYPE_CURRENT, parameter);
 }
 
 static const char *
@@ -353,7 +353,7 @@ static int
 setVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIVoiceParam parameter, int setting) {
    if (!useParameterUnit(spk, parameter)) return 0;
    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set voice parameter: %s: %d=%d%s", description, parameter, setting, getVoiceParameterUnit(parameter));
-   return eciSetVoiceParam(spk->driver.data->eci.handle, 0, parameter, setting) >= 0;
+   return eciSetVoiceParam(spk->driver.data->eci.handle, VOICE_TYPE_CURRENT, parameter, setting) >= 0;
 }
 
 static int
