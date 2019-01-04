@@ -16,213 +16,213 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-{  .identifier = eciGeneralAmericanEnglish,
-   .name = "American-English",
-   .language = "en",
-   .territory = "US",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciGeneralAmericanEnglish,
+  .name = "American-English",
+  .language = "en",
+  .territory = "US",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciBritishEnglish,
-   .name = "British-English",
-   .language = "en",
-   .territory = "GB",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciBritishEnglish,
+  .name = "British-English",
+  .language = "en",
+  .territory = "GB",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciCastilianSpanish,
-   .name = "Castilian-Spanish",
-   .language = "es",
-   .territory = "ES",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciCastilianSpanish,
+  .name = "Castilian-Spanish",
+  .language = "es",
+  .territory = "ES",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciMexicanSpanish,
-   .name = "Mexican-Spanish",
-   .language = "es",
-   .territory = "MX",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciMexicanSpanish,
+  .name = "Mexican-Spanish",
+  .language = "es",
+  .territory = "MX",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciStandardFrench,
-   .name = "Standard-French",
-   .language = "fr",
-   .territory = "FR",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciStandardFrench,
+  .name = "Standard-French",
+  .language = "fr",
+  .territory = "FR",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciCanadianFrench,
-   .name = "Canadian-French",
-   .language = "fr",
-   .territory = "CA",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciCanadianFrench,
+  .name = "Canadian-French",
+  .language = "fr",
+  .territory = "CA",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciStandardGerman,
-   .name = "Standard-German",
-   .language = "de",
-   .territory = "DE",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciStandardGerman,
+  .name = "Standard-German",
+  .language = "de",
+  .territory = "DE",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciStandardItalian,
-   .name = "Standard-Italian",
-   .language = "it",
-   .territory = "IT",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciStandardItalian,
+  .name = "Standard-Italian",
+  .language = "it",
+  .territory = "IT",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciMandarinChineseGB,
-   .name = "Standard-Mandarin-GB",
-   .language = "zh",
-   .territory = "CN",
-   .encoding = "GBK"
+{ .identifier = eciMandarinChineseGB,
+  .name = "Standard-Mandarin-GB",
+  .language = "zh",
+  .territory = "CN",
+  .encoding = "GBK"
 },
 
-{  .identifier = eciMandarinChinesePinYin,
-   .name = "Standard-Mandarin-PinYin",
-   .language = "zh",
-   .territory = "CN",
-   .encoding = "GBK"
+{ .identifier = eciMandarinChinesePinYin,
+  .name = "Standard-Mandarin-PinYin",
+  .language = "zh",
+  .territory = "CN",
+  .encoding = "GBK"
 },
 
-{  .identifier = eciMandarinChineseUCS,
-   .name = "Standard-Mandarin-UCS",
-   .language = "zh",
-   .territory = "CN",
-   .encoding = "UCS-2"
+{ .identifier = eciMandarinChineseUCS,
+  .name = "Standard-Mandarin-UCS",
+  .language = "zh",
+  .territory = "CN",
+  .encoding = "UCS-2"
 },
 
-{  .identifier = eciTaiwaneseMandarinBig5,
-   .name = "Taiwanese-Mandarin-Big5",
-   .language = "zh",
-   .territory = "TW",
-   .encoding = "BIG5"
+{ .identifier = eciTaiwaneseMandarinBig5,
+  .name = "Taiwanese-Mandarin-Big5",
+  .language = "zh",
+  .territory = "TW",
+  .encoding = "BIG5"
 },
 
-{  .identifier = eciTaiwaneseMandarinZhuYin,
-   .name = "Taiwanese-Mandarin-ZhuYin",
-   .language = "zh",
-   .territory = "TW",
-   .encoding = "BIG5"
+{ .identifier = eciTaiwaneseMandarinZhuYin,
+  .name = "Taiwanese-Mandarin-ZhuYin",
+  .language = "zh",
+  .territory = "TW",
+  .encoding = "BIG5"
 },
 
-{  .identifier = eciTaiwaneseMandarinPinYin,
-   .name = "Taiwanese-Mandarin-PinYin",
-   .language = "zh",
-   .territory = "TW",
-   .encoding = "BIG5"
+{ .identifier = eciTaiwaneseMandarinPinYin,
+  .name = "Taiwanese-Mandarin-PinYin",
+  .language = "zh",
+  .territory = "TW",
+  .encoding = "BIG5"
 },
 
-{  .identifier = eciTaiwaneseMandarinUCS,
-   .name = "Taiwanese-Mandarin-UCS",
-   .language = "zh",
-   .territory = "TW",
-   .encoding = "UCS-2"
+{ .identifier = eciTaiwaneseMandarinUCS,
+  .name = "Taiwanese-Mandarin-UCS",
+  .language = "zh",
+  .territory = "TW",
+  .encoding = "UCS-2"
 },
 
-{  .identifier = eciBrazilianPortuguese,
-   .name = "Brazilian-Portuguese",
-   .language = "pt",
-   .territory = "BR",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciBrazilianPortuguese,
+  .name = "Brazilian-Portuguese",
+  .language = "pt",
+  .territory = "BR",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciStandardJapaneseSJIS,
-   .name = "Standard-Japanese-SJIS",
-   .language = "ja",
-   .territory = "JP",
-   .encoding = "SJIS"
+{ .identifier = eciStandardJapaneseSJIS,
+  .name = "Standard-Japanese-SJIS",
+  .language = "ja",
+  .territory = "JP",
+  .encoding = "SJIS"
 },
 
-{  .identifier = eciStandardJapaneseUCS,
-   .name = "Standard-Japanese-UCS",
-   .language = "ja",
-   .territory = "JP",
-   .encoding = "UCS-2"
+{ .identifier = eciStandardJapaneseUCS,
+  .name = "Standard-Japanese-UCS",
+  .language = "ja",
+  .territory = "JP",
+  .encoding = "UCS-2"
 },
 
-{  .identifier = eciStandardFinnish,
-   .name = "Standard-Finnish",
-   .language = "fi",
-   .territory = "FI",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciStandardFinnish,
+  .name = "Standard-Finnish",
+  .language = "fi",
+  .territory = "FI",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciStandardKoreanUHC,
-   .name = "Standard-Korean-UHC",
-   .language = "ko",
-   .territory = "KR",
-   .encoding = "UHC"
+{ .identifier = eciStandardKoreanUHC,
+  .name = "Standard-Korean-UHC",
+  .language = "ko",
+  .territory = "KR",
+  .encoding = "UHC"
 },
 
-{  .identifier = eciStandardKoreanUCS,
-   .name = "Standard-Korean-UCS",
-   .language = "ko",
-   .territory = "KR",
-   .encoding = "UCS-2"
+{ .identifier = eciStandardKoreanUCS,
+  .name = "Standard-Korean-UCS",
+  .language = "ko",
+  .territory = "KR",
+  .encoding = "UCS-2"
 },
 
-{  .identifier = eciStandardCantoneseGB,
-   .name = "Standard-Cantonese-GB",
-   .language = "zh",
-   .territory = "HK",
-   .encoding = "GBK"
+{ .identifier = eciStandardCantoneseGB,
+  .name = "Standard-Cantonese-GB",
+  .language = "zh",
+  .territory = "HK",
+  .encoding = "GBK"
 },
 
-{  .identifier = eciStandardCantoneseUCS,
-   .name = "Standard-Cantonese-UCS",
-   .language = "zh",
-   .territory = "HK",
-   .encoding = "UCS-2"
+{ .identifier = eciStandardCantoneseUCS,
+  .name = "Standard-Cantonese-UCS",
+  .language = "zh",
+  .territory = "HK",
+  .encoding = "UCS-2"
 },
 
-{  .identifier = eciHongKongCantoneseBig5,
-   .name = "HongKong-Cantonese-Big5",
-   .language = "zh",
-   .territory = "HK",
-   .encoding = "BIG5"
+{ .identifier = eciHongKongCantoneseBig5,
+  .name = "HongKong-Cantonese-Big5",
+  .language = "zh",
+  .territory = "HK",
+  .encoding = "BIG5"
 },
 
-{  .identifier = eciHongKongCantoneseUCS,
-   .name = "HongKong-Cantonese-UCS",
-   .language = "zh",
-   .territory = "HK",
-   .encoding = "UCS-2"
+{ .identifier = eciHongKongCantoneseUCS,
+  .name = "HongKong-Cantonese-UCS",
+  .language = "zh",
+  .territory = "HK",
+  .encoding = "UCS-2"
 },
 
-{  .identifier = eciStandardDutch,
-   .name = "Standard-Dutch",
-   .language = "nl",
-   .territory = "NL",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciStandardDutch,
+  .name = "Standard-Dutch",
+  .language = "nl",
+  .territory = "NL",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciStandardNorwegian,
-   .name = "Standard-Norwegian",
-   .language = "no",
-   .territory = "NO",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciStandardNorwegian,
+  .name = "Standard-Norwegian",
+  .language = "no",
+  .territory = "NO",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciStandardSwedish,
-   .name = "Standard-Swedish",
-   .language = "sv",
-   .territory = "SE",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciStandardSwedish,
+  .name = "Standard-Swedish",
+  .language = "sv",
+  .territory = "SE",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciStandardDanish,
-   .name = "Standard-Danish",
-   .language = "da",
-   .territory = "DK",
-   .encoding = "ISO-8859-1"
+{ .identifier = eciStandardDanish,
+  .name = "Standard-Danish",
+  .language = "da",
+  .territory = "DK",
+  .encoding = "ISO-8859-1"
 },
 
-{  .identifier = eciStandardThaiTIS,
-   .name = "Standard-Thai-TIS",
-   .language = "th",
-   .territory = "TH",
-   .encoding = "TIS-620"
+{ .identifier = eciStandardThaiTIS,
+  .name = "Standard-Thai-TIS",
+  .language = "th",
+  .territory = "TH",
+  .encoding = "TIS-620"
 },
 

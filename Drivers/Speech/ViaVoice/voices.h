@@ -16,278 +16,278 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-{  .name = "Reed",
-   .language = eciGeneralAmericanEnglish,
-   .voice = 1
+{ .name = "Reed",
+  .language = eciGeneralAmericanEnglish,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Shelley",
-   .language = eciGeneralAmericanEnglish,
-   .voice = 2
+{ .name = "Shelley",
+  .language = eciGeneralAmericanEnglish,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Sandy",
-   .language = eciGeneralAmericanEnglish,
-   .voice = 3
+{ .name = "Sandy",
+  .language = eciGeneralAmericanEnglish,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Grandma",
-   .language = eciGeneralAmericanEnglish,
-   .voice = 7
+{ .name = "Grandma",
+  .language = eciGeneralAmericanEnglish,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Grandpa",
-   .language = eciGeneralAmericanEnglish,
-   .voice = 8
+{ .name = "Grandpa",
+  .language = eciGeneralAmericanEnglish,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "Justin",
-   .language = eciBritishEnglish,
-   .voice = 1
+{ .name = "Justin",
+  .language = eciBritishEnglish,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Jane",
-   .language = eciBritishEnglish,
-   .voice = 2
+{ .name = "Jane",
+  .language = eciBritishEnglish,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Nicky",
-   .language = eciBritishEnglish,
-   .voice = 3
+{ .name = "Nicky",
+  .language = eciBritishEnglish,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Nanny",
-   .language = eciBritishEnglish,
-   .voice = 7
+{ .name = "Nanny",
+  .language = eciBritishEnglish,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Gramps",
-   .language = eciBritishEnglish,
-   .voice = 8
+{ .name = "Gramps",
+  .language = eciBritishEnglish,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "Carlos",
-   .language = eciCastilianSpanish,
-   .voice = 1
+{ .name = "Carlos",
+  .language = eciCastilianSpanish,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Pilar",
-   .language = eciCastilianSpanish,
-   .voice = 2
+{ .name = "Pilar",
+  .language = eciCastilianSpanish,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Pepe",
-   .language = eciCastilianSpanish,
-   .voice = 3
+{ .name = "Pepe",
+  .language = eciCastilianSpanish,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Abuela",
-   .language = eciCastilianSpanish,
-   .voice = 7
+{ .name = "Abuela",
+  .language = eciCastilianSpanish,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Abuelo",
-   .language = eciCastilianSpanish,
-   .voice = 8
+{ .name = "Abuelo",
+  .language = eciCastilianSpanish,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "Jacques",
-   .language = eciStandardFrench,
-   .voice = 1
+{ .name = "Jacques",
+  .language = eciStandardFrench,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Jacqueline",
-   .language = eciStandardFrench,
-   .voice = 2
+{ .name = "Jacqueline",
+  .language = eciStandardFrench,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Marius",
-   .language = eciStandardFrench,
-   .voice = 3
+{ .name = "Marius",
+  .language = eciStandardFrench,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Mamie",
-   .language = eciStandardFrench,
-   .voice = 7
+{ .name = "Mamie",
+  .language = eciStandardFrench,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Grandpère",
-   .language = eciStandardFrench,
-   .voice = 8
+{ .name = "Grandpère",
+  .language = eciStandardFrench,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "Max",
-   .language = eciStandardGerman,
-   .voice = 1
+{ .name = "Max",
+  .language = eciStandardGerman,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Gisela",
-   .language = eciStandardGerman,
-   .voice = 2
+{ .name = "Gisela",
+  .language = eciStandardGerman,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Matti",
-   .language = eciStandardGerman,
-   .voice = 3
+{ .name = "Matti",
+  .language = eciStandardGerman,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Oma",
-   .language = eciStandardGerman,
-   .voice = 7
+{ .name = "Oma",
+  .language = eciStandardGerman,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Opa",
-   .language = eciStandardGerman,
-   .voice = 8
+{ .name = "Opa",
+  .language = eciStandardGerman,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "Enrico",
-   .language = eciStandardItalian,
-   .voice = 1
+{ .name = "Enrico",
+  .language = eciStandardItalian,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Lucia",
-   .language = eciStandardItalian,
-   .voice = 2
+{ .name = "Lucia",
+  .language = eciStandardItalian,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Chicco",
-   .language = eciStandardItalian,
-   .voice = 3
+{ .name = "Chicco",
+  .language = eciStandardItalian,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Nonna",
-   .language = eciStandardItalian,
-   .voice = 7
+{ .name = "Nonna",
+  .language = eciStandardItalian,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Nonno",
-   .language = eciStandardItalian,
-   .voice = 8
+{ .name = "Nonno",
+  .language = eciStandardItalian,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "Li3 Jing4",
-   .language = eciMandarinChinese,
-   .voice = 1
+{ .name = "Li3 Jing4",
+  .language = eciMandarinChinese,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Wang2 Yan4",
-   .language = eciMandarinChinese,
-   .voice = 2
+{ .name = "Wang2 Yan4",
+  .language = eciMandarinChinese,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Li3 Dong1 Dong1",
-   .language = eciMandarinChinese,
-   .voice = 3
+{ .name = "Li3 Dong1 Dong1",
+  .language = eciMandarinChinese,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Nai3 Nai",
-   .language = eciMandarinChinese,
-   .voice = 7
+{ .name = "Nai3 Nai",
+  .language = eciMandarinChinese,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Ye2 Ye",
-   .language = eciMandarinChinese,
-   .voice = 8
+{ .name = "Ye2 Ye",
+  .language = eciMandarinChinese,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "Zhi4 Ming2",
-   .language = eciTaiwaneseMandarin,
-   .voice = 1
+{ .name = "Zhi4 Ming2",
+  .language = eciTaiwaneseMandarin,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Chun1 Jiao1",
-   .language = eciTaiwaneseMandarin,
-   .voice = 2
+{ .name = "Chun1 Jiao1",
+  .language = eciTaiwaneseMandarin,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Xiao3 Bu4 Dian3",
-   .language = eciTaiwaneseMandarin,
-   .voice = 3
+{ .name = "Xiao3 Bu4 Dian3",
+  .language = eciTaiwaneseMandarin,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "A3 Ma4",
-   .language = eciTaiwaneseMandarin,
-   .voice = 7
+{ .name = "A3 Ma4",
+  .language = eciTaiwaneseMandarin,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "A3 Gong1",
-   .language = eciTaiwaneseMandarin,
-   .voice = 8
+{ .name = "A3 Gong1",
+  .language = eciTaiwaneseMandarin,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "João",
-   .language = eciBrazilianPortuguese,
-   .voice = 1
+{ .name = "João",
+  .language = eciBrazilianPortuguese,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Cláudia",
-   .language = eciBrazilianPortuguese,
-   .voice = 2
+{ .name = "Cláudia",
+  .language = eciBrazilianPortuguese,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Chico",
-   .language = eciBrazilianPortuguese,
-   .voice = 3
+{ .name = "Chico",
+  .language = eciBrazilianPortuguese,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Avó",
-   .language = eciBrazilianPortuguese,
-   .voice = 7
+{ .name = "Avó",
+  .language = eciBrazilianPortuguese,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Avô",
-   .language = eciBrazilianPortuguese,
-   .voice = 8
+{ .name = "Avô",
+  .language = eciBrazilianPortuguese,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "Taroo",
-   .language = eciStandardJapanese,
-   .voice = 1
+{ .name = "Taroo",
+  .language = eciStandardJapanese,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Hanako",
-   .language = eciStandardJapanese,
-   .voice = 2
+{ .name = "Hanako",
+  .language = eciStandardJapanese,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Jiroo",
-   .language = eciStandardJapanese,
-   .voice = 3
+{ .name = "Jiroo",
+  .language = eciStandardJapanese,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Obaachan",
-   .language = eciStandardJapanese,
-   .voice = 7
+{ .name = "Obaachan",
+  .language = eciStandardJapanese,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Taroo",
-   .language = eciStandardJapanese,
-   .voice = 8
+{ .name = "Taroo",
+  .language = eciStandardJapanese,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 
-{  .name = "Antti",
-   .language = eciStandardFinnish,
-   .voice = 1
+{ .name = "Antti",
+  .language = eciStandardFinnish,
+  .type = VOICE_TYPE_MAN1
 },
 
-{  .name = "Tarja",
-   .language = eciStandardFinnish,
-   .voice = 2
+{ .name = "Tarja",
+  .language = eciStandardFinnish,
+  .type = VOICE_TYPE_WOMAN1
 },
 
-{  .name = "Pekka",
-   .language = eciStandardFinnish,
-   .voice = 3
+{ .name = "Pekka",
+  .language = eciStandardFinnish,
+  .type = VOICE_TYPE_CHILD1
 },
 
-{  .name = "Isoäiti",
-   .language = eciStandardFinnish,
-   .voice = 7
+{ .name = "Isoäiti",
+  .language = eciStandardFinnish,
+  .type = VOICE_TYPE_MATRIARCH1
 },
 
-{  .name = "Isoisä",
-   .language = eciStandardFinnish,
-   .voice = 8
+{ .name = "Isoisä",
+  .language = eciStandardFinnish,
+  .type = VOICE_TYPE_PATRIARCH1
 },
 

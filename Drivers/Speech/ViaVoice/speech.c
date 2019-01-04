@@ -140,36 +140,55 @@ mapLanguage (int index) {
    return languageChoices[index].identifier;
 }
 
+typedef enum {
+   VOICE_TYPE_CURRENT,
+   VOICE_TYPE_MAN1,
+   VOICE_TYPE_WOMAN1,
+   VOICE_TYPE_CHILD1,
+   VOICE_TYPE_MAN2,
+   VOICE_TYPE_MAN3,
+   VOICE_TYPE_WOMAN2,
+   VOICE_TYPE_MATRIARCH1,
+   VOICE_TYPE_PATRIARCH1,
+   VOICE_TYPE_USER1,
+   VOICE_TYPE_USER2,
+   VOICE_TYPE_USER3,
+   VOICE_TYPE_USER4,
+   VOICE_TYPE_USER5,
+   VOICE_TYPE_USER6,
+   VOICE_TYPE_USER7
+} VoiceType;
+
 typedef struct {
    const char *name; // must be first
    int language;
-   int voice;
+   VoiceType type;
 } VoiceChoice;
 
 static const VoiceChoice voiceChoices[] = {
    {  .name = "Dad",
       .language = NODEFINEDCODESET,
-      .voice = 1
+      .type = VOICE_TYPE_MAN1
    },
 
    {  .name = "Mom",
       .language = NODEFINEDCODESET,
-      .voice = 2
+      .type = VOICE_TYPE_WOMAN1
    },
 
    {  .name = "child",
       .language = NODEFINEDCODESET,
-      .voice = 3
+      .type = VOICE_TYPE_CHILD1
    },
 
    {  .name = "Grandma",
       .language = NODEFINEDCODESET,
-      .voice = 7
+      .type = VOICE_TYPE_MATRIARCH1
    },
 
    {  .name = "Grandpa",
       .language = NODEFINEDCODESET,
-      .voice = 8
+      .type = VOICE_TYPE_PATRIARCH1
    },
 
    #include "voices.h"
@@ -178,7 +197,7 @@ static const VoiceChoice voiceChoices[] = {
 
 static int
 mapVoice (int index) {
-   return voiceChoices[index].voice;
+   return voiceChoices[index].type;
 }
 
 static void
@@ -246,7 +265,7 @@ static int
 setEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting) {
    if (parameter == eciNumParams) {
       logMessage(LOG_CATEGORY(SPEECH_DRIVER), "copy voice: %d", setting);
-      int ok = eciCopyVoice(spk->driver.data->eci.handle, setting, 0);
+      int ok = eciCopyVoice(spk->driver.data->eci.handle, setting, VOICE_TYPE_CURRENT);
       if (!ok) reportError(spk, "eciCopyVoice");
       return ok;
    }
