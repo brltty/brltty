@@ -120,7 +120,6 @@ static const char *abbreviationsChoices[] = {"on", "off", NULL};
 static const char *yearsChoices[] = {"off", "on", NULL};
 static const char *synthesizeChoices[] = {"sentences", "all", NULL};
 static const char *modeChoices[] = {"words", "letters", "punctuation", "phonetic", NULL};
-static const char *voiceChoices[] = {"", "Dad", "Mom", "child", "", "", "", "Grandma", "Grandpa", NULL};
 static const char *genderChoices[] = {"male", "female", NULL};
 
 typedef struct {
@@ -132,222 +131,54 @@ typedef struct {
 } LanguageChoice;
 
 static const LanguageChoice languageChoices[] = {
-   {  .identifier = eciGeneralAmericanEnglish,
-      .name = "American-English",
-      .language = "en",
-      .territory = "US",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciBritishEnglish,
-      .name = "British-English",
-      .language = "en",
-      .territory = "GB",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciCastilianSpanish,
-      .name = "Castilian-Spanish",
-      .language = "es",
-      .territory = "ES",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciMexicanSpanish,
-      .name = "Mexican-Spanish",
-      .language = "es",
-      .territory = "MX",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciStandardFrench,
-      .name = "Standard-French",
-      .language = "fr",
-      .territory = "FR",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciCanadianFrench,
-      .name = "Canadian-French",
-      .language = "fr",
-      .territory = "CA",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciStandardGerman,
-      .name = "Standard-German",
-      .language = "de",
-      .territory = "DE",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciStandardItalian,
-      .name = "Standard-Italian",
-      .language = "it",
-      .territory = "IT",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciMandarinChineseGB,
-      .name = "Standard-Mandarin-GB",
-      .language = "zh",
-      .territory = "CN",
-      .encoding = "GBK"
-   },
-
-   {  .identifier = eciMandarinChinesePinYin,
-      .name = "Standard-Mandarin-PinYin",
-      .language = "zh",
-      .territory = "CN",
-      .encoding = "GBK"
-   },
-
-   {  .identifier = eciMandarinChineseUCS,
-      .name = "Standard-Mandarin-UCS",
-      .language = "zh",
-      .territory = "CN",
-      .encoding = "UCS-2"
-   },
-
-   {  .identifier = eciTaiwaneseMandarinBig5,
-      .name = "Taiwanese-Mandarin-Big5",
-      .language = "zh",
-      .territory = "TW",
-      .encoding = "BIG5"
-   },
-
-   {  .identifier = eciTaiwaneseMandarinZhuYin,
-      .name = "Taiwanese-Mandarin-ZhuYin",
-      .language = "zh",
-      .territory = "TW",
-      .encoding = "BIG5"
-   },
-
-   {  .identifier = eciTaiwaneseMandarinPinYin,
-      .name = "Taiwanese-Mandarin-PinYin",
-      .language = "zh",
-      .territory = "TW",
-      .encoding = "BIG5"
-   },
-
-   {  .identifier = eciTaiwaneseMandarinUCS,
-      .name = "Taiwanese-Mandarin-UCS",
-      .language = "zh",
-      .territory = "TW",
-      .encoding = "UCS-2"
-   },
-
-   {  .identifier = eciBrazilianPortuguese,
-      .name = "Brazilian-Portuguese",
-      .language = "pt",
-      .territory = "BR",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciStandardJapaneseSJIS,
-      .name = "Standard-Japanese-SJIS",
-      .language = "ja",
-      .territory = "JP",
-      .encoding = "SJIS"
-   },
-
-   {  .identifier = eciStandardJapaneseUCS,
-      .name = "Standard-Japanese-UCS",
-      .language = "ja",
-      .territory = "JP",
-      .encoding = "UCS-2"
-   },
-
-   {  .identifier = eciStandardFinnish,
-      .name = "Standard-Finnish",
-      .language = "fi",
-      .territory = "FI",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciStandardKoreanUHC,
-      .name = "Standard-Korean-UHC",
-      .language = "ko",
-      .territory = "KR",
-      .encoding = "UHC"
-   },
-
-   {  .identifier = eciStandardKoreanUCS,
-      .name = "Standard-Korean-UCS",
-      .language = "ko",
-      .territory = "KR",
-      .encoding = "UCS-2"
-   },
-
-   {  .identifier = eciStandardCantoneseGB,
-      .name = "Standard-Cantonese-GB",
-      .language = "zh",
-      .territory = "HK",
-      .encoding = "GBK"
-   },
-
-   {  .identifier = eciStandardCantoneseUCS,
-      .name = "Standard-Cantonese-UCS",
-      .language = "zh",
-      .territory = "HK",
-      .encoding = "UCS-2"
-   },
-
-   {  .identifier = eciHongKongCantoneseBig5,
-      .name = "HongKong-Cantonese-Big5",
-      .language = "zh",
-      .territory = "HK",
-      .encoding = "BIG5"
-   },
-
-   {  .identifier = eciHongKongCantoneseUCS,
-      .name = "HongKong-Cantonese-UCS",
-      .language = "zh",
-      .territory = "HK",
-      .encoding = "UCS-2"
-   },
-
-   {  .identifier = eciStandardDutch,
-      .name = "Standard-Dutch",
-      .language = "nl",
-      .territory = "NL",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciStandardNorwegian,
-      .name = "Standard-Norwegian",
-      .language = "no",
-      .territory = "NO",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciStandardSwedish,
-      .name = "Standard-Swedish",
-      .language = "sv",
-      .territory = "SE",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciStandardDanish,
-      .name = "Standard-Danish",
-      .language = "da",
-      .territory = "DK",
-      .encoding = "ISO-8859-1"
-   },
-
-   {  .identifier = eciStandardThaiTIS,
-      .name = "Standard-Thai-TIS",
-      .language = "th",
-      .territory = "TH",
-      .encoding = "TIS-620"
-   },
-
-   {  .identifier = NODEFINEDCODESET  }
+   #include "languages.h"
+   { .identifier = NODEFINEDCODESET }
 };
 
 static int
 mapLanguage (int index) {
    return languageChoices[index].identifier;
+}
+
+typedef struct {
+   const char *name; // must be first
+   int language;
+   int voice;
+} VoiceChoice;
+
+static const VoiceChoice voiceChoices[] = {
+   {  .name = "Dad",
+      .language = NODEFINEDCODESET,
+      .voice = 1
+   },
+
+   {  .name = "Mom",
+      .language = NODEFINEDCODESET,
+      .voice = 2
+   },
+
+   {  .name = "child",
+      .language = NODEFINEDCODESET,
+      .voice = 3
+   },
+
+   {  .name = "Grandma",
+      .language = NODEFINEDCODESET,
+      .voice = 7
+   },
+
+   {  .name = "Grandpa",
+      .language = NODEFINEDCODESET,
+      .voice = 8
+   },
+
+   #include "voices.h"
+   { .name = NULL }
+};
+
+static int
+mapVoice (int index) {
+   return voiceChoices[index].voice;
 }
 
 static void
@@ -908,7 +739,7 @@ setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
    choiceEnvironmentParameter(spk, "abbreviations (dictionary)", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), NULL);
    choiceEnvironmentParameter(spk, "years (number mode)", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), NULL);
    choiceEnvironmentParameter(spk, "language", parameters[PARM_Language], eciLanguageDialect, languageChoices, sizeof(*languageChoices), mapLanguage);
-   choiceEnvironmentParameter(spk, "voice name", parameters[PARM_Voice], eciNumParams, voiceChoices, sizeof(*voiceChoices), NULL);
+   choiceEnvironmentParameter(spk, "voice name", parameters[PARM_Voice], eciNumParams, voiceChoices, sizeof(*voiceChoices), mapVoice);
 
    choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderChoices, NULL);
    rangeVoiceParameter(spk, "head size", parameters[PARM_HeadSize], eciHeadSize, 0, 100);
