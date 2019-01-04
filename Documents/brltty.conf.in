@@ -435,7 +435,7 @@
 #speech-parameters vv:Abbreviations= # [on,off]
 #speech-parameters vv:Years= # [on,off]
 #speech-parameters vv:Language= # [American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin-GB, Standard-Mandarin-PinYin, Standard-Mandarin-UCS, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS, Brazilian-Portuguese, Standard-Japanese-SJIS, Standard-Japanese-UCS, Standard-Finnish, Standard-Korean-UHC, Standard-Korean-UCS, Standard-Cantonese-GB, Standard-Cantonese-UCS, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai-TIS]
-#speech-parameters vv:Voice= # [Dad,Mom,child,Grandma,Grandpa]
+#speech-parameters vv:Voice= # [man,woman,child,patriarch,matriarch]
 #speech-parameters vv:Gender= # [male,female]
 #speech-parameters vv:HeadSize= # [0-100]
 #speech-parameters vv:Pitch= # [40-422 Hz]

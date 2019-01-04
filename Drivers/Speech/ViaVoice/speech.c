@@ -165,35 +165,17 @@ typedef struct {
    VoiceType type;
 } VoiceChoice;
 
+#define GENERIC_VOICE_NAME(t,n) { .name=#n, .language=NODEFINEDCODESET, .type=VOICE_TYPE_##t }
 static const VoiceChoice voiceChoices[] = {
-   {  .name = "Dad",
-      .language = NODEFINEDCODESET,
-      .type = VOICE_TYPE_MAN1
-   },
-
-   {  .name = "Mom",
-      .language = NODEFINEDCODESET,
-      .type = VOICE_TYPE_WOMAN1
-   },
-
-   {  .name = "child",
-      .language = NODEFINEDCODESET,
-      .type = VOICE_TYPE_CHILD1
-   },
-
-   {  .name = "Grandma",
-      .language = NODEFINEDCODESET,
-      .type = VOICE_TYPE_MATRIARCH1
-   },
-
-   {  .name = "Grandpa",
-      .language = NODEFINEDCODESET,
-      .type = VOICE_TYPE_PATRIARCH1
-   },
-
+   GENERIC_VOICE_NAME(MAN1, man),
+   GENERIC_VOICE_NAME(WOMAN1, woman),
+   GENERIC_VOICE_NAME(CHILD1, child),
+   GENERIC_VOICE_NAME(PATRIARCH1, patriarch),
+   GENERIC_VOICE_NAME(MATRIARCH1, matriarch),
    #include "voices.h"
    { .name = NULL }
 };
+#undef GENERIC_VOICE_NAME
 
 static int
 mapVoice (int index) {
