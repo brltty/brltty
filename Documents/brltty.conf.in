@@ -438,8 +438,8 @@
 #speech-parameters vv:Voice= # [man,woman,child,patriarch,matriarch]
 #speech-parameters vv:Gender= # [male,female]
 #speech-parameters vv:HeadSize= # [0-100]
-#speech-parameters vv:Pitch= # [40-422 Hz]
-#speech-parameters vv:Expressiveness= # [0-100]
+#speech-parameters vv:PitchBaseline= # [40-422 Hz]
+#speech-parameters vv:Expressiveness= # [0-100] (pitch fluctuation)
 #speech-parameters vv:Roughness= # [0-100]
 #speech-parameters vv:Breathiness= # [0-100]
 #speech-parameters vv:Volume= # [0-100 %]

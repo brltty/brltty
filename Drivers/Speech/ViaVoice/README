@@ -26,12 +26,12 @@ This driver recognizes the following parameters (see below for details):
    Voice           built-in type or ViaVoice name
    Gender          male, female
    HeadSize        0-100
-   Pitch           40-422 (Hz)
-   Expressiveness  0-100
+   PitchBaseline   40-422 [Herz]
+   Expressiveness  0-100 (pitch fluctuation)
    Roughness       0-100
    Breathiness     0-100
-   Volume          0-100 (%)
-   Speed           70-1297 (words per minute)
+   Volume          0-100 [percent]
+   Speed           70-1297 [words per minute]
 
 The quality parameter sets the sample rate of the generated audio:
 
