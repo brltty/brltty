@@ -59,6 +59,8 @@ typedef enum {
 
 #define MAXIMUM_SAMPLES 0X800
 
+typedef void SaveSettingFunction (volatile SpeechSynthesizer *spk, int setting);
+
 typedef struct {
    const char *name; // must be first
    int rate;
@@ -148,6 +150,11 @@ struct SpeechDataStruct {
    } eci;
 
    struct {
+      const LanguageChoice *language;
+      const VoiceChoice *voice;
+   } setting;
+
+   struct {
       short *buffer;
       FILE *stream;
       char *command;
@@ -157,11 +164,6 @@ struct SpeechDataStruct {
       char *buffer;
       size_t size;
    } say;
-
-   struct {
-      const LanguageChoice *language;
-      const VoiceChoice *voice;
-   } choice;
 
    struct {
       int unitType;
@@ -174,6 +176,16 @@ struct SpeechDataStruct {
    } iconv;
 #endif /* ICONV_NULL */
 };
+
+static void
+saveLanguageSetting (volatile SpeechSynthesizer *spk, int setting) {
+   spk->driver.data->setting.language = &languageChoices[setting];
+}
+
+static void
+saveVoiceSetting (volatile SpeechSynthesizer *spk, int setting) {
+   spk->driver.data->setting.voice = &voiceChoices[setting];
+}
 
 static void
 reportError (volatile SpeechSynthesizer *spk, const char *routine) {
@@ -243,38 +255,27 @@ setEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *descriptio
 }
 
 static int
-choiceEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *description, const char *value, enum ECIParam parameter, const void *choices, size_t size, int report) {
+choiceEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *description, const char *value, enum ECIParam parameter, const void *choices, size_t size, SaveSettingFunction *save) {
    int ok = !*value;
 
    if (!ok) {
       unsigned int setting;
 
       if (validateChoiceEx(&setting, value, choices, size)) {
-         switch (parameter) {
-            case eciLanguageDialect:
-               spk->driver.data->choice.language = &languageChoices[setting];
-               return 1;
-
-            case eciNumParams:
-               spk->driver.data->choice.voice = &voiceChoices[setting];
-               return 1;
-
-            default: {
-               if (setEnvironmentParameter(spk, description, parameter, setting)) {
-                  ok = 1;
-               } else {
-                  logMessage(LOG_WARNING, "%s not supported: %s", description, value);
-               }
-
-               break;
-            }
+         if (save) {
+            save(spk, setting);
+            ok = 1;
+         } else if (setEnvironmentParameter(spk, description, parameter, setting)) {
+            ok = 1;
+         } else {
+            logMessage(LOG_WARNING, "%s not supported: %s", description, value);
          }
       } else {
          logMessage(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
 
-   if (report) reportEnvironmentParameter(spk, description, parameter, choices, size);
+   if (!save) reportEnvironmentParameter(spk, description, parameter, choices, size);
    return ok;
 }
 
@@ -737,8 +738,8 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
 
 static void
 setLanguageAndVoice (volatile SpeechSynthesizer *spk) {
-   const LanguageChoice *language = spk->driver.data->choice.language;
-   const VoiceChoice *voice = spk->driver.data->choice.voice;
+   const LanguageChoice *language = spk->driver.data->setting.language;
+   const VoiceChoice *voice = spk->driver.data->setting.voice;
 
    if (voice && (voice->language != NODEFINEDCODESET)) {
       if (!language) {
@@ -770,14 +771,14 @@ setLanguageAndVoice (volatile SpeechSynthesizer *spk) {
 
 static void
 setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
-   choiceEnvironmentParameter(spk, "quality (sample rate)", parameters[PARM_Quality], eciSampleRate, qualityChoices, sizeof(*qualityChoices), 1);
-   choiceEnvironmentParameter(spk, "mode (text mode)", parameters[PARM_Mode], eciTextMode, modeChoices, sizeof(*modeChoices), 1);
-   choiceEnvironmentParameter(spk, "synthesize (synth mode)", parameters[PARM_Synthesize], eciSynthMode, synthesizeChoices, sizeof(*synthesizeChoices), 1);
-   choiceEnvironmentParameter(spk, "abbreviations (dictionary)", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), 1);
-   choiceEnvironmentParameter(spk, "years (number mode)", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), 1);
+   choiceEnvironmentParameter(spk, "quality (sample rate)", parameters[PARM_Quality], eciSampleRate, qualityChoices, sizeof(*qualityChoices), NULL);
+   choiceEnvironmentParameter(spk, "mode (text mode)", parameters[PARM_Mode], eciTextMode, modeChoices, sizeof(*modeChoices), NULL);
+   choiceEnvironmentParameter(spk, "synthesize (synth mode)", parameters[PARM_Synthesize], eciSynthMode, synthesizeChoices, sizeof(*synthesizeChoices), NULL);
+   choiceEnvironmentParameter(spk, "abbreviations (dictionary)", parameters[PARM_Abbreviations], eciDictionary, abbreviationsChoices, sizeof(*abbreviationsChoices), NULL);
+   choiceEnvironmentParameter(spk, "years (number mode)", parameters[PARM_Years], eciNumberMode, yearsChoices, sizeof(*yearsChoices), NULL);
 
-   choiceEnvironmentParameter(spk, "language", parameters[PARM_Language], eciLanguageDialect, languageChoices, sizeof(*languageChoices), 0);
-   choiceEnvironmentParameter(spk, "voice name", parameters[PARM_Voice], eciNumParams, voiceChoices, sizeof(*voiceChoices), 0);
+   choiceEnvironmentParameter(spk, "language", parameters[PARM_Language], eciLanguageDialect, languageChoices, sizeof(*languageChoices), saveLanguageSetting);
+   choiceEnvironmentParameter(spk, "voice name", parameters[PARM_Voice], eciNumParams, voiceChoices, sizeof(*voiceChoices), saveVoiceSetting);
    setLanguageAndVoice(spk);
 
    choiceVoiceParameter(spk, "gender", parameters[PARM_Gender], eciGender, genderChoices);
@@ -845,15 +846,15 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
       spk->driver.data->eci.handle = NULL_ECI_HAND;
       spk->driver.data->eci.useSSML = 0;
 
+      spk->driver.data->setting.language = NULL;
+      spk->driver.data->setting.voice = NULL;
+
       spk->driver.data->pcm.buffer = NULL;
       spk->driver.data->pcm.stream = NULL;
       spk->driver.data->pcm.command = NULL;
 
       spk->driver.data->say.buffer = NULL;
       spk->driver.data->say.size = 0;
-
-      spk->driver.data->choice.language = NULL;
-      spk->driver.data->choice.voice = NULL;
 
       if ((spk->driver.data->eci.handle = eciNew()) != NULL_ECI_HAND) {
          eciRegisterCallback(spk->driver.data->eci.handle, clientCallback, (void *)spk);
