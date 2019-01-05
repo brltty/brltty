@@ -22,8 +22,8 @@ This driver recognizes the following parameters (see below for details):
    Synthesize      sentences, all
    Abbreviations   on, off
    Years           on, off
-   Language        American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin-GBK, Standard-Mandarin-PinYin, Standard-Mandarin-UCS2, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS2, Brazilian-Portuguese, Standard-Japanese-SJIS, Standard-Japanese-UCS2, Standard-Finnish, Standard-Korean-UHC, Standard-Korean-UCS2, Standard-Cantonese-GBK, Standard-Cantonese-UCS2, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS2, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai-TIS620
-   Voice           man,woman,child,patriarch,matriarch
+   Language        dialect-language[-encoding]
+   Voice           built-in type or ViaVoice name
    Gender          male, female
    HeadSize        0-100
    Pitch           40-422 (Hz)
@@ -107,63 +107,63 @@ are supported:
 
 The voice parameter specifies which type of voice is to be synthesized. It
 may be either a built-in voice type or a ViaVoice voice name. The built-in
-voice types are: man, woman, child, patriarch (elderly man), matriarch
-(elderly woman). The ViaVoice voice names are:
+voice types are: man (the default), woman, child, patriarch (elderly man),
+matriarch (elderly woman). The ViaVoice voice names are:
 
    Language              Type       Name
-   American-English      Man        Reed
-   American-English      Woman      Shelley
-   American-English      Child      Sandy
-   American-English      Patriarch  Grandpa
-   American-English      Matriarch  Grandma
-   British-English       Man        Justin
-   British-English       Woman      Jane
-   British-English       Child      Nicky
-   British-English       Patriarch  Gramps
-   British-English       Matriarch  Nanny
-   Castilian-Spanish     Man        Carlos
-   Castilian-Spanish     Woman      Pilar
-   Castilian-Spanish     Child      Pepe
-   Castilian-Spanish     Patriarch  Abuelo
-   Castilian-Spanish     Matriarch  Abuela
-   Standard-French       Man        Jacques
-   Standard-French       Woman      Jacqueline
-   Standard-French       Child      Marius
-   Standard-French       Patriarch  Grandpère
-   Standard-French       Matriarch  Mamie
-   Standard-German       Man        Max
-   Standard-German       Woman      Gisela
-   Standard-German       Child      Matti
-   Standard-German       Patriarch  Opa
-   Standard-German       Matriarch  Oma
-   Standard-Italian      Man        Enrico
-   Standard-Italian      Woman      Lucia
-   Standard-Italian      Child      Chicco
-   Standard-Italian      Patriarch  Nonno
-   Standard-Italian      Matriarch  Nonna
-   Standard-Mandarin     Man        Li3 Jing4
-   Standard-Mandarin     Woman      Wang2 Yan4
-   Standard-Mandarin     Child      Li3 Dong1 Dong1
-   Standard-Mandarin     Patriarch  Ye2 Ye
-   Standard-Mandarin     Matriarch  Nai3 Nai
-   Taiwanese-Mandarin    Man        Zhi4 Ming2
-   Taiwanese-Mandarin    Woman      Chun1 Jiao1
-   Taiwanese-Mandarin    Child      Xiao3 Bu4 Dian3
-   Taiwanese-Mandarin    Patriarch  A3 Gong1
-   Taiwanese-Mandarin    Matriarch  A3 Ma4
-   Brazilian-Portuguese  Man        João
-   Brazilian-Portuguese  Woman      Cláudia
-   Brazilian-Portuguese  Child      Chico
-   Brazilian-Portuguese  Patriarch  Avô
-   Brazilian-Portuguese  Matriarch  Avó
-   Standard-Japanese     Man        Taroo
-   Standard-Japanese     Woman      Hanako
-   Standard-Japanese     Child      Jiroo
-   Standard-Japanese     Patriarch  Taroo
-   Standard-Japanese     Matriarch  Obaachan
-   Standard-Finnish      Man        Antti
-   Standard-Finnish      Woman      Tarja
-   Standard-Finnish      Child      Pekka
-   Standard-Finnish      Patriarch  Isoisä
-   Standard-Finnish      Matriarch  Isoäiti
+   American English      Man        Reed
+   American English      Woman      Shelley
+   American English      Child      Sandy
+   American English      Patriarch  Grandpa
+   American English      Matriarch  Grandma
+   British English       Man        Justin
+   British English       Woman      Jane
+   British English       Child      Nicky
+   British English       Patriarch  Gramps
+   British English       Matriarch  Nanny
+   Castilian Spanish     Man        Carlos
+   Castilian Spanish     Woman      Pilar
+   Castilian Spanish     Child      Pepe
+   Castilian Spanish     Patriarch  Abuelo
+   Castilian Spanish     Matriarch  Abuela
+   Standard French       Man        Jacques
+   Standard French       Woman      Jacqueline
+   Standard French       Child      Marius
+   Standard French       Patriarch  Grandpère
+   Standard French       Matriarch  Mamie
+   Standard German       Man        Max
+   Standard German       Woman      Gisela
+   Standard German       Child      Matti
+   Standard German       Patriarch  Opa
+   Standard German       Matriarch  Oma
+   Standard Italian      Man        Enrico
+   Standard Italian      Woman      Lucia
+   Standard Italian      Child      Chicco
+   Standard Italian      Patriarch  Nonno
+   Standard Italian      Matriarch  Nonna
+   Standard Mandarin     Man        Li3 Jing4
+   Standard Mandarin     Woman      Wang2 Yan4
+   Standard Mandarin     Child      Li3 Dong1 Dong1
+   Standard Mandarin     Patriarch  Ye2 Ye
+   Standard Mandarin     Matriarch  Nai3 Nai
+   Taiwanese Mandarin    Man        Zhi4 Ming2
+   Taiwanese Mandarin    Woman      Chun1 Jiao1
+   Taiwanese Mandarin    Child      Xiao3 Bu4 Dian3
+   Taiwanese Mandarin    Patriarch  A3 Gong1
+   Taiwanese Mandarin    Matriarch  A3 Ma4
+   Brazilian Portuguese  Man        João
+   Brazilian Portuguese  Woman      Cláudia
+   Brazilian Portuguese  Child      Chico
+   Brazilian Portuguese  Patriarch  Avô
+   Brazilian Portuguese  Matriarch  Avó
+   Standard Japanese     Man        Taroo
+   Standard Japanese     Woman      Hanako
+   Standard Japanese     Child      Jiroo
+   Standard Japanese     Patriarch  Taroo
+   Standard Japanese     Matriarch  Obaachan
+   Standard Finnish      Man        Antti
+   Standard Finnish      Woman      Tarja
+   Standard Finnish      Child      Pekka
+   Standard Finnish      Patriarch  Isoisä
+   Standard Finnish      Matriarch  Isoäiti
 
