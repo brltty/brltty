@@ -96,7 +96,7 @@ typedef struct {
 
 static const LanguageChoice languageChoices[] = {
    #include "languages.h"
-   { .identifier = NODEFINEDCODESET }
+   { .name = NULL }
 };
 
 typedef enum {
@@ -124,17 +124,23 @@ typedef struct {
    VoiceType type;
 } VoiceChoice;
 
-#define GENERIC_VOICE_NAME(t,n) { .name=#n, .language=NODEFINEDCODESET, .type=VOICE_TYPE_##t }
+#define GENERIC_VOICE_LANGUAGE NODEFINEDCODESET
+#define GENERIC_VOICE(t,n) { .name=#n, .language=GENERIC_VOICE_LANGUAGE, .type=VOICE_TYPE_##t }
+
 static const VoiceChoice voiceChoices[] = {
-   GENERIC_VOICE_NAME(MAN1, man),
-   GENERIC_VOICE_NAME(WOMAN1, woman),
-   GENERIC_VOICE_NAME(CHILD1, child),
-   GENERIC_VOICE_NAME(PATRIARCH1, patriarch),
-   GENERIC_VOICE_NAME(MATRIARCH1, matriarch),
+   GENERIC_VOICE(MAN1, man),
+   GENERIC_VOICE(WOMAN1, woman),
+   GENERIC_VOICE(CHILD1, child),
+   GENERIC_VOICE(PATRIARCH1, patriarch),
+   GENERIC_VOICE(MATRIARCH1, matriarch),
    #include "voices.h"
    { .name = NULL }
 };
-#undef GENERIC_VOICE_NAME
+
+static int
+isGenericVoice (const VoiceChoice *voice) {
+   return voice->language == GENERIC_VOICE_LANGUAGE;
+}
 
 struct SpeechDataStruct {
    struct {
@@ -744,7 +750,7 @@ setLanguageAndVoice (volatile SpeechSynthesizer *spk) {
    const LanguageChoice *language = spk->driver.data->setting.language;
    const VoiceChoice *voice = spk->driver.data->setting.voice;
 
-   if (voice && (voice->language != NODEFINEDCODESET)) {
+   if (voice && !isGenericVoice(voice)) {
       if (!language) {
          language = findLanguage(voice->language);
       } else if (language->identifier != voice->language) {
@@ -765,7 +771,7 @@ setLanguageAndVoice (volatile SpeechSynthesizer *spk) {
       logMessage(LOG_CATEGORY(SPEECH_DRIVER), "copy voice: %d (%s)", voice->type, voice->name);
 
       if (eciCopyVoice(spk->driver.data->eci.handle, voice->type, VOICE_TYPE_CURRENT)) {
-         const char *description = (voice->language == NODEFINEDCODESET)? "type": "name";
+         const char *description = isGenericVoice(voice)? "type": "name";
          reportSetting("voice", description, voice->name, NULL);
       } else {
          reportError(spk, "eciCopyVoice");
