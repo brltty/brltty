@@ -16,8 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* ViaVoice/speech.c */
-
 #include "prologue.h"
 
 #include <stdio.h>
@@ -196,6 +194,12 @@ reportError (volatile SpeechSynthesizer *spk, const char *routine) {
 }
 
 static void
+reportSetting (const char *type, const char *description, const char *setting, const char *unit) {
+   if (!unit) unit = "";
+   logMessage(LOG_DEBUG, "%s setting: %s = %s%s", type, description, setting, unit);
+}
+
+static void
 reportParameter (const char *type, const char *description, int setting, const void *choices, size_t size, const char *unit) {
    char buffer[0X10];
    const char *value = buffer;
@@ -225,8 +229,7 @@ reportParameter (const char *type, const char *description, int setting, const v
    }
 
    if (value == buffer) snprintf(buffer, sizeof(buffer), "%d", setting);
-   if (!unit) unit = "";
-   logMessage(LOG_DEBUG, "ViaVoice %s parameter: %s = %s%s", type, description, value, unit);
+   reportSetting(type, description, value, unit);
 }
 
 static int
@@ -756,13 +759,13 @@ setLanguageAndVoice (volatile SpeechSynthesizer *spk) {
    }
 
    language = getLanguage(spk);
-   logMessage(LOG_DEBUG, "language: %s", language->name);
+   reportSetting("environment", "language", language->name, NULL);
 
    if (voice) {
       logMessage(LOG_CATEGORY(SPEECH_DRIVER), "copy voice: %d (%s)", voice->type, voice->name);
 
       if (eciCopyVoice(spk->driver.data->eci.handle, voice->type, VOICE_TYPE_CURRENT)) {
-         logMessage(LOG_DEBUG, "voice: %s", voice->name);
+         reportSetting("environment", "voice", voice->name, NULL);
       } else {
          reportError(spk, "eciCopyVoice");
       }
@@ -840,7 +843,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
       memset(spk->driver.data, 0, sizeof(*spk->driver.data));
 
       eciVersion(spk->driver.data->version.text);
-      logMessage(LOG_INFO, "ViaVoice Engine Version: %s", spk->driver.data->version.text);
+      logMessage(LOG_INFO, "ViaVoice engine version: %s", spk->driver.data->version.text);
       spk->driver.data->version.binary = parseVersion(spk->driver.data->version.text);
 
       spk->driver.data->eci.handle = NULL_ECI_HAND;
@@ -878,7 +881,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 
          eciDelete(spk->driver.data->eci.handle);
       } else {
-         logMessage(LOG_ERR, "ViaVoice initialization error");
+         logMessage(LOG_ERR, "ViaVoice engine initialization failure");
       }
 
       free(spk->driver.data);
