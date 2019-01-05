@@ -35,7 +35,7 @@ This driver recognizes the following parameters (see below for details):
 
 The quality parameter sets the sample rate of the generated audio:
 
-   Value  Rate
+   Value   Rate
    Poor    8000Hz
   *Fair   11025Hz
    Good   22050Hz
