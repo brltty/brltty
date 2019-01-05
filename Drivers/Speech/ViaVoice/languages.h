@@ -73,7 +73,7 @@
 },
 
 { .identifier = eciMandarinChineseGB,
-  .name = "Standard-Mandarin-GB",
+  .name = "Standard-Mandarin-GBK",
   .language = "zh",
   .territory = "CN",
   .encoding = "GBK"
@@ -87,7 +87,7 @@
 },
 
 { .identifier = eciMandarinChineseUCS,
-  .name = "Standard-Mandarin-UCS",
+  .name = "Standard-Mandarin-UCS2",
   .language = "zh",
   .territory = "CN",
   .encoding = "UCS-2"
@@ -115,7 +115,7 @@
 },
 
 { .identifier = eciTaiwaneseMandarinUCS,
-  .name = "Taiwanese-Mandarin-UCS",
+  .name = "Taiwanese-Mandarin-UCS2",
   .language = "zh",
   .territory = "TW",
   .encoding = "UCS-2"
@@ -136,7 +136,7 @@
 },
 
 { .identifier = eciStandardJapaneseUCS,
-  .name = "Standard-Japanese-UCS",
+  .name = "Standard-Japanese-UCS2",
   .language = "ja",
   .territory = "JP",
   .encoding = "UCS-2"
@@ -157,21 +157,21 @@
 },
 
 { .identifier = eciStandardKoreanUCS,
-  .name = "Standard-Korean-UCS",
+  .name = "Standard-Korean-UCS2",
   .language = "ko",
   .territory = "KR",
   .encoding = "UCS-2"
 },
 
 { .identifier = eciStandardCantoneseGB,
-  .name = "Standard-Cantonese-GB",
+  .name = "Standard-Cantonese-GBK",
   .language = "zh",
   .territory = "HK",
   .encoding = "GBK"
 },
 
 { .identifier = eciStandardCantoneseUCS,
-  .name = "Standard-Cantonese-UCS",
+  .name = "Standard-Cantonese-UCS2",
   .language = "zh",
   .territory = "HK",
   .encoding = "UCS-2"
@@ -185,7 +185,7 @@
 },
 
 { .identifier = eciHongKongCantoneseUCS,
-  .name = "HongKong-Cantonese-UCS",
+  .name = "HongKong-Cantonese-UCS2",
   .language = "zh",
   .territory = "HK",
   .encoding = "UCS-2"
@@ -220,7 +220,7 @@
 },
 
 { .identifier = eciStandardThaiTIS,
-  .name = "Standard-Thai-TIS",
+  .name = "Standard-Thai-TIS620",
   .language = "th",
   .territory = "TH",
   .encoding = "TIS-620"

@@ -434,7 +434,7 @@
 #speech-parameters vv:Synthesize= # [sentences,all]
 #speech-parameters vv:Abbreviations= # [on,off]
 #speech-parameters vv:Years= # [on,off]
-#speech-parameters vv:Language= # [American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin-GB, Standard-Mandarin-PinYin, Standard-Mandarin-UCS, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS, Brazilian-Portuguese, Standard-Japanese-SJIS, Standard-Japanese-UCS, Standard-Finnish, Standard-Korean-UHC, Standard-Korean-UCS, Standard-Cantonese-GB, Standard-Cantonese-UCS, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai-TIS]
+#speech-parameters vv:Language= # [American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin-GBK, Standard-Mandarin-PinYin, Standard-Mandarin-UCS2, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS2, Brazilian-Portuguese, Standard-Japanese-SJIS, Standard-Japanese-UCS2, Standard-Finnish, Standard-Korean-UHC, Standard-Korean-UCS2, Standard-Cantonese-GBK, Standard-Cantonese-UCS2, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS2, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai-TIS620]
 #speech-parameters vv:Voice= # [man,woman,child,patriarch,matriarch]
 #speech-parameters vv:Gender= # [male,female]
 #speech-parameters vv:HeadSize= # [0-100]
