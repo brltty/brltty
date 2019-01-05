@@ -765,7 +765,8 @@ setLanguageAndVoice (volatile SpeechSynthesizer *spk) {
       logMessage(LOG_CATEGORY(SPEECH_DRIVER), "copy voice: %d (%s)", voice->type, voice->name);
 
       if (eciCopyVoice(spk->driver.data->eci.handle, voice->type, VOICE_TYPE_CURRENT)) {
-         reportSetting("environment", "voice", voice->name, NULL);
+         const char *description = (voice->language == NODEFINEDCODESET)? "type": "name";
+         reportSetting("voice", description, voice->name, NULL);
       } else {
          reportError(spk, "eciCopyVoice");
       }
