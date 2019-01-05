@@ -1,43 +1,169 @@
 This directory contains the BRLTTY speech synthesizer driver for the ViaVoice
 [http://www.ibm.com/software/speech/dev/ttssdk_linux.html] text to speech
 engine from International Business Machines (IBM) [http://www.ibm.com]. It was
-implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
+implemented, and is being maintained, by Dave Mielke <Dave@Mielke.cc>.
 
-BRLTTY's configure script automatically includes this driver if ViaVoice's
-software development kit has been installed. The default is to check the
-directories /usr, /usr/local, /usr/local/ViaVoice, /usr/local/viavoice,
-/opt/ViaVoice, and /opt/viavoice. The actual location can be explicitly
-specified via --with-viavoice.
+ViaVoice was its original name. It's currently  known as Voxin
+[http://voxin.oralux.net/], and is currently being maintained by the Oralux
+Association [http://oralux.org/]. Other names by which ViaVoice has been
+known include Eloquence, Outloud, and DecTalk.
 
 This driver can be either dynamically loaded (at run time) or built directly
-into a dynamically linked BRLTTY binary (via --with-speech-driver), but it
-cannot be built into a statically linked BRLTTY binary (via
---enable-standalone-programs) because ViaVoice's run time kit doesn't contain a
-static archive. 
+into a dynamically linked BRLTTY binary (via --with-speech-driver),
+but it can't be built into a statically linked BRLTTY binary (via
+--enable-standalone-programs) because the Voxin package doesn't contain
+static archives.
 
-The path to the ini file is determined via the following huristic. If the
-driver parameter "inifile" is set, then that value is used. If it isn't, but if
-the environment variable "ECIINI" is set, then that value is used. If neither
-is set, then the default (/usr/lib/ViaVoiceTTS/eci.ini) is used.
+This driver recognizes the following parameters (see below for details):
 
-This driver recognizes the following additional parameters (see the file
-tts.pdf in the ViaVoice documentation directory for details):
+   Parameter       Value
+   Quality         fair, poor, good
+   Mode            words, letters, punctuation, phonetic
+   Synthesize      sentences, all
+   Abbreviations   on, off
+   Years           on, off
+   Language        American-English, British-English, Castilian-Spanish, Mexican-Spanish, Standard-French, Canadian-French, Standard-German, Standard-Italian, Standard-Mandarin-GBK, Standard-Mandarin-PinYin, Standard-Mandarin-UCS2, Taiwanese-Mandarin-Big5, Taiwanese-Mandarin-ZhuYin, Taiwanese-Mandarin-PinYin, Taiwanese-Mandarin-UCS2, Brazilian-Portuguese, Standard-Japanese-SJIS, Standard-Japanese-UCS2, Standard-Finnish, Standard-Korean-UHC, Standard-Korean-UCS2, Standard-Cantonese-GBK, Standard-Cantonese-UCS2, HongKong-Cantonese-Big5, HongKong-Cantonese-UCS2, Standard-Dutch, Standard-Norwegian, Standard-Swedish, Standard-Danish, Standard-Thai-TIS620
+   Voice           man,woman,child,patriarch,matriarch
+   Gender          male, female
+   HeadSize        0-100
+   Pitch           40-422 (Hz)
+   Expressiveness  0-100
+   Roughness       0-100
+   Breathiness     0-100
+   Volume          0-100 (%)
+   Speed           70-1297 (words per minute)
 
-   Parameter         Settings
-   samplerate        8000, 11025, 22050
-   abbreviationmode  on, off
-   numbermode        word, year
-   synthmode         sentence, none
-   textmode          talk, spell, literal, phonetic
-   language          AmericanEnglish, BritishEnglish, CastilianSpanish,
-			MexicanSpanish, StandardFrench, CanadianFrench,
-			StandardGerman, StandardItalian,
-			SimplifiedChinese, BrazilianPortuguese
-   voice             AdultMale, AdultFemale, Child, ElderlyFemale,
-                        ElderlyMale
-   vocaltract        male, female
-   breathiness       0-100
-   headsize          0-100
-   pitchbaseline     0-100
-   pitchfluctuation  0-100
-   roughness         0-100
+The quality parameter sets the sample rate of the generated audio:
+
+   Value  Rate
+   Poor    8000Hz
+  *Fair   11025Hz
+   Good   22050Hz
+
+The mode parameter determines how the text is spoken:
+
+  Value         Action
+  *Words        words are spoken
+   Letters      letters are spoken
+   Punctuation  letters and punctuation are spoken
+   Phonetic     letters are spoken phonetically
+
+The synthesize parameter determines how the text is synthesized:
+
+   Value      Action
+  *Sentences  each sentence is synthesized separately
+   All        the entire text is synthesized
+
+The abbreviations parameter determines how known abbreviations are spoken:
+
+   Value  Action
+  *On     abbreviations are expanded
+   Off    abbreviations aren't expanded
+
+The years parameter determines how four-digit numbers are spoken:
+
+   Value  Action            Example
+  *On     as year numbers   twenty nineteen
+   Off    as other numbers  two thousand nineteen
+
+The language parameter specifies which language is to be synthesized. The
+components of a language name are separated from one another by a dash [-].
+The first component is the dialect, the second component is the language,
+and the optional third component is the encoding (character set). Case
+doesn't matter, and each component may be individually abbreviated as
+desired. For example, ca-fr means Canadian-French. The following languages
+are supported:
+
+  *American-English
+   British-English
+   Castilian-Spanish
+   Mexican-Spanish
+   Standard-French
+   Canadian-French
+   Standard-German
+   Standard-Italian
+   Standard-Mandarin-GBK
+   Standard-Mandarin-PinYin
+   Standard-Mandarin-UCS2
+   Taiwanese-Mandarin-Big5
+   Taiwanese-Mandarin-ZhuYin
+   Taiwanese-Mandarin-PinYin
+   Taiwanese-Mandarin-UCS2
+   Brazilian-Portuguese
+   Standard-Japanese-SJIS
+   Standard-Japanese-UCS2
+   Standard-Finnish
+   Standard-Korean-UHC
+   Standard-Korean-UCS2
+   Standard-Cantonese-GBK
+   Standard-Cantonese-UCS2
+   HongKong-Cantonese-Big5
+   HongKong-Cantonese-UCS2
+   Standard-Dutch
+   Standard-Norwegian
+   Standard-Swedish
+   Standard-Danish
+   Standard-Thai-TIS620
+
+The voice parameter specifies which type of voice is to be synthesized. It
+may be either a built-in voice type or a ViaVoice voice name. The built-in
+voice types are: man, woman, child, patriarch (elderly man), matriarch
+(elderly woman). The ViaVoice voice names are:
+
+   Language              Type       Name
+   American-English      Man        Reed
+   American-English      Woman      Shelley
+   American-English      Child      Sandy
+   American-English      Patriarch  Grandpa
+   American-English      Matriarch  Grandma
+   British-English       Man        Justin
+   British-English       Woman      Jane
+   British-English       Child      Nicky
+   British-English       Patriarch  Gramps
+   British-English       Matriarch  Nanny
+   Castilian-Spanish     Man        Carlos
+   Castilian-Spanish     Woman      Pilar
+   Castilian-Spanish     Child      Pepe
+   Castilian-Spanish     Patriarch  Abuelo
+   Castilian-Spanish     Matriarch  Abuela
+   Standard-French       Man        Jacques
+   Standard-French       Woman      Jacqueline
+   Standard-French       Child      Marius
+   Standard-French       Patriarch  Grandpère
+   Standard-French       Matriarch  Mamie
+   Standard-German       Man        Max
+   Standard-German       Woman      Gisela
+   Standard-German       Child      Matti
+   Standard-German       Patriarch  Opa
+   Standard-German       Matriarch  Oma
+   Standard-Italian      Man        Enrico
+   Standard-Italian      Woman      Lucia
+   Standard-Italian      Child      Chicco
+   Standard-Italian      Patriarch  Nonno
+   Standard-Italian      Matriarch  Nonna
+   Standard-Mandarin     Man        Li3 Jing4
+   Standard-Mandarin     Woman      Wang2 Yan4
+   Standard-Mandarin     Child      Li3 Dong1 Dong1
+   Standard-Mandarin     Patriarch  Ye2 Ye
+   Standard-Mandarin     Matriarch  Nai3 Nai
+   Taiwanese-Mandarin    Man        Zhi4 Ming2
+   Taiwanese-Mandarin    Woman      Chun1 Jiao1
+   Taiwanese-Mandarin    Child      Xiao3 Bu4 Dian3
+   Taiwanese-Mandarin    Patriarch  A3 Gong1
+   Taiwanese-Mandarin    Matriarch  A3 Ma4
+   Brazilian-Portuguese  Man        João
+   Brazilian-Portuguese  Woman      Cláudia
+   Brazilian-Portuguese  Child      Chico
+   Brazilian-Portuguese  Patriarch  Avô
+   Brazilian-Portuguese  Matriarch  Avó
+   Standard-Japanese     Man        Taroo
+   Standard-Japanese     Woman      Hanako
+   Standard-Japanese     Child      Jiroo
+   Standard-Japanese     Patriarch  Taroo
+   Standard-Japanese     Matriarch  Obaachan
+   Standard-Finnish      Man        Antti
+   Standard-Finnish      Woman      Tarja
+   Standard-Finnish      Child      Pekka
+   Standard-Finnish      Patriarch  Isoisä
+   Standard-Finnish      Matriarch  Isoäiti
+
