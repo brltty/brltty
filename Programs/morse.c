@@ -229,8 +229,8 @@ setMorsePitch (MorseObject *morse, unsigned int frequency) {
 }
 
 static int
-setMorseUnit (MorseObject *morse, unsigned int rate, unsigned int reference) {
-  unsigned int unit = reference / rate;
+setMorseSpeed (MorseObject *morse, unsigned int speed, unsigned int reference) {
+  unsigned int unit = reference / speed;
   if (unit < 10) return 0;
 
   morse->parameters.unit = unit;
@@ -238,13 +238,13 @@ setMorseUnit (MorseObject *morse, unsigned int rate, unsigned int reference) {
 }
 
 int
-setMorseWordsPerMinute (MorseObject *morse, unsigned int rate) {
-  return setMorseUnit(morse, rate, 1200);
+setMorseWordsPerMinute (MorseObject *morse, unsigned int speed) {
+  return setMorseSpeed(morse, speed, 1200);
 }
 
 int
-setMorseGroupsPerMinute (MorseObject *morse, unsigned int rate) {
-  return setMorseUnit(morse, rate, 1000);
+setMorseGroupsPerMinute (MorseObject *morse, unsigned int speed) {
+  return setMorseSpeed(morse, speed, 1000);
 }
 
 void *
@@ -255,7 +255,7 @@ newMorseObject (void) {
     memset(morse, 0, sizeof(*morse));
 
     setMorsePitch(morse, 440);
-    setMorseWordsPerMinute(morse, 10);
+    setMorseWordsPerMinute(morse, 20);
 
     morse->state.wasSpace = 1;
 

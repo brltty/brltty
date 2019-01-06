@@ -23,11 +23,14 @@
 #include "log.h"
 #include "options.h"
 #include "prefs.h"
+#include "parse.h"
 #include "tune_utils.h"
 #include "notes.h"
 #include "datafile.h"
 #include "morse.h"
 
+static char *opt_morseSpeed;
+static int opt_morseGroups;
 static int opt_fromFiles;
 static char *opt_outputVolume;
 static char *opt_tuneDevice;
@@ -41,6 +44,19 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "files",
     .setting.flag = &opt_fromFiles,
     .description = "Use files rather than command line arguments."
+  },
+
+  { .letter = 's',
+    .word = "speed",
+    .argument = "wordsPerMinute",
+    .setting.string = &opt_morseSpeed,
+    .description = "Morse speed (words per minute)."
+  },
+
+  { .letter = 'g',
+    .word = "groups",
+    .setting.flag = &opt_morseGroups,
+    .description = "Speed is in groups (rather than words) per minute."
   },
 
   { .letter = 'v',
@@ -121,6 +137,27 @@ main (int argc, char *argv[]) {
   MorseObject *morse;
 
   if ((morse = newMorseObject())) {
+    {
+      int speed = 20;
+      static int minimum = 1;
+      static int maximum = 100;
+
+      int ok = 0;
+      const char *speedUnit = opt_morseGroups? "groups": "words";
+
+      if (validateInteger(&speed, opt_morseSpeed, &minimum, &maximum)) {
+        if (opt_morseGroups) {
+          if (setMorseGroupsPerMinute(morse, speed)) ok = 1;
+        } else {
+          if (setMorseWordsPerMinute(morse, speed)) ok = 1;
+        }
+      }
+
+      if (!ok) {
+        logMessage(LOG_WARNING, "unsupported Morse speed: %s (%s per minute)", opt_morseSpeed, speedUnit);
+      }
+    }
+
     if (opt_fromFiles) {
       const InputFilesProcessingParameters parameters = {
         .dataFileParameters = {
