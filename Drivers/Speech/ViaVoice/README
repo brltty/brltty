@@ -26,7 +26,7 @@ This driver recognizes the following parameters (see below for details):
    Voice           built-in type or ViaVoice name
    Gender          male, female
    HeadSize        0-100
-   PitchBaseline   40-422 [Herz]
+   PitchBaseline   40-422 [Hertz]
    Expressiveness  0-100 (pitch fluctuation)
    Roughness       0-100
    Breathiness     0-100
