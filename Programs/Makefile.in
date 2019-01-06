@@ -1192,7 +1192,8 @@ distclean clean::
 	for language do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) $@); done
 
 clean::
-	-rm -f brltty$X brltty-lscmds$X brltty-lsinc$X
+	-rm -f brltty$X brltty-cldr$X
+	-rm -f brltty-lscmds$X brltty-lsinc$X
 	-rm -f brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X brltty-ktb$X
 	-rm -f brltty-tune$X brltty-morse$X
 	-rm -f xbrlapi$X
