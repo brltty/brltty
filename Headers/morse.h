@@ -36,10 +36,14 @@ typedef struct MorseObjectStruct MorseObject;
 extern void *newMorseObject (void);
 extern void destroyMorseObject (MorseObject *morse);
 
-extern int addMorseString (const char *string, MorseObject *morse);
-extern int addMorseCharacters (const wchar_t *characters, size_t count, MorseObject *morse);
-extern int addMorseCharacter (wchar_t character, MorseObject *morse);
-extern int addMorsePattern (MorsePattern pattern, MorseObject *morse);
+extern int setMorsePitch (MorseObject *morse, unsigned int frequency);
+extern int setMorseWordsPerMinute (MorseObject *morse, unsigned int rate);
+extern int setMorseGroupsPerMinute (MorseObject *morse, unsigned int rate);
+
+extern int addMorseString (MorseObject *morse, const char *string);
+extern int addMorseCharacters (MorseObject *morse, const wchar_t *characters, size_t count);
+extern int addMorseCharacter (MorseObject *morse, wchar_t character);
+extern int addMorsePattern (MorseObject *morse, MorsePattern pattern);
 extern int playMorsePatterns (MorseObject *morse);
 
 #ifdef __cplusplus

@@ -92,8 +92,8 @@ DATA_OPERANDS_PROCESSOR(processMorseLine) {
   DataOperand text;
   getTextRemaining(file, &text);
 
-  if (!addMorseCharacters(text.characters, text.length, morse)) return 0;
-  if (!addMorseCharacter(WC_C(' '), morse)) return 0;
+  if (!addMorseCharacters(morse, text.characters, text.length)) return 0;
+  if (!addMorseCharacter(morse, WC_C(' '))) return 0;
   return 1;
 }
 
@@ -134,7 +134,7 @@ main (int argc, char *argv[]) {
       exitStatus = PROG_EXIT_SUCCESS;
 
       do {
-        if (!(addMorseString(*argv, morse) && addMorseCharacter(WC_C(' '), morse))) {
+        if (!(addMorseString(morse, *argv) && addMorseCharacter(morse, WC_C(' ')))) {
           exitStatus = PROG_EXIT_FATAL;
           break;
         }
