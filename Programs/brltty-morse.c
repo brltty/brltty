@@ -26,7 +26,9 @@
 #include "prefs.h"
 #include "tune_utils.h"
 #include "notes.h"
+#include "tune.h"
 #include "datafile.h"
+#include "charset.h"
 
 static int opt_fromFiles;
 static char *opt_outputVolume;
@@ -85,12 +87,141 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE
 
+typedef uint8_t MorsePattern;
+
+static const MorsePattern morsePatterns[] = {
+  [WC_C('a')] = 0B101,
+  [WC_C('b')] = 0B11110,
+  [WC_C('c')] = 0B11010,
+  [WC_C('d')] = 0B1110,
+  [WC_C('e')] = 0B11,
+  [WC_C('f')] = 0B11011,
+  [WC_C('g')] = 0B1100,
+  [WC_C('h')] = 0B11111,
+  [WC_C('i')] = 0B111,
+  [WC_C('j')] = 0B10001,
+  [WC_C('k')] = 0B1010,
+  [WC_C('l')] = 0B11101,
+  [WC_C('m')] = 0B100,
+  [WC_C('n')] = 0B110,
+  [WC_C('o')] = 0B1000,
+  [WC_C('p')] = 0B11001,
+  [WC_C('q')] = 0B10100,
+  [WC_C('r')] = 0B1101,
+  [WC_C('s')] = 0B1111,
+  [WC_C('t')] = 0B10,
+  [WC_C('u')] = 0B1011,
+  [WC_C('v')] = 0B10111,
+  [WC_C('w')] = 0B1001,
+  [WC_C('x')] = 0B10110,
+  [WC_C('y')] = 0B10010,
+  [WC_C('z')] = 0B11100
+};
+
 typedef struct {
-  int i;
+  struct {
+    ToneElement *array;
+    size_t size;
+    size_t count;
+  } elements;
 } MorseData;
+
+static int
+addElement (const ToneElement *element, MorseData *morse) {
+  if (morse->elements.count == morse->elements.size) {
+    size_t newSize = morse->elements.size? (morse->elements.size << 1): 0X10;
+    ToneElement *newArray = realloc(morse->elements.array, (newSize * sizeof(*newArray)));
+
+    if (!newArray) {
+      logMallocError();
+      return 0;
+    }
+
+    morse->elements.array = newArray;
+    morse->elements.size = newSize;
+  }
+
+  morse->elements.array[morse->elements.count++] = *element;
+  return 1;
+}
+
+static int
+addTone (unsigned int length, MorseData *morse) {
+  ToneElement tone = TONE_PLAY((50 * length), 440);
+  return addElement(&tone, morse);;
+}
+
+static int
+addSilence (unsigned int length, MorseData *morse) {
+  ToneElement tone = TONE_REST((50 * length));
+  return addElement(&tone, morse);;
+}
+
+static int
+addMorse (MorsePattern pattern, MorseData *morse) {
+  if (pattern) {
+    while (pattern != 0B1) {
+      unsigned int length = (pattern & 0B1)? 1: 3;
+      if (!addTone(length, morse)) return 0;
+      if (!addSilence(1, morse)) return 0;
+      pattern >>= 1;
+    }
+
+    if (!addSilence(2, morse)) return 0;
+  }
+
+  return 1;
+}
+
+static int
+addCharacter (wchar_t character, MorseData *morse) {
+  character = towlower(character);
+  MorsePattern pattern = (character < ARRAY_COUNT(morsePatterns))? morsePatterns[character]: 0;
+  return addMorse(pattern, morse);
+}
+
+static int
+addCharacters (const wchar_t *characters, size_t count, MorseData *morse) {
+  const wchar_t *character = characters;
+  const wchar_t *end = character + count;
+
+  while (character < end) {
+    if (!addCharacter(*character++, morse)) return 0;
+  }
+
+  return 1;
+}
+
+static int
+addString (const char *string, MorseData *morse) {
+  size_t size = strlen(string) + 1;
+  wchar_t characters[size];
+
+  const char *byte = string;
+  wchar_t *end = characters;
+
+  convertUtf8ToWchars(&byte, &end, size);
+  return addCharacters(characters, (end - characters), morse);
+}
 
 static
 DATA_OPERANDS_PROCESSOR(processMorseLine) {
+  MorseData *morse = data;
+
+  DataOperand text;
+  getTextRemaining(file, &text);
+  return addCharacters(text.characters, text.length, morse);
+}
+
+static int
+playMorse (MorseData *morse) {
+  {
+    ToneElement element = TONE_STOP();
+    if (!addElement(&element, morse)) return 0;
+  }
+
+  tunePlayTones(morse->elements.array);
+  tuneSynchronize();
   return 1;
 }
 
@@ -117,7 +248,11 @@ main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
 
   MorseData morse = {
-    .i = 0
+    .elements = {
+      .array = NULL,
+      .size = 0,
+      .count = 0
+    }
   };
 
   if (opt_fromFiles) {
@@ -133,11 +268,22 @@ main (int argc, char *argv[]) {
     exitStatus = PROG_EXIT_SUCCESS;
 
     do {
+      if (!addString(*argv, &morse)) {
+        exitStatus = PROG_EXIT_FATAL;
+        break;
+      }
+
       argv += 1;
     } while (argc -= 1);
   } else {
     logMessage(LOG_ERR, "missing text");
     exitStatus = PROG_EXIT_SYNTAX;
+  }
+
+  if (exitStatus == PROG_EXIT_SUCCESS) {
+    if (playMorse(&morse)) {
+      exitStatus = PROG_EXIT_FATAL;
+    }
   }
 
   return exitStatus;
