@@ -14,6 +14,10 @@ but it can't be built into a statically linked BRLTTY binary (via
 --enable-standalone-programs) because the Voxin package doesn't contain
 static archives.
 
+The sox command must be installed because this driver uses it in order to
+resample from one of the underlying speech engine's fixed set of rates (see
+the quality parameter, below) to one that's supported by the sound card.
+
 This driver recognizes the following parameters (see below for details):
 
    Parameter       Value
