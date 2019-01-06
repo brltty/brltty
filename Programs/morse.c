@@ -102,8 +102,12 @@ getMorsePattern (wchar_t character) {
 struct  MorseObjectStruct {
   struct {
     unsigned int frequency;
-    unsigned int duration;
+    unsigned int unit;
   } parameters;
+
+  struct {
+    unsigned wasSpace:1;
+  } state;
 
   struct {
     ToneElement *array;
@@ -132,33 +136,33 @@ addMorseElement (const ToneElement *element, MorseObject *morse) {
 }
 
 static int
-addMorseTone (unsigned int length, MorseObject *morse) {
-  ToneElement tone = TONE_PLAY((morse->parameters.duration * length), morse->parameters.frequency);
+addMorseMark (unsigned int units, MorseObject *morse) {
+  ToneElement tone = TONE_PLAY((morse->parameters.unit * units), morse->parameters.frequency);
   return addMorseElement(&tone, morse);;
 }
 
 static int
-addMorseSilence (unsigned int length, MorseObject *morse) {
-  ToneElement tone = TONE_REST((morse->parameters.duration * length));
+addMorseGap (unsigned int units, MorseObject *morse) {
+  ToneElement tone = TONE_REST((morse->parameters.unit * units));
   return addMorseElement(&tone, morse);;
-}
-
-int
-addMorseSpace (MorseObject *morse) {
-  return addMorseSilence(2, morse);
 }
 
 int
 addMorsePattern (MorsePattern pattern, MorseObject *morse) {
   if (pattern) {
+    int addGap = 0;
+
     while (pattern != 0B1) {
-      unsigned int length = (pattern & 0B1)? 1: 3;
-      if (!addMorseTone(length, morse)) return 0;
-      if (!addMorseSilence(1, morse)) return 0;
+      if (!addGap) {
+        addGap = 1;
+      } else if (!addMorseGap(MORSE_UNITS_GAP_SYMBOL, morse)) {
+        return 0;
+      }
+
+      unsigned int units = (pattern & 0B1)? MORSE_UNITS_MARK_SHORT: MORSE_UNITS_MARK_LONG;
+      if (!addMorseMark(units, morse)) return 0;
       pattern >>= 1;
     }
-
-    if (!addMorseSilence(2, morse)) return 0;
   }
 
   return 1;
@@ -166,7 +170,20 @@ addMorsePattern (MorsePattern pattern, MorseObject *morse) {
 
 int
 addMorseCharacter (wchar_t character, MorseObject *morse) {
-  return addMorsePattern(getMorsePattern(character), morse);
+  if (!iswspace(character)) {
+    if (morse->state.wasSpace) {
+      morse->state.wasSpace = 0;
+    } else if (!addMorseGap(MORSE_UNITS_GAP_LETTER, morse)) {
+      return 0;
+    }
+
+    if (!addMorsePattern(getMorsePattern(character), morse)) return 0;
+  } else if (!morse->state.wasSpace) {
+    morse->state.wasSpace = 1;
+    if (!addMorseGap(MORSE_UNITS_GAP_WORD, morse)) return 0;
+  }
+
+  return 1;
 }
 
 int
@@ -213,7 +230,9 @@ newMorseObject (void) {
     memset(morse, 0, sizeof(*morse));
 
     morse->parameters.frequency = 440;
-    morse->parameters.duration = 50;
+    morse->parameters.unit = 50;
+
+    morse->state.wasSpace = 1;
 
     morse->elements.array = NULL;
     morse->elements.size = 0;

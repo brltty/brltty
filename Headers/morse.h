@@ -26,6 +26,12 @@ extern "C" {
 typedef uint8_t MorsePattern;
 extern MorsePattern getMorsePattern (wchar_t character);
 
+#define MORSE_UNITS_MARK_SHORT 1
+#define MORSE_UNITS_MARK_LONG  3
+#define MORSE_UNITS_GAP_SYMBOL 1
+#define MORSE_UNITS_GAP_LETTER 3
+#define MORSE_UNITS_GAP_WORD   7
+
 typedef struct MorseObjectStruct MorseObject;
 extern void *newMorseObject (void);
 extern void destroyMorseObject (MorseObject *morse);
@@ -33,7 +39,6 @@ extern void destroyMorseObject (MorseObject *morse);
 extern int addMorseString (const char *string, MorseObject *morse);
 extern int addMorseCharacters (const wchar_t *characters, size_t count, MorseObject *morse);
 extern int addMorseCharacter (wchar_t character, MorseObject *morse);
-extern int addMorseSpace (MorseObject *morse);
 extern int addMorsePattern (MorsePattern pattern, MorseObject *morse);
 extern int playMorsePatterns (MorseObject *morse);
 
