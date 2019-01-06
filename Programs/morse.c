@@ -91,7 +91,20 @@ static const MorsePattern morsePatterns[] = {
   [0] = 0
 };
 
+MorsePattern
+getMorsePattern (wchar_t character) {
+  character = towlower(character);
+  if (character < 0) return 0;
+  if (character >= ARRAY_COUNT(morsePatterns)) return 0;
+  return morsePatterns[character];
+}
+
 struct  MorseObjectStruct {
+  struct {
+    unsigned int frequency;
+    unsigned int duration;
+  } parameters;
+
   struct {
     ToneElement *array;
     size_t size;
@@ -120,13 +133,13 @@ addMorseElement (const ToneElement *element, MorseObject *morse) {
 
 static int
 addMorseTone (unsigned int length, MorseObject *morse) {
-  ToneElement tone = TONE_PLAY((50 * length), 440);
+  ToneElement tone = TONE_PLAY((morse->parameters.duration * length), morse->parameters.frequency);
   return addMorseElement(&tone, morse);;
 }
 
 static int
 addMorseSilence (unsigned int length, MorseObject *morse) {
-  ToneElement tone = TONE_REST((50 * length));
+  ToneElement tone = TONE_REST((morse->parameters.duration * length));
   return addMorseElement(&tone, morse);;
 }
 
@@ -153,9 +166,7 @@ addMorsePattern (MorsePattern pattern, MorseObject *morse) {
 
 int
 addMorseCharacter (wchar_t character, MorseObject *morse) {
-  character = towlower(character);
-  MorsePattern pattern = (character < ARRAY_COUNT(morsePatterns))? morsePatterns[character]: 0;
-  return addMorsePattern(pattern, morse);
+  return addMorsePattern(getMorsePattern(character), morse);
 }
 
 int
@@ -200,6 +211,9 @@ newMorseObject (void) {
 
   if ((morse = malloc(sizeof(*morse)))) {
     memset(morse, 0, sizeof(*morse));
+
+    morse->parameters.frequency = 440;
+    morse->parameters.duration = 50;
 
     morse->elements.array = NULL;
     morse->elements.size = 0;

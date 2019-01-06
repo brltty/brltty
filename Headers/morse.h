@@ -23,9 +23,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct MorseObjectStruct MorseObject;
 typedef uint8_t MorsePattern;
+extern MorsePattern getMorsePattern (wchar_t character);
 
+typedef struct MorseObjectStruct MorseObject;
 extern void *newMorseObject (void);
 extern void destroyMorseObject (MorseObject *morse);
 
