@@ -115,7 +115,44 @@ static const MorsePattern morsePatterns[] = {
   [WC_C('w')] = 0B1001,
   [WC_C('x')] = 0B10110,
   [WC_C('y')] = 0B10010,
-  [WC_C('z')] = 0B11100
+  [WC_C('z')] = 0B11100,
+
+  [WC_C('ä')] = 0B10101,
+  [WC_C('á')] = 0B101001,
+  [WC_C('å')] = 0B101001,
+  [WC_C('é')] = 0B111011,
+  [WC_C('ñ')] = 0B100100,
+  [WC_C('ö')] = 0B11000,
+  [WC_C('ü')] = 0B10011,
+
+  [WC_C('0')] = 0B100000,
+  [WC_C('1')] = 0B100001,
+  [WC_C('2')] = 0B100011,
+  [WC_C('3')] = 0B100111,
+  [WC_C('4')] = 0B101111,
+  [WC_C('5')] = 0B111111,
+  [WC_C('6')] = 0B111110,
+  [WC_C('7')] = 0B111100,
+  [WC_C('8')] = 0B111000,
+  [WC_C('9')] = 0B110000,
+
+  [WC_C('.')] = 0B1010101,
+  [WC_C(',')] = 0B1001100,
+  [WC_C('?')] = 0B1110011,
+  [WC_C('!')] = 0B1001010,
+  [WC_C(':')] = 0B1111000,
+  [WC_C('\'')] = 0B1100001,
+  [WC_C('"')] = 0B1101101,
+  [WC_C('(')] = 0B110010,
+  [WC_C(')')] = 0B1010010,
+  [WC_C('=')] = 0B101110,
+  [WC_C('+')] = 0B110101,
+  [WC_C('-')] = 0B1011110,
+  [WC_C('/')] = 0B110110,
+  [WC_C('&')] = 0B111101,
+  [WC_C('@')] = 0B1101001,
+
+  [0] = 0
 };
 
 typedef struct {
@@ -155,6 +192,11 @@ static int
 addSilence (unsigned int length, MorseData *morse) {
   ToneElement tone = TONE_REST((50 * length));
   return addElement(&tone, morse);;
+}
+
+static int
+addSpace (MorseData *morse) {
+  return addSilence(2, morse);
 }
 
 static int
@@ -210,7 +252,10 @@ DATA_OPERANDS_PROCESSOR(processMorseLine) {
 
   DataOperand text;
   getTextRemaining(file, &text);
-  return addCharacters(text.characters, text.length, morse);
+
+  if (!addCharacters(text.characters, text.length, morse)) return 0;
+  if (!addSpace(morse)) return 0;
+  return 1;
 }
 
 static int
@@ -268,7 +313,7 @@ main (int argc, char *argv[]) {
     exitStatus = PROG_EXIT_SUCCESS;
 
     do {
-      if (!addString(*argv, &morse)) {
+      if (!(addString(*argv, &morse) && addSpace(&morse))) {
         exitStatus = PROG_EXIT_FATAL;
         break;
       }
