@@ -222,29 +222,57 @@ playMorsePatterns (MorseObject *morse) {
   return 1;
 }
 
+unsigned int
+getMorsePitch (MorseObject *morse) {
+  return morse->parameters.frequency;
+}
+
 int
 setMorsePitch (MorseObject *morse, unsigned int frequency) {
+  if (frequency < 1) return 0;
+  if (frequency > 0XFFFF) return 0;
+
   morse->parameters.frequency = frequency;
   return 1;
 }
 
-static int
-setMorseSpeed (MorseObject *morse, unsigned int speed, unsigned int reference) {
-  unsigned int unit = reference / speed;
-  if (unit < 10) return 0;
+static inline unsigned int
+getMorseReferenceDuration (unsigned int unitsPerMinute) {
+  return 60000 / unitsPerMinute;
+}
 
-  morse->parameters.unit = unit;
+static unsigned int
+getMorseSpeed (MorseObject *morse, unsigned int unitsPerMinute) {
+  return getMorseReferenceDuration(unitsPerMinute) / morse->parameters.unit;
+}
+
+static int
+setMorseSpeed (MorseObject *morse, unsigned int speed, unsigned int unitsPerMinute) {
+  unsigned int unitDuration = getMorseReferenceDuration(unitsPerMinute) / speed;
+  if (unitDuration < 10) return 0;
+
+  morse->parameters.unit = unitDuration;
   return 1;
+}
+
+unsigned int
+getMorseWordsPerMinute (MorseObject *morse) {
+  return getMorseSpeed(morse, MORSE_UNITS_PER_WORD);
 }
 
 int
 setMorseWordsPerMinute (MorseObject *morse, unsigned int speed) {
-  return setMorseSpeed(morse, speed, 1200);
+  return setMorseSpeed(morse, speed, MORSE_UNITS_PER_WORD);
+}
+
+unsigned int
+getMorseGroupsPerMinute (MorseObject *morse) {
+  return getMorseSpeed(morse, MORSE_UNITS_PER_GROUP);
 }
 
 int
 setMorseGroupsPerMinute (MorseObject *morse, unsigned int speed) {
-  return setMorseSpeed(morse, speed, 1000);
+  return setMorseSpeed(morse, speed, MORSE_UNITS_PER_GROUP);
 }
 
 void *
