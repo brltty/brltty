@@ -30,6 +30,7 @@
 #include "morse.h"
 
 static char *opt_morseSpeed;
+static char *opt_morsePitch;
 static int opt_morseGroups;
 static int opt_fromFiles;
 static char *opt_outputVolume;
@@ -44,6 +45,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "files",
     .setting.flag = &opt_fromFiles,
     .description = "Use files rather than command line arguments."
+  },
+
+  { .letter = 't',
+    .word = "tone",
+    .argument = "frequency",
+    .setting.string = &opt_morsePitch,
+    .description = "The pitch of the tone."
   },
 
   { .letter = 's',
@@ -109,7 +117,7 @@ DATA_OPERANDS_PROCESSOR(processMorseLine) {
   getTextRemaining(file, &text);
 
   if (!addMorseCharacters(morse, text.characters, text.length)) return 0;
-  if (!addMorseCharacter(morse, WC_C(' '))) return 0;
+  if (!addMorseSpace(morse)) return 0;
   return 1;
 }
 
@@ -138,23 +146,54 @@ main (int argc, char *argv[]) {
 
   if ((morse = newMorseObject())) {
     {
-      int speed = 20;
-      static int minimum = 1;
-      static int maximum = 100;
-
       int ok = 0;
-      const char *speedUnit = opt_morseGroups? "groups": "words";
 
-      if (validateInteger(&speed, opt_morseSpeed, &minimum, &maximum)) {
-        if (opt_morseGroups) {
-          if (setMorseGroupsPerMinute(morse, speed)) ok = 1;
-        } else {
-          if (setMorseWordsPerMinute(morse, speed)) ok = 1;
+      {
+        int pitch = getMorsePitch(morse);
+        static int minimum = 1;
+        static int maximum = 0XFFFF;
+
+        if (validateInteger(&pitch, opt_morsePitch, &minimum, &maximum)) {
+          if (setMorsePitch(morse, pitch)) {
+            ok = 1;
+          }
         }
       }
 
       if (!ok) {
-        logMessage(LOG_WARNING, "unsupported Morse speed: %s (%s per minute)", opt_morseSpeed, speedUnit);
+        logMessage(LOG_WARNING, "unsupported Morse pitch: %s (Hz)", opt_morsePitch);
+      }
+    }
+
+    {
+      int ok = 0;
+
+      int speed;
+      const char *unit;
+
+      if (opt_morseGroups) {
+        speed = getMorseGroupsPerMinute(morse);
+        unit = "groups";
+      } else {
+        speed = getMorseWordsPerMinute(morse);
+        unit = "words";
+      }
+
+      {
+        static int minimum = 1;
+        static int maximum = 100;
+
+        if (validateInteger(&speed, opt_morseSpeed, &minimum, &maximum)) {
+          if (opt_morseGroups) {
+            if (setMorseGroupsPerMinute(morse, speed)) ok = 1;
+          } else {
+            if (setMorseWordsPerMinute(morse, speed)) ok = 1;
+          }
+        }
+      }
+
+      if (!ok) {
+        logMessage(LOG_WARNING, "unsupported Morse speed: %s (%s per minute)", opt_morseSpeed, unit);
       }
     }
 
@@ -171,7 +210,7 @@ main (int argc, char *argv[]) {
       exitStatus = PROG_EXIT_SUCCESS;
 
       do {
-        if (!(addMorseString(morse, *argv) && addMorseCharacter(morse, WC_C(' ')))) {
+        if (!(addMorseString(morse, *argv) && addMorseSpace(morse))) {
           exitStatus = PROG_EXIT_FATAL;
           break;
         }

@@ -187,6 +187,11 @@ addMorseCharacter (MorseObject *morse, wchar_t character) {
 }
 
 int
+addMorseSpace (MorseObject *morse) {
+  return addMorseCharacter(morse, WC_C(' '));
+}
+
+int
 addMorseCharacters (MorseObject *morse, const wchar_t *characters, size_t count) {
   const wchar_t *character = characters;
   const wchar_t *end = character + count;

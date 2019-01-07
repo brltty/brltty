@@ -47,6 +47,7 @@ extern int setMorseGroupsPerMinute (MorseObject *morse, unsigned int rate);
 extern int addMorseString (MorseObject *morse, const char *string);
 extern int addMorseCharacters (MorseObject *morse, const wchar_t *characters, size_t count);
 extern int addMorseCharacter (MorseObject *morse, wchar_t character);
+extern int addMorseSpace (MorseObject *morse);
 
 typedef uint8_t MorsePattern;
 extern MorsePattern getMorsePattern (wchar_t character);
