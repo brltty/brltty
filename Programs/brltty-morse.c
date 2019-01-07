@@ -29,10 +29,10 @@
 #include "datafile.h"
 #include "morse.h"
 
-static char *opt_morseSpeed;
-static char *opt_morsePitch;
-static int opt_morseGroups;
 static int opt_fromFiles;
+static char *opt_morsePitch;
+static char *opt_morseSpeed;
+static int opt_morseGroups;
 static char *opt_outputVolume;
 static char *opt_tuneDevice;
 
@@ -121,6 +121,12 @@ DATA_OPERANDS_PROCESSOR(processMorseLine) {
   return 1;
 }
 
+static void
+exitMorseObject (void *data) {
+  MorseObject *morse = data;
+  destroyMorseObject(morse);
+}
+
 int
 main (int argc, char *argv[]) {
   {
@@ -140,96 +146,96 @@ main (int argc, char *argv[]) {
   if (!parseTuneInstrument(opt_midiInstrument)) return PROG_EXIT_SYNTAX;
 #endif /* HAVE_MIDI_SUPPORT */
 
+  MorseObject *morse = newMorseObject();
+  if (!morse) return PROG_EXIT_FATAL;
+  onProgramExit("morse-object", exitMorseObject, morse);
+
+  {
+    int ok = 0;
+
+    {
+      int pitch = getMorsePitch(morse);
+      static int minimum = 1;
+      static int maximum = 0XFFFF;
+
+      if (validateInteger(&pitch, opt_morsePitch, &minimum, &maximum)) {
+        if (setMorsePitch(morse, pitch)) {
+          ok = 1;
+        }
+      }
+    }
+
+    if (!ok) {
+      logMessage(LOG_WARNING, "unsupported Morse pitch: %s (Hz)", opt_morsePitch);
+      return PROG_EXIT_SYNTAX;
+    }
+  }
+
+  {
+    int ok = 0;
+
+    int speed;
+    const char *unit;
+
+    if (opt_morseGroups) {
+      speed = getMorseGroupsPerMinute(morse);
+      unit = "groups";
+    } else {
+      speed = getMorseWordsPerMinute(morse);
+      unit = "words";
+    }
+
+    {
+      static int minimum = 1;
+      static int maximum = 100;
+
+      if (validateInteger(&speed, opt_morseSpeed, &minimum, &maximum)) {
+        if (opt_morseGroups) {
+          if (setMorseGroupsPerMinute(morse, speed)) ok = 1;
+        } else {
+          if (setMorseWordsPerMinute(morse, speed)) ok = 1;
+        }
+      }
+    }
+
+    if (!ok) {
+      logMessage(LOG_WARNING, "unsupported Morse speed: %s (%s per minute)", opt_morseSpeed, unit);
+      return PROG_EXIT_SYNTAX;
+    }
+  }
+
   if (!setTuneDevice()) return PROG_EXIT_SEMANTIC;
   ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
-  MorseObject *morse;
 
-  if ((morse = newMorseObject())) {
-    {
-      int ok = 0;
-
-      {
-        int pitch = getMorsePitch(morse);
-        static int minimum = 1;
-        static int maximum = 0XFFFF;
-
-        if (validateInteger(&pitch, opt_morsePitch, &minimum, &maximum)) {
-          if (setMorsePitch(morse, pitch)) {
-            ok = 1;
-          }
-        }
+  if (opt_fromFiles) {
+    const InputFilesProcessingParameters parameters = {
+      .dataFileParameters = {
+        .processOperands = processMorseLine,
+        .data = &morse
       }
+    };
 
-      if (!ok) {
-        logMessage(LOG_WARNING, "unsupported Morse pitch: %s (Hz)", opt_morsePitch);
-      }
-    }
+    exitStatus = processInputFiles(argv, argc, &parameters);
+  } else if (argc) {
+    exitStatus = PROG_EXIT_SUCCESS;
 
-    {
-      int ok = 0;
-
-      int speed;
-      const char *unit;
-
-      if (opt_morseGroups) {
-        speed = getMorseGroupsPerMinute(morse);
-        unit = "groups";
-      } else {
-        speed = getMorseWordsPerMinute(morse);
-        unit = "words";
-      }
-
-      {
-        static int minimum = 1;
-        static int maximum = 100;
-
-        if (validateInteger(&speed, opt_morseSpeed, &minimum, &maximum)) {
-          if (opt_morseGroups) {
-            if (setMorseGroupsPerMinute(morse, speed)) ok = 1;
-          } else {
-            if (setMorseWordsPerMinute(morse, speed)) ok = 1;
-          }
-        }
-      }
-
-      if (!ok) {
-        logMessage(LOG_WARNING, "unsupported Morse speed: %s (%s per minute)", opt_morseSpeed, unit);
-      }
-    }
-
-    if (opt_fromFiles) {
-      const InputFilesProcessingParameters parameters = {
-        .dataFileParameters = {
-          .processOperands = processMorseLine,
-          .data = &morse
-        }
-      };
-
-      exitStatus = processInputFiles(argv, argc, &parameters);
-    } else if (argc) {
-      exitStatus = PROG_EXIT_SUCCESS;
-
-      do {
-        if (!(addMorseString(morse, *argv) && addMorseSpace(morse))) {
-          exitStatus = PROG_EXIT_FATAL;
-          break;
-        }
-
-        argv += 1;
-      } while (argc -= 1);
-    } else {
-      logMessage(LOG_ERR, "missing text");
-      exitStatus = PROG_EXIT_SYNTAX;
-    }
-
-    if (exitStatus == PROG_EXIT_SUCCESS) {
-      if (!playMorsePatterns(morse)) {
+    do {
+      if (!(addMorseString(morse, *argv) && addMorseSpace(morse))) {
         exitStatus = PROG_EXIT_FATAL;
+        break;
       }
-    }
 
-    destroyMorseObject(morse);
-    morse = NULL;
+      argv += 1;
+    } while (argc -= 1);
+  } else {
+    logMessage(LOG_ERR, "missing text");
+    exitStatus = PROG_EXIT_SYNTAX;
+  }
+
+  if (exitStatus == PROG_EXIT_SUCCESS) {
+    if (!playMorseSequence(morse)) {
+      exitStatus = PROG_EXIT_FATAL;
+    }
   }
 
   return exitStatus;

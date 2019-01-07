@@ -216,7 +216,7 @@ addMorseString (MorseObject *morse, const char *string) {
 }
 
 int
-playMorsePatterns (MorseObject *morse) {
+playMorseSequence (MorseObject *morse) {
   {
     ToneElement element = TONE_STOP();
     if (!addMorseElement(morse, &element)) return 0;
@@ -225,6 +225,12 @@ playMorsePatterns (MorseObject *morse) {
   tunePlayTones(morse->elements.array);
   tuneSynchronize();
   return 1;
+}
+
+void
+clearMorseSequence (MorseObject *morse) {
+  morse->elements.count = 0;
+  morse->state.wasSpace = 1;
 }
 
 unsigned int
@@ -290,12 +296,10 @@ newMorseObject (void) {
     setMorsePitch(morse, 440);
     setMorseWordsPerMinute(morse, 20);
 
-    morse->state.wasSpace = 1;
-
     morse->elements.array = NULL;
     morse->elements.size = 0;
-    morse->elements.count = 0;
 
+    clearMorseSequence(morse);;
     return morse;
   } else {
     logMallocError();

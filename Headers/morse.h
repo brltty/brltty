@@ -53,7 +53,8 @@ typedef uint8_t MorsePattern;
 extern MorsePattern getMorsePattern (wchar_t character);
 extern int addMorsePattern (MorseObject *morse, MorsePattern pattern);
 
-extern int playMorsePatterns (MorseObject *morse);
+extern int playMorseSequence (MorseObject *morse);
+extern void clearMorseSequence (MorseObject *morse);
 
 #ifdef __cplusplus
 }
