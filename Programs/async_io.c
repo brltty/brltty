@@ -376,13 +376,15 @@ initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const O
 
 static int
 testMonitor (const MonitorEntry *monitor, int *error) {
-  if (monitor->revents & POLLERR) {
-    *error = EIO;
-  } else if (monitor->revents & POLLHUP) {
+  if (monitor->revents & monitor->events) return 1;
+
+  if (monitor->revents & POLLHUP) {
     *error = ENODEV;
+  } else {
+    *error = EIO;
   }
 
-  return monitor->revents != 0;
+  return 0;
 }
 
 static void
