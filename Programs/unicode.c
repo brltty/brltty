@@ -58,11 +58,6 @@ getByName (wchar_t *character, const char *name, UCharNameChoice choice) {
 }
 
 static int
-hasBinaryProperty (wchar_t character, UProperty property) {
-  return u_hasBinaryProperty(character, property);
-}
-
-static int
 nextBaseCharacter (const UChar **current, const UChar *end) {
   do {
     if (*current == end) return 0;
@@ -169,15 +164,6 @@ getCharacterWidth (wchar_t character) {
 int
 isBrailleCharacter (wchar_t character) {
   return (character & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW;
-}
-
-int
-isEmojiCharacter (wchar_t character) {
-#ifdef HAVE_ICU
-  if (hasBinaryProperty(character, UCHAR_EMOJI)) return 1;
-#endif /* HAVE_ICU */
-
-  return 0;
 }
 
 int
