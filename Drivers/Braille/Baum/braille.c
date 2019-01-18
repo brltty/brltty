@@ -181,6 +181,14 @@ BEGIN_KEY_NAME_TABLES(connect)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(b2g)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLES(conny)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(entry),
@@ -271,6 +279,7 @@ END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(default)
 DEFINE_KEY_TABLE(connect)
+DEFINE_KEY_TABLE(b2g)
 DEFINE_KEY_TABLE(conny)
 DEFINE_KEY_TABLE(orbit)
 DEFINE_KEY_TABLE(pronto)
@@ -288,6 +297,7 @@ DEFINE_KEY_TABLE(vk)
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(default),
   &KEY_TABLE_DEFINITION(connect),
+  &KEY_TABLE_DEFINITION(b2g),
   &KEY_TABLE_DEFINITION(conny),
   &KEY_TABLE_DEFINITION(orbit),
   &KEY_TABLE_DEFINITION(pronto),
@@ -825,6 +835,7 @@ typedef union {
 
 typedef enum {
   BAUM_DEVICE_Default,
+  BAUM_DEVICE_B2G,
   BAUM_DEVICE_Conny,
   BAUM_DEVICE_Orbit,
   BAUM_DEVICE_PocketVario,
@@ -853,6 +864,10 @@ static const BaumDeviceIdentityEntry baumDeviceIdentityTable[] = {
 
   { .string = "Brailliant",
     .type = BAUM_DEVICE_SuperVario
+  },
+
+  { .string = "Conny (NBP B2G)",
+    .type = BAUM_DEVICE_B2G
   },
 
   { .string = "Conny",
@@ -1404,6 +1419,11 @@ writeBaumCells_modular (BrailleDisplay *brl, unsigned int start, unsigned int co
 static const BaumDeviceOperations baumDeviceOperations[] = {
   [BAUM_DEVICE_Default] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(default),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_B2G] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(b2g),
     .writeAllCells = writeBaumCells_all
   },
 
