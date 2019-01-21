@@ -179,4 +179,5 @@ alias	\u2298	\x2F	# ⊘ [CIRCLED DIVISION SLASH]
 alias	\u229B	\x2A	# ⊛ [CIRCLED ASTERISK OPERATOR]
 alias	\u229C	\x3D	# ⊜ [CIRCLED EQUALS]
 
+include de-chess.tti
 include common.tti
