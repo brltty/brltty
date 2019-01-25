@@ -28,9 +28,11 @@ class i i
 class m m
 class n n
 class r r
-class hilrs hilrs
+class hilmrs hilmrs
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
+
+include de-kurzschrift-wort.cti
 
 # Ausnahmen für Vokalgruppen aus de-vollschrift.ctb
 before e always arteri 356-2345-12456-24
@@ -55,72 +57,6 @@ always x 6-1346
 always X 6-1346
 always y 6-13456
 always Y 6-13456
-
-always europa 126-1235-135-1234-1
-begword neuro 1345-126-1235-135
-always olympia =
-
-# Doppelvokale
-always frisbee 124-1235-24-234-12-15-15
-always kaffee 13-1-124-124-15-15
-always coffee 6-14-135-124-124-15-15
-always toffee 2345-135-124-124-15-15
-always dragee 145-1235-1-1245-15-15
-always bungee 12-256-1245-15-15
-always dorothee 145-26-135-2345-125-15-15
-always cheese 1456-15-15-234-15
-always pappmaschee 1234-1-1234-1234-134-1-156-15-15
-always klischee 13-123-24-156-15-15
-always yankee 6-13456-235-13-15-15
-
-always gelee 1245-13456-15-15
-prfword geleerte 12346-123-15-15-1235-236
-always geleert 12346-123-15-15-1235-2345
-
-always soufflee =
-always defilee 145-15-124-24-123-15-15
-always klee 13-123-15-15
-always renommee 1235-14-135-1346-15-15
-always armee 356-134-15-15
-always resümee 1235-123456-1256-134-15-15
-always schnee 156-1345-15-15
-always trainee 2345-1235-1-24-1345-15-15
-always pralinee 1234-1235-1-123-35-15-15
-always portmonee 1234-26-2345-134-135-1345-15-15
-always kanapee 13-235-1-1234-15-15
-always portepee 1234-26-236-1234-15-15
-always separee 234-15-1234-356-15-15
-always referee 1235-15-124-12456-15-15
-always schikoree 156-24-13-26-15-15
-always spree 234-1234-1235-15-15
-always karree 13-356-1235-15-15
-always porree 1234-26-1235-15-15
-always püree 1234-1256-1235-15-15
-always frikassee 124-1235-24-13-1-2346-15-15
-always plissee 1234-123-24-2346-15-15
-always varietee 1236-356-24-15-2345-15-15
-always komitee 13-135-134-24-2345-15-15
-always trustee 2345-1235-136-23456-15-15
-always frottee 124-1235-135-2345-2345-15-15
-always queen =
-always halloween 125-1-12345-135-2456-15-15-1345
-
-always hawaii 125-1-2456-1-24-24
-always ascii 1-234-6-14-24-24
-
-always boom 12-135-135-134
-always voodoo 1236-135-135-145-135-135
-always yahoo 6-13456-1-125-135-135
-always waterloo 2456-1-2345-12456-123-135-135
-always shampoo 234-125-1-134-1234-135-135
-always tattoo 2345-1-2345-2345-135-135
-always daewoo 145-1-15-2456-135-135
-always zoo 1356-135-135
-
-always erdbeer 12456-145-12-15-15-1235
-always zwergerdbeer 1356-2456-12456-1245-12456-145-12-15-15-1235
-always ägypten 345-1245-6-13456-1234-2345-14 shouldn't use the te-contraction
-always aegypten 345-1245-6-13456-1234-2345-14 shouldn't use the te-contraction
 
 # Lautgruppenkürzungen
 midendword ach 56
@@ -149,7 +85,6 @@ begmidword elineal 15-123-35-15-25
 endword elineal 15-123-35-15-1-123
 always eleist 15-123-146-23456
 always em 12356
-always temperatur 2345-12356-1234-12456-1-2345-136-1235 prefer em-contraction over te-contraction
 always emach 15-134-56
 before e always emachs 12356-56-234 Systemachse
 always en 14
@@ -157,9 +92,6 @@ always denunz 145-15-1345-256-1356 shouldn't use the en-contraction
 always er 12456
 always dereferenzier 145-15-1235-15-124-12456-14-1356-346-1235 shouldn't use the er-contraction
 always deregulier 145-15-1235-15-1245-136-123-346-1235 shouldn't use the er-contraction
-prfword gebäudes 12346-12-34-145-123456
-before hilrs always gebäude 12346-12-34-145-15
-before hilrs always gemeinde 12346-134-1246-145-15 gemeinderat shouldn't use the er-contraction
 always es 123456
 always ge 12346
 prfword gehe 1245-2356-15
@@ -178,7 +110,6 @@ before konsonant always bem 12-12356
 before konsonant always ben 12-14
 before konsonant always ber 12-12456
 before konsonant always gel 1245-13456 klingelton shouldn't use the ge-contraction
-always ziegel 1356-346-1245-13456 shouldn't use the ge-contraction
 before konsonant always gen 1245-14
 begword lungen 123-256-1245-14 shouldn't use the ge-contraction
 begword magen 134-1-1245-14 shouldn't use the ge-contraction
@@ -188,8 +119,6 @@ before konsonant always ter 2345-12456
 always güter 1245-1256-2345-12456 should use the er-contraction
 always güteregel 1245-1256-236-1235-15-1245-13456
 always gütericht 1245-1256-236-2-3456
-always schulter 156-136-123-2345-12456 shouldn't use the te-contraction
-always theater 2345-125-15-1-2345-12456 shouldn't use the te-contraction
 midendword ich 3456
 midendword ig 45
 always in 35
@@ -205,7 +134,6 @@ before konsonant always seen 234-15-14
 word seele 234-15-13456-15
 sufword seelen 234-15-13456-14
 always seelisch 234-15-13456-24-156
-begword tee =
 word teer 2345-15-12456
 sufword teerartig 2345-15-12456-356-2345-45
 before konsonant begword teer 2345-15-12456
@@ -219,8 +147,6 @@ word teerender 2345-15-12456-14-145-12456
 word teerendes 2345-15-12456-14-145-123456
 word teerung 2345-15-12456-136
 word teerungen 2345-15-12456-136-14
-sufword teenager 2345-15-14-1-1245-12456
-sufword teenie 2345-15-14-346
 always teelich 2345-15-15-456 shouldn't use the el-contraction
 always teelöffel 2345-15-15-123-246-124-124-13456 shouldn't use the el-contraction
 always teemaschin 2345-15-15-134-156 shouldn't use the em-contraction
