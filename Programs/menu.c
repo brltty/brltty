@@ -87,7 +87,7 @@ struct MenuStruct {
   unsigned int submenuCount;
   MenuItem *activeItem;
 
-  char valueBuffer[0X10];
+  char valueBuffer[0X20];
 };
 
 typedef struct {
@@ -582,9 +582,7 @@ endItem_files (MenuItem *item, int deallocating) {
 
 #if defined(HAVE_GLOB)
   if (files->glob.gl_pathc) {
-    int i;
-
-    for (i=0; i<files->glob.gl_offs; i+=1) files->glob.gl_pathv[i] = NULL;
+    for (int i=0; i<files->glob.gl_offs; i+=1) files->glob.gl_pathv[i] = NULL;
     globfree(&files->glob);
     files->glob.gl_pathc = 0;
   }
