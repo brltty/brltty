@@ -28,6 +28,7 @@ class i i
 class m m
 class n n
 class r r
+class hilrs hilrs
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
 
@@ -156,6 +157,9 @@ always denunz 145-15-1345-256-1356 shouldn't use the en-contraction
 always er 12456
 always dereferenzier 145-15-1235-15-124-12456-14-1356-346-1235 shouldn't use the er-contraction
 always deregulier 145-15-1235-15-1245-136-123-346-1235 shouldn't use the er-contraction
+prfword gebäudes 12346-12-34-145-123456
+before hilrs always gebäude 12346-12-34-145-15
+before hilrs always gemeinde 12346-134-1246-145-15 gemeinderat shouldn't use the er-contraction
 always es 123456
 always ge 12346
 prfword gehe 1245-2356-15
@@ -726,6 +730,7 @@ always		konson		=
 begmidword	sensor		234-14-234-26
 endword		sensor		234-14-234-135-1235
 endword		sensor		234-14-234-135-1235
+always		sockel		234-135-46-13456
 word		soda		=
 always		soffizier	234-135-124-124-24-1356-346-1235
 always		soft		=
