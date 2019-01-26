@@ -18,23 +18,62 @@
 
 # BRLTTY Contraction Subtable - German (contracted)
 
+always absolvent 1-12-234-135-123-1236-14-2345
+begmidword anachron 235-1-1456-1235-135-1345
 always ägypten 345-1245-6-13456-1234-2345-14 shouldn't use the te-contraction
 always aegypten 345-1245-6-13456-1234-2345-14
-
+prfword bachelor 12-1-1456-13456-135-1235
+begmidword bachelor 12-1-1456-13456-26
+always dealer 145-15-1-123-12456
 always europa 126-1235-135-1234-1
 before hilmrs always gebäude 12346-12-34-145-15
 prfword gebäudes 12346-12-34-145-123456
+before hilmrs always gebinde 12346-12-35-145-15
+prfword gebindes 12346-12-35-145-123456
+before hilmrs always gewinde 12346-2456-35-145-15
+always gewindelt 12346-2456-35-145-13456-2345
+always gewindelte 12346-2456-35-145-13456-236
+always gewindeltem 12346-2456-35-145-13456-2345-12356
+always gewindelten 12346-2456-35-145-13456-2345-14
+always gewindelter 12346-2456-35-145-13456-2345-12456
+always gewindeltes 12346-2456-35-145-13456-2345-123456
+prfword gewindes 12346-2456-35-145-123456
+word Gewindeschaft 12346-2456-35-145-15-156-1-124-2345
 before hilmrs always gemeinde 12346-134-1246-145-15 gemeinderat shouldn't use the er-contraction
-before hilmrs always getreide 12346-2345-1235-146-145-15
+always getreide 12346-2345-1235-146-145-15
+prfword getreiden 12346-2345-1235-146-145-14
 prfword getreides 12346-2345-1235-146-145-123456
+always health =
+prfword imitat =
+before lnr always kamera 13-1-134-12456-1
+before konsonant always kameral 13-1-134-12456-25
+always kameralia 13-1-134-12456-25-24-1
+always kameralismus 13-1-134-12456-25-5-24
+always kameralist 13-1-134-12456-25-24-23456
+always kameralistisch 13-1-134-12456-25-5-156
+always lipizzaner 123-24-1234-24-1356-1356-235-12456
 always matura =
 always maturant 134-1-2345-136-1235-235-2345
+prfword mitte 134-24-2345-236
+prfword mitten 134-24-2345-2345-14
+always nappaleder 1345-1-1234-1234-1-123-15-145-12456
 begword neuro 1345-126-1235-135
 always olympia =
+begword ortsteil 26-2345-234-2345-146-123
+before lnr always pizza =
+always rastalock 1235-1-23456-1-123-135-46
+before l always sauna 234-16-1345-1
 always schulter 156-136-123-2345-12456 shouldn't use the te-contraction
+always teacher 2345-15-1-1456-12456
+always teaching 2345-15-1-1456-35-1245
 always temperatur 2345-12356-1234-12456-1-2345-136-1235 prefer em-contraction over te-contraction
 always theater 2345-125-15-1-2345-12456 shouldn't use the te-contraction
+before lnr always tundra 2345-256-145-1235-1
+before lnr always ultra =
+before l always vokal 1236-135-13-25
+before lnr always yoga =
 always ziegel 1356-346-1245-13456 shouldn't use the ge-contraction
+word zugmitte 1356-136-1245-134-24-2345-236
 
 # Doppelvokale
 always erdbeer 12456-145-12-15-15-1235
