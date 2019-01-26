@@ -25,7 +25,9 @@ always aegypten 345-1245-6-13456-1234-2345-14
 prfword bachelor 12-1-1456-13456-135-1235
 begmidword bachelor 12-1-1456-13456-26
 always dealer 145-15-1-123-12456
+always erpresser 12456-1234-1235-15-2346-12456
 always europa 126-1235-135-1234-1
+midendword expresses 15-6-1346-1234-1235-15-2346-123456
 before hilmrs always gebäude 12346-12-34-145-15
 prfword gebäudes 12346-12-34-145-123456
 before hilmrs always gebinde 12346-12-35-145-15
@@ -51,6 +53,8 @@ always kameralia 13-1-134-12456-25-24-1
 always kameralismus 13-1-134-12456-25-5-24
 always kameralist 13-1-134-12456-25-24-23456
 always kameralistisch 13-1-134-12456-25-5-156
+always leiterin 123-146-2345-12456-35
+always limit =
 always lipizzaner 123-24-1234-24-1356-1356-235-12456
 always matura =
 always maturant 134-1-2345-136-1235-235-2345
@@ -61,19 +65,32 @@ begword neuro 1345-126-1235-135
 always olympia =
 begword ortsteil 26-2345-234-2345-146-123
 before lnr always pizza =
+before hilmrs always presse 1234-1235-15-2346-15
 always rastalock 1235-1-23456-1-123-135-46
 before l always sauna 234-16-1345-1
+before l always schul 156-136-123
 always schulter 156-136-123-2345-12456 shouldn't use the te-contraction
+always schultragödie 156-136-123-2345-1235-1-1245-246-145-24-15
+always schultragödien 156-136-123-2345-1235-1-1245-246-145-24-14
+always schultrans 156-136-123-2345-1235-235-234 schultransport
 always teacher 2345-15-1-1456-12456
 always teaching 2345-15-1-1456-35-1245
+before l always teil 2345-146-123
 always temperatur 2345-12356-1234-12456-1-2345-136-1235 prefer em-contraction over te-contraction
+always tempo 2345-12356-1234-135
+prfword temporal 2345-12356-1234-26-1-123
+begmidword temporal 2345-12356-1234-26-25
+always temporär 2345-12356-1234-26-345-1235
+word tempore 2345-12356-1234-26-15
 always theater 2345-125-15-1-2345-12456 shouldn't use the te-contraction
 before lnr always tundra 2345-256-145-1235-1
 before lnr always ultra =
 before l always vokal 1236-135-13-25
 before lnr always yoga =
 always ziegel 1356-346-1245-13456 shouldn't use the ge-contraction
+always zugbegleiter 1356-136-1245-23-1245-123-146-2345-12456
 word zugmitte 1356-136-1245-134-24-2345-236
+always zugtempo 1356-136-1245-2345-12356-1234-135
 
 # Doppelvokale
 always erdbeer 12456-145-12-15-15-1235

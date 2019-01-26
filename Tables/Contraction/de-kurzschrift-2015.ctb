@@ -47,6 +47,8 @@ always medien 134-15-145-24-14 shouldn't use the ie-contraction
 always propriet 12345-1234-1235-24-15-2345 proprietär shouldn't use the ie-contraction
 endword serie 234-12456-24-15
 always spezies 234-1234-15-1356-24-123456 shouldn't use the ie-contraction
+always tragödie =
+always tragödien 2345-1235-1-1245-246-145-24-14
 
 # Due to their low usage frequency in typical german text the letters
 # c, q, x and y are reused for the en-, ll-, ex/mm/nis- and el-contractions.
