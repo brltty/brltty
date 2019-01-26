@@ -28,20 +28,35 @@ always dealer 145-15-1-123-12456
 always erpresser 12456-1234-1235-15-2346-12456
 always europa 126-1235-135-1234-1
 midendword expresses 15-6-1346-1234-1235-15-2346-123456
-before hilmrs always gebäude 12346-12-34-145-15
+word expresses 1346-1234-1235-15-2346-123456
+before hilmnrsu always gebäude 12346-12-34-145-15
+prfword gebäuden 12346-12-34-145-14
 prfword gebäudes 12346-12-34-145-123456
-before hilmrs always gebinde 12346-12-35-145-15
+before hilmnrsu always gebinde 12346-12-35-145-15
+prfword gebinden 12346-12-35-145-14
 prfword gebindes 12346-12-35-145-123456
-before hilmrs always gewinde 12346-2456-35-145-15
+sufword gehäuse 12346-125-34-234-15
+prfword gehäusen 12346-125-34-234-14
+prfword gehäuses 12346-125-34-234-123456
+before hilmnrsu always gewinde 12346-2456-35-145-15
 always gewindelt 12346-2456-35-145-13456-2345
 always gewindelte 12346-2456-35-145-13456-236
 always gewindeltem 12346-2456-35-145-13456-2345-12356
 always gewindelten 12346-2456-35-145-13456-2345-14
 always gewindelter 12346-2456-35-145-13456-2345-12456
 always gewindeltes 12346-2456-35-145-13456-2345-123456
+prfword gewinden 12346-2456-35-145-14
 prfword gewindes 12346-2456-35-145-123456
 word Gewindeschaft 12346-2456-35-145-15-156-1-124-2345
-before hilmrs always gemeinde 12346-134-1246-145-15 gemeinderat shouldn't use the er-contraction
+before hilmnrsu always gemeinde 12346-134-1246-145-15 gemeinderat shouldn't use the er-contraction
+prfword gemeinden 12346-134-1246-145-14
+prfword gemeindend 12346-134-1246-145-14-145
+prfword gemeindende 12346-134-1246-145-14-145-15
+prfword gemeindendem 12346-134-1246-145-14-145-12356
+prfword gemeindenden 12346-134-1246-145-14-145-14
+prfword gemeindender 12346-134-1246-145-14-145-12456
+prfword gemeindendes 12346-134-1246-145-14-145-123456
+always gemeindeutsch 12346-134-1246-145-156
 always getreide 12346-2345-1235-146-145-15
 prfword getreiden 12346-2345-1235-146-145-14
 prfword getreides 12346-2345-1235-146-145-123456
@@ -65,7 +80,17 @@ begword neuro 1345-126-1235-135
 always olympia =
 begword ortsteil 26-2345-234-2345-146-123
 before lnr always pizza =
-before hilmrs always presse 1234-1235-15-2346-15
+before hilmnrsu always presse 1234-1235-15-2346-15
+prfword pressen 1234-1235-15-2346-14
+prfword pressend 1234-1235-15-2346-14-145
+prfword pressende 1234-1235-15-2346-14-145-15
+prfword pressendem 1234-1235-15-2346-14-145-12356
+prfword pressenden 1234-1235-15-2346-14-145-14
+prfword pressender 1234-1235-15-2346-14-145-12456
+prfword pressendes 1234-1235-15-2346-14-145-123456
+always pressendruck 1234-1235-15-2346-14-145-46
+prfword pressens 1234-1235-15-2346-14-234
+always pressentisch 1234-1235-15-2346-14-2345-24-156
 always rastalock 1235-1-23456-1-123-135-46
 before l always sauna 234-16-1345-1
 before l always schul 156-136-123
@@ -91,6 +116,7 @@ always ziegel 1356-346-1245-13456 shouldn't use the ge-contraction
 always zugbegleiter 1356-136-1245-23-1245-123-146-2345-12456
 word zugmitte 1356-136-1245-134-24-2345-236
 always zugtempo 1356-136-1245-2345-12356-1234-135
+always zypressen 1356-6-13456-1234-1235-15-2346-14
 
 # Doppelvokale
 always erdbeer 12456-145-12-15-15-1235
