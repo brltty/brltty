@@ -2723,7 +2723,6 @@ brlttyStart (void) {
   logProperty(opt_preferencesFile, "preferencesFile", gettext("Preferences File"));
 
   constructBrailleDisplay(&brl);
-  constructSpeechSynthesizer(&spk);
   loadPreferences();
 
   if (opt_promptPatterns && *opt_promptPatterns) {
@@ -2824,6 +2823,7 @@ brlttyStart (void) {
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
+  constructSpeechSynthesizer(&spk);
   changeSpeechDriver(opt_speechDriver);
   changeSpeechParameters(opt_speechParameters);
   onProgramExit("speech-data", exitSpeechData, NULL);
