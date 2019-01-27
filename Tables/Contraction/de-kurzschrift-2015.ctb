@@ -35,6 +35,8 @@ class st st
 class konsonant bcdfghjklmnpqrstvwxyz
 
 include de-kurzschrift-wort.cti
+before e always auslöse 16-234-123-246-234-15
+before e always ausreise 16-234-1235-146-234-15
 
 # Ausnahmen für Vokalgruppen aus de-vollschrift.ctb
 before e always arteri 356-2345-12456-24
@@ -134,7 +136,7 @@ always lichtsch 123-3456-2345-156
 always bodenlicht 12-135-145-14-123-3456-2345 shouldn't use the lich-contraction
 begword see =
 begword neusee 1345-126-234-15-15
-before konsonant always seen 234-15-14
+#before konsonant always seen 234-15-14
 word seele 234-15-13456-15
 sufword seelen 234-15-13456-14
 always seelisch 234-15-13456-24-156
