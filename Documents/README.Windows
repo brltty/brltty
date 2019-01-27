@@ -400,27 +400,37 @@ The following software components should already be installed:
 
 *  ``MinGW`` [32-bit] (from `<http://mingw.org/>`_)
 
-   The following ``MinGW`` packages should be installed:
+The following ``MinGW`` packages should be installed:
 
-   +  ``mingw32-pdcurses``
-   +  ``mingw32-pthreads-w32``
-   +  ``msys-bison``
-   +  ``msys-dos2unix``
-   +  ``msys-groff``
-   +  ``msys-m4``
-   +  ``msys-zip``
+*  ``mingw32-pthreads-w32``
+*  ``mingw32-pdcurses``
+*  ``mingw32-tcl``
+*  ``msys-bison``
+*  ``msys-dos2unix``
+*  ``msys-groff``
+*  ``msys-m4``
+*  ``msys-zip``
+*  ``msys-unzip``
+
+The packages listed below should also be installed.
+We've preserved copies of them in case any of them is hard to f9nd.
+The pages from whch we got our copies are listed,
+but, by the time you're reading these instructions, some may have become out-of-date.
+Our copies of these archives are at `<http://BRLTTY.app/archive/Windows/>`_.
 
 *  ``AutoHotkey`` (from `<http://www.autohotkey.com/>`_)
 
    The ``mkwin`` script assumes that it has been installed in
-   ``C:\Program Files\AutoHotkey``. The ``-A`` (AutoHotkey) option can be used
-   to specify another location.
+   ``C:\Program Files (x86)\AutoHotkey``.
+   The ``-A`` (AutoHotkey) option can be used to specify another location.
+   The Windows installer currently being used is named ``AutoHotkey104805_Install.exe``.
 
 *  ``NSIS`` (from `<http://nsis.sourceforge.net/>`_)
 
    The ``mkwin`` script assumes that it has been installed in
-   ``C:\Program Files\NSIS``. The ``-N`` (NSIS) option can be used to specify
-   another location.
+   ``C:\Program Files (x86)\NSIS``.
+   The ``-N`` (NSIS) option can be used to specify another location.
+   The Windows installer currently being used is named ``nsis-3.0b0-setup.exe``.
 
 *  ``Python`` (from `<http://www.python.org>`_)
 
@@ -438,55 +448,69 @@ The following software components should already be installed:
 *  ``LibUSB-Win32`` (from `<http://libusb-win32.sourceforge.net/>`_)
 
    The ``mkwin`` script assumes that it has been installed in
-   ``C:\LibUSB-Win32``. The ``-U`` (LibUSB-Win32) option can be used to specify
-   another location.
+   ``C:\LibUSB-Win32``.
+   The ``-U`` (LibUSB-Win32) option can be used to specify another location.
+   The archive currently being used is named ``libusb-win32-bin-1.2.6.0.zip``.
+   Our copy of this archive has a top-level directory named ``libusb-win32-bin-1.2.6.0``.
 
 *  ``LibUSB-1.0`` (from `<http://www.libusb.org/wiki/windows_backend>`_)
 
    The ``mkwin`` script assumes that it has been installed in
-   ``C:\LibUSB-1.0``. The ``-X`` (libusbx) option can be used to specify
-   another location.
+   ``C:\LibUSB-1.0``.
+   The ``-X`` (libusbx) option can be used to specify another location.
+   The archive currently being used is named ``libusbx-1.0.18-win.7z``.
+   Our copy of this archive doesn't have a top-level directory.
+   We have an alternate copy of this archive named ``libusbx-1.0.18-win.tar.gz``.
 
 *  ``WinUSB`` (from `<http://www.libusb.org/wiki/windows_backend>`_)
 
-   The ``mkwin`` script assumes that it has been installed in ``C:\WinUSB``.
+   The ``mkwin`` script assumes that it has been installed in
+   ``C:\WinUSB``.
    The ``-W`` (WinUSB) option can be used to specify another location.
+   The archive currently being used is named ``winusb.zip``.
+   Our copy of this archive doesn't have a top-level directory.
 
 *  ``ICU`` (from `<http://icu-project.org/>`_)
 
-   The ``mkwin`` script assumes that it has been installed in ``C:\ICU``. The
-   ``-I`` (ICU) option can be used to specify another location. The archive's
-   only top-level directory is named ``icu``, so unpack it when in MinGW's
-   ``/c/`` directory. Since Windows file systems aren't case sensitive,
+   The ``mkwin`` script assumes that it has been installed in ``C:\ICU``.
+   The ``-I`` (ICU) option can be used to specify another location.
+   The archive currently being used is named ``icu4c-53_1-Win32-msvc10.zip``.
+   Our copy of this archive has a top-level directory named ``icu``.
+   Since Windows file systems don't have case sensitive names,
    renaming it from ``icu`` to ``ICU`` is optional.
 
 *  ``pkg-config`` (from `<http://gtk.org/download/win32.php>`_)
 
-   Its archive should be unpacked when in MinGW's ``/mingw/`` directory.
+   The archive currently being used is named ``pkg-config_0.28-1_win32.zip``.
+   Our copy of this archive doesn't have a top-level directory.
+   It should be unpacked when in MinGW's ``/mingw/`` directory.
 
 *  ``Glib`` (from `<http://gtk.org/download/win32.php>`_)
 
-   Its archive should be unpacked when in MinGW's ``/mingw/`` directory.
+   The archive currently being used is named ``glib_2.34.3-1_win32.zip``.
+   Our copy of this archive doesn't have a top-level directory.
+   It should be unpacked when in MinGW's ``/mingw/`` directory.
 
 *  ``gettext-runtime`` (from `<http://gtk.org/download/win32.php>`_)
 
-   Its archive should be unpacked when in MinGW's ``/mingw/`` directory. Only
-   install it if your MinGW installation doesn't already have it. Check for the
-   presence of a ``libintl`` DLL in MinGW's ``/mingw/bin/`` directory.
+   Only install it if your MinGW installation doesn't already have it.
+   Check for the presence of a ``libintl`` DLL in MinGW's ``/mingw/bin/`` directory.
 
-The ``mkwin`` script uses the ``lib`` command, which belongs to MSVC (Microsoft Visual 
-C++). On newer Windows systems, MSVC has become a component of Microsoft Visual 
-Studio. If you don't have it then you'll need to get the following files from
-someone who does:
+The ``mkwin`` script uses the ``lib`` command,
+which belongs to MSVC (Microsoft Visual C++).
+On newer Windows systems, MSVC has become
+a component of Microsoft Visual Studio.
+If you don't have it then you'll need to get
+the following files from someone who does:
 
 *  lib.exe
 *  link.exe
 *  mspdb100.dll
 *  msvcr100.dll
 
-All of them should be placed in the same directory. Either add this directory
-to your command search path or use the ``-M`` (MSVC) option to specify its
-location.
+All of them should be placed in the same directory.
+Either add this directory to your command search path
+or use the ``-M`` (MSVC) option to specify its location.
 
 More Options
 ~~~~~~~~~~~~
