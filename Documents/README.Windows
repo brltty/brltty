@@ -400,10 +400,11 @@ The following software components should already be installed:
 
 *  ``MinGW`` [32-bit] (from `<http://mingw.org/>`_)
 
-The following ``MinGW`` packages should be installed:
+The following ``MinGW`` packages may still need to be installed:
 
 *  ``mingw32-pthreads-w32``
 *  ``mingw32-pdcurses``
+*  ``mingw32-libpdcurses``
 *  ``mingw32-tcl``
 *  ``msys-bison``
 *  ``msys-dos2unix``
@@ -413,24 +414,26 @@ The following ``MinGW`` packages should be installed:
 *  ``msys-unzip``
 
 The packages listed below should also be installed.
-We've preserved copies of them in case any of them is hard to f9nd.
-The pages from whch we got our copies are listed,
-but, by the time you're reading these instructions, some may have become out-of-date.
-Our copies of these archives are at `<http://BRLTTY.app/archive/Windows/>`_.
+We've preserved copies of them in case any of them is hard to find.
+Links to the pages from which we got our copies are listed,
+but, by the time you're reading these instructions,
+some of those may have become out-of-date.
+Our copies of these installers, archives, and files are at
+`<http://BRLTTY.app/archive/Windows/>`_.
 
 *  ``AutoHotkey`` (from `<http://www.autohotkey.com/>`_)
 
    The ``mkwin`` script assumes that it has been installed in
    ``C:\Program Files (x86)\AutoHotkey``.
    The ``-A`` (AutoHotkey) option can be used to specify another location.
-   The Windows installer currently being used is named ``AutoHotkey104805_Install.exe``.
+   The installer currently being used is named ``AutoHotkey104805_Install.exe``.
 
 *  ``NSIS`` (from `<http://nsis.sourceforge.net/>`_)
 
    The ``mkwin`` script assumes that it has been installed in
    ``C:\Program Files (x86)\NSIS``.
    The ``-N`` (NSIS) option can be used to specify another location.
-   The Windows installer currently being used is named ``nsis-3.0b0-setup.exe``.
+   The installer currently being used is named ``nsis-3.0b0-setup.exe``.
 
 *  ``Python`` (from `<http://www.python.org>`_)
 
@@ -501,16 +504,26 @@ which belongs to MSVC (Microsoft Visual C++).
 On newer Windows systems, MSVC has become
 a component of Microsoft Visual Studio.
 If you don't have it then you'll need to get
-the following files from someone who does:
+the following files from someone who does.
+We've preserved copies of them within the ``MSVC/`` subdirectory.
 
 *  lib.exe
 *  link.exe
 *  mspdb100.dll
 *  msvcr100.dll
 
-All of them should be placed in the same directory.
+All of them should be placed within the same directory
+(MinGW's ``/usr/local/bin/`` directory may be a good place).
 Either add this directory to your command search path
 or use the ``-M`` (MSVC) option to specify its location.
+
+If you'd like to have Bluetooth support then you'll need to add
+the files listed below to MinGW's ``/mingw/include/`` directory.
+We've preserved copies of them within the ``Bluetooth/`` subdirectory.
+
+*  ws2bth.h
+*  bthdef.h
+*  bthsdpdef.h
 
 More Options
 ~~~~~~~~~~~~
