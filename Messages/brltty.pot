@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 5.6\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2018-12-06 20:37+0100\n"
+"POT-Creation-Date: 2019-01-31 23:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -93,7 +93,7 @@ msgstr ""
 msgid "<off>"
 msgstr ""
 
-#: Programs/config.c:1314
+#: Programs/config.c:1316
 msgid "API Parameter"
 msgstr ""
 
@@ -164,6 +164,10 @@ msgstr ""
 msgid "Alto Sax"
 msgstr ""
 
+#: Drivers/Screen/Android/screen.c:162
+msgid "Android locked"
+msgstr ""
+
 #: Programs/midi.c:185
 msgid "Applause"
 msgstr ""
@@ -180,7 +184,7 @@ msgstr ""
 msgid "Attributes Invisible Time"
 msgstr ""
 
-#: Programs/config.c:2744 Programs/menu_prefs.c:1263
+#: Programs/config.c:2783 Programs/menu_prefs.c:1263
 msgid "Attributes Table"
 msgstr ""
 
@@ -216,7 +220,7 @@ msgstr ""
 msgid "Autospeak"
 msgstr ""
 
-#: Programs/config.c:1710
+#: Programs/config.c:1718
 msgid "BRLTTY stopped"
 msgstr ""
 
@@ -280,7 +284,7 @@ msgstr ""
 msgid "Bluetooth I/O"
 msgstr ""
 
-#: Programs/config.c:1481
+#: Programs/config.c:1483
 msgid "Braille Device"
 msgstr ""
 
@@ -288,7 +292,7 @@ msgstr ""
 msgid "Braille Display Orientation"
 msgstr ""
 
-#: Programs/config.c:1477
+#: Programs/config.c:1479
 msgid "Braille Driver"
 msgstr ""
 
@@ -304,7 +308,7 @@ msgstr ""
 msgid "Braille Key Events"
 msgstr ""
 
-#: Programs/config.c:1480
+#: Programs/config.c:1482
 msgid "Braille Parameter"
 msgstr ""
 
@@ -418,7 +422,7 @@ msgstr ""
 msgid "Clavi"
 msgstr ""
 
-#: Programs/menu.c:822
+#: Programs/menu.c:820
 msgid "Close"
 msgstr ""
 
@@ -430,7 +434,7 @@ msgstr ""
 msgid "Configuration Directory"
 msgstr ""
 
-#: Programs/config.c:2682 Programs/menu_prefs.c:1319
+#: Programs/config.c:2722 Programs/menu_prefs.c:1319
 msgid "Configuration File"
 msgstr ""
 
@@ -450,7 +454,7 @@ msgstr ""
 msgid "Contracted Braille"
 msgstr ""
 
-#: Programs/config.c:2751 Programs/menu_prefs.c:1271
+#: Programs/config.c:2790 Programs/menu_prefs.c:1271
 msgid "Contraction Table"
 msgstr ""
 
@@ -548,7 +552,7 @@ msgstr ""
 msgid "Drawbar Organ"
 msgstr ""
 
-#: Programs/config.c:2704 Programs/menu_prefs.c:1339
+#: Programs/config.c:2743 Programs/menu_prefs.c:1339
 msgid "Drivers Directory"
 msgstr ""
 
@@ -786,11 +790,11 @@ msgstr ""
 msgid "Immediate"
 msgstr ""
 
-#: Programs/xbrlapi.c:604
+#: Programs/xbrlapi.c:611
 msgid "Incompatible XKB library\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:606
+#: Programs/xbrlapi.c:613
 msgid "Incompatible XKB server support\n"
 msgstr ""
 
@@ -823,6 +827,18 @@ msgstr ""
 msgid "January"
 msgstr ""
 
+#: Drivers/Screen/Android/screen.c:175
+msgid "Java class not found"
+msgstr ""
+
+#: Drivers/Screen/Android/screen.c:159
+msgid "Java exception occurred"
+msgstr ""
+
+#: Drivers/Screen/Android/screen.c:172
+msgid "Java method not found"
+msgstr ""
+
 #: Programs/cmd_miscellaneous.c:63
 msgid "July"
 msgstr ""
@@ -835,15 +851,15 @@ msgstr ""
 msgid "Kalimba"
 msgstr ""
 
-#: Programs/config.c:1405
+#: Programs/config.c:1407
 msgid "Key Bindings"
 msgstr ""
 
-#: Programs/config.c:1006
+#: Programs/config.c:1008
 msgid "Key Help"
 msgstr ""
 
-#: Programs/config.c:1410 Programs/ktb_list.c:737
+#: Programs/config.c:1412 Programs/ktb_list.c:737
 msgid "Key Table"
 msgstr ""
 
@@ -859,7 +875,7 @@ msgstr ""
 msgid "Keyboard LED Alerts"
 msgstr ""
 
-#: Programs/config.c:2758 Programs/menu_prefs.c:897
+#: Programs/config.c:2797 Programs/menu_prefs.c:897
 msgid "Keyboard Table"
 msgstr ""
 
@@ -867,7 +883,7 @@ msgstr ""
 msgid "Koto"
 msgstr ""
 
-#: Programs/config.c:2888
+#: Programs/config.c:2930
 msgid "Language"
 msgstr ""
 
@@ -1115,7 +1131,7 @@ msgstr ""
 msgid "Off"
 msgstr ""
 
-#: Programs/config.c:1494
+#: Programs/config.c:1496
 msgid "Old Preferences File"
 msgstr ""
 
@@ -1299,11 +1315,11 @@ msgstr ""
 msgid "Pizzicato Strings"
 msgstr ""
 
-#: Drivers/Braille/Baum/braille.c:1104
+#: Drivers/Braille/Baum/braille.c:1119
 msgid "Powerdown"
 msgstr ""
 
-#: Programs/config.c:2683 Programs/menu_prefs.c:1329
+#: Programs/config.c:2723 Programs/menu_prefs.c:1329
 msgid "Preferences File"
 msgstr ""
 
@@ -1462,7 +1478,7 @@ msgstr ""
 msgid "Screen Cursor and Braille Window Row"
 msgstr ""
 
-#: Programs/config.c:2174
+#: Programs/config.c:2210
 msgid "Screen Driver"
 msgstr ""
 
@@ -1474,7 +1490,7 @@ msgstr ""
 msgid "Screen Number"
 msgstr ""
 
-#: Programs/config.c:2180
+#: Programs/config.c:2216
 msgid "Screen Parameter"
 msgstr ""
 
@@ -1629,7 +1645,7 @@ msgstr ""
 msgid "Speech Cursor Visible Time"
 msgstr ""
 
-#: Programs/config.c:1937
+#: Programs/config.c:1964
 msgid "Speech Driver"
 msgstr ""
 
@@ -1642,7 +1658,7 @@ msgid "Speech Events"
 msgstr ""
 
 #. Create the file system object for speech input.
-#: Programs/config.c:2798
+#: Programs/config.c:2838
 msgid "Speech Input"
 msgstr ""
 
@@ -1650,7 +1666,7 @@ msgstr ""
 msgid "Speech Options"
 msgstr ""
 
-#: Programs/config.c:1940
+#: Programs/config.c:1967
 msgid "Speech Parameter"
 msgstr ""
 
@@ -1797,7 +1813,7 @@ msgstr ""
 msgid "System Log Level"
 msgstr ""
 
-#: Programs/config.c:2705 Programs/menu_prefs.c:1344
+#: Programs/config.c:2744 Programs/menu_prefs.c:1344
 msgid "Tables Directory"
 msgstr ""
 
@@ -1829,7 +1845,7 @@ msgstr ""
 msgid "Text Style"
 msgstr ""
 
-#: Programs/config.c:2730 Programs/menu_prefs.c:1256
+#: Programs/config.c:2769 Programs/menu_prefs.c:1256
 msgid "Text Table"
 msgstr ""
 
@@ -1931,7 +1947,7 @@ msgstr ""
 msgid "Unfrozen"
 msgstr ""
 
-#: Programs/config.c:2702 Programs/menu_prefs.c:1324
+#: Programs/config.c:2741 Programs/menu_prefs.c:1324
 msgid "Updatable Directory"
 msgstr ""
 
@@ -1984,11 +2000,11 @@ msgstr ""
 msgid "Word Wrap"
 msgstr ""
 
-#: Programs/config.c:2675
+#: Programs/config.c:2715
 msgid "Working Directory"
 msgstr ""
 
-#: Programs/config.c:2703 Programs/menu_prefs.c:1334
+#: Programs/config.c:2742 Programs/menu_prefs.c:1334
 msgid "Writable Directory"
 msgstr ""
 
@@ -2000,7 +2016,7 @@ msgstr ""
 msgid "X display to connect to"
 msgstr ""
 
-#: Programs/xbrlapi.c:718
+#: Programs/xbrlapi.c:725
 msgid "XFree(wm_name) for change"
 msgstr ""
 
@@ -2048,7 +2064,7 @@ msgstr ""
 msgid "backspace key"
 msgstr ""
 
-#: Drivers/Braille/Baum/braille.c:1095
+#: Drivers/Braille/Baum/braille.c:1110
 #: Drivers/Braille/TSI/braille.c:869
 msgid "battery low"
 msgstr ""
@@ -2070,7 +2086,7 @@ msgstr ""
 msgid "black"
 msgstr ""
 
-#: Programs/core.c:1059
+#: Programs/core.c:1063
 msgid "blank line"
 msgstr ""
 
@@ -2083,7 +2099,7 @@ msgstr ""
 msgid "blue"
 msgstr ""
 
-#: Programs/config.c:2770
+#: Programs/config.c:2809
 #, c-format
 msgid "braille device not specified"
 msgstr ""
@@ -2092,16 +2108,24 @@ msgstr ""
 msgid "braille display temporarily unavailable"
 msgstr ""
 
-#: Programs/config.c:1435
+#: Programs/config.c:1437
 msgid "braille driver initialization failed"
 msgstr ""
 
-#: Programs/config.c:1511
+#: Programs/config.c:1512
 msgid "braille driver not loadable"
 msgstr ""
 
+#: Programs/config.c:1781
+msgid "braille driver restarting"
+msgstr ""
+
 #: Programs/cmd_miscellaneous.c:178
-msgid "braille stopped"
+msgid "braille driver stopped"
+msgstr ""
+
+#: Drivers/Screen/Android/screen.c:167
+msgid "braille released"
 msgstr ""
 
 #: Programs/cmds.auto.h:879
@@ -2129,11 +2153,11 @@ msgstr ""
 msgid "cannot compile contraction table"
 msgstr ""
 
-#: Programs/config.c:1416
+#: Programs/config.c:1418
 msgid "cannot compile key table"
 msgstr ""
 
-#: Programs/config.c:1050
+#: Programs/config.c:1052
 msgid "cannot compile keyboard table"
 msgstr ""
 
@@ -2151,7 +2175,7 @@ msgstr ""
 msgid "cannot connect to braille devices daemon brltty at %s\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:593
+#: Programs/xbrlapi.c:600
 #, c-format
 msgid "cannot connect to display %s\n"
 msgstr ""
@@ -2165,7 +2189,7 @@ msgstr ""
 msgid "cannot determine program directory"
 msgstr ""
 
-#: Programs/config.c:2678 Programs/menu.c:544
+#: Programs/config.c:2718 Programs/menu.c:544
 msgid "cannot determine working directory"
 msgstr ""
 
@@ -2177,11 +2201,11 @@ msgstr ""
 msgid "cannot fix install path"
 msgstr ""
 
-#: Programs/xbrlapi.c:219
+#: Programs/xbrlapi.c:226
 msgid "cannot get tty\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:225
+#: Programs/xbrlapi.c:232
 #, c-format
 msgid "cannot get tty %d\n"
 msgstr ""
@@ -2190,12 +2214,12 @@ msgstr ""
 msgid "cannot get working directory"
 msgstr ""
 
-#: Programs/xbrlapi.c:636
+#: Programs/xbrlapi.c:643
 #, c-format
 msgid "cannot grab windows on screen %d\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:232
+#: Programs/xbrlapi.c:239
 msgid "cannot ignore keys\n"
 msgstr ""
 
@@ -2211,7 +2235,7 @@ msgstr ""
 msgid "cannot load text table"
 msgstr ""
 
-#: Programs/config.c:1008
+#: Programs/config.c:1010
 msgid "cannot open key help"
 msgstr ""
 
@@ -2227,7 +2251,7 @@ msgstr ""
 msgid "cannot read preferences file"
 msgstr ""
 
-#: Programs/xbrlapi.c:297
+#: Programs/xbrlapi.c:304
 #, c-format
 msgid "cannot set focus to %#010x\n"
 msgstr ""
@@ -2242,7 +2266,7 @@ msgstr ""
 
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
-#: Programs/core.c:1004
+#: Programs/core.c:1008
 msgid "cap"
 msgstr ""
 
@@ -2252,6 +2276,10 @@ msgstr ""
 
 #: Programs/cmd_preferences.c:81
 msgid "changes discarded"
+msgstr ""
+
+#: Programs/config.c:2898
+msgid "changing language"
 msgstr ""
 
 #: Programs/cmds.auto.h:775
@@ -2398,7 +2426,7 @@ msgstr ""
 msgid "dots 7 and 8"
 msgstr ""
 
-#: Drivers/Braille/Baum/braille.c:1092
+#: Drivers/Braille/Baum/braille.c:1107
 msgid "driver request"
 msgstr ""
 
@@ -2459,7 +2487,7 @@ msgstr ""
 msgid "execution of \"%s\" failed: %s\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:643
+#: Programs/xbrlapi.c:650
 msgid "failed to get first focus\n"
 msgstr ""
 
@@ -2705,7 +2733,7 @@ msgstr ""
 msgid "green"
 msgstr ""
 
-#: Programs/cmd_miscellaneous.c:230
+#: Programs/cmd_miscellaneous.c:228
 msgid "help not available"
 msgstr ""
 
@@ -2721,7 +2749,7 @@ msgstr ""
 msgid "identifier,..."
 msgstr ""
 
-#: Drivers/Braille/Baum/braille.c:1094
+#: Drivers/Braille/Baum/braille.c:1109
 msgid "idle timeout"
 msgstr ""
 
@@ -2733,7 +2761,7 @@ msgstr ""
 msgid "increase speaking volume"
 msgstr ""
 
-#: Programs/core.c:1062
+#: Programs/core.c:1066
 msgid "indent"
 msgstr ""
 
@@ -2765,7 +2793,7 @@ msgstr ""
 msgid "invalid flag setting"
 msgstr ""
 
-#: Programs/config.c:2590
+#: Programs/config.c:2630
 msgid "invalid message hold timeout"
 msgstr ""
 
@@ -2834,15 +2862,15 @@ msgstr ""
 msgid "missing operand"
 msgstr ""
 
-#: Programs/parse.c:428
+#: Programs/parse.c:455
 msgid "missing parameter name"
 msgstr ""
 
-#: Programs/parse.c:414
+#: Programs/parse.c:441
 msgid "missing parameter qualifier"
 msgstr ""
 
-#: Programs/parse.c:390
+#: Programs/parse.c:417
 msgid "missing parameter value"
 msgstr ""
 
@@ -2856,7 +2884,7 @@ msgstr ""
 msgid "native"
 msgstr ""
 
-#: Programs/config.c:1017
+#: Programs/config.c:1019
 msgid "no key bindings"
 msgstr ""
 
@@ -2868,7 +2896,7 @@ msgstr ""
 msgid "none"
 msgstr ""
 
-#: Programs/config.c:1284
+#: Programs/config.c:1286
 msgid "not saved"
 msgstr ""
 
@@ -2888,7 +2916,7 @@ msgstr ""
 msgid "percentage"
 msgstr ""
 
-#: Programs/config.c:2563
+#: Programs/config.c:2603
 msgid "pid file not specified"
 msgstr ""
 
@@ -2904,7 +2932,7 @@ msgstr ""
 msgid "place left end of braille window at character"
 msgstr ""
 
-#: Drivers/Braille/Baum/braille.c:1093
+#: Drivers/Braille/Baum/braille.c:1108
 msgid "power switch"
 msgstr ""
 
@@ -2925,17 +2953,17 @@ msgstr ""
 msgid "regexp,..."
 msgstr ""
 
-#: Programs/config.c:1758
+#: Programs/config.c:1785
 #, c-format
 msgid "reinitializing braille driver"
 msgstr ""
 
-#: Programs/config.c:2311
+#: Programs/config.c:2351
 #, c-format
 msgid "reinitializing screen driver"
 msgstr ""
 
-#: Programs/config.c:2092
+#: Programs/config.c:2128
 #, c-format
 msgid "reinitializing speech driver"
 msgstr ""
@@ -2979,8 +3007,16 @@ msgstr ""
 msgid "save preferences to disk"
 msgstr ""
 
-#: Programs/config.c:2191
+#: Programs/config.c:2227
 msgid "screen driver not loadable"
+msgstr ""
+
+#: Programs/config.c:2348
+msgid "screen driver restarting"
+msgstr ""
+
+#: Programs/cmd_miscellaneous.c:186
+msgid "screen driver stopped"
 msgstr ""
 
 #: Drivers/Screen/Linux/screen.c:1486
@@ -3153,7 +3189,7 @@ msgstr ""
 msgid "soundcard synthesizer"
 msgstr ""
 
-#: Programs/cmd.c:277 Programs/core.c:985
+#: Programs/cmd.c:277 Programs/core.c:989
 msgid "space"
 msgstr ""
 
@@ -3185,8 +3221,16 @@ msgstr ""
 msgid "speak speech cursor location"
 msgstr ""
 
-#: Programs/config.c:1951
+#: Programs/config.c:1978
 msgid "speech driver not loadable"
+msgstr ""
+
+#: Programs/config.c:2125
+msgid "speech driver restarting"
+msgstr ""
+
+#: Programs/cmd_speech.c:90
+msgid "speech driver stopped"
 msgstr ""
 
 #: Programs/cmds.auto.h:723
@@ -3225,7 +3269,7 @@ msgstr ""
 msgid "stop the speech driver"
 msgstr ""
 
-#: Programs/xbrlapi.c:595
+#: Programs/xbrlapi.c:602
 msgid "strange old error handler\n"
 msgstr ""
 
@@ -3265,11 +3309,11 @@ msgstr ""
 msgid "type unicode character"
 msgstr ""
 
-#: Programs/xbrlapi.c:906
+#: Programs/xbrlapi.c:913
 msgid "unexpected block type"
 msgstr ""
 
-#: Programs/xbrlapi.c:796
+#: Programs/xbrlapi.c:803
 msgid "unexpected cmd"
 msgstr ""
 
@@ -3293,7 +3337,7 @@ msgstr ""
 msgid "unknown option"
 msgstr ""
 
-#: Programs/parse.c:457
+#: Programs/parse.c:484
 msgid "unsupported parameter"
 msgstr ""
 
@@ -3306,88 +3350,88 @@ msgstr ""
 msgid "white"
 msgstr ""
 
-#: Programs/xbrlapi.c:843
+#: Programs/xbrlapi.c:850
 #, c-format
 msgid "xbrlapi: Couldn't find a keycode to remap for simulating unbound keysym %08X\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:830
+#: Programs/xbrlapi.c:837
 #, c-format
 msgid "xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:806
+#: Programs/xbrlapi.c:813
 #, c-format
 msgid "xbrlapi: Couldn't translate keysym %08X to keycode.\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:373
+#: Programs/xbrlapi.c:380
 #, c-format
 msgid "xbrlapi: X Error %d, %s on display %s\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:415
+#: Programs/xbrlapi.c:422
 #, c-format
 msgid "xbrlapi: bad format for VT number\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:418
+#: Programs/xbrlapi.c:425
 #, c-format
 msgid "xbrlapi: bad type for VT number\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:397
+#: Programs/xbrlapi.c:404
 #, c-format
 msgid "xbrlapi: cannot get root window XFree86_VT property\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:276
+#: Programs/xbrlapi.c:283
 #, c-format
 msgid "xbrlapi: cannot write window name %s\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:696
+#: Programs/xbrlapi.c:703
 #, c-format
 msgid "xbrlapi: didn't grab parent of %#010lx\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:714
+#: Programs/xbrlapi.c:721
 #, c-format
 msgid "xbrlapi: didn't grab window %#010lx\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:540
+#: Programs/xbrlapi.c:547
 #, c-format
 msgid "xbrlapi: didn't grab window %#010lx but got focus\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:406
+#: Programs/xbrlapi.c:413
 #, c-format
 msgid "xbrlapi: more than one item for VT number\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:391
+#: Programs/xbrlapi.c:398
 #, c-format
 msgid "xbrlapi: no XFree86_VT atom\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:402
+#: Programs/xbrlapi.c:409
 #, c-format
 msgid "xbrlapi: no items for VT number\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:374
+#: Programs/xbrlapi.c:381
 #, c-format
 msgid "xbrlapi: resource %#010lx, req %u:%u\n"
 msgstr ""
 
 #. "shouldn't happen" events
-#: Programs/xbrlapi.c:743
+#: Programs/xbrlapi.c:750
 #, c-format
 msgid "xbrlapi: unhandled event type: %d\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:722
+#: Programs/xbrlapi.c:729
 #, c-format
 msgid "xbrlapi: window %#010lx changed to NULL name\n"
 msgstr ""
