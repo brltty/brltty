@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.5\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2018-12-06 20:37+0100\n"
-"PO-Revision-Date: 2018-12-06 20:58+0100\n"
+"POT-Creation-Date: 2019-01-31 23:51+0100\n"
+"PO-Revision-Date: 2019-02-01 00:01+0100\n"
 "Last-Translator: Angela Engel <angela.engel@gmx.at>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: de\n"
@@ -101,7 +101,7 @@ msgstr "8-bit Zeichensatz der verwendet werden soll."
 msgid "<off>"
 msgstr "<aus>"
 
-#: Programs/config.c:1314
+#: Programs/config.c:1316
 msgid "API Parameter"
 msgstr "API Parameter"
 
@@ -172,6 +172,10 @@ msgstr "Alphabetische Bildschirm Cursor Koordinaten"
 msgid "Alto Sax"
 msgstr "Altsaxophon"
 
+#: Drivers/Screen/Android/screen.c:162
+msgid "Android locked"
+msgstr "Android gesperrt"
+
 #: Programs/midi.c:185
 msgid "Applause"
 msgstr "Applaus"
@@ -188,7 +192,7 @@ msgstr "Asynchrone Ereignisse"
 msgid "Attributes Invisible Time"
 msgstr "Attribute sind unsichtbar für"
 
-#: Programs/config.c:2744 Programs/menu_prefs.c:1263
+#: Programs/config.c:2783 Programs/menu_prefs.c:1263
 msgid "Attributes Table"
 msgstr "Attributtabelle"
 
@@ -224,7 +228,7 @@ msgstr "Automatische Wiederholung für Seitwertsbewegungen"
 msgid "Autospeak"
 msgstr "Automatisches Sprechen"
 
-#: Programs/config.c:1710
+#: Programs/config.c:1718
 msgid "BRLTTY stopped"
 msgstr "BRLTTY gestoppt"
 
@@ -288,7 +292,7 @@ msgstr "Geblasene Flasche"
 msgid "Bluetooth I/O"
 msgstr "Bluetooth E/A"
 
-#: Programs/config.c:1481
+#: Programs/config.c:1483
 msgid "Braille Device"
 msgstr "Braillegerät"
 
@@ -296,7 +300,7 @@ msgstr "Braillegerät"
 msgid "Braille Display Orientation"
 msgstr "Braillezeilenausrichtung"
 
-#: Programs/config.c:1477
+#: Programs/config.c:1479
 msgid "Braille Driver"
 msgstr "Brailletreiber"
 
@@ -312,7 +316,7 @@ msgstr "Braille-Stärke"
 msgid "Braille Key Events"
 msgstr "Tastenereignisse der Braillezeile"
 
-#: Programs/config.c:1480
+#: Programs/config.c:1482
 msgid "Braille Parameter"
 msgstr "Braille-Parameter"
 
@@ -427,7 +431,7 @@ msgstr "Klarinette"
 msgid "Clavi"
 msgstr "Clave"
 
-#: Programs/menu.c:822
+#: Programs/menu.c:820
 msgid "Close"
 msgstr "Schließen"
 
@@ -439,7 +443,7 @@ msgstr "Doppelpunkt"
 msgid "Configuration Directory"
 msgstr "Konfigurationsverzeichnis"
 
-#: Programs/config.c:2682 Programs/menu_prefs.c:1319
+#: Programs/config.c:2722 Programs/menu_prefs.c:1319
 msgid "Configuration File"
 msgstr "Konfigurationsdatei"
 
@@ -459,7 +463,7 @@ msgstr "Kontrabass"
 msgid "Contracted Braille"
 msgstr "Braille-Kurzschrift"
 
-#: Programs/config.c:2751 Programs/menu_prefs.c:1271
+#: Programs/config.c:2790 Programs/menu_prefs.c:1271
 msgid "Contraction Table"
 msgstr "Kurzschrifttabelle"
 
@@ -556,7 +560,7 @@ msgstr "Punkte via Unicode Braille"
 msgid "Drawbar Organ"
 msgstr "Orgel mit Zugstange"
 
-#: Programs/config.c:2704 Programs/menu_prefs.c:1339
+#: Programs/config.c:2743 Programs/menu_prefs.c:1339
 msgid "Drivers Directory"
 msgstr "Treiber-Verzeichnis"
 
@@ -796,11 +800,11 @@ msgstr "Honky-tonk Klavier"
 msgid "Immediate"
 msgstr "Sofort"
 
-#: Programs/xbrlapi.c:604
+#: Programs/xbrlapi.c:611
 msgid "Incompatible XKB library\n"
 msgstr "Inkompatible XKB Bibliothek\n"
 
-#: Programs/xbrlapi.c:606
+#: Programs/xbrlapi.c:613
 msgid "Incompatible XKB server support\n"
 msgstr "Inkompatible XKB Serverunterstützung\n"
 
@@ -833,6 +837,18 @@ msgstr "Interne Parameter"
 msgid "January"
 msgstr "Januar"
 
+#: Drivers/Screen/Android/screen.c:175
+msgid "Java class not found"
+msgstr "Java-Klasse nicht gefunden"
+
+#: Drivers/Screen/Android/screen.c:159
+msgid "Java exception occurred"
+msgstr ""
+
+#: Drivers/Screen/Android/screen.c:172
+msgid "Java method not found"
+msgstr "Java-Methode nicht gefunden"
+
 #: Programs/cmd_miscellaneous.c:63
 msgid "July"
 msgstr "Juli"
@@ -845,15 +861,15 @@ msgstr "Juni"
 msgid "Kalimba"
 msgstr "Kalimba"
 
-#: Programs/config.c:1405
+#: Programs/config.c:1407
 msgid "Key Bindings"
 msgstr "Tastenbelegungen"
 
-#: Programs/config.c:1006
+#: Programs/config.c:1008
 msgid "Key Help"
 msgstr "Tastenhilfe"
 
-#: Programs/config.c:1410 Programs/ktb_list.c:737
+#: Programs/config.c:1412 Programs/ktb_list.c:737
 msgid "Key Table"
 msgstr "Tastentabelle"
 
@@ -869,7 +885,7 @@ msgstr "Tastaturereignisse"
 msgid "Keyboard LED Alerts"
 msgstr "Tastaturer-LED Warnungen"
 
-#: Programs/config.c:2758 Programs/menu_prefs.c:897
+#: Programs/config.c:2797 Programs/menu_prefs.c:897
 msgid "Keyboard Table"
 msgstr "Tastaturtabelle"
 
@@ -877,7 +893,7 @@ msgstr "Tastaturtabelle"
 msgid "Koto"
 msgstr "Koto"
 
-#: Programs/config.c:2888
+#: Programs/config.c:2930
 msgid "Language"
 msgstr "Sprache"
 
@@ -1123,7 +1139,7 @@ msgstr "Oktober"
 msgid "Off"
 msgstr "Aus"
 
-#: Programs/config.c:1494
+#: Programs/config.c:1496
 msgid "Old Preferences File"
 msgstr "Alte Einstellungsdatei"
 
@@ -1306,11 +1322,11 @@ msgstr "Pfeife"
 msgid "Pizzicato Strings"
 msgstr "Pizzikato-Saiten"
 
-#: Drivers/Braille/Baum/braille.c:1104
+#: Drivers/Braille/Baum/braille.c:1119
 msgid "Powerdown"
 msgstr "Abschaltung"
 
-#: Programs/config.c:2683 Programs/menu_prefs.c:1329
+#: Programs/config.c:2723 Programs/menu_prefs.c:1329
 msgid "Preferences File"
 msgstr "Einstellungsdatei"
 
@@ -1469,7 +1485,7 @@ msgstr "Spaltenanzeige für Bildschirmcursor und Braillezeilenausschnitt"
 msgid "Screen Cursor and Braille Window Row"
 msgstr "Zeilenanzeige für Bildschirmcursor und Braillezeilenausschnitt"
 
-#: Programs/config.c:2174
+#: Programs/config.c:2210
 msgid "Screen Driver"
 msgstr "Bildschirmtreiber"
 
@@ -1481,7 +1497,7 @@ msgstr "Bildschirmtreiberereignisse"
 msgid "Screen Number"
 msgstr "Bildschirmnummer"
 
-#: Programs/config.c:2180
+#: Programs/config.c:2216
 msgid "Screen Parameter"
 msgstr "Bildschirm-Parameter"
 
@@ -1637,7 +1653,7 @@ msgstr "Sprachcursordarstellung"
 msgid "Speech Cursor Visible Time"
 msgstr "Sprachcursor ist sichtbar für"
 
-#: Programs/config.c:1937
+#: Programs/config.c:1964
 msgid "Speech Driver"
 msgstr "Sprachausgabentreiber"
 
@@ -1650,15 +1666,15 @@ msgid "Speech Events"
 msgstr "Sprachausgabenereignisse"
 
 #. Create the file system object for speech input.
-#: Programs/config.c:2798
+#: Programs/config.c:2838
 msgid "Speech Input"
-msgstr ""
+msgstr "Spracheingabe"
 
 #: Programs/menu_prefs.c:988
 msgid "Speech Options"
 msgstr "Sprachausgabenoptionen"
 
-#: Programs/config.c:1940
+#: Programs/config.c:1967
 msgid "Speech Parameter"
 msgstr "Sprachausgaben-Parameter"
 
@@ -1805,7 +1821,7 @@ msgstr "Synth Saiteninstrumente 2"
 msgid "System Log Level"
 msgstr "System-Protokollierungsausführlichkeit"
 
-#: Programs/config.c:2705 Programs/menu_prefs.c:1344
+#: Programs/config.c:2744 Programs/menu_prefs.c:1344
 msgid "Tables Directory"
 msgstr "Tabellenverzeichnis"
 
@@ -1837,7 +1853,7 @@ msgstr "Textseitig"
 msgid "Text Style"
 msgstr "Textdarstellung"
 
-#: Programs/config.c:2730 Programs/menu_prefs.c:1256
+#: Programs/config.c:2769 Programs/menu_prefs.c:1256
 msgid "Text Table"
 msgstr "Texttabelle"
 
@@ -1939,7 +1955,7 @@ msgstr "Unterlegung"
 msgid "Unfrozen"
 msgstr "Aufgetaut"
 
-#: Programs/config.c:2702 Programs/menu_prefs.c:1324
+#: Programs/config.c:2741 Programs/menu_prefs.c:1324
 msgid "Updatable Directory"
 msgstr "Modifizierbares Verzeichnis"
 
@@ -1992,11 +2008,11 @@ msgstr "Holzblock"
 msgid "Word Wrap"
 msgstr "Wortumbruch"
 
-#: Programs/config.c:2675
+#: Programs/config.c:2715
 msgid "Working Directory"
 msgstr "Arbeitsverzeichnis"
 
-#: Programs/config.c:2703 Programs/menu_prefs.c:1334
+#: Programs/config.c:2742 Programs/menu_prefs.c:1334
 msgid "Writable Directory"
 msgstr "Verzeichnis mit Schreibzugriff"
 
@@ -2008,7 +2024,7 @@ msgstr "Schreibe das Startprotokoll und beende dann."
 msgid "X display to connect to"
 msgstr "X Display mit dem Verbindung aufgenommen werden soll"
 
-#: Programs/xbrlapi.c:718
+#: Programs/xbrlapi.c:725
 msgid "XFree(wm_name) for change"
 msgstr ""
 
@@ -2056,7 +2072,7 @@ msgstr "beim Cursor"
 msgid "backspace key"
 msgstr "Rücktaste"
 
-#: Drivers/Braille/Baum/braille.c:1095 Drivers/Braille/TSI/braille.c:869
+#: Drivers/Braille/Baum/braille.c:1110 Drivers/Braille/TSI/braille.c:869
 msgid "battery low"
 msgstr "Akku schwach"
 
@@ -2077,7 +2093,7 @@ msgstr "an das vorhergehende virtuelle Terminal anbinden"
 msgid "black"
 msgstr "Schwarz"
 
-#: Programs/core.c:1059
+#: Programs/core.c:1063
 msgid "blank line"
 msgstr "leere Zeile"
 
@@ -2090,7 +2106,7 @@ msgstr "blinken"
 msgid "blue"
 msgstr "Blau"
 
-#: Programs/config.c:2770
+#: Programs/config.c:2809
 #, c-format
 msgid "braille device not specified"
 msgstr "Braillegerät nicht spezifiziert"
@@ -2099,17 +2115,25 @@ msgstr "Braillegerät nicht spezifiziert"
 msgid "braille display temporarily unavailable"
 msgstr "Braillezeile vorübergehend nicht verfügbar"
 
-#: Programs/config.c:1435
+#: Programs/config.c:1437
 msgid "braille driver initialization failed"
 msgstr "Initialisierung des Brailletreibers fehlgeschlagen"
 
-#: Programs/config.c:1511
+#: Programs/config.c:1512
 msgid "braille driver not loadable"
 msgstr "Brailletreiber kann nicht geladen werden"
 
+#: Programs/config.c:1781
+msgid "braille driver restarting"
+msgstr "Braille Treiber wird neu gestartet"
+
 #: Programs/cmd_miscellaneous.c:178
-msgid "braille stopped"
-msgstr "Braille gestoppt"
+msgid "braille driver stopped"
+msgstr "Braille Treiber gestoppt"
+
+#: Drivers/Screen/Android/screen.c:167
+msgid "braille released"
+msgstr "Braille freigegeben"
 
 #: Programs/cmds.auto.h:879
 msgid "bring screen cursor to character"
@@ -2136,11 +2160,11 @@ msgstr "kann Attributtabelle nicht kompilieren"
 msgid "cannot compile contraction table"
 msgstr "kann Kurzschrifttabelle nicht kompilieren"
 
-#: Programs/config.c:1416
+#: Programs/config.c:1418
 msgid "cannot compile key table"
 msgstr "kann Tastentabelle nicht kompilieren"
 
-#: Programs/config.c:1050
+#: Programs/config.c:1052
 msgid "cannot compile keyboard table"
 msgstr "kann Tastentabelle nicht kompilieren"
 
@@ -2158,7 +2182,7 @@ msgstr "kann Texttabelle nicht kompilieren"
 msgid "cannot connect to braille devices daemon brltty at %s\n"
 msgstr "Kann nicht mit Braillegerätedienst brltty via %s verbinden\n"
 
-#: Programs/xbrlapi.c:593
+#: Programs/xbrlapi.c:600
 #, c-format
 msgid "cannot connect to display %s\n"
 msgstr "kann mit Braillezeile %s nicht verbinden\n"
@@ -2172,7 +2196,7 @@ msgstr "kann Verzeichnis nicht erstellen"
 msgid "cannot determine program directory"
 msgstr "kann Programmverzeichnis nicht bestimmen"
 
-#: Programs/config.c:2678 Programs/menu.c:544
+#: Programs/config.c:2718 Programs/menu.c:544
 msgid "cannot determine working directory"
 msgstr "kann Arbeitsverzeichnis nicht bestimmen"
 
@@ -2184,11 +2208,11 @@ msgstr "kann Prozedur nicht finden"
 msgid "cannot fix install path"
 msgstr "kann Installationspfad nicht beheben"
 
-#: Programs/xbrlapi.c:219
+#: Programs/xbrlapi.c:226
 msgid "cannot get tty\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:225
+#: Programs/xbrlapi.c:232
 #, c-format
 msgid "cannot get tty %d\n"
 msgstr ""
@@ -2197,12 +2221,12 @@ msgstr ""
 msgid "cannot get working directory"
 msgstr "kann Arbeitsverzeichnis nicht erfragen"
 
-#: Programs/xbrlapi.c:636
+#: Programs/xbrlapi.c:643
 #, c-format
 msgid "cannot grab windows on screen %d\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:232
+#: Programs/xbrlapi.c:239
 msgid "cannot ignore keys\n"
 msgstr "kann tasten nicht ignorieren\n"
 
@@ -2218,7 +2242,7 @@ msgstr "kann Programmbibliothek nicht laden"
 msgid "cannot load text table"
 msgstr "kann Texttabelle nicht laden"
 
-#: Programs/config.c:1008
+#: Programs/config.c:1010
 msgid "cannot open key help"
 msgstr "kann Tastenhilfe nicht öffnen"
 
@@ -2234,7 +2258,7 @@ msgstr "kann Arbeitsverzeichnis nicht öffnen"
 msgid "cannot read preferences file"
 msgstr "kann Einstellungsdatei nicht lesen"
 
-#: Programs/xbrlapi.c:297
+#: Programs/xbrlapi.c:304
 #, c-format
 msgid "cannot set focus to %#010x\n"
 msgstr "kann Fokus nicht auf %#010x setzen\n"
@@ -2249,7 +2273,7 @@ msgstr "kann Einstellungsdatei nicht schreiben"
 
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
-#: Programs/core.c:1004
+#: Programs/core.c:1008
 msgid "cap"
 msgstr "Groß"
 
@@ -2260,6 +2284,10 @@ msgstr "Zellen"
 #: Programs/cmd_preferences.c:81
 msgid "changes discarded"
 msgstr "Änderungen verworfen"
+
+#: Programs/config.c:2898
+msgid "changing language"
+msgstr "wechsle Sprache"
 
 #: Programs/cmds.auto.h:775
 msgid "clear all sticky input modifiers"
@@ -2403,7 +2431,7 @@ msgstr "Punkt 8"
 msgid "dots 7 and 8"
 msgstr "Punkte 7 und 8"
 
-#: Drivers/Braille/Baum/braille.c:1092
+#: Drivers/Braille/Baum/braille.c:1107
 msgid "driver request"
 msgstr "Treiberanfrage"
 
@@ -2463,7 +2491,7 @@ msgstr "führe \"%s\" (von \"%s\") aus\n"
 msgid "execution of \"%s\" failed: %s\n"
 msgstr "Ausführen von \"%s\" fehlgeschlagen: %s\n"
 
-#: Programs/xbrlapi.c:643
+#: Programs/xbrlapi.c:650
 msgid "failed to get first focus\n"
 msgstr ""
 
@@ -2706,7 +2734,7 @@ msgstr "Gehe nach oben zum vorherigen Element"
 msgid "green"
 msgstr "Grün"
 
-#: Programs/cmd_miscellaneous.c:230
+#: Programs/cmd_miscellaneous.c:228
 msgid "help not available"
 msgstr "Hilfe nicht verfügbar"
 
@@ -2722,7 +2750,7 @@ msgstr "Pos1-Taste"
 msgid "identifier,..."
 msgstr "Bezeichnung,..."
 
-#: Drivers/Braille/Baum/braille.c:1094
+#: Drivers/Braille/Baum/braille.c:1109
 msgid "idle timeout"
 msgstr "Inaktivitätszeitüberschreitung"
 
@@ -2734,7 +2762,7 @@ msgstr "Schneller sprechen"
 msgid "increase speaking volume"
 msgstr "Lauter sprechen"
 
-#: Programs/core.c:1062
+#: Programs/core.c:1066
 msgid "indent"
 msgstr "Einrückung"
 
@@ -2766,7 +2794,7 @@ msgstr "ungültige Escape-Sequenz"
 msgid "invalid flag setting"
 msgstr "ungültige Schalter-Einstellung"
 
-#: Programs/config.c:2590
+#: Programs/config.c:2630
 msgid "invalid message hold timeout"
 msgstr "ungültige Meldungsanzeigedauer"
 
@@ -2835,15 +2863,15 @@ msgstr "Magenta"
 msgid "missing operand"
 msgstr "fehlender Operand"
 
-#: Programs/parse.c:428
+#: Programs/parse.c:455
 msgid "missing parameter name"
 msgstr "fehlender Parametername"
 
-#: Programs/parse.c:414
+#: Programs/parse.c:441
 msgid "missing parameter qualifier"
 msgstr "fehlende Parameterkennzeichnung"
 
-#: Programs/parse.c:390
+#: Programs/parse.c:417
 msgid "missing parameter value"
 msgstr "fehlender Parameterwert"
 
@@ -2856,7 +2884,7 @@ msgstr "Name=Wert,..."
 msgid "native"
 msgstr "eigenes"
 
-#: Programs/config.c:1017
+#: Programs/config.c:1019
 msgid "no key bindings"
 msgstr "Keine Tastenbelegungen"
 
@@ -2868,7 +2896,7 @@ msgstr "Kein Bildschirm"
 msgid "none"
 msgstr "keine"
 
-#: Programs/config.c:1284
+#: Programs/config.c:1286
 msgid "not saved"
 msgstr "nicht gespeichert"
 
@@ -2888,7 +2916,7 @@ msgstr "Seite-Rauf Taste"
 msgid "percentage"
 msgstr "prozent"
 
-#: Programs/config.c:2563
+#: Programs/config.c:2603
 msgid "pid file not specified"
 msgstr "PID-Datei nicht spezifiziert"
 
@@ -2904,7 +2932,7 @@ msgstr "Tonhöhe"
 msgid "place left end of braille window at character"
 msgstr "Positioniere linken Rand der Braillezeile bei Zeichen"
 
-#: Drivers/Braille/Baum/braille.c:1093
+#: Drivers/Braille/Baum/braille.c:1108
 msgid "power switch"
 msgstr "Ein-/Aus-Schalter"
 
@@ -2925,17 +2953,17 @@ msgstr "Rot"
 msgid "regexp,..."
 msgstr "regexp,..."
 
-#: Programs/config.c:1758
+#: Programs/config.c:1785
 #, c-format
 msgid "reinitializing braille driver"
 msgstr "reinitialisiere Brailletreiber"
 
-#: Programs/config.c:2311
+#: Programs/config.c:2351
 #, c-format
 msgid "reinitializing screen driver"
 msgstr "reinitialisiere Bildschirmtreiber"
 
-#: Programs/config.c:2092
+#: Programs/config.c:2128
 #, c-format
 msgid "reinitializing speech driver"
 msgstr "reinitialisiere Sprachausgabentreiber"
@@ -2979,9 +3007,17 @@ msgstr "Speichert den Inhalt der Zwischenablage auf die Festplatte"
 msgid "save preferences to disk"
 msgstr "Einstellungen speichern"
 
-#: Programs/config.c:2191
+#: Programs/config.c:2227
 msgid "screen driver not loadable"
 msgstr "Bildschirmtreiber kann nicht geladen werden"
+
+#: Programs/config.c:2348
+msgid "screen driver restarting"
+msgstr "Bildschirmtreiber wird neu gestartet"
+
+#: Programs/cmd_miscellaneous.c:186
+msgid "screen driver stopped"
+msgstr "Bildschirmtreiber gestoppt"
 
 #: Drivers/Screen/Linux/screen.c:1486
 msgid "screen not in text mode"
@@ -3154,7 +3190,7 @@ msgstr "Digital Audio Soundkarte"
 msgid "soundcard synthesizer"
 msgstr "Synthesizer der Soundkarte"
 
-#: Programs/cmd.c:277 Programs/core.c:985
+#: Programs/cmd.c:277 Programs/core.c:989
 msgid "space"
 msgstr "leer"
 
@@ -3186,9 +3222,17 @@ msgstr "sprich die Einrückung der aktuellen Zeile"
 msgid "speak speech cursor location"
 msgstr "Sprich Sprachcursorposition"
 
-#: Programs/config.c:1951
+#: Programs/config.c:1978
 msgid "speech driver not loadable"
 msgstr "Sprachausgabentreiber kann nicht geladen werden"
+
+#: Programs/config.c:2125
+msgid "speech driver restarting"
+msgstr "Bildschirmtreiber wird neu gestartet"
+
+#: Programs/cmd_speech.c:90
+msgid "speech driver stopped"
+msgstr "Bildschirmtreiber gestoppt"
 
 #: Programs/cmds.auto.h:723
 msgid "spell current word"
@@ -3226,14 +3270,13 @@ msgstr "Bildschirmtreiber stoppen"
 msgid "stop the speech driver"
 msgstr "Sprachausgabentreiber stoppen"
 
-#: Programs/xbrlapi.c:595
+#: Programs/xbrlapi.c:602
 msgid "strange old error handler\n"
 msgstr "befremdlicher alter Fehlerbehandler\n"
 
 #: Programs/brltty-cldr.c:39
-#, fuzzy
 msgid "string"
-msgstr "Saiteninstrumente"
+msgstr "Zeichenkette"
 
 #: Programs/cmds.auto.h:1102
 msgid "switch to command context"
@@ -3267,11 +3310,11 @@ msgstr "Braillezeichen eingeben"
 msgid "type unicode character"
 msgstr "Unicode-Zeichen eingeben"
 
-#: Programs/xbrlapi.c:906
+#: Programs/xbrlapi.c:913
 msgid "unexpected block type"
 msgstr "unerwarteter Blocktyp"
 
-#: Programs/xbrlapi.c:796
+#: Programs/xbrlapi.c:803
 msgid "unexpected cmd"
 msgstr "unerwartetes Kommando"
 
@@ -3295,7 +3338,7 @@ msgstr "unbekannte Protokollierungsausführlichkeit oder Kategorie"
 msgid "unknown option"
 msgstr "unbekannte Option"
 
-#: Programs/parse.c:457
+#: Programs/parse.c:484
 msgid "unsupported parameter"
 msgstr "nicht unterstützter Parameter"
 
@@ -3308,88 +3351,88 @@ msgstr "Lautstärke"
 msgid "white"
 msgstr "Weiß"
 
-#: Programs/xbrlapi.c:843
+#: Programs/xbrlapi.c:850
 #, c-format
 msgid "xbrlapi: Couldn't find a keycode to remap for simulating unbound keysym %08X\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:830
+#: Programs/xbrlapi.c:837
 #, c-format
 msgid "xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:806
+#: Programs/xbrlapi.c:813
 #, c-format
 msgid "xbrlapi: Couldn't translate keysym %08X to keycode.\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:373
+#: Programs/xbrlapi.c:380
 #, c-format
 msgid "xbrlapi: X Error %d, %s on display %s\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:415
+#: Programs/xbrlapi.c:422
 #, c-format
 msgid "xbrlapi: bad format for VT number\n"
 msgstr "xbrlapi: ungültiges Format für VT Nummer\n"
 
-#: Programs/xbrlapi.c:418
+#: Programs/xbrlapi.c:425
 #, c-format
 msgid "xbrlapi: bad type for VT number\n"
 msgstr "xbrlapi: ungültiger Typ für VT Nummer\n"
 
-#: Programs/xbrlapi.c:397
+#: Programs/xbrlapi.c:404
 #, c-format
 msgid "xbrlapi: cannot get root window XFree86_VT property\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:276
+#: Programs/xbrlapi.c:283
 #, c-format
 msgid "xbrlapi: cannot write window name %s\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:696
+#: Programs/xbrlapi.c:703
 #, c-format
 msgid "xbrlapi: didn't grab parent of %#010lx\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:714
+#: Programs/xbrlapi.c:721
 #, c-format
 msgid "xbrlapi: didn't grab window %#010lx\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:540
+#: Programs/xbrlapi.c:547
 #, c-format
 msgid "xbrlapi: didn't grab window %#010lx but got focus\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:406
+#: Programs/xbrlapi.c:413
 #, c-format
 msgid "xbrlapi: more than one item for VT number\n"
 msgstr "xbrlapi: mehr als ein Element für VT Nummer\n"
 
-#: Programs/xbrlapi.c:391
+#: Programs/xbrlapi.c:398
 #, c-format
 msgid "xbrlapi: no XFree86_VT atom\n"
 msgstr ""
 
-#: Programs/xbrlapi.c:402
+#: Programs/xbrlapi.c:409
 #, c-format
 msgid "xbrlapi: no items for VT number\n"
 msgstr "xbrlapi: keine Elemente für VT Nummer\n"
 
-#: Programs/xbrlapi.c:374
+#: Programs/xbrlapi.c:381
 #, c-format
 msgid "xbrlapi: resource %#010lx, req %u:%u\n"
 msgstr ""
 
 #. "shouldn't happen" events
-#: Programs/xbrlapi.c:743
+#: Programs/xbrlapi.c:750
 #, c-format
 msgid "xbrlapi: unhandled event type: %d\n"
 msgstr "xbrlapi: unbehandelter Ereignistyp: %d\n"
 
-#: Programs/xbrlapi.c:722
+#: Programs/xbrlapi.c:729
 #, c-format
 msgid "xbrlapi: window %#010lx changed to NULL name\n"
 msgstr ""
@@ -3398,6 +3441,3 @@ msgstr ""
 #: Programs/cmd_utils.c:130
 msgid "yellow"
 msgstr "Gelb"
-
-#~ msgid "Braille Keyboard Enabled"
-#~ msgstr "Brailletastatur aktiviert"
