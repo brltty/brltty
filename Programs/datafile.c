@@ -79,7 +79,7 @@ brlDotBitToIndex (unsigned char bit, int *index) {
 
 void
 reportDataError (DataFile *file, char *format, ...) {
-  char message[0X100];
+  char message[0X200];
 
   {
     const char *name = NULL;
