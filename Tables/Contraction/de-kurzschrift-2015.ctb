@@ -37,6 +37,22 @@ class konsonant bcdfghjklmnpqrstvwxyz
 include de-kurzschrift-wort.cti
 before e always auslöse 16-234-123-246-234-15
 before e always ausreise 16-234-1235-146-234-15
+before hilmnrsu always ausnahme 16-234-1345-134-15
+prfword ausnahmen 16-234-1345-134-14
+before hilmnrsu always aussage 16-234-234-1245-15
+prfword aussagen 16-234-234-1245-14
+before konsonant always aussagen 16-234-234-1245-14
+prfword aussagend 16-234-234-1245-14-145
+prfword aussagende 16-234-234-1245-14-145-15
+prfword aussagendem 16-234-234-1245-14-145-12356
+prfword aussagenden 16-234-234-1245-14-145-14
+prfword aussagender 16-234-234-1245-14-145-12456
+prfword aussagendes 16-234-234-1245-14-145-123456
+always aussagenklass 16-234-234-1245-14-13-123-1-2346
+before g always aussagenklän 16-234-234-1245-14-13-123-345-1345
+
+
+before s always aus 16-234
 
 # Ausnahmen für Vokalgruppen aus de-vollschrift.ctb
 before e always arteri 356-2345-12456-24
@@ -500,7 +516,6 @@ sufword aufstell 16-2-13456
 sufword aufweis 16-2-146
 before g always aufwie 2-16-2456-346 aufwiegeln/aufwiegler/aufwiegst shouldn't use the wie-contraction
 before s always aufwie 2-16-2456-346
-sufword aufzu 16-2-1356
 begword aufzuck 2-16-1356-136-46
 before konsonant always aufzug 2-16-1356-136-1245
 always aufzugsturm 2-16-1356-136-1245-234-2345-136-1235-134 shouldn't use zu-contraction and st-contraction
@@ -647,7 +662,6 @@ always so 2-1234
 sufword soundso 1234-2-136-2-1234
 sufword sowie 1234-2-126
 endword son =
-begword sozu 1234-2-1356
 always cursor = shouldn't use the so-contraction
 begword		absol		=
 begword		absorb		=
@@ -753,7 +767,6 @@ sufword zuspiel 1356-2-346
 sufword zustand 1356-2-23456
 sufword zuständ 1356-5-23456
 sufword zustell 1356-2-13456
-sufword zuzu 1356-2-1356
 always zucht 1356-136-1456-2345 shouldn't use the zu-contraction
 always zuck 1356-136-46 shouldn't use the zu-contraction
 before g always zug =
@@ -1041,8 +1054,12 @@ always kömm 5-13-1346
 always konnt 13-2345
 contraction kt
 always könn 2-13
+
+always kraft 13-124
+contraction kf
 always kräft 5-13-124
 always kraeft 5-13-124
+
 always kulturell 13-136-123-2345-136-1235-15-12345 should use the ll-contraction
 always kürz 5-13-1356
 

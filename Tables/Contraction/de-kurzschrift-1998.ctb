@@ -499,7 +499,6 @@ sufword aufstell 16-2-13456
 sufword aufweis 16-2-146
 before g always aufwie 2-16-2456-346 aufwiegeln/aufwiegler/aufwiegst shouldn't use the wie-contraction
 before s always aufwie 2-16-2456-346
-sufword aufzu 16-2-1356
 begword aufzuck 2-16-1356-136-46
 before konsonant always aufzug 2-16-1356-136-1245
 always aufzugsturm 2-16-1356-136-1245-234-2345-136-1235-134 shouldn't use zu-contraction and st-contraction
@@ -644,7 +643,6 @@ always so 2-1234
 sufword soundso 1234-2-136-2-1234
 sufword sowie 1234-2-126
 endword son =
-begword sozu 1234-2-1356
 always cursor = shouldn't use the so-contraction
 begword		absol		=
 begword		absorb		=
@@ -750,7 +748,6 @@ sufword zuspiel 1356-2-346
 sufword zustand 1356-2-23456
 sufword zuständ 1356-5-23456
 sufword zustell 1356-2-13456
-sufword zuzu 1356-2-1356
 always zucht 1356-136-1456-2345 shouldn't use the zu-contraction
 always zuck 1356-136-46 shouldn't use the zu-contraction
 before g always zug =
