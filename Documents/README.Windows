@@ -435,7 +435,7 @@ The following packages should also be installed:
    The ``-N`` (NSIS) option can be used to specify another location.
    The installer currently being used is named ``nsis-3.0b0-setup.exe``.
 
-*  ``Python`` (from `<http://www.python.org>`_)
+*  ``Python`` (from `<http://www.python.org/>`_)
 
    The 32-bit variants are required. Version 2 or 3 may be used. If the
    ``python`` command isn't in your command search path, or if you'd like to
@@ -446,7 +446,34 @@ The following packages should also be installed:
 
    A corresponding version of ``Cython`` must be installed for each version of
    ``Python``. Each ``Cython`` version is installed within the corresponding
-   ``Python`` version's hierarchy.
+   ``Python`` version's hierarchy. Install ``Cython`` with the command::
+
+      pip install cython
+
+   If you get a message like "Unknown MS Compiler version 1900"
+   then you may need to do one or more of the following
+   (copies of these files are within the ``Cython/`` subdirectory):
+
+   ``patch1`` (from `<https://bugs.python.org/file40608/patch.diff>`_)
+      Apply ``patch1`` when within the ``Python/lib/distutils/`` directory::
+
+         cd Python/lib/distutils
+         patch patch1
+
+   ``distutils.cfg``
+      Add ``distutils.cfg`` to the ``Python/lib/distutils/`` directory.
+      It should contain these lines::
+
+         [build]
+         compiler = mingw32
+
+   ``vcruntime140.dll.cfg`` (from `<https://www.dll-files.com/>`_)
+      Add ``vcruntime140.dll`` to the ``Python/libs/`` directory.
+      The 32-bit version is required. You can verify that you have
+      the 32-bit version with the ``file`` command::
+
+         file vcruntime140.dll
+         vcruntime140.dll: PE32 executable (DLL) (console) Intel 80386, for MS Windows
 
 *  ``LibUSB-Win32`` (from `<http://libusb-win32.sourceforge.net/>`_)
 
