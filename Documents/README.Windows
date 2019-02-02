@@ -186,7 +186,7 @@ As of the time of this writing, LibUSB-1.0 binary snapshots can be found on
    2) Symlink the header and library files into your MinGW
       installation::
 
-         ln -s LibUSB-1.0/include/libusb-1.0 /mingw/include/
+         ln -s LibUSB-1.0/include/libusbx-1.0 /mingw/include/libusb-1.0
          ln -s LibUSB-1.0/MinGW32/dll/libusb-1.0.dll.a /mingw/lib/
          ln -s LibUSB-1.0/MinGW32/dll/libusb-1.0.dll /mingw/bin/
 
@@ -517,8 +517,11 @@ All of them should be placed within the same directory
 Either add this directory to your command search path
 or use the ``-M`` (MSVC) option to specify its location.
 
-If you'd like to have USB support then see the instructions for building with
-`LibUSB-Win32`_ and/or `LibUSB-1.0`_.
+If you'd like to have USB support then create the symbolic links as described
+within the MinGW instructions for using `LibUSB-Win32`_ and/or `LibUSB-1.0`_.
+You'll also need to create ``.pc`` (pkg-config) files for them within MinGW's
+``/mingw/lib/pkgconfig/`` directory. The ones we've created can be found
+within the ``pkgconfig/`` subdirectory.
 
 If you'd like to have Bluetooth support then you'll need to add
 the files listed below to MinGW's ``/mingw/include/`` directory.
