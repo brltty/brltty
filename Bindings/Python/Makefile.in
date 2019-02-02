@@ -47,7 +47,7 @@ $(PYTHON_API): brlapi.auto.c $(API_HDRS) brlapi
 	[ "@host_os@" != "mingw32" ] || "$(PYTHON)" ./setup.py --quiet bdist_wininst --skip-build
 
 brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd constants.auto.pyx
-	"$(CYTHON)" -I. -o $@ $(SRC_DIR)/brlapi.pyx
+	"$(CYTHON)" -$(PYTHON_VERSION) -I. -o $@ $(SRC_DIR)/brlapi.pyx
 
 constants.auto.pyx: $(CONSTANTS_DEPENDENCIES)
 	$(AWK) $(CONSTANTS_ARGUMENTS) >$@

@@ -54,14 +54,10 @@ else
    then
       if test -z "${PYTHON_VERSION}"
       then
-         [PYTHON_VERSION="`"${PYTHON}" -c "${PYTHON_PROLOGUE} print(distutils.sysconfig.get_config_vars('VERSION')[0]);"`"]
+         [PYTHON_VERSION="`"${PYTHON}" -c "${PYTHON_PROLOGUE} print(sys.version_info[0]);"`"]
          if test -z "${PYTHON_VERSION}"
          then
-            [PYTHON_VERSION="`"${PYTHON}" -c "${PYTHON_PROLOGUE} print('.'.join(sys.version.split()[0].split('.')[:2]));"`"]
-            if test -z "${PYTHON_VERSION}"
-            then
-               AC_MSG_WARN([Python version not defined])
-            fi
+            AC_MSG_WARN([Python version not defined])
          fi
       fi
       AC_SUBST([PYTHON_VERSION])
