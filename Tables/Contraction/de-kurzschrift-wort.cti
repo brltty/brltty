@@ -18,6 +18,10 @@
 
 # BRLTTY Contraction Subtable - German (contracted)
 
+always aldehyd 25-145-15-125-6-13456-145
+sufword alpha 25-1234-125-1
+always arhythm =
+
 before hilmnrsu always aufnahme 2-16-1345-134-15
 prfword aufnahmen 2-16-1345-134-14
 
@@ -33,9 +37,20 @@ always arthrose 356-2345-125-1235-135-234-15
 prfword arthrosen 356-2345-125-1235-135-234-14
 always ägypten 345-1245-6-13456-1234-2345-14 shouldn't use the te-contraction
 always aegypten 345-1245-6-13456-1234-2345-14
-always aufgabenüber 2-16-1234-1-12-14-2-1256
+always aufgaben 2-16-1245-1-12-14
 prfword bachelor 12-1-1456-13456-135-1235
 begmidword bachelor 12-1-1456-13456-26
+
+word beat =
+always beatbox =
+always beatmusik 12-15-1-2345-134-13
+always beatnik =
+always backbeat 12-1-46-12-15-1-2345
+word offbeat = Sauerstoffbeatmung
+always popbeat =
+always rockbeat 1235-135-46-12-15-1-2345
+
+always befund 23-124-256-145
 always beicht 12-146-1456-2345
 prfword beichte 12-146-1456-236
 prfword beichtest 12-146-1456-236-23456
@@ -54,9 +69,11 @@ prfword bund 12-256-145
 always burgunder 12-136-1235-1245-256-145-12456
 #always cranberry 6-14-1235-235-23-1235-1235-6-13456
 always dealer 145-15-1-123-12456
+always dehydr =
 always diagnose =
 prfword diagnosen 145-24-1-1245-1345-135-234-14
 before konsonant always diagnosen 145-24-1-1245-1345-135-234-14
+always diamant 145-24-1-134-235-2345
 before e always einreise 1246-1235-146-234-15
 always eisstau 146-234-23456-16 eisstau eisstaub gleisstaub
 always erpresser 12456-1234-1235-15-2346-12456
@@ -64,6 +81,7 @@ always estragon 123456-2345-1235-1-1245-135-1345 # trag?
 always europa 126-1235-135-1234-1
 midendword expresses 15-6-1346-1234-1235-15-2346-123456
 word expresses 1346-1234-1235-15-2346-123456
+sufword gamma 1245-1-1346-1
 before hilmnrsu always gebäude 12346-12-34-145-15
 prfword gebäuden 12346-12-34-145-14
 prfword gebäudes 12346-12-34-145-123456
@@ -73,6 +91,7 @@ prfword gebindes 12346-12-35-145-123456
 sufword gehäuse 12346-125-34-234-15
 prfword gehäusen 12346-125-34-234-14
 prfword gehäuses 12346-125-34-234-123456
+always gesund 12346-234-256-145
 before hilmnrsu always gewinde 12346-2456-35-145-15
 always gewindelt 12346-2456-35-145-13456-2345
 always gewindelte 12346-2456-35-145-13456-236
@@ -107,7 +126,9 @@ sufword gottes 1245-135-2345-2345-123456
 always gottesdienst 1245-135-2345-2345-123456-145-346-1345-23456
 always glucose =
 always glukose =
+before t always habich 125-1-12-3456
 prfword haie =
+always haustier 125-16-234-2345-346-1235
 always health =
 always heidelbeer 125-146-145-13456-12-15-15-1235
 before t always hilfs =
@@ -131,6 +152,8 @@ always kameralist 13-1-134-12456-25-24-23456
 always kameralistisch 13-1-134-12456-25-5-156
 before hilmnrsu always karriere 13-356-1235-24-12456-15
 prfword karrieren 13-356-1235-24-12456-14
+always klasse 13-123-1-2346-15
+always klassen 13-123-1-2346-14
 always koriander 13-135-1235-24-235-145-12456
 always kurzbein 13-1356-12-146-1345
 prfword kurzeit 13-136-1235-1356-146-2345
@@ -144,6 +167,8 @@ always laufwerk 123-16-124-2456-12456-13
 always leiterin 123-146-2345-12456-35
 always limit =
 always lipizzaner 123-24-1234-24-1356-1356-235-12456
+
+always mantel 134-235-2345-13456
 
 before hilmnrsu always marine 134-356-35-15
 prfword marinem 134-356-35-12356
@@ -182,6 +207,7 @@ sufword orts 26-2345-234
 always ortschaft 26-2345-156
 always ortstein 26-2345-23456-1246
 
+always papagei 1234-1-1234-1-1245-146
 always paprika =
 always pestorahm 1234-15-23456-135-1235-1-125-134
 before lnr always pizza =
@@ -209,8 +235,21 @@ prfword runde 1235-256-145-15
 prfword runden 1235-256-145-14
 sufword sahne =
 always sahnemeer =
+always salbei 234-25-12-146
 sufword sauf 234-16-124
+
+always sample =
+prfword samplen 234-1-134-1234-123-14
+prfword sampler 234-1-134-1234-123-12456
+always samplermodul 234-1-134-1234-123-12456-134-135-145-136-123
+prfword samplern 234-1-134-1234-123-12456-1345
+prfword samplers 234-1-134-1234-123-12456-234
+prfword samples 234-1-134-1234-123-123456
+
+midendword samt =
 before l always sauna 234-16-1345-1
+prfword solos =
+prfword soli =
 before l always schul 156-136-123
 always schulter 156-136-123-2345-12456 shouldn't use the te-contraction
 always schultragödie 156-136-123-2345-1235-1-1245-246-145-24-15
@@ -220,6 +259,8 @@ before hilmnrsu always see =
 sufword solar 234-135-123-356
 prfword soße =
 prfword soßen 234-135-6-2346-14
+always sound =
+always soundso 2-1234-2-136-2-1234
 before e always speise 234-1234-146-234-15
 always tabasco =
 always teacher 2345-15-1-1456-12456
@@ -237,7 +278,7 @@ always theater 2345-125-15-1-2345-12456 shouldn't use the te-contraction
 always tuberkulose 2345-136-12-12456-13-136-123-135-234-15
 prfword tuberkulosen 2345-136-12-12456-13-136-123-135-234-14
 before lnr always tundra 2345-256-145-1235-1
-before lnr always ultra =
+sufword ultra =
 always vegetarier 1236-15-12346-2345-356-24-12456
 before l always vokal 1236-135-13-25
 always völkerkunde 5-1236-13-12456-13-256-145-15

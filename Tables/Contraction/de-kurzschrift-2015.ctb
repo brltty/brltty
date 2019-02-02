@@ -500,20 +500,6 @@ always bergzabern 12-12456-1245-1356-1-12-12456-1345
 
 word auf 16
 always auf 2-16
-sufword aufbrauch 16-2-34
-sufword aufeinander 16-2-1246
-sufword auffahr 16-2-1235
-sufword aufhab 16-2-125
-sufword auflass 16-2-123
-sufword aufricht 16-2-3456
-sufword aufschrieb 16-2-156
-sufword aufsetz 16-2-15
-sufword aufsitz 16-2-24
-sufword aufspiel 16-2-346
-sufword aufstand 16-2-23456
-sufword aufständ 16-5-23456
-sufword aufstell 16-2-13456
-sufword aufweis 16-2-146
 before g always aufwie 2-16-2456-346 aufwiegeln/aufwiegler/aufwiegst shouldn't use the wie-contraction
 before s always aufwie 2-16-2456-346
 begword aufzuck 2-16-1356-136-46
@@ -547,15 +533,6 @@ midendword verlauf 1236-12456-123-16-124 shouldn't use the auf-contraction
 
 word bei 12
 always bei 2-12
-sufword beieinander 12-2-1246
-sufword beifahr 12-2-1235
-sufword beisetz 12-2-15
-sufword beisitz 12-2-24
-sufword beispiel 12-2-346
-sufword beistand 12-2-23456
-sufword beiständ 12-5-23456
-sufword beistell 12-2-13456
-sufword beizu 12-2-1356
 always beizung 12-146-1356-136 shouldn't use the bei-contraction
 always beiß 12-146-6-2346 shouldn't use the bei-contraction
 endword bein 12-1246 shouldn't use the bei-contraction
@@ -573,7 +550,6 @@ always schlüsselbein 156-123-1256-2346-13456-12-1246 shouldn't use the bei-cont
 
 word dem 12356
 always dem 2-12356
-sufword demzu 12356-2-1356
 endword dem 145-12356 shouldn't use the dem-contraction
 always außerdem 16-6-2346-12456-2-12356
 always demask = demaskiert shouldn't use the dem-contraction
@@ -584,83 +560,54 @@ word demos 145-12356-135-234 shouldn't use the dem-contraction
 
 word durch 1456
 always durch 2-1456
-sufword durcheinander 1456-2-1246
-sufword durchfahr 1456-2-1235
-sufword durchlass 1456-2-123
-sufword durchläss 1456-5-123
-sufword durchsprech 1456-2-2346
-sufword durchsetz 1456-2-15
-sufword durchspiel 1456-2-346
-sufword durchstand 1456-2-23456
-sufword durchstell 1456-2-13456
-sufword durchzu 1456-2-1356
 sufword durchzuck 2-1456-1356-136-46 shouldn't use the zu-contraction
 word durchzug 2-1456-1356-136-1245 shouldn't use the zu-contraction
 word durchzuges 2-1456-1356-136-1245-123456 shouldn't use the zu-contraction
 sufword durchzugs 2-1456-1356-136-1245-234 shouldn't use the zu-contraction
-begword durcheinandergerat 1456-2-1246-12346-1235-1-2345
+#begword durcheinandergerat 1456-2-1246-12346-1235-1-2345
 always zugerat 2-1356-12346-1235-1-2345 shouldn't use the er-contraction
+
 word für 124
 always für 2-124
-sufword füreinander 124-2-1246
 always fürst 124-1256-1235-23456 shouldn't use the für-contraction
+
 word gegen 1245
 always gegen 2-1245
-sufword gegenauf 1245-2-16
-sufword gegeneinander 1245-2-1246
-sufword gegenfahr 1245-2-1235
-sufword gegensetz 1245-2-15
-sufword gegenstand 1245-2-23456
-sufword gegenständ 1245-5-23456
-sufword gegenzu 1245-2-1356
 prfword gegenzug 2-1245-1356-136-1245
 prfword gegenzuge 2-1245-1356-136-12346
 prfword gegenzuges 2-1245-1356-136-1245-123456
 prfword gegenzugs 2-1245-1356-136-1245-234
 before g sufword gegenzun 2-1245-1356-256
+
 word gewesen 12346
 always gewesen 2-12346
 always fürsorgewesen 2-124-234-26-12346-2456-123456-14 shouldn't use the gewesen-contraction
 
 word immer 1346
-word immerzu 1346-2-1356
 always immer 2-1346
 always immersion 24-1346-12456-234-24-135-1345 shouldn't use the immer-contraction
 always immersiv 24-1346-12456-234-24-1236
 always flimmer 124-123-24-1346-12456
 always wimmer 2456-24-1346-12456 shouldn't use the immer-contraction
 always zimmer 1356-24-1346-12456 shouldn't use the immer-contraction
+
 word jetzt 245
 always jetzt 2-245
+
 word mehr 2356
 always mehr 2-2356
-sufword mehrstell 2356-2-13456
+
 word mit 2345
 always mit 2-2345
-sufword mitauf 2345-2-16
-sufword mitdürf 2345-2-145
-sufword miteinander 2345-2-1246
-sufword mitfahr 2345-2-1235
-sufword mithab 2345-2-125
-sufword mitkönn 2345-2-13
-sufword mitmüss 2345-2-134
-sufword mitnicht 2345-2-1345
-sufword mitschrieb 2345-2-156
-sufword mitspiel 2345-2-346
-sufword mitunter 2345-2-256
-sufword mitzu 2345-2-1356
+
 word nicht 1345
 word n 6-1345
 always nicht 2-1345
-sufword nichtauf 1345-2-16
-sufword nichtzu 1345-2-1356
 always nichtzughör 2-1345-1356-136-1245-125-246-1235
 always nichtzuck 2-1345-1356-136-46
-always nichtzusammen 2-1345-1356-234
+
 word so 1234
 always so 2-1234
-sufword soundso 1234-2-136-2-1234
-sufword sowie 1234-2-126
 endword son =
 always cursor = shouldn't use the so-contraction
 begword		absol		=
@@ -698,15 +645,13 @@ midword ungsopt 136-234-135-1234-2345 Abendgestaltungsoption shouldn't use the s
 word über 1256
 word ueber 1256
 always über 2-1256
-sufword überdurch 1256-2-1456
-sufword übereinander 1256-2-1246
-sufword überzu 1256-2-1356
 always überzucht 2-1256-1356-136-1456-2345
 always überzuck 2-1256-1356-136-46
 prfword überzug 2-1256-1356-136-1245
 prfword überzuges 2-1256-1356-136-1245-123456
 before konsonant always überzug 2-1256-1356-136-1245
 always überlauf 2-1256-123-16-124
+
 word und 136
 always und 2-136
 sufword gesund 12346-234-256-145
@@ -727,46 +672,35 @@ always unter 2-256
 sufword kunter 13-256-2345-12456 shouldn't use the unter-contraction
 sufword kunterbunter 13-256-2345-12456-12-256-2345-12456
 sufword munter 134-256-2345-12456 shouldn't use the unter-contraction
-sufword untereinander 256-2-1246
 always virus =
+
 word voll 12345
 always voll 2-12345
-sufword vollständ 12345-5-23456
-sufword vollzu 12345-2-1356
 prfword vollzug 2-12345-1356-136-1245
 prfword vollzuge 2-12345-1356-136-12346
 prfword vollzuges 2-12345-1356-136-1245-123456
 always vollzugs 2-12345-1356-136-1245-234
+
 word von 1236
 always von 2-1236
-sufword voneinander 1236-2-1246
+
 word vor 26
 always vor 2-26
-sufword vorbei 26-2-12
-sufword vorspiel 26-2-346
-sufword vorstell 26-2-13456
-sufword vorüber 26-2-1256
-sufword vorzu 26-2-1356
 always vorzugs 2-26-1356-136-1245-234
+always vorzugstimme 2-26-1356-136-1245-23456-24-1346-15
 always vorzugstimmen 2-26-1356-136-1245-23456-24-1346-14
 always favorit 124-1-1236-26-24-2345 shouldn't use the vor-contraction
+
 word wie 126
 always wie 2-126
 always zwiebel 1356-2456-346-12-13456 shouldn't use the wie-contraction
+
 word zu 1356
 always zu 2-1356
 always zugentlast 1356-136-1245-14-2345-123-1-23456 shouldn't use the zu- nor ge-contraction
 word indem 35-2-12356
 word trotzdem 2345-1356-2-12356
 word zudem 1356-2-12356
-sufword zueinander 1356-2-1246
-sufword zufahr 1356-2-1235
-sufword zulass 1356-2-123
-sufword zuläss 1356-5-123
-sufword zuspiel 1356-2-346
-sufword zustand 1356-2-23456
-sufword zuständ 1356-5-23456
-sufword zustell 1356-2-13456
 always zucht 1356-136-1456-2345 shouldn't use the zu-contraction
 always zuck 1356-136-46 shouldn't use the zu-contraction
 before g always zug =
