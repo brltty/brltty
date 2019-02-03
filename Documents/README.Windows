@@ -450,30 +450,35 @@ The following packages should also be installed:
 
       pip install cython
 
-   If you get a message like "Unknown MS Compiler version 1900"
-   then you may need to do one or more of the following
-   (copies of these files are at `<http://BRLTTY.app/archive/Windows/Cython/>`_):
+   Copies of the files mentioned below are at
+   `<http://BRLTTY.app/archive/Windows/Cython/>`_:
 
-   ``patch1`` (from `<https://bugs.python.org/file40608/patch.diff>`_)
-      Apply ``patch1`` when within the ``Python/lib/distutils/`` directory::
-
-         cd Python/lib/distutils
-         patch patch1
-
-   ``distutils.cfg``
-      Add ``distutils.cfg`` to the ``Python/lib/distutils/`` directory.
+   +  To force use of MinGW's (rather than Microsoft's) C compiler,
+      add ``distutils.cfg`` to the ``Python/lib/distutils/`` directory.
       It should contain these lines::
 
          [build]
          compiler = mingw32
 
-   ``vcruntime140.dll.cfg`` (from `<https://www.dll-files.com/>`_)
-      Add ``vcruntime140.dll`` to the ``Python/libs/`` directory.
-      The 32-bit version is required. You can verify that you have
-      the 32-bit version with the ``file`` command::
+   +  If you get a message like "Unknown MS Compiler version 1900"
+      then you'll probably need to apply the patch ``patch1``
+      (from `<https://bugs.python.org/file40608/patch.diff>`_)
+      when within the ``Python/lib/distutils/`` directory::
+
+         cd Python/lib/distutils
+         patch patch1
+
+   +  If you get a message like "cannot find -lvcruntime140"
+      then you'll need to add the 32-bit version of ``vcruntime140.dll``
+      (from `<http://www.dll-files.com/>`_)
+      to the ``Python/libs/`` directory.
+      You can verify that you have the 32-bit version with the ``file`` command::
 
          file vcruntime140.dll
          vcruntime140.dll: PE32 executable (DLL) (console) Intel 80386, for MS Windows
+
+      A message like "vcruntime140.dll: file not recognized: File format not recognized"
+      probably means that you don't have the 32-bit version of the DLL.
 
 *  ``LibUSB-Win32`` (from `<http://libusb-win32.sourceforge.net/>`_)
 
