@@ -452,7 +452,7 @@ The following packages should also be installed:
 
    If you get a message like "Unknown MS Compiler version 1900"
    then you may need to do one or more of the following
-   (copies of these files are within the ``Cython/`` subdirectory):
+   (copies of these files are at `<http://BRLTTY.app/archive/Windows/Cython/>`_):
 
    ``patch1`` (from `<https://bugs.python.org/file40608/patch.diff>`_)
       Apply ``patch1`` when within the ``Python/lib/distutils/`` directory::
@@ -532,7 +532,7 @@ On newer Windows systems, MSVC has become
 a component of Microsoft Visual Studio.
 If you don't have it then you'll need to get
 the following files from someone who does.
-Copies of them can be found within the ``MSVC/`` subdirectory.
+Copies of them are at `<http://BRLTTY.app/archive/Windows/MSVC/>`_.
 
 *  lib.exe
 *  link.exe
@@ -547,12 +547,12 @@ or use the ``-M`` (MSVC) option to specify its location.
 If you'd like to have USB support then create the symbolic links as described
 within the MinGW instructions for using `LibUSB-Win32`_ and/or `LibUSB-1.0`_.
 You'll also need to create ``.pc`` (pkg-config) files for them within MinGW's
-``/mingw/lib/pkgconfig/`` directory. The ones we've created can be found
-within the ``pkgconfig/`` subdirectory.
+``/mingw/lib/pkgconfig>`` directory. The ones we've created are at
+`<http://BRLTTY.app/archive/Windows/pkgconfig/>`_.
 
 If you'd like to have Bluetooth support then you'll need to add
 the files listed below to MinGW's ``/mingw/include/`` directory.
-Copies of them can be found within the ``Bluetooth/`` subdirectory.
+Copies of them are at `<http://BRLTTY.app/archive/Windows/Bluetooth/>`_.
 
 *  ws2bth.h
 *  bthdef.h
