@@ -8,6 +8,7 @@ Using Systemd Service Management
 .. |unit directory| replace:: |configuration directory|/systemd/system
 .. |wrapper directory| replace:: /usr/libexec
 .. |build subdirectory| replace:: Autostart/Systemd
+.. |default configuration file| replace:: ``/etc/brltty.conf``
 
 Initial Setup
 =============
@@ -32,8 +33,8 @@ To do this, run the command::
 That's all you need to do.
 Your system is now able to manage BRLTTY instances via Systemd.
 
-Managing the BRLTTY Service
-===========================
+Managing BRLTTY Instances
+=========================
 
 Systemd manages BRLTTY instances on your system in a number of ways.
 
@@ -47,11 +48,17 @@ and automatically stopped when it's disconnected.
 Several braille devices can be managed in this way at the same time.
 They can be connected and disconnected at any time and in any order.
 
+The default configuration file - |default configuration file| - is used
+except that any ``braille-device`` and ``braille-driver`` directives
+that it specifies are ignored because they're overridden by the Udev rules.
+It's safe, therefore, to specify a default non-USB braille device
+within |default configuration file|.
+
 The Default Instance
 --------------------
 
 The default BRLTTY instance is the one that's configured
-via the file ``/etc/brltty.conf``.
+via the file |default configuration file|.
 It's managed by applying standard Systemd commands to BRLTTY's path unit.
 For example::
 
@@ -77,4 +84,10 @@ and it'd be managed via Systemd commands like these::
   systemctl disable brltty@iname.path
 
 Any number of instances may be managed in this way.
+These instances don't implicitly also read the default configuration file
+(|default configuration file|).
+You can, however, explicitly include it
+from within any instance-specific configuration file:
+
+.. parsed-literal:: include |default configuration file|
 
