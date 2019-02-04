@@ -126,26 +126,34 @@ installRequiredPackages() {
    installMingwPackage msys-unzip /usr/bin/unzip
 }
 
-installBluetoothHeaders() {
-   local header
-   for header in ws2bth bthdef bthsdpdef
-   do
-      local source="${header}.h"
-      local target="${headersDirectory}/${source}"
-      [ -e "${target}" ] && continue
+installMingwHeader() {
+   local header="${1}"
 
-      logMessage task "installing Bluetooth header: ${source}"
-      downloadFile "Bluetooth/${source}"
+   local source="${header##*/}"
+   local target="${headersDirectory}/${source}"
+
+   [ -e "${target}" ] || {
+      logMessage task "installing MinGW header: ${source}"
+      downloadFile "${header}"
       executeCommand cp "${source}" "${target}"
+   }
+}
+
+installBluetoothHeaders() {
+   local name
+
+   for name in ws2bth bthdef bthsdpdef
+   do
+      installMingwHeader "Bluetooth/${name}.h"
    done
 }
 
 . "`dirname "${0}"`/../prologue.sh"
-#. "${programDirectory}/mingw.sh"
+#. "${programDirectory}/mingw.sh" #restore uncomment
 
 urlArchiveRoot="http://brltty.app/archive/Windows"
-windowsDirectory="/tmp/w"
-mingwDirectory="/tmp/m"
+windowsDirectory="/tmp/w" #restore should be /c
+mingwDirectory="/tmp/m" #restore should be /mingw
 
 headersDirectory="${mingwDirectory}/include"
 
@@ -170,7 +178,7 @@ fi
 
 mkdir -p "${temporaryDirectory}"
 cd "${temporaryDirectory}"
-temporaryDirectory="$(pwd -P)"
+temporaryDirectory="$(pwd -P)" #restore -P should be -W
 
 installRequiredPackages
 installBluetoothHeaders
