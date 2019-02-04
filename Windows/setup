@@ -121,11 +121,6 @@ installMingwPackage() {
    }
 }
 
-installRequiredPackages() {
-   installMingwPackage msys-wget /usr/bin/wget
-   installMingwPackage msys-unzip /usr/bin/unzip
-}
-
 installMingwHeader() {
    local header="${1}"
 
@@ -137,6 +132,35 @@ installMingwHeader() {
       downloadFile "${header}"
       executeCommand cp "${source}" "${target}"
    }
+}
+
+installMingwBinary() {
+   local binary="${1}"
+
+   local source="${binary##*/}"
+   local binaryDirectory="${mingwDirectory}/local/bin" #restore should be /usr
+   local target="${binaryDirectory}/${source}"
+
+   [ -e "${target}" ] || {
+      logMessage task "installing MinGW binary: ${source}"
+      downloadFile "${binary}"
+      [ -d "${binaryDirectory}" ] || executeCommand mkdir -p "${binaryDirectory}"
+      executeCommand cp "${source}" "${target}"
+   }
+}
+
+installRequiredPackages() {
+   installMingwPackage msys-wget /usr/bin/wget
+   installMingwPackage msys-unzip /usr/bin/unzip
+}
+
+installMsvcCommands() {
+   local binary
+
+   for binary in lib.exe link.exe mspdb100.dll msvcr100.dll
+   do
+      installMingwBinary "MSVC/${binary}"
+   done
 }
 
 installBluetoothHeaders() {
@@ -181,6 +205,7 @@ cd "${temporaryDirectory}"
 temporaryDirectory="$(pwd -P)" #restore -P should be -W
 
 installRequiredPackages
+installMsvcCommands
 installBluetoothHeaders
 
 installMingwArchive pkg-config_0.28-1_win32.zip "bin/pkg-config.exe"
