@@ -149,6 +149,21 @@ installMingwBinary() {
    }
 }
 
+installMingwLink() {
+   local target="${1}"
+   local directory="${2}"
+   local name="${3}"
+
+   [ -n "${name}" ] || name="${target##*/}"
+   local source="${mingwDirectory}/${directory}/${name}"
+
+   havePath "${source}" || {
+      logMessage task "installing MinGW link: ${source} -> ${target}"
+      [ -e "${target}" ] || semanticError "link target not found: ${target}"
+      executeCommand ln -s "${target}" "${source}"
+   }
+}
+
 installRequiredPackages() {
    installMingwPackage msys-wget /usr/bin/wget
    installMingwPackage msys-unzip /usr/bin/unzip
@@ -170,6 +185,27 @@ installBluetoothHeaders() {
    do
       installMingwHeader "Bluetooth/${name}.h"
    done
+}
+
+installICU() {
+   installWindowsArchive icu4c-53_1-Win32-msvc10.zip "${windowsDirectory}/ICU"
+}
+
+installLibUSB0() {
+   local directory="${windowsDirectory}/LibUSB-Win32"
+   installWindowsArchive libusb-win32-bin-1.2.6.0.zip "${directory}"
+   installMingwLink "${directory}/include/lusb0_usb.h" include usb.h
+   installMingwLink "${directory}/lib/gcc/libusb.a" lib
+   installMingwLink "${directory}/bin/x86/libusb0_x86.dll" bin libusb0.dll
+}
+
+installLibUSB1() {
+   local directory="${windowsDirectory}/LibUSB-1.0"
+   installWindowsArchive libusbx-1.0.18-win.tar.gz "${directory}"
+   installMingwLink "${directory}/include/libusbx-1.0" include libusb-1.0
+   installMingwLink "${directory}/MinGW32/dll/libusb-1.0.dll.a" lib
+   installMingwLink "${directory}/MinGW32/dll/libusb-1.0.dll" bin
+   installWindowsArchive winusb.zip "${windowsDirectory}/WinUSB"
 }
 
 . "`dirname "${0}"`/../prologue.sh"
@@ -211,10 +247,9 @@ installBluetoothHeaders
 installMingwArchive pkg-config_0.28-1_win32.zip "bin/pkg-config.exe"
 installMingwArchive glib_2.34.3-1_win32.zip "bin/libgobject-2.0-0.dll"
 
-installWindowsArchive icu4c-53_1-Win32-msvc10.zip "${windowsDirectory}/ICU"
-installWindowsArchive libusb-win32-bin-1.2.6.0.zip "${windowsDirectory}/LibUSB-Win32"
-installWindowsArchive libusbx-1.0.18-win.tar.gz "${windowsDirectory}/LibUSB-1.0"
-installWindowsArchive winusb.zip "${windowsDirectory}/WinUSB"
+installICU
+installLibUSB0
+installLibUSB1
 
 "${keepFiles}" || {
    logMessage task "cleaning up"
