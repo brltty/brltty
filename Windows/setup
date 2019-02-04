@@ -20,12 +20,36 @@
 set -e
 umask 022
 
+verifyDirectory() {
+   local path="${1}"
+
+   [ -e "${path}" ] || semanticError "directory not found: ${path}"
+   [ -d "${path}" ] || semanticError "not a directory: ${path}"
+   [ -w "${path}" ] || semanticError "directory not writable: ${path}"
+   [ -r "${path}" ] || semanticError "directory not readable: ${path}"
+   [ -x "${path}" ] || semanticError "directory not searchable: ${path}"
+}
+
 executeCommand() {
-   logMessage detail "host command: ${*}"
+   logMessage detail "executing command: ${*}"
+
    exitStatus=0
    "${@}" || exitStatus="${?}"
-   [ "${exitStatus}" -eq 0 ] || logMessage warning "host command failed: ${1}: exit status ${exitStatus}"
+
+   [ "${exitStatus}" -eq 0 ] || logMessage warning "command failed: ${1}: exit status ${exitStatus}"
    return "${exitStatus}"
+}
+
+unpackArchive() {
+   local path="${1}"
+
+   case "${path}"
+   in
+      *.zip) set -- unzip -q;;
+      *) semanticError "unsupported archive: ${path}";;
+   esac
+
+   executeCommand "${@}" "${path}"
 }
 
 downloadFile() {
@@ -40,33 +64,27 @@ downloadFile() {
 havePath() {
    local path="${1}"
 
-   [ -z "${path}" ] && return 1
-   [ ! -e "${path}" ] && return 2
+   [ -n "${path}" ] || return 1
+   [ -e "${path}" ] || return 2
    return 0
 }
 
-installArchive() {
+installWindowsArchive() {
    local archive="${1}"
    local path="${2}"
 
    havePath "${path}" || {
-      logMessage task "installing archive: ${archive}"
+      logMessage task "installing Windows archive: ${archive}"
       downloadFile "${archive}"
 
       local directory=archive
       executeCommand mkdir "${directory}"
       executeCommand cd "${directory}"
 
-      case "${archive}"
-      in
-         *.zip) set -- unzip -q;;
-         *) semanticError "unsupported archive: ${archive}";;
-      esac
-
-      executeCommand "${@}" "../${archive}"
+      unpackArchive "../${archive}"
       set -- *
 
-      if [ "${#}" -eq 1 ]
+      if [ "${#}" -eq 1 -a -d "${1}" ]
       then
          executeCommand mv "${1}" "${path}"
          executeCommand cd ..
@@ -75,6 +93,20 @@ installArchive() {
          executeCommand cd ..
          executeCommand mv "${directory}" "${path}"
       fi
+   }
+}
+
+installMingwArchive() {
+   local archive="${1}"
+   local path="${2}"
+
+   havePath "${mingwDirectory}/${path}" || {
+      logMessage task "installing MinGW archive: ${archive}"
+      downloadFile "MinGW/${archive}"
+
+      executeCommand cd "${mingwDirectory}"
+      unpackArchive "${temporaryDirectory}/${archive}"
+      executeCommand cd "${temporaryDirectory}"
    }
 }
 
@@ -101,7 +133,7 @@ installBluetoothHeaders() {
    for header in ws2bth bthdef bthsdpdef
    do
       local source="${header}.h"
-      local target="/mingw/include/${header}.h"
+      local target="${mingwDirectory}/include/${source}"
       [ -e "${target}" ] && continue
 
       downloadFile "Bluetooth/${source}"
@@ -110,15 +142,20 @@ installBluetoothHeaders() {
 }
 
 . "`dirname "${0}"`/../prologue.sh"
-. "${programDirectory}/mingw.sh"
+#. "${programDirectory}/mingw.sh"
 
 urlArchiveRoot="http://brltty.app/archive/Windows"
+windowsDirectory="/tmp/w"
+mingwDirectory="/tmp/m"
 
 defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
 
 addProgramOption k flag keepFiles "keep (do not remove) the temporary directory"
 addProgramOption t string.directory temporaryDirectory "the temporary directory to use" "${defaultTemporaryDirectory}"
 parseProgramArguments "${@}"
+
+verifyDirectory "${windowsDirectory}"
+verifyDirectory "${mingwDirectory}"
 
 if [ -z "${temporaryDirectory}" ]
 then
@@ -131,14 +168,18 @@ fi
 
 mkdir -p "${temporaryDirectory}"
 cd "${temporaryDirectory}"
-temporaryDirectory="$(pwd -W)"
+temporaryDirectory="$(pwd -P)"
 
 installRequiredPackages
 installBluetoothHeaders
-installArchive icu4c-53_1-Win32-msvc10.zip /tmp/ICU
-installArchive libusb-win32-bin-1.2.6.0.zip /tmp/LibUSB-Win32
-installArchive LibUSBx.zip /tmp/LibUSB-1.0
-installArchive winusb.zip /tmp/WinUSB
+
+installMingwArchive pkg-config_0.28-1_win32.zip "bin/pkg-config.exe"
+installMingwArchive glib_2.34.3-1_win32.zip "bin/libgobject-2.0-0.dll"
+
+installWindowsArchive icu4c-53_1-Win32-msvc10.zip "${windowsDirectory}/ICU"
+installWindowsArchive libusb-win32-bin-1.2.6.0.zip "${windowsDirectory}/LibUSB-Win32"
+installWindowsArchive LibUSBx.zip "${windowsDirectory}/LibUSB-1.0"
+installWindowsArchive winusb.zip "${windowsDirectory}/WinUSB"
 
 "${keepFiles}" || {
    logMessage task "cleaning up"
