@@ -110,32 +110,30 @@ installMingwArchive() {
    }
 }
 
-installPackage() {
+installMingwPackage() {
    local package="${1}"
    local path="${2}"
 
    havePath "${path}" || {
-      logMessage step "installing package: ${package}"
+      logMessage task "installing MinGW package: ${package}"
       executeCommand mingw-get install "${package}"
    }
 }
 
 installRequiredPackages() {
-   logMessage task "installing required packages"
-   installPackage msys-wget /usr/bin/wget
-   installPackage msys-unzip /usr/bin/unzip
+   installMingwPackage msys-wget /usr/bin/wget
+   installMingwPackage msys-unzip /usr/bin/unzip
 }
 
 installBluetoothHeaders() {
-   logMessage task "installing Bluetooth headers"
-
    local header
    for header in ws2bth bthdef bthsdpdef
    do
       local source="${header}.h"
-      local target="${mingwDirectory}/include/${source}"
+      local target="${headersDirectory}/${source}"
       [ -e "${target}" ] && continue
 
+      logMessage task "installing Bluetooth header: ${source}"
       downloadFile "Bluetooth/${source}"
       executeCommand cp "${source}" "${target}"
    done
@@ -148,6 +146,8 @@ urlArchiveRoot="http://brltty.app/archive/Windows"
 windowsDirectory="/tmp/w"
 mingwDirectory="/tmp/m"
 
+headersDirectory="${mingwDirectory}/include"
+
 defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
 
 addProgramOption k flag keepFiles "keep (do not remove) the temporary directory"
@@ -156,6 +156,7 @@ parseProgramArguments "${@}"
 
 verifyDirectory "${windowsDirectory}"
 verifyDirectory "${mingwDirectory}"
+verifyDirectory "${headersDirectory}"
 
 if [ -z "${temporaryDirectory}" ]
 then
