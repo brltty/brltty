@@ -46,6 +46,7 @@ unpackArchive() {
    case "${path}"
    in
       *.zip) set -- unzip -q;;
+      *.tar.gz) set -- tar xfz;;
       *) semanticError "unsupported archive: ${path}";;
    esac
 
@@ -179,7 +180,7 @@ installMingwArchive glib_2.34.3-1_win32.zip "bin/libgobject-2.0-0.dll"
 
 installWindowsArchive icu4c-53_1-Win32-msvc10.zip "${windowsDirectory}/ICU"
 installWindowsArchive libusb-win32-bin-1.2.6.0.zip "${windowsDirectory}/LibUSB-Win32"
-installWindowsArchive LibUSBx.zip "${windowsDirectory}/LibUSB-1.0"
+installWindowsArchive libusbx-1.0.18-win.tar.gz "${windowsDirectory}/LibUSB-1.0"
 installWindowsArchive winusb.zip "${windowsDirectory}/WinUSB"
 
 "${keepFiles}" || {
