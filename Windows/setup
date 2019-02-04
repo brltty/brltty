@@ -1,0 +1,150 @@
+#!/bin/bash -p
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2019 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+set -e
+umask 022
+
+executeCommand() {
+   logMessage detail "host command: ${*}"
+   exitStatus=0
+   "${@}" || exitStatus="${?}"
+   [ "${exitStatus}" -eq 0 ] || logMessage warning "host command failed: ${1}: exit status ${exitStatus}"
+   return "${exitStatus}"
+}
+
+downloadFile() {
+   local source="${1}"
+   local target="${2}"
+
+   logMessage step "downloading file: ${source}"
+   [ -z "${target}" ] && target="${source##*/}"
+   executeCommand wget -q -O "${target}" "${urlArchiveRoot}/${source}"
+}
+
+havePath() {
+   local path="${1}"
+
+   [ -z "${path}" ] && return 1
+   [ ! -e "${path}" ] && return 2
+   return 0
+}
+
+installArchive() {
+   local archive="${1}"
+   local path="${2}"
+
+   havePath "${path}" || {
+      logMessage task "installing archive: ${archive}"
+      downloadFile "${archive}"
+
+      local directory=archive
+      executeCommand mkdir "${directory}"
+      executeCommand cd "${directory}"
+
+      case "${archive}"
+      in
+         *.zip) set -- unzip -q;;
+         *) semanticError "unsupported archive: ${archive}";;
+      esac
+
+      executeCommand "${@}" "../${archive}"
+      set -- *
+
+      if [ "${#}" -eq 1 ]
+      then
+         executeCommand mv "${1}" "${path}"
+         executeCommand cd ..
+         executeCommand rmdir "${directory}"
+      else
+         executeCommand cd ..
+         executeCommand mv "${directory}" "${path}"
+      fi
+   }
+}
+
+installPackage() {
+   local package="${1}"
+   local path="${2}"
+
+   havePath "${path}" || {
+      logMessage step "installing package: ${package}"
+      executeCommand mingw-get install "${package}"
+   }
+}
+
+installRequiredPackages() {
+   logMessage task "installing required packages"
+   installPackage msys-wget /usr/bin/wget
+   installPackage msys-unzip /usr/bin/unzip
+}
+
+installBluetoothHeaders() {
+   logMessage task "installing Bluetooth headers"
+
+   local header
+   for header in ws2bth bthdef bthsdpdef
+   do
+      local source="${header}.h"
+      local target="/mingw/include/${header}.h"
+      [ -e "${target}" ] && continue
+
+      downloadFile "Bluetooth/${source}"
+      executeCommand cp "${source}" "${target}"
+   done
+}
+
+. "`dirname "${0}"`/../prologue.sh"
+. "${programDirectory}/mingw.sh"
+
+urlArchiveRoot="http://brltty.app/archive/Windows"
+
+defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
+
+addProgramOption k flag keepFiles "keep (do not remove) the temporary directory"
+addProgramOption t string.directory temporaryDirectory "the temporary directory to use" "${defaultTemporaryDirectory}"
+parseProgramArguments "${@}"
+
+if [ -z "${temporaryDirectory}" ]
+then
+   temporaryDirectory="${defaultTemporaryDirectory}"
+   rm -f -r "${temporaryDirectory}"
+elif [ -e "${temporaryDirectory}" ]
+then
+   semanticError "directory already exists: ${temporaryDirectory}"
+fi
+
+mkdir -p "${temporaryDirectory}"
+cd "${temporaryDirectory}"
+temporaryDirectory="$(pwd -W)"
+
+installRequiredPackages
+installBluetoothHeaders
+installArchive icu4c-53_1-Win32-msvc10.zip /tmp/ICU
+installArchive libusb-win32-bin-1.2.6.0.zip /tmp/LibUSB-Win32
+installArchive LibUSBx.zip /tmp/LibUSB-1.0
+installArchive winusb.zip /tmp/WinUSB
+
+"${keepFiles}" || {
+   logMessage task "cleaning up"
+   cd "${initialDirectory}"
+   rm -f -r "${temporaryDirectory}"
+}
+
+logMessage task "done"
+exit 0
