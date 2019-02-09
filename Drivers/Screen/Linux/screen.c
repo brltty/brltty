@@ -1570,31 +1570,37 @@ describe_LinuxScreen (ScreenDescription *description) {
 }
 
 static int
-appendScreenRow (ScreenCharacter *buffer, unsigned int row, unsigned int width, unsigned int offset, unsigned int count) {
-  ScreenCharacter characters[width];
-  if (!readScreenRow(row, width, characters, NULL)) return 0;
+getScreenRow (
+  ScreenCharacter *buffer,
+  unsigned int row, unsigned int width,
+  unsigned int offset, unsigned int count
+) {
+  const ScreenCharacter *bufferEnd = buffer + count;
 
-  const ScreenCharacter *src = &characters[offset];
-  const ScreenCharacter *srcEnd = src + count;
-  ScreenCharacter *trg = buffer;
-  const ScreenCharacter *trgEnd = trg + count;
-  unsigned int blanks = 0;
+  {
+    ScreenCharacter characters[width];
+    if (!readScreenRow(row, width, characters, NULL)) return 0;
 
-  while (src < srcEnd) {
-    if ((blanks > 0) && (src->text == WC_C(' '))) {
-      blanks -= 1;
-    } else {
-      blanks = getCharacterWidth(src->text) - 1;
-      *trg++ = *src;
+    const ScreenCharacter *character = &characters[offset];
+    const ScreenCharacter *end = character + count;
+    unsigned int blanks = 0;
+
+    while (character < end) {
+      if ((blanks > 0) && (character->text == WC_C(' '))) {
+        blanks -= 1;
+      } else {
+        blanks = getCharacterWidth(character->text) - 1;
+        *buffer++ = *character;
+      }
+
+      character += 1;
     }
-
-    src += 1;
   }
 
-  while (trg < trgEnd) {
-    trg->text = WC_C(' ');
-    trg->attributes = SCR_COLOUR_DEFAULT;
-    trg += 1;
+  while (buffer < bufferEnd) {
+    buffer->text = WC_C(' ');
+    buffer->attributes = SCR_COLOUR_DEFAULT;
+    buffer += 1;
   }
 
   return 1;
@@ -1612,7 +1618,7 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
       }
 
       for (unsigned int row=0; row<box->height; row+=1) {
-        if (!appendScreenRow(buffer, box->top+row, size.columns, box->left, box->width)) return 0;
+        if (!getScreenRow(buffer, box->top+row, size.columns, box->left, box->width)) return 0;
         buffer += box->width;
       }
 
