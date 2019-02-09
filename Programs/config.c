@@ -2895,7 +2895,7 @@ static const ProfileProperty languageProfileProperties[] = {
 static int
 beginLanguageProfile (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
-  disableSpeechDriver(gettext("changing language"));
+  disableSpeechDriver(NULL);
   awaitActivityStopped(speechDriverActivity);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
