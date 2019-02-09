@@ -1597,10 +1597,13 @@ getScreenRow (
     }
   }
 
-  while (buffer < bufferEnd) {
-    buffer->text = WC_C(' ');
-    buffer->attributes = SCR_COLOUR_DEFAULT;
-    buffer += 1;
+  {
+    static const ScreenCharacter character = {
+      .text = WC_C(' '),
+      .attributes = SCR_COLOUR_DEFAULT
+    };
+
+    while (buffer < bufferEnd) *buffer++ = character;
   }
 
   return 1;
