@@ -45,6 +45,7 @@
 #include "brl_cmds.h"
 #include "kbd_keycodes.h"
 #include "ascii.h"
+#include "unicode.h"
 #include "charset.h"
 #include "system_linux.h"
 
@@ -1569,6 +1570,37 @@ describe_LinuxScreen (ScreenDescription *description) {
 }
 
 static int
+appendScreenRow (ScreenCharacter *buffer, unsigned int row, unsigned int width, unsigned int offset, unsigned int count) {
+  ScreenCharacter characters[width];
+  if (!readScreenRow(row, width, characters, NULL)) return 0;
+
+  const ScreenCharacter *src = &characters[offset];
+  const ScreenCharacter *srcEnd = src + count;
+  ScreenCharacter *trg = buffer;
+  const ScreenCharacter *trgEnd = trg + count;
+  unsigned int blanks = 0;
+
+  while (src < srcEnd) {
+    if ((blanks > 0) && (src->text == WC_C(' '))) {
+      blanks -= 1;
+    } else {
+      blanks = getCharacterWidth(src->text) - 1;
+      *trg++ = *src;
+    }
+
+    src += 1;
+  }
+
+  while (trg < trgEnd) {
+    trg->text = WC_C(' ');
+    trg->attributes = SCR_COLOUR_DEFAULT;
+    trg += 1;
+  }
+
+  return 1;
+}
+
+static int
 readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   ScreenSize size;
 
@@ -1580,12 +1612,7 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
       }
 
       for (unsigned int row=0; row<box->height; row+=1) {
-        ScreenCharacter characters[size.columns];
-        if (!readScreenRow(box->top+row, size.columns, characters, NULL)) return 0;
-
-        memcpy(buffer, &characters[box->left],
-               box->width * sizeof(characters[0]));
-        buffer += box->width;
+        if (!appendScreenRow(buffer, box->top+row, size.columns, box->left, box->width)) return 0;
       }
 
       return 1;
