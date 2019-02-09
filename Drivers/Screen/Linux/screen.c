@@ -1613,6 +1613,7 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
       for (unsigned int row=0; row<box->height; row+=1) {
         if (!appendScreenRow(buffer, box->top+row, size.columns, box->left, box->width)) return 0;
+        buffer += box->width;
       }
 
       return 1;
