@@ -1583,7 +1583,7 @@ getScreenRow (
 
     const ScreenCharacter *character = &characters[offset];
     const ScreenCharacter *end = character + count;
-    unsigned int blanks = 0;
+    int blanks = 0;
 
     while (character < end) {
       if ((blanks > 0) && (character->text == WC_C(' '))) {
