@@ -735,10 +735,19 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   };
 
   BEGIN_USB_CHANNEL_DEFINITIONS
-    { /* all models (serial protocol) */
+    { /* 32, 40, 80 (serial protocol) */
       .vendor=0X1C71, .product=0XC005, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=3,
+      .serial = &serialParameters,
+      .data = &resourceData_serial,
+      .resetDevice = 1
+    },
+
+    { /* 14 (serial protocol) */
+      .vendor=0X1C71, .product=0XC021, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
       .serial = &serialParameters,
       .data = &resourceData_serial,
       .resetDevice = 1
