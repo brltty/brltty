@@ -297,7 +297,7 @@ brltty 0x0003 0x1209 0xabc0
 brltty 0x0003 0x1c71 0xc004
 
 # Device: 1C71:C005
-# HumanWare [all models (serial protocol)]
+# HumanWare [32, 40, 80 (serial protocol)]
 brltty 0x0003 0x1c71 0xc005
 
 # Device: 1C71:C006
@@ -307,6 +307,10 @@ brltty 0x0003 0x1c71 0xc006
 # Device: 1C71:C00A
 # HumanWare [BrailleNote Touch (HID protocol)]
 brltty 0x0003 0x1c71 0xc00a
+
+# Device: 1C71:C021
+# HumanWare [14 (serial protocol)]
+brltty 0x0003 0x1c71 0xc021
 
 # Device: 1FE4:0003
 # HandyTech [USB-HID adapter]

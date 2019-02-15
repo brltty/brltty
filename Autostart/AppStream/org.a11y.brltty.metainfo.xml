@@ -317,7 +317,7 @@
     <modalias>usb:v1C71pC004*</modalias>
 
     <!-- Device: 1C71:C005 -->
-    <!-- HumanWare [all models (serial protocol)] -->
+    <!-- HumanWare [32, 40, 80 (serial protocol)] -->
     <modalias>usb:v1C71pC005*</modalias>
 
     <!-- Device: 1C71:C006 -->
@@ -327,6 +327,10 @@
     <!-- Device: 1C71:C00A -->
     <!-- HumanWare [BrailleNote Touch (HID protocol)] -->
     <modalias>usb:v1C71pC00A*</modalias>
+
+    <!-- Device: 1C71:C021 -->
+    <!-- HumanWare [14 (serial protocol)] -->
+    <modalias>usb:v1C71pC021*</modalias>
 
     <!-- Device: 1FE4:0003 -->
     <!-- HandyTech [USB-HID adapter] -->

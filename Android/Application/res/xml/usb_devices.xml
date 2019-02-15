@@ -282,7 +282,7 @@
   <usb-device vendor-id="7281" product-id="49156" />
 
   <!-- Device: 1C71:C005 -->
-  <!-- HumanWare [all models (serial protocol)] -->
+  <!-- HumanWare [32, 40, 80 (serial protocol)] -->
   <usb-device vendor-id="7281" product-id="49157" />
 
   <!-- Device: 1C71:C006 -->
@@ -292,6 +292,10 @@
   <!-- Device: 1C71:C00A -->
   <!-- HumanWare [BrailleNote Touch (HID protocol)] -->
   <usb-device vendor-id="7281" product-id="49162" />
+
+  <!-- Device: 1C71:C021 -->
+  <!-- HumanWare [14 (serial protocol)] -->
+  <usb-device vendor-id="7281" product-id="49185" />
 
   <!-- Device: 1FE4:0003 -->
   <!-- HandyTech [USB-HID adapter] -->
