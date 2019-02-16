@@ -306,7 +306,7 @@ USB_DEVICE_ENTRY(0X1209, 0XABC0, "ic"),
 USB_DEVICE_ENTRY(0X1C71, 0XC004, "bn"),
 
 // Device: 1C71:C005
-// HumanWare [32, 40, 80 (serial protocol)]
+// HumanWare [Brailliant BI 32/40, Brailliant B 80 (serial protocol)]
 USB_DEVICE_ENTRY(0X1C71, 0XC005, "hw"),
 
 // Device: 1C71:C006
@@ -318,7 +318,7 @@ USB_DEVICE_ENTRY(0X1C71, 0XC006, "hw"),
 USB_DEVICE_ENTRY(0X1C71, 0XC00A, "hw"),
 
 // Device: 1C71:C021
-// HumanWare [14 (serial protocol)]
+// HumanWare [Brailliant BI 14 (serial protocol)]
 USB_DEVICE_ENTRY(0X1C71, 0XC021, "hw"),
 
 // Device: 1FE4:0003
