@@ -24,6 +24,14 @@
 set -e
 umask 022
 
+havePath() {
+   local path="${1}"
+
+   [ -n "${path}" ] || return 1
+   [ -e "${path}" ] || return 2
+   return 0
+}
+
 verifyDirectory() {
    local path="${1}"
 
@@ -32,6 +40,15 @@ verifyDirectory() {
    [ -w "${path}" ] || semanticError "directory not writable: ${path}"
    [ -r "${path}" ] || semanticError "directory not readable: ${path}"
    [ -x "${path}" ] || semanticError "directory not searchable: ${path}"
+}
+
+findCommand() {
+   local name="${1}"
+   local variable="${2}"
+
+   local path="$(command -v "${name}")"
+   [ -n "${path}" ] || return 1
+   [ -n "${variable}" ] && setVariable "${variable}" "${path}"
 }
 
 executeCommand() {
@@ -64,14 +81,6 @@ unpackArchive() {
    esac
 
    executeCommand "${@}" "${path}"
-}
-
-havePath() {
-   local path="${1}"
-
-   [ -n "${path}" ] || return 1
-   [ -e "${path}" ] || return 2
-   return 0
 }
 
 installFile() {
@@ -206,6 +215,22 @@ installLibUSB1() {
    installWindowsArchive winusb.zip "${windowsDirectory}/WinUSB"
 }
 
+installCython() {
+   local python
+
+   if findCommand python python
+   then
+      local directory="${python%/*}"
+
+      findCommand cython || {
+         logMessage task "installing Cython"
+         "${dryRun}" || executeCommand pip -q install cython
+      }
+   else
+      logMessage warning "Python not found"
+   fi
+}
+
 . "`dirname "${0}"`/../prologue.sh"
 . "${programDirectory}/mingw.sh"
 
@@ -257,6 +282,7 @@ installWindowsArchive icu4c-53_1-Win32-msvc10.zip "${windowsDirectory}/ICU"
 
 installLibUSB0
 installLibUSB1
+installCython
 
 "${keepFiles}" || {
    logMessage task "cleaning up"
