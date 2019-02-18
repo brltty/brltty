@@ -79,6 +79,28 @@ unpackArchive() {
    executeCommand "${@}" "${path}"
 }
 
+applyPatch() {
+   local patch="${1}"
+   local directory="${2}"
+   shift 2
+
+   while [ "${#}" -gt 0 ]
+   do
+      local file="${1}"
+      local pattern="${2}"
+      shift 2
+
+      grep -q "${pattern}" "${directory}/${file}" || {
+         local name="${patch##*/}"
+         logMessage task "applying patch: ${name}"
+
+         downloadFile "${patch}"
+         "${dryRun}" || executeCommand patch -N -i "${temporaryDirectory}/${name}" -d "${directory}"
+         return 0
+      }
+   done
+}
+
 installFile() {
    local file="${1}"
    local directory="${2}"
@@ -225,14 +247,7 @@ installCython() {
 
       installFile Cython/vcruntime140.dll "${directory}/libs"
       installFile Cython/distutils.cfg "${directory}/lib/distutils"
-
-      grep -q "vcruntime140" "${directory}/lib/distutils/cygwinccompiler.py" || {
-         local patch="PythonCygwinCCompiler.patch"
-         logMessage task "applying patch: ${patch}"
-
-         downloadFile "Cython/${patch}"
-         "${dryRun}" || executeCommand patch -N -i "${temporaryDirectory}/${patch}" -d "${directory}/lib/distutils"
-      }
+      applyPatch "Cython/PythonCygwinCCompiler.patch" "${directory}/lib/distutils" "cygwinccompiler.py" "vcruntime140"
    else
       logMessage warning "Python not found"
    fi
