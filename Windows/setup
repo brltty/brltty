@@ -132,8 +132,10 @@ installMingwFile() {
    local file="${1}"
    local subdirectory="${2}"
 
+   local directory="${subdirectory}"
+   [ "${directory}" = "${directory#/}" ] && directory="${mingwDirectory}/${directory}"
+
    local source="${file##*/}"
-   local directory="${mingwDirectory}/${subdirectory}"
    local target="${directory}/${source}"
 
    [ -e "${target}" ] || {
@@ -169,7 +171,7 @@ installMicrosoftVisualCTools() {
 
    for file in lib.exe link.exe mspdb100.dll msvcr100.dll
    do
-      installMingwFile "MSVC/${file}" usr/local/bin
+      installMingwFile "MSVC/${file}" usr/local/bin #restore should be absolute
    done
 }
 
