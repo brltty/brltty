@@ -17,6 +17,14 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+# TO-DO
+# more MSYS/MinGW requird packages
+# AutoHotkey104805_Install.exe
+# nsis-3.0b0-setup.exe
+# Cython/
+# pkgconfig/
+# fix the lines tagged with #restore
+
 set -e
 umask 022
 
