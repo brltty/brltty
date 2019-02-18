@@ -45,6 +45,15 @@ executeCommand() {
    return "${exitStatus}"
 }
 
+downloadFile() {
+   local source="${1}"
+   local target="${2}"
+
+   logMessage step "downloading file: ${source}"
+   [ -z "${target}" ] && target="${source##*/}"
+   executeCommand wget -q -O "${target}" "${urlArchiveRoot}/${source}"
+}
+
 unpackArchive() {
    local path="${1}"
 
@@ -58,21 +67,42 @@ unpackArchive() {
    executeCommand "${@}" "${path}"
 }
 
-downloadFile() {
-   local source="${1}"
-   local target="${2}"
-
-   logMessage step "downloading file: ${source}"
-   [ -z "${target}" ] && target="${source##*/}"
-   executeCommand wget -q -O "${target}" "${urlArchiveRoot}/${source}"
-}
-
 havePath() {
    local path="${1}"
 
    [ -n "${path}" ] || return 1
    [ -e "${path}" ] || return 2
    return 0
+}
+
+installFile() {
+   local file="${1}"
+   local directory="${2}"
+
+   local source="${file##*/}"
+   local target="${directory}/${source}"
+
+   [ -e "${target}" ] || {
+      logMessage task "installing file: ${target}"
+      downloadFile "${file}"
+      [ -d "${directory}" ] || "${dryRun}" || executeCommand mkdir -p "${directory}"
+      "${dryRun}" || executeCommand cp "${source}" "${target}"
+   }
+}
+
+installLink() {
+   local to="${1}"
+   local directory="${2}"
+   local name="${3}"
+
+   [ -n "${name}" ] || name="${to##*/}"
+   local from="${directory}/${name}"
+
+   havePath "${from}" || {
+      logMessage task "installing link: ${from} -> ${to}"
+      [ -e "${to}" ] || semanticError "link target not found: ${to}"
+      "${dryRun}" || executeCommand ln -s "${to}" "${from}"
+   }
 }
 
 installWindowsArchive() {
@@ -83,7 +113,7 @@ installWindowsArchive() {
       logMessage task "installing Windows archive: ${archive}"
       downloadFile "${archive}"
 
-      local directory=archive
+      local directory="content-${archive}"
       executeCommand mkdir "${directory}"
       executeCommand cd "${directory}"
 
@@ -92,12 +122,12 @@ installWindowsArchive() {
 
       if [ "${#}" -eq 1 -a -d "${1}" ]
       then
-         executeCommand mv "${1}" "${path}"
+         "${dryRun}" || executeCommand mv "${1}" "${path}"
          executeCommand cd ..
          executeCommand rmdir "${directory}"
       else
          executeCommand cd ..
-         executeCommand mv "${directory}" "${path}"
+         "${dryRun}" || executeCommand mv "${directory}" "${path}"
       fi
    }
 }
@@ -110,9 +140,11 @@ installMingwArchive() {
       logMessage task "installing MinGW archive: ${archive}"
       downloadFile "MinGW/${archive}"
 
-      executeCommand cd "${mingwDirectory}"
-      unpackArchive "${temporaryDirectory}/${archive}"
-      executeCommand cd "${temporaryDirectory}"
+      "${dryRun}" || {
+         executeCommand cd "${mingwDirectory}"
+         unpackArchive "${temporaryDirectory}/${archive}"
+         executeCommand cd "${temporaryDirectory}"
+      }
    }
 }
 
@@ -122,44 +154,11 @@ installMingwPackage() {
 
    havePath "${path}" || {
       logMessage task "installing MinGW package: ${package}"
-      executeCommand mingw-get install "${package}"
+      "${dryRun}" || executeCommand mingw-get install "${package}"
    }
 }
 
-installMingwFile() {
-   local file="${1}"
-   local subdirectory="${2}"
-
-   local directory="${subdirectory}"
-   [ "${directory}" = "${directory#/}" ] && directory="${mingwDirectory}/${directory}"
-
-   local source="${file##*/}"
-   local target="${directory}/${source}"
-
-   [ -e "${target}" ] || {
-      logMessage task "installing MinGW file: ${subdirectory}/${source}"
-      downloadFile "${file}"
-      [ -d "${directory}" ] || executeCommand mkdir -p "${directory}"
-      executeCommand cp "${source}" "${target}"
-   }
-}
-
-installMingwLink() {
-   local target="${1}"
-   local directory="${2}"
-   local name="${3}"
-
-   [ -n "${name}" ] || name="${target##*/}"
-   local source="${mingwDirectory}/${directory}/${name}"
-
-   havePath "${source}" || {
-      logMessage task "installing MinGW link: ${source} -> ${target}"
-      [ -e "${target}" ] || semanticError "link target not found: ${target}"
-      executeCommand ln -s "${target}" "${source}"
-   }
-}
-
-installRequiredPackages() {
+installMingwPackages() {
    installMingwPackage msys-wget /usr/bin/wget
    installMingwPackage msys-unzip /usr/bin/unzip
 }
@@ -169,7 +168,7 @@ installMicrosoftVisualCTools() {
 
    for file in lib.exe link.exe mspdb100.dll msvcr100.dll
    do
-      installMingwFile "MSVC/${file}" usr/local/bin #restore should be absolute
+      installFile "MSVC/${file}" "${mingwDirectory}/usr/local/bin" #restore remove mingwDirectory
    done
 }
 
@@ -178,7 +177,7 @@ installPackageConfigurationFiles() {
 
    for package in libusb libusb-1.0
    do
-      installMingwFile "pkgconfig/${package}.pc" "lib/pkgconfig"
+      installFile "pkgconfig/${package}.pc" "${librariesDirectory}/pkgconfig"
    done
 }
 
@@ -187,24 +186,24 @@ installBluetoothHeaders() {
 
    for name in ws2bth bthdef bthsdpdef
    do
-      installMingwFile "Bluetooth/${name}.h" include
+      installFile "Bluetooth/${name}.h" "${headersDirectory}"
    done
 }
 
 installLibUSB0() {
    local directory="${windowsDirectory}/LibUSB-Win32"
    installWindowsArchive libusb-win32-bin-1.2.6.0.zip "${directory}"
-   installMingwLink "${directory}/include/lusb0_usb.h" include usb.h
-   installMingwLink "${directory}/lib/gcc/libusb.a" lib
-   installMingwLink "${directory}/bin/x86/libusb0_x86.dll" bin libusb0.dll
+   installLink "${directory}/include/lusb0_usb.h" "${headersDirectory}" usb.h
+   installLink "${directory}/lib/gcc/libusb.a" "${librariesDirectory}"
+   installLink "${directory}/bin/x86/libusb0_x86.dll" "${commandsDirectory}" libusb0.dll
 }
 
 installLibUSB1() {
    local directory="${windowsDirectory}/LibUSB-1.0"
    installWindowsArchive libusbx-1.0.18-win.tar.gz "${directory}"
-   installMingwLink "${directory}/include/libusbx-1.0" include libusb-1.0
-   installMingwLink "${directory}/MinGW32/dll/libusb-1.0.dll.a" lib
-   installMingwLink "${directory}/MinGW32/dll/libusb-1.0.dll" bin
+   installLink "${directory}/include/libusbx-1.0" "${headersDirectory}" libusb-1.0
+   installLink "${directory}/MinGW32/dll/libusb-1.0.dll.a" "${librariesDirectory}"
+   installLink "${directory}/MinGW32/dll/libusb-1.0.dll" "${commandsDirectory}"
    installWindowsArchive winusb.zip "${windowsDirectory}/WinUSB"
 }
 
@@ -221,6 +220,7 @@ headersDirectory="${mingwDirectory}/include"
 
 defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
 
+addProgramOption d flag dryRun "dry run - don't actually install anything"
 addProgramOption k flag keepFiles "keep (do not remove) the temporary directory"
 addProgramOption t string.directory temporaryDirectory "the temporary directory to use" "${defaultTemporaryDirectory}"
 parseProgramArguments "${@}"
@@ -244,7 +244,7 @@ mkdir -p "${temporaryDirectory}"
 cd "${temporaryDirectory}"
 temporaryDirectory="$(pwd -P)" #restore -P should be -W
 
-installRequiredPackages
+installMingwPackages
 installMicrosoftVisualCTools
 installPackageConfigurationFiles
 installBluetoothHeaders
