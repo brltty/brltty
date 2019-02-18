@@ -17,10 +17,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# TO-DO
-# more MSYS/MinGW requird packages
-# Cython/
-
 set -e
 umask 022
 
@@ -48,7 +44,7 @@ findCommand() {
 
    local path="$(command -v "${name}")"
    [ -n "${path}" ] || return 1
-   [ -n "${variable}" ] && setVariable "${variable}" "${path}"
+   [ -z "${variable}" ] || setVariable "${variable}" "${path}"
 }
 
 executeCommand() {
@@ -225,6 +221,17 @@ installCython() {
       findCommand cython || {
          logMessage task "installing Cython"
          "${dryRun}" || executeCommand pip -q install cython
+      }
+
+      installFile Cython/vcruntime140.dll "${directory}/libs"
+      installFile Cython/distutils.cfg "${directory}/lib/distutils"
+
+      grep -q "vcruntime140" "${directory}/lib/distutils/cygwinccompiler.py" || {
+         local patch="PythonCygwinCCompiler.patch"
+         logMessage task "applying patch: ${patch}"
+
+         downloadFile "Cython/${patch}"
+         "${dryRun}" || executeCommand patch -N -i "${temporaryDirectory}/${patch}" -d "${directory}/lib/distutils"
       }
    else
       logMessage warning "Python not found"
