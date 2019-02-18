@@ -22,7 +22,6 @@
 # AutoHotkey104805_Install.exe
 # nsis-3.0b0-setup.exe
 # Cython/
-# pkgconfig/
 # fix the lines tagged with #restore
 
 set -e
@@ -129,30 +128,18 @@ installMingwPackage() {
    }
 }
 
-installMingwHeader() {
-   local header="${1}"
+installMingwFile() {
+   local file="${1}"
+   local subdirectory="${2}"
 
-   local source="${header##*/}"
-   local target="${headersDirectory}/${source}"
-
-   [ -e "${target}" ] || {
-      logMessage task "installing MinGW header: ${source}"
-      downloadFile "${header}"
-      executeCommand cp "${source}" "${target}"
-   }
-}
-
-installMingwBinary() {
-   local binary="${1}"
-
-   local source="${binary##*/}"
-   local binaryDirectory="${mingwDirectory}/local/bin" #restore should be /usr
-   local target="${binaryDirectory}/${source}"
+   local source="${file##*/}"
+   local directory="${mingwDirectory}/${subdirectory}"
+   local target="${directory}/${source}"
 
    [ -e "${target}" ] || {
-      logMessage task "installing MinGW binary: ${source}"
-      downloadFile "${binary}"
-      [ -d "${binaryDirectory}" ] || executeCommand mkdir -p "${binaryDirectory}"
+      logMessage task "installing MinGW file: ${subdirectory}/${source}"
+      downloadFile "${file}"
+      [ -d "${directory}" ] || executeCommand mkdir -p "${directory}"
       executeCommand cp "${source}" "${target}"
    }
 }
@@ -177,12 +164,21 @@ installRequiredPackages() {
    installMingwPackage msys-unzip /usr/bin/unzip
 }
 
-installMsvcCommands() {
-   local binary
+installMicrosoftVisualCTools() {
+   local file
 
-   for binary in lib.exe link.exe mspdb100.dll msvcr100.dll
+   for file in lib.exe link.exe mspdb100.dll msvcr100.dll
    do
-      installMingwBinary "MSVC/${binary}"
+      installMingwFile "MSVC/${file}" usr/local/bin
+   done
+}
+
+installPackageConfigurationFiles() {
+   local package
+
+   for package in libusb libusb-1.0
+   do
+      installMingwFile "pkgconfig/${package}.pc" "lib/pkgconfig"
    done
 }
 
@@ -191,7 +187,7 @@ installBluetoothHeaders() {
 
    for name in ws2bth bthdef bthsdpdef
    do
-      installMingwHeader "Bluetooth/${name}.h"
+      installMingwFile "Bluetooth/${name}.h" include
    done
 }
 
@@ -223,6 +219,8 @@ urlArchiveRoot="http://brltty.app/archive/Windows"
 windowsDirectory="/tmp/w" #restore should be /c
 mingwDirectory="/tmp/m" #restore should be /mingw
 
+commandsDirectory="${mingwDirectory}/bin"
+librariesDirectory="${mingwDirectory}/lib"
 headersDirectory="${mingwDirectory}/include"
 
 defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
@@ -233,6 +231,8 @@ parseProgramArguments "${@}"
 
 verifyDirectory "${windowsDirectory}"
 verifyDirectory "${mingwDirectory}"
+verifyDirectory "${commandsDirectory}"
+verifyDirectory "${librariesDirectory}"
 verifyDirectory "${headersDirectory}"
 
 if [ -z "${temporaryDirectory}" ]
@@ -249,7 +249,8 @@ cd "${temporaryDirectory}"
 temporaryDirectory="$(pwd -P)" #restore -P should be -W
 
 installRequiredPackages
-installMsvcCommands
+installMicrosoftVisualCTools
+installPackageConfigurationFiles
 installBluetoothHeaders
 
 installMingwArchive pkg-config_0.28-1_win32.zip "bin/pkg-config.exe"
