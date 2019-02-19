@@ -17,6 +17,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+. "`dirname "${0}"`/../prologue.sh"
+. "${programDirectory}/mingw.sh"
+
 set -e
 umask 022
 
@@ -184,11 +187,6 @@ installMingwPackage() {
    }
 }
 
-installMingwPackages() {
-   installMingwPackage msys-wget /usr/bin/wget
-   installMingwPackage msys-unzip /usr/bin/unzip
-}
-
 installMicrosoftVisualCTools() {
    local file
 
@@ -253,9 +251,6 @@ installCython() {
    fi
 }
 
-. "`dirname "${0}"`/../prologue.sh"
-. "${programDirectory}/mingw.sh"
-
 urlArchiveRoot="http://brltty.app/archive/Windows"
 windowsDirectory="/c"
 mingwDirectory="/mingw"
@@ -290,7 +285,9 @@ mkdir -p "${temporaryDirectory}"
 cd "${temporaryDirectory}"
 temporaryDirectory="$(pwd -W)"
 
-installMingwPackages
+installMingwPackage msys-wget /usr/bin/wget
+installMingwPackage msys-unzip /usr/bin/unzip
+
 installMicrosoftVisualCTools
 installPackageConfigurationFiles
 installBluetoothHeaders
