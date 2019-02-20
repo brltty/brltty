@@ -294,6 +294,7 @@ installMingwPackage msys-m4 /bin/m4
 installMingwPackage msys-tar /bin/tar
 installMingwPackage msys-unzip /bin/unzip
 installMingwPackage msys-wget /bin/wget
+installMingwPackage msys-zip /bin/zip
 
 installMingwPackage mingw32-libpdcurses /mingw/include/curses.h
 installMingwPackage mingw32-pthreads-w32 /mingw/include/pthread.h

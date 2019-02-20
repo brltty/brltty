@@ -415,6 +415,7 @@ The following ``MinGW`` packages may still need to be installed:
 *  ``msys-tar``
 *  ``msys-unzip``
 *  ``msys-wget``
+*  ``msys-zip``
 *  ``mingw32-libpdcurses``
 *  ``mingw32-pthreads-w32``
 *  ``mingw32-tcl``
