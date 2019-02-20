@@ -307,9 +307,9 @@ installBluetoothHeaders
 installMingwArchive pkg-config_0.28-1_win32.zip "bin/pkg-config.exe"
 installMingwArchive glib_2.34.3-1_win32.zip "bin/libgobject-2.0-0.dll"
 
-installWindowsArchive AutoHotkey104805.tar.gz "${windowsDirectory}/AutoHotkey"
-installWindowsArchive nsis-3.0b0.tar.gz "${windowsDirectory}/NSIS"
-installWindowsArchive icu4c-53_1-Win32-msvc10.zip "${windowsDirectory}/ICU"
+installWindowsArchive AutoHotkey104805.tar.gz "${ahkLocation}"
+installWindowsArchive nsis-3.0b0.tar.gz "${nsisLocation}"
+installWindowsArchive icu4c-53_1-Win32-msvc10.zip "${icuLocation}"
 
 installLibUSB0
 installLibUSB1
