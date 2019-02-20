@@ -408,16 +408,16 @@ The following software components should already be installed:
 
 The following ``MinGW`` packages may still need to be installed:
 
-*  ``mingw32-pthreads-w32``
-*  ``mingw32-pdcurses``
-*  ``mingw32-libpdcurses``
-*  ``mingw32-tcl``
 *  ``msys-bison``
 *  ``msys-dos2unix``
 *  ``msys-groff``
 *  ``msys-m4``
-*  ``msys-zip``
+*  ``msys-tar``
 *  ``msys-unzip``
+*  ``msys-wget``
+*  ``mingw32-libpdcurses``
+*  ``mingw32-pthreads-w32``
+*  ``mingw32-tcl``
 
 The following packages should also be installed:
 
