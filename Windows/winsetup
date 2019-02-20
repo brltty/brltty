@@ -23,6 +23,9 @@
 set -e
 umask 022
 
+readonly urlArchiveRoot="http://brltty.app/archive/Windows"
+readonly defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
+
 havePath() {
    local path="${1}"
 
@@ -251,25 +254,24 @@ installCython() {
    fi
 }
 
-urlArchiveRoot="http://brltty.app/archive/Windows"
-windowsDirectory="/c"
-mingwDirectory="/mingw"
-
-commandsDirectory="${mingwDirectory}/bin"
-librariesDirectory="${mingwDirectory}/lib"
-headersDirectory="${mingwDirectory}/include"
-
-defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
-
 addProgramOption d flag dryRun "dry run - don't actually install anything"
 addProgramOption k flag keepFiles "keep (do not remove) the temporary directory"
 addProgramOption t string.directory temporaryDirectory "the temporary directory to use" "${defaultTemporaryDirectory}"
 parseProgramArguments "${@}"
 
+readonly windowsDirectory="/c"
 verifyDirectory "${windowsDirectory}"
+
+readonly mingwDirectory="/mingw"
 verifyDirectory "${mingwDirectory}"
+
+readonly commandsDirectory="${mingwDirectory}/bin"
 verifyDirectory "${commandsDirectory}"
+
+readonly librariesDirectory="${mingwDirectory}/lib"
 verifyDirectory "${librariesDirectory}"
+
+readonly headersDirectory="${mingwDirectory}/include"
 verifyDirectory "${headersDirectory}"
 
 if [ -z "${temporaryDirectory}" ]
