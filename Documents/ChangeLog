@@ -1,6 +1,93 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+ - BRLTTY 6.0 released:
+   General changes:
+      Chords Dot4 + Dot6 + Dot8/Dot7 turn on/off typing Unicode braille patterns.
+      Word wrap when panning to the left now works properly.
+      Cursor tracking while word wrap is on has been fixed.
+      Support for speaking the current line's indent has been added.
+      Vertical screen scroll tracking is now supported.
+      Command execution can now be delayed till all the keys have been released.
+      Resources are no longer wasted checking non-braille USB devices.
+      The eSpeak-NG speech driver has been added.
+      BRLTTY can now run within an InitRamFS as a dracut module.
+      The -Y [--start-message=] and -Z [--stop-message=] options have been added.
+      The prompt-pattern configuration file directive has been added.
+   B2G braille driver changes:
+      The key bindings have been significantly improved.
+   HandyTech braille driver changes:
+      Support for the Activator has been added.
+      Key bindings now work correctly after returning from the internal mode.
+   Hedo braille driver changes:
+      Newer MobilLine models are now detected.
+   HIMS braille driver changes:
+      Shifted qwerty keyboard letters are now interpreted correctly.
+   HumanWare braille driver changes:
+      Bluetooth connection problems have been resolved.
+      USB session initialization problems have been resolved.
+      The BrailleNote Touch routing keys now work.
+      The BI 32 joystick now works.
+      BI 14 USB detection has been fixed.
+   MDV braille driver changes:
+      Binding changes have been made so that F10 now does exit the menu.
+   ViaVoice speech driver changes:
+      The driver has finally been revived.
+      Speech tracking has been implemented.
+      The configure option --with-viavoice has been removed.
+   Linux screen driver changes:
+      Full Unicode support is finally available (no more 512 character limit).
+      Among many other benefits, Unicode braille patterns now automatically render.
+      This capability only works if a 4.19 (or later) kernel is being used.
+      The unicode=no driver parameter can be used to revert to the older behaviour.
+   AtSpi2 screen driver changes:
+      The default is now to only read terminal screens.
+      Determining which widget is currently active has been fixed.
+      BRLTTY is now automatically stopped when the session is closed.
+   BrlAPI changes:
+      The server now starts immediately rather than when the braille driver starts.
+      The following new client functions have been added:
+         void brlapi_getLibraryVersion(int *major, int *minor, int *revision)
+         void brlapi__setClientData(brlapi_handle_t *handle, void *data)
+         void *brlapi__getClientData(brlapi_handle_t *handle)
+         int brlapi__readKeyWithTimeout(brlapi_handle_t *handle,
+                                        int milliseconds,
+                                        brlapi_keyCode_t *code)
+      xbrlapi now maps unmapped keysyms to temporary keycodes.
+   Text table changes:
+      The se (Northern Sami) table has been added.
+      New directives: ifGlyph, ifNotGlyph, ifCell, ifNotCell
+   Contraction table changes:
+      A table for the German 2015 standard [de-kurzschrift-2015] has been added
+      (the de-kurzschrift-1998 table should now be used for the 1998 standard).
+      New directives: cldr, replace
+      The cldr directive has been added to tables for languages that have defined
+      annotations: af, de, en, es, fr, ko, nl, pt, sw, th, zu
+      (you also need to install your distribution's CLDR annotations package).
+   Android changes:
+      The Android device is now kept awake while navigating internal screens
+      (help, the preferences menu, a frozen screen, etc).
+      New braille-friendly widget representations:
+         Check Boxes: ⣏ ⣹ (not checked), ⣏⠶⣹ (checked)
+         Radio Buttons: ⢎ ⡱ (not selected), ⢎⠶⡱ (selected)
+         Switches: ⢸⣭⡇ (off), ⢸⣛⡇ (on)
+      A notification showing the braille device and its state has been added.
+      Support for the Accessibility button (Android 8 or later) has been added.
+      The Actions screen has been added - you can get to it by:
+         Global Action #5 (emulate the F5 keyboard key)
+         Tapping the (new) notification.
+         Clicking the (new) Accessibility button.
+      Routing keys beyond an element's text are now associated with that element.
+      Routing key #6 now does a context click (for elements that support it).
+      The algorithm that decides which elements to render has been much improved.
+      The list renderer now orders elements much more sensibly.
+      The accuracy of left, right, up, and down navigation has been improved.
+      Support for range controls has been added (adjust with the scroll actions).
+      Bluetooth connections are no longer tried:
+         If the Android device doesn't have a Bluetooth adapter.
+         If the Android device's Bluetooth adapter is disabled.
+         While the Android device is searching for new Bluetooth devices.
+
 February 5, 2018:
  - BRLTTY 5.6 released:
    General updates:
