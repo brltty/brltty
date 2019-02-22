@@ -684,7 +684,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 
 %changelog
-* Mon Feb 5 2018 Dave Mielke <Dave@Mielke.cc> 6.0
+* Fri Feb 22 2019 Dave Mielke <Dave@Mielke.cc> 6.0
 General changes:
    Chords Dot4 + Dot6 + Dot8/Dot7 turn on/off typing Unicode braille patterns.
    Word wrap when panning to the left now works properly.

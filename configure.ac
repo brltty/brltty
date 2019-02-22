@@ -18,7 +18,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 
 AC_PREREQ([2.64])
-AC_INIT([BRLTTY], [5.6], [BRLTTY@brltty.app], [brltty], [http://brltty.app/])
+AC_INIT([BRLTTY], [6.0], [BRLTTY@brltty.app], [brltty], [http://brltty.app/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
 copyright="© 1995-2019 by The BRLTTY Developers"
@@ -27,8 +27,8 @@ AC_DEFINE_UNQUOTED([PACKAGE_COPYRIGHT], ["${copyright}"],
                    [Define this to be a string containing the copyright notice.])
 
 AC_SUBST([api_major], [0])
-AC_SUBST([api_minor], [6])
-AC_SUBST([api_revision], [7])
+AC_SUBST([api_minor], [7])
+AC_SUBST([api_revision], [0])
 
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])

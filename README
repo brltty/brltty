@@ -2,7 +2,7 @@ BRLTTY is a background process (daemon) providing access to the Linux/Unix
 console (when in text mode) for a blind person using a refreshable braille
 display.
 
-Version 5.6, Feb 2018
+Version 6.0, Feb 2019
 
 Copyright (C) 1995-2019 by The BRLTTY Developers.
 
@@ -171,7 +171,7 @@ The following braille displays are supported:
 -  FreedomScientific [Focus 1 44/70/84, Focus 2 40/80, Focus Blue 14/40/80,
                       PAC Mate 20/40]
 -  HandyTech [Modular 20/40/80, Modular Evolution 64/88, Modular Connect 88,
-              Active Braille, Active Star 40, Actilino,
+              Active Braille, Active Star 40, Actilino, Activator,
               Basic Braille 16/20/32/40/48/64/80, Braillino,
               Braille Wave, Easy Braille, Braille Star 40/80,
               Connect Braille 40, Bookworm]

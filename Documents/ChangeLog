@@ -1,6 +1,7 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+February 22, 2019:
  - BRLTTY 6.0 released:
    General changes:
       Chords Dot4 + Dot6 + Dot8/Dot7 turn on/off typing Unicode braille patterns.
