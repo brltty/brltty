@@ -166,7 +166,7 @@ Section "install"
 	File /oname=etc\brltty.conf "${DISTDIR}\etc\brltty.conf"
 	SetOverwrite IfNewer
 
-	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\brlapi-0.6.dll" "$SYSDIR\brlapi-0.6.dll" "$SYSDIR"
+	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\brlapi-0.7.dll" "$SYSDIR\brlapi-0.7.dll" "$SYSDIR"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb-1.0.dll" "$SYSDIR\libusb-1.0.dll" "$SYSDIR"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\msvcr90.dll" "$SYSDIR\msvcr90.dll" "$SYSDIR"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libiconv-2.dll" "$SYSDIR\libiconv-2.dll" "$SYSDIR"
@@ -230,7 +230,7 @@ Section "Uninstall"
 	ExecWait "$INSTDIR\bin\brltty.exe -R"
 	;ExecWait "rundll32 libusb0.dll,usb_uninstall_service_np_rundll"
 
-	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\brlapi-0.6.dll"
+	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\brlapi-0.7.dll"
 	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\WdfCoInstaller01009.dll"
 	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\winusbcoinstaller2.dll"
 
