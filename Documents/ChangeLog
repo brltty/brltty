@@ -15,8 +15,8 @@ February 22, 2019:
       BRLTTY can now run within an InitRamFS as a dracut module.
       The -Y [--start-message=] and -Z [--stop-message=] options have been added.
       The prompt-pattern configuration file directive has been added.
-   B2G braille driver changes:
-      The key bindings have been significantly improved.
+   Baum braille driver changes:
+      The B2G key bindings have been significantly improved.
    HandyTech braille driver changes:
       Support for the Activator has been added.
       Key bindings now work correctly after returning from the internal mode.
