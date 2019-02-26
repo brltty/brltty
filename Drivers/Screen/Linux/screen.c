@@ -1077,6 +1077,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     const uint16_t *end = vga + size;
     const uint32_t *text = NULL;
     ScreenCharacter *character = characters;
+    int blanks = 0;
 
     if (directUnicode) {
       if (unicodeCacheUsed) {
@@ -1086,25 +1087,36 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
       }
     }
 
-    while (vga != end) {
-      if (character) {
-        character->attributes = ((*vga & unshiftedAttributesMask) |
-                                 ((*vga & shiftedAttributesMask) >> 1)) >> 8;
+    while (vga < end) {
+      wint_t wc;
 
-        if (text) {
-          character->text = *text++;
+      if (text) {
+        wc = *text++;
+
+        if ((blanks > 0) && (wc == WC_C(' '))) {
+          blanks -= 1;
+          wc = WEOF;
         } else {
-          uint16_t position = *vga & 0XFF;
-          if (*vga & fontAttributesMask) position |= 0X100;
-
-          wint_t wc = convertCharacter(&translationTable[position]);
-          character->text = (wc != WEOF)? wc: WC_C(' ');
+          blanks = getCharacterWidth(wc) - 1;
         }
-
-        character += 1;
+      } else {
+        uint16_t position = *vga & 0XFF;
+        if (*vga & fontAttributesMask) position |= 0X100;
+        wc = convertCharacter(&translationTable[position]);
       }
 
-      if (offsets) offsets[column++] = vga - vgaBuffer;
+      if (wc != WEOF) {
+        if (character) {
+          character->attributes = ((*vga & unshiftedAttributesMask) |
+                                   ((*vga & shiftedAttributesMask) >> 1)) >> 8;
+
+          character->text = wc;
+          character += 1;
+        }
+
+        if (offsets) offsets[column++] = vga - vgaBuffer;
+      }
+
       vga += 1;
     }
 
@@ -1130,28 +1142,24 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
 
 static void
 adjustCursorColumn (short *column, short row, short columns) {
-  const CharsetEntry *charset = getCharsetEntry();
+  int offsets[columns];
 
-  if (charset->isMultiByte) {
-    int offsets[columns];
+  if (readScreenRow(row, columns, NULL, offsets)) {
+    int first = 0;
+    int last = columns - 1;
 
-    if (readScreenRow(row, columns, NULL, offsets)) {
-      int first = 0;
-      int last = columns - 1;
+    while (first <= last) {
+      int current = (first + last) / 2;
 
-      while (first <= last) {
-        int current = (first + last) / 2;
-
-        if (offsets[current] < *column) {
-          first = current + 1;
-        } else {
-          last = current - 1;
-        }
+      if (offsets[current] < *column) {
+        first = current + 1;
+      } else {
+        last = current - 1;
       }
-
-      if (first == columns) first -= 1;
-      *column = first;
     }
+
+    if (first == columns) first -= 1;
+    *column = first;
   }
 }
 
@@ -1570,46 +1578,6 @@ describe_LinuxScreen (ScreenDescription *description) {
 }
 
 static int
-getScreenRow (
-  ScreenCharacter *buffer,
-  unsigned int row, unsigned int width,
-  unsigned int offset, unsigned int count
-) {
-  const ScreenCharacter *bufferEnd = buffer + count;
-
-  {
-    ScreenCharacter characters[width];
-    if (!readScreenRow(row, width, characters, NULL)) return 0;
-
-    const ScreenCharacter *character = &characters[offset];
-    const ScreenCharacter *end = character + count;
-    int blanks = 0;
-
-    while (character < end) {
-      if ((blanks > 0) && (character->text == WC_C(' '))) {
-        blanks -= 1;
-      } else {
-        blanks = getCharacterWidth(character->text) - 1;
-        *buffer++ = *character;
-      }
-
-      character += 1;
-    }
-  }
-
-  {
-    static const ScreenCharacter character = {
-      .text = WC_C(' '),
-      .attributes = SCR_COLOUR_DEFAULT
-    };
-
-    while (buffer < bufferEnd) *buffer++ = character;
-  }
-
-  return 1;
-}
-
-static int
 readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   ScreenSize size;
 
@@ -1621,7 +1589,12 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
       }
 
       for (unsigned int row=0; row<box->height; row+=1) {
-        if (!getScreenRow(buffer, box->top+row, size.columns, box->left, box->width)) return 0;
+        ScreenCharacter characters[size.columns];
+        if (!readScreenRow(box->top+row, size.columns, characters, NULL)) return 0;
+
+        memcpy(buffer, &characters[box->left],
+               (box->width * sizeof(characters[0])));
+
         buffer += box->width;
       }
 
