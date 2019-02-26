@@ -1067,25 +1067,29 @@ setTranslationTable (int force) {
 
 static int
 readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) {
-  uint16_t vgaBuffer[size];
-  uint32_t textBuffer[size];
   off_t offset = row * size;
-  int column = 0;
+  uint16_t vgaBuffer[size];
+  if (!readScreenContent(offset, vgaBuffer, size)) return 0;
 
-  if (readScreenContent(offset, vgaBuffer, size)) {
-    const uint16_t *vga = vgaBuffer;
-    const uint16_t *end = vga + size;
-    const uint32_t *text = NULL;
-    ScreenCharacter *character = characters;
-    int blanks = 0;
+  uint32_t textBuffer[size];
+  const uint32_t *text = NULL;
 
-    if (directUnicode) {
-      if (unicodeCacheUsed) {
-        if (readUnicodeContent(offset, textBuffer, size)) {
-          text = textBuffer;
-        }
+  if (directUnicode) {
+    if (unicodeCacheUsed) {
+      if (readUnicodeContent(offset, textBuffer, size)) {
+        text = textBuffer;
       }
     }
+  }
+
+  ScreenCharacter *character = characters;
+  int pad = 0;
+  int column = 0;
+
+  {
+    const uint16_t *vga = vgaBuffer;
+    const uint16_t *end = vga + size;
+    int blanks = 0;
 
     while (vga < end) {
       wint_t wc;
@@ -1105,7 +1109,9 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
         wc = convertCharacter(&translationTable[position]);
       }
 
-      if (wc != WEOF) {
+      if (wc == WEOF) {
+        pad += 1;
+      } else {
         if (character) {
           character->attributes = ((*vga & unshiftedAttributesMask) |
                                    ((*vga & shiftedAttributesMask) >> 1)) >> 8;
@@ -1119,25 +1125,35 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
 
       vga += 1;
     }
-
-    {
-      wint_t wc;
-
-      while ((wc = convertCharacter(NULL)) != WEOF) {
-        if (character) {
-          character->text = wc;
-          character->attributes = SCR_COLOUR_DEFAULT;
-          character += 1;
-        }
-
-        if (offsets) offsets[column++] = size - 1;
-      }
-    }
-
-    return 1;
   }
 
-  return 0;
+  {
+    wint_t wc;
+
+    while ((wc = convertCharacter(NULL)) != WEOF) {
+      if (character) {
+        character->text = wc;
+        character->attributes = SCR_COLOUR_DEFAULT;
+        character += 1;
+      }
+
+      if (offsets) offsets[column++] = size - 1;
+      pad -= 1;
+    }
+  }
+
+  while (pad > 0) {
+    static const ScreenCharacter sc = {
+      .text = WC_C(' '),
+      .attributes = SCR_COLOUR_DEFAULT
+    };
+
+    if (character) *character++ = sc;
+    if (offsets) offsets[column++] = size - 1;
+    pad -= 1;
+  }
+
+  return 1;
 }
 
 static void
