@@ -1082,8 +1082,8 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     }
   }
 
-  int column = 0;
   ScreenCharacter *character = characters;
+  int column = 0;
 
   {
     const uint16_t *vga = vgaBuffer;
@@ -1125,7 +1125,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     }
   }
 
-  {
+  if (!text) {
     wint_t wc;
 
     while ((wc = convertCharacter(NULL)) != WEOF) {
@@ -1141,12 +1141,15 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
   }
 
   while (column < size) {
-    static const ScreenCharacter sc = {
-      .text = WC_C(' '),
-      .attributes = SCR_COLOUR_DEFAULT
-    };
+    if (character) {
+      static const ScreenCharacter pad = {
+        .text = WC_C(' '),
+        .attributes = SCR_COLOUR_DEFAULT
+      };
 
-    if (character) *character++ = sc;
+      *character++ = pad;
+    }
+
     if (offsets) offsets[column] = size - 1;
     column += 1;
   }
