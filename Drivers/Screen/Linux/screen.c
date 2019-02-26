@@ -1075,10 +1075,8 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
   const uint32_t *unicode = NULL;
 
   if (directUnicode) {
-    if (unicodeCacheUsed) {
-      if (readUnicodeContent(offset, unicodeBuffer, size)) {
-        unicode = unicodeBuffer;
-      }
+    if (readUnicodeContent(offset, unicodeBuffer, size)) {
+      unicode = unicodeBuffer;
     }
   }
 
