@@ -1071,13 +1071,13 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
   uint16_t vgaBuffer[size];
   if (!readScreenContent(offset, vgaBuffer, size)) return 0;
 
-  uint32_t textBuffer[size];
-  const uint32_t *text = NULL;
+  uint32_t unicodeBuffer[size];
+  const uint32_t *unicode = NULL;
 
   if (directUnicode) {
     if (unicodeCacheUsed) {
-      if (readUnicodeContent(offset, textBuffer, size)) {
-        text = textBuffer;
+      if (readUnicodeContent(offset, unicodeBuffer, size)) {
+        unicode = unicodeBuffer;
       }
     }
   }
@@ -1093,8 +1093,8 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     while (vga < end) {
       wint_t wc;
 
-      if (text) {
-        wc = *text++;
+      if (unicode) {
+        wc = *unicode++;
 
         if ((blanks > 0) && (wc == WC_C(' '))) {
           blanks -= 1;
@@ -1125,7 +1125,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     }
   }
 
-  if (!text) {
+  if (!unicode) {
     wint_t wc;
 
     while ((wc = convertCharacter(NULL)) != WEOF) {
