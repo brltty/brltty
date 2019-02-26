@@ -1082,9 +1082,8 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     }
   }
 
-  ScreenCharacter *character = characters;
-  int pad = 0;
   int column = 0;
+  ScreenCharacter *character = characters;
 
   {
     const uint16_t *vga = vgaBuffer;
@@ -1109,9 +1108,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
         wc = convertCharacter(&translationTable[position]);
       }
 
-      if (wc == WEOF) {
-        pad += 1;
-      } else {
+      if (wc != WEOF) {
         if (character) {
           character->attributes = ((*vga & unshiftedAttributesMask) |
                                    ((*vga & shiftedAttributesMask) >> 1)) >> 8;
@@ -1120,7 +1117,8 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
           character += 1;
         }
 
-        if (offsets) offsets[column++] = vga - vgaBuffer;
+        if (offsets) offsets[column] = vga - vgaBuffer;
+        column += 1;
       }
 
       vga += 1;
@@ -1137,20 +1135,20 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
         character += 1;
       }
 
-      if (offsets) offsets[column++] = size - 1;
-      pad -= 1;
+      if (offsets) offsets[column] = size - 1;
+      column += 1;
     }
   }
 
-  while (pad > 0) {
+  while (column < size) {
     static const ScreenCharacter sc = {
       .text = WC_C(' '),
       .attributes = SCR_COLOUR_DEFAULT
     };
 
     if (character) *character++ = sc;
-    if (offsets) offsets[column++] = size - 1;
-    pad -= 1;
+    if (offsets) offsets[column] = size - 1;
+    column += 1;
   }
 
   return 1;
