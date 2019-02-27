@@ -1068,6 +1068,7 @@ setTranslationTable (int force) {
 static int
 readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) {
   off_t offset = row * size;
+
   uint16_t vgaBuffer[size];
   if (!readScreenContent(offset, vgaBuffer, size)) return 0;
 
@@ -1127,14 +1128,16 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
     wint_t wc;
 
     while ((wc = convertCharacter(NULL)) != WEOF) {
-      if (character) {
-        character->text = wc;
-        character->attributes = SCR_COLOUR_DEFAULT;
-        character += 1;
-      }
+      if (column < size) {
+        if (character) {
+          character->text = wc;
+          character->attributes = SCR_COLOUR_DEFAULT;
+          character += 1;
+        }
 
-      if (offsets) offsets[column] = size - 1;
-      column += 1;
+        if (offsets) offsets[column] = size - 1;
+        column += 1;
+      }
     }
   }
 
