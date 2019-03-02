@@ -103,14 +103,16 @@ else
 fi])
 
 AC_DEFUN([BRLTTY_JAVA_DIRECTORY], [dnl
-JAVA_$1_DIR=""
-for directory in $2
-do
-   test -d "${directory}" && {
-      JAVA_$1_DIR="${directory}"
-      break
-   }
-done
+if test -z "${JAVA_$1_DIR}"
+then
+   for directory in $2
+   do
+      test -d "${directory}" && {
+	 JAVA_$1_DIR="${directory}"
+	 break
+      }
+   done
+fi
 
 if test -n "${JAVA_$1_DIR}"
 then
