@@ -83,7 +83,7 @@ then
    AC_SUBST([JAVA_JNI_HDR])
    AC_SUBST([JAVA_JNI_INC], ["'${JAVA_JNI_INC}'"])
    AC_SUBST([JAVA_JNI_FLAGS])
-   BRLTTY_JAVA_DIRECTORY([JNI], [/usr/lib*/java /usr/lib*/jni /mingw])
+   BRLTTY_JAVA_DIRECTORY([JNI], [/usr/lib*/java /usr/lib*/jni /usr/lib/*/jni /mingw])
 else
    AC_MSG_WARN([Java compiler not found])
 fi
