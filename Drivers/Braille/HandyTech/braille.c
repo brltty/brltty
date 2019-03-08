@@ -175,7 +175,7 @@ BEGIN_KEY_NAME_TABLES(as40)
   KEY_NAME_TABLE(brailleStar),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(ab40)
+BEGIN_KEY_NAME_TABLES(ab)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(rockers),
@@ -229,6 +229,13 @@ BEGIN_KEY_NAME_TABLES(bb)
   KEY_NAME_TABLE(basicBraille),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(bbp)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(brailleStar),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLES(alo)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
@@ -273,11 +280,12 @@ DEFINE_KEY_TABLE(bs40)
 DEFINE_KEY_TABLE(bs80)
 DEFINE_KEY_TABLE(brln)
 DEFINE_KEY_TABLE(as40)
-DEFINE_KEY_TABLE(ab40)
+DEFINE_KEY_TABLE(ab)
 DEFINE_KEY_TABLE(cb40)
 DEFINE_KEY_TABLE(wave)
 DEFINE_KEY_TABLE(easy)
 DEFINE_KEY_TABLE(bb)
+DEFINE_KEY_TABLE(bbp)
 DEFINE_KEY_TABLE(alo)
 DEFINE_KEY_TABLE(ac4)
 DEFINE_KEY_TABLE(bkwm)
@@ -291,11 +299,12 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(bs80),
   &KEY_TABLE_DEFINITION(brln),
   &KEY_TABLE_DEFINITION(as40),
-  &KEY_TABLE_DEFINITION(ab40),
+  &KEY_TABLE_DEFINITION(ab),
   &KEY_TABLE_DEFINITION(cb40),
   &KEY_TABLE_DEFINITION(wave),
   &KEY_TABLE_DEFINITION(easy),
   &KEY_TABLE_DEFINITION(bb),
+  &KEY_TABLE_DEFINITION(bbp),
   &KEY_TABLE_DEFINITION(alo),
   &KEY_TABLE_DEFINITION(ac4),
   &KEY_TABLE_DEFINITION(bkwm),
@@ -449,7 +458,7 @@ static const ModelEntry modelTable[] = {
     .name = "Active Braille",
     .textCells = 40,
     .statusCells = 0,
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(ab40),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ab),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
     .setFirmness = setFirmness,
@@ -476,6 +485,24 @@ static const ModelEntry modelTable[] = {
   HT_BASIC_BRAILLE(80),
   HT_BASIC_BRAILLE(160),
 #undef HT_BASIC_BRAILLE
+
+#define HT_BASIC_BRAILLE_PLUS(cells)                 \
+  { .identifier = HT_MODEL_BasicBraillePlus##cells,  \
+    .name = "Basic Braille Plus " STRINGIFY(cells),  \
+    .textCells = cells,                              \
+    .statusCells = 0,                                \
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(bbp),\
+    .interpretByte = interpretByte_key,              \
+    .writeCells = writeCells_Evolution               \
+  }
+  HT_BASIC_BRAILLE_PLUS(20),
+  HT_BASIC_BRAILLE_PLUS(32),
+  HT_BASIC_BRAILLE_PLUS(40),
+  HT_BASIC_BRAILLE_PLUS(48),
+  HT_BASIC_BRAILLE_PLUS(64),
+  HT_BASIC_BRAILLE_PLUS(80),
+  HT_BASIC_BRAILLE_PLUS(84),
+#undef HT_BASIC_BRAILLE_PLUS
 
   { .identifier = HT_MODEL_Actilino,
     .name = "Actilino",

@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Active Braille 40
+title HandyTech Active Braille
 
 bind B1+B4+SpaceLeft TOUCH_NAV
 
