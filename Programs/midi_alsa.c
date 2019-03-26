@@ -18,7 +18,7 @@
 
 #include "prologue.h"
 
-#include <asoundlib.h>
+#include <alsa/asoundlib.h>
 
 #include "log.h"
 #include "parse.h"
