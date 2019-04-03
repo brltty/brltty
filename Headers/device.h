@@ -33,7 +33,7 @@ extern int ringBell (void);
 
 extern const char *getDeviceDirectory (void);
 extern char *getDevicePath (const char *device);
-extern const char *resolveDeviceName (const char *const *names, const char *description);
+extern const char *resolveDeviceName (const char *const *names, int strict, const char *description);
 
 #define DEVICE_PARAMETER_SEPARATOR '+'
 extern char **getDeviceParameters (const char *const *names, const char *identifier);

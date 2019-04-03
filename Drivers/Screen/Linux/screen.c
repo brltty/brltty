@@ -63,7 +63,7 @@ typedef enum {
 
 static const char *problemText;
 static unsigned int logScreenFontMap;
-static unsigned int directUnicode;
+static unsigned int unicodeEnabled;
 static int virtualTerminalNumber;
 
 #define UNICODE_ROW_DIRECT 0XF000
@@ -318,8 +318,8 @@ convertCharacter (const wchar_t *character) {
 }
 
 static int
-setDeviceName (const char **name, const char *const *names, const char *description) {
-  return (*name = resolveDeviceName(names, description)) != NULL;
+setDeviceName (const char **name, const char *const *names, int strict, const char *description) {
+  return (*name = resolveDeviceName(names, strict, description)) != NULL;
 }
 
 static char *
@@ -347,7 +347,7 @@ static const char *consoleName = NULL;
 static int
 setConsoleName (void) {
   static const char *const names[] = {"tty0", "vc/0", NULL};
-  return setDeviceName(&consoleName, names, "console");
+  return setDeviceName(&consoleName, names, 0, "console");
 }
 
 static void
@@ -485,7 +485,7 @@ static const char *unicodeName = NULL;
 static int
 setUnicodeName (void) {
   static const char *const names[] = {"vcsu", "vcsu0", NULL};
-  return setDeviceName(&unicodeName, names, "unicode");
+  return setDeviceName(&unicodeName, names, 1, "unicode");
 }
 
 static void
@@ -534,6 +534,7 @@ closeCurrentUnicode (void) {
 
 static int
 openCurrentUnicode (void) {
+  if (!unicodeEnabled) return 0;
   return openUnicode(&unicodeDescriptor, virtualTerminalNumber);
 }
 
@@ -662,7 +663,7 @@ canMonitorScreen (void) {
 static int
 setScreenName (void) {
   static const char *const names[] = {"vcsa", "vcsa0", "vcc/a", NULL};
-  return setDeviceName(&screenName, names, "screen");
+  return setDeviceName(&screenName, names, 0, "screen");
 }
 
 static int
@@ -1075,7 +1076,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
   uint32_t unicodeBuffer[size];
   const uint32_t *unicode = NULL;
 
-  if (directUnicode) {
+  if (unicodeEnabled) {
     if (readUnicodeContent(offset, unicodeBuffer, size)) {
       unicode = unicodeBuffer;
     }
@@ -1265,12 +1266,12 @@ processParameters_LinuxScreen (char **parameters) {
     }
   }
 
-  directUnicode = 1;
+  unicodeEnabled = 1;
   {
     const char *parameter = parameters[PARM_UNICODE];
 
     if (parameter && *parameter) {
-      if (!validateYesNo(&directUnicode, parameter)) {
+      if (!validateYesNo(&unicodeEnabled, parameter)) {
         logMessage(LOG_WARNING, "%s: %s", "invalid direct unicode setting", parameter);
       }
     }
@@ -1332,13 +1333,17 @@ construct_LinuxScreen (void) {
 
   if (setScreenName()) {
     if (setConsoleName()) {
-      if (setUnicodeName()) {
-        if (openMainConsole()) {
-          if (setCurrentScreen(virtualTerminalNumber)) {
-            openKeyboard();
-            brailleDeviceOfflineListener = registerReportListener(REPORT_BRAILLE_DEVICE_OFFLINE, lxBrailleDeviceOfflineListener, NULL);
-            return 1;
-          }
+      if (unicodeEnabled) {
+        if (!setUnicodeName()) {
+          unicodeEnabled = 0;
+        }
+      }
+
+      if (openMainConsole()) {
+        if (setCurrentScreen(virtualTerminalNumber)) {
+          openKeyboard();
+          brailleDeviceOfflineListener = registerReportListener(REPORT_BRAILLE_DEVICE_OFFLINE, lxBrailleDeviceOfflineListener, NULL);
+          return 1;
         }
       }
     }
@@ -1518,7 +1523,13 @@ static int
 refreshCache (void) {
   size_t size = refreshScreenBuffer(&screenCacheBuffer, &screenCacheSize);
   if (!size) return 0;
-  if (!refreshUnicodeCache(size)) return 0;
+
+  if (unicodeEnabled) {
+    if (!refreshUnicodeCache(size)) {
+      return 0;
+    }
+  }
+
   return 1;
 }
 

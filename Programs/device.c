@@ -130,14 +130,13 @@ getDevicePath (const char *device) {
 }
 
 const char *
-resolveDeviceName (const char *const *names, const char *description) {
+resolveDeviceName (const char *const *names, int strict, const char *description) {
   const char *first = *names;
   const char *device = NULL;
   const char *name;
 
   while ((name = *names++)) {
     char *path = getDevicePath(name);
-
     if (!path) break;
     logMessage(LOG_DEBUG, "checking %s device: %s", description, path);
 
@@ -149,17 +148,23 @@ resolveDeviceName (const char *const *names, const char *description) {
 
     logMessage(LOG_DEBUG, "%s device access error: %s: %s",
                description, path, strerror(errno));
-    if (errno != ENOENT)
-      if (!device)
+
+    if (errno != ENOENT) {
+      if (!device) {
         device = name;
+      }
+    }
+
     free(path);
   }
 
   if (!device) {
-    if (first) {
-      device = first;
-    } else {
+    if (!first) {
       logMessage(LOG_ERR, "%s device names not defined", description);
+    } else if (strict) {
+      logMessage(LOG_ERR, "%s device not found", description);
+    } else {
+      device = first;
     }
   }
 

@@ -864,7 +864,7 @@ newUinputObject (const char *name) {
     const char *device;
     {
       static const char *const names[] = {"uinput", "input/uinput", NULL};
-      device = resolveDeviceName(names, "uinput");
+      device = resolveDeviceName(names, 0, "uinput");
     }
 
     if (device) {
