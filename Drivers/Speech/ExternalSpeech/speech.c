@@ -30,32 +30,23 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifdef HAVE_PWD_H
-#include <pwd.h>
-#endif /* HAVE_PWD_H */
+#include <sys/socket.h>
+#include <linux/un.h>
 
-#ifdef HAVE_GRP_H
-#include <grp.h>
-#endif /* HAVE_GRP_H */
-
-#ifdef __MINGW32__
-#include <io.h>
-#endif /* __MINGW32__ */
 
 #include "log.h"
 #include "timing.h"
 #include "async_io.h"
 
 typedef enum {
-  PARM_PROGRAM=0,
-  PARM_UID, PARM_GID
+  PARM_SOCK_PATH,
 } DriverParameter;
-#define SPKPARMS "program", "uid", "gid"
+#define SPKPARMS "socket_path"
 
 #include "spk_driver.h"
 #include "speech.h"
 
-static int helper_fd_in = -1, helper_fd_out = -1;
+static int helper_fd = -1;
 static uint16_t totalCharacterCount;
 
 #define TRACK_DATA_SIZE 2
@@ -120,7 +111,7 @@ static void mywrite(volatile SpeechSynthesizer *spk, int fd, const void *buf, in
 static void spk_say(volatile SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
 {
   unsigned char l[5];
-  if(helper_fd_out < 0) return;
+  if(helper_fd < 0) return;
   l[0] = 4; /* say code */
   l[1] = length >> 8;
   l[2] = length & 0xFF;
@@ -131,18 +122,18 @@ static void spk_say(volatile SpeechSynthesizer *spk, const unsigned char *text, 
     l[3] = 0;
     l[4] = 0;
   }
-  mywrite(spk, helper_fd_out, l, 5);
-  mywrite(spk, helper_fd_out, text, length);
-  if (attributes) mywrite(spk, helper_fd_out, attributes, count);
+  mywrite(spk, helper_fd, l, 5);
+  mywrite(spk, helper_fd, text, length);
+  if (attributes) mywrite(spk, helper_fd, attributes, count);
   totalCharacterCount = count;
 }
 
 static void spk_mute (volatile SpeechSynthesizer *spk)
 {
   unsigned char c = 1;
-  if(helper_fd_out < 0) return;
+  if(helper_fd < 0) return;
   logMessage(LOG_DEBUG,"mute");
-  mywrite(spk, helper_fd_out, &c,1);
+  mywrite(spk, helper_fd, &c,1);
 }
 
 static void spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting)
@@ -150,7 +141,7 @@ static void spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting)
   float expand = 1.0 / getFloatSpeechRate(setting); 
   unsigned char *p = (unsigned char *)&expand;
   unsigned char l[5];
-  if(helper_fd_out < 0) return;
+  if(helper_fd < 0) return;
   logMessage(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
   l[0] = 3; /* time scale code */
 #ifdef WORDS_BIGENDIAN
@@ -158,7 +149,7 @@ static void spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting)
 #else /* WORDS_BIGENDIAN */
   l[1] = p[3]; l[2] = p[2]; l[3] = p[1]; l[4] = p[0];
 #endif /* WORDS_BIGENDIAN */
-  mywrite(spk, helper_fd_out, &l, 5);
+  mywrite(spk, helper_fd, &l, 5);
 }
 
 ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
@@ -186,144 +177,36 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
 
 static int spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
 {
-  char *extProgPath = parameters[PARM_PROGRAM];
+  char *extSockPath = parameters[PARM_SOCK_PATH];
 
   spk->setRate = spk_setRate;
 
-  if(!*extProgPath) extProgPath = HELPER_PROG_PATH;
+  if(!*extSockPath) extSockPath = HELPER_SOCKET_PATH;
 
-#ifdef __MINGW32__
-  STARTUPINFO startupinfo;
-  PROCESS_INFORMATION processinfo;
-  SECURITY_ATTRIBUTES attributes;
-  HANDLE fd1R,fd1W,fd2R,fd2W;
-
-  memset(&attributes, 0, sizeof(attributes));
-  attributes.nLength = sizeof(attributes);
-  attributes.bInheritHandle = TRUE;
-
-  if (!CreatePipe(&fd1R,&fd1W,&attributes,0)
-      ||!CreatePipe(&fd2R,&fd2W,&attributes,0)) {
-    logWindowsSystemError("CreatePipe");
+  if((helper_fd = socket(PF_UNIX, SOCK_STREAM, 0)) <0) {
+    myperror(spk, "socket");
     return 0;
   }
 
-  memset(&startupinfo, 0, sizeof(startupinfo));
-  startupinfo.cb = sizeof(startupinfo);
-  startupinfo.dwFlags = STARTF_USESTDHANDLES;
-  startupinfo.hStdInput = fd2R;
-  startupinfo.hStdOutput = fd1W;
-  if (!CreateProcess(NULL, extProgPath, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupinfo, &processinfo)) {
-    logWindowsSystemError("CreateProcess");
+  struct sockaddr_un tgtaddr;
+  memset(&tgtaddr, 0, sizeof(tgtaddr));
+  tgtaddr.sun_family = PF_UNIX;
+  strncpy(tgtaddr.sun_path, extSockPath, UNIX_PATH_MAX);
+  if(connect(helper_fd, (struct sockaddr *)&tgtaddr, sizeof(tgtaddr)) <0) {
+    myperror(spk, "connect to %s", extSockPath);
     return 0;
   }
-  if ((helper_fd_in = _open_osfhandle((long)fd1R, O_RDONLY)) < 0) {
-    logSystemError("open_osfhandle");
+
+  if(fcntl(helper_fd, F_SETFL,O_NONBLOCK) < 0) {
+    myperror(spk, "fcntl F_SETFL O_NONBLOCK");
+    //close(helper_fd);
+    //helper_fd = -1;
     return 0;
   }
-  if ((helper_fd_out = _open_osfhandle((long)fd2W, O_WRONLY)) < 0) {
-    logSystemError("open_osfhandle");
-    return 0;
-  }
-#else /* __MINGW32__ */
-  int fd1[2], fd2[2];
-  uid_t uid, gid;
-  char
-    *s_uid = parameters[PARM_UID],
-    *s_gid = parameters[PARM_GID];
+  logMessage(LOG_INFO, "Connected to ExternalSpeech helper socket at %s", extSockPath);
 
-  if(*s_uid) {
-#ifdef HAVE_PWD_H
-    struct passwd *pe = getpwnam(s_uid);
-    if (pe) {
-      uid = pe->pw_uid;
-    } else
-#endif /* HAVE_PWD_H */
-    {
-      char *ptr;
-      uid = strtol(s_uid, &ptr, 0);
-      if(*ptr != 0) {
-        myerror(spk, "Unable to get an uid value with '%s'", s_uid);
-        return 0;
-      }
-    }
-  }else uid = UID;
 
-  if(*s_gid) {
-#ifdef HAVE_GRP_H
-    struct group *ge = getgrnam(s_gid);
-    if (ge) {
-      gid = ge->gr_gid;
-    } else
-#endif /* HAVE_GRP_H */
-    {
-      char *ptr;
-      gid = strtol(s_gid, &ptr, 0);
-      if(*ptr != 0) {
-        myerror(spk, "Unable to get a gid value with '%s'", s_gid);
-        return 0;
-      }
-    }
-  }else gid = GID;
-
-  if(pipe(fd1) < 0
-     || pipe(fd2) < 0) {
-    myperror(spk, "pipe");
-    return 0;
-  }
-  logMessage(LOG_DEBUG, "pipe fds: fd1 %d %d, fd2 %d %d",
-	     fd1[0],fd1[1], fd2[0],fd2[1]);
-  switch(fork()) {
-  case -1:
-    myperror(spk, "fork");
-    return 0;
-  case 0: {
-    int i;
-    if(setgid(gid) <0) {
-      myperror(spk, "setgid to %u", gid);
-      _exit(1);
-    }
-    if(setuid(uid) <0) {
-      myperror(spk, "setuid to %u", uid);
-      _exit(1);
-    }
-
-    {
-      unsigned long uid = getuid();
-      unsigned long gid = getgid();
-      logMessage(LOG_INFO, "ExternalSpeech program uid is %lu, gid is %lu", uid, gid);
-    }
-
-    if(dup2(fd2[0], 0) < 0 /* stdin */
-       || dup2(fd1[1], 1) < 0){ /* stdout */
-      myperror(spk, "dup2");
-      _exit(1);
-    }
-    {
-      long numfds = sysconf(_SC_OPEN_MAX);
-      for(i=2; i<numfds; i++) close(i);
-    }
-    execl(extProgPath, extProgPath, (void *)NULL);
-    myperror(spk, "Unable to execute external speech program '%s'", extProgPath);
-    _exit(1);
-  }
-  default:
-    helper_fd_in = fd1[0];
-    helper_fd_out = fd2[1];
-    close(fd1[1]);
-    close(fd2[0]);
-    if(fcntl(helper_fd_in, F_SETFL,O_NONBLOCK) < 0
-       || fcntl(helper_fd_out, F_SETFL,O_NONBLOCK) < 0) {
-      myperror(spk, "fcntl F_SETFL O_NONBLOCK");
-      return 0;
-    }
-  };
-#endif /* __MINGW32__ */
-
-  logMessage(LOG_INFO,"Opened pipe to external speech program '%s'",
-	     extProgPath);
-
-  asyncReadFile(&trackHandle, helper_fd_in, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, (void *)spk);
+  asyncReadFile(&trackHandle, helper_fd, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, (void *)spk);
   return 1;
 }
 
@@ -331,10 +214,8 @@ static void spk_destruct (volatile SpeechSynthesizer *spk)
 {
   if(trackHandle)
     asyncCancelRequest(trackHandle);
-  if(helper_fd_in >= 0)
-    close(helper_fd_in);
-  if(helper_fd_out >= 0)
-    close(helper_fd_out);
-  helper_fd_in = helper_fd_out = -1;
+  if(helper_fd >= 0)
+    close(helper_fd);
+  helper_fd = -1;
   trackHandle = NULL;
 }

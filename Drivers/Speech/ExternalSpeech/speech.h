@@ -22,9 +22,5 @@
    is specified on the command-line (-p) or in the brltty.conf file
    (speech-driverparm option). */
 
-/* Specify the path of the external program that will handle speech. */
-#define HELPER_PROG_PATH "/usr/local/bin/externalspeech"
-
-#define UID 65534
-#define GID 65534
-/* We setuid/setgid before exec'ing the external program. */
+/* Specify the path of UNIX-domain socket to the external helper program. */
+#define HELPER_SOCKET_PATH "/tmp/exs-data"
