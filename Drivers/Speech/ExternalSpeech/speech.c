@@ -191,7 +191,7 @@ static int spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
   struct sockaddr_un tgtaddr;
   memset(&tgtaddr, 0, sizeof(tgtaddr));
   tgtaddr.sun_family = PF_UNIX;
-  strncpy(tgtaddr.sun_path, extSockPath, UNIX_PATH_MAX);
+  strncpy(tgtaddr.sun_path, extSockPath, UNIX_PATH_MAX-1);
   if(connect(helper_fd, (struct sockaddr *)&tgtaddr, sizeof(tgtaddr)) <0) {
     myperror(spk, "connect to %s", extSockPath);
     return 0;
