@@ -39,21 +39,11 @@
 BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(FS_KEY_LeftAdvance, "LeftAdvance"),
   KEY_NAME_ENTRY(FS_KEY_RightAdvance, "RightAdvance"),
-  KEY_NAME_ENTRY(FS_KEY_LeftGdf, "LeftSelector"),
-  KEY_NAME_ENTRY(FS_KEY_RightGdf, "RightSelector"),
+  KEY_NAME_ENTRY(FS_KEY_LeftSelector, "LeftSelector"),
+  KEY_NAME_ENTRY(FS_KEY_RightSelector, "RightSelector"),
 
   KEY_GROUP_ENTRY(FS_GRP_RoutingKeys, "RoutingKey"),
   KEY_GROUP_ENTRY(FS_GRP_NavrowKeys, "NavrowKey"),
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLE(wheel)
-  KEY_NAME_ENTRY(FS_KEY_LeftWheel, "LeftWheelPress"),
-  KEY_NAME_ENTRY(FS_KEY_RightWheel, "RightWheelPress"),
-
-  KEY_NAME_ENTRY(FS_KEY_WHEEL+0, "LeftWheelUp"),
-  KEY_NAME_ENTRY(FS_KEY_WHEEL+1, "LeftWheelDown"),
-  KEY_NAME_ENTRY(FS_KEY_WHEEL+2, "RightWheelDown"),
-  KEY_NAME_ENTRY(FS_KEY_WHEEL+3, "RightWheelUp"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(nav)
@@ -66,7 +56,7 @@ BEGIN_KEY_NAME_TABLE(nav)
   KEY_NAME_ENTRY(FS_KEY_WHEEL+3, "RightNavUp"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(focus)
+BEGIN_KEY_NAME_TABLE(keyboard)
   KEY_NAME_ENTRY(FS_KEY_Dot1, "Dot1"),
   KEY_NAME_ENTRY(FS_KEY_Dot2, "Dot2"),
   KEY_NAME_ENTRY(FS_KEY_Dot3, "Dot3"),
@@ -81,13 +71,6 @@ BEGIN_KEY_NAME_TABLE(focus)
   KEY_NAME_ENTRY(FS_KEY_RightShift, "RightShift"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(bumpers)
-  KEY_NAME_ENTRY(FS_KEY_LeftBumperUp, "LeftBumperUp"),
-  KEY_NAME_ENTRY(FS_KEY_LeftBumperDown, "LeftBumperDown"),
-  KEY_NAME_ENTRY(FS_KEY_RightBumperUp, "RightBumperUp"),
-  KEY_NAME_ENTRY(FS_KEY_RightBumperDown, "RightBumperDown"),
-END_KEY_NAME_TABLE
-
 BEGIN_KEY_NAME_TABLE(rockers)
   KEY_NAME_ENTRY(FS_KEY_LeftRockerUp, "LeftRockerUp"),
   KEY_NAME_ENTRY(FS_KEY_LeftRockerDown, "LeftRockerDown"),
@@ -95,7 +78,52 @@ BEGIN_KEY_NAME_TABLE(rockers)
   KEY_NAME_ENTRY(FS_KEY_RightRockerDown, "RightRockerDown"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(pacmate)
+BEGIN_KEY_NAME_TABLE(bumpers)
+  KEY_NAME_ENTRY(FS_KEY_LeftBumperUp, "LeftBumperUp"),
+  KEY_NAME_ENTRY(FS_KEY_LeftBumperDown, "LeftBumperDown"),
+  KEY_NAME_ENTRY(FS_KEY_RightBumperUp, "RightBumperUp"),
+  KEY_NAME_ENTRY(FS_KEY_RightBumperDown, "RightBumperDown"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLES(focus1)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(nav),
+  KEY_NAME_TABLE(keyboard),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(focus14)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(nav),
+  KEY_NAME_TABLE(keyboard),
+  KEY_NAME_TABLE(rockers),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(focus40)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(nav),
+  KEY_NAME_TABLE(keyboard),
+  KEY_NAME_TABLE(rockers),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(focus80)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(nav),
+  KEY_NAME_TABLE(keyboard),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(bumpers),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLE(wheel)
+  KEY_NAME_ENTRY(FS_KEY_LeftWheel, "LeftWheelPress"),
+  KEY_NAME_ENTRY(FS_KEY_RightWheel, "RightWheelPress"),
+
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+0, "LeftWheelUp"),
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+1, "LeftWheelDown"),
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+2, "RightWheelDown"),
+  KEY_NAME_ENTRY(FS_KEY_WHEEL+3, "RightWheelUp"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(hot)
   KEY_NAME_ENTRY(FS_KEY_HOT+0, "Hot1"),
   KEY_NAME_ENTRY(FS_KEY_HOT+1, "Hot2"),
   KEY_NAME_ENTRY(FS_KEY_HOT+2, "Hot3"),
@@ -106,42 +134,23 @@ BEGIN_KEY_NAME_TABLE(pacmate)
   KEY_NAME_ENTRY(FS_KEY_HOT+7, "Hot8"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(focus_basic)
-  KEY_NAME_TABLE(common),
-  KEY_NAME_TABLE(nav),
-  KEY_NAME_TABLE(focus),
-END_KEY_NAME_TABLES
-
-BEGIN_KEY_NAME_TABLES(focus_large)
-  KEY_NAME_TABLE(common),
-  KEY_NAME_TABLE(nav),
-  KEY_NAME_TABLE(focus),
-  KEY_NAME_TABLE(bumpers),
-  KEY_NAME_TABLE(rockers),
-END_KEY_NAME_TABLES
-
-BEGIN_KEY_NAME_TABLES(focus_small)
-  KEY_NAME_TABLE(common),
-  KEY_NAME_TABLE(nav),
-  KEY_NAME_TABLE(focus),
-  KEY_NAME_TABLE(rockers),
-END_KEY_NAME_TABLES
-
 BEGIN_KEY_NAME_TABLES(pacmate)
   KEY_NAME_TABLE(common),
   KEY_NAME_TABLE(wheel),
-  KEY_NAME_TABLE(pacmate),
+  KEY_NAME_TABLE(hot),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(focus_basic)
-DEFINE_KEY_TABLE(focus_large)
-DEFINE_KEY_TABLE(focus_small)
+DEFINE_KEY_TABLE(focus1)
+DEFINE_KEY_TABLE(focus14)
+DEFINE_KEY_TABLE(focus40)
+DEFINE_KEY_TABLE(focus80)
 DEFINE_KEY_TABLE(pacmate)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(focus_basic),
-  &KEY_TABLE_DEFINITION(focus_large),
-  &KEY_TABLE_DEFINITION(focus_small),
+  &KEY_TABLE_DEFINITION(focus1),
+  &KEY_TABLE_DEFINITION(focus14),
+  &KEY_TABLE_DEFINITION(focus40),
+  &KEY_TABLE_DEFINITION(focus80),
   &KEY_TABLE_DEFINITION(pacmate),
 END_KEY_TABLE_LIST
 
@@ -230,7 +239,7 @@ typedef enum {
 
 static const ModelTypeEntry modelTypeTable[] = {
   [MOD_TYPE_Focus] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(focus_basic),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(focus1),
     .hotkeysRow = -1
   },
 
@@ -839,10 +848,12 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
       if (firmwareVersion >= 3) {
 	brl->data->configFlags |= 0X02;
 
-	if (brl->data->model->cellCount < 80) {
-	  brl->data->keyTableDefinition = &KEY_TABLE_DEFINITION(focus_small);
+	if (brl->data->model->cellCount < 20) {
+	  brl->data->keyTableDefinition = &KEY_TABLE_DEFINITION(focus14);
+	} else if (brl->data->model->cellCount < 80) {
+	  brl->data->keyTableDefinition = &KEY_TABLE_DEFINITION(focus40);
 	} else {
-	  brl->data->keyTableDefinition = &KEY_TABLE_DEFINITION(focus_large);
+	  brl->data->keyTableDefinition = &KEY_TABLE_DEFINITION(focus80);
 	}
       }
     }
@@ -1014,10 +1025,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
         if (group == modelTypeTable[brl->data->model->type].hotkeysRow) {
           static const KeyNumber keys[] = {
-            FS_KEY_LeftGdf,
+            FS_KEY_LeftSelector,
             FS_KEY_HOT+0, FS_KEY_HOT+1, FS_KEY_HOT+2, FS_KEY_HOT+3,
             FS_KEY_HOT+4, FS_KEY_HOT+5, FS_KEY_HOT+6, FS_KEY_HOT+7,
-            FS_KEY_RightGdf
+            FS_KEY_RightSelector
           };
 
           static const unsigned char keyCount = ARRAY_COUNT(keys);
