@@ -18,6 +18,6 @@
 
 title FreedomScientific Focus2 40
 
-assign frontKeys left\sadvance,\sleft\srocker,\sleft\sselector,\sleft\sshift,\sright\sshift,\sright\sselector,\sright\srocker,\sright\sadvance
+assign frontKeys pan\sleft,\sleft\srocker,\sleft\sselector,\sleft\sshift,\sright\sshift,\sright\sselector,\sright\srocker,\span\sright
 include focus.kti
 include rockers.kti

@@ -18,5 +18,5 @@
 
 title FreedomScientific Focus1
 
-assign frontKeys left\sadvance,\sleft\sselector,\sleft\sshift,\sright\sshift,\sright\sselector,\sright\sadvance
+assign frontKeys pan\sleft,\sleft\sselector,\sleft\sshift,\sright\sshift,\sright\sselector,\span\sright
 include focus.kti
