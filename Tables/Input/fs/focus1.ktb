@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title FreedomScientific Focus1
+title FreedomScientific Focus1 (original)
 
 assign frontKeys pan\sleft,\sleft\sselector,\sleft\sshift,\sright\sshift,\sright\sselector,\span\sright
 include focus.kti

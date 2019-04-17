@@ -27,11 +27,12 @@ note There are two Nav controls - one next to each end of the braille cells.
 note * Each has three actions: Up, Down, and Press.
 note * On newer models, it's an up/down rocker along with a separate, pressable button.
 note * On older ones, it's a wheel that can be both rolled and pressed.
-note The keys on the front, from left to right, are: \{frontKeys}.
-note The panning keys are long and flat. Each presents a raised double-arrow.
-note The Selector keys are round and concave.
+note The keys on the front, from left to right, are:
+note * \{frontKeys}.
+note The left and right panning keys are long and flat with a raised double-arrow.
+note The left and right selector keys are round and concave.
 note * On older models, they're known as GDF (General Display Function) keys.
-note The shift keys are square and flat.
+note The left and right shift keys are square and flat.
 
 assign navKeyType Nav
 include common.kti
