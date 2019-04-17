@@ -18,6 +18,7 @@
 
 title FreedomScientific Focus2 80
 
+assign frontKeys left\sadvance,\sleft\sbumper,\sleft\sselector,\sleft\sshift,\sright\sshift,\sright\sselector,\sright\sbumper,\sright\sadvance
 include focus.kti
 include rockers.kti
 include bumpers.kti

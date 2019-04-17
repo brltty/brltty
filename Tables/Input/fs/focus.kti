@@ -18,10 +18,15 @@
 
 # This key subtable is for all FreedomScientific Focus displays.
 
+note The space bar is in front of the braille cells.
+note The routing keys are immediately behind the braille cells.
+note Some models have navrow keys immediately behind the routing keys.
+note An eight-dot, Perkins-style, braille keyboard is behind the routing and navrow keys.
 note There are two Nav controls - one next to each end of the braille cells.
 note * Each has three actions: Up, Down, and Press.
-note * On older models, a Nav control is a wheel which can be both rolled and pressed.
-note * On newer ones, it's an up/down rocker along with a separate pressable button.
+note * On newer models, it's an up/down rocker along with a separate, pressable button.
+note * On older ones, it's a wheel that can be both rolled and pressed.
+note The keys on the front, from left to right, are: \{frontKeys}.
 note The Selector keys are the concave buttons on the front.
 note * On older models, they're known as GDF (General Display Function) keys.
 note The Advance keys are just inside the rockers and outside the shift keys.
