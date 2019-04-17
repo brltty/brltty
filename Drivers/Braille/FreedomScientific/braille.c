@@ -154,50 +154,6 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(pacmate),
 END_KEY_TABLE_LIST
 
-typedef enum {
-  PKT_QUERY  = 0X00, /* host->unit: request device information */
-  PKT_ACK    = 0X01, /* unit->host: acknowledge packet receipt */
-  PKT_NAK    = 0X02, /* unit->host: negative acknowledge, report error */
-  PKT_KEY    = 0X03, /* unit->host: key event */
-  PKT_BUTTON = 0X04, /* unit->host: routing button event */
-  PKT_WHEEL  = 0X05, /* unit->host: whiz wheel event */
-  PKT_HVADJ  = 0X08, /* host->unit: set braille display voltage */
-  PKT_BEEP   = 0X09, /* host->unit: sound short beep */
-  PKT_CONFIG = 0X0F, /* host->unit: configure device options */
-  PKT_INFO   = 0X80, /* unit->host: response to query packet */
-  PKT_WRITE  = 0X81, /* host->unit: write to braille display */
-  PKT_EXTKEY = 0X82  /* unit->host: extended keys event */
-} PacketType;
-
-typedef enum {
-  PKT_ERR_TIMEOUT   = 0X30, /* no data received from host for a while */
-  PKT_ERR_CHECKSUM  = 0X31, /* incorrect checksum */
-  PKT_ERR_TYPE      = 0X32, /* unsupported packet type */
-  PKT_ERR_PARAMETER = 0X33, /* invalid parameter */
-  PKT_ERR_SIZE      = 0X34, /* write size too large */
-  PKT_ERR_POSITION  = 0X35, /* write position too large */
-  PKT_ERR_OVERRUN   = 0X36, /* message queue overflow */
-  PKT_ERR_POWER     = 0X37, /* insufficient USB power */
-  PKT_ERR_SPI       = 0X38  /* timeout on SPI bus */
-} PacketError;
-
-typedef enum {
-  PKT_EXT_HVADJ    = 0X08, /* error in varibraille packet */
-  PKT_EXT_BEEP     = 0X09, /* error in beep packet */
-  PKT_EXT_CLEAR    = 0X31, /* error in ClearMsgBuf function */
-  PKT_EXT_LOOP     = 0X32, /* timing loop in ParseCommands function */
-  PKT_EXT_TYPE     = 0X33, /* unknown packet type in ParseCommands function */
-  PKT_EXT_CMDWRITE = 0X34, /* error in CmdWrite function */
-  PKT_EXT_UPDATE   = 0X7E, /* error in update packet */
-  PKT_EXT_DIAG     = 0X7F, /* error in diag packet */
-  PKT_EXT_QUERY    = 0X80, /* error in query packet */
-  PKT_EXT_WRITE    = 0X81  /* error in write packet */
-} PacketExtended;
-
-typedef enum {
-  OPT_EXTKEY = 0X01  /* send extended key events */
-} UnitOption;
-
 typedef struct {
   unsigned char type;
   unsigned char arg1;
@@ -380,31 +336,31 @@ logNegativeAcknowledgement (const Packet *packet) {
     default:
       problem = "unknown problem";
       break;
-    case PKT_ERR_TIMEOUT:
+    case FS_ERR_TIMEOUT:
       problem = "timeout during packet transmission";
       break;
-    case PKT_ERR_CHECKSUM:
+    case FS_ERR_CHECKSUM:
       problem = "incorrect checksum";
       break;
-    case PKT_ERR_TYPE:
+    case FS_ERR_TYPE:
       problem = "unknown packet type";
       break;
-    case PKT_ERR_PARAMETER:
+    case FS_ERR_PARAMETER:
       problem = "invalid parameter value";
       break;
-    case PKT_ERR_SIZE:
+    case FS_ERR_SIZE:
       problem = "write size too large";
       break;
-    case PKT_ERR_POSITION:
+    case FS_ERR_POSITION:
       problem = "write start too large";
       break;
-    case PKT_ERR_OVERRUN:
+    case FS_ERR_OVERRUN:
       problem = "message FIFO overflow";
       break;
-    case PKT_ERR_POWER:
+    case FS_ERR_POWER:
       problem = "insufficient USB power";
       break;
-    case PKT_ERR_SPI:
+    case FS_ERR_SPI:
       problem = "SPI bus timeout";
       break;
   }
@@ -413,34 +369,34 @@ logNegativeAcknowledgement (const Packet *packet) {
     default:
       component = "unknown component";
       break;
-    case PKT_EXT_HVADJ:
+    case FS_EXT_HVADJ:
       component = "VariBraille packet";
       break;
-    case PKT_EXT_BEEP:
+    case FS_EXT_BEEP:
       component = "beep packet";
       break;
-    case PKT_EXT_CLEAR:
+    case FS_EXT_CLEAR:
       component = "ClearMsgBuf function";
       break;
-    case PKT_EXT_LOOP:
+    case FS_EXT_LOOP:
       component = "timing loop of ParseCommands function";
       break;
-    case PKT_EXT_TYPE:
+    case FS_EXT_TYPE:
       component = "ParseCommands function";
       break;
-    case PKT_EXT_CMDWRITE:
+    case FS_EXT_CMDWRITE:
       component = "CmdWrite function";
       break;
-    case PKT_EXT_UPDATE:
+    case FS_EXT_UPDATE:
       component = "update packet";
       break;
-    case PKT_EXT_DIAG:
+    case FS_EXT_DIAG:
       component = "diag packet";
       break;
-    case PKT_EXT_QUERY:
+    case FS_EXT_QUERY:
       component = "query packet";
       break;
-    case PKT_EXT_WRITE:
+    case FS_EXT_WRITE:
       component = "write packet";
       break;
   }
@@ -516,7 +472,7 @@ writeRequest (BrailleDisplay *brl) {
   if (brl->data->acknowledgementHandler) return 1;
 
   if (brl->data->configFlags) {
-    if (!writePacket(brl, PKT_CONFIG, brl->data->configFlags, 0, 0, NULL)) {
+    if (!writePacket(brl, FS_PKT_CONFIG, brl->data->configFlags, 0, 0, NULL)) {
       return 0;
     }
 
@@ -525,7 +481,7 @@ writeRequest (BrailleDisplay *brl) {
   }
 
   if (brl->data->firmnessSetting >= 0) {
-    if (!writePacket(brl, PKT_HVADJ, brl->data->firmnessSetting, 0, 0, NULL)) {
+    if (!writePacket(brl, FS_PKT_HVADJ, brl->data->firmnessSetting, 0, 0, NULL)) {
       return 0;
     }
 
@@ -540,7 +496,7 @@ writeRequest (BrailleDisplay *brl) {
 
     if (truncate) count = brl->data->outputPayloadLimit;
     translateOutputCells(buffer, &brl->data->outputBuffer[brl->data->writeFirst], count);
-    if (!writePacket(brl, PKT_WRITE, count, brl->data->writeFirst, 0, buffer)) {
+    if (!writePacket(brl, FS_PKT_WRITE, count, brl->data->writeFirst, 0, buffer)) {
       return 0;
     }
 
@@ -605,13 +561,13 @@ verifyPacket (
   switch (size) {
     case 1:
       switch (byte) {
-        case PKT_ACK:
-        case PKT_NAK:
-        case PKT_KEY:
-        case PKT_EXTKEY:
-        case PKT_BUTTON:
-        case PKT_WHEEL:
-        case PKT_INFO:
+        case FS_PKT_ACK:
+        case FS_PKT_NAK:
+        case FS_PKT_KEY:
+        case FS_PKT_EXTKEY:
+        case FS_PKT_BUTTON:
+        case FS_PKT_WHEEL:
+        case FS_PKT_INFO:
           *length = sizeof(PacketHeader);
           break;
 
@@ -653,7 +609,7 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
         {
           int ok;
 
-        case PKT_NAK:
+        case FS_PKT_NAK:
           cancelMissingAcknowledgementAlarm(brl);
           logNegativeAcknowledgement(packet);
 
@@ -663,7 +619,7 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
           }
 
           switch (packet->header.arg1) {
-            case PKT_ERR_TIMEOUT: {
+            case FS_ERR_TIMEOUT: {
               int originalLimit = brl->data->outputPayloadLimit;
 
               if (brl->data->outputPayloadLimit > brl->data->model->cellCount)
@@ -684,7 +640,7 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
           ok = 0;
           goto doAcknowledgement;
 
-        case PKT_ACK:
+        case FS_PKT_ACK:
           cancelMissingAcknowledgementAlarm(brl);
 
           if (!brl->data->acknowledgementHandler) {
@@ -846,7 +802,8 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
       unsigned char firmwareVersion = firmware[0] - '0';
 
       if (firmwareVersion >= 3) {
-	brl->data->configFlags |= 0X02;
+        /* send the extended keys packet (FS_PKT_EXTKEY) */
+	brl->data->configFlags |= FS_CFG_EXTKEY;
 
 	if (brl->data->model->cellCount < 20) {
 	  brl->data->keyTableDefinition = &KEY_TABLE_DEFINITION(focus14);
@@ -875,7 +832,7 @@ static int
 writeIdentityRequest (BrailleDisplay *brl) {
   brl->data->queryAcknowledged = 0;
   brl->data->model = NULL;
-  return writePacket(brl, PKT_QUERY, 0, 0, 0, NULL);
+  return writePacket(brl, FS_PKT_QUERY, 0, 0, 0, NULL);
 }
 
 static size_t
@@ -888,15 +845,15 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
   const Packet *response = packet;
 
   switch (response->header.type) {
-    case PKT_INFO:
+    case FS_PKT_INFO:
       if (!setModel(brl, response->payload.info.model, response->payload.info.firmware)) return BRL_RSP_FAIL;
       break;
 
-    case PKT_ACK:
+    case FS_PKT_ACK:
       brl->data->queryAcknowledged = 1;
       break;
 
-    case PKT_NAK:
+    case FS_PKT_NAK:
       logNegativeAcknowledgement(response);
       brl->data->queryAcknowledged = 0;
       brl->data->model = NULL;
@@ -1002,7 +959,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while ((count = getPacket(brl, &packet))) {
     switch (packet.header.type) {
-      case PKT_KEY: {
+      case FS_PKT_KEY: {
         uint64_t newKeys = packet.header.arg1 |
                            (packet.header.arg2 << 8) |
                            (packet.header.arg3 << 16);
@@ -1011,14 +968,14 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         continue;
       }
 
-      case PKT_EXTKEY: {
+      case FS_PKT_EXTKEY: {
         uint64_t newKeys = packet.payload.extkey.bytes[0];
 
         updateKeys(brl, newKeys, 24, 8);
         continue;
       }
 
-      case PKT_BUTTON: {
+      case FS_PKT_BUTTON: {
         KeyNumber number = packet.header.arg1;
         unsigned char press = (packet.header.arg2 & 0X01) != 0;
         KeyGroup group = packet.header.arg3;
@@ -1051,7 +1008,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         continue;
       }
 
-      case PKT_WHEEL: {
+      case FS_PKT_WHEEL: {
         const KeyGroup group = FS_GRP_NavigationKeys;
         const KeyNumber number = FS_KEY_WHEEL + ((packet.header.arg1 >> 3) & 0X7);
         unsigned int count = packet.header.arg1 & 0X7;
