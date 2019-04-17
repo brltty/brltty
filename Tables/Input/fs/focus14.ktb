@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title FreedomScientific Focus 2 14
+title FreedomScientific Focus2 14
 
-include focus_basic.kti
+include focus.kti
 include rockers.kti

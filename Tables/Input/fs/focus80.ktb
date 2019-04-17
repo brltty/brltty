@@ -16,9 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title FreedomScientific Focus 2 80
+title FreedomScientific Focus2 80
 
-include focus_basic.kti
-include bumpers.kti
+include focus.kti
 include rockers.kti
-
+include bumpers.kti
