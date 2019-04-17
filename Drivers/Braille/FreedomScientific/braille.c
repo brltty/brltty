@@ -37,8 +37,8 @@
 #include "brldefs-fs.h"
 
 BEGIN_KEY_NAME_TABLE(common)
-  KEY_NAME_ENTRY(FS_KEY_LeftAdvance, "LeftAdvance"),
-  KEY_NAME_ENTRY(FS_KEY_RightAdvance, "RightAdvance"),
+  KEY_NAME_ENTRY(FS_KEY_PanLeft, "PanLeft"),
+  KEY_NAME_ENTRY(FS_KEY_PanRight, "PanRight"),
   KEY_NAME_ENTRY(FS_KEY_LeftSelector, "LeftSelector"),
   KEY_NAME_ENTRY(FS_KEY_RightSelector, "RightSelector"),
 
@@ -1035,9 +1035,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
           const unsigned char base = (brl->data->model->cellCount - keyCount) / 2;
 
           if (number < base) {
-            number = FS_KEY_LeftAdvance;
+            number = FS_KEY_PanLeft;
           } else if ((number -= base) >= keyCount) {
-            number = FS_KEY_RightAdvance;
+            number = FS_KEY_PanRight;
           } else {
             number = keys[number];
           }

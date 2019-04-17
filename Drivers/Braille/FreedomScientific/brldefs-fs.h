@@ -36,8 +36,8 @@ typedef enum {
   FS_KEY_RightWheel = 9,
   FS_KEY_LeftShift = 10,
   FS_KEY_RightShift = 11,
-  FS_KEY_LeftAdvance = 12,
-  FS_KEY_RightAdvance = 13,
+  FS_KEY_PanLeft = 12,
+  FS_KEY_PanRight = 13,
   FS_KEY_Space = 15,
 
   FS_KEY_LeftSelector = 16,

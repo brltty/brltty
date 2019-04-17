@@ -23,14 +23,14 @@ bind LeftSelector BACK
 bind RightSelector HOME
 bind LeftSelector+RightSelector PASTE
 
-bind LeftAdvance FWINLT
-bind RightAdvance FWINRT
+bind PanLeft FWINLT
+bind PanRight FWINRT
 
-bind LeftSelector+LeftAdvance TOP_LEFT
-bind LeftSelector+RightAdvance BOT_LEFT
+bind LeftSelector+PanLeft TOP_LEFT
+bind LeftSelector+PanRight BOT_LEFT
 
-bind RightSelector+LeftAdvance TOP
-bind RightSelector+RightAdvance BOT
+bind RightSelector+PanLeft TOP
+bind RightSelector+PanRight BOT
 
 bind !Left\{navKeyType}Up LNUP
 bind !Left\{navKeyType}Down LNDN
@@ -44,11 +44,11 @@ bind Left\{navKeyType}Press+!Left\{navKeyType}Down NXDIFLN
 bind Right\{navKeyType}Press+!Right\{navKeyType}Up CHRLT
 bind Right\{navKeyType}Press+!Right\{navKeyType}Down CHRRT
 
-bind LeftAdvance+!Left\{navKeyType}Up PRPROMPT
-bind LeftAdvance+!Left\{navKeyType}Down NXPROMPT
+bind PanLeft+!Left\{navKeyType}Up PRPROMPT
+bind PanLeft+!Left\{navKeyType}Down NXPROMPT
 
-bind RightAdvance+!Left\{navKeyType}Up PRPGRPH
-bind RightAdvance+!Left\{navKeyType}Down NXPGRPH
+bind PanRight+!Left\{navKeyType}Up PRPGRPH
+bind PanRight+!Left\{navKeyType}Down NXPGRPH
 
 bind LeftSelector+!Left\{navKeyType}Up ATTRUP
 bind LeftSelector+!Left\{navKeyType}Down ATTRDN
@@ -61,7 +61,7 @@ bind Left\{navKeyType}Press+!RoutingKey SETLEFT
 bind Right\{navKeyType}Press+!RoutingKey DESCCHAR
 
 bind RoutingKey+!RoutingKey CLIP_COPY
-bind LeftAdvance+!RoutingKey CLIP_NEW
-bind RightAdvance+!RoutingKey COPY_RECT
+bind PanLeft+!RoutingKey CLIP_NEW
+bind PanRight+!RoutingKey COPY_RECT
 bind LeftSelector+!RoutingKey CLIP_ADD
 bind RightSelector+!RoutingKey COPY_LINE
