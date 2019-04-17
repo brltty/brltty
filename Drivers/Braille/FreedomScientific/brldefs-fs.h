@@ -63,6 +63,35 @@ typedef enum {
   FS_CFG_EXTKEY = 0X02  /* send extended key events */
 } FS_ConfigFlag;
 
+typedef struct {
+  unsigned char type;
+  unsigned char arg1;
+  unsigned char arg2;
+  unsigned char arg3;
+} FS_PacketHeader;
+
+#define FS_INFO_MANUFACTURER_SIZE 24
+#define FS_INFO_MODEL_SIZE 16
+#define FS_INFO_FIRMWARE_SIZE 8
+
+typedef struct {
+  FS_PacketHeader header;
+
+  union {
+    unsigned char bytes[0X100];
+
+    struct {
+      char manufacturer[FS_INFO_MANUFACTURER_SIZE];
+      char model[FS_INFO_MODEL_SIZE];
+      char firmware[FS_INFO_FIRMWARE_SIZE];
+    } info;
+
+    struct {
+      unsigned char bytes[4];
+    } extkey;
+  } payload;
+} FS_Packet;
+
 #define FS_KEYS_WHEEL 8
 #define FS_KEYS_HOT 8
 

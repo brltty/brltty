@@ -155,35 +155,6 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 typedef struct {
-  unsigned char type;
-  unsigned char arg1;
-  unsigned char arg2;
-  unsigned char arg3;
-} PacketHeader;
-
-#define PACKET_PAYLOAD_INFO_MANUFACTURER_SIZE 24
-#define PACKET_PAYLOAD_INFO_MODEL_SIZE 16
-#define PACKET_PAYLOAD_INFO_FIRMWARE_SIZE 8
-
-typedef struct {
-  PacketHeader header;
-
-  union {
-    unsigned char bytes[0X100];
-
-    struct {
-      char manufacturer[PACKET_PAYLOAD_INFO_MANUFACTURER_SIZE];
-      char model[PACKET_PAYLOAD_INFO_MODEL_SIZE];
-      char firmware[PACKET_PAYLOAD_INFO_FIRMWARE_SIZE];
-    } info;
-
-    struct {
-      unsigned char bytes[4];
-    } extkey;
-  } payload;
-} Packet;
-
-typedef struct {
   const KeyTableDefinition *keyTableDefinition;
   signed char hotkeysRow;
 } ModelTypeEntry;
@@ -276,7 +247,7 @@ struct BrailleDataStruct {
   const KeyTableDefinition *keyTableDefinition;
 
   ModelEntry genericModelEntry;
-  char genericModelIdentifier[PACKET_PAYLOAD_INFO_MODEL_SIZE];
+  char genericModelIdentifier[FS_INFO_MODEL_SIZE];
 
   unsigned char outputBuffer[UINT8_MAX + 1];
   int writeFirst;
@@ -304,7 +275,7 @@ writePacket (
   unsigned char arg3,
   const unsigned char *data
 ) {
-  Packet packet;
+  FS_Packet packet;
   int size = sizeof(packet.header);
   unsigned char checksum = 0;
 
@@ -328,7 +299,7 @@ writePacket (
 }
 
 static void
-logNegativeAcknowledgement (const Packet *packet) {
+logNegativeAcknowledgement (const FS_Packet *packet) {
   const char *problem;
   const char *component;
 
@@ -568,7 +539,7 @@ verifyPacket (
         case FS_PKT_BUTTON:
         case FS_PKT_WHEEL:
         case FS_PKT_INFO:
-          *length = sizeof(PacketHeader);
+          *length = sizeof(FS_PacketHeader);
           break;
 
         default:
@@ -587,20 +558,20 @@ verifyPacket (
   }
 
   rpd->checksum -= byte;
-  if ((size == *length) && (size > sizeof(PacketHeader)) && rpd->checksum) return BRL_PVR_INVALID;
+  if ((size == *length) && (size > sizeof(FS_PacketHeader)) && rpd->checksum) return BRL_PVR_INVALID;
 
   return BRL_PVR_INCLUDE;
 }
 
 static size_t
-readPacket (BrailleDisplay *brl, Packet *packet) {
+readPacket (BrailleDisplay *brl, FS_Packet *packet) {
   ReadPacketData rpd;
 
   return readBraillePacket(brl, NULL, packet, sizeof(*packet), verifyPacket, &rpd);
 }
 
 static size_t
-getPacket (BrailleDisplay *brl, Packet *packet) {
+getPacket (BrailleDisplay *brl, FS_Packet *packet) {
   while (1) {
     size_t count = readPacket(brl, packet);
 
@@ -842,7 +813,7 @@ readResponse (BrailleDisplay *brl, void *packet, size_t size) {
 
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  const Packet *response = packet;
+  const FS_Packet *response = packet;
 
   switch (response->header.type) {
     case FS_PKT_INFO:
@@ -873,7 +844,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->outputPayloadLimit = 0XFF;
 
     if (connectResource(brl, device)) {
-      Packet response;
+      FS_Packet response;
 
       if (probeBrailleDisplay(brl, 2, NULL, 100,
                               writeIdentityRequest,
@@ -954,7 +925,7 @@ updateKeys (BrailleDisplay *brl, uint64_t newKeys, KeyNumber keyBase, unsigned c
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  Packet packet;
+  FS_Packet packet;
   size_t count;
 
   while ((count = getPacket(brl, &packet))) {
@@ -1033,7 +1004,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t length) {
-  Packet packet;
+  FS_Packet packet;
   size_t count = readPacket(brl, &packet);
 
   if (count == 0) return (errno == EAGAIN)? 0: -1;
