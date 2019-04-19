@@ -45,7 +45,7 @@ typedef enum {
   FS_EXT_DIAG     = 0X7F, /* error in diag packet */
   FS_EXT_QUERY    = 0X80, /* error in query packet */
   FS_EXT_WRITE    = 0X81  /* error in write packet */
-} FS_PacketExtended;
+} FS_ExtendedPacketType;
 
 typedef enum {
   FS_ERR_TIMEOUT   = 0X30, /* no data received from host for a while */
@@ -57,7 +57,7 @@ typedef enum {
   FS_ERR_OVERRUN   = 0X36, /* message queue overflow */
   FS_ERR_POWER     = 0X37, /* insufficient USB power */
   FS_ERR_SPI       = 0X38  /* timeout on SPI bus */
-} FS_PacketError;
+} FS_ErrorCode;
 
 typedef enum {
   FS_CFG_EXTKEY = 0X02  /* send extended key events */
