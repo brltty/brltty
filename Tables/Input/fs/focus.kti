@@ -18,21 +18,31 @@
 
 # This key subtable is for all FreedomScientific Focus displays.
 
-note The space bar is in front of the braille cells.
+note An eight-dot, Perkins-style, braille keyboard is near the rear of the top.
+note * Its keys, From left to right, are: Dot7, Dot3, Dot2, Dot1, Dot4, Dot5, Dot6, Dot8.
+note * The space bar is in front of the braille cells.
+
 note There is a routing key immediately behind each braille cell.
 note * Some models have a navrow key immediately behind each routing key.
-note An eight-dot, Perkins-style, braille keyboard is behind the routing and navrow keys.
-note * From left to right, its keys are: Dot7, Dot3, Dot2, Dot1, Dot4, Dot5, Dot6, Dot8.
-note There are two Nav controls - one next to each end of the braille cells.
-note * Each has three actions: Up, Down, and Press.
-note * On newer models, it's an up/down rocker along with a separate, pressable button.
-note * On older ones, it's a wheel that can be both rolled and pressed.
+
+note There are two Nav controls - one at each end of the braille cells.
+note * They have three actions: Up, Down, and Press.
+note * On newer models, each is a rocker combined with a button.
+note * On older models, each is a wheel that can be both rolled and pressed.
+
 note The keys on the front, from left to right, are:
-note * \{frontKeys}.
+note * \{frontKeysLeft} - \{frontKeysRight}.
+
+note The left and right shift keys are squarish and flat.
 note The left and right panning keys are long and flat with a raised double-arrow.
+
 note The left and right selector keys are round and concave.
 note * On older models, they're known as GDF (General Display Function) keys.
-note The left and right shift keys are square and flat.
+
+ifKey LeftBumperUp
+  note There indeed are two left and two right bumper keys.
+  note * Both left ones perform the same functions, as do both right ones.
+endIf
 
 assign navKeyType Nav
 include common.kti
