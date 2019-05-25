@@ -827,6 +827,9 @@ FUNCTION_HANDLER(session, write) {
     }
 
     cellCount = size;
+  } else {
+    options.arguments.regionBegin = 1;
+    options.arguments.regionSize = cellCount;
   }
 
   unsigned char andMask[cellCount];
