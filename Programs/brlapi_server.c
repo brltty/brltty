@@ -127,10 +127,10 @@ static AsyncEvent *flushEvent;
   logMessage(LOG_ERR, __VA_ARGS__); \
   writeError(x, y); \
 } while(0)
-#define WEXC(x, y, type, packet, size, ...) do { \
-  logMessage(LOG_ERR, "writing exception %d to %"PRIfd, y, x); \
+#define WEXC(fd, err, type, packet, size, ...) do { \
+  logMessage(LOG_ERR, "writing exception %d to fd %"PRIfd, err, fd); \
   logMessage(LOG_ERR, __VA_ARGS__); \
-  writeException(x, y, type, packet, size); \
+  writeException(fd, err, type, packet, size); \
 } while(0)
 
 /* These CHECK* macros check whether a condition is true, and, if not, */
@@ -868,6 +868,40 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
   return 0;
 }
 
+static void
+logConversionResult (Connection *connection, unsigned int chars, unsigned int bytes) {
+  logMessage(LOG_CATEGORY(SERVER_EVENTS),
+    "fd %"PRIfd" wrote %d characters %d bytes",
+    connection->fd, chars, bytes
+  );
+}
+
+static void
+convertFromLatin1 (Connection *c, unsigned int rbeg, unsigned int rsiz, const unsigned char *text, unsigned int textLen) {
+  for (int i=0; i<rsiz; i+=1) {
+    c->brailleWindow.text[rbeg-1+i] = text[i];
+  }
+
+  logConversionResult(c, rsiz, rsiz);
+}
+
+static int
+convertFromUTF8 (Connection *c, wchar_t *outBuff, size_t *outLeft, const char *inBuff, size_t *inLeft) {
+  wchar_t *out = outBuff;
+  const char *in = inBuff;
+
+  while ((*outLeft > 0) && (*inLeft > 0)) {
+    wint_t wc = convertUtf8ToWchar(&in, inLeft);
+    if (wc == WEOF) return 0;
+
+    *out++ = wc;
+    *outLeft -= 1;
+  }
+
+  logConversionResult(c, (out - outBuff), (in - inBuff));
+  return 1;
+}
+
 static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
   brlapi_writeArgumentsPacket_t *wa = &packet->writeArguments;
@@ -953,51 +987,88 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   }
   CHECKEXC(remaining==0, BRLAPI_ERROR_INVALID_PACKET, "packet too big");
   /* Here the whole packet has been checked */
+
   if (text) {
+    int isLatin1 = 0;
+    int isUTF8 = 0;
+
     if (charset) {
       charset[charsetLen] = 0; /* we have room for this */
+
+      if (strcasecmp(charset, "iso-8859-1") == 0) {
+        isLatin1 = 1;
+      } else if (strcasecmp(charset, "utf-8") == 0) {
+        isUTF8 = 1;
+      } else {
 #ifndef HAVE_ICONV_H
-      CHECKEXC(!strcasecmp(charset, "iso-8859-1"), BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
+        CHECKEXC(1, BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
 #endif /* !HAVE_ICONV_H */
+      }
     }
 #ifdef HAVE_ICONV_H
     else {
       lockCharset(0);
       charset = coreCharset = (char *) getCharset();
-      if (!coreCharset) {
-        unlockCharset();
-      }
+      if (!coreCharset) unlockCharset();
     }
-    if (charset) {
-      iconv_t conv;
+#endif /* HAVE_ICONV_H */
+
+    if (isLatin1) {
+      lockMutex(&c->brailleWindowMutex);
+      convertFromLatin1(c, rbeg, rsiz, text, textLen);
+    } else if (isUTF8) {
+      size_t outLeft = rsiz;
+      wchar_t outBuff[outLeft];
+
+      size_t inLeft = textLen;
+      const char *inBuff = (char *)text;
+
+      CHECKEXC(
+        convertFromUTF8(c, outBuff, &outLeft, inBuff, &inLeft),
+        BRLAPI_ERROR_INVALID_PACKET, "invalid charset conversion"
+      );
+
+      CHECKEXC(!inLeft, BRLAPI_ERROR_INVALID_PACKET, "text too big");
+      CHECKEXC(!outLeft, BRLAPI_ERROR_INVALID_PACKET, "text too small");
+
+      lockMutex(&c->brailleWindowMutex);
+      wmemcpy(c->brailleWindow.text+rbeg-1, outBuff, rsiz);
+    }
+
+#ifdef HAVE_ICONV_H
+    else if (charset) {
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;
-      size_t sin = textLen, sout = sizeof(textBuf), res;
+      size_t sin = textLen, sout = sizeof(textBuf);
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset %s",c->fd,charset);
-      CHECKEXC((conv = iconv_open(getWcharCharset(),charset)) != (iconv_t)(-1), BRLAPI_ERROR_INVALID_PACKET, "invalid charset");
-      res = iconv(conv,&in,&sin,&out,&sout);
+
+      iconv_t conv = iconv_open(getWcharCharset(), charset);
+      CHECKEXC((conv != (iconv_t)(-1)), BRLAPI_ERROR_INVALID_PACKET, "invalid charset");
+      size_t res = iconv(conv,&in,&sin,&out,&sout);
       iconv_close(conv);
-      CHECKEXC(res != (size_t) -1, BRLAPI_ERROR_INVALID_PACKET, "invalid charset conversion");
+
+      CHECKEXC((res != (size_t)-1), BRLAPI_ERROR_INVALID_PACKET, "invalid charset conversion");
       CHECKEXC(!sin, BRLAPI_ERROR_INVALID_PACKET, "text too big");
       CHECKEXC(!sout, BRLAPI_ERROR_INVALID_PACKET, "text too small");
+      logConversionResult(c, rsiz, textLen);
+
       if (coreCharset) unlockCharset();
       lockMutex(&c->brailleWindowMutex);
-      memcpy(c->brailleWindow.text+rbeg-1,textBuf,rsiz*sizeof(wchar_t));
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" wrote %d characters %d bytes",c->fd,rsiz,textLen);
-    } else
-#endif /* HAVE_ICONV_H */
-    {
-      int i;
-      lockMutex(&c->brailleWindowMutex);
-      for (i=0; i<rsiz; i++) {
-	/* assume latin1 */
-        c->brailleWindow.text[rbeg-1+i] = text[i];
-      }
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" wrote %d characters %d bytes",c->fd,rsiz,rsiz);
+      wmemcpy(c->brailleWindow.text+rbeg-1, textBuf, rsiz);
     }
+#endif /* HAVE_ICONV_H */
+    else {
+      /* assume latin1 */
+      lockMutex(&c->brailleWindowMutex);
+      convertFromLatin1(c, rbeg, rsiz, text, textLen);
+    }
+
     if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz);
     if (!orAttr)  memset(c->brailleWindow.orAttr+rbeg-1,0x00,rsiz);
-  } else lockMutex(&c->brailleWindowMutex);
+  } else {
+    lockMutex(&c->brailleWindowMutex);
+  }
+
   if (andAttr) memcpy(c->brailleWindow.andAttr+rbeg-1,andAttr,rsiz);
   if (orAttr) memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
   if (cursor>=0) c->brailleWindow.cursor = cursor;
