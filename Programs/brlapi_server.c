@@ -995,9 +995,9 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     if (charset) {
       charset[charsetLen] = 0; /* we have room for this */
 
-      if (strcasecmp(charset, "iso-8859-1") == 0) {
+      if (isCharsetLatin1(charset)) {
         isLatin1 = 1;
-      } else if (strcasecmp(charset, "utf-8") == 0) {
+      } else if (isCharsetUTF8(charset)) {
         isUTF8 = 1;
       } else {
 #ifndef HAVE_ICONV_H
@@ -1014,11 +1014,11 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 #endif /* HAVE_ICONV_H */
 
     if (isLatin1) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset iso-8859-1", c->fd);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset ISO_8859-1", c->fd);
       lockMutex(&c->brailleWindowMutex);
       convertFromLatin1(c, rbeg, rsiz, text, textLen);
     } else if (isUTF8) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset utf-8", c->fd);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset UTF-8", c->fd);
 
       size_t outLeft = rsiz;
       wchar_t outBuff[outLeft];
@@ -1062,7 +1062,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     }
 #endif /* HAVE_ICONV_H */
     else {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" assuming charset iso-8859-1", c->fd);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" assuming charset ISO_8859-1", c->fd);
       lockMutex(&c->brailleWindowMutex);
       convertFromLatin1(c, rbeg, rsiz, text, textLen);
     }

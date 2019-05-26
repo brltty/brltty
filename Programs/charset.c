@@ -27,6 +27,40 @@
 #include "lock.h"
 #include "program.h"
 
+int
+isCharsetLatin1 (const char *name) {
+  {
+    const char *substring = "iso";
+    size_t length = strlen(substring);
+    if (strncasecmp(name, substring, length) != 0) return 0;
+    name += length;
+    if ((*name == '-') || (*name == '_')) name += 1;
+  }
+
+  {
+    const char *substring = "8859";
+    size_t length = strlen(substring);
+    if (strncmp(name, substring, length) != 0) return 0;
+    name += length;
+    if (*name == '-') name += 1;
+  }
+
+  return strcmp(name, "1") == 0;
+}
+
+int
+isCharsetUTF8 (const char *name) {
+  {
+    const char *substring = "utf";
+    size_t length = strlen(substring);
+    if (strncasecmp(name, substring, length) != 0) return 0;
+    name += length;
+    if (*name == '-') name += 1;
+  }
+
+  return strcmp(name, "8") == 0;
+}
+
 #if defined(__MINGW32__)
 #include "system_windows.h"
 
