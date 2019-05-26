@@ -1521,29 +1521,47 @@ int BRLAPI_STDCALL brlapi_writeWText(int cursor, const wchar_t *str)
 /* Writes dot-matrix to the braille display */
 int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots)
 {
-  int res;
-  unsigned int size = handle->brlx * handle->brly;
   brlapi_writeArguments_t wa = BRLAPI_WRITEARGUMENTS_INITIALIZER;
+  unsigned int size = handle->brlx * handle->brly;
+
   if (size == 0) {
     brlapi_errno=BRLAPI_ERROR_INVALID_PARAMETER;
     return -1;
   }
+
+  unsigned char andMask[size];
+  memset(andMask, 0, size);
+  wa.andMask = andMask;
+
+  unsigned char orMask[size];
+  memcpy(orMask, dots, size);
+  wa.orMask = orMask;
+
+  char text[(size * 3) + 1];
+  wa.text = text;
+  wa.charset = "utf-8";
+
   {
-    char text[size+1];
-    unsigned char andMask[size], orMask[size];
-    memset(text, ' ', size);
-    text[size] = 0;
-    wa.regionBegin = 1;
-    wa.regionSize = size;
-    wa.text = text;
-    memcpy(orMask, dots, size);
-    wa.orMask = orMask;
-    memset(andMask, 0, size);
-    wa.andMask = andMask;
-    wa.cursor = 0;
-    res = brlapi__write(handle,&wa);
+    char *byte = text;
+    const unsigned char *cell = dots;
+    const unsigned char *end = cell + size;
+
+    while (cell < end) {
+      *byte++ = 0XE2;
+      *byte++ = 0XA0 | ((*cell >> 6) & 0X3);
+      *byte++ = 0X80 | (*cell & 0X3F);
+      cell += 1;
+    }
+
+    *byte = 0;
+    wa.textSize = byte - text;
   }
-  return res;
+
+  wa.regionBegin = 1;
+  wa.regionSize = size;
+  wa.cursor = 0;
+
+  return brlapi__write(handle, &wa);
 }
 
 int BRLAPI_STDCALL brlapi_writeDots(const unsigned char *dots)
