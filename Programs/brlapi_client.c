@@ -1542,6 +1542,17 @@ int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned cha
   wa.charset = "utf-8";
 
   {
+    /* Pass a UTF8-encoded string of the braille characters as the text.
+     *
+     * The Unicode row for the braille pattern characters is U+2800.
+     * Each of the eight dots is represented by a bit in the low-order byte:
+     * Dot1 by 0X01, Dot2 by 0X02, ..., Dot7 by 0X40, and Dot8 by 0X80.
+     *
+     * The UTF-8 template for the Unicode braille row is 0XE2, 0XA0, 0X80.
+     * Dots 1-6 are the low-order six bits of the last (0X80) byte.
+     * Dots 7-8 are the low-order two bits of the middle (0XA0) byte.
+     */
+
     char *byte = text;
     const unsigned char *cell = dots;
     const unsigned char *end = cell + size;
