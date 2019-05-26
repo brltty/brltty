@@ -1001,7 +1001,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
         isUTF8 = 1;
       } else {
 #ifndef HAVE_ICONV_H
-        CHECKEXC(1, BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
+        CHECKEXC(0, BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
 #endif /* !HAVE_ICONV_H */
       }
     }
