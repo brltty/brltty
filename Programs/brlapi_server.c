@@ -987,10 +987,12 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 
   if (text) {
     char charsetBuffer[0X20];
-    int isLatin1 = 0;
     int isUTF8 = 0;
+    int isLatin1 = 0;
 
-    if (!charset) {
+    if (charset) {
+      charset[charsetLen] = 0; /* we have room for this */
+    } else {
       lockCharset(0);
       const char *coreCharset = getCharset();
 
@@ -1003,12 +1005,10 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     }
 
     if (charset) {
-      charset[charsetLen] = 0; /* we have room for this */
-
-      if (isCharsetLatin1(charset)) {
-        isLatin1 = 1;
-      } else if (isCharsetUTF8(charset)) {
+      if (isCharsetUTF8(charset)) {
         isUTF8 = 1;
+      } else if (isCharsetLatin1(charset)) {
+        isLatin1 = 1;
       } else {
 #ifndef HAVE_ICONV_H
         CHECKEXC(0, BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
@@ -1016,11 +1016,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       }
     }
 
-    if (isLatin1) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset ISO_8859-1", c->fd);
-      lockMutex(&c->brailleWindowMutex);
-      convertFromLatin1(c, rbeg, rsiz, text, textLen);
-    } else if (isUTF8) {
+    if (isUTF8) {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset UTF-8", c->fd);
 
       size_t outLeft = rsiz;
@@ -1039,6 +1035,10 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 
       lockMutex(&c->brailleWindowMutex);
       wmemcpy(c->brailleWindow.text+rbeg-1, outBuff, rsiz);
+    } else if (isLatin1) {
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset ISO_8859-1", c->fd);
+      lockMutex(&c->brailleWindowMutex);
+      convertFromLatin1(c, rbeg, rsiz, text, textLen);
     }
 
 #ifdef HAVE_ICONV_H
