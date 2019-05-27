@@ -1566,7 +1566,7 @@ int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned cha
 
   wa.regionBegin = 1;
   wa.regionSize = size;
-  wa.cursor = 0;
+  wa.cursor = BRLAPI_CURSOR_OFF;
 
   return brlapi__write(handle, &wa);
 }
@@ -1656,7 +1656,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
     }
     *((uint32_t *) p) = htonl(s->cursor);
     p += sizeof(uint32_t);
-  } else if (s->cursor!=-1) {
+  } else if (s->cursor != BRLAPI_CURSOR_LEAVE) {
     brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
     return -1;
   }
