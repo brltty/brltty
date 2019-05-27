@@ -912,9 +912,6 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   int remaining = size;
   char *charset = NULL;
   unsigned int charsetLen = 0;
-#ifdef HAVE_ICONV_H
-  char *coreCharset = NULL;
-#endif /* HAVE_ICONV_H */
   CHECKEXC(remaining>=sizeof(wa->flags), BRLAPI_ERROR_INVALID_PACKET, "packet too small for flags");
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
@@ -989,8 +986,21 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   /* Here the whole packet has been checked */
 
   if (text) {
+    char charsetBuffer[0X20];
     int isLatin1 = 0;
     int isUTF8 = 0;
+
+    if (!charset) {
+      lockCharset(0);
+      const char *coreCharset = getCharset();
+
+      if (coreCharset && (strlen(coreCharset) < sizeof(charsetBuffer))) {
+        strcpy(charsetBuffer, coreCharset);
+        charset = charsetBuffer;
+      }
+
+      unlockCharset();
+    }
 
     if (charset) {
       charset[charsetLen] = 0; /* we have room for this */
@@ -1005,13 +1015,6 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 #endif /* !HAVE_ICONV_H */
       }
     }
-#ifdef HAVE_ICONV_H
-    else {
-      lockCharset(0);
-      charset = coreCharset = (char *) getCharset();
-      if (!coreCharset) unlockCharset();
-    }
-#endif /* HAVE_ICONV_H */
 
     if (isLatin1) {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset ISO_8859-1", c->fd);
@@ -1056,7 +1059,6 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       CHECKEXC(!sout, BRLAPI_ERROR_INVALID_PACKET, "text too small");
       logConversionResult(c, rsiz, textLen);
 
-      if (coreCharset) unlockCharset();
       lockMutex(&c->brailleWindowMutex);
       wmemcpy(c->brailleWindow.text+rbeg-1, textBuf, rsiz);
     }
