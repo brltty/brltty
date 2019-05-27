@@ -70,10 +70,6 @@
 
 #include <sys/time.h>
 
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif /* HAVE_ALLOCA_H */
-
 #ifdef linux
 #include <sys/sysmacros.h>
 #include <linux/major.h>
@@ -1548,7 +1544,7 @@ int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned cha
      * Each of the eight dots is represented by a bit in the low-order byte:
      * Dot1 by 0X01, Dot2 by 0X02, ..., Dot7 by 0X40, and Dot8 by 0X80.
      *
-     * The UTF-8 template for the Unicode braille row is 0XE2, 0XA0, 0X80.
+     * The UTF-8 template for the Unicode braille row is: 0XE2, 0XA0, 0X80.
      * Dots 1-6 are the low-order six bits of the last (0X80) byte.
      * Dots 7-8 are the low-order two bits of the middle (0XA0) byte.
      */
@@ -1559,8 +1555,8 @@ int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned cha
 
     while (cell < end) {
       *byte++ = 0XE2;
-      *byte++ = 0XA0 | ((*cell >> 6) & 0X3);
-      *byte++ = 0X80 | (*cell & 0X3F);
+      *byte++ = 0XA0 | ((*cell >> 6) & 0X3); // dots 7-8
+      *byte++ = 0X80 | (*cell & 0X3F); // dots 1-6
       cell += 1;
     }
 
