@@ -46,6 +46,10 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
 
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif /* HAVE_ALLOCA_H */
+
 #ifdef __MINGW32__
 #include "system_windows.h"
 #include "win_pthread.h"
@@ -986,19 +990,34 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   /* Here the whole packet has been checked */
 
   if (text) {
-    char charsetBuffer[0X20];
     int isUTF8 = 0;
     int isLatin1 = 0;
+
+#ifndef HAVE_ALLOCA_H
+    char charsetBuffer[0X20];
+#endif /* HAVE_ALLOCA_H */
 
     if (charset) {
       charset[charsetLen] = 0; /* we have room for this */
     } else {
       lockCharset(0);
-      const char *coreCharset = getCharset();
+      const char *name = getCharset();
 
-      if (coreCharset && (strlen(coreCharset) < sizeof(charsetBuffer))) {
-        strcpy(charsetBuffer, coreCharset);
-        charset = charsetBuffer;
+      if (name) {
+        size_t length = strlen(name);
+
+#ifdef HAVE_ALLOCA_H
+        size_t size = length + 1;
+        charset = alloca(size);
+        strcpy(charset, name);
+#else /* HAVE_ALLOCA_H */
+        if (length < sizeof(charsetBuffer)) {
+          strcpy(charsetBuffer, name);
+          charset = charsetBuffer;
+        }
+#endif /* HAVE_ALLOCA_H */
+
+        if (charset) charsetLen = length;
       }
 
       unlockCharset();
@@ -1017,7 +1036,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     }
 
     if (isUTF8) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset UTF-8", c->fd);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset UTF-8 internal conversion", c->fd);
 
       size_t outLeft = rsiz;
       wchar_t outBuff[outLeft];
@@ -1036,14 +1055,14 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       lockMutex(&c->brailleWindowMutex);
       wmemcpy(c->brailleWindow.text+rbeg-1, outBuff, rsiz);
     } else if (isLatin1) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" internal charset ISO_8859-1", c->fd);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset ISO_8859-1 internal conversion", c->fd);
       lockMutex(&c->brailleWindowMutex);
       convertFromLatin1(c, rbeg, rsiz, text, textLen);
     }
 
 #ifdef HAVE_ICONV_H
     else if (charset) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" iconv charset %s", c->fd, charset);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset %s iconv conversion", c->fd, charset);
 
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;
@@ -1063,11 +1082,17 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       wmemcpy(c->brailleWindow.text+rbeg-1, textBuf, rsiz);
     }
 #endif /* HAVE_ICONV_H */
+
     else {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" assuming charset ISO_8859-1", c->fd);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset ISO_8859-1 assumed", c->fd);
       lockMutex(&c->brailleWindowMutex);
       convertFromLatin1(c, rbeg, rsiz, text, textLen);
     }
+
+    // Forget the charset in case it's pointing to a local buffer.
+    // This occurs when getCharset() is saved and alloca() isn't available.
+    charset = NULL;
+    charsetLen = 0;
 
     if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz);
     if (!orAttr)  memset(c->brailleWindow.orAttr+rbeg-1,0x00,rsiz);
@@ -1077,7 +1102,8 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 
   if (andAttr) memcpy(c->brailleWindow.andAttr+rbeg-1,andAttr,rsiz);
   if (orAttr) memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
-  if (cursor>=0) c->brailleWindow.cursor = cursor;
+  if (cursor >= 0) c->brailleWindow.cursor = cursor;
+
   c->brlbufstate = TODISPLAY;
   unlockMutex(&c->brailleWindowMutex);
   asyncSignalEvent(flushEvent, NULL);
