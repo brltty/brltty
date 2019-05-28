@@ -873,6 +873,14 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
 }
 
 static void
+logConversionDecision (Connection *connection, const char *charset, const char *decision) {
+  logMessage(LOG_CATEGORY(SERVER_EVENTS),
+    "fd %"PRIfd" charset %s %s",
+    connection->fd, charset, decision
+  );
+}
+
+static void
 logConversionResult (Connection *connection, unsigned int chars, unsigned int bytes) {
   logMessage(LOG_CATEGORY(SERVER_EVENTS),
     "fd %"PRIfd" wrote %d characters %d bytes",
@@ -1036,7 +1044,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     }
 
     if (isUTF8) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset UTF-8 internal conversion", c->fd);
+      logConversionDecision(c, "UTF-8", "internal conversion");
 
       size_t outLeft = rsiz;
       wchar_t outBuff[outLeft];
@@ -1055,14 +1063,14 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       lockMutex(&c->brailleWindowMutex);
       wmemcpy(c->brailleWindow.text+rbeg-1, outBuff, rsiz);
     } else if (isLatin1) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset ISO_8859-1 internal conversion", c->fd);
+      logConversionDecision(c, "ISO_8859-1", "internal conversion");
       lockMutex(&c->brailleWindowMutex);
       convertFromLatin1(c, rbeg, rsiz, text, textLen);
     }
 
 #ifdef HAVE_ICONV_H
     else if (charset) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset %s iconv conversion", c->fd, charset);
+      logConversionDecision(c, charset, "iconv conversion");
 
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;
@@ -1084,7 +1092,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 #endif /* HAVE_ICONV_H */
 
     else {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" charset ISO_8859-1 assumed", c->fd);
+      logConversionDecision(c, "ISO_8859-1", "assumed");
       lockMutex(&c->brailleWindowMutex);
       convertFromLatin1(c, rbeg, rsiz, text, textLen);
     }
