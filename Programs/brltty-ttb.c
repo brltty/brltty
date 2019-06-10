@@ -842,6 +842,33 @@ error:
 }
 
 static int
+writeCharacter_lefthalfalt_XCompose (
+  FILE *file, wchar_t character, unsigned char dots,
+  const unsigned char *byte, int isPrimary, const void *_data
+) {
+  if (isPrimary) {
+    unsigned char leftDots = getLeftDots(dots);
+    unsigned char rightDots = getRightDotsToLeftDotsAlt(dots);
+
+    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
+  }
+
+  return 1;
+}
+
+static int
+writeTable_lefthalfalt_XCompose (
+  const char *path, FILE *file, TextTableData *ttd, const void *data
+) {
+  if (!writeHeaderComment(file, writeHashComment)) goto error;
+  if (!writeCharacters(file, ttd, writeCharacter_lefthalfalt_XCompose, NULL)) goto error;
+  return 1;
+
+error:
+  return 0;
+}
+
+static int
 writeCharacter_righthalf_XCompose (
   FILE *file, wchar_t character, unsigned char dots,
   const unsigned char *byte, int isPrimary, const void *_data
@@ -862,6 +889,33 @@ writeTable_righthalf_XCompose (
 ) {
   if (!writeHeaderComment(file, writeHashComment)) goto error;
   if (!writeCharacters(file, ttd, writeCharacter_righthalf_XCompose, NULL)) goto error;
+  return 1;
+
+error:
+  return 0;
+}
+
+static int
+writeCharacter_righthalfalt_XCompose (
+  FILE *file, wchar_t character, unsigned char dots,
+  const unsigned char *byte, int isPrimary, const void *_data
+) {
+  if (isPrimary) {
+    unsigned char leftDots = getLeftDotsToRightDotsAlt(dots);
+    unsigned char rightDots = getRightDots(dots);
+
+    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
+  }
+
+  return 1;
+}
+
+static int
+writeTable_righthalfalt_XCompose (
+  const char *path, FILE *file, TextTableData *ttd, const void *data
+) {
+  if (!writeHeaderComment(file, writeHashComment)) goto error;
+  if (!writeCharacters(file, ttd, writeCharacter_righthalfalt_XCompose, NULL)) goto error;
   return 1;
 
 error:
@@ -1034,8 +1088,16 @@ static const FormatEntry formatEntries[] = {
     .write = writeTable_lefthalf_XCompose,
   },
 
+  { .name = "lefthalfalt-XCompose",
+    .write = writeTable_lefthalfalt_XCompose,
+  },
+
   { .name = "righthalf-XCompose",
     .write = writeTable_righthalf_XCompose,
+  },
+
+  { .name = "righthalfalt-XCompose",
+    .write = writeTable_righthalfalt_XCompose,
   },
 
   { .name = "jbt",
