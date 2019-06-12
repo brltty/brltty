@@ -1,7 +1,7 @@
 """
 This module implements a set of bindings for BrlAPI, a braille bridge for applications.
 
-The reference C API documentation is available online http://brltty.app/doc/BrlAPIref-HTML, as well as in manual pages.
+The reference C API documentation is available online http://brltty.app/doc/BrlAPIref, as well as in manual pages.
 
 This documentation is only a python helper, you should also read C manual pages.
 
