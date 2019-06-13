@@ -48,13 +48,13 @@ try:
 
 except brlapi.ConnectionError as e:
   if e.brlerrno == brlapi.ERROR_CONNREFUSED:
-    print "Connection to %s refused. BRLTTY is too busy..." % e.host
+    print("Connection to %s refused. BRLTTY is too busy..." % e.host)
   elif e.brlerrno == brlapi.ERROR_AUTHENTICATION:
-    print "Authentication with %s failed. Please check the permissions of %s" % (e.host,e.auth)
+    print("Authentication with %s failed. Please check the permissions of %s" % (e.host,e.auth))
   elif e.brlerrno == brlapi.ERROR_LIBCERR and (e.libcerrno == errno.ECONNREFUSED or e.libcerrno == errno.ENOENT):
-    print "Connection to %s failed. Is BRLTTY really running?" % (e.host)
+    print("Connection to %s failed. Is BRLTTY really running?" % (e.host))
   else:
-    print "Connection to BRLTTY at %s failed: " % (e.host)
+    print("Connection to BRLTTY at %s failed: " % (e.host))
   print(e)
   print(e.brlerrno)
   print(e.libcerrno)
