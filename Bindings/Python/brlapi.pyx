@@ -30,6 +30,7 @@ try:
   k = brlapi.expandKeyCode(key)
   b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
   b.writeText(None,1)
+  b.acceptAllKeys()
   b.readKey()
 
   underline = chr(brlapi.DOT7 + brlapi.DOT8)
@@ -37,10 +38,24 @@ try:
   b.write(
       regionBegin = 1,
       regionSize = 40,
-      text = "Press any key to exit ¤                 ",
-      orMask = "".center(21,underline) + "".center(19,chr(0)))
+      text = "Press any key to continue               ",
+      orMask = 25*underline + 15*chr(0))
+  b.readKey()
 
-  b.acceptKeys(brlapi.rangeType_all,[0])
+  b.acceptAllKeys()
+  b.writeText("Press any key")
+  k = b.readKey()
+  k = brlapi.expandKeyCode(key)
+  b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
+  b.readKey()
+
+  b.ignoreAllKeys()
+  b.acceptKeyRanges([(brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_PASSDOTS, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_PASSDOTS|brlapi.KEY_CMD_ARG_MASK)])
+  b.writeText("Press a dot key")
+  key = b.readKey()
+  k = brlapi.expandKeyCode(key)
+  b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
+  b.acceptAllKeys()
   b.readKey()
 
   b.leaveTtyMode()
