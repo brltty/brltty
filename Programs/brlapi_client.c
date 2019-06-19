@@ -441,9 +441,10 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
 
 /* brlapi_waitForPacket */
 /* same as brlapi_doWaitForPacket, but sleeps instead of reading if another
- * and timeout_ms expressed as relative ms delay instead of absolute deadline.
+ * thread is already reading, and timeout_ms expressed as relative ms delay
+ * instead of absolute deadline.
  * timeout_ms set to -1 means no deadline.
- * thread is already reading. Never returns -2. If loop is 1, never returns -3.
+ * Never returns -2. If loop is 1, never returns -3.
  */
 static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t size, int loop, int timeout_ms) {
   int doread = 0;
