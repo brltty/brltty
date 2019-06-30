@@ -373,7 +373,7 @@ rgxDestroyObject (RGX_Object *rgx) {
 
 static int
 rgxOption (
-  RGX_OptionAction action, RGX_CompileOption option,
+  RGX_OptionAction action, int option,
   RGX_OptionsType *bits, const RGX_OptionMap *map
 ) {
   RGX_OptionsType bit = ((option >= 0) && (option < map->count))? map->array[option]: 0;
