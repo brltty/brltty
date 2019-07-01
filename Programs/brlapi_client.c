@@ -170,6 +170,26 @@ sem_wait (sem_t *sem) {
 }
 
 static int
+sem_timedwait (sem_t *sem, const struct timespec *at) {
+  struct timeval now;
+  gettimeofday(&now, NULL);
+
+  mach_timespec_t in;
+  in.tv_sec = at->tv_sec - now.tv_sec;
+  in.tv_nsec = at->tv_nsec - (now.tv_usec * 1000);
+  if (in.tv_nsec < 0) in.tv_sec -= 1, in.tv_nsec += 1000000000;
+  if (in.tv_sec < 0) in.tv_sec = 0, in.tv_nsec = 0;
+
+  return semaphore_timedwait(*sem, in);
+}
+
+static int
+sem_trywait (sem_t *sem) {
+  struct timespec at = { .tv_sec=0, .tv_nsec=0 };
+  return sem_timedwait(sem, &at);
+}
+
+static int
 sem_destroy (sem_t *sem) {
   return semaphore_destroy(mach_task_self(), *sem);
 }
