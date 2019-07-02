@@ -42,13 +42,13 @@ extern int validateChoice (unsigned int *value, const char *string, const char *
 extern int validateChoiceEx (unsigned int *value, const char *string, const void *choices, size_t size);
 
 typedef struct {
-  const char *true;
-  const char *false;
+  const char *on;
+  const char *off;
 } FlagKeywordPair;
 
 static inline const char *
 getFlagKeyword (const FlagKeywordPair *fkp, int state) {
-  return state? fkp->true: fkp->false;
+  return state? fkp->on: fkp->off;
 }
 
 extern FlagKeywordPair fkpOnOff;

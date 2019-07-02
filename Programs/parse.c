@@ -281,10 +281,10 @@ validateChoice (unsigned int *value, const char *string, const char *const *choi
   return validateChoiceEx(value, string, choices, sizeof(*choices));
 }
 
-FlagKeywordPair fkpOnOff     = {.true="on"  , .false="off"  };
-FlagKeywordPair fkpTrueFalse = {.true="true", .false="false"};
-FlagKeywordPair fkpYesNo     = {.true="yes" , .false="no"   };
-FlagKeywordPair fkp10        = {.true="1"   , .false="0"    };
+FlagKeywordPair fkpOnOff     = {.on="on"  , .off="off"  };
+FlagKeywordPair fkpTrueFalse = {.on="true", .off="false"};
+FlagKeywordPair fkpYesNo     = {.on="yes" , .off="no"   };
+FlagKeywordPair fkp10        = {.on="1"   , .off="0"    };
 
 const FlagKeywordPair *const flagKeywordPairs[] = {
   &fkpOnOff, &fkpTrueFalse, &fkpYesNo, &fkp10
@@ -308,8 +308,8 @@ validateFlagKeyword (unsigned int *value, const char *string) {
     const char **choice = choices;
 
     while (fkp < end) {
-      *choice++ = (*fkp)->false;
-      *choice++ = (*fkp)->true;
+      *choice++ = (*fkp)->off;
+      *choice++ = (*fkp)->on;
       fkp += 1;
     }
 
@@ -323,7 +323,7 @@ validateFlagKeyword (unsigned int *value, const char *string) {
 
 int
 validateFlag (unsigned int *value, const char *string, const FlagKeywordPair *fkp) {
-  const char *choices[] = {fkp->false, fkp->true, NULL};
+  const char *choices[] = {fkp->off, fkp->on, NULL};
   return validateChoice(value, string, choices);
 }
 
