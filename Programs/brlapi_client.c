@@ -187,8 +187,8 @@ sem_timedwait (sem_t *sem, const struct timespec *abs) {
 
 static int
 sem_trywait (sem_t *sem) {
-  struct timespec abs = { .tv_sec=0, .tv_nsec=0 };
-  return sem_timedwait(sem, &abs);
+  mach_timespec_t rel = { .tv_sec=0, .tv_nsec=0 };
+  return semaphore_timedwait(*sem, rel);
 }
 
 static int
