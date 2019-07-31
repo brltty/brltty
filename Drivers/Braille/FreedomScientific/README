@@ -4,13 +4,13 @@ been implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
 
 The most important single command is the one to access the help screen. On the
 PAC Mate display this is the key just to the right of the center marker (also
-referred to as HK5 below). On the Focus, this is chord H (Space+Dot1+Dot2+
-Dot5).
+referred to as HK5 below). On the Focus, this is chord H (Space+Dots125).
 
-The serial and USB ports are both supported. The following models are 
+Serial, USB, and Bluetooth are all supported. The following models are 
 recognized:
-*  Focus: 44, 70, 84
+*  Focus 1: 44, 70, 84
 *  Focus 2: 40, 80
+*  Focus Blue: 14, 40, 80
 *  PAC Mate: 20, 40
 
 If an unrecognized model is connected then the driver makes an attempt to
