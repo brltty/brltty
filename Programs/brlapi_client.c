@@ -585,7 +585,7 @@ static int brlapi__writePacketWaitForAck(brlapi_handle_t *handle, brlapi_packetT
 
 /* Function: tryHost */
 /* Tries to connect to the given host. */
-static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
+static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
   char *host = NULL;
   char *port;
   SocketDescriptor sockfd = -1;
@@ -1393,7 +1393,7 @@ static int brlapi___writeText(brlapi_handle_t *handle, int cursor, const void *s
   brlapi_packet_t packet;
   brlapi_writeArgumentsPacket_t *wa = &packet.writeArguments;
   unsigned char *p = &wa->data;
-  char *locale;
+  const char *locale;
   int res;
   size_t len;
 

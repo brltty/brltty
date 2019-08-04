@@ -372,7 +372,7 @@ endProgram (void) {
 
   while (programExitEntries) {
     ProgramExitEntry *pxe = programExitEntries;
-    char *name = pxe->name;
+    const char *name = pxe->name;
 
     programExitEntries = pxe->next;
     if (!name) name = "unknown";

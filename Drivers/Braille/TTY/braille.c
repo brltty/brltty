@@ -105,7 +105,7 @@ getch_noCurses (void) {
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   unsigned int ttyBaud = 9600;
-  char *ttyType = "vt100";
+  const char *ttyType = "vt100";
   int windowLines = 1;
   int windowColumns = 40;
 

@@ -112,7 +112,7 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
   }
 
   {
-    static char *const colours[] = {
+    static const char *const colours[] = {
       /*      */ strtext("black"),
       /*    B */ strtext("blue"),
       /*   G  */ strtext("green"),

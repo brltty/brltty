@@ -49,7 +49,7 @@ typedef struct {
 } DataFileParameters;
 
 extern int processDataFile (const char *name, const DataFileParameters *parameters);
-extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
+extern void reportDataError (DataFile *file, const char *format, ...) PRINTF(2, 3);
 
 extern int processDataStream (
   DataFile *includer,

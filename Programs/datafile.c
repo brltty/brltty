@@ -78,7 +78,7 @@ brlDotBitToIndex (unsigned char bit, int *index) {
 }
 
 void
-reportDataError (DataFile *file, char *format, ...) {
+reportDataError (DataFile *file, const char *format, ...) {
   char message[0X200];
 
   {

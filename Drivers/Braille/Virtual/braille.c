@@ -469,8 +469,7 @@ setInetAddress (const char *string, struct sockaddr_in *address) {
 
     if (portNumber) {
       *portNumber++ = 0;
-    } else {
-      portNumber = "";
+      if (!*portNumber) portNumber = NULL;
     }
 
     memset(address, 0, sizeof(*address));
@@ -488,7 +487,7 @@ setInetAddress (const char *string, struct sockaddr_in *address) {
       address->sin_addr.s_addr = INADDR_ANY;
     }
 
-    if (*portNumber) {
+    if (portNumber) {
       int port;
 
       if (isInteger(&port, portNumber)) {

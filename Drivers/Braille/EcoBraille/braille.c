@@ -42,12 +42,12 @@
 
 /* Braille display parameters */
 typedef struct{
-    char *Name;
+    const char *Name;
     int Cols;
     int NbStCells;
 } BRLPARAMS;
 
-static BRLPARAMS Models[NB_MODEL] ={
+static const BRLPARAMS Models[NB_MODEL] ={
   {
     /* ID == 0 */
     "ECO20",
@@ -77,7 +77,7 @@ static BRLPARAMS Models[NB_MODEL] ={
 static SerialDevice *serialDevice;			/* file descriptor for Braille display */
 static unsigned char *rawdata;		/* translated data to send to Braille */
 static unsigned char Status[MAX_STCELLS]; /* to hold status */
-static BRLPARAMS *model;		/* points to terminal model config struct */
+static const BRLPARAMS *model;		/* points to terminal model config struct */
 static int BrailleSize=0;		/* Braille size of braille line */
 
 #ifdef DEBUG

@@ -206,7 +206,7 @@ readCharacters_ScreenScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
 static int
 insertKey_ScreenScreen (ScreenKey key) {
-  char *sequence;
+  const char *sequence;
   char buffer[0X10];
 
   setScreenKeyModifiers(&key, 0);

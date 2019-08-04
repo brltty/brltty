@@ -1377,7 +1377,7 @@ static int
 AtSpi2GenerateKeyboardEvent (dbus_uint32_t keysym, enum key_type_e key_type)
 {
   DBusMessage *msg, *reply;
-  char *s = "";
+  const char *s = "";
 
   msg = new_method_call(SPI2_DBUS_INTERFACE_REG, SPI2_DBUS_PATH_DEC, SPI2_DBUS_INTERFACE_DEC, "GenerateKeyboardEvent");
   if (!msg)

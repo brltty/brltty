@@ -53,7 +53,7 @@ static uint16_t totalCharacterCount;
 static AsyncHandle trackHandle = NULL;
 
 #define ERRBUFLEN 200
-static void myerror(volatile SpeechSynthesizer *spk, char *fmt, ...)
+static void myerror(volatile SpeechSynthesizer *spk, const char *fmt, ...)
 {
   char buf[ERRBUFLEN];
   int offs;
@@ -68,7 +68,7 @@ static void myerror(volatile SpeechSynthesizer *spk, char *fmt, ...)
   logMessage(LOG_ERR, "%s", buf);
   spk_destruct(spk);
 }
-static void myperror(volatile SpeechSynthesizer *spk, char *fmt, ...)
+static void myperror(volatile SpeechSynthesizer *spk, const char *fmt, ...)
 {
   char buf[ERRBUFLEN];
   int offs;
@@ -177,7 +177,7 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
 
 static int spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
 {
-  char *extSockPath = parameters[PARM_SOCK_PATH];
+  const char *extSockPath = parameters[PARM_SOCK_PATH];
 
   spk->setRate = spk_setRate;
 

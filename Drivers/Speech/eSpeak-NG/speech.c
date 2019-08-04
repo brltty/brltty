@@ -114,7 +114,7 @@ spk_setPunctuation(volatile SpeechSynthesizer *spk, SpeechPunctuation setting)
 
 static int spk_construct(volatile SpeechSynthesizer *spk, char **parameters)
 {
-	char *data_path, *voicename, *punctlist;
+	const char *data_path, *voicename, *punctlist;
 	int result;
 
 	spk->setVolume = spk_setVolume;
