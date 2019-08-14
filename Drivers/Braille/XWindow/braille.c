@@ -210,7 +210,7 @@ typedef enum {
 #define WHOLESIZE (MAXLINES * MAXCOLS)
 static int cols,lines;
 static int input;
-static char *model = "simple";
+static const char *model = "simple";
 static const char *fontname = "-*-clearlyu-*-*-*-*-*-*-*-*-*-*-iso10646-1,-*-fixed-*-*-*-*-*-*-*-*-*-*-iso10646-1,-*-unifont-*-*-*-*-*-*-*-*-*-*-iso10646-1,-*-fixed-*-*-*-*-*-*-*-*-*-*-iso8859-1";
 static int xtArgc = 1;
 static char *xtDefArgv[]= { "brltty", NULL };
@@ -454,12 +454,12 @@ struct button {
 };
 
 struct model {
-  char *name;
+  const char *name;
   struct button *buttons;
   int width,height;
 };
 
-static struct model *keyModel;
+static const struct model *keyModel;
 
 static struct button buttons_simple[] = {
   { "Dot1",   BRL_CMD_BLK(PASSDOTS)  | BRL_DOT1  , 0, 0, 0 },
@@ -530,7 +530,7 @@ static struct button buttons_vs[] = {
   { NULL,   0,                  0, 0, 0},
 };
 
-static struct model models[] = {
+static const struct model models[] = {
   { "normal",	buttons_simple,	4, 4 },
   { "vs",	buttons_vs,	9, 5 },
 };
@@ -552,11 +552,11 @@ static void createKeyButtons(struct button *buttons) {
 }
 
 struct radioInt {
-  char *name;
+  const char *name;
   int value;
 };
 
-static struct radioInt colsRadio [] = {
+static const struct radioInt colsRadio [] = {
   { "80", 80 },
   { "60", 60 },
   { "40", 40 },
@@ -752,8 +752,8 @@ static int generateToplevel(void)
 #ifdef USE_WINDOWS
   UINT cb = 0;
 #endif /* USE_WINDOWS */
-  struct radioInt *radioInt;
-  struct model *radioModel;
+  const struct radioInt *radioInt;
+  const struct model *radioModel;
   int y,x;
 
 #if defined(USE_XT)
