@@ -424,6 +424,40 @@ out:
   return res;
 }
 
+/* Get the get interfaces of an AT-SPI2 object */
+static int getHasTextInterface(const char *sender, const char *path) {
+  DBusMessage *msg, *reply;
+  DBusMessageIter iter;
+  DBusMessageIter iter_array;
+  int ret = 0;
+
+  msg = new_method_call(sender, path, SPI2_DBUS_INTERFACE_ACCESSIBLE, "GetInterfaces");
+  if (!msg)
+    return 0;
+  reply = send_with_reply_and_block(bus, msg, 1000, "getting interfaces");
+  if (!reply)
+    return 0;
+
+  dbus_message_iter_init(reply, &iter);
+  dbus_message_iter_recurse (&iter, &iter_array);
+  while (dbus_message_iter_get_arg_type (&iter_array) != DBUS_TYPE_INVALID)
+  {
+    const char *iface;
+    dbus_message_iter_get_basic (&iter_array, &iface);
+
+    if (!strcmp (iface, "org.a11y.atspi.Text"))
+    {
+      ret = 1;
+      goto out;
+    }
+    dbus_message_iter_next (&iter_array);
+  }
+
+out:
+  dbus_message_unref(reply);
+  return ret;
+}
+
 /* Get the text of an AT-SPI2 object */
 static char *getText(const char *sender, const char *path) {
   const char *text;
@@ -564,11 +598,12 @@ static void restartTerm(const char *sender, const char *path) {
 /* Switched to a new object, check whether we want to read it, and if so, restart with it */
 static void tryRestartTerm(const char *sender, const char *path) {
   char *role = getRole(sender, path);
+  int hasTextInterface = getHasTextInterface(sender, path);
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "state changed focus to role %s", role);
-  if (typeFlags[TYPE_ALL] ||
+  if (hasTextInterface && (typeFlags[TYPE_ALL] ||
       (role && typeFlags[TYPE_TEXT] && (strcmp(role, "text") == 0)) ||
-      (role && typeFlags[TYPE_TERMINAL] && (strcmp(role, "terminal") == 0))) {
+      (role && typeFlags[TYPE_TERMINAL] && (strcmp(role, "terminal") == 0)))) {
     restartTerm(sender, path);
   } else {
     if (curPath)
