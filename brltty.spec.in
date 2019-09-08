@@ -49,6 +49,7 @@ Requires: cldr-emoji-annotation
 BuildRequires: /bin/sh
 BuildRequires: /usr/bin/env
 BuildRequires: autoconf >= 2.53
+BuildRequires: automake
 BuildRequires: make
 BuildRequires: gcc
 BuildRequires: coreutils
