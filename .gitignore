@@ -3,6 +3,7 @@ Makefile
 reldeps.mk
 
 /configure
+/aclocal.m4
 /autom4te*.cache
 /BinTree/
 

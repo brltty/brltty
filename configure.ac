@@ -1,4 +1,3 @@
-dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -20,6 +19,13 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 AC_PREREQ([2.64])
 AC_INIT([BRLTTY], [6.0], [BRLTTY@brltty.app], [brltty], [http://brltty.app/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
+
+AC_CONFIG_MACRO_DIR([m4])
+m4_include([Bindings/Java/bindings.m4])
+m4_include([Bindings/Lisp/bindings.m4])
+m4_include([Bindings/OCaml/bindings.m4])
+m4_include([Bindings/Python/bindings.m4])
+m4_include([Bindings/Tcl/bindings.m4])
 
 copyright="© 1995-2019 by The BRLTTY Developers"
 AC_SUBST([PACKAGE_COPYRIGHT], ["${copyright}"])
@@ -359,7 +365,11 @@ AC_PATH_TOOL([RANLIB], [ranlib])
 AC_PROG_AWK
 AC_PROG_LN_S
 
-AC_PATH_TOOL([PKG_CONFIG], [pkg-config], [false])
+PKG_PROG_PKG_CONFIG()
+if test -z "${PKG_CONFIG}"
+then
+   PKG_CONFIG=false
+fi
 
 AC_PATH_PROG([MSGMERGE], [msgmerge], [false])
 AC_PATH_PROG([MSGFMT], [msgfmt], [false])
