@@ -41,7 +41,7 @@ public class Connection extends BasicConnection {
     return enterTtyMode(null);
   }
 
-  public void enterTtyModeWithPath (int[] ttys) {
+  public void enterTtyModeWithPath (int... ttys) {
     enterTtyModeWithPath(ttys, null);
   }
 
