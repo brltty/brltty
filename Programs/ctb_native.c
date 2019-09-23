@@ -25,6 +25,7 @@
 
 #include "log.h"
 #include "ctb_translate.h"
+#include "ttb.h"
 #include "brl_dots.h"
 #include "unicode.h"
 #include "charset.h"
@@ -843,20 +844,18 @@ putCharacter (BrailleContractionData *bcd, wchar_t character) {
   }
 
   {
-#ifdef HAVE_WCHAR_H
-    const wchar_t replacementCharacter = UNICODE_REPLACEMENT_CHARACTER;
-    if (getCharacterWidth(character) == 0) return 1;
-#else /* HAVE_WCHAR_H */
-    const wchar_t replacementCharacter = SUB;
-#endif /* HAVE_WCHAR_H */
+    const wchar_t replacementCharacter = getReplacementCharacter();
 
     if (replacementCharacter != character) {
       const ContractionTableRule *rule = getAlwaysRule(bcd, replacementCharacter);
-      if (rule) return putReplace(bcd, rule, character);
+      if (rule) return putReplace(bcd, rule, replacementCharacter);
     }
   }
 
-  return putCell(bcd, BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8);
+  {
+    unsigned char dots = convertCharacterToDots(textTable, character);
+    return putCell(bcd, dots);
+  }
 }
 
 static int
@@ -1107,19 +1106,24 @@ finishCharacterEntry_native (BrailleContractionData *bcd, CharacterEntry *entry)
 
   {
     const ContractionTableCharacter *ctc = getContractionTableCharacter(bcd, character);
-
     if (ctc) entry->attributes |= ctc->attributes;
   }
 
   {
+    int ok = 0;
+
     SetAlwaysRuleData sar = {
       .bcd = bcd,
       .character = entry
     };
 
-    if (!handleBestCharacter(character, setAlwaysRule, &sar)) {
-      entry->always = NULL;
+    if (character == getReplacementCharacter()) {
+      ok = setAlwaysRule(character, &sar);
+    } else {
+      ok = handleBestCharacter(character, setAlwaysRule, &sar);
     }
+
+    if (!ok) entry->always = NULL;
   }
 }
 
