@@ -1110,18 +1110,14 @@ finishCharacterEntry_native (BrailleContractionData *bcd, CharacterEntry *entry)
   }
 
   {
-    int ok = 0;
-
     SetAlwaysRuleData sar = {
       .bcd = bcd,
       .character = entry
     };
 
-    if (character == getReplacementCharacter()) {
-      ok = setAlwaysRule(character, &sar);
-    } else {
-      ok = handleBestCharacter(character, setAlwaysRule, &sar);
-    }
+    int ok = (character == getReplacementCharacter())?
+             setAlwaysRule(character, &sar):
+             handleBestCharacter(character, setAlwaysRule, &sar);
 
     if (!ok) entry->always = NULL;
   }
