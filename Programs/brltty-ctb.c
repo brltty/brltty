@@ -478,7 +478,8 @@ main (int argc, char *argv[]) {
           char *textTablePath;
 
           if ((textTablePath = makeTextTablePath(opt_tablesDirectory, opt_textTable))) {
-            exitStatus = (textTable = compileTextTable(textTablePath))? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
+            textTable = compileTextTable(textTablePath);
+            exitStatus = textTable? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
             free(textTablePath);
           } else {
             exitStatus = PROG_EXIT_FATAL;
