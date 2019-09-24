@@ -26,15 +26,6 @@
 #include "unicode.h"
 #include "prefs.h"
 
-wchar_t
-getReplacementCharacter (void) {
-#ifdef HAVE_WCHAR_H
- return UNICODE_REPLACEMENT_CHARACTER;
-#else /* HAVE_WCHAR_H */
- return SUB;
-#endif /* HAVE_WCHAR_H */
-}
-
 CharacterEntry *
 getCharacterEntry (BrailleContractionData *bcd, wchar_t character) {
   int first = 0;

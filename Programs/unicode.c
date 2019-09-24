@@ -166,6 +166,15 @@ isBrailleCharacter (wchar_t character) {
   return (character & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW;
 }
 
+wchar_t
+getReplacementCharacter (void) {
+#ifdef HAVE_WCHAR_H
+ return UNICODE_REPLACEMENT_CHARACTER;
+#else /* HAVE_WCHAR_H */
+ return SUB;
+#endif /* HAVE_WCHAR_H */
+}
+
 int
 normalizeCharacters (
   size_t *length, const wchar_t *characters,
