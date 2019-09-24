@@ -75,7 +75,7 @@ getUnicodeRowEntry (TextTable *table, wchar_t character) {
 }
 
 static inline const unsigned char *
-getUnicodeCellEntry (TextTable *table, wchar_t character) {
+getUnicodeCell (TextTable *table, wchar_t character) {
   const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
 
   if (row) {
@@ -126,7 +126,7 @@ typedef struct {
 static int
 setBrailleRepresentation (wchar_t character, void *data) {
   SetBrailleRepresentationData *sbr = data;
-  const unsigned char *cell = getUnicodeCellEntry(sbr->table, character);
+  const unsigned char *cell = getUnicodeCell(sbr->table, character);
 
   if (cell) {
     sbr->dots = *cell;
@@ -181,6 +181,8 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
         }
       }
 
+      if (character == UNICODE_REPLACEMENT_CHARACTER) break;
+
       if (table->options.tryBaseCharacter) {
         SetBrailleRepresentationData sbr = {
           .table = table,
@@ -197,10 +199,8 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
   }
 
   {
-    const unsigned char *cell;
-
-    if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return *cell;
-    if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return *cell;
+    const unsigned char *cell = table->cells.replacementCharacter;
+    if (cell) return *cell;
   }
 
   return BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8;

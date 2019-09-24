@@ -93,7 +93,7 @@ showUndefinedCharacters (TextTableData *ttd) {
         if (character == UNICODE_REPLACEMENT_CHARACTER) continue;
         if ((character & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW) continue;
 
-        if (!getUnicodeCellEntry(ttd, character)) {
+        if (!getUnicodeCell(ttd, character)) {
           const TextTableHeader *header = getTextTableHeader(ttd);
 
           const TextTableAliasEntry *alias = locateTextTableAlias(
@@ -220,7 +220,7 @@ typedef int AliasWriter (FILE *file, const TextTableAliasEntry *alias, const voi
 
 static int
 getDots (TextTableData *ttd, wchar_t character, unsigned char *dots) {
-  const unsigned char *cell = getUnicodeCellEntry(ttd, character);
+  const unsigned char *cell = getUnicodeCell(ttd, character);
   if (!cell) return 0;
   *dots = *cell;
   return 1;
@@ -351,7 +351,7 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const v
       wint_t character = convertCharToWchar(byte);
 
       if (character != WEOF) {
-        const unsigned char *cell = getUnicodeCellEntry(ttd, character);
+        const unsigned char *cell = getUnicodeCell(ttd, character);
 
         if (cell) {
           int isPrimary = isPrimaryCharacter(ttd, character, *cell);
@@ -1716,7 +1716,7 @@ findCharacter (EditTableData *etd, int backward) {
         wint_t wc = convertCharToWchar(byte);
 
         if (wc != WEOF) {
-          if (getUnicodeCellEntry(etd->ttd, wc)) {
+          if (getUnicodeCell(etd->ttd, wc)) {
             etd->character.byte = byte;
             return 1;
           }
@@ -1865,7 +1865,7 @@ toggleCharacter (EditTableData *etd) {
   if (!getCharacter(etd, &character)) return 0;
 
   {
-    const unsigned char *cell = getUnicodeCellEntry(etd->ttd, character);
+    const unsigned char *cell = getUnicodeCell(etd->ttd, character);
     if (cell && !*cell) {
       unsetTextTableCharacter(etd->ttd, character);
     } else if (!setTextTableCharacter(etd->ttd, character, 0)) {
@@ -1882,7 +1882,7 @@ toggleDot (EditTableData *etd, unsigned char dot) {
   wchar_t character;
 
   if (getCharacter(etd, &character)) {
-    const unsigned char *cell = getUnicodeCellEntry(etd->ttd, character);
+    const unsigned char *cell = getUnicodeCell(etd->ttd, character);
     unsigned char dots = cell? *cell: 0;
 
     if (setTextTableCharacter(etd->ttd, character, dots^dot)) {

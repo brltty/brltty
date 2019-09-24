@@ -71,6 +71,10 @@ struct TextTableStruct {
   struct {
     unsigned char tryBaseCharacter;
   } options;
+
+  struct {
+    const unsigned char *replacementCharacter;
+  } cells;
 };
 
 extern const TextTableAliasEntry *locateTextTableAlias (
