@@ -843,6 +843,11 @@ putCharacter (BrailleContractionData *bcd, wchar_t character) {
     return putCell(bcd, (character & UNICODE_CELL_MASK));
   }
 
+  if (textTable) {
+    unsigned char dots = convertCharacterToDots(textTable, character);
+    return putCell(bcd, dots);
+  }
+
   {
     const wchar_t replacementCharacter = getReplacementCharacter();
 
@@ -850,11 +855,6 @@ putCharacter (BrailleContractionData *bcd, wchar_t character) {
       const ContractionTableRule *rule = getAlwaysRule(bcd, replacementCharacter);
       if (rule) return putReplace(bcd, rule, replacementCharacter);
     }
-  }
-
-  if (textTable) {
-    unsigned char dots = convertCharacterToDots(textTable, character);
-    return putCell(bcd, dots);
   }
 
   return putCell(bcd, (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8));
