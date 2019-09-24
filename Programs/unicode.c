@@ -293,7 +293,15 @@ getTransliteratedCharacter (wchar_t character) {
 
     if (iconv(handle, &inputAddress, &inputSize, &outputAddress, &outputSize) != (size_t)-1) {
       if ((outputAddress - outputBuffer) == 1) {
-        return outputBuffer[0] & 0XFF;
+        wchar_t result = outputBuffer[0] & 0XFF;
+
+        if (result != character) {
+          if (result == WC_C('?')) {
+            return 0;
+          }
+        }
+
+        return result;
       }
     }
   }
