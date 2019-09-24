@@ -852,10 +852,12 @@ putCharacter (BrailleContractionData *bcd, wchar_t character) {
     }
   }
 
-  {
+  if (textTable) {
     unsigned char dots = convertCharacterToDots(textTable, character);
     return putCell(bcd, dots);
   }
+
+  return putCell(bcd, (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8));
 }
 
 static int

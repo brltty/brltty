@@ -474,9 +474,8 @@ main (int argc, char *argv[]) {
     if ((contractionTablePath = makeContractionTablePath(opt_tablesDirectory, opt_contractionTable))) {
       if ((contractionTable = compileContractionTable(contractionTablePath))) {
         if (*opt_textTable) {
-          char *textTablePath;
-
           putCell = putTextCell;
+          char *textTablePath;
 
           if ((textTablePath = makeTextTablePath(opt_tablesDirectory, opt_textTable))) {
             exitStatus = (textTable = compileTextTable(textTablePath))? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
@@ -486,6 +485,7 @@ main (int argc, char *argv[]) {
           }
         } else {
           putCell = putBrailleCell;
+          textTable = NULL;
           exitStatus = PROG_EXIT_SUCCESS;
         }
 
