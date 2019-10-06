@@ -236,8 +236,7 @@ do
 done
 
 readmeHeader="\
-This is an unofficial build of ${BRLTTY_NAME} ${BRLTTY_VERSION} which also includes a few fixes
-for Windows.
+This build of ${BRLTTY_NAME} ${BRLTTY_VERSION} includes a few patches for Windows.
 
 You should probably read doc/BRLTTY.txt and doc/Windows.txt for information
 on BRLTTY.
