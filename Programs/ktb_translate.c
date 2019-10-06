@@ -361,7 +361,7 @@ processCommand (KeyTable *table, int command) {
   }
 
   if (isInput) {
-    if (table->options.keyboardEnabledFlag && !*table->options.keyboardEnabledFlag) {
+    if (table->options.inputEnabledFlag && !*table->options.inputEnabledFlag) {
       command = BRL_CMD_ALERT(COMMAND_REJECTED);
     }
   }
@@ -646,8 +646,8 @@ setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag) {
 }
 
 void
-setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag) {
-  table->options.keyboardEnabledFlag = flag;
+setInputEnabledFlag (KeyTable *table, const unsigned char *flag) {
+  table->options.inputEnabledFlag = flag;
 }
 
 void
