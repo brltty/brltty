@@ -295,40 +295,75 @@ addCommandArguments (KeyTable *table, int *command, const CommandEntry *entry, c
 }
 
 static int
+isInputKey (BRL_Key key) {
+  switch (key) {
+    case BRL_KEY_BACKSPACE:
+    case BRL_KEY_DELETE:
+    case BRL_KEY_ESCAPE:
+    case BRL_KEY_TAB:
+    case BRL_KEY_ENTER:
+      return 1;
+
+    default:
+      return 0;
+  }
+}
+
+static int
 processCommand (KeyTable *table, int command) {
-  int blk = command & BRL_MSK_BLK;
+  int isInput = 0;
   int arg = command & BRL_MSK_ARG;
 
-  switch (blk) {
-    case BRL_CMD_BLK(CONTEXT): {
-      unsigned char context = KTB_CTX_DEFAULT + arg;
-      const KeyContext *ctx = getKeyContext(table, context);
+  switch (command) {
+    case BRL_CMD_PASTE:
+      isInput = 1;
+      break;
 
-      if (ctx) {
-        command = BRL_CMD_NOOP;
-        table->context.next = context;
+    default: {
+      int blk = command & BRL_MSK_BLK;
 
-        if (isTemporaryKeyContext(table, ctx)) {
-          if (!enqueueCommand(BRL_CMD_ALERT(TOGGLE_ON))) return 0;
-        } else {
-          table->context.persistent = context;
-          if (!enqueueCommand(BRL_CMD_ALERT(TOGGLE_OFF))) return 0;
+      switch (blk) {
+        case BRL_CMD_BLK(CONTEXT): {
+          unsigned char context = KTB_CTX_DEFAULT + arg;
+          const KeyContext *ctx = getKeyContext(table, context);
+
+          if (ctx) {
+            command = BRL_CMD_NOOP;
+            table->context.next = context;
+
+            if (isTemporaryKeyContext(table, ctx)) {
+              if (!enqueueCommand(BRL_CMD_ALERT(TOGGLE_ON))) return 0;
+            } else {
+              table->context.persistent = context;
+              if (!enqueueCommand(BRL_CMD_ALERT(TOGGLE_OFF))) return 0;
+            }
+          }
+
+          break;
         }
+
+        case BRL_CMD_BLK(PASTE_HISTORY):
+        case BRL_CMD_BLK(PASSDOTS):
+        case BRL_CMD_BLK(PASSCHAR):
+          isInput = 1;
+          break;
+
+        case BRL_CMD_BLK(PASSKEY):
+          if (isInputKey(arg)) isInput = 1;
+          break;
+
+        default:
+          break;
       }
 
       break;
     }
+  }
 
-    case BRL_CMD_BLK(PASSCHAR):
-    case BRL_CMD_BLK(PASSDOTS):
-    case BRL_CMD_BLK(PASSKEY):
-      if (table->options.keyboardEnabledFlag && !*table->options.keyboardEnabledFlag) {
-        command = BRL_CMD_ALERT(COMMAND_REJECTED);
-      }
-      break;
-
-    default:
-      break;
+  if (isInput) {
+    if (table->options.keyboardEnabledFlag && !*table->options.keyboardEnabledFlag) {
+      command = BRL_CMD_ALERT(COMMAND_REJECTED);
+    }
   }
 
   return enqueueCommand(command);
