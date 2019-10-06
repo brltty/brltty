@@ -236,7 +236,7 @@ do
 done
 
 readmeHeader="\
-This build of ${BRLTTY_NAME} ${BRLTTY_VERSION} includes a few patches for Windows.
+This build of ${BRLTTY_NAME} ${BRLTTY_VERSION} includes Windows-specific patches.
 
 You should probably read doc/BRLTTY.txt and doc/Windows.txt for information
 on BRLTTY.
