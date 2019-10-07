@@ -112,6 +112,7 @@ addWindowsPackageOption P python
 addWindowsPackageOption I icu
 addProgramOption C string.directory cygwinRoot "the root directory of a Cygwin installation"
 addProgramParameter source sourceRoot "the top-level directory of the source tree"
+optionalProgramParameters
 addProgramParameter revision buildRevision "the revision of the build"
 parseProgramArguments "${@}"
 
@@ -120,6 +121,13 @@ sourceRoot="$(cd "${sourceRoot}" && pwd -W)"
 
 revisionIdentifier="$("${sourceRoot}/getrevid" "${sourceRoot}")"
 logMessage task "revision identifier: ${revisionIdentifier}"
+
+[ -n "${buildRevision}" ] || {
+   buildRevision="${revisionIdentifier%-g*}"
+   buildRevision="${buildRevision#*-}"
+   buildRevision="${buildRevision#*-}"
+   [ -n "${buildRevision}" ] || buildRevision="0"
+}
 
 [ -z "${cygwinRoot}" ] || {
    if [ -d "${cygwinRoot}/cygdrive" ]
