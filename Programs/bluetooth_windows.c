@@ -22,6 +22,7 @@
 #pragma pack(push,2)
 #include <winsock2.h>
 #include <ws2bth.h>
+#include <nspapi.h>
 #pragma pack(pop)
 
 #include "prologue.h"
