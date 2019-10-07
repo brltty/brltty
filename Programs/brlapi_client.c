@@ -69,6 +69,7 @@
 #endif /* __MINGW32__ */
 
 #include <sys/time.h>
+#include "gettime.h"
 
 #ifdef linux
 #include <sys/sysmacros.h>
@@ -172,7 +173,7 @@ sem_wait (sem_t *sem) {
 static int
 sem_timedwait (sem_t *sem, const struct timespec *abs) {
   struct timeval now;
-  gettimeofday(&now, NULL);
+  getRealTime(&now);
 
   mach_timespec_t rel = {
     .tv_sec = abs->tv_sec - now.tv_sec,
@@ -341,7 +342,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
 
   do {
     if (deadline) {
-      gettimeofday(&now, NULL);
+      getRealTime(&now);
       delay = (deadline->tv_sec  - now.tv_sec ) * 1000 +
 	      (deadline->tv_usec - now.tv_usec) / 1000;
       if (delay < 0) {
@@ -474,7 +475,7 @@ static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_
   sem_t sem;
   struct timeval deadline, *pdeadline = NULL;
   if (timeout_ms >= 0) {
-    gettimeofday(&deadline, NULL);
+    getRealTime(&deadline);
     deadline.tv_sec += timeout_ms / 1000;
     deadline.tv_usec += (timeout_ms % 1000) * 1000;
     if (deadline.tv_usec >= 1000000) {
