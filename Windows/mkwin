@@ -123,10 +123,16 @@ revisionIdentifier="$("${sourceRoot}/getrevid" "${sourceRoot}")"
 logMessage task "revision identifier: ${revisionIdentifier}"
 
 [ -n "${buildRevision}" ] || {
-   buildRevision="${revisionIdentifier%-g*}"
+   buildRevision="${revisionIdentifier%-g*}-"
    buildRevision="${buildRevision#*-}"
    buildRevision="${buildRevision#*-}"
-   [ -n "${buildRevision}" ] || buildRevision="0"
+
+   if [ -n "${buildRevision}" ]
+   then
+      buildRevision="${buildRevision%-}"
+   else
+      buildRevision="0"
+   fi
 }
 
 [ -z "${cygwinRoot}" ] || {
