@@ -32,19 +32,18 @@ extern "C" {
 
 static inline int
 getRealTime (struct timeval *now) {
+  int result;
+
 #if defined(HAVE_CLOCK_GETTIME)
   struct timespec time;
-  int result = clock_gettime(CLOCK_REALTIME, &time);
-  if (result == -1) return result;
-
+  result = clock_gettime(CLOCK_REALTIME, &time);
   now->tv_sec = time.tv_sec;
   now->tv_usec = time.tv_nsec / 1000;
 #else /* getRealTime */
-  int result = gettimeofday(now, NULL);
-  if (result == -1) return result;
+  result = gettimeofday(now, NULL);
 #endif /* getRealTime */
 
-  return 0;
+  return result;
 }
 
 #ifdef __cplusplus
