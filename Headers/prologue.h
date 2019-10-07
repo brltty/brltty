@@ -128,7 +128,6 @@ extern "C" {
 #include <stdlib.h>
 #include <unistd.h>
 #include <inttypes.h>
-#include <stdbool.h>
 
 #ifdef __MINGW32__
 #if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 10))
