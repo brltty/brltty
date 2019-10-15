@@ -177,7 +177,7 @@ typedef struct {
   /*****************************************************************************/
 
   unsigned char brailleKeyboardEnabled;
-  unsigned char brailleInputMode;
+  unsigned char brailleTypingMode;
   unsigned char brailleQuickSpace;
   unsigned char brailleDisplayOrientation;
 

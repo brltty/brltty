@@ -295,16 +295,16 @@ handleInputCommands (int command, void *data) {
           applyModifierFlags(icd, &flags);
           wchar_t character;
 
-          switch (prefs.brailleInputMode) {
-            case BRL_INPUT_TEXT:
+          switch (prefs.brailleTypingMode) {
+            case BRL_TYPING_TEXT:
               character = convertDotsToCharacter(textTable, arg);
               break;
 
             default:
-              logMessage(LOG_WARNING, "unknown braille input mode: %u", prefs.brailleInputMode);
+              logMessage(LOG_WARNING, "unknown braille typing mode: %u", prefs.brailleTypingMode);
               /* fall through */
 
-            case BRL_INPUT_DOTS:
+            case BRL_TYPING_DOTS:
               character = UNICODE_BRAILLE_ROW | arg;
               break;
           }

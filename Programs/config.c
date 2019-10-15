@@ -1413,7 +1413,7 @@ constructBrailleDriver (void) {
 
               setKeyTableLogLabel(brl.keyTable, "brl");
               setLogKeyEventsFlag(brl.keyTable, &LOG_CATEGORY_FLAG(BRAILLE_KEYS));
-              setInputEnabledFlag(brl.keyTable, &prefs.brailleKeyboardEnabled);
+              setKeyboardEnabledFlag(brl.keyTable, &prefs.brailleKeyboardEnabled);
             } else {
               logMessage(LOG_WARNING, "%s: %s", gettext("cannot compile key table"), keyTablePath);
             }

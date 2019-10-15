@@ -210,7 +210,7 @@ renderStatusField_generic (unsigned char *cells) {
   cells[gscAlertTunes] = prefs.alertTunes;
   cells[gscAutorepeat] = prefs.autorepeatEnabled;
   cells[gscAutospeak] = prefs.autospeak;
-  cells[gscBrailleInputMode] = prefs.brailleInputMode;
+  cells[gscBrailleTypingMode] = prefs.brailleTypingMode;
 }
 
 typedef struct {

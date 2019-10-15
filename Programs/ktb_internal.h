@@ -171,7 +171,7 @@ struct KeyTableStruct {
   struct {
     const char *logLabel;
     const unsigned char *logKeyEventsFlag;
-    const unsigned char *inputEnabledFlag;
+    const unsigned char *keyboardEnabledFlag;
   } options;
 };
 

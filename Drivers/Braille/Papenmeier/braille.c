@@ -1221,7 +1221,7 @@ initializeGenericStatusCodes (BrailleDisplay *brl) {
         SET(BRL_CMD_TUNES, PM_GSC_FLAG, gscAlertTunes);
         SET(BRL_CMD_AUTOREPEAT, PM_GSC_FLAG, gscAutorepeat);
         SET(BRL_CMD_AUTOSPEAK, PM_GSC_FLAG, gscAutospeak);
-        SET(BRL_CMD_BRLUCDOTS, PM_GSC_FLAG, gscBrailleInputMode);
+        SET(BRL_CMD_BRLUCDOTS, PM_GSC_FLAG, gscBrailleTypingMode);
       }
 #undef SET
     }

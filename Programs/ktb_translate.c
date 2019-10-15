@@ -315,14 +315,8 @@ processCommand (KeyTable *table, int command) {
   int arg = command & BRL_MSK_ARG;
 
   switch (command) {
-    case BRL_CMD_PASTE:
-      isInput = 1;
-      break;
-
     default: {
-      int blk = command & BRL_MSK_BLK;
-
-      switch (blk) {
+      switch (command & BRL_MSK_BLK) {
         case BRL_CMD_BLK(CONTEXT): {
           unsigned char context = KTB_CTX_DEFAULT + arg;
           const KeyContext *ctx = getKeyContext(table, context);
@@ -342,7 +336,6 @@ processCommand (KeyTable *table, int command) {
           break;
         }
 
-        case BRL_CMD_BLK(PASTE_HISTORY):
         case BRL_CMD_BLK(PASSDOTS):
         case BRL_CMD_BLK(PASSCHAR):
           isInput = 1;
@@ -361,7 +354,7 @@ processCommand (KeyTable *table, int command) {
   }
 
   if (isInput) {
-    if (table->options.inputEnabledFlag && !*table->options.inputEnabledFlag) {
+    if (table->options.keyboardEnabledFlag && !*table->options.keyboardEnabledFlag) {
       command = BRL_CMD_ALERT(COMMAND_REJECTED);
     }
   }
@@ -646,8 +639,8 @@ setLogKeyEventsFlag (KeyTable *table, const unsigned char *flag) {
 }
 
 void
-setInputEnabledFlag (KeyTable *table, const unsigned char *flag) {
-  table->options.inputEnabledFlag = flag;
+setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag) {
+  table->options.keyboardEnabledFlag = flag;
 }
 
 void

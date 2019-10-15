@@ -171,7 +171,7 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_BRLUCDOTS:
-      toggleFeatureSetting(&prefs.brailleInputMode, command);
+      toggleFeatureSetting(&prefs.brailleTypingMode, command);
       break;
 
     case BRL_CMD_TOUCH_NAV:

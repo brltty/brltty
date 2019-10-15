@@ -71,7 +71,7 @@ typedef enum {
   gscAlertTunes,
   gscAutorepeat,
   gscAutospeak,
-  gscBrailleInputMode,
+  gscBrailleTypingMode,
 
   GSC_COUNT /* must be last */
 } BRL_GenericStatusCell;

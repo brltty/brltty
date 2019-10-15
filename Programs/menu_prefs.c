@@ -804,8 +804,8 @@ makePreferencesMenu (void) {
         {.label=strtext("Dots via Unicode Braille")}
       };
 
-      NAME(strtext("Input Mode"));
-      ITEM(newEnumeratedMenuItem(typingSubmenu, &prefs.brailleInputMode, &itemName, strings));
+      NAME(strtext("Typing Mode"));
+      ITEM(newEnumeratedMenuItem(typingSubmenu, &prefs.brailleTypingMode, &itemName, strings));
     }
 
     {
@@ -832,7 +832,7 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("First Release"));
+      NAME(strtext("On First Release"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.firstRelease, &itemName));
     }
 
@@ -843,7 +843,7 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Autorepeat"));
+      NAME(strtext("Autorepeat Enabled"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeatEnabled, &itemName));
       CHANGED(AutorepeatEnabled);
     }

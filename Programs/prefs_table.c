@@ -66,7 +66,7 @@ PREFERENCE_STRING_TABLE(touchSensitivity,
   "minimum", "low", "medium", "high", "maximum"
 )
 
-PREFERENCE_STRING_TABLE(brailleInputMode,
+PREFERENCE_STRING_TABLE(brailleTypingMode,
   "text", "dots"
 )
 
@@ -365,10 +365,10 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.brailleKeyboardEnabled
   },
 
-  { .name = "braille-input-mode",
-    .defaultValue = DEFAULT_BRAILLE_INPUT_MODE,
-    .settingNames = &preferenceStringTable_brailleInputMode,
-    .setting = &prefs.brailleInputMode
+  { .name = "braille-typing-mode",
+    .defaultValue = DEFAULT_BRAILLE_TYPING_MODE,
+    .settingNames = &preferenceStringTable_brailleTypingMode,
+    .setting = &prefs.brailleTypingMode
   },
 
   { .name = "braille-quick-space",
@@ -634,6 +634,7 @@ const PreferenceAliasEntry preferenceAliasTable[] = {
   {.oldName="uppercase-indicator", .newName="speech-uppercase-indicator"},
   {.oldName="whitespace-indicator", .newName="speech-whitespace-indicator"},
   {.oldName="braille-sensitivity", .newName="touch-sensitivity"},
+  {.oldName="braille-input-mode", .newName="braille-typing-mode"},
 };
 
 const unsigned char preferenceAliasCount = ARRAY_COUNT(preferenceAliasTable);

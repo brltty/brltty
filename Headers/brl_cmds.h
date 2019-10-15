@@ -208,7 +208,7 @@ typedef enum {
   BRL_CMD_CLIP_SAVE /* save clipboard to disk */,
   BRL_CMD_CLIP_RESTORE /* restore clipboard from disk */,
 
-  BRL_CMD_BRLUCDOTS /* set braille input mode dots/text */,
+  BRL_CMD_BRLUCDOTS /* set braille typing mode dots/text */,
   BRL_CMD_BRLKBD /* set braille keyboard enabled/disabled */,
 
   BRL_CMD_UNSTICK /* clear all sticky input modifiers */,
