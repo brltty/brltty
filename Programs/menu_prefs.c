@@ -105,30 +105,30 @@ testAutorepeatEnabled (void) {
 }
 
 static int
-setAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
-  if (!brl->setAutorepeat) return 1;
-  return setBrailleAutorepeat(brl, on, delay, interval);
+changeAutorepeatProperties (BrailleDisplay *brl, int on, int delay, int interval) {
+  if (!canSetAutorepeatProperties(brl)) return 1;
+  return setAutorepeatProperties(brl, on, delay, interval);
 }
 
 static int
 changedAutorepeatEnabled (const MenuItem *item UNUSED, unsigned char setting) {
-  return setAutorepeat(&brl, setting,
-                       PREFERENCES_TIME(prefs.longPressTime),
-                       PREFERENCES_TIME(prefs.autorepeatInterval));
+  return changeAutorepeatProperties(&brl, setting,
+                                    PREFERENCES_TIME(prefs.longPressTime),
+                                    PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
 static int
 changedAutorepeatDelay (const MenuItem *item UNUSED, unsigned char setting) {
-  return setAutorepeat(&brl, prefs.autorepeatEnabled,
-                       setting,
-                       PREFERENCES_TIME(prefs.autorepeatInterval));
+  return changeAutorepeatProperties(&brl, prefs.autorepeatEnabled,
+                                    setting,
+                                    PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
 static int
 changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
-  return setAutorepeat(&brl, prefs.autorepeatEnabled,
-                       PREFERENCES_TIME(prefs.longPressTime),
-                       setting);
+  return changeAutorepeatProperties(&brl, prefs.autorepeatEnabled,
+                                    PREFERENCES_TIME(prefs.longPressTime),
+                                    setting);
 }
 
 static int
@@ -178,7 +178,7 @@ changedTouchSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
 
 static int
 testBrailleOrientation (void) {
-  return brl.rotateInput != NULL;
+  return brl.rotateInputKeys != NULL;
 }
 
 static int

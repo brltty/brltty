@@ -537,7 +537,7 @@ enqueueKeyEvent (
   if (brl->keyTable) {
     switch (prefs.brailleOrientation) {
       case BRL_ORIENTATION_ROTATED:
-        if (brl->rotateInput) brl->rotateInput(brl, &group, &number);
+        if (brl->rotateInputKeys) brl->rotateInputKeys(brl, &group, &number);
         break;
 
       default:

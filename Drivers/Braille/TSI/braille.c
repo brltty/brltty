@@ -530,7 +530,7 @@ getIdentity (BrailleDisplay *brl, InputPacket *reply) {
 }
 
 static int
-setAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
+setAutorepeatProperties (BrailleDisplay *brl, int on, int delay, int interval) {
   const unsigned char request[] = {
     0XFF, 0XFF, 0X0D,
     on? ((delay + 9) / 10) /* 10ms */: 0XFF /* long delay */,
@@ -742,7 +742,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       makeOutputTable(dotsTable_ISO11548_1);
 
       brl->textColumns = brl->data->cellCount;		/* initialise size of display */
-      brl->setAutorepeat = setAutorepeat;
+      brl->setAutorepeatProperties = setAutorepeatProperties;
 
       memset(brl->data->routingKeys, 0, sizeof(brl->data->routingKeys));
       brl->data->forceWrite = 1;

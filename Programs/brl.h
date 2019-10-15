@@ -57,8 +57,8 @@ extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 extern int canSetTouchSensitivity (BrailleDisplay *brl);
 extern int setTouchSensitivity (BrailleDisplay *brl, TouchSensitivity setting);
 
-extern int canSetBrailleAutorepeat (BrailleDisplay *brl);
-extern int setBrailleAutorepeat (BrailleDisplay *brl, int on, int delay, int interval);
+extern int canSetAutorepeatProperties (BrailleDisplay *brl);
+extern int setAutorepeatProperties (BrailleDisplay *brl, int on, int delay, int interval);
 
 extern int haveBrailleDriver (const char *code);
 extern const char *getDefaultBrailleDriver (void);

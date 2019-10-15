@@ -99,7 +99,7 @@ typedef struct {
   void (*writeText) (BrailleDisplay *brl, unsigned int start, unsigned int count);
   void (*writeStatus) (BrailleDisplay *brl, unsigned int start, unsigned int count);
   void (*flushCells) (BrailleDisplay *brl);
-  int (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
+  int (*setBrailleFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
 } ProtocolOperations;
 
 typedef enum {
@@ -887,7 +887,7 @@ releaseResources2 (BrailleDisplay *brl) {
 }
 
 static int
-setFirmness2 (BrailleDisplay *brl, BrailleFirmness setting) {
+setBrailleFirmness2 (BrailleDisplay *brl, BrailleFirmness setting) {
   unsigned char data[] = {(setting * 98 / BRL_FIRMNESS_MAXIMUM) + 2, 0X99};
   return writePacket2(brl, 6, sizeof(data), data);
 }
@@ -896,7 +896,7 @@ static const ProtocolOperations protocolOperations2 = {
   initializeTerminal2, releaseResources2,
   readCommand2,
   writeCells2, writeCells2, flushCells2,
-  setFirmness2
+  setBrailleFirmness2
 };
 
 typedef struct {
@@ -1061,7 +1061,7 @@ static int
 startTerminal (BrailleDisplay *brl) {
   if (gioDiscardInput(brl->gioEndpoint)) {
     if (identifyTerminal(brl)) {
-      brl->setFirmness = brl->data->protocol->setFirmness;
+      brl->setBrailleFirmness = brl->data->protocol->setBrailleFirmness;
 
       memset(brl->data->textCells, 0, brl->data->model->textColumns);
       memset(brl->data->statusCells, 0, brl->data->model->statusCount);

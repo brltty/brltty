@@ -638,7 +638,7 @@ getPacket (BrailleDisplay *brl, FS_Packet *packet) {
 }
 
 static int
-setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
+setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
   brl->data->firmnessSetting = setting * 0XFF / BRL_FIRMNESS_MAXIMUM;
   return writeRequest(brl);
 }
@@ -858,7 +858,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->textRows = 1;
 
         setBrailleKeyTable(brl, brl->data->keyTableDefinition);
-        brl->setFirmness = setFirmness;
+        brl->setBrailleFirmness = setBrailleFirmness;
 
         return writeRequest(brl);
       }

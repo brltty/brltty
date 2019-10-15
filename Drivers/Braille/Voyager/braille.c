@@ -909,7 +909,7 @@ static unsigned char *translatedCells = NULL; /* buffer to prepare new pattern *
  * We are told 265V is normal operating voltage but we don't know the scale.
  */
 static int
-setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
+setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
   unsigned char voltage = 0XFF - (setting * 0XFF / BRL_FIRMNESS_MAXIMUM);
   logMessage(LOG_DEBUG, "setting display voltage: %02X", voltage);
   return protocol->setDisplayVoltage(brl, voltage);
@@ -947,7 +947,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->textRows = 1;		/* always 1 */
 
           setBrailleKeyTable(brl, deviceType->keyTableDefinition);
-          brl->setFirmness = setFirmness;
+          brl->setBrailleFirmness = setBrailleFirmness;
 
           if ((previousCells = malloc(cellCount))) {
             if ((translatedCells = malloc(cellCount))) {

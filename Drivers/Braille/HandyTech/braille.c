@@ -325,10 +325,10 @@ static CellWriter writeCells_statusAndText;
 static CellWriter writeCells_Bookworm;
 static CellWriter writeCells_Evolution;
 
-static SetBrailleFirmnessMethod setFirmness;
+static SetBrailleFirmnessMethod setBrailleFirmness;
 
-static SetTouchSensitivityMethod setSensitivity_Evolution;
-static SetTouchSensitivityMethod setSensitivity_ActiveBraille;
+static SetTouchSensitivityMethod setTouchSensitivity_Evolution;
+static SetTouchSensitivityMethod setTouchSensitivity_ActiveBraille;
 
 typedef struct {
   const char *name;
@@ -336,8 +336,8 @@ typedef struct {
 
   ByteInterpreter *interpretByte;
   CellWriter *writeCells;
-  SetBrailleFirmnessMethod *setFirmness;
-  SetTouchSensitivityMethod *setSensitivity;
+  SetBrailleFirmnessMethod *setBrailleFirmness;
+  SetTouchSensitivityMethod *setTouchSensitivity;
 
   BrailleSessionEnder *sessionEnder;
 
@@ -384,7 +384,7 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(me64),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
-    .setSensitivity = setSensitivity_Evolution,
+    .setTouchSensitivity = setTouchSensitivity_Evolution,
     .hasATC = 1
   },
 
@@ -395,7 +395,7 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(me88),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
-    .setSensitivity = setSensitivity_Evolution,
+    .setTouchSensitivity = setTouchSensitivity_Evolution,
     .hasATC = 1
   },
 
@@ -461,8 +461,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(ab),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
-    .setFirmness = setFirmness,
-    .setSensitivity = setSensitivity_ActiveBraille,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
     .hasATC = 1,
     .hasTime = 1
   },
@@ -511,8 +511,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(alo),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
-    .setFirmness = setFirmness,
-    .setSensitivity = setSensitivity_ActiveBraille,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
     .hasATC = 1,
     .hasTime = 1
   },
@@ -524,8 +524,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
-    .setFirmness = setFirmness,
-    .setSensitivity = setSensitivity_ActiveBraille,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
     .hasATC = 1,
     .hasTime = 1
   },
@@ -537,8 +537,8 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(as40),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
-    .setFirmness = setFirmness,
-    .setSensitivity = setSensitivity_ActiveBraille,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
     .hasATC = 1,
     .hasTime = 1
   },
@@ -559,7 +559,7 @@ static const ModelEntry modelTable[] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(cb40),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
-    .setFirmness = setFirmness,
+    .setBrailleFirmness = setBrailleFirmness,
     .hasTime = 1
   },
 
@@ -1019,8 +1019,8 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   brl->statusRows = 1;
 
   setBrailleKeyTable(brl, brl->data->model->keyTableDefinition);
-  brl->setFirmness = brl->data->model->setFirmness;
-  brl->setSensitivity = brl->data->model->setSensitivity;
+  brl->setBrailleFirmness = brl->data->model->setBrailleFirmness;
+  brl->setTouchSensitivity = brl->data->model->setTouchSensitivity;
 
   memset(brl->data->rawStatus, 0, brl->data->model->statusCells);
   memset(brl->data->rawData, 0, brl->data->model->textCells);
@@ -1056,19 +1056,19 @@ setAtcMode (BrailleDisplay *brl, unsigned char value) {
 }
 
 static int
-setFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
+setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
   const unsigned char data[] = {setting * 2 / BRL_FIRMNESS_MAXIMUM};
   return writeExtendedPacket(brl, HT_EXTPKT_SetFirmness, data, sizeof(data));
 }
 
 static int
-setSensitivity_Evolution (BrailleDisplay *brl, TouchSensitivity setting) {
+setTouchSensitivity_Evolution (BrailleDisplay *brl, TouchSensitivity setting) {
   const unsigned char data[] = {0XFF - (setting * 0XF0 / BRL_SENSITIVITY_MAXIMUM)};
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity, data, sizeof(data));
 }
 
 static int
-setSensitivity_ActiveBraille (BrailleDisplay *brl, TouchSensitivity setting) {
+setTouchSensitivity_ActiveBraille (BrailleDisplay *brl, TouchSensitivity setting) {
   const unsigned char data[] = {setting * 6 / BRL_SENSITIVITY_MAXIMUM};
   return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity2, data, sizeof(data));
 }

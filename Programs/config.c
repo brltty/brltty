@@ -1139,9 +1139,9 @@ applyBraillePreferences (void) {
   setBrailleFirmness(&brl, prefs.brailleFirmness);
   setTouchSensitivity(&brl, prefs.touchSensitivity);
 
-  setBrailleAutorepeat(&brl, prefs.autorepeatEnabled,
-                       PREFERENCES_TIME(prefs.longPressTime),
-                       PREFERENCES_TIME(prefs.autorepeatInterval));
+  setAutorepeatProperties(&brl, prefs.autorepeatEnabled,
+                          PREFERENCES_TIME(prefs.longPressTime),
+                          PREFERENCES_TIME(prefs.autorepeatInterval));
 
   if (brl.keyTable) {
     setKeyAutoreleaseTime(brl.keyTable, prefs.autoreleaseTime);

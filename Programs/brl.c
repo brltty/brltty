@@ -36,9 +36,9 @@ void
 constructBrailleDisplay (BrailleDisplay *brl) {
   brl->data = NULL;
 
-  brl->setFirmness = NULL;
-  brl->setSensitivity = NULL;
-  brl->setAutorepeat = NULL;
+  brl->setBrailleFirmness = NULL;
+  brl->setTouchSensitivity = NULL;
+  brl->setAutorepeatProperties = NULL;
 
   brl->textColumns = 0;
   brl->textRows = 1;
@@ -66,7 +66,7 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->isOffline = 0;
   brl->isSuspended = 0;
 
-  brl->rotateInput = NULL;
+  brl->rotateInputKeys = NULL;
   brl->api = NULL;
 
   brl->acknowledgements.messages = NULL;
@@ -248,37 +248,37 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
 int
 canSetBrailleFirmness (BrailleDisplay *brl) {
-  return brl->setFirmness != NULL;
+  return brl->setBrailleFirmness != NULL;
 }
 
 int
 setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting) {
   if (!canSetBrailleFirmness(brl)) return 0;
   logMessage(LOG_DEBUG, "setting braille firmness: %d", setting);
-  return brl->setFirmness(brl, setting);
+  return brl->setBrailleFirmness(brl, setting);
 }
 
 int
 canSetTouchSensitivity (BrailleDisplay *brl) {
-  return brl->setSensitivity != NULL;
+  return brl->setTouchSensitivity != NULL;
 }
 
 int
 setTouchSensitivity (BrailleDisplay *brl, TouchSensitivity setting) {
   if (!canSetTouchSensitivity(brl)) return 0;
   logMessage(LOG_DEBUG, "setting touch sensitivity: %d", setting);
-  return brl->setSensitivity(brl, setting);
+  return brl->setTouchSensitivity(brl, setting);
 }
 
 int
-canSetBrailleAutorepeat (BrailleDisplay *brl) {
-  return brl->setAutorepeat != NULL;
+canSetAutorepeatProperties (BrailleDisplay *brl) {
+  return brl->setAutorepeatProperties != NULL;
 }
 
 int
-setBrailleAutorepeat (BrailleDisplay *brl, int on, int delay, int interval) {
-  if (!canSetBrailleAutorepeat(brl)) return 0;
-  logMessage(LOG_DEBUG, "setting braille autorepeat: %s Delay:%d Interval:%d", 
+setAutorepeatProperties (BrailleDisplay *brl, int on, int delay, int interval) {
+  if (!canSetAutorepeatProperties(brl)) return 0;
+  logMessage(LOG_DEBUG, "setting autorepeat properties: %s Delay:%d Interval:%d", 
              (on? "on": "off"), delay, interval);
-  return brl->setAutorepeat(brl, on, delay, interval);
+  return brl->setAutorepeatProperties(brl, on, delay, interval);
 }

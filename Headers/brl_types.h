@@ -63,16 +63,15 @@ typedef struct BrailleDataStruct BrailleData;
 
 typedef int SetBrailleFirmnessMethod (BrailleDisplay *brl, BrailleFirmness setting);
 typedef int SetTouchSensitivityMethod (BrailleDisplay *brl, TouchSensitivity setting);
-typedef int SetBrailleAutorepeatMethod (BrailleDisplay *brl, int on, int delay, int interval);
-
-typedef void SetRotateInputMethod (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
+typedef int SetAutorepeatPropertiesMethod (BrailleDisplay *brl, int on, int delay, int interval);
+typedef void RotateInputKeysMethod (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
 
 struct BrailleDisplayStruct {
   BrailleData *data;
 
-  SetBrailleFirmnessMethod *setFirmness;
-  SetTouchSensitivityMethod *setSensitivity;
-  SetBrailleAutorepeatMethod *setAutorepeat;
+  SetBrailleFirmnessMethod *setBrailleFirmness;
+  SetTouchSensitivityMethod *setTouchSensitivity;
+  SetAutorepeatPropertiesMethod *setAutorepeatProperties;
 
   unsigned int textColumns;
   unsigned int textRows;
@@ -100,7 +99,7 @@ struct BrailleDisplayStruct {
   unsigned isOffline:1;
   unsigned isSuspended:1;
 
-  SetRotateInputMethod *rotateInput;
+  RotateInputKeysMethod *rotateInputKeys;
   const ApiMethods *api;
 
   struct {

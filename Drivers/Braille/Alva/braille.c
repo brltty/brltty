@@ -881,7 +881,7 @@ updateConfiguration1 (BrailleDisplay *brl, int autodetecting, const unsigned cha
 }
 
 static int
-setFirmness1 (BrailleDisplay *brl, BrailleFirmness setting) {
+setBrailleFirmness1 (BrailleDisplay *brl, BrailleFirmness setting) {
   return writeParameter1(brl, 3,
                          setting * 4 / BRL_FIRMNESS_MAXIMUM);
 }
@@ -898,7 +898,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
   if (model->name) {
     if (setDefaultConfiguration(brl)) {
       if (model->flags & MOD_FLAG_CAN_CONFIGURE) {
-        brl->setFirmness = setFirmness1;
+        brl->setBrailleFirmness = setBrailleFirmness1;
 
         if (!writeFunction1(brl, 0X07)) return 0;
 
