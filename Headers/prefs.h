@@ -179,7 +179,6 @@ typedef struct {
   unsigned char brailleKeyboardEnabled;
   unsigned char brailleTypingMode;
   unsigned char brailleQuickSpace;
-  unsigned char brailleDisplayOrientation;
 
   unsigned char wordWrap;
   unsigned char capitalizationMode;
@@ -214,6 +213,7 @@ typedef struct {
   unsigned char autoreleaseTime;
   unsigned char firstRelease;
   unsigned char touchNavigation;
+  unsigned char brailleOrientation;
 
   unsigned char cursorTrackingDelay;
   unsigned char trackScreenScroll;

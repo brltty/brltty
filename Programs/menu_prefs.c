@@ -177,7 +177,7 @@ changedTouchSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testBrailleDisplayOrientation (void) {
+testBrailleOrientation (void) {
   return brl.rotateInput != NULL;
 }
 
@@ -888,9 +888,9 @@ makePreferencesMenu (void) {
         {.label=strtext("Rotated")}
       };
 
-      NAME(strtext("Braille Display Orientation"));
-      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleDisplayOrientation, &itemName, strings));
-      TEST(BrailleDisplayOrientation);
+      NAME(strtext("Braille Orientation"));
+      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleOrientation, &itemName, strings));
+      TEST(BrailleOrientation);
     }
 
     {

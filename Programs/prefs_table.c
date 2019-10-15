@@ -70,7 +70,7 @@ PREFERENCE_STRING_TABLE(brailleTypingMode,
   "text", "dots"
 )
 
-PREFERENCE_STRING_TABLE(displayOrientation,
+PREFERENCE_STRING_TABLE(brailleOrientation,
   "normal", "rotated"
 )
 
@@ -376,10 +376,10 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.brailleQuickSpace
   },
 
-  { .name = "braille-display-orientation",
-    .defaultValue = DEFAULT_BRAILLE_DISPLAY_ORIENTATION,
-    .settingNames = &preferenceStringTable_displayOrientation,
-    .setting = &prefs.brailleDisplayOrientation
+  { .name = "braille-orientation",
+    .defaultValue = DEFAULT_BRAILLE_ORIENTATION,
+    .settingNames = &preferenceStringTable_brailleOrientation,
+    .setting = &prefs.brailleOrientation
   },
 
   { .name = "alerts-console-bell",
@@ -635,6 +635,7 @@ const PreferenceAliasEntry preferenceAliasTable[] = {
   {.oldName="whitespace-indicator", .newName="speech-whitespace-indicator"},
   {.oldName="braille-sensitivity", .newName="touch-sensitivity"},
   {.oldName="braille-input-mode", .newName="braille-typing-mode"},
+  {.oldName="braille-display-orientation", .newName="braille-orientation"},
 };
 
 const unsigned char preferenceAliasCount = ARRAY_COUNT(preferenceAliasTable);
