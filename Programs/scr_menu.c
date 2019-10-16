@@ -21,10 +21,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "parameters.h"
 #include "log.h"
 #include "strfmt.h"
 #include "scr.h"
+#include "scr_special.h"
 #include "scr_menu.h"
+#include "update.h"
 #include "brl_cmds.h"
 #include "cmd_queue.h"
 #include "alert.h"
@@ -269,11 +272,6 @@ getTitle_MenuScreen (void) {
 }
 
 static void
-enter_MenuScreen (void) {
-  screenUpdated = 1;
-}
-
-static void
 describe_MenuScreen (ScreenDescription *description) {
   description->cols = MAX(screenWidth, 1);
   description->rows = MAX(screenHeight, 1);
@@ -321,6 +319,15 @@ itemChanged (void) {
 static void
 settingChanged (void) {
   screenUpdated = 1;
+}
+
+void
+menuScreenUpdated (void) {
+  screenUpdated = 1;
+
+  if (isSpecialScreen(SCR_MENU)) {
+    scheduleUpdateIn("menu screen updated", SCREEN_UPDATE_SCHEDULE_DELAY);
+  }
 }
 
 static int
@@ -488,7 +495,6 @@ initializeMenuScreen (MenuScreen *menu) {
 
   menu->base.currentVirtualTerminal = currentVirtualTerminal_MenuScreen;
   menu->base.getTitle = getTitle_MenuScreen;
-  menu->base.enter = enter_MenuScreen;
 
   menu->base.refresh = refresh_MenuScreen;
   menu->base.describe = describe_MenuScreen;

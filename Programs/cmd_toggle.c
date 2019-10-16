@@ -25,6 +25,7 @@
 #include "prefs.h"
 #include "scr.h"
 #include "scr_special.h"
+#include "scr_menu.h"
 #include "alert.h"
 #include "tune.h"
 #include "core.h"
@@ -90,8 +91,10 @@ toggleSetting (
 }
 
 static ToggleResult
-toggleFeatureSetting (unsigned char *setting, int command) {
-  return toggleSetting(setting, command, ALERT_TOGGLE_OFF, ALERT_TOGGLE_ON);
+togglePreferenceSetting (unsigned char *setting, int command) {
+  ToggleResult result = toggleSetting(setting, command, ALERT_TOGGLE_OFF, ALERT_TOGGLE_ON);
+  if (result > TOGGLE_SAME) menuScreenUpdated();
+  return result;
 }
 
 static ToggleResult
@@ -103,19 +106,19 @@ static int
 handleToggleCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_SKPIDLNS:
-      toggleFeatureSetting(&prefs.skipIdenticalLines, command);
+      togglePreferenceSetting(&prefs.skipIdenticalLines, command);
       break;
 
     case BRL_CMD_SKPBLNKWINS:
-      toggleFeatureSetting(&prefs.skipBlankBrailleWindows, command);
+      togglePreferenceSetting(&prefs.skipBlankBrailleWindows, command);
       break;
 
     case BRL_CMD_SLIDEWIN:
-      toggleFeatureSetting(&prefs.slidingBrailleWindow, command);
+      togglePreferenceSetting(&prefs.slidingBrailleWindow, command);
       break;
 
     case BRL_CMD_SIXDOTS:
-      toggleFeatureSetting(&prefs.textStyle, command);
+      togglePreferenceSetting(&prefs.textStyle, command);
       break;
 
     case BRL_CMD_CSRTRK:
@@ -135,11 +138,11 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_CSRSIZE:
-      toggleFeatureSetting(&prefs.screenCursorStyle, command);
+      togglePreferenceSetting(&prefs.screenCursorStyle, command);
       break;
 
     case BRL_CMD_CSRVIS:
-      toggleFeatureSetting(&prefs.showScreenCursor, command);
+      togglePreferenceSetting(&prefs.showScreenCursor, command);
       break;
 
     case BRL_CMD_CSRHIDE:
@@ -147,75 +150,75 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_CSRBLINK:
-      toggleFeatureSetting(&prefs.blinkingScreenCursor, command);
+      togglePreferenceSetting(&prefs.blinkingScreenCursor, command);
       break;
 
     case BRL_CMD_ATTRVIS:
-      toggleFeatureSetting(&prefs.showAttributes, command);
+      togglePreferenceSetting(&prefs.showAttributes, command);
       break;
 
     case BRL_CMD_ATTRBLINK:
-      toggleFeatureSetting(&prefs.blinkingAttributes, command);
+      togglePreferenceSetting(&prefs.blinkingAttributes, command);
       break;
 
     case BRL_CMD_CAPBLINK:
-      toggleFeatureSetting(&prefs.blinkingCapitals, command);
+      togglePreferenceSetting(&prefs.blinkingCapitals, command);
       break;
 
     case BRL_CMD_AUTOREPEAT:
-      toggleFeatureSetting(&prefs.autorepeatEnabled, command);
+      togglePreferenceSetting(&prefs.autorepeatEnabled, command);
       break;
 
     case BRL_CMD_BRLKBD:
-      toggleFeatureSetting(&prefs.brailleKeyboardEnabled, command);
+      togglePreferenceSetting(&prefs.brailleKeyboardEnabled, command);
       break;
 
     case BRL_CMD_BRLUCDOTS:
-      toggleFeatureSetting(&prefs.brailleTypingMode, command);
+      togglePreferenceSetting(&prefs.brailleTypingMode, command);
       break;
 
     case BRL_CMD_TOUCH_NAV:
-      toggleFeatureSetting(&prefs.touchNavigation, command);
+      togglePreferenceSetting(&prefs.touchNavigation, command);
       break;
 
     case BRL_CMD_TUNES:
-      toggleFeatureSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
+      togglePreferenceSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
       break;
 
     case BRL_CMD_AUTOSPEAK:
-      toggleFeatureSetting(&prefs.autospeak, command);
+      togglePreferenceSetting(&prefs.autospeak, command);
       break;
 
     case BRL_CMD_ASPK_SEL_LINE:
-      toggleFeatureSetting(&prefs.autospeakSelectedLine, command);
+      togglePreferenceSetting(&prefs.autospeakSelectedLine, command);
       break;
 
     case BRL_CMD_ASPK_SEL_CHAR:
-      toggleFeatureSetting(&prefs.autospeakSelectedCharacter, command);
+      togglePreferenceSetting(&prefs.autospeakSelectedCharacter, command);
       break;
 
     case BRL_CMD_ASPK_INS_CHARS:
-      toggleFeatureSetting(&prefs.autospeakInsertedCharacters, command);
+      togglePreferenceSetting(&prefs.autospeakInsertedCharacters, command);
       break;
 
     case BRL_CMD_ASPK_DEL_CHARS:
-      toggleFeatureSetting(&prefs.autospeakDeletedCharacters, command);
+      togglePreferenceSetting(&prefs.autospeakDeletedCharacters, command);
       break;
 
     case BRL_CMD_ASPK_REP_CHARS:
-      toggleFeatureSetting(&prefs.autospeakReplacedCharacters, command);
+      togglePreferenceSetting(&prefs.autospeakReplacedCharacters, command);
       break;
 
     case BRL_CMD_ASPK_CMP_WORDS:
-      toggleFeatureSetting(&prefs.autospeakCompletedWords, command);
+      togglePreferenceSetting(&prefs.autospeakCompletedWords, command);
       break;
 
     case BRL_CMD_ASPK_INDENT:
-      toggleFeatureSetting(&prefs.autospeakLineIndent, command);
+      togglePreferenceSetting(&prefs.autospeakLineIndent, command);
       break;
 
     case BRL_CMD_SHOW_CURR_LOCN:
-      toggleFeatureSetting(&prefs.showSpeechCursor, command);
+      togglePreferenceSetting(&prefs.showSpeechCursor, command);
       break;
 
     case BRL_CMD_INFO:

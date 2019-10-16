@@ -33,6 +33,7 @@ typedef struct {
 } MenuScreen;
 
 extern void initializeMenuScreen (MenuScreen *menu);
+extern void menuScreenUpdated (void);
 
 #ifdef __cplusplus
 }
