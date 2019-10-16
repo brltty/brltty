@@ -76,8 +76,6 @@ extern unsigned char translateInputCell (unsigned char cell);
   makeOutputTable(dots); \
 }
 
-extern void applyBrailleOrientation (unsigned char *cells, size_t count);
-
 extern int awaitBrailleInput (BrailleDisplay *brl, int timeout);
 
 typedef int BrailleSessionInitializer (BrailleDisplay *brl);

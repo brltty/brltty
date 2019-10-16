@@ -139,33 +139,6 @@ translateInputCell (unsigned char cell) {
   return translateCell(inputTable, cell);
 }
 
-void
-applyBrailleOrientation (unsigned char *cells, size_t count) {
-  switch (prefs.brailleOrientation) {
-    case BRL_ORIENTATION_ROTATED: {
-      static TranslationTable rotateTable = {[1] = 0};
-
-      const unsigned char *source = cells;
-      const unsigned char *end = source + count;
-
-      unsigned char buffer[count];
-      unsigned char *target = &buffer[count];
-
-      if (!rotateTable[1]) {
-        makeTranslationTable(dotsTable_rotated, rotateTable);
-      }
-
-      while (source < end) *--target = rotateTable[*source++];
-      memcpy(cells, buffer, count);
-      break;
-    }
-
-    default:
-    case BRL_ORIENTATION_NORMAL:
-      break;
-  }
-}
-
 int
 awaitBrailleInput (BrailleDisplay *brl, int timeout) {
   return gioAwaitInput(brl->gioEndpoint, timeout);
@@ -535,16 +508,6 @@ enqueueKeyEvent (
   }
 
   if (brl->keyTable) {
-    switch (prefs.brailleOrientation) {
-      case BRL_ORIENTATION_ROTATED:
-        if (brl->rotateInputKeys) brl->rotateInputKeys(brl, &group, &number);
-        break;
-
-      default:
-      case BRL_ORIENTATION_NORMAL:
-        break;
-    }
-
     processKeyEvent(brl->keyTable, getCurrentCommandContext(), group, number, press);
     return 1;
   }

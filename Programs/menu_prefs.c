@@ -177,11 +177,6 @@ changedTouchSensitivity (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testBrailleOrientation (void) {
-  return brl.rotateInputKeys != NULL;
-}
-
-static int
 testConsoleBellAlert (void) {
   return canMonitorConsoleBell();
 }
@@ -880,17 +875,6 @@ makePreferencesMenu (void) {
       ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.touchSensitivity, &itemName, strings));
       TEST(TouchSensitivity);
       CHANGED(TouchSensitivity);
-    }
-
-    {
-      static const MenuString strings[] = {
-        {.label=strtext("Normal")},
-        {.label=strtext("Rotated")}
-      };
-
-      NAME(strtext("Braille Orientation"));
-      ITEM(newEnumeratedMenuItem(inputSubmenu, &prefs.brailleOrientation, &itemName, strings));
-      TEST(BrailleOrientation);
     }
 
     {

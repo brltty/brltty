@@ -53,18 +53,12 @@ typedef enum {
   BRL_TYPING_DOTS
 } BrailleTypingMode;
 
-typedef enum {
-  BRL_ORIENTATION_NORMAL,
-  BRL_ORIENTATION_ROTATED
-} BrailleDisplayOrientation;
-
 typedef struct BrailleDisplayStruct BrailleDisplay;
 typedef struct BrailleDataStruct BrailleData;
 
 typedef int SetBrailleFirmnessMethod (BrailleDisplay *brl, BrailleFirmness setting);
 typedef int SetTouchSensitivityMethod (BrailleDisplay *brl, TouchSensitivity setting);
 typedef int SetAutorepeatPropertiesMethod (BrailleDisplay *brl, int on, int delay, int interval);
-typedef void RotateInputKeysMethod (BrailleDisplay *brl, KeyGroup *group, KeyNumber *number);
 
 struct BrailleDisplayStruct {
   BrailleData *data;
@@ -99,7 +93,6 @@ struct BrailleDisplayStruct {
   unsigned isOffline:1;
   unsigned isSuspended:1;
 
-  RotateInputKeysMethod *rotateInputKeys;
   const ApiMethods *api;
 
   struct {

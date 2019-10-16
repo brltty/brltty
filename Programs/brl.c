@@ -66,7 +66,6 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->isOffline = 0;
   brl->isSuspended = 0;
 
-  brl->rotateInputKeys = NULL;
   brl->api = NULL;
 
   brl->acknowledgements.messages = NULL;
