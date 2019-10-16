@@ -28,7 +28,6 @@
 #include "brl_base.h"
 #include "brl_utils.h"
 #include "brl_dots.h"
-#include "prefs.h"
 #include "kbd_keycodes.h"
 #include "io_generic.h"
 #include "cmd_queue.h"
