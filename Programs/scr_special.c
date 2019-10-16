@@ -159,7 +159,10 @@ announceCurrentScreen (void) {
 
 static void
 setCurrentScreen (BaseScreen *screen) {
+  currentScreen->leave();
   currentScreen = screen;
+  currentScreen->enter();
+
   scheduleUpdate("new screen selected");
   announceCurrentScreen();
 }
@@ -176,16 +179,16 @@ selectCurrentScreen (void) {
   const SpecialScreenEntry *end = sse + specialScreenCount;
 
   while (sse < end) {
-    if (sse->isActive) break;
+    if (sse->isActive) {
+      setSpecialScreen(sse);
+      return;
+    }
+
     sse += 1;
   }
 
-  if (sse == end) {
-    logMainScreenAction("selecting");
-    setCurrentScreen(&mainScreen.base);
-  } else {
-    setSpecialScreen(sse);
-  }
+  logMainScreenAction("selecting");
+  setCurrentScreen(&mainScreen.base);
 }
 
 int

@@ -269,6 +269,11 @@ getTitle_MenuScreen (void) {
 }
 
 static void
+enter_MenuScreen (void) {
+  screenUpdated = 1;
+}
+
+static void
 describe_MenuScreen (ScreenDescription *description) {
   description->cols = MAX(screenWidth, 1);
   description->rows = MAX(screenHeight, 1);
@@ -483,6 +488,7 @@ initializeMenuScreen (MenuScreen *menu) {
 
   menu->base.currentVirtualTerminal = currentVirtualTerminal_MenuScreen;
   menu->base.getTitle = getTitle_MenuScreen;
+  menu->base.enter = enter_MenuScreen;
 
   menu->base.refresh = refresh_MenuScreen;
   menu->base.describe = describe_MenuScreen;

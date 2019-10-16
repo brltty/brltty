@@ -31,6 +31,8 @@ extern void setScreenKeyModifiers (ScreenKey *key, ScreenKey which);
 
 typedef struct {
   const char * (*getTitle) (void);
+  void (*enter) (void);
+  void (*leave) (void);
 
   int (*poll) (void);
   int (*refresh) (void);

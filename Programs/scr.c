@@ -53,6 +53,7 @@ getScreenDriverDefinition (const ScreenDriver *driver) {
 static void
 initializeScreen (void) {
   screen->initialize(&mainScreen);
+  mainScreen.base.enter();
 }
 
 void

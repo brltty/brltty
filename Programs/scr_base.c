@@ -122,6 +122,14 @@ getTitle_BaseScreen (void) {
   return NULL;
 }
 
+static void
+enter_BaseScreen (void) {
+}
+
+static void
+leave_BaseScreen (void) {
+}
+
 static int
 poll_BaseScreen (void) {
   return 0;
@@ -188,6 +196,8 @@ getCommandContext_BaseScreen (void) {
 void
 initializeBaseScreen (BaseScreen *base) {
   base->getTitle = getTitle_BaseScreen;
+  base->enter = enter_BaseScreen;
+  base->leave = leave_BaseScreen;
 
   base->poll = poll_BaseScreen;
   base->refresh = refresh_BaseScreen;
