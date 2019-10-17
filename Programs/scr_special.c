@@ -159,12 +159,14 @@ announceCurrentScreen (void) {
 
 static void
 setCurrentScreen (BaseScreen *screen) {
-  currentScreen->leave();
-  currentScreen = screen;
-  currentScreen->enter();
+  if (screen != currentScreen) {
+    currentScreen->onBackground();
+    currentScreen = screen;
+    currentScreen->onForeground();
 
-  scheduleUpdate("new screen selected");
-  announceCurrentScreen();
+    scheduleUpdate("new screen selected");
+    announceCurrentScreen();
+  }
 }
 
 static void
