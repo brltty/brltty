@@ -100,8 +100,11 @@ applyPatch() {
          local name="${patch##*/}"
          logMessage task "applying patch: ${name}"
 
-         downloadFile "${patch}"
-         "${dryRun}" || executeCommand patch -N -i "${temporaryDirectory}/${name}" -d "${directory}"
+         "${dryRun}" || {
+            downloadFile "${patch}"
+            executeCommand patch -N -i "${temporaryDirectory}/${name}" -d "${directory}"
+         }
+
          return 0
       }
    done
@@ -116,9 +119,12 @@ installFile() {
 
    [ -e "${target}" ] || {
       logMessage task "installing file: ${target}"
-      downloadFile "${file}"
-      [ -d "${directory}" ] || "${dryRun}" || executeCommand mkdir -p "${directory}"
-      "${dryRun}" || executeCommand cp "${source}" "${target}"
+
+      "${dryRun}" || {
+         downloadFile "${file}"
+         [ -d "${directory}" ] || executeCommand mkdir -p "${directory}"
+         executeCommand cp "${source}" "${target}"
+      }
    }
 }
 
@@ -143,24 +149,27 @@ installWindowsArchive() {
 
    havePath "${path}" || {
       logMessage task "installing Windows archive: ${archive}"
-      downloadFile "${archive}"
 
-      local directory="content-${archive}"
-      executeCommand mkdir "${directory}"
-      executeCommand cd "${directory}"
+      "${dryRun}" || {
+         downloadFile "${archive}"
 
-      unpackArchive "../${archive}"
-      set -- *
+         local directory="content-${archive}"
+         executeCommand mkdir "${directory}"
+         executeCommand cd "${directory}"
 
-      if [ "${#}" -eq 1 -a -d "${1}" ]
-      then
-         "${dryRun}" || executeCommand mv "${1}" "${path}"
-         executeCommand cd ..
-         "${dryRun}" || executeCommand rmdir "${directory}"
-      else
-         executeCommand cd ..
-         "${dryRun}" || executeCommand mv "${directory}" "${path}"
-      fi
+         unpackArchive "../${archive}"
+         set -- *
+
+         if [ "${#}" -eq 1 -a -d "${1}" ]
+         then
+            executeCommand mv "${1}" "${path}"
+            executeCommand cd ..
+            executeCommand rmdir "${directory}"
+         else
+            executeCommand cd ..
+            executeCommand mv "${directory}" "${path}"
+         fi
+      }
    }
 }
 
@@ -170,9 +179,9 @@ installMingwArchive() {
 
    havePath "${mingwDirectory}/${path}" || {
       logMessage task "installing MinGW archive: ${archive}"
-      downloadFile "MinGW/${archive}"
 
       "${dryRun}" || {
+         downloadFile "MinGW/${archive}"
          executeCommand cd "${mingwDirectory}"
          unpackArchive "${temporaryDirectory}/${archive}"
          executeCommand cd "${temporaryDirectory}"
