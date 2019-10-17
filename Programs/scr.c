@@ -33,7 +33,7 @@
 #include "driver.h"
 
 MainScreen mainScreen;
-BaseScreen *currentScreen = &mainScreen.base;
+BaseScreen *currentScreen = NULL;
 
 int
 isMainScreen (void) {
@@ -53,7 +53,8 @@ getScreenDriverDefinition (const ScreenDriver *driver) {
 static void
 initializeScreen (void) {
   screen->initialize(&mainScreen);
-  mainScreen.base.onForeground();
+  currentScreen = &mainScreen.base;
+  currentScreen->onForeground();
 }
 
 void
