@@ -312,10 +312,11 @@ isInputKey (BRL_Key key) {
 static int
 processCommand (KeyTable *table, int command) {
   int isInput = 0;
-  int arg = command & BRL_MSK_ARG;
 
   switch (command) {
     default: {
+      int arg = command & BRL_MSK_ARG;
+
       switch (command & BRL_MSK_BLK) {
         case BRL_CMD_BLK(CONTEXT): {
           unsigned char context = KTB_CTX_DEFAULT + arg;
