@@ -69,7 +69,7 @@ downloadFile() {
 
    logMessage step "downloading file: ${source}"
    [ -z "${target}" ] && target="${source##*/}"
-   executeCommand wget -q -O "${target}" "${urlArchiveRoot}/${source}"
+   executeCommand wget -nv -O "${target}" "${urlArchiveRoot}/${source}"
 }
 
 unpackArchive() {
@@ -195,7 +195,7 @@ installMingwPackage() {
 
    havePath "${path}" || {
       logMessage task "installing MinGW package: ${package}"
-      "${dryRun}" || executeCommand mingw-get install "${package}"
+      "${dryRun}" || executeCommand mingw-get --verbose=0 install "${package}"
    }
 }
 
