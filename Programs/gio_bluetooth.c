@@ -94,7 +94,7 @@ static const GioPublicProperties gioPublicProperties_bluetooth = {
   .testIdentifier = testBluetoothIdentifier,
 
   .type = {
-    .name = "Bl;uetooth",
+    .name = "Bluetooth",
     .identifier = GIO_TYPE_BLUETOOTH
   }
 };
