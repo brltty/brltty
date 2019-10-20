@@ -102,6 +102,9 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   // Baum: Conny
   BLUETOOTH_NAME_ENTRY("Conny", "bm"),
 
+  // HandyTech: Easy Braille
+  BLUETOOTH_NAME_ENTRY("Easy Braille EBR", "ht"),
+
   // Alva: EL12
   // Harpo: Braille Pen
   BLUETOOTH_NAME_ENTRY("EL12-", "al", "vo"),
