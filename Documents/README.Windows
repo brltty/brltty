@@ -10,8 +10,8 @@ BRLTTY on Windows
 .. _Cygwin Ports: http://cygwinports.org/
 .. _Cygwin java-ecj jar: ftp://sourceware.org/pub/java/ecj-4.5.jar
 
-Using BRLTTY
-============
+Building BRLTTY
+===============
 
 System Requirements
 -------------------
@@ -229,6 +229,36 @@ This problem occurs when the ``java-ecj`` package isn't installed. It can be
 obtained from `Cygwin Ports`_. You can also resolve the probem by downloading
 the `Cygwin java-ecj jar`_, and installing it into ``/usr/share/java/ecj.jar``.
 
+Using BRLTTY
+============
+
+Useful Scripts for Managing BRLTTY
+----------------------------------
+
+These ``.bat`` scripts are in the top-level folder where BRLTTY has been installed.
+They should be run by a user that has administrative privileges.
+
+``run-brltty.bat``
+~~~~~~~~~~~~~~~~~~
+
+Manually run BRLTTY with a log level of ``info``.
+
+``debug-brltty.bat``
+~~~~~~~~~~~~~~~~~~~~
+
+Manually run BRLTTY with a log level of ``debug``
+and with several useful log categories enabled.
+
+``enable-brlapi.bat``
+~~~~~~~~~~~~~~~~~~~~~~
+
+Install the BrlAPI service and start it.
+
+``disable-brlapi.bat``
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Stop the BrlAPI service and uninstall it.
+
 Sticking to a Console
 ---------------------
 
@@ -384,8 +414,8 @@ and stable. Second, JAWS braille must be put to sleep.
    unplugged/replugged to allow JAWS to regain control. In extreme cases, you
    may need to exit BRLTTY before going to Windows.
 
-Useful Scripts
-==============
+Useful Scripts for Building BRLTTY
+==================================
 
 The ``mkwin`` Script
 --------------------

@@ -349,10 +349,10 @@ cd "${programDirectory}"
 installFile "msvcr90.dll" "bin/"
 installFile "brltty.cat" "bin/"
 installFile "brltty_x64.cat" "bin/"
-installFile "install-brltty.bat" "/"
-installFile "uninstall-brltty.bat" "/"
 installFile "run-brltty.bat" "/"
 installFile "debug-brltty.bat" "/"
+installFile "enable-brlapi.bat" "/"
+installFile "disable-brlapi.bat" "/"
 
 installFiles ${usbWindowsPackages}
 
