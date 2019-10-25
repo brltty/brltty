@@ -390,11 +390,12 @@ Useful Scripts
 The ``mkwin`` Script
 --------------------
 
-The ``mkwin`` script, which can be found in the ``Windows/`` subdirectory of
-BRLTTY's source tree, builds the Windows archive and installer for BRLTTY.
+The ``mkwin`` script,
+which can be found in the ``Windows/`` subdirectory of BRLTTY's source tree,
+builds the Windows archive and installer for BRLTTY.
 
-Required Software Components
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Software Components Required by ``mkwin``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Links to the pages where we found these
 installers, components, and files are listed.
@@ -564,8 +565,8 @@ Copies of them are at `<http://BRLTTY.app/archive/Windows/Bluetooth/>`_.
 *  bthdef.h
 *  bthsdpdef.h
 
-More Options
-~~~~~~~~~~~~
+More ``mkwin`` Options
+~~~~~~~~~~~~~~~~~~~~~~
 
 ``-u`` (USB)
    Specify which USB package is to be used. The following USB packages are
@@ -585,29 +586,34 @@ More Options
    environment variable is set then that shell is used. If not, ``/bin/sh`` is
    assumed.
 
-``-t`` (temporary)
-   Specify the temporary directory that is to be used for the build. It must
-   not already exist. If you don't specify it then an internally generated path
-   is used.
+``-t`` (temporary directory)
+   Specify the temporary directory that is to be used for the build.
+   It must not already exist.
+   If you don't specify it then an internally generated path is used.
 
 ``-k`` (keep)
-   Prevent the temporary directory from being removed at the end of a
-   successful build. It isn't removed if the build fails so that you can have a
-   look at what went wrong.
+   Don't remove the temporary directory
+   at the end of a successful build.
+   It isn't removed if the build fails
+   so that you can have a look at what went wrong.
 
 .. include:: common-options.rst
 
-Parameters
-~~~~~~~~~~
+``mkwin`` Parameters
+~~~~~~~~~~~~~~~~~~~~
 
-The ``mkwin`` script requires two parameters:
+The ``mkwin`` script accepts two parameters:
 
-1) The path to the top-level directory of BRLTTY's source tree. It may be
-   either relative or absolute.
+1) The path to the top-level directory of BRLTTY's source tree.
+   It may be either relative or absolute.
+   This parameter is required.
 
-2) The build revision. It may be any character sequence that doesn't include
-   whitespace. It is appended, with a prepended dash (``-``), to BRLTTY's
-   version number in order to construct the build version.
+2) The build revision.
+   It may be any character sequence that doesn't include whitespace.
+   It is appended, with a prepended dash (``-``), to
+   BRLTTY's version number in order to construct the build version.
+   This parameter is optional - if it isn't specified then
+   it defaults to the revision number part of the build identifier.
 
 The build name is used as:
 
@@ -617,7 +623,7 @@ The build name is used as:
 
 It has the following form::
 
-   brltty-win-buildVersion-usbPackage
+   brltty-win-buildVersion-buildRevision-usbPackage
 
 For example:
 
@@ -636,4 +642,28 @@ will create these files within the current working directory:
 
 *  brltty-win-5.2-4-libusb.zip (the archive)
 *  brltty-win-5.2-4-libusb.exe (the installer)
+
+The ``winsetup`` Script
+-----------------------
+
+The ``winsetup`` script,
+which can be found in the ``Windows/`` subdirectory of BRLTTY's source tree,
+ensures that all needed components are installed on your system
+so that `the mkwin script`_ can successfully build BRLTTY.
+
+``winsetup`` Options
+~~~~~~~~~~~~~~~~~~~~
+
+``-d`` (dry run)
+  Don't actually install anything.
+
+``-k`` (keep)
+   Don't remove the temporary directory.
+
+``-t`` (temporary directory)
+   Specify the temporary directory that is to be used for the installs.
+   It must not already exist.
+   If you don't specify it then an internally generated path is used.
+
+.. include:: common-options.rst
 
