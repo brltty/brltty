@@ -19,17 +19,17 @@
 readonly initialDirectory="$(pwd)"
 readonly programName="$(basename "${0}")"
 
-getVariable() {
-   local __variable__="${1}"
-
-   eval 'echo "${'"${__variable__}"'}"'
+setVariable() {
+   eval "${1}"'="${2}"'
 }
 
-setVariable() {
-   local __variable__="${1}"
-   local value="${2}"
-
-   eval "${__variable__}"'="${value}"'
+getVariable() {
+   if [ -n "${2}" ]
+   then
+      eval "${2}"'="${'"${1}"'}"'
+   else
+      eval 'echo "${'"${1}"'}"'
+   fi
 }
 
 defineEnumeration() {
