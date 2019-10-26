@@ -57,7 +57,8 @@ then
 
    for variable in CC  CFLAGS CXX CXXFLAGS LDFLAGS LDLIBS
    do
-      setVariable "${variable}" "$(getVariable "${variable}_FOR_BUILD")"
+      getVariable "${variable}_FOR_BUILD" value
+      setVariable "${variable}" "${value}"
       export "${variable}"
    done
 
