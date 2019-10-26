@@ -45,12 +45,19 @@ verifyDirectory() {
 }
 
 findCommand() {
-   local name="${1}"
-   local variable="${2}"
+   local variable="${1}"
+   shift 1
 
-   local path="$(command -v "${name}")"
-   [ -n "${path}" ] || return 1
-   [ -z "${variable}" ] || setVariable "${variable}" "${path}"
+   for name
+   do
+      local path="$(command -v "${name}")"
+      [ -n "${path}" ] && {
+         setVariable "${variable}" "${path}"
+         return 0
+      }
+   done
+
+   return 1
 }
 
 executeCommand() {
@@ -96,16 +103,16 @@ applyPatch() {
       local pattern="${2}"
       shift 2
 
-      grep -q "${pattern}" "${directory}/${file}" || {
-         local name="${patch##*/}"
-         logMessage task "applying patch: ${name}"
+      local path="${directory}/${file}"
+      [ -f "${path}" ] || continue
+      grep -q "${pattern}" "${path}" && continue
 
-         "${dryRun}" || {
-            downloadFile "${patch}"
-            executeCommand patch -N -i "${temporaryDirectory}/${name}" -d "${directory}"
-         }
+      local name="${patch##*/}"
+      logMessage task "applying patch: ${name}"
 
-         return 0
+      "${dryRun}" || {
+         downloadFile "${patch}"
+         executeCommand patch -N -i "${temporaryDirectory}/${name}" -d "${directory}"
       }
    done
 }
@@ -246,11 +253,12 @@ installLibUSB1() {
 installCython() {
    local python
 
-   if findCommand python python
+   if findCommand python python py
    then
+      export PYTHONIOENCODING="utf-8"
       local directory="${python%/*}"
 
-      findCommand cython || {
+      findCommand cython cython || {
          logMessage task "installing Cython"
          "${dryRun}" || executeCommand pip -q install cython
       }
@@ -265,8 +273,14 @@ installCython() {
 
 addProgramOption d flag dryRun "dry run - don't actually install anything"
 addProgramOption k flag keepFiles "keep (do not remove) the temporary directory"
+addProgramOption p string.directory pythonDirectory "the directory where Python has been installed"
 addProgramOption t string.directory temporaryDirectory "the temporary directory to use" "${defaultTemporaryDirectory}"
 parseProgramArguments "${@}"
+
+[ -n "${pythonDirectory}" ] && {
+   [ -d "${pythonDirectory}" ] || semanticError "Python directory not found: ${pythonDirectory}"
+   PATH="${pythonDirectory}:${pythonDirectory}/scripts:${PATH}"
+}
 
 readonly windowsDirectory="/c"
 verifyDirectory "${windowsDirectory}"
