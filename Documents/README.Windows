@@ -232,8 +232,8 @@ the `Cygwin java-ecj jar`_, and installing it into ``/usr/share/java/ecj.jar``.
 Using BRLTTY
 ============
 
-Useful Scripts for Managing BRLTTY
-----------------------------------
+Windows Scripts for Managing BRLTTY
+-----------------------------------
 
 These ``.bat`` scripts are in the top-level folder where BRLTTY has been installed.
 They should be run by a user that has administrative privileges.
@@ -414,8 +414,8 @@ and stable. Second, JAWS braille must be put to sleep.
    unplugged/replugged to allow JAWS to regain control. In extreme cases, you
    may need to exit BRLTTY before going to Windows.
 
-Useful Scripts for Building BRLTTY
-==================================
+MinGW Scripts for Building BRLTTY
+=================================
 
 The ``mkwin`` Script
 --------------------
@@ -619,7 +619,7 @@ More ``mkwin`` Options
 ``-t`` (temporary directory)
    Specify the temporary directory that is to be used for the build.
    It must not already exist.
-   If you don't specify it then an internally generated path is used.
+   If it isn't specified then an internally generated path is used.
 
 ``-k`` (keep)
    Don't remove the temporary directory
@@ -643,7 +643,7 @@ The ``mkwin`` script accepts two parameters:
    It is appended, with a prepended dash (``-``), to
    BRLTTY's version number in order to construct the build version.
    This parameter is optional - if it isn't specified then
-   it defaults to the revision number part of the build identifier.
+   the revision number part of the build identifier is used.
 
 The build name is used as:
 
@@ -690,10 +690,13 @@ so that `the mkwin script`_ can successfully build BRLTTY.
 ``-k`` (keep)
    Don't remove the temporary directory.
 
+``-p`` (Python directory)
+   Specify the location where Python has been installed.
+
 ``-t`` (temporary directory)
    Specify the temporary directory that is to be used for the installs.
    It must not already exist.
-   If you don't specify it then an internally generated path is used.
+   If it isn't specified then an internally generated path is used.
 
 .. include:: common-options.rst
 
