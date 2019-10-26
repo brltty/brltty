@@ -52,16 +52,16 @@ objectExtension='$(O_FOR_BUILD)'
 
 if [ "${hostSystem}" != "${buildSystem}" ]
 then
-   objectExtension="build.${objectExtension}"
    needTemporaryDirectory
-   set --
+   objectExtension="build.${objectExtension}"
 
    for variable in CC  CFLAGS CXX CXXFLAGS LDFLAGS LDLIBS
    do
-      set -- "${@}" "${variable}=\"\${${variable}_FOR_BUILD}\""
+      setVariable "${variable}" "$(getVariable "${variable}_FOR_BUILD")"
+      export "${variable}"
    done
 
-   "${@}" "${sourceRoot}/configure" \
+   "${sourceRoot}/configure" \
       --disable-api \
       --disable-gpm \
       --disable-iconv \
