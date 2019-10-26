@@ -17,8 +17,17 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/prologue.sh"
 set -e
+
+defaultSourceRoot="`dirname "${0}"`"
+
+. "`dirname "${0}"`/prologue.sh"
+addProgramOption s string.directory sourceRoot "the top-level directory of the source tree" "${defaultSourceRoot}"
+parseProgramArguments "${@}"
+
+[ -n "${sourceRoot}" ] || sourceRoot="${defaultSourceRoot}"
+[ -d "${sourceRoot}" ] || semanticError "source root not found: ${sourceRoot}"
+sourceRoot=`cd "${sourceRoot}" && pwd` || exit "${?}"
 
 inputName="config"
 outputName="forbuild"
@@ -31,26 +40,6 @@ statusExtension="status"
 
 makeInput="${inputName}.${makeExtension}"
 makeOutput="${initialDirectory}/${outputName}.${makeExtension}"
-
-sourceRoot=""
-
-while getopts ":s:" option
-do
-   case "${option}"
-   in
-      s) sourceRoot="${OPTARG}";;
-      :) syntaxError "missing value: -${OPTARG}";;
-     \?) syntaxError "unknown option: -${OPTARG}";;
-      *) syntaxError "unimplemented option: -${option}";;
-   esac
-done
-shift `expr "${OPTIND}" - 1`
-
-[ "${#}" -eq 0 ] || syntaxError "too many parameters."
-
-[ -n "${sourceRoot}" ] || sourceRoot=`dirname "${0}"`
-[ -d "${sourceRoot}" ] || semanticError "source root not found: ${sourceRoot}"
-sourceRoot=`cd "${sourceRoot}" && pwd` || exit "${?}"
 
 getMakeProperty() {
    grep "^ *${1} *=" "${makeInput}" | sed -e 's/^[^=]*= *//' -e 's/ *$//'
