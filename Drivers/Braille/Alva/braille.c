@@ -553,7 +553,7 @@ static const ModelEntry modelBC680 = {
 
 static const ModelEntry modelEL12 = {
   .identifier = 0X40,
-  .name = "EL12 Touch",
+  .name = "EasyLink 12 Touch",
   .columns = 12,
   .flags = MOD_FLAG_FORCE_FROM_0,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(el)

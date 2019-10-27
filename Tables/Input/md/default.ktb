@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title MDV Unrecognized Model (all keys defined)
+title MDV (unrecognized model - all keys defined)
 
 include common.kti
 include keyboard.kti

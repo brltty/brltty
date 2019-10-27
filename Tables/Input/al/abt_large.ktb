@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Alva ABT [3nn] and Delphi [4nn] (large)
+title Alva ABT 380 / Delphi 480
 
 context default
 include abt_basic.kti

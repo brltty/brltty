@@ -16,6 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Optelec Easylink 12 Touch
+title Optelec EasyLink 12 Touch
 
 include ../bp/all.kti

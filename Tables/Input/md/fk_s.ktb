@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title MDV Models with Function Keys and Status Cells
+title MDV (with function keys and status cells)
 
 include common.kti
 include fkeys.kti

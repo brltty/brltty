@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Alva Satellite [5nn] (small)
+title Alva Satellite 544
 
 context default
 include sat_basic.kti

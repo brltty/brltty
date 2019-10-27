@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HIMS Braille Sense with Two Scroll Keys
+title HIMS Braille Sense (with two scroll keys)
 
 include common.kti
 include braille.kti

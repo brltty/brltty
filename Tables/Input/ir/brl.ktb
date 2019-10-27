@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Iris with Braille Keyboard
+title Iris (with braille keyboard)
 
 note The braille keyboard has two thumb keys rather than a single space bar.
 note * The left one is named Backspace, and the right one is named Space.
