@@ -709,6 +709,9 @@ so that `the mkwin script`_ can successfully build BRLTTY.
 ``winsetup`` Options
 ~~~~~~~~~~~~~~~~~~~~
 
+``-a`` (archive URL)
+   Specify the location for BRLTTY's Windows archive.
+
 ``-d`` (dry run)
   Don't actually install anything.
 

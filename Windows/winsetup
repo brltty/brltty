@@ -23,7 +23,7 @@
 set -e
 umask 022
 
-readonly urlArchiveRoot="http://brltty.app/archive/Windows"
+readonly defaultArchiveRoot="http://brltty.app/archive/Windows"
 readonly defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
 
 havePath() {
@@ -76,7 +76,7 @@ downloadFile() {
 
    logMessage step "downloading file: ${source}"
    [ -z "${target}" ] && target="${source##*/}"
-   executeCommand wget -nv -O "${target}" "${urlArchiveRoot}/${source}"
+   executeCommand wget -nv -O "${target}" "${archiveRoot}/${source}"
 }
 
 unpackArchive() {
@@ -271,6 +271,7 @@ installCython() {
    fi
 }
 
+addProgramOption a string.URL archiveRoot "the URL for BRLTTY's Windows archive" "${defaultArchiveRoot}"
 addProgramOption d flag dryRun "dry run - don't actually install anything"
 addProgramOption k flag keepFiles "keep (do not remove) the temporary directory"
 addProgramOption p string.directory pythonDirectory "the directory where Python has been installed"
