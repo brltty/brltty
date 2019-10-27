@@ -19,9 +19,8 @@
 
 set -e
 
-defaultSourceRoot="`dirname "${0}"`"
-
 . "`dirname "${0}"`/prologue.sh"
+defaultSourceRoot="${programDirectory}"
 addProgramOption s string.directory sourceRoot "the top-level directory of the source tree" "${defaultSourceRoot}"
 parseProgramArguments "${@}"
 
