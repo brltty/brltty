@@ -93,6 +93,7 @@ Managing Cygwin Packages
 A convenient way to manage Cygwin packages from the command line
 is to use the ``apt-cyg`` command.
 It's similar to the ``apt-get`` command which some Linux distributions use.
+
 As of the time of this writing, this is how you can install it::
 
    svn --force export http://apt-cyg.googlecode.com/svn/trunk/ /usr/local/bin/
@@ -262,12 +263,16 @@ They should be run by a user that has administrative privileges.
 ~~~~~~~~~~~~~~~~~~
 
 Manually run BRLTTY with a log level of ``info``.
+Logs are written to the file ``brltty.log``
+in the top-level folder where BRLTTY has been installed.
+All arguments are passed through to BRLTTY.
 
 ``debug-brltty.bat``
 ~~~~~~~~~~~~~~~~~~~~
 
-Manually run BRLTTY with a log level of ``debug``
-and with several useful log categories enabled.
+Manually run BRLTTY, via the ``run-brltty.bat`` script, with options that
+set the log level to ``debug`` and enable several useful log categories.
+All arguments are passed through to the ``run-brltty.bat`` script.
 
 ``enable-brlapi.bat``
 ~~~~~~~~~~~~~~~~~~~~~~
