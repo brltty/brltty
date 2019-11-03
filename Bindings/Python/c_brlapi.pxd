@@ -136,7 +136,7 @@ cdef extern from "Programs/brlapi.h":
 
 	brlapi_param_t BRLAPI_PARAM_BROWSE_SKIPLINE
 	brlapi_param_t BRLAPI_PARAM_BROWSE_BEEP
-	brlapi_param_t BRLAPI_PARAM_CUTBUFFER
+	brlapi_param_t BRLAPI_PARAM_CLIPBOARD
 
 	brlapi_param_t BRLAPI_PARAM_KEY_CMD_SET
 	brlapi_param_t BRLAPI_PARAM_KEY_CMD_SHORT_NAME

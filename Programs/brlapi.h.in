@@ -1050,7 +1050,7 @@ typedef enum {
   BRLAPI_PARAM_BROWSE_BEEP,			/**< Whether to beep: uint8_t */
 
   /* Cut buffer(s) */
-  BRLAPI_PARAM_CUTBUFFER = 0x500,		/**< Content of the cut buffer: UTF-8 string */
+  BRLAPI_PARAM_CLIPBOARD = 0x500,		/**< Content of the clipboard: UTF-8 string */
 
   /* Keys */
   BRLAPI_PARAM_KEY_CMD_SET = 0x600,		/**< Set of navigation commands for the plugged device,
