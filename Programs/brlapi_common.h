@@ -475,6 +475,8 @@ static const brlapi_packetTypeEntry_t brlapi_packetTypeTable[] = {
   { BRLAPI_PACKET_PACKET, "Packet" },
   { BRLAPI_PACKET_SUSPENDDRIVER, "SuspendDriver" },
   { BRLAPI_PACKET_RESUMEDRIVER, "ResumeDriver" },
+  { BRLAPI_PACKET_PARAM_VALUE, "ParameterValue" },
+  { BRLAPI_PACKET_PARAM_REQUEST, "ParameterRequest" },
   { BRLAPI_PACKET_ACK, "Ack" },
   { BRLAPI_PACKET_ERROR, "Error" },
   { BRLAPI_PACKET_EXCEPTION, "Exception" },
@@ -570,3 +572,63 @@ BRLAPI(getKeyFile)(const char *auth)
     *delim = 0;
   return ret;
 }
+
+/* Function: _brlapi_parameterConv */
+/* returns how many uint32 should be swapped for a parameter */
+static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
+{
+  switch (parameter) {
+    case BRLAPI_PARAM_CONNECTION_SERVERVERSION:
+    case BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL:
+      return 1;
+
+    case BRLAPI_PARAM_DEVICE_DISPLAYSIZE:
+      return 2;
+    case BRLAPI_PARAM_DEVICE_SPEED:
+      return 1;
+
+    case BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE:
+    case BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH:
+      return 1;
+
+    default:
+      return 0;
+  }
+}
+
+/* Function: _brlapi_htonParameter */
+/* swap uint32 values of the parameter from host to network */
+void _brlapi_htonParameter(brlapi_param_t parameter, brlapi_paramValuePacket_t *value, size_t len)
+{
+  unsigned n = _brlapi_parameterConv(parameter);
+  uint32_t *p = (uint32_t*) value->data;
+  unsigned i;
+
+  if (n == 0) return;
+
+  if (n * sizeof(uint32_t) > len)
+    n = len / sizeof(uint32_t);
+  for (i = 0; i < n; i++) {
+    *p = htonl(*p);
+    p++;
+  }
+}
+
+/* Function: _brlapi_ntohParameter */
+/* swap uint32 values of the parameter from network to host */
+void _brlapi_ntohParameter(brlapi_param_t parameter, brlapi_paramValuePacket_t *value, size_t len)
+{
+  unsigned n = _brlapi_parameterConv(parameter);
+  uint32_t *p = (uint32_t*) value->data;
+  unsigned i;
+
+  if (n == 0) return;
+
+  if (n * sizeof(uint32_t) > len)
+    n = len / sizeof(uint32_t);
+  for (i = 0; i < n; i++) {
+    *p = ntohl(*p);
+    p++;
+  }
+}
+
