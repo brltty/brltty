@@ -467,12 +467,12 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
     pthread_mutex_lock(&handle->callbacks_mutex);
     for(handle->nextCallback = handle->parameterCallbacks;
 	handle->nextCallback; ) {
-      struct brlapi_parameterCallback_t *entry = handle->nextCallback;
+      struct brlapi_parameterCallback_t *callback = handle->nextCallback;
       handle->nextCallback = handle->nextCallback->next;
-      if (entry->parameter == param &&
-	  entry->subparam == subparam &&
-	  entry->global == !!(flags & BRLAPI_PARAMF_GLOBAL)) {
-	entry->func(param, subparam, entry->global, entry->priv, value->data,
+      if (callback->parameter == param &&
+	  callback->subparam == subparam &&
+	  callback->global == !!(flags & BRLAPI_PARAMF_GLOBAL)) {
+	callback->func(param, subparam, callback->global, callback->priv, value->data,
 	    size - sizeof(flags) - sizeof(param) - sizeof(subparam));
 	/* Note: the callback might have removed this entry */
       }
@@ -1309,7 +1309,7 @@ int BRLAPI_STDCALL brlapi_setParameter(brlapi_param_t parameter, uint64_t subpar
 }
 
 /* Function: brlapi_watchParameter */
-brlapi_paramCallbackEntry BRLAPI_STDCALL brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len)
+brlapi_paramCallbackDescriptor BRLAPI_STDCALL brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len)
 {
   brlapi_paramValuePacket_t reply;
   ssize_t rlen;
@@ -1352,17 +1352,17 @@ brlapi_paramCallbackEntry BRLAPI_STDCALL brlapi__watchParameter(brlapi_handle_t 
   return callback;
 }
 
-brlapi_paramCallbackEntry BRLAPI_STDCALL brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len)
+brlapi_paramCallbackDescriptor BRLAPI_STDCALL brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len)
 {
   return brlapi__watchParameter(&defaultHandle, parameter, subparam, global, func, priv, data, len);
 }
 
 /* Function: brlapi_unwatchParameter */
-int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackEntry entry)
+int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor descriptor)
 {
   brlapi_paramValuePacket_t reply;
   ssize_t rlen;
-  struct brlapi_parameterCallback_t *callback = entry;
+  struct brlapi_parameterCallback_t *callback = descriptor;
 
   pthread_mutex_lock(&handle->callbacks_mutex);
   rlen = _brlapi__getParameter(handle, callback->parameter, callback->subparam, callback->global, 0, BRLAPI_PARAMF_UNSUBSCRIBE, &reply);
@@ -1390,9 +1390,9 @@ int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_para
   return 0;
 }
 
-int BRLAPI_STDCALL brlapi_unwatchParameter(brlapi_paramCallbackEntry entry)
+int BRLAPI_STDCALL brlapi_unwatchParameter(brlapi_paramCallbackDescriptor descriptor)
 {
-  return brlapi__unwatchParameter(&defaultHandle, entry);
+  return brlapi__unwatchParameter(&defaultHandle, descriptor);
 }
 
 
