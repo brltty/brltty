@@ -50,6 +50,7 @@ static int opt_showModelIdentifier;
 static int opt_showSize;
 static int opt_showKeyCodes;
 static int opt_suspendMode;
+static int opt_parameters;
 static int opt_threadMode;
 
 BEGIN_OPTION_TABLE(programOptions)
@@ -94,6 +95,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "suspend",
     .setting.flag = &opt_suspendMode,
     .description = "Suspend the braille driver (press ^C or send SIGUSR1 to resume)."
+  },
+
+  { .letter = 'p',
+    .word = "parameters",
+    .setting.flag = &opt_parameters,
+    .description = "Test parameters"
   },
 
   { .letter = 't',
@@ -296,6 +303,47 @@ static void suspendDriver(void)
   }
 }
 
+static void brailleRetainDotsChanged(brlapi_param_t parameter, uint64_t subparam, int local, void *priv, const void *data, size_t len)
+{
+  if (parameter != BRLAPI_PARAM_BRAILLE_RETAINDOTS)
+  {
+    printf("handler called for %x, another parameter than retaindot parameter?!\n", parameter);
+    return;
+  }
+  printf("new retain dots %zd: %d\n", len, *(uint8_t*) data);
+}
+
+static void testParameters(void)
+{
+  uint8_t val;
+  if (brlapi_getParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+    brlapi_perror("getParameter");
+  }
+  printf("retain dots was %d\n", val);
+  printf("now watching retain dots parameter\n");
+  if (brlapi_watchParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, brailleRetainDotsChanged, NULL, NULL, 0) == 0) {
+    brlapi_perror("watchParameter");
+  }
+  val = 0;
+  printf("setting retain dots parameter to %d\n", val);
+  if (brlapi_setParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+    brlapi_perror("setParameter");
+  }
+  if (brlapi_getParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+    brlapi_perror("getParameter");
+  }
+  printf("retain dots now %d\n", val);
+  val = 1;
+  printf("setting retain dots parameter to %d\n", val);
+  if (brlapi_setParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+    brlapi_perror("setParameter");
+  }
+  if (brlapi_getParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+    brlapi_perror("getParameter");
+  }
+  printf("retain dots now %d\n", val);
+}
+
 volatile int thread_done;
 static void *thread_fun(void *foo)
 {
@@ -384,6 +432,10 @@ main (int argc, char *argv[]) {
 
     if (opt_suspendMode) {
       suspendDriver();
+    }
+
+    if (opt_parameters) {
+      testParameters();
     }
 
     if (opt_threadMode) {

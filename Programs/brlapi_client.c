@@ -219,6 +219,15 @@ sem_destroy (sem_t *sem) {
 */
 #define BRL_KEYBUF_SIZE 256
 
+struct brlapi_parameterCallback_t {
+  brlapi_param_t parameter;
+  uint64_t subparam;
+  int global;
+  brlapi_paramCallback func;
+  void *priv;
+  struct brlapi_parameterCallback_t *prev, *next;
+};
+
 struct brlapi_handle_t { /* Connection-specific information */
   uint32_t serverVersion;
   unsigned int brlx;
@@ -265,6 +274,17 @@ struct brlapi_handle_t { /* Connection-specific information */
     brlapi__exceptionHandler_t withHandle;
   } exceptionHandler;
   pthread_mutex_t exceptionHandler_mutex;
+
+  struct brlapi_parameterCallback_t *parameterCallbacks;
+  /* This protects the callback list, but also callback calling conventions in
+   * general:
+   * callbacks are called in the update order, and not after unregistration */
+  pthread_mutex_t callbacks_mutex;
+  /* The callback might want to unregister itself, while we are processing the
+   * list of callbacks. This records where we are in the list, to skip the
+   * deleted item. */
+  struct brlapi_parameterCallback_t *nextCallback;
+
   void *clientData; /* Private client data */
 };
 
@@ -318,6 +338,14 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
   else
     handle->exceptionHandler.withHandle = brlapi__defaultExceptionHandler;
   pthread_mutex_init(&handle->exceptionHandler_mutex, NULL);
+  handle->parameterCallbacks = NULL;
+  {
+    pthread_mutexattr_t mattr;
+    pthread_mutexattr_init(&mattr);
+    pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&handle->callbacks_mutex, &mattr);
+  }
+  handle->nextCallback = NULL;
   handle->clientData = NULL;
 }
 
@@ -430,9 +458,31 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
     pthread_mutex_unlock(&handle->read_mutex);
     return -3;
   }
+  if (type==BRLAPI_PACKET_PARAM_UPDATE) {
+    /* Parameter update, find handler */
+    brlapi_paramValuePacket_t *value = (void*) handle->packet.content;
+    uint32_t flags = ntohl(value->flags);
+    brlapi_param_t param = ntohl(value->param);
+    uint64_t subparam = ((uint64_t)ntohl(value->subparam_hi) << 32) | ntohl(value->subparam_lo);
+    pthread_mutex_lock(&handle->callbacks_mutex);
+    for(handle->nextCallback = handle->parameterCallbacks;
+	handle->nextCallback; ) {
+      struct brlapi_parameterCallback_t *entry = handle->nextCallback;
+      handle->nextCallback = handle->nextCallback->next;
+      if (entry->parameter == param &&
+	  entry->subparam == subparam &&
+	  entry->global == !!(flags & BRLAPI_PARAMF_GLOBAL)) {
+	entry->func(param, subparam, entry->global, entry->priv, value->data,
+	    size - sizeof(flags) - sizeof(param) - sizeof(subparam));
+	/* Note: the callback might have removed this entry */
+      }
+    }
+    handle->nextCallback = NULL;
+    pthread_mutex_unlock(&handle->callbacks_mutex);
+  }
   pthread_mutex_unlock(&handle->read_mutex);
 
-  /* else this is an error */
+  /* otherwise this is an error */
 
   if (type==BRLAPI_PACKET_ERROR) {
     brlapi_errno = ntohl(errorPacket->code);
@@ -1159,6 +1209,192 @@ int BRLAPI_STDCALL brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 {
   return brlapi__getDisplaySize(&defaultHandle, x, y);
 }
+
+/* Function: brlapi_getParameter */
+
+/* Internal version, returns the reply value packet and the length of the value */
+static ssize_t _brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, int get, uint32_t flags, brlapi_paramValuePacket_t *reply)
+{
+  brlapi_paramRequestPacket_t request;
+  int res;
+  ssize_t rlen;
+
+  if (global)
+    flags |= BRLAPI_PARAMF_GLOBAL;
+  if (get)
+    flags |= BRLAPI_PARAMF_GET;
+  request.flags = htonl(flags);
+  request.param = htonl(parameter);
+  request.subparam_hi = htonl(subparam >> 32);
+  request.subparam_lo = htonl(subparam & 0xfffffffful);
+
+  pthread_mutex_lock(&handle->req_mutex);
+  res = brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_PARAM_REQUEST, &request, sizeof(request));
+  if (res < 0) {
+    pthread_mutex_unlock(&handle->req_mutex);
+    return -1;
+  }
+  if (get)
+    rlen = brlapi__waitForPacket(handle, BRLAPI_PACKET_PARAM_VALUE, reply, sizeof(*reply), 1, -1);
+  else
+    rlen = brlapi__waitForAck(handle);
+  pthread_mutex_unlock(&handle->req_mutex);
+
+  if (rlen < 0) {
+    return -1;
+  }
+
+  if (get) {
+    rlen -= sizeof(uint32_t) + sizeof(brlapi_param_t) + sizeof(uint64_t);
+    if (rlen < 0) {
+      brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
+      return -1;
+    }
+  }
+
+  return rlen;
+}
+
+ssize_t BRLAPI_STDCALL brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, void* data, size_t len)
+{
+  brlapi_paramValuePacket_t reply;
+  ssize_t rlen;
+
+  rlen = _brlapi__getParameter(handle, parameter, subparam, global, 1, 0, &reply);
+  if (rlen < 0)
+    return -1;
+
+  if (rlen < len) {
+    len = rlen;
+  }
+  _brlapi_ntohParameter(parameter, &reply, rlen);
+  memcpy(data, &reply.data, len);
+
+  return rlen;
+}
+
+ssize_t BRLAPI_STDCALL brlapi_getParameter(brlapi_param_t parameter, uint64_t subparam, int global, void* data, size_t len)
+{
+  return brlapi__getParameter(&defaultHandle, parameter, subparam, global, data, len);
+}
+
+/* Function: brlapi_setParameter */
+int BRLAPI_STDCALL brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, const void* data, size_t len)
+{
+  brlapi_paramValuePacket_t packet;
+  int res;
+
+  if (len > sizeof(packet.data)) {
+    brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
+    return -1;
+  }
+
+  if (global)
+    packet.flags = htonl(BRLAPI_PARAMF_GLOBAL);
+  else
+    packet.flags = htonl(0);
+  packet.param = htonl(parameter);
+  packet.subparam_hi = htonl(subparam >> 32);
+  packet.subparam_lo = htonl(subparam & 0xfffffffful);
+  memcpy(packet.data, data, len);
+  _brlapi_htonParameter(parameter, &packet, len);
+
+  res = brlapi__writePacketWaitForAck(handle, BRLAPI_PACKET_PARAM_VALUE, &packet, sizeof(packet.flags) + sizeof(parameter) + sizeof(subparam) + len);
+  return res;
+}
+
+int BRLAPI_STDCALL brlapi_setParameter(brlapi_param_t parameter, uint64_t subparam, int global, const void* data, size_t len)
+{
+  return brlapi__setParameter(&defaultHandle, parameter, subparam, global, data, len);
+}
+
+/* Function: brlapi_watchParameter */
+brlapi_paramCallbackEntry BRLAPI_STDCALL brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len)
+{
+  brlapi_paramValuePacket_t reply;
+  ssize_t rlen;
+  struct brlapi_parameterCallback_t *callback;
+
+  pthread_mutex_lock(&handle->callbacks_mutex);
+  rlen = _brlapi__getParameter(handle, parameter, subparam, global, 1, BRLAPI_PARAMF_SUBSCRIBE, &reply);
+  if (rlen < 0) {
+    pthread_mutex_unlock(&handle->callbacks_mutex);
+    return NULL;
+  }
+
+  callback = malloc(sizeof(*callback));
+  if (callback == NULL) {
+    brlapi_errno = BRLAPI_ERROR_NOMEM;
+    return NULL;
+  }
+  callback->parameter = parameter;
+  callback->subparam = subparam;
+  callback->global = global;
+  callback->func = func;
+  callback->priv = priv;
+
+  callback->next = handle->parameterCallbacks;
+  if (callback->next)
+    callback->next->prev = callback;
+  callback->prev = NULL;
+  handle->parameterCallbacks = callback;
+
+  if (data) {
+    if (rlen < len) {
+      len = rlen;
+    }
+    memcpy(data, &reply.data, len);
+  } else {
+    func(parameter, subparam, global, priv, &reply.data, rlen);
+  }
+  pthread_mutex_unlock(&handle->callbacks_mutex);
+
+  return callback;
+}
+
+brlapi_paramCallbackEntry BRLAPI_STDCALL brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len)
+{
+  return brlapi__watchParameter(&defaultHandle, parameter, subparam, global, func, priv, data, len);
+}
+
+/* Function: brlapi_unwatchParameter */
+int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackEntry entry)
+{
+  brlapi_paramValuePacket_t reply;
+  ssize_t rlen;
+  struct brlapi_parameterCallback_t *callback = entry;
+
+  pthread_mutex_lock(&handle->callbacks_mutex);
+  rlen = _brlapi__getParameter(handle, callback->parameter, callback->subparam, callback->global, 0, BRLAPI_PARAMF_UNSUBSCRIBE, &reply);
+  if (rlen < 0) {
+    pthread_mutex_unlock(&handle->callbacks_mutex);
+    return -1;
+  }
+
+  if (handle->nextCallback == callback) {
+    /* We might be removing an entry which brlapi__doWaitForPacket was planning
+     * to have a look at next, make it skip it. */
+    handle->nextCallback = handle->nextCallback->next;
+  }
+
+  if (callback->next) {
+    callback->next->prev = callback->prev;
+  }
+  if (callback->prev) {
+    callback->prev->next = callback->next;
+  } else {
+    handle->parameterCallbacks = callback->next;
+  }
+  pthread_mutex_unlock(&handle->callbacks_mutex);
+  free(callback);
+  return 0;
+}
+
+int BRLAPI_STDCALL brlapi_unwatchParameter(brlapi_paramCallbackEntry entry)
+{
+  return brlapi__unwatchParameter(&defaultHandle, entry);
+}
+
 
 /* Function : getControllingTty */
 /* Returns the number of the caller's controlling terminal */

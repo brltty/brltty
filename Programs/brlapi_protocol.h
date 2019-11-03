@@ -75,6 +75,9 @@ extern "C" {
 #define BRLAPI_PACKET_EXCEPTION       'E'   /**< Exception                   */
 #define BRLAPI_PACKET_SUSPENDDRIVER   'S'   /**< Suspend driver              */
 #define BRLAPI_PACKET_RESUMEDRIVER    'R'   /**< Resume driver               */
+#define BRLAPI_PACKET_PARAM_VALUE     (('P'<<8) + 'V') /**< Parameter value  */
+#define BRLAPI_PACKET_PARAM_REQUEST   (('P'<<8) + 'R') /**< Parameter request*/
+#define BRLAPI_PACKET_PARAM_UPDATE    (('P'<<8) + 'U') /**< Parameter update */
 
 /** Magic number to give when sending a BRLPACKET_ENTERRAWMODE or BRLPACKET_SUSPEND packet */
 #define BRLAPI_DEVICE_MAGIC (0xdeadbeefL)
@@ -136,6 +139,32 @@ typedef struct {
   unsigned char data; /** Fields in the same order as flag weight */
 } brlapi_writeArgumentsPacket_t;
 
+/** Flags for parameter values */
+#define BRLAPI_PVF_GLOBAL            0X01    /** Value is the global value */
+
+/** Structure of Parameter value or update */
+typedef struct {
+  uint32_t flags; /** Flags to tell how value was gotten */
+  brlapi_param_t param; /** Which parameter being transmitted */
+  uint32_t subparam_hi; /** Which sub-parameter being transmitted, hi 32bits */
+  uint32_t subparam_lo; /** Which sub-parameter being transmitted, lo 32bits */
+  unsigned char data[BRLAPI_MAXPACKETSIZE - (sizeof(uint32_t) + sizeof(brlapi_param_t) + 2*sizeof(uint32_t))]; /** Content of the parameter */
+} brlapi_paramValuePacket_t;
+
+/** Flags for parameter requests */
+#define BRLAPI_PARAMF_GLOBAL         0X01    /** Request the global value */
+#define BRLAPI_PARAMF_GET            0X02    /** Get current parameter value    */
+#define BRLAPI_PARAMF_SUBSCRIBE      0X04    /** Subscribe to parameter updates */
+#define BRLAPI_PARAMF_UNSUBSCRIBE    0X08    /** Unsubscribe from parameter updates */
+
+/** Structure of Parameter request */
+typedef struct {
+  uint32_t flags; /** Flags to tell whether/how to get values */
+  brlapi_param_t param; /** Which parameter to be transmitted */
+  uint32_t subparam_hi; /** Which sub-parameter being transmitted, hi 32bits */
+  uint32_t subparam_lo; /** Which sub-parameter being transmitted, lo 32bits */
+} brlapi_paramRequestPacket_t;
+
 /** Type for packets.  Should be used instead of a mere char[], since it has
  * correct alignment requirements. */
 typedef union {
@@ -146,6 +175,8 @@ typedef union {
 	brlapi_errorPacket_t error;
 	brlapi_getDriverSpecificModePacket_t getDriverSpecificMode;
 	brlapi_writeArgumentsPacket_t writeArguments;
+	brlapi_paramValuePacket_t paramValue;
+	brlapi_paramRequestPacket_t paramRequest;
 	uint32_t uint32;
 } brlapi_packet_t;
 
