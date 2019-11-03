@@ -1135,12 +1135,12 @@ int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint
  */
 typedef void (*brlapi_paramCallback)(brlapi_param_t parameter, uint64_t subparam, int global, void *priv, const void *data, size_t len);
 
-/* brlapi_paramCallbackEntry */
-/** Entry type for callback
+/* brlapi_paramCallbackDescriptor */
+/** Type for callback descriptors
  * This is returned by brlapi_watchParameter, to be passed to
  * brlapi_unwatchParameter.
  */
-typedef void *brlapi_paramCallbackEntry;
+typedef void *brlapi_paramCallbackDescriptor;
 
 /* brlapi_watchParameter */
 /** Set a parameter change callback
@@ -1156,7 +1156,7 @@ typedef void *brlapi_paramCallbackEntry;
  * stored;
  * \param len is the size of the buffer.
  *
- * \return the callback entry (to be passed to brlapi_unwatchParameter to
+ * \return the callback descriptor (to be passed to brlapi_unwatchParameter to
  * unregister the callback), or NULL on error.
  *
  * \note Default parameter callbacks don't do anything, except the ones for
@@ -1165,9 +1165,9 @@ typedef void *brlapi_paramCallbackEntry;
  * brlapi_watchParameter, for providing the initial value
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-brlapi_paramCallbackEntry brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len);
+brlapi_paramCallbackDescriptor brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len);
 #endif
-brlapi_paramCallbackEntry brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len);
+brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len);
 
 /* brlapi_unwatchParameter */
 /** Clear a parameter change callback
@@ -1176,14 +1176,15 @@ brlapi_paramCallbackEntry brlapi__watchParameter(brlapi_handle_t *handle, brlapi
  * callback function previously registered with brlapi_watchParameter will
  * not be called any longer.
  *
- * \param brlapi_paramCallbackEntry callback entry to be removed.
+ * \param brlapi_paramCallbackDescriptor descriptor of the callback to be
+ * removed.
  *
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_unwatchParameter(brlapi_paramCallbackEntry entry);
+int brlapi_unwatchParameter(brlapi_paramCallbackDescriptor descriptor);
 #endif
-int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackEntry entry);
+int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor descriptor);
 
 /* brlapi_cacheParameter */
 /**

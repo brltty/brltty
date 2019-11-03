@@ -110,7 +110,7 @@ cdef extern from "Programs/brlapi.h":
 	int brlapi__sendRaw(brlapi_handle_t *, void*, int)
 
 	ctypedef int brlapi_param_t
-	ctypedef void *brlapi_paramCallbackEntry
+	ctypedef void *brlapi_paramCallbackDescriptor
 
 	brlapi_param_t BRLAPI_PARAM_CONNECTION_SERVERVERSION
 	brlapi_param_t BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL
@@ -150,8 +150,9 @@ cdef extern from "Programs/brlapi.h":
 
 	ssize_t brlapi__getParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t ) nogil
 	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t) nogil
-	brlapi_paramCallbackEntry brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, brlapi_paramCallback, void *, void*, size_t);
-	int brlapi__unwatchParameter(brlapi_handle_t *, brlapi_paramCallbackEntry)
+	brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, brlapi_paramCallback, void *, void*, size_t);
+	int brlapi__unwatchParameter(brlapi_handle_t *,
+	brlapi_paramCallbackDescriptor)
 
 	brlapi_error_t* brlapi_error_location()
 	char* brlapi_strerror(brlapi_error_t*)
