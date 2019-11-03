@@ -49,11 +49,11 @@ extern "C" {
  *
  * @{ */
 
-#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 8) /** Communication protocol version */
+#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 9) /** Communication protocol version */
 
 /** Maximum packet size for packets exchanged on sockets and with braille
  * terminal */
-#define BRLAPI_MAXPACKETSIZE 512
+#define BRLAPI_MAXPACKETSIZE 4096
 
 #define BRLAPI_PACKET_VERSION         'v'   /**< Version                     */
 #define BRLAPI_PACKET_AUTH            'a'   /**< Authorization               */
