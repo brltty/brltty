@@ -29,6 +29,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <locale.h>
+#include <assert.h>
+#include <limits.h>
 
 #ifndef __MINGW32__
 #ifdef HAVE_LANGINFO_H
@@ -218,6 +220,7 @@ sem_destroy (sem_t *sem) {
 #define BRL_KEYBUF_SIZE 256
 
 struct brlapi_handle_t { /* Connection-specific information */
+  uint32_t serverVersion;
   unsigned int brlx;
   unsigned int brly;
   brlapi_fileDescriptor fileDescriptor; /* Descriptor of the socket connected to BrlApi */
@@ -842,7 +845,8 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
   if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, &serverPacket, sizeof(serverPacket), 1, -1)) < 0)
     goto outfd;
 
-  if (version->protocolVersion != htonl(BRLAPI_PROTOCOL_VERSION)) {
+  handle->serverVersion = ntohl(version->protocolVersion);
+  if (handle->serverVersion < 8 || handle->serverVersion > BRLAPI_PROTOCOL_VERSION) {
     brlapi_errno = BRLAPI_ERROR_PROTOCOL_VERSION;
     goto outfd;
   }
@@ -1229,12 +1233,13 @@ int BRLAPI_STDCALL brlapi_enterTtyMode(int tty, const char *how)
 int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *driverName)
 {
   int res;
-  brlapi_packet_t packet;
+  void *packet;
   unsigned char *p;
-  uint32_t *nbTtys = (uint32_t*) &packet, *t = nbTtys+1;
-  char *ttytreepath,*ttytreepathstop;
+  uint32_t *nbTtys, *t;
+  char *ttytreepath,*cur,*next;
   int ttypath;
-  unsigned int n;
+  unsigned int n, nttytreepath;
+  size_t size;
 
   pthread_mutex_lock(&handle->state_mutex);
   if ((handle->state & STCONTROLLINGTTY)) {
@@ -1251,23 +1256,44 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
   pthread_mutex_unlock(&handle->read_mutex);
 
   /* OK, Now we know where we are, so get the effective control of the terminal! */
-  *nbTtys = 0;
   ttytreepath = getenv("WINDOWPATH");
   if (!ttytreepath && getenv("DISPLAY"))
     /* Cope with some DMs which are not setting WINDOWPATH (e.g. gdm 3.12) */
     ttytreepath = getenv("XDG_VTNR");
-  if (ttytreepath)
-  for(; *ttytreepath && t-(nbTtys+1)<=BRLAPI_MAXPACKETSIZE/sizeof(uint32_t);
-    *t++ = htonl(ttypath), (*nbTtys)++, ttytreepath = ttytreepathstop+1) {
-    ttypath=strtol(ttytreepath,&ttytreepathstop,0);
-    /* TODO: log it out. check overflow/underflow & co */
-    if (ttytreepathstop==ttytreepath) break;
+
+  nttytreepath = 0;
+  if (ttytreepath) {
+    /* Count ttys from path */
+    for(cur = ttytreepath; *cur; nttytreepath++, cur = next+1) {
+      strtol(cur,&next,0);
+      if (next==cur) {
+        syslog(LOG_WARNING, "Erroneous window path %s", ttytreepath);
+        pthread_mutex_unlock(&handle->state_mutex);
+        brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
+      }
+      if (*next==0) { nttytreepath++; break; }
+    }
   }
 
-  for (n=0; n<nttys; n++) *t++ = htonl(ttys[n]);
-  (*nbTtys)+=nttys;
+  size = (1 + nttytreepath + nttys) * sizeof(uint32_t);
+  size += 1 + (driverName ? strlen(driverName) : 0);
+  packet = alloca(size);
+  nbTtys = packet;
+  t = nbTtys+1;
+  *nbTtys = htonl(nttytreepath + nttys);
 
-  *nbTtys = htonl(*nbTtys);
+  if (ttytreepath) {
+    /* First add ttys from environment path */
+    for(cur=ttytreepath; *cur; nttytreepath++, cur=next+1) {
+      ttypath=strtol(cur,&next,0);
+      *t++ = htonl(ttypath);
+      if (*next==0) break;
+    }
+  }
+
+  /* Then add ttys from caller path */
+  for (n=0; n<nttys; n++) *t++ = htonl(ttys[n]);
+
   p = (unsigned char *) t;
   if (driverName==NULL) n = 0; else n = strlen(driverName);
   if (n>BRLAPI_MAXNAMELENGTH) {
@@ -1278,7 +1304,8 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
   p++;
   if (n) p = mempcpy(p, driverName, n);
 
-  if ((res=brlapi__writePacketWaitForAck(handle,BRLAPI_PACKET_ENTERTTYMODE,&packet,(p-(unsigned char *)&packet))) == 0) {
+  assert(p-(unsigned char *)packet == size);
+  if ((res=brlapi__writePacketWaitForAck(handle,BRLAPI_PACKET_ENTERTTYMODE,packet,size)) == 0) {
     handle->state |= STCONTROLLINGTTY;
   }
 
@@ -1950,7 +1977,7 @@ done:
 static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, const brlapi_range_t ranges[], unsigned int n)
 {
   uint32_t ints[n][4];
-  unsigned int i, remaining, todo;
+  unsigned int i, remaining, todo, max = UINT_MAX;
 
   for (i=0; i<n; i++) {
     ints[i][0] = htonl(ranges[i].first >> 32);
@@ -1959,10 +1986,14 @@ static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, const brl
     ints[i][3] = htonl(ranges[i].last & 0xffffffff);
   };
 
+  if (handle->serverVersion == 8)
+    /* BRLAPI_MAXPACKETSIZE was 512 at the time, split requests */
+    max = 512 / (2*sizeof(brlapi_keyCode_t));
+
   for (remaining = n; remaining; remaining -= todo) {
     todo = remaining;
-    if (todo > BRLAPI_MAXPACKETSIZE / (2*sizeof(brlapi_keyCode_t)))
-      todo = BRLAPI_MAXPACKETSIZE / (2*sizeof(brlapi_keyCode_t));
+    if (todo > max)
+      todo = max;
     if (brlapi__writePacketWaitForAck(handle,(what ? BRLAPI_PACKET_ACCEPTKEYRANGES : BRLAPI_PACKET_IGNOREKEYRANGES),&ints[n-remaining],todo*2*sizeof(brlapi_keyCode_t)))
       return -1;
   }
