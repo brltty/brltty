@@ -995,6 +995,232 @@ int BRLAPI_STDCALL brlapi_resumeDriver(void);
 int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 /** @} */
 
+/** \defgroup brlapi_parameters Parameters
+ * \brief How to manage BrlAPI parameters
+ *
+ * There are several kinds of parameters:
+ * - states associated with the braille device itself, such as its size or
+ * parameters of the device port
+ * - states of the BrlAPI connection itself, such as the displaying level or
+ * key passing preferences.
+ * - general states such as the cut buffer,
+ * - braille parameters: braille table, contraction, cursor shape, etc,
+ * - browse parameters: line skip, beep, etc.
+ *
+ * Some of them are subdivided in subparameters.  Others have only subparameter 0.
+ *
+ * Some of them are read-only, others are read/write.
+ *
+ * A client can either request the immediate content of a parameter by
+ * using brlapi_getParameter(); set the content of a parameter by using
+ * brlapi_setParameter(); or register a callback that may be called immediately
+ * and on each change of a given parameter, by using brlapi_watchParameter().
+ *
+ * @{ */
+
+/** Enumeration of parameter types */
+typedef enum {
+  /* BrlAPI */
+  BRLAPI_PARAM_CONNECTION_SERVERVERSION = 0,	/**< Version of the API server: uint32_t */
+  BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL,		/**< "Display level": uint32_t */
+
+  /* Device */
+  BRLAPI_PARAM_DEVICE_DRIVERNAME = 0x100,	/**< Driver name: string */
+  BRLAPI_PARAM_DEVICE_DRIVERCODE,		/**< Driver code: string */
+  BRLAPI_PARAM_DEVICE_DRIVERVERSION,		/**< Driver version: string */
+  BRLAPI_PARAM_DEVICE_MODELIDENTIFIER,		/**< Model Identifier: string */
+  BRLAPI_PARAM_DEVICE_DISPLAYSIZE,		/**< Dimensions of the braille device: { uint32_t x; uint32_t y; } */
+  BRLAPI_PARAM_DEVICE_PORT,			/**< Path to the device: string */
+  BRLAPI_PARAM_DEVICE_SPEED,			/**< Speed of the port: uint32_t */
+  BRLAPI_PARAM_DEVICE_ONLINE,			/**< Is online: uint8_t */
+/* TODO: status area */
+
+  /* Braille rendering */
+  BRLAPI_PARAM_BRAILLE_RETAINDOTS = 0x200,	/**< Pass chars or dot combinations: uint8_t */
+  BRLAPI_PARAM_BRAILLE_DOTSPERCELL,		/**< 8 dots or 6 dots style ? uint8_t */
+  BRLAPI_PARAM_BRAILLE_CONTRACTED,		/**< Whether braille is contracted: uint8_t */
+  BRLAPI_PARAM_BRAILLE_CURSORMASK,		/**< Cursor Mask: uint8_t */
+  BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE,		/**< Cursor blinking rate (ms): uint32_t */
+  BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH,	/**< Cursor blinking length (ms): uint32_t */
+
+  BRLAPI_PARAM_RENDERED_OUTPUT = 0x300,		/**< Dot rendering of client output */
+
+  /* Navigation parameters */
+  BRLAPI_PARAM_BROWSE_SKIPLINE = 0x400,		/**< Whether to skip empty lines: uint8_t */
+  BRLAPI_PARAM_BROWSE_BEEP,			/**< Whether to beep: uint8_t */
+
+  /* Cut buffer(s) */
+  BRLAPI_PARAM_CLIPBOARD = 0x500,		/**< Content of the clipboard: UTF-8 string */
+
+  /* Keys */
+  BRLAPI_PARAM_KEY_CMD_SET = 0x600,		/**< Set of navigation commands for the plugged device,
+						  * one uint64_t per code */
+  BRLAPI_PARAM_KEY_CMD_SHORT_NAME,		/**< Abbreviated name for the navigation command,
+						  * a few characters typically: string
+						  * which key is specified by the subparam value. */
+  BRLAPI_PARAM_KEY_CMD_NAME,			/**< Long name for the navigation command,
+						  * a few words typically: string
+						  * which key is specified by the subparam value. */
+  BRLAPI_PARAM_KEY_RAW_SET,			/**< Set of raw key codes for the plugged device,
+						  * one uint64_t per code */
+  BRLAPI_PARAM_KEY_RAW_SHORT_NAME,		/**< Abbreviated name for the key,
+						  * a few characters typically: string
+						  * which key is specified by the subparam value. */
+  BRLAPI_PARAM_KEY_RAW_NAME,			/**< Long name for the key, a few words typically: string
+						  * which key is specified by the subparam value. */
+
+  /* Braille translation */
+  BRLAPI_PARAM_BRAILLE_TABLE_ROWS = 0x700,	/**< Sets of Unicode rows that are defined,
+						  * 1 bit per row, 512 uint8_t, for
+						  * U+0000 to U+10FFFF. */
+  BRLAPI_PARAM_BRAILLE_TABLE,			/**< Unicode 1-to-1 Braille table,
+						  * which row is specified by the subparam value.
+						  * 256*uint8_t for each row */
+  /* TODO: dot-to-unicode as well */
+
+ /* TODO
+  * help strings?
+  */
+
+} brlapi_param_t;
+
+/* brlapi_getParameter */
+/** Get the content of a parameter
+ *
+ * brlapi_getParameter gets the current content of a parameter
+ *
+ * \param parameter is the parameter whose content shall be got;
+ * \param global specifies whether the global value should be returned instead of the local value;
+ * \param data is a buffer where content of the parameter shall be stored;
+ * \param len is the size of the buffer.
+ *
+ * \return the real size of the parameter's content. If the parameter does not fit in the provided buffer, it is truncated to len bytes (but the real size of the parameter is still returned). In that case, the client must call brlapi_getParameter again with a big enough buffer.
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+ssize_t brlapi_getParameter(brlapi_param_t parameter, uint64_t subparam, int global, void* data, size_t len);
+#endif
+ssize_t brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, void* data, size_t len);
+
+/* brlapi_setParameter */
+/** Set the content of a parameter
+ *
+ * brlapi_setParameter sets the content of a parameter
+ *
+ * \param parameter is the parameter to set;
+ * \param global specifies whether the global value should be set instead of the local value;
+ * \param data is a buffer containing the data to store in the parameter;
+ * \param len is the size of the data.
+ *
+ * \return 0 on success, -1 on error (read-only parameter for instance).
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int brlapi_setParameter(brlapi_param_t parameter, uint64_t subparam, int global, const void* data, size_t len);
+#endif
+int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, const void* data, size_t len);
+
+/* brlapi_paramCallback */
+/** Callback for parameter changes
+ *
+ * When a parameter gets changed, application-defined callbacks set by the
+ * brlapi_watchParameter() function are called.
+ *
+ * \param parameter is the parameter that changed;
+ * \param global specifies whether it is the global value which has changed, or the local value;
+ * \param priv is the void pointer that was passed to the brlapi_watchParameter call which registered the callback;
+ * \param data is a buffer containing the new value of the parameter;
+ * \param len is the size of the data.
+ *
+ * This callback only gets called when the application calls some brlapi_
+ * function (i.e. BrlAPI gets direct control of the execution).
+ */
+typedef void (*brlapi_paramCallback)(brlapi_param_t parameter, uint64_t subparam, int global, void *priv, const void *data, size_t len);
+
+/* brlapi_paramCallbackDescriptor */
+/** Type for callback descriptors
+ * This is returned by brlapi_watchParameter, to be passed to
+ * brlapi_unwatchParameter.
+ */
+typedef void *brlapi_paramCallbackDescriptor;
+
+/* brlapi_watchParameter */
+/** Set a parameter change callback
+ *
+ * brlapi_watchParameter registers a parameter change callback: whenever the
+ * given parameter changes, the given function is called.
+ *
+ * \param parameter is the parameter to watch;
+ * \param global specifies whether it is the global value which should be monitored, or the local value;
+ * \param func is the function to call on parameter change;
+ * \param priv is a void pointer which will be passed as such to the function
+ * \param data is a buffer where the current content of the parameter shall be
+ * stored;
+ * \param len is the size of the buffer.
+ *
+ * \return the callback descriptor (to be passed to brlapi_unwatchParameter to
+ * unregister the callback), or NULL on error.
+ *
+ * \note Default parameter callbacks don't do anything, except the ones for
+ * display size which just raise SIGWINCH.
+ * \note If data is NULL, the callback will be called immediately by
+ * brlapi_watchParameter, for providing the initial value
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+brlapi_paramCallbackDescriptor brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len);
+#endif
+brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len);
+
+/* brlapi_unwatchParameter */
+/** Clear a parameter change callback
+ *
+ * brlapi_unwatchParameter unregisters a parameter change callback: the
+ * callback function previously registered with brlapi_watchParameter will
+ * not be called any longer.
+ *
+ * \param brlapi_paramCallbackDescriptor descriptor of the callback to be
+ * removed.
+ *
+ * \return 0 on success, -1 on error.
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int brlapi_unwatchParameter(brlapi_paramCallbackDescriptor descriptor);
+#endif
+int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor descriptor);
+
+/* brlapi_cacheParameter */
+/**
+ * Caches some parameter
+ * When activated, libbrlapi registers for parameter update, and getParameter achieves a simple copy from the value cached in libbrlapi which receives parameter changes from the server.
+ * This is useful for parameters that the application reads often e.g. displaySize
+ * When desactivated (default), getParameter requests value from server which is expensive but avoids receiving a lot of updates. This is useful when application reads parameters seldomly
+ * \return nothing
+ * \param parameter is the parameter to be cached or not
+ * \param global specifies whether it is the global value which should be cached, or the local value;
+ * \param cached whether this parameter should be cached or not
+ * \return 0 on success, -1 on error.
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int brlapi_cacheParameter(brlapi_param_t parameter, uint64_t subparam, int global, int cached);
+#endif
+int brlapi__cacheParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, int cached);
+
+/** @} */
+
+/** \defgroup brlapi_misc Miscellaneous functions
+ * @{ */
+
+/* brlapi_pause */
+/**
+ * Waits until an event is received from the BrlAPI server
+ * \param timeout_ms specifies an optional timeout which can be zero for polling, or -1 for infinite wait
+ * \return nothing
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+void brlapi_pause(int timeout_ms);
+#endif
+void brlapi__pause(brlapi_handle_t *handle, int timeout_ms);
+
+/** @} */
+
 /** \defgroup brlapi_error Error handling
  * \brief How to handle errors
  *
@@ -1035,6 +1261,7 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 #define BRLAPI_ERROR_EMPTYKEY             15  /**< Key file empty */
 #define BRLAPI_ERROR_DRIVERERROR          16  /**< Packet returned by driver too large */
 #define BRLAPI_ERROR_AUTHENTICATION       17  /**< Authentication failed */
+#define BRLAPI_ERROR_READONLY_PARAMETER   18  /**< Parameter can not be changed */
 
 /* brlapi_errlist */
 /** Error message list

@@ -11,6 +11,14 @@ import errno
 import Xlib.keysymdef.miscellany
 try:
   b = brlapi.Connection()
+  print("Server version " + str(b.getParameter(brlapi.PARAM_CONNECTION_SERVERVERSION)))
+  print("Display size " + str(b.getParameter(brlapi.PARAM_DEVICE_DISPLAYSIZE)))
+  print("Driver " + b.getParameter(brlapi.PARAM_DEVICE_DRIVERNAME))
+  print("Model " + b.getParameter(brlapi.PARAM_DEVICE_MODELIDENTIFIER))
+
+  print("Command 1 short name " + b.getParameter(brlapi.PARAM_KEY_CMD_SHORT_NAME, 1))
+  print("Command 1 name '" + b.getParameter(brlapi.PARAM_KEY_CMD_NAME, 1) + "'")
+
   b.enterTtyMode()
   b.ignoreKeys(brlapi.rangeType_all,[0])
 
@@ -95,7 +103,9 @@ except brlapi.ConnectionError as e:
 ###############################################################################
 
 cimport c_brlapi
+from libc.stdint cimport uint8_t, uint32_t, uint64_t
 import errno
+
 include "constants.auto.pyx"
 
 def getLibraryVersion():
@@ -807,3 +817,173 @@ cdef class Connection:
 		else:
 			return retval
 
+	def getParameter(self, param, subparam = 0, local = False):
+		"""Get the value of a parameter.
+		See brlapi_getParameter(3).
+
+		This gets the current content of a parameter"""
+		cdef uint32_t c_param
+		cdef uint64_t c_subparam
+		cdef int c_local
+		cdef void *c_value
+		cdef size_t size
+		cdef ssize_t retval
+		cdef uint64_t *lvalues
+		cdef uint32_t *values
+		cdef uint8_t *bytes
+		cdef char *string
+
+		c_param = param
+		c_subparam = subparam
+		c_local = local
+
+		size = c_brlapi.BRLAPI_MAXPACKETSIZE - 2*4
+		c_value = <void*>c_brlapi.malloc(size)
+
+		with nogil:
+			retval = c_brlapi.brlapi__getParameter(self.h, c_param, c_subparam, c_local, c_value, size)
+		if retval == -1:
+			c_brlapi.free(c_value)
+			raise OperationError()
+
+		# One 32bit value
+		if param == PARAM_CONNECTION_SERVERVERSION or \
+		   param == PARAM_CONNECTION_DISPLAYLEVEL or \
+		   param == PARAM_DEVICE_SPEED or \
+		   param == PARAM_BRAILLE_CURSORBLINKRATE or \
+		   param == PARAM_BRAILLE_CURSORBLINKLENGTH:
+			values = <uint32_t *>c_value
+			ret = values[0]
+
+		# Two 32bit values
+		elif param == PARAM_DEVICE_DISPLAYSIZE:
+			values = <uint32_t *>c_value
+			ret = (values[0], values[1])
+
+		# 64bit values
+		elif param == PARAM_KEY_CMD_SET or \
+		     param == PARAM_KEY_RAW_SET:
+			lvalues = <uint64_t *>c_value
+			ret = [ lvalues[i] for i in range(int(retval/8)) ]
+
+		# Byte value
+		elif param == PARAM_BRAILLE_DOTSPERCELL or \
+		     param == PARAM_BRAILLE_CURSORMASK:
+			bytes = <uint8_t *>c_value
+			ret = bytes[0]
+
+		# Bytes value
+		elif param == PARAM_RENDERED_OUTPUT or \
+		     param == PARAM_BRAILLE_TABLE_ROWS or \
+		     param == PARAM_BRAILLE_TABLE_ROWS or \
+		     param == PARAM_BRAILLE_TABLE:
+			bytes = <uint8_t *>c_value
+			ret = bytes[:retval]
+
+		# Boolean value
+		elif param == PARAM_DEVICE_ONLINE or \
+		     param == PARAM_BRAILLE_RETAINDOTS or \
+		     param == PARAM_BRAILLE_CONTRACTED or \
+		     param == PARAM_BROWSE_SKIPLINE or \
+		     param == PARAM_BROWSE_BEEP:
+			bytes = <uint8_t *>c_value
+			ret = bytes[0] != 0
+
+		# ASCII value
+		elif param == PARAM_DEVICE_DRIVERNAME or \
+		     param == PARAM_DEVICE_DRIVERCODE or \
+		     param == PARAM_DEVICE_DRIVERVERSION or \
+		     param == PARAM_DEVICE_MODELIDENTIFIER or \
+		     param == PARAM_DEVICE_PORT or \
+		     param == PARAM_KEY_CMD_SHORT_NAME or \
+		     param == PARAM_KEY_CMD_NAME or \
+		     param == PARAM_KEY_RAW_SHORT_NAME or \
+		     param == PARAM_KEY_RAW_NAME:
+			string = <char *>c_value
+			s = string[:retval]
+			ret = s.decode("ASCII")
+
+		# UTF-8 value
+		elif param == PARAM_CLIPBOARD:
+			string = <char *>c_value
+			s = string[:retval]
+			ret = s.decode("UTF-8")
+		else:
+			c_brlapi.free(c_value)
+			raise ValueError("Unsupported parameter")
+
+		c_brlapi.free(c_value)
+		return ret
+
+
+	def setParameter(self, param, subparam, local, value):
+		"""Set the value of a parameter.
+		See brlapi_setParameter(3).
+
+		This sets the content of a parameter"""
+		cdef uint32_t c_param
+		cdef uint64_t c_subparam
+		cdef int c_local
+		cdef void *c_value
+		cdef uint32_t *values
+		cdef uint8_t *bytes
+		cdef char *string
+
+		c_param = param
+		c_subparam = subparam
+		c_local = local
+
+		size = c_brlapi.BRLAPI_MAXPACKETSIZE - 2*4
+		c_value = <void*>c_brlapi.malloc(size)
+
+		if param == PARAM_CONNECTION_DISPLAYLEVEL:
+			values = <uint32_t *>c_value
+			values[0] = value
+			size = 4
+
+		if param == PARAM_BRAILLE_DOTSPERCELL or \
+		   param == PARAM_BRAILLE_RETAINDOTS or \
+		   param == PARAM_BRAILLE_CONTRACTED or \
+		   param == PARAM_BRAILLE_CURSORMASK or \
+		   param == PARAM_BRAILLE_CURSORBLINKRATE or \
+		   param == PARAM_BRAILLE_CURSORBLINKLENGTH or \
+		   param == PARAM_BROWSE_SKIPLINE or \
+		   param == PARAM_BROWSE_BEEP:
+			bytes = <uint8_t *>c_value
+			bytes[0] = value
+			size = 1
+
+		if param == PARAM_CLIPBOARD:
+			bytes = <uint8_t *>c_value
+			size = len(value)
+			string = value
+			c_brlapi.memcpy(<void*>bytes,<void*>string,size)
+
+		with nogil:
+			retval = c_brlapi.brlapi__setParameter(self.h, c_param, c_subparam, c_local, c_value, size)
+		if retval == -1:
+			c_brlapi.free(c_value)
+			raise OperationError()
+		c_brlapi.free(c_value)
+
+	def watchParameter(self, param, local, func):
+		"""Set a parameter change callback.
+		See brlapi_watchParameter(3).
+
+		This registers a parameter change callback: whenever the given
+		parameter changes, the given function is called.
+
+		This returns a tuple containing an entry object, to be passed to
+		unwatchParameter, and the initial value of the parameter."""
+		# TODO
+		raise NotImplementedError
+
+	def unwatchParameter(self, entry):
+		"""Clear a parameter change callback.
+		See brlapi_unwatchParameter(3).
+
+		This unregisters a parameter change callback: the callback
+		function previously registered with brlapi_watchParameter
+		will not be called any more."""
+		# TODO
+		raise NotImplementedError

@@ -18,6 +18,7 @@
 
 BEGIN {
   apiRangeTypeCount = 0
+  paramCount = 0
 }
 
 /#define[ \t]*BRLAPI_(CURSOR|DISPLAY|ERROR|TTY)_/ {
@@ -53,5 +54,18 @@ BEGIN {
 /^ *brlapi_rangeType_/ {
   gsub(",", "", $1)
   apiRangeType(substr($1, 18), $1, apiRangeTypeCount++, "")
+  next
+}
+
+/^ *BRLAPI_PARAM_[^ ]+ = [0-9x]+,/ {
+  gsub(",", "", $3)
+  paramCount = strtonum($3);
+  apiConstant(substr($1, 8), $1, paramCount++, "")
+  next
+}
+
+/^ *BRLAPI_PARAM_[^ ,]+,/ {
+  gsub(",", "", $1)
+  apiConstant(substr($1, 8), $1, paramCount++, "")
   next
 }

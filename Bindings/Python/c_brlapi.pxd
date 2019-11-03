@@ -21,6 +21,10 @@
 
 cdef extern from "sys/types.h":
 	ctypedef Py_ssize_t size_t
+	ctypedef Py_ssize_t ssize_t
+
+cdef extern from "Programs/brlapi_protocol.h":
+	int BRLAPI_MAXPACKETSIZE
 
 cdef extern from "Programs/brlapi.h":
 	ctypedef struct brlapi_connectionSettings_t:
@@ -105,6 +109,51 @@ cdef extern from "Programs/brlapi.h":
 	int brlapi__recvRaw(brlapi_handle_t *, void*, int)
 	int brlapi__sendRaw(brlapi_handle_t *, void*, int)
 
+	ctypedef int brlapi_param_t
+	ctypedef void *brlapi_paramCallbackDescriptor
+
+	brlapi_param_t BRLAPI_PARAM_CONNECTION_SERVERVERSION
+	brlapi_param_t BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL
+
+	brlapi_param_t BRLAPI_PARAM_DEVICE_DRIVERNAME
+	brlapi_param_t BRLAPI_PARAM_DEVICE_DRIVERCODE
+	brlapi_param_t BRLAPI_PARAM_DEVICE_DRIVERVERSION
+	brlapi_param_t BRLAPI_PARAM_DEVICE_MODELIDENTIFIER
+	brlapi_param_t BRLAPI_PARAM_DEVICE_DISPLAYSIZE
+
+	brlapi_param_t BRLAPI_PARAM_DEVICE_PORT
+	brlapi_param_t BRLAPI_PARAM_DEVICE_SPEED
+	brlapi_param_t BRLAPI_PARAM_DEVICE_ONLINE
+
+	brlapi_param_t BRLAPI_PARAM_BRAILLE_RETAINDOTS
+	brlapi_param_t BRLAPI_PARAM_BRAILLE_DOTSPERCELL
+	brlapi_param_t BRLAPI_PARAM_BRAILLE_CONTRACTED
+	brlapi_param_t BRLAPI_PARAM_BRAILLE_CURSORMASK
+	brlapi_param_t BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE
+	brlapi_param_t BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH
+
+	brlapi_param_t BRLAPI_PARAM_RENDERED_OUTPUT
+
+	brlapi_param_t BRLAPI_PARAM_BROWSE_SKIPLINE
+	brlapi_param_t BRLAPI_PARAM_BROWSE_BEEP
+	brlapi_param_t BRLAPI_PARAM_CLIPBOARD
+
+	brlapi_param_t BRLAPI_PARAM_KEY_CMD_SET
+	brlapi_param_t BRLAPI_PARAM_KEY_CMD_SHORT_NAME
+	brlapi_param_t BRLAPI_PARAM_KEY_CMD_NAME
+	brlapi_param_t BRLAPI_PARAM_KEY_RAW_SET
+	brlapi_param_t BRLAPI_PARAM_KEY_RAW_SHORT_NAME
+	brlapi_param_t BRLAPI_PARAM_KEY_RAW_NAME
+
+	brlapi_param_t BRLAPI_PARAM_BRAILLE_TABLE_ROWS
+	brlapi_param_t BRLAPI_PARAM_BRAILLE_TABLE
+
+	ssize_t brlapi__getParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t ) nogil
+	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t) nogil
+	brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, brlapi_paramCallback, void *, void*, size_t);
+	int brlapi__unwatchParameter(brlapi_handle_t *,
+	brlapi_paramCallbackDescriptor)
+
 	brlapi_error_t* brlapi_error_location()
 	char* brlapi_strerror(brlapi_error_t*)
 	brlapi_keyCode_t BRLAPI_KEY_MAX
@@ -126,4 +175,3 @@ cdef extern from "stdlib.h":
 
 cdef extern from "string.h":
 	void *memcpy(void *, void *, size_t)
-

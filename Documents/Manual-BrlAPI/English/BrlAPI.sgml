@@ -9,7 +9,7 @@ name="&lt;Sebastien.Hinderer@ens-lyon.org&gt;"></tt><newline></name>
 <name>Samuel Thibault <tt><htmlurl url="mailto:Samuel.Thibault@ens-lyon.org"
 name="&lt;Samuel.Thibault@ens-lyon.org&gt;"></tt><newline></name>
 </author>
-<date>V1.4, December 2006
+<date>V1.5, November 2019
 <abstract>
 This document describes <tt>BrlAPI</tt>.
 </abstract>
@@ -312,6 +312,18 @@ Once the client is not interested in displaying text
 or reading braille keys any more, it has to leave the tty, so
 that either <em/brltty/ can continue its job, or another client can
 take control of it.
+
+<sect3>Parameter handling
+
+The server exposes some parameters to the client. Some parameters are global to
+all clients (e.g. the braille display size), while others are local per client
+(e.g. retaindots, i.e. whether to send Perkins presses as dot patterns or as
+letters). Some parameters are read-only (e.g. the braille display size), while
+others are read-write (e.g. retaindots). Some parameters may change during
+execution, while others change only when a client set it.
+
+Clients can either request the current value of a parameter, or set its value
+(if it is read-write), or request the server to notify on value change.
 
 <sect3>Raw mode.
 
@@ -786,6 +798,9 @@ Eventually, named equivalents are provided:
 	  fprintf(stderr, " %s", dkey.flag[i]);
 	fprintf(stderr, "\n");
 </code></tscreen>
+
+
+
 
 <sect1>Leaving tty control
 
@@ -1539,5 +1554,71 @@ The data must hold the special value <tt/BRLAPI_DEVICE_MAGIC/: <tt/0xdeadbeef/,
 then the name of the driver (one byte for the length, then the name) to avoid
 erroneous raw mode activating.
 
+<sect2><tt/BRLAPI_PACKET_PARAM_REQUEST/
+
+<p>
+
+This packet is sent by the client to request values of parameters. The packet
+begins with an integer which holds flags (see <tt/BRLAPI_PARAMF_*/) which
+describe which, how, and when the value should be returned by the server:
+<itemize>
+<item> When the <tt/BRLAPI_PARAMF_GLOBAL/ flag is set, the server will
+return/subscribe the global value instead of the local value.
+<item> When the <tt/BRLAPI_PARAMF_GET/ flag is set, the server acknowledges the
+request by returning the latest value with a <tt/BRLAPI_PACKET_PARAM_VALUE/
+packet. Otherwise the server acknowledges the request with a
+<tt/BRLAPI_PACKET_ACK/ packet, without providing the value.
+<item> When the <tt/BRLAPI_PARAMF_SUBSCRIBE/ flag is set, the server will keep
+sending asynchronously the value of the parameter whenever it changes, with
+<tt/BRLAPI_PACKET_PARAM_UPDATE/ packets, until
+another request packet has the <tt/BRLAPI_PARAMF_UNSUBSCRIBE/ flag set for this
+parameter.
+<item> When the <tt/BRLAPI_PARAMF_UNSUBSCRIBE/ flag is set, the server
+will stop sending asynchronously the value of the parameter with
+<tt/BRLAPI_PACKET_PARAM_UPDATE/ packets.
+</itemize>
+
+It does not make sense to set both the <tt/BRLAPI_PARAMF_SUBSCRIBE/ and
+<tt/BRLAPI_PARAMF_UNSUBSCRIBE/ flags.
+
+Then an integer representing the parameter to be requested.
+Then two integers that form (in big-endian order) a 64bit value used to
+subspecify the precise parameter to be requested (e.g. a keycode number).
+
+If several <tt/BRLAPI_PARAMF_SUBSCRIBE/ packets are sent by the client, as
+many <tt/BRLAPI_PARAMF_UNSUBSCRIBE/ packets have to be sent by the client before
+the server stops sending <tt/BRLAPI_PACKET_PARAM_UPDATE/ packets.
+
+<sect2><tt/BRLAPI_PACKET_PARAM_VALUE/
+
+<p>
+This packet is sent by the client or the server to provide the value of a
+parameter. The packet begins with an integer which holds flags (see
+<tt/BRLAPI_PVF_*/) which describe which value is being transmitted:
+
+<itemize>
+<item> When the <tt/BRLAPI_PVF_GLOBAL/ flag is set, the value is the global value
+instead of the local value.
+</itemize>
+
+Then an integer representing the parameter being transmitted. Then two integers
+that form (in big-endian order) a 64bit value used to subspecify the precise
+parameter being transmitted (e.g. a keycode number).  Eventually, the packet
+contains the value.
+
+When the packet is sent by the client, it defines the new value of the
+parameter, and if it is a global value, the server broadcasts the new value to
+all clients which have subscribed to updates. The packet is then acknowledged by
+the server on success. If the value can not be changed, the server returns an
+error (e.g. <tt/BRLAPI_ERROR_READONLY_PARAMETER/).
+
+<sect2><tt/BRLAPI_PACKET_PARAM_VALUE/
+
+This packet is sent asynchronously by the server to provide an update of a
+value of a parameter. This is sent only if the client has previously sent a
+<tt/BRLAPI_PACKET_PARAM_REQUEST/ packet with the <tt/BRLAPI_PARAMF_SUBSCRIBE/
+for the corresponding parameter.
+
+It is structured exactly like a <tt/BRLAPI_PACKET_PARAM_VALUE/ packet.
 
 </article>
