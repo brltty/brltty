@@ -1269,7 +1269,7 @@ static int checkParamRead(Connection *c, brlapi_param_t param, uint32_t flags)
     case BRLAPI_PARAM_BROWSE_SKIPLINE:
     case BRLAPI_PARAM_BROWSE_BEEP:
 
-    case BRLAPI_PARAM_CUTBUFFER:
+    case BRLAPI_PARAM_CLIPBOARD:
 
     case BRLAPI_PARAM_KEY_CMD_SET:
     case BRLAPI_PARAM_KEY_CMD_SHORT_NAME:
@@ -1366,7 +1366,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
 
     case BRLAPI_PARAM_BROWSE_SKIPLINE:
     case BRLAPI_PARAM_BROWSE_BEEP:
-    case BRLAPI_PARAM_CUTBUFFER:
+    case BRLAPI_PARAM_CLIPBOARD:
 
       WERR(c->fd, BRLAPI_ERROR_READONLY_PARAMETER, "unimplemented parameter %x", param);
       return 0;
@@ -1425,7 +1425,7 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
  * BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH
  * BRLAPI_PARAM_BROWSE_SKIPLINE
  * BRLAPI_PARAM_BROWSE_BEEP
- * BRLAPI_PARAM_CUTBUFFER
+ * BRLAPI_PARAM_CLIPBOARD
  * BRLAPI_PARAM_BRAILLE_TABLE
  */
 static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
@@ -1591,7 +1591,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
       case BRLAPI_PARAM_BROWSE_SKIPLINE:
       case BRLAPI_PARAM_BROWSE_BEEP:
 
-      case BRLAPI_PARAM_CUTBUFFER:
+      case BRLAPI_PARAM_CLIPBOARD:
 
       case BRLAPI_PARAM_KEY_CMD_SET:
       case BRLAPI_PARAM_KEY_RAW_SET:

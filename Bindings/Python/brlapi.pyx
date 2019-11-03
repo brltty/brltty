@@ -904,7 +904,7 @@ cdef class Connection:
 			ret = s.decode("ASCII")
 
 		# UTF-8 value
-		elif param == PARAM_CUTBUFFER:
+		elif param == PARAM_CLIPBOARD:
 			string = <char *>c_value
 			s = string[:retval]
 			ret = s.decode("UTF-8")
@@ -953,7 +953,7 @@ cdef class Connection:
 			bytes[0] = value
 			size = 1
 
-		if param == PARAM_CUTBUFFER:
+		if param == PARAM_CLIPBOARD:
 			bytes = <uint8_t *>c_value
 			size = len(value)
 			string = value
