@@ -194,7 +194,7 @@ typedef struct Connection {
   FileDescriptor fd;
   int auth;
   struct Tty *tty;
-  int display_level;
+  brlapi_param_connection_displayLevel_t display_level;
   int raw, suspend;
   unsigned int how; /* how keys must be delivered to clients */
   uint8_t dots; /* whether client wants dots instead of translating to chars */
@@ -1232,64 +1232,219 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
   return 0;
 }
 
-/* checkParamRead: check that the parameter makes sense for reading */
-static int checkParamRead(Connection *c, brlapi_param_t param, uint32_t flags)
+typedef int (*paramRead)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size);
+typedef int (*paramWrite)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size);
+
+/* BRLAPI_PARAM_CONNECTION_SERVERVERSION */
+static int connection_serverVersion_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  switch (param) {
+  * (brlapi_param_connection_serverVersion_t*) data = BRLAPI_PROTOCOL_VERSION;
+  *size = sizeof(brlapi_param_connection_serverVersion_t);
+  return 1;
+}
 
-    /* Check against parameters which don't make sense globally */
-    case BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL:
-    case BRLAPI_PARAM_BRAILLE_RETAINDOTS:
-    case BRLAPI_PARAM_RENDERED_OUTPUT:
+/* BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL */
+static int connection_displayLevel_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  * (brlapi_param_connection_displayLevel_t*) data = c->display_level;
+  *size = sizeof(brlapi_param_connection_displayLevel_t);
+  return 1;
+}
+static int connection_displayLevel_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+{
+  CHECKERR( (size == sizeof(brlapi_param_connection_displayLevel_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
+  brlapi_param_connection_displayLevel_t level = * (brlapi_param_connection_displayLevel_t*) data;
+  c->display_level = level;
+  return 1;
+}
 
-      if ((flags & BRLAPI_PARAMF_GLOBAL)) {
-	WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "invalid global parameter %x", param);
-	return -1;
-      }
-      return 0;
+/* BRLAPI_PARAM_DEVICE_DRIVERNAME */
+static int device_driverName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  *size = strlen(braille->definition.name);
+  memcpy(data, braille->definition.name, *size);
+  return 1;
+}
 
-    /* Check against parameters which don't make sense locally */
-    case BRLAPI_PARAM_CONNECTION_SERVERVERSION:
+/* BRLAPI_PARAM_DEVICE_DRIVERCODE */
+static int device_driverCode_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  *size = strlen(braille->definition.code);
+  memcpy(data, braille->definition.code, *size);
+  return 1;
+}
 
-    case BRLAPI_PARAM_DEVICE_DRIVERNAME:
-    case BRLAPI_PARAM_DEVICE_DRIVERCODE:
-    case BRLAPI_PARAM_DEVICE_DRIVERVERSION:
-    case BRLAPI_PARAM_DEVICE_MODELIDENTIFIER:
-    case BRLAPI_PARAM_DEVICE_DISPLAYSIZE:
+/* BRLAPI_PARAM_DEVICE_DRIVERVERSION */
+static int device_driverVersion_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  *size = strlen(braille->definition.version);
+  memcpy(data, braille->definition.version, *size);
+  return 1;
+}
 
-    case BRLAPI_PARAM_DEVICE_PORT:
-    case BRLAPI_PARAM_DEVICE_SPEED:
-    case BRLAPI_PARAM_DEVICE_ONLINE:
-
-    case BRLAPI_PARAM_BRAILLE_DOTSPERCELL:
-    case BRLAPI_PARAM_BRAILLE_CONTRACTED:
-    case BRLAPI_PARAM_BRAILLE_CURSORMASK:
-    case BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE:
-    case BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH:
-
-    case BRLAPI_PARAM_BROWSE_SKIPLINE:
-    case BRLAPI_PARAM_BROWSE_BEEP:
-
-    case BRLAPI_PARAM_CLIPBOARD:
-
-    case BRLAPI_PARAM_KEY_CMD_SET:
-    case BRLAPI_PARAM_KEY_CMD_SHORT_NAME:
-    case BRLAPI_PARAM_KEY_CMD_NAME:
-    case BRLAPI_PARAM_KEY_RAW_SET:
-    case BRLAPI_PARAM_KEY_RAW_SHORT_NAME:
-    case BRLAPI_PARAM_KEY_RAW_NAME:
-
-    case BRLAPI_PARAM_BRAILLE_TABLE_ROWS:
-    case BRLAPI_PARAM_BRAILLE_TABLE:
-
-      if (!(flags & BRLAPI_PARAMF_GLOBAL)) {
-	WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "invalid local parameter %x", param);
-	return -1;
-      }
-      return 0;
+/* BRLAPI_PARAM_DEVICE_MODELIDENTIFIER */
+static int device_modelIdentifier_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  if (disp) {
+    *size = strlen(disp->keyBindings);
+    memcpy(data, disp->keyBindings, *size);
+  } else {
+    const char *unknown = "unknown";
+    *size = strlen(unknown);
+    memcpy(data, unknown, *size);
   }
-  /* Not supposed to happen */
-  return -1;
+  return 1;
+}
+
+/* BRLAPI_PARAM_DEVICE_DISPLAYSIZE */
+static int device_displaySize_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  brlapi_param_device_displaySize_t *displaySize = data;
+  displaySize->x = htonl(displayDimensions[0]);
+  displaySize->y = htonl(displayDimensions[1]);
+  *size = 2*sizeof(uint32_t);
+  return 1;
+}
+
+/* BRLAPI_PARAM_BRAILLE_DOTSPERCELL */
+static int braille_dotsPerCell_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  /* TODO */
+  *(uint8_t*)data = 8;
+  *size = sizeof(brlapi_param_braille_dotsPerCell_t);
+  return 1;
+}
+
+/* BRLAPI_PARAM_BRAILLE_RETAINDOTS */
+static int braille_retainDots_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  *(uint8_t*)data = c->dots;
+  *size = sizeof(brlapi_param_braille_retaindots_t);
+  return 1;
+}
+static int braille_retainDots_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+{
+  CHECKERR( (size == sizeof(brlapi_param_braille_retaindots_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
+  c->dots = *(uint8_t*)data;
+  return 1;
+}
+
+/* BRLAPI_PARAM_RENDERED_OUTPUT */
+static int rendered_output_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  /* FIXME: should provide local output of the connection only! */
+  if (disp) {
+    *size = displaySize;
+    memcpy(data, disp->buffer, *size);
+  } else {
+    *size = 0;
+    WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "unsupported parameter %u", param);
+  }
+  return 1;
+}
+
+/* BRLAPI_PARAM_KEY_CMD_SHORT_NAME */
+static int key_cmd_short_name_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  char buffer[0X100];
+  char *colon;
+  describeCommand(buffer, sizeof(buffer), subparam, CDO_IncludeName);
+  colon = strchr(buffer, ':');
+  if (colon) *colon = 0;
+  *size = strlen(buffer);
+  memcpy(data, buffer, *size);
+  return 1;
+}
+
+/* BRLAPI_PARAM_KEY_CMD_NAME */
+static int key_cmd_name_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  char buffer[0X100];
+  describeCommand(buffer, sizeof(buffer), subparam, 0);
+  *size = strlen(buffer);
+  memcpy(data, buffer, *size);
+  return 1;
+}
+
+/* For parameters to be implemented */
+static int unimplemented_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "parameter %u not implemented yet", param);
+  *size = 0;
+  return 0;
+}
+
+static int unimplemented_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+{
+  WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "parameter %u not implemented yet", param);
+  return 0;
+}
+
+typedef struct {
+  unsigned local:1;
+  unsigned global:1;
+  paramRead read;
+  paramWrite write;
+} ParamDispatch;
+
+static ParamDispatch paramDispatch[BRLAPI_PARAM_NUMBER] = {
+  /* BrlAPI */
+  [ BRLAPI_PARAM_CONNECTION_SERVERVERSION ]	= { 0, 1, connection_serverVersion_read, NULL, },
+  [ BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL ]	= { 1, 0, connection_displayLevel_read, connection_displayLevel_write, },
+
+  /* Device */
+  [ BRLAPI_PARAM_DEVICE_DRIVERNAME ]		= { 0, 1, device_driverName_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_DRIVERCODE ]		= { 0, 1, device_driverCode_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_DRIVERVERSION ]		= { 0, 1, device_driverVersion_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_MODELIDENTIFIER ]	= { 0, 1, device_modelIdentifier_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_DISPLAYSIZE ]		= { 0, 1, device_displaySize_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_PORT ]			= { 0, 1, unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_SPEED ]			= { 0, 1, unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_ONLINE ]		= { 0, 1, unimplemented_read, NULL, },
+
+  /* Braille rendering */
+  [ BRLAPI_PARAM_BRAILLE_RETAINDOTS ]		= { 1, 0, braille_retainDots_read, braille_retainDots_write, },
+  [ BRLAPI_PARAM_BRAILLE_DOTSPERCELL ]		= { 1, 1, braille_dotsPerCell_read, unimplemented_write, },
+  [ BRLAPI_PARAM_BRAILLE_CONTRACTED ]		= { 1, 1, unimplemented_read, unimplemented_write, },
+  [ BRLAPI_PARAM_BRAILLE_CURSORMASK ]		= { 1, 1, unimplemented_read, unimplemented_write, },
+  [ BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE ]	= { 1, 1, unimplemented_read, unimplemented_write, },
+  [ BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH ]	= { 1, 1, unimplemented_read, unimplemented_write, },
+  [ BRLAPI_PARAM_RENDERED_OUTPUT ]		= { 1, 1, rendered_output_read, NULL, },
+
+  /* Navigation parameters */
+  [ BRLAPI_PARAM_BROWSE_SKIPLINE ]		= { 1, 1, unimplemented_read, unimplemented_write, },
+  [ BRLAPI_PARAM_BROWSE_BEEP ]			= { 1, 1, unimplemented_read, unimplemented_write, },
+
+  /* Cut buffer(s) */
+  [ BRLAPI_PARAM_CLIPBOARD ]			= { 0, 1, unimplemented_read, unimplemented_write, },
+
+  /* Keys */
+  [ BRLAPI_PARAM_KEY_CMD_SET ]			= { 0, 1, unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_KEY_CMD_SHORT_NAME ]		= { 0, 1, key_cmd_short_name_read, NULL, },
+  [ BRLAPI_PARAM_KEY_CMD_NAME ]			= { 0, 1, key_cmd_name_read, NULL, },
+  [ BRLAPI_PARAM_KEY_RAW_SET ]			= { 0, 1, unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_KEY_RAW_SHORT_NAME ]		= { 0, 1, unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_KEY_RAW_NAME ]			= { 0, 1, unimplemented_read, NULL, },
+
+  /* Braille translation */
+  [ BRLAPI_PARAM_BRAILLE_TABLE_ROWS ]		= { 0, 1, unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_BRAILLE_TABLE ]		= { 0, 1, unimplemented_read, NULL, },
+};
+
+static int checkParamLocalGlobal(Connection *c, brlapi_param_t param, uint32_t flags)
+{
+  if (flags & BRLAPI_PARAMF_GLOBAL) {
+    if (!paramDispatch[param].global) {
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u does not make sense globally", param);
+      return 0;
+    }
+  } else {
+    if (!paramDispatch[param].local) {
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u does not make sense locally", param);
+      return 0;
+    }
+  }
+  return 1;
 }
 
 static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
@@ -1298,89 +1453,42 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   brlapi_param_t param;
   uint64_t subparam;
   uint32_t flags;
-  unsigned char *p = paramValue->data;
+  int ret;
+
   CHECKERR( (size >= sizeof(flags) + sizeof(param) + sizeof(subparam)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
   flags = ntohl(paramValue->flags);
   param = ntohl(paramValue->param);
+
+  if (param >= sizeof(paramDispatch) / sizeof(*paramDispatch)) {
+    WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "unknown parameter %u", param);
+    return 0;
+  }
+
+  paramWrite writeHandler = paramDispatch[param].write;
+  /* Check against read-only parameters */
+  if (!writeHandler) {
+    WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for writing", param);
+    return 0;
+  }
+
+  if (!checkParamLocalGlobal(c, param, flags))
+    return 0;
+
   subparam = ((uint64_t)ntohl(paramValue->subparam_hi) << 32) || ntohl(paramValue->subparam_lo);
   size -= sizeof(flags) + sizeof(param) + sizeof(subparam);
   _brlapi_ntohParameter(param, paramValue, size);
 
-  /* Check against read-only parameters */
-  switch (param) {
-    case BRLAPI_PARAM_CONNECTION_SERVERVERSION:
-
-    case BRLAPI_PARAM_DEVICE_DRIVERNAME:
-    case BRLAPI_PARAM_DEVICE_DRIVERCODE:
-    case BRLAPI_PARAM_DEVICE_DRIVERVERSION:
-    case BRLAPI_PARAM_DEVICE_MODELIDENTIFIER:
-    case BRLAPI_PARAM_DEVICE_DISPLAYSIZE:
-
-    case BRLAPI_PARAM_DEVICE_PORT:
-    case BRLAPI_PARAM_DEVICE_SPEED:
-    case BRLAPI_PARAM_DEVICE_ONLINE:
-
-    case BRLAPI_PARAM_RENDERED_OUTPUT:
-
-    case BRLAPI_PARAM_KEY_CMD_SET:
-    case BRLAPI_PARAM_KEY_CMD_SHORT_NAME:
-    case BRLAPI_PARAM_KEY_CMD_NAME:
-    case BRLAPI_PARAM_KEY_RAW_SET:
-    case BRLAPI_PARAM_KEY_RAW_SHORT_NAME:
-    case BRLAPI_PARAM_KEY_RAW_NAME:
-
-    case BRLAPI_PARAM_BRAILLE_TABLE_ROWS:
-    case BRLAPI_PARAM_BRAILLE_TABLE:
-
-      WERR(c->fd, BRLAPI_ERROR_READONLY_PARAMETER, "read-only parameter %x", param);
-      return 0;
-    default:
-      break;
-  }
-
-  /* Check against parameters which don't make sense globally */
-  if (checkParamRead(c, param, flags) < 0)
+  ret = writeHandler(c, param, subparam, flags, paramValue->data, size);
+  if (!ret)
     return 0;
 
-  switch (param) {
-    case BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL: {
-      CHECKERR( (size == sizeof(brlapi_param_connection_displayLevel_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
-      brlapi_param_connection_displayLevel_t value = * (brlapi_param_connection_displayLevel_t*) p;
-      c->display_level = value;
-      break;
-    }
-
-    case BRLAPI_PARAM_BRAILLE_RETAINDOTS: {
-      CHECKERR( (size == sizeof(brlapi_param_braille_retaindots_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
-      c->dots = *p;
-      handleParamUpdate(c, BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 0, &c->dots, sizeof(c->dots));
-      break;
-    }
-
-    /* TODO */
-    case BRLAPI_PARAM_BRAILLE_DOTSPERCELL:
-    case BRLAPI_PARAM_BRAILLE_CONTRACTED:
-    case BRLAPI_PARAM_BRAILLE_CURSORMASK:
-    case BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE:
-    case BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH:
-
-    case BRLAPI_PARAM_BROWSE_SKIPLINE:
-    case BRLAPI_PARAM_BROWSE_BEEP:
-    case BRLAPI_PARAM_CLIPBOARD:
-
-      WERR(c->fd, BRLAPI_ERROR_READONLY_PARAMETER, "unimplemented parameter %x", param);
-      return 0;
-
-    /* Check against unknown parameters */
-    default:
-      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "invalid parameter %x", param);
-      return 0;
-  }
-  if ((flags & BRLAPI_PARAMF_GLOBAL)) {
+  if (flags & BRLAPI_PARAMF_GLOBAL) {
+    pthread_mutex_lock(&paramMutex);
     /* TODO: broadcast new value */
     /* Or will perhaps rather be reported by the core through handleParamUpdate */
-    pthread_mutex_lock(&paramMutex);
     pthread_mutex_unlock(&paramMutex);
+  } else {
+    handleParamUpdate(c, param, subparam, flags, paramValue->data, size);
   }
   writeAck(c->fd);
   return 0;
@@ -1457,15 +1565,28 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   brlapi_param_t param;
   uint64_t subparam;
   uint32_t flags;
+  int ret;
+
   CHECKERR( (size == sizeof(brlapi_paramRequestPacket_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramRequest packet: %lu vs %lu", (unsigned long) size, (unsigned long) sizeof(brlapi_paramRequestPacket_t));
   flags = ntohl(paramRequest->flags);
   param = ntohl(paramRequest->param);
-  subparam = (uint64_t)ntohl(paramRequest->subparam_hi) << 32 | ntohl(paramRequest->subparam_lo);
-  /* Check against parameters which don't make sense globally */
-  if (checkParamRead(c, param, flags) < 0)
-  {
+
+  if (param >= sizeof(paramDispatch) / sizeof(*paramDispatch)) {
+    WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "unknown parameter %u", param);
     return 0;
   }
+
+  paramRead readHandler = paramDispatch[param].read;
+  /* Check against non-readable parameters */
+  if (!readHandler) {
+    WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for reading", param);
+    return 0;
+  }
+
+  if (!checkParamLocalGlobal(c, param, flags))
+    return 0;
+
+  subparam = (uint64_t)ntohl(paramRequest->subparam_hi) << 32 | ntohl(paramRequest->subparam_lo);
   if ((flags & BRLAPI_PARAMF_SUBSCRIBE) &&
       (flags & BRLAPI_PARAMF_UNSUBSCRIBE)) {
     WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "subscribe and unsubscribe flags both set");
@@ -1509,137 +1630,12 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   if (flags & BRLAPI_PARAMF_GET) { /* Ack by sending parameter value */
     brlapi_packet_t response;
     brlapi_paramValuePacket_t *paramValue = &response.paramValue;
-    unsigned char *p = paramValue->data;
     paramValue->flags = htonl(flags & BRLAPI_PARAMF_GLOBAL);
     paramValue->param = paramRequest->param;
     paramValue->subparam_hi = paramRequest->subparam_hi;
     paramValue->subparam_lo = paramRequest->subparam_lo;
-    switch (param) {
-
-      case BRLAPI_PARAM_CONNECTION_SERVERVERSION:
-	* (brlapi_param_connection_serverVersion_t*) p = BRLAPI_PROTOCOL_VERSION;
-	size = sizeof(brlapi_param_connection_serverVersion_t);
-	break;
-      case BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL:
-	* (brlapi_param_connection_displayLevel_t*) p = c->display_level;
-	size = sizeof(brlapi_param_connection_displayLevel_t);
-	break;
-
-      case BRLAPI_PARAM_DEVICE_DRIVERNAME:
-	size = strlen(braille->definition.name);
-	memcpy(p, braille->definition.name, size);
-	break;
-      case BRLAPI_PARAM_DEVICE_DRIVERCODE:
-	size = strlen(braille->definition.code);
-	memcpy(p, braille->definition.code, size);
-	break;
-      case BRLAPI_PARAM_DEVICE_DRIVERVERSION:
-	size = strlen(braille->definition.version);
-	memcpy(p, braille->definition.version, size);
-	break;
-      case BRLAPI_PARAM_DEVICE_MODELIDENTIFIER:
-	if (disp) {
-	  size = strlen(disp->keyBindings);
-	  memcpy(p, disp->keyBindings, size);
-	} else {
-	  size = strlen("unknown");
-	  memcpy(p, "unknown", size);
-	}
-	break;
-      case BRLAPI_PARAM_DEVICE_DISPLAYSIZE:
-      {
-	brlapi_param_device_displaySize_t *displaySize = p;
-	displaySize->x = htonl(displayDimensions[0]);
-	displaySize->y = htonl(displayDimensions[1]);
-	size = 2*sizeof(uint32_t);
-	break;
-      }
-      case BRLAPI_PARAM_DEVICE_PORT:
-      case BRLAPI_PARAM_DEVICE_SPEED:
-      case BRLAPI_PARAM_DEVICE_ONLINE:
-	size = 0;
-	WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "unsupported parameter %x", param);
-	break;
-
-      case BRLAPI_PARAM_BRAILLE_DOTSPERCELL:
-	/* TODO */
-	*p = 8;
-	size = sizeof(brlapi_param_braille_dotsPerCell_t);
-	break;
-
-      case BRLAPI_PARAM_BRAILLE_RETAINDOTS:
-	*p = c->dots;
-	size = sizeof(brlapi_param_braille_retaindots_t);
-	break;
-      case BRLAPI_PARAM_BRAILLE_CONTRACTED:
-      case BRLAPI_PARAM_BRAILLE_CURSORMASK:
-      case BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE:
-      case BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH:
-	/* TODO */
-	size = 0;
-	WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "unsupported parameter %x", param);
-	break;
-
-      case BRLAPI_PARAM_RENDERED_OUTPUT:
-	/* FIXME: should provide local output of the connection only! */
-	if (disp) {
-	  size = displaySize;
-	  memcpy(p, disp->buffer, size);
-	} else {
-	  size = 0;
-	  WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "unsupported parameter %x", param);
-	}
-	break;
-
-      case BRLAPI_PARAM_BROWSE_SKIPLINE:
-      case BRLAPI_PARAM_BROWSE_BEEP:
-
-      case BRLAPI_PARAM_CLIPBOARD:
-
-      case BRLAPI_PARAM_KEY_CMD_SET:
-      case BRLAPI_PARAM_KEY_RAW_SET:
-	/* TODO */
-	size = 0;
-	WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "unsupported parameter %x", param);
-	break;
-
-      case BRLAPI_PARAM_KEY_CMD_SHORT_NAME:
-      {
-	char buffer[0X100];
-	char *colon;
-	describeCommand(buffer, sizeof(buffer), subparam, CDO_IncludeName);
-	colon = strchr(buffer, ':');
-	if (colon) *colon = 0;
-	size = strlen(buffer);
-	memcpy(p, buffer, size);
-	break;
-      }
-      case BRLAPI_PARAM_KEY_CMD_NAME:
-      {
-	char buffer[0X100];
-	describeCommand(buffer, sizeof(buffer), subparam, 0);
-	size = strlen(buffer);
-	memcpy(p, buffer, size);
-	break;
-      }
-
-      case BRLAPI_PARAM_KEY_RAW_SHORT_NAME:
-      case BRLAPI_PARAM_KEY_RAW_NAME:
-
-      case BRLAPI_PARAM_BRAILLE_TABLE_ROWS:
-      case BRLAPI_PARAM_BRAILLE_TABLE:
-
-	/* TODO */
-	size = 0;
-	WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "unsupported parameter %x", param);
-	break;
-
-      default:
-	size = 0;
-	WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "invalid parameter %x", param);
-	break;
-    }
-    if (size) {
+    ret = readHandler(c, param, subparam, flags, paramValue->data, &size);
+    if (ret && size) {
       _brlapi_htonParameter(param, paramValue, size);
       size += sizeof(flags) + sizeof(param) + sizeof(subparam);
       brlapiserver_writePacket(c->fd,BRLAPI_PACKET_PARAM_VALUE,paramValue,size);
