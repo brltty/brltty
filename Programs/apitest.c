@@ -305,12 +305,13 @@ static void suspendDriver(void)
 
 static void brailleRetainDotsChanged(brlapi_param_t parameter, uint64_t subparam, int local, void *priv, const void *data, size_t len)
 {
+  const brlapi_param_braille_retaindots_t *d = data;
   if (parameter != BRLAPI_PARAM_BRAILLE_RETAINDOTS)
   {
     printf("handler called for %x, another parameter than retaindot parameter?!\n", parameter);
     return;
   }
-  printf("new retain dots %zd: %d\n", len, *(uint8_t*) data);
+  printf("new retain dots %zd: %d\n", len, *d);
 }
 
 static void testParameters(void)
