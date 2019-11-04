@@ -315,30 +315,30 @@ static void brailleRetainDotsChanged(brlapi_param_t parameter, uint64_t subparam
 
 static void testParameters(void)
 {
-  uint8_t val;
-  if (brlapi_getParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+  brlapi_param_braille_retaindots_t val;
+  if (brlapi_getParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 0, &val, sizeof(val)) < 0) {
     brlapi_perror("getParameter");
   }
   printf("retain dots was %d\n", val);
   printf("now watching retain dots parameter\n");
-  if (brlapi_watchParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, brailleRetainDotsChanged, NULL, NULL, 0) == 0) {
+  if (brlapi_watchParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 0, brailleRetainDotsChanged, NULL, NULL, 0) == 0) {
     brlapi_perror("watchParameter");
   }
   val = 0;
   printf("setting retain dots parameter to %d\n", val);
-  if (brlapi_setParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+  if (brlapi_setParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 0, &val, sizeof(val)) < 0) {
     brlapi_perror("setParameter");
   }
-  if (brlapi_getParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+  if (brlapi_getParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 0, &val, sizeof(val)) < 0) {
     brlapi_perror("getParameter");
   }
   printf("retain dots now %d\n", val);
   val = 1;
   printf("setting retain dots parameter to %d\n", val);
-  if (brlapi_setParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+  if (brlapi_setParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 0, &val, sizeof(val)) < 0) {
     brlapi_perror("setParameter");
   }
-  if (brlapi_getParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 1, &val, sizeof(val)) < 0) {
+  if (brlapi_getParameter(BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 0, &val, sizeof(val)) < 0) {
     brlapi_perror("getParameter");
   }
   printf("retain dots now %d\n", val);
