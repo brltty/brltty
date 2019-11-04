@@ -211,7 +211,7 @@ static void enterLearnMode(void)
   int res;
   brlapi_keyCode_t code;
   int cmd;
-  char buf[0X100];
+  char buf[0X100], *val;
 
   fprintf(stderr,"Entering command learn mode\n");
   if (brlapi_enterTtyMode(-1, NULL)<0) {
@@ -231,6 +231,9 @@ static void enterLearnMode(void)
                     (CDO_IncludeName | CDO_IncludeOperand));
     brlapi_writeText(BRLAPI_CURSOR_OFF, buf);
     fprintf(stderr, "%s\n", buf);
+    val = brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_CMD_NAME, cmd, 1, NULL);
+    fprintf(stderr, "%s\n", val);
+    free(val);
     if (cmd==BRL_CMD_LEARN) return;
   }
   brlapi_perror("brlapi_readKey");
