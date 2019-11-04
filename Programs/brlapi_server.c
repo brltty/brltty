@@ -1351,7 +1351,6 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
 
     case BRLAPI_PARAM_BRAILLE_RETAINDOTS: {
       CHECKERR( (size == sizeof(uint8_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
-      fprintf(stderr,"\n\nsetting dots to %d\n\n", *p);
       c->dots = *p;
       handleParamUpdate(c, BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 0, &c->dots, sizeof(c->dots));
       break;
