@@ -1278,6 +1278,33 @@ ssize_t BRLAPI_STDCALL brlapi_getParameter(brlapi_param_t parameter, uint64_t su
   return brlapi__getParameter(&defaultHandle, parameter, subparam, global, data, len);
 }
 
+void* BRLAPI_STDCALL brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, size_t *len)
+{
+  brlapi_paramValuePacket_t reply;
+  ssize_t rlen;
+  void *data;
+
+  rlen = _brlapi__getParameter(handle, parameter, subparam, global, 1, 0, &reply);
+  if (rlen < 0)
+    return NULL;
+
+  data = malloc(rlen + 1);
+  if (!data)
+    return NULL;
+
+  _brlapi_ntohParameter(parameter, &reply, rlen);
+  memcpy(data, &reply.data, rlen);
+  ((char*)data)[rlen] = 0;
+  if (len)
+    *len = rlen;
+  return data;
+}
+
+void* BRLAPI_STDCALL brlapi_getParameterAlloc(brlapi_param_t parameter, uint64_t subparam, int global, size_t *len)
+{
+  return brlapi__getParameterAlloc(&defaultHandle, parameter, subparam, global, len);
+}
+
 /* Function: brlapi_setParameter */
 int BRLAPI_STDCALL brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, const void* data, size_t len)
 {

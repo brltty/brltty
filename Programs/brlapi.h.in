@@ -1221,6 +1221,23 @@ ssize_t brlapi_getParameter(brlapi_param_t parameter, uint64_t subparam, int glo
 #endif
 ssize_t brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, void* data, size_t len);
 
+/* brlapi_getParameterAlloc */
+/** Return the content of a parameter
+ *
+ * brlapi_getParameterAlloc gets the current content of a parameter, by returning it as a newly-allocated buffer.
+ * The buffer is allocated to one byte more than the parameter value. This byte is set to zero. This allows, for string parameters, to be able to immediately use it as a C string.
+ *
+ * \param parameter is the parameter whose content shall be got;
+ * \param global specifies whether the global value should be returned instead of the local value;
+ * \param len is the address where to store the size of the parameter value.
+ *
+ * \return a newly-allocated buffer that contains the value of the parameter. The caller must call free() on it after use. NULL is returned on errors
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+void *brlapi_getParameterAlloc(brlapi_param_t parameter, uint64_t subparam, int global, size_t *len);
+#endif
+void *brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, size_t *len);
+
 /* brlapi_setParameter */
 /** Set the content of a parameter
  *
