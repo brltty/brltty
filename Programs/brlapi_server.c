@@ -182,6 +182,7 @@ typedef struct {
 typedef enum { TODISPLAY, EMPTY } BrlBufState;
 
 typedef struct Connection {
+  uint32_t clientVersion;
   struct Connection *prev, *next;
   FileDescriptor fd;
   int auth;
@@ -1257,8 +1258,15 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
       brlapi_authServerPacket_t *authPacket = &serverPacket.authServer;
       int nbmethods = 0;
 
-      if (size<sizeof(*versionPacket) || ntohl(versionPacket->protocolVersion)!=BRLAPI_PROTOCOL_VERSION) {
+      if (size<sizeof(*versionPacket)) {
 	WERR(c->fd, BRLAPI_ERROR_PROTOCOL_VERSION, "wrong protocol version");
+	return 1;
+      }
+
+      c->clientVersion = ntohl(versionPacket->protocolVersion);
+      if (c->clientVersion < 8) {
+	/* We only provide compatibility with version 8 and later. */
+	WERR(c->fd, BRLAPI_ERROR_PROTOCOL_VERSION, "protocol version %"PRIu32" < 8 is not supported", c->clientVersion);
 	return 1;
       }
 

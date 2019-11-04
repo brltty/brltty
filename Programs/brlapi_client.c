@@ -218,6 +218,7 @@ sem_destroy (sem_t *sem) {
 #define BRL_KEYBUF_SIZE 256
 
 struct brlapi_handle_t { /* Connection-specific information */
+  uint32_t serverVersion;
   unsigned int brlx;
   unsigned int brly;
   brlapi_fileDescriptor fileDescriptor; /* Descriptor of the socket connected to BrlApi */
@@ -842,11 +843,14 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
   if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, &serverPacket, sizeof(serverPacket), 1, -1)) < 0)
     goto outfd;
 
-  if (version->protocolVersion != htonl(BRLAPI_PROTOCOL_VERSION)) {
+  handle->serverVersion = ntohl(version->protocolVersion);
+  if (handle->serverVersion < 8) {
+    /* We only provide compatibility with version 8 and later. */
     brlapi_errno = BRLAPI_ERROR_PROTOCOL_VERSION;
     goto outfd;
   }
 
+  version->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
   if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_VERSION, version, sizeof(*version)) < 0)
     goto outfd;
 
