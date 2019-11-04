@@ -846,11 +846,13 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
     goto outfd;
 
   handle->serverVersion = ntohl(version->protocolVersion);
-  if (handle->serverVersion < 8 || handle->serverVersion > BRLAPI_PROTOCOL_VERSION) {
+  if (handle->serverVersion < 8) {
+    /* We only provide compatibility with version 8 and later. */
     brlapi_errno = BRLAPI_ERROR_PROTOCOL_VERSION;
     goto outfd;
   }
 
+  version->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
   if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_VERSION, version, sizeof(*version)) < 0)
     goto outfd;
 
@@ -1977,7 +1979,7 @@ done:
 static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, const brlapi_range_t ranges[], unsigned int n)
 {
   uint32_t ints[n][4];
-  unsigned int i, remaining, todo, max = UINT_MAX;
+  unsigned int i;
 
   for (i=0; i<n; i++) {
     ints[i][0] = htonl(ranges[i].first >> 32);
@@ -1986,17 +1988,8 @@ static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, const brl
     ints[i][3] = htonl(ranges[i].last & 0xffffffff);
   };
 
-  if (handle->serverVersion == 8)
-    /* BRLAPI_MAXPACKETSIZE was 512 at the time, split requests */
-    max = 512 / (2*sizeof(brlapi_keyCode_t));
-
-  for (remaining = n; remaining; remaining -= todo) {
-    todo = remaining;
-    if (todo > max)
-      todo = max;
-    if (brlapi__writePacketWaitForAck(handle,(what ? BRLAPI_PACKET_ACCEPTKEYRANGES : BRLAPI_PACKET_IGNOREKEYRANGES),&ints[n-remaining],todo*2*sizeof(brlapi_keyCode_t)))
-      return -1;
-  }
+  if (brlapi__writePacketWaitForAck(handle,(what ? BRLAPI_PACKET_ACCEPTKEYRANGES : BRLAPI_PACKET_IGNOREKEYRANGES),ints,n*2*sizeof(brlapi_keyCode_t)))
+    return -1;
   return 0;
 }
 
