@@ -11,13 +11,13 @@ import errno
 import Xlib.keysymdef.miscellany
 try:
   b = brlapi.Connection()
-  print("Server version " + str(b.getParameter(brlapi.PARAM_CONNECTION_SERVERVERSION)))
-  print("Display size " + str(b.getParameter(brlapi.PARAM_DEVICE_DISPLAYSIZE)))
-  print("Driver " + b.getParameter(brlapi.PARAM_DEVICE_DRIVERNAME))
-  print("Model " + b.getParameter(brlapi.PARAM_DEVICE_MODELIDENTIFIER))
+  print("Server version " + str(b.getParameter(brlapi.PARAM_CONNECTION_SERVERVERSION, 0, True)))
+  print("Display size " + str(b.getParameter(brlapi.PARAM_DEVICE_DISPLAYSIZE, 0, True)))
+  print("Driver " + b.getParameter(brlapi.PARAM_DEVICE_DRIVERNAME, 0, True))
+  print("Model " + b.getParameter(brlapi.PARAM_DEVICE_MODELIDENTIFIER, 0, True))
 
-  print("Command 1 short name " + b.getParameter(brlapi.PARAM_KEY_CMD_SHORT_NAME, 1))
-  print("Command 1 name '" + b.getParameter(brlapi.PARAM_KEY_CMD_NAME, 1) + "'")
+  print("Command 1 short name " + b.getParameter(brlapi.PARAM_KEY_CMD_SHORT_NAME, 1, True))
+  print("Command 1 name '" + b.getParameter(brlapi.PARAM_KEY_CMD_NAME, 1, True) + "'")
 
   b.enterTtyMode()
   b.ignoreKeys(brlapi.rangeType_all,[0])
@@ -817,14 +817,14 @@ cdef class Connection:
 		else:
 			return retval
 
-	def getParameter(self, param, subparam = 0, local = False):
+	def getParameter(self, param, subparam = 0, globalparam = False):
 		"""Get the value of a parameter.
 		See brlapi_getParameter(3).
 
 		This gets the current content of a parameter"""
 		cdef uint32_t c_param
 		cdef uint64_t c_subparam
-		cdef int c_local
+		cdef int c_global
 		cdef void *c_value
 		cdef size_t size
 		cdef ssize_t retval
@@ -835,13 +835,13 @@ cdef class Connection:
 
 		c_param = param
 		c_subparam = subparam
-		c_local = local
+		c_global = globalparam
 
 		size = c_brlapi.BRLAPI_MAXPACKETSIZE - 2*4
 		c_value = <void*>c_brlapi.malloc(size)
 
 		with nogil:
-			retval = c_brlapi.brlapi__getParameter(self.h, c_param, c_subparam, c_local, c_value, size)
+			retval = c_brlapi.brlapi__getParameter(self.h, c_param, c_subparam, c_global, c_value, size)
 		if retval == -1:
 			c_brlapi.free(c_value)
 			raise OperationError()
@@ -916,14 +916,14 @@ cdef class Connection:
 		return ret
 
 
-	def setParameter(self, param, subparam, local, value):
+	def setParameter(self, param, subparam, globalparam, value):
 		"""Set the value of a parameter.
 		See brlapi_setParameter(3).
 
 		This sets the content of a parameter"""
 		cdef uint32_t c_param
 		cdef uint64_t c_subparam
-		cdef int c_local
+		cdef int c_global
 		cdef void *c_value
 		cdef uint32_t *values
 		cdef uint8_t *bytes
@@ -931,7 +931,7 @@ cdef class Connection:
 
 		c_param = param
 		c_subparam = subparam
-		c_local = local
+		c_global = globalparam
 
 		size = c_brlapi.BRLAPI_MAXPACKETSIZE - 2*4
 		c_value = <void*>c_brlapi.malloc(size)
@@ -960,13 +960,13 @@ cdef class Connection:
 			c_brlapi.memcpy(<void*>bytes,<void*>string,size)
 
 		with nogil:
-			retval = c_brlapi.brlapi__setParameter(self.h, c_param, c_subparam, c_local, c_value, size)
+			retval = c_brlapi.brlapi__setParameter(self.h, c_param, c_subparam, c_global, c_value, size)
 		if retval == -1:
 			c_brlapi.free(c_value)
 			raise OperationError()
 		c_brlapi.free(c_value)
 
-	def watchParameter(self, param, local, func):
+	def watchParameter(self, param, _global, func):
 		"""Set a parameter change callback.
 		See brlapi_watchParameter(3).
 
