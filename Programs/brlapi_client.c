@@ -846,11 +846,13 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
     goto outfd;
 
   handle->serverVersion = ntohl(version->protocolVersion);
-  if (handle->serverVersion < 8 || handle->serverVersion > BRLAPI_PROTOCOL_VERSION) {
+  if (handle->serverVersion < 8) {
+    /* We only provide compatibility with version 8 and later. */
     brlapi_errno = BRLAPI_ERROR_PROTOCOL_VERSION;
     goto outfd;
   }
 
+  version->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
   if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_VERSION, version, sizeof(*version)) < 0)
     goto outfd;
 
