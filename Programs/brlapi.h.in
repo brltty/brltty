@@ -1022,58 +1022,58 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 typedef enum {
   /* BrlAPI */
   BRLAPI_PARAM_CONNECTION_SERVERVERSION = 0,	/**< Version of the API server: uint32_t */
-  BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL,		/**< "Display level": uint32_t */
+  BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL = 1,	/**< "Display level": uint32_t */
 
   /* Device */
-  BRLAPI_PARAM_DEVICE_DRIVERNAME = 0x100,	/**< Driver name: string */
-  BRLAPI_PARAM_DEVICE_DRIVERCODE,		/**< Driver code: string */
-  BRLAPI_PARAM_DEVICE_DRIVERVERSION,		/**< Driver version: string */
-  BRLAPI_PARAM_DEVICE_MODELIDENTIFIER,		/**< Model Identifier: string */
-  BRLAPI_PARAM_DEVICE_DISPLAYSIZE,		/**< Dimensions of the braille device: { uint32_t x; uint32_t y; } */
-  BRLAPI_PARAM_DEVICE_PORT,			/**< Path to the device: string */
-  BRLAPI_PARAM_DEVICE_SPEED,			/**< Speed of the port: uint32_t */
-  BRLAPI_PARAM_DEVICE_ONLINE,			/**< Is online: boolean */
+  BRLAPI_PARAM_DEVICE_DRIVERNAME = 2,		/**< Driver name: string */
+  BRLAPI_PARAM_DEVICE_DRIVERCODE = 3,		/**< Driver code: string */
+  BRLAPI_PARAM_DEVICE_DRIVERVERSION = 4,	/**< Driver version: string */
+  BRLAPI_PARAM_DEVICE_MODELIDENTIFIER = 5,	/**< Model Identifier: string */
+  BRLAPI_PARAM_DEVICE_DISPLAYSIZE = 6,		/**< Dimensions of the braille device: { uint32_t x; uint32_t y; } */
+  BRLAPI_PARAM_DEVICE_PORT = 7,			/**< Path to the device: string */
+  BRLAPI_PARAM_DEVICE_SPEED = 8,		/**< Speed of the port: uint32_t */
+  BRLAPI_PARAM_DEVICE_ONLINE = 9,		/**< Is online: boolean */
 /* TODO: status area */
 
   /* Braille rendering */
-  BRLAPI_PARAM_BRAILLE_RETAINDOTS = 0x200,	/**< Pass dot combinations instead of chars: boolean */
-  BRLAPI_PARAM_BRAILLE_DOTSPERCELL,		/**< 8 dots or 6 dots style ? uint8_t */
-  BRLAPI_PARAM_BRAILLE_CONTRACTED,		/**< Whether braille is contracted: boolean */
-  BRLAPI_PARAM_BRAILLE_CURSORMASK,		/**< Cursor Mask: uint8_t */
-  BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE,		/**< Cursor blinking rate (ms): uint32_t */
-  BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH,	/**< Cursor blinking length (ms): uint32_t */
+  BRLAPI_PARAM_BRAILLE_RETAINDOTS = 10,		/**< Pass dot combinations instead of chars: boolean */
+  BRLAPI_PARAM_BRAILLE_DOTSPERCELL = 11,	/**< 8 dots or 6 dots style ? uint8_t */
+  BRLAPI_PARAM_BRAILLE_CONTRACTED = 12,		/**< Whether braille is contracted: boolean */
+  BRLAPI_PARAM_BRAILLE_CURSORMASK = 13,		/**< Cursor Mask: uint8_t */
+  BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE = 14,	/**< Cursor blinking rate (ms): uint32_t */
+  BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH = 15,	/**< Cursor blinking length (ms): uint32_t */
 
-  BRLAPI_PARAM_RENDERED_OUTPUT = 0x300,		/**< Dot rendering of client output */
+  BRLAPI_PARAM_RENDERED_OUTPUT = 16,		/**< Dot rendering of client output */
 
   /* Navigation parameters */
-  BRLAPI_PARAM_BROWSE_SKIPLINE = 0x400,		/**< Whether to skip empty lines: boolean */
-  BRLAPI_PARAM_BROWSE_BEEP,			/**< Whether to beep: boolean */
+  BRLAPI_PARAM_BROWSE_SKIPLINE = 17,		/**< Whether to skip empty lines: boolean */
+  BRLAPI_PARAM_BROWSE_BEEP = 18,		/**< Whether to beep: boolean */
 
   /* Cut buffer(s) */
-  BRLAPI_PARAM_CLIPBOARD = 0x500,		/**< Content of the clipboard: UTF-8 string */
+  BRLAPI_PARAM_CLIPBOARD = 19,			/**< Content of the clipboard: UTF-8 string */
 
   /* Keys */
-  BRLAPI_PARAM_KEY_CMD_SET = 0x600,		/**< Set of navigation commands for the plugged device,
+  BRLAPI_PARAM_KEY_CMD_SET = 20,		/**< Set of navigation commands for the plugged device,
 						  * one uint64_t per code */
-  BRLAPI_PARAM_KEY_CMD_SHORT_NAME,		/**< Abbreviated name for the navigation command,
+  BRLAPI_PARAM_KEY_CMD_SHORT_NAME = 21,		/**< Abbreviated name for the navigation command,
 						  * a few characters typically: string
 						  * which key is specified by the subparam value. */
-  BRLAPI_PARAM_KEY_CMD_NAME,			/**< Long name for the navigation command,
+  BRLAPI_PARAM_KEY_CMD_NAME = 22,		/**< Long name for the navigation command,
 						  * a few words typically: string
 						  * which key is specified by the subparam value. */
-  BRLAPI_PARAM_KEY_RAW_SET,			/**< Set of raw key codes for the plugged device,
+  BRLAPI_PARAM_KEY_RAW_SET = 23,		/**< Set of raw key codes for the plugged device,
 						  * one uint64_t per code */
-  BRLAPI_PARAM_KEY_RAW_SHORT_NAME,		/**< Abbreviated name for the key,
+  BRLAPI_PARAM_KEY_RAW_SHORT_NAME = 24,		/**< Abbreviated name for the key,
 						  * a few characters typically: string
 						  * which key is specified by the subparam value. */
-  BRLAPI_PARAM_KEY_RAW_NAME,			/**< Long name for the key, a few words typically: string
+  BRLAPI_PARAM_KEY_RAW_NAME = 25,		/**< Long name for the key, a few words typically: string
 						  * which key is specified by the subparam value. */
 
   /* Braille translation */
-  BRLAPI_PARAM_BRAILLE_TABLE_ROWS = 0x700,	/**< Sets of Unicode rows that are defined,
+  BRLAPI_PARAM_BRAILLE_TABLE_ROWS = 26,		/**< Sets of Unicode rows that are defined,
 						  * 1 bit per row, 512 uint8_t, for
 						  * U+0000 to U+10FFFF. */
-  BRLAPI_PARAM_BRAILLE_TABLE,			/**< Unicode 1-to-1 Braille table,
+  BRLAPI_PARAM_BRAILLE_TABLE = 27,		/**< Unicode 1-to-1 Braille table,
 						  * which row is specified by the subparam value.
 						  * 256*uint8_t for each row */
   /* TODO: dot-to-unicode as well */
@@ -1081,6 +1081,7 @@ typedef enum {
  /* TODO
   * help strings?
   */
+  BRLAPI_PARAM_NUMBER = 28,
 
 } brlapi_param_t;
 
