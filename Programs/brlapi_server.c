@@ -1344,14 +1344,14 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
 
   switch (param) {
     case BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL: {
-      CHECKERR( (size == sizeof(uint32_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
-      uint32_t value = * (uint32_t*) p;
+      CHECKERR( (size == sizeof(brlapi_param_connection_displayLevel_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
+      brlapi_param_connection_displayLevel_t value = * (brlapi_param_connection_displayLevel_t*) p;
       c->display_level = value;
       break;
     }
 
     case BRLAPI_PARAM_BRAILLE_RETAINDOTS: {
-      CHECKERR( (size == sizeof(uint8_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
+      CHECKERR( (size == sizeof(brlapi_param_braille_retaindots_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
       fprintf(stderr,"\n\nsetting dots to %d\n\n", *p);
       c->dots = *p;
       handleParamUpdate(c, BRLAPI_PARAM_BRAILLE_RETAINDOTS, 0, 0, &c->dots, sizeof(c->dots));
@@ -1518,12 +1518,12 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     switch (param) {
 
       case BRLAPI_PARAM_CONNECTION_SERVERVERSION:
-	* (uint32_t*) p = BRLAPI_PROTOCOL_VERSION;
-	size = sizeof(uint32_t);
+	* (brlapi_param_connection_serverVersion_t*) p = BRLAPI_PROTOCOL_VERSION;
+	size = sizeof(brlapi_param_connection_serverVersion_t);
 	break;
       case BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL:
-	* (uint32_t*) p = c->display_level;
-	size = sizeof(uint32_t);
+	* (brlapi_param_connection_displayLevel_t*) p = c->display_level;
+	size = sizeof(brlapi_param_connection_displayLevel_t);
 	break;
 
       case BRLAPI_PARAM_DEVICE_DRIVERNAME:
@@ -1548,10 +1548,13 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
 	}
 	break;
       case BRLAPI_PARAM_DEVICE_DISPLAYSIZE:
-	((uint32_t*) p)[0] = ntohl(displayDimensions[0]);
-	((uint32_t*) p)[1] = ntohl(displayDimensions[1]);
+      {
+	brlapi_param_device_displaySize_t *displaySize = p;
+	displaySize->x = htonl(displayDimensions[0]);
+	displaySize->y = htonl(displayDimensions[1]);
 	size = 2*sizeof(uint32_t);
 	break;
+      }
       case BRLAPI_PARAM_DEVICE_PORT:
       case BRLAPI_PARAM_DEVICE_SPEED:
       case BRLAPI_PARAM_DEVICE_ONLINE:
@@ -1562,12 +1565,12 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
       case BRLAPI_PARAM_BRAILLE_DOTSPERCELL:
 	/* TODO */
 	*p = 8;
-	size = sizeof(uint8_t);
+	size = sizeof(brlapi_param_braille_dotsPerCell_t);
 	break;
 
       case BRLAPI_PARAM_BRAILLE_RETAINDOTS:
 	*p = c->dots;
-	size = sizeof(c->dots);
+	size = sizeof(brlapi_param_braille_retaindots_t);
 	break;
       case BRLAPI_PARAM_BRAILLE_CONTRACTED:
       case BRLAPI_PARAM_BRAILLE_CURSORMASK:
