@@ -1558,6 +1558,11 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
   pthread_mutex_unlock(&paramMutex);
 }
 
+void api_updateParameter(brlapi_param_t param, uint64_t subparam, const void *data, size_t size)
+{
+  handleParamUpdate(NULL, param, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+}
+
 static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
   brlapi_paramRequestPacket_t *paramRequest = &packet->paramRequest;
