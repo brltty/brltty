@@ -112,42 +112,6 @@ cdef extern from "Programs/brlapi.h":
 	ctypedef int brlapi_param_t
 	ctypedef void *brlapi_paramCallbackDescriptor
 
-	brlapi_param_t BRLAPI_PARAM_SERVER_VERSION
-	brlapi_param_t BRLAPI_PARAM_CLIENT_PRIORITY
-
-	brlapi_param_t BRLAPI_PARAM_DRIVER_NAME
-	brlapi_param_t BRLAPI_PARAM_DRIVER_CODE
-	brlapi_param_t BRLAPI_PARAM_DRIVER_VERSION
-	brlapi_param_t BRLAPI_PARAM_DEVICE_MODEL
-	brlapi_param_t BRLAPI_PARAM_DISPLAY_SIZE
-
-	brlapi_param_t BRLAPI_PARAM_DEVICE_IDENTIFIER
-	brlapi_param_t BRLAPI_PARAM_DEVICE_SPEED
-	brlapi_param_t BRLAPI_PARAM_DEVICE_ONLINE
-
-	brlapi_param_t BRLAPI_PARAM_RETAIN_DOTS
-	brlapi_param_t BRLAPI_PARAM_DOTSPERCELL
-	brlapi_param_t BRLAPI_PARAM_CONTRACTED_BRAILLE
-	brlapi_param_t BRLAPI_PARAM_CURSOR_DOTS
-	brlapi_param_t BRLAPI_PARAM_CURSOR_BLINK_PERIOD
-	brlapi_param_t BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE
-
-	brlapi_param_t BRLAPI_PARAM_RENDERED_CELLS
-
-	brlapi_param_t BRLAPI_PARAM_SKIP_EMPTY_LINES
-	brlapi_param_t BRLAPI_PARAM_AUDIBLE_ALERTS
-	brlapi_param_t BRLAPI_PARAM_CLIPBOARD_CONTENT
-
-	brlapi_param_t BRLAPI_PARAM_COMMAND_SET
-	brlapi_param_t BRLAPI_PARAM_COMMAND_SHORT_NAME
-	brlapi_param_t BRLAPI_PARAM_COMMAND_LONG_NAME
-	brlapi_param_t BRLAPI_PARAM_KEY_SET
-	brlapi_param_t BRLAPI_PARAM_KEY_SHORT_NAME
-	brlapi_param_t BRLAPI_PARAM_KEY_LONG_NAME
-
-	brlapi_param_t BRLAPI_PARAM_BRAILLE_TABLE_ROWS
-	brlapi_param_t BRLAPI_PARAM_BRAILLE_TABLE
-
 	ssize_t brlapi__getParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t ) nogil
 	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t) nogil
 	brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, brlapi_paramCallback, void *, void*, size_t);
