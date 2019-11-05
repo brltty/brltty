@@ -875,7 +875,6 @@ cdef class Connection:
 		# Bytes value
 		elif param == PARAM_RENDERED_CELLS or \
 		     param == PARAM_BRAILLE_TABLE_ROWS or \
-		     param == PARAM_BRAILLE_TABLE_ROWS or \
 		     param == PARAM_BRAILLE_TABLE:
 			bytes = <uint8_t *>c_value
 			ret = bytes[:retval]
