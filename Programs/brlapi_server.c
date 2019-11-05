@@ -1329,7 +1329,7 @@ static int param_retainDots_write(Connection *c, brlapi_param_t param, uint64_t 
 }
 
 /* BRLAPI_PARAM_RENDERED_CELLS */
-static int rendered_output_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+static int param_renderedCells_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   /* FIXME: should provide local output of the connection only! */
   if (disp) {
@@ -1343,7 +1343,7 @@ static int rendered_output_read(Connection *c, brlapi_param_t param, uint64_t su
 }
 
 /* BRLAPI_PARAM_COMMAND_SHORT_NAME */
-static int key_cmd_short_name_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+static int param_commandShortName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   char buffer[0X100];
   char *colon;
@@ -1356,7 +1356,7 @@ static int key_cmd_short_name_read(Connection *c, brlapi_param_t param, uint64_t
 }
 
 /* BRLAPI_PARAM_COMMAND_LONG_NAME */
-static int key_cmd_name_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+static int param_commandLongName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   char buffer[0X100];
   describeCommand(buffer, sizeof(buffer), subparam, 0);
@@ -1365,7 +1365,7 @@ static int key_cmd_name_read(Connection *c, brlapi_param_t param, uint64_t subpa
   return 1;
 }
 
-/* For parameters to be implemented */
+/* For parameters yet to be implemented */
 static int param_unimplemented_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "parameter %u not implemented yet", param);
@@ -1408,7 +1408,7 @@ static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [ BRLAPI_PARAM_CURSOR_DOTS ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_BLINK_RATE ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_BLINK_LENGTH ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_RENDERED_CELLS ]		= { 1, 1, rendered_output_read, NULL, },
+  [ BRLAPI_PARAM_RENDERED_CELLS ]		= { 1, 1, param_renderedCells_read, NULL, },
 
   /* Navigation parameters */
   [ BRLAPI_PARAM_SKIP_EMPTY_LINES ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
@@ -1419,8 +1419,8 @@ static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   /* Keys */
   [ BRLAPI_PARAM_COMMAND_SET ]			= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_COMMAND_SHORT_NAME ]		= { 0, 1, key_cmd_short_name_read, NULL, },
-  [ BRLAPI_PARAM_COMMAND_LONG_NAME ]			= { 0, 1, key_cmd_name_read, NULL, },
+  [ BRLAPI_PARAM_COMMAND_SHORT_NAME ]		= { 0, 1, param_commandShortName_read, NULL, },
+  [ BRLAPI_PARAM_COMMAND_LONG_NAME ]			= { 0, 1, param_commandLongName_read, NULL, },
   [ BRLAPI_PARAM_KEY_SET ]			= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_KEY_SHORT_NAME ]		= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_KEY_LONG_NAME ]			= { 0, 1, param_unimplemented_read, NULL, },
