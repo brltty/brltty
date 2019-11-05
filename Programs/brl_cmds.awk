@@ -128,7 +128,7 @@ function getComment(line) {
   if (!match(line, "/\\*.*\\*/")) return ""
   line = substr(line, RSTART+2, RLENGTH-4)
 
-  match(line, "^\\** *")
+  match(line, "^\\**<? *")
   line = substr(line, RLENGTH+1)
 
   match(line, " *$")
