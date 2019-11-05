@@ -11,13 +11,13 @@ import errno
 import Xlib.keysymdef.miscellany
 try:
   b = brlapi.Connection()
-  print("Server version " + str(b.getParameter(brlapi.PARAM_CONNECTION_SERVERVERSION, 0, True)))
-  print("Display size " + str(b.getParameter(brlapi.PARAM_DEVICE_DISPLAYSIZE, 0, True)))
-  print("Driver " + b.getParameter(brlapi.PARAM_DEVICE_DRIVERNAME, 0, True))
-  print("Model " + b.getParameter(brlapi.PARAM_DEVICE_MODELIDENTIFIER, 0, True))
+  print("Server version " + str(b.getParameter(brlapi.PARAM_SERVER_VERSION, 0, True)))
+  print("Display size " + str(b.getParameter(brlapi.PARAM_DISPLAY_SIZE, 0, True)))
+  print("Driver " + b.getParameter(brlapi.PARAM_DRIVER_NAME, 0, True))
+  print("Model " + b.getParameter(brlapi.PARAM_DEVICE_MODEL, 0, True))
 
-  print("Command 1 short name " + b.getParameter(brlapi.PARAM_KEY_CMD_SHORT_NAME, 1, True))
-  print("Command 1 name '" + b.getParameter(brlapi.PARAM_KEY_CMD_NAME, 1, True) + "'")
+  print("Command 1 short name " + b.getParameter(brlapi.PARAM_COMMAND_SHORT_NAME, 1, True))
+  print("Command 1 name '" + b.getParameter(brlapi.PARAM_COMMAND_LONG_NAME, 1, True) + "'")
 
   b.enterTtyMode()
   b.ignoreKeys(brlapi.rangeType_all,[0])
@@ -847,33 +847,33 @@ cdef class Connection:
 			raise OperationError()
 
 		# One 32bit value
-		if param == PARAM_CONNECTION_SERVERVERSION or \
-		   param == PARAM_CONNECTION_DISPLAYLEVEL or \
+		if param == PARAM_SERVER_VERSION or \
+		   param == PARAM_DISPLAY_LEVEL or \
 		   param == PARAM_DEVICE_SPEED or \
-		   param == PARAM_BRAILLE_CURSORBLINKRATE or \
-		   param == PARAM_BRAILLE_CURSORBLINKLENGTH:
+		   param == PARAM_CURSOR_BLINK_RATE or \
+		   param == PARAM_CURSOR_BLINK_LENGTH:
 			values = <uint32_t *>c_value
 			ret = values[0]
 
 		# Two 32bit values
-		elif param == PARAM_DEVICE_DISPLAYSIZE:
+		elif param == PARAM_DISPLAY_SIZE:
 			values = <uint32_t *>c_value
 			ret = (values[0], values[1])
 
 		# 64bit values
-		elif param == PARAM_KEY_CMD_SET or \
-		     param == PARAM_KEY_RAW_SET:
+		elif param == PARAM_COMMAND_SET or \
+		     param == PARAM_KEY_SET:
 			lvalues = <uint64_t *>c_value
 			ret = [ lvalues[i] for i in range(int(retval/8)) ]
 
 		# Byte value
-		elif param == PARAM_BRAILLE_DOTSPERCELL or \
-		     param == PARAM_BRAILLE_CURSORMASK:
+		elif param == PARAM_DOTSPERCELL or \
+		     param == PARAM_CURSOR_DOTS:
 			bytes = <uint8_t *>c_value
 			ret = bytes[0]
 
 		# Bytes value
-		elif param == PARAM_RENDERED_OUTPUT or \
+		elif param == PARAM_RENDERED_CELLS or \
 		     param == PARAM_BRAILLE_TABLE_ROWS or \
 		     param == PARAM_BRAILLE_TABLE_ROWS or \
 		     param == PARAM_BRAILLE_TABLE:
@@ -882,29 +882,29 @@ cdef class Connection:
 
 		# Boolean value
 		elif param == PARAM_DEVICE_ONLINE or \
-		     param == PARAM_BRAILLE_RETAINDOTS or \
-		     param == PARAM_BRAILLE_CONTRACTED or \
-		     param == PARAM_BROWSE_SKIPLINE or \
-		     param == PARAM_BROWSE_BEEP:
+		     param == PARAM_RETAIN_DOTS or \
+		     param == PARAM_CONTRACTED_BRAILLE or \
+		     param == PARAM_SKIP_EMPTY_LINES or \
+		     param == PARAM_AUDIBLE_ALERTS:
 			bytes = <uint8_t *>c_value
 			ret = bytes[0] != 0
 
 		# ASCII value
-		elif param == PARAM_DEVICE_DRIVERNAME or \
-		     param == PARAM_DEVICE_DRIVERCODE or \
-		     param == PARAM_DEVICE_DRIVERVERSION or \
-		     param == PARAM_DEVICE_MODELIDENTIFIER or \
+		elif param == PARAM_DRIVER_NAME or \
+		     param == PARAM_DRIVER_CODE or \
+		     param == PARAM_DRIVER_VERSION or \
+		     param == PARAM_DEVICE_MODEL or \
 		     param == PARAM_DEVICE_PORT or \
-		     param == PARAM_KEY_CMD_SHORT_NAME or \
-		     param == PARAM_KEY_CMD_NAME or \
-		     param == PARAM_KEY_RAW_SHORT_NAME or \
-		     param == PARAM_KEY_RAW_NAME:
+		     param == PARAM_COMMAND_SHORT_NAME or \
+		     param == PARAM_COMMAND_LONG_NAME or \
+		     param == PARAM_KEY_SHORT_NAME or \
+		     param == PARAM_KEY_LONG_NAME:
 			string = <char *>c_value
 			s = string[:retval]
 			ret = s.decode("ASCII")
 
 		# UTF-8 value
-		elif param == PARAM_CLIPBOARD:
+		elif param == PARAM_CLIPBOARD_CONTENT:
 			string = <char *>c_value
 			s = string[:retval]
 			ret = s.decode("UTF-8")
@@ -936,24 +936,24 @@ cdef class Connection:
 		size = c_brlapi.BRLAPI_MAXPACKETSIZE - 2*4
 		c_value = <void*>c_brlapi.malloc(size)
 
-		if param == PARAM_CONNECTION_DISPLAYLEVEL:
+		if param == PARAM_DISPLAY_LEVEL:
 			values = <uint32_t *>c_value
 			values[0] = value
 			size = 4
 
-		if param == PARAM_BRAILLE_DOTSPERCELL or \
-		   param == PARAM_BRAILLE_RETAINDOTS or \
-		   param == PARAM_BRAILLE_CONTRACTED or \
-		   param == PARAM_BRAILLE_CURSORMASK or \
-		   param == PARAM_BRAILLE_CURSORBLINKRATE or \
-		   param == PARAM_BRAILLE_CURSORBLINKLENGTH or \
-		   param == PARAM_BROWSE_SKIPLINE or \
-		   param == PARAM_BROWSE_BEEP:
+		if param == PARAM_DOTSPERCELL or \
+		   param == PARAM_RETAIN_DOTS or \
+		   param == PARAM_CONTRACTED_BRAILLE or \
+		   param == PARAM_CURSOR_DOTS or \
+		   param == PARAM_CURSOR_BLINK_RATE or \
+		   param == PARAM_CURSOR_BLINK_LENGTH or \
+		   param == PARAM_SKIP_EMPTY_LINES or \
+		   param == PARAM_AUDIBLE_ALERTS:
 			bytes = <uint8_t *>c_value
 			bytes[0] = value
 			size = 1
 
-		if param == PARAM_CLIPBOARD:
+		if param == PARAM_CLIPBOARD_CONTENT:
 			bytes = <uint8_t *>c_value
 			size = len(value)
 			string = value
