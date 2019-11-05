@@ -850,8 +850,8 @@ cdef class Connection:
 		if param == PARAM_SERVER_VERSION or \
 		   param == PARAM_DISPLAY_LEVEL or \
 		   param == PARAM_DEVICE_SPEED or \
-		   param == PARAM_CURSOR_BLINK_RATE or \
-		   param == PARAM_CURSOR_BLINK_LENGTH:
+		   param == PARAM_CURSOR_BLINK_PERIOD or \
+		   param == PARAM_CURSOR_BLINK_DURATION:
 			values = <uint32_t *>c_value
 			ret = values[0]
 
@@ -894,7 +894,7 @@ cdef class Connection:
 		     param == PARAM_DRIVER_CODE or \
 		     param == PARAM_DRIVER_VERSION or \
 		     param == PARAM_DEVICE_MODEL or \
-		     param == PARAM_DEVICE_PORT or \
+		     param == PARAM_DEVICE_IDENTIFIER or \
 		     param == PARAM_COMMAND_SHORT_NAME or \
 		     param == PARAM_COMMAND_LONG_NAME or \
 		     param == PARAM_KEY_SHORT_NAME or \
@@ -945,8 +945,8 @@ cdef class Connection:
 		   param == PARAM_RETAIN_DOTS or \
 		   param == PARAM_CONTRACTED_BRAILLE or \
 		   param == PARAM_CURSOR_DOTS or \
-		   param == PARAM_CURSOR_BLINK_RATE or \
-		   param == PARAM_CURSOR_BLINK_LENGTH or \
+		   param == PARAM_CURSOR_BLINK_PERIOD or \
+		   param == PARAM_CURSOR_BLINK_DURATION or \
 		   param == PARAM_SKIP_EMPTY_LINES or \
 		   param == PARAM_AUDIBLE_ALERTS:
 			bytes = <uint8_t *>c_value

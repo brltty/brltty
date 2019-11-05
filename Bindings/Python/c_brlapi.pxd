@@ -121,7 +121,7 @@ cdef extern from "Programs/brlapi.h":
 	brlapi_param_t BRLAPI_PARAM_DEVICE_MODEL
 	brlapi_param_t BRLAPI_PARAM_DISPLAY_SIZE
 
-	brlapi_param_t BRLAPI_PARAM_DEVICE_PORT
+	brlapi_param_t BRLAPI_PARAM_DEVICE_IDENTIFIER
 	brlapi_param_t BRLAPI_PARAM_DEVICE_SPEED
 	brlapi_param_t BRLAPI_PARAM_DEVICE_ONLINE
 
@@ -129,8 +129,8 @@ cdef extern from "Programs/brlapi.h":
 	brlapi_param_t BRLAPI_PARAM_DOTSPERCELL
 	brlapi_param_t BRLAPI_PARAM_CONTRACTED_BRAILLE
 	brlapi_param_t BRLAPI_PARAM_CURSOR_DOTS
-	brlapi_param_t BRLAPI_PARAM_CURSOR_BLINK_RATE
-	brlapi_param_t BRLAPI_PARAM_CURSOR_BLINK_LENGTH
+	brlapi_param_t BRLAPI_PARAM_CURSOR_BLINK_PERIOD
+	brlapi_param_t BRLAPI_PARAM_CURSOR_BLINK_DURATION
 
 	brlapi_param_t BRLAPI_PARAM_RENDERED_CELLS
 

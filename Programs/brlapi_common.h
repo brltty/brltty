@@ -587,8 +587,8 @@ static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
     case BRLAPI_PARAM_DEVICE_SPEED:
       return 1;
 
-    case BRLAPI_PARAM_CURSOR_BLINK_RATE:
-    case BRLAPI_PARAM_CURSOR_BLINK_LENGTH:
+    case BRLAPI_PARAM_CURSOR_BLINK_PERIOD:
+    case BRLAPI_PARAM_CURSOR_BLINK_DURATION:
       return 1;
 
     default:

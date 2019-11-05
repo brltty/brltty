@@ -376,7 +376,7 @@ static int resumeDriver(BrailleDisplay *brl) {
     handleParamUpdate(NULL, BRLAPI_PARAM_DRIVER_VERSION, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.version, strlen(braille->definition.version));
     if (disp) handleParamUpdate(NULL, BRLAPI_PARAM_DEVICE_MODEL, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
     brlResize(brl);
-    /* TODO: notify BRLAPI_PARAM_DEVICE_PORT, BRLAPI_PARAM_DEVICE_SPEED, BRLAPI_PARAM_DEVICE_ONLINE */
+    /* TODO: notify BRLAPI_PARAM_DEVICE_IDENTIFIER, BRLAPI_PARAM_DEVICE_SPEED, BRLAPI_PARAM_DEVICE_ONLINE */
   }
   unlockMutex(&apiSuspendMutex);
   driverConstructing = 0;
@@ -1397,7 +1397,7 @@ static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [ BRLAPI_PARAM_DRIVER_VERSION ]		= { 0, 1, param_driverVersion_read, NULL, },
   [ BRLAPI_PARAM_DEVICE_MODEL ]	= { 0, 1, param_deviceModel_read, NULL, },
   [ BRLAPI_PARAM_DISPLAY_SIZE ]		= { 0, 1, param_displaySize_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_PORT ]			= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_IDENTIFIER ]			= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_DEVICE_SPEED ]			= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_DEVICE_ONLINE ]		= { 0, 1, param_unimplemented_read, NULL, },
 
@@ -1406,8 +1406,8 @@ static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [ BRLAPI_PARAM_DOTSPERCELL ]		= { 1, 1, param_dotsPerCell_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CONTRACTED_BRAILLE ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_DOTS ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_CURSOR_BLINK_RATE ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_CURSOR_BLINK_LENGTH ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CURSOR_BLINK_PERIOD ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CURSOR_BLINK_DURATION ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_RENDERED_CELLS ]		= { 1, 1, param_renderedCells_read, NULL, },
 
   /* Navigation parameters */
@@ -1528,8 +1528,8 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
  * BRLAPI_PARAM_DOTSPERCELL,
  * BRLAPI_PARAM_CONTRACTED_BRAILLE,
  * BRLAPI_PARAM_CURSOR_DOTS,
- * BRLAPI_PARAM_CURSOR_BLINK_RATE,
- * BRLAPI_PARAM_CURSOR_BLINK_LENGTH
+ * BRLAPI_PARAM_CURSOR_BLINK_PERIOD,
+ * BRLAPI_PARAM_CURSOR_BLINK_DURATION
  * BRLAPI_PARAM_SKIP_EMPTY_LINES
  * BRLAPI_PARAM_AUDIBLE_ALERTS
  * BRLAPI_PARAM_CLIPBOARD_CONTENT
