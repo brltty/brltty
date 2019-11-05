@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_API_TYPES
 
 #include "ktb_types.h"
+#include "brlapi.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +48,7 @@ typedef struct {
   int (*handleKeyEvent) (KeyGroup group, KeyNumber number, int press);
 
   int (*flush) (void);
+  void (*updateParameter) (brlapi_param_t param, uint64_t subparam, const void *data, size_t size);
 } ApiMethods;
 
 #ifdef __cplusplus
