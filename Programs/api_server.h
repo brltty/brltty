@@ -25,6 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "brlapi.h"
+
 extern void api_identify (int full);
 extern const char *const api_parameters[];
 
@@ -44,6 +46,8 @@ extern int api_handleCommand (int command);
 extern int api_handleKeyEvent (KeyGroup group, KeyNumber number, int press);
 
 extern int api_flush (BrailleDisplay *brl);
+
+extern void api_updateParameter(brlapi_param_t param, uint64_t subparam, const void *data, size_t size);
 
 #ifdef __cplusplus
 }
