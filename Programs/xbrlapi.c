@@ -174,6 +174,7 @@ static int tobrltty_init(char *auth, char *host) {
   settings.host=host;
   settings.auth=auth;
   static int had_succeeded;
+  brlapi_param_clientPriority_t priority;
 
   if ((brlapi_fd = brlapi_openConnection(&settings,&settings))<0)
   {
@@ -207,6 +208,10 @@ static int tobrltty_init(char *auth, char *host) {
   }
 
   brlapi_setExceptionHandler(exception_handler);
+
+  /* Our output is really not very interesting */
+  priority = 10;
+  brlapi_setParameter(BRLAPI_PARAM_CLIENT_PRIORITY, 0, 0, &priority, sizeof(priority));
   return 1;
 }
 
