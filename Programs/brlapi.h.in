@@ -1030,7 +1030,7 @@ typedef enum {
   BRLAPI_PARAM_DRIVER_VERSION = 4,	/**< Driver version: string */
   BRLAPI_PARAM_DEVICE_MODEL = 5,	/**< Model Identifier: string */
   BRLAPI_PARAM_DISPLAY_SIZE = 6,		/**< Dimensions of the braille device: { uint32_t x; uint32_t y; } */
-  BRLAPI_PARAM_DEVICE_PORT = 7,			/**< Path to the device: string */
+  BRLAPI_PARAM_DEVICE_IDENTIFIER = 7,			/**< Path to the device: string */
   BRLAPI_PARAM_DEVICE_SPEED = 8,		/**< Speed of the port: uint32_t */
   BRLAPI_PARAM_DEVICE_ONLINE = 9,		/**< Is online: boolean */
 /* TODO: status area */
@@ -1040,8 +1040,8 @@ typedef enum {
   BRLAPI_PARAM_DOTSPERCELL = 11,	/**< 8 dots or 6 dots style ? uint8_t */
   BRLAPI_PARAM_CONTRACTED_BRAILLE = 12,		/**< Whether braille is contracted: boolean */
   BRLAPI_PARAM_CURSOR_DOTS = 13,		/**< Cursor Dots: uint8_t */
-  BRLAPI_PARAM_CURSOR_BLINK_RATE = 14,	/**< Cursor blinking rate (ms): uint32_t */
-  BRLAPI_PARAM_CURSOR_BLINK_LENGTH = 15,	/**< Cursor blinking length (ms): uint32_t */
+  BRLAPI_PARAM_CURSOR_BLINK_PERIOD = 14,	/**< Cursor blinking rate (ms): uint32_t */
+  BRLAPI_PARAM_CURSOR_BLINK_DURATION = 15,	/**< Cursor blinking length (ms): uint32_t */
 
   BRLAPI_PARAM_RENDERED_CELLS = 16,		/**< Dot rendering of client output */
 
@@ -1120,9 +1120,9 @@ typedef struct {
   uint32_t y;
 } brlapi_param_displaySize_t;
 
-/* brlapi_param_devicePort_t */
-/** Type to be used for BRLAPI_PARAM_DEVICE_PORT */
-typedef char *brlapi_param_devicePort_t;
+/* brlapi_param_deviceIdentifier_t */
+/** Type to be used for BRLAPI_PARAM_DEVICE_IDENTIFIER */
+typedef char *brlapi_param_deviceIdentifier_t;
 
 /* brlapi_param_deviceSpeed_t */
 /** Type to be used for BRLAPI_PARAM_DEVICE_SPEED */
@@ -1148,13 +1148,13 @@ typedef brlapi_param_bool_t brlapi_param_contractedBraille_t;
 /** Type to be used for BRLAPI_PARAM_CURSOR_DOTS */
 typedef uint8_t brlapi_param_cursorDots_t;
 
-/* brlapi_param_cursorBlinkRate_t */
-/** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_RATE */
-typedef uint32_t brlapi_param_cursorBlinkRate_t;
+/* brlapi_param_cursorBlinkPeriod_t */
+/** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_PERIOD */
+typedef uint32_t brlapi_param_cursorBlinkPeriod_t;
 
-/* brlapi_param_cursorBlinkLength_t */
-/** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_LENGTH */
-typedef uint32_t brlapi_param_cursorBlinkLength_t;
+/* brlapi_param_cursorBlinkDuration_t */
+/** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_DURATION */
+typedef uint32_t brlapi_param_cursorBlinkDuration_t;
 
 /* brlapi_param_renderedCells_t */
 /** Type to be used for BRLAPI_PARAM_RENDERED_CELLS */
