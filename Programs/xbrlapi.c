@@ -175,6 +175,7 @@ static int tobrltty_init(char *auth, char *host) {
   settings.auth=auth;
   static int had_succeeded;
   brlapi_param_clientPriority_t priority;
+  brlapi_param_retainDots_t dots;
 
   if ((brlapi_fd = brlapi_openConnection(&settings,&settings))<0)
   {
@@ -212,6 +213,10 @@ static int tobrltty_init(char *auth, char *host) {
   /* Our output is really not very interesting */
   priority = 10;
   brlapi_setParameter(BRLAPI_PARAM_CLIENT_PRIORITY, 0, 0, &priority, sizeof(priority));
+
+  /* We prefer to get translated keypresses */
+  dots = 0;
+  brlapi_setParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, 0, &dots, sizeof(dots));
   return 1;
 }
 
