@@ -113,7 +113,7 @@ cdef extern from "Programs/brlapi.h":
 	ctypedef void *brlapi_paramCallbackDescriptor
 
 	brlapi_param_t BRLAPI_PARAM_SERVER_VERSION
-	brlapi_param_t BRLAPI_PARAM_DISPLAY_LEVEL
+	brlapi_param_t BRLAPI_PARAM_CLIENT_PRIORITY
 
 	brlapi_param_t BRLAPI_PARAM_DRIVER_NAME
 	brlapi_param_t BRLAPI_PARAM_DRIVER_CODE

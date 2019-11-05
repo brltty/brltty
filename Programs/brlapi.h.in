@@ -1022,7 +1022,7 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 typedef enum {
   /* BrlAPI */
   BRLAPI_PARAM_SERVER_VERSION = 0,	/**< Version of the API server: uint32_t */
-  BRLAPI_PARAM_DISPLAY_LEVEL = 1,	/**< "Display level": uint32_t */
+  BRLAPI_PARAM_CLIENT_PRIORITY = 1,	/**< "Display level": uint32_t */
 
   /* Device */
   BRLAPI_PARAM_DRIVER_NAME = 2,		/**< Driver name: string */
@@ -1093,9 +1093,9 @@ typedef uint8_t brlapi_param_bool_t;
 /** Type to be used for BRLAPI_PARAM_SERVER_VERSION */
 typedef uint32_t brlapi_param_serverVersion_t;
 
-/* brlapi_param_displayLevel_t */
-/** Type to be used for BRLAPI_PARAM_DISPLAY_LEVEL */
-typedef uint32_t brlapi_param_displayLevel_t;
+/* brlapi_param_clientPriority_t */
+/** Type to be used for BRLAPI_PARAM_CLIENT_PRIORITY */
+typedef uint32_t brlapi_param_clientPriority_t;
 
 /* brlapi_param_driverName_t */
 /** Type to be used for BRLAPI_PARAM_DRIVER_NAME */
