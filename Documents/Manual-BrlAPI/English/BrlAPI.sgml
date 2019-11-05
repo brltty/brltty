@@ -471,9 +471,10 @@ transparent), and as a result <em/A/'s output appear on the braille display (by
 transparency through <em/B/'s sheet).
 
 <p>
-The sheet order is determined by the Tty "get"ting order. Some mecanism will be
-added in near future for clients to precise "at which level its sheet should be
-inserted" so as to avoid race conditions on the "get"ting order.
+The sheet order is by default determined by the Tty "get"ting order. Clients
+can however change their priority (which by default is 50) to a higher value in
+order to show up higher in the pile, or to a lower value in order to hide lower
+in the pile.
 
 <sect1>Hierarchy
 

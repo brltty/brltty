@@ -19,6 +19,9 @@ try:
   print("Command 1 short name " + b.getParameter(brlapi.PARAM_COMMAND_SHORT_NAME, 1, True))
   print("Command 1 name '" + b.getParameter(brlapi.PARAM_COMMAND_LONG_NAME, 1, True) + "'")
 
+  # Make our output more prioritized
+  b.setParameter(brlapi.PARAM_CLIENT_PRIORITY, 0, False, 70)
+
   b.enterTtyMode()
   b.ignoreKeys(brlapi.rangeType_all,[0])
 

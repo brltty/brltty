@@ -533,7 +533,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   c->auth = -1;
   c->fd = fd;
   c->tty = NULL;
-  c->client_priority = 0;
+  c->client_priority = 50;
   c->raw = 0;
   c->suspend = 0;
   c->brlbufstate = EMPTY;
@@ -602,6 +602,13 @@ static void __addConnection(Connection *c, Connection *connections)
   c->prev = connections;
   connections->next->prev = c;
   connections->next = c;
+}
+static void __addConnectionSorted(Connection *c, Connection *head)
+{
+  Connection *cur = head;
+  while (cur->next != head && cur->next->client_priority > c->client_priority)
+    cur = cur->next;
+  __addConnection(c, cur);
 }
 static void addConnection(Connection *c, Connection *connections)
 {
@@ -822,7 +829,7 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   c->tty = tty;
   c->how = how;
   __removeConnection(c);
-  __addConnection(c,tty->connections);
+  __addConnectionSorted(c,tty->connections);
   unlockMutex(&apiConnectionsMutex);
   writeAck(c->fd);
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" taking control of tty %#010x (how=%d)",c->fd,tty->number,how);
@@ -1253,8 +1260,15 @@ static int param_clientPriority_read(Connection *c, brlapi_param_t param, uint64
 static int param_clientPriority_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
   CHECKERR( (size == sizeof(brlapi_param_clientPriority_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
-  brlapi_param_clientPriority_t level = * (brlapi_param_clientPriority_t*) data;
-  c->client_priority = level;
+  brlapi_param_clientPriority_t priority = * (brlapi_param_clientPriority_t*) data;
+
+  lockMutex(&apiConnectionsMutex);
+  c->client_priority = priority;
+  if (c->tty) {
+    __removeConnection(c);
+    __addConnectionSorted(c,c->tty->connections);
+  }
+  unlockMutex(&apiConnectionsMutex);
   return 1;
 }
 
@@ -3176,7 +3190,6 @@ static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how,
   Connection *c;
   Tty *t;
   int passKey;
-  /* TODO: support client_priority parameter */
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
     lockMutex(&c->acceptedKeysMutex);
     passKey = (c->how==how) && (inKeyrangeList(c->acceptedKeys,code) != NULL)
