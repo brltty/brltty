@@ -1407,7 +1407,7 @@ static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [ BRLAPI_PARAM_CONTRACTED_BRAILLE ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_DOTS ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_BLINK_PERIOD ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_CURSOR_BLINK_DURATION ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_RENDERED_CELLS ]		= { 1, 1, param_renderedCells_read, NULL, },
 
   /* Navigation parameters */
@@ -1529,7 +1529,7 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
  * BRLAPI_PARAM_CONTRACTED_BRAILLE,
  * BRLAPI_PARAM_CURSOR_DOTS,
  * BRLAPI_PARAM_CURSOR_BLINK_PERIOD,
- * BRLAPI_PARAM_CURSOR_BLINK_DURATION
+ * BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE
  * BRLAPI_PARAM_SKIP_EMPTY_LINES
  * BRLAPI_PARAM_AUDIBLE_ALERTS
  * BRLAPI_PARAM_CLIPBOARD_CONTENT

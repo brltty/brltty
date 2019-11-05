@@ -851,7 +851,7 @@ cdef class Connection:
 		   param == PARAM_DISPLAY_LEVEL or \
 		   param == PARAM_DEVICE_SPEED or \
 		   param == PARAM_CURSOR_BLINK_PERIOD or \
-		   param == PARAM_CURSOR_BLINK_DURATION:
+		   param == PARAM_CURSOR_BLINK_PERCENTAGE:
 			values = <uint32_t *>c_value
 			ret = values[0]
 
@@ -946,7 +946,7 @@ cdef class Connection:
 		   param == PARAM_CONTRACTED_BRAILLE or \
 		   param == PARAM_CURSOR_DOTS or \
 		   param == PARAM_CURSOR_BLINK_PERIOD or \
-		   param == PARAM_CURSOR_BLINK_DURATION or \
+		   param == PARAM_CURSOR_BLINK_PERCENTAGE or \
 		   param == PARAM_SKIP_EMPTY_LINES or \
 		   param == PARAM_AUDIBLE_ALERTS:
 			bytes = <uint8_t *>c_value

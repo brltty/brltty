@@ -1040,8 +1040,8 @@ typedef enum {
   BRLAPI_PARAM_DOTSPERCELL = 11,	/**< 8 dots or 6 dots style ? uint8_t */
   BRLAPI_PARAM_CONTRACTED_BRAILLE = 12,		/**< Whether braille is contracted: boolean */
   BRLAPI_PARAM_CURSOR_DOTS = 13,		/**< Cursor Dots: uint8_t */
-  BRLAPI_PARAM_CURSOR_BLINK_PERIOD = 14,	/**< Cursor blinking rate (ms): uint32_t */
-  BRLAPI_PARAM_CURSOR_BLINK_DURATION = 15,	/**< Cursor blinking length (ms): uint32_t */
+  BRLAPI_PARAM_CURSOR_BLINK_PERIOD = 14,	/**< Cursor blinking period (ms): uint32_t */
+  BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE = 15,	/**< Cursor blinking visible percentage (%): uint32_t */
 
   BRLAPI_PARAM_RENDERED_CELLS = 16,		/**< Dot rendering of client output */
 
@@ -1152,9 +1152,9 @@ typedef uint8_t brlapi_param_cursorDots_t;
 /** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_PERIOD */
 typedef uint32_t brlapi_param_cursorBlinkPeriod_t;
 
-/* brlapi_param_cursorBlinkDuration_t */
-/** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_DURATION */
-typedef uint32_t brlapi_param_cursorBlinkDuration_t;
+/* brlapi_param_cursorBlinkPercentage_t */
+/** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE */
+typedef uint32_t brlapi_param_cursorBlinkPercentage_t;
 
 /* brlapi_param_renderedCells_t */
 /** Type to be used for BRLAPI_PARAM_RENDERED_CELLS */

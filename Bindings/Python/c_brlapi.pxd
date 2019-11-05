@@ -130,7 +130,7 @@ cdef extern from "Programs/brlapi.h":
 	brlapi_param_t BRLAPI_PARAM_CONTRACTED_BRAILLE
 	brlapi_param_t BRLAPI_PARAM_CURSOR_DOTS
 	brlapi_param_t BRLAPI_PARAM_CURSOR_BLINK_PERIOD
-	brlapi_param_t BRLAPI_PARAM_CURSOR_BLINK_DURATION
+	brlapi_param_t BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE
 
 	brlapi_param_t BRLAPI_PARAM_RENDERED_CELLS
 
