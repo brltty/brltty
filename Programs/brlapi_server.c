@@ -193,7 +193,7 @@ typedef struct Connection {
   FileDescriptor fd;
   int auth;
   struct Tty *tty;
-  brlapi_param_connection_displayLevel_t display_level;
+  brlapi_param_displayLevel_t display_level;
   int raw, suspend;
   unsigned int how; /* how keys must be delivered to clients */
   uint8_t dots; /* whether client wants dots instead of translating to chars */
@@ -371,10 +371,10 @@ static int resumeDriver(BrailleDisplay *brl) {
   driverConstructed = constructBrailleDriver();
   if (driverConstructed) {
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver resumed");
-    handleParamUpdate(NULL, BRLAPI_PARAM_DEVICE_DRIVERNAME, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.name, strlen(braille->definition.name));
-    handleParamUpdate(NULL, BRLAPI_PARAM_DEVICE_DRIVERCODE, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.code, strlen(braille->definition.code));
-    handleParamUpdate(NULL, BRLAPI_PARAM_DEVICE_DRIVERVERSION, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.version, strlen(braille->definition.version));
-    if (disp) handleParamUpdate(NULL, BRLAPI_PARAM_DEVICE_MODELIDENTIFIER, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
+    handleParamUpdate(NULL, BRLAPI_PARAM_DRIVER_NAME, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.name, strlen(braille->definition.name));
+    handleParamUpdate(NULL, BRLAPI_PARAM_DRIVER_CODE, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.code, strlen(braille->definition.code));
+    handleParamUpdate(NULL, BRLAPI_PARAM_DRIVER_VERSION, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.version, strlen(braille->definition.version));
+    if (disp) handleParamUpdate(NULL, BRLAPI_PARAM_DEVICE_MODEL, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
     brlResize(brl);
     /* TODO: notify BRLAPI_PARAM_DEVICE_PORT, BRLAPI_PARAM_DEVICE_SPEED, BRLAPI_PARAM_DEVICE_ONLINE */
   }
@@ -1234,55 +1234,55 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 typedef int (*paramRead)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size);
 typedef int (*paramWrite)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size);
 
-/* BRLAPI_PARAM_CONNECTION_SERVERVERSION */
-static int connection_serverVersion_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_SERVER_VERSION */
+static int param_serverVersion_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  * (brlapi_param_connection_serverVersion_t*) data = BRLAPI_PROTOCOL_VERSION;
-  *size = sizeof(brlapi_param_connection_serverVersion_t);
+  * (brlapi_param_serverVersion_t*) data = BRLAPI_PROTOCOL_VERSION;
+  *size = sizeof(brlapi_param_serverVersion_t);
   return 1;
 }
 
-/* BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL */
-static int connection_displayLevel_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_DISPLAY_LEVEL */
+static int param_displayLevel_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  * (brlapi_param_connection_displayLevel_t*) data = c->display_level;
-  *size = sizeof(brlapi_param_connection_displayLevel_t);
+  * (brlapi_param_displayLevel_t*) data = c->display_level;
+  *size = sizeof(brlapi_param_displayLevel_t);
   return 1;
 }
-static int connection_displayLevel_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+static int param_displayLevel_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
-  CHECKERR( (size == sizeof(brlapi_param_connection_displayLevel_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
-  brlapi_param_connection_displayLevel_t level = * (brlapi_param_connection_displayLevel_t*) data;
+  CHECKERR( (size == sizeof(brlapi_param_displayLevel_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
+  brlapi_param_displayLevel_t level = * (brlapi_param_displayLevel_t*) data;
   c->display_level = level;
   return 1;
 }
 
-/* BRLAPI_PARAM_DEVICE_DRIVERNAME */
-static int device_driverName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_DRIVER_NAME */
+static int param_driverName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   *size = strlen(braille->definition.name);
   memcpy(data, braille->definition.name, *size);
   return 1;
 }
 
-/* BRLAPI_PARAM_DEVICE_DRIVERCODE */
-static int device_driverCode_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_DRIVER_CODE */
+static int param_driverCode_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   *size = strlen(braille->definition.code);
   memcpy(data, braille->definition.code, *size);
   return 1;
 }
 
-/* BRLAPI_PARAM_DEVICE_DRIVERVERSION */
-static int device_driverVersion_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_DRIVER_VERSION */
+static int param_driverVersion_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   *size = strlen(braille->definition.version);
   memcpy(data, braille->definition.version, *size);
   return 1;
 }
 
-/* BRLAPI_PARAM_DEVICE_MODELIDENTIFIER */
-static int device_modelIdentifier_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_DEVICE_MODEL */
+static int param_deviceModel_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   if (disp) {
     *size = strlen(disp->keyBindings);
@@ -1295,40 +1295,40 @@ static int device_modelIdentifier_read(Connection *c, brlapi_param_t param, uint
   return 1;
 }
 
-/* BRLAPI_PARAM_DEVICE_DISPLAYSIZE */
-static int device_displaySize_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_DISPLAY_SIZE */
+static int param_displaySize_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  brlapi_param_device_displaySize_t *displaySize = data;
+  brlapi_param_displaySize_t *displaySize = data;
   displaySize->x = htonl(displayDimensions[0]);
   displaySize->y = htonl(displayDimensions[1]);
   *size = 2*sizeof(uint32_t);
   return 1;
 }
 
-/* BRLAPI_PARAM_BRAILLE_DOTSPERCELL */
-static int braille_dotsPerCell_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_DOTSPERCELL */
+static int param_dotsPerCell_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   /* TODO */
   *(uint8_t*)data = 8;
-  *size = sizeof(brlapi_param_braille_dotsPerCell_t);
+  *size = sizeof(brlapi_param_dotsPerCell_t);
   return 1;
 }
 
-/* BRLAPI_PARAM_BRAILLE_RETAINDOTS */
-static int braille_retainDots_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_RETAIN_DOTS */
+static int param_retainDots_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   *(uint8_t*)data = c->dots;
-  *size = sizeof(brlapi_param_braille_retaindots_t);
+  *size = sizeof(brlapi_param_retainDots_t);
   return 1;
 }
-static int braille_retainDots_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+static int param_retainDots_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
-  CHECKERR( (size == sizeof(brlapi_param_braille_retaindots_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
+  CHECKERR( (size == sizeof(brlapi_param_retainDots_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
   c->dots = *(uint8_t*)data;
   return 1;
 }
 
-/* BRLAPI_PARAM_RENDERED_OUTPUT */
+/* BRLAPI_PARAM_RENDERED_CELLS */
 static int rendered_output_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   /* FIXME: should provide local output of the connection only! */
@@ -1342,7 +1342,7 @@ static int rendered_output_read(Connection *c, brlapi_param_t param, uint64_t su
   return 1;
 }
 
-/* BRLAPI_PARAM_KEY_CMD_SHORT_NAME */
+/* BRLAPI_PARAM_COMMAND_SHORT_NAME */
 static int key_cmd_short_name_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   char buffer[0X100];
@@ -1355,7 +1355,7 @@ static int key_cmd_short_name_read(Connection *c, brlapi_param_t param, uint64_t
   return 1;
 }
 
-/* BRLAPI_PARAM_KEY_CMD_NAME */
+/* BRLAPI_PARAM_COMMAND_LONG_NAME */
 static int key_cmd_name_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   char buffer[0X100];
@@ -1366,14 +1366,14 @@ static int key_cmd_name_read(Connection *c, brlapi_param_t param, uint64_t subpa
 }
 
 /* For parameters to be implemented */
-static int unimplemented_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+static int param_unimplemented_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "parameter %u not implemented yet", param);
   *size = 0;
   return 0;
 }
 
-static int unimplemented_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+static int param_unimplemented_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
   WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "parameter %u not implemented yet", param);
   return 0;
@@ -1386,48 +1386,48 @@ typedef struct {
   paramWrite write;
 } ParamDispatch;
 
-static ParamDispatch paramDispatch[BRLAPI_PARAM_NUMBER] = {
+static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   /* BrlAPI */
-  [ BRLAPI_PARAM_CONNECTION_SERVERVERSION ]	= { 0, 1, connection_serverVersion_read, NULL, },
-  [ BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL ]	= { 1, 0, connection_displayLevel_read, connection_displayLevel_write, },
+  [ BRLAPI_PARAM_SERVER_VERSION ]	= { 0, 1, param_serverVersion_read, NULL, },
+  [ BRLAPI_PARAM_DISPLAY_LEVEL ]	= { 1, 0, param_displayLevel_read, param_displayLevel_write, },
 
   /* Device */
-  [ BRLAPI_PARAM_DEVICE_DRIVERNAME ]		= { 0, 1, device_driverName_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_DRIVERCODE ]		= { 0, 1, device_driverCode_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_DRIVERVERSION ]		= { 0, 1, device_driverVersion_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_MODELIDENTIFIER ]	= { 0, 1, device_modelIdentifier_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_DISPLAYSIZE ]		= { 0, 1, device_displaySize_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_PORT ]			= { 0, 1, unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_SPEED ]			= { 0, 1, unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_ONLINE ]		= { 0, 1, unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_DRIVER_NAME ]		= { 0, 1, param_driverName_read, NULL, },
+  [ BRLAPI_PARAM_DRIVER_CODE ]		= { 0, 1, param_driverCode_read, NULL, },
+  [ BRLAPI_PARAM_DRIVER_VERSION ]		= { 0, 1, param_driverVersion_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_MODEL ]	= { 0, 1, param_deviceModel_read, NULL, },
+  [ BRLAPI_PARAM_DISPLAY_SIZE ]		= { 0, 1, param_displaySize_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_PORT ]			= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_SPEED ]			= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_ONLINE ]		= { 0, 1, param_unimplemented_read, NULL, },
 
   /* Braille rendering */
-  [ BRLAPI_PARAM_BRAILLE_RETAINDOTS ]		= { 1, 0, braille_retainDots_read, braille_retainDots_write, },
-  [ BRLAPI_PARAM_BRAILLE_DOTSPERCELL ]		= { 1, 1, braille_dotsPerCell_read, unimplemented_write, },
-  [ BRLAPI_PARAM_BRAILLE_CONTRACTED ]		= { 1, 1, unimplemented_read, unimplemented_write, },
-  [ BRLAPI_PARAM_BRAILLE_CURSORMASK ]		= { 1, 1, unimplemented_read, unimplemented_write, },
-  [ BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE ]	= { 1, 1, unimplemented_read, unimplemented_write, },
-  [ BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH ]	= { 1, 1, unimplemented_read, unimplemented_write, },
-  [ BRLAPI_PARAM_RENDERED_OUTPUT ]		= { 1, 1, rendered_output_read, NULL, },
+  [ BRLAPI_PARAM_RETAIN_DOTS ]		= { 1, 0, param_retainDots_read, param_retainDots_write, },
+  [ BRLAPI_PARAM_DOTSPERCELL ]		= { 1, 1, param_dotsPerCell_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CONTRACTED_BRAILLE ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CURSOR_DOTS ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CURSOR_BLINK_RATE ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CURSOR_BLINK_LENGTH ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_RENDERED_CELLS ]		= { 1, 1, rendered_output_read, NULL, },
 
   /* Navigation parameters */
-  [ BRLAPI_PARAM_BROWSE_SKIPLINE ]		= { 1, 1, unimplemented_read, unimplemented_write, },
-  [ BRLAPI_PARAM_BROWSE_BEEP ]			= { 1, 1, unimplemented_read, unimplemented_write, },
+  [ BRLAPI_PARAM_SKIP_EMPTY_LINES ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_AUDIBLE_ALERTS ]			= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
 
   /* Cut buffer(s) */
-  [ BRLAPI_PARAM_CLIPBOARD ]			= { 0, 1, unimplemented_read, unimplemented_write, },
+  [ BRLAPI_PARAM_CLIPBOARD_CONTENT ]			= { 0, 1, param_unimplemented_read, param_unimplemented_write, },
 
   /* Keys */
-  [ BRLAPI_PARAM_KEY_CMD_SET ]			= { 0, 1, unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_KEY_CMD_SHORT_NAME ]		= { 0, 1, key_cmd_short_name_read, NULL, },
-  [ BRLAPI_PARAM_KEY_CMD_NAME ]			= { 0, 1, key_cmd_name_read, NULL, },
-  [ BRLAPI_PARAM_KEY_RAW_SET ]			= { 0, 1, unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_KEY_RAW_SHORT_NAME ]		= { 0, 1, unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_KEY_RAW_NAME ]			= { 0, 1, unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_COMMAND_SET ]			= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_COMMAND_SHORT_NAME ]		= { 0, 1, key_cmd_short_name_read, NULL, },
+  [ BRLAPI_PARAM_COMMAND_LONG_NAME ]			= { 0, 1, key_cmd_name_read, NULL, },
+  [ BRLAPI_PARAM_KEY_SET ]			= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_KEY_SHORT_NAME ]		= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_KEY_LONG_NAME ]			= { 0, 1, param_unimplemented_read, NULL, },
 
   /* Braille translation */
-  [ BRLAPI_PARAM_BRAILLE_TABLE_ROWS ]		= { 0, 1, unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_BRAILLE_TABLE ]		= { 0, 1, unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_BRAILLE_TABLE_ROWS ]		= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_BRAILLE_TABLE ]		= { 0, 1, param_unimplemented_read, NULL, },
 };
 
 static int checkParamLocalGlobal(Connection *c, brlapi_param_t param, uint32_t flags)
@@ -1525,14 +1525,14 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
 /* TODO: call for
- * BRLAPI_PARAM_BRAILLE_DOTSPERCELL,
- * BRLAPI_PARAM_BRAILLE_CONTRACTED,
- * BRLAPI_PARAM_BRAILLE_CURSORMASK,
- * BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE,
- * BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH
- * BRLAPI_PARAM_BROWSE_SKIPLINE
- * BRLAPI_PARAM_BROWSE_BEEP
- * BRLAPI_PARAM_CLIPBOARD
+ * BRLAPI_PARAM_DOTSPERCELL,
+ * BRLAPI_PARAM_CONTRACTED_BRAILLE,
+ * BRLAPI_PARAM_CURSOR_DOTS,
+ * BRLAPI_PARAM_CURSOR_BLINK_RATE,
+ * BRLAPI_PARAM_CURSOR_BLINK_LENGTH
+ * BRLAPI_PARAM_SKIP_EMPTY_LINES
+ * BRLAPI_PARAM_AUDIBLE_ALERTS
+ * BRLAPI_PARAM_CLIPBOARD_CONTENT
  * BRLAPI_PARAM_BRAILLE_TABLE
  */
 static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
@@ -3373,7 +3373,7 @@ int api_flush(BrailleDisplay *brl) {
       /* FIXME: the client should have gotten the notification when the write
        * was received, rather than only when it eventually gets displayed
        * (possibly only because of focus change) */
-      if (ok) handleParamUpdate(c, BRLAPI_PARAM_RENDERED_OUTPUT, 0, 0, disp->buffer, displaySize);
+      if (ok) handleParamUpdate(c, BRLAPI_PARAM_RENDERED_CELLS, 0, 0, disp->buffer, displaySize);
       drain = 1;
       disp->buffer = oldbuf;
       displayed_last = c;
@@ -3459,7 +3459,7 @@ static void brlResize(BrailleDisplay *brl)
   coreWindowDots = realloc(coreWindowDots, displaySize * sizeof(*coreWindowDots));
   coreWindowCursor = 0;
   disp = brl;
-  handleParamUpdate(NULL, BRLAPI_PARAM_DEVICE_DISPLAYSIZE, 0, BRLAPI_PARAMF_GLOBAL, displayDimensions, sizeof(displayDimensions));
+  handleParamUpdate(NULL, BRLAPI_PARAM_DISPLAY_SIZE, 0, BRLAPI_PARAMF_GLOBAL, displayDimensions, sizeof(displayDimensions));
 }
 
 REPORT_LISTENER(brlapi_handleReports)

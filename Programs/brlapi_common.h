@@ -578,17 +578,17 @@ BRLAPI(getKeyFile)(const char *auth)
 static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
 {
   switch (parameter) {
-    case BRLAPI_PARAM_CONNECTION_SERVERVERSION:
-    case BRLAPI_PARAM_CONNECTION_DISPLAYLEVEL:
+    case BRLAPI_PARAM_SERVER_VERSION:
+    case BRLAPI_PARAM_DISPLAY_LEVEL:
       return 1;
 
-    case BRLAPI_PARAM_DEVICE_DISPLAYSIZE:
+    case BRLAPI_PARAM_DISPLAY_SIZE:
       return 2;
     case BRLAPI_PARAM_DEVICE_SPEED:
       return 1;
 
-    case BRLAPI_PARAM_BRAILLE_CURSORBLINKRATE:
-    case BRLAPI_PARAM_BRAILLE_CURSORBLINKLENGTH:
+    case BRLAPI_PARAM_CURSOR_BLINK_RATE:
+    case BRLAPI_PARAM_CURSOR_BLINK_LENGTH:
       return 1;
 
     default:
