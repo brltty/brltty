@@ -588,7 +588,7 @@ static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
       return 1;
 
     case BRLAPI_PARAM_CURSOR_BLINK_PERIOD:
-    case BRLAPI_PARAM_CURSOR_BLINK_DURATION:
+    case BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE:
       return 1;
 
     default:
