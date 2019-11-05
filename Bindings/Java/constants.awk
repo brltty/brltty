@@ -62,7 +62,7 @@ function brlDot(number, symbol, value, help) {
 }
 
 function apiConstant(name, symbol, value, help) {
-  writeJavaConstant("int", name, value);
+  writeJavaConstant("int", name, value, help);
 }
 
 function apiMask(name, symbol, value, help) {

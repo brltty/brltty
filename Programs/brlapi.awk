@@ -18,7 +18,7 @@
 
 BEGIN {
   apiRangeTypeCount = 0
-  apiParameterCount = 0
+  apiParameterNext = 0
 }
 
 /#define[ \t]*BRLAPI_(CURSOR|DISPLAY|ERROR|TTY)_/ {
@@ -59,13 +59,17 @@ BEGIN {
 
 /^ *BRLAPI_PARAM_[^ ]+ += +[0-9]+,?/ {
   gsub(",", "", $3)
-  apiParameterCount = strtonum($3)
-  apiConstant(substr($1, 8), $1, apiParameterCount++, "")
+  apiParameterNext = strtonum($3)
+  apiParameter($0, $1)
   next
 }
 
 /^ *BRLAPI_PARAM_[^ ,]+,?/ {
   gsub(",", "", $1)
-  apiConstant(substr($1, 8), $1, apiParameterCount++, "")
+  apiParameter($0, $1)
   next
+}
+
+function apiParameter(line, symbol) {
+  apiConstant(substr(symbol, 8), symbol, apiParameterNext++, getComment(line))
 }

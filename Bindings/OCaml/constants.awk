@@ -58,7 +58,7 @@ function brlDot(number, symbol, value, help) {
 }
 
 function apiConstant(name, symbol, value, help) {
-  writeCamlConstant("int", name, value);
+  writeCamlConstant("int", name, value, help);
 }
 
 function apiMask(name, symbol, value, help) {
