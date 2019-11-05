@@ -1097,6 +1097,10 @@ typedef uint32_t brlapi_param_serverVersion_t;
 /** Type to be used for BRLAPI_PARAM_CLIENT_PRIORITY */
 typedef uint32_t brlapi_param_clientPriority_t;
 
+/* BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT */
+/** Default value for BRLAPI_PARAM_CLIENT_PRIORITY */
+#define BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT 50
+
 /* brlapi_param_driverName_t */
 /** Type to be used for BRLAPI_PARAM_DRIVER_NAME */
 typedef char *brlapi_param_driverName_t;
