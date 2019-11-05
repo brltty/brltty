@@ -848,7 +848,7 @@ cdef class Connection:
 
 		# One 32bit value
 		if param == PARAM_SERVER_VERSION or \
-		   param == PARAM_DISPLAY_LEVEL or \
+		   param == PARAM_CLIENT_PRIORITY or \
 		   param == PARAM_DEVICE_SPEED or \
 		   param == PARAM_CURSOR_BLINK_PERIOD or \
 		   param == PARAM_CURSOR_BLINK_PERCENTAGE:
@@ -936,7 +936,7 @@ cdef class Connection:
 		size = c_brlapi.BRLAPI_MAXPACKETSIZE - 2*4
 		c_value = <void*>c_brlapi.malloc(size)
 
-		if param == PARAM_DISPLAY_LEVEL:
+		if param == PARAM_CLIENT_PRIORITY:
 			values = <uint32_t *>c_value
 			values[0] = value
 			size = 4

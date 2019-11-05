@@ -579,7 +579,7 @@ static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
 {
   switch (parameter) {
     case BRLAPI_PARAM_SERVER_VERSION:
-    case BRLAPI_PARAM_DISPLAY_LEVEL:
+    case BRLAPI_PARAM_CLIENT_PRIORITY:
       return 1;
 
     case BRLAPI_PARAM_DISPLAY_SIZE:

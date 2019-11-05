@@ -193,7 +193,7 @@ typedef struct Connection {
   FileDescriptor fd;
   int auth;
   struct Tty *tty;
-  brlapi_param_displayLevel_t display_level;
+  brlapi_param_clientPriority_t client_priority;
   int raw, suspend;
   unsigned int how; /* how keys must be delivered to clients */
   uint8_t dots; /* whether client wants dots instead of translating to chars */
@@ -532,7 +532,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   c->auth = -1;
   c->fd = fd;
   c->tty = NULL;
-  c->display_level = 0;
+  c->client_priority = 0;
   c->raw = 0;
   c->suspend = 0;
   c->brlbufstate = EMPTY;
@@ -1242,18 +1242,18 @@ static int param_serverVersion_read(Connection *c, brlapi_param_t param, uint64_
   return 1;
 }
 
-/* BRLAPI_PARAM_DISPLAY_LEVEL */
-static int param_displayLevel_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_CLIENT_PRIORITY */
+static int param_clientPriority_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  * (brlapi_param_displayLevel_t*) data = c->display_level;
-  *size = sizeof(brlapi_param_displayLevel_t);
+  * (brlapi_param_clientPriority_t*) data = c->client_priority;
+  *size = sizeof(brlapi_param_clientPriority_t);
   return 1;
 }
-static int param_displayLevel_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+static int param_clientPriority_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
-  CHECKERR( (size == sizeof(brlapi_param_displayLevel_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
-  brlapi_param_displayLevel_t level = * (brlapi_param_displayLevel_t*) data;
-  c->display_level = level;
+  CHECKERR( (size == sizeof(brlapi_param_clientPriority_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
+  brlapi_param_clientPriority_t level = * (brlapi_param_clientPriority_t*) data;
+  c->client_priority = level;
   return 1;
 }
 
@@ -1389,7 +1389,7 @@ typedef struct {
 static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   /* BrlAPI */
   [ BRLAPI_PARAM_SERVER_VERSION ]	= { 0, 1, param_serverVersion_read, NULL, },
-  [ BRLAPI_PARAM_DISPLAY_LEVEL ]	= { 1, 0, param_displayLevel_read, param_displayLevel_write, },
+  [ BRLAPI_PARAM_CLIENT_PRIORITY ]	= { 1, 0, param_clientPriority_read, param_clientPriority_write, },
 
   /* Device */
   [ BRLAPI_PARAM_DRIVER_NAME ]		= { 0, 1, param_driverName_read, NULL, },
@@ -3168,7 +3168,7 @@ static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how,
   Connection *c;
   Tty *t;
   int passKey;
-  /* TODO: support display_level parameter */
+  /* TODO: support client_priority parameter */
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
     lockMutex(&c->acceptedKeysMutex);
     passKey = (c->how==how) && (inKeyrangeList(c->acceptedKeys,code) != NULL)
