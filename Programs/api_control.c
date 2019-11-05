@@ -79,6 +79,10 @@ int
 api_flush (BrailleDisplay *brl) {
   return 0;
 }
+
+void
+api_updateParameter (brlapi_param_t param, uint64_t subparam, const void *data, size_t size) {
+}
 #endif /* ENABLE_API */
 
 static int apiStarted = 0;
@@ -195,6 +199,11 @@ apiFlush (void) {
   return api_flush(&brl);
 }
 
+static void
+apiUpdateParameter (brlapi_param_t param, uint64_t subparam, const void *data, size_t size) {
+  if (apiStarted) api_updateParameter(param, subparam, data, size);
+}
+
 const ApiMethods api = {
   .identify = apiIdentify,
   .getParameters = apiGetParameters,
@@ -216,5 +225,6 @@ const ApiMethods api = {
   .handleCommand = apiHandleCommand,
   .handleKeyEvent = apiHandleKeyEvent,
 
-  .flush = apiFlush
+  .flush = apiFlush,
+  .updateParameter = apiUpdateParameter
 };
