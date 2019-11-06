@@ -533,7 +533,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   c->auth = -1;
   c->fd = fd;
   c->tty = NULL;
-  c->client_priority = 50;
+  c->client_priority = BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT;
   c->raw = 0;
   c->suspend = 0;
   c->brlbufstate = EMPTY;
