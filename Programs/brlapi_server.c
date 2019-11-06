@@ -1319,12 +1319,12 @@ static int param_displaySize_read(Connection *c, brlapi_param_t param, uint64_t 
   return 1;
 }
 
-/* BRLAPI_PARAM_DOTSPERCELL */
-static int param_dotsPerCell_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS */
+static int param_computerBrailleCellDots_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   /* TODO */
   *(uint8_t*)data = 8;
-  *size = sizeof(brlapi_param_dotsPerCell_t);
+  *size = sizeof(brlapi_param_computerBrailleCellDots_t);
   return 1;
 }
 
@@ -1417,7 +1417,7 @@ static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   /* Braille rendering parameters */
   [ BRLAPI_PARAM_RETAIN_DOTS ]			= { 1, 0, param_retainDots_read, param_retainDots_write, },
-  [ BRLAPI_PARAM_DOTSPERCELL ]			= { 1, 1, param_dotsPerCell_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS ]	= { 1, 1, param_computerBrailleCellDots_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_LITERARY_BRAILLE ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_DOTS ]			= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_BLINK_PERIOD ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
@@ -1442,8 +1442,8 @@ static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [ BRLAPI_PARAM_KEY_LONG_NAME ]		= { 0, 1, param_unimplemented_read, NULL, },
 
   /* Braille translation parameters */
-  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MASK ]	= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP ]	= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK ]	= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS ]	= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE ]	= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_LITERARY_BRAILLE_TABLE ]	= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_MESSAGE_LOCALE ]		= { 0, 1, param_unimplemented_read, NULL, },
@@ -1544,7 +1544,7 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
 /* TODO: call for
- * BRLAPI_PARAM_DOTSPERCELL,
+ * BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS,
  * BRLAPI_PARAM_LITERARY_BRAILLE,
  * BRLAPI_PARAM_CURSOR_DOTS,
  * BRLAPI_PARAM_CURSOR_BLINK_PERIOD,
