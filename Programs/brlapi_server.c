@@ -1402,50 +1402,50 @@ typedef struct {
 
 static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   /* connection parameters */
-  [ BRLAPI_PARAM_SERVER_VERSION ]	= { 0, 1, param_serverVersion_read, NULL, },
-  [ BRLAPI_PARAM_CLIENT_PRIORITY ]	= { 1, 0, param_clientPriority_read, param_clientPriority_write, },
+  [ BRLAPI_PARAM_SERVER_VERSION ]		= { 0, 1, param_serverVersion_read, NULL, },
+  [ BRLAPI_PARAM_CLIENT_PRIORITY ]		= { 1, 0, param_clientPriority_read, param_clientPriority_write, },
 
   /* device parameters */
-  [ BRLAPI_PARAM_DRIVER_NAME ]		= { 0, 1, param_driverName_read, NULL, },
-  [ BRLAPI_PARAM_DRIVER_CODE ]		= { 0, 1, param_driverCode_read, NULL, },
+  [ BRLAPI_PARAM_DRIVER_NAME ]			= { 0, 1, param_driverName_read, NULL, },
+  [ BRLAPI_PARAM_DRIVER_CODE ]			= { 0, 1, param_driverCode_read, NULL, },
   [ BRLAPI_PARAM_DRIVER_VERSION ]		= { 0, 1, param_driverVersion_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_MODEL ]	= { 0, 1, param_deviceModel_read, NULL, },
-  [ BRLAPI_PARAM_DISPLAY_SIZE ]		= { 0, 1, param_displaySize_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_IDENTIFIER ]			= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_MODEL ]			= { 0, 1, param_deviceModel_read, NULL, },
+  [ BRLAPI_PARAM_DISPLAY_SIZE ]			= { 0, 1, param_displaySize_read, NULL, },
+  [ BRLAPI_PARAM_DEVICE_IDENTIFIER ]		= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_DEVICE_SPEED ]			= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_DEVICE_ONLINE ]		= { 0, 1, param_unimplemented_read, NULL, },
 
   /* Braille rendering parameters */
-  [ BRLAPI_PARAM_RETAIN_DOTS ]		= { 1, 0, param_retainDots_read, param_retainDots_write, },
-  [ BRLAPI_PARAM_DOTSPERCELL ]		= { 1, 1, param_dotsPerCell_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_RETAIN_DOTS ]			= { 1, 0, param_retainDots_read, param_retainDots_write, },
+  [ BRLAPI_PARAM_DOTSPERCELL ]			= { 1, 1, param_dotsPerCell_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_LITERARY_BRAILLE ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_CURSOR_DOTS ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_CURSOR_BLINK_PERIOD ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CURSOR_DOTS ]			= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CURSOR_BLINK_PERIOD ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_RENDERED_CELLS ]		= { 1, 1, param_renderedCells_read, NULL, },
 
   /* navigation parameters */
   [ BRLAPI_PARAM_SKIP_EMPTY_LINES ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_AUDIBLE_ALERTS ]			= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_AUDIBLE_ALERTS ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
 
   /* clipboard parameters */
-  [ BRLAPI_PARAM_CLIPBOARD_CONTENT ]			= { 0, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_CLIPBOARD_CONTENT ]		= { 0, 1, param_unimplemented_read, param_unimplemented_write, },
 
   /* tty mode parameters */
   [ BRLAPI_PARAM_COMMAND_SET ]			= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_COMMAND_SHORT_NAME ]		= { 0, 1, param_commandShortName_read, NULL, },
-  [ BRLAPI_PARAM_COMMAND_LONG_NAME ]			= { 0, 1, param_commandLongName_read, NULL, },
+  [ BRLAPI_PARAM_COMMAND_LONG_NAME ]		= { 0, 1, param_commandLongName_read, NULL, },
 
   /* raw mode parameters */
   [ BRLAPI_PARAM_KEY_SET ]			= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_KEY_SHORT_NAME ]		= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_KEY_LONG_NAME ]			= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_KEY_LONG_NAME ]		= { 0, 1, param_unimplemented_read, NULL, },
 
   /* Braille translation parameters */
-  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MASK ]		= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP ]		= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE ]		= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_LITERARY_BRAILLE_TABLE ]		= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MASK ]	= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP ]	= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE ]	= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_LITERARY_BRAILLE_TABLE ]	= { 0, 1, param_unimplemented_read, NULL, },
   [ BRLAPI_PARAM_MESSAGE_LOCALE ]		= { 0, 1, param_unimplemented_read, NULL, },
 };
 
