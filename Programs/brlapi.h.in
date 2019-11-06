@@ -1021,23 +1021,23 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 /** Enumeration of parameter types */
 typedef enum {
   /* connection parameters */
-  BRLAPI_PARAM_SERVER_VERSION = 0,	/**< Version of the API server: uint32_t */
-  BRLAPI_PARAM_CLIENT_PRIORITY = 1,	/**< Client priority, between 0 and 100, default is 50: uint32_t */
+  BRLAPI_PARAM_SERVER_VERSION = 0,		/**< Version of the API server: uint32_t */
+  BRLAPI_PARAM_CLIENT_PRIORITY = 1,		/**< Client priority, between 0 and 100, default is 50: uint32_t */
 
   /* device parameters */
-  BRLAPI_PARAM_DRIVER_NAME = 2,		/**< Driver name: string */
-  BRLAPI_PARAM_DRIVER_CODE = 3,		/**< Driver code: string */
-  BRLAPI_PARAM_DRIVER_VERSION = 4,	/**< Driver version: string */
-  BRLAPI_PARAM_DEVICE_MODEL = 5,	/**< Model Identifier: string */
+  BRLAPI_PARAM_DRIVER_NAME = 2,			/**< Driver name: string */
+  BRLAPI_PARAM_DRIVER_CODE = 3,			/**< Driver code: string */
+  BRLAPI_PARAM_DRIVER_VERSION = 4,		/**< Driver version: string */
+  BRLAPI_PARAM_DEVICE_MODEL = 5,		/**< Model Identifier: string */
   BRLAPI_PARAM_DISPLAY_SIZE = 6,		/**< Dimensions of the braille device: { uint32_t x; uint32_t y; } */
-  BRLAPI_PARAM_DEVICE_IDENTIFIER = 7,			/**< Path to the device: string */
+  BRLAPI_PARAM_DEVICE_IDENTIFIER = 7,		/**< Path to the device: string */
   BRLAPI_PARAM_DEVICE_SPEED = 8,		/**< Speed of the port: uint32_t */
   BRLAPI_PARAM_DEVICE_ONLINE = 9,		/**< Is online: boolean */
 /* TODO: status area */
 
   /* Braille rendering parameters */
   BRLAPI_PARAM_RETAIN_DOTS = 10,		/**< Pass dot combinations instead of chars: boolean */
-  BRLAPI_PARAM_DOTSPERCELL = 11,	/**< 8 dots or 6 dots style ? uint8_t */
+  BRLAPI_PARAM_DOTSPERCELL = 11,		/**< 8 dots or 6 dots style ? uint8_t */
   BRLAPI_PARAM_LITERARY_BRAILLE = 12,		/**< Whether braille is literary (or computer): boolean */
   BRLAPI_PARAM_CURSOR_DOTS = 13,		/**< Cursor Dots: uint8_t */
   BRLAPI_PARAM_CURSOR_BLINK_PERIOD = 14,	/**< Cursor blinking period (ms): uint32_t */
@@ -1049,7 +1049,7 @@ typedef enum {
   BRLAPI_PARAM_AUDIBLE_ALERTS = 18,		/**< Whether to use audible alerts: boolean */
 
   /* clipboard parameters */
-  BRLAPI_PARAM_CLIPBOARD_CONTENT = 19,			/**< Content of the clipboard: UTF-8 string */
+  BRLAPI_PARAM_CLIPBOARD_CONTENT = 19,		/**< Content of the clipboard: UTF-8 string */
 
   /* tty mode parameters */
   BRLAPI_PARAM_COMMAND_SET = 20,		/**< Set of navigation commands for the plugged device,
@@ -1062,7 +1062,7 @@ typedef enum {
 						  * which key is specified by the subparam value. */
 
   /* raw mode parameters */
-  BRLAPI_PARAM_KEY_SET = 23,		/**< Set of raw key codes for the plugged device,
+  BRLAPI_PARAM_KEY_SET = 23,			/**< Set of raw key codes for the plugged device,
 						  * one uint64_t per code */
   BRLAPI_PARAM_KEY_SHORT_NAME = 24,		/**< Abbreviated name for the key,
 						  * a few characters typically: string
