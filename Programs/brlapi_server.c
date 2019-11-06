@@ -1657,7 +1657,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     paramValue->param = paramRequest->param;
     paramValue->subparam_hi = paramRequest->subparam_hi;
     paramValue->subparam_lo = paramRequest->subparam_lo;
-    size = paramValue->data;
+    size = sizeof(paramValue->data);
     ret = readHandler(c, param, subparam, flags, paramValue->data, &size);
     if (ret && size) {
       _brlapi_htonParameter(param, paramValue, size);
