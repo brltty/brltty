@@ -1038,7 +1038,7 @@ typedef enum {
   /* Braille rendering */
   BRLAPI_PARAM_RETAIN_DOTS = 10,		/**< Pass dot combinations instead of chars: boolean */
   BRLAPI_PARAM_DOTSPERCELL = 11,	/**< 8 dots or 6 dots style ? uint8_t */
-  BRLAPI_PARAM_CONTRACTED_BRAILLE = 12,		/**< Whether braille is contracted: boolean */
+  BRLAPI_PARAM_LITERARY_BRAILLE = 12,		/**< Whether braille is literary (or computer): boolean */
   BRLAPI_PARAM_CURSOR_DOTS = 13,		/**< Cursor Dots: uint8_t */
   BRLAPI_PARAM_CURSOR_BLINK_PERIOD = 14,	/**< Cursor blinking period (ms): uint32_t */
   BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE = 15,	/**< Cursor blinking visible percentage (%): uint32_t */
@@ -1070,10 +1070,10 @@ typedef enum {
 						  * which key is specified by the subparam value. */
 
   /* Braille translation */
-  BRLAPI_PARAM_BRAILLE_TABLE_ROWS = 26,		/**< Sets of Unicode rows that are defined,
+  BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MASK = 26,	/**< Sets of Unicode rows that are defined,
 						  * 1 bit per row, 512 uint8_t, for
-						  * U+0000 to U+10FFFF. */
-  BRLAPI_PARAM_BRAILLE_TABLE = 27,		/**< Unicode 1-to-1 Braille table,
+						  * U+0000 through U+10FFFF. */
+  BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP = 27,	/**< 1-to-1 Unicode to Braille map,
 						  * which row is specified by the subparam value.
 						  * 256*uint8_t for each row */
   /* TODO: dot-to-unicode as well */
@@ -1144,9 +1144,9 @@ typedef brlapi_param_bool_t brlapi_param_retainDots_t;
 /** Type to be used for BRLAPI_PARAM_DOTSPERCELL */
 typedef uint8_t brlapi_param_dotsPerCell_t;
 
-/* brlapi_param_contractedBraille_t */
-/** Type to be used for BRLAPI_PARAM_CONTRACTED_BRAILLE */
-typedef brlapi_param_bool_t brlapi_param_contractedBraille_t;
+/* brlapi_param_literaryBraille_t */
+/** Type to be used for BRLAPI_PARAM_LITERARY_BRAILLE */
+typedef brlapi_param_bool_t brlapi_param_literaryBraille_t;
 
 /* brlapi_param_cursorDots_t */
 /** Type to be used for BRLAPI_PARAM_CURSOR_DOTS */
@@ -1200,13 +1200,13 @@ typedef char *brlapi_param_keyShortName_t;
 /** Type to be used for BRLAPI_PARAM_KEY_LONG_NAME */
 typedef char *brlapi_param_keyLongName_t;
 
-/* brlapi_param_braille_table_rows */
-/** Type to be used for BRLAPI_PARAM_BRAILLE_TABLE_ROWS */
-typedef uint8_t brlapi_param_braille_table_rows[512];
+/* brlapi_param_computerBrailleRowMask_t */
+/** Type to be used for BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MASK */
+typedef uint8_t brlapi_param_computerBrailleRowMask_t[0X200];
 
-/* brlapi_param_braille_table */
-/** Type to be used for BRLAPI_PARAM_BRAILLE_TABLE */
-typedef uint8_t brlapi_param_braille_table[256];
+/* brlapi_param_computerBrailleRowMap_t */
+/** Type to be used for BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP */
+typedef uint8_t brlapi_param_computerBrailleRowMap_t[0X100];
 
 /* brlapi_getParameter */
 /** Get the content of a parameter

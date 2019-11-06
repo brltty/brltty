@@ -1419,7 +1419,7 @@ static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   /* Braille rendering */
   [ BRLAPI_PARAM_RETAIN_DOTS ]		= { 1, 0, param_retainDots_read, param_retainDots_write, },
   [ BRLAPI_PARAM_DOTSPERCELL ]		= { 1, 1, param_dotsPerCell_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_CONTRACTED_BRAILLE ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [ BRLAPI_PARAM_LITERARY_BRAILLE ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_DOTS ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_BLINK_PERIOD ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
   [ BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
@@ -1441,8 +1441,8 @@ static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [ BRLAPI_PARAM_KEY_LONG_NAME ]			= { 0, 1, param_unimplemented_read, NULL, },
 
   /* Braille translation */
-  [ BRLAPI_PARAM_BRAILLE_TABLE_ROWS ]		= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_BRAILLE_TABLE ]		= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MASK ]		= { 0, 1, param_unimplemented_read, NULL, },
+  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP ]		= { 0, 1, param_unimplemented_read, NULL, },
 };
 
 static int checkParamLocalGlobal(Connection *c, brlapi_param_t param, uint32_t flags)
@@ -1541,14 +1541,14 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
 /* TODO: call for
  * BRLAPI_PARAM_DOTSPERCELL,
- * BRLAPI_PARAM_CONTRACTED_BRAILLE,
+ * BRLAPI_PARAM_LITERARY_BRAILLE,
  * BRLAPI_PARAM_CURSOR_DOTS,
  * BRLAPI_PARAM_CURSOR_BLINK_PERIOD,
  * BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE
  * BRLAPI_PARAM_SKIP_EMPTY_LINES
  * BRLAPI_PARAM_AUDIBLE_ALERTS
  * BRLAPI_PARAM_CLIPBOARD_CONTENT
- * BRLAPI_PARAM_BRAILLE_TABLE
+ * BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP
  */
 static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
 {

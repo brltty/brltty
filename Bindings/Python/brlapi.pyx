@@ -877,15 +877,15 @@ cdef class Connection:
 
 		# Bytes value
 		elif param == PARAM_RENDERED_CELLS or \
-		     param == PARAM_BRAILLE_TABLE_ROWS or \
-		     param == PARAM_BRAILLE_TABLE:
+		     param == PARAM_COMPUTER_BRAILLE_ROW_MASK or \
+		     param == PARAM_COMPUTER_BRAILLE_ROW_MAP:
 			bytes = <uint8_t *>c_value
 			ret = bytes[:retval]
 
 		# Boolean value
 		elif param == PARAM_DEVICE_ONLINE or \
 		     param == PARAM_RETAIN_DOTS or \
-		     param == PARAM_CONTRACTED_BRAILLE or \
+		     param == PARAM_LITERARY_BRAILLE or \
 		     param == PARAM_SKIP_EMPTY_LINES or \
 		     param == PARAM_AUDIBLE_ALERTS:
 			bytes = <uint8_t *>c_value
@@ -945,7 +945,7 @@ cdef class Connection:
 
 		if param == PARAM_DOTSPERCELL or \
 		   param == PARAM_RETAIN_DOTS or \
-		   param == PARAM_CONTRACTED_BRAILLE or \
+		   param == PARAM_LITERARY_BRAILLE or \
 		   param == PARAM_CURSOR_DOTS or \
 		   param == PARAM_CURSOR_BLINK_PERIOD or \
 		   param == PARAM_CURSOR_BLINK_PERCENTAGE or \
