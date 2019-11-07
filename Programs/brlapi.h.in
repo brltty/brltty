@@ -1039,7 +1039,7 @@ typedef enum {
   BRLAPI_PARAM_RETAIN_DOTS = 10,		/**< Pass dot combinations instead of chars: boolean */
 
 //Braille Rendering Parameters
-  BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS = 11,	/**< 8 dots or 6 dots style ? uint8_t */
+  BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE = 11,	/**< 8 dots or 6 dots style ? uint8_t */
   BRLAPI_PARAM_LITERARY_BRAILLE = 12,		/**< Whether braille is literary (or computer): boolean */
   BRLAPI_PARAM_CURSOR_DOTS = 13,		/**< Cursor Dots: uint8_t */
   BRLAPI_PARAM_CURSOR_BLINK_PERIOD = 14,	/**< Cursor blinking period (ms): uint32_t */
@@ -1147,9 +1147,9 @@ typedef brlapi_param_bool_t brlapi_param_deviceOnline_t;
 /** Type to be used for BRLAPI_PARAM_RETAIN_DOTS */
 typedef brlapi_param_bool_t brlapi_param_retainDots_t;
 
-/* brlapi_param_computerBrailleCellDots_t */
-/** Type to be used for BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS */
-typedef uint8_t brlapi_param_computerBrailleCellDots_t;
+/* brlapi_param_computerBrailleCellSize_t */
+/** Type to be used for BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE */
+typedef uint8_t brlapi_param_computerBrailleCellSize_t;
 
 /* brlapi_param_literaryBraille_t */
 /** Type to be used for BRLAPI_PARAM_LITERARY_BRAILLE */
