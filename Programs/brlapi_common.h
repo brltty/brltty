@@ -573,6 +573,162 @@ BRLAPI(getKeyFile)(const char *auth)
   return ret;
 }
 
+typedef enum {
+  BRLAPI_PARAM_TYPE_STRING,
+  BRLAPI_PARAM_TYPE_BOOLEAN,
+  BRLAPI_PARAM_TYPE_UINT8,
+  BRLAPI_PARAM_TYPE_UINT32,
+  BRLAPI_PARAM_TYPE_UINT64,
+} brlapi_param_type_t;
+
+typedef struct {
+  brlapi_param_type_t type;
+  uint16_t elements;
+} brlapi_param_properties_t;
+
+static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUNT] = {
+//Connection Parameters
+  [BRLAPI_PARAM_SERVER_VERSION] = {
+    .type = BRLAPI_PARAM_TYPE_UINT32,
+    .elements = 1,
+  },
+
+  [BRLAPI_PARAM_CLIENT_PRIORITY] = {
+    .type = BRLAPI_PARAM_TYPE_UINT32,
+    .elements = 1,
+  },
+
+//Device Parameters
+  [BRLAPI_PARAM_DRIVER_NAME] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+  [BRLAPI_PARAM_DRIVER_CODE] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+  [BRLAPI_PARAM_DRIVER_VERSION] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+  [BRLAPI_PARAM_DEVICE_MODEL] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+  [BRLAPI_PARAM_DISPLAY_SIZE] = {
+    .type = BRLAPI_PARAM_TYPE_UINT32,
+    .elements = 2,
+  },
+
+  [BRLAPI_PARAM_DEVICE_IDENTIFIER] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+  [BRLAPI_PARAM_DEVICE_SPEED] = {
+    .type = BRLAPI_PARAM_TYPE_UINT32,
+    .elements = 1,
+  },
+
+  [BRLAPI_PARAM_DEVICE_ONLINE] = {
+    .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+  },
+
+//Input Parameters
+  [BRLAPI_PARAM_RETAIN_DOTS] = {
+    .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+  },
+
+//Braille Rendering Parameters
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS] = {
+    .type = BRLAPI_PARAM_TYPE_UINT8,
+  },
+
+  [BRLAPI_PARAM_LITERARY_BRAILLE] = {
+    .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+  },
+
+  [BRLAPI_PARAM_CURSOR_DOTS] = {
+    .type = BRLAPI_PARAM_TYPE_UINT8,
+  },
+
+  [BRLAPI_PARAM_CURSOR_BLINK_PERIOD] = {
+    .type = BRLAPI_PARAM_TYPE_UINT32,
+    .elements = 1,
+  },
+
+  [BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE] = {
+    .type = BRLAPI_PARAM_TYPE_UINT32,
+    .elements = 1,
+  },
+
+  [BRLAPI_PARAM_RENDERED_CELLS] = {
+    .type = BRLAPI_PARAM_TYPE_UINT8,
+  },
+
+//Navigation Parameters
+  [BRLAPI_PARAM_SKIP_EMPTY_LINES] = {
+    .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+  },
+
+  [BRLAPI_PARAM_AUDIBLE_ALERTS] = {
+    .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+  },
+
+//Clipboard Parameters
+  [BRLAPI_PARAM_CLIPBOARD_CONTENT] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+//TTY Mode Parameters
+  [BRLAPI_PARAM_COMMAND_SET] = {
+    .type = BRLAPI_PARAM_TYPE_UINT64,
+  },
+
+  [BRLAPI_PARAM_COMMAND_SHORT_NAME] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+  [BRLAPI_PARAM_COMMAND_LONG_NAME] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+//Raw Mode Parameters
+  [BRLAPI_PARAM_KEY_SET] = {
+    .type = BRLAPI_PARAM_TYPE_UINT64,
+  },
+
+  [BRLAPI_PARAM_KEY_SHORT_NAME] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+  [BRLAPI_PARAM_KEY_LONG_NAME] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+//Braille Translation Parameters
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK] = {
+    .type = BRLAPI_PARAM_TYPE_UINT8,
+    .elements = 544,
+  },
+
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
+    .type = BRLAPI_PARAM_TYPE_UINT8,
+    .elements = 256,
+  },
+
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+  [BRLAPI_PARAM_LITERARY_BRAILLE_TABLE] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+
+  [BRLAPI_PARAM_MESSAGE_LOCALE] = {
+    .type = BRLAPI_PARAM_TYPE_STRING,
+  },
+};
+
 /* Function: _brlapi_parameterConv */
 /* returns how many uint32 should be swapped for a parameter */
 static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
