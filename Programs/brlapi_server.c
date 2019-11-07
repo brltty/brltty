@@ -1401,7 +1401,7 @@ typedef struct {
 } ParamDispatch;
 
 static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
-  /* connection parameters */
+//Connection Parameters
   [BRLAPI_PARAM_SERVER_VERSION] = {
     .global = 1,
     .read = param_serverVersion_read,
@@ -1413,7 +1413,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .write = param_clientPriority_write,
   },
 
-  /* device parameters */
+//Device Parameters
   [BRLAPI_PARAM_DRIVER_NAME] = {
     .global = 1,
     .read = param_driverName_read,
@@ -1454,14 +1454,14 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .read = param_unimplemented_read,
   },
 
-  /* input parameters */
+//Input Parameters
   [BRLAPI_PARAM_RETAIN_DOTS] = {
     .local = 1,
     .read = param_retainDots_read,
     .write = param_retainDots_write,
   },
 
-  /* Braille rendering parameters */
+//Braille Rendering Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS] = {
     .local = 1,
     .global = 1,
@@ -1503,7 +1503,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .read = param_renderedCells_read,
   },
 
-  /* navigation parameters */
+//Navigation Parameters
   [BRLAPI_PARAM_SKIP_EMPTY_LINES] = {
     .local = 1,
     .global = 1,
@@ -1518,14 +1518,14 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .write = param_unimplemented_write,
   },
 
-  /* clipboard parameters */
+//Clipboard Parameters
   [BRLAPI_PARAM_CLIPBOARD_CONTENT] = {
     .global = 1,
     .read = param_unimplemented_read,
     .write = param_unimplemented_write,
   },
 
-  /* tty mode parameters */
+//TTY Mode Parameters
   [BRLAPI_PARAM_COMMAND_SET] = {
     .global = 1,
     .read = param_unimplemented_read,
@@ -1541,7 +1541,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .read = param_commandLongName_read,
   },
 
-  /* raw mode parameters */
+//Raw Mode Parameters
   [BRLAPI_PARAM_KEY_SET] = {
     .global = 1,
     .read = param_unimplemented_read,
@@ -1557,7 +1557,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .read = param_unimplemented_read,
   },
 
-  /* Braille translation parameters */
+//Braille Translation Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK] = {
     .global = 1,
     .read = param_unimplemented_read,
