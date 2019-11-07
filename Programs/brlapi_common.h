@@ -583,19 +583,19 @@ typedef enum {
 
 typedef struct {
   brlapi_param_type_t type;
-  uint16_t elements;
+  uint16_t count;
 } brlapi_param_properties_t;
 
 static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUNT] = {
 //Connection Parameters
   [BRLAPI_PARAM_SERVER_VERSION] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .elements = 1,
+    .count = 1,
   },
 
   [BRLAPI_PARAM_CLIENT_PRIORITY] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .elements = 1,
+    .count = 1,
   },
 
 //Device Parameters
@@ -617,7 +617,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 
   [BRLAPI_PARAM_DISPLAY_SIZE] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .elements = 2,
+    .count = 2,
   },
 
   [BRLAPI_PARAM_DEVICE_IDENTIFIER] = {
@@ -626,60 +626,60 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 
   [BRLAPI_PARAM_DEVICE_SPEED] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .elements = 1,
+    .count = 1,
   },
 
   [BRLAPI_PARAM_DEVICE_ONLINE] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .elements = 1,
+    .count = 1,
   },
 
 //Input Parameters
   [BRLAPI_PARAM_RETAIN_DOTS] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .elements = 1,
+    .count = 1,
   },
 
 //Braille Rendering Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .elements = 1,
+    .count = 1,
   },
 
   [BRLAPI_PARAM_LITERARY_BRAILLE] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .elements = 1,
+    .count = 1,
   },
 
   [BRLAPI_PARAM_CURSOR_DOTS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .elements = 1,
+    .count = 1,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERIOD] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .elements = 1,
+    .count = 1,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .elements = 1,
+    .count = 1,
   },
 
   [BRLAPI_PARAM_RENDERED_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .elements = 1,
+    .count = 1,
   },
 
 //Navigation Parameters
   [BRLAPI_PARAM_SKIP_EMPTY_LINES] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .elements = 1,
+    .count = 1,
   },
 
   [BRLAPI_PARAM_AUDIBLE_ALERTS] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .elements = 1,
+    .count = 1,
   },
 
 //Clipboard Parameters
@@ -716,12 +716,12 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 //Braille Translation Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .elements = 544,
+    .count = 544,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .elements = 256,
+    .count = 256,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE] = {
@@ -737,22 +737,27 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   },
 };
 
+const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter) {
+  if (parameter >= (sizeof(brlapi_param_properties) / sizeof(*brlapi_param_properties)))
+    return NULL;
+
+  return &brlapi_param_properties[parameter];
+}
+
 /* Function: _brlapi_parameterConv */
 /* returns how many uint32 should be swapped for a parameter */
 static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
 {
-  brlapi_param_type_t type;
-  if (parameter > sizeof(brlapi_param_properties) / sizeof(*brlapi_param_properties))
-    return 0;
+  const brlapi_param_properties_t *properties = brlapi_getParameterProperties(parameter);
+  if (!properties) return 0;
 
-  type = brlapi_param_properties[parameter].type;
-  if (type == BRLAPI_PARAM_TYPE_STRING
-   || type == BRLAPI_PARAM_TYPE_BOOLEAN
-   || type == BRLAPI_PARAM_TYPE_UINT8)
+  brlapi_param_type_t type = properties->type;
+  if (type != BRLAPI_PARAM_TYPE_UINT32
+   && type != BRLAPI_PARAM_TYPE_UINT64)
     /* No conversion needed */
     return 0;
 
-  return brlapi_param_properties[parameter].elements;
+  return properties->count;
 }
 
 /* Function: _brlapi_htonParameter */
