@@ -1455,13 +1455,14 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .read = param_unimplemented_read,
   },
 
-  /* Braille rendering parameters */
+  /* input parameters */
   [BRLAPI_PARAM_RETAIN_DOTS] = {
     .local = 1,
     .read = param_retainDots_read,
     .write = param_retainDots_write,
   },
 
+  /* Braille rendering parameters */
   [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS] = {
     .local = 1,
     .global = 1,
