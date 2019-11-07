@@ -733,23 +733,18 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 /* returns how many uint32 should be swapped for a parameter */
 static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
 {
-  switch (parameter) {
-    case BRLAPI_PARAM_SERVER_VERSION:
-    case BRLAPI_PARAM_CLIENT_PRIORITY:
-      return 1;
+  brlapi_param_type_t type;
+  if (parameter > sizeof(brlapi_param_properties) / sizeof(*brlapi_param_properties))
+    return 0;
 
-    case BRLAPI_PARAM_DISPLAY_SIZE:
-      return 2;
-    case BRLAPI_PARAM_DEVICE_SPEED:
-      return 1;
+  type = brlapi_param_properties[parameter].type;
+  if (type == BRLAPI_PARAM_TYPE_STRING
+   || type == BRLAPI_PARAM_TYPE_BOOLEAN
+   || type == BRLAPI_PARAM_TYPE_UINT8)
+    /* No conversion needed */
+    return 0;
 
-    case BRLAPI_PARAM_CURSOR_BLINK_PERIOD:
-    case BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE:
-      return 1;
-
-    default:
-      return 0;
-  }
+  return brlapi_param_properties[parameter].elements;
 }
 
 /* Function: _brlapi_htonParameter */
