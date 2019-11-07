@@ -1402,51 +1402,188 @@ typedef struct {
 
 static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   /* connection parameters */
-  [ BRLAPI_PARAM_SERVER_VERSION ]		= { 0, 1, param_serverVersion_read, NULL, },
-  [ BRLAPI_PARAM_CLIENT_PRIORITY ]		= { 1, 0, param_clientPriority_read, param_clientPriority_write, },
+  [BRLAPI_PARAM_SERVER_VERSION] = {
+    .global = 1,
+    .read = param_serverVersion_read,
+  },
+
+  [BRLAPI_PARAM_CLIENT_PRIORITY] = {
+    .local = 1,
+    .read = param_clientPriority_read,
+    .write = param_clientPriority_write,
+  },
 
   /* device parameters */
-  [ BRLAPI_PARAM_DRIVER_NAME ]			= { 0, 1, param_driverName_read, NULL, },
-  [ BRLAPI_PARAM_DRIVER_CODE ]			= { 0, 1, param_driverCode_read, NULL, },
-  [ BRLAPI_PARAM_DRIVER_VERSION ]		= { 0, 1, param_driverVersion_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_MODEL ]			= { 0, 1, param_deviceModel_read, NULL, },
-  [ BRLAPI_PARAM_DISPLAY_SIZE ]			= { 0, 1, param_displaySize_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_IDENTIFIER ]		= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_SPEED ]			= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_DEVICE_ONLINE ]		= { 0, 1, param_unimplemented_read, NULL, },
+  [BRLAPI_PARAM_DRIVER_NAME] = {
+    .global = 1,
+    .read = param_driverName_read,
+  },
+
+  [BRLAPI_PARAM_DRIVER_CODE] = {
+    .global = 1,
+    .read = param_driverCode_read,
+  },
+
+  [BRLAPI_PARAM_DRIVER_VERSION] = {
+    .global = 1,
+    .read = param_driverVersion_read,
+  },
+
+  [BRLAPI_PARAM_DEVICE_MODEL] = {
+    .global = 1,
+    .read = param_deviceModel_read,
+  },
+
+  [BRLAPI_PARAM_DISPLAY_SIZE] = {
+    .global = 1,
+    .read = param_displaySize_read,
+  },
+
+  [BRLAPI_PARAM_DEVICE_IDENTIFIER] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+  },
+
+  [BRLAPI_PARAM_DEVICE_SPEED] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+  },
+
+  [BRLAPI_PARAM_DEVICE_ONLINE] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+  },
 
   /* Braille rendering parameters */
-  [ BRLAPI_PARAM_RETAIN_DOTS ]			= { 1, 0, param_retainDots_read, param_retainDots_write, },
-  [ BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS ]	= { 1, 1, param_computerBrailleCellDots_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_LITERARY_BRAILLE ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_CURSOR_DOTS ]			= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_CURSOR_BLINK_PERIOD ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE ]	= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_RENDERED_CELLS ]		= { 1, 1, param_renderedCells_read, NULL, },
+  [BRLAPI_PARAM_RETAIN_DOTS] = {
+    .local = 1,
+    .read = param_retainDots_read,
+    .write = param_retainDots_write,
+  },
+
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS] = {
+    .local = 1,
+    .global = 1,
+    .read = param_computerBrailleCellDots_read,
+    .write = param_unimplemented_write,
+  },
+
+  [BRLAPI_PARAM_LITERARY_BRAILLE] = {
+    .local = 1,
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
+
+  [BRLAPI_PARAM_CURSOR_DOTS] = {
+    .local = 1,
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
+
+  [BRLAPI_PARAM_CURSOR_BLINK_PERIOD] = {
+    .local = 1,
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
+
+  [BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE] = {
+    .local = 1,
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
+
+  [BRLAPI_PARAM_RENDERED_CELLS] = {
+    .local = 1,
+    .global = 1,
+    .read = param_renderedCells_read,
+  },
 
   /* navigation parameters */
-  [ BRLAPI_PARAM_SKIP_EMPTY_LINES ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
-  [ BRLAPI_PARAM_AUDIBLE_ALERTS ]		= { 1, 1, param_unimplemented_read, param_unimplemented_write, },
+  [BRLAPI_PARAM_SKIP_EMPTY_LINES] = {
+    .local = 1,
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
+
+  [BRLAPI_PARAM_AUDIBLE_ALERTS] = {
+    .local = 1,
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
 
   /* clipboard parameters */
-  [ BRLAPI_PARAM_CLIPBOARD_CONTENT ]		= { 0, 1, param_unimplemented_read, param_unimplemented_write, },
+  [BRLAPI_PARAM_CLIPBOARD_CONTENT] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
 
   /* tty mode parameters */
-  [ BRLAPI_PARAM_COMMAND_SET ]			= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_COMMAND_SHORT_NAME ]		= { 0, 1, param_commandShortName_read, NULL, },
-  [ BRLAPI_PARAM_COMMAND_LONG_NAME ]		= { 0, 1, param_commandLongName_read, NULL, },
+  [BRLAPI_PARAM_COMMAND_SET] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+  },
+
+  [BRLAPI_PARAM_COMMAND_SHORT_NAME] = {
+    .global = 1,
+    .read = param_commandShortName_read,
+  },
+
+  [BRLAPI_PARAM_COMMAND_LONG_NAME] = {
+    .global = 1,
+    .read = param_commandLongName_read,
+  },
 
   /* raw mode parameters */
-  [ BRLAPI_PARAM_KEY_SET ]			= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_KEY_SHORT_NAME ]		= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_KEY_LONG_NAME ]		= { 0, 1, param_unimplemented_read, NULL, },
+  [BRLAPI_PARAM_KEY_SET] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+  },
+
+  [BRLAPI_PARAM_KEY_SHORT_NAME] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+  },
+
+  [BRLAPI_PARAM_KEY_LONG_NAME] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+  },
 
   /* Braille translation parameters */
-  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK ]	= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS ]	= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE ]	= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_LITERARY_BRAILLE_TABLE ]	= { 0, 1, param_unimplemented_read, NULL, },
-  [ BRLAPI_PARAM_MESSAGE_LOCALE ]		= { 0, 1, param_unimplemented_read, NULL, },
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+  },
+
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+  },
+
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
+
+  [BRLAPI_PARAM_LITERARY_BRAILLE_TABLE] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
+
+  [BRLAPI_PARAM_MESSAGE_LOCALE] = {
+    .global = 1,
+    .read = param_unimplemented_read,
+    .write = param_unimplemented_write,
+  },
 };
 
 static int checkParamLocalGlobal(Connection *c, brlapi_param_t param, uint32_t flags)
