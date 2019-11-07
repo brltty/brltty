@@ -639,7 +639,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   },
 
 //Braille Rendering Parameters
-  [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS] = {
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
   },
 

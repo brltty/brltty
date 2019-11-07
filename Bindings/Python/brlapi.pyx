@@ -870,7 +870,7 @@ cdef class Connection:
 			ret = [ lvalues[i] for i in range(int(retval/8)) ]
 
 		# Byte value
-		elif param == PARAM_COMPUTER_BRAILLE_CELL_DOTS or \
+		elif param == PARAM_COMPUTER_BRAILLE_CELL_SIZE or \
 		     param == PARAM_CURSOR_DOTS:
 			bytes = <uint8_t *>c_value
 			ret = bytes[0]
@@ -943,7 +943,7 @@ cdef class Connection:
 			values[0] = value
 			size = 4
 
-		if param == PARAM_COMPUTER_BRAILLE_CELL_DOTS or \
+		if param == PARAM_COMPUTER_BRAILLE_CELL_SIZE or \
 		   param == PARAM_RETAIN_DOTS or \
 		   param == PARAM_LITERARY_BRAILLE or \
 		   param == PARAM_CURSOR_DOTS or \

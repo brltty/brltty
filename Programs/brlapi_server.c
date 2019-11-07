@@ -1319,12 +1319,12 @@ static int param_displaySize_read(Connection *c, brlapi_param_t param, uint64_t 
   return 1;
 }
 
-/* BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS */
-static int param_computerBrailleCellDots_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+/* BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE */
+static int param_computerBrailleCellSize_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   /* TODO */
   *(uint8_t*)data = 8;
-  *size = sizeof(brlapi_param_computerBrailleCellDots_t);
+  *size = sizeof(brlapi_param_computerBrailleCellSize_t);
   return 1;
 }
 
@@ -1462,10 +1462,10 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 
 //Braille Rendering Parameters
-  [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS] = {
+  [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE] = {
     .local = 1,
     .global = 1,
-    .read = param_computerBrailleCellDots_read,
+    .read = param_computerBrailleCellSize_read,
     .write = param_unimplemented_write,
   },
 
@@ -1682,7 +1682,7 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
 /* TODO: call for
- * BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS,
+ * BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE,
  * BRLAPI_PARAM_LITERARY_BRAILLE,
  * BRLAPI_PARAM_CURSOR_DOTS,
  * BRLAPI_PARAM_CURSOR_BLINK_PERIOD,
