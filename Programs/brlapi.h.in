@@ -1227,6 +1227,21 @@ typedef char *brlapi_param_literaryBrailleTable_t;
 /** Type to be used for BRLAPI_PARAM_MESSAGE_LOCALE      */
 typedef char *brlapi_param_messageLocale_t;
 
+typedef enum {
+  BRLAPI_PARAM_TYPE_STRING,
+  BRLAPI_PARAM_TYPE_BOOLEAN,
+  BRLAPI_PARAM_TYPE_UINT8,
+  BRLAPI_PARAM_TYPE_UINT32,
+  BRLAPI_PARAM_TYPE_UINT64,
+} brlapi_param_type_t;
+
+typedef struct {
+  brlapi_param_type_t type;
+  uint16_t count;
+} brlapi_param_properties_t;
+
+extern const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter);
+
 /* brlapi_getParameter */
 /** Get the content of a parameter
  *

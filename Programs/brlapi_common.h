@@ -573,19 +573,6 @@ BRLAPI(getKeyFile)(const char *auth)
   return ret;
 }
 
-typedef enum {
-  BRLAPI_PARAM_TYPE_STRING,
-  BRLAPI_PARAM_TYPE_BOOLEAN,
-  BRLAPI_PARAM_TYPE_UINT8,
-  BRLAPI_PARAM_TYPE_UINT32,
-  BRLAPI_PARAM_TYPE_UINT64,
-} brlapi_param_type_t;
-
-typedef struct {
-  brlapi_param_type_t type;
-  uint16_t count;
-} brlapi_param_properties_t;
-
 static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUNT] = {
 //Connection Parameters
   [BRLAPI_PARAM_SERVER_VERSION] = {
