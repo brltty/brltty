@@ -891,7 +891,7 @@ cdef class Connection:
 			bytes = <uint8_t *>c_value
 			ret = bytes[0] != 0
 
-		# ASCII value
+		# UTF-8 value
 		elif param == PARAM_DRIVER_NAME or \
 		     param == PARAM_DRIVER_CODE or \
 		     param == PARAM_DRIVER_VERSION or \
@@ -900,13 +900,8 @@ cdef class Connection:
 		     param == PARAM_COMMAND_SHORT_NAME or \
 		     param == PARAM_COMMAND_LONG_NAME or \
 		     param == PARAM_KEY_SHORT_NAME or \
-		     param == PARAM_KEY_LONG_NAME:
-			string = <char *>c_value
-			s = string[:retval]
-			ret = s.decode("ASCII")
-
-		# UTF-8 value
-		elif param == PARAM_CLIPBOARD_CONTENT:
+		     param == PARAM_KEY_LONG_NAME or \
+		     param == PARAM_CLIPBOARD_CONTENT:
 			string = <char *>c_value
 			s = string[:retval]
 			ret = s.decode("UTF-8")
