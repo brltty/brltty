@@ -864,8 +864,8 @@ cdef class Connection:
 			ret = (values[0], values[1])
 
 		# 64bit values
-		elif param == PARAM_COMMAND_SET or \
-		     param == PARAM_KEY_SET:
+		elif param == PARAM_NAVIGATION_COMMANDS or \
+		     param == PARAM_ALL_KEYS:
 			lvalues = <uint64_t *>c_value
 			ret = [ lvalues[i] for i in range(int(retval/8)) ]
 
