@@ -631,24 +631,29 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 
   [BRLAPI_PARAM_DEVICE_ONLINE] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+    .elements = 1,
   },
 
 //Input Parameters
   [BRLAPI_PARAM_RETAIN_DOTS] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+    .elements = 1,
   },
 
 //Braille Rendering Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
+    .elements = 1,
   },
 
   [BRLAPI_PARAM_LITERARY_BRAILLE] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+    .elements = 1,
   },
 
   [BRLAPI_PARAM_CURSOR_DOTS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
+    .elements = 1,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERIOD] = {
@@ -663,15 +668,18 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 
   [BRLAPI_PARAM_RENDERED_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
+    .elements = 1,
   },
 
 //Navigation Parameters
   [BRLAPI_PARAM_SKIP_EMPTY_LINES] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+    .elements = 1,
   },
 
   [BRLAPI_PARAM_AUDIBLE_ALERTS] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
+    .elements = 1,
   },
 
 //Clipboard Parameters
