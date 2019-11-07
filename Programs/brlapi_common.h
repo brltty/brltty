@@ -680,7 +680,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   },
 
 //TTY Mode Parameters
-  [BRLAPI_PARAM_COMMAND_SET] = {
+  [BRLAPI_PARAM_NAVIGATION_COMMANDS] = {
     .type = BRLAPI_PARAM_TYPE_UINT64,
   },
 
@@ -693,7 +693,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   },
 
 //Raw Mode Parameters
-  [BRLAPI_PARAM_KEY_SET] = {
+  [BRLAPI_PARAM_ALL_KEYS] = {
     .type = BRLAPI_PARAM_TYPE_UINT64,
   },
 
