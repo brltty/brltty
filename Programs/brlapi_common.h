@@ -655,7 +655,6 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 
   [BRLAPI_PARAM_RENDERED_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .count = 1,
   },
 
 //Navigation Parameters
