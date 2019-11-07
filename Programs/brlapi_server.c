@@ -1400,7 +1400,7 @@ typedef struct {
   paramWrite write;
 } ParamDispatch;
 
-static ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
+static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   /* connection parameters */
   [ BRLAPI_PARAM_SERVER_VERSION ]		= { 0, 1, param_serverVersion_read, NULL, },
   [ BRLAPI_PARAM_CLIENT_PRIORITY ]		= { 1, 0, param_clientPriority_read, param_clientPriority_write, },
