@@ -1035,8 +1035,10 @@ typedef enum {
   BRLAPI_PARAM_DEVICE_ONLINE = 9,		/**< Is online: boolean */
 /* TODO: status area */
 
-  /* Braille rendering parameters */
+  /* input parameters */
   BRLAPI_PARAM_RETAIN_DOTS = 10,		/**< Pass dot combinations instead of chars: boolean */
+
+  /* Braille rendering parameters */
   BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_DOTS = 11,	/**< 8 dots or 6 dots style ? uint8_t */
   BRLAPI_PARAM_LITERARY_BRAILLE = 12,		/**< Whether braille is literary (or computer): boolean */
   BRLAPI_PARAM_CURSOR_DOTS = 13,		/**< Cursor Dots: uint8_t */
