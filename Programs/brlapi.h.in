@@ -1227,19 +1227,28 @@ typedef char *brlapi_param_literaryBrailleTable_t;
 /** Type to be used for BRLAPI_PARAM_MESSAGE_LOCALE      */
 typedef char *brlapi_param_messageLocale_t;
 
+/** Enumeration of parameter content types */
 typedef enum {
-  BRLAPI_PARAM_TYPE_STRING,
-  BRLAPI_PARAM_TYPE_BOOLEAN,
-  BRLAPI_PARAM_TYPE_UINT8,
-  BRLAPI_PARAM_TYPE_UINT32,
-  BRLAPI_PARAM_TYPE_UINT64,
+  BRLAPI_PARAM_TYPE_STRING,	/**< Parameter is a string of UTF-8 characters */
+  BRLAPI_PARAM_TYPE_BOOLEAN,	/**< Parameter is one or more booleans represented by a uint8_t */
+  BRLAPI_PARAM_TYPE_UINT8,	/**< Parameter is one or more 8-bit integers */
+  BRLAPI_PARAM_TYPE_UINT32,	/**< Parameter is one or more 32-bit integers */
+  BRLAPI_PARAM_TYPE_UINT64,	/**< Parameter is one or more 64-bit integers */
 } brlapi_param_type_t;
 
+/** Structure that describes the content of a parameter type */
 typedef struct {
-  brlapi_param_type_t type;
-  uint16_t count;
+  brlapi_param_type_t type;	/**< Type of the content */
+  uint16_t count;		/**< Number of elements of the content */
 } brlapi_param_properties_t;
 
+/* brlapi_getParameterProperties */
+/** Return a description of the content of a parameter
+ *
+ * \param parameter is the parameter whose content described shall be returned.
+ *
+ * \return a pointer to a description of the content of the parameter.
+ */
 extern const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter);
 
 /* brlapi_getParameter */
