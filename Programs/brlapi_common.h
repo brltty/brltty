@@ -737,13 +737,16 @@ static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
   const brlapi_param_properties_t *properties = brlapi_getParameterProperties(parameter);
   if (!properties) return 0;
 
-  brlapi_param_type_t type = properties->type;
-  if (type != BRLAPI_PARAM_TYPE_UINT32
-   && type != BRLAPI_PARAM_TYPE_UINT64)
-    /* No conversion needed */
-    return 0;
+  switch (properties->type) {
+    case BRLAPI_PARAM_TYPE_UINT16:
+    case BRLAPI_PARAM_TYPE_UINT32:
+    case BRLAPI_PARAM_TYPE_UINT64:
+      return properties->count;
 
-  return properties->count;
+    default:
+      /* no conversion needed */
+      return 0;
+  }
 }
 
 /* Function: _brlapi_htonParameter */
