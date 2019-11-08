@@ -29,12 +29,12 @@ BEGIN {
   brlBlockDeprecations["CLIP_APPEND"] = "APNDCHARS"
 }
 
-/^ *BRL_CMD_/ {
+/^\s*BRL_CMD_/ {
   brlCommand(substr($1, 9), $1, brlCommandValue++, getComment($0))
   next
 }
 
-/^ *BRL_BLK_/ {
+/^\s*BRL_BLK_/ {
   prefix = substr($1, 1, 8)
   name = substr($1, 9)
   value = brlBlockValue++
@@ -52,7 +52,7 @@ BEGIN {
   next
 }
 
-/^ *BRL_KEY_/ {
+/^\s*BRL_KEY_/ {
   gsub(",", "", $1)
   key = tolower(substr($1, 9))
   gsub("_", "-", key)
@@ -60,12 +60,12 @@ BEGIN {
   next
 }
 
-/#define[ \t]*BRL_FLG_/ {
+/#define\s+BRL_FLG_/ {
   brlFlag(substr($2, 9), $2, getDefineValue(), getComment($0))
   next
 }
 
-/#define[ \t]*BRL_DOT/ {
+/#define\s+BRL_DOT/ {
   value = getDefineValue()
   sub("^.*\\(", "", value)
   sub("\\).*$", "", value)

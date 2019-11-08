@@ -21,49 +21,49 @@ BEGIN {
   apiParameterTypeCount = 0
 }
 
-/#define[ \t]*BRLAPI_(CURSOR|DISPLAY|ERROR|TTY)_/ {
+/#define\s+BRLAPI_(CURSOR|DISPLAY|ERROR|TTY)_/ {
   apiConstant(substr($2, 8), $2, getDefineValue(), "")
   next
 }
 
-/#define[ \t]*BRLAPI_KEY_MAX/ {
+/#define\s+BRLAPI_KEY_MAX/ {
   apiMask(substr($2, 12), $2, getDefineValue(), "")
   next
 }
 
-/#define[ \t]*BRLAPI_KEY_[A-Z_]+_MASK/ {
+/#define\s+BRLAPI_KEY_[A-Z_]+_MASK/ {
   apiMask(substr($2, 12), $2, getDefineValue(), "")
   next
 }
 
-/#define[ \t]*BRLAPI_KEY_[A-Z_]+_SHIFT/ {
+/#define\s+BRLAPI_KEY_[A-Z_]+_SHIFT/ {
   apiShift(substr($2, 12), $2, getDefineValue(), "")
   next
 }
 
-/#define[ \t]*BRLAPI_KEY_TYPE_/ {
+/#define\s+BRLAPI_KEY_TYPE_/ {
   apiType(substr($2, 17), $2, getDefineValue(), "")
   next
 }
 
-/#define[ \t]*BRLAPI_KEY_SYM_/ {
+/#define\s+BRLAPI_KEY_SYM_/ {
   apiKey(substr($2, 16), $2, getDefineValue(), "")
   next
 }
 
-/^ *brlapi_rangeType_/ {
+/^\s*brlapi_rangeType_/ {
   gsub(",", "", $1)
   apiRangeType(substr($1, 18), $1, apiRangeTypeCount++, "")
   next
 }
 
-/^ *BRLAPI_PARAM_TYPE_[^ ,]+,?/ {
+/^\s*BRLAPI_PARAM_TYPE_[^\s,]+,?/ {
   gsub(",", "", $1)
   apiConstant(substr($1, 8), $1, apiParameterTypeCount++, getComment($0))
   next
 }
 
-/^ *BRLAPI_PARAM_[^ ]+ += +[0-9]+,?/ {
+/^\s*BRLAPI_PARAM_[^\s]+ += +[0-9]+,?/ {
   gsub(",", "", $3)
   apiConstant(substr($1, 8), $1, strtonum($3), getComment($0))
   next
