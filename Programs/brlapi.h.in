@@ -1231,9 +1231,10 @@ typedef char *brlapi_param_messageLocale_t;
 typedef enum {
   BRLAPI_PARAM_TYPE_STRING,	/**< Parameter is a string of UTF-8 characters */
   BRLAPI_PARAM_TYPE_BOOLEAN,	/**< Parameter is one or more booleans represented by a uint8_t */
-  BRLAPI_PARAM_TYPE_UINT8,	/**< Parameter is one or more 8-bit integers */
-  BRLAPI_PARAM_TYPE_UINT32,	/**< Parameter is one or more 32-bit integers */
-  BRLAPI_PARAM_TYPE_UINT64,	/**< Parameter is one or more 64-bit integers */
+  BRLAPI_PARAM_TYPE_UINT8,	/**< Parameter is one or more 8-bit unsigned integers */
+  BRLAPI_PARAM_TYPE_UINT16,	/**< Parameter is one or more 16-bit unsigned integers */
+  BRLAPI_PARAM_TYPE_UINT32,	/**< Parameter is one or more 32-bit unsigned integers */
+  BRLAPI_PARAM_TYPE_UINT64,	/**< Parameter is one or more 64-bit unsigned integers */
 } brlapi_param_type_t;
 
 /** Structure that describes the content of a parameter type */
