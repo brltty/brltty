@@ -730,22 +730,55 @@ const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t pa
   return &brlapi_param_properties[parameter];
 }
 
-/* Function: _brlapi_parameterConv */
-/* returns how many uint32 should be swapped for a parameter */
-static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
-{
-  const brlapi_param_properties_t *properties = brlapi_getParameterProperties(parameter);
-  if (!properties) return 0;
+typedef void IntegerConverter (void *v);
 
-  switch (properties->type) {
-    case BRLAPI_PARAM_TYPE_UINT16:
-    case BRLAPI_PARAM_TYPE_UINT32:
-    case BRLAPI_PARAM_TYPE_UINT64:
-      return properties->count;
+static void convertInteger_hton16 (void *v) {
+  uint16_t *u = v;
+  *u = htons(*u);
+}
 
-    default:
-      /* no conversion needed */
-      return 0;
+static void convertInteger_ntoh16 (void *v) {
+  uint16_t *u = v;
+  *u = ntohs(*u);
+}
+
+static void convertInteger_hton32 (void *v) {
+  uint32_t *u = v;
+  *u = htonl(*u);
+}
+
+static void convertInteger_ntoh32 (void *v) {
+  uint32_t *u = v;
+  *u = ntohl(*u);
+}
+
+#define UINT64_SHIFT ((sizeof(uint64_t) / 2) * 8)
+#define UINT64_LOW ((UINT64_C(1) << UINT64_SHIFT) - 1)
+
+static void convertInteger_hton64 (void *v) {
+#ifndef WORDS_BIGENDIAN
+  uint64_t *u = v;
+  uint32_t low = *u & UINT64_LOW;
+  uint32_t high = *u >> UINT64_SHIFT;
+  *u = ((uint64_t)htonl(low) << UINT64_SHIFT) | htonl(high);
+#endif /* WORDS_BIGENDIAN */
+}
+
+static void convertInteger_ntoh64 (void *v) {
+#ifndef WORDS_BIGENDIAN
+  uint64_t *u = v;
+  uint32_t low = *u & UINT64_LOW;
+  uint32_t high = *u >> UINT64_SHIFT;
+  *u = ((uint64_t)ntohl(low) << UINT64_SHIFT) | ntohl(high);
+#endif /* WORDS_BIGENDIAN */
+}
+
+static void convertIntegers (void *data, size_t length, size_t size, IntegerConverter *convert) {
+  void *end = data + length;
+
+  while (data < end) {
+    convert(data);
+    data += size;
   }
 }
 
@@ -753,17 +786,28 @@ static unsigned _brlapi_parameterConv(brlapi_param_t parameter)
 /* swap uint32 values of the parameter from host to network */
 void _brlapi_htonParameter(brlapi_param_t parameter, brlapi_paramValuePacket_t *value, size_t len)
 {
-  unsigned n = _brlapi_parameterConv(parameter);
-  uint32_t *p = (uint32_t*) value->data;
-  unsigned i;
+  const brlapi_param_properties_t *properties = brlapi_getParameterProperties(parameter);
 
-  if (n == 0) return;
+  if (properties) {
+    void *p =  value->data;
 
-  if (n * sizeof(uint32_t) > len)
-    n = len / sizeof(uint32_t);
-  for (i = 0; i < n; i++) {
-    *p = htonl(*p);
-    p++;
+    switch (properties->type) {
+      case BRLAPI_PARAM_TYPE_UINT16:
+        convertIntegers(p, len, 2, convertInteger_hton16);
+        return;
+
+      case BRLAPI_PARAM_TYPE_UINT32:
+        convertIntegers(p, len, 4, convertInteger_hton32);
+        return;
+
+      case BRLAPI_PARAM_TYPE_UINT64:
+        convertIntegers(p, len, 8, convertInteger_hton64);
+        return;
+
+      default:
+        /* no conversion needed */
+        return;
+    }
   }
 }
 
@@ -771,17 +815,28 @@ void _brlapi_htonParameter(brlapi_param_t parameter, brlapi_paramValuePacket_t *
 /* swap uint32 values of the parameter from network to host */
 void _brlapi_ntohParameter(brlapi_param_t parameter, brlapi_paramValuePacket_t *value, size_t len)
 {
-  unsigned n = _brlapi_parameterConv(parameter);
-  uint32_t *p = (uint32_t*) value->data;
-  unsigned i;
+  const brlapi_param_properties_t *properties = brlapi_getParameterProperties(parameter);
 
-  if (n == 0) return;
+  if (properties) {
+    void *p =  value->data;
 
-  if (n * sizeof(uint32_t) > len)
-    n = len / sizeof(uint32_t);
-  for (i = 0; i < n; i++) {
-    *p = ntohl(*p);
-    p++;
+    switch (properties->type) {
+      case BRLAPI_PARAM_TYPE_UINT16:
+        convertIntegers(p, len, 2, convertInteger_ntoh16);
+        return;
+
+      case BRLAPI_PARAM_TYPE_UINT32:
+        convertIntegers(p, len, 4, convertInteger_ntoh32);
+        return;
+
+      case BRLAPI_PARAM_TYPE_UINT64:
+        convertIntegers(p, len, 8, convertInteger_ntoh64);
+        return;
+
+      default:
+        /* no conversion needed */
+        return;
+    }
   }
 }
 
