@@ -793,15 +793,15 @@ void _brlapi_htonParameter(brlapi_param_t parameter, brlapi_paramValuePacket_t *
 
     switch (properties->type) {
       case BRLAPI_PARAM_TYPE_UINT16:
-        convertIntegers(p, len, 2, convertInteger_hton16);
+        convertIntegers(p, len, sizeof(uint16_t), convertInteger_hton16);
         return;
 
       case BRLAPI_PARAM_TYPE_UINT32:
-        convertIntegers(p, len, 4, convertInteger_hton32);
+        convertIntegers(p, len, sizeof(uint32_t), convertInteger_hton32);
         return;
 
       case BRLAPI_PARAM_TYPE_UINT64:
-        convertIntegers(p, len, 8, convertInteger_hton64);
+        convertIntegers(p, len, sizeof(uint64_t), convertInteger_hton64);
         return;
 
       default:
@@ -822,15 +822,15 @@ void _brlapi_ntohParameter(brlapi_param_t parameter, brlapi_paramValuePacket_t *
 
     switch (properties->type) {
       case BRLAPI_PARAM_TYPE_UINT16:
-        convertIntegers(p, len, 2, convertInteger_ntoh16);
+        convertIntegers(p, len, sizeof(uint16_t), convertInteger_ntoh16);
         return;
 
       case BRLAPI_PARAM_TYPE_UINT32:
-        convertIntegers(p, len, 4, convertInteger_ntoh32);
+        convertIntegers(p, len, sizeof(uint32_t), convertInteger_ntoh32);
         return;
 
       case BRLAPI_PARAM_TYPE_UINT64:
-        convertIntegers(p, len, 8, convertInteger_ntoh64);
+        convertIntegers(p, len, sizeof(uint64_t), convertInteger_ntoh64);
         return;
 
       default:
