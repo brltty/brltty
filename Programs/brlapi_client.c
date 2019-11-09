@@ -512,12 +512,18 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
   return -3;
 }
 
+#define TRY_WAIT_FOR_EXPECTED_PACKET 0
+#define WAIT_FOR_EXPECTED_PACKET 1
+
+#define POLL 0
+#define WAIT_FOREVER (-1)
+
 /* brlapi_waitForPacket */
 /* same as brlapi_doWaitForPacket, but sleeps instead of reading if another
  * thread is already reading, and timeout_ms expressed as relative ms delay
  * instead of absolute deadline.
- * timeout_ms set to -1 means no deadline.
- * Never returns -2. If loop is 1, never returns -3.
+ * timeout_ms set to WAIT_FOREVER means no deadline.
+ * Never returns -2. If loop is WAIT_FOR_EXPECTED_PACKET, never returns -3.
  */
 static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t size, int loop, int timeout_ms) {
   int doread = 0;
@@ -607,7 +613,7 @@ again:
   }
   if (res==-2) {
     res = -1;
-    brlapi_errno=BRLAPI_ERROR_EOF;
+    brlapi_errno = BRLAPI_ERROR_EOF;
   }
   return res;
 }
@@ -616,7 +622,7 @@ again:
 /* Wait for an acknowledgement, must be called with brlapi_req_mutex locked */
 static int brlapi__waitForAck(brlapi_handle_t *handle)
 {
-  return brlapi__waitForPacket(handle, BRLAPI_PACKET_ACK, NULL, 0, 1, -1);
+  return brlapi__waitForPacket(handle, BRLAPI_PACKET_ACK, NULL, 0, WAIT_FOR_EXPECTED_PACKET, WAIT_FOREVER);
 }
 
 /* brlapi_writePacketWaitForAck */
@@ -889,7 +895,7 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
     if (usedSettings) usedSettings->host = settings.host;
   }
 
-  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, &serverPacket, sizeof(serverPacket), 1, -1)) < 0)
+  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, &serverPacket, sizeof(serverPacket), WAIT_FOR_EXPECTED_PACKET, WAIT_FOREVER)) < 0)
     goto outfd;
 
   if (version->protocolVersion != htonl(BRLAPI_PROTOCOL_VERSION)) {
@@ -900,7 +906,7 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
   if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_VERSION, version, sizeof(*version)) < 0)
     goto outfd;
 
-  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, &serverPacket, sizeof(serverPacket), 1, -1)) < 0)
+  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, &serverPacket, sizeof(serverPacket), WAIT_FOR_EXPECTED_PACKET, WAIT_FOREVER)) < 0)
     return INVALID_FILE_DESCRIPTOR;
 
   for (type = &authServer->type[0]; type < &authServer->type[len / sizeof(authServer->type[0])]; type++) {
@@ -1101,7 +1107,7 @@ ssize_t BRLAPI_STDCALL brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_
     brlapi_errno = BRLAPI_ERROR_ILLEGAL_INSTRUCTION;
     return -1;
   }
-  res = brlapi__waitForPacket(handle, BRLAPI_PACKET_PACKET, buf, size, 0, -1);
+  res = brlapi__waitForPacket(handle, BRLAPI_PACKET_PACKET, buf, size, TRY_WAIT_FOR_EXPECTED_PACKET, WAIT_FOREVER);
   if (res == -3) {
     brlapi_libcerrno = EINTR;
     brlapi_errno = BRLAPI_ERROR_LIBCERR;
@@ -1150,7 +1156,7 @@ static ssize_t brlapi__request(brlapi_handle_t *handle, brlapi_packetType_t requ
     pthread_mutex_unlock(&handle->req_mutex);
     return -1;
   }
-  res = brlapi__waitForPacket(handle, request, packet, size, 1, -1);
+  res = brlapi__waitForPacket(handle, request, packet, size, WAIT_FOR_EXPECTED_PACKET, WAIT_FOREVER);
   pthread_mutex_unlock(&handle->req_mutex);
   return res;
 }
@@ -2030,7 +2036,7 @@ int BRLAPI_STDCALL brlapi__readKeyWithTimeout(brlapi_handle_t *handle, int timeo
   pthread_mutex_unlock(&handle->read_mutex);
 
   pthread_mutex_lock(&handle->key_mutex);
-  res=brlapi__waitForPacket(handle,BRLAPI_PACKET_KEY, buf, sizeof(buf), 0, timeout_ms);
+  res = brlapi__waitForPacket(handle,BRLAPI_PACKET_KEY, buf, sizeof(buf), TRY_WAIT_FOR_EXPECTED_PACKET, timeout_ms);
   pthread_mutex_unlock(&handle->key_mutex);
   if (res == -3) {
     if (timeout_ms == 0) return 0;
