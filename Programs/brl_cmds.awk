@@ -124,15 +124,33 @@ function writeMacroDefinition(name, definition, help) {
   print statement
 }
 
-function getComment(line) {
-  if (!match(line, "/\\*.*\\*/")) return ""
-  line = substr(line, RSTART+2, RLENGTH-4)
+function getComment(line,     comment, last) {
+  comment = ""
 
-  match(line, "^\\**<? *")
-  line = substr(line, RLENGTH+1)
+  if (match(line, "/\\*")) {
+    line = substr(line, RSTART+2)
+    gsub("^\\**<? *", "", line)
 
-  match(line, " *$")
-  return substr(line, 1, RSTART-1)
+    while (1) {
+      last = gsub("\\*/.*$", "", line)
+      gsub(" *$", "", line)
+
+      if (length(comment) > 0) comment = comment " "
+      comment = comment line
+      if (last) break
+
+      getline line
+      gsub("^\\s*\\**\\s*", "", line)
+    }
+  } else if (match(line, "//")) {
+    comment = substr(line, RSTART+2);
+    gsub("^ *", "", comment)
+
+    gsub("\\*/.*$", "", comment)
+    gsub(" *$", "", comment)
+  }
+
+  return comment
 }
 
 function getDefineValue() {
