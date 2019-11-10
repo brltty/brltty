@@ -1043,7 +1043,7 @@ typedef enum {
   BRLAPI_PARAM_LITERARY_BRAILLE = 12,		/**< Whether braille is literary (rather than computer): boolean */
   BRLAPI_PARAM_CURSOR_DOTS = 13,		/**< Representation of the cursor: uint8_t (ISO 11548-1) */
   BRLAPI_PARAM_CURSOR_BLINK_PERIOD = 14,	/**< Blinking period of the cursor: uint32_t (milliseconds) */
-  BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE = 15,	/**< Portion of the blinking period that the cursor is visible: uint32_t (from 0 through 100) */
+  BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE = 15,	/**< Portion of the blinking period that the cursor is visible: uint8_t (from 0 through 100) */
   BRLAPI_PARAM_RENDERED_CELLS = 16,		/**< Cells rendered by the client: uint8_t[] (ISO 11548-1), one cell per element */
 
 //Navigation Parameters
@@ -1159,7 +1159,7 @@ typedef uint8_t brlapi_param_cursorDots_t;
 
 /* brlapi_param_cursorBlinkPeriod_t */
 /** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_PERIOD */
-typedef uint32_t brlapi_param_cursorBlinkPeriod_t;
+typedef uint8_t brlapi_param_cursorBlinkPeriod_t;
 
 /* brlapi_param_cursorBlinkPercentage_t */
 /** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE */
