@@ -529,7 +529,7 @@ FUNCTION_HANDLER(session, leaveTtyMode) {
 }
 
 typedef struct {
-  Tcl_Obj *set;
+  Tcl_Obj *value;
   int global;
 } ParameterOptions;
 
@@ -541,7 +541,7 @@ OPTION_HANDLER(session, parameter, global) {
 
 OPTION_HANDLER(session, parameter, set) {
   ParameterOptions *options = data;
-  options->set = objv[1];
+  options->value = objv[1];
   return TCL_OK;
 }
 
@@ -568,7 +568,7 @@ FUNCTION_HANDLER(session, parameter) {
   BrlapiSession *session = data;
 
   ParameterOptions options = {
-    .set = NULL,
+    .value = NULL,
     .global = 0
   };
 
@@ -613,7 +613,98 @@ FUNCTION_HANDLER(session, parameter) {
     subparam = 0;
   }
 
-  if (options.set) {
+  if (options.value) {
+    Tcl_Obj *value = options.value;
+
+    switch (properties->type) {
+      case BRLAPI_PARAM_TYPE_STRING: {
+        const char *string = Tcl_GetString(value);
+        TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, string, (strlen(string) + 1)));
+        break;
+      }
+
+      default: {
+        Tcl_Obj **elements;
+        int count;
+        TEST_TCL_OK(Tcl_ListObjGetElements(interp, value, &count, &elements));
+
+        if (count) {
+          switch (properties->type) {
+            case BRLAPI_PARAM_TYPE_BOOLEAN: {
+              brlapi_param_bool_t buffer[count];
+
+              for (int index=0; index<count; index+=1) {
+                int boolean;
+                TEST_TCL_OK(Tcl_GetBooleanFromObj(interp, elements[index], &boolean));
+                buffer[index] = !!boolean;
+              }
+
+              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+              break;
+            }
+
+            case BRLAPI_PARAM_TYPE_UINT8: {
+              uint8_t buffer[count];
+
+              for (int index=0; index<count; index+=1) {
+                int integer;
+                TEST_TCL_OK(Tcl_GetIntFromObj(interp, elements[index], &integer));
+                buffer[index] = integer;
+              }
+
+              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+              break;
+            }
+
+            case BRLAPI_PARAM_TYPE_UINT16: {
+              uint16_t buffer[count];
+
+              for (int index=0; index<count; index+=1) {
+                int integer;
+                TEST_TCL_OK(Tcl_GetIntFromObj(interp, elements[index], &integer));
+                buffer[index] = integer;
+              }
+
+              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+              break;
+            }
+
+            case BRLAPI_PARAM_TYPE_UINT32: {
+              uint32_t buffer[count];
+
+              for (int index=0; index<count; index+=1) {
+                int integer;
+                TEST_TCL_OK(Tcl_GetIntFromObj(interp, elements[index], &integer));
+                buffer[index] = integer;
+              }
+
+              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+              break;
+            }
+
+            case BRLAPI_PARAM_TYPE_UINT64: {
+              uint64_t buffer[count];
+
+              for (int index=0; index<count; index+=1) {
+                long integer;
+                TEST_TCL_OK(Tcl_GetLongFromObj(interp, elements[index], &integer));
+                buffer[index] = integer;
+              }
+
+              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+              break;
+            }
+
+            default:
+              break;
+          }
+        } else {
+          TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, NULL, 0));
+        }
+
+        break;
+      }
+    }
   } else {
     size_t length;
     void *value = brlapi__getParameterAlloc(session->handle, parameter, subparam, options.global, &length);
@@ -624,8 +715,6 @@ FUNCTION_HANDLER(session, parameter) {
     }
 
     Tcl_Obj *result = Tcl_GetObjResult(interp);
-    Tcl_SetStringObj(result, "", -1);
-    const void *end = value + length;
 
     switch (properties->type) {
       case BRLAPI_PARAM_TYPE_STRING: {
@@ -633,66 +722,78 @@ FUNCTION_HANDLER(session, parameter) {
         break;
       }
 
-      case BRLAPI_PARAM_TYPE_BOOLEAN: {
-        const brlapi_param_bool_t *boolean = value;
+      default: {
+        Tcl_SetListObj(result, 0, NULL);
+        const void *end = value + length;
 
-        while (boolean < (const brlapi_param_bool_t *)end) {
-          Tcl_Obj *element = Tcl_NewBooleanObj(*boolean);
-          if (!element) return TCL_ERROR;
-          TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
-          boolean += 1;
-        }
+        switch (properties->type) {
+          case BRLAPI_PARAM_TYPE_BOOLEAN: {
+            const brlapi_param_bool_t *boolean = value;
 
-        break;
-      }
+            while (boolean < (const brlapi_param_bool_t *)end) {
+              Tcl_Obj *element = Tcl_NewBooleanObj(*boolean);
+              if (!element) return TCL_ERROR;
+              TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
+              boolean += 1;
+            }
 
-      case BRLAPI_PARAM_TYPE_UINT8: {
-        const uint8_t *integer = value;
+            break;
+          }
 
-        while (integer < (const uint8_t *)end) {
-          Tcl_Obj *element = Tcl_NewIntObj(*integer);
-          if (!element) return TCL_ERROR;
-          TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
-          integer += 1;
-        }
+          case BRLAPI_PARAM_TYPE_UINT8: {
+            const uint8_t *integer = value;
 
-        break;
-      }
+            while (integer < (const uint8_t *)end) {
+              Tcl_Obj *element = Tcl_NewIntObj(*integer);
+              if (!element) return TCL_ERROR;
+              TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
+              integer += 1;
+            }
 
-      case BRLAPI_PARAM_TYPE_UINT16: {
-        const uint16_t *integer = value;
+            break;
+          }
 
-        while (integer < (const uint16_t *)end) {
-          Tcl_Obj *element = Tcl_NewIntObj(*integer);
-          if (!element) return TCL_ERROR;
-          TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
-          integer += 1;
-        }
+          case BRLAPI_PARAM_TYPE_UINT16: {
+            const uint16_t *integer = value;
 
-        break;
-      }
+            while (integer < (const uint16_t *)end) {
+              Tcl_Obj *element = Tcl_NewIntObj(*integer);
+              if (!element) return TCL_ERROR;
+              TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
+              integer += 1;
+            }
 
-      case BRLAPI_PARAM_TYPE_UINT32: {
-        const uint32_t *integer = value;
+            break;
+          }
 
-        while (integer < (const uint32_t *)end) {
-          Tcl_Obj *element = Tcl_NewIntObj(*integer);
-          if (!element) return TCL_ERROR;
-          TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
-          integer += 1;
-        }
+          case BRLAPI_PARAM_TYPE_UINT32: {
+            const uint32_t *integer = value;
 
-        break;
-      }
+            while (integer < (const uint32_t *)end) {
+              Tcl_Obj *element = Tcl_NewIntObj(*integer);
+              if (!element) return TCL_ERROR;
+              TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
+              integer += 1;
+            }
 
-      case BRLAPI_PARAM_TYPE_UINT64: {
-        const uint64_t *integer = value;
+            break;
+          }
 
-        while (integer < (const uint64_t *)end) {
-          Tcl_Obj *element = Tcl_NewWideIntObj(*integer);
-          if (!element) return TCL_ERROR;
-          TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
-          integer += 1;
+          case BRLAPI_PARAM_TYPE_UINT64: {
+            const uint64_t *integer = value;
+
+            while (integer < (const uint64_t *)end) {
+              Tcl_Obj *element = Tcl_NewWideIntObj(*integer);
+              if (!element) return TCL_ERROR;
+              TEST_TCL_OK(Tcl_ListObjAppendElement(interp, result, element));
+              integer += 1;
+            }
+
+            break;
+          }
+
+          default:
+            break;
         }
 
         break;
