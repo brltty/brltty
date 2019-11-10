@@ -19,6 +19,8 @@
 
 # File binding C functions
 
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
+
 cdef extern from "sys/types.h":
 	ctypedef Py_ssize_t size_t
 	ctypedef Py_ssize_t ssize_t
@@ -112,8 +114,16 @@ cdef extern from "Programs/brlapi.h":
 	ctypedef int brlapi_param_t
 	ctypedef void *brlapi_paramCallbackDescriptor
 
+	ctypedef int brlapi_param_type_t
+	ctypedef struct brlapi_param_properties_t:
+		brlapi_param_type_t type
+		uint16_t count
+		uint8_t isArray
+		uint8_t hasSubparam
+
 	void *brlapi__getParameterAlloc(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, size_t *) nogil
 	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t) nogil
+	const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter) nogil
 	brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, brlapi_paramCallback, void *, void*, size_t);
 	int brlapi__unwatchParameter(brlapi_handle_t *,
 	brlapi_paramCallbackDescriptor)
