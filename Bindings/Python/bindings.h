@@ -21,6 +21,22 @@
 
 #include "brlapi.h"
 
+typedef struct {
+  brlapi_paramCallbackDescriptor brlapi_descr;
+  PyObject *callback;
+} brlapi_python_paramCallbackDescriptor_t;
+
+typedef struct {
+  brlapi_param_t parameter;
+  uint64_t subparam;
+  int globalparam;
+  const void *data;
+  size_t len;
+} brlapi_python_callbackData_t;
+
 extern const brlapi_writeArguments_t brlapi_writeArguments_initialized;
 extern char *brlapi_protocolException(void);
 extern void brlapi_protocolExceptionInit(brlapi_handle_t *handle);
+
+extern brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_handle_t *handle, brlapi_param_t param, uint64_t subparam, int global, PyObject *args);
+extern int brlapi_python_unwatchParameter(brlapi_handle_t *handle, brlapi_python_paramCallbackDescriptor_t *descr);

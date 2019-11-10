@@ -22,6 +22,14 @@ try:
   # Make our output more prioritized
   b.setParameter(brlapi.PARAM_CLIENT_PRIORITY, 0, False, 70)
 
+  def update_callback(param, subparam, globalparam, value):
+    s = ""
+    for i in value:
+      s += unichr(0x2800 + ord(i))
+    print("Got output update %s" % s)
+
+  p = b.watchParameter(brlapi.PARAM_RENDERED_CELLS, 0, False, update_callback)
+
   b.enterTtyMode()
   b.ignoreKeys(brlapi.rangeType_all,[0])
 
@@ -69,6 +77,7 @@ try:
   b.acceptAllKeys()
   b.readKey()
 
+  b.unwatchParameter(p)
   b.leaveTtyMode()
   b.closeConnection()
 
@@ -106,7 +115,7 @@ except brlapi.ConnectionError as e:
 ###############################################################################
 
 cimport c_brlapi
-from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t, uintptr_t
 import errno
 
 include "constants.auto.pyx"
@@ -155,6 +164,55 @@ def describeKeyCode(code):
 			"argument": dkc.argument,
 			"flags": flags
 		}
+
+cdef object _parameterToPython(uint32_t c_param, const void *c_value, size_t size):
+	cdef const c_brlapi.brlapi_param_properties_t *props
+
+	with nogil:
+		props = c_brlapi.brlapi_getParameterProperties(c_param)
+
+	if props == NULL:
+		raise OperationError()
+
+	if props.type == PARAM_TYPE_STRING:
+		string = <char *>c_value
+		s = string[:size]
+		ret = s.decode("UTF-8")
+	elif props.type == PARAM_TYPE_BOOLEAN:
+		values8 = <uint8_t *>c_value
+		ret = values8[0] != 0
+	elif props.type == PARAM_TYPE_UINT8:
+		if props.isArray:
+			values8 = <uint8_t *>c_value
+			ret = values8[:size]
+		else:
+			values8 = <uint8_t *>c_value
+			ret = values8[0]
+	elif props.type == PARAM_TYPE_UINT16:
+		if props.isArray:
+			values16 = <uint16_t *>c_value
+			ret = [values16[i] for i in range(size//2)]
+		else:
+			values16 = <uint16_t *>c_value
+			ret = values16[0]
+	elif props.type == PARAM_TYPE_UINT32:
+		if props.isArray:
+			values32 = <uint32_t *>c_value
+			ret = [values32[i] for i in range(size//4)]
+		else:
+			values32 = <uint32_t *>c_value
+			ret = values32[0]
+	elif props.type == PARAM_TYPE_UINT64:
+		if props.isArray:
+			values64 = <uint64_t *>c_value
+			ret = [values64[i] for i in range(size//8)]
+		else:
+			values64 = <uint64_t *>c_value
+			ret = values64[0]
+	else:
+		raise ValueError("Unsupported parameter type")
+
+	return ret
 
 class OperationError(Exception):
 	"""Error while performing some operation"""
@@ -842,61 +900,21 @@ cdef class Connection:
 		cdef uint16_t *values16
 		cdef uint8_t *values8
 		cdef char *string
-		cdef const c_brlapi.brlapi_param_properties_t *props
 
 		c_param = param
 		c_subparam = subparam
 		c_global = globalparam
 
 		with nogil:
-			props = c_brlapi.brlapi_getParameterProperties(c_param)
-
-		if props == NULL:
-			raise OperationError()
-
-		with nogil:
 			c_value = c_brlapi.brlapi__getParameterAlloc(self.h, c_param, c_subparam, c_global, &size)
 		if c_value == NULL:
 			raise OperationError()
 
-		if props.type == PARAM_TYPE_STRING:
-			string = <char *>c_value
-			s = string[:size]
-			ret = s.decode("UTF-8")
-		elif props.type == PARAM_TYPE_BOOLEAN:
-			values8 = <uint8_t *>c_value
-			ret = values8[0] != 0
-		elif props.type == PARAM_TYPE_UINT8:
-			if props.isArray:
-				values8 = <uint8_t *>c_value
-				ret = values8[:size]
-			else:
-				values8 = <uint8_t *>c_value
-				ret = values8[0]
-		elif props.type == PARAM_TYPE_UINT16:
-			if props.isArray:
-				values16 = <uint16_t *>c_value
-				ret = [values16[i] for i in range(size//2)]
-			else:
-				values16 = <uint16_t *>c_value
-				ret = values16[0]
-		elif props.type == PARAM_TYPE_UINT32:
-			if props.isArray:
-				values32 = <uint32_t *>c_value
-				ret = [values32[i] for i in range(size//4)]
-			else:
-				values32 = <uint32_t *>c_value
-				ret = values32[0]
-		elif props.type == PARAM_TYPE_UINT64:
-			if props.isArray:
-				values64 = <uint64_t *>c_value
-				ret = [values64[i] for i in range(size//8)]
-			else:
-				values64 = <uint64_t *>c_value
-				ret = values64[0]
-		else:
+		try:
+			ret = _parameterToPython(c_param, c_value, size)
+		except Exception as e:
 			c_brlapi.free(c_value)
-			raise ValueError("Unsupported parameter type")
+			raise(e)
 
 		c_brlapi.free(c_value)
 		return ret
@@ -1016,17 +1034,39 @@ cdef class Connection:
 			raise OperationError()
 		c_brlapi.free(c_value)
 
-	def watchParameter(self, param, _global, func):
+	def watchParameter(self, param, subparam, globalparam, func):
 		"""Set a parameter change callback.
 		See brlapi_watchParameter(3).
 
 		This registers a parameter change callback: whenever the given
 		parameter changes, the given function is called.
 
-		This returns a tuple containing an entry object, to be passed to
-		unwatchParameter, and the initial value of the parameter."""
-		# TODO
-		raise NotImplementedError
+		This returns an entry object, to be passed to unwatchParameter."""
+		cdef uint32_t c_param
+		cdef uint64_t c_subparam
+		cdef int c_global
+		cdef c_brlapi.brlapi_python_paramCallbackDescriptor_t *descr
+
+		c_param = param
+		c_subparam = subparam
+		c_global = globalparam
+
+		def cfunc(param):
+			cdef c_brlapi.brlapi_python_callbackData_t *callbackData
+			callbackData = <c_brlapi.brlapi_python_callbackData_t*> <uintptr_t> param
+
+			parameter = callbackData.parameter
+			subparam = callbackData.subparam
+			if callbackData.globalparam != 0:
+				globalparam = True
+			else:
+				globalparam = False
+			data = _parameterToPython(callbackData.parameter, callbackData.data, callbackData.len)
+
+			func(parameter, subparam, globalparam, data)
+
+		descr = c_brlapi.brlapi_python_watchParameter(self.h, c_param, c_subparam, c_global, cfunc)
+		return <uintptr_t>descr
 
 	def unwatchParameter(self, entry):
 		"""Clear a parameter change callback.
@@ -1035,5 +1075,7 @@ cdef class Connection:
 		This unregisters a parameter change callback: the callback
 		function previously registered with brlapi_watchParameter
 		will not be called any more."""
-		# TODO
-		raise NotImplementedError
+		cdef uintptr_t descr
+
+		descr = entry
+		c_brlapi.brlapi_python_unwatchParameter(self.h, <c_brlapi.brlapi_python_paramCallbackDescriptor_t *>descr)

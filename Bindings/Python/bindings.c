@@ -37,6 +37,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <Python.h>
+
 #include "bindings.h"
 
 const brlapi_writeArguments_t brlapi_writeArguments_initialized = BRLAPI_WRITEARGUMENTS_INITIALIZER;
@@ -96,4 +98,62 @@ void brlapi_protocolExceptionInit(brlapi_handle_t *handle) {
     pthread_once(&brlapi_protocolExceptionOnce, do_brlapi_protocolExceptionInit);
 
   brlapi__setExceptionHandler(handle, &brlapi_pythonExceptionHandler);
+}
+
+/* brlapi_python_parameter_callback */
+/* This is called from brlapi functions called by Python. We pass the callback
+ * data as such for brlapi.pyx' callback to translate them into python objects
+ */
+static void brlapi_python_parameter_callback(brlapi_param_t parameter, uint64_t subparam, int global, void *priv, const void *data, size_t len)
+{
+  brlapi_python_paramCallbackDescriptor_t *descr = priv;
+  PyObject *arglist, *result;
+  PyGILState_STATE gstate;
+  brlapi_python_callbackData_t callbackData = {
+    .parameter = parameter,
+    .subparam = subparam,
+    .globalparam = global,
+    .data = data,
+    .len = len,
+  };
+
+  gstate = PyGILState_Ensure();
+
+  arglist = Py_BuildValue("(L)", (long long) (uintptr_t) &callbackData);
+
+  result = PyObject_CallObject(descr->callback, arglist);
+  if (result != NULL)
+    Py_DECREF(result);
+
+  PyGILState_Release(gstate);
+}
+
+brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_handle_t *handle, brlapi_param_t param, uint64_t subparam, int global, PyObject *func)
+{
+  brlapi_python_paramCallbackDescriptor_t *descr;
+  PyObject *result;
+
+  if (!PyCallable_Check(func)) {
+    PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+    return NULL;
+  }
+
+  Py_INCREF(func);
+  descr = malloc(sizeof(*descr));
+  descr->callback = func;
+
+  descr->brlapi_descr = brlapi__watchParameter(handle, param, subparam, global, brlapi_python_parameter_callback, descr, NULL, 0);
+
+  return descr;
+}
+
+int brlapi_python_unwatchParameter(brlapi_handle_t *handle, brlapi_python_paramCallbackDescriptor_t *descr)
+{
+  int ret;
+
+  ret = brlapi__unwatchParameter(handle, descr->brlapi_descr);
+  Py_DECREF(descr->callback);
+  free(descr);
+
+  return ret;
 }
