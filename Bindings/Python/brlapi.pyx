@@ -637,14 +637,17 @@ cdef class Connection:
 		cdef int retval
 		cdef int c_wait
 		c_wait = wait
-		with nogil:
-			retval = c_brlapi.brlapi__readKey(self.h, c_wait, <c_brlapi.brlapi_keyCode_t*>&code)
-		if retval == -1:
-			raise OperationError()
-		elif retval <= 0 and wait == False:
-			return None
-		else:
-			return code
+
+		while True:
+			with nogil:
+				retval = c_brlapi.brlapi__readKey(self.h, c_wait, <c_brlapi.brlapi_keyCode_t*>&code)
+			if retval == -1 and not (c_brlapi.brlapi_error.brlerrno == ERROR_LIBCERR and c_brlapi.brlapi_error.libcerrno == errno.EINTR):
+				raise OperationError()
+			elif retval <= 0:
+				if not wait:
+					return None
+			else:
+				return code
 
 	def readKeyWithTimeout(self, timeout_ms = -1):
 		"""Read a key from the braille keyboard.
@@ -655,14 +658,17 @@ cdef class Connection:
 		cdef int retval
 		cdef int c_timeout_ms
 		c_timeout_ms = timeout_ms
-		with nogil:
-			retval = c_brlapi.brlapi__readKeyWithTimeout(self.h, c_timeout_ms, <c_brlapi.brlapi_keyCode_t*>&code)
-		if retval == -1:
-			raise OperationError()
-		elif retval <= 0 and timeout_ms >= 0:
-			return None
-		else:
-			return code
+
+		while True:
+			with nogil:
+				retval = c_brlapi.brlapi__readKeyWithTimeout(self.h, c_timeout_ms, <c_brlapi.brlapi_keyCode_t*>&code)
+			if retval == -1 and not (c_brlapi.brlapi_error.brlerrno == ERROR_LIBCERR and c_brlapi.brlapi_error.libcerrno == errno.EINTR):
+				raise OperationError()
+			elif retval <= 0:
+				if timeout_ms >= 0:
+					return None
+			else:
+				return code
 
 	def expandKeyCode(self, code):
 		"""Expand a keycode into its individual components.
