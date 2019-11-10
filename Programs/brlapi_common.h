@@ -680,10 +680,12 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 
   [BRLAPI_PARAM_COMMAND_SHORT_NAME] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .hasSubparam = 1,
   },
 
   [BRLAPI_PARAM_COMMAND_LONG_NAME] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .hasSubparam = 1,
   },
 
 //Raw Mode Parameters
@@ -693,10 +695,12 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 
   [BRLAPI_PARAM_KEY_SHORT_NAME] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .hasSubparam = 1,
   },
 
   [BRLAPI_PARAM_KEY_LONG_NAME] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .hasSubparam = 1,
   },
 
 //Braille Translation Parameters
@@ -708,6 +712,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
     .count = 256,
+    .hasSubparam = 1,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE] = {
