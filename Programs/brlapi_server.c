@@ -1624,7 +1624,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   paramWrite writeHandler = paramDispatch[param].write;
   /* Check against read-only parameters */
   if (!writeHandler) {
-    WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for writing", param);
+    WERR(c->fd, BRLAPI_ERROR_READONLY_PARAMETER, "parameter %u not available for writing", param);
     return 0;
   }
 
