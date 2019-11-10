@@ -1535,7 +1535,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 
 //TTY Mode Parameters
-  [BRLAPI_PARAM_NAVIGATION_COMMANDS] = {
+  [BRLAPI_PARAM_COMMAND_CODES] = {
     .global = 1,
     .read = param_unimplemented_read,
   },
@@ -1551,7 +1551,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 
 //Raw Mode Parameters
-  [BRLAPI_PARAM_ALL_KEYS] = {
+  [BRLAPI_PARAM_KEY_CODES] = {
     .global = 1,
     .read = param_unimplemented_read,
   },
