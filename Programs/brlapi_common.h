@@ -605,6 +605,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   [BRLAPI_PARAM_DISPLAY_SIZE] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
     .count = 2,
+    .isArray = 1,
   },
 
   [BRLAPI_PARAM_DEVICE_IDENTIFIER] = {
@@ -655,6 +656,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 
   [BRLAPI_PARAM_RENDERED_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
+    .isArray = 1,
   },
 
 //Navigation Parameters
@@ -676,6 +678,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 //TTY Mode Parameters
   [BRLAPI_PARAM_NAVIGATION_COMMANDS] = {
     .type = BRLAPI_PARAM_TYPE_UINT64,
+    .isArray = 1,
   },
 
   [BRLAPI_PARAM_COMMAND_SHORT_NAME] = {
@@ -691,6 +694,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 //Raw Mode Parameters
   [BRLAPI_PARAM_ALL_KEYS] = {
     .type = BRLAPI_PARAM_TYPE_UINT64,
+    .isArray = 1,
   },
 
   [BRLAPI_PARAM_KEY_SHORT_NAME] = {
@@ -707,11 +711,13 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
     .count = 544,
+    .isArray = 1,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
     .count = 256,
+    .isArray = 1,
     .hasSubparam = 1,
   },
 

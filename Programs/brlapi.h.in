@@ -1239,6 +1239,7 @@ typedef enum {
 typedef struct {
   brlapi_param_type_t type;	/**< Type of the parameter's value */
   uint16_t count;		/**< Number of elements in the parameter's value */
+  uint8_t isArray;		/**< Whether the parameter contains several values, or always only one */
   uint8_t hasSubparam;		/**< Parameter uses the subparam argument */
 } brlapi_param_properties_t;
 

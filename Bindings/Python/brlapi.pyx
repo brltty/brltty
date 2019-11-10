@@ -106,7 +106,7 @@ except brlapi.ConnectionError as e:
 ###############################################################################
 
 cimport c_brlapi
-from libc.stdint cimport uint8_t, uint32_t, uint64_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
 import errno
 
 include "constants.auto.pyx"
@@ -831,79 +831,63 @@ cdef class Connection:
 		cdef void *c_value
 		cdef size_t size
 		cdef ssize_t retval
-		cdef uint64_t *lvalues
-		cdef uint32_t *values
-		cdef uint8_t *bytes
+		cdef uint64_t *values64
+		cdef uint32_t *values32
+		cdef uint16_t *values16
+		cdef uint8_t *values8
 		cdef char *string
+		cdef const c_brlapi.brlapi_param_properties_t *props
 
 		c_param = param
 		c_subparam = subparam
 		c_global = globalparam
 
 		with nogil:
+			props = c_brlapi.brlapi_getParameterProperties(c_param)
+			if props == NULL:
+				raise OperationError()
 			c_value = c_brlapi.brlapi__getParameterAlloc(self.h, c_param, c_subparam, c_global, &size)
 		if c_value == NULL:
 			raise OperationError()
 
-		# One 32bit value
-		if param == PARAM_SERVER_VERSION or \
-		   param == PARAM_CLIENT_PRIORITY or \
-		   param == PARAM_DEVICE_SPEED or \
-		   param == PARAM_CURSOR_BLINK_PERIOD or \
-		   param == PARAM_CURSOR_BLINK_PERCENTAGE:
-			values = <uint32_t *>c_value
-			ret = values[0]
-
-		# Two 32bit values
-		elif param == PARAM_DISPLAY_SIZE:
-			values = <uint32_t *>c_value
-			ret = (values[0], values[1])
-
-		# 64bit values
-		elif param == PARAM_NAVIGATION_COMMANDS or \
-		     param == PARAM_ALL_KEYS:
-			lvalues = <uint64_t *>c_value
-			ret = [ lvalues[i] for i in range(size//8) ]
-
-		# Byte value
-		elif param == PARAM_COMPUTER_BRAILLE_CELL_SIZE or \
-		     param == PARAM_CURSOR_DOTS:
-			bytes = <uint8_t *>c_value
-			ret = bytes[0]
-
-		# Bytes value
-		elif param == PARAM_RENDERED_CELLS or \
-		     param == PARAM_COMPUTER_BRAILLE_ROWS_MASK or \
-		     param == PARAM_COMPUTER_BRAILLE_ROW_CELLS:
-			bytes = <uint8_t *>c_value
-			ret = bytes[:size]
-
-		# Boolean value
-		elif param == PARAM_DEVICE_ONLINE or \
-		     param == PARAM_RETAIN_DOTS or \
-		     param == PARAM_LITERARY_BRAILLE or \
-		     param == PARAM_SKIP_EMPTY_LINES or \
-		     param == PARAM_AUDIBLE_ALERTS:
-			bytes = <uint8_t *>c_value
-			ret = bytes[0] != 0
-
-		# UTF-8 value
-		elif param == PARAM_DRIVER_NAME or \
-		     param == PARAM_DRIVER_CODE or \
-		     param == PARAM_DRIVER_VERSION or \
-		     param == PARAM_DEVICE_MODEL or \
-		     param == PARAM_DEVICE_IDENTIFIER or \
-		     param == PARAM_COMMAND_SHORT_NAME or \
-		     param == PARAM_COMMAND_LONG_NAME or \
-		     param == PARAM_KEY_SHORT_NAME or \
-		     param == PARAM_KEY_LONG_NAME or \
-		     param == PARAM_CLIPBOARD_CONTENT:
+		if props.type == PARAM_TYPE_STRING:
 			string = <char *>c_value
 			s = string[:size]
 			ret = s.decode("UTF-8")
+		elif props.type == PARAM_TYPE_BOOLEAN:
+			values8 = <uint8_t *>c_value
+			ret = values8[0] != 0
+		elif props.type == PARAM_TYPE_UINT8:
+			if props.isArray:
+				values8 = <uint8_t *>c_value
+				ret = values8[:size]
+			else:
+				values8 = <uint8_t *>c_value
+				ret = values8[0]
+		elif props.type == PARAM_TYPE_UINT16:
+			if props.isArray:
+				values16 = <uint16_t *>c_value
+				ret = [values16[i] for i in range(size//2)]
+			else:
+				values16 = <uint16_t *>c_value
+				ret = values16[0]
+		elif props.type == PARAM_TYPE_UINT32:
+			if props.isArray:
+				values32 = <uint32_t *>c_value
+				ret = [values32[i] for i in range(size//4)]
+			else:
+				values32 = <uint32_t *>c_value
+				ret = values32[0]
+		elif props.type == PARAM_TYPE_UINT64:
+			if props.isArray:
+				values64 = <uint64_t *>c_value
+				ret = [values64[i] for i in range(size//8)]
+			else:
+				values64 = <uint64_t *>c_value
+				ret = values64[0]
 		else:
 			c_brlapi.free(c_value)
-			raise ValueError("Unsupported parameter")
+			raise ValueError("Unsupported parameter type")
 
 		c_brlapi.free(c_value)
 		return ret
@@ -918,39 +902,100 @@ cdef class Connection:
 		cdef uint64_t c_subparam
 		cdef int c_global
 		cdef void *c_value
-		cdef uint32_t *values
-		cdef uint8_t *bytes
+		cdef uint64_t *values64
+		cdef uint32_t *values32
+		cdef uint16_t *values16
+		cdef uint8_t *values8
 		cdef char *string
+		cdef const c_brlapi.brlapi_param_properties_t *props
 
 		c_param = param
 		c_subparam = subparam
 		c_global = globalparam
 
-		if param == PARAM_CLIENT_PRIORITY:
-			size = 4
-			c_value = <void*>c_brlapi.malloc(size)
-			values = <uint32_t *>c_value
-			values[0] = value
+		with nogil:
+			props = c_brlapi.brlapi_getParameterProperties(c_param)
 
-		if param == PARAM_COMPUTER_BRAILLE_CELL_SIZE or \
-		   param == PARAM_RETAIN_DOTS or \
-		   param == PARAM_LITERARY_BRAILLE or \
-		   param == PARAM_CURSOR_DOTS or \
-		   param == PARAM_CURSOR_BLINK_PERIOD or \
-		   param == PARAM_CURSOR_BLINK_PERCENTAGE or \
-		   param == PARAM_SKIP_EMPTY_LINES or \
-		   param == PARAM_AUDIBLE_ALERTS:
-			size = 1
-			c_value = <void*>c_brlapi.malloc(size)
-			bytes = <uint8_t *>c_value
-			bytes[0] = value
+		if props.type == PARAM_TYPE_STRING:
+			if type(value) != unicode and type(value) != str:
+				raise ValueError("String value expected")
 
-		if param == PARAM_CLIPBOARD_CONTENT:
+		if props.type == PARAM_TYPE_BOOLEAN:
+			if props.isArray:
+				if type(value[0]) != bool:
+					raise ValueError("Boolean values expected")
+			else:
+				if type(value) != bool:
+					raise ValueError("Boolean value expected")
+
+		if props.type == PARAM_TYPE_UINT8 or \
+		   props.type == PARAM_TYPE_UINT16 or \
+		   props.type == PARAM_TYPE_UINT32:
+			if props.isArray:
+				if type(value[0]) != int:
+					raise ValueError("Integer values expected")
+			else:
+				if type(value) != int:
+					raise ValueError("Integer value expected")
+
+		if props.type == PARAM_TYPE_STRING:
+			if type(value) == unicode:
+				value = value.encode('UTF-8')
 			size = len(value)
 			c_value = <void*>c_brlapi.malloc(size)
-			bytes = <uint8_t *>c_value
+			values8 = <uint8_t *>c_value
 			string = value
-			c_brlapi.memcpy(<void*>bytes,<void*>string,size)
+			c_brlapi.memcpy(<void*>values8,<void*>string,size)
+		elif props.type == PARAM_TYPE_BOOLEAN or props.type == PARAM_TYPE_UINT8:
+			if props.isArray:
+				size = 1 * len(value)
+				c_value = <void*>c_brlapi.malloc(size)
+				values8 = <uint8_t *>c_value
+				for i in len(value):
+					values8[i] = value[i]
+			else:
+				size = 1
+				c_value = <void*>c_brlapi.malloc(size)
+				values8 = <uint8_t *>c_value
+				values8[0] = value
+		elif props.type == PARAM_TYPE_UINT16:
+			if props.isArray:
+				size = 2 * len(value)
+				c_value = <void*>c_brlapi.malloc(size)
+				values16 = <uint16_t *>c_value
+				for i in len(value):
+					values16[i] = value[i]
+			else:
+				size = 2
+				c_value = <void*>c_brlapi.malloc(size)
+				values16 = <uint16_t *>c_value
+				values16[0] = value
+		elif props.type == PARAM_TYPE_UINT32:
+			if props.isArray:
+				size = 4 * len(value)
+				c_value = <void*>c_brlapi.malloc(size)
+				values32 = <uint32_t *>c_value
+				for i in len(value):
+					values32[i] = value[i]
+			else:
+				size = 4
+				c_value = <void*>c_brlapi.malloc(size)
+				values32 = <uint32_t *>c_value
+				values32[0] = value
+		elif props.type == PARAM_TYPE_UINT64:
+			if props.isArray:
+				size = 4 * len(value)
+				c_value = <void*>c_brlapi.malloc(size)
+				values64 = <uint64_t *>c_value
+				for i in len(value):
+					values64[i] = value[i]
+			else:
+				size = 8
+				c_value = <void*>c_brlapi.malloc(size)
+				values64 = <uint64_t *>c_value
+				values64[0] = value
+		else:
+			raise ValueError("Unsupported parameter type")
 
 		with nogil:
 			retval = c_brlapi.brlapi__setParameter(self.h, c_param, c_subparam, c_global, c_value, size)
