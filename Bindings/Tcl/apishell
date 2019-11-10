@@ -1,3 +1,4 @@
+#!/bin/bash
 ###############################################################################
 # libbrlapi - A library providing access to braille terminals for applications.
 #
@@ -15,5 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-source [eval file join [lreplace [file split [info script]] end-2 end-1]]
-load libbrlapi_tcl.so
+. "${0%/*}/../../apitest.sh"
+exec tclsh "${@}"
+exit "${?}"

@@ -17,7 +17,6 @@
 ###############################################################################
 
 source [file join [file dirname $argv0] prologue.tcl]
-load libbrlapi_tcl.so
 
 proc putProperties {label properties} {
    puts stdout "$label: $properties"

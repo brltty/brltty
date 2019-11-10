@@ -40,11 +40,12 @@ function brlDot(number, symbol, value, help) {
 
 function apiConstant(name, symbol, value, help) {
   if (gsub("^PARAM_", "", name)) {
-    if (!gsub("^TYPE_", "", name)) {
-      gsub("_", "-", name)
-      name = tolower(name)
-      print "{ \"" name "\", " symbol " }," >parametersHeader
-    }
+    if (name == "COUNT") return
+    if (gsub("^TYPE_", "", name)) return
+
+    gsub("_", "-", name)
+    name = tolower(name)
+    print "{ \"" name "\", " symbol " }," >parametersHeader
   }
 }
 
