@@ -840,13 +840,9 @@ cdef class Connection:
 		c_subparam = subparam
 		c_global = globalparam
 
-		size = c_brlapi.BRLAPI_MAXPACKETSIZE - 2*4
-		c_value = <void*>c_brlapi.malloc(size)
-
 		with nogil:
-			retval = c_brlapi.brlapi__getParameter(self.h, c_param, c_subparam, c_global, c_value, size)
-		if retval == -1:
-			c_brlapi.free(c_value)
+			c_value = c_brlapi.brlapi__getParameterAlloc(self.h, c_param, c_subparam, c_global, &size)
+		if c_value == NULL:
 			raise OperationError()
 
 		# One 32bit value
@@ -867,7 +863,7 @@ cdef class Connection:
 		elif param == PARAM_NAVIGATION_COMMANDS or \
 		     param == PARAM_ALL_KEYS:
 			lvalues = <uint64_t *>c_value
-			ret = [ lvalues[i] for i in range(int(retval/8)) ]
+			ret = [ lvalues[i] for i in range(size//8) ]
 
 		# Byte value
 		elif param == PARAM_COMPUTER_BRAILLE_CELL_SIZE or \
@@ -880,7 +876,7 @@ cdef class Connection:
 		     param == PARAM_COMPUTER_BRAILLE_ROWS_MASK or \
 		     param == PARAM_COMPUTER_BRAILLE_ROW_CELLS:
 			bytes = <uint8_t *>c_value
-			ret = bytes[:retval]
+			ret = bytes[:size]
 
 		# Boolean value
 		elif param == PARAM_DEVICE_ONLINE or \
@@ -903,7 +899,7 @@ cdef class Connection:
 		     param == PARAM_KEY_LONG_NAME or \
 		     param == PARAM_CLIPBOARD_CONTENT:
 			string = <char *>c_value
-			s = string[:retval]
+			s = string[:size]
 			ret = s.decode("UTF-8")
 		else:
 			c_brlapi.free(c_value)
@@ -930,13 +926,11 @@ cdef class Connection:
 		c_subparam = subparam
 		c_global = globalparam
 
-		size = c_brlapi.BRLAPI_MAXPACKETSIZE - 2*4
-		c_value = <void*>c_brlapi.malloc(size)
-
 		if param == PARAM_CLIENT_PRIORITY:
+			size = 4
+			c_value = <void*>c_brlapi.malloc(size)
 			values = <uint32_t *>c_value
 			values[0] = value
-			size = 4
 
 		if param == PARAM_COMPUTER_BRAILLE_CELL_SIZE or \
 		   param == PARAM_RETAIN_DOTS or \
@@ -946,13 +940,15 @@ cdef class Connection:
 		   param == PARAM_CURSOR_BLINK_PERCENTAGE or \
 		   param == PARAM_SKIP_EMPTY_LINES or \
 		   param == PARAM_AUDIBLE_ALERTS:
+			size = 1
+			c_value = <void*>c_brlapi.malloc(size)
 			bytes = <uint8_t *>c_value
 			bytes[0] = value
-			size = 1
 
 		if param == PARAM_CLIPBOARD_CONTENT:
-			bytes = <uint8_t *>c_value
 			size = len(value)
+			c_value = <void*>c_brlapi.malloc(size)
+			bytes = <uint8_t *>c_value
 			string = value
 			c_brlapi.memcpy(<void*>bytes,<void*>string,size)
 

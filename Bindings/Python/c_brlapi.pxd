@@ -112,7 +112,7 @@ cdef extern from "Programs/brlapi.h":
 	ctypedef int brlapi_param_t
 	ctypedef void *brlapi_paramCallbackDescriptor
 
-	ssize_t brlapi__getParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t ) nogil
+	void *brlapi__getParameterAlloc(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, size_t *) nogil
 	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t) nogil
 	brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, brlapi_paramCallback, void *, void*, size_t);
 	int brlapi__unwatchParameter(brlapi_handle_t *,
