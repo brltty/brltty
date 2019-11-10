@@ -1021,74 +1021,73 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 /** Enumeration of parameter types */
 typedef enum {
 //Connection Parameters
-  BRLAPI_PARAM_SERVER_VERSION = 0,		/**< Version of the API server: uint32_t */
-  BRLAPI_PARAM_CLIENT_PRIORITY = 1,		/**< Client priority, between 0 and 100, default is 50: uint32_t */
+  BRLAPI_PARAM_SERVER_VERSION = 0,		/**< Version of the server: uint32_t */
+  BRLAPI_PARAM_CLIENT_PRIORITY = 1,		/**< Priority of the client: uint32_t (from 0 through 100, default is 50) */
 
 //Device Parameters
-  BRLAPI_PARAM_DRIVER_NAME = 2,			/**< Driver name: string */
-  BRLAPI_PARAM_DRIVER_CODE = 3,			/**< Driver code: string */
-  BRLAPI_PARAM_DRIVER_VERSION = 4,		/**< Driver version: string */
-  BRLAPI_PARAM_DEVICE_MODEL = 5,		/**< Model Identifier: string */
-  BRLAPI_PARAM_DISPLAY_SIZE = 6,		/**< Dimensions of the braille device: { uint32_t x; uint32_t y; } */
-  BRLAPI_PARAM_DEVICE_IDENTIFIER = 7,		/**< Path to the device: string */
-  BRLAPI_PARAM_DEVICE_SPEED = 8,		/**< Speed of the port: uint32_t */
-  BRLAPI_PARAM_DEVICE_ONLINE = 9,		/**< Is online: boolean */
+  BRLAPI_PARAM_DRIVER_NAME = 2,			/**< Full name of the driver: string */
+  BRLAPI_PARAM_DRIVER_CODE = 3,			/**< Code (short name) of the driver: string */
+  BRLAPI_PARAM_DRIVER_VERSION = 4,		/**< Version of the driver: string */
+  BRLAPI_PARAM_DEVICE_MODEL = 5,		/**< Model of the device: string */
+  BRLAPI_PARAM_DISPLAY_SIZE = 6,		/**< Dimensions of the braille display: { uint32_t columns; uint32_t rows; } */
+  BRLAPI_PARAM_DEVICE_IDENTIFIER = 7,		/**< Identifier of the device: string */
+  BRLAPI_PARAM_DEVICE_SPEED = 8,		/**< Speed of the device: uint32_t */
+  BRLAPI_PARAM_DEVICE_ONLINE = 9,		/**< Device is online: boolean */
 /* TODO: status area */
 
 //Input Parameters
-  BRLAPI_PARAM_RETAIN_DOTS = 10,		/**< Pass dot combinations instead of chars: boolean */
+  BRLAPI_PARAM_RETAIN_DOTS = 10,		/**< Pass dot combinations (rather than characters): boolean */
 
 //Braille Rendering Parameters
-  BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE = 11,	/**< 8 dots or 6 dots style ? uint8_t */
-  BRLAPI_PARAM_LITERARY_BRAILLE = 12,		/**< Whether braille is literary (or computer): boolean */
-  BRLAPI_PARAM_CURSOR_DOTS = 13,		/**< Cursor Dots: uint8_t */
-  BRLAPI_PARAM_CURSOR_BLINK_PERIOD = 14,	/**< Cursor blinking period (ms): uint32_t */
-  BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE = 15,	/**< Cursor blinking visible percentage (%): uint32_t */
-  BRLAPI_PARAM_RENDERED_CELLS = 16,		/**< Dot rendering of client output: uint8_t[] */
+  BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE = 11,	/**< Number of dots used to render a computer braille character: uint8_t (8 or 6) */
+  BRLAPI_PARAM_LITERARY_BRAILLE = 12,		/**< Whether braille is literary (rather than computer): boolean */
+  BRLAPI_PARAM_CURSOR_DOTS = 13,		/**< Representation of the cursor: uint8_t (ISO 11548-1) */
+  BRLAPI_PARAM_CURSOR_BLINK_PERIOD = 14,	/**< Blinking period of the cursor: uint32_t (milliseconds) */
+  BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE = 15,	/**< Portion of the blinking period that the cursor is visible: uint32_t (from 0 through 100) */
+  BRLAPI_PARAM_RENDERED_CELLS = 16,		/**< Cells rendered by the client: uint8_t[] (ISO 11548-1), one cell per element */
 
 //Navigation Parameters
-  BRLAPI_PARAM_SKIP_EMPTY_LINES = 17,		/**< Whether to skip empty lines: boolean */
+  BRLAPI_PARAM_SKIP_EMPTY_LINES = 17,		/**< Whether to skip empty screen lines: boolean */
   BRLAPI_PARAM_AUDIBLE_ALERTS = 18,		/**< Whether to use audible alerts: boolean */
 
 //Clipboard Parameters
   BRLAPI_PARAM_CLIPBOARD_CONTENT = 19,		/**< Content of the clipboard: UTF-8 string */
 
 //TTY Mode Parameters
-  BRLAPI_PARAM_NAVIGATION_COMMANDS = 20,	/**< Set of navigation commands for the connected device:
+  BRLAPI_PARAM_NAVIGATION_COMMANDS = 20,	/**< Set of navigation commands for the device:
 						  * uint64_t[], one code per element */
-  BRLAPI_PARAM_COMMAND_SHORT_NAME = 21,		/**< Abbreviated name for the navigation command,
-						  * a few characters typically: string
-						  * which key is specified by the subparam value. */
-  BRLAPI_PARAM_COMMAND_LONG_NAME = 22,		/**< Long name for the navigation command,
-						  * a few words typically: string
-						  * which key is specified by the subparam value. */
+  BRLAPI_PARAM_COMMAND_SHORT_NAME = 21,		/**< Short name for a command
+						  * (specified via the subparam argument):
+						  * string (usually a few characters) */
+  BRLAPI_PARAM_COMMAND_LONG_NAME = 22,		/**< Long name for a command
+						  * (specified via the subparam argument):
+						  * string (usually a few words) */
 
 //Raw Mode Parameters
-  BRLAPI_PARAM_ALL_KEYS = 23,			/**< Set of raw key codes for the connected device:
+  BRLAPI_PARAM_ALL_KEYS = 23,			/**< Set of keys for the device:
 						  * uint64_t[], one code per element */
-  BRLAPI_PARAM_KEY_SHORT_NAME = 24,		/**< Abbreviated name for the key,
-						  * a few characters typically: string
-						  * which key is specified by the subparam value. */
-  BRLAPI_PARAM_KEY_LONG_NAME = 25,		/**< Long name for the key, a few words typically: string
-						  * which key is specified by the subparam value. */
+  BRLAPI_PARAM_KEY_SHORT_NAME = 24,		/**< Short name for a key
+						  * (specified via the subparam argument):
+						  * string (usually a few characters) */
+  BRLAPI_PARAM_KEY_LONG_NAME = 25,		/**< Long name for a key
+						  * (specified via the subparam argument):
+						  * string (usually a few words) */
 
 //Braille Translation Parameters
-  BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK = 26,	/**< Sets of Unicode rows that are defined,
-						  * 1 bit per row, uint8_t[544], for
-						  * U+0000 through U+10FFFF. */
-  BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS = 27,	/**< 1-to-1 Unicode to Braille map,
-						  * which row is specified by the subparam value.
-						  * uint8_t[256] for each row */
-  BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE = 28,	/**< computer braille table: string */
-  BRLAPI_PARAM_LITERARY_BRAILLE_TABLE = 29,	/**< literary braille table: string */
-  BRLAPI_PARAM_MESSAGE_LOCALE = 30,		/**< locale for messages: string */
-  /* TODO: dot-to-unicode as well */
+  BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK = 26,	/**< Set of Unicode rows that are defined for computer braille
+						  * (from U+0000 through U+10FFFF):
+						  * uint8_t[544], one bit per row, eight rows per element */
+  BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS = 27,	/**< Computer braille cells for a Unicode row
+						  * (specified via the subparam argument):
+						  * uint8_t[256] (ISO 11548-1), one cell per element */
+  BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE = 28,	/**< Name of the computer braille table: string */
+  BRLAPI_PARAM_LITERARY_BRAILLE_TABLE = 29,	/**< Name of the literary braille table: string */
+  BRLAPI_PARAM_MESSAGE_LOCALE = 30,		/**< Locale to use for messages: string */
+/* TODO: dot-to-unicode as well */
 
- /* TODO
-  * help strings?
-  */
+ /* TODO: help strings */
 
-  BRLAPI_PARAM_COUNT = 31 /** The number of parameters that have been defined. */
+  BRLAPI_PARAM_COUNT = 31 /** Number of parameters */
 } brlapi_param_t;
 
 /* brlapi_param_bool_t */
@@ -1226,28 +1225,29 @@ typedef char *brlapi_param_literaryBrailleTable_t;
 /** Type to be used for BRLAPI_PARAM_MESSAGE_LOCALE      */
 typedef char *brlapi_param_messageLocale_t;
 
-/** Enumeration of parameter content types */
+/** Enumeration of parameter value types */
 typedef enum {
-  BRLAPI_PARAM_TYPE_STRING,	/**< The parameter is a string of UTF-8 characters */
-  BRLAPI_PARAM_TYPE_BOOLEAN,	/**< The parameter is one or more booleans represented by a uint8_t */
-  BRLAPI_PARAM_TYPE_UINT8,	/**< The parameter is one or more 8-bit unsigned integers */
-  BRLAPI_PARAM_TYPE_UINT16,	/**< The parameter is one or more 16-bit unsigned integers */
-  BRLAPI_PARAM_TYPE_UINT32,	/**< The parameter is one or more 32-bit unsigned integers */
-  BRLAPI_PARAM_TYPE_UINT64,	/**< The parameter is one or more 64-bit unsigned integers */
+  BRLAPI_PARAM_TYPE_STRING,	/**< Parameter is a string of UTF-8 characters */
+  BRLAPI_PARAM_TYPE_BOOLEAN,	/**< Parameter is one or more booleans represented by a uint8_t */
+  BRLAPI_PARAM_TYPE_UINT8,	/**< Parameter is one or more 8-bit unsigned integers */
+  BRLAPI_PARAM_TYPE_UINT16,	/**< Parameter is one or more 16-bit unsigned integers */
+  BRLAPI_PARAM_TYPE_UINT32,	/**< Parameter is one or more 32-bit unsigned integers */
+  BRLAPI_PARAM_TYPE_UINT64,	/**< Parameter is one or more 64-bit unsigned integers */
 } brlapi_param_type_t;
 
-/** Structure that describes the content of a parameter type */
+/** Structure that describes the properties of a parameter */
 typedef struct {
-  brlapi_param_type_t type;	/**< Type of the content */
-  uint16_t count;		/**< Number of elements of the content */
+  brlapi_param_type_t type;	/**< Type of the parameter's value */
+  uint16_t count;		/**< Number of elements in the parameter's value */
+  unsigned hasSubparam:1;	/**< Parameter uses the subparam argument */
 } brlapi_param_properties_t;
 
 /* brlapi_getParameterProperties */
-/** Return a description of the content of a parameter
+/** Return a description of the properties of a parameter
  *
- * \param parameter is the parameter whose content described shall be returned.
+ * \param parameter is the parameter whose properties describion shall be returned.
  *
- * \return a pointer to a description of the content of the parameter.
+ * \return a pointer to the description of the properties of the parameter.
  */
 extern const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter);
 
