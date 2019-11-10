@@ -197,7 +197,7 @@ typedef struct Connection {
   brlapi_param_clientPriority_t client_priority;
   int raw, suspend;
   unsigned int how; /* how keys must be delivered to clients */
-  uint8_t dots; /* whether client wants dots instead of translating to chars */
+  uint8_t retainDots; /* whether client wants dots instead of translating to chars */
   BrailleWindow brailleWindow;
   BrlBufState brlbufstate;
   pthread_mutex_t brailleWindowMutex;
@@ -552,7 +552,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   }
 
   c->how = 0;
-  c->dots = 1;
+  c->retainDots = 1;
   c->acceptedKeys = NULL;
   c->upTime = currentTime;
   c->brailleWindow.text = NULL;
@@ -1332,14 +1332,14 @@ static int param_computerBrailleCellSize_read(Connection *c, brlapi_param_t para
 /* BRLAPI_PARAM_RETAIN_DOTS */
 static int param_retainDots_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  *(uint8_t*)data = c->dots;
+  *(uint8_t*)data = c->retainDots;
   *size = sizeof(brlapi_param_retainDots_t);
   return 1;
 }
 static int param_retainDots_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
   CHECKERR( (size == sizeof(brlapi_param_retainDots_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
-  c->dots = *(uint8_t*)data;
+  c->retainDots = *(uint8_t*)data;
   return 1;
 }
 
@@ -3329,7 +3329,7 @@ static int api_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 
 /* Function: whoGetsKey */
 /* Returns the connection which gets that key */
-static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how, unsigned int retaindots)
+static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how, unsigned int retainDots)
 {
   Connection *c;
   Tty *t;
@@ -3337,7 +3337,7 @@ static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how,
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
     lockMutex(&c->acceptedKeysMutex);
     passKey = (c->how==how) && (inKeyrangeList(c->acceptedKeys,code) != NULL)
-      && (how != BRL_COMMANDS || (!retaindots || c->dots));
+      && (how != BRL_COMMANDS || (!retainDots || c->retainDots));
     unlockMutex(&c->acceptedKeysMutex);
     if (passKey) goto found;
   }
@@ -3345,7 +3345,7 @@ static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how,
 found:
   for (t = tty->subttys; t; t = t->next)
     if (tty->focus==SCR_NO_VT || t->number == tty->focus) {
-      Connection *recur_c = whoGetsKey(t, code, how, retaindots);
+      Connection *recur_c = whoGetsKey(t, code, how, retainDots);
       return recur_c ? recur_c : c;
     }
   return c;
@@ -3416,7 +3416,7 @@ static int api__handleCommand(int command) {
     Connection *c = NULL;
     brlapi_keyCode_t code;
     if (!cmdBrlttyToBrlapi(&code, command, 1)) {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x could not be converted to BrlAPI with retaindots", command);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x could not be converted to BrlAPI with retainDots", command);
     } else {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, code);
       c = whoGetsKey(&ttys, code, BRL_COMMANDS, 1);
@@ -3425,7 +3425,7 @@ static int api__handleCommand(int command) {
     if (!c) {
       brlapi_keyCode_t alternate;
       if (!cmdBrlttyToBrlapi(&alternate, command, 0)) {
-	logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x could not be converted to BrlAPI without retaindots", command);
+	logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x could not be converted to BrlAPI without retainDots", command);
       } else {
 	if (alternate != code) {
 	  logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, alternate);
