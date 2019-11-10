@@ -32,7 +32,13 @@ all: $(TCL_API)
 $(TCL_API): bindings.$O $(API_NAME)
 	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O $(TCL_LIBS) $(API_LDFLAGS)
 
-bindings.$O:
+PARAMETERS_HEADER = parameters.auto.h
+CONSTANTS_HEADERS = $(PARAMETERS_HEADER)
+
+$(CONSTANTS_HEADERS): $(CONSTANTS_DEPENDENCIES)
+	$(AWK) -v parametersHeader=$(PARAMETERS_HEADER) $(CONSTANTS_ARGUMENTS)
+
+bindings.$O: $(CONSTANTS_HEADERS)
 	$(CC) $(TCL_CPPFLAGS) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
 
 mkindex:
@@ -40,6 +46,7 @@ mkindex:
 
 clean::
 	-rm -f $(TCL_API) mkindex
+	-rm -f $(CONSTANTS_HEADERS)
 
 install: all mkindex
 	$(INSTALL_DIRECTORY) $(TCL_DESTDIR)$(TCL_PKG)
