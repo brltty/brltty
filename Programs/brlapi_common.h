@@ -774,6 +774,8 @@ static void convertInteger_ntoh64 (void *v) {
 }
 
 static void convertIntegers (void *data, size_t length, size_t size, IntegerConverter *convert) {
+  length /= size;
+  length *= size;
   void *end = data + length;
 
   while (data < end) {
