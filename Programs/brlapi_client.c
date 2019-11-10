@@ -2329,6 +2329,7 @@ const char *brlapi_errlist[] = {
   "Key file is empty",                  /* BRLAPI_ERROR_EMPTYKEY */
   "Driver error",                       /* BRLAPI_ERROR_DRIVERERROR */
   "Authentication failed",              /* BRLAPI_ERROR_AUTHENTICATION */
+  "Parameter can not be changed",       /* BRLAPI_ERROR_READONLY_PARAMETER */
 };
 
 /* brlapi_nerr: number of error codes */
