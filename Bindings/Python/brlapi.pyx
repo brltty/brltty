@@ -844,8 +844,11 @@ cdef class Connection:
 
 		with nogil:
 			props = c_brlapi.brlapi_getParameterProperties(c_param)
-			if props == NULL:
-				raise OperationError()
+
+		if props == NULL:
+			raise OperationError()
+
+		with nogil:
 			c_value = c_brlapi.brlapi__getParameterAlloc(self.h, c_param, c_subparam, c_global, &size)
 		if c_value == NULL:
 			raise OperationError()
@@ -915,6 +918,9 @@ cdef class Connection:
 
 		with nogil:
 			props = c_brlapi.brlapi_getParameterProperties(c_param)
+
+		if props == NULL:
+			raise OperationError()
 
 		if props.type == PARAM_TYPE_STRING:
 			if type(value) != unicode and type(value) != str:
