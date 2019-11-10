@@ -644,12 +644,12 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERIOD] = {
-    .type = BRLAPI_PARAM_TYPE_UINT8,
+    .type = BRLAPI_PARAM_TYPE_UINT32,
     .count = 1,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE] = {
-    .type = BRLAPI_PARAM_TYPE_UINT32,
+    .type = BRLAPI_PARAM_TYPE_UINT8,
     .count = 1,
   },
 
