@@ -1159,11 +1159,11 @@ typedef uint8_t brlapi_param_cursorDots_t;
 
 /* brlapi_param_cursorBlinkPeriod_t */
 /** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_PERIOD */
-typedef uint8_t brlapi_param_cursorBlinkPeriod_t;
+typedef uint32_t brlapi_param_cursorBlinkPeriod_t;
 
 /* brlapi_param_cursorBlinkPercentage_t */
 /** Type to be used for BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE */
-typedef uint32_t brlapi_param_cursorBlinkPercentage_t;
+typedef uint8_t brlapi_param_cursorBlinkPercentage_t;
 
 /* brlapi_param_renderedCells_t */
 /** Type to be used for BRLAPI_PARAM_RENDERED_CELLS */
