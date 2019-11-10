@@ -1359,23 +1359,32 @@ static int param_renderedCells_read(Connection *c, brlapi_param_t param, uint64_
 /* BRLAPI_PARAM_COMMAND_SHORT_NAME */
 static int param_commandShortName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  char buffer[0X100];
-  char *colon;
-  describeCommand(buffer, sizeof(buffer), subparam, CDO_IncludeName);
-  colon = strchr(buffer, ':');
-  if (colon) *colon = 0;
-  *size = strlen(buffer);
-  memcpy(data, buffer, *size);
+  int command = cmdBrlapiToBrltty(subparam);
+
+  if (command == EOF) {
+    *size = 0;
+  } else {
+    describeCommand(data, *size, command, CDO_IncludeName);
+    char *colon = strchr(data, ':');
+    if (colon) *colon = 0;
+    *size = strlen(data);
+  }
+
   return 1;
 }
 
 /* BRLAPI_PARAM_COMMAND_LONG_NAME */
 static int param_commandLongName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  char buffer[0X100];
-  describeCommand(buffer, sizeof(buffer), subparam, 0);
-  *size = strlen(buffer);
-  memcpy(data, buffer, *size);
+  int command = cmdBrlapiToBrltty(subparam);
+
+  if (command == EOF) {
+    *size = 0;
+  } else {
+    describeCommand(data, *size, command, 0);
+    *size = strlen(data);
+  }
+
   return 1;
 }
 
@@ -1797,7 +1806,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     paramValue->subparam_lo = paramRequest->subparam_lo;
     size = sizeof(paramValue->data);
     ret = readHandler(c, param, subparam, flags, paramValue->data, &size);
-    if (ret && size) {
+    if (ret) {
       _brlapi_htonParameter(param, paramValue, size);
       size += sizeof(flags) + sizeof(param) + sizeof(subparam);
       brlapiserver_writePacket(c->fd,BRLAPI_PACKET_PARAM_VALUE,paramValue,size);
