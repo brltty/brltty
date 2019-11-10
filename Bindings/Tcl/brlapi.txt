@@ -20,6 +20,9 @@ brlapi<sessionNumber> function [arg ...]
    getDriverName
    getModelIdentifier
    getDisplaySize
+   parameter [<option> ...] <name> [<subparam>]
+      -global
+      -set <value>
    enterTtyMode [<option> ...]
       -tty {default | <number>}
       -keyCodes
