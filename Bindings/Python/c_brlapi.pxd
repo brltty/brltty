@@ -21,6 +21,8 @@
 
 from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
 
+from cpython.ref cimport PyObject
+
 cdef extern from "sys/types.h":
 	ctypedef Py_ssize_t size_t
 	ctypedef Py_ssize_t ssize_t
@@ -141,6 +143,20 @@ cdef extern from "bindings.h":
 	brlapi_writeArguments_t brlapi_writeArguments_initialized
 	char *brlapi_protocolException()
 	void brlapi_protocolExceptionInit(brlapi_handle_t *)
+
+	ctypedef struct brlapi_python_paramCallbackDescriptor_t:
+		brlapi_paramCallbackDescriptor brlapi_descr
+		PyObject *callback
+
+	ctypedef struct brlapi_python_callbackData_t:
+		brlapi_param_t parameter
+		uint64_t subparam
+		int globalparam
+		const void *data
+		size_t len
+
+	brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, object) except NULL
+	int brlapi_python_unwatchParameter(brlapi_handle_t *, brlapi_python_paramCallbackDescriptor_t *)
 
 cdef extern from "stdlib.h":
 	void *malloc(size_t)
