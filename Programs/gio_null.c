@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "parse.h"
@@ -33,6 +34,14 @@ static int
 disconnectNullResource (GioHandle *handle) {
   free(handle);
   return 1;
+}
+
+static const char *
+makeNullResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("null:");
+  STR_END;
+  return buffer;
 }
 
 static int
@@ -55,6 +64,8 @@ monitorNullInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data)
 
 static const GioMethods gioNullMethods = {
   .disconnectResource = disconnectNullResource,
+
+  .makeResourceIdentifier = makeNullResourceIdentifier,
 
   .awaitInput = awaitNullInput,
   .readData = readNullData,

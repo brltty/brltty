@@ -48,6 +48,9 @@ extern int bthParseChannelNumber (uint8_t *channel, const char *string);
 extern BluetoothConnection *bthOpenConnection (const BluetoothConnectionRequest *request);
 extern void bthCloseConnection (BluetoothConnection *connection);
 
+extern uint64_t bthGetAddress (BluetoothConnection *connection);
+extern uint8_t bthGetChannel (BluetoothConnection *connection);
+
 extern int bthMonitorInput (BluetoothConnection *connection, AsyncMonitorCallback *callback, void *data);
 extern int bthAwaitInput (BluetoothConnection *connection, int timeout);
 
@@ -58,6 +61,7 @@ extern ssize_t bthReadData (
 
 extern ssize_t bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size);
 
+#define BLUETOOTH_DEVICE_QUALIFIER "bluetooth"
 extern int isBluetoothDeviceIdentifier (const char **identifier);
 
 #ifdef __cplusplus

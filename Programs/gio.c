@@ -217,6 +217,20 @@ gioGetApplicationData (GioEndpoint *endpoint) {
   return endpoint->options.applicationData;
 }
 
+const char *
+gioMakeResourceIdentifier (GioEndpoint *endpoint, char *buffer, size_t size) {
+  const char *identifier = NULL;
+  MakeResourceIdentifierMethod *method = endpoint->methods->makeResourceIdentifier;
+
+  if (!method) {
+    logUnsupportedOperation("makeResourceIdentifier");
+  } else {
+    identifier = method(endpoint->handle, buffer, size);
+  }
+
+  return identifier;
+}
+
 char *
 gioGetResourceName (GioEndpoint *endpoint) {
   char *name = NULL;

@@ -1689,5 +1689,5 @@ usbGetDriverCodes (uint16_t vendor, uint16_t product) {
 
 int
 isUsbDeviceIdentifier (const char **identifier) {
-  return hasQualifier(identifier, "usb");
+  return hasQualifier(identifier, USB_DEVICE_QUALIFIER);
 }

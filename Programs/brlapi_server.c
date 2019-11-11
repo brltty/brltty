@@ -98,6 +98,7 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 #include "parse.h"
 #include "timing.h"
 #include "auth.h"
+#include "io_generic.h"
 #include "io_misc.h"
 #include "scr.h"
 #include "charset.h"
@@ -1258,7 +1259,7 @@ static int param_writeString(Connection *c, int (*handler) (const char *string),
   string[size] = 0;
 
   if (handler(string)) return 1;
-  WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "set parameter failed");
+  WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "set string parameter failed");
   return 0;
 }
 
@@ -1283,7 +1284,7 @@ static int param_clientPriority_read(Connection *c, brlapi_param_t param, uint64
 static int param_clientPriority_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
   brlapi_param_clientPriority_t *clientPriority = data;
-  CHECKERR( (size == sizeof(*clientPriority)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
+  CHECKERR((size == sizeof(*clientPriority)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for client priority");
 
   lockMutex(&apiConnectionsMutex);
   c->client_priority = *clientPriority;
@@ -1344,7 +1345,15 @@ static int param_displaySize_read(Connection *c, brlapi_param_t param, uint64_t 
 /* BRLAPI_PARAM_DEVICE_IDENTIFIER */
 static int param_deviceIdentifier_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  param_readString(opt_brailleDevice, data, size);
+  if (disp) {
+    if (disp->gioEndpoint) {
+      gioMakeResourceIdentifier(disp->gioEndpoint, data, *size);
+      *size = strlen(data);
+      return 1;
+    }
+  }
+
+  *size = 0;
   return 1;
 }
 

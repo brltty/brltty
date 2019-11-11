@@ -32,6 +32,8 @@ typedef struct {
 
 typedef int GioDisconnectResourceMethod (GioHandle *handle);
 
+typedef const char *MakeResourceIdentifierMethod (GioHandle *handle, char *buffer, size_t size);
+
 typedef char *GioGetResourceNameMethod (GioHandle *handle, int timeout);
 
 typedef ssize_t GioWriteDataMethod (GioHandle *handle, const void *data, size_t size, int timeout);
@@ -88,6 +90,7 @@ typedef void *GioGetResourceObjectMethod (GioHandle *handle);
 typedef struct {
   GioDisconnectResourceMethod *disconnectResource;
 
+  MakeResourceIdentifierMethod *makeResourceIdentifier;
   GioGetResourceNameMethod *getResourceName;
 
   GioWriteDataMethod *writeData;

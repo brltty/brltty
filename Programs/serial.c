@@ -44,6 +44,11 @@
 
 #include "serial_internal.h"
 
+const char *
+serialGetDevicePath (SerialDevice *serial) {
+  return serial->devicePath;
+}
+
 const SerialBaudEntry *
 serialGetBaudEntry (unsigned int baud) {
   const SerialBaudEntry *entry = serialBaudTable;
@@ -701,26 +706,19 @@ serialOpenDevice (const char *identifier) {
     SerialDevice *serial;
 
     if ((serial = malloc(sizeof(*serial)))) {
-      char *path;
+      memset(serial, 0, sizeof(*serial));
 
       {
         const char *name = parameters[SERIAL_DEV_NAME];
-
         if (!*name) name = SERIAL_FIRST_DEVICE;
-        path = getDevicePath(name);
+        serial->devicePath = getDevicePath(name);
       }
 
-      if (path) {
-        int connected;
-
+      if (serial->devicePath) {
         serial->fileDescriptor = -1;
         serial->stream = NULL;
 
-        connected = serialConnectDevice(serial, path);
-        free(path);
-        path = NULL;
-
-        if (connected) {
+        if (serialConnectDevice(serial, serial->devicePath)) {
           int ok = 1;
 
           if (!serialConfigureBaud(serial, parameters[SERIAL_DEV_BAUD])) ok = 0;
@@ -735,6 +733,8 @@ serialOpenDevice (const char *identifier) {
           serialCloseDevice(serial);
           return NULL;
         }
+
+        free(serial->devicePath);
       }
 
       free(serial);
@@ -764,6 +764,7 @@ serialCloseDevice (SerialDevice *serial) {
     serialDisconnectDevice(serial);
   }
 
+  free(serial->devicePath);
   free(serial);
 }
 
@@ -871,7 +872,7 @@ isSerialDeviceIdentifier (const char **identifier) {
   if (isDosDevice(*identifier, "COM")) return 1;
 #endif /* ALLOW_DOS_DEVICE_NAMES */
 
-  if (hasQualifier(identifier, "serial")) return 1;
+  if (hasQualifier(identifier, SERIAL_DEVICE_QUALIFIER)) return 1;
   if (hasNoQualifier(*identifier)) return 1;
   return 0;
 }

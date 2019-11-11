@@ -21,6 +21,8 @@
 #include <string.h>
 
 #include "log.h"
+#include "strfmt.h"
+#include "parse.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_serial.h"
@@ -35,6 +37,22 @@ disconnectSerialResource (GioHandle *handle) {
   serialCloseDevice(handle->device);
   free(handle);
   return 1;
+}
+
+static const char *
+makeSerialResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
+  STR_BEGIN(buffer, size);
+
+  STR_PRINTF(
+    "%s%cname%c%s",
+    SERIAL_DEVICE_QUALIFIER,
+    PARAMETER_QUALIFIER_CHARACTER,
+    PARAMETER_ASSIGNMENT_CHARACTER,
+    serialGetDevicePath(handle->device)
+  );
+
+  STR_END;
+  return buffer;
 }
 
 static ssize_t
@@ -76,6 +94,8 @@ getSerialResourceObject (GioHandle *handle) {
 
 static const GioMethods gioSerialMethods = {
   .disconnectResource = disconnectSerialResource,
+
+  .makeResourceIdentifier = makeSerialResourceIdentifier,
 
   .writeData = writeSerialData,
   .awaitInput = awaitSerialInput,
