@@ -1446,7 +1446,7 @@ static int param_commandLongName_read(Connection *c, brlapi_param_t param, uint6
   return 1;
 }
 
-/* BRLAPI_PARAM_KEY_CODES */
+/* BRLAPI_PARAM_AVAILABLE_KEY_CODES */
 typedef struct {
   void *next;
   const void *end;
@@ -1467,7 +1467,7 @@ static int param_addKeyCode (const KeyNameEntry *kne, void *data)
   return 1;
 }
 
-static int param_keyCodes_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+static int param_availableKeyCodes_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   if (disp) {
     KEY_NAME_TABLES_REFERENCE keys = disp->keyNames;
@@ -1712,7 +1712,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 
 //TTY Mode Parameters
-  [BRLAPI_PARAM_COMMAND_CODES] = {
+  [BRLAPI_PARAM_AVAILABLE_COMMAND_CODES] = {
     .global = 1,
     .read = param_unimplemented_read,
   },
@@ -1728,9 +1728,9 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 
 //Raw Mode Parameters
-  [BRLAPI_PARAM_KEY_CODES] = {
+  [BRLAPI_PARAM_AVAILABLE_KEY_CODES] = {
     .global = 1,
-    .read = param_keyCodes_read,
+    .read = param_availableKeyCodes_read,
   },
 
   [BRLAPI_PARAM_KEY_SHORT_NAME] = {
