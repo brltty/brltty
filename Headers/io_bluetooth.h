@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_IO_BLUETOOTH
 #define BRLTTY_INCLUDED_IO_BLUETOOTH
 
+#include "strfmth.h"
 #include "async_io.h"
 
 #ifdef __cplusplus
@@ -44,6 +45,8 @@ typedef struct {
 extern void bthInitializeConnectionRequest (BluetoothConnectionRequest *request);
 extern int bthParseAddress (uint64_t *address, const char *string);
 extern int bthParseChannelNumber (uint8_t *channel, const char *string);
+
+extern STR_DECLARE_FORMATTER (bthFormatAddress, uint64_t address);
 
 extern BluetoothConnection *bthOpenConnection (const BluetoothConnectionRequest *request);
 extern void bthCloseConnection (BluetoothConnection *connection);
