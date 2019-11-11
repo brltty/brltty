@@ -1250,13 +1250,14 @@ static void param_readString(const char *string, void *data, size_t *size)
   memcpy(data, string, *size);
 }
 
-static int param_writeString(int (*handler) (const char *string), void *data, size_t size)
+static int param_writeString(Connection *c, int (*handler) (const char *string), void *data, size_t size)
 {
   char string[size + 1];
   memcpy(string, data, size);
   string[size] = 0;
 
   if (handler(string)) return 1;
+  WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "set parameter failed");
   return 0;
 }
 
@@ -1348,7 +1349,7 @@ static int param_deviceIdentifier_read(Connection *c, brlapi_param_t param, uint
 
 static int param_deviceIdentifier_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
-  return param_writeString(changeBrailleDevice, data, size);
+  return param_writeString(c, changeBrailleDevice, data, size);
 }
 
 /* BRLAPI_PARAM_DEVICE_ONLINE */
@@ -1523,7 +1524,7 @@ static int param_computerBrailleTable_read(Connection *c, brlapi_param_t param, 
 
 static int param_computerBrailleTable_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
-  return param_writeString(changeTextTable, data, size);
+  return param_writeString(c, changeTextTable, data, size);
 }
 
 /* BRLAPI_PARAM_LITERARY_BRAILLE_TABLE */
@@ -1535,7 +1536,7 @@ static int param_literaryBrailleTable_read(Connection *c, brlapi_param_t param, 
 
 static int param_literaryBrailleTable_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
-  return param_writeString(changeContractionTable, data, size);
+  return param_writeString(c, changeContractionTable, data, size);
 }
 
 /* BRLAPI_PARAM_MESSAGE_LOCALE */
@@ -1551,7 +1552,7 @@ static int changeMessageLocale (const char *locale) {
 
 static int param_messageLocale_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
-  return param_writeString(changeMessageLocale, data, size);
+  return param_writeString(c, changeMessageLocale, data, size);
 }
 
 /* For parameters yet to be implemented */
