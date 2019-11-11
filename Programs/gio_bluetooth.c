@@ -21,6 +21,9 @@
 #include <string.h>
 
 #include "log.h"
+#include "strfmt.h"
+#include "parse.h"
+#include "device.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_bluetooth.h"
@@ -35,6 +38,58 @@ disconnectBluetoothResource (GioHandle *handle) {
   bthCloseConnection(handle->connection);
   free(handle);
   return 1;
+}
+
+static
+STR_BEGIN_FORMATTER(formatBluetoothAddress, uint64_t address)
+  uint8_t bytes[6];
+  size_t count = ARRAY_COUNT(bytes);
+  unsigned int index = count;
+
+  while (index > 0) {
+    bytes[--index] = address & 0XFF;
+    address >>= 8;
+  }
+
+  while (index < count) {
+    if (index > 0) STR_PRINTF("%c", ':');
+    STR_PRINTF("%02X", bytes[index++]);
+  }
+STR_END_FORMATTER
+
+static const char *
+makeBluetoothResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
+  size_t length;
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%s%c", BLUETOOTH_DEVICE_QUALIFIER, PARAMETER_QUALIFIER_CHARACTER);
+
+  {
+    uint64_t address = bthGetAddress(handle->connection);
+    STR_PRINTF("address%c", PARAMETER_ASSIGNMENT_CHARACTER);
+    STR_FORMAT(formatBluetoothAddress, address);
+    STR_PRINTF("%c", DEVICE_PARAMETER_SEPARATOR);
+  }
+
+  {
+    uint8_t channel = bthGetChannel(handle->connection);
+
+    if (channel) {
+      STR_PRINTF(
+        "channel%c%u%c",
+        PARAMETER_ASSIGNMENT_CHARACTER, channel, DEVICE_PARAMETER_SEPARATOR
+      );
+    }
+  }
+
+  length = STR_LENGTH;
+  STR_END;
+
+  {
+    char *last = &buffer[length] - 1;
+    if (*last == DEVICE_PARAMETER_SEPARATOR) *last = 0;
+  }
+
+  return buffer;
 }
 
 static char *
@@ -74,6 +129,7 @@ getBluetoothResourceObject (GioHandle *handle) {
 static const GioMethods gioBluetoothMethods = {
   .disconnectResource = disconnectBluetoothResource,
 
+  .makeResourceIdentifier = makeBluetoothResourceIdentifier,
   .getResourceName = getBluetoothResourceName,
 
   .writeData = writeBluetoothData,

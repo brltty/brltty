@@ -313,6 +313,8 @@ extern UsbChannel *usbOpenChannel (const UsbChannelDefinition *definitions, cons
 extern void usbCloseChannel (UsbChannel *channel);
 
 extern const char *const *usbGetDriverCodes (uint16_t vendor, uint16_t product);
+
+#define USB_DEVICE_QUALIFIER "usb"
 extern int isUsbDeviceIdentifier (const char **identifier);
 
 #ifdef __cplusplus

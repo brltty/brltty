@@ -30,12 +30,16 @@ extern "C" {
 
 typedef struct SerialDeviceStruct SerialDevice;
 
+#define SERIAL_DEVICE_QUALIFIER "serial"
 extern int isSerialDeviceIdentifier (const char **identifier);
+
 extern int serialValidateBaud (unsigned int *baud, const char *description, const char *word, const unsigned int *choices);
 
 extern SerialDevice *serialOpenDevice (const char *identifier);
 extern void serialCloseDevice (SerialDevice *serial);
 extern int serialRestartDevice (SerialDevice *serial, unsigned int baud);
+
+extern const char *serialGetDevicePath (SerialDevice *serial);
 extern FILE *serialGetStream (SerialDevice *serial);
 
 extern int serialDiscardInput (SerialDevice *serial);

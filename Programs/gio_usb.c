@@ -30,6 +30,10 @@
 #endif /* HAVE_POSIX_THREADS */
 
 #include "log.h"
+#include "strfmt.h"
+#include "parse.h"
+#include "device.h"
+#include "bitfield.h"
 #include "parameters.h"
 #include "async_wait.h"
 #include "io_generic.h"
@@ -46,6 +50,48 @@ disconnectUsbResource (GioHandle *handle) {
   usbCloseChannel(handle->channel);
   free(handle);
   return 1;
+}
+
+static const char *
+makeUsbResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
+  UsbDeviceDescriptor descriptor;
+  if (!usbGetDeviceDescriptor(handle->channel->device, &descriptor)) return NULL;
+
+  size_t length;
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%s%c", USB_DEVICE_QUALIFIER, PARAMETER_QUALIFIER_CHARACTER);
+
+  {
+    uint16_t vendor = getLittleEndian16(descriptor.idVendor);
+
+    if (vendor) {
+      STR_PRINTF(
+        "vendor%c0X%04X%c",
+        PARAMETER_ASSIGNMENT_CHARACTER, DEVICE_PARAMETER_SEPARATOR,  vendor
+      );
+    }
+  }
+
+  {
+    uint16_t product = getLittleEndian16(descriptor.idProduct);
+
+    if (product) {
+      STR_PRINTF(
+        "product%c0X%04X%c",
+        PARAMETER_ASSIGNMENT_CHARACTER, DEVICE_PARAMETER_SEPARATOR,  product
+      );
+    }
+  }
+
+  length = STR_LENGTH;
+  STR_END;
+
+  {
+    char *last = &buffer[length] - 1;
+    if (*last == DEVICE_PARAMETER_SEPARATOR) *last = 0;
+  }
+
+  return buffer;
 }
 
 static char *
@@ -257,6 +303,7 @@ getUsbResourceObject (GioHandle *handle) {
 static const GioMethods gioUsbMethods = {
   .disconnectResource = disconnectUsbResource,
 
+  .makeResourceIdentifier = makeUsbResourceIdentifier,
   .getResourceName = getUsbResourceName,
 
   .writeData = writeUsbData,

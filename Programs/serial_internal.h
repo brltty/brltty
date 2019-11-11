@@ -33,6 +33,7 @@ extern "C" {
 typedef void SerialFlowControlProc (SerialDevice *serial);
 
 struct SerialDeviceStruct {
+  char *devicePath;
   int fileDescriptor;
   FILE *stream;
 

@@ -550,6 +550,16 @@ bthCloseConnection (BluetoothConnection *connection) {
   free(connection);
 }
 
+uint64_t
+bthGetAddress (BluetoothConnection *connection) {
+  return connection->address;
+}
+
+uint8_t
+bthGetChannel (BluetoothConnection *connection) {
+  return connection->channel;
+}
+
 int
 bthAwaitInput (BluetoothConnection *connection, int timeout) {
   return bthPollInput(connection->extension, timeout);
@@ -728,5 +738,5 @@ bthGetDriverCodes (const char *identifier, int timeout) {
 
 int
 isBluetoothDeviceIdentifier (const char **identifier) {
-  return hasQualifier(identifier, "bluetooth");
+  return hasQualifier(identifier, BLUETOOTH_DEVICE_QUALIFIER);
 }
