@@ -1389,6 +1389,49 @@ static int param_commandLongName_read(Connection *c, brlapi_param_t param, uint6
   return 1;
 }
 
+/* BRLAPI_PARAM_KEY_CODES */
+typedef struct {
+  void *next;
+  const void *end;
+} param_addKeyCode_t;
+
+static int param_addKeyCode (const KeyNameEntry *kne, void *data)
+{
+  if (kne) {
+    param_addKeyCode_t *akc = data;
+
+    if (akc->next < akc->end) {
+      brlapi_param_keyCode_t *key = akc->next;
+      *key = (kne->value.group << 8) | kne->value.number;
+      akc->next += sizeof(*key);
+    }
+  }
+
+  return 1;
+}
+
+static int param_keyCodes_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  KEY_NAME_TABLES_REFERENCE keys = brl.keyNames;
+
+  if (keys) {
+    *size /= sizeof(brlapi_param_keyCode_t);
+    *size *= sizeof(brlapi_param_keyCode_t);
+
+    param_addKeyCode_t akc = {
+      .next = data,
+      .end = data + *size
+    };
+
+    forEachKeyName(keys, param_addKeyCode, &akc);
+    *size = akc.next - data;
+  } else {
+    *size = 0;
+  }
+
+  return 1;
+}
+
 /* For parameters yet to be implemented */
 static int param_unimplemented_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
@@ -1554,7 +1597,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 //Raw Mode Parameters
   [BRLAPI_PARAM_KEY_CODES] = {
     .global = 1,
-    .read = param_unimplemented_read,
+    .read = param_keyCodes_read,
   },
 
   [BRLAPI_PARAM_KEY_SHORT_NAME] = {
