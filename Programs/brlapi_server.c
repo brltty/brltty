@@ -1432,6 +1432,40 @@ static int param_keyCodes_read(Connection *c, brlapi_param_t param, uint64_t sub
   return 1;
 }
 
+/* BRLAPI_PARAM_KEY_SHORT_NAME */
+static int param_keyShortName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  KeyTable *table = brl.keyTable;
+
+  if (table) {
+    if (subparam <= UINT16_MAX) {
+      const KeyValue keyValue = {
+        .group = subparam >> 8,
+        .number = subparam & 0XFF
+      };
+
+      const KeyNameEntry *kne = findKeyNameEntry(table, &keyValue);
+      if (kne) {
+        const char *name = kne->name;
+        size_t length = strlen(name);
+        if (length < *size) *size = length;
+        memcpy(data, name, *size);
+        return 1;
+      }
+    }
+  }
+
+  *size = 0;
+  return 1;
+}
+
+/* BRLAPI_PARAM_KEY_LONG_NAME */
+static int param_keyLongName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  *size = 0;
+  return 1;
+}
+
 /* For parameters yet to be implemented */
 static int param_unimplemented_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
@@ -1602,12 +1636,12 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_KEY_SHORT_NAME] = {
     .global = 1,
-    .read = param_unimplemented_read,
+    .read = param_keyShortName_read,
   },
 
   [BRLAPI_PARAM_KEY_LONG_NAME] = {
     .global = 1,
-    .read = param_unimplemented_read,
+    .read = param_keyLongName_read,
   },
 
 //Braille Translation Parameters

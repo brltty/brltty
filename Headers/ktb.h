@@ -30,6 +30,7 @@ extern void destroyKeyTable (KeyTable *table);
 
 typedef int KeyNameEntryHandler (const KeyNameEntry *kne, void *data);
 extern int forEachKeyName (KEY_NAME_TABLES_REFERENCE keys, KeyNameEntryHandler *handleKeyNameEntry, void *data);
+extern const KeyNameEntry *findKeyNameEntry (KeyTable *table, const KeyValue *value);
 
 typedef int KeyTableWriteLineMethod (const wchar_t *line, void *data);
 typedef int KeyTableWriteHeaderMethod (const wchar_t *text, unsigned int level, void *data);
