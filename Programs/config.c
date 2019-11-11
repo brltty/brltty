@@ -774,12 +774,26 @@ brlttyPrepare (int argc, char *argv[]) {
 
 int
 changeTextTable (const char *name) {
-  return replaceTextTable(opt_tablesDirectory, name);
+  char *newName = strdup(name);
+
+  if (newName) {
+    if (replaceTextTable(opt_tablesDirectory, newName)) {
+      free(opt_textTable);
+      opt_textTable = newName;
+      return 1;
+    }
+
+    free(newName);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
 }
 
 static void
 exitTextTable (void *data) {
-  changeTextTable(NULL);
+  changeTextTable("");
 }
 
 int
@@ -804,11 +818,17 @@ exitContractionTable (void *data) {
 int
 changeContractionTable (const char *name) {
   ContractionTable *table = NULL;
+  char *newName = strdup(name);
 
-  if (*name) {
-    char *path;
+  if (!newName) {
+    logMallocError();
+    return 0;
+  }
 
-    if ((path = makeContractionTablePath(opt_tablesDirectory, name))) {
+  if (*newName) {
+    char *path = makeContractionTablePath(opt_tablesDirectory, newName);
+
+    if (path) {
       logMessage(LOG_DEBUG, "compiling contraction table: %s", path);
 
       if (!(table = compileContractionTable(path))) {
@@ -818,11 +838,18 @@ changeContractionTable (const char *name) {
       free(path);
     }
 
-    if (!table) return 0;
+    if (!table) {
+      free(newName);
+      return 0;
+    }
   }
 
   if (contractionTable) destroyContractionTable(contractionTable);
   contractionTable = table;
+
+  free(opt_contractionTable);
+  opt_contractionTable = newName;
+
   return 1;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */

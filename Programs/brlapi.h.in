@@ -1125,8 +1125,8 @@ typedef char *brlapi_param_deviceModel_t;
 /* brlapi_param_display_Size_t */
 /** Type to be used for BRLAPI_PARAM_DISPLAY_SIZE */
 typedef struct {
-  uint32_t x;
-  uint32_t y;
+  uint32_t columns;
+  uint32_t rows;
 } brlapi_param_displaySize_t;
 
 /* brlapi_param_deviceIdentifier_t */
