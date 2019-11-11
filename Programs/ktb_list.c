@@ -204,7 +204,7 @@ searchKeyNameEntry (const void *target, const void *element) {
   return compareKeyValues(value, &(*kne)->value);
 }
 
-static const KeyNameEntry *
+const KeyNameEntry *
 findKeyNameEntry (KeyTable *table, const KeyValue *value) {
   const KeyNameEntry *const *array = table->keyNames.table;
   unsigned int count = table->keyNames.count;
