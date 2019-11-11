@@ -40,23 +40,6 @@ disconnectBluetoothResource (GioHandle *handle) {
   return 1;
 }
 
-static
-STR_BEGIN_FORMATTER(formatBluetoothAddress, uint64_t address)
-  uint8_t bytes[6];
-  size_t count = ARRAY_COUNT(bytes);
-  unsigned int index = count;
-
-  while (index > 0) {
-    bytes[--index] = address & 0XFF;
-    address >>= 8;
-  }
-
-  while (index < count) {
-    if (index > 0) STR_PRINTF("%c", ':');
-    STR_PRINTF("%02X", bytes[index++]);
-  }
-STR_END_FORMATTER
-
 static const char *
 makeBluetoothResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
   size_t length;
@@ -66,7 +49,7 @@ makeBluetoothResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
   {
     uint64_t address = bthGetAddress(handle->connection);
     STR_PRINTF("address%c", PARAMETER_ASSIGNMENT_CHARACTER);
-    STR_FORMAT(formatBluetoothAddress, address);
+    STR_FORMAT(bthFormatAddress, address);
     STR_PRINTF("%c", DEVICE_PARAMETER_SEPARATOR);
   }
 
