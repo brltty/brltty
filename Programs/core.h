@@ -92,6 +92,7 @@ extern char *opt_attributesTable;
 extern char *opt_contractionTable;
 extern char *opt_keyboardTable;
 
+extern char *opt_brailleDevice;
 extern int opt_releaseDevice;
 
 extern int isWordBreak (const ScreenCharacter *characters, int x);

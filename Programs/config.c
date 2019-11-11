@@ -176,7 +176,7 @@ static char *opt_updatableDirectory;
 static char *opt_writableDirectory;
 static char *opt_driversDirectory;
 
-static char *opt_brailleDevice;
+char *opt_brailleDevice;
 int opt_releaseDevice;
 static char **brailleDevices = NULL;
 static const char *brailleDevice = NULL;
@@ -1866,14 +1866,27 @@ changeBrailleParameters (const char *parameters) {
 }
 int
 changeBrailleDevice (const char *device) {
-  char **newDevices = splitString(device, ',', NULL);
+  char *newDevice = strdup(device);
 
-  if (newDevices) {
-    char **oldDevices = brailleDevices;
+  if (newDevice) {
+    char **newDevices = splitString(newDevice, PARAMETER_SEPARATOR_CHARACTER, NULL);
 
-    brailleDevices = newDevices;
-    if (oldDevices) deallocateStrings(oldDevices);
-    return 1;
+    if (newDevices) {
+      char *oldDevice = opt_brailleDevice;
+      char **oldDevices = brailleDevices;
+
+      opt_brailleDevice = newDevice;
+      brailleDevices = newDevices;
+
+      if (oldDevice) free(oldDevice);
+      if (oldDevices) deallocateStrings(oldDevices);
+
+      return 1;
+    }
+
+    free(newDevice);
+  } else {
+    logMallocError();
   }
 
   return 0;

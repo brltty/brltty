@@ -1337,6 +1337,18 @@ static int param_displaySize_read(Connection *c, brlapi_param_t param, uint64_t 
   return 1;
 }
 
+/* BRLAPI_PARAM_DEVICE_IDENTIFIER */
+static int param_deviceIdentifier_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  param_readString(opt_brailleDevice, data, size);
+  return 1;
+}
+
+static int param_deviceIdentifier_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+{
+  return param_writeString(changeBrailleDevice, data, size);
+}
+
 /* BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE */
 static int param_computerBrailleCellSize_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
@@ -1573,7 +1585,8 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_DEVICE_IDENTIFIER] = {
     .global = 1,
-    .read = param_unimplemented_read,
+    .read = param_deviceIdentifier_read,
+    .write = param_deviceIdentifier_write,
   },
 
   [BRLAPI_PARAM_DEVICE_SPEED] = {
