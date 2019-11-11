@@ -1351,6 +1351,19 @@ static int param_deviceIdentifier_write(Connection *c, brlapi_param_t param, uin
   return param_writeString(changeBrailleDevice, data, size);
 }
 
+/* BRLAPI_PARAM_DEVICE_ONLINE */
+static int param_deviceOnline_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  brlapi_param_deviceOnline_t *deviceOnline = data;
+
+  lockMutex(&apiDriverMutex);
+  *deviceOnline = driverConstructed;
+  unlockMutex(&apiDriverMutex);
+
+  *size = sizeof(*deviceOnline);
+  return 1;
+}
+
 /* BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE */
 static int param_computerBrailleCellSize_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
@@ -1614,7 +1627,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_DEVICE_ONLINE] = {
     .global = 1,
-    .read = param_unimplemented_read,
+    .read = param_deviceOnline_read,
   },
 
 //Input Parameters
