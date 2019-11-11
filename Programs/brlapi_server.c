@@ -41,6 +41,7 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <locale.h>
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
@@ -1524,6 +1525,22 @@ static int param_literaryBrailleTable_write(Connection *c, brlapi_param_t param,
   return param_writeString(changeContractionTable, data, size);
 }
 
+/* BRLAPI_PARAM_MESSAGE_LOCALE */
+static int param_messageLocale_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  param_readString(setlocale(LC_ALL, NULL), data, size);
+  return 1;
+}
+
+static int changeLocale (const char *locale) {
+  return !!setlocale(LC_ALL, locale);
+}
+
+static int param_messageLocale_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+{
+  return param_writeString(changeLocale, data, size);
+}
+
 /* For parameters yet to be implemented */
 static int param_unimplemented_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
@@ -1728,8 +1745,8 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_MESSAGE_LOCALE] = {
     .global = 1,
-    .read = param_unimplemented_read,
-    .write = param_unimplemented_write,
+    .read = param_messageLocale_read,
+    .write = param_messageLocale_write,
   },
 };
 
