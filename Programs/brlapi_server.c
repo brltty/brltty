@@ -1375,6 +1375,23 @@ static int param_deviceIdentifier_write(Connection *c, brlapi_param_t param, uin
   return param_writeString(c, changeBrailleDevice, data, size);
 }
 
+/* BRLAPI_PARAM_DEVICE_SPEED */
+static int param_deviceSpeed_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+{
+  brlapi_param_deviceSpeed_t *deviceSpeed = data;
+
+  lockMutex(&apiDriverMutex);
+    if (disp) {
+      if (disp->gioEndpoint) {
+        *deviceSpeed = gioGetBytesPerSecond(disp->gioEndpoint);
+      }
+    }
+  unlockMutex(&apiDriverMutex);
+
+  *size = sizeof(*deviceSpeed);
+  return 1;
+}
+
 /* BRLAPI_PARAM_DEVICE_ONLINE */
 static int param_deviceOnline_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
@@ -1656,7 +1673,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_DEVICE_SPEED] = {
     .global = 1,
-    .read = param_unimplemented_read,
+    .read = param_deviceSpeed_read,
   },
 
   [BRLAPI_PARAM_DEVICE_ONLINE] = {
