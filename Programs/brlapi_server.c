@@ -1243,14 +1243,15 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 typedef int (*paramRead)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size);
 typedef int (*paramWrite)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size);
 
-static inline void param_readString(const char *string, void *data, size_t *size)
+static void param_readString(const char *string, void *data, size_t *size)
 {
+  if (!string) string = "";
   size_t length = strlen(string);
   if (length < *size) *size = length;
   memcpy(data, string, *size);
 }
 
-static inline int param_writeString(int (*handler) (const char *string), void *data, size_t size)
+static int param_writeString(int (*handler) (const char *string), void *data, size_t size)
 {
   char string[size + 1];
   memcpy(string, data, size);
@@ -1532,13 +1533,13 @@ static int param_messageLocale_read(Connection *c, brlapi_param_t param, uint64_
   return 1;
 }
 
-static int changeLocale (const char *locale) {
+static int changeMessageLocale (const char *locale) {
   return !!setlocale(LC_ALL, locale);
 }
 
 static int param_messageLocale_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
-  return param_writeString(changeLocale, data, size);
+  return param_writeString(changeMessageLocale, data, size);
 }
 
 /* For parameters yet to be implemented */
