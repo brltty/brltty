@@ -217,7 +217,7 @@ int
 replaceTextTable (const char *directory, const char *name) {
   TextTable *newTable = NULL;
 
-  if (name) {
+  if (name && *name) {
     char *path;
 
     if ((path = makeTextTablePath(directory, name))) {
@@ -235,7 +235,6 @@ replaceTextTable (const char *directory, const char *name) {
 
   if (newTable) {
     TextTable *oldTable = textTable;
-
     textTable = newTable;
     destroyTextTable(oldTable);
     return 1;
