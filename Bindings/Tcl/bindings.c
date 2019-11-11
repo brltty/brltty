@@ -619,7 +619,7 @@ FUNCTION_HANDLER(session, parameter) {
     switch (properties->type) {
       case BRLAPI_PARAM_TYPE_STRING: {
         const char *string = Tcl_GetString(value);
-        TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, string, (strlen(string) + 1)));
+        TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, string, strlen(string)));
         break;
       }
 
