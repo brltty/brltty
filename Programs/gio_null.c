@@ -39,7 +39,7 @@ disconnectNullResource (GioHandle *handle) {
 static const char *
 makeNullResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
   STR_BEGIN(buffer, size);
-  STR_PRINTF("null:");
+  STR_PRINTF("%s%c", "null", PARAMETER_QUALIFIER_CHARACTER);
   STR_END;
   return buffer;
 }
