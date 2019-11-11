@@ -1286,11 +1286,12 @@ static int param_clientPriority_write(Connection *c, brlapi_param_t param, uint6
   CHECKERR((size == sizeof(*clientPriority)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for client priority");
 
   lockMutex(&apiConnectionsMutex);
-  c->client_priority = *clientPriority;
-  if (c->tty) {
-    __removeConnection(c);
-    __addConnectionSorted(c,c->tty->connections);
-  }
+    c->client_priority = *clientPriority;
+
+    if (c->tty) {
+      __removeConnection(c);
+      __addConnectionSorted(c,c->tty->connections);
+    }
   unlockMutex(&apiConnectionsMutex);
 
   return 1;
@@ -1320,14 +1321,18 @@ static int param_driverVersion_read(Connection *c, brlapi_param_t param, uint64_
 /* BRLAPI_PARAM_DEVICE_MODEL */
 static int param_deviceModel_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  if (disp) {
-    if (disp->keyBindings) {
-      param_readString(disp->keyBindings, data, size);
-      return 1;
+  lockMutex(&apiDriverMutex);
+    if (disp) {
+      if (disp->keyBindings) {
+        param_readString(disp->keyBindings, data, size);
+        goto done;
+      }
     }
-  }
 
-  *size = 0;
+    *size = 0;
+done:
+  unlockMutex(&apiDriverMutex);
+
   return 1;
 }
 
@@ -1335,8 +1340,12 @@ static int param_deviceModel_read(Connection *c, brlapi_param_t param, uint64_t 
 static int param_displaySize_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   brlapi_param_displaySize_t *displaySize = data;
-  displaySize->columns = ntohl(displayDimensions[0]);
-  displaySize->rows = ntohl(displayDimensions[1]);
+
+  lockMutex(&apiDriverMutex);
+    displaySize->columns = ntohl(displayDimensions[0]);
+    displaySize->rows = ntohl(displayDimensions[1]);
+  unlockMutex(&apiDriverMutex);
+
   *size = sizeof(*displaySize);
   return 1;
 }
@@ -1344,15 +1353,19 @@ static int param_displaySize_read(Connection *c, brlapi_param_t param, uint64_t 
 /* BRLAPI_PARAM_DEVICE_IDENTIFIER */
 static int param_deviceIdentifier_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  if (disp) {
-    if (disp->gioEndpoint) {
-      gioMakeResourceIdentifier(disp->gioEndpoint, data, *size);
-      *size = strlen(data);
-      return 1;
+  lockMutex(&apiDriverMutex);
+    if (disp) {
+      if (disp->gioEndpoint) {
+        gioMakeResourceIdentifier(disp->gioEndpoint, data, *size);
+        *size = strlen(data);
+        goto done;
+      }
     }
-  }
 
-  *size = 0;
+    *size = 0;
+done:
+  unlockMutex(&apiDriverMutex);
+
   return 1;
 }
 
@@ -1367,7 +1380,7 @@ static int param_deviceOnline_read(Connection *c, brlapi_param_t param, uint64_t
   brlapi_param_deviceOnline_t *deviceOnline = data;
 
   lockMutex(&apiDriverMutex);
-  *deviceOnline = driverConstructed;
+    *deviceOnline = driverConstructed;
   unlockMutex(&apiDriverMutex);
 
   *size = sizeof(*deviceOnline);
@@ -1395,7 +1408,7 @@ static int param_retainDots_read(Connection *c, brlapi_param_t param, uint64_t s
 static int param_retainDots_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 {
   brlapi_param_retainDots_t *retainDots = data;
-  CHECKERR( (size == sizeof(*retainDots)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
+  CHECKERR((size == sizeof(*retainDots)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for retainDots value");
   c->retainDots = *retainDots;
   return 1;
 }
@@ -1404,13 +1417,15 @@ static int param_retainDots_write(Connection *c, brlapi_param_t param, uint64_t 
 static int param_renderedCells_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
   /* FIXME: should provide local output of the connection only! */
-  if (disp) {
-    *size = displaySize;
-    memcpy(data, disp->buffer, *size);
-  } else {
-    *size = 0;
-    WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "unsupported parameter %u", param);
-  }
+  lockMutex(&apiDriverMutex);
+    if (disp) {
+      if (displaySize < *size) *size = displaySize;
+      memcpy(data, disp->buffer, *size);
+    } else {
+      *size = 0;
+    }
+  unlockMutex(&apiDriverMutex);
+
   return 1;
 }
 
@@ -1469,51 +1484,59 @@ static int param_addKeyCode (const KeyNameEntry *kne, void *data)
 
 static int param_availableKeyCodes_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  if (disp) {
-    KEY_NAME_TABLES_REFERENCE keys = disp->keyNames;
+  lockMutex(&apiDriverMutex);
+    if (disp) {
+      KEY_NAME_TABLES_REFERENCE keys = disp->keyNames;
 
-    if (keys) {
-      *size /= sizeof(brlapi_param_keyCode_t);
-      *size *= sizeof(brlapi_param_keyCode_t);
+      if (keys) {
+        *size /= sizeof(brlapi_param_keyCode_t);
+        *size *= sizeof(brlapi_param_keyCode_t);
 
-      param_addKeyCode_t akc = {
-        .next = data,
-        .end = data + *size
-      };
+        param_addKeyCode_t akc = {
+          .next = data,
+          .end = data + *size
+        };
 
-      forEachKeyName(keys, param_addKeyCode, &akc);
-      *size = akc.next - data;
-      return 1;
+        forEachKeyName(keys, param_addKeyCode, &akc);
+        *size = akc.next - data;
+        goto done;
+      }
     }
-  }
 
-  *size = 0;
+    *size = 0;
+done:
+  unlockMutex(&apiDriverMutex);
+
   return 1;
 }
 
 /* BRLAPI_PARAM_KEY_SHORT_NAME */
 static int param_keyShortName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 {
-  if (disp) {
-    KeyTable *table = brl.keyTable;
+  lockMutex(&apiDriverMutex);
+    if (disp) {
+      KeyTable *table = disp->keyTable;
 
-    if (table) {
-      if (subparam <= UINT16_MAX) {
-        const KeyValue keyValue = {
-          .group = subparam >> 8,
-          .number = subparam & 0XFF
-        };
+      if (table) {
+        if (subparam <= UINT16_MAX) {
+          const KeyValue keyValue = {
+            .group = subparam >> 8,
+            .number = subparam & 0XFF
+          };
 
-        const KeyNameEntry *kne = findKeyNameEntry(table, &keyValue);
-        if (kne) {
-          param_readString(kne->name, data, size);
-          return 1;
+          const KeyNameEntry *kne = findKeyNameEntry(table, &keyValue);
+          if (kne) {
+            param_readString(kne->name, data, size);
+            goto done;
+          }
         }
       }
     }
-  }
 
-  *size = 0;
+    *size = 0;
+done:
+  unlockMutex(&apiDriverMutex);
+
   return 1;
 }
 
