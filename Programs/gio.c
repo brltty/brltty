@@ -232,6 +232,17 @@ gioMakeResourceIdentifier (GioEndpoint *endpoint, char *buffer, size_t size) {
 }
 
 char *
+gioGetResourceIdentifier (GioEndpoint *endpoint) {
+  char buffer[0X100];
+  const char *identifier = gioMakeResourceIdentifier(endpoint, buffer, sizeof(buffer));
+  if (!identifier) return NULL;
+
+  char *copy = strdup(identifier);
+  if (!copy) logMallocError();
+  return copy;
+}
+
+char *
 gioGetResourceName (GioEndpoint *endpoint) {
   char *name = NULL;
   GioGetResourceNameMethod *method = endpoint->methods->getResourceName;
