@@ -53,6 +53,7 @@ joinStrings (const char *const *strings, int count) {
 
 int
 changeStringSetting (char **setting, const char *value) {
+  if (value == *setting) return 1;
   char *string;
 
   if (!value) {
