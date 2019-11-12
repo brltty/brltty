@@ -1879,10 +1879,10 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   }
 
   if (flags & BRLAPI_PARAMF_GLOBAL) {
-    pthread_mutex_lock(&paramMutex);
+    lockMutex(&paramMutex);
     /* TODO: broadcast new value */
     /* Or will perhaps rather be reported by the core through handleParamUpdate */
-    pthread_mutex_unlock(&paramMutex);
+    unlockMutex(&paramMutex);
   } else {
     handleParamUpdate(c, param, subparam, flags, paramValue->data, size);
   }
@@ -1943,7 +1943,7 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
   paramValue->subparam_lo = htonl(subparam & 0xfffffffful);
   memcpy(p, data, size);
   size += sizeof(flags) + sizeof(param) + sizeof(subparam);
-  pthread_mutex_lock(&paramMutex);
+  lockMutex(&paramMutex);
   if (!(flags & BRLAPI_PARAMF_GLOBAL)) {
     sendConnectionParamUpdate(c,param,subparam,flags,paramValue,size);
   } else {
@@ -1952,7 +1952,7 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
     sendParamUpdate(&notty,param,subparam,flags,paramValue,size);
     unlockMutex(&apiConnectionsMutex);
   }
-  pthread_mutex_unlock(&paramMutex);
+  unlockMutex(&paramMutex);
 }
 
 void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
@@ -2016,7 +2016,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "subscribe and unsubscribe flags both set");
     return 0;
   }
-  pthread_mutex_lock(&paramMutex);
+  lockMutex(&paramMutex);
   if (flags & BRLAPI_PARAMF_SUBSCRIBE) {
     /* subscribe to parameter updates */
     struct Subscription *s;
@@ -2045,7 +2045,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
       free(s);
     } else {
       WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "was not subscribed");
-      pthread_mutex_unlock(&paramMutex);
+      unlockMutex(&paramMutex);
       unlockMutex(&apiConnectionsMutex);
       return 0;
     }
@@ -2071,7 +2071,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   } else { /* Ack with ack */
     writeAck(c->fd);
   }
-  pthread_mutex_unlock(&paramMutex);
+  unlockMutex(&paramMutex);
   return 0;
 }
 
