@@ -1240,14 +1240,14 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
   return 0;
 }
 
-/* On success, this should fill 'size' and return 1.
- * On error, this should use WERR to send an error to the client, and return 0. */
+/* On success, this should fill 'data', adjust 'size', and return NULL.
+ * On failure, this should return an error message string. */
 #define PARAM_READER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 typedef PARAM_READER_DECLARATION(ParamReader);
 #define PARAM_READER(name) static PARAM_READER_DECLARATION(param_ ## name ## _read)
 
-/* On success, this should return 1.
- * On error, this should use WERR to send an error to the client, and return 0. */
+/* On success, this should return NULL.
+ * On failure, this should return an error message string. */
 #define PARAM_WRITER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 typedef PARAM_WRITER_DECLARATION(ParamWriter);
 #define PARAM_WRITER(name) static PARAM_WRITER_DECLARATION(param_ ## name ## _write)
