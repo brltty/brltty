@@ -1074,7 +1074,7 @@ int brlapi_setParameter(brlapi_param_t parameter, uint64_t subparam, int global,
 #endif
 int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, const void* data, size_t len);
 
-/* brlapi_paramCallback */
+/* brlapi_paramCallback_t */
 /** Callback for parameter changes
  *
  * When a parameter gets changed, application-defined callbacks set by the
@@ -1089,14 +1089,14 @@ int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint
  * This callback only gets called when the application calls some brlapi_
  * function (i.e. BrlAPI gets direct control of the execution).
  */
-typedef void (*brlapi_paramCallback)(brlapi_param_t parameter, uint64_t subparam, int global, void *priv, const void *data, size_t len);
+typedef void (*brlapi_paramCallback_t)(brlapi_param_t parameter, uint64_t subparam, int global, void *priv, const void *data, size_t len);
 
-/* brlapi_paramCallbackDescriptor */
+/* brlapi_paramCallbackDescriptor_t */
 /** Type for callback descriptors
  * This is returned by brlapi_watchParameter, to be passed to
  * brlapi_unwatchParameter.
  */
-typedef void *brlapi_paramCallbackDescriptor;
+typedef void *brlapi_paramCallbackDescriptor_t;
 
 /* brlapi_watchParameter */
 /** Set a parameter change callback
@@ -1122,9 +1122,9 @@ typedef void *brlapi_paramCallbackDescriptor;
  * brlapi_watchParameter, for providing the initial value
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-brlapi_paramCallbackDescriptor brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len);
+brlapi_paramCallbackDescriptor_t brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
 #endif
-brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len);
+brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
 
 /* brlapi_unwatchParameter */
 /** Clear a parameter change callback
@@ -1138,9 +1138,9 @@ brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *handle, b
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_unwatchParameter(brlapi_paramCallbackDescriptor descriptor);
+int brlapi_unwatchParameter(brlapi_paramCallbackDescriptor_t descriptor);
 #endif
-int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor descriptor);
+int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor_t descriptor);
 
 /* brlapi_cacheParameter */
 /**

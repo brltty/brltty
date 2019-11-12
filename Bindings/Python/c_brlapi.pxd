@@ -114,7 +114,7 @@ cdef extern from "Programs/brlapi.h":
 	int brlapi__sendRaw(brlapi_handle_t *, void*, int)
 
 	ctypedef int brlapi_param_t
-	ctypedef void *brlapi_paramCallbackDescriptor
+	ctypedef void *brlapi_paramCallbackDescriptor_t
 
 	ctypedef int brlapi_param_type_t
 	ctypedef struct brlapi_param_properties_t:
@@ -126,9 +126,9 @@ cdef extern from "Programs/brlapi.h":
 	void *brlapi__getParameterAlloc(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, size_t *) nogil
 	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t) nogil
 	const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter) nogil
-	brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, brlapi_paramCallback, void *, void*, size_t);
+	brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, brlapi_paramCallback_t, void *, void*, size_t);
 	int brlapi__unwatchParameter(brlapi_handle_t *,
-	brlapi_paramCallbackDescriptor)
+	brlapi_paramCallbackDescriptor_t)
 
 	brlapi_error_t* brlapi_error_location()
 	char* brlapi_strerror(brlapi_error_t*)
@@ -145,7 +145,7 @@ cdef extern from "bindings.h":
 	void brlapi_protocolExceptionInit(brlapi_handle_t *)
 
 	ctypedef struct brlapi_python_paramCallbackDescriptor_t:
-		brlapi_paramCallbackDescriptor brlapi_descr
+		brlapi_paramCallbackDescriptor_t brlapi_descr
 		PyObject *callback
 
 	ctypedef struct brlapi_python_callbackData_t:

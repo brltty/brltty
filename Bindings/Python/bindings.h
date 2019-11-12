@@ -22,7 +22,7 @@
 #include "brlapi.h"
 
 typedef struct {
-  brlapi_paramCallbackDescriptor brlapi_descr;
+  brlapi_paramCallbackDescriptor_t brlapi_descr;
   PyObject *callback;
 } brlapi_python_paramCallbackDescriptor_t;
 
