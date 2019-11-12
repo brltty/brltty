@@ -1025,7 +1025,8 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
  *
  * brlapi_getParameter gets the current content of a parameter
  *
- * \param parameter is the parameter whose content shall be got;
+ * \param parameter is the parameter whose content shall be gotten;
+ * \param subparam is a specific instance of the parameter;
  * \param global specifies whether the global value should be returned instead of the local value;
  * \param data is a buffer where content of the parameter shall be stored;
  * \param len is the size of the buffer.
@@ -1043,7 +1044,8 @@ ssize_t brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, 
  * brlapi_getParameterAlloc gets the current content of a parameter, by returning it as a newly-allocated buffer.
  * The buffer is allocated to one byte more than the parameter value. This byte is set to zero. This allows, for string parameters, to be able to immediately use it as a C string.
  *
- * \param parameter is the parameter whose content shall be got;
+ * \param parameter is the parameter whose content shall be gotten;
+ * \param subparam is a specific instance of the parameter;
  * \param global specifies whether the global value should be returned instead of the local value;
  * \param len is the address where to store the size of the parameter value.
  *
@@ -1060,6 +1062,7 @@ void *brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t paramete
  * brlapi_setParameter sets the content of a parameter
  *
  * \param parameter is the parameter to set;
+ * \param subparam is a specific instance of the parameter;
  * \param global specifies whether the global value should be set instead of the local value;
  * \param data is a buffer containing the data to store in the parameter;
  * \param len is the size of the data.
@@ -1102,9 +1105,10 @@ typedef void *brlapi_paramCallbackDescriptor;
  * given parameter changes, the given function is called.
  *
  * \param parameter is the parameter to watch;
+ * \param subparam is a specific instance of the parameter;
  * \param global specifies whether it is the global value which should be monitored, or the local value;
  * \param func is the function to call on parameter change;
- * \param priv is a void pointer which will be passed as such to the function
+ * \param priv is a void pointer which will be passed as such to the function;
  * \param data is a buffer where the current content of the parameter shall be
  * stored;
  * \param len is the size of the buffer.
@@ -1129,8 +1133,7 @@ brlapi_paramCallbackDescriptor brlapi__watchParameter(brlapi_handle_t *handle, b
  * callback function previously registered with brlapi_watchParameter will
  * not be called any longer.
  *
- * \param brlapi_paramCallbackDescriptor descriptor of the callback to be
- * removed.
+ * \param descriptor refers to the callback to be removed.
  *
  * \return 0 on success, -1 on error.
  */
@@ -1146,9 +1149,10 @@ int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescri
  * This is useful for parameters that the application reads often e.g. displaySize
  * When desactivated (default), getParameter requests value from server which is expensive but avoids receiving a lot of updates. This is useful when application reads parameters seldomly
  * \return nothing
- * \param parameter is the parameter to be cached or not
+ * \param parameter is the parameter to be cached or not;
+ * \param subparam is a specific instance of the parameter;
  * \param global specifies whether it is the global value which should be cached, or the local value;
- * \param cached whether this parameter should be cached or not
+ * \param cached whether this parameter should be cached or not.
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
