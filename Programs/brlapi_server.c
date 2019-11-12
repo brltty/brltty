@@ -1243,13 +1243,15 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 
 /* On success, this should fill 'size' and return 1.
  * On error, this should use WERR to send an error to the client, and return 0. */
-typedef const char *(*ParamReader)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size);
-#define PARAM_READER(name) static const char *param_ ## name ## _read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+#define PARAM_READER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+typedef PARAM_READER_DECLARATION(ParamReader);
+#define PARAM_READER(name) static PARAM_READER_DECLARATION(param_ ## name ## _read)
 
 /* On success, this should return 1.
  * On error, this should use WERR to send an error to the client, and return 0. */
-typedef const char *(*ParamWriter)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size);
-#define PARAM_WRITER(name) static const char *param_ ## name ## _write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+#define PARAM_WRITER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+typedef PARAM_WRITER_DECLARATION(ParamWriter);
+#define PARAM_WRITER(name) static PARAM_WRITER_DECLARATION(param_ ## name ## _write)
 
 static void param_readString(const char *string, void *data, size_t *size)
 {
@@ -1624,8 +1626,8 @@ PARAM_WRITER(unimplemented)
 typedef struct {
   unsigned local:1;
   unsigned global:1;
-  ParamReader read;
-  ParamWriter write;
+  ParamReader *read;
+  ParamWriter *write;
 } ParamDispatch;
 
 static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
@@ -1848,7 +1850,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
     return 0;
   }
 
-  ParamWriter writeHandler = paramDispatch[param].write;
+  ParamWriter *writeHandler = paramDispatch[param].write;
   /* Check against read-only parameters */
   if (!writeHandler) {
     WERR(c->fd, BRLAPI_ERROR_READONLY_PARAMETER, "parameter %u not available for writing", param);
@@ -1949,7 +1951,7 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
 
 void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
 {
-  ParamReader readHandler = paramDispatch[parameter].read;
+  ParamReader *readHandler = paramDispatch[parameter].read;
 
   if (readHandler) {
     unsigned char data[0X1000];
@@ -1980,7 +1982,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     return 0;
   }
 
-  ParamReader readHandler = paramDispatch[param].read;
+  ParamReader *readHandler = paramDispatch[param].read;
   /* Check against non-readable parameters */
   if (!readHandler) {
     WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for reading", param);
