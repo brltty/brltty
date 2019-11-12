@@ -780,6 +780,8 @@ changeTextTable (const char *name) {
     if (replaceTextTable(opt_tablesDirectory, newName)) {
       free(opt_textTable);
       opt_textTable = newName;
+
+      api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE, 0);
       return 1;
     }
 
@@ -850,6 +852,7 @@ changeContractionTable (const char *name) {
   free(opt_contractionTable);
   opt_contractionTable = newName;
 
+  api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE_TABLE, 0);
   return 1;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -2786,9 +2789,8 @@ brlttyStart (void) {
   /* handle text table option */
   if (*opt_textTable) {
     if (strcmp(opt_textTable, optionOperand_autodetect) == 0) {
-      char *name = selectTextTable(opt_tablesDirectory);
-
       changeStringSetting(&opt_textTable, "");
+      char *name = selectTextTable(opt_tablesDirectory);
 
       if (name) {
         if (replaceTextTable(opt_tablesDirectory, name)) {
