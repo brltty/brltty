@@ -30,10 +30,6 @@
 #endif /* HAVE_POSIX_THREADS */
 
 #include "log.h"
-#include "strfmt.h"
-#include "parse.h"
-#include "device.h"
-#include "bitfield.h"
 #include "parameters.h"
 #include "async_wait.h"
 #include "io_generic.h"
@@ -54,61 +50,7 @@ disconnectUsbResource (GioHandle *handle) {
 
 static const char *
 makeUsbResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
-  UsbDevice *device = handle->channel->device;
-
-  UsbDeviceDescriptor descriptor;
-  if (!usbGetDeviceDescriptor(device, &descriptor)) return NULL;
-
-  size_t length;
-  STR_BEGIN(buffer, size);
-  STR_PRINTF("%s%c", USB_DEVICE_QUALIFIER, PARAMETER_QUALIFIER_CHARACTER);
-
-  {
-    uint16_t vendorIdentifier = getLittleEndian16(descriptor.idVendor);
-
-    if (vendorIdentifier) {
-      STR_PRINTF(
-        "vendorIdentifier%c0X%04X%c",
-        PARAMETER_ASSIGNMENT_CHARACTER, vendorIdentifier, DEVICE_PARAMETER_SEPARATOR
-      );
-    }
-  }
-
-  {
-    uint16_t productIdentifier = getLittleEndian16(descriptor.idProduct);
-
-    if (productIdentifier) {
-      STR_PRINTF(
-        "productIdentifier%c0X%04X%c",
-        PARAMETER_ASSIGNMENT_CHARACTER, productIdentifier, DEVICE_PARAMETER_SEPARATOR
-      );
-    }
-  }
-
-  {
-    char *serialNumber = usbGetSerialNumber(device, 1000);
-
-    if (serialNumber) {
-      if (!strchr(serialNumber, DEVICE_PARAMETER_SEPARATOR)) {
-        STR_PRINTF(
-          "serialNumber%c%s%c",
-          PARAMETER_ASSIGNMENT_CHARACTER, serialNumber, DEVICE_PARAMETER_SEPARATOR
-        );
-      }
-
-      free(serialNumber);
-    }
-  }
-
-  length = STR_LENGTH;
-  STR_END;
-
-  {
-    char *last = &buffer[length] - 1;
-    if (*last == DEVICE_PARAMETER_SEPARATOR) *last = 0;
-  }
-
-  return buffer;
+  return usbMakeChannelIdentifier(handle->channel, buffer, size);
 }
 
 static char *

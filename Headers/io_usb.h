@@ -311,6 +311,7 @@ typedef struct {
 
 extern UsbChannel *usbOpenChannel (const UsbChannelDefinition *definitions, const char *identifier);
 extern void usbCloseChannel (UsbChannel *channel);
+extern const char *usbMakeChannelIdentifier (UsbChannel *channel, char *buffer, size_t size);
 
 extern const char *const *usbGetDriverCodes (uint16_t vendor, uint16_t product);
 
