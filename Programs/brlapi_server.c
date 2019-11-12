@@ -1959,23 +1959,27 @@ void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
   const ParamDispatch *pd = param_getDispatch(parameter);
 
   if (pd) {
-    ParamReader *readHandler = pd->read;
+    if (pd->global) {
+      ParamReader *readHandler = pd->read;
 
-    if (readHandler) {
-      unsigned char data[0X1000];
-      size_t size = sizeof(data);
-      const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
+      if (readHandler) {
+        unsigned char data[0X1000];
+        size_t size = sizeof(data);
+        const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
 
-      if (error) {
-        logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d read error: %s", parameter, error);
+        if (error) {
+          logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d read error: %s", parameter, error);
+        } else {
+          handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+        }
       } else {
-        handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+        logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d is not readable", parameter);
       }
     } else {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d not readable", parameter);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d is not global", parameter);
     }
   } else {
-    logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d out of range", parameter);
+    logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d is out of range", parameter);
   }
 }
 
