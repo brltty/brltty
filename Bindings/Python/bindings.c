@@ -21,6 +21,9 @@
  * the Python bindings */
 
 
+/* include Python.h first in order to prevent a redefine of _POSIX_C_SOURCE */
+#include <Python.h>
+
 #include "brlapi.h"
 
 /* a kludge to get around a broken MinGW <pthread.h> header */
@@ -36,8 +39,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-
-#include <Python.h>
 
 #include "bindings.h"
 
