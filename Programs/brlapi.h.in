@@ -995,7 +995,9 @@ int BRLAPI_STDCALL brlapi_resumeDriver(void);
 int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 /** @} */
 
-/** \defgroup brlapi_parameters Parameters
+#include "brlapi_param.h"
+
+/** \defgroup brlapi_paramFunctions Parameters
  * \brief How to manage BrlAPI parameters
  *
  * There are several kinds of parameters:
@@ -1017,8 +1019,6 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
  * and on each change of a given parameter, by using brlapi_watchParameter().
  *
  * @{ */
-
-#include "brlapi_param.h"
 
 /* brlapi_getParameter */
 /** Get the content of a parameter
