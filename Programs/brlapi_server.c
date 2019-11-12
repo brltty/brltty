@@ -1241,13 +1241,13 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 }
 
 /* On success, this should fill 'data', adjust 'size', and return NULL.
- * On failure, this should return an error message string. */
+ * On failure, this should return a non-allocated error message string. */
 #define PARAM_READER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 typedef PARAM_READER_DECLARATION(ParamReader);
 #define PARAM_READER(name) static PARAM_READER_DECLARATION(param_ ## name ## _read)
 
 /* On success, this should return NULL.
- * On failure, this should return an error message string. */
+ * On failure, this should return a non-allocated error message string. */
 #define PARAM_WRITER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 typedef PARAM_WRITER_DECLARATION(ParamWriter);
 #define PARAM_WRITER(name) static PARAM_WRITER_DECLARATION(param_ ## name ## _write)
@@ -1817,6 +1817,12 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 };
 
+static inline const ParamDispatch *param_getDispatch(brlapi_param_t parameter)
+{
+  if (parameter >= ARRAY_COUNT(paramDispatch)) return NULL;
+  return &paramDispatch[parameter];
+}
+
 static int checkParamLocalGlobal(Connection *c, brlapi_param_t param, uint32_t flags)
 {
   if (flags & BRLAPI_PARAMF_GLOBAL) {
@@ -1866,7 +1872,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   {
     const char *error = writeHandler(c, param, subparam, flags, paramValue->data, size);
     if (error) {
-      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "%s", error);
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %d write error: %s", param, error);
       return 0;
     }
   }
@@ -1950,18 +1956,26 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
 
 void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
 {
-  ParamReader *readHandler = paramDispatch[parameter].read;
+  const ParamDispatch *pd = param_getDispatch(parameter);
 
-  if (readHandler) {
-    unsigned char data[0X1000];
-    size_t size = sizeof(data);
-    const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
+  if (pd) {
+    ParamReader *readHandler = pd->read;
 
-    if (error) {
+    if (readHandler) {
+      unsigned char data[0X1000];
+      size_t size = sizeof(data);
+      const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
+
+      if (error) {
+        logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d read error: %s", parameter, error);
+      } else {
+        handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+      }
     } else {
-      handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d not readable", parameter);
     }
   } else {
+    logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d out of range", parameter);
   }
 }
 
@@ -2043,7 +2057,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     const char *error = readHandler(c, param, subparam, flags, paramValue->data, &size);
 
     if (error) {
-      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "%s", error);
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %d read error: %s", param, error);
     } else {
       _brlapi_htonParameter(param, paramValue, size);
       size += sizeof(flags) + sizeof(param) + sizeof(subparam);
