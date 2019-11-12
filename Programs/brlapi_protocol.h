@@ -142,13 +142,15 @@ typedef struct {
 /** Flags for parameter values */
 #define BRLAPI_PVF_GLOBAL            0X01    /** Value is the global value */
 
+#define BRLAPI_MAXPARAMSIZE (BRLAPI_MAXPACKETSIZE - (sizeof(uint32_t) + sizeof(brlapi_param_t) + 2*sizeof(uint32_t)))
+
 /** Structure of Parameter value or update */
 typedef struct {
   uint32_t flags; /** Flags to tell how value was gotten */
   brlapi_param_t param; /** Which parameter being transmitted */
   uint32_t subparam_hi; /** Which sub-parameter being transmitted, hi 32bits */
   uint32_t subparam_lo; /** Which sub-parameter being transmitted, lo 32bits */
-  unsigned char data[BRLAPI_MAXPACKETSIZE - (sizeof(uint32_t) + sizeof(brlapi_param_t) + 2*sizeof(uint32_t))]; /** Content of the parameter */
+  unsigned char data[BRLAPI_MAXPARAMSIZE]; /** Content of the parameter */
 } brlapi_paramValuePacket_t;
 
 /** Flags for parameter requests */
