@@ -235,7 +235,7 @@ static struct socketInfo {
 
 static int serverSocketCount; /* number of sockets */
 static int serverSocketsPending; /* number of sockets not opened yet */
-pthread_mutex_t serverSocketsMutex;
+pthread_mutex_t apiSocketsMutex;
 
 /* Protects from connection addition / remove from the server thread */
 pthread_mutex_t apiConnectionsMutex;
@@ -248,7 +248,7 @@ pthread_mutex_t apiRawMutex;
 static Connection *rawConnection = NULL;
 static Connection *suspendConnection = NULL;
 
-static pthread_mutex_t paramMutex;
+pthread_mutex_t apiParamMutex;
 
 /* mutex lock order is as follows:
  * 1. apiConnectionsMutex
@@ -1878,10 +1878,10 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   }
 
   if (flags & BRLAPI_PARAMF_GLOBAL) {
-    lockMutex(&paramMutex);
+    lockMutex(&apiParamMutex);
     /* TODO: broadcast new value */
     /* Or will perhaps rather be reported by the core through handleParamUpdate */
-    unlockMutex(&paramMutex);
+    unlockMutex(&apiParamMutex);
   } else {
     handleParamUpdate(c, param, subparam, flags, paramValue->data, size);
   }
@@ -1942,7 +1942,7 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
   paramValue->subparam_lo = htonl(subparam & 0xfffffffful);
   memcpy(p, data, size);
   size += sizeof(flags) + sizeof(param) + sizeof(subparam);
-  lockMutex(&paramMutex);
+  lockMutex(&apiParamMutex);
   if (!(flags & BRLAPI_PARAMF_GLOBAL)) {
     sendConnectionParamUpdate(c,param,subparam,flags,paramValue,size);
   } else {
@@ -1951,7 +1951,7 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
     sendParamUpdate(&notty,param,subparam,flags,paramValue,size);
     unlockMutex(&apiConnectionsMutex);
   }
-  unlockMutex(&paramMutex);
+  unlockMutex(&apiParamMutex);
 }
 
 void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
@@ -2015,7 +2015,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "subscribe and unsubscribe flags both set");
     return 0;
   }
-  lockMutex(&paramMutex);
+  lockMutex(&apiParamMutex);
   if (flags & BRLAPI_PARAMF_SUBSCRIBE) {
     /* subscribe to parameter updates */
     struct Subscription *s;
@@ -2044,7 +2044,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
       free(s);
     } else {
       WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "was not subscribed");
-      unlockMutex(&paramMutex);
+      unlockMutex(&apiParamMutex);
       unlockMutex(&apiConnectionsMutex);
       return 0;
     }
@@ -2070,7 +2070,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   } else { /* Ack with ack */
     writeAck(c->fd);
   }
-  unlockMutex(&paramMutex);
+  unlockMutex(&apiParamMutex);
   return 0;
 }
 
@@ -3032,9 +3032,9 @@ THREAD_FUNCTION(createServerSocket) {
     createSocket(num);
   }
 
-  lockMutex(&serverSocketsMutex);
+  lockMutex(&apiSocketsMutex);
     serverSocketsPending -= 1;
-  unlockMutex(&serverSocketsMutex);
+  unlockMutex(&apiSocketsMutex);
 
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "socket creation finished: %"PRIdPTR, num);
   return NULL;
@@ -3109,7 +3109,7 @@ THREAD_FUNCTION(runServer) {
   {
     pthread_mutexattr_t attributes;
     pthread_mutexattr_init(&attributes);
-    pthread_mutex_init(&serverSocketsMutex, &attributes);
+    pthread_mutex_init(&apiSocketsMutex, &attributes);
     serverSocketsPending = serverSocketCount;
   }
 
@@ -3201,7 +3201,7 @@ THREAD_FUNCTION(runServer) {
     {
       struct timeval tv, *timeout;
 
-      lockMutex(&serverSocketsMutex);
+      lockMutex(&apiSocketsMutex);
 	for (i=0;i<serverSocketCount;i++) {
 	  if (socketInfo[i].fd>=0) {
 	    FD_SET(socketInfo[i].fd, &sockset);
@@ -3219,7 +3219,7 @@ THREAD_FUNCTION(runServer) {
         } else {
           timeout = NULL;
         }
-      unlockMutex(&serverSocketsMutex);
+      unlockMutex(&apiSocketsMutex);
 
       if (select(fdmax+1, &sockset, NULL, NULL, timeout) < 0) {
         if (fdmax==0) continue; /* still no server socket */
@@ -4027,7 +4027,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_mutex_init(&apiDriverMutex,&mattr);
   pthread_mutex_init(&apiRawMutex,&mattr);
   pthread_mutex_init(&apiSuspendMutex,&mattr);
-  pthread_mutex_init(&paramMutex,&mattr);
+  pthread_mutex_init(&apiParamMutex,&mattr);
 
   pthread_attr_init(&attr);
   pthread_attr_setstacksize(&attr,stackSize);
