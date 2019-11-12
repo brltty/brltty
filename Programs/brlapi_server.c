@@ -1240,6 +1240,12 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
   return 0;
 }
 
+typedef struct {
+  unsigned subscriptions;
+} ParamState;
+
+static ParamState paramState[BRLAPI_PARAM_COUNT];
+
 /* On success, this should fill 'data', adjust 'size', and return NULL.
  * On failure, this should return a non-allocated error message string. */
 #define PARAM_READER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
@@ -1934,7 +1940,7 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
  * BRLAPI_PARAM_CLIPBOARD_CONTENT
  * BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP
  */
-static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
+static void __handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
 {
   brlapi_packet_t response;
   brlapi_paramValuePacket_t *paramValue = &response.paramValue;
@@ -1945,7 +1951,6 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
   paramValue->subparam_lo = htonl(subparam & 0xfffffffful);
   memcpy(p, data, size);
   size += sizeof(flags) + sizeof(param) + sizeof(subparam);
-  lockMutex(&apiParamMutex);
   if (!(flags & BRLAPI_PARAMF_GLOBAL)) {
     sendConnectionParamUpdate(c,param,subparam,flags,paramValue,size);
   } else {
@@ -1954,6 +1959,12 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
     sendParamUpdate(&notty,param,subparam,flags,paramValue,size);
     unlockMutex(&apiConnectionsMutex);
   }
+}
+
+static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
+{
+  lockMutex(&apiParamMutex);
+  __handleParamUpdate(c, param, subparam, flags, data, size);
   unlockMutex(&apiParamMutex);
 }
 
@@ -1966,15 +1977,19 @@ void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
       ParamReader *readHandler = pd->read;
 
       if (readHandler) {
-        unsigned char data[0X1000];
-        size_t size = sizeof(data);
-        const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
+        lockMutex(&apiParamMutex);
+        if (paramState[parameter].subscriptions) {
+          unsigned char data[BRLAPI_MAXPARAMSIZE];
+          size_t size = sizeof(data);
+          const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
 
-        if (error) {
-          logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d read error: %s", parameter, error);
-        } else {
-          handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+          if (error) {
+            logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d read error: %s", parameter, error);
+          } else {
+            __handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+          }
         }
+        unlockMutex(&apiParamMutex);
       } else {
         logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d is not readable", parameter);
       }
@@ -2023,6 +2038,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     /* subscribe to parameter updates */
     struct Subscription *s;
     lockMutex(&apiConnectionsMutex);
+    paramState[param].subscriptions++;
     s = malloc(sizeof(*s));
     s->parameter = param;
     s->subparam = subparam;
@@ -2042,6 +2058,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
 	break;
     }
     if (s) {
+      paramState[param].subscriptions--;
       s->next->prev = s->prev;
       s->prev->next = s->next;
       free(s);
