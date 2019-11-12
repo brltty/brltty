@@ -1240,7 +1240,12 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
   return 0;
 }
 
+/* On success, this should fill 'size' and return 1.
+ * On error, this should use WERR to send an error to the client, and return 0. */
 typedef int (*paramRead)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size);
+
+/* On success, this should return 1.
+ * On error, this should use WERR to send an error to the client, and return 0. */
 typedef int (*paramWrite)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size);
 
 static void param_readString(const char *string, void *data, size_t *size)
