@@ -219,6 +219,12 @@ typedef struct Tty {
   struct Tty *subttys; /* children */
 } Tty;
 
+typedef struct {
+  unsigned subscriptions;
+} ParamState;
+
+static ParamState paramState[BRLAPI_PARAM_COUNT];
+
 /* Pointer to the connection accepter thread */
 static pthread_t serverThread; /* server */
 static pthread_t socketThreads[SERVER_SOCKET_LIMIT]; /* socket binding threads */
@@ -580,6 +586,16 @@ out:
 /* Frees all resources associated to a connection */
 static void freeConnection(Connection *c)
 {
+  struct Subscription *s, *next;
+
+  lockMutex(&apiParamMutex);
+  for (s=c->subscriptions.next; s!=&c->subscriptions; s=next) {
+    paramState[s->parameter].subscriptions--;
+    next = s->next;
+    free(s);
+  }
+  unlockMutex(&apiParamMutex);
+
   if (c->fd != INVALID_FILE_DESCRIPTOR) {
     if (c->auth != 1) unauthConnections--;
     closeFileDescriptor(c->fd);
@@ -1240,12 +1256,6 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
   writeAck(c->fd);
   return 0;
 }
-
-typedef struct {
-  unsigned subscriptions;
-} ParamState;
-
-static ParamState paramState[BRLAPI_PARAM_COUNT];
 
 /* On success, this should fill 'data', adjust 'size', and return NULL.
  * On failure, this should return a non-allocated error message string. */
