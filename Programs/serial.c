@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "parameters.h"
 #include "parse.h"
 #include "device.h"
@@ -682,20 +683,20 @@ typedef enum {
   SERIAL_DEV_FLOW_CONTROL
 } SerialDeviceParameter;
 
+static const char *const serialDeviceParameters[] = {
+  "name",
+  "baud",
+  "dataBits",
+  "stopBits",
+  "parity",
+  "flowControl",
+  NULL
+};
+
 static char **
 serialGetDeviceParameters (const char *identifier) {
-  static const char *const names[] = {
-    "name",
-    "baud",
-    "dataBits",
-    "stopBits",
-    "parity",
-    "flowControl",
-    NULL
-  };
-
   if (!identifier) identifier = "";
-  return getDeviceParameters(names, identifier);
+  return getDeviceParameters(serialDeviceParameters, identifier);
 }
 
 SerialDevice *
@@ -766,6 +767,23 @@ serialCloseDevice (SerialDevice *serial) {
 
   free(serial->devicePath);
   free(serial);
+}
+
+const char *
+serialMakeDeviceIdentifier (SerialDevice *serial, char *buffer, size_t size) {
+  STR_BEGIN(buffer, size);
+
+  STR_PRINTF(
+    "%s%c%s%c%s",
+    SERIAL_DEVICE_QUALIFIER,
+    PARAMETER_QUALIFIER_CHARACTER,
+    serialDeviceParameters[SERIAL_DEV_NAME],
+    PARAMETER_ASSIGNMENT_CHARACTER,
+    serialGetDevicePath(serial)
+  );
+
+  STR_END;
+  return buffer;
 }
 
 int

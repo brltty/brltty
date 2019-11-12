@@ -39,6 +39,7 @@ extern SerialDevice *serialOpenDevice (const char *identifier);
 extern void serialCloseDevice (SerialDevice *serial);
 extern int serialRestartDevice (SerialDevice *serial, unsigned int baud);
 
+extern const char *serialMakeDeviceIdentifier (SerialDevice *serial, char *buffer, size_t size);
 extern const char *serialGetDevicePath (SerialDevice *serial);
 extern FILE *serialGetStream (SerialDevice *serial);
 

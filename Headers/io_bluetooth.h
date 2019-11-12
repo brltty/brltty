@@ -50,6 +50,7 @@ extern STR_DECLARE_FORMATTER (bthFormatAddress, uint64_t address);
 
 extern BluetoothConnection *bthOpenConnection (const BluetoothConnectionRequest *request);
 extern void bthCloseConnection (BluetoothConnection *connection);
+extern const char *bthMakeConnectionIdentifier (BluetoothConnection *connection, char *buffer, size_t size);
 
 extern uint64_t bthGetAddress (BluetoothConnection *connection);
 extern uint8_t bthGetChannel (BluetoothConnection *connection);

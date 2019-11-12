@@ -21,9 +21,6 @@
 #include <string.h>
 
 #include "log.h"
-#include "strfmt.h"
-#include "parse.h"
-#include "device.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_bluetooth.h"
@@ -42,37 +39,7 @@ disconnectBluetoothResource (GioHandle *handle) {
 
 static const char *
 makeBluetoothResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
-  size_t length;
-  STR_BEGIN(buffer, size);
-  STR_PRINTF("%s%c", BLUETOOTH_DEVICE_QUALIFIER, PARAMETER_QUALIFIER_CHARACTER);
-
-  {
-    uint64_t address = bthGetAddress(handle->connection);
-    STR_PRINTF("address%c", PARAMETER_ASSIGNMENT_CHARACTER);
-    STR_FORMAT(bthFormatAddress, address);
-    STR_PRINTF("%c", DEVICE_PARAMETER_SEPARATOR);
-  }
-
-  {
-    uint8_t channel = bthGetChannel(handle->connection);
-
-    if (channel) {
-      STR_PRINTF(
-        "channel%c%u%c",
-        PARAMETER_ASSIGNMENT_CHARACTER, channel, DEVICE_PARAMETER_SEPARATOR
-      );
-    }
-  }
-
-  length = STR_LENGTH;
-  STR_END;
-
-  {
-    char *last = &buffer[length] - 1;
-    if (*last == DEVICE_PARAMETER_SEPARATOR) *last = 0;
-  }
-
-  return buffer;
+  return bthMakeConnectionIdentifier(handle->connection, buffer, size);
 }
 
 static char *
