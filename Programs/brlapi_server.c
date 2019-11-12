@@ -1243,11 +1243,13 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 
 /* On success, this should fill 'size' and return 1.
  * On error, this should use WERR to send an error to the client, and return 0. */
-typedef int (*paramRead)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size);
+typedef const char *(*ParamReader)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size);
+#define PARAM_READER(name) static const char *param_ ## name ## _read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 
 /* On success, this should return 1.
  * On error, this should use WERR to send an error to the client, and return 0. */
-typedef int (*paramWrite)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size);
+typedef const char *(*ParamWriter)(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size);
+#define PARAM_WRITER(name) static const char *param_ ## name ## _write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
 
 static void param_readString(const char *string, void *data, size_t *size)
 {
@@ -1257,39 +1259,37 @@ static void param_readString(const char *string, void *data, size_t *size)
   memcpy(data, string, *size);
 }
 
-static int param_writeString(Connection *c, int (*handler) (const char *string), void *data, size_t size)
+static const char *param_writeString(Connection *c, int (*handler) (const char *string), void *data, size_t size)
 {
   char string[size + 1];
   memcpy(string, data, size);
   string[size] = 0;
 
-  if (handler(string)) return 1;
-  WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "set string parameter failed");
-  return 0;
+  if (handler(string)) return NULL;
+  return "set string parameter failed";
 }
 
 /* BRLAPI_PARAM_SERVER_VERSION */
-static int param_serverVersion_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(serverVersion)
 {
   brlapi_param_serverVersion_t *serverVersion = data;
   *serverVersion = BRLAPI_PROTOCOL_VERSION;
   *size = sizeof(*serverVersion);
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_CLIENT_PRIORITY */
-static int param_clientPriority_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(clientPriority)
 {
   brlapi_param_clientPriority_t *clientPriority = data;
   *clientPriority = c->client_priority;
   *size = sizeof(*clientPriority);
-  return 1;
+  return NULL;
 }
 
-static int param_clientPriority_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+PARAM_WRITER(clientPriority)
 {
   brlapi_param_clientPriority_t *clientPriority = data;
-  CHECKERR((size == sizeof(*clientPriority)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for client priority");
 
   lockMutex(&apiConnectionsMutex);
     c->client_priority = *clientPriority;
@@ -1300,32 +1300,32 @@ static int param_clientPriority_write(Connection *c, brlapi_param_t param, uint6
     }
   unlockMutex(&apiConnectionsMutex);
 
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_DRIVER_NAME */
-static int param_driverName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(driverName)
 {
   param_readString(braille->definition.name, data, size);
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_DRIVER_CODE */
-static int param_driverCode_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(driverCode)
 {
   param_readString(braille->definition.code, data, size);
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_DRIVER_VERSION */
-static int param_driverVersion_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(driverVersion)
 {
   param_readString(braille->definition.version, data, size);
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_DEVICE_MODEL */
-static int param_deviceModel_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(deviceModel)
 {
   lockMutex(&apiDriverMutex);
     if (disp) {
@@ -1339,11 +1339,11 @@ static int param_deviceModel_read(Connection *c, brlapi_param_t param, uint64_t 
 done:
   unlockMutex(&apiDriverMutex);
 
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_DISPLAY_SIZE */
-static int param_displaySize_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(displaySize)
 {
   brlapi_param_displaySize_t *displaySize = data;
 
@@ -1353,11 +1353,11 @@ static int param_displaySize_read(Connection *c, brlapi_param_t param, uint64_t 
   unlockMutex(&apiDriverMutex);
 
   *size = sizeof(*displaySize);
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_DEVICE_IDENTIFIER */
-static int param_deviceIdentifier_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(deviceIdentifier)
 {
   lockMutex(&apiDriverMutex);
     if (disp) {
@@ -1372,16 +1372,16 @@ static int param_deviceIdentifier_read(Connection *c, brlapi_param_t param, uint
 done:
   unlockMutex(&apiDriverMutex);
 
-  return 1;
+  return NULL;
 }
 
-static int param_deviceIdentifier_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+PARAM_WRITER(deviceIdentifier)
 {
   return param_writeString(c, changeBrailleDevice, data, size);
 }
 
 /* BRLAPI_PARAM_DEVICE_SPEED */
-static int param_deviceSpeed_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(deviceSpeed)
 {
   brlapi_param_deviceSpeed_t *deviceSpeed = data;
 
@@ -1394,11 +1394,11 @@ static int param_deviceSpeed_read(Connection *c, brlapi_param_t param, uint64_t 
   unlockMutex(&apiDriverMutex);
 
   *size = sizeof(*deviceSpeed);
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_DEVICE_ONLINE */
-static int param_deviceOnline_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(deviceOnline)
 {
   brlapi_param_deviceOnline_t *deviceOnline = data;
 
@@ -1407,37 +1407,36 @@ static int param_deviceOnline_read(Connection *c, brlapi_param_t param, uint64_t
   unlockMutex(&apiDriverMutex);
 
   *size = sizeof(*deviceOnline);
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE */
-static int param_computerBrailleCellSize_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(computerBrailleCellSize)
 {
   brlapi_param_computerBrailleCellSize_t *cellSize = data;
   *cellSize = prefs.textStyle? 6: 8;
   *size = sizeof(*cellSize);
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_RETAIN_DOTS */
-static int param_retainDots_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(retainDots)
 {
   brlapi_param_retainDots_t *retainDots = data;
   *retainDots = c->retainDots;
   *size = sizeof(*retainDots);
-  return 1;
+  return NULL;
 }
 
-static int param_retainDots_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+PARAM_WRITER(retainDots)
 {
   brlapi_param_retainDots_t *retainDots = data;
-  CHECKERR((size == sizeof(*retainDots)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for retainDots value");
   c->retainDots = *retainDots;
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_RENDERED_CELLS */
-static int param_renderedCells_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(renderedCells)
 {
   /* FIXME: should provide local output of the connection only! */
   lockMutex(&apiDriverMutex);
@@ -1449,11 +1448,11 @@ static int param_renderedCells_read(Connection *c, brlapi_param_t param, uint64_
     }
   unlockMutex(&apiDriverMutex);
 
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_COMMAND_SHORT_NAME */
-static int param_commandShortName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(commandShortName)
 {
   int command = cmdBrlapiToBrltty(subparam);
 
@@ -1466,11 +1465,11 @@ static int param_commandShortName_read(Connection *c, brlapi_param_t param, uint
     *size = strlen(data);
   }
 
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_COMMAND_LONG_NAME */
-static int param_commandLongName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(commandLongName)
 {
   int command = cmdBrlapiToBrltty(subparam);
 
@@ -1481,7 +1480,7 @@ static int param_commandLongName_read(Connection *c, brlapi_param_t param, uint6
     *size = strlen(data);
   }
 
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_AVAILABLE_KEY_CODES */
@@ -1505,7 +1504,7 @@ static int param_addKeyCode (const KeyNameEntry *kne, void *data)
   return 1;
 }
 
-static int param_availableKeyCodes_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(availableKeyCodes)
 {
   lockMutex(&apiDriverMutex);
     if (disp) {
@@ -1530,11 +1529,11 @@ static int param_availableKeyCodes_read(Connection *c, brlapi_param_t param, uin
 done:
   unlockMutex(&apiDriverMutex);
 
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_KEY_SHORT_NAME */
-static int param_keyShortName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(keyShortName)
 {
   lockMutex(&apiDriverMutex);
     if (disp) {
@@ -1560,75 +1559,73 @@ static int param_keyShortName_read(Connection *c, brlapi_param_t param, uint64_t
 done:
   unlockMutex(&apiDriverMutex);
 
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_KEY_LONG_NAME */
-static int param_keyLongName_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(keyLongName)
 {
   *size = 0;
-  return 1;
+  return NULL;
 }
 
 /* BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE */
-static int param_computerBrailleTable_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(computerBrailleTable)
 {
   param_readString(opt_textTable, data, size);
-  return 1;
+  return NULL;
 }
 
-static int param_computerBrailleTable_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+PARAM_WRITER(computerBrailleTable)
 {
   return param_writeString(c, changeTextTable, data, size);
 }
 
 /* BRLAPI_PARAM_LITERARY_BRAILLE_TABLE */
-static int param_literaryBrailleTable_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(literaryBrailleTable)
 {
   param_readString(opt_contractionTable, data, size);
-  return 1;
+  return NULL;
 }
 
-static int param_literaryBrailleTable_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+PARAM_WRITER(literaryBrailleTable)
 {
   return param_writeString(c, changeContractionTable, data, size);
 }
 
 /* BRLAPI_PARAM_MESSAGE_LOCALE */
-static int param_messageLocale_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(messageLocale)
 {
   param_readString(setlocale(LC_ALL, NULL), data, size);
-  return 1;
+  return NULL;
 }
 
 static int changeMessageLocale (const char *locale) {
   return !!setlocale(LC_ALL, locale);
 }
 
-static int param_messageLocale_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+PARAM_WRITER(messageLocale)
 {
   return param_writeString(c, changeMessageLocale, data, size);
 }
 
 /* For parameters yet to be implemented */
-static int param_unimplemented_read(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+PARAM_READER(unimplemented)
 {
   *size = 0;
-  WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "parameter %u not implemented yet", param);
-  return 0;
+  return "parameter read not implemented yet";
 }
 
-static int param_unimplemented_write(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+PARAM_WRITER(unimplemented)
 {
-  WERR(c->fd, BRLAPI_ERROR_OPNOTSUPP, "parameter %u not implemented yet", param);
-  return 0;
+  return "parameter write not implemented yet";
 }
 
 typedef struct {
   unsigned local:1;
   unsigned global:1;
-  paramRead read;
-  paramWrite write;
+  ParamReader read;
+  ParamWriter write;
 } ParamDispatch;
 
 static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
@@ -1841,7 +1838,6 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   brlapi_param_t param;
   uint64_t subparam;
   uint32_t flags;
-  int ret;
 
   CHECKERR( (size >= sizeof(flags) + sizeof(param) + sizeof(subparam)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
   flags = ntohl(paramValue->flags);
@@ -1852,7 +1848,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
     return 0;
   }
 
-  paramWrite writeHandler = paramDispatch[param].write;
+  ParamWriter writeHandler = paramDispatch[param].write;
   /* Check against read-only parameters */
   if (!writeHandler) {
     WERR(c->fd, BRLAPI_ERROR_READONLY_PARAMETER, "parameter %u not available for writing", param);
@@ -1866,9 +1862,13 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   size -= sizeof(flags) + sizeof(param) + sizeof(subparam);
   _brlapi_ntohParameter(param, paramValue, size);
 
-  ret = writeHandler(c, param, subparam, flags, paramValue->data, size);
-  if (!ret)
-    return 0;
+  {
+    const char *error = writeHandler(c, param, subparam, flags, paramValue->data, size);
+    if (error) {
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "%s", error);
+      return 0;
+    }
+  }
 
   if (flags & BRLAPI_PARAMF_GLOBAL) {
     pthread_mutex_lock(&paramMutex);
@@ -1958,7 +1958,6 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   brlapi_param_t param;
   uint64_t subparam;
   uint32_t flags;
-  int ret;
 
   CHECKERR( (size == sizeof(brlapi_paramRequestPacket_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramRequest packet: %lu vs %lu", (unsigned long) size, (unsigned long) sizeof(brlapi_paramRequestPacket_t));
   flags = ntohl(paramRequest->flags);
@@ -1969,7 +1968,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     return 0;
   }
 
-  paramRead readHandler = paramDispatch[param].read;
+  ParamReader readHandler = paramDispatch[param].read;
   /* Check against non-readable parameters */
   if (!readHandler) {
     WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for reading", param);
@@ -2028,8 +2027,11 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     paramValue->subparam_hi = paramRequest->subparam_hi;
     paramValue->subparam_lo = paramRequest->subparam_lo;
     size = sizeof(paramValue->data);
-    ret = readHandler(c, param, subparam, flags, paramValue->data, &size);
-    if (ret) {
+    const char *error = readHandler(c, param, subparam, flags, paramValue->data, &size);
+
+    if (error) {
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "%s", error);
+    } else {
       _brlapi_htonParameter(param, paramValue, size);
       size += sizeof(flags) + sizeof(param) + sizeof(subparam);
       brlapiserver_writePacket(c->fd,BRLAPI_PACKET_PARAM_VALUE,paramValue,size);
