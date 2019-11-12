@@ -48,7 +48,7 @@ typedef struct {
   int (*handleKeyEvent) (KeyGroup group, KeyNumber number, int press);
 
   int (*flush) (void);
-  void (*updateParameter) (brlapi_param_t param, uint64_t subparam, const void *data, size_t size);
+  void (*updateParameter) (brlapi_param_t parameter, uint64_t subparam);
 } ApiMethods;
 
 #ifdef __cplusplus
