@@ -27,8 +27,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/** \defgroup brlapi_parameterDefinitions Parameter definitions
- * \brief Constants, types, and properties for BrlAPI parameters
+/** \ingroup brlapi_parameterManagement
  *
  * @{ */
 
