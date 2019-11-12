@@ -774,23 +774,10 @@ brlttyPrepare (int argc, char *argv[]) {
 
 int
 changeTextTable (const char *name) {
-  char *newName = strdup(name);
-
-  if (newName) {
-    if (replaceTextTable(opt_tablesDirectory, newName)) {
-      free(opt_textTable);
-      opt_textTable = newName;
-
-      api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE, 0);
-      return 1;
-    }
-
-    free(newName);
-  } else {
-    logMallocError();
-  }
-
-  return 0;
+  if (!replaceTextTable(opt_tablesDirectory, name)) return 0;
+  changeStringSetting(&opt_textTable, name);
+  api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE, 0);
+  return 1;
 }
 
 static void
@@ -800,7 +787,9 @@ exitTextTable (void *data) {
 
 int
 changeAttributesTable (const char *name) {
-  return replaceAttributesTable(opt_tablesDirectory, name);
+  if (!replaceAttributesTable(opt_tablesDirectory, name)) return 0;
+  changeStringSetting(&opt_attributesTable, name);
+  return 1;
 }
 
 static void
@@ -820,15 +809,9 @@ exitContractionTable (void *data) {
 int
 changeContractionTable (const char *name) {
   ContractionTable *table = NULL;
-  char *newName = strdup(name);
 
-  if (!newName) {
-    logMallocError();
-    return 0;
-  }
-
-  if (*newName) {
-    char *path = makeContractionTablePath(opt_tablesDirectory, newName);
+  if (*name) {
+    char *path = makeContractionTablePath(opt_tablesDirectory, name);
 
     if (path) {
       logMessage(LOG_DEBUG, "compiling contraction table: %s", path);
@@ -840,18 +823,13 @@ changeContractionTable (const char *name) {
       free(path);
     }
 
-    if (!table) {
-      free(newName);
-      return 0;
-    }
+    if (!table) return 0;
   }
 
   if (contractionTable) destroyContractionTable(contractionTable);
   contractionTable = table;
 
-  free(opt_contractionTable);
-  opt_contractionTable = newName;
-
+  changeStringSetting(&opt_contractionTable, name);
   api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE_TABLE, 0);
   return 1;
 }
@@ -1102,6 +1080,7 @@ changeKeyboardTable (const char *name) {
     makeKeyboardHelpPage();
   }
 
+  changeStringSetting(&opt_keyboardTable, name);
   return 1;
 }
 
@@ -2793,13 +2772,10 @@ brlttyStart (void) {
       char *name = selectTextTable(opt_tablesDirectory);
 
       if (name) {
-        if (replaceTextTable(opt_tablesDirectory, name)) {
-          changeStringSetting(&opt_textTable, name);
-        }
-
+        changeTextTable(name);
         free(name);
       }
-    } else if (!replaceTextTable(opt_tablesDirectory, opt_textTable)) {
+    } else if (!changeTextTable(opt_textTable)) {
       changeStringSetting(&opt_textTable, "");
     }
   }
@@ -2813,7 +2789,7 @@ brlttyStart (void) {
 
   /* handle attributes table option */
   if (*opt_attributesTable) {
-    if (!replaceAttributesTable(opt_tablesDirectory, opt_attributesTable)) {
+    if (!changeAttributesTable(opt_attributesTable)) {
       changeStringSetting(&opt_attributesTable, "");
     }
   }
