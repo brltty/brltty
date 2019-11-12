@@ -27,6 +27,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/** \defgroup brlapi_paramTypes Parameters
+ *
+ * @{ */
+
 typedef enum {
 //Connection Parameters
   BRLAPI_PARAM_SERVER_VERSION = 0,		/**< Version of the server: uint32_t */
@@ -260,6 +264,8 @@ typedef struct {
  * \return a pointer to the description of the properties of the parameter.
  */
 extern const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter);
+
+/** @} */
 
 #ifdef __cplusplus
 }
