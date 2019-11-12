@@ -223,7 +223,7 @@ struct brlapi_parameterCallback_t {
   brlapi_param_t parameter;
   uint64_t subparam;
   int global;
-  brlapi_paramCallback func;
+  brlapi_paramCallback_t func;
   void *priv;
   struct brlapi_parameterCallback_t *prev, *next;
 };
@@ -1342,7 +1342,7 @@ int BRLAPI_STDCALL brlapi_setParameter(brlapi_param_t parameter, uint64_t subpar
 }
 
 /* Function: brlapi_watchParameter */
-brlapi_paramCallbackDescriptor BRLAPI_STDCALL brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len)
+brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback_t func, void *priv, void* data, size_t len)
 {
   brlapi_paramValuePacket_t reply;
   ssize_t rlen;
@@ -1385,13 +1385,13 @@ brlapi_paramCallbackDescriptor BRLAPI_STDCALL brlapi__watchParameter(brlapi_hand
   return callback;
 }
 
-brlapi_paramCallbackDescriptor BRLAPI_STDCALL brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback func, void *priv, void* data, size_t len)
+brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback_t func, void *priv, void* data, size_t len)
 {
   return brlapi__watchParameter(&defaultHandle, parameter, subparam, global, func, priv, data, len);
 }
 
 /* Function: brlapi_unwatchParameter */
-int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor descriptor)
+int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor_t descriptor)
 {
   brlapi_paramValuePacket_t reply;
   ssize_t rlen;
@@ -1423,7 +1423,7 @@ int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_para
   return 0;
 }
 
-int BRLAPI_STDCALL brlapi_unwatchParameter(brlapi_paramCallbackDescriptor descriptor)
+int BRLAPI_STDCALL brlapi_unwatchParameter(brlapi_paramCallbackDescriptor_t descriptor)
 {
   return brlapi__unwatchParameter(&defaultHandle, descriptor);
 }
