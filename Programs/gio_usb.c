@@ -54,32 +54,49 @@ disconnectUsbResource (GioHandle *handle) {
 
 static const char *
 makeUsbResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
+  UsbDevice *device = handle->channel->device;
+
   UsbDeviceDescriptor descriptor;
-  if (!usbGetDeviceDescriptor(handle->channel->device, &descriptor)) return NULL;
+  if (!usbGetDeviceDescriptor(device, &descriptor)) return NULL;
 
   size_t length;
   STR_BEGIN(buffer, size);
   STR_PRINTF("%s%c", USB_DEVICE_QUALIFIER, PARAMETER_QUALIFIER_CHARACTER);
 
   {
-    uint16_t vendor = getLittleEndian16(descriptor.idVendor);
+    uint16_t vendorIdentifier = getLittleEndian16(descriptor.idVendor);
 
-    if (vendor) {
+    if (vendorIdentifier) {
       STR_PRINTF(
-        "vendor%c0X%04X%c",
-        PARAMETER_ASSIGNMENT_CHARACTER, DEVICE_PARAMETER_SEPARATOR,  vendor
+        "vendorIdentifier%c0X%04X%c",
+        PARAMETER_ASSIGNMENT_CHARACTER, vendorIdentifier, DEVICE_PARAMETER_SEPARATOR
       );
     }
   }
 
   {
-    uint16_t product = getLittleEndian16(descriptor.idProduct);
+    uint16_t productIdentifier = getLittleEndian16(descriptor.idProduct);
 
-    if (product) {
+    if (productIdentifier) {
       STR_PRINTF(
-        "product%c0X%04X%c",
-        PARAMETER_ASSIGNMENT_CHARACTER, DEVICE_PARAMETER_SEPARATOR,  product
+        "productIdentifier%c0X%04X%c",
+        PARAMETER_ASSIGNMENT_CHARACTER, productIdentifier, DEVICE_PARAMETER_SEPARATOR
       );
+    }
+  }
+
+  {
+    char *serialNumber = usbGetSerialNumber(device, 1000);
+
+    if (serialNumber) {
+      if (!strchr(serialNumber, DEVICE_PARAMETER_SEPARATOR)) {
+        STR_PRINTF(
+          "serialNumber%c%s%c",
+          PARAMETER_ASSIGNMENT_CHARACTER, serialNumber, DEVICE_PARAMETER_SEPARATOR
+        );
+      }
+
+      free(serialNumber);
     }
   }
 
