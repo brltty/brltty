@@ -1347,14 +1347,17 @@ done:
 /* BRLAPI_PARAM_DISPLAY_SIZE */
 PARAM_READER(displaySize)
 {
-  brlapi_param_displaySize_t *displaySize = data;
-
   lockMutex(&apiDriverMutex);
-    displaySize->columns = ntohl(displayDimensions[0]);
-    displaySize->rows = ntohl(displayDimensions[1]);
+    if (driverConstructed) {
+      brlapi_param_displaySize_t *displaySize = data;
+      displaySize->columns = ntohl(displayDimensions[0]);
+      displaySize->rows = ntohl(displayDimensions[1]);
+      *size = sizeof(*displaySize);
+    } else {
+      *size = 0;
+    }
   unlockMutex(&apiDriverMutex);
 
-  *size = sizeof(*displaySize);
   return NULL;
 }
 
