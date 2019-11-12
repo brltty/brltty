@@ -81,7 +81,7 @@ api_flush (BrailleDisplay *brl) {
 }
 
 void
-api_updateParameter (brlapi_param_t param, uint64_t subparam, const void *data, size_t size) {
+api_updateParameter (brlapi_param_t parameter, uint64_t subparam) {
 }
 #endif /* ENABLE_API */
 
@@ -200,8 +200,8 @@ apiFlush (void) {
 }
 
 static void
-apiUpdateParameter (brlapi_param_t param, uint64_t subparam, const void *data, size_t size) {
-  if (apiStarted) api_updateParameter(param, subparam, data, size);
+apiUpdateParameter (brlapi_param_t parameter, uint64_t subparam) {
+  if (apiStarted) api_updateParameter(parameter, subparam);
 }
 
 const ApiMethods api = {

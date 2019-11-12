@@ -1946,9 +1946,21 @@ static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subp
   pthread_mutex_unlock(&paramMutex);
 }
 
-void api_updateParameter(brlapi_param_t param, uint64_t subparam, const void *data, size_t size)
+void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
 {
-  handleParamUpdate(NULL, param, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+  ParamReader readHandler = paramDispatch[parameter].read;
+
+  if (readHandler) {
+    unsigned char data[0X1000];
+    size_t size = sizeof(data);
+    const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
+
+    if (error) {
+    } else {
+      handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+    }
+  } else {
+  }
 }
 
 static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)

@@ -46,7 +46,7 @@ extern int api_handleKeyEvent (KeyGroup group, KeyNumber number, int press);
 
 extern int api_flush (BrailleDisplay *brl);
 
-extern void api_updateParameter (brlapi_param_t param, uint64_t subparam, const void *data, size_t size);
+extern void api_updateParameter (brlapi_param_t parameter, uint64_t subparam);
 
 #ifdef __cplusplus
 }
