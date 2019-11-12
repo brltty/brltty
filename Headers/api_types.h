@@ -19,8 +19,8 @@
 #ifndef BRLTTY_INCLUDED_API_TYPES
 #define BRLTTY_INCLUDED_API_TYPES
 
+#include "brlapi_param.h"
 #include "ktb_types.h"
-#include "brlapi.h"
 
 #ifdef __cplusplus
 extern "C" {
