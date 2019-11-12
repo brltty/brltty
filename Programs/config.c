@@ -1848,27 +1848,14 @@ changeBrailleParameters (const char *parameters) {
 }
 int
 changeBrailleDevice (const char *device) {
-  char *newDevice = strdup(device);
+  char **newDevices = splitString(device, PARAMETER_SEPARATOR_CHARACTER, NULL);
 
-  if (newDevice) {
-    char **newDevices = splitString(newDevice, PARAMETER_SEPARATOR_CHARACTER, NULL);
-
-    if (newDevices) {
-      char *oldDevice = opt_brailleDevice;
-      char **oldDevices = brailleDevices;
-
-      opt_brailleDevice = newDevice;
-      brailleDevices = newDevices;
-
-      if (oldDevice) free(oldDevice);
-      if (oldDevices) deallocateStrings(oldDevices);
-
-      return 1;
-    }
-
-    free(newDevice);
-  } else {
-    logMallocError();
+  if (newDevices) {
+    char **oldDevices = brailleDevices;
+    brailleDevices = newDevices;
+    if (oldDevices) deallocateStrings(oldDevices);
+    changeStringSetting(&opt_brailleDevice, device);
+    return 1;
   }
 
   return 0;
