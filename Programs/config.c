@@ -1815,50 +1815,18 @@ exitBrailleData (void *data) {
 
 int
 changeBrailleDriver (const char *driver) {
-  char **newDrivers = splitString(driver, ',', NULL);
-
-  if (newDrivers) {
-    char **oldDrivers = brailleDrivers;
-
-    brailleDrivers = newDrivers;
-    if (oldDrivers) deallocateStrings(oldDrivers);
-    return 1;
-  }
-
-  return 0;
+  return changeListSetting(&brailleDrivers, &opt_brailleDriver, driver);
 }
 
 int
 changeBrailleParameters (const char *parameters) {
-  char *newParameters;
-
   if (!parameters) parameters = "";
-
-  if ((newParameters = strdup(parameters))) {
-    char *oldParameters = brailleParameters;
-
-    brailleParameters = newParameters;
-    if (oldParameters) free(oldParameters);
-    return 1;
-  } else {
-    logMallocError();
-  }
-
-  return 0;
+  return changeStringSetting(&brailleParameters, parameters);
 }
+
 int
 changeBrailleDevice (const char *device) {
-  char **newDevices = splitString(device, PARAMETER_SEPARATOR_CHARACTER, NULL);
-
-  if (newDevices) {
-    char **oldDevices = brailleDevices;
-    brailleDevices = newDevices;
-    if (oldDevices) deallocateStrings(oldDevices);
-    changeStringSetting(&opt_brailleDevice, device);
-    return 1;
-  }
-
-  return 0;
+  return changeListSetting(&brailleDevices, &opt_brailleDevice, device);
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -2161,36 +2129,13 @@ exitSpeechInput (void *data) {
 
 int
 changeSpeechDriver (const char *driver) {
-  char **newDrivers = splitString(driver, ',', NULL);
-
-  if (newDrivers) {
-    char **oldDrivers = speechDrivers;
-
-    speechDrivers = newDrivers;
-    if (oldDrivers) deallocateStrings(oldDrivers);
-    return 1;
-  }
-
-  return 0;
+  return changeListSetting(&speechDrivers, &opt_speechDriver, driver);
 }
 
 int
 changeSpeechParameters (const char *parameters) {
-  char *newParameters;
-
   if (!parameters) parameters = "";
-
-  if ((newParameters = strdup(parameters))) {
-    char *oldParameters = speechParameters;
-
-    speechParameters = newParameters;
-    if (oldParameters) free(oldParameters);
-    return 1;
-  } else {
-    logMallocError();
-  }
-
-  return 0;
+  return changeStringSetting(&speechParameters, parameters);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -2378,36 +2323,13 @@ exitScreenData (void *data) {
 
 int
 changeScreenDriver (const char *driver) {
-  char **newDrivers = splitString(driver, ',', NULL);
-
-  if (newDrivers) {
-    char **oldDrivers = screenDrivers;
-
-    screenDrivers = newDrivers;
-    if (oldDrivers) deallocateStrings(oldDrivers);
-    return 1;
-  }
-
-  return 0;
+  return changeListSetting(&screenDrivers, &opt_screenDriver, driver);
 }
 
 int
 changeScreenParameters (const char *parameters) {
-  char *newParameters;
-
   if (!parameters) parameters = "";
-
-  if ((newParameters = strdup(parameters))) {
-    char *oldParameters = screenParameters;
-
-    screenParameters = newParameters;
-    if (oldParameters) free(oldParameters);
-    return 1;
-  } else {
-    logMallocError();
-  }
-
-  return 0;
+  return changeStringSetting(&screenParameters, parameters);
 }
 
 static void
