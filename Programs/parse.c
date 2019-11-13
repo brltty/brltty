@@ -152,6 +152,24 @@ done:
 }
 
 int
+changeListSetting (char ***list, char **setting, const char *value) {
+  char **newList = splitString(value, PARAMETER_SEPARATOR_CHARACTER, NULL);
+
+  if (newList) {
+    if (changeStringSetting(setting, value)) {
+      char **oldList = *list;
+      *list = newList;
+      if (oldList) deallocateStrings(oldList);
+      return 1;
+    }
+
+    deallocateStrings(newList);
+  }
+
+  return 0;
+}
+
+int
 rescaleInteger (int value, int from, int to) {
   return (to * (value + (from / (to * 2)))) / from;
 }
