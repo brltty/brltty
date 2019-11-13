@@ -1324,21 +1324,42 @@ PARAM_WRITER(clientPriority)
 /* BRLAPI_PARAM_DRIVER_NAME */
 PARAM_READER(driverName)
 {
-  param_readString(braille->definition.name, data, size);
+  lockMutex(&apiDriverMutex);
+    if (driverConstructed) {
+      param_readString(braille->definition.name, data, size);
+    } else {
+      *size = 0;
+    }
+  unlockMutex(&apiDriverMutex);
+
   return NULL;
 }
 
 /* BRLAPI_PARAM_DRIVER_CODE */
 PARAM_READER(driverCode)
 {
-  param_readString(braille->definition.code, data, size);
+  lockMutex(&apiDriverMutex);
+    if (driverConstructed) {
+      param_readString(braille->definition.code, data, size);
+    } else {
+      *size = 0;
+    }
+  unlockMutex(&apiDriverMutex);
+
   return NULL;
 }
 
 /* BRLAPI_PARAM_DRIVER_VERSION */
 PARAM_READER(driverVersion)
 {
-  param_readString(braille->definition.version, data, size);
+  lockMutex(&apiDriverMutex);
+    if (driverConstructed) {
+      param_readString(braille->definition.version, data, size);
+    } else {
+      *size = 0;
+    }
+  unlockMutex(&apiDriverMutex);
+
   return NULL;
 }
 
@@ -1404,30 +1425,32 @@ PARAM_WRITER(deviceIdentifier)
 /* BRLAPI_PARAM_DEVICE_SPEED */
 PARAM_READER(deviceSpeed)
 {
-  brlapi_param_deviceSpeed_t *deviceSpeed = data;
-
   lockMutex(&apiDriverMutex);
     if (disp) {
       if (disp->gioEndpoint) {
+        brlapi_param_deviceSpeed_t *deviceSpeed = data;
         *deviceSpeed = gioGetBytesPerSecond(disp->gioEndpoint);
+        *size = sizeof(*deviceSpeed);
+        goto done;
       }
     }
+
+    *size = 0;
+done:
   unlockMutex(&apiDriverMutex);
 
-  *size = sizeof(*deviceSpeed);
   return NULL;
 }
 
 /* BRLAPI_PARAM_DEVICE_ONLINE */
 PARAM_READER(deviceOnline)
 {
-  brlapi_param_deviceOnline_t *deviceOnline = data;
-
   lockMutex(&apiDriverMutex);
+    brlapi_param_deviceOnline_t *deviceOnline = data;
     *deviceOnline = driverConstructed;
+    *size = sizeof(*deviceOnline);
   unlockMutex(&apiDriverMutex);
 
-  *size = sizeof(*deviceOnline);
   return NULL;
 }
 
