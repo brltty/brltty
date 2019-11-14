@@ -180,7 +180,7 @@ char *opt_brailleDevice;
 int opt_releaseDevice;
 static char **brailleDevices = NULL;
 static const char *brailleDevice = NULL;
-static int brailleConstructed;
+static int brailleDriverConstructed;
 
 static char *opt_brailleDriver;
 static char **brailleDrivers = NULL;
@@ -1405,6 +1405,11 @@ initializeBrailleDisplay (void) {
 }
 
 int
+isBrailleDriverConstructed (void) {
+  return brailleDriverConstructed;
+}
+
+int
 constructBrailleDriver (void) {
   initializeBrailleDisplay();
 
@@ -1436,7 +1441,7 @@ constructBrailleDriver (void) {
       report(REPORT_BRAILLE_DEVICE_ONLINE, NULL);
       startBrailleInput();
 
-      brailleConstructed = 1;
+      brailleDriverConstructed = 1;
       return 1;
     }
 
@@ -1456,7 +1461,7 @@ destructBrailleDriver (void) {
   drainBrailleOutput(&brl, 0);
   report(REPORT_BRAILLE_DEVICE_OFFLINE, NULL);
 
-  brailleConstructed = 0;
+  brailleDriverConstructed = 0;
   braille->destruct(&brl);
 
   disableBrailleHelpPage();
@@ -1615,7 +1620,7 @@ static void
 deactivateBrailleDriver (void) {
   if (brailleDriver) {
     api.unlink();
-    if (brailleConstructed) destructBrailleDriver();
+    if (brailleDriverConstructed) destructBrailleDriver();
     braille = &noBraille;
     brailleDevice = NULL;
     brailleDriver = NULL;
@@ -1722,7 +1727,7 @@ writeBrailleMessage (const char *text) {
 
 static void
 exitBrailleDriver (void *data) {
-  if (brailleConstructed) {
+  if (brailleDriverConstructed) {
     const char *text = opt_stopMessage;
     if (!*text) text = gettext("BRLTTY stopped");
     writeBrailleMessage(text);
@@ -2753,7 +2758,7 @@ brlttyStart (void) {
   changeBrailleDriver(opt_brailleDriver);
   changeBrailleParameters(opt_brailleParameters);
   changeBrailleDevice(opt_brailleDevice);
-  brailleConstructed = 0;
+  brailleDriverConstructed = 0;
   onProgramExit("braille-data", exitBrailleData, NULL);
 
   if (opt_verify) {

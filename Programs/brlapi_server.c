@@ -1449,12 +1449,9 @@ done:
 /* BRLAPI_PARAM_DEVICE_ONLINE */
 PARAM_READER(deviceOnline)
 {
-  lockMutex(&apiDriverMutex);
-    brlapi_param_deviceOnline_t *deviceOnline = data;
-    *deviceOnline = driverConstructed;
-    *size = sizeof(*deviceOnline);
-  unlockMutex(&apiDriverMutex);
-
+  brlapi_param_deviceOnline_t *deviceOnline = data;
+  *deviceOnline = isBrailleDriverConstructed();
+  *size = sizeof(*deviceOnline);
   return NULL;
 }
 
