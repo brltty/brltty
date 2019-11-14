@@ -1954,12 +1954,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
     }
   }
 
-  if (flags & BRLAPI_PARAMF_GLOBAL) {
-    lockMutex(&apiParamMutex);
-    /* TODO: broadcast new value */
-    /* Or will perhaps rather be reported by the core through handleParamUpdate */
-    unlockMutex(&apiParamMutex);
-  } else {
+  if (!(flags & BRLAPI_PARAMF_GLOBAL)) {
     handleParamUpdate(c, param, subparam, flags, paramValue->data, size);
   }
   writeAck(c->fd);
