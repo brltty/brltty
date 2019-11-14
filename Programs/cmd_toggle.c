@@ -119,6 +119,7 @@ handleToggleCommands (int command, void *data) {
 
     case BRL_CMD_SIXDOTS:
       togglePreferenceSetting(&prefs.textStyle, command);
+      onTextStyleUpdated();
       break;
 
     case BRL_CMD_CSRTRK:

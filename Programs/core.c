@@ -96,6 +96,45 @@ int contractedOffsets[0X100];
 int contractedTrack = 0;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
+int
+isContractedBraille (void) {
+  return (prefs.textStyle == tsContractedBraille6)
+      || (prefs.textStyle == tsContractedBraille8)
+      ;
+}
+
+int
+isSixDotBraille (void) {
+  return (prefs.textStyle == tsComputerBraille6)
+      || (prefs.textStyle == tsContractedBraille6)
+      ;
+}
+
+static void
+setTextStyle (int contracted, int sixDot) {
+  prefs.textStyle = contracted?
+                    (sixDot? tsContractedBraille6: tsContractedBraille8):
+                    (sixDot? tsComputerBraille6: tsComputerBraille8);
+}
+
+void
+setContractedBraille (int contracted) {
+  setTextStyle(contracted, isSixDotBraille());
+  api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE, 0);
+}
+
+void
+setSixDotBraille (int sixDot) {
+  setTextStyle(isContractedBraille(), sixDot);
+  api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE, 0);
+}
+
+void
+onTextStyleUpdated (void) {
+  api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE, 0);
+  api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE, 0);
+}
+
 static void
 checkRoutingStatus (RoutingStatus ok, int wait) {
   RoutingStatus status = getRoutingStatus(wait);
@@ -1077,7 +1116,7 @@ speakIndent (const ScreenCharacter *characters, int count, int evenIfNoIndent) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
 int
 isContracting (void) {
-  return (prefs.textStyle == tsContractedBraille) && contractionTable;
+  return isContractedBraille() && contractionTable;
 }
 
 int

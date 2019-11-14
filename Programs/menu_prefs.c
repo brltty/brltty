@@ -366,6 +366,12 @@ STATUS_FIELD_HANDLERS(9)
 #undef STATUS_FIELD_HANDLERS
 
 static int
+changedTextStyle (const MenuItem *item, unsigned char setting UNUSED) {
+  onTextStyleUpdated();
+  return 1;
+}
+
+static int
 changedTextTable (const MenuItem *item, unsigned char setting UNUSED) {
   return changeTextTable(getMenuItemValue(item));
 }
@@ -383,7 +389,7 @@ changedKeyboardTable (const MenuItem *item, unsigned char setting UNUSED) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static int
 testContractedBraille (void) {
-  return prefs.textStyle == tsContractedBraille;
+  return isContractedBraille();
 }
 
 static int
@@ -593,11 +599,13 @@ makePreferencesMenu (void) {
       static const MenuString strings[] = {
         {.label=strtext("8-Dot Computer Braille")},
         {.label=strtext("Contracted Braille")},
-        {.label=strtext("6-Dot Computer Braille")}
+        {.label=strtext("6-Dot Computer Braille")},
+        {.label=strtext("Literary Braille")}
       };
 
       NAME(strtext("Text Style"));
       ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.textStyle, &itemName, strings));
+      CHANGED(TextStyle);
     }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE

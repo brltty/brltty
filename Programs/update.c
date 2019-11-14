@@ -255,7 +255,7 @@ showInfo (void) {
                                               (prefs.blinkingScreenCursor? 'b': ' '),
                       ses->displayMode           ? 'a': 't',
                       isSpecialScreen(SCR_FROZEN)? 'f': ' ',
-                      prefs.textStyle            ? '6': '8',
+                      isSixDotBraille()          ? '6': '8',
                       prefs.blinkingCapitals     ? 'B': ' ');
     if (length > size) length = size;
 
@@ -286,7 +286,7 @@ showInfo (void) {
                                      (prefs.blinkingScreenCursor? 'b': ' '),
              ses->displayMode           ? 'a': 't',
              isSpecialScreen(SCR_FROZEN)? 'f': ' ',
-             prefs.textStyle            ? '6': '8',
+             isSixDotBraille()          ? '6': '8',
              prefs.blinkingCapitals     ? 'B': ' ');
 
   {
@@ -956,7 +956,7 @@ doUpdate (void) {
                 if (!isBlinkVisible(blink)) *dots = 0;
               }
 
-              if (prefs.textStyle) *dots &= ~(BRL_DOT_7 | BRL_DOT_8);
+              if (isSixDotBraille()) *dots &= ~(BRL_DOT_7 | BRL_DOT_8);
               if (prefs.showAttributes) overlayAttributesUnderline(dots, character->attributes);
 
               text[column] = character->text;
