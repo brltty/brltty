@@ -1263,13 +1263,13 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 
 /* On success, this should fill 'data', adjust 'size', and return NULL.
  * On failure, this should return a non-allocated error message string. */
-#define PARAM_READER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+#define PARAM_READER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t parameter, uint64_t subparam, uint32_t flags, void *data, size_t *size)
 typedef PARAM_READER_DECLARATION(ParamReader);
 #define PARAM_READER(name) static PARAM_READER_DECLARATION(param_ ## name ## _read)
 
 /* On success, this should return NULL.
  * On failure, this should return a non-allocated error message string. */
-#define PARAM_WRITER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, void *data, size_t size)
+#define PARAM_WRITER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t parameter, uint64_t subparam, uint32_t flags, void *data, size_t size)
 typedef PARAM_WRITER_DECLARATION(ParamWriter);
 #define PARAM_WRITER(name) static PARAM_WRITER_DECLARATION(param_ ## name ## _write)
 
@@ -1458,15 +1458,6 @@ PARAM_READER(deviceOnline)
   return NULL;
 }
 
-/* BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE */
-PARAM_READER(computerBrailleCellSize)
-{
-  brlapi_param_computerBrailleCellSize_t *cellSize = data;
-  *cellSize = prefs.textStyle? 6: 8;
-  *size = sizeof(*cellSize);
-  return NULL;
-}
-
 /* BRLAPI_PARAM_RETAIN_DOTS */
 PARAM_READER(retainDots)
 {
@@ -1480,6 +1471,53 @@ PARAM_WRITER(retainDots)
 {
   brlapi_param_retainDots_t *retainDots = data;
   c->retainDots = *retainDots;
+  return NULL;
+}
+
+/* BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE */
+PARAM_READER(computerBrailleCellSize)
+{
+  brlapi_param_computerBrailleCellSize_t *cellSize = data;
+  *cellSize = prefs.textStyle? 6: 8;
+  *size = sizeof(*cellSize);
+  return NULL;
+}
+
+PARAM_WRITER(computerBrailleCellSize)
+{
+  brlapi_param_computerBrailleCellSize_t *cellSize = data;
+
+  switch (*cellSize) {
+    case 8:
+      prefs.textStyle = tsComputerBraille8;
+      break;
+
+    case 6:
+      prefs.textStyle = tsComputerBraille6;
+      break;
+
+    default:
+      return "unsupported computer braille cell size";
+  }
+
+  api_updateParameter(parameter, subparam);
+  return NULL;
+}
+
+/* BRLAPI_PARAM_LITERARY_BRAILLE */
+PARAM_READER(literaryBraille)
+{
+  brlapi_param_literaryBraille_t *literaryBraille = data;
+  *literaryBraille = prefs.textStyle == tsContractedBraille;
+  *size = sizeof(*literaryBraille);
+  return NULL;
+}
+
+PARAM_WRITER(literaryBraille)
+{
+  brlapi_param_literaryBraille_t *literaryBraille = data;
+  prefs.textStyle = *literaryBraille? tsContractedBraille: tsComputerBraille8;
+  api_updateParameter(parameter, subparam);
   return NULL;
 }
 
@@ -1739,14 +1777,14 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .local = 1,
     .global = 1,
     .read = param_computerBrailleCellSize_read,
-    .write = param_unimplemented_write,
+    .write = param_computerBrailleCellSize_write,
   },
 
   [BRLAPI_PARAM_LITERARY_BRAILLE] = {
     .local = 1,
     .global = 1,
-    .read = param_unimplemented_read,
-    .write = param_unimplemented_write,
+    .read = param_literaryBraille_read,
+    .write = param_literaryBraille_write,
   },
 
   [BRLAPI_PARAM_CURSOR_DOTS] = {
