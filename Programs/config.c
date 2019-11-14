@@ -1409,6 +1409,12 @@ isBrailleDriverConstructed (void) {
   return brailleDriverConstructed;
 }
 
+static void
+setBrailleDriverConstructed (int yes) {
+  brailleDriverConstructed = yes;
+  api.updateParameter(BRLAPI_PARAM_DEVICE_ONLINE, 0);
+}
+
 int
 constructBrailleDriver (void) {
   initializeBrailleDisplay();
@@ -1438,10 +1444,9 @@ constructBrailleDriver (void) {
         }
       }
 
+      setBrailleDriverConstructed(1);
       report(REPORT_BRAILLE_DEVICE_ONLINE, NULL);
       startBrailleInput();
-
-      brailleDriverConstructed = 1;
       return 1;
     }
 
@@ -1461,7 +1466,7 @@ destructBrailleDriver (void) {
   drainBrailleOutput(&brl, 0);
   report(REPORT_BRAILLE_DEVICE_OFFLINE, NULL);
 
-  brailleDriverConstructed = 0;
+  setBrailleDriverConstructed(0);
   braille->destruct(&brl);
 
   disableBrailleHelpPage();
