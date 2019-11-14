@@ -68,6 +68,7 @@ SYMBOL_POINTER(restartScreenDriver);
 SYMBOL_POINTER(changeScreenDriver);
 SYMBOL_POINTER(changeScreenParameters);
 
+SYMBOL_POINTER(changeMessageLocale);
 SYMBOL_POINTER(showMessage);
 
 typedef struct {
@@ -111,6 +112,7 @@ BEGIN_SYMBOL_TABLE
   SYMBOL_ENTRY(changeScreenDriver),
   SYMBOL_ENTRY(changeScreenParameters),
 
+  SYMBOL_ENTRY(changeMessageLocale),
   SYMBOL_ENTRY(showMessage),
 END_SYMBOL_TABLE
 
@@ -444,6 +446,20 @@ JAVA_STATIC_METHOD (
   jstring parameters
 ) {
   return changeStringValue(env, changeScreenParameters_p, parameters);
+}
+
+JAVA_STATIC_METHOD (
+  org_a11y_brltty_core_CoreWrapper, changeMessageLocale, void,
+  jstring jLocale
+) {
+  const char *cLocale = (*env)->GetStringUTFChars(env, jLocale, NULL);
+
+  if (cLocale) {
+    changeMessageLocale(cLocale);
+    (*env)->ReleaseStringUTFChars(env, jLocale, cLocale);
+  } else {
+    reportOutOfMemory(env, "C new value string");
+  }
 }
 
 JAVA_STATIC_METHOD (
