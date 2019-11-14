@@ -1647,10 +1647,6 @@ PARAM_READER(messageLocale)
   return NULL;
 }
 
-static int changeMessageLocale (const char *locale) {
-  return !!setlocale(LC_ALL, locale);
-}
-
 PARAM_WRITER(messageLocale)
 {
   return param_writeString(c, changeMessageLocale, data, size);

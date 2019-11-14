@@ -2332,6 +2332,19 @@ changeScreenParameters (const char *parameters) {
   return changeStringSetting(&screenParameters, parameters);
 }
 
+int
+changeMessageLocale (const char *locale) {
+  int changed = !!setlocale(LC_ALL, locale);
+
+  if (changed) {
+    api.updateParameter(BRLAPI_PARAM_MESSAGE_LOCALE, 0);
+  } else {
+    logMessage(LOG_WARNING, "message locale change failed: %s", locale);
+  }
+
+  return changed;
+}
+
 static void
 exitPidFile (void *data) {
 #if defined(GRUB_RUNTIME)
@@ -2782,8 +2795,7 @@ static char *configuredLocale = "";
 
 static int
 changeLocale (const char *locale) {
-  if (setlocale(LC_ALL, locale)) return 1;
-  logSystemError("setlocale");
+  if (changeMessageLocale(locale)) return 1;
   setlocale(LC_ALL, configuredLocale);
   return 0;
 }
