@@ -32,8 +32,9 @@ typedef enum {
 
 typedef enum {
   tsComputerBraille8,
-  tsContractedBraille,
-  tsComputerBraille6
+  tsContractedBraille6,
+  tsComputerBraille6,
+  tsContractedBraille8,
 } TextStyles;
 
 typedef enum {

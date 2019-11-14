@@ -38,6 +38,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern int isContractedBraille (void);
+extern int isSixDotBraille (void);
+extern void setContractedBraille (int contracted);
+extern void setSixDotBraille (int sixDot);
+extern void onTextStyleUpdated (void);
+
 extern ScreenDescription scr;
 #define SCR_COLUMN_OK(column) IS_WITHIN_BOUNDS((column), scr.cols)
 #define SCR_ROW_OK(row) IS_WITHIN_BOUNDS((row), scr.rows)

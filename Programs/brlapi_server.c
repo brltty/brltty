@@ -1476,38 +1476,35 @@ PARAM_WRITER(retainDots)
 /* BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE */
 PARAM_READER(computerBrailleCellSize)
 {
-  brlapi_param_computerBrailleCellSize_t *cellSize = data;
-  *cellSize = prefs.textStyle? 6: 8;
-  *size = sizeof(*cellSize);
+  brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
+  *computerBrailleCellSize = isSixDotBraille()? 6: 8;
+  *size = sizeof(*computerBrailleCellSize);
   return NULL;
 }
 
 PARAM_WRITER(computerBrailleCellSize)
 {
-  brlapi_param_computerBrailleCellSize_t *cellSize = data;
+  brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
 
-  switch (*cellSize) {
+  switch (*computerBrailleCellSize) {
     case 8:
-      prefs.textStyle = tsComputerBraille8;
-      break;
+      setSixDotBraille(0);
+      return NULL;
 
     case 6:
-      prefs.textStyle = tsComputerBraille6;
-      break;
+      setSixDotBraille(1);
+      return NULL;
 
     default:
       return "unsupported computer braille cell size";
   }
-
-  api_updateParameter(parameter, subparam);
-  return NULL;
 }
 
 /* BRLAPI_PARAM_LITERARY_BRAILLE */
 PARAM_READER(literaryBraille)
 {
   brlapi_param_literaryBraille_t *literaryBraille = data;
-  *literaryBraille = prefs.textStyle == tsContractedBraille;
+  *literaryBraille = isContractedBraille();
   *size = sizeof(*literaryBraille);
   return NULL;
 }
@@ -1515,8 +1512,7 @@ PARAM_READER(literaryBraille)
 PARAM_WRITER(literaryBraille)
 {
   brlapi_param_literaryBraille_t *literaryBraille = data;
-  prefs.textStyle = *literaryBraille? tsContractedBraille: tsComputerBraille8;
-  api_updateParameter(parameter, subparam);
+  setContractedBraille(*literaryBraille);
   return NULL;
 }
 
