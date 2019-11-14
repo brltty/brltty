@@ -220,7 +220,8 @@ typedef struct Tty {
 } Tty;
 
 typedef struct {
-  unsigned subscriptions;
+  unsigned local_subscriptions;
+  unsigned global_subscriptions;
 } ParamState;
 
 static ParamState paramState[BRLAPI_PARAM_COUNT];
@@ -590,7 +591,10 @@ static void freeConnection(Connection *c)
 
   lockMutex(&apiParamMutex);
   for (s=c->subscriptions.next; s!=&c->subscriptions; s=next) {
-    paramState[s->parameter].subscriptions--;
+    if (s->flags & BRLAPI_PARAMF_GLOBAL)
+      paramState[s->parameter].global_subscriptions--;
+    else
+      paramState[s->parameter].local_subscriptions--;
     next = s->next;
     free(s);
   }
@@ -1998,7 +2002,8 @@ static void __handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t su
 static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
 {
   lockMutex(&apiParamMutex);
-  __handleParamUpdate(c, param, subparam, flags, data, size);
+  if (paramState[param].local_subscriptions)
+    __handleParamUpdate(c, param, subparam, flags, data, size);
   unlockMutex(&apiParamMutex);
 }
 
@@ -2012,7 +2017,7 @@ void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
 
       if (readHandler) {
         lockMutex(&apiParamMutex);
-        if (paramState[parameter].subscriptions) {
+        if (paramState[parameter].global_subscriptions) {
           unsigned char data[BRLAPI_MAXPARAMSIZE];
           size_t size = sizeof(data);
           const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
@@ -2072,7 +2077,10 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     /* subscribe to parameter updates */
     struct Subscription *s;
     lockMutex(&apiConnectionsMutex);
-    paramState[param].subscriptions++;
+    if (flags & BRLAPI_PARAMF_GLOBAL)
+      paramState[param].global_subscriptions++;
+    else
+      paramState[param].local_subscriptions++;
     s = malloc(sizeof(*s));
     s->parameter = param;
     s->subparam = subparam;
@@ -2092,7 +2100,10 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
 	break;
     }
     if (s) {
-      paramState[param].subscriptions--;
+      if (flags & BRLAPI_PARAMF_GLOBAL)
+        paramState[param].global_subscriptions--;
+      else
+        paramState[param].local_subscriptions--;
       s->next->prev = s->prev;
       s->prev->next = s->next;
       free(s);
