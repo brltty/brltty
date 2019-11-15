@@ -1405,8 +1405,8 @@ initializeBrailleDisplay (void) {
 }
 
 int
-isBrailleOnline (void) {
-  return brailleDriverConstructed && !brl.isOffline;
+isBrailleDriverConstructed (void) {
+  return brailleDriverConstructed;
 }
 
 static void
@@ -1472,6 +1472,11 @@ destructBrailleDriver (void) {
 
   disableBrailleHelpPage();
   destructBrailleDisplay(&brl);
+}
+
+int
+isBrailleOnline (void) {
+  return isBrailleDriverConstructed() && !brl.isOffline;
 }
 
 static int

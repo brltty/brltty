@@ -1332,7 +1332,7 @@ PARAM_WRITER(clientPriority)
 PARAM_READER(driverName)
 {
   lockMutex(&apiDriverMutex);
-    if (driverConstructed) {
+    if (isBrailleDriverConstructed()) {
       param_readString(braille->definition.name, data, size);
     } else {
       *size = 0;
@@ -1346,7 +1346,7 @@ PARAM_READER(driverName)
 PARAM_READER(driverCode)
 {
   lockMutex(&apiDriverMutex);
-    if (driverConstructed) {
+    if (isBrailleDriverConstructed()) {
       param_readString(braille->definition.code, data, size);
     } else {
       *size = 0;
@@ -1360,7 +1360,7 @@ PARAM_READER(driverCode)
 PARAM_READER(driverVersion)
 {
   lockMutex(&apiDriverMutex);
-    if (driverConstructed) {
+    if (isBrailleDriverConstructed()) {
       param_readString(braille->definition.version, data, size);
     } else {
       *size = 0;
@@ -1373,34 +1373,30 @@ PARAM_READER(driverVersion)
 /* BRLAPI_PARAM_DEVICE_MODEL */
 PARAM_READER(deviceModel)
 {
-  lockMutex(&apiDriverMutex);
-    if (disp) {
-      if (disp->keyBindings) {
-        param_readString(disp->keyBindings, data, size);
-        goto done;
-      }
+  if (isBrailleDriverConstructed()) {
+    const char *deviceModel = brl.keyBindings;
+
+    if (deviceModel) {
+      param_readString(deviceModel, data, size);
+      return NULL;
     }
+  }
 
-    *size = 0;
-done:
-  unlockMutex(&apiDriverMutex);
-
+  *size = 0;
   return NULL;
 }
 
 /* BRLAPI_PARAM_DISPLAY_SIZE */
 PARAM_READER(displaySize)
 {
-  lockMutex(&apiDriverMutex);
-    if (driverConstructed) {
-      brlapi_param_displaySize_t *displaySize = data;
-      displaySize->columns = ntohl(displayDimensions[0]);
-      displaySize->rows = ntohl(displayDimensions[1]);
-      *size = sizeof(*displaySize);
-    } else {
-      *size = 0;
-    }
-  unlockMutex(&apiDriverMutex);
+  if (isBrailleDriverConstructed()) {
+    brlapi_param_displaySize_t *displaySize = data;
+    displaySize->columns = brl.textColumns;
+    displaySize->rows = brl.textRows;
+    *size = sizeof(*displaySize);
+  } else {
+    *size = 0;
+  }
 
   return NULL;
 }
@@ -1408,19 +1404,17 @@ PARAM_READER(displaySize)
 /* BRLAPI_PARAM_DEVICE_IDENTIFIER */
 PARAM_READER(deviceIdentifier)
 {
-  lockMutex(&apiDriverMutex);
-    if (disp) {
-      if (disp->gioEndpoint) {
-        gioMakeResourceIdentifier(disp->gioEndpoint, data, *size);
-        *size = strlen(data);
-        goto done;
-      }
+  if (isBrailleDriverConstructed()) {
+    GioEndpoint *endpoint = brl.gioEndpoint;
+
+    if (endpoint) {
+      gioMakeResourceIdentifier(endpoint, data, *size);
+      *size = strlen(data);
+      return NULL;
     }
+  }
 
-    *size = 0;
-done:
-  unlockMutex(&apiDriverMutex);
-
+  *size = 0;
   return NULL;
 }
 
@@ -1432,20 +1426,18 @@ PARAM_WRITER(deviceIdentifier)
 /* BRLAPI_PARAM_DEVICE_SPEED */
 PARAM_READER(deviceSpeed)
 {
-  lockMutex(&apiDriverMutex);
-    if (disp) {
-      if (disp->gioEndpoint) {
-        brlapi_param_deviceSpeed_t *deviceSpeed = data;
-        *deviceSpeed = gioGetBytesPerSecond(disp->gioEndpoint);
-        *size = sizeof(*deviceSpeed);
-        goto done;
-      }
+  if (isBrailleDriverConstructed()) {
+    GioEndpoint *endpoint = brl.gioEndpoint;
+
+    if (endpoint) {
+      brlapi_param_deviceSpeed_t *deviceSpeed = data;
+      *deviceSpeed = gioGetBytesPerSecond(endpoint);
+      *size = sizeof(*deviceSpeed);
+      return NULL;
     }
+  }
 
-    *size = 0;
-done:
-  unlockMutex(&apiDriverMutex);
-
+  *size = 0;
   return NULL;
 }
 
