@@ -22,6 +22,7 @@
 
 #include "log.h"
 #include "report.h"
+#include "api_control.h"
 #include "brl_utils.h"
 #include "brl_dots.h"
 #include "async_wait.h"
@@ -40,6 +41,7 @@ void
 setBrailleOffline (BrailleDisplay *brl) {
   if (!brl->isOffline) {
     brl->isOffline = 1;
+    api.updateParameter(BRLAPI_PARAM_DEVICE_ONLINE, 0);
     logMessage(LOG_DEBUG, "braille offline");
 
     {
@@ -56,6 +58,7 @@ void
 setBrailleOnline (BrailleDisplay *brl) {
   if (brl->isOffline) {
     brl->isOffline = 0;
+    api.updateParameter(BRLAPI_PARAM_DEVICE_ONLINE, 0);
     brl->writeDelay = 0;
 
     logMessage(LOG_DEBUG, "braille online");

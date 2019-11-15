@@ -1453,7 +1453,7 @@ done:
 PARAM_READER(deviceOnline)
 {
   brlapi_param_deviceOnline_t *deviceOnline = data;
-  *deviceOnline = isBrailleDriverConstructed();
+  *deviceOnline = isBrailleOnline();
   *size = sizeof(*deviceOnline);
   return NULL;
 }
