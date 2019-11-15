@@ -1416,6 +1416,14 @@ setBrailleDriverConstructed (int yes) {
   } else {
     announceBrailleOffline();
   }
+
+  api.updateParameter(BRLAPI_PARAM_DRIVER_NAME, 0);
+  api.updateParameter(BRLAPI_PARAM_DRIVER_CODE, 0);
+  api.updateParameter(BRLAPI_PARAM_DRIVER_VERSION, 0);
+  api.updateParameter(BRLAPI_PARAM_DEVICE_MODEL, 0);
+  api.updateParameter(BRLAPI_PARAM_DEVICE_IDENTIFIER, 0);
+  api.updateParameter(BRLAPI_PARAM_DEVICE_SPEED, 0);
+  api.updateParameter(BRLAPI_PARAM_DISPLAY_SIZE, 0);
 }
 
 int
