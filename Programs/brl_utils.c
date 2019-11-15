@@ -38,19 +38,30 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
 }
 
 void
+announceBrailleOffline (void) {
+  logMessage(LOG_DEBUG, "braille offline");
+  api.updateParameter(BRLAPI_PARAM_DEVICE_ONLINE, 0);
+  report(REPORT_BRAILLE_DEVICE_OFFLINE, NULL);
+}
+
+void
+announceBrailleOnline (void) {
+  logMessage(LOG_DEBUG, "braille online");
+  api.updateParameter(BRLAPI_PARAM_DEVICE_ONLINE, 0);
+  report(REPORT_BRAILLE_DEVICE_ONLINE, NULL);
+}
+
+void
 setBrailleOffline (BrailleDisplay *brl) {
   if (!brl->isOffline) {
     brl->isOffline = 1;
-    api.updateParameter(BRLAPI_PARAM_DEVICE_ONLINE, 0);
-    logMessage(LOG_DEBUG, "braille offline");
+    announceBrailleOffline();
 
     {
       KeyTable *keyTable = brl->keyTable;
 
       if (keyTable) releaseAllKeys(keyTable);
     }
-
-    report(REPORT_BRAILLE_DEVICE_OFFLINE, NULL);
   }
 }
 
@@ -58,11 +69,9 @@ void
 setBrailleOnline (BrailleDisplay *brl) {
   if (brl->isOffline) {
     brl->isOffline = 0;
-    api.updateParameter(BRLAPI_PARAM_DEVICE_ONLINE, 0);
-    brl->writeDelay = 0;
+    announceBrailleOnline();
 
-    logMessage(LOG_DEBUG, "braille online");
-    report(REPORT_BRAILLE_DEVICE_ONLINE, NULL);
+    brl->writeDelay = 0;
   }
 }
 

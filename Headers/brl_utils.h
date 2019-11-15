@@ -26,6 +26,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern void drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
+
+extern void announceBrailleOffline (void);
+extern void announceBrailleOnline (void);
+
 extern void setBrailleOffline (BrailleDisplay *brl);
 extern void setBrailleOnline (BrailleDisplay *brl);
 
