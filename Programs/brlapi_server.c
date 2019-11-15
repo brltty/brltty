@@ -1273,6 +1273,8 @@ typedef PARAM_READER_DECLARATION(ParamReader);
 typedef PARAM_WRITER_DECLARATION(ParamWriter);
 #define PARAM_WRITER(name) static PARAM_WRITER_DECLARATION(param_ ## name ## _write)
 
+#define PARAM_ASSERT(condition) if (!(condition)) return "assertion failed: " #condition;
+
 static void param_readString(const char *string, void *data, size_t *size)
 {
   if (!string) string = "";
@@ -1312,6 +1314,7 @@ PARAM_READER(clientPriority)
 PARAM_WRITER(clientPriority)
 {
   brlapi_param_clientPriority_t *clientPriority = data;
+  PARAM_ASSERT(size == sizeof(*clientPriority));
 
   lockMutex(&apiConnectionsMutex);
     c->client_priority = *clientPriority;
@@ -1467,6 +1470,7 @@ PARAM_READER(retainDots)
 PARAM_WRITER(retainDots)
 {
   brlapi_param_retainDots_t *retainDots = data;
+  PARAM_ASSERT(size == sizeof(*retainDots));
   c->retainDots = *retainDots;
   return NULL;
 }
@@ -1483,6 +1487,7 @@ PARAM_READER(computerBrailleCellSize)
 PARAM_WRITER(computerBrailleCellSize)
 {
   brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
+  PARAM_ASSERT(size == sizeof(*computerBrailleCellSize));
 
   switch (*computerBrailleCellSize) {
     case 8:
@@ -1510,6 +1515,7 @@ PARAM_READER(literaryBraille)
 PARAM_WRITER(literaryBraille)
 {
   brlapi_param_literaryBraille_t *literaryBraille = data;
+  PARAM_ASSERT(size == sizeof(*literaryBraille));
   setContractedBraille(*literaryBraille);
   return NULL;
 }
