@@ -172,6 +172,7 @@ extern void enableBrailleDriver (void);
 extern void disableBrailleDriver (const char *reason);
 extern int constructBrailleDriver (void);
 extern void destructBrailleDriver (void);
+extern int isBrailleDriverConstructed (void);
 extern int isBrailleOnline (void);
 extern void forgetDevices (void);
 
