@@ -39,14 +39,14 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
 
 void
 announceBrailleOffline (void) {
-  logMessage(LOG_DEBUG, "braille offline");
+  logMessage(LOG_DEBUG, "braille is offline");
   api.updateParameter(BRLAPI_PARAM_DEVICE_ONLINE, 0);
   report(REPORT_BRAILLE_DEVICE_OFFLINE, NULL);
 }
 
 void
 announceBrailleOnline (void) {
-  logMessage(LOG_DEBUG, "braille online");
+  logMessage(LOG_DEBUG, "braille is online");
   api.updateParameter(BRLAPI_PARAM_DEVICE_ONLINE, 0);
   report(REPORT_BRAILLE_DEVICE_ONLINE, NULL);
 }
