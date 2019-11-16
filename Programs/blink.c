@@ -71,24 +71,24 @@ static BlinkDescriptor *const blinkDescriptors[] = {
   NULL
 };
 
-int
-getBlinkVisible (BlinkDescriptor *blink) {
+static int
+getBlinkVisibleTime (BlinkDescriptor *blink) {
   return PREFS2MSECS(*blink->visibleTime);
 }
 
-int
-getBlinkInvisible (BlinkDescriptor *blink) {
+static int
+getBlinkInvisibleTime (BlinkDescriptor *blink) {
   return PREFS2MSECS(*blink->invisibleTime);
 }
 
 int
 getBlinkPeriod (BlinkDescriptor *blink) {
-  return getBlinkVisible(blink) + getBlinkInvisible(blink);
+  return getBlinkVisibleTime(blink) + getBlinkInvisibleTime(blink);
 }
 
 int
 getBlinkPercentage (BlinkDescriptor *blink) {
-  return (getBlinkVisible(blink) * 100) / getBlinkPeriod(blink);
+  return (getBlinkVisibleTime(blink) * 100) / getBlinkPeriod(blink);
 }
 
 int
