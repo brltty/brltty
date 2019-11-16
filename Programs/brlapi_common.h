@@ -660,7 +660,7 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   },
 
 //Navigation Parameters
-  [BRLAPI_PARAM_SKIP_EMPTY_LINES] = {
+  [BRLAPI_PARAM_SKIP_IDENTICAL_LINES] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
     .count = 1,
   },

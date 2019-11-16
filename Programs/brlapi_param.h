@@ -59,7 +59,7 @@ typedef enum {
   BRLAPI_PARAM_RENDERED_CELLS = 16,		/**< Cells rendered by the client: uint8_t[] (ISO 11548-1), one cell per element */
 
 //Navigation Parameters
-  BRLAPI_PARAM_SKIP_EMPTY_LINES = 17,		/**< Whether to skip empty screen lines: boolean */
+  BRLAPI_PARAM_SKIP_IDENTICAL_LINES = 17,	/**< Whether to skip identical screen lines: boolean */
   BRLAPI_PARAM_AUDIBLE_ALERTS = 18,		/**< Whether to use audible alerts: boolean */
 
 //Clipboard Parameters
@@ -181,9 +181,9 @@ typedef uint8_t brlapi_param_cursorBlinkPercentage_t;
 /** Type to be used for BRLAPI_PARAM_RENDERED_CELLS */
 typedef uint8_t *brlapi_param_renderedCells_t;
 
-/* brlapi_param_skipEmptyLines_t */
-/** Type to be used for BRLAPI_PARAM_SKIP_EMPTY_LINES */
-typedef brlapi_param_bool_t brlapi_param_skipEmptyLines;
+/* brlapi_param_skipIdenticalLines_t */
+/** Type to be used for BRLAPI_PARAM_SKIP_IDENTICAL_LINES */
+typedef brlapi_param_bool_t brlapi_param_skipIdenticalLines_t;
 
 /* brlapi_param_audibleAlerts_t */
 /** Type to be used for BRLAPI_PARAM_AUDIBLE_ALERTS */

@@ -1545,6 +1545,23 @@ PARAM_READER(renderedCells)
   return NULL;
 }
 
+/* BRLAPI_PARAM_RENDERED_CELLS */
+PARAM_READER(skipIdenticalLines)
+{
+  brlapi_param_skipIdenticalLines_t *skipIdenticalLines = data;
+  *skipIdenticalLines = !!prefs.skipIdenticalLines;
+  *size = sizeof(*skipIdenticalLines);
+  return NULL;
+}
+
+PARAM_WRITER(skipIdenticalLines)
+{
+  brlapi_param_skipIdenticalLines_t *skipIdenticalLines = data;
+  PARAM_ASSERT(size == sizeof(*skipIdenticalLines));
+  prefs.skipIdenticalLines = !!*skipIdenticalLines;
+  return NULL;
+}
+
 /* BRLAPI_PARAM_COMMAND_SHORT_NAME */
 PARAM_READER(commandShortName)
 {
@@ -1817,10 +1834,10 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 
 //Navigation Parameters
-  [BRLAPI_PARAM_SKIP_EMPTY_LINES] = {
+  [BRLAPI_PARAM_SKIP_IDENTICAL_LINES] = {
     .global = 1,
-    .read = param_unimplemented_read,
-    .write = param_unimplemented_write,
+    .read = param_skipIdenticalLines_read,
+    .write = param_skipIdenticalLines_write,
   },
 
   [BRLAPI_PARAM_AUDIBLE_ALERTS] = {
@@ -2002,7 +2019,7 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
  * BRLAPI_PARAM_CURSOR_DOTS,
  * BRLAPI_PARAM_CURSOR_BLINK_PERIOD,
  * BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE
- * BRLAPI_PARAM_SKIP_EMPTY_LINES
+ * BRLAPI_PARAM_SKIP_IDENTICAL_LINES
  * BRLAPI_PARAM_AUDIBLE_ALERTS
  * BRLAPI_PARAM_CLIPBOARD_CONTENT
  * BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP
