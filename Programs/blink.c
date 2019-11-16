@@ -27,8 +27,8 @@
 struct BlinkDescriptorStruct {
   const char *const name;
   const unsigned char *const isEnabled;
-  const unsigned char *const visibleTime;
-  const unsigned char *const invisibleTime;
+  unsigned char *const visibleTime;
+  unsigned char *const invisibleTime;
 
   unsigned isRequired:1;
   unsigned isVisible:1;
@@ -70,6 +70,46 @@ static BlinkDescriptor *const blinkDescriptors[] = {
   &speechCursorBlinkDescriptor,
   NULL
 };
+
+int
+getBlinkVisible (BlinkDescriptor *blink) {
+  return *blink->visibleTime * 10;
+}
+
+int
+getBlinkInvisible (BlinkDescriptor *blink) {
+  return *blink->invisibleTime * 10;
+}
+
+int
+getBlinkPeriod (BlinkDescriptor *blink) {
+  return getBlinkVisible(blink) + getBlinkInvisible(blink);
+}
+
+int
+getBlinkPercentage (BlinkDescriptor *blink) {
+  return (getBlinkVisible(blink) * 100) / getBlinkPeriod(blink);
+}
+
+int
+setBlinkProperties (BlinkDescriptor *blink, int period, int percentage) {
+  if (period < 0) return 0;
+  period += 9;
+  period /= 10;
+
+  if (percentage < 0) return 0;
+  if (percentage > 100) return 0;
+
+  int visible = (period * percentage) / 100;
+  int invisible = period - visible;
+
+  if (visible > UINT8_MAX) return 0;
+  if (invisible > UINT8_MAX) return 0;
+
+  *blink->visibleTime = visible;
+  *blink->invisibleTime = invisible;
+  return 1;
+}
 
 int
 isBlinkVisible (const BlinkDescriptor *blink) {

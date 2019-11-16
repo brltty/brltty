@@ -29,6 +29,12 @@ extern BlinkDescriptor attributesUnderlineBlinkDescriptor;
 extern BlinkDescriptor uppercaseLettersBlinkDescriptor;
 extern BlinkDescriptor speechCursorBlinkDescriptor;
 
+extern int getBlinkVisible (BlinkDescriptor *blink);
+extern int getBlinkInvisible (BlinkDescriptor *blink);
+extern int getBlinkPeriod (BlinkDescriptor *blink);
+extern int getBlinkPercentage (BlinkDescriptor *blink);
+extern int setBlinkProperties (BlinkDescriptor *blink, int period, int percentage);
+
 extern int isBlinkVisible (const BlinkDescriptor *blink);
 extern void setBlinkState (BlinkDescriptor *blink, int visible);
 
