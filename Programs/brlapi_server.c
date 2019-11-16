@@ -1330,13 +1330,13 @@ PARAM_WRITER(clientPriority)
 /* BRLAPI_PARAM_DRIVER_NAME */
 PARAM_READER(driverName)
 {
-  lockMutex(&apiDriverMutex);
+  lockBrailleDriver();
     if (isBrailleDriverConstructed()) {
       param_readString(braille->definition.name, data, size);
     } else {
       *size = 0;
     }
-  unlockMutex(&apiDriverMutex);
+  unlockBrailleDriver();
 
   return NULL;
 }
@@ -1344,13 +1344,13 @@ PARAM_READER(driverName)
 /* BRLAPI_PARAM_DRIVER_CODE */
 PARAM_READER(driverCode)
 {
-  lockMutex(&apiDriverMutex);
+  lockBrailleDriver();
     if (isBrailleDriverConstructed()) {
       param_readString(braille->definition.code, data, size);
     } else {
       *size = 0;
     }
-  unlockMutex(&apiDriverMutex);
+  unlockBrailleDriver();
 
   return NULL;
 }
@@ -1358,13 +1358,13 @@ PARAM_READER(driverCode)
 /* BRLAPI_PARAM_DRIVER_VERSION */
 PARAM_READER(driverVersion)
 {
-  lockMutex(&apiDriverMutex);
+  lockBrailleDriver();
     if (isBrailleDriverConstructed()) {
       param_readString(braille->definition.version, data, size);
     } else {
       *size = 0;
     }
-  unlockMutex(&apiDriverMutex);
+  unlockBrailleDriver();
 
   return NULL;
 }
@@ -1372,30 +1372,36 @@ PARAM_READER(driverVersion)
 /* BRLAPI_PARAM_DEVICE_MODEL */
 PARAM_READER(deviceModel)
 {
-  if (isBrailleDriverConstructed()) {
-    const char *deviceModel = brl.keyBindings;
+  lockBrailleDriver();
+    if (isBrailleDriverConstructed()) {
+      const char *deviceModel = brl.keyBindings;
 
-    if (deviceModel) {
-      param_readString(deviceModel, data, size);
-      return NULL;
+      if (deviceModel) {
+        param_readString(deviceModel, data, size);
+        goto unlock;
+      }
     }
-  }
 
-  *size = 0;
+    *size = 0;
+unlock:
+  unlockBrailleDriver();
+
   return NULL;
 }
 
 /* BRLAPI_PARAM_DISPLAY_SIZE */
 PARAM_READER(displaySize)
 {
-  if (isBrailleDriverConstructed()) {
-    brlapi_param_displaySize_t *displaySize = data;
-    displaySize->columns = brl.textColumns;
-    displaySize->rows = brl.textRows;
-    *size = sizeof(*displaySize);
-  } else {
-    *size = 0;
-  }
+  lockBrailleDriver();
+    if (isBrailleDriverConstructed()) {
+      brlapi_param_displaySize_t *displaySize = data;
+      displaySize->columns = brl.textColumns;
+      displaySize->rows = brl.textRows;
+      *size = sizeof(*displaySize);
+    } else {
+      *size = 0;
+    }
+  unlockBrailleDriver();
 
   return NULL;
 }
@@ -1403,17 +1409,21 @@ PARAM_READER(displaySize)
 /* BRLAPI_PARAM_DEVICE_IDENTIFIER */
 PARAM_READER(deviceIdentifier)
 {
-  if (isBrailleDriverConstructed()) {
-    GioEndpoint *endpoint = brl.gioEndpoint;
+  lockBrailleDriver();
+    if (isBrailleDriverConstructed()) {
+      GioEndpoint *endpoint = brl.gioEndpoint;
 
-    if (endpoint) {
-      gioMakeResourceIdentifier(endpoint, data, *size);
-      *size = strlen(data);
-      return NULL;
+      if (endpoint) {
+        gioMakeResourceIdentifier(endpoint, data, *size);
+        *size = strlen(data);
+        goto unlock;
+      }
     }
-  }
 
-  *size = 0;
+    *size = 0;
+unlock:
+  unlockBrailleDriver();
+
   return NULL;
 }
 
@@ -1425,27 +1435,34 @@ PARAM_WRITER(deviceIdentifier)
 /* BRLAPI_PARAM_DEVICE_SPEED */
 PARAM_READER(deviceSpeed)
 {
-  if (isBrailleDriverConstructed()) {
-    GioEndpoint *endpoint = brl.gioEndpoint;
+  lockBrailleDriver();
+    if (isBrailleDriverConstructed()) {
+      GioEndpoint *endpoint = brl.gioEndpoint;
 
-    if (endpoint) {
-      brlapi_param_deviceSpeed_t *deviceSpeed = data;
-      *deviceSpeed = gioGetBytesPerSecond(endpoint);
-      *size = sizeof(*deviceSpeed);
-      return NULL;
+      if (endpoint) {
+        brlapi_param_deviceSpeed_t *deviceSpeed = data;
+        *deviceSpeed = gioGetBytesPerSecond(endpoint);
+        *size = sizeof(*deviceSpeed);
+        goto unlock;
+      }
     }
-  }
 
-  *size = 0;
+    *size = 0;
+unlock:
+  unlockBrailleDriver();
+
   return NULL;
 }
 
 /* BRLAPI_PARAM_DEVICE_ONLINE */
 PARAM_READER(deviceOnline)
 {
-  brlapi_param_deviceOnline_t *deviceOnline = data;
-  *deviceOnline = isBrailleOnline();
-  *size = sizeof(*deviceOnline);
+  lockBrailleDriver();
+    brlapi_param_deviceOnline_t *deviceOnline = data;
+    *deviceOnline = isBrailleOnline();
+    *size = sizeof(*deviceOnline);
+  unlockBrailleDriver();
+
   return NULL;
 }
 

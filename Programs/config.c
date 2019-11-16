@@ -31,6 +31,7 @@
 #include "log.h"
 #include "report.h"
 #include "strfmt.h"
+#include "lock.h"
 #include "activity.h"
 #include "update.h"
 #include "cmd.h"
@@ -1404,6 +1405,22 @@ initializeBrailleDisplay (void) {
   brl.api = &api;
 }
 
+static LockDescriptor *
+getBrailleDriverLock (void) {
+  static LockDescriptor *lock = NULL;
+  return getLockDescriptor(&lock, "braille-driver");
+}
+
+void
+lockBrailleDriver (void) {
+  obtainExclusiveLock(getBrailleDriverLock());
+}
+
+void
+unlockBrailleDriver (void) {
+  releaseLock(getBrailleDriverLock());
+}
+
 int
 isBrailleDriverConstructed (void) {
   return brailleDriverConstructed;
@@ -1411,7 +1428,11 @@ isBrailleDriverConstructed (void) {
 
 static void
 setBrailleDriverConstructed (int yes) {
-  if ((brailleDriverConstructed = yes)) {
+  lockBrailleDriver();
+  brailleDriverConstructed = yes;
+  unlockBrailleDriver();
+
+  if (brailleDriverConstructed) {
     announceBrailleOnline();
   } else {
     announceBrailleOffline();

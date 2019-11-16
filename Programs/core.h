@@ -168,6 +168,8 @@ extern unsigned int verticalWindowShift;			/* Window vertical distance */
 
 extern void setBrailleOn (void);
 extern void setBrailleOff (const char *message);
+extern void lockBrailleDriver (void);
+extern void unlockBrailleDriver (void);
 extern void enableBrailleDriver (void);
 extern void disableBrailleDriver (const char *reason);
 extern int constructBrailleDriver (void);
