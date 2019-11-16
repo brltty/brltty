@@ -1544,7 +1544,7 @@ PARAM_READER(renderedCells)
   return NULL;
 }
 
-/* BRLAPI_PARAM_RENDERED_CELLS */
+/* BRLAPI_PARAM_SKIP_IDENTICAL_LINES */
 PARAM_READER(skipIdenticalLines)
 {
   brlapi_param_skipIdenticalLines_t *skipIdenticalLines = data;
@@ -1558,6 +1558,23 @@ PARAM_WRITER(skipIdenticalLines)
   brlapi_param_skipIdenticalLines_t *skipIdenticalLines = data;
   PARAM_ASSERT(size == sizeof(*skipIdenticalLines));
   prefs.skipIdenticalLines = !!*skipIdenticalLines;
+  return NULL;
+}
+
+/* BRLAPI_PARAM_AUDIBLE_ALERTS */
+PARAM_READER(audibleAlerts)
+{
+  brlapi_param_audibleAlerts_t *audibleAlerts = data;
+  *audibleAlerts = !!prefs.alertTunes;
+  *size = sizeof(*audibleAlerts);
+  return NULL;
+}
+
+PARAM_WRITER(audibleAlerts)
+{
+  brlapi_param_audibleAlerts_t *audibleAlerts = data;
+  PARAM_ASSERT(size == sizeof(*audibleAlerts));
+  prefs.alertTunes = !!*audibleAlerts;
   return NULL;
 }
 
@@ -1841,8 +1858,8 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_AUDIBLE_ALERTS] = {
     .global = 1,
-    .read = param_unimplemented_read,
-    .write = param_unimplemented_write,
+    .read = param_audibleAlerts_read,
+    .write = param_audibleAlerts_write,
   },
 
 //Clipboard Parameters
