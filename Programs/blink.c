@@ -73,12 +73,12 @@ static BlinkDescriptor *const blinkDescriptors[] = {
 
 int
 getBlinkVisible (BlinkDescriptor *blink) {
-  return *blink->visibleTime * 10;
+  return PREFS2MSECS(*blink->visibleTime);
 }
 
 int
 getBlinkInvisible (BlinkDescriptor *blink) {
-  return *blink->invisibleTime * 10;
+  return PREFS2MSECS(*blink->invisibleTime);
 }
 
 int
@@ -94,8 +94,7 @@ getBlinkPercentage (BlinkDescriptor *blink) {
 int
 setBlinkProperties (BlinkDescriptor *blink, int period, int percentage) {
   if (period < 0) return 0;
-  period += 9;
-  period /= 10;
+  period = MSECS2PREFS(period);
 
   if (percentage < 0) return 0;
   if (percentage > 100) return 0;
@@ -119,7 +118,7 @@ isBlinkVisible (const BlinkDescriptor *blink) {
 
 static int
 getBlinkDuration (const BlinkDescriptor *blink) {
-  return PREFERENCES_TIME(blink->isVisible? *blink->visibleTime: *blink->invisibleTime);
+  return PREFS2MSECS(blink->isVisible? *blink->visibleTime: *blink->invisibleTime);
 }
 
 void

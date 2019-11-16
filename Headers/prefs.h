@@ -225,7 +225,10 @@ typedef struct {
 } PACKED Preferences;
 
 extern Preferences prefs;		/* current preferences settings */
-#define PREFERENCES_TIME(time) ((time) * 10)
+
+#define PREFS_TIME_MULTIPLIER 10
+#define PREFS2MSECS(time) ((time) * PREFS_TIME_MULTIPLIER)
+#define MSECS2PREFS(msecs) (((msecs) + (PREFS_TIME_MULTIPLIER - 1)) / PREFS_TIME_MULTIPLIER)
 
 extern void resetPreferences (void);
 extern int setPreference (char *string);
