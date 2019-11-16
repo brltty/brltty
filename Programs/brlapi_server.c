@@ -1781,35 +1781,30 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
 //Braille Rendering Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE] = {
-    .local = 1,
     .global = 1,
     .read = param_computerBrailleCellSize_read,
     .write = param_computerBrailleCellSize_write,
   },
 
   [BRLAPI_PARAM_LITERARY_BRAILLE] = {
-    .local = 1,
     .global = 1,
     .read = param_literaryBraille_read,
     .write = param_literaryBraille_write,
   },
 
   [BRLAPI_PARAM_CURSOR_DOTS] = {
-    .local = 1,
     .global = 1,
     .read = param_unimplemented_read,
     .write = param_unimplemented_write,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERIOD] = {
-    .local = 1,
     .global = 1,
     .read = param_unimplemented_read,
     .write = param_unimplemented_write,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE] = {
-    .local = 1,
     .global = 1,
     .read = param_unimplemented_read,
     .write = param_unimplemented_write,
@@ -1822,14 +1817,12 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
 //Navigation Parameters
   [BRLAPI_PARAM_SKIP_EMPTY_LINES] = {
-    .local = 1,
     .global = 1,
     .read = param_unimplemented_read,
     .write = param_unimplemented_write,
   },
 
   [BRLAPI_PARAM_AUDIBLE_ALERTS] = {
-    .local = 1,
     .global = 1,
     .read = param_unimplemented_read,
     .write = param_unimplemented_write,
