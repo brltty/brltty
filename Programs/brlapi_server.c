@@ -1558,6 +1558,7 @@ PARAM_WRITER(skipIdenticalLines)
   brlapi_param_skipIdenticalLines_t *skipIdenticalLines = data;
   PARAM_ASSERT(size == sizeof(*skipIdenticalLines));
   prefs.skipIdenticalLines = !!*skipIdenticalLines;
+  api_updateParameter(BRLAPI_PARAM_SKIP_IDENTICAL_LINES, 0);
   return NULL;
 }
 
@@ -1575,6 +1576,7 @@ PARAM_WRITER(audibleAlerts)
   brlapi_param_audibleAlerts_t *audibleAlerts = data;
   PARAM_ASSERT(size == sizeof(*audibleAlerts));
   prefs.alertTunes = !!*audibleAlerts;
+  api_updateParameter(BRLAPI_PARAM_AUDIBLE_ALERTS, 0);
   return NULL;
 }
 

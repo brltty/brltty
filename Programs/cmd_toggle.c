@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "parameters.h"
+#include "api_control.h"
 #include "cmd_queue.h"
 #include "cmd_toggle.h"
 #include "brl_cmds.h"
@@ -107,6 +108,7 @@ handleToggleCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     case BRL_CMD_SKPIDLNS:
       togglePreferenceSetting(&prefs.skipIdenticalLines, command);
+      api.updateParameter(BRLAPI_PARAM_SKIP_IDENTICAL_LINES, 0);
       break;
 
     case BRL_CMD_SKPBLNKWINS:
@@ -184,6 +186,7 @@ handleToggleCommands (int command, void *data) {
 
     case BRL_CMD_TUNES:
       togglePreferenceSetting(&prefs.alertTunes, command);        /* toggle sound on/off */
+      api.updateParameter(BRLAPI_PARAM_AUDIBLE_ALERTS, 0);
       break;
 
     case BRL_CMD_AUTOSPEAK:
