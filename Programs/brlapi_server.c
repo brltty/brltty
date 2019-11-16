@@ -1268,7 +1268,7 @@ typedef PARAM_READER_DECLARATION(ParamReader);
 
 /* On success, this should return NULL.
  * On failure, this should return a non-allocated error message string. */
-#define PARAM_WRITER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t parameter, uint64_t subparam, uint32_t flags, void *data, size_t size)
+#define PARAM_WRITER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t parameter, uint64_t subparam, uint32_t flags, const void *data, size_t size)
 typedef PARAM_WRITER_DECLARATION(ParamWriter);
 #define PARAM_WRITER(name) static PARAM_WRITER_DECLARATION(param_ ## name ## _write)
 
@@ -1285,7 +1285,7 @@ static void param_readString(const char *string, void *data, size_t *size)
   memcpy(data, string, *size);
 }
 
-static const char *param_writeString(Connection *c, int (*handler) (const char *string), void *data, size_t size)
+static const char *param_writeString(Connection *c, int (*handler) (const char *string), const void *data, size_t size)
 {
   char string[size + 1];
   memcpy(string, data, size);
@@ -1315,7 +1315,7 @@ PARAM_READER(clientPriority)
 
 PARAM_WRITER(clientPriority)
 {
-  brlapi_param_clientPriority_t *clientPriority = data;
+  const brlapi_param_clientPriority_t *clientPriority = data;
   PARAM_ASSERT(size == sizeof(*clientPriority));
 
   lockMutex(&apiConnectionsMutex);
@@ -1480,7 +1480,7 @@ PARAM_READER(retainDots)
 
 PARAM_WRITER(retainDots)
 {
-  brlapi_param_retainDots_t *retainDots = data;
+  const brlapi_param_retainDots_t *retainDots = data;
   PARAM_ASSERT(size == sizeof(*retainDots));
   c->retainDots = *retainDots;
   return NULL;
@@ -1497,7 +1497,7 @@ PARAM_READER(computerBrailleCellSize)
 
 PARAM_WRITER(computerBrailleCellSize)
 {
-  brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
+  const brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
   PARAM_ASSERT(size == sizeof(*computerBrailleCellSize));
 
   switch (*computerBrailleCellSize) {
@@ -1525,7 +1525,7 @@ PARAM_READER(literaryBraille)
 
 PARAM_WRITER(literaryBraille)
 {
-  brlapi_param_literaryBraille_t *literaryBraille = data;
+  const brlapi_param_literaryBraille_t *literaryBraille = data;
   PARAM_ASSERT(size == sizeof(*literaryBraille));
   setContractedBraille(*literaryBraille);
   return NULL;
@@ -1558,7 +1558,7 @@ PARAM_READER(skipIdenticalLines)
 
 PARAM_WRITER(skipIdenticalLines)
 {
-  brlapi_param_skipIdenticalLines_t *skipIdenticalLines = data;
+  const brlapi_param_skipIdenticalLines_t *skipIdenticalLines = data;
   PARAM_ASSERT(size == sizeof(*skipIdenticalLines));
   prefs.skipIdenticalLines = !!*skipIdenticalLines;
   api_updateParameter(BRLAPI_PARAM_SKIP_IDENTICAL_LINES, 0);
@@ -1576,7 +1576,7 @@ PARAM_READER(audibleAlerts)
 
 PARAM_WRITER(audibleAlerts)
 {
-  brlapi_param_audibleAlerts_t *audibleAlerts = data;
+  const brlapi_param_audibleAlerts_t *audibleAlerts = data;
   PARAM_ASSERT(size == sizeof(*audibleAlerts));
   prefs.alertTunes = !!*audibleAlerts;
   api_updateParameter(BRLAPI_PARAM_AUDIBLE_ALERTS, 0);
