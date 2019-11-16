@@ -113,21 +113,21 @@ changeAutorepeatProperties (BrailleDisplay *brl, int on, int delay, int interval
 static int
 changedAutorepeatEnabled (const MenuItem *item UNUSED, unsigned char setting) {
   return changeAutorepeatProperties(&brl, setting,
-                                    PREFERENCES_TIME(prefs.longPressTime),
-                                    PREFERENCES_TIME(prefs.autorepeatInterval));
+                                    PREFS2MSECS(prefs.longPressTime),
+                                    PREFS2MSECS(prefs.autorepeatInterval));
 }
 
 static int
 changedAutorepeatDelay (const MenuItem *item UNUSED, unsigned char setting) {
   return changeAutorepeatProperties(&brl, prefs.autorepeatEnabled,
                                     setting,
-                                    PREFERENCES_TIME(prefs.autorepeatInterval));
+                                    PREFS2MSECS(prefs.autorepeatInterval));
 }
 
 static int
 changedAutorepeatInterval (const MenuItem *item UNUSED, unsigned char setting) {
   return changeAutorepeatProperties(&brl, prefs.autorepeatEnabled,
-                                    PREFERENCES_TIME(prefs.longPressTime),
+                                    PREFS2MSECS(prefs.longPressTime),
                                     setting);
 }
 

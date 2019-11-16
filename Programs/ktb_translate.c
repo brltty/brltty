@@ -414,7 +414,7 @@ ASYNC_ALARM_CALLBACK(handleLongPressAlarm) {
 
 static void
 setLongPressAlarm (KeyTable *table, unsigned char when) {
-  asyncNewRelativeAlarm(&table->longPress.alarm, PREFERENCES_TIME(when),
+  asyncNewRelativeAlarm(&table->longPress.alarm, PREFS2MSECS(when),
                         handleLongPressAlarm, table);
 }
 

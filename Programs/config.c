@@ -1150,8 +1150,8 @@ applyBraillePreferences (void) {
   setTouchSensitivity(&brl, prefs.touchSensitivity);
 
   setAutorepeatProperties(&brl, prefs.autorepeatEnabled,
-                          PREFERENCES_TIME(prefs.longPressTime),
-                          PREFERENCES_TIME(prefs.autorepeatInterval));
+                          PREFS2MSECS(prefs.longPressTime),
+                          PREFS2MSECS(prefs.autorepeatInterval));
 
   if (brl.keyTable) {
     setKeyAutoreleaseTime(brl.keyTable, prefs.autoreleaseTime);
