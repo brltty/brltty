@@ -1817,7 +1817,6 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_RENDERED_CELLS] = {
     .local = 1,
-    .global = 1,
     .read = param_renderedCells_read,
   },
 
