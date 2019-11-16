@@ -1272,7 +1272,10 @@ typedef PARAM_READER_DECLARATION(ParamReader);
 typedef PARAM_WRITER_DECLARATION(ParamWriter);
 #define PARAM_WRITER(name) static PARAM_WRITER_DECLARATION(param_ ## name ## _write)
 
-#define PARAM_ASSERT(condition) if (!(condition)) return "assertion failed: " #condition;
+#define PARAM_ASSERT(condition) \
+do { \
+  if (!(condition)) return "assertion failed: " #condition; \
+} while (0)
 
 static void param_readString(const char *string, void *data, size_t *size)
 {
