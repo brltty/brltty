@@ -25,6 +25,7 @@
 #include "log_history.h"
 #include "embed.h"
 #include "revision.h"
+#include "api_control.h"
 #include "menu.h"
 #include "menu_prefs.h"
 #include "prefs.h"
@@ -197,8 +198,14 @@ changedKeyboardLedAlerts (const MenuItem *item UNUSED, unsigned char setting) {
 }
 
 static int
-testTunes (void) {
+testAlertTunes (void) {
   return prefs.alertTunes;
+}
+
+static int
+changedAlertTunes (const MenuItem *item UNUSED, unsigned char setting) {
+  api.updateParameter(BRLAPI_PARAM_AUDIBLE_ALERTS, 0);
+  return 1;
 }
 
 static int
@@ -209,21 +216,21 @@ changedTuneDevice (const MenuItem *item UNUSED, unsigned char setting) {
 #ifdef HAVE_PCM_SUPPORT
 static int
 testTunesPcm (void) {
-  return testTunes() && (prefs.tuneDevice == tdPcm);
+  return testAlertTunes() && (prefs.tuneDevice == tdPcm);
 }
 #endif /* HAVE_PCM_SUPPORT */
 
 #ifdef HAVE_MIDI_SUPPORT
 static int
 testTunesMidi (void) {
-  return testTunes() && (prefs.tuneDevice == tdMidi);
+  return testAlertTunes() && (prefs.tuneDevice == tdMidi);
 }
 #endif /* HAVE_MIDI_SUPPORT */
 
 #ifdef HAVE_FM_SUPPORT
 static int
 testTunesFm (void) {
-  return testTunes() && (prefs.tuneDevice == tdFm);
+  return testAlertTunes() && (prefs.tuneDevice == tdFm);
 }
 #endif /* HAVE_FM_SUPPORT */
 
@@ -368,6 +375,12 @@ STATUS_FIELD_HANDLERS(9)
 static int
 changedTextStyle (const MenuItem *item, unsigned char setting UNUSED) {
   onTextStyleUpdated();
+  return 1;
+}
+
+static int
+changedSkipIdenticalLines (const MenuItem *item, unsigned char setting UNUSED) {
+  api.updateParameter(BRLAPI_PARAM_SKIP_IDENTICAL_LINES, 0);
   return 1;
 }
 
@@ -727,6 +740,7 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Skip Identical Lines"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipIdenticalLines, &itemName));
+      CHANGED(SkipIdenticalLines);
     }
 
     {
@@ -913,6 +927,7 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Alert Tunes"));
       ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertTunes, &itemName));
+      CHANGED(AlertTunes);
     }
 
     {
@@ -925,7 +940,7 @@ makePreferencesMenu (void) {
 
       NAME(strtext("Tune Device"));
       ITEM(newEnumeratedMenuItem(alertsSubmenu, &prefs.tuneDevice, &itemName, strings));
-      TEST(Tunes);
+      TEST(AlertTunes);
       CHANGED(TuneDevice);
     }
 
