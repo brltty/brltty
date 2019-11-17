@@ -385,7 +385,6 @@ static int resumeDriver(BrailleDisplay *brl) {
     handleParamUpdate(NULL, BRLAPI_PARAM_DRIVER_VERSION, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.version, strlen(braille->definition.version));
     if (disp) handleParamUpdate(NULL, BRLAPI_PARAM_DEVICE_MODEL, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
     brlResize(brl);
-    /* TODO: notify BRLAPI_PARAM_DEVICE_IDENTIFIER, BRLAPI_PARAM_DEVICE_SPEED, BRLAPI_PARAM_DEVICE_ONLINE */
   }
   unlockMutex(&apiSuspendMutex);
   driverConstructing = 0;
@@ -2035,15 +2034,12 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
 /* TODO: call for
- * BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE,
- * BRLAPI_PARAM_LITERARY_BRAILLE,
  * BRLAPI_PARAM_CURSOR_DOTS,
  * BRLAPI_PARAM_CURSOR_BLINK_PERIOD,
  * BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE
- * BRLAPI_PARAM_SKIP_IDENTICAL_LINES
- * BRLAPI_PARAM_AUDIBLE_ALERTS
  * BRLAPI_PARAM_CLIPBOARD_CONTENT
- * BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_MAP
+ * BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK
+ * BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS
  */
 static void __handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
 {
