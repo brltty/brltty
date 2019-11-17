@@ -1751,6 +1751,7 @@ PARAM_WRITER(unimplemented)
 typedef struct {
   unsigned local:1;
   unsigned global:1;
+  unsigned unwatchable:1;
   ParamReader *read;
   ParamWriter *write;
 } ParamDispatch;
@@ -1876,43 +1877,51 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 //TTY Mode Parameters
   [BRLAPI_PARAM_AVAILABLE_COMMAND_CODES] = {
     .global = 1,
+    .unwatchable = 1,
     .read = param_unimplemented_read,
   },
 
   [BRLAPI_PARAM_COMMAND_SHORT_NAME] = {
     .global = 1,
+    .unwatchable = 1,
     .read = param_commandShortName_read,
   },
 
   [BRLAPI_PARAM_COMMAND_LONG_NAME] = {
     .global = 1,
+    .unwatchable = 1,
     .read = param_commandLongName_read,
   },
 
 //Raw Mode Parameters
   [BRLAPI_PARAM_AVAILABLE_KEY_CODES] = {
     .global = 1,
+    .unwatchable = 1,
     .read = param_availableKeyCodes_read,
   },
 
   [BRLAPI_PARAM_KEY_SHORT_NAME] = {
     .global = 1,
+    .unwatchable = 1,
     .read = param_keyShortName_read,
   },
 
   [BRLAPI_PARAM_KEY_LONG_NAME] = {
     .global = 1,
+    .unwatchable = 1,
     .read = param_keyLongName_read,
   },
 
 //Braille Translation Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK] = {
     .global = 1,
+    .unwatchable = 1,
     .read = param_unimplemented_read,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
     .global = 1,
+    .unwatchable = 1,
     .read = param_unimplemented_read,
   },
 
@@ -2123,6 +2132,10 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   /* Check against non-readable parameters */
   if (!readHandler) {
     WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for reading", param);
+    return 0;
+  }
+  if (paramDispatch[param].unwatchable) {
+    WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching", param);
     return 0;
   }
 
