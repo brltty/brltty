@@ -1791,7 +1791,7 @@ PARAM_WRITER(unimplemented)
 typedef struct {
   unsigned local:1;
   unsigned global:1;
-  unsigned rootParameter;
+  brlapi_param_t rootParameter;
   ParamReader *read;
   ParamWriter *write;
 } ParamDispatch;
@@ -2185,9 +2185,18 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   if (flags & BRLAPI_PARAMF_SUBSCRIBE) {
     /* subscribe to parameter updates */
 
-    if (paramDispatch[param].rootParameter) {
-      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching - %u should be watched instead", param, paramDispatch[param].rootParameter);
+    if (param == BRLAPI_PARAM_SERVER_VERSION) {
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching - it won't change", param);
       return 0;
+    }
+
+    {
+      brlapi_param_t root = paramDispatch[param].rootParameter;
+
+      if (root) {
+        WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching - %u should be watched instead", param, root);
+        return 0;
+      }
     }
 
     struct Subscription *s;
