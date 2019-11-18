@@ -1438,13 +1438,24 @@ setBrailleDriverConstructed (int yes) {
     announceBrailleOffline();
   }
 
-  api.updateParameter(BRLAPI_PARAM_DRIVER_NAME, 0);
-  api.updateParameter(BRLAPI_PARAM_DRIVER_CODE, 0);
-  api.updateParameter(BRLAPI_PARAM_DRIVER_VERSION, 0);
-  api.updateParameter(BRLAPI_PARAM_DEVICE_MODEL, 0);
-  api.updateParameter(BRLAPI_PARAM_DEVICE_IDENTIFIER, 0);
-  api.updateParameter(BRLAPI_PARAM_DEVICE_SPEED, 0);
-  api.updateParameter(BRLAPI_PARAM_DISPLAY_SIZE, 0);
+  static const brlapi_param_t parameters[] = {
+    BRLAPI_PARAM_DRIVER_CODE,
+    BRLAPI_PARAM_DRIVER_NAME,
+    BRLAPI_PARAM_DRIVER_VERSION,
+    BRLAPI_PARAM_DEVICE_MODEL,
+    BRLAPI_PARAM_DEVICE_IDENTIFIER,
+    BRLAPI_PARAM_DEVICE_SPEED,
+    BRLAPI_PARAM_DEVICE_KEY_CODES,
+    BRLAPI_PARAM_BOUND_COMMAND_CODES,
+    BRLAPI_PARAM_DISPLAY_SIZE,
+  };
+
+  const brlapi_param_t *parameter = parameters;
+  const brlapi_param_t *end = parameter + ARRAY_COUNT(parameters);
+
+  while (parameter < end) {
+    api.updateParameter(*parameter++, 0);
+  }
 }
 
 int
