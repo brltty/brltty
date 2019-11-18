@@ -132,6 +132,7 @@ static void brlapi_python_parameter_callback(brlapi_param_t parameter, uint64_t 
 brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_handle_t *handle, brlapi_param_t param, uint64_t subparam, int global, PyObject *func)
 {
   brlapi_python_paramCallbackDescriptor_t *descr;
+  brlapi_paramCallbackDescriptor_t *brlapi_descr;
   PyObject *result;
 
   if (!PyCallable_Check(func)) {
@@ -140,10 +141,17 @@ brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_han
   }
 
   Py_INCREF(func);
+
+  brlapi_descr = brlapi__watchParameter(handle, param, subparam, global, brlapi_python_parameter_callback, descr, NULL, 0);
+
+  if (!brlapi_descr) {
+    PyErr_SetString(PyExc_ValueError, "watching parameter failed");
+    return NULL;
+  }
+
   descr = malloc(sizeof(*descr));
   descr->callback = func;
-
-  descr->brlapi_descr = brlapi__watchParameter(handle, param, subparam, global, brlapi_python_parameter_callback, descr, NULL, 0);
+  descr->brlapi_descr = brlapi_descr;
 
   return descr;
 }
