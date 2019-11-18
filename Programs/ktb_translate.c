@@ -740,13 +740,26 @@ getBoundCommands (KeyTable *table, unsigned int *count) {
     const KeyContext *ctx = getKeyContext(table, context);
 
     if (ctx) {
-      const KeyBinding *binding = ctx->keyBindings.table;
-      const KeyBinding *end = binding + ctx->keyBindings.count;
+      {
+        const KeyBinding *binding = ctx->keyBindings.table;
+        const KeyBinding *end = binding + ctx->keyBindings.count;
 
-      while (binding < end) {
-        if (!addBoundCommand(&acd, &binding->primaryCommand)) goto error;
-        if (!addBoundCommand(&acd, &binding->secondaryCommand)) goto error;
-        binding += 1;
+        while (binding < end) {
+          if (!addBoundCommand(&acd, &binding->primaryCommand)) goto error;
+          if (!addBoundCommand(&acd, &binding->secondaryCommand)) goto error;
+          binding += 1;
+        }
+      }
+
+      {
+        const HotkeyEntry *hotkey = ctx->hotkeys.table;
+        const HotkeyEntry *end = hotkey + ctx->hotkeys.count;
+
+        while (hotkey < end) {
+          if (!addBoundCommand(&acd, &hotkey->pressCommand)) goto error;
+          if (!addBoundCommand(&acd, &hotkey->releaseCommand)) goto error;
+          hotkey += 1;
+        }
       }
 
       if (ctx->mappedKeys.count) {
