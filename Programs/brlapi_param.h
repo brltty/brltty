@@ -66,7 +66,7 @@ typedef enum {
   BRLAPI_PARAM_CLIPBOARD_CONTENT = 19,		/**< Content of the clipboard: UTF-8 string */
 
 //TTY Mode Parameters
-  BRLAPI_PARAM_AVAILABLE_COMMAND_CODES = 20,	/**< Commands bound for the device:
+  BRLAPI_PARAM_BOUND_COMMAND_CODES = 20,	/**< Commands bound for the device:
 						  * uint64_t[], one command code per element */
   BRLAPI_PARAM_COMMAND_SHORT_NAME = 21,		/**< Short name for a command
 						  * (specified via the subparam argument):
@@ -76,7 +76,7 @@ typedef enum {
 						  * string (usually a few words) */
 
 //Raw Mode Parameters
-  BRLAPI_PARAM_AVAILABLE_KEY_CODES = 23,	/**< Keys defined for the device:
+  BRLAPI_PARAM_DEVICE_KEY_CODES = 23,		/**< Keys defined for the device:
 						  * uint64_t[], one key code per element */
   BRLAPI_PARAM_KEY_SHORT_NAME = 24,		/**< Short name for a key
 						  * (specified via the subparam argument):
@@ -194,7 +194,7 @@ typedef brlapi_param_bool_t brlapi_param_audibleAlerts_t;
 typedef char *brlapi_param_clipboardContent_t;
 
 /* brlapi_param_commandCode_t */
-/** Type to be used for BRLAPI_PARAM_AVAILABLE_COMMAND_CODES */
+/** Type to be used for BRLAPI_PARAM_BOUND_COMMAND_CODES */
 typedef uint64_t brlapi_param_commandCode_t;
 
 /* brlapi_param_commandShortName_t */
@@ -206,7 +206,7 @@ typedef char *brlapi_param_commandShortName_t;
 typedef char *brlapi_param_commandLongName_t;
 
 /* brlapi_param_keyCode_t */
-/** Type to be used for BRLAPI_PARAM_AVAILABLE_KEY_CODES */
+/** Type to be used for BRLAPI_PARAM_DEVICE_KEY_CODES */
 typedef uint64_t brlapi_param_keyCode_t;
 
 /* brlapi_param_keyShortName_t */

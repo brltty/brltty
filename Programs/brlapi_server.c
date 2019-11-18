@@ -1582,6 +1582,51 @@ PARAM_WRITER(audibleAlerts)
   return NULL;
 }
 
+/* BRLAPI_PARAM_BOUND_COMMAND_CODES */
+PARAM_READER(boundCommandCodes)
+{
+  lockBrailleDriver();
+    if (isBrailleDriverConstructed()) {
+      KeyTable *table = brl.keyTable;
+
+      if (table) {
+        unsigned int count;
+        int *commands = getBoundCommands(table, &count);
+
+        if (commands) {
+          *size /= sizeof(brlapi_param_commandCode_t);
+          *size *= sizeof(brlapi_param_commandCode_t);
+
+          void *next = data;
+          const void *end = next + *size;
+
+          for (unsigned int i=0; i<count; i+=1) {
+            if (next == end) break;
+
+            int command = commands[i];
+            brlapi_keyCode_t code;
+
+            if (cmdBrlttyToBrlapi(&code, command, c->retainDots)) {
+              brlapi_param_commandCode_t *commandCode = next;
+              *commandCode = code;
+              next += sizeof(*commandCode);
+            }
+          }
+
+          *size = next - data;
+          free(commands);
+          goto unlock;
+        }
+      }
+    }
+
+    *size = 0;
+unlock:
+  unlockBrailleDriver();
+
+  return NULL;
+}
+
 /* BRLAPI_PARAM_COMMAND_SHORT_NAME */
 PARAM_READER(commandShortName)
 {
@@ -1614,7 +1659,7 @@ PARAM_READER(commandLongName)
   return NULL;
 }
 
-/* BRLAPI_PARAM_AVAILABLE_KEY_CODES */
+/* BRLAPI_PARAM_DEVICE_KEY_CODES */
 typedef struct {
   void *next;
   const void *end;
@@ -1635,11 +1680,11 @@ static int param_addKeyCode (const KeyNameEntry *kne, void *data)
   return 1;
 }
 
-PARAM_READER(availableKeyCodes)
+PARAM_READER(deviceKeyCodes)
 {
-  lockMutex(&apiDriverMutex);
-    if (disp) {
-      KEY_NAME_TABLES_REFERENCE keys = disp->keyNames;
+  lockBrailleDriver();
+    if (isBrailleDriverConstructed()) {
+      KEY_NAME_TABLES_REFERENCE keys = brl.keyNames;
 
       if (keys) {
         *size /= sizeof(brlapi_param_keyCode_t);
@@ -1652,13 +1697,13 @@ PARAM_READER(availableKeyCodes)
 
         forEachKeyName(keys, param_addKeyCode, &akc);
         *size = akc.next - data;
-        goto done;
+        goto unlock;
       }
     }
 
     *size = 0;
-done:
-  unlockMutex(&apiDriverMutex);
+unlock:
+  unlockBrailleDriver();
 
   return NULL;
 }
@@ -1666,9 +1711,9 @@ done:
 /* BRLAPI_PARAM_KEY_SHORT_NAME */
 PARAM_READER(keyShortName)
 {
-  lockMutex(&apiDriverMutex);
-    if (disp) {
-      KeyTable *table = disp->keyTable;
+  lockBrailleDriver();
+    if (isBrailleDriverConstructed()) {
+      KeyTable *table = brl.keyTable;
 
       if (table) {
         if (subparam <= UINT16_MAX) {
@@ -1680,15 +1725,15 @@ PARAM_READER(keyShortName)
           const KeyNameEntry *kne = findKeyNameEntry(table, &keyValue);
           if (kne) {
             param_readString(kne->name, data, size);
-            goto done;
+            goto unlock;
           }
         }
       }
     }
 
     *size = 0;
-done:
-  unlockMutex(&apiDriverMutex);
+unlock:
+  unlockBrailleDriver();
 
   return NULL;
 }
@@ -1875,10 +1920,9 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 
 //TTY Mode Parameters
-  [BRLAPI_PARAM_AVAILABLE_COMMAND_CODES] = {
+  [BRLAPI_PARAM_BOUND_COMMAND_CODES] = {
     .global = 1,
-    .unwatchable = 1,
-    .read = param_unimplemented_read,
+    .read = param_boundCommandCodes_read,
   },
 
   [BRLAPI_PARAM_COMMAND_SHORT_NAME] = {
@@ -1894,10 +1938,9 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 
 //Raw Mode Parameters
-  [BRLAPI_PARAM_AVAILABLE_KEY_CODES] = {
+  [BRLAPI_PARAM_DEVICE_KEY_CODES] = {
     .global = 1,
-    .unwatchable = 1,
-    .read = param_availableKeyCodes_read,
+    .read = param_deviceKeyCodes_read,
   },
 
   [BRLAPI_PARAM_KEY_SHORT_NAME] = {
@@ -2134,10 +2177,6 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for reading", param);
     return 0;
   }
-  if (paramDispatch[param].unwatchable) {
-    WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching", param);
-    return 0;
-  }
 
   if (!checkParamLocalGlobal(c, param, flags))
     return 0;
@@ -2151,6 +2190,12 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   lockMutex(&apiParamMutex);
   if (flags & BRLAPI_PARAMF_SUBSCRIBE) {
     /* subscribe to parameter updates */
+
+    if (paramDispatch[param].unwatchable) {
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching", param);
+      return 0;
+    }
+
     struct Subscription *s;
     lockMutex(&apiConnectionsMutex);
     if (flags & BRLAPI_PARAMF_GLOBAL)
