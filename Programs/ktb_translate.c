@@ -682,3 +682,105 @@ getKeyGroupCommands (KeyTable *table, KeyGroup group, int *commands, unsigned in
     }
   }
 }
+
+typedef struct {
+  int *array;
+  unsigned int size;
+  unsigned int count;
+} AddCommandData;
+
+static int
+addCommand (AddCommandData *acd, int command) {
+  if (command == EOF) return 1;
+  int blk = command & BRL_MSK_BLK;
+  command &= blk? BRL_MSK_BLK: BRL_MSK_CMD;
+  if (command == BRL_CMD_NOOP) return 1;
+
+  if (acd->count == acd->size) {
+    unsigned int newSize = acd->size? (acd->size << 1): 1;
+    int *newArray = realloc(acd->array, ARRAY_SIZE(newArray, newSize));
+
+    if (!newArray) {
+      logMallocError();
+      return 0;
+    }
+
+    acd->array = newArray;
+    acd->size = newSize;
+  }
+
+  acd->array[acd->count++] = command;
+  return 1;
+}
+
+static int
+addBoundCommand (AddCommandData *acd, const BoundCommand *cmd) {
+  return addCommand(acd, cmd->value);
+}
+
+static int
+sortCommands (const void *element1, const void *element2) {
+  const int *command1 = element1;
+  const int *command2 = element2;
+
+  if (*command1 < *command2) return -1;
+  if (*command1 > *command2) return 1;
+  return 0;
+}
+
+int *
+getBoundCommands (KeyTable *table, unsigned int *count) {
+  AddCommandData acd = {
+    .array = NULL,
+    .size = 0,
+    .count = 0
+  };
+
+  for (unsigned int context=0; context<table->keyContexts.count; context+=1) {
+    const KeyContext *ctx = getKeyContext(table, context);
+
+    if (ctx) {
+      const KeyBinding *binding = ctx->keyBindings.table;
+      const KeyBinding *end = binding + ctx->keyBindings.count;
+
+      while (binding < end) {
+        if (!addBoundCommand(&acd, &binding->primaryCommand)) goto error;
+        if (!addBoundCommand(&acd, &binding->secondaryCommand)) goto error;
+        binding += 1;
+      }
+
+      if (ctx->mappedKeys.count) {
+        if (!addCommand(&acd, BRL_CMD_BLK(PASSDOTS))) {
+          goto error;
+        }
+      }
+    }
+  }
+
+  if (acd.count > 1) {
+    qsort(acd.array, acd.count, sizeof(*acd.array), sortCommands);
+
+    int *to = acd.array;
+    const int *from = to;
+    const int *end = from + acd.count;
+
+    while (from < end) {
+      if ((from == acd.array) || (*from != *(from - 1))) {
+        if (from != to) *to = *from;
+        to += 1;
+      }
+
+      from += 1;
+    }
+
+    unsigned int newCount = to - acd.array;
+    acd.count = newCount;
+  }
+
+  *count = acd.count;
+  return acd.array;
+
+error:
+  if (acd.array) free(acd.array);
+  return NULL;
+}
