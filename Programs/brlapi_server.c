@@ -1797,7 +1797,7 @@ PARAM_WRITER(unimplemented)
 typedef struct {
   unsigned local:1;
   unsigned global:1;
-  unsigned unwatchable:1;
+  unsigned rootParameter;
   ParamReader *read;
   ParamWriter *write;
 } ParamDispatch;
@@ -1928,13 +1928,13 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_COMMAND_SHORT_NAME] = {
     .global = 1,
-    .unwatchable = 1,
+    .rootParameter = BRLAPI_PARAM_BOUND_COMMAND_CODES,
     .read = param_commandShortName_read,
   },
 
   [BRLAPI_PARAM_COMMAND_LONG_NAME] = {
     .global = 1,
-    .unwatchable = 1,
+    .rootParameter = BRLAPI_PARAM_BOUND_COMMAND_CODES,
     .read = param_commandLongName_read,
   },
 
@@ -1946,26 +1946,26 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_KEY_SHORT_NAME] = {
     .global = 1,
-    .unwatchable = 1,
+    .rootParameter = BRLAPI_PARAM_DEVICE_KEY_CODES,
     .read = param_keyShortName_read,
   },
 
   [BRLAPI_PARAM_KEY_LONG_NAME] = {
     .global = 1,
-    .unwatchable = 1,
+    .rootParameter = BRLAPI_PARAM_DEVICE_KEY_CODES,
     .read = param_keyLongName_read,
   },
 
 //Braille Translation Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK] = {
     .global = 1,
-    .unwatchable = 1,
+    .rootParameter = BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE,
     .read = param_unimplemented_read,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
     .global = 1,
-    .unwatchable = 1,
+    .rootParameter = BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE,
     .read = param_unimplemented_read,
   },
 
@@ -2192,8 +2192,8 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   if (flags & BRLAPI_PARAMF_SUBSCRIBE) {
     /* subscribe to parameter updates */
 
-    if (paramDispatch[param].unwatchable) {
-      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching", param);
+    if (paramDispatch[param].rootParameter) {
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching, %u should be used instead", param, paramDispatch[param].rootParameter);
       return 0;
     }
 
