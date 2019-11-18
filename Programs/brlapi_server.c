@@ -1429,11 +1429,6 @@ unlock:
   return NULL;
 }
 
-PARAM_WRITER(deviceIdentifier)
-{
-  return param_writeString(c, changeBrailleDevice, data, size);
-}
-
 /* BRLAPI_PARAM_DEVICE_SPEED */
 PARAM_READER(deviceSpeed)
 {
@@ -1843,7 +1838,6 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [BRLAPI_PARAM_DEVICE_IDENTIFIER] = {
     .global = 1,
     .read = param_deviceIdentifier_read,
-    .write = param_deviceIdentifier_write,
   },
 
   [BRLAPI_PARAM_DEVICE_SPEED] = {
@@ -2042,7 +2036,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   {
     const char *error = writeHandler(c, param, subparam, flags, paramValue->data, size);
     if (error) {
-      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %d write error: %s", param, error);
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u write error: %s", param, error);
       return 0;
     }
   }
@@ -2138,20 +2132,20 @@ void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
           const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
 
           if (error) {
-            logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d read error: %s", parameter, error);
+            logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %u read error: %s", parameter, error);
           } else {
             __handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
           }
         }
         unlockMutex(&apiParamMutex);
       } else {
-        logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d is not readable", parameter);
+        logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %u is not readable", parameter);
       }
     } else {
-      logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d is not global", parameter);
+      logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %u is not global", parameter);
     }
   } else {
-    logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %d is out of range", parameter);
+    logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %u is out of range", parameter);
   }
 }
 
@@ -2192,7 +2186,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     /* subscribe to parameter updates */
 
     if (paramDispatch[param].rootParameter) {
-      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching, %u should be used instead", param, paramDispatch[param].rootParameter);
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching - %u should be watched instead", param, paramDispatch[param].rootParameter);
       return 0;
     }
 
@@ -2247,7 +2241,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
     const char *error = readHandler(c, param, subparam, flags, paramValue->data, &size);
 
     if (error) {
-      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %d read error: %s", param, error);
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u read error: %s", param, error);
     } else {
       _brlapi_htonParameter(param, paramValue, size);
       size += sizeof(flags) + sizeof(param) + sizeof(subparam);
