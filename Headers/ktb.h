@@ -67,6 +67,7 @@ extern void setKeyboardEnabledFlag (KeyTable *table, const unsigned char *flag);
 extern void setKeyAutoreleaseTime (KeyTable *table, unsigned char setting);
 
 extern void getKeyGroupCommands (KeyTable *table, KeyGroup group, int *commands, unsigned int size);
+extern int *getBoundCommands (KeyTable *table, unsigned int *count);
 
 #ifdef __cplusplus
 }
