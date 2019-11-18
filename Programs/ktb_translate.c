@@ -697,7 +697,7 @@ addCommand (AddCommandData *acd, int command) {
   if (command == BRL_CMD_NOOP) return 1;
 
   if (acd->count == acd->size) {
-    unsigned int newSize = acd->size? (acd->size << 1): 1;
+    unsigned int newSize = acd->size? (acd->size << 1): 0X100;
     int *newArray = realloc(acd->array, ARRAY_SIZE(newArray, newSize));
 
     if (!newArray) {
@@ -773,8 +773,12 @@ getBoundCommands (KeyTable *table, unsigned int *count) {
       from += 1;
     }
 
-    unsigned int newCount = to - acd.array;
-    acd.count = newCount;
+    if (to < end) {
+      acd.count = to - acd.array;
+
+      int *newArray = realloc(acd.array, ARRAY_SIZE(newArray, acd.count));
+      if (newArray) acd.array = newArray;
+    }
   }
 
   *count = acd.count;
