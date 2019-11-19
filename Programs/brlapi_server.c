@@ -1284,7 +1284,7 @@ static void param_readString(const char *string, void *data, size_t *size)
   memcpy(data, string, *size);
 }
 
-static const char *param_writeString(Connection *c, int (*handler) (const char *string), const void *data, size_t size)
+static const char *param_writeString(int (*handler) (const char *string), const void *data, size_t size)
 {
   char string[size + 1];
   memcpy(string, data, size);
@@ -1747,7 +1747,7 @@ PARAM_READER(computerBrailleTable)
 
 PARAM_WRITER(computerBrailleTable)
 {
-  return param_writeString(c, changeTextTable, data, size);
+  return param_writeString(changeTextTable, data, size);
 }
 
 /* BRLAPI_PARAM_LITERARY_BRAILLE_TABLE */
@@ -1759,7 +1759,7 @@ PARAM_READER(literaryBrailleTable)
 
 PARAM_WRITER(literaryBrailleTable)
 {
-  return param_writeString(c, changeContractionTable, data, size);
+  return param_writeString(changeContractionTable, data, size);
 }
 
 /* BRLAPI_PARAM_MESSAGE_LOCALE */
@@ -1771,7 +1771,7 @@ PARAM_READER(messageLocale)
 
 PARAM_WRITER(messageLocale)
 {
-  return param_writeString(c, changeMessageLocale, data, size);
+  return param_writeString(changeMessageLocale, data, size);
 }
 
 /* For parameters yet to be implemented */
