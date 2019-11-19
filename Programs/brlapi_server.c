@@ -1598,13 +1598,11 @@ PARAM_READER(boundCommandCodes)
 
           for (unsigned int i=0; i<count; i+=1) {
             if (next == end) break;
+            brlapi_keyCode_t keyCode;
 
-            int command = commands[i];
-            brlapi_keyCode_t code;
-
-            if (cmdBrlttyToBrlapi(&code, command, c->retainDots)) {
+            if (cmdBrlttyToBrlapi(&keyCode, commands[i], c->retainDots)) {
               brlapi_param_commandCode_t *commandCode = next;
-              *commandCode = code;
+              *commandCode = keyCode;
               next += sizeof(*commandCode);
             }
           }

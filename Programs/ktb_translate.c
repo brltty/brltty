@@ -786,12 +786,12 @@ getBoundCommands (KeyTable *table, unsigned int *count) {
       from += 1;
     }
 
-    if (to < end) {
-      acd.count = to - acd.array;
+    acd.count = to - acd.array;
+  }
 
-      int *newArray = realloc(acd.array, ARRAY_SIZE(newArray, acd.count));
-      if (newArray) acd.array = newArray;
-    }
+  {
+    int *newArray = realloc(acd.array, ARRAY_SIZE(newArray, acd.count));
+    if (newArray) acd.array = newArray;
   }
 
   *count = acd.count;
