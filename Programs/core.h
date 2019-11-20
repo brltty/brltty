@@ -154,7 +154,14 @@ extern void setPreferences (const Preferences *newPreferences);
 extern int loadPreferences (void);
 extern int savePreferences (void);
 
+extern unsigned char getCursorDots (const unsigned char *setting);
+extern int setCursorDots (unsigned char *setting, unsigned char dots);
+
 extern unsigned char getScreenCursorDots (void);
+extern int setScreenCursorDots (unsigned char dots);
+
+extern unsigned char getSpeechCursorDots (void);
+extern int setSpeechCursorDots (unsigned char dots);
 
 extern BrailleDisplay brl;			/* braille driver reference */
 extern unsigned int textStart;

@@ -1525,6 +1525,57 @@ PARAM_WRITER(literaryBraille)
   return NULL;
 }
 
+/* BRLAPI_PARAM_CURSOR_DOTS */
+PARAM_READER(cursorDots)
+{
+  brlapi_param_cursorDots_t *cursorDots = data;
+  *cursorDots = getScreenCursorDots();
+  *size = sizeof(*cursorDots);
+  return NULL;
+}
+
+PARAM_WRITER(cursorDots)
+{
+  const brlapi_param_cursorDots_t *cursorDots = data;
+  PARAM_ASSERT(size == sizeof(*cursorDots));
+  if (!setScreenCursorDots(*cursorDots)) return "unsupported cursor style";
+  return NULL;
+}
+
+/* BRLAPI_PARAM_CURSOR_BLINK_PERIOD */
+PARAM_READER(cursorBlinkPeriod)
+{
+  brlapi_param_cursorBlinkPeriod_t *cursorBlinkPeriod = data;
+  *cursorBlinkPeriod = getBlinkPeriod(&screenCursorBlinkDescriptor);
+  *size = sizeof(*cursorBlinkPeriod);
+  return NULL;
+}
+
+PARAM_WRITER(cursorBlinkPeriod)
+{
+  const brlapi_param_cursorBlinkPeriod_t *cursorBlinkPeriod = data;
+  PARAM_ASSERT(size == sizeof(*cursorBlinkPeriod));
+  setBlinkPeriod(&screenCursorBlinkDescriptor, *cursorBlinkPeriod);
+  return NULL;
+}
+
+/* BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE */
+PARAM_READER(cursorBlinkPercentage)
+{
+  brlapi_param_cursorBlinkPercentage_t *cursorBlinkPercentage = data;
+  *cursorBlinkPercentage = getBlinkPercentage(&screenCursorBlinkDescriptor);
+  *size = sizeof(*cursorBlinkPercentage);
+  return NULL;
+}
+
+PARAM_WRITER(cursorBlinkPercentage)
+{
+  const brlapi_param_cursorBlinkPercentage_t *cursorBlinkPercentage = data;
+  PARAM_ASSERT(size == sizeof(*cursorBlinkPercentage));
+  setBlinkPercentage(&screenCursorBlinkDescriptor, *cursorBlinkPercentage);
+  return NULL;
+}
+
 /* BRLAPI_PARAM_RENDERED_CELLS */
 PARAM_READER(renderedCells)
 {
@@ -1870,20 +1921,20 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 
   [BRLAPI_PARAM_CURSOR_DOTS] = {
     .global = 1,
-    .read = param_unimplemented_read,
-    .write = param_unimplemented_write,
+    .read = param_cursorDots_read,
+    .write = param_cursorDots_write,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERIOD] = {
     .global = 1,
-    .read = param_unimplemented_read,
-    .write = param_unimplemented_write,
+    .read = param_cursorBlinkPeriod_read,
+    .write = param_cursorBlinkPeriod_write,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE] = {
     .global = 1,
-    .read = param_unimplemented_read,
-    .write = param_unimplemented_write,
+    .read = param_cursorBlinkPercentage_read,
+    .write = param_cursorBlinkPercentage_write,
   },
 
   [BRLAPI_PARAM_RENDERED_CELLS] = {
@@ -2078,9 +2129,6 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
 /* TODO: call for
- * BRLAPI_PARAM_CURSOR_DOTS,
- * BRLAPI_PARAM_CURSOR_BLINK_PERIOD,
- * BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE
  * BRLAPI_PARAM_CLIPBOARD_CONTENT
  * BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK
  * BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS

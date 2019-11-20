@@ -113,8 +113,41 @@ static const unsigned char cursorStyles[] = {
 };
 
 unsigned char
+getCursorDots (const unsigned char *setting) {
+  if (*setting >= ARRAY_COUNT(cursorStyles)) return 0;
+  return cursorStyles[*setting];
+}
+
+int
+setCursorDots (unsigned char *setting, unsigned char dots) {
+  for (unsigned char style=0; style<ARRAY_COUNT(cursorStyles); style+=1) {
+    if (dots == cursorStyles[style]) {
+      *setting = style;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+unsigned char
 getScreenCursorDots (void) {
-  return cursorStyles[prefs.screenCursorStyle];
+  return getCursorDots(&prefs.screenCursorStyle);
+}
+
+int
+setScreenCursorDots (unsigned char dots) {
+  return setCursorDots(&prefs.screenCursorStyle, dots);
+}
+
+unsigned char
+getSpeechCursorDots (void) {
+  return getCursorDots(&prefs.speechCursorStyle);
+}
+
+int
+setSpeechCursorDots (unsigned char dots) {
+  return setCursorDots(&prefs.speechCursorStyle, dots);
 }
 
 static int
@@ -982,7 +1015,7 @@ doUpdate (void) {
             BlinkDescriptor *blink = &speechCursorBlinkDescriptor;
 
             requireBlinkDescriptor(blink);
-            if (isBlinkVisible(blink)) brl.buffer[position] |= cursorStyles[prefs.speechCursorStyle];
+            if (isBlinkVisible(blink)) brl.buffer[position] |= getSpeechCursorDots();
           }
         }
       }
