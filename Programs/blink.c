@@ -93,17 +93,15 @@ getBlinkPercentage (BlinkDescriptor *blink) {
 
 int
 setBlinkProperties (BlinkDescriptor *blink, int period, int percentage) {
-  if (period < 0) return 0;
+  if (period < 1) return 0;
   period = MSECS2PREFS(period);
+  if (period > UINT8_MAX) return 0;
 
   if (percentage < 0) return 0;
   if (percentage > 100) return 0;
 
   int visible = (period * percentage) / 100;
   int invisible = period - visible;
-
-  if (visible > UINT8_MAX) return 0;
-  if (invisible > UINT8_MAX) return 0;
 
   *blink->visibleTime = visible;
   *blink->invisibleTime = invisible;

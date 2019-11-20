@@ -1556,7 +1556,7 @@ PARAM_WRITER(cursorBlinkPeriod)
 {
   const brlapi_param_cursorBlinkPeriod_t *cursorBlinkPeriod = data;
   PARAM_ASSERT(size == sizeof(*cursorBlinkPeriod));
-  setBlinkPeriod(&screenCursorBlinkDescriptor, *cursorBlinkPeriod);
+  if (!setBlinkPeriod(&screenCursorBlinkDescriptor, *cursorBlinkPeriod)) return "unsupported cursor blink period";
   return NULL;
 }
 
@@ -1573,7 +1573,7 @@ PARAM_WRITER(cursorBlinkPercentage)
 {
   const brlapi_param_cursorBlinkPercentage_t *cursorBlinkPercentage = data;
   PARAM_ASSERT(size == sizeof(*cursorBlinkPercentage));
-  setBlinkPercentage(&screenCursorBlinkDescriptor, *cursorBlinkPercentage);
+  if (!setBlinkPercentage(&screenCursorBlinkDescriptor, *cursorBlinkPercentage)) return "unsupported cursor blink percentage";
   return NULL;
 }
 
