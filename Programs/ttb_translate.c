@@ -118,6 +118,41 @@ findTextTableAlias (TextTable *table, wchar_t character) {
   return locateTextTableAlias(character, getTextTableItem(table, header->aliasArray), header->aliasCount);
 }
 
+static int
+getDotsForAliasedCharacter (TextTable *table, wchar_t *character, unsigned char *dots) {
+  unsigned int iterationLimit = 0X10;
+  wchar_t characterEncountered[iterationLimit];
+  unsigned int iterationNumber = 0;
+
+  while (iterationNumber < iterationLimit) {
+    if (wmemchr(characterEncountered, *character, iterationNumber)) break;
+    characterEncountered[iterationNumber++] = *character;
+    const UnicodeRowEntry *row = getUnicodeRowEntry(table, *character);
+
+    if (row) {
+      unsigned int cellNumber = UNICODE_CELL_NUMBER(*character);
+
+      if (BITMASK_TEST(row->cellDefined, cellNumber)) {
+        *dots = row->cells[cellNumber];
+        return 1;
+      }
+
+      if (BITMASK_TEST(row->cellAliased, cellNumber)) {
+        const TextTableAliasEntry *alias = findTextTableAlias(table, *character);
+
+        if (alias) {
+          *character = alias->to;
+          continue;
+        }
+      }
+    }
+
+    break;
+  }
+
+  return 0;
+}
+
 typedef struct {
   TextTable *const table;
   unsigned char dots;
@@ -151,34 +186,8 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
 
     default: {
       {
-        unsigned int iterationLimit = 0X10;
-        wchar_t characterEncountered[iterationLimit];
-        unsigned int iterationNumber = 0;
-
-        while (iterationNumber < iterationLimit) {
-          if (wmemchr(characterEncountered, character, iterationNumber)) break;
-          characterEncountered[iterationNumber++] = character;
-          const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
-
-          if (row) {
-            unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
-
-            if (BITMASK_TEST(row->cellDefined, cellNumber)) {
-              return row->cells[cellNumber];
-            }
-
-            if (BITMASK_TEST(row->cellAliased, cellNumber)) {
-              const TextTableAliasEntry *alias = findTextTableAlias(table, character);
-
-              if (alias) {
-                character = alias->to;
-                continue;
-              }
-            }
-          }
-
-          break;
-        }
+        unsigned char dots;
+        if (getDotsForAliasedCharacter(table, &character, &dots)) return dots;
       }
 
       if (character == UNICODE_REPLACEMENT_CHARACTER) break;
@@ -256,6 +265,7 @@ getUnicodeRowCells (TextTable *table, wchar_t character, uint8_t *cells, uint8_t
 
   for (unsigned int cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
     unsigned char *cell = &cells[cellNumber];
+    *cell = 0;
 
     if (!maskBit) {
       defined[++maskIndex] = 0;
@@ -265,8 +275,14 @@ getUnicodeRowCells (TextTable *table, wchar_t character, uint8_t *cells, uint8_t
     if (BITMASK_TEST(row->cellDefined, cellNumber)) {
       *cell = row->cells[cellNumber];
       defined[maskIndex] |= maskBit;
-    } else {
-      *cell = 0;
+    } else if (BITMASK_TEST(row->cellAliased, cellNumber)) {
+      wchar_t wc = character | cellNumber;
+      unsigned char dots;
+
+      if (getDotsForAliasedCharacter(table, &wc, &dots)) {
+        *cell = dots;
+        defined[maskIndex] |= maskBit;
+      }
     }
 
     maskBit <<= 1;
