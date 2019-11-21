@@ -262,6 +262,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               isIdentityResponse)) {
         setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
         makeOutputTable(dotsTable_ISO11548_1);
+        brl->cellSize = 6;
 
         brl->data->braille.rewrite = 1;
         brl->data->text.rewrite = 1;
