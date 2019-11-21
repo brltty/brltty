@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "lock.h"
 #include "file.h"
 #include "charset.h"
 #include "ttb.h"
@@ -38,6 +39,22 @@ static TextTable internalTextTable = {
 };
 
 TextTable *textTable = &internalTextTable;
+
+static LockDescriptor *
+getTextTableLock (void) {
+  static LockDescriptor *lock = NULL;
+  return getLockDescriptor(&lock, "text-table");
+}
+
+void
+lockTextTable (void) {
+  obtainExclusiveLock(getTextTableLock());
+}
+
+void
+unlockTextTable (void) {
+  releaseLock(getTextTableLock());
+}
 
 static inline const void *
 getTextTableItem (TextTable *table, TextTableOffset offset) {
@@ -245,7 +262,11 @@ replaceTextTable (const char *directory, const char *name) {
 
   if (newTable) {
     TextTable *oldTable = textTable;
-    textTable = newTable;
+
+    lockTextTable();
+      textTable = newTable;
+    unlockTextTable();
+
     destroyTextTable(oldTable);
     return 1;
   }
@@ -292,8 +313,8 @@ done:
 }
 
 int
-getTextTableRowCells (TextTable *table, uint32_t rowNumber, uint8_t *cells, uint8_t *defined) {
-  wchar_t character = rowNumber << UNICODE_ROW_SHIFT;
+getTextTableRowCells (TextTable *table, uint32_t rowIndex, uint8_t *cells, uint8_t *defined) {
+  wchar_t character = rowIndex << UNICODE_ROW_SHIFT;
   const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
   if (!row) return 0;
 

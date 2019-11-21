@@ -24,8 +24,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct TextTableStruct TextTable;
-
 extern TextTable *textTable;
+
+extern void lockTextTable (void);
+extern void unlockTextTable (void);
 
 extern TextTable *compileTextTable (const char *name);
 extern void destroyTextTable (TextTable *table);
@@ -42,7 +44,7 @@ extern wchar_t convertDotsToCharacter (TextTable *table, unsigned char dots);
 extern void setTryBaseCharacter (TextTable *table, unsigned char yes);
 
 extern size_t getTextTableRowsMask (TextTable *table, uint8_t *mask, size_t size);
-extern int getTextTableRowCells (TextTable *table, uint32_t rowNumber, uint8_t *cells, uint8_t *defined);
+extern int getTextTableRowCells (TextTable *table, uint32_t rowIndex, uint8_t *cells, uint8_t *defined);
 
 #ifdef __cplusplus
 }
