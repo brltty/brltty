@@ -774,7 +774,9 @@ brlttyPrepare (int argc, char *argv[]) {
 
 int
 changeTextTable (const char *name) {
+  if (!name) name = "";
   if (!replaceTextTable(opt_tablesDirectory, name)) return 0;
+
   changeStringSetting(&opt_textTable, name);
   api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE, 0);
   return 1;
@@ -782,25 +784,29 @@ changeTextTable (const char *name) {
 
 static void
 exitTextTable (void *data) {
-  changeTextTable("");
+  changeTextTable(NULL);
 }
 
 int
 changeAttributesTable (const char *name) {
+  if (!name) name = "";
   if (!replaceAttributesTable(opt_tablesDirectory, name)) return 0;
+
   changeStringSetting(&opt_attributesTable, name);
   return 1;
 }
 
 static void
 exitAttributesTable (void *data) {
-  changeAttributesTable("");
+  changeAttributesTable(NULL);
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 int
 changeContractionTable (const char *name) {
+  if (!name) name = "";
   if (!replaceContractionTable(opt_tablesDirectory, name)) return 0;
+
   changeStringSetting(&opt_contractionTable, name);
   api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE_TABLE, 0);
   return 1;
@@ -808,7 +814,7 @@ changeContractionTable (const char *name) {
 
 static void
 exitContractionTable (void *data) {
-  changeContractionTable("");
+  changeContractionTable(NULL);
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
