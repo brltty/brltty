@@ -142,7 +142,7 @@ brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_han
 
   Py_INCREF(func);
 
-  brlapi_descr = brlapi__watchParameter(handle, param, subparam, global, brlapi_python_parameter_callback, descr, NULL, 0);
+  brlapi_descr = brlapi__watchParameter(handle, param, subparam, global, brlapi_python_parameter_callback, NULL, NULL, 0);
 
   if (!brlapi_descr) {
     PyErr_SetString(PyExc_ValueError, "watching parameter failed");
