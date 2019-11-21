@@ -622,6 +622,11 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
     .count = 1,
   },
 
+  [BRLAPI_PARAM_DEVICE_CELL_SIZE] = {
+    .type = BRLAPI_PARAM_TYPE_UINT8,
+    .count = 1,
+  },
+
 //Input Parameters
   [BRLAPI_PARAM_RETAIN_DOTS] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,

@@ -62,6 +62,7 @@ typedef int SetAutorepeatPropertiesMethod (BrailleDisplay *brl, int on, int dela
 
 struct BrailleDisplayStruct {
   BrailleData *data;
+  const ApiMethods *api;
 
   SetBrailleFirmnessMethod *setBrailleFirmness;
   SetTouchSensitivityMethod *setTouchSensitivity;
@@ -71,7 +72,7 @@ struct BrailleDisplayStruct {
   unsigned int textRows;
   unsigned int statusColumns;
   unsigned int statusRows;
-  unsigned hideCursor:1;
+  unsigned char cellSize;
 
   const char *keyBindings;
   KEY_NAME_TABLES_REFERENCE keyNames;
@@ -92,8 +93,7 @@ struct BrailleDisplayStruct {
   unsigned hasFailed:1;
   unsigned isOffline:1;
   unsigned isSuspended:1;
-
-  const ApiMethods *api;
+  unsigned hideCursor:1;
 
   struct {
     Queue *messages;

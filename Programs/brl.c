@@ -35,6 +35,7 @@
 void
 constructBrailleDisplay (BrailleDisplay *brl) {
   brl->data = NULL;
+  brl->api = NULL;
 
   brl->setBrailleFirmness = NULL;
   brl->setTouchSensitivity = NULL;
@@ -44,7 +45,7 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->textRows = 1;
   brl->statusColumns = 0;
   brl->statusRows = 0;
-  brl->hideCursor = 0;
+  brl->cellSize = 8;
 
   brl->keyBindings = "all";
   brl->keyNames = NULL;
@@ -65,8 +66,7 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->hasFailed = 0;
   brl->isOffline = 0;
   brl->isSuspended = 0;
-
-  brl->api = NULL;
+  brl->hideCursor = 0;
 
   brl->acknowledgements.messages = NULL;
   brl->acknowledgements.alarm = NULL;
