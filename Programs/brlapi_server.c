@@ -1299,8 +1299,8 @@ static const char *param_writeString(int (*handler) (const char *string), const 
 PARAM_READER(serverVersion)
 {
   brlapi_param_serverVersion_t *serverVersion = data;
-  *serverVersion = BRLAPI_PROTOCOL_VERSION;
   *size = sizeof(*serverVersion);
+  *serverVersion = BRLAPI_PROTOCOL_VERSION;
   return NULL;
 }
 
@@ -1308,8 +1308,8 @@ PARAM_READER(serverVersion)
 PARAM_READER(clientPriority)
 {
   brlapi_param_clientPriority_t *clientPriority = data;
-  *clientPriority = c->client_priority;
   *size = sizeof(*clientPriority);
+  *clientPriority = c->client_priority;
   return NULL;
 }
 
@@ -1395,13 +1395,14 @@ unlock:
 /* BRLAPI_PARAM_DEVICE_CELL_SIZE */
 PARAM_READER(deviceCellSize)
 {
+  brlapi_param_deviceCellSize_t *deviceCellSize = data;
+  *size = sizeof(*deviceCellSize);
+
   lockBrailleDriver();
     if (isBrailleDriverConstructed()) {
-      brlapi_param_deviceCellSize_t *deviceCellSize = data;
       *deviceCellSize = brl.cellSize;
-      *size = sizeof(*deviceCellSize);
     } else {
-      *size = 0;
+      *deviceCellSize = 0;
     }
   unlockBrailleDriver();
 
@@ -1411,14 +1412,16 @@ PARAM_READER(deviceCellSize)
 /* BRLAPI_PARAM_DISPLAY_SIZE */
 PARAM_READER(displaySize)
 {
+  brlapi_param_displaySize_t *displaySize = data;
+  *size = sizeof(*displaySize);
+
   lockBrailleDriver();
     if (isBrailleDriverConstructed()) {
-      brlapi_param_displaySize_t *displaySize = data;
       displaySize->columns = brl.textColumns;
       displaySize->rows = brl.textRows;
-      *size = sizeof(*displaySize);
     } else {
-      *size = 0;
+      displaySize->columns = 0;
+      displaySize->rows = 0;
     }
   unlockBrailleDriver();
 
@@ -1449,20 +1452,18 @@ unlock:
 /* BRLAPI_PARAM_DEVICE_SPEED */
 PARAM_READER(deviceSpeed)
 {
+  brlapi_param_deviceSpeed_t *deviceSpeed = data;
+  *size = sizeof(*deviceSpeed);
+  *deviceSpeed = 0;
+
   lockBrailleDriver();
     if (isBrailleDriverConstructed()) {
       GioEndpoint *endpoint = brl.gioEndpoint;
 
       if (endpoint) {
-        brlapi_param_deviceSpeed_t *deviceSpeed = data;
         *deviceSpeed = gioGetBytesPerSecond(endpoint);
-        *size = sizeof(*deviceSpeed);
-        goto unlock;
       }
     }
-
-    *size = 0;
-unlock:
   unlockBrailleDriver();
 
   return NULL;
@@ -1471,10 +1472,11 @@ unlock:
 /* BRLAPI_PARAM_DEVICE_ONLINE */
 PARAM_READER(deviceOnline)
 {
+  brlapi_param_deviceOnline_t *deviceOnline = data;
+  *size = sizeof(*deviceOnline);
+
   lockBrailleDriver();
-    brlapi_param_deviceOnline_t *deviceOnline = data;
     *deviceOnline = isBrailleOnline();
-    *size = sizeof(*deviceOnline);
   unlockBrailleDriver();
 
   return NULL;
@@ -1484,8 +1486,8 @@ PARAM_READER(deviceOnline)
 PARAM_READER(retainDots)
 {
   brlapi_param_retainDots_t *retainDots = data;
-  *retainDots = c->retainDots;
   *size = sizeof(*retainDots);
+  *retainDots = c->retainDots;
   return NULL;
 }
 
@@ -1501,8 +1503,8 @@ PARAM_WRITER(retainDots)
 PARAM_READER(computerBrailleCellSize)
 {
   brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
-  *computerBrailleCellSize = isSixDotBraille()? 6: 8;
   *size = sizeof(*computerBrailleCellSize);
+  *computerBrailleCellSize = isSixDotBraille()? 6: 8;
   return NULL;
 }
 
@@ -1529,8 +1531,8 @@ PARAM_WRITER(computerBrailleCellSize)
 PARAM_READER(literaryBraille)
 {
   brlapi_param_literaryBraille_t *literaryBraille = data;
-  *literaryBraille = isContractedBraille();
   *size = sizeof(*literaryBraille);
+  *literaryBraille = isContractedBraille();
   return NULL;
 }
 
@@ -1546,8 +1548,8 @@ PARAM_WRITER(literaryBraille)
 PARAM_READER(cursorDots)
 {
   brlapi_param_cursorDots_t *cursorDots = data;
-  *cursorDots = getScreenCursorDots();
   *size = sizeof(*cursorDots);
+  *cursorDots = getScreenCursorDots();
   return NULL;
 }
 
@@ -1563,8 +1565,8 @@ PARAM_WRITER(cursorDots)
 PARAM_READER(cursorBlinkPeriod)
 {
   brlapi_param_cursorBlinkPeriod_t *cursorBlinkPeriod = data;
-  *cursorBlinkPeriod = getBlinkPeriod(&screenCursorBlinkDescriptor);
   *size = sizeof(*cursorBlinkPeriod);
+  *cursorBlinkPeriod = getBlinkPeriod(&screenCursorBlinkDescriptor);
   return NULL;
 }
 
@@ -1580,8 +1582,8 @@ PARAM_WRITER(cursorBlinkPeriod)
 PARAM_READER(cursorBlinkPercentage)
 {
   brlapi_param_cursorBlinkPercentage_t *cursorBlinkPercentage = data;
-  *cursorBlinkPercentage = getBlinkPercentage(&screenCursorBlinkDescriptor);
   *size = sizeof(*cursorBlinkPercentage);
+  *cursorBlinkPercentage = getBlinkPercentage(&screenCursorBlinkDescriptor);
   return NULL;
 }
 
@@ -1613,8 +1615,8 @@ PARAM_READER(renderedCells)
 PARAM_READER(skipIdenticalLines)
 {
   brlapi_param_skipIdenticalLines_t *skipIdenticalLines = data;
-  *skipIdenticalLines = !!prefs.skipIdenticalLines;
   *size = sizeof(*skipIdenticalLines);
+  *skipIdenticalLines = !!prefs.skipIdenticalLines;
   return NULL;
 }
 
@@ -1631,8 +1633,8 @@ PARAM_WRITER(skipIdenticalLines)
 PARAM_READER(audibleAlerts)
 {
   brlapi_param_audibleAlerts_t *audibleAlerts = data;
-  *audibleAlerts = !!prefs.alertTunes;
   *size = sizeof(*audibleAlerts);
+  *audibleAlerts = !!prefs.alertTunes;
   return NULL;
 }
 
