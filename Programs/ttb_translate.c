@@ -255,7 +255,7 @@ replaceTextTable (const char *directory, const char *name) {
 }
 
 size_t
-markUnicodeRowsUsed (TextTable *table, uint8_t *mask, size_t size) {
+getTextTableRowsMask (TextTable *table, uint8_t *mask, size_t size) {
   size_t result = 0;
   memset(mask, 0, size);
 
@@ -278,8 +278,7 @@ markUnicodeRowsUsed (TextTable *table, uint8_t *mask, size_t size) {
               uint32_t row = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, 0) >> UNICODE_ROW_SHIFT;
               uint32_t index = row / 8;
               if (index >= size) goto done;
-              uint8_t bit = 1 << (row % 8);
-              mask[index] |= bit;
+              mask[index] |= 1 << (row % 8);
               result = index + 1;
             }
           }
@@ -293,9 +292,8 @@ done:
 }
 
 int
-getUnicodeRowCells (TextTable *table, wchar_t character, uint8_t *cells, uint8_t *defined) {
-  if (character & UNICODE_CELL_MASK) return 0;
-
+getTextTableRowCells (TextTable *table, uint32_t rowNumber, uint8_t *cells, uint8_t *defined) {
+  wchar_t character = rowNumber << UNICODE_ROW_SHIFT;
   const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
   if (!row) return 0;
 

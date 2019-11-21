@@ -1793,7 +1793,7 @@ PARAM_READER(keyLongName)
 /* BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK */
 PARAM_READER(computerBrailleRowsMask)
 {
-  *size = markUnicodeRowsUsed(textTable, data, *size);
+  *size = getTextTableRowsMask(textTable, data, *size);
   return NULL;
 }
 
@@ -1802,7 +1802,7 @@ PARAM_READER(computerBrailleRowCells)
 {
   brlapi_param_computerBrailleRowCells_t *computerBrailleRowCells = data;
 
-  if (getUnicodeRowCells(textTable, subparam, computerBrailleRowCells->cells, computerBrailleRowCells->defined)) {
+  if (getTextTableRowCells(textTable, subparam, computerBrailleRowCells->cells, computerBrailleRowCells->defined)) {
     *size = sizeof(*computerBrailleRowCells);
   } else {
     *size = 0;
