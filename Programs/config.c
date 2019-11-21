@@ -199,7 +199,6 @@ char *opt_attributesTable;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 char *opt_contractionTable;
-ContractionTable *contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 char *opt_keyboardTable;
@@ -795,44 +794,21 @@ changeAttributesTable (const char *name) {
 
 static void
 exitAttributesTable (void *data) {
-  changeAttributesTable(NULL);
+  changeAttributesTable("");
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-static void
-exitContractionTable (void *data) {
-  if (contractionTable) {
-    destroyContractionTable(contractionTable);
-    contractionTable = NULL;
-  }
-}
-
 int
 changeContractionTable (const char *name) {
-  ContractionTable *table = NULL;
-
-  if (*name) {
-    char *path = makeContractionTablePath(opt_tablesDirectory, name);
-
-    if (path) {
-      logMessage(LOG_DEBUG, "compiling contraction table: %s", path);
-
-      if (!(table = compileContractionTable(path))) {
-        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile contraction table"), path);
-      }
-
-      free(path);
-    }
-
-    if (!table) return 0;
-  }
-
-  if (contractionTable) destroyContractionTable(contractionTable);
-  contractionTable = table;
-
+  if (!replaceContractionTable(opt_tablesDirectory, name)) return 0;
   changeStringSetting(&opt_contractionTable, name);
   api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE_TABLE, 0);
   return 1;
+}
+
+static void
+exitContractionTable (void *data) {
+  changeContractionTable("");
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 

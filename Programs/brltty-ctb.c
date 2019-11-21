@@ -109,7 +109,6 @@ static int outputExtend;
 #define VERIFICATION_TABLE_EXTENSION ".cvb"
 #define VERIFICATION_SUBTABLE_EXTENSION ".cvi"
 
-static ContractionTable *contractionTable;
 static char *verificationTablePath;
 static FILE *verificationTableStream;
 
