@@ -243,3 +243,34 @@ replaceTextTable (const char *directory, const char *name) {
   logMessage(LOG_ERR, "%s: %s", gettext("cannot load text table"), name);
   return 0;
 }
+
+int
+getUnicodeRowCells (TextTable *table, wchar_t character, uint8_t *cells, uint8_t *defined) {
+  if (character & UNICODE_CELL_MASK) return 0;
+
+  const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
+  if (!row) return 0;
+
+  int maskIndex = -1;
+  uint8_t maskBit = 0;
+
+  for (unsigned int cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
+    unsigned char *cell = &cells[cellNumber];
+
+    if (!maskBit) {
+      defined[++maskIndex] = 0;
+      maskBit = 1;
+    }
+
+    if (BITMASK_TEST(row->cellDefined, cellNumber)) {
+      *cell = row->cells[cellNumber];
+      defined[maskIndex] |= maskBit;
+    } else {
+      *cell = 0;
+    }
+
+    maskBit <<= 1;
+  }
+
+  return 1;
+}

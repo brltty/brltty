@@ -134,7 +134,7 @@ typedef char *brlapi_param_driverVersion_t;
 /** Type to be used for BRLAPI_PARAM_DEVICE_MODEL */
 typedef char *brlapi_param_deviceModel_t;
 
-/* brlapi_param_display_Size_t */
+/* brlapi_param_displaySize_t */
 /** Type to be used for BRLAPI_PARAM_DISPLAY_SIZE */
 typedef struct {
   uint32_t columns;
@@ -223,7 +223,10 @@ typedef uint8_t brlapi_param_computerBrailleRowsMask_t[544];
 
 /* brlapi_param_computerBrailleRowCells_t */
 /** Type to be used for BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS */
-typedef uint8_t brlapi_param_computerBrailleRowCells_t[0X100];
+typedef struct {
+  uint8_t cells[0X100];
+  uint8_t defined[0X100 / 8];
+} brlapi_param_computerBrailleRowCells_t;
 
 /* brlapi_param_computerBrailleTable_t */
 /** Type to be used for BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE */
