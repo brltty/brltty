@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "log.h"
 #include "file.h"
@@ -253,6 +254,44 @@ replaceTextTable (const char *directory, const char *name) {
   return 0;
 }
 
+size_t
+markUnicodeRowsUsed (TextTable *table, uint8_t *mask, size_t size) {
+  size_t result = 0;
+  memset(mask, 0, size);
+
+  for (unsigned int groupNumber=0; groupNumber<UNICODE_GROUP_COUNT; groupNumber+=1) {
+    TextTableOffset groupOffset = table->header.fields->unicodeGroups[groupNumber];
+
+    if (groupOffset) {
+      const UnicodeGroupEntry *group = getTextTableItem(table, groupOffset);
+
+      for (unsigned int planeNumber=0; planeNumber<UNICODE_PLANES_PER_GROUP; planeNumber+=1) {
+        TextTableOffset planeOffset = group->planes[planeNumber];
+
+        if (planeOffset) {
+          const UnicodePlaneEntry *plane = getTextTableItem(table, planeOffset);
+
+          for (unsigned int rowNumber=0; rowNumber<UNICODE_ROWS_PER_PLANE; rowNumber+=1) {
+            TextTableOffset rowOffset = plane->rows[rowNumber];
+
+            if (rowOffset) {
+              uint32_t row = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, 0) >> UNICODE_ROW_SHIFT;
+              uint32_t index = row / 8;
+              if (index >= size) goto done;
+              uint8_t bit = 1 << (row % 8);
+              mask[index] |= bit;
+              result = index + 1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+done:
+  return result;
+}
+
 int
 getUnicodeRowCells (TextTable *table, wchar_t character, uint8_t *cells, uint8_t *defined) {
   if (character & UNICODE_CELL_MASK) return 0;
@@ -276,7 +315,7 @@ getUnicodeRowCells (TextTable *table, wchar_t character, uint8_t *cells, uint8_t
       *cell = row->cells[cellNumber];
       defined[maskIndex] |= maskBit;
     } else if (BITMASK_TEST(row->cellAliased, cellNumber)) {
-      wchar_t wc = character | cellNumber;
+      wchar_t wc = character | (cellNumber << UNICODE_CELL_SHIFT);
       unsigned char dots;
 
       if (getDotsForAliasedCharacter(table, &wc, &dots)) {

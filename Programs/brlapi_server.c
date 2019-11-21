@@ -1790,6 +1790,13 @@ PARAM_READER(keyLongName)
   return NULL;
 }
 
+/* BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK */
+PARAM_READER(computerBrailleRowsMask)
+{
+  *size = markUnicodeRowsUsed(textTable, data, *size);
+  return NULL;
+}
+
 /* BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS */
 PARAM_READER(computerBrailleRowCells)
 {
@@ -2017,7 +2024,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK] = {
     .global = 1,
     .rootParameter = BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE,
-    .read = param_unimplemented_read,
+    .read = param_computerBrailleRowsMask_read,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
@@ -2145,8 +2152,6 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
 /* TODO: call for
  * BRLAPI_PARAM_CLIPBOARD_CONTENT
- * BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK
- * BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS
  */
 static void __handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
 {
