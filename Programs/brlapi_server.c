@@ -1392,6 +1392,22 @@ unlock:
   return NULL;
 }
 
+/* BRLAPI_PARAM_DEVICE_CELL_SIZE */
+PARAM_READER(deviceCellSize)
+{
+  lockBrailleDriver();
+    if (isBrailleDriverConstructed()) {
+      brlapi_param_deviceCellSize_t *deviceCellSize = data;
+      *deviceCellSize = brl.cellSize;
+      *size = sizeof(*deviceCellSize);
+    } else {
+      *size = 0;
+    }
+  unlockBrailleDriver();
+
+  return NULL;
+}
+
 /* BRLAPI_PARAM_DISPLAY_SIZE */
 PARAM_READER(displaySize)
 {
@@ -1459,22 +1475,6 @@ PARAM_READER(deviceOnline)
     brlapi_param_deviceOnline_t *deviceOnline = data;
     *deviceOnline = isBrailleOnline();
     *size = sizeof(*deviceOnline);
-  unlockBrailleDriver();
-
-  return NULL;
-}
-
-/* BRLAPI_PARAM_DEVICE_CELL_SIZE */
-PARAM_READER(deviceCellSize)
-{
-  lockBrailleDriver();
-    if (isBrailleDriverConstructed()) {
-      brlapi_param_deviceCellSize_t *deviceCellSize = data;
-      *deviceCellSize = brl.cellSize;
-      *size = sizeof(*deviceCellSize);
-    } else {
-      *size = 0;
-    }
   unlockBrailleDriver();
 
   return NULL;
@@ -1929,6 +1929,11 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .read = param_deviceModel_read,
   },
 
+  [BRLAPI_PARAM_DEVICE_CELL_SIZE] = {
+    .global = 1,
+    .read = param_deviceCellSize_read,
+  },
+
   [BRLAPI_PARAM_DISPLAY_SIZE] = {
     .global = 1,
     .read = param_displaySize_read,
@@ -1947,11 +1952,6 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [BRLAPI_PARAM_DEVICE_ONLINE] = {
     .global = 1,
     .read = param_deviceOnline_read,
-  },
-
-  [BRLAPI_PARAM_DEVICE_CELL_SIZE] = {
-    .global = 1,
-    .read = param_deviceCellSize_read,
   },
 
 //Input Parameters

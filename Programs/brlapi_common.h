@@ -602,6 +602,11 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
     .type = BRLAPI_PARAM_TYPE_STRING,
   },
 
+  [BRLAPI_PARAM_DEVICE_CELL_SIZE] = {
+    .type = BRLAPI_PARAM_TYPE_UINT8,
+    .count = 1,
+  },
+
   [BRLAPI_PARAM_DISPLAY_SIZE] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
     .count = 2,
@@ -619,11 +624,6 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 
   [BRLAPI_PARAM_DEVICE_ONLINE] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .count = 1,
-  },
-
-  [BRLAPI_PARAM_DEVICE_CELL_SIZE] = {
-    .type = BRLAPI_PARAM_TYPE_UINT8,
     .count = 1,
   },
 

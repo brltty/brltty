@@ -41,11 +41,11 @@ typedef enum {
   BRLAPI_PARAM_DRIVER_CODE = 3,			/**< Code (short name) of the driver: string */
   BRLAPI_PARAM_DRIVER_VERSION = 4,		/**< Version of the driver: string */
   BRLAPI_PARAM_DEVICE_MODEL = 5,		/**< Model of the device: string */
+  BRLAPI_PARAM_DEVICE_CELL_SIZE = 31,		/**< Number of dots in a cell: uint8_t */
   BRLAPI_PARAM_DISPLAY_SIZE = 6,		/**< Dimensions of the braille display: { uint32_t columns; uint32_t rows; } */
   BRLAPI_PARAM_DEVICE_IDENTIFIER = 7,		/**< Identifier of the device: string */
   BRLAPI_PARAM_DEVICE_SPEED = 8,		/**< Speed of the device: uint32_t */
   BRLAPI_PARAM_DEVICE_ONLINE = 9,		/**< Device is online: boolean */
-  BRLAPI_PARAM_DEVICE_CELL_SIZE = 31,		/**< Number of dots in a cell: uint8_t */
 /* TODO: status area */
 
 //Input Parameters
@@ -135,6 +135,10 @@ typedef char *brlapi_param_driverVersion_t;
 /** Type to be used for BRLAPI_PARAM_DEVICE_MODEL */
 typedef char *brlapi_param_deviceModel_t;
 
+/* brlapi_param_deviceCellSize_t */
+/** Type to be used for BRLAPI_PARAM_DEVICE_CELL_SIZE */
+typedef uint8_t brlapi_param_deviceCellSize_t;
+
 /* brlapi_param_displaySize_t */
 /** Type to be used for BRLAPI_PARAM_DISPLAY_SIZE */
 typedef struct {
@@ -153,10 +157,6 @@ typedef uint32_t brlapi_param_deviceSpeed_t;
 /* brlapi_param_deviceOnline_t */
 /** Type to be used for BRLAPI_PARAM_DEVICE_ONLINE */
 typedef brlapi_param_bool_t brlapi_param_deviceOnline_t;
-
-/* brlapi_param_deviceCellSize_t */
-/** Type to be used for BRLAPI_PARAM_DEVICE_CELL_SIZE */
-typedef uint8_t brlapi_param_deviceCellSize_t;
 
 /* brlapi_param_retainDots_t */
 /** Type to be used for BRLAPI_PARAM_RETAIN_DOTS */
