@@ -60,7 +60,7 @@ int
 replaceAttributesTable (const char *directory, const char *name) {
   AttributesTable *newTable = NULL;
 
-  if (name) {
+  if (*name) {
     char *path;
 
     if ((path = makeAttributesTablePath(directory, name))) {
