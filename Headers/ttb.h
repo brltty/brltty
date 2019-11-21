@@ -41,6 +41,8 @@ extern wchar_t convertDotsToCharacter (TextTable *table, unsigned char dots);
 
 extern void setTryBaseCharacter (TextTable *table, unsigned char yes);
 
+extern int getUnicodeRowCells (TextTable *table, wchar_t character, uint8_t *cells, uint8_t *defined);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

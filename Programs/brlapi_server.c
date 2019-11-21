@@ -1790,6 +1790,20 @@ PARAM_READER(keyLongName)
   return NULL;
 }
 
+/* BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS */
+PARAM_READER(computerBrailleRowCells)
+{
+  brlapi_param_computerBrailleRowCells_t *computerBrailleRowCells = data;
+
+  if (getUnicodeRowCells(textTable, subparam, computerBrailleRowCells->cells, computerBrailleRowCells->defined)) {
+    *size = sizeof(*computerBrailleRowCells);
+  } else {
+    *size = 0;
+  }
+
+  return NULL;
+}
+
 /* BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE */
 PARAM_READER(computerBrailleTable)
 {
@@ -2009,7 +2023,7 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
     .global = 1,
     .rootParameter = BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE,
-    .read = param_unimplemented_read,
+    .read = param_computerBrailleRowCells_read,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE] = {
