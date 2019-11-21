@@ -24,8 +24,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct AttributesTableStruct AttributesTable;
-
 extern AttributesTable *attributesTable;
+
+extern void lockAttributesTable (void);
+extern void unlockAttributesTable (void);
 
 extern AttributesTable *compileAttributesTable (const char *name);
 extern void destroyAttributesTable (AttributesTable *table);

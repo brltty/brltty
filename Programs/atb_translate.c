@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include "log.h"
+#include "lock.h"
 #include "file.h"
 #include "atb.h"
 #include "atb_internal.h"
@@ -33,6 +34,22 @@ static AttributesTable internalAttributesTable = {
 };
 
 AttributesTable *attributesTable = &internalAttributesTable;
+
+static LockDescriptor *
+getAttributesTableLock (void) {
+  static LockDescriptor *lock = NULL;
+  return getLockDescriptor(&lock, "attributes-table");
+}
+
+void
+lockAttributesTable (void) {
+  obtainExclusiveLock(getAttributesTableLock());
+}
+
+void
+unlockAttributesTable (void) {
+  releaseLock(getAttributesTableLock());
+}
 
 unsigned char
 convertAttributesToDots (AttributesTable *table, unsigned char attributes) {
@@ -62,7 +79,10 @@ replaceAttributesTable (const char *directory, const char *name) {
   if (newTable) {
     AttributesTable *oldTable = attributesTable;
 
-    attributesTable = newTable;
+    lockAttributesTable();
+      attributesTable = newTable;
+    unlockAttributesTable();
+
     destroyAttributesTable(oldTable);
     return 1;
   }
