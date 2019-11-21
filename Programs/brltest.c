@@ -300,3 +300,7 @@ getScreenCommandContext (void) {
 void
 alert (AlertIdentifier identifier) {
 }
+
+#include "api_control.h"
+
+const ApiMethods api;

@@ -407,26 +407,6 @@ main (int argc, char *argv[]) {
   return exitStatus;
 }
 
-#include "core.h"
-
-unsigned int textStart;
-unsigned int textCount;
-
-unsigned char
-getScreenCursorDots (void) {
-  return 0;
-}
-
-int
-api_handleCommand (int command) {
-  return 0;
-}
-
-int
-api_handleKeyEvent (KeyGroup group, KeyNumber number, int press) {
-  return 0;
-}
-
 #include "scr.h"
 
 KeyTableCommandContext
@@ -434,26 +414,12 @@ getScreenCommandContext (void) {
   return KTB_CTX_DEFAULT;
 }
 
-int
-currentVirtualTerminal (void) {
-  return 1;
-}
-
-#include "message.h"
-
-int
-message (const char *mode, const char *text, MessageOptions options) {
-  return 1;
-}
-
-#include "update.h"
-
-void
-scheduleUpdate (const char *reason) {
-}
-
 #include "alert.h"
 
 void
 alert (AlertIdentifier identifier) {
 }
+
+#include "api_control.h"
+
+const ApiMethods api;
