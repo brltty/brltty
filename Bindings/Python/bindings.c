@@ -142,15 +142,17 @@ brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_han
 
   Py_INCREF(func);
 
-  brlapi_descr = brlapi__watchParameter(handle, param, subparam, global, brlapi_python_parameter_callback, NULL, NULL, 0);
+  descr = malloc(sizeof(*descr));
+  descr->callback = func;
+
+  brlapi_descr = brlapi__watchParameter(handle, param, subparam, global, brlapi_python_parameter_callback, descr, NULL, 0);
 
   if (!brlapi_descr) {
+    free(descr);
     PyErr_SetString(PyExc_ValueError, "watching parameter failed");
     return NULL;
   }
 
-  descr = malloc(sizeof(*descr));
-  descr->callback = func;
   descr->brlapi_descr = brlapi_descr;
 
   return descr;
