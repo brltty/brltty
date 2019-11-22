@@ -729,7 +729,7 @@ driver.$O:
 
 ###############################################################################
 
-CMD_OBJECTS = cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_clipboard.$O cmd_custom.$O cmd_input.$O cmd_keycodes.$O cmd_learn.$O cmd_miscellaneous.$O cmd_navigation.$O cmd_preferences.$O cmd_speech.$O cmd_toggle.$O cmd_touch.$O learn.$O
+CMD_OBJECTS = cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_clipboard.$O cmd_custom.$O cmd_input.$O cmd_keycodes.$O cmd_learn.$O cmd_miscellaneous.$O cmd_navigation.$O cmd_preferences.$O cmd_speech.$O cmd_toggle.$O cmd_touch.$O clipboard.$O learn.$O
 
 cmd.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd.c
@@ -775,6 +775,9 @@ cmd_toggle.$O:
 
 cmd_touch.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_touch.c
+
+clipboard.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/clipboard.c
 
 learn.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/learn.c
