@@ -571,7 +571,6 @@ handleClipboardCommands (int command, void *data) {
 static void
 destroyClipboardCommandData (void *data) {
   ClipboardCommandData *ccd = data;
-  destroyClipboardObject(ccd->clipboard);
   free(ccd);
 }
 
@@ -581,18 +580,15 @@ addClipboardCommands (void) {
 
   if ((ccd = malloc(sizeof(*ccd)))) {
     memset(ccd, 0, sizeof(*ccd));
+    ccd->clipboard = getMainClipboard();
 
     ccd->begin.column = 0;
     ccd->begin.row = 0;
     ccd->begin.offset = -1;
 
-    if ((ccd->clipboard = newClipboardObject())) {
-      if (pushCommandHandler("clipboard", KTB_CTX_DEFAULT,
-                             handleClipboardCommands, destroyClipboardCommandData, ccd)) {
-        return 1;
-      }
-
-      destroyClipboardObject(ccd->clipboard);
+    if (pushCommandHandler("clipboard", KTB_CTX_DEFAULT,
+                           handleClipboardCommands, destroyClipboardCommandData, ccd)) {
+      return 1;
     }
 
     free(ccd);

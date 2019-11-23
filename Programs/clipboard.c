@@ -157,6 +157,12 @@ appendClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t 
   return 1;
 }
 
+int
+setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length) {
+  truncateClipboardContent(cpb, 0);
+  return appendClipboardContent(cpb, characters, length);
+}
+
 static void
 deallocateClipboardHistoryEntry (void *item, void *data) {
   HistoryEntry *entry = item;
@@ -165,7 +171,7 @@ deallocateClipboardHistoryEntry (void *item, void *data) {
 }
 
 ClipboardObject *
-newClipboardObject (void) {
+newClipboard (void) {
   ClipboardObject *cpb;
 
   if ((cpb = malloc(sizeof(*cpb)))) {
@@ -186,7 +192,7 @@ newClipboardObject (void) {
 }
 
 void
-destroyClipboardObject (ClipboardObject *cpb) {
+destroyClipboard (ClipboardObject *cpb) {
   if (cpb->buffer.characters) free(cpb->buffer.characters);
   deallocateQueue(cpb->history.queue);
   free(cpb);
@@ -213,7 +219,7 @@ getMainClipboard (void) {
   static ClipboardObject *clipboard = NULL;
 
   lockMainClipboard();
-    if (!clipboard) clipboard = newClipboardObject();
+    if (!clipboard) clipboard = newClipboard();
   unlockMainClipboard();
 
   return clipboard;

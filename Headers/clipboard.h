@@ -25,9 +25,10 @@ extern "C" {
 
 typedef struct ClipboardObjectStruct ClipboardObject;
 
-extern ClipboardObject *newClipboardObject (void);
-extern void destroyClipboardObject (ClipboardObject *cpb);
+extern ClipboardObject *newClipboard (void);
+extern void destroyClipboard (ClipboardObject *cpb);
 
+extern int setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length);
 extern int appendClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length);
 extern void truncateClipboardContent (ClipboardObject *cpb, size_t length);
 extern void clearClipboardContent (ClipboardObject *cpb);

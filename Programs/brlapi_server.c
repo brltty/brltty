@@ -87,6 +87,7 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 #include "brl_cmds.h"
 #include "brl_utils.h"
 #include "embed.h"
+#include "clipboard.h"
 #include "ttb.h"
 #include "core.h"
 #include "api_server.h"
@@ -1647,6 +1648,61 @@ PARAM_WRITER(audibleAlerts)
   return NULL;
 }
 
+/* BRLAPI_PARAM_CLIPBOARD_CONTENT */
+PARAM_READER(clipboardContent)
+{
+  ClipboardObject *clipboard = getMainClipboard();
+  void *next = data;
+  const void *limit = next + *size;
+
+  lockMainClipboard();
+    size_t length;
+    const wchar_t *characters = getClipboardContent(clipboard, &length);
+
+    if (characters) {
+      const wchar_t *character = characters;
+      const wchar_t *end = character + length;
+
+      while (character < end) {
+        Utf8Buffer utf8;
+        size_t utfs = convertWcharToUtf8(*character++, utf8);
+
+        if ((next + utfs) > limit) break;
+        next = mempcpy(next, utf8, utfs);
+      }
+    }
+  unlockMainClipboard();
+
+  *size = next - data;
+  return NULL;
+}
+
+PARAM_WRITER(clipboardContent)
+{
+  wchar_t characters[size];
+  size_t length = 0;
+
+  while (size > 0) {
+    const char *next = data;
+    wint_t wc = convertUtf8ToWchar(&next, &size);
+    if (wc == WEOF) return "UTF-8 error";
+
+    characters[length++] = wc;
+    data = next;
+  }
+
+  const char *error = NULL;
+  ClipboardObject *clipboard = getMainClipboard();
+
+  lockMainClipboard();
+    if (!setClipboardContent(clipboard, characters, length)) {
+      error = "clipboard not set";
+    }
+  unlockMainClipboard();
+
+  return error;
+}
+
 /* BRLAPI_PARAM_BOUND_COMMAND_CODES */
 PARAM_READER(boundCommandCodes)
 {
@@ -1877,18 +1933,6 @@ PARAM_WRITER(messageLocale)
   return param_writeString(changeMessageLocale, data, size);
 }
 
-/* For parameters yet to be implemented */
-PARAM_READER(unimplemented)
-{
-  *size = 0;
-  return "parameter read not implemented yet";
-}
-
-PARAM_WRITER(unimplemented)
-{
-  return "parameter write not implemented yet";
-}
-
 typedef struct {
   unsigned local:1;
   unsigned global:1;
@@ -2015,8 +2059,8 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
 //Clipboard Parameters
   [BRLAPI_PARAM_CLIPBOARD_CONTENT] = {
     .global = 1,
-    .read = param_unimplemented_read,
-    .write = param_unimplemented_write,
+    .read = param_clipboardContent_read,
+    .write = param_clipboardContent_write,
   },
 
 //TTY Mode Parameters
@@ -2185,9 +2229,6 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 }
 
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
-/* TODO: call for
- * BRLAPI_PARAM_CLIPBOARD_CONTENT
- */
 static void __handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
 {
   brlapi_packet_t response;
