@@ -16,8 +16,11 @@ try:
   print("Driver " + b.getParameter(brlapi.PARAM_DRIVER_NAME, 0, True))
   print("Model " + b.getParameter(brlapi.PARAM_DEVICE_MODEL, 0, True))
 
-  print("Command 1 short name " + b.getParameter(brlapi.PARAM_COMMAND_SHORT_NAME, 1, True))
-  print("Command 1 name '" + b.getParameter(brlapi.PARAM_COMMAND_LONG_NAME, 1, True) + "'")
+  for cmd in b.getParameter(brlapi.PARAM_BOUND_COMMAND_CODES, 0, True):
+    print("Command %x short name: %s" % (cmd, b.getParameter(brlapi.PARAM_COMMAND_SHORT_NAME, cmd, True)))
+
+  for key in b.getParameter(brlapi.PARAM_DEVICE_KEY_CODES, 0, True):
+    print("Key %x short name: %s" % (key, b.getParameter(brlapi.PARAM_KEY_SHORT_NAME, key, True)))
 
   # Make our output more prioritized
   b.setParameter(brlapi.PARAM_CLIENT_PRIORITY, 0, False, 70)
