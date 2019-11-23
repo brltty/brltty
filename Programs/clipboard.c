@@ -26,6 +26,13 @@
 #include "clipboard_internal.h"
 #include "queue.h"
 #include "lock.h"
+#include "program.h"
+#include "api_control.h"
+
+typedef struct {
+  wchar_t *characters;
+  size_t length;
+} HistoryEntry;
 
 struct ClipboardObjectStruct {
   struct {
@@ -38,11 +45,6 @@ struct ClipboardObjectStruct {
     Queue *queue;
   } history;
 };
-
-typedef struct {
-  wchar_t *characters;
-  size_t length;
-} HistoryEntry;
 
 wchar_t *
 allocateClipboardCharacters (size_t count) {
@@ -119,18 +121,20 @@ getClipboardContentLength (ClipboardObject *cpb) {
   return cpb->buffer.length;
 }
 
-void
+int
 truncateClipboardContent (ClipboardObject *cpb, size_t length) {
-  if (length < cpb->buffer.length) cpb->buffer.length = length;
+  if (length >= cpb->buffer.length) return 0;
+  cpb->buffer.length = length;
+  return 1;
 }
 
-void
+int
 clearClipboardContent (ClipboardObject *cpb) {
   size_t length;
   const wchar_t *characters = getClipboardContent(cpb, &length);
 
-  addClipboardHistory(cpb, characters, length);
-  truncateClipboardContent(cpb, 0);
+  if (!addClipboardHistory(cpb, characters, length)) return 0;
+  return truncateClipboardContent(cpb, 0);
 }
 
 int
@@ -159,8 +163,9 @@ appendClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t 
 
 int
 setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length) {
-  truncateClipboardContent(cpb, 0);
-  return appendClipboardContent(cpb, characters, length);
+  int truncated = truncateClipboardContent(cpb, 0);
+  int appended = appendClipboardContent(cpb, characters, length);
+  return truncated || appended;
 }
 
 static void
@@ -214,12 +219,31 @@ unlockMainClipboard (void) {
   releaseLock(getMainClipboardLock());
 }
 
+void
+onMainClipboardUpdated (void) {
+  api.updateParameter(BRLAPI_PARAM_CLIPBOARD_CONTENT, 0);
+}
+
+static void
+exitMainClipboard (void *data) {
+  ClipboardObject **clipboard = data;
+
+  lockMainClipboard();
+    destroyClipboard(*clipboard);
+    *clipboard = NULL;
+  unlockMainClipboard();
+}
+
 ClipboardObject *
 getMainClipboard (void) {
   static ClipboardObject *clipboard = NULL;
 
   lockMainClipboard();
-    if (!clipboard) clipboard = newClipboard();
+    if (!clipboard) {
+      if ((clipboard = newClipboard())) {
+        onProgramExit("main-clipboard", exitMainClipboard, &clipboard);
+      }
+    }
   unlockMainClipboard();
 
   return clipboard;

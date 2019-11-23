@@ -30,8 +30,8 @@ extern void destroyClipboard (ClipboardObject *cpb);
 
 extern int setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length);
 extern int appendClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length);
-extern void truncateClipboardContent (ClipboardObject *cpb, size_t length);
-extern void clearClipboardContent (ClipboardObject *cpb);
+extern int truncateClipboardContent (ClipboardObject *cpb, size_t length);
+extern int clearClipboardContent (ClipboardObject *cpb);
 
 extern const wchar_t *getClipboardContent (ClipboardObject *cpb, size_t *length);
 extern size_t getClipboardContentLength (ClipboardObject *cpb);
@@ -40,6 +40,8 @@ extern int addClipboardHistory (ClipboardObject *cpb, const wchar_t *characters,
 extern const wchar_t *getClipboardHistory (ClipboardObject *cpb, unsigned int index, size_t *length);
 
 extern ClipboardObject *getMainClipboard (void);
+extern void onMainClipboardUpdated (void);
+
 extern void lockMainClipboard (void);
 extern void unlockMainClipboard (void);
 
