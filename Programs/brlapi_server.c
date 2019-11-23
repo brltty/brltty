@@ -1695,13 +1695,12 @@ PARAM_WRITER(clipboardContent)
   ClipboardObject *clipboard = getMainClipboard();
 
   lockMainClipboard();
-    if (setClipboardContent(clipboard, characters, length)) {
-      onMainClipboardUpdated();
-    } else {
+    if (!setClipboardContent(clipboard, characters, length)) {
       error = "clipboard not set";
     }
   unlockMainClipboard();
 
+  if (!error) onMainClipboardUpdated();
   return error;
 }
 

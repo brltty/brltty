@@ -94,9 +94,9 @@ cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t le
   lockMainClipboard();
     int truncated = truncateClipboardContent(ccd->clipboard, ccd->begin.offset);
     int appended = appendClipboardContent(ccd->clipboard, characters, length);
-    if (truncated || appended) onMainClipboardUpdated();
   unlockMainClipboard();
 
+  if (truncated || appended) onMainClipboardUpdated();
   if (!appended) return 0;
   alert(ALERT_CLIPBOARD_END);
   return 1;
@@ -330,8 +330,11 @@ cpbRestore (ClipboardCommandData *ccd) {
   FILE *stream = cpbOpenFile("r");
 
   if (stream) {
+    int updated = 0;
+
     lockMainClipboard();
       if (clearClipboardContent(ccd->clipboard)) {
+        updated = 1;
         ok = 1;
 
         size_t size = 0X1000;
@@ -376,8 +379,6 @@ cpbRestore (ClipboardCommandData *ccd) {
 
           if (done) break;
         } while (ok);
-
-        onMainClipboardUpdated();
       }
     unlockMainClipboard();
 
@@ -385,6 +386,8 @@ cpbRestore (ClipboardCommandData *ccd) {
       logSystemError("fclose");
       ok = 0;
     }
+
+    if (updated) onMainClipboardUpdated();
   }
 
   return ok;
