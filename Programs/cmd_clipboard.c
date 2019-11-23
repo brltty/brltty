@@ -330,11 +330,20 @@ cpbRestore (ClipboardCommandData *ccd) {
   FILE *stream = cpbOpenFile("r");
 
   if (stream) {
-    int updated = 0;
+    int wasUpdated = 0;
 
     lockMainClipboard();
-      if (clearClipboardContent(ccd->clipboard)) {
-        updated = 1;
+    {
+      int isClear = 0;
+
+      if (isClipboardEmpty(ccd->clipboard)) {
+        isClear = 1;
+      } else if (clearClipboardContent(ccd->clipboard)) {
+        isClear = 1;
+        wasUpdated = 1;
+      }
+
+      if (isClear) {
         ok = 1;
 
         size_t size = 0X1000;
@@ -369,7 +378,9 @@ cpbRestore (ClipboardCommandData *ccd) {
               } else {
                 wchar_t wc = wi;
 
-                if (!appendClipboardContent(ccd->clipboard, &wc, 1)) {
+                if (appendClipboardContent(ccd->clipboard, &wc, 1)) {
+                  wasUpdated = 1;
+                } else {
                   ok = 0;
                   break;
                 }
@@ -380,6 +391,7 @@ cpbRestore (ClipboardCommandData *ccd) {
           if (done) break;
         } while (ok);
       }
+    }
     unlockMainClipboard();
 
     if (fclose(stream) == EOF) {
@@ -387,7 +399,7 @@ cpbRestore (ClipboardCommandData *ccd) {
       ok = 0;
     }
 
-    if (updated) onMainClipboardUpdated();
+    if (wasUpdated) onMainClipboardUpdated();
   }
 
   return ok;
