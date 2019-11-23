@@ -106,7 +106,11 @@ static void
 cpbBeginOperation (ClipboardCommandData *ccd, int column, int row) {
   ccd->begin.column = column;
   ccd->begin.row = row;
-  ccd->begin.offset = getClipboardContentLength(ccd->clipboard);
+
+  lockMainClipboard();
+    ccd->begin.offset = getClipboardContentLength(ccd->clipboard);
+  unlockMainClipboard();
+
   alert(ALERT_CLIPBOARD_BEGIN);
 }
 
@@ -238,18 +242,9 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
 }
 
 static int
-cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
-  const wchar_t *characters;
-  size_t length;
-
-  if (index) {
-    characters = getClipboardHistory(ccd->clipboard, index-1, &length);
-  } else {
-    characters = getClipboardContent(ccd->clipboard, &length);
-  }
-
+pasteCharacters (const wchar_t *characters, size_t count) {
   if (!characters) return 0;
-  if (!length) return 0;
+  if (!count) return 0;
 
   if (!isMainScreen()) return 0;
   if (isRouting()) return 0;
@@ -257,12 +252,32 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
   {
     unsigned int i;
 
-    for (i=0; i<length; i+=1)
-      if (!insertScreenKey(characters[i]))
-        return 0;
+    for (i=0; i<count; i+=1) {
+      if (!insertScreenKey(characters[i])) return 0;
+    }
   }
 
   return 1;
+}
+
+static int
+cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
+  int pasted;
+
+  lockMainClipboard();
+    const wchar_t *characters;
+    size_t length;
+
+    if (index) {
+      characters = getClipboardHistory(ccd->clipboard, index-1, &length);
+    } else {
+      characters = getClipboardContent(ccd->clipboard, &length);
+    }
+
+    pasted = pasteCharacters(characters, length);
+  unlockMainClipboard();
+
+  return pasted;
 }
 
 static FILE *
@@ -429,59 +444,64 @@ handleClipboardCommands (int command, void *data) {
       goto doSearch;
 
     doSearch:
-      if ((cpbBuffer = getClipboardContent(ccd->clipboard, &cpbLength))) {
-        int found = 0;
-        size_t count = cpbLength;
+      lockMainClipboard();
+        if ((cpbBuffer = getClipboardContent(ccd->clipboard, &cpbLength))) {
+          int found = 0;
+          size_t count = cpbLength;
 
-        if (count <= scr.cols) {
-          int line = ses->winy;
-          wchar_t buffer[scr.cols];
-          wchar_t characters[count];
-
-          {
-            unsigned int i;
-            for (i=0; i<count; i+=1) characters[i] = towlower(cpbBuffer[i]);
-          }
-
-          while ((line >= 0) && (line <= (int)(scr.rows - brl.textRows))) {
-            const wchar_t *address = buffer;
-            size_t length = scr.cols;
-            readScreenText(0, line, length, 1, buffer);
+          if (count <= scr.cols) {
+            int line = ses->winy;
+            wchar_t buffer[scr.cols];
+            wchar_t characters[count];
 
             {
-              size_t i;
-              for (i=0; i<length; i++) buffer[i] = towlower(buffer[i]);
+              unsigned int i;
+              for (i=0; i<count; i+=1) characters[i] = towlower(cpbBuffer[i]);
             }
 
-            if (line == ses->winy) {
-              if (increment < 0) {
-                int end = ses->winx + count - 1;
-                if (end < length) length = end;
-              } else {
-                int start = ses->winx + textCount;
-                if (start > length) start = length;
-                address += start;
-                length -= start;
+            while ((line >= 0) && (line <= (int)(scr.rows - brl.textRows))) {
+              const wchar_t *address = buffer;
+              size_t length = scr.cols;
+              readScreenText(0, line, length, 1, buffer);
+
+              {
+                for (size_t i=0; i<length; i+=1) buffer[i] = towlower(buffer[i]);
               }
-            }
-            if (findCharacters(&address, &length, characters, count)) {
-              if (increment < 0)
-                while (findCharacters(&address, &length, characters, count))
-                  ++address, --length;
 
-              ses->winy = line;
-              ses->winx = (address - buffer) / textCount * textCount;
-              found = 1;
-              break;
+              if (line == ses->winy) {
+                if (increment < 0) {
+                  int end = ses->winx + count - 1;
+                  if (end < length) length = end;
+                } else {
+                  int start = ses->winx + textCount;
+                  if (start > length) start = length;
+                  address += start;
+                  length -= start;
+                }
+              }
+
+              if (findCharacters(&address, &length, characters, count)) {
+                if (increment < 0) {
+                  while (findCharacters(&address, &length, characters, count)) {
+                    ++address, --length;
+                  }
+                }
+
+                ses->winy = line;
+                ses->winx = (address - buffer) / textCount * textCount;
+                found = 1;
+                break;
+              }
+
+              line += increment;
             }
-            line += increment;
           }
-        }
 
-        if (!found) alert(ALERT_BOUNCE);
-      } else {
-        alert(ALERT_COMMAND_REJECTED);
-      }
+          if (!found) alert(ALERT_BOUNCE);
+        } else {
+          alert(ALERT_COMMAND_REJECTED);
+        }
+      unlockMainClipboard();
 
       break;
     }
