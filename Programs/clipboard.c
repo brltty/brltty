@@ -134,7 +134,8 @@ clearClipboardContent (ClipboardObject *cpb) {
   const wchar_t *characters = getClipboardContent(cpb, &length);
 
   if (!addClipboardHistory(cpb, characters, length)) return 0;
-  return truncateClipboardContent(cpb, 0);
+  truncateClipboardContent(cpb, 0);
+  return 1;
 }
 
 int

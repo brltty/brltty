@@ -91,8 +91,13 @@ cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fr
 
 static int
 cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
-  truncateClipboardContent(ccd->clipboard, ccd->begin.offset);
-  if (!appendClipboardContent(ccd->clipboard, characters, length)) return 0;
+  lockMainClipboard();
+    int truncated = truncateClipboardContent(ccd->clipboard, ccd->begin.offset);
+    int appended = appendClipboardContent(ccd->clipboard, characters, length);
+    if (truncated || appended) onMainClipboardUpdated();
+  unlockMainClipboard();
+
+  if (!appended) return 0;
   alert(ALERT_CLIPBOARD_END);
   return 1;
 }
@@ -280,23 +285,26 @@ cpbOpenFile (const char *mode) {
 static int
 cpbSave (ClipboardCommandData *ccd) {
   int ok = 0;
-  size_t length;
-  const wchar_t *characters = getClipboardContent(ccd->clipboard, &length);
 
-  if (length > 0) {
-    FILE *stream = cpbOpenFile("w");
+  lockMainClipboard();
+    size_t length;
+    const wchar_t *characters = getClipboardContent(ccd->clipboard, &length);
 
-    if (stream) {
-      if (writeUtf8Characters(stream, characters, length)) {
-        ok = 1;
-      }
+    if (length > 0) {
+      FILE *stream = cpbOpenFile("w");
 
-      if (fclose(stream) == EOF) {
-        logSystemError("fclose");
-        ok = 0;
+      if (stream) {
+        if (writeUtf8Characters(stream, characters, length)) {
+          ok = 1;
+        }
+
+        if (fclose(stream) == EOF) {
+          logSystemError("fclose");
+          ok = 0;
+        }
       }
     }
-  }
+  unlockMainClipboard();
 
   return ok;
 }
@@ -307,51 +315,56 @@ cpbRestore (ClipboardCommandData *ccd) {
   FILE *stream = cpbOpenFile("r");
 
   if (stream) {
-    size_t size = 0X1000;
-    char buffer[size];
-    size_t length = 0;
+    lockMainClipboard();
+      if (clearClipboardContent(ccd->clipboard)) {
+        ok = 1;
 
-    clearClipboardContent(ccd->clipboard);
-    ok = 1;
+        size_t size = 0X1000;
+        char buffer[size];
+        size_t length = 0;
 
-    do {
-      size_t count = fread(&buffer[length], 1, (size - length), stream);
-      int done = (length += count) < size;
+        do {
+          size_t count = fread(&buffer[length], 1, (size - length), stream);
+          int done = (length += count) < size;
 
-      if (ferror(stream)) {
-        logSystemError("fread");
-        ok = 0;
-      } else {
-        const char *next = buffer;
-        size_t left = length;
-
-        while (left > 0) {
-          const char *start = next;
-          wint_t wi = convertUtf8ToWchar(&next, &left);
-
-          if (wi == WEOF) {
-            length = next - start;
-
-            if (left > 0) {
-              logBytes(LOG_ERR, "invalid UTF-8 character", start, length);
-              ok = 0;
-              break;
-            }
-
-            memmove(buffer, start, length);
+          if (ferror(stream)) {
+            logSystemError("fread");
+            ok = 0;
           } else {
-            wchar_t wc = wi;
+            const char *next = buffer;
+            size_t left = length;
 
-            if (!appendClipboardContent(ccd->clipboard, &wc, 1)) {
-              ok = 0;
-              break;
+            while (left > 0) {
+              const char *start = next;
+              wint_t wi = convertUtf8ToWchar(&next, &left);
+
+              if (wi == WEOF) {
+                length = next - start;
+
+                if (left > 0) {
+                  logBytes(LOG_ERR, "invalid UTF-8 character", start, length);
+                  ok = 0;
+                  break;
+                }
+
+                memmove(buffer, start, length);
+              } else {
+                wchar_t wc = wi;
+
+                if (!appendClipboardContent(ccd->clipboard, &wc, 1)) {
+                  ok = 0;
+                  break;
+                }
+              }
             }
           }
-        }
-      }
 
-      if (done) break;
-    } while (ok);
+          if (done) break;
+        } while (ok);
+
+        onMainClipboardUpdated();
+      }
+    unlockMainClipboard();
 
     if (fclose(stream) == EOF) {
       logSystemError("fclose");
