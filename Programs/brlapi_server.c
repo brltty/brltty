@@ -1278,6 +1278,8 @@ do { \
   if (!(condition)) return "assertion failed: " #condition; \
 } while (0)
 
+#define PARAM_ASSERT_SIZE(pointer) PARAM_ASSERT(size == sizeof(*pointer))
+
 static void param_readString(const char *string, void *data, size_t *size)
 {
   if (!string) string = "";
@@ -1317,7 +1319,7 @@ PARAM_READER(clientPriority)
 PARAM_WRITER(clientPriority)
 {
   const brlapi_param_clientPriority_t *clientPriority = data;
-  PARAM_ASSERT(size == sizeof(*clientPriority));
+  PARAM_ASSERT_SIZE(clientPriority);
 
   lockMutex(&apiConnectionsMutex);
     c->client_priority = *clientPriority;
@@ -1495,7 +1497,7 @@ PARAM_READER(retainDots)
 PARAM_WRITER(retainDots)
 {
   const brlapi_param_retainDots_t *retainDots = data;
-  PARAM_ASSERT(size == sizeof(*retainDots));
+  PARAM_ASSERT_SIZE(retainDots);
   c->retainDots = *retainDots;
   return NULL;
 }
@@ -1512,7 +1514,7 @@ PARAM_READER(computerBrailleCellSize)
 PARAM_WRITER(computerBrailleCellSize)
 {
   const brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
-  PARAM_ASSERT(size == sizeof(*computerBrailleCellSize));
+  PARAM_ASSERT_SIZE(computerBrailleCellSize);
 
   switch (*computerBrailleCellSize) {
     case 8:
@@ -1540,7 +1542,7 @@ PARAM_READER(literaryBraille)
 PARAM_WRITER(literaryBraille)
 {
   const brlapi_param_literaryBraille_t *literaryBraille = data;
-  PARAM_ASSERT(size == sizeof(*literaryBraille));
+  PARAM_ASSERT_SIZE(literaryBraille);
   setContractedBraille(*literaryBraille);
   return NULL;
 }
@@ -1557,7 +1559,7 @@ PARAM_READER(cursorDots)
 PARAM_WRITER(cursorDots)
 {
   const brlapi_param_cursorDots_t *cursorDots = data;
-  PARAM_ASSERT(size == sizeof(*cursorDots));
+  PARAM_ASSERT_SIZE(cursorDots);
   if (!setScreenCursorDots(*cursorDots)) return "unsupported cursor style";
   return NULL;
 }
@@ -1574,7 +1576,7 @@ PARAM_READER(cursorBlinkPeriod)
 PARAM_WRITER(cursorBlinkPeriod)
 {
   const brlapi_param_cursorBlinkPeriod_t *cursorBlinkPeriod = data;
-  PARAM_ASSERT(size == sizeof(*cursorBlinkPeriod));
+  PARAM_ASSERT_SIZE(cursorBlinkPeriod);
   if (!setBlinkPeriod(&screenCursorBlinkDescriptor, *cursorBlinkPeriod)) return "unsupported cursor blink period";
   return NULL;
 }
@@ -1591,7 +1593,7 @@ PARAM_READER(cursorBlinkPercentage)
 PARAM_WRITER(cursorBlinkPercentage)
 {
   const brlapi_param_cursorBlinkPercentage_t *cursorBlinkPercentage = data;
-  PARAM_ASSERT(size == sizeof(*cursorBlinkPercentage));
+  PARAM_ASSERT_SIZE(cursorBlinkPercentage);
   if (!setBlinkPercentage(&screenCursorBlinkDescriptor, *cursorBlinkPercentage)) return "unsupported cursor blink percentage";
   return NULL;
 }
@@ -1624,7 +1626,7 @@ PARAM_READER(skipIdenticalLines)
 PARAM_WRITER(skipIdenticalLines)
 {
   const brlapi_param_skipIdenticalLines_t *skipIdenticalLines = data;
-  PARAM_ASSERT(size == sizeof(*skipIdenticalLines));
+  PARAM_ASSERT_SIZE(skipIdenticalLines);
   prefs.skipIdenticalLines = !!*skipIdenticalLines;
   api_updateParameter(BRLAPI_PARAM_SKIP_IDENTICAL_LINES, 0);
   return NULL;
@@ -1642,7 +1644,7 @@ PARAM_READER(audibleAlerts)
 PARAM_WRITER(audibleAlerts)
 {
   const brlapi_param_audibleAlerts_t *audibleAlerts = data;
-  PARAM_ASSERT(size == sizeof(*audibleAlerts));
+  PARAM_ASSERT_SIZE(audibleAlerts);
   prefs.alertTunes = !!*audibleAlerts;
   api_updateParameter(BRLAPI_PARAM_AUDIBLE_ALERTS, 0);
   return NULL;
