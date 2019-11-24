@@ -231,7 +231,7 @@ static void enterLearnMode(void)
                     (CDO_IncludeName | CDO_IncludeOperand));
     brlapi_writeText(BRLAPI_CURSOR_OFF, buf);
     fprintf(stderr, "%s\n", buf);
-    val = brlapi_getParameterAlloc(BRLAPI_PARAM_COMMAND_LONG_NAME, cmd, 1, NULL);
+    val = brlapi_getParameterAlloc(BRLAPI_PARAM_COMMAND_LONG_NAME, cmd, BRLAPI_PARAMF_GLOBAL, NULL);
     fprintf(stderr, "%s\n", val);
     free(val);
     if (cmd==BRL_CMD_LEARN) return;
@@ -306,7 +306,7 @@ static void suspendDriver(void)
   }
 }
 
-static void brailleRetainDotsChanged(brlapi_param_t parameter, uint64_t subparam, int local, void *priv, const void *data, size_t len)
+static void brailleRetainDotsChanged(brlapi_param_t parameter, uint64_t subparam, unsigned flags, void *priv, const void *data, size_t len)
 {
   const brlapi_param_retainDots_t *d = data;
   if (parameter != BRLAPI_PARAM_RETAIN_DOTS)
@@ -320,29 +320,29 @@ static void brailleRetainDotsChanged(brlapi_param_t parameter, uint64_t subparam
 static void testParameters(void)
 {
   brlapi_param_retainDots_t val;
-  if (brlapi_getParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, 0, &val, sizeof(val)) < 0) {
+  if (brlapi_getParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, BRLAPI_PARAMF_LOCAL, &val, sizeof(val)) < 0) {
     brlapi_perror("getParameter");
   }
   printf("retain dots was %d\n", val);
   printf("now watching retain dots parameter\n");
-  if (brlapi_watchParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, 0, brailleRetainDotsChanged, NULL, NULL, 0) == 0) {
+  if (brlapi_watchParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, BRLAPI_PARAMF_LOCAL, brailleRetainDotsChanged, NULL, NULL, 0) == 0) {
     brlapi_perror("watchParameter");
   }
   val = 0;
   printf("setting retain dots parameter to %d\n", val);
-  if (brlapi_setParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, 0, &val, sizeof(val)) < 0) {
+  if (brlapi_setParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, BRLAPI_PARAMF_LOCAL, &val, sizeof(val)) < 0) {
     brlapi_perror("setParameter");
   }
-  if (brlapi_getParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, 0, &val, sizeof(val)) < 0) {
+  if (brlapi_getParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, BRLAPI_PARAMF_LOCAL, &val, sizeof(val)) < 0) {
     brlapi_perror("getParameter");
   }
   printf("retain dots now %d\n", val);
   val = 1;
   printf("setting retain dots parameter to %d\n", val);
-  if (brlapi_setParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, 0, &val, sizeof(val)) < 0) {
+  if (brlapi_setParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, BRLAPI_PARAMF_LOCAL, &val, sizeof(val)) < 0) {
     brlapi_perror("setParameter");
   }
-  if (brlapi_getParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, 0, &val, sizeof(val)) < 0) {
+  if (brlapi_getParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, BRLAPI_PARAMF_LOCAL, &val, sizeof(val)) < 0) {
     brlapi_perror("getParameter");
   }
   printf("retain dots now %d\n", val);

@@ -11,21 +11,21 @@ import errno
 import Xlib.keysymdef.miscellany
 try:
   b = brlapi.Connection()
-  print("Server version " + str(b.getParameter(brlapi.PARAM_SERVER_VERSION, 0, True)))
-  print("Display size " + str(b.getParameter(brlapi.PARAM_DISPLAY_SIZE, 0, True)))
-  print("Driver " + b.getParameter(brlapi.PARAM_DRIVER_NAME, 0, True))
-  print("Model " + b.getParameter(brlapi.PARAM_DEVICE_MODEL, 0, True))
+  print("Server version " + str(b.getParameter(brlapi.PARAM_SERVER_VERSION, 0, brlapi.PARAMF_GLOBAL)))
+  print("Display size " + str(b.getParameter(brlapi.PARAM_DISPLAY_SIZE, 0, brlapi.PARAMF_GLOBAL)))
+  print("Driver " + b.getParameter(brlapi.PARAM_DRIVER_NAME, 0, brlapi.PARAMF_GLOBAL))
+  print("Model " + b.getParameter(brlapi.PARAM_DEVICE_MODEL, 0, brlapi.PARAMF_GLOBAL))
 
-  for cmd in b.getParameter(brlapi.PARAM_BOUND_COMMAND_CODES, 0, True):
-    print("Command %x short name: %s" % (cmd, b.getParameter(brlapi.PARAM_COMMAND_SHORT_NAME, cmd, True)))
+  for cmd in b.getParameter(brlapi.PARAM_BOUND_COMMAND_CODES, 0, brlapi.PARAMF_GLOBAL):
+    print("Command %x short name: %s" % (cmd, b.getParameter(brlapi.PARAM_COMMAND_SHORT_NAME, cmd, brlapi.PARAMF_GLOBAL)))
 
-  for key in b.getParameter(brlapi.PARAM_DEVICE_KEY_CODES, 0, True):
-    print("Key %x short name: %s" % (key, b.getParameter(brlapi.PARAM_KEY_SHORT_NAME, key, True)))
+  for key in b.getParameter(brlapi.PARAM_DEVICE_KEY_CODES, 0, brlapi.PARAMF_GLOBAL):
+    print("Key %x short name: %s" % (key, b.getParameter(brlapi.PARAM_KEY_SHORT_NAME, key, brlapi.PARAMF_GLOBAL)))
 
   # Make our output more prioritized
   b.setParameter(brlapi.PARAM_CLIENT_PRIORITY, 0, False, 70)
 
-  def update_callback(param, subparam, globalparam, value):
+  def update_callback(param, subparam, flags, value):
     s = ""
     for i in value:
       s += unichr(0x2800 + ord(i))
@@ -887,14 +887,14 @@ cdef class Connection:
 		else:
 			return retval
 
-	def getParameter(self, param, subparam = 0, globalparam = False):
+	def getParameter(self, param, subparam = 0, flags = 0):
 		"""Get the value of a parameter.
 		See brlapi_getParameter(3).
 
 		This gets the current content of a parameter"""
 		cdef uint32_t c_param
 		cdef uint64_t c_subparam
-		cdef int c_global
+		cdef unsigned c_flags
 		cdef void *c_value
 		cdef size_t size
 		cdef ssize_t retval
@@ -906,10 +906,10 @@ cdef class Connection:
 
 		c_param = param
 		c_subparam = subparam
-		c_global = globalparam
+		c_flags = flags
 
 		with nogil:
-			c_value = c_brlapi.brlapi__getParameterAlloc(self.h, c_param, c_subparam, c_global, &size)
+			c_value = c_brlapi.brlapi__getParameterAlloc(self.h, c_param, c_subparam, c_flags, &size)
 		if c_value == NULL:
 			raise OperationError()
 
@@ -923,14 +923,14 @@ cdef class Connection:
 		return ret
 
 
-	def setParameter(self, param, subparam, globalparam, value):
+	def setParameter(self, param, subparam, flags, value):
 		"""Set the value of a parameter.
 		See brlapi_setParameter(3).
 
 		This sets the content of a parameter"""
 		cdef uint32_t c_param
 		cdef uint64_t c_subparam
-		cdef int c_global
+		cdef int c_flags
 		cdef void *c_value
 		cdef uint64_t *values64
 		cdef uint32_t *values32
@@ -941,7 +941,7 @@ cdef class Connection:
 
 		c_param = param
 		c_subparam = subparam
-		c_global = globalparam
+		c_flags = flags
 
 		with nogil:
 			props = c_brlapi.brlapi_getParameterProperties(c_param)
@@ -1031,13 +1031,13 @@ cdef class Connection:
 			raise ValueError("Unsupported parameter type")
 
 		with nogil:
-			retval = c_brlapi.brlapi__setParameter(self.h, c_param, c_subparam, c_global, c_value, size)
+			retval = c_brlapi.brlapi__setParameter(self.h, c_param, c_subparam, c_flags, c_value, size)
 		if retval == -1:
 			c_brlapi.free(c_value)
 			raise OperationError()
 		c_brlapi.free(c_value)
 
-	def watchParameter(self, param, subparam, globalparam, func):
+	def watchParameter(self, param, subparam, flags, func):
 		"""Set a parameter change callback.
 		See brlapi_watchParameter(3).
 
@@ -1047,12 +1047,12 @@ cdef class Connection:
 		This returns an entry object, to be passed to unwatchParameter."""
 		cdef uint32_t c_param
 		cdef uint64_t c_subparam
-		cdef int c_global
+		cdef int c_flags
 		cdef c_brlapi.brlapi_python_paramCallbackDescriptor_t *descr
 
 		c_param = param
 		c_subparam = subparam
-		c_global = globalparam
+		c_flags = flags
 
 		def cfunc(param):
 			cdef c_brlapi.brlapi_python_callbackData_t *callbackData
@@ -1060,15 +1060,12 @@ cdef class Connection:
 
 			parameter = callbackData.parameter
 			subparam = callbackData.subparam
-			if callbackData.globalparam != 0:
-				globalparam = True
-			else:
-				globalparam = False
+			flags = callbackData.flags
 			data = _parameterToPython(callbackData.parameter, callbackData.data, callbackData.len)
 
-			func(parameter, subparam, globalparam, data)
+			func(parameter, subparam, flags, data)
 
-		descr = c_brlapi.brlapi_python_watchParameter(self.h, c_param, c_subparam, c_global, cfunc)
+		descr = c_brlapi.brlapi_python_watchParameter(self.h, c_param, c_subparam, c_flags, cfunc)
 		return <uintptr_t>descr
 
 	def unwatchParameter(self, entry):

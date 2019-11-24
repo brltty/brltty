@@ -57,6 +57,11 @@ BEGIN {
   next
 }
 
+/#define[[:space:]]+BRLAPI_PARAMF_/ {
+  apiConstant(substr($2, 8), $2, getDefineValue(), "")
+  next
+}
+
 /^[[:space:]]*BRLAPI_PARAM_TYPE_[^[:space:],]+,?/ {
   gsub(",", "", $1)
   apiConstant(substr($1, 8), $1, apiParameterTypeCount++, getComment($0))

@@ -530,12 +530,12 @@ FUNCTION_HANDLER(session, leaveTtyMode) {
 
 typedef struct {
   Tcl_Obj *value;
-  int global;
+  unsigned flags;
 } ParameterOptions;
 
-OPTION_HANDLER(session, parameter, global) {
+OPTION_HANDLER(session, parameter, flags) {
   ParameterOptions *options = data;
-  options->global = 1;
+  options->flags = flags;
   return TCL_OK;
 }
 
@@ -569,11 +569,11 @@ FUNCTION_HANDLER(session, parameter) {
 
   ParameterOptions options = {
     .value = NULL,
-    .global = 0
+    .flags = 0
   };
 
   BEGIN_OPTIONS
-    { OPTION(session, parameter, global),
+    { OPTION(session, parameter, flags),
       OPERANDS(0, "")
     },
 
@@ -619,7 +619,7 @@ FUNCTION_HANDLER(session, parameter) {
     switch (properties->type) {
       case BRLAPI_PARAM_TYPE_STRING: {
         const char *string = Tcl_GetString(value);
-        TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, string, strlen(string)));
+	TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.flags, string, strlen(string)));
         break;
       }
 
@@ -639,7 +639,7 @@ FUNCTION_HANDLER(session, parameter) {
                 buffer[index] = !!boolean;
               }
 
-              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+	      TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.flags, buffer, sizeof(buffer)));
               break;
             }
 
@@ -652,7 +652,7 @@ FUNCTION_HANDLER(session, parameter) {
                 buffer[index] = integer;
               }
 
-              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+	      TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.flags, buffer, sizeof(buffer)));
               break;
             }
 
@@ -665,7 +665,7 @@ FUNCTION_HANDLER(session, parameter) {
                 buffer[index] = integer;
               }
 
-              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+	      TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.flags, buffer, sizeof(buffer)));
               break;
             }
 
@@ -678,7 +678,7 @@ FUNCTION_HANDLER(session, parameter) {
                 buffer[index] = integer;
               }
 
-              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+	      TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.flags, buffer, sizeof(buffer)));
               break;
             }
 
@@ -691,7 +691,7 @@ FUNCTION_HANDLER(session, parameter) {
                 buffer[index] = integer;
               }
 
-              TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, buffer, sizeof(buffer)));
+	      TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.flags, buffer, sizeof(buffer)));
               break;
             }
 
@@ -699,7 +699,7 @@ FUNCTION_HANDLER(session, parameter) {
               break;
           }
         } else {
-          TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.global, NULL, 0));
+	  TEST_BRLAPI_OK(brlapi__setParameter(session->handle, parameter, subparam, options.flags, NULL, 0));
         }
 
         break;
@@ -707,7 +707,7 @@ FUNCTION_HANDLER(session, parameter) {
     }
   } else {
     size_t length;
-    void *value = brlapi__getParameterAlloc(session->handle, parameter, subparam, options.global, &length);
+    void *value = brlapi__getParameterAlloc(session->handle, parameter, subparam, options.flags, &length);
 
     if (!value) {
       setBrlapiError(interp);

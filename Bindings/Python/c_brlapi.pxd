@@ -123,10 +123,10 @@ cdef extern from "Programs/brlapi.h":
 		uint8_t isArray
 		uint8_t hasSubparam
 
-	void *brlapi__getParameterAlloc(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, size_t *) nogil
-	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, int, void*, size_t) nogil
+	void *brlapi__getParameterAlloc(brlapi_handle_t *, brlapi_param_t, unsigned long long, unsigned, size_t *) nogil
+	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, unsigned, void*, size_t) nogil
 	const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter) nogil
-	brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, int, brlapi_paramCallback_t, void *, void*, size_t);
+	brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, unsigned, brlapi_paramCallback_t, void *, void*, size_t);
 	int brlapi__unwatchParameter(brlapi_handle_t *,
 	brlapi_paramCallbackDescriptor_t)
 
@@ -151,7 +151,7 @@ cdef extern from "bindings.h":
 	ctypedef struct brlapi_python_callbackData_t:
 		brlapi_param_t parameter
 		uint64_t subparam
-		int globalparam
+		unsigned flags
 		const void *data
 		size_t len
 

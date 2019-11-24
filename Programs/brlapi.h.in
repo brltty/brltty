@@ -1020,6 +1020,10 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
  *
  * @{ */
 
+/** Flags for parameter requests */
+#define BRLAPI_PARAMF_LOCAL          0X00    /**< Refer to the value local to the connection instead of the global value */
+#define BRLAPI_PARAMF_GLOBAL         0X01    /**< Refer to the global value instead of the value local to the connection */
+
 /* brlapi_getParameter */
 /** Get the content of a parameter
  *
@@ -1027,16 +1031,16 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
  *
  * \param parameter is the parameter whose content shall be gotten;
  * \param subparam is a specific instance of the parameter;
- * \param global specifies whether the global value should be returned instead of the local value;
+ * \param flags specify which value should be returned;
  * \param data is a buffer where content of the parameter shall be stored;
  * \param len is the size of the buffer.
  *
  * \return the real size of the parameter's content. If the parameter does not fit in the provided buffer, it is truncated to len bytes (but the real size of the parameter is still returned). In that case, the client must call brlapi_getParameter again with a big enough buffer.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-ssize_t brlapi_getParameter(brlapi_param_t parameter, uint64_t subparam, int global, void* data, size_t len);
+ssize_t brlapi_getParameter(brlapi_param_t parameter, uint64_t subparam, unsigned flags, void* data, size_t len);
 #endif
-ssize_t brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, void* data, size_t len);
+ssize_t brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, unsigned flags, void* data, size_t len);
 
 /* brlapi_getParameterAlloc */
 /** Return the content of a parameter
@@ -1046,15 +1050,15 @@ ssize_t brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, 
  *
  * \param parameter is the parameter whose content shall be gotten;
  * \param subparam is a specific instance of the parameter;
- * \param global specifies whether the global value should be returned instead of the local value;
+ * \param flags specify which value should be returned;
  * \param len is the address where to store the size of the parameter value.
  *
  * \return a newly-allocated buffer that contains the value of the parameter. The caller must call free() on it after use. NULL is returned on errors
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-void *brlapi_getParameterAlloc(brlapi_param_t parameter, uint64_t subparam, int global, size_t *len);
+void *brlapi_getParameterAlloc(brlapi_param_t parameter, uint64_t subparam, unsigned flags, size_t *len);
 #endif
-void *brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, size_t *len);
+void *brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, unsigned flags, size_t *len);
 
 /* brlapi_setParameter */
 /** Set the content of a parameter
@@ -1063,16 +1067,16 @@ void *brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t paramete
  *
  * \param parameter is the parameter to set;
  * \param subparam is a specific instance of the parameter;
- * \param global specifies whether the global value should be set instead of the local value;
+ * \param flags specify which value should be set;
  * \param data is a buffer containing the data to store in the parameter;
  * \param len is the size of the data.
  *
  * \return 0 on success, -1 on error (read-only parameter for instance).
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_setParameter(brlapi_param_t parameter, uint64_t subparam, int global, const void* data, size_t len);
+int brlapi_setParameter(brlapi_param_t parameter, uint64_t subparam, unsigned flags, const void* data, size_t len);
 #endif
-int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, const void* data, size_t len);
+int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, unsigned flags, const void* data, size_t len);
 
 /* brlapi_paramCallback_t */
 /** Callback for parameter changes
@@ -1081,7 +1085,7 @@ int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint
  * brlapi_watchParameter() function are called.
  *
  * \param parameter is the parameter that changed;
- * \param global specifies whether it is the global value which has changed, or the local value;
+ * \param flags specify which value was changed;
  * \param priv is the void pointer that was passed to the brlapi_watchParameter call which registered the callback;
  * \param data is a buffer containing the new value of the parameter;
  * \param len is the size of the data.
@@ -1089,7 +1093,7 @@ int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint
  * This callback only gets called when the application calls some brlapi_
  * function (i.e. BrlAPI gets direct control of the execution).
  */
-typedef void (*brlapi_paramCallback_t)(brlapi_param_t parameter, uint64_t subparam, int global, void *priv, const void *data, size_t len);
+typedef void (*brlapi_paramCallback_t)(brlapi_param_t parameter, uint64_t subparam, unsigned flags, void *priv, const void *data, size_t len);
 
 /* brlapi_paramCallbackDescriptor_t */
 /** Type for callback descriptors
@@ -1106,7 +1110,7 @@ typedef void *brlapi_paramCallbackDescriptor_t;
  *
  * \param parameter is the parameter to watch;
  * \param subparam is a specific instance of the parameter;
- * \param global specifies whether it is the global value which should be monitored, or the local value;
+ * \param flags specify which value should be monitored;
  * \param func is the function to call on parameter change;
  * \param priv is a void pointer which will be passed as such to the function;
  * \param data is a buffer where the current content of the parameter shall be
@@ -1122,9 +1126,9 @@ typedef void *brlapi_paramCallbackDescriptor_t;
  * brlapi_watchParameter, for providing the initial value
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-brlapi_paramCallbackDescriptor_t brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
+brlapi_paramCallbackDescriptor_t brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, unsigned flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
 #endif
-brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
+brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, unsigned flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
 
 /* brlapi_unwatchParameter */
 /** Clear a parameter change callback
@@ -1151,14 +1155,14 @@ int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescri
  * \return nothing
  * \param parameter is the parameter to be cached or not;
  * \param subparam is a specific instance of the parameter;
- * \param global specifies whether it is the global value which should be cached, or the local value;
+ * \param flags specify which value should be cached;
  * \param cached whether this parameter should be cached or not.
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_cacheParameter(brlapi_param_t parameter, uint64_t subparam, int global, int cached);
+int brlapi_cacheParameter(brlapi_param_t parameter, uint64_t subparam, unsigned flags, int cached);
 #endif
-int brlapi__cacheParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, int global, int cached);
+int brlapi__cacheParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, unsigned flags, int cached);
 
 /** @} */
 
