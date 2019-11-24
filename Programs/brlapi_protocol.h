@@ -158,6 +158,7 @@ typedef struct {
 #define BRLAPI_PARAMF_GET            0X02    /** Get current parameter value    */
 #define BRLAPI_PARAMF_SUBSCRIBE      0X04    /** Subscribe to parameter updates */
 #define BRLAPI_PARAMF_UNSUBSCRIBE    0X08    /** Unsubscribe from parameter updates */
+#define BRLAPI_PARAMF_SELF           0X10    /** Also subscribe to self-updates */
 
 /** Structure of Parameter request */
 typedef struct {

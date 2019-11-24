@@ -1023,6 +1023,7 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 /** Flags for parameter requests */
 #define BRLAPI_PARAMF_LOCAL          0X00    /**< Refer to the value local to the connection instead of the global value */
 #define BRLAPI_PARAMF_GLOBAL         0X01    /**< Refer to the global value instead of the value local to the connection */
+#define BRLAPI_PARAMF_SELF           0X10    /**< Specify whether to receive notifications of value self-changes */
 
 /* brlapi_getParameter */
 /** Get the content of a parameter
@@ -1031,7 +1032,7 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
  *
  * \param parameter is the parameter whose content shall be gotten;
  * \param subparam is a specific instance of the parameter;
- * \param flags specify which value should be returned;
+ * \param flags specify which value and how it should be returned;
  * \param data is a buffer where content of the parameter shall be stored;
  * \param len is the size of the buffer.
  *
@@ -1050,7 +1051,7 @@ ssize_t brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, 
  *
  * \param parameter is the parameter whose content shall be gotten;
  * \param subparam is a specific instance of the parameter;
- * \param flags specify which value should be returned;
+ * \param flags specify which value and how it should be returned;
  * \param len is the address where to store the size of the parameter value.
  *
  * \return a newly-allocated buffer that contains the value of the parameter. The caller must call free() on it after use. NULL is returned on errors
@@ -1067,7 +1068,7 @@ void *brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t paramete
  *
  * \param parameter is the parameter to set;
  * \param subparam is a specific instance of the parameter;
- * \param flags specify which value should be set;
+ * \param flags specify which value and how it should be set;
  * \param data is a buffer containing the data to store in the parameter;
  * \param len is the size of the data.
  *
@@ -1085,7 +1086,7 @@ int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint
  * brlapi_watchParameter() function are called.
  *
  * \param parameter is the parameter that changed;
- * \param flags specify which value was changed;
+ * \param flags specify which value and how it was changed;
  * \param priv is the void pointer that was passed to the brlapi_watchParameter call which registered the callback;
  * \param data is a buffer containing the new value of the parameter;
  * \param len is the size of the data.
@@ -1110,7 +1111,7 @@ typedef void *brlapi_paramCallbackDescriptor_t;
  *
  * \param parameter is the parameter to watch;
  * \param subparam is a specific instance of the parameter;
- * \param flags specify which value should be monitored;
+ * \param flags specify which value and how it should be monitored;
  * \param func is the function to call on parameter change;
  * \param priv is a void pointer which will be passed as such to the function;
  * \param data is a buffer where the current content of the parameter shall be
@@ -1155,7 +1156,7 @@ int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescri
  * \return nothing
  * \param parameter is the parameter to be cached or not;
  * \param subparam is a specific instance of the parameter;
- * \param flags specify which value should be cached;
+ * \param flags specify which value and how it should be cached;
  * \param cached whether this parameter should be cached or not.
  * \return 0 on success, -1 on error.
  */

@@ -1356,7 +1356,7 @@ brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi__watchParameter(brlapi_ha
   ssize_t rlen;
   struct brlapi_parameterCallback_t *callback;
 
-  if (flags & ~BRLAPI_PARAMF_GLOBAL) {
+  if (flags & ~(BRLAPI_PARAMF_GLOBAL|BRLAPI_PARAMF_SELF)) {
     brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
     return NULL;
   }

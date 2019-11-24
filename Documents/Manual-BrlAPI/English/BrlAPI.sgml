@@ -1574,6 +1574,9 @@ sending asynchronously the value of the parameter whenever it changes, with
 <tt/BRLAPI_PACKET_PARAM_UPDATE/ packets, until
 another request packet has the <tt/BRLAPI_PARAMF_UNSUBSCRIBE/ flag set for this
 parameter.
+<item> When the <tt/BRLAPI_PARAMF_SELF/ flag is set along
+<tt/BRLAPI_PARAMF_SUBSCRIBE/, the server will send the value of the parameter
+when it is changed even by the client itself.
 <item> When the <tt/BRLAPI_PARAMF_UNSUBSCRIBE/ flag is set, the server
 will stop sending asynchronously the value of the parameter with
 <tt/BRLAPI_PACKET_PARAM_UPDATE/ packets.

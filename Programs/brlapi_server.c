@@ -258,6 +258,8 @@ static Connection *rawConnection = NULL;
 static Connection *suspendConnection = NULL;
 
 pthread_mutex_t apiParamMutex;
+/* Which connection is currently modifying a parameter */
+static Connection *paramUpdateConnection;
 
 /* mutex lock order is as follows:
  * 1. apiConnectionsMutex
@@ -338,7 +340,7 @@ static unsigned char cursorOverlay = 0;
 extern void processParameters(char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable);
 static int initializeAcceptedKeys(Connection *c, int how);
 static void brlResize(BrailleDisplay *brl);
-static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size);
+static void handleParamUpdate(Connection *source, Connection *dest, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size);
 
 /****************************************************************************/
 /** DRIVER CAPABILITIES                                                    **/
@@ -382,10 +384,10 @@ static int resumeDriver(BrailleDisplay *brl) {
   driverConstructed = constructBrailleDriver();
   if (driverConstructed) {
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver resumed");
-    handleParamUpdate(NULL, BRLAPI_PARAM_DRIVER_NAME, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.name, strlen(braille->definition.name));
-    handleParamUpdate(NULL, BRLAPI_PARAM_DRIVER_CODE, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.code, strlen(braille->definition.code));
-    handleParamUpdate(NULL, BRLAPI_PARAM_DRIVER_VERSION, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.version, strlen(braille->definition.version));
-    if (disp) handleParamUpdate(NULL, BRLAPI_PARAM_DEVICE_MODEL, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
+    handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_NAME, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.name, strlen(braille->definition.name));
+    handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_CODE, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.code, strlen(braille->definition.code));
+    handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_VERSION, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.version, strlen(braille->definition.version));
+    if (disp) handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DEVICE_MODEL, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
     brlResize(brl);
   }
   unlockMutex(&apiSuspendMutex);
@@ -2187,15 +2189,23 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   _brlapi_ntohParameter(param, paramValue, size);
 
   {
-    const char *error = writeHandler(c, param, subparam, flags, paramValue->data, size);
+    const char *error;
+
+    lockMutex(&apiParamMutex);
+    paramUpdateConnection = c;
+    error = writeHandler(c, param, subparam, flags, paramValue->data, size);
+    paramUpdateConnection = NULL;
+    unlockMutex(&apiParamMutex);
+
     if (error) {
       WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u write error: %s", param, error);
+      unlockMutex(&apiParamMutex);
       return 0;
     }
   }
 
   if (!(flags & BRLAPI_PARAMF_GLOBAL)) {
-    handleParamUpdate(c, param, subparam, flags, paramValue->data, size);
+    handleParamUpdate(c, c, param, subparam, flags, paramValue->data, size);
   }
   writeAck(c->fd);
   return 0;
@@ -2210,7 +2220,8 @@ static void sendConnectionParamUpdate(Connection *c, brlapi_param_t param, uint6
   for (s=c->subscriptions.next; s!=&c->subscriptions; s=s->next) {
     if (s->parameter == param
 	&& s->subparam == subparam
-	&& (s->flags & BRLAPI_PARAMF_GLOBAL) == (flags & BRLAPI_PARAMF_GLOBAL))
+	&& (s->flags & BRLAPI_PARAMF_GLOBAL) == (flags & BRLAPI_PARAMF_GLOBAL)
+	&& ((s->flags & BRLAPI_PARAMF_SELF) || (paramUpdateConnection != c)))
     {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "writing parameter %"PRIx32" update to fd %"PRIfd,param,c->fd);
       brlapiserver_writePacket(c->fd,BRLAPI_PACKET_PARAM_UPDATE,paramValue,size);
@@ -2232,7 +2243,7 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 }
 
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
-static void __handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
+static void __handleParamUpdate(Connection *dest, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
 {
   brlapi_packet_t response;
   brlapi_paramValuePacket_t *paramValue = &response.paramValue;
@@ -2244,7 +2255,7 @@ static void __handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t su
   memcpy(p, data, size);
   size += sizeof(flags) + sizeof(param) + sizeof(subparam);
   if (!(flags & BRLAPI_PARAMF_GLOBAL)) {
-    sendConnectionParamUpdate(c,param,subparam,flags,paramValue,size);
+    sendConnectionParamUpdate(dest,param,subparam,flags,paramValue,size);
   } else {
     lockMutex(&apiConnectionsMutex);
     sendParamUpdate(&ttys,param,subparam,flags,paramValue,size);
@@ -2253,11 +2264,14 @@ static void __handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t su
   }
 }
 
-static void handleParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
+static void handleParamUpdate(Connection *source, Connection *dest, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
 {
   lockMutex(&apiParamMutex);
-  if (paramState[param].local_subscriptions)
-    __handleParamUpdate(c, param, subparam, flags, data, size);
+  paramUpdateConnection = source;
+  if (((flags & BRLAPI_PARAMF_GLOBAL) && paramState[param].global_subscriptions)
+  || (!(flags & BRLAPI_PARAMF_GLOBAL) && paramState[param].local_subscriptions))
+    __handleParamUpdate(dest, param, subparam, flags, data, size);
+  paramUpdateConnection = NULL;
   unlockMutex(&apiParamMutex);
 }
 
@@ -4141,7 +4155,7 @@ int api_flush(BrailleDisplay *brl) {
       /* FIXME: the client should have gotten the notification when the write
        * was received, rather than only when it eventually gets displayed
        * (possibly only because of focus change) */
-      if (ok) handleParamUpdate(c, BRLAPI_PARAM_RENDERED_CELLS, 0, 0, disp->buffer, displaySize);
+      if (ok) handleParamUpdate(c, c, BRLAPI_PARAM_RENDERED_CELLS, 0, 0, disp->buffer, displaySize);
       drain = 1;
       disp->buffer = oldbuf;
       displayed_last = c;
@@ -4227,7 +4241,7 @@ static void brlResize(BrailleDisplay *brl)
   coreWindowDots = realloc(coreWindowDots, displaySize * sizeof(*coreWindowDots));
   coreWindowCursor = 0;
   disp = brl;
-  handleParamUpdate(NULL, BRLAPI_PARAM_DISPLAY_SIZE, 0, BRLAPI_PARAMF_GLOBAL, displayDimensions, sizeof(displayDimensions));
+  handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DISPLAY_SIZE, 0, BRLAPI_PARAMF_GLOBAL, displayDimensions, sizeof(displayDimensions));
 }
 
 REPORT_LISTENER(brlapi_handleReports)
