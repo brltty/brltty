@@ -154,11 +154,9 @@ typedef struct {
 } brlapi_paramValuePacket_t;
 
 /** Flags for parameter requests */
-#define BRLAPI_PARAMF_GLOBAL         0X01    /** Request the global value */
-#define BRLAPI_PARAMF_GET            0X02    /** Get current parameter value    */
-#define BRLAPI_PARAMF_SUBSCRIBE      0X04    /** Subscribe to parameter updates */
-#define BRLAPI_PARAMF_UNSUBSCRIBE    0X08    /** Unsubscribe from parameter updates */
-#define BRLAPI_PARAMF_SELF           0X10    /** Also subscribe to self-updates */
+#define BRLAPI_PARAMF_GET            0X100    /** Get current parameter value    */
+#define BRLAPI_PARAMF_SUBSCRIBE      0X200    /** Subscribe to parameter updates */
+#define BRLAPI_PARAMF_UNSUBSCRIBE    0X400    /** Unsubscribe from parameter updates */
 
 /** Structure of Parameter request */
 typedef struct {

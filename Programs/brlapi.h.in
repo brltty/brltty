@@ -1024,7 +1024,7 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 typedef unsigned brlapi_param_flags_t;
 #define BRLAPI_PARAMF_LOCAL          0X00    /**< Refer to the value local to the connection instead of the global value */
 #define BRLAPI_PARAMF_GLOBAL         0X01    /**< Refer to the global value instead of the value local to the connection */
-#define BRLAPI_PARAMF_SELF           0X10    /**< Specify whether to receive notifications of value self-changes */
+#define BRLAPI_PARAMF_SELF           0X02    /**< Specify whether to receive notifications of value self-changes */
 
 /* brlapi_getParameter */
 /** Get the content of a parameter
