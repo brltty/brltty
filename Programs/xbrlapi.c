@@ -56,9 +56,9 @@
 
 #ifdef HAVE_X11_EXTENSIONS_XFIXES_H
 #include <X11/extensions/Xfixes.h>
-#else
-#warning clipboard tracking not supported byt this build - check that libxfixes has been installed
-#endif
+#else /* HAVE_X11_EXTENSIONS_XFIXES_H */
+#warning clipboard tracking not supported by this build - check that libxfixes has been installed
+#endif /* HAVE_X11_EXTENSIONS_XFIXES_H */
 
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
