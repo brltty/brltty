@@ -533,9 +533,35 @@ typedef struct {
   unsigned flags;
 } ParameterOptions;
 
-OPTION_HANDLER(session, parameter, flags) {
+OPTION_HANDLER(session, parameter, echo) {
   ParameterOptions *options = data;
-  options->flags = flags;
+  unsigned flag = BRLAPI_PARAMF_SELF;
+
+  int echo;
+  TEST_TCL_OK(Tcl_GetBooleanFromObj(interp, objv[1], &echo));
+
+  if (echo) {
+    options->flags |= flag;
+  } else {
+    options->flags &= ~flag;
+  }
+
+  return TCL_OK;
+}
+
+OPTION_HANDLER(session, parameter, global) {
+  ParameterOptions *options = data;
+  unsigned flag = BRLAPI_PARAMF_GLOBAL;
+
+  int global;
+  TEST_TCL_OK(Tcl_GetBooleanFromObj(interp, objv[1], &global));
+
+  if (global) {
+    options->flags |= flag;
+  } else {
+    options->flags &= ~flag;
+  }
+
   return TCL_OK;
 }
 
@@ -573,8 +599,12 @@ FUNCTION_HANDLER(session, parameter) {
   };
 
   BEGIN_OPTIONS
-    { OPTION(session, parameter, flags),
-      OPERANDS(0, "")
+    { OPTION(session, parameter, echo),
+      OPERANDS(1, "<boolean>")
+    },
+
+    { OPTION(session, parameter, global),
+      OPERANDS(1, "<boolean>")
     },
 
     { OPTION(session, parameter, set),

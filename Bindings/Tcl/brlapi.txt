@@ -21,7 +21,8 @@ brlapi<sessionNumber> function [arg ...]
    getModelIdentifier
    getDisplaySize
    parameter [<option> ...] <name> [<subparam>]
-      -global
+      -echo <boolean>
+      -global <boolean>
       -set <value>
    enterTtyMode [<option> ...]
       -tty {default | <number>}
