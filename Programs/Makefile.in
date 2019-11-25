@@ -968,7 +968,7 @@ scr.auto.h: $(SRC_DIR)/mkdrvtab
 XBRLAPI_OBJECTS = xbrlapi.$O $(PROGRAM_OBJECTS)
 
 xbrlapi$X: $(XBRLAPI_OBJECTS) api
-	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) $(API_LIBS) $(XKB_LIBS) $(X11_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) $(API_LIBS) $(XKB_LIBS) $(XFIXES_LIBS) $(X11_LIBS) $(LDLIBS)
 
 xbrlapi.$O:
 	$(CC) $(CFLAGS) $(X11_INCLUDES) -c $(SRC_DIR)/xbrlapi.c

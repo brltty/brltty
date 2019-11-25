@@ -784,6 +784,10 @@ BRLTTY_ARG_DISABLE(
             AC_CHECK_HEADERS([X11/extensions/XTest.h])
             AC_CHECK_HEADERS([X11/extensions/XKB.h])
          ])
+
+         BRLTTY_HAVE_PACKAGE([xfixes], [xfixes], [dnl
+	    AC_CHECK_HEADERS([X11/extensions/Xfixes.h])
+         ])
       ])
 
       BRLTTY_HAVE_PACKAGE([xt], [xt], [dnl

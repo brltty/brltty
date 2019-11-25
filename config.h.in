@@ -555,6 +555,9 @@ extern "C" {
 /* Define this if the header file X11/extensions/XKB.h exists. */
 #undef HAVE_X11_EXTENSIONS_XKB_H
 
+/* Define this if the header file X11/extensions/Xfixes.h exists. */
+#undef HAVE_X11_EXTENSIONS_XFIXES_H
+
 /* Define this if the function atspi_get_a11y_bus exists in atspi2. */
 #undef HAVE_ATSPI_GET_A11Y_BUS
 

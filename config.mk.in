@@ -80,6 +80,7 @@ XT_LIBS = @xt_libs@
 
 XKB_LIBS = @xkb_libs@
 XTK_LIBS = @xtk_libs@
+XFIXES_LIBS = @xfixes_libs@
 
 CURSES_PACKAGE = @curses_package@
 CURSES_LIBS = @curses_libs@
