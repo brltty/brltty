@@ -114,6 +114,7 @@ cdef extern from "Programs/brlapi.h":
 	int brlapi__sendRaw(brlapi_handle_t *, void*, int)
 
 	ctypedef int brlapi_param_t
+	ctypedef unsigned brlapi_param_flags_t
 	ctypedef void *brlapi_paramCallbackDescriptor_t
 
 	ctypedef int brlapi_param_type_t
@@ -123,10 +124,10 @@ cdef extern from "Programs/brlapi.h":
 		uint8_t isArray
 		uint8_t hasSubparam
 
-	void *brlapi__getParameterAlloc(brlapi_handle_t *, brlapi_param_t, unsigned long long, unsigned, size_t *) nogil
-	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, unsigned, void*, size_t) nogil
+	void *brlapi__getParameterAlloc(brlapi_handle_t *, brlapi_param_t, unsigned long long, brlapi_param_flags_t, size_t *) nogil
+	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, brlapi_param_flags_t, void*, size_t) nogil
 	const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter) nogil
-	brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, unsigned, brlapi_paramCallback_t, void *, void*, size_t);
+	brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, brlapi_param_flags_t, brlapi_paramCallback_t, void *, void*, size_t);
 	int brlapi__unwatchParameter(brlapi_handle_t *,
 	brlapi_paramCallbackDescriptor_t)
 
@@ -151,7 +152,7 @@ cdef extern from "bindings.h":
 	ctypedef struct brlapi_python_callbackData_t:
 		brlapi_param_t parameter
 		uint64_t subparam
-		unsigned flags
+		brlapi_param_flags_t flags
 		const void *data
 		size_t len
 

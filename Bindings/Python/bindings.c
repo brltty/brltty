@@ -105,7 +105,7 @@ void brlapi_protocolExceptionInit(brlapi_handle_t *handle) {
 /* This is called from brlapi functions called by Python. We pass the callback
  * data as such for brlapi.pyx' callback to translate them into python objects
  */
-static void brlapi_python_parameter_callback(brlapi_param_t parameter, uint64_t subparam, unsigned flags, void *priv, const void *data, size_t len)
+static void brlapi_python_parameter_callback(brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, void *priv, const void *data, size_t len)
 {
   brlapi_python_paramCallbackDescriptor_t *descr = priv;
   PyObject *arglist, *result;
@@ -129,7 +129,7 @@ static void brlapi_python_parameter_callback(brlapi_param_t parameter, uint64_t 
   PyGILState_Release(gstate);
 }
 
-brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_handle_t *handle, brlapi_param_t param, uint64_t subparam, unsigned flags, PyObject *func)
+brlapi_python_paramCallbackDescriptor_t *brlapi_python_watchParameter(brlapi_handle_t *handle, brlapi_param_t param, uint64_t subparam, brlapi_param_flags_t flags, PyObject *func)
 {
   brlapi_python_paramCallbackDescriptor_t *descr;
   brlapi_paramCallbackDescriptor_t *brlapi_descr;

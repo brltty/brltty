@@ -222,7 +222,7 @@ sem_destroy (sem_t *sem) {
 struct brlapi_parameterCallback_t {
   brlapi_param_t parameter;
   uint64_t subparam;
-  unsigned flags;
+  brlapi_param_flags_t flags;
   brlapi_paramCallback_t func;
   void *priv;
   struct brlapi_parameterCallback_t *prev, *next;
@@ -1257,7 +1257,7 @@ static ssize_t _brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t par
   return rlen;
 }
 
-ssize_t BRLAPI_STDCALL brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, unsigned flags, void* data, size_t len)
+ssize_t BRLAPI_STDCALL brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, void* data, size_t len)
 {
   brlapi_paramValuePacket_t reply;
   ssize_t rlen;
@@ -1280,12 +1280,12 @@ ssize_t BRLAPI_STDCALL brlapi__getParameter(brlapi_handle_t *handle, brlapi_para
   return rlen;
 }
 
-ssize_t BRLAPI_STDCALL brlapi_getParameter(brlapi_param_t parameter, uint64_t subparam, unsigned flags, void* data, size_t len)
+ssize_t BRLAPI_STDCALL brlapi_getParameter(brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, void* data, size_t len)
 {
   return brlapi__getParameter(&defaultHandle, parameter, subparam, flags, data, len);
 }
 
-void* BRLAPI_STDCALL brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, unsigned flags, size_t *len)
+void* BRLAPI_STDCALL brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, size_t *len)
 {
   brlapi_paramValuePacket_t reply;
   ssize_t rlen;
@@ -1312,13 +1312,13 @@ void* BRLAPI_STDCALL brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_p
   return data;
 }
 
-void* BRLAPI_STDCALL brlapi_getParameterAlloc(brlapi_param_t parameter, uint64_t subparam, unsigned flags, size_t *len)
+void* BRLAPI_STDCALL brlapi_getParameterAlloc(brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, size_t *len)
 {
   return brlapi__getParameterAlloc(&defaultHandle, parameter, subparam, flags, len);
 }
 
 /* Function: brlapi_setParameter */
-int BRLAPI_STDCALL brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, unsigned flags, const void* data, size_t len)
+int BRLAPI_STDCALL brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, const void* data, size_t len)
 {
   brlapi_paramValuePacket_t packet;
   int res;
@@ -1344,13 +1344,13 @@ int BRLAPI_STDCALL brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t 
   return res;
 }
 
-int BRLAPI_STDCALL brlapi_setParameter(brlapi_param_t parameter, uint64_t subparam, unsigned flags, const void* data, size_t len)
+int BRLAPI_STDCALL brlapi_setParameter(brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, const void* data, size_t len)
 {
   return brlapi__setParameter(&defaultHandle, parameter, subparam, flags, data, len);
 }
 
 /* Function: brlapi_watchParameter */
-brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, unsigned flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len)
+brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len)
 {
   brlapi_paramValuePacket_t reply;
   ssize_t rlen;
@@ -1398,7 +1398,7 @@ brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi__watchParameter(brlapi_ha
   return callback;
 }
 
-brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, unsigned flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len)
+brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi_watchParameter(brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len)
 {
   return brlapi__watchParameter(&defaultHandle, parameter, subparam, flags, func, priv, data, len);
 }

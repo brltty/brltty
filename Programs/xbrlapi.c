@@ -176,7 +176,7 @@ static void fatal(const char *fmt, ...) {
 #define MIN(a, b) (((a) < (b))? (a): (b))
 #endif /* MIN */
 
-static void clipboardContentChanged(brlapi_param_t parameter, uint64_t subparam, unsigned flags, void *priv, const void *data, size_t len);
+static void clipboardContentChanged(brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, void *priv, const void *data, size_t len);
 
 static int tobrltty_init(char *auth, char *host) {
   brlapi_connectionSettings_t settings;
