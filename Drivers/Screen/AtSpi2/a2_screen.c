@@ -1116,21 +1116,23 @@ ASYNC_MONITOR_CALLBACK(a2ProcessX) {
 REPORT_LISTENER(a2CoreSelUpdated) {
   const ApiParameterUpdatedReport *report = parameters->reportData;
   if (report->parameter != BRLAPI_PARAM_CLIPBOARD_CONTENT) return;
+
   ClipboardObject *clipboard = getMainClipboard();
+  char *newContent;
 
   lockMainClipboard();
-    char *newContent = getClipboardContentUTF8(clipboard);
-
-    if (newContent) {
-      if (!clipboardContent || (strcmp(clipboardContent, newContent) != 0)) {
-	free(clipboardContent);
-	clipboardContent = newContent;
-	XSelSet(dpy, &xselData);
-      } else {
-        free(newContent);
-      }
-    }
+    newContent = getClipboardContentUTF8(clipboard);
   unlockMainClipboard();
+
+  if (newContent) {
+    if (!clipboardContent || (strcmp(clipboardContent, newContent) != 0)) {
+      free(clipboardContent);
+      clipboardContent = newContent;
+      XSelSet(dpy, &xselData);
+    } else {
+      free(newContent);
+    }
+  }
 }
 #endif /* HAVE_PKG_X11 */
 
