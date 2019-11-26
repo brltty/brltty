@@ -762,6 +762,7 @@ AC_SUBST([curses_libs])
 
 xkb_libs=""
 xtk_libs=""
+xsel_object=""
 all_xbrlapi=""
 install_xbrlapi=""
 BRLTTY_ARG_DISABLE(
@@ -772,7 +773,7 @@ BRLTTY_ARG_DISABLE(
    BRLTTY_HAVE_PACKAGE([x11], [x11], [dnl
       all_xbrlapi="all-xbrlapi"
       install_xbrlapi="install-xbrlapi"
-      atspi2_xsel="xsel.o"
+      xsel_object='xsel.$O'
 
       AC_CHECK_HEADERS([X11/keysym.h])
 
@@ -788,7 +789,6 @@ BRLTTY_ARG_DISABLE(
 
          BRLTTY_HAVE_PACKAGE([xfixes], [xfixes], [dnl
 	    AC_CHECK_HEADERS([X11/extensions/Xfixes.h])
-	    xfixes_libraries_a2="${xfixes_libs}"
          ])
       ])
 
@@ -817,10 +817,9 @@ BRLTTY_ARG_DISABLE(
 ])
 AC_SUBST([xkb_libs])
 AC_SUBST([xtk_libs])
+AC_SUBST([xsel_object])
 AC_SUBST([all_xbrlapi])
 AC_SUBST([install_xbrlapi])
-AC_SUBST([atspi2_xsel])
-AC_SUBST([xfixes_libraries_a2])
 
 test -z "$gui_toolkit_package" && {
    case "${host_os}"
@@ -1926,7 +1925,7 @@ BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
          BRLTTY_HAVE_PACKAGE([glib2], [glib-2.0])
       ])
 
-      BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBS) $(ATSPI2_LIBS) $(GLIB2_LIBS) $(X11_LIBS)])
+      BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBS) $(ATSPI2_LIBS) $(GLIB2_LIBS) $(X11_LIBS) $(XFIXES_LIBS)])
    ])
 ])
 
