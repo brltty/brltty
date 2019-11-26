@@ -19,7 +19,6 @@
 #include "prologue.h"
 
 #include "log.h"
-#include "report.h"
 #include "api_control.h"
 #include "api_server.h"
 #include "core.h"
@@ -203,15 +202,6 @@ apiFlush (void) {
 static void
 apiUpdateParameter (brlapi_param_t parameter, uint64_t subparam) {
   if (apiStarted) api_updateParameter(parameter, subparam);
-
-  {
-    const ApiParameterUpdatedReport data = {
-      .parameter = parameter,
-      .subparam = subparam
-    };
-
-    report(REPORT_API_PARAMETER_UPDATED, &data);
-  }
 }
 
 const ApiMethods api = {

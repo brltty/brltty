@@ -2297,6 +2297,15 @@ void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
           }
         }
         unlockMutex(&apiParamMutex);
+
+        {
+          const ApiParameterUpdatedReport data = {
+            .parameter = parameter,
+            .subparam = subparam
+          };
+
+          report(REPORT_API_PARAMETER_UPDATED, &data);
+        }
       } else {
         logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %u is not readable", parameter);
       }
