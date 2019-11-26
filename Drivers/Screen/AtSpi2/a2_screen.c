@@ -1080,6 +1080,9 @@ void a2XSelUpdated(const char *data, unsigned long size) {
   wchar_t characters[size];
   size_t length = 0;
 
+  if (!data)
+    return;
+
   while (size > 0) {
     const char *next = data;
     wint_t wc = convertUtf8ToWchar(&next, &size);
@@ -1136,9 +1139,11 @@ REPORT_LISTENER(a2CoreSelUpdated) {
         next = mempcpy(next, utf8, utfs);
       }
 
-      free(clipboardContent);
-      clipboardContent = strndup(data, next - data);
-      XSelSet(dpy, &xselData);
+      if (!clipboardContent || strncmp(clipboardContent, data, next - data)) {
+	free(clipboardContent);
+	clipboardContent = strndup(data, next - data);
+	XSelSet(dpy, &xselData);
+      }
     }
   unlockMainClipboard();
 }
