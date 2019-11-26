@@ -530,12 +530,12 @@ FUNCTION_HANDLER(session, leaveTtyMode) {
 
 typedef struct {
   Tcl_Obj *value;
-  unsigned flags;
+  brlapi_param_flags_t flags;
 } ParameterOptions;
 
 OPTION_HANDLER(session, parameter, echo) {
   ParameterOptions *options = data;
-  unsigned flag = BRLAPI_PARAMF_SELF;
+  brlapi_param_flags_t flag = BRLAPI_PARAMF_SELF;
 
   int echo;
   TEST_TCL_OK(Tcl_GetBooleanFromObj(interp, objv[1], &echo));
@@ -551,7 +551,7 @@ OPTION_HANDLER(session, parameter, echo) {
 
 OPTION_HANDLER(session, parameter, global) {
   ParameterOptions *options = data;
-  unsigned flag = BRLAPI_PARAMF_GLOBAL;
+  brlapi_param_flags_t flag = BRLAPI_PARAMF_GLOBAL;
 
   int global;
   TEST_TCL_OK(Tcl_GetBooleanFromObj(interp, objv[1], &global));
