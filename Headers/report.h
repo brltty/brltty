@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_REPORT
 #define BRLTTY_INCLUDED_REPORT
 
+#include "brlapi_param.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -29,6 +31,7 @@ typedef enum {
   REPORT_BRAILLE_WINDOW_MOVED,
   REPORT_BRAILLE_WINDOW_UPDATED,
   REPORT_BRAILLE_KEY_EVENT,
+  REPORT_API_PARAMETER_UPDATED,
 } ReportIdentifier;
 
 extern void report (ReportIdentifier identiier, const void *data);
@@ -66,6 +69,11 @@ typedef struct {
   const unsigned char *cells;
   unsigned int count;
 } BrailleWindowUpdatedReport;
+
+typedef struct {
+  brlapi_param_t parameter;
+  uint64_t subparam;
+} ApiParameterUpdatedReport;
 
 #ifdef __cplusplus
 }
