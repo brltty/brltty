@@ -22,6 +22,12 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 
+#include "prologue.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 typedef struct {
   Atom sel, selProp;
   Window selWindow;
@@ -39,5 +45,9 @@ typedef void (*XSelUpdate)(const char *data, unsigned long size);
 void XSelInit(Display *dpy, XSelData *data);
 void XSelSet(Display *dpy, XSelData *data);
 int XSelProcess(Display *dpy, XSelData *data, XEvent *ev, const char *content, XSelUpdate update);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* BRLAPI_INCLUDED_XSEL */
