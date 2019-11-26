@@ -115,7 +115,7 @@ cdef extern from "Programs/brlapi.h":
 
 	ctypedef int brlapi_param_t
 	ctypedef uint64_t brlapi_param_subparam_t
-	ctypedef unsigned brlapi_param_flags_t
+	ctypedef uint32_t brlapi_param_flags_t
 	ctypedef void *brlapi_paramCallbackDescriptor_t
 
 	ctypedef int brlapi_param_type_t

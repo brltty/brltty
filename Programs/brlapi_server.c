@@ -187,7 +187,7 @@ typedef enum { TODISPLAY, EMPTY } BrlBufState;
 typedef struct Subscription {
   brlapi_param_t parameter;
   brlapi_param_subparam_t subparam;
-  int flags;
+  brlapi_param_flags_t flags;
   struct Subscription *prev, *next;
 } Subscription;
 
@@ -2142,7 +2142,7 @@ static inline const ParamDispatch *param_getDispatch(brlapi_param_t parameter)
   return &paramDispatch[parameter];
 }
 
-static int checkParamLocalGlobal(Connection *c, brlapi_param_t param, uint32_t flags)
+static int checkParamLocalGlobal(Connection *c, brlapi_param_t param, brlapi_param_flags_t flags)
 {
   if (flags & BRLAPI_PARAMF_GLOBAL) {
     if (!paramDispatch[param].global) {
@@ -2163,7 +2163,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   brlapi_paramValuePacket_t *paramValue = &packet->paramValue;
   brlapi_param_t param;
   brlapi_param_subparam_t subparam;
-  uint32_t flags;
+  brlapi_param_flags_t flags;
 
   CHECKERR( (size >= sizeof(flags) + sizeof(param) + sizeof(subparam)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
   flags = ntohl(paramValue->flags);
@@ -2243,7 +2243,7 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, brlapi_param_subpara
 }
 
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
-static void __handleParamUpdate(Connection *dest, brlapi_param_t param, brlapi_param_subparam_t subparam, uint32_t flags, const void *data, size_t size)
+static void __handleParamUpdate(Connection *dest, brlapi_param_t param, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, const void *data, size_t size)
 {
   brlapi_packet_t response;
   brlapi_paramValuePacket_t *paramValue = &response.paramValue;
@@ -2322,7 +2322,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   brlapi_paramRequestPacket_t *paramRequest = &packet->paramRequest;
   brlapi_param_t param;
   brlapi_param_subparam_t subparam;
-  uint32_t flags;
+  brlapi_param_flags_t flags;
 
   CHECKERR( (size == sizeof(brlapi_paramRequestPacket_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramRequest packet: %lu vs %lu", (unsigned long) size, (unsigned long) sizeof(brlapi_paramRequestPacket_t));
   flags = ntohl(paramRequest->flags);

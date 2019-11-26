@@ -461,7 +461,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
   if (type==BRLAPI_PACKET_PARAM_UPDATE) {
     /* Parameter update, find handler */
     brlapi_paramValuePacket_t *value = (void*) handle->packet.content;
-    uint32_t flags = ntohl(value->flags);
+    brlapi_param_flags_t flags = ntohl(value->flags);
     brlapi_param_t param = ntohl(value->param);
     brlapi_param_subparam_t subparam = ((brlapi_param_subparam_t)ntohl(value->subparam_hi) << 32) | ntohl(value->subparam_lo);
     pthread_mutex_lock(&handle->callbacks_mutex);
@@ -1219,7 +1219,7 @@ int BRLAPI_STDCALL brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 /* Function: brlapi_getParameter */
 
 /* Internal version, returns the reply value packet and the length of the value */
-static ssize_t _brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, uint32_t flags, brlapi_paramValuePacket_t *reply)
+static ssize_t _brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, brlapi_paramValuePacket_t *reply)
 {
   brlapi_paramRequestPacket_t request;
   int res;
@@ -1247,7 +1247,7 @@ static ssize_t _brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t par
   }
 
   if (flags & BRLAPI_PARAMF_GET) {
-    rlen -= sizeof(uint32_t) + sizeof(brlapi_param_t) + sizeof(uint64_t);
+    rlen -= sizeof(brlapi_param_flags_t) + sizeof(brlapi_param_t) + sizeof(brlapi_param_subparam_t);
     if (rlen < 0) {
       brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
       return -1;

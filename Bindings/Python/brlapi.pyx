@@ -894,7 +894,7 @@ cdef class Connection:
 		This gets the current content of a parameter"""
 		cdef c_brlapi.brlapi_param_t c_param
 		cdef c_brlapi.brlapi_param_subparam_t c_subparam
-		cdef unsigned c_flags
+		cdef c_brlapi.brlapi_param_flags_t c_flags
 		cdef void *c_value
 		cdef size_t size
 		cdef ssize_t retval
@@ -930,7 +930,7 @@ cdef class Connection:
 		This sets the content of a parameter"""
 		cdef c_brlapi.brlapi_param_t c_param
 		cdef c_brlapi.brlapi_param_subparam_t c_subparam
-		cdef int c_flags
+		cdef c_brlapi.brlapi_param_flags_t c_flags
 		cdef void *c_value
 		cdef uint64_t *values64
 		cdef uint32_t *values32
@@ -1047,7 +1047,7 @@ cdef class Connection:
 		This returns an entry object, to be passed to unwatchParameter."""
 		cdef c_brlapi.brlapi_param_t c_param
 		cdef c_brlapi.brlapi_param_subparam_t c_subparam
-		cdef int c_flags
+		cdef c_brlapi.brlapi_param_flags_t c_flags
 		cdef c_brlapi.brlapi_python_paramCallbackDescriptor_t *descr
 
 		c_param = param
