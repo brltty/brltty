@@ -24,9 +24,9 @@
 #include <locale.h>
 
 #include <limits.h>
-#ifndef MB_MAX_LEN
-#define MB_MAX_LEN 16
-#endif /* MB_MAX_LEN */
+#ifndef MB_LEN_MAX
+#define MB_LEN_MAX 16
+#endif /* MB_LEN_MAX */
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
@@ -255,9 +255,9 @@ writeText (const wchar_t *buffer, int columns) {
 #ifdef HAVE_ICONV_H
     char *pc = (char*) &c;
     size_t sc = sizeof(wchar_t);
-    char d[MB_MAX_LEN+1];
+    char d[MB_LEN_MAX+1];
     char *pd = d;
-    size_t sd = MB_MAX_LEN;
+    size_t sd = MB_LEN_MAX;
 
     if (iconv(conversionDescriptor, &pc, &sc, &pd, &sd) != (size_t)-1) {
       *pd = 0;
