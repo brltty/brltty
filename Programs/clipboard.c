@@ -24,6 +24,7 @@
 #include "log.h"
 #include "clipboard.h"
 #include "clipboard_internal.h"
+#include "charset.h"
 #include "queue.h"
 #include "lock.h"
 #include "program.h"
@@ -114,6 +115,13 @@ const wchar_t *
 getClipboardContent (ClipboardObject *cpb, size_t *length) {
   *length = cpb->buffer.length;
   return cpb->buffer.characters;
+}
+
+char *
+getClipboardContentUTF8 (ClipboardObject *cpb) {
+  size_t length;
+  const wchar_t *characters = getClipboardContent(cpb, &length);
+  return getUtf8FromWchars(characters, length, NULL);
 }
 
 size_t

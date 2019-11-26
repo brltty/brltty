@@ -657,7 +657,7 @@ static DATA_OPERANDS_PROCESSOR(processCLDROperands) {
   DataOperand operand;
 
   if (getDataOperand(file, &operand, "CLDR annotations file name/path")) {
-    char *name = makeUtf8FromWchars(operand.characters, operand.length, NULL);
+    char *name = getUtf8FromWchars(operand.characters, operand.length, NULL);
 
     if (name) {
       AnnotationHandlerData ahd = {

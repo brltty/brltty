@@ -1115,34 +1115,19 @@ ASYNC_MONITOR_CALLBACK(a2ProcessX) {
 /* Called when BRLTTY selection got updated, update the X clipboard content */
 REPORT_LISTENER(a2CoreSelUpdated) {
   const ApiParameterUpdatedReport *report = parameters->reportData;
-  ClipboardObject *clipboard;
-
-  if (report->parameter != BRLAPI_PARAM_CLIPBOARD_CONTENT)
-    return;
-
-  clipboard = getMainClipboard();
+  if (report->parameter != BRLAPI_PARAM_CLIPBOARD_CONTENT) return;
+  ClipboardObject *clipboard = getMainClipboard();
 
   lockMainClipboard();
-    size_t length;
-    const wchar_t *characters = getClipboardContent(clipboard, &length);
-    char data[length * MB_LEN_MAX];
-    char *next = data;
+    char *newContent = getClipboardContentUTF8(clipboard);
 
-    if (characters) {
-      const wchar_t *character = characters;
-      const wchar_t *end = character + length;
-
-      while (character < end) {
-        Utf8Buffer utf8;
-        size_t utfs = convertWcharToUtf8(*character++, utf8);
-
-        next = mempcpy(next, utf8, utfs);
-      }
-
-      if (!clipboardContent || strncmp(clipboardContent, data, next - data)) {
+    if (newContent) {
+      if (!clipboardContent || (strcmp(clipboardContent, newContent) != 0)) {
 	free(clipboardContent);
-	clipboardContent = strndup(data, next - data);
+	clipboardContent = newContent;
 	XSelSet(dpy, &xselData);
+      } else {
+        free(newContent);
       }
     }
   unlockMainClipboard();

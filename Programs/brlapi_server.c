@@ -1656,28 +1656,15 @@ PARAM_WRITER(audibleAlerts)
 PARAM_READER(clipboardContent)
 {
   ClipboardObject *clipboard = getMainClipboard();
-  void *next = data;
-  const void *limit = next + *size;
+  char *content;
 
   lockMainClipboard();
-    size_t length;
-    const wchar_t *characters = getClipboardContent(clipboard, &length);
-
-    if (characters) {
-      const wchar_t *character = characters;
-      const wchar_t *end = character + length;
-
-      while (character < end) {
-        Utf8Buffer utf8;
-        size_t utfs = convertWcharToUtf8(*character++, utf8);
-
-        if ((next + utfs) > limit) break;
-        next = mempcpy(next, utf8, utfs);
-      }
-    }
+    content = getClipboardContentUTF8(clipboard);
   unlockMainClipboard();
 
-  *size = next - data;
+  if (!content) return "no memory";
+  param_readString(content, data, size);
+  free(content);
   return NULL;
 }
 
@@ -2285,15 +2272,17 @@ void api_updateParameter(brlapi_param_t parameter, brlapi_param_subparam_t subpa
 
       if (readHandler) {
         lockMutex(&apiParamMutex);
-        if (paramState[parameter].global_subscriptions) {
-          unsigned char data[BRLAPI_MAXPARAMSIZE];
-          size_t size = sizeof(data);
-          const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
+        {
+          if (paramState[parameter].global_subscriptions) {
+            unsigned char data[BRLAPI_MAXPARAMSIZE];
+            size_t size = sizeof(data);
+            const char *error = readHandler(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, &size);
 
-          if (error) {
-            logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %u read error: %s", parameter, error);
-          } else {
-            __handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+            if (error) {
+              logMessage(LOG_CATEGORY(SERVER_EVENTS), "parameter %u read error: %s", parameter, error);
+            } else {
+              __handleParamUpdate(NULL, parameter, subparam, BRLAPI_PARAMF_GLOBAL, data, size);
+            }
           }
         }
         unlockMutex(&apiParamMutex);

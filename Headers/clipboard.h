@@ -34,6 +34,7 @@ extern int truncateClipboardContent (ClipboardObject *cpb, size_t length);
 extern int clearClipboardContent (ClipboardObject *cpb);
 
 extern const wchar_t *getClipboardContent (ClipboardObject *cpb, size_t *length);
+extern char *getClipboardContentUTF8 (ClipboardObject *cpb);
 extern size_t getClipboardContentLength (ClipboardObject *cpb);
 
 static inline int

@@ -104,7 +104,7 @@ sayWideCharacters (
 ) {
   int ok = 0;
   size_t length;
-  void *text = makeUtf8FromWchars(characters, count, &length);
+  void *text = getUtf8FromWchars(characters, count, &length);
 
   if (text) {
     if (sayUtf8Characters(spk, text, attributes, length, count, options)) ok = 1;

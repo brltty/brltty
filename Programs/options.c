@@ -785,7 +785,7 @@ static DATA_OPERANDS_PROCESSOR(processConfigurationOperands) {
     DataString value;
 
     if (getDataString(file, &value, 0, "configuration value")) {
-      char *v = makeUtf8FromWchars(value.characters, value.length, NULL);
+      char *v = getUtf8FromWchars(value.characters, value.length, NULL);
 
       if (v) {
         if (!processConfigurationDirective(keyword.characters, v, conf)) ok = 0;

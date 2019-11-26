@@ -1196,7 +1196,7 @@ includeDataFile (DataFile *file, const wchar_t *name, int length) {
   size_t prefixLength = 0;
 
   size_t suffixLength;
-  char *suffixAddress = makeUtf8FromWchars(name, length, &suffixLength);
+  char *suffixAddress = getUtf8FromWchars(name, length, &suffixLength);
 
   if (suffixAddress) {
     if (!isAbsolutePath(suffixAddress)) {

@@ -273,33 +273,40 @@ convertUtf8ToWchars (const char **utf8, wchar_t **characters, size_t count) {
   if (count) **characters = 0;
 }
 
-char *
-makeUtf8FromWchars (const wchar_t *characters, unsigned int count, size_t *length) {
-  char *text = malloc((count * UTF8_LEN_MAX) + 1);
+size_t
+makeUtf8FromWchars (const wchar_t *characters, unsigned int count, char *buffer, size_t size) {
+  char *byte = buffer;
+  const char *end = byte + size;
 
-  if (text) {
-    char *t = text;
-    unsigned int i;
+  for (unsigned int i=0; i<count; i+=1) {
+    Utf8Buffer utf8;
+    size_t utfs = convertWcharToUtf8(characters[i], utf8);
 
-    for (i=0; i<count; i+=1) {
-      Utf8Buffer utf8;
-      size_t utfs = convertWcharToUtf8(characters[i], utf8);
+    char *next = byte + utfs;
+    if (next >= end) break;
 
-      if (utfs) {
-        t = mempcpy(t, utf8, utfs);
-      } else {
-        *t++ = ' ';
-      }
-    }
-
-    *t = 0;
-    if (length) *length = t - text;
-    return text;
-  } else {
-    logMallocError();
+    memcpy(byte, utf8, utfs);
+    byte = next;
   }
 
-  return NULL;
+  *byte = 0;
+  return byte - buffer;
+}
+
+char *
+getUtf8FromWchars (const wchar_t *characters, unsigned int count, size_t *length) {
+  size_t size = (count * UTF8_LEN_MAX) + 1;
+  char buffer[size];
+  size_t len = makeUtf8FromWchars(characters, count, buffer, size);
+  char *utf8 = strdup(buffer);
+
+  if (!utf8) {
+    logMallocError();
+  } else if (length) {
+    *length = len;
+  }
+
+  return utf8;
 }
 
 size_t

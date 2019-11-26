@@ -68,7 +68,7 @@ static DATA_OPERANDS_PROCESSOR(processPropertyOperands) {
     DataString value;
 
     if (getDataString(file, &value, 0, "property value")) {
-      char *v = makeUtf8FromWchars(value.characters, value.length, NULL);
+      char *v = getUtf8FromWchars(value.characters, value.length, NULL);
 
       if (v) {
         if (!processPropertyAssignment(file, &name, &v, pad)) ok = 0;
