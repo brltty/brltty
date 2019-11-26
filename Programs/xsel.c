@@ -91,7 +91,7 @@ int XSelProcess(Display *dpy, XSelData *data, XEvent *ev, const char *content, X
     case SelectionRequest: {
       XSelectionEvent sev;
       XSelectionRequestEvent *srev = (XSelectionRequestEvent*)&ev->xselectionrequest;
-      if (data && srev->target == data->utf8) {
+      if (content && srev->target == data->utf8) {
 	XChangeProperty(dpy, srev->requestor, srev->property, data->utf8, 8, PropModeReplace, (unsigned char*) content, strlen(content));
 	sev.property = srev->property;
       } else if (srev->target == data->targetsAtom) {
