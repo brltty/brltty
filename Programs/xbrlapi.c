@@ -54,11 +54,7 @@
 #warning key press simulation not supported by this build - check that libxtst has been installed
 #endif /* HAVE_X11_EXTENSIONS_XTEST_H && HAVE_X11_EXTENSIONS_XKB_H */
 
-#ifdef HAVE_X11_EXTENSIONS_XFIXES_H
-#include <X11/extensions/Xfixes.h>
-#else /* HAVE_X11_EXTENSIONS_XFIXES_H */
-#warning clipboard tracking not supported by this build - check that libxfixes has been installed
-#endif /* HAVE_X11_EXTENSIONS_XFIXES_H */
+#include "xsel.h"
 
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
@@ -347,10 +343,9 @@ static const char *Xdisplay;
 static Display *dpy;
 
 static Window curWindow;
-static Atom netWmNameAtom, utf8StringAtom, targetsAtom;
+static Atom netWmNameAtom, utf8StringAtom;
 
-static Atom sel;
-static Window selWindow;
+static XSelData xselData;
 
 static volatile int grabFailed;
 
@@ -611,8 +606,18 @@ static void clipboardContentChanged(brlapi_param_t parameter, uint64_t subparam,
   clipboardData = strndup(data, len);
   debugf("new clipboard content from BrlAPI: '%s'\n", (const char *) clipboardData);
   if (dpy)
-    XSetSelectionOwner(dpy, sel, selWindow, CurrentTime);
+    XSelSet(dpy, &xselData);
 }
+
+static void XClipboardContentChanged(const char *data, unsigned long size) {
+  free(clipboardData);
+  if (data) {
+    clipboardData = strndup(data, size);
+    brlapi_setParameter(BRLAPI_PARAM_CLIPBOARD_CONTENT, 0, BRLAPI_PARAMF_GLOBAL, clipboardData, size);
+  } else
+    clipboardData = NULL;
+}
+
 
 static void toX_f(const char *display) {
   Window root;
@@ -634,12 +639,6 @@ static void toX_f(const char *display) {
   int last_remap_keycode = -1, remap_keycode;
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 
-#ifdef HAVE_X11_EXTENSIONS_XFIXES_H
-  int xfixesEventBase, xfixesErrorBase;
-  Bool haveXfixes;
-#endif /* HAVE_X11_EXTENSIONS_XFIXES_H */
-  Atom selProp, incr;
-
   Xdisplay = display;
   if (!Xdisplay) Xdisplay=getenv("DISPLAY");
   if (!(dpy=XOpenDisplay(Xdisplay))) fatal(gettext("cannot connect to display %s\n"),Xdisplay);
@@ -659,19 +658,10 @@ static void toX_f(const char *display) {
   }
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 
-  sel = XInternAtom(dpy, "CLIPBOARD", False);
-  selProp = XInternAtom(dpy, "XBRLAPI_CLIPBOARD", False);
-  incr = XInternAtom(dpy, "INCR", False);
-  selWindow = XCreateSimpleWindow(dpy, RootWindow(dpy, DefaultScreen(dpy)), -10, -10, 1, 1, 0, 0, 0);
-  if (clipboardData)
-    XSetSelectionOwner(dpy, sel, selWindow, CurrentTime);
+  XSelInit(dpy, &xselData);
 
-#ifdef HAVE_X11_EXTENSIONS_XFIXES_H
-  haveXfixes = XFixesQueryExtension(dpy, &xfixesEventBase, &xfixesErrorBase);
-  if (haveXfixes) {
-    XFixesSelectSelectionInput(dpy, selWindow, sel, XFixesSetSelectionOwnerNotifyMask);
-  }
-#endif /* HAVE_X11_EXTENSIONS_XFIXES_H */
+  if (clipboardData)
+    XSelSet(dpy, &xselData);
 
   X_fd = XConnectionNumber(dpy);
 
@@ -684,7 +674,6 @@ static void toX_f(const char *display) {
   }
   netWmNameAtom = XInternAtom(dpy,"_NET_WM_NAME",False);
   utf8StringAtom = XInternAtom(dpy,"UTF8_STRING",False);
-  targetsAtom = XInternAtom(dpy,"TARGETS",False);
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_ICONV_H)
   {
@@ -727,22 +716,8 @@ static void toX_f(const char *display) {
       if ((i=XNextEvent(dpy,&ev)))
 	fatal("XNextEvent: %d\n",i);
 
-#ifdef HAVE_X11_EXTENSIONS_XFIXES_H
-      if (haveXfixes && ev.type == xfixesEventBase + XFixesSelectionNotify) {
-	XFixesSelectionNotifyEvent *xfEvent = (XFixesSelectionNotifyEvent *) &ev;
-	if (xfEvent->subtype == XFixesSetSelectionOwnerNotify &&
-	    xfEvent->selection == sel &&
-	    xfEvent->owner != None &&
-	    xfEvent->owner != selWindow) {
-	  debugf("got new selection owner %#010lx\n", xfEvent->owner);
-	  /* TODO: use TARGETS to support non-utf8 clients */
-	  XConvertSelection(dpy, sel, utf8StringAtom, selProp, selWindow, xfEvent->selection_timestamp);
-	}
-      } else
-#endif /* HAVE_X11_EXTENSIONS_XFIXES_H */
-
+      if (!XSelProcess(dpy, &xselData, &ev, clipboardData, XClipboardContentChanged))
       switch (ev.type) {
-
       /* focus events */
       case FocusIn:
 	switch (ev.xfocus.detail) {
@@ -821,54 +796,6 @@ static void toX_f(const char *display) {
       case CirculateRequest:
       case ClientMessage:
 	break;
-
-      case SelectionNotify:
-	if (ev.xselection.property != None) {
-	  Atom type;
-	  int format;
-	  unsigned long nitems, size, ignore;
-	  unsigned char *prop_ret;
-	  XGetWindowProperty(dpy, selWindow, selProp, 0, 0, False, AnyPropertyType, &type, &format, &nitems, &size, &prop_ret);
-	  XFree(prop_ret);
-	  if (type == incr) {
-	    debugf("large data, but INCR not supported yet\n");
-	  } else if (size != 0) {
-	    XGetWindowProperty(dpy, selWindow, selProp, 0, size, False, AnyPropertyType, &type, &format, &nitems, &ignore, &prop_ret);
-	    debugf("got X11 clipboard content '%s'\n", prop_ret);
-	    free(clipboardData);
-	    clipboardData = strdup((char*) prop_ret);
-	    brlapi_setParameter(BRLAPI_PARAM_CLIPBOARD_CONTENT, 0, BRLAPI_PARAMF_GLOBAL, clipboardData, size);
-	    XFree(prop_ret);
-	    XDeleteProperty(dpy, selWindow, selProp);
-	  }
-	}
-	break;
-      case SelectionClear:
-	debugf("lost X11 selection ownership\n");
-	free(clipboardData);
-	clipboardData = NULL;
-	break;
-      case SelectionRequest: {
-	XSelectionEvent sev;
-	XSelectionRequestEvent *srev = (XSelectionRequestEvent*)&ev.xselectionrequest;
-	if (clipboardData && srev->target == utf8StringAtom) {
-	  debugf("got request from %#010lx for clipboard\n", srev->requestor);
-	  XChangeProperty(dpy, srev->requestor, srev->property, utf8StringAtom, 8, PropModeReplace, clipboardData, strlen(clipboardData));
-	  sev.property = srev->property;
-	} else if (srev->target == targetsAtom) {
-	  const void *targets = "TARGETS\nUTF8_STRING\n";
-	  XChangeProperty(dpy, srev->requestor, srev->property, targetsAtom, 8, PropModeReplace, targets, strlen(targets));
-	  sev.property = srev->property;
-	} else {
-	  sev.property = None;
-	}
-	sev.type = SelectionNotify;
-	sev.requestor = srev->requestor;
-	sev.selection = srev->selection;
-	sev.target = srev->target;
-	sev.time = srev->time;
-	XSendEvent(dpy, srev->requestor, True, NoEventMask, (XEvent *) &sev);
-      } break;
 
       /* "shouldn't happen" events */
       default: fprintf(stderr,gettext("xbrlapi: unhandled event type: %d\n"),ev.type); break;

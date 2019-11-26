@@ -56,6 +56,11 @@
 #include <X11/keysym.h>
 #endif /* HAVE_X11_KEYSYM_H */
 
+#ifdef HAVE_PKG_X11
+#include "xsel.h"
+#include "clipboard.h"
+#endif /* HAVE_PKG_X11 */
+
 #include "log.h"
 #include "parse.h"
 #include "thread.h"
@@ -94,6 +99,12 @@ static long curCaret,curPosX,curPosY;
 static DBusConnection *bus = NULL;
 
 static int updated;
+
+#ifdef HAVE_PKG_X11
+static Display *dpy;
+static XSelData xselData;
+static char *clipboardContent;
+#endif /* HAVE_PKG_X11 */
 
 /* having our own implementation is much more independant on locales */
 
@@ -1057,6 +1068,53 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
   return DBUS_HANDLER_RESULT_HANDLED;
 }
 
+#ifdef HAVE_PKG_X11
+/* Integration of X11 events with brltty monitors */
+static AsyncHandle a2XWatch;
+
+/* Called when X selection got updated, update the BRLTTY clipboard content */
+void a2XSelUpdated(const char *data, unsigned long size) {
+  int ret;
+  wchar_t characters[size];
+  size_t length = 0;
+
+  while (size > 0) {
+    const char *next = data;
+    wint_t wc = convertUtf8ToWchar(&next, &size);
+    if (wc == WEOF) return;
+
+    characters[length++] = wc;
+    data = next;
+  }
+
+  ClipboardObject *clipboard = getMainClipboard();
+  lockMainClipboard();
+    ret = setClipboardContent(clipboard, characters, size);
+  unlockMainClipboard();
+
+  if (ret) onMainClipboardUpdated();
+}
+
+/* Called when BRLTTY selection got updated, update the X clipboard content */
+/* TODO: call it */
+void a2CoreSelUpdated(const char *data, unsigned long size) {
+  clipboardContent = strndup(data, size);
+  XSelSet(dpy, &xselData);
+}
+
+/* Called when X events are available, process them */
+ASYNC_MONITOR_CALLBACK(a2ProcessX) {
+  XEvent ev;
+
+  while (XPending(dpy)) {
+    XNextEvent(dpy, &ev);
+    XSelProcess(dpy, &xselData, &ev, clipboardContent, a2XSelUpdated);
+  }
+
+  return 1;
+}
+#endif /* HAVE_PKG_X11 */
+
 /* Integration of DBus watches with brltty monitors */
 
 struct a2Watch
@@ -1311,6 +1369,15 @@ construct_AtSpi2Screen (void) {
   dbus_connection_set_watch_functions(bus, a2AddWatch, a2RemoveWatch, a2WatchToggled, NULL, NULL);
   dbus_connection_set_timeout_functions(bus, a2AddTimeout, a2RemoveTimeout, a2TimeoutToggled, NULL, NULL);
 
+#ifdef HAVE_PKG_X11
+  dpy = XOpenDisplay(NULL);
+  if (dpy) {
+    XSelInit(dpy, &xselData);
+    XFlush(dpy);
+    asyncMonitorFileInput(&a2XWatch, XConnectionNumber(dpy), a2ProcessX, NULL);
+  }
+#endif /* HAVE_PKG_X11 */
+
   logMessage(LOG_CATEGORY(SCREEN_DRIVER), "SPI2 initialized");
   return 1;
 
@@ -1325,6 +1392,13 @@ noBus:
 
 static void
 destruct_AtSpi2Screen (void) {
+#ifdef HAVE_PKG_X11
+  if (dpy) {
+    asyncCancelRequest(a2XWatch);
+    XCloseDisplay(dpy);
+    dpy = NULL;
+  }
+#endif /* HAVE_PKG_X11 */
   dbus_connection_remove_filter(bus, AtSpi2Filter, NULL);
   dbus_connection_close(bus);
   dbus_connection_unref(bus);

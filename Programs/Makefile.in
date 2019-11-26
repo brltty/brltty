@@ -333,6 +333,11 @@ dataarea.$O:
 
 ###############################################################################
 
+xsel.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/xsel.c
+
+###############################################################################
+
 PREFS_OBJECTS = prefs.$O prefs_table.$O
 
 prefs.$O:
@@ -965,7 +970,7 @@ scr.auto.h: $(SRC_DIR)/mkdrvtab
 
 ###############################################################################
 
-XBRLAPI_OBJECTS = xbrlapi.$O $(PROGRAM_OBJECTS)
+XBRLAPI_OBJECTS = xbrlapi.$O xsel.$O $(PROGRAM_OBJECTS)
 
 xbrlapi$X: $(XBRLAPI_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) $(API_LIBS) $(XKB_LIBS) $(XFIXES_LIBS) $(X11_LIBS) $(LDLIBS)
