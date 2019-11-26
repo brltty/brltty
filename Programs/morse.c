@@ -138,13 +138,13 @@ addMorseElement (MorseObject *morse, const ToneElement *element) {
 static int
 addMorseMark (MorseObject *morse, unsigned int units) {
   ToneElement element = TONE_PLAY((morse->parameters.unit * units), morse->parameters.frequency);
-  return addMorseElement(morse, &element);;
+  return addMorseElement(morse, &element);
 }
 
 static int
 addMorseGap (MorseObject *morse, unsigned int units) {
   ToneElement element = TONE_REST((morse->parameters.unit * units));
-  return addMorseElement(morse, &element);;
+  return addMorseElement(morse, &element);
 }
 
 int
@@ -299,7 +299,7 @@ newMorseObject (void) {
     morse->elements.array = NULL;
     morse->elements.size = 0;
 
-    clearMorseSequence(morse);;
+    clearMorseSequence(morse);
     return morse;
   } else {
     logMallocError();

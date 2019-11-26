@@ -546,7 +546,7 @@ extern "C" {
 /* Define this if X is not available. */
 #undef X_DISPLAY_MISSING
 
-  /* Define this if the package x11 is available. */
+/* Define this if the package x11 is available. */
 #undef HAVE_PKG_X11
 
 /* Define this if the header file X11/keysym.h exists. */

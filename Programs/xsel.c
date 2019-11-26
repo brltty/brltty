@@ -47,7 +47,7 @@ void XSelInit(Display *dpy, XSelData *data) {
 
 void XSelSet(Display *dpy, XSelData *data) {
   XSetSelectionOwner(dpy, data->sel, data->selWindow, CurrentTime);
-};
+}
 
 int XSelProcess(Display *dpy, XSelData *data, XEvent *ev, const char *content, XSelUpdate update) {
 #ifdef HAVE_X11_EXTENSIONS_XFIXES_H
