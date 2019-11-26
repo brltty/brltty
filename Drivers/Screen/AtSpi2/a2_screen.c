@@ -69,6 +69,7 @@
 #include "async_io.h"
 #include "async_alarm.h"
 #include "async_event.h"
+#include "report.h"
 
 typedef enum {
   PARM_RELEASE,
@@ -1071,6 +1072,7 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
 #ifdef HAVE_PKG_X11
 /* Integration of X11 events with brltty monitors */
 static AsyncHandle a2XWatch;
+static ReportListenerInstance *coreSelUpdatedListener;
 
 /* Called when X selection got updated, update the BRLTTY clipboard content */
 void a2XSelUpdated(const char *data, unsigned long size) {
@@ -1089,17 +1091,10 @@ void a2XSelUpdated(const char *data, unsigned long size) {
 
   ClipboardObject *clipboard = getMainClipboard();
   lockMainClipboard();
-    ret = setClipboardContent(clipboard, characters, size);
+    ret = setClipboardContent(clipboard, characters, length);
   unlockMainClipboard();
 
   if (ret) onMainClipboardUpdated();
-}
-
-/* Called when BRLTTY selection got updated, update the X clipboard content */
-/* TODO: call it */
-void a2CoreSelUpdated(const char *data, unsigned long size) {
-  clipboardContent = strndup(data, size);
-  XSelSet(dpy, &xselData);
 }
 
 /* Called when X events are available, process them */
@@ -1112,6 +1107,40 @@ ASYNC_MONITOR_CALLBACK(a2ProcessX) {
   }
 
   return 1;
+}
+
+/* Called when BRLTTY selection got updated, update the X clipboard content */
+REPORT_LISTENER(a2CoreSelUpdated) {
+  const ApiParameterUpdatedReport *report = parameters->reportData;
+  ClipboardObject *clipboard;
+
+  if (report->parameter != BRLAPI_PARAM_CLIPBOARD_CONTENT)
+    return;
+
+  clipboard = getMainClipboard();
+
+  lockMainClipboard();
+    size_t length;
+    const wchar_t *characters = getClipboardContent(clipboard, &length);
+    char data[length * MB_LEN_MAX];
+    char *next = data;
+
+    if (characters) {
+      const wchar_t *character = characters;
+      const wchar_t *end = character + length;
+
+      while (character < end) {
+        Utf8Buffer utf8;
+        size_t utfs = convertWcharToUtf8(*character++, utf8);
+
+        next = mempcpy(next, utf8, utfs);
+      }
+
+      free(clipboardContent);
+      clipboardContent = strndup(data, next - data);
+      XSelSet(dpy, &xselData);
+    }
+  unlockMainClipboard();
 }
 #endif /* HAVE_PKG_X11 */
 
@@ -1375,6 +1404,7 @@ construct_AtSpi2Screen (void) {
     XSelInit(dpy, &xselData);
     XFlush(dpy);
     asyncMonitorFileInput(&a2XWatch, XConnectionNumber(dpy), a2ProcessX, NULL);
+    coreSelUpdatedListener = registerReportListener(REPORT_API_PARAMETER_UPDATED, a2CoreSelUpdated , NULL);
   }
 #endif /* HAVE_PKG_X11 */
 
@@ -1394,6 +1424,8 @@ static void
 destruct_AtSpi2Screen (void) {
 #ifdef HAVE_PKG_X11
   if (dpy) {
+    unregisterReportListener(coreSelUpdatedListener);
+    coreSelUpdatedListener = NULL;
     asyncCancelRequest(a2XWatch);
     XCloseDisplay(dpy);
     dpy = NULL;
