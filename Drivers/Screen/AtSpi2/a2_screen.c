@@ -1434,6 +1434,8 @@ destruct_AtSpi2Screen (void) {
     asyncCancelRequest(a2XWatch);
     XCloseDisplay(dpy);
     dpy = NULL;
+    free(clipboardContent);
+    clipboardContent = NULL;
   }
 #endif /* HAVE_PKG_X11 */
   dbus_connection_remove_filter(bus, AtSpi2Filter, NULL);
