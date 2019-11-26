@@ -172,7 +172,7 @@ static void fatal(const char *fmt, ...) {
 #define MIN(a, b) (((a) < (b))? (a): (b))
 #endif /* MIN */
 
-static void clipboardContentChanged(brlapi_param_t parameter, uint64_t subparam, brlapi_param_flags_t flags, void *priv, const void *data, size_t len);
+static void clipboardContentChanged(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, void *priv, const void *data, size_t len);
 
 static int tobrltty_init(char *auth, char *host) {
   brlapi_connectionSettings_t settings;
@@ -601,7 +601,7 @@ static void ignoreServerKeys(void) {
 }
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 
-static void clipboardContentChanged(brlapi_param_t parameter, uint64_t subparam, unsigned flags, void *priv, const void *data, size_t len) {
+static void clipboardContentChanged(brlapi_param_t parameter, brlapi_param_subparam_t subparam, unsigned flags, void *priv, const void *data, size_t len) {
   free(clipboardData);
   clipboardData = strndup(data, len);
   debugf("new clipboard content from BrlAPI: '%s'\n", (const char *) clipboardData);

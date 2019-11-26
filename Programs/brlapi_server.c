@@ -186,7 +186,7 @@ typedef enum { TODISPLAY, EMPTY } BrlBufState;
 
 typedef struct Subscription {
   brlapi_param_t parameter;
-  uint64_t subparam;
+  brlapi_param_subparam_t subparam;
   int flags;
   struct Subscription *prev, *next;
 } Subscription;
@@ -340,7 +340,7 @@ static unsigned char cursorOverlay = 0;
 extern void processParameters(char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable);
 static int initializeAcceptedKeys(Connection *c, int how);
 static void brlResize(BrailleDisplay *brl);
-static void handleParamUpdate(Connection *source, Connection *dest, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size);
+static void handleParamUpdate(Connection *source, Connection *dest, brlapi_param_t param, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, const void *data, size_t size);
 
 /****************************************************************************/
 /** DRIVER CAPABILITIES                                                    **/
@@ -1265,13 +1265,13 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 
 /* On success, this should fill 'data', adjust 'size', and return NULL.
  * On failure, this should return a non-allocated error message string. */
-#define PARAM_READER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t parameter, uint64_t subparam, uint32_t flags, void *data, size_t *size)
+#define PARAM_READER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, void *data, size_t *size)
 typedef PARAM_READER_DECLARATION(ParamReader);
 #define PARAM_READER(name) static PARAM_READER_DECLARATION(param_ ## name ## _read)
 
 /* On success, this should return NULL.
  * On failure, this should return a non-allocated error message string. */
-#define PARAM_WRITER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t parameter, uint64_t subparam, uint32_t flags, const void *data, size_t size)
+#define PARAM_WRITER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, const void *data, size_t size)
 typedef PARAM_WRITER_DECLARATION(ParamWriter);
 #define PARAM_WRITER(name) static PARAM_WRITER_DECLARATION(param_ ## name ## _write)
 
@@ -2162,7 +2162,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
 {
   brlapi_paramValuePacket_t *paramValue = &packet->paramValue;
   brlapi_param_t param;
-  uint64_t subparam;
+  brlapi_param_subparam_t subparam;
   uint32_t flags;
 
   CHECKERR( (size >= sizeof(flags) + sizeof(param) + sizeof(subparam)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramValue packet");
@@ -2184,7 +2184,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   if (!checkParamLocalGlobal(c, param, flags))
     return 0;
 
-  subparam = ((uint64_t)ntohl(paramValue->subparam_hi) << 32) || ntohl(paramValue->subparam_lo);
+  subparam = ((brlapi_param_subparam_t)ntohl(paramValue->subparam_hi) << 32) || ntohl(paramValue->subparam_lo);
   size -= sizeof(flags) + sizeof(param) + sizeof(subparam);
   _brlapi_ntohParameter(param, paramValue, size);
 
@@ -2213,7 +2213,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
 
 
 /* sendConnectionParamUpdate: Send the parameter update to a connection */
-static void sendConnectionParamUpdate(Connection *c, brlapi_param_t param, uint64_t subparam, uint32_t flags, brlapi_paramValuePacket_t *paramValue, size_t size)
+static void sendConnectionParamUpdate(Connection *c, brlapi_param_t param, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, brlapi_paramValuePacket_t *paramValue, size_t size)
 {
   struct Subscription *s;
 
@@ -2231,7 +2231,7 @@ static void sendConnectionParamUpdate(Connection *c, brlapi_param_t param, uint6
 }
 
 /* sendParamUpdate: Send the parameter update to connections bound to a given tree of ttys */
-static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, uint32_t flags, brlapi_paramValuePacket_t *paramValue, size_t size)
+static void sendParamUpdate(Tty *tty, brlapi_param_t param, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, brlapi_paramValuePacket_t *paramValue, size_t size)
 {
   Connection *c;
   Tty *t;
@@ -2243,7 +2243,7 @@ static void sendParamUpdate(Tty *tty, brlapi_param_t param, uint64_t subparam, u
 }
 
 /* handleParamUpdate: Prepare and send the parameter update to all connections */
-static void __handleParamUpdate(Connection *dest, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
+static void __handleParamUpdate(Connection *dest, brlapi_param_t param, brlapi_param_subparam_t subparam, uint32_t flags, const void *data, size_t size)
 {
   brlapi_packet_t response;
   brlapi_paramValuePacket_t *paramValue = &response.paramValue;
@@ -2264,7 +2264,7 @@ static void __handleParamUpdate(Connection *dest, brlapi_param_t param, uint64_t
   }
 }
 
-static void handleParamUpdate(Connection *source, Connection *dest, brlapi_param_t param, uint64_t subparam, uint32_t flags, const void *data, size_t size)
+static void handleParamUpdate(Connection *source, Connection *dest, brlapi_param_t param, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, const void *data, size_t size)
 {
   lockMutex(&apiParamMutex);
   paramUpdateConnection = source;
@@ -2275,7 +2275,7 @@ static void handleParamUpdate(Connection *source, Connection *dest, brlapi_param
   unlockMutex(&apiParamMutex);
 }
 
-void api_updateParameter(brlapi_param_t parameter, uint64_t subparam)
+void api_updateParameter(brlapi_param_t parameter, brlapi_param_subparam_t subparam)
 {
   const ParamDispatch *pd = param_getDispatch(parameter);
 
@@ -2321,7 +2321,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
 {
   brlapi_paramRequestPacket_t *paramRequest = &packet->paramRequest;
   brlapi_param_t param;
-  uint64_t subparam;
+  brlapi_param_subparam_t subparam;
   uint32_t flags;
 
   CHECKERR( (size == sizeof(brlapi_paramRequestPacket_t)), BRLAPI_ERROR_INVALID_PACKET, "wrong size for paramRequest packet: %lu vs %lu", (unsigned long) size, (unsigned long) sizeof(brlapi_paramRequestPacket_t));
@@ -2343,7 +2343,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   if (!checkParamLocalGlobal(c, param, flags))
     return 0;
 
-  subparam = (uint64_t)ntohl(paramRequest->subparam_hi) << 32 | ntohl(paramRequest->subparam_lo);
+  subparam = (brlapi_param_subparam_t)ntohl(paramRequest->subparam_hi) << 32 | ntohl(paramRequest->subparam_lo);
   if ((flags & BRLAPI_PARAMF_SUBSCRIBE) &&
       (flags & BRLAPI_PARAMF_UNSUBSCRIBE)) {
     WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "subscribe and unsubscribe flags both set");

@@ -168,7 +168,7 @@ def describeKeyCode(code):
 			"flags": flags
 		}
 
-cdef object _parameterToPython(uint32_t c_param, const void *c_value, size_t size):
+cdef object _parameterToPython(c_brlapi.brlapi_param_t c_param, const void *c_value, size_t size):
 	cdef const c_brlapi.brlapi_param_properties_t *props
 
 	with nogil:
@@ -892,8 +892,8 @@ cdef class Connection:
 		See brlapi_getParameter(3).
 
 		This gets the current content of a parameter"""
-		cdef uint32_t c_param
-		cdef uint64_t c_subparam
+		cdef c_brlapi.brlapi_param_t c_param
+		cdef c_brlapi.brlapi_param_subparam_t c_subparam
 		cdef unsigned c_flags
 		cdef void *c_value
 		cdef size_t size
@@ -928,8 +928,8 @@ cdef class Connection:
 		See brlapi_setParameter(3).
 
 		This sets the content of a parameter"""
-		cdef uint32_t c_param
-		cdef uint64_t c_subparam
+		cdef c_brlapi.brlapi_param_t c_param
+		cdef c_brlapi.brlapi_param_subparam_t c_subparam
 		cdef int c_flags
 		cdef void *c_value
 		cdef uint64_t *values64
@@ -1045,8 +1045,8 @@ cdef class Connection:
 		parameter changes, the given function is called.
 
 		This returns an entry object, to be passed to unwatchParameter."""
-		cdef uint32_t c_param
-		cdef uint64_t c_subparam
+		cdef c_brlapi.brlapi_param_t c_param
+		cdef c_brlapi.brlapi_param_subparam_t c_subparam
 		cdef int c_flags
 		cdef c_brlapi.brlapi_python_paramCallbackDescriptor_t *descr
 

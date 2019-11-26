@@ -72,7 +72,7 @@ typedef struct {
 
 typedef struct {
   brlapi_param_t parameter;
-  uint64_t subparam;
+  brlapi_param_subparam_t subparam;
 } ApiParameterUpdatedReport;
 
 #ifdef __cplusplus

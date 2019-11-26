@@ -103,6 +103,10 @@ typedef enum {
   BRLAPI_PARAM_COUNT = 32 /** Number of parameters */
 } brlapi_param_t;
 
+/* brlapi_param_subparam_t */
+/** Type to be used for specifying a sub-parameter */
+typedef uint64_t brlapi_param_subparam_t;
+
 /* brlapi_param_bool_t */
 /** Type to be used for boolean parameters */
 typedef uint8_t brlapi_param_bool_t;

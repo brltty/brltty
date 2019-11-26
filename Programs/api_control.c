@@ -81,7 +81,7 @@ api_flush (BrailleDisplay *brl) {
 }
 
 void
-api_updateParameter (brlapi_param_t parameter, uint64_t subparam) {
+api_updateParameter (brlapi_param_t parameter, brlapi_param_subparam_t subparam) {
 }
 #endif /* ENABLE_API */
 
@@ -200,7 +200,7 @@ apiFlush (void) {
 }
 
 static void
-apiUpdateParameter (brlapi_param_t parameter, uint64_t subparam) {
+apiUpdateParameter (brlapi_param_t parameter, brlapi_param_subparam_t subparam) {
   if (apiStarted) api_updateParameter(parameter, subparam);
 }
 

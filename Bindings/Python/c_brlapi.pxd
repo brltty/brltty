@@ -114,6 +114,7 @@ cdef extern from "Programs/brlapi.h":
 	int brlapi__sendRaw(brlapi_handle_t *, void*, int)
 
 	ctypedef int brlapi_param_t
+	ctypedef uint64_t brlapi_param_subparam_t
 	ctypedef unsigned brlapi_param_flags_t
 	ctypedef void *brlapi_paramCallbackDescriptor_t
 
@@ -151,7 +152,7 @@ cdef extern from "bindings.h":
 
 	ctypedef struct brlapi_python_callbackData_t:
 		brlapi_param_t parameter
-		uint64_t subparam
+		brlapi_param_subparam_t subparam
 		brlapi_param_flags_t flags
 		const void *data
 		size_t len

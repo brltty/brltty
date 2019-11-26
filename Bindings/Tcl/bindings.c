@@ -623,7 +623,7 @@ FUNCTION_HANDLER(session, parameter) {
   }
 
   int haveSubparam = objc > 1;
-  uint64_t subparam;
+  brlapi_param_subparam_t subparam;
 
   if (properties->hasSubparam) {
     if (!haveSubparam) {

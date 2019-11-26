@@ -306,7 +306,7 @@ static void suspendDriver(void)
   }
 }
 
-static void brailleRetainDotsChanged(brlapi_param_t parameter, uint64_t subparam, unsigned flags, void *priv, const void *data, size_t len)
+static void brailleRetainDotsChanged(brlapi_param_t parameter, brlapi_param_subparam_t subparam, unsigned flags, void *priv, const void *data, size_t len)
 {
   const brlapi_param_retainDots_t *d = data;
   if (parameter != BRLAPI_PARAM_RETAIN_DOTS)
