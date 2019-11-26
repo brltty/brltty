@@ -26,12 +26,12 @@ brlapi<sessionNumber> function [arg ...]
       -set <value>
    enterTtyMode [<option> ...]
       -tty {default | <number>}
-      -keyCodes
-      -events <driver>
+      -commands
+      -keys <driver>
    enterTtyModeWithPath [<option> ...]
       -path <list>
-      -keyCodes
-      -events <driver>
+      -commands
+      -keys <driver>
    leaveTtyMode
    setFocus <ttyNumber>
    readKey <wait>

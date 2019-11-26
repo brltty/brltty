@@ -330,15 +330,15 @@ typedef struct {
   const char *driver;
 } EnterTtyModeOptions;
 
-OPTION_HANDLER(session, enterTtyMode, events) {
-  EnterTtyModeOptions *options = data;
-  return (options->driver = Tcl_GetString(objv[1]))? TCL_OK: TCL_ERROR;
-}
-
-OPTION_HANDLER(session, enterTtyMode, keyCodes) {
+OPTION_HANDLER(session, enterTtyMode, commands) {
   EnterTtyModeOptions *options = data;
   options->driver = NULL;
   return TCL_OK;
+}
+
+OPTION_HANDLER(session, enterTtyMode, keys) {
+  EnterTtyModeOptions *options = data;
+  return (options->driver = Tcl_GetString(objv[1]))? TCL_OK: TCL_ERROR;
 }
 
 OPTION_HANDLER(session, enterTtyMode, tty) {
@@ -366,12 +366,12 @@ FUNCTION_HANDLER(session, enterTtyMode) {
   };
 
   BEGIN_OPTIONS
-    { OPTION(session, enterTtyMode, events),
-      OPERANDS(1, "<driver>")
+    { OPTION(session, enterTtyMode, commands),
+      OPERANDS(0, "")
     },
 
-    { OPTION(session, enterTtyMode, keyCodes),
-      OPERANDS(0, "")
+    { OPTION(session, enterTtyMode, keys),
+      OPERANDS(1, "<driver>")
     },
 
     { OPTION(session, enterTtyMode, tty),
@@ -393,15 +393,15 @@ typedef struct {
   const char *driver;
 } EnterTtyModeWithPathOptions;
 
-OPTION_HANDLER(session, enterTtyModeWithPath, events) {
-  EnterTtyModeWithPathOptions *options = data;
-  return (options->driver = Tcl_GetString(objv[1]))? TCL_OK: TCL_ERROR;
-}
-
-OPTION_HANDLER(session, enterTtyModeWithPath, keyCodes) {
+OPTION_HANDLER(session, enterTtyModeWithPath, commands) {
   EnterTtyModeWithPathOptions *options = data;
   options->driver = NULL;
   return TCL_OK;
+}
+
+OPTION_HANDLER(session, enterTtyModeWithPath, keys) {
+  EnterTtyModeWithPathOptions *options = data;
+  return (options->driver = Tcl_GetString(objv[1]))? TCL_OK: TCL_ERROR;
 }
 
 OPTION_HANDLER(session, enterTtyModeWithPath, path) {
@@ -419,12 +419,12 @@ FUNCTION_HANDLER(session, enterTtyModeWithPath) {
   };
 
   BEGIN_OPTIONS
-    { OPTION(session, enterTtyModeWithPath, events),
-      OPERANDS(1, "<driver>")
+    { OPTION(session, enterTtyModeWithPath, commands),
+      OPERANDS(0, "")
     },
 
-    { OPTION(session, enterTtyModeWithPath, keyCodes),
-      OPERANDS(0, "")
+    { OPTION(session, enterTtyModeWithPath, keys),
+      OPERANDS(1, "<driver>")
     },
 
     { OPTION(session, enterTtyModeWithPath, path),
