@@ -27,7 +27,7 @@
 #include "log.h"
 #include "cldr.h"
 #include "datafile.h"
-#include "charset.h"
+#include "utf8.h"
 
 #define DEFAULT_OUTPUT_FORMAT "%s\\t%n\\n"
 

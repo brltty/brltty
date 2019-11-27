@@ -24,7 +24,7 @@
 #include "log.h"
 #include "clipboard.h"
 #include "clipboard_internal.h"
-#include "charset.h"
+#include "utf8.h"
 #include "queue.h"
 #include "lock.h"
 #include "program.h"

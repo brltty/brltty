@@ -29,7 +29,7 @@
 #include "file.h"
 #include "datafile.h"
 #include "parse.h"
-#include "charset.h"
+#include "utf8.h"
 #include "unicode.h"
 #include "ascii.h"
 #include "ttb.h"

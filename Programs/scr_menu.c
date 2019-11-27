@@ -31,7 +31,7 @@
 #include "brl_cmds.h"
 #include "cmd_queue.h"
 #include "alert.h"
-#include "charset.h"
+#include "utf8.h"
 #include "core.h"
 
 typedef struct {

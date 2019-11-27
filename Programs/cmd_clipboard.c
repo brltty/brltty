@@ -34,7 +34,7 @@
 #include "alert.h"
 #include "file.h"
 #include "datafile.h"
-#include "charset.h"
+#include "utf8.h"
 #include "core.h"
 
 typedef struct {

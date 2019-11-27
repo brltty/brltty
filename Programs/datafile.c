@@ -30,7 +30,7 @@
 #include "queue.h"
 #include "datafile.h"
 #include "variables.h"
-#include "charset.h"
+#include "utf8.h"
 #include "unicode.h"
 #include "brl_dots.h"
 

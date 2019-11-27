@@ -27,7 +27,7 @@
 #include "log.h"
 #include "file.h"
 #include "unicode.h"
-#include "charset.h"
+#include "utf8.h"
 #include "brl_dots.h"
 #include "ttb.h"
 

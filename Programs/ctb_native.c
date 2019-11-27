@@ -28,7 +28,7 @@
 #include "ttb.h"
 #include "brl_dots.h"
 #include "unicode.h"
-#include "charset.h"
+#include "utf8.h"
 
 #ifdef HAVE_ICU
 #include <unicode/uchar.h>

@@ -23,7 +23,7 @@
 #include "log.h"
 #include "morse.h"
 #include "tune.h"
-#include "charset.h"
+#include "utf8.h"
 
 static const MorsePattern morsePatterns[] = {
   [WC_C('a')] = 0B101,

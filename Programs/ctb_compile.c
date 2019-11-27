@@ -32,7 +32,7 @@
 #include "brl_dots.h"
 #include "cldr.h"
 #include "unicode.h"
-#include "charset.h"
+#include "utf8.h"
 #include "hostcmd.h"
 
 static const wchar_t *const characterClassNames[] = {

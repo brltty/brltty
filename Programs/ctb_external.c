@@ -26,7 +26,7 @@
 #include "brl_dots.h"
 #include "file.h"
 #include "parse.h"
-#include "charset.h"
+#include "utf8.h"
 
 static int
 putExternalRequests (BrailleContractionData *bcd) {

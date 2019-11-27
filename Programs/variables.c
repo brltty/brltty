@@ -24,7 +24,7 @@
 #include "strfmt.h"
 #include "variables.h"
 #include "queue.h"
-#include "charset.h"
+#include "utf8.h"
 
 typedef struct {
   const wchar_t *characters;

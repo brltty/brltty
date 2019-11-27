@@ -22,7 +22,7 @@
 #include "profile.h"
 #include "datafile.h"
 #include "file.h"
-#include "charset.h"
+#include "utf8.h"
 
 typedef struct {
   const ProfileDescriptor *profile;

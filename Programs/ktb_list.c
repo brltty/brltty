@@ -23,7 +23,7 @@
 
 #include "log.h"
 #include "strfmt.h"
-#include "charset.h"
+#include "utf8.h"
 #include "cmd.h"
 #include "brl_cmds.h"
 #include "ktb.h"

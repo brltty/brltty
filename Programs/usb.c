@@ -34,7 +34,7 @@
 #include "bitmask.h"
 #include "parse.h"
 #include "file.h"
-#include "charset.h"
+#include "utf8.h"
 #include "device.h"
 #include "timing.h"
 #include "async_wait.h"

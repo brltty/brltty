@@ -30,7 +30,7 @@
 #include "log.h"
 #include "file.h"
 #include "datafile.h"
-#include "charset.h"
+#include "utf8.h"
 #include "parse.h"
 
 #undef ALLOW_DOS_OPTION_SYNTAX

@@ -27,7 +27,7 @@
 #include "defaults.h"
 #include "async_wait.h"
 #include "async_task.h"
-#include "charset.h"
+#include "utf8.h"
 #include "brl_utils.h"
 #include "brl_cmds.h"
 #include "spk.h"

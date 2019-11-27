@@ -30,7 +30,7 @@
 #include "file.h"
 #include "parse.h"
 #include "prefs.h"
-#include "charset.h"
+#include "utf8.h"
 #include "spk.h"
 #include "spk_thread.h"
 

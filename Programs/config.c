@@ -72,7 +72,7 @@
 #include "core.h"
 #include "api_control.h"
 #include "prefs.h"
-#include "charset.h"
+#include "utf8.h"
 
 #include "io_generic.h"
 #include "io_usb.h"

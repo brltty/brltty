@@ -57,7 +57,7 @@
 #include "alert.h"
 #include "ctb.h"
 #include "routing.h"
-#include "charset.h"
+#include "utf8.h"
 #include "scr.h"
 #include "update.h"
 #include "ses.h"

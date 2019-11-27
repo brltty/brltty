@@ -27,7 +27,7 @@
 #include "log.h"
 #include "tune_build.h"
 #include "notes.h"
-#include "charset.h"
+#include "utf8.h"
 
 typedef unsigned int TuneNumber;
 

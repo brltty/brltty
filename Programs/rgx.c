@@ -23,7 +23,7 @@
 #include "log.h"
 #include "rgx.h"
 #include "rgx_internal.h"
-#include "charset.h"
+#include "utf8.h"
 #include "queue.h"
 #include "strfmt.h"
 
