@@ -58,24 +58,27 @@ convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {
 
 wint_t
 convertUtf8ToWchar (const char **utf8, size_t *utfs) {
-  uint32_t character = UINT32_MAX;
+  const uint32_t initial = UINT32_MAX;
+  uint32_t character = initial;
   int state = 0;
 
   while (*utfs) {
+    const int first = character == initial;
+
     unsigned char byte = *(*utf8)++;
     (*utfs) -= 1;
 
     if (!(byte & 0X80)) {
-      if (character != UINT32_MAX) goto truncated;
+      if (!first) goto truncated;
       character = byte;
       break;
     }
 
     if (!(byte & 0X40)) {
-      if (character == UINT32_MAX) break;
+      if (first) break;
       character = (character << 6) | (byte & 0X3F);
       if (!--state) break;
-    } else if (character != UINT32_MAX) {
+    } else if (!first) {
       goto truncated;
     } else {
       if (!(byte & 0X20)) {
@@ -89,7 +92,7 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
       } else if (!(byte & 0X02)) {
         state = 5;
       } else {
-        character = UINT32_MAX;
+        character = initial;
         break;
       }
 
@@ -101,10 +104,10 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
     if ((**utf8 & 0XC0) != 0X80) break;
     (*utf8) += 1;
     (*utfs) -= 1;
-    character = UINT32_MAX;
+    character = initial;
   }
 
-  if (character == UINT32_MAX) goto error;
+  if (character == initial) goto error;
   if (character > WCHAR_MAX) character = UNICODE_REPLACEMENT_CHARACTER;
   return character;
 
