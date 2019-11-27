@@ -28,10 +28,14 @@ typedef struct ClipboardObjectStruct ClipboardObject;
 extern ClipboardObject *newClipboard (void);
 extern void destroyClipboard (ClipboardObject *cpb);
 
+extern int clearClipboardContent (ClipboardObject *cpb);
+extern int truncateClipboardContent (ClipboardObject *cpb, size_t length);
+
 extern int setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length);
 extern int appendClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length);
-extern int truncateClipboardContent (ClipboardObject *cpb, size_t length);
-extern int clearClipboardContent (ClipboardObject *cpb);
+
+extern int setClipboardContentUTF8 (ClipboardObject *cpb, const char *text);
+extern int appendClipboardContentUTF8 (ClipboardObject *cpb, const char *text);
 
 extern const wchar_t *getClipboardContent (ClipboardObject *cpb, size_t *length);
 extern char *getClipboardContentUTF8 (ClipboardObject *cpb);

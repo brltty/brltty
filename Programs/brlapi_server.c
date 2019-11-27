@@ -1668,29 +1668,21 @@ PARAM_READER(clipboardContent)
   return NULL;
 }
 
-PARAM_WRITER(clipboardContent)
-{
-  wchar_t characters[size];
-  size_t length = 0;
-
-  while (size > 0) {
-    const char *next = data;
-    wint_t wc = convertUtf8ToWchar(&next, &size);
-    if (wc == WEOF) return "UTF-8 error";
-
-    characters[length++] = wc;
-    data = next;
-  }
-
-  const char *error = NULL;
+static int
+changeClipboardContent (const char *content) {
   ClipboardObject *clipboard = getMainClipboard();
+  int updated;
 
   lockMainClipboard();
-    if (!setClipboardContent(clipboard, characters, length)) {
-      error = "clipboard not set";
-    }
+    updated = setClipboardContentUTF8(clipboard, content);
   unlockMainClipboard();
 
+  return updated;
+}
+
+PARAM_WRITER(clipboardContent)
+{
+  const char *error = param_writeString(changeClipboardContent, data, size);
   if (!error) onMainClipboardUpdated();
   return error;
 }

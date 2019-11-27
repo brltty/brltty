@@ -177,6 +177,21 @@ setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t len
   return truncated || appended;
 }
 
+int
+appendClipboardContentUTF8 (ClipboardObject *cpb, const char *text) {
+  size_t length = strlen(text);
+  wchar_t characters[length + 1];
+  size_t count = makeWcharsFromUtf8(text, characters, ARRAY_COUNT(characters));
+  return appendClipboardContent(cpb, characters, count);
+}
+
+int
+setClipboardContentUTF8 (ClipboardObject *cpb, const char *text) {
+  int truncated = truncateClipboardContent(cpb, 0);
+  int appended = appendClipboardContentUTF8(cpb, text);
+  return truncated || appended;
+}
+
 static void
 deallocateClipboardHistoryEntry (void *item, void *data) {
   HistoryEntry *entry = item;

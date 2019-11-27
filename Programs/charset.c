@@ -107,30 +107,13 @@ size_t
 makeWcharsFromUtf8 (const char *text, wchar_t *characters, size_t size) {
   size_t length = strlen(text);
   size_t count = 0;
-  mbstate_t state;
-  memset(&state, 0, sizeof(state));
 
   while (length > 0) {
-    wchar_t character;
-    ssize_t consumed;
-
-#if defined(__ANDROID__)
     const char *utf8 = text;
     size_t utfs = length;
-    wint_t wc = convertUtf8ToWchar(&utf8, &utfs);
+    wint_t character = convertUtf8ToWchar(&utf8, &utfs);
 
-    if (!wc) break;
-    character = wc;
-    consumed = utf8 - text;
-#elif defined(HAVE_WCHAR_H)
-    consumed = mbrtowc(&character, text, length, &state);
-    if (consumed < 0) consumed = 0;
-#else /* no conversion */
-    character = *text & 0XFF;
-    consumed = 1;
-#endif /* HAVE_WCHAR_H */
-
-    if (!consumed) break;
+    if (character == WEOF) break;
     if (!character) break;
 
     if (characters) {
@@ -138,9 +121,9 @@ makeWcharsFromUtf8 (const char *text, wchar_t *characters, size_t size) {
       characters[count] = character;
     }
 
-    text += consumed;
-    length -= consumed;
     count += 1;
+    text = utf8;
+    length = utfs;
   }
 
   if (characters && (count < size)) characters[count] = 0;
@@ -190,7 +173,7 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
 
   while (*utfs) {
     unsigned char byte = *(*utf8)++;
-    (*utfs)--;
+    (*utfs) -= 1;
 
     if (!(byte & 0X80)) {
       if (character != UINT32_MAX) goto truncated;
@@ -202,6 +185,8 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
       if (character == UINT32_MAX) break;
       character = (character << 6) | (byte & 0X3F);
       if (!--state) break;
+    } else if (character != UINT32_MAX) {
+      goto truncated;
     } else {
       if (!(byte & 0X20)) {
         state = 1;
@@ -214,12 +199,6 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
       } else if (!(byte & 0X02)) {
         state = 5;
       } else {
-        state = 0;
-      }
-
-      if (character != UINT32_MAX) goto truncated;
-
-      if (!state) {
         character = UINT32_MAX;
         break;
       }
@@ -230,7 +209,8 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
 
   while (*utfs) {
     if ((**utf8 & 0XC0) != 0X80) break;
-    (*utf8)++, (*utfs)--;
+    (*utf8) += 1;
+    (*utfs) -= 1;
     character = UINT32_MAX;
   }
 
@@ -239,7 +219,8 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
   return character;
 
 truncated:
-  (*utf8)--, (*utfs)++;
+  (*utf8) -= 1;
+  (*utfs) += 1;
 error:
   return WEOF;
 }

@@ -1076,28 +1076,20 @@ static ReportListenerInstance *coreSelUpdatedListener;
 
 /* Called when X selection got updated, update the BRLTTY clipboard content */
 void a2XSelUpdated(const char *data, unsigned long size) {
-  int ret;
-  wchar_t characters[size];
-  size_t length = 0;
+  if (!data) return;
 
-  if (!data)
-    return;
-
-  while (size > 0) {
-    const char *next = data;
-    wint_t wc = convertUtf8ToWchar(&next, &size);
-    if (wc == WEOF) return;
-
-    characters[length++] = wc;
-    data = next;
-  }
+  char content[size + 1];
+  memcpy(content, data, size);
+  content[size] = 0;
 
   ClipboardObject *clipboard = getMainClipboard();
+  int updated;
+
   lockMainClipboard();
-    ret = setClipboardContent(clipboard, characters, length);
+    updated = setClipboardContentUTF8(clipboard, content);
   unlockMainClipboard();
 
-  if (ret) onMainClipboardUpdated();
+  if (updated) onMainClipboardUpdated();
 }
 
 /* Called when X events are available, process them */
