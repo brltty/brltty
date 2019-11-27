@@ -50,10 +50,11 @@ extern int addClipboardHistory (ClipboardObject *cpb, const wchar_t *characters,
 extern const wchar_t *getClipboardHistory (ClipboardObject *cpb, unsigned int index, size_t *length);
 
 extern ClipboardObject *getMainClipboard (void);
-extern void onMainClipboardUpdated (void);
-
 extern void lockMainClipboard (void);
 extern void unlockMainClipboard (void);
+
+extern void onMainClipboardUpdated (void);
+extern int changeMainClipboardContent (const char *content);
 
 #ifdef __cplusplus
 }

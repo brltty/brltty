@@ -1082,14 +1082,7 @@ void a2XSelUpdated(const char *data, unsigned long size) {
   memcpy(content, data, size);
   content[size] = 0;
 
-  ClipboardObject *clipboard = getMainClipboard();
-  int updated;
-
-  lockMainClipboard();
-    updated = setClipboardContentUTF8(clipboard, content);
-  unlockMainClipboard();
-
-  if (updated) onMainClipboardUpdated();
+  changeMainClipboardContent(content);
 }
 
 /* Called when X events are available, process them */

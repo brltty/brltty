@@ -1668,23 +1668,9 @@ PARAM_READER(clipboardContent)
   return NULL;
 }
 
-static int
-changeClipboardContent (const char *content) {
-  ClipboardObject *clipboard = getMainClipboard();
-  int updated;
-
-  lockMainClipboard();
-    updated = setClipboardContentUTF8(clipboard, content);
-  unlockMainClipboard();
-
-  return updated;
-}
-
 PARAM_WRITER(clipboardContent)
 {
-  const char *error = param_writeString(changeClipboardContent, data, size);
-  if (!error) onMainClipboardUpdated();
-  return error;
+  return param_writeString(changeMainClipboardContent, data, size);
 }
 
 /* BRLAPI_PARAM_BOUND_COMMAND_CODES */

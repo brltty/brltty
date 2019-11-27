@@ -243,11 +243,6 @@ unlockMainClipboard (void) {
   releaseLock(getMainClipboardLock());
 }
 
-void
-onMainClipboardUpdated (void) {
-  api.updateParameter(BRLAPI_PARAM_CLIPBOARD_CONTENT, 0);
-}
-
 static void
 exitMainClipboard (void *data) {
   ClipboardObject **clipboard = data;
@@ -271,4 +266,22 @@ getMainClipboard (void) {
   unlockMainClipboard();
 
   return clipboard;
+}
+
+void
+onMainClipboardUpdated (void) {
+  api.updateParameter(BRLAPI_PARAM_CLIPBOARD_CONTENT, 0);
+}
+
+int
+changeMainClipboardContent (const char *content) {
+  ClipboardObject *cpb = getMainClipboard();
+  int updated;
+
+  lockMainClipboard();
+    updated = setClipboardContentUTF8(cpb, content);
+  unlockMainClipboard();
+
+  if (updated) onMainClipboardUpdated();
+  return updated;
 }
