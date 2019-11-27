@@ -414,7 +414,7 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
 
 int
 writeBrailleText (const char *mode, const char *text) {
-  size_t count = getTextLength(text) + 1;
+  size_t count = countUtf8Characters(text) + 1;
   wchar_t characters[count];
   size_t length = convertTextToWchars(characters, text, count);
   return writeBrailleCharacters(mode, characters, length);

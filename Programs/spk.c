@@ -121,7 +121,7 @@ sayString (
   volatile SpeechSynthesizer *spk,
   const char *string, SayOptions options
 ) {
-  return sayUtf8Characters(spk, string, NULL, strlen(string), getTextLength(string), options);
+  return sayUtf8Characters(spk, string, NULL, strlen(string), countUtf8Characters(string), options);
 }
 
 static int

@@ -141,7 +141,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       .parameters = mgp
     };
 
-    const size_t characterCount = getTextLength(mgp->text);
+    const size_t characterCount = countUtf8Characters(mgp->text);
     MessageSegment messageSegments[characterCount];
     wchar_t characters[characterCount + 1];
     convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));

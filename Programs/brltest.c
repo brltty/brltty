@@ -242,7 +242,7 @@ message (const char *mode, const char *text, MessageOptions options) {
   size_t size = brl.textColumns * brl.textRows;
   wchar_t buffer[size];
 
-  size_t length = getTextLength(text);
+  size_t length = countUtf8Characters(text);
   wchar_t characters[length + 1];
   const wchar_t *character = characters;
 

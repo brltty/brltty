@@ -59,7 +59,7 @@ extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);
 
 extern size_t convertTextToWchars (wchar_t *characters, const char *text, size_t size);
-extern size_t getTextLength (const char *text);
+extern size_t countUtf8Characters (const char *text);
 
 extern int lockCharset (LockOptions options);
 extern void unlockCharset (void);

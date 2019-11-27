@@ -148,7 +148,7 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 }
 
 size_t
-getTextLength (const char *text) {
+countUtf8Characters (const char *text) {
   return convertTextToWchars(NULL, text, 0);
 }
 
@@ -298,15 +298,15 @@ getUtf8FromWchars (const wchar_t *characters, unsigned int count, size_t *length
   size_t size = (count * UTF8_LEN_MAX) + 1;
   char buffer[size];
   size_t len = makeUtf8FromWchars(characters, count, buffer, size);
-  char *utf8 = strdup(buffer);
+  char *text = strdup(buffer);
 
-  if (!utf8) {
+  if (!text) {
     logMallocError();
   } else if (length) {
     *length = len;
   }
 
-  return utf8;
+  return text;
 }
 
 size_t
