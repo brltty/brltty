@@ -104,7 +104,7 @@ isPosixLocale (const char *locale) {
 }
 
 size_t
-convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
+makeWcharsFromUtf8 (const char *text, wchar_t *characters, size_t size) {
   size_t length = strlen(text);
   size_t count = 0;
   mbstate_t state;
@@ -149,7 +149,7 @@ convertTextToWchars (wchar_t *characters, const char *text, size_t size) {
 
 size_t
 countUtf8Characters (const char *text) {
-  return convertTextToWchars(NULL, text, 0);
+  return makeWcharsFromUtf8(text, NULL, 0);
 }
 
 size_t

@@ -401,7 +401,7 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
   {
     size_t modeLength = mode? getUtf8Length(mode): 0;
     wchar_t modeCharacters[modeLength + 1];
-    convertTextToWchars(modeCharacters, mode, ARRAY_COUNT(modeCharacters));
+    makeWcharsFromUtf8(mode, modeCharacters, ARRAY_COUNT(modeCharacters));
     fillTextRegion(textBuffer, brl.buffer,
                    statusStart, statusCount, brl.textColumns, brl.textRows,
                    modeCharacters, modeLength);
@@ -416,7 +416,7 @@ int
 writeBrailleText (const char *mode, const char *text) {
   size_t count = countUtf8Characters(text) + 1;
   wchar_t characters[count];
-  size_t length = convertTextToWchars(characters, text, count);
+  size_t length = makeWcharsFromUtf8(text, characters, count);
   return writeBrailleCharacters(mode, characters, length);
 }
 
@@ -1025,7 +1025,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
 
       case swsSaySpace: {
         wchar_t buffer[0X100];
-        size_t length = convertTextToWchars(buffer, gettext("space"), ARRAY_COUNT(buffer));
+        size_t length = makeWcharsFromUtf8(gettext("space"), buffer, ARRAY_COUNT(buffer));
 
         sayWideCharacters(&spk, buffer, NULL, length, sayOptions);
         break;
@@ -1055,7 +1055,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
 
     if (prefix) {
       wchar_t buffer[0X100];
-      size_t length = convertTextToWchars(buffer, prefix, ARRAY_COUNT(buffer));
+      size_t length = makeWcharsFromUtf8(prefix, buffer, ARRAY_COUNT(buffer));
 
       buffer[length++] = WC_C(' ');
       buffer[length++] = character;

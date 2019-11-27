@@ -247,7 +247,7 @@ message (const char *mode, const char *text, MessageOptions options) {
   const wchar_t *character = characters;
 
   clearStatusCells(&brl);
-  convertTextToWchars(characters, text, ARRAY_COUNT(characters));
+  makeWcharsFromUtf8(text, characters, ARRAY_COUNT(characters));
 
   pushCommandEnvironment("message", NULL, NULL);
   pushCommandHandler("message", KTB_CTX_WAITING,

@@ -121,10 +121,10 @@ newRenderedMenuItem (Menu *menu) {
     {
       size_t currentLength = 0;
        
-      currentLength += convertTextToWchars(&characters[currentLength], labelString, maximumLength-currentLength);
+      currentLength += makeWcharsFromUtf8(labelString, &characters[currentLength], maximumLength-currentLength);
       settingIndent = currentLength;
 
-      currentLength += convertTextToWchars(&characters[currentLength], settingString, maximumLength-currentLength);
+      currentLength += makeWcharsFromUtf8(settingString, &characters[currentLength], maximumLength-currentLength);
       actualLength = currentLength;
     }
 

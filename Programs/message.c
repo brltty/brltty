@@ -144,7 +144,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     const size_t characterCount = countUtf8Characters(mgp->text);
     MessageSegment messageSegments[characterCount];
     wchar_t characters[characterCount + 1];
-    convertTextToWchars(characters, mgp->text, ARRAY_COUNT(characters));
+    makeWcharsFromUtf8(mgp->text, characters, ARRAY_COUNT(characters));
 
     const size_t brailleSize = textCount * brl.textRows;
     wchar_t brailleBuffer[brailleSize];
