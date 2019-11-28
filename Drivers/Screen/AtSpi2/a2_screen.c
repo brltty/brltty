@@ -1082,7 +1082,7 @@ void a2XSelUpdated(const char *data, unsigned long size) {
   memcpy(content, data, size);
   content[size] = 0;
 
-  changeMainClipboardContent(content);
+  setMainClipboardContent(content);
 }
 
 /* Called when X events are available, process them */
@@ -1101,13 +1101,7 @@ ASYNC_MONITOR_CALLBACK(a2ProcessX) {
 REPORT_LISTENER(a2CoreSelUpdated) {
   const ApiParameterUpdatedReport *report = parameters->reportData;
   if (report->parameter != BRLAPI_PARAM_CLIPBOARD_CONTENT) return;
-
-  ClipboardObject *clipboard = getMainClipboard();
-  char *newContent;
-
-  lockMainClipboard();
-    newContent = getClipboardContentUTF8(clipboard);
-  unlockMainClipboard();
+  char *newContent = getMainClipboardContent();
 
   if (newContent) {
     if (!clipboardContent || (strcmp(clipboardContent, newContent) != 0)) {

@@ -1655,14 +1655,9 @@ PARAM_WRITER(audibleAlerts)
 /* BRLAPI_PARAM_CLIPBOARD_CONTENT */
 PARAM_READER(clipboardContent)
 {
-  ClipboardObject *clipboard = getMainClipboard();
-  char *content;
-
-  lockMainClipboard();
-    content = getClipboardContentUTF8(clipboard);
-  unlockMainClipboard();
-
+  char *content = getMainClipboardContent();
   if (!content) return "no memory";
+
   param_readString(content, data, size);
   free(content);
   return NULL;
@@ -1670,7 +1665,7 @@ PARAM_READER(clipboardContent)
 
 PARAM_WRITER(clipboardContent)
 {
-  return param_writeString(changeMainClipboardContent, data, size);
+  return param_writeString(setMainClipboardContent, data, size);
 }
 
 /* BRLAPI_PARAM_BOUND_COMMAND_CODES */

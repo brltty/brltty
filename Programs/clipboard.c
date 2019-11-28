@@ -274,7 +274,7 @@ onMainClipboardUpdated (void) {
 }
 
 int
-changeMainClipboardContent (const char *content) {
+setMainClipboardContent (const char *content) {
   ClipboardObject *cpb = getMainClipboard();
   int updated;
 
@@ -284,4 +284,16 @@ changeMainClipboardContent (const char *content) {
 
   if (updated) onMainClipboardUpdated();
   return updated;
+}
+
+char *
+getMainClipboardContent (void) {
+  ClipboardObject *cpb = getMainClipboard();
+  char *content;
+
+  lockMainClipboard();
+    content = getClipboardContentUTF8(cpb);
+  unlockMainClipboard();
+
+  return content;
 }

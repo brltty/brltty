@@ -54,7 +54,8 @@ extern void lockMainClipboard (void);
 extern void unlockMainClipboard (void);
 
 extern void onMainClipboardUpdated (void);
-extern int changeMainClipboardContent (const char *content);
+extern int setMainClipboardContent (const char *content);
+extern char *getMainClipboardContent (void);
 
 #ifdef __cplusplus
 }
