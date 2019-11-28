@@ -119,7 +119,7 @@ else
    fi
 fi
 
-AC_PATH_PROGS([CYTHON], [cython])
+AC_PATH_PROGS([CYTHON], [cython cython3])
 if test -z "${CYTHON}"
 then
    AC_MSG_WARN([Cython compiler not found])
