@@ -25,6 +25,17 @@
 #include "utf8.h"
 #include "unicode.h"
 
+wchar_t *
+allocateCharacters (size_t count) {
+  {
+    wchar_t *characters = malloc(count * sizeof(*characters));
+    if (characters) return characters;
+  }
+
+  logMallocError();
+  return NULL;
+}
+
 size_t
 convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {
   size_t utfs;

@@ -23,15 +23,14 @@
 #include <ctype.h>
 
 #include "log.h"
+#include "alert.h"
 #include "cmd_queue.h"
-#include "cmd_clipboard.h"
 #include "cmd_utils.h"
+#include "cmd_clipboard.h"
 #include "clipboard.h"
-#include "clipboard_internal.h"
 #include "brl_cmds.h"
 #include "scr.h"
 #include "routing.h"
-#include "alert.h"
 #include "file.h"
 #include "datafile.h"
 #include "utf8.h"
@@ -79,7 +78,7 @@ cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fr
       {
         size_t newLength = toAddress - toBuffer;
 
-        if ((newBuffer = allocateClipboardCharacters(newLength))) {
+        if ((newBuffer = allocateCharacters(newLength))) {
           wmemcpy(newBuffer, toBuffer, (*length = newLength));
         }
       }

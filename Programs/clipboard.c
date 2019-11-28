@@ -23,7 +23,6 @@
 
 #include "log.h"
 #include "clipboard.h"
-#include "clipboard_internal.h"
 #include "utf8.h"
 #include "queue.h"
 #include "lock.h"
@@ -46,17 +45,6 @@ struct ClipboardObjectStruct {
     Queue *queue;
   } history;
 };
-
-wchar_t *
-allocateClipboardCharacters (size_t count) {
-  {
-    wchar_t *characters = malloc(count * sizeof(*characters));
-    if (characters) return characters;
-  }
-
-  logMallocError();
-  return NULL;
-}
 
 const wchar_t *
 getClipboardHistory (ClipboardObject *cpb, unsigned int index, size_t *length) {
@@ -89,7 +77,7 @@ addClipboardHistory (ClipboardObject *cpb, const wchar_t *characters, size_t len
     HistoryEntry *entry;
 
     if ((entry = malloc(sizeof(*entry)))) {
-      if ((entry->characters = allocateClipboardCharacters(length))) {
+      if ((entry->characters = allocateCharacters(length))) {
         wmemcpy(entry->characters, characters, length);
         entry->length = length;
 
@@ -152,7 +140,7 @@ appendClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t 
 
   if (newLength > cpb->buffer.size) {
     size_t newSize = newLength | 0XFF;
-    wchar_t *newCharacters = allocateClipboardCharacters(newSize);
+    wchar_t *newCharacters = allocateCharacters(newSize);
 
     if (!newCharacters) {
       logMallocError();

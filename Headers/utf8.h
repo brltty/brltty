@@ -25,6 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+wchar_t *allocateCharacters (size_t count);
+
 #define UTF8_SIZE(bits) (((bits) < 8)? 1: (((bits) + 3) / 5))
 #define UTF8_LEN_MAX UTF8_SIZE(32)
 typedef char Utf8Buffer[UTF8_LEN_MAX + 1];
