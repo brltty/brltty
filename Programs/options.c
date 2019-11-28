@@ -863,7 +863,7 @@ addConfigurationDirectives (ConfigurationFileProcessingData *conf) {
     if ((option->flags & OPT_Config) && option->word) {
       ConfigurationDirective *directive;
       const char *keyword = option->word;
-      size_t length = getUtf8Length(keyword);
+      size_t length = countUtf8Characters(keyword);
       size_t size = sizeof(*directive) + ((length + 1) * sizeof(wchar_t));
 
       if (!(directive = malloc(size))) {

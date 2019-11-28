@@ -399,7 +399,7 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
                  characters, length);
 
   {
-    size_t modeLength = mode? getUtf8Length(mode): 0;
+    size_t modeLength = mode? countUtf8Characters(mode): 0;
     wchar_t modeCharacters[modeLength + 1];
     makeWcharsFromUtf8(mode, modeCharacters, ARRAY_COUNT(modeCharacters));
     fillTextRegion(textBuffer, brl.buffer,

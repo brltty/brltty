@@ -32,7 +32,6 @@ typedef char Utf8Buffer[UTF8_LEN_MAX + 1];
 extern size_t convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8);
 extern wint_t convertUtf8ToWchar (const char **utf8, size_t *utfs);
 
-extern size_t getUtf8Length (const char *utf8);
 extern void convertUtf8ToWchars (const char **utf8, wchar_t **characters, size_t count);
 
 extern size_t makeUtf8FromWchars (const wchar_t *characters, unsigned int count, char *buffer, size_t size);

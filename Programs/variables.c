@@ -278,10 +278,10 @@ getVariableValue (const Variable *variable, const wchar_t **characters, int *len
 
 int
 setStringVariable (VariableNestingLevel *vnl, const char *name, const char *value) {
-  size_t nameLength = getUtf8Length(name);
+  size_t nameLength = countUtf8Characters(name);
   wchar_t nameBuffer[nameLength + 1];
 
-  size_t valueLength = getUtf8Length(value);
+  size_t valueLength = countUtf8Characters(value);
   wchar_t valueBuffer[valueLength + 1];
 
   {

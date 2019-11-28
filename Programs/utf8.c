@@ -118,21 +118,6 @@ error:
   return WEOF;
 }
 
-size_t
-getUtf8Length (const char *utf8) {
-  size_t length = 0;
-
-  while (*utf8) {
-    size_t utfs = UTF8_LEN_MAX;
-    wint_t character = convertUtf8ToWchar(&utf8, &utfs);
-
-    if (character == WEOF) break;
-    length += 1;
-  }
-
-  return length;
-}
-
 void
 convertUtf8ToWchars (const char **utf8, wchar_t **characters, size_t count) {
   while (**utf8 && (count > 1)) {
