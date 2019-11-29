@@ -839,7 +839,8 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
 
   if (!jdriver) {
-    driver = NULL;
+    throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
+    return;
   } else if (!(driver = (char *)(*env)->GetStringUTFChars(env, jdriver, NULL))) {
     throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
