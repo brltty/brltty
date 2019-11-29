@@ -3129,16 +3129,16 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
 
   if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa)) == -1) {
     logMessage(LOG_WARNING, "bind: %s", strerror(errno));
-    goto outlock;
+    goto outfd;
   }
 
   if (!adjustPermissions(sa.sun_path)) {
-    goto outlock;
+    goto outfd;
   }
 
   if (listen(fd,1)<0) {
     logSystemError("listen");
-    goto outlock;
+    goto outfd;
   }
   return fd;
 
