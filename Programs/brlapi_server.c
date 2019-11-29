@@ -2159,7 +2159,6 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
 
     if (error) {
       WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u write error: %s", param, error);
-      unlockMutex(&apiParamMutex);
       return 0;
     }
   }
