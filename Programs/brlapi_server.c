@@ -2317,6 +2317,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
 
     if (param == BRLAPI_PARAM_SERVER_VERSION) {
       WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching - it won't change", param);
+      unlockMutex(&apiParamMutex);
       return 0;
     }
 
@@ -2325,6 +2326,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
 
       if (root) {
         WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching - %u should be watched instead", param, root);
+        unlockMutex(&apiParamMutex);
         return 0;
       }
     }
