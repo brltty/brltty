@@ -327,6 +327,7 @@ JAVA_INSTANCE_METHOD(
     }
 
     if ((fileDescriptor = brlapi__openConnection(handle, pRequestedSettings, pActualSettings)) < 0) {
+      free(handle);
       throwConnectionError(env);
       return -1;
     }
