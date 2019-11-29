@@ -3143,8 +3143,6 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   }
   return fd;
 
-outlock:
-  unlink(lockpath);
 outtmp:
   unlink(tmppath);
 outlockfd:
