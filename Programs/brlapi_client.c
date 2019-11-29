@@ -1554,6 +1554,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
         syslog(LOG_WARNING, "Erroneous window path %s", ttytreepath);
         pthread_mutex_unlock(&handle->state_mutex);
         brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
+        return -1;
       }
       if (*next==0) { nttytreepath++; break; }
     }
