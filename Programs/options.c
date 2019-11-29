@@ -545,6 +545,7 @@ processCommandLine (
 
       case 'H':                /* help */
         optHelpAll = 1;
+        /* fall through */
       case 'h':                /* help */
         optHelp = 1;
         break;

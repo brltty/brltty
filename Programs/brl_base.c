@@ -440,6 +440,7 @@ probeBrailleDisplay (
 
           default:
             logMessage(LOG_WARNING, "unimplemented braille response result: %u", result);
+            /* fall through */
           case BRL_RSP_FAIL:
             return 0;
         }

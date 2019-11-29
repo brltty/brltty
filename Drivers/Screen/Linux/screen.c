@@ -2126,10 +2126,13 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
           break;
 
         case K_METABIT:
-          if (*character < 0X80) {
-            *character |= 0X80;
-            break;
+          if (*character >= 0X80) {
+            logMessage(LOG_WARNING, "can't add meta bit to character: U+%04X", *character);
+            return 0;
           }
+
+          *character |= 0X80;
+          break;
 
         default:
           logMessage(LOG_WARNING, "unsupported keyboard meta mode: %d", meta);

@@ -869,6 +869,7 @@ usbReadEndpoint (
 
           break;
         }
+        /* fall through */
 
       case UsbEndpointTransfer_Bulk:
         count = usbBulkTransfer(endpoint, buffer, length, timeout);

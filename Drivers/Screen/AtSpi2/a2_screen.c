@@ -201,9 +201,15 @@ static size_t my_mbsrtowcs(wchar_t *dest, const char **src, size_t len, my_mbsta
   while (len-put || !dest) {
     skip = my_mbrtowc(bufp, *src, 6, ps);
     switch (skip) {
-      case (size_t)(-2): errno = EILSEQ; /* shouldn't happen ! */
-      case (size_t)(-1): return (size_t)(-1);
-      case 0: *src = NULL; return put;
+      case (size_t)(-2):
+        errno = EILSEQ; /* shouldn't happen ! */
+        /* fall through */
+      case (size_t)(-1):
+        return (size_t)(-1);
+
+      case 0:
+        *src = NULL;
+        return put;
     }
     *src += skip;
     if (dest) bufp++;

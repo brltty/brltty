@@ -364,6 +364,7 @@ parseKeySignature (TuneBuilder *tb, const wchar_t **operand) {
   switch (accidental) {
     case '-':
       increment = -increment;
+      /* fall through */
     case '+':
       if (haveCount) {
         *operand += 1;

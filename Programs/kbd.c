@@ -311,7 +311,7 @@ handleKeyEvent (KeyboardInstanceObject *kio, int code, int press) {
     switch (action) {
       case WKA_ALL:
         flushKeyEvents(kio);
-
+        /* fall through */
       case WKA_CURRENT:
         logKeyEvent("forwarding", code, press);
         forwardKeyEvent(kio, code, press);

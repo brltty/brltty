@@ -199,9 +199,8 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
       wint_t wc = convertCharToWchar(character & UNICODE_CELL_MASK);
       if (wc == WEOF) break;
       character = wc;
-      /* fall through */
     }
-
+    /* fall through */
     default: {
       {
         unsigned char dots;

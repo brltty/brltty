@@ -350,11 +350,10 @@ handleCommand_MenuScreen (int command) {
         return 1;
       }
     }
-
+    /* fall through */
     case BRL_CMD_KEY(ESCAPE):
     case BRL_CMD_KEY(ENTER): {
       int handled = handleCommand(BRL_CMD_PREFMENU);
-
       if (handled) setFocusedItem();
       return handled;
     }

@@ -332,6 +332,7 @@ handleNavigationCommands (int command, void *data) {
 
     case BRL_CMD_TOP_LEFT:
       command |= BRL_FLG_MOTION_TOLEFT;
+      /* fall through */
     case BRL_CMD_TOP:
       row = 0;
       ok = ses->winy > row;
@@ -339,6 +340,7 @@ handleNavigationCommands (int command, void *data) {
 
     case BRL_CMD_BOT_LEFT:
       command |= BRL_FLG_MOTION_TOLEFT;
+      /* fall through */
     case BRL_CMD_BOT:
       row = MAX(scr.rows, brl.textRows) - brl.textRows;
       ok = ses->winy < row;
@@ -679,14 +681,16 @@ handleNavigationCommands (int command, void *data) {
     }
 
     case BRL_CMD_RETURN:
-      if ((ses->winx != ses->motx) || (ses->winy != ses->moty)) {
-    case BRL_CMD_BACK:
-        ses->winx = ses->motx;
-        ses->winy = ses->moty;
-        break;
-      }
+      if ((ses->winx != ses->motx) || (ses->winy != ses->moty)) goto doBack;
+      /* fall through */
     case BRL_CMD_HOME:
       if (!trackScreenCursor(1)) alert(ALERT_COMMAND_REJECTED);
+      break;
+
+    doBack:
+    case BRL_CMD_BACK:
+      ses->winx = ses->motx;
+      ses->winy = ses->moty;
       break;
 
     case BRL_CMD_CSRJMP_VERT:
