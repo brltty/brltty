@@ -89,5 +89,5 @@ function writeBrlapiDots() {
   print "#define BRLAPI_DOTS(" arguments ") (\\\n" expression " \\\n)"
 
   print ""
-  writeMacroDefinition("BRLAPI_DOT_CHORD", 0X100, "space key")
+  writeMacroDefinition("BRLAPI_DOT_CHORD", 256, "space key")
 }
