@@ -22,9 +22,9 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/sysmacros.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <sys/sysmacros.h>
 #include <linux/major.h>
 
 #include "log.h"

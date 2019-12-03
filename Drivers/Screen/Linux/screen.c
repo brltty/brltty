@@ -365,7 +365,7 @@ openConsole (int *fd, int vt) {
   char *name = vtName(consoleName, vt);
 
   if (name) {
-    int console = openCharacterDevice(name, O_RDWR|O_NOCTTY, TTY_MAJOR, vt);
+    int console = openCharacterDevice(name, O_WRONLY|O_NOCTTY, TTY_MAJOR, vt);
 
     if (console != -1) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -506,7 +506,7 @@ openUnicode (int *fd, int vt) {
   char *name = vtName(unicodeName, vt);
 
   if (name) {
-    int unicode = openCharacterDevice(name, O_RDWR|O_NOCTTY, VCS_MAJOR, 0X40|vt);
+    int unicode = openCharacterDevice(name, O_RDWR, VCS_MAJOR, 0X40|vt);
 
     if (unicode != -1) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
