@@ -57,7 +57,7 @@ typedef enum {
   PARM_UNICODE,
   PARM_VIRTUAL_TERMINAL_NUMBER,
 } ScreenParameters;
-#define SCRPARMS "charset", "fbtext", "hfb", "logsfm", "unicode", "vt"
+#define SCRPARMS "charset", "fallbacktext", "hfb", "logsfm", "unicode", "vt"
 
 #include "scr_driver.h"
 #include "screen.h"
