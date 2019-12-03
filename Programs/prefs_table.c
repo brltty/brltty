@@ -369,6 +369,7 @@ const PreferenceEntry preferenceTable[] = {
 
   { .name = "braille-quick-space",
     .defaultValue = DEFAULT_BRAILLE_QUICK_SPACE,
+    .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.brailleQuickSpace
   },
 
