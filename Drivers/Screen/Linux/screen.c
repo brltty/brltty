@@ -51,17 +51,20 @@
 
 typedef enum {
   PARM_CHARSET,
-  PARM_HFB,
-  PARM_LOG_SFM,
+  PARM_FALLBACK_TEXT,
+  PARM_HIGH_FONT_BIT,
+  PARM_LOG_SCREEN_FONT_MAP,
   PARM_UNICODE,
-  PARM_VT,
+  PARM_VIRTUAL_TERMINAL_NUMBER,
 } ScreenParameters;
-#define SCRPARMS "charset", "hfb", "logsfm", "unicode", "vt"
+#define SCRPARMS "charset", "fbtext", "hfb", "logsfm", "unicode", "vt"
 
 #include "scr_driver.h"
 #include "screen.h"
 
 static const char *problemText;
+static const char *fallbackText;
+
 static unsigned int logScreenFontMap;
 static unsigned int unicodeEnabled;
 static int virtualTerminalNumber;
@@ -1224,6 +1227,8 @@ resetKeyboard (void) {
 
 static int
 processParameters_LinuxScreen (char **parameters) {
+  fallbackText = parameters[PARM_FALLBACK_TEXT];
+
   {
     const char *names = parameters[PARM_CHARSET];
 
@@ -1233,7 +1238,7 @@ processParameters_LinuxScreen (char **parameters) {
 
   highFontBit = 0;
   {
-    const char *parameter = parameters[PARM_HFB];
+    const char *parameter = parameters[PARM_HIGH_FONT_BIT];
 
     if (parameter && *parameter) {
       int bit = 0;
@@ -1257,7 +1262,7 @@ processParameters_LinuxScreen (char **parameters) {
 
   logScreenFontMap = 0;
   {
-    const char *parameter = parameters[PARM_LOG_SFM];
+    const char *parameter = parameters[PARM_LOG_SCREEN_FONT_MAP];
 
     if (parameter && *parameter) {
       if (!validateYesNo(&logScreenFontMap, parameter)) {
@@ -1279,7 +1284,7 @@ processParameters_LinuxScreen (char **parameters) {
 
   virtualTerminalNumber = 0;
   {
-    const char *parameter = parameters[PARM_VT];
+    const char *parameter = parameters[PARM_VIRTUAL_TERMINAL_NUMBER];
 
     if (parameter && *parameter) {
       static const int minimum = 0;
@@ -1613,7 +1618,8 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   if (readScreenSize(&size)) {
     if (validateScreenBox(box, size.columns, size.rows)) {
       if (problemText) {
-        setScreenMessage(box, buffer, problemText);
+        const char *text = *fallbackText? fallbackText: problemText;
+        setScreenMessage(box, buffer, text);
         return 1;
       }
 
