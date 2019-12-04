@@ -467,6 +467,9 @@ LABEL="brltty_run"
 TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_systemd"
 ENV{BRLTTY_PID_FILE}="/run/brltty.$kernel.pid"
 
+TEST=="/etc/init", GOTO="brltty_upstart"
+TEST=="/etc/event.d", GOTO="brltty_upstart"
+
 ACTION=="add", GOTO="brltty_add"
 ACTION=="remove", GOTO="brltty_remove"
 GOTO="brltty_end"
@@ -477,6 +480,12 @@ GOTO="brltty_end"
 
 LABEL="brltty_remove"
 RUN+="brltty-wrapper -C"
+GOTO="brltty_end"
+
+LABEL="brltty_upstart"
+ACTION=="add", RUN+="/sbin/start brltty"
+ACTION=="change", RUN+="/sbin/start brltty"
+ACTION=="remove", RUN+="/sbin/stop brltty"
 GOTO="brltty_end"
 
 LABEL="brltty_systemd"
