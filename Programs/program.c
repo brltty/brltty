@@ -202,6 +202,15 @@ createPidFile (const char *path, ProcessIdentifier pid) {
   if (!pid) pid = getProcessIdentifier();
 
   if (path && *path) {
+    {
+      char *directory = getPathDirectory(path);
+      if (!directory) return 0;
+
+      int exists = ensureDirectory(directory);
+      free(directory);
+      if (!exists) return 0;
+    }
+
     typedef enum {PFS_ready, PFS_stale, PFS_clash, PFS_error} PidFileState;
     PidFileState state = PFS_error;
     int file = open(path,
