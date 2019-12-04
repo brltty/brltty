@@ -346,6 +346,20 @@ static void testParameters(void)
     brlapi_perror("getParameter");
   }
   printf("retain dots now %d\n", val);
+
+  size_t len, i;
+  brlapi_param_keyCode_t *keys = brlapi_getParameterAlloc (BRLAPI_PARAM_DEVICE_KEY_CODES, 0, 1, &len);
+
+  len /= sizeof(*keys);
+
+  printf("%zd keys\n", len);
+
+  for (i = 0; i < len; i++) {
+    char *name = brlapi_getParameterAlloc (BRLAPI_PARAM_KEY_SHORT_NAME, keys[i], 1, NULL);
+    printf("key %llx: name %s\n", (unsigned long long) keys[i], name);
+    free(name);
+  }
+  free(keys);
 }
 
 volatile int thread_done;
