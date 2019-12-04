@@ -465,7 +465,7 @@ GOTO="brltty_run"
 
 LABEL="brltty_run"
 TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_systemd"
-ENV{BRLTTY_PID_FILE}="/run/brltty.$kernel.pid"
+ENV{BRLTTY_PID_FILE}="/run/brltty/brltty.$kernel.pid"
 
 TEST=="/etc/init", GOTO="brltty_upstart"
 TEST=="/etc/event.d", GOTO="brltty_upstart"
