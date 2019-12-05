@@ -51,6 +51,7 @@ extern int testDirectoryPath (const char *path);
 
 extern int createDirectory (const char *path);
 extern int ensureDirectory (const char *path);
+extern int ensureParentDirectory (const char *path);
 
 extern void setUpdatableDirectory (const char *directory);
 extern const char *getUpdatableDirectory (void);

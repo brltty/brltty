@@ -365,6 +365,18 @@ ensureDirectory (const char *path) {
   return 0;
 }
 
+int
+ensureParentDirectory (const char *path) {
+  char *directory = getPathDirectory(path);
+  if (!directory) return 0;
+
+  {
+    int exists = ensureDirectory(directory);
+    free(directory);
+    return exists;
+  }
+}
+
 static void
 setDirectory (const char **variable, const char *directory) {
   *variable = directory;
