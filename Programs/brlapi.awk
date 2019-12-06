@@ -63,8 +63,15 @@ BEGIN {
 }
 
 /^[[:space:]]*BRLAPI_PARAM_TYPE_[^[:space:],]+,?/ {
-  gsub(",", "", $1)
-  apiConstant(substr($1, 8), $1, apiParameterTypeCount++, getComment($0))
+  if ($2 == "=" ) {
+    gsub("^BRLAPI_", "", $3)
+    gsub(",", "", $3)
+    apiConstant(substr($1, 8), $1, $3, getComment($0))
+  } else {
+    gsub(",", "", $1)
+    apiConstant(substr($1, 8), $1, apiParameterTypeCount++, getComment($0))
+  }
+
   next
 }
 
