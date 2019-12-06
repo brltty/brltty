@@ -47,6 +47,7 @@
 #include "ascii.h"
 #include "unicode.h"
 #include "charset.h"
+#include "scr_gpm.h"
 #include "system_linux.h"
 
 typedef enum {

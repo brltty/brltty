@@ -29,7 +29,7 @@
 
 #include "log.h"
 #include "brl_cmds.h"
-#include "charset.h"
+#include "utf8.h"
 
 #include "scr_driver.h"
 #include "screen.h"

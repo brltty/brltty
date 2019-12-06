@@ -62,14 +62,13 @@
 #endif /* HAVE_PKG_X11 */
 
 #include "log.h"
+#include "report.h"
 #include "parse.h"
 #include "thread.h"
 #include "brl_cmds.h"
-#include "charset.h"
 #include "async_io.h"
 #include "async_alarm.h"
 #include "async_event.h"
-#include "report.h"
 
 typedef enum {
   PARM_RELEASE,

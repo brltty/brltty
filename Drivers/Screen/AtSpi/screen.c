@@ -39,7 +39,6 @@
 #include "parse.h"
 #include "thread.h"
 #include "brl_cmds.h"
-#include "charset.h"
 
 typedef enum {
   PARM_TYPE

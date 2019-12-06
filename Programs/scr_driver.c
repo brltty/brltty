@@ -21,8 +21,6 @@
 #include <string.h>
 
 #include "drivers.h"
-#include "scr.h"
-#include "scr_main.h"
 #include "scr.auto.h"
 
 typedef enum {
