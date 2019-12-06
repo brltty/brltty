@@ -356,7 +356,7 @@ static void testParameters(void)
 
   for (i = 0; i < len; i++) {
     char *name = brlapi_getParameterAlloc (BRLAPI_PARAM_KEY_SHORT_NAME, keys[i], 1, NULL);
-    printf("key %llx: name %s\n", (unsigned long long) keys[i], name);
+    printf("key %"BRLAPI_PRIxKEYCODE": name %s\n", keys[i], name);
     free(name);
   }
   free(keys);
