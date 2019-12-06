@@ -27,6 +27,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "brlapi_keycodes.h"
+
 /** \ingroup brlapi_parameterManagement
  *
  * @{ */
@@ -204,7 +206,7 @@ typedef char *brlapi_param_clipboardContent_t;
 
 /* brlapi_param_commandCode_t */
 /** Type to be used for BRLAPI_PARAM_BOUND_COMMAND_CODES */
-typedef uint64_t brlapi_param_commandCode_t;
+typedef brlapi_keyCode_t brlapi_param_commandCode_t;
 
 /* brlapi_param_commandShortName_t */
 /** Type to be used for BRLAPI_PARAM_COMMAND_SHORT_NAME */
@@ -216,7 +218,7 @@ typedef char *brlapi_param_commandLongName_t;
 
 /* brlapi_param_keyCode_t */
 /** Type to be used for BRLAPI_PARAM_DEVICE_KEY_CODES */
-typedef uint64_t brlapi_param_keyCode_t;
+typedef brlapi_keyCode_t brlapi_param_keyCode_t;
 
 /* brlapi_param_keyShortName_t */
 /** Type to be used for BRLAPI_PARAM_KEY_SHORT_NAME */
