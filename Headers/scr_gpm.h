@@ -25,7 +25,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void includeGpmScreen (MainScreen *);
+extern void gpmIncludeScreenHandlers (MainScreen *);
 
 #ifdef __cplusplus
 }

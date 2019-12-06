@@ -2399,7 +2399,7 @@ handleCommand_LinuxScreen (int command) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
-  includeGpmScreen(main);
+  gpmIncludeScreenHandlers(main);
 
   main->base.poll = poll_LinuxScreen;
   main->base.refresh = refresh_LinuxScreen;
