@@ -259,6 +259,7 @@ typedef enum {
   BRLAPI_PARAM_TYPE_UINT16,	/**< Parameter is one or more 16-bit unsigned integers */
   BRLAPI_PARAM_TYPE_UINT32,	/**< Parameter is one or more 32-bit unsigned integers */
   BRLAPI_PARAM_TYPE_UINT64,	/**< Parameter is one or more 64-bit unsigned integers */
+  BRLAPI_PARAM_TYPE_KEYCODE = BRLAPI_PARAM_TYPE_UINT64,	/**< Parameter is one or more key codes */
 } brlapi_param_type_t;
 
 /** Structure that describes the properties of a parameter */
