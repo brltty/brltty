@@ -35,6 +35,7 @@
 #include "parameters.h"
 #include "embed.h"
 #include "log.h"
+#include "thread.h"
 #include "strfmt.h"
 #include "brl_cmds.h"
 #include "cmd_queue.h"
@@ -1395,8 +1396,8 @@ stopCoreTasks (void) {
 }
 
 static void
-logCoreTaskEvent (CoreTaskCallback *handler, const char *event) {
-  logSymbol(LOG_NOTICE, handler, "core task %s", event);
+logCoreTaskAction (CoreTaskCallback *handler, const char *action) {
+  logSymbol(LOG_NOTICE, handler, "%s core task", action);
 }
 
 typedef struct {
@@ -1415,9 +1416,9 @@ ASYNC_TASK_CALLBACK(handleCoreTask) {
   CoreTaskData *ctd = data;
   CoreTaskCallback *handler = ctd->callback.handler;
 
-  logCoreTaskEvent(handler, "starting");
+  logCoreTaskAction(handler, "starting");
   handler(ctd->callback.data);
-  logCoreTaskEvent(handler, "finished");
+  logCoreTaskAction(handler, "finished");
 
   asyncSignalEvent(ctd->done.event, NULL);
 }
@@ -1447,13 +1448,13 @@ runCoreTask (CoreTaskCallback *handler, void *data) {
 
       if ((ctd->done.event = asyncNewEvent(setCoreTaskDone, ctd))) {
         ctd->done.flag = 0;
-        logCoreTaskEvent(handler, "scheduling");
+        logCoreTaskAction(handler, "scheduling");
 
         if (asyncAddTask(addCoreTaskEvent, handleCoreTask, ctd)) {
-          logCoreTaskEvent(handler, "waiting");
+          logCoreTaskAction(handler, "awaiting");
           asyncWaitFor(testCoreTaskDone, ctd);
 
-          logCoreTaskEvent(handler, "done");
+          logCoreTaskAction(handler, "completed");
           wasRun = 1;
         }
 
@@ -1494,6 +1495,8 @@ ASYNC_SIGNAL_HANDLER(handleChildDeath) {
 
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
+  setThreadName("core-main");
+
   {
     TimeValue now;
     getMonotonicTime(&now);
