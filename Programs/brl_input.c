@@ -23,6 +23,7 @@
 #include "log.h"
 #include "embed.h"
 #include "parameters.h"
+#include "api_control.h"
 #include "brl_input.h"
 #include "brl_utils.h"
 #include "brl_cmds.h"
@@ -69,13 +70,13 @@ GIO_INPUT_HANDLER(handleBrailleInput) {
   suspendCommandQueue();
 
   if (!brl.isSuspended) {
-    if (brl.api) brl.api->claimDriver();
+    api.claimDriver();
     if (processInput()) processed = 1;
-    if (brl.api) brl.api->releaseDriver();
+    api.releaseDriver();
   }
 
 #ifdef ENABLE_API
-  else if (brl.api && brl.api->isStarted()) {
+  else if (api.isStarted()) {
     switch (readBrailleCommand(&brl, KTB_CTX_DEFAULT)) {
       case BRL_CMD_RESTARTBRL:
         brl.hasFailed = 1;

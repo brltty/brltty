@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "report.h"
+#include "api_control.h"
 #include "queue.h"
 #include "async_alarm.h"
 #include "brl_base.h"
@@ -500,12 +501,7 @@ enqueueKeyEvent (
   KeyGroup group, KeyNumber number, int press
 ) {
   report(REPORT_BRAILLE_KEY_EVENT, NULL);
-
-  if (brl->api) {
-    if (brl->api->handleKeyEvent(group, number, press)) {
-      return 1;
-    }
-  }
+  if (api.handleKeyEvent(group, number, press)) return 1;
 
   if (brl->keyTable) {
     processKeyEvent(brl->keyTable, getCurrentCommandContext(), group, number, press);

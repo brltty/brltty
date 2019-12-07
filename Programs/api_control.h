@@ -19,11 +19,37 @@
 #ifndef BRLTTY_INCLUDED_API_CONTROL
 #define BRLTTY_INCLUDED_API_CONTROL
 
-#include "api_types.h"
+#include "brlapi_param.h"
+#include "ktb_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+typedef struct {
+  void (*identify) (int full);
+  const char *const * (*getParameters) (void);
+
+  int (*start) (char **parameters);
+  void (*stop) (void);
+  int (*isStarted) (void);
+
+  void (*link) (void);
+  void (*unlink) (void);
+  int (*isLinked) (void);
+
+  void (*suspend) (void);
+  int (*resume) (void);
+
+  int (*claimDriver) (void);
+  void (*releaseDriver) (void);
+
+  int (*handleCommand) (int command);
+  int (*handleKeyEvent) (KeyGroup group, KeyNumber number, int press);
+
+  int (*flush) (void);
+  void (*updateParameter) (brlapi_param_t parameter, brlapi_param_subparam_t subparam);
+} ApiMethods;
 
 extern const ApiMethods api;
 

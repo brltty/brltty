@@ -21,7 +21,6 @@
 
 #include "driver.h"
 #include "ktb_types.h"
-#include "api_types.h"
 #include "gio_types.h"
 #include "queue.h"
 #include "async.h"
@@ -62,7 +61,6 @@ typedef int SetAutorepeatPropertiesMethod (BrailleDisplay *brl, int on, int dela
 
 struct BrailleDisplayStruct {
   BrailleData *data;
-  const ApiMethods *api;
 
   SetBrailleFirmnessMethod *setBrailleFirmness;
   SetTouchSensitivityMethod *setTouchSensitivity;

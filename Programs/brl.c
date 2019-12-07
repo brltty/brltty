@@ -35,7 +35,6 @@
 void
 constructBrailleDisplay (BrailleDisplay *brl) {
   brl->data = NULL;
-  brl->api = NULL;
 
   brl->setBrailleFirmness = NULL;
   brl->setTouchSensitivity = NULL;

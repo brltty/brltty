@@ -1384,7 +1384,6 @@ static void
 initializeBrailleDisplay (void) {
   constructBrailleDisplay(&brl);
   brl.bufferResized = &brailleWindowReconfigured;
-  brl.api = &api;
 }
 
 static LockDescriptor *
