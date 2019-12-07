@@ -225,6 +225,10 @@ extern int isWindowsService;
 
 extern const ProfileDescriptor languageProfile;
 
+#define CORE_TASK_CALLBACK(name) void name (void *data)
+typedef CORE_TASK_CALLBACK(CoreTaskCallback);
+extern int runCoreTask (CoreTaskCallback *handler, void *data);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

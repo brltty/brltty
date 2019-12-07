@@ -51,9 +51,10 @@
 #include "cmd_miscellaneous.h"
 #include "timing.h"
 #include "async_wait.h"
+#include "async_alarm.h"
 #include "async_event.h"
 #include "async_signal.h"
-#include "async_alarm.h"
+#include "async_task.h"
 #include "alert.h"
 #include "ctb.h"
 #include "routing.h"
@@ -279,6 +280,29 @@ addCommands (void) {
                      handleApiCommands, NULL, NULL);
 
   return 1;
+}
+
+static AsyncHandle delayedCursorTrackingAlarm;
+
+ASYNC_ALARM_CALLBACK(handleDelayedCursorTrackingAlarm) {
+  asyncDiscardHandle(delayedCursorTrackingAlarm);
+  delayedCursorTrackingAlarm = NULL;
+
+  ses->trkx = ses->dctx;
+  ses->trky = ses->dcty;
+
+  ses->dctx = -1;
+  ses->dcty = -1;
+
+  scheduleUpdate("delayed cursor tracking");
+}
+
+void
+cancelDelayedCursorTrackingAlarm (void) {
+  if (delayedCursorTrackingAlarm) {
+    asyncCancelRequest(delayedCursorTrackingAlarm);
+    delayedCursorTrackingAlarm = NULL;
+  }
 }
 
 static void
@@ -816,29 +840,6 @@ isWithinBrailleWindow (int x, int y) {
       ;
 }
 
-static AsyncHandle delayedCursorTrackingAlarm;
-
-ASYNC_ALARM_CALLBACK(handleDelayedCursorTrackingAlarm) {
-  asyncDiscardHandle(delayedCursorTrackingAlarm);
-  delayedCursorTrackingAlarm = NULL;
-
-  ses->trkx = ses->dctx;
-  ses->trky = ses->dcty;
-
-  ses->dctx = -1;
-  ses->dcty = -1;
-
-  scheduleUpdate("delayed cursor tracking");
-}
-
-void
-cancelDelayedCursorTrackingAlarm (void) {
-  if (delayedCursorTrackingAlarm) {
-    asyncCancelRequest(delayedCursorTrackingAlarm);
-    delayedCursorTrackingAlarm = NULL;
-  }
-}
-
 int
 trackScreenCursor (int place) {
   if (!SCR_CURSOR_OK()) return 0;
@@ -1372,6 +1373,104 @@ exitSessions (void *data) {
   deallocateSessionEntries();
 }
 
+static AsyncEvent *addCoreTaskEvent = NULL;
+
+static int
+startCoreTasks (void) {
+  if (!addCoreTaskEvent) {
+    if (!(addCoreTaskEvent = asyncNewAddTaskEvent())) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static void
+stopCoreTasks (void) {
+  if (addCoreTaskEvent) {
+    asyncDiscardEvent(addCoreTaskEvent);
+    addCoreTaskEvent = NULL;
+  }
+}
+
+static void
+logCoreTaskEvent (CoreTaskCallback *handler, const char *event) {
+  logSymbol(LOG_NOTICE, handler, "core task %s", event);
+}
+
+typedef struct {
+  struct {
+    CoreTaskCallback *handler;
+    void *data;
+  } callback;
+
+  struct {
+    AsyncEvent *event;
+    unsigned flag:1;
+  } done;
+} CoreTaskData;
+
+ASYNC_TASK_CALLBACK(handleCoreTask) {
+  CoreTaskData *ctd = data;
+  CoreTaskCallback *handler = ctd->callback.handler;
+
+  logCoreTaskEvent(handler, "starting");
+  handler(ctd->callback.data);
+  logCoreTaskEvent(handler, "finished");
+
+  asyncSignalEvent(ctd->done.event, NULL);
+}
+
+ASYNC_CONDITION_TESTER(testCoreTaskDone) {
+  CoreTaskData *ctd = data;
+  return ctd->done.flag;
+}
+
+ASYNC_EVENT_CALLBACK(setCoreTaskDone) {
+  CoreTaskData *ctd = parameters->eventData;
+  ctd->done.flag = 1;
+}
+
+int
+runCoreTask (CoreTaskCallback *handler, void *data) {
+  int wasRun = 0;
+
+  if (addCoreTaskEvent) {
+    CoreTaskData *ctd;
+
+    if ((ctd = malloc(sizeof(*ctd)))) {
+      memset(ctd, 0, sizeof(*ctd));
+
+      ctd->callback.handler = handler;
+      ctd->callback.data = data;
+
+      if ((ctd->done.event = asyncNewEvent(setCoreTaskDone, ctd))) {
+        ctd->done.flag = 0;
+        logCoreTaskEvent(handler, "scheduling");
+
+        if (asyncAddTask(addCoreTaskEvent, handleCoreTask, ctd)) {
+          logCoreTaskEvent(handler, "waiting");
+          asyncWaitFor(testCoreTaskDone, ctd);
+
+          logCoreTaskEvent(handler, "done");
+          wasRun = 1;
+        }
+
+        asyncDiscardEvent(ctd->done.event);
+      }
+
+      free(ctd);
+    } else {
+      logMallocError();
+    }
+  } else {
+    logMessage(LOG_ERR, "core tasks not started");
+  }
+
+  return wasRun;
+}
+
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 ASYNC_SIGNAL_HANDLER(handleProgramTerminationRequest) {
   time_t now = time(NULL);
@@ -1397,14 +1496,12 @@ ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
   {
     TimeValue now;
-
     getMonotonicTime(&now);
     srand(now.seconds ^ now.nanoseconds);
   }
 
   {
     ProgramExitStatus exitStatus = brlttyPrepare(argc, argv);
-
     if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
   }
 
@@ -1417,8 +1514,8 @@ brlttyConstruct (int argc, char *argv[]) {
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 #ifdef SIGPIPE
-  /* We ignore SIGPIPE before calling brlttyStart() so that a driver which uses
-   * a broken pipe won't abort program execution.
+  /* We ignore SIGPIPE before calling brlttyStart() so that a driver
+   * which uses a broken pipe won't abort program execution.
    */
   asyncIgnoreSignal(SIGPIPE, NULL);
 #endif /* SIGPIPE */
@@ -1442,13 +1539,13 @@ brlttyConstruct (int argc, char *argv[]) {
 
   delayedCursorTrackingAlarm = NULL;
 
+  startCoreTasks();
   beginCommandQueue();
   beginUpdates();
   suspendUpdates();
 
   {
     ProgramExitStatus exitStatus = brlttyStart();
-
     if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
   }
 
@@ -1466,6 +1563,7 @@ brlttyConstruct (int argc, char *argv[]) {
 int
 brlttyDestruct (void) {
   suspendUpdates();
+  stopCoreTasks();
   endProgram();
   endCommandQueue();
   return 1;
