@@ -306,12 +306,11 @@ static void suspendDriver(void)
     pause();
 #endif /* HAVE_PAUSE */
 
-    fprintf(stderr, "Resuming driver\n");
-
 #ifdef SIGUSR1
     signal(SIGUSR1,SIG_DFL);
 #endif /* SIGUSR1 */
 
+    fprintf(stderr, "Resuming driver\n");
     if (brlapi_resumeDriver()) {
       brlapi_perror("resumeDriver");
     }
@@ -327,6 +326,23 @@ static void brailleRetainDotsChanged(brlapi_param_t parameter, brlapi_param_subp
     return;
   }
   printf("new retain dots %zd: %d\n", len, *d);
+}
+
+static void listKeys(void)
+{
+  size_t length;
+  brlapi_param_keyCode_t *keys = brlapi_getParameterAlloc(BRLAPI_PARAM_DEVICE_KEY_CODES, 0, BRLAPI_PARAMF_GLOBAL, &length);
+
+  length /= sizeof(*keys);
+  printf("%zu keys\n", length);
+
+  for (int i = 0; i < length; i+=1) {
+    char *name = brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_SHORT_NAME, keys[i], BRLAPI_PARAMF_GLOBAL, NULL);
+    printf("key %"BRLAPI_PRIxKEYCODE": name %s\n", keys[i], name);
+    free(name);
+  }
+
+  free(keys);
 }
 
 static void testParameters(void)
@@ -359,19 +375,7 @@ static void testParameters(void)
   }
   printf("retain dots now %d\n", val);
 
-  size_t len, i;
-  brlapi_param_keyCode_t *keys = brlapi_getParameterAlloc (BRLAPI_PARAM_DEVICE_KEY_CODES, 0, 1, &len);
-
-  len /= sizeof(*keys);
-
-  printf("%zd keys\n", len);
-
-  for (i = 0; i < len; i++) {
-    char *name = brlapi_getParameterAlloc (BRLAPI_PARAM_KEY_SHORT_NAME, keys[i], 1, NULL);
-    printf("key %"BRLAPI_PRIxKEYCODE": name %s\n", keys[i], name);
-    free(name);
-  }
-  free(keys);
+  listKeys();
 }
 
 volatile int thread_done;
