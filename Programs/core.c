@@ -35,7 +35,6 @@
 #include "parameters.h"
 #include "embed.h"
 #include "log.h"
-#include "thread.h"
 #include "strfmt.h"
 #include "brl_cmds.h"
 #include "cmd_queue.h"
@@ -1495,8 +1494,6 @@ ASYNC_SIGNAL_HANDLER(handleChildDeath) {
 
 ProgramExitStatus
 brlttyConstruct (int argc, char *argv[]) {
-  setThreadName("core-main");
-
   {
     TimeValue now;
     getMonotonicTime(&now);
