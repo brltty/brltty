@@ -240,17 +240,50 @@ static void enterLearnMode(void)
   brlapi_perror("brlapi_readKey");
 }
 
+static char *getKeyName (brlapi_keyCode_t key)
+{
+  return brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_SHORT_NAME, key, BRLAPI_PARAMF_GLOBAL, NULL);
+}
+
+static void listKeys(void)
+{
+  size_t length;
+  brlapi_param_keyCode_t *keys = brlapi_getParameterAlloc(BRLAPI_PARAM_DEVICE_KEY_CODES, 0, BRLAPI_PARAMF_GLOBAL, &length);
+
+  if (keys) {
+    length /= sizeof(*keys);
+    printf("%zu keys\n", length);
+
+    for (int i=0; i<length; i+=1) {
+      printf("key %04"BRLAPI_PRIxKEYCODE":", keys[i]);
+
+      {
+        char *name = getKeyName(keys[i]);
+
+        if (name) {
+          printf(" name %s", name);
+          free(name);
+        }
+      }
+
+      printf("\n");
+    }
+
+    free(keys);
+  }
+}
+
 static void showKeyCodes(void)
 {
-  int res;
-  brlapi_keyCode_t cmd;
   char buf[0X100];
 
-  fprintf(stderr,"Entering keycode learn mode\n");
+  fprintf(stderr, "Entering keycode learn mode\n");
+
   if (brlapi_getDriverName(buf, sizeof(buf))==-1) {
     brlapi_perror("getDriverName");
     return;
   }
+
   if (brlapi_enterTtyMode(-1, buf)<0) {
     brlapi_perror("enterTtyMode");
     return;
@@ -266,11 +299,25 @@ static void showKeyCodes(void)
     exit(PROG_EXIT_FATAL);
   }
 
-  while ((res = brlapi_readKey(1, &cmd)) != -1) {
-    sprintf(buf, "0X%" BRLAPI_PRIxKEYCODE " (%" BRLAPI_PRIuKEYCODE ")",cmd, cmd);
+  int res;
+  brlapi_keyCode_t key;
+
+  while ((res = brlapi_readKey(1, &key)) != -1) {
+    size_t length = snprintf(buf, sizeof(buf), "%04" BRLAPI_PRIxKEYCODE " (%" BRLAPI_PRIuKEYCODE ")", key, key);
+
+    {
+      char *name = getKeyName(key);
+
+      if (name) {
+        snprintf(&buf[length], (sizeof(buf) - length), ": %s", name);
+        free(name);
+      }
+    }
+
     brlapi_writeText(BRLAPI_CURSOR_OFF, buf);
     fprintf(stderr, "%s\n", buf);
   }
+
   brlapi_perror("brlapi_readKey");
 }
 
@@ -326,34 +373,6 @@ static void brailleRetainDotsChanged(brlapi_param_t parameter, brlapi_param_subp
     return;
   }
   printf("new retain dots %zd: %d\n", len, *d);
-}
-
-static void listKeys(void)
-{
-  size_t length;
-  brlapi_param_keyCode_t *keys = brlapi_getParameterAlloc(BRLAPI_PARAM_DEVICE_KEY_CODES, 0, BRLAPI_PARAMF_GLOBAL, &length);
-
-  if (keys) {
-    length /= sizeof(*keys);
-    printf("%zu keys\n", length);
-
-    for (int i=0; i<length; i+=1) {
-      printf("key %04"BRLAPI_PRIxKEYCODE":", keys[i]);
-
-      {
-        char *name = brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_SHORT_NAME, keys[i], BRLAPI_PARAMF_GLOBAL, NULL);
-
-        if (name) {
-          printf(" name %s", name);
-          free(name);
-        }
-      }
-
-      printf("\n");
-    }
-
-    free(keys);
-  }
 }
 
 static void testParameters(void)
