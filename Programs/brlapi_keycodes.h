@@ -89,7 +89,7 @@ extern "C" {
  */
 typedef uint64_t brlapi_keyCode_t;
 
-#define BRLAPI_KEYCODE_PRESS 0X8000000000000000L
+#define BRLAPI_KEYCODE_PRESS UINT64_C(0X8000000000000000)
 
 /** Hex print format for brlapi_keyCode_t */
 #define BRLAPI_PRIxKEYCODE PRIx64
