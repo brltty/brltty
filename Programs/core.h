@@ -227,7 +227,7 @@ extern const ProfileDescriptor languageProfile;
 
 #define CORE_TASK_CALLBACK(name) void name (void *data)
 typedef CORE_TASK_CALLBACK(CoreTaskCallback);
-extern int runCoreTask (CoreTaskCallback *callback, void *data);
+extern int runCoreTask (CoreTaskCallback *callback, void *data, int wait);
 
 #ifdef __cplusplus
 }

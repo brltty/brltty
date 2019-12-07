@@ -375,7 +375,7 @@ static void suspendDriver(BrailleDisplay *brl) {
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver suspended");
   lockMutex(&apiSuspendMutex);
   driverConstructed = 0;
-  runCoreTask(apiCoreTask_destructBrailleDriver, NULL);
+  runCoreTask(apiCoreTask_destructBrailleDriver, NULL, 1);
   unlockMutex(&apiSuspendMutex);
 }
 
@@ -400,7 +400,7 @@ static int resumeDriver(BrailleDisplay *brl) {
       .constructed = 0
     };
 
-    runCoreTask(apiCoreTask_constructBrailleDriver, &cbd);
+    runCoreTask(apiCoreTask_constructBrailleDriver, &cbd, 1);
     driverConstructed = cbd.constructed;
   }
 

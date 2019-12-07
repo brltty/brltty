@@ -1403,38 +1403,43 @@ typedef struct {
   struct {
     CoreTaskCallback *callback;
     void *data;
-  } callback;
+  } run;
 
   struct {
     AsyncEvent *event;
-    unsigned flag:1;
-  } done;
+    unsigned finished:1;
+  } wait;
 } CoreTaskData;
 
 ASYNC_TASK_CALLBACK(handleCoreTask) {
   CoreTaskData *ctd = data;
-  CoreTaskCallback *callback = ctd->callback.callback;
 
-  logCoreTaskAction(callback, "starting");
-  callback(ctd->callback.data);
-  logCoreTaskAction(callback, "finished");
+  {
+    CoreTaskCallback *callback = ctd->run.callback;
+    logCoreTaskAction(callback, "starting");
+    callback(ctd->run.data);
+    logCoreTaskAction(callback, "finished");
+  }
 
-  asyncSignalEvent(ctd->done.event, NULL);
+  {
+    AsyncEvent *event = ctd->wait.event;
+    if (event) asyncSignalEvent(event, ctd);
+  }
 }
 
-ASYNC_CONDITION_TESTER(testCoreTaskDone) {
+ASYNC_CONDITION_TESTER(testCoreTaskFinished) {
   CoreTaskData *ctd = data;
-  return ctd->done.flag;
+  return ctd->wait.finished;
 }
 
-ASYNC_EVENT_CALLBACK(setCoreTaskDone) {
-  CoreTaskData *ctd = parameters->eventData;
-  ctd->done.flag = 1;
+ASYNC_EVENT_CALLBACK(setCoreTaskFinished) {
+  CoreTaskData *ctd = parameters->signalData;
+  ctd->wait.finished = 1;
 }
 
 int
-runCoreTask (CoreTaskCallback *callback, void *data) {
-  int wasRun = 0;
+runCoreTask (CoreTaskCallback *callback, void *data, int wait) {
+  int wasScheduled = 0;
 
   if (addCoreTaskEvent) {
     CoreTaskData *ctd;
@@ -1442,22 +1447,29 @@ runCoreTask (CoreTaskCallback *callback, void *data) {
     if ((ctd = malloc(sizeof(*ctd)))) {
       memset(ctd, 0, sizeof(*ctd));
 
-      ctd->callback.callback = callback;
-      ctd->callback.data = data;
+      ctd->run.callback = callback;
+      ctd->run.data = data;
 
-      if ((ctd->done.event = asyncNewEvent(setCoreTaskDone, ctd))) {
-        ctd->done.flag = 0;
+      ctd->wait.event = NULL;
+      ctd->wait.finished = 0;
+
+      if (!wait || (ctd->wait.event = asyncNewEvent(setCoreTaskFinished, NULL))) {
         logCoreTaskAction(callback, "scheduling");
 
         if (asyncAddTask(addCoreTaskEvent, handleCoreTask, ctd)) {
-          logCoreTaskAction(callback, "awaiting");
-          asyncWaitFor(testCoreTaskDone, ctd);
+          wasScheduled = 1;
 
-          logCoreTaskAction(callback, "completed");
-          wasRun = 1;
+          if (wait) {
+            logCoreTaskAction(callback, "awaiting");
+            asyncWaitFor(testCoreTaskFinished, ctd);
+            logCoreTaskAction(callback, "completed");
+          }
         }
 
-        asyncDiscardEvent(ctd->done.event);
+        {
+          AsyncEvent *event = ctd->wait.event;
+          if (event) asyncDiscardEvent(event);
+        }
       }
 
       free(ctd);
@@ -1468,7 +1480,7 @@ runCoreTask (CoreTaskCallback *callback, void *data) {
     logMessage(LOG_ERR, "core tasks not started");
   }
 
-  return wasRun;
+  return wasScheduled;
 }
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
