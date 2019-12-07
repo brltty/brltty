@@ -1285,6 +1285,13 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
   return 0;
 }
 
+static brlapi_keyCode_t makeClientKeyCode (KeyGroup group, KeyNumber number, int press)
+{
+  brlapi_keyCode_t code = (group << 8) | number;
+  if (press) code |= BRLAPI_KEYCODE_PRESS;
+  return code;
+}
+
 /* On success, this should fill 'data', adjust 'size', and return NULL.
  * On failure, this should return a non-allocated error message string. */
 #define PARAM_READER_DECLARATION(name) const char *name (Connection *c, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, void *data, size_t *size)
@@ -1778,7 +1785,7 @@ static int param_addKeyCode (const KeyNameEntry *kne, void *data)
 
     if (akc->next < akc->end) {
       brlapi_param_keyCode_t *key = akc->next;
-      *key = (kne->value.group << 8) | kne->value.number;
+      *key = makeClientKeyCode(kne->value.group, kne->value.number, 0);
       akc->next += sizeof(*key);
     }
   }
@@ -3988,11 +3995,10 @@ static int api__handleKeyEvent(brlapi_keyCode_t clientCode) {
 }
 
 int api_handleKeyEvent(KeyGroup group, KeyNumber number, int press) {
-  int ret;
-  brlapi_keyCode_t clientCode;
-  clientCode = ((brlapi_keyCode_t)group << 8) | number | ((brlapi_keyCode_t)press << 63);
+  brlapi_keyCode_t clientCode = makeClientKeyCode(group, number, press);
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "API got key %02x %02x (press %d), thus client code %016"BRLAPI_PRIxKEYCODE, group, number, press, clientCode);
 
+  int ret;
   lockMutex(&apiConnectionsMutex);
   ret = api__handleKeyEvent(clientCode);
   unlockMutex(&apiConnectionsMutex);
