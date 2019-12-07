@@ -337,8 +337,8 @@ static void listKeys(void)
     length /= sizeof(*keys);
     printf("%zu keys\n", length);
 
-    for (int i = 0; i < length; i+=1) {
-      printf("key %"BRLAPI_PRIxKEYCODE":", keys[i]);
+    for (int i=0; i<length; i+=1) {
+      printf("key %04"BRLAPI_PRIxKEYCODE":", keys[i]);
 
       {
         char *name = brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_SHORT_NAME, keys[i], BRLAPI_PARAMF_GLOBAL, NULL);
