@@ -333,16 +333,27 @@ static void listKeys(void)
   size_t length;
   brlapi_param_keyCode_t *keys = brlapi_getParameterAlloc(BRLAPI_PARAM_DEVICE_KEY_CODES, 0, BRLAPI_PARAMF_GLOBAL, &length);
 
-  length /= sizeof(*keys);
-  printf("%zu keys\n", length);
+  if (keys) {
+    length /= sizeof(*keys);
+    printf("%zu keys\n", length);
 
-  for (int i = 0; i < length; i+=1) {
-    char *name = brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_SHORT_NAME, keys[i], BRLAPI_PARAMF_GLOBAL, NULL);
-    printf("key %"BRLAPI_PRIxKEYCODE": name %s\n", keys[i], name);
-    free(name);
+    for (int i = 0; i < length; i+=1) {
+      printf("key %"BRLAPI_PRIxKEYCODE":", keys[i]);
+
+      {
+        char *name = brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_SHORT_NAME, keys[i], BRLAPI_PARAMF_GLOBAL, NULL);
+
+        if (name) {
+          printf(" name %s", name);
+          free(name);
+        }
+      }
+
+      printf("\n");
+    }
+
+    free(keys);
   }
-
-  free(keys);
 }
 
 static void testParameters(void)
