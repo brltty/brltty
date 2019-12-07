@@ -30,6 +30,7 @@
 #endif
 
 #include "options.h"
+#include "pid.h"
 #include "brl_cmds.h"
 #include "brl_dots.h"
 #include "cmd.h"
@@ -279,30 +280,41 @@ static void emptySignalHandler(int sig) { }
 
 static void suspendDriver(void)
 {
-  char name[30];
+  char driver[30];
   fprintf(stderr, "Getting driver name: ");
-  if (brlapi_getDriverName(name, sizeof(name))<0) {
+
+  if (brlapi_getDriverName(driver, sizeof(driver))<0) {
     brlapi_perror("failed");
     exit(PROG_EXIT_FATAL);
   }
-  fprintf(stderr, "%s\n", name);
-  fprintf(stderr, "Suspending\n");
-  if (brlapi_suspendDriver(name)) {
+  fprintf(stderr, "%s\n", driver);
+
+  fprintf(stderr, "Suspending driver\n");
+  if (brlapi_suspendDriver(driver)) {
     brlapi_perror("suspend");
   } else {
 #ifdef SIGUSR1
     signal(SIGUSR1,emptySignalHandler);
 #endif /* SIGUSR1 */
-    fprintf(stderr, "Sleeping\n");
+
+    {
+      ProcessIdentifier pid = getProcessIdentifier();
+      fprintf(stderr, "Waiting (send SIGUSR1 to %"PRIpid" to resume)\n", pid);
+    }
+
 #ifdef HAVE_PAUSE
     pause();
 #endif /* HAVE_PAUSE */
-    fprintf(stderr, "Resuming\n");
+
+    fprintf(stderr, "Resuming driver\n");
+
 #ifdef SIGUSR1
     signal(SIGUSR1,SIG_DFL);
 #endif /* SIGUSR1 */
-    if (brlapi_resumeDriver())
+
+    if (brlapi_resumeDriver()) {
       brlapi_perror("resumeDriver");
+    }
   }
 }
 
