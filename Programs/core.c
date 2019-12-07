@@ -1396,13 +1396,13 @@ stopCoreTasks (void) {
 }
 
 static void
-logCoreTaskAction (CoreTaskCallback *handler, const char *action) {
-  logSymbol(LOG_NOTICE, handler, "%s core task", action);
+logCoreTaskAction (CoreTaskCallback *callback, const char *action) {
+  logSymbol(LOG_NOTICE, callback, "%s core task", action);
 }
 
 typedef struct {
   struct {
-    CoreTaskCallback *handler;
+    CoreTaskCallback *callback;
     void *data;
   } callback;
 
@@ -1414,11 +1414,11 @@ typedef struct {
 
 ASYNC_TASK_CALLBACK(handleCoreTask) {
   CoreTaskData *ctd = data;
-  CoreTaskCallback *handler = ctd->callback.handler;
+  CoreTaskCallback *callback = ctd->callback.callback;
 
-  logCoreTaskAction(handler, "starting");
-  handler(ctd->callback.data);
-  logCoreTaskAction(handler, "finished");
+  logCoreTaskAction(callback, "starting");
+  callback(ctd->callback.data);
+  logCoreTaskAction(callback, "finished");
 
   asyncSignalEvent(ctd->done.event, NULL);
 }
@@ -1434,7 +1434,7 @@ ASYNC_EVENT_CALLBACK(setCoreTaskDone) {
 }
 
 int
-runCoreTask (CoreTaskCallback *handler, void *data) {
+runCoreTask (CoreTaskCallback *callback, void *data) {
   int wasRun = 0;
 
   if (addCoreTaskEvent) {
@@ -1443,18 +1443,18 @@ runCoreTask (CoreTaskCallback *handler, void *data) {
     if ((ctd = malloc(sizeof(*ctd)))) {
       memset(ctd, 0, sizeof(*ctd));
 
-      ctd->callback.handler = handler;
+      ctd->callback.callback = callback;
       ctd->callback.data = data;
 
       if ((ctd->done.event = asyncNewEvent(setCoreTaskDone, ctd))) {
         ctd->done.flag = 0;
-        logCoreTaskAction(handler, "scheduling");
+        logCoreTaskAction(callback, "scheduling");
 
         if (asyncAddTask(addCoreTaskEvent, handleCoreTask, ctd)) {
-          logCoreTaskAction(handler, "awaiting");
+          logCoreTaskAction(callback, "awaiting");
           asyncWaitFor(testCoreTaskDone, ctd);
 
-          logCoreTaskAction(handler, "completed");
+          logCoreTaskAction(callback, "completed");
           wasRun = 1;
         }
 
