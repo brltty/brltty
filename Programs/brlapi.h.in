@@ -1148,24 +1148,6 @@ int brlapi_unwatchParameter(brlapi_paramCallbackDescriptor_t descriptor);
 #endif
 int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor_t descriptor);
 
-/* brlapi_cacheParameter */
-/**
- * Caches some parameter
- * When activated, libbrlapi registers for parameter update, and getParameter achieves a simple copy from the value cached in libbrlapi which receives parameter changes from the server.
- * This is useful for parameters that the application reads often e.g. displaySize
- * When desactivated (default), getParameter requests value from server which is expensive but avoids receiving a lot of updates. This is useful when application reads parameters seldomly
- * \return nothing
- * \param parameter is the parameter to be cached or not;
- * \param subparam is a specific instance of the parameter;
- * \param flags specify which value and how it should be cached;
- * \param cached whether this parameter should be cached or not.
- * \return 0 on success, -1 on error.
- */
-#ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_cacheParameter(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, int cached);
-#endif
-int brlapi__cacheParameter(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, int cached);
-
 /** @} */
 
 /** \defgroup brlapi_misc Miscellaneous functions
