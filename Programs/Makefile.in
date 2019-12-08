@@ -16,11 +16,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: all-brltty all-brltty-cldr all-brltty-lscmds all-brltty-lsinc all-brltty-trtxt all-brltty-ttb all-brltty-atb $(ALL_BRLTTY_CTB) all-brltty-ktb all-brltty-tune all-brltty-morse $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
+all: all-commands all-tools $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
+
+all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-atb $(ALL_BRLTTY_CTB) all-brltty-ktb all-brltty-tune all-brltty-morse
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
-all-brltty-cldr: brltty-cldr$X
 all-brltty-lscmds: brltty-lscmds$X
-all-brltty-lsinc: brltty-lsinc$X
 all-brltty-trtxt: brltty-trtxt$X
 all-brltty-ttb: brltty-ttb$X
 all-brltty-atb: brltty-atb$X
@@ -28,7 +28,10 @@ all-brltty-ctb: brltty-ctb$X
 all-brltty-ktb: brltty-ktb$X $(BRAILLE_DRIVERS)
 all-brltty-tune: brltty-tune$X
 all-brltty-morse: brltty-morse$X
-all-xbrlapi: xbrlapi$X
+
+all-tools: all-brltty-cldr all-brltty-lsinc
+all-brltty-cldr: brltty-cldr$X
+all-brltty-lsinc: brltty-lsinc$X
 
 everything: all all-brltest all-scrtest all-spktest $(ALL_API)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
@@ -37,6 +40,7 @@ all-scrtest: scrtest$X $(SCREEN_DRIVERS)
 
 all-api: all-apitest
 all-apitest: apitest$X
+all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
@@ -1016,12 +1020,11 @@ check-all: check-text-tables check-attributes-tables check-contraction-tables ch
 
 install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
 
-install-programs: install-commands brltty-cldr$X brltty-lsinc$X install-program-directories
-	$(INSTALL_PROGRAM) brltty-cldr$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-lsinc$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
+install-programs: install-commands install-tools
 
-install-commands: brltty$X brltty-lscmds$X brltty-trtxt$X brltty-ttb$X brltty-atb$X $(INSTALL_BRLTTY_CTB) brltty-ktb$X brltty-tune$X brltty-morse$X install-program-directories
+install-program-directories: install-program-directory install-writable-directory
+
+install-commands: all-commands $(INSTALL_BRLTTY_CTB) install-program-directories
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -1034,7 +1037,10 @@ install-commands: brltty$X brltty-lscmds$X brltty-trtxt$X brltty-ttb$X brltty-at
 install-brltty-ctb: brltty-ctb$X install-program-directories
 	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
 
-install-program-directories: install-program-directory install-writable-directory
+install-tools: all-tools install-program-directories
+	$(INSTALL_PROGRAM) brltty-cldr$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-lsinc$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
 
 XBRLAPI_X11_AUTOSTART_FILE = 60xbrlapi
 XBRLAPI_GDM_AUTOSTART_FILE = xbrlapi.desktop

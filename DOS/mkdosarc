@@ -106,7 +106,7 @@ logMessage task "configuring build"
 "${sourceDirectory}/cfg-dos" --prefix="${installDirectory}"
 
 logMessage task "building programs"
-make -s -C Programs all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-atb all-brltty-ctb all-brltty-ktb all-brltty-tune all-brltty-morse
+make -s -C Programs all-commands
 
 logMessage task "building documentation"
 make -s -C Documents all
