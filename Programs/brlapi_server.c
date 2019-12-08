@@ -379,31 +379,11 @@ static void suspendDriver(BrailleDisplay *brl) {
   unlockMutex(&apiSuspendMutex);
 }
 
-typedef struct {
-  unsigned constructed:1;
-} CoreTaskData_constructBrailleDriver;
-
-CORE_TASK_CALLBACK(apiCoreTask_constructBrailleDriver) {
-  CoreTaskData_constructBrailleDriver *cbd = data;
-  cbd->constructed = constructBrailleDriver();
-}
-
-/* Function : resumeDriver */
-/* Re-open driver */
-static int resumeDriver(BrailleDisplay *brl) {
+static int resumeBrailleDriver(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return 0; /* core unlinked api */
   driverConstructing = 1;
   lockMutex(&apiSuspendMutex);
-
-  {
-    CoreTaskData_constructBrailleDriver cbd = {
-      .constructed = 0
-    };
-
-    runCoreTask(apiCoreTask_constructBrailleDriver, &cbd, 1);
-    driverConstructed = cbd.constructed;
-  }
-
+  driverConstructed = constructBrailleDriver();
   if (driverConstructed) {
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver resumed");
     handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_NAME, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.name, strlen(braille->definition.name));
@@ -415,6 +395,28 @@ static int resumeDriver(BrailleDisplay *brl) {
   unlockMutex(&apiSuspendMutex);
   driverConstructing = 0;
   return driverConstructed;
+}
+
+typedef struct {
+  BrailleDisplay *brl;
+  unsigned resumed:1;
+} CoreTaskData_resumeBrailleDriver;
+
+CORE_TASK_CALLBACK(apiCoreTask_resumeBrailleDriver) {
+  CoreTaskData_resumeBrailleDriver *rbd = data;
+  rbd->resumed = resumeBrailleDriver(rbd->brl);
+}
+
+/* Function : resumeDriver */
+/* Re-open driver */
+static int resumeDriver(BrailleDisplay *brl) {
+  CoreTaskData_resumeBrailleDriver rbd = {
+    .brl = brl,
+    .resumed = 0
+  };
+
+  runCoreTask(apiCoreTask_resumeBrailleDriver, &rbd, 1);
+  return rbd.resumed;
 }
 
 /****************************************************************************/
