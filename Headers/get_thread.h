@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_GET_PTHREADS
-#define BRLTTY_INCLUDED_GET_PTHREADS
+#ifndef BRLTTY_INCLUDED_GET_THREAD
+#define BRLTTY_INCLUDED_GET_THREAD
 
 #include "prologue.h"
 #undef GOT_PTHREADS
@@ -40,4 +40,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_GET_PTHREADS */
+#endif /* BRLTTY_INCLUDED_GET_THREAD */

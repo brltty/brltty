@@ -23,7 +23,7 @@
 
 #include "lock.h"
 #include "log.h"
-#include "get_pthreads.h"
+#include "get_thread.h"
  
 #undef CAN_LOCK
 #if defined(PTHREAD_RWLOCK_INITIALIZER)

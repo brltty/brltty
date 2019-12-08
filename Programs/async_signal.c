@@ -24,7 +24,7 @@
 #include "async_event.h"
 #include "async_signal.h"
 #include "async_internal.h"
-#include "get_pthreads.h"
+#include "get_thread.h"
 
 #ifdef ASYNC_CAN_HANDLE_SIGNALS
 #if defined(HAVE_SYS_SIGNALFD_H)

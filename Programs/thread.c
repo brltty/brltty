@@ -34,17 +34,16 @@
 typedef struct {
   ThreadFunction *function;
   void *argument;
-  char name[0];
+  char name[];
 } RunThreadArgument;
 
 static void *
 runThread (void *argument) {
   RunThreadArgument *run = argument;
-  void *result;
 
   setThreadName(run->name);
   logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread starting: %s", run->name);
-  result = run->function(run->argument);
+  void *result = run->function(run->argument);
   logMessage(LOG_CATEGORY(ASYNC_EVENTS), "thread finished: %s", run->name);
 
   free(run);

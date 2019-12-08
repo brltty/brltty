@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_THREAD
 #define BRLTTY_INCLUDED_THREAD
 
-#include "get_pthreads.h"
+#include "get_thread.h"
 
 #ifdef __cplusplus
 extern "C" {
