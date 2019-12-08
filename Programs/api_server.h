@@ -19,8 +19,7 @@
 #ifndef BRLTTY_INCLUDED_API_SERVER
 #define BRLTTY_INCLUDED_API_SERVER
 
-#include "brl.h"
-#include "brlapi.h"
+#include "brl_types.h"
 
 #ifdef __cplusplus
 extern "C" {
