@@ -419,6 +419,26 @@ static int resumeDriver(BrailleDisplay *brl) {
   return rbd.resumed;
 }
 
+static void resetBrailleDriver(void) {
+  logMessage(LOG_WARNING, "trying to reset the braille device");
+
+  if (!trueBraille->reset || !disp || !trueBraille->reset(disp)) {
+    if (trueBraille->reset) {
+      logMessage(LOG_WARNING, "reset failed - restarting the braille driver");
+    }
+
+    restartBrailleDriver();
+  }
+}
+
+CORE_TASK_CALLBACK(apiCoreTask_resetBrailleDriver) {
+  resetBrailleDriver();
+}
+
+static void resetDriver(void) {
+  runCoreTask(apiCoreTask_resetBrailleDriver, NULL, 1);
+}
+
 /****************************************************************************/
 /** PACKET HANDLING                                                        **/
 /****************************************************************************/
@@ -2572,8 +2592,9 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   res = brlapi__readPacket(&c->packet, c->fd);
   if (res==0) return 0; /* No packet ready */
   if (res<0) {
-    if (res==-1) logMessage(LOG_WARNING,"read : %s (connection on fd %"PRIfd")",strerror(errno),c->fd);
-    else {
+    if (res==-1) {
+      logMessage(LOG_WARNING,"read : %s (connection on fd %"PRIfd")",strerror(errno),c->fd);
+    } else {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "closing connection on fd %"PRIfd,c->fd);
     }
     if (c->raw) {
@@ -2582,12 +2603,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       rawConnection = NULL;
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up raw mode properly",c->fd);
       lockMutex(&apiDriverMutex);
-      logMessage(LOG_WARNING,"Trying to reset braille terminal");
-      if (!trueBraille->reset || !disp || !trueBraille->reset(disp)) {
-	if (trueBraille->reset)
-          logMessage(LOG_WARNING,"Reset failed. Restarting braille driver");
-        restartBrailleDriver();
-      }
+      resetDriver();
       unlockMutex(&apiDriverMutex);
       unlockMutex(&apiRawMutex);
     } else if (c->suspend) {
@@ -2642,7 +2658,9 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   if (p!=NULL) {
     logRequest(type, c->fd);
     p(c, type, packet, size);
-  } else WEXC(c->fd,BRLAPI_ERROR_UNKNOWN_INSTRUCTION, type, packet, size, "unknown packet type %x", type);
+  } else {
+    WEXC(c->fd,BRLAPI_ERROR_UNKNOWN_INSTRUCTION, type, packet, size, "unknown packet type %x", type);
+  }
   return 0;
 }
 
