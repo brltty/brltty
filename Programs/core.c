@@ -1396,7 +1396,7 @@ stopCoreTasks (void) {
 
 static void
 logCoreTaskAction (CoreTaskCallback *callback, const char *action) {
-  logSymbol(LOG_NOTICE, callback, "%s core task", action);
+  logSymbol(LOG_DEBUG, callback, "%s core task", action);
 }
 
 typedef struct {
