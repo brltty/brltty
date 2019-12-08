@@ -252,7 +252,7 @@ pthread_mutex_t apiConnectionsMutex;
 /* Protects the real driver's functions */
 pthread_mutex_t apiDriverMutex;
 
-/* Which connection currently has raw mode */
+/* Which connection currently has raw mode or requested device suspension */
 pthread_mutex_t apiRawMutex;
 static Connection *rawConnection = NULL;
 static Connection *suspendConnection = NULL;
@@ -1237,17 +1237,16 @@ static int handleEnterRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     unlockMutex(&apiRawMutex);
     return 0;
   }
+  rawConnection = c;
+  unlockMutex(&apiRawMutex);
   lockMutex(&apiDriverMutex);
   if (!driverConstructed && !driverConstructing && (!disp || !resumeDriver(disp))) {
     WERR(c->fd, BRLAPI_ERROR_DRIVERERROR,"driver resume error");
     unlockMutex(&apiDriverMutex);
-    unlockMutex(&apiRawMutex);
     return 0;
   }
   unlockMutex(&apiDriverMutex);
   c->raw = 1;
-  rawConnection = c;
-  unlockMutex(&apiRawMutex);
   writeAck(c->fd);
   return 0;
 }
@@ -1256,8 +1255,8 @@ static int handleLeaveRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
 {
   CHECKERR(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" going out of raw mode",c->fd);
-  lockMutex(&apiRawMutex);
   c->raw = 0;
+  lockMutex(&apiRawMutex);
   rawConnection = NULL;
   unlockMutex(&apiRawMutex);
   writeAck(c->fd);
@@ -1283,9 +1282,9 @@ static int handleSuspendDriver(Connection *c, brlapi_packetType_t type, brlapi_p
     unlockMutex(&apiRawMutex);
     return 0;
   }
-  c->suspend = 1;
   suspendConnection = c;
   unlockMutex(&apiRawMutex);
+  c->suspend = 1;
   lockMutex(&apiDriverMutex);
   if (driverConstructed) suspendDriver(disp);
   unlockMutex(&apiDriverMutex);
@@ -1296,8 +1295,8 @@ static int handleSuspendDriver(Connection *c, brlapi_packetType_t type, brlapi_p
 static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
   CHECKERR(c->suspend,BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "not allowed out of suspend mode");
-  lockMutex(&apiRawMutex);
   c->suspend = 0;
+  lockMutex(&apiRawMutex);
   suspendConnection = NULL;
   unlockMutex(&apiRawMutex);
   lockMutex(&apiDriverMutex);
@@ -2598,18 +2597,19 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "closing connection on fd %"PRIfd,c->fd);
     }
     if (c->raw) {
-      lockMutex(&apiRawMutex);
       c->raw = 0;
+      lockMutex(&apiRawMutex);
       rawConnection = NULL;
+      unlockMutex(&apiRawMutex);
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up raw mode properly",c->fd);
       lockMutex(&apiDriverMutex);
       resetDevice();
       unlockMutex(&apiDriverMutex);
-      unlockMutex(&apiRawMutex);
     } else if (c->suspend) {
-      lockMutex(&apiRawMutex);
       c->suspend = 0;
+      lockMutex(&apiRawMutex);
       suspendConnection = NULL;
+      unlockMutex(&apiRawMutex);
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up suspended mode properly",c->fd);
       lockMutex(&apiDriverMutex);
       if (!driverConstructed && !driverConstructing && (!disp || !resumeDriver(disp)))
@@ -2620,7 +2620,6 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
 	  logMessage(LOG_WARNING,"Resetting braille terminal failed, hoping it's ok");
       }
       unlockMutex(&apiDriverMutex);
-      unlockMutex(&apiRawMutex);
     }
     if (c->tty) {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "client on fd %"PRIfd" did not give up control of tty %#010x properly",c->fd,c->tty->number);
