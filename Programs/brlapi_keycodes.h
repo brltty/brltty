@@ -89,8 +89,6 @@ extern "C" {
  */
 typedef uint64_t brlapi_keyCode_t;
 
-#define BRLAPI_KEYCODE_PRESS UINT64_C(0X8000000000000000)
-
 /** Hex print format for brlapi_keyCode_t */
 #define BRLAPI_PRIxKEYCODE PRIx64
 /** Unsigned print format for brlapi_keyCode_t */
@@ -167,6 +165,16 @@ typedef uint64_t brlapi_keyCode_t;
 #define BRLAPI_KEY_SYM_FUNCTION		UINT64_C(0X0000FFBE)
 #define BRLAPI_KEY_SYM_DELETE		UINT64_C(0X0000FFFF)
 #define BRLAPI_KEY_SYM_UNICODE		UINT64_C(0X01000000)
+
+/**
+ * Flag for a raw keycode press vs release
+ *
+ * When brlapi_enterTtyMode() is used with a driver name, brlapi_readKey()
+ * will return raw keycodes, whose values are device-dependent, except the
+ * BRLAPI_RAWKEY_PRESS flag which specifies whether this is a raw key press
+ * event or a raw key release event.
+ */
+#define BRLAPI_RAWKEY_PRESS UINT64_C(0X8000000000000000)
 
 /** @} */
 
