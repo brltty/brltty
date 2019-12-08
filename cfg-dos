@@ -64,7 +64,7 @@ export LDFLAGS=""
    --without-speechd \
    --without-swift \
    --without-theta \
-   --with-speech-driver=all \
+   --with-speech-driver=-xs,all \
    \
    --with-screen-driver=pb,-all \
    \
