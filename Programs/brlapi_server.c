@@ -419,7 +419,7 @@ static int resumeDriver(BrailleDisplay *brl) {
   return rbd.resumed;
 }
 
-static void resetBrailleDriver(void) {
+static void resetBrailleDevice(void) {
   logMessage(LOG_WARNING, "trying to reset the braille device");
 
   if (!trueBraille->reset || !disp || !trueBraille->reset(disp)) {
@@ -431,12 +431,12 @@ static void resetBrailleDriver(void) {
   }
 }
 
-CORE_TASK_CALLBACK(apiCoreTask_resetBrailleDriver) {
-  resetBrailleDriver();
+CORE_TASK_CALLBACK(apiCoreTask_resetBrailleDevice) {
+  resetBrailleDevice();
 }
 
-static void resetDriver(void) {
-  runCoreTask(apiCoreTask_resetBrailleDriver, NULL, 1);
+static void resetDevice(void) {
+  runCoreTask(apiCoreTask_resetBrailleDevice, NULL, 1);
 }
 
 /****************************************************************************/
@@ -2603,7 +2603,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       rawConnection = NULL;
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up raw mode properly",c->fd);
       lockMutex(&apiDriverMutex);
-      resetDriver();
+      resetDevice();
       unlockMutex(&apiDriverMutex);
       unlockMutex(&apiRawMutex);
     } else if (c->suspend) {
