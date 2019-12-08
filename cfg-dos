@@ -47,6 +47,7 @@ export LDFLAGS=""
    --enable-relocatable-install \
    \
    --disable-api \
+   --disable-expat \
    --disable-gpm \
    --disable-icu \
    --disable-liblouis \
@@ -77,6 +78,7 @@ export LDFLAGS=""
    --without-pgmpath-package \
    --without-service-package \
    --without-params-package \
+   --without-rgx-package \
    --without-hostcmd-package \
    --without-mntpt-package \
    --without-mntfs-package \

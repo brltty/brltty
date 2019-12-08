@@ -452,7 +452,7 @@ AC_SUBST([can_make_BrlAPIref])
 AC_CACHE_CHECK([for shared object creation command], [brltty_cv_prog_make_object_shared], [dnl
    case "${host_os}"
    in
-      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|elf*|haiku*)
+      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*|msdos*|elf*|haiku*)
          brltty_mkshr_ld_make="-shared"
          ;;
       solaris*)
