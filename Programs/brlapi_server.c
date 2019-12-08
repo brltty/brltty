@@ -364,21 +364,34 @@ static int isKeyCapable(const BrailleDriver *brl)
   return ret;
 }
 
-CORE_TASK_CALLBACK(apiCoreTask_destructBrailleDriver) {
-  destructBrailleDriver();
-}
-
-/* Function : suspendDriver */
-/* Close driver */
-static void suspendDriver(BrailleDisplay *brl) {
+/* Function : suspendBrailleDriver */
+/* Really suspend the braille driver. Assumes that apiDriverMutex is locked */
+static void suspendBrailleDriver() {
   if (trueBraille == &noBraille) return; /* core unlinked api */
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver suspended");
   lockMutex(&apiSuspendMutex);
   driverConstructed = 0;
-  runCoreTask(apiCoreTask_destructBrailleDriver, NULL, 1);
+  destructBrailleDriver();
   unlockMutex(&apiSuspendMutex);
 }
 
+
+CORE_TASK_CALLBACK(apiCoreTask_destructBrailleDriver) {
+  lockMutex(&apiDriverMutex);
+  if (driverConstructed) {
+    suspendBrailleDriver();
+  }
+  unlockMutex(&apiDriverMutex);
+}
+
+/* Function : suspendDriver */
+/* Requests suspending the driver */
+static void suspendDriver() {
+  runCoreTask(apiCoreTask_destructBrailleDriver, NULL, 1);
+}
+
+/* Function : resumeBrailleDriver */
+/* Really resume the braille driver. Assumes that apiDriverMutex is locked */
 static int resumeBrailleDriver(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return 0; /* core unlinked api */
   driverConstructing = 1;
@@ -415,7 +428,7 @@ CORE_TASK_CALLBACK(apiCoreTask_resumeBrailleDriver) {
 }
 
 /* Function : resumeDriver */
-/* Re-open driver */
+/* Requests resuming the driver */
 static int resumeDriver() {
   CoreTaskData_resumeBrailleDriver rbd = {
     .resumed = 0
@@ -425,6 +438,8 @@ static int resumeDriver() {
   return rbd.resumed;
 }
 
+/* Function : resetBrailleDriver */
+/* Really reset the braille driver. Assumes that apiDriverMutex is locked */
 static void resetBrailleDevice(void) {
   logMessage(LOG_WARNING, "trying to reset the braille device");
 
@@ -444,7 +459,7 @@ CORE_TASK_CALLBACK(apiCoreTask_resetBrailleDevice) {
 }
 
 /* Function : resetDriver */
-/* Reset device */
+/* Requests resetting the driver */
 static void resetDevice(void) {
   runCoreTask(apiCoreTask_resetBrailleDevice, NULL, 1);
 }
@@ -1292,9 +1307,7 @@ static int handleSuspendDriver(Connection *c, brlapi_packetType_t type, brlapi_p
   suspendConnection = c;
   unlockMutex(&apiRawMutex);
   c->suspend = 1;
-  lockMutex(&apiDriverMutex);
-  if (driverConstructed) suspendDriver(disp);
-  unlockMutex(&apiDriverMutex);
+  suspendDriver();
   writeAck(c->fd);
   return 0;
 }
@@ -4186,7 +4199,7 @@ int api_flush(BrailleDisplay *brl) {
 	brl->cursor = coreWindowCursor;
 	trueBraille->writeWindow(brl, coreWindowText);
 	disp->buffer = oldbuf;
-	suspendDriver(brl);
+	suspendBrailleDriver();
       }
       unlockMutex(&apiDriverMutex);
       unlockMutex(&apiRawMutex);
@@ -4310,7 +4323,7 @@ void api_unlink(BrailleDisplay *brl)
   trueBraille=&noBraille;
   lockMutex(&apiDriverMutex);
   if (!coreActive && driverConstructed)
-    suspendDriver(disp);
+    suspendBrailleDriver();
   driverConstructed=0;
   disp = NULL;
   unlockMutex(&apiDriverMutex);
