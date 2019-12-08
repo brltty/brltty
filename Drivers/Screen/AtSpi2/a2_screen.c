@@ -90,6 +90,7 @@ static unsigned char typeFlags[TYPE_COUNT];
 
 static char *curSender;
 static char *curPath;
+static char *curRole;
 
 static long curNumRows, curNumCols;
 static wchar_t **curRows;
@@ -395,6 +396,20 @@ static void findPosition(long position, long *px, long *py) {
   *py = y;
 }
 
+static long findCoordinates(long xx, long yy) {
+  long offset=0, y;
+  /* XXX: I don't know what they do with necessary combining accents */
+  if (yy >= curNumRows) {
+    return -1;
+  }
+  for (y=0; y<yy; y++) {
+    offset += curRowLengths[y];
+  }
+  if (xx >= curRowLengths[y])
+    xx = curRowLengths[y]-1;
+  return offset + xx;
+}
+
 static void caretPosition(long caret) {
   findPosition(caret,&curPosX,&curPosY);
   curCaret = caret;
@@ -407,6 +422,8 @@ static void finiTerm(void) {
   curSender = NULL;
   free(curPath);
   curPath = NULL;
+  free(curRole);
+  curRole = NULL;
   curPosX = curPosY = 0;
   free(curRows);
   curRows = NULL;
@@ -559,6 +576,7 @@ static void restartTerm(const char *sender, const char *path) {
 
   curSender = strdup(sender);
   curPath = strdup(path);
+  curRole = getRole(sender, path);
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "new term %s:%s with text %s",curSender,curPath, text);
 
@@ -1635,6 +1653,74 @@ insertKey_AtSpi2Screen (ScreenKey key) {
   }
 }
 
+static int
+setSelection_AtSpi2Screen (int beginOffset, int endOffset) {
+  dbus_bool_t result;
+  DBusMessage *msg, *reply;
+  DBusMessageIter iter;
+  dbus_int32_t num = 0;
+  dbus_int32_t begin = beginOffset;
+  dbus_int32_t end = endOffset;
+
+  msg = new_method_call(curSender, curPath, SPI2_DBUS_INTERFACE_TEXT, "SetSelection");
+  if (!msg)
+    return 0;
+  dbus_message_append_args(msg, DBUS_TYPE_INT32, &num, DBUS_TYPE_INT32, &begin, DBUS_TYPE_INT32, &end, DBUS_TYPE_INVALID);
+  reply = send_with_reply_and_block(bus, msg, 1000, "setting selection");
+  if (!reply)
+    return 0;
+
+  dbus_message_iter_init(reply, &iter);
+  if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_BOOLEAN) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "SetSelection didn't return a boolean but '%c'", dbus_message_iter_get_arg_type(&iter));
+    result = 0;
+    goto out;
+  }
+  dbus_message_iter_get_basic(&iter, &result);
+
+out:
+  dbus_message_unref(reply);
+  return result;
+}
+
+static int
+highlightRegion_AtSpi2Screen (int left, int right, int top, int bottom) {
+  int begin, end;
+
+  if (!curRole)
+    return 0;
+
+  if (strcmp (curRole, "terminal") != 0)
+    /* It is safe to play with selections only with terminals */
+    return 0;
+
+  if (top != bottom)
+    /* AtSpi selection only supports linear selection */
+    return 0;
+
+  begin = findCoordinates(left, top);
+  if (begin == -1)
+    return 0;
+  end = findCoordinates(right, bottom);
+  if (end == -1)
+    return 0;
+
+  return setSelection_AtSpi2Screen(begin, end+1);
+}
+
+static int
+unhighlightRegion_AtSpi2Screen (void) {
+  if (!curRole)
+    return 0;
+
+  if (strcmp (curRole, "terminal") != 0)
+    /* It is safe to play with selections only with terminals */
+    return 0;
+
+  return setSelection_AtSpi2Screen(0, 0);
+}
+
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
@@ -1643,6 +1729,8 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_AtSpi2Screen;
   main->base.readCharacters = readCharacters_AtSpi2Screen;
   main->base.insertKey = insertKey_AtSpi2Screen;
+  main->base.highlightRegion = highlightRegion_AtSpi2Screen;
+  main->base.unhighlightRegion = unhighlightRegion_AtSpi2Screen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_AtSpi2Screen;
   main->processParameters = processParameters_AtSpi2Screen;
   main->construct = construct_AtSpi2Screen;
