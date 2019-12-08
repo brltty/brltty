@@ -350,9 +350,7 @@ static void suspendDriver(void)
       fprintf(stderr, "Waiting (send SIGUSR1 to %"PRIpid" to resume)\n", pid);
     }
 
-#ifdef HAVE_PAUSE
-    pause();
-#endif /* HAVE_PAUSE */
+    brlapi_pause(-1);
 
 #ifdef SIGUSR1
     signal(SIGUSR1,SIG_DFL);
