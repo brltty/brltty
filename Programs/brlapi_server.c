@@ -398,20 +398,26 @@ static int resumeBrailleDriver(BrailleDisplay *brl) {
 }
 
 typedef struct {
-  BrailleDisplay *brl;
   unsigned resumed:1;
 } CoreTaskData_resumeBrailleDriver;
 
 CORE_TASK_CALLBACK(apiCoreTask_resumeBrailleDriver) {
   CoreTaskData_resumeBrailleDriver *rbd = data;
-  rbd->resumed = resumeBrailleDriver(rbd->brl);
+  lockMutex(&apiDriverMutex);
+  if (!disp) {
+    rbd->resumed = 0;
+  } else if (driverConstructed || driverConstructing) {
+    rbd->resumed = 1;
+  } else {
+    rbd->resumed = resumeBrailleDriver(disp);
+  }
+  unlockMutex(&apiDriverMutex);
 }
 
 /* Function : resumeDriver */
 /* Re-open driver */
-static int resumeDriver(BrailleDisplay *brl) {
+static int resumeDriver() {
   CoreTaskData_resumeBrailleDriver rbd = {
-    .brl = brl,
     .resumed = 0
   };
 
@@ -432,9 +438,13 @@ static void resetBrailleDevice(void) {
 }
 
 CORE_TASK_CALLBACK(apiCoreTask_resetBrailleDevice) {
+  lockMutex(&apiDriverMutex);
   resetBrailleDevice();
+  unlockMutex(&apiDriverMutex);
 }
 
+/* Function : resetDriver */
+/* Reset device */
 static void resetDevice(void) {
   runCoreTask(apiCoreTask_resetBrailleDevice, NULL, 1);
 }
@@ -1239,13 +1249,10 @@ static int handleEnterRawMode(Connection *c, brlapi_packetType_t type, brlapi_pa
   }
   rawConnection = c;
   unlockMutex(&apiRawMutex);
-  lockMutex(&apiDriverMutex);
-  if (!driverConstructed && !driverConstructing && (!disp || !resumeDriver(disp))) {
+  if (!resumeDriver()) {
     WERR(c->fd, BRLAPI_ERROR_DRIVERERROR,"driver resume error");
-    unlockMutex(&apiDriverMutex);
     return 0;
   }
-  unlockMutex(&apiDriverMutex);
   c->raw = 1;
   writeAck(c->fd);
   return 0;
@@ -1299,9 +1306,7 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
   lockMutex(&apiRawMutex);
   suspendConnection = NULL;
   unlockMutex(&apiRawMutex);
-  lockMutex(&apiDriverMutex);
-  if (!driverConstructed && !driverConstructing) resumeDriver(disp);
-  unlockMutex(&apiDriverMutex);
+  resumeDriver();
   writeAck(c->fd);
   return 0;
 }
@@ -2602,24 +2607,15 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       rawConnection = NULL;
       unlockMutex(&apiRawMutex);
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up raw mode properly",c->fd);
-      lockMutex(&apiDriverMutex);
       resetDevice();
-      unlockMutex(&apiDriverMutex);
     } else if (c->suspend) {
       c->suspend = 0;
       lockMutex(&apiRawMutex);
       suspendConnection = NULL;
       unlockMutex(&apiRawMutex);
       logMessage(LOG_WARNING,"Client on fd %"PRIfd" did not give up suspended mode properly",c->fd);
-      lockMutex(&apiDriverMutex);
-      if (!driverConstructed && !driverConstructing && (!disp || !resumeDriver(disp)))
+      if (!resumeDriver())
 	logMessage(LOG_WARNING,"Couldn't resume braille driver");
-      if (driverConstructed && trueBraille->reset) {
-        logMessage(LOG_CATEGORY(SERVER_EVENTS), "trying to reset braille terminal");
-	if (!trueBraille->reset(disp))
-	  logMessage(LOG_WARNING,"Resetting braille terminal failed, hoping it's ok");
-      }
-      unlockMutex(&apiDriverMutex);
     }
     if (c->tty) {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "client on fd %"PRIfd" did not give up control of tty %#010x properly",c->fd,c->tty->number);
