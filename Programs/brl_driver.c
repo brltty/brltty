@@ -21,7 +21,6 @@
 #include "log.h"
 #include "drivers.h"
 #include "brl.h"
-#include "brl.auto.h"
 
 #define BRLSYMBOL noBraille
 #define DRIVER_NAME NoBraille
@@ -30,6 +29,7 @@
 #define DRIVER_VERSION ""
 #define DRIVER_DEVELOPERS ""
 #include "brl_driver.h"
+#include "brl.auto.h"
 
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {

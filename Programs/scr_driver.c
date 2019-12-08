@@ -21,7 +21,6 @@
 #include <string.h>
 
 #include "drivers.h"
-#include "scr.auto.h"
 
 typedef enum {
   PARM_MESSAGE
@@ -35,6 +34,7 @@ typedef enum {
 #define DRIVER_VERSION ""
 #define DRIVER_DEVELOPERS ""
 #include "scr_driver.h"
+#include "scr.auto.h"
 
 static const char defaultMessage[] = strtext("no screen");
 static const char *messageParameter = NULL;

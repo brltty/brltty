@@ -20,7 +20,6 @@
 
 #include "drivers.h"
 #include "spk.h"
-#include "spk.auto.h"
 
 #define SPKSYMBOL noSpeech
 #define DRIVER_NAME NoSpeech
@@ -29,6 +28,7 @@
 #define DRIVER_VERSION ""
 #define DRIVER_DEVELOPERS ""
 #include "spk_driver.h"
+#include "spk.auto.h"
 
 static int
 spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
