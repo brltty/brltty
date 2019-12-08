@@ -4146,7 +4146,7 @@ int api_flush(BrailleDisplay *brl) {
     lockMutex(&c->brailleWindowMutex);
     lockMutex(&apiDriverMutex);
     if (!driverConstructed && !driverConstructing) {
-      if (!resumeDriver(brl)) {
+      if (!resumeBrailleDriver(brl)) {
 	unlockMutex(&apiDriverMutex);
 	unlockMutex(&c->brailleWindowMutex);
         unlockMutex(&apiRawMutex);
@@ -4222,7 +4222,7 @@ int api_resume(BrailleDisplay *brl) {
   lockMutex(&apiRawMutex);
   lockMutex(&apiDriverMutex);
   if (!suspendConnection && !driverConstructed)
-    resumeDriver(brl);
+    resumeBrailleDriver(brl);
   unlockMutex(&apiDriverMutex);
   unlockMutex(&apiRawMutex);
   return (coreActive = driverConstructed);
