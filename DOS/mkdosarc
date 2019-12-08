@@ -112,7 +112,7 @@ logMessage task "building documentation"
 make -s -C Documents all
 
 logMessage task "installing files"
-make -s -C Programs install-commands install-core-headers install-manpages
+make -s -C Programs install-commands install-tables install-core-headers install-manpages
 
 logMessage task "updating files"
 
