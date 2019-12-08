@@ -423,3 +423,10 @@ alert (AlertIdentifier identifier) {
 #include "api_control.h"
 
 const ApiMethods api;
+
+#include "message.h"
+
+int
+message (const char *mode, const char *text, MessageOptions options) {
+  return 1;
+}

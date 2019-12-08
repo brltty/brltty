@@ -104,22 +104,29 @@ manualSubdirectory="${documentSubdirectory}/Manual"
 cd "${buildDirectory}"
 logMessage task "configuring build"
 "${sourceDirectory}/cfg-dos" --prefix="${installDirectory}"
+
 logMessage task "building programs"
-make -s all
+make -s -C Programs all-brltty all-brltty-ttb all-brltty-atb all-brltty-ctb all-brltty-ktb all-brltty-trtxt all-brltty-tune all-brltty-morse all-brltty-lscmds
+
 logMessage task "building documentation"
 make -s -C Documents
+
 logMessage task "installing files"
-make -s install
+make -s -C Programs install-programs install-drivers install-core-headers install-manpages
+make -s -C Documents install
+
 logMessage task "updating files"
 
 cd "${installDirectory}/bin"
 rm brltty-config
-mv brltty-trtxt.exe brltrtxt.exe
 mv brltty-ttb.exe brlttb.exe
 mv brltty-atb.exe brlatb.exe
 mv brltty-ctb.exe brlctb.exe
 mv brltty-ktb.exe brlktb.exe
+mv brltty-trtxt.exe brltrtxt.exe
 mv brltty-tune.exe brltune.exe
+mv brltty-morse.exe brlmorse.exe
+mv brltty-lscmds.exe brllscmd.exe
 
 cd "${sourceDirectory}/DOS"
 installFile cwsdpmi.exe "bin/cwsdpmi.exe"
