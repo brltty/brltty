@@ -34,8 +34,8 @@ extern void api_stop (BrailleDisplay *brl);
 extern void api_link (BrailleDisplay *brl);
 extern void api_unlink (BrailleDisplay *brl);
 
-extern void api_suspend (BrailleDisplay *brl);
-extern int api_resume (BrailleDisplay *brl);
+extern void api_suspendDriver (BrailleDisplay *brl);
+extern int api_resumeDriver (BrailleDisplay *brl);
 
 extern int api_claimDriver (BrailleDisplay *brl);
 extern void api_releaseDriver (BrailleDisplay *brl);

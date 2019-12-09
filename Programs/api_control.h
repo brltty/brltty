@@ -38,8 +38,8 @@ typedef struct {
   void (*unlink) (void);
   int (*isLinked) (void);
 
-  void (*suspend) (void);
-  int (*resume) (void);
+  void (*suspendDriver) (void);
+  int (*resumeDriver) (void);
 
   int (*claimDriver) (void);
   void (*releaseDriver) (void);

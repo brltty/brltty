@@ -4236,7 +4236,7 @@ out:
   return ok;
 }
 
-int api_resume(BrailleDisplay *brl) {
+int api_resumeDriver(BrailleDisplay *brl) {
   /* core is resuming or opening the device for the first time, let's try to go
    * to normal state */
   lockMutex(&apiRawMutex);
@@ -4263,7 +4263,7 @@ void api_releaseDriver(BrailleDisplay *brl)
   unlockMutex(&apiSuspendMutex);
 }
 
-void api_suspend(BrailleDisplay *brl) {
+void api_suspendDriver(BrailleDisplay *brl) {
   /* core is suspending, going to core suspend state */
   coreActive = 0;
   flushBrailleOutput(brl);

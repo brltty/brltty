@@ -48,11 +48,11 @@ api_unlink (BrailleDisplay *brl) {
 }
 
 void
-api_suspend (BrailleDisplay *brl) {
+api_suspendDriver (BrailleDisplay *brl) {
 }
 
 int
-api_resume (BrailleDisplay *brl) {
+api_resumeDriver (BrailleDisplay *brl) {
   return 0;
 }
 
@@ -142,10 +142,10 @@ apiIsLinked (void) {
 }
 
 static void
-apiSuspend (void) {
+apiSuspendDriver (void) {
 #ifdef ENABLE_API
   if (apiStarted) {
-    api_suspend(&brl);
+    api_suspendDriver(&brl);
   } else
 #endif /* ENABLE_API */
 
@@ -155,9 +155,9 @@ apiSuspend (void) {
 }
 
 static int
-apiResume (void) {
+apiResumeDriver (void) {
 #ifdef ENABLE_API
-  if (apiStarted) return api_resume(&brl);
+  if (apiStarted) return api_resumeDriver(&brl);
 #endif /* ENABLE_API */
 
   return constructBrailleDriver();
@@ -216,8 +216,8 @@ const ApiMethods api = {
   .unlink = apiUnlink,
   .isLinked = apiIsLinked,
 
-  .suspend = apiSuspend,
-  .resume = apiResume,
+  .suspendDriver = apiSuspendDriver,
+  .resumeDriver = apiResumeDriver,
 
   .claimDriver = apiClaimDriver,
   .releaseDriver = apiReleaseDriver,
