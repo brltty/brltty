@@ -76,7 +76,7 @@ api_handleKeyEvent (KeyGroup group, KeyNumber number, int press) {
 }
 
 int
-api_flush (BrailleDisplay *brl) {
+api_flushOutput (BrailleDisplay *brl) {
   return 0;
 }
 
@@ -194,9 +194,9 @@ apiHandleKeyEvent (KeyGroup group, KeyNumber number, int press) {
 }
 
 static int
-apiFlush (void) {
+apiFlushOutput (void) {
   if (!apiStarted) return 1;
-  return api_flush(&brl);
+  return api_flushOutput(&brl);
 }
 
 static void
@@ -225,6 +225,6 @@ const ApiMethods api = {
   .handleCommand = apiHandleCommand,
   .handleKeyEvent = apiHandleKeyEvent,
 
-  .flush = apiFlush,
+  .flushOutput = apiFlushOutput,
   .updateParameter = apiUpdateParameter
 };

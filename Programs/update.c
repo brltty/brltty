@@ -687,7 +687,7 @@ doUpdate (void) {
   unrequireAllBlinkDescriptors();
   refreshScreen();
   updateSessionAttributes();
-  api.flush();
+  api.flushOutput();
 
   if (scr.unreadable) {
     logMessage(LOG_CATEGORY(UPDATE_EVENTS), "screen unreadable: %s", scr.unreadable);

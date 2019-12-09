@@ -47,7 +47,7 @@ typedef struct {
   int (*handleCommand) (int command);
   int (*handleKeyEvent) (KeyGroup group, KeyNumber number, int press);
 
-  int (*flush) (void);
+  int (*flushOutput) (void);
   void (*updateParameter) (brlapi_param_t parameter, brlapi_param_subparam_t subparam);
 } ApiMethods;
 

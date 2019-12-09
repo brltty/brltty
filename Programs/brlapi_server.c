@@ -463,7 +463,7 @@ static void resetDevice(void) {
 }
 
 static int flushBrailleOutput(void) {
-  int flushed = api_flush(&brl);
+  int flushed = api_flushOutput(&brl);
   resetAllBlinkDescriptors();
   return flushed;
 }
@@ -4150,10 +4150,10 @@ out:
   return command;
 }
 
-/* Function : api_flush
+/* Function : api_flushOutput
  * Flush writes to the braille device.
  */
-int api_flush(BrailleDisplay *brl) {
+int api_flushOutput(BrailleDisplay *brl) {
   Connection *c;
   static Connection *displayed_last;
   int ok = 1;
@@ -4285,7 +4285,7 @@ REPORT_LISTENER(brlapi_handleReports)
 {
   if (parameters->reportIdentifier == REPORT_BRAILLE_DEVICE_ONLINE) {
     BrailleDisplay *brl = parameters->listenerData;
-    api_flush(brl);
+    api_flushOutput(brl);
     resetAllBlinkDescriptors();
   }
 }
