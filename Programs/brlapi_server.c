@@ -103,7 +103,6 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 #include "io_misc.h"
 #include "scr.h"
 #include "charset.h"
-#include "async_event.h"
 #include "async_signal.h"
 #include "thread.h"
 #include "blink.h"
@@ -127,7 +126,6 @@ typedef enum {
 const char *const api_parameters[] = { "auth", "host", "stacksize", NULL };
 
 static size_t stackSize;
-static AsyncEvent *flushEvent;
 
 #define WERR(x, y, ...) do { \
   logMessage(LOG_ERR, "writing error %d to %"PRIfd, y, x); \
@@ -366,7 +364,7 @@ static int isKeyCapable(const BrailleDriver *brl)
 
 /* Function : suspendBrailleDriver */
 /* Really suspend the braille driver. Assumes that apiDriverMutex is locked */
-static void suspendBrailleDriver() {
+static void suspendBrailleDriver(void) {
   if (trueBraille == &noBraille) return; /* core unlinked api */
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver suspended");
   lockMutex(&apiSuspendMutex);
@@ -386,7 +384,7 @@ CORE_TASK_CALLBACK(apiCoreTask_destructBrailleDriver) {
 
 /* Function : suspendDriver */
 /* Requests suspending the driver */
-static void suspendDriver() {
+static void suspendDriver(void) {
   runCoreTask(apiCoreTask_destructBrailleDriver, NULL, 1);
 }
 
@@ -429,7 +427,7 @@ CORE_TASK_CALLBACK(apiCoreTask_resumeBrailleDriver) {
 
 /* Function : resumeDriver */
 /* Requests resuming the driver */
-static int resumeDriver() {
+static int resumeDriver(void) {
   CoreTaskData_resumeBrailleDriver rbd = {
     .resumed = 0
   };
@@ -462,6 +460,30 @@ CORE_TASK_CALLBACK(apiCoreTask_resetBrailleDevice) {
 /* Requests resetting the driver */
 static void resetDevice(void) {
   runCoreTask(apiCoreTask_resetBrailleDevice, NULL, 1);
+}
+
+static int flushBrailleOutput(void) {
+  int flushed = api_flush(&brl);
+  resetAllBlinkDescriptors();
+  return flushed;
+}
+
+typedef struct {
+  unsigned flushed:1;
+} CoreTaskData_flushBrailleOutput;
+
+CORE_TASK_CALLBACK(apiCoreTask_flushBrailleOutput) {
+  CoreTaskData_flushBrailleOutput *fbo = data;
+  fbo->flushed = flushBrailleOutput();
+}
+
+static int flushOutput(void) {
+  CoreTaskData_flushBrailleOutput fbo = {
+    .flushed = 0
+  };
+
+  runCoreTask(apiCoreTask_flushBrailleOutput, &fbo, 1);
+  return fbo.flushed;
 }
 
 /****************************************************************************/
@@ -936,7 +958,7 @@ static int handleSetFocus(Connection *c, brlapi_packetType_t type, brlapi_packet
   CHECKEXC(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   c->tty->focus = ntohl(ints[0]);
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "focus on window %#010x from fd%"PRIfd,c->tty->focus,c->fd);
-  asyncSignalEvent(flushEvent, NULL);
+  flushOutput();
   return 0;
 }
 
@@ -1233,7 +1255,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 
   c->brlbufstate = TODISPLAY;
   unlockMutex(&c->brailleWindowMutex);
-  asyncSignalEvent(flushEvent, NULL);
+  flushOutput();
   return 0;
 }
 
@@ -3879,11 +3901,6 @@ static void ttyTerminationHandler(Tty *tty)
       t = t->next;
     }
   }
-
-  if (flushEvent) {
-    asyncDiscardEvent(flushEvent);
-    flushEvent = NULL;
-  }
 }
 /* Function : terminationHandler */
 /* Terminates driver */
@@ -4219,12 +4236,6 @@ out:
   return ok;
 }
 
-ASYNC_EVENT_CALLBACK(handleServerFlushEvent) {
-  BrailleDisplay *brl = parameters->eventData;
-  api_flush(brl);
-  resetAllBlinkDescriptors();
-}
-
 int api_resume(BrailleDisplay *brl) {
   /* core is resuming or opening the device for the first time, let's try to go
    * to normal state */
@@ -4255,7 +4266,7 @@ void api_releaseDriver(BrailleDisplay *brl)
 void api_suspend(BrailleDisplay *brl) {
   /* core is suspending, going to core suspend state */
   coreActive = 0;
-  asyncSignalEvent(flushEvent, NULL);
+  flushBrailleOutput();
 }
 
 static void brlResize(BrailleDisplay *brl)
@@ -4413,8 +4424,6 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_attr_init(&attr);
   pthread_attr_setstacksize(&attr,stackSize);
 
-  if (!(flushEvent = asyncNewEvent(handleServerFlushEvent, brl))) goto noFlushEvent;
-
 #ifndef __MINGW32__
   initializeBlockedSignalsMask();
   asyncHandleSignal(SIGUSR2, asyncEmptySignalHandler, NULL);
@@ -4443,8 +4452,6 @@ int api_start(BrailleDisplay *brl, char **parameters)
   return 1;
 
 noServerThread:
-  asyncDiscardEvent(flushEvent);
-noFlushEvent:
   freeConnection(ttys.connections);
 noTtysConnections:
   freeConnection(notty.connections);
