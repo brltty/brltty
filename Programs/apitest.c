@@ -294,7 +294,7 @@ static void showKeyCodes(void)
     return;
   }
 
-  if (brlapi_writeText(BRLAPI_CURSOR_OFF, "show key codes")<0) {
+  if (brlapi_writeText(BRLAPI_CURSOR_OFF, "showing key codes")<0) {
     brlapi_perror("brlapi_writeText");
     exit(PROG_EXIT_FATAL);
   }
@@ -302,7 +302,7 @@ static void showKeyCodes(void)
   int res;
   brlapi_keyCode_t key;
 
-  while ((res = brlapi_readKey(1, &key)) != -1) {
+  while ((res = brlapi_readKeyWithTimeout(10000, &key)) > 0) {
     const char *action = (key & BRLAPI_RAWKEY_PRESS)? "press": "release";
     size_t length = snprintf(buf, sizeof(buf), "%04" BRLAPI_PRIxKEYCODE " (%" BRLAPI_PRIuKEYCODE ") %s", key, key, action);
 
@@ -319,7 +319,7 @@ static void showKeyCodes(void)
     fprintf(stderr, "%s\n", buf);
   }
 
-  brlapi_perror("brlapi_readKey");
+  if (res < 0) brlapi_perror("brlapi_readKey");
 }
 
 #ifdef SIGUSR1
@@ -347,7 +347,7 @@ static void suspendDriver(void)
 
     {
       ProcessIdentifier pid = getProcessIdentifier();
-      fprintf(stderr, "Waiting (send SIGUSR1 to %"PRIpid" to resume)\n", pid);
+      fprintf(stderr, "Waiting (to resume, send SIGUSR1 to process %"PRIpid")\n", pid);
     }
 
     brlapi_pause(-1);
