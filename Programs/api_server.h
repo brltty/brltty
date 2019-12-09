@@ -28,8 +28,8 @@ extern "C" {
 extern void api_identify (int full);
 extern const char *const api_parameters[];
 
-extern int api_start (BrailleDisplay *brl, char **parameters);
-extern void api_stop (BrailleDisplay *brl);
+extern int api_startServer (BrailleDisplay *brl, char **parameters);
+extern void api_stopServer (BrailleDisplay *brl);
 
 extern void api_link (BrailleDisplay *brl);
 extern void api_unlink (BrailleDisplay *brl);

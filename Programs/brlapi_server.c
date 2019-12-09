@@ -4349,11 +4349,11 @@ void api_identify(int full)
   }
 }
 
-/* Function : api_start */
+/* Function : api_startServer */
 /* Initializes BrlApi */
 /* One first initialize the driver */
 /* Then one creates the communication socket */
-int api_start(BrailleDisplay *brl, char **parameters)
+int api_startServer(BrailleDisplay *brl, char **parameters)
 {
   int res,i;
 
@@ -4460,11 +4460,11 @@ noNottyConnections:
   return 0;
 }
 
-/* Function : api_stop */
+/* Function : api_stopServer */
 /* End of BrlApi session. Closes the listening socket */
 /* destroys opened connections and associated resources */
 /* Closes the driver */
-void api_stop(BrailleDisplay *brl)
+void api_stopServer(BrailleDisplay *brl)
 {
   terminationHandler();
 }

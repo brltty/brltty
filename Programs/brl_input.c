@@ -76,7 +76,7 @@ GIO_INPUT_HANDLER(handleBrailleInput) {
   }
 
 #ifdef ENABLE_API
-  else if (api.isStarted()) {
+  else if (api.isServerRunning()) {
     switch (readBrailleCommand(&brl, KTB_CTX_DEFAULT)) {
       case BRL_CMD_RESTARTBRL:
         brl.hasFailed = 1;

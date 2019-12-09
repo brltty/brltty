@@ -31,12 +31,12 @@ api_identify (int full) {
 }
 
 int
-api_start (BrailleDisplay *brl, char **parameters) {
+api_startServer (BrailleDisplay *brl, char **parameters) {
   return 0;
 }
 
 void
-api_stop (BrailleDisplay *brl) {
+api_stopServer (BrailleDisplay *brl) {
 }
 
 void
@@ -85,9 +85,9 @@ api_updateParameter (brlapi_param_t parameter, brlapi_param_subparam_t subparam)
 }
 #endif /* ENABLE_API */
 
-static int apiStarted = 0;
+static int isRunning = 0;
 static int apiLinked = 0;
-static int driverClaimed = 0;
+static int isClaimed = 0;
 
 static void
 apiIdentify (int full) {
@@ -100,9 +100,9 @@ apiGetParameters (void) {
 }
 
 static int
-apiStart (char **parameters) {
-  if (api_start(&brl, parameters)) {
-    apiStarted = 1;
+apiStartServer (char **parameters) {
+  if (api_startServer(&brl, parameters)) {
+    isRunning = 1;
     return 1;
   }
 
@@ -110,19 +110,19 @@ apiStart (char **parameters) {
 }
 
 static void
-apiStop (void) {
-  api_stop(&brl);
-  apiStarted = 0;
+apiStopServer (void) {
+  api_stopServer(&brl);
+  isRunning = 0;
 }
 
 static int
-apiIsStarted (void) {
-  return apiStarted;
+apiIsServerRunning (void) {
+  return isRunning;
 }
 
 static void
 apiLink (void) {
-  if (apiStarted) {
+  if (isRunning) {
     api_link(&brl);
     apiLinked = 1;
   }
@@ -130,7 +130,7 @@ apiLink (void) {
 
 static void
 apiUnlink (void) {
-  if (apiStarted) {
+  if (isRunning) {
     api_unlink(&brl);
     apiLinked = 0;
   }
@@ -144,7 +144,7 @@ apiIsLinked (void) {
 static void
 apiSuspendDriver (void) {
 #ifdef ENABLE_API
-  if (apiStarted) {
+  if (isRunning) {
     api_suspendDriver(&brl);
   } else
 #endif /* ENABLE_API */
@@ -157,7 +157,7 @@ apiSuspendDriver (void) {
 static int
 apiResumeDriver (void) {
 #ifdef ENABLE_API
-  if (apiStarted) return api_resumeDriver(&brl);
+  if (isRunning) return api_resumeDriver(&brl);
 #endif /* ENABLE_API */
 
   return constructBrailleDriver();
@@ -165,9 +165,9 @@ apiResumeDriver (void) {
 
 static int
 apiClaimDriver (void) {
-  if (!driverClaimed && apiStarted) {
+  if (!isClaimed && isRunning) {
     if (!api_claimDriver(&brl)) return 0;
-    driverClaimed = 1;
+    isClaimed = 1;
   }
 
   return 1;
@@ -175,42 +175,42 @@ apiClaimDriver (void) {
 
 static void
 apiReleaseDriver (void) {
-  if (driverClaimed) {
+  if (isClaimed) {
     api_releaseDriver(&brl);
-    driverClaimed = 0;
+    isClaimed = 0;
   }
 }
 
 static int
 apiHandleCommand (int command) {
-  if (!apiStarted) return 0;
+  if (!isRunning) return 0;
   return api_handleCommand(command);
 }
 
 static int
 apiHandleKeyEvent (KeyGroup group, KeyNumber number, int press) {
-  if (!apiStarted) return 0;
+  if (!isRunning) return 0;
   return api_handleKeyEvent(group, number, press);
 }
 
 static int
 apiFlushOutput (void) {
-  if (!apiStarted) return 1;
+  if (!isRunning) return 1;
   return api_flushOutput(&brl);
 }
 
 static void
 apiUpdateParameter (brlapi_param_t parameter, brlapi_param_subparam_t subparam) {
-  if (apiStarted) api_updateParameter(parameter, subparam);
+  if (isRunning) api_updateParameter(parameter, subparam);
 }
 
 const ApiMethods api = {
   .identify = apiIdentify,
   .getParameters = apiGetParameters,
 
-  .start = apiStart,
-  .stop = apiStop,
-  .isStarted = apiIsStarted,
+  .startServer = apiStartServer,
+  .stopServer = apiStopServer,
+  .isServerRunning = apiIsServerRunning,
 
   .link = apiLink,
   .unlink = apiUnlink,

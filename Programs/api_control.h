@@ -30,9 +30,9 @@ typedef struct {
   void (*identify) (int full);
   const char *const * (*getParameters) (void);
 
-  int (*start) (char **parameters);
-  void (*stop) (void);
-  int (*isStarted) (void);
+  int (*startServer) (char **parameters);
+  void (*stopServer) (void);
+  int (*isServerRunning) (void);
 
   void (*link) (void);
   void (*unlink) (void);

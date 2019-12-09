@@ -1283,7 +1283,7 @@ savePreferences (void) {
 static void
 exitApiServer (void *data) {
   if (api.isLinked()) api.unlink();
-  if (api.isStarted()) api.stop();
+  if (api.isServerRunning()) api.stopServer();
 
   if (apiParameters) {
     deallocateStrings(apiParameters);
@@ -1295,7 +1295,7 @@ exitApiServer (void *data) {
 static void
 startApiServer (void) {
 #ifdef ENABLE_API
-  if (!(opt_noApi || api.isStarted())) {
+  if (!(opt_noApi || api.isServerRunning())) {
     const char *const *parameters = api.getParameters();
 
     apiParameters = getParameters(parameters,
@@ -1308,7 +1308,7 @@ startApiServer (void) {
                     gettext("API Parameter"));
 
       if (!opt_verify) {
-        if (api.start(apiParameters)) {
+        if (api.startServer(apiParameters)) {
           onProgramExit("api-server", exitApiServer, NULL);
         }
       }
