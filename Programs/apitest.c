@@ -242,7 +242,7 @@ static void enterLearnMode(void)
 
 static char *getKeyName (brlapi_keyCode_t key)
 {
-  return brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_SHORT_NAME, (key & ~BRLAPI_RAWKEY_PRESS), BRLAPI_PARAMF_GLOBAL, NULL);
+  return brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_SHORT_NAME, (key & ~BRLAPI_DRV_KEY_PRESS), BRLAPI_PARAMF_GLOBAL, NULL);
 }
 
 static void listKeys(void)
@@ -303,7 +303,7 @@ static void showKeyCodes(void)
   brlapi_keyCode_t key;
 
   while ((res = brlapi_readKeyWithTimeout(10000, &key)) > 0) {
-    const char *action = (key & BRLAPI_RAWKEY_PRESS)? "press": "release";
+    const char *action = (key & BRLAPI_DRV_KEY_PRESS)? "press": "release";
     size_t length = snprintf(buf, sizeof(buf), "%04" BRLAPI_PRIxKEYCODE " (%" BRLAPI_PRIuKEYCODE ") %s", key, key, action);
 
     {

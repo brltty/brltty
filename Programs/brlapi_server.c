@@ -1349,7 +1349,7 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 static brlapi_keyCode_t makeClientKeyCode (KeyGroup group, KeyNumber number, int press)
 {
   brlapi_keyCode_t code = (group << 8) | number;
-  if (press) code |= BRLAPI_RAWKEY_PRESS;
+  if (press) code |= BRLAPI_DRV_KEY_PRESS;
   return code;
 }
 
