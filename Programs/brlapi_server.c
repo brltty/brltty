@@ -462,8 +462,8 @@ static void resetDevice(void) {
   runCoreTask(apiCoreTask_resetBrailleDevice, NULL, 1);
 }
 
-static int flushBrailleOutput(void) {
-  int flushed = api_flushOutput(&brl);
+static int flushBrailleOutput(BrailleDisplay *brl) {
+  int flushed = api_flushOutput(brl);
   resetAllBlinkDescriptors();
   return flushed;
 }
@@ -474,7 +474,7 @@ typedef struct {
 
 CORE_TASK_CALLBACK(apiCoreTask_flushBrailleOutput) {
   CoreTaskData_flushBrailleOutput *fbo = data;
-  fbo->flushed = flushBrailleOutput();
+  fbo->flushed = flushBrailleOutput(&brl);
 }
 
 static int flushOutput(void) {
@@ -4266,7 +4266,7 @@ void api_releaseDriver(BrailleDisplay *brl)
 void api_suspend(BrailleDisplay *brl) {
   /* core is suspending, going to core suspend state */
   coreActive = 0;
-  flushBrailleOutput();
+  flushBrailleOutput(brl);
 }
 
 static void brlResize(BrailleDisplay *brl)
@@ -4285,8 +4285,7 @@ REPORT_LISTENER(brlapi_handleReports)
 {
   if (parameters->reportIdentifier == REPORT_BRAILLE_DEVICE_ONLINE) {
     BrailleDisplay *brl = parameters->listenerData;
-    api_flushOutput(brl);
-    resetAllBlinkDescriptors();
+    flushBrailleOutput(brl);
   }
 }
 
