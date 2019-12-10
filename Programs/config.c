@@ -1296,14 +1296,14 @@ static void
 startApiServer (void) {
 #ifdef ENABLE_API
   if (!(opt_noApi || api.isServerRunning())) {
-    const char *const *parameters = api.getParameters();
+    const char *const *parameters = api.getServerParameters();
 
     apiParameters = getParameters(parameters,
                                   NULL,
                                   opt_apiParameters);
 
     if (apiParameters) {
-      api.identify(0);
+      api.logServerIdentity(0);
       logParameters(parameters, apiParameters,
                     gettext("API Parameter"));
 
@@ -2617,7 +2617,7 @@ brlttyStart (void) {
     identifyScreenDrivers(1);
 
 #ifdef ENABLE_API
-    api.identify(1);
+    api.logServerIdentity(1);
 #endif /* ENABLE_API */
 
     identifyBrailleDrivers(1);

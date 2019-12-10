@@ -27,8 +27,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-  void (*identify) (int full);
-  const char *const * (*getParameters) (void);
+  void (*logServerIdentity) (int full);
+  const char *const * (*getServerParameters) (void);
 
   int (*startServer) (char **parameters);
   void (*stopServer) (void);

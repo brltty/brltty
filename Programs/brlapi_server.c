@@ -123,7 +123,7 @@ typedef enum {
   PARM_STACKSIZE
 } Parameters;
 
-const char *const api_parameters[] = { "auth", "host", "stacksize", NULL };
+const char *const api_serverParameters[] = { "auth", "host", "stacksize", NULL };
 
 static size_t stackSize;
 
@@ -4339,9 +4339,9 @@ void api_unlink(BrailleDisplay *brl)
   unlockMutex(&apiDriverMutex);
 }
 
-/* Function : api_identify */
+/* Function : api_logServerIdentity */
 /* Identifies BrlApi */
-void api_identify(int full)
+void api_logServerIdentity(int full)
 {
   logMessage(LOG_NOTICE, RELEASE);
   if (full) {

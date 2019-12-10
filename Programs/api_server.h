@@ -25,8 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void api_identify (int full);
-extern const char *const api_parameters[];
+extern void api_logServerIdentity (int full);
+extern const char *const api_serverParameters[];
 
 extern int api_startServer (BrailleDisplay *brl, char **parameters);
 extern void api_stopServer (BrailleDisplay *brl);

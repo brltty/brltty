@@ -24,10 +24,10 @@
 #include "core.h"
 
 #ifndef ENABLE_API
-const char *const api_parameters[] = {NULL};
+const char *const api_serverParameters[] = {NULL};
 
 void
-api_identify (int full) {
+api_logServerIdentity (int full) {
 }
 
 int
@@ -86,17 +86,17 @@ api_updateParameter (brlapi_param_t parameter, brlapi_param_subparam_t subparam)
 #endif /* ENABLE_API */
 
 static int isRunning = 0;
-static int apiLinked = 0;
+static int isLinked = 0;
 static int isClaimed = 0;
 
 static void
-apiIdentify (int full) {
-  api_identify(full);
+apiLogServerIdentity (int full) {
+  api_logServerIdentity(full);
 }
 
 static const char *const *
-apiGetParameters (void) {
-  return api_parameters;
+apiGetServerParameters (void) {
+  return api_serverParameters;
 }
 
 static int
@@ -124,7 +124,7 @@ static void
 apiLink (void) {
   if (isRunning) {
     api_link(&brl);
-    apiLinked = 1;
+    isLinked = 1;
   }
 }
 
@@ -132,13 +132,13 @@ static void
 apiUnlink (void) {
   if (isRunning) {
     api_unlink(&brl);
-    apiLinked = 0;
+    isLinked = 0;
   }
 }
 
 static int
 apiIsLinked (void) {
-  return apiLinked;
+  return isLinked;
 }
 
 static void
@@ -205,8 +205,8 @@ apiUpdateParameter (brlapi_param_t parameter, brlapi_param_subparam_t subparam) 
 }
 
 const ApiMethods api = {
-  .identify = apiIdentify,
-  .getParameters = apiGetParameters,
+  .logServerIdentity = apiLogServerIdentity,
+  .getServerParameters = apiGetServerParameters,
 
   .startServer = apiStartServer,
   .stopServer = apiStopServer,
