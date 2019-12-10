@@ -31,8 +31,8 @@ extern const char *const api_serverParameters[];
 extern int api_startServer (BrailleDisplay *brl, char **parameters);
 extern void api_stopServer (BrailleDisplay *brl);
 
-extern void api_link (BrailleDisplay *brl);
-extern void api_unlink (BrailleDisplay *brl);
+extern void api_linkServer (BrailleDisplay *brl);
+extern void api_unlinkServer (BrailleDisplay *brl);
 
 extern void api_suspendDriver (BrailleDisplay *brl);
 extern int api_resumeDriver (BrailleDisplay *brl);

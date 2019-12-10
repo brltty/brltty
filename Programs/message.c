@@ -173,8 +173,8 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       mgd.segments.last = segment - 1;
     }
 
-    int wasLinked = api.isLinked();
-    if (wasLinked) api.unlink();
+    int wasLinked = api.isServerLinked();
+    if (wasLinked) api.unlinkServer();
 
     suspendUpdates();
     pushCommandEnvironment("message", NULL, NULL);
@@ -223,7 +223,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
   DONE:
     popCommandEnvironment();
     resumeUpdates(1);
-    if (wasLinked) api.link();
+    if (wasLinked) api.linkServer();
   }
 
   if (mgp->deallocate) free(mgp);

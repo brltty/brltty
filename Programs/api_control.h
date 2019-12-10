@@ -34,9 +34,9 @@ typedef struct {
   void (*stopServer) (void);
   int (*isServerRunning) (void);
 
-  void (*link) (void);
-  void (*unlink) (void);
-  int (*isLinked) (void);
+  void (*linkServer) (void);
+  void (*unlinkServer) (void);
+  int (*isServerLinked) (void);
 
   void (*suspendDriver) (void);
   int (*resumeDriver) (void);

@@ -4291,10 +4291,10 @@ REPORT_LISTENER(brlapi_handleReports)
 
 static ReportListenerInstance *api_reportListener;
 
-/* Function : api_link */
+/* Function : api_linkServer */
 /* Does all the link stuff to let api get events from the driver and */
 /* writes from brltty */
-void api_link(BrailleDisplay *brl)
+void api_linkServer(BrailleDisplay *brl)
 {
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "api link");
   trueBraille=braille;
@@ -4316,9 +4316,9 @@ void api_link(BrailleDisplay *brl)
   api_reportListener = registerReportListener(REPORT_BRAILLE_DEVICE_ONLINE, brlapi_handleReports, brl);
 }
 
-/* Function : api_unlink */
+/* Function : api_unlinkServer */
 /* Does all the unlink stuff to remove api from the picture */
-void api_unlink(BrailleDisplay *brl)
+void api_unlinkServer(BrailleDisplay *brl)
 {
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "api unlink");
   unregisterReportListener(api_reportListener);

@@ -40,11 +40,11 @@ api_stopServer (BrailleDisplay *brl) {
 }
 
 void
-api_link (BrailleDisplay *brl) {
+api_linkServer (BrailleDisplay *brl) {
 }
 
 void
-api_unlink (BrailleDisplay *brl) {
+api_unlinkServer (BrailleDisplay *brl) {
 }
 
 void
@@ -121,23 +121,23 @@ apiIsServerRunning (void) {
 }
 
 static void
-apiLink (void) {
+apiLinkServer (void) {
   if (isRunning) {
-    api_link(&brl);
+    api_linkServer(&brl);
     isLinked = 1;
   }
 }
 
 static void
-apiUnlink (void) {
+apiUnlinkServer (void) {
   if (isRunning) {
-    api_unlink(&brl);
+    api_unlinkServer(&brl);
     isLinked = 0;
   }
 }
 
 static int
-apiIsLinked (void) {
+apiIsServerLinked (void) {
   return isLinked;
 }
 
@@ -212,9 +212,9 @@ const ApiMethods api = {
   .stopServer = apiStopServer,
   .isServerRunning = apiIsServerRunning,
 
-  .link = apiLink,
-  .unlink = apiUnlink,
-  .isLinked = apiIsLinked,
+  .linkServer = apiLinkServer,
+  .unlinkServer = apiUnlinkServer,
+  .isServerLinked = apiIsServerLinked,
 
   .suspendDriver = apiSuspendDriver,
   .resumeDriver = apiResumeDriver,

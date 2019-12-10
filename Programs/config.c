@@ -1282,7 +1282,7 @@ savePreferences (void) {
 #ifdef ENABLE_API
 static void
 exitApiServer (void *data) {
-  if (api.isLinked()) api.unlink();
+  if (api.isServerLinked()) api.unlinkServer();
   if (api.isServerRunning()) api.stopServer();
 
   if (apiParameters) {
@@ -1542,7 +1542,7 @@ initializeBrailleDriver (const char *code, int verify) {
         if (oldPreferencesFile) {
           logMessage(LOG_INFO, "%s: %s", gettext("Old Preferences File"), oldPreferencesFile);
 
-          api.link();
+          api.linkServer();
 
           return 1;
         } else {
@@ -1652,7 +1652,7 @@ activateBrailleDriver (int verify) {
 static void
 deactivateBrailleDriver (void) {
   if (brailleDriver) {
-    api.unlink();
+    api.unlinkServer();
     if (brailleDriverConstructed) destructBrailleDriver();
     braille = &noBraille;
     brailleDevice = NULL;
