@@ -1547,7 +1547,7 @@ refresh_LinuxScreen (void) {
 
       if (!refreshCache()) {
         problemText = "can't read screen content";
-        return 1;
+        goto done;
       }
 
       {
@@ -1564,6 +1564,13 @@ refresh_LinuxScreen (void) {
 
     inTextMode = testTextMode();
     screenUpdated = 0;
+
+  done:
+    if (problemText) {
+      if (*fallbackText) {
+        problemText = fallbackText;
+      }
+    }
   }
 
   return 1;
@@ -1619,8 +1626,7 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   if (readScreenSize(&size)) {
     if (validateScreenBox(box, size.columns, size.rows)) {
       if (problemText) {
-        const char *text = *fallbackText? fallbackText: problemText;
-        setScreenMessage(box, buffer, text);
+        setScreenMessage(box, buffer, problemText);
         return 1;
       }
 
