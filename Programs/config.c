@@ -1207,8 +1207,8 @@ ensureStatusFields (void) {
     static const unsigned char *const fieldsTable[] = {
       fields1, fields2, fields3, fields4, fields5, fields6, fields7
     };
-    static const unsigned char fieldsCount = ARRAY_COUNT(fieldsTable);
 
+    static const unsigned char fieldsCount = ARRAY_COUNT(fieldsTable);
     if (count > fieldsCount) count = fieldsCount;
     fields = fieldsTable[count - 1];
   }
@@ -1234,6 +1234,13 @@ setPreferenceOverrides (void) {
   }
 }
 
+static void
+finishPreferencesLoad (int ok) {
+  if (!ok) resetPreferences();
+  setPreferenceOverrides();
+  applyAllPreferences();
+}
+
 int
 loadPreferences (void) {
   int ok = 0;
@@ -1255,9 +1262,7 @@ loadPreferences (void) {
     if (loadPreferencesFile(oldPreferencesFile)) ok = 1;
   }
 
-  if (!ok) resetPreferences();
-  setPreferenceOverrides();
-  applyAllPreferences();
+  finishPreferencesLoad(ok);
   return ok;
 }
 
@@ -1679,9 +1684,7 @@ startBrailleDriver (void) {
 
   if (activateBrailleDriver(0)) {
     if (oldPreferencesEnabled) {
-      if (!loadPreferencesFile(oldPreferencesFile)) resetPreferences();
-      setPreferenceOverrides();
-      applyAllPreferences();
+      finishPreferencesLoad(loadPreferencesFile(oldPreferencesFile));
     } else {
       applyBraillePreferences();
     }
