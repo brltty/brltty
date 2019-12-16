@@ -850,7 +850,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("On First Release"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.firstRelease, &itemName));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.onFirstRelease, &itemName));
     }
 
     {

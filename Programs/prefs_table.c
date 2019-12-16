@@ -316,9 +316,10 @@ const PreferenceEntry preferenceTable[] = {
     .setting = &prefs.autoreleaseTime
   },
 
-  { .name = "first-release",
-    .defaultValue = DEFAULT_FIRST_RELEASE,
-    .setting = &prefs.firstRelease
+  { .name = "on-first-release",
+    .defaultValue = DEFAULT_ON_FIRST_RELEASE,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.onFirstRelease
   },
 
   { .name = "long-press-time",
@@ -627,6 +628,7 @@ const PreferenceAliasEntry preferenceAliasTable[] = {
   {.oldName="braille-sensitivity", .newName="touch-sensitivity"},
   {.oldName="braille-input-mode", .newName="braille-typing-mode"},
   {.oldName="braille-display-orientation"},
+  {.oldName="first-release", .newName="on-first-release"},
 };
 
 const unsigned char preferenceAliasCount = ARRAY_COUNT(preferenceAliasTable);

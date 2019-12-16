@@ -604,7 +604,7 @@ processKeyEvent (
     } else {
       resetLongPressData(table);
 
-      if (prefs.firstRelease || (table->pressedKeys.count == 0)) {
+      if (prefs.onFirstRelease || (table->pressedKeys.count == 0)) {
         int *cmd = &table->release.command;
 
         if (*cmd != BRL_CMD_NOOP) {

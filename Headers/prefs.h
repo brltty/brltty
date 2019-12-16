@@ -212,7 +212,7 @@ typedef struct {
   unsigned char keyboardLedAlerts;
 
   unsigned char autoreleaseTime;
-  unsigned char firstRelease;
+  unsigned char onFirstRelease;
   unsigned char touchNavigation;
 
   unsigned char cursorTrackingDelay;

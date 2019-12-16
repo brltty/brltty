@@ -83,7 +83,7 @@ extern "C" {
 #define DEFAULT_BRAILLE_QUICK_SPACE 0
 
 #define DEFAULT_AUTORELEASE_TIME at20s
-#define DEFAULT_FIRST_RELEASE 1
+#define DEFAULT_ON_FIRST_RELEASE 1
 #define DEFAULT_LONG_PRESS_TIME 50	/* hundredths of a second */
 #define DEFAULT_AUTOREPEAT_ENABLED 1		/* 1 for on, 0 for off */
 #define DEFAULT_AUTOREPEAT_INTERVAL 10	/* hundredths of a second */
