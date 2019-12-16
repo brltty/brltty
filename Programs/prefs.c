@@ -154,7 +154,7 @@ searchPreferenceByName (const void *target, const void *element) {
   return comparePreferenceNames(name, (*pref)->name);
 }
 
-const PreferenceEntry *
+static const PreferenceEntry *
 findPreferenceByName (const char *name) {
   static const PreferenceEntry **sortedPreferences = NULL;
 
@@ -164,12 +164,8 @@ findPreferenceByName (const char *name) {
       return NULL;
     }
 
-    {
-      unsigned int index;
-
-      for (index=0; index<preferenceCount; index+=1) {
-        sortedPreferences[index] = &preferenceTable[index];
-      }
+    for (unsigned int index=0; index<preferenceCount; index+=1) {
+      sortedPreferences[index] = &preferenceTable[index];
     }
 
     qsort(sortedPreferences, preferenceCount, sizeof(*sortedPreferences), sortPreferencesByName);
@@ -204,7 +200,7 @@ searchAliasByOldName (const void *target, const void *element) {
   return comparePreferenceNames(name, (*alias)->oldName);
 }
 
-const PreferenceEntry *
+static const PreferenceAliasEntry *
 findPreferenceByAlias (const char *name) {
   static const PreferenceAliasEntry **sortedAliases = NULL;
 
@@ -214,12 +210,8 @@ findPreferenceByAlias (const char *name) {
       return NULL;
     }
 
-    {
-      unsigned int index;
-
-      for (index=0; index<preferenceAliasCount; index+=1) {
-        sortedAliases[index] = &preferenceAliasTable[index];
-      }
+    for (unsigned int index=0; index<preferenceAliasCount; index+=1) {
+      sortedAliases[index] = &preferenceAliasTable[index];
     }
 
     qsort(sortedAliases, preferenceAliasCount, sizeof(*sortedAliases), sortAliasesByOldName);
@@ -232,7 +224,7 @@ findPreferenceByAlias (const char *name) {
       searchAliasByOldName
     );
 
-    if (alias) return findPreferenceByName((*alias)->newName);
+    if (alias) return *alias;
   }
 
   return NULL;
@@ -240,10 +232,20 @@ findPreferenceByAlias (const char *name) {
 
 const PreferenceEntry *
 findPreferenceEntry (const char *name) {
-  const PreferenceEntry *pref;
+  while (name) {
+    {
+      const PreferenceEntry *pref = findPreferenceByName(name);
+      if (pref) return pref;
+    }
 
-  if ((pref = findPreferenceByName(name))) return pref;
-  if ((pref = findPreferenceByAlias(name))) return pref;
+    {
+      const PreferenceAliasEntry *alias = findPreferenceByAlias(name);
+      if (!alias) break;
+      name = alias->newName;
+    }
+  }
+
+  if (name) logMessage(LOG_WARNING, "unknown preference: %s", name);
   return NULL;
 }
 
@@ -319,8 +321,6 @@ setPreference (char *string) {
         logMessage(LOG_WARNING, "missing preference setting: %s", name);
       } else if (!changePreferenceSetting(name, operand, pref->setting, pref->settingNames)) {
       }
-    } else {
-      logMessage(LOG_WARNING, "unknown preference: %s", name);
     }
   } else {
     logMessage(LOG_WARNING, "missing preference name");

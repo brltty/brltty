@@ -626,6 +626,7 @@ const PreferenceAliasEntry preferenceAliasTable[] = {
   {.oldName="whitespace-indicator", .newName="speech-whitespace-indicator"},
   {.oldName="braille-sensitivity", .newName="touch-sensitivity"},
   {.oldName="braille-input-mode", .newName="braille-typing-mode"},
+  {.oldName="braille-display-orientation"},
 };
 
 const unsigned char preferenceAliasCount = ARRAY_COUNT(preferenceAliasTable);
