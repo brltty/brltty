@@ -230,6 +230,9 @@ extern Preferences prefs;		/* current preferences settings */
 #define PREFS2MSECS(time) ((time) * PREFS_TIME_MULTIPLIER)
 #define MSECS2PREFS(msecs) (((msecs) + (PREFS_TIME_MULTIPLIER - 1)) / PREFS_TIME_MULTIPLIER)
 
+typedef struct PreferenceDefinitionStruct PreferenceDefinition;
+extern const PreferenceDefinition *findPreference (const char *name);
+
 extern void resetPreferences (void);
 extern int setPreference (char *string);
 extern void setStatusFields (const unsigned char *fields);
@@ -237,9 +240,6 @@ extern void setStatusFields (const unsigned char *fields);
 extern char *makePreferencesFilePath (const char *name);
 extern int loadPreferencesFile (const char *path);
 extern int savePreferencesFile (const char *path);
-
-typedef struct PreferenceEntryStruct PreferenceEntry;
-extern const PreferenceEntry *findPreferenceEntry (const char *name);
 
 #ifdef __cplusplus
 }

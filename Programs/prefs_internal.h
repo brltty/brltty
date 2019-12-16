@@ -28,7 +28,7 @@ typedef struct {
   unsigned char count;
 } PreferenceStringTable;
 
-struct PreferenceEntryStruct {
+struct PreferenceDefinitionStruct {
   const char *name;
   unsigned char *encountered;
   const PreferenceStringTable *settingNames;
@@ -38,15 +38,15 @@ struct PreferenceEntryStruct {
 };
 
 extern unsigned char statusFieldsSet;
-extern const PreferenceEntry preferenceTable[];
-extern const unsigned char preferenceCount;
+extern const PreferenceDefinition preferenceDefinitionTable[];
+extern const unsigned char preferenceDefinitionCount;
 
 typedef struct {
   const char *oldName;
   const char *newName;
-} PreferenceAliasEntry;
+} PreferenceAlias;
 
-extern const PreferenceAliasEntry preferenceAliasTable[];
+extern const PreferenceAlias preferenceAliasTable[];
 extern const unsigned char preferenceAliasCount;
 
 #ifdef __cplusplus

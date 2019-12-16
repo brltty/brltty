@@ -101,8 +101,124 @@ setStatusStyle (unsigned char style) {
   }
 }
 
+static int
+comparePreferenceNames (const char *name1, const char *name2) {
+  return strcmp(name1, name2);
+}
+
+static int
+sortPreferenceDefinitions (const void *element1, const void *element2) {
+  const PreferenceDefinition *const *pref1 = element1;
+  const PreferenceDefinition *const *pref2 = element2;
+  return comparePreferenceNames((*pref1)->name, (*pref2)->name);
+}
+
+static int
+searchPreferenceDefinition (const void *target, const void *element) {
+  const char *name = target;
+  const PreferenceDefinition *const *pref = element;
+  return comparePreferenceNames(name, (*pref)->name);
+}
+
+static const PreferenceDefinition *
+findPreferenceDefinition (const char *name) {
+  static const PreferenceDefinition **sortedDefinitions = NULL;
+
+  if (!sortedDefinitions) {
+    if (!(sortedDefinitions = malloc(ARRAY_SIZE(sortedDefinitions, preferenceDefinitionCount)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    for (unsigned int index=0; index<preferenceDefinitionCount; index+=1) {
+      sortedDefinitions[index] = &preferenceDefinitionTable[index];
+    }
+
+    qsort(
+      sortedDefinitions, preferenceDefinitionCount,
+      sizeof(*sortedDefinitions), sortPreferenceDefinitions
+    );
+  }
+
+  {
+    const PreferenceDefinition *const *pref = bsearch(
+      name, sortedDefinitions, preferenceDefinitionCount,
+      sizeof(*sortedDefinitions), searchPreferenceDefinition
+    );
+
+    if (pref) return *pref;
+  }
+
+  return NULL;
+}
+
+static int
+sortPreferenceAliases (const void *element1, const void *element2) {
+  const PreferenceAlias *const *alias1 = element1;
+  const PreferenceAlias *const *alias2 = element2;
+  return comparePreferenceNames((*alias1)->oldName, (*alias2)->oldName);
+}
+
+static int
+searchPreferenceAlias (const void *target, const void *element) {
+  const char *name = target;
+  const PreferenceAlias *const *alias = element;
+  return comparePreferenceNames(name, (*alias)->oldName);
+}
+
+static const PreferenceAlias *
+findPreferenceAlias (const char *name) {
+  static const PreferenceAlias **sortedAliases = NULL;
+
+  if (!sortedAliases) {
+    if (!(sortedAliases = malloc(ARRAY_SIZE(sortedAliases, preferenceAliasCount)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    for (unsigned int index=0; index<preferenceAliasCount; index+=1) {
+      sortedAliases[index] = &preferenceAliasTable[index];
+    }
+
+    qsort(
+      sortedAliases, preferenceAliasCount,
+      sizeof(*sortedAliases), sortPreferenceAliases
+    );
+  }
+
+  {
+    const PreferenceAlias *const *alias = bsearch(
+      name, sortedAliases, preferenceAliasCount,
+      sizeof(*sortedAliases), searchPreferenceAlias
+    );
+
+    if (alias) return *alias;
+  }
+
+  return NULL;
+}
+
+const PreferenceDefinition *
+findPreference (const char *name) {
+  while (name) {
+    {
+      const PreferenceDefinition *pref = findPreferenceDefinition(name);
+      if (pref) return pref;
+    }
+
+    {
+      const PreferenceAlias *alias = findPreferenceAlias(name);
+      if (!alias) break;
+      name = alias->newName;
+    }
+  }
+
+  if (name) logMessage(LOG_WARNING, "unknown preference: %s", name);
+  return NULL;
+}
+
 static void
-resetPreference (const PreferenceEntry *pref) {
+resetPreference (const PreferenceDefinition *pref) {
   if (pref->settingCount) {
     memset(pref->setting, pref->defaultValue, pref->settingCount);
   } else {
@@ -121,132 +237,11 @@ resetPreferences (void) {
   prefs.version = 6;
 
   {
-    const PreferenceEntry *pref = preferenceTable;
-    const PreferenceEntry *end = pref + preferenceCount;
+    const PreferenceDefinition *pref = preferenceDefinitionTable;
+    const PreferenceDefinition *end = pref + preferenceDefinitionCount;
 
     while (pref < end) resetPreference(pref++);
   }
-}
-
-char *
-makePreferencesFilePath (const char *name) {
-  if (!name) name = PREFERENCES_FILE;
-  return makeUpdatablePath(name);
-}
-
-static int
-comparePreferenceNames (const char *name1, const char *name2) {
-  return strcmp(name1, name2);
-}
-
-static int
-sortPreferencesByName (const void *element1, const void *element2) {
-  const PreferenceEntry *const *pref1 = element1;
-  const PreferenceEntry *const *pref2 = element2;
-
-  return comparePreferenceNames((*pref1)->name, (*pref2)->name);
-}
-
-static int
-searchPreferenceByName (const void *target, const void *element) {
-  const char *name = target;
-  const PreferenceEntry *const *pref = element;
-  return comparePreferenceNames(name, (*pref)->name);
-}
-
-static const PreferenceEntry *
-findPreferenceByName (const char *name) {
-  static const PreferenceEntry **sortedPreferences = NULL;
-
-  if (!sortedPreferences) {
-    if (!(sortedPreferences = malloc(ARRAY_SIZE(sortedPreferences, preferenceCount)))) {
-      logMallocError();
-      return NULL;
-    }
-
-    for (unsigned int index=0; index<preferenceCount; index+=1) {
-      sortedPreferences[index] = &preferenceTable[index];
-    }
-
-    qsort(sortedPreferences, preferenceCount, sizeof(*sortedPreferences), sortPreferencesByName);
-  }
-
-  {
-    const PreferenceEntry *const *pref = bsearch(
-      name, sortedPreferences,
-      preferenceCount, sizeof(*sortedPreferences),
-      searchPreferenceByName
-    );
-
-    if (pref) return *pref;
-  }
-
-  return NULL;
-}
-
-static int
-sortAliasesByOldName (const void *element1, const void *element2) {
-  const PreferenceAliasEntry *const *alias1 = element1;
-  const PreferenceAliasEntry *const *alias2 = element2;
-
-  return comparePreferenceNames((*alias1)->oldName, (*alias2)->oldName);
-}
-
-static int
-searchAliasByOldName (const void *target, const void *element) {
-  const char *name = target;
-  const PreferenceAliasEntry *const *alias = element;
-
-  return comparePreferenceNames(name, (*alias)->oldName);
-}
-
-static const PreferenceAliasEntry *
-findPreferenceByAlias (const char *name) {
-  static const PreferenceAliasEntry **sortedAliases = NULL;
-
-  if (!sortedAliases) {
-    if (!(sortedAliases = malloc(ARRAY_SIZE(sortedAliases, preferenceAliasCount)))) {
-      logMallocError();
-      return NULL;
-    }
-
-    for (unsigned int index=0; index<preferenceAliasCount; index+=1) {
-      sortedAliases[index] = &preferenceAliasTable[index];
-    }
-
-    qsort(sortedAliases, preferenceAliasCount, sizeof(*sortedAliases), sortAliasesByOldName);
-  }
-
-  {
-    const PreferenceAliasEntry *const *alias = bsearch(
-      name, sortedAliases,
-      preferenceAliasCount, sizeof(*sortedAliases),
-      searchAliasByOldName
-    );
-
-    if (alias) return *alias;
-  }
-
-  return NULL;
-}
-
-const PreferenceEntry *
-findPreferenceEntry (const char *name) {
-  while (name) {
-    {
-      const PreferenceEntry *pref = findPreferenceByName(name);
-      if (pref) return pref;
-    }
-
-    {
-      const PreferenceAliasEntry *alias = findPreferenceByAlias(name);
-      if (!alias) break;
-      name = alias->newName;
-    }
-  }
-
-  if (name) logMessage(LOG_WARNING, "unknown preference: %s", name);
-  return NULL;
 }
 
 static int
@@ -293,7 +288,7 @@ setPreference (char *string) {
   }
 
   if (name) {
-    const PreferenceEntry *pref = findPreferenceEntry(name);
+    const PreferenceDefinition *pref = findPreference(name);
 
     if (pref) {
       if (pref->encountered) *pref->encountered = 1;
@@ -327,6 +322,12 @@ setPreference (char *string) {
   }
 
   return 1;
+}
+
+char *
+makePreferencesFilePath (const char *name) {
+  if (!name) name = PREFERENCES_FILE;
+  return makeUpdatablePath(name);
 }
 
 static int
@@ -363,8 +364,8 @@ loadPreferencesFile (const char *path) {
       ok = 1;
 
       {
-        const PreferenceEntry *pref = preferenceTable;
-        const PreferenceEntry *end = pref + preferenceCount;
+        const PreferenceDefinition *pref = preferenceDefinitionTable;
+        const PreferenceDefinition *end = pref + preferenceDefinitionCount;
 
         const unsigned char *from = prefs.magic;
         const unsigned char *to = from + length;
@@ -439,7 +440,7 @@ loadPreferencesFile (const char *path) {
 }
 
 static int
-putPreferenceComment (FILE *file, const PreferenceEntry *pref) {
+putPreferenceComment (FILE *file, const PreferenceDefinition *pref) {
   if (fprintf(file, "\n%c %s", PREFS_COMMENT_CHARACTER, pref->name) < 0) return 0;
 
   if (pref->settingCount) {
@@ -493,8 +494,8 @@ savePreferencesFile (const char *path) {
   FILE *file = openDataFile(path, "w", 0);
 
   if (file) {
-    const PreferenceEntry *pref = preferenceTable;
-    const PreferenceEntry *const end = pref + preferenceCount;
+    const PreferenceDefinition *pref = preferenceDefinitionTable;
+    const PreferenceDefinition *const end = pref + preferenceDefinitionCount;
 
     if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_NAME) < 0) goto done;
 

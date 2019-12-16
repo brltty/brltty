@@ -130,7 +130,7 @@ PREFERENCE_STRING_TABLE(statusField,
   "generic"
 )
 
-const PreferenceEntry preferenceTable[] = {
+const PreferenceDefinition preferenceDefinitionTable[] = {
   { .name = "save-on-exit",
     .defaultValue = DEFAULT_SAVE_ON_EXIT,
     .settingNames = &preferenceStringTable_boolean,
@@ -607,9 +607,9 @@ const PreferenceEntry preferenceTable[] = {
   }
 };
 
-const unsigned char preferenceCount = ARRAY_COUNT(preferenceTable);
+const unsigned char preferenceDefinitionCount = ARRAY_COUNT(preferenceDefinitionTable);
 
-const PreferenceAliasEntry preferenceAliasTable[] = {
+const PreferenceAlias preferenceAliasTable[] = {
   {.oldName="autorepeat-delay", .newName="long-press-time"},
   {.oldName="show-cursor", .newName="show-screen-cursor"},
   {.oldName="cursor-style", .newName="screen-cursor-style"},
