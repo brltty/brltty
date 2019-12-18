@@ -24,7 +24,7 @@
 #include <ctype.h>
 
 #include "prefs.h"
-#include "prefs_internal.h"
+#include "pref_tables.h"
 #include "status_types.h"
 #include "defaults.h"
 #include "log.h"
@@ -34,9 +34,6 @@
 
 #define PREFS_COMMENT_CHARACTER '#'
 #define PREFS_MAGIC_NUMBER 0x4005
-
-Preferences prefs;                /* environment (i.e. global) parameters */
-unsigned char statusFieldsSet;
 
 void
 setStatusFields (const unsigned char *fields) {

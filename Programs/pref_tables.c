@@ -19,9 +19,12 @@
 #include "prologue.h"
 
 #include "prefs.h"
-#include "prefs_internal.h"
+#include "pref_tables.h"
 #include "status_types.h"
 #include "defaults.h"
+
+Preferences prefs;                /* environment (i.e. global) parameters */
+unsigned char statusFieldsSet;
 
 #define PREFERENCE_STRING_TABLE(name, ...) \
 static const char *const preferenceStringArray_##name[] = {__VA_ARGS__}; \
@@ -607,8 +610,6 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
   }
 };
 
-const unsigned char preferenceDefinitionCount = ARRAY_COUNT(preferenceDefinitionTable);
-
 const PreferenceAlias preferenceAliasTable[] = {
   {.oldName="autorepeat-delay", .newName="long-press-time"},
   {.oldName="show-cursor", .newName="show-screen-cursor"},
@@ -631,4 +632,5 @@ const PreferenceAlias preferenceAliasTable[] = {
   {.oldName="first-release", .newName="on-first-release"},
 };
 
+const unsigned char preferenceDefinitionCount = ARRAY_COUNT(preferenceDefinitionTable);
 const unsigned char preferenceAliasCount = ARRAY_COUNT(preferenceAliasTable);

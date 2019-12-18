@@ -340,13 +340,13 @@ dataarea.$O:
 
 ###############################################################################
 
-PREFS_OBJECTS = prefs.$O prefs_table.$O
+PREFS_OBJECTS = prefs.$O pref_tables.$O
 
 prefs.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/prefs.c
 
-prefs_table.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/prefs_table.c
+pref_tables.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pref_tables.c
 
 ###############################################################################
 
