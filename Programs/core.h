@@ -150,7 +150,7 @@ extern KeyTable *keyboardTable;
 extern ProgramExitStatus brlttyPrepare (int argc, char *argv[]);
 extern ProgramExitStatus brlttyStart (void);
 
-extern void setPreferences (const Preferences *newPreferences);
+extern void setPreferences (const PreferenceSettings *newPreferences);
 extern int loadPreferences (void);
 extern int savePreferences (void);
 

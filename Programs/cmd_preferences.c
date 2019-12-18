@@ -18,6 +18,9 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
+#include "log.h"
 #include "cmd_queue.h"
 #include "cmd_preferences.h"
 #include "brl_cmds.h"
@@ -29,13 +32,16 @@
 #include "alert.h"
 #include "core.h"
 
+typedef struct {
+  PreferenceSettings savedPreferences;
+} PreferencesCommandData;
+
 static int
 handlePreferencesCommands (int command, void *data) {
-  switch (command & BRL_MSK_CMD) {
-    {
-      static const char modeString_preferences[] = "prf";
-      static Preferences savedPreferences;
+  static const char modeString_preferences[] = "prf";
+  PreferencesCommandData *pcd = data;
 
+  switch (command & BRL_MSK_CMD) {
     case BRL_CMD_PREFMENU: {
       int ok = 0;
 
@@ -51,7 +57,7 @@ handlePreferencesCommands (int command, void *data) {
       } else if (activateSpecialScreen(SCR_MENU)) {
         updateLogMessagesSubmenu();
         updateSessionAttributes();
-        savedPreferences = prefs;
+        pcd->savedPreferences = prefs;
         ok = 1;
       }
 
@@ -77,7 +83,7 @@ handlePreferencesCommands (int command, void *data) {
 
     case BRL_CMD_PREFLOAD:
       if (isSpecialScreen(SCR_MENU)) {
-        setPreferences(&savedPreferences);
+        setPreferences(&pcd->savedPreferences);
         message(modeString_preferences, gettext("changes discarded"), 0);
       } else if (loadPreferences()) {
         alert(ALERT_COMMAND_DONE);
@@ -85,7 +91,6 @@ handlePreferencesCommands (int command, void *data) {
         alert(ALERT_COMMAND_REJECTED);
       }
       break;
-    }
 
     default: {
       int arg = command & BRL_MSK_ARG;
@@ -141,8 +146,28 @@ handlePreferencesCommands (int command, void *data) {
   return 1;
 }
 
+static void
+destroyPreferencesCommandData (void *data) {
+  PreferencesCommandData *pcd = data;
+  free(pcd);
+}
+
 int
 addPreferencesCommands (void) {
-  return pushCommandHandler("preferences", KTB_CTX_DEFAULT,
-                            handlePreferencesCommands, NULL, NULL);
+  PreferencesCommandData *pcd;
+
+  if ((pcd = malloc(sizeof(*pcd)))) {
+    memset(pcd, 0, sizeof(*pcd));
+
+    if (pushCommandHandler("preferences", KTB_CTX_DEFAULT,
+                           handlePreferencesCommands, destroyPreferencesCommandData, pcd)) {
+      return 1;
+    }
+
+    free(pcd);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
 }

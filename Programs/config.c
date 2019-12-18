@@ -1163,7 +1163,7 @@ applyAllPreferences (void) {
 }
 
 void
-setPreferences (const Preferences *newPreferences) {
+setPreferences (const PreferenceSettings *newPreferences) {
   prefs = *newPreferences;
   applyAllPreferences();
 }

@@ -23,7 +23,7 @@
 #include "status_types.h"
 #include "defaults.h"
 
-Preferences prefs;                /* environment (i.e. global) parameters */
+PreferenceSettings prefs;                /* environment (i.e. global) parameters */
 unsigned char statusFieldsSet;
 
 #define PREFERENCE_STRING_TABLE(name, ...) \

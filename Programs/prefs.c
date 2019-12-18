@@ -341,7 +341,7 @@ loadPreferencesFile (const char *path) {
   FILE *file = openDataFile(path, "rb", 1);
 
   if (file) {
-    Preferences newPreferences;
+    PreferenceSettings newPreferences;
     size_t length = fread(&newPreferences, 1, sizeof(newPreferences), file);
 
     if (ferror(file)) {

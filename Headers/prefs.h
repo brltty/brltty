@@ -117,9 +117,6 @@ typedef enum {
   ctd2s
 } CursorTrackingDelay;
 
-/*
- * Structure definition for preferences (settings which are saveable).
- */
 typedef struct {
   unsigned char magic[2];
   unsigned char showScreenCursor;
@@ -222,9 +219,9 @@ typedef struct {
   unsigned char showSubmenuSizes;
   unsigned char showAdvancedSubmenus;
   unsigned char showAllItems;
-} PACKED Preferences;
+} PACKED PreferenceSettings;
 
-extern Preferences prefs;		/* current preferences settings */
+extern PreferenceSettings prefs;		/* current preferences settings */
 
 #define PREFS_TIME_MULTIPLIER 10
 #define PREFS2MSECS(time) ((time) * PREFS_TIME_MULTIPLIER)
