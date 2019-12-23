@@ -18,6 +18,7 @@
 
 package org.a11y.brltty.android;
 
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -366,6 +367,30 @@ public abstract class ScreenLogger {
         if (extras.size() > 0) {
           add(sb, "extras: ");
           sb.append(extras.toString());
+        }
+      }
+    }
+
+    if (ApplicationUtilities.haveLollipop) {
+      List<AccessibilityNodeInfo.AccessibilityAction> actions = node.getActionList();
+
+      if (actions != null) {
+        boolean first = true;
+
+        for (AccessibilityNodeInfo.AccessibilityAction action : actions) {
+          CharSequence label = action.getLabel();
+          if (label == null) continue;
+          if (label.length() == 0) continue;
+
+          if (first) {
+            first = false;
+            add(sb, "actions:");
+          } else {
+            sb.append(',');
+          }
+
+          sb.append(' ');
+          sb.append(label);
         }
       }
     }
