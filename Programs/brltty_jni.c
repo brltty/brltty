@@ -449,17 +449,10 @@ JAVA_STATIC_METHOD (
 }
 
 JAVA_STATIC_METHOD (
-  org_a11y_brltty_core_CoreWrapper, changeMessageLocale, void,
-  jstring jLocale
+  org_a11y_brltty_core_CoreWrapper, changeMessageLocale, jboolean,
+  jstring locale
 ) {
-  const char *cLocale = (*env)->GetStringUTFChars(env, jLocale, NULL);
-
-  if (cLocale) {
-    changeMessageLocale(cLocale);
-    (*env)->ReleaseStringUTFChars(env, jLocale, cLocale);
-  } else {
-    reportOutOfMemory(env, "C new value string");
-  }
+  return changeStringValue(env, changeMessageLocale_p, locale);
 }
 
 JAVA_STATIC_METHOD (

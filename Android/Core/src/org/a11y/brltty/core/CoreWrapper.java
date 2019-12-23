@@ -62,7 +62,9 @@ public abstract class CoreWrapper {
   public native static boolean changeScreenDriver (String driver);
   public native static boolean changeScreenParameters (String parameters);
 
+  public native static boolean changeMessageLocale (String locale);
   public native static void showMessage (String text);
+
   public native static boolean setEnvironmentVariable (String name, String value);
 
   public static boolean changeLogCategories (Set<String> categories) {
