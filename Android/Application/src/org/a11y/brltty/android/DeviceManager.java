@@ -78,7 +78,7 @@ public final class DeviceManager extends SettingsFragment {
   }
 
   private static String getSelectedDevice (SharedPreferences prefs) {
-    Context context = ApplicationContext.get();
+    Context context = BrailleApplication.get();
     String key = context.getResources().getString(R.string.PREF_KEY_SELECTED_DEVICE);
     return prefs.getString(key, "");
   }

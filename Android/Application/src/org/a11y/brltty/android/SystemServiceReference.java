@@ -23,7 +23,7 @@ public final class SystemServiceReference<T> extends SingletonReference<T> {
 
   @Override
   protected final T onNeedReference () {
-    return (T)ApplicationContext.get().getSystemService(serviceName);
+    return (T)BrailleApplication.get().getSystemService(serviceName);
   }
 
   SystemServiceReference (String name) {

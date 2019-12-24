@@ -30,7 +30,6 @@ public class SettingsActivity extends PreferenceActivity {
   @Override
   protected void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    ApplicationContext.set(this);
     setTitle(R.string.SETTINGS_SCREEN_MAIN);
   }
 

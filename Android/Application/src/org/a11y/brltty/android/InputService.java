@@ -42,7 +42,6 @@ public class InputService extends InputMethodService {
   @Override
   public void onCreate () {
     super.onCreate();
-    ApplicationContext.set(this);
     inputService = this;
     Log.d(LOG_TAG, "input service started");
   }
@@ -239,7 +238,7 @@ public class InputService extends InputMethodService {
   }
 
   private static void reportInputProblem (int message) {
-    Context context = ApplicationContext.get();
+    Context context = BrailleApplication.get();
     Log.w(LOG_TAG, context.getResources().getString(message));
     Message.show(Message.Type.WARNING, context.getString(message));
   }

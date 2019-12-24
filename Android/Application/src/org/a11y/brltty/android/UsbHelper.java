@@ -78,7 +78,7 @@ public class UsbHelper {
   }
 
   public static void begin () {
-    usbContext = ApplicationContext.get();
+    usbContext = BrailleApplication.get();
     usbManager = ApplicationUtilities.getUsbManager();
     makePermissionReceiver();
   }

@@ -29,7 +29,7 @@ public enum DataType {
   public static Context getContext () {
     synchronized (DATA_CONTEXT_LOCK) {
       if (dataContext == null) {
-        Context context = ApplicationContext.get();
+        Context context = BrailleApplication.get();
 
         if (ApplicationUtilities.haveNougat) {
           dataContext = context.createDeviceProtectedStorageContext();

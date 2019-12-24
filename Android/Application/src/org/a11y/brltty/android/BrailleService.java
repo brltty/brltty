@@ -39,7 +39,6 @@ public class BrailleService extends AccessibilityService {
   @Override
   public void onCreate () {
     super.onCreate();
-    ApplicationContext.set(this);
     brailleService = this;
     Log.d(LOG_TAG, "braille service started");
   }

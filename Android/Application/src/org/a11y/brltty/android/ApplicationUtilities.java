@@ -87,11 +87,11 @@ public abstract class ApplicationUtilities {
   }
 
   public static String getResourceString (int identifier) {
-    return ApplicationContext.get().getString(identifier);
+    return BrailleApplication.get().getString(identifier);
   }
 
   public static ContentResolver getContentResolver () {
-    return ApplicationContext.get().getContentResolver();
+    return BrailleApplication.get().getContentResolver();
   }
 
   public static String getSecureSetting (String setting) {
@@ -133,7 +133,7 @@ public abstract class ApplicationUtilities {
   }
 
   public static void launch (Class<? extends Activity> activityClass) {
-    Intent intent = new Intent(ApplicationContext.get(), activityClass);
+    Intent intent = new Intent(BrailleApplication.get(), activityClass);
 
     intent.addFlags(
       Intent.FLAG_ACTIVITY_NEW_TASK |
@@ -141,6 +141,6 @@ public abstract class ApplicationUtilities {
       Intent.FLAG_FROM_BACKGROUND
     );
 
-    ApplicationContext.get().startActivity(intent);
+    BrailleApplication.get().startActivity(intent);
   }
 }

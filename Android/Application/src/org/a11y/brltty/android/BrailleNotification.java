@@ -40,7 +40,7 @@ public abstract class BrailleNotification {
 
   private static Context getContext () {
     if (applicationContext == null) {
-      applicationContext = ApplicationContext.get();
+      applicationContext = BrailleApplication.get();
     }
 
     return applicationContext;
