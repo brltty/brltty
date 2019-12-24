@@ -18,15 +18,10 @@
 
 package org.a11y.brltty.android;
 
-import android.util.Log;
-
 import android.app.Application;
-import android.content.Context;
 import android.os.Handler;
 
 public class BrailleApplication extends Application {
-  private static final String LOG_TAG = BrailleApplication.class.getName();
-
   private static BrailleApplication applicationObject = null;
   private static Handler applicationHandler = null;
 

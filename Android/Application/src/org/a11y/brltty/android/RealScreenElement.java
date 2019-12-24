@@ -18,8 +18,9 @@
 
 package org.a11y.brltty.android;
 
-import android.util.Log;
+import java.util.List;
 
+import android.util.Log;
 import android.os.Bundle;
 
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -249,6 +250,52 @@ public class RealScreenElement extends ScreenElement {
     }
 
     return super.onContextClick();
+  }
+
+  @Override
+  public boolean onCustomAction () {
+    if (ApplicationUtilities.haveLollipop) {
+      List<AccessibilityNodeInfo.AccessibilityAction> actions = accessibilityNode.getActionList();
+
+      if (actions != null) {
+        final CharSequence[] labels;
+        final int[] ids;
+
+        {
+          int size = actions.size();
+          CharSequence[] labelBuffer = new CharSequence[size];
+          int[] idBuffer = new int[size];
+          int count = 0;
+
+          for (AccessibilityNodeInfo.AccessibilityAction action : actions) {
+            CharSequence label = action.getLabel();
+            if (label == null) continue;
+            if (label.length() == 0) continue;
+
+            labelBuffer[count] = label;
+            idBuffer[count] = action.getId();
+            count += 1;
+          }
+
+          if (count > 0) {
+            labels = new CharSequence[count];
+            System.arraycopy(labelBuffer, 0, labels, 0, count);
+
+            ids = new int[count];
+            System.arraycopy(idBuffer, 0, ids, 0, count);
+          } else {
+            labels = null;
+            ids = null;
+          }
+        }
+
+        if (labels != null) {
+          return true;
+        }
+      }
+    }
+
+    return super.onCustomAction();
   }
 
   @Override
