@@ -49,31 +49,30 @@ typedef struct {
     size_t size;
     size_t count;
   } content;
-
-  ProgramExitStatus exitStatus;
 } LineProcessingData;
 
 static int
 addContent (LineProcessingData *lpd, const wchar_t *characters, size_t count) {
-  size_t size = lpd->content.count + count;
+  {
+    size_t newSize = lpd->content.count + count;
 
-  if (size > lpd->content.size) {
-    size |= 0XFFF;
-    size += 1;
-    wchar_t *characters = allocateCharacters(size);
+    if (newSize > lpd->content.size) {
+      newSize |= 0XFFF;
+      newSize += 1;
+      wchar_t *newCharacters = allocateCharacters(newSize);
 
-    if (!characters) {
-      logMallocError();
-      lpd->exitStatus = PROG_EXIT_FATAL;
-      return 0;
+      if (!newCharacters) {
+        logMallocError();
+        return 0;
+      }
+
+      if (lpd->content.characters) {
+        wmemcpy(newCharacters, lpd->content.characters, lpd->content.count);
+      }
+
+      lpd->content.characters = newCharacters;
+      lpd->content.size = newSize;
     }
-
-    if (lpd->content.characters) {
-      wmemcpy(characters, lpd->content.characters, lpd->content.count);
-    }
-
-    lpd->content.characters = characters;
-    lpd->content.size = size;
   }
 
   wmemcpy(&lpd->content.characters[lpd->content.count], characters, count);
@@ -102,7 +101,7 @@ main (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
-      .applicationName = "brlclip",
+      .applicationName = "brltty-clip",
       .argumentsSummary = "[{input-file | -} ...]"
     };
 
@@ -127,9 +126,7 @@ main (int argc, char *argv[]) {
           .characters = NULL,
           .size = 0,
           .count = 0
-        },
-
-        .exitStatus = PROG_EXIT_SUCCESS
+        }
       };
 
       const InputFilesProcessingParameters parameters = {
@@ -154,6 +151,8 @@ main (int argc, char *argv[]) {
           free(content);
         }
       }
+
+      if (lpd.content.characters) free(lpd.content.characters);
     } else {
       char *content = brlapi_getParameterAlloc(parameter, subparam, flags, NULL);
 
@@ -167,7 +166,8 @@ main (int argc, char *argv[]) {
 
     brlapi_closeConnection();
   } else {
-    logMessage(LOG_ERR, "failed to connect to %s using auth %s: %s", settings.host, settings.auth, brlapi_strerror(&brlapi_error));
+    logMessage(LOG_ERR, "failed to connect to %s using auth %s: %s",
+               settings.host, settings.auth, brlapi_strerror(&brlapi_error));
   }
 
   return exitStatus;
