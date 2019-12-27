@@ -26,6 +26,7 @@
 
 static char *opt_host;
 static char *opt_auth;
+static int opt_get;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'b',
@@ -40,6 +41,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "scheme+...",
     .setting.string = &opt_auth,
     .description = "BrlAPI authorization/authentication schemes."
+  },
+
+  { .letter = 'g',
+    .word = "get",
+    .setting.flag = &opt_get,
+    .description = "Write the content of the clipboard to standard output."
   },
 END_OPTION_TABLE
 
@@ -120,7 +127,7 @@ main (int argc, char *argv[]) {
     brlapi_param_subparam_t subparam = 0;
     brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
 
-    if (argc > 0) {
+    if (!opt_get) {
       LineProcessingData lpd = {
         .content = {
           .characters = NULL,
@@ -153,6 +160,9 @@ main (int argc, char *argv[]) {
       }
 
       if (lpd.content.characters) free(lpd.content.characters);
+    } else if (argc > 0) {
+      logMessage(LOG_ERR, "too many arguments");
+      exitStatus = PROG_EXIT_SYNTAX;
     } else {
       char *content = brlapi_getParameterAlloc(parameter, subparam, flags, NULL);
 
