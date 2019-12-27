@@ -91,9 +91,9 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'a',
     .word = "auth",
-    .argument = strtext("file"),
+    .argument = strtext("scheme+..."),
     .setting.string = &auth,
-    .description = strtext("BrlAPI authorization/authentication string")
+    .description = strtext("BrlAPI authorization/authentication schemes")
   },
 
   { .letter = 'd',
