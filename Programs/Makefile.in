@@ -985,6 +985,16 @@ xsel.$O:
 
 ###############################################################################
 
+BRLCLIP_OBJECTS = brlclip.$O $(PROGRAM_OBJECTS)
+
+brlclip$X: $(BRLCLIP_OBJECTS) api
+	$(CC) $(LDFLAGS) -o $@ $(BRLCLIP_OBJECTS) $(API_LIBS) $(LDLIBS)
+
+brlclip.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brlclip.c
+
+###############################################################################
+
 TBL2HEX_OBJECTS_FOR_BUILD = tbl2hex.$(O_FOR_BUILD) $(PROGRAM_OBJECTS_FOR_BUILD) dataarea.$(O_FOR_BUILD) ttb_compile.$(O_FOR_BUILD) ttb_native.$(O_FOR_BUILD) $(CHARSET_OBJECTS_FOR_BUILD) atb_compile.$(O_FOR_BUILD) ctb_compile.$(O_FOR_BUILD) cldr.$(O_FOR_BUILD)
 TBL2HEX_OBJECTS = $(TBL2HEX_OBJECTS_FOR_BUILD:.$(O_FOR_BUILD)=.$B)
 
