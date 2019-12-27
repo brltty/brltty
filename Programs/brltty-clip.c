@@ -151,7 +151,7 @@ main (int argc, char *argv[]) {
         char *content = getUtf8FromWchars(lpd.content.characters, lpd.content.count, &length);
 
         if (content) {
-          if (brlapi_setParameter(parameter, subparam, flags, content, length)) {
+          if (brlapi_setParameter(parameter, subparam, flags, content, length) >= 0) {
             exitStatus = PROG_EXIT_SUCCESS;
           }
 
@@ -168,10 +168,9 @@ main (int argc, char *argv[]) {
 
       if (content) {
         printf("%s", content);
+        if (!ferror(stdout)) exitStatus = PROG_EXIT_SUCCESS;
         free(content);
       }
-
-      exitStatus = PROG_EXIT_SUCCESS;
     }
 
     brlapi_closeConnection();
