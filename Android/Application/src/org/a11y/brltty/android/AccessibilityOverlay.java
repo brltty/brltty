@@ -25,12 +25,14 @@ import android.view.View;
 import android.view.Gravity;
 import android.graphics.PixelFormat;
 
-public class AccessibilityOverlay {
-  private final static WindowManager windowManager = ApplicationUtilities.getWindowManager();
+import android.view.LayoutInflater;
+
+public abstract class AccessibilityOverlay {
+  private final WindowManager windowManager = BrailleService.getWindowManager();
   private final LayoutParams layoutParameters = new LayoutParams();
   private View currentView = null;
 
-  public AccessibilityOverlay () {
+  protected AccessibilityOverlay () {
     layoutParameters.format = PixelFormat.TRANSPARENT;
     layoutParameters.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
 
@@ -59,5 +61,10 @@ public class AccessibilityOverlay {
 
   protected final boolean removeView () {
     return setView(null);
+  }
+
+  protected final boolean setView (int resource) {
+    LayoutInflater inflater = LayoutInflater.from(BrailleService.getBrailleService());
+    return setView(inflater.inflate(resource, null));
   }
 }
