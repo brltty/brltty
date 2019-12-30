@@ -18,17 +18,25 @@
 
 package org.a11y.brltty.android;
 
+import android.content.Context;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import android.view.View;
+import android.view.LayoutInflater;
+
 import android.view.Gravity;
 import android.graphics.PixelFormat;
 
-import android.view.LayoutInflater;
-
 public abstract class AccessibilityOverlay {
-  private final WindowManager windowManager = BrailleService.getWindowManager();
+  protected static Context getContext () {
+    return BrailleService.getBrailleService();
+  }
+
+  protected static WindowManager getWindowManager () {
+    return (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
+  }
+
   private final LayoutParams layoutParameters = new LayoutParams();
   private View currentView = null;
 
@@ -40,7 +48,6 @@ public abstract class AccessibilityOverlay {
     layoutParameters.height = LayoutParams.WRAP_CONTENT;
 
     layoutParameters.flags |= LayoutParams.FLAG_NOT_TOUCHABLE;
-    layoutParameters.flags |= LayoutParams.FLAG_NOT_FOCUSABLE;
 
     if (ApplicationUtilities.haveLollipopMR1) {
       layoutParameters.type = LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
@@ -49,22 +56,27 @@ public abstract class AccessibilityOverlay {
     }
   }
 
-  protected final boolean setView (View newView) {
+  protected final void setView (View newView) {
     synchronized (this) {
-      if (newView == currentView) return false;
-      if (currentView != null) windowManager.removeView(currentView);
-      currentView = newView;
-      if (currentView != null) windowManager.addView(currentView, layoutParameters);
-      return true;
+      if (newView != currentView) {
+        if (currentView != null) getWindowManager().removeView(currentView);
+        currentView = newView;
+        if (currentView != null) getWindowManager().addView(currentView, layoutParameters);
+      }
     }
   }
 
-  protected final boolean removeView () {
-    return setView(null);
+  protected final void removeView () {
+    setView(null);
   }
 
-  protected final boolean setView (int resource) {
-    LayoutInflater inflater = LayoutInflater.from(BrailleService.getBrailleService());
-    return setView(inflater.inflate(resource, null));
+  protected final View setView (int resource) {
+    LayoutInflater inflater = LayoutInflater.from(getContext());
+    View view = inflater.inflate(resource, null);
+    setView(view);
+
+    view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+    view.requestFocus();
+    return view;
   }
 }

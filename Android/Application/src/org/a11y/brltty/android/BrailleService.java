@@ -25,37 +25,27 @@ import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
 
 import android.content.Intent;
-import android.content.Context;
-import android.view.WindowManager;
 
 public class BrailleService extends AccessibilityService {
   private static final String LOG_TAG = BrailleService.class.getName();
 
   private static volatile BrailleService brailleService = null;
-  private static WindowManager windowManager = null;
 
   public static BrailleService getBrailleService () {
     return brailleService;
   }
 
-  public static WindowManager getWindowManager () {
-    return windowManager;
-  }
-
   @Override
   public void onCreate () {
     super.onCreate();
-    Log.d(LOG_TAG, "braille service started");
-
     brailleService = this;
-    windowManager = (WindowManager)getSystemService(Context.WINDOW_SERVICE);
+    Log.d(LOG_TAG, "braille service started");
   }
 
   @Override
   public void onDestroy () {
     try {
       brailleService = null;
-      windowManager = null;
       Log.d(LOG_TAG, "braille service stopped");
     } finally {
       super.onDestroy();

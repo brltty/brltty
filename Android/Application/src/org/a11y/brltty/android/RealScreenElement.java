@@ -290,6 +290,23 @@ public class RealScreenElement extends ScreenElement {
         }
 
         if (labels != null) {
+          BrailleApplication.post(
+            new Runnable() {
+              @Override
+              public void run () {
+                new AccessibilityChooser(
+                  labels,
+                  new AccessibilityChooser.ActionClickListener() {
+                    @Override
+                    public void onClick (int position) {
+                      accessibilityNode.performAction(ids[position]);
+                    }
+                  }
+                );
+              }
+            }
+          );
+
           return true;
         }
       }

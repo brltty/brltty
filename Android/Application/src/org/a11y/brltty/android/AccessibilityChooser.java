@@ -18,9 +18,57 @@
 
 package org.a11y.brltty.android;
 
+import android.view.View;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+
 public class AccessibilityChooser extends AccessibilityOverlay {
-  public AccessibilityChooser () {
+  private final ListView actionsList;
+  private final Button dismissButton;
+
+  private final void dismiss () {
+    actionsList.setOnItemClickListener(null);
+    dismissButton.setOnClickListener(null);
+    removeView();
+  }
+
+  public static interface ActionClickListener {
+    public void onClick (int position);
+  }
+
+  public AccessibilityChooser (CharSequence[] actionLabels, final ActionClickListener actionClickListener) {
     super();
-    setView(R.layout.accessibility_chooser);
+
+    View view = setView(R.layout.accessibility_chooser);
+    actionsList = (ListView)view.findViewById(R.id.accessibility_chooser_list);
+    dismissButton = (Button)view.findViewById(R.id.accessibility_chooser_dismiss);
+
+    {
+      ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
+        getContext(), android.R.layout.simple_list_item_1, actionLabels
+      );
+
+      actionsList.setAdapter(adapter);
+    }
+
+    actionsList.setOnItemClickListener(
+      new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick (AdapterView adapter, View view, int position, long id) {
+          actionClickListener.onClick(position);
+          dismiss();
+        }
+      }
+    );
+    dismissButton.setOnClickListener(
+      new View.OnClickListener() {
+        @Override
+        public void onClick (View view) {
+          dismiss();
+        }
+      }
+    );
   }
 }

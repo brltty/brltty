@@ -6,6 +6,15 @@
   >
 
   <TextView
-    android:text="hello there"
+    android:text="Choose an action:"
+   />
+
+  <ListView
+    android:id="@+id/accessibility_chooser_list"
+   />
+
+  <Button
+    android:id="@+id/accessibility_chooser_dismiss"
+    android:text="@android:string/no"
    />
 </TableLayout>
