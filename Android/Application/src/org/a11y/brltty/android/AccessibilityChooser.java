@@ -77,5 +77,7 @@ public class AccessibilityChooser extends AccessibilityOverlay {
         }
       }
     );
+
+    itemList.requestFocus();
   }
 }

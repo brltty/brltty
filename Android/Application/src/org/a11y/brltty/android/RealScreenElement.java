@@ -296,7 +296,7 @@ public class RealScreenElement extends ScreenElement {
               public void run () {
                 new AccessibilityChooser(
                   labels,
-                  R.string.CHOOSER_TITLE_CUSTOM_ACTION,
+                  R.string.CHOOSER_TITLE_CUSTOM_ACTIONS,
                   new AccessibilityChooser.ItemClickListener() {
                     @Override
                     public void onClick (int position) {

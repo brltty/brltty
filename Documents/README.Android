@@ -336,12 +336,13 @@ cursor routing key performs an action on the screen element under it. Starting
 with the leftmost routing key over a screen element, which we'll call key #1,
 these actions are as follows:
 
-1) set accessibility focus (used for cursor tracking and routing)
+1) Bring accessibility focus (cursor)
 2) tap (click)
 3) hold (long click)
 4) scroll backward (up or left)
 5) scroll forward (down or right)
 6) context click
+7) custom action
 
 A range control (progress bar, volume slider, etc) can be adjusted up/down
 via the scroll forward/backward actions.
