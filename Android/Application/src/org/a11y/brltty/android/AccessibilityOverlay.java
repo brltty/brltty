@@ -59,9 +59,14 @@ public abstract class AccessibilityOverlay {
   protected final void setView (View newView) {
     synchronized (this) {
       if (newView != currentView) {
-        if (currentView != null) getWindowManager().removeView(currentView);
-        currentView = newView;
-        if (currentView != null) getWindowManager().addView(currentView, layoutParameters);
+        WindowManager wm = getWindowManager();
+        if (currentView != null) wm.removeView(currentView);
+
+        if ((currentView = newView) != null) {
+          wm.addView(currentView, layoutParameters);
+          currentView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+          currentView.requestFocus();
+        }
       }
     }
   }
@@ -74,9 +79,6 @@ public abstract class AccessibilityOverlay {
     LayoutInflater inflater = LayoutInflater.from(getContext());
     View view = inflater.inflate(resource, null);
     setView(view);
-
-    view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-    view.requestFocus();
     return view;
   }
 }

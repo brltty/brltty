@@ -19,45 +19,52 @@
 package org.a11y.brltty.android;
 
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Button;
+
 import android.widget.ListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 public class AccessibilityChooser extends AccessibilityOverlay {
-  private final ListView actionsList;
+  private final ListView itemList;
   private final Button dismissButton;
 
   private final void dismiss () {
-    actionsList.setOnItemClickListener(null);
+    itemList.setOnItemClickListener(null);
     dismissButton.setOnClickListener(null);
     removeView();
   }
 
-  public static interface ActionClickListener {
+  public static interface ItemClickListener {
     public void onClick (int position);
   }
 
-  public AccessibilityChooser (CharSequence[] actionLabels, final ActionClickListener actionClickListener) {
+  public AccessibilityChooser (CharSequence[] itemLabels, int title, final ItemClickListener itemClickListener) {
     super();
 
     View view = setView(R.layout.accessibility_chooser);
-    actionsList = (ListView)view.findViewById(R.id.accessibility_chooser_list);
+    itemList = (ListView)view.findViewById(R.id.accessibility_chooser_list);
     dismissButton = (Button)view.findViewById(R.id.accessibility_chooser_dismiss);
 
     {
-      ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
-        getContext(), android.R.layout.simple_list_item_1, actionLabels
-      );
-
-      actionsList.setAdapter(adapter);
+      TextView titleView = (TextView)view.findViewById(R.id.accessibility_chooser_title);
+      titleView.setText(title);
     }
 
-    actionsList.setOnItemClickListener(
+    {
+      ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
+        getContext(), android.R.layout.simple_list_item_1, itemLabels
+      );
+
+      itemList.setAdapter(adapter);
+    }
+
+    itemList.setOnItemClickListener(
       new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick (AdapterView adapter, View view, int position, long id) {
-          actionClickListener.onClick(position);
+          itemClickListener.onClick(position);
           dismiss();
         }
       }

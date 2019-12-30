@@ -6,7 +6,7 @@
   >
 
   <TextView
-    android:text="Choose an action:"
+    android:id="@+id/accessibility_chooser_title"
    />
 
   <ListView
