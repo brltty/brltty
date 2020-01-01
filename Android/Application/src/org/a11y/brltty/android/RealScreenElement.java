@@ -253,7 +253,7 @@ public class RealScreenElement extends ScreenElement {
   }
 
   @Override
-  public boolean onCustomAction () {
+  public boolean onAccessibilityActions () {
     if (ApplicationUtilities.haveLollipop) {
       List<AccessibilityNodeInfo.AccessibilityAction> actions = accessibilityNode.getActionList();
 
@@ -294,10 +294,10 @@ public class RealScreenElement extends ScreenElement {
             new Runnable() {
               @Override
               public void run () {
-                new AccessibilityChooser(
+                new ChooserWindow(
                   labels,
-                  R.string.CHOOSER_TITLE_CUSTOM_ACTIONS,
-                  new AccessibilityChooser.ItemClickListener() {
+                  R.string.CHOOSER_TITLE_ACCESSIBILITY_ACTIONS,
+                  new ChooserWindow.ItemClickListener() {
                     @Override
                     public void onClick (int position) {
                       accessibilityNode.performAction(ids[position]);
@@ -313,7 +313,7 @@ public class RealScreenElement extends ScreenElement {
       }
     }
 
-    return super.onCustomAction();
+    return super.onAccessibilityActions();
   }
 
   @Override

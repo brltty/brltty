@@ -141,7 +141,7 @@ public class ScreenElement {
     return false;
   }
 
-  public boolean onCustomAction () {
+  public boolean onAccessibilityActions () {
     return false;
   }
 
@@ -153,7 +153,7 @@ public class ScreenElement {
       case  3: return onScrollBackward();
       case  4: return onScrollForward();
       case  5: return onContextClick();
-      case  6: return onCustomAction();
+      case  6: return onAccessibilityActions();
       default: return false;
     }
   }

@@ -26,7 +26,7 @@ import android.widget.ListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
-public class AccessibilityChooser extends AccessibilityOverlay {
+public class ChooserWindow extends OverlayWindow {
   private final ListView itemList;
   private final Button dismissButton;
 
@@ -40,15 +40,15 @@ public class AccessibilityChooser extends AccessibilityOverlay {
     public void onClick (int position);
   }
 
-  public AccessibilityChooser (CharSequence[] itemLabels, int title, final ItemClickListener itemClickListener) {
+  public ChooserWindow (CharSequence[] itemLabels, int title, final ItemClickListener itemClickListener) {
     super();
 
-    View view = setView(R.layout.accessibility_chooser);
-    itemList = (ListView)view.findViewById(R.id.accessibility_chooser_list);
-    dismissButton = (Button)view.findViewById(R.id.accessibility_chooser_dismiss);
+    View view = setView(R.layout.chooser);
+    itemList = (ListView)view.findViewById(R.id.chooser_list);
+    dismissButton = (Button)view.findViewById(R.id.chooser_dismiss);
 
     {
-      TextView titleView = (TextView)view.findViewById(R.id.accessibility_chooser_title);
+      TextView titleView = (TextView)view.findViewById(R.id.chooser_title);
       titleView.setText(title);
     }
 

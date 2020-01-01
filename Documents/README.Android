@@ -342,7 +342,7 @@ these actions are as follows:
 4) scroll backward (up or left)
 5) scroll forward (down or right)
 6) context click
-7) custom action
+7) accessibility actions
 
 A range control (progress bar, volume slider, etc) can be adjusted up/down
 via the scroll forward/backward actions.

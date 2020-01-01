@@ -6,15 +6,16 @@
   >
 
   <TextView
-    android:id="@+id/accessibility_chooser_title"
+    android:id="@+id/chooser_title"
+    android:textStyle="bold"
    />
 
   <ListView
-    android:id="@+id/accessibility_chooser_list"
+    android:id="@+id/chooser_list"
    />
 
   <Button
-    android:id="@+id/accessibility_chooser_dismiss"
+    android:id="@+id/chooser_dismiss"
     android:text="@android:string/no"
    />
 </TableLayout>
