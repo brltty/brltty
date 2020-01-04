@@ -40,6 +40,8 @@
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Administrer fellesskapsmedlemskap</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Oppdater programmet</string>
 
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Tilgjengelighetshandlinger</string>
+
   <string name="SETTINGS_SCREEN_MAIN">Innstillinger for BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Generelle innstillinger</string>
   <string name="SETTINGS_SCREEN_MESSAGE">Meldingsinnstillinger</string>
