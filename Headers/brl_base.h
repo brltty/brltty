@@ -97,7 +97,8 @@ extern void disconnectBrailleResource (
 typedef enum {
   BRL_PVR_INVALID,
   BRL_PVR_INCLUDE,
-  BRL_PVR_EXCLUDE
+  BRL_PVR_EXCLUDE,
+  BRL_PVR_IGNORE
 } BraillePacketVerifierResult;
 
 typedef BraillePacketVerifierResult BraillePacketVerifier (

@@ -201,40 +201,37 @@ readBraillePacket (
     }
 
   gotByte:
-    started = 1;
-
     if (count < size) {
       bytes[count++] = byte;
+      BraillePacketVerifierResult result = verifyPacket(brl, bytes, count, &length, data);
 
-      {
-        BraillePacketVerifierResult result = verifyPacket(brl, bytes, count, &length, data);
+      switch (result) {
+        case BRL_PVR_EXCLUDE:
+          count -= 1;
+          /* fall through */
+        case BRL_PVR_INCLUDE:
+          started = 1;
+          break;
 
-        switch (result) {
-          case BRL_PVR_EXCLUDE:
-            if (!(count -= 1)) {
-              started = 0;
-              continue;
-            }
-            /* fall through */
-          case BRL_PVR_INCLUDE:
-            break;
+        case BRL_PVR_IGNORE:
+          count -= 1;
+          continue;
 
-          default:
-            logMessage(LOG_WARNING, "unimplemented braille packet verifier result: %u", result);
-            /* fall through */
-          case BRL_PVR_INVALID:
-            started = 0;
+        default:
+          logMessage(LOG_WARNING, "unimplemented braille packet verifier result: %u", result);
+          /* fall through */
+        case BRL_PVR_INVALID:
+          started = 0;
+          length = 1;
 
-            if (--count) {
-              logShortPacket(bytes, count);
-              count = 0;
-              length = 1;
-              goto gotByte;
-            }
+          if (--count) {
+            logShortPacket(bytes, count);
+            count = 0;
+            goto gotByte;
+          }
 
-            logIgnoredByte(byte);
-            continue;
-        }
+          logIgnoredByte(byte);
+          continue;
       }
 
       if (count >= length) {
