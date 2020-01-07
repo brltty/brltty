@@ -466,6 +466,27 @@ releaseBrailleKeys (BrailleDisplay *brl) {
   releaseAllKeys(brl->keyTable);
 }
 
+KeyNumberSet
+mapKeyNumbers (KeyNumberSet fromKeys, const KeyNumberMapEntry *map, size_t count) {
+  KeyNumberSet toKeys = fromKeys;
+  const KeyNumberMapEntry *end = map + count;
+
+  while (map < end) {
+    KeyNumber key = map->from;
+    int yes = (key == KTB_KEY_ANY)? 0: isKeyNumberIncluded(fromKeys, key);
+
+    setKeyNumberIncluded(&toKeys, map->to, yes);
+    map += 1;
+  }
+
+  return toKeys;
+}
+
+void
+remapKeyNumbers (KeyNumberSet *keys, const KeyNumberMapEntry *map, size_t count) {
+  *keys = mapKeyNumbers(*keys, map, count);
+}
+
 typedef struct {
   const KeyGroup group;
 

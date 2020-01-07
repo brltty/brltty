@@ -62,7 +62,13 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
 
+typedef struct {
+  void (*normalizeKeys) (KeyNumberSet *keys);
+} InputOutputMethods;
+
 struct BrailleDataStruct {
+  const InputOutputMethods *io;
+
   struct {
     unsigned char rewrite;
     unsigned char cells[MAXIMUM_TEXT_CELLS];
@@ -77,6 +83,34 @@ struct BrailleDataStruct {
     unsigned char rewrite;
     int position;
   } cursor;
+};
+
+static void
+normalizeKeys_USB (KeyNumberSet *keys) {
+}
+
+static const InputOutputMethods ioMethods_USB = {
+  .normalizeKeys = normalizeKeys_USB
+};
+
+static void
+normalizeKeys_Bluetooth (KeyNumberSet *keys) {
+  {
+    static const KeyNumberMapEntry map[] = {
+      {.to=IC_KEY_LeftUp   , .from=IC_KEY_LeftDown},
+      {.to=IC_KEY_LeftDown , .from=IC_KEY_RightUp },
+      {.to=IC_KEY_RightUp  , .from=IC_KEY_Back    },
+      {.to=IC_KEY_RightDown, .from=IC_KEY_Enter   },
+      {.to=IC_KEY_Back     , .from=KTB_KEY_ANY    },
+      {.to=IC_KEY_Enter    , .from=KTB_KEY_ANY    },
+    };
+
+    remapKeyNumbers(keys, map, ARRAY_COUNT(map));
+  }
+}
+
+static const InputOutputMethods ioMethods_Bluetooth = {
+  .normalizeKeys = normalizeKeys_Bluetooth
 };
 
 static int
@@ -222,11 +256,14 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
+  descriptor.usb.options.applicationData = &ioMethods_USB;
 
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.discoverChannel = 1;
+  descriptor.bluetooth.options.applicationData = &ioMethods_Bluetooth;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
+    brl->data->io = gioGetApplicationData(brl->gioEndpoint);
     return 1;
   }
 
@@ -353,12 +390,16 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       }
 
       case 0X01: {
-        KeyNumberSet bits = (packet.fields.reserved[0] << 0X00)
+        KeyNumberSet keys = (packet.fields.reserved[0] << 0X00)
                           | (packet.fields.reserved[1] << 0X08)
                           | (packet.fields.reserved[2] << 0X10)
                           | (packet.fields.reserved[3] << 0X18);
 
-        enqueueKeys(brl, bits, IC_GRP_NavigationKeys, 0);
+        if (keys) {
+          brl->data->io->normalizeKeys(&keys);
+          enqueueKeys(brl, keys, IC_GRP_NavigationKeys, 0);
+        }
+
         continue;
       }
 

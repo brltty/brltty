@@ -157,6 +157,30 @@ extern void releaseBrailleKeys (BrailleDisplay *brl);
 
 typedef uint32_t KeyNumberSet;
 #define KEY_NUMBER_BIT(number) (UINT32_C(1) << (number))
+
+static inline int
+isKeyNumberIncluded (KeyNumberSet set, KeyNumber number) {
+  return !!(set & KEY_NUMBER_BIT(number));
+}
+
+static inline void
+setKeyNumberIncluded (KeyNumberSet *set, KeyNumber number, int yes) {
+  KeyNumberSet bit = KEY_NUMBER_BIT(number);
+
+  if (yes) {
+    *set |= bit;
+  } else {
+    *set &= ~bit;
+  }
+}
+
+typedef struct {
+  KeyNumber from;
+  KeyNumber to;
+} KeyNumberMapEntry;
+
+extern KeyNumberSet mapKeyNumbers (KeyNumberSet fromKeys, const KeyNumberMapEntry *map, size_t count);
+extern void remapKeyNumbers (KeyNumberSet *keys, const KeyNumberMapEntry *map, size_t count);
 extern KeyNumberSet makeKeyNumberSet (KEY_NAME_TABLES_REFERENCE keys, KeyGroup group);
 
 extern int enqueueKeyEvent (
