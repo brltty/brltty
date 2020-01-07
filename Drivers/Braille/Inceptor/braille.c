@@ -201,6 +201,10 @@ verifyPacket (
           *length = 10;
           break;
 
+        // an ASCII linefeed is being sent after each Bluetooth packet
+        case 0X0A:
+          return BRL_PVR_EXCLUDE;
+
         default:
           return BRL_PVR_INVALID;
       }

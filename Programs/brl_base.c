@@ -185,12 +185,12 @@ readBraillePacket (
   void *packet, size_t size,
   BraillePacketVerifier *verifyPacket, void *data
 ) {
+  if (!endpoint) endpoint = brl->gioEndpoint;
+
   unsigned char *bytes = packet;
   size_t count = 0;
   size_t length = 1;
   int started = 0;
-
-  if (!endpoint) endpoint = brl->gioEndpoint;
 
   while (1) {
     unsigned char byte;
@@ -211,7 +211,7 @@ readBraillePacket (
 
         switch (result) {
           case BRL_PVR_EXCLUDE:
-            count -= 1;
+            if (!(count -= 1)) started = 0;
           case BRL_PVR_INCLUDE:
             break;
 
