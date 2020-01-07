@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "log.h"
 #include "options.h"
 #include "datafile.h"
@@ -27,6 +29,7 @@
 static char *opt_host;
 static char *opt_auth;
 static int opt_get;
+static char *opt_set;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'b',
@@ -48,7 +51,28 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_get,
     .description = "Write the content of the clipboard to standard output."
   },
+
+  { .letter = 's',
+    .word = "set",
+    .argument = strtext("content"),
+    .setting.string = &opt_set,
+    .description = "Set the content of the clipboard."
+  },
 END_OPTION_TABLE
+
+static const brlapi_param_t apiParameter = BRLAPI_PARAM_CLIPBOARD_CONTENT;
+static const brlapi_param_subparam_t apiSubparam = 0;
+static const brlapi_param_flags_t apiFlags = BRLAPI_PARAMF_GLOBAL;
+
+static char *
+getClipboardContent (void) {
+  return brlapi_getParameterAlloc(apiParameter, apiSubparam, apiFlags, NULL);
+}
+
+static int
+setClipboardContent (const char *content, size_t length) {
+  return brlapi_setParameter(apiParameter, apiSubparam, apiFlags, content, length) >= 0;
+}
 
 typedef struct {
   struct {
@@ -123,19 +147,20 @@ main (int argc, char *argv[]) {
   brlapi_fileDescriptor fileDescriptor = brlapi_openConnection(&settings, &settings);
 
   if (fileDescriptor != (brlapi_fileDescriptor)(-1)) {
-    brlapi_param_t parameter = BRLAPI_PARAM_CLIPBOARD_CONTENT;
-    brlapi_param_subparam_t subparam = 0;
-    brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
+    char *oldContent = NULL;
 
-    if (!opt_get) {
-      LineProcessingData lpd = {
-        .content = {
-          .characters = NULL,
-          .size = 0,
-          .count = 0
-        }
-      };
+    LineProcessingData lpd = {
+      .content = {
+        .characters = NULL,
+        .size = 0,
+        .count = 0
+      }
+    };
 
+    int getContent = !!opt_get;
+    int setContent = !!*opt_set;
+
+    if (!(getContent || setContent)) {
       const InputFilesProcessingParameters parameters = {
         .dataFileParameters = {
           .options = DFO_NO_COMMENTS,
@@ -144,14 +169,38 @@ main (int argc, char *argv[]) {
         }
       };
 
-      if ((exitStatus = processInputFiles(argv, argc, &parameters)) == PROG_EXIT_SUCCESS) {
+      exitStatus = processInputFiles(argv, argc, &parameters);
+    } else if (argc > 0) {
+      logMessage(LOG_ERR, "too many arguments");
+      exitStatus = PROG_EXIT_SYNTAX;
+    } else {
+      exitStatus = PROG_EXIT_SUCCESS;
+    }
+
+    if (exitStatus == PROG_EXIT_SUCCESS) {
+      if (getContent) {
+        oldContent = getClipboardContent();
+        if (!oldContent) exitStatus = PROG_EXIT_FATAL;
+      }
+    }
+
+    if (exitStatus == PROG_EXIT_SUCCESS) {
+      if (setContent) {
+        if (!setClipboardContent(opt_set, strlen(opt_set))) {
+          exitStatus = PROG_EXIT_FATAL;
+        }
+      }
+    }
+
+    if (lpd.content.characters) {
+      if (exitStatus == PROG_EXIT_SUCCESS) {
         exitStatus = PROG_EXIT_FATAL;
 
         size_t length;
         char *content = getUtf8FromWchars(lpd.content.characters, lpd.content.count, &length);
 
         if (content) {
-          if (brlapi_setParameter(parameter, subparam, flags, content, length) >= 0) {
+          if (setClipboardContent(content, length)) {
             exitStatus = PROG_EXIT_SUCCESS;
           }
 
@@ -159,18 +208,16 @@ main (int argc, char *argv[]) {
         }
       }
 
-      if (lpd.content.characters) free(lpd.content.characters);
-    } else if (argc > 0) {
-      logMessage(LOG_ERR, "too many arguments");
-      exitStatus = PROG_EXIT_SYNTAX;
-    } else {
-      char *content = brlapi_getParameterAlloc(parameter, subparam, flags, NULL);
+      free(lpd.content.characters);
+    }
 
-      if (content) {
-        printf("%s", content);
-        if (!ferror(stdout)) exitStatus = PROG_EXIT_SUCCESS;
-        free(content);
+    if (oldContent) {
+      if (exitStatus == PROG_EXIT_SUCCESS) {
+        printf("%s", oldContent);
+        if (ferror(stdout)) exitStatus = PROG_EXIT_FATAL;
       }
+
+      free(oldContent);
     }
 
     brlapi_closeConnection();
