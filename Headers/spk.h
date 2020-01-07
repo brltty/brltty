@@ -51,7 +51,7 @@ extern int sayWideCharacters (
 
 extern int sayString (
   volatile SpeechSynthesizer *spk,
-  const char *string, SayOptions
+  const char *string, SayOptions options
 );
 
 extern int canSetSpeechVolume (volatile SpeechSynthesizer *spk);
