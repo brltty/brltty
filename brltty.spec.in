@@ -54,7 +54,7 @@ BuildRequires: make
 BuildRequires: gcc
 BuildRequires: coreutils
 BuildRequires: binutils
-BuildRequires: /usr/bin/awk
+BuildRequires: gawk
 BuildRequires: tcl
 BuildRequires: glibc-headers
 BuildRequires: glibc-devel
