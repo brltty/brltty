@@ -211,7 +211,10 @@ readBraillePacket (
 
         switch (result) {
           case BRL_PVR_EXCLUDE:
-            if (!(count -= 1)) started = 0;
+            if (!(count -= 1)) {
+              started = 0;
+              continue;
+            }
             /* fall through */
           case BRL_PVR_INCLUDE:
             break;
