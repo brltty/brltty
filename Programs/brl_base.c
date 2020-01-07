@@ -488,6 +488,23 @@ remapKeyNumbers (KeyNumberSet *keys, const KeyNumberMapEntry *map, size_t count)
   *keys = mapKeyNumbers(*keys, map, count);
 }
 
+KeyNumberSet
+mapKeyNumberSet (KeyNumberSet keys, const KeyNumberSetMapEntry *map, size_t count) {
+  const KeyNumberSetMapEntry *end = map + count;
+
+  while (map < end) {
+    if (keys == map->from) return map->to;
+    map += 1;
+  }
+
+  return 0;
+}
+
+void
+remapKeyNumberSet (KeyNumberSet *keys, const KeyNumberSetMapEntry *map, size_t count) {
+  *keys = mapKeyNumberSet(*keys, map, count);
+}
+
 typedef struct {
   const KeyGroup group;
 

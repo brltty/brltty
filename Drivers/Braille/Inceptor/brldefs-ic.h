@@ -48,7 +48,6 @@ typedef enum {
   IC_KEY_LeftDown      = 10,
   IC_KEY_RightUp       = 11,
   IC_KEY_RightDown     = 12,
-
   IC_KEY_Back          = 13,
   IC_KEY_Enter         = 14,
 } IC_NavigationKey;

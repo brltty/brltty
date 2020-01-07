@@ -182,6 +182,15 @@ typedef struct {
 
 extern KeyNumberSet mapKeyNumbers (KeyNumberSet fromKeys, const KeyNumberMapEntry *map, size_t count);
 extern void remapKeyNumbers (KeyNumberSet *keys, const KeyNumberMapEntry *map, size_t count);
+
+typedef struct {
+  KeyNumberSet from;
+  KeyNumberSet to;
+} KeyNumberSetMapEntry;
+
+extern KeyNumberSet mapKeyNumberSet (KeyNumberSet keys, const KeyNumberSetMapEntry *map, size_t count);
+extern void remapKeyNumberSet (KeyNumberSet *keys, const KeyNumberSetMapEntry *map, size_t count);
+
 extern KeyNumberSet makeKeyNumberSet (KEY_NAME_TABLES_REFERENCE keys, KeyGroup group);
 
 extern int enqueueKeyEvent (

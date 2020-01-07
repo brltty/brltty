@@ -63,11 +63,11 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 typedef struct {
-  void (*normalizeKeys) (KeyNumberSet *keys);
-} InputOutputMethods;
+  void (*remapKeyNumbers) (KeyNumberSet *keys);
+} InputOutputData;
 
 struct BrailleDataStruct {
-  const InputOutputMethods *io;
+  const InputOutputData *io;
 
   struct {
     unsigned char rewrite;
@@ -85,16 +85,33 @@ struct BrailleDataStruct {
   } cursor;
 };
 
+#define KEY_BIT_Dot1 KEY_NUMBER_BIT(IC_KEY_Dot1)
+#define KEY_BIT_Dot2 KEY_NUMBER_BIT(IC_KEY_Dot2)
+#define KEY_BIT_Dot3 KEY_NUMBER_BIT(IC_KEY_Dot3)
+#define KEY_BIT_Dot4 KEY_NUMBER_BIT(IC_KEY_Dot4)
+#define KEY_BIT_Dot5 KEY_NUMBER_BIT(IC_KEY_Dot5)
+#define KEY_BIT_Dot6 KEY_NUMBER_BIT(IC_KEY_Dot6)
+#define KEY_BIT_Dot7 KEY_NUMBER_BIT(IC_KEY_Dot7)
+#define KEY_BIT_Dot8 KEY_NUMBER_BIT(IC_KEY_Dot8)
+
+#define KEY_BIT_Space KEY_NUMBER_BIT(IC_KEY_Space)
+#define KEY_BIT_LeftUp KEY_NUMBER_BIT(IC_KEY_LeftUp)
+#define KEY_BIT_LeftDown KEY_NUMBER_BIT(IC_KEY_LeftDown)
+#define KEY_BIT_RightUp KEY_NUMBER_BIT(IC_KEY_RightUp)
+#define KEY_BIT_RightDown KEY_NUMBER_BIT(IC_KEY_RightDown)
+#define KEY_BIT_Back KEY_NUMBER_BIT(IC_KEY_Back)
+#define KEY_BIT_Enter KEY_NUMBER_BIT(IC_KEY_Enter)
+
 static void
-normalizeKeys_USB (KeyNumberSet *keys) {
+remapKeyNumbers_USB (KeyNumberSet *keys) {
 }
 
-static const InputOutputMethods ioMethods_USB = {
-  .normalizeKeys = normalizeKeys_USB
+static const InputOutputData ioData_USB = {
+  .remapKeyNumbers = remapKeyNumbers_USB
 };
 
 static void
-normalizeKeys_Bluetooth (KeyNumberSet *keys) {
+remapKeyNumbers_Bluetooth (KeyNumberSet *keys) {
   {
     static const KeyNumberMapEntry map[] = {
       {.to=IC_KEY_LeftUp   , .from=IC_KEY_LeftDown},
@@ -107,10 +124,32 @@ normalizeKeys_Bluetooth (KeyNumberSet *keys) {
 
     remapKeyNumbers(keys, map, ARRAY_COUNT(map));
   }
+
+  {
+    static const KeyNumberSetMapEntry map[] = {
+      { .from = KEY_BIT_Space | KEY_BIT_Dot7,
+        .to = KEY_BIT_Dot7
+      },
+
+      { .from = KEY_BIT_Space | KEY_BIT_Dot8,
+        .to = KEY_BIT_Dot8
+      },
+
+      { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot5,
+        .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4
+      },
+
+      { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot5,
+        .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot6
+      },
+    };
+
+    remapKeyNumberSet(keys, map, ARRAY_COUNT(map));
+  }
 }
 
-static const InputOutputMethods ioMethods_Bluetooth = {
-  .normalizeKeys = normalizeKeys_Bluetooth
+static const InputOutputData ioData_Bluetooth = {
+  .remapKeyNumbers = remapKeyNumbers_Bluetooth
 };
 
 static int
@@ -260,11 +299,11 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
-  descriptor.usb.options.applicationData = &ioMethods_USB;
+  descriptor.usb.options.applicationData = &ioData_USB;
 
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.discoverChannel = 1;
-  descriptor.bluetooth.options.applicationData = &ioMethods_Bluetooth;
+  descriptor.bluetooth.options.applicationData = &ioData_Bluetooth;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     brl->data->io = gioGetApplicationData(brl->gioEndpoint);
@@ -293,6 +332,7 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
+    brl->data->io = NULL;
 
     if (connectResource(brl, device)) {
       InputPacket response;
@@ -400,7 +440,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                           | (packet.fields.reserved[3] << 0X18);
 
         if (keys) {
-          brl->data->io->normalizeKeys(&keys);
+          brl->data->io->remapKeyNumbers(&keys);
           enqueueKeys(brl, keys, IC_GRP_NavigationKeys, 0);
         }
 
