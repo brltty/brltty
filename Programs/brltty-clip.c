@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <errno.h>
 
 #include "log.h"
 #include "options.h"
@@ -26,37 +27,44 @@
 #include "utf8.h"
 #include "brlapi.h"
 
-static char *opt_host;
-static char *opt_auth;
-static int opt_get;
-static char *opt_set;
+static char *opt_apiHost;
+static char *opt_authSchemes;
+static int opt_getContent;
+static char *opt_setContent;
+static int opt_removeNewline;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'b',
     .word = "brlapi",
     .argument = "[host][:port]",
-    .setting.string = &opt_host,
+    .setting.string = &opt_apiHost,
     .description = "BrlAPIa host and/or port to connect to."
   },
 
   { .letter = 'a',
     .word = "auth",
     .argument = "scheme+...",
-    .setting.string = &opt_auth,
+    .setting.string = &opt_authSchemes,
     .description = "BrlAPI authorization/authentication schemes."
   },
 
   { .letter = 'g',
     .word = "get",
-    .setting.flag = &opt_get,
+    .setting.flag = &opt_getContent,
     .description = "Write the content of the clipboard to standard output."
   },
 
   { .letter = 's',
     .word = "set",
-    .argument = strtext("content"),
-    .setting.string = &opt_set,
+    .argument = "content",
+    .setting.string = &opt_setContent,
     .description = "Set the content of the clipboard."
+  },
+
+  { .letter = 'r',
+    .word = "remove",
+    .setting.flag = &opt_removeNewline,
+    .description = "Remove a trailing newline."
   },
 END_OPTION_TABLE
 
@@ -71,6 +79,13 @@ getClipboardContent (void) {
 
 static int
 setClipboardContent (const char *content, size_t length) {
+  if (opt_removeNewline) {
+    if (length > 0) {
+      size_t newLength = length - 1;
+      if (content[newLength] == '\n') length = newLength;
+    }
+  }
+
   return brlapi_setParameter(apiParameter, apiSubparam, apiFlags, content, length) >= 0;
 }
 
@@ -114,15 +129,16 @@ addContent (LineProcessingData *lpd, const wchar_t *characters, size_t count) {
 static DATA_OPERANDS_PROCESSOR(processInputLine) {
   LineProcessingData *lpd = data;
 
-  DataOperand line;
-  getTextRemaining(file, &line);
-
-  if (lpd->content.count > 0) {
-    static const wchar_t delimiter[] = {WC_C('\n')};
-    if (!addContent(lpd, delimiter, ARRAY_COUNT(delimiter))) return 0;
+  {
+    DataOperand line;
+    getTextRemaining(file, &line);
+    if (!addContent(lpd, line.characters, line.length)) return 0;
   }
 
-  return addContent(lpd, line.characters, line.length);
+  {
+    static const wchar_t delimiter[] = {WC_C('\n')};
+    return addContent(lpd, delimiter, ARRAY_COUNT(delimiter));
+  }
 }
 
 int
@@ -140,8 +156,8 @@ main (int argc, char *argv[]) {
   }
 
   brlapi_connectionSettings_t settings = {
-    .host = opt_host,
-    .auth = opt_auth
+    .host = opt_apiHost,
+    .auth = opt_authSchemes
   };
 
   brlapi_fileDescriptor fileDescriptor = brlapi_openConnection(&settings, &settings);
@@ -157,8 +173,8 @@ main (int argc, char *argv[]) {
       }
     };
 
-    int getContent = !!opt_get;
-    int setContent = !!*opt_set;
+    int getContent = !!opt_getContent;
+    int setContent = !!*opt_setContent;
 
     if (!(getContent || setContent)) {
       const InputFilesProcessingParameters parameters = {
@@ -186,7 +202,7 @@ main (int argc, char *argv[]) {
 
     if (exitStatus == PROG_EXIT_SUCCESS) {
       if (setContent) {
-        if (!setClipboardContent(opt_set, strlen(opt_set))) {
+        if (!setClipboardContent(opt_setContent, strlen(opt_setContent))) {
           exitStatus = PROG_EXIT_FATAL;
         }
       }
@@ -213,8 +229,22 @@ main (int argc, char *argv[]) {
 
     if (oldContent) {
       if (exitStatus == PROG_EXIT_SUCCESS) {
+        if (opt_removeNewline) {
+          size_t length = strlen(oldContent);
+
+          if (length > 0) {
+            if (oldContent[--length] == '\n') {
+              oldContent[length] = 0;
+            }
+          }
+        }
+
         printf("%s", oldContent);
-        if (ferror(stdout)) exitStatus = PROG_EXIT_FATAL;
+
+        if (ferror(stdout)) {
+          logMessage(LOG_ERR, "standard output write error: %s", strerror(errno));
+          exitStatus = PROG_EXIT_FATAL;
+        }
       }
 
       free(oldContent);
