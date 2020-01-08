@@ -30,7 +30,7 @@
 #define PROBE_INPUT_TIMEOUT 1000
 #define MAXIMUM_TEXT_CELLS 0XFF
 
-BEGIN_KEY_NAME_TABLE(navigation)
+BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(IC_KEY_Dot1, "Dot1"),
   KEY_NAME_ENTRY(IC_KEY_Dot2, "Dot2"),
   KEY_NAME_ENTRY(IC_KEY_Dot3, "Dot3"),
@@ -40,29 +40,35 @@ BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(IC_KEY_Dot7, "Dot7"),
   KEY_NAME_ENTRY(IC_KEY_Dot8, "Dot8"),
 
+  KEY_NAME_ENTRY(IC_KEY_Space, "Space"),
   KEY_NAME_ENTRY(IC_KEY_LeftUp, "LeftUp"),
   KEY_NAME_ENTRY(IC_KEY_LeftDown, "LeftDown"),
   KEY_NAME_ENTRY(IC_KEY_RightUp, "RightUp"),
   KEY_NAME_ENTRY(IC_KEY_RightDown, "RightDown"),
-
   KEY_NAME_ENTRY(IC_KEY_Back, "Back"),
-  KEY_NAME_ENTRY(IC_KEY_Space, "Space"),
   KEY_NAME_ENTRY(IC_KEY_Enter, "Enter"),
 
   KEY_GROUP_ENTRY(IC_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(navigation),
+BEGIN_KEY_NAME_TABLES(bb)
+  KEY_NAME_TABLE(common),
 END_KEY_NAME_TABLES
 
-DEFINE_KEY_TABLE(all)
+BEGIN_KEY_NAME_TABLES(nvda)
+  KEY_NAME_TABLE(common),
+END_KEY_NAME_TABLES
+
+DEFINE_KEY_TABLE(bb)
+DEFINE_KEY_TABLE(nvda)
 
 BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(bb),
+  &KEY_TABLE_DEFINITION(nvda),
 END_KEY_TABLE_LIST
 
 typedef struct {
+  const KeyTableDefinition *keyTableDefinition;
   void (*remapKeyNumbers) (KeyNumberSet *keys);
 
   struct {
@@ -107,6 +113,72 @@ struct BrailleDataStruct {
 #define KEY_BIT_RightDown KEY_NUMBER_BIT(IC_KEY_RightDown)
 #define KEY_BIT_Back KEY_NUMBER_BIT(IC_KEY_Back)
 #define KEY_BIT_Enter KEY_NUMBER_BIT(IC_KEY_Enter)
+
+static void
+remapKeyNumbers_BrailleBack (KeyNumberSet *keys) {
+  static const KeyNumberMapEntry map[] = {
+    {.to=IC_KEY_LeftUp   , .from=IC_KEY_LeftDown},
+    {.to=IC_KEY_LeftDown , .from=IC_KEY_RightUp },
+    {.to=IC_KEY_RightUp  , .from=IC_KEY_Back    },
+    {.to=IC_KEY_RightDown, .from=IC_KEY_Enter   },
+    {.to=IC_KEY_Back     , .from=KTB_KEY_ANY    },
+    {.to=IC_KEY_Enter    , .from=KTB_KEY_ANY    },
+  };
+
+  remapKeyNumbers(keys, map, ARRAY_COUNT(map));
+}
+
+static const KeyNumberSetMapEntry keyNumberSetMap_BrailleBack[] = {
+  { .to = KEY_BIT_Dot7,
+    .from = KEY_BIT_Space | KEY_BIT_Dot7
+  },
+
+  { .to = KEY_BIT_Dot8,
+    .from = KEY_BIT_Space | KEY_BIT_Dot8
+  },
+
+  { .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot5
+  },
+
+  { .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot6,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot5
+  },
+
+  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4 | KEY_BIT_Dot7
+  },
+
+  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4
+  },
+
+  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
+    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot7
+  },
+
+  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
+    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4
+  },
+
+  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot7
+  },
+
+  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4
+  },
+};
+
+static const InputOutputData ioData_BrailleBack = {
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(bb),
+  .remapKeyNumbers = remapKeyNumbers_BrailleBack,
+
+  .keyNumberSetMap = {
+    .entries = keyNumberSetMap_BrailleBack,
+    .count = ARRAY_COUNT(keyNumberSetMap_BrailleBack)
+  }
+};
 
 static void
 remapKeyNumbers_NVDA (KeyNumberSet *keys) {
@@ -199,76 +271,12 @@ static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
 };
 
 static const InputOutputData ioData_NVDA = {
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(nvda),
   .remapKeyNumbers = remapKeyNumbers_NVDA,
 
   .keyNumberSetMap = {
     .entries = keyNumberSetMap_NVDA,
     .count = ARRAY_COUNT(keyNumberSetMap_NVDA)
-  }
-};
-
-static void
-remapKeyNumbers_BrailleBack (KeyNumberSet *keys) {
-  static const KeyNumberMapEntry map[] = {
-    {.to=IC_KEY_LeftUp   , .from=IC_KEY_LeftDown},
-    {.to=IC_KEY_LeftDown , .from=IC_KEY_RightUp },
-    {.to=IC_KEY_RightUp  , .from=IC_KEY_Back    },
-    {.to=IC_KEY_RightDown, .from=IC_KEY_Enter   },
-    {.to=IC_KEY_Back     , .from=KTB_KEY_ANY    },
-    {.to=IC_KEY_Enter    , .from=KTB_KEY_ANY    },
-  };
-
-  remapKeyNumbers(keys, map, ARRAY_COUNT(map));
-}
-
-static const KeyNumberSetMapEntry keyNumberSetMap_BrailleBack[] = {
-  { .to = KEY_BIT_Dot7,
-    .from = KEY_BIT_Space | KEY_BIT_Dot7
-  },
-
-  { .to = KEY_BIT_Dot8,
-    .from = KEY_BIT_Space | KEY_BIT_Dot8
-  },
-
-  { .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot5
-  },
-
-  { .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot6,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot5
-  },
-
-  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4 | KEY_BIT_Dot7
-  },
-
-  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4
-  },
-
-  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
-    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot7
-  },
-
-  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
-    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4
-  },
-
-  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
-    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot7
-  },
-
-  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
-    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4
-  },
-};
-
-static const InputOutputData ioData_BrailleBack = {
-  .remapKeyNumbers = remapKeyNumbers_BrailleBack,
-
-  .keyNumberSetMap = {
-    .entries = keyNumberSetMap_BrailleBack,
-    .count = ARRAY_COUNT(keyNumberSetMap_BrailleBack)
   }
 };
 
@@ -468,7 +476,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentityRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
-        setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
+        setBrailleKeyTable(brl, brl->data->io->keyTableDefinition);
         makeOutputTable(dotsTable_ISO11548_1);
         brl->cellSize = 6;
 

@@ -16,8 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title BrailleMe
-
 map Dot1 DOT1
 map Dot2 DOT2
 map Dot3 DOT3
