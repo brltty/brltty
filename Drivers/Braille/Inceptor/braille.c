@@ -559,7 +559,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while ((size = readPacket(brl, &packet, sizeof(packet)))) {
     switch (packet.fields.type) {
       case 0X00: {
-        unsigned char key = packet.fields.data;
+        unsigned char key = packet.fields.data - 1;
 
         enqueueKey(brl, IC_GRP_RoutingKeys, key);
         continue;
