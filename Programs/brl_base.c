@@ -489,7 +489,8 @@ remapKeyNumbers (KeyNumberSet *keys, const KeyNumberMapEntry *map, size_t count)
 }
 
 struct KeyNumberSetMapStruct {
-  const KeyNumberSetMapEntry **entries;
+  const KeyNumberSetMapEntry *linear;
+  const KeyNumberSetMapEntry **sorted;
   size_t count;
 };
 
@@ -521,14 +522,20 @@ newKeyNumberSetMap (const KeyNumberSetMapEntry *entries, size_t count) {
   if ((map = malloc(sizeof(*map)))) {
     memset(map, 0, sizeof(*map));
 
-    if ((map->entries = malloc(ARRAY_SIZE(map->entries, count)))) {
-      map->count = count;
+    map->linear = entries;
+    map->count = count;
 
+    if (count < 4) {
+      map->sorted = NULL;
+      return map;
+    }
+
+    if ((map->sorted = malloc(ARRAY_SIZE(map->sorted, count)))) {
       for (size_t i=0; i<count; i+=1) {
-        map->entries[i] = &entries[i];
+        map->sorted[i] = &entries[i];
       }
 
-      qsort(map->entries, map->count, sizeof(*map->entries), sortKeyNumberSets);
+      qsort(map->sorted, map->count, sizeof(*map->sorted), sortKeyNumberSets);
       return map;
     }
 
@@ -541,19 +548,29 @@ newKeyNumberSetMap (const KeyNumberSetMapEntry *entries, size_t count) {
 
 void
 destroyKeyNumberSetMap (KeyNumberSetMap *map) {
-  free(map->entries);
+  if (map->sorted) free(map->sorted);
   free(map);
 }
 
 KeyNumberSet
 mapKeyNumberSet (KeyNumberSet keys, const KeyNumberSetMap *map) {
   if (map) {
-    const KeyNumberSetMapEntry *const *entry = bsearch(
-      &keys, map->entries, map->count,
-      sizeof(*map->entries), searchKeyNumberSetMapEntry
-    );
+    if (map->sorted) {
+      const KeyNumberSetMapEntry *const *entry = bsearch(
+        &keys, map->sorted, map->count,
+        sizeof(*map->sorted), searchKeyNumberSetMapEntry
+      );
 
-    if (entry) return (*entry)->to;
+      if (entry) return (*entry)->to;
+    } else {
+      const KeyNumberSetMapEntry *entry = map->linear;
+      const KeyNumberSetMapEntry *end = entry + map->count;
+
+      while (entry < end) {
+        if (keys == entry->from) return entry->to;
+        entry += 1;
+      }
+    }
   }
 
   return keys;
