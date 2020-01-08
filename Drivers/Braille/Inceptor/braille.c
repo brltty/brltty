@@ -112,8 +112,23 @@ static void
 remapKeyNumbers_USB (KeyNumberSet *keys) {
 }
 
+static const KeyNumberSetMapEntry keyNumberSetMap_USB[] = {
+  { .to = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot8
+  },
+
+  { .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot5 | KEY_BIT_Dot6,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot6 | KEY_BIT_Dot8
+  },
+};
+
 static const InputOutputData ioData_USB = {
-  .remapKeyNumbers = remapKeyNumbers_USB
+  .remapKeyNumbers = remapKeyNumbers_USB,
+
+  .keyNumberSetMap = {
+    .entries = keyNumberSetMap_USB,
+    .count = ARRAY_COUNT(keyNumberSetMap_USB)
+  }
 };
 
 static void
@@ -131,44 +146,44 @@ remapKeyNumbers_Bluetooth (KeyNumberSet *keys) {
 }
 
 static const KeyNumberSetMapEntry keyNumberSetMap_Bluetooth[] = {
-  { .from = KEY_BIT_Space | KEY_BIT_Dot7,
-    .to = KEY_BIT_Dot7
+  { .to = KEY_BIT_Dot7,
+    .from = KEY_BIT_Space | KEY_BIT_Dot7
   },
 
-  { .from = KEY_BIT_Space | KEY_BIT_Dot8,
-    .to = KEY_BIT_Dot8
+  { .to = KEY_BIT_Dot8,
+    .from = KEY_BIT_Space | KEY_BIT_Dot8
   },
 
-  { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot5,
-    .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4
+  { .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot5
   },
 
-  { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot5,
-    .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot6
+  { .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot6,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot5
   },
 
-  { .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot7,
-    .to = KEY_BIT_Dot7 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3
+  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4 | KEY_BIT_Dot7
   },
 
-  { .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4,
-    .to = KEY_BIT_Dot8 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3
+  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4
   },
 
-  { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4 | KEY_BIT_Dot7,
-    .to = KEY_BIT_Dot7 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4
+  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
+    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot7
   },
 
-  { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4,
-    .to = KEY_BIT_Dot8 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4
+  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
+    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4
   },
 
-  { .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot7,
-    .to = KEY_BIT_Dot7 | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4
+  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot7
   },
 
-  { .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
-    .to = KEY_BIT_Dot8 | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4
+  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4
   },
 };
 
