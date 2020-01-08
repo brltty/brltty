@@ -109,10 +109,10 @@ struct BrailleDataStruct {
 #define KEY_BIT_Enter KEY_NUMBER_BIT(IC_KEY_Enter)
 
 static void
-remapKeyNumbers_USB (KeyNumberSet *keys) {
+remapKeyNumbers_NVDA (KeyNumberSet *keys) {
 }
 
-static const KeyNumberSetMapEntry keyNumberSetMap_USB[] = {
+static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
   { .to = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
     .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot8
   },
@@ -198,17 +198,17 @@ static const KeyNumberSetMapEntry keyNumberSetMap_USB[] = {
   },
 };
 
-static const InputOutputData ioData_USB = {
-  .remapKeyNumbers = remapKeyNumbers_USB,
+static const InputOutputData ioData_NVDA = {
+  .remapKeyNumbers = remapKeyNumbers_NVDA,
 
   .keyNumberSetMap = {
-    .entries = keyNumberSetMap_USB,
-    .count = ARRAY_COUNT(keyNumberSetMap_USB)
+    .entries = keyNumberSetMap_NVDA,
+    .count = ARRAY_COUNT(keyNumberSetMap_NVDA)
   }
 };
 
 static void
-remapKeyNumbers_Bluetooth (KeyNumberSet *keys) {
+remapKeyNumbers_BrailleBack (KeyNumberSet *keys) {
   static const KeyNumberMapEntry map[] = {
     {.to=IC_KEY_LeftUp   , .from=IC_KEY_LeftDown},
     {.to=IC_KEY_LeftDown , .from=IC_KEY_RightUp },
@@ -221,7 +221,7 @@ remapKeyNumbers_Bluetooth (KeyNumberSet *keys) {
   remapKeyNumbers(keys, map, ARRAY_COUNT(map));
 }
 
-static const KeyNumberSetMapEntry keyNumberSetMap_Bluetooth[] = {
+static const KeyNumberSetMapEntry keyNumberSetMap_BrailleBack[] = {
   { .to = KEY_BIT_Dot7,
     .from = KEY_BIT_Space | KEY_BIT_Dot7
   },
@@ -263,12 +263,12 @@ static const KeyNumberSetMapEntry keyNumberSetMap_Bluetooth[] = {
   },
 };
 
-static const InputOutputData ioData_Bluetooth = {
-  .remapKeyNumbers = remapKeyNumbers_Bluetooth,
+static const InputOutputData ioData_BrailleBack = {
+  .remapKeyNumbers = remapKeyNumbers_BrailleBack,
 
   .keyNumberSetMap = {
-    .entries = keyNumberSetMap_Bluetooth,
-    .count = ARRAY_COUNT(keyNumberSetMap_Bluetooth)
+    .entries = keyNumberSetMap_BrailleBack,
+    .count = ARRAY_COUNT(keyNumberSetMap_BrailleBack)
   }
 };
 
@@ -360,7 +360,7 @@ verifyPacket (
           *length = 10;
           break;
 
-        // an ASCII linefeed is being sent after each Bluetooth packet
+        // an ASCII LF is being sent after each Bluetooth packet
         case 0X0A:
           return BRL_PVR_IGNORE;
 
@@ -419,11 +419,11 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
-  descriptor.usb.options.applicationData = &ioData_USB;
+  descriptor.usb.options.applicationData = &ioData_NVDA;
 
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.discoverChannel = 1;
-  descriptor.bluetooth.options.applicationData = &ioData_Bluetooth;
+  descriptor.bluetooth.options.applicationData = &ioData_BrailleBack;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     brl->data->io = gioGetApplicationData(brl->gioEndpoint);
@@ -560,7 +560,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     switch (packet.fields.type) {
       case 0X00: {
         unsigned char key = packet.fields.data - 1;
-
         enqueueKey(brl, IC_GRP_RoutingKeys, key);
         continue;
       }
