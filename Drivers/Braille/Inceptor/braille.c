@@ -64,10 +64,16 @@ END_KEY_TABLE_LIST
 
 typedef struct {
   void (*remapKeyNumbers) (KeyNumberSet *keys);
+
+  struct {
+    const KeyNumberSetMapEntry *entries;
+    size_t count;
+  } keyNumberSetMap;
 } InputOutputData;
 
 struct BrailleDataStruct {
   const InputOutputData *io;
+  KeyNumberSetMap *keyNumberSetMap;
 
   struct {
     unsigned char rewrite;
@@ -112,44 +118,43 @@ static const InputOutputData ioData_USB = {
 
 static void
 remapKeyNumbers_Bluetooth (KeyNumberSet *keys) {
-  {
-    static const KeyNumberMapEntry map[] = {
-      {.to=IC_KEY_LeftUp   , .from=IC_KEY_LeftDown},
-      {.to=IC_KEY_LeftDown , .from=IC_KEY_RightUp },
-      {.to=IC_KEY_RightUp  , .from=IC_KEY_Back    },
-      {.to=IC_KEY_RightDown, .from=IC_KEY_Enter   },
-      {.to=IC_KEY_Back     , .from=KTB_KEY_ANY    },
-      {.to=IC_KEY_Enter    , .from=KTB_KEY_ANY    },
-    };
+  static const KeyNumberMapEntry map[] = {
+    {.to=IC_KEY_LeftUp   , .from=IC_KEY_LeftDown},
+    {.to=IC_KEY_LeftDown , .from=IC_KEY_RightUp },
+    {.to=IC_KEY_RightUp  , .from=IC_KEY_Back    },
+    {.to=IC_KEY_RightDown, .from=IC_KEY_Enter   },
+    {.to=IC_KEY_Back     , .from=KTB_KEY_ANY    },
+    {.to=IC_KEY_Enter    , .from=KTB_KEY_ANY    },
+  };
 
-    remapKeyNumbers(keys, map, ARRAY_COUNT(map));
-  }
-
-  {
-    static const KeyNumberSetMapEntry map[] = {
-      { .from = KEY_BIT_Space | KEY_BIT_Dot7,
-        .to = KEY_BIT_Dot7
-      },
-
-      { .from = KEY_BIT_Space | KEY_BIT_Dot8,
-        .to = KEY_BIT_Dot8
-      },
-
-      { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot5,
-        .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4
-      },
-
-      { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot5,
-        .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot6
-      },
-    };
-
-    remapKeyNumberSet(keys, map, ARRAY_COUNT(map));
-  }
+  remapKeyNumbers(keys, map, ARRAY_COUNT(map));
 }
 
+static const KeyNumberSetMapEntry keyNumberSetMap_Bluetooth[] = {
+  { .from = KEY_BIT_Space | KEY_BIT_Dot7,
+    .to = KEY_BIT_Dot7
+  },
+
+  { .from = KEY_BIT_Space | KEY_BIT_Dot8,
+    .to = KEY_BIT_Dot8
+  },
+
+  { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot4 | KEY_BIT_Dot5,
+    .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot4
+  },
+
+  { .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot5,
+    .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot6
+  },
+};
+
 static const InputOutputData ioData_Bluetooth = {
-  .remapKeyNumbers = remapKeyNumbers_Bluetooth
+  .remapKeyNumbers = remapKeyNumbers_Bluetooth,
+
+  .keyNumberSetMap = {
+    .entries = keyNumberSetMap_Bluetooth,
+    .count = ARRAY_COUNT(keyNumberSetMap_Bluetooth)
+  }
 };
 
 static int
@@ -307,6 +312,12 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     brl->data->io = gioGetApplicationData(brl->gioEndpoint);
+
+    brl->data->keyNumberSetMap = newKeyNumberSetMap(
+      brl->data->io->keyNumberSetMap.entries,
+      brl->data->io->keyNumberSetMap.count
+    );
+
     return 1;
   }
 
@@ -333,6 +344,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
     brl->data->io = NULL;
+    brl->data->keyNumberSetMap = NULL;
 
     if (connectResource(brl, device)) {
       InputPacket response;
@@ -367,6 +379,11 @@ brl_destruct (BrailleDisplay *brl) {
   disconnectBrailleResource(brl, NULL);
 
   if (brl->data) {
+    {
+      KeyNumberSetMap *map = brl->data->keyNumberSetMap;
+      if (map) destroyKeyNumberSetMap(map);
+    }
+
     free(brl->data);
     brl->data = NULL;
   }
@@ -441,6 +458,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
         if (keys) {
           brl->data->io->remapKeyNumbers(&keys);
+          remapKeyNumberSet(&keys, brl->data->keyNumberSetMap);
           enqueueKeys(brl, keys, IC_GRP_NavigationKeys, 0);
         }
 

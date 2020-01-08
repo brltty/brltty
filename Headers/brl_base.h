@@ -188,8 +188,11 @@ typedef struct {
   KeyNumberSet to;
 } KeyNumberSetMapEntry;
 
-extern KeyNumberSet mapKeyNumberSet (KeyNumberSet keys, const KeyNumberSetMapEntry *map, size_t count);
-extern void remapKeyNumberSet (KeyNumberSet *keys, const KeyNumberSetMapEntry *map, size_t count);
+typedef struct KeyNumberSetMapStruct KeyNumberSetMap;
+extern KeyNumberSetMap *newKeyNumberSetMap (const KeyNumberSetMapEntry *entries, size_t count);
+extern void destroyKeyNumberSetMap (KeyNumberSetMap *map);
+extern KeyNumberSet mapKeyNumberSet (KeyNumberSet keys, const KeyNumberSetMap *map);
+extern void remapKeyNumberSet (KeyNumberSet *keys, const KeyNumberSetMap *map);
 
 extern KeyNumberSet makeKeyNumberSet (KEY_NAME_TABLES_REFERENCE keys, KeyGroup group);
 

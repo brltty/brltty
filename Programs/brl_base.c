@@ -488,21 +488,89 @@ remapKeyNumbers (KeyNumberSet *keys, const KeyNumberMapEntry *map, size_t count)
   *keys = mapKeyNumbers(*keys, map, count);
 }
 
-KeyNumberSet
-mapKeyNumberSet (KeyNumberSet keys, const KeyNumberSetMapEntry *map, size_t count) {
-  const KeyNumberSetMapEntry *end = map + count;
+struct KeyNumberSetMapStruct {
+  const KeyNumberSetMapEntry **entries;
+  size_t count;
+};
 
-  while (map < end) {
-    if (keys == map->from) return map->to;
-    map += 1;
-  }
-
+static int
+compareKeyNumberSets (KeyNumberSet keys1, KeyNumberSet keys2) {
+  if (keys1 < keys2) return -1;
+  if (keys1 > keys2) return 1;
   return 0;
 }
 
+static int
+compareKeyNumberSetMapEntries (const KeyNumberSetMapEntry *entry1, const KeyNumberSetMapEntry *entry2) {
+  return compareKeyNumberSets(entry1->from, entry2->from);
+}
+
+static int
+sortKeyNumberSets (const void *element1, const void *element2) {
+  const KeyNumberSetMapEntry *const *entry1 = element1;
+  const KeyNumberSetMapEntry *const *entry2 = element2;
+  return compareKeyNumberSetMapEntries(*entry1, *entry2);
+}
+
+static int
+searchKeyNumberSetMapEntry (const void *target, const void *element) {
+  const KeyNumberSetMapEntry *reference = target;
+  const KeyNumberSetMapEntry *const *entry = element;
+  return compareKeyNumberSetMapEntries(reference, *entry);
+}
+
+KeyNumberSetMap *
+newKeyNumberSetMap (const KeyNumberSetMapEntry *entries, size_t count) {
+  KeyNumberSetMap *map;
+
+  if ((map = malloc(sizeof(*map)))) {
+    memset(map, 0, sizeof(*map));
+
+    if ((map->entries = malloc(ARRAY_SIZE(map->entries, count)))) {
+      map->count = count;
+
+      for (size_t i=0; i<count; i+=1) {
+        map->entries[i] = &entries[i];
+      }
+
+      qsort(map->entries, map->count, sizeof(*map->entries), sortKeyNumberSets);
+      return map;
+    }
+
+    free(map);
+  }
+
+  logMallocError();
+  return NULL;
+}
+
 void
-remapKeyNumberSet (KeyNumberSet *keys, const KeyNumberSetMapEntry *map, size_t count) {
-  *keys = mapKeyNumberSet(*keys, map, count);
+destroyKeyNumberSetMap (KeyNumberSetMap *map) {
+  free(map->entries);
+  free(map);
+}
+
+KeyNumberSet
+mapKeyNumberSet (KeyNumberSet keys, const KeyNumberSetMap *map) {
+  if (map) {
+    const KeyNumberSetMapEntry target = {
+      .from = keys
+    };
+
+    const KeyNumberSetMapEntry *const *entry = bsearch(
+      &target, map->entries, map->count,
+      sizeof(*map->entries), searchKeyNumberSetMapEntry
+    );
+
+    if (entry) return (*entry)->to;
+  }
+
+  return keys;
+}
+
+void
+remapKeyNumberSet (KeyNumberSet *keys, const KeyNumberSetMap *map) {
+  *keys = mapKeyNumberSet(*keys, map);
 }
 
 typedef struct {
