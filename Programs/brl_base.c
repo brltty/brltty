@@ -501,22 +501,17 @@ compareKeyNumberSets (KeyNumberSet keys1, KeyNumberSet keys2) {
 }
 
 static int
-compareKeyNumberSetMapEntries (const KeyNumberSetMapEntry *entry1, const KeyNumberSetMapEntry *entry2) {
-  return compareKeyNumberSets(entry1->from, entry2->from);
-}
-
-static int
 sortKeyNumberSets (const void *element1, const void *element2) {
   const KeyNumberSetMapEntry *const *entry1 = element1;
   const KeyNumberSetMapEntry *const *entry2 = element2;
-  return compareKeyNumberSetMapEntries(*entry1, *entry2);
+  return compareKeyNumberSets((*entry1)->from, (*entry2)->from);
 }
 
 static int
 searchKeyNumberSetMapEntry (const void *target, const void *element) {
-  const KeyNumberSetMapEntry *reference = target;
+  const KeyNumberSet *reference = target;
   const KeyNumberSetMapEntry *const *entry = element;
-  return compareKeyNumberSetMapEntries(reference, *entry);
+  return compareKeyNumberSets(*reference, (*entry)->from);
 }
 
 KeyNumberSetMap *
@@ -553,12 +548,8 @@ destroyKeyNumberSetMap (KeyNumberSetMap *map) {
 KeyNumberSet
 mapKeyNumberSet (KeyNumberSet keys, const KeyNumberSetMap *map) {
   if (map) {
-    const KeyNumberSetMapEntry target = {
-      .from = keys
-    };
-
     const KeyNumberSetMapEntry *const *entry = bsearch(
-      &target, map->entries, map->count,
+      &keys, map->entries, map->count,
       sizeof(*map->entries), searchKeyNumberSetMapEntry
     );
 
