@@ -19,3 +19,13 @@
 title BrailleMe (BrailleBack)
 include common.kti
 
+bind Space+Dot1 FWINLTSKIP
+bind Space+Dot4 FWINRTSKIP
+
+bind Space+Dot4+Dot3 TOP
+bind Space+Dot4+Dot6 BOT
+
+bind Space+Dot1+Dot2 LNBEG
+bind Space+Dot2+Dot4 PREFMENU
+bind Space+Dot1+Dot2+Dot3+Dot5 HELP
+

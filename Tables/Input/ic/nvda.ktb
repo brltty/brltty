@@ -28,3 +28,30 @@ bind Dot8+LeftDown BOT
 bind Space+RightUp FWINLTSKIP
 bind Space+RightDown FWINRTSKIP
 
+bind Space+Dot1+Dot2+Dot3 LNBEG
+bind Space+Dot4+Dot5+Dot6 LNEND
+
+bind Space+Dot2+Dot3 PRPROMPT
+bind Space+Dot5+Dot6 NXPROMPT
+
+bind Space+Dot3 NOOP
+bind Space+Dot6 NOOP
+
+bind Space+Dot1+Dot4+Dot5+Dot6 PRPGRPH
+bind Space+Dot3+Dot4+Dot5+Dot6 NXPGRPH
+
+bind Space+Dot1+Dot2 NOOP
+bind Space+Dot1+Dot4+Dot5 NOOP
+bind Space+Dot1+Dot5 NOOP
+bind Space+Dot1+Dot2+Dot4 FREEZE
+bind Space+Dot1+Dot2+Dot5 HELP
+bind Space+Dot1+Dot3+Dot4+Dot5 NOOP
+bind Space+Dot1+Dot2+Dot3+Dot5 NOOP
+bind Space+Dot2+Dot3+Dot4 INFO
+bind Space+Dot2+Dot3+Dot4+Dot5 CSRTRK
+bind Space+Dot2+Dot4+Dot5+Dot6 NOOP
+bind Space+Dot1+Dot2+Dot5+Dot6 NOOP
+bind Space+Dot2+Dot5 HOME
+bind Space+Dot4 NOOP
+bind Space+Dot4+Dot6 NOOP
+
