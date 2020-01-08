@@ -32,16 +32,7 @@ include ../chords.kti
 bind LeftUp LNUP
 bind LeftDown LNDN
 
-bind Space+LeftUp PRDIFLN
-bind Space+LeftDown NXDIFLN
-
-bind Dot8+LeftUp TOP
-bind Dot8+LeftDown BOT
-
 bind RightUp FWINLT
 bind RightDown FWINRT
-
-bind Space+RightUp FWINLTSKIP
-bind Space+RightDown FWINRTSKIP
 
 bind RoutingKey ROUTE

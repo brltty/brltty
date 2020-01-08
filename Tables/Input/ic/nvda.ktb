@@ -17,5 +17,14 @@
 ###############################################################################
 
 title BrailleMe (NVDA)
-
 include common.kti
+
+bind Space+LeftUp PRDIFLN
+bind Space+LeftDown NXDIFLN
+
+bind Dot8+LeftUp TOP
+bind Dot8+LeftDown BOT
+
+bind Space+RightUp FWINLTSKIP
+bind Space+RightDown FWINRTSKIP
+
