@@ -268,6 +268,8 @@ static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
   { .to = KEY_BIT_Dot7 | KEY_BIT_Dot6,
     .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4
   },
+
+  {.from = KEY_BIT_Dot7 | KEY_BIT_Dot8},
 };
 
 static const InputOutputData ioData_NVDA = {
@@ -581,7 +583,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         if (keys) {
           brl->data->io->remapKeyNumbers(&keys);
           remapKeyNumberSet(&keys, brl->data->keyNumberSetMap);
-          enqueueKeys(brl, keys, IC_GRP_NavigationKeys, 0);
+          if (keys) enqueueKeys(brl, keys, IC_GRP_NavigationKeys, 0);
         }
 
         continue;
