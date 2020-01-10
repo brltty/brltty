@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title BrailleMe (BrailleBack)
+title BrailleMe (in BrailleBack mode)
 include common.kti
 
 bind Space+Dot1 FWINLTSKIP
