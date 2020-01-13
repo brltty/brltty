@@ -58,5 +58,5 @@ bind Space+Dot2+Dot5 RETURN
 bind Space+Dot4 UPPER
 bind Space+Dot4+Dot6 CONTROL
 
-bind Dot6+Dot7 PREFMENU
+bind Dot7+Dot6 PREFMENU
 

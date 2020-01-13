@@ -185,22 +185,6 @@ remapKeyNumbers_NVDA (KeyNumberSet *keys) {
 }
 
 static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
-  { .to = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot8
-  },
-
-  { .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot5 | KEY_BIT_Dot6,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot6 | KEY_BIT_Dot8
-  },
-
-  { .to = KEY_BIT_Dot1 | KEY_BIT_Dot7,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_LeftUp
-  },
-
-  { .to = KEY_BIT_Dot4 | KEY_BIT_Dot8,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_LeftDown
-  },
-
   { .to = KEY_BIT_Space | KEY_BIT_LeftUp,
     .from = KEY_BIT_Space | KEY_BIT_LeftUp | KEY_BIT_Dot2
   },
@@ -233,6 +217,38 @@ static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
     .from = KEY_BIT_Space | KEY_BIT_RightDown
   },
 
+  { .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3,
+    .from = KEY_BIT_Space | KEY_BIT_LeftUp
+  },
+
+  { .to = KEY_BIT_Space | KEY_BIT_Dot5 | KEY_BIT_Dot6,
+    .from = KEY_BIT_Space | KEY_BIT_LeftDown
+  },
+
+  { .to = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot3 | KEY_BIT_Dot8
+  },
+
+  { .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot5 | KEY_BIT_Dot6,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot6 | KEY_BIT_Dot8
+  },
+
+  { .to = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4 | KEY_BIT_Dot5 | KEY_BIT_Dot6,
+    .from = KEY_BIT_Space | KEY_BIT_Dot6
+  },
+
+  { .to = KEY_BIT_Space | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot5 | KEY_BIT_Dot6,
+    .from = KEY_BIT_Space | KEY_BIT_Dot3
+  },
+
+  { .to = KEY_BIT_Dot7 | KEY_BIT_Dot1,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_LeftUp
+  },
+
+  { .to = KEY_BIT_Dot8 | KEY_BIT_Dot4,
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_LeftDown
+  },
+
   { .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
     .from = KEY_BIT_Dot8 | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
   },
@@ -241,24 +257,8 @@ static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
     .from = KEY_BIT_Space | KEY_BIT_Dot5
   },
 
-  { .to = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4 | KEY_BIT_Dot5 | KEY_BIT_Dot6,
-    .from = KEY_BIT_Space | KEY_BIT_Dot6
-  },
-
   { .to = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot5 | KEY_BIT_Dot6,
     .from = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot5
-  },
-
-  { .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3,
-    .from = KEY_BIT_Space | KEY_BIT_LeftUp
-  },
-
-  { .to = KEY_BIT_Space | KEY_BIT_Dot3 | KEY_BIT_Dot4 | KEY_BIT_Dot5 | KEY_BIT_Dot6,
-    .from = KEY_BIT_Space | KEY_BIT_Dot3
-  },
-
-  { .to = KEY_BIT_Space | KEY_BIT_Dot5 | KEY_BIT_Dot6,
-    .from = KEY_BIT_Space | KEY_BIT_LeftDown
   },
 
   { .to = KEY_BIT_Space | KEY_BIT_Dot4 | KEY_BIT_Dot6,
@@ -269,7 +269,7 @@ static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
     .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot4
   },
 
-  {.from = KEY_BIT_Dot7 | KEY_BIT_Dot8},
+  { .from = KEY_BIT_Dot7 | KEY_BIT_Dot8 },
 };
 
 static const InputOutputData ioData_NVDA = {
