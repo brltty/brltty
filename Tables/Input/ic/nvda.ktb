@@ -25,23 +25,23 @@ bind Space+LeftDown NXDIFLN
 bind Dot8+LeftUp TOP
 bind Dot8+LeftDown BOT
 
+bind Dot8+Dot1 LNBEG
+bind Dot8+Dot4 LNEND
+
 bind Space+RightUp FWINLTSKIP
 bind Space+RightDown FWINRTSKIP
 
-bind Dot8+Dot1 NOOP
-bind Dot8+Dot4 NOOP
-
-bind Space+Dot3 LNBEG
-bind Space+Dot6 LNEND
+bind Space+Dot3 PRNBWIN
+bind Space+Dot6 NXNBWIN
 
 bind Space+Dot2+Dot3 PRPROMPT
 bind Space+Dot5+Dot6 NXPROMPT
 
-bind Space+Dot1+Dot2+Dot3 PRNBWIN
-bind Space+Dot4+Dot5+Dot6 NXNBWIN
+bind Space+Dot1+Dot2+Dot3 PRPGRPH
+bind Space+Dot4+Dot5+Dot6 NXPGRPH
 
-bind Space+Dot1+Dot4+Dot5+Dot6 PRPGRPH
-bind Space+Dot3+Dot4+Dot5+Dot6 NXPGRPH
+bind Space+Dot1+Dot4+Dot5+Dot6 PRSEARCH
+bind Space+Dot3+Dot4+Dot5+Dot6 NXSEARCH
 
 bind Space+Dot1+Dot2 SKPBLNKWINS
 bind Space+Dot1+Dot4+Dot5 NOOP
@@ -49,11 +49,11 @@ bind Space+Dot1+Dot5 NOOP
 bind Space+Dot1+Dot2+Dot4 FREEZE
 bind Space+Dot1+Dot2+Dot5 HELP
 bind Space+Dot1+Dot3+Dot4+Dot5 NOOP
-bind Space+Dot1+Dot2+Dot3+Dot5 NOOP
+bind Space+Dot1+Dot2+Dot3+Dot5 CONTEXT+routingKeys
 bind Space+Dot2+Dot3+Dot4 SKPIDLNS
 bind Space+Dot2+Dot3+Dot4+Dot5 CSRTRK
 bind Space+Dot2+Dot4+Dot5+Dot6 SLIDEWIN
-bind Space+Dot1+Dot2+Dot5+Dot6  CSRJMP_VERT
+bind Space+Dot1+Dot2+Dot5+Dot6 CSRJMP_VERT
 bind Space+Dot2+Dot5 RETURN
 bind Space+Dot4 UPPER
 bind Space+Dot4+Dot6 CONTROL

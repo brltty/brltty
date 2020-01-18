@@ -27,9 +27,9 @@ bind Space+Dot4+Dot6 BOT
 
 bind Space+Dot1+Dot2 RETURN
 bind Space+Dot2+Dot4 PREFMENU
-bind Space+Dot1+Dot2+Dot3+Dot5 HELP
+bind Space+Dot1+Dot2+Dot3+Dot5 CONTEXT+routingKeys
 
-bind Dot8+Dot1+Dot2+Dot4 NOOP
-bind Dot8+Dot1+Dot2+Dot3 NOOP
-bind Dot8+Dot2+Dot3+Dot4 NOOP
+bind Dot8+Dot1+Dot2+Dot4 FREEZE
+bind Dot8+Dot1+Dot2+Dot3 HELP
+bind Dot8+Dot2+Dot3+Dot4 SKPIDLNS
 
