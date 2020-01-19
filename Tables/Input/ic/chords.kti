@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-context extra
+context chords
 bind Dot7 CONTEXT+toggleOff
 bind Dot8 CONTEXT+toggleOn
 

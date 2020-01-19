@@ -19,7 +19,7 @@
 title BrailleMe (in NVDA mode)
 
 include common.kti
-include extra.kti
+include chords.kti
 include route.kti
 
 bind Space+LeftUp PRDIFLN
@@ -46,16 +46,17 @@ bind Space+Dot4+Dot5+Dot6 NXPGRPH
 bind Space+Dot1+Dot4+Dot5+Dot6 PRSEARCH
 bind Space+Dot3+Dot4+Dot5+Dot6 NXSEARCH
 
-bind Space+Dot1+Dot2 CONTEXT+extra
+bind Space+Dot1+Dot2 CONTEXT+chords
 bind Space+Dot1+Dot4+Dot5 NOOP
 bind Space+Dot1+Dot5 NOOP
 bind Space+Dot1+Dot2+Dot4 FREEZE
 bind Space+Dot1+Dot2+Dot5 HELP
 bind Space+Dot1+Dot3+Dot4+Dot5 NOOP
 bind Space+Dot1+Dot2+Dot3+Dot5 CONTEXT+routingKeys
-bind Space+Dot2+Dot3+Dot4 SKPIDLNS
+bind Space+Dot2+Dot3+Dot4 NOOP
 bind Space+Dot2+Dot3+Dot4+Dot5 CSRTRK
-bind Space+Dot2+Dot4+Dot5+Dot6 SLIDEWIN
+bind Space+Dot2+Dot4+Dot5+Dot6 NOOP
+
 bind Space+Dot1+Dot2+Dot5+Dot6 CSRJMP_VERT
 bind Space+Dot2+Dot5 RETURN
 bind Space+Dot4 UPPER

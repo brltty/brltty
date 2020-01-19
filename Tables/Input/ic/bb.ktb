@@ -19,20 +19,25 @@
 title BrailleMe (in BrailleBack mode)
 
 include common.kti
-include extra.kti
+include chords.kti
 include route.kti
 
-bind Space+Dot1 FWINLTSKIP
-bind Space+Dot4 FWINRTSKIP
+bind Space+Dot4 UPPER
+bind Space+Dot4+Dot6 CONTROL
 
-bind Space+Dot4+Dot3 TOP
-bind Space+Dot4+Dot6 BOT
+bind Space+Dot1 HELP
+bind Space+Dot3+Dot4 PREFMENU
 
-bind Space+Dot1+Dot2 CONTEXT+extra
-bind Space+Dot2+Dot4 PREFMENU
+bind Space+Dot1+Dot2 CONTEXT+chords
+bind Space+Dot2+Dot4 RETURN
 bind Space+Dot1+Dot2+Dot3+Dot5 CONTEXT+routingKeys
 
-bind Dot8+Dot1+Dot2+Dot4 FREEZE
-bind Dot8+Dot1+Dot2+Dot3 HELP
-bind Dot8+Dot2+Dot3+Dot4 SKPIDLNS
+bind Dot7+Dot1+Dot2+Dot4 FWINLTSKIP
+bind Dot8+Dot1+Dot2+Dot4 FWINRTSKIP
+
+bind Dot7+Dot1+Dot2+Dot3 LNBEG
+bind Dot8+Dot1+Dot2+Dot3 LNEND
+
+bind Dot7+Dot2+Dot3+Dot4 TOP
+bind Dot8+Dot2+Dot3+Dot4 BOT
 

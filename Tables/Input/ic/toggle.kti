@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-context extra
+context chords
 bind \{toggleKeys} \{toggleCommand}
 
 context toggleOff
