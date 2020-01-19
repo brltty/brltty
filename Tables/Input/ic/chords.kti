@@ -62,12 +62,6 @@ include toggle.kti
 endVariables
 
 beginVariables
-assign toggleKeys Dot1+Dot3
-assign toggleCommand BRLKBD
-include toggle.kti
-endVariables
-
-beginVariables
 assign toggleKeys Dot1+Dot2+Dot3+Dot5
 assign toggleCommand AUTOREPEAT
 include toggle.kti
@@ -111,8 +105,22 @@ bind Dot1+Dot2+Dot3+Dot4 PREFLOAD
 bind Dot1+Dot2+Dot3+Dot6 SWITCHVT_PREV
 bind Dot1+Dot3+Dot4+Dot6 CLIP_RESTORE
 
+bind Dot1+Dot3 BRLKBD+off
+bind Dot4+Dot6 BRLUCDOTS+off
+
 context toggleOn
 bind Dot1+Dot2+Dot3+Dot4 PREFSAVE
 bind Dot1+Dot2+Dot3+Dot6 SWITCHVT_NEXT
 bind Dot1+Dot3+Dot4+Dot6 CLIP_SAVE
+
+bind Dot1+Dot3 BRLKBD+on
+bind Dot4+Dot6 BRLUCDOTS+on
+
+bind Dot1 GUI
+bind Dot2 META
+bind Dot3 CONTROL
+bind Dot4 SHIFT
+bind Dot5 ALTGR
+bind Dot6 UPPER
+bind Dot7 UNSTICK
 
