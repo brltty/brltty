@@ -16,6 +16,17 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note The three keys along the front edge of the top are: Dot7, Space, Dot8.
+note Behind them is a six-dot braille keyboard.
+note * From left to right, they are: Dot3, Dot2, Dot1, Dot4, Dot5, Dot6.
+note * There's a gap the width of the spacebar between the Dot1 and Dot4 keys.
+note Behind the braille keyboard is the row of cursor routing keys,
+note * and behind it are the braille cells.
+note To the left of the braille cells are the MoveUp and MoveDown keys,
+note * and to their right are the PanLeft and PanRight keys.
+note * MoveUp is behind MoveDown, and PanLeft is behind PanRight.
+note * The Move and Pan key pairs can be reversed via the internal Settings menu.
+
 map Space SPACE
 map Dot1 DOT1
 map Dot2 DOT2
@@ -29,11 +40,11 @@ map Dot8 DOT8
 bind Dot7 KEY_BACKSPACE
 bind Dot8 KEY_ENTER
 
-bind LeftUp LNUP
-bind LeftDown LNDN
+bind MoveUp LNUP
+bind MoveDown LNDN
 
-bind RightUp FWINLT
-bind RightDown FWINRT
+bind PanLeft FWINLT
+bind PanRight FWINRT
 
 bind RoutingKey ROUTE
 

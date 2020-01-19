@@ -34,22 +34,22 @@ typedef union {
 } InputPacket;
 
 typedef enum {
-  IC_KEY_Dot1          =  0,
-  IC_KEY_Dot2          =  1,
-  IC_KEY_Dot3          =  2,
-  IC_KEY_Dot4          =  3,
-  IC_KEY_Dot5          =  4,
-  IC_KEY_Dot6          =  5,
-  IC_KEY_Dot7          =  6,
-  IC_KEY_Dot8          =  7,
+  IC_KEY_Dot1     =  0,
+  IC_KEY_Dot2     =  1,
+  IC_KEY_Dot3     =  2,
+  IC_KEY_Dot4     =  3,
+  IC_KEY_Dot5     =  4,
+  IC_KEY_Dot6     =  5,
+  IC_KEY_Dot7     =  6,
+  IC_KEY_Dot8     =  7,
 
-  IC_KEY_Space         =  8,
-  IC_KEY_LeftUp        =  9,
-  IC_KEY_LeftDown      = 10,
-  IC_KEY_RightUp       = 11,
-  IC_KEY_RightDown     = 12,
-  IC_KEY_Back          = 13,
-  IC_KEY_Enter         = 14,
+  IC_KEY_Space    =  8,
+  IC_KEY_MoveUp   =  9,
+  IC_KEY_MoveDown = 10,
+  IC_KEY_PanLeft  = 11,
+  IC_KEY_PanRight = 12,
+  IC_KEY_Back     = 13,
+  IC_KEY_Enter    = 14,
 } IC_NavigationKey;
 
 typedef enum {

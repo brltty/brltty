@@ -29,10 +29,10 @@ bind Dot7 CONTEXT+setMark
 bind Dot8 CONTEXT+goToMark
 bind Space CONTEXT+switchVirtualTerminal
 
-bind LeftUp CONTEXT+upSameIndent
-bind LeftDown CONTEXT+downSameIndent
-bind RightUp CONTEXT+upDifferentCharacter
-bind RightDown CONTEXT+downDifferentCharacter
+bind MoveUp CONTEXT+upSameIndent
+bind MoveDown CONTEXT+downSameIndent
+bind PanLeft CONTEXT+upDifferentCharacter
+bind PanRight CONTEXT+downDifferentCharacter
 
 context clipNew
 bind RoutingKey CLIP_NEW

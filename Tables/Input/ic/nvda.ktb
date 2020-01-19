@@ -22,17 +22,17 @@ include common.kti
 include chords.kti
 include route.kti
 
-bind Space+LeftUp PRDIFLN
-bind Space+LeftDown NXDIFLN
+bind Space+MoveUp PRDIFLN
+bind Space+MoveDown NXDIFLN
 
-bind Dot8+LeftUp TOP
-bind Dot8+LeftDown BOT
+bind Dot8+MoveUp TOP
+bind Dot8+MoveDown BOT
 
 bind Dot8+Dot1 LNBEG
 bind Dot8+Dot4 LNEND
 
-bind Space+RightUp FWINLTSKIP
-bind Space+RightDown FWINRTSKIP
+bind Space+PanLeft FWINLTSKIP
+bind Space+PanRight FWINRTSKIP
 
 bind Space+Dot3 PRNBWIN
 bind Space+Dot6 NXNBWIN

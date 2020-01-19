@@ -41,10 +41,10 @@ BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(IC_KEY_Dot8, "Dot8"),
 
   KEY_NAME_ENTRY(IC_KEY_Space, "Space"),
-  KEY_NAME_ENTRY(IC_KEY_LeftUp, "LeftUp"),
-  KEY_NAME_ENTRY(IC_KEY_LeftDown, "LeftDown"),
-  KEY_NAME_ENTRY(IC_KEY_RightUp, "RightUp"),
-  KEY_NAME_ENTRY(IC_KEY_RightDown, "RightDown"),
+  KEY_NAME_ENTRY(IC_KEY_MoveUp, "MoveUp"),
+  KEY_NAME_ENTRY(IC_KEY_MoveDown, "MoveDown"),
+  KEY_NAME_ENTRY(IC_KEY_PanLeft, "PanLeft"),
+  KEY_NAME_ENTRY(IC_KEY_PanRight, "PanRight"),
   KEY_NAME_ENTRY(IC_KEY_Back, "Back"),
   KEY_NAME_ENTRY(IC_KEY_Enter, "Enter"),
 
@@ -108,22 +108,22 @@ struct BrailleDataStruct {
 #define KEY_BIT_Dot8 KEY_NUMBER_BIT(IC_KEY_Dot8)
 
 #define KEY_BIT_Space KEY_NUMBER_BIT(IC_KEY_Space)
-#define KEY_BIT_LeftUp KEY_NUMBER_BIT(IC_KEY_LeftUp)
-#define KEY_BIT_LeftDown KEY_NUMBER_BIT(IC_KEY_LeftDown)
-#define KEY_BIT_RightUp KEY_NUMBER_BIT(IC_KEY_RightUp)
-#define KEY_BIT_RightDown KEY_NUMBER_BIT(IC_KEY_RightDown)
+#define KEY_BIT_MoveUp KEY_NUMBER_BIT(IC_KEY_MoveUp)
+#define KEY_BIT_MoveDown KEY_NUMBER_BIT(IC_KEY_MoveDown)
+#define KEY_BIT_PanLeft KEY_NUMBER_BIT(IC_KEY_PanLeft)
+#define KEY_BIT_PanRight KEY_NUMBER_BIT(IC_KEY_PanRight)
 #define KEY_BIT_Back KEY_NUMBER_BIT(IC_KEY_Back)
 #define KEY_BIT_Enter KEY_NUMBER_BIT(IC_KEY_Enter)
 
 static void
 remapKeyNumbers_BrailleBack (KeyNumberSet *keys) {
   static const KeyNumberMapEntry map[] = {
-    {.to=IC_KEY_LeftUp   , .from=IC_KEY_LeftDown},
-    {.to=IC_KEY_LeftDown , .from=IC_KEY_RightUp },
-    {.to=IC_KEY_RightUp  , .from=IC_KEY_Back    },
-    {.to=IC_KEY_RightDown, .from=IC_KEY_Enter   },
-    {.to=IC_KEY_Back     , .from=KTB_KEY_ANY    },
-    {.to=IC_KEY_Enter    , .from=KTB_KEY_ANY    },
+    {.to=IC_KEY_MoveUp  , .from=IC_KEY_MoveDown},
+    {.to=IC_KEY_MoveDown, .from=IC_KEY_PanLeft },
+    {.to=IC_KEY_PanLeft , .from=IC_KEY_Back    },
+    {.to=IC_KEY_PanRight, .from=IC_KEY_Enter   },
+    {.to=IC_KEY_Back    , .from=KTB_KEY_ANY    },
+    {.to=IC_KEY_Enter   , .from=KTB_KEY_ANY    },
   };
 
   remapKeyNumbers(keys, map, ARRAY_COUNT(map));
@@ -186,44 +186,44 @@ remapKeyNumbers_NVDA (KeyNumberSet *keys) {
 }
 
 static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
-  { .to = KEY_BIT_Space | KEY_BIT_LeftUp,
-    .from = KEY_BIT_Space | KEY_BIT_LeftUp | KEY_BIT_Dot2
+  { .to = KEY_BIT_Space | KEY_BIT_MoveUp,
+    .from = KEY_BIT_Space | KEY_BIT_MoveUp | KEY_BIT_Dot2
   },
 
-  { .to = KEY_BIT_Space | KEY_BIT_LeftDown,
-    .from = KEY_BIT_Space | KEY_BIT_LeftDown | KEY_BIT_Dot2
+  { .to = KEY_BIT_Space | KEY_BIT_MoveDown,
+    .from = KEY_BIT_Space | KEY_BIT_MoveDown | KEY_BIT_Dot2
   },
 
-  { .to = KEY_BIT_Space | KEY_BIT_RightUp,
-    .from = KEY_BIT_Space | KEY_BIT_RightUp | KEY_BIT_Dot2
+  { .to = KEY_BIT_Space | KEY_BIT_PanLeft,
+    .from = KEY_BIT_Space | KEY_BIT_PanLeft | KEY_BIT_Dot2
   },
 
-  { .to = KEY_BIT_Space | KEY_BIT_RightDown,
-    .from = KEY_BIT_Space | KEY_BIT_RightDown | KEY_BIT_Dot2
+  { .to = KEY_BIT_Space | KEY_BIT_PanRight,
+    .from = KEY_BIT_Space | KEY_BIT_PanRight | KEY_BIT_Dot2
   },
 
-  { .to = KEY_BIT_Dot8 | KEY_BIT_LeftUp,
-    .from = KEY_BIT_Space | KEY_BIT_LeftUp | KEY_BIT_Dot4
+  { .to = KEY_BIT_Dot8 | KEY_BIT_MoveUp,
+    .from = KEY_BIT_Space | KEY_BIT_MoveUp | KEY_BIT_Dot4
   },
 
-  { .to = KEY_BIT_Dot8 | KEY_BIT_LeftDown,
-    .from = KEY_BIT_Space | KEY_BIT_LeftDown | KEY_BIT_Dot4
+  { .to = KEY_BIT_Dot8 | KEY_BIT_MoveDown,
+    .from = KEY_BIT_Space | KEY_BIT_MoveDown | KEY_BIT_Dot4
   },
 
   { .to = KEY_BIT_Space | KEY_BIT_Dot3,
-    .from = KEY_BIT_Space | KEY_BIT_RightUp
+    .from = KEY_BIT_Space | KEY_BIT_PanLeft
   },
 
   { .to = KEY_BIT_Space | KEY_BIT_Dot6,
-    .from = KEY_BIT_Space | KEY_BIT_RightDown
+    .from = KEY_BIT_Space | KEY_BIT_PanRight
   },
 
   { .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3,
-    .from = KEY_BIT_Space | KEY_BIT_LeftUp
+    .from = KEY_BIT_Space | KEY_BIT_MoveUp
   },
 
   { .to = KEY_BIT_Space | KEY_BIT_Dot5 | KEY_BIT_Dot6,
-    .from = KEY_BIT_Space | KEY_BIT_LeftDown
+    .from = KEY_BIT_Space | KEY_BIT_MoveDown
   },
 
   { .to = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_Dot2 | KEY_BIT_Dot3,
@@ -243,11 +243,11 @@ static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
   },
 
   { .to = KEY_BIT_Dot7 | KEY_BIT_Dot1,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_LeftUp
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_MoveUp
   },
 
   { .to = KEY_BIT_Dot8 | KEY_BIT_Dot4,
-    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_LeftDown
+    .from = KEY_BIT_Space | KEY_BIT_Dot1 | KEY_BIT_MoveDown
   },
 
   { .to = KEY_BIT_Space | KEY_BIT_Dot2 | KEY_BIT_Dot3 | KEY_BIT_Dot4,
