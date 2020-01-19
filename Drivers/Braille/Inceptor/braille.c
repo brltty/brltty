@@ -298,7 +298,7 @@ writePacket (
 ) {
   unsigned char packet[2 + 1 + 1 + 2 + length1 + 1 + 1 + 2 + length2 + 1 + 4 + 1 + 2];
   unsigned char *byte = packet;
-  unsigned char *checksum;
+  unsigned char *checksum = NULL;
 
   /* DS */
   *byte++ = type;
@@ -528,16 +528,11 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
       textHasChanged(brl->data->text.characters, text, cellCount,
                      NULL, NULL, &brl->data->text.rewrite);
 
-  int newCursor =
-      cursorHasChanged(&brl->data->cursor.position, brl->cursor,
-                       &brl->data->cursor.rewrite);
-
-  if (newBraille || newText || newCursor) {
+  if (newBraille || newText) {
     unsigned char cells[cellCount];
-    unsigned char attributes[cellCount];
-    int cursor = 0;
-
     translateOutputCells(cells, brl->data->braille.cells, cellCount);
+
+    unsigned char attributes[cellCount];
     memset(attributes, 0, sizeof(attributes));
 
     for (int i=0; i<cellCount; i+=1) {
@@ -550,11 +545,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
       }
     }
 
-    if ((brl->cursor >= 0) && (brl->cursor < cellCount)) {
-      cursor = brl->cursor + 1;
-    }
-
-    if (!writePacket(brl, 0XFC, cursor,
+    if (!writePacket(brl, 0XFC, 0X01,
                      cells, sizeof(cells),
                      attributes, sizeof(attributes))) return 0;
   }
