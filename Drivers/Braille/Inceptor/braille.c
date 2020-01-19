@@ -70,6 +70,7 @@ END_KEY_TABLE_LIST
 typedef struct {
   const KeyTableDefinition *keyTableDefinition;
   void (*remapKeyNumbers) (KeyNumberSet *keys);
+  unsigned adjustRoutingKey:1;
 
   struct {
     const KeyNumberSetMapEntry *entries;
@@ -275,6 +276,7 @@ static const KeyNumberSetMapEntry keyNumberSetMap_NVDA[] = {
 static const InputOutputData ioData_NVDA = {
   .keyTableDefinition = &KEY_TABLE_DEFINITION(nvda),
   .remapKeyNumbers = remapKeyNumbers_NVDA,
+  .adjustRoutingKey = 1,
 
   .keyNumberSetMap = {
     .entries = keyNumberSetMap_NVDA,
@@ -533,11 +535,10 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (newBraille || newText || newCursor) {
     unsigned char cells[cellCount];
     unsigned char attributes[cellCount];
-    int cursor;
+    int cursor = 0;
 
     translateOutputCells(cells, brl->data->braille.cells, cellCount);
     memset(attributes, 0, sizeof(attributes));
-    cursor = 0;
 
     for (int i=0; i<cellCount; i+=1) {
       unsigned char *byte = &attributes[i];
@@ -569,7 +570,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while ((size = readPacket(brl, &packet, sizeof(packet)))) {
     switch (packet.fields.type) {
       case 0X00: {
-        unsigned char key = packet.fields.data - 1;
+        unsigned char key = packet.fields.data;
+        if (brl->data->io->adjustRoutingKey) key -= 1;
         enqueueKey(brl, IC_GRP_RoutingKeys, key);
         continue;
       }
