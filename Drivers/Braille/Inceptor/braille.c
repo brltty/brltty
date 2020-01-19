@@ -298,7 +298,6 @@ writePacket (
 ) {
   unsigned char packet[2 + 1 + 1 + 2 + length1 + 1 + 1 + 2 + length2 + 1 + 4 + 1 + 2];
   unsigned char *byte = packet;
-  unsigned char *checksum = NULL;
 
   /* DS */
   *byte++ = type;
@@ -340,7 +339,8 @@ writePacket (
   }
 
   /* Chk */
-  *(checksum = byte++) = 0;
+  unsigned char *checksum = byte++;
+  *checksum = 0;
 
   /* DE */
   *byte++ = 0XFD;
@@ -563,7 +563,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       case 0X00: {
         unsigned char key = packet.fields.data;
         if (brl->data->io->adjustRoutingKey) key -= 1;
-        enqueueKey(brl, IC_GRP_RoutingKeys, key);
+        if (key < brl->textColumns) enqueueKey(brl, IC_GRP_RoutingKeys, key);
         continue;
       }
 
