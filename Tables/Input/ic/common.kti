@@ -38,31 +38,3 @@ bind RightDown FWINRT
 bind RoutingKey ROUTE
 
 include ../menu.kti
-
-context routingKeys
-bind RoutingKey KEY_FUNCTION
-bind LeftUp CONTEXT+clipNew
-bind LeftDown CONTEXT+clipAdd
-bind RightUp CONTEXT+copyLinear
-bind RightDown CONTEXT+copyRectangular
-bind Dot7 CONTEXT+setLeft
-bind Dot8 CONTEXT+describeCharacter
-
-context clipNew
-bind RoutingKey CLIP_NEW
-
-context clipAdd
-bind RoutingKey CLIP_ADD
-
-context copyLinear
-bind RoutingKey COPY_LINE
-
-context copyRectangular
-bind RoutingKey COPY_RECT
-
-context setLeft
-bind RoutingKey SETLEFT
-
-context describeCharacter
-bind RoutingKey DESCCHAR
-

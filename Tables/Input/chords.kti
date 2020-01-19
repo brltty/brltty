@@ -19,31 +19,43 @@
 assign toggleOff Dot7
 assign toggleOn Dot8
 
+beginVariables
 assign toggleKeys \{chord}Dot1+Dot2
 assign toggleCommand SKPBLNKWINS
 include toggle.kti
+endVariables
 
+beginVariables
 assign toggleKeys \{chord}Dot1+Dot4
 assign toggleCommand CSRVIS
 include toggle.kti
+endVariables
 
+beginVariables
 assign toggleKeys \{chord}Dot1+Dot4+Dot5
 assign toggleCommand DISPMD
 include toggle.kti
+endVariables
 
+beginVariables
 assign toggleKeys \{chord}Dot1+Dot2+Dot4
 assign toggleCommand FREEZE
 include toggle.kti
+endVariables
 
 bind \{chord}Dot1+Dot2+Dot5 HELP
 
+beginVariables
 assign toggleKeys \{chord}Dot2+Dot4
 assign toggleCommand SKPIDLNS
 include toggle.kti
+endVariables
 
+beginVariables
 assign toggleKeys \{chord}Dot1+Dot3
 assign toggleCommand BRLKBD
 include toggle.kti
+endVariables
 
 bind \{chord}Dot1+Dot2+Dot3 LEARN
 
@@ -51,27 +63,35 @@ bind \{chord}Dot1+Dot2+Dot3+Dot4 PREFMENU
 bind \{chord}Dot1+Dot2+Dot3+Dot4+\{toggleOff} PREFLOAD
 bind \{chord}Dot1+Dot2+Dot3+Dot4+\{toggleOn} PREFSAVE
 
+beginVariables
 assign toggleKeys \{chord}Dot1+Dot2+Dot3+Dot5
 assign toggleCommand AUTOREPEAT
 include toggle.kti
+endVariables
 
 bind \{chord}Dot2+Dot3+Dot4 INFO
 
+beginVariables
 assign toggleKeys \{chord}Dot2+Dot3+Dot4+Dot5
 assign toggleCommand CSRTRK
 include toggle.kti
+endVariables
 
+beginVariables
 assign toggleKeys \{chord}Dot1+Dot3+Dot6
 assign toggleCommand ATTRVIS
 include toggle.kti
+endVariables
 
 bind \{chord}Dot1+Dot2+Dot3+Dot6 CSRJMP_VERT
 bind \{chord}Dot1+Dot2+Dot3+Dot6+\{toggleOff} SWITCHVT_PREV
 bind \{chord}Dot1+Dot2+Dot3+Dot6+\{toggleOn} SWITCHVT_NEXT
 
+beginVariables
 assign toggleKeys \{chord}Dot2+Dot4+Dot5+Dot6
 assign toggleCommand SLIDEWIN
 include toggle.kti
+endVariables
 
 bind \{chord}Dot1+Dot3+Dot4+Dot6 PASTE
 bind \{chord}Dot1+Dot3+Dot4+Dot6+\{toggleOff} CLIP_RESTORE

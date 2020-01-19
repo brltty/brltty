@@ -1,0 +1,75 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2020 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+context routingKeys
+bind RoutingKey KEY_FUNCTION
+
+bind Dot1 CONTEXT+clipNew
+bind Dot2 CONTEXT+clipAdd
+bind Dot4 CONTEXT+copyLinear
+bind Dot5 CONTEXT+copyRectangular
+bind Dot3 CONTEXT+setLeft
+bind Dot6 CONTEXT+describeCharacter
+bind Dot7 CONTEXT+setMark
+bind Dot8 CONTEXT+goToMark
+bind Space CONTEXT+switchVirtualTerminal
+
+bind LeftUp CONTEXT+upSameIndent
+bind LeftDown CONTEXT+downSameIndent
+bind RightUp CONTEXT+upDifferentCharacter
+bind RightDown CONTEXT+downDifferentCharacter
+
+context clipNew
+bind RoutingKey CLIP_NEW
+
+context clipAdd
+bind RoutingKey CLIP_ADD
+
+context copyLinear
+bind RoutingKey COPY_LINE
+
+context copyRectangular
+bind RoutingKey COPY_RECT
+
+context setLeft
+bind RoutingKey SETLEFT
+
+context describeCharacter
+bind RoutingKey DESCCHAR
+
+context setMark
+bind RoutingKey SETMARK
+
+context goToMark
+bind RoutingKey GOTOMARK
+
+context switchVirtualTerminal
+bind RoutingKey SWITCHVT
+
+context upSameIndent
+bind RoutingKey PRINDENT
+
+context downSameIndent
+bind RoutingKey NXINDENT
+
+context upDifferentCharacter
+bind RoutingKey PRDIFCHAR
+
+context downDifferentCharacter
+bind RoutingKey NXDIFCHAR
+

@@ -16,23 +16,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title BrailleMe (in BrailleBack mode)
+context extra
+bind \{toggleKeys} \{toggleCommand}
 
-include common.kti
-include extra.kti
-include route.kti
+context toggleOff
+bind \{toggleKeys} \{toggleCommand}+off
 
-bind Space+Dot1 FWINLTSKIP
-bind Space+Dot4 FWINRTSKIP
-
-bind Space+Dot4+Dot3 TOP
-bind Space+Dot4+Dot6 BOT
-
-bind Space+Dot1+Dot2 CONTEXT+extra
-bind Space+Dot2+Dot4 PREFMENU
-bind Space+Dot1+Dot2+Dot3+Dot5 CONTEXT+routingKeys
-
-bind Dot8+Dot1+Dot2+Dot4 FREEZE
-bind Dot8+Dot1+Dot2+Dot3 HELP
-bind Dot8+Dot2+Dot3+Dot4 SKPIDLNS
+context toggleOn
+bind \{toggleKeys} \{toggleCommand}+on
 

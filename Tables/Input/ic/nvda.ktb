@@ -17,7 +17,10 @@
 ###############################################################################
 
 title BrailleMe (in NVDA mode)
+
 include common.kti
+include extra.kti
+include route.kti
 
 bind Space+LeftUp PRDIFLN
 bind Space+LeftDown NXDIFLN
@@ -43,7 +46,7 @@ bind Space+Dot4+Dot5+Dot6 NXPGRPH
 bind Space+Dot1+Dot4+Dot5+Dot6 PRSEARCH
 bind Space+Dot3+Dot4+Dot5+Dot6 NXSEARCH
 
-bind Space+Dot1+Dot2 SKPBLNKWINS
+bind Space+Dot1+Dot2 CONTEXT+extra
 bind Space+Dot1+Dot4+Dot5 NOOP
 bind Space+Dot1+Dot5 NOOP
 bind Space+Dot1+Dot2+Dot4 FREEZE

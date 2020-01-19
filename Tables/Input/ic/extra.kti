@@ -1,0 +1,118 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2020 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+context extra
+bind Dot7 CONTEXT+toggleOff
+bind Dot8 CONTEXT+toggleOn
+
+bind Dot1+Dot2+Dot5 HELP
+bind Dot1+Dot2+Dot3 LEARN
+bind Dot2+Dot3+Dot4 INFO
+   
+bind Dot1+Dot2+Dot3+Dot4 PREFMENU
+bind Dot1+Dot2+Dot3+Dot6 CSRJMP_VERT
+bind Dot1+Dot3+Dot4+Dot6 PASTE
+
+bind Dot2+Dot3+Dot5 SIXDOTS+on
+bind Dot2+Dot3+Dot6 SIXDOTS+off
+
+beginVariables
+assign toggleKeys Dot1+Dot2
+assign toggleCommand SKPBLNKWINS
+include toggle.kti
+endVariables
+
+beginVariables
+assign toggleKeys Dot1+Dot4
+assign toggleCommand CSRVIS
+include toggle.kti
+endVariables
+
+beginVariables
+assign toggleKeys Dot1+Dot4+Dot5
+assign toggleCommand DISPMD
+include toggle.kti
+endVariables
+
+beginVariables
+assign toggleKeys Dot1+Dot2+Dot4
+assign toggleCommand FREEZE
+include toggle.kti
+endVariables
+
+beginVariables
+assign toggleKeys Dot2+Dot4
+assign toggleCommand SKPIDLNS
+include toggle.kti
+endVariables
+
+beginVariables
+assign toggleKeys Dot1+Dot3
+assign toggleCommand BRLKBD
+include toggle.kti
+endVariables
+
+beginVariables
+assign toggleKeys Dot1+Dot2+Dot3+Dot5
+assign toggleCommand AUTOREPEAT
+include toggle.kti
+endVariables
+
+beginVariables
+assign toggleKeys Dot2+Dot3+Dot4+Dot5
+assign toggleCommand CSRTRK
+include toggle.kti
+endVariables
+
+beginVariables
+assign toggleKeys Dot1+Dot3+Dot6
+assign toggleCommand ATTRVIS
+include toggle.kti
+endVariables
+
+beginVariables
+assign toggleKeys Dot2+Dot4+Dot5+Dot6
+assign toggleCommand SLIDEWIN
+include toggle.kti
+endVariables
+
+bind Dot3 KEY_CURSOR_LEFT
+bind Dot6 KEY_CURSOR_RIGHT
+bind Dot2 KEY_HOME
+bind Dot5 KEY_END
+bind Dot1 KEY_CURSOR_UP
+bind Dot4 KEY_CURSOR_DOWN
+
+bind Dot2+Dot3 KEY_PAGE_UP
+bind Dot5+Dot6 KEY_PAGE_DOWN
+bind Dot4+Dot5 KEY_TAB
+
+bind Dot2+Dot5+Dot6 KEY_DELETE
+bind Dot2+Dot6 KEY_ESCAPE
+bind Dot3+Dot5 KEY_INSERT
+
+context toggleOff
+bind Dot1+Dot2+Dot3+Dot4 PREFLOAD
+bind Dot1+Dot2+Dot3+Dot6 SWITCHVT_PREV
+bind Dot1+Dot3+Dot4+Dot6 CLIP_RESTORE
+
+context toggleOn
+bind Dot1+Dot2+Dot3+Dot4 PREFSAVE
+bind Dot1+Dot2+Dot3+Dot6 SWITCHVT_NEXT
+bind Dot1+Dot3+Dot4+Dot6 CLIP_SAVE
+
