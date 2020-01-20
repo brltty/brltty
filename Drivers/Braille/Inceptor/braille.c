@@ -45,8 +45,6 @@ BEGIN_KEY_NAME_TABLE(common)
   KEY_NAME_ENTRY(IC_KEY_MoveDown, "MoveDown"),
   KEY_NAME_ENTRY(IC_KEY_PanLeft, "PanLeft"),
   KEY_NAME_ENTRY(IC_KEY_PanRight, "PanRight"),
-  KEY_NAME_ENTRY(IC_KEY_Back, "Back"),
-  KEY_NAME_ENTRY(IC_KEY_Enter, "Enter"),
 
   KEY_GROUP_ENTRY(IC_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
@@ -283,6 +281,13 @@ static const InputOutputData ioData_NVDA = {
     .count = ARRAY_COUNT(keyNumberSetMap_NVDA)
   }
 };
+
+static void
+remapRoutingKeys (KeyNumberSet *keys) {
+  KeyNumberSet mask = 0XF000;
+  *keys |= (*keys & mask) << 4;
+  *keys &= ~mask;
+}
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
@@ -571,12 +576,26 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         KeyNumberSet keys = (packet.fields.reserved[0] << 0X00)
                           | (packet.fields.reserved[1] << 0X08)
                           | (packet.fields.reserved[2] << 0X10)
-                          | (packet.fields.reserved[3] << 0X18);
+                          | (packet.fields.reserved[3] << 0X18)
+                          ;
 
-        if (keys) {
-          brl->data->io->remapKeyNumbers(&keys);
-          remapKeyNumberSet(&keys, brl->data->keyNumberSetMap);
-          if (keys) enqueueKeys(brl, keys, IC_GRP_NavigationKeys, 0);
+        KeyNumberSet navigationKeys = keys & 0XFFFF;
+        KeyNumberSet routingKeys = keys >> 0X10;
+
+        if (navigationKeys) {
+          brl->data->io->remapKeyNumbers(&navigationKeys);
+          remapKeyNumberSet(&navigationKeys, brl->data->keyNumberSetMap);
+
+          if (navigationKeys) {
+            enqueueKeyEvents(brl, navigationKeys, IC_GRP_NavigationKeys, 0, 1);
+
+            if (routingKeys) {
+              remapRoutingKeys(&routingKeys);
+              enqueueKeys(brl, routingKeys, IC_GRP_RoutingKeys, 0);
+            }
+
+            enqueueKeyEvents(brl, navigationKeys, IC_GRP_NavigationKeys, 0, 0);
+          }
         }
 
         continue;
