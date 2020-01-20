@@ -282,13 +282,6 @@ static const InputOutputData ioData_NVDA = {
   }
 };
 
-static void
-remapRoutingKeys (KeyNumberSet *keys) {
-  KeyNumberSet mask = 0XF000;
-  *keys |= (*keys & mask) << 4;
-  *keys &= ~mask;
-}
-
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
   return writeBraillePacket(brl, NULL, bytes, count);
@@ -558,6 +551,28 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
+static void
+splitKeys (KeyNumberSet keys, KeyNumberSet *navigation, KeyNumberSet *routing) {
+  {
+    const KeyNumber routingShift = IC_KEY_RoutingKey1;
+    const KeyNumberSet navigationMask = KEY_NUMBER_BIT(routingShift) - 1;
+
+    *navigation = keys & navigationMask;
+    *routing = keys >> routingShift;
+  }
+
+  if (*routing) {
+    KeyNumber shift = IC_KEY_RoutingKey17 - IC_KEY_RoutingKey1;
+    KeyNumberSet mask = KEY_NUMBER_BIT(shift) - 1;
+
+    KeyNumberSet left = *routing & mask;
+    *routing &= ~mask;
+
+    *routing <<= 4;
+    *routing |= left;
+  }
+}
+
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   InputPacket packet;
@@ -573,28 +588,27 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       }
 
       case 0X01: {
-        KeyNumberSet keys = (packet.fields.reserved[0] << 0X00)
-                          | (packet.fields.reserved[1] << 0X08)
-                          | (packet.fields.reserved[2] << 0X10)
-                          | (packet.fields.reserved[3] << 0X18)
-                          ;
+        KeyNumberSet navigation;
+        KeyNumberSet routing;
 
-        KeyNumberSet navigationKeys = keys & 0XFFFF;
-        KeyNumberSet routingKeys = keys >> 0X10;
+        {
+          KeyNumberSet keys = (packet.fields.reserved[0] << 0X00)
+                            | (packet.fields.reserved[1] << 0X08)
+                            | (packet.fields.reserved[2] << 0X10)
+                            | (packet.fields.reserved[3] << 0X18)
+                            ;
 
-        if (navigationKeys) {
-          brl->data->io->remapKeyNumbers(&navigationKeys);
-          remapKeyNumberSet(&navigationKeys, brl->data->keyNumberSetMap);
+          brl->data->io->remapKeyNumbers(&keys);
+          splitKeys(keys, &navigation, &routing);
+        }
 
-          if (navigationKeys) {
-            enqueueKeyEvents(brl, navigationKeys, IC_GRP_NavigationKeys, 0, 1);
+        if (navigation) {
+          remapKeyNumberSet(&navigation, brl->data->keyNumberSetMap);
 
-            if (routingKeys) {
-              remapRoutingKeys(&routingKeys);
-              enqueueKeys(brl, routingKeys, IC_GRP_RoutingKeys, 0);
-            }
-
-            enqueueKeyEvents(brl, navigationKeys, IC_GRP_NavigationKeys, 0, 0);
+          if (navigation) {
+            enqueueKeyEvents(brl, navigation, IC_GRP_NavigationKeys, 0, 1);
+            enqueueKeys(brl, routing, IC_GRP_RoutingKeys, 0);
+            enqueueKeyEvents(brl, navigation, IC_GRP_NavigationKeys, 0, 0);
           }
         }
 
