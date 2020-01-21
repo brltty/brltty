@@ -252,80 +252,62 @@ writeStatusCells (void) {
 
 static int
 showInfo (void) {
-  const char *mode = "info";
-  const size_t size = brl.textColumns * brl.textRows;
-  char text[size + 1];
-
   brl.cursor = BRL_NO_CURSOR;
+
+  static const char mode[] = "info";
   if (!setStatusText(&brl, mode)) return 0;
 
-  /* Here we must be careful. Some displays (e.g. Braille Lite 18)
+  /* We must be careful. Some displays (e.g. Braille Lite 18)
    * are very small, and others (e.g. Bookworm) are even smaller.
+   * Also, some displays (e.g. Braille Me) have only six dots per cell.
    */
-  if (size < 21) {
-    wchar_t characters[size];
-    size_t length;
+  const size_t size = brl.textColumns * brl.textRows;
+  int compact = (size <= 21) && (brl.cellSize == 8);
 
-    const int cellCount = 5;
-    unsigned char cells[cellCount];
-    char prefix[cellCount];
+  static const unsigned char compactFields[] = {
+    sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+  };
 
-    {
-      static const unsigned char fields[] = {
-        sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
-      };
+  const unsigned int compactLength = getStatusFieldsLength(compactFields);
+  unsigned char compactCells[compactLength];
 
-      memset(cells, 0, cellCount);
-      renderStatusFields(fields, cells);
-    }
+  size_t length;
+  char text[size + 1];
+  STR_BEGIN(text, sizeof(text));
 
-    memset(prefix, 'x', cellCount);
-    length = snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c",
-                      cellCount, prefix,
-                      scr.number,
-                      ses->trackScreenCursor? 't': ' ',
-                      prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'B': 'v'):
-                                              (prefs.blinkingScreenCursor? 'b': ' '),
-                      ses->displayMode           ? 'a': 't',
-                      isSpecialScreen(SCR_FROZEN)? 'f': ' ',
-                      isSixDotBraille()          ? '6': '8',
-                      prefs.blinkingCapitals     ? 'B': ' ');
-    if (length > size) length = size;
+  if (compact) {
+    memset(compactCells, 0, compactLength);
+    renderStatusFields(compactFields, compactCells);
 
     {
-      unsigned int i;
-
-      for (i=0; i<length; i+=1) {
-        if (i < cellCount) {
-          characters[i] = UNICODE_BRAILLE_ROW | cells[i];
-        } else {
-          wint_t character = convertCharToWchar(text[i]);
-          if (character == WEOF) character = WC_C('?');
-          characters[i] = character;
-        }
-      }
+      unsigned int counter = compactLength;
+      while (counter--) STR_PRINTF("x");
     }
-
-    return writeBrailleCharacters(mode, characters, length);
+  } else {
+    STR_PRINTF(
+      "%02d:%02d %02d:%02d",
+      SCR_COLUMN_NUMBER(ses->winx), SCR_ROW_NUMBER(ses->winy),
+      SCR_COLUMN_NUMBER(scr.posx), SCR_ROW_NUMBER(scr.posy)
+    );
   }
 
-  STR_BEGIN(text, sizeof(text));
-  STR_PRINTF("%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
-             SCR_COLUMN_NUMBER(ses->winx), SCR_ROW_NUMBER(ses->winy),
-             SCR_COLUMN_NUMBER(scr.posx), SCR_ROW_NUMBER(scr.posy),
-             scr.number, 
-             ses->trackScreenCursor? 't': ' ',
-             prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'B': 'v'):
-                                     (prefs.blinkingScreenCursor? 'b': ' '),
-             ses->displayMode           ? 'a': 't',
-             isSpecialScreen(SCR_FROZEN)? 'f': ' ',
-             isSixDotBraille()          ? '6': '8',
-             prefs.blinkingCapitals     ? 'B': ' ');
+  STR_PRINTF(
+    " %02d %c%c%c%c%c%c",
+    scr.number, 
+    ses->trackScreenCursor? 't': ' ',
+    prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'B': 'v'):
+                            (prefs.blinkingScreenCursor? 'b': ' '),
+    ses->displayMode? 'a': 't',
+    isSpecialScreen(SCR_FROZEN)? 'f': ' ',
+    isSixDotBraille()? '6': '8',
+    prefs.blinkingCapitals? 'B': ' '
+  );
 
-  {
+  if (!compact) {
     TimeFormattingData fmt;
-
     getTimeFormattingData(&fmt);
+
+    STR_PRINTF(" ");
     STR_FORMAT(formatBrailleTime, &fmt);
 
     if (prefs.showSeconds) {
@@ -335,8 +317,26 @@ showInfo (void) {
     }
   }
 
+  length = STR_LENGTH;
   STR_END;
-  return writeBrailleText(mode, text);
+
+  if (length > size) length = size;
+  wchar_t characters[length];
+
+  for (unsigned int i=0; i<length; i+=1) {
+    wint_t character;
+
+    if (compact && (i < compactLength)) {
+      character = UNICODE_BRAILLE_ROW | compactCells[i];
+    } else {
+      character = convertCharToWchar(text[i]);
+      if (character == WEOF) character = WC_C('?');
+    }
+
+    characters[i] = character;
+  }
+
+  return writeBrailleCharacters(mode, characters, length);
 }
 
 static int
