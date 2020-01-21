@@ -60,53 +60,53 @@ typedef unsigned char BrlDots;
 #define BRL_DOT_8 BRL_DOT(8) /* lower-right dot of computer braille cell */
 
 static inline BrlDots
-getLeftDots (unsigned char cell) {
+getLeftDots (BrlDots cell) {
   return cell & (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7);
 }
 
 static inline BrlDots
-getRightDots (unsigned char cell) {
+getRightDots (BrlDots cell) {
   return cell & (BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8);
 }
 
 static inline BrlDots
 getRightDotsToLeftDots (BrlDots cell) {
-  unsigned char ret = 0;
-  if (cell & BRL_DOT_4) ret |= BRL_DOT_1;
-  if (cell & BRL_DOT_5) ret |= BRL_DOT_2;
-  if (cell & BRL_DOT_6) ret |= BRL_DOT_3;
-  if (cell & BRL_DOT_8) ret |= BRL_DOT_7;
-  return ret;
+  BrlDots dots = 0;
+  if (cell & BRL_DOT_4) dots |= BRL_DOT_1;
+  if (cell & BRL_DOT_5) dots |= BRL_DOT_2;
+  if (cell & BRL_DOT_6) dots |= BRL_DOT_3;
+  if (cell & BRL_DOT_8) dots |= BRL_DOT_7;
+  return dots;
 }
 
 static inline BrlDots
 getRightDotsToLeftDotsAlt (BrlDots cell) {
-  unsigned char ret = 0;
-  if (cell & BRL_DOT_4) ret |= BRL_DOT_3;
-  if (cell & BRL_DOT_5) ret |= BRL_DOT_2;
-  if (cell & BRL_DOT_6) ret |= BRL_DOT_1;
-  if (cell & BRL_DOT_8) ret |= BRL_DOT_7;
-  return ret;
+  BrlDots dots = 0;
+  if (cell & BRL_DOT_4) dots |= BRL_DOT_3;
+  if (cell & BRL_DOT_5) dots |= BRL_DOT_2;
+  if (cell & BRL_DOT_6) dots |= BRL_DOT_1;
+  if (cell & BRL_DOT_8) dots |= BRL_DOT_7;
+  return dots;
 }
 
 static inline BrlDots
 getLeftDotsToRightDots (BrlDots cell) {
-  unsigned char ret = 0;
-  if (cell & BRL_DOT_1) ret |= BRL_DOT_4;
-  if (cell & BRL_DOT_2) ret |= BRL_DOT_5;
-  if (cell & BRL_DOT_3) ret |= BRL_DOT_6;
-  if (cell & BRL_DOT_7) ret |= BRL_DOT_8;
-  return ret;
+  BrlDots dots = 0;
+  if (cell & BRL_DOT_1) dots |= BRL_DOT_4;
+  if (cell & BRL_DOT_2) dots |= BRL_DOT_5;
+  if (cell & BRL_DOT_3) dots |= BRL_DOT_6;
+  if (cell & BRL_DOT_7) dots |= BRL_DOT_8;
+  return dots;
 }
 
 static inline BrlDots
 getLeftDotsToRightDotsAlt (BrlDots cell) {
-  unsigned char ret = 0;
-  if (cell & BRL_DOT_1) ret |= BRL_DOT_6;
-  if (cell & BRL_DOT_2) ret |= BRL_DOT_5;
-  if (cell & BRL_DOT_3) ret |= BRL_DOT_4;
-  if (cell & BRL_DOT_7) ret |= BRL_DOT_8;
-  return ret;
+  BrlDots dots = 0;
+  if (cell & BRL_DOT_1) dots |= BRL_DOT_6;
+  if (cell & BRL_DOT_2) dots |= BRL_DOT_5;
+  if (cell & BRL_DOT_3) dots |= BRL_DOT_4;
+  if (cell & BRL_DOT_7) dots |= BRL_DOT_8;
+  return dots;
 }
 
 static inline BrlDots
