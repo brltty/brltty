@@ -262,13 +262,14 @@ showInfo (void) {
    * Also, some displays (e.g. Braille Me) have only six dots per cell.
    */
   const size_t size = brl.textColumns * brl.textRows;
-  int compact = (size <= 21) && (brl.cellSize == 8);
+  int compact = (size < 21) && (brl.cellSize == 8);
 
   static const unsigned char compactFields[] = {
     sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
   };
 
-  const unsigned int compactLength = getStatusFieldsLength(compactFields);
+  static unsigned int compactLength = 0;
+  if (!compactLength) compactLength = getStatusFieldsLength(compactFields);
   unsigned char compactCells[compactLength];
 
   size_t length;
@@ -303,7 +304,7 @@ showInfo (void) {
     prefs.blinkingCapitals? 'B': ' '
   );
 
-  if (!compact) {
+  if ((STR_LENGTH + 6) <= size) {
     TimeFormattingData fmt;
     getTimeFormattingData(&fmt);
 
