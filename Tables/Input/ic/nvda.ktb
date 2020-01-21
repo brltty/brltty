@@ -61,6 +61,7 @@ bind Space+Dot1+Dot2+Dot5+Dot6 CSRJMP_VERT
 bind Space+Dot2+Dot5 RETURN
 bind Space+Dot4 UPPER
 bind Space+Dot4+Dot6 CONTROL
+bind Space+Dot8 TIME
 
 bind Dot7+Dot6 PREFMENU
 
