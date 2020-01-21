@@ -260,6 +260,40 @@ writeStatusCells (void) {
   return 1;
 }
 
+static inline char
+getScreenCursorTrackingCharacter (void) {
+  return ses->trackScreenCursor? 't': ' ';
+}
+
+static inline char
+getScreenCursorVisibilityCharacter (void) {
+  return prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'b': 'v'):
+                                 (prefs.blinkingScreenCursor? 'B': ' ');
+}
+
+static inline char
+getDisplayModeCharacter (void) {
+  return ses->displayMode? 'a': 't';
+}
+
+static inline char
+getScreenTypeCharacter (void) {
+  if (isSpecialScreen(SCR_FROZEN)) return 'f';
+  if (isSpecialScreen(SCR_HELP)) return 'h';
+  if (isSpecialScreen(SCR_MENU)) return 'm';
+  return ' ';
+}
+
+static inline char
+getTextStyleCharacter (void) {
+  return isSixDotBraille()? '6': '8';
+}
+
+static inline char
+getUppercaseIndicatorCharacter (void) {
+  return prefs.blinkingCapitals? 'B': ' ';
+}
+
 static int
 showInfo (void) {
   brl.cursor = BRL_NO_CURSOR;
@@ -305,18 +339,12 @@ showInfo (void) {
   STR_PRINTF(
     " %02d %c%c%c%c%c%c",
     scr.number, 
-    ses->trackScreenCursor? 't': ' ',
-    prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'b': 'v'):
-                            (prefs.blinkingScreenCursor? 'B': ' '),
-    ses->displayMode? 'a': 't',
-
-    isSpecialScreen(SCR_FROZEN)? 'f':
-    isSpecialScreen(SCR_HELP)? 'h':
-    isSpecialScreen(SCR_MENU)? 'm':
-    ' ',
-
-    isSixDotBraille()? '6': '8',
-    prefs.blinkingCapitals? 'B': ' '
+    getScreenCursorTrackingCharacter(),
+    getScreenCursorVisibilityCharacter(),
+    getDisplayModeCharacter(),
+    getScreenTypeCharacter(),
+    getTextStyleCharacter(),
+    getUppercaseIndicatorCharacter()
   );
 
   if ((STR_LENGTH + 6) <= size) {
