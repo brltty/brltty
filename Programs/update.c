@@ -306,10 +306,15 @@ showInfo (void) {
     " %02d %c%c%c%c%c%c",
     scr.number, 
     ses->trackScreenCursor? 't': ' ',
-    prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'B': 'v'):
-                            (prefs.blinkingScreenCursor? 'b': ' '),
+    prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'b': 'v'):
+                            (prefs.blinkingScreenCursor? 'B': ' '),
     ses->displayMode? 'a': 't',
-    isSpecialScreen(SCR_FROZEN)? 'f': ' ',
+
+    isSpecialScreen(SCR_FROZEN)? 'f':
+    isSpecialScreen(SCR_HELP)? 'h':
+    isSpecialScreen(SCR_MENU)? 'm':
+    ' ',
+
     isSixDotBraille()? '6': '8',
     prefs.blinkingCapitals? 'B': ' '
   );
