@@ -44,7 +44,7 @@ char *const strEnd = strStart + (size); \
 #define STR_POP() ((strNext > strStart)? --strNext: NULL)
 
 #define STR_ADJUST(length) \
-do { if ((strNext += (length)) > strEnd) strNext = strEnd; } while (0)
+do { if ((strNext += (length)) >= strEnd) strNext = (strEnd - 1); } while (0)
 
 #define STR_BEGIN_FORMATTER(name, ...) \
 STR_DECLARE_FORMATTER(name, __VA_ARGS__) { \
