@@ -77,9 +77,9 @@ rgxLogError (int error, const RGX_Matcher *matcher, RGX_OffsetType *offset) {
   STR_PRINTF(": ");
 
   {
-    size_t left = STR_LEFT;
+    size_t oldLength = STR_LENGTH;
     STR_FORMAT(rgxFormatErrorMessage, error);
-    if (STR_LEFT == left) STR_PRINTF("unrecognized error %d", error);
+    if (STR_LENGTH == oldLength) STR_PRINTF("unrecognized error %d", error);
   }
 
   if (matcher) {
