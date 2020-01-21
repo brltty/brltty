@@ -150,6 +150,23 @@ setSpeechCursorDots (unsigned char dots) {
   return setCursorDots(&prefs.speechCursorStyle, dots);
 }
 
+static unsigned char
+mapCursorDots (unsigned char dots) {
+  if (brl.cellSize < 8) {
+    if (dots & BRL_DOT_7) {
+      dots &= ~BRL_DOT_7;
+      dots |= BRL_DOT_3;
+    }
+
+    if (dots & BRL_DOT_8) {
+      dots &= ~BRL_DOT_8;
+      dots |= BRL_DOT_6;
+    }
+  }
+
+  return dots;
+}
+
 static int
 getScreenCursorPosition (int x, int y) {
   int position = BRL_NO_CURSOR;
@@ -1006,9 +1023,11 @@ doUpdate (void) {
       if ((brl.cursor = getScreenCursorPosition(scr.posx, scr.posy)) != BRL_NO_CURSOR) {
         if (showScreenCursor()) {
           BlinkDescriptor *blink = &screenCursorBlinkDescriptor;
-
           requireBlinkDescriptor(blink);
-          if (isBlinkVisible(blink)) brl.buffer[brl.cursor] |= getScreenCursorDots();
+
+          if (isBlinkVisible(blink)) {
+            brl.buffer[brl.cursor] |= mapCursorDots(getScreenCursorDots());
+          }
         }
       }
 
@@ -1018,9 +1037,11 @@ doUpdate (void) {
         if (position != BRL_NO_CURSOR) {
           if (position != brl.cursor) {
             BlinkDescriptor *blink = &speechCursorBlinkDescriptor;
-
             requireBlinkDescriptor(blink);
-            if (isBlinkVisible(blink)) brl.buffer[position] |= getSpeechCursorDots();
+
+            if (isBlinkVisible(blink)) {
+              brl.buffer[position] |= mapCursorDots(getSpeechCursorDots());
+            }
           }
         }
       }
