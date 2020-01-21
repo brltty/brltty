@@ -324,17 +324,21 @@ showInfo (void) {
   if (length > size) length = size;
   wchar_t characters[length];
 
-  for (unsigned int i=0; i<length; i+=1) {
-    wint_t character;
+  {
+    unsigned int threshold = compact? compactLength: 0;
 
-    if (compact && (i < compactLength)) {
-      character = UNICODE_BRAILLE_ROW | compactCells[i];
-    } else {
-      character = convertCharToWchar(text[i]);
-      if (character == WEOF) character = WC_C('?');
+    for (unsigned int i=0; i<length; i+=1) {
+      wint_t character;
+
+      if (i < threshold) {
+        character = UNICODE_BRAILLE_ROW | compactCells[i];
+      } else {
+        character = convertCharToWchar(text[i]);
+        if (character == WEOF) character = WC_C('?');
+      }
+
+      characters[i] = character;
     }
-
-    characters[i] = character;
   }
 
   return writeBrailleCharacters(mode, characters, length);
