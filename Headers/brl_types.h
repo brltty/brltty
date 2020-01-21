@@ -105,6 +105,11 @@ struct BrailleDisplayStruct {
   } acknowledgements;
 };
 
+static inline int
+have8DotCells (const BrailleDisplay *brl) {
+  return brl->cellSize >= 8;
+}
+
 typedef struct {
   DRIVER_DEFINITION_DECLARATION;
 

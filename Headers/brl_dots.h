@@ -60,37 +60,17 @@ typedef unsigned char BrlDots;
 #define BRL_DOT_8 BRL_DOT(8) /* lower-right dot of computer braille cell */
 
 static inline BrlDots
-getLeftDots (BrlDots cell) {
+brlGetLeftDots (BrlDots cell) {
   return cell & (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7);
 }
 
 static inline BrlDots
-getRightDots (BrlDots cell) {
+brlGetRightDots (BrlDots cell) {
   return cell & (BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8);
 }
 
 static inline BrlDots
-getRightDotsToLeftDots (BrlDots cell) {
-  BrlDots dots = 0;
-  if (cell & BRL_DOT_4) dots |= BRL_DOT_1;
-  if (cell & BRL_DOT_5) dots |= BRL_DOT_2;
-  if (cell & BRL_DOT_6) dots |= BRL_DOT_3;
-  if (cell & BRL_DOT_8) dots |= BRL_DOT_7;
-  return dots;
-}
-
-static inline BrlDots
-getRightDotsToLeftDotsAlt (BrlDots cell) {
-  BrlDots dots = 0;
-  if (cell & BRL_DOT_4) dots |= BRL_DOT_3;
-  if (cell & BRL_DOT_5) dots |= BRL_DOT_2;
-  if (cell & BRL_DOT_6) dots |= BRL_DOT_1;
-  if (cell & BRL_DOT_8) dots |= BRL_DOT_7;
-  return dots;
-}
-
-static inline BrlDots
-getLeftDotsToRightDots (BrlDots cell) {
+brlGetLeftDotsToRightDots (BrlDots cell) {
   BrlDots dots = 0;
   if (cell & BRL_DOT_1) dots |= BRL_DOT_4;
   if (cell & BRL_DOT_2) dots |= BRL_DOT_5;
@@ -100,12 +80,32 @@ getLeftDotsToRightDots (BrlDots cell) {
 }
 
 static inline BrlDots
-getLeftDotsToRightDotsAlt (BrlDots cell) {
+brlGetRightDotsToLeftDots (BrlDots cell) {
+  BrlDots dots = 0;
+  if (cell & BRL_DOT_4) dots |= BRL_DOT_1;
+  if (cell & BRL_DOT_5) dots |= BRL_DOT_2;
+  if (cell & BRL_DOT_6) dots |= BRL_DOT_3;
+  if (cell & BRL_DOT_8) dots |= BRL_DOT_7;
+  return dots;
+}
+
+static inline BrlDots
+brlGetLeftDotsToRightDotsAlt (BrlDots cell) {
   BrlDots dots = 0;
   if (cell & BRL_DOT_1) dots |= BRL_DOT_6;
   if (cell & BRL_DOT_2) dots |= BRL_DOT_5;
   if (cell & BRL_DOT_3) dots |= BRL_DOT_4;
   if (cell & BRL_DOT_7) dots |= BRL_DOT_8;
+  return dots;
+}
+
+static inline BrlDots
+brlGetRightDotsToLeftDotsAlt (BrlDots cell) {
+  BrlDots dots = 0;
+  if (cell & BRL_DOT_4) dots |= BRL_DOT_3;
+  if (cell & BRL_DOT_5) dots |= BRL_DOT_2;
+  if (cell & BRL_DOT_6) dots |= BRL_DOT_1;
+  if (cell & BRL_DOT_8) dots |= BRL_DOT_7;
   return dots;
 }
 
@@ -118,6 +118,14 @@ static inline char
 brlDotToNumber (BrlDots dot) {
   int shift = ffs(dot);
   return shift? ((char)shift + '0'): 0;
+}
+
+static inline void
+brlRemapDot (BrlDots *dots, BrlDots from, BrlDots to) {
+  if (*dots & from) {
+    *dots &= ~from;
+    *dots |= to;
+  }
 }
 
 typedef BrlDots BrlDotTable[BRL_DOT_COUNT];

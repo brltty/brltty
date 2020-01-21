@@ -164,11 +164,14 @@ extern unsigned char getSpeechCursorDots (void);
 extern int setSpeechCursorDots (unsigned char dots);
 
 extern BrailleDisplay brl;			/* braille driver reference */
+
 extern unsigned int textStart;
 extern unsigned int textCount;
 extern unsigned char textMaximized;
+
 extern unsigned int statusStart;
 extern unsigned int statusCount;
+
 extern unsigned int fullWindowShift;			/* Full window horizontal distance */
 extern unsigned int halfWindowShift;			/* Half window horizontal distance */
 extern unsigned int verticalWindowShift;			/* Window vertical distance */

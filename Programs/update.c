@@ -45,19 +45,6 @@
 #include "api_control.h"
 #include "core.h"
 
-static inline int
-have8DotCells (void) {
-  return brl.cellSize >= 8;
-}
-
-static inline void
-remapDot (unsigned char *dots, unsigned char from, unsigned char to) {
-  if (*dots & from) {
-    *dots &= ~from;
-    *dots |= to;
-  }
-}
-
 static int oldwinx;
 static int oldwiny;
 
@@ -165,9 +152,9 @@ setSpeechCursorDots (unsigned char dots) {
 
 static unsigned char
 mapCursorDots (unsigned char dots) {
-  if (!have8DotCells()) {
-    remapDot(&dots, BRL_DOT_7, BRL_DOT_3);
-    remapDot(&dots, BRL_DOT_8, BRL_DOT_6);
+  if (!have8DotCells(&brl)) {
+    brlRemapDot(&dots, BRL_DOT_7, BRL_DOT_3);
+    brlRemapDot(&dots, BRL_DOT_8, BRL_DOT_6);
   }
 
   return dots;
@@ -285,7 +272,7 @@ showInfo (void) {
    * Also, some displays (e.g. Braille Me) have only six dots per cell.
    */
   const size_t size = brl.textColumns * brl.textRows;
-  int compact = (size < 21) && have8DotCells();
+  int compact = (size < 21) && have8DotCells(&brl);
 
   static const unsigned char compactFields[] = {
     sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd

@@ -785,8 +785,8 @@ writeCharacter_leftrighthalf_XCompose (
   const unsigned char *byte, int isPrimary, const void *_data
 ) {
   if (isPrimary) {
-    unsigned char leftDots = getLeftDots(dots);
-    unsigned char rightDots = getRightDots(dots);
+    unsigned char leftDots = brlGetLeftDots(dots);
+    unsigned char rightDots = brlGetRightDots(dots);
 
     if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
     if (!leftDots)
@@ -820,8 +820,8 @@ writeCharacter_lefthalf_XCompose (
   const unsigned char *byte, int isPrimary, const void *_data
 ) {
   if (isPrimary) {
-    unsigned char leftDots = getLeftDots(dots);
-    unsigned char rightDots = getRightDotsToLeftDots(dots);
+    unsigned char leftDots = brlGetLeftDots(dots);
+    unsigned char rightDots = brlGetRightDotsToLeftDots(dots);
 
     if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
   }
@@ -847,8 +847,8 @@ writeCharacter_lefthalfalt_XCompose (
   const unsigned char *byte, int isPrimary, const void *_data
 ) {
   if (isPrimary) {
-    unsigned char leftDots = getLeftDots(dots);
-    unsigned char rightDots = getRightDotsToLeftDotsAlt(dots);
+    unsigned char leftDots = brlGetLeftDots(dots);
+    unsigned char rightDots = brlGetRightDotsToLeftDotsAlt(dots);
 
     if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
   }
@@ -874,8 +874,8 @@ writeCharacter_righthalf_XCompose (
   const unsigned char *byte, int isPrimary, const void *_data
 ) {
   if (isPrimary) {
-    unsigned char leftDots = getLeftDotsToRightDots(dots);
-    unsigned char rightDots = getRightDots(dots);
+    unsigned char leftDots = brlGetLeftDotsToRightDots(dots);
+    unsigned char rightDots = brlGetRightDots(dots);
 
     if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
   }
@@ -901,8 +901,8 @@ writeCharacter_righthalfalt_XCompose (
   const unsigned char *byte, int isPrimary, const void *_data
 ) {
   if (isPrimary) {
-    unsigned char leftDots = getLeftDotsToRightDotsAlt(dots);
-    unsigned char rightDots = getRightDots(dots);
+    unsigned char leftDots = brlGetLeftDotsToRightDotsAlt(dots);
+    unsigned char rightDots = brlGetRightDots(dots);
 
     if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
   }
