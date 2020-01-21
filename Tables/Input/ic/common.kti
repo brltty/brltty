@@ -25,7 +25,7 @@ note * and behind it are the braille cells.
 note To the left of the braille cells are the MoveUp and MoveDown keys,
 note * and to their right are the PanLeft and PanRight keys.
 note * MoveUp is behind MoveDown, and PanLeft is behind PanRight.
-note * The Move and Pan key pairs can be reversed via the internal Settings menu.
+note * The Move and Pan key pairs can be swapped via the internal Settings menu.
 
 map Space SPACE
 map Dot1 DOT1
