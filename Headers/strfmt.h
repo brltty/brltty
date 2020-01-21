@@ -29,9 +29,9 @@ extern "C" {
 
 #define STR_BEGIN(buffer, size) { \
 char *strNext = (buffer); \
-char *const strStart = strNext; \
-char *const strEnd = strStart + (size); \
-char *const strLast = strEnd - 1; \
+const char *const strStart = strNext; \
+const char *const strEnd = strStart + (size); \
+const char *const strLast = strEnd - 1; \
 *strNext = 0;
 
 #define STR_END }
@@ -45,7 +45,7 @@ char *const strLast = strEnd - 1; \
 #define STR_POP() ((strNext > strStart)? --strNext: NULL)
 
 #define STR_ADJUST(length) \
-do { if ((strNext += (length)) > strLast) strNext = strLast; } while (0)
+do { if ((strNext += (length)) > strLast) strNext = (char *)strLast; } while (0)
 
 #define STR_BEGIN_FORMATTER(name, ...) \
 STR_DECLARE_FORMATTER(name, __VA_ARGS__) { \
