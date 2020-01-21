@@ -59,14 +59,18 @@ typedef unsigned char BrlDots;
 #define BRL_DOT_7 BRL_DOT(7) /* lower-left dot of computer braille cell */
 #define BRL_DOT_8 BRL_DOT(8) /* lower-right dot of computer braille cell */
 
+#define BRL_DOTS_LEFT (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7)
+#define BRL_DOTS_RIGHT (BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8)
+#define BRL_DOTS_ALL (BRL_DOTS_LEFT | BRL_DOTS_RIGHT)
+
 static inline BrlDots
 brlGetLeftDots (BrlDots cell) {
-  return cell & (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_7);
+  return cell & BRL_DOTS_LEFT;
 }
 
 static inline BrlDots
 brlGetRightDots (BrlDots cell) {
-  return cell & (BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_8);
+  return cell & BRL_DOTS_RIGHT;
 }
 
 static inline BrlDots

@@ -107,7 +107,7 @@ highlightBrailleWindowLocation (void) {
 
 static const unsigned char cursorStyles[] = {
   [csUnderline] = (BRL_DOT_7 | BRL_DOT_8),
-  [csBlock] = (BRL_DOT_1 | BRL_DOT_2 | BRL_DOT_3 | BRL_DOT_4 | BRL_DOT_5 | BRL_DOT_6 | BRL_DOT_7 | BRL_DOT_8),
+  [csBlock] = BRL_DOTS_ALL,
   [csLowerLeftDot] = (BRL_DOT_7),
   [csLowerRightDot] = (BRL_DOT_8)
 };
