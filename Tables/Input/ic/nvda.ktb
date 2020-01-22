@@ -65,3 +65,8 @@ bind Space+Dot8 TIME
 
 bind Dot7+Dot6 PREFMENU
 
+bind Dot8+RoutingKey.20 CSRVIS
+bind Dot8+RoutingKey.19 CSRSIZE
+bind Dot8+RoutingKey.18 CSRBLINK
+bind Dot8+RoutingKey.17 CAPBLINK
+
