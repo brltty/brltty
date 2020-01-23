@@ -220,15 +220,17 @@ public abstract class ScreenDriver {
     }
   }
 
-  private static Window currentWindow = Window.get(0)
-                                       .setScreen(new RenderedScreen(null));
+  private static ScreenWindow currentScreenWindow =
+    ScreenWindow.getScreenWindow(0)
+                .setRenderedScreen(new RenderedScreen(null))
+                ;
 
-  public static Window getWindow () {
-    return currentWindow;
+  public static ScreenWindow getCurrentScreenWindow () {
+    return currentScreenWindow;
   }
 
-  public static RenderedScreen getScreen () {
-    return getWindow().getScreen();
+  public static RenderedScreen getCurrentRenderedScreen () {
+    return getCurrentScreenWindow().getRenderedScreen();
   }
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
@@ -355,8 +357,8 @@ public abstract class ScreenDriver {
   );
 
   private static void exportScreenProperties () {
-    Window window = getWindow();
-    RenderedScreen screen = window.getScreen();
+    ScreenWindow window = getCurrentScreenWindow();
+    RenderedScreen screen = window.getRenderedScreen();
     AccessibilityNodeInfo node = screen.getCursorNode();
 
     int locationLeft = 0;
@@ -438,7 +440,7 @@ public abstract class ScreenDriver {
   }
 
   private static void refreshScreen (AccessibilityNodeInfo node) {
-    currentWindow = Window.setScreen(node);
+    currentScreenWindow = ScreenWindow.setRenderedScreen(node);
     exportScreenProperties();
   }
 
@@ -467,7 +469,7 @@ public abstract class ScreenDriver {
   }
 
   public static char[] getRowText (int row, int column) {
-    RenderedScreen screen = getScreen();
+    RenderedScreen screen = getCurrentRenderedScreen();
     String text = (row < screen.getScreenHeight())? screen.getScreenRow(row): "";
     int length = text.length();
 
@@ -481,7 +483,7 @@ public abstract class ScreenDriver {
 
   public static boolean routeCursor (int column, int row) {
     if (row == -1) return false;
-    return getScreen().performAction(column, row);
+    return getCurrentRenderedScreen().performAction(column, row);
   }
 
   public static void reportEvent (char event) {

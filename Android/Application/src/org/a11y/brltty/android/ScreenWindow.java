@@ -27,31 +27,36 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 
-public class Window {
-  private final static Map<Integer, Window> windows =
-               new HashMap<Integer, Window>();
-
+public class ScreenWindow {
   private final int windowIdentifier;
-  private AccessibilityWindowInfo windowObject = null;
-  private RenderedScreen renderedScreen = null;
 
-  private Window (int identifier) {
+  private ScreenWindow (int identifier) {
     windowIdentifier = identifier;
   }
 
-  public static Window get (Integer identifier) {
-    synchronized (windows) {
-      Window window = windows.get(identifier);
+  public final int getIdentifier () {
+    return windowIdentifier;
+  }
+
+  private final static Map<Integer, ScreenWindow> screenWindowCache =
+               new HashMap<Integer, ScreenWindow>();
+
+  private AccessibilityWindowInfo windowObject = null;
+  private RenderedScreen renderedScreen = null;
+
+  public static ScreenWindow getScreenWindow (Integer identifier) {
+    synchronized (screenWindowCache) {
+      ScreenWindow window = screenWindowCache.get(identifier);
       if (window != null) return window;
 
-      window = new Window(identifier);
-      windows.put(identifier, window);
+      window = new ScreenWindow(identifier);
+      screenWindowCache.put(identifier, window);
       return window;
     }
   }
 
-  public static Window get (AccessibilityWindowInfo object) {
-    Window window = get(object.getId());
+  public static ScreenWindow getScreenWindow (AccessibilityWindowInfo object) {
+    ScreenWindow window = getScreenWindow(object.getId());
 
     synchronized (window) {
       if (window.windowObject != null) window.windowObject.recycle();
@@ -61,13 +66,13 @@ public class Window {
     return window;
   }
 
-  public static Window get (AccessibilityNodeInfo node) {
+  public static ScreenWindow getScreenWindow (AccessibilityNodeInfo node) {
     if (ApplicationUtilities.haveLollipop) {
       AccessibilityWindowInfo object = node.getWindow();
 
       if (object != null) {
         try {
-          return get(object);
+          return getScreenWindow(object);
         } finally {
           object.recycle();
           object = null;
@@ -75,11 +80,7 @@ public class Window {
       }
     }
 
-    return get(node.getWindowId());
-  }
-
-  public final int getIdentifier () {
-    return windowIdentifier;
+    return getScreenWindow(node.getWindowId());
   }
 
   public final Rect getLocation () {
@@ -102,18 +103,17 @@ public class Window {
     return getLocation().contains(location);
   }
 
-  public final RenderedScreen getScreen () {
+  public final RenderedScreen getRenderedScreen () {
     return renderedScreen;
   }
 
-  public final Window setScreen (RenderedScreen screen) {
+  public final ScreenWindow setRenderedScreen (RenderedScreen screen) {
     renderedScreen = screen;
     return this;
   }
 
-  public static Window setScreen (AccessibilityNodeInfo node) {
-    Window window = get(node);
-    window.setScreen(new RenderedScreen(node));
-    return window;
+  public static ScreenWindow setRenderedScreen (AccessibilityNodeInfo node) {
+    ScreenWindow window = getScreenWindow(node);
+    return window.setRenderedScreen(new RenderedScreen(node));
   }
 }
