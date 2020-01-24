@@ -119,7 +119,7 @@ public abstract class ScreenUtilities {
 
     Rect location = new Rect();
     node.getBoundsInScreen(location);
-    return ScreenDriver.getWindow().contains(location);
+    return ScreenDriver.getCurrentScreenWindow().contains(location);
   }
 
   public static boolean isSubclassOf (AccessibilityNodeInfo node, Class type) {

@@ -47,7 +47,7 @@ public abstract class InputHandlers {
   }
 
   private static AccessibilityNodeInfo getCursorNode () {
-    RenderedScreen screen = ScreenDriver.getScreen();
+    RenderedScreen screen = ScreenDriver.getCurrentRenderedScreen();
     if (screen == null) return null;
     return screen.getCursorNode();
   }
@@ -134,7 +134,7 @@ public abstract class InputHandlers {
   }
 
   private static boolean moveFocus (RenderedScreen.SearchDirection direction) {
-    RenderedScreen screen = ScreenDriver.getScreen();
+    RenderedScreen screen = ScreenDriver.getCurrentRenderedScreen();
 
     if (screen != null) {
       if (screen.moveFocus(direction)) {
