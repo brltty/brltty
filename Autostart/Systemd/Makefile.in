@@ -18,7 +18,7 @@
 
 #SYSTEMD_UNITS_DIRECTORY = $(INSTALL_ROOT)$(sysconfdir)/systemd/system
 SYSTEMD_UNITS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/systemd/system
-SYSTEMD_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)/usr/libexec
+SYSTEMD_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/$(PACKAGE_TARNAME)
 
 install: install-units install-scripts
 
@@ -34,7 +34,7 @@ install-scripts-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_SCRIPTS_DIRECTORY)
 
 install-scripts: install-scripts-directory
-	$(INSTALL_SCRIPT) $(SRC_DIR)/$(PACKAGE_TARNAME)-systemd-wrapper $(SYSTEMD_SCRIPTS_DIRECTORY)
+	$(INSTALL_SCRIPT) $(SRC_DIR)/systemd-wrapper $(SYSTEMD_SCRIPTS_DIRECTORY)
 
 uninstall:
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME).*

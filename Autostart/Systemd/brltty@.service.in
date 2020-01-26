@@ -37,7 +37,7 @@ RefuseManualStop=true
 [Service]
 
 Environment="BRLTTY_SYSTEMD_INSTANCE=%I"
-ExecStart=/usr/libexec/brltty-systemd-wrapper
+ExecStart=/usr/lib/brltty/systemd-wrapper
 
 Type=@SYSTEMD_SERVICE_TYPE@
 Environment="BRLTTY_EXECUTABLE_ARGUMENTS=@SYSTEMD_SERVICE_ARGUMENTS@"

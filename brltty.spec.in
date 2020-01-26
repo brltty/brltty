@@ -34,8 +34,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _libdir /lib
 %define _datadir /usr/share
 %define _sysconfdir /etc
+%define _pkglibdir %{_libdir}/%{name}
 %define _systemdunitdir %{_libdir}/systemd/system
-%define _systemdscriptdir %{_libexecdir}
 %define _udevlibdir %{_libdir}/udev
 
 Requires: dbus-libs
@@ -572,16 +572,19 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -f %{name}.lang
 %defattr(-,root,root)
 %{_bindir}/brltty
-%{_libdir}/brltty
-%exclude %{_libdir}/brltty/libbrlttybba.so
-%exclude %{_libdir}/brltty/libbrlttybxw.so
-%exclude %{_libdir}/brltty/libbrlttysen.so
-%exclude %{_libdir}/brltty/libbrlttyses.so
-%exclude %{_libdir}/brltty/libbrlttysfl.so
-%exclude %{_libdir}/brltty/libbrlttysfv.so
-%exclude %{_libdir}/brltty/libbrlttyssd.so
-%exclude %{_libdir}/brltty/libbrlttyxa2.so
-%exclude %{_libdir}/brltty/libbrlttyxsc.so
+%{_pkglibdir}
+%exclude %{_pkglibdir}/libbrlttybba.so
+%exclude %{_pkglibdir}/libbrlttybxw.so
+%exclude %{_pkglibdir}/libbrlttysen.so
+%exclude %{_pkglibdir}/libbrlttyses.so
+%exclude %{_pkglibdir}/libbrlttysfl.so
+%exclude %{_pkglibdir}/libbrlttysfv.so
+%exclude %{_pkglibdir}/libbrlttyssd.so
+%exclude %{_pkglibdir}/libbrlttysvv.so
+%exclude %{_pkglibdir}/libbrlttyxa2.so
+%exclude %{_pkglibdir}/libbrlttyxsc.so
+%exclude %{_pkglibdir}/systemd-*
+%exclude %{_pkglibdir}/udev-*
 %{_sysconfdir}/brltty
 %exclude %{_sysconfdir}/brltty/dracut.conf
 %{_datadir}/metainfo/org.a11y.brltty.metainfo.xml
@@ -597,34 +600,34 @@ rm -fr "${RPM_BUILD_ROOT}"
 %config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
 
 %files -n brltty-braille-brlapi
-%{_libdir}/brltty/libbrlttybba.so
+%{_pkglibdir}/libbrlttybba.so
 
 %files -n brltty-braille-xwindow
-%{_libdir}/brltty/libbrlttybxw.so
+%{_pkglibdir}/libbrlttybxw.so
 
 %files -n brltty-speech-espeak
-%{_libdir}/brltty/libbrlttyses.so
+%{_pkglibdir}/libbrlttyses.so
 
 %files -n brltty-speech-espeak-ng
-%{_libdir}/brltty/libbrlttysen.so
+%{_pkglibdir}/libbrlttysen.so
 
 %files -n brltty-speech-festival
-%{_libdir}/brltty/libbrlttysfv.so
+%{_pkglibdir}/libbrlttysfv.so
 
 %files -n brltty-speech-flite
-%{_libdir}/brltty/libbrlttysfl.so
+%{_pkglibdir}/libbrlttysfl.so
 
 %files -n brltty-speech-speechd
-%{_libdir}/brltty/libbrlttyssd.so
+%{_pkglibdir}/libbrlttyssd.so
 
 %files -n brltty-speech-viavoice
-%{_libdir}/brltty/libbrlttysvv.so
+%{_pkglibdir}/libbrlttysvv.so
 
 %files -n brltty-screen-atspi2
-%{_libdir}/brltty/libbrlttyxa2.so
+%{_pkglibdir}/libbrlttyxa2.so
 
 %files -n brltty-screen-screen
-%{_libdir}/brltty/libbrlttyxsc.so
+%{_pkglibdir}/libbrlttyxsc.so
 
 %files -n brltty-utils
 %{_bindir}/brltty-*
@@ -634,10 +637,11 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brltty-systemd
 %{_systemdunitdir}/*
-%{_systemdscriptdir}/brltty-systemd-*
+%{_pkglibdir}/systemd-*
 
 %files -n brltty-udev
 %{_udevlibdir}/*
+%{_pkglibdir}/udev-*
 
 %files -n brltty-dracut
 /usr/lib/dracut/modules.d/99brltty
