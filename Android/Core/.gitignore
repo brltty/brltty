@@ -1,5 +1,5 @@
 /local.properties
 
 /bin/
-/libs/
+/libs/*/
 /gen/

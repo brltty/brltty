@@ -16,6 +16,7 @@
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
   <application
     android:label="@string/app_name"
@@ -95,5 +96,18 @@
         <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
       </intent-filter>
     </receiver>
+
+    <provider
+      android:name="android.support.v4.content.FileProvider"
+      android:authorities="org.a11y.brltty.android.fileprovider"
+      android:exported="false"
+      android:grantUriPermissions="true"
+      >
+
+      <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_provider_paths"
+       />
+    </provider>
   </application>
 </manifest>

@@ -72,7 +72,12 @@ public class ActionsActivity extends InternalActivity {
   }
 
   public void updateApplication (View view) {
-    launch(R.string.application_package_url);
+    new PackageInstaller(this, R.string.application_package_url, "latest.apk") {
+      @Override
+      protected void onInstallFailed (String message) {
+        showMessage("application update failed");
+      }
+    }.startInstall();
   }
 
   public void launchAboutActivity (View view) {

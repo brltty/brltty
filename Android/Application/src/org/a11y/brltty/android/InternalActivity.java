@@ -19,6 +19,7 @@
 package org.a11y.brltty.android;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -30,6 +31,14 @@ public abstract class InternalActivity extends Activity {
 
   protected final String getResourceString (int identifier) {
     return getResources().getString(identifier);
+  }
+
+  protected final void showMessage (String message) {
+    Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+  }
+
+  protected final void showMessage (int message) {
+    showMessage(getResourceString(message));
   }
 
   protected final void launch (Intent intent) {
