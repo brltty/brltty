@@ -42,16 +42,16 @@ public class PackageInstaller {
   private final static String LOG_TAG = PackageInstaller.class.getName();
 
   protected final Context owningContext;
-  protected final String packageURL;
-  protected final String fileName;
+  protected final String sourceURL;
+  protected final File targetFile;
 
-  public PackageInstaller (Context context, String url, String file) {
+  public PackageInstaller (Context context, String url, File file) {
     owningContext = context;
-    packageURL = url;
-    fileName = file;
+    sourceURL = url;
+    targetFile = file;
   }
 
-  public PackageInstaller (Context context, int url, String file) {
+  public PackageInstaller (Context context, int url, File file) {
     this(context, context.getResources().getString(url), file);
   }
 
@@ -71,22 +71,20 @@ public class PackageInstaller {
     new AsyncTask<Object, Object, String>() {
       @Override
       protected String doInBackground (Object... arguments) {
-        File directory = new File(owningContext.getCacheDir(), "public");
-        directory.mkdir();
-        File file = new File(directory, fileName);
-
         try {
+          URL url = new URL(sourceURL);
+          HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+          connection.setRequestMethod("GET");
+          connection.connect();
+
           try {
-            URL url = new URL(packageURL);
-            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.connect();
+            InputStream input = connection.getInputStream();
 
             try {
-              InputStream input = connection.getInputStream();
+              File file = targetFile;
+              file.delete();
 
               try {
-                file.delete();
                 OutputStream output = new FileOutputStream(file);
 
                 try {
@@ -117,20 +115,20 @@ public class PackageInstaller {
                   output = null;
                 }
               } finally {
-                input.close();
-                input = null;
+                if (file != null) file.delete();
               }
             } finally {
-              connection.disconnect();
-              connection = null;
+              input.close();
+              input = null;
             }
-          } catch (IOException exception) {
-            String message = exception.getMessage();
-            Log.w(LOG_TAG, String.format("package install failed: %s: %s", packageURL, message));
-            return message;
+          } finally {
+            connection.disconnect();
+            connection = null;
           }
-        } finally {
-          if (file != null) file.delete();
+        } catch (IOException exception) {
+          String message = exception.getMessage();
+          Log.w(LOG_TAG, String.format("package install failed: %s: %s", sourceURL, message));
+          return message;
         }
 
         return null;

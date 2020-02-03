@@ -25,6 +25,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
 import android.net.Uri;
+import java.io.File;
 
 public abstract class InternalActivity extends Activity {
   private final static String LOG_TAG = InternalActivity.class.getName();
@@ -51,6 +52,10 @@ public abstract class InternalActivity extends Activity {
 
   protected final void launch (Uri uri) {
     launch(new Intent(Intent.ACTION_VIEW, uri));
+  }
+
+  protected final void launch (File file) {
+    launch(Uri.fromFile(file));
   }
 
   protected final void launch (String url) {

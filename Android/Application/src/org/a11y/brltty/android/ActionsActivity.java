@@ -23,6 +23,7 @@ import android.view.View;
 
 import android.content.Intent;
 import android.net.Uri;
+import java.io.File;
 
 public class ActionsActivity extends InternalActivity {
   @Override
@@ -72,7 +73,11 @@ public class ActionsActivity extends InternalActivity {
   }
 
   public void updateApplication (View view) {
-    new PackageInstaller(this, R.string.application_package_url, "latest.apk") {
+    File directory = new File(getCacheDir(), "public");
+    directory.mkdir();
+    File file = new File(directory, "latest.apk");
+
+    new PackageInstaller(this, R.string.application_package_url, file) {
       @Override
       protected void onInstallFailed (String message) {
         showMessage("application update failed");
