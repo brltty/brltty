@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import android.content.res.Resources;
+
 public abstract class InternalActivityComponent {
   private final InternalActivity owningActivity;
 
@@ -29,7 +31,16 @@ public abstract class InternalActivityComponent {
     return owningActivity;
   }
 
-  protected final String getString (int resource) {
+  protected final String getString (int resource, boolean untranslated) {
+    if (untranslated) getActivity().getResourceString(resource);
     return getActivity().getString(resource);
+  }
+
+  protected final String getString (int resource) {
+    return getString(resource, false);
+  }
+
+  protected final Resources getResources () {
+    return getActivity().getResources();
   }
 }

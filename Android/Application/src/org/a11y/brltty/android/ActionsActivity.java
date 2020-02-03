@@ -80,7 +80,13 @@ public class ActionsActivity extends InternalActivity {
     new PackageInstaller(this, R.string.application_package_url, file) {
       @Override
       protected void onInstallFailed (String message) {
-        showMessage("application update failed");
+        showMessage(
+          String.format(
+            "%s: %s",
+            getString(R.string.updateApplication_problem_failed),
+            message
+          )
+        );
       }
     }.startInstall();
   }

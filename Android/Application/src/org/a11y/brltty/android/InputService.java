@@ -249,13 +249,13 @@ public class InputService extends InputMethodService {
     if (service != null) {
       InputConnection connection = service.getCurrentInputConnection();
       if (connection != null) return connection;
-      reportInputProblem(R.string.input_service_not_connected);
+      reportInputProblem(R.string.inputService_not_connected);
     } else if (isSelected()) {
-      reportInputProblem(R.string.input_service_not_started);
+      reportInputProblem(R.string.inputService_not_started);
     } else if (isEnabled()) {
-      reportInputProblem(R.string.input_service_not_selected);
+      reportInputProblem(R.string.inputService_not_selected);
     } else {
-      reportInputProblem(R.string.input_service_not_enabled);
+      reportInputProblem(R.string.inputService_not_enabled);
     }
 
     return null;

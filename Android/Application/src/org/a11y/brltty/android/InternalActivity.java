@@ -21,9 +21,13 @@ package org.a11y.brltty.android;
 import android.util.Log;
 import android.widget.Toast;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
+
 import android.net.Uri;
 import java.io.File;
 
@@ -34,12 +38,36 @@ public abstract class InternalActivity extends Activity {
     return getResources().getString(identifier);
   }
 
+  protected final void showMessage (CharSequence message, boolean asToast) {
+    if (asToast) {
+      Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    } else {
+      DialogInterface.OnClickListener listener =
+        new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick (DialogInterface dialog, int button) {
+            dialog.dismiss();
+          }
+        };
+
+      new AlertDialog.Builder(this)
+        .setMessage(message)
+        .setNeutralButton(android.R.string.yes, listener)
+        .create()
+        .show();
+    }
+  }
+
   protected final void showMessage (CharSequence message) {
-    Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    showMessage(message, false);
+  }
+
+  protected final void showMessage (int message, boolean asToast) {
+    showMessage(getResourceString(message), asToast);
   }
 
   protected final void showMessage (int message) {
-    showMessage(getResourceString(message));
+    showMessage(message, false);
   }
 
   protected final void launch (Intent intent) {

@@ -33,6 +33,8 @@ import android.content.pm.PackageInfo;
 public class PackageInstaller extends InternalActivityComponent {
   private final static String LOG_TAG = PackageInstaller.class.getName();
 
+  public final static String MIME_TYPE = "application/vnd.android.package-archive";
+
   protected final String sourceURL;
   protected final File targetFile;
 
@@ -72,22 +74,16 @@ public class PackageInstaller extends InternalActivityComponent {
     return getPackageManager().getPackageArchiveInfo(file.getAbsolutePath(), 0);
   }
 
-  private final void reportProblem (String... components) {
-    StringBuilder problem = new StringBuilder();
-
-    for (String component : components) {
-      if (problem.length() > 0) problem.append(": ");
-      problem.append(component);
-    }
-
-    getActivity().showMessage(problem);
+  protected void onInstallFailed (String message) {
   }
 
-  private final void reportNotUpdated (String reason) {
-    reportProblem(getString(R.string.packageInstaller_problem_reject), reason);
+  private void onInstallFailed (Exception exception) {
+    String message = exception.getMessage();
+    Log.w(LOG_TAG, String.format("package install failed: %s: %s", sourceURL, message));
+    onInstallFailed(message);
   }
 
-  private final boolean checkVersion (PackageInfo oldInfo, PackageInfo newInfo) {
+  private final boolean isVersionOK (PackageInfo oldInfo, PackageInfo newInfo) {
     int oldCode = oldInfo.versionCode;
     int newCode = newInfo.versionCode;
 
@@ -95,7 +91,7 @@ public class PackageInstaller extends InternalActivityComponent {
     String newName = newInfo.versionName;
 
     if (newCode == oldCode) {
-      reportNotUpdated(
+      onInstallFailed(
         String.format(
           "%s: %s (%d)",
           getString(R.string.packageInstaller_problem_same),
@@ -109,7 +105,7 @@ public class PackageInstaller extends InternalActivityComponent {
     if (newCode < oldCode) {
       final String operator = "<";
 
-      reportNotUpdated(
+      onInstallFailed(
         String.format(
           "%s: %s %s %s (%d %s %d)",
           getString(R.string.packageInstaller_problem_downgrade),
@@ -124,19 +120,12 @@ public class PackageInstaller extends InternalActivityComponent {
     return true;
   }
 
-  private final boolean checkArchive () {
+  private final boolean canInstallPackage () {
     PackageInfo oldInfo = getPackageInfo();
     PackageInfo newInfo = getPackageInfo(targetFile);
-    return checkVersion(oldInfo, newInfo);
-  }
 
-  protected void onInstallFailed (String message) {
-  }
-
-  private void onInstallFailed (Exception exception) {
-    String message = exception.getMessage();
-    Log.w(LOG_TAG, String.format("package install failed: %s: %s", sourceURL, message));
-    onInstallFailed(message);
+    if (oldInfo == null) return true;
+    return isVersionOK(oldInfo, newInfo);
   }
 
   public final void startInstall () {
@@ -151,19 +140,25 @@ public class PackageInstaller extends InternalActivityComponent {
 
       @Override
       protected void onDownloadFinished () {
-        if (checkArchive()) {
-          Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (canInstallPackage()) {
+          Uri uri;
+          int flags;
 
           if (ApplicationUtilities.haveNougat) {
-            String authority = getClass().getPackage().getName() + ".fileprovider";
-            Uri uri = FileProvider.getUriForFile(getActivity(), authority, targetFile);
+            {
+              String authority = getClass().getPackage().getName() + ".fileprovider";
+              uri = FileProvider.getUriForFile(getActivity(), authority, targetFile);
+            }
 
-            intent.setData(uri);
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
           } else {
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setDataAndType(Uri.fromFile(targetFile), "application/vnd.android.package-archive");
+            uri = Uri.fromFile(targetFile);
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK;
           }
+
+          Intent intent = new Intent(Intent.ACTION_VIEW);
+          intent.setDataAndType(uri, MIME_TYPE);
+          intent.setFlags(flags);
 
           try {
             getActivity().startActivity(intent);
