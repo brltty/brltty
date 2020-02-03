@@ -19,22 +19,12 @@
 package org.a11y.brltty.android;
 
 import android.util.Log;
-import android.os.AsyncTask;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
 
 import android.net.Uri;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.HttpURLConnection;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-
 import java.io.File;
 import android.support.v4.content.FileProvider;
 
@@ -55,89 +45,43 @@ public class PackageInstaller {
     this(context, context.getResources().getString(url), file);
   }
 
-  private static void copy (InputStream input, OutputStream output) throws IOException {
-    byte[] buffer = new byte[0X1000];
-    int length;
-
-    while ((length = input.read(buffer)) != -1) {
-      output.write(buffer, 0, length);
-    }
-  }
-
   protected void onInstallFailed (String message) {
   }
 
+  private void onInstallFailed (Exception exception) {
+    String message = exception.getMessage();
+    Log.w(LOG_TAG, String.format("package install failed: %s: %s", sourceURL, message));
+    onInstallFailed(message);
+  }
+
   public final void startInstall () {
-    new AsyncTask<Object, Object, String>() {
+    new FileDownloader(sourceURL, targetFile) {
       @Override
-      protected String doInBackground (Object... arguments) {
-        try {
-          URL url = new URL(sourceURL);
-          HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-          connection.setRequestMethod("GET");
-          connection.connect();
+      protected void onDownloadFinished () {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
 
-          try {
-            InputStream input = connection.getInputStream();
+        if (ApplicationUtilities.haveNougat) {
+          String authority = getClass().getPackage().getName() + ".fileprovider";
+          Uri uri = FileProvider.getUriForFile(owningContext, authority, targetFile);
 
-            try {
-              File file = targetFile;
-              file.delete();
-
-              try {
-                OutputStream output = new FileOutputStream(file);
-
-                try {
-                  copy(input, output);
-                  output.flush();
-
-                  try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-
-                    if (ApplicationUtilities.haveNougat) {
-                      String authority = getClass().getPackage().getName() + ".fileprovider";
-                      Uri uri = FileProvider.getUriForFile(owningContext, authority, file);
-
-                      intent.setData(uri);
-                      intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    } else {
-                      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                      intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
-                    }
-
-                    owningContext.startActivity(intent);
-                    file = null;
-                  } catch (ActivityNotFoundException exception) {
-                    throw new IOException(exception.getMessage());
-                  }
-                } finally {
-                  output.close();
-                  output = null;
-                }
-              } finally {
-                if (file != null) file.delete();
-              }
-            } finally {
-              input.close();
-              input = null;
-            }
-          } finally {
-            connection.disconnect();
-            connection = null;
-          }
-        } catch (IOException exception) {
-          String message = exception.getMessage();
-          Log.w(LOG_TAG, String.format("package install failed: %s: %s", sourceURL, message));
-          return message;
+          intent.setData(uri);
+          intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else {
+          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          intent.setDataAndType(Uri.fromFile(targetFile), "application/vnd.android.package-archive");
         }
 
-        return null;
+        try {
+          owningContext.startActivity(intent);
+        } catch (ActivityNotFoundException exception) {
+          onInstallFailed(exception);
+        }
       }
 
       @Override
-      protected void onPostExecute (String message) {
-        if (message != null) onInstallFailed(message);
+      protected void onDownloadFailed (String message) {
+        onInstallFailed(message);
       }
-    }.execute();
+    }.startDownload();
   }
 }
