@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="match_parent"
+  android:layout_width="match_parent"
+  android:orientation="vertical"
+  >
+
+  <TextView android:id="@+id/state" />
+
+  <TableLayout
+    android:id="@+id/progress"
+    android:visibility="gone"
+    android:padding="25dp"
+    android:stretchColumns="1"
+    >
+
+    <ProgressBar android:id="@+id/bar" />
+
+    <TableRow>
+      <TextView android:id="@+id/current" />
+      <Space />
+      <TextView android:id="@+id/remaining" android:gravity="right" />
+    </TableRow>
+  </TableLayout>
+</TableLayout>

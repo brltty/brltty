@@ -20,7 +20,7 @@ package org.a11y.brltty.android;
 
 import android.util.Log;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
 
@@ -31,18 +31,18 @@ import android.support.v4.content.FileProvider;
 public class PackageInstaller {
   private final static String LOG_TAG = PackageInstaller.class.getName();
 
-  protected final Context owningContext;
+  protected final Activity owningActivity;
   protected final String sourceURL;
   protected final File targetFile;
 
-  public PackageInstaller (Context context, String url, File file) {
-    owningContext = context;
+  public PackageInstaller (Activity activity, String url, File file) {
+    owningActivity = activity;
     sourceURL = url;
     targetFile = file;
   }
 
-  public PackageInstaller (Context context, int url, File file) {
-    this(context, context.getResources().getString(url), file);
+  public PackageInstaller (Activity activity, int url, File file) {
+    this(activity, activity.getResources().getString(url), file);
   }
 
   protected void onInstallFailed (String message) {
@@ -55,9 +55,13 @@ public class PackageInstaller {
   }
 
   public final void startInstall () {
-    new FileDownloader(sourceURL, targetFile) {
+    new FileDownloader(owningActivity, sourceURL, targetFile) {
       @Override
       protected void onDownloadProgress (long time, long position, Long length) {
+        if (true) {
+          long remaining = (length == null)? -1: (length - position);
+          Log.d("dnld-prog", String.format("t=%d p=%d r=%d", time, position, remaining));
+        }
       }
 
       @Override
@@ -66,7 +70,7 @@ public class PackageInstaller {
 
         if (ApplicationUtilities.haveNougat) {
           String authority = getClass().getPackage().getName() + ".fileprovider";
-          Uri uri = FileProvider.getUriForFile(owningContext, authority, targetFile);
+          Uri uri = FileProvider.getUriForFile(owningActivity, authority, targetFile);
 
           intent.setData(uri);
           intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -76,7 +80,7 @@ public class PackageInstaller {
         }
 
         try {
-          owningContext.startActivity(intent);
+          owningActivity.startActivity(intent);
         } catch (ActivityNotFoundException exception) {
           onInstallFailed(exception);
         }

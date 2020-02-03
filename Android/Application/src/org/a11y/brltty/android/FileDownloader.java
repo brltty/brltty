@@ -21,6 +21,15 @@ package org.a11y.brltty.android;
 import android.util.Log;
 import android.os.AsyncTask;
 
+import android.content.Context;
+import android.app.Activity;
+
+import android.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.ProgressBar;
+
 import java.net.URL;
 import java.io.File;
 
@@ -35,10 +44,12 @@ import java.io.FileOutputStream;
 public class FileDownloader {
   private final static String LOG_TAG = FileDownloader.class.getName();
 
+  protected final Activity owningActivity;
   protected final String sourceURL;
   protected final File targetFile;
 
-  public FileDownloader (String url, File file) {
+  public FileDownloader (Activity activity, String url, File file) {
+    owningActivity = activity;
     sourceURL = url;
     targetFile = file;
   }
@@ -56,37 +67,129 @@ public class FileDownloader {
   }
 
   public final void startDownload () {
-    new AsyncTask<Object, Long, String>() {
+    new AsyncTask<Object, Object, String>() {
+      private final Object PROGRESS_LOCK = new Object();
+      private boolean progressInitialized = false;
+
       private long startTime;
       private long currentTime;
+      private long currentPosition;
       private Long contentLength;
 
-      @Override
-      protected void onProgressUpdate (Long... arguments) {
-        long now = System.currentTimeMillis() - startTime;
+      private AlertDialog alertDialog;
+      private TextView stateView;
+      private View progressView;
+      private ProgressBar progressBar;
+      private TextView progressCurrent;
+      private TextView progressRemaining;
 
-        if (now > currentTime) {
-          currentTime = now;
-          onDownloadProgress(now, arguments[0], contentLength);
+      private long getTime () {
+        return System.currentTimeMillis();
+      }
+
+      private void setState (int state) {
+        stateView.setText(state);
+      }
+
+      private void setBytes (TextView view, long value) {
+        view.setText(Long.toString(value));
+      }
+
+      private AlertDialog makeDialog () {
+        AlertDialog.Builder builder = new AlertDialog.Builder(owningActivity)
+          .setTitle(R.string.file_downloader_title)
+          .setMessage(sourceURL)
+          ;
+
+        {
+          int layout = R.layout.file_downloader;
+
+          if (ApplicationUtilities.haveLollipop) {
+            builder.setView(layout);
+          } else {
+            Context context = builder.getContext();
+            LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            builder.setView(inflater.inflate(layout, null));
+          }
+        }
+
+        return builder.create();
+      }
+
+      private void showDialog () {
+        alertDialog = makeDialog();
+        alertDialog.show();
+
+        stateView = (TextView)alertDialog.findViewById(R.id.state);
+        progressView = alertDialog.findViewById(R.id.progress);
+        progressBar = (ProgressBar)alertDialog.findViewById(R.id.bar);
+        progressCurrent = (TextView)alertDialog.findViewById(R.id.current);
+        progressRemaining = (TextView)alertDialog.findViewById(R.id.remaining);
+      }
+
+      @Override
+      protected void onProgressUpdate (Object... arguments) {
+        synchronized (PROGRESS_LOCK) {
+          if (!progressInitialized) {
+            progressView.setVisibility(View.VISIBLE);
+            setState(R.string.file_downloader_state_downloading);
+
+            if (contentLength == null) {
+              progressBar.setIndeterminate(true);
+              progressRemaining.setVisibility(View.GONE);
+            } else {
+              progressBar.setIndeterminate(false);
+              progressBar.setMin(0);
+              progressBar.setMax((int)(long)contentLength);
+            }
+
+            progressInitialized = true;
+          }
+
+          progressBar.setProgress((int)currentPosition);
+          setBytes(progressCurrent, currentPosition);
+
+          if (contentLength != null) {
+            setBytes(progressRemaining, (currentPosition - contentLength));
+          }
+
+          onDownloadProgress(currentTime, currentPosition, contentLength);
         }
       }
 
       private void copy (InputStream input, OutputStream output) throws IOException {
-        long position = 0;
-        publishProgress(position);
+        synchronized (PROGRESS_LOCK) {
+          currentPosition = 0;
+          publishProgress();
+        }
 
         byte[] buffer = new byte[0X1000];
         int count;
 
         while ((count = input.read(buffer)) != -1) {
           output.write(buffer, 0, count);
-          publishProgress((position += count));
+          currentPosition += count;
+
+          synchronized (PROGRESS_LOCK) {
+            long newTime = getTime() - startTime;
+
+            if ((newTime - currentTime) > 100) {
+              currentTime = newTime;
+              publishProgress();
+            }
+          }
+        }
+
+        synchronized (PROGRESS_LOCK) {
+          publishProgress();
         }
       }
 
       @Override
       protected void onPreExecute () {
         onDownloadStarted();
+        showDialog();
+        setState(R.string.file_downloader_state_connecting);
       }
 
       @Override
@@ -115,8 +218,8 @@ public class FileDownloader {
                   }
 
                   if (contentLength < 0) contentLength = null;
-                  startTime = System.currentTimeMillis();
-                  currentTime = -1;
+                  startTime = getTime();
+                  currentTime = 0;
 
                   copy(input, output);
                   output.flush();
@@ -147,6 +250,8 @@ public class FileDownloader {
 
       @Override
       protected void onPostExecute (String message) {
+        alertDialog.dismiss();
+
         if (message == null) {
           onDownloadFinished();
         } else {
