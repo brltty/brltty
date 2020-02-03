@@ -57,6 +57,10 @@ public class PackageInstaller {
   public final void startInstall () {
     new FileDownloader(sourceURL, targetFile) {
       @Override
+      protected void onDownloadProgress (long time, long position, Long length) {
+      }
+
+      @Override
       protected void onDownloadFinished () {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 

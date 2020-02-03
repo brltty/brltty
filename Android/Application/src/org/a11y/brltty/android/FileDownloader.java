@@ -43,16 +43,10 @@ public class FileDownloader {
     targetFile = file;
   }
 
-  private static void copy (InputStream input, OutputStream output) throws IOException {
-    byte[] buffer = new byte[0X1000];
-    int length;
-
-    while ((length = input.read(buffer)) != -1) {
-      output.write(buffer, 0, length);
-    }
+  protected void onDownloadStarted () {
   }
 
-  protected void onDownloadStarted () {
+  protected void onDownloadProgress (long time, long position, Long length) {
   }
 
   protected void onDownloadFinished () {
@@ -62,7 +56,34 @@ public class FileDownloader {
   }
 
   public final void startDownload () {
-    new AsyncTask<Object, Object, String>() {
+    new AsyncTask<Object, Long, String>() {
+      private long startTime;
+      private long currentTime;
+      private Long contentLength;
+
+      @Override
+      protected void onProgressUpdate (Long... arguments) {
+        long now = System.currentTimeMillis() - startTime;
+
+        if (now > currentTime) {
+          currentTime = now;
+          onDownloadProgress(now, arguments[0], contentLength);
+        }
+      }
+
+      private void copy (InputStream input, OutputStream output) throws IOException {
+        long position = 0;
+        publishProgress(position);
+
+        byte[] buffer = new byte[0X1000];
+        int count;
+
+        while ((count = input.read(buffer)) != -1) {
+          output.write(buffer, 0, count);
+          publishProgress((position += count));
+        }
+      }
+
       @Override
       protected void onPreExecute () {
         onDownloadStarted();
@@ -87,9 +108,21 @@ public class FileDownloader {
                 OutputStream output = new FileOutputStream(file);
 
                 try {
+                  if (ApplicationUtilities.haveNougat) {
+                    contentLength = connection.getContentLengthLong();
+                  } else {
+                    contentLength = (long)connection.getContentLength();
+                  }
+
+                  if (contentLength < 0) contentLength = null;
+                  startTime = System.currentTimeMillis();
+                  currentTime = -1;
+
                   copy(input, output);
                   output.flush();
+
                   file = null;
+                  return null;
                 } finally {
                   output.close();
                   output = null;
@@ -110,8 +143,6 @@ public class FileDownloader {
           Log.w(LOG_TAG, String.format("file download failed: %s: %s", sourceURL, message));
           return message;
         }
-
-        return null;
       }
 
       @Override
