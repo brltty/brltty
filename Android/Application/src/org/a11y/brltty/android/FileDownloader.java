@@ -20,9 +20,7 @@ package org.a11y.brltty.android;
 
 import android.util.Log;
 import android.os.AsyncTask;
-
 import android.content.Context;
-import android.app.Activity;
 
 import android.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -41,15 +39,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 
-public class FileDownloader {
+public class FileDownloader extends InternalActivityComponent {
   private final static String LOG_TAG = FileDownloader.class.getName();
 
-  protected final Activity owningActivity;
   protected final String sourceURL;
   protected final File targetFile;
 
-  public FileDownloader (Activity activity, String url, File file) {
-    owningActivity = activity;
+  public FileDownloader (InternalActivity owner, String url, File file) {
+    super(owner);
     sourceURL = url;
     targetFile = file;
   }
@@ -96,8 +93,8 @@ public class FileDownloader {
       }
 
       private AlertDialog makeDialog () {
-        AlertDialog.Builder builder = new AlertDialog.Builder(owningActivity)
-          .setTitle(R.string.file_downloader_title)
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+          .setTitle(R.string.fileDownloader_title)
           .setMessage(sourceURL)
           ;
 
@@ -132,7 +129,7 @@ public class FileDownloader {
         synchronized (PROGRESS_LOCK) {
           if (!progressInitialized) {
             progressView.setVisibility(View.VISIBLE);
-            setState(R.string.file_downloader_state_downloading);
+            setState(R.string.fileDownloader_state_downloading);
 
             if (contentLength == null) {
               progressBar.setIndeterminate(true);
@@ -189,7 +186,7 @@ public class FileDownloader {
       protected void onPreExecute () {
         onDownloadStarted();
         showDialog();
-        setState(R.string.file_downloader_state_connecting);
+        setState(R.string.fileDownloader_state_connecting);
       }
 
       @Override

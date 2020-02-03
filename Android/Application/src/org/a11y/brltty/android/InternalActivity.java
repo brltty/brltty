@@ -34,7 +34,7 @@ public abstract class InternalActivity extends Activity {
     return getResources().getString(identifier);
   }
 
-  protected final void showMessage (String message) {
+  protected final void showMessage (CharSequence message) {
     Toast.makeText(this, message, Toast.LENGTH_LONG).show();
   }
 
