@@ -15,10 +15,12 @@ inputService_not_connected input service not connected
 
 updateApplication_problem_failed application not updated
 
+packageInstaller_problem_failed package not installed
 packageInstaller_problem_same same version
 packageInstaller_problem_downgrade downgrade not allowed
 
 fileDownloader_title BRLTTY File Downloader
+fileDownloader_problem_failed file not downloaded
 fileDownloader_state_connecting connecting
 fileDownloader_state_downloading downloading
 

@@ -75,6 +75,13 @@ public class PackageInstaller extends InternalActivityComponent {
   }
 
   protected void onInstallFailed (String message) {
+    getActivity().showMessage(
+      String.format(
+        "%s: %s",
+        getString(R.string.packageInstaller_problem_failed),
+        message
+      )
+    );
   }
 
   private void onInstallFailed (Exception exception) {

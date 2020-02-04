@@ -18,10 +18,12 @@
 
   <string name="updateApplication_problem_failed">application not updated</string>
 
+  <string name="packageInstaller_problem_failed">package not installed</string>
   <string name="packageInstaller_problem_same">same version</string>
   <string name="packageInstaller_problem_downgrade">downgrade not allowed</string>
 
   <string name="fileDownloader_title">BRLTTY File Downloader</string>
+  <string name="fileDownloader_problem_failed">file not downloaded</string>
   <string name="fileDownloader_state_connecting">connecting</string>
   <string name="fileDownloader_state_downloading">downloading</string>
 

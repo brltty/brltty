@@ -65,6 +65,13 @@ public class FileDownloader extends InternalActivityComponent {
   }
 
   protected void onDownloadFailed (String message) {
+    getActivity().showMessage(
+      String.format(
+        "%s: %s",
+        getString(R.string.fileDownloader_problem_failed),
+        message
+      )
+    );
   }
 
   public final void startDownload () {
