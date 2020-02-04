@@ -55,6 +55,10 @@ public class FileDownloader extends InternalActivityComponent {
   }
 
   protected void onDownloadProgress (long time, long position, Long length) {
+    if (false) {
+      long remaining = (length == null)? -1: (length - position);
+      Log.d("dnld-prog", String.format("t=%d p=%d r=%d", time, position, remaining));
+    }
   }
 
   protected void onDownloadFinished () {

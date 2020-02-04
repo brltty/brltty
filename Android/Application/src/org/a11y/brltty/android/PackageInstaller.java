@@ -131,14 +131,6 @@ public class PackageInstaller extends InternalActivityComponent {
   public final void startInstall () {
     new FileDownloader(getActivity(), sourceURL, targetFile) {
       @Override
-      protected void onDownloadProgress (long time, long position, Long length) {
-        if (true) {
-          long remaining = (length == null)? -1: (length - position);
-          Log.d("dnld-prog", String.format("t=%d p=%d r=%d", time, position, remaining));
-        }
-      }
-
-      @Override
       protected void onDownloadFinished () {
         if (canInstallPackage()) {
           Uri uri;
