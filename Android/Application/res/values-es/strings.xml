@@ -9,12 +9,12 @@
   <string name="application_version_label">Versión</string>
   <string name="application_copyright_label">Derechos de autor</string>
 
-  <string name="input_service_name">BRLTTY Servicio de Entrada</string>
-  <string name="input_service_type">Teclados En Dispositivos de Braille</string>
-  <string name="input_service_not_enabled">servicio de entrada no habilitado</string>
-  <string name="input_service_not_selected">servicio de entrada no seleccionado</string>
-  <string name="input_service_not_started">servicio de entrada no iniciado</string>
-  <string name="input_service_not_connected">servicio de entrada no conectado</string>
+  <string name="inputService_name">BRLTTY Servicio de Entrada</string>
+  <string name="inputService_type">Teclados En Dispositivos de Braille</string>
+  <string name="inputService_not_enabled">servicio de entrada no habilitado</string>
+  <string name="inputService_not_selected">servicio de entrada no seleccionado</string>
+  <string name="inputService_not_started">servicio de entrada no iniciado</string>
+  <string name="inputService_not_connected">servicio de entrada no conectado</string>
 
   <string name="checkbox_state_unchecked">No</string>
   <string name="checkbox_state_checked">Sí</string>

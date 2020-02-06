@@ -9,12 +9,12 @@
   <string name="application_version_label">نسخه</string>
   <string name="application_copyright_label">حق انتشار</string>
 
-  <string name="input_service_name">BRLTTY خدمات ورودی</string>
-  <string name="input_service_type">صفحه کلیدهای دستگاه بریل</string>
-  <string name="input_service_not_enabled">خدمات ورودی فعال نشده است</string>
-  <string name="input_service_not_selected">خدمات ورودی انتخاب نشده است</string>
-  <string name="input_service_not_started">خدمات ورودی اجرا نشده است</string>
-  <string name="input_service_not_connected">خدمات ورودی وصل نیست</string>
+  <string name="inputService_name">BRLTTY خدمات ورودی</string>
+  <string name="inputService_type">صفحه کلیدهای دستگاه بریل</string>
+  <string name="inputService_not_enabled">خدمات ورودی فعال نشده است</string>
+  <string name="inputService_not_selected">خدمات ورودی انتخاب نشده است</string>
+  <string name="inputService_not_started">خدمات ورودی اجرا نشده است</string>
+  <string name="inputService_not_connected">خدمات ورودی وصل نیست</string>
 
   <string name="checkbox_state_unchecked">خیر</string>
   <string name="checkbox_state_checked">بله</string>

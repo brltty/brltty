@@ -9,12 +9,12 @@
   <string name="application_version_label">Različica</string>
   <string name="application_copyright_label">Avtorske Pravice</string>
 
-  <string name="input_service_name">BRLTTY Storitev Vnosa</string>
-  <string name="input_service_type">Tipkovnice na Brajevih Vrsticah</string>
-  <string name="input_service_not_enabled">storitev vnosa ni omogočena</string>
-  <string name="input_service_not_selected">storitev vnosa ni izbrana</string>
-  <string name="input_service_not_started">storitev vnosa ni zagnana</string>
-  <string name="input_service_not_connected">storitev vnosa ni priključena</string>
+  <string name="inputService_name">BRLTTY Storitev Vnosa</string>
+  <string name="inputService_type">Tipkovnice na Brajevih Vrsticah</string>
+  <string name="inputService_not_enabled">storitev vnosa ni omogočena</string>
+  <string name="inputService_not_selected">storitev vnosa ni izbrana</string>
+  <string name="inputService_not_started">storitev vnosa ni zagnana</string>
+  <string name="inputService_not_connected">storitev vnosa ni priključena</string>
 
   <string name="checkbox_state_unchecked">Ne</string>
   <string name="checkbox_state_checked">Da</string>

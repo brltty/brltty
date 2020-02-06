@@ -9,12 +9,12 @@
   <string name="application_version_label">Version</string>
   <string name="application_copyright_label">Copyright</string>
 
-  <string name="input_service_name">BRLTTY Input Service</string>
-  <string name="input_service_type">Tastaturer på Braille enheder</string>
-  <string name="input_service_not_enabled">input service ikke tilgængelig</string>
-  <string name="input_service_not_selected">input service ikke valgt</string>
-  <string name="input_service_not_started">input service ikke startet</string>
-  <string name="input_service_not_connected">input service ikke forbundet</string>
+  <string name="inputService_name">BRLTTY Input Service</string>
+  <string name="inputService_type">Tastaturer på Braille enheder</string>
+  <string name="inputService_not_enabled">input service ikke tilgængelig</string>
+  <string name="inputService_not_selected">input service ikke valgt</string>
+  <string name="inputService_not_started">input service ikke startet</string>
+  <string name="inputService_not_connected">input service ikke forbundet</string>
 
   <string name="checkbox_state_unchecked">Nej</string>
   <string name="checkbox_state_checked">Ja</string>

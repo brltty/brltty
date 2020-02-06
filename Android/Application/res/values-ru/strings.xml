@@ -9,12 +9,12 @@
   <string name="application_version_label">Версия</string>
   <string name="application_copyright_label">Авторские права</string>
 
-  <string name="input_service_name">Служба ввода BRLTTY</string>
-  <string name="input_service_type">Клавиатуры на брайлевских устройствах</string>
-  <string name="input_service_not_enabled">служба ввода не включена</string>
-  <string name="input_service_not_selected">служба ввода не выбрана</string>
-  <string name="input_service_not_started">служба ввода не запущена</string>
-  <string name="input_service_not_connected">служба ввода не подключена</string>
+  <string name="inputService_name">Служба ввода BRLTTY</string>
+  <string name="inputService_type">Клавиатуры на брайлевских устройствах</string>
+  <string name="inputService_not_enabled">служба ввода не включена</string>
+  <string name="inputService_not_selected">служба ввода не выбрана</string>
+  <string name="inputService_not_started">служба ввода не запущена</string>
+  <string name="inputService_not_connected">служба ввода не подключена</string>
 
   <string name="checkbox_state_unchecked">Нет</string>
   <string name="checkbox_state_checked">Да</string>

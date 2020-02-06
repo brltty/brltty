@@ -9,12 +9,12 @@
   <string name="application_version_label">版本</string>
   <string name="application_copyright_label">版權</string>
 
-  <string name="input_service_name">BRLTTY 點字鍵盤輸入</string>
-  <string name="input_service_type">點顯器上的鍵盤</string>
-  <string name="input_service_not_enabled">輸入服務尚未啟用</string>
-  <string name="input_service_not_selected">輸入服務尚未選用</string>
-  <string name="input_service_not_started">輸入服務尚未開始</string>
-  <string name="input_service_not_connected">輸入服務尚未連線</string>
+  <string name="inputService_name">BRLTTY 點字鍵盤輸入</string>
+  <string name="inputService_type">點顯器上的鍵盤</string>
+  <string name="inputService_not_enabled">輸入服務尚未啟用</string>
+  <string name="inputService_not_selected">輸入服務尚未選用</string>
+  <string name="inputService_not_started">輸入服務尚未開始</string>
+  <string name="inputService_not_connected">輸入服務尚未連線</string>
 
   <string name="checkbox_state_unchecked">否</string>
   <string name="checkbox_state_checked">市</string>
