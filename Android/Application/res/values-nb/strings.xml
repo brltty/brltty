@@ -9,12 +9,23 @@
   <string name="application_version_label">Versjon</string>
   <string name="application_copyright_label">Opphavsrett</string>
 
-  <string name="input_service_name">Inndatatjeneste for BRLTTY</string>
-  <string name="input_service_type">Tastatur på punktskriftenheter</string>
-  <string name="input_service_not_enabled">inndatatjenesten er ikke aktivert</string>
-  <string name="input_service_not_selected">inndatatjenesten er ikke valgt</string>
-  <string name="input_service_not_started">inndatatjenesten er ikke startet</string>
-  <string name="input_service_not_connected">inndatatjenesten er ikke tilkoblet</string>
+  <string name="inputService_name">Inndatatjeneste for BRLTTY</string>
+  <string name="inputService_type">Tastatur på punktskriftenheter</string>
+  <string name="inputService_not_enabled">inndatatjenesten er ikke aktivert</string>
+  <string name="inputService_not_selected">inndatatjenesten er ikke valgt</string>
+  <string name="inputService_not_started">inndatatjenesten er ikke startet</string>
+  <string name="inputService_not_connected">inndatatjenesten er ikke tilkoblet</string>
+
+  <string name="updateApplication_problem_failed">programmet er ikke oppdatert</string>
+
+  <string name="packageInstaller_problem_failed">pakken er ikke installert</string>
+  <string name="packageInstaller_problem_same">samme versjon</string>
+  <string name="packageInstaller_problem_downgrade">nedgradering er ikke tillatt</string>
+
+  <string name="fileDownloader_title">BRLTTY filnedlaster</string>
+  <string name="fileDownloader_problem_failed">fila er ikke lastet ned</string>
+  <string name="fileDownloader_state_connecting">kobler til</string>
+  <string name="fileDownloader_state_downloading">laster ned</string>
 
   <string name="checkbox_state_unchecked">nei</string>
   <string name="checkbox_state_checked">ja</string>
