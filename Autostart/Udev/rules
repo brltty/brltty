@@ -299,6 +299,10 @@ ENV{PRODUCT}=="1148/301/*", ENV{BRLTTY_BRAILLE_DRIVER}="mm", GOTO="brltty_usb_ru
 # Inceptor [all models]
 ENV{PRODUCT}=="1209/abc0/*", ENV{BRLTTY_BRAILLE_DRIVER}="ic", GOTO="brltty_usb_run"
 
+# Device: 16C0:05E1
+# Canute [all models]
+ENV{PRODUCT}=="16c0/5e1/*", ENV{BRLTTY_BRAILLE_DRIVER}="cn", GOTO="brltty_usb_run"
+
 # Device: 1C71:C004
 # BrailleNote [HumanWare APEX]
 ENV{PRODUCT}=="1c71/c004/*", ENV{BRLTTY_BRAILLE_DRIVER}="bn", GOTO="brltty_usb_run"

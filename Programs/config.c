@@ -1601,7 +1601,7 @@ activateBrailleDriver (int verify) {
 
           case GIO_TYPE_USB: {
             static const char *const usbDrivers[] = {
-              "al", "bm", "bn", "eu", "fs", "hd", "hm", "ht", "hw", "ic", "mt", "pg", "pm", "sk", "vo",
+              "al", "bm", "bn", "cn", "eu", "fs", "hd", "hm", "ht", "hw", "ic", "mt", "pg", "pm", "sk", "vo",
               NULL
             };
 

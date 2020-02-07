@@ -312,6 +312,10 @@
     <!-- Inceptor [all models] -->
     <modalias>usb:v1209pABC0*</modalias>
 
+    <!-- Device: 16C0:05E1 -->
+    <!-- Canute [all models] -->
+    <modalias>usb:v16C0p05E1*</modalias>
+
     <!-- Device: 1C71:C004 -->
     <!-- BrailleNote [HumanWare APEX] -->
     <modalias>usb:v1C71pC004*</modalias>

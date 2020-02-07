@@ -301,6 +301,10 @@ USB_DEVICE_ENTRY(0X1148, 0X0301, "mm"),
 // Inceptor [all models]
 USB_DEVICE_ENTRY(0X1209, 0XABC0, "ic"),
 
+// Device: 16C0:05E1
+// Canute [all models]
+USB_DEVICE_ENTRY(0X16C0, 0X05E1, "cn"),
+
 // Device: 1C71:C004
 // BrailleNote [HumanWare APEX]
 USB_DEVICE_ENTRY(0X1C71, 0XC004, "bn"),

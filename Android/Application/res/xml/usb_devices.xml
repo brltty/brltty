@@ -277,6 +277,10 @@
   <!-- Inceptor [all models] -->
   <usb-device vendor-id="4617" product-id="43968" />
 
+  <!-- Device: 16C0:05E1 -->
+  <!-- Canute [all models] -->
+  <usb-device vendor-id="5824" product-id="1505" />
+
   <!-- Device: 1C71:C004 -->
   <!-- BrailleNote [HumanWare APEX] -->
   <usb-device vendor-id="7281" product-id="49156" />
