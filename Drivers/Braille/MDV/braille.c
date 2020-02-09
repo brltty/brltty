@@ -295,7 +295,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
-writeIdentityRequest (BrailleDisplay *brl) {
+writeIdentifyRequest (BrailleDisplay *brl) {
   return writePacket(brl, MD_CODE_IDENTIFY, NULL, 0);
 }
 
@@ -312,7 +312,7 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
 static int
 probeDevice (BrailleDisplay *brl, MD_Packet *response) {
   return probeBrailleDisplay(
-    brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT, writeIdentityRequest,
+    brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT, writeIdentifyRequest,
     readBytes, response, sizeof(*response), isIdentityResponse
   );
 }

@@ -284,7 +284,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
-writeIdentityRequest (BrailleDisplay *brl) {
+writeIdentifyRequest (BrailleDisplay *brl) {
   static const unsigned char bytes[] = {CE_REQ_Identify};
   return writeBytes(brl, bytes, sizeof(bytes));
 }
@@ -305,7 +305,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       unsigned char response[MAXIMUM_RESPONSE_SIZE];
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-                              writeIdentityRequest,
+                              writeIdentifyRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
         if (setModel(brl, response[1])) {

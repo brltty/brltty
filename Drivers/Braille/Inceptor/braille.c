@@ -450,7 +450,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
-writeIdentityRequest (BrailleDisplay *brl) {
+writeIdentifyRequest (BrailleDisplay *brl) {
   static const unsigned char data1[20] = {0};
   return writePacket(brl, 0XFB, 0X01, data1, sizeof(data1), NULL, 0);
 }
@@ -475,7 +475,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       InputPacket response;
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-                              writeIdentityRequest,
+                              writeIdentifyRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
         setBrailleKeyTable(brl, brl->data->io->keyTableDefinition);

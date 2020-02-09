@@ -308,7 +308,7 @@ writeCells (BrailleDisplay *brl, int wait) {
 }
 
 static int
-writeIdentityRequest (BrailleDisplay *brl) {
+writeIdentifyRequest (BrailleDisplay *brl) {
   memset(brl->data->textCells, 0, sizeof(brl->data->textCells));
   memset(brl->data->statusCells, 0, sizeof(brl->data->statusCells));
   return writeCells(brl, 0);
@@ -334,7 +334,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       makeOutputTable(dotsTable_ISO11548_1);
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-                              writeIdentityRequest,
+                              writeIdentifyRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
         setBrailleKeyTable(brl, brl->data->model->keyTableDefinition);

@@ -800,7 +800,7 @@ setModel (BrailleDisplay *brl, const char *modelName, const char *firmware) {
 }
 
 static int
-writeIdentityRequest (BrailleDisplay *brl) {
+writeIdentifyRequest (BrailleDisplay *brl) {
   brl->data->queryAcknowledged = 0;
   brl->data->model = NULL;
   return writePacket(brl, FS_PKT_QUERY, 0, 0, 0, NULL);
@@ -847,7 +847,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       FS_Packet response;
 
       if (probeBrailleDisplay(brl, 2, NULL, 100,
-                              writeIdentityRequest,
+                              writeIdentifyRequest,
                               readResponse, &response, sizeof(response),
                               isIdentityResponse)) {
         logMessage(LOG_DEBUG, "Manufacturer: %s", response.payload.info.manufacturer);

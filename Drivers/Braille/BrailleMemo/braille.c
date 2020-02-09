@@ -346,7 +346,7 @@ detectModel (BrailleDisplay *brl, const MM_IdentityPacket *identity) {
 }
 
 static int
-writeIdentityRequest (BrailleDisplay *brl) {
+writeIdentifyRequest (BrailleDisplay *brl) {
   return writePacket(brl, MM_CMD_QueryIdentity, 0, NULL, 0);
 }
 
@@ -412,7 +412,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       MM_IdentityPacket identity;
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-                              writeIdentityRequest,
+                              writeIdentifyRequest,
                               readIdentityResponse, &identity, sizeof(identity),
                               isIdentityResponse)) {
         detectModel(brl, &identity);
