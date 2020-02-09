@@ -106,8 +106,13 @@ struct BrailleDisplayStruct {
 };
 
 static inline int
-have8DotCells (const BrailleDisplay *brl) {
+hasEightDotCells (const BrailleDisplay *brl) {
   return brl->cellSize >= 8;
+}
+
+static inline int
+isMultiRow (const BrailleDisplay *brl) {
+  return brl->textRows > 1;
 }
 
 typedef struct {
