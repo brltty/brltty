@@ -26,9 +26,9 @@ typedef enum {
   CN_CMD_SEND_ROW         = 0X06,
   CN_CMD_RESET_CELLS      = 0X07,
   CN_CMD_LOWER_ROWS       = 0X09,
-  CN_CMD_POLL_KEYS        = 0X0A,
+  CN_CMD_KEYS_STATE       = 0X0A,
   CN_CMD_SOURCE_VERSION   = 0X0B,
-  CN_CMD_POLL_STATE       = 0X0D,
+  CN_CMD_DEVICE_STATE     = 0X0D,
   CN_CMD_SET_ROW          = 0X0E,
 } CN_Command;
 
@@ -47,6 +47,10 @@ typedef enum {
   CN_KEY_Back    = 11,
   CN_KEY_Menu    = 12,
   CN_KEY_Forward = 13,
-} CN_Keys;
+} CN_NavigationKey;
+
+typedef enum {
+  CN_GRP_NavigationKeys = 0,
+} CN_KeyGroup;
 
 #endif /* BRLTTY_INCLUDED_CN_BRLDEFS */ 

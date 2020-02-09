@@ -351,7 +351,17 @@ pref_tables.$O:
 
 ###############################################################################
 
-BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS)
+CRC_OBJECTS = crc_generator.$O crc_utils.$O
+
+crc_generator.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_generator.c
+
+crc_utils.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_utils.c
+
+###############################################################################
+
+BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(CRC_OBJECTS)
 
 brl.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl.c
