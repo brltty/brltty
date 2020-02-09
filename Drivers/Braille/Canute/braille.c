@@ -126,10 +126,15 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
 }
 
 static BrailleResponseResult
-writeNextIdentifyRequest (BrailleDisplay *brl, unsigned char command, IdentityResponseHandler *handler) {
-  if (!writeCommand(brl, command)) return BRL_RSP_FAIL;
+writeIdentifyCommand (BrailleDisplay *brl, unsigned char command, IdentityResponseHandler *handler) {
+  if (!writeCommand(brl, command)) return 0;
   brl->data->handleIdentityResponse = handler;
-  return BRL_RSP_CONTINUE;
+  return 1;
+}
+
+static BrailleResponseResult
+writeNextIdentifyCommand (BrailleDisplay *brl, unsigned char command, IdentityResponseHandler *handler) {
+  return writeIdentifyCommand(brl, command, handler)? BRL_RSP_CONTINUE: BRL_RSP_FAIL;
 }
 
 static BrailleResponseResult
@@ -143,14 +148,12 @@ static BrailleResponseResult
 handleColumnCount (BrailleDisplay *brl, const unsigned char *response, size_t size) {
   if (response[0] != CN_CMD_COLUMN_COUNT) return BRL_RSP_UNEXPECTED;
   brl->textColumns = response[1];
-  return writeNextIdentifyRequest(brl, CN_CMD_ROW_COUNT, handleRowCount);
+  return writeNextIdentifyCommand(brl, CN_CMD_ROW_COUNT, handleRowCount);
 }
 
 static int
 writeIdentifyRequest (BrailleDisplay *brl) {
-  if (!writeCommand(brl, CN_CMD_COLUMN_COUNT)) return 0;
-  brl->data->handleIdentityResponse = handleColumnCount;
-  return 1;
+  return writeIdentifyCommand(brl, CN_CMD_COLUMN_COUNT, handleColumnCount);
 }
 
 static void

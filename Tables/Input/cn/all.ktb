@@ -16,7 +16,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Seika Braille Displays
+title Canute
+
+note The keys on the front, from left to right, are: Back, Menu, Forward.
+note The triangular keys to the left of each row of cells are selection keys.
+note + From top to bottom, they're named Line1 through Line9.
+note + The round key above them (labelled H) is named Help.
+note + The square key below them (labelled 0) is named Refresh.
 
 bind Help HELP
 bind Menu PREFMENU
