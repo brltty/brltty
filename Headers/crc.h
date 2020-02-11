@@ -25,91 +25,60 @@ extern "C" {
 
 typedef uint32_t crc_t;
 #define CRC_C UINT32_C
+
 typedef struct CRCGeneratorStruct CRCGenerator;
 
-extern CRCGenerator *crcNewGenerator (
-  unsigned int width, crc_t polynomial, crc_t initial, crc_t xor
-);
-
-extern void crcResetGenerator (CRCGenerator *crc);
-extern void crcDestroyGenerator (CRCGenerator *crc);
-
-extern crc_t crcGetChecksum (const CRCGenerator *crc);
-extern void crcAddByte (CRCGenerator *crc, uint8_t byte);
-extern void crcAddData (CRCGenerator *crc, const void *data, size_t size);
-
 typedef struct {
+  const char *algorithmName;
   unsigned int checksumWidth;
-  crc_t polynomialDivisor;
-  crc_t initialRemainder;
-  crc_t finalXorMask;
-} CRCParameters;
+  crc_t generatorPolynomial;
+  crc_t initialValue;
+  crc_t xorMask;
+  crc_t checkValue;
+  crc_t residue;
+  unsigned reflectInput:1;
+  unsigned reflectResult:1;
+} CRCAlgorithmParameters;
+
+extern const CRCAlgorithmParameters *crcProvidedAlgorithms[];
+extern const CRCAlgorithmParameters crcAlgorithmParameters_CCITT_FALSE;
+extern const CRCAlgorithmParameters crcAlgorithmParameters_HDLC;
+extern const CRCAlgorithmParameters crcAlgorithmParameters_UMTS;
+extern const CRCAlgorithmParameters crcAlgorithmParameters_GSM;
 
 typedef struct {
   unsigned int byteWidth;
   unsigned int byteShift;
   crc_t mostSignificantBit;
-  crc_t remainderMask;
+  crc_t valueMask;
   crc_t remainderCache[UINT8_MAX + 1];
-} CRCProperties;
+} CRCGeneratorProperties;
 
-extern const CRCParameters *crcGetParameters (const CRCGenerator *crc);
-extern const CRCProperties *crcGetProperties (const CRCGenerator *crc);
-extern crc_t crcGetRemainder (const CRCGenerator *crc);
+extern CRCGenerator *crcNewGenerator (const CRCAlgorithmParameters *parameters);
+extern void crcResetGenerator (CRCGenerator *crc);
+extern void crcDestroyGenerator (CRCGenerator *crc);
 
-#define CRC_CCITT_ALGORITHM_NAME "CRC-CCITT"
-#define CRC_CCITT_CHECKSUM_WIDTH 16
-#define CRC_CCITT_POLYNOMIAL_DIVISOR UINT16_C(0X1021)
-#define CRC_CCITT_INITIAL_REMAINDER UINT16_MAX
-#define CRC_CCITT_FINAL_XOR 0
+extern void crcAddByte (CRCGenerator *crc, uint8_t byte);
+extern void crcAddData (CRCGenerator *crc, const void *data, size_t size);
 
-static inline CRCGenerator *
-crcNewGenerator_CCITT (void) {
-  return crcNewGenerator(
-    CRC_CCITT_CHECKSUM_WIDTH,
-    CRC_CCITT_POLYNOMIAL_DIVISOR,
-    CRC_CCITT_INITIAL_REMAINDER,
-    CRC_CCITT_FINAL_XOR
-  );
-}
+extern crc_t crcGetChecksum (const CRCGenerator *crc);
+extern crc_t crcGetResidue (CRCGenerator *crc);
 
-#define CRC_CRC16_ALGORITHM_NAME "CRC-16"
-#define CRC_CRC16_CHECKSUM_WIDTH 16
-#define CRC_CRC16_POLYNOMIAL_DIVISOR UINT16_C(0X8005)
-#define CRC_CRC16_INITIAL_REMAINDER 0
-#define CRC_CRC16_FINAL_XOR 0
+extern const CRCAlgorithmParameters *crcGetAlgorithmParameters (const CRCGenerator *crc);
+extern const CRCGeneratorProperties *crcGetGeneratorProperties (const CRCGenerator *crc);
+extern crc_t crcGetValue (const CRCGenerator *crc);
 
-static inline CRCGenerator *
-crcNewGenerator_CRC16 (void) {
-  return crcNewGenerator(
-    CRC_CRC16_CHECKSUM_WIDTH,
-    CRC_CRC16_POLYNOMIAL_DIVISOR,
-    CRC_CRC16_INITIAL_REMAINDER,
-    CRC_CRC16_FINAL_XOR
-  );
-}
+extern const uint8_t crcCheckData[];
+extern const uint8_t crcCheckSize;
 
-#define CRC_CRC32_ALGORITHM_NAME "CRC-32"
-#define CRC_CRC32_CHECKSUM_WIDTH 32
-#define CRC_CRC32_POLYNOMIAL_DIVISOR UINT32_C(0X04C11DB7)
-#define CRC_CRC32_INITIAL_REMAINDER UINT32_MAX
-#define CRC_CRC32_FINAL_XOR UINT32_MAX
-
-static inline CRCGenerator *
-crcNewGenerator_CRC32 (void) {
-  return crcNewGenerator(
-    CRC_CRC32_CHECKSUM_WIDTH,
-    CRC_CRC32_POLYNOMIAL_DIVISOR,
-    CRC_CRC32_INITIAL_REMAINDER,
-    CRC_CRC32_FINAL_XOR
-  );
-}
-
-extern void crcLogParameters (const CRCGenerator *crc, const char *label);
-extern void crcLogProperties (const CRCGenerator *crc, const char *label);
+extern void crcLogAlgorithmParameters (const CRCAlgorithmParameters *parameters);
+extern void crcLogGeneratorProperties (const CRCGenerator *crc);
 
 extern int crcVerifyChecksum (CRCGenerator *crc, const char *label, crc_t expected);
-extern void crcVerifyProvidedGenerators (void);
+extern int crcVerifyResidue (CRCGenerator *crc, const char *label);
+
+extern int crcVerifyAlgorithm (const CRCAlgorithmParameters *parameters);
+extern int crcVerifyProvidedAlgorithms (void);
 
 extern int crcVerifyGeneratorWithData (
   CRCGenerator *crc, const char *label,
@@ -119,12 +88,6 @@ extern int crcVerifyGeneratorWithData (
 extern int crcVerifyGeneratorWithString (
   CRCGenerator *crc, const char *label,
   const char *string, crc_t expected
-);
-
-extern int crcVerifyAlgorithm (
-  const char *label, const void *data, size_t size,
-  unsigned int width, crc_t polynomial, crc_t initial, crc_t xor,
-  crc_t expected
 );
 
 #ifdef __cplusplus

@@ -26,9 +26,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 struct CRCGeneratorStruct {
-  CRCParameters parameters;
-  CRCProperties properties;
-  crc_t currentRemainder;
+  CRCAlgorithmParameters parameters;
+  CRCGeneratorProperties properties;
+  crc_t currentValue;
 };
 
 #ifdef __cplusplus

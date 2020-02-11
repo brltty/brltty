@@ -338,7 +338,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     brl->data->output.rowEntries = NULL;
 
-    if ((brl->data->crcGenerator = crcNewGenerator_CRC16())) {
+    if ((brl->data->crcGenerator = crcNewGenerator(&crcAlgorithmParameters_HDLC))) {
       if (connectResource(brl, device)) {
         unsigned char response[MAXIMUM_RESPONSE_SIZE];
 

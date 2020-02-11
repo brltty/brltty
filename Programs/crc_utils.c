@@ -23,22 +23,31 @@
 #include "log.h"
 #include "crc_internal.h"
 
+const uint8_t crcCheckData[] = {
+  0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39
+}; const uint8_t crcCheckSize = sizeof(crcCheckData);
+
 void
-crcLogParameters (const CRCGenerator *crc, const char *label) {
-  logMessage(LOG_INFO,
-    "CRC parameters: %s: Width:%u Polynomial:%X Initial:%X Xor:%X", label,
-    crc->parameters.checksumWidth, crc->parameters.polynomialDivisor,
-    crc->parameters.initialRemainder, crc->parameters.finalXorMask
+crcLogAlgorithmParameters (const CRCAlgorithmParameters *parameters) {
+  logMessage(LOG_DEBUG,
+    "CRC Parameters: %s: Width:%u Poly:%X Init:%X Xor:%X RefIn:%u RefOut:%u Chk:%X Res:%X",
+    parameters->algorithmName,
+    parameters->checksumWidth, parameters->generatorPolynomial,
+    parameters->initialValue, parameters->xorMask,
+    parameters->reflectInput, parameters->reflectResult,
+    parameters->checkValue, parameters->residue
   );
 }
 
 void
-crcLogProperties (const CRCGenerator *crc, const char *label) {
-  logMessage(LOG_INFO,
-    "CRC properteis: %s: Shift:%u MSB:%X Mask:%X", label,
-    crc->properties.byteShift,
-    crc->properties.mostSignificantBit,
-    crc->properties.remainderMask
+crcLogGeneratorProperties (const CRCGenerator *crc) {
+  const CRCGeneratorProperties *properties = crcGetGeneratorProperties(crc);
+
+  logMessage(LOG_DEBUG,
+    "CRC Properteis: %s: Byte:%u Shift:%u MSB:%X Mask:%X",
+    crc->parameters.algorithmName,
+    properties->byteWidth, properties->byteShift,
+    properties->mostSignificantBit, properties->valueMask
   );
 }
 
@@ -58,51 +67,65 @@ crcVerifyChecksum (CRCGenerator *crc, const char *label, crc_t expected) {
 }
 
 int
-crcVerifyGeneratorWithData (CRCGenerator *crc, const char *label, const void *data, size_t size, crc_t expected) {
-  crcResetGenerator(crc);
-  crcAddData(crc, data, size);
-  return crcVerifyChecksum(crc, label, expected);
+crcVerifyResidue (CRCGenerator *crc, const char *label) {
+  crc_t actual = crcGetResidue(crc);
+  crc_t expected = crc->parameters.residue;
+  int ok = actual == expected;
+
+  if (!ok) {
+    logMessage(LOG_WARNING,
+      "CRC: residue mismatch: %s: Actual:%X Expected:%X",
+      label, actual, expected
+    );
+  }
+
+  return ok;
 }
 
 int
-crcVerifyGeneratorWithString (CRCGenerator *crc, const char *label, const char *string, crc_t expected) {
+crcVerifyGeneratorWithData (
+  CRCGenerator *crc, const char *label,
+  const void *data, size_t size, crc_t expected
+) {
+  crcResetGenerator(crc);
+  crcAddData(crc, data, size);
+
+  if (!label) label = crc->parameters.algorithmName;
+  int okChecksum = crcVerifyChecksum(crc, label, expected);
+  int okResidue = crcVerifyResidue(crc, label);
+
+  return okChecksum && okResidue;
+}
+
+int
+crcVerifyGeneratorWithString (
+  CRCGenerator *crc, const char *label,
+  const char *string, crc_t expected
+) {
   return crcVerifyGeneratorWithData(crc, label, string, strlen(string), expected);
 }
 
-static int
-crcVerifyAndDestroyGenerator (CRCGenerator *crc, const char *label, const void *data, size_t size, crc_t expected) {
-  int ok = crcVerifyGeneratorWithData(crc, label, data, size, expected);
+int
+crcVerifyAlgorithm (const CRCAlgorithmParameters *parameters) {
+  CRCGenerator *crc = crcNewGenerator(parameters);
+
+  int ok = crcVerifyGeneratorWithData(
+    crc, NULL, crcCheckData, crcCheckSize, parameters->checkValue
+  );
+
   crcDestroyGenerator(crc);
   return ok;
 }
 
-void
-crcVerifyProvidedGenerators (void) {
-  static const char data[] = {'1', '2', '3', '4', '5', '6', '7', '8', '9'};
-  static const size_t size = sizeof(data);
-
-  crcVerifyAndDestroyGenerator(
-    crcNewGenerator_CCITT(), CRC_CCITT_ALGORITHM_NAME,
-    data, size, UINT16_C(0X29B1)
-  );
-
-  crcVerifyAndDestroyGenerator(
-    crcNewGenerator_CRC16(), CRC_CRC16_ALGORITHM_NAME,
-    data, size, UINT16_C(0XFEE8)
-  );
-
-  crcVerifyAndDestroyGenerator(
-    crcNewGenerator_CRC32(), CRC_CRC32_ALGORITHM_NAME,
-    data, size, UINT32_C(0XFC891918)
-  );
-}
-
 int
-crcVerifyAlgorithm (
-  const char *label, const void *data, size_t size,
-  unsigned int width, crc_t polynomial, crc_t initial, crc_t xor,
-  crc_t expected
-) {
-  CRCGenerator *crc = crcNewGenerator(width, polynomial, initial, xor);
-  return crcVerifyAndDestroyGenerator(crc, label, data, size, expected);
+crcVerifyProvidedAlgorithms (void) {
+  int ok = 1;
+  const CRCAlgorithmParameters **parameters = crcProvidedAlgorithms;
+
+  while (*parameters) {
+    if (!crcVerifyAlgorithm(*parameters)) ok = 0;
+    parameters += 1;
+  }
+
+  return ok;
 }

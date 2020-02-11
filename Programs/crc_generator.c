@@ -23,6 +23,26 @@
 #include "log.h"
 #include "crc_internal.h"
 
+static inline crc_t
+crcMostSignificantBit (unsigned int width) {
+  return CRC_C(1) << (width - 1);
+}
+
+static crc_t
+crcReflectBits (crc_t from, unsigned int width) {
+  crc_t fromBit = crcMostSignificantBit(width);
+  crc_t toBit = 1;
+  crc_t to = 0;
+
+  while (fromBit) {
+    if (from & fromBit) to |= toBit;
+    fromBit >>= 1;
+    toBit <<= 1;
+  }
+
+  return to;
+}
+
 static void
 crcCacheRemainders (CRCGenerator *crc) {
   // Compute the remainder for each possible dividend.
@@ -35,23 +55,29 @@ crcCacheRemainders (CRCGenerator *crc) {
       // Try to divide the current data bit.
       if (remainder & crc->properties.mostSignificantBit) {
         remainder <<= 1;
-        remainder ^= crc->parameters.polynomialDivisor;
+        remainder ^= crc->parameters.generatorPolynomial;
       } else {
         remainder <<= 1;
       }
     }
 
     // Store the result into the table.
-    crc->properties.remainderCache[dividend] = remainder & crc->properties.remainderMask;
+    uint8_t byte = dividend;
+
+    if (crc->parameters.reflectInput) {
+      byte = crcReflectBits(byte, crc->properties.byteWidth);
+    }
+
+    crc->properties.remainderCache[byte] = remainder & crc->properties.valueMask;
   }
 }
 
 void
 crcAddByte (CRCGenerator *crc, uint8_t byte) {
   // Divide the byte by the polynomial.
-  byte ^= crc->currentRemainder >> crc->properties.byteShift;
-  crc->currentRemainder = crc->properties.remainderCache[byte] ^ (crc->currentRemainder << crc->properties.byteWidth);
-  crc->currentRemainder &= crc->properties.remainderMask;
+  byte ^= crc->currentValue >> crc->properties.byteShift;
+  crc->currentValue = crc->properties.remainderCache[byte] ^ (crc->currentValue << crc->properties.byteWidth);
+  crc->currentValue &= crc->properties.valueMask;
 }
 
 void
@@ -62,31 +88,60 @@ crcAddData (CRCGenerator *crc, const void *data, size_t size) {
 }
 
 crc_t
+crcGetValue (const CRCGenerator *crc) {
+  return crc->currentValue;
+}
+
+crc_t
 crcGetChecksum (const CRCGenerator *crc) {
-  return crc->currentRemainder ^ crc->parameters.finalXorMask;
+  crc_t checksum = crc->currentValue;
+
+  if (crc->parameters.reflectResult) {
+    checksum = crcReflectBits(checksum, crc->parameters.checksumWidth);
+  }
+
+  checksum ^= crc->parameters.xorMask;
+  return checksum;
+}
+
+crc_t
+crcGetResidue (CRCGenerator *crc) {
+  crc_t originalValue = crc->currentValue;
+  crc_t checksum = crcGetChecksum(crc);
+
+  unsigned int size = crc->parameters.checksumWidth / crc->properties.byteWidth;
+  uint8_t data[size];
+  uint8_t *byte = data + size;
+
+  while (byte-- > data) {
+    *byte = checksum;
+    checksum >>= crc->properties.byteWidth;
+  }
+
+  crcAddData(crc, data, size);
+  crc_t residue = crc->currentValue;
+
+  crc->currentValue = originalValue;
+  return residue;
 }
 
 void
 crcResetGenerator (CRCGenerator *crc) {
-  crc->currentRemainder = crc->parameters.initialRemainder;
+  crc->currentValue = crc->parameters.initialValue;
 }
 
 CRCGenerator *
-crcNewGenerator (unsigned int width, crc_t polynomial, crc_t initial, crc_t xor) {
+crcNewGenerator (const CRCAlgorithmParameters *parameters) {
   CRCGenerator *crc;
 
   if ((crc = malloc(sizeof(*crc)))) {
     memset(crc, 0, sizeof(*crc));
-
-    crc->parameters.checksumWidth = width;
-    crc->parameters.polynomialDivisor = polynomial;
-    crc->parameters.initialRemainder = initial;
-    crc->parameters.finalXorMask = xor;
+    crc->parameters = *parameters;
 
     crc->properties.byteWidth = 8;
     crc->properties.byteShift = crc->parameters.checksumWidth - crc->properties.byteWidth;
-    crc->properties.mostSignificantBit = CRC_C(1) << (crc->parameters.checksumWidth - 1);
-    crc->properties.remainderMask = (crc->properties.mostSignificantBit - 1) | crc->properties.mostSignificantBit;
+    crc->properties.mostSignificantBit = crcMostSignificantBit(crc->parameters.checksumWidth);
+    crc->properties.valueMask = (crc->properties.mostSignificantBit - 1) | crc->properties.mostSignificantBit;
     crcCacheRemainders(crc);
 
     crcResetGenerator(crc);
@@ -103,17 +158,12 @@ crcDestroyGenerator (CRCGenerator *crc) {
   free(crc);
 }
 
-const CRCParameters *
-crcGetParameters (const CRCGenerator *crc) {
+const CRCAlgorithmParameters *
+crcGetAlgorithmParameters (const CRCGenerator *crc) {
   return &crc->parameters;
 }
 
-const CRCProperties *
-crcGetProperties (const CRCGenerator *crc) {
+const CRCGeneratorProperties *
+crcGetGeneratorProperties (const CRCGenerator *crc) {
   return &crc->properties;
-}
-
-crc_t
-crcGetRemainder (const CRCGenerator *crc) {
-  return crc->currentRemainder;
 }
