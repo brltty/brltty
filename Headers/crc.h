@@ -60,8 +60,10 @@ extern const CRCAlgorithmParameters *crcGetAlgorithm (const char *name);
 typedef struct {
   unsigned int byteWidth; // the width of a byte (in bits)
   unsigned int byteShift; // the bit offset of the high-order byte of the value
+
   crc_t mostSignificantBit; // the most significant bit of the value
   crc_t valueMask; // the mask for removing overflow bits in the value
+
   crc_t remainderCache[UINT8_MAX + 1]; // for preevaluating a common
                                        // calculation for each input byte
 } CRCGeneratorProperties;
@@ -86,6 +88,8 @@ crcMostSignificantBit (unsigned int width) {
 }
 
 extern crc_t crcReflectBits (crc_t fromValue, unsigned int width);
+extern void crcReflectByte (const CRCGenerator *crc, uint8_t *byte);
+extern void crcReflectValue (const CRCGenerator *crc, crc_t *value);
 
 extern const uint8_t crcCheckData[];
 extern const uint8_t crcCheckSize;

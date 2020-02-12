@@ -38,12 +38,12 @@ crcReflectBits (crc_t fromValue, unsigned int width) {
   return toValue;
 }
 
-static inline void
+void
 crcReflectByte (const CRCGenerator *crc, uint8_t *byte) {
   *byte = crcReflectBits(*byte, crc->properties.byteWidth);
 }
 
-static inline void
+void
 crcReflectValue (const CRCGenerator *crc, crc_t *value) {
   *value = crcReflectBits(*value, crc->parameters.checksumWidth);
 }
