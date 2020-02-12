@@ -38,6 +38,16 @@ crcReflectBits (crc_t fromValue, unsigned int width) {
   return toValue;
 }
 
+static inline void
+crcReflectByte (const CRCGenerator *crc, uint8_t *byte) {
+  *byte = crcReflectBits(*byte, crc->properties.byteWidth);
+}
+
+static inline void
+crcReflectValue (const CRCGenerator *crc, crc_t *value) {
+  *value = crcReflectBits(*value, crc->parameters.checksumWidth);
+}
+
 static void
 crcCacheRemainders (CRCGenerator *crc) {
   // Compute the remainder for each possible dividend.
@@ -57,19 +67,13 @@ crcCacheRemainders (CRCGenerator *crc) {
     }
 
     // Store the result into the table.
-    uint8_t byte = dividend;
-
-    if (crc->parameters.reflectInput) {
-      byte = crcReflectBits(byte, crc->properties.byteWidth);
-    }
-
-    crc->properties.remainderCache[byte] = remainder & crc->properties.valueMask;
+    crc->properties.remainderCache[dividend] = remainder & crc->properties.valueMask;
   }
 }
 
 void
 crcAddByte (CRCGenerator *crc, uint8_t byte) {
-  // Divide the byte by the polynomial.
+  if (crc->parameters.reflectInput) crcReflectByte(crc, &byte);
   byte ^= crc->currentValue >> crc->properties.byteShift;
   crc->currentValue = crc->properties.remainderCache[byte] ^ (crc->currentValue << crc->properties.byteWidth);
   crc->currentValue &= crc->properties.valueMask;
@@ -90,11 +94,7 @@ crcGetValue (const CRCGenerator *crc) {
 crc_t
 crcGetChecksum (const CRCGenerator *crc) {
   crc_t checksum = crc->currentValue;
-
-  if (crc->parameters.reflectResult) {
-    checksum = crcReflectBits(checksum, crc->parameters.checksumWidth);
-  }
-
+  if (crc->parameters.reflectResult) crcReflectValue(crc, &checksum);
   checksum ^= crc->parameters.xorMask;
   return checksum;
 }
