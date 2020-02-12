@@ -31,13 +31,13 @@ typedef struct CRCGeneratorStruct CRCGenerator;
 typedef struct {
   const char *algorithmName; // the name of the algorithm
   unsigned int checksumWidth; // the width of the checksum (in bits)
-  crc_t generatorPolynomial;
+  crc_t generatorPolynomial; // the polynomial that generates the checksum
 
   crc_t initialValue; // the starting value (before any processing)
   crc_t xorMask; // the xor (exclussive or) mask to apply to the final value
 
   unsigned reflectInput:1; // reflect each input byte before processing it
-  unsigned reflectResult:1; // reflect the final value (before xor)
+  unsigned reflectResult:1; // reflect the final value (before the xor)
 
   crc_t checkValue; // the checksum for the official check data ("123456789")
   crc_t residue; // the final value (no reflection or xor) of the check data
@@ -55,7 +55,7 @@ typedef struct {
   unsigned int byteShift; // the bit offset of the high-order byte of the value
   crc_t mostSignificantBit; // the most significant bit of the value
   crc_t valueMask; // the mask for removing overflow bits in the value
-  crc_t remainderCache[UINT8_MAX + 1]; // for precalculating a common
+  crc_t remainderCache[UINT8_MAX + 1]; // for preevaluating a common
                                        // calculation for each input byte
 } CRCGeneratorProperties;
 
@@ -73,25 +73,32 @@ extern const CRCAlgorithmParameters *crcGetAlgorithmParameters (const CRCGenerat
 extern const CRCGeneratorProperties *crcGetGeneratorProperties (const CRCGenerator *crc);
 extern crc_t crcGetValue (const CRCGenerator *crc);
 
+static inline crc_t
+crcMostSignificantBit (unsigned int width) {
+  return CRC_C(1) << (width - 1);
+}
+
+extern crc_t crcReflectBits (crc_t fromValue, unsigned int width);
+
 extern const uint8_t crcCheckData[];
 extern const uint8_t crcCheckSize;
 
 extern void crcLogAlgorithmParameters (const CRCAlgorithmParameters *parameters);
 extern void crcLogGeneratorProperties (const CRCGenerator *crc);
 
-extern int crcVerifyChecksum (CRCGenerator *crc, const char *label, crc_t expected);
-extern int crcVerifyResidue (CRCGenerator *crc, const char *label);
+extern int crcVerifyChecksum (const CRCGenerator *crc, crc_t expected);
+extern int crcVerifyResidue (CRCGenerator *crc);
 
 extern int crcVerifyAlgorithm (const CRCAlgorithmParameters *parameters);
 extern int crcVerifyProvidedAlgorithms (void);
 
-extern int crcVerifyGeneratorWithData (
-  CRCGenerator *crc, const char *label,
+extern int crcVerifyAlgorithmWithData (
+  const CRCAlgorithmParameters *parameters,
   const void *data, size_t size, crc_t expected
 );
 
-extern int crcVerifyGeneratorWithString (
-  CRCGenerator *crc, const char *label,
+extern int crcVerifyAlgorithmWithString (
+  const CRCAlgorithmParameters *parameters,
   const char *string, crc_t expected
 );
 

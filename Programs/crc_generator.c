@@ -23,24 +23,19 @@
 #include "log.h"
 #include "crc_internal.h"
 
-static inline crc_t
-crcMostSignificantBit (unsigned int width) {
-  return CRC_C(1) << (width - 1);
-}
-
-static crc_t
-crcReflectBits (crc_t from, unsigned int width) {
+crc_t
+crcReflectBits (crc_t fromValue, unsigned int width) {
   crc_t fromBit = crcMostSignificantBit(width);
   crc_t toBit = 1;
-  crc_t to = 0;
+  crc_t toValue = 0;
 
   while (fromBit) {
-    if (from & fromBit) to |= toBit;
+    if (fromValue & fromBit) toValue |= toBit;
     fromBit >>= 1;
     toBit <<= 1;
   }
 
-  return to;
+  return toValue;
 }
 
 static void

@@ -25,7 +25,9 @@
 
 const uint8_t crcCheckData[] = {
   0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39
-}; const uint8_t crcCheckSize = sizeof(crcCheckData);
+};
+
+const uint8_t crcCheckSize = sizeof(crcCheckData);
 
 void
 crcLogAlgorithmParameters (const CRCAlgorithmParameters *parameters) {
@@ -51,70 +53,59 @@ crcLogGeneratorProperties (const CRCGenerator *crc) {
   );
 }
 
+static void
+crcLogMismatch (const CRCGenerator *crc,const char *what, crc_t actual, crc_t expected) {
+  logMessage(LOG_WARNING,
+    "CRC %s mismatch: %s: Actual:%X Expected:%X",
+    what, crcGetAlgorithmName(crc), actual, expected
+  );
+}
+
 int
-crcVerifyChecksum (CRCGenerator *crc, const char *label, crc_t expected) {
+crcVerifyChecksum (const CRCGenerator *crc, crc_t expected) {
   crc_t actual = crcGetChecksum(crc);
   int ok = actual == expected;
-
-  if (!ok) {
-    logMessage(LOG_WARNING,
-      "CRC: checksum mismatch: %s: Actual:%X Expected:%X",
-      label, actual, expected
-    );
-  }
-
+  if (!ok) crcLogMismatch(crc, "checksum", actual, expected);
   return ok;
 }
 
 int
-crcVerifyResidue (CRCGenerator *crc, const char *label) {
+crcVerifyResidue (CRCGenerator *crc) {
   crc_t actual = crcGetResidue(crc);
   crc_t expected = crc->parameters.residue;
   int ok = actual == expected;
-
-  if (!ok) {
-    logMessage(LOG_WARNING,
-      "CRC: residue mismatch: %s: Actual:%X Expected:%X",
-      label, actual, expected
-    );
-  }
-
+  if (!ok) crcLogMismatch(crc, "residue", actual, expected);
   return ok;
 }
 
 int
-crcVerifyGeneratorWithData (
-  CRCGenerator *crc, const char *label,
+crcVerifyAlgorithmWithData (
+  const CRCAlgorithmParameters *parameters,
   const void *data, size_t size, crc_t expected
 ) {
-  crcResetGenerator(crc);
+  CRCGenerator *crc = crcNewGenerator(parameters);
   crcAddData(crc, data, size);
 
-  if (!label) label = crc->parameters.algorithmName;
-  int okChecksum = crcVerifyChecksum(crc, label, expected);
-  int okResidue = crcVerifyResidue(crc, label);
+  int okChecksum = crcVerifyChecksum(crc, expected);
+  int okResidue = crcVerifyResidue(crc);
 
+  crcDestroyGenerator(crc);
   return okChecksum && okResidue;
 }
 
 int
-crcVerifyGeneratorWithString (
-  CRCGenerator *crc, const char *label,
+crcVerifyAlgorithmWithString (
+  const CRCAlgorithmParameters *parameters,
   const char *string, crc_t expected
 ) {
-  return crcVerifyGeneratorWithData(crc, label, string, strlen(string), expected);
+  return crcVerifyAlgorithmWithData(parameters, string, strlen(string), expected);
 }
 
 int
 crcVerifyAlgorithm (const CRCAlgorithmParameters *parameters) {
-  CRCGenerator *crc = crcNewGenerator(parameters);
-
-  int ok = crcVerifyGeneratorWithData(
-    crc, NULL, crcCheckData, crcCheckSize, parameters->checkValue
+  return crcVerifyAlgorithmWithData(
+    parameters, crcCheckData, crcCheckSize, parameters->checkValue
   );
-
-  crcDestroyGenerator(crc);
-  return ok;
 }
 
 int

@@ -32,6 +32,11 @@ struct CRCGeneratorStruct {
   char algorithmName[];
 };
 
+static inline const char *
+crcGetAlgorithmName (const CRCGenerator *crc) {
+  return crc->parameters.algorithmName;
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
