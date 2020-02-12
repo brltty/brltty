@@ -64,7 +64,7 @@ typedef struct {
   crc_t mostSignificantBit; // the most significant bit of the value
   crc_t valueMask; // the mask for removing overflow bits in the value
 
-  uint8_t inputTranslationTable[UINT8_MAX + 1]; // for optimizing input reflection
+  const uint8_t *inputTranslationTable; // for optimizing input reflection
   crc_t remainderCache[UINT8_MAX + 1]; // for preevaluating a common
                                        // calculation on each input byte
 } CRCGeneratorProperties;

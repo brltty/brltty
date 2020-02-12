@@ -48,12 +48,30 @@ crcReflectByte (const CRCGenerator *crc, uint8_t *byte) {
   *byte = crcReflectBits(*byte, crc->properties.byteWidth);
 }
 
+static uint8_t crcDirectInputTranslationTable[UINT8_MAX + 1] = {1};
+static uint8_t crcReflectedInputTranslationTable[UINT8_MAX + 1] = {1};
+
 static void
 crcMakeInputTranslationTable (CRCGenerator *crc) {
-  for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
-    uint8_t *byte = &crc->properties.inputTranslationTable[index];
-    *byte = index;
-    if (crc->parameters.reflectInput) crcReflectByte(crc, byte);
+  if (crc->parameters.reflectInput) {
+    if (crcReflectedInputTranslationTable[0]) {
+      for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
+        uint8_t *byte = &crcReflectedInputTranslationTable[index];
+        *byte = index;
+        crcReflectByte(crc, byte);
+      }
+    }
+
+    crc->properties.inputTranslationTable = crcReflectedInputTranslationTable;
+  } else {
+    if (crcDirectInputTranslationTable[0]) {
+      for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
+        uint8_t *byte = &crcDirectInputTranslationTable[index];
+        *byte = index;
+      }
+    }
+
+    crc->properties.inputTranslationTable = crcDirectInputTranslationTable;
   }
 }
 
