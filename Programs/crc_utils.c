@@ -33,7 +33,7 @@ void
 crcLogAlgorithmParameters (const CRCAlgorithmParameters *parameters) {
   logMessage(LOG_DEBUG,
     "CRC Parameters: %s: Width:%u Poly:%X Init:%X Xor:%X RefIn:%u RefOut:%u Chk:%X Res:%X",
-    parameters->algorithmName,
+    parameters->primaryName,
     parameters->checksumWidth, parameters->generatorPolynomial,
     parameters->initialValue, parameters->xorMask,
     parameters->reflectInput, parameters->reflectResult,
@@ -43,11 +43,11 @@ crcLogAlgorithmParameters (const CRCAlgorithmParameters *parameters) {
 
 void
 crcLogGeneratorProperties (const CRCGenerator *crc) {
-  const CRCGeneratorProperties *properties = crcGetGeneratorProperties(crc);
+  const CRCGeneratorProperties *properties = crcGetProperties(crc);
 
   logMessage(LOG_DEBUG,
     "CRC Properteis: %s: Byte:%u Shift:%u MSB:%X Mask:%X",
-    crc->parameters.algorithmName,
+    crcGetName(crc),
     properties->byteWidth, properties->byteShift,
     properties->mostSignificantBit, properties->valueMask
   );
@@ -57,7 +57,7 @@ static void
 crcLogMismatch (const CRCGenerator *crc,const char *what, crc_t actual, crc_t expected) {
   logMessage(LOG_WARNING,
     "CRC %s mismatch: %s: Actual:%X Expected:%X",
-    what, crcGetAlgorithmName(crc), actual, expected
+    what, crcGetName(crc), actual, expected
   );
 }
 
@@ -86,11 +86,11 @@ crcVerifyAlgorithmWithData (
   CRCGenerator *crc = crcNewGenerator(parameters);
   crcAddData(crc, data, size);
 
-  int okChecksum = crcVerifyChecksum(crc, expected);
-  int okResidue = crcVerifyResidue(crc);
+  int ok = crcVerifyChecksum(crc, expected);
+  if (ok) ok = crcVerifyResidue(crc);
 
   crcDestroyGenerator(crc);
-  return okChecksum && okResidue;
+  return ok;
 }
 
 int

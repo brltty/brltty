@@ -18,48 +18,14 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "crc.h"
 
 #define SECONDARY_NAMES(...) .secondaryNames = (const char *const []){__VA_ARGS__, NULL}
 
-const CRCAlgorithmParameters crcAlgorithmParameters_CCITT_FALSE = {
-  .algorithmName = "CRC-16/CCITT-FALSE",
-  .checksumWidth = 16,
-  .generatorPolynomial = UINT16_C(0X1021),
-  .initialValue = UINT16_MAX,
-  .checkValue = UINT16_C(0X29B1),
-};
-
-const CRCAlgorithmParameters crcAlgorithmParameters_HDLC = {
-  .algorithmName = "CRC-16/ISO-HDLC",
-  .checksumWidth = 16,
-  .generatorPolynomial = UINT16_C(0X1021),
-  .initialValue = UINT16_MAX,
-  .reflectInput = 1,
-  .reflectResult = 1,
-  .xorMask = UINT16_MAX,
-  .checkValue = UINT16_C(0X906E),
-  .residue = UINT16_C(0XF0B8),
-};
-
-const CRCAlgorithmParameters crcAlgorithmParameters_UMTS = {
-  .algorithmName = "CRC-16/UMTS",
-  .checksumWidth = 16,
-  .generatorPolynomial = UINT16_C(0X8005),
-  .checkValue = UINT16_C(0XFEE8),
-};
-
-const CRCAlgorithmParameters crcAlgorithmParameters_GSM = {
-  .algorithmName = "CRC-16/GSM",
-  .checksumWidth = 16,
-  .generatorPolynomial = UINT16_C(0X1021),
-  .xorMask = UINT16_MAX,
-  .checkValue = UINT16_C(0XCE3C),
-  .residue = UINT16_C(0X1D0F),
-};
-
-const CRCAlgorithmParameters crcAlgorithmParameters_x00 = {
-  .algorithmName = "CRC-16/ARC",
+static const CRCAlgorithmParameters crcAlgorithmParameters_ARC = {
+  .primaryName = "CRC-16/ARC",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("ARC", "CRC-16", "CRC-16/LHA", "CRC-IBM"),
 
@@ -71,8 +37,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x00 = {
   .checkValue = 0xbb3d,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x01 = {
-  .algorithmName = "CRC-16/CDMA2000",
+static const CRCAlgorithmParameters crcAlgorithmParameters_CDMA2000 = {
+  .primaryName = "CRC-16/CDMA2000",
   .algorithmClass = CRC_ALGORITHM_CLASS_ACADEMIC,
 
   .checksumWidth = 16,
@@ -82,8 +48,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x01 = {
   .checkValue = 0x4c06,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x02 = {
-  .algorithmName = "CRC-16/CMS",
+static const CRCAlgorithmParameters crcAlgorithmParameters_CMS = {
+  .primaryName = "CRC-16/CMS",
   .algorithmClass = CRC_ALGORITHM_CLASS_THIRD_PARTY,
 
   .checksumWidth = 16,
@@ -93,8 +59,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x02 = {
   .checkValue = 0xaee7,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x03 = {
-  .algorithmName = "CRC-16/DDS-110",
+static const CRCAlgorithmParameters crcAlgorithmParameters_DDS_110 = {
+  .primaryName = "CRC-16/DDS-110",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
 
   .checksumWidth = 16,
@@ -104,8 +70,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x03 = {
   .checkValue = 0x9ecf,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x04 = {
-  .algorithmName = "CRC-16/DECT-R",
+static const CRCAlgorithmParameters crcAlgorithmParameters_DECT_R = {
+  .primaryName = "CRC-16/DECT-R",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("R-CRC-16"),
 
@@ -117,8 +83,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x04 = {
   .residue = 0x0589,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x05 = {
-  .algorithmName = "CRC-16/DECT-X",
+static const CRCAlgorithmParameters crcAlgorithmParameters_DECT_X = {
+  .primaryName = "CRC-16/DECT-X",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("X-CRC-16"),
 
@@ -128,8 +94,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x05 = {
   .checkValue = 0x007f,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x06 = {
-  .algorithmName = "CRC-16/DNP",
+static const CRCAlgorithmParameters crcAlgorithmParameters_DNP = {
+  .primaryName = "CRC-16/DNP",
   .algorithmClass = CRC_ALGORITHM_CLASS_CONFIRMED,
 
   .checksumWidth = 16,
@@ -142,8 +108,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x06 = {
   .residue = 0x66c5,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x07 = {
-  .algorithmName = "CRC-16/EN-13757",
+static const CRCAlgorithmParameters crcAlgorithmParameters_EN_13757 = {
+  .primaryName = "CRC-16/EN-13757",
   .algorithmClass = CRC_ALGORITHM_CLASS_CONFIRMED,
 
   .checksumWidth = 16,
@@ -154,8 +120,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x07 = {
   .residue = 0xa366,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x08 = {
-  .algorithmName = "CRC-16/GENIBUS",
+static const CRCAlgorithmParameters crcAlgorithmParameters_GENIBUS = {
+  .primaryName = "CRC-16/GENIBUS",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-16/DARC", "CRC-16/EPC", "CRC-16/EPC-C1G2", "CRC-16/I-CODE"),
 
@@ -168,8 +134,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x08 = {
   .residue = 0x1d0f,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x09 = {
-  .algorithmName = "CRC-16/GSM",
+static const CRCAlgorithmParameters crcAlgorithmParameters_GSM = {
+  .primaryName = "CRC-16/GSM",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
 
   .checksumWidth = 16,
@@ -180,8 +146,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x09 = {
   .residue = 0x1d0f,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x10 = {
-  .algorithmName = "CRC-16/IBM-3740",
+static const CRCAlgorithmParameters crcAlgorithmParameters_IBM_3740 = {
+  .primaryName = "CRC-16/IBM-3740",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-16/AUTOSAR", "CRC-16/CCITT-FALSE"),
 
@@ -192,8 +158,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x10 = {
   .checkValue = 0x29b1,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x11 = {
-  .algorithmName = "CRC-16/IBM-SDLC",
+static const CRCAlgorithmParameters crcAlgorithmParameters_IBM_SDLC = {
+  .primaryName = "CRC-16/IBM-SDLC",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-16/ISO-HDLC", "CRC-16/ISO-IEC-14443-3-B", "CRC-16/X-25", "CRC-B", "X-25"),
 
@@ -208,8 +174,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x11 = {
   .residue = 0xf0b8,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x12 = {
-  .algorithmName = "CRC-16/ISO-IEC-14443-3-A",
+static const CRCAlgorithmParameters crcAlgorithmParameters_ISO_IEC_14443_3_A = {
+  .primaryName = "CRC-16/ISO-IEC-14443-3-A",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-A"),
 
@@ -222,8 +188,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x12 = {
   .checkValue = 0xbf05,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x13 = {
-  .algorithmName = "CRC-16/KERMIT",
+static const CRCAlgorithmParameters crcAlgorithmParameters_KERMIT = {
+  .primaryName = "CRC-16/KERMIT",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-16/CCITT", "CRC-16/CCITT-TRUE", "CRC-16/V-41-LSB", "CRC-CCITT", "KERMIT"),
 
@@ -235,8 +201,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x13 = {
   .checkValue = 0x2189,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x14 = {
-  .algorithmName = "CRC-16/LJ1200",
+static const CRCAlgorithmParameters crcAlgorithmParameters_LJ1200 = {
+  .primaryName = "CRC-16/LJ1200",
   .algorithmClass = CRC_ALGORITHM_CLASS_THIRD_PARTY,
 
   .checksumWidth = 16,
@@ -245,8 +211,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x14 = {
   .checkValue = 0xbdf4,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x15 = {
-  .algorithmName = "CRC-16/MAXIM-DOW",
+static const CRCAlgorithmParameters crcAlgorithmParameters_MAXIM_DOW = {
+  .primaryName = "CRC-16/MAXIM-DOW",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-16/MAXIM"),
 
@@ -260,8 +226,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x15 = {
   .residue = 0xb001,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x16 = {
-  .algorithmName = "CRC-16/MCRF4XX",
+static const CRCAlgorithmParameters crcAlgorithmParameters_MCRF4XX = {
+  .primaryName = "CRC-16/MCRF4XX",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
 
   .checksumWidth = 16,
@@ -273,8 +239,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x16 = {
   .checkValue = 0x6f91,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x17 = {
-  .algorithmName = "CRC-16/MODBUS",
+static const CRCAlgorithmParameters crcAlgorithmParameters_MODBUS = {
+  .primaryName = "CRC-16/MODBUS",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("MODBUS"),
 
@@ -287,8 +253,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x17 = {
   .checkValue = 0x4b37,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x18 = {
-  .algorithmName = "CRC-16/NRSC-5",
+static const CRCAlgorithmParameters crcAlgorithmParameters_NRSC_5 = {
+  .primaryName = "CRC-16/NRSC-5",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
 
   .checksumWidth = 16,
@@ -300,8 +266,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x18 = {
   .checkValue = 0xa066,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x19 = {
-  .algorithmName = "CRC-16/OPENSAFETY-A",
+static const CRCAlgorithmParameters crcAlgorithmParameters_OPENSAFETY_A = {
+  .primaryName = "CRC-16/OPENSAFETY-A",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
 
   .checksumWidth = 16,
@@ -310,8 +276,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x19 = {
   .checkValue = 0x5d38,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x20 = {
-  .algorithmName = "CRC-16/OPENSAFETY-B",
+static const CRCAlgorithmParameters crcAlgorithmParameters_OPENSAFETY_B = {
+  .primaryName = "CRC-16/OPENSAFETY-B",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
 
   .checksumWidth = 16,
@@ -320,8 +286,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x20 = {
   .checkValue = 0x20fe,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x21 = {
-  .algorithmName = "CRC-16/PROFIBUS",
+static const CRCAlgorithmParameters crcAlgorithmParameters_PROFIBUS = {
+  .primaryName = "CRC-16/PROFIBUS",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-16/IEC-61158-2"),
 
@@ -334,8 +300,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x21 = {
   .residue = 0xe394,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x22 = {
-  .algorithmName = "CRC-16/RIELLO",
+static const CRCAlgorithmParameters crcAlgorithmParameters_RIELLO = {
+  .primaryName = "CRC-16/RIELLO",
   .algorithmClass = CRC_ALGORITHM_CLASS_THIRD_PARTY,
 
   .checksumWidth = 16,
@@ -347,8 +313,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x22 = {
   .checkValue = 0x63d0,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x23 = {
-  .algorithmName = "CRC-16/SPI-FUJITSU",
+static const CRCAlgorithmParameters crcAlgorithmParameters_SPI_FUJITSU = {
+  .primaryName = "CRC-16/SPI-FUJITSU",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-16/AUG-CCITT"),
 
@@ -359,8 +325,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x23 = {
   .checkValue = 0xe5cc,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x24 = {
-  .algorithmName = "CRC-16/T10-DIF",
+static const CRCAlgorithmParameters crcAlgorithmParameters_T10_DIF = {
+  .primaryName = "CRC-16/T10-DIF",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
 
   .checksumWidth = 16,
@@ -369,8 +335,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x24 = {
   .checkValue = 0xd0db,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x25 = {
-  .algorithmName = "CRC-16/TELEDISK",
+static const CRCAlgorithmParameters crcAlgorithmParameters_TELEDISK = {
+  .primaryName = "CRC-16/TELEDISK",
   .algorithmClass = CRC_ALGORITHM_CLASS_CONFIRMED,
 
   .checksumWidth = 16,
@@ -379,8 +345,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x25 = {
   .checkValue = 0x0fb3,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x26 = {
-  .algorithmName = "CRC-16/TMS37157",
+static const CRCAlgorithmParameters crcAlgorithmParameters_TMS37157 = {
+  .primaryName = "CRC-16/TMS37157",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
 
   .checksumWidth = 16,
@@ -392,8 +358,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x26 = {
   .checkValue = 0x26b1,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x27 = {
-  .algorithmName = "CRC-16/UMTS",
+static const CRCAlgorithmParameters crcAlgorithmParameters_UMTS = {
+  .primaryName = "CRC-16/UMTS",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-16/BUYPASS", "CRC-16/VERIFONE"),
 
@@ -403,8 +369,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x27 = {
   .checkValue = 0xfee8,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x28 = {
-  .algorithmName = "CRC-16/USB",
+static const CRCAlgorithmParameters crcAlgorithmParameters_USB = {
+  .primaryName = "CRC-16/USB",
   .algorithmClass = CRC_ALGORITHM_CLASS_THIRD_PARTY,
 
   .checksumWidth = 16,
@@ -418,8 +384,8 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x28 = {
   .residue = 0xb001,
 };
 
-const CRCAlgorithmParameters crcAlgorithmParameters_x29 = {
-  .algorithmName = "CRC-16/XMODEM",
+static const CRCAlgorithmParameters crcAlgorithmParameters_XMODEM = {
+  .primaryName = "CRC-16/XMODEM",
   .algorithmClass = CRC_ALGORITHM_CLASS_ATTESTED,
   SECONDARY_NAMES("CRC-16/ACORN", "CRC-16/LTE", "CRC-16/V-41-MSB", "XMODEM", "ZMODEM"),
 
@@ -430,9 +396,56 @@ const CRCAlgorithmParameters crcAlgorithmParameters_x29 = {
 };
 
 const CRCAlgorithmParameters *crcProvidedAlgorithms[] = {
-  &crcAlgorithmParameters_CCITT_FALSE,
-  &crcAlgorithmParameters_HDLC,
-  &crcAlgorithmParameters_UMTS,
+  &crcAlgorithmParameters_ARC,
+  &crcAlgorithmParameters_CDMA2000,
+  &crcAlgorithmParameters_CMS,
+  &crcAlgorithmParameters_DDS_110,
+  &crcAlgorithmParameters_DECT_R,
+  &crcAlgorithmParameters_DECT_X,
+  &crcAlgorithmParameters_DNP,
+  &crcAlgorithmParameters_EN_13757,
+  &crcAlgorithmParameters_GENIBUS,
   &crcAlgorithmParameters_GSM,
+  &crcAlgorithmParameters_IBM_3740,
+  &crcAlgorithmParameters_IBM_SDLC,
+  &crcAlgorithmParameters_ISO_IEC_14443_3_A,
+  &crcAlgorithmParameters_KERMIT,
+  &crcAlgorithmParameters_LJ1200,
+  &crcAlgorithmParameters_MAXIM_DOW,
+  &crcAlgorithmParameters_MCRF4XX,
+  &crcAlgorithmParameters_MODBUS,
+  &crcAlgorithmParameters_NRSC_5,
+  &crcAlgorithmParameters_OPENSAFETY_A,
+  &crcAlgorithmParameters_OPENSAFETY_B,
+  &crcAlgorithmParameters_PROFIBUS,
+  &crcAlgorithmParameters_RIELLO,
+  &crcAlgorithmParameters_SPI_FUJITSU,
+  &crcAlgorithmParameters_T10_DIF,
+  &crcAlgorithmParameters_TELEDISK,
+  &crcAlgorithmParameters_TMS37157,
+  &crcAlgorithmParameters_UMTS,
+  &crcAlgorithmParameters_USB,
+  &crcAlgorithmParameters_XMODEM,
   NULL
 };
+
+const CRCAlgorithmParameters *
+crcGetAlgorithm (const char *name) {
+  const CRCAlgorithmParameters **parameters = crcProvidedAlgorithms;
+
+  while (*parameters) {
+    if (strcmp(name, (*parameters)->primaryName) == 0) return *parameters;
+    const char *const *alias = (*parameters)->secondaryNames;
+
+    if (alias) {
+      while (*alias) {
+        if (strcmp(name, *alias) == 0) return *parameters;
+        alias += 1;
+      }
+    }
+
+    parameters += 1;
+  }
+
+  return NULL;
+}

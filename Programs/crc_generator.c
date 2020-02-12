@@ -128,14 +128,14 @@ crcResetGenerator (CRCGenerator *crc) {
 CRCGenerator *
 crcNewGenerator (const CRCAlgorithmParameters *parameters) {
   CRCGenerator *crc;
-  size_t size = sizeof(*crc) + strlen(parameters->algorithmName) + 1;
+  size_t size = sizeof(*crc) + strlen(parameters->primaryName) + 1;
 
   if ((crc = malloc(size))) {
     memset(crc, 0, size);
 
     crc->parameters = *parameters;
-    strcpy(crc->algorithmName, parameters->algorithmName);
-    crc->parameters.algorithmName = crc->algorithmName;
+    strcpy(crc->primaryName, parameters->primaryName);
+    crc->parameters.primaryName = crc->primaryName;
 
     crc->properties.byteWidth = 8;
     crc->properties.byteShift = crc->parameters.checksumWidth - crc->properties.byteWidth;
@@ -158,11 +158,11 @@ crcDestroyGenerator (CRCGenerator *crc) {
 }
 
 const CRCAlgorithmParameters *
-crcGetAlgorithmParameters (const CRCGenerator *crc) {
+crcGetParameters (const CRCGenerator *crc) {
   return &crc->parameters;
 }
 
 const CRCGeneratorProperties *
-crcGetGeneratorProperties (const CRCGenerator *crc) {
+crcGetProperties (const CRCGenerator *crc) {
   return &crc->properties;
 }

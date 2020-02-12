@@ -406,7 +406,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     brl->data->output.rowEntries = NULL;
 
-    if ((brl->data->crcGenerator = crcNewGenerator(&crcAlgorithmParameters_HDLC))) {
+    if ((brl->data->crcGenerator = crcNewGenerator(crcGetAlgorithm("CRC-16/ISO-HDLC")))) {
       if (connectResource(brl, device)) {
         unsigned char response[MAXIMUM_RESPONSE_SIZE];
 

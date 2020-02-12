@@ -36,7 +36,7 @@ typedef enum {
 } CRCAlgorithmClass;
 
 typedef struct {
-  const char *algorithmName; // the official name of the algorithm
+  const char *primaryName; // the official name of the algorithm
   const char *const *secondaryNames; // other names that the algorithm is known by (NULL terminated)
   CRCAlgorithmClass algorithmClass;
 
@@ -55,10 +55,7 @@ typedef struct {
 } CRCAlgorithmParameters;
 
 extern const CRCAlgorithmParameters *crcProvidedAlgorithms[];
-extern const CRCAlgorithmParameters crcAlgorithmParameters_CCITT_FALSE;
-extern const CRCAlgorithmParameters crcAlgorithmParameters_HDLC;
-extern const CRCAlgorithmParameters crcAlgorithmParameters_UMTS;
-extern const CRCAlgorithmParameters crcAlgorithmParameters_GSM;
+extern const CRCAlgorithmParameters *crcGetAlgorithm (const char *name);
 
 typedef struct {
   unsigned int byteWidth; // the width of a byte (in bits)
@@ -79,8 +76,8 @@ extern void crcAddData (CRCGenerator *crc, const void *data, size_t size);
 extern crc_t crcGetChecksum (const CRCGenerator *crc);
 extern crc_t crcGetResidue (CRCGenerator *crc);
 
-extern const CRCAlgorithmParameters *crcGetAlgorithmParameters (const CRCGenerator *crc);
-extern const CRCGeneratorProperties *crcGetGeneratorProperties (const CRCGenerator *crc);
+extern const CRCAlgorithmParameters *crcGetParameters (const CRCGenerator *crc);
+extern const CRCGeneratorProperties *crcGetProperties (const CRCGenerator *crc);
 extern crc_t crcGetValue (const CRCGenerator *crc);
 
 static inline crc_t
