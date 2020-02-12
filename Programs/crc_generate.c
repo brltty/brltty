@@ -39,17 +39,26 @@ crcReflectBits (crc_t fromValue, unsigned int width) {
 }
 
 void
-crcReflectByte (const CRCGenerator *crc, uint8_t *byte) {
-  *byte = crcReflectBits(*byte, crc->properties.byteWidth);
-}
-
-void
 crcReflectValue (const CRCGenerator *crc, crc_t *value) {
   *value = crcReflectBits(*value, crc->parameters.checksumWidth);
 }
 
+void
+crcReflectByte (const CRCGenerator *crc, uint8_t *byte) {
+  *byte = crcReflectBits(*byte, crc->properties.byteWidth);
+}
+
 static void
-crcCacheRemainders (CRCGenerator *crc) {
+crcMakeInputTranslationTable (CRCGenerator *crc) {
+  for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
+    uint8_t *byte = &crc->properties.inputTranslationTable[index];
+    *byte = index;
+    if (crc->parameters.reflectInput) crcReflectByte(crc, byte);
+  }
+}
+
+static void
+crcMakeRemainderCache (CRCGenerator *crc) {
   // Compute the remainder for each possible dividend.
   for (unsigned int dividend=0; dividend<=UINT8_MAX; dividend+=1) {
     // Start with the dividend followed by zeros.
@@ -73,7 +82,7 @@ crcCacheRemainders (CRCGenerator *crc) {
 
 void
 crcAddByte (CRCGenerator *crc, uint8_t byte) {
-  if (crc->parameters.reflectInput) crcReflectByte(crc, &byte);
+  byte = crc->properties.inputTranslationTable[byte];
   byte ^= crc->currentValue >> crc->properties.byteShift;
   crc->currentValue = crc->properties.remainderCache[byte] ^ (crc->currentValue << crc->properties.byteWidth);
   crc->currentValue &= crc->properties.valueMask;
@@ -156,7 +165,9 @@ crcNewGenerator (const CRCAlgorithmParameters *parameters) {
     crc->properties.mostSignificantBit = crcMostSignificantBit(crc->parameters.checksumWidth);
     crc->properties.valueMask = (crc->properties.mostSignificantBit - 1) | crc->properties.mostSignificantBit;
 
-    crcCacheRemainders(crc);
+    crcMakeInputTranslationTable(crc);
+    crcMakeRemainderCache(crc);
+
     crcResetGenerator(crc);
     return crc;
   } else {

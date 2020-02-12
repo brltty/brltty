@@ -64,8 +64,9 @@ typedef struct {
   crc_t mostSignificantBit; // the most significant bit of the value
   crc_t valueMask; // the mask for removing overflow bits in the value
 
+  uint8_t inputTranslationTable[UINT8_MAX + 1]; // for optimizing input reflection
   crc_t remainderCache[UINT8_MAX + 1]; // for preevaluating a common
-                                       // calculation for each input byte
+                                       // calculation on each input byte
 } CRCGeneratorProperties;
 
 extern CRCGenerator *crcNewGenerator (const CRCAlgorithmParameters *parameters);
@@ -88,8 +89,8 @@ crcMostSignificantBit (unsigned int width) {
 }
 
 extern crc_t crcReflectBits (crc_t fromValue, unsigned int width);
-extern void crcReflectByte (const CRCGenerator *crc, uint8_t *byte);
 extern void crcReflectValue (const CRCGenerator *crc, crc_t *value);
+extern void crcReflectByte (const CRCGenerator *crc, uint8_t *byte);
 
 extern const uint8_t crcCheckData[];
 extern const uint8_t crcCheckSize;
