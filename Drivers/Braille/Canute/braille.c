@@ -32,7 +32,7 @@
 #define PROBE_RETRY_LIMIT 0
 #define PROBE_INPUT_TIMEOUT 1000
 #define POLL_ALARM_INTERVAL 100
-#define MAXIMUM_RESPONSE_SIZE 3
+#define MAXIMUM_RESPONSE_SIZE 0X100
 
 BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(CN_KEY_Help, "Help"),
@@ -77,6 +77,7 @@ typedef BrailleResponseResult IdentityResponseHandler (
 struct BrailleDataStruct {
   IdentityResponseHandler *handleIdentityResponse;
   CRCGenerator *crcGenerator;
+  unsigned int protocolVersion;
   AsyncHandle pollAlarm;
 
   struct {
@@ -91,7 +92,19 @@ struct BrailleDataStruct {
 #define PACKET_ESCAPE_BYTE 0X7D
 #define PACKET_FRAMING_BYTE 0X7E
 
-static uint16_t
+typedef uint16_t PacketInteger;
+
+static PacketInteger
+getResponseInteger (const unsigned char *response, unsigned int offset) {
+  return response[offset] | (response[offset+1] << 8);
+}
+
+static PacketInteger
+getResponseResult (const unsigned char *response) {
+  return getResponseInteger(response, 1);
+}
+
+static crc_t
 makePacketChecksum (BrailleDisplay *brl, const void *packet, size_t size) {
   CRCGenerator *crc = brl->data->crcGenerator;
   crcResetGenerator(crc);
@@ -99,32 +112,48 @@ makePacketChecksum (BrailleDisplay *brl, const void *packet, size_t size) {
   return crcGetChecksum(crc);
 }
 
+typedef enum {
+  PVS_WAITING,
+  PVS_STARTED,
+  PVS_DONE
+} PacketVerificationState;
+
+typedef struct {
+  PacketVerificationState state;
+  unsigned escaped:1;
+} PacketVerificationData;
+
 static BraillePacketVerifierResult
 verifyPacket (
   BrailleDisplay *brl,
   const unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
+  PacketVerificationData *pvd = data;
   unsigned char byte = bytes[size-1];
 
-  switch (size) {
-    case 1:
-      switch (byte) {
-        case CN_CMD_COLUMN_COUNT:
-        case CN_CMD_ROW_COUNT:
-        case CN_CMD_SEND_ROW:
-        case CN_CMD_KEYS_STATE:
-        case CN_CMD_DEVICE_STATE:
-          *length = 3;
-          break;
+  if (byte == PACKET_FRAMING_BYTE) {
+    if ((pvd->state += 1) == PVS_DONE) {
+      if (pvd->escaped) return BRL_PVR_INVALID;
+      *length = size - 1;
+    } else {
+      *length = MAXIMUM_RESPONSE_SIZE;
+    }
 
-        default:
-          return BRL_PVR_INVALID;
-      }
-      break;
+    return BRL_PVR_EXCLUDE;
+  } else if (pvd->state == PVS_WAITING) {
+    return BRL_PVR_INVALID;
+  }
 
-    default:
-      break;
+  if (byte == PACKET_ESCAPE_BYTE) {
+    if (pvd->escaped) return BRL_PVR_INVALID;
+    pvd->escaped = 1;
+    return BRL_PVR_EXCLUDE;
+  }
+
+  if (pvd->escaped) {
+    pvd->escaped = 0;
+    byte ^= 0X20;
   }
 
   return BRL_PVR_INCLUDE;
@@ -132,14 +161,34 @@ verifyPacket (
 
 static size_t
 readPacket (BrailleDisplay *brl, void *packet, size_t size) {
-  return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
-}
+  PacketVerificationData pvd = {
+    .state = PVS_WAITING
+  };
 
-typedef uint16_t ResponseResult;
+  while (1) {
+    size_t length = readBraillePacket(brl, NULL, packet, size, verifyPacket, &pvd);
 
-static ResponseResult
-getResponseResult (const unsigned char *response) {
-  return response[1] | (response[2] << 8);
+    if (length > 0) {
+      if (length < 3) {
+        logShortPacket(packet, length);
+        continue;
+      }
+
+      {
+        crc_t expected = getResponseInteger(packet, (length -= 2));
+        crc_t actual = makePacketChecksum(brl, packet, length);
+
+        if (actual != expected) {
+          logMessage(LOG_CATEGORY(INPUT_PACKETS),
+            "checksum mismatch: Actual:%X Expected:%X",
+            actual, expected
+          );
+        }
+      }
+    }
+
+    return length;
+  }
 }
 
 static int
@@ -231,10 +280,29 @@ writeNextIdentifyCommand (BrailleDisplay *brl, unsigned char command, IdentityRe
 }
 
 static BrailleResponseResult
+handleFirmwareVersion (BrailleDisplay *brl, const unsigned char *response, size_t size) {
+  if (response[0] != CN_CMD_FIRMWARE_VERSION) return BRL_RSP_UNEXPECTED;
+
+  response += 1;
+  size -= 1;
+  logMessage(LOG_INFO, "Firmware Version: %.*s", (int)size, response);
+
+  return BRL_RSP_DONE;
+}
+
+static BrailleResponseResult
+handleProtocolVersion (BrailleDisplay *brl, const unsigned char *response, size_t size) {
+  if (response[0] != CN_CMD_PROTOCOL_VERSION) return BRL_RSP_UNEXPECTED;
+  brl->data->protocolVersion = getResponseResult(response);
+  logMessage(LOG_INFO, "Protocol Version: %u", brl->data->protocolVersion);
+  return writeNextIdentifyCommand(brl, CN_CMD_FIRMWARE_VERSION, handleFirmwareVersion);
+}
+
+static BrailleResponseResult
 handleRowCount (BrailleDisplay *brl, const unsigned char *response, size_t size) {
   if (response[0] != CN_CMD_ROW_COUNT) return BRL_RSP_UNEXPECTED;
   brl->textRows = getResponseResult(response);
-  return BRL_RSP_DONE;
+  return writeNextIdentifyCommand(brl, CN_CMD_PROTOCOL_VERSION, handleProtocolVersion);
 }
 
 static BrailleResponseResult
@@ -413,7 +481,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    ResponseResult result = getResponseResult(packet);
+    PacketInteger result = getResponseResult(packet);
 
     switch (packet[0]) {
       case CN_CMD_SEND_ROW:
