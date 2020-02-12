@@ -47,7 +47,7 @@ crcLogGeneratorProperties (const CRCGenerator *crc) {
 
   logMessage(LOG_DEBUG,
     "CRC Properteis: %s: Byte:%u Shift:%u MSB:%X Mask:%X",
-    crcGetName(crc),
+    crcGetAlgorithmName(crc),
     properties->byteWidth, properties->byteShift,
     properties->mostSignificantBit, properties->valueMask
   );
@@ -57,7 +57,7 @@ static void
 crcLogMismatch (const CRCGenerator *crc,const char *what, crc_t actual, crc_t expected) {
   logMessage(LOG_WARNING,
     "CRC %s mismatch: %s: Actual:%X Expected:%X",
-    what, crcGetName(crc), actual, expected
+    what, crcGetAlgorithmName(crc), actual, expected
   );
 }
 

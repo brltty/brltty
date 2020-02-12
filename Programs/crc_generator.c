@@ -134,8 +134,8 @@ crcNewGenerator (const CRCAlgorithmParameters *parameters) {
     memset(crc, 0, size);
 
     crc->parameters = *parameters;
-    strcpy(crc->primaryName, parameters->primaryName);
-    crc->parameters.primaryName = crc->primaryName;
+    strcpy(crc->algorithmName, parameters->primaryName);
+    crc->parameters.primaryName = crc->algorithmName;
 
     crc->properties.byteWidth = 8;
     crc->properties.byteShift = crc->parameters.checksumWidth - crc->properties.byteWidth;

@@ -29,12 +29,12 @@ struct CRCGeneratorStruct {
   CRCAlgorithmParameters parameters;
   CRCGeneratorProperties properties;
   crc_t currentValue;
-  char primaryName[];
+  char algorithmName[];
 };
 
 static inline const char *
-crcGetName (const CRCGenerator *crc) {
-  return crc->parameters.primaryName;
+crcGetAlgorithmName (const CRCGenerator *crc) {
+  return crc->algorithmName;
 }
 
 #ifdef __cplusplus
