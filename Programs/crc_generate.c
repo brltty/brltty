@@ -109,7 +109,7 @@ crcGetResidue (CRCGenerator *crc) {
 
   if (crc->parameters.reflectResult) {
     uint8_t *byte = data;
-    uint8_t *end = byte + size;
+    const uint8_t *end = byte + size;
 
     while (byte < end) {
       *byte++ = checksum;
@@ -140,21 +140,23 @@ crcResetGenerator (CRCGenerator *crc) {
 CRCGenerator *
 crcNewGenerator (const CRCAlgorithmParameters *parameters) {
   CRCGenerator *crc;
-  size_t size = sizeof(*crc) + strlen(parameters->primaryName) + 1;
+  const char *name = parameters->primaryName;
+  size_t size = sizeof(*crc) + strlen(name) + 1;
 
   if ((crc = malloc(size))) {
     memset(crc, 0, size);
 
     crc->parameters = *parameters;
-    strcpy(crc->algorithmName, parameters->primaryName);
+    strcpy(crc->algorithmName, name);
     crc->parameters.primaryName = crc->algorithmName;
 
     crc->properties.byteWidth = 8;
     crc->properties.byteShift = crc->parameters.checksumWidth - crc->properties.byteWidth;
+
     crc->properties.mostSignificantBit = crcMostSignificantBit(crc->parameters.checksumWidth);
     crc->properties.valueMask = (crc->properties.mostSignificantBit - 1) | crc->properties.mostSignificantBit;
-    crcCacheRemainders(crc);
 
+    crcCacheRemainders(crc);
     crcResetGenerator(crc);
     return crc;
   } else {
