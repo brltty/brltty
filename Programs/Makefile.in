@@ -351,16 +351,16 @@ pref_tables.$O:
 
 ###############################################################################
 
-CRC_OBJECTS = crc_generator.$O crc_algorithms.$O crc_utils.$O
+CRC_OBJECTS = crc_generate.$O crc_algorithms.$O crc_verify.$O
 
-crc_generator.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_generator.c
+crc_generate.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_generate.c
 
 crc_algorithms.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_algorithms.c
 
-crc_utils.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_utils.c
+crc_verify.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_verify.c
 
 ###############################################################################
 
