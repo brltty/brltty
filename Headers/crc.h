@@ -29,15 +29,19 @@ typedef uint32_t crc_t;
 typedef struct CRCGeneratorStruct CRCGenerator;
 
 typedef struct {
-  const char *algorithmName;
-  unsigned int checksumWidth;
+  const char *algorithmName; // the name of the algorithm
+  unsigned int checksumWidth; // the width of the checksum (in bits)
   crc_t generatorPolynomial;
-  crc_t initialValue;
-  crc_t xorMask;
-  crc_t checkValue;
-  crc_t residue;
-  unsigned reflectInput:1;
-  unsigned reflectResult:1;
+
+  crc_t initialValue; // the starting value (before any processing)
+  crc_t xorMask; // the xor (exclussive or) mask to apply to the final value
+
+  unsigned reflectInput:1; // reflect each input byte before processing it
+  unsigned reflectResult:1; // reflect the final value (before xor)
+
+  crc_t checkValue; // the checksum for the official check data ("123456789")
+  crc_t residue; // the final value (no reflection or xor) of the check data
+                 // followed by its checksum (in network byte order)
 } CRCAlgorithmParameters;
 
 extern const CRCAlgorithmParameters *crcProvidedAlgorithms[];
@@ -47,11 +51,12 @@ extern const CRCAlgorithmParameters crcAlgorithmParameters_UMTS;
 extern const CRCAlgorithmParameters crcAlgorithmParameters_GSM;
 
 typedef struct {
-  unsigned int byteWidth;
-  unsigned int byteShift;
-  crc_t mostSignificantBit;
-  crc_t valueMask;
-  crc_t remainderCache[UINT8_MAX + 1];
+  unsigned int byteWidth; // the width of a byte (in bits)
+  unsigned int byteShift; // the bit offset of the high-order byte of the value
+  crc_t mostSignificantBit; // the most significant bit of the value
+  crc_t valueMask; // the mask for removing overflow bits in the value
+  crc_t remainderCache[UINT8_MAX + 1]; // for precalculating a common
+                                       // calculation for each input byte
 } CRCGeneratorProperties;
 
 extern CRCGenerator *crcNewGenerator (const CRCAlgorithmParameters *parameters);
