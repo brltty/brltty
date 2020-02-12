@@ -63,6 +63,8 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
 
+typedef uint16_t PacketInteger;
+
 typedef struct {
   unsigned char isNew:1;
   unsigned char force;
@@ -78,7 +80,12 @@ struct BrailleDataStruct {
   IdentityResponseHandler *handleIdentityResponse;
   CRCGenerator *crcGenerator;
   unsigned int protocolVersion;
-  AsyncHandle pollAlarm;
+
+  struct {
+    AsyncHandle alarm;
+    PacketInteger state;
+    unsigned waiting:1;
+  } poll;
 
   struct {
     KeyNumberSet keys;
@@ -93,8 +100,6 @@ struct BrailleDataStruct {
 #define PACKET_ESCAPE_BYTE 0X7D
 #define PACKET_ESCAPE_BIT 0X20
 #define PACKET_FRAMING_BYTE 0X7E
-
-typedef uint16_t PacketInteger;
 
 static PacketInteger
 getResponseInteger (const unsigned char *response, unsigned int offset) {
@@ -223,7 +228,10 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
 
   *target++ = PACKET_FRAMING_BYTE;
   size = target - buffer;
-  return writeBraillePacket(brl, NULL, buffer, size);
+  if (!writeBraillePacket(brl, NULL, buffer, size)) return 0;
+
+  brl->data->poll.waiting = 1;
+  return 1;
 }
 
 static int
@@ -233,11 +241,14 @@ writeCommand (BrailleDisplay *brl, unsigned char command) {
 }
 
 ASYNC_ALARM_CALLBACK(CN_handlePollAlarm) {
+  BrailleDisplay *brl = parameters->data;
+  if (brl->data->poll.waiting) return;
+  writeCommand(brl, CN_CMD_KEYS_STATE);
 }
 
 static void
 stopPollAlarm (BrailleDisplay *brl) {
-  AsyncHandle *alarm = &brl->data->pollAlarm;
+  AsyncHandle *alarm = &brl->data->poll.alarm;
 
   if (*alarm) {
     asyncDiscardHandle(*alarm);
@@ -247,12 +258,12 @@ stopPollAlarm (BrailleDisplay *brl) {
 
 static int
 startPollAlarm (BrailleDisplay *brl) {
-  AsyncHandle alarm = brl->data->pollAlarm;
+  AsyncHandle alarm = brl->data->poll.alarm;
   if (alarm) return 1;
 
   if (asyncNewRelativeAlarm(&alarm, 0, CN_handlePollAlarm, brl)) {
     if (asyncResetAlarmEvery(alarm, POLL_ALARM_INTERVAL)) {
-      brl->data->pollAlarm = alarm;
+      brl->data->poll.alarm = alarm;
       return 1;
     }
 
@@ -264,6 +275,7 @@ startPollAlarm (BrailleDisplay *brl) {
 
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  brl->data->poll.waiting = 0;
   IdentityResponseHandler *handler = brl->data->handleIdentityResponse;
   brl->data->handleIdentityResponse = NULL;
   return handler(brl, packet, size);
@@ -282,6 +294,13 @@ writeNextIdentifyCommand (BrailleDisplay *brl, unsigned char command, IdentityRe
 }
 
 static BrailleResponseResult
+handleDeviceState (BrailleDisplay *brl, const unsigned char *response, size_t size) {
+  if (response[0] != CN_CMD_DEVICE_STATE) return BRL_RSP_UNEXPECTED;
+  brl->data->poll.state = getResponseResult(response);
+  return BRL_RSP_DONE;
+}
+
+static BrailleResponseResult
 handleFirmwareVersion (BrailleDisplay *brl, const unsigned char *response, size_t size) {
   if (response[0] != CN_CMD_FIRMWARE_VERSION) return BRL_RSP_UNEXPECTED;
 
@@ -289,7 +308,7 @@ handleFirmwareVersion (BrailleDisplay *brl, const unsigned char *response, size_
   size -= 1;
   logMessage(LOG_INFO, "Firmware Version: %.*s", (int)size, response);
 
-  return BRL_RSP_DONE;
+  return writeNextIdentifyCommand(brl, CN_CMD_DEVICE_STATE, handleDeviceState);
 }
 
 static BrailleResponseResult
@@ -402,7 +421,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     brl->data->handleIdentityResponse = NULL;
     brl->data->crcGenerator = NULL;
-    brl->data->pollAlarm = NULL;
+
+    brl->data->poll.alarm = NULL;
 
     brl->data->input.keys = 0;
 
@@ -483,6 +503,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
+    brl->data->poll.waiting = 0;
     PacketInteger result = getResponseResult(packet);
 
     switch (packet[0]) {

@@ -53,4 +53,8 @@ typedef enum {
   CN_GRP_NavigationKeys = 0,
 } CN_KeyGroup;
 
+typedef enum {
+  CN_DEV_MOTORS_ACTIVE = 0X01,
+} CN_DeviceStates;
+
 #endif /* BRLTTY_INCLUDED_CN_BRLDEFS */ 
