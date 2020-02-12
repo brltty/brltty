@@ -106,15 +106,27 @@ crcGetResidue (CRCGenerator *crc) {
 
   unsigned int size = crc->parameters.checksumWidth / crc->properties.byteWidth;
   uint8_t data[size];
-  uint8_t *byte = data + size;
 
-  while (byte-- > data) {
-    *byte = checksum;
-    checksum >>= crc->properties.byteWidth;
+  if (crc->parameters.reflectResult) {
+    uint8_t *byte = data;
+    uint8_t *end = byte + size;
+
+    while (byte < end) {
+      *byte++ = checksum;
+      checksum >>= crc->properties.byteWidth;
+    }
+  } else {
+    uint8_t *byte = data + size;
+
+    while (byte-- > data) {
+      *byte = checksum;
+      checksum >>= crc->properties.byteWidth;
+    }
   }
 
   crcAddData(crc, data, size);
   crc_t residue = crc->currentValue;
+  if (crc->parameters.reflectResult) crcReflectValue(crc, &residue);
 
   crc->currentValue = originalValue;
   return residue;
