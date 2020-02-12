@@ -29,6 +29,7 @@ struct CRCGeneratorStruct {
   CRCAlgorithmParameters parameters;
   CRCGeneratorProperties properties;
   crc_t currentValue;
+  char algorithmName[];
 };
 
 #ifdef __cplusplus
