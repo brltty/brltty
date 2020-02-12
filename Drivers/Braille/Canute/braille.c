@@ -89,7 +89,9 @@ struct BrailleDataStruct {
   } output;
 };
 
+#define PACKET_CHECKSUM_ALGORITHM "CRC-16/ISO-HDLC"
 #define PACKET_ESCAPE_BYTE 0X7D
+#define PACKET_ESCAPE_BIT 0X20
 #define PACKET_FRAMING_BYTE 0X7E
 
 typedef uint16_t PacketInteger;
@@ -153,7 +155,7 @@ verifyPacket (
 
   if (pvd->escaped) {
     pvd->escaped = 0;
-    byte ^= 0X20;
+    byte ^= PACKET_ESCAPE_BIT;
   }
 
   return BRL_PVR_INCLUDE;
@@ -207,7 +209,7 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
 
     if ((byte == PACKET_ESCAPE_BYTE) || (byte == PACKET_FRAMING_BYTE)) {
       *target++ = PACKET_ESCAPE_BYTE;
-      byte ^= 0X20;
+      byte ^= PACKET_ESCAPE_BIT;
     }
 
     *target++ = byte;
@@ -406,7 +408,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     brl->data->output.rowEntries = NULL;
 
-    if ((brl->data->crcGenerator = crcNewGenerator(crcGetAlgorithm("CRC-16/ISO-HDLC")))) {
+    if ((brl->data->crcGenerator = crcNewGenerator(crcGetAlgorithm(PACKET_CHECKSUM_ALGORITHM)))) {
       if (connectResource(brl, device)) {
         unsigned char response[MAXIMUM_RESPONSE_SIZE];
 
