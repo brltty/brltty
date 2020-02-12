@@ -28,8 +28,18 @@ typedef uint32_t crc_t;
 
 typedef struct CRCGeneratorStruct CRCGenerator;
 
+typedef enum {
+  CRC_ALGORITHM_CLASS_CONFIRMED,
+  CRC_ALGORITHM_CLASS_ATTESTED,
+  CRC_ALGORITHM_CLASS_ACADEMIC,
+  CRC_ALGORITHM_CLASS_THIRD_PARTY,
+} CRCAlgorithmClass;
+
 typedef struct {
-  const char *algorithmName; // the name of the algorithm
+  const char *algorithmName; // the official name of the algorithm
+  const char *const *secondaryNames; // other names that the algorithm is known by (NULL terminated)
+  CRCAlgorithmClass algorithmClass;
+
   unsigned int checksumWidth; // the width of the checksum (in bits)
   crc_t generatorPolynomial; // the polynomial that generates the checksum
 
