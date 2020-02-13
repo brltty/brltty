@@ -78,6 +78,11 @@ typedef struct {
   crc_t remainderCache[CRC_BYTE_INDEXED_TABLE_SIZE];
 } CRCProperties;
 
+extern void crcMakeProperties (
+  CRCProperties *properties,
+  const CRCAlgorithm *algorithm
+);
+
 typedef struct CRCGeneratorStruct CRCGenerator;
 extern CRCGenerator *crcNewGenerator (const CRCAlgorithm *algorithm);
 extern void crcResetGenerator (CRCGenerator *crc);
