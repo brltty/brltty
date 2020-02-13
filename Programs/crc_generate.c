@@ -39,34 +39,34 @@ crcReflectBits (crc_t fromValue, unsigned int width) {
 }
 
 void
-crcReflectValue (const CRCGenerator *crc, crc_t *value) {
-  *value = crcReflectBits(*value, crc->algorithm.checksumWidth);
+crcReflectValue (crc_t *value, const CRCAlgorithm *algorithm) {
+  *value = crcReflectBits(*value, algorithm->checksumWidth);
 }
 
 void
-crcReflectByte (const CRCGenerator *crc, uint8_t *byte) {
-  *byte = crcReflectBits(*byte, crc->properties.byteWidth);
+crcReflectByte (uint8_t *byte) {
+  *byte = crcReflectBits(*byte, CRC_BYTE_WIDTH);
 }
 
-static uint8_t crcDirectInputTranslationTable[UINT8_MAX + 1] = {1};
-static uint8_t crcReflectedInputTranslationTable[UINT8_MAX + 1] = {1};
+static uint8_t crcDirectInputTranslationTable[CRC_BYTE_INDEXED_TABLE_SIZE] = {1};
+static uint8_t crcReflectedInputTranslationTable[CRC_BYTE_INDEXED_TABLE_SIZE] = {1};
 
 static void
-crcMakeInputTranslationTable (CRCGenerator *crc) {
-  if (crc->algorithm.reflectInput) {
+crcMakeInputTranslationTable (CRCProperties *properties, const CRCAlgorithm *algorithm) {
+  if (algorithm->reflectInput) {
     uint8_t *table = crcReflectedInputTranslationTable;
-    crc->properties.inputTranslationTable = table;
+    properties->inputTranslationTable = table;
 
     if (*table) {
       for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
         uint8_t *byte = &table[index];
         *byte = index;
-        crcReflectByte(crc, byte);
+        crcReflectByte(byte);
       }
     }
   } else {
     uint8_t *table = crcDirectInputTranslationTable;
-    crc->properties.inputTranslationTable = table;
+    properties->inputTranslationTable = table;
 
     if (*table) {
       for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
@@ -77,87 +77,36 @@ crcMakeInputTranslationTable (CRCGenerator *crc) {
 }
 
 static void
-crcMakeRemainderCache (CRCGenerator *crc) {
+crcMakeRemainderCache (CRCProperties *properties, const CRCAlgorithm *algorithm) {
   // Compute the remainder for each possible dividend.
   for (unsigned int dividend=0; dividend<=UINT8_MAX; dividend+=1) {
     // Start with the dividend followed by zeros.
-    crc_t remainder = dividend << crc->properties.byteShift;
+    crc_t remainder = dividend << properties->byteShift;
 
     // Perform modulo-2 division, a bit at a time.
-    for (unsigned int bit=crc->properties.byteWidth; bit>0; bit-=1) {
+    for (unsigned int bit=CRC_BYTE_WIDTH; bit>0; bit-=1) {
       // Try to divide the current data bit.
-      if (remainder & crc->properties.mostSignificantBit) {
+      if (remainder & properties->mostSignificantBit) {
         remainder <<= 1;
-        remainder ^= crc->algorithm.generatorPolynomial;
+        remainder ^= algorithm->generatorPolynomial;
       } else {
         remainder <<= 1;
       }
     }
 
     // Store the result into the table.
-    crc->properties.remainderCache[dividend] = remainder & crc->properties.valueMask;
+    properties->remainderCache[dividend] = remainder & properties->valueMask;
   }
 }
 
 void
-crcAddByte (CRCGenerator *crc, uint8_t byte) {
-  byte = crc->properties.inputTranslationTable[byte];
-  byte ^= crc->currentValue >> crc->properties.byteShift;
-  crc->currentValue = crc->properties.remainderCache[byte] ^ (crc->currentValue << crc->properties.byteWidth);
-  crc->currentValue &= crc->properties.valueMask;
-}
+crcMakeProperties (CRCProperties *properties, const CRCAlgorithm *algorithm) {
+  properties->byteShift = algorithm->checksumWidth - CRC_BYTE_WIDTH;
+  properties->mostSignificantBit = crcMostSignificantBit(algorithm->checksumWidth);
+  properties->valueMask = (properties->mostSignificantBit - 1) | properties->mostSignificantBit;
 
-void
-crcAddData (CRCGenerator *crc, const void *data, size_t size) {
-  const uint8_t *byte = data;
-  const uint8_t *end = byte + size;
-  while (byte < end) crcAddByte(crc, *byte++);
-}
-
-crc_t
-crcGetValue (const CRCGenerator *crc) {
-  return crc->currentValue;
-}
-
-crc_t
-crcGetChecksum (const CRCGenerator *crc) {
-  crc_t checksum = crc->currentValue;
-  if (crc->algorithm.reflectResult) crcReflectValue(crc, &checksum);
-  checksum ^= crc->algorithm.xorMask;
-  return checksum;
-}
-
-crc_t
-crcGetResidue (CRCGenerator *crc) {
-  crc_t originalValue = crc->currentValue;
-  crc_t checksum = crcGetChecksum(crc);
-
-  unsigned int size = crc->algorithm.checksumWidth / crc->properties.byteWidth;
-  uint8_t data[size];
-
-  if (crc->algorithm.reflectResult) {
-    uint8_t *byte = data;
-    const uint8_t *end = byte + size;
-
-    while (byte < end) {
-      *byte++ = checksum;
-      checksum >>= crc->properties.byteWidth;
-    }
-  } else {
-    uint8_t *byte = data + size;
-
-    while (byte-- > data) {
-      *byte = checksum;
-      checksum >>= crc->properties.byteWidth;
-    }
-  }
-
-  crcAddData(crc, data, size);
-  crc_t residue = crc->currentValue;
-  if (crc->algorithm.reflectResult) crcReflectValue(crc, &residue);
-
-  crc->currentValue = originalValue;
-  return residue;
+  crcMakeInputTranslationTable(properties, algorithm);
+  crcMakeRemainderCache(properties, algorithm);
 }
 
 void
@@ -178,15 +127,7 @@ crcNewGenerator (const CRCAlgorithm *algorithm) {
     strcpy(crc->algorithmName, name);
     crc->algorithm.primaryName = crc->algorithmName;
 
-    crc->properties.byteWidth = 8;
-    crc->properties.byteShift = crc->algorithm.checksumWidth - crc->properties.byteWidth;
-
-    crc->properties.mostSignificantBit = crcMostSignificantBit(crc->algorithm.checksumWidth);
-    crc->properties.valueMask = (crc->properties.mostSignificantBit - 1) | crc->properties.mostSignificantBit;
-
-    crcMakeInputTranslationTable(crc);
-    crcMakeRemainderCache(crc);
-
+    crcMakeProperties(&crc->properties, &crc->algorithm);
     crcResetGenerator(crc);
     return crc;
   } else {
@@ -201,12 +142,76 @@ crcDestroyGenerator (CRCGenerator *crc) {
   free(crc);
 }
 
+void
+crcAddByte (CRCGenerator *crc, uint8_t byte) {
+  byte = crc->properties.inputTranslationTable[byte];
+  byte ^= crc->currentValue >> crc->properties.byteShift;
+  crc->currentValue = crc->properties.remainderCache[byte] ^ (crc->currentValue << CRC_BYTE_WIDTH);
+  crc->currentValue &= crc->properties.valueMask;
+}
+
+void
+crcAddData (CRCGenerator *crc, const void *data, size_t size) {
+  const uint8_t *byte = data;
+  const uint8_t *end = byte + size;
+  while (byte < end) crcAddByte(crc, *byte++);
+}
+
+crc_t
+crcGetValue (const CRCGenerator *crc) {
+  return crc->currentValue;
+}
+
+crc_t
+crcGetChecksum (const CRCGenerator *crc) {
+  const CRCAlgorithm *algorithm = &crc->algorithm;
+  crc_t checksum = crc->currentValue;
+  if (crc->algorithm.reflectResult) crcReflectValue(&checksum, algorithm);
+  checksum ^= algorithm->xorMask;
+  return checksum;
+}
+
+crc_t
+crcGetResidue (CRCGenerator *crc) {
+  const CRCAlgorithm *algorithm = &crc->algorithm;
+
+  crc_t originalValue = crc->currentValue;
+  crc_t checksum = crcGetChecksum(crc);
+
+  unsigned int size = algorithm->checksumWidth / CRC_BYTE_WIDTH;
+  uint8_t data[size];
+
+  if (algorithm->reflectResult) {
+    uint8_t *byte = data;
+    const uint8_t *end = byte + size;
+
+    while (byte < end) {
+      *byte++ = checksum;
+      checksum >>= CRC_BYTE_WIDTH;
+    }
+  } else {
+    uint8_t *byte = data + size;
+
+    while (byte-- > data) {
+      *byte = checksum;
+      checksum >>= CRC_BYTE_WIDTH;
+    }
+  }
+
+  crcAddData(crc, data, size);
+  crc_t residue = crc->currentValue;
+  if (algorithm->reflectResult) crcReflectValue(&residue, algorithm);
+
+  crc->currentValue = originalValue;
+  return residue;
+}
+
 const CRCAlgorithm *
 crcGetAlgorithm (const CRCGenerator *crc) {
   return &crc->algorithm;
 }
 
-const CRCGeneratorProperties *
+const CRCProperties *
 crcGetProperties (const CRCGenerator *crc) {
   return &crc->properties;
 }

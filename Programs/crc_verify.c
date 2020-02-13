@@ -30,7 +30,7 @@ const uint8_t crcCheckData[] = {
 const uint8_t crcCheckSize = sizeof(crcCheckData);
 
 void
-crcLogAlgorithmProperties (const CRCAlgorithm *algorithm) {
+crcLogAlgorithm (const CRCAlgorithm *algorithm) {
   logMessage(LOG_DEBUG,
     "CRC Algorithm: %s: Width:%u Poly:%X Init:%X Xor:%X RefIn:%u RefOut:%u Chk:%X Res:%X",
     algorithm->primaryName,
@@ -42,14 +42,12 @@ crcLogAlgorithmProperties (const CRCAlgorithm *algorithm) {
 }
 
 void
-crcLogGeneratorProperties (const CRCGenerator *crc) {
-  const CRCGeneratorProperties *properties = crcGetProperties(crc);
-
+crcLogProperties (const CRCProperties *properties) {
   logMessage(LOG_DEBUG,
-    "CRC Properteis: %s: Byte:%u Shift:%u MSB:%X Mask:%X",
-    crcGetAlgorithmName(crc),
-    properties->byteWidth, properties->byteShift,
-    properties->mostSignificantBit, properties->valueMask
+    "CRC Properteis: Shift:%u MSB:%X Mask:%X",
+    properties->byteShift,
+    properties->mostSignificantBit,
+    properties->valueMask
   );
 }
 

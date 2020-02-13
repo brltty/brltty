@@ -26,9 +26,19 @@ extern "C" {
 typedef uint32_t crc_t;
 #define CRC_C UINT32_C
 
-typedef struct CRCGeneratorStruct CRCGenerator;
+#define CRC_BYTE_WIDTH 8
+#define CRC_BYTE_INDEXED_TABLE_SIZE (UINT8_MAX + 1)
+
+static inline crc_t
+crcMostSignificantBit (unsigned int width) {
+  return CRC_C(1) << (width - 1);
+}
+
+extern crc_t crcReflectBits (crc_t fromValue, unsigned int width);
+extern void crcReflectByte (uint8_t *byte);
 
 typedef enum {
+  CRC_ALGORITHM_CLASS_UNKNOWN,
   CRC_ALGORITHM_CLASS_CONFIRMED,
   CRC_ALGORITHM_CLASS_ATTESTED,
   CRC_ALGORITHM_CLASS_ACADEMIC,
@@ -56,19 +66,19 @@ typedef struct {
 
 extern const CRCAlgorithm *crcProvidedAlgorithms[];
 extern const CRCAlgorithm *crcGetProvidedAlgorithm (const char *name);
+extern void crcReflectValue (crc_t *value, const CRCAlgorithm *algorithm);
 
 typedef struct {
-  unsigned int byteWidth; // the width of a byte (in bits)
   unsigned int byteShift; // the bit offset of the high-order byte of the value
-
   crc_t mostSignificantBit; // the most significant bit of the value
   crc_t valueMask; // the mask for removing overflow bits in the value
-
   const uint8_t *inputTranslationTable; // for optimizing input reflection
-  crc_t remainderCache[UINT8_MAX + 1]; // for preevaluating a common
-                                       // calculation on each input byte
-} CRCGeneratorProperties;
 
+  // for preevaluating a common calculation on each input byte
+  crc_t remainderCache[CRC_BYTE_INDEXED_TABLE_SIZE];
+} CRCProperties;
+
+typedef struct CRCGeneratorStruct CRCGenerator;
 extern CRCGenerator *crcNewGenerator (const CRCAlgorithm *algorithm);
 extern void crcResetGenerator (CRCGenerator *crc);
 extern void crcDestroyGenerator (CRCGenerator *crc);
@@ -80,20 +90,11 @@ extern crc_t crcGetChecksum (const CRCGenerator *crc);
 extern crc_t crcGetResidue (CRCGenerator *crc);
 
 extern const CRCAlgorithm *crcGetAlgorithm (const CRCGenerator *crc);
-extern const CRCGeneratorProperties *crcGetProperties (const CRCGenerator *crc);
+extern const CRCProperties *crcGetProperties (const CRCGenerator *crc);
 extern crc_t crcGetValue (const CRCGenerator *crc);
 
-static inline crc_t
-crcMostSignificantBit (unsigned int width) {
-  return CRC_C(1) << (width - 1);
-}
-
-extern crc_t crcReflectBits (crc_t fromValue, unsigned int width);
-extern void crcReflectValue (const CRCGenerator *crc, crc_t *value);
-extern void crcReflectByte (const CRCGenerator *crc, uint8_t *byte);
-
-extern void crcLogAlgorithmProperties (const CRCAlgorithm *algorithm);
-extern void crcLogGeneratorProperties (const CRCGenerator *crc);
+extern void crcLogAlgorithm (const CRCAlgorithm *algorithm);
+extern void crcLogProperties (const CRCProperties *properties);
 
 extern const uint8_t crcCheckData[];
 extern const uint8_t crcCheckSize;

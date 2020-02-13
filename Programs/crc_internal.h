@@ -27,7 +27,7 @@ extern "C" {
 
 struct CRCGeneratorStruct {
   CRCAlgorithm algorithm;
-  CRCGeneratorProperties properties;
+  CRCProperties properties;
   crc_t currentValue;
   char algorithmName[];
 };
