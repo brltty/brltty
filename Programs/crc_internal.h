@@ -26,7 +26,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 struct CRCGeneratorStruct {
-  CRCAlgorithmParameters parameters;
+  CRCAlgorithm algorithm;
   CRCGeneratorProperties properties;
   crc_t currentValue;
   char algorithmName[];

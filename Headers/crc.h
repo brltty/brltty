@@ -52,10 +52,10 @@ typedef struct {
   crc_t checkValue; // the checksum for the official check data ("123456789")
   crc_t residue; // the final value (no reflection or xor) of the check data
                  // followed by its checksum (in network byte order)
-} CRCAlgorithmParameters;
+} CRCAlgorithm;
 
-extern const CRCAlgorithmParameters *crcProvidedAlgorithms[];
-extern const CRCAlgorithmParameters *crcGetAlgorithm (const char *name);
+extern const CRCAlgorithm *crcProvidedAlgorithms[];
+extern const CRCAlgorithm *crcGetProvidedAlgorithm (const char *name);
 
 typedef struct {
   unsigned int byteWidth; // the width of a byte (in bits)
@@ -69,7 +69,7 @@ typedef struct {
                                        // calculation on each input byte
 } CRCGeneratorProperties;
 
-extern CRCGenerator *crcNewGenerator (const CRCAlgorithmParameters *parameters);
+extern CRCGenerator *crcNewGenerator (const CRCAlgorithm *algorithm);
 extern void crcResetGenerator (CRCGenerator *crc);
 extern void crcDestroyGenerator (CRCGenerator *crc);
 
@@ -79,7 +79,7 @@ extern void crcAddData (CRCGenerator *crc, const void *data, size_t size);
 extern crc_t crcGetChecksum (const CRCGenerator *crc);
 extern crc_t crcGetResidue (CRCGenerator *crc);
 
-extern const CRCAlgorithmParameters *crcGetParameters (const CRCGenerator *crc);
+extern const CRCAlgorithm *crcGetGeneratorAlgorithm (const CRCGenerator *crc);
 extern const CRCGeneratorProperties *crcGetProperties (const CRCGenerator *crc);
 extern crc_t crcGetValue (const CRCGenerator *crc);
 
@@ -95,22 +95,22 @@ extern void crcReflectByte (const CRCGenerator *crc, uint8_t *byte);
 extern const uint8_t crcCheckData[];
 extern const uint8_t crcCheckSize;
 
-extern void crcLogAlgorithmParameters (const CRCAlgorithmParameters *parameters);
+extern void crcLogAlgorithmProperties (const CRCAlgorithm *algorithm);
 extern void crcLogGeneratorProperties (const CRCGenerator *crc);
 
 extern int crcVerifyChecksum (const CRCGenerator *crc, crc_t expected);
 extern int crcVerifyResidue (CRCGenerator *crc);
 
-extern int crcVerifyAlgorithm (const CRCAlgorithmParameters *parameters);
+extern int crcVerifyAlgorithm (const CRCAlgorithm *algorithm);
 extern int crcVerifyProvidedAlgorithms (void);
 
 extern int crcVerifyAlgorithmWithData (
-  const CRCAlgorithmParameters *parameters,
+  const CRCAlgorithm *algorithm,
   const void *data, size_t size, crc_t expected
 );
 
 extern int crcVerifyAlgorithmWithString (
-  const CRCAlgorithmParameters *parameters,
+  const CRCAlgorithm *algorithm,
   const char *string, crc_t expected
 );
 

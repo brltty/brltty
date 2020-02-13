@@ -30,14 +30,14 @@ const uint8_t crcCheckData[] = {
 const uint8_t crcCheckSize = sizeof(crcCheckData);
 
 void
-crcLogAlgorithmParameters (const CRCAlgorithmParameters *parameters) {
+crcLogAlgorithmProperties (const CRCAlgorithm *algorithm) {
   logMessage(LOG_DEBUG,
-    "CRC Parameters: %s: Width:%u Poly:%X Init:%X Xor:%X RefIn:%u RefOut:%u Chk:%X Res:%X",
-    parameters->primaryName,
-    parameters->checksumWidth, parameters->generatorPolynomial,
-    parameters->initialValue, parameters->xorMask,
-    parameters->reflectInput, parameters->reflectResult,
-    parameters->checkValue, parameters->residue
+    "CRC Algorithm: %s: Width:%u Poly:%X Init:%X Xor:%X RefIn:%u RefOut:%u Chk:%X Res:%X",
+    algorithm->primaryName,
+    algorithm->checksumWidth, algorithm->generatorPolynomial,
+    algorithm->initialValue, algorithm->xorMask,
+    algorithm->reflectInput, algorithm->reflectResult,
+    algorithm->checkValue, algorithm->residue
   );
 }
 
@@ -72,7 +72,7 @@ crcVerifyChecksum (const CRCGenerator *crc, crc_t expected) {
 int
 crcVerifyResidue (CRCGenerator *crc) {
   crc_t actual = crcGetResidue(crc);
-  crc_t expected = crc->parameters.residue;
+  crc_t expected = crc->algorithm.residue;
   int ok = actual == expected;
   if (!ok) crcLogMismatch(crc, "residue", actual, expected);
   return ok;
@@ -80,10 +80,10 @@ crcVerifyResidue (CRCGenerator *crc) {
 
 int
 crcVerifyAlgorithmWithData (
-  const CRCAlgorithmParameters *parameters,
+  const CRCAlgorithm *algorithm,
   const void *data, size_t size, crc_t expected
 ) {
-  CRCGenerator *crc = crcNewGenerator(parameters);
+  CRCGenerator *crc = crcNewGenerator(algorithm);
   crcAddData(crc, data, size);
 
   int ok = crcVerifyChecksum(crc, expected);
@@ -95,27 +95,27 @@ crcVerifyAlgorithmWithData (
 
 int
 crcVerifyAlgorithmWithString (
-  const CRCAlgorithmParameters *parameters,
+  const CRCAlgorithm *algorithm,
   const char *string, crc_t expected
 ) {
-  return crcVerifyAlgorithmWithData(parameters, string, strlen(string), expected);
+  return crcVerifyAlgorithmWithData(algorithm, string, strlen(string), expected);
 }
 
 int
-crcVerifyAlgorithm (const CRCAlgorithmParameters *parameters) {
+crcVerifyAlgorithm (const CRCAlgorithm *algorithm) {
   return crcVerifyAlgorithmWithData(
-    parameters, crcCheckData, crcCheckSize, parameters->checkValue
+    algorithm, crcCheckData, crcCheckSize, algorithm->checkValue
   );
 }
 
 int
 crcVerifyProvidedAlgorithms (void) {
   int ok = 1;
-  const CRCAlgorithmParameters **parameters = crcProvidedAlgorithms;
+  const CRCAlgorithm **algorithm = crcProvidedAlgorithms;
 
-  while (*parameters) {
-    if (!crcVerifyAlgorithm(*parameters)) ok = 0;
-    parameters += 1;
+  while (*algorithm) {
+    if (!crcVerifyAlgorithm(*algorithm)) ok = 0;
+    algorithm += 1;
   }
 
   return ok;

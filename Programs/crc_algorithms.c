@@ -22,12 +22,12 @@
 
 #include "crc.h"
 
-#define CRC_ALGORITHM_NAME(name) crcAlgorithmParameters_ ## name
-#define CRC_ALGORITHM_DEFINITION(name) static const CRCAlgorithmParameters CRC_ALGORITHM_NAME(name)
+#define CRC_ALGORITHM_NAME(name) crcAlgorithm_ ## name
+#define CRC_ALGORITHM_DEFINITION(name) static const CRCAlgorithm CRC_ALGORITHM_NAME(name)
 #define CRC_SECONDARY_NAMES(...) .secondaryNames = (const char *const []){__VA_ARGS__, NULL}
 
 /*
- * These CRC algorithm parameters have been copied from:
+ * These CRC algorithms have been copied from:
  * http://reveng.sourceforge.net/crc-catalogue/16.htm
  */
 
@@ -402,7 +402,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_XMODEM) = {
   .checkValue = UINT16_C(0X31C3),
 };
 
-const CRCAlgorithmParameters *crcProvidedAlgorithms[] = {
+const CRCAlgorithm *crcProvidedAlgorithms[] = {
   &CRC_ALGORITHM_NAME(CRC16_ARC),
   &CRC_ALGORITHM_NAME(CRC16_CDMA2000),
   &CRC_ALGORITHM_NAME(CRC16_CMS),
@@ -436,22 +436,22 @@ const CRCAlgorithmParameters *crcProvidedAlgorithms[] = {
   NULL
 };
 
-const CRCAlgorithmParameters *
-crcGetAlgorithm (const char *name) {
-  const CRCAlgorithmParameters **parameters = crcProvidedAlgorithms;
+const CRCAlgorithm *
+crcGetProvidedAlgorithm (const char *name) {
+  const CRCAlgorithm **algorithm = crcProvidedAlgorithms;
 
-  while (*parameters) {
-    if (strcmp(name, (*parameters)->primaryName) == 0) return *parameters;
-    const char *const *alias = (*parameters)->secondaryNames;
+  while (*algorithm) {
+    if (strcmp(name, (*algorithm)->primaryName) == 0) return *algorithm;
+    const char *const *alias = (*algorithm)->secondaryNames;
 
     if (alias) {
       while (*alias) {
-        if (strcmp(name, *alias) == 0) return *parameters;
+        if (strcmp(name, *alias) == 0) return *algorithm;
         alias += 1;
       }
     }
 
-    parameters += 1;
+    algorithm += 1;
   }
 
   return NULL;
