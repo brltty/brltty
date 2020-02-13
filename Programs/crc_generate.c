@@ -54,24 +54,25 @@ static uint8_t crcReflectedInputTranslationTable[UINT8_MAX + 1] = {1};
 static void
 crcMakeInputTranslationTable (CRCGenerator *crc) {
   if (crc->parameters.reflectInput) {
-    if (crcReflectedInputTranslationTable[0]) {
+    uint8_t *table = crcReflectedInputTranslationTable;
+    crc->properties.inputTranslationTable = table;
+
+    if (*table) {
       for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
-        uint8_t *byte = &crcReflectedInputTranslationTable[index];
+        uint8_t *byte = &table[index];
         *byte = index;
         crcReflectByte(crc, byte);
       }
     }
-
-    crc->properties.inputTranslationTable = crcReflectedInputTranslationTable;
   } else {
-    if (crcDirectInputTranslationTable[0]) {
+    uint8_t *table = crcDirectInputTranslationTable;
+    crc->properties.inputTranslationTable = table;
+
+    if (*table) {
       for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
-        uint8_t *byte = &crcDirectInputTranslationTable[index];
-        *byte = index;
+        table[index] = index;
       }
     }
-
-    crc->properties.inputTranslationTable = crcDirectInputTranslationTable;
   }
 }
 
