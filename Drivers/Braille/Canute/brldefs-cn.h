@@ -62,4 +62,16 @@ typedef enum {
 #define CN_PACKET_ESCAPE_BYTE 0X7D
 #define CN_PACKET_ESCAPE_BIT 0X20
 
+typedef uint16_t CN_PacketInteger;
+
+static inline CN_PacketInteger
+CN_getResponseInteger (const unsigned char *response, unsigned int offset) {
+  return response[offset] | (response[offset+1] << 8);
+}
+
+static inline CN_PacketInteger
+CN_getResponseResult (const unsigned char *response) {
+  return CN_getResponseInteger(response, 1);
+}
+
 #endif /* BRLTTY_INCLUDED_CN_BRLDEFS */ 

@@ -63,15 +63,13 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
 END_KEY_TABLE_LIST
 
-typedef uint16_t PacketInteger;
-
 typedef struct {
   unsigned char isNew:1;
   unsigned char force;
   unsigned char cells[];
 } RowEntry;
 
-typedef BrailleResponseResult IdentityResponseHandler (
+typedef BrailleResponseResult ProbeResponseHandler (
   BrailleDisplay *brl,
   const unsigned char *response, size_t size
 );
@@ -80,14 +78,15 @@ struct BrailleDataStruct {
   CRCGenerator *crcGenerator;
 
   struct {
-    IdentityResponseHandler *handleIdentityResponse;
+    ProbeResponseHandler *responseHandler;
     unsigned int protocolVersion;
   } probe;
 
   struct {
-    AsyncHandle alarm;
-    PacketInteger state;
-    unsigned waiting:1;
+    AsyncHandle alarmHandle;
+    CN_PacketInteger deviceState;
+    unsigned char deviceStateCounter;
+    unsigned waitingForResponse:1;
   } poll;
 
   struct {
@@ -96,18 +95,9 @@ struct BrailleDataStruct {
 
   struct {
     RowEntry **rowEntries;
+    unsigned int firstNewRow;
   } output;
 };
-
-static PacketInteger
-getResponseInteger (const unsigned char *response, unsigned int offset) {
-  return response[offset] | (response[offset+1] << 8);
-}
-
-static PacketInteger
-getResponseResult (const unsigned char *response) {
-  return getResponseInteger(response, 1);
-}
 
 static crc_t
 makePacketChecksum (BrailleDisplay *brl, const void *packet, size_t size) {
@@ -180,20 +170,59 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
       }
 
       {
-        crc_t expected = getResponseInteger(packet, (length -= 2));
+        crc_t expected = CN_getResponseInteger(packet, (length -= 2));
         crc_t actual = makePacketChecksum(brl, packet, length);
 
         if (actual != expected) {
-          logMessage(LOG_CATEGORY(INPUT_PACKETS),
-            "checksum mismatch: Actual:%X Expected:%X",
+          logMessage(LOG_WARNING,
+            "input packet checksum mismatch: Actual:%X Expected:%X",
             actual, expected
           );
+
+          continue;
+        }
+      }
+
+      {
+        const unsigned char *bytes = packet;
+        unsigned char type = bytes[0];
+        size_t expected = 0;
+
+        switch (type) {
+          case CN_CMD_COLUMN_COUNT:
+          case CN_CMD_ROW_COUNT:
+          case CN_CMD_PROTOCOL_VERSION:
+          case CN_CMD_FIRMWARE_VERSION:
+          case CN_CMD_DEVICE_STATE:
+          case CN_CMD_KEYS_STATE:
+          case CN_CMD_SEND_ROW:
+            expected = 3;
+            break;
+
+          default:
+            logUnexpectedPacket(packet, length);
+            continue;
+        }
+
+        if (length < expected) {
+          logTruncatedPacket(packet, length);
+          continue;
         }
       }
     }
 
     return length;
   }
+}
+
+static inline void
+addByteToPacket (unsigned char **target, unsigned char byte) {
+  if ((byte == CN_PACKET_ESCAPE_BYTE) || (byte == CN_PACKET_FRAMING_BYTE)) {
+    *(*target)++ = CN_PACKET_ESCAPE_BYTE;
+    byte ^= CN_PACKET_ESCAPE_BIT;
+  }
+
+  *(*target)++ = byte;
 }
 
 static int
@@ -204,31 +233,26 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
   unsigned char *target = buffer;
   *target++ = CN_PACKET_FRAMING_BYTE;
 
-  const unsigned char *source = packet;
-  const unsigned char *end = source + size;
+  {
+    const unsigned char *source = packet;
+    const unsigned char *end = source + size;
 
-  while (source < end) {
-    unsigned char byte = *source++;
-
-    if ((byte == CN_PACKET_ESCAPE_BYTE) || (byte == CN_PACKET_FRAMING_BYTE)) {
-      *target++ = CN_PACKET_ESCAPE_BYTE;
-      byte ^= CN_PACKET_ESCAPE_BIT;
+    while (source < end) {
+      addByteToPacket(&target, *source++);
     }
-
-    *target++ = byte;
   }
 
   {
     uint16_t checksum = makePacketChecksum(brl, packet, size);
-    *target++ = checksum & UINT8_MAX;
-    *target++ = checksum >> 8;
+    addByteToPacket(&target, (checksum & UINT8_MAX));
+    addByteToPacket(&target, (checksum >> 8));
   }
 
   *target++ = CN_PACKET_FRAMING_BYTE;
   size = target - buffer;
   if (!writeBraillePacket(brl, NULL, buffer, size)) return 0;
 
-  brl->data->poll.waiting = 1;
+  brl->data->poll.waitingForResponse = 1;
   return 1;
 }
 
@@ -238,15 +262,99 @@ writeCommand (BrailleDisplay *brl, unsigned char command) {
   return writePacket(brl, packet, sizeof(packet));
 }
 
+static RowEntry *
+getRowEntry (BrailleDisplay *brl, unsigned int index) {
+  return brl->data->output.rowEntries[index];
+}
+
+static void
+deallocateRowEntries (BrailleDisplay *brl, unsigned int count) {
+  RowEntry ***rowEntries = &brl->data->output.rowEntries;
+
+  if (*rowEntries) {
+    while (count > 0) free(getRowEntry(brl, --count));
+    free(*rowEntries);
+    *rowEntries = NULL;
+  }
+}
+
+static int
+allocateRowEntries (BrailleDisplay *brl) {
+  RowEntry ***rowEntries = &brl->data->output.rowEntries;
+
+  if (!(*rowEntries = malloc(ARRAY_SIZE(*rowEntries, brl->textRows)))) {
+    logMallocError();
+    return 0;
+  }
+
+  for (unsigned int index=0; index<brl->textRows; index+=1) {
+    RowEntry **row = &(*rowEntries)[index];
+    size_t size = sizeof(**row) + brl->textColumns;
+
+    if (!(*row = malloc(size))) {
+      logMallocError();
+      deallocateRowEntries(brl, (index + 1));
+      return 0;
+    }
+
+    memset(*row, 0, size);
+    (*row)->force = 1;
+  }
+
+  return 1;
+}
+
+static int
+sendRow (BrailleDisplay *brl) {
+  while (brl->data->output.firstNewRow < brl->textRows) {
+    RowEntry *row = getRowEntry(brl, brl->data->output.firstNewRow);
+
+    if (row->isNew) {
+      unsigned int length = brl->textColumns;
+      unsigned char packet[2 + length];
+      unsigned char *byte = packet;
+
+      *byte++ = CN_CMD_SEND_ROW;
+      *byte++ = brl->data->output.firstNewRow;
+      byte = translateOutputCells(byte, row->cells, length);
+
+      if (writePacket(brl, packet, (byte - packet))) {
+        row->isNew = 0;
+        brl->data->poll.deviceState |= CN_DEV_MOTORS_ACTIVE;
+        brl->data->poll.deviceStateCounter = 0;
+      } else {
+        brl->hasFailed = 1;
+      }
+
+      return 1;
+    }
+
+    brl->data->output.firstNewRow += 1;
+  }
+
+  return 0;
+}
+
 ASYNC_ALARM_CALLBACK(CN_handlePollAlarm) {
   BrailleDisplay *brl = parameters->data;
-  if (brl->data->poll.waiting) return;
-  writeCommand(brl, CN_CMD_KEYS_STATE);
+  if (brl->data->poll.waitingForResponse) return;
+  unsigned char command = CN_CMD_KEYS_STATE;
+
+  if (!(brl->data->poll.deviceState & CN_DEV_MOTORS_ACTIVE)) {
+    if (sendRow(brl)) return;
+  } else if (brl->data->poll.deviceStateCounter) {
+    brl->data->poll.deviceStateCounter -= 1;
+  } else {
+    brl->data->poll.deviceStateCounter = 10;
+    command = CN_CMD_DEVICE_STATE;
+  }
+
+  if (!writeCommand(brl, command)) brl->hasFailed = 1;
 }
 
 static void
 stopPollAlarm (BrailleDisplay *brl) {
-  AsyncHandle *alarm = &brl->data->poll.alarm;
+  AsyncHandle *alarm = &brl->data->poll.alarmHandle;
 
   if (*alarm) {
     asyncDiscardHandle(*alarm);
@@ -256,12 +364,12 @@ stopPollAlarm (BrailleDisplay *brl) {
 
 static int
 startPollAlarm (BrailleDisplay *brl) {
-  AsyncHandle alarm = brl->data->poll.alarm;
+  AsyncHandle alarm = brl->data->poll.alarmHandle;
   if (alarm) return 1;
 
   if (asyncNewRelativeAlarm(&alarm, 0, CN_handlePollAlarm, brl)) {
     if (asyncResetAlarmEvery(alarm, POLL_ALARM_INTERVAL)) {
-      brl->data->poll.alarm = alarm;
+      brl->data->poll.alarmHandle = alarm;
       return 1;
     }
 
@@ -273,28 +381,28 @@ startPollAlarm (BrailleDisplay *brl) {
 
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  brl->data->poll.waiting = 0;
-  IdentityResponseHandler *handler = brl->data->probe.handleIdentityResponse;
-  brl->data->probe.handleIdentityResponse = NULL;
+  brl->data->poll.waitingForResponse = 0;
+  ProbeResponseHandler *handler = brl->data->probe.responseHandler;
+  brl->data->probe.responseHandler = NULL;
   return handler(brl, packet, size);
 }
 
 static BrailleResponseResult
-writeIdentifyCommand (BrailleDisplay *brl, unsigned char command, IdentityResponseHandler *handler) {
+writeProbeCommand (BrailleDisplay *brl, unsigned char command, ProbeResponseHandler *handler) {
   if (!writeCommand(brl, command)) return 0;
-  brl->data->probe.handleIdentityResponse = handler;
+  brl->data->probe.responseHandler = handler;
   return 1;
 }
 
 static BrailleResponseResult
-writeNextIdentifyCommand (BrailleDisplay *brl, unsigned char command, IdentityResponseHandler *handler) {
-  return writeIdentifyCommand(brl, command, handler)? BRL_RSP_CONTINUE: BRL_RSP_FAIL;
+writeNextProbeCommand (BrailleDisplay *brl, unsigned char command, ProbeResponseHandler *handler) {
+  return writeProbeCommand(brl, command, handler)? BRL_RSP_CONTINUE: BRL_RSP_FAIL;
 }
 
 static BrailleResponseResult
 handleDeviceState (BrailleDisplay *brl, const unsigned char *response, size_t size) {
   if (response[0] != CN_CMD_DEVICE_STATE) return BRL_RSP_UNEXPECTED;
-  brl->data->poll.state = getResponseResult(response);
+  brl->data->poll.deviceState = CN_getResponseResult(response);
   return BRL_RSP_DONE;
 }
 
@@ -306,69 +414,35 @@ handleFirmwareVersion (BrailleDisplay *brl, const unsigned char *response, size_
   size -= 1;
   logMessage(LOG_INFO, "Firmware Version: %.*s", (int)size, response);
 
-  return writeNextIdentifyCommand(brl, CN_CMD_DEVICE_STATE, handleDeviceState);
+  return writeNextProbeCommand(brl, CN_CMD_DEVICE_STATE, handleDeviceState);
 }
 
 static BrailleResponseResult
 handleProtocolVersion (BrailleDisplay *brl, const unsigned char *response, size_t size) {
   if (response[0] != CN_CMD_PROTOCOL_VERSION) return BRL_RSP_UNEXPECTED;
-  brl->data->probe.protocolVersion = getResponseResult(response);
+  brl->data->probe.protocolVersion = CN_getResponseResult(response);
   logMessage(LOG_INFO, "Protocol Version: %u", brl->data->probe.protocolVersion);
-  return writeNextIdentifyCommand(brl, CN_CMD_FIRMWARE_VERSION, handleFirmwareVersion);
+  return writeNextProbeCommand(brl, CN_CMD_FIRMWARE_VERSION, handleFirmwareVersion);
 }
 
 static BrailleResponseResult
 handleRowCount (BrailleDisplay *brl, const unsigned char *response, size_t size) {
   if (response[0] != CN_CMD_ROW_COUNT) return BRL_RSP_UNEXPECTED;
-  brl->textRows = getResponseResult(response);
-  return writeNextIdentifyCommand(brl, CN_CMD_PROTOCOL_VERSION, handleProtocolVersion);
+  brl->textRows = CN_getResponseResult(response);
+  brl->data->output.firstNewRow = brl->textRows;
+  return writeNextProbeCommand(brl, CN_CMD_PROTOCOL_VERSION, handleProtocolVersion);
 }
 
 static BrailleResponseResult
 handleColumnCount (BrailleDisplay *brl, const unsigned char *response, size_t size) {
   if (response[0] != CN_CMD_COLUMN_COUNT) return BRL_RSP_UNEXPECTED;
-  brl->textColumns = getResponseResult(response);
-  return writeNextIdentifyCommand(brl, CN_CMD_ROW_COUNT, handleRowCount);
+  brl->textColumns = CN_getResponseResult(response);
+  return writeNextProbeCommand(brl, CN_CMD_ROW_COUNT, handleRowCount);
 }
 
 static int
 writeIdentifyRequest (BrailleDisplay *brl) {
-  return writeIdentifyCommand(brl, CN_CMD_COLUMN_COUNT, handleColumnCount);
-}
-
-static RowEntry *
-getRowEntry (BrailleDisplay *brl, unsigned int index) {
-  return brl->data->output.rowEntries[index];
-}
-
-static void
-deallocateRowEntries (BrailleDisplay *brl, unsigned int count) {
-  if (brl->data->output.rowEntries) {
-    while (count > 0) free(getRowEntry(brl, --count));
-    free(brl->data->output.rowEntries);
-    brl->data->output.rowEntries = NULL;
-  }
-}
-
-static int
-allocateRowEntries (BrailleDisplay *brl) {
-  if ((brl->data->output.rowEntries = malloc(ARRAY_SIZE(brl->data->output.rowEntries, brl->textRows)))) {
-    for (unsigned int index=0; index<brl->textRows; index+=1) {
-      RowEntry **row = &brl->data->output.rowEntries[index];
-      size_t size = sizeof(**row) + brl->textColumns;
-
-      if (!(*row = malloc(size))) {
-        logMallocError();
-        deallocateRowEntries(brl, (index + 1));
-        return 0;
-      }
-
-      memset(*row, 0, size);
-      (*row)->force = 1;
-    }
-  }
-
-  return 1;
+  return writeProbeCommand(brl, CN_CMD_COLUMN_COUNT, handleColumnCount);
 }
 
 static int
@@ -416,15 +490,9 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
-
-    brl->data->crcGenerator = NULL;
-
-    brl->data->probe.handleIdentityResponse = NULL;
-
-    brl->data->poll.alarm = NULL;
-
+    brl->data->probe.responseHandler = NULL;
+    brl->data->poll.alarmHandle = NULL;
     brl->data->input.keys = 0;
-
     brl->data->output.rowEntries = NULL;
 
     if ((brl->data->crcGenerator = crcNewGenerator(crcGetProvidedAlgorithm(CN_PACKET_CHECKSUM_ALGORITHM)))) {
@@ -467,32 +535,34 @@ static void
 brl_destruct (BrailleDisplay *brl) {
   stopPollAlarm(brl);
   disconnectBrailleResource(brl, NULL);
+  deallocateRowEntries(brl, brl->textRows);
+  crcDestroyGenerator(brl->data->crcGenerator);
 
-  if (brl->data) {
-    deallocateRowEntries(brl, brl->textRows);
-
-    {
-      CRCGenerator *crc = brl->data->crcGenerator;
-      if (crc) crcDestroyGenerator(crc);
-    }
-
-    free(brl->data);
-    brl->data = NULL;
-  }
+  free(brl->data);
+  brl->data = NULL;
 }
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned int length = brl->textColumns;
+  unsigned int firstNewRow = brl->textRows;
+  const unsigned char *cells = brl->buffer;
 
   for (unsigned int index=0; index<brl->textRows; index+=1) {
     RowEntry *row = getRowEntry(brl, index);
 
-    if (cellsHaveChanged(row->cells, &brl->buffer[index * length], length, NULL, NULL, &row->force)) {
+    if (cellsHaveChanged(row->cells, cells, length, NULL, NULL, &row->force)) {
       row->isNew = 1;
     }
+
+    if (row->isNew) {
+      if (index < firstNewRow) firstNewRow = index;
+    }
+
+    cells += length;
   }
 
+  brl->data->output.firstNewRow = firstNewRow;
   return 1;
 }
 
@@ -502,19 +572,19 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    brl->data->poll.waiting = 0;
-    PacketInteger result = getResponseResult(packet);
+    brl->data->poll.waitingForResponse = 0;
+    CN_PacketInteger result = CN_getResponseResult(packet);
 
     switch (packet[0]) {
-      case CN_CMD_SEND_ROW:
+      case CN_CMD_DEVICE_STATE:
+        brl->data->poll.deviceState = result;
         continue;
 
       case CN_CMD_KEYS_STATE:
         enqueueUpdatedKeys(brl, result, &brl->data->input.keys, CN_GRP_NavigationKeys, 0);
         continue;
 
-      case CN_CMD_DEVICE_STATE:
-        brl->data->poll.state = getResponseResult(packet);
+      case CN_CMD_SEND_ROW:
         continue;
 
       default:
