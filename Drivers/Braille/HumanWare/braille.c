@@ -357,7 +357,7 @@ handlePoweringOff (BrailleDisplay *brl) {
 static BraillePacketVerifierResult
 verifySerialPacket (
   BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
+  unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
   unsigned char byte = bytes[size-1];
@@ -566,7 +566,7 @@ writeHidReport (BrailleDisplay *brl, const void *data, size_t size) {
 static BraillePacketVerifierResult
 verifyHidPacket (
   BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
+  unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
   unsigned char byte = bytes[size-1];

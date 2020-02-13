@@ -113,7 +113,7 @@ struct BrailleDataStruct {
 static BraillePacketVerifierResult
 verifyPacket_ProfiLine (
   BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
+  unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
   switch (size) {
@@ -166,7 +166,7 @@ static const ModelEntry modelEntry_ProfiLine = {
 static BraillePacketVerifierResult
 verifyPacket_MobilLine (
   BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
+  unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
   off_t index = size - 1;

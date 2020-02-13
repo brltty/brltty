@@ -207,7 +207,7 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
 static BraillePacketVerifierResult
 verifyPacket1 (
   BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
+  unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
   unsigned char byte = bytes[size-1];
@@ -584,7 +584,7 @@ typedef struct {
 static BraillePacketVerifierResult
 verifyPacket2 (
   BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
+  unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
   Packet2 *packet = data;

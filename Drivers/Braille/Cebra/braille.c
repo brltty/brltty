@@ -206,7 +206,7 @@ writePacket (BrailleDisplay *brl, unsigned char type, size_t size, const unsigne
 static BraillePacketVerifierResult
 verifyPacket (
   BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
+  unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
   const unsigned char byte = bytes[size-1];

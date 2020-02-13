@@ -1402,7 +1402,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
 static BraillePacketVerifierResult
 verifyPacket2s (
   BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
+  unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
   unsigned char byte = bytes[size-1];
@@ -1652,7 +1652,7 @@ static const ProtocolOperations protocol2sOperations = {
 static BraillePacketVerifierResult
 verifyPacket2u (
   BrailleDisplay *brl,
-  const unsigned char *bytes, size_t size,
+  unsigned char *bytes, size_t size,
   size_t *length, void *data
 ) {
   unsigned char byte = bytes[size-1];
