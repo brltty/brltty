@@ -202,7 +202,7 @@ crcDestroyGenerator (CRCGenerator *crc) {
 }
 
 const CRCAlgorithm *
-crcGetGeneratorAlgorithm (const CRCGenerator *crc) {
+crcGetAlgorithm (const CRCGenerator *crc) {
   return &crc->algorithm;
 }
 

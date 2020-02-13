@@ -79,7 +79,7 @@ extern void crcAddData (CRCGenerator *crc, const void *data, size_t size);
 extern crc_t crcGetChecksum (const CRCGenerator *crc);
 extern crc_t crcGetResidue (CRCGenerator *crc);
 
-extern const CRCAlgorithm *crcGetGeneratorAlgorithm (const CRCGenerator *crc);
+extern const CRCAlgorithm *crcGetAlgorithm (const CRCGenerator *crc);
 extern const CRCGeneratorProperties *crcGetProperties (const CRCGenerator *crc);
 extern crc_t crcGetValue (const CRCGenerator *crc);
 
@@ -92,11 +92,11 @@ extern crc_t crcReflectBits (crc_t fromValue, unsigned int width);
 extern void crcReflectValue (const CRCGenerator *crc, crc_t *value);
 extern void crcReflectByte (const CRCGenerator *crc, uint8_t *byte);
 
-extern const uint8_t crcCheckData[];
-extern const uint8_t crcCheckSize;
-
 extern void crcLogAlgorithmProperties (const CRCAlgorithm *algorithm);
 extern void crcLogGeneratorProperties (const CRCGenerator *crc);
+
+extern const uint8_t crcCheckData[];
+extern const uint8_t crcCheckSize;
 
 extern int crcVerifyChecksum (const CRCGenerator *crc, crc_t expected);
 extern int crcVerifyResidue (CRCGenerator *crc);
