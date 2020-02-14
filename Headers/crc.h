@@ -49,14 +49,13 @@ typedef struct {
   const char *const *secondaryNames; // other names that the algorithm is known by (NULL terminated)
   CRCAlgorithmClass algorithmClass;
 
-  unsigned int checksumWidth; // the width of the checksum (in bits)
-  crc_t generatorPolynomial; // the polynomial that generates the checksum
+  unsigned char checksumWidth; // the width of the checksum (in bits)
+  unsigned char reflectData; // reflect each data byte before processing it
+  unsigned char reflectResult; // reflect the final value (before the xor)
 
+  crc_t generatorPolynomial; // the polynomial that generates the checksum
   crc_t initialValue; // the starting value (before any processing)
   crc_t xorMask; // the xor (exclussive or) mask to apply to the final value
-
-  unsigned reflectData:1; // reflect each data byte before processing it
-  unsigned reflectResult:1; // reflect the final value (before the xor)
 
   crc_t checkValue; // the checksum for the official check data ("123456789")
   crc_t residue; // the final value (no reflection or xor) of the check data

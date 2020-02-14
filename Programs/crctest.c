@@ -22,8 +22,93 @@
 #include "options.h"
 #include "crc.h"
 
+static char *opt_algorithmName;
+static char *opt_algorithmClass;
+static char *opt_checksumWidth;
+static char *opt_reflectData;
+static char *opt_reflectResult;
+static char *opt_generatorPolynomial;
+static char *opt_initialValue;
+static char *opt_xorMask;
+static char *opt_checkValue;
+static char *opt_residue;
+
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'n',
+    .word = "name",
+    .argument = "string",
+    .setting.string = &opt_algorithmName,
+    .description = "the algorithm name"
+  },
+
+  { .letter = 'c',
+    .word = "class",
+    .argument = "string",
+    .setting.string = &opt_algorithmClass,
+    .description = "the algorithm class"
+  },
+
+  { .letter = 'w',
+    .word = "width",
+    .argument = "integer",
+    .setting.string = &opt_checksumWidth,
+    .description = "the checksum width"
+  },
+
+  { .letter = 'd',
+    .word = "reflect-data",
+    .argument = "boolean",
+    .setting.string = &opt_reflectData,
+    .description = "reflect the data"
+  },
+
+  { .letter = 'r',
+    .word = "reflect-result",
+    .argument = "boolean",
+    .setting.string = &opt_reflectResult,
+    .description = "reflect the result"
+  },
+
+  { .letter = 'p',
+    .word = "polynomial",
+    .argument = "integer",
+    .setting.string = &opt_generatorPolynomial,
+    .description = "the generator polynomial"
+  },
+
+  { .letter = 'i',
+    .word = "initial-value",
+    .argument = "integer",
+    .setting.string = &opt_initialValue,
+    .description = "the initial value"
+  },
+
+  { .letter = 'x',
+    .word = "xor-mask",
+    .argument = "integer",
+    .setting.string = &opt_xorMask,
+    .description = "the final xor mask"
+  },
+
+  { .letter = 'C',
+    .word = "check-value",
+    .argument = "integer",
+    .setting.string = &opt_checkValue,
+    .description = "the check value"
+  },
+
+  { .letter = 'R',
+    .word = "residue",
+    .argument = "integer",
+    .setting.string = &opt_residue,
+    .description = "the residue"
+  },
 END_OPTION_TABLE
+
+static int
+validateOptions (void) {
+  return 1;
+}
 
 int
 main (int argc, char *argv[]) {
@@ -36,6 +121,8 @@ main (int argc, char *argv[]) {
 
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
+
+  if (!validateOptions()) return PROG_EXIT_SYNTAX;
 
   if (!crcVerifyProvidedAlgorithms()) return PROG_EXIT_FATAL;
   return PROG_EXIT_SUCCESS;
