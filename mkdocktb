@@ -58,7 +58,7 @@ addTocEntry() {
    local title="${1}"
    local anchor="${2}"
 
-   addTocLine "<LI><A HREF=\"#${anchor}\">${title}</A></LI>"
+   addTocLine "<li><a href=\"#${anchor}\">${title}</a></li>"
 }
 
 declare -a documentLines
@@ -72,7 +72,7 @@ addLine() {
 addAnchor() {
    local anchor="${1}"
 
-   addLine "<A NAME=\"${anchor}\"></A>"
+   addLine "<a name=\"${anchor}\"></a>"
 }
 
 beginDocument() {
@@ -80,19 +80,22 @@ beginDocument() {
 
    headerLevel=0
 
-   addLine "<HTML>"
-   addLine "<HEAD>"
-   addLine "<TITLE>${title}</TITLE>"
-   addLine "</HEAD>"
-   addLine "<BODY>"
+   addLine "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+   addLine "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
+
+   addLine "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
+   addLine "<head>"
+   addLine "<title>${title}</title>"
+   addLine "</head>"
+   addLine "<body>"
 }
 
 endDocument() {
    local file="${1}"
 
-   addLine "</BODY>"
-   addLine "</HTML>"
-   addTocLine "<HR>"
+   addLine "</body>"
+   addLine "</html>"
+   addTocLine "<hr />"
 
    local docCount="${#documentLines[*]}"
    local docIndex=0
@@ -126,19 +129,19 @@ beginSection() {
    addAnchor "${anchor}"
 
    headerLevel=$((headerLevel + 1))
-   addLine "<H${headerLevel}>${title}</H${headerLevel}>"
+   addLine "<h${headerLevel}>${title}</h${headerLevel}>"
 
    if ((headerLevel == 1))
    then
       tocStart="${#documentLines[*]}"
-      addTocLine "<UL>"
+      addTocLine "<ul>"
    else
       addTocEntry "${title}" "${anchor}"
    fi
 }
 
 endSection() {
-   ((headerLevel > 1)) || addTocLine "</UL>"
+   ((headerLevel > 1)) || addTocLine "</ul>"
    headerLevel=$((headerLevel - 1))
 }
 
@@ -148,7 +151,7 @@ beginLayoutList() {
 
 endLayoutList() {
    ! "${layoutListed}" || {
-      addLine "</UL>"
+      addLine "</ul>"
    }
 }
 
@@ -188,10 +191,10 @@ endLayoutEntry() {
 
    "${layoutListed}" || {
       layoutListed=true
-      addLine "<UL>"
+      addLine "<ul>"
    }
 
-   addLine "<LI><A HREF=\"${outputFile##*/}\">${description}</A>"
+   addLine "<li><a href=\"${outputFile##*/}\">${description}</a></li>"
 }
 
 listKeyTable() {
@@ -241,10 +244,10 @@ beginSection "${documentTitle}"
 beginSection "Computer Keyboard Bindings"
 addLine "In order to use one of these keyboard tables,"
 addLine "you need to explicitly specify it in one of the following ways:"
-addLine "<UL>"
-addLine "<LI>Use BRLTTY's <TT>-k</TT> (or <TT>--keyboard-table=</TT>) command line option."
-addLine "<LI>Use the <TT>keyboard-table</TT> configuration file (<TT>brltty.conf</TT>) directive."
-addLine "</UL>"
+addLine "<ul>"
+addLine "<li>Use BRLTTY's <tt>-k</tt> (or <tt>--keyboard-table=</tt>) command line option.</li>"
+addLine "<li>Use the <tt>keyboard-table</tt> configuration file (<tt>brltty.conf</tt>) directive.</li>"
+addLine "</ul>"
 
 beginLayoutList
 set -- "${tablesDirectory}/${keyboardSubdirectory}/"*".${keyTableExtension}"
@@ -255,7 +258,7 @@ do
    endLayoutEntry
 done
 endLayoutList
-addLine "<HR>"
+addLine "<hr />"
 endSection
 
 beginSection "Braille Device Bindings"
@@ -263,8 +266,8 @@ addLine "The driver automatically selects the appropriate key table for the devi
 addLine "Click on the driver's name for general information about it."
 addLine "Click on the device model for its key bindings."
 
-addTocLine "<LI><UL>"
-addLine "<DL>"
+addTocLine "<li><ul>"
+addLine "<dl>"
 
 for driverDirectory in "${driversDirectory}/"*
 do
@@ -278,13 +281,15 @@ do
    [ ! -f "${inputFile}" ] || {
       outputFile="${outputRoot}/${braillePrefix}-${driverCode}.${plainTextExtension}"
       cp -a -- "${inputFile}" "${outputFile}"
-      header="<A HREF=\"${outputFile##*/}\">${header}</A>"
+      header="<a href=\"${outputFile##*/}\">${header}</a>"
    }
 
    anchor="${braillePrefix}-${driverCode}"
    addTocEntry "${driverName}" "${anchor}"
+   addLine "<dt>"
    addAnchor "${anchor}"
-   addLine "<DT>${header}<DD>"
+   addLine "${header}"
+   addLine "</dt><dd>"
 
    beginLayoutList
    set -- "${tablesDirectory}/${brailleSubdirectory}/${driverCode}/"*".${keyTableExtension}"
@@ -307,12 +312,13 @@ do
    fi
 
    endLayoutList
+   addLine "</dd>"
 done
 
-addLine "</DL>"
-addTocLine "</UL></LI>"
+addLine "</dl>"
+addTocLine "</ul></li>"
 
-addLine "<HR>"
+addLine "<hr />"
 endSection
 
 endSection
