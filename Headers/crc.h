@@ -32,11 +32,7 @@ typedef uint32_t crc_t;
 #define CRC_BYTE_WIDTH 8
 #define CRC_BYTE_INDEXED_TABLE_SIZE (UINT8_MAX + 1)
 
-static inline crc_t
-crcMostSignificantBit (unsigned int width) {
-  return CRC_C(1) << (width - 1);
-}
-
+extern crc_t crcMostSignificantBit (unsigned int width);
 extern crc_t crcReflectBits (crc_t fromValue, unsigned int width);
 extern void crcReflectByte (uint8_t *byte);
 

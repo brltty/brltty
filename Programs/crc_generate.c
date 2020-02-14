@@ -26,6 +26,11 @@
 #include "crc_internal.h"
 
 crc_t
+crcMostSignificantBit (unsigned int width) {
+  return CRC_C(1) << (width - 1);
+}
+
+crc_t
 crcReflectBits (crc_t fromValue, unsigned int width) {
   crc_t fromBit = crcMostSignificantBit(width);
   crc_t toBit = 1;
