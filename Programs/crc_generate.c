@@ -16,7 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+// This source has been designed for and may be used within external code.
+// It doesn't rely on our prologue header.
+//#include "prologue.h"
 
 #include <string.h>
 
@@ -48,14 +50,14 @@ crcReflectByte (uint8_t *byte) {
   *byte = crcReflectBits(*byte, CRC_BYTE_WIDTH);
 }
 
-static uint8_t crcDirectInputTranslationTable[CRC_BYTE_INDEXED_TABLE_SIZE] = {1};
-static uint8_t crcReflectedInputTranslationTable[CRC_BYTE_INDEXED_TABLE_SIZE] = {1};
+static uint8_t crcDirectDataTranslationTable[CRC_BYTE_INDEXED_TABLE_SIZE] = {1};
+static uint8_t crcReflectedDataTranslationTable[CRC_BYTE_INDEXED_TABLE_SIZE] = {1};
 
 static void
-crcMakeInputTranslationTable (CRCProperties *properties, const CRCAlgorithm *algorithm) {
-  if (algorithm->reflectInput) {
-    uint8_t *table = crcReflectedInputTranslationTable;
-    properties->inputTranslationTable = table;
+crcMakeDataTranslationTable (CRCProperties *properties, const CRCAlgorithm *algorithm) {
+  if (algorithm->reflectData) {
+    uint8_t *table = crcReflectedDataTranslationTable;
+    properties->dataTranslationTable = table;
 
     if (*table) {
       for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
@@ -65,8 +67,8 @@ crcMakeInputTranslationTable (CRCProperties *properties, const CRCAlgorithm *alg
       }
     }
   } else {
-    uint8_t *table = crcDirectInputTranslationTable;
-    properties->inputTranslationTable = table;
+    uint8_t *table = crcDirectDataTranslationTable;
+    properties->dataTranslationTable = table;
 
     if (*table) {
       for (unsigned int index=0; index<=UINT8_MAX; index+=1) {
@@ -105,7 +107,7 @@ crcMakeProperties (CRCProperties *properties, const CRCAlgorithm *algorithm) {
   properties->mostSignificantBit = crcMostSignificantBit(algorithm->checksumWidth);
   properties->valueMask = (properties->mostSignificantBit - 1) | properties->mostSignificantBit;
 
-  crcMakeInputTranslationTable(properties, algorithm);
+  crcMakeDataTranslationTable(properties, algorithm);
   crcMakeRemainderCache(properties, algorithm);
 }
 
@@ -144,7 +146,7 @@ crcDestroyGenerator (CRCGenerator *crc) {
 
 void
 crcAddByte (CRCGenerator *crc, uint8_t byte) {
-  byte = crc->properties.inputTranslationTable[byte];
+  byte = crc->properties.dataTranslationTable[byte];
   byte ^= crc->currentValue >> crc->properties.byteShift;
   crc->currentValue = crc->properties.remainderCache[byte] ^ (crc->currentValue << CRC_BYTE_WIDTH);
   crc->currentValue &= crc->properties.valueMask;

@@ -16,7 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+// This source has been designed for and may be used within external code.
+// It doesn't rely on our prologue header.
+//#include "prologue.h"
 
 #include <string.h>
 
@@ -38,7 +40,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_ARC) = {
 
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X8005),
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
 
   .checkValue = UINT16_C(0XBB3D),
@@ -107,7 +109,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_DNP) = {
 
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X3D65),
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
   .xorMask = UINT16_MAX,
 
@@ -173,7 +175,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_IBM_SDLC) = {
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X1021),
   .initialValue = UINT16_MAX,
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
   .xorMask = UINT16_MAX,
 
@@ -189,7 +191,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_ISO_IEC_14443_3_A) = {
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X1021),
   .initialValue = UINT16_C(0XC6C6),
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
 
   .checkValue = UINT16_C(0XBF05),
@@ -202,7 +204,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_KERMIT) = {
 
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X1021),
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
 
   .checkValue = UINT16_C(0X2189),
@@ -225,7 +227,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_MAXIM_DOW) = {
 
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X8005),
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
   .xorMask = UINT16_MAX,
 
@@ -240,7 +242,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_MCRF4XX) = {
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X1021),
   .initialValue = UINT16_MAX,
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
 
   .checkValue = UINT16_C(0X6F91),
@@ -254,7 +256,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_MODBUS) = {
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X8005),
   .initialValue = UINT16_MAX,
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
 
   .checkValue = UINT16_C(0X4B37),
@@ -267,7 +269,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_NRSC_5) = {
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X080B),
   .initialValue = UINT16_MAX,
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
 
   .checkValue = UINT16_C(0XA066),
@@ -314,7 +316,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_RIELLO) = {
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X1021),
   .initialValue = UINT16_C(0XB2AA),
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
 
   .checkValue = UINT16_C(0X63D0),
@@ -359,7 +361,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_TMS37157) = {
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X1021),
   .initialValue = UINT16_C(0X89EC),
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
 
   .checkValue = UINT16_C(0X26B1),
@@ -383,7 +385,7 @@ CRC_ALGORITHM_DEFINITION(CRC16_USB) = {
   .checksumWidth = 16,
   .generatorPolynomial = UINT16_C(0X8005),
   .initialValue = UINT16_MAX,
-  .reflectInput = 1,
+  .reflectData = 1,
   .reflectResult = 1,
   .xorMask = UINT16_MAX,
 

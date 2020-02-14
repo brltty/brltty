@@ -19,6 +19,9 @@
 #ifndef BRLTTY_INCLUDED_CRC
 #define BRLTTY_INCLUDED_CRC
 
+#include <sys/types.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -56,7 +59,7 @@ typedef struct {
   crc_t initialValue; // the starting value (before any processing)
   crc_t xorMask; // the xor (exclussive or) mask to apply to the final value
 
-  unsigned reflectInput:1; // reflect each input byte before processing it
+  unsigned reflectData:1; // reflect each data byte before processing it
   unsigned reflectResult:1; // reflect the final value (before the xor)
 
   crc_t checkValue; // the checksum for the official check data ("123456789")
@@ -72,9 +75,9 @@ typedef struct {
   unsigned int byteShift; // the bit offset of the high-order byte of the value
   crc_t mostSignificantBit; // the most significant bit of the value
   crc_t valueMask; // the mask for removing overflow bits in the value
-  const uint8_t *inputTranslationTable; // for optimizing input reflection
+  const uint8_t *dataTranslationTable; // for optimizing data reflection
 
-  // for preevaluating a common calculation on each input byte
+  // for preevaluating a common calculation on each data byte
   crc_t remainderCache[CRC_BYTE_INDEXED_TABLE_SIZE];
 } CRCProperties;
 

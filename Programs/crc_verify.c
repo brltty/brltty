@@ -16,7 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+// This source has been designed for and may be used within external code.
+// It doesn't rely on our prologue header.
+//#include "prologue.h"
 
 #include <string.h>
 
@@ -32,11 +34,11 @@ const uint8_t crcCheckSize = sizeof(crcCheckData);
 void
 crcLogAlgorithm (const CRCAlgorithm *algorithm) {
   logMessage(LOG_DEBUG,
-    "CRC Algorithm: %s: Width:%u Poly:%X Init:%X Xor:%X RefIn:%u RefOut:%u Chk:%X Res:%X",
+    "CRC Algorithm: %s: Width:%u Poly:%X Init:%X Xor:%X RefDat:%u RefRes:%u Chk:%X Res:%X",
     algorithm->primaryName,
     algorithm->checksumWidth, algorithm->generatorPolynomial,
     algorithm->initialValue, algorithm->xorMask,
-    algorithm->reflectInput, algorithm->reflectResult,
+    algorithm->reflectData, algorithm->reflectResult,
     algorithm->checkValue, algorithm->residue
   );
 }
