@@ -53,7 +53,7 @@ canMoveUp (void) {
 
 static int
 canMoveDown (void) {
-  return ses->winy < (int)(scr.rows - brl.textRows);
+  return (ses->winy + brl.textRows) < scr.rows;
 }
 
 static int
@@ -447,19 +447,32 @@ handleNavigationCommands (int command, void *data) {
     }
 
     case BRL_CMD_NXPGRPH: {
+      int width = scr.cols;
+      ScreenCharacter characters[width];
+
       int found = 0;
-      ScreenCharacter characters[scr.cols];
       int findBlankLine = 1;
       int line = ses->winy;
 
-      while (line <= (int)(scr.rows - brl.textRows)) {
-        readScreenRow(line, scr.cols, characters);
+      while (line < scr.rows) {
+        readScreenRow(line, width, characters);
 
-        if (isAllSpaceCharacters(characters, scr.cols) == findBlankLine) {
+        if (isAllSpaceCharacters(characters, width) == findBlankLine) {
           if (!findBlankLine) {
-            found = 1;
-            ses->winy = line;
-            ses->winx = 0;
+            {
+              int rows = brl.textRows;
+
+              line += rows;
+              line = MIN(line, scr.rows);
+              line -= rows;
+            }
+
+            if (line > ses->winy) {
+              ses->winy = line;
+              ses->winx = 0;
+              found = 1;
+            }
+
             break;
           }
 
