@@ -357,7 +357,7 @@ stopPollAlarm (BrailleDisplay *brl) {
   AsyncHandle *alarm = &brl->data->poll.alarmHandle;
 
   if (*alarm) {
-    asyncDiscardHandle(*alarm);
+    asyncCancelRequest(*alarm);
     *alarm = NULL;
   }
 }
