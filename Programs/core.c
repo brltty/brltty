@@ -332,7 +332,7 @@ updateSessionAttributes (void) {
   setSessionEntry();
 
   {
-    int maximum = MAX(scr.rows-(int)brl.textRows, 0);
+    int maximum = MAX(scr.rows-1, 0);
     int *table[] = {&ses->winy, &ses->moty, NULL};
     int **value = table;
 

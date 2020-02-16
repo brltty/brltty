@@ -978,9 +978,10 @@ doUpdate (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
       {
         int windowColumns = MIN(textCount, scr.cols-ses->winx);
+        int windowRows = MIN(brl.textRows, scr.rows-ses->winy);
 
         ScreenCharacter characters[textLength];
-        readScreen(ses->winx, ses->winy, windowColumns, brl.textRows, characters);
+        readScreen(ses->winx, ses->winy, windowColumns, windowRows, characters);
 
         if (prefs.wordWrap) {
           int columns = getWordWrapLength(ses->winy, ses->winx, windowColumns);
@@ -993,16 +994,34 @@ doUpdate (void) {
            * so we'll insert these cells and blank them.
            */
 
-          for (int row=brl.textRows-1; row>0; row-=1) {
-            memmove(characters + (row * textCount),
-                    characters + (row * windowColumns),
-                    windowColumns * sizeof(*characters));
+          {
+            int last = windowRows - 1;
+            const ScreenCharacter *source = characters + (last * windowColumns);
+            ScreenCharacter *target = characters + (last * textCount);
+            size_t size = windowColumns * sizeof(*target);
+
+            while (source > characters) {
+              memmove(target, source, size);
+              source -= windowColumns;
+              target -= textCount;
+            }
           }
 
-          for (int row=0; row<brl.textRows; row+=1) {
-            clearScreenCharacters(characters + (row * textCount) + windowColumns,
-                                  textCount-windowColumns);
+          {
+            ScreenCharacter *row = characters + windowColumns;
+            const ScreenCharacter *end = characters + (windowRows * textCount);
+            size_t count = textCount - windowColumns;
+
+            while (row < end) {
+              clearScreenCharacters(row, count);
+              row += textCount;
+            }
           }
+        }
+
+        if (windowRows < brl.textRows) {
+          clearScreenCharacters(characters + (windowRows * textCount),
+                                (brl.textRows - windowRows) * textCount);
         }
 
         /* convert to dots using the current translation table */

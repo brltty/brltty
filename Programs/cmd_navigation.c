@@ -459,20 +459,9 @@ handleNavigationCommands (int command, void *data) {
 
         if (isAllSpaceCharacters(characters, width) == findBlankLine) {
           if (!findBlankLine) {
-            {
-              int rows = brl.textRows;
-
-              line += rows;
-              line = MIN(line, scr.rows);
-              line -= rows;
-            }
-
-            if (line > ses->winy) {
-              ses->winy = line;
-              ses->winx = 0;
-              found = 1;
-            }
-
+            ses->winy = line;
+            ses->winx = 0;
+            found = 1;
             break;
           }
 
