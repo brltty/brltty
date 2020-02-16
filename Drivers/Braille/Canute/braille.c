@@ -156,11 +156,11 @@ verifyPacket (
 
 static size_t
 readPacket (BrailleDisplay *brl, void *packet, size_t size) {
-  PacketVerificationData pvd = {
-    .state = PVS_WAITING
-  };
-
   while (1) {
+    PacketVerificationData pvd = {
+      .state = PVS_WAITING
+    };
+
     size_t length = readBraillePacket(brl, NULL, packet, size, verifyPacket, &pvd);
 
     if (length > 0) {
