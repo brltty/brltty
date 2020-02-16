@@ -777,6 +777,55 @@ readBrailleWindow (ScreenCharacter *characters, size_t count) {
   }
 }
 
+typedef void BrailleCharacterTranslator (
+  const ScreenCharacter *character, unsigned char *cell, wchar_t *text
+);
+
+static void
+translateBrailleCharacterText (
+  const ScreenCharacter *character, unsigned char *cell, wchar_t *text
+) {
+  *cell = convertCharacterToDots(textTable, character->text);
+  *text = character->text;
+
+  if (isSixDotBraille()) *cell &= ~(BRL_DOT_7 | BRL_DOT_8);
+  if (prefs.showAttributes) overlayAttributesUnderline(cell, character->attributes);
+
+  if (iswupper(character->text)) {
+    BlinkDescriptor *blink = &uppercaseLettersBlinkDescriptor;
+    requireBlinkDescriptor(blink);
+    if (!isBlinkVisible(blink)) *cell = 0;
+  }
+}
+
+static void
+translateBrailleCharacterAttributes (
+  const ScreenCharacter *character, unsigned char *cell, wchar_t *text
+) {
+  *text = UNICODE_BRAILLE_ROW | (*cell = convertAttributesToDots(attributesTable, character->attributes));
+}
+
+static void
+translateBrailleWindow (
+  const ScreenCharacter *characters, wchar_t *textBuffer
+) {
+  BrailleCharacterTranslator *translate =
+    ses->displayMode?
+    translateBrailleCharacterAttributes:
+    translateBrailleCharacterText;
+
+  for (unsigned int row=0; row<brl.textRows; row+=1) {
+    const ScreenCharacter *source = &characters[row * textCount];
+    unsigned int start = (row * brl.textColumns) + textStart;
+    unsigned char *cells = &brl.buffer[start];
+    wchar_t *text = &textBuffer[start];
+
+    for (int column=0; column<textCount; column+=1) {
+      translate(&source[column], &cells[column], &text[column]);
+    }
+  }
+}
+
 static void
 doUpdate (void) {
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "starting");
@@ -1027,46 +1076,7 @@ doUpdate (void) {
       {
         ScreenCharacter characters[textLength];
         readBrailleWindow(characters, ARRAY_COUNT(characters));
-
-        /* convert to dots using the current translation table */
-        if (ses->displayMode) {
-          for (int row=0; row<brl.textRows; row+=1) {
-            const ScreenCharacter *source = &characters[row * textCount];
-            unsigned int start = (row * brl.textColumns) + textStart;
-            unsigned char *target = &brl.buffer[start];
-            wchar_t *text = &textBuffer[start];
-
-            for (int column=0; column<textCount; column+=1) {
-              text[column] = UNICODE_BRAILLE_ROW | (target[column] = convertAttributesToDots(attributesTable, source[column].attributes));
-            }
-          }
-        } else {
-          for (unsigned int row=0; row<brl.textRows; row+=1) {
-            const ScreenCharacter *source = &characters[row * textCount];
-            unsigned int start = (row * brl.textColumns) + textStart;
-            unsigned char *target = &brl.buffer[start];
-            wchar_t *text = &textBuffer[start];
-
-            for (unsigned int column=0; column<textCount; column+=1) {
-              const ScreenCharacter *character = &source[column];
-
-              unsigned char *dots = &target[column];
-              *dots = convertCharacterToDots(textTable, character->text);
-
-              if (iswupper(character->text)) {
-                BlinkDescriptor *blink = &uppercaseLettersBlinkDescriptor;
-
-                requireBlinkDescriptor(blink);
-                if (!isBlinkVisible(blink)) *dots = 0;
-              }
-
-              if (isSixDotBraille()) *dots &= ~(BRL_DOT_7 | BRL_DOT_8);
-              if (prefs.showAttributes) overlayAttributesUnderline(dots, character->attributes);
-
-              text[column] = character->text;
-            }
-          }
-        }
+        translateBrailleWindow(characters, textBuffer);
       }
 
       if ((brl.cursor = getScreenCursorPosition(scr.posx, scr.posy)) != BRL_NO_CURSOR) {
