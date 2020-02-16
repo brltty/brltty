@@ -39,7 +39,6 @@ prepareUinputObject (UinputObject *uinput) {
 
 static void
 handleInputEvent (const InputEvent *event) {
-logMessage(LOG_NOTICE, "LED event: t=%u c=%u v=%d", event->type, event->code, event->value);
   switch (event->type) {
     case EV_LED: {
       switch (event->code) {
