@@ -730,6 +730,54 @@ writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static void
+readBrailleWindow (ScreenCharacter *characters, size_t count) {
+  int screenColumns = MIN(textCount, scr.cols-ses->winx);
+  int screenRows = MIN(brl.textRows, scr.rows-ses->winy);
+  readScreen(ses->winx, ses->winy, screenColumns, screenRows, characters);
+
+  if (prefs.wordWrap) {
+    int columns = getWordWrapLength(ses->winy, ses->winx, screenColumns);
+    if (columns < screenColumns) screenColumns = columns;
+  }
+
+  if (screenColumns < textCount) {
+    /* We got a rectangular piece of text with readScreen but the display
+     * is in an off-right position with some cells at the end blank
+     * so we'll insert these cells and blank them.
+     */
+
+    {
+      int lastRow = screenRows - 1;
+      const ScreenCharacter *source = characters + (lastRow * screenColumns);
+      ScreenCharacter *target = characters + (lastRow * textCount);
+      size_t size = screenColumns * sizeof(*target);
+
+      while (source > characters) {
+        memmove(target, source, size);
+        source -= screenColumns;
+        target -= textCount;
+      }
+    }
+
+    {
+      ScreenCharacter *row = characters + screenColumns;
+      const ScreenCharacter *end = characters + (screenRows * textCount);
+      size_t count = textCount - screenColumns;
+
+      while (row < end) {
+        clearScreenCharacters(row, count);
+        row += textCount;
+      }
+    }
+  }
+
+  if (screenRows < brl.textRows) {
+    clearScreenCharacters(characters + (screenRows * textCount),
+                          (brl.textRows - screenRows) * textCount);
+  }
+}
+
+static void
 doUpdate (void) {
   logMessage(LOG_CATEGORY(UPDATE_EVENTS), "starting");
   unrequireAllBlinkDescriptors();
@@ -977,52 +1025,8 @@ doUpdate (void) {
       if (!isContracted)
 #endif /* ENABLE_CONTRACTED_BRAILLE */
       {
-        int windowColumns = MIN(textCount, scr.cols-ses->winx);
-        int windowRows = MIN(brl.textRows, scr.rows-ses->winy);
-
         ScreenCharacter characters[textLength];
-        readScreen(ses->winx, ses->winy, windowColumns, windowRows, characters);
-
-        if (prefs.wordWrap) {
-          int columns = getWordWrapLength(ses->winy, ses->winx, windowColumns);
-          if (columns < windowColumns) windowColumns = columns;
-        }
-
-        if (windowColumns < textCount) {
-          /* We got a rectangular piece of text with readScreen but the display
-           * is in an off-right position with some cells at the end blank
-           * so we'll insert these cells and blank them.
-           */
-
-          {
-            int last = windowRows - 1;
-            const ScreenCharacter *source = characters + (last * windowColumns);
-            ScreenCharacter *target = characters + (last * textCount);
-            size_t size = windowColumns * sizeof(*target);
-
-            while (source > characters) {
-              memmove(target, source, size);
-              source -= windowColumns;
-              target -= textCount;
-            }
-          }
-
-          {
-            ScreenCharacter *row = characters + windowColumns;
-            const ScreenCharacter *end = characters + (windowRows * textCount);
-            size_t count = textCount - windowColumns;
-
-            while (row < end) {
-              clearScreenCharacters(row, count);
-              row += textCount;
-            }
-          }
-        }
-
-        if (windowRows < brl.textRows) {
-          clearScreenCharacters(characters + (windowRows * textCount),
-                                (brl.textRows - windowRows) * textCount);
-        }
+        readBrailleWindow(characters, ARRAY_COUNT(characters));
 
         /* convert to dots using the current translation table */
         if (ses->displayMode) {
