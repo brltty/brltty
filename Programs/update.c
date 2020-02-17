@@ -777,12 +777,12 @@ readBrailleWindow (ScreenCharacter *characters, size_t count) {
   }
 }
 
-typedef void BrailleCharacterTranslator (
+typedef void ScreenCharacterTranslator (
   const ScreenCharacter *character, unsigned char *cell, wchar_t *text
 );
 
 static void
-translateBrailleCharacterText (
+translateScreenCharacterText (
   const ScreenCharacter *character, unsigned char *cell, wchar_t *text
 ) {
   *cell = convertCharacterToDots(textTable, character->text);
@@ -799,7 +799,7 @@ translateBrailleCharacterText (
 }
 
 static void
-translateBrailleCharacterAttributes (
+translateScreenCharacterAttributes (
   const ScreenCharacter *character, unsigned char *cell, wchar_t *text
 ) {
   *text = UNICODE_BRAILLE_ROW | (*cell = convertAttributesToDots(attributesTable, character->attributes));
@@ -809,19 +809,21 @@ static void
 translateBrailleWindow (
   const ScreenCharacter *characters, wchar_t *textBuffer
 ) {
-  BrailleCharacterTranslator *translate =
+  ScreenCharacterTranslator *translateScreenCharacter =
     ses->displayMode?
-    translateBrailleCharacterAttributes:
-    translateBrailleCharacterText;
+    translateScreenCharacterAttributes:
+    translateScreenCharacterText;
 
   for (unsigned int row=0; row<brl.textRows; row+=1) {
-    const ScreenCharacter *source = &characters[row * textCount];
+    const ScreenCharacter *character = &characters[row * textCount];
+    const ScreenCharacter *end = character + textCount;
+
     unsigned int start = (row * brl.textColumns) + textStart;
-    unsigned char *cells = &brl.buffer[start];
+    unsigned char *cell = &brl.buffer[start];
     wchar_t *text = &textBuffer[start];
 
-    for (int column=0; column<textCount; column+=1) {
-      translate(&source[column], &cells[column], &text[column]);
+    while (character < end) {
+      translateScreenCharacter(character++, cell++, text++);
     }
   }
 }
