@@ -573,6 +573,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
     brl->data->poll.waitingForResponse = 0;
+    brl->writeDelay = 0;
     CN_PacketInteger result = CN_getResponseResult(packet);
 
     switch (packet[0]) {
