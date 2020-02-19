@@ -42,13 +42,13 @@ bind Refresh+Back TOP_LEFT
 bind Refresh+Menu LNBEG
 bind Refresh+Forward BOT_LEFT
 
-bind Line1 CSRJMP_LINE+0
-bind Line2 CSRJMP_LINE+1
-bind Line3 CSRJMP_LINE+2
-bind Line4 CSRJMP_LINE+3
-bind Line5 CSRJMP_LINE+4
-bind Line6 CSRJMP_LINE+5
-bind Line7 CSRJMP_LINE+6
-bind Line8 CSRJMP_LINE+7
-bind Line9 CSRJMP_LINE+8
+bind Line1 ROUTE_LINE+0
+bind Line2 ROUTE_LINE+1
+bind Line3 ROUTE_LINE+2
+bind Line4 ROUTE_LINE+3
+bind Line5 ROUTE_LINE+4
+bind Line6 ROUTE_LINE+5
+bind Line7 ROUTE_LINE+6
+bind Line8 ROUTE_LINE+7
+bind Line9 ROUTE_LINE+8
 

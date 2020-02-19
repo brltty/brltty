@@ -35,9 +35,10 @@ static const CommandListEntry commandList_modes[] = {
 
 static const CommandListEntry commandList_cursor[] = {
   { .code = BRL_CMD_HOME },
-  { .code = BRL_CMD_RETURN },
   { .code = BRL_CMD_BACK },
+  { .code = BRL_CMD_RETURN },
   { .code = BRL_CMD_BLK(ROUTE) },
+  { .code = BRL_CMD_BLK(ROUTE_LINE) },
   { .code = BRL_CMD_CSRJMP_VERT },
   { .code = BRL_CMD_ROUTE_CURR_LOCN },
 };
@@ -211,6 +212,7 @@ static const CommandListEntry commandList_input[] = {
 static const CommandListEntry commandList_special[] = {
   { .code = BRL_CMD_BLK(SETMARK) },
   { .code = BRL_CMD_BLK(GOTOMARK) },
+  { .code = BRL_CMD_REFRESH },
   { .code = BRL_CMD_RESTARTBRL },
   { .code = BRL_CMD_BRL_STOP },
   { .code = BRL_CMD_BRL_START },

@@ -720,7 +720,7 @@ handleNavigationCommands (int command, void *data) {
           break;
         }
 
-        case BRL_CMD_BLK(CSRJMP_LINE): {
+        case BRL_CMD_BLK(ROUTE_LINE): {
           if (routeScreenCursor(-1, arg, scr.number)) {
             alert(ALERT_ROUTING_STARTED);
           } else {
