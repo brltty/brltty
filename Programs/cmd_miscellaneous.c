@@ -272,6 +272,17 @@ handleMiscellaneousCommands (int command, void *data) {
           break;
         }
 
+        case BRL_CMD_BLK(REFRESH_LINE): {
+          if (canRefreshBrailleRow(&brl)) {
+            if (refreshBrailleRow(&brl, arg)) {
+              break;
+            }
+          }
+
+          alert(ALERT_COMMAND_REJECTED);
+          break;
+        }
+
         case BRL_CMD_BLK(ALERT):
           alert(arg);
           break;

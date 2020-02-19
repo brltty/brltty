@@ -363,6 +363,11 @@ refreshAllRows (BrailleDisplay *brl) {
   return writeMotorsCommand(brl, CN_CMD_RESET_CELLS);
 }
 
+static int
+refreshRow (BrailleDisplay *brl, int row) {
+  return refreshAllRows(brl); // for now
+}
+
 ASYNC_ALARM_CALLBACK(CN_handlePollAlarm) {
   BrailleDisplay *brl = parameters->data;
   if (brl->data->poll.waitingForResponse) return;
@@ -534,6 +539,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                                 isIdentityResponse)) {
           if (allocateRowEntries(brl)) {
             brl->refreshBrailleDisplay = refreshAllRows;
+            brl->refreshBrailleRow = refreshRow;
+
             setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
             makeOutputTable(dotsTable_ISO11548_1);
             brl->cellSize = 6;

@@ -233,7 +233,7 @@ typedef enum {
   BRL_CMD_SPEAK_INDENT /* speak indent of current line */,
   BRL_CMD_ASPK_INDENT /* set autospeak indent of current line on/off */,
 
-  BRL_CMD_REFRESH /* refresh the braille display */,
+  BRL_CMD_REFRESH /* refresh braille display */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
@@ -268,7 +268,7 @@ typedef enum {
   BRL_BLK_SET_KEYBOARD_TABLE /* set keyboard table */,
   BRL_BLK_SET_LANGUAGE_PROFILE /* set language profile */,
   BRL_BLK_ROUTE_LINE /* bring screen cursor to line */,
-  BRL_BLK_19 /* (reserved) */,
+  BRL_BLK_REFRESH_LINE /* refresh braille line */,
   BRL_BLK_1A /* (reserved) */,
   BRL_BLK_1B /* (reserved) */,
   BRL_BLK_1C /* (reserved) */,

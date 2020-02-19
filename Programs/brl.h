@@ -54,6 +54,9 @@ extern int readBrailleCommand (BrailleDisplay *, KeyTableCommandContext);
 extern int canRefreshBrailleDisplay (BrailleDisplay *brl);
 extern int refreshBrailleDisplay (BrailleDisplay *brl);
 
+extern int canRefreshBrailleRow (BrailleDisplay *brl);
+extern int refreshBrailleRow (BrailleDisplay *brl, int row);
+
 extern int canSetBrailleFirmness (BrailleDisplay *brl);
 extern int setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 

@@ -213,6 +213,7 @@ static const CommandListEntry commandList_special[] = {
   { .code = BRL_CMD_BLK(SETMARK) },
   { .code = BRL_CMD_BLK(GOTOMARK) },
   { .code = BRL_CMD_REFRESH },
+  { .code = BRL_CMD_BLK(REFRESH_LINE) },
   { .code = BRL_CMD_RESTARTBRL },
   { .code = BRL_CMD_BRL_STOP },
   { .code = BRL_CMD_BRL_START },

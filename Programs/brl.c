@@ -37,6 +37,8 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->data = NULL;
 
   brl->refreshBrailleDisplay = NULL;
+  brl->refreshBrailleRow = NULL;
+
   brl->setBrailleFirmness = NULL;
   brl->setTouchSensitivity = NULL;
   brl->setAutorepeatProperties = NULL;
@@ -255,6 +257,18 @@ refreshBrailleDisplay (BrailleDisplay *brl) {
   if (!canRefreshBrailleDisplay(brl)) return 0;
   logMessage(LOG_DEBUG, "refreshing braille display");
   return brl->refreshBrailleDisplay(brl);
+}
+
+int
+canRefreshBrailleRow (BrailleDisplay *brl) {
+  return brl->refreshBrailleRow != NULL;
+}
+
+int
+refreshBrailleRow (BrailleDisplay *brl, int row) {
+  if (!canRefreshBrailleRow(brl)) return 0;
+  logMessage(LOG_DEBUG, "refreshing braille row");
+  return brl->refreshBrailleRow(brl, row);
 }
 
 int

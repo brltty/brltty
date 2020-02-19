@@ -56,6 +56,8 @@ typedef struct BrailleDisplayStruct BrailleDisplay;
 typedef struct BrailleDataStruct BrailleData;
 
 typedef int RefreshBrailleDisplayMethod (BrailleDisplay *brl);
+typedef int RefreshBrailleRowMethod (BrailleDisplay *brl, int row);
+
 typedef int SetBrailleFirmnessMethod (BrailleDisplay *brl, BrailleFirmness setting);
 typedef int SetTouchSensitivityMethod (BrailleDisplay *brl, TouchSensitivity setting);
 typedef int SetAutorepeatPropertiesMethod (BrailleDisplay *brl, int on, int delay, int interval);
@@ -64,6 +66,8 @@ struct BrailleDisplayStruct {
   BrailleData *data;
 
   RefreshBrailleDisplayMethod *refreshBrailleDisplay;
+  RefreshBrailleRowMethod *refreshBrailleRow;
+
   SetBrailleFirmnessMethod *setBrailleFirmness;
   SetTouchSensitivityMethod *setTouchSensitivity;
   SetAutorepeatPropertiesMethod *setAutorepeatProperties;

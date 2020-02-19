@@ -25,8 +25,6 @@ note + The round key above them (labelled H) is named Help.
 note + The square key below them (labelled 0) is named Refresh.
 
 bind Help HELP
-bind Help+Refresh REFRESH
-
 bind Help+Menu PREFMENU
 bind Help+Back PREFLOAD
 bind Help+Forward PREFSAVE
@@ -51,4 +49,15 @@ bind Line6 ROUTE_LINE+5
 bind Line7 ROUTE_LINE+6
 bind Line8 ROUTE_LINE+7
 bind Line9 ROUTE_LINE+8
+
+bind Refresh+Help REFRESH
+bind Refresh+Line1 REFRESH_LINE+0
+bind Refresh+Line2 REFRESH_LINE+1
+bind Refresh+Line3 REFRESH_LINE+2
+bind Refresh+Line4 REFRESH_LINE+3
+bind Refresh+Line5 REFRESH_LINE+4
+bind Refresh+Line6 REFRESH_LINE+5
+bind Refresh+Line7 REFRESH_LINE+6
+bind Refresh+Line8 REFRESH_LINE+7
+bind Refresh+Line9 REFRESH_LINE+8
 
