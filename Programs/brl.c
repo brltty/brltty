@@ -267,7 +267,7 @@ canRefreshBrailleRow (BrailleDisplay *brl) {
 int
 refreshBrailleRow (BrailleDisplay *brl, int row) {
   if (!canRefreshBrailleRow(brl)) return 0;
-  logMessage(LOG_DEBUG, "refreshing braille row");
+  logMessage(LOG_DEBUG, "refreshing braille row: %d", row);
   return brl->refreshBrailleRow(brl, row);
 }
 
