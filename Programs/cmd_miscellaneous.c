@@ -243,6 +243,17 @@ handleMiscellaneousCommands (int command, void *data) {
       break;
     }
 
+    case BRL_CMD_REFRESH: {
+      if (canRefreshBrailleDisplay(&brl)) {
+        if (refreshBrailleDisplay(&brl)) {
+          break;
+        }
+      }
+
+      alert(ALERT_COMMAND_REJECTED);
+      break;
+    }
+
     default: {
       int arg = command & BRL_MSK_ARG;
 

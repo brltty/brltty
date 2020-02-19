@@ -65,7 +65,7 @@ END_KEY_TABLE_LIST
 
 typedef struct {
   unsigned char isNew:1;
-  unsigned char force;
+  unsigned char refresh;
   unsigned char cells[];
 } RowEntry;
 
@@ -196,6 +196,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
           case CN_CMD_DEVICE_STATE:
           case CN_CMD_KEYS_STATE:
           case CN_CMD_SEND_ROW:
+          case CN_CMD_RESET_CELLS:
             expected = 3;
             break;
 
@@ -262,6 +263,24 @@ writeCommand (BrailleDisplay *brl, unsigned char command) {
   return writePacket(brl, packet, sizeof(packet));
 }
 
+static int
+testMotorsActive (BrailleDisplay *brl) {
+  return !!(brl->data->poll.deviceState & CN_DEV_MOTORS_ACTIVE);
+}
+
+static void
+setMotorsActive (BrailleDisplay *brl) {
+  brl->data->poll.deviceState |= CN_DEV_MOTORS_ACTIVE;
+  brl->data->poll.deviceStateCounter = 0;
+}
+
+static int
+writeMotorsCommand (BrailleDisplay *brl, unsigned char command) {
+  int ok = writeCommand(brl, command);
+  if (ok) setMotorsActive(brl);
+  return ok;
+}
+
 static RowEntry *
 getRowEntry (BrailleDisplay *brl, unsigned int index) {
   return brl->data->output.rowEntries[index];
@@ -298,7 +317,7 @@ allocateRowEntries (BrailleDisplay *brl) {
     }
 
     memset(*row, 0, size);
-    (*row)->force = 1;
+    (*row)->refresh = 1;
   }
 
   return 1;
@@ -319,9 +338,8 @@ sendRow (BrailleDisplay *brl) {
       byte = translateOutputCells(byte, row->cells, length);
 
       if (writePacket(brl, packet, (byte - packet))) {
+        setMotorsActive(brl);
         row->isNew = 0;
-        brl->data->poll.deviceState |= CN_DEV_MOTORS_ACTIVE;
-        brl->data->poll.deviceStateCounter = 0;
       } else {
         brl->hasFailed = 1;
       }
@@ -335,12 +353,22 @@ sendRow (BrailleDisplay *brl) {
   return 0;
 }
 
+static int
+refreshAllRows (BrailleDisplay *brl) {
+  for (unsigned int index=0; index<brl->textRows; index+=1) {
+    getRowEntry(brl, index)->refresh = 1;
+  }
+
+  brl->data->output.firstNewRow = 0;
+  return writeMotorsCommand(brl, CN_CMD_RESET_CELLS);
+}
+
 ASYNC_ALARM_CALLBACK(CN_handlePollAlarm) {
   BrailleDisplay *brl = parameters->data;
   if (brl->data->poll.waitingForResponse) return;
   unsigned char command = CN_CMD_KEYS_STATE;
 
-  if (!(brl->data->poll.deviceState & CN_DEV_MOTORS_ACTIVE)) {
+  if (!testMotorsActive(brl)) {
     if (sendRow(brl)) return;
   } else if (brl->data->poll.deviceStateCounter) {
     brl->data->poll.deviceStateCounter -= 1;
@@ -505,6 +533,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                                 readPacket, &response, sizeof(response),
                                 isIdentityResponse)) {
           if (allocateRowEntries(brl)) {
+            brl->refreshBrailleDisplay = refreshAllRows;
             setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
             makeOutputTable(dotsTable_ISO11548_1);
             brl->cellSize = 6;
@@ -551,7 +580,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   for (unsigned int index=0; index<brl->textRows; index+=1) {
     RowEntry *row = getRowEntry(brl, index);
 
-    if (cellsHaveChanged(row->cells, cells, length, NULL, NULL, &row->force)) {
+    if (cellsHaveChanged(row->cells, cells, length, NULL, NULL, &row->refresh)) {
       row->isNew = 1;
     }
 
@@ -586,6 +615,9 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         continue;
 
       case CN_CMD_SEND_ROW:
+        continue;
+
+      case CN_CMD_RESET_CELLS:
         continue;
 
       default:

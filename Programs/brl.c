@@ -36,6 +36,7 @@ void
 constructBrailleDisplay (BrailleDisplay *brl) {
   brl->data = NULL;
 
+  brl->refreshBrailleDisplay = NULL;
   brl->setBrailleFirmness = NULL;
   brl->setTouchSensitivity = NULL;
   brl->setAutorepeatProperties = NULL;
@@ -242,6 +243,18 @@ readBrailleCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
   resizeBrailleBuffer(brl, 0, LOG_INFO);
   return command;
+}
+
+int
+canRefreshBrailleDisplay (BrailleDisplay *brl) {
+  return brl->refreshBrailleDisplay != NULL;
+}
+
+int
+refreshBrailleDisplay (BrailleDisplay *brl) {
+  if (!canRefreshBrailleDisplay(brl)) return 0;
+  logMessage(LOG_DEBUG, "refreshing braille display");
+  return brl->refreshBrailleDisplay(brl);
 }
 
 int

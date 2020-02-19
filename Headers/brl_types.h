@@ -55,6 +55,7 @@ typedef enum {
 typedef struct BrailleDisplayStruct BrailleDisplay;
 typedef struct BrailleDataStruct BrailleData;
 
+typedef int RefreshBrailleDisplayMethod (BrailleDisplay *brl);
 typedef int SetBrailleFirmnessMethod (BrailleDisplay *brl, BrailleFirmness setting);
 typedef int SetTouchSensitivityMethod (BrailleDisplay *brl, TouchSensitivity setting);
 typedef int SetAutorepeatPropertiesMethod (BrailleDisplay *brl, int on, int delay, int interval);
@@ -62,6 +63,7 @@ typedef int SetAutorepeatPropertiesMethod (BrailleDisplay *brl, int on, int dela
 struct BrailleDisplayStruct {
   BrailleData *data;
 
+  RefreshBrailleDisplayMethod *refreshBrailleDisplay;
   SetBrailleFirmnessMethod *setBrailleFirmness;
   SetTouchSensitivityMethod *setTouchSensitivity;
   SetAutorepeatPropertiesMethod *setAutorepeatProperties;

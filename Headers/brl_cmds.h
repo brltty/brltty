@@ -233,6 +233,8 @@ typedef enum {
   BRL_CMD_SPEAK_INDENT /* speak indent of current line */,
   BRL_CMD_ASPK_INDENT /* set autospeak indent of current line on/off */,
 
+  BRL_CMD_REFRESH /* refresh the braille display */,
+
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
 
