@@ -786,7 +786,7 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
           offsetDone = 1;
           continue;
         }
-      } else if (((*command)->isOffset || (*command)->isColumn)) {
+      } else if (((*command)->isOffset || (*command)->isColumn) || (*command)->isRow) {
         int maximum = BRL_MSK_ARG - ((*command)->code & BRL_MSK_ARG);
         int offset;
 

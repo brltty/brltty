@@ -265,7 +265,7 @@ typedef enum {
   BRL_BLK_SET_CONTRACTION_TABLE /* set contraction table */,
   BRL_BLK_SET_KEYBOARD_TABLE /* set keyboard table */,
   BRL_BLK_SET_LANGUAGE_PROFILE /* set language profile */,
-  BRL_BLK_18 /* (reserved) */,
+  BRL_BLK_CSRJMP_LINE /* bring screen cursor to line */,
   BRL_BLK_19 /* (reserved) */,
   BRL_BLK_1A /* (reserved) */,
   BRL_BLK_1B /* (reserved) */,

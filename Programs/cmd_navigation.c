@@ -720,6 +720,16 @@ handleNavigationCommands (int command, void *data) {
           break;
         }
 
+        case BRL_CMD_BLK(CSRJMP_LINE): {
+          if (routeScreenCursor(-1, arg, scr.number)) {
+            alert(ALERT_ROUTING_STARTED);
+          } else {
+            alert(ALERT_COMMAND_REJECTED);
+          }
+
+          break;
+        }
+
         case BRL_CMD_BLK(SETLEFT): {
           int column, row;
 
