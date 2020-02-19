@@ -196,7 +196,7 @@ typedef struct {
    *
    * Setting \c NULL defaults it to local installation setup or to the content
    * of the BRLAPI_AUTH environment variable, if it exists. */
-  char *auth;
+  const char *auth;
 
   /** This tells where the \e BrlAPI server resides: it might be listening on
    * another computer, on any TCP port. It should look like "foo:1", which
@@ -206,7 +206,7 @@ typedef struct {
    * Settings \c NULL defaults it to localhost, using the local installation's
    * default TCP port, or to the content of the BRLAPI_HOST environment
    * variable, if it exists. */
-  char *host;
+  const char *host;
 } brlapi_connectionSettings_t;
 
 /* BRLAPI_SETTINGS_INITIALIZER */
