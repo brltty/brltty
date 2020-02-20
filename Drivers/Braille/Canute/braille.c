@@ -65,7 +65,7 @@ END_KEY_TABLE_LIST
 
 typedef struct {
   unsigned char isNew:1;
-  unsigned char refresh;
+  unsigned char force;
   unsigned char cells[];
 } RowEntry;
 
@@ -317,7 +317,7 @@ allocateRowEntries (BrailleDisplay *brl) {
     }
 
     memset(*row, 0, size);
-    (*row)->refresh = 1;
+    (*row)->force = 1;
   }
 
   return 1;
@@ -340,6 +340,7 @@ sendRow (BrailleDisplay *brl) {
       if (writePacket(brl, packet, (byte - packet))) {
         setMotorsActive(brl);
         row->isNew = 0;
+        brl->data->output.firstNewRow += 1;
       } else {
         brl->hasFailed = 1;
       }
@@ -353,10 +354,17 @@ sendRow (BrailleDisplay *brl) {
   return 0;
 }
 
+static void
+setFirstNewRow (BrailleDisplay *brl, unsigned int index) {
+  if (index < brl->data->output.firstNewRow) {
+    brl->data->output.firstNewRow = index;
+  }
+}
+
 static int
 refreshAllRows (BrailleDisplay *brl) {
   for (unsigned int index=0; index<brl->textRows; index+=1) {
-    getRowEntry(brl, index)->refresh = 1;
+    getRowEntry(brl, index)->isNew = 1;
   }
 
   brl->data->output.firstNewRow = 0;
@@ -462,7 +470,6 @@ static BrailleResponseResult
 handleRowCount (BrailleDisplay *brl, const unsigned char *response, size_t size) {
   if (response[0] != CN_CMD_ROW_COUNT) return BRL_RSP_UNEXPECTED;
   brl->textRows = CN_getResponseResult(response);
-  brl->data->output.firstNewRow = brl->textRows;
   return writeNextProbeCommand(brl, CN_CMD_PROTOCOL_VERSION, handleProtocolVersion);
 }
 
@@ -581,24 +588,19 @@ brl_destruct (BrailleDisplay *brl) {
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned int length = brl->textColumns;
-  unsigned int firstNewRow = brl->textRows;
   const unsigned char *cells = brl->buffer;
 
   for (unsigned int index=0; index<brl->textRows; index+=1) {
     RowEntry *row = getRowEntry(brl, index);
 
-    if (cellsHaveChanged(row->cells, cells, length, NULL, NULL, &row->refresh)) {
+    if (cellsHaveChanged(row->cells, cells, length, NULL, NULL, &row->force)) {
       row->isNew = 1;
-    }
-
-    if (row->isNew) {
-      if (index < firstNewRow) firstNewRow = index;
+      setFirstNewRow(brl, index);
     }
 
     cells += length;
   }
 
-  brl->data->output.firstNewRow = firstNewRow;
   return 1;
 }
 
