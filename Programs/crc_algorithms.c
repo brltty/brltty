@@ -22,10 +22,7 @@
 
 #include <string.h>
 
-#include "crc.h"
-
-#define UINT24_C UINT32_C
-#define UINT24_MAX UINT24_C(0XFFFFFF)
+#include "crc_algorithms.h"
 
 #define CRC_ALGORITHM_SYMBOL(name) crcAlgorithm_ ## name
 #define CRC_ALGORITHM_DEFINITION(name) static const CRCAlgorithm CRC_ALGORITHM_SYMBOL(name)

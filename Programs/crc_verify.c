@@ -22,36 +22,15 @@
 
 #include <string.h>
 
-#include "log.h"
+#include "crc_verify.h"
 #include "crc_internal.h"
+#include "log.h"
 
 const uint8_t crcCheckData[] = {
   0X31, 0X32, 0X33, 0X34, 0X35, 0X36, 0X37, 0X38, 0X39
 };
 
 const uint8_t crcCheckSize = sizeof(crcCheckData);
-
-void
-crcLogAlgorithm (const CRCAlgorithm *algorithm) {
-  logMessage(LOG_DEBUG,
-    "CRC Algorithm: %s: Width:%u Poly:%X Init:%X Xor:%X RefDat:%u RefRes:%u Chk:%X Res:%X",
-    algorithm->primaryName,
-    algorithm->checksumWidth, algorithm->generatorPolynomial,
-    algorithm->initialValue, algorithm->xorMask,
-    algorithm->reflectData, algorithm->reflectResult,
-    algorithm->checkValue, algorithm->residue
-  );
-}
-
-void
-crcLogProperties (const CRCProperties *properties) {
-  logMessage(LOG_DEBUG,
-    "CRC Properteis: Shift:%u MSB:%X Mask:%X",
-    properties->byteShift,
-    properties->mostSignificantBit,
-    properties->valueMask
-  );
-}
 
 static void
 crcLogMismatch (const CRCGenerator *crc,const char *what, crc_t actual, crc_t expected) {

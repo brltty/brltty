@@ -16,11 +16,30 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_CRC
-#define BRLTTY_INCLUDED_CRC
+#ifndef BRLTTY_INCLUDED_CRC_DEFINITIONS
+#define BRLTTY_INCLUDED_CRC_DEFINITIONS
 
-#include "crc_algorithms.h"
-#include "crc_generate.h"
-#include "crc_verify.h"
+#include <stdint.h>
 
-#endif /* BRLTTY_INCLUDED_CRC */
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+typedef uint32_t crc_t;
+#define CRC_C UINT32_C
+
+#define CRC_BYTE_WIDTH 8
+
+#ifndef UINT24_C
+#define UINT24_C UINT32_C
+#endif /* UINT24_C */
+
+#ifndef UINT24_MAX
+#define UINT24_MAX UINT24_C(0XFFFFFF)
+#endif /* UINT24_MAX */
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* BRLTTY_INCLUDED_CRC_DEFINITIONS */

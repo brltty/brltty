@@ -22,8 +22,9 @@
 
 #include <string.h>
 
-#include "log.h"
+#include "crc_generate.h"
 #include "crc_internal.h"
+#include "log.h"
 
 crc_t
 crcMostSignificantBit (unsigned int width) {
