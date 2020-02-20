@@ -36,7 +36,7 @@ static void
 crcLogMismatch (const CRCGenerator *crc,const char *what, crc_t actual, crc_t expected) {
   logMessage(LOG_WARNING,
     "CRC %s mismatch: %s: Actual:%X Expected:%X",
-    what, crcGetAlgorithmName(crc), actual, expected
+    what, crc->algorithmName, actual, expected
   );
 }
 

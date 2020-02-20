@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_CRC_INTERNAL
 #define BRLTTY_INCLUDED_CRC_INTERNAL
 
-#include "crc.h"
+#include "crc_generate.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,11 +31,6 @@ struct CRCGeneratorStruct {
   crc_t currentValue;
   char algorithmName[];
 };
-
-static inline const char *
-crcGetAlgorithmName (const CRCGenerator *crc) {
-  return crc->algorithmName;
-}
 
 #ifdef __cplusplus
 }
