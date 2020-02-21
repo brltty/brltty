@@ -218,14 +218,14 @@ asyncResetAlarmIn (AsyncHandle handle, int milliseconds) {
 }
 
 int
-asyncResetAlarmEvery (AsyncHandle handle, int milliseconds) {
+asyncResetAlarmInterval (AsyncHandle handle, int milliseconds) {
   Element *element = getAlarmElement(handle);
 
   if (element) {
     AlarmEntry *alarm = getElementItem(element);
 
     alarm->interval = milliseconds;
-    alarm->reschedule = 1;
+    alarm->reschedule = milliseconds > 0;
     return 1;
   }
 

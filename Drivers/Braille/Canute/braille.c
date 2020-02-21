@@ -427,7 +427,7 @@ startPollAlarm (BrailleDisplay *brl) {
   if (alarm) return 1;
 
   if (asyncNewRelativeAlarm(&alarm, 0, CN_handlePollAlarm, brl)) {
-    if (asyncResetAlarmEvery(alarm, POLL_ALARM_INTERVAL)) {
+    if (asyncResetAlarmInterval(alarm, POLL_ALARM_INTERVAL)) {
       brl->data->poll.alarmHandle = alarm;
       return 1;
     }

@@ -613,7 +613,7 @@ gioNewHandleInputObject (
     }
 
     if (asyncNewRelativeAlarm(&hio->pollAlarm, 0, handleInputAlarm, hio)) {
-      if (asyncResetAlarmEvery(hio->pollAlarm, pollInterval)) {
+      if (asyncResetAlarmInterval(hio->pollAlarm, pollInterval)) {
         return hio;
       }
 

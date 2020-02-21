@@ -1849,7 +1849,7 @@ startLatchMonitor (BrailleDisplay *brl) {
   if (!brl->data->latch.delay) return 1;
 
   if (asyncNewRelativeAlarm(&brl->data->latch.monitor, 0, irMonitorLatch, brl)) {
-    if (asyncResetAlarmEvery(brl->data->latch.monitor, brl->data->latch.interval)) {
+    if (asyncResetAlarmInterval(brl->data->latch.monitor, brl->data->latch.interval)) {
       brl->data->latch.pulled = 0;
       return 1;
     }

@@ -50,7 +50,7 @@ extern int asyncNewRelativeAlarm (
 
 extern int asyncResetAlarmTo (AsyncHandle handle, const TimeValue *time);
 extern int asyncResetAlarmIn (AsyncHandle handle, int milliseconds);
-extern int asyncResetAlarmEvery (AsyncHandle handle, int milliseconds);
+extern int asyncResetAlarmInterval (AsyncHandle handle, int milliseconds);
 
 #ifdef __cplusplus
 }
