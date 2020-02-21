@@ -25,13 +25,15 @@
 #include "crc.h"
 #include "async.h"
 #include "async_alarm.h"
+#include "timing.h"
 
 #include "brl_driver.h"
 #include "brldefs-cn.h"
 
 #define PROBE_RETRY_LIMIT 0
-#define PROBE_INPUT_TIMEOUT 1000
+#define PROBE_RESPONSE_TIMEOUT 1000
 #define POLL_ALARM_INTERVAL 100
+#define REQUEST_RESPONSE_TIMEOUT 5000
 #define MAXIMUM_RESPONSE_SIZE 0X100
 
 BEGIN_KEY_NAME_TABLE(navigation)
@@ -86,6 +88,7 @@ struct BrailleDataStruct {
     AsyncHandle alarmHandle;
     CN_PacketInteger deviceState;
     unsigned char deviceStateCounter;
+    TimeValue lastWriteTime;
     unsigned waitingForResponse:1;
   } poll;
 
@@ -254,6 +257,7 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
   if (!writeBraillePacket(brl, NULL, buffer, size)) return 0;
 
   brl->data->poll.waitingForResponse = 1;
+  getMonotonicTime(&brl->data->poll.lastWriteTime);
   return 1;
 }
 
@@ -378,7 +382,21 @@ refreshRow (BrailleDisplay *brl, int row) {
 
 ASYNC_ALARM_CALLBACK(CN_handlePollAlarm) {
   BrailleDisplay *brl = parameters->data;
-  if (brl->data->poll.waitingForResponse) return;
+
+  if (brl->data->poll.waitingForResponse) {
+    {
+      long int elapsed = millisecondsBetween(
+        &brl->data->poll.lastWriteTime,
+        parameters->now
+      );
+
+      if (elapsed <= REQUEST_RESPONSE_TIMEOUT) return;
+    }
+
+    logMessage(LOG_WARNING, "Canute response timeout");
+    return;
+  }
+
   unsigned char command = CN_CMD_KEYS_STATE;
 
   if (!testMotorsActive(brl)) {
@@ -540,7 +558,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         unsigned char response[MAXIMUM_RESPONSE_SIZE];
 
         if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT,
-                                NULL, PROBE_INPUT_TIMEOUT,
+                                NULL, PROBE_RESPONSE_TIMEOUT,
                                 writeIdentifyRequest,
                                 readPacket, &response, sizeof(response),
                                 isIdentityResponse)) {
