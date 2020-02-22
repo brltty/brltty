@@ -32,9 +32,13 @@
 
 #define PROBE_RETRY_LIMIT 0
 #define PROBE_RESPONSE_TIMEOUT 1000
+
 #define POLL_ALARM_INTERVAL 100
-#define REQUEST_RESPONSE_TIMEOUT 10000
+#define ROW_RENDER_TIME 1200
+#define STATE_POLL_INTERVAL 400
+
 #define MAXIMUM_RESPONSE_SIZE 0X100
+#define REQUEST_RESPONSE_TIMEOUT 10000
 
 BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(CN_KEY_Help, "Help"),
@@ -272,15 +276,20 @@ writeCommand (BrailleDisplay *brl, unsigned char command) {
   return writePacket(brl, packet, sizeof(packet));
 }
 
-static int
-testMotorsActive (BrailleDisplay *brl) {
-  return !!(brl->data->poll.deviceState & CN_DEV_MOTORS_ACTIVE);
+static void
+setDeviceStateCounter (BrailleDisplay *brl, unsigned int time) {
+  brl->data->poll.deviceStateCounter = (time - 1) / POLL_ALARM_INTERVAL;
 }
 
 static void
 setMotorsActive (BrailleDisplay *brl) {
   brl->data->poll.deviceState |= CN_DEV_MOTORS_ACTIVE;
-  brl->data->poll.deviceStateCounter = 0;
+  setDeviceStateCounter(brl, ROW_RENDER_TIME);
+}
+
+static int
+testMotorsActive (BrailleDisplay *brl) {
+  return !!(brl->data->poll.deviceState & CN_DEV_MOTORS_ACTIVE);
 }
 
 static int
@@ -423,7 +432,7 @@ ASYNC_ALARM_CALLBACK(CN_handlePollAlarm) {
   } else if (brl->data->poll.deviceStateCounter) {
     brl->data->poll.deviceStateCounter -= 1;
   } else {
-    brl->data->poll.deviceStateCounter = 10;
+    setDeviceStateCounter(brl, STATE_POLL_INTERVAL);
     command = CN_CMD_DEVICE_STATE;
   }
 
