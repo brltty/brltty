@@ -33,7 +33,7 @@
 #define PROBE_RETRY_LIMIT 0
 #define PROBE_RESPONSE_TIMEOUT 1000
 #define POLL_ALARM_INTERVAL 100
-#define REQUEST_RESPONSE_TIMEOUT 5000
+#define REQUEST_RESPONSE_TIMEOUT 10000
 #define MAXIMUM_RESPONSE_SIZE 0X100
 
 BEGIN_KEY_NAME_TABLE(navigation)
@@ -99,6 +99,8 @@ struct BrailleDataStruct {
   struct {
     RowEntry **rowEntries;
     unsigned int firstNewRow;
+    unsigned int lastRowSent;
+    unsigned char lastCommandSent;
   } output;
 };
 
@@ -177,8 +179,9 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
         crc_t actual = makePacketChecksum(brl, packet, length);
 
         if (actual != expected) {
-          logMessage(LOG_WARNING,
+          logBytes(LOG_WARNING,
             "input packet checksum mismatch: Actual:%X Expected:%X",
+            packet, length,
             actual, expected
           );
 
@@ -257,6 +260,8 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
   if (!writeBraillePacket(brl, NULL, buffer, size)) return 0;
 
   brl->data->poll.waitingForResponse = 1;
+  brl->data->output.lastCommandSent = packet[0];
+
   getMonotonicTime(&brl->data->poll.lastWriteTime);
   return 1;
 }
@@ -344,7 +349,7 @@ sendRow (BrailleDisplay *brl) {
       if (writePacket(brl, packet, (byte - packet))) {
         setMotorsActive(brl);
         row->isNew = 0;
-        brl->data->output.firstNewRow += 1;
+        brl->data->output.lastRowSent = brl->data->output.firstNewRow++;
       } else {
         brl->hasFailed = 1;
       }
@@ -359,10 +364,17 @@ sendRow (BrailleDisplay *brl) {
 }
 
 static void
-setFirstNewRow (BrailleDisplay *brl, unsigned int index) {
+setRowIsNew (BrailleDisplay *brl, unsigned int index) {
+  getRowEntry(brl, index)->isNew = 1;
+
   if (index < brl->data->output.firstNewRow) {
     brl->data->output.firstNewRow = index;
   }
+}
+
+static void
+resendRow (BrailleDisplay *brl) {
+  setRowIsNew(brl, brl->data->output.lastRowSent);
 }
 
 static int
@@ -391,10 +403,17 @@ ASYNC_ALARM_CALLBACK(CN_handlePollAlarm) {
       );
 
       if (elapsed <= REQUEST_RESPONSE_TIMEOUT) return;
+      logMessage(LOG_WARNING, "response timeout - retrying");
     }
 
-    logMessage(LOG_WARNING, "Canute response timeout");
-    return;
+    switch (brl->data->output.lastCommandSent) {
+      case CN_CMD_SEND_ROW:
+        resendRow(brl);
+        break;
+
+      default:
+        break;
+    }
   }
 
   unsigned char command = CN_CMD_KEYS_STATE;
@@ -612,8 +631,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     RowEntry *row = getRowEntry(brl, index);
 
     if (cellsHaveChanged(row->cells, cells, length, NULL, NULL, &row->force)) {
-      row->isNew = 1;
-      setFirstNewRow(brl, index);
+      setRowIsNew(brl, index);
     }
 
     cells += length;
@@ -642,6 +660,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         continue;
 
       case CN_CMD_SEND_ROW:
+        if (result) resendRow(brl);
         continue;
 
       case CN_CMD_RESET_CELLS:
