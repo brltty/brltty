@@ -30,7 +30,7 @@
 
 /*
  * These CRC algorithms have been copied from:
- * http://reveng.sourceforge.net/crc-catalogue/16.htm
+ * http://reveng.sourceforge.net/crc-catalogue/: 1-15.htm, 16.htm, 17plus.htm
  */
 
 CRC_ALGORITHM_DEFINITION(CRC8_AUTOSAR) = {
