@@ -22,7 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "crc.h"
+#include "crc_generate.h"
 #include "async.h"
 #include "async_alarm.h"
 #include "timing.h"
@@ -586,7 +586,23 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->window.rowEntries = NULL;
     brl->data->keys.pressed = 0;
 
-    if ((brl->data->crcGenerator = crcNewGenerator(crcGetProvidedAlgorithm(CN_PACKET_CHECKSUM_ALGORITHM)))) {
+    {
+      static const CRCAlgorithm algorithm = {
+        .primaryName = CN_CRC_ALGORITHM_NAME,
+        .checksumWidth = CN_CRC_CHECKSUM_WIDTH,
+        .reflectData = CN_CRC_REFLECT_DATA,
+        .reflectResult = CN_CRC_REFLECT_RESULT,
+        .generatorPolynomial = UINT16_C(CN_CRC_GENERATOR_POLYNOMIAL),
+        .initialValue = UINT16_C(CN_CRC_INITIAL_VALUE),
+        .xorMask = UINT16_C(CN_CRC_XOR_MASK),
+        .checkValue = UINT16_C(CN_CRC_CHECK_VALUE),
+        .residue = UINT16_C(CN_CRC_RESIDUE),
+      };
+
+      brl->data->crcGenerator = crcNewGenerator(&algorithm);
+    }
+
+    if (brl->data->crcGenerator) {
       if (connectResource(brl, device)) {
         unsigned char response[MAXIMUM_RESPONSE_SIZE];
 

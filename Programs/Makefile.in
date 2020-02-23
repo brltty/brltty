@@ -351,18 +351,7 @@ pref_tables.$O:
 
 ###############################################################################
 
-CRC_OBJECTS = crc_algorithms.$O crc_generate.$O crc_verify.$O
-
-crc_generate.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_generate.c
-
-crc_algorithms.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_algorithms.c
-
-crc_verify.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_verify.c
-
-CRCTEST_OBJECTS = crctest.$O $(PROGRAM_OBJECTS) $(CRC_OBJECTS)
+CRCTEST_OBJECTS = crctest.$O $(PROGRAM_OBJECTS) crc_algorithms.$O crc_generate.$O crc_verify.$O
 
 crctest$X: $(CRCTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(CRCTEST_OBJECTS) $(LDLIBS)
@@ -370,9 +359,18 @@ crctest$X: $(CRCTEST_OBJECTS)
 crctest.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crctest.c
 
+crc_algorithms.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_algorithms.c
+
+crc_generate.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_generate.c
+
+crc_verify.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/crc_verify.c
+
 ###############################################################################
 
-BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) $(CRC_OBJECTS)
+BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) crc_generate.$O
 
 brl.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl.c
