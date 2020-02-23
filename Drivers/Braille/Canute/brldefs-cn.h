@@ -26,9 +26,9 @@ typedef enum {
   CN_CMD_SEND_ROW         = 0X06,
   CN_CMD_RESET_CELLS      = 0X07,
   CN_CMD_LOWER_ROWS       = 0X09,
-  CN_CMD_KEYS_STATE       = 0X0A,
+  CN_CMD_PRESSED_KEYS     = 0X0A,
   CN_CMD_FIRMWARE_VERSION = 0X0B,
-  CN_CMD_DEVICE_STATE     = 0X0D,
+  CN_CMD_DEVICE_STATUS    = 0X0D,
   CN_CMD_SET_ROW          = 0X0E,
 } CN_Command;
 
@@ -54,8 +54,8 @@ typedef enum {
 } CN_KeyGroup;
 
 typedef enum {
-  CN_DEV_MOTORS_ACTIVE = 0X01,
-} CN_DeviceStates;
+  CN_STATUS_MOTORS_ACTIVE = 0X01,
+} CN_Status;
 
 #define CN_PACKET_CHECKSUM_ALGORITHM "CRC-16/ISO-HDLC"
 #define CN_PACKET_FRAMING_BYTE 0X7E
