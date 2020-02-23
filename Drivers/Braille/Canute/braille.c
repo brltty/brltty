@@ -37,6 +37,7 @@
 
 #define MAIN_TASK_INTERVAL 100
 #define ROW_UPDATE_TIME 1200
+#define CELLS_RESET_TIME 14000
 #define MOTORS_POLL_INTERVAL 400
 
 BEGIN_KEY_NAME_TABLE(navigation)
@@ -286,24 +287,6 @@ setStatusPollTime (BrailleDisplay *brl, unsigned int in) {
   brl->data->status.counter = (in + MAIN_TASK_INTERVAL - 1) / MAIN_TASK_INTERVAL;
 }
 
-static void
-setMotorsActive (BrailleDisplay *brl) {
-  brl->data->status.flags |= CN_STATUS_MOTORS_ACTIVE;
-  setStatusPollTime(brl, ROW_UPDATE_TIME);
-}
-
-static int
-testMotorsActive (BrailleDisplay *brl) {
-  return !!(brl->data->status.flags & CN_STATUS_MOTORS_ACTIVE);
-}
-
-static int
-writeMotorsCommand (BrailleDisplay *brl, unsigned char command) {
-  int ok = writeSimpleCommand(brl, command);
-  if (ok) setMotorsActive(brl);
-  return ok;
-}
-
 static RowEntry *
 getRowEntry (BrailleDisplay *brl, unsigned int index) {
   return brl->data->window.rowEntries[index];
@@ -361,7 +344,6 @@ sendRow (BrailleDisplay *brl) {
       byte = translateOutputCells(byte, row->cells, length);
 
       if (writePacket(brl, packet, (byte - packet))) {
-        setMotorsActive(brl);
         row->hasChanged = 0;
         brl->data->window.lastRowSent = brl->data->window.firstChangedRow++;
       } else {
@@ -398,7 +380,7 @@ refreshAllRows (BrailleDisplay *brl) {
   }
 
   brl->data->window.firstChangedRow = 0;
-  return writeMotorsCommand(brl, CN_CMD_RESET_CELLS);
+  return writeSimpleCommand(brl, CN_CMD_RESET_CELLS);
 }
 
 static int
@@ -408,6 +390,7 @@ refreshRow (BrailleDisplay *brl, int row) {
 
 ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
   BrailleDisplay *brl = parameters->data;
+  int motorsActive = !!(brl->data->status.flags & CN_STATUS_MOTORS_ACTIVE);
 
   if (brl->data->main.waitingForResponse) {
     {
@@ -419,6 +402,8 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
       "command response timeout: Cmd:0X%02X",
       brl->data->sent.command
     );
+
+    if (motorsActive) setStatusPollTime(brl, 1);
 
     switch (brl->data->sent.command) {
       case CN_CMD_SEND_ROW:
@@ -432,7 +417,7 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
 
   unsigned char command = CN_CMD_PRESSED_KEYS;
 
-  if (!testMotorsActive(brl)) {
+  if (!motorsActive) {
     if (sendRow(brl)) return;
   } else if (brl->data->status.counter > 0) {
     if (!(brl->data->status.counter -= 1)) {
@@ -677,11 +662,16 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    brl->writeDelay = 0;
     brl->data->main.waitingForResponse = 0;
+    brl->writeDelay = 0;
+
+    unsigned char command = packet[0];
     CN_PacketInteger result = CN_getResponseResult(packet);
 
-    switch (packet[0]) {
+    unsigned int motorsTime = 0;
+    void (*handleError) (BrailleDisplay *brl) = NULL;
+
+    switch (command) {
       case CN_CMD_DEVICE_STATUS:
         brl->data->status.flags = result;
         continue;
@@ -691,17 +681,30 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         continue;
 
       case CN_CMD_SEND_ROW:
-        if (result != 0) resendRow(brl);
-        continue;
+        motorsTime = ROW_UPDATE_TIME;
+        handleError = resendRow;
+        break;
 
       case CN_CMD_RESET_CELLS:
-        continue;
+        motorsTime = CELLS_RESET_TIME;
+        break;
 
       default:
-        break;
+        logUnexpectedPacket(packet, size);
+        continue;
     }
 
-    logUnexpectedPacket(packet, size);
+    if (result) {
+      logMessage(LOG_WARNING,
+        "command failed: Cmd:0X%02X Err:0X%02X",
+        command, result
+      );
+
+      if (handleError) handleError(brl);
+    } else if (motorsTime) {
+      brl->data->status.flags |= CN_STATUS_MOTORS_ACTIVE;
+      setStatusPollTime(brl, motorsTime);
+    }
   }
 
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
