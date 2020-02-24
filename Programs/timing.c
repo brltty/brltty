@@ -256,7 +256,7 @@ millisecondsBetween (const TimeValue *from, const TimeValue *to) {
   };
 
   normalizeTimeValue(&elapsed);
-  return (elapsed.seconds * MSECS_PER_SEC)
+  return ((long int)elapsed.seconds * MSECS_PER_SEC)
        + (elapsed.nanoseconds / NSECS_PER_MSEC);
 }
 
