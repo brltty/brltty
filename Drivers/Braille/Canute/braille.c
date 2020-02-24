@@ -37,6 +37,7 @@
 
 #define MAIN_TASK_INTERVAL 100
 #define ROW_UPDATE_TIME 1200
+#define ROW_RETRY_DELAY 5000
 #define CELLS_RESET_TIME 14000
 #define MOTORS_POLL_INTERVAL 400
 
@@ -97,6 +98,7 @@ struct BrailleDataStruct {
   } response;
 
   struct {
+    TimePeriod retryDelay;
     RowEntry **rowEntries;
     unsigned int firstChangedRow;
     unsigned int lastRowSent;
@@ -326,6 +328,8 @@ allocateRowEntries (BrailleDisplay *brl) {
 
 static int
 sendRow (BrailleDisplay *brl) {
+  if (!afterTimePeriod(&brl->data->window.retryDelay, NULL)) return 0;
+
   while (brl->data->window.firstChangedRow < brl->textRows) {
     RowEntry *row = getRowEntry(brl, brl->data->window.firstChangedRow);
 
@@ -558,8 +562,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     brl->data->crcGenerator = NULL;
     brl->data->mainTaskAlarm = NULL;
+
     brl->data->probe.responseHandler = NULL;
+    brl->data->probe.protocolVersion = 0;
+
+    startTimePeriod(&brl->data->window.retryDelay, 0);
     brl->data->window.rowEntries = NULL;
+
+    brl->data->keys.pressed = 0;
 
     {
       static const CRCAlgorithm algorithm = {
@@ -659,7 +669,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     CN_PacketInteger result = CN_getResponseResult(packet);
 
     unsigned int motorsTime = 0;
-    void (*handleError) (BrailleDisplay *brl) = NULL;
 
     switch (command) {
       case CN_CMD_DEVICE_STATUS:
@@ -672,7 +681,6 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
       case CN_CMD_SEND_ROW:
         motorsTime = ROW_UPDATE_TIME;
-        handleError = resendRow;
         break;
 
       case CN_CMD_RESET_CELLS:
@@ -690,7 +698,15 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         command, result
       );
 
-      if (handleError) handleError(brl);
+      switch (command) {
+        case CN_CMD_SEND_ROW:
+          startTimePeriod(&brl->data->window.retryDelay, ROW_RETRY_DELAY);
+          resendRow(brl);
+          continue;
+
+        default:
+          continue;;
+      }
     } else if (motorsTime) {
       brl->data->status.flags |= CN_STATUS_MOTORS_ACTIVE;
       setStatusPollTime(brl, motorsTime);
