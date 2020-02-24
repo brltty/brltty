@@ -83,6 +83,7 @@ typedef BrailleResponseResult ProbeResponseHandler (
 
 struct BrailleDataStruct {
   CRCGenerator *crcGenerator;
+  AsyncHandle mainTaskAlarm;
 
   struct {
     ProbeResponseHandler *responseHandler;
@@ -90,25 +91,21 @@ struct BrailleDataStruct {
   } probe;
 
   struct {
-    AsyncHandle alarmHandle;
-    unsigned waitingForResponse:1;
-  } main;
-
-  struct {
-    CN_PacketInteger flags;
-    unsigned char counter;
-  } status;
-
-  struct {
-    TimeValue at;
+    TimePeriod timeout;
+    unsigned char waiting:1;
     unsigned char command;
-  } sent;
+  } response;
 
   struct {
     RowEntry **rowEntries;
     unsigned int firstChangedRow;
     unsigned int lastRowSent;
   } window;
+
+  struct {
+    CN_PacketInteger flags;
+    unsigned char counter;
+  } status;
 
   struct {
     KeyNumberSet pressed;
@@ -266,13 +263,11 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
 
   *target++ = CN_PACKET_FRAMING_BYTE;
   size = target - buffer;
-
   if (!writeBraillePacket(brl, NULL, buffer, size)) return 0;
-  brl->data->main.waitingForResponse = 1;
 
-  brl->data->sent.command = packet[0];
-  getMonotonicTime(&brl->data->sent.at);
-
+  brl->data->response.waiting = 1;
+  startTimePeriod(&brl->data->response.timeout, COMMAND_RESPONSE_TIMEOUT);
+  brl->data->response.command = packet[0];
   return 1;
 }
 
@@ -392,20 +387,14 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
   BrailleDisplay *brl = parameters->data;
   int motorsActive = !!(brl->data->status.flags & CN_STATUS_MOTORS_ACTIVE);
 
-  if (brl->data->main.waitingForResponse) {
-    {
-      long int elapsed = millisecondsBetween(&brl->data->sent.at, parameters->now);
-      if (elapsed <= COMMAND_RESPONSE_TIMEOUT) return;
-    }
+  if (brl->data->response.waiting) {
+    if (!afterTimePeriod(&brl->data->response.timeout, NULL)) return;
 
-    logMessage(LOG_WARNING,
-      "command response timeout: Cmd:0X%02X",
-      brl->data->sent.command
-    );
-
+    unsigned char command = brl->data->response.command;
+    logMessage(LOG_WARNING, "command response timeout: Cmd:0X%02X", command);
     if (motorsActive) setStatusPollTime(brl, 1);
 
-    switch (brl->data->sent.command) {
+    switch (command) {
       case CN_CMD_SEND_ROW:
         resendRow(brl);
         break;
@@ -431,7 +420,7 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
 
 static void
 stopMainTask (BrailleDisplay *brl) {
-  AsyncHandle *alarm = &brl->data->main.alarmHandle;
+  AsyncHandle *alarm = &brl->data->mainTaskAlarm;
 
   if (*alarm) {
     asyncCancelRequest(*alarm);
@@ -441,12 +430,12 @@ stopMainTask (BrailleDisplay *brl) {
 
 static int
 startMainTask (BrailleDisplay *brl) {
-  AsyncHandle alarm = brl->data->main.alarmHandle;
+  AsyncHandle alarm = brl->data->mainTaskAlarm;
   if (alarm) return 1;
 
   if (asyncNewRelativeAlarm(&alarm, 0, CN_mainTaskHandler, brl)) {
     if (asyncResetAlarmInterval(alarm, MAIN_TASK_INTERVAL)) {
-      brl->data->main.alarmHandle = alarm;
+      brl->data->mainTaskAlarm = alarm;
       return 1;
     }
 
@@ -458,7 +447,7 @@ startMainTask (BrailleDisplay *brl) {
 
 static BrailleResponseResult
 isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  brl->data->main.waitingForResponse = 0;
+  brl->data->response.waiting = 0;
   ProbeResponseHandler *handler = brl->data->probe.responseHandler;
   brl->data->probe.responseHandler = NULL;
   return handler(brl, packet, size);
@@ -566,10 +555,11 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
+
+    brl->data->crcGenerator = NULL;
+    brl->data->mainTaskAlarm = NULL;
     brl->data->probe.responseHandler = NULL;
-    brl->data->main.alarmHandle = NULL;
     brl->data->window.rowEntries = NULL;
-    brl->data->keys.pressed = 0;
 
     {
       static const CRCAlgorithm algorithm = {
@@ -662,7 +652,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   size_t size;
 
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    brl->data->main.waitingForResponse = 0;
+    brl->data->response.waiting = 0;
     brl->writeDelay = 0;
 
     unsigned char command = packet[0];
