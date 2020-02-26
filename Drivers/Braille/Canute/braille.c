@@ -36,10 +36,10 @@
 #define MAXIMUM_RESPONSE_SIZE 0X100
 
 #define MAIN_TASK_INTERVAL 100
-#define ROW_UPDATE_TIME 1200
-#define ROW_RETRY_DELAY 5000
-#define CELLS_RESET_TIME 14000
 #define MOTORS_POLL_INTERVAL 400
+#define ROW_UPDATE_TIME 1200
+#define CELLS_RESET_TIME 14000
+#define UPDATE_RETRY_DELAY 5000
 
 BEGIN_KEY_NAME_TABLE(navigation)
   KEY_NAME_ENTRY(CN_KEY_Help, "Help"),
@@ -93,8 +93,8 @@ struct BrailleDataStruct {
 
   struct {
     TimePeriod timeout;
-    unsigned char waiting:1;
     unsigned char command;
+    unsigned char waiting:1;
   } response;
 
   struct {
@@ -102,6 +102,7 @@ struct BrailleDataStruct {
     RowEntry **rowEntries;
     unsigned int firstChangedRow;
     unsigned int lastRowSent;
+    unsigned char resetCells:1;
   } window;
 
   struct {
@@ -265,12 +266,17 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
 
   *target++ = CN_PACKET_FRAMING_BYTE;
   size = target - buffer;
-  if (!writeBraillePacket(brl, NULL, buffer, size)) return 0;
+  int ok = writeBraillePacket(brl, NULL, buffer, size);
 
-  brl->data->response.waiting = 1;
-  startTimePeriod(&brl->data->response.timeout, COMMAND_RESPONSE_TIMEOUT);
-  brl->data->response.command = packet[0];
-  return 1;
+  if (ok) {
+    brl->data->response.waiting = 1;
+    startTimePeriod(&brl->data->response.timeout, COMMAND_RESPONSE_TIMEOUT);
+    brl->data->response.command = packet[0];
+  } else {
+    brl->hasFailed = 1;
+  }
+
+  return ok;
 }
 
 static int
@@ -326,38 +332,6 @@ allocateRowEntries (BrailleDisplay *brl) {
   return 1;
 }
 
-static int
-sendRow (BrailleDisplay *brl) {
-  if (!afterTimePeriod(&brl->data->window.retryDelay, NULL)) return 0;
-
-  while (brl->data->window.firstChangedRow < brl->textRows) {
-    RowEntry *row = getRowEntry(brl, brl->data->window.firstChangedRow);
-
-    if (row->hasChanged) {
-      unsigned int length = brl->textColumns;
-      unsigned char packet[2 + length];
-      unsigned char *byte = packet;
-
-      *byte++ = CN_CMD_SEND_ROW;
-      *byte++ = brl->data->window.firstChangedRow;
-      byte = translateOutputCells(byte, row->cells, length);
-
-      if (writePacket(brl, packet, (byte - packet))) {
-        row->hasChanged = 0;
-        brl->data->window.lastRowSent = brl->data->window.firstChangedRow++;
-      } else {
-        brl->hasFailed = 1;
-      }
-
-      return 1;
-    }
-
-    brl->data->window.firstChangedRow += 1;
-  }
-
-  return 0;
-}
-
 static void
 setRowHasChanged (BrailleDisplay *brl, unsigned int index) {
   getRowEntry(brl, index)->hasChanged = 1;
@@ -374,17 +348,55 @@ resendRow (BrailleDisplay *brl) {
 
 static int
 refreshAllRows (BrailleDisplay *brl) {
-  for (unsigned int index=0; index<brl->textRows; index+=1) {
-    getRowEntry(brl, index)->hasChanged = 1;
-  }
-
-  brl->data->window.firstChangedRow = 0;
-  return writeSimpleCommand(brl, CN_CMD_RESET_CELLS);
+  brl->data->window.resetCells = 1;
+  return 1;
 }
 
 static int
 refreshRow (BrailleDisplay *brl, int row) {
   return refreshAllRows(brl); // for now
+}
+
+static int
+startUpdate (BrailleDisplay *brl) {
+  if (!afterTimePeriod(&brl->data->window.retryDelay, NULL)) return 0;
+
+  if (brl->data->window.resetCells) {
+    brl->data->window.resetCells = 0;
+    brl->data->window.firstChangedRow = 0;
+
+    for (unsigned int index=0; index<brl->textRows; index+=1) {
+      getRowEntry(brl, index)->hasChanged = 1;
+    }
+
+    writeSimpleCommand(brl, CN_CMD_RESET_CELLS);
+    return 1;
+  }
+
+  while (brl->data->window.firstChangedRow < brl->textRows) {
+    RowEntry *row = getRowEntry(brl, brl->data->window.firstChangedRow);
+
+    if (row->hasChanged) {
+      unsigned int length = brl->textColumns;
+      unsigned char packet[2 + length];
+      unsigned char *byte = packet;
+
+      *byte++ = CN_CMD_SEND_ROW;
+      *byte++ = brl->data->window.firstChangedRow;
+      byte = translateOutputCells(byte, row->cells, length);
+
+      if (writePacket(brl, packet, (byte - packet))) {
+        row->hasChanged = 0;
+        brl->data->window.lastRowSent = brl->data->window.firstChangedRow++;
+      }
+
+      return 1;
+    }
+
+    brl->data->window.firstChangedRow += 1;
+  }
+
+  return 0;
 }
 
 ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
@@ -403,6 +415,10 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
         resendRow(brl);
         break;
 
+      case CN_CMD_RESET_CELLS:
+        brl->data->window.resetCells = 1;;
+        break;
+
       default:
         break;
     }
@@ -411,7 +427,7 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
   unsigned char command = CN_CMD_PRESSED_KEYS;
 
   if (!motorsActive) {
-    if (sendRow(brl)) return;
+    if (startUpdate(brl)) return;
   } else if (brl->data->status.counter > 0) {
     if (!(brl->data->status.counter -= 1)) {
       setStatusPollTime(brl, MOTORS_POLL_INTERVAL);
@@ -419,7 +435,7 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
     }
   }
 
-  if (!writeSimpleCommand(brl, command)) brl->hasFailed = 1;
+  writeSimpleCommand(brl, command);
 }
 
 static void
@@ -566,8 +582,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     brl->data->probe.responseHandler = NULL;
     brl->data->probe.protocolVersion = 0;
 
+    brl->data->response.waiting = 0;
+
     startTimePeriod(&brl->data->window.retryDelay, 0);
     brl->data->window.rowEntries = NULL;
+    brl->data->window.resetCells = 0;
 
     brl->data->keys.pressed = 0;
 
@@ -700,8 +719,15 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 
       switch (command) {
         case CN_CMD_SEND_ROW:
-          startTimePeriod(&brl->data->window.retryDelay, ROW_RETRY_DELAY);
           resendRow(brl);
+          goto UPDATE_FAILED;
+
+        case CN_CMD_RESET_CELLS:
+          brl->data->window.resetCells = 1;
+          goto UPDATE_FAILED;
+
+        UPDATE_FAILED:
+          startTimePeriod(&brl->data->window.retryDelay, UPDATE_RETRY_DELAY);
           continue;
 
         default:
