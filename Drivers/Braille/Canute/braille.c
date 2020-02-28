@@ -357,6 +357,11 @@ refreshRow (BrailleDisplay *brl, int row) {
   return refreshAllRows(brl); // for now
 }
 
+static inline int
+testMotorsActive (const BrailleDisplay *brl) {
+  return !!(brl->data->status.flags & CN_STATUS_MOTORS_ACTIVE);
+}
+
 static int
 startUpdate (BrailleDisplay *brl) {
   if (!afterTimePeriod(&brl->data->window.retryDelay, NULL)) return 0;
@@ -401,14 +406,13 @@ startUpdate (BrailleDisplay *brl) {
 
 ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
   BrailleDisplay *brl = parameters->data;
-  int motorsActive = !!(brl->data->status.flags & CN_STATUS_MOTORS_ACTIVE);
 
   if (brl->data->response.waiting) {
     if (!afterTimePeriod(&brl->data->response.timeout, NULL)) return;
 
     unsigned char command = brl->data->response.command;
     logMessage(LOG_WARNING, "command response timeout: Cmd:0X%02X", command);
-    if (motorsActive) setStatusPollTime(brl, 1);
+    if (testMotorsActive(brl)) setStatusPollTime(brl, 1);
 
     switch (command) {
       case CN_CMD_SEND_ROW:
@@ -426,7 +430,7 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
 
   unsigned char command = CN_CMD_PRESSED_KEYS;
 
-  if (!motorsActive) {
+  if (!testMotorsActive(brl)) {
     if (startUpdate(brl)) return;
   } else if (brl->data->status.counter > 0) {
     if (!(brl->data->status.counter -= 1)) {
@@ -692,6 +696,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     switch (command) {
       case CN_CMD_DEVICE_STATUS:
         brl->data->status.flags = result;
+        if (!testMotorsActive(brl)) startUpdate(brl);
         continue;
 
       case CN_CMD_PRESSED_KEYS:
