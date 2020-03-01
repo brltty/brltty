@@ -106,8 +106,8 @@ struct BrailleDataStruct {
   } window;
 
   struct {
+    TimePeriod delay;
     CN_PacketInteger flags;
-    unsigned char counter;
   } status;
 
   struct {
@@ -285,11 +285,6 @@ writeSimpleCommand (BrailleDisplay *brl, unsigned char command) {
   return writePacket(brl, packet, sizeof(packet));
 }
 
-static void
-setStatusPollTime (BrailleDisplay *brl, unsigned int in) {
-  brl->data->status.counter = (in + MAIN_TASK_INTERVAL - 1) / MAIN_TASK_INTERVAL;
-}
-
 static RowEntry *
 getRowEntry (BrailleDisplay *brl, unsigned int index) {
   return brl->data->window.rowEntries[index];
@@ -406,13 +401,13 @@ startUpdate (BrailleDisplay *brl) {
 
 ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
   BrailleDisplay *brl = parameters->data;
+  unsigned char nextCommand = CN_CMD_PRESSED_KEYS;
 
   if (brl->data->response.waiting) {
     if (!afterTimePeriod(&brl->data->response.timeout, NULL)) return;
 
     unsigned char command = brl->data->response.command;
     logMessage(LOG_WARNING, "command response timeout: Cmd:0X%02X", command);
-    if (testMotorsActive(brl)) setStatusPollTime(brl, 1);
 
     switch (command) {
       case CN_CMD_SEND_ROW:
@@ -426,20 +421,16 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
       default:
         break;
     }
-  }
 
-  unsigned char command = CN_CMD_PRESSED_KEYS;
-
-  if (!testMotorsActive(brl)) {
+    nextCommand = CN_CMD_DEVICE_STATUS;
+  } else if (!testMotorsActive(brl)) {
     if (startUpdate(brl)) return;
-  } else if (brl->data->status.counter > 0) {
-    if (!(brl->data->status.counter -= 1)) {
-      setStatusPollTime(brl, MOTORS_POLL_INTERVAL);
-      command = CN_CMD_DEVICE_STATUS;
-    }
+  } else if (afterTimePeriod(&brl->data->status.delay, NULL)) {
+    startTimePeriod(&brl->data->status.delay, MOTORS_POLL_INTERVAL);
+    nextCommand = CN_CMD_DEVICE_STATUS;
   }
 
-  writeSimpleCommand(brl, command);
+  writeSimpleCommand(brl, nextCommand);
 }
 
 static void
@@ -740,7 +731,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
       }
     } else if (motorsTime) {
       brl->data->status.flags |= CN_STATUS_MOTORS_ACTIVE;
-      setStatusPollTime(brl, motorsTime);
+      startTimePeriod(&brl->data->status.delay, motorsTime);
     }
   }
 
