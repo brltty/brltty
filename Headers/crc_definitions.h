@@ -28,8 +28,6 @@ extern "C" {
 typedef uint32_t crc_t;
 #define CRC_C UINT32_C
 
-#define CRC_BYTE_WIDTH 8
-
 #ifndef UINT24_C
 #define UINT24_C UINT32_C
 #endif /* UINT24_C */

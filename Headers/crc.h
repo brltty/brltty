@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_CRC
 
 #include "crc_algorithms.h"
+#include "crc_properties.h"
 #include "crc_generate.h"
 #include "crc_verify.h"
 
