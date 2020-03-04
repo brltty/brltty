@@ -352,11 +352,6 @@ refreshRow (BrailleDisplay *brl, int row) {
   return refreshAllRows(brl); // for now
 }
 
-static inline int
-testMotorsActive (const BrailleDisplay *brl) {
-  return !!(brl->data->status.flags & CN_STATUS_MOTORS_ACTIVE);
-}
-
 static int
 startUpdate (BrailleDisplay *brl) {
   if (!afterTimePeriod(&brl->data->window.retryDelay, NULL)) return 0;
@@ -401,7 +396,6 @@ startUpdate (BrailleDisplay *brl) {
 
 ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
   BrailleDisplay *brl = parameters->data;
-  unsigned char nextCommand = CN_CMD_PRESSED_KEYS;
 
   if (brl->data->response.waiting) {
     if (!afterTimePeriod(&brl->data->response.timeout, NULL)) return;
@@ -422,15 +416,11 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
         break;
     }
 
-    nextCommand = CN_CMD_DEVICE_STATUS;
-  } else if (!testMotorsActive(brl)) {
-    if (startUpdate(brl)) return;
-  } else if (afterTimePeriod(&brl->data->status.delay, NULL)) {
-    startTimePeriod(&brl->data->status.delay, MOTORS_POLL_INTERVAL);
-    nextCommand = CN_CMD_DEVICE_STATUS;
+    writeSimpleCommand(brl, CN_CMD_DEVICE_STATUS);
+    return;
   }
 
-  writeSimpleCommand(brl, nextCommand);
+  writeSimpleCommand(brl, CN_CMD_PRESSED_KEYS);
 }
 
 static void
@@ -670,6 +660,16 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
+static void
+writeNextCommand (BrailleDisplay *brl) {
+  if (!(brl->data->status.flags & CN_STATUS_MOTORS_ACTIVE)) {
+    startUpdate(brl);
+  } else if (afterTimePeriod(&brl->data->status.delay, NULL)) {
+    startTimePeriod(&brl->data->status.delay, MOTORS_POLL_INTERVAL);
+    writeSimpleCommand(brl, CN_CMD_DEVICE_STATUS);
+  }
+}
+
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   unsigned char packet[MAXIMUM_RESPONSE_SIZE];
@@ -685,13 +685,13 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     unsigned int motorsTime = 0;
 
     switch (command) {
-      case CN_CMD_DEVICE_STATUS:
-        brl->data->status.flags = result;
-        if (!testMotorsActive(brl)) startUpdate(brl);
-        continue;
-
       case CN_CMD_PRESSED_KEYS:
         enqueueUpdatedKeys(brl, result, &brl->data->keys.pressed, CN_GRP_NavigationKeys, 0);
+        writeNextCommand(brl);
+        continue;
+
+      case CN_CMD_DEVICE_STATUS:
+        brl->data->status.flags = result;
         continue;
 
       case CN_CMD_SEND_ROW:
