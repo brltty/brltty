@@ -16,8 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HumanWare BrailleNote Touch
+title APH Mantis Q40
 
 include thumb.kti
-include braille.kti
 include routing.kti

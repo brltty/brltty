@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HumanWare BrailleNote Touch
+title NLS eReader
 
 include thumb.kti
 include braille.kti

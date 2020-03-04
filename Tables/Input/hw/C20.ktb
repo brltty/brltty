@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HumanWare BrailleNote Touch
+title APH Chameleon 20
 
 include thumb.kti
 include braille.kti

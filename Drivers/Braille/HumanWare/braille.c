@@ -102,11 +102,38 @@ BEGIN_KEY_NAME_TABLES(touch)
   KEY_NAME_TABLE(braille),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(C20)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(braille),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(M40)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(NLS)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(braille),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(one)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(braille),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(BI14)
 DEFINE_KEY_TABLE(BI32)
 DEFINE_KEY_TABLE(BI40)
 DEFINE_KEY_TABLE(B80)
 DEFINE_KEY_TABLE(touch)
+DEFINE_KEY_TABLE(C20)
+DEFINE_KEY_TABLE(M40)
+DEFINE_KEY_TABLE(NLS)
+DEFINE_KEY_TABLE(one)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(BI14),
@@ -114,45 +141,113 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(BI40),
   &KEY_TABLE_DEFINITION(B80),
   &KEY_TABLE_DEFINITION(touch),
+  &KEY_TABLE_DEFINITION(C20),
+  &KEY_TABLE_DEFINITION(M40),
+  &KEY_TABLE_DEFINITION(NLS),
+  &KEY_TABLE_DEFINITION(one),
 END_KEY_TABLE_LIST
 
 typedef struct {
+  const char *modelName;
   const KeyTableDefinition *keyTableDefinition;
-  unsigned hasBrailleKeys:1;
-  unsigned hasCommandKeys:1;
-  unsigned hasJoystick:1;
-  unsigned hasSecondThumbKeys:1;
+  HW_ModelIdentifier modelIdentifier;
+
+  unsigned char hasBrailleKeys:1;
+  unsigned char hasCommandKeys:1;
+  unsigned char hasJoystick:1;
+  unsigned char hasSecondThumbKeys:1;
 } ModelEntry;
 
 static const ModelEntry modelEntry_BI14 = {
+  .modelName = "Brailliant BI 14",
   .hasBrailleKeys = 1,
   .hasJoystick = 1,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(BI14)
 };
 
 static const ModelEntry modelEntry_BI32 = {
+  .modelName = "Brailliant BI 32",
   .hasBrailleKeys = 1,
   .hasCommandKeys = 1,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(BI32)
 };
 
 static const ModelEntry modelEntry_BI40 = {
+  .modelName = "Brailliant BI 40",
   .hasBrailleKeys = 1,
   .hasCommandKeys = 1,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(BI40)
 };
 
 static const ModelEntry modelEntry_B80 = {
+  .modelName = "Brailliant B 80",
   .hasCommandKeys = 1,
   .hasSecondThumbKeys = 1,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(B80)
 };
 
 static const ModelEntry modelEntry_touch = {
+  .modelName = "BrailleNote Touch",
+  .modelIdentifier = HW_MODEL_HW_BRAILLE_NOTE_TOUCH,
   .hasBrailleKeys = 1,
-  .hasCommandKeys = 0,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(touch)
 };
+
+static const ModelEntry modelEntry_C20 = {
+  .modelName = "APH Chameleon 20",
+  .modelIdentifier = HW_MODEL_APH_CHAMELEON_20,
+  .hasBrailleKeys = 1,
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(C20)
+};
+
+static const ModelEntry modelEntry_M40 = {
+  .modelName = "APH Mantis Q40",
+  .modelIdentifier = HW_MODEL_APH_MANTIS_Q40,
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(M40)
+};
+
+static const ModelEntry modelEntry_NLS = {
+  .modelName = "NLS eReader",
+  .modelIdentifier = HW_MODEL_NLS_EREADER,
+  .hasBrailleKeys = 1,
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(NLS)
+};
+
+static const ModelEntry modelEntry_one = {
+  .modelName = "HumanWare BrailleOne",
+  .modelIdentifier = HW_MODEL_HW_BRAILLE_ONE,
+  .hasBrailleKeys = 1,
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(one)
+};
+
+static const ModelEntry *modelTable[] = {
+  &modelEntry_BI14,
+  &modelEntry_BI32,
+  &modelEntry_BI40,
+  &modelEntry_B80,
+  &modelEntry_touch,
+  &modelEntry_C20,
+  &modelEntry_M40,
+  &modelEntry_NLS,
+  &modelEntry_one,
+};
+
+static unsigned char modelCount = ARRAY_COUNT(modelTable);
+
+static const ModelEntry *
+getModelByIdentifier (HW_ModelIdentifier identifier) {
+  if (identifier) {
+    const ModelEntry *const *model = modelTable;
+    const ModelEntry *const *end = model + modelCount;
+
+    while (model < end) {
+      if ((*model)->modelIdentifier == identifier) return *model;
+      model += 1;
+    }
+  }
+
+  return NULL;
+}
 
 #define OPEN_READY_DELAY 100
 
@@ -185,7 +280,6 @@ struct BrailleDataStruct {
   const ModelEntry *model;
 
   uint32_t firmwareVersion;
-  unsigned isBrailleNoteTouch:1;
   unsigned isOffline:1;
 
   struct {
@@ -212,9 +306,7 @@ struct BrailleDataStruct {
 };
 
 static const ModelEntry *
-getModelEntry (BrailleDisplay *brl) {
-  if (brl->data->isBrailleNoteTouch) return &modelEntry_touch;
-
+getModelByCellCount (BrailleDisplay *brl) {
   switch (brl->textColumns) {
     case 14: return &modelEntry_BI14;
     case 32: return &modelEntry_BI32;
@@ -226,7 +318,7 @@ getModelEntry (BrailleDisplay *brl) {
 
 static void
 setModel (BrailleDisplay *brl) {
-  brl->data->model = getModelEntry(brl);
+  if (!brl->data->model) brl->data->model = getModelByCellCount(brl);
 }
 
 static int
@@ -447,10 +539,16 @@ probeSerialDisplay (BrailleDisplay *brl) {
                response.fields.data.init.modelIdentifier,
                response.fields.data.init.cellCount);
 
-    switch (response.fields.data.init.modelIdentifier) {
-      case HW_MODEL_BrailleNoteTouch:
-        brl->data->isBrailleNoteTouch = 1;
-        break;
+    {
+      unsigned char identifier = response.fields.data.init.modelIdentifier;
+      const ModelEntry *model = getModelByIdentifier(identifier);
+
+      if (model) {
+        if (!brl->data->model) {
+          brl->data->model = model;
+        } else if (model != brl->data->model) {
+        }
+      }
     }
 
     brl->textColumns = response.fields.data.init.cellCount;
@@ -708,22 +806,40 @@ static const ProtocolEntry hidProtocol = {
 
 typedef struct {
   const ProtocolEntry *protocol;
-  unsigned isTouch:1;
+  const ModelEntry *model;
 } ResourceData;
 
 static const ResourceData resourceData_serial = {
-  .isTouch = 0, // probing detects if it's a Touch or not
   .protocol = &serialProtocol
 };
 
 static const ResourceData resourceData_HID = {
-  .isTouch = 0, // only for non-Touch models
   .protocol = &hidProtocol
 };
 
 static const ResourceData resourceData_touch = {
-  .isTouch = 1,
+  .model = &modelEntry_touch,
   .protocol = &hidProtocol
+};
+
+static const ResourceData resourceData_C20 = {
+  .model = &modelEntry_C20,
+  .protocol = &serialProtocol
+};
+
+static const ResourceData resourceData_M40 = {
+  .model = &modelEntry_M40,
+  .protocol = &serialProtocol
+};
+
+static const ResourceData resourceData_NLS = {
+  .model = &modelEntry_NLS,
+  .protocol = &serialProtocol
+};
+
+static const ResourceData resourceData_one = {
+  .model = &modelEntry_one,
+  .protocol = &serialProtocol
 };
 
 static int
@@ -750,6 +866,42 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=1,
       .serial = &serialParameters,
       .data = &resourceData_serial,
+      .resetDevice = 1
+    },
+
+    { /* APH Chameleon 20 (serial protocol) */
+      .vendor=0X1C71, .product=0XC101, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .serial = &serialParameters,
+      .data = &resourceData_C20,
+      .resetDevice = 1
+    },
+
+    { /* APH Mantis Q40 (serial protocol) */
+      .vendor=0X1C71, .product=0XC111, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .serial = &serialParameters,
+      .data = &resourceData_M40,
+      .resetDevice = 1
+    },
+
+    { /* NLS eReader (serial protocol) */
+      .vendor=0X1C71, .product=0XCE01, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .serial = &serialParameters,
+      .data = &resourceData_NLS,
+      .resetDevice = 1
+    },
+
+    { /* Humanware BrailleOne (serial protocol) */
+      .vendor=0X1C71, .product=0XC121, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .serial = &serialParameters,
+      .data = &resourceData_one,
       .resetDevice = 1
     },
 
@@ -786,7 +938,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     const ResourceData *resourceData = gioGetApplicationData(brl->gioEndpoint);
     brl->data->protocol = resourceData->protocol;
-    brl->data->isBrailleNoteTouch = resourceData->isTouch;
+    brl->data->model = resourceData->model;
     return 1;
   }
 

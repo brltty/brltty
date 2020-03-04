@@ -39,6 +39,12 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   // Alva: Basic Controller (6nn)
   BLUETOOTH_NAME_ENTRY("ALVA BC", "al"),
 
+  // HumanWare: APH Chameleon
+  BLUETOOTH_NAME_ENTRY("APH Chameleon", "hw"),
+
+  // HumanWare: APH Mantis
+  BLUETOOTH_NAME_ENTRY("APH Mantis", "hw"),
+
   // HandyTech: Basic Braille
   BLUETOOTH_NAME_ENTRY("Basic Braille BB", "ht"),
 
@@ -115,11 +121,17 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   // Freedom Scientific: Focus
   BLUETOOTH_NAME_ENTRY("Focus", "fs"),
 
+  // HumanWare: BrailleOne
+  BLUETOOTH_NAME_ENTRY("Humanware BrailleOne", "hw"),
+
   // HumanWare: Brailliant
   BLUETOOTH_NAME_ENTRY("HWG Brailliant", "bm"),
 
   // MDV
   BLUETOOTH_NAME_ENTRY("MB248", "md"),
+
+  // HumanWare: NLS eReader
+  BLUETOOTH_NAME_ENTRY("NLS eReader", "hw"),
 
   // American Printing House: Orbit Reader
   BLUETOOTH_NAME_ENTRY("Orbit Reader", "bm"),
