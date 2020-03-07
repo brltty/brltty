@@ -35,7 +35,7 @@
 #define COMMAND_RESPONSE_TIMEOUT 10000
 #define MAXIMUM_RESPONSE_SIZE 0X100
 
-#define MAIN_TASK_INTERVAL 100
+#define KEYS_POLL_INTERVAL 100
 #define MOTORS_POLL_INTERVAL 400
 #define ROW_UPDATE_TIME 1200
 #define CELLS_RESET_TIME 14000
@@ -84,7 +84,7 @@ typedef BrailleResponseResult ProbeResponseHandler (
 
 struct BrailleDataStruct {
   CRCGenerator *crcGenerator;
-  AsyncHandle mainTaskAlarm;
+  AsyncHandle keysPollerAlarm;
 
   struct {
     ProbeResponseHandler *responseHandler;
@@ -352,54 +352,12 @@ refreshRow (BrailleDisplay *brl, int row) {
   return refreshAllRows(brl); // for now
 }
 
-static int
-startUpdate (BrailleDisplay *brl) {
-  if (!afterTimePeriod(&brl->data->window.retryDelay, NULL)) return 0;
-
-  if (brl->data->window.resetCells) {
-    brl->data->window.resetCells = 0;
-    brl->data->window.firstChangedRow = 0;
-
-    for (unsigned int index=0; index<brl->textRows; index+=1) {
-      getRowEntry(brl, index)->hasChanged = 1;
-    }
-
-    writeSimpleCommand(brl, CN_CMD_RESET_CELLS);
-    return 1;
-  }
-
-  while (brl->data->window.firstChangedRow < brl->textRows) {
-    RowEntry *row = getRowEntry(brl, brl->data->window.firstChangedRow);
-
-    if (row->hasChanged) {
-      unsigned int length = brl->textColumns;
-      unsigned char packet[2 + length];
-      unsigned char *byte = packet;
-
-      *byte++ = CN_CMD_SEND_ROW;
-      *byte++ = brl->data->window.firstChangedRow;
-      byte = translateOutputCells(byte, row->cells, length);
-
-      if (writePacket(brl, packet, (byte - packet))) {
-        row->hasChanged = 0;
-        brl->data->window.lastRowSent = brl->data->window.firstChangedRow++;
-      }
-
-      return 1;
-    }
-
-    brl->data->window.firstChangedRow += 1;
-  }
-
-  return 0;
-}
-
-ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
+ASYNC_ALARM_CALLBACK(CN_keysPoller) {
   BrailleDisplay *brl = parameters->data;
 
-  if (brl->data->response.waiting) {
-    if (!afterTimePeriod(&brl->data->response.timeout, NULL)) return;
-
+  if (!brl->data->response.waiting) {
+    writeSimpleCommand(brl, CN_CMD_PRESSED_KEYS);
+  } else if (afterTimePeriod(&brl->data->response.timeout, NULL)) {
     unsigned char command = brl->data->response.command;
     logMessage(LOG_WARNING, "command response timeout: Cmd:0X%02X", command);
 
@@ -417,15 +375,12 @@ ASYNC_ALARM_CALLBACK(CN_mainTaskHandler) {
     }
 
     writeSimpleCommand(brl, CN_CMD_DEVICE_STATUS);
-    return;
   }
-
-  writeSimpleCommand(brl, CN_CMD_PRESSED_KEYS);
 }
 
 static void
-stopMainTask (BrailleDisplay *brl) {
-  AsyncHandle *alarm = &brl->data->mainTaskAlarm;
+stopKeysPoller (BrailleDisplay *brl) {
+  AsyncHandle *alarm = &brl->data->keysPollerAlarm;
 
   if (*alarm) {
     asyncCancelRequest(*alarm);
@@ -434,13 +389,13 @@ stopMainTask (BrailleDisplay *brl) {
 }
 
 static int
-startMainTask (BrailleDisplay *brl) {
-  AsyncHandle alarm = brl->data->mainTaskAlarm;
+startKeysPoller (BrailleDisplay *brl) {
+  AsyncHandle alarm = brl->data->keysPollerAlarm;
   if (alarm) return 1;
 
-  if (asyncNewRelativeAlarm(&alarm, 0, CN_mainTaskHandler, brl)) {
-    if (asyncResetAlarmInterval(alarm, MAIN_TASK_INTERVAL)) {
-      brl->data->mainTaskAlarm = alarm;
+  if (asyncNewRelativeAlarm(&alarm, 0, CN_keysPoller, brl)) {
+    if (asyncResetAlarmInterval(alarm, KEYS_POLL_INTERVAL)) {
+      brl->data->keysPollerAlarm = alarm;
       return 1;
     }
 
@@ -562,7 +517,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     brl->data->crcGenerator = NULL;
-    brl->data->mainTaskAlarm = NULL;
+    brl->data->keysPollerAlarm = NULL;
 
     brl->data->probe.responseHandler = NULL;
     brl->data->probe.protocolVersion = 0;
@@ -608,7 +563,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
             makeOutputTable(dotsTable_ISO11548_1);
 
-            if (startMainTask(brl)) {
+            if (startKeysPoller(brl)) {
               return 1;
             }
 
@@ -632,7 +587,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  stopMainTask(brl);
+  stopKeysPoller(brl);
   disconnectBrailleResource(brl, NULL);
 
   deallocateRowEntries(brl, brl->textRows);
@@ -660,8 +615,50 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
+static int
+startUpdate (BrailleDisplay *brl) {
+  if (!afterTimePeriod(&brl->data->window.retryDelay, NULL)) return 0;
+
+  if (brl->data->window.resetCells) {
+    brl->data->window.resetCells = 0;
+    brl->data->window.firstChangedRow = 0;
+
+    for (unsigned int index=0; index<brl->textRows; index+=1) {
+      getRowEntry(brl, index)->hasChanged = 1;
+    }
+
+    writeSimpleCommand(brl, CN_CMD_RESET_CELLS);
+    return 1;
+  }
+
+  while (brl->data->window.firstChangedRow < brl->textRows) {
+    RowEntry *row = getRowEntry(brl, brl->data->window.firstChangedRow);
+
+    if (row->hasChanged) {
+      unsigned int length = brl->textColumns;
+      unsigned char packet[2 + length];
+      unsigned char *byte = packet;
+
+      *byte++ = CN_CMD_SEND_ROW;
+      *byte++ = brl->data->window.firstChangedRow;
+      byte = translateOutputCells(byte, row->cells, length);
+
+      if (writePacket(brl, packet, (byte - packet))) {
+        row->hasChanged = 0;
+        brl->data->window.lastRowSent = brl->data->window.firstChangedRow++;
+      }
+
+      return 1;
+    }
+
+    brl->data->window.firstChangedRow += 1;
+  }
+
+  return 0;
+}
+
 static void
-writeNextCommand (BrailleDisplay *brl) {
+startNextCommand (BrailleDisplay *brl) {
   if (!(brl->data->status.flags & CN_STATUS_MOTORS_ACTIVE)) {
     startUpdate(brl);
   } else if (afterTimePeriod(&brl->data->status.delay, NULL)) {
@@ -687,7 +684,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
     switch (command) {
       case CN_CMD_PRESSED_KEYS:
         enqueueUpdatedKeys(brl, result, &brl->data->keys.pressed, CN_GRP_NavigationKeys, 0);
-        writeNextCommand(brl);
+        startNextCommand(brl);
         continue;
 
       case CN_CMD_DEVICE_STATUS:
