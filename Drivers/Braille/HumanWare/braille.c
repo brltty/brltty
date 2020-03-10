@@ -873,8 +873,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* APH Chameleon 20 (serial protocol) */
       .vendor=0X1C71, .product=0XC101, 
-      .configuration=1, .interface=1, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=1,
+      .configuration=1, .interface=5, .alternative=0,
+      .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
       .data = &resourceData_C20,
       .resetDevice = 1
@@ -882,8 +882,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* APH Mantis Q40 (serial protocol) */
       .vendor=0X1C71, .product=0XC111, 
-      .configuration=1, .interface=1, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=1,
+      .configuration=1, .interface=5, .alternative=0,
+      .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
       .data = &resourceData_M40,
       .resetDevice = 1
@@ -891,8 +891,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* NLS eReader (serial protocol) */
       .vendor=0X1C71, .product=0XCE01, 
-      .configuration=1, .interface=1, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=1,
+      .configuration=1, .interface=5, .alternative=0,
+      .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
       .data = &resourceData_NLS,
       .resetDevice = 1
@@ -900,8 +900,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Humanware BrailleOne (serial protocol) */
       .vendor=0X1C71, .product=0XC121, 
-      .configuration=1, .interface=1, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=1,
+      .configuration=1, .interface=5, .alternative=0,
+      .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
       .data = &resourceData_one,
       .resetDevice = 1
