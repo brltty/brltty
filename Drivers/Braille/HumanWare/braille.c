@@ -319,6 +319,7 @@ getModelByCellCount (BrailleDisplay *brl) {
 static void
 setModel (BrailleDisplay *brl) {
   if (!brl->data->model) brl->data->model = getModelByCellCount(brl);
+  logMessage(LOG_DEBUG, "Model Name: %s", brl->data->model->modelName);
 }
 
 static int
@@ -726,7 +727,8 @@ probeHidDisplay (BrailleDisplay *brl) {
   setFirmwareVersion(brl,
     getDecimalValue(&capabilities.version.major, 1),
     getDecimalValue(&capabilities.version.minor, 1),
-    getDecimalValue(&capabilities.version.build[0], 2));
+    getDecimalValue(&capabilities.version.build[0], 2)
+  );
 
   brl->textColumns = capabilities.cellCount;
   setModel(brl);
