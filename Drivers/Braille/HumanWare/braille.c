@@ -815,18 +815,9 @@ static const ResourceData resourceData_serial = {
   .protocol = &serialProtocol
 };
 
-static const ResourceData resourceData_HID = {
-  .protocol = &hidProtocol
-};
-
-static const ResourceData resourceData_BI14 = {
+static const ResourceData resourceData_serial_BI14 = {
   .model = &modelEntry_BI14,
   .protocol = &serialProtocol
-};
-
-static const ResourceData resourceData_touch = {
-  .model = &modelEntry_touch,
-  .protocol = &hidProtocol
 };
 
 static const ResourceData resourceData_serial_C20 = {
@@ -847,6 +838,15 @@ static const ResourceData resourceData_serial_NLS = {
 static const ResourceData resourceData_serial_one = {
   .model = &modelEntry_one,
   .protocol = &serialProtocol
+};
+
+static const ResourceData resourceData_HID = {
+  .protocol = &hidProtocol
+};
+
+static const ResourceData resourceData_HID_touch = {
+  .model = &modelEntry_touch,
+  .protocol = &hidProtocol
 };
 
 static const ResourceData resourceData_HID_C20 = {
@@ -892,7 +892,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .serial = &serialParameters,
-      .data = &resourceData_BI14,
+      .data = &resourceData_serial_BI14,
       .resetDevice = 1
     },
 
@@ -979,7 +979,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X1C71, .product=0XC00A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
-      .data = &resourceData_touch
+      .data = &resourceData_HID_touch
     },
   END_USB_CHANNEL_DEFINITIONS
 
