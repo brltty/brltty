@@ -829,24 +829,44 @@ static const ResourceData resourceData_touch = {
   .protocol = &hidProtocol
 };
 
-static const ResourceData resourceData_C20 = {
+static const ResourceData resourceData_serial_C20 = {
   .model = &modelEntry_C20,
   .protocol = &serialProtocol
 };
 
-static const ResourceData resourceData_M40 = {
+static const ResourceData resourceData_serial_M40 = {
   .model = &modelEntry_M40,
   .protocol = &serialProtocol
 };
 
-static const ResourceData resourceData_NLS = {
+static const ResourceData resourceData_serial_NLS = {
   .model = &modelEntry_NLS,
   .protocol = &serialProtocol
 };
 
-static const ResourceData resourceData_one = {
+static const ResourceData resourceData_serial_one = {
   .model = &modelEntry_one,
   .protocol = &serialProtocol
+};
+
+static const ResourceData resourceData_HID_C20 = {
+  .model = &modelEntry_C20,
+  .protocol = &hidProtocol
+};
+
+static const ResourceData resourceData_HID_M40 = {
+  .model = &modelEntry_M40,
+  .protocol = &hidProtocol
+};
+
+static const ResourceData resourceData_HID_NLS = {
+  .model = &modelEntry_NLS,
+  .protocol = &hidProtocol
+};
+
+static const ResourceData resourceData_HID_one = {
+  .model = &modelEntry_one,
+  .protocol = &hidProtocol
 };
 
 static int
@@ -881,7 +901,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=5, .alternative=0,
       .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
-      .data = &resourceData_C20,
+      .data = &resourceData_serial_C20,
       .resetDevice = 1
     },
 
@@ -890,7 +910,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=5, .alternative=0,
       .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
-      .data = &resourceData_M40,
+      .data = &resourceData_serial_M40,
       .resetDevice = 1
     },
 
@@ -899,7 +919,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=5, .alternative=0,
       .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
-      .data = &resourceData_NLS,
+      .data = &resourceData_serial_NLS,
       .resetDevice = 1
     },
 
@@ -908,7 +928,43 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=5, .alternative=0,
       .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
-      .data = &resourceData_one,
+      .data = &resourceData_serial_one,
+      .resetDevice = 1
+    },
+
+    { /* APH Chameleon 20 (HID protocol) */
+      .vendor=0X1C71, .product=0XC101, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=4, .outputEndpoint=5,
+      .serial = &serialParameters,
+      .data = &resourceData_HID_C20,
+      .resetDevice = 1
+    },
+
+    { /* APH Mantis Q40 (HID protocol) */
+      .vendor=0X1C71, .product=0XC111, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=4, .outputEndpoint=5,
+      .serial = &serialParameters,
+      .data = &resourceData_HID_M40,
+      .resetDevice = 1
+    },
+
+    { /* NLS eReader (HID protocol) */
+      .vendor=0X1C71, .product=0XCE01, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=4, .outputEndpoint=5,
+      .serial = &serialParameters,
+      .data = &resourceData_HID_NLS,
+      .resetDevice = 1
+    },
+
+    { /* Humanware BrailleOne (HID protocol) */
+      .vendor=0X1C71, .product=0XC121, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=4, .outputEndpoint=5,
+      .serial = &serialParameters,
+      .data = &resourceData_HID_one,
       .resetDevice = 1
     },
 
