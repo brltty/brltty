@@ -348,6 +348,18 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Device: 1C71:C021
 "LibUSB-Win32: HumanWare [Brailliant BI 14 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C021
 
+; Device: 1C71:C101
+"LibUSB-Win32: HumanWare [APH Chameleon 20 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C101
+
+; Device: 1C71:C111
+"LibUSB-Win32: HumanWare [APH Mantis Q40 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C111
+
+; Device: 1C71:C121
+"LibUSB-Win32: HumanWare [Humanware BrailleOne (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C121
+
+; Device: 1C71:CE01
+"LibUSB-Win32: HumanWare [NLS eReader (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
+
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
@@ -674,6 +686,18 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Device: 1C71:C021
 "LibUSB-Win32: HumanWare [Brailliant BI 14 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C021
 
+; Device: 1C71:C101
+"LibUSB-Win32: HumanWare [APH Chameleon 20 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C101
+
+; Device: 1C71:C111
+"LibUSB-Win32: HumanWare [APH Mantis Q40 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C111
+
+; Device: 1C71:C121
+"LibUSB-Win32: HumanWare [Humanware BrailleOne (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C121
+
+; Device: 1C71:CE01
+"LibUSB-Win32: HumanWare [NLS eReader (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
+
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003
 
@@ -999,6 +1023,18 @@ ServiceBinary  = %12%\libusb0_x64.sys
 
 ; Device: 1C71:C021
 "LibUSB-Win32: HumanWare [Brailliant BI 14 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C021
+
+; Device: 1C71:C101
+"LibUSB-Win32: HumanWare [APH Chameleon 20 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C101
+
+; Device: 1C71:C111
+"LibUSB-Win32: HumanWare [APH Mantis Q40 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C111
+
+; Device: 1C71:C121
+"LibUSB-Win32: HumanWare [Humanware BrailleOne (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C121
+
+; Device: 1C71:CE01
+"LibUSB-Win32: HumanWare [NLS eReader (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
 
 ; Device: 1FE4:0003
 "LibUSB-Win32: HandyTech [USB-HID adapter]"=LIBUSB_DEV, USB\VID_1FE4&PID_0003

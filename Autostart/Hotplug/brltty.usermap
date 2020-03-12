@@ -316,6 +316,22 @@ brltty 0x0003 0x1c71 0xc00a
 # HumanWare [Brailliant BI 14 (serial protocol)]
 brltty 0x0003 0x1c71 0xc021
 
+# Device: 1C71:C101
+# HumanWare [APH Chameleon 20 (serial protocol)]
+brltty 0x0003 0x1c71 0xc101
+
+# Device: 1C71:C111
+# HumanWare [APH Mantis Q40 (serial protocol)]
+brltty 0x0003 0x1c71 0xc111
+
+# Device: 1C71:C121
+# HumanWare [Humanware BrailleOne (serial protocol)]
+brltty 0x0003 0x1c71 0xc121
+
+# Device: 1C71:CE01
+# HumanWare [NLS eReader (serial protocol)]
+brltty 0x0003 0x1c71 0xce01
+
 # Device: 1FE4:0003
 # HandyTech [USB-HID adapter]
 brltty 0x0003 0x1fe4 0x0003

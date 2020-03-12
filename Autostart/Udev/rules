@@ -323,6 +323,22 @@ ENV{PRODUCT}=="1c71/c00a/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_r
 # HumanWare [Brailliant BI 14 (serial protocol)]
 ENV{PRODUCT}=="1c71/c021/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
+# Device: 1C71:C101
+# HumanWare [APH Chameleon 20 (serial protocol)]
+ENV{PRODUCT}=="1c71/c101/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
+
+# Device: 1C71:C111
+# HumanWare [APH Mantis Q40 (serial protocol)]
+ENV{PRODUCT}=="1c71/c111/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
+
+# Device: 1C71:C121
+# HumanWare [Humanware BrailleOne (serial protocol)]
+ENV{PRODUCT}=="1c71/c121/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
+
+# Device: 1C71:CE01
+# HumanWare [NLS eReader (serial protocol)]
+ENV{PRODUCT}=="1c71/ce01/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
+
 # Device: 1FE4:0003
 # HandyTech [USB-HID adapter]
 ENV{PRODUCT}=="1fe4/3/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"
