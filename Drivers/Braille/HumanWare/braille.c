@@ -819,6 +819,11 @@ static const ResourceData resourceData_HID = {
   .protocol = &hidProtocol
 };
 
+static const ResourceData resourceData_BI14 = {
+  .model = &modelEntry_BI14,
+  .protocol = &serialProtocol
+};
+
 static const ResourceData resourceData_touch = {
   .model = &modelEntry_touch,
   .protocol = &hidProtocol
@@ -867,7 +872,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .serial = &serialParameters,
-      .data = &resourceData_serial,
+      .data = &resourceData_BI14,
       .resetDevice = 1
     },
 

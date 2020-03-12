@@ -21,3 +21,4 @@ title HumanWare Brailliant BI 14
 include thumb.kti
 include braille.kti
 include joystick.kti
+include routing.kti
