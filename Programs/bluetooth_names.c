@@ -96,6 +96,9 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   // HumanWare: Brailliant BI
   BLUETOOTH_NAME_ENTRY("Brailliant BI", "hw"),
 
+  // HumanWare: Brailliant BI 14
+  BLUETOOTH_NAME_ENTRY("Brailliant 14", "hw"),
+
   // HumanWare: Brailliant B 80
   BLUETOOTH_NAME_ENTRY("Brailliant 80", "hw"),
 
