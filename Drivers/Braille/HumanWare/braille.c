@@ -932,6 +932,20 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .resetDevice = 1
     },
 
+    { /* non-Touch models (HID protocol) */
+      .vendor=0X1C71, .product=0XC006,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1,
+      .data = &resourceData_HID
+    },
+
+    { /* BrailleNote Touch (HID protocol) */
+      .vendor=0X1C71, .product=0XC00A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1,
+      .data = &resourceData_HID_touch
+    },
+
     { /* APH Chameleon 20 (HID protocol) */
       .vendor=0X1C71, .product=0XC101, 
       .configuration=1, .interface=1, .alternative=0,
@@ -966,20 +980,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .serial = &serialParameters,
       .data = &resourceData_HID_one,
       .resetDevice = 1
-    },
-
-    { /* non-Touch models (HID protocol) */
-      .vendor=0X1C71, .product=0XC006,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1,
-      .data = &resourceData_HID
-    },
-
-    { /* BrailleNote Touch (HID protocol) */
-      .vendor=0X1C71, .product=0XC00A,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1,
-      .data = &resourceData_HID_touch
     },
   END_USB_CHANNEL_DEFINITIONS
 
