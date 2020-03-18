@@ -950,7 +950,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X1C71, .product=0XC101, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=4, .outputEndpoint=5,
-      .serial = &serialParameters,
       .data = &resourceData_HID_C20,
       .resetDevice = 1
     },
@@ -959,7 +958,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X1C71, .product=0XC111, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=4, .outputEndpoint=5,
-      .serial = &serialParameters,
       .data = &resourceData_HID_M40,
       .resetDevice = 1
     },
@@ -968,7 +966,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X1C71, .product=0XCE01, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=4, .outputEndpoint=5,
-      .serial = &serialParameters,
       .data = &resourceData_HID_NLS,
       .resetDevice = 1
     },
@@ -977,7 +974,6 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X1C71, .product=0XC121, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=4, .outputEndpoint=5,
-      .serial = &serialParameters,
       .data = &resourceData_HID_one,
       .resetDevice = 1
     },
