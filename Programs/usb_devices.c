@@ -326,20 +326,36 @@ USB_DEVICE_ENTRY(0X1C71, 0XC00A, "hw"),
 USB_DEVICE_ENTRY(0X1C71, 0XC021, "hw"),
 
 // Device: 1C71:C101
-// HumanWare [APH Chameleon 20 (serial protocol)]
+// HumanWare [APH Chameleon 20 (HID protocol)]
 USB_DEVICE_ENTRY(0X1C71, 0XC101, "hw"),
 
+// Device: 1C71:C104
+// HumanWare [APH Chameleon 20 (serial protocol)]
+USB_DEVICE_ENTRY(0X1C71, 0XC104, "hw"),
+
 // Device: 1C71:C111
-// HumanWare [APH Mantis Q40 (serial protocol)]
+// HumanWare [APH Mantis Q40 (HID protocol)]
 USB_DEVICE_ENTRY(0X1C71, 0XC111, "hw"),
 
+// Device: 1C71:C114
+// HumanWare [APH Mantis Q40 (serial protocol)]
+USB_DEVICE_ENTRY(0X1C71, 0XC114, "hw"),
+
 // Device: 1C71:C121
-// HumanWare [Humanware BrailleOne (serial protocol)]
+// HumanWare [Humanware BrailleOne (HID protocol)]
 USB_DEVICE_ENTRY(0X1C71, 0XC121, "hw"),
 
+// Device: 1C71:C124
+// HumanWare [Humanware BrailleOne (serial protocol)]
+USB_DEVICE_ENTRY(0X1C71, 0XC124, "hw"),
+
 // Device: 1C71:CE01
-// HumanWare [NLS eReader (serial protocol)]
+// HumanWare [NLS eReader (HID protocol)]
 USB_DEVICE_ENTRY(0X1C71, 0XCE01, "hw"),
+
+// Device: 1C71:CE04
+// HumanWare [NLS eReader (serial protocol)]
+USB_DEVICE_ENTRY(0X1C71, 0XCE04, "hw"),
 
 // Device: 1FE4:0003
 // HandyTech [USB-HID adapter]

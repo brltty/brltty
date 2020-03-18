@@ -897,7 +897,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     },
 
     { /* APH Chameleon 20 (serial protocol) */
-      .vendor=0X1C71, .product=0XC101, 
+      .vendor=0X1C71, .product=0XC104, 
       .configuration=1, .interface=5, .alternative=0,
       .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
@@ -906,7 +906,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     },
 
     { /* APH Mantis Q40 (serial protocol) */
-      .vendor=0X1C71, .product=0XC111, 
+      .vendor=0X1C71, .product=0XC114, 
       .configuration=1, .interface=5, .alternative=0,
       .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
@@ -915,7 +915,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     },
 
     { /* NLS eReader (serial protocol) */
-      .vendor=0X1C71, .product=0XCE01, 
+      .vendor=0X1C71, .product=0XCE04, 
       .configuration=1, .interface=5, .alternative=0,
       .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
@@ -924,7 +924,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     },
 
     { /* Humanware BrailleOne (serial protocol) */
-      .vendor=0X1C71, .product=0XC121, 
+      .vendor=0X1C71, .product=0XC124, 
       .configuration=1, .interface=5, .alternative=0,
       .inputEndpoint=10, .outputEndpoint=11,
       .serial = &serialParameters,
