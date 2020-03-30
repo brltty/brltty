@@ -66,6 +66,7 @@
 #braille-driver	bn	# BrailleNote
 #braille-driver	cb	# CombiBraille
 #braille-driver	ce	# Cebra
+#braille-driver	cn	# Canute
 #braille-driver	ec	# EcoBraille
 #braille-driver	eu	# EuroBraille
 #braille-driver	fs	# FreedomScientific

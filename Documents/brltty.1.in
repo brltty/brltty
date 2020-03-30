@@ -722,6 +722,12 @@ BrailleNote
 .B cb
 CombiBraille
 .TP 4
+.B ce
+Cebra
+.TP 4
+.B cn
+Canute
+.TP 4
 .B ec
 EcoBraille
 .TP 4

@@ -40,6 +40,8 @@ BrailleNote
   |Apex@
 Braudi@
 BrlAPI@
+Canute
+  |360 (40x9)@
 Cebra
   |20/40/60/80/100/120/140@
 CombiBraille
@@ -85,8 +87,12 @@ HumanWare
   |Brailliant BI 14/32/40@
   |Brailliant B 80@
   |BrailleNote Touch@
+  |BrailleOne@
+  |APH Chameleon 20@
+  |APH Mantis Q40@
+  |NLS eReader@
 Inceptor
-  |BrailleMe@
+  |BrailleMe (20)@
 Iris@
 Libbraille@
 LogText
