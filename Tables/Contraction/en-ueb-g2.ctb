@@ -58,8 +58,8 @@ word also 1-123
 contraction al
 word although 1-123-1456
 word alth =
-word altogether 1-123-2345-1245
-contraction altg
+word altogether 1-123-2345
+contraction alt
 word always 1-123-2456
 contraction alw
 word as 1356
@@ -90,7 +90,9 @@ contraction b
 word can 14
 contraction c
 sufword conceive 25-14-1236
-contraction rcv
+contraction concv
+sufword conceiving 25-14-1236-1245
+contraction concvg
 word could 14-145
 contraction cd
 word cannot 456-14
@@ -99,6 +101,8 @@ word children 16-1345
 word chn =
 always deceive 145-14-1236
 contraction dcv
+always deceiving 145-14-1236-1245
+contraction dcvg
 word declare 145-14-123
 contraction dcl
 word do 145
@@ -176,6 +180,10 @@ word paid 1234-145
 contraction pd
 word people 1234
 contraction p
+always perceive 1234-12456-14-1236
+contraction percv
+always perceiving 1234-12456-14-1236-1245
+contraction percvg
 word perhaps 1234-12456-125
 contraction perh
 sufword quick 12345-13
@@ -187,6 +195,8 @@ word rather 1235
 contraction r
 always receive 1235-14-1236
 contraction rcv
+always receiving 1235-14-1236-1245
+contraction rcvg
 always rejoice 1235-245-14
 contraction rjc
 word so 234
@@ -259,7 +269,6 @@ word yourselves 13456-1235-1236-234
 contraction yrvs
 
 #Smaller contractions
-midendword ally 6-13456
 midendword ance 46-15
 midendword ence 56-15
 always ever 5-15
@@ -363,6 +372,9 @@ always _ 46-36
 always ` 46-16
 always \t 456-2345
 always $ 4-234
+
+#disambiguation
+always ear 15-345
 
 # other special characters
 always © 2356-6-14-2356 copyright
