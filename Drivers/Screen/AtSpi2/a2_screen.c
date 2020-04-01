@@ -430,6 +430,25 @@ static void finiTerm(void) {
   curNumCols = curNumRows = 0;
 }
 
+#define ROLE_TERMINAL "terminal"
+#define ROLE_TEXT "text"
+
+static int
+isRole (const char *role) {
+  if (!curRole) return 0;
+  return strcmp(curRole, role) == 0;
+}
+
+static int
+isTerminal (void) {
+  return isRole(ROLE_TERMINAL);
+}
+
+static int
+isText (void) {
+  return isRole(ROLE_TEXT);
+}
+
 /* Get the role of an AT-SPI2 object */
 static char *getRole(const char *sender, const char *path) {
   const char *text;
@@ -562,23 +581,17 @@ out:
 
 /* Switched to a new terminal, restart from scratch */
 static void restartTerm(const char *sender, const char *path) {
+  char *text = getText(sender, path);
+  if (!text) return;
+
   char *c,*d;
   const char *e;
   long i,len;
-  char *text;
-
-  if (curPath)
-    finiTerm();
-
-  text = getText(sender, path);
-  if (!text)
-    return;
 
   curSender = strdup(sender);
   curPath = strdup(path);
-  curRole = getRole(sender, path);
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-             "new term %s:%s with text %s",curSender,curPath, text);
+             "new term %s:%s with text %s", curSender, curPath, text);
 
   if (curRows) {
     for (i=0;i<curNumRows;i++)
@@ -632,19 +645,18 @@ static void restartTerm(const char *sender, const char *path) {
 
 /* Switched to a new object, check whether we want to read it, and if so, restart with it */
 static void tryRestartTerm(const char *sender, const char *path) {
-  char *role = getRole(sender, path);
-  int hasTextInterface = getHasTextInterface(sender, path);
+  if (curPath) finiTerm();
+
+  curRole = getRole(sender, path);
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-             "state changed focus to role %s", role);
+             "state changed focus to role %s", curRole);
+
+  int hasTextInterface = getHasTextInterface(sender, path);
   if (hasTextInterface && (typeFlags[TYPE_ALL] ||
-      (role && typeFlags[TYPE_TEXT] && (strcmp(role, "text") == 0)) ||
-      (role && typeFlags[TYPE_TERMINAL] && (strcmp(role, "terminal") == 0)))) {
+      (typeFlags[TYPE_TEXT] && isText()) ||
+      (typeFlags[TYPE_TERMINAL] && isTerminal()))) {
     restartTerm(sender, path);
-  } else {
-    if (curPath)
-      finiTerm();
   }
-  free(role);
 }
 
 /* Get the state of an object */
@@ -1688,12 +1700,8 @@ static int
 highlightRegion_AtSpi2Screen (int left, int right, int top, int bottom) {
   int begin, end;
 
-  if (!curRole)
-    return 0;
-
-  if (strcmp (curRole, "terminal") != 0)
-    /* It is safe to play with selections only with terminals */
-    return 0;
+  /* It is safe to play with selections only with terminals */
+  if (!isTerminal()) return 0;
 
   if (top != bottom)
     /* AtSpi selection only supports linear selection */
@@ -1711,12 +1719,8 @@ highlightRegion_AtSpi2Screen (int left, int right, int top, int bottom) {
 
 static int
 unhighlightRegion_AtSpi2Screen (void) {
-  if (!curRole)
-    return 0;
-
-  if (strcmp (curRole, "terminal") != 0)
-    /* It is safe to play with selections only with terminals */
-    return 0;
+  /* It is safe to play with selections only with terminals */
+  if (!isTerminal()) return 0;
 
   return setSelection_AtSpi2Screen(0, 0);
 }
