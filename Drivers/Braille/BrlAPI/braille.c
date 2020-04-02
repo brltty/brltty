@@ -124,18 +124,31 @@ static void brl_destruct(BrailleDisplay *brl)
   brlapi_closeConnection();
 }
 
-static void
+static int
 setClientPriority (BrailleDisplay *brl) {
   unsigned char worst = ARRAY_COUNT(qualityPriorities) - 1;
-  unsigned char quality = MAX(brl->quality, worst);
+  unsigned char quality = MIN(brl->quality, worst);
+
+  while (quality > 0) {
+    if (qualityPriorities[quality]) break;
+    quality -= 1;
+  }
 
   if (quality != currentQuality) {
     brlapi_param_clientPriority_t priority = qualityPriorities[quality];
 
-    if (brlapi_setParameter(BRLAPI_PARAM_CLIENT_PRIORITY, 0, BRLAPI_PARAMF_LOCAL, &priority, sizeof(priority)) >= 0) {
+    if (priority > 0) {
+      int result = brlapi_setParameter(
+        BRLAPI_PARAM_CLIENT_PRIORITY, 0,
+        BRLAPI_PARAMF_LOCAL, &priority, sizeof(priority)
+      );
+
+      if (result < 0) return 0;
       currentQuality = quality;
     }
   }
+
+  return 1;
 }
 
 /* function : brl_writeWindow */
