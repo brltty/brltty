@@ -70,11 +70,19 @@ typedef struct {
   ScreenAttributes attributes;
 } ScreenCharacter;
 
+typedef enum {
+  SCQ_NONE,
+  SCQ_POOR,
+  SCQ_FAIR,
+  SCQ_GOOD
+} ScreenContentQuality;
+
 typedef struct {
   short rows, cols;	/* screen dimensions */
   short posx, posy;	/* cursor position */
   int number;		      /* screen number */
   unsigned cursor:1;
+  ScreenContentQuality quality;
   const char *unreadable;
 } ScreenDescription;
 

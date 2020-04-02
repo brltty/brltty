@@ -79,9 +79,9 @@ typedef enum {
 #include "scr_driver.h"
 
 typedef enum {
-  TYPE_TEXT,
-  TYPE_TERMINAL,
   TYPE_ALL,
+  TYPE_TERMINAL,
+  TYPE_TEXT,
   TYPE_COUNT
 } TypeValue;
 
@@ -91,6 +91,7 @@ static unsigned char typeFlags[TYPE_COUNT];
 static char *curSender;
 static char *curPath;
 static char *curRole;
+static ScreenContentQuality curQuality;
 
 static long curNumRows, curNumCols;
 static wchar_t **curRows;
@@ -270,9 +271,9 @@ processParameters_AtSpi2Screen (char **parameters) {
     }
   }
 
-  typeFlags[TYPE_TEXT] = 0;
-  typeFlags[TYPE_TERMINAL] = 1;
   typeFlags[TYPE_ALL] = 0;
+  typeFlags[TYPE_TERMINAL] = 1;
+  typeFlags[TYPE_TEXT] = 0;
   {
     const char *parameter = parameters[PARM_TYPE];
 
@@ -282,9 +283,9 @@ processParameters_AtSpi2Screen (char **parameters) {
 
       if (types) {
         static const char *const choices[] = {
-          [TYPE_TEXT] = "text",
-          [TYPE_TERMINAL] = "terminal",
           [TYPE_ALL] = "all",
+          [TYPE_TERMINAL] = "terminal",
+          [TYPE_TEXT] = "text",
           [TYPE_COUNT] = NULL
         };
 
@@ -646,16 +647,24 @@ static void restartTerm(const char *sender, const char *path) {
 /* Switched to a new object, check whether we want to read it, and if so, restart with it */
 static void tryRestartTerm(const char *sender, const char *path) {
   if (curPath) finiTerm();
+  restartTerm(sender, path);
 
   curRole = getRole(sender, path);
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "state changed focus to role %s", curRole);
 
-  int hasTextInterface = getHasTextInterface(sender, path);
-  if (hasTextInterface && (typeFlags[TYPE_ALL] ||
-      (typeFlags[TYPE_TEXT] && isText()) ||
-      (typeFlags[TYPE_TERMINAL] && isTerminal()))) {
-    restartTerm(sender, path);
+  curQuality =
+    !getHasTextInterface(sender, path)? SCQ_NONE:
+    isTerminal()? SCQ_GOOD:
+    isText()? SCQ_FAIR:
+    SCQ_POOR;
+
+  if (curQuality != SCQ_NONE) {
+    if (typeFlags[TYPE_ALL] ||
+        (typeFlags[TYPE_TEXT] && isText()) ||
+        (typeFlags[TYPE_TERMINAL] && isTerminal())) {
+      curQuality = SCQ_GOOD;
+    }
   }
 }
 
@@ -1451,7 +1460,7 @@ currentVirtualTerminal_AtSpi2Screen (void) {
   return (curPath || !releaseScreen)? 0: SCR_NO_VT;
 }
 
-static const char nonatspi [] = "not an AT-SPI2 text widget";
+static const char msgNotAtSpi [] = "not an AT-SPI2 text widget";
 
 static int
 poll_AtSpi2Screen (void)
@@ -1476,14 +1485,16 @@ describe_AtSpi2Screen (ScreenDescription *description) {
     description->rows = curNumRows?curNumRows:1;
     description->posx = curPosX;
     description->posy = curPosY;
+    description->quality = curQuality;
   } else {
-    const char *message = nonatspi;
+    const char *message = msgNotAtSpi;
     if (releaseScreen) description->unreadable = message;
 
     description->rows = 1;
     description->cols = strlen(message);
     description->posx = 0;
     description->posy = 0;
+    description->quality = SCQ_NONE;
   }
 
   description->number = currentVirtualTerminal_AtSpi2Screen();
@@ -1494,7 +1505,7 @@ readCharacters_AtSpi2Screen (const ScreenBox *box, ScreenCharacter *buffer) {
   clearScreenCharacters(buffer, (box->height * box->width));
 
   if (!curPath) {
-    setScreenMessage(box, buffer, nonatspi);
+    setScreenMessage(box, buffer, msgNotAtSpi);
     return 1;
   }
 
