@@ -559,13 +559,13 @@ static dbus_int32_t getCaret(const char *sender, const char *path) {
   dbus_message_iter_init(reply, &iter);
   if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT) {
     logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-               "getText didn't return a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
+               "getCaret didn't return a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
     goto out;
   }
   dbus_message_iter_recurse(&iter, &iter_variant);
   if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_INT32) {
     logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-               "getText didn't return an int32 but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
+               "getCaret didn't return an int32 but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
     goto out;
   }
   dbus_message_iter_get_basic(&iter_variant, &res);
