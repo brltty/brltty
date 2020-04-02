@@ -71,7 +71,7 @@ typedef struct {
 } ScreenCharacter;
 
 typedef enum {
-  SCQ_GOOD,
+  SCQ_GOOD = 0,
   SCQ_FAIR,
   SCQ_POOR,
   SCQ_NONE

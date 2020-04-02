@@ -65,7 +65,8 @@ static int restart;
 /* Opens a connection with BrlAPI's server */
 static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
-  currentQuality = 0XFF; // ensure that it's set the first time
+  // ensure that the client priority is set before the first write
+  currentQuality = ARRAY_COUNT(qualityPriorities);
 
   brlapi_connectionSettings_t settings;
   settings.host = parameters[PARM_HOST];
