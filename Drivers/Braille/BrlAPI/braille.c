@@ -45,6 +45,14 @@ typedef enum {
     } \
   } while (0);
 
+static unsigned char currentQuality;
+static const brlapi_param_clientPriority_t qualityPriorities[] = {
+  [SCQ_GOOD] = BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT + 10,
+  [SCQ_FAIR] = BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT - 10,
+  [SCQ_POOR] = BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT - 20,
+  [SCQ_NONE] = BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT - 30,
+};
+
 static int displaySize;
 static unsigned char *prevData;
 static wchar_t *prevText;
@@ -57,6 +65,8 @@ static int restart;
 /* Opens a connection with BrlAPI's server */
 static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
+  currentQuality = 0XFF; // ensure that it's set the first time
+
   brlapi_connectionSettings_t settings;
   settings.host = parameters[PARM_HOST];
   settings.auth = parameters[PARM_AUTH];
@@ -118,6 +128,19 @@ static void brl_destruct(BrailleDisplay *brl)
 /* the one already displayed */
 static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
+  {
+    unsigned char worst = ARRAY_COUNT(qualityPriorities) - 1;
+    unsigned char quality = MAX(brl->quality, worst);
+
+    if (quality != currentQuality) {
+      brlapi_param_clientPriority_t priority = qualityPriorities[quality];
+
+      if (brlapi_setParameter(BRLAPI_PARAM_CLIENT_PRIORITY, 0, BRLAPI_PARAMF_LOCAL, &priority, sizeof(priority)) >= 0) {
+        currentQuality = quality;
+      }
+    }
+  }
+
   brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int vt = currentVirtualTerminal();
 
