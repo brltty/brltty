@@ -124,23 +124,26 @@ static void brl_destruct(BrailleDisplay *brl)
   brlapi_closeConnection();
 }
 
+static void
+setClientPriority (BrailleDisplay *brl) {
+  unsigned char worst = ARRAY_COUNT(qualityPriorities) - 1;
+  unsigned char quality = MAX(brl->quality, worst);
+
+  if (quality != currentQuality) {
+    brlapi_param_clientPriority_t priority = qualityPriorities[quality];
+
+    if (brlapi_setParameter(BRLAPI_PARAM_CLIENT_PRIORITY, 0, BRLAPI_PARAMF_LOCAL, &priority, sizeof(priority)) >= 0) {
+      currentQuality = quality;
+    }
+  }
+}
+
 /* function : brl_writeWindow */
 /* Displays a text on the braille window, only if it's different from */
 /* the one already displayed */
 static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
-  {
-    unsigned char worst = ARRAY_COUNT(qualityPriorities) - 1;
-    unsigned char quality = MAX(brl->quality, worst);
-
-    if (quality != currentQuality) {
-      brlapi_param_clientPriority_t priority = qualityPriorities[quality];
-
-      if (brlapi_setParameter(BRLAPI_PARAM_CLIENT_PRIORITY, 0, BRLAPI_PARAMF_LOCAL, &priority, sizeof(priority)) >= 0) {
-        currentQuality = quality;
-      }
-    }
-  }
+  setClientPriority(brl);
 
   brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int vt = currentVirtualTerminal();
