@@ -271,46 +271,43 @@ processParameters_AtSpi2Screen (char **parameters) {
     }
   }
 
-  typeFlags[TYPE_ALL] = 0;
-  typeFlags[TYPE_TERMINAL] = 1;
-  typeFlags[TYPE_TEXT] = 0;
   {
     const char *parameter = parameters[PARM_TYPE];
 
+    for (unsigned int index=0; index<TYPE_COUNT; index+=1) {
+      typeFlags[index] = 0;
+    }
+
     if (*parameter) {
-      int count;
-      char **types = splitString(parameter, '+', &count);
+      if (!isAbbreviation("default", parameter)) {
+        int count;
+        char **types = splitString(parameter, '+', &count);
 
-      if (types) {
-        static const char *const choices[] = {
-          [TYPE_ALL] = "all",
-          [TYPE_TERMINAL] = "terminal",
-          [TYPE_TEXT] = "text",
-          [TYPE_COUNT] = NULL
-        };
+        if (types) {
+          static const char *const choices[] = {
+            [TYPE_ALL] = "all",
+            [TYPE_TERMINAL] = "terminal",
+            [TYPE_TEXT] = "text",
+            [TYPE_COUNT] = NULL
+          };
 
-        for (unsigned int index=0; index<TYPE_COUNT; index+=1) {
-          typeFlags[index] = 0;
-        }
+          for (unsigned int index=0; index<count; index+=1) {
+            const char *type = types[index];
+            unsigned int choice;
 
-        for (unsigned int index=0; index<count; index+=1) {
-          const char *type = types[index];
-          unsigned int choice;
-
-          if (validateChoice(&choice, type, choices)) {
-            if ((choice == TYPE_ALL) && (index > 0)) {
+            if (!validateChoice(&choice, type, choices)) {
+              logMessage(LOG_WARNING, "%s: %s", "invalid widget type", type);
+            } else if ((choice == TYPE_ALL) && (index > 0)) {
               logMessage(LOG_WARNING, "widget type is mutually exclusive: %s", type);
             } else if (typeFlags[choice] || typeFlags[TYPE_ALL]) {
               logMessage(LOG_WARNING, "widget type specified more than once: %s", type);
             } else {
               typeFlags[choice] = 1;
             }
-          } else {
-            logMessage(LOG_WARNING, "%s: %s", "invalid widget type", type);
           }
-        }
 
-        deallocateStrings(types);
+          deallocateStrings(types);
+        }
       }
     }
   }
@@ -653,19 +650,20 @@ static void tryRestartTerm(const char *sender, const char *path) {
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "state changed focus to role %s", curRole);
 
-  curQuality =
-    !getHasTextInterface(sender, path)? SCQ_NONE:
-    isTerminal()? SCQ_GOOD:
-    isText()? SCQ_FAIR:
-    SCQ_POOR;
+  curQuality = getHasTextInterface(sender, path)? SCQ_POOR: SCQ_NONE;
+  unsigned char requested = typeFlags[TYPE_ALL];
 
-  if (curQuality != SCQ_NONE) {
-    if (typeFlags[TYPE_ALL] ||
-        (typeFlags[TYPE_TEXT] && isText()) ||
-        (typeFlags[TYPE_TERMINAL] && isTerminal())) {
+  if (!requested) {
+    if (isTerminal()) {
       curQuality = SCQ_GOOD;
+      requested = typeFlags[TYPE_TERMINAL];
+    } else if (isText()) {
+      curQuality = SCQ_FAIR;
+      requested = typeFlags[TYPE_TEXT];
     }
   }
+
+  if (requested) curQuality = SCQ_GOOD;     
 }
 
 /* Get the state of an object */

@@ -651,8 +651,8 @@
 #screen-parameters as:Type=text+terminal # [text,terminal,all]+...
 
 # AtSpi2 Screen Driver Parameters
-#screen-parameters as:Release=yes # [yes,no]
-#screen-parameters as:Type=text+terminal # [text,terminal,all]+...
+#screen-parameters a2:Release=yes # [yes,no]
+#screen-parameters a2:Type=default # [default,all,{terminal,text}+...]
 
 # Linux Screen Driver Parameters
 #screen-parameters lx:Charset=name+... # []
