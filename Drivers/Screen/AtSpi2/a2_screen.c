@@ -509,6 +509,42 @@ out:
   return ret;
 }
 
+static char *getName(const char *sender, const char *path) {
+  const char *name;
+  char *res = NULL;
+  DBusMessage *msg, *reply = NULL;
+  const char *interface = SPI2_DBUS_INTERFACE_ACCESSIBLE;
+  const char *property = "Name";
+  DBusMessageIter iter, iter_variant;
+
+  msg = new_method_call(sender, path, DBUS_INTERFACE_PROPERTIES, "Get");
+  if (!msg)
+    return NULL;
+  dbus_message_append_args(msg, DBUS_TYPE_STRING, &interface, DBUS_TYPE_STRING, &property, DBUS_TYPE_INVALID);
+  reply = send_with_reply_and_block(bus, msg, 1000, "getting name");
+  if (!reply)
+    return NULL;
+
+  dbus_message_iter_init(reply, &iter);
+  if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "getName didn't return a variant but '%c'", dbus_message_iter_get_arg_type(&iter));
+    goto out;
+  }
+  dbus_message_iter_recurse(&iter, &iter_variant);
+  if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_STRING) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "getName didn't return a variant but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
+    goto out;
+  }
+  dbus_message_iter_get_basic(&iter_variant, &name);
+  res = strdup(name);
+
+out:
+  dbus_message_unref(reply);
+  return res;
+}
+
 /* Get the text of an AT-SPI2 object */
 static char *getText(const char *sender, const char *path) {
   const char *text;
@@ -580,7 +616,10 @@ out:
 /* Switched to a new terminal, restart from scratch */
 static void restartTerm(const char *sender, const char *path) {
   char *text = getText(sender, path);
-  if (!text) return;
+  if (!text) {
+    text = getName(sender, path);
+    if (!text) return;
+  }
 
   char *c,*d;
   const char *e;
