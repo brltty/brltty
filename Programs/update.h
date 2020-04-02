@@ -25,7 +25,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text);
+extern int writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text, unsigned char quality);
 extern void reportBrailleWindowMoved (void);
 
 extern void scheduleUpdate (const char *reason);

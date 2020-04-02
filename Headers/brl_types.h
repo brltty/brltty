@@ -86,18 +86,19 @@ struct BrailleDisplayStruct {
   unsigned int writeDelay;
 
   unsigned char *buffer;
-  unsigned isCoreBuffer:1;
+  unsigned char quality;
+  unsigned char isCoreBuffer:1;
 
   void (*bufferResized) (unsigned int rows, unsigned int columns);
-  unsigned resizeRequired:1;
+  unsigned char resizeRequired:1;
 
   int cursor;
 
-  unsigned noDisplay:1;
-  unsigned hasFailed:1;
-  unsigned isOffline:1;
-  unsigned isSuspended:1;
-  unsigned hideCursor:1;
+  unsigned char noDisplay:1;
+  unsigned char hasFailed:1;
+  unsigned char isOffline:1;
+  unsigned char isSuspended:1;
+  unsigned char hideCursor:1;
 
   struct {
     Queue *messages;

@@ -227,6 +227,7 @@ describeBaseScreen (BaseScreen *base, ScreenDescription *description) {
   description->posx = description->posy = 0;
   description->number = 0;
   description->cursor = 1;
+  description->quality = SCQ_GOOD;
   description->unreadable = NULL;
   base->describe(description);
 

@@ -71,14 +71,14 @@ typedef struct {
 } ScreenCharacter;
 
 typedef enum {
-  SCQ_NONE,
-  SCQ_POOR,
+  SCQ_GOOD,
   SCQ_FAIR,
-  SCQ_GOOD
+  SCQ_POOR,
+  SCQ_NONE
 } ScreenContentQuality;
 
 typedef struct {
-  short rows, cols;	/* screen dimensions */
+  short cols, rows;	/* screen dimensions */
   short posx, posy;	/* cursor position */
   int number;		      /* screen number */
   unsigned cursor:1;
