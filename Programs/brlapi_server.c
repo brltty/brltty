@@ -3670,6 +3670,16 @@ THREAD_FUNCTION(runServer) {
             continue;
           }
 
+#ifndef __MINGW32__
+          if (resfd >= FD_SETSIZE) {
+            /* Will not be able to call select() on this */
+            setErrno(EMFILE);
+            logMessage(LOG_WARNING,"accept(%"PRIfd"): %s",socketInfo[i].fd,strerror(errno));
+            continue;
+          }
+
+#endif
+
           formatAddress(source, sizeof(source), &addr, addrlen);
 #ifdef __MINGW32__
         }

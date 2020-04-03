@@ -717,6 +717,14 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
         goto outlibc;
       }
 
+      if (sockfd >= FD_SETSIZE) {
+	/* Will not be able to call select() on this */
+	closeFileDescriptor(sockfd);
+	brlapi_errfun="socket";
+	setErrno(EMFILE);
+	goto outlibc;
+      }
+
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
       memcpy(sa.sun_path+lpath+1,port,lport+1);
@@ -757,6 +765,17 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
     for(cur = res; cur; cur = cur->ai_next) {
       sockfd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
       if (sockfd<0) continue;
+
+#ifndef __MINGW32__
+      if (sockfd >= FD_SETSIZE) {
+	/* Will not be able to call select() on this */
+	closeFileDescriptor(sockfd);
+	brlapi_errfun="socket";
+	setErrno(EMFILE);
+	goto outlibc;
+      }
+#endif
+
       if (connect(sockfd, cur->ai_addr, cur->ai_addrlen)<0) {
         closeSocketDescriptor(sockfd);
         continue;
@@ -828,6 +847,17 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
       setSocketErrno();
       goto outlibc;
     }
+
+#ifndef __MINGW32__
+    if (sockfd >= FD_SETSIZE) {
+      /* Will not be able to call select() on this */
+      closeFileDescriptor(sockfd);
+      brlapi_errfun="socket";
+      setErrno(EMFILE);
+      goto outlibc;
+    }
+#endif
+
     if (connect(sockfd, (struct sockaddr *) &addr, sizeof(addr))<0) {
       brlapi_errfun = "connect";
       setSocketErrno();
