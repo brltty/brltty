@@ -3678,7 +3678,7 @@ THREAD_FUNCTION(runServer) {
             continue;
           }
 
-#endif
+#endif /* !__MINGW32__ */
 
           formatAddress(source, sizeof(source), &addr, addrlen);
 #ifdef __MINGW32__

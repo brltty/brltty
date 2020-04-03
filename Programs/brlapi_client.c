@@ -425,7 +425,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
     }
 
     if (FD_ISSET(handle->fileDescriptor, &sockset))
-#endif /* HAVE_POLL */
+#endif /* !HAVE_POLL */
 #endif /* __MINGW32__ */
     {
       /* Some data is here, read it */
@@ -743,7 +743,7 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
 	setErrno(EMFILE);
 	goto outlibc;
       }
-#endif /* HAVE_POLL */
+#endif /* !HAVE_POLL */
 
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
@@ -794,7 +794,7 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
 	setErrno(EMFILE);
 	goto outlibc;
       }
-#endif
+#endif /* !__MINGW32__ && !HAVE_POLL */
 
       if (connect(sockfd, cur->ai_addr, cur->ai_addrlen)<0) {
         closeSocketDescriptor(sockfd);
@@ -876,7 +876,7 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
       setErrno(EMFILE);
       goto outlibc;
     }
-#endif
+#endif /* !__MINGW32__ && !HAVE_POLL */
 
     if (connect(sockfd, (struct sockaddr *) &addr, sizeof(addr))<0) {
       brlapi_errfun = "connect";
