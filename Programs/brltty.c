@@ -26,7 +26,6 @@
 
 #include "embed.h"
 #include "log.h"
-#include "thread.h"
 #include "api_control.h"
 #include "core.h"
 
@@ -143,8 +142,6 @@ serviceMain (DWORD argc, LPSTR *argv) {
 
 int
 main (int argc, char *argv[]) {
-  setThreadName("core-main");
-
 #ifdef __MINGW32__
   {
     static SERVICE_TABLE_ENTRY serviceTable[] = {
