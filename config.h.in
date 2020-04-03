@@ -143,6 +143,9 @@ extern "C" {
 
 /* Define this if the function select exists. */
 #undef HAVE_SELECT
+
+/* Define this if the function poll exists. */
+#undef HAVE_POLL
 #endif /* __MINGW32__ */
 
 /* Define this if the header file signal.h exists. */

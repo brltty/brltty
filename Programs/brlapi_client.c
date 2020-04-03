@@ -68,6 +68,9 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
+#ifdef HAVE_SYS_POLL_H
+#include <sys/poll.h>
+#endif /* HAVE_SYS_POLL_H */
 #endif /* __MINGW32__ */
 
 #include <sys/time.h>
@@ -392,6 +395,20 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
 
     if (dw == WAIT_OBJECT_0)
 #else /* __MINGW32__ */
+#ifdef HAVE_POLL
+    struct pollfd pollfd;
+
+    pollfd.fd = handle->fileDescriptor;
+    pollfd.events = POLLIN;
+    pollfd.revents = 0;
+
+    if (poll(&pollfd, 1, deadline ? delay : -1) < 0) {
+      LibcError("waiting for packet");
+      return -2;
+    }
+
+    if (pollfd.revents & POLLIN)
+#else /* HAVE_POLL */
     fd_set sockset;
     struct timeval timeout, *ptimeout = NULL;
     if (deadline) {
@@ -408,6 +425,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
     }
 
     if (FD_ISSET(handle->fileDescriptor, &sockset))
+#endif /* HAVE_POLL */
 #endif /* __MINGW32__ */
     {
       /* Some data is here, read it */
@@ -717,6 +735,7 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
         goto outlibc;
       }
 
+#if !defined(HAVE_POLL)
       if (sockfd >= FD_SETSIZE) {
 	/* Will not be able to call select() on this */
 	closeFileDescriptor(sockfd);
@@ -724,6 +743,7 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
 	setErrno(EMFILE);
 	goto outlibc;
       }
+#endif /* HAVE_POLL */
 
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
@@ -766,7 +786,7 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
       sockfd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
       if (sockfd<0) continue;
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(HAVE_POLL)
       if (sockfd >= FD_SETSIZE) {
 	/* Will not be able to call select() on this */
 	closeFileDescriptor(sockfd);
@@ -848,7 +868,7 @@ static int tryHost(brlapi_handle_t *handle, const char *hostAndPort) {
       goto outlibc;
     }
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(HAVE_POLL)
     if (sockfd >= FD_SETSIZE) {
       /* Will not be able to call select() on this */
       closeFileDescriptor(sockfd);
