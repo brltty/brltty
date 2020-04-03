@@ -71,8 +71,13 @@ static void
 describe_NoScreen (ScreenDescription *description) {
   {
     const char *message = noDriverReason;
-    if (!message) message = messageParameter;
-    if (!message) message = gettext(defaultMessage);
+
+    if (!message) {
+      message = messageParameter;
+      if (!message) message = defaultMessage;
+      message = gettext(message);
+    }
+
     screenMessage = message;
   }
 

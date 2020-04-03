@@ -1705,7 +1705,9 @@ startBrailleDriver (void) {
         char banner[0X100];
         const char *text = opt_startMessage;
 
-        if (!*text) {
+        if (*text) {
+          text = gettext(text);
+        } else {
           makeProgramBanner(banner, sizeof(banner), 0);
           text = banner;
         }
@@ -1765,7 +1767,13 @@ static void
 exitBrailleDriver (void *data) {
   if (brailleDriverConstructed) {
     const char *text = opt_stopMessage;
-    if (!*text) text = gettext("BRLTTY stopped");
+
+    if (*text) {
+      text = gettext(text);
+    } else {
+      text = gettext("BRLTTY stopped");
+    }
+
     writeBrailleMessage(text);
   }
 
@@ -2044,7 +2052,9 @@ startSpeechDriver (void) {
     char banner[0X100];
     const char *text = opt_startMessage;
 
-    if (!*text) {
+    if (*text) {
+      text = gettext(text);
+    } else {
       makeProgramBanner(banner, sizeof(banner), 0);
       text = banner;
     }

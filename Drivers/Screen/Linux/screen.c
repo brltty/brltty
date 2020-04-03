@@ -1422,7 +1422,7 @@ static int
 getConsoleState (struct vt_stat *state) {
   if (controlMainConsole(VT_GETSTATE, state) != -1) return 1;
   logSystemError("ioctl[VT_GETSTATE]");
-  problemText = "can't get console state";
+  problemText = gettext("can't get console state");
   return 0;
 }
 
@@ -1500,7 +1500,7 @@ getConsoleNumber (void) {
     if (!canOpenCurrentConsole()) {
       problemText = gettext("console not in use");
     } else if (!openCurrentConsole()) {
-      problemText = "can't open console";
+      problemText = gettext("can't open console");
     }
 
     setTranslationTable(1);
@@ -1546,7 +1546,7 @@ refresh_LinuxScreen (void) {
       problemText = NULL;
 
       if (!refreshCache()) {
-        problemText = "can't read screen content";
+        problemText = gettext("can't read screen content");
         goto done;
       }
 
@@ -1568,7 +1568,7 @@ refresh_LinuxScreen (void) {
   done:
     if (problemText) {
       if (*fallbackText) {
-        problemText = fallbackText;
+        problemText = gettext(fallbackText);
       }
     }
   }
@@ -1591,7 +1591,7 @@ getScreenDescription (ScreenDescription *description) {
     return 1;
   }
 
-  problemText = "can't read screen header";
+  problemText = gettext("can't read screen header");
   return 0;
 }
 
