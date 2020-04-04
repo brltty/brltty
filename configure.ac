@@ -2020,6 +2020,7 @@ AC_OUTPUT([
    Bindings/Python/setup.py
    Autostart/Systemd/brltty@.service
    Autostart/X11/60xbrlapi
+   Autostart/X11/90brltty
    Android/Application/res/values/configured.xml:Android/Application/res.strings.in
    ${brltty_make_files}
 ])

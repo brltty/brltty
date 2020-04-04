@@ -1,0 +1,1 @@
+if [ -x @program_directory@/brltty ]; then @program_directory@/brltty -b ba -s no -x a2 -N 2> /dev/null & fi
