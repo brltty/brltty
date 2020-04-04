@@ -1072,7 +1072,7 @@ install-tools: all-tools install-program-directories
 	$(INSTALL_PROGRAM) brltty-lsinc$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) $(BLD_TOP)config.sh $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
 
-XBRLAPI_X11_AUTOSTART_FILE = 60xbrlapi
+XBRLAPI_X11_AUTOSTART_FILE = 90xbrlapi
 XBRLAPI_GDM_AUTOSTART_FILE = xbrlapi.desktop
 
 install-xbrlapi: xbrlapi$X install-program-directory install-x11-autostart-directory install-gdm-autostart-directory

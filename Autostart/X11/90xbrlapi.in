@@ -1,3 +1,5 @@
+# startup script for /etc/X11/Xsession.d
+
 program_directory="@program_directory@"
 xbrlapi="$program_directory/xbrlapi"
 brltty="$program_directory/brltty"
