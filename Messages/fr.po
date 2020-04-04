@@ -107,7 +107,7 @@ msgstr "Paramètre de l'API"
 
 #: Programs/cmds.auto.h:1068
 msgid "AT (set 2) keyboard scan code"
-msgstr "Scancode AT du clavier (réglé à 2)"
+msgstr "Scancode AT du clavier (set 2)"
 
 #: Programs/midi.c:67
 msgid "Accordion"
@@ -182,7 +182,7 @@ msgstr "Avril"
 
 #: Programs/log.c:116
 msgid "Async Events"
-msgstr "Événements désynchronisés"
+msgstr "Événements asynchrones"
 
 #: Programs/menu_prefs.c:694
 msgid "Attributes Invisible Time"
@@ -367,7 +367,7 @@ msgstr "Bruit de souffle"
 
 #: Programs/midi.c:45
 msgid "Bright Acoustic Piano"
-msgstr "Piano accoustique brillaq"
+msgstr "Piano accoustique brillant"
 
 #: Programs/xbrlapi.c:92
 msgid "BrlAPI authorization/authentication string"
@@ -452,7 +452,7 @@ msgstr "Beep de la console"
 
 #: Programs/menu_prefs.c:894
 msgid "Console Bell Alert"
-msgstr "Beep de la console"
+msgstr "Beep d'alerte de la console"
 
 #: Programs/midi.c:92
 msgid "Contrabass"
@@ -812,7 +812,7 @@ msgstr "Paquets entrants"
 #: Programs/config.c:302
 #, c-format
 msgid "Install the %s service, and then exit."
-msgstr "Installe le service %s et quittez."
+msgstr "Installez le service %s et quittez."
 
 #: Programs/menu_prefs.c:1346
 msgid "Internal Parameters"
@@ -1163,7 +1163,7 @@ msgstr "Version du paquet"
 #. Synth Pad
 #: Programs/midi.c:143
 msgid "Pad 1 (new age)"
-msgstr "bloc 1 ("
+msgstr "bloc 1 (new age)"
 
 #: Programs/midi.c:144
 msgid "Pad 2 (warm)"
@@ -1199,7 +1199,7 @@ msgstr "Flûte de pan"
 
 #: Programs/config.c:402
 msgid "Parameters for the application programming interface."
-msgstr "Paramètres pour l'interface de programmation de l'application."
+msgstr "Paramètres pour l'interface de programmation pour applications."
 
 #: Programs/config.c:424
 msgid "Parameters for the braille driver."
@@ -1240,7 +1240,7 @@ msgstr "Chemin du répertoire des tables de texte"
 
 #: Programs/brltest.c:78 Programs/config.c:375
 msgid "Path to directory which can be written to."
-msgstr "Chemin du répertoire oÃ¹ il est possible d'écrire."
+msgstr "Chemin du répertoire où il est possible d'écrire."
 
 #: Programs/config.c:365
 msgid "Path to directory which contains files that can be updated."
@@ -1345,7 +1345,7 @@ msgstr "Abandonne le périphérique braille quand il n'est pas possible de lire 
 
 #: Programs/config.c:295
 msgid "Remain a foreground process."
-msgstr "Rappelle un processus en tÃ¢che de fond."
+msgstr "Rappelle un processus en tâche de fond."
 
 #: Programs/brltty-trtxt.c:76
 msgid "Remove dots seven and eight."
@@ -1382,7 +1382,7 @@ msgstr "Redémarre le pilote de synthèse vocale"
 
 #: Programs/midi.c:177
 msgid "Reverse Cymbal"
-msgstr "Cymballes renversées"
+msgstr "Cymbales renversées"
 
 #: Programs/menu_prefs.c:1186
 msgid "Right"
@@ -1477,7 +1477,7 @@ msgstr "Septembre"
 
 #: Programs/log.c:128
 msgid "Serial I/O"
-msgstr "E/S sçrie"
+msgstr "E/S série"
 
 #: Programs/log.c:122
 msgid "Server Events"
@@ -1843,7 +1843,7 @@ msgstr "Séparateur de l'heure"
 
 #: Programs/midi.c:96
 msgid "Timpani"
-msgstr "Timballes"
+msgstr "Timbales"
 
 #. Percussive Instruments
 #: Programs/midi.c:170
@@ -1876,11 +1876,11 @@ msgstr "Traduit via la table de caractères"
 
 #: Programs/midi.c:93
 msgid "Tremolo Strings"
-msgstr "Cordes de tremolo"
+msgstr "Cordes avec tremolo"
 
 #: Programs/midi.c:108
 msgid "Trombone"
-msgstr "Trombonne"
+msgstr "Trombone"
 
 #. Brass
 #: Programs/midi.c:107
@@ -1982,11 +1982,11 @@ msgstr "Afficheur X auquel se connecter"
 
 #: Programs/xbrlapi.c:718
 msgid "XFree(wm_name) for change"
-msgstr "Pour changer XFree(wm_name)"
+msgstr "XFree(wm_name) pour changer"
 
 #: Programs/cmds.auto.h:1075
 msgid "XT (set 1) keyboard scan code"
-msgstr "Scancode de clavier XT (réglé à 1)"
+msgstr "Scancode de clavier XT (set 1)"
 
 #: Programs/midi.c:58
 msgid "Xylophone"
@@ -2349,7 +2349,7 @@ msgstr "répertoire"
 
 #: Programs/xbrlapi.c:97
 msgid "display"
-msgstr "affichage"
+msgstr "écran"
 
 #: Programs/cmds.auto.h:4
 msgid "do nothing"
@@ -2405,7 +2405,7 @@ msgstr "entrer/quitter l'affichage de l'état"
 
 #: Programs/cmds.auto.h:1124
 msgid "escape key"
-msgstr "Touche Ãchap"
+msgstr "Touche Échap"
 
 #: Drivers/Braille/Iris/braille.c:1494
 msgid "eurobraille"
@@ -2433,7 +2433,7 @@ msgstr "Échec de l'exécution de \"%s\" : %s\n"
 
 #: Programs/xbrlapi.c:643
 msgid "failed to get first focus\n"
-msgstr "échec de la récupÃ§ration du premier focus\n"
+msgstr "échec de la récupération du premier focus\n"
 
 #: Programs/brltty-trtxt.c:57 Programs/brltty-trtxt.c:66 Programs/config.c:325
 #: Programs/config.c:334 Programs/config.c:344 Programs/config.c:463
@@ -3179,7 +3179,7 @@ msgstr "Arrête le pilote de synthèse vocale"
 
 #: Programs/xbrlapi.c:595
 msgid "strange old error handler\n"
-msgstr "Gestionnaire d'étranges erreurs anciennes\n"
+msgstr "ancien gestionnaire d'erreurs étrange\n"
 
 #: Programs/cmds.auto.h:1089
 msgid "switch to command context"
@@ -3287,7 +3287,7 @@ msgstr "xbrlapi : Mauvais type de numéro de terminal virtuel\n"
 #: Programs/xbrlapi.c:397
 #, c-format
 msgid "xbrlapi: cannot get root window XFree86_VT property\n"
-msgstr "xbrlapi : Ne peut pas trouver la propriété de la fenêtre racine XFree86_VT\n"
+msgstr "xbrlapi : Ne peut pas trouver la propriété XFree86_VT de la fenêtre racine\n"
 
 #
 #: Programs/xbrlapi.c:276
@@ -3298,7 +3298,7 @@ msgstr "xbrlapi : Ne peut pas écrire le nom de la fenêtre %s\n"
 #: Programs/xbrlapi.c:696
 #, c-format
 msgid "xbrlapi: didn't grab parent of %#010lx\n"
-msgstr "n'a pas extrait le parent de %#010lx\n"
+msgstr "xbrlapi : n'a pas extrait le parent de %#010lx\n"
 
 #: Programs/xbrlapi.c:714
 #, c-format
@@ -3313,7 +3313,7 @@ msgstr "xbrlapi : n'a pas extrait la fenêtre %#010lx mais a récupéré le focu
 #: Programs/xbrlapi.c:406
 #, c-format
 msgid "xbrlapi: more than one item for VT number\n"
-msgstr "xbrlapi : Plus d'un élément pour le terminal virtuel numéro\n"
+msgstr "xbrlapi : Plus d'un élément pour le numéro de terminal virtuel\n"
 
 #: Programs/xbrlapi.c:391
 #, c-format
@@ -3323,7 +3323,7 @@ msgstr "xbrlapi : Pas d'atome XFree86_VT\n"
 #: Programs/xbrlapi.c:402
 #, c-format
 msgid "xbrlapi: no items for VT number\n"
-msgstr "xbrlapi : Pas d'éléments pour le terminal virtuel numéro\n"
+msgstr "xbrlapi : Pas d'éléments pour le numéro de terminal virtuel\n"
 
 #: Programs/xbrlapi.c:374
 #, c-format
