@@ -663,12 +663,12 @@ static int brlapi__writePacketWaitForAck(brlapi_handle_t *handle, brlapi_packetT
 
 /* brlapi__pause */
 /* Wait for an event to be received */
-void brlapi__pause(brlapi_handle_t *handle, int timeout_ms) {
+void BRLAPI_STDCALL brlapi__pause(brlapi_handle_t *handle, int timeout_ms) {
   brlapi__waitForPacket(handle, 0, NULL, 0, TRY_WAIT_FOR_EXPECTED_PACKET, timeout_ms);
 }
 
 /* brlapi_pause */
-void brlapi_pause(int timeout_ms) {
+void BRLAPI_STDCALL brlapi_pause(int timeout_ms) {
   brlapi__pause(&defaultHandle, timeout_ms);
 }
 

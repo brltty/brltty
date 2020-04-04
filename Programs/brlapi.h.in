@@ -1045,9 +1045,9 @@ typedef uint32_t brlapi_param_flags_t;
  * \return the real size of the parameter's content. If the parameter does not fit in the provided buffer, it is truncated to len bytes (but the real size of the parameter is still returned). In that case, the client must call brlapi_getParameter again with a big enough buffer.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-ssize_t brlapi_getParameter(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, void* data, size_t len);
+ssize_t BRLAPI_STDCALL brlapi_getParameter(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, void* data, size_t len);
 #endif
-ssize_t brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, void* data, size_t len);
+ssize_t BRLAPI_STDCALL brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, void* data, size_t len);
 
 /* brlapi_getParameterAlloc */
 /** Return the content of a parameter
@@ -1063,9 +1063,9 @@ ssize_t brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t parameter, 
  * \return a newly-allocated buffer that contains the value of the parameter. The caller must call free() on it after use. NULL is returned on errors
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-void *brlapi_getParameterAlloc(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, size_t *len);
+void * BRLAPI_STDCALL brlapi_getParameterAlloc(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, size_t *len);
 #endif
-void *brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, size_t *len);
+void * BRLAPI_STDCALL brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, size_t *len);
 
 /* brlapi_setParameter */
 /** Set the content of a parameter
@@ -1081,9 +1081,9 @@ void *brlapi__getParameterAlloc(brlapi_handle_t *handle, brlapi_param_t paramete
  * \return 0 on success, -1 on error (read-only parameter for instance).
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_setParameter(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, const void* data, size_t len);
+int BRLAPI_STDCALL brlapi_setParameter(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, const void* data, size_t len);
 #endif
-int brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, const void* data, size_t len);
+int BRLAPI_STDCALL brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, const void* data, size_t len);
 
 /* brlapi_paramCallback_t */
 /** Callback for parameter changes
@@ -1133,9 +1133,9 @@ typedef void *brlapi_paramCallbackDescriptor_t;
  * brlapi_watchParameter, for providing the initial value
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-brlapi_paramCallbackDescriptor_t brlapi_watchParameter(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
+brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi_watchParameter(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
 #endif
-brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
+brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi__watchParameter(brlapi_handle_t *handle, brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, brlapi_paramCallback_t func, void *priv, void* data, size_t len);
 
 /* brlapi_unwatchParameter */
 /** Clear a parameter change callback
@@ -1149,9 +1149,9 @@ brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *handle,
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_unwatchParameter(brlapi_paramCallbackDescriptor_t descriptor);
+int BRLAPI_STDCALL brlapi_unwatchParameter(brlapi_paramCallbackDescriptor_t descriptor);
 #endif
-int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor_t descriptor);
+int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescriptor_t descriptor);
 
 /** @} */
 
@@ -1165,9 +1165,9 @@ int brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_paramCallbackDescri
  * \return nothing
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-void brlapi_pause(int timeout_ms);
+void BRLAPI_STDCALL brlapi_pause(int timeout_ms);
 #endif
-void brlapi__pause(brlapi_handle_t *handle, int timeout_ms);
+void BRLAPI_STDCALL brlapi__pause(brlapi_handle_t *handle, int timeout_ms);
 
 /** @} */
 
