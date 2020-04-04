@@ -1,1 +1,2 @@
-if [ -x @program_directory@/xbrlapi ]; then @program_directory@/xbrlapi 2> /dev/null & fi
+program="@program_directory@/xbrlapi"
+[ -x "${program}" ] && "${program}" 2>/dev/null &
