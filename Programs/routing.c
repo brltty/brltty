@@ -57,11 +57,11 @@ typedef enum {
 } RoutingResult;
 
 typedef struct {
-#ifdef HAVE_SIGNAL_H
+#ifdef SIGUSR1
   struct {
     sigset_t mask;
   } signal;
-#endif /* HAVE_SIGNAL_H */
+#endif /* SIGUSR1 */
 
   struct {
     int number;
