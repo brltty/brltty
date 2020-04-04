@@ -1,1 +1,1 @@
-if [ -x /usr/bin/xbrlapi ]; then /usr/bin/xbrlapi -q 2> /dev/null & fi
+if [ -x /usr/bin/xbrlapi ]; then /usr/bin/xbrlapi 2> /dev/null & fi
