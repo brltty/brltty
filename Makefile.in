@@ -115,8 +115,7 @@ distclean:: clean
 	$(ITERATE)
 	-rm -f brltty.spec
 	-rm -f Autostart/Systemd/brltty@.service
-	-rm -f Autostart/X11/60xbrlapi
-	-rm -f Autostart/X11/90brltty
+	-rm -f Autostart/X11/90xbrlapi
 	-rm -fr autom4te*.cache
 	-rm -f config.log config.cache config.status
 	-rm -f config.mk config.h config.sh
