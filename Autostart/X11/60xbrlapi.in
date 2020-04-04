@@ -1,2 +1,0 @@
-program="@program_directory@/xbrlapi"
-[ -x "${program}" ] && "${program}" 2>/dev/null &

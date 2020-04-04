@@ -1,2 +1,0 @@
-program="@program_directory@/brltty"
-[ -x "${program}" ] && "${program}" -b ba -s no -x a2 -N 2>/dev/null &

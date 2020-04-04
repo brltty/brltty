@@ -75,6 +75,7 @@
 static char *auth;
 static char *host;
 static char *xDisplay;
+static int no_daemon;
 static int quiet;
 
 static int brlapi_fd;
@@ -101,6 +102,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("display"),
     .setting.string = &xDisplay,
     .description = strtext("X display to connect to")
+  },
+
+  { .letter = 'n',
+    .word = "no-daemon",
+    .setting.flag = &no_daemon,
+    .description = strtext("Remain a foreground process")
   },
 
   { .letter = 'q',
@@ -1017,6 +1024,18 @@ main (int argc, char *argv[]) {
 #endif /* SIGPIPE */
 
   tobrltty_init(auth,host);
+
+  if (!no_daemon) {
+    pid_t child = fork();
+    if (child == -1)
+      fatal_errno("failed to fork", NULL);
+
+    if (child)
+      exit(PROG_EXIT_SUCCESS);
+
+    if (setsid() == -1)
+      fatal_errno("failed to create background session", NULL);
+  }
 
   toX_f(xDisplay);
 

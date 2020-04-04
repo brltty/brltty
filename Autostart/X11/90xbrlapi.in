@@ -1,0 +1,12 @@
+program_directory="@program_directory@"
+xbrlapi="$program_directory/xbrlapi"
+brltty="$program_directory/brltty"
+
+if [ -x "${xbrlapi}" ]; then
+  if "${xbrlapi}" 2>/dev/null ; then
+    # xbrlapi could connect to BrlAPI, try to start brltty with AtSpi2 driver.
+    if [ -x "${brltty}" ]; then
+      "${brltty}" -b ba -s no -x a2 -N 2>/dev/null
+    fi
+  fi
+fi
