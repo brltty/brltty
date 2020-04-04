@@ -2019,6 +2019,7 @@ AC_OUTPUT([
    Bindings/Lisp/brlapi_config.lisp
    Bindings/Python/setup.py
    Autostart/Systemd/brltty@.service
+   Autostart/X11/60xbrlapi
    Android/Application/res/values/configured.xml:Android/Application/res.strings.in
    ${brltty_make_files}
 ])

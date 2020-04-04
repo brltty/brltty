@@ -1,0 +1,1 @@
+if [ -x @program_directory@/xbrlapi ]; then @program_directory@/xbrlapi 2> /dev/null & fi
