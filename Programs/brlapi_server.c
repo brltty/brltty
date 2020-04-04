@@ -3042,7 +3042,10 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   if ((fd = CreateNamedPipe(path,
 	  PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 	  PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
-	  PIPE_UNLIMITED_INSTANCES, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
+	  PIPE_UNLIMITED_INSTANCES,
+	  BRLAPI_MAXPACKETSIZE + sizeof(brlapi_header_t),
+	  BRLAPI_MAXPACKETSIZE + sizeof(brlapi_header_t),
+	  0, NULL)) == INVALID_HANDLE_VALUE) {
     if (GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
       logWindowsSystemError("CreateNamedPipe");
     goto out;
