@@ -80,4 +80,3 @@ bind RoutingKey+Left PRDIFCHAR
 bind RoutingKey+Right NXDIFCHAR
 bind RoutingKey+Action DESCCHAR
 
-include ../bm/routing.kti

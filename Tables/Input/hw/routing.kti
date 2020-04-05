@@ -16,4 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+note RoutingKey refers to any of the keys immediately behind the braille cells.
+
 bind RoutingKey ROUTE
