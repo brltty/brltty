@@ -507,6 +507,15 @@ The following packages should also be installed:
 
       pip install cython
 
+   Some systems, either in addition to or in place of the ``pip`` command,
+   have the ``pip2`` and/or the ``pip3`` command. As you might have guessed,
+   ``pip2`` corresponds to ``Python2`` and ``pip3`` corresponds to ``Python3``.
+   It's best to use the one with the most explicit version suffix.
+
+   If the ``pip`` command isn't already included within  the version of
+   ``Python`` that you're using (usually within its ``scripts`` subdirectory)
+   then you can install it from `<https://pip.pypa.io/en/stable/installing/>`_.
+
    Copies of the files mentioned below are at
    `<http://BRLTTY.app/archive/Windows/Cython/>`_:
 
