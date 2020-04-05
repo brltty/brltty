@@ -49,7 +49,7 @@ For example, a profile for the German language might look like this::
    speech-driver es
    speech-parameters voice=de,maxrate=300
    text-table de
-   contraction-table de-kurzschrift
+   contraction-table de-g2
 
 All of the speech driver parameters must be specified on a single line, and be
 separated from one another by a comma (``,``).

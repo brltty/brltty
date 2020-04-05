@@ -13,6 +13,7 @@
   <string name="BRAILLE_DRIVER_LABEL_bn">BrailleNote</string>
   <string name="BRAILLE_DRIVER_LABEL_cb">CombiBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_ce">Cebra</string>
+  <string name="BRAILLE_DRIVER_LABEL_cn">Canute</string>
   <string name="BRAILLE_DRIVER_LABEL_ec">EcoBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_eu">EuroBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_fs">FreedomScientific</string>
@@ -55,6 +56,7 @@
     <item>@string/BRAILLE_DRIVER_LABEL_bn</item>
     <item>@string/BRAILLE_DRIVER_LABEL_cb</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ce</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_cn</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ec</item>
     <item>@string/BRAILLE_DRIVER_LABEL_eu</item>
     <item>@string/BRAILLE_DRIVER_LABEL_fs</item>
@@ -98,6 +100,7 @@
     <item>bn</item>
     <item>cb</item>
     <item>ce</item>
+    <item>cn</item>
     <item>ec</item>
     <item>eu</item>
     <item>fs</item>
@@ -420,16 +423,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">German (uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">German (contracted - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">German (contracted - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">German (contracted - 2015 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">German (basic contractions)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">German (contracted - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">German (contracted - 2015 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">German (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">German (basic contractions)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">German (contracted - 1998 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">English (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (US, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Spanish (grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">French (contracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">French (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">French (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">French (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesian (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">International Phonetic Alphabet</string>
@@ -453,16 +456,16 @@
   <string-array name="CONTRACTION_TABLE_LABELS">
     <item>@string/CONTRACTION_TABLE_LABEL_af</item>
     <item>@string/CONTRACTION_TABLE_LABEL_am</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_basis</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_kurzschrift</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_kurzschrift_1998</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_kurzschrift_2015</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_de_vollschrift</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_1998</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_2015</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_g0</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_g1</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_en_ueb_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_en_us_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_es</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_fr_abrege</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_fr_integral</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_fr_g1</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_fr_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ha</item>
     <item>@string/CONTRACTION_TABLE_LABEL_id</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ipa</item>
@@ -487,16 +490,16 @@
   <string-array name="CONTRACTION_TABLE_VALUES">
     <item>af</item>
     <item>am</item>
-    <item>de-basis</item>
-    <item>de-kurzschrift</item>
-    <item>de-kurzschrift-1998</item>
-    <item>de-kurzschrift-2015</item>
-    <item>de-vollschrift</item>
+    <item>de-1998</item>
+    <item>de-2015</item>
+    <item>de-g0</item>
+    <item>de-g1</item>
+    <item>de-g2</item>
     <item>en-ueb-g2</item>
     <item>en-us-g2</item>
     <item>es</item>
-    <item>fr-abrege</item>
-    <item>fr-integral</item>
+    <item>fr-g1</item>
+    <item>fr-g2</item>
     <item>ha</item>
     <item>id</item>
     <item>ipa</item>

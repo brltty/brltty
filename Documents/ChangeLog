@@ -1,13 +1,14 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+April 6, 2020:
  - BRLTTY 6.1 released:
    New commands:
       REFRESH: rewrite the whole braille display (some drivers).
       REFRESH_LINE: rewrite a specific braille line (some drivers).
       ROUTE_LINE: bring the cursor to a specific braille line.
    New braille drivers:
-      Canute (our first multi-line display!)
+      Canute: A 40 column, 9 line display from Bristol Braille.
    BrlAPI braille driver changes:
       Increase/decrease the client priority based on the screen content quality.
       A quality of "good" overrides Orca rendering - lower ones don't.

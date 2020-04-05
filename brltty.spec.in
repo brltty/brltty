@@ -689,90 +689,91 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 
 %changelog
-* Fri Feb 22 2019 Dave Mielke <Dave@Mielke.cc> 6.0
-General changes:
-   Chords Dot4 + Dot6 + Dot8/Dot7 turn on/off typing Unicode braille patterns.
-   Word wrap when panning to the left now works properly.
-   Cursor tracking while word wrap is on has been fixed.
-   Support for speaking the current line's indent has been added.
-   Vertical screen scroll tracking is now supported.
-   Command execution can now be delayed till all the keys have been released.
-   Resources are no longer wasted checking non-braille USB devices.
-   The eSpeak-NG speech driver has been added.
-   BRLTTY can now run within an InitRamFS as a dracut module.
-   The -Y [--start-message=] and -Z [--stop-message=] options have been added.
-   The prompt-pattern configuration file directive has been added.
-B2G braille driver changes:
-   The key bindings have been significantly improved.
+* Mon Apr 6 2020 Dave Mielke <Dave@Mielke.cc> 6.1
+New commands:
+   REFRESH: rewrite the whole braille display (some drivers).
+   REFRESH_LINE: rewrite a specific braille line (some drivers).
+   ROUTE_LINE: bring the cursor to a specific braille line.
+New braille drivers:
+   Canute: A 40 column, 9 line display from Bristol Braille.
+BrlAPI braille driver changes:
+   Increase/decrease the client priority based on the screen content quality.
+   A quality of "good" overrides Orca rendering - lower ones don't.
 HandyTech braille driver changes:
-   Support for the Activator has been added.
-   Key bindings now work correctly after returning from the internal mode.
-Hedo braille driver changes:
-   Newer MobilLine models are now detected.
-HIMS braille driver changes:
-   Shifted qwerty keyboard letters are now interpreted correctly.
+   Basic Braille Plus models are supported.
+   The Easy Braille can be autodetected when using Bluetooth.
 HumanWare braille driver changes:
-   Bluetooth connection problems have been resolved.
-   USB session initialization problems have been resolved.
-   The BrailleNote Touch routing keys now work.
-   The BI 32 joystick now works.
-   BI 14 USB detection has been fixed.
-MDV braille driver changes:
-   Binding changes have been made so that F10 now does exit the menu.
-ViaVoice speech driver changes:
-   The driver has finally been revived.
-   Speech tracking has been implemented.
-   The configure option --with-viavoice has been removed.
-Linux screen driver changes:
-   Full Unicode support is finally available (no more 512 character limit).
-   Among many other benefits, Unicode braille patterns now automatically render.
-   This capability only works if a 4.19 (or later) kernel is being used.
-   The unicode=no driver parameter can be used to revert to the older behaviour.
+   The Brailliant BI 14 can be autodetected when using Bluetooth.
+   The routing keys of the Brailliant BI 14 work.
+   Four new models are supported:
+      HumanWare BrailleOne
+      APH Chameleon 20
+      APH Mantis Q40
+      NLS eReader
+Inceptor (BrailleMe) braille driver changes:
+   Cursor positioning has been fixed.
+   USB (NVDA mode) autodetection works.
+   USB (NVDA mode) key bindings have been rationalized.
+   Bluetooth (BrailleBack mode) key bindings have been rationalized.
 AtSpi2 screen driver changes:
-   The default is now to only read terminal screens.
-   Determining which widget is currently active has been fixed.
-   BRLTTY is now automatically stopped when the session is closed.
+   The BRLTTY and X clipboards are synchronized.
+   Highlighted screen regions are supported.
+   When a widget doesn't have text then its accessibility name is rendered.
+   Set the screen content quality (for the BrlAPI braille driver) as follows:
+      good: terminal widgets
+      fair: text widgets (e.g. labels)
+      poor: widgets that have descriptive text
+      none: widgets that don't have a text interface
+   The type= parameter now specifies which widgets override Orca rendering.
+   type=default has been added (and is the new default).
+   The default is to defer to Orca except for terminal widgets.
+Linux screen driver changes:
+   The fallbackText= parameter has been added.
+   Cursor routing when there are wide characters has been fixed.
+   Cursor positioning when there are wide characters has been fixed.
 BrlAPI changes:
-   The server now starts immediately rather than when the braille driver starts.
-   The following new client functions have been added:
-      void brlapi_getLibraryVersion(int *major, int *minor, int *revision)
-      void brlapi__setClientData(brlapi_handle_t *handle, void *data)
-      void *brlapi__getClientData(brlapi_handle_t *handle)
-      int brlapi__readKeyWithTimeout(brlapi_handle_t *handle,
-                                     int milliseconds,
-                                     brlapi_keyCode_t *code)
-   xbrlapi now maps unmapped keysyms to temporary keycodes.
+   UTF-8 character encoding is handled internally (no longer needs iconv).
+   Large file descriptor numbers no longer cause a client to crash.
+   The client and server protocol versions can be increased independently.
+   Packets can contain up to 4096 (rather than 512) bytes.
+   The brlapi__pause() function can be used to wait for an incoming event.
+   A framework for setting, getting, and watching parameters has been added:
+      brlapi_getParameterProperties()
+      brlapi__getParameter()
+      brlapi__getParameterAlloc()
+      brlapi__setParameter()
+      brlapi__watchParameter()
+      brlapi__unwatchParameter()
+   The brltty-clip command can be used to get/set the clipboard content.
+xbrlapi changes:
+   Now backgrounds after successfully establishing the BrlAPI connection.
+   The -n (--no-daemon) option disables backgrounding.
+   The BRLTTY and X clipboards are synchronized.
 Text table changes:
-   The se (Northern Sami) table has been added.
-   New directives: ifGlyph, ifNotGlyph, ifCell, ifNotCell
+   Defining the Unicode replacement character (U+FFFD) works properly.
+   The fr-vs table supports the middle dot character.
 Contraction table changes:
-   A table for the German 2015 standard [de-kurzschrift-2015] has been added
-   (the de-kurzschrift-1998 table should now be used for the 1998 standard).
-   New directives: cldr, replace
-   The cldr directive has been added to tables for languages that have defined
-   annotations: af, de, en, es, fr, ko, nl, pt, sw, th, zu
-   (you also need to install your distribution's CLDR annotations package).
+   Undefined characters now fall back to their text table representations.
+   The en-ueb-g2 table has been updated.
+   The zh-tw-ucb table has been removed.
+   Renamed French tables:
+      fr-integral -> fr-g1
+      fr-abrege -> fr-g2
+   Renamed German tables:
+      de-basis -> de-g0
+      de-vollschrift -> de-g1
+      de-kurzschrift -> de-g2
+      de-kurzschrift-1998 -> de-1998
+      de-kurzschrift-2015 -> de-2015
+Linux changes:
+   The systemd and udev wrappers are now in /usr/lib/brltty/.
 Android changes:
-   The Android device is now kept awake while navigating internal screens
-   (help, the preferences menu, a frozen screen, etc).
-   New braille-friendly widget representations:
-      Check Boxes: ⣏ ⣹ (not checked), ⣏⠶⣹ (checked)
-      Radio Buttons: ⢎ ⡱ (not selected), ⢎⠶⡱ (selected)
-      Switches: ⢸⣭⡇ (off), ⢸⣛⡇ (on)
-   A notification showing the braille device and its state has been added.
-   Support for the Accessibility button (Android 8 or later) has been added.
-   The Actions screen has been added - you can get to it by:
-      Global Action #5 (emulate the F5 keyboard key)
-      Tapping the (new) notification.
-      Clicking the (new) Accessibility button.
-   Routing keys beyond an element's text are now associated with that element.
-   Routing key #6 now does a context click (for elements that support it).
-   The algorithm that decides which elements to render has been much improved.
-   The list renderer now orders elements much more sensibly.
-   The accuracy of left, right, up, and down navigation has been improved.
-   Support for range controls has been added (adjust with the scroll actions).
-   Bluetooth connections are no longer tried:
-      If the Android device doesn't have a Bluetooth adapter.
-      If the Android device's Bluetooth adapter is disabled.
-      While the Android device is searching for new Bluetooth devices.
+   The Update Application button on the Actions screen works.
+   Routing key #7 presents the Accessibility Actions for a screen element.
+Windows changes:
+   A potential BrlAPI client/server communication deadlock has been fixed.
+   Some .bat scripts have been renamed:
+      install-brltty -> enable-brlapi
+      uninstall-brltty -> disable-brlapi
+      run-debug -> debug-brltty
 
