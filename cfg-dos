@@ -55,7 +55,7 @@ export LDFLAGS=""
    --disable-x \
    \
    --without-libbraille \
-   --with-braille-driver=-vr,all \
+   --with-braille-driver=-vr,-cn,all \
    \
    --without-espeak \
    --without-espeak-ng \
