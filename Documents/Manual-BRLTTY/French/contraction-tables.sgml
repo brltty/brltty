@@ -1,15 +1,15 @@
 af|Afrikaans (abrégé)@
 am|Amharic (désabrégé)@
-de-basis|Allemand (désabrégé)@
-de-kurzschrift|Allemand (abrégé - standard 1998)@
-de-kurzschrift-1998|Allemand (abrégé - standard 1998)@
-de-kurzschrift-2015|Allemand (abrégé - standard 2015)@
-de-vollschrift|Allemand (abréviations de base)@
+de-g0|Allemand (désabrégé)@
+de-g1|Allemand (abréviations de base)@
+de-g2|Allemand (abrégé - standard 1998)@
+de-1998|Allemand (abrégé - standard 1998)@
+de-2015|Allemand (abrégé - standard 2015)@
 en-ueb-g2|Anglais (Braille anglais unifié, 2ème degré)@
 en-us-g2|Anglais (USA, 2ème degré)@
 es|Espagnol (2ème degré)@
-fr-abrege|Français (abrégé)@
-fr-integral|Français (désabrégé)@
+fr-g1|Français (désabrégé)@
+fr-g2|Français (abrégé)@
 ha|Hausa (abrégé)@
 id|Indonésien (abrégé)@
 ja|Japoneais (désabrégé)@

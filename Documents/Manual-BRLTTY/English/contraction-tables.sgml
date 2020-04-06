@@ -1,15 +1,15 @@
 af|Afrikaans (contracted)@
 am|Amharic (uncontracted)@
-de-basis|German (uncontracted)@
-de-kurzschrift|German (contracted - 1998 standard)@
-de-kurzschrift-1998|German (contracted - 1998 standard)@
-de-kurzschrift-2015|German (contracted - 2015 standard)@
-de-vollschrift|German (basic contractions)@
+de-g0|German (uncontracted)@
+de-g1|German (basic contractions)@
+de-g2|German (contracted - 1998 standard)@
+de-1998|German (contracted - 1998 standard)@
+de-2015|German (contracted - 2015 standard)@
 en-ueb-g2|English (Unified English Braille, grade 2)@
 en-us-g2|English (US, grade 2)@
 es|Spanish (grade 2)@
-fr-abrege|French (contracted)@
-fr-integral|French (uncontracted)@
+fr-g1|French (uncontracted)@
+fr-g2|French (contracted)@
 ha|Hausa (contracted)@
 id|Indonesian (contracted)@
 ja|Japanese (uncontracted)@

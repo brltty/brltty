@@ -19,7 +19,7 @@
 # BRLTTY Contraction Table - German (contracted - 1998 standard)
 # Created by Mario Lang <mlang@delysid.org>.
 
-include de-vollschrift.ctb
+include de-g1.ctb
 
 class e e
 class g g
@@ -33,7 +33,7 @@ class lnr lnr
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
 
-# Ausnahmen für Vokalgruppen aus de-vollschrift.ctb
+# Ausnahmen für Vokalgruppen aus de-g1.ctb
 before e always arteri 356-2345-12456-24
 always barrier 12-356-1235-24-12456 shouldn't use the ie-contraction
 always bankier 12-235-13-24-12456 shouldn't use the ie-contraction
@@ -45,7 +45,7 @@ always propriet 12345-1234-1235-24-15-2345 proprietär shouldn't use the ie-cont
 endword serie 234-12456-24-15
 always spezies 234-1234-15-1356-24-123456 shouldn't use the ie-contraction
 
-include de-kurzschrift-wort.cti
+include de-wort.cti
 
 # Due to their low usage frequency in typical german text the letters
 # c, q, x and y are reused for the en-, ll-, ex/mm/nis- and el-contractions.

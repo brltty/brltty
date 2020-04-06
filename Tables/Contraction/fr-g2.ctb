@@ -29,7 +29,7 @@
 #	Service de production Braille, Institut Nazareth et Louis-Braille
 #	Longueuil (Québec)
 
-include fr-integral.ctb
+include fr-g1.ctb
 
 ###
 ### 1. Assemblages de lettres représentés par un seul symbole,

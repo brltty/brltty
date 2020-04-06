@@ -19,7 +19,7 @@
 # BRLTTY Contraction Table - German (basic contractions)
 # Created by Mario Lang <mlang@delysid.org>.
 
-include de-basis.ctb
+include de-g0.ctb
 
 class cst cst
 class s s

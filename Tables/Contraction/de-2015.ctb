@@ -19,7 +19,7 @@
 # BRLTTY Contraction Table - German (contracted - 2015 standard)
 # Created by Mario Lang <mlang@delysid.org>.
 
-include de-vollschrift.ctb
+include de-g1.ctb
 
 class e e
 class g g
@@ -34,7 +34,7 @@ class lnr lnr
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
 
-include de-kurzschrift-wort.cti
+include de-wort.cti
 before e always auslöse 16-234-123-246-234-15
 before e always ausreise 16-234-1235-146-234-15
 before hilmnrsu always ausnahme 16-234-1345-134-15
@@ -54,7 +54,7 @@ before g always aussagenklän 16-234-234-1245-14-13-123-345-1345
 
 before s always aus 16-234
 
-# Ausnahmen für Vokalgruppen aus de-vollschrift.ctb
+# Ausnahmen für Vokalgruppen aus de-g1.ctb
 before e always arteri 356-2345-12456-24
 always barrier 12-356-1235-24-12456 shouldn't use the ie-contraction
 always bankier 12-235-13-24-12456 shouldn't use the ie-contraction

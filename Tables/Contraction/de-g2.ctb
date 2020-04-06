@@ -18,5 +18,5 @@
 
 # BRLTTY Contraction Table - German (contracted)
 
-include de-kurzschrift-1998.ctb
+include de-1998.ctb
 

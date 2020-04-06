@@ -68,6 +68,15 @@ Note: this file is in reversed chronological order (bottom to top).
       Undefined characters now fall back to their text table representations.
       The en-ueb-g2 table has been updated.
       The zh-tw-ucb table has been removed.
+      Renamed French tables:
+         fr-integral -> fr-g1
+         fr-abrege -> fr-g2
+      Renamed German tables:
+         de-basis -> de-g0
+         de-vollschrift -> de-g1
+         de-kurzschrift -> de-g2
+         de-kurzschrift-1998 -> de-1998
+         de-kurzschrift-2015 -> de-2015
    Linux changes:
       The systemd and udev wrappers are now in /usr/lib/brltty/.
    Android changes:
