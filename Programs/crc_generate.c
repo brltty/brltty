@@ -16,9 +16,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-// This source has been designed for and may be used within external code.
-// It doesn't rely on our prologue header.
-//#include "prologue.h"
+#include "prologue.h"
 
 #include <string.h>
 
