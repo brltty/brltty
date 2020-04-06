@@ -278,6 +278,8 @@ addProgramOption p string.directory pythonDirectory "the directory where Python 
 addProgramOption t string.directory temporaryDirectory "the temporary directory to use" "${defaultTemporaryDirectory}"
 parseProgramArguments "${@}"
 
+[ -n "${archiveRoot}" ] || archiveRoot="${defaultArchiveRoot}"
+
 [ -n "${pythonDirectory}" ] && {
    [ -d "${pythonDirectory}" ] || semanticError "Python directory not found: ${pythonDirectory}"
    PATH="${pythonDirectory}:${pythonDirectory}/scripts:${PATH}"
