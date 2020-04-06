@@ -136,7 +136,7 @@ logMessage task "revision identifier: ${revisionIdentifier}"
 }
 
 [ -z "${cygwinRoot}" ] || {
-   if [ -d "${cygwinRoot}/cygdrive" ]
+   if [ -f "${cygwinRoot}/cygwin.ico" ]
    then
       export PATH="${PATH}:${cygwinRoot}/bin"
       export nodosfilewarning=1
