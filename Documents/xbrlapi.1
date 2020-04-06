@@ -14,7 +14,7 @@ It also simulates
 .B X
 keysyms from braille key presses (else brltty would simulate them using a qwerty
 keyboard). By default, it puts itself in the background, unless option
-.B -f
+.B -n
 is given.
 .SH OPTIONS
 Options are processed sequentially from left to right.
@@ -42,7 +42,7 @@ If not specified, the content of the
 .B DISPLAY
 environment variable is used.
 .TP
-\fB-f\fR (\fB--foreground\fR)
+\fB-n\fR (\fB--no-daemon\fR)
 Keep xbrlapi in the foreground.
 .TP
 \fB-q\fR (\fB--quiet\fR)
