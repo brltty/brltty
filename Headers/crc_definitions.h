@@ -27,6 +27,7 @@ extern "C" {
 
 typedef uint32_t crc_t;
 #define CRC_C UINT32_C
+#define PRIcrc PRIX32
 
 #ifndef UINT24_C
 #define UINT24_C UINT32_C

@@ -193,7 +193,8 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 
         if (actual != expected) {
           logBytes(LOG_WARNING,
-            "input packet checksum mismatch: Actual:%X Expected:%X",
+            "input packet checksum mismatch:"
+            " Actual:%"PRIcrc " Expected:%"PRIcrc,
             packet, length,
             actual, expected
           );

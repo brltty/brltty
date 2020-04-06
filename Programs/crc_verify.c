@@ -35,7 +35,7 @@ const uint8_t crcCheckSize = sizeof(crcCheckData);
 static void
 crcLogMismatch (const CRCGenerator *crc,const char *what, crc_t actual, crc_t expected) {
   logMessage(LOG_WARNING,
-    "CRC %s mismatch: %s: Actual:%X Expected:%X",
+    "CRC %s mismatch: %s: Actual:%"PRIcrc " Expected:%"PRIcrc,
     what, crc->algorithmName, actual, expected
   );
 }
