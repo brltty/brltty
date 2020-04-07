@@ -1964,6 +1964,7 @@ PARAM_WRITER(computerBrailleTable)
   return param_writeString(changeTextTable, data, size);
 }
 
+#ifdef ENABLE_CONTRACTED_BRAILLE
 /* BRLAPI_PARAM_LITERARY_BRAILLE_TABLE */
 PARAM_READER(literaryBrailleTable)
 {
@@ -1975,6 +1976,7 @@ PARAM_WRITER(literaryBrailleTable)
 {
   return param_writeString(changeContractionTable, data, size);
 }
+#endif
 
 /* BRLAPI_PARAM_MESSAGE_LOCALE */
 PARAM_READER(messageLocale)
@@ -2173,11 +2175,13 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .write = param_computerBrailleTable_write,
   },
 
+#ifdef ENABLE_CONTRACTED_BRAILLE
   [BRLAPI_PARAM_LITERARY_BRAILLE_TABLE] = {
     .global = 1,
     .read = param_literaryBrailleTable_read,
     .write = param_literaryBrailleTable_write,
   },
+#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   [BRLAPI_PARAM_MESSAGE_LOCALE] = {
     .global = 1,
