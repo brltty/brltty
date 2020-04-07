@@ -1976,7 +1976,7 @@ PARAM_WRITER(literaryBrailleTable)
 {
   return param_writeString(changeContractionTable, data, size);
 }
-#endif
+#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 /* BRLAPI_PARAM_MESSAGE_LOCALE */
 PARAM_READER(messageLocale)
