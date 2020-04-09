@@ -17,29 +17,46 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/prologue.sh"
+. "$(dirname "${0}")/prologue.sh"
 
-[ -z "${LD_LIBRARY_PATH}" ] || LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
+[ "${#}" -eq 0 ] && syntaxError "command not specified"
+commandName="${1}"
+shift 1
+
+commandPath="$(type -P "${commandName}")"
+[ -n "${commandPath}" ] || semanticError "command not found: ${commandName}"
+set -- "${commandPath}" "${@}"
+
+[ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
 LD_LIBRARY_PATH="${programDirectory}/Programs${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH
 
 vgFile=""
-vgDirectory="${BRLTTY_VALGRIND}"
+vgDirectory="${BRLTTY_VALGRIND_DIRECTORY}"
 
-[ -z "${vgDirectory}" ] || {
-  [ ! -d "${vgDirectory}" ] || {
-    [ ! -w "${vgDirectory}" ] || {
-      vgFile="${vgDirectory}/$(basename "${1}")-$(date +%Y%m%d-%H%M%S).vg"
-    }
-  }
+[ -n "${vgDirectory}" ] && {
+   [ -e "${vgDirectory}" ] || semanticError "directory not found: ${vgDirectory}"
+   [ -d "${vgDirectory}" ] || semanticError "not a directory: ${vgDirectory}"
+   [ -w "${vgDirectory}" ] || semanticError "directory not writable: ${vgDirectory}"
+   vgFile="${vgDirectory}/$(basename "${1}")-$(date +%Y%m%d-%H%M%S).vg"
+
+   set -- valgrind \
+       --log-file="${vgFile}" \
+       --leak-check=full \
+       --show-reachable=yes \
+       "${@}"
 }
 
-if [ -n "${vgFile}" ]
-then
-  set -- valgrind --log-file="${vgFile}" --leak-check=full --show-reachable=yes "${@}"
-else
-  set -- exec "${@}"
-fi
+asUser="${BRLTTY_USER_NAME}"
+[ -n "${asUser}" ] && {
+   id -u -- "${asUser}" >/dev/null 2>&1 || semanticError "unknown user: ${asUser}"
+   set -- capsh \
+      --caps=cap_sys_admin,cap_sys_tty_config,cap_setuid,cap_setgid=ep \
+      --user="${asUser}" \
+      --caps=cap_setuid,cap_setgid-ep \
+      -- -c "${*}"
+}
 
-"${@}"
+[ "$(id -u)" -eq 0 ] || set -- sudo -E -- "${@}"
+exec "${@}"
 exit "${?}"
