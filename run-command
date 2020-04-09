@@ -19,21 +19,38 @@
 
 . "$(dirname "${0}")/prologue.sh"
 
-[ "${#}" -eq 0 ] && syntaxError "command not specified"
+[ "${#}" -eq 0 ] && {
+cat <<END_OF_USAGE
+Usage: ${programName} command [argument ...]
+Execute the specified command with the specified arguments. If not root
+then execute the command as root via sudo.
+
+Environment Variables:
+  <COMMAND>_VALGRIND_DIRECTORY=path
+    If set then write a valgrind memory usage log to a file named
+    <command>-yyyymmdd-HHMMSS.vg in the specified directory.
+  <COMMAND>_USER_NAME=user
+    If set then execute the command as the specified user. The
+    user's primary group and supplementary groups will also be set.
+END_OF_USAGE
+exit 0
+}
+
 commandName="${1}"
 shift 1
 
-commandPath="$(type -P "${commandName}")"
+readonly commandPath="$(type -P "${commandName}")"
 [ -n "${commandPath}" ] || semanticError "command not found: ${commandName}"
+readonly commandName="${commandPath##*/}"
 set -- "${commandPath}" "${@}"
-commandName="${commandPath##*/}"
+
+readonly variablePrefix="${commandName^^?}"
+getVariable "${variablePrefix}_VALGRIND_DIRECTORY" vgDirectory
+getVariable "${variablePrefix}_USER_NAME" asUser
 
 [ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
 LD_LIBRARY_PATH="${programDirectory}/Programs${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH
-
-vgFile=""
-vgDirectory="${BRLTTY_VALGRIND_DIRECTORY}"
 
 [ -n "${vgDirectory}" ] && {
    [ -e "${vgDirectory}" ] || semanticError "directory not found: ${vgDirectory}"
@@ -50,14 +67,13 @@ vgDirectory="${BRLTTY_VALGRIND_DIRECTORY}"
        "${@}"
 }
 
-asUser="${BRLTTY_USER_NAME}"
 [ -n "${asUser}" ] && {
    id -u -- "${asUser}" >/dev/null 2>&1 || semanticError "unknown user: ${asUser}"
    set -- capsh \
-      --caps=cap_sys_admin,cap_sys_tty_config,cap_setuid,cap_setgid=ep \
-      --user="${asUser}" \
-      --caps=cap_setuid,cap_setgid-ep \
-      -- -c "${*}"
+       --caps=cap_sys_admin,cap_sys_tty_config,cap_setuid,cap_setgid=ep \
+       --user="${asUser}" \
+       --caps=cap_setuid,cap_setgid-ep \
+       -- -c "${*}"
 }
 
 [ "$(id -u)" -eq 0 ] || set -- sudo -E -- "${@}"
