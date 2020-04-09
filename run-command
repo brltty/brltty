@@ -26,6 +26,7 @@ shift 1
 commandPath="$(type -P "${commandName}")"
 [ -n "${commandPath}" ] || semanticError "command not found: ${commandName}"
 set -- "${commandPath}" "${@}"
+commandName="${commandPath##*/}"
 
 [ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
 LD_LIBRARY_PATH="${programDirectory}/Programs${LD_LIBRARY_PATH}"
@@ -38,7 +39,9 @@ vgDirectory="${BRLTTY_VALGRIND_DIRECTORY}"
    [ -e "${vgDirectory}" ] || semanticError "directory not found: ${vgDirectory}"
    [ -d "${vgDirectory}" ] || semanticError "not a directory: ${vgDirectory}"
    [ -w "${vgDirectory}" ] || semanticError "directory not writable: ${vgDirectory}"
-   vgFile="${vgDirectory}/$(basename "${1}")-$(date +%Y%m%d-%H%M%S).vg"
+
+   vgFile="${vgDirectory}/${commandName}-$(date +%Y%m%d-%H%M%S).vg"
+   programMessage "valgrind log: ${vgFile}"
 
    set -- valgrind \
        --log-file="${vgFile}" \
