@@ -36,6 +36,9 @@ RefuseManualStop=true
 
 [Service]
 
+ExecStartPre=-/sbin/modprobe pcspkr
+ExecStartPre=-/sbin/modprobe uinput
+
 Environment="BRLTTY_SYSTEMD_INSTANCE=%I"
 ExecStart=/usr/lib/brltty/systemd-wrapper
 
