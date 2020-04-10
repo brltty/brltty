@@ -58,11 +58,14 @@ OOMScoreAdjust=-900
 ExecStartPre=-/sbin/modprobe pcspkr
 AmbientCapabilities=CAP_SYS_TTY_CONFIG
 
+# for virtual keyboard creation
+ExecStartPre=-/sbin/modprobe uinput
+
 # for inserting input characters typed on a braille device (TIOCSTI)
 AmbientCapabilities=CAP_SYS_ADMIN
 
-# for virtual keyboard creation
-ExecStartPre=-/sbin/modprobe uinput
+# for creating missing device files
+AmbientCapabilities=CAP_MKNOD
 
 #######################################################
 # keep these synchronized with sysusers.d/brltty.conf #
