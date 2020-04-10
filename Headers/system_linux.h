@@ -24,8 +24,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern int installKernelModule (const char *name, unsigned char *status);
-extern void installSpeakerModule (void);
-extern void installUinputModule (void);
+extern int installSpeakerModule (void);
+extern int installUinputModule (void);
 
 extern int openCharacterDevice (const char *name, int flags, int major, int minor);
 

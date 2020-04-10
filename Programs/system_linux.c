@@ -757,19 +757,21 @@ installKernelModule (const char *name, unsigned char *status) {
   return 1;
 }
 
-void
+int
 installSpeakerModule (void) {
   static unsigned char status = 0;
-  installKernelModule("pcspkr", &status);
+  return installKernelModule("pcspkr", &status);
 }
 
-void
+int
 installUinputModule (void) {
   static unsigned char status = 0;
   int wait = !status;
+  int installed = installKernelModule("uinput", &status);
 
-  if (!installKernelModule("uinput", &status)) wait = 0;
+  if (!installed) wait = 0;
   if (wait) asyncWait(500);
+  return installed;
 }
 
 static int
