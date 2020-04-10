@@ -68,6 +68,8 @@ ExecStartPre=-/sbin/modprobe uinput
 # keep these synchronized with sysusers.d/brltty.conf #
 #######################################################
 
+User=brltty
+
 # for reading screen content (/dev/vcs*)
 SupplementaryGroups=tty
 
