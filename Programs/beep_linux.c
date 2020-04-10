@@ -38,13 +38,6 @@ getTicksPerWave (BeepFrequency frequency) {
   return frequency? (TICKS_PER_SECOND / frequency): 0;
 }
 
-static void
-enableBeeps (void) {
-  static unsigned char status = 0;
-
-  installKernelModule("pcspkr", &status);
-}
-
 int
 canBeep (void) {
   if (beepDevice == INVALID_FILE_DESCRIPTOR) {
@@ -57,7 +50,7 @@ canBeep (void) {
     }
 
     beepDevice = device;
-    enableBeeps();
+    installSpeakerModule();
   }
 
   return 1;

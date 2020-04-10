@@ -757,6 +757,21 @@ installKernelModule (const char *name, unsigned char *status) {
   return 1;
 }
 
+void
+installSpeakerModule (void) {
+  static unsigned char status = 0;
+  installKernelModule("pcspkr", &status);
+}
+
+void
+installUinputModule (void) {
+  static unsigned char status = 0;
+  int wait = !status;
+
+  if (!installKernelModule("uinput", &status)) wait = 0;
+  if (wait) asyncWait(500);
+}
+
 static int
 openDevice (const char *path, mode_t flags, int allowModeSubset) {
   int descriptor;
@@ -852,14 +867,7 @@ newUinputObject (const char *name) {
 
   if ((uinput = malloc(sizeof(*uinput)))) {
     memset(uinput, 0, sizeof(*uinput));
-
-    {
-      static unsigned char status = 0;
-      int wait = !status;
-
-      if (!installKernelModule("uinput", &status)) wait = 0;
-      if (wait) asyncWait(500);
-    }
+    installUinputModule();
 
     const char *device;
     {
@@ -1203,4 +1211,6 @@ destroyInputEventMonitor (InputEventMonitor *monitor) {
 
 void
 initializeSystemObject (void) {
+  installSpeakerModule();
+  installUinputModule();
 }
