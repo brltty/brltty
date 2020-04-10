@@ -16,11 +16,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-#SYSTEMD_UNITS_DIRECTORY = $(INSTALL_ROOT)$(sysconfdir)/systemd/system
 SYSTEMD_UNITS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/systemd/system
 SYSTEMD_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/$(PACKAGE_TARNAME)
+SYSTEMD_USERS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/sysusers.d
+SYSTEMD_USERS_FILE = $(SYSTEMD_USERS_DIRECTORY)/$(PACKAGE_TARNAME).conf
 
-install: install-units install-scripts
+install: install-units install-scripts install-users
 
 install-units-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_UNITS_DIRECTORY)
@@ -36,10 +37,17 @@ install-scripts-directory:
 install-scripts: install-scripts-directory
 	$(INSTALL_SCRIPT) $(SRC_DIR)/systemd-wrapper $(SYSTEMD_SCRIPTS_DIRECTORY)
 
+install-users-directory:
+	$(INSTALL_DIRECTORY) $(SYSTEMD_USERS_DIRECTORY)
+
+install-users: install-users-directory
+	$(INSTALL_DATA) $(SRC_DIR)/sysusers $(SYSTEMD_USERS_FILE)
+
 uninstall:
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME).*
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME)@.*
-	-rm -f $(SYSTEMD_SCRIPTS_DIRECTORY)/$(PACKAGE_TARNAME)-systemd-*
+	-rm -f $(SYSTEMD_SCRIPTS_DIRECTORY)/systemd-*
+	-rm -f $(SYSTEMD_USERS_FILE)
 
 reload:
 	systemctl daemon-reload

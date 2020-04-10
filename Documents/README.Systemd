@@ -6,22 +6,30 @@ Using Systemd Service Management
 
 .. |configuration directory| replace:: /usr/lib
 .. |unit directory| replace:: |configuration directory|/systemd/system
-.. |wrapper directory| replace:: /usr/libexec
+.. |scripts directory| replace:: |configuration directory|/brltty
+.. |users directory| replace:: |configuration directory|/sysusers.d
 .. |build subdirectory| replace:: Autostart/Systemd
 .. |default configuration file| replace:: ``/etc/brltty.conf``
 
 Initial Setup
 =============
 
-A set of Systemd service and path units needs to be installed
-into the |unit directory| directory,
-and a wrapper script needs to be installed
-into the |wrapper directory| directory.
+The following steps need to be performed:
+
+* Systemd service and path units need to be installed
+  into the |unit directory| directory.
+
+* A wrapper script needs to be installed
+  into the |scripts directory| directory.
+
+* A file defining the non-root user that BRLTTY is to run as,
+  including the supplementary groups that it needs access to,
+  needs to be installed into the |users directory| directory.
+
 A make file has been provided in order to make this easy to do.
 It can be found within the |build subdirectory| subdirectory
 of BRLTTY's build tree.
-To install all of these files, change to this subdirectory
-and run the command::
+To install all of these files, change to this directory and run the command::
 
   make install
 
