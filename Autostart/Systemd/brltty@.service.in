@@ -36,9 +36,6 @@ RefuseManualStop=true
 
 [Service]
 
-ExecStartPre=-/sbin/modprobe pcspkr
-ExecStartPre=-/sbin/modprobe uinput
-
 Environment="BRLTTY_SYSTEMD_INSTANCE=%I"
 ExecStart=/usr/lib/brltty/systemd-wrapper
 
@@ -56,6 +53,16 @@ RestartSec=30
 
 Nice=-10
 OOMScoreAdjust=-900
+
+# for alert tunes played via the beeper (built-in PC speaker)
+ExecStartPre=-/sbin/modprobe pcspkr
+AmbientCapabilities=CAP_SYS_TTY_CONFIG
+
+# for inserting input characters typed on a braille device (TIOCSTI)
+AmbientCapabilities=CAP_SYS_ADMIN
+
+# for virtual keyboard creation
+ExecStartPre=-/sbin/modprobe uinput
 
 #######################################################
 # keep these synchronized with sysusers.d/brltty.conf #
