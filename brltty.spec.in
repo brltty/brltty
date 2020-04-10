@@ -35,7 +35,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _datadir /usr/share
 %define _sysconfdir /etc
 %define _pkglibdir %{_libdir}/%{name}
-%define _systemdunitdir %{_libdir}/systemd/system
+%define _systemdunitsdir %{_libdir}/systemd/system
+%define _systemdusersdir %{_libdir}/sysusers.d
 %define _udevlibdir %{_libdir}/udev
 
 Requires: dbus-libs
@@ -636,7 +637,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_includedir}/brltty
 
 %files -n brltty-systemd
-%{_systemdunitdir}/*
+%{_systemdunitsdir}/*
+%{_systemdusersdir}/*
 %{_pkglibdir}/systemd-*
 
 %files -n brltty-udev
