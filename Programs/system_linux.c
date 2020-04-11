@@ -1391,7 +1391,7 @@ setSupplementaryGroups (void) {
 }
 #endif /* HAVE_GRP_H */
 
-#ifdef HAVE_SYS_CAPABILITY_H
+#if defined(HAVE_LIBCAP) && defined(HAVE_SYS_CAPABILITY_H)
 #include <sys/capability.h>
 
 typedef struct {
@@ -1475,11 +1475,11 @@ setRequiredCapabilities (void) {
   }
 }
 
-#else /* HAVE_SYS_CAPABILITY_H */
+#else /* defined(HAVE_LIBCAP) && defined(HAVE_SYS_CAPABILITY_H) */
 static void
 setRequiredCapabilities (void) {
 }
-#endif /* HAVE_SYS_CAPABILITY_H */
+#endif /* defined(HAVE_LIBCAP) && defined(HAVE_SYS_CAPABILITY_H) */
 
 void
 initializeSystemObject (void) {

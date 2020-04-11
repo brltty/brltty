@@ -148,6 +148,9 @@ extern "C" {
 #undef HAVE_SELECT
 #endif /* __MINGW32__ */
 
+/* Define this if the cap(abilities) library is available. */
+#undef HAVE_LIBCAP
+
 /* Define this if the header file sys/capability.h exists. */
 #undef HAVE_SYS_CAPABILITY_H
 
