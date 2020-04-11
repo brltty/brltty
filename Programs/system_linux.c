@@ -28,6 +28,7 @@
 #include <linux/major.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "file.h"
 #include "device.h"
 #include "async_wait.h"
@@ -1232,6 +1233,7 @@ typedef struct {
 
 static SupplementaryGroupEntry supplementaryGroupTable[] = {
   { .reason = "for reading screen content",
+    .name = "tty",
     .path = "/dev/vcs1",
   },
 
@@ -1240,6 +1242,7 @@ static SupplementaryGroupEntry supplementaryGroupTable[] = {
   },
 
   { .reason = "for serial I/O",
+    .name = "dialout",
     .path = "/dev/ttyS0",
   },
 
@@ -1248,6 +1251,7 @@ static SupplementaryGroupEntry supplementaryGroupTable[] = {
   },
 
   { .reason = "for sound via the ALSA framework",
+    .name = "audio",
     .path = "/dev/snd/seq",
   },
 
@@ -1256,6 +1260,7 @@ static SupplementaryGroupEntry supplementaryGroupTable[] = {
   },
 
   { .reason = "for keyboard detection",
+    .name = "input",
     .path = "/dev/input/mice",
   },
 
@@ -1263,6 +1268,37 @@ static SupplementaryGroupEntry supplementaryGroupTable[] = {
     .path = "/dev/uinput",
   },
 };
+
+typedef struct {
+  const char *action;
+  const gid_t *groups;
+  size_t count;
+} SupplementaryGroupsLogData;
+
+static size_t
+supplementaryGroupsLogFormatter (char *buffer, size_t size, const void *data) {
+  const SupplementaryGroupsLogData *sgl = data;
+
+  size_t length;
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%s:", sgl->action);
+
+  const gid_t *gid = sgl->groups;
+  const gid_t *end = gid + sgl->count;
+
+  while (gid < end) {
+    STR_PRINTF(" %d", *gid);
+
+    const struct group *grp = getgrgid(*gid);
+    if (grp) STR_PRINTF("(%s)", grp->gr_name);
+
+    gid += 1;
+  }
+
+  length = STR_LENGTH;
+  STR_END;
+  return length;
+}
 
 static int
 sortGroupIdentifiers (const void *element1,const void *element2) {
@@ -1277,39 +1313,45 @@ sortGroupIdentifiers (const void *element1,const void *element2) {
 static void
 setSupplementaryGroups (void) {
   size_t count = ARRAY_COUNT(supplementaryGroupTable);
-  gid_t list[count];
+  gid_t list[count * 2];
   unsigned int size = 0;
 
-  for (unsigned index=0; index<count; index+=1) {
-    const SupplementaryGroupEntry *spg = &supplementaryGroupTable[index];
+  {
+    const SupplementaryGroupEntry *spg = supplementaryGroupTable;
+    const SupplementaryGroupEntry *end = spg + count;
 
-    {
-      const char *name = spg->name;
+    while (spg < end) {
+      {
+        const char *name = spg->name;
 
-      if (name) {
-        const struct group *grp = getgrnam(name);
+        if (name) {
+          const struct group *grp = getgrnam(name);
 
-        if (grp) {
-          list[size++] = grp->gr_gid;
-          continue;
+          if (grp) {
+            list[size++] = grp->gr_gid;
+          } else {
+            logMessage(LOG_WARNING, "unknown user group: %s", name);
+          }
         }
       }
-    }
 
-    {
-      const char *path = spg->path;
+      {
+        const char *path = spg->path;
 
-      if (path) {
-        struct stat s;
+        if (path) {
+          struct stat s;
 
-        if (stat(path, &s) != -1) {
-          list[size++] = s.st_gid;
-          continue;
+          if (stat(path, &s) != -1) {
+            list[size++] = s.st_gid;
+          } else {
+            logMessage(LOG_WARNING, "path access error: %s: %s", path, strerror(errno));
+          }
         }
       }
+
+      spg += 1;
     }
   }
-  endgrent();
 
   if (size > 1) {
     qsort(list, size, sizeof(list[0]), sortGroupIdentifiers);
@@ -1326,9 +1368,21 @@ setSupplementaryGroups (void) {
     size = ++to - list;
   }
 
+  {
+    SupplementaryGroupsLogData sgl = {
+      .action = "setting supplementary groups",
+      .groups = list,
+      .count = size
+    };
+
+    logData(LOG_DEBUG, supplementaryGroupsLogFormatter, &sgl);
+  }
+
   if (setgroups(size, list) == -1) {
     logSystemError("setgroups");
   }
+
+  endgrent();
 }
 
 #else /* HAVE_GRP_H */
