@@ -1,0 +1,59 @@
+~~~~~~~~~~~~~~~
+BRLTTY on Linux
+~~~~~~~~~~~~~~~
+
+.. include:: prologue.rst
+
+Privileged Operations
+=====================
+
+Required Privileges
+-------------------
+
+Kernel Modules
+~~~~~~~~~~~~~~
+
+**pcspkr**
+  * For playing alert tunes via the built-in PC speaker.
+
+**uinput**
+  * For creating virtual keyboards via ``/dev/uinput``.
+
+Group Membership
+~~~~~~~~~~~~~~~~
+
+**audio**
+  For playing sound via the ALSA framework.
+
+**dialout**
+  For serial I/O via the ``/dev/ttyS<n>`` devices.
+
+**input**
+  For intercepting keyboard key events via the devices in ``/dev/input/``.
+  This capability is used to support keyboard key tables.
+
+**pulse-access**
+  For playing sound via the Pulse Audio daemon.
+
+**root**
+  * For USB I/O via the devices in ``/dev/bus/usb/``.
+
+  * For creating virtual keyboards via ``/dev/uinput``.
+
+**tty**
+  * For reading screen content via the ``/dev/vcs`` devices.
+
+  * For virtual console monitoring and control via the ``/dev/tty<n>`` devices.
+
+Process Capabilities
+~~~~~~~~~~~~~~~~~~~~
+
+**CAP_MKNOD**
+  For creating needed but missing special device files.
+
+**CAP_SYS_ADMIN**
+  For using ``TIOCSTI`` to insert input characters typed on a braille device.
+
+**CAP_SYS_TTY_CONFIG**
+  For using ``KDMKTONE`` and ``KIOCSOUND`` to play alert tunes via the built-in PC speaker.
+

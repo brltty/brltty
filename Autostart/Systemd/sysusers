@@ -25,7 +25,7 @@ u brltty - "Braille Device Daemon"
 # for reading screen content (/dev/vcs*)
 m brltty tty
 
-# for virtual console access (/dev/tty<n>)
+# for virtual console monitoring and control (/dev/tty<n>)
 m brltty tty
 
 # for serial I/O (/dev/ttyS<n>)
@@ -34,15 +34,15 @@ m brltty dialout
 # for USB I/o (/dev/bus/usb/*/*)
 m brltty root
 
-# for sound via the ALSA framework
+# for playing sound via the ALSA framework
 m brltty audio
 
-# for sound via the Pulse Audio daemon
+# for playing sound via the Pulse Audio daemon
 m brltty pulse-access
 
-# for keyboard detection (/dev/input/*)
+# for intercepting keyboard key events (/dev/input/*)
 m brltty input
 
-# for virtual keyboard creation (/dev/uinput)
+# for creating virtual keyboards (/dev/uinput)
 m brltty root
 

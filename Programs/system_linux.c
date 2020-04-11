@@ -1237,7 +1237,7 @@ static SupplementaryGroupEntry supplementaryGroupTable[] = {
     .path = "/dev/vcs1",
   },
 
-  { .reason = "for virtual console access",
+  { .reason = "for virtual console monitoring and control",
     .path = "/dev/tty1",
   },
 
@@ -1250,21 +1250,21 @@ static SupplementaryGroupEntry supplementaryGroupTable[] = {
     .path = "/dev/bus/usb",
   },
 
-  { .reason = "for sound via the ALSA framework",
+  { .reason = "for playing sound via the ALSA framework",
     .name = "audio",
     .path = "/dev/snd/seq",
   },
 
-  { .reason = "for sound via the Pulse Audio daemon",
+  { .reason = "for playing sound via the Pulse Audio daemon",
     .name = "pulse-access",
   },
 
-  { .reason = "for keyboard detection",
+  { .reason = "for intercepting keyboard key events",
     .name = "input",
     .path = "/dev/input/mice",
   },
 
-  { .reason = "for virtual keyboard creation",
+  { .reason = "for creating virtual keyboards",
     .path = "/dev/uinput",
   },
 };
@@ -1404,11 +1404,11 @@ static const RequiredCapabilityEntry requiredCapabilityTable[] = {
     .value = CAP_SYS_ADMIN,
   },
 
-  { .reason = "for alert tunes played via the beeper (built-in PC speaker)",
+  { .reason = "for playing alert tunes via the built-in PC speaker",
     .value = CAP_SYS_TTY_CONFIG,
   },
 
-  { .reason = "for creating missing device files",
+  { .reason = "for creating needed but missing special device files",
     .value = CAP_MKNOD,
   },
 };

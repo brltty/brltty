@@ -7,6 +7,7 @@
 .. |README.Devices| replace:: `Device Identifiers`_
 .. |README.DOS| replace:: `BRLTTY on DOS`_
 .. |README.KeyTables| replace:: `Key Tables`_
+.. |README.Linux| replace:: `BRLTTY on Linux`_
 .. |README.OpenBSD| replace:: `BRLTTY on OpenBSD`_
 .. |README.Polling| replace:: `Polling`_
 .. |README.Profiles| replace:: `Profiles`_

@@ -7,6 +7,7 @@
 .. _Device Identifiers: Devices.html
 .. _BRLTTY on DOS: DOS.html
 .. _Key Tables: KeyTables.html
+.. _BRLTTY on Linux: Linux.html
 .. _BRLTTY on OpenBSD: OpenBSD.html
 .. _Polling: Polling.html
 .. _Profiles: Profiles.html

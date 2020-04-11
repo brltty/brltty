@@ -54,17 +54,17 @@ RestartSec=30
 Nice=-10
 OOMScoreAdjust=-900
 
-# for alert tunes played via the beeper (built-in PC speaker)
+# for playing alert tunes via the built-in PC speaker (KDMKTONE, KIOCSOUND)
 ExecStartPre=-/sbin/modprobe pcspkr
 AmbientCapabilities=CAP_SYS_TTY_CONFIG
 
-# for virtual keyboard creation
+# for creating virtual keyboards
 ExecStartPre=-/sbin/modprobe uinput
 
 # for inserting input characters typed on a braille device (TIOCSTI)
 AmbientCapabilities=CAP_SYS_ADMIN
 
-# for creating missing device files
+# for creating needed but missing special device files
 AmbientCapabilities=CAP_MKNOD
 
 #######################################################
@@ -76,7 +76,7 @@ User=brltty
 # for reading screen content (/dev/vcs*)
 SupplementaryGroups=tty
 
-# for virtual console access (/dev/tty<n>)
+# for virtual console monitoring and control (/dev/tty<n>)
 SupplementaryGroups=tty
 
 # for serial I/O (/dev/ttyS<n>)
@@ -85,15 +85,15 @@ SupplementaryGroups=dialout
 # for USB I/o (/dev/bus/usb/*/*)
 SupplementaryGroups=root
 
-# for sound via the ALSA framework
+# for playing sound via the ALSA framework
 SupplementaryGroups=audio
 
-# for sound via the Pulse Audio daemon
+# for playing sound via the Pulse Audio daemon
 SupplementaryGroups=pulse-access
 
-# for keyboard detection (/dev/input/*)
+# for intercepting keyboard key events (/dev/input/*)
 SupplementaryGroups=input
 
-# for virtual keyboard creation (/dev/uinput)
+# for creating virtual keyboards (/dev/uinput)
 SupplementaryGroups=root
 
