@@ -138,15 +138,21 @@ extern "C" {
 /* Define this if the header file sys/poll.h exists. */
 #undef HAVE_SYS_POLL_H
 
+/* Define this if the function poll exists. */
+#undef HAVE_POLL
+
 /* Define this if the header file sys/select.h exists. */
 #undef HAVE_SYS_SELECT_H
 
 /* Define this if the function select exists. */
 #undef HAVE_SELECT
-
-/* Define this if the function poll exists. */
-#undef HAVE_POLL
 #endif /* __MINGW32__ */
+
+/* Define this if the header file sys/capability.h exists. */
+#undef HAVE_SYS_CAPABILITY_H
+
+/* Define this if the header file sys/prctl.h exists. */
+#undef HAVE_SYS_PRCTL_H
 
 /* Define this if the header file signal.h exists. */
 #undef HAVE_SIGNAL_H

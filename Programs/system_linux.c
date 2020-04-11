@@ -1211,8 +1211,227 @@ destroyInputEventMonitor (InputEventMonitor *monitor) {
   free(monitor);
 }
 
-void
-initializeSystemObject (void) {
+#ifdef HAVE_SYS_PRCTL_H
+#include <sys/prctl.h>
+#endif /* HAVE_SYS_PRCTL_H */
+
+static void
+installKernelModules (void) {
   installSpeakerModule();
   installUinputModule();
+}
+
+#ifdef HAVE_GRP_H
+#include <grp.h>
+
+typedef struct {
+  const char *reason;
+  const char *name;
+  const char *path;
+} SupplementaryGroupEntry;
+
+static SupplementaryGroupEntry supplementaryGroupTable[] = {
+  { .reason = "for reading screen content",
+    .path = "/dev/vcs1",
+  },
+
+  { .reason = "for virtual console access",
+    .path = "/dev/tty1",
+  },
+
+  { .reason = "for serial I/O",
+    .path = "/dev/ttyS0",
+  },
+
+  { .reason = "for USB I/O",
+    .path = "/dev/bus/usb",
+  },
+
+  { .reason = "for sound via the ALSA framework",
+    .path = "/dev/snd/seq",
+  },
+
+  { .reason = "for sound via the Pulse Audio daemon",
+    .name = "pulse-access",
+  },
+
+  { .reason = "for keyboard detection",
+    .path = "/dev/input/mice",
+  },
+
+  { .reason = "for virtual keyboard creation",
+    .path = "/dev/uinput",
+  },
+};
+
+static int
+sortGroupIdentifiers (const void *element1,const void *element2) {
+  const gid_t *identifier1 = element1;
+  const gid_t *identifier2 = element2;
+
+  if (*identifier1 < *identifier2) return -1;
+  if (*identifier1 > *identifier2) return 1;
+  return 0;
+}
+
+static void
+setSupplementaryGroups (void) {
+  size_t count = ARRAY_COUNT(supplementaryGroupTable);
+  gid_t list[count];
+  unsigned int size = 0;
+
+  for (unsigned index=0; index<count; index+=1) {
+    const SupplementaryGroupEntry *spg = &supplementaryGroupTable[index];
+
+    {
+      const char *name = spg->name;
+
+      if (name) {
+        const struct group *grp = getgrnam(name);
+
+        if (grp) {
+          list[size++] = grp->gr_gid;
+          continue;
+        }
+      }
+    }
+
+    {
+      const char *path = spg->path;
+
+      if (path) {
+        struct stat s;
+
+        if (stat(path, &s) != -1) {
+          list[size++] = s.st_gid;
+          continue;
+        }
+      }
+    }
+  }
+  endgrent();
+
+  if (size > 1) {
+    qsort(list, size, sizeof(list[0]), sortGroupIdentifiers);
+
+    gid_t *to = list;
+    const gid_t *from = to + 1;
+    const gid_t *end = to + size;
+
+    while (from < end) {
+      if (*from != *to) *++to = *from;
+      from += 1;
+    }
+
+    size = ++to - list;
+  }
+
+  if (setgroups(size, list) == -1) {
+    logSystemError("setgroups");
+  }
+}
+
+#else /* HAVE_GRP_H */
+static void
+setSupplementaryGroups (void) {
+}
+#endif /* HAVE_GRP_H */
+
+#ifdef HAVE_SYS_CAPABILITY_H
+#include <sys/capability.h>
+
+typedef struct {
+  const char *reason;
+  cap_value_t value;
+} RequiredCapabilityEntry;
+
+static const RequiredCapabilityEntry requiredCapabilityTable[] = {
+  { .reason = "for inserting input characters typed on a braille device",
+    .value = CAP_SYS_ADMIN,
+  },
+
+  { .reason = "for alert tunes played via the beeper (built-in PC speaker)",
+    .value = CAP_SYS_TTY_CONFIG,
+  },
+
+  { .reason = "for creating missing device files",
+    .value = CAP_MKNOD,
+  },
+};
+
+static void
+setAmbientCapabilities (void) {
+  if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) != -1) {
+    const RequiredCapabilityEntry *rqc = requiredCapabilityTable;
+    const RequiredCapabilityEntry *end = rqc + ARRAY_COUNT(requiredCapabilityTable);
+
+    while (rqc < end) {
+      if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, rqc->value, 0, 0) == -1) {
+        logSystemError("PR_CAP_AMBIENT_RAISE");
+        break;
+      }
+
+      rqc += 1;
+    }
+  } else {
+    logSystemError("PR_CAP_AMBIENT_CLEAR_ALL");
+  }
+}
+
+static int
+addRequiredCapability (cap_t caps, const RequiredCapabilityEntry *rqc) {
+  static const cap_flag_t flags[] = {CAP_PERMITTED, CAP_EFFECTIVE, CAP_INHERITABLE};
+  const cap_flag_t *flag = flags;
+  const cap_flag_t *end = flags + ARRAY_COUNT(flags);;
+
+  while (flag < end) {
+    if (cap_set_flag(caps, *flag, 1, &rqc->value, CAP_SET) == -1) {
+      logSystemError("cap_set_flag");
+      return 0;
+    }
+
+    flag += 1;
+  }
+
+  return 1;
+}
+
+static void
+setRequiredCapabilities (void) {
+  cap_t caps = cap_init();
+
+  if (caps) {
+    const RequiredCapabilityEntry *rqc = requiredCapabilityTable;
+    const RequiredCapabilityEntry *end = rqc + ARRAY_COUNT(requiredCapabilityTable);
+
+    while (rqc < end) {
+      if (!addRequiredCapability(caps, rqc)) break;
+      rqc += 1;
+    }
+
+    if (cap_set_proc(caps) != -1) {
+      setAmbientCapabilities();
+    } else {
+      logSystemError("cap_set_proc");
+    }
+
+    cap_free(caps);
+  } else {
+    logMallocError();
+  }
+}
+
+#else /* HAVE_SYS_CAPABILITY_H */
+static void
+setRequiredCapabilities (void) {
+}
+#endif /* HAVE_SYS_CAPABILITY_H */
+
+void
+initializeSystemObject (void) {
+  if (!geteuid()) {
+    installKernelModules();
+    setSupplementaryGroups();
+    setRequiredCapabilities();
+  }
 }

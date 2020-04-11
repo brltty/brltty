@@ -848,6 +848,8 @@ AC_CHECK_HEADERS([sys/poll.h sys/select.h sys/wait.h])
 AC_CHECK_FUNCS([select])
 AC_CHECK_FUNCS([poll])
 
+AC_CHECK_HEADERS([sys/capability.h sys/prctl.h])
+
 AC_CHECK_HEADERS([signal.h sys/signalfd.h])
 AC_CHECK_FUNCS([sigaction])
 
@@ -1117,6 +1119,7 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
       ;;
    linux*)
       system_package="linux"
+      AC_HAVE_LIBRARY([cap])
       ;;
    mingw*)
       system_package="windows"
