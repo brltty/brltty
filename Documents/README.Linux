@@ -55,12 +55,12 @@ can make things a little easier.
 They're only retained until they're no longer needed.
 They are:
 
-**CAP_SETGID**
+**cap_setgid**
   If this capability has been assigned
   then BRLTTY ignores the user's supplementary group list
   because it's able to join the correct ones.
 
-**CAP_SYS_MODULE**
+**cap_sys_module**
   If this capability has been assigned
   then BRLTTY is able to install the `kernel modules`_ that it needs.
 
@@ -114,12 +114,12 @@ Supplementary Groups
 Process Capabilities
 ~~~~~~~~~~~~~~~~~~~~
 
-**CAP_MKNOD**
+**cap_mknod**
   For creating needed but missing special device files.
 
-**CAP_SYS_ADMIN**
+**cap_sys_admin**
   For using ``TIOCSTI`` to insert input characters typed on a braille device.
 
-**CAP_SYS_TTY_CONFIG**
+**cap_sys_tty_config**
   For using ``KDMKTONE`` and ``KIOCSOUND`` to play alert tunes via the built-in PC speaker.
 

@@ -56,16 +56,16 @@ OOMScoreAdjust=-900
 
 # for playing alert tunes via the built-in PC speaker (KDMKTONE, KIOCSOUND)
 ExecStartPre=-/sbin/modprobe pcspkr
-AmbientCapabilities=CAP_SYS_TTY_CONFIG
+AmbientCapabilities=cap_sys_tty_config
 
 # for creating virtual keyboards
 ExecStartPre=-/sbin/modprobe uinput
 
 # for inserting input characters typed on a braille device (TIOCSTI)
-AmbientCapabilities=CAP_SYS_ADMIN
+AmbientCapabilities=cap_sys_admin
 
 # for creating needed but missing special device files
-AmbientCapabilities=CAP_MKNOD
+AmbientCapabilities=cap_mknod
 
 #######################################################
 # keep these synchronized with sysusers.d/brltty.conf #
