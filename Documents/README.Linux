@@ -23,7 +23,7 @@ that it actually needs, by:
 
 * Installing the needed `kernel modules`_.
 * Joining the needed `supplementary groups`_.
-* Assigning to itself the needed `process capabilities`_.
+* Assigning to itself its `required capabilities`_.
 
 It then tries to switch to running as a regular user
 in order to relinquish all other privileges.
@@ -48,9 +48,9 @@ it "hopes" that:
 
 * All of the needed `kernel modules`_ have already been installed.
 * The user who invoked it belongs to all of the needed `supplementary groups`_.
-* All of the needed `process capabilities`_ have been assigned to its executable file.
+* All of the `required capabilities`_ have been assigned to its executable file.
 
-Assigning extra process capabilities to BRLTTY's executable file
+Assigning extra capabilities to BRLTTY's executable file
 can make things a little easier.
 They're only retained until they're no longer needed.
 They are:
@@ -111,8 +111,8 @@ Supplementary Groups
 
   * For virtual console monitoring and control via the ``/dev/tty<n>`` devices.
 
-Process Capabilities
-~~~~~~~~~~~~~~~~~~~~
+Required Capabilities
+~~~~~~~~~~~~~~~~~~~~~
 
 **cap_mknod**
   For creating needed but missing special device files.

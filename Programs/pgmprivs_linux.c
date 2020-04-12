@@ -244,9 +244,9 @@ IsPermittedCapability (cap_t caps, cap_value_t capability) {
 typedef struct {
   const char *reason;
   cap_value_t value;
-} ProcessCapabilityEntry;
+} RequiredCapabilityEntry;
 
-static const ProcessCapabilityEntry processCapabilityTable[] = {
+static const RequiredCapabilityEntry requiredCapabilityTable[] = {
   { .reason = "for inserting input characters typed on a braille device",
     .value = CAP_SYS_ADMIN,
   },
@@ -273,11 +273,11 @@ static void
 setAmbientCapabilities (cap_t caps) {
 #ifdef PR_CAP_AMBIENT
   if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) != -1) {
-    const ProcessCapabilityEntry *pce = processCapabilityTable;
-    const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
+    const RequiredCapabilityEntry *rce = requiredCapabilityTable;
+    const RequiredCapabilityEntry *end = rce + ARRAY_COUNT(requiredCapabilityTable);
 
-    while (pce < end) {
-      cap_value_t capability = pce->value;
+    while (rce < end) {
+      cap_value_t capability = rce->value;
 
       if (IsPermittedCapability(caps, capability)) {
         if (!addAmbientCapability(capability)) {
@@ -285,7 +285,7 @@ setAmbientCapabilities (cap_t caps) {
         }
       }
 
-      pce += 1;
+      rce += 1;
     }
   } else {
     logSystemError("PR_CAP_AMBIENT_CLEAR_ALL");
@@ -294,7 +294,7 @@ setAmbientCapabilities (cap_t caps) {
 }
 
 static int
-addProcessCapability (cap_t caps, cap_value_t capability) {
+addRequiredCapability (cap_t caps, cap_value_t capability) {
   static const cap_flag_t sets[] = {CAP_PERMITTED, CAP_EFFECTIVE, CAP_INHERITABLE};
   const cap_flag_t *set = sets;
   const cap_flag_t *end = set + ARRAY_COUNT(sets);;
@@ -308,7 +308,7 @@ addProcessCapability (cap_t caps, cap_value_t capability) {
 }
 
 static void
-assignProcessCapabilities (int amRoot) {
+assignRequiredCapabilities (int amRoot) {
   cap_t newCaps, oldCaps;
 
   if (amRoot) {
@@ -320,19 +320,19 @@ assignProcessCapabilities (int amRoot) {
 
   if ((newCaps = cap_init())) {
     {
-      const ProcessCapabilityEntry *pce = processCapabilityTable;
-      const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
+      const RequiredCapabilityEntry *rce = requiredCapabilityTable;
+      const RequiredCapabilityEntry *end = rce + ARRAY_COUNT(requiredCapabilityTable);
 
-      while (pce < end) {
-        cap_value_t capability = pce->value;
+      while (rce < end) {
+        cap_value_t capability = rce->value;
 
         if (IsPermittedCapability(oldCaps, capability)) {
-          if (!addProcessCapability(newCaps, capability)) {
+          if (!addRequiredCapability(newCaps, capability)) {
             break;
           }
         }
 
-        pce += 1;
+        rce += 1;
       }
     }
 
@@ -350,20 +350,20 @@ logUnassignedCapabilities (void) {
   cap_t caps;
 
   if ((caps = cap_get_proc())) {
-    const ProcessCapabilityEntry *pce = processCapabilityTable;
-    const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
+    const RequiredCapabilityEntry *rce = requiredCapabilityTable;
+    const RequiredCapabilityEntry *end = rce + ARRAY_COUNT(requiredCapabilityTable);
 
-    while (pce < end) {
-      cap_value_t capability = pce->value;
+    while (rce < end) {
+      cap_value_t capability = rce->value;
 
       if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
         logMessage(LOG_WARNING,
           "capability not assigned: %s (%s)",
-          cap_to_name(capability), pce->reason
+          cap_to_name(capability), rce->reason
         );
       }
 
-      pce += 1;
+      rce += 1;
     }
 
     cap_free(caps);
@@ -403,7 +403,7 @@ static const PrivilegesSetterEntry privilegesSetterTable[] = {
 #endif /* HAVE_GRP_H */
 
 #ifdef CAP_IS_SUPPORTED
-  { .acquirePrivileges = assignProcessCapabilities,
+  { .acquirePrivileges = assignRequiredCapabilities,
     .logMissingPrivileges = logUnassignedCapabilities,
   },
 #endif /* CAP_IS_SUPPORTED */
