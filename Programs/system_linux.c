@@ -1225,6 +1225,65 @@ installKernelModules (int amRoot) {
 #ifdef HAVE_GRP_H
 #include <grp.h>
 
+static int
+sortGroupIdentifiers (const void *element1,const void *element2) {
+  const gid_t *identifier1 = element1;
+  const gid_t *identifier2 = element2;
+
+  if (*identifier1 < *identifier2) return -1;
+  if (*identifier1 > *identifier2) return 1;
+  return 0;
+}
+
+static void
+removeDuplicateGroupIdentifiers (gid_t *groups, size_t *count) {
+  if (*count > 1) {
+    qsort(groups, *count, sizeof(*groups), sortGroupIdentifiers);
+
+    gid_t *to = groups;
+    const gid_t *from = to + 1;
+    const gid_t *end = to + *count;
+
+    while (from < end) {
+      if (*from != *to) *++to = *from;
+      from += 1;
+    }
+
+    *count = ++to - groups;
+  }
+}
+
+typedef struct {
+  const char *action;
+  const gid_t *groups;
+  size_t count;
+} SupplementaryGroupsLogData;
+
+static size_t
+supplementaryGroupsLogFormatter (char *buffer, size_t size, const void *data) {
+  const SupplementaryGroupsLogData *sgl = data;
+
+  size_t length;
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%s:", sgl->action);
+
+  const gid_t *gid = sgl->groups;
+  const gid_t *end = gid + sgl->count;
+
+  while (gid < end) {
+    STR_PRINTF(" %d", *gid);
+
+    const struct group *grp = getgrgid(*gid);
+    if (grp) STR_PRINTF("(%s)", grp->gr_name);
+
+    gid += 1;
+  }
+
+  length = STR_LENGTH;
+  STR_END;
+  return length;
+}
+
 typedef struct {
   const char *reason;
   const char *name;
@@ -1269,56 +1328,15 @@ static SupplementaryGroupEntry supplementaryGroupTable[] = {
   },
 };
 
-typedef struct {
-  const char *action;
-  const gid_t *groups;
-  size_t count;
-} SupplementaryGroupsLogData;
-
-static size_t
-supplementaryGroupsLogFormatter (char *buffer, size_t size, const void *data) {
-  const SupplementaryGroupsLogData *sgl = data;
-
-  size_t length;
-  STR_BEGIN(buffer, size);
-  STR_PRINTF("%s:", sgl->action);
-
-  const gid_t *gid = sgl->groups;
-  const gid_t *end = gid + sgl->count;
-
-  while (gid < end) {
-    STR_PRINTF(" %d", *gid);
-
-    const struct group *grp = getgrgid(*gid);
-    if (grp) STR_PRINTF("(%s)", grp->gr_name);
-
-    gid += 1;
-  }
-
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
-
-static int
-sortGroupIdentifiers (const void *element1,const void *element2) {
-  const gid_t *identifier1 = element1;
-  const gid_t *identifier2 = element2;
-
-  if (*identifier1 < *identifier2) return -1;
-  if (*identifier1 > *identifier2) return 1;
-  return 0;
-}
-
 static void
 setSupplementaryGroups (int amRoot) {
-  size_t count = ARRAY_COUNT(supplementaryGroupTable);
-  gid_t list[count * 2];
-  unsigned int size = 0;
+  size_t size = ARRAY_COUNT(supplementaryGroupTable);
+  gid_t groups[size * 2];
+  size_t count = 0;
 
   {
     const SupplementaryGroupEntry *sge = supplementaryGroupTable;
-    const SupplementaryGroupEntry *end = sge + count;
+    const SupplementaryGroupEntry *end = sge + size;
 
     while (sge < end) {
       {
@@ -1328,7 +1346,7 @@ setSupplementaryGroups (int amRoot) {
           const struct group *grp = getgrnam(name);
 
           if (grp) {
-            list[size++] = grp->gr_gid;
+            groups[count++] = grp->gr_gid;
           } else {
             logMessage(LOG_WARNING, "unknown user group: %s", name);
           }
@@ -1342,7 +1360,7 @@ setSupplementaryGroups (int amRoot) {
           struct stat s;
 
           if (stat(path, &s) != -1) {
-            list[size++] = s.st_gid;
+            groups[count++] = s.st_gid;
           } else {
             logMessage(LOG_WARNING, "path access error: %s: %s", path, strerror(errno));
           }
@@ -1351,43 +1369,25 @@ setSupplementaryGroups (int amRoot) {
 
       sge += 1;
     }
-  }
 
-  if (size > 1) {
-    qsort(list, size, sizeof(list[0]), sortGroupIdentifiers);
-
-    gid_t *to = list;
-    const gid_t *from = to + 1;
-    const gid_t *end = to + size;
-
-    while (from < end) {
-      if (*from != *to) *++to = *from;
-      from += 1;
-    }
-
-    size = ++to - list;
+    removeDuplicateGroupIdentifiers(groups, &count);
   }
 
   {
     SupplementaryGroupsLogData sgl = {
       .action = "setting supplementary groups",
-      .groups = list,
-      .count = size
+      .groups = groups,
+      .count = count
     };
 
     logData(LOG_DEBUG, supplementaryGroupsLogFormatter, &sgl);
   }
 
-  if (setgroups(size, list) == -1) {
+  if (setgroups(count, groups) == -1) {
     logSystemError("setgroups");
   }
 
   endgrent();
-}
-
-#else /* HAVE_GRP_H */
-static void
-setSupplementaryGroups (void) {
 }
 #endif /* HAVE_GRP_H */
 
@@ -1398,25 +1398,6 @@ setSupplementaryGroups (void) {
 #endif /* HAVE_LIBCAP */
 
 #ifdef CAP_IS_SUPPORTED
-typedef struct {
-  const char *reason;
-  cap_value_t value;
-} ProcessCapabilityEntry;
-
-static const ProcessCapabilityEntry processCapabilityTable[] = {
-  { .reason = "for inserting input characters typed on a braille device",
-    .value = CAP_SYS_ADMIN,
-  },
-
-  { .reason = "for playing alert tunes via the built-in PC speaker",
-    .value = CAP_SYS_TTY_CONFIG,
-  },
-
-  { .reason = "for creating needed but missing special device files",
-    .value = CAP_MKNOD,
-  },
-};
-
 static int
 setCapabilities (cap_t caps) {
   if (cap_set_proc(caps) != -1) return 1;
@@ -1438,6 +1419,25 @@ addCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
   logSystemError("cap_set_flag");
   return 0;
 }
+
+typedef struct {
+  const char *reason;
+  cap_value_t value;
+} ProcessCapabilityEntry;
+
+static const ProcessCapabilityEntry processCapabilityTable[] = {
+  { .reason = "for inserting input characters typed on a braille device",
+    .value = CAP_SYS_ADMIN,
+  },
+
+  { .reason = "for playing alert tunes via the built-in PC speaker",
+    .value = CAP_SYS_TTY_CONFIG,
+  },
+
+  { .reason = "for creating needed but missing special device files",
+    .value = CAP_MKNOD,
+  },
+};
 
 static int
 addAmbientCapability (cap_value_t capability) {
