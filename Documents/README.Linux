@@ -4,11 +4,68 @@ BRLTTY on Linux
 
 .. include:: prologue.rst
 
+.. |default user| replace:: ``brltty``
+.. |super user| replace:: ``root``
+
 Privileged Operations
 =====================
 
-Required Privileges
--------------------
+Invoking BRLTTY
+---------------
+
+As the Super User
+~~~~~~~~~~~~~~~~~
+
+When BRLTTY starts executing as the super user (|super user|),
+i.e. when its initial effective user identifier is 0,
+it first explicitly configures the `host privileges`_
+that it actually needs, by:
+
+* Installing the needed `kernel modules`_.
+* Joining the needed `supplementary groups`_.
+* Assigning to itself the needed `process capabilities`_.
+
+It then tries to switch to running as a regular user
+in order to relinquish all other privileges.
+
+1) If its ``-u`` command line option has been supplied
+   then it switches to the specified user.
+   That user must exist.
+
+2) If its ``-u`` command line option hasn't been specified
+   then the |default user| user is assumed.
+   Its existence is optional.
+
+3) If the |default user| user doesn't exist
+   then BRLTTY continues to run as |super user|.
+
+As a Regular User
+~~~~~~~~~~~~~~~~~
+
+When BRLTTY starts executing as a regular user (not |super user|),
+i.e. when its initial effective user identifier isn't 0,
+it "hopes" that:
+
+* All of the needed `kernel modules`_ have already been installed.
+* The user who invoked it belongs to all of the needed `supplementary groups`_.
+* All of the needed `process capabilities`_ have been assigned to its executable file.
+
+Assigning extra process capabilities to BRLTTY's executable file
+can make things a little easier.
+They're only retained until they're no longer needed.
+They are:
+
+**CAP_SETGID**
+  If this capability has been assigned
+  then BRLTTY ignores the user's supplementary group list
+  because it's able to join the correct ones.
+
+**CAP_SYS_MODULE**
+  If this capability has been assigned
+  then BRLTTY is able to install the `kernel modules`_ that it needs.
+
+Host Privileges
+---------------
 
 Kernel Modules
 ~~~~~~~~~~~~~~
@@ -19,14 +76,23 @@ Kernel Modules
 **uinput**
   * For creating virtual keyboards via ``/dev/uinput``.
 
-Group Membership
-~~~~~~~~~~~~~~~~
+Supplementary Groups
+~~~~~~~~~~~~~~~~~~~~
 
 **audio**
   For playing sound via the ALSA framework.
 
 **dialout**
-  For serial I/O via the ``/dev/ttyS<n>`` devices.
+  For serial I/O via these ``/dev/`` devices:
+
+  **ttyS<n>**
+    Actual serial devices.
+
+  **ttyACM<n>**
+    USB to serial adapters that implement the CDC ACM standard.
+
+  **ttyUSB<n>**
+    Other USB to serial adapters.
 
 **input**
   For intercepting keyboard key events via the devices in ``/dev/input/``.
