@@ -1317,12 +1317,12 @@ setSupplementaryGroups (int amRoot) {
   unsigned int size = 0;
 
   {
-    const SupplementaryGroupEntry *spg = supplementaryGroupTable;
-    const SupplementaryGroupEntry *end = spg + count;
+    const SupplementaryGroupEntry *sge = supplementaryGroupTable;
+    const SupplementaryGroupEntry *end = sge + count;
 
-    while (spg < end) {
+    while (sge < end) {
       {
-        const char *name = spg->name;
+        const char *name = sge->name;
 
         if (name) {
           const struct group *grp = getgrnam(name);
@@ -1336,7 +1336,7 @@ setSupplementaryGroups (int amRoot) {
       }
 
       {
-        const char *path = spg->path;
+        const char *path = sge->path;
 
         if (path) {
           struct stat s;
@@ -1349,7 +1349,7 @@ setSupplementaryGroups (int amRoot) {
         }
       }
 
-      spg += 1;
+      sge += 1;
     }
   }
 
@@ -1397,9 +1397,9 @@ setSupplementaryGroups (void) {
 typedef struct {
   const char *reason;
   cap_value_t value;
-} RequiredCapabilityEntry;
+} ProcessCapabilityEntry;
 
-static const RequiredCapabilityEntry requiredCapabilityTable[] = {
+static const ProcessCapabilityEntry processCapabilityTable[] = {
   { .reason = "for inserting input characters typed on a braille device",
     .value = CAP_SYS_ADMIN,
   },
@@ -1448,19 +1448,19 @@ static void
 setAmbientCapabilities (cap_t caps) {
 #ifdef PR_CAP_AMBIENT
   if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) != -1) {
-    const RequiredCapabilityEntry *rqc = requiredCapabilityTable;
-    const RequiredCapabilityEntry *end = rqc + ARRAY_COUNT(requiredCapabilityTable);
+    const ProcessCapabilityEntry *pce = processCapabilityTable;
+    const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
 
-    while (rqc < end) {
-      cap_value_t capability = rqc->value;
+    while (pce < end) {
+      cap_value_t capability = pce->value;
 
       if (!caps || hasCapability(caps, CAP_PERMITTED, capability)) {
-        if (!addAmbientCapability(rqc->value)) {
+        if (!addAmbientCapability(capability)) {
           break;
         }
       }
 
-      rqc += 1;
+      pce += 1;
     }
   } else {
     logSystemError("PR_CAP_AMBIENT_CLEAR_ALL");
@@ -1469,7 +1469,7 @@ setAmbientCapabilities (cap_t caps) {
 }
 
 static int
-addRequiredCapability (cap_t caps, cap_value_t capability) {
+addProcessCapability (cap_t caps, cap_value_t capability) {
   static const cap_flag_t sets[] = {CAP_PERMITTED, CAP_EFFECTIVE, CAP_INHERITABLE};
   const cap_flag_t *set = sets;
   const cap_flag_t *end = set + ARRAY_COUNT(sets);;
@@ -1483,33 +1483,39 @@ addRequiredCapability (cap_t caps, cap_value_t capability) {
 }
 
 static void
-setRequiredCapabilities (int amRoot) {
-  cap_t newCaps = cap_init();
+setProcessCapabilities (int amRoot) {
+  cap_t newCaps, oldCaps;
 
-  if (newCaps) {
-    cap_t oldCaps = amRoot? NULL: cap_get_proc();
+  if (amRoot) {
+    oldCaps = NULL;
+  } else if (!(oldCaps = cap_get_proc())) {
+    logSystemError("cap_get_proc");
+    return;
+  }
 
-    const RequiredCapabilityEntry *rqc = requiredCapabilityTable;
-    const RequiredCapabilityEntry *end = rqc + ARRAY_COUNT(requiredCapabilityTable);
+  if ((newCaps = cap_init())) {
+    const ProcessCapabilityEntry *pce = processCapabilityTable;
+    const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
 
-    while (rqc < end) {
-      cap_value_t capability = rqc->value;
+    while (pce < end) {
+      cap_value_t capability = pce->value;
 
       if (!oldCaps || hasCapability(oldCaps, CAP_PERMITTED, capability)) {
-        if (!addRequiredCapability(newCaps, capability)) {
+        if (!addProcessCapability(newCaps, capability)) {
           break;
         }
       }
 
-      rqc += 1;
+      pce += 1;
     }
 
     if (setCapabilities(newCaps)) setAmbientCapabilities(oldCaps);
-    if (oldCaps) cap_free(oldCaps);
     cap_free(newCaps);
   } else {
     logSystemError("cap_init");
   }
+
+  if (oldCaps) cap_free(oldCaps);
 }
 #endif /* defined(HAVE_LIBCAP) && defined(HAVE_SYS_CAPABILITY_H) */
 
@@ -1539,7 +1545,7 @@ static const PrivilegesSetterEntry privilegesSetterTable[] = {
 #endif /* HAVE_GRP_H */
 
 #ifdef CAP_IS_SUPPORTED
-  { .handler = setRequiredCapabilities,
+  { .handler = setProcessCapabilities,
   },
 #endif /* CAP_IS_SUPPORTED */
 };
