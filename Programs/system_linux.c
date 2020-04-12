@@ -1217,7 +1217,7 @@ destroyInputEventMonitor (InputEventMonitor *monitor) {
 #endif /* HAVE_SYS_PRCTL_H */
 
 static void
-installKernelModules (void) {
+installKernelModules (int amRoot) {
   installSpeakerModule();
   installUinputModule();
 }
@@ -1311,7 +1311,7 @@ sortGroupIdentifiers (const void *element1,const void *element2) {
 }
 
 static void
-setSupplementaryGroups (void) {
+setSupplementaryGroups (int amRoot) {
   size_t count = ARRAY_COUNT(supplementaryGroupTable);
   gid_t list[count * 2];
   unsigned int size = 0;
@@ -1413,16 +1413,51 @@ static const RequiredCapabilityEntry requiredCapabilityTable[] = {
   },
 };
 
+static int
+setCapabilities (cap_t caps) {
+  if (cap_set_proc(caps) != -1) return 1;
+  logSystemError("cap_set_proc");
+  return 0;
+}
+
+static int
+hasCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
+  cap_flag_value_t value;
+  if (cap_get_flag(caps, capability, set, &value) != -1) return value == CAP_SET;
+  logSystemError("cap_get_flag");
+  return 0;
+}
+
+static int
+addCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
+  if (cap_set_flag(caps, set, 1, &capability, CAP_SET) != -1) return 1;
+  logSystemError("cap_set_flag");
+  return 0;
+}
+
+static int
+addAmbientCapability (cap_value_t capability) {
+#ifdef PR_CAP_AMBIENT_RAISE
+  if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, capability, 0, 0) != -1) return 1;
+  logSystemError("PR_CAP_AMBIENT_RAISE");
+#endif /*( PR_CAP_AMBIENT_RAISE */
+  return 0;
+}
+
 static void
-setAmbientCapabilities (void) {
+setAmbientCapabilities (cap_t caps) {
+#ifdef PR_CAP_AMBIENT
   if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) != -1) {
     const RequiredCapabilityEntry *rqc = requiredCapabilityTable;
     const RequiredCapabilityEntry *end = rqc + ARRAY_COUNT(requiredCapabilityTable);
 
     while (rqc < end) {
-      if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, rqc->value, 0, 0) == -1) {
-        logSystemError("PR_CAP_AMBIENT_RAISE");
-        break;
+      cap_value_t capability = rqc->value;
+
+      if (!caps || hasCapability(caps, CAP_PERMITTED, capability)) {
+        if (!addAmbientCapability(rqc->value)) {
+          break;
+        }
       }
 
       rqc += 1;
@@ -1430,62 +1465,127 @@ setAmbientCapabilities (void) {
   } else {
     logSystemError("PR_CAP_AMBIENT_CLEAR_ALL");
   }
+#endif /* PR_CAP_AMBIENT */
 }
 
 static int
-addRequiredCapability (cap_t caps, const RequiredCapabilityEntry *rqc) {
-  static const cap_flag_t flags[] = {CAP_PERMITTED, CAP_EFFECTIVE, CAP_INHERITABLE};
-  const cap_flag_t *flag = flags;
-  const cap_flag_t *end = flags + ARRAY_COUNT(flags);;
+addRequiredCapability (cap_t caps, cap_value_t capability) {
+  static const cap_flag_t sets[] = {CAP_PERMITTED, CAP_EFFECTIVE, CAP_INHERITABLE};
+  const cap_flag_t *set = sets;
+  const cap_flag_t *end = set + ARRAY_COUNT(sets);;
 
-  while (flag < end) {
-    if (cap_set_flag(caps, *flag, 1, &rqc->value, CAP_SET) == -1) {
-      logSystemError("cap_set_flag");
-      return 0;
-    }
-
-    flag += 1;
+  while (set < end) {
+    if (!addCapability(caps, *set, capability)) return 0;
+    set += 1;
   }
 
   return 1;
 }
 
 static void
-setRequiredCapabilities (void) {
-  cap_t caps = cap_init();
+setRequiredCapabilities (int amRoot) {
+  cap_t newCaps = cap_init();
 
-  if (caps) {
+  if (newCaps) {
+    cap_t oldCaps = amRoot? NULL: cap_get_proc();
+
     const RequiredCapabilityEntry *rqc = requiredCapabilityTable;
     const RequiredCapabilityEntry *end = rqc + ARRAY_COUNT(requiredCapabilityTable);
 
     while (rqc < end) {
-      if (!addRequiredCapability(caps, rqc)) break;
+      cap_value_t capability = rqc->value;
+
+      if (!oldCaps || hasCapability(oldCaps, CAP_PERMITTED, capability)) {
+        if (!addRequiredCapability(newCaps, capability)) {
+          break;
+        }
+      }
+
       rqc += 1;
     }
 
-    if (cap_set_proc(caps) != -1) {
-      setAmbientCapabilities();
-    } else {
-      logSystemError("cap_set_proc");
-    }
-
-    cap_free(caps);
+    if (setCapabilities(newCaps)) setAmbientCapabilities(oldCaps);
+    if (oldCaps) cap_free(oldCaps);
+    cap_free(newCaps);
   } else {
-    logMallocError();
+    logSystemError("cap_init");
   }
-}
-
-#else /* defined(HAVE_LIBCAP) && defined(HAVE_SYS_CAPABILITY_H) */
-static void
-setRequiredCapabilities (void) {
 }
 #endif /* defined(HAVE_LIBCAP) && defined(HAVE_SYS_CAPABILITY_H) */
 
+typedef struct {
+  void (*handler) (int amRoot);
+
+  #ifdef CAP_IS_SUPPORTED
+  cap_value_t capability;
+  #endif /* CAP_IS_SUPPORTED */
+} PrivilegesSetterEntry;
+
+static const PrivilegesSetterEntry privilegesSetterTable[] = {
+  { .handler = installKernelModules,
+
+    #ifdef CAP_SYS_MODULE
+    .capability = CAP_SYS_MODULE,
+    #endif /* CAP_SYS_MODULE, */
+  },
+
+#ifdef HAVE_GRP_H
+  { .handler = setSupplementaryGroups,
+
+    #ifdef CAP_SETGID
+    .capability = CAP_SETGID,
+    #endif /* CAP_SETGID, */
+  },
+#endif /* HAVE_GRP_H */
+
+#ifdef CAP_IS_SUPPORTED
+  { .handler = setRequiredCapabilities,
+  },
+#endif /* CAP_IS_SUPPORTED */
+};
+
+static void
+setPrivileges (void) {
+  int amRoot = !geteuid();
+  const PrivilegesSetterEntry *pse = privilegesSetterTable;
+  const PrivilegesSetterEntry *end = pse + ARRAY_COUNT(privilegesSetterTable);
+
+  if (amRoot) {
+    while (pse < end) {
+      pse->handler(amRoot);
+      pse += 1;
+    }
+  }
+
+#ifdef CAP_IS_SUPPORTED
+  else {
+    cap_t caps = cap_get_proc();
+
+    if (caps) {
+      while (pse < end) {
+        cap_value_t capability = (pse++)->capability;
+
+        if (capability) {
+          if (hasCapability(caps, CAP_EFFECTIVE, capability)) continue;
+          if (!hasCapability(caps, CAP_PERMITTED, capability)) continue;
+          if (!addCapability(caps, CAP_EFFECTIVE, capability)) continue;
+          if (!addCapability(caps, CAP_INHERITABLE, capability)) continue;
+          if (!setCapabilities(caps)) continue;
+          if (!addAmbientCapability(capability)) continue;
+        }
+
+        (pse-1)->handler(amRoot);
+      }
+
+      cap_free(caps);
+    } else {
+      logSystemError("cap_get_proc");
+    }
+  }
+#endif /* CAP_IS_SUPPORTED */
+}
+
 void
 initializeSystemObject (void) {
-  if (!geteuid()) {
-    installKernelModules();
-    setSupplementaryGroups();
-    setRequiredCapabilities();
-  }
+  setPrivileges();
 }
