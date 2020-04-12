@@ -308,7 +308,7 @@ addProcessCapability (cap_t caps, cap_value_t capability) {
 }
 
 static void
-setProcessCapabilities (int amRoot) {
+assignProcessCapabilities (int amRoot) {
   cap_t newCaps, oldCaps;
 
   if (amRoot) {
@@ -336,21 +336,6 @@ setProcessCapabilities (int amRoot) {
       }
     }
 
-    {
-      const ProcessCapabilityEntry *pce = processCapabilityTable;
-      const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
-
-      while (pce < end) {
-        cap_value_t capability = pce->value;
-
-        if (!hasCapability(newCaps, CAP_EFFECTIVE, capability)) {
-          logMessage(LOG_WARNING, "capability not assigned: %s", cap_to_name(capability));
-        }
-
-        pce += 1;
-      }
-    }
-
     if (setCapabilities(newCaps)) setAmbientCapabilities(oldCaps);
     cap_free(newCaps);
   } else {
@@ -359,10 +344,41 @@ setProcessCapabilities (int amRoot) {
 
   if (oldCaps) cap_free(oldCaps);
 }
+
+static void
+logUnassignedCapabilities (void) {
+  cap_t caps;
+
+  if ((caps = cap_get_proc())) {
+    const ProcessCapabilityEntry *pce = processCapabilityTable;
+    const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
+
+    while (pce < end) {
+      cap_value_t capability = pce->value;
+
+      if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
+        logMessage(LOG_WARNING,
+          "capability not assigned: %s (%s)",
+          cap_to_name(capability), pce->reason
+        );
+      }
+
+      pce += 1;
+    }
+
+    cap_free(caps);
+  } else {
+    logSystemError("cap_get_proc");
+  }
+}
 #endif /* CAP_IS_SUPPORTED */
 
+typedef void PrivilegesAcquisitionFunction (int amRoot);
+typedef void MissingPrivilegesLogger (void);
+
 typedef struct {
-  void (*handler) (int amRoot);
+  PrivilegesAcquisitionFunction *acquirePrivileges;
+  MissingPrivilegesLogger *logMissingPrivileges;
 
   #ifdef CAP_IS_SUPPORTED
   cap_value_t capability;
@@ -370,7 +386,7 @@ typedef struct {
 } PrivilegesSetterEntry;
 
 static const PrivilegesSetterEntry privilegesSetterTable[] = {
-  { .handler = installKernelModules,
+  { .acquirePrivileges = installKernelModules,
 
     #ifdef CAP_SYS_MODULE
     .capability = CAP_SYS_MODULE,
@@ -378,7 +394,7 @@ static const PrivilegesSetterEntry privilegesSetterTable[] = {
   },
 
 #ifdef HAVE_GRP_H
-  { .handler = setSupplementaryGroups,
+  { .acquirePrivileges = setSupplementaryGroups,
 
     #ifdef CAP_SETGID
     .capability = CAP_SETGID,
@@ -387,7 +403,8 @@ static const PrivilegesSetterEntry privilegesSetterTable[] = {
 #endif /* HAVE_GRP_H */
 
 #ifdef CAP_IS_SUPPORTED
-  { .handler = setProcessCapabilities,
+  { .acquirePrivileges = assignProcessCapabilities,
+    .logMissingPrivileges = logUnassignedCapabilities,
   },
 #endif /* CAP_IS_SUPPORTED */
 };
@@ -395,21 +412,25 @@ static const PrivilegesSetterEntry privilegesSetterTable[] = {
 void
 setProgramPrivileges (void) {
   int amRoot = !geteuid();
-  const PrivilegesSetterEntry *pse = privilegesSetterTable;
-  const PrivilegesSetterEntry *end = pse + ARRAY_COUNT(privilegesSetterTable);
 
   if (amRoot) {
+    const PrivilegesSetterEntry *pse = privilegesSetterTable;
+    const PrivilegesSetterEntry *end = pse + ARRAY_COUNT(privilegesSetterTable);
+
     while (pse < end) {
-      pse->handler(amRoot);
+      pse->acquirePrivileges(amRoot);
       pse += 1;
     }
   }
 
 #ifdef CAP_IS_SUPPORTED
   else {
-    cap_t caps = cap_get_proc();
+    cap_t caps;
 
-    if (caps) {
+    if ((caps = cap_get_proc())) {
+      const PrivilegesSetterEntry *pse = privilegesSetterTable;
+      const PrivilegesSetterEntry *end = pse + ARRAY_COUNT(privilegesSetterTable);
+
       while (pse < end) {
         cap_value_t capability = (pse++)->capability;
 
@@ -422,7 +443,7 @@ setProgramPrivileges (void) {
           if (!addAmbientCapability(capability)) continue;
         }
 
-        (pse-1)->handler(amRoot);
+        (pse-1)->acquirePrivileges(amRoot);
       }
 
       cap_free(caps);
@@ -431,4 +452,15 @@ setProgramPrivileges (void) {
     }
   }
 #endif /* CAP_IS_SUPPORTED */
+
+  {
+    const PrivilegesSetterEntry *pse = privilegesSetterTable;
+    const PrivilegesSetterEntry *end = pse + ARRAY_COUNT(privilegesSetterTable);
+
+    while (pse < end) {
+      MissingPrivilegesLogger *logger = pse->logMissingPrivileges;
+      if (logger) logger();
+      pse += 1;
+    }
+  }
 }
