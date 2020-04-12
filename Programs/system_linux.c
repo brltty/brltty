@@ -1391,9 +1391,13 @@ setSupplementaryGroups (void) {
 }
 #endif /* HAVE_GRP_H */
 
-#if defined(HAVE_LIBCAP) && defined(HAVE_SYS_CAPABILITY_H)
+#ifdef HAVE_LIBCAP
+#ifdef HAVE_SYS_CAPABILITY_H
 #include <sys/capability.h>
+#endif /* HAVE_SYS_CAPABILITY_H */
+#endif /* HAVE_LIBCAP */
 
+#ifdef CAP_IS_SUPPORTED
 typedef struct {
   const char *reason;
   cap_value_t value;
@@ -1517,7 +1521,7 @@ setProcessCapabilities (int amRoot) {
 
   if (oldCaps) cap_free(oldCaps);
 }
-#endif /* defined(HAVE_LIBCAP) && defined(HAVE_SYS_CAPABILITY_H) */
+#endif /* CAP_IS_SUPPORTED */
 
 typedef struct {
   void (*handler) (int amRoot);
