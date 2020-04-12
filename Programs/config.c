@@ -31,6 +31,7 @@
 #include "log.h"
 #include "report.h"
 #include "strfmt.h"
+#include "pgmprivs.h"
 #include "lock.h"
 #include "activity.h"
 #include "update.h"
@@ -769,6 +770,7 @@ brlttyPrepare (int argc, char *argv[]) {
   logProgramBanner();
   logProperty(opt_logLevel, "logLevel", gettext("Log Level"));
 
+  setProgramPrivileges();
   return PROG_EXIT_SUCCESS;
 }
 

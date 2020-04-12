@@ -1119,7 +1119,6 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
       ;;
    linux*)
       system_package="linux"
-      AC_HAVE_LIBRARY([cap])
       ;;
    mingw*)
       system_package="windows"
@@ -1213,6 +1212,13 @@ BRLTTY_ARG_PACKAGE([pgmpath], [program path], [], [dnl
       ;;
    solaris*)
       pgmpath_package="solaris"
+      ;;
+])
+
+BRLTTY_ARG_PACKAGE([pgmprivs], [program privileges], [], [dnl
+   linux*)
+      pgmprivs_package="linux"
+      AC_HAVE_LIBRARY([cap])
       ;;
 ])
 

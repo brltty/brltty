@@ -63,6 +63,9 @@ program.$O:
 $(PGMPATH_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(PGMPATH_INCLUDES) -c $(SRC_DIR)/$(PGMPATH_OBJECT).c
 
+$(PGMPRIVS_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(PGMPRIVS_INCLUDES) -c $(SRC_DIR)/$(PGMPRIVS_OBJECT).c
+
 ###############################################################################
 
 $(SERVICE_OBJECT).$O:
@@ -710,7 +713,7 @@ $(RGX_OBJECT).$O:
 
 ###############################################################################
 
-CORE_OBJECTS = core.$O $(PROGRAM_OBJECTS) revision.$O report.$O config.$O $(RGX_OBJECTS) $(SERVICE_OBJECTS) activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O $(CMD_OBJECTS) pipe.$O $(TTB_OBJECTS) $(CHARSET_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(BELL_OBJECTS) $(LEDS_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
+CORE_OBJECTS = core.$O $(PROGRAM_OBJECTS) revision.$O $(PGMPRIVS_OBJECTS) report.$O config.$O $(RGX_OBJECTS) $(SERVICE_OBJECTS) activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O $(CMD_OBJECTS) pipe.$O $(TTB_OBJECTS) $(CHARSET_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(BELL_OBJECTS) $(LEDS_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
