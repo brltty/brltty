@@ -1420,6 +1420,12 @@ addCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
   return 0;
 }
 
+static int
+IsPermittedCapability (cap_t caps, cap_value_t capability) {
+  if (!caps) return 1;
+  return hasCapability(caps, CAP_PERMITTED, capability);
+}
+
 typedef struct {
   const char *reason;
   cap_value_t value;
@@ -1458,7 +1464,7 @@ setAmbientCapabilities (cap_t caps) {
     while (pce < end) {
       cap_value_t capability = pce->value;
 
-      if (!caps || hasCapability(caps, CAP_PERMITTED, capability)) {
+      if (IsPermittedCapability(caps, capability)) {
         if (!addAmbientCapability(capability)) {
           break;
         }
@@ -1498,19 +1504,36 @@ setProcessCapabilities (int amRoot) {
   }
 
   if ((newCaps = cap_init())) {
-    const ProcessCapabilityEntry *pce = processCapabilityTable;
-    const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
+    {
+      const ProcessCapabilityEntry *pce = processCapabilityTable;
+      const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
 
-    while (pce < end) {
-      cap_value_t capability = pce->value;
+      while (pce < end) {
+        cap_value_t capability = pce->value;
 
-      if (!oldCaps || hasCapability(oldCaps, CAP_PERMITTED, capability)) {
-        if (!addProcessCapability(newCaps, capability)) {
-          break;
+        if (IsPermittedCapability(oldCaps, capability)) {
+          if (!addProcessCapability(newCaps, capability)) {
+            break;
+          }
         }
-      }
 
-      pce += 1;
+        pce += 1;
+      }
+    }
+
+    {
+      const ProcessCapabilityEntry *pce = processCapabilityTable;
+      const ProcessCapabilityEntry *end = pce + ARRAY_COUNT(processCapabilityTable);
+
+      while (pce < end) {
+        cap_value_t capability = pce->value;
+
+        if (!hasCapability(newCaps, CAP_EFFECTIVE, capability)) {
+          logMessage(LOG_WARNING, "capability not assigned: %s", cap_to_name(capability));
+        }
+
+        pce += 1;
+      }
     }
 
     if (setCapabilities(newCaps)) setAmbientCapabilities(oldCaps);
