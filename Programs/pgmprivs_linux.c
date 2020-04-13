@@ -41,19 +41,23 @@ installKernelModules (int amRoot) {
 #include <grp.h>
 
 static int
-sortGroupIdentifiers (const void *element1,const void *element2) {
-  const gid_t *identifier1 = element1;
-  const gid_t *identifier2 = element2;
-
-  if (*identifier1 < *identifier2) return -1;
-  if (*identifier1 > *identifier2) return 1;
+compareGroups (gid_t group1, gid_t group2) {
+  if (group1 < group2) return -1;
+  if (group1 > group2) return 1;
   return 0;
 }
 
+static int
+sortGroups (const void *element1,const void *element2) {
+  const gid_t *group1 = element1;
+  const gid_t *group2 = element2;
+  return compareGroups(*group1, *group2);
+}
+
 static void
-removeDuplicateGroupIdentifiers (gid_t *groups, size_t *count) {
+removeDuplicateGroups (gid_t *groups, size_t *count) {
   if (*count > 1) {
-    qsort(groups, *count, sizeof(*groups), sortGroupIdentifiers);
+    qsort(groups, *count, sizeof(*groups), sortGroups);
 
     gid_t *to = groups;
     const gid_t *from = to + 1;
@@ -69,21 +73,21 @@ removeDuplicateGroupIdentifiers (gid_t *groups, size_t *count) {
 }
 
 typedef struct {
-  const char *action;
+  const char *message;
   const gid_t *groups;
   size_t count;
-} SupplementaryGroupsLogData;
+} GroupsLogData;
 
 static size_t
-supplementaryGroupsLogFormatter (char *buffer, size_t size, const void *data) {
-  const SupplementaryGroupsLogData *sgl = data;
+groupsLogFormatter (char *buffer, size_t size, const void *data) {
+  const GroupsLogData *gld = data;
 
   size_t length;
   STR_BEGIN(buffer, size);
-  STR_PRINTF("%s:", sgl->action);
+  STR_PRINTF("%s:", gld->message);
 
-  const gid_t *gid = sgl->groups;
-  const gid_t *end = gid + sgl->count;
+  const gid_t *gid = gld->groups;
+  const gid_t *end = gid + gld->count;
 
   while (gid < end) {
     STR_PRINTF(" %d", *gid);
@@ -99,13 +103,29 @@ supplementaryGroupsLogFormatter (char *buffer, size_t size, const void *data) {
   return length;
 }
 
+static void
+logGroups (int level, const char *message, const gid_t *groups, size_t count) {
+  GroupsLogData gld = {
+    .message = message,
+    .groups = groups,
+    .count = count
+  };
+
+  logData(level, groupsLogFormatter, &gld);
+}
+
+static void
+logGroup (int level, const char *message, gid_t group) {
+  logGroups(level, message, &group, 1);
+}
+
 typedef struct {
   const char *reason;
   const char *name;
   const char *path;
-} SupplementaryGroupEntry;
+} RequiredGroupEntry;
 
-static SupplementaryGroupEntry supplementaryGroupTable[] = {
+static RequiredGroupEntry requiredGroupTable[] = {
   { .reason = "for reading screen content",
     .name = "tty",
     .path = "/dev/vcs1",
@@ -143,19 +163,21 @@ static SupplementaryGroupEntry supplementaryGroupTable[] = {
   },
 };
 
+typedef void RequiredGroupsProcessor (const gid_t *groups, size_t count, void *data);
+
 static void
-setSupplementaryGroups (int amRoot) {
-  size_t size = ARRAY_COUNT(supplementaryGroupTable);
+processRequiredGroups (RequiredGroupsProcessor *processGroups, void *data) {
+  size_t size = ARRAY_COUNT(requiredGroupTable);
   gid_t groups[size * 2];
   size_t count = 0;
 
   {
-    const SupplementaryGroupEntry *sge = supplementaryGroupTable;
-    const SupplementaryGroupEntry *end = sge + size;
+    const RequiredGroupEntry *rge = requiredGroupTable;
+    const RequiredGroupEntry *end = rge + size;
 
-    while (sge < end) {
+    while (rge < end) {
       {
-        const char *name = sge->name;
+        const char *name = rge->name;
 
         if (name) {
           const struct group *grp = getgrnam(name);
@@ -169,7 +191,7 @@ setSupplementaryGroups (int amRoot) {
       }
 
       {
-        const char *path = sge->path;
+        const char *path = rge->path;
 
         if (path) {
           struct stat s;
@@ -182,27 +204,78 @@ setSupplementaryGroups (int amRoot) {
         }
       }
 
-      sge += 1;
+      rge += 1;
     }
-
-    removeDuplicateGroupIdentifiers(groups, &count);
   }
 
-  {
-    SupplementaryGroupsLogData sgl = {
-      .action = "setting supplementary groups",
-      .groups = groups,
-      .count = count
-    };
+  removeDuplicateGroups(groups, &count);
+  processGroups(groups, count, data);
+  endgrent();
+}
 
-    logData(LOG_DEBUG, supplementaryGroupsLogFormatter, &sgl);
-  }
+static void
+setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
+  logGroups(LOG_DEBUG, "setting supplementary groups", groups, count);
 
   if (setgroups(count, groups) == -1) {
     logSystemError("setgroups");
   }
+}
 
-  endgrent();
+static void
+joinRequiredGroups (int amRoot) {
+  processRequiredGroups(setSupplementaryGroups, NULL);
+}
+
+typedef struct {
+  const gid_t *groups;
+  size_t count;
+} CurrentGroupsData;
+
+static void
+logMissingGroups (const gid_t *groups, size_t count, void *data) {
+  const CurrentGroupsData *cgd = data;
+
+  const gid_t *cur = cgd->groups;
+  const gid_t *curEnd = cur + cgd->count;
+
+  const gid_t *req = groups;
+  const gid_t *reqEnd = req + count;
+
+  while (req < reqEnd) {
+    int relation = (cur < curEnd)? compareGroups(*cur, *req): 1;
+
+    if (relation > 0) {
+      logGroup(LOG_WARNING, "group not joined", *req++);
+    } else {
+      if (!relation) req += 1;
+      cur += 1;
+    }
+  }
+}
+
+static void
+logUnjoinedGroups (void) {
+  ssize_t size = getgroups(0, NULL);
+
+  if (size != -1) {
+    gid_t groups[size];
+    ssize_t count = getgroups(size, groups);
+
+    if (count != -1) {
+      CurrentGroupsData cgd = {
+        .groups = groups,
+        .count = count
+      };
+
+      removeDuplicateGroups(groups, &cgd.count);
+      processRequiredGroups(logMissingGroups, &cgd);
+    } else {
+      logSystemError("getgroups");
+    }
+  } else {
+    logSystemError("getgroups");
+  }
 }
 #endif /* HAVE_GRP_H */
 
@@ -394,7 +467,8 @@ static const PrivilegesSetterEntry privilegesSetterTable[] = {
   },
 
 #ifdef HAVE_GRP_H
-  { .acquirePrivileges = setSupplementaryGroups,
+  { .acquirePrivileges = joinRequiredGroups,
+    .logMissingPrivileges = logUnjoinedGroups,
 
     #ifdef CAP_SETGID
     .capability = CAP_SETGID,
