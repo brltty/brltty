@@ -210,7 +210,6 @@ processRequiredGroups (RequiredGroupsProcessor *processGroups, void *data) {
 
   removeDuplicateGroups(groups, &count);
   processGroups(groups, count, data);
-  endgrent();
 }
 
 static void
@@ -276,6 +275,11 @@ logUnjoinedGroups (void) {
   } else {
     logSystemError("getgroups");
   }
+}
+
+static void
+closeGroupsDatabase (void) {
+  endgrent();
 }
 #endif /* HAVE_GRP_H */
 
@@ -448,17 +452,19 @@ logUnassignedCapabilities (void) {
 
 typedef void PrivilegesAcquisitionFunction (int amRoot);
 typedef void MissingPrivilegesLogger (void);
+typedef void ReleaseResourcesFunction (void);
 
 typedef struct {
   PrivilegesAcquisitionFunction *acquirePrivileges;
   MissingPrivilegesLogger *logMissingPrivileges;
+  ReleaseResourcesFunction *releaseResources;
 
   #ifdef CAP_IS_SUPPORTED
   cap_value_t capability;
   #endif /* CAP_IS_SUPPORTED */
-} PrivilegesSetterEntry;
+} PrivilegesAcquisitionEntry;
 
-static const PrivilegesSetterEntry privilegesSetterTable[] = {
+static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
   { .acquirePrivileges = installKernelModules,
 
     #ifdef CAP_SYS_MODULE
@@ -469,6 +475,7 @@ static const PrivilegesSetterEntry privilegesSetterTable[] = {
 #ifdef HAVE_GRP_H
   { .acquirePrivileges = joinRequiredGroups,
     .logMissingPrivileges = logUnjoinedGroups,
+    .releaseResources = closeGroupsDatabase,
 
     #ifdef CAP_SETGID
     .capability = CAP_SETGID,
@@ -476,10 +483,11 @@ static const PrivilegesSetterEntry privilegesSetterTable[] = {
   },
 #endif /* HAVE_GRP_H */
 
+// This one must be last because it relinquishes the temporary capabilities.
 #ifdef CAP_IS_SUPPORTED
   { .acquirePrivileges = assignRequiredCapabilities,
     .logMissingPrivileges = logUnassignedCapabilities,
-  },
+  }
 #endif /* CAP_IS_SUPPORTED */
 };
 
@@ -488,12 +496,12 @@ setProgramPrivileges (void) {
   int amRoot = !geteuid();
 
   if (amRoot) {
-    const PrivilegesSetterEntry *pse = privilegesSetterTable;
-    const PrivilegesSetterEntry *end = pse + ARRAY_COUNT(privilegesSetterTable);
+    const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
+    const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
 
-    while (pse < end) {
-      pse->acquirePrivileges(amRoot);
-      pse += 1;
+    while (pae < end) {
+      pae->acquirePrivileges(amRoot);
+      pae += 1;
     }
   }
 
@@ -502,11 +510,11 @@ setProgramPrivileges (void) {
     cap_t caps;
 
     if ((caps = cap_get_proc())) {
-      const PrivilegesSetterEntry *pse = privilegesSetterTable;
-      const PrivilegesSetterEntry *end = pse + ARRAY_COUNT(privilegesSetterTable);
+      const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
+      const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
 
-      while (pse < end) {
-        cap_value_t capability = (pse++)->capability;
+      while (pae < end) {
+        cap_value_t capability = (pae++)->capability;
 
         if (capability) {
           if (hasCapability(caps, CAP_EFFECTIVE, capability)) continue;
@@ -517,7 +525,7 @@ setProgramPrivileges (void) {
           if (!addAmbientCapability(capability)) continue;
         }
 
-        (pse-1)->acquirePrivileges(amRoot);
+        (pae-1)->acquirePrivileges(amRoot);
       }
 
       cap_free(caps);
@@ -528,13 +536,21 @@ setProgramPrivileges (void) {
 #endif /* CAP_IS_SUPPORTED */
 
   {
-    const PrivilegesSetterEntry *pse = privilegesSetterTable;
-    const PrivilegesSetterEntry *end = pse + ARRAY_COUNT(privilegesSetterTable);
+    const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
+    const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
 
-    while (pse < end) {
-      MissingPrivilegesLogger *logger = pse->logMissingPrivileges;
-      if (logger) logger();
-      pse += 1;
+    while (pae < end) {
+      {
+        MissingPrivilegesLogger *log = pae->logMissingPrivileges;
+        if (log) log();
+      }
+
+      {
+        ReleaseResourcesFunction *release = pae->releaseResources;
+        if (release) release();
+      }
+
+      pae += 1;
     }
   }
 }
