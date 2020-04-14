@@ -219,6 +219,23 @@ then
 fi
 BRLTTY_SUMMARY_ITEM([init-path], [init_path])
 
+brltty_default_unprivileged_user=brltty
+BRLTTY_ARG_WITH(
+   [unprivileged-user], [USER],
+   [name of unprivileged user to switch to],
+   [unprivileged_user], ["yes"]
+)
+if test "${unprivileged_user}" = "no"
+then
+   unprivileged_user=""
+elif test "${unprivileged_user}" = "yes"
+then
+   unprivileged_user="${brltty_default_unprivileged_user}"
+fi
+AC_DEFINE_UNQUOTED([UNPRIVILEGED_USER], ["${unprivileged_user}"],
+                   [Define this to be a string containing the name of the unprivileged user to switch to.])
+BRLTTY_SUMMARY_ITEM([unprivileged-user], [unprivileged_user])
+
 brltty_default_stderr_path=/tmp/brltty.log
 BRLTTY_ARG_WITH(
    [stderr-path], [FILE],
