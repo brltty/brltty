@@ -30,6 +30,7 @@
 #include "strfmt.h"
 #include "pgmprivs.h"
 #include "system_linux.h"
+#include "program.h"
 
 static void
 installKernelModules (int amRoot) {
@@ -579,6 +580,44 @@ ensureCapability (cap_value_t capability) {
   return yes;
 }
 
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+
+static int
+switchToUser (const char *user) {
+  const struct passwd *pwd = getpwnam(user);
+
+  if (pwd) {
+    if (seteuid(pwd->pw_uid) != -1) {
+      logMessage(LOG_NOTICE, "switched to user: %s", user);
+      return 1;
+    } else {
+      logSystemError("seteuid");
+    }
+  } else {
+    logMessage(LOG_WARNING, "user not found: %s", user);
+  }
+
+  return 0;
+}
+
+static int
+switchUser (const char *user) {
+  if (*user) {
+    if (switchToUser(user)) return 1;
+    logMessage(LOG_ERR, "can't switch to explicitly specified user: %s", user);
+    exit(PROG_EXIT_FATAL);
+  }
+
+  if (*(user = UNPRIVILEGED_USER)) {
+    if (switchToUser(user)) return 1;
+    logMessage(LOG_WARNING, "couldn't switch to default unprivileged user: %s", user);
+  }
+
+  return 0;
+}
+#endif /* HAVE_PWD_H */
+
 void
 establishProgramPrivileges (const char *user) {
   int amRoot = !geteuid();
@@ -594,4 +633,24 @@ establishProgramPrivileges (const char *user) {
   }
 
   acquirePrivileges(amRoot);
+
+#ifdef HAVE_PWD_H
+  if (!switchUser(user)) {
+    uid_t uid = geteuid();
+    const struct passwd *pwd = getpwuid(uid);
+    const char *name;
+    char number[0X10];
+
+    if (pwd) {
+      name = pwd->pw_name;
+    } else {
+      snprintf(number, sizeof(number), "%d", uid);
+      name = number;
+    }
+
+    logMessage(LOG_ERR, "continuing to execute as user: %s", name);
+  }
+
+  endpwent();
+#endif /* HAVE_PWD_H */
 }
