@@ -21,5 +21,5 @@
 #include "pgmprivs.h"
 
 void
-setProgramPrivileges (void) {
+establishProgramPrivileges (const char *user) {
 }

@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void setProgramPrivileges (void);
+extern void establishProgramPrivileges (const char *user);
 
 #ifdef __cplusplus
 }

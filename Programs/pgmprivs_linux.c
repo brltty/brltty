@@ -491,10 +491,8 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 #endif /* CAP_IS_SUPPORTED */
 };
 
-void
-setProgramPrivileges (void) {
-  int amRoot = !geteuid();
-
+static void
+acquirePrivileges (int amRoot) {
   if (amRoot) {
     const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
     const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
@@ -553,4 +551,10 @@ setProgramPrivileges (void) {
       pae += 1;
     }
   }
+}
+
+void
+establishProgramPrivileges (const char *user) {
+  int amRoot = !geteuid();
+  acquirePrivileges(amRoot);
 }

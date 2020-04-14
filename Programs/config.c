@@ -168,29 +168,34 @@ static const char *const optionStrings_CancelExecution[] = {
   NULL
 };
 
-static char *opt_pidFile;
-static char *opt_configurationFile;
-static char *opt_preferencesFile;
-static char *opt_preferenceOverrides;
 static char *opt_promptPatterns;
 
+static char *opt_unprivilegedUser;
+static char *opt_pidFile;
+
+static char *opt_configurationFile;
 static char *opt_updatableDirectory;
 static char *opt_writableDirectory;
 static char *opt_driversDirectory;
 
 char *opt_brailleDevice;
-int opt_releaseDevice;
 static char **brailleDevices = NULL;
 static const char *brailleDevice = NULL;
-static int brailleDriverConstructed;
+int opt_releaseDevice;
 
 static char *opt_brailleDriver;
 static char **brailleDrivers = NULL;
 static const BrailleDriver *brailleDriver = NULL;
 static void *brailleObject = NULL;
+static int brailleDriverConstructed;
+
 static char *opt_brailleParameters;
 static char *brailleParameters = NULL;
 static char **brailleDriverParameters = NULL;
+
+static char *opt_preferencesFile;
+static char *opt_preferenceOverrides;
+
 static char *oldPreferencesFile = NULL;
 static int oldPreferencesEnabled = 1;
 
@@ -312,6 +317,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_removeService,
     .description = strtext("Remove the %s service, and then exit."),
     .strings.array = optionStrings_RemoveService
+  },
+
+  { .letter = 'u',
+    .word = "unprivileged-user",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("user"),
+    .setting.string = &opt_unprivilegedUser,
+    .description = strtext("Name of unprivileged user to switch to.")
   },
 
   { .letter = 'C',
@@ -770,7 +783,7 @@ brlttyPrepare (int argc, char *argv[]) {
   logProgramBanner();
   logProperty(opt_logLevel, "logLevel", gettext("Log Level"));
 
-  setProgramPrivileges();
+  establishProgramPrivileges(opt_unprivilegedUser);
   return PROG_EXIT_SUCCESS;
 }
 
