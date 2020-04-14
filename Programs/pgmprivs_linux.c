@@ -371,6 +371,58 @@ setAmbientCapabilities (cap_t caps) {
 #endif /* PR_CAP_AMBIENT */
 }
 
+typedef struct {
+  const char *name;
+  cap_flag_t value;
+} CapabilitySetEntry;
+
+static const CapabilitySetEntry capabilitySetTable[] = {
+  { .value = CAP_PERMITTED,
+    .name = "permitted"
+  },
+
+  { .value = CAP_EFFECTIVE,
+    .name = "effective"
+  },
+
+  { .value = CAP_INHERITABLE,
+    .name = "inheritable"
+  },
+};
+
+/*
+static void
+logCapabilities (const char *label) {
+  cap_t caps;
+
+  if ((caps = cap_get_proc())) {
+    const CapabilitySetEntry *cse = capabilitySetTable;
+    const CapabilitySetEntry *end = cse + ARRAY_COUNT(capabilitySetTable);
+
+    while (cse < end) {
+      char buffer[0X1000];
+      STR_BEGIN(buffer, sizeof(buffer));
+      char delimiter = ':';
+
+      for (cap_value_t capability=0; capability<=CAP_LAST_CAP; capability+=1) {
+        if (!hasCapability(caps, cse->value, capability)) continue;
+        STR_PRINTF("%c %s", delimiter, cap_to_name(capability));
+        delimiter = ',';
+      }
+
+      STR_END;
+      logMessage(LOG_DEBUG, "%s capabilities: %s%s", cse->name, label, buffer);
+
+      cse += 1;
+    }
+
+    cap_free(caps);
+  } else {
+    logSystemError("cap_get_proc");
+  }
+}
+*/
+
 static int
 canUseCapability (cap_t caps, cap_value_t capability) {
   return hasCapability(caps, CAP_EFFECTIVE, capability);
@@ -388,13 +440,12 @@ enableCapability (cap_t caps, cap_value_t capability) {
 
 static int
 addRequiredCapability (cap_t caps, cap_value_t capability) {
-  static const cap_flag_t sets[] = {CAP_PERMITTED, CAP_EFFECTIVE, CAP_INHERITABLE};
-  const cap_flag_t *set = sets;
-  const cap_flag_t *end = set + ARRAY_COUNT(sets);;
+  const CapabilitySetEntry *cse = capabilitySetTable;
+  const CapabilitySetEntry *end = cse + ARRAY_COUNT(capabilitySetTable);;
 
-  while (set < end) {
-    if (!addCapability(caps, *set, capability)) return 0;
-    set += 1;
+  while (cse < end) {
+    if (!addCapability(caps, cse->value, capability)) return 0;
+    cse += 1;
   }
 
   return 1;
@@ -632,25 +683,30 @@ establishProgramPrivileges (const char *user) {
     }
   }
 
-  acquirePrivileges(amRoot);
-
 #ifdef HAVE_PWD_H
-  if (!switchUser(user)) {
-    uid_t uid = geteuid();
-    const struct passwd *pwd = getpwuid(uid);
-    const char *name;
-    char number[0X10];
-
-    if (pwd) {
-      name = pwd->pw_name;
+  if (amRoot) {
+    if (switchUser(user)) {
+      amRoot = 0;
     } else {
-      snprintf(number, sizeof(number), "%d", uid);
-      name = number;
+      uid_t uid = geteuid();
+      const struct passwd *pwd = getpwuid(uid);
+
+      const char *name;
+      char number[0X10];
+
+      if (pwd) {
+        name = pwd->pw_name;
+      } else {
+        snprintf(number, sizeof(number), "%d", uid);
+        name = number;
+      }
+
+      logMessage(LOG_ERR, "continuing to execute as user: %s", name);
     }
 
-    logMessage(LOG_ERR, "continuing to execute as user: %s", name);
+    endpwent();
   }
-
-  endpwent();
 #endif /* HAVE_PWD_H */
+
+  acquirePrivileges(amRoot);
 }
