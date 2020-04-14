@@ -439,6 +439,21 @@ enableCapability (cap_t caps, cap_value_t capability) {
 }
 
 static int
+ensureCapability (cap_value_t capability) {
+  int yes = 0;
+  cap_t caps;
+
+  if ((caps = cap_get_proc())) {
+    yes = canUseCapability(caps, capability) || enableCapability(caps, capability);
+    cap_free(caps);
+  } else {
+    logSystemError("cap_get_proc");
+  }
+
+  return yes;
+}
+
+static int
 addRequiredCapability (cap_t caps, cap_value_t capability) {
   const CapabilitySetEntry *cse = capabilitySetTable;
   const CapabilitySetEntry *end = cse + ARRAY_COUNT(capabilitySetTable);;
@@ -616,21 +631,6 @@ acquirePrivileges (int amRoot) {
   }
 }
 
-static int
-ensureCapability (cap_value_t capability) {
-  int yes = 0;
-  cap_t caps;
-
-  if ((caps = cap_get_proc())) {
-    yes = canUseCapability(caps, capability) || enableCapability(caps, capability);
-    cap_free(caps);
-  } else {
-    logSystemError("cap_get_proc");
-  }
-
-  return yes;
-}
-
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 
@@ -673,6 +673,7 @@ void
 establishProgramPrivileges (const char *user) {
   int amRoot = !geteuid();
 
+#ifdef CAP_SETUID
   if (!amRoot) {
     if (ensureCapability(CAP_SETUID)) {
       if (seteuid(0) != -1) {
@@ -682,6 +683,7 @@ establishProgramPrivileges (const char *user) {
       }
     }
   }
+#endif /* CAP_SETUID */
 
 #ifdef HAVE_PWD_H
   if (amRoot) {
