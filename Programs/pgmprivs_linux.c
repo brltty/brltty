@@ -371,6 +371,21 @@ setAmbientCapabilities (cap_t caps) {
 }
 
 static int
+canUseCapability (cap_t caps, cap_value_t capability) {
+  return hasCapability(caps, CAP_EFFECTIVE, capability);
+}
+
+static int
+enableCapability (cap_t caps, cap_value_t capability) {
+  return hasCapability(caps, CAP_PERMITTED, capability)
+      && addCapability(caps, CAP_EFFECTIVE, capability)
+      && addCapability(caps, CAP_INHERITABLE, capability)
+      && setCapabilities(caps)
+      && addAmbientCapability(capability)
+      ;
+}
+
+static int
 addRequiredCapability (cap_t caps, cap_value_t capability) {
   static const cap_flag_t sets[] = {CAP_PERMITTED, CAP_EFFECTIVE, CAP_INHERITABLE};
   const cap_flag_t *set = sets;
@@ -515,12 +530,8 @@ acquirePrivileges (int amRoot) {
         cap_value_t capability = (pae++)->capability;
 
         if (capability) {
-          if (hasCapability(caps, CAP_EFFECTIVE, capability)) continue;
-          if (!hasCapability(caps, CAP_PERMITTED, capability)) continue;
-          if (!addCapability(caps, CAP_EFFECTIVE, capability)) continue;
-          if (!addCapability(caps, CAP_INHERITABLE, capability)) continue;
-          if (!setCapabilities(caps)) continue;
-          if (!addAmbientCapability(capability)) continue;
+          if (canUseCapability(caps, capability)) continue;
+          if (!enableCapability(caps, capability)) continue;
         }
 
         (pae-1)->acquirePrivileges(amRoot);
@@ -553,8 +564,34 @@ acquirePrivileges (int amRoot) {
   }
 }
 
+static int
+ensureCapability (cap_value_t capability) {
+  int yes = 0;
+  cap_t caps;
+
+  if ((caps = cap_get_proc())) {
+    yes = canUseCapability(caps, capability) || enableCapability(caps, capability);
+    cap_free(caps);
+  } else {
+    logSystemError("cap_get_proc");
+  }
+
+  return yes;
+}
+
 void
 establishProgramPrivileges (const char *user) {
   int amRoot = !geteuid();
+
+  if (!amRoot) {
+    if (ensureCapability(CAP_SETUID)) {
+      if (seteuid(0) != -1) {
+        amRoot = 1;
+      } else {
+        logSystemError("seteuid");
+      }
+    }
+  }
+
   acquirePrivileges(amRoot);
 }
