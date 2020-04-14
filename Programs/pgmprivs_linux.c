@@ -342,7 +342,7 @@ static int
 addAmbientCapability (cap_value_t capability) {
 #ifdef PR_CAP_AMBIENT_RAISE
   if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, capability, 0, 0) != -1) return 1;
-  logSystemError("PR_CAP_AMBIENT_RAISE");
+  logSystemError("prctl[PR_CAP_AMBIENT_RAISE]");
 #endif /*( PR_CAP_AMBIENT_RAISE */
   return 0;
 }
@@ -366,7 +366,7 @@ setAmbientCapabilities (cap_t caps) {
       rce += 1;
     }
   } else {
-    logSystemError("PR_CAP_AMBIENT_CLEAR_ALL");
+    logSystemError("prctl[PR_CAP_AMBIENT_CLEAR_ALL]");
   }
 #endif /* PR_CAP_AMBIENT */
 }
@@ -682,7 +682,7 @@ establishProgramPrivileges (const char *user) {
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
-    logSystemError("PR_SET_KEEPCAPS");
+    logSystemError("prctl[PR_SET_KEEPCAPS]");
   }
 #endif /* PR_SET_KEEPCAPS */
 
