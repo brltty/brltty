@@ -639,11 +639,18 @@ switchToUser (const char *user) {
   const struct passwd *pwd = getpwnam(user);
 
   if (pwd) {
-    if (seteuid(pwd->pw_uid) != -1) {
-      logMessage(LOG_NOTICE, "switched to user: %s", user);
-      return 1;
+    uid_t uid = pwd->pw_uid;
+    gid_t gid = pwd->pw_gid;
+
+    if (setresgid(gid, gid, gid) != -1) {
+      if (setresuid(uid, uid, uid) != -1) {
+        logMessage(LOG_NOTICE, "switched to user: %s", user);
+        return 1;
+      } else {
+        logSystemError("setresuid");
+      }
     } else {
-      logSystemError("seteuid");
+      logSystemError("setresgid");
     }
   } else {
     logMessage(LOG_WARNING, "user not found: %s", user);
@@ -672,6 +679,12 @@ switchUser (const char *user) {
 void
 establishProgramPrivileges (const char *user) {
   int amRoot = !geteuid();
+
+#ifdef PR_SET_KEEPCAPS
+  if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
+    logSystemError("PR_SET_KEEPCAPS");
+  }
+#endif /* PR_SET_KEEPCAPS */
 
 #ifdef CAP_SETUID
   if (!amRoot) {
