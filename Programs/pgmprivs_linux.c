@@ -624,19 +624,26 @@ switchToUser (const char *user) {
   const struct passwd *pwd = getpwnam(user);
 
   if (pwd) {
-    uid_t uid = pwd->pw_uid;
-    gid_t gid = pwd->pw_gid;
+    uid_t newUid = pwd->pw_uid;
+    gid_t newGid = pwd->pw_gid;
+    gid_t oldRgid, oldEgid, oldSgid;
 
-    if (setresgid(gid, gid, gid) != -1) {
-      if (setresuid(uid, uid, uid) != -1) {
-        logMessage(LOG_NOTICE, "switched to user: %s", user);
-        return 1;
+    if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
+      if (setresgid(newGid, newGid, newGid) != -1) {
+        if (setresuid(newUid, newUid, newUid) != -1) {
+          logMessage(LOG_NOTICE, "switched to user: %s", user);
+          return 1;
+        } else {
+          logSystemError("setresuid");
+        }
+
+        setresgid(oldRgid, oldEgid, oldSgid);
       } else {
-        logSystemError("setresuid");
+        logSystemError("setresgid");
       }
     } else {
-      logSystemError("setresgid");
-    }
+      logSystemError("getresgid");
+    };
   } else {
     logMessage(LOG_WARNING, "user not found: %s", user);
   }
@@ -689,7 +696,7 @@ establishProgramPrivileges (const char *user) {
         name = number;
       }
 
-      logMessage(LOG_ERR, "continuing to execute as user: %s", name);
+      logMessage(LOG_ERR, "continuing to execute as privileged user: %s", name);
     }
 
     endpwent();
