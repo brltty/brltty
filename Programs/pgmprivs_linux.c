@@ -33,7 +33,7 @@
 #include "program.h"
 
 static void
-installKernelModules (int amRoot) {
+installKernelModules (int amPrivilegedUser) {
   installSpeakerModule();
   installUinputModule();
 }
@@ -223,7 +223,7 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
 }
 
 static void
-joinRequiredGroups (int amRoot) {
+joinRequiredGroups (int amPrivilegedUser) {
   processRequiredGroups(setSupplementaryGroups, NULL);
 }
 
@@ -424,7 +424,7 @@ logCapabilities (const char *label) {
 */
 
 static int
-canUseCapability (cap_t caps, cap_value_t capability) {
+isCapabilityEnabled (cap_t caps, cap_value_t capability) {
   return hasCapability(caps, CAP_EFFECTIVE, capability);
 }
 
@@ -452,10 +452,10 @@ addRequiredCapability (cap_t caps, cap_value_t capability) {
 }
 
 static void
-assignRequiredCapabilities (int amRoot) {
+assignRequiredCapabilities (int amPrivilegedUser) {
   cap_t newCaps, oldCaps;
 
-  if (amRoot) {
+  if (amPrivilegedUser) {
     oldCaps = NULL;
   } else if (!(oldCaps = cap_get_proc())) {
     logSystemError("cap_get_proc");
@@ -517,7 +517,7 @@ logUnassignedCapabilities (void) {
 }
 #endif /* CAP_IS_SUPPORTED */
 
-typedef void PrivilegesAcquisitionFunction (int amRoot);
+typedef void PrivilegesAcquisitionFunction (int amPrivilegedUser);
 typedef void MissingPrivilegesLogger (void);
 typedef void ReleaseResourcesFunction (void);
 
@@ -559,13 +559,13 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 };
 
 static void
-acquirePrivileges (int amRoot) {
-  if (amRoot) {
+acquirePrivileges (int amPrivilegedUser) {
+  if (amPrivilegedUser) {
     const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
     const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
 
     while (pae < end) {
-      pae->acquirePrivileges(amRoot);
+      pae->acquirePrivileges(amPrivilegedUser);
       pae += 1;
     }
   }
@@ -582,11 +582,11 @@ acquirePrivileges (int amRoot) {
         cap_value_t capability = (pae++)->capability;
 
         if (capability) {
-          if (canUseCapability(caps, capability)) continue;
+          if (isCapabilityEnabled(caps, capability)) continue;
           if (!enableCapability(caps, capability)) continue;
         }
 
-        (pae-1)->acquirePrivileges(amRoot);
+        (pae-1)->acquirePrivileges(amPrivilegedUser);
       }
 
       cap_free(caps);
@@ -625,25 +625,31 @@ switchToUser (const char *user) {
 
   if (pwd) {
     uid_t newUid = pwd->pw_uid;
-    gid_t newGid = pwd->pw_gid;
-    gid_t oldRgid, oldEgid, oldSgid;
 
-    if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
-      if (setresgid(newGid, newGid, newGid) != -1) {
-        if (setresuid(newUid, newUid, newUid) != -1) {
-          logMessage(LOG_NOTICE, "switched to user: %s", user);
-          return 1;
+    if (newUid) {
+      gid_t oldRgid, oldEgid, oldSgid;
+
+      if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
+        gid_t newGid = pwd->pw_gid;
+
+        if (setresgid(newGid, newGid, newGid) != -1) {
+          if (setresuid(newUid, newUid, newUid) != -1) {
+            logMessage(LOG_NOTICE, "switched to user: %s", user);
+            return 1;
+          } else {
+            logSystemError("setresuid");
+          }
+
+          setresgid(oldRgid, oldEgid, oldSgid);
         } else {
-          logSystemError("setresuid");
+          logSystemError("setresgid");
         }
-
-        setresgid(oldRgid, oldEgid, oldSgid);
       } else {
-        logSystemError("setresgid");
+        logSystemError("getresgid");
       }
     } else {
-      logSystemError("getresgid");
-    };
+      logMessage(LOG_WARNING, "user is privileged: %s", user);
+    }
   } else {
     logMessage(LOG_WARNING, "user not found: %s", user);
   }
@@ -670,7 +676,7 @@ switchUser (const char *user) {
 
 void
 establishProgramPrivileges (const char *user) {
-  int amRoot = !geteuid();
+  int amPrivilegedUser = !geteuid();
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
@@ -679,9 +685,9 @@ establishProgramPrivileges (const char *user) {
 #endif /* PR_SET_KEEPCAPS */
 
 #ifdef HAVE_PWD_H
-  if (amRoot) {
+  if (amPrivilegedUser) {
     if (switchUser(user)) {
-      amRoot = 0;
+      amPrivilegedUser = 0;
     } else {
       uid_t uid = geteuid();
       const struct passwd *pwd = getpwuid(uid);
@@ -696,12 +702,12 @@ establishProgramPrivileges (const char *user) {
         name = number;
       }
 
-      logMessage(LOG_ERR, "continuing to execute as privileged user: %s", name);
+      logMessage(LOG_ERR, "continuing to execute as invoking user: %s", name);
     }
 
     endpwent();
   }
 #endif /* HAVE_PWD_H */
 
-  acquirePrivileges(amRoot);
+  acquirePrivileges(amPrivilegedUser);
 }
