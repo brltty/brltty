@@ -19,9 +19,6 @@
 
 . "$(dirname "${0}")/prologue.sh"
 
-readonly permanentCapabilities="CAP_SYS_ADMIN,CAP_SYS_TTY_CONFIG"
-readonly temporaryCapabilities="CAP_SETUID,CAP_SETGID"
-
 [ "${#}" -eq 0 ] && {
 cat <<END_OF_USAGE
 Usage: ${programName} command [argument ...]
@@ -32,13 +29,6 @@ Environment Variables:
   <COMMAND>_VALGRIND_DIRECTORY=path
     If set then write a valgrind memory usage log to a file named
     <command>-yyyymmdd-HHMMSS.vg in the specified directory.
-
-  <COMMAND>_USER_NAME=user
-    If set then execute the command as the specified user. The
-    user's primary group and supplementary groups will also be set,
-    and the following capabilities are assigned:
-
-      ${permanentCapabilities//,/, }
 
 END_OF_USAGE
 exit 0
@@ -54,7 +44,6 @@ set -- "${commandPath}" "${@}"
 
 readonly variablePrefix="${commandName^^?}"
 getVariable "${variablePrefix}_VALGRIND_DIRECTORY" vgDirectory
-getVariable "${variablePrefix}_USER_NAME" asUser
 
 [ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
 LD_LIBRARY_PATH="${programDirectory}/Programs${LD_LIBRARY_PATH}"
@@ -75,15 +64,5 @@ export LD_LIBRARY_PATH
        "${@}"
 }
 
-[ -n "${asUser}" ] && {
-   id -u -- "${asUser}" >/dev/null 2>&1 || semanticError "unknown user: ${asUser}"
-   set -- capsh \
-       --caps="${permanentCapabilities},${temporaryCapabilities}=ep" \
-       --user="${asUser}" \
-       --caps="${temporaryCapabilities}-ep" \
-       -- -c "${*}"
-}
-
-[ "$(id -u)" -eq 0 ] || set -- sudo -E -- "${@}"
 exec "${@}"
 exit "${?}"
