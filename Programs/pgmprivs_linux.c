@@ -439,6 +439,12 @@ enableCapability (cap_t caps, cap_value_t capability) {
 }
 
 static int
+ensureCapability (cap_t caps, cap_value_t capability) {
+  if (isCapabilityEnabled(caps, capability)) return 1;
+  return enableCapability(caps, capability);
+}
+
+static int
 addRequiredCapability (cap_t caps, cap_value_t capability) {
   const CapabilitySetEntry *cse = capabilitySetTable;
   const CapabilitySetEntry *end = cse + ARRAY_COUNT(capabilitySetTable);;
@@ -579,14 +585,19 @@ acquirePrivileges (int amPrivilegedUser) {
       const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
 
       while (pae < end) {
-        cap_value_t capability = (pae++)->capability;
+        cap_value_t capability = pae->capability;
+        int callHandler = 1;
 
         if (capability) {
-          if (isCapabilityEnabled(caps, capability)) continue;
-          if (!enableCapability(caps, capability)) continue;
+          if (!isCapabilityEnabled(caps, capability)) {
+            if (!enableCapability(caps, capability)) {
+              callHandler = 0;
+            }
+          }
         }
 
-        (pae-1)->acquirePrivileges(amPrivilegedUser);
+        if (callHandler) pae->acquirePrivileges(amPrivilegedUser);
+        pae += 1;
       }
 
       cap_free(caps);
@@ -677,6 +688,8 @@ switchUser (const char *user) {
 void
 establishProgramPrivileges (const char *user) {
   int amPrivilegedUser = !geteuid();
+  int canSwitchUser = amPrivilegedUser;
+  int canSwitchGroup = amPrivilegedUser;
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
@@ -684,8 +697,41 @@ establishProgramPrivileges (const char *user) {
   }
 #endif /* PR_SET_KEEPCAPS */
 
+#ifdef CAP_IS_SUPPORTED
+  {
+    cap_t curCaps;
+
+    if ((curCaps = cap_get_proc())) {
+      cap_t newCaps;
+
+      if ((newCaps = cap_dup(curCaps))) {
+        if (!canSwitchUser) {
+          if (ensureCapability(newCaps, CAP_SETUID)) {
+            canSwitchUser = 1;
+          }
+        }
+
+        if (!canSwitchGroup) {
+          if (ensureCapability(newCaps, CAP_SETGID)) {
+            canSwitchGroup = 1;
+          }
+        }
+
+        if (cap_compare(newCaps, curCaps) != 0) setCapabilities(newCaps);
+        cap_free(newCaps);
+      } else {
+        logSystemError("cap_dup");
+      }
+
+      cap_free(curCaps);
+    } else {
+      logSystemError("cap_get_proc");
+    }
+  }
+#endif /* CAP_IS_SUPPORTED */
+
 #ifdef HAVE_PWD_H
-  if (amPrivilegedUser) {
+  if (canSwitchUser) {
     if (switchUser(user)) {
       amPrivilegedUser = 0;
     } else {
