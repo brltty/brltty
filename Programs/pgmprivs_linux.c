@@ -589,10 +589,8 @@ acquirePrivileges (int amPrivilegedUser) {
         int callHandler = 1;
 
         if (capability) {
-          if (!isCapabilityEnabled(caps, capability)) {
-            if (!enableCapability(caps, capability)) {
-              callHandler = 0;
-            }
+          if (!ensureCapability(caps, capability)) {
+            callHandler = 0;
           }
         }
 
