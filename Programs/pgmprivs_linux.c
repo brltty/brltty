@@ -669,9 +669,14 @@ switchToUser (const char *user) {
 }
 
 static int
-switchUser (const char *user) {
+switchUser (const char *user, int amPrivilegedUser) {
   if (*user) {
-    if (switchToUser(user)) return 1;
+    if (!amPrivilegedUser) {
+      logMessage(LOG_WARNING, "not executing as a privileged user");
+    } else if (switchToUser(user)) {
+      return 1;
+    }
+
     logMessage(LOG_ERR, "can't switch to explicitly specified user: %s", user);
     exit(PROG_EXIT_FATAL);
   }
@@ -732,7 +737,7 @@ establishProgramPrivileges (const char *user) {
 
 #ifdef HAVE_PWD_H
   if (canSwitchUser) {
-    if (switchUser(user)) {
+    if (switchUser(user, amPrivilegedUser)) {
       amPrivilegedUser = 0;
     } else {
       uid_t uid = geteuid();

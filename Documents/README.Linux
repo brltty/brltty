@@ -74,7 +74,7 @@ so that it can be fully functional when started as a regular user,
 without requiring any additional administrator configuration,
 is::
 
-  setcap cap_sys_module,cap_setgid,cap_sys_admin,cap_sys_tty_config,cap_mknod+p /path/to/brltty
+  setcap cap_setuid,cap_setgid,cap_sys_module,cap_sys_admin,cap_sys_tty_config,cap_mknod+p /path/to/brltty
 
 Privileged Host Operations
 --------------------------
@@ -159,10 +159,18 @@ and are relinquished right after this has been done.
 **cap_setgid**
   If this capability has also been assigned to BRLTTY's executable
   then ignore the invoking user's group memberships
-  and join the needed `group memberships`_ internally.
+  and internally establish the actually needed `group memberships`_.
+
+**cap_setuid**
+  If this capability has also been assigned to BRLTTY's executable
+  then switching to the default unprivileged user
+  can be done when BRLTTY is started `as a regular user`_.
+  This functionality also requires the ``cap_setgid`` temporary capability
+  in order to also switch to that user's primary group.
+  This capability doesn't allow switching to an explicit user.
 
 **cap_sys_module**
   If this capability has also been assigned to BRLTTY's executable
   then the needed `kernel modules`_ needn't have been already installed
-  because they can be installed internally.
+  because they can be internally installed.
 
