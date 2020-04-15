@@ -26,17 +26,20 @@ and then drops the rest of them by becoming a regular user process.
 
 The steps that are performed to accomplish this are as follows:
 
-1) Installing the needed `kernel modules`_.
-2) Establishing the needed `group memberships`_.
-3) Assigning to itself its `required capabilities`_.
-4) Switching to executing as a regular user process.
+1) Switch to executing as a regular user process.
+2) Install the needed `kernel modules`_.
+3) Establish the needed `group memberships`_.
+4) Assign to itself its `required capabilities`_.
+5) Relinquish all of the other capabilities.
 
 The decision regarding which regular user to run as is made as follows:
 
-1) If the ``-u`` command line option has been supplied
-   then run as the specified user if it exists.
+1) If the ``-u`` command line option has been supplied then:
 
-2) Run as the |default user| default user if it exists.
+   * Run as the specified user if it exists.
+   * Stop with a nonzero exit status if it doesn't exist.
+
+2) Run as the default unprivileged user (|default user|) if it exists.
 
 3) Continue to run as |super user|.
 
@@ -47,7 +50,7 @@ When BRLTTY starts executing as a regular user (not |super user|),
 i.e. when its initial effective user identifier isn't 0,
 it "hopes" that
 the system,
-the user who invoked it,
+the user who started it,
 and its executable
 have all been adequately configured.
 While BRLTTY will continue to run in spite of inadequate host configuration,
@@ -59,7 +62,7 @@ These failures can range all the way from minor to severe.
   This isn't necessary if the (temporary) capability
   ``cap_sys_module`` has also been assigned to BRLTTY's executable.
 
-* Adequate user configuration means that the user who invoked BRLTTY
+* Adequate user configuration means that the user who started BRLTTY
   has all of the needed `group memberships`_.
   This isn't necessary if the (temporary) capability
   ``cap_setgid`` has also been assigned to BRLTTY's executable.
@@ -67,14 +70,25 @@ These failures can range all the way from minor to severe.
 * Adequate executable configuration means that
   all of the `required capabilities`_ have been assigned to it.
 
+If the (temporary) capabilities ``cap_setuid`` and ``cap_setgid``
+have both also been assigned to BRLTTY's executable
+then it's able to switch to its default unprivileged user (|default user|)
+even when started as a regular user.
+If the default unprivileged user doesn't exist then
+BRLTTY continues to run as the user who started it.
+This feature doesn't allow an explicit user to be specified
+(via the ``-u`` command line option).
+
 The command to assign all of the capabilities,
 i.e. both the `required capabilities`_ and the `temporary capabilities`_,
-to the BRLTTY executable
-so that it can be fully functional when started as a regular user,
+to BRLTTY's executable
+so that it'll be fully functional when started as a regular user,
 without requiring any additional administrator configuration,
 is::
 
   setcap cap_setuid,cap_setgid,cap_sys_module,cap_sys_admin,cap_sys_tty_config,cap_mknod+p /path/to/brltty
+
+This command must be run as |super user|.
 
 Privileged Host Operations
 --------------------------
@@ -91,12 +105,14 @@ BRLTTY relies on functionality provided by these kernel modules:
   For playing alert tunes via the built-in PC speaker.
 
 **uinput**
-  For creating virtual keyboards via ``/dev/uinput``.
+  For creating virtual keyboards via
+  ``/dev/uinput`` (or ``/dev/input/uinput``).
 
 Group Memberships
 ~~~~~~~~~~~~~~~~~
 
-BRLTTY relies on file system and server (daemon) access granted by these groups:
+BRLTTY relies on file system and server (daemon) access
+granted via membership in these groups:
 
 **audio**
   For playing sound via the ALSA framework.
@@ -122,11 +138,12 @@ BRLTTY relies on file system and server (daemon) access granted by these groups:
 
 **root**
   Note that this is the ``root`` group - not the ``root`` user.
-  It's used:
+  It's used for:
 
-  * For USB I/O via the devices in ``/dev/bus/usb/``.
+  * USB I/O via the devices in ``/dev/bus/usb/``.
 
-  * For creating virtual keyboards via ``/dev/uinput``.
+  * Creating virtual keyboards via
+    ``/dev/uinput`` (or ``/dev/input/uinput``).
 
 **tty**
   * For reading screen content via the ``/dev/vcs`` devices.
@@ -136,7 +153,8 @@ BRLTTY relies on file system and server (daemon) access granted by these groups:
 Required Capabilities
 ~~~~~~~~~~~~~~~~~~~~~
 
-BRLTTY uses kernel operations that are enabled via these capabilities:
+BRLTTY uses privileged kernel operations
+that are granted via these capabilities:
 
 **cap_mknod**
   For creating needed but missing special device files.
@@ -150,7 +168,8 @@ BRLTTY uses kernel operations that are enabled via these capabilities:
 Temporary Capabilities
 ~~~~~~~~~~~~~~~~~~~~~~
 
-BRLTTY only uses kernel operations enabled via these capabilities
+BRLTTY only uses the privileged kernel operations
+that are granted via these capabilities
 when it starts `as a regular user`_.
 They allow it to configure itself,
 and thus not rely so heavily on explicit administrator configuration,
@@ -163,11 +182,12 @@ and are relinquished right after this has been done.
 
 **cap_setuid**
   If this capability has also been assigned to BRLTTY's executable
-  then switching to the default unprivileged user
+  then switching to the default unprivileged user (|default user|)
   can be done when BRLTTY is started `as a regular user`_.
-  This functionality also requires the ``cap_setgid`` temporary capability
-  in order to also switch to that user's primary group.
-  This capability doesn't allow switching to an explicit user.
+  The ``cap_setgid`` temporary capability is also required
+  so that BRLTTY can switch to that user's primary group.
+  Ihis feature doesn't allow switching to an explicit user
+  (via the ``-u`` command line option).
 
 **cap_sys_module**
   If this capability has also been assigned to BRLTTY's executable
