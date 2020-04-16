@@ -18,20 +18,20 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
-addProgramOption u flag noSetUserIdentifiers "doo't allow setting user identifiers"
-addProgramOption g flag noSetGroupIdentifiers "doo't allow setting group identifiers"
-addProgramOption k flag noInstallKernelModules "doo't allow installing kernel modules"
-addProgramOption i flag noInsertTypedInput "doo't allow inserting typed input"
-addProgramOption s flag noUseInternalSpeaker "doo't allow using the built-in PC speaker"
-addProgramOption d flag noCreateDeviceFiles "doo't allow creating device files"
+addProgramOption u flag noUsers "don't allow switching to the default unprivileged user"
+addProgramOption g flag noGroups "don't allow switching to the writable group or joining required groups"
+addProgramOption m flag noModules "don't allow installing kernel modules"
+addProgramOption i flag noInput "don't allow inserting input characters"
+addProgramOption s flag noSpeaker "don't allow using the built-in PC speaker"
+addProgramOption d flag noDevices "don't allow creating special device files"
 addProgramParameter executable executablePath "the path to the executable"
 
-noSetUserIdentifiers= false
-noSetGroupIdentifiers= false
-noInstallKernelModules= false
-noInsertTypedInput= false
-noUseInternalSpeaker= false
-noCreateDeviceFiles= false
+noUsers=false
+noGroups=false
+noModules=false
+noInput=false
+noSpeaker=false
+noDevices=false
 parseProgramArguments "${@}"
 
 [ -e "${executablePath}" ] || semanticError "file not found: ${executablePath}"
@@ -43,18 +43,18 @@ addCapability() {
    capabilitiesList[${#capabilitiesList[*]}]="${1}"
 }
 
-"${noSetUserIdentifiers}" || addCapability "cap_setuid"
-"${noSetGroupIdentifiers}" || addCapability "cap_setgid"
-"${noInstallKernelModules}" || addCapability "cap_sys_module"
-"${noInsertTypedInput}" || addCapability "cap_sys_admin"
-"${noUseInternalSpeaker}" || addCapability "cap_sys_tty_config"
-"${noCreateDeviceFiles}" || addCapability "cap_mknod"
+"${noUsers}" || addCapability "cap_setuid"
+"${noGroups}" || addCapability "cap_setgid"
+"${noModules}" || addCapability "cap_sys_module"
+"${noInput}" || addCapability "cap_sys_admin"
+"${noSpeaker}" || addCapability "cap_sys_tty_config"
+"${noDevices}" || addCapability "cap_mknod"
 
-capabilitiesString="${capabilitiesList[*]}"
-capabilitiesString="${capabilitiesString// /,}"
-capabilitiesString+="+p"
+capabilitiesOperand="${capabilitiesList[*]}"
+capabilitiesOperand="${capabilitiesOperand// /,}"
+capabilitiesOperand+="+p"
+set -- setcap "${capabilitiesOperand}" "${executablePath}"
 
-set -- setcap "${capabilitiesString}" "${executablePath}"
 [ "$(id -u)" -eq 0 ] || set -- sudo -- "${@}"
 "${@}"
 exit "${?}"
