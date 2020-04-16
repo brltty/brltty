@@ -1,0 +1,60 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2020 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+. "`dirname "${0}"`/prologue.sh"
+addProgramOption u flag noSetUserIdentifiers "doo't allow setting user identifiers"
+addProgramOption g flag noSetGroupIdentifiers "doo't allow setting group identifiers"
+addProgramOption k flag noInstallKernelModules "doo't allow installing kernel modules"
+addProgramOption i flag noInsertTypedInput "doo't allow inserting typed input"
+addProgramOption s flag noUseInternalSpeaker "doo't allow using the built-in PC speaker"
+addProgramOption d flag noCreateDeviceFiles "doo't allow creating device files"
+addProgramParameter executable executablePath "the path to the executable"
+
+noSetUserIdentifiers= false
+noSetGroupIdentifiers= false
+noInstallKernelModules= false
+noInsertTypedInput= false
+noUseInternalSpeaker= false
+noCreateDeviceFiles= false
+parseProgramArguments "${@}"
+
+[ -e "${executablePath}" ] || semanticError "file not found: ${executablePath}"
+[ -f "${executablePath}" ] || semanticError "not a file: ${executablePath}"
+[ -x "${executablePath}" ] || semanticError "file not executable: ${executablePath}"
+
+capabilitiesList=()
+addCapability() {
+   capabilitiesList[${#capabilitiesList[*]}]="${1}"
+}
+
+"${noSetUserIdentifiers}" || addCapability "cap_setuid"
+"${noSetGroupIdentifiers}" || addCapability "cap_setgid"
+"${noInstallKernelModules}" || addCapability "cap_sys_module"
+"${noInsertTypedInput}" || addCapability "cap_sys_admin"
+"${noUseInternalSpeaker}" || addCapability "cap_sys_tty_config"
+"${noCreateDeviceFiles}" || addCapability "cap_mknod"
+
+capabilitiesString="${capabilitiesList[*]}"
+capabilitiesString="${capabilitiesString// /,}"
+capabilitiesString+="+p"
+
+set -- setcap "${capabilitiesString}" "${executablePath}"
+[ "$(id -u)" -eq 0 ] || set -- sudo -- "${@}"
+"${@}"
+exit "${?}"
