@@ -442,7 +442,10 @@ enableCapability (cap_t caps, cap_value_t capability) {
 static int
 ensureCapability (cap_t caps, cap_value_t capability) {
   if (isCapabilityEnabled(caps, capability)) return 1;
-  return enableCapability(caps, capability);
+  if (enableCapability(caps, capability)) return 1;
+
+  logMessage(LOG_WARNING, "can't enable capability: %s", cap_to_name(capability));
+  return 0;
 }
 
 static int
@@ -587,15 +590,11 @@ acquirePrivileges (int amPrivilegedUser) {
 
       while (pae < end) {
         cap_value_t capability = pae->capability;
-        int callHandler = 1;
 
-        if (capability) {
-          if (!ensureCapability(caps, capability)) {
-            callHandler = 0;
-          }
+        if (!capability || ensureCapability(caps, capability)) {
+          pae->acquirePrivileges(amPrivilegedUser);
         }
 
-        if (callHandler) pae->acquirePrivileges(amPrivilegedUser);
         pae += 1;
       }
 
@@ -712,12 +711,16 @@ establishProgramPrivileges (const char *user) {
         if (!canSwitchUser) {
           if (ensureCapability(newCaps, CAP_SETUID)) {
             canSwitchUser = 1;
+          } else {
+            logMessage(LOG_WARNING, "can't switch user");
           }
         }
 
         if (!canSwitchGroup) {
           if (ensureCapability(newCaps, CAP_SETGID)) {
             canSwitchGroup = 1;
+          } else {
+            logMessage(LOG_WARNING, "can't switch primary group");
           }
         }
 
