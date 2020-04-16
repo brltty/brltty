@@ -7,6 +7,20 @@ BRLTTY on Linux
 .. |default user| replace:: ``brltty``
 .. |super user| replace:: ``root``
 
+.. |cap_setuid| replace:: *cap_setuid*
+.. |cap_setgid| replace:: *cap_setgid*
+.. |cap_sys_module| replace:: *cap_sys_module*
+.. |cap_sys_admin| replace:: **cap_sys_admin**
+.. |cap_sys_tty_config| replace:: **cap_sys_tty_config**
+.. |cap_mknod| replace:: **cap_mknod**
+
+.. |cap_setuid reason| replace:: switching to the default unprivileged user
+.. |cap_setgid reason| replace:: switching to the writable group and joining required groups
+.. |cap_sys_module reason| replace:: installing kernel modules
+.. |cap_sys_admin reason| replace:: inserting input characters
+.. |cap_sys_tty_config reason| replace:: using the built-in PC speaker
+.. |cap_mknod reason| replace:: creating special device files
+
 For System Administrators
 =========================
 
@@ -60,17 +74,17 @@ These failures can range all the way from minor to severe.
 * Adequate system configuration means that
   all of the needed `kernel modules`_ have already been installed.
   This isn't necessary if the (temporary) capability
-  ``cap_sys_module`` has also been assigned to BRLTTY's executable.
+  |cap_sys_module| has also been assigned to BRLTTY's executable.
 
 * Adequate user configuration means that the user who started BRLTTY
   has all of the needed `group memberships`_.
   This isn't necessary if the (temporary) capability
-  ``cap_setgid`` has also been assigned to BRLTTY's executable.
+  |cap_setgid| has also been assigned to BRLTTY's executable.
 
 * Adequate executable configuration means that
   all of the `required capabilities`_ have been assigned to it.
 
-If the (temporary) capabilities ``cap_setuid`` and ``cap_setgid``
+If the (temporary) capabilities |cap_setuid| and |cap_setgid|
 have both also been assigned to BRLTTY's executable
 then it's able to switch to its default unprivileged user (|default user|)
 even when started as a regular user.
@@ -78,6 +92,33 @@ If the default unprivileged user doesn't exist then
 BRLTTY continues to run as the user who started it.
 This feature doesn't allow an explicit user to be specified
 (via the ``-u`` command line option).
+
+Assigning the Capabilities to the Executable
+--------------------------------------------
+
+First, here's a summary of all of the capabilities that BRLTTY needs
+when started `as a regular user`_.
+
+* The `required capabilities`_ are highlighted **this way**.
+  They're needed throughout BRLTTY's execution.
+
+* The `temporary capabilities`_ are highlighted *this way*.
+  They're only needed when BRLTTY starts,
+  and are relinquished when they're no longer needed.
+
+====================  ===========================
+Capability            Reason
+--------------------  ---------------------------
+|cap_setuid|          |cap_setuid reason|
+|cap_setgid|          |cap_setgid reason|
+|cap_sys_module|      |cap_sys_module reason|
+|cap_sys_admin|       |cap_sys_admin reason|
+|cap_sys_tty_config|  |cap_sys_tty_config reason|
+|cap_mknod|           |cap_mknod reason|
+====================  ===========================
+
+The Command
+~~~~~~~~~~~
 
 The command to assign all of the capabilities,
 i.e. both the `required capabilities`_ and the `temporary capabilities`_,
@@ -88,7 +129,34 @@ is::
 
   setcap cap_setuid,cap_setgid,cap_sys_module,cap_sys_admin,cap_sys_tty_config,cap_mknod+p /path/to/brltty
 
-This command must be run as |super user|.
+This command must be run as the super user (|super user|).
+
+The ``setcaps`` Script
+~~~~~~~~~~~~~~~~~~~~~~
+
+The top-level directory of BRLTTY's source tree contains
+a script named ``setcaps`` that simplifies the job of
+assigning the needed capabilities to BRLTTY's executable.
+Its default is to assign all of them.
+For all of the details, run this command::
+
+  setcaps -h
+
+It requires one positional argument - the path to BRLTTY's executable.
+It also accepts a number of options (which must precede that path).
+In particular, these are the options that
+remove capabilities from the full set.
+
+======  ====================  ===========================
+Option  Capability            Reason
+------  --------------------  ---------------------------
+-u      |cap_setuid|          |cap_setuid reason|
+-g      |cap_setgid|          |cap_setgid reason|
+-m      |cap_sys_module|      |cap_sys_module reason|
+-i      |cap_sys_admin|       |cap_sys_admin reason|
+-s      |cap_sys_tty_config|  |cap_sys_tty_config reason|
+-d      |cap_mknod|           |cap_mknod reason|
+======  ====================  ===========================
 
 Privileged Host Operations
 --------------------------
@@ -156,13 +224,13 @@ Required Capabilities
 BRLTTY uses privileged kernel operations
 that are granted via these capabilities:
 
-**cap_mknod**
+|cap_mknod|
   For creating needed but missing special device files.
 
-**cap_sys_admin**
+|cap_sys_admin|
   For using ``TIOCSTI`` to insert input characters typed on a braille device.
 
-**cap_sys_tty_config**
+|cap_sys_tty_config|
   For using ``KDMKTONE`` and ``KIOCSOUND`` to play alert tunes via the built-in PC speaker.
 
 Temporary Capabilities
@@ -175,21 +243,21 @@ They allow it to configure itself,
 and thus not rely so heavily on explicit administrator configuration,
 and are relinquished right after this has been done.
 
-**cap_setgid**
+|cap_setgid|
   If this capability has also been assigned to BRLTTY's executable
   then ignore the invoking user's group memberships
   and internally establish the actually needed `group memberships`_.
 
-**cap_setuid**
+|cap_setuid|
   If this capability has also been assigned to BRLTTY's executable
   then switching to the default unprivileged user (|default user|)
   can be done when BRLTTY is started `as a regular user`_.
-  The ``cap_setgid`` temporary capability is also required
+  The |cap_setgid| temporary capability is also required
   so that BRLTTY can switch to that user's primary group.
-  Ihis feature doesn't allow switching to an explicit user
+  This feature doesn't allow switching to an explicit user
   (via the ``-u`` command line option).
 
-**cap_sys_module**
+|cap_sys_module|
   If this capability has also been assigned to BRLTTY's executable
   then the needed `kernel modules`_ needn't have been already installed
   because they can be internally installed.
