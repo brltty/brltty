@@ -292,6 +292,30 @@ closeGroupsDatabase (void) {
 #endif /* HAVE_LIBCAP */
 
 #ifdef CAP_IS_SUPPORTED
+static void
+logCapabilities (cap_t caps, const char *label) {
+  char *text;
+
+  if ((text = cap_to_text(caps, NULL))) {
+    logMessage(LOG_DEBUG, "capabilities: %s: %s", label, text);
+    cap_free(text);
+  } else {
+    logSystemError("cap_to_text");
+  }
+}
+
+static void
+logCurrentCapabilities (const char *label) {
+  cap_t caps;
+
+  if ((caps = cap_get_proc())) {
+    logCapabilities(caps, label);
+    cap_free(caps);
+  } else {
+    logSystemError("cap_get_proc");
+  }
+}
+
 static int
 setCapabilities (cap_t caps) {
   if (cap_set_proc(caps) != -1) return 1;
@@ -372,58 +396,6 @@ setAmbientCapabilities (cap_t caps) {
 #endif /* PR_CAP_AMBIENT */
 }
 
-typedef struct {
-  const char *name;
-  cap_flag_t value;
-} CapabilitySetEntry;
-
-static const CapabilitySetEntry capabilitySetTable[] = {
-  { .value = CAP_PERMITTED,
-    .name = "permitted"
-  },
-
-  { .value = CAP_EFFECTIVE,
-    .name = "effective"
-  },
-
-  { .value = CAP_INHERITABLE,
-    .name = "inheritable"
-  },
-};
-
-/*
-static void
-logCapabilities (const char *label) {
-  cap_t caps;
-
-  if ((caps = cap_get_proc())) {
-    const CapabilitySetEntry *cse = capabilitySetTable;
-    const CapabilitySetEntry *end = cse + ARRAY_COUNT(capabilitySetTable);
-
-    while (cse < end) {
-      char buffer[0X1000];
-      STR_BEGIN(buffer, sizeof(buffer));
-      char delimiter = ':';
-
-      for (cap_value_t capability=0; capability<=CAP_LAST_CAP; capability+=1) {
-        if (!hasCapability(caps, cse->value, capability)) continue;
-        STR_PRINTF("%c %s", delimiter, cap_to_name(capability));
-        delimiter = ',';
-      }
-
-      STR_END;
-      logMessage(LOG_DEBUG, "%s capabilities: %s%s", cse->name, label, buffer);
-
-      cse += 1;
-    }
-
-    cap_free(caps);
-  } else {
-    logSystemError("cap_get_proc");
-  }
-}
-*/
-
 static int
 isCapabilityEnabled (cap_t caps, cap_value_t capability) {
   return hasCapability(caps, CAP_EFFECTIVE, capability);
@@ -447,6 +419,25 @@ ensureCapability (cap_t caps, cap_value_t capability) {
   logMessage(LOG_WARNING, "can't enable capability: %s", cap_to_name(capability));
   return 0;
 }
+
+typedef struct {
+  const char *name;
+  cap_flag_t value;
+} CapabilitySetEntry;
+
+static const CapabilitySetEntry capabilitySetTable[] = {
+  { .value = CAP_PERMITTED,
+    .name = "permitted"
+  },
+
+  { .value = CAP_EFFECTIVE,
+    .name = "effective"
+  },
+
+  { .value = CAP_INHERITABLE,
+    .name = "inheritable"
+  },
+};
 
 static int
 addRequiredCapability (cap_t caps, cap_value_t capability) {
@@ -778,4 +769,5 @@ establishProgramPrivileges (const char *user) {
 #endif /* HAVE_PWD_H */
 
   acquirePrivileges(amPrivilegedUser);
+  logCurrentCapabilities("after relinquish");
 }
