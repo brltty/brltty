@@ -529,6 +529,17 @@ logUnassignedCapabilities (void) {
     logSystemError("cap_get_proc");
   }
 }
+
+static void
+needCapability (int *have, cap_t caps, cap_value_t capability, const char *reason) {
+  if (!*have) {
+    if (ensureCapability(caps, capability)) {
+      *have = 1;
+    } else {
+      logUnassignedCapability(capability, reason);
+    }
+  }
+}
 #endif /* CAP_IS_SUPPORTED */
 
 typedef void PrivilegesAcquisitionFunction (int amPrivilegedUser);
@@ -718,21 +729,15 @@ establishProgramPrivileges (const char *user) {
       cap_t newCaps;
 
       if ((newCaps = cap_dup(curCaps))) {
-        if (!canSwitchUser) {
-          if (ensureCapability(newCaps, CAP_SETUID)) {
-            canSwitchUser = 1;
-          } else {
-            logMessage(LOG_WARNING, "can't switch user");
-          }
-        }
+        needCapability(
+          &canSwitchUser, newCaps, CAP_SETUID,
+          "for switching to the default unprivileged user"
+        );
 
-        if (!canSwitchGroup) {
-          if (ensureCapability(newCaps, CAP_SETGID)) {
-            canSwitchGroup = 1;
-          } else {
-            logMessage(LOG_WARNING, "can't switch primary group");
-          }
-        }
+        needCapability(
+          &canSwitchGroup, newCaps, CAP_SETGID,
+          "for switching to the writable group"
+        );
 
         if (cap_compare(newCaps, curCaps) != 0) setCapabilities(newCaps);
         cap_free(newCaps);
