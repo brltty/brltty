@@ -7,6 +7,9 @@ BRLTTY on Linux
 .. |default user| replace:: ``brltty``
 .. |super user| replace:: ``root``
 
+.. |speaker| replace:: built-in PC speaker
+.. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
+
 .. |cap_setuid| replace:: *cap_setuid*
 .. |cap_setgid| replace:: *cap_setgid*
 .. |cap_sys_module| replace:: *cap_sys_module*
@@ -18,7 +21,7 @@ BRLTTY on Linux
 .. |cap_setgid reason| replace:: switching to the writable group and joining required groups
 .. |cap_sys_module reason| replace:: installing kernel modules
 .. |cap_sys_admin reason| replace:: inserting input characters
-.. |cap_sys_tty_config reason| replace:: using the built-in PC speaker
+.. |cap_sys_tty_config reason| replace:: using the |speaker|
 .. |cap_mknod reason| replace:: creating special device files
 
 For System Administrators
@@ -170,11 +173,10 @@ Kernel Modules
 BRLTTY relies on functionality provided by these kernel modules:
 
 **pcspkr**
-  For playing alert tunes via the built-in PC speaker.
+  For playing alert tunes via the |speaker|.
 
 **uinput**
-  For creating virtual keyboards via
-  ``/dev/uinput`` (or ``/dev/input/uinput``).
+  For creating virtual devices via the |uinput device|.
 
 Group Memberships
 ~~~~~~~~~~~~~~~~~
@@ -198,7 +200,7 @@ granted via membership in these groups:
     Other USB to serial adapters.
 
 **input**
-  For intercepting keyboard key events via the devices in ``/dev/input/``.
+  For finding connected keyboards via the devices in ``/dev/input/``.
   This capability is used to support keyboard key tables.
 
 **pulse-access**
@@ -210,8 +212,7 @@ granted via membership in these groups:
 
   * USB I/O via ``USBFS`` (using the devices in ``/dev/bus/usb/``).
 
-  * Creating virtual keyboards via
-    ``/dev/uinput`` (or ``/dev/input/uinput``).
+  * Creating virtual devices via the |uinput device|.
 
 **tty**
   * For reading screen content via the ``/dev/vcs`` devices.
@@ -231,7 +232,7 @@ that are granted via these capabilities:
   For using ``TIOCSTI`` to insert input characters typed on a braille device.
 
 |cap_sys_tty_config|
-  For using ``KDMKTONE`` and ``KIOCSOUND`` to play alert tunes via the built-in PC speaker.
+  For using ``KDMKTONE`` and ``KIOCSOUND`` to play alert tunes via the |speaker|.
 
 Temporary Capabilities
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -261,4 +262,77 @@ and are relinquished right after this has been done.
   If this capability has also been assigned to BRLTTY's executable
   then the needed `kernel modules`_ needn't have been already installed
   because they can be internally installed.
+
+Known Problems
+~~~~~~~~~~~~~~
+
+Writing to SYSFS Files
+``````````````````````
+
+The ``SYSFS`` virtual file system (usually mounted at ``/sys/``)
+contains some files that BRLTTY occasionally needs to write to.
+While they can be read by anyone,
+they can only be written to by the super user (|super user|).
+These problems haven't been resolved yet.
+They include:
+
+* Disabling USB autosuspend.
+  Some USB-connected braille devices don't respond very well
+  to being automatically suspended by the kernel.
+  In these cases, BRLTTY disables the feature
+  by writing to the ``power/autosuspend`` file
+  of the associated PCI device.
+
+Creating Virtual Devices via Uinput
+```````````````````````````````````
+
+The |uinput device| is only readable and writable
+by the super user (|super user|) -
+it hasn't been granted any group or others access.
+This makes it impossible for BRLTTY to access it
+when started `as a regular user`_.
+
+This situation could be easily resolved
+by granting group read and write access to the device.
+This shouldn't be problematic because its owned by the ``root`` group.
+Why this hasn't been done is escaping the comprehension of this author.
+Even better, of course, why not give the device its own group?
+
+BRLTTY currently gets around this problem
+by using the |cap_mknod| capability
+to create its own copy of the device within a private area.
+
+Being able to create virtual devices
+is a very important ability for BRLTTY to have.
+It's used for:
+
+* Creating a virtual keyboard in order to
+  monitor what the user is typing (key press and release events).
+  This is done to support keyboard key tables
+  (which allow keyboard key combinations to be bound
+  to BRLTTY's navigation and configuration commands).
+
+* Creating a virtual keyboard in order to inject simulated typing. 
+  This is done to support the typing of
+  arbitrary combinations of modifier keys (shift, control, alt, etc),
+  in combination (or not) with any character(s) and/or special key(s),
+  on the keyboard of a braille device.
+  The fallback interface - ``TIOCSTI`` - only provides character injection,
+  which means that it can only support the typing of individual characters
+  and the pressing of only those special keys
+  that can be emulated by well-known escape sequences.
+
+* Creating a virtual sound device in order to
+  watch for tones sent to the |speaker|.
+  This is done to support the redirection of these tones
+  to the PCM interface of a sound card.
+  While sighted users seem to be content with not hearing these tones
+  on a computer that doesn't have a |speaker|,
+  most blind users rely on being able to hear them.
+  For example, a blind person can't see a visual bell.
+
+* Creating a virtual LED device in order to
+  monitor what the keyboard LEDs are showing.
+  This is done to support the generation of
+  An audio-based rendering of LED state changes.
 

@@ -58,7 +58,7 @@ OOMScoreAdjust=-900
 ExecStartPre=-/sbin/modprobe pcspkr
 AmbientCapabilities=cap_sys_tty_config
 
-# for creating virtual keyboards
+# for creating virtual devices
 ExecStartPre=-/sbin/modprobe uinput
 
 # for inserting input characters typed on a braille device (TIOCSTI)
@@ -91,9 +91,9 @@ SupplementaryGroups=audio
 # for playing sound via the Pulse Audio daemon
 SupplementaryGroups=pulse-access
 
-# for intercepting keyboard key events (/dev/input/*)
+# for finding connected keyboards (/dev/input/*)
 SupplementaryGroups=input
 
-# for creating virtual keyboards (/dev/uinput)
+# for creating virtual devices (/dev/uinput or /dev/input/uinput)
 SupplementaryGroups=root
 

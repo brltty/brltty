@@ -40,9 +40,9 @@ m brltty audio
 # for playing sound via the Pulse Audio daemon
 m brltty pulse-access
 
-# for intercepting keyboard key events (/dev/input/*)
+# for finding connected keyboards (/dev/input/*)
 m brltty input
 
-# for creating virtual keyboards (/dev/uinput)
+# for creating virtual devices (/dev/uinput)
 m brltty root
 

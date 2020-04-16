@@ -155,12 +155,12 @@ static RequiredGroupEntry requiredGroupTable[] = {
     .name = "pulse-access",
   },
 
-  { .reason = "for intercepting keyboard key events",
+  { .reason = "for finding connected keyboards",
     .name = "input",
     .path = "/dev/input/mice",
   },
 
-  { .reason = "for creating virtual keyboards",
+  { .reason = "for creating virtual devices",
     .path = "/dev/uinput",
   },
 };
