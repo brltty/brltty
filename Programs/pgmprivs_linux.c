@@ -133,6 +133,7 @@ static RequiredGroupEntry requiredGroupTable[] = {
   },
 
   { .reason = "for virtual console monitoring and control",
+    .name = "tty",
     .path = "/dev/tty1",
   },
 
@@ -141,7 +142,7 @@ static RequiredGroupEntry requiredGroupTable[] = {
     .path = "/dev/ttyS0",
   },
 
-  { .reason = "for USB I/O",
+  { .reason = "for USB I/O via USBFS",
     .path = "/dev/bus/usb",
   },
 

@@ -140,7 +140,7 @@ granted via membership in these groups:
   Note that this is the ``root`` group - not the ``root`` user.
   It's used for:
 
-  * USB I/O via the devices in ``/dev/bus/usb/``.
+  * USB I/O via ``USBFS`` (using the devices in ``/dev/bus/usb/``).
 
   * Creating virtual keyboards via
     ``/dev/uinput`` (or ``/dev/input/uinput``).
