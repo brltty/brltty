@@ -500,6 +500,13 @@ assignRequiredCapabilities (int amPrivilegedUser) {
 }
 
 static void
+logUnassignedCapability (cap_value_t capability, const char *reason) {
+  logMessage(LOG_WARNING,
+             "capability not assigned: %s (%s)",
+             cap_to_name(capability), reason);
+}
+
+static void
 logUnassignedCapabilities (void) {
   cap_t caps;
 
@@ -511,10 +518,7 @@ logUnassignedCapabilities (void) {
       cap_value_t capability = rce->value;
 
       if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
-        logMessage(LOG_WARNING,
-          "capability not assigned: %s (%s)",
-          cap_to_name(capability), rce->reason
-        );
+        logUnassignedCapability(capability, rce->reason);
       }
 
       rce += 1;
@@ -532,6 +536,7 @@ typedef void MissingPrivilegesLogger (void);
 typedef void ReleaseResourcesFunction (void);
 
 typedef struct {
+  const char *reason;
   PrivilegesAcquisitionFunction *acquirePrivileges;
   MissingPrivilegesLogger *logMissingPrivileges;
   ReleaseResourcesFunction *releaseResources;
@@ -542,7 +547,8 @@ typedef struct {
 } PrivilegesAcquisitionEntry;
 
 static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
-  { .acquirePrivileges = installKernelModules,
+  { .reason = "for installing kernel modules",
+    .acquirePrivileges = installKernelModules,
 
     #ifdef CAP_SYS_MODULE
     .capability = CAP_SYS_MODULE,
@@ -550,7 +556,8 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
   },
 
 #ifdef HAVE_GRP_H
-  { .acquirePrivileges = joinRequiredGroups,
+  { .reason = "for joining required groups",
+    .acquirePrivileges = joinRequiredGroups,
     .logMissingPrivileges = logUnjoinedGroups,
     .releaseResources = closeGroupsDatabase,
 
@@ -562,7 +569,8 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 
 // This one must be last because it relinquishes the temporary capabilities.
 #ifdef CAP_IS_SUPPORTED
-  { .acquirePrivileges = assignRequiredCapabilities,
+  { .reason = "for assigning required capabilities",
+    .acquirePrivileges = assignRequiredCapabilities,
     .logMissingPrivileges = logUnassignedCapabilities,
   }
 #endif /* CAP_IS_SUPPORTED */
@@ -593,6 +601,8 @@ acquirePrivileges (int amPrivilegedUser) {
 
         if (!capability || ensureCapability(caps, capability)) {
           pae->acquirePrivileges(amPrivilegedUser);
+        } else {
+          logUnassignedCapability(capability, pae->reason);
         }
 
         pae += 1;
