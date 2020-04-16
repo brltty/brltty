@@ -531,10 +531,10 @@ logUnassignedCapabilities (void) {
 }
 
 static void
-needCapability (int *have, cap_t caps, cap_value_t capability, const char *reason) {
-  if (!*have) {
+needCapability (int *can, cap_t caps, cap_value_t capability, const char *reason) {
+  if (!*can) {
     if (ensureCapability(caps, capability)) {
-      *have = 1;
+      *can = 1;
     } else {
       logUnassignedCapability(capability, reason);
     }
@@ -753,8 +753,8 @@ establishProgramPrivileges (const char *user) {
 #endif /* CAP_IS_SUPPORTED */
 
 #ifdef HAVE_PWD_H
-  if (canSwitchUser) {
-    if (switchUser(user, amPrivilegedUser)) {
+  {
+    if (canSwitchUser && canSwitchGroup && switchUser(user, amPrivilegedUser)) {
       amPrivilegedUser = 0;
     } else {
       uid_t uid = geteuid();
