@@ -227,8 +227,13 @@ granted via membership in these groups:
 Required Capabilities
 ~~~~~~~~~~~~~~~~~~~~~
 
-BRLTTY uses privileged kernel operations
-that are granted via these capabilities:
+BRLTTY uses the privileged kernel operations
+that are granted via these capabilities
+throughout its execution.
+They are retained iwithin its ``permitted`` and ``effective`` sets,
+but not iwithin its ``inheritable`` and ``ambient`` sets.
+In other words, they're for BRLTTY itself
+and aren't passed along to any host command that it may invoke.
 
 |cap_mknod|
   For creating needed but missing special device files.
@@ -246,7 +251,7 @@ BRLTTY only uses the privileged kernel operations
 that are granted via these capabilities
 when it starts `as a regular user`_.
 They allow it to configure itself,
-and thus not rely so heavily on explicit administrator configuration,
+thus not relying so heavily on explicit administrator configuration,
 and are relinquished right after this has been done.
 
 |cap_setgid|

@@ -316,6 +316,24 @@ logCurrentCapabilities (const char *label) {
   }
 }
 
+static void
+clearAmbientCapabilities (void) {
+#ifdef PR_CAP_AMBIENT
+  if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) == -1) {
+    logSystemError("prctl[PR_CAP_AMBIENT_CLEAR_ALL]");
+  }
+#endif /* PR_CAP_AMBIENT */
+}
+
+static int
+addAmbientCapability (cap_value_t capability) {
+#ifdef PR_CAP_AMBIENT_RAISE
+  if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, capability, 0, 0) != -1) return 1;
+  logSystemError("prctl[PR_CAP_AMBIENT_RAISE]");
+#endif /*( PR_CAP_AMBIENT_RAISE */
+  return 0;
+}
+
 static int
 setCapabilities (cap_t caps) {
   if (cap_set_proc(caps) != -1) return 1;
@@ -336,64 +354,6 @@ addCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
   if (cap_set_flag(caps, set, 1, &capability, CAP_SET) != -1) return 1;
   logSystemError("cap_set_flag");
   return 0;
-}
-
-static int
-IsPermittedCapability (cap_t caps, cap_value_t capability) {
-  if (!caps) return 1;
-  return hasCapability(caps, CAP_PERMITTED, capability);
-}
-
-typedef struct {
-  const char *reason;
-  cap_value_t value;
-} RequiredCapabilityEntry;
-
-static const RequiredCapabilityEntry requiredCapabilityTable[] = {
-  { .reason = "for injecting input characters typed on a braille device",
-    .value = CAP_SYS_ADMIN,
-  },
-
-  { .reason = "for playing alert tunes via the built-in PC speaker",
-    .value = CAP_SYS_TTY_CONFIG,
-  },
-
-  { .reason = "for creating needed but missing special device files",
-    .value = CAP_MKNOD,
-  },
-};
-
-static int
-addAmbientCapability (cap_value_t capability) {
-#ifdef PR_CAP_AMBIENT_RAISE
-  if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, capability, 0, 0) != -1) return 1;
-  logSystemError("prctl[PR_CAP_AMBIENT_RAISE]");
-#endif /*( PR_CAP_AMBIENT_RAISE */
-  return 0;
-}
-
-static void
-setAmbientCapabilities (cap_t caps) {
-#ifdef PR_CAP_AMBIENT
-  if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) != -1) {
-    const RequiredCapabilityEntry *rce = requiredCapabilityTable;
-    const RequiredCapabilityEntry *end = rce + ARRAY_COUNT(requiredCapabilityTable);
-
-    while (rce < end) {
-      cap_value_t capability = rce->value;
-
-      if (IsPermittedCapability(caps, capability)) {
-        if (!addAmbientCapability(capability)) {
-          break;
-        }
-      }
-
-      rce += 1;
-    }
-  } else {
-    logSystemError("prctl[PR_CAP_AMBIENT_CLEAR_ALL]");
-  }
-#endif /* PR_CAP_AMBIENT */
 }
 
 static int
@@ -421,35 +381,28 @@ ensureCapability (cap_t caps, cap_value_t capability) {
 }
 
 typedef struct {
-  const char *name;
-  cap_flag_t value;
-} CapabilitySetEntry;
+  const char *reason;
+  cap_value_t value;
+} RequiredCapabilityEntry;
 
-static const CapabilitySetEntry capabilitySetTable[] = {
-  { .value = CAP_PERMITTED,
-    .name = "permitted"
+static const RequiredCapabilityEntry requiredCapabilityTable[] = {
+  { .reason = "for injecting input characters typed on a braille device",
+    .value = CAP_SYS_ADMIN,
   },
 
-  { .value = CAP_EFFECTIVE,
-    .name = "effective"
+  { .reason = "for playing alert tunes via the built-in PC speaker",
+    .value = CAP_SYS_TTY_CONFIG,
   },
 
-  { .value = CAP_INHERITABLE,
-    .name = "inheritable"
+  { .reason = "for creating needed but missing special device files",
+    .value = CAP_MKNOD,
   },
 };
 
 static int
-addRequiredCapability (cap_t caps, cap_value_t capability) {
-  const CapabilitySetEntry *cse = capabilitySetTable;
-  const CapabilitySetEntry *end = cse + ARRAY_COUNT(capabilitySetTable);;
-
-  while (cse < end) {
-    if (!addCapability(caps, cse->value, capability)) return 0;
-    cse += 1;
-  }
-
-  return 1;
+IsPermittedCapability (cap_t caps, cap_value_t capability) {
+  if (!caps) return 1;
+  return hasCapability(caps, CAP_PERMITTED, capability);
 }
 
 static void
@@ -472,22 +425,22 @@ assignRequiredCapabilities (int amPrivilegedUser) {
         cap_value_t capability = rce->value;
 
         if (IsPermittedCapability(oldCaps, capability)) {
-          if (!addRequiredCapability(newCaps, capability)) {
-            break;
-          }
+          if (!addCapability(newCaps, CAP_PERMITTED, capability)) break;
+          if (!addCapability(newCaps, CAP_EFFECTIVE, capability)) break;
         }
 
         rce += 1;
       }
     }
 
-    if (setCapabilities(newCaps)) setAmbientCapabilities(oldCaps);
+    setCapabilities(newCaps);
     cap_free(newCaps);
   } else {
     logSystemError("cap_init");
   }
 
   if (oldCaps) cap_free(oldCaps);
+  clearAmbientCapabilities();
 }
 
 static void
