@@ -922,13 +922,17 @@ getKobjectUeventSocket (void) {
     };
 
     if ((socketDescriptor = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT)) != -1) {
-      if (bind(socketDescriptor, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) == -1) {
-        logSystemError("bind");
+      if (bind(socketDescriptor, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) != -1) {
+        logMessage(LOG_DEBUG,
+          "netlink kobject uevent socket opened: fd=%d", socketDescriptor
+        );
+      } else {
+        logSystemError("netlink kobject uevent socket bind");
         close(socketDescriptor);
         socketDescriptor = -1;
       }
     } else {
-      logSystemError("socket");
+      logSystemError("netlink kobject uevent socket creation");
     }
   }
 
