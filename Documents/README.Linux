@@ -306,6 +306,17 @@ Even better, of course, why not give the device its own group?
 BRLTTY currently gets around this problem
 by using the |cap_mknod| capability
 to create its own copy of the device within a private area.
+Other alternatives include:
+
+* Adding the ``cap_dac_override`` (permanent) capability
+  so that BRLTTY isn't subject to file ownership restrictions.
+
+* Adding the ``cap_fowner`` (temporary) capability
+  so that BRLTTY can add an acl (access control list) entry
+  that grants itself access to the device.
+
+* Adding the ``cap_fowner`` (temporary) capability
+  so that BRLTTY can add read and write group access to the device.
 
 Being able to create virtual devices
 is a very important ability for BRLTTY to have.
