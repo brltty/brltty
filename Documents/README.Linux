@@ -10,6 +10,11 @@ BRLTTY on Linux
 .. |speaker| replace:: built-in PC speaker
 .. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
 
+.. |keyboard key tables| replace::
+  keyboard key tables
+  (which allow keyboard key combinations to be bound
+  to BRLTTY's navigation and configuration commands)
+
 .. |cap_setuid| replace:: *cap_setuid*
 .. |cap_setgid| replace:: *cap_setgid*
 .. |cap_sys_module| replace:: *cap_sys_module*
@@ -20,7 +25,7 @@ BRLTTY on Linux
 .. |cap_setuid reason| replace:: switching to the default unprivileged user
 .. |cap_setgid reason| replace:: switching to the writable group and joining required groups
 .. |cap_sys_module reason| replace:: installing kernel modules
-.. |cap_sys_admin reason| replace:: inserting input characters
+.. |cap_sys_admin reason| replace:: injecting input characters
 .. |cap_sys_tty_config reason| replace:: using the |speaker|
 .. |cap_mknod reason| replace:: creating special device files
 
@@ -200,8 +205,8 @@ granted via membership in these groups:
     Other USB to serial adapters.
 
 **input**
-  For finding connected keyboards via the devices in ``/dev/input/``.
-  This capability is used to support keyboard key tables.
+  For monitoring keyboard input via the devices in ``/dev/input/``.
+  This capability is used to support |keyboard key tables|.
 
 **pulse-access**
   For playing sound via the Pulse Audio daemon.
@@ -229,7 +234,7 @@ that are granted via these capabilities:
   For creating needed but missing special device files.
 
 |cap_sys_admin|
-  For using ``TIOCSTI`` to insert input characters typed on a braille device.
+  For using ``TIOCSTI`` to inject input characters typed on a braille device.
 
 |cap_sys_tty_config|
   For using ``KDMKTONE`` and ``KIOCSOUND`` to play alert tunes via the |speaker|.
@@ -307,10 +312,9 @@ is a very important ability for BRLTTY to have.
 It's used for:
 
 * Creating a virtual keyboard in order to
-  monitor what the user is typing (key press and release events).
-  This is done to support keyboard key tables
-  (which allow keyboard key combinations to be bound
-  to BRLTTY's navigation and configuration commands).
+  forward those keyboard events (key presses and releases)
+  that haven't been claimed by bindings within |keyboard key tables|
+  back to the system.
 
 * Creating a virtual keyboard in order to inject simulated typing. 
   This is done to support the typing of

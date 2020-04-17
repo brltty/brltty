@@ -61,7 +61,7 @@ AmbientCapabilities=cap_sys_tty_config
 # for creating virtual devices
 ExecStartPre=-/sbin/modprobe uinput
 
-# for inserting input characters typed on a braille device (TIOCSTI)
+# for injecting input characters typed on a braille device (TIOCSTI)
 AmbientCapabilities=cap_sys_admin
 
 # for creating needed but missing special device files
@@ -91,7 +91,7 @@ SupplementaryGroups=audio
 # for playing sound via the Pulse Audio daemon
 SupplementaryGroups=pulse-access
 
-# for finding connected keyboards (/dev/input/*)
+# for monitoring keyboard input (/dev/input/*)
 SupplementaryGroups=input
 
 # for creating virtual devices (/dev/uinput or /dev/input/uinput)

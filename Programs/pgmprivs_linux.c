@@ -155,7 +155,7 @@ static RequiredGroupEntry requiredGroupTable[] = {
     .name = "pulse-access",
   },
 
-  { .reason = "for finding connected keyboards",
+  { .reason = "for monitoring keyboard input",
     .name = "input",
     .path = "/dev/input/mice",
   },
@@ -350,7 +350,7 @@ typedef struct {
 } RequiredCapabilityEntry;
 
 static const RequiredCapabilityEntry requiredCapabilityTable[] = {
-  { .reason = "for inserting input characters typed on a braille device",
+  { .reason = "for injecting input characters typed on a braille device",
     .value = CAP_SYS_ADMIN,
   },
 
@@ -761,7 +761,7 @@ establishProgramPrivileges (const char *user) {
         name = number;
       }
 
-      logMessage(LOG_ERR, "continuing to execute as invoking user: %s", name);
+      logMessage(LOG_NOTICE, "continuing to execute as invoking user: %s", name);
     }
 
     endpwent();
