@@ -44,17 +44,22 @@ compareGroups (gid_t group1, gid_t group2) {
   return 0;
 }
 
-int
-sortGroups (const void *element1,const void *element2) {
+static int
+groupSorter (const void *element1,const void *element2) {
   const gid_t *group1 = element1;
   const gid_t *group2 = element2;
   return compareGroups(*group1, *group2);
 }
 
 void
+sortGroups (gid_t *groups, size_t count) {
+  qsort(groups, count, sizeof(*groups), groupSorter);
+}
+
+void
 removeDuplicateGroups (gid_t *groups, size_t *count) {
   if (*count > 1) {
-    qsort(groups, *count, sizeof(*groups), sortGroups);
+    sortGroups(groups, *count);
 
     gid_t *to = groups;
     const gid_t *from = to + 1;
@@ -75,9 +80,11 @@ processSupplementaryGroups (GroupsProcessor *processGroups, void *data) {
 
   if (size != -1) {
     gid_t groups[size];
-    ssize_t count = getgroups(size, groups);
+    ssize_t result = getgroups(size, groups);
 
-    if (count != -1) {
+    if (result != -1) {
+      size_t count = result;
+      removeDuplicateGroups(groups, &count);
       processGroups(groups, count, data);
     } else {
       logSystemError("getgroups");

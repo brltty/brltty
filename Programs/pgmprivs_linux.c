@@ -200,7 +200,7 @@ typedef struct {
 } CurrentGroupsData;
 
 static void
-logMissingGroups (const gid_t *groups, size_t count, void *data) {
+logUnjoinedGroups (const gid_t *groups, size_t count, void *data) {
   const CurrentGroupsData *cgd = data;
 
   const gid_t *cur = cgd->groups;
@@ -222,27 +222,18 @@ logMissingGroups (const gid_t *groups, size_t count, void *data) {
 }
 
 static void
-logUnjoinedGroups (void) {
-  ssize_t size = getgroups(0, NULL);
+logWantedGroups (const gid_t *groups, size_t count, void *data) {
+  CurrentGroupsData cgd = {
+    .groups = groups,
+    .count = count
+  };
 
-  if (size != -1) {
-    gid_t groups[size];
-    ssize_t count = getgroups(size, groups);
+  processRequiredGroups(logUnjoinedGroups, &cgd);
+}
 
-    if (count != -1) {
-      CurrentGroupsData cgd = {
-        .groups = groups,
-        .count = count
-      };
-
-      removeDuplicateGroups(groups, &cgd.count);
-      processRequiredGroups(logMissingGroups, &cgd);
-    } else {
-      logSystemError("getgroups");
-    }
-  } else {
-    logSystemError("getgroups");
-  }
+static void
+logMissingGroups (void) {
+  processSupplementaryGroups(logWantedGroups, NULL);
 }
 
 static void
@@ -507,7 +498,7 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 #ifdef HAVE_GRP_H
   { .reason = "for joining required groups",
     .acquirePrivileges = joinRequiredGroups,
-    .logMissingPrivileges = logUnjoinedGroups,
+    .logMissingPrivileges = logMissingGroups,
     .releaseResources = closeGroupsDatabase,
 
     #ifdef CAP_SETGID

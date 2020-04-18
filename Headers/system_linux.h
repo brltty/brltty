@@ -24,7 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern int compareGroups (gid_t group1, gid_t group2);
-extern int sortGroups (const void *element1,const void *element2);
+extern void sortGroups (gid_t *groups, size_t count);
 extern void removeDuplicateGroups (gid_t *groups, size_t *count);
 
 typedef void GroupsProcessor (const gid_t *groups, size_t count, void *data);
