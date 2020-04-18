@@ -23,6 +23,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern int compareGroups (gid_t group1, gid_t group2);
+extern int sortGroups (const void *element1,const void *element2);
+extern void removeDuplicateGroups (gid_t *groups, size_t *count);
+
+typedef void GroupsProcessor (const gid_t *groups, size_t count, void *data);
+extern void processSupplementaryGroups (GroupsProcessor *processGroups, void *data);
+
 extern int installKernelModule (const char *name, unsigned char *status);
 extern int installSpeakerModule (void);
 extern int installUinputModule (void);

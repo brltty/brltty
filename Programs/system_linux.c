@@ -37,6 +37,56 @@
 #include "system.h"
 #include "system_linux.h"
 
+int
+compareGroups (gid_t group1, gid_t group2) {
+  if (group1 < group2) return -1;
+  if (group1 > group2) return 1;
+  return 0;
+}
+
+int
+sortGroups (const void *element1,const void *element2) {
+  const gid_t *group1 = element1;
+  const gid_t *group2 = element2;
+  return compareGroups(*group1, *group2);
+}
+
+void
+removeDuplicateGroups (gid_t *groups, size_t *count) {
+  if (*count > 1) {
+    qsort(groups, *count, sizeof(*groups), sortGroups);
+
+    gid_t *to = groups;
+    const gid_t *from = to + 1;
+    const gid_t *end = to + *count;
+
+    while (from < end) {
+      if (*from != *to) *++to = *from;
+      from += 1;
+    }
+
+    *count = ++to - groups;
+  }
+}
+
+void
+processSupplementaryGroups (GroupsProcessor *processGroups, void *data) {
+  ssize_t size = getgroups(0, NULL);
+
+  if (size != -1) {
+    gid_t groups[size];
+    ssize_t count = getgroups(size, groups);
+
+    if (count != -1) {
+      processGroups(groups, count, data);
+    } else {
+      logSystemError("getgroups");
+    }
+  } else {
+    logSystemError("getgroups");
+  }
+}
+
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 

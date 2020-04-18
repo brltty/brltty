@@ -41,38 +41,6 @@ installKernelModules (int amPrivilegedUser) {
 #ifdef HAVE_GRP_H
 #include <grp.h>
 
-static int
-compareGroups (gid_t group1, gid_t group2) {
-  if (group1 < group2) return -1;
-  if (group1 > group2) return 1;
-  return 0;
-}
-
-static int
-sortGroups (const void *element1,const void *element2) {
-  const gid_t *group1 = element1;
-  const gid_t *group2 = element2;
-  return compareGroups(*group1, *group2);
-}
-
-static void
-removeDuplicateGroups (gid_t *groups, size_t *count) {
-  if (*count > 1) {
-    qsort(groups, *count, sizeof(*groups), sortGroups);
-
-    gid_t *to = groups;
-    const gid_t *from = to + 1;
-    const gid_t *end = to + *count;
-
-    while (from < end) {
-      if (*from != *to) *++to = *from;
-      from += 1;
-    }
-
-    *count = ++to - groups;
-  }
-}
-
 typedef struct {
   const char *message;
   const gid_t *groups;
@@ -165,10 +133,8 @@ static RequiredGroupEntry requiredGroupTable[] = {
   },
 };
 
-typedef void RequiredGroupsProcessor (const gid_t *groups, size_t count, void *data);
-
 static void
-processRequiredGroups (RequiredGroupsProcessor *processGroups, void *data) {
+processRequiredGroups (GroupsProcessor *processGroups, void *data) {
   size_t size = ARRAY_COUNT(requiredGroupTable);
   gid_t groups[size * 2];
   size_t count = 0;
