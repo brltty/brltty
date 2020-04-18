@@ -20,8 +20,10 @@
 
 #include "bluetooth_internal.h"
 
-#define BLUETOOTH_NAME_ENTRY(name,...) \
-  {.namePrefix=name, .driverCodes=(const char *const []){__VA_ARGS__, NULL}}
+#define BLUETOOTH_NAME_ENTRY(name,...) { \
+  .namePrefix = name, \
+  .driverCodes = NULL_TERMINATED_STRING_ARRAY(__VA_ARGS__) \
+}
 
 const BluetoothNameEntry bluetoothNameTable[] = {
   // HandyTech: Actilino

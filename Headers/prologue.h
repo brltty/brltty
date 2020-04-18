@@ -36,6 +36,8 @@ extern "C" {
 #define STRINGIFY_1(a) #a
 #define STRINGIFY(a) STRINGIFY_1(a)
 
+#define NULL_TERMINATED_STRING_ARRAY(...) (const char *const []){__VA_ARGS__, NULL}
+
 #define MIN(a, b)  (((a) < (b))? (a): (b)) 
 #define MAX(a, b)  (((a) > (b))? (a): (b)) 
 

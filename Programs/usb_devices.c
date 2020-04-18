@@ -18,11 +18,11 @@
 
 #include "usb_devices.h"
 
-#define USB_DEVICE_ENTRY(vendor,product,...) \
-  { .vendorIdentifier = vendor, \
-    .productIdentifier = product, \
-    .driverCodes = (const char *const []){__VA_ARGS__, NULL} \
-  }
+#define USB_DEVICE_ENTRY(vendor,product,...) { \
+  .vendorIdentifier = vendor, \
+  .productIdentifier = product, \
+  .driverCodes = NULL_TERMINATED_STRING_ARRAY(__VA_ARGS__) \
+}
 
 const UsbDeviceEntry usbDeviceTable[] = {
 // BEGIN_USB_DEVICES
