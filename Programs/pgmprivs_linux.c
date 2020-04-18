@@ -292,28 +292,62 @@ closeGroupsDatabase (void) {
 #endif /* HAVE_LIBCAP */
 
 #ifdef CAP_IS_SUPPORTED
+typedef struct {
+  const char *label;
+  cap_t caps;
+} CapabilitiesLogData;
+
+static size_t
+capabilitiesLogFormatter (char *buffer, size_t size, const void *data) {
+  const CapabilitiesLogData *cld = data;
+
+  size_t length;
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("capabilities: %s:", cld->label);
+
+  cap_t caps = cld->caps;
+  int capsAllocated = 0;
+
+  if (!caps) {
+    if (!(caps = cap_get_proc())) {
+      logSystemError("cap_get_proc");
+      goto done;
+    }
+
+    capsAllocated = 1;
+  }
+
+  {
+    char *text;
+
+    if ((text = cap_to_text(caps, NULL))) {
+      STR_PRINTF(" %s", text);
+      cap_free(text);
+    } else {
+      logSystemError("cap_to_text");
+    }
+  }
+
+  if (capsAllocated) {
+    cap_free(caps);
+    caps = NULL;
+  }
+
+done:
+  length = STR_LENGTH;
+  STR_END;
+  return length;
+}
+
 static void
 logCapabilities (cap_t caps, const char *label) {
-  char *text;
-
-  if ((text = cap_to_text(caps, NULL))) {
-    logMessage(LOG_DEBUG, "capabilities: %s: %s", label, text);
-    cap_free(text);
-  } else {
-    logSystemError("cap_to_text");
-  }
+  CapabilitiesLogData cld = { .label=label, .caps=caps };
+  logData(LOG_DEBUG, capabilitiesLogFormatter, &cld);
 }
 
 static void
 logCurrentCapabilities (const char *label) {
-  cap_t caps;
-
-  if ((caps = cap_get_proc())) {
-    logCapabilities(caps, label);
-    cap_free(caps);
-  } else {
-    logSystemError("cap_get_proc");
-  }
+  logCapabilities(NULL, label);
 }
 
 static void
@@ -399,14 +433,8 @@ static const RequiredCapabilityEntry requiredCapabilityTable[] = {
   },
 };
 
-static int
-IsPermittedCapability (cap_t caps, cap_value_t capability) {
-  if (!caps) return 1;
-  return hasCapability(caps, CAP_PERMITTED, capability);
-}
-
 static void
-assignRequiredCapabilities (int amPrivilegedUser) {
+setRequiredCapabilities (int amPrivilegedUser) {
   cap_t newCaps, oldCaps;
 
   if (amPrivilegedUser) {
@@ -424,7 +452,7 @@ assignRequiredCapabilities (int amPrivilegedUser) {
       while (rce < end) {
         cap_value_t capability = rce->value;
 
-        if (IsPermittedCapability(oldCaps, capability)) {
+        if (!oldCaps || hasCapability(oldCaps, CAP_PERMITTED, capability)) {
           if (!addCapability(newCaps, CAP_PERMITTED, capability)) break;
           if (!addCapability(newCaps, CAP_EFFECTIVE, capability)) break;
         }
@@ -451,7 +479,7 @@ logUnassignedCapability (cap_value_t capability, const char *reason) {
 }
 
 static void
-logUnassignedCapabilities (void) {
+logMissingCapabilities (void) {
   cap_t caps;
 
   if ((caps = cap_get_proc())) {
@@ -475,7 +503,7 @@ logUnassignedCapabilities (void) {
 }
 
 static void
-needCapability (int *can, cap_t caps, cap_value_t capability, const char *reason) {
+wantCapability (int *can, cap_t caps, cap_value_t capability, const char *reason) {
   if (!*can) {
     if (ensureCapability(caps, capability)) {
       *can = 1;
@@ -525,8 +553,8 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 // This one must be last because it relinquishes the temporary capabilities.
 #ifdef CAP_IS_SUPPORTED
   { .reason = "for assigning required capabilities",
-    .acquirePrivileges = assignRequiredCapabilities,
-    .logMissingPrivileges = logUnassignedCapabilities,
+    .acquirePrivileges = setRequiredCapabilities,
+    .logMissingPrivileges = logMissingCapabilities,
   }
 #endif /* CAP_IS_SUPPORTED */
 };
@@ -655,6 +683,8 @@ switchUser (const char *user, int amPrivilegedUser) {
 
 void
 establishProgramPrivileges (const char *user) {
+  logCurrentCapabilities("at start");
+
   int amPrivilegedUser = !geteuid();
   int canSwitchUser = amPrivilegedUser;
   int canSwitchGroup = amPrivilegedUser;
@@ -673,12 +703,12 @@ establishProgramPrivileges (const char *user) {
       cap_t newCaps;
 
       if ((newCaps = cap_dup(curCaps))) {
-        needCapability(
+        wantCapability(
           &canSwitchUser, newCaps, CAP_SETUID,
           "for switching to the default unprivileged user"
         );
 
-        needCapability(
+        wantCapability(
           &canSwitchGroup, newCaps, CAP_SETGID,
           "for switching to the writable group"
         );
