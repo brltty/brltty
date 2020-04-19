@@ -29,6 +29,7 @@ BRLTTY on Linux
 .. |cap_setgid| replace:: *cap_setgid*
 .. |cap_chown| replace:: *cap_chown*
 .. |cap_fowner| replace:: *cap_fowner*
+.. |cap_dac_override| replace:: *cap_dac_override*
 .. |cap_sys_module| replace:: *cap_sys_module*
 .. |cap_sys_admin| replace:: **cap_sys_admin**
 .. |cap_sys_tty_config| replace:: **cap_sys_tty_config**
@@ -38,6 +39,7 @@ BRLTTY on Linux
 .. |cap_setgid reason| replace:: switching to the writable group and joining required groups
 .. |cap_chown reason| replace:: claiming group ownership of the `state directories`_
 .. |cap_fowner reason| replace:: adding group permissions to the `state directories`_
+.. |cap_dac_override reason| replace:: creating missing `state directories`_
 .. |cap_sys_module reason| replace:: installing kernel modules
 .. |cap_sys_admin reason| replace:: injecting input characters
 .. |cap_sys_tty_config reason| replace:: using the |speaker|
@@ -151,6 +153,7 @@ Capability            Reason
 |cap_setgid|          |cap_setgid reason|
 |cap_chown|           |cap_chown reason|
 |cap_fowner|          |cap_fowner reason|
+|cap_dac_override|    |cap_dac_override reason|
 |cap_sys_module|      |cap_sys_module reason|
 |cap_sys_admin|       |cap_sys_admin reason|
 |cap_sys_tty_config|  |cap_sys_tty_config reason|
@@ -194,6 +197,7 @@ Option  Capability            Reason
 -g      |cap_setgid|          |cap_setgid reason|
 -o      |cap_chown|           |cap_chown reason|
 -p      |cap_fowner|          |cap_fowner reason|
+-c      |cap_dac_override|    |cap_dac_override reason|
 -m      |cap_sys_module|      |cap_sys_module reason|
 -i      |cap_sys_admin|       |cap_sys_admin reason|
 -s      |cap_sys_tty_config|  |cap_sys_tty_config reason|
@@ -302,6 +306,11 @@ and are relinquished right after this has been done.
   In addition, for all directories,
   group search permission is added
   and the set-group-ID bit is set.
+
+|cap_dac_override|
+  If this capability has also been assigned to BRLTTY's executable
+  then it can create missing `state directories`_
+  after having successfully switched to executing as an unprivileged user.
 
 |cap_setgid|
   If this capability has also been assigned to BRLTTY's executable

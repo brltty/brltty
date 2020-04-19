@@ -22,6 +22,7 @@ addProgramOption u flag noUsers "don't allow switching to the default unprivileg
 addProgramOption g flag noGroups "don't allow switching to the writable group or joining required groups"
 addProgramOption o flag noOwnership "don't allow claiming group ownership of the state directories"
 addProgramOption p flag noPermissions "don't allow adding group permissions to the state directories"
+addProgramOption c flag noCreation "don't allow creating missing state directories"
 addProgramOption m flag noModules "don't allow installing kernel modules"
 addProgramOption i flag noInput "don't allow injecting input characters"
 addProgramOption s flag noSpeaker "don't allow using the built-in PC speaker"
@@ -32,6 +33,7 @@ noUsers=false
 noGroups=false
 noOwnership=false
 noPermissions=false
+noCreation=false
 noModules=false
 noInput=false
 noSpeaker=false
@@ -51,6 +53,7 @@ addCapability() {
 "${noGroups}" || addCapability "cap_setgid"
 "${noOwnership}" || addCapability "cap_chown"
 "${noPermissions}" || addCapability "cap_fowner"
+"${noCreation}" || addCapability "cap_dac_override"
 "${noModules}" || addCapability "cap_sys_module"
 "${noInput}" || addCapability "cap_sys_admin"
 "${noSpeaker}" || addCapability "cap_sys_tty_config"

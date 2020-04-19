@@ -775,6 +775,7 @@ establishProgramPrivileges (const char *user) {
   int canSwitchGroup = amPrivilegedUser;
   int canChangeOwnership = amPrivilegedUser;
   int canChangePermissions = amPrivilegedUser;
+  int canOverridePermissions = amPrivilegedUser;
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
@@ -808,6 +809,11 @@ establishProgramPrivileges (const char *user) {
         wantCapability(
           &canChangePermissions, newCaps, CAP_FOWNER,
           "for adding group permissions to the state directories"
+        );
+
+        wantCapability(
+          &canOverridePermissions, newCaps, CAP_DAC_OVERRIDE,
+          "for creating missing state directories"
         );
 
         if (cap_compare(newCaps, curCaps) != 0) setCapabilities(newCaps);
