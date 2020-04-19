@@ -33,10 +33,30 @@
 #include "program.h"
 #include "file.h"
 
+typedef struct {
+  const char *reason;
+  int (*install) (void);
+} KernelModuleEntry;
+
+static const KernelModuleEntry kernelModuleTable[] = {
+  { .reason = "for playing alert tunes via the built-in PC speaker",
+    .install = installSpeakerModule,
+  },
+
+  { .reason = "for creating virtual devices",
+    .install = installUinputModule,
+  },
+};
+
 static void
 installKernelModules (int amPrivilegedUser) {
-  installSpeakerModule();
-  installUinputModule();
+  const KernelModuleEntry *kme = kernelModuleTable;
+  const KernelModuleEntry *end = kme + ARRAY_COUNT(kernelModuleTable);
+
+  while (kme < end) {
+    kme->install();
+    kme += 1;
+  }
 }
 
 #ifdef HAVE_GRP_H
@@ -646,23 +666,23 @@ getSocketsDirectory (void) {
 
 typedef struct {
   const char *reason;
-  const char * (*getPath) (void);
+  const char * (*get) (void);
   const char *name;
-} FixPathEntry;
+} StateDirectoryEntry;
 
-static const FixPathEntry fixPathTable[] = {
+static const StateDirectoryEntry stateDirectoryTable[] = {
   { .reason = "updatable directory",
-    .getPath = getUpdatableDirectory,
+    .get = getUpdatableDirectory,
     .name = "brltty",
   },
 
   { .reason = "writable directory",
-    .getPath = getWritableDirectory,
+    .get = getWritableDirectory,
     .name = "brltty",
   },
 
   { .reason = "sockets directory",
-    .getPath = getSocketsDirectory,
+    .get = getSocketsDirectory,
     .name = "BrlAPI",
   },
 };
@@ -671,18 +691,18 @@ typedef struct {
   gid_t group;
   unsigned char canChangeOwnership:1;
   unsigned char canChangePermissions:1;
-} PathProcessorData;
+} StateDirectoryData;
 
 static int
-fixPath (const PathProcessorParameters *parameters) {
-  const PathProcessorData *ppd = parameters->data;
+claimStateDirectory (const PathProcessorParameters *parameters) {
+  const StateDirectoryData *sdd = parameters->data;
   const char *path = parameters->path;
-  gid_t group = ppd->group;
+  gid_t group = sdd->group;
   struct stat status;
 
   if (stat(path, &status) != -1) {
     if (status.st_gid != group) {
-      if (!ppd->canChangeOwnership) {
+      if (!sdd->canChangeOwnership) {
         logMessage(LOG_WARNING, "can't change group ownership: %s", path);
       } else if (chown(path, -1, group) != -1) {
         logMessage(LOG_INFO, "group ownership changed: %s", path);
@@ -699,7 +719,7 @@ fixPath (const PathProcessorParameters *parameters) {
       if (S_ISDIR(newMode)) newMode |= S_IXGRP | S_ISGID;
 
       if (newMode != oldMode) {
-        if (!ppd->canChangePermissions) {
+        if (!sdd->canChangePermissions) {
           logMessage(LOG_WARNING, "can't change group permissions: %s", path);
         } else if (chmod(path, newMode) != -1) {
           logMessage(LOG_INFO, "group permissions changed: %s", path);
@@ -716,25 +736,25 @@ fixPath (const PathProcessorParameters *parameters) {
 }
 
 static void
-fixPaths (int canChangeOwnership, int canChangePermissions) {
-  PathProcessorData ppd = {
+claimStateDirectories (int canChangeOwnership, int canChangePermissions) {
+  StateDirectoryData sdd = {
     .group = getegid(),
     .canChangeOwnership = canChangeOwnership,
     .canChangePermissions = canChangePermissions,
   };
 
-  const FixPathEntry *fpe = fixPathTable;
-  const FixPathEntry *end = fpe + ARRAY_COUNT(fixPathTable);
+  const StateDirectoryEntry *sde = stateDirectoryTable;
+  const StateDirectoryEntry *end = sde + ARRAY_COUNT(stateDirectoryTable);
 
-  while (fpe < end) {
-    const char *path = fpe->getPath();
+  while (sde < end) {
+    const char *path = sde->get();
     const char *name = locatePathName(path);
 
-    if (path && *path && (strcasecmp(name, fpe->name) == 0)) {
-      processPathTree(path, fixPath, &ppd);
+    if (path && *path && (strcasecmp(name, sde->name) == 0)) {
+      processPathTree(path, claimStateDirectory, &sdd);
     }
 
-    fpe += 1;
+    sde += 1;
   }
 }
 
@@ -774,12 +794,12 @@ establishProgramPrivileges (const char *user) {
 
         wantCapability(
           &canChangeOwnership, newCaps, CAP_CHOWN,
-          "for claiming group ownership"
+          "for claiming group ownership of the state directories"
         );
 
         wantCapability(
           &canChangePermissions, newCaps, CAP_FOWNER,
-          "for adding group write permission"
+          "for adding group permissions to the state directories"
         );
 
         if (cap_compare(newCaps, curCaps) != 0) setCapabilities(newCaps);
@@ -799,7 +819,7 @@ establishProgramPrivileges (const char *user) {
   {
     if (canSwitchUser && canSwitchGroup && switchUser(user, amPrivilegedUser)) {
       amPrivilegedUser = 0;
-      fixPaths(canChangeOwnership, canChangePermissions);
+      claimStateDirectories(canChangeOwnership, canChangePermissions);
     } else {
       uid_t uid = geteuid();
       const struct passwd *pwd = getpwuid(uid);

@@ -10,6 +10,10 @@ BRLTTY on Linux
 .. |speaker| replace:: built-in PC speaker
 .. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
 
+.. |updatable directory| replace:: updatable directory (usually ``/var/lib/brltty/``)
+.. |writable directory| replace:: writable directory (usually ``/var/run/brltty/``)
+.. |sockets directory| replace:: sockets directory (usually ``/var/lib/BrlAPI/``)
+
 .. |keyboard key tables| replace::
   keyboard key tables
   (which allow keyboard key combinations to be bound
@@ -26,8 +30,8 @@ BRLTTY on Linux
 
 .. |cap_setuid reason| replace:: switching to the default unprivileged user
 .. |cap_setgid reason| replace:: switching to the writable group and joining required groups
-.. |cap_chown reason| replace:: claiming group ownership for the writable directories
-.. |cap_fowner reason| replace:: adding group permissions to the writable directories
+.. |cap_chown reason| replace:: claiming group ownership of the `state directories`_
+.. |cap_fowner reason| replace:: adding group permissions to the `state directories`_
 .. |cap_sys_module reason| replace:: installing kernel modules
 .. |cap_sys_admin reason| replace:: injecting input characters
 .. |cap_sys_tty_config reason| replace:: using the |speaker|
@@ -35,6 +39,22 @@ BRLTTY on Linux
 
 For System Administrators
 =========================
+
+State Directories
+-----------------
+
+|sockets directory|
+  This directory is where BRLTTY creates BrlAP's local server sockets.
+
+|updatable directory|
+  This directory is where BRLTTY keeps its preferences files.
+  It's also where, if requested, the speech FIFO is created.
+
+|writable directory|
+  This directory is where BRLTTY creates private copies of
+  file system objects that it eneds but
+  that don't already exist (or, at least, that it can't find),
+  or that are inaccessible (can't be opened).
 
 Starting BRLTTY
 ---------------
