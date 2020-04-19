@@ -688,7 +688,7 @@ static const StateDirectoryEntry stateDirectoryTable[] = {
 };
 
 typedef struct {
-  gid_t group;
+  gid_t owningGroup;
   unsigned char canChangeOwnership:1;
   unsigned char canChangePermissions:1;
 } StateDirectoryData;
@@ -697,21 +697,24 @@ static int
 claimStateDirectory (const PathProcessorParameters *parameters) {
   const StateDirectoryData *sdd = parameters->data;
   const char *path = parameters->path;
-  gid_t group = sdd->group;
+  gid_t group = sdd->owningGroup;
   struct stat status;
 
   if (stat(path, &status) != -1) {
-    if (status.st_gid != group) {
-      if (!sdd->canChangeOwnership) {
-        logMessage(LOG_WARNING, "can't change group ownership: %s", path);
-      } else if (chown(path, -1, group) != -1) {
-        logMessage(LOG_INFO, "group ownership changed: %s", path);
-      } else {
-        logSystemError("chown");
-      }
+    int addPermissions = 0;
+
+    if (status.st_gid == group) {
+      addPermissions = 1;
+    } else if (!sdd->canChangeOwnership) {
+      logMessage(LOG_WARNING, "can't claim group ownership: %s", path);
+    } else if (chown(path, -1, group) != -1) {
+      logMessage(LOG_INFO, "group ownership claimed: %s", path);
+      addPermissions = 1;
+    } else {
+      logSystemError("chown");
     }
 
-    {
+    if (addPermissions) {
       mode_t oldMode = status.st_mode;
       mode_t newMode = oldMode;
 
@@ -720,9 +723,9 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
 
       if (newMode != oldMode) {
         if (!sdd->canChangePermissions) {
-          logMessage(LOG_WARNING, "can't change group permissions: %s", path);
+          logMessage(LOG_WARNING, "can't add group permissions: %s", path);
         } else if (chmod(path, newMode) != -1) {
-          logMessage(LOG_INFO, "group permissions changed: %s", path);
+          logMessage(LOG_INFO, "group permissions added: %s", path);
         } else {
           logSystemError("chmod");
         }
@@ -738,7 +741,7 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
 static void
 claimStateDirectories (int canChangeOwnership, int canChangePermissions) {
   StateDirectoryData sdd = {
-    .group = getegid(),
+    .owningGroup = getegid(),
     .canChangeOwnership = canChangeOwnership,
     .canChangePermissions = canChangePermissions,
   };
