@@ -4,15 +4,21 @@ BRLTTY on Linux
 
 .. include:: prologue.rst
 
-.. |default user| replace:: ``brltty``
 .. |super user| replace:: ``root``
+.. |default user| replace:: ``brltty``
+.. |default sockets directory| replace:: ``/var/lib/BrlAPI/``
+.. |default updatable directory| replace:: ``/var/lib/brltty/``
+.. |default writable directory| replace:: ``/var/run/brltty/``
+
+.. |default unprivileged user| replace:: default unprivileged user (|default user|)
+.. |unprivileged user option| replace:: ``-u`` (``--unprivileged-user=``) command line option
 
 .. |speaker| replace:: built-in PC speaker
 .. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
 
-.. |updatable directory| replace:: updatable directory (usually ``/var/lib/brltty/``)
-.. |writable directory| replace:: writable directory (usually ``/var/run/brltty/``)
-.. |sockets directory| replace:: sockets directory (usually ``/var/lib/BrlAPI/``)
+.. |sockets directory| replace:: sockets directory (usually |default sockets directory|)
+.. |updatable directory| replace:: updatable directory (usually |default updatable directory|)
+.. |writable directory| replace:: writable directory (usually |default writable directory|)
 
 .. |keyboard key tables| replace::
   keyboard key tables
@@ -28,7 +34,7 @@ BRLTTY on Linux
 .. |cap_sys_tty_config| replace:: **cap_sys_tty_config**
 .. |cap_mknod| replace:: **cap_mknod**
 
-.. |cap_setuid reason| replace:: switching to the default unprivileged user
+.. |cap_setuid reason| replace:: switching to the |default unprivileged user|
 .. |cap_setgid reason| replace:: switching to the writable group and joining required groups
 .. |cap_chown reason| replace:: claiming group ownership of the `state directories`_
 .. |cap_fowner reason| replace:: adding group permissions to the `state directories`_
@@ -52,7 +58,7 @@ State Directories
 
 |writable directory|
   This directory is where BRLTTY creates private copies of
-  file system objects that it eneds but
+  file system objects that it needs but
   that don't already exist (or, at least, that it can't find),
   or that are inaccessible (can't be opened).
 
@@ -80,12 +86,12 @@ The steps that are performed to accomplish this are as follows:
 
 The decision regarding which regular user to run as is made as follows:
 
-1) If the ``-u`` command line option has been supplied then:
+1) If the |unprivileged user option| has been supplied then:
 
    * Run as the specified user if it exists.
    * Stop with a nonzero exit status if it doesn't exist.
 
-2) Run as the default unprivileged user (|default user|) if it exists.
+2) Run as the |default unprivileged user| if it exists.
 
 3) Continue to run as |super user|.
 
@@ -118,12 +124,12 @@ These failures can range all the way from minor to severe.
 
 If the (temporary) capabilities |cap_setuid| and |cap_setgid|
 have both also been assigned to BRLTTY's executable
-then it's able to switch to its default unprivileged user (|default user|)
+then it's able to switch to its |default unprivileged user|
 even when started as a regular user.
-If the default unprivileged user doesn't exist then
+If the |default unprivileged user| doesn't exist then
 BRLTTY continues to run as the user who started it.
 This feature doesn't allow an explicit user to be specified
-(via the ``-u`` command line option).
+(via the |unprivileged user option|).
 
 Assigning the Capabilities to the Executable
 --------------------------------------------
@@ -258,8 +264,8 @@ Required Capabilities
 BRLTTY uses the privileged kernel operations
 that are granted via these capabilities
 throughout its execution.
-They are retained iwithin its ``permitted`` and ``effective`` sets,
-but not iwithin its ``inheritable`` and ``ambient`` sets.
+They are retained within its ``permitted`` and ``effective`` sets,
+but not within its ``inheritable`` and ``ambient`` sets.
 In other words, they're for BRLTTY itself
 and aren't passed along to any host command that it may invoke.
 
@@ -282,19 +288,33 @@ They allow it to configure itself,
 thus not relying so heavily on explicit administrator configuration,
 and are relinquished right after this has been done.
 
+|cap_chown|
+  If this capability has also been assigned to BRLTTY's executable
+  then it can claim group ownership of its `state directories`_
+  after having successfully switched to executing as an unprivileged user.
+  The primary group of that user is used.
+
+|cap_fowner|
+  If this capability has also been assigned to BRLTTY's executable
+  then it can add group permissions to its `state directories`_
+  after having successfully switched to executing as an unprivileged user.
+  Both read and write group permissions are added to all files and directories.
+  In addition, for all directories,
+  group search permission is added
+  and the set-group-ID bit is set.
+
 |cap_setgid|
   If this capability has also been assigned to BRLTTY's executable
-  then ignore the invoking user's group memberships
+  then it ignores the invoking user's group memberships
   and internally establish the actually needed `group memberships`_.
 
 |cap_setuid|
   If this capability has also been assigned to BRLTTY's executable
-  then switching to the default unprivileged user (|default user|)
-  can be done when BRLTTY is started `as a regular user`_.
-  The |cap_setgid| temporary capability is also required
-  so that BRLTTY can switch to that user's primary group.
+  then it can switch to the |default unprivileged user|.
+  The |cap_setgid| (temporary) capability is also required
+  so that it can also switch to that user's primary group.
   This feature doesn't allow switching to an explicit user
-  (via the ``-u`` command line option).
+  (via the |unprivileged user option|).
 
 |cap_sys_module|
   If this capability has also been assigned to BRLTTY's executable
