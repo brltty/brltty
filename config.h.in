@@ -546,6 +546,9 @@ extern "C" {
 /* Define this to be a string containing the default parameters for the application programming interface. */
 #undef API_PARAMETERS
 
+/* Define this to be a string containing the path to the local BrlAPI sockets. */
+#undef BRLAPI_SOCKETPATH
+
 /* Define this if shared object support is to be included. */
 #undef ENABLE_SHARED_OBJECTS
 

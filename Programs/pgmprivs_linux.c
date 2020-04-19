@@ -639,6 +639,11 @@ switchUser (const char *user, int amPrivilegedUser) {
 }
 #endif /* HAVE_PWD_H */
 
+static const char *
+getSocketsDirectory (void) {
+  return BRLAPI_SOCKETPATH;
+}
+
 typedef struct {
   const char *reason;
   const char * (*getPath) (void);
@@ -654,6 +659,11 @@ static const FixPathEntry fixPathTable[] = {
   { .reason = "writable directory",
     .getPath = getWritableDirectory,
     .name = "brltty",
+  },
+
+  { .reason = "sockets directory",
+    .getPath = getSocketsDirectory,
+    .name = "BrlAPI",
   },
 };
 
