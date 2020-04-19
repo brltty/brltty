@@ -822,6 +822,7 @@ establishProgramPrivileges (const char *user) {
   {
     if (canSwitchUser && canSwitchGroup && switchUser(user, amPrivilegedUser)) {
       amPrivilegedUser = 0;
+      umask(umask(0) & ~S_IRWXG);
       claimStateDirectories(canChangeOwnership, canChangePermissions);
     } else {
       uid_t uid = geteuid();
