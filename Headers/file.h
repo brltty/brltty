@@ -29,6 +29,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define CURRENT_DIRECTORY_NAME "."
+#define PARENT_DIRECTORY_NAME ".."
+
 extern int isPathDelimiter (const char character);
 extern int isAbsolutePath (const char *path);
 extern char *getPathDirectory (const char *path);

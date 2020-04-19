@@ -31,6 +31,7 @@
 #include "pgmprivs.h"
 #include "system_linux.h"
 #include "program.h"
+#include "file.h"
 
 static void
 installKernelModules (int amPrivilegedUser) {
@@ -162,10 +163,10 @@ processRequiredGroups (GroupsProcessor *processGroups, void *data) {
         const char *path = rge->path;
 
         if (path) {
-          struct stat s;
+          struct stat status;
 
-          if (stat(path, &s) != -1) {
-            groups[count++] = s.st_gid;
+          if (stat(path, &status) != -1) {
+            groups[count++] = status.st_gid;
           } else {
             logMessage(LOG_WARNING, "path access error: %s: %s", path, strerror(errno));
           }
@@ -625,7 +626,7 @@ switchUser (const char *user, int amPrivilegedUser) {
       return 1;
     }
 
-    logMessage(LOG_ERR, "can't switch to explicitly specified user: %s", user);
+    logMessage(LOG_ERR, "won't switch to an explicitly specified user: %s", user);
     exit(PROG_EXIT_FATAL);
   }
 
@@ -638,6 +639,95 @@ switchUser (const char *user, int amPrivilegedUser) {
 }
 #endif /* HAVE_PWD_H */
 
+typedef struct {
+  const char *reason;
+  const char * (*getPath) (void);
+  const char *name;
+} FixPathEntry;
+
+static const FixPathEntry fixPathTable[] = {
+  { .reason = "updatable directory",
+    .getPath = getUpdatableDirectory,
+    .name = "brltty",
+  },
+
+  { .reason = "writable directory",
+    .getPath = getWritableDirectory,
+    .name = "brltty",
+  },
+};
+
+typedef struct {
+  gid_t group;
+  unsigned char canChangeOwnership:1;
+  unsigned char canChangePermissions:1;
+} PathProcessorData;
+
+static int
+fixPath (const PathProcessorParameters *parameters) {
+  const PathProcessorData *ppd = parameters->data;
+  const char *path = parameters->path;
+  gid_t group = ppd->group;
+  struct stat status;
+
+  if (stat(path, &status) != -1) {
+    if (status.st_gid != group) {
+      if (!ppd->canChangeOwnership) {
+        logMessage(LOG_WARNING, "can't change group ownership: %s", path);
+      } else if (chown(path, -1, group) != -1) {
+        logMessage(LOG_INFO, "group ownership changed: %s", path);
+      } else {
+        logSystemError("chown");
+      }
+    }
+
+    {
+      mode_t oldMode = status.st_mode;
+      mode_t newMode = oldMode;
+
+      newMode |= S_IRGRP | S_IWGRP;
+      if (S_ISDIR(newMode)) newMode |= S_IXGRP | S_ISGID;
+
+      if (newMode != oldMode) {
+        if (!ppd->canChangePermissions) {
+          logMessage(LOG_WARNING, "can't change group permissions: %s", path);
+        } else if (chmod(path, newMode) != -1) {
+          logMessage(LOG_INFO, "group permissions changed: %s", path);
+        } else {
+          logSystemError("chmod");
+        }
+      }
+    }
+  } else {
+    logSystemError("stat");
+  }
+
+  return 1;
+}
+
+static void
+fixPaths (int canChangeOwnership, int canChangePermissions) {
+  PathProcessorData ppd = {
+    .group = getegid(),
+    .canChangeOwnership = canChangeOwnership,
+    .canChangePermissions = canChangePermissions,
+  };
+
+  const FixPathEntry *fpe = fixPathTable;
+  const FixPathEntry *end = fpe + ARRAY_COUNT(fixPathTable);
+
+  while (fpe < end) {
+    const char *path = fpe->getPath();
+    const char *name = locatePathName(path);
+
+    if (path && *path && (strcasecmp(name, fpe->name) == 0)) {
+      processPathTree(path, fixPath, &ppd);
+    }
+
+    fpe += 1;
+  }
+}
+
 void
 establishProgramPrivileges (const char *user) {
   logCurrentCapabilities("at start");
@@ -645,6 +735,8 @@ establishProgramPrivileges (const char *user) {
   int amPrivilegedUser = !geteuid();
   int canSwitchUser = amPrivilegedUser;
   int canSwitchGroup = amPrivilegedUser;
+  int canChangeOwnership = amPrivilegedUser;
+  int canChangePermissions = amPrivilegedUser;
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
@@ -670,6 +762,16 @@ establishProgramPrivileges (const char *user) {
           "for switching to the writable group"
         );
 
+        wantCapability(
+          &canChangeOwnership, newCaps, CAP_CHOWN,
+          "for claiming group ownership"
+        );
+
+        wantCapability(
+          &canChangePermissions, newCaps, CAP_FOWNER,
+          "for adding group write permission"
+        );
+
         if (cap_compare(newCaps, curCaps) != 0) setCapabilities(newCaps);
         cap_free(newCaps);
       } else {
@@ -687,6 +789,7 @@ establishProgramPrivileges (const char *user) {
   {
     if (canSwitchUser && canSwitchGroup && switchUser(user, amPrivilegedUser)) {
       amPrivilegedUser = 0;
+      fixPaths(canChangeOwnership, canChangePermissions);
     } else {
       uid_t uid = geteuid();
       const struct passwd *pwd = getpwuid(uid);

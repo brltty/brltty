@@ -24,10 +24,12 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <sys/sysmacros.h>
 #include <linux/major.h>
 
 #include "log.h"
+#include "parse.h"
 #include "file.h"
 #include "device.h"
 #include "async_wait.h"
@@ -36,6 +38,66 @@
 #include "bitmask.h"
 #include "system.h"
 #include "system_linux.h"
+
+typedef struct {
+  PathProcessor *processor;
+  const PathProcessorParameters *parameters;
+} PathProcessingData;
+
+static int
+processDirectoryEntry (const char *name, const PathProcessingData *ppd) {
+  const PathProcessorParameters *parameters = ppd->parameters;
+
+  const char *directory = parameters->path;
+  char path[strlen(directory) + 1 + strlen(name) + 1];
+  snprintf(path, sizeof(path), "%s%c%s", directory, FILE_PATH_DELIMITER, name);
+
+  return processPathTree(path, ppd->processor, parameters->data);
+}
+
+int
+processPathTree (const char *path, PathProcessor *processPath, void *data) {
+  PathProcessorParameters parameters = {
+    .path = path,
+    .data = data
+  };
+
+  PathProcessingData ppd = {
+    .processor = processPath,
+    .parameters = &parameters
+  };
+
+  int stop = 0;
+  DIR *directory;
+
+  if ((directory = opendir(path))) {
+    if (processPath(&parameters)) {
+      struct dirent *entry;
+
+      while ((entry = readdir(directory))) {
+        const char *name = entry->d_name;
+
+        if (strcmp(name, CURRENT_DIRECTORY_NAME) == 0) continue;
+        if (strcmp(name, PARENT_DIRECTORY_NAME) == 0) continue;
+
+        if (!processDirectoryEntry(name, &ppd)) {
+          stop = 1;
+          break;
+        }
+      }
+    } else {
+      stop = 1;
+    }
+
+    closedir(directory);
+  } else if (errno == ENOTDIR) {
+    if (!processPath(&parameters)) stop = 1;
+  } else {
+    logMessage(LOG_WARNING, "can't access path: %s: %s", path, strerror(errno));
+  }
+
+  return !stop;
+}
 
 int
 compareGroups (gid_t group1, gid_t group2) {

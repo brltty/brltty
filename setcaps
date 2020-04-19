@@ -20,14 +20,18 @@
 . "`dirname "${0}"`/prologue.sh"
 addProgramOption u flag noUsers "don't allow switching to the default unprivileged user"
 addProgramOption g flag noGroups "don't allow switching to the writable group or joining required groups"
+addProgramOption o flag noOwnership "don't allow claiming group ownership"
+addProgramOption p flag noPermissions "don't allow adding group permissions"
 addProgramOption m flag noModules "don't allow installing kernel modules"
-addProgramOption i flag noInput "don't allow inserting input characters"
+addProgramOption i flag noInput "don't allow injecting input characters"
 addProgramOption s flag noSpeaker "don't allow using the built-in PC speaker"
 addProgramOption d flag noDevices "don't allow creating special device files"
 addProgramParameter executable executablePath "the path to the executable"
 
 noUsers=false
 noGroups=false
+noOwnership=false
+noPermissions=false
 noModules=false
 noInput=false
 noSpeaker=false
@@ -45,6 +49,8 @@ addCapability() {
 
 "${noUsers}" || addCapability "cap_setuid"
 "${noGroups}" || addCapability "cap_setgid"
+"${noOwnership}" || addCapability "cap_chown"
+"${noPermissions}" || addCapability "cap_fowner"
 "${noModules}" || addCapability "cap_sys_module"
 "${noInput}" || addCapability "cap_sys_admin"
 "${noSpeaker}" || addCapability "cap_sys_tty_config"

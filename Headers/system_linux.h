@@ -23,6 +23,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct {
+  const char *path;
+  void *data;
+} PathProcessorParameters;
+
+typedef int PathProcessor (const PathProcessorParameters *parameters);
+extern int processPathTree (const char *path, PathProcessor *processPath, void *data);
+
 extern int compareGroups (gid_t group1, gid_t group2);
 extern void sortGroups (gid_t *groups, size_t count);
 extern void removeDuplicateGroups (gid_t *groups, size_t *count);

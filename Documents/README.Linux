@@ -17,6 +17,8 @@ BRLTTY on Linux
 
 .. |cap_setuid| replace:: *cap_setuid*
 .. |cap_setgid| replace:: *cap_setgid*
+.. |cap_chown| replace:: *cap_chown*
+.. |cap_fowner| replace:: *cap_fowner*
 .. |cap_sys_module| replace:: *cap_sys_module*
 .. |cap_sys_admin| replace:: **cap_sys_admin**
 .. |cap_sys_tty_config| replace:: **cap_sys_tty_config**
@@ -24,6 +26,8 @@ BRLTTY on Linux
 
 .. |cap_setuid reason| replace:: switching to the default unprivileged user
 .. |cap_setgid reason| replace:: switching to the writable group and joining required groups
+.. |cap_chown reason| replace:: claiming group ownership for the writable directories
+.. |cap_fowner reason| replace:: adding group permissions to the writable directories
 .. |cap_sys_module reason| replace:: installing kernel modules
 .. |cap_sys_admin reason| replace:: injecting input characters
 .. |cap_sys_tty_config reason| replace:: using the |speaker|
@@ -119,6 +123,8 @@ Capability            Reason
 --------------------  ---------------------------
 |cap_setuid|          |cap_setuid reason|
 |cap_setgid|          |cap_setgid reason|
+|cap_chown|           |cap_chown reason|
+|cap_fowner|          |cap_fowner reason|
 |cap_sys_module|      |cap_sys_module reason|
 |cap_sys_admin|       |cap_sys_admin reason|
 |cap_sys_tty_config|  |cap_sys_tty_config reason|
@@ -160,6 +166,8 @@ Option  Capability            Reason
 ------  --------------------  ---------------------------
 -u      |cap_setuid|          |cap_setuid reason|
 -g      |cap_setgid|          |cap_setgid reason|
+-o      |cap_chown|           |cap_chown reason|
+-p      |cap_fowner|          |cap_fowner reason|
 -m      |cap_sys_module|      |cap_sys_module reason|
 -i      |cap_sys_admin|       |cap_sys_admin reason|
 -s      |cap_sys_tty_config|  |cap_sys_tty_config reason|
