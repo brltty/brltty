@@ -450,9 +450,10 @@ setRequiredCapabilities (int amPrivilegedUser) {
 }
 
 static void
-logUnassignedCapability (cap_value_t capability, const char *reason) {
+logUnassignedCapability (cap_value_t capability, int required, const char *reason) {
   logMessage(LOG_WARNING,
-             "capability not assigned: %s (%s)",
+             "%s capability not assigned: %s (%s)",
+             (required? "required": "temporary"),
              cap_to_name(capability), reason);
 }
 
@@ -468,7 +469,7 @@ logMissingCapabilities (void) {
       cap_value_t capability = rce->value;
 
       if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
-        logUnassignedCapability(capability, rce->reason);
+        logUnassignedCapability(capability, 1, rce->reason);
       }
 
       rce += 1;
@@ -481,12 +482,12 @@ logMissingCapabilities (void) {
 }
 
 static void
-wantCapability (int *can, cap_t caps, cap_value_t capability, const char *reason) {
+wantTemporaryCapability (int *can, cap_t caps, cap_value_t capability, const char *reason) {
   if (!*can) {
     if (ensureCapability(caps, capability)) {
       *can = 1;
     } else {
-      logUnassignedCapability(capability, reason);
+      logUnassignedCapability(capability, 0, reason);
     }
   }
 }
@@ -563,7 +564,7 @@ acquirePrivileges (int amPrivilegedUser) {
         if (!capability || ensureCapability(caps, capability)) {
           pae->acquirePrivileges(amPrivilegedUser);
         } else {
-          logUnassignedCapability(capability, pae->reason);
+          logUnassignedCapability(capability, 0, pae->reason);
         }
 
         pae += 1;
@@ -791,27 +792,27 @@ establishProgramPrivileges (const char *user) {
       cap_t newCaps;
 
       if ((newCaps = cap_dup(curCaps))) {
-        wantCapability(
+        wantTemporaryCapability(
           &canSwitchUser, newCaps, CAP_SETUID,
           "for switching to the default unprivileged user"
         );
 
-        wantCapability(
+        wantTemporaryCapability(
           &canSwitchGroup, newCaps, CAP_SETGID,
           "for switching to the writable group"
         );
 
-        wantCapability(
+        wantTemporaryCapability(
           &canChangeOwnership, newCaps, CAP_CHOWN,
           "for claiming group ownership of the state directories"
         );
 
-        wantCapability(
+        wantTemporaryCapability(
           &canChangePermissions, newCaps, CAP_FOWNER,
           "for adding group permissions to the state directories"
         );
 
-        wantCapability(
+        wantTemporaryCapability(
           &canOverridePermissions, newCaps, CAP_DAC_OVERRIDE,
           "for creating missing state directories"
         );
