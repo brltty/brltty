@@ -661,7 +661,9 @@ switchUser (const char *user, int amPrivilegedUser) {
 
 static const char *
 getSocketsDirectory (void) {
-  return BRLAPI_SOCKETPATH;
+  const char *path = BRLAPI_SOCKETPATH;
+  if (!ensureDirectory(path)) path = NULL;
+  return path;
 }
 
 typedef struct {
@@ -751,10 +753,13 @@ claimStateDirectories (int canChangeOwnership, int canChangePermissions) {
 
   while (sde < end) {
     const char *path = sde->get();
-    const char *name = locatePathName(path);
 
-    if (path && *path && (strcasecmp(name, sde->name) == 0)) {
-      processPathTree(path, claimStateDirectory, &sdd);
+    if (path && *path) {
+      const char *name = locatePathName(path);
+
+      if (strcasecmp(name, sde->name) == 0) {
+        processPathTree(path, claimStateDirectory, &sdd);
+      }
     }
 
     sde += 1;
