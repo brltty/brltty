@@ -474,6 +474,36 @@ requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
   return 0;
 }
 
+static int
+needCapability (cap_value_t capability, const char *reason) {
+  typedef uint64_t CapabilityMask;
+  CapabilityMask bit = UINT64_C(1) << capability;
+
+  static CapabilityMask requestedCapabilitiesMask = 0;
+  static CapabilityMask enabledCapabilitiesMask = 0;
+
+  if (!(requestedCapabilitiesMask & bit)) {
+    cap_t caps;
+
+    if ((caps = cap_get_proc())) {
+      if (requestCapability(caps, capability, 0)) {
+        enabledCapabilitiesMask |= bit;
+        logMessage(LOG_DEBUG, "capability enabled: %s", cap_to_name(capability));
+      } else {
+        logUnassignedCapability(capability, 0, reason);
+      }
+
+      cap_free(caps);
+    } else {
+      logSystemError("cap_get_proc");
+    }
+
+    requestedCapabilitiesMask |= bit;
+  }
+
+  return !!(enabledCapabilitiesMask & bit);
+}
+
 static void
 wantTemporaryCapability (int *can, cap_t caps, cap_value_t capability, const char *reason) {
   if (!*can) {
@@ -750,6 +780,14 @@ claimStateDirectories (int canChangeOwnership, int canChangePermissions) {
   while (sde < end) {
     const char *path = sde->get();
 
+#ifdef CAP_DAC_OVERRIDE
+    if (!path) {
+      if (needCapability(CAP_DAC_OVERRIDE, "for creating missing state directories")) {
+        path = sde->get();
+      }
+    }
+#endif /* CAP_DAC_OVERRIDE */
+
     if (path && *path) {
       const char *name = locatePathName(path);
 
@@ -771,7 +809,6 @@ establishProgramPrivileges (const char *user) {
   int canSwitchGroup = amPrivilegedUser;
   int canChangeOwnership = amPrivilegedUser;
   int canChangePermissions = amPrivilegedUser;
-  int canOverridePermissions = amPrivilegedUser;
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
@@ -805,11 +842,6 @@ establishProgramPrivileges (const char *user) {
         wantTemporaryCapability(
           &canChangePermissions, newCaps, CAP_FOWNER,
           "for adding group permissions to the state directories"
-        );
-
-        wantTemporaryCapability(
-          &canOverridePermissions, newCaps, CAP_DAC_OVERRIDE,
-          "for creating missing state directories"
         );
 
         if (cap_compare(newCaps, curCaps) != 0) setCapabilities(newCaps);
