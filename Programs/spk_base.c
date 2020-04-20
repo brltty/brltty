@@ -32,7 +32,6 @@ tellSpeechFinished (volatile SpeechSynthesizer *spk) {
 
 int
 tellSpeechLocation (volatile SpeechSynthesizer *spk, int index) {
-  if (!spk->track.isActive) return 1;
   return speechMessage_speechLocation(spk->driver.thread, index);
 }
 

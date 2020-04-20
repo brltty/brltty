@@ -32,6 +32,18 @@
 #include "thread.h"
 #include "queue.h"
 
+#ifdef GOT_PTHREADS
+#define WANT_SPK_PROCESS
+#endif
+
+#ifdef WANT_SPK_PROCESS
+#include "file.h"
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <errno.h>
+#endif
+
 #ifdef ENABLE_SPEECH_SUPPORT
 typedef enum {
   THD_CONSTRUCTING,
@@ -87,8 +99,16 @@ struct SpeechDriverThreadStruct {
 
 #ifdef GOT_PTHREADS
   pthread_t threadIdentifier;
+#ifdef WANT_SPK_PROCESS
+  FileDescriptor requestSendDescriptor;
+  FileDescriptor requestRecvDescriptor;
+  FileDescriptor messageSendDescriptor;
+  FileDescriptor messageRecvDescriptor;
+  AsyncEvent *pingEvent;
+#else
   AsyncEvent *requestEvent;
   AsyncEvent *messageEvent;
+#endif
   unsigned isBeingDestroyed:1;
 #endif /* GOT_PTHREADS */
 
@@ -124,14 +144,13 @@ static const char *const speechRequestNames[] = {
 };
 
 typedef struct {
+  size_t size;
   SpeechRequestType type;
 
   union {
     struct {
-      const unsigned char *text;
       size_t length;
       size_t count;
-      const unsigned char *attributes;
       SayOptions options;
     } sayText;
 
@@ -177,6 +196,7 @@ static const char *const speechMessageNames[] = {
 };
 
 typedef struct {
+  size_t size;
   SpeechMessageType type;
 
   union {
@@ -314,6 +334,9 @@ static void
 setIntegerResponse (volatile SpeechDriverThread *sdt, int value) {
   sdt->response.type = RSP_INTEGER;
   sdt->response.value.INTEGER = value;
+#ifdef WANT_SPK_PROCESS
+  asyncSignalEvent(sdt->pingEvent, NULL);
+#endif
 }
 
 ASYNC_CONDITION_TESTER(testSpeechResponseReceived) {
@@ -350,8 +373,9 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
 
       case MSG_SPEECH_LOCATION: {
         volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
-        SetSpeechLocationMethod *setLocation = spk->setLocation;
+        if (!spk->track.isActive) break;
 
+        SetSpeechLocationMethod *setLocation = spk->setLocation;
         if (setLocation) setLocation(spk, msg->arguments.speechLocation.location);
         break;
       }
@@ -369,7 +393,14 @@ static int
 sendSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
   logSpeechMessage(msg, "sending");
 
-#ifdef GOT_PTHREADS
+#if defined(WANT_SPK_PROCESS)
+  if (msg) {
+    ssize_t result = write(sdt->messageSendDescriptor, msg, msg->size);
+    if (result != msg->size) return 0;
+    free(msg);
+  }
+  return 1;
+#elif defined(GOT_PTHREADS)
   return asyncSignalEvent(sdt->messageEvent, msg);
 #else /* GOT_PTHREADS */
   handleSpeechMessage(sdt, msg);
@@ -384,6 +415,7 @@ newSpeechMessage (SpeechMessageType type, SpeechDatum *data) {
 
   if ((msg = malloc(size))) {
     memset(msg, 0, sizeof(*msg));
+    msg->size = size;
     msg->type = type;
     moveSpeechData(msg->data, data);
     return msg;
@@ -457,6 +489,8 @@ handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
   if (req) {
     switch (req->type) {
       case REQ_SAY_TEXT: {
+	const unsigned char *text = req->data;
+	const unsigned char *attrib = text + req->arguments.sayText.length + 1;
         SayOptions options = req->arguments.sayText.options;
         int restorePitch = 0;
         int restorePunctuation = 0;
@@ -487,10 +521,8 @@ handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
           }
         }
 
-        speech->say(spk,
-          req->arguments.sayText.text, req->arguments.sayText.length,
-          req->arguments.sayText.count, req->arguments.sayText.attributes
-        );
+        speech->say(spk, text, req->arguments.sayText.length,
+          req->arguments.sayText.count, attrib);
 
         if (restorePunctuation) spk->setPunctuation(spk, prefs.speechPunctuation);
         if (restorePitch) spk->setPitch(spk, prefs.speechPitch);
@@ -597,7 +629,20 @@ sendSpeechRequest (volatile SpeechDriverThread *sdt) {
     logSpeechRequest(req, "sending");
     setResponsePending(sdt);
 
-#ifdef GOT_PTHREADS
+#if defined(WANT_SPK_PROCESS)
+    if (req) {
+      ssize_t result = write(sdt->requestSendDescriptor, req, req->size);
+      int ok = (result == req->size);
+      free(req);
+      if (!ok) {
+	setIntegerResponse(sdt, 0);
+	continue;
+      }
+    } else {
+      setThreadState(sdt, THD_STOPPING);
+      setIntegerResponse(sdt, 1);
+    }
+#elif defined(GOT_PTHREADS)
     if (!asyncSignalEvent(sdt->requestEvent, req)) {
       if (req) free(req);
       setIntegerResponse(sdt, 0);
@@ -637,6 +682,7 @@ newSpeechRequest (SpeechRequestType type, SpeechDatum *data) {
 
   if ((req = malloc(size))) {
     memset(req, 0, sizeof(*req));
+    req->size = size;
     req->type = type;
     moveSpeechData(req->data, data);
     return req;
@@ -662,10 +708,8 @@ speechRequest_sayText (
   END_SPEECH_DATA
 
   if ((req = newSpeechRequest(REQ_SAY_TEXT, data))) {
-    req->arguments.sayText.text = data[0].address;
     req->arguments.sayText.length = length;
     req->arguments.sayText.count = count;
-    req->arguments.sayText.attributes = data[1].address;
     req->arguments.sayText.options = options;
 
     if (options & SAY_OPT_MUTE_FIRST) muteSpeechRequestQueue(sdt);
@@ -779,11 +823,13 @@ speechRequest_setPunctuation (
   return 0;
 }
 
+#ifndef WANT_SPK_PROCESS
 static void
 setThreadReady (volatile SpeechDriverThread *sdt) {
   setThreadState(sdt, THD_READY);
   sendIntegerResponse(sdt, 1);
 }
+#endif
 
 static int
 startSpeechDriver (volatile SpeechDriverThread *sdt) {
@@ -804,6 +850,54 @@ ASYNC_CONDITION_TESTER(testSpeechDriverThreadStopping) {
   return sdt->threadState == THD_STOPPING;
 }
 
+#if defined(WANT_SPK_PROCESS)
+
+static int
+processSpeechMessages(volatile SpeechDriverThread *sdt) {
+  int fd = sdt->messageRecvDescriptor;
+  while (sdt->threadState == THD_READY) {
+    size_t size;
+    if (read(fd, &size, sizeof(size_t)) != sizeof(size_t)) return 0;
+    if (size >= sizeof(SpeechMessage)) {
+      SpeechMessage *msg = malloc(size);
+      if (msg) {
+	char *p = (char *)msg + sizeof(size_t);
+	msg->size = size;
+	size -= sizeof(size_t);
+	if (read(fd, p, size) != size) return 0;
+	handleSpeechMessage(sdt, msg);
+	continue;
+      }
+    }
+    return 0;
+  }
+  return 1;
+}
+
+static int
+processSpeechRequests(volatile SpeechDriverThread *sdt) {
+  int fd = sdt->requestRecvDescriptor;
+  while (1) {
+    size_t size;
+    if (read(fd, &size, sizeof(size_t)) != sizeof(size_t)) return 0;
+    if (size >= sizeof(SpeechRequest)) {
+      SpeechRequest *req = malloc(size);
+      if (req) {
+	char *p = (char *)req + sizeof(size_t);
+	req->size = size;
+	size -= sizeof(size_t);
+	if (read(fd, p, size) != size) return 0;
+	handleSpeechRequest(sdt, req);
+	continue;
+      }
+    }
+    return 0;
+  }
+  return 1;
+}
+
+#else
+
 ASYNC_EVENT_CALLBACK(handleSpeechMessageEvent) {
   volatile SpeechDriverThread *sdt = parameters->eventData;
   SpeechMessage *msg = parameters->signalData;
@@ -818,12 +912,66 @@ ASYNC_EVENT_CALLBACK(handleSpeechRequestEvent) {
   handleSpeechRequest(sdt, req);
 }
 
+#endif
+
 static void
 awaitSpeechDriverThreadTermination (volatile SpeechDriverThread *sdt) {
   void *result;
 
   pthread_join(sdt->threadIdentifier, &result);
 }
+
+#if defined(WANT_SPK_PROCESS)
+
+THREAD_FUNCTION(runSpeechDriverThread) {
+  volatile SpeechDriverThread *sdt = argument;
+  pid_t spkProcess;
+
+  setThreadState(sdt, THD_STARTING);
+
+  /* populate spk method pointers before forking so capabilities are known * */
+  startSpeechDriver(sdt);
+  stopSpeechDriver(sdt);
+
+  spkProcess = fork();
+  if (spkProcess == 0) {
+    /* we are the spk process */
+    closeFileDescriptor(sdt->requestSendDescriptor);
+    closeFileDescriptor(sdt->messageRecvDescriptor);
+    if (startSpeechDriver(sdt)) {
+      processSpeechRequests(sdt);
+      stopSpeechDriver(sdt);
+    }
+    _exit(0);
+  }
+
+  /* we are the main process */
+  closeFileDescriptor(sdt->messageSendDescriptor);
+  closeFileDescriptor(sdt->requestRecvDescriptor);
+
+  if (spkProcess == -1) {
+    logMessage(LOG_ERR, "speech process fork: %s", strerror(errno));
+  } else {
+    setThreadState(sdt, THD_READY);
+    setIntegerResponse(sdt, 1);
+    processSpeechMessages(sdt);
+  }
+
+  closeFileDescriptor(sdt->requestSendDescriptor);
+  closeFileDescriptor(sdt->messageRecvDescriptor);
+  if (spkProcess != -1) waitpid(spkProcess, NULL, 0);
+
+  {
+    int ok = sdt->threadState == THD_STOPPING;
+
+    setIntegerResponse(sdt, ok);
+  }
+
+  setThreadState(sdt, THD_FINISHED);
+  return NULL;
+}
+
+#else
 
 THREAD_FUNCTION(runSpeechDriverThread) {
   volatile SpeechDriverThread *sdt = argument;
@@ -854,6 +1002,7 @@ THREAD_FUNCTION(runSpeechDriverThread) {
   setThreadState(sdt, THD_FINISHED);
   return NULL;
 }
+#endif
 #endif /* GOT_PTHREADS */
 
 static void
@@ -882,7 +1031,47 @@ constructSpeechDriverThread (
     if ((sdt->requestQueue = newQueue(deallocateSpeechRequest, NULL))) {
       spk->driver.thread = sdt;
 
-#ifdef GOT_PTHREADS
+#if defined(WANT_SPK_PROCESS)
+      if ((sdt->pingEvent = asyncNewEvent(NULL, NULL))) {
+	if (createAnonymousPipe(&sdt->messageSendDescriptor,
+				&sdt->messageRecvDescriptor)) {
+	  if (createAnonymousPipe(&sdt->requestSendDescriptor,
+				  &sdt->requestRecvDescriptor)) {
+	    pthread_t threadIdentifier;
+	    int createError = createThread("speech-driver",
+                                           &threadIdentifier, NULL,
+                                           runSpeechDriverThread, (void *)sdt);
+
+	    if (!createError) {
+              sdt->threadIdentifier = threadIdentifier;
+
+	      if (awaitSpeechResponse(sdt, SPEECH_DRIVER_THREAD_START_TIMEOUT)) {
+                if (sdt->response.type == RSP_INTEGER) {
+                  if (sdt->response.value.INTEGER) {
+                    return 1;
+		  }
+		}
+
+		logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread initialization failure");
+		awaitSpeechDriverThreadTermination(sdt);
+	      } else {
+                logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread initialization timeout");
+	      }
+	    } else {
+	      logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver thread creation failure: %s", strerror(createError));
+	    }
+	    if (!sdt->threadIdentifier) {
+	      closeFileDescriptor(sdt->requestRecvDescriptor);
+	      closeFileDescriptor(sdt->requestSendDescriptor);
+	    }
+	  }
+	  if (!sdt->threadIdentifier) {
+	    closeFileDescriptor(sdt->messageRecvDescriptor);
+	    closeFileDescriptor(sdt->messageSendDescriptor);
+	  }
+	}
+      }
+#elif defined(GOT_PTHREADS)
       if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessageEvent, (void *)sdt))) {
         pthread_t threadIdentifier;
         int createError = createThread("speech-driver",
@@ -950,7 +1139,11 @@ destroySpeechDriverThread (volatile SpeechSynthesizer *spk) {
     awaitSpeechDriverThreadTermination(sdt);
   }
 
+#ifdef WANT_SPK_PROCESS
+  if (sdt->pingEvent) asyncDiscardEvent(sdt->pingEvent);
+#else
   if (sdt->messageEvent) asyncDiscardEvent(sdt->messageEvent);
+#endif
 #else /* GOT_PTHREADS */
   stopSpeechDriver(sdt);
   setThreadState(sdt, THD_FINISHED);
