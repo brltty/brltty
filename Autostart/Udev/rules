@@ -16,7 +16,19 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# udev rules file for BRLTTY
+##############################
+# Udev Rules File for BRLTTY #
+##############################
+
+#############################################################################
+# The following rule adds read and write group permissions to /dev/uinput.  #
+# BRLTTY is now able to switch to running as an unprivileged user, using    #
+# only a few capabilities), and we don't want to be using CAP_DAC_OVERRIDE. #
+# It uses uinput in order to support some important features, including:    #
+# *  Keyboard Key Tables                                                    #
+# *  Injecting arbitrary key combinations typed on braille devices.         #
+#############################################################################
+KERNEL=="uinput", ACTION=="add", MODE="0660"
 
 SUBSYSTEM=="usb_device", GOTO="brltty_usb_begin"
 SUBSYSTEM=="usb", KERNEL!="*:*", GOTO="brltty_usb_begin"
