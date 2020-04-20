@@ -488,7 +488,11 @@ needCapability (cap_value_t capability, const char *reason) {
     if ((caps = cap_get_proc())) {
       if (requestCapability(caps, capability, 0)) {
         enabledCapabilitiesMask |= bit;
-        logMessage(LOG_DEBUG, "capability enabled: %s", cap_to_name(capability));
+
+        logMessage(LOG_DEBUG,
+          "temporary capability assigned: %s (%s)",
+          cap_to_name(capability), reason
+        );
       } else {
         logUnassignedCapability(capability, 0, reason);
       }
@@ -502,17 +506,6 @@ needCapability (cap_value_t capability, const char *reason) {
   }
 
   return !!(enabledCapabilitiesMask & bit);
-}
-
-static void
-wantTemporaryCapability (int *can, cap_t caps, cap_value_t capability, const char *reason) {
-  if (!*can) {
-    if (requestCapability(caps, capability, 0)) {
-      *can = 1;
-    } else {
-      logUnassignedCapability(capability, 0, reason);
-    }
-  }
 }
 #endif /* CAP_IS_SUPPORTED */
 
@@ -626,6 +619,23 @@ acquirePrivileges (int amPrivilegedUser) {
 #include <pwd.h>
 
 static int
+canSwitchUser (void) {
+#ifdef CAP_SETUID
+  if (!needCapability(CAP_SETUID, "for switching to the unprivileged user")) {
+    return 0;
+  }
+#endif /* CAP_SETUID */
+
+#ifdef CAP_SETGID
+  if (!needCapability(CAP_SETGID, "for switching to the writable group")) {
+    return 0;
+  }
+#endif /* CAP_SETGID */
+
+  return 1;
+}
+
+static int
 switchToUser (const char *user) {
   const struct passwd *pwd = getpwnam(user);
 
@@ -633,28 +643,34 @@ switchToUser (const char *user) {
     uid_t newUid = pwd->pw_uid;
 
     if (newUid) {
-      gid_t oldRgid, oldEgid, oldSgid;
+      if (newUid == geteuid()) return 1;
 
-      if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
-        gid_t newGid = pwd->pw_gid;
+      if (canSwitchUser()) {
+        gid_t oldRgid, oldEgid, oldSgid;
 
-        if (setresgid(newGid, newGid, newGid) != -1) {
-          if (setresuid(newUid, newUid, newUid) != -1) {
-            logMessage(LOG_NOTICE, "switched to user: %s", user);
-            return 1;
+        if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
+          gid_t newGid = pwd->pw_gid;
+
+          if (setresgid(newGid, newGid, newGid) != -1) {
+            if (setresuid(newUid, newUid, newUid) != -1) {
+              logMessage(LOG_NOTICE, "switched to user: %s", user);
+              return 1;
+            } else {
+              logSystemError("setresuid");
+            }
+
+            setresgid(oldRgid, oldEgid, oldSgid);
           } else {
-            logSystemError("setresuid");
+            logSystemError("setresgid");
           }
-
-          setresgid(oldRgid, oldEgid, oldSgid);
         } else {
-          logSystemError("setresgid");
+          logSystemError("getresgid");
         }
       } else {
-        logSystemError("getresgid");
+        logMessage(LOG_WARNING, "can't switch to another user");
       }
     } else {
-      logMessage(LOG_WARNING, "user is privileged: %s", user);
+      logMessage(LOG_WARNING, "not an unprivileged user: %s", user);
     }
   } else {
     logMessage(LOG_WARNING, "user not found: %s", user);
@@ -672,7 +688,7 @@ switchUser (const char *user, int amPrivilegedUser) {
       return 1;
     }
 
-    logMessage(LOG_ERR, "won't switch to an explicitly specified user: %s", user);
+    logMessage(LOG_ERR, "won't switch to the explicitly specified user: %s", user);
     exit(PROG_EXIT_FATAL);
   }
 
@@ -767,12 +783,22 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
 }
 
 static void
-claimStateDirectories (int canChangeOwnership, int canChangePermissions) {
+claimStateDirectories (void) {
   StateDirectoryData sdd = {
     .owningGroup = getegid(),
-    .canChangeOwnership = canChangeOwnership,
-    .canChangePermissions = canChangePermissions,
   };
+
+#ifdef CAP_CHOWN
+  if (needCapability(CAP_CHOWN, "for claiming group ownership of the state directories")) {
+    sdd.canChangeOwnership = 1;
+  }
+#endif /* CAP_CHOWN */
+
+#ifdef CAP_FOWNER
+  if (needCapability(CAP_FOWNER, "for adding group permissions to the state directories")) {
+    sdd.canChangePermissions = 1;
+  }
+#endif /* CAP_FOWNER */
 
   const StateDirectoryEntry *sde = stateDirectoryTable;
   const StateDirectoryEntry *end = sde + ARRAY_COUNT(stateDirectoryTable);
@@ -803,12 +829,7 @@ claimStateDirectories (int canChangeOwnership, int canChangePermissions) {
 void
 establishProgramPrivileges (const char *user) {
   logCurrentCapabilities("at start");
-
   int amPrivilegedUser = !geteuid();
-  int canSwitchUser = amPrivilegedUser;
-  int canSwitchGroup = amPrivilegedUser;
-  int canChangeOwnership = amPrivilegedUser;
-  int canChangePermissions = amPrivilegedUser;
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
@@ -816,53 +837,12 @@ establishProgramPrivileges (const char *user) {
   }
 #endif /* PR_SET_KEEPCAPS */
 
-#ifdef CAP_IS_SUPPORTED
-  {
-    cap_t curCaps;
-
-    if ((curCaps = cap_get_proc())) {
-      cap_t newCaps;
-
-      if ((newCaps = cap_dup(curCaps))) {
-        wantTemporaryCapability(
-          &canSwitchUser, newCaps, CAP_SETUID,
-          "for switching to the default unprivileged user"
-        );
-
-        wantTemporaryCapability(
-          &canSwitchGroup, newCaps, CAP_SETGID,
-          "for switching to the writable group"
-        );
-
-        wantTemporaryCapability(
-          &canChangeOwnership, newCaps, CAP_CHOWN,
-          "for claiming group ownership of the state directories"
-        );
-
-        wantTemporaryCapability(
-          &canChangePermissions, newCaps, CAP_FOWNER,
-          "for adding group permissions to the state directories"
-        );
-
-        if (cap_compare(newCaps, curCaps) != 0) setCapabilities(newCaps);
-        cap_free(newCaps);
-      } else {
-        logSystemError("cap_dup");
-      }
-
-      cap_free(curCaps);
-    } else {
-      logSystemError("cap_get_proc");
-    }
-  }
-#endif /* CAP_IS_SUPPORTED */
-
 #ifdef HAVE_PWD_H
   {
-    if (canSwitchUser && canSwitchGroup && switchUser(user, amPrivilegedUser)) {
+    if (switchUser(user, amPrivilegedUser)) {
       amPrivilegedUser = 0;
       umask(umask(0) & ~S_IRWXG);
-      claimStateDirectories(canChangeOwnership, canChangePermissions);
+      claimStateDirectories();
     } else {
       uid_t uid = geteuid();
       const struct passwd *pwd = getpwuid(uid);
