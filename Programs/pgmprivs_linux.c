@@ -733,8 +733,6 @@ static const StateDirectoryEntry stateDirectoryTable[] = {
 
 typedef struct {
   gid_t owningGroup;
-  unsigned char canChangeOwnership:1;
-  unsigned char canChangePermissions:1;
 } StateDirectoryData;
 
 static int
@@ -749,13 +747,23 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
 
     if (status.st_gid == group) {
       addPermissions = 1;
-    } else if (!sdd->canChangeOwnership) {
-      logMessage(LOG_WARNING, "can't claim group ownership: %s", path);
-    } else if (chown(path, -1, group) != -1) {
-      logMessage(LOG_INFO, "group ownership claimed: %s", path);
-      addPermissions = 1;
     } else {
-      logSystemError("chown");
+      int canClaimOwnership = 0;
+
+#ifdef CAP_CHOWN
+      if (needCapability(CAP_CHOWN, "for claiming group ownership of the state directories")) {
+        canClaimOwnership = 1;
+      }
+#endif /* CAP_CHOWN */
+
+      if (!canClaimOwnership) {
+        logMessage(LOG_WARNING, "can't claim group ownership: %s", path);
+      } else if (chown(path, -1, group) != -1) {
+        logMessage(LOG_INFO, "group ownership claimed: %s", path);
+        addPermissions = 1;
+      } else {
+        logSystemError("chown");
+      }
     }
 
     if (addPermissions) {
@@ -766,7 +774,15 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
       if (S_ISDIR(newMode)) newMode |= S_IXGRP | S_ISGID;
 
       if (newMode != oldMode) {
-        if (!sdd->canChangePermissions) {
+        int canAddPermissions = 0;
+
+#ifdef CAP_FOWNER
+        if (needCapability(CAP_FOWNER, "for adding group permissions to the state directories")) {
+          canAddPermissions = 1;
+        }
+#endif /* CAP_FOWNER */
+
+        if (!canAddPermissions) {
           logMessage(LOG_WARNING, "can't add group permissions: %s", path);
         } else if (chmod(path, newMode) != -1) {
           logMessage(LOG_INFO, "group permissions added: %s", path);
@@ -787,18 +803,6 @@ claimStateDirectories (void) {
   StateDirectoryData sdd = {
     .owningGroup = getegid(),
   };
-
-#ifdef CAP_CHOWN
-  if (needCapability(CAP_CHOWN, "for claiming group ownership of the state directories")) {
-    sdd.canChangeOwnership = 1;
-  }
-#endif /* CAP_CHOWN */
-
-#ifdef CAP_FOWNER
-  if (needCapability(CAP_FOWNER, "for adding group permissions to the state directories")) {
-    sdd.canChangePermissions = 1;
-  }
-#endif /* CAP_FOWNER */
 
   const StateDirectoryEntry *sde = stateDirectoryTable;
   const StateDirectoryEntry *end = sde + ARRAY_COUNT(stateDirectoryTable);
