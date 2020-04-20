@@ -113,6 +113,8 @@ typedef struct {
   const char *reason;
   const char *name;
   const char *path;
+  unsigned char needRead:1;
+  unsigned char needWrite:1;
 } RequiredGroupEntry;
 
 static RequiredGroupEntry requiredGroupTable[] = {
@@ -151,6 +153,8 @@ static RequiredGroupEntry requiredGroupTable[] = {
 
   { .reason = "for creating virtual devices",
     .path = "/dev/uinput",
+    .needRead = 1,
+    .needWrite = 1,
   },
 };
 
@@ -187,6 +191,14 @@ processRequiredGroups (GroupsProcessor *processGroups, void *data) {
 
           if (stat(path, &status) != -1) {
             groups[count++] = status.st_gid;
+
+            if (rge->needRead && !(status.st_mode & S_IRGRP)) {
+              logMessage(LOG_WARNING, "path not group readable: %s", path);
+            }
+
+            if (rge->needWrite && !(status.st_mode & S_IWGRP)) {
+              logMessage(LOG_WARNING, "path not group writable: %s", path);
+            }
           } else {
             logMessage(LOG_WARNING, "path access error: %s: %s", path, strerror(errno));
           }
