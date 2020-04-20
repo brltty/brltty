@@ -328,24 +328,6 @@ logCurrentCapabilities (const char *label) {
   logCapabilities(NULL, label);
 }
 
-static void
-clearAmbientCapabilities (void) {
-#ifdef PR_CAP_AMBIENT
-  if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) == -1) {
-    logSystemError("prctl[PR_CAP_AMBIENT_CLEAR_ALL]");
-  }
-#endif /* PR_CAP_AMBIENT */
-}
-
-static int
-addAmbientCapability (cap_value_t capability) {
-#ifdef PR_CAP_AMBIENT_RAISE
-  if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, capability, 0, 0) != -1) return 1;
-  logSystemError("prctl[PR_CAP_AMBIENT_RAISE]");
-#endif /*( PR_CAP_AMBIENT_RAISE */
-  return 0;
-}
-
 static int
 setCapabilities (cap_t caps) {
   if (cap_set_proc(caps) != -1) return 1;
@@ -365,30 +347,6 @@ static int
 addCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
   if (cap_set_flag(caps, set, 1, &capability, CAP_SET) != -1) return 1;
   logSystemError("cap_set_flag");
-  return 0;
-}
-
-static int
-isCapabilityEnabled (cap_t caps, cap_value_t capability) {
-  return hasCapability(caps, CAP_EFFECTIVE, capability);
-}
-
-static int
-enableCapability (cap_t caps, cap_value_t capability) {
-  return hasCapability(caps, CAP_PERMITTED, capability)
-      && addCapability(caps, CAP_EFFECTIVE, capability)
-      && addCapability(caps, CAP_INHERITABLE, capability)
-      && setCapabilities(caps)
-      && addAmbientCapability(capability)
-      ;
-}
-
-static int
-ensureCapability (cap_t caps, cap_value_t capability) {
-  if (isCapabilityEnabled(caps, capability)) return 1;
-  if (enableCapability(caps, capability)) return 1;
-
-  logMessage(LOG_WARNING, "can't enable capability: %s", cap_to_name(capability));
   return 0;
 }
 
@@ -445,8 +403,13 @@ setRequiredCapabilities (int amPrivilegedUser) {
     logSystemError("cap_init");
   }
 
+#ifdef PR_CAP_AMBIENT
+  if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) == -1) {
+    logSystemError("prctl[PR_CAP_AMBIENT_CLEAR_ALL]");
+  }
+#endif /* PR_CAP_AMBIENT */
+
   if (oldCaps) cap_free(oldCaps);
-  clearAmbientCapabilities();
 }
 
 static void
@@ -481,10 +444,40 @@ logMissingCapabilities (void) {
   }
 }
 
+static int
+requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
+  if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
+    if (!hasCapability(caps, CAP_PERMITTED, capability)) {
+      logMessage(LOG_WARNING, "capability not permitted: %s", cap_to_name(capability));
+      return 0;
+    }
+
+    if (!addCapability(caps, CAP_EFFECTIVE, capability)) return 0;
+    if (!inheritable) return setCapabilities(caps);
+  } else if (!inheritable) {
+    return 1;
+  }
+
+  if (!hasCapability(caps, CAP_INHERITABLE, capability)) {
+    if (!addCapability(caps, CAP_INHERITABLE, capability)) {
+      return 0;
+    }
+  }
+
+  if (setCapabilities(caps)) {
+    #ifdef PR_CAP_AMBIENT_RAISE
+    if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, capability, 0, 0) != -1) return 1;
+    logSystemError("prctl[PR_CAP_AMBIENT_RAISE]");
+    #endif /* PR_CAP_AMBIENT_RAISE */
+  }
+
+  return 0;
+}
+
 static void
 wantTemporaryCapability (int *can, cap_t caps, cap_value_t capability, const char *reason) {
   if (!*can) {
-    if (ensureCapability(caps, capability)) {
+    if (requestCapability(caps, capability, 0)) {
       *can = 1;
     } else {
       logUnassignedCapability(capability, 0, reason);
@@ -505,6 +498,7 @@ typedef struct {
 
   #ifdef CAP_IS_SUPPORTED
   cap_value_t capability;
+  unsigned char inheritable:1;
   #endif /* CAP_IS_SUPPORTED */
 } PrivilegesAcquisitionEntry;
 
@@ -514,6 +508,7 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 
     #ifdef CAP_SYS_MODULE
     .capability = CAP_SYS_MODULE,
+    .inheritable = 1,
     #endif /* CAP_SYS_MODULE, */
   },
 
@@ -561,7 +556,7 @@ acquirePrivileges (int amPrivilegedUser) {
       while (pae < end) {
         cap_value_t capability = pae->capability;
 
-        if (!capability || ensureCapability(caps, capability)) {
+        if (!capability || requestCapability(caps, capability, pae->inheritable)) {
           pae->acquirePrivileges(amPrivilegedUser);
         } else {
           logUnassignedCapability(capability, 0, pae->reason);
