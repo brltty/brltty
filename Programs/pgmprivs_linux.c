@@ -489,17 +489,17 @@ requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
 static int
 needCapability (cap_value_t capability, const char *reason) {
   typedef uint64_t CapabilityMask;
-  CapabilityMask bit = UINT64_C(1) << capability;
+  CapabilityMask bit = (CapabilityMask)1 << capability;
 
   static CapabilityMask requestedCapabilitiesMask = 0;
-  static CapabilityMask enabledCapabilitiesMask = 0;
+  static CapabilityMask assignedCapabilitiesMask = 0;
 
   if (!(requestedCapabilitiesMask & bit)) {
     cap_t caps;
 
     if ((caps = cap_get_proc())) {
       if (requestCapability(caps, capability, 0)) {
-        enabledCapabilitiesMask |= bit;
+        assignedCapabilitiesMask |= bit;
 
         logMessage(LOG_DEBUG,
           "temporary capability assigned: %s (%s)",
@@ -517,7 +517,7 @@ needCapability (cap_value_t capability, const char *reason) {
     requestedCapabilitiesMask |= bit;
   }
 
-  return !!(enabledCapabilitiesMask & bit);
+  return !!(assignedCapabilitiesMask & bit);
 }
 #endif /* CAP_IS_SUPPORTED */
 
