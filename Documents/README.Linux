@@ -6,9 +6,15 @@ BRLTTY on Linux
 
 .. |super user| replace:: ``root``
 .. |default user| replace:: ``brltty``
-.. |default sockets directory| replace:: ``/var/lib/BrlAPI/``
-.. |default updatable directory| replace:: ``/var/lib/brltty/``
-.. |default writable directory| replace:: ``/var/run/brltty/``
+
+.. |sockets directory name| replace:: ``BrlAPI``
+.. |updatable directory name| replace:: ``brltty``
+.. |writable directory name| replace:: ``brltty``
+
+.. |configuration file path| replace:: ``/etc/brltty.conf``
+.. |sockets directory path| replace:: ``/var/lib/BrlAPI/``
+.. |updatable directory path| replace:: ``/var/lib/brltty/``
+.. |writable directory path| replace:: ``/var/run/brltty/``
 
 .. |default unprivileged user| replace:: default unprivileged user (|default user|)
 .. |unprivileged user option| replace:: ``-u`` (``--unprivileged-user=``) command line option
@@ -16,9 +22,9 @@ BRLTTY on Linux
 .. |speaker| replace:: built-in PC speaker
 .. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
 
-.. |sockets directory| replace:: sockets directory (usually |default sockets directory|)
-.. |updatable directory| replace:: updatable directory (usually |default updatable directory|)
-.. |writable directory| replace:: writable directory (usually |default writable directory|)
+.. |sockets directory| replace:: sockets directory (usually |sockets directory path|)
+.. |updatable directory| replace:: updatable directory (usually |updatable directory path|)
+.. |writable directory| replace:: writable directory (usually |writable directory path|)
 
 .. |keyboard key tables| replace::
   keyboard key tables
@@ -51,18 +57,77 @@ For System Administrators
 State Directories
 -----------------
 
+A state directory is one which a program needs to be able to write data to.
+BRLTTY's state directories are:
+
 |sockets directory|
-  This directory is where BRLTTY creates BrlAP's local server sockets.
+  This directory is where BRLTTY creates BrlAPI's
+  local (UNIX domain) server sockets.
 
 |updatable directory|
-  This directory is where BRLTTY keeps its preferences files.
-  It's also where, if requested, the speech FIFO is created.
+  This directory is where BRLTTY saves user data.
+  This includes:
+
+  * preferences files
+  * clipboard content
 
 |writable directory|
   This directory is where BRLTTY creates private copies of
   file system objects that it needs but
   that don't already exist (or, at least, that it can't find),
   or that are inaccessible (can't be opened).
+  It's also where, if requested, the speech FIFO is created.
+
+The actual locations of these directories can be specified in a number of ways.
+From highest to lowest precedence, they are:
+
+* command line option
+* configuration directive (in |configuration file path|)
+* environment variable (if the ``-E`` command line option has been specified)
+* default location (can be changed with ``configure`` at build time)
+
+.. table:: State Directory Location Specification
+
+  =========  ======  ===================  ==========================  ==========================
+  Directory  Option  Config Directive     Environment Variable        Default Location
+  ---------  ------  -------------------  --------------------------  --------------------------
+  Sockets                                                             |sockets directory path|
+  Updatable  -U      updatable-directory  BRLTTY_UPDATABLE_DIRECTORY  |updatable directory path|
+  Writable   -W      writable-directory   BRLTTY_WRITABLE_DIRECTORY   |writable directory path|
+  =========  ======  ===================  ==========================  ==========================
+
+After having successfully switched to executing as an unprivileged user,
+BRLTTY attempts to gain full access to its data directories.
+For each of its state directories:
+
+* If it doesn't exist then it's created.
+  This requires the |cap_dac_override| (temporary) capability.
+
+* Its owning group is changed to be the primary group
+  of the unprivileged user that BRLTTY Is executing as.
+  This same change is also made to whatever the directory contains.
+  This requires the |cap_chown| (temporary) capability.
+
+* Group read and write permissions are added to it
+  and to whatever it contains.
+  For directories, group search permission is also added
+  and the set-group-ID bit is set.
+  This requires the |cap_fowner| (temporary) capability.
+
+As a protection, given that command line options, etc
+can be used to change them to non-BRLTTY-specific locations,
+attempts to gain full access to any of the state directories
+are only performed if the last component of its path is its default name.
+
+.. table:: Expected State Directory Names
+
+  =========  ==========================
+  Directory  Expected Name
+  ---------  --------------------------
+  Sockets    |sockets directory name|
+  Updatable  |updatable directory name|
+  Writable   |writable directory name|
+  =========  ==========================
 
 Starting BRLTTY
 ---------------
@@ -146,19 +211,21 @@ when started `as a regular user`_.
   They're only needed when BRLTTY starts,
   and are relinquished when they're no longer needed.
 
-====================  ===========================
-Capability            Reason
---------------------  ---------------------------
-|cap_setuid|          |cap_setuid reason|
-|cap_setgid|          |cap_setgid reason|
-|cap_chown|           |cap_chown reason|
-|cap_fowner|          |cap_fowner reason|
-|cap_dac_override|    |cap_dac_override reason|
-|cap_sys_module|      |cap_sys_module reason|
-|cap_sys_admin|       |cap_sys_admin reason|
-|cap_sys_tty_config|  |cap_sys_tty_config reason|
-|cap_mknod|           |cap_mknod reason|
-====================  ===========================
+.. table:: Capability Reasons
+
+  ====================  ===========================
+  Capability            Reason
+  --------------------  ---------------------------
+  |cap_setuid|          |cap_setuid reason|
+  |cap_setgid|          |cap_setgid reason|
+  |cap_chown|           |cap_chown reason|
+  |cap_fowner|          |cap_fowner reason|
+  |cap_dac_override|    |cap_dac_override reason|
+  |cap_sys_module|      |cap_sys_module reason|
+  |cap_sys_admin|       |cap_sys_admin reason|
+  |cap_sys_tty_config|  |cap_sys_tty_config reason|
+  |cap_mknod|           |cap_mknod reason|
+  ====================  ===========================
 
 The Command
 ~~~~~~~~~~~
@@ -190,19 +257,21 @@ It also accepts a number of options (which must precede that path).
 In particular, these are the options that
 remove capabilities from the full set.
 
-======  ====================  ===========================
-Option  Capability            Reason
-------  --------------------  ---------------------------
--u      |cap_setuid|          |cap_setuid reason|
--g      |cap_setgid|          |cap_setgid reason|
--o      |cap_chown|           |cap_chown reason|
--p      |cap_fowner|          |cap_fowner reason|
--c      |cap_dac_override|    |cap_dac_override reason|
--m      |cap_sys_module|      |cap_sys_module reason|
--i      |cap_sys_admin|       |cap_sys_admin reason|
--s      |cap_sys_tty_config|  |cap_sys_tty_config reason|
--d      |cap_mknod|           |cap_mknod reason|
-======  ====================  ===========================
+.. table:: ``setcaps`` Script Options for Excluding Capabilities
+
+  ======  ====================  ===========================
+  Option  Capability            Reason
+  ------  --------------------  ---------------------------
+  -u      |cap_setuid|          |cap_setuid reason|
+  -g      |cap_setgid|          |cap_setgid reason|
+  -o      |cap_chown|           |cap_chown reason|
+  -p      |cap_fowner|          |cap_fowner reason|
+  -c      |cap_dac_override|    |cap_dac_override reason|
+  -m      |cap_sys_module|      |cap_sys_module reason|
+  -i      |cap_sys_admin|       |cap_sys_admin reason|
+  -s      |cap_sys_tty_config|  |cap_sys_tty_config reason|
+  -d      |cap_mknod|           |cap_mknod reason|
+  ======  ====================  ===========================
 
 Privileged Host Operations
 --------------------------
@@ -331,10 +400,10 @@ and are relinquished right after this has been done.
   because they can be internally installed.
 
 Known Problems
-~~~~~~~~~~~~~~
+--------------
 
 Writing to SYSFS Files
-``````````````````````
+~~~~~~~~~~~~~~~~~~~~~~
 
 The ``SYSFS`` virtual file system (usually mounted at ``/sys/``)
 contains some files that BRLTTY occasionally needs to write to.
@@ -351,34 +420,44 @@ They include:
   of the associated PCI device.
 
 Creating Virtual Devices via Uinput
-```````````````````````````````````
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The |uinput device| is only readable and writable
-by the super user (|super user|) -
-it hasn't been granted any group or others access.
-This makes it impossible for BRLTTY to access it
+The |uinput device| is usually only readable and writable
+by the super user (|super user|).
+Without any group and/or others access,
+it's impossible for BRLTTY to access it
 when started `as a regular user`_.
 
 This situation could be easily resolved
-by granting group read and write access to the device.
+by granting group read and write permissions to the device.
 This shouldn't be problematic because its owned by the ``root`` group.
-Why this hasn't been done is escaping the comprehension of this author.
-Even better, of course, why not give the device its own group?
+Even better, of course, would be to also give the device its own group
+(e.g. ``uinput``).
 
-BRLTTY currently gets around this problem
-by using the |cap_mknod| capability
-to create its own copy of the device within a private area.
+BRLTTY currently gets around this problem by including the following
+Udev rule to add group read and write permissions to the device::
+
+  KERNEL=="uinput", ACTION=="add", MODE="0660"
+
+If BRLTTY finds that it isn't permitted to open the device
+(perhaps because the Udev rule isn't present)
+then its fallback method Is to create a private copy of the device file
+within its |writable directory|.
+This requires the |cap_mknod| (temporary) capability.
+
 Other alternatives include:
 
 * Adding the ``cap_dac_override`` (permanent) capability
   so that BRLTTY isn't subject to file ownership restrictions.
+  This is a very, very bad idea
+  but, for completeness, it's on the table.
 
 * Adding the ``cap_fowner`` (temporary) capability
   so that BRLTTY can add an acl (access control list) entry
   that grants itself access to the device.
 
 * Adding the ``cap_fowner`` (temporary) capability
-  so that BRLTTY can add read and write group access to the device.
+  so that BRLTTY can add group read and write permissions to the device.
 
 Being able to create virtual devices
 is a very important ability for BRLTTY to have.
@@ -412,4 +491,18 @@ It's used for:
   monitor what the keyboard LEDs are showing.
   This is done to support the generation of
   An audio-based rendering of LED state changes.
+
+Private Copies of Device Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The default location of the |writable directory| on a modern system
+is usually on a memory-resident file system
+that has been mounted with the ``nodev`` option.
+This prevents any device file within the file system from being opened
+even if its permissions (mode, acl, etc) allow it.
+The good news is that this isn't really a problem
+on a well-configured system.
+If it is then the best solution is
+to change the writable directory to a better location
+(see `State Directories`_ for how to do that).
 
