@@ -141,11 +141,11 @@ it has unrestricted access to all of the privileged operations
 that the host has to offer.
 When started in this way, therefore, it first configures itself
 to only have access to the `privileged host operations`_ that it actually needs,
-and then drops the rest of them by becoming a regular user process.
+and then drops the rest of them by becoming an unprivileged user process.
 
 The steps that are performed to accomplish this are as follows:
 
-1) Switch to executing as a regular user process.
+1) Switch to executing as an unprivileged user process.
 2) Install the needed `kernel modules`_.
 3) Establish the needed `group memberships`_.
 4) Assign to itself its `required capabilities`_.
@@ -162,10 +162,10 @@ The decision regarding which regular user to run as is made as follows:
 
 3) Continue to run as |super user|.
 
-As a Regular User
-~~~~~~~~~~~~~~~~~
+As an Unprivileged User
+~~~~~~~~~~~~~~~~~~~~~~~
 
-When BRLTTY starts executing as a regular user (not |super user|),
+When BRLTTY starts executing as an unprivileged user (not |super user|),
 i.e. when its initial effective user identifier isn't 0,
 it "hopes" that
 the system,
@@ -192,17 +192,17 @@ These failures can range all the way from minor to severe.
 If the (temporary) capabilities |cap_setuid| and |cap_setgid|
 have both also been assigned to BRLTTY's executable
 then it's able to switch to its |default unprivileged user|
-even when started as a regular user.
+even when started as an unprivileged user.
 If the |default unprivileged user| doesn't exist then
 BRLTTY continues to run as the user who started it.
 This feature doesn't allow an explicit user to be specified
 (via the |unprivileged user option|).
 
-Assigning the Capabilities to the Executable
---------------------------------------------
+Assigning Capabilities to the Executable
+----------------------------------------
 
 First, here's a summary of all of the capabilities that BRLTTY needs
-when started `as a regular user`_.
+when started `as an unprivileged user`_.
 
 * The `required capabilities`_ are highlighted **this way**.
   They're needed throughout BRLTTY's execution.
@@ -233,7 +233,7 @@ The Command
 The command to assign all of the capabilities,
 i.e. both the `required capabilities`_ and the `temporary capabilities`_,
 to BRLTTY's executable
-so that it'll be fully functional when started as a regular user,
+so that it'll be fully functional when started as an unprivileged user,
 without requiring any additional administrator configuration,
 is::
 
@@ -356,7 +356,7 @@ Temporary Capabilities
 
 BRLTTY only uses the privileged kernel operations
 that are granted via these capabilities
-when it starts `as a regular user`_.
+when it starts `as an unprivileged user`_.
 They allow it to configure itself,
 thus not relying so heavily on explicit administrator configuration,
 and are relinquished right after this has been done.
@@ -426,7 +426,7 @@ The |uinput device| is usually only readable and writable
 by the super user (|super user|).
 Without any group and/or others access,
 it's impossible for BRLTTY to access it
-when started `as a regular user`_.
+when started `as an unprivileged user`_.
 
 This situation could be easily resolved
 by granting group read and write permissions to the device.

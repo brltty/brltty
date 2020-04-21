@@ -696,6 +696,8 @@ switchUser (const char *user, int amPrivilegedUser) {
   if (*user) {
     if (!amPrivilegedUser) {
       logMessage(LOG_WARNING, "not executing as a privileged user");
+    } else if (getuid()) {
+      logMessage(LOG_WARNING, "executing as a set-user-ID root program");
     } else if (switchToUser(user)) {
       return 1;
     }
