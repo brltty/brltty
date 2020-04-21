@@ -30,7 +30,6 @@
 #include "strfmt.h"
 #include "pgmprivs.h"
 #include "system_linux.h"
-#include "program.h"
 #include "file.h"
 
 typedef struct {
@@ -702,8 +701,7 @@ switchUser (const char *user, int amPrivilegedUser) {
       return 1;
     }
 
-    logMessage(LOG_ERR, "won't switch to the explicitly specified user: %s", user);
-    exit(PROG_EXIT_FATAL);
+    logMessage(LOG_WARNING, "ignoring the explicitly specified user: %s", user);
   }
 
   if (*(user = UNPRIVILEGED_USER)) {
