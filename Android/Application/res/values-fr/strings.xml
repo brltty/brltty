@@ -16,6 +16,17 @@
   <string name="inputService_not_started">Dispositif de saisie non démarré</string>
   <string name="inputService_not_connected">Dispositif de saisie non connecté</string>
 
+  <string name="updateApplication_problem_failed">Application non mise à jour</string>
+   
+  <string name="packageInstaller_problem_failed">Paquet non installé</string>
+  <string name="packageInstaller_problem_same">Version identique</string>
+  <string name="packageInstaller_problem_downgrade">Rétrogradation non permise</string>
+   
+  <string name="fileDownloader_title">Téléchargeur du fichier de BRLTTY</string>
+  <string name="fileDownloader_problem_failed">Fichier non téléchargé</string>
+  <string name="fileDownloader_state_connecting">Connexion</string>
+  <string name="fileDownloader_state_downloading">Téléchargement</string>
+   
   <string name="checkbox_state_unchecked">Non</string>
   <string name="checkbox_state_checked">Oui</string>
 
@@ -39,6 +50,8 @@
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">oster un message à la communauté</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Gérer le statut de membre de la communauté</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Mettre à jour l\'application</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Actions d\'accessibilité</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Paramètres de BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Paramètres généraux</string>
