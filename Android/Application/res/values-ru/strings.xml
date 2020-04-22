@@ -16,6 +16,17 @@
   <string name="inputService_not_started">служба ввода не запущена</string>
   <string name="inputService_not_connected">служба ввода не подключена</string>
 
+  <string name="updateApplication_problem_failed">приложение не обновлено</string>
+
+  <string name="packageInstaller_problem_failed">пакет не установлен</string>
+  <string name="packageInstaller_problem_same">та же версия</string>
+  <string name="packageInstaller_problem_downgrade">понижение версии не допускается</string>
+
+  <string name="fileDownloader_title">Загрузчик файлов BRLTTY</string>
+  <string name="fileDownloader_problem_failed">файл не загружен</string>
+  <string name="fileDownloader_state_connecting">подключение</string>
+  <string name="fileDownloader_state_downloading">скачивание</string>
+
   <string name="checkbox_state_unchecked">Нет</string>
   <string name="checkbox_state_checked">Да</string>
 
@@ -39,6 +50,8 @@
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Отправка сообщений сообщества</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Управление членством в сообществе</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Обновление приложения</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Действия специальных возможностей</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Настройки BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Общие настройки</string>
