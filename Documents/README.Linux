@@ -216,15 +216,15 @@ when started `as an unprivileged user`_.
   ====================  ===========================
   Capability            Reason
   --------------------  ---------------------------
-  |cap_setuid|          |cap_setuid reason|
-  |cap_setgid|          |cap_setgid reason|
   |cap_chown|           |cap_chown reason|
-  |cap_fowner|          |cap_fowner reason|
   |cap_dac_override|    |cap_dac_override reason|
-  |cap_sys_module|      |cap_sys_module reason|
-  |cap_sys_admin|       |cap_sys_admin reason|
-  |cap_sys_tty_config|  |cap_sys_tty_config reason|
+  |cap_fowner|          |cap_fowner reason|
   |cap_mknod|           |cap_mknod reason|
+  |cap_setgid|          |cap_setgid reason|
+  |cap_setuid|          |cap_setuid reason|
+  |cap_sys_admin|       |cap_sys_admin reason|
+  |cap_sys_module|      |cap_sys_module reason|
+  |cap_sys_tty_config|  |cap_sys_tty_config reason|
   ====================  ===========================
 
 The Command
@@ -262,15 +262,15 @@ remove capabilities from the full set.
   ======  ====================  ===========================
   Option  Capability            Reason
   ------  --------------------  ---------------------------
-  -u      |cap_setuid|          |cap_setuid reason|
+  -c      |cap_dac_override|    |cap_dac_override reason|
+  -d      |cap_mknod|           |cap_mknod reason|
   -g      |cap_setgid|          |cap_setgid reason|
+  -i      |cap_sys_admin|       |cap_sys_admin reason|
+  -m      |cap_sys_module|      |cap_sys_module reason|
   -o      |cap_chown|           |cap_chown reason|
   -p      |cap_fowner|          |cap_fowner reason|
-  -c      |cap_dac_override|    |cap_dac_override reason|
-  -m      |cap_sys_module|      |cap_sys_module reason|
-  -i      |cap_sys_admin|       |cap_sys_admin reason|
   -s      |cap_sys_tty_config|  |cap_sys_tty_config reason|
-  -d      |cap_mknod|           |cap_mknod reason|
+  -u      |cap_setuid|          |cap_setuid reason|
   ======  ====================  ===========================
 
 Privileged Host Operations
