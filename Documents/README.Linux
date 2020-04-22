@@ -42,14 +42,14 @@ BRLTTY on Linux
 .. |cap_mknod| replace:: **cap_mknod**
 
 .. |cap_setuid reason| replace:: switching to the |default unprivileged user|
-.. |cap_setgid reason| replace:: switching to the writable group and joining required groups
+.. |cap_setgid reason| replace:: switching to the writable group and joining the required groups
 .. |cap_chown reason| replace:: claiming group ownership of the `state directories`_
 .. |cap_fowner reason| replace:: adding group permissions to the `state directories`_
 .. |cap_dac_override reason| replace:: creating missing `state directories`_
 .. |cap_sys_module reason| replace:: installing kernel modules
 .. |cap_sys_admin reason| replace:: injecting input characters
 .. |cap_sys_tty_config reason| replace:: using the |speaker|
-.. |cap_mknod reason| replace:: creating special device files
+.. |cap_mknod reason| replace:: creating needed but missing device files
 
 For System Administrators
 =========================
