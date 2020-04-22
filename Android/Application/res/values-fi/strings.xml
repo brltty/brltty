@@ -16,6 +16,17 @@
   <string name="inputService_not_started">Syötepalvelua ei ole käynnistetty</string>
   <string name="inputService_not_connected">Syötepalvelua ei ole yhdistetty</string>
 
+  <string name="updateApplication_problem_failed">sovellusta ei päivitetty</string>
+
+  <string name="packageInstaller_problem_failed">pakettia ei asennettu</string>
+  <string name="packageInstaller_problem_same">sama versio</string>
+  <string name="packageInstaller_problem_downgrade">alaspäin päivittämistä ei sallita</string>
+
+  <string name="fileDownloader_title">BRLTTY-tiedostolataaja</string>
+  <string name="fileDownloader_problem_failed">tiedostoa ei ladattu</string>
+  <string name="fileDownloader_state_connecting">yhdistetään</string>
+  <string name="fileDownloader_state_downloading">ladataan</string>
+
   <string name="checkbox_state_unchecked">Ei</string>
   <string name="checkbox_state_checked">Kyllä</string>
 
@@ -39,6 +50,8 @@
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Lähetä yhteisöviesti</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Hallinnoi yhteisöjäsenyyttä</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Päivitä sovellus</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Helppokäyttötoiminnot</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY:n asetukset</string>
   <string name="SETTINGS_SCREEN_GENERAL">Yleiset</string>
