@@ -16,6 +16,17 @@
   <string name="inputService_not_started">servizio immissione non avviato</string>
   <string name="inputService_not_connected">servizio immissione non connesso</string>
 
+  <string name="updateApplication_problem_failed">applicazione nonon aggiornata</string>
+
+  <string name="packageInstaller_problem_failed">pacchetto non installato</string>
+  <string name="packageInstaller_problem_same">same version</string>
+  <string name="packageInstaller_problem_downgrade">downgrade non consentito</string>
+
+  <string name="fileDownloader_title">BRLTTY File Scaricato</string>
+  <string name="fileDownloader_problem_failed">file non scaricato</string>
+  <string name="fileDownloader_state_connecting">connessione in corso</string>
+  <string name="fileDownloader_state_downloading">scaricamento in corso</string>
+
   <string name="checkbox_state_unchecked">No</string>
   <string name="checkbox_state_checked">Sì</string>
 
@@ -39,6 +50,8 @@
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Posta un Messaggio alla Community</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Gestisci Iscrizione alla Community</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Aggiorna Applicazione</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Azioni Accessibilità</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Impostazioni BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Impostazioni Generali</string>
@@ -204,6 +217,7 @@
   <string name="TEXT_TABLE_LABEL_sa">Sanscrito</string>
   <string name="TEXT_TABLE_LABEL_sat">Santali</string>
   <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
+  <string name="TEXT_TABLE_LABEL_se">Sami (Settentrionale)</string>
   <string name="TEXT_TABLE_LABEL_sk">Slovacco</string>
   <string name="TEXT_TABLE_LABEL_sl">Sloveno</string>
   <string name="TEXT_TABLE_LABEL_sv">Svedese</string>
