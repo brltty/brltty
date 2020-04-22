@@ -16,6 +16,17 @@
   <string name="inputService_not_started">storitev vnosa ni zagnana</string>
   <string name="inputService_not_connected">storitev vnosa ni priključena</string>
 
+  <string name="updateApplication_problem_failed">program se ni posodobil</string>
+
+  <string name="packageInstaller_problem_failed">paket ni nameščen</string>
+  <string name="packageInstaller_problem_same">enaka različica</string>
+  <string name="packageInstaller_problem_downgrade">podgradnja se ne dovoli</string>
+
+  <string name="fileDownloader_title">BRLTTY Prenos Datoteke</string>
+  <string name="fileDownloader_problem_failed">datoteka se ni prenesla</string>
+  <string name="fileDownloader_state_connecting">povezovanje</string>
+  <string name="fileDownloader_state_downloading">prenašanje</string>
+
   <string name="checkbox_state_unchecked">Ne</string>
   <string name="checkbox_state_checked">Da</string>
 
@@ -39,6 +50,8 @@
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Objavi Sporočilo Skupnosti</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Upravljaj Članstvo v Skupnosti</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Posodobi Program</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Dejanja Dostopnosti</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Settings</string>
   <string name="SETTINGS_SCREEN_GENERAL">Splošne Nastavitve</string>
