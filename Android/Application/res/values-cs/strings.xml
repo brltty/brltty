@@ -223,16 +223,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikánština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharština (plnopis)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">Němčina (plnopis)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Němčina (zkratkopis - standart 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">Němčina (zkratkopis - standart 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">Němčina (zkratkopis - standart 2015)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Němčina (základní zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">Němčina (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">Němčina (základní zkratkopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Němčina (zkratkopis - standart 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">Němčina (zkratkopis - standart 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">Němčina (zkratkopis - standart 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Angličtina (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Angličtina (US, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Španělština (grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">Francouzština (zkratkopis)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">Francouzština (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">Francouzština (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">Francouzština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hauština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonéština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">International Phonetic Alphabet</string>

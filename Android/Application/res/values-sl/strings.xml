@@ -223,16 +223,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikanska (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharijska (brez krajšav)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">Nemška (brez krajšav)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Nemška (s krajšavami - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">Nemška (s krajšavami - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">Nemška (s krajšavami - 2015 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Nemška (osnovne krajšave)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">Nemška (brez krajšav)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">Nemška (osnovne krajšave)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Nemška (s krajšavami - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">Nemška (s krajšavami - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">Nemška (s krajšavami - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">English (Združena Angleška Brajica, razvrstitev 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (ZDA, razvrstitev 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Španska(razvrstitev 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">Francoska(s krajšavami)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">Francoska (brez krajšav)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">Francoska (brez krajšav)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">Francoska(s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonezijska(s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Mednarodna Fonetična Abeceda</string>

@@ -236,16 +236,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">afrikaans (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">amharisk (fullskrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">tysk (fullskrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">tysk (kortskrift - 1998-standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">tysk (kortskrift - 1998-standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">tysk (kortskrift - 2015-standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">tysk (enkel kortskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">tysk (fullskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">tysk (enkel kortskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">tysk (kortskrift - 1998-standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">tysk (kortskrift - 1998-standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">tysk (kortskrift - 2015-standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">engelsk (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">engelsk (US, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">spansk (grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">fransk (kortskrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">fransk (fullskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">fransk (fullskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">fransk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">hausa (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">indonesisk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">internasjonalt fonetisk alfabet</string>

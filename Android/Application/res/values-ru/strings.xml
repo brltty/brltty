@@ -223,16 +223,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">Африкаанс (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Амхарский (несокращённый)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">Немецкий (несокращённый)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Немецкий (сокращённый - стандарт 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">Немецкий (сокращённый - стандарт 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">Немецкий (сокращённый - стандарт 2015)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Немецкий (базовые сокращения)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">Немецкий (несокращённый)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">Немецкий (базовые сокращения)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Немецкий (сокращённый - стандарт 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">Немецкий (сокращённый - стандарт 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">Немецкий (сокращённый - стандарт 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Английский (унифицированный английский Брайль, ступень 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Английский (США, ступень 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Испанский (ступень 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">Французский (сокращённый)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">Французский (несокращённый)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">Французский (несокращённый)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">Французский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Хауса (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Индонезийский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Международный фонетический алфавит</string>

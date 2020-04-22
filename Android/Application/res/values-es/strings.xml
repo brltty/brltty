@@ -223,16 +223,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">Africaans (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharico (sin contracciones)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">Alemán (sin contracciones)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Alemán (contraccionado - estándar de 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">Alemán (contraccionado - estándar de 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">Alemán (contraccionado - estándar de 2015)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Alemán (contracciones básicas)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">Alemán (sin contracciones)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">Alemán (contracciones básicas)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Alemán (contraccionado - estándar de 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">Alemán (contraccionado - estándar de 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">Alemán (contraccionado - estándar de 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Inglés (Braille Inglés unificado, grado 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Inglés (Estados Unidos, grado 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Español (grado 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">Francés (contraccionado)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">Francés (sin contracciones)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">Francés (sin contracciones)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">Francés (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesio (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Alfabeto Fonético Internacional</string>

@@ -223,16 +223,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (désabrégé)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">Allemand (désabrégé)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Allemand (abrégé - standard 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">Allemand (abrégé - standard 1998)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">Allemand (abrégé - standard 2015)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Allemand (abréviations de base)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">Allemand (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">Allemand (abréviations de base)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Allemand (abrégé - standard 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">Allemand (abrégé - standard 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">Allemand (abrégé - standard 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Anglais (Braille anglais unifié, 2ème degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Anglais (EU, 2ème degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Espagnol (2ème deghé)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">Français (abrégé)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">Français (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">Français (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">Français (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonésien (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Alphabet Phonétique international</string>

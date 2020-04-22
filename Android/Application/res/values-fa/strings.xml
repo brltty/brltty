@@ -223,16 +223,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">آفریقایی (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">German (uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">German (contracted - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">German (contracted - 1998 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">German (contracted - 2015 standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">German (basic contractions)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">German (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">German (basic contractions)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">German (contracted - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">German (contracted - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">German (contracted - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">English (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (US, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Spanish (grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">French (contracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">French (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">French (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">French (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesian (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">International Phonetic Alphabet</string>

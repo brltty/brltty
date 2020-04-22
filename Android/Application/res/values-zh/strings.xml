@@ -223,16 +223,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">南非的荷蘭語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_am">阿比西尼亞官話無縮寫</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">德文無縮寫</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">德文縮寫 1998 標準</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">德文縮寫 1998 標準</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">德文縮寫 2015 標準</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">德文基本縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">德文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">德文基本縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">德文縮寫 1998 標準</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">德文縮寫 1998 標準</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">德文縮寫 2015 標準</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">英文統一二級點字</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">英文二級</string>
   <string name="CONTRACTION_TABLE_LABEL_es">西班牙語二級</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">法文縮寫</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">法文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">法文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">法文縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">豪撒語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_id">印尼語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">國際拼音字母</string>

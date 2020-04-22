@@ -223,16 +223,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">afrikaans (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">amhara (tavallinen kirjoitus)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">saksa (tavallinen kirjoitus)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">saksa (lyhennekirjoitus - 1998 standardi)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">saksa (lyhennekirjoitus - 1998 standardi)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">saksa (lyhennekirjoitus - 2015 standardi)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">saksa (peruslyhenteet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">saksa (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">saksa (peruslyhenteet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">saksa (lyhennekirjoitus - 1998 standardi)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">saksa (lyhennekirjoitus - 1998 standardi)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">saksa (lyhennekirjoitus - 2015 standardi)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">englanti (Unified English Braille, taso 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">englanti (Yhdysvallat, taso 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">espanja (taso 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">ranska (lyhennekirjoitus)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">ranska (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">ranska (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">ranska (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">hausa (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">indonesia (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Kansainvälinen foneettinen aakkosto</string>

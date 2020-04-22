@@ -223,16 +223,16 @@
 
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikanisch (Kurzschrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharisch (ungekürzt)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_basis">Deutsch (Vollschrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift">Deutsch (Kurzschrift - 1998 Standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_1998">Deutsch (Kurzschrift - 1998 Standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_kurzschrift_2015">Deutsch (Kurzschrift - 2015 Standard)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_vollschrift">Deutsch (Basisübersetzung Computerbraille?)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">Deutsch (Vollschrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">Deutsch (Basisübersetzung Computerbraille?)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Deutsch (Kurzschrift - 1998 Standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">Deutsch (Kurzschrift - 1998 Standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">Deutsch (Kurzschrift - 2015 Standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Englisch (Unified English Braille, Grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Englisch (US, Grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Spanisch (Grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_abrege">Französisch (Kurzschrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_fr_integral">Französisch (ungekürzt)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">Französisch (ungekürzt)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">Französisch (Kurzschrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (Kurzschrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesisch (Kurzschrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Internationales Phonetisches Alphabet</string>
