@@ -518,6 +518,11 @@ needCapability (cap_value_t capability, int inheritable, const char *reason) {
 
   return !!(assignedCapabilitiesMask & bit);
 }
+
+#else /* CAP_IS_SUPPORTED */
+static void
+logCurrentCapabilities (const char *label) {
+}
 #endif /* CAP_IS_SUPPORTED */
 
 typedef void PrivilegesAcquisitionFunction (int amPrivilegedUser);
@@ -618,9 +623,6 @@ acquirePrivileges (int amPrivilegedUser) {
   }
 }
 
-#ifdef HAVE_PWD_H
-#include <pwd.h>
-
 static int
 setEnvironmentVariable (const char *name, const char *value) {
   if (setenv(name, value, 1) != -1) {
@@ -652,6 +654,9 @@ static int
 setSafeShell (void) {
   return setEnvironmentVariable("SHELL", "/bin/sh");
 }
+
+#ifdef HAVE_PWD_H
+#include <pwd.h>
 
 static int
 setHomeDirectory (const char *directory) {
@@ -757,7 +762,6 @@ switchUser (const char *user, int amPrivilegedUser) {
 
   return 0;
 }
-#endif /* HAVE_PWD_H */
 
 static const char *
 getSocketsDirectory (void) {
@@ -887,6 +891,7 @@ claimStateDirectories (void) {
     sde += 1;
   }
 }
+#endif /* HAVE_PWD_H */
 
 void
 establishProgramPrivileges (const char *user) {
