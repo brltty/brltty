@@ -116,7 +116,7 @@ typedef struct {
   unsigned char needWrite:1;
 } RequiredGroupEntry;
 
-static RequiredGroupEntry requiredGroupTable[] = {
+static const RequiredGroupEntry requiredGroupTable[] = {
   { .reason = "for reading screen content",
     .name = "tty",
     .path = "/dev/vcs1",
