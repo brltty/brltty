@@ -487,36 +487,29 @@ requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
 
 static int
 needCapability (cap_value_t capability, int inheritable, const char *reason) {
-  typedef uint64_t CapabilityMask;
-  CapabilityMask bit = (CapabilityMask)1 << capability;
+  int haveCapability = 0;
+  cap_t caps;
 
-  static CapabilityMask requestedCapabilitiesMask = 0;
-  static CapabilityMask assignedCapabilitiesMask = 0;
+  if ((caps = cap_get_proc())) {
+    if (hasCapability(caps, CAP_EFFECTIVE, capability)) {
+      haveCapability = 1;
+    } else if (requestCapability(caps, capability, inheritable)) {
+      haveCapability = 1;
 
-  if (!(requestedCapabilitiesMask & bit)) {
-    cap_t caps;
-
-    if ((caps = cap_get_proc())) {
-      if (requestCapability(caps, capability, inheritable)) {
-        assignedCapabilitiesMask |= bit;
-
-        logMessage(LOG_DEBUG,
-          "temporary capability assigned: %s (%s)",
-          cap_to_name(capability), reason
-        );
-      } else {
-        logUnassignedCapability(capability, 0, reason);
-      }
-
-      cap_free(caps);
+      logMessage(LOG_DEBUG,
+        "temporary capability assigned: %s (%s)",
+        cap_to_name(capability), reason
+      );
     } else {
-      logSystemError("cap_get_proc");
+      logUnassignedCapability(capability, 0, reason);
     }
 
-    requestedCapabilitiesMask |= bit;
+    cap_free(caps);
+  } else {
+    logSystemError("cap_get_proc");
   }
 
-  return !!(assignedCapabilitiesMask & bit);
+  return haveCapability;
 }
 
 #else /* CAP_IS_SUPPORTED */
@@ -524,6 +517,47 @@ static void
 logCurrentCapabilities (const char *label) {
 }
 #endif /* CAP_IS_SUPPORTED */
+
+#ifdef HAVE_SCHED_H
+#include <sched.h>
+
+typedef struct {
+  const char *reason;
+  int flag;
+} PrivateNamespaceEntry;
+
+static const PrivateNamespaceEntry privateNamespaceTable[] = {
+  { .flag = CLONE_NEWUTS,
+  },
+};
+
+static void
+createPrivateNamespaces (void) {
+  int canUnshareNamespaces = 0;
+
+#ifdef CAP_SYS_ADMIN
+  if (needCapability(CAP_SYS_ADMIN, 0, "for unsharing namespaces")) {
+    canUnshareNamespaces = 1;
+  }
+#endif /* CAP_SYS_ADMIN */
+
+  if (canUnshareNamespaces) {
+    int flags = 0;
+
+    const PrivateNamespaceEntry *pne = privateNamespaceTable;
+    const PrivateNamespaceEntry *end = pne + ARRAY_COUNT(privateNamespaceTable);
+
+    while (pne < end) {
+      flags |= pne->flag;
+      pne += 1;
+    }
+
+    if (unshare(flags) == -1) {
+      logSystemError("unshare");
+    }
+  }
+}
+#endif /* HAVE_SCHED_H */
 
 typedef void PrivilegesAcquisitionFunction (int amPrivilegedUser);
 typedef void MissingPrivilegesLogger (void);
@@ -594,8 +628,6 @@ acquirePrivileges (int amPrivilegedUser) {
 
       if (!capability || needCapability(capability, pae->inheritable, pae->reason)) {
         pae->acquirePrivileges(amPrivilegedUser);
-      } else {
-        logUnassignedCapability(capability, 0, pae->reason);
       }
 
       pae += 1;
@@ -936,6 +968,10 @@ establishProgramPrivileges (const char *user) {
     endpwent();
   }
 #endif /* HAVE_PWD_H */
+
+#ifdef HAVE_SCHED_H
+  createPrivateNamespaces();
+#endif /* HAVE_SCHED_H */
 
   acquirePrivileges(amPrivilegedUser);
   logCurrentCapabilities("after relinquish");
