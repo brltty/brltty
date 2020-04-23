@@ -255,23 +255,35 @@ For all of the details, run this command::
 It requires one positional argument - the path to BRLTTY's executable.
 It also accepts a number of options (which must precede that path).
 In particular, these are the options that
-remove capabilities from the full set.
+remove capabilities from the full set:
 
 .. table:: ``setcaps`` Script Options for Excluding Capabilities
 
   ======  ====================  ===========================
   Option  Capability            Reason
   ------  --------------------  ---------------------------
-  -c      |cap_dac_override|    |cap_dac_override reason|
-  -d      |cap_mknod|           |cap_mknod reason|
-  -g      |cap_setgid|          |cap_setgid reason|
-  -i      |cap_sys_admin|       |cap_sys_admin reason|
-  -m      |cap_sys_module|      |cap_sys_module reason|
-  -o      |cap_chown|           |cap_chown reason|
-  -p      |cap_fowner|          |cap_fowner reason|
-  -s      |cap_sys_tty_config|  |cap_sys_tty_config reason|
-  -u      |cap_setuid|          |cap_setuid reason|
+  ``-c``  |cap_dac_override|    |cap_dac_override reason|
+  ``-d``  |cap_mknod|           |cap_mknod reason|
+  ``-g``  |cap_setgid|          |cap_setgid reason|
+  ``-i``  |cap_sys_admin|       |cap_sys_admin reason|
+  ``-m``  |cap_sys_module|      |cap_sys_module reason|
+  ``-o``  |cap_chown|           |cap_chown reason|
+  ``-p``  |cap_fowner|          |cap_fowner reason|
+  ``-s``  |cap_sys_tty_config|  |cap_sys_tty_config reason|
+  ``-u``  |cap_setuid|          |cap_setuid reason|
   ======  ====================  ===========================
+
+.. table:: ``setcaps`` Script Options for Developers
+
+  ======  ====================================================
+  Option  Description
+  ------  ----------------------------------------------------
+  ``-C``  don't set the capabilities
+  ``-G``  set group root execution
+  ``-S``  use sudo to execute the commands
+  ``-T``  test mode - show the commands that would be executed
+  ``-U``  set user root execution
+  ======  ====================================================
 
 Privileged Host Operations
 --------------------------

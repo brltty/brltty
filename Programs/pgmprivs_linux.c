@@ -486,7 +486,7 @@ requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
 }
 
 static int
-needCapability (cap_value_t capability, const char *reason) {
+needCapability (cap_value_t capability, int inheritable, const char *reason) {
   typedef uint64_t CapabilityMask;
   CapabilityMask bit = (CapabilityMask)1 << capability;
 
@@ -497,7 +497,7 @@ needCapability (cap_value_t capability, const char *reason) {
     cap_t caps;
 
     if ((caps = cap_get_proc())) {
-      if (requestCapability(caps, capability, 0)) {
+      if (requestCapability(caps, capability, inheritable)) {
         assignedCapabilitiesMask |= bit;
 
         logMessage(LOG_DEBUG,
@@ -547,7 +547,7 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
   },
 
 #ifdef HAVE_GRP_H
-  { .reason = "for joining required groups",
+  { .reason = "for joining the required groups",
     .acquirePrivileges = joinRequiredGroups,
     .logMissingPrivileges = logMissingGroups,
     .releaseResources = closeGroupsDatabase,
@@ -581,27 +581,19 @@ acquirePrivileges (int amPrivilegedUser) {
 
 #ifdef CAP_IS_SUPPORTED
   else {
-    cap_t caps;
+    const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
+    const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
 
-    if ((caps = cap_get_proc())) {
-      const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-      const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
+    while (pae < end) {
+      cap_value_t capability = pae->capability;
 
-      while (pae < end) {
-        cap_value_t capability = pae->capability;
-
-        if (!capability || requestCapability(caps, capability, pae->inheritable)) {
-          pae->acquirePrivileges(amPrivilegedUser);
-        } else {
-          logUnassignedCapability(capability, 0, pae->reason);
-        }
-
-        pae += 1;
+      if (!capability || needCapability(capability, pae->inheritable, pae->reason)) {
+        pae->acquirePrivileges(amPrivilegedUser);
+      } else {
+        logUnassignedCapability(capability, 0, pae->reason);
       }
 
-      cap_free(caps);
-    } else {
-      logSystemError("cap_get_proc");
+      pae += 1;
     }
   }
 #endif /* CAP_IS_SUPPORTED */
@@ -632,13 +624,13 @@ acquirePrivileges (int amPrivilegedUser) {
 static int
 canSwitchUser (void) {
 #ifdef CAP_SETUID
-  if (!needCapability(CAP_SETUID, "for switching to the unprivileged user")) {
+  if (!needCapability(CAP_SETUID, 0, "for switching to the unprivileged user")) {
     return 0;
   }
 #endif /* CAP_SETUID */
 
 #ifdef CAP_SETGID
-  if (!needCapability(CAP_SETGID, "for switching to the writable group")) {
+  if (!needCapability(CAP_SETGID, 0, "for switching to the writable group")) {
     return 0;
   }
 #endif /* CAP_SETGID */
@@ -706,7 +698,7 @@ switchUser (const char *user, int amPrivilegedUser) {
 
   if (*(user = UNPRIVILEGED_USER)) {
     if (switchToUser(user)) return 1;
-    logMessage(LOG_WARNING, "couldn't switch to default unprivileged user: %s", user);
+    logMessage(LOG_WARNING, "couldn't switch to the default unprivileged user: %s", user);
   }
 
   return 0;
@@ -763,7 +755,7 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
       int canClaimOwnership = 0;
 
 #ifdef CAP_CHOWN
-      if (needCapability(CAP_CHOWN, "for claiming group ownership of the state directories")) {
+      if (needCapability(CAP_CHOWN, 0, "for claiming group ownership of the state directories")) {
         canClaimOwnership = 1;
       }
 #endif /* CAP_CHOWN */
@@ -789,7 +781,7 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
         int canAddPermissions = 0;
 
 #ifdef CAP_FOWNER
-        if (needCapability(CAP_FOWNER, "for adding group permissions to the state directories")) {
+        if (needCapability(CAP_FOWNER, 0, "for adding group permissions to the state directories")) {
           canAddPermissions = 1;
         }
 #endif /* CAP_FOWNER */
@@ -824,7 +816,7 @@ claimStateDirectories (void) {
 
 #ifdef CAP_DAC_OVERRIDE
     if (!path) {
-      if (needCapability(CAP_DAC_OVERRIDE, "for creating missing state directories")) {
+      if (needCapability(CAP_DAC_OVERRIDE, 0, "for creating missing state directories")) {
         path = sde->get();
       }
     }
@@ -860,20 +852,22 @@ establishProgramPrivileges (const char *user) {
       umask(umask(0) & ~S_IRWXG);
       claimStateDirectories();
     } else {
-      uid_t uid = geteuid();
-      const struct passwd *pwd = getpwuid(uid);
+      uid_t uid = getuid();
+      setresuid(uid, uid, uid);
+      if (uid) amPrivilegedUser = 0;
 
+      const struct passwd *pwd;
       const char *name;
       char number[0X10];
 
-      if (pwd) {
+      if ((pwd = getpwuid(uid))) {
         name = pwd->pw_name;
       } else {
         snprintf(number, sizeof(number), "%d", uid);
         name = number;
       }
 
-      logMessage(LOG_NOTICE, "continuing to execute as invoking user: %s", name);
+      logMessage(LOG_NOTICE, "continuing to execute as the invoking user: %s", name);
     }
 
     endpwent();
