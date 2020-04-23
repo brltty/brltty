@@ -16,6 +16,17 @@
   <string name="inputService_not_started">služba vstupu nespuštěna</string>
   <string name="inputService_not_connected">služba vstupu nepřipojena</string>
 
+  <string name="updateApplication_problem_failed">aplikace nebyla aktualizována</string>
+
+  <string name="packageInstaller_problem_failed">balíček nebyl nainstalován</string>
+  <string name="packageInstaller_problem_same">shodná verze</string>
+  <string name="packageInstaller_problem_downgrade">instalace starší verze není možná</string>
+
+  <string name="fileDownloader_title">Nástroj stahování BRLTTY</string>
+  <string name="fileDownloader_problem_failed">soubor nebyl stažen</string>
+  <string name="fileDownloader_state_connecting">připojování</string>
+  <string name="fileDownloader_state_downloading">stahování</string>
+
   <string name="checkbox_state_unchecked">Vypnuto</string>
   <string name="checkbox_state_checked">Zapnuto</string>
 
@@ -39,6 +50,8 @@
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Napsat zprávu komunitě</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Spravovat členství v komunitě</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Aktualizovat aplikaci</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Akce zpřístupnění</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Nastavení BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Obecná nastavení</string>
