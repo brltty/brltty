@@ -132,8 +132,68 @@ are only performed if the last component of its path is its default name.
 Starting BRLTTY
 ---------------
 
-As the Super User
-~~~~~~~~~~~~~~~~~
+Safe Execution Environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+BRLTTY takes a number of steps to establish a safe
+(well, safer)
+execution environment:
+
+* Set a safe command search path.
+  This is done by setting the ``PATH`` environment variable.
+  The safe path is retrieved from the host system's configuration.
+  You can find out what it is by running this command::
+
+    getconf PATH
+
+* Set a safe default shell for external software to assume.
+  This is done by setting the ``SHELL`` environment variable.
+  The safe shell is hard-coded to be ``/bin/sh``.
+  Note that scripts usually internally specify which shell is to be used.
+
+* Switch to executing as `the unprivileged user`_.
+
+* Install the needed `kernel modules`_.
+
+* Establish the needed `group memberships`_.
+
+* Set its `required capabilities`_.
+
+* Relinquish all non-required capabilities.
+
+The Unprivileged User
+~~~~~~~~~~~~~~~~~~~~~
+
+The decision regarding which unprivileged user to switch to
+is made as follows:
+
+1) The user specified via the |unprivileged user option|.
+   This step only succeeds if that user exists.
+   BRLTTY only performs it `when started as the super user`_.
+
+2) The |default unprivileged user|.
+   This step only succeeds if that user exists.
+   It can be chosen with ``configure`` at build time
+   via its ``--with-unprivileged-user`` option.
+   Specifying ``--without-unprivileged-user`` causes this step to be skipped.
+
+3) The user that started it.
+
+In all cases,
+including when continuing to execute as the user that started it,
+the following is done:
+
+* Ensure that all of the user identifiers
+  (real, effective, saved, file system)
+  are set to the selected user.
+
+* If the user's home directory is defined then switch to it by:
+
+  * Changing the working directory.
+  * Setting the ``HOME`` environment variable.
+
+When Started as the Super User
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When BRLTTY starts executing as the super user (|super user|),
 i.e. when its initial effective user identifier is 0,
@@ -151,19 +211,8 @@ The steps that are performed to accomplish this are as follows:
 4) Assign to itself its `required capabilities`_.
 5) Relinquish all of the other capabilities.
 
-The decision regarding which regular user to run as is made as follows:
-
-1) If the |unprivileged user option| has been supplied then:
-
-   * Run as the specified user if it exists.
-   * Stop with a nonzero exit status if it doesn't exist.
-
-2) Run as the |default unprivileged user| if it exists.
-
-3) Continue to run as |super user|.
-
-As an Unprivileged User
-~~~~~~~~~~~~~~~~~~~~~~~
+When Started as an Unprivileged User
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When BRLTTY starts executing as an unprivileged user (not |super user|),
 i.e. when its initial effective user identifier isn't 0,
@@ -192,7 +241,7 @@ These failures can range all the way from minor to severe.
 If the (temporary) capabilities |cap_setuid| and |cap_setgid|
 have both also been assigned to BRLTTY's executable
 then it's able to switch to its |default unprivileged user|
-even when started as an unprivileged user.
+even `when started as an unprivileged user`_.
 If the |default unprivileged user| doesn't exist then
 BRLTTY continues to run as the user who started it.
 This feature doesn't allow an explicit user to be specified
@@ -202,7 +251,7 @@ Assigning Capabilities to the Executable
 ----------------------------------------
 
 First, here's a summary of all of the capabilities that BRLTTY needs
-when started `as an unprivileged user`_.
+`when started as an unprivileged user`_.
 
 * The `required capabilities`_ are highlighted **this way**.
   They're needed throughout BRLTTY's execution.
@@ -233,7 +282,7 @@ The Command
 The command to assign all of the capabilities,
 i.e. both the `required capabilities`_ and the `temporary capabilities`_,
 to BRLTTY's executable
-so that it'll be fully functional when started as an unprivileged user,
+so that it'll be fully functional `when started as an unprivileged user`_,
 without requiring any additional administrator configuration,
 is::
 
@@ -280,7 +329,7 @@ remove capabilities from the full set:
   ------  ----------------------------------------------------
   ``-C``  don't set the capabilities
   ``-G``  set group root execution
-  ``-S``  use sudo to execute the commands
+  ``-S``  use ``sudo`` to execute the commands
   ``-T``  test mode - show the commands that would be executed
   ``-U``  set user root execution
   ======  ====================================================
@@ -368,7 +417,7 @@ Temporary Capabilities
 
 BRLTTY only uses the privileged kernel operations
 that are granted via these capabilities
-when it starts `as an unprivileged user`_.
+`when started as an unprivileged user`_.
 They allow it to configure itself,
 thus not relying so heavily on explicit administrator configuration,
 and are relinquished right after this has been done.
@@ -376,13 +425,13 @@ and are relinquished right after this has been done.
 |cap_chown|
   If this capability has also been assigned to BRLTTY's executable
   then it can claim group ownership of its `state directories`_
-  after having successfully switched to executing as an unprivileged user.
+  after having successfully switched to executing as `the unprivileged user`_.
   The primary group of that user is used.
 
 |cap_fowner|
   If this capability has also been assigned to BRLTTY's executable
   then it can add group permissions to its `state directories`_
-  after having successfully switched to executing as an unprivileged user.
+  after having successfully switched to executing as `the unprivileged user`_.
   Both read and write group permissions are added to all files and directories.
   In addition, for all directories,
   group search permission is added
@@ -391,7 +440,7 @@ and are relinquished right after this has been done.
 |cap_dac_override|
   If this capability has also been assigned to BRLTTY's executable
   then it can create missing `state directories`_
-  after having successfully switched to executing as an unprivileged user.
+  after having successfully switched to executing as `the unprivileged user`_.
 
 |cap_setgid|
   If this capability has also been assigned to BRLTTY's executable
@@ -438,7 +487,7 @@ The |uinput device| is usually only readable and writable
 by the super user (|super user|).
 Without any group and/or others access,
 it's impossible for BRLTTY to access it
-when started `as an unprivileged user`_.
+`when started as an unprivileged user`_.
 
 This situation could be easily resolved
 by granting group read and write permissions to the device.
