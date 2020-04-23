@@ -16,6 +16,17 @@
   <string name="inputService_not_started">輸入服務尚未開始</string>
   <string name="inputService_not_connected">輸入服務尚未連線</string>
 
+  <string name="updateApplication_problem_failed">軟體未升級</string>
+
+  <string name="packageInstaller_problem_failed">套件未安裝</string>
+  <string name="packageInstaller_problem_same">版本相同</string>
+  <string name="packageInstaller_problem_downgrade">不允許降級</string>
+
+  <string name="fileDownloader_title">BRLTTY 檔案下載工具</string>
+  <string name="fileDownloader_problem_failed">檔案未下載</string>
+  <string name="fileDownloader_state_connecting">連接中</string>
+  <string name="fileDownloader_state_downloading">下載中</string>
+
   <string name="checkbox_state_unchecked">否</string>
   <string name="checkbox_state_checked">市</string>
 
@@ -39,6 +50,8 @@
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">張貼社群訊息</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">管理社群會員</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">更新軟體</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">無障礙活動</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY 設定</string>
   <string name="SETTINGS_SCREEN_GENERAL">一般設定</string>
