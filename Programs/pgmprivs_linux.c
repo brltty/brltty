@@ -622,6 +622,59 @@ acquirePrivileges (int amPrivilegedUser) {
 #include <pwd.h>
 
 static int
+setEnvironmentVariable (const char *name, const char *value) {
+  if (setenv(name, value, 1) != -1) {
+    logMessage(LOG_DEBUG, "environment variable set: %s: %s", name, value);
+    return 1;
+  } else {
+    logSystemError("setenv");
+  }
+
+  return 0;
+}
+
+static int
+setSafePath (void) {
+  int parameter = _CS_PATH;
+  const char *variable = "PATH";
+  size_t size = confstr(parameter, NULL, 0);
+
+  if (size > 0) {
+    char path[size];
+    confstr(parameter, path, sizeof(path));
+    return setEnvironmentVariable(variable, path);
+  }
+
+  return setEnvironmentVariable(variable, "/usr/sbin:/sbin:/usr/bin:/bin");
+}
+
+static int
+setSafeShell (void) {
+  return setEnvironmentVariable("SHELL", "/bin/sh");
+}
+
+static int
+setHomeDirectory (const char *directory) {
+  if (directory && *directory) {
+    if (chdir(directory) != -1) {
+      logMessage(LOG_DEBUG, "working directory changed: %s", directory);
+      setEnvironmentVariable("HOME", directory);
+      return 1;
+    } else {
+      logSystemError("chdir");
+    }
+  }
+
+  return 0;
+}
+
+static void
+setUserProperties (const struct passwd *pwd) {
+  logMessage(LOG_DEBUG, "setting home directory: %s", pwd->pw_name);
+  setHomeDirectory(pwd->pw_dir);
+}
+
+static int
 canSwitchUser (void) {
 #ifdef CAP_SETUID
   if (!needCapability(CAP_SETUID, 0, "for switching to the unprivileged user")) {
@@ -657,6 +710,7 @@ switchToUser (const char *user) {
           if (setresgid(newGid, newGid, newGid) != -1) {
             if (setresuid(newUid, newUid, newUid) != -1) {
               logMessage(LOG_NOTICE, "switched to user: %s", user);
+              setUserProperties(pwd);
               return 1;
             } else {
               logSystemError("setresuid");
@@ -839,6 +893,9 @@ establishProgramPrivileges (const char *user) {
   logCurrentCapabilities("at start");
   int amPrivilegedUser = !geteuid();
 
+  setSafePath();
+  setSafeShell();
+
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
     logSystemError("prctl[PR_SET_KEEPCAPS]");
@@ -862,6 +919,7 @@ establishProgramPrivileges (const char *user) {
 
       if ((pwd = getpwuid(uid))) {
         name = pwd->pw_name;
+        setUserProperties(pwd);
       } else {
         snprintf(number, sizeof(number), "%d", uid);
         name = number;
