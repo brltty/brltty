@@ -16,6 +16,17 @@
   <string name="inputService_not_started">input service ikke startet</string>
   <string name="inputService_not_connected">input service ikke forbundet</string>
 
+  <string name="updateApplication_problem_failed">applikation blev ikke opdateret</string>
+
+  <string name="packageInstaller_problem_failed">pakke ikke installet</string>
+  <string name="packageInstaller_problem_same">samme version</string>
+  <string name="packageInstaller_problem_downgrade">nedgradering ikke tilladt</string>
+
+  <string name="fileDownloader_title">Fil Downloader</string>
+  <string name="fileDownloader_problem_failed">fil ikke hentet</string>
+  <string name="fileDownloader_state_connecting">forbinder</string>
+  <string name="fileDownloader_state_downloading">henter</string>
+
   <string name="checkbox_state_unchecked">Nej</string>
   <string name="checkbox_state_checked">Ja</string>
 
@@ -39,6 +50,8 @@
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Skriv Fællesskabs Besked</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Ændre Fællesskabs Indstillinger</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Updater Applikation</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Tilgængelighedshandlinger</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Indstillinger</string>
   <string name="SETTINGS_SCREEN_GENERAL">Generalle indstillinger</string>
