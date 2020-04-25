@@ -713,18 +713,23 @@ setUserProperties (const struct passwd *pwd) {
 static int
 canSwitchUser (void) {
 #ifdef CAP_SETUID
-  if (!needCapability(CAP_SETUID, 0, "for switching to the unprivileged user")) {
-    return 0;
+  if (needCapability(CAP_SETUID, 0, "for switching to the unprivileged user")) {
+    return 1;
   }
 #endif /* CAP_SETUID */
 
+  return 0;
+}
+
+static int
+canSwitchGroup (void) {
 #ifdef CAP_SETGID
-  if (!needCapability(CAP_SETGID, 0, "for switching to the writable group")) {
-    return 0;
+  if (needCapability(CAP_SETGID, 0, "for switching to the writable group")) {
+    return 1;
   }
 #endif /* CAP_SETGID */
 
-  return 1;
+  return 0;
 }
 
 static int
@@ -737,7 +742,7 @@ switchToUser (const char *user) {
     if (newUid) {
       if (newUid == geteuid()) return 1;
 
-      if (canSwitchUser()) {
+      if (canSwitchUser() && canSwitchGroup()) {
         gid_t oldRgid, oldEgid, oldSgid;
 
         if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
@@ -789,6 +794,25 @@ switchUser (const char *user, int amPrivilegedUser) {
   if (*(user = UNPRIVILEGED_USER)) {
     if (switchToUser(user)) return 1;
     logMessage(LOG_WARNING, "couldn't switch to the default unprivileged user: %s", user);
+  }
+
+  {
+    uid_t uid = getuid();
+    setresuid(uid, uid, uid);
+
+    const struct passwd *pwd;
+    const char *name;
+    char number[0X10];
+
+    if ((pwd = getpwuid(uid))) {
+      name = pwd->pw_name;
+      setUserProperties(pwd);
+    } else {
+      snprintf(number, sizeof(number), "%d", uid);
+      name = number;
+    }
+
+    logMessage(LOG_NOTICE, "continuing to execute as the invoking user: %s", name);
   }
 
   return 0;
@@ -941,29 +965,11 @@ establishProgramPrivileges (const char *user) {
 #ifdef HAVE_PWD_H
   {
     if (switchUser(user, amPrivilegedUser)) {
-      amPrivilegedUser = 0;
       umask(umask(0) & ~S_IRWXG);
       claimStateDirectories();
-    } else {
-      uid_t uid = getuid();
-      setresuid(uid, uid, uid);
-      if (uid) amPrivilegedUser = 0;
-
-      const struct passwd *pwd;
-      const char *name;
-      char number[0X10];
-
-      if ((pwd = getpwuid(uid))) {
-        name = pwd->pw_name;
-        setUserProperties(pwd);
-      } else {
-        snprintf(number, sizeof(number), "%d", uid);
-        name = number;
-      }
-
-      logMessage(LOG_NOTICE, "continuing to execute as the invoking user: %s", name);
     }
 
+    if (getuid()) amPrivilegedUser = 0;
     endpwent();
   }
 #endif /* HAVE_PWD_H */
