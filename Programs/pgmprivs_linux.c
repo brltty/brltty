@@ -848,6 +848,52 @@ static const StateDirectoryEntry stateDirectoryTable[] = {
   },
 };
 
+static int
+canCreateStateDirectory (void) {
+#ifdef CAP_DAC_OVERRIDE
+  if (needCapability(CAP_DAC_OVERRIDE, 0, "for creating missing state directories")) {
+    return 1;
+  }
+#endif /* CAP_DAC_OVERRIDE */
+
+  return 0;
+}
+
+static const char *
+getStateDirectory (const StateDirectoryEntry *sde) {
+  const char *path = sde->get();
+
+  if (!path) {
+    if (canCreateStateDirectory()) {
+      path = sde->get();
+    }
+  }
+
+  return path;
+}
+
+static int
+canChangePathOwnership (const char *path) {
+#ifdef CAP_CHOWN
+  if (needCapability(CAP_CHOWN, 0, "for claiming group ownership of the state directories")) {
+    return 1;
+  }
+#endif /* CAP_CHOWN */
+
+  return 0;
+}
+
+static int
+canChangePathPermissions (const char *path) {
+#ifdef CAP_FOWNER
+  if (needCapability(CAP_FOWNER, 0, "for adding group permissions to the state directories")) {
+    return 1;
+  }
+#endif /* CAP_FOWNER */
+
+  return 0;
+}
+
 typedef struct {
   gid_t owningGroup;
 } StateDirectoryData;
@@ -865,15 +911,7 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
     if (status.st_gid == group) {
       addPermissions = 1;
     } else {
-      int canClaimOwnership = 0;
-
-#ifdef CAP_CHOWN
-      if (needCapability(CAP_CHOWN, 0, "for claiming group ownership of the state directories")) {
-        canClaimOwnership = 1;
-      }
-#endif /* CAP_CHOWN */
-
-      if (!canClaimOwnership) {
+      if (!canChangePathOwnership(path)) {
         logMessage(LOG_WARNING, "can't claim group ownership: %s", path);
       } else if (chown(path, -1, group) != -1) {
         logMessage(LOG_INFO, "group ownership claimed: %s", path);
@@ -891,15 +929,7 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
       if (S_ISDIR(newMode)) newMode |= S_IXGRP | S_ISGID;
 
       if (newMode != oldMode) {
-        int canAddPermissions = 0;
-
-#ifdef CAP_FOWNER
-        if (needCapability(CAP_FOWNER, 0, "for adding group permissions to the state directories")) {
-          canAddPermissions = 1;
-        }
-#endif /* CAP_FOWNER */
-
-        if (!canAddPermissions) {
+        if (!canChangePathPermissions(path)) {
           logMessage(LOG_WARNING, "can't add group permissions: %s", path);
         } else if (chmod(path, newMode) != -1) {
           logMessage(LOG_INFO, "group permissions added: %s", path);
@@ -925,15 +955,7 @@ claimStateDirectories (void) {
   const StateDirectoryEntry *end = sde + ARRAY_COUNT(stateDirectoryTable);
 
   while (sde < end) {
-    const char *path = sde->get();
-
-#ifdef CAP_DAC_OVERRIDE
-    if (!path) {
-      if (needCapability(CAP_DAC_OVERRIDE, 0, "for creating missing state directories")) {
-        path = sde->get();
-      }
-    }
-#endif /* CAP_DAC_OVERRIDE */
+    const char *path = getStateDirectory(sde);
 
     if (path && *path) {
       const char *name = locatePathName(path);
@@ -948,10 +970,14 @@ claimStateDirectories (void) {
 }
 #endif /* HAVE_PWD_H */
 
+static int
+amPrivilegedUser (void) {
+  return !geteuid();
+}
+
 void
 establishProgramPrivileges (const char *user) {
   logCurrentCapabilities("at start");
-  int amPrivilegedUser = !geteuid();
 
   setSafePath();
   setSafeShell();
@@ -964,12 +990,11 @@ establishProgramPrivileges (const char *user) {
 
 #ifdef HAVE_PWD_H
   {
-    if (switchUser(user, amPrivilegedUser)) {
+    if (switchUser(user, amPrivilegedUser())) {
       umask(umask(0) & ~S_IRWXG);
       claimStateDirectories();
     }
 
-    if (getuid()) amPrivilegedUser = 0;
     endpwent();
   }
 #endif /* HAVE_PWD_H */
@@ -978,6 +1003,6 @@ establishProgramPrivileges (const char *user) {
   createPrivateNamespaces();
 #endif /* HAVE_SCHED_H */
 
-  acquirePrivileges(amPrivilegedUser);
+  acquirePrivileges(amPrivilegedUser());
   logCurrentCapabilities("after relinquish");
 }
