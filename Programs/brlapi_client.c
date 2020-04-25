@@ -92,6 +92,10 @@
 #define MAXIMUM_VIRTUAL_CONSOLE 1
 #endif /* MAXIMUM_VIRTUAL_CONSOLE */
 
+#ifdef HAVE_SD_SESSION_GET_VT
+#include <systemd/sd-login.h>
+#endif /* HAVE_SD_SESSION_GET_VT */
+
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
 #include "brlapi_protocol.h"
@@ -1602,9 +1606,64 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
 
   /* OK, Now we know where we are, so get the effective control of the terminal! */
   ttytreepath = getenv("WINDOWPATH");
-  if (!ttytreepath && getenv("DISPLAY"))
+  if (!ttytreepath && (getenv("DISPLAY") || getenv("WAYLAND_DISPLAY"))) {
     /* Cope with some DMs which are not setting WINDOWPATH (e.g. gdm 3.12) */
     ttytreepath = getenv("XDG_VTNR");
+
+#ifdef HAVE_SD_SESSION_GET_VT
+    if (!ttytreepath) {
+      /* Fallback to asking logind */
+      char *id;
+      unsigned vtnr = 0;
+      int ret;
+
+      ret = sd_pid_get_session(0, &id);
+      if (ret == 0 && id != NULL) {
+	sd_session_get_vt(id, &vtnr);
+	free(id);
+      } else {
+	char **sessions;
+	/* Not even logind knows :/ we are probably logged in from gdm */
+	ret = sd_uid_get_sessions(getuid(), 0, &sessions);
+
+	if (ret > 0) {
+	  int i, chosen = -1;
+
+	  for (i = 0; i < ret; i++) {
+	    char *type;
+
+	    ret = sd_session_get_type(sessions[i], &type);
+	    if (ret == 0) {
+	      if (strcmp(type, "tty") != 0 &&
+	          strcmp(type, "unspecified") != 0) {
+		/* x11, wayland or mir, so graphical.
+		 * User normally has only one of them */
+		if (chosen >= 0) {
+		  /* Oops, several sessions? That is not supposed to happen, better
+		   * choose none of them. */
+		  chosen = -1;
+		  break;
+		}
+		chosen = i;
+	      }
+	    }
+	  }
+
+	  if (chosen >= 0) sd_session_get_vt(sessions[i], &vtnr);
+
+	  for (i = 0; i < ret; i++) free(sessions[i]);
+	  free(sessions);
+	}
+      }
+
+      if (vtnr) {
+	size_t size = sizeof(vtnr)*3 + 1;
+	ttytreepath=alloca(size);
+	snprintf(ttytreepath, size, "%u", vtnr);
+      }
+    }
+#endif /* HAVE_SD_SESSION_GET_VT */
+  }
 
   nttytreepath = 0;
   if (ttytreepath) {

@@ -1230,6 +1230,17 @@ in
       ;;
 esac
 
+BRLTTY_HAVE_PACKAGE([systemd], [libsystemd], [
+    brltty_libs_save="${LIBS}"
+    LIBS="${LIBS} ${systemd_libs}"
+    AC_CHECK_FUNC([sd_session_get_vt], [
+      AC_DEFINE([HAVE_SD_SESSION_GET_VT], [1],
+                [Define this if the function sd_session_get_vt is available in libsystemd.])
+      api_libraries="${api_libraries} ${systemd_libs}"
+    ])
+    LIBS="${brltty_libs_save}"
+])
+
 BRLTTY_ARG_PACKAGE([params], [boot parameters], [], [dnl
    linux*)
       params_package="linux"

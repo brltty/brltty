@@ -254,6 +254,9 @@ extern "C" {
 /* Define this if the function shl_load is available. */
 #undef HAVE_SHL_LOAD
 
+/* Define this if the function sd_session_get_vt is available in libsystemd. */
+#undef HAVE_SD_SESSION_GET_VT
+
 /* Define this to be a string containing the copyright notice. */
 #undef PACKAGE_COPYRIGHT
 
