@@ -32,6 +32,11 @@
 #include "system_linux.h"
 #include "file.h"
 
+static int
+amPrivilegedUser (void) {
+  return !geteuid();
+}
+
 typedef struct {
   const char *reason;
   int (*install) (void);
@@ -45,12 +50,12 @@ static const KernelModuleEntry kernelModuleTable[] = {
   { .reason = "for creating virtual devices",
     .install = installUinputModule,
   },
-};
+}; static const unsigned char kernelModuleCount = ARRAY_COUNT(kernelModuleTable);
 
 static void
-installKernelModules (int amPrivilegedUser) {
+installKernelModules (void) {
   const KernelModuleEntry *kme = kernelModuleTable;
-  const KernelModuleEntry *end = kme + ARRAY_COUNT(kernelModuleTable);
+  const KernelModuleEntry *end = kme + kernelModuleCount;
 
   while (kme < end) {
     kme->install();
@@ -155,17 +160,16 @@ static const RequiredGroupEntry requiredGroupTable[] = {
     .needRead = 1,
     .needWrite = 1,
   },
-};
+}; static const unsigned char requiredGroupCount = ARRAY_COUNT(requiredGroupTable);
 
 static void
 processRequiredGroups (GroupsProcessor *processGroups, void *data) {
-  size_t size = ARRAY_COUNT(requiredGroupTable);
-  gid_t groups[size * 2];
+  gid_t groups[requiredGroupCount * 2];
   size_t count = 0;
 
   {
     const RequiredGroupEntry *rge = requiredGroupTable;
-    const RequiredGroupEntry *end = rge + size;
+    const RequiredGroupEntry *end = rge + requiredGroupCount;
 
     while (rge < end) {
       {
@@ -222,7 +226,7 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
 }
 
 static void
-joinRequiredGroups (int amPrivilegedUser) {
+joinRequiredGroups (void) {
   processRequiredGroups(setSupplementaryGroups, NULL);
 }
 
@@ -378,13 +382,13 @@ static const RequiredCapabilityEntry requiredCapabilityTable[] = {
   { .reason = "for creating needed but missing special device files",
     .value = CAP_MKNOD,
   },
-};
+}; static const unsigned char requiredCapabilityCount = ARRAY_COUNT(requiredCapabilityTable);
 
 static void
-setRequiredCapabilities (int amPrivilegedUser) {
+setRequiredCapabilities (void) {
   cap_t newCaps, oldCaps;
 
-  if (amPrivilegedUser) {
+  if (amPrivilegedUser()) {
     oldCaps = NULL;
   } else if (!(oldCaps = cap_get_proc())) {
     logSystemError("cap_get_proc");
@@ -394,7 +398,7 @@ setRequiredCapabilities (int amPrivilegedUser) {
   if ((newCaps = cap_init())) {
     {
       const RequiredCapabilityEntry *rce = requiredCapabilityTable;
-      const RequiredCapabilityEntry *end = rce + ARRAY_COUNT(requiredCapabilityTable);
+      const RequiredCapabilityEntry *end = rce + requiredCapabilityCount;
 
       while (rce < end) {
         cap_value_t capability = rce->value;
@@ -429,7 +433,7 @@ logMissingCapabilities (void) {
 
   if ((caps = cap_get_proc())) {
     const RequiredCapabilityEntry *rce = requiredCapabilityTable;
-    const RequiredCapabilityEntry *end = rce + ARRAY_COUNT(requiredCapabilityTable);
+    const RequiredCapabilityEntry *end = rce + requiredCapabilityCount;
 
     while (rce < end) {
       cap_value_t capability = rce->value;
@@ -528,7 +532,7 @@ typedef struct {
 static const PrivateNamespaceEntry privateNamespaceTable[] = {
   { .flag = CLONE_NEWUTS,
   },
-};
+}; static const unsigned char privateNamespaceCount = ARRAY_COUNT(privateNamespaceTable);
 
 static void
 createPrivateNamespaces (void) {
@@ -544,7 +548,7 @@ createPrivateNamespaces (void) {
     int flags = 0;
 
     const PrivateNamespaceEntry *pne = privateNamespaceTable;
-    const PrivateNamespaceEntry *end = pne + ARRAY_COUNT(privateNamespaceTable);
+    const PrivateNamespaceEntry *end = pne + privateNamespaceCount;
 
     while (pne < end) {
       flags |= pne->flag;
@@ -558,7 +562,7 @@ createPrivateNamespaces (void) {
 }
 #endif /* HAVE_SCHED_H */
 
-typedef void PrivilegesAcquisitionFunction (int amPrivilegedUser);
+typedef void PrivilegesAcquisitionFunction (void);
 typedef void MissingPrivilegesLogger (void);
 typedef void ReleaseResourcesFunction (void);
 
@@ -603,16 +607,16 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
     .logMissingPrivileges = logMissingCapabilities,
   }
 #endif /* CAP_IS_SUPPORTED */
-};
+}; static const unsigned char privilegesAcquisitionCount = ARRAY_COUNT(privilegesAcquisitionTable);
 
 static void
-acquirePrivileges (int amPrivilegedUser) {
-  if (amPrivilegedUser) {
+acquirePrivileges (void) {
+  if (amPrivilegedUser()) {
     const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-    const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
+    const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
 
     while (pae < end) {
-      pae->acquirePrivileges(amPrivilegedUser);
+      pae->acquirePrivileges();
       pae += 1;
     }
   }
@@ -620,13 +624,13 @@ acquirePrivileges (int amPrivilegedUser) {
 #ifdef CAP_IS_SUPPORTED
   else {
     const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-    const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
+    const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
 
     while (pae < end) {
       cap_value_t capability = pae->capability;
 
       if (!capability || needCapability(capability, pae->inheritable, pae->reason)) {
-        pae->acquirePrivileges(amPrivilegedUser);
+        pae->acquirePrivileges();
       }
 
       pae += 1;
@@ -636,7 +640,7 @@ acquirePrivileges (int amPrivilegedUser) {
 
   {
     const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-    const PrivilegesAcquisitionEntry *end = pae + ARRAY_COUNT(privilegesAcquisitionTable);
+    const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
 
     while (pae < end) {
       {
@@ -778,9 +782,9 @@ switchToUser (const char *user) {
 }
 
 static int
-switchUser (const char *user, int amPrivilegedUser) {
+switchUser (const char *user) {
   if (*user) {
-    if (!amPrivilegedUser) {
+    if (!amPrivilegedUser()) {
       logMessage(LOG_WARNING, "not executing as a privileged user");
     } else if (getuid()) {
       logMessage(LOG_WARNING, "executing as a set-user-ID root program");
@@ -846,7 +850,7 @@ static const StateDirectoryEntry stateDirectoryTable[] = {
     .get = getSocketsDirectory,
     .name = "BrlAPI",
   },
-};
+}; static const unsigned char stateDirectoryCount = ARRAY_COUNT(stateDirectoryTable);
 
 static int
 canCreateStateDirectory (void) {
@@ -952,7 +956,7 @@ claimStateDirectories (void) {
   };
 
   const StateDirectoryEntry *sde = stateDirectoryTable;
-  const StateDirectoryEntry *end = sde + ARRAY_COUNT(stateDirectoryTable);
+  const StateDirectoryEntry *end = sde + stateDirectoryCount;
 
   while (sde < end) {
     const char *path = getStateDirectory(sde);
@@ -970,11 +974,6 @@ claimStateDirectories (void) {
 }
 #endif /* HAVE_PWD_H */
 
-static int
-amPrivilegedUser (void) {
-  return !geteuid();
-}
-
 void
 establishProgramPrivileges (const char *user) {
   logCurrentCapabilities("at start");
@@ -990,7 +989,7 @@ establishProgramPrivileges (const char *user) {
 
 #ifdef HAVE_PWD_H
   {
-    if (switchUser(user, amPrivilegedUser())) {
+    if (switchUser(user)) {
       umask(umask(0) & ~S_IRWXG);
       claimStateDirectories();
     }
@@ -1003,6 +1002,6 @@ establishProgramPrivileges (const char *user) {
   createPrivateNamespaces();
 #endif /* HAVE_SCHED_H */
 
-  acquirePrivileges(amPrivilegedUser());
+  acquirePrivileges();
   logCurrentCapabilities("after relinquish");
 }
