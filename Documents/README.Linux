@@ -184,8 +184,14 @@ including when continuing to execute as the user that started it,
 the following is done:
 
 * Ensure that all of the user identifiers
-  (real, effective, saved, file system)
+  (real, effective, saved, filesystem)
   are set to the selected user.
+
+* Ensure that all of the group identifiers
+  (real, effective, saved, filesystem)
+  are set to the primary group of the selected user.
+  When continuing to execute as the user that started BRLTTY,
+  the current real group identifier is used.
 
 * If the user's home directory is defined then switch to it by:
 

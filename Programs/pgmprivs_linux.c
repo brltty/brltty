@@ -37,6 +37,29 @@ amPrivilegedUser (void) {
   return !geteuid();
 }
 
+static int
+setProcessOwnership (uid_t newUid, gid_t newGid) {
+  gid_t oldRgid, oldEgid, oldSgid;
+
+  if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
+    if (setresgid(newGid, newGid, newGid) != -1) {
+      if (setresuid(newUid, newUid, newUid) != -1) {
+        return 1;
+      } else {
+        logSystemError("setresuid");
+      }
+
+      setresgid(oldRgid, oldEgid, oldSgid);
+    } else {
+      logSystemError("setresgid");
+    }
+  } else {
+    logSystemError("getresgid");
+  }
+
+  return 0;
+}
+
 typedef struct {
   const char *reason;
   int (*install) (void);
@@ -738,35 +761,19 @@ canSwitchGroup (void) {
 
 static int
 switchToUser (const char *user) {
-  const struct passwd *pwd = getpwnam(user);
+  const struct passwd *pwd;
 
-  if (pwd) {
+  if ((pwd = getpwnam(user))) {
     uid_t newUid = pwd->pw_uid;
 
     if (newUid) {
       if (newUid == geteuid()) return 1;
 
       if (canSwitchUser() && canSwitchGroup()) {
-        gid_t oldRgid, oldEgid, oldSgid;
-
-        if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
-          gid_t newGid = pwd->pw_gid;
-
-          if (setresgid(newGid, newGid, newGid) != -1) {
-            if (setresuid(newUid, newUid, newUid) != -1) {
-              logMessage(LOG_NOTICE, "switched to user: %s", user);
-              setUserProperties(pwd);
-              return 1;
-            } else {
-              logSystemError("setresuid");
-            }
-
-            setresgid(oldRgid, oldEgid, oldSgid);
-          } else {
-            logSystemError("setresgid");
-          }
-        } else {
-          logSystemError("getresgid");
+        if (setProcessOwnership(newUid, pwd->pw_gid)) {
+          logMessage(LOG_NOTICE, "switched to user: %s", user);
+          setUserProperties(pwd);
+          return 1;
         }
       } else {
         logMessage(LOG_WARNING, "can't switch to another user");
@@ -802,7 +809,7 @@ switchUser (const char *user) {
 
   {
     uid_t uid = getuid();
-    setresuid(uid, uid, uid);
+    setProcessOwnership(uid, getgid());
 
     const struct passwd *pwd;
     const char *name;
@@ -865,15 +872,13 @@ canCreateStateDirectory (void) {
 
 static const char *
 getStateDirectory (const StateDirectoryEntry *sde) {
-  const char *path = sde->get();
-
-  if (!path) {
-    if (canCreateStateDirectory()) {
-      path = sde->get();
-    }
+  {
+    const char *path = sde->get();
+    if (path) return path;
   }
 
-  return path;
+  if (!canCreateStateDirectory()) return NULL;
+  return sde->get();
 }
 
 static int
