@@ -424,14 +424,6 @@ setRequiredCapabilities (int amPrivilegedUser) {
 }
 
 static void
-logUnassignedCapability (cap_value_t capability, int required, const char *reason) {
-  logMessage(LOG_WARNING,
-             "%s capability not assigned: %s (%s)",
-             (required? "required": "temporary"),
-             cap_to_name(capability), reason);
-}
-
-static void
 logMissingCapabilities (void) {
   cap_t caps;
 
@@ -443,7 +435,10 @@ logMissingCapabilities (void) {
       cap_value_t capability = rce->value;
 
       if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
-        logUnassignedCapability(capability, 1, rce->reason);
+        logMessage(LOG_WARNING,
+          "required capability not granted: %s (%s)",
+          cap_to_name(capability), rce->reason
+        );
       }
 
       rce += 1;
@@ -488,6 +483,7 @@ requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
 static int
 needCapability (cap_value_t capability, int inheritable, const char *reason) {
   int haveCapability = 0;
+  const char *outcome = NULL;
   cap_t caps;
 
   if ((caps = cap_get_proc())) {
@@ -495,18 +491,21 @@ needCapability (cap_value_t capability, int inheritable, const char *reason) {
       haveCapability = 1;
     } else if (requestCapability(caps, capability, inheritable)) {
       haveCapability = 1;
-
-      logMessage(LOG_DEBUG,
-        "temporary capability assigned: %s (%s)",
-        cap_to_name(capability), reason
-      );
+      outcome = "added";
     } else {
-      logUnassignedCapability(capability, 0, reason);
+      outcome = "not granted";
     }
 
     cap_free(caps);
   } else {
     logSystemError("cap_get_proc");
+  }
+
+  if (outcome) {
+    logMessage(LOG_DEBUG,
+      "temporary capability %s: %s (%s)",
+      outcome, cap_to_name(capability), reason
+    );
   }
 
   return haveCapability;
