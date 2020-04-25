@@ -199,12 +199,12 @@ processRequiredGroups (GroupsProcessor *processGroups, void *data) {
         const char *name = rge->name;
 
         if (name) {
-          const struct group *grp = getgrnam(name);
+          const struct group *grp;
 
-          if (grp) {
+          if ((grp = getgrnam(name))) {
             groups[count++] = grp->gr_gid;
           } else {
-            logMessage(LOG_WARNING, "unknown user group: %s", name);
+            logMessage(LOG_WARNING, "unknown group: %s", name);
           }
         }
       }
@@ -321,10 +321,10 @@ capabilitiesLogFormatter (char *buffer, size_t size, const void *data) {
   STR_BEGIN(buffer, size);
   STR_PRINTF("capabilities: %s:", cld->label);
 
-  cap_t caps = cld->caps;
   int capsAllocated = 0;
+  cap_t caps;
 
-  if (!caps) {
+  if (!(caps = cld->caps)) {
     if (!(caps = cap_get_proc())) {
       logSystemError("cap_get_proc");
       goto done;
@@ -441,11 +441,13 @@ setRequiredCapabilities (void) {
     logSystemError("cap_init");
   }
 
-#ifdef PR_CAP_AMBIENT
+#ifdef PR_CAP_AMBIENT_CLEAR_ALL
   if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_CLEAR_ALL, 0, 0, 0) == -1) {
     logSystemError("prctl[PR_CAP_AMBIENT_CLEAR_ALL]");
   }
-#endif /* PR_CAP_AMBIENT */
+#else /* PR_CAP_AMBIENT_CLEAR_ALL */
+  logMessage(LOG_WARNING, "can't clear ambient capabilities");
+#endif /* PR_CAP_AMBIENT_CLEAR_ALL */
 
   if (oldCaps) cap_free(oldCaps);
 }
@@ -498,10 +500,12 @@ requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
   }
 
   if (setCapabilities(caps)) {
-    #ifdef PR_CAP_AMBIENT_RAISE
+#ifdef PR_CAP_AMBIENT_RAISE
     if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, capability, 0, 0) != -1) return 1;
     logSystemError("prctl[PR_CAP_AMBIENT_RAISE]");
-    #endif /* PR_CAP_AMBIENT_RAISE */
+#else /* PR_CAP_AMBIENT_RAISE */
+    logMessage(LOG_WARNING, "can't raise ambient capabilities");
+#endif /* PR_CAP_AMBIENT_RAISE */
   }
 
   return 0;
@@ -557,17 +561,20 @@ static const PrivateNamespaceEntry privateNamespaceTable[] = {
   },
 }; static const unsigned char privateNamespaceCount = ARRAY_COUNT(privateNamespaceTable);
 
-static void
-createPrivateNamespaces (void) {
-  int canUnshareNamespaces = 0;
-
+static int
+canUnshareNamespaces (void) {
 #ifdef CAP_SYS_ADMIN
   if (needCapability(CAP_SYS_ADMIN, 0, "for unsharing namespaces")) {
-    canUnshareNamespaces = 1;
+    return 1;
   }
 #endif /* CAP_SYS_ADMIN */
 
-  if (canUnshareNamespaces) {
+  return 0;
+}
+
+static void
+createPrivateNamespaces (void) {
+  if (canUnshareNamespaces()) {
     int flags = 0;
 
     const PrivateNamespaceEntry *pne = privateNamespaceTable;
@@ -718,14 +725,12 @@ setSafeShell (void) {
 
 static int
 setHomeDirectory (const char *directory) {
-  if (directory && *directory) {
-    if (chdir(directory) != -1) {
-      logMessage(LOG_DEBUG, "working directory changed: %s", directory);
-      setEnvironmentVariable("HOME", directory);
-      return 1;
-    } else {
-      logSystemError("chdir");
-    }
+  if (chdir(directory) != -1) {
+    logMessage(LOG_DEBUG, "working directory changed: %s", directory);
+    setEnvironmentVariable("HOME", directory);
+    return 1;
+  } else {
+    logSystemError("chdir");
   }
 
   return 0;
@@ -733,8 +738,18 @@ setHomeDirectory (const char *directory) {
 
 static void
 setUserProperties (const struct passwd *pwd) {
-  logMessage(LOG_DEBUG, "setting home directory: %s", pwd->pw_name);
-  setHomeDirectory(pwd->pw_dir);
+  const char *user = pwd->pw_name;
+
+  {
+    const char *directory = pwd->pw_dir;
+
+    if (directory && *directory) {
+      logMessage(LOG_DEBUG, "setting home directory: %s", user);
+      setHomeDirectory(pwd->pw_dir);
+    } else {
+      logMessage(LOG_DEBUG, "home directory not defined: %s", user);
+    }
+  }
 }
 
 static int
@@ -837,25 +852,25 @@ getSocketsDirectory (void) {
 }
 
 typedef struct {
-  const char *reason;
-  const char * (*get) (void);
-  const char *name;
+  const char *whichDirectory;
+  const char *(*getPath) (void);
+  const char *expectedName;
 } StateDirectoryEntry;
 
 static const StateDirectoryEntry stateDirectoryTable[] = {
-  { .reason = "updatable directory",
-    .get = getUpdatableDirectory,
-    .name = "brltty",
+  { .whichDirectory = "updatable",
+    .getPath = getUpdatableDirectory,
+    .expectedName = "brltty",
   },
 
-  { .reason = "writable directory",
-    .get = getWritableDirectory,
-    .name = "brltty",
+  { .whichDirectory = "writable",
+    .getPath = getWritableDirectory,
+    .expectedName = "brltty",
   },
 
-  { .reason = "sockets directory",
-    .get = getSocketsDirectory,
-    .name = "BrlAPI",
+  { .whichDirectory = "sockets",
+    .getPath = getSocketsDirectory,
+    .expectedName = "BrlAPI",
   },
 }; static const unsigned char stateDirectoryCount = ARRAY_COUNT(stateDirectoryTable);
 
@@ -871,14 +886,14 @@ canCreateStateDirectory (void) {
 }
 
 static const char *
-getStateDirectory (const StateDirectoryEntry *sde) {
+getStateDirectoryPath (const StateDirectoryEntry *sde) {
   {
-    const char *path = sde->get();
+    const char *path = sde->getPath();
     if (path) return path;
   }
 
   if (!canCreateStateDirectory()) return NULL;
-  return sde->get();
+  return sde->getPath();
 }
 
 static int
@@ -915,22 +930,20 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
   struct stat status;
 
   if (stat(path, &status) != -1) {
-    int addPermissions = 0;
+    int ownershipClaimed = 0;
 
     if (status.st_gid == group) {
-      addPermissions = 1;
+      ownershipClaimed = 1;
+    } else if (!canChangePathOwnership(path)) {
+      logMessage(LOG_WARNING, "can't claim ownership: %s", path);
+    } else if (chown(path, -1, group) == -1) {
+      logSystemError("chown");
     } else {
-      if (!canChangePathOwnership(path)) {
-        logMessage(LOG_WARNING, "can't claim group ownership: %s", path);
-      } else if (chown(path, -1, group) != -1) {
-        logMessage(LOG_INFO, "group ownership claimed: %s", path);
-        addPermissions = 1;
-      } else {
-        logSystemError("chown");
-      }
+      logMessage(LOG_INFO, "ownership claimed: %s", path);
+      ownershipClaimed = 1;
     }
 
-    if (addPermissions) {
+    if (ownershipClaimed) {
       mode_t oldMode = status.st_mode;
       mode_t newMode = oldMode;
 
@@ -964,13 +977,18 @@ claimStateDirectories (void) {
   const StateDirectoryEntry *end = sde + stateDirectoryCount;
 
   while (sde < end) {
-    const char *path = getStateDirectory(sde);
+    const char *path = getStateDirectoryPath(sde);
 
     if (path && *path) {
       const char *name = locatePathName(path);
 
-      if (strcasecmp(name, sde->name) == 0) {
+      if (strcasecmp(name, sde->expectedName) == 0) {
         processPathTree(path, claimStateDirectory, &sdd);
+      } else {
+        logMessage(LOG_WARNING,
+          "not claiming %s directory: %s (expecting %s)",
+          sde->whichDirectory, path, sde->expectedName
+        );
       }
     }
 
