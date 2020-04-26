@@ -866,6 +866,7 @@ AC_CHECK_FUNCS([select])
 AC_CHECK_FUNCS([poll])
 
 AC_CHECK_HEADERS([sys/capability.h sys/prctl.h sched.h])
+AC_CHECK_HEADERS([linux/seccomp.h linux/filter.h linux/audit.h])
 
 AC_CHECK_HEADERS([signal.h sys/signalfd.h])
 AC_CHECK_FUNCS([sigaction])

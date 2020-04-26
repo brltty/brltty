@@ -466,15 +466,18 @@ and are relinquished right after this has been done.
 |cap_sys_admin|
   While this is one of the `required capabilities`_,
   it's also needed as a temporary capability
-  in order to create the `private namespaces`_.
+  in order to create privileged `private namespaces`_.
 
 |cap_sys_module|
   If this capability has also been assigned to BRLTTY's executable
   then the needed `kernel modules`_ needn't have been already installed
   because they can be internally installed.
 
+Other Protective Measures
+-------------------------
+
 Private Namespaces
-------------------
+~~~~~~~~~~~~~~~~~~
 
 BRLTTY unshares (makes a private copy of) some of the kernel's namespaces
 as one of the ways that it uses
@@ -483,6 +486,9 @@ The namespaces that it currently unshares are:
 
 UTS
   This namespace is used to manage the host name and the NIS domain name.
+
+The Security Filter
+~~~~~~~~~~~~~~~~~~~
 
 Known Problems
 --------------

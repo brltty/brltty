@@ -160,6 +160,15 @@ extern "C" {
 /* Define this if the header file sched.h exists. */
 #undef HAVE_SCHED_H
 
+/* Define this if the header file linux/seccomp.h exists. */
+#undef HAVE_LINUX_SECCOMP_H
+
+/* Define this if the header file linux/filter.h exists. */
+#undef HAVE_LINUX_FILTER_H
+
+/* Define this if the header file linux/audit.h exists. */
+#undef HAVE_LINUX_AUDIT_H
+
 /* Define this if the header file signal.h exists. */
 #undef HAVE_SIGNAL_H
 
