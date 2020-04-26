@@ -520,6 +520,7 @@ needCapability (cap_value_t capability, int inheritable, const char *reason) {
   if ((caps = cap_get_proc())) {
     if (hasCapability(caps, CAP_EFFECTIVE, capability)) {
       haveCapability = 1;
+      outcome = "already added";
     } else if (requestCapability(caps, capability, inheritable)) {
       haveCapability = 1;
       outcome = "added";
@@ -753,7 +754,16 @@ setUserProperties (const struct passwd *pwd) {
 }
 
 static int
-canSwitchUser (void) {
+canSwitchUser (uid_t uid) {
+  {
+    uid_t rUid, eUid, sUid;
+    getresuid(&rUid, &eUid, &sUid);
+
+    if (uid == rUid) return 1;
+    if (uid == eUid) return 1;
+    if (uid == sUid) return 1;
+  }
+
 #ifdef CAP_SETUID
   if (needCapability(CAP_SETUID, 0, "for switching to the unprivileged user")) {
     return 1;
@@ -764,7 +774,16 @@ canSwitchUser (void) {
 }
 
 static int
-canSwitchGroup (void) {
+canSwitchGroup (gid_t gid) {
+  {
+    gid_t rGid, eGid, sGid;
+    getresgid(&rGid, &eGid, &sGid);
+
+    if (gid == rGid) return 1;
+    if (gid == eGid) return 1;
+    if (gid == sGid) return 1;
+  }
+
 #ifdef CAP_SETGID
   if (needCapability(CAP_SETGID, 0, "for switching to the writable group")) {
     return 1;
@@ -779,13 +798,12 @@ switchToUser (const char *user) {
   const struct passwd *pwd;
 
   if ((pwd = getpwnam(user))) {
-    uid_t newUid = pwd->pw_uid;
+    uid_t uid = pwd->pw_uid;
+    gid_t gid = pwd->pw_gid;
 
-    if (newUid) {
-      if (newUid == geteuid()) return 1;
-
-      if (canSwitchUser() && canSwitchGroup()) {
-        if (setProcessOwnership(newUid, pwd->pw_gid)) {
+    if (uid) {
+      if (amPrivilegedUser() || (canSwitchUser(uid) && canSwitchGroup(gid))) {
+        if (setProcessOwnership(uid, gid)) {
           logMessage(LOG_NOTICE, "switched to user: %s", user);
           setUserProperties(pwd);
           return 1;
