@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <dirent.h>
 #include <sys/sysmacros.h>
 #include <linux/major.h>
@@ -927,6 +928,59 @@ opened:
   return descriptor;
 }
 
+static int
+canContainDevices (const char *path) {
+  int ok = 0;
+  char *directory;
+
+  if ((directory = getPathDirectory(path))) {
+    struct statvfs vfs;
+
+    if (statvfs(directory, &vfs) == -1) {
+      logSystemError("statvfs");
+    } else if (vfs.f_flag & ST_NODEV) {
+      logMessage(LOG_WARNING, "cannot contain device files: %s", directory);
+      errno = EPERM;
+    } else {
+      ok = 1;
+    }
+
+    free(directory);
+  }
+
+  return ok;
+}
+
+static int
+createCharacterDevice (const char *path, int flags, int major, int minor) {
+  int descriptor = -1;
+
+  if (canContainDevices(path)) {
+    descriptor = openDevice(path, flags, 0);
+  }
+
+  if (descriptor == -1) {
+    if (errno == ENOENT) {
+      mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
+
+      if (mknod(path, mode, makedev(major, minor)) == -1) {
+        logMessage(LOG_DEBUG,
+          "cannot create device: %s: %s", path, strerror(errno)
+        );
+      } else {
+        logMessage(LOG_DEBUG,
+          "device created: %s mode=%06o major=%d minor=%d",
+          path, mode, major, minor
+        );
+
+        descriptor = openDevice(path, flags, 0);
+      }
+    }
+  }
+
+  return descriptor;
+}
+
 int
 openCharacterDevice (const char *name, int flags, int major, int minor) {
   char *path = getDevicePath(name);
@@ -939,20 +993,7 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
       free(path);
 
       if ((path = makeWritablePath(locatePathName(name)))) {
-        if ((descriptor = openDevice(path, flags, 0)) == -1) {
-          if (errno == ENOENT) {
-            mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
-
-            if (mknod(path, mode, makedev(major, minor)) == -1) {
-              logMessage(LOG_DEBUG, "cannot create device: %s: %s", path, strerror(errno));
-            } else {
-              logMessage(LOG_DEBUG, "device created: %s mode=%06o major=%d minor=%d",
-                         path, mode, major, minor);
-
-              descriptor = openDevice(path, flags, 0);
-            }
-          }
-        }
+        descriptor = createCharacterDevice(path, flags, major, minor);
       }
     }
   }
