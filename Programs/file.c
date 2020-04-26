@@ -71,16 +71,20 @@ getPathDirectory (const char *path) {
   size_t end = stripPathDelimiter(path, length);
 
   if (end) {
-    while (--end)
-      if (isPathDelimiter(path[end-1]))
+    while (--end) {
+      if (isPathDelimiter(path[end-1])) {
         break;
+      }
+    }
 
-    if ((length = end))
-      if ((end = stripPathDelimiter(path, length)))
+    if ((length = end)) {
+      if ((end = stripPathDelimiter(path, length))) {
         length = end;
+      }
+    }
   }
 
-  if (!length) length = strlen(path = ".");
+  if (!length) length = strlen((path = CURRENT_DIRECTORY_NAME));
   {
     char *directory = malloc(length + 1);
 
@@ -366,7 +370,7 @@ ensureDirectory (const char *path) {
 }
 
 int
-ensureParentDirectory (const char *path) {
+ensurePathDirectory (const char *path) {
   char *directory = getPathDirectory(path);
   if (!directory) return 0;
 
@@ -502,7 +506,7 @@ getHomeDirectory (void) {
 
 static char *
 makeOverridePath (const char *base, int xdg) {
-  return makePath(base, (xdg? PACKAGE_TARNAME: ("." PACKAGE_TARNAME)));
+  return makePath(base, (xdg? PACKAGE_TARNAME: (CURRENT_DIRECTORY_NAME PACKAGE_TARNAME)));
 }
 
 static int

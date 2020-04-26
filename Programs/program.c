@@ -80,11 +80,9 @@ findProgram (const char *name) {
     char **array;
 
     if ((array = splitString(string, ':', &count))) {
-      int index;
-
-      for (index=0; index<count; ++index) {
+      for (unsigned int index=0; index<count; index+=1) {
         const char *directory = array[index];
-        if (!*directory) directory = ".";
+        if (!*directory) directory = CURRENT_DIRECTORY_NAME;
         if ((path = testProgram(directory, name))) break;
       }
 
@@ -114,7 +112,7 @@ beginProgram (int argumentCount, char **argumentVector) {
 
   if (!isExplicitPath(programPath)) {
     char *path = findProgram(programPath);
-    if (!path) path = testProgram(".", programPath);
+    if (!path) path = testProgram(CURRENT_DIRECTORY_NAME, programPath);
     if (path) programPath = path;
   }
 
@@ -162,7 +160,7 @@ fixInstallPath (char **path) {
       registerProgramMemory("program-directory", &programDirectory);
     } else {
       logMessage(LOG_WARNING, gettext("cannot determine program directory"));
-      programDirectory = ".";
+      programDirectory = CURRENT_DIRECTORY_NAME;
     }
 
     logMessage(LOG_DEBUG, "program directory: %s", programDirectory);
@@ -202,7 +200,7 @@ createPidFile (const char *path, ProcessIdentifier pid) {
   if (!pid) pid = getProcessIdentifier();
 
   if (path && *path) {
-    if (!ensureParentDirectory(path)) return 0;
+    if (!ensurePathDirectory(path)) return 0;
 
     typedef enum {PFS_ready, PFS_stale, PFS_clash, PFS_error} PidFileState;
     PidFileState state = PFS_error;
