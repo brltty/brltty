@@ -38,12 +38,12 @@ amPrivilegedUser (void) {
 }
 
 static int
-setProcessOwnership (uid_t newUid, gid_t newGid) {
+setProcessOwnership (uid_t uid, gid_t gid) {
   gid_t oldRgid, oldEgid, oldSgid;
 
   if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
-    if (setresgid(newGid, newGid, newGid) != -1) {
-      if (setresuid(newUid, newUid, newUid) != -1) {
+    if (setresgid(gid, gid, gid) != -1) {
+      if (setresuid(uid, uid, uid) != -1) {
         return 1;
       } else {
         logSystemError("setresuid");
@@ -553,40 +553,64 @@ logCurrentCapabilities (const char *label) {
 #include <sched.h>
 
 typedef struct {
-  const char *reason;
-  int flag;
+  const char *name;
+  const char *summary;
+  int unshareFlag;
+  unsigned char needSysadmin:1;
 } PrivateNamespaceEntry;
 
 static const PrivateNamespaceEntry privateNamespaceTable[] = {
-  { .flag = CLONE_NEWUTS,
+  { .unshareFlag = CLONE_NEWUTS,
+    .needSysadmin = 1,
+    .name = "UTS",
+    .summary = "host name and NIS domain name",
   },
 }; static const unsigned char privateNamespaceCount = ARRAY_COUNT(privateNamespaceTable);
 
-static int
-canUnshareNamespaces (void) {
-#ifdef CAP_SYS_ADMIN
-  if (needCapability(CAP_SYS_ADMIN, 0, "for unsharing namespaces")) {
-    return 1;
-  }
-#endif /* CAP_SYS_ADMIN */
-
-  return 0;
-}
-
 static void
-createPrivateNamespaces (void) {
-  if (canUnshareNamespaces()) {
-    int flags = 0;
+unshareNamespaces (void) {
+  int unshareFlags = 0;
 
-    const PrivateNamespaceEntry *pne = privateNamespaceTable;
-    const PrivateNamespaceEntry *end = pne + privateNamespaceCount;
+  int sysadminRequested = 0;
+  int sysadminGranted = 0;
 
-    while (pne < end) {
-      flags |= pne->flag;
-      pne += 1;
+  const PrivateNamespaceEntry *pne = privateNamespaceTable;
+  const PrivateNamespaceEntry *end = pne + privateNamespaceCount;
+
+  while (pne < end) {
+    int canUnshare = 1;
+
+    if (pne->needSysadmin) {
+      if (!sysadminRequested) {
+        sysadminRequested = 1;
+
+#ifdef CAP_SYS_ADMIN
+        if (needCapability(CAP_SYS_ADMIN, 0, "for unsharing privileged namespaces")) {
+          sysadminGranted = 1;
+        }
+#endif /* CAP_SYS_ADMIN */
+      }
+
+      canUnshare = sysadminGranted;
     }
 
-    if (unshare(flags) == -1) {
+    if (canUnshare) {
+      logMessage(LOG_DEBUG,
+        "unsharing namespace: %s (%s)", pne->name, pne->summary
+      );
+
+      unshareFlags |= pne->unshareFlag;
+    } else {
+      logMessage(LOG_WARNING,
+        "can't unshare privileged namespace: %s (%s)", pne->name, pne->summary
+      );
+    }
+
+    pne += 1;
+  }
+
+  if (unshareFlags) {
+    if (unshare(unshareFlags) == -1) {
       logSystemError("unshare");
     }
   }
@@ -758,10 +782,7 @@ canSwitchUser (uid_t uid) {
   {
     uid_t rUid, eUid, sUid;
     getresuid(&rUid, &eUid, &sUid);
-
-    if (uid == rUid) return 1;
-    if (uid == eUid) return 1;
-    if (uid == sUid) return 1;
+    if ((uid == rUid) || (uid == eUid) || (uid == sUid)) return 1;
   }
 
 #ifdef CAP_SETUID
@@ -778,10 +799,7 @@ canSwitchGroup (gid_t gid) {
   {
     gid_t rGid, eGid, sGid;
     getresgid(&rGid, &eGid, &sGid);
-
-    if (gid == rGid) return 1;
-    if (gid == eGid) return 1;
-    if (gid == sGid) return 1;
+    if ((gid == rGid) || (gid == eGid) || (gid == sGid)) return 1;
   }
 
 #ifdef CAP_SETGID
@@ -1028,6 +1046,10 @@ establishProgramPrivileges (const char *user) {
   }
 #endif /* PR_SET_KEEPCAPS */
 
+#ifdef HAVE_SCHED_H
+  unshareNamespaces();
+#endif /* HAVE_SCHED_H */
+
 #ifdef HAVE_PWD_H
   {
     if (switchUser(user)) {
@@ -1038,10 +1060,6 @@ establishProgramPrivileges (const char *user) {
     endpwent();
   }
 #endif /* HAVE_PWD_H */
-
-#ifdef HAVE_SCHED_H
-  createPrivateNamespaces();
-#endif /* HAVE_SCHED_H */
 
   acquirePrivileges();
   logCurrentCapabilities("after relinquish");

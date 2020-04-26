@@ -151,6 +151,8 @@ execution environment:
   The safe shell is hard-coded to be ``/bin/sh``.
   Note that scripts usually internally specify which shell is to be used.
 
+* Create the `private namespaces`_.
+
 * Switch to executing as `the unprivileged user`_.
 
 * Install the needed `kernel modules`_.
@@ -434,6 +436,11 @@ and are relinquished right after this has been done.
   after having successfully switched to executing as `the unprivileged user`_.
   The primary group of that user is used.
 
+|cap_dac_override|
+  If this capability has also been assigned to BRLTTY's executable
+  then it can create missing `state directories`_
+  after having successfully switched to executing as `the unprivileged user`_.
+
 |cap_fowner|
   If this capability has also been assigned to BRLTTY's executable
   then it can add group permissions to its `state directories`_
@@ -442,11 +449,6 @@ and are relinquished right after this has been done.
   In addition, for all directories,
   group search permission is added
   and the set-group-ID bit is set.
-
-|cap_dac_override|
-  If this capability has also been assigned to BRLTTY's executable
-  then it can create missing `state directories`_
-  after having successfully switched to executing as `the unprivileged user`_.
 
 |cap_setgid|
   If this capability has also been assigned to BRLTTY's executable
@@ -461,10 +463,26 @@ and are relinquished right after this has been done.
   This feature doesn't allow switching to an explicit user
   (via the |unprivileged user option|).
 
+|cap_sys_admin|
+  While this is one of the `required capabilities`_,
+  it's also needed as a temporary capability
+  in order to create the `private namespaces`_.
+
 |cap_sys_module|
   If this capability has also been assigned to BRLTTY's executable
   then the needed `kernel modules`_ needn't have been already installed
   because they can be internally installed.
+
+Private Namespaces
+------------------
+
+BRLTTY unshares (makes a private copy of) some of the kernel's namespaces
+as one of the ways that it uses
+to reduce its exposure to being hacked.
+The namespaces that it currently unshares are:
+
+UTS
+  This namespace is used to manage the host name and the NIS domain name.
 
 Known Problems
 --------------
