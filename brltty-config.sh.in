@@ -18,11 +18,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-brlttyAssignVariable() {
+brlttyConfig_assignVariable() {
    eval "${1}"'="${2}"'
 }
 
-brlttyDefineVariable() {
+brlttyConfig_defineVariable() {
    local name="${1}"
    local value="${2}"
 
@@ -33,10 +33,10 @@ brlttyDefineVariable() {
       value="${new}"
    done
 
-   brlttyAssignVariable "${name}" "${value}"
+   brlttyConfig_assignVariable "${name}" "${value}"
 }
 
-brlttyDefineVariables() {
+brlttyConfig_defineVariables() {
    local prefix='@prefix@'
    local sysconfdir='@sysconfdir@'
    local datarootdir='@datarootdir@'
@@ -80,48 +80,48 @@ brlttyDefineVariables() {
    local api_release='@api_release@'
    local api_authkeyfile='@api_authkeyfile@'
 
-   brlttyDefineVariable BRLTTY_PREFIX "${prefix}"
-   brlttyDefineVariable BRLTTY_SYSCONFDIR "${sysconfdir}"
-   brlttyDefineVariable BRLTTY_DATAROOTDIR "${datarootdir}"
-   brlttyDefineVariable BRLTTY_DATADIR "${datadir}"
-   brlttyDefineVariable BRLTTY_SHAREDSTATEDIR "${sharedstatedir}"
-   brlttyDefineVariable BRLTTY_LOCALSTATEDIR "${localstatedir}"
-   brlttyDefineVariable BRLTTY_INCLUDEDIR "${includedir}"
-   brlttyDefineVariable BRLTTY_OLDINCLUDEDIR "${oldincludedir}"
+   brlttyConfig_defineVariable BRLTTY_PREFIX "${prefix}"
+   brlttyConfig_defineVariable BRLTTY_SYSCONFDIR "${sysconfdir}"
+   brlttyConfig_defineVariable BRLTTY_DATAROOTDIR "${datarootdir}"
+   brlttyConfig_defineVariable BRLTTY_DATADIR "${datadir}"
+   brlttyConfig_defineVariable BRLTTY_SHAREDSTATEDIR "${sharedstatedir}"
+   brlttyConfig_defineVariable BRLTTY_LOCALSTATEDIR "${localstatedir}"
+   brlttyConfig_defineVariable BRLTTY_INCLUDEDIR "${includedir}"
+   brlttyConfig_defineVariable BRLTTY_OLDINCLUDEDIR "${oldincludedir}"
 
-   brlttyDefineVariable BRLTTY_EXEC_PREFIX "${exec_prefix}"
-   brlttyDefineVariable BRLTTY_BINDIR "${bindir}"
-   brlttyDefineVariable BRLTTY_SBINDIR "${sbindir}"
-   brlttyDefineVariable BRLTTY_LIBDIR "${libdir}"
-   brlttyDefineVariable BRLTTY_LIBEXECDIR "${libexecdir}"
+   brlttyConfig_defineVariable BRLTTY_EXEC_PREFIX "${exec_prefix}"
+   brlttyConfig_defineVariable BRLTTY_BINDIR "${bindir}"
+   brlttyConfig_defineVariable BRLTTY_SBINDIR "${sbindir}"
+   brlttyConfig_defineVariable BRLTTY_LIBDIR "${libdir}"
+   brlttyConfig_defineVariable BRLTTY_LIBEXECDIR "${libexecdir}"
 
-   brlttyDefineVariable BRLTTY_LOCALEDIR "${localedir}"
-   brlttyDefineVariable BRLTTY_MANDIR "${mandir}"
-   brlttyDefineVariable BRLTTY_INFODIR "${infodir}"
-   brlttyDefineVariable BRLTTY_DOCDIR "${docdir}"
-   brlttyDefineVariable BRLTTY_HTMLDIR "${htmldir}"
-   brlttyDefineVariable BRLTTY_PDFDIR "${pdfdir}"
-   brlttyDefineVariable BRLTTY_PSDIR "${psdir}"
-   brlttyDefineVariable BRLTTY_DVIDIR "${dvidir}"
+   brlttyConfig_defineVariable BRLTTY_LOCALEDIR "${localedir}"
+   brlttyConfig_defineVariable BRLTTY_MANDIR "${mandir}"
+   brlttyConfig_defineVariable BRLTTY_INFODIR "${infodir}"
+   brlttyConfig_defineVariable BRLTTY_DOCDIR "${docdir}"
+   brlttyConfig_defineVariable BRLTTY_HTMLDIR "${htmldir}"
+   brlttyConfig_defineVariable BRLTTY_PDFDIR "${pdfdir}"
+   brlttyConfig_defineVariable BRLTTY_PSDIR "${psdir}"
+   brlttyConfig_defineVariable BRLTTY_DVIDIR "${dvidir}"
 
-   brlttyDefineVariable BRLTTY_TARNAME "${PACKAGE_TARNAME}"
-   brlttyDefineVariable BRLTTY_NAME "${PACKAGE_NAME}"
-   brlttyDefineVariable BRLTTY_VERSION "${PACKAGE_VERSION}"
-   brlttyDefineVariable BRLTTY_URL "${PACKAGE_URL}"
-   brlttyDefineVariable BRLTTY_BUGREPORT "${PACKAGE_BUGREPORT}"
+   brlttyConfig_defineVariable BRLTTY_TARNAME "${PACKAGE_TARNAME}"
+   brlttyConfig_defineVariable BRLTTY_NAME "${PACKAGE_NAME}"
+   brlttyConfig_defineVariable BRLTTY_VERSION "${PACKAGE_VERSION}"
+   brlttyConfig_defineVariable BRLTTY_URL "${PACKAGE_URL}"
+   brlttyConfig_defineVariable BRLTTY_BUGREPORT "${PACKAGE_BUGREPORT}"
 
-   brlttyDefineVariable BRLTTY_ROOT "${execute_root}"
-   brlttyDefineVariable BRLTTY_PROGRAMS_DIRECTORY "${program_directory}"
-   brlttyDefineVariable BRLTTY_DRIVERS_DIRECTORY "${drivers_directory}"
-   brlttyDefineVariable BRLTTY_TABLES_DIRECTORY "${tables_directory}"
-   brlttyDefineVariable BRLTTY_MANPAGE_DIRECTORY "${manpage_directory}"
-   brlttyDefineVariable BRLTTY_INCLUDE_DIRECTORY "${include_directory}"
+   brlttyConfig_defineVariable BRLTTY_ROOT "${execute_root}"
+   brlttyConfig_defineVariable BRLTTY_PROGRAMS_DIRECTORY "${program_directory}"
+   brlttyConfig_defineVariable BRLTTY_DRIVERS_DIRECTORY "${drivers_directory}"
+   brlttyConfig_defineVariable BRLTTY_TABLES_DIRECTORY "${tables_directory}"
+   brlttyConfig_defineVariable BRLTTY_MANPAGE_DIRECTORY "${manpage_directory}"
+   brlttyConfig_defineVariable BRLTTY_INCLUDE_DIRECTORY "${include_directory}"
 
-   brlttyDefineVariable BRLTTY_UNPRIVILEGED_USER "${unprivileged_user}"
+   brlttyConfig_defineVariable BRLTTY_UNPRIVILEGED_USER "${unprivileged_user}"
 
-   brlttyDefineVariable BRLAPI_VERSION "${api_version}"
-   brlttyDefineVariable BRLAPI_RELEASE "${api_release}"
-   brlttyDefineVariable BRLAPI_AUTHKEYFILE "${api_authkeyfile}"
+   brlttyConfig_defineVariable BRLAPI_VERSION "${api_version}"
+   brlttyConfig_defineVariable BRLAPI_RELEASE "${api_release}"
+   brlttyConfig_defineVariable BRLAPI_AUTHKEYFILE "${api_authkeyfile}"
 }
 
-brlttyDefineVariables
+brlttyConfig_defineVariables
