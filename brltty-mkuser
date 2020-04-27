@@ -74,14 +74,14 @@ addProgramOption l string.path loginShell "set/change the user's login shell"
 addProgramOption p flag noPulse "don't allow playing sound via the Pulse Audio server"
 addProgramOption s flag noSerial "don't allow access to serial devices"
 addProgramOption u flag noUSB "don't allow access to USB devices"
-
 addProgramOption G flag noGroups "don't set/change the supplementary groups"
 addProgramOption S flag useSudo "use sudo to execute the commands"
 addProgramOption T flag testMode "test mode - show the commands that would be executed"
 addProgramOption U string.user userName "the name of the user to create/modify" "${defaultUserName}"
-
 parseProgramArguments "${@}"
+
 [ -n "${userName}" ] || userName="${defaultUserName}"
+[ -n "${userName}" ] || syntaxError "user not specified"
 
 "${testMode}" || {
    if "${useSudo}"
