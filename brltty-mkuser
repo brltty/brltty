@@ -19,8 +19,9 @@
 
 set -e
 . "`dirname "${0}"`/brltty-prologue.sh"
+. "${programDirectory}/brltty-config.sh"
 
-readonly defaultUserName="brltty"
+readonly defaultUserName="${BRLTTY_UNPRIVILEGED_USER}"
 readonly defaultUserInformation="Braille Device Daemon"
 readonly defaultLoginShell="/sbin/nologin"
 
@@ -83,16 +84,6 @@ parseProgramArguments "${@}"
 [ -n "${userName}" ] || userName="${defaultUserName}"
 [ -n "${userName}" ] || syntaxError "user not specified"
 
-"${testMode}" || {
-   if "${useSudo}"
-   then
-      sudo -v
-   elif [ "$(id -u)" -ne 0 ]
-   then
-      semanticError "not root"
-   fi
-}
-
 if id -u "${userName}" >/dev/null 2>&1
 then
    "${forceUpdate}" || semanticError "user already exists; ${userName}"
@@ -128,6 +119,16 @@ fi
    groupsOperand="${groupList[*]}"
    groupsOperand="${groupsOperand// /,}"
    command+=(--groups "${groupsOperand}")
+}
+
+"${testMode}" || {
+   if "${useSudo}"
+   then
+      sudo -v
+   elif [ "$(id -u)" -ne 0 ]
+   then
+      semanticError "not root"
+   fi
 }
 
 command+=(-- "${userName}")

@@ -74,6 +74,8 @@ brlttyDefineVariables() {
    local manpage_directory='@manpage_directory@'
    local include_directory='@include_directory@'
 
+   local unprivileged_user='@unprivileged_user@'
+
    local api_version='@api_version@'
    local api_release='@api_release@'
    local api_authkeyfile='@api_authkeyfile@'
@@ -114,6 +116,8 @@ brlttyDefineVariables() {
    brlttyDefineVariable BRLTTY_TABLES_DIRECTORY "${tables_directory}"
    brlttyDefineVariable BRLTTY_MANPAGE_DIRECTORY "${manpage_directory}"
    brlttyDefineVariable BRLTTY_INCLUDE_DIRECTORY "${include_directory}"
+
+   brlttyDefineVariable BRLTTY_UNPRIVILEGED_USER "${unprivileged_user}"
 
    brlttyDefineVariable BRLAPI_VERSION "${api_version}"
    brlttyDefineVariable BRLAPI_RELEASE "${api_release}"

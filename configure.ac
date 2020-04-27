@@ -232,6 +232,7 @@ elif test "${unprivileged_user}" = "yes"
 then
    unprivileged_user="${brltty_default_unprivileged_user}"
 fi
+AC_SUBST([unprivileged_user])
 AC_DEFINE_UNQUOTED([UNPRIVILEGED_USER], ["${unprivileged_user}"],
                    [Define this to be a string containing the name of the unprivileged user to switch to.])
 BRLTTY_SUMMARY_ITEM([unprivileged-user], [unprivileged_user])
