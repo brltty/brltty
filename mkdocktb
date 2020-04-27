@@ -19,7 +19,7 @@
 
 defaultOutputRoot="doc-ktb"
 
-. "`dirname "${0}"`/prologue.sh"
+. "`dirname "${0}"`/brltty-prologue.sh"
 addProgramOption s string.directory sourceRoot "top-level directory of source tree" "the location of this script"
 addProgramOption b string.directory buildRoot "top-level directory of build tree" "the source tree"
 addProgramOption o string.directory outputRoot "top-level directory of output tree" "${defaultOutputRoot}"

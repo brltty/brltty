@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/prologue.sh"
+. "`dirname "${0}"`/brltty-prologue.sh"
 
 androidPlatform=android-21
 androidArchitecture=arm

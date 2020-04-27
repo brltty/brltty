@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/prologue.sh"
+. "`dirname "${0}"`/brltty-prologue.sh"
 addProgramOption d string.anything defaultIdentifier "the default revision identifier"
 addProgramOption f string.file outputFile "the file in which to write the revision identifier" "standard output"
 addProgramOption i flag asInteger "render the revision identifier as a 32-bit integer"

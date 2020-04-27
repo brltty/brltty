@@ -298,23 +298,23 @@ is::
 
 This command must be run as the super user (|super user|).
 
-The ``setcaps`` Script
-~~~~~~~~~~~~~~~~~~~~~~
+The ``brltty-setcaps`` Script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The top-level directory of BRLTTY's source tree contains
-a script named ``setcaps`` that simplifies the job of
+a script named ``brltty-setcaps`` that simplifies the job of
 assigning the needed capabilities to BRLTTY's executable.
 Its default is to assign all of them.
 For all of the details, run this command::
 
-  setcaps -h
+  brltty-setcaps -h
 
 It requires one positional argument - the path to BRLTTY's executable.
 It also accepts a number of options (which must precede that path).
 In particular, these are the options that
 remove capabilities from the full set:
 
-.. table:: ``setcaps`` Script Options for Excluding Capabilities
+.. table:: ``brltty-setcaps`` Script Options for Excluding Capabilities
 
   ======  ====================  ===========================
   Option  Capability            Reason
@@ -330,7 +330,7 @@ remove capabilities from the full set:
   ``-u``  |cap_setuid|          |cap_setuid reason|
   ======  ====================  ===========================
 
-.. table:: ``setcaps`` Script Options for Developers
+.. table:: ``brltty-setcaps`` Script Options for Developers
 
   ======  ====================================================
   Option  Description

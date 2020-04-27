@@ -11,7 +11,7 @@ reldeps.mk
 /config.status
 /config.mk
 /config.h
-/config.sh
+/brltty-config.sh
 
 /forbuild.log
 /forbuild.status

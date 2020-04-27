@@ -18,7 +18,7 @@
 ###############################################################################
 
 set -e
-. "`dirname "${0}"`/prologue.sh"
+. "`dirname "${0}"`/brltty-prologue.sh"
 
 readonly defaultUserName="brltty"
 readonly defaultUserDescription="Braille Device Daemon"

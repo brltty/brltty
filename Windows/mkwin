@@ -92,7 +92,7 @@ installFiles_winusb() {
    fi
 }
 
-. "`dirname "${0}"`/../prologue.sh"
+. "`dirname "${0}"`/../brltty-prologue.sh"
 . "${programDirectory}/mingw.sh"
 
 defaultUsbPackage="libusb"
@@ -220,7 +220,7 @@ logMessage task "configuring build"
 configureOptions="--enable-relocatable-install --with-usb-package="${usbPackage}" --disable-i18n --without-params-package --without-mntpt-package --without-mntfs-package --without-kbd-package --without-bell-package --without-leds-package --without-libbraille --disable-speech-support --disable-java-bindings --disable-ocaml-bindings --disable-tcl-bindings"
 "../source/configure" --quiet --prefix=/ ${configureOptions}
 
-. ./config.sh
+. ./brltty-config.sh
 buildVersion="${BRLTTY_VERSION}-${buildRevision}"
 buildName="${BRLTTY_TARNAME}-win-${buildVersion}-${usbPackage}"
 

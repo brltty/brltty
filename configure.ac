@@ -2052,7 +2052,7 @@ s%\([^ ][^ ]*\)%\1/Makefile:prologue.mk:\1/Makefile.in%g
 AC_OUTPUT([
    config.mk
    brltty.spec
-   config.sh
+   brltty-config.sh
    Documents/brltty.conf
    Documents/brltty.1
    Documents/BrlAPIref.doxy

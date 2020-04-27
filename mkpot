@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/prologue.sh"
+. "`dirname "${0}"`/brltty-prologue.sh"
 addProgramOption p string.name packageName "specify the package name" "the name of the top-level directory of the source tree"
 addProgramOption n string.version packageVersion "specify the package version" "no version"
 addProgramOption o string.file outputFile "specify the output file" "<package-name>.pot in the current directory"
