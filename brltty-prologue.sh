@@ -152,12 +152,12 @@ internalError() {
    exit 4
 }
 
-verifyProgram() {
+verifyExecutable() {
    local path="${1}"
 
-   [ -e "${path}" ] || semanticError "program not found: ${path}"
+   [ -e "${path}" ] || semanticError "file not found: ${path}"
    [ -f "${path}" ] || semanticError "not a file: ${path}"
-   [ -x "${path}" ] || semanticError "not executable: ${path}"
+   [ -x "${path}" ] || semanticError "file not executable: ${path}"
 }
 
 testDirectory() {

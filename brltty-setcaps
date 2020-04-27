@@ -82,9 +82,7 @@ addProgramOption U flag rootUser "set user root execution"
 addProgramParameter executable executablePath "the path to the executable"
 parseProgramArguments "${@}"
 
-[ -e "${executablePath}" ] || semanticError "file not found: ${executablePath}"
-[ -f "${executablePath}" ] || semanticError "not a file: ${executablePath}"
-[ -x "${executablePath}" ] || semanticError "file not executable: ${executablePath}"
+verifyExecutable "${executablePath}"
 
 "${testMode}" || {
    if "${useSudo}"
@@ -92,7 +90,7 @@ parseProgramArguments "${@}"
       sudo -v
    elif [ "$(id -u)" -ne 0 ]
    then
-      semanticError "not root"
+      semanticError "not executing as root"
    fi
 }
 

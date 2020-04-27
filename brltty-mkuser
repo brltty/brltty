@@ -67,18 +67,18 @@ addGroups() {
 addProgramOption a flag noALSA "don't allow playing sound via the ALSA framework"
 addProgramOption c flag noConsoles "don't allow access to the virtual consoles"
 addProgramOption d string.path homeDirectory "set/change the home (login) directory"
-addProgramOption f flag forceUpdate "force the update of an existing user"
+addProgramOption f flag forceChanges "force changes to an existing user"
 addProgramOption g string.group primaryGroup "set/change the primary (login) group"
-addProgramOption i string.text userInformation "set/change the user's information (gecos) field"
+addProgramOption i string.text userInformation "set/change the user information (gecos) text"
 addProgramOption k flag noKeyboards "don't allow keyboard monitoring"
-addProgramOption l string.path loginShell "set/change the user's login shell"
+addProgramOption l string.path loginShell "set/change the login shell"
 addProgramOption p flag noPulse "don't allow playing sound via the Pulse Audio server"
 addProgramOption s flag noSerial "don't allow access to serial devices"
 addProgramOption u flag noUSB "don't allow access to USB devices"
 addProgramOption G flag noGroups "don't set/change the supplementary groups"
 addProgramOption S flag useSudo "use sudo to execute the commands"
 addProgramOption T flag testMode "test mode - show the commands that would be executed"
-addProgramOption U string.user userName "the name of the user to create/modify" "${defaultUserName}"
+addProgramOption U string.user userName "the user to be created/changed" "${defaultUserName}"
 parseProgramArguments "${@}"
 
 [ -n "${userName}" ] || userName="${defaultUserName}"
@@ -86,7 +86,7 @@ parseProgramArguments "${@}"
 
 if id -u "${userName}" >/dev/null 2>&1
 then
-   "${forceUpdate}" || semanticError "user already exists; ${userName}"
+   "${forceChanges}" || semanticError "user already exists: ${userName}"
    command=(usermod)
 else
    command=(useradd --system)
@@ -127,7 +127,7 @@ fi
       sudo -v
    elif [ "$(id -u)" -ne 0 ]
    then
-      semanticError "not root"
+      semanticError "not executing as root"
    fi
 }
 
