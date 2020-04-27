@@ -1,0 +1,128 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2020 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+set -e
+. "`dirname "${0}"`/prologue.sh"
+
+readonly defaultUserName="brltty"
+readonly defaultUserDescription="Braille Device Daemon"
+readonly defaultLoginShell="/sbin/nologin"
+
+executeCommand() {
+   "${useSudo}" && set -- sudo -- "${@}"
+
+   if "${testMode}"
+   then
+      echo "${*}"
+   else
+      "${@}"
+   fi
+}
+
+groupList=()
+addGroups() {
+   while [ "${#}" -gt 0 ]
+   do
+      local group="${1}"
+      shift 1
+      [ -n "${group}" ] || continue
+
+      [ "${group#*/}" = "${group}" ] || {
+         group="$(stat -c "%G" "${group}")" || :
+         [ -n "${group}" ] || continue
+      }
+
+      local g
+      for g in "${groupList[@]}"
+      do
+         [ "${g}" = "${group}" ] && {
+            group=""
+            break
+         }
+      done
+
+      [ -n "${group}" ] && groupList[${#groupList[*]}]="${group}"
+   done
+
+   return 0
+}
+
+addProgramOption a flag noALSA "don't allow playing sound via the ALSA framework"
+addProgramOption c flag noConsoles "don't allow access to the virtual consoles"
+addProgramOption d string.path homeDirectory "set/change the home (login) directory"
+addProgramOption g string.group primaryGroup "set/change the primary (login) group"
+addProgramOption k flag noKeyboards "don't allow keyboard monitoring"
+addProgramOption p flag noPulse "don't allow playing sound via the Pulse Audio server"
+addProgramOption s flag noSerial "don't allow access to serial devices"
+addProgramOption u flag noUSB "don't allow access to USB devices"
+
+addProgramOption G flag noGroups "don't set/change the supplementary groups"
+addProgramOption S flag useSudo "use sudo to execute the commands"
+addProgramOption T flag testMode "test mode - show the commands that would be executed"
+addProgramOption U string.user userName "the name of the user to create/modify" "${defaultUserName}"
+
+parseProgramArguments "${@}"
+[ -n "${userName}" ] || userName="${defaultUserName}"
+
+"${testMode}" || {
+   if "${useSudo}"
+   then
+      sudo -v
+   elif [ "$(id -u)" -ne 0 ]
+   then
+      semanticError "not root"
+   fi
+}
+
+if id -u "${userName}" >/dev/null 2>&1
+then
+   command=(usermod)
+else
+   command=(useradd --system)
+   [ -n "${primaryGroup}" ] || command+=(--user-group)
+
+   if [ -n "${homeDirectory}" ]
+   then
+      command+=(--create-home)
+   else
+      command+=(--no-create-home)
+   fi
+fi
+
+[ -n "${homeDirectory}" ] && command+=(--home-dir "${homeDirectory}")
+[ -n "${primaryGroup}" ] && command+=(--gid "${primaryGroup}")
+command+=(--comment "Braille Device Daemon")
+command+=(--shell /sbin/nologin)
+
+"${noGroups}" || {
+   "${noALSA}" || addGroups audio
+   "${noConsoles}" || addGroups tty /dev/vcs1 /dev/tty1
+   "${noKeyboards}" || addGroups input
+   "${noPulse}" || addGroups pulse-access
+   "${noSerial}" || addGroups dialout /dev/ttyS0
+   "${noUSB}" || addGroups /dev/bus/usb
+
+   groupsOperand="${groupList[*]}"
+   groupsOperand="${groupsOperand// /,}"
+   command+=(--groups "${groupsOperand}")
+}
+
+command+=(-- "${userName}")
+executeCommand "${command[@]}"
+exit 0
