@@ -868,13 +868,13 @@ switchUser (const char *user) {
 
     if ((pwd = getpwuid(uid))) {
       name = pwd->pw_name;
-      setUserProperties(pwd);
     } else {
       snprintf(number, sizeof(number), "%d", uid);
       name = number;
     }
 
     logMessage(LOG_NOTICE, "continuing to execute as the invoking user: %s", name);
+    if (pwd) setUserProperties(pwd);
   }
 
   return 0;
