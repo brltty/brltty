@@ -326,6 +326,11 @@ addProgramUsageText() {
    done
 }
 
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+END_OF_PROGRAM_USAGE_NOTES
+}
+
 showProgramUsageSummary() {
    programUsageLineCount=0
    set ${programOptionLetters}
@@ -405,6 +410,8 @@ showProgramUsageSummary() {
       getVariable "programUsageLine_${index}"
       index=$((index + 1))
    done
+
+   showProgramUsageNotes
 }
 
 addProgramOption h flag programOption_showUsageSummary "show usage summary (this output), and then exit"

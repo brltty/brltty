@@ -25,6 +25,17 @@ readonly defaultUserName="${BRLTTY_UNPRIVILEGED_USER}"
 readonly defaultUserInformation="Braille Device Daemon"
 readonly defaultLoginShell="/sbin/nologin"
 
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+When creating a new user, these options have the following defaults:
+  -d  no home directory is defined
+  -g  a group with the same name as the user (must not already exist)
+  -i  ${defaultUserInformation}
+  -l  ${defaultLoginShell}
+These defaults don't apply when making changes to an existing user.
+END_OF_PROGRAM_USAGE_NOTES
+}
+
 executeCommand() {
    "${useSudo}" && set -- sudo -- "${@}"
 
@@ -77,7 +88,7 @@ addProgramOption u flag noUSB "don't allow access to USB devices"
 addProgramOption E flag allowChanges "allow changes to an existing user"
 addProgramOption G flag noGroups "don't set/change the supplementary groups"
 addProgramOption N flag allowCreate "allow creating a new user"
-addProgramOption S flag useSudo "use sudo to execute the commands"
+addProgramOption S flag useSudo "use sudo to execute the commands as root"
 addProgramOption T flag testMode "test mode - show the commands that would be executed"
 addProgramOption U string.user userName "the user to be created/changed" "${defaultUserName}"
 parseProgramArguments "${@}"
