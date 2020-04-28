@@ -67,7 +67,6 @@ addGroups() {
 addProgramOption a flag noALSA "don't allow playing sound via the ALSA framework"
 addProgramOption c flag noConsoles "don't allow access to the virtual consoles"
 addProgramOption d string.path homeDirectory "set/change the home (login) directory"
-addProgramOption f flag forceChanges "force changes to an existing user"
 addProgramOption g string.group primaryGroup "set/change the primary (login) group"
 addProgramOption i string.text userInformation "set/change the user information (gecos) text"
 addProgramOption k flag noKeyboards "don't allow keyboard monitoring"
@@ -75,7 +74,9 @@ addProgramOption l string.path loginShell "set/change the login shell"
 addProgramOption p flag noPulse "don't allow playing sound via the Pulse Audio server"
 addProgramOption s flag noSerial "don't allow access to serial devices"
 addProgramOption u flag noUSB "don't allow access to USB devices"
+addProgramOption E flag allowChanges "allow changes to an existing user"
 addProgramOption G flag noGroups "don't set/change the supplementary groups"
+addProgramOption N flag allowCreate "allow creating a new user"
 addProgramOption S flag useSudo "use sudo to execute the commands"
 addProgramOption T flag testMode "test mode - show the commands that would be executed"
 addProgramOption U string.user userName "the user to be created/changed" "${defaultUserName}"
@@ -86,9 +87,10 @@ parseProgramArguments "${@}"
 
 if id -u "${userName}" >/dev/null 2>&1
 then
-   "${forceChanges}" || semanticError "user already exists: ${userName}"
+   "${allowChanges}" || semanticError "user already exists: ${userName} - use -E (existing) to allow"
    command=(usermod)
 else
+   "${allowCreate}" || semanticError "user doesn't exist: ${userName} - use -N (new) to allow"
    command=(useradd --system)
    [ -n "${primaryGroup}" ] || command+=(--user-group)
 
