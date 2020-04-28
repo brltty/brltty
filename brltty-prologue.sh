@@ -19,6 +19,15 @@
 readonly initialDirectory="$(pwd)"
 readonly programName="$(basename "${0}")"
 
+resolveDirectory() {
+   local path="${1}"
+
+   (cd "${path}" && pwd)
+}
+
+programDirectory="$(dirname "${0}")"
+readonly programDirectory="$(resolveDirectory "${programDirectory}")"
+
 setVariable() {
    eval "${1}"'="${2}"'
 }
@@ -186,12 +195,6 @@ verifyOutputDirectory() {
    fi
 }
 
-resolveDirectory() {
-   local path="${1}"
-
-   (cd "${path}" && pwd)
-}
-
 needTemporaryDirectory() {
    cleanup() {
       set +e
@@ -324,11 +327,6 @@ addProgramUsageText() {
       addProgramUsageLine "${prefix}${line}"
       prefix="${indent}"
    done
-}
-
-showProgramUsageNotes() {
-cat <<END_OF_PROGRAM_USAGE_NOTES
-END_OF_PROGRAM_USAGE_NOTES
 }
 
 showProgramUsageSummary() {
@@ -470,5 +468,12 @@ parseProgramArguments() {
    readonly programLogLevel=$((programLogLevel + programOption_verboseCount - programOption_quietCount))
 }
 
-programDirectory="$(dirname "${0}")"
-readonly programDirectory="$(resolveDirectory "${programDirectory}")"
+##############################################################################
+# The following functions are stubs that can be copied into the main script. #
+##############################################################################
+
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+END_OF_PROGRAM_USAGE_NOTES
+}
+
