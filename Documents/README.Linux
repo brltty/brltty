@@ -139,28 +139,13 @@ BRLTTY takes a number of steps to establish a safe
 (well, safer)
 execution environment:
 
-* Set a safe command search path.
-  This is done by setting the ``PATH`` environment variable.
-  The safe path is retrieved from the host system's configuration.
-  You can find out what it is by running this command::
-
-    getconf PATH
-
-* Set a safe default shell for external software to assume.
-  This is done by setting the ``SHELL`` environment variable.
-  The safe shell is hard-coded to be ``/bin/sh``.
-  Note that scripts usually internally specify which shell is to be used.
-
+* Set a `safe command search path`_.
+* Set a `safe default shell`_.
 * Create the `private namespaces`_.
-
 * Switch to executing as `the unprivileged user`_.
-
 * Install the needed `kernel modules`_.
-
 * Establish the needed `group memberships`_.
-
 * Set its `required capabilities`_.
-
 * Relinquish all non-required capabilities.
 
 The Unprivileged User
@@ -199,6 +184,95 @@ the following is done:
 
   * Changing the working directory.
   * Setting the ``HOME`` environment variable.
+
+The ``brltty-mkuser`` Script
+````````````````````````````
+
+The top-level directory of BRLTTY's source tree contains
+a script named ``brltty-mkuser`` that simplifies the job of
+Creating and making changes to `the unprivileged user`_.
+For all of the details, run this command::
+
+  brltty-mkuser -h
+
+The following options require special mention:
+
+``-U``
+  This option specifies the name of the user
+  that's to be created or changed.
+  It defaults to the |default unprivileged user|.
+
+``-N`` *name*
+  This option allows the creation of a new user.
+
+``-E``
+  This option allows changes to be made to an existing user.
+
+``-G``
+  This option suppresses setting the user's supplementary group list.
+  A new user won't belong to any supplementary groups,
+  and an existing user will retain its current supplementary group memberships.
+
+The user's supplementary group list is used
+to establish the needed `group memberships`_.
+Each of the following options removes a group from the full list,
+and, therefore, that group's associated functionality from BRLTTY.
+
+.. table:: ``brltty-mkuser`` Options for Excluding Supplementary Groups
+
+  ======  ================  ========================================
+  Option  Removes Group     Lost Functionality
+  ------  ----------------  ----------------------------------------
+  ``-a``  ``audio``         playing sound via the ALSA framework
+  ``-c``  ``tty``           access to the virtual consoles
+  ``-k``  ``input``         keyboard monitoring
+  ``-p``  ``pulse-access``  playing sound via the Pulse Audio server
+  ``-s``  ``dialout``       access to serial devices
+  ``-u``  usually ``root``  access to USB devices
+  ======  ================  ========================================
+
+The following options are for configuring
+the basic (password file) fields of the user:
+
+.. table:: ``brltty-mkuser`` Options for New / Existing User Configuration
+
+  ======  =======  =================================
+  Option  Operand  Sets / Changes
+  ------  -------  ---------------------------------
+  11-d``  *path*   the home (login) directory
+  11-g``  *group*  the primary (login) group
+  11-i``  *text*   the user information (gecos) text
+  11-l``  *path*   the login shell
+  ======  =======  =================================
+
+If any of these options isn't specified, then:
+
+* When making changes to an existing user it has no effect.
+  Its associated field isn't changed.
+
+* When creating a new user, the defaults are:
+
+  .. table:: ``brltty-mkuser`` Defaults for New User Configuration
+
+    ======  ==========================================
+    Option  Default When creating a New User
+    ------  ------------------------------------------
+    ``-d``  the home directory isn't defined
+    ``-g``  a new group with the same name as the user
+    ``-i``  **Braille Device Daemon**
+    ``-l``  ``/sbin/nologin``
+    ======  ==========================================
+
+The following options are primarily for developer use:
+
+.. table:: ``brltty-mkuser`` Options for Developers
+
+  ======  ====================================================
+  Option  Description
+  ------  ----------------------------------------------------
+  ``-S``  use ``sudo`` to execute the commands as root
+  ``-T``  test mode - show the commands that would be executed
+  ======  ====================================================
 
 When Started as the Super User
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -303,7 +377,7 @@ The ``brltty-setcaps`` Script
 
 The top-level directory of BRLTTY's source tree contains
 a script named ``brltty-setcaps`` that simplifies the job of
-assigning the needed capabilities to BRLTTY's executable.
+`assigning capabilities to the executable`_.
 Its default is to assign all of them.
 For all of the details, run this command::
 
@@ -311,13 +385,14 @@ For all of the details, run this command::
 
 It requires one positional argument - the path to BRLTTY's executable.
 It also accepts a number of options (which must precede that path).
-In particular, these are the options that
-remove capabilities from the full set:
+In particular, each of the following options
+removes a capability from the full set,
+and, therefore, the functionality that that capability grants from BRLTTY.
 
-.. table:: ``brltty-setcaps`` Script Options for Excluding Capabilities
+.. table:: ``brltty-setcaps`` Options for Excluding Capabilities
 
   ======  ====================  ===========================
-  Option  Capability            Reason
+  Option  Removes Capability    Lost Functionality
   ------  --------------------  ---------------------------
   ``-c``  |cap_dac_override|    |cap_dac_override reason|
   ``-d``  |cap_mknod|           |cap_mknod reason|
@@ -330,14 +405,16 @@ remove capabilities from the full set:
   ``-u``  |cap_setuid|          |cap_setuid reason|
   ======  ====================  ===========================
 
-.. table:: ``brltty-setcaps`` Script Options for Developers
+The following options are primarily for developer use:
+
+.. table:: ``brltty-setcaps`` Options for Developers
 
   ======  ====================================================
   Option  Description
   ------  ----------------------------------------------------
   ``-C``  don't set the capabilities
   ``-G``  set group root execution
-  ``-S``  use ``sudo`` to execute the commands
+  ``-S``  use ``sudo`` to execute the commands as root
   ``-T``  test mode - show the commands that would be executed
   ``-U``  set user root execution
   ======  ====================================================
@@ -412,7 +489,7 @@ In other words, they're for BRLTTY itself
 and aren't passed along to any host command that it may invoke.
 
 |cap_mknod|
-  For creating needed but missing special device files.
+  For creating needed but missing device files.
 
 |cap_sys_admin|
   For using ``TIOCSTI`` to inject input characters typed on a braille device.
@@ -475,6 +552,28 @@ and are relinquished right after this has been done.
 
 Other Protective Measures
 -------------------------
+
+In addition to switching to `the unprivileged user`_
+and then only relying on the minimum `required capabilities`_,
+BRLTTY takes a few more protective measures
+in order to reduce its exposure to being hacked.
+
+Safe Command Search Path
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is done by setting the ``PATH`` environment variable.
+The safe path is retrieved from the host system's configuration.
+You can find out what it is by running this command::
+
+  getconf PATH
+
+Safe Default Shell
+~~~~~~~~~~~~~~~~~~
+
+Set a safe default shell for external software to assume.
+This is done by setting the ``SHELL`` environment variable.
+The safe shell is hard-coded to be ``/bin/sh``.
+Note that scripts usually internally specify which shell is to be used.
 
 Private Namespaces
 ~~~~~~~~~~~~~~~~~~
