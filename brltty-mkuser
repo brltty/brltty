@@ -118,7 +118,7 @@ else
    fi
 fi
 
-[ -n "${homeDirectory}" ] && command+=(--home-dir "${homeDirectory}")
+[ -n "${homeDirectory}" ] && command+=(--home "${homeDirectory}")
 [ -n "${primaryGroup}" ] && command+=(--gid "${primaryGroup}")
 [ -n "${userInformation}" ] && command+=(--comment "${userInformation}")
 [ -n "${loginShell}" ] && command+=(--shell "${loginShell}")
