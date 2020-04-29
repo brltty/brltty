@@ -254,14 +254,14 @@ If any of these options isn't specified, then:
 
   .. table:: ``brltty-mkuser`` Defaults for New User Configuration
 
-    ======  ==========================================
+    ======  ====================================================
     Option  Default When creating a New User
-    ------  ------------------------------------------
-    ``-d``  the home directory isn't defined
+    ------  ----------------------------------------------------
+    ``-d``  the updatable directory (|updatable directory path|)
     ``-g``  a new group with the same name as the user
     ``-i``  **Braille Device Daemon**
     ``-l``  ``/sbin/nologin``
-    ======  ==========================================
+    ======  ====================================================
 
 The following options are primarily for developer use:
 

@@ -23,12 +23,13 @@ set -e
 
 readonly defaultUserName="${BRLTTY_UNPRIVILEGED_USER}"
 readonly defaultUserInformation="Braille Device Daemon"
+readonly defaultHomeDirectory="${BRLTTY_UPDATABLE_DIRECTORY}"
 readonly defaultLoginShell="/sbin/nologin"
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
 When creating a new user, these options have the following defaults:
-  -d  the home directory isn't defined
+  -d  ${defaultHomeDirectory:-the home directory isn't defined}
   -g  a new group with the same name as the user
   -i  ${defaultUserInformation}
   -l  ${defaultLoginShell}
@@ -105,15 +106,16 @@ else
    command=(useradd --system)
    [ -n "${primaryGroup}" ] || command+=(--user-group)
 
+   [ -n "${userInformation}" ] || userInformation="${defaultUserInformation}"
+   [ -n "${homeDirectory}" ] || homeDirectory="${defaultHomeDirectory}"
+   [ -n "${loginShell}" ] || loginShell="${defaultLoginShell}"
+
    if [ -n "${homeDirectory}" ]
    then
       command+=(--create-home)
    else
       command+=(--no-create-home)
    fi
-
-   [ -n "${userInformation}" ] || userInformation="${defaultUserInformation}"
-   [ -n "${loginShell}" ] || loginShell="${defaultLoginShell}"
 fi
 
 [ -n "${homeDirectory}" ] && command+=(--home-dir "${homeDirectory}")

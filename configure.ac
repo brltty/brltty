@@ -145,6 +145,21 @@ BRLTTY_ARG_REQUIRED(
 )
 
 BRLTTY_ARG_WITH(
+   [updatable-directory], [DIRECTORY],
+   [path to directory which contains files that can be updated],
+   [updatable_directory], ["yes"]
+)
+if test "${updatable_directory}" = "no"
+then
+   updatable_directory=""
+elif test "${updatable_directory}" = "yes"
+then
+   updatable_directory="${localstatedir}/lib/${PACKAGE_TARNAME}"
+fi
+AC_SUBST([updatable_directory])
+BRLTTY_SUMMARY_ITEM([updatable-directory], [updatable_directory])
+
+BRLTTY_ARG_WITH(
    [writable-directory], [DIRECTORY],
    [path to directory which can be written to],
    [writable_directory], ["yes"]
@@ -2018,19 +2033,24 @@ test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
 BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_directory}])
 BRLTTY_DEFINE_DIRECTORY([LOCALE_DIRECTORY], ["${execute_root}${localedir}"],
                         [Define this to be a string containing the path to the locale directory.])
+if test -n "${updatable_directory}"
+then
+   BRLTTY_DEFINE_DIRECTORY([UPDATABLE_DIRECTORY], [${updatable_directory}],
+                           [Define this to be a string containing the path to a directory which contains files that can be updated.])
+fi
+
 if test -n "${writable_directory}"
 then
    BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${writable_directory}],
                            [Define this to be a string containing the path to a writable directory.])
 fi
+
 BRLTTY_DEFINE_DIRECTORY([TABLES_DIRECTORY], [${execute_root}${tables_directory}],
                         [Define this to be a string containing the path to the data files directory.])
 BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory}],
                         [Define this to be a string containing the path to the drivers directory.])
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
-BRLTTY_DEFINE_DIRECTORY([UPDATABLE_DIRECTORY], [${localstatedir}/lib/${PACKAGE_TARNAME}],
-                        [Define this to be a string containing the path to a directory which contains files that can be updated.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
                        [Define this to be a string containing the path to the directory where the authorization key and driver-dependent key names are found.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socket_path}"],

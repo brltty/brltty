@@ -71,6 +71,8 @@ brlttyConfig_defineVariables() {
    local program_directory='@program_directory@'
    local drivers_directory='@drivers_directory@'
    local tables_directory='@tables_directory@'
+   local updatable_directory='@updatable_directory@'
+   local writable_directory='@writable_directory@'
    local manpage_directory='@manpage_directory@'
    local include_directory='@include_directory@'
 
@@ -114,6 +116,8 @@ brlttyConfig_defineVariables() {
    brlttyConfig_defineVariable BRLTTY_PROGRAMS_DIRECTORY "${program_directory}"
    brlttyConfig_defineVariable BRLTTY_DRIVERS_DIRECTORY "${drivers_directory}"
    brlttyConfig_defineVariable BRLTTY_TABLES_DIRECTORY "${tables_directory}"
+   brlttyConfig_defineVariable BRLTTY_UPDATABLE_DIRECTORY "${updatable_directory}"
+   brlttyConfig_defineVariable BRLTTY_WRITABLE_DIRECTORY "${writable_directory}"
    brlttyConfig_defineVariable BRLTTY_MANPAGE_DIRECTORY "${manpage_directory}"
    brlttyConfig_defineVariable BRLTTY_INCLUDE_DIRECTORY "${include_directory}"
 
