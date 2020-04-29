@@ -767,10 +767,12 @@ setUserProperties (const struct passwd *pwd) {
 
   {
     const char *directory = pwd->pw_dir;
+    if (!directory) directory = "";
+    if (!*directory) directory = getUpdatableDirectory();
 
-    if (directory && *directory) {
+    if (directory) {
       logMessage(LOG_DEBUG, "setting home directory: %s", user);
-      setHomeDirectory(pwd->pw_dir);
+      setHomeDirectory(directory);
     } else {
       logMessage(LOG_DEBUG, "home directory not defined: %s", user);
     }
