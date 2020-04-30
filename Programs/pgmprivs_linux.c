@@ -726,6 +726,25 @@ setEnvironmentVariable (const char *name, const char *value) {
 }
 
 static int
+setHomeDirectory (const char *directory) {
+  if (!directory) return 0;
+  if (!*directory) return 0;
+
+  if (chdir(directory) != -1) {
+    logMessage(LOG_DEBUG, "working directory changed: %s", directory);
+    setEnvironmentVariable("HOME", directory);
+    return 1;
+  } else {
+    logMessage(LOG_WARNING, 
+      "working directory not changed: %s: %s",
+      directory, strerror(errno)
+    );
+  }
+
+  return 0;
+}
+
+static int
 setSafePath (void) {
   int parameter = _CS_PATH;
   const char *variable = "PATH";
@@ -747,37 +766,6 @@ setSafeShell (void) {
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
-
-static int
-setHomeDirectory (const char *directory) {
-  if (chdir(directory) != -1) {
-    logMessage(LOG_DEBUG, "working directory changed: %s", directory);
-    setEnvironmentVariable("HOME", directory);
-    return 1;
-  } else {
-    logSystemError("chdir");
-  }
-
-  return 0;
-}
-
-static void
-setUserProperties (const struct passwd *pwd) {
-  const char *user = pwd->pw_name;
-
-  {
-    const char *directory = pwd->pw_dir;
-    if (!directory) directory = "";
-    if (!*directory) directory = getUpdatableDirectory();
-
-    if (directory) {
-      logMessage(LOG_DEBUG, "setting home directory: %s", user);
-      setHomeDirectory(directory);
-    } else {
-      logMessage(LOG_DEBUG, "home directory not defined: %s", user);
-    }
-  }
-}
 
 static int
 canSwitchUser (uid_t uid) {
@@ -814,7 +802,7 @@ canSwitchGroup (gid_t gid) {
 }
 
 static int
-switchToUser (const char *user) {
+switchToUser (const char *user, int *haveHomeDirectory) {
   const struct passwd *pwd;
 
   if ((pwd = getpwnam(user))) {
@@ -825,7 +813,7 @@ switchToUser (const char *user) {
       if (amPrivilegedUser() || (canSwitchUser(uid) && canSwitchGroup(gid))) {
         if (setProcessOwnership(uid, gid)) {
           logMessage(LOG_NOTICE, "switched to user: %s", user);
-          setUserProperties(pwd);
+          if (setHomeDirectory(pwd->pw_dir)) *haveHomeDirectory = 1;
           return 1;
         }
       } else {
@@ -842,13 +830,13 @@ switchToUser (const char *user) {
 }
 
 static int
-switchUser (const char *user) {
+switchUser (const char *user, int *haveHomeDirectory) {
   if (*user) {
     if (!amPrivilegedUser()) {
       logMessage(LOG_WARNING, "not executing as a privileged user");
     } else if (getuid()) {
       logMessage(LOG_WARNING, "executing as a set-user-ID root program");
-    } else if (switchToUser(user)) {
+    } else if (switchToUser(user, haveHomeDirectory)) {
       return 1;
     }
 
@@ -856,7 +844,7 @@ switchUser (const char *user) {
   }
 
   if (*(user = UNPRIVILEGED_USER)) {
-    if (switchToUser(user)) return 1;
+    if (switchToUser(user, haveHomeDirectory)) return 1;
     logMessage(LOG_WARNING, "couldn't switch to the default unprivileged user: %s", user);
   }
 
@@ -876,7 +864,7 @@ switchUser (const char *user) {
     }
 
     logMessage(LOG_NOTICE, "continuing to execute as the invoking user: %s", name);
-    if (pwd) setUserProperties(pwd);
+    if (pwd && setHomeDirectory(pwd->pw_dir)) *haveHomeDirectory = 1;
   }
 
   return 0;
@@ -1052,16 +1040,24 @@ establishProgramPrivileges (const char *user) {
   unshareNamespaces();
 #endif /* HAVE_SCHED_H */
 
-#ifdef HAVE_PWD_H
   {
-    if (switchUser(user)) {
+    int haveHomeDirectory = 0;
+
+#ifdef HAVE_PWD_H
+    if (switchUser(user, &haveHomeDirectory)) {
       umask(umask(0) & ~S_IRWXG);
       claimStateDirectories();
     }
 
     endpwent();
-  }
 #endif /* HAVE_PWD_H */
+
+    if (!haveHomeDirectory) {
+      if (!setHomeDirectory(getUpdatableDirectory())) {
+        logMessage(LOG_WARNING, "home directory not set");
+      }
+    }
+  }
 
   acquirePrivileges();
   logCurrentCapabilities("after relinquish");
