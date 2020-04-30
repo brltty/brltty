@@ -873,7 +873,7 @@ switchUser (const char *user, int *haveHomeDirectory) {
 static const char *
 getSocketsDirectory (void) {
   const char *path = BRLAPI_SOCKETPATH;
-  if (!ensureDirectory(path)) path = NULL;
+  if (!ensureDirectory(path, 1)) path = NULL;
   return path;
 }
 

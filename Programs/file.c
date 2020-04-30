@@ -322,26 +322,40 @@ testDirectoryPath (const char *path) {
 }
 
 int
-createDirectory (const char *path) {
+createDirectory (const char *path, int worldWritable) {
 #if defined(GRUB_RUNTIME)
   errno = EROFS;
 
 #else /* make directory */
-  if (mkdir(path
-#ifndef __MINGW32__
-           ,(S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
+#ifdef __MINGW32__
+  if (mkdir(path) != -1) return 1;
+#else /* __MINGW32__ */
+  if (mkdir(path, (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) != -1) {
+    if (!worldWritable) return 1;
+    if (chmod(path, (S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX)) != -1) return 1;
+
+    logMessage(LOG_WARNING,
+      "%s: %s: %s",
+      gettext("cannot make world writable"),
+      path, strerror(errno)
+    );
+
+    return 0;
+  }
 #endif /* __MINGW32__ */
-           ) != -1) return 1;
 #endif /* make directory */
 
-  logMessage(LOG_WARNING, "%s: %s: %s",
-             gettext("cannot create directory"),
-             path, strerror(errno));
+  logMessage(LOG_WARNING,
+    "%s: %s: %s",
+    gettext("cannot create directory"),
+    path, strerror(errno)
+  );
+
   return 0;
 }
 
 int
-ensureDirectory (const char *path) {
+ensureDirectory (const char *path, int worldWritable) {
   if (testDirectoryPath(path)) return 1;
 
   if (errno == EEXIST) {
@@ -354,13 +368,13 @@ ensureDirectory (const char *path) {
       if (!directory) return 0;
 
       {
-         int exists = ensureDirectory(directory);
+         int exists = ensureDirectory(directory, 0);
          free(directory);
          if (!exists) return 0;
       }
     }
 
-    if (createDirectory(path)) {
+    if (createDirectory(path, worldWritable)) {
       logMessage(LOG_NOTICE, "directory created: %s", path);
       return 1;
     }
@@ -375,7 +389,7 @@ ensurePathDirectory (const char *path) {
   if (!directory) return 0;
 
   {
-    int exists = ensureDirectory(directory);
+    int exists = ensureDirectory(directory, 0);
     free(directory);
     return exists;
   }
@@ -389,7 +403,7 @@ setDirectory (const char **variable, const char *directory) {
 static const char *
 getDirectory (const char *const *variable) {
   if (*variable && **variable) {
-    if (ensureDirectory(*variable)) {
+    if (ensureDirectory(*variable, 0)) {
       return *variable;
     }
   }

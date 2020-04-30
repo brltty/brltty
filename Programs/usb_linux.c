@@ -1446,7 +1446,7 @@ usbGetFileSystem (const char *type, const FileSystemCandidate *candidates, Mount
     char *directory = makeWritablePath(type);
 
     if (directory) {
-      if (ensureDirectory(directory)) {
+      if (ensureDirectory(directory, 0)) {
         if (verify(directory)) return directory;
 
         {

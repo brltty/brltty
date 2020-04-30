@@ -1155,7 +1155,7 @@ openIncludedDataFile (DataFile *includer, const char *path, const char *mode, in
         char *directory = getPathDirectory(path);
 
         if (directory) {
-          int exists = ensureDirectory(directory);
+          int exists = ensureDirectory(directory, 0);
           free(directory);
 
           if (exists) {
@@ -1168,7 +1168,7 @@ openIncludedDataFile (DataFile *includer, const char *path, const char *mode, in
       if ((errno == EACCES) || (errno == EROFS)) {
         if ((overrideDirectory = getPrimaryOverrideDirectory())) {
           if ((overridePath = makePath(overrideDirectory, name))) {
-            if (ensureDirectory(overrideDirectory)) {
+            if (ensureDirectory(overrideDirectory, 0)) {
               file = openFile(overridePath, mode, optional);
               goto done;
             }

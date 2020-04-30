@@ -4,7 +4,9 @@ BRLTTY on Linux
 
 .. include:: prologue.rst
 
-.. |user information| replace:: Braille Device Daemon
+.. |nologin shell path| replace:: ``/sbin/nologin``
+.. |user information field| replace:: user information (gecos) field
+.. |user information text| replace:: Braille Device Daemon
 .. |super user| replace:: ``root``
 .. |default user| replace:: ``brltty``
 
@@ -64,6 +66,11 @@ BRLTTY's state directories are:
 |sockets directory|
   This directory is where BRLTTY creates BrlAPI's
   local (UNIX domain) server sockets.
+  It needs to be world writable, and, as such,
+  should also have its sticky bit set.
+  So:
+
+  .. parsed-literal:: chmod ugo=rwx,o+t *path*
 
 |updatable directory|
   This directory is where BRLTTY saves user data.
@@ -263,13 +270,13 @@ or if it does but BRLTTY is unable to use it,
 then the |updatable directory| will be used.
 
 There's normally no need for anyone to log into the user.
-This can be enforced by setting its login shell to ``/sbin/nologin``.
+This can be enforced by setting its login shell to |nologin shell path|.
 
-The user's information (gecos) field should be set
+The |user information field| should be set
 to a user-friendly description of why it exists.
 We recommend something like:
 
-.. parsed-literal:: |user information|
+.. parsed-literal:: |user information text|
 
 The ``useradd`` Command
 ```````````````````````
@@ -300,7 +307,7 @@ its most important options are:
   ``--no-create-home``      don't create the home (login) directory
   ``--create-home``         create the home (login) directory
   ``--home`` *path*         the absolute path for the home (login) directory
-  ``--comment`` *text*      set the user information (gecos) text
+  ``--comment`` *text*      set the |user information field|
   ``--shell`` *path*        set the login shell
   ========================  ================================================
 
@@ -366,7 +373,7 @@ the basic (password file) fields of the user:
   ------  -------  ---------------------------------
   11-d``  *path*   the home (login) directory
   11-g``  *group*  the primary (login) group
-  11-i``  *text*   the user information (gecos) text
+  11-i``  *text*   the |user information field|
   11-l``  *path*   the login shell
   ======  =======  =================================
 
@@ -384,8 +391,8 @@ If any of these options isn't specified, then:
     ------  ----------------------------------------------------
     ``-d``  the updatable directory (|updatable directory path|)
     ``-g``  a new group with the same name as the user
-    ``-i``  |user information|
-    ``-l``  ``/sbin/nologin``
+    ``-i``  |user information text|
+    ``-l``  |nologin shell path|
     ======  ====================================================
 
 The following options are primarily for developer use:
