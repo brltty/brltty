@@ -1047,6 +1047,8 @@ establishProgramPrivileges (const char *user) {
     if (switchUser(user, &haveHomeDirectory)) {
       umask(umask(0) & ~S_IRWXG);
       claimStateDirectories();
+    } else {
+      logMessage(LOG_DEBUG, "not claiming state directories");
     }
 
     endpwent();
