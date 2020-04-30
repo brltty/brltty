@@ -929,33 +929,39 @@ opened:
 }
 
 static int
-canContainDevices (const char *path) {
-  int ok = 0;
+canContainDevices (const char *directory) {
+  struct statvfs vfs;
+
+  if (statvfs(directory, &vfs) == -1) {
+    logSystemError("statvfs");
+  } else if (vfs.f_flag & ST_NODEV) {
+    logMessage(LOG_WARNING, "cannot contain device files: %s", directory);
+    errno = EPERM;
+  } else {
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+canCreateDevice (const char *path) {
+  int yes = 0;
   char *directory;
 
   if ((directory = getPathDirectory(path))) {
-    struct statvfs vfs;
-
-    if (statvfs(directory, &vfs) == -1) {
-      logSystemError("statvfs");
-    } else if (vfs.f_flag & ST_NODEV) {
-      logMessage(LOG_WARNING, "cannot contain device files: %s", directory);
-      errno = EPERM;
-    } else {
-      ok = 1;
-    }
-
+    if (canContainDevices(directory)) yes = 1;
     free(directory);
   }
 
-  return ok;
+  return yes;
 }
 
 static int
 createCharacterDevice (const char *path, int flags, int major, int minor) {
   int descriptor = -1;
 
-  if (canContainDevices(path)) {
+  if (canCreateDevice(path)) {
     descriptor = openDevice(path, flags, 0);
   }
 
