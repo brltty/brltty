@@ -4,6 +4,7 @@ BRLTTY on Linux
 
 .. include:: prologue.rst
 
+.. |user information| replace:: Braille Device Daemon
 .. |super user| replace:: ``root``
 .. |default user| replace:: ``brltty``
 
@@ -185,95 +186,6 @@ the following is done:
   * Changing the working directory.
   * Setting the ``HOME`` environment variable.
 
-The ``brltty-mkuser`` Script
-````````````````````````````
-
-The top-level directory of BRLTTY's source tree contains
-a script named ``brltty-mkuser`` that simplifies the job of
-Creating and making changes to `the unprivileged user`_.
-For all of the details, run this command::
-
-  brltty-mkuser -h
-
-The following options require special mention:
-
-``-U``
-  This option specifies the name of the user
-  that's to be created or changed.
-  It defaults to the |default unprivileged user|.
-
-``-N`` *name*
-  This option allows the creation of a new user.
-
-``-E``
-  This option allows changes to be made to an existing user.
-
-``-G``
-  This option suppresses setting the user's supplementary group list.
-  A new user won't belong to any supplementary groups,
-  and an existing user will retain its current supplementary group memberships.
-
-The user's supplementary group list is used
-to establish the needed `group memberships`_.
-Each of the following options removes a group from the full list,
-and, therefore, that group's associated functionality from BRLTTY.
-
-.. table:: ``brltty-mkuser`` Options for Excluding Supplementary Groups
-
-  ======  ================  ========================================
-  Option  Removes Group     Lost Functionality
-  ------  ----------------  ----------------------------------------
-  ``-a``  ``audio``         playing sound via the ALSA framework
-  ``-c``  ``tty``           access to the virtual consoles
-  ``-k``  ``input``         keyboard monitoring
-  ``-p``  ``pulse-access``  playing sound via the Pulse Audio server
-  ``-s``  ``dialout``       access to serial devices
-  ``-u``  usually ``root``  access to USB devices
-  ======  ================  ========================================
-
-The following options are for configuring
-the basic (password file) fields of the user:
-
-.. table:: ``brltty-mkuser`` Options for New / Existing User Configuration
-
-  ======  =======  =================================
-  Option  Operand  Sets / Changes
-  ------  -------  ---------------------------------
-  11-d``  *path*   the home (login) directory
-  11-g``  *group*  the primary (login) group
-  11-i``  *text*   the user information (gecos) text
-  11-l``  *path*   the login shell
-  ======  =======  =================================
-
-If any of these options isn't specified, then:
-
-* When making changes to an existing user it has no effect.
-  Its associated field isn't changed.
-
-* When creating a new user, the defaults are:
-
-  .. table:: ``brltty-mkuser`` Defaults for New User Configuration
-
-    ======  ====================================================
-    Option  Default When creating a New User
-    ------  ----------------------------------------------------
-    ``-d``  the updatable directory (|updatable directory path|)
-    ``-g``  a new group with the same name as the user
-    ``-i``  **Braille Device Daemon**
-    ``-l``  ``/sbin/nologin``
-    ======  ====================================================
-
-The following options are primarily for developer use:
-
-.. table:: ``brltty-mkuser`` Options for Developers
-
-  ======  ====================================================
-  Option  Description
-  ------  ----------------------------------------------------
-  ``-S``  use ``sudo`` to execute the commands as root
-  ``-T``  test mode - show the commands that would be executed
-  ======  ====================================================
-
 When Started as the Super User
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -329,8 +241,166 @@ BRLTTY continues to run as the user who started it.
 This feature doesn't allow an explicit user to be specified
 (via the |unprivileged user option|).
 
+Useful Commands
+---------------
+
+Creating the Unprivileged User
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The user's primary (login) group should be user-specific.
+Ideally, it should have the same name as the user.
+
+The user's supplementary group list should include
+all of the groups that own the various system resources
+that BRLTTY needs access to in order for it to do its job properly.
+See `Group Memberships`_ for details.
+
+The user should have a home directory.
+It should be on a local file system
+so that BRLTTY can start properly when there are network problems.
+If the user doesn't have a home directory,
+or if it does but BRLTTY is unable to use it,
+then the |updatable directory| will be used.
+
+There's normally no need for anyone to log into the user.
+This can be enforced by setting its login shell to ``/sbin/nologin``.
+
+The user's information (gecos) field should be set
+to a user-friendly description of why it exists.
+We recommend something like:
+
+.. parsed-literal:: |user information|
+
+The ``useradd`` Command
+```````````````````````
+
+The command to create a user is:
+
+.. parsed-literal:: useradd *option* ... *name*
+
+It must be run as the super user (|super user|).
+
+It accepts a lot of options.
+For all of the details, run this command::
+
+  man useradd
+
+Unless there are special and/or unusual considerations,
+its most important options are:
+
+.. table:: ``useradd`` Options
+
+  ========================  ================================================
+  Option
+  ------------------------  ------------------------------------------------
+  ``--system``              create a system user
+  ``--user-group``          create a user-specific primary (login) group
+  ``--gid`` *group*         set the primary (login) group
+  ``--groups`` *group*,...  set the supplementary group list
+  ``--no-create-home``      don't create the home (login) directory
+  ``--create-home``         create the home (login) directory
+  ``--home`` *path*         the absolute path for the home (login) directory
+  ``--comment`` *text*      set the user information (gecos) text
+  ``--shell`` *path*        set the login shell
+  ========================  ================================================
+
+The ``brltty-mkuser`` Script
+````````````````````````````
+
+The top-level directory of BRLTTY's source tree contains
+a script named ``brltty-mkuser`` that simplifies the job of
+Creating and making changes to `the unprivileged user`_.
+For all of the details, run this command::
+
+  brltty-mkuser -h
+
+The following options require special mention:
+
+``-U``
+  This option specifies the name of the user
+  that's to be created or changed.
+  It defaults to the |default unprivileged user|.
+
+``-N`` *name*
+  This option allows the creation of a new user.
+
+``-E``
+  This option allows changes to be made to an existing user.
+
+``-G``
+  This option suppresses setting the user's supplementary group list.
+  A new user won't belong to any supplementary groups,
+  and an existing user will retain its current supplementary group memberships.
+
+Note that this script is safe to accidentally invoke because
+both creating a new user (``-N``)
+and making changes to an existing user (``-E``)
+must be explicitly allowed.
+These options aren't mutually exclusive - both may be specified.
+
+The user's supplementary group list is used
+to establish the needed `group memberships`_.
+Each of the following options removes a group from the full list,
+and, therefore, that group's associated functionality from BRLTTY.
+
+.. table:: ``brltty-mkuser`` Options for Excluding Supplementary Groups
+
+  ======  ================  ========================================
+  Option  Removes Group     Lost Functionality
+  ------  ----------------  ----------------------------------------
+  ``-a``  ``audio``         playing sound via the ALSA framework
+  ``-c``  ``tty``           access to the virtual consoles
+  ``-k``  ``input``         keyboard monitoring
+  ``-p``  ``pulse-access``  playing sound via the Pulse Audio server
+  ``-s``  ``dialout``       access to serial devices
+  ``-u``  usually ``root``  access to USB devices
+  ======  ================  ========================================
+
+The following options are for configuring
+the basic (password file) fields of the user:
+
+.. table:: ``brltty-mkuser`` Options for New / Existing User Configuration
+
+  ======  =======  =================================
+  Option  Operand  Sets / Changes
+  ------  -------  ---------------------------------
+  11-d``  *path*   the home (login) directory
+  11-g``  *group*  the primary (login) group
+  11-i``  *text*   the user information (gecos) text
+  11-l``  *path*   the login shell
+  ======  =======  =================================
+
+If any of these options isn't specified, then:
+
+* When making changes to an existing user it has no effect.
+  Its associated field isn't changed.
+
+* When creating a new user, the defaults are:
+
+  .. table:: ``brltty-mkuser`` Defaults for New User Configuration
+
+    ======  ====================================================
+    Option  Default When creating a New User
+    ------  ----------------------------------------------------
+    ``-d``  the updatable directory (|updatable directory path|)
+    ``-g``  a new group with the same name as the user
+    ``-i``  |user information|
+    ``-l``  ``/sbin/nologin``
+    ======  ====================================================
+
+The following options are primarily for developer use:
+
+.. table:: ``brltty-mkuser`` Options for Developers
+
+  ======  ====================================================
+  Option  Description
+  ------  ----------------------------------------------------
+  ``-S``  use ``sudo`` to execute the commands as root
+  ``-T``  test mode - show the commands that would be executed
+  ======  ====================================================
+
 Assigning Capabilities to the Executable
-----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First, here's a summary of all of the capabilities that BRLTTY needs
 `when started as an unprivileged user`_.
@@ -358,8 +428,8 @@ First, here's a summary of all of the capabilities that BRLTTY needs
   |cap_sys_tty_config|  |cap_sys_tty_config reason|
   ====================  ===========================
 
-The Command
-~~~~~~~~~~~
+The ``setcap`` Command
+``````````````````````
 
 The command to assign all of the capabilities,
 i.e. both the `required capabilities`_ and the `temporary capabilities`_,
@@ -370,10 +440,10 @@ is::
 
   setcap cap_setuid,cap_setgid,cap_sys_module,cap_sys_admin,cap_sys_tty_config,cap_mknod+p /path/to/brltty
 
-This command must be run as the super user (|super user|).
+It must be run as the super user (|super user|).
 
 The ``brltty-setcaps`` Script
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+`````````````````````````````
 
 The top-level directory of BRLTTY's source tree contains
 a script named ``brltty-setcaps`` that simplifies the job of
