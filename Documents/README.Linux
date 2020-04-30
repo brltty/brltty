@@ -57,88 +57,8 @@ BRLTTY on Linux
 For System Administrators
 =========================
 
-State Directories
------------------
-
-A state directory is one which a program needs to be able to write data to.
-BRLTTY's state directories are:
-
-|sockets directory|
-  This directory is where BRLTTY creates BrlAPI's
-  local (UNIX domain) server sockets.
-  It needs to be world writable, and, as such,
-  should also have its sticky bit set.
-  So:
-
-  .. parsed-literal:: chmod ugo=rwx,o+t *path*
-
-|updatable directory|
-  This directory is where BRLTTY saves user data.
-  This includes:
-
-  * preferences files
-  * clipboard content
-
-|writable directory|
-  This directory is where BRLTTY creates private copies of
-  file system objects that it needs but
-  that don't already exist (or, at least, that it can't find),
-  or that are inaccessible (can't be opened).
-  It's also where, if requested, the speech FIFO is created.
-
-The actual locations of these directories can be specified in a number of ways.
-From highest to lowest precedence, they are:
-
-* command line option
-* configuration directive (in |configuration file path|)
-* environment variable (if the ``-E`` command line option has been specified)
-* default location (can be changed with ``configure`` at build time)
-
-.. table:: State Directory Location Specification
-
-  =========  ======  ===================  ==========================  ==========================
-  Directory  Option  Config Directive     Environment Variable        Default Location
-  ---------  ------  -------------------  --------------------------  --------------------------
-  Sockets                                                             |sockets directory path|
-  Updatable  -U      updatable-directory  BRLTTY_UPDATABLE_DIRECTORY  |updatable directory path|
-  Writable   -W      writable-directory   BRLTTY_WRITABLE_DIRECTORY   |writable directory path|
-  =========  ======  ===================  ==========================  ==========================
-
-After having successfully switched to executing as an unprivileged user,
-BRLTTY attempts to gain full access to its data directories.
-For each of its state directories:
-
-* If it doesn't exist then it's created.
-  This requires the |cap_dac_override| (temporary) capability.
-
-* Its owning group is changed to be the primary group
-  of the unprivileged user that BRLTTY Is executing as.
-  This same change is also made to whatever the directory contains.
-  This requires the |cap_chown| (temporary) capability.
-
-* Group read and write permissions are added to it
-  and to whatever it contains.
-  For directories, group search permission is also added
-  and the set-group-ID bit is set.
-  This requires the |cap_fowner| (temporary) capability.
-
-As a protection, given that command line options, etc
-can be used to change them to non-BRLTTY-specific locations,
-attempts to gain full access to any of the state directories
-are only performed if the last component of its path is its default name.
-
-.. table:: Expected State Directory Names
-
-  =========  ==========================
-  Directory  Expected Name
-  ---------  --------------------------
-  Sockets    |sockets directory name|
-  Updatable  |updatable directory name|
-  Writable   |writable directory name|
-  =========  ==========================
-
-Starting BRLTTY
----------------
+When BRLTTY Starts
+------------------
 
 Safe Execution Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -248,13 +168,128 @@ BRLTTY continues to run as the user who started it.
 This feature doesn't allow an explicit user to be specified
 (via the |unprivileged user option|).
 
-Useful Commands
----------------
+State Directories
+~~~~~~~~~~~~~~~~~
+
+A state directory is one which a program needs to be able to write data to.
+BRLTTY's state directories are:
+
+|sockets directory|
+  This directory is where BRLTTY creates BrlAPI's
+  local (UNIX domain) server sockets.
+  It needs to be world writable, and, as such,
+  should also have its sticky bit set.
+  So:
+
+  .. parsed-literal:: chmod ugo=rwx,o+t *path*
+
+|updatable directory|
+  This directory is where BRLTTY saves user data.
+  This includes:
+
+  * preferences files
+  * clipboard content
+
+|writable directory|
+  This directory is where BRLTTY creates private copies of
+  file system objects that it needs but
+  that don't already exist (or, at least, that it can't find),
+  or that are inaccessible (can't be opened).
+  It's also where, if requested, BRLTTY creates its input FIFO
+  (which allows users to take advantage of its text-to-speech capability).
+
+Specifying State Directory Locations
+````````````````````````````````````
+
+The actual locations of these directories can be specified in a number of ways.
+From highest to lowest precedence, they are:
+
+* command line option
+* configuration directive (in |configuration file path|)
+* environment variable (if the ``-E`` command line option has been specified)
+* default location (can be changed with ``configure`` at build time)
+
+.. table:: State Directory Location Specification
+
+  =========  ======  ===================  ==========================  ==========================
+  Directory  Option  Config Directive     Environment Variable        Default Location
+  ---------  ------  -------------------  --------------------------  --------------------------
+  Sockets                                                             |sockets directory path|
+  Updatable  -U      updatable-directory  BRLTTY_UPDATABLE_DIRECTORY  |updatable directory path|
+  Writable   -W      writable-directory   BRLTTY_WRITABLE_DIRECTORY   |writable directory path|
+  =========  ======  ===================  ==========================  ==========================
+
+Gaining Full Access
+```````````````````
+
+After having successfully switched to executing as `the unprivileged user`_,
+BRLTTY attempts to gain full access to its state directories.
+The most common case where this is necessary is
+to automate the transition from an older release of BRLTTY
+from the days when it had to execute as the super user (|super user|).
+Another (much rarer) case would be
+when transitioning from one unprivileged user to another.
+
+There are at least a couple of reasons why BRLTTY does this job since
+it could, of course, be left for a system administrator to take care of.
+One is that the steps are well-defined so it was deemed better
+to code it right in a central place
+rather than to risk administrative error.
+The other, way more important, one is that it's extremely difficult
+for a blind user to figure out what's wrong
+before his/her braille device is up and running.
+Put another way, it can be near impossible for a braille user to figure out
+why BRLTTY is having problems while BRLTTY is having problems.
+
+The following actions are taken for each of the state directories:
+
+* If it doesn't exist then it's created.
+  This usually requires the |cap_dac_override| (temporary) capability
+  because it's usually a subdirectory of a directory
+  that can only be written to by the super user (|super user|),
+  e.g. ``/var/lib/``.
+
+* Its owning group is changed to be the primary group
+  of `the unprivileged user`_ that BRLTTY Is executing as.
+  The same change is also made to whatever the directory contains.
+  This requires the |cap_chown| (temporary) capability
+  for a directory or file that's owned by a different user.
+
+* Group read and write permissions are added to it
+  and to whatever it contains.
+  For directories, group search permission is also added
+  and the set-group-ID bit is set.
+  This requires the |cap_fowner| (temporary) capability
+  for a directory or file that's owned by a different user.
+
+Gaining full access to a state directory is only attempted
+if the last component of its path is its expected name:
+
+.. table:: Expected State Directory Names
+
+  =========  ==========================
+  Directory  Expected Name
+  ---------  --------------------------
+  Sockets    |sockets directory name|
+  Updatable  |updatable directory name|
+  Writable   |writable directory name|
+  =========  ==========================
+
+This is a protective measure, given that command line options, etc
+can be used to change the location of a state directory
+to a non-BRLTTY-specific location.
+It prevents BRLTTY from Attempting to gain full access
+to another program's data, or, even worse, to a public directory.
+If it's really necessary to use such a directory
+then it's far batter to let a human being take care of it.
+
+Preparing the Environment
+-------------------------
 
 Creating the Unprivileged User
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The user's primary (login) group should be user-specific.
+The user's primary group should be user-specific.
 Ideally, it should have the same name as the user.
 
 The user's supplementary group list should include
@@ -297,19 +332,19 @@ its most important options are:
 
 .. table:: ``useradd`` Options
 
-  ========================  ================================================
+  ========================  ========================================
   Option
-  ------------------------  ------------------------------------------------
+  ------------------------  ----------------------------------------
   ``--system``              create a system user
-  ``--user-group``          create a user-specific primary (login) group
-  ``--gid`` *group*         set the primary (login) group
+  ``--user-group``          create a user-specific primary group
+  ``--gid`` *group*         set the primary group
   ``--groups`` *group*,...  set the supplementary group list
-  ``--no-create-home``      don't create the home (login) directory
-  ``--create-home``         create the home (login) directory
-  ``--home`` *path*         the absolute path for the home (login) directory
+  ``--no-create-home``      don't create the home directory
+  ``--create-home``         create the home directory
+  ``--home`` *path*         the absolute path for the home directory
   ``--comment`` *text*      set the |user information field|
   ``--shell`` *path*        set the login shell
-  ========================  ================================================
+  ========================  ========================================
 
 The ``brltty-mkuser`` Script
 ````````````````````````````
@@ -368,14 +403,14 @@ the basic (password file) fields of the user:
 
 .. table:: ``brltty-mkuser`` Options for New / Existing User Configuration
 
-  ======  =======  =================================
+  ======  =======  ============================
   Option  Operand  Sets / Changes
-  ------  -------  ---------------------------------
-  11-d``  *path*   the home (login) directory
-  11-g``  *group*  the primary (login) group
+  ------  -------  ----------------------------
+  11-d``  *path*   the home directory
+  11-g``  *group*  the primary group
   11-i``  *text*   the |user information field|
   11-l``  *path*   the login shell
-  ======  =======  =================================
+  ======  =======  ============================
 
 If any of these options isn't specified, then:
 
