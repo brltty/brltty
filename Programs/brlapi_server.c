@@ -4376,9 +4376,9 @@ int api_startServer(BrailleDisplay *brl, char **parameters)
 
   char *hosts =
 #if defined(PF_LOCAL)
-	":0+127.0.0.1:0"
+	":0+127.0.0.1:0+::1:0"
 #else /* PF_LOCAL */
-	"127.0.0.1:0"
+	"127.0.0.1:0+::1:0"
 #endif /* PF_LOCAL */
 	;
 
