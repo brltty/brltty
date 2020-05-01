@@ -16,6 +16,17 @@
   <string name="inputService_not_started">servicio de entrada no iniciado</string>
   <string name="inputService_not_connected">servicio de entrada no conectado</string>
 
+  <string name="updateApplication_problem_failed">aplicación no actualizada</string>
+
+  <string name="packageInstaller_problem_failed">paquete no instalado</string>
+  <string name="packageInstaller_problem_same">misma versión</string>
+  <string name="packageInstaller_problem_downgrade">degrado no permitido</string>
+
+  <string name="fileDownloader_title">BRLTTY Bajador de Archivos</string>
+  <string name="fileDownloader_problem_failed">archivo no bajado</string>
+  <string name="fileDownloader_state_connecting">conectando</string>
+  <string name="fileDownloader_state_downloading">bajando</string>
+
   <string name="checkbox_state_unchecked">No</string>
   <string name="checkbox_state_checked">Sí</string>
 
@@ -39,6 +50,8 @@
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Publica mensaje de comunidad</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Administra membresía de comunidad</string>
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Actualiza aplicación</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Acciones de la accesibilidad</string>
 
   <string name="SETTINGS_SCREEN_MAIN">Ajustos de BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Configuración General</string>
