@@ -950,17 +950,26 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
   brlapi_initializeHandle(handle);
 
   if (tryHost(handle, settings.host)<0) {
-    brlapi_error_t error = brlapi_error;
-    if (strrchr(settings.host, ':') != settings.host ||
-	(tryHost(handle, settings.host="127.0.0.1:0")<0
+    const char *port = strrchr(settings.host, ':');
+    if (port != settings.host) goto out;
+
+    brlapi_error_t originalError = brlapi_error;
+    size_t portLength = strlen(port);
+    char host[20 + portLength + 1];
+
+    snprintf(host, sizeof(host), "%s%s", "127.0.0.1", port);
+    if (tryHost(handle, host) != -1) goto connected;
+
 #ifdef AF_INET6
-      && tryHost(handle, settings.host="::1:0")<0
+    snprintf(host, sizeof(host), "%s%s", "::1", port);
+    if (tryHost(handle, host) != -1) goto connected;
 #endif /* AF_INET6 */
-      )) {
-      brlapi_error = error;
-      goto out;
-    }
-    if (usedSettings) usedSettings->host = settings.host;
+
+    brlapi_error = originalError;
+    goto out;
+
+  connected:
+    if (usedSettings) usedSettings->host = strdup(host);
   }
 
   if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, &serverPacket, sizeof(serverPacket), WAIT_FOR_EXPECTED_PACKET, WAIT_FOREVER)) < 0)
