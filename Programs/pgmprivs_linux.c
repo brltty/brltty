@@ -556,63 +556,45 @@ typedef struct {
   const char *name;
   const char *summary;
   int unshareFlag;
-  unsigned char needSysadmin:1;
-} PrivateNamespaceEntry;
+} IsolatedNamespaceEntry;
 
-static const PrivateNamespaceEntry privateNamespaceTable[] = {
+static const IsolatedNamespaceEntry isolatedNamespaceTable[] = {
   { .unshareFlag = CLONE_NEWUTS,
-    .needSysadmin = 1,
     .name = "UTS",
     .summary = "host name and NIS domain name",
   },
-}; static const unsigned char privateNamespaceCount = ARRAY_COUNT(privateNamespaceTable);
+}; static const unsigned char isolatedNamespaceCount = ARRAY_COUNT(isolatedNamespaceTable);
 
 static void
-unshareNamespaces (void) {
-  int unshareFlags = 0;
-
-  int sysadminRequested = 0;
-  int sysadminGranted = 0;
-
-  const PrivateNamespaceEntry *pne = privateNamespaceTable;
-  const PrivateNamespaceEntry *end = pne + privateNamespaceCount;
-
-  while (pne < end) {
-    int canUnshare = 1;
-
-    if (pne->needSysadmin) {
-      if (!sysadminRequested) {
-        sysadminRequested = 1;
+isolateNamespaces (void) {
+  int canIsolateNamespaces = 0;
 
 #ifdef CAP_SYS_ADMIN
-        if (needCapability(CAP_SYS_ADMIN, 0, "for unsharing privileged namespaces")) {
-          sysadminGranted = 1;
-        }
-#endif /* CAP_SYS_ADMIN */
-      }
-
-      canUnshare = sysadminGranted;
-    }
-
-    if (canUnshare) {
-      logMessage(LOG_DEBUG,
-        "unsharing namespace: %s (%s)", pne->name, pne->summary
-      );
-
-      unshareFlags |= pne->unshareFlag;
-    } else {
-      logMessage(LOG_WARNING,
-        "can't unshare privileged namespace: %s (%s)", pne->name, pne->summary
-      );
-    }
-
-    pne += 1;
+  if (needCapability(CAP_SYS_ADMIN, 0, "for isolating namespaces")) {
+    canIsolateNamespaces = 1;
   }
+#endif /* CAP_SYS_ADMIN */
 
-  if (unshareFlags) {
+  if (canIsolateNamespaces) {
+    int unshareFlags = 0;
+
+    const IsolatedNamespaceEntry *ine = isolatedNamespaceTable;
+    const IsolatedNamespaceEntry *end = ine + isolatedNamespaceCount;
+
+    while (ine < end) {
+      logMessage(LOG_DEBUG,
+        "isolating namespace: %s (%s)", ine->name, ine->summary
+      );
+
+      unshareFlags |= ine->unshareFlag;
+      ine += 1;
+    }
+
     if (unshare(unshareFlags) == -1) {
       logSystemError("unshare");
     }
+  } else {
+    logMessage(LOG_DEBUG, "not isolating namespaces");
   }
 }
 #endif /* HAVE_SCHED_H */
@@ -1037,7 +1019,7 @@ establishProgramPrivileges (const char *user) {
 #endif /* PR_SET_KEEPCAPS */
 
 #ifdef HAVE_SCHED_H
-  unshareNamespaces();
+  isolateNamespaces();
 #endif /* HAVE_SCHED_H */
 
   {
