@@ -3001,9 +3001,9 @@ static int readPid(char *path)
 
 static int
 adjustPermissions (const char *path) {
-  int adjust = 0;
+  int adjust = !geteuid();
 
-  {
+  if (!adjust) {
     char *directory = getPathDirectory(path);
 
     if (directory) {
