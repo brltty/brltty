@@ -3001,7 +3001,25 @@ static int readPid(char *path)
 
 static int
 adjustPermissions (const char *path) {
-  if (!getegid()) {
+  int adjust = 0;
+
+  {
+    char *directory = getPathDirectory(path);
+
+    if (directory) {
+      struct stat status;
+
+      if (stat(directory, &status) == -1) {
+        logSystemError("stat");
+      } else if (status.st_uid == geteuid()) {
+        adjust = 1;
+      }
+
+      free(directory);
+    }
+  }
+
+  if (adjust) {
     struct stat status;
 
     if (stat(path, &status) == -1) {
