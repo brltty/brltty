@@ -907,7 +907,7 @@ getStateDirectoryPath (const StateDirectoryEntry *sde) {
 static int
 canChangePathOwnership (const char *path) {
 #ifdef CAP_CHOWN
-  if (needCapability(CAP_CHOWN, 0, "for claiming group ownership of the state directories")) {
+  if (needCapability(CAP_CHOWN, 0, "for claiming ownership of the state directories")) {
     return 1;
   }
 #endif /* CAP_CHOWN */
@@ -927,6 +927,7 @@ canChangePathPermissions (const char *path) {
 }
 
 typedef struct {
+  uid_t owningUser;
   gid_t owningGroup;
 } StateDirectoryData;
 
@@ -934,17 +935,18 @@ static int
 claimStateDirectory (const PathProcessorParameters *parameters) {
   const StateDirectoryData *sdd = parameters->data;
   const char *path = parameters->path;
+  uid_t user = sdd->owningUser;
   gid_t group = sdd->owningGroup;
   struct stat status;
 
   if (stat(path, &status) != -1) {
     int ownershipClaimed = 0;
 
-    if (status.st_gid == group) {
+    if ((status.st_uid == user) && (status.st_gid == group)) {
       ownershipClaimed = 1;
     } else if (!canChangePathOwnership(path)) {
       logMessage(LOG_WARNING, "can't claim ownership: %s", path);
-    } else if (chown(path, -1, group) == -1) {
+    } else if (chown(path, user, group) == -1) {
       logSystemError("chown");
     } else {
       logMessage(LOG_INFO, "ownership claimed: %s", path);
@@ -978,6 +980,7 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
 static void
 claimStateDirectories (void) {
   StateDirectoryData sdd = {
+    .owningUser = geteuid(),
     .owningGroup = getegid(),
   };
 

@@ -46,7 +46,7 @@ BRLTTY on Linux
 
 .. |cap_setuid reason| replace:: switching to `the unprivileged user`_
 .. |cap_setgid reason| replace:: switching to the primary group of `the unprivileged user`_ and establishing the needed `group memberships`_
-.. |cap_chown reason| replace:: claiming group ownership of the `state directories`_
+.. |cap_chown reason| replace:: claiming ownership of the `state directories`_
 .. |cap_fowner reason| replace:: adding group permissions to the `state directories`_
 .. |cap_dac_override reason| replace:: creating missing `state directories`_
 .. |cap_sys_module reason| replace:: installing the needed `kernel modules`_
@@ -233,14 +233,15 @@ why BRLTTY is having problems while BRLTTY is having problems.
 
 The following actions are taken for each of the state directories:
 
-* If it doesn't exist then it's created.
+* If it doesn't exist then it is created.
   This usually requires the |cap_dac_override| (temporary) capability
   because it's usually a subdirectory of a directory
   that can only be written to by the super user (|super user|),
   e.g. ``/var/lib/``.
 
-* Its owning group is changed to be the primary group
-  of `the unprivileged user`_ that BRLTTY Is executing as.
+* Its owning user and group are changed to be
+  the user and the primary group of the user
+  that BRLTTY Is executing as.
   The same change is also made to whatever the directory contains.
   This requires the |cap_chown| (temporary) capability
   for a directory or file that's owned by a different user.
@@ -612,7 +613,7 @@ and are relinquished right after this has been done.
 
 |cap_chown|
   If this capability has also been assigned to BRLTTY's executable
-  then it can claim group ownership of its `state directories`_
+  then it can claim ownership of its `state directories`_
   and their contents
   after having successfully switched to executing as `the unprivileged user`_.
   The primary group of that user is used.

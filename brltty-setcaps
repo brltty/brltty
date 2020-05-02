@@ -70,7 +70,7 @@ addProgramOption d flag noDevices "don't allow creating needed but missing devic
 addProgramOption g flag noGroups "don't allow switching to the writable group or joining the required groups"
 addProgramOption i flag noInput "don't allow injecting input characters"
 addProgramOption m flag noModules "don't allow installing kernel modules"
-addProgramOption o flag noOwnership "don't allow claiming group ownership of the state directories"
+addProgramOption o flag noOwnership "don't allow claiming ownership of the state directories"
 addProgramOption p flag noPermissions "don't allow adding group permissions to the state directories"
 addProgramOption s flag noSpeaker "don't allow using the built-in PC speaker"
 addProgramOption u flag noUsers "don't allow switching to the default unprivileged user"
