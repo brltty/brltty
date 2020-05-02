@@ -594,7 +594,7 @@ isolateNamespaces (void) {
       logSystemError("unshare");
     }
   } else {
-    logMessage(LOG_DEBUG, "not isolating namespaces");
+    logMessage(LOG_DEBUG, "can't isolate namespaces");
   }
 }
 #endif /* HAVE_SCHED_H */
@@ -750,23 +750,6 @@ setSafeShell (void) {
 #include <pwd.h>
 
 static int
-canSwitchUser (uid_t uid) {
-  {
-    uid_t rUid, eUid, sUid;
-    getresuid(&rUid, &eUid, &sUid);
-    if ((uid == rUid) || (uid == eUid) || (uid == sUid)) return 1;
-  }
-
-#ifdef CAP_SETUID
-  if (needCapability(CAP_SETUID, 0, "for switching to the unprivileged user")) {
-    return 1;
-  }
-#endif /* CAP_SETUID */
-
-  return 0;
-}
-
-static int
 canSwitchGroup (gid_t gid) {
   {
     gid_t rGid, eGid, sGid;
@@ -791,18 +774,12 @@ switchToUser (const char *user, int *haveHomeDirectory) {
     uid_t uid = pwd->pw_uid;
     gid_t gid = pwd->pw_gid;
 
-    if (uid) {
-      if (amPrivilegedUser() || (canSwitchUser(uid) && canSwitchGroup(gid))) {
-        if (setProcessOwnership(uid, gid)) {
-          logMessage(LOG_NOTICE, "switched to user: %s", user);
-          if (setHomeDirectory(pwd->pw_dir)) *haveHomeDirectory = 1;
-          return 1;
-        }
-      } else {
-        logMessage(LOG_WARNING, "can't switch to another user");
-      }
-    } else {
+    if (!uid) {
       logMessage(LOG_WARNING, "not an unprivileged user: %s", user);
+    } else if (setProcessOwnership(uid, gid)) {
+      logMessage(LOG_NOTICE, "switched to user: %s", user);
+      if (setHomeDirectory(pwd->pw_dir)) *haveHomeDirectory = 1;
+      return 1;
     }
   } else {
     logMessage(LOG_WARNING, "user not found: %s", user);
@@ -813,40 +790,52 @@ switchToUser (const char *user, int *haveHomeDirectory) {
 
 static int
 switchUser (const char *user, int *haveHomeDirectory) {
-  if (*user) {
-    if (!amPrivilegedUser()) {
-      logMessage(LOG_WARNING, "not executing as a privileged user");
-    } else if (getuid()) {
-      logMessage(LOG_WARNING, "executing as a set-user-ID root program");
-    } else if (switchToUser(user, haveHomeDirectory)) {
-      return 1;
+  if (amPrivilegedUser()) {
+    if (*user) {
+      if (switchToUser(user, haveHomeDirectory)) {
+        return 1;
+      }
     }
 
-    logMessage(LOG_WARNING, "ignoring the explicitly specified user: %s", user);
-  }
-
-  if (*(user = UNPRIVILEGED_USER)) {
-    if (switchToUser(user, haveHomeDirectory)) return 1;
-    logMessage(LOG_WARNING, "couldn't switch to the default unprivileged user: %s", user);
+    if (*(user = UNPRIVILEGED_USER)) {
+      if (switchToUser(user, haveHomeDirectory)) return 1;
+      logMessage(LOG_WARNING, "couldn't switch to the default unprivileged user: %s", user);
+    } else {
+      logMessage(LOG_WARNING, "unprivileged user not configured");
+    }
   }
 
   {
     uid_t uid = getuid();
-    setProcessOwnership(uid, getgid());
+    gid_t gid = getgid();
 
-    const struct passwd *pwd;
-    const char *name;
-    char number[0X10];
+    {
+      const struct passwd *pwd;
+      const char *name;
+      char number[0X10];
 
-    if ((pwd = getpwuid(uid))) {
-      name = pwd->pw_name;
-    } else {
-      snprintf(number, sizeof(number), "%d", uid);
-      name = number;
+      if ((pwd = getpwuid(uid))) {
+        name = pwd->pw_name;
+      } else {
+        snprintf(number, sizeof(number), "%d", uid);
+        name = number;
+      }
+
+      logMessage(LOG_NOTICE, "executing as the invoking user: %s", name);
     }
 
-    logMessage(LOG_NOTICE, "continuing to execute as the invoking user: %s", name);
-    if (pwd && setHomeDirectory(pwd->pw_dir)) *haveHomeDirectory = 1;
+    if (*(user = UNPRIVILEGED_USER)) {
+      struct passwd *pwd;
+
+      if ((pwd = getpwnam(user))) {
+        if (canSwitchGroup(pwd->pw_gid)) {
+          gid = pwd->pw_gid;
+        }
+      }
+    }
+
+    setProcessOwnership(uid, gid);
+    if (!amPrivilegedUser()) *haveHomeDirectory = 1;
   }
 
   return 0;
