@@ -953,6 +953,19 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
     const char *port = strrchr(settings.host, ':');
     if (port != settings.host) goto out;
 
+    {
+      const char *number = port + 1;
+
+      if (*number < '0') goto out;
+      if (*number > '9') goto out;
+
+      char *end;
+      long int value = strtol(number, &end, 10);
+      if (*end) goto out;
+
+      if (value < 0) goto out;
+    }
+
     brlapi_error_t originalError = brlapi_error;
     size_t portLength = strlen(port);
 
