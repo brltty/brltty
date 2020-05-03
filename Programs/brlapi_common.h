@@ -408,6 +408,26 @@ static int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *a
   return 0;
 }
 
+#define LOCALHOST_ADDRESS_IPV4 "127.0.0.1"
+#define LOCALHOST_ADDRESS_IPV6 "::1"
+
+static int
+isPortNumber (const char *number, uint16_t *port) {
+  if (!number) return 0;
+  if (*number < '0') return 0;
+  if (*number > '9') return 0;
+
+  char *end;
+  long int value = strtol(number, &end, 10);
+  if (*end) return 0;
+
+  if (value < 0) return 0;
+  if (value > (UINT16_MAX - BRLAPI_SOCKETPORTNUM)) return 0;
+
+  if (port) *port = value + BRLAPI_SOCKETPORTNUM;
+  return 1;
+}
+
 /* Function: brlapi_expandHost
  * splits host into host & port */
 static int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port) {
@@ -418,19 +438,19 @@ static int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port)
     *port = strdup("0");
     return PF_LOCAL;
 #else /* PF_LOCAL */
-    *host = strdup("127.0.0.1");
+    *host = strdup(LOCALHOST_ADDRESS_IPV4);
     *port = strdup(BRLAPI_SOCKETPORT);
     return PF_UNSPEC;
 #endif /* PF_LOCAL */
   } else if ((c = strrchr(hostAndPort,':'))) {
     if (c != hostAndPort) {
-      int porti = atoi(c+1);
-      if (porti>=(1<<16)-BRLAPI_SOCKETPORTNUM) porti=0;
+      uint16_t porti = BRLAPI_SOCKETPORTNUM;
+      isPortNumber(c+1, &porti);
       *host = malloc(c-hostAndPort+1);
       memcpy(*host, hostAndPort, c-hostAndPort);
       (*host)[c-hostAndPort] = 0;
       *port = malloc(6);
-      snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
+      snprintf(*port,6,"%u",porti);
       return PF_UNSPEC;
     } else {
 #if defined(PF_LOCAL)
@@ -438,11 +458,11 @@ static int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port)
       *port = strdup(c+1);
       return PF_LOCAL;
 #else /* PF_LOCAL */
-      int porti = atoi(c+1);
-      if (porti>=(1<<16)-BRLAPI_SOCKETPORTNUM) porti=0;
-      *host = strdup("127.0.0.1");
+      uint16_t porti = BRLAPI_SOCKETPORTNUM;
+      isPortNumber(c+1, &porti);
+      *host = strdup(LOCALHOST_ADDRESS_IPV4);
       *port = malloc(6);
-      snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
+      snprintf(*port,6,"%u",porti);
       return PF_UNSPEC;
 #endif /* PF_LOCAL */
     }

@@ -952,33 +952,21 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
   if (tryHost(handle, settings.host)<0) {
     const char *port = strrchr(settings.host, ':');
     if (port != settings.host) goto out;
-
-    {
-      const char *number = port + 1;
-
-      if (*number < '0') goto out;
-      if (*number > '9') goto out;
-
-      char *end;
-      long int value = strtol(number, &end, 10);
-      if (*end) goto out;
-
-      if (value < 0) goto out;
-    }
+    if (!isPortNumber(port+1, NULL)) goto out;
 
     brlapi_error_t originalError = brlapi_error;
     size_t portLength = strlen(port);
 
-    static const char *const localHostAddresses[] = {
-      "127.0.0.1",
+    static const char *const localhostAddressTable[] = {
+      LOCALHOST_ADDRESS_IPV4,
 
       #ifdef AF_INET6
-      "::1",
+      LOCALHOST_ADDRESS_IPV6,
       #endif /* AF_INET6 */
     };
 
-    const char *const *lha = localHostAddresses;
-    const char *const *end = lha + ARRAY_COUNT(localHostAddresses);
+    const char *const *lha = localhostAddressTable;
+    const char *const *end = lha + ARRAY_COUNT(localhostAddressTable);
 
     while (lha < end) {
       size_t hostLength = strlen(*lha);
