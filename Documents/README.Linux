@@ -67,34 +67,52 @@ we also don't feel that it's worth risking the possibility
 that our code might be hacked.
 To reduce this possibility, therefore, BRLTTY first
 establishes a `safer execution environment`_ within which to do its job.
+This is a best security practice known as "least privilege".
 
-When Started as an Unprivileged User
+When Started by an Unprivileged User
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When BRLTTY starts executing as an unprivileged user (not |super user|)
-then it simply can't do its job at all without a bit of administrative help.
-Figuratively speaking, therefore, it "hopes" that
-its executable,
-the user who started it,
-and the system
-have all been adequately configured.
+BRLTTY, as of release 6.2, can be started
+by an unprivileged user (not |super user|).
+The main use case for this is for BRLTTY to be started
+by its |default unprivileged user|.
+Others include system administrators or users
+who'd like BRLTTY to be startable
+by any user, by users who belong to a specific group, etc.
 
-* Adequate executable configuration means that
-  all of the `required capabilities`_ have been assigned to it.
+In order for an unprivileged user to successfully start BRLTTY,
+its environment needs to be prepared as follows:
 
-* Adequate user configuration means that the user who started BRLTTY
-  has all of the needed `group memberships`_.
-  This isn't necessary, i.e. BRLTTY will do this by itself,
-  if the |cap_setgid| capability has also been assigned to its executable.
+* All of its `required capabilities`_ to have been assigned to its executable.
 
-* Adequate system configuration means that
-  all of the needed `kernel modules`_ have already been installed.
-  This isn't necessary, i.e. BRLTTY will do this by itself,
-  if the |cap_sys_module| capability has also been assigned to its executable.
+* The user that starts it to have all of the needed `group memberships`_.
+  This isn't necessary, i.e. BRLTTY will join them by itself,
+  if the |cap_setgid| (temporary) capability
+  has also been assigned to its executable.
 
-While BRLTTY will continue to run in spite of inadequate configuration,
-some of its individual components will likely fail.
-These failures can range all the way from minor to severe.
+* The needed `kernel modules`_ to have been installed.
+  This isn't necessary, i.e. BRLTTY will install them by itself,
+  if the |cap_sys_module| (temporary) capability
+  has also been assigned to its executable.
+
+* Its `state directories`_
+  to have been created,
+  to have the correct ownership,
+  and to have the correct permissions.
+  Each of these prerequisites isn't necessary,
+  i.e. BRLTTY will take care of it by itself,
+  if the associated (temporary) capability
+  has also been assigned to its executable.
+
+  .. table:: Temporary Capabilities for State Directory Prerequisites
+
+    ============  ====================
+    Prerequisite  Temporary Capability
+    ------------  --------------------
+    create        |cap_dac_override|
+    ownership     |cap_chown|
+    permissions   |cap_fowner|
+    ============  ====================
 
 Safer Execution Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -422,7 +440,7 @@ Assigning Capabilities to the Executable
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First, here's a summary of all of the capabilities that BRLTTY needs
-`when started as an unprivileged user`_.
+`when started by an unprivileged user`_.
 
 * The `required capabilities`_ are highlighted **this way**.
   They're needed throughout BRLTTY's execution.
@@ -452,7 +470,7 @@ The ``setcap`` Command
 The host command to assign all of the capabilities,
 i.e. both the `required capabilities`_ and the `temporary capabilities`_,
 to BRLTTY's executable
-so that it'll be fully functional `when started as an unprivileged user`_,
+so that it'll be fully functional `when started by an unprivileged user`_,
 without requiring any additional administrator configuration,
 is::
 
@@ -591,7 +609,7 @@ Temporary Capabilities
 
 BRLTTY only uses the privileged kernel operations
 that are granted via these capabilities
-`when started as an unprivileged user`_.
+`when started by an unprivileged user`_.
 They allow it to configure itself,
 thus not relying so heavily on explicit administrator configuration,
 and are relinquished right after this has been done.
