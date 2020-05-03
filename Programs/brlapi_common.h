@@ -408,6 +408,13 @@ static int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *a
   return 0;
 }
 
+static char *
+intToString (int64_t value) {
+  char buffer[0X20];
+  snprintf(buffer, sizeof(buffer), "%"PRId64, value);
+  return strdup(buffer);
+}
+
 #define LOCALHOST_ADDRESS_IPV4 "127.0.0.1"
 #define LOCALHOST_ADDRESS_IPV6 "::1"
 
@@ -449,8 +456,7 @@ static int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port)
       *host = malloc(c-hostAndPort+1);
       memcpy(*host, hostAndPort, c-hostAndPort);
       (*host)[c-hostAndPort] = 0;
-      *port = malloc(6);
-      snprintf(*port,6,"%u",porti);
+      *port = intToString(porti);
       return PF_UNSPEC;
     } else {
 #if defined(PF_LOCAL)
@@ -461,8 +467,7 @@ static int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port)
       uint16_t porti = BRLAPI_SOCKETPORTNUM;
       isPortNumber(c+1, &porti);
       *host = strdup(LOCALHOST_ADDRESS_IPV4);
-      *port = malloc(6);
-      snprintf(*port,6,"%u",porti);
+      *port = intToString(porti);
       return PF_UNSPEC;
 #endif /* PF_LOCAL */
     }
