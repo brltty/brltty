@@ -955,21 +955,35 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
 
     brlapi_error_t originalError = brlapi_error;
     size_t portLength = strlen(port);
-    char host[20 + portLength + 1];
 
-    snprintf(host, sizeof(host), "%s%s", "127.0.0.1", port);
-    if (tryHost(handle, host) != -1) goto connected;
+    static const char *const localHostAddresses[] = {
+      "127.0.0.1",
 
-#ifdef AF_INET6
-    snprintf(host, sizeof(host), "%s%s", "::1", port);
-    if (tryHost(handle, host) != -1) goto connected;
-#endif /* AF_INET6 */
+      #ifdef AF_INET6
+      "::1",
+      #endif /* AF_INET6 */
+    };
 
-    brlapi_error = originalError;
-    goto out;
+    const char *const *lha = localHostAddresses;
+    const char *const *end = lha + ARRAY_COUNT(localHostAddresses);
 
-  connected:
-    if (usedSettings) usedSettings->host = strdup(host);
+    while (lha < end) {
+      size_t hostLength = strlen(*lha);
+      char host[hostLength + portLength + 1];
+      snprintf(host, sizeof(host), "%s%s", *lha, port);
+
+      if (tryHost(handle, host) != -1) {
+        if (usedSettings) usedSettings->host = strdup(host);
+        break;
+      }
+
+      lha += 1;
+    }
+
+    if (lha == end) {
+      brlapi_error = originalError;
+      goto out;
+    }
   }
 
   if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, &serverPacket, sizeof(serverPacket), WAIT_FOR_EXPECTED_PACKET, WAIT_FOREVER)) < 0)
