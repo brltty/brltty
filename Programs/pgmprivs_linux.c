@@ -559,10 +559,33 @@ typedef struct {
 } IsolatedNamespaceEntry;
 
 static const IsolatedNamespaceEntry isolatedNamespaceTable[] = {
+  #ifdef CLONE_NEWCGROUP
+  { .unshareFlag = CLONE_NEWCGROUP,
+    .name = "cgroup",
+    .summary = "control groups",
+  },
+  #endif /* CLONE_NEWCGROUP */
+
+  #ifdef CLONE_NEWIPC
+  { .unshareFlag = CLONE_NEWIPC,
+    .name = "IPC",
+    .summary = "System V interprocess communication objects and POSIX message queues",
+  },
+  #endif /* CLONE_NEWIPC */
+
+  #ifdef CLONE_NEWNS
+  { .unshareFlag = CLONE_NEWNS,
+    .name = "mount",
+    .summary = "mount points",
+  },
+  #endif /* CLONE_NEWNS */
+
+  #ifdef CLONE_NEWUTS
   { .unshareFlag = CLONE_NEWUTS,
     .name = "UTS",
     .summary = "host name and NIS domain name",
   },
+  #endif /* CLONE_NEWUTS */
 }; static const unsigned char isolatedNamespaceCount = ARRAY_COUNT(isolatedNamespaceTable);
 
 static void

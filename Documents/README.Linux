@@ -103,7 +103,7 @@ BRLTTY takes a number of steps to establish a safer execution environment:
 
 * Set a `safe command search path`_.
 * Set a `safe default shell`_.
-* Isolate some `process namespaces`_.
+* `Namespace isolation`_.
 * Switch to executing as `the unprivileged user`_.
 * Install the needed `kernel modules`_.
 * Establish the needed `group memberships`_.
@@ -625,8 +625,7 @@ and are relinquished right after this has been done.
 
 |cap_sys_admin|
   While this is one of the `required capabilities`_,
-  it's also needed as a temporary capability
-  in order to isolate `process namespaces`_.
+  it's also needed as a temporary capability for `namespace isolation`_.
 
 |cap_sys_module|
   If this capability has also been assigned to BRLTTY's executable
@@ -666,12 +665,24 @@ To find out what it is on your system, run this command::
 
 Note that scripts usually internally specify which shell is to be used.
 
-Process Namespaces
-~~~~~~~~~~~~~~~~~~
+Namespace Isolation
+~~~~~~~~~~~~~~~~~~~
 
 BRLTTY isolates some of the kernel namespaces
 that are associated with its process.
 The namespaces that it currently isolates are:
+
+cgroup
+  This namespace is used to manage control groups.
+
+IPC
+  This namespace is used to manage:
+
+  * System V interprocess communication objects
+  * POSIX message queues
+
+mount
+  This namespace is used to manage mount points.
 
 UTS
   This namespace is used to manage the host name and the NIS domain name.
