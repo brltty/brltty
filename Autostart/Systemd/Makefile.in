@@ -16,9 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-SYSTEMD_UNITS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/systemd/system
-SYSTEMD_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/$(PACKAGE_TARNAME)
-SYSTEMD_USERS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/sysusers.d
+SYSTEMD_UNITS_DIRECTORY = $(INSTALL_ROOT)$(SYSTEMD_SYSTEMUNIT_DIR)
+SYSTEMD_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)$(libexecdir)/$(PACKAGE_TARNAME)
+SYSTEMD_USERS_DIRECTORY = $(INSTALL_ROOT)$(SYSTEMD_SYSUSERS_DIR)
 SYSTEMD_USERS_FILE = $(SYSTEMD_USERS_DIRECTORY)/$(PACKAGE_TARNAME).conf
 
 install: install-units install-scripts install-users

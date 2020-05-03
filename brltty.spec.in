@@ -35,9 +35,9 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _datadir /usr/share
 %define _sysconfdir /etc
 %define _pkglibdir %{_libdir}/%{name}
-%define _systemdunitsdir %{_libdir}/systemd/system
-%define _systemdusersdir %{_libdir}/sysusers.d
-%define _udevlibdir %{_libdir}/udev
+%define _pkglibexecdir %{_libexecdir}/%{name}
+%define _systemdunitsdir %{_unitdir}
+%define _systemdusersdir %{_sysusersdir}
 
 Requires: dbus-libs
 Requires: polkit-libs
@@ -584,8 +584,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %exclude %{_pkglibdir}/libbrlttysvv.so
 %exclude %{_pkglibdir}/libbrlttyxa2.so
 %exclude %{_pkglibdir}/libbrlttyxsc.so
-%exclude %{_pkglibdir}/systemd-*
-%exclude %{_pkglibdir}/udev-*
+%dir %{_pkglibexecdir}
 %{_sysconfdir}/brltty
 %exclude %{_sysconfdir}/brltty/dracut.conf
 %{_datadir}/metainfo/org.a11y.brltty.metainfo.xml
@@ -639,11 +638,11 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brltty-systemd
 %{_systemdunitsdir}/*
 %{_systemdusersdir}/*
-%{_pkglibdir}/systemd-*
+%{_pkglibexecdir}/systemd-*
 
 %files -n brltty-udev
-%{_udevlibdir}/*
-%{_pkglibdir}/udev-*
+%{_udevrulesdir}/*
+%{_pkglibexecdir}/udev-*
 
 %files -n brltty-dracut
 /usr/lib/dracut/modules.d/99brltty

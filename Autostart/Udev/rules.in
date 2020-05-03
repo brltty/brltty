@@ -523,11 +523,11 @@ ACTION=="remove", GOTO="brltty_remove"
 GOTO="brltty_end"
 
 LABEL="brltty_add"
-RUN+="/usr/lib/brltty/udev-wrapper"
+RUN+="@libexecdir@/brltty/udev-wrapper"
 GOTO="brltty_end"
 
 LABEL="brltty_remove"
-RUN+="/usr/lib/brltty/udev-wrapper -C"
+RUN+="@libexecdir@/brltty/udev-wrapper -C"
 GOTO="brltty_end"
 
 LABEL="brltty_upstart"

@@ -1256,6 +1256,8 @@ BRLTTY_ARG_PACKAGE([pgmprivs], [program privileges], [], [dnl
       ;;
 ])
 
+UDEV_DIR=$($PKG_CONFIG --variable=udevdir udev)
+
 BRLTTY_ARG_PACKAGE([service], [system service], [libsystemd], [dnl
    mingw*)
       service_package="windows"
@@ -1270,8 +1272,14 @@ in
    libsystemd)
       SYSTEMD_SERVICE_TYPE="notify"
       SYSTEMD_SERVICE_ARGUMENTS="-n"
+      SYSTEMD_SYSTEMUNIT_DIR=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)
+      SYSTEMD_SYSUSERS_DIR=$($PKG_CONFIG --variable=sysusersdir systemd)
       ;;
 esac
+
+AC_SUBST([UDEV_DIR], ["/usr/lib/udev"])
+AC_SUBST([SYSTEMD_SYSTEMUNIT_DIR], ["/usr/lib/systemd/system"])
+AC_SUBST([SYSTEMD_SYSUSERS_DIR], ["/usr/lib/sysusers.d"])
 
 BRLTTY_HAVE_PACKAGE([systemd], [libsystemd], [
     brltty_libs_save="${LIBS}"
@@ -2081,6 +2089,7 @@ AC_OUTPUT([
    Bindings/Lisp/brlapi_config.lisp
    Bindings/Python/setup.py
    Autostart/Systemd/brltty@.service
+   Autostart/Udev/rules
    Autostart/X11/90xbrlapi
    Android/Application/res/values/configured.xml:Android/Application/res.strings.in
    ${brltty_make_files}
