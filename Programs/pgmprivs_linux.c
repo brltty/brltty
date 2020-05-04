@@ -73,7 +73,7 @@ static const KernelModuleEntry kernelModuleTable[] = {
   { .reason = "for creating virtual devices",
     .install = installUinputModule,
   },
-}; static const unsigned char kernelModuleCount = ARRAY_COUNT(kernelModuleTable);
+}; static const uint8_t kernelModuleCount = ARRAY_COUNT(kernelModuleTable);
 
 static void
 installKernelModules (void) {
@@ -183,7 +183,7 @@ static const RequiredGroupEntry requiredGroupTable[] = {
     .needRead = 1,
     .needWrite = 1,
   },
-}; static const unsigned char requiredGroupCount = ARRAY_COUNT(requiredGroupTable);
+}; static const uint8_t requiredGroupCount = ARRAY_COUNT(requiredGroupTable);
 
 static void
 processRequiredGroups (GroupsProcessor *processGroups, void *data) {
@@ -405,7 +405,7 @@ static const RequiredCapabilityEntry requiredCapabilityTable[] = {
   { .reason = "for creating needed but missing special device files",
     .value = CAP_MKNOD,
   },
-}; static const unsigned char requiredCapabilityCount = ARRAY_COUNT(requiredCapabilityTable);
+}; static const uint8_t requiredCapabilityCount = ARRAY_COUNT(requiredCapabilityTable);
 
 static void
 setRequiredCapabilities (void) {
@@ -586,7 +586,7 @@ static const IsolatedNamespaceEntry isolatedNamespaceTable[] = {
     .summary = "host name and NIS domain name",
   },
   #endif /* CLONE_NEWUTS */
-}; static const unsigned char isolatedNamespaceCount = ARRAY_COUNT(isolatedNamespaceTable);
+}; static const uint8_t isolatedNamespaceCount = ARRAY_COUNT(isolatedNamespaceTable);
 
 static void
 isolateNamespaces (void) {
@@ -621,6 +621,102 @@ isolateNamespaces (void) {
   }
 }
 #endif /* HAVE_SCHED_H */
+
+#ifdef HAVE_LINUX_FILTER_H
+#include <linux/filter.h>
+
+#ifdef HAVE_LINUX_AUDIT_H
+#include <linux/audit.h>
+
+#ifdef HAVE_LINUX_SECCOMP_H
+#include <linux/seccomp.h>
+#endif /* HAVE_LINUX_SECCOMP_H */
+#endif /* HAVE_LINUX_AUDIT_H */
+#endif /* HAVE_LINUX_FILTER_H */
+
+#ifdef SECCOMP_MODE_FILTER
+#include <linux/unistd.h>
+
+static const uint16_t syscallTable[] = {
+#include "syscalls_linux.h"
+}; static const uint8_t syscallCount = ARRAY_COUNT(syscallTable);
+
+#if defined(__i386__)
+#define FILTER_ARCHITECTURE AUDIT_ARCH_I386
+#elif defined(__x86_64__)
+#define FILTER_ARCHITECTURE AUDIT_ARCH_X86_64
+#else /* filter architecture */
+#warning seccomp not supported on this platform
+#define FILTER_ARCHITECTURE 0
+#endif /* filter architecture */
+
+#define FILTER_OFFSET(field) offsetof(struct seccomp_data, field)
+
+#define FILTER_LOAD(field) \
+BPF_STMT(BPF_LD|BPF_W|BPF_ABS, FILTER_OFFSET(field))
+
+#define FILTER_LOAD_ARCHITECTURE FILTER_LOAD(arch)
+#define FILTER_LOAD_SYSCALL FILTER_LOAD(nr)
+
+#define FILTER_RETURN(action, value) \
+BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
+
+#define FILTER_TEST(condition, value, true, false) \
+BPF_JUMP(BPF_JMP|BPF_J##condition|BPF_K, (value), (true), (false))
+
+#define FILTER_VERIFY_ARCHITECTURE \
+FILTER_LOAD_ARCHITECTURE, \
+FILTER_TEST(EQ, FILTER_ARCHITECTURE, 1, 0), \
+FILTER_RETURN(ERRNO, EPERM)
+
+static void
+installSecurityFilter (void) {
+  static const struct sock_filter prologue[] = {
+    FILTER_VERIFY_ARCHITECTURE,
+    FILTER_LOAD_SYSCALL
+  }; static const uint8_t prologueCount = ARRAY_COUNT(prologue);
+
+  static const struct sock_filter epilogue[] = {
+    FILTER_RETURN(LOG, 0),
+    FILTER_RETURN(ALLOW, 0)
+  }; static const uint8_t epilogueCount = ARRAY_COUNT(epilogue);
+
+  struct sock_filter filter[prologueCount + syscallCount + epilogueCount];
+  struct sock_filter *next = filter;
+
+  {
+    const struct sock_filter *pro = prologue;
+    const struct sock_filter *end = pro + prologueCount;
+    while (pro < end) *next++ = *pro++;
+  }
+
+  {
+    const uint16_t *syscall = syscallTable;
+    const uint16_t *end = syscall + syscallCount;
+    uint16_t trueOffset = syscallCount;
+
+    while (syscall < end) {
+      struct sock_filter statement = FILTER_TEST(EQ, *syscall++, trueOffset--, 0);
+      *next++ = statement;
+    }
+  }
+
+  {
+    const struct sock_filter *epi = epilogue;
+    const struct sock_filter *end = epi + epilogueCount;
+    while (epi < end) *next++ = *epi++;
+  }
+
+  struct sock_fprog program = {
+    .filter = filter,
+    .len = next - filter
+  };
+
+  if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program) == -1) {
+    logSystemError("prctl[PR_SET_SECCOMP,SECCOMP_MODE_FILTER]");
+  }
+}
+#endif /* SECCOMP_MODE_FILTER */
 
 typedef void PrivilegesAcquisitionFunction (void);
 typedef void MissingPrivilegesLogger (void);
@@ -667,7 +763,7 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
     .logMissingPrivileges = logMissingCapabilities,
   }
 #endif /* CAP_IS_SUPPORTED */
-}; static const unsigned char privilegesAcquisitionCount = ARRAY_COUNT(privilegesAcquisitionTable);
+}; static const uint8_t privilegesAcquisitionCount = ARRAY_COUNT(privilegesAcquisitionTable);
 
 static void
 acquirePrivileges (void) {
@@ -892,7 +988,7 @@ static const StateDirectoryEntry stateDirectoryTable[] = {
     .getPath = getSocketsDirectory,
     .expectedName = "BrlAPI",
   },
-}; static const unsigned char stateDirectoryCount = ARRAY_COUNT(stateDirectoryTable);
+}; static const uint8_t stateDirectoryCount = ARRAY_COUNT(stateDirectoryTable);
 
 static int
 canCreateStateDirectory (void) {
@@ -1060,4 +1156,6 @@ establishProgramPrivileges (const char *user) {
 
   acquirePrivileges();
   logCurrentCapabilities("after relinquish");
+
+  installSecurityFilter();
 }
