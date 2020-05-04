@@ -4,12 +4,10 @@ BRLTTY on Linux
 
 .. include:: prologue.rst
 
-.. |nologin shell path| replace:: ``/sbin/nologin``
-.. |user information field| replace:: user information (gecos) field
-.. |user information text| replace:: Braille Device Daemon
 .. |super user| replace:: ``root``
-.. |the super user| replace:: the super user (|super user|)
 .. |default user| replace:: ``brltty``
+.. |user information text| replace:: Braille Device Daemon
+.. |nologin shell path| replace:: ``/sbin/nologin``
 
 .. |sockets directory name| replace:: ``BrlAPI``
 .. |updatable directory name| replace:: ``brltty``
@@ -20,11 +18,13 @@ BRLTTY on Linux
 .. |updatable directory path| replace:: ``/var/lib/brltty/``
 .. |writable directory path| replace:: ``/var/run/brltty/``
 
+.. |the super user| replace:: the super user (|super user|)
+.. |user information field| replace:: user information (gecos) field
+.. |configuration directive| replace:: configuration directive (in |configuration file path|)
+.. |environment variable| replace:: environment variable (if the ``-E`` command line option has been specified)
 .. |default unprivileged user| replace:: default unprivileged user (|default user|)
-
 .. |speaker| replace:: built-in PC speaker
 .. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
-
 .. |sockets directory| replace:: sockets directory (usually |sockets directory path|)
 .. |updatable directory| replace:: updatable directory (usually |updatable directory path|)
 .. |writable directory| replace:: writable directory (usually |writable directory path|)
@@ -140,12 +140,8 @@ Explicit Specification
   From highest to lowest precedence, it may be specified via:
 
   * The ``-u`` (``--unprivileged-user=``) command line option.
-
-  * The ``unprivileged-user`` configuration directive
-    (in |configuration file path|).
-
-  * The ``BRLTTY_UNPRIVILEGED_USER`` environment variable
-    (if the ``-E`` command line option has been specified).
+  * The ``unprivileged-user`` |configuration directive|.
+  * The ``BRLTTY_UNPRIVILEGED_USER`` |environment variable|.
 
   If the user isn't explicitly specified,
   or if there's a problem:
@@ -230,8 +226,8 @@ The actual locations of these directories can be specified in a number of ways.
 From highest to lowest precedence, they are:
 
 * command line option
-* configuration directive (in |configuration file path|)
-* environment variable (if the ``-E`` command line option has been specified)
+* |configuration directive|
+* |environment variable|
 * default location (can be changed with ``configure`` at build time)
 
 .. table:: State Directory Location Specification
