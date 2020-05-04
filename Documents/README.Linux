@@ -8,6 +8,7 @@ BRLTTY on Linux
 .. |user information field| replace:: user information (gecos) field
 .. |user information text| replace:: Braille Device Daemon
 .. |super user| replace:: ``root``
+.. |the super user| replace:: the super user (|super user|)
 .. |default user| replace:: ``brltty``
 
 .. |sockets directory name| replace:: ``BrlAPI``
@@ -20,7 +21,6 @@ BRLTTY on Linux
 .. |writable directory path| replace:: ``/var/run/brltty/``
 
 .. |default unprivileged user| replace:: default unprivileged user (|default user|)
-.. |unprivileged user option| replace:: ``-u`` (``--unprivileged-user=``) command line option
 
 .. |speaker| replace:: built-in PC speaker
 .. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
@@ -52,13 +52,10 @@ BRLTTY on Linux
 .. |cap_sys_tty_config reason| replace:: using the |speaker|
 .. |cap_mknod reason| replace:: creating needed but missing device files
 
-For System Administrators
-=========================
+Least Privilege
+===============
 
-When BRLTTY Starts
-------------------
-
-When BRLTTY starts executing as the super user (|super user|),
+When BRLTTY starts executing as |the super user|,
 i.e. when its initial effective user identifier is 0,
 it has unrestricted access to all of the privileged operations
 that the host has to offer.
@@ -66,11 +63,12 @@ While we always endeavour to ensure that BRLTTY isn't abusing this freedom,
 we also don't feel that it's worth risking the possibility
 that our code might be hacked.
 To reduce this possibility, therefore, BRLTTY first
-establishes a `safer execution environment`_ within which to do its job.
-This is a best security practice known as "least privilege".
+establishes a `safer execution environment`_ within which It only has
+access to those `privileged host operations`_ that it actually needs.
+This is a best security practice known as **least privilege**.
 
 When Started by an Unprivileged User
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
 BRLTTY, as of release 6.2, can be started
 by an unprivileged user (not |super user|).
@@ -103,13 +101,14 @@ its environment needs to be prepared as follows:
   i.e. BRLTTY will take care of it by itself,
   if the associated (temporary) capability
   has also been assigned to its executable.
+  They are:
 
   .. table:: Temporary Capabilities for State Directory Prerequisites
 
     ============  ====================
     Prerequisite  Temporary Capability
     ------------  --------------------
-    create        |cap_dac_override|
+    creation      |cap_dac_override|
     ownership     |cap_chown|
     permissions   |cap_fowner|
     ============  ====================
@@ -131,25 +130,48 @@ BRLTTY takes a number of steps to establish a safer execution environment:
 The Unprivileged User
 ~~~~~~~~~~~~~~~~~~~~~
 
-When BRLTTY starts executing as the super user (|super user|),
+When BRLTTY starts executing as |the super user|,
 one of the first things it does is switch
 to executing as an unprivileged user.
-The decision regarding which user to continue executing as
-is made as follows:
+The user is selected as follows:
 
-1) The user specified via the |unprivileged user option|.
-   This step only succeeds if that user exists.
+Explicit Specification
+  This method is only allowed when BRLTTY was started as |the super user|.
+  From highest to lowest precedence, it may be specified via:
 
-2) The |default unprivileged user|.
-   This step only succeeds if that user exists.
-   The actual default user can be configured at build time
-   via the ``--with-unprivileged-user`` option.
-   Specifying ``--without-unprivileged-user``
-   causes this step to be skipped.
+  * The ``-u`` (``--unprivileged-user=``) command line option.
 
-3) The privileged user that started BRLTTY.
+  * The ``unprivileged-user`` configuration directive
+    (in |configuration file path|).
 
-After selecting the user to continue executing as,
+  * The ``BRLTTY_UNPRIVILEGED_USER`` environment variable
+    (if the ``-E`` command line option has been specified).
+
+  If the user isn't explicitly specified,
+  or if there's a problem:
+
+  * The user doesn't exist.
+
+  * The specification is ignored because
+    BRLTTY wasn't started as |the super user|.
+
+  then the default user is selected.
+
+The Default User
+  The default unprivileged user is |default user|.
+  This can be configured at build time via
+  the ``--with-unprivileged-user`` option.
+  If there's a problem:
+
+  * the user doesn't exist.
+
+  * There is no default user because
+    BRLTTY was configured with the ``--without-unprivileged-user`` option.
+
+  then BRLTTY continues to execute as |the super user|.
+  In this case, it still establishes its `safer execution environment`_.
+
+After having successfully switched to executing as an unprivileged user,
 the following is done:
 
 * Ensure that all of the user identifiers
@@ -165,8 +187,11 @@ the following is done:
   * Changing the working directory.
   * Setting the ``HOME`` environment variable.
 
-  If it isn't defined, or if BRLTTY is unable to switch to it,
-  then the |updatable directory| is used instead.
+  The |updatable directory| is used instead if:
+
+  * The user's home directory isn't defined.
+  * BRLTTY is unable to switch to the user's home directory.
+  * BRLTTY had to continue executing as |the super user|.
 
 State Directories
 ~~~~~~~~~~~~~~~~~
@@ -226,7 +251,7 @@ After having successfully switched to executing as `the unprivileged user`_,
 BRLTTY attempts to gain full access to its state directories.
 The most common case where this is necessary is
 to automate the transition from an older release of BRLTTY
-from the days when it had to execute as the super user (|super user|).
+from the days when it had to execute as |the super user|.
 Another (much rarer) case would be
 when transitioning from one unprivileged user to another.
 
@@ -241,7 +266,7 @@ The following actions are taken for each of the state directories:
 * If it doesn't exist then it is created.
   This usually requires the |cap_dac_override| (temporary) capability
   because it's usually a subdirectory of a directory
-  that can only be written to by the super user (|super user|),
+  that can only be written to by |the super user|,
   e.g. ``/var/lib/``.
 
 * Its owning user and group are changed to be
@@ -285,7 +310,8 @@ Preparing the Environment
 Creating the Unprivileged User
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In most cases, it should be a system user.
+We recommend that `the unprivileged user`_ be named |default user|,
+and that it be a system user.
 
 The user's primary group should be user-specific.
 Ideally, it should have the same name as the user.
@@ -315,7 +341,7 @@ The host command to create a user is:
 
 .. parsed-literal:: useradd *option* ... *name*
 
-It must be run as the super user (|super user|).
+It must be run as |the super user|.
 
 It accepts a lot of options.
 For all of the details, run this command::
@@ -476,7 +502,7 @@ is::
 
   setcap cap_setgid,cap_chown,cap_fowner,cap_dac_override,cap_sys_module,cap_sys_admin,cap_sys_tty_config,cap_mknod+p /path/to/brltty
 
-It must be run as the super user (|super user|).
+It must be run as |the super user|.
 
 The ``brltty-setcaps`` Script
 `````````````````````````````
@@ -720,7 +746,7 @@ Writing to SYSFS Files
 The ``SYSFS`` virtual file system (usually mounted at ``/sys/``)
 contains some files that BRLTTY occasionally needs to write to.
 While they can be read by anyone,
-they can only be written to by the super user (|super user|).
+they can only be written to by |the super user|.
 BRLTTY needs to be able to write to these files
 for (at least) the following reasons:
 
@@ -737,7 +763,7 @@ Creating Virtual Devices via Uinput
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The |uinput device| is usually only readable and writable
-by the super user (|super user|).
+by |the super user|.
 Without any group and/or others access,
 it's impossible for BRLTTY to access it
 after having switched to `the unprivileged user`_.

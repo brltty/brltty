@@ -12,7 +12,7 @@
 # Foundation; either version 2.1 of the License, or (at your option) any
 # later version. Please see the file LICENSE-LGPL for details.
 #
-# Web Page: http://brltty.app/
+# Web Page: http://BRLTTY.app/
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
@@ -561,7 +561,13 @@
 # The pid-file directive specifies the absolute path to a file that will
 # contain BRLTTY's process identifier. It is removed when BRLTTY terminates.
 # (can be overridden with the -P [--pid-file=] option)
-#pid-file /run/brltty.pid
+#pid-file @WRITABLE_DIRECTORY@/brltty.pid
+
+# The unprivileged-user directive specifies the unprivileged user to switch
+# to if BRLTTY was started as a privileged user (i.e. as root).
+# If not specified, "@unprivileged_user@" will be used.
+# (can be overridden with the -u [--unprivileged-user=] option)
+#unprivileged-user @unprivileged_user@
 
 # The updatable-directory directive specifies the absolute path to a directory
 # which contains files that can be updated (preferences, saved clipboard, etc).
