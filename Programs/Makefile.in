@@ -1077,6 +1077,7 @@ install-tools: all-tools install-program-directories
 	$(INSTALL_DATA) $(SRC_TOP)brltty-prologue.sh $(INSTALL_PROGRAM_DIRECTORY)
 	$(INSTALL_SCRIPT) $(SRC_TOP)brltty-mkuser $(INSTALL_PROGRAM_DIRECTORY)
 	$(INSTALL_SCRIPT) $(SRC_TOP)brltty-setcaps $(INSTALL_PROGRAM_DIRECTORY)
+	$(INSTALL_SCRIPT) $(SRC_TOP)brltty-genkey $(INSTALL_PROGRAM_DIRECTORY)
 
 XBRLAPI_X11_AUTOSTART_FILE = 90xbrlapi
 XBRLAPI_GDM_AUTOSTART_FILE = xbrlapi.desktop
@@ -1169,7 +1170,7 @@ install-api-manpages: install-man3-directory
 install-api-key:
 	file=$(sysconfdir)/$(API_AUTHFILE) && \
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
-	then umask 077 && $(SRC_DIR)/brltty-genkey $$file; fi
+	then $(SRC_TOP)brltty-genkey -f $$file; fi
 
 API_POLICY_FILE = org.a11y.brlapi.policy
 install-api-policy: install-apipol-directory

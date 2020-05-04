@@ -17,49 +17,41 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Generate a key for BrlAPI.
-# Usage: brltty-genkey [/path/to/file]
-
-programName="${0}"
-programMessage() {
-   echo "${programName}: ${1}"
-}
-syntaxError() {
-   programMessage "${1}"
-   exit 2
-}
-
-try() {
-   ("${@}"; exit "${?}") 2>/dev/null && exit 0
-}
-
-if [ "${#}" -eq 0 ]
-then
-   . "`dirname "${0}"`/brltty-config" || exit "${?}"
-   file="${BRLTTY_EXECUTE_ROOT}${sysconfdir}/${BRLAPI_AUTHKEYFILE}"
-elif [ "${#}" -eq 1 ]
-then
-   file="${1}"
-else
-   syntaxError "too many parameters."
-fi
-
+set -e
 umask 077
 
-try mcookie >"${file}"
+. "`dirname "${0}"`/brltty-prologue.sh"
+. "${programDirectory}/brltty-config.sh"
+
+defaultKeyFile="${BRLTTY_EXECUTE_ROOT}${BRLTTY_SYSCONFDIR}/${BRLAPI_AUTHKEYFILE}"
+
+addProgramOption f string.path keyFile "the BrlAPI key file" "${defaultKeyFile}"
+parseProgramArguments "${@}"
+
+try() {
+   ("${@}"; exit "${?}") 2>/dev/null && {
+      logMessage task "key generated"
+      exit 0
+   }
+}
+
+[ -n "${keyFile}" ] || keyFile="${defaultKeyFile}"
+
+logMessage step "trying mcookie"
+try mcookie >"${keyFile}"
 
 for device in "/dev/urandom" "/dev/random"
 do
    [ -c "${device}" -a -r "${device}" ] && {
-      try dd if="${device}" of="${file}" bs=32 count=1
+      logMessage step "trying ${device}"
+      try dd if="${device}" of="${keyFile}" bs=32 count=1
    }
 done
 
+logMessage step "trying \$RANDOM"
 key="${RANDOM}"
-[ -n "${key}" ] && {
-   try echo >"${file}" "${key}"
-}
+[ -n "${key}" ] && try echo >"${keyFile}" "${key}"
 
-programMessage "no known mechanism is supported."
-rm -f -- "${file}"
+rm -f -- "${keyFile}"
+semanticError "no supported mechanism is available"
 exit 3
