@@ -655,7 +655,7 @@ typedef struct {
     struct sock_filter *array;
     size_t size;
     size_t count;
-  } statement;
+  } instruction;
 } SecurityFilter;
 
 static SecurityFilter *
@@ -665,9 +665,9 @@ sfNewObject (void) {
   if ((filter = malloc(sizeof(*filter)))) {
     memset(filter, 0, sizeof(*filter));
 
-    filter->statement.array = NULL;
-    filter->statement.size = 0;
-    filter->statement.count = 0;
+    filter->instruction.array = NULL;
+    filter->instruction.size = 0;
+    filter->instruction.count = 0;
 
     return filter;
   } else {
@@ -679,36 +679,36 @@ sfNewObject (void) {
 
 static void
 sfDestroyObject (SecurityFilter *filter) {
-  if (filter->statement.array) free(filter->statement.array);
+  if (filter->instruction.array) free(filter->instruction.array);
   free(filter);
 }
 
 static int
-sfAddStatement (SecurityFilter *filter, const struct sock_filter *statement) {
-  if (filter->statement.count == filter->statement.size) {
-    size_t newSize = filter->statement.size? filter->statement.size<<1: 0X10;
+sfAddInstruction (SecurityFilter *filter, const struct sock_filter *instruction) {
+  if (filter->instruction.count == filter->instruction.size) {
+    size_t newSize = filter->instruction.size? filter->instruction.size<<1: 0X10;
     struct sock_filter *newArray;
 
-    if (!(newArray = realloc(filter->statement.array, ARRAY_SIZE(newArray, newSize)))) {
+    if (!(newArray = realloc(filter->instruction.array, ARRAY_SIZE(newArray, newSize)))) {
       logMallocError();
       return 0;
     }
 
-    filter->statement.array = newArray;
-    filter->statement.size = newSize;
+    filter->instruction.array = newArray;
+    filter->instruction.size = newSize;
   }
 
-  filter->statement.array[filter->statement.count++] = *statement;
+  filter->instruction.array[filter->instruction.count++] = *instruction;
   return 1;
 }
 
 static int
-sfAddStatements (SecurityFilter *filter, const struct sock_filter *statements, size_t count) {
-  const struct sock_filter *stmt = statements;
-  const struct sock_filter *end = stmt + count;
+sfAddInstructions (SecurityFilter *filter, const struct sock_filter *instructions, size_t count) {
+  const struct sock_filter *cur = instructions;
+  const struct sock_filter *end = cur + count;
 
-  while (stmt < end) {
-    if (!sfAddStatement(filter, stmt++)) return 0;
+  while (cur < end) {
+    if (!sfAddInstruction(filter, cur++)) return 0;
   }
 
   return 1;
@@ -753,7 +753,7 @@ makeSecurityFilter (void) {
         SECURITY_FILTER_LOAD_SYSCALL
       };
 
-      if (!sfAddStatements(filter, prologue, ARRAY_COUNT(prologue))) goto failed;
+      if (!sfAddInstructions(filter, prologue, ARRAY_COUNT(prologue))) goto failed;
     }
 
     {
@@ -762,8 +762,8 @@ makeSecurityFilter (void) {
       uint16_t trueOffset = syscallCount;
 
       while (sfe < end) {
-        struct sock_filter statement = SECURITY_FILTER_TEST(EQ, sfe->value, trueOffset--, 0);
-        if (!sfAddStatement(filter, &statement)) goto failed;
+        struct sock_filter instruction = SECURITY_FILTER_TEST(EQ, sfe->value, trueOffset--, 0);
+        if (!sfAddInstruction(filter, &instruction)) goto failed;
         sfe += 1;
       }
     }
@@ -774,7 +774,7 @@ makeSecurityFilter (void) {
         SECURITY_FILTER_RETURN(ALLOW, 0)
       };
 
-      if (!sfAddStatements(filter, epilogue, ARRAY_COUNT(epilogue))) goto failed;
+      if (!sfAddInstructions(filter, epilogue, ARRAY_COUNT(epilogue))) goto failed;
     }
 
     return filter;
@@ -791,8 +791,8 @@ installSecurityFilter (void) {
 
   if (filter) {
     struct sock_fprog program = {
-      .filter = filter->statement.array,
-      .len = filter->statement.count
+      .filter = filter->instruction.array,
+      .len = filter->instruction.count
     };
 
     if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program) == -1) {
