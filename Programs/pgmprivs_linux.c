@@ -622,98 +622,184 @@ isolateNamespaces (void) {
 }
 #endif /* HAVE_SCHED_H */
 
+#ifdef HAVE_LINUX_AUDIT_H
+#include <linux/audit.h>
+
+#if defined(__i386__)
+#define SECURITY_FILTER_ARCHITECTURE AUDIT_ARCH_I386
+#elif defined(__x86_64__)
+#define SECURITY_FILTER_ARCHITECTURE AUDIT_ARCH_X86_64
+#else /* security filter architecture */
+#warning seccomp not supported on this platform
+#endif /* security filter architecture */
+#endif /* HAVE_LINUX_AUDIT_H */
+
+#ifdef SECURITY_FILTER_ARCHITECTURE
 #ifdef HAVE_LINUX_FILTER_H
 #include <linux/filter.h>
 
-#ifdef HAVE_LINUX_AUDIT_H
-#include <linux/audit.h>
+struct SecurityFilterEntry {
+  uint32_t value;
+  uint8_t argumentNumber;
+  const struct SecurityFilterEntry *argumentTable;
+}; typedef struct SecurityFilterEntry SecurityFilterEntry;
+
+#define SECURITY_FILTER_BEGIN(name) \
+static const SecurityFilterEntry name##Table[] = {
+
+#define SECURITY_FILTER_END(name) \
+{0}}; static const uint8_t name##Count = ARRAY_COUNT(name##Table) - 1;
+
+typedef struct {
+  struct {
+    struct sock_filter *array;
+    size_t size;
+    size_t count;
+  } statement;
+} SecurityFilter;
+
+static SecurityFilter *
+sfNewObject (void) {
+  SecurityFilter *filter;
+
+  if ((filter = malloc(sizeof(*filter)))) {
+    memset(filter, 0, sizeof(*filter));
+
+    filter->statement.array = NULL;
+    filter->statement.size = 0;
+    filter->statement.count = 0;
+
+    return filter;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static void
+sfDestroyObject (SecurityFilter *filter) {
+  if (filter->statement.array) free(filter->statement.array);
+  free(filter);
+}
+
+static int
+sfAddStatement (SecurityFilter *filter, const struct sock_filter *statement) {
+  if (filter->statement.count == filter->statement.size) {
+    size_t newSize = filter->statement.size? filter->statement.size<<1: 0X10;
+    struct sock_filter *newArray;
+
+    if (!(newArray = realloc(filter->statement.array, ARRAY_SIZE(newArray, newSize)))) {
+      logMallocError();
+      return 0;
+    }
+
+    filter->statement.array = newArray;
+    filter->statement.size = newSize;
+  }
+
+  filter->statement.array[filter->statement.count++] = *statement;
+  return 1;
+}
+
+static int
+sfAddStatements (SecurityFilter *filter, const struct sock_filter *statements, size_t count) {
+  const struct sock_filter *stmt = statements;
+  const struct sock_filter *end = stmt + count;
+
+  while (stmt < end) {
+    if (!sfAddStatement(filter, stmt++)) return 0;
+  }
+
+  return 1;
+}
+
+#define SECURITY_FILTER_FIELD_OFFSET(field) offsetof(struct seccomp_data, field)
+
+#define SECURITY_FILTER_LOAD_FIELD(field) \
+BPF_STMT(BPF_LD|BPF_W|BPF_ABS, SECURITY_FILTER_FIELD_OFFSET(field))
+
+#define SECURITY_FILTER_LOAD_ARCHITECTURE SECURITY_FILTER_LOAD_FIELD(arch)
+#define SECURITY_FILTER_LOAD_SYSCALL SECURITY_FILTER_LOAD_FIELD(nr)
+
+#define SECURITY_FILTER_TEST(condition, value, true, false) \
+BPF_JUMP(BPF_JMP|BPF_J##condition|BPF_K, (value), (true), (false))
 
 #ifdef HAVE_LINUX_SECCOMP_H
 #include <linux/seccomp.h>
 #endif /* HAVE_LINUX_SECCOMP_H */
-#endif /* HAVE_LINUX_AUDIT_H */
 #endif /* HAVE_LINUX_FILTER_H */
+#endif /* SECURITY_FILTER_ARCHITECTURE */
 
 #ifdef SECCOMP_MODE_FILTER
-#include <linux/unistd.h>
-
-static const uint16_t syscallTable[] = {
 #include "syscalls_linux.h"
-}; static const uint8_t syscallCount = ARRAY_COUNT(syscallTable);
 
-#if defined(__i386__)
-#define FILTER_ARCHITECTURE AUDIT_ARCH_I386
-#elif defined(__x86_64__)
-#define FILTER_ARCHITECTURE AUDIT_ARCH_X86_64
-#else /* filter architecture */
-#warning seccomp not supported on this platform
-#define FILTER_ARCHITECTURE 0
-#endif /* filter architecture */
-
-#define FILTER_OFFSET(field) offsetof(struct seccomp_data, field)
-
-#define FILTER_LOAD(field) \
-BPF_STMT(BPF_LD|BPF_W|BPF_ABS, FILTER_OFFSET(field))
-
-#define FILTER_LOAD_ARCHITECTURE FILTER_LOAD(arch)
-#define FILTER_LOAD_SYSCALL FILTER_LOAD(nr)
-
-#define FILTER_RETURN(action, value) \
+#define SECURITY_FILTER_RETURN(action, value) \
 BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
 
-#define FILTER_TEST(condition, value, true, false) \
-BPF_JUMP(BPF_JMP|BPF_J##condition|BPF_K, (value), (true), (false))
+#define SECURITY_FILTER_VERIFY_ARCHITECTURE \
+SECURITY_FILTER_LOAD_ARCHITECTURE, \
+SECURITY_FILTER_TEST(EQ, SECURITY_FILTER_ARCHITECTURE, 1, 0), \
+SECURITY_FILTER_RETURN(ERRNO, EPERM)
 
-#define FILTER_VERIFY_ARCHITECTURE \
-FILTER_LOAD_ARCHITECTURE, \
-FILTER_TEST(EQ, FILTER_ARCHITECTURE, 1, 0), \
-FILTER_RETURN(ERRNO, EPERM)
+static SecurityFilter *
+makeSecurityFilter (void) {
+  SecurityFilter *filter = sfNewObject();
+
+  if (filter) {
+    {
+      static const struct sock_filter prologue[] = {
+        SECURITY_FILTER_VERIFY_ARCHITECTURE,
+        SECURITY_FILTER_LOAD_SYSCALL
+      };
+
+      if (!sfAddStatements(filter, prologue, ARRAY_COUNT(prologue))) goto failed;
+    }
+
+    {
+      const SecurityFilterEntry *sfe = syscallTable;
+      const SecurityFilterEntry *end = sfe + syscallCount;
+      uint16_t trueOffset = syscallCount;
+
+      while (sfe < end) {
+        struct sock_filter statement = SECURITY_FILTER_TEST(EQ, sfe->value, trueOffset--, 0);
+        if (!sfAddStatement(filter, &statement)) goto failed;
+        sfe += 1;
+      }
+    }
+
+    {
+      static const struct sock_filter epilogue[] = {
+        SECURITY_FILTER_RETURN(LOG, 0),
+        SECURITY_FILTER_RETURN(ALLOW, 0)
+      };
+
+      if (!sfAddStatements(filter, epilogue, ARRAY_COUNT(epilogue))) goto failed;
+    }
+
+    return filter;
+  failed:
+    sfDestroyObject(filter);
+  }
+
+  return NULL;
+}
 
 static void
 installSecurityFilter (void) {
-  static const struct sock_filter prologue[] = {
-    FILTER_VERIFY_ARCHITECTURE,
-    FILTER_LOAD_SYSCALL
-  }; static const uint8_t prologueCount = ARRAY_COUNT(prologue);
+  SecurityFilter *filter = makeSecurityFilter();
 
-  static const struct sock_filter epilogue[] = {
-    FILTER_RETURN(LOG, 0),
-    FILTER_RETURN(ALLOW, 0)
-  }; static const uint8_t epilogueCount = ARRAY_COUNT(epilogue);
+  if (filter) {
+    struct sock_fprog program = {
+      .filter = filter->statement.array,
+      .len = filter->statement.count
+    };
 
-  struct sock_filter filter[prologueCount + syscallCount + epilogueCount];
-  struct sock_filter *next = filter;
-
-  {
-    const struct sock_filter *pro = prologue;
-    const struct sock_filter *end = pro + prologueCount;
-    while (pro < end) *next++ = *pro++;
-  }
-
-  {
-    const uint16_t *syscall = syscallTable;
-    const uint16_t *end = syscall + syscallCount;
-    uint16_t trueOffset = syscallCount;
-
-    while (syscall < end) {
-      struct sock_filter statement = FILTER_TEST(EQ, *syscall++, trueOffset--, 0);
-      *next++ = statement;
+    if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program) == -1) {
+      logSystemError("prctl[PR_SET_SECCOMP,SECCOMP_MODE_FILTER]");
     }
-  }
 
-  {
-    const struct sock_filter *epi = epilogue;
-    const struct sock_filter *end = epi + epilogueCount;
-    while (epi < end) *next++ = *epi++;
-  }
-
-  struct sock_fprog program = {
-    .filter = filter,
-    .len = next - filter
-  };
-
-  if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program) == -1) {
-    logSystemError("prctl[PR_SET_SECCOMP,SECCOMP_MODE_FILTER]");
+    sfDestroyObject(filter);
   }
 }
 #endif /* SECCOMP_MODE_FILTER */
