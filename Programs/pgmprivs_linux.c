@@ -31,6 +31,7 @@
 #include "pgmprivs.h"
 #include "system_linux.h"
 #include "file.h"
+#include "parse.h"
 
 static int
 amPrivilegedUser (void) {
@@ -742,11 +743,50 @@ SECURITY_FILTER_LOAD_ARCHITECTURE, \
 SECURITY_FILTER_TEST(EQ, SECURITY_FILTER_ARCHITECTURE, 1, 0), \
 SECURITY_FILTER_RETURN(ERRNO, EPERM)
 
-static SecurityFilter *
-makeSecurityFilter (void) {
-  SecurityFilter *filter = sfNewObject();
+static const struct sock_filter *
+getRejectInstruction (const char *modeKeyword) {
+  typedef struct {
+    const char *keyword;
+    struct sock_filter instruction;
+  } ModeEntry;
 
-  if (filter) {
+  static const ModeEntry modeTable[] = {
+    { .keyword = "no",
+      .instruction = SECURITY_FILTER_RETURN(ALLOW, 0)
+    },
+
+    { .keyword = "log",
+      .instruction = SECURITY_FILTER_RETURN(LOG, 0)
+    },
+
+    { .keyword = "fail",
+      .instruction = SECURITY_FILTER_RETURN(ERRNO, EPERM)
+    },
+
+    { .keyword = "kill",
+      .instruction = SECURITY_FILTER_RETURN(KILL_PROCESS, 0)
+    },
+  };
+
+  unsigned int choice;
+  int valid = validateChoiceEx(&choice, modeKeyword, modeTable, sizeof(modeTable[0]));
+  const ModeEntry *mode = &modeTable[choice];
+
+  if (!valid) {
+    logMessage(LOG_WARNING,
+      "unknown SECCOMP mode: %s: assuming %s",
+      modeKeyword, mode->keyword
+    );
+  }
+
+  return &mode->instruction;
+}
+
+static SecurityFilter *
+makeSecurityFilter (const struct sock_filter *rejectInstruction) {
+  SecurityFilter *filter;
+
+  if ((filter = sfNewObject())) {
     {
       static const struct sock_filter prologue[] = {
         SECURITY_FILTER_VERIFY_ARCHITECTURE,
@@ -769,12 +809,9 @@ makeSecurityFilter (void) {
     }
 
     {
-      static const struct sock_filter epilogue[] = {
-        SECURITY_FILTER_RETURN(LOG, 0),
-        SECURITY_FILTER_RETURN(ALLOW, 0)
-      };
-
-      if (!sfAddInstructions(filter, epilogue, ARRAY_COUNT(epilogue))) goto failed;
+      if (!sfAddInstruction(filter, rejectInstruction)) goto failed;
+      static const struct sock_filter allow = SECURITY_FILTER_RETURN(ALLOW, 0);
+      if (!sfAddInstruction(filter, &allow)) goto failed;
     }
 
     return filter;
@@ -786,20 +823,24 @@ makeSecurityFilter (void) {
 }
 
 static void
-installSecurityFilter (void) {
-  SecurityFilter *filter = makeSecurityFilter();
+installSecurityFilter (const char *modeKeyword) {
+  const struct sock_filter *rejectInstruction = getRejectInstruction(modeKeyword);
 
-  if (filter) {
-    struct sock_fprog program = {
-      .filter = filter->instruction.array,
-      .len = filter->instruction.count
-    };
+  if ((rejectInstruction->k & SECCOMP_RET_ACTION_FULL) != SECCOMP_RET_ALLOW) {
+    SecurityFilter *filter;
 
-    if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program) == -1) {
-      logSystemError("prctl[PR_SET_SECCOMP,SECCOMP_MODE_FILTER]");
+    if ((filter = makeSecurityFilter(rejectInstruction))) {
+      struct sock_fprog program = {
+        .filter = filter->instruction.array,
+        .len = filter->instruction.count
+      };
+
+      if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program) == -1) {
+        logSystemError("prctl[PR_SET_SECCOMP,SECCOMP_MODE_FILTER]");
+      }
+
+      sfDestroyObject(filter);
     }
-
-    sfDestroyObject(filter);
   }
 }
 #endif /* SECCOMP_MODE_FILTER */
@@ -1207,12 +1248,13 @@ claimStateDirectories (void) {
 #endif /* HAVE_PWD_H */
 
 typedef enum {
-  PARM_USER
+  PARM_SECCOMP,
+  PARM_USER,
 } Parameters;
 
 const char *const *
 getPrivilegeParameterNames (void) {
-  static const char *const names[] = {"user", NULL};
+  static const char *const names[] = {"seccomp", "user", NULL};
   return names;
 }
 
@@ -1268,5 +1310,5 @@ establishProgramPrivileges (char **specifiedParameters, char **configuredParamet
   acquirePrivileges();
   logCurrentCapabilities("after relinquish");
 
-  installSecurityFilter();
+  installSecurityFilter(specifiedParameters[PARM_SECCOMP]);
 }

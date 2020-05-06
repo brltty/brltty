@@ -610,6 +610,7 @@
 # (can be overridden with the -u [--privilege-parameters=] option)
 #privilege-parameters platform:name=value,...
 
+#privilege-parameters lx:seccomp=no # [no,log,fail,kill]
 #privilege-parameters lx:user=brltty
 
 
