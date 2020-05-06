@@ -113,17 +113,18 @@ AC_SUBST([$1_table])])
 
 AC_DEFUN([BRLTTY_ARG_PARAMETERS], [dnl
 BRLTTY_ARG_WITH(
-   [$1-parameters], [$3PARAMETER=SETTING... (comma-separated)],
+   [$1-parameters], [$3NAME=VALUE... (comma-separated)],
    [default parameters for the $2],
-   [$1_parameters], [""]
+   [$1_parameters], ["yes"]
 )
 if test "${$1_parameters}" = "no"
 then
    $1_parameters=""
 elif test "${$1_parameters}" = "yes"
 then
-   $1_parameters=""
+   $1_parameters="$4"
 fi
+AC_SUBST([$1_parameters])
 AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_parameters]), ["${$1_parameters}"],
                    [Define this to be a string containing the default parameters for the $2.])
 BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])

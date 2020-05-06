@@ -272,7 +272,7 @@
 # The braille-parameters directive passes non-generic parameters through
 # to the braille driver.
 # (can be overridden with the -B [--braille-parameters=] option)
-#braille-parameters driver:parameter=setting,...
+#braille-parameters driver:name=value,...
 
 # Alva Braille Driver Parameters
 #braille-parameters al:RotatedCells=no # [no,yes]
@@ -380,7 +380,7 @@
 # The speech-parameters directive passes non-generic parameters through
 # to the speech driver.
 # (can be overridden with the -S [--speech-parameters=] option)
-#speech-parameters driver:parameter=setting,...
+#speech-parameters driver:name=value,...
 
 # eSpeak Speech Driver Parameters
 #speech-parameters es:MaxRate=450 # [80-]
@@ -563,12 +563,6 @@
 # (can be overridden with the -P [--pid-file=] option)
 #pid-file @WRITABLE_DIRECTORY@/brltty.pid
 
-# The unprivileged-user directive specifies the unprivileged user to switch
-# to if BRLTTY was started as a privileged user (i.e. as root).
-# If not specified, "@unprivileged_user@" will be used.
-# (can be overridden with the -u [--unprivileged-user=] option)
-#unprivileged-user @unprivileged_user@
-
 # The updatable-directory directive specifies the absolute path to a directory
 # which contains files that can be updated (preferences, saved clipboard, etc).
 # If not specified, "@UPDATABLE_DIRECTORY@" will be used.
@@ -605,6 +599,20 @@
 #stop-message @PACKAGE_NAME@\sstopped
 
 
+######################################
+# Privilege Establishment Parameters #
+######################################
+
+# The privilege-parameters directive specifies the default privilege
+# establishment parameters to use when BRLTTY is started by a privileged
+# user (e.g. by root on a Linux/Unix system). The configured defaults are:
+# "@privilege_parameters@".
+# (can be overridden with the -u [--privilege-parameters=] option)
+#privilege-parameters platform:name=value,...
+
+#privilege-parameters lx:user=brltty
+
+
 ################################################
 # Application Programming Interface Parameters #
 ################################################
@@ -616,7 +624,7 @@
 # The api-parameters directive passes parameters to the Application
 # Programming Interface.
 # (can be overridden with the -A [--api-parameters=] option)
-#api-parameters parameter=setting,...
+#api-parameters name=value,...
 
 #api-parameters Auth=keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@	# Require authentication key
 #api-parameters Auth=user:joe		# Allow some local user
@@ -651,7 +659,7 @@
 # The screen-parameters directive passes non-generic parameters through
 # to the screen driver.
 # (can be overridden with the -X [--screen-parameters=] option)
-#screen-parameters driver:parameter=setting,...
+#screen-parameters driver:name=value,...
 
 # AtSpi Screen Driver Parameters
 #screen-parameters as:Type=text+terminal # [text,terminal,all]+...

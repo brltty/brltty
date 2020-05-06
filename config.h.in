@@ -302,8 +302,8 @@ extern "C" {
 /* Define this if BRLTTY is to be run as init. */
 #undef INIT_PATH
 
-/* Define this to be a string containing the name of the unprivileged user to switch to. */
-#undef UNPRIVILEGED_USER
+/* Define this to be a string containing the default parameters for the privilege establishment stage. */
+#undef PRIVILEGE_PARAMETERS
 
 /* Define this if standard error is to be redirected to a file. */
 #undef STDERR_PATH

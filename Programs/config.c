@@ -170,7 +170,7 @@ static const char *const optionStrings_CancelExecution[] = {
 
 static char *opt_promptPatterns;
 
-static char *opt_unprivilegedUser;
+static char *opt_privilegeParameters;
 static char *opt_pidFile;
 
 static char *opt_configurationFile;
@@ -320,11 +320,12 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
   { .letter = 'u',
-    .word = "unprivileged-user",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("user"),
-    .setting.string = &opt_unprivilegedUser,
-    .description = strtext("Name of unprivileged user to switch to.")
+    .word = "privilege-parameters",
+    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_Environ,
+    .argument = strtext("name=value,..."),
+    .setting.string = &opt_privilegeParameters,
+    .internal.setting = PRIVILEGE_PARAMETERS,
+    .description = strtext("Parameters for the privilege establishment stage.")
   },
 
   { .letter = 'C',
@@ -742,6 +743,25 @@ setLogLevels (void) {
   }
 }
 
+static void
+establishPrivileges (void) {
+  const char *platform = getPrivilegeParametersPlatform();
+  const char *const *names = getPrivilegeParameterNames();
+  char **specifiedParameters = getParameters(names, platform, opt_privilegeParameters);
+
+  if (specifiedParameters) {
+    logParameters(names, specifiedParameters, gettext("Privilege Parameter"));
+    char **configuredParameters = getParameters(names, platform, PRIVILEGE_PARAMETERS);
+
+    if (configuredParameters) {
+      establishProgramPrivileges(specifiedParameters, configuredParameters);
+      deallocateStrings(configuredParameters);
+    }
+
+    deallocateStrings(specifiedParameters);
+  }
+}
+
 ProgramExitStatus
 brlttyPrepare (int argc, char *argv[]) {
   {
@@ -783,7 +803,7 @@ brlttyPrepare (int argc, char *argv[]) {
   logProgramBanner();
   logProperty(opt_logLevel, "logLevel", gettext("Log Level"));
 
-  establishProgramPrivileges(opt_unprivilegedUser);
+  establishPrivileges();
   return PROG_EXIT_SUCCESS;
 }
 
@@ -1324,8 +1344,7 @@ startApiServer (void) {
 
     if (apiParameters) {
       api.logServerIdentity(0);
-      logParameters(parameters, apiParameters,
-                    gettext("API Parameter"));
+      logParameters(parameters, apiParameters, gettext("API Parameter"));
 
       if (!opt_verify) {
         if (api.startServer(apiParameters)) {

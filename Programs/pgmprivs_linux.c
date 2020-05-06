@@ -994,17 +994,21 @@ switchToUser (const char *user, int *haveHomeDirectory) {
 }
 
 static int
-switchUser (const char *user, int *haveHomeDirectory) {
+switchUser (const char *specifiedUser, const char *configuredUser, int *haveHomeDirectory) {
+  const char *user;
+
   if (amPrivilegedUser()) {
-    if (*user) {
-      if (switchToUser(user, haveHomeDirectory)) {
-        return 1;
+    if (strcmp(specifiedUser, configuredUser) != 0) {
+      if (*(user = specifiedUser)) {
+        if (switchToUser(user, haveHomeDirectory)) {
+          return 1;
+        }
       }
     }
 
-    if (*(user = UNPRIVILEGED_USER)) {
+    if (*(user = configuredUser)) {
       if (switchToUser(user, haveHomeDirectory)) return 1;
-      logMessage(LOG_WARNING, "couldn't switch to the default unprivileged user: %s", user);
+      logMessage(LOG_WARNING, "couldn't switch to the configured unprivileged user: %s", user);
     } else {
       logMessage(LOG_WARNING, "unprivileged user not configured");
     }
@@ -1029,7 +1033,7 @@ switchUser (const char *user, int *haveHomeDirectory) {
       logMessage(LOG_NOTICE, "executing as the invoking user: %s", name);
     }
 
-    if (*(user = UNPRIVILEGED_USER)) {
+    if (*(user = configuredUser)) {
       struct passwd *pwd;
 
       if ((pwd = getpwnam(user))) {
@@ -1202,8 +1206,23 @@ claimStateDirectories (void) {
 }
 #endif /* HAVE_PWD_H */
 
+typedef enum {
+  PARM_USER
+} Parameters;
+
+const char *const *
+getPrivilegeParameterNames (void) {
+  static const char *const names[] = {"user", NULL};
+  return names;
+}
+
+const char *
+getPrivilegeParametersPlatform (void) {
+  return "lx";
+}
+
 void
-establishProgramPrivileges (const char *user) {
+establishProgramPrivileges (char **specifiedParameters, char **configuredParameters) {
   logCurrentCapabilities("at start");
 
   setSafePath();
@@ -1223,7 +1242,13 @@ establishProgramPrivileges (const char *user) {
     int haveHomeDirectory = 0;
 
 #ifdef HAVE_PWD_H
-    if (switchUser(user, &haveHomeDirectory)) {
+    int switched = switchUser(
+      specifiedParameters[PARM_USER],
+      configuredParameters[PARM_USER],
+      &haveHomeDirectory
+    );
+
+    if (switched) {
       umask(umask(0) & ~S_IRWXG);
       claimStateDirectories();
     } else {

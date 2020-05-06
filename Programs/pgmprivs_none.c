@@ -20,6 +20,17 @@
 
 #include "pgmprivs.h"
 
+const char *const *
+getPrivilegeParameterNames (void) {
+  static const char *const names[] = {NULL};
+  return names;
+}
+
+const char *
+getPrivilegeParametersPlatform (void) {
+  return "no";
+}
+
 void
-establishProgramPrivileges (const char *user) {
+establishProgramPrivileges (char **specifiedParameters, char **configuredParameters) {
 }

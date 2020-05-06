@@ -23,7 +23,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void establishProgramPrivileges (const char *user);
+extern const char *const *getPrivilegeParameterNames (void);
+extern const char *getPrivilegeParametersPlatform (void);
+extern void establishProgramPrivileges (char **specifiedParameters, char **configuredParameters);
 
 #ifdef __cplusplus
 }
