@@ -319,7 +319,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.array = optionStrings_RemoveService
   },
 
-  { .letter = 'u',
+  { .letter = 'z',
     .word = "privilege-parameters",
     .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_Environ,
     .argument = strtext("name=value,..."),
