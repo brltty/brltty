@@ -607,11 +607,13 @@
 # establishment parameters to use when BRLTTY is started by a privileged
 # user (e.g. by root on a Linux/Unix system). The configured defaults are:
 # "@privilege_parameters@".
-# (can be overridden with the -z [--privilege-parameters=] option)
+# (can be overridden with the -y [--privilege-parameters=] option)
 #privilege-parameters platform:name=value,...
 
 # Linux Privilege Parameters
+#privilege-parameters lx:path=/usr/sbin:/sbin:/usr/bin:/bin
 #privilege-parameters lx:seccomp=no # [no,log,fail,kill]
+#privilege-parameters lx:shell=/bin/sh
 #privilege-parameters lx:user=brltty
 
 

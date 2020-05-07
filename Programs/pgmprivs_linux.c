@@ -973,23 +973,29 @@ setHomeDirectory (const char *directory) {
 }
 
 static int
-setSafePath (void) {
-  int parameter = _CS_PATH;
+setCommandSearchPath (const char *path) {
   const char *variable = "PATH";
-  size_t size = confstr(parameter, NULL, 0);
 
-  if (size > 0) {
-    char path[size];
-    confstr(parameter, path, sizeof(path));
-    return setEnvironmentVariable(variable, path);
+  if (!*path) {
+    int parameter = _CS_PATH;
+    size_t size = confstr(parameter, NULL, 0);
+
+    if (size > 0) {
+      char buffer[size];
+      confstr(parameter, buffer, sizeof(buffer));
+      return setEnvironmentVariable(variable, buffer);
+    }
+
+    path = "/usr/sbin:/sbin:/usr/bin:/bin";
   }
 
-  return setEnvironmentVariable(variable, "/usr/sbin:/sbin:/usr/bin:/bin");
+  return setEnvironmentVariable(variable, path);
 }
 
 static int
-setSafeShell (void) {
-  return setEnvironmentVariable("SHELL", "/bin/sh");
+setDefaultShell (const char *shell) {
+  if (!*shell) shell = "/bin/sh";
+  return setEnvironmentVariable("SHELL", shell);
 }
 
 #ifdef HAVE_PWD_H
@@ -1248,13 +1254,18 @@ claimStateDirectories (void) {
 #endif /* HAVE_PWD_H */
 
 typedef enum {
+  PARM_PATH,
   PARM_SECCOMP,
+  PARM_SHELL,
   PARM_USER,
 } Parameters;
 
 const char *const *
 getPrivilegeParameterNames (void) {
-  static const char *const names[] = {"seccomp", "user", NULL};
+  static const char *const names[] = NULL_TERMINATED_STRING_ARRAY(
+    "path", "seccomp", "shell", "user"
+  );
+
   return names;
 }
 
@@ -1267,8 +1278,8 @@ void
 establishProgramPrivileges (char **specifiedParameters, char **configuredParameters) {
   logCurrentCapabilities("at start");
 
-  setSafePath();
-  setSafeShell();
+  setCommandSearchPath(specifiedParameters[PARM_PATH]);
+  setDefaultShell(specifiedParameters[PARM_SHELL]);
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {

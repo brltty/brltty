@@ -8,6 +8,7 @@ BRLTTY on Linux
 .. |default user| replace:: ``brltty``
 .. |user information text| replace:: Braille Device Daemon
 .. |nologin shell path| replace:: ``/sbin/nologin``
+.. |safe shell path| replace:: ``/bin/sh``
 
 .. |sockets directory name| replace:: ``BrlAPI``
 .. |updatable directory name| replace:: ``brltty``
@@ -95,13 +96,8 @@ The user is selected as follows:
 
 Explicit Specification
   This method is only allowed when BRLTTY was started as |the super user|.
-  From highest to lowest precedence, it may be specified via:
-
-  * The ``-u`` (``--unprivileged-user=``) command line option.
-  * The ``unprivileged-user`` |configuration directive|.
-  * The ``BRLTTY_UNPRIVILEGED_USER`` |environment variable|.
-
-  If the user isn't explicitly specified,
+  It may be specified via the ``user`` `privilege parameter`_.
+  If it isn't explicitly specified,
   or if there's a problem:
 
   * The user doesn't exist.
@@ -118,12 +114,11 @@ The Default User
   If there's a problem:
 
   * the user doesn't exist.
-
-  * There is no default user because
-    BRLTTY was configured with the ``--without-unprivileged-user`` option.
+  * BRLTTY wasn't configured with a ``user`` `privilege parameter`_.
 
   then BRLTTY continues to execute as |the super user|.
-  In this case, it still establishes its `safer execution environment`_.
+  In this case, it still establishes
+  the rest of its `safer execution environment`_.
 
 After having successfully switched to executing as an unprivileged user,
 the following is done:
@@ -299,29 +294,54 @@ the environment needs to be prepared as follows:
     permissions   |cap_fowner|
     ============  ====================
 
+.. _privilege parameter:
+
+Privilege Parameters
+~~~~~~~~~~~~~~~~~~~~
+
+From highest to lowest precedence, they may be specified via:
+
+* The ``-y`` (``--privilege-parameters=``) command line option.
+* The ``privilege-parameters`` |configuration directive|.
+* The ``BRLTTY_PRIVILEGE_PARAMETERS`` |environment variable|.
+
+``path``
+
+``seccomp``
+
+``shell``
+
+``user``
+
 Safe Command Search Path
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 A safe command search path is established
 by setting the ``PATH`` environment variable
-to a system-configured safe set of directories.
-You can find out what it is by running this command::
+to a system-configured set of safe directories.
+You can find out which ones they are by running this command::
 
   getconf PATH
+
+The command search path can be explicitly set
+via the ``path`` `privilege parameter`_.
 
 Safe Default Shell
 ~~~~~~~~~~~~~~~~~~
 
 A safe default shell for external software to assume
 is established by setting the ``SHELL`` environment variable
-to ``/bin/sh``.
+to |safe shell path|.
 On many systems this is the Bourne Shell.
 On others, it's a symbolic link to some other shell.
-To find out what it is on your system, run this command::
+To find out what it is on your system, run this command:
 
-  ls -l /bin/sh
+.. parsed-literal:: ls -l |safe shell path|
 
 Note that scripts usually internally specify which shell is to be used.
+
+The default shell can be explicitly set
+via the ``shell`` `privilege parameter`_.
 
 Namespace Isolation
 ~~~~~~~~~~~~~~~~~~~
@@ -350,6 +370,8 @@ Secure Computing Filter
 
 This protective measure hasn't been implemented yet.
 The current plan is to use the kernel's ``seccomp`` feature.
+The filter's mode can be set via the ``seccomp`` `privilege parameter`_.
+It defaults to ``no``.
 
 Preparing the Environment
 -------------------------
