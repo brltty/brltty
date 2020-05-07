@@ -67,54 +67,8 @@ establishes a `safer execution environment`_ within which It only has
 access to those `privileged host operations`_ that it actually needs.
 This is a best security practice known as **least privilege**.
 
-When Started by an Unprivileged User
-------------------------------------
-
-BRLTTY, as of release 6.2, can be started
-by an unprivileged user (not |super user|).
-The main use case for this is for BRLTTY to be started
-by its |default unprivileged user|.
-Others include system administrators or users
-who'd like BRLTTY to be startable
-by any user, by users who belong to a specific group, etc.
-
-In order for an unprivileged user to successfully start BRLTTY,
-its environment needs to be prepared as follows:
-
-* All of its `required capabilities`_ to have been assigned to its executable.
-
-* The user that starts it to have all of the needed `group memberships`_.
-  This isn't necessary, i.e. BRLTTY will join them by itself,
-  if the |cap_setgid| (temporary) capability
-  has also been assigned to its executable.
-
-* The needed `kernel modules`_ to have been installed.
-  This isn't necessary, i.e. BRLTTY will install them by itself,
-  if the |cap_sys_module| (temporary) capability
-  has also been assigned to its executable.
-
-* Its `state directories`_
-  to have been created,
-  to have the correct ownership,
-  and to have the correct permissions.
-  Each of these prerequisites isn't necessary,
-  i.e. BRLTTY will take care of it by itself,
-  if the associated (temporary) capability
-  has also been assigned to its executable.
-  They are:
-
-  .. table:: Temporary Capabilities for State Directory Prerequisites
-
-    ============  ====================
-    Prerequisite  Temporary Capability
-    ------------  --------------------
-    creation      |cap_dac_override|
-    ownership     |cap_chown|
-    permissions   |cap_fowner|
-    ============  ====================
-
 Safer Execution Environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 BRLTTY takes a number of steps to establish a safer execution environment:
 
@@ -126,6 +80,7 @@ BRLTTY takes a number of steps to establish a safer execution environment:
 * Establish the needed `group memberships`_.
 * Set its `required capabilities`_.
 * Relinquish all non-required capabilities.
+* Install the `secure computing filter`_.
 
 The Unprivileged User
 ~~~~~~~~~~~~~~~~~~~~~
@@ -299,6 +254,52 @@ It prevents BRLTTY from Attempting to gain full access
 to another program's data, or, even worse, to a public directory.
 If it's really necessary to use such a directory
 then it's far better to let a human being take care of it.
+
+When Started by an Unprivileged User
+------------------------------------
+
+BRLTTY, as of release 6.2, can be started
+by an unprivileged user (not |super user|).
+The main use case for this is for BRLTTY to be started
+by its |default unprivileged user|.
+Others include system administrators or users
+who'd like BRLTTY to be startable
+by any user, by users who belong to a specific group, etc.
+
+In order for an unprivileged user to successfully start BRLTTY,
+its environment needs to be prepared as follows:
+
+* All of its `required capabilities`_ to have been assigned to its executable.
+
+* The user that starts it to have all of the needed `group memberships`_.
+  This isn't necessary, i.e. BRLTTY will join them by itself,
+  if the |cap_setgid| (temporary) capability
+  has also been assigned to its executable.
+
+* The needed `kernel modules`_ to have been installed.
+  This isn't necessary, i.e. BRLTTY will install them by itself,
+  if the |cap_sys_module| (temporary) capability
+  has also been assigned to its executable.
+
+* Its `state directories`_
+  to have been created,
+  to have the correct ownership,
+  and to have the correct permissions.
+  Each of these prerequisites isn't necessary,
+  i.e. BRLTTY will take care of it by itself,
+  if the associated (temporary) capability
+  has also been assigned to its executable.
+  They are:
+
+  .. table:: Temporary Capabilities for State Directory Prerequisites
+
+    ============  ====================
+    Prerequisite  Temporary Capability
+    ------------  --------------------
+    creation      |cap_dac_override|
+    ownership     |cap_chown|
+    permissions   |cap_fowner|
+    ============  ====================
 
 Preparing the Environment
 -------------------------
@@ -727,8 +728,8 @@ mount
 UTS
   This namespace is used to manage the host name and the NIS domain name.
 
-The Security Filter
-~~~~~~~~~~~~~~~~~~~
+Secure Computing Filter
+~~~~~~~~~~~~~~~~~~~~~~~
 
 This protective measure hasn't been implemented yet.
 The current plan is to use the kernel's ``seccomp`` feature.
