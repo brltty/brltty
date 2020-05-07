@@ -9,6 +9,7 @@ BRLTTY on Linux
 .. |user information text| replace:: Braille Device Daemon
 .. |nologin shell path| replace:: ``/sbin/nologin``
 .. |safe shell path| replace:: ``/bin/sh``
+.. |safe command search path| replace:: ``/usr/sbin:/sbin:/usr/bin:/bin``
 
 .. |sockets directory name| replace:: ``BrlAPI``
 .. |updatable directory name| replace:: ``brltty``
@@ -23,6 +24,7 @@ BRLTTY on Linux
 .. |user information field| replace:: user information (gecos) field
 .. |configuration directive| replace:: configuration directive (in |configuration file path|)
 .. |environment variable| replace:: environment variable (if the ``-E`` command line option has been specified)
+.. |configure option| replace:: configure option (at build time)
 .. |default unprivileged user| replace:: default unprivileged user (|default user|)
 .. |speaker| replace:: built-in PC speaker
 .. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
@@ -299,19 +301,63 @@ the environment needs to be prepared as follows:
 Privilege Parameters
 ~~~~~~~~~~~~~~~~~~~~
 
-From highest to lowest precedence, they may be specified via:
+Privilege parameters control how BRLTTY establishes
+its `safer execution environment`_.
+From highest to lowest precedence, they can be specified via:
 
-* The ``-y`` (``--privilege-parameters=``) command line option.
+* The ``--privilege-parameters`` command line option.
 * The ``privilege-parameters`` |configuration directive|.
 * The ``BRLTTY_PRIVILEGE_PARAMETERS`` |environment variable|.
+* The ``--with-privilege-parameters`` |configure option|.
+
+Each of these takes a comma-separated list of parameters in the form::
+
+  platform:name=value
+
+The ``platform:`` part is optional -
+if it's omitted then the parameter setting applies on all platforms.
+It's best, therefore, to always include it.
+The platform code for Linux is ``lx``.
+
+The command line option can be specified any number of times.
+Likewise, the configuration directive can be specified any number of times.
+Additional specifications extend, rather than replace, the parameter list.
+The same parameter specified later at the same level of precedence,
+or at a higher level of precedence, overrides its earlier setting.
+
+The following privilege parameters are supported for Linux:
 
 ``path``
+  This parameter sets the `safe command search path`_.
+  No attempt is made to validate it.
 
 ``seccomp``
+  This parameter sets the mode of the `secure computing filter`_.
+  The supported modes are:
+
+  ``no``
+    Don't install the filter.
+    This is the default.
+
+  ``log``
+    Log each unapproved system call to ``syslog``.
+    It's still executed.
+
+  ``fail``
+    Each unapproved system call fails with ``errno`` set to ``EPERM``
+    (operation not permitted).
+
+  ``kill``
+    An attempt to execute an unapproved system call
+    causes the entire BRLTTY process to be killed.
 
 ``shell``
+  This parameter sets the path to the `safe default shell`_.
+  No attempt is made to validate it.
 
 ``user``
+  This parameter sets `the unprivileged user`_.
+  It defaults to |default user|.
 
 Safe Command Search Path
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -323,7 +369,10 @@ You can find out which ones they are by running this command::
 
   getconf PATH
 
-The command search path can be explicitly set
+If, for some reason, the system-configured path isn't available
+then |safe command search path| is used.
+
+The path can be explicitly set
 via the ``path`` `privilege parameter`_.
 
 Safe Default Shell
@@ -332,7 +381,7 @@ Safe Default Shell
 A safe default shell for external software to assume
 is established by setting the ``SHELL`` environment variable
 to |safe shell path|.
-On many systems this is the Bourne Shell.
+On many systems, this is the Bourne Shell.
 On others, it's a symbolic link to some other shell.
 To find out what it is on your system, run this command:
 
@@ -368,10 +417,42 @@ UTS
 Secure Computing Filter
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-This protective measure hasn't been implemented yet.
-The current plan is to use the kernel's ``seccomp`` feature.
-The filter's mode can be set via the ``seccomp`` `privilege parameter`_.
-It defaults to ``no``.
+The kernel provides a secure computing filter, known as ``seccomp``,
+that verifies that only an approved set of system calls is being used.
+The default is that BRLTTY doesn't actually use it
+because, by nature, using a system call filter
+makes a program somewhat fragile.
+Reasons for this include:
+
+* The various object libraries that BRLTTY relies on, e.g. ``libc``,
+  might change which system calls they use from one release to the next.
+
+* The filter is also applied to any external software,
+  e.g. text-to-speech engines,
+  that BRLTTY uses.
+
+Even though the default is that BRLTTY doesn't use the filter,
+access to it is still provided for those users or administrators who prefer
+to avail themselves of the additional protection that it offers.
+Use the ``seccomp`` `privilege parameter`_ to specify how BRLTTY uses it.
+
+* Specify ``log`` if you'd like BRLTTY to continue executing normally
+  but to also record any unapproved system calls in the system log.
+
+* Specify ``fail`` if you'd like unapproved system calls to fail,
+  with BRLTTY attempting to handle those failures.
+  Note that, while BRLTTY endeavours to handle such failures well,
+  external software that it uses might not.
+
+* Specify ``kill`` if you'd like an unapproved system call
+  to cause the entire BRLTTY process to be summarily killed.
+
+The current list of approved system calls
+is in the ``syscalls_linux.h`` header,
+which is in the ``Programs/`` subdirectory of BRLTTY's source tree.
+BRLTTY must be rebuilt in order for changes to the list to become effective.
+Please let us know if you discover any system calls
+that are missing and should be added.
 
 Preparing the Environment
 -------------------------
