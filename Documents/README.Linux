@@ -70,6 +70,9 @@ This is a best security practice known as **least privilege**.
 Safer Execution Environment
 ---------------------------
 
+When Started by the Super User
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 BRLTTY takes a number of steps to establish a safer execution environment:
 
 * Set a `safe command search path`_.
@@ -83,7 +86,7 @@ BRLTTY takes a number of steps to establish a safer execution environment:
 * Install the `secure computing filter`_.
 
 The Unprivileged User
-~~~~~~~~~~~~~~~~~~~~~
+`````````````````````
 
 When BRLTTY starts executing as |the super user|,
 one of the first things it does is switch
@@ -145,7 +148,7 @@ the following is done:
   * BRLTTY had to continue executing as |the super user|.
 
 State Directories
-~~~~~~~~~~~~~~~~~
+`````````````````
 
 A state directory is one which a program needs to be able to write data to.
 BRLTTY's state directories are:
@@ -174,9 +177,6 @@ BRLTTY's state directories are:
   It's also where, if requested, BRLTTY creates its input FIFO
   (which allows users to take advantage of its text-to-speech capability).
 
-Specifying State Directory Locations
-````````````````````````````````````
-
 The actual locations of these directories can be specified in a number of ways.
 From highest to lowest precedence, they are:
 
@@ -194,9 +194,6 @@ From highest to lowest precedence, they are:
   Updatable  -U      updatable-directory  BRLTTY_UPDATABLE_DIRECTORY  |updatable directory path|
   Writable   -W      writable-directory   BRLTTY_WRITABLE_DIRECTORY   |writable directory path|
   =========  ======  ===================  ==========================  ==========================
-
-Gaining Full Access
-```````````````````
 
 After having successfully switched to executing as `the unprivileged user`_,
 BRLTTY attempts to gain full access to its state directories.
@@ -256,7 +253,7 @@ If it's really necessary to use such a directory
 then it's far better to let a human being take care of it.
 
 When Started by an Unprivileged User
-------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 BRLTTY, as of release 6.2, can be started
 by an unprivileged user (not |super user|).
@@ -267,24 +264,25 @@ who'd like BRLTTY to be startable
 by any user, by users who belong to a specific group, etc.
 
 In order for an unprivileged user to successfully start BRLTTY,
-its environment needs to be prepared as follows:
+the environment needs to be prepared as follows:
 
-* All of its `required capabilities`_ to have been assigned to its executable.
+* Assign the `required capabilities`_ to BRLTTY's executable.
 
-* The user that starts it to have all of the needed `group memberships`_.
+* Give the user that's to be able to start BRLTTY
+  the needed `group memberships`_.
   This isn't necessary, i.e. BRLTTY will join them by itself,
   if the |cap_setgid| (temporary) capability
   has also been assigned to its executable.
 
-* The needed `kernel modules`_ to have been installed.
+* Install the needed `kernel modules`_.
   This isn't necessary, i.e. BRLTTY will install them by itself,
   if the |cap_sys_module| (temporary) capability
   has also been assigned to its executable.
 
-* Its `state directories`_
-  to have been created,
-  to have the correct ownership,
-  and to have the correct permissions.
+* Ensure that BRLTTY's `state directories`_
+  have been created,
+  have the correct ownership,
+  and have the correct permissions.
   Each of these prerequisites isn't necessary,
   i.e. BRLTTY will take care of it by itself,
   if the associated (temporary) capability
@@ -300,6 +298,58 @@ its environment needs to be prepared as follows:
     ownership     |cap_chown|
     permissions   |cap_fowner|
     ============  ====================
+
+Safe Command Search Path
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+A safe command search path is established
+by setting the ``PATH`` environment variable
+to a system-configured safe set of directories.
+You can find out what it is by running this command::
+
+  getconf PATH
+
+Safe Default Shell
+~~~~~~~~~~~~~~~~~~
+
+A safe default shell for external software to assume
+is established by setting the ``SHELL`` environment variable
+to ``/bin/sh``.
+On many systems this is the Bourne Shell.
+On others, it's a symbolic link to some other shell.
+To find out what it is on your system, run this command::
+
+  ls -l /bin/sh
+
+Note that scripts usually internally specify which shell is to be used.
+
+Namespace Isolation
+~~~~~~~~~~~~~~~~~~~
+
+BRLTTY isolates some of the kernel namespaces
+that are associated with its process.
+The namespaces that it currently isolates are:
+
+cgroup
+  This namespace is used to manage control groups.
+
+IPC
+  This namespace is used to manage:
+
+  * System V interprocess communication objects
+  * POSIX message queues
+
+mount
+  This namespace is used to manage mount points.
+
+UTS
+  This namespace is used to manage the host name and the NIS domain name.
+
+Secure Computing Filter
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This protective measure hasn't been implemented yet.
+The current plan is to use the kernel's ``seccomp`` feature.
 
 Preparing the Environment
 -------------------------
@@ -672,67 +722,6 @@ and are relinquished right after this has been done.
   If this capability has also been assigned to BRLTTY's executable
   then the needed `kernel modules`_ needn't have been already installed
   because they can be internally installed.
-
-Other Protective Measures
--------------------------
-
-In addition to switching to `the unprivileged user`_
-and then only relying on the minimum `required capabilities`_
-and the needed `group memberships`_,
-BRLTTY takes a few more protective measures
-in order to reduce its exposure to being hacked.
-
-Safe Command Search Path
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-A safe command search path is established
-by setting the ``PATH`` environment variable
-to a system-configured safe set of directories.
-You can find out what it is by running this command::
-
-  getconf PATH
-
-Safe Default Shell
-~~~~~~~~~~~~~~~~~~
-
-A safe default shell for external software to assume
-is established by setting the ``SHELL`` environment variable
-to ``/bin/sh``.
-On many systems this is the Bourne Shell.
-On others, it's a symbolic link to some other shell.
-To find out what it is on your system, run this command::
-
-  ls -l /bin/sh
-
-Note that scripts usually internally specify which shell is to be used.
-
-Namespace Isolation
-~~~~~~~~~~~~~~~~~~~
-
-BRLTTY isolates some of the kernel namespaces
-that are associated with its process.
-The namespaces that it currently isolates are:
-
-cgroup
-  This namespace is used to manage control groups.
-
-IPC
-  This namespace is used to manage:
-
-  * System V interprocess communication objects
-  * POSIX message queues
-
-mount
-  This namespace is used to manage mount points.
-
-UTS
-  This namespace is used to manage the host name and the NIS domain name.
-
-Secure Computing Filter
-~~~~~~~~~~~~~~~~~~~~~~~
-
-This protective measure hasn't been implemented yet.
-The current plan is to use the kernel's ``seccomp`` feature.
 
 Known Problems
 --------------
