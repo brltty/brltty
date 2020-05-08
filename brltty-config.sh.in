@@ -36,6 +36,34 @@ brlttyConfig_defineVariable() {
    brlttyConfig_assignVariable "${name}" "${value}"
 }
 
+brlttyConfig_parseParameters() {
+   local prefix="${1}"
+   local parameters="${2}"
+   local platform="${3}"
+
+   set -- ${parameters//,/ }
+   local parameter
+
+   for parameter
+   do
+      local name="${parameter%%=*}"
+      [ "${name}" = "${parameter}" ] && continue
+      [ -n "${name}" ] || continue
+      local value="${parameter#*=}"
+
+      [ -n "${platform}" ] || continue
+      local qualifier="${name%%:*}"
+
+      [ "${qualifier}" = "${name}" ] || {
+         [ -n "${qualifier}" ] || continue
+         [ "${qualifier}" = "${platform}" ] || continue
+         name="${name#*:}"
+      }
+
+      brlttyConfig_defineVariable "${prefix}${name^^*}" "${value}"
+   done
+}
+
 brlttyConfig_defineVariables() {
    local prefix='@prefix@'
    local sysconfdir='@sysconfdir@'
@@ -76,7 +104,7 @@ brlttyConfig_defineVariables() {
    local manpage_directory='@manpage_directory@'
    local include_directory='@include_directory@'
 
-   local unprivileged_user='@unprivileged_user@'
+   local privilege_parameters='@privilege_parameters@'
 
    local api_version='@api_version@'
    local api_release='@api_release@'
@@ -121,7 +149,7 @@ brlttyConfig_defineVariables() {
    brlttyConfig_defineVariable BRLTTY_MANPAGE_DIRECTORY "${manpage_directory}"
    brlttyConfig_defineVariable BRLTTY_INCLUDE_DIRECTORY "${include_directory}"
 
-   brlttyConfig_defineVariable BRLTTY_UNPRIVILEGED_USER "${unprivileged_user}"
+   brlttyConfig_parseParameters BRLTTY_PRIVILEGE_PARAMETER_ "${privilege_parameters}" lx
 
    brlttyConfig_defineVariable BRLAPI_VERSION "${api_version}"
    brlttyConfig_defineVariable BRLAPI_RELEASE "${api_release}"
