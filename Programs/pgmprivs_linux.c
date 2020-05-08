@@ -22,10 +22,6 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#ifdef HAVE_SYS_PRCTL_H
-#include <sys/prctl.h>
-#endif /* HAVE_SYS_PRCTL_H */
-
 #include "log.h"
 #include "strfmt.h"
 #include "pgmprivs.h"
@@ -33,32 +29,23 @@
 #include "file.h"
 #include "parse.h"
 
+//#undef HAVE_PWD_H
+//#undef HAVE_GRP_H
+//#undef HAVE_SYS_PRCTL_H
+//#undef HAVE_SYS_CAPABILITY_H
+//#undef HAVE_LIBCAP
+//#undef HAVE_SCHED_H
+//#undef HAVE_LINUX_AUDIT_H
+//#undef HAVE_LINUX_FILTER_H
+//#undef HAVE_LINUX_SECCOMP_H
+
+#ifdef HAVE_SYS_PRCTL_H
+#include <sys/prctl.h>
+#endif /* HAVE_SYS_PRCTL_H */
+
 static int
 amPrivilegedUser (void) {
   return !geteuid();
-}
-
-static int
-setProcessOwnership (uid_t uid, gid_t gid) {
-  gid_t oldRgid, oldEgid, oldSgid;
-
-  if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
-    if (setresgid(gid, gid, gid) != -1) {
-      if (setresuid(uid, uid, uid) != -1) {
-        return 1;
-      } else {
-        logSystemError("setresuid");
-      }
-
-      setresgid(oldRgid, oldEgid, oldSgid);
-    } else {
-      logSystemError("setresgid");
-    }
-  } else {
-    logSystemError("getresgid");
-  }
-
-  return 0;
 }
 
 typedef struct {
@@ -639,17 +626,27 @@ isolateNamespaces (void) {
 #ifdef HAVE_LINUX_FILTER_H
 #include <linux/filter.h>
 
+#ifdef HAVE_LINUX_SECCOMP_H
+#include <linux/seccomp.h>
+#endif /* HAVE_LINUX_SECCOMP_H */
+#endif /* HAVE_LINUX_FILTER_H */
+#endif /* SECURITY_FILTER_ARCHITECTURE */
+
+#ifdef SECCOMP_MODE_FILTER
 struct SecurityFilterEntry {
   uint32_t value;
   uint8_t argumentNumber;
   const struct SecurityFilterEntry *argumentTable;
-}; typedef struct SecurityFilterEntry SecurityFilterEntry;
+};
 
 #define SECURITY_FILTER_BEGIN(name) \
 static const SecurityFilterEntry name##Table[] = {
 
 #define SECURITY_FILTER_END(name) \
 {0}}; static const uint8_t name##Count = ARRAY_COUNT(name##Table) - 1;
+
+typedef struct SecurityFilterEntry SecurityFilterEntry;
+#include "syscalls_linux.h"
 
 typedef struct {
   struct {
@@ -725,15 +722,6 @@ BPF_STMT(BPF_LD|BPF_W|BPF_ABS, SECURITY_FILTER_FIELD_OFFSET(field))
 
 #define SECURITY_FILTER_TEST(condition, value, true, false) \
 BPF_JUMP(BPF_JMP|BPF_J##condition|BPF_K, (value), (true), (false))
-
-#ifdef HAVE_LINUX_SECCOMP_H
-#include <linux/seccomp.h>
-#endif /* HAVE_LINUX_SECCOMP_H */
-#endif /* HAVE_LINUX_FILTER_H */
-#endif /* SECURITY_FILTER_ARCHITECTURE */
-
-#ifdef SECCOMP_MODE_FILTER
-#include "syscalls_linux.h"
 
 #define SECURITY_FILTER_RETURN(action, value) \
 BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
@@ -823,7 +811,7 @@ makeSecurityFilter (const struct sock_filter *rejectInstruction) {
 }
 
 static void
-installSecurityFilter (const char *modeKeyword) {
+installSecureComputingFilter (const char *modeKeyword) {
   const struct sock_filter *rejectInstruction = getRejectInstruction(modeKeyword);
 
   if ((rejectInstruction->k & SECCOMP_RET_ACTION_FULL) != SECCOMP_RET_ALLOW) {
@@ -835,9 +823,19 @@ installSecurityFilter (const char *modeKeyword) {
         .len = filter->instruction.count
       };
 
+#if defined(PR_SET_SECCOMP)
       if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program) == -1) {
         logSystemError("prctl[PR_SET_SECCOMP,SECCOMP_MODE_FILTER]");
       }
+#elif defined(SECCOMP_SET_MODE_FILTER)
+      unsigned int flags = 0;
+
+      if (seccomp(SECCOMP_SET_MODE_FILTER, flags, &program) == -1) {
+        logSystemError("seccomp[SECCOMP_SET_MODE_FILTER]");
+      }
+#else /* install secure computing filter */
+#warning no mechanism for installing the secure computing filter
+#endif /* install secure computing filter */
 
       sfDestroyObject(filter);
     }
@@ -1014,6 +1012,29 @@ canSwitchGroup (gid_t gid) {
     return 1;
   }
 #endif /* CAP_SETGID */
+
+  return 0;
+}
+
+static int
+setProcessOwnership (uid_t uid, gid_t gid) {
+  gid_t oldRgid, oldEgid, oldSgid;
+
+  if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
+    if (setresgid(gid, gid, gid) != -1) {
+      if (setresuid(uid, uid, uid) != -1) {
+        return 1;
+      } else {
+        logSystemError("setresuid");
+      }
+
+      setresgid(oldRgid, oldEgid, oldSgid);
+    } else {
+      logSystemError("setresgid");
+    }
+  } else {
+    logSystemError("getresgid");
+  }
 
   return 0;
 }
@@ -1321,5 +1342,7 @@ establishProgramPrivileges (char **specifiedParameters, char **configuredParamet
   acquirePrivileges();
   logCurrentCapabilities("after relinquish");
 
-  installSecurityFilter(specifiedParameters[PARM_SECCOMP]);
+  #ifdef SECCOMP_MODE_FILTER
+  installSecureComputingFilter(specifiedParameters[PARM_SECCOMP]);
+  #endif /* SECCOMP_MODE_FILTER */
 }
