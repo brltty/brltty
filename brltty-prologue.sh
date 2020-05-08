@@ -198,7 +198,7 @@ verifyOutputDirectory() {
 parseParameterString() {
    local valuesArray="${1}"
    local parameters="${2}"
-   local platform="${3}"
+   local code="${3}"
 
    set -- ${parameters//,/ }
    local parameter
@@ -210,12 +210,10 @@ parseParameterString() {
       [ -n "${name}" ] || continue
       local value="${parameter#*=}"
 
-      [ -n "${platform}" ] || continue
       local qualifier="${name%%:*}"
-
       [ "${qualifier}" = "${name}" ] || {
          [ -n "${qualifier}" ] || continue
-         [ "${qualifier}" = "${platform}" ] || continue
+         [ "${qualifier}" = "${code}" ] || continue
          name="${name#*:}"
       }
 
