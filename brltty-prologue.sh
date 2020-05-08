@@ -195,6 +195,34 @@ verifyOutputDirectory() {
    fi
 }
 
+parseParameterString() {
+   local valuesArray="${1}"
+   local parameters="${2}"
+   local platform="${3}"
+
+   set -- ${parameters//,/ }
+   local parameter
+
+   for parameter
+   do
+      local name="${parameter%%=*}"
+      [ "${name}" = "${parameter}" ] && continue
+      [ -n "${name}" ] || continue
+      local value="${parameter#*=}"
+
+      [ -n "${platform}" ] || continue
+      local qualifier="${name%%:*}"
+
+      [ "${qualifier}" = "${name}" ] || {
+         [ -n "${qualifier}" ] || continue
+         [ "${qualifier}" = "${platform}" ] || continue
+         name="${name#*:}"
+      }
+
+      setVariable "${valuesArray}[${name^^*}]" "${value}"
+   done
+}
+
 needTemporaryDirectory() {
    cleanup() {
       set +e

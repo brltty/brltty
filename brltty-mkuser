@@ -21,7 +21,10 @@ set -e
 . "`dirname "${0}"`/brltty-prologue.sh"
 . "${programDirectory}/brltty-config.sh"
 
-readonly defaultUserName="${BRLTTY_PRIVILEGE_PARAMETER_USER}"
+declare -A privilegeParameters
+parseParameterString privilegeParameters "${BRLTTY_PRIVILEGE_PARAMETERS}" lx
+
+readonly defaultUserName="${privilegeParameters["USER"]}"
 readonly defaultUserInformation="Braille Device Daemon"
 readonly defaultHomeDirectory="${BRLTTY_UPDATABLE_DIRECTORY}"
 readonly defaultLoginShell="/sbin/nologin"
