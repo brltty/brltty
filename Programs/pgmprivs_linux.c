@@ -614,15 +614,15 @@ isolateNamespaces (void) {
 #include <linux/audit.h>
 
 #if defined(__i386__)
-#define SECURITY_FILTER_ARCHITECTURE AUDIT_ARCH_I386
+#define SCF_ARCHITECTURE AUDIT_ARCH_I386
 #elif defined(__x86_64__)
-#define SECURITY_FILTER_ARCHITECTURE AUDIT_ARCH_X86_64
+#define SCF_ARCHITECTURE AUDIT_ARCH_X86_64
 #else /* security filter architecture */
 #warning seccomp not supported on this platform
 #endif /* security filter architecture */
 #endif /* HAVE_LINUX_AUDIT_H */
 
-#ifdef SECURITY_FILTER_ARCHITECTURE
+#ifdef SCF_ARCHITECTURE
 #ifdef HAVE_LINUX_FILTER_H
 #include <linux/filter.h>
 
@@ -630,22 +630,23 @@ isolateNamespaces (void) {
 #include <linux/seccomp.h>
 #endif /* HAVE_LINUX_SECCOMP_H */
 #endif /* HAVE_LINUX_FILTER_H */
-#endif /* SECURITY_FILTER_ARCHITECTURE */
+#endif /* SCF_ARCHITECTURE */
 
 #ifdef SECCOMP_MODE_FILTER
-struct SecurityFilterEntry {
+typedef struct SCFTableEntryStruct SCFTableEntry;
+
+struct SCFTableEntryStruct {
   uint32_t value;
   uint8_t argumentNumber;
-  const struct SecurityFilterEntry *argumentTable;
+  const SCFTableEntry *argumentTable;
 };
 
-#define SECURITY_FILTER_BEGIN(name) \
-static const SecurityFilterEntry name##Table[] = {
+#define SCF_BEGIN_TABLE(name) \
+static const SCFTableEntry name##Table[] = {
 
-#define SECURITY_FILTER_END(name) \
+#define SCF_END_TABLE(name) \
 {0}}; static const uint8_t name##Count = ARRAY_COUNT(name##Table) - 1;
 
-typedef struct SecurityFilterEntry SecurityFilterEntry;
 #include "syscalls_linux.h"
 
 typedef struct {
@@ -654,20 +655,20 @@ typedef struct {
     size_t size;
     size_t count;
   } instruction;
-} SecurityFilter;
+} SCFObject;
 
-static SecurityFilter *
-sfNewObject (void) {
-  SecurityFilter *filter;
+static SCFObject *
+scfNewObject (void) {
+  SCFObject *scf;
 
-  if ((filter = malloc(sizeof(*filter)))) {
-    memset(filter, 0, sizeof(*filter));
+  if ((scf = malloc(sizeof(*scf)))) {
+    memset(scf, 0, sizeof(*scf));
 
-    filter->instruction.array = NULL;
-    filter->instruction.size = 0;
-    filter->instruction.count = 0;
+    scf->instruction.array = NULL;
+    scf->instruction.size = 0;
+    scf->instruction.count = 0;
 
-    return filter;
+    return scf;
   } else {
     logMallocError();
   }
@@ -676,60 +677,60 @@ sfNewObject (void) {
 }
 
 static void
-sfDestroyObject (SecurityFilter *filter) {
-  if (filter->instruction.array) free(filter->instruction.array);
-  free(filter);
+scfDestroyObject (SCFObject *scf) {
+  if (scf->instruction.array) free(scf->instruction.array);
+  free(scf);
 }
 
 static int
-sfAddInstruction (SecurityFilter *filter, const struct sock_filter *instruction) {
-  if (filter->instruction.count == filter->instruction.size) {
-    size_t newSize = filter->instruction.size? filter->instruction.size<<1: 0X10;
+scfAddInstruction (SCFObject *scf, const struct sock_filter *instruction) {
+  if (scf->instruction.count == scf->instruction.size) {
+    size_t newSize = scf->instruction.size? scf->instruction.size<<1: 0X10;
     struct sock_filter *newArray;
 
-    if (!(newArray = realloc(filter->instruction.array, ARRAY_SIZE(newArray, newSize)))) {
+    if (!(newArray = realloc(scf->instruction.array, ARRAY_SIZE(newArray, newSize)))) {
       logMallocError();
       return 0;
     }
 
-    filter->instruction.array = newArray;
-    filter->instruction.size = newSize;
+    scf->instruction.array = newArray;
+    scf->instruction.size = newSize;
   }
 
-  filter->instruction.array[filter->instruction.count++] = *instruction;
+  scf->instruction.array[scf->instruction.count++] = *instruction;
   return 1;
 }
 
 static int
-sfAddInstructions (SecurityFilter *filter, const struct sock_filter *instructions, size_t count) {
+scfAddInstructions (SCFObject *scf, const struct sock_filter *instructions, size_t count) {
   const struct sock_filter *cur = instructions;
   const struct sock_filter *end = cur + count;
 
   while (cur < end) {
-    if (!sfAddInstruction(filter, cur++)) return 0;
+    if (!scfAddInstruction(scf, cur++)) return 0;
   }
 
   return 1;
 }
 
-#define SECURITY_FILTER_FIELD_OFFSET(field) offsetof(struct seccomp_data, field)
+#define SCF_FIELD_OFFSET(field) offsetof(struct seccomp_data, field)
 
-#define SECURITY_FILTER_LOAD_FIELD(field) \
-BPF_STMT(BPF_LD|BPF_W|BPF_ABS, SECURITY_FILTER_FIELD_OFFSET(field))
+#define SCF_LOAD_FIELD(field) \
+BPF_STMT(BPF_LD|BPF_W|BPF_ABS, SCF_FIELD_OFFSET(field))
 
-#define SECURITY_FILTER_LOAD_ARCHITECTURE SECURITY_FILTER_LOAD_FIELD(arch)
-#define SECURITY_FILTER_LOAD_SYSCALL SECURITY_FILTER_LOAD_FIELD(nr)
+#define SCF_LOAD_ARCHITECTURE SCF_LOAD_FIELD(arch)
+#define SCF_LOAD_SYSCALL SCF_LOAD_FIELD(nr)
 
-#define SECURITY_FILTER_TEST(condition, value, true, false) \
+#define SCF_TEST(condition, value, true, false) \
 BPF_JUMP(BPF_JMP|BPF_J##condition|BPF_K, (value), (true), (false))
 
-#define SECURITY_FILTER_RETURN(action, value) \
+#define SCF_RETURN(action, value) \
 BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
 
-#define SECURITY_FILTER_VERIFY_ARCHITECTURE \
-SECURITY_FILTER_LOAD_ARCHITECTURE, \
-SECURITY_FILTER_TEST(EQ, SECURITY_FILTER_ARCHITECTURE, 1, 0), \
-SECURITY_FILTER_RETURN(ERRNO, EPERM)
+#define SCF_VERIFY_ARCHITECTURE \
+SCF_LOAD_ARCHITECTURE, \
+SCF_TEST(EQ, SCF_ARCHITECTURE, 1, 0), \
+SCF_RETURN(ERRNO, EPERM)
 
 static const struct sock_filter *
 getRejectInstruction (const char *modeKeyword) {
@@ -739,21 +740,31 @@ getRejectInstruction (const char *modeKeyword) {
   } ModeEntry;
 
   static const ModeEntry modeTable[] = {
+    #ifdef SECCOMP_RET_ALLOW
     { .keyword = "no",
-      .instruction = SECURITY_FILTER_RETURN(ALLOW, 0)
+      .instruction = SCF_RETURN(ALLOW, 0)
     },
+    #endif /* SECCOMP_RET_ALLOW */
 
+    #ifdef SECCOMP_RET_LOG
     { .keyword = "log",
-      .instruction = SECURITY_FILTER_RETURN(LOG, 0)
+      .instruction = SCF_RETURN(LOG, 0)
     },
+    #endif /* SECCOMP_RET_LOG */
 
+    #ifdef SECCOMP_RET_ERRNO
     { .keyword = "fail",
-      .instruction = SECURITY_FILTER_RETURN(ERRNO, EPERM)
+      .instruction = SCF_RETURN(ERRNO, EPERM)
     },
+    #endif /* SECCOMP_RET_ERRNO */
 
+    #ifdef SECCOMP_RET_KILL_PROCESS
     { .keyword = "kill",
-      .instruction = SECURITY_FILTER_RETURN(KILL_PROCESS, 0)
+      .instruction = SCF_RETURN(KILL_PROCESS, 0)
     },
+    #endif /* SECCOMP_RET_KILL_PROCESS */
+
+    { .keyword = NULL }
   };
 
   unsigned int choice;
@@ -770,41 +781,41 @@ getRejectInstruction (const char *modeKeyword) {
   return &mode->instruction;
 }
 
-static SecurityFilter *
-makeSecurityFilter (const struct sock_filter *rejectInstruction) {
-  SecurityFilter *filter;
+static SCFObject *
+makeSecureComputingFilter (const struct sock_filter *rejectInstruction) {
+  SCFObject *scf;
 
-  if ((filter = sfNewObject())) {
+  if ((scf = scfNewObject())) {
     {
       static const struct sock_filter prologue[] = {
-        SECURITY_FILTER_VERIFY_ARCHITECTURE,
-        SECURITY_FILTER_LOAD_SYSCALL
+        SCF_VERIFY_ARCHITECTURE,
+        SCF_LOAD_SYSCALL
       };
 
-      if (!sfAddInstructions(filter, prologue, ARRAY_COUNT(prologue))) goto failed;
+      if (!scfAddInstructions(scf, prologue, ARRAY_COUNT(prologue))) goto failed;
     }
 
     {
-      const SecurityFilterEntry *sfe = syscallTable;
-      const SecurityFilterEntry *end = sfe + syscallCount;
+      const SCFTableEntry *cur = syscallTable;
+      const SCFTableEntry *end = cur + syscallCount;
       uint16_t trueOffset = syscallCount;
 
-      while (sfe < end) {
-        struct sock_filter instruction = SECURITY_FILTER_TEST(EQ, sfe->value, trueOffset--, 0);
-        if (!sfAddInstruction(filter, &instruction)) goto failed;
-        sfe += 1;
+      while (cur < end) {
+        struct sock_filter instruction = SCF_TEST(EQ, cur->value, trueOffset--, 0);
+        if (!scfAddInstruction(scf, &instruction)) goto failed;
+        cur += 1;
       }
     }
 
     {
-      if (!sfAddInstruction(filter, rejectInstruction)) goto failed;
-      static const struct sock_filter allow = SECURITY_FILTER_RETURN(ALLOW, 0);
-      if (!sfAddInstruction(filter, &allow)) goto failed;
+      if (!scfAddInstruction(scf, rejectInstruction)) goto failed;
+      static const struct sock_filter allow = SCF_RETURN(ALLOW, 0);
+      if (!scfAddInstruction(scf, &allow)) goto failed;
     }
 
-    return filter;
+    return scf;
   failed:
-    sfDestroyObject(filter);
+    scfDestroyObject(scf);
   }
 
   return NULL;
@@ -815,12 +826,12 @@ installSecureComputingFilter (const char *modeKeyword) {
   const struct sock_filter *rejectInstruction = getRejectInstruction(modeKeyword);
 
   if ((rejectInstruction->k & SECCOMP_RET_ACTION_FULL) != SECCOMP_RET_ALLOW) {
-    SecurityFilter *filter;
+    SCFObject *scf;
 
-    if ((filter = makeSecurityFilter(rejectInstruction))) {
+    if ((scf = makeSecureComputingFilter(rejectInstruction))) {
       struct sock_fprog program = {
-        .filter = filter->instruction.array,
-        .len = filter->instruction.count
+        .filter = scf->instruction.array,
+        .len = scf->instruction.count
       };
 
 #if defined(PR_SET_SECCOMP)
@@ -837,7 +848,7 @@ installSecureComputingFilter (const char *modeKeyword) {
 #warning no mechanism for installing the secure computing filter
 #endif /* install secure computing filter */
 
-      sfDestroyObject(filter);
+      scfDestroyObject(scf);
     }
   }
 }

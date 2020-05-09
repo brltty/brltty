@@ -1,5 +1,5 @@
 #include <linux/unistd.h>
-SECURITY_FILTER_BEGIN(syscall)
+SCF_BEGIN_TABLE(syscall)
   #ifdef __NR_clock_gettime
   {__NR_clock_gettime},
   #endif /* __NR_clock_gettime */
@@ -287,4 +287,4 @@ SECURITY_FILTER_BEGIN(syscall)
   #ifdef __NR_exit
   {__NR_exit},
   #endif /* __NR_exit */
-SECURITY_FILTER_END(syscall)
+SCF_END_TABLE(syscall)
