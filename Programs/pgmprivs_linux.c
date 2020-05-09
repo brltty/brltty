@@ -858,6 +858,46 @@ scfJumpIf (SCFObject *scf, uint32_t value, SCFTest test, SCFJump *jump) {
   return scfAddInstruction(scf, &instruction);
 }
 
+static int
+scfAddSubtable (SCFObject *scf, const SCFTableEntry *table, size_t count, const struct sock_filter *deny) {
+  const SCFTableEntry *cur = table;
+  const SCFTableEntry *end = cur + count;
+
+  while (cur < end) {
+    SCFJump *jump;
+
+    if ((jump = malloc(sizeof(*jump)))) {
+      if (scfJumpIf(scf, cur->value, SCF_TEST_EQ, jump)) {
+        jump->next = scf->jumps.allow;
+        scf->jumps.allow = jump;
+
+        cur += 1;
+        continue;
+      }
+
+      free(jump);
+    } else {
+      logMallocError();
+    }
+
+    return 0;
+  }
+
+  return 1;
+}
+
+static size_t
+scfGetTableSize (const SCFTableEntry *table) {
+  const SCFTableEntry *end = table;
+  while (end->value != UINT32_MAX) end += 1;
+  return end - table;
+}
+
+static int
+scfAddTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_filter *deny) {
+  return scfAddSubtable(scf, table, scfGetTableSize(table), deny);
+}
+
 #define SCF_RETURN(action, value) \
 BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
 
@@ -926,29 +966,7 @@ makeSecureComputingFilter (const struct sock_filter *deny) {
       if (!scfLoadSyscall(scf)) goto failed;
     }
 
-    {
-      const SCFTableEntry *cur = syscallTable;
-
-      while (cur->value != UINT32_MAX) {
-        SCFJump *jump;
-
-        if ((jump = malloc(sizeof(*jump)))) {
-          if (scfJumpIf(scf, cur->value, SCF_TEST_EQ, jump)) {
-            jump->next = scf->jumps.allow;
-            scf->jumps.allow = jump;
-
-            cur += 1;
-            continue;
-          }
-
-          free(jump);
-        } else {
-          logMallocError();
-        }
-
-        goto failed;
-      }
-    }
+    if (!scfAddTable(scf, syscallTable, deny)) goto failed;
 
     {
       if (!scfAddInstruction(scf, deny)) goto failed;
