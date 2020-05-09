@@ -1002,9 +1002,13 @@ scfAddTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_filte
     if (!scfAddTableEntries(scf, buffer, count, deny)) return 0;
   }
 
-  if (!scfEndJumps(scf, &scf->jumps.allow)) return 0;
-  static const struct sock_filter allow = SCF_RETURN(ALLOW, 0);
-  return scfAddInstruction(scf, &allow);
+  if (scf->jumps.allow) {
+    if (!scfEndJumps(scf, &scf->jumps.allow)) return 0;
+    static const struct sock_filter allow = SCF_RETURN(ALLOW, 0);
+    if (!scfAddInstruction(scf, &allow)) return 0;
+  }
+
+  return 1;
 }
 
 static int
