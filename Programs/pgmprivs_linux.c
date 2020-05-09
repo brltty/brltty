@@ -859,31 +859,51 @@ scfJumpIf (SCFObject *scf, uint32_t value, SCFTest test, SCFJump *jump) {
 }
 
 static int
-scfAddSubtable (SCFObject *scf, const SCFTableEntry *table, size_t count, const struct sock_filter *deny) {
-  const SCFTableEntry *cur = table;
-  const SCFTableEntry *end = cur + count;
+scfAllowValue (SCFObject *scf, uint32_t value) {
+  SCFJump *jump;
 
-  while (cur < end) {
-    SCFJump *jump;
-
-    if ((jump = malloc(sizeof(*jump)))) {
-      if (scfJumpIf(scf, cur->value, SCF_TEST_EQ, jump)) {
-        jump->next = scf->jumps.allow;
-        scf->jumps.allow = jump;
-
-        cur += 1;
-        continue;
-      }
-
-      free(jump);
-    } else {
-      logMallocError();
+  if ((jump = malloc(sizeof(*jump)))) {
+    if (scfJumpIf(scf, value, SCF_TEST_EQ, jump)) {
+      jump->next = scf->jumps.allow;
+      scf->jumps.allow = jump;
+      return 1;
     }
 
-    return 0;
+    free(jump);
+  } else {
+    logMallocError();
   }
 
-  return 1;
+  return 0;
+}
+
+static int
+scfAddTableEntries (SCFObject *scf, const SCFTableEntry *entries, size_t count, const struct sock_filter *deny) {
+  if (count <= 3) {
+    const SCFTableEntry *cur = entries;
+    const SCFTableEntry *end = cur + count;
+
+    while (cur < end) {
+      if (!scfAllowValue(scf, cur->value)) return 0;
+      cur += 1;
+    }
+
+    return scfAddInstruction(scf, deny);
+  }
+
+  const SCFTableEntry *entry = entries + ((count - 1) / 2);
+  uint32_t value = entry->value;
+
+  SCFJump jump;
+  if (!scfJumpIf(scf, value, SCF_TEST_GT, &jump)) return 0;
+  if (!scfAllowValue(scf, value)) return 0;
+
+  if (!scfAddTableEntries(scf, entries, (entry - entries), deny)) return 0;
+  if (!scfEndJump(scf, &jump)) return 0;
+
+  const SCFTableEntry *end = entries + count;
+  entry += 1;
+  return scfAddTableEntries(scf, entry, (end - entry), deny);
 }
 
 static size_t
@@ -894,8 +914,22 @@ scfGetTableSize (const SCFTableEntry *table) {
 }
 
 static int
+scfTableEntrySorter (const void *element1, const void *element2) {
+  const SCFTableEntry *entry1 = element1;
+  const SCFTableEntry *entry2 = element2;
+
+  if (entry1->value < entry2->value) return -1;
+  if (entry1->value > entry2->value) return 1;
+  return 0;
+}
+
+static int
 scfAddTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_filter *deny) {
-  return scfAddSubtable(scf, table, scfGetTableSize(table), deny);
+  size_t count = scfGetTableSize(table);
+  SCFTableEntry buffer[count];
+  memcpy(buffer, table, sizeof(buffer));
+  qsort(buffer, count, sizeof(buffer[0]), scfTableEntrySorter);
+  return scfAddTableEntries(scf, buffer, count, deny);
 }
 
 #define SCF_RETURN(action, value) \
@@ -976,6 +1010,7 @@ makeSecureComputingFilter (const struct sock_filter *deny) {
       if (!scfAddInstruction(scf, &allow)) goto failed;
     }
 
+    logMessage(LOG_DEBUG, "BPF instruction count: %zu", scf->instruction.count);
     return scf;
   failed:
     scfDestroyObject(scf);
