@@ -287,4 +287,4 @@ SCF_BEGIN_TABLE(syscall)
   #ifdef __NR_exit
   {__NR_exit},
   #endif /* __NR_exit */
-SCF_END_TABLE(syscall)
+SCF_END_TABLE

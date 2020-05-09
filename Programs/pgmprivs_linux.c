@@ -641,13 +641,25 @@ struct SCFTableEntryStruct {
   const SCFTableEntry *argumentTable;
 };
 
-#define SCF_BEGIN_TABLE(name) \
-static const SCFTableEntry name##Table[] = {
-
-#define SCF_END_TABLE(name) \
-{0}}; static const uint8_t name##Count = ARRAY_COUNT(name##Table) - 1;
-
+#define SCF_BEGIN_TABLE(name) static const SCFTableEntry name##Table[] = {
+#define SCF_END_TABLE {UINT32_MAX}};
 #include "syscalls_linux.h"
+
+#define SCF_FIELD_OFFSET(field) offsetof(struct seccomp_data, field)
+
+typedef enum {
+  SCF_JUMP_ALWAYS,
+  SCF_JUMP_TRUE,
+  SCF_JUMP_FALSE
+} SCFJumpType;
+
+typedef struct SCFJumpStruct SCFJump;
+
+struct SCFJumpStruct {
+  SCFJump *next;
+  size_t location;
+  SCFJumpType type;
+};
 
 typedef struct {
   struct {
@@ -655,6 +667,10 @@ typedef struct {
     size_t size;
     size_t count;
   } instruction;
+
+  struct {
+    SCFJump *allow;
+  } jumps;
 } SCFObject;
 
 static SCFObject *
@@ -668,6 +684,8 @@ scfNewObject (void) {
     scf->instruction.size = 0;
     scf->instruction.count = 0;
 
+    scf->jumps.allow = NULL;
+
     return scf;
   } else {
     logMallocError();
@@ -677,7 +695,17 @@ scfNewObject (void) {
 }
 
 static void
+scfDestroyJumps (SCFJump *jump) {
+  while (jump) {
+    SCFJump *next = jump->next;
+    free(jump);
+    jump = next;
+  }
+}
+
+static void
 scfDestroyObject (SCFObject *scf) {
+  scfDestroyJumps(scf->jumps.allow);
   if (scf->instruction.array) free(scf->instruction.array);
   free(scf);
 }
@@ -702,38 +730,139 @@ scfAddInstruction (SCFObject *scf, const struct sock_filter *instruction) {
 }
 
 static int
-scfAddInstructions (SCFObject *scf, const struct sock_filter *instructions, size_t count) {
-  const struct sock_filter *cur = instructions;
-  const struct sock_filter *end = cur + count;
+scfLoadField (SCFObject *scf, uint32_t offset, uint8_t width) {
+  struct sock_filter instruction = BPF_STMT(BPF_LD|BPF_ABS, offset);
 
-  while (cur < end) {
-    if (!scfAddInstruction(scf, cur++)) return 0;
+  switch (width) {
+    case 1:
+      instruction.code |= BPF_B;
+      break;
+
+    case 2:
+      instruction.code |= BPF_H;
+      break;
+
+    case 4:
+      instruction.code |= BPF_W;
+      break;
+
+    default:
+      logMessage(LOG_ERR, "unsupported field width: %u", width);
+      return 0;
+  }
+
+  return scfAddInstruction(scf, &instruction);
+}
+
+static int
+scfLoadArchitecture (SCFObject *scf) {
+  return scfLoadField(scf, SCF_FIELD_OFFSET(arch), 4);
+}
+
+static int
+scfLoadSyscall (SCFObject *scf) {
+  return scfLoadField(scf, SCF_FIELD_OFFSET(nr), 4);
+}
+
+static void
+scfBeginJump (SCFObject *scf, SCFJump *jump, SCFJumpType type) {
+  memset(jump, 0, sizeof(*jump));
+  jump->next = NULL;
+  jump->location = scf->instruction.count;
+  jump->type = type;
+}
+
+static int
+scfEndJump (SCFObject *scf, const SCFJump *jump) {
+  size_t from = jump->location;
+  struct sock_filter *instruction = &scf->instruction.array[from];
+
+  size_t to = scf->instruction.count - from - 1;
+  SCFJumpType type = jump->type;
+
+  switch (type) {
+    case SCF_JUMP_ALWAYS:
+      instruction->k = to;
+      break;
+
+    case SCF_JUMP_TRUE:
+      instruction->jt = to;
+      break;
+
+    case SCF_JUMP_FALSE:
+      instruction->jf = to;
+      break;
+
+    default:
+      logMessage(LOG_ERR, "unsupported jump type: %u", type);
+      return 0;
   }
 
   return 1;
 }
 
-#define SCF_FIELD_OFFSET(field) offsetof(struct seccomp_data, field)
+static int
+scfEndJumps (SCFObject *scf, SCFJump **jumps) {
+  int ok = 1;
 
-#define SCF_LOAD_FIELD(field) \
-BPF_STMT(BPF_LD|BPF_W|BPF_ABS, SCF_FIELD_OFFSET(field))
+  while (*jumps) {
+    SCFJump *jump = *jumps;
+    *jumps = jump->next;
 
-#define SCF_LOAD_ARCHITECTURE SCF_LOAD_FIELD(arch)
-#define SCF_LOAD_SYSCALL SCF_LOAD_FIELD(nr)
+    if (!scfEndJump(scf, jump)) ok = 0;
+    free(jump);
+  }
 
-#define SCF_TEST(condition, value, true, false) \
-BPF_JUMP(BPF_JMP|BPF_J##condition|BPF_K, (value), (true), (false))
+  return ok;
+}
+
+typedef enum {
+  SCF_TEST_NE,
+  SCF_TEST_LT,
+  SCF_TEST_LE,
+  SCF_TEST_EQ,
+  SCF_TEST_GE,
+  SCF_TEST_GT,
+} SCFTest;
+
+static int
+scfJumpIf (SCFObject *scf, uint32_t value, SCFTest test, SCFJump *jump) {
+  struct sock_filter instruction = BPF_STMT(BPF_JMP|BPF_K, value);
+  int invert = 0;
+
+  switch (test) {
+    case SCF_TEST_NE:
+      invert = 1;
+    case SCF_TEST_EQ:
+      instruction.code |= BPF_JEQ;
+      break;
+
+    case SCF_TEST_LT:
+      invert = 1;
+    case SCF_TEST_GE:
+      instruction.code |= BPF_JGE;
+      break;
+
+    case SCF_TEST_LE:
+      invert = 1;
+    case SCF_TEST_GT:
+      instruction.code |= BPF_JGT;
+      break;
+
+    default:
+      logMessage(LOG_ERR, "unsupported value test: %u", test);
+      return 0;
+  }
+
+  scfBeginJump(scf, jump, (invert? SCF_JUMP_FALSE: SCF_JUMP_TRUE));
+  return scfAddInstruction(scf, &instruction);
+}
 
 #define SCF_RETURN(action, value) \
 BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
 
-#define SCF_VERIFY_ARCHITECTURE \
-SCF_LOAD_ARCHITECTURE, \
-SCF_TEST(EQ, SCF_ARCHITECTURE, 1, 0), \
-SCF_RETURN(ERRNO, EPERM)
-
 static const struct sock_filter *
-getRejectInstruction (const char *modeKeyword) {
+getDenyInstruction (const char *modeKeyword) {
   typedef struct {
     const char *keyword;
     struct sock_filter instruction;
@@ -782,33 +911,49 @@ getRejectInstruction (const char *modeKeyword) {
 }
 
 static SCFObject *
-makeSecureComputingFilter (const struct sock_filter *rejectInstruction) {
+makeSecureComputingFilter (const struct sock_filter *deny) {
   SCFObject *scf;
 
   if ((scf = scfNewObject())) {
     {
-      static const struct sock_filter prologue[] = {
-        SCF_VERIFY_ARCHITECTURE,
-        SCF_LOAD_SYSCALL
-      };
+      if (!scfLoadArchitecture(scf)) goto failed;
 
-      if (!scfAddInstructions(scf, prologue, ARRAY_COUNT(prologue))) goto failed;
+      SCFJump jump;
+      if (!scfJumpIf(scf, SCF_ARCHITECTURE, SCF_TEST_EQ, &jump)) goto failed;
+      if (!scfAddInstruction(scf, deny)) goto failed;
+
+      if (!scfEndJump(scf, &jump)) goto failed;
+      if (!scfLoadSyscall(scf)) goto failed;
     }
 
     {
       const SCFTableEntry *cur = syscallTable;
-      const SCFTableEntry *end = cur + syscallCount;
-      uint16_t trueOffset = syscallCount;
 
-      while (cur < end) {
-        struct sock_filter instruction = SCF_TEST(EQ, cur->value, trueOffset--, 0);
-        if (!scfAddInstruction(scf, &instruction)) goto failed;
-        cur += 1;
+      while (cur->value != UINT32_MAX) {
+        SCFJump *jump;
+
+        if ((jump = malloc(sizeof(*jump)))) {
+          if (scfJumpIf(scf, cur->value, SCF_TEST_EQ, jump)) {
+            jump->next = scf->jumps.allow;
+            scf->jumps.allow = jump;
+
+            cur += 1;
+            continue;
+          }
+
+          free(jump);
+        } else {
+          logMallocError();
+        }
+
+        goto failed;
       }
     }
 
     {
-      if (!scfAddInstruction(scf, rejectInstruction)) goto failed;
+      if (!scfAddInstruction(scf, deny)) goto failed;
+      if (!scfEndJumps(scf, &scf->jumps.allow)) goto failed;
+
       static const struct sock_filter allow = SCF_RETURN(ALLOW, 0);
       if (!scfAddInstruction(scf, &allow)) goto failed;
     }
@@ -823,12 +968,12 @@ makeSecureComputingFilter (const struct sock_filter *rejectInstruction) {
 
 static void
 installSecureComputingFilter (const char *modeKeyword) {
-  const struct sock_filter *rejectInstruction = getRejectInstruction(modeKeyword);
+  const struct sock_filter *deny = getDenyInstruction(modeKeyword);
 
-  if ((rejectInstruction->k & SECCOMP_RET_ACTION_FULL) != SECCOMP_RET_ALLOW) {
+  if ((deny->k & SECCOMP_RET_ACTION_FULL) != SECCOMP_RET_ALLOW) {
     SCFObject *scf;
 
-    if ((scf = makeSecureComputingFilter(rejectInstruction))) {
+    if ((scf = makeSecureComputingFilter(deny))) {
       struct sock_fprog program = {
         .filter = scf->instruction.array,
         .len = scf->instruction.count
