@@ -734,6 +734,11 @@ scfDestroyObject (SCFObject *scf) {
 
 static int
 scfAddInstruction (SCFObject *scf, const struct sock_filter *instruction) {
+  if (scf->instruction.count == BPF_MAXINSNS) {
+    logMessage(LOG_ERR, "syscall filter too large");
+    return 0;
+  }
+
   if (scf->instruction.count == scf->instruction.size) {
     size_t newSize = scf->instruction.size? scf->instruction.size<<1: 0X10;
     struct sock_filter *newArray;
@@ -749,38 +754,6 @@ scfAddInstruction (SCFObject *scf, const struct sock_filter *instruction) {
 
   scf->instruction.array[scf->instruction.count++] = *instruction;
   return 1;
-}
-
-static void
-scfLogInstructions (SCFObject *scf) {
-  const  char *label = "SCF";
-
-  size_t count = scf->instruction.count;
-  logMessage(SCF_LOG_LEVEL, "%s instruction count: %zu", label, count);
-
-  if (SCF_LOG_INSTRUCTIONS) {
-    int decIndexWidth;
-    int hexIndexWidth;
-
-    {
-      size_t index = count;
-      if (index > 0) index -= 1;
-
-      char buffer[0X40];
-      decIndexWidth = snprintf(buffer, sizeof(buffer), "%zu", index);
-      hexIndexWidth = snprintf(buffer, sizeof(buffer), "%zx", index);
-    }
-
-    for (size_t index=0; index<count; index+=1) {
-      const struct sock_filter *instruction = &scf->instruction.array[index];
-
-      logMessage(SCF_LOG_LEVEL,
-        "%s: %*zu %0*zX: %04X %08X %02X %02X",
-        label, decIndexWidth, index, hexIndexWidth, index,
-        instruction->code, instruction->k, instruction->jt, instruction->jf
-      );
-    }
-  }
 }
 
 static int
@@ -1065,6 +1038,313 @@ scfAllowArgumentTables (SCFObject *scf, const struct sock_filter *deny) {
   }
 
   return 1;
+}
+
+#if SCF_LOG_INSTRUCTIONS
+static size_t
+scfDisassembleInstructionCode (uint16_t code, uint32_t value, char *buffer, size_t size) {
+  size_t length;
+  STR_BEGIN(buffer, size);
+
+  const char *name = NULL;
+  int hasSize = 0;
+  int hasMode = 0;
+  int hasSource = 0;
+  int isReturn = 0;
+  int problem = 0;
+
+  switch (BPF_CLASS(code)) {
+    case BPF_LD:
+      name = "ld";
+      hasSize = 1;
+      hasMode = 1;
+      break;
+
+    case BPF_LDX:
+      name = "ldx";
+      hasSize = 1;
+      hasMode = 1;
+      break;
+
+    case BPF_ST:
+      name = "st";
+      hasSize = 1;
+      hasMode = 1;
+      break;
+
+    case BPF_STX:
+      name = "stx";
+      hasSize = 1;
+      hasMode = 1;
+      break;
+
+    case BPF_ALU:
+      switch (BPF_OP(code)) {
+        case BPF_ADD:
+          name = "add";
+          break;
+
+        case BPF_SUB:
+          name = "sub";
+          break;
+
+        case BPF_MUL:
+          name = "mul";
+          break;
+
+        case BPF_DIV:
+          name = "div";
+          break;
+
+        case BPF_MOD:
+          name = "mod";
+          break;
+
+        case BPF_LSH:
+          name = "lsh";
+          break;
+
+        case BPF_RSH:
+          name = "rsh";
+          break;
+
+        case BPF_AND:
+          name = "and";
+          break;
+
+        case BPF_OR:
+          name = "or";
+          break;
+
+        case BPF_XOR:
+          name = "xor";
+          break;
+
+        case BPF_NEG:
+          name = "neg";
+          break;
+
+        default:
+          name = "alu";
+          problem = 1;
+          break;
+      }
+
+      hasSource = 1;
+      break;
+
+    case BPF_JMP:
+      switch (BPF_OP(code)) {
+        case BPF_JEQ:
+          name = "jeq";
+          break;
+
+        case BPF_JGT:
+          name = "jgt";
+          break;
+
+        case BPF_JGE:
+          name = "jge";
+          break;
+
+        case BPF_JSET:
+          name = "jseT";
+          break;
+
+        default:
+          problem = 1;
+          /* fall through */
+
+        case BPF_JA:
+          name = "jmp";
+          break;
+      }
+
+      hasSource = 1;
+      break;
+
+    case BPF_RET:
+      name = "ret";
+      isReturn = 1;
+      break;
+
+    default:
+      problem = 1;
+      break;
+  }
+
+  if (name) STR_PRINTF("%s", name);
+
+  if (hasSize) {
+    const char *size = NULL;
+
+    switch (BPF_SIZE(code)) {
+      case BPF_B:
+        size = "b";
+        break;
+
+      case BPF_H:
+        size = "h";
+        break;
+
+      case BPF_W:
+        size = "w";
+        break;
+
+      default:
+        problem = 1;
+        break;
+    }
+
+    if (size) STR_PRINTF("-%s", size);
+  }
+
+  if (hasMode) {
+    const char *mode = NULL;
+
+    switch (BPF_MODE(code)) {
+      case BPF_IMM:
+        mode = "imm";
+        break;
+
+      case BPF_ABS:
+        mode = "abs";
+        break;
+
+      case BPF_IND:
+        mode = "ind";
+        break;
+
+      case BPF_MEM:
+        mode = "mem";
+        break;
+
+      case BPF_LEN:
+        mode = "len";
+        break;
+
+      default:
+        problem = 1;
+        break;
+    }
+
+    if (mode) STR_PRINTF("-%s", mode);
+  }
+
+  if (hasSource) {
+    const char *source = NULL;
+
+    switch (BPF_SRC(code)) {
+      case BPF_K:
+        source = "k";
+        break;
+
+      case BPF_X:
+        source = "x";
+        break;
+
+      default:
+        problem = 1;
+        break;
+    }
+
+    if (source) STR_PRINTF("-%s", source);
+  }
+
+  if (isReturn) {
+    const char *action = NULL;
+
+    switch (value & SECCOMP_RET_ACTION_FULL) {
+      case SECCOMP_RET_KILL_PROCESS:
+        action = "kill-process";
+        break;
+
+      case SECCOMP_RET_KILL_THREAD:
+        action = "kill-thread";
+        break;
+
+      case SECCOMP_RET_TRAP:
+        action = "trap";
+        break;
+
+      case SECCOMP_RET_ERRNO:
+        action = "errno";
+        break;
+
+      case SECCOMP_RET_USER_NOTIF:
+        action = "notify";
+        break;
+
+      case SECCOMP_RET_TRACE:
+        action = "trace";
+        break;
+
+      case SECCOMP_RET_LOG:
+        action = "log";
+        break;
+
+      case SECCOMP_RET_ALLOW:
+        action = "allow";
+        break;
+
+      default:
+        break;
+    }
+
+    if (action) {
+      STR_PRINTF("-%s", action);
+      uint16_t data = value & SECCOMP_RET_DATA;
+      if (data) STR_PRINTF("(%u)", data);
+    }
+  }
+
+  if (problem) STR_PRINTF("?");
+  length = STR_LENGTH;
+  STR_END;
+  return length;
+}
+#endif /* SCF_LOG_INSTRUCTIONS */
+
+static void
+scfLogInstructions (SCFObject *scf) {
+  const  char *label = "SCF";
+
+  size_t count = scf->instruction.count;
+  logMessage(SCF_LOG_LEVEL, "%s instruction count: %zu", label, count);
+
+#if SCF_LOG_INSTRUCTIONS
+  {
+    int decIndexWidth;
+    int hexIndexWidth;
+
+    {
+      size_t index = count;
+      if (index > 0) index -= 1;
+
+      char buffer[0X40];
+      decIndexWidth = snprintf(buffer, sizeof(buffer), "%zu", index);
+      hexIndexWidth = snprintf(buffer, sizeof(buffer), "%zx", index);
+    }
+
+    for (size_t index=0; index<count; index+=1) {
+      const struct sock_filter *instruction = &scf->instruction.array[index];
+
+      char disassembly[0X40];
+      scfDisassembleInstructionCode(
+        instruction->code, instruction->k,
+        disassembly, sizeof(disassembly)
+      );
+
+      logMessage(SCF_LOG_LEVEL,
+        "%s: %*zu %0*zX: %04X %08X %02X %02X: %s",
+        label, decIndexWidth, index, hexIndexWidth, index,
+        instruction->code, instruction->k,
+        instruction->jt, instruction->jf,
+        disassembly
+      );
+    }
+  }
+#endif /* SCF_LOG_INSTRUCTIONS */
 }
 
 static const struct sock_filter *
