@@ -1443,6 +1443,12 @@ installSecureComputingFilter (const char *modeKeyword) {
   if ((deny->k & SECCOMP_RET_ACTION_FULL) != SECCOMP_RET_ALLOW) {
     SCFObject *scf;
 
+#ifdef PR_SET_NO_NEW_PRIVS
+    if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1) {
+      logSystemError("prctl[PR_SET_NO_NEW_PRIVS]");
+    }
+#endif /* PR_SET_NO_NEW_PRIVS */
+
     if ((scf = makeSecureComputingFilter(deny))) {
       struct sock_fprog program = {
         .filter = scf->instruction.array,
@@ -1450,7 +1456,7 @@ installSecureComputingFilter (const char *modeKeyword) {
       };
 
 #if defined(PR_SET_SECCOMP)
-      if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program) == -1) {
+      if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program, 0, 0) == -1) {
         logSystemError("prctl[PR_SET_SECCOMP,SECCOMP_MODE_FILTER]");
       }
 #elif defined(SECCOMP_SET_MODE_FILTER)
