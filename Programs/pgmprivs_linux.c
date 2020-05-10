@@ -637,8 +637,11 @@ typedef struct SCFTableEntryStruct SCFTableEntry;
 
 struct SCFTableEntryStruct {
   uint32_t value;
-  uint8_t argumentNumber;
-  const SCFTableEntry *argumentTable;
+
+  struct {
+    const SCFTableEntry *table;
+    uint8_t index;
+  } argument;
 };
 
 #define SCF_BEGIN_TABLE(name) static const SCFTableEntry name##Table[] = {
@@ -667,8 +670,8 @@ struct SCFJumpStruct {
 typedef struct {
   SCFJump jump;
   const SCFTableEntry *table;
-  uint8_t argument;
-} SCFSubtable;
+  uint8_t index;
+} SCFArgumentTable;
 
 typedef struct {
   struct {
@@ -682,7 +685,7 @@ typedef struct {
   } jumps;
 
   struct {
-    SCFSubtable *array;
+    SCFArgumentTable *array;
     size_t size;
     size_t count;
   } subtable;
@@ -898,10 +901,10 @@ scfVerifyArchitecture (SCFObject *scf, const struct sock_filter *deny) {
 }
 
 static int
-scfAddSubtable (SCFObject *scf, uint8_t argument, const SCFTableEntry *table) {
+scfAddArgumentTable (SCFObject *scf, uint8_t index, const SCFTableEntry *table) {
   if (scf->subtable.count == scf->subtable.size) {
     size_t newSize = scf->subtable.size? scf->subtable.size<<1: 0X10;
-    SCFSubtable *newArray;
+    SCFArgumentTable *newArray;
 
     if (!(newArray = realloc(scf->subtable.array, ARRAY_SIZE(newArray, newSize)))) {
       logMallocError();
@@ -912,22 +915,22 @@ scfAddSubtable (SCFObject *scf, uint8_t argument, const SCFTableEntry *table) {
     scf->subtable.size = newSize;
   }
 
-  SCFSubtable subtable = {
-    .argument = argument,
+  SCFArgumentTable argument = {
+    .index = index,
     .table = table
   };
 
-  if (!scfJumpTo(scf, &subtable.jump)) return 0;
-  scf->subtable.array[scf->subtable.count++] = subtable;
+  if (!scfJumpTo(scf, &argument.jump)) return 0;
+  scf->subtable.array[scf->subtable.count++] = argument;
   return 1;
 }
 
 static int
 scfAllowTableEntry (SCFObject *scf, const SCFTableEntry *entry) {
-  if (entry->argumentTable) {
+  if (entry->argument.table) {
     SCFJump jump;
     if (!scfJumpIf(scf, &jump, entry->value, SCF_TEST_NE)) return 0;
-    if (!scfAddSubtable(scf, entry->argumentNumber, entry->argumentTable)) return 0;
+    if (!scfAddArgumentTable(scf, entry->argument.index, entry->argument.table)) return 0;
     return scfEndJump(scf, &jump);
   }
 
@@ -949,7 +952,7 @@ scfAllowTableEntry (SCFObject *scf, const SCFTableEntry *entry) {
 }
 
 static int
-scfAddTableEntries (SCFObject *scf, const SCFTableEntry *entries, size_t count, const struct sock_filter *deny) {
+scfAllowTableEntries (SCFObject *scf, const SCFTableEntry *entries, size_t count, const struct sock_filter *deny) {
   if (count <= 3) {
     const SCFTableEntry *cur = entries;
     const SCFTableEntry *end = cur + count;
@@ -967,16 +970,16 @@ scfAddTableEntries (SCFObject *scf, const SCFTableEntry *entries, size_t count, 
   if (!scfJumpIf(scf, &jump, entry->value, SCF_TEST_GT)) return 0;
   if (!scfAllowTableEntry(scf, entry)) return 0;
 
-  if (!scfAddTableEntries(scf, entries, (entry - entries), deny)) return 0;
+  if (!scfAllowTableEntries(scf, entries, (entry - entries), deny)) return 0;
   if (!scfEndJump(scf, &jump)) return 0;
 
   const SCFTableEntry *end = entries + count;
   entry += 1;
-  return scfAddTableEntries(scf, entry, (end - entry), deny);
+  return scfAllowTableEntries(scf, entry, (end - entry), deny);
 }
 
 static size_t
-scfGetTableSize (const SCFTableEntry *table) {
+scfGetTableEntryCount (const SCFTableEntry *table) {
   const SCFTableEntry *end = table;
   while (end->value != UINT32_MAX) end += 1;
   return end - table;
@@ -993,13 +996,13 @@ scfTableEntrySorter (const void *element1, const void *element2) {
 }
 
 static int
-scfAddTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_filter *deny) {
+scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_filter *deny) {
   {
-    size_t count = scfGetTableSize(table);
-    SCFTableEntry buffer[count];
-    memcpy(buffer, table, sizeof(buffer));
-    qsort(buffer, count, sizeof(buffer[0]), scfTableEntrySorter);
-    if (!scfAddTableEntries(scf, buffer, count, deny)) return 0;
+    size_t count = scfGetTableEntryCount(table);
+    SCFTableEntry entries[count];
+    memcpy(entries, table, sizeof(entries));
+    qsort(entries, count, sizeof(entries[0]), scfTableEntrySorter);
+    if (!scfAllowTableEntries(scf, entries, count, deny)) return 0;
   }
 
   if (scf->jumps.allow) {
@@ -1012,12 +1015,18 @@ scfAddTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_filte
 }
 
 static int
-scfFlushSubtables (SCFObject *scf, const struct sock_filter *deny) {
+scfAllowSyscallTable (SCFObject *scf, const struct sock_filter *deny) {
+  if (!scfLoadSyscall(scf)) return 0;
+  return scfAllowTable(scf, syscallTable, deny);
+}
+
+static int
+scfAllowArgumentTables (SCFObject *scf, const struct sock_filter *deny) {
   for (size_t index=0; index<scf->subtable.count; index+=1) {
-    const SCFSubtable *subtable = &scf->subtable.array[index];
-    if (!scfEndJump(scf, &subtable->jump)) return 0;
-    if (!scfLoadArgument(scf, subtable->argument)) return 0;
-    if (!scfAddTable(scf, subtable->table, deny)) return 0;
+    const SCFArgumentTable *argument = &scf->subtable.array[index];
+    if (!scfEndJump(scf, &argument->jump)) return 0;
+    if (!scfLoadArgument(scf, argument->index)) return 0;
+    if (!scfAllowTable(scf, argument->table, deny)) return 0;
   }
 
   return 1;
@@ -1078,9 +1087,8 @@ makeSecureComputingFilter (const struct sock_filter *deny) {
 
   if ((scf = scfNewObject())) {
     if (!scfVerifyArchitecture(scf, deny)) goto failed;
-    if (!scfLoadSyscall(scf)) goto failed;
-    if (!scfAddTable(scf, syscallTable, deny)) goto failed;
-    if (!scfFlushSubtables(scf, deny)) goto failed;
+    if (!scfAllowSyscallTable(scf, deny)) goto failed;
+    if (!scfAllowArgumentTables(scf, deny)) goto failed;
 
     logMessage(LOG_DEBUG, "BPF instruction count: %zu", scf->instruction.count);
     return scf;
