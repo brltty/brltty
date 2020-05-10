@@ -1024,8 +1024,8 @@ scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_fil
 
 static int
 scfAllowSyscallTable (SCFObject *scf, const struct sock_filter *deny) {
-  if (!scfLoadSyscall(scf)) return 0;
-  return scfAllowTable(scf, syscallTable, deny);
+  return scfLoadSyscall(scf)
+      && scfAllowTable(scf, syscallTable, deny);
 }
 
 static int
@@ -1041,13 +1041,26 @@ scfAllowArgumentTables (SCFObject *scf, const struct sock_filter *deny) {
 }
 
 #if SCF_LOG_INSTRUCTIONS
-static size_t
-scfDisassembleInstruction (char *buffer, size_t size, const struct sock_filter *instruction, size_t index, int hexIndexWidth) {
+typedef struct {
+  const struct sock_filter *instruction;
+  size_t location;
+
+  struct {
+    int decimal;
+    int hexadecimal;
+  } width;
+} SCFInstructionFormattingData;
+
+static
+STR_BEGIN_FORMATTER(scfFormatLocation, size_t location, const SCFInstructionFormattingData *ifd)
+  STR_PRINTF("X%0*zX", ifd->width.hexadecimal, location);
+STR_END_FORMATTER
+
+static
+STR_BEGIN_FORMATTER(scfDisassembleInstruction, const SCFInstructionFormattingData *ifd)
+  const struct sock_filter *instruction = ifd->instruction;
   uint16_t code = instruction->code;
   uint32_t operand = instruction->k;
-
-  size_t length;
-  STR_BEGIN(buffer, size);
 
   const char *name = NULL;
   int hasSize = 0;
@@ -1256,21 +1269,6 @@ scfDisassembleInstruction (char *buffer, size_t size, const struct sock_filter *
     if (source) STR_PRINTF("-%s", source);
   }
 
-  if (isJump && !problem) {
-    STR_PRINTF(" -> ");
-    size_t from = index + 1;
-
-    if (BPF_OP(code) == BPF_JA) {
-      STR_PRINTF("X%0*zX", hexIndexWidth, (from + operand));
-    } else {
-      STR_PRINTF(
-        "X%0*zX X%0*zX",
-        hexIndexWidth, (from + instruction->jt),
-        hexIndexWidth, (from + instruction->jf)
-      );
-    }
-  }
-
   if (isReturn) {
     const char *action = NULL;
 
@@ -1318,11 +1316,34 @@ scfDisassembleInstruction (char *buffer, size_t size, const struct sock_filter *
     }
   }
 
-  if (problem) STR_PRINTF("?");
-  length = STR_LENGTH;
-  STR_END;
-  return length;
-}
+  if (problem) {
+    STR_PRINTF("?");
+  } else if (isJump) {
+    STR_PRINTF(" -> ");
+    size_t from = ifd->location + 1;
+
+    if (BPF_OP(code) == BPF_JA) {
+      STR_FORMAT(scfFormatLocation, (from + operand), ifd);
+    } else {
+      STR_FORMAT(scfFormatLocation, (from + instruction->jt), ifd);
+      STR_PRINTF(" ");
+      STR_FORMAT(scfFormatLocation, (from + instruction->jf), ifd);
+    }
+  }
+STR_END_FORMATTER
+
+static
+STR_BEGIN_FORMATTER(scfFormatInstruction, const SCFInstructionFormattingData *ifd)
+  STR_FORMAT(scfFormatLocation, ifd->location, ifd);
+
+  STR_PRINTF(
+    ": %04X %08X %02X %02X: ",
+    ifd->instruction->code, ifd->instruction->k,
+    ifd->instruction->jt, ifd->instruction->jf
+  );
+
+  STR_FORMAT(scfDisassembleInstruction, ifd);
+STR_END_FORMATTER
 #endif /* SCF_LOG_INSTRUCTIONS */
 
 static void
@@ -1334,34 +1355,30 @@ scfLogInstructions (SCFObject *scf) {
 
 #if SCF_LOG_INSTRUCTIONS
   {
-    int decIndexWidth;
-    int hexIndexWidth;
+    SCFInstructionFormattingData ifd;
+    memset(&ifd, 0, sizeof(ifd));
 
     {
       size_t index = count;
       if (index > 0) index -= 1;
 
       char buffer[0X40];
-      decIndexWidth = snprintf(buffer, sizeof(buffer), "%zu", index);
-      hexIndexWidth = snprintf(buffer, sizeof(buffer), "%zx", index);
+      ifd.width.decimal = snprintf(buffer, sizeof(buffer), "%zu", index);
+      ifd.width.hexadecimal = snprintf(buffer, sizeof(buffer), "%zx", index);
     }
 
     for (size_t index=0; index<count; index+=1) {
-      const struct sock_filter *instruction = &scf->instruction.array[index];
+      ifd.location = index;
+      ifd.instruction = &scf->instruction.array[index];
 
-      char disassembly[0X40];
-      scfDisassembleInstruction(
-        disassembly, sizeof(disassembly),
-        instruction, index, hexIndexWidth
-      );
+      char log[0X100];
+      STR_BEGIN(log, sizeof(log));
 
-      logMessage(SCF_LOG_LEVEL,
-        "%s: %*zu X%0*zX: %04X %08X %02X %02X: %s",
-        label, decIndexWidth, index, hexIndexWidth, index,
-        instruction->code, instruction->k,
-        instruction->jt, instruction->jf,
-        disassembly
-      );
+      STR_PRINTF("%s: %*zu ", label, ifd.width.decimal, index);
+      STR_FORMAT(scfFormatInstruction, &ifd);
+
+      STR_END;
+      logMessage(SCF_LOG_LEVEL, "%s", log);
     }
   }
 #endif /* SCF_LOG_INSTRUCTIONS */
