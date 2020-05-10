@@ -29,6 +29,9 @@
 #include "file.h"
 #include "parse.h"
 
+#define SCF_LOG_LEVEL LOG_DEBUG
+#define SCF_LOG_INSTRUCTIONS 0
+
 //#undef HAVE_PWD_H
 //#undef HAVE_GRP_H
 //#undef HAVE_SYS_PRCTL_H
@@ -748,6 +751,38 @@ scfAddInstruction (SCFObject *scf, const struct sock_filter *instruction) {
   return 1;
 }
 
+static void
+scfLogInstructions (SCFObject *scf) {
+  const  char *label = "SCF";
+
+  size_t count = scf->instruction.count;
+  logMessage(SCF_LOG_LEVEL, "%s instruction count: %zu", label, count);
+
+  if (SCF_LOG_INSTRUCTIONS) {
+    int decIndexWidth;
+    int hexIndexWidth;
+
+    {
+      size_t index = count;
+      if (index > 0) index -= 1;
+
+      char buffer[0X40];
+      decIndexWidth = snprintf(buffer, sizeof(buffer), "%zu", index);
+      hexIndexWidth = snprintf(buffer, sizeof(buffer), "%zx", index);
+    }
+
+    for (size_t index=0; index<count; index+=1) {
+      const struct sock_filter *instruction = &scf->instruction.array[index];
+
+      logMessage(SCF_LOG_LEVEL,
+        "%s: %*zu %0*zX: %04X %08X %02X %02X",
+        label, decIndexWidth, index, hexIndexWidth, index,
+        instruction->code, instruction->k, instruction->jt, instruction->jf
+      );
+    }
+  }
+}
+
 static int
 scfLoadField (SCFObject *scf, uint32_t offset, uint8_t width) {
   struct sock_filter instruction = BPF_STMT(BPF_LD|BPF_ABS, offset);
@@ -893,11 +928,10 @@ static int
 scfVerifyArchitecture (SCFObject *scf, const struct sock_filter *deny) {
   SCFJump jump;
 
-  if (!scfLoadArchitecture(scf)) return 0;
-  if (!scfJumpIf(scf, &jump, SCF_ARCHITECTURE, SCF_TEST_EQ)) return 0;
-  if (!scfAddInstruction(scf, deny)) return 0;
-
-  return scfEndJump(scf, &jump);
+  return scfLoadArchitecture(scf)
+      && scfJumpIf(scf, &jump, SCF_ARCHITECTURE, SCF_TEST_EQ)
+      && scfAddInstruction(scf, deny)
+      && scfEndJump(scf, &jump);
 }
 
 static int
@@ -929,23 +963,24 @@ static int
 scfAllowTableEntry (SCFObject *scf, const SCFTableEntry *entry) {
   if (entry->argument.table) {
     SCFJump jump;
-    if (!scfJumpIf(scf, &jump, entry->value, SCF_TEST_NE)) return 0;
-    if (!scfAddArgumentTable(scf, entry->argument.index, entry->argument.table)) return 0;
-    return scfEndJump(scf, &jump);
-  }
 
-  SCFJump *jump;
-
-  if ((jump = malloc(sizeof(*jump)))) {
-    if (scfJumpIf(scf, jump, entry->value, SCF_TEST_EQ)) {
-      jump->next = scf->jumps.allow;
-      scf->jumps.allow = jump;
-      return 1;
-    }
-
-    free(jump);
+    return scfJumpIf(scf, &jump, entry->value, SCF_TEST_NE)
+        && scfAddArgumentTable(scf, entry->argument.index, entry->argument.table)
+        && scfEndJump(scf, &jump);
   } else {
-    logMallocError();
+    SCFJump *jump;
+
+    if ((jump = malloc(sizeof(*jump)))) {
+      if (scfJumpIf(scf, jump, entry->value, SCF_TEST_EQ)) {
+        jump->next = scf->jumps.allow;
+        scf->jumps.allow = jump;
+        return 1;
+      }
+
+      free(jump);
+    } else {
+      logMallocError();
+    }
   }
 
   return 0;
@@ -1086,13 +1121,15 @@ makeSecureComputingFilter (const struct sock_filter *deny) {
   SCFObject *scf;
 
   if ((scf = scfNewObject())) {
-    if (!scfVerifyArchitecture(scf, deny)) goto failed;
-    if (!scfAllowSyscallTable(scf, deny)) goto failed;
-    if (!scfAllowArgumentTables(scf, deny)) goto failed;
+    if (scfVerifyArchitecture(scf, deny)) {
+      if (scfAllowSyscallTable(scf, deny)) {
+        if (scfAllowArgumentTables(scf, deny)) {
+          scfLogInstructions(scf);
+          return scf;
+        }
+      }
+    }
 
-    logMessage(LOG_DEBUG, "BPF instruction count: %zu", scf->instruction.count);
-    return scf;
-  failed:
     scfDestroyObject(scf);
   }
 
