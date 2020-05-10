@@ -1042,7 +1042,10 @@ scfAllowArgumentTables (SCFObject *scf, const struct sock_filter *deny) {
 
 #if SCF_LOG_INSTRUCTIONS
 static size_t
-scfDisassembleInstructionCode (uint16_t code, uint32_t value, char *buffer, size_t size) {
+scfDisassembleInstruction (char *buffer, size_t size, const struct sock_filter *instruction, size_t index, int hexIndexWidth) {
+  uint16_t code = instruction->code;
+  uint32_t operand = instruction->k;
+
   size_t length;
   STR_BEGIN(buffer, size);
 
@@ -1050,6 +1053,7 @@ scfDisassembleInstructionCode (uint16_t code, uint32_t value, char *buffer, size
   int hasSize = 0;
   int hasMode = 0;
   int hasSource = 0;
+  int isJump = 0;
   int isReturn = 0;
   int problem = 0;
 
@@ -1161,6 +1165,7 @@ scfDisassembleInstructionCode (uint16_t code, uint32_t value, char *buffer, size
       }
 
       hasSource = 1;
+      isJump = 1;
       break;
 
     case BPF_RET:
@@ -1251,10 +1256,25 @@ scfDisassembleInstructionCode (uint16_t code, uint32_t value, char *buffer, size
     if (source) STR_PRINTF("-%s", source);
   }
 
+  if (isJump && !problem) {
+    STR_PRINTF(" -> ");
+    size_t from = index + 1;
+
+    if (BPF_OP(code) == BPF_JA) {
+      STR_PRINTF("X%0*zX", hexIndexWidth, (from + operand));
+    } else {
+      STR_PRINTF(
+        "X%0*zX X%0*zX",
+        hexIndexWidth, (from + instruction->jt),
+        hexIndexWidth, (from + instruction->jf)
+      );
+    }
+  }
+
   if (isReturn) {
     const char *action = NULL;
 
-    switch (value & SECCOMP_RET_ACTION_FULL) {
+    switch (operand & SECCOMP_RET_ACTION_FULL) {
       case SECCOMP_RET_KILL_PROCESS:
         action = "kill-process";
         break;
@@ -1293,7 +1313,7 @@ scfDisassembleInstructionCode (uint16_t code, uint32_t value, char *buffer, size
 
     if (action) {
       STR_PRINTF("-%s", action);
-      uint16_t data = value & SECCOMP_RET_DATA;
+      uint16_t data = operand & SECCOMP_RET_DATA;
       if (data) STR_PRINTF("(%u)", data);
     }
   }
@@ -1330,13 +1350,13 @@ scfLogInstructions (SCFObject *scf) {
       const struct sock_filter *instruction = &scf->instruction.array[index];
 
       char disassembly[0X40];
-      scfDisassembleInstructionCode(
-        instruction->code, instruction->k,
-        disassembly, sizeof(disassembly)
+      scfDisassembleInstruction(
+        disassembly, sizeof(disassembly),
+        instruction, index, hexIndexWidth
       );
 
       logMessage(SCF_LOG_LEVEL,
-        "%s: %*zu %0*zX: %04X %08X %02X %02X: %s",
+        "%s: %*zu X%0*zX: %04X %08X %02X %02X: %s",
         label, decIndexWidth, index, hexIndexWidth, index,
         instruction->code, instruction->k,
         instruction->jt, instruction->jf,
