@@ -1010,6 +1010,26 @@ scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_fil
     SCFTableEntry entries[count];
     memcpy(entries, table, sizeof(entries));
     qsort(entries, count, sizeof(entries[0]), scfTableEntrySorter);
+
+    if (count > 1) {
+      SCFTableEntry *to = entries;
+      const SCFTableEntry *from = entries + 1;
+      const SCFTableEntry *end = entries + count;
+
+      while (from < end) {
+        if (from->value != to->value) {
+          if (++to != from) {
+            *to = *from;
+          }
+        }
+
+        from += 1;
+      }
+
+      count = ++to - entries;
+    }
+
+    logMessage(SCF_LOG_LEVEL, "syscall count: %zu", count);
     if (!scfAllowTableEntries(scf, entries, count, deny)) return 0;
   }
 
