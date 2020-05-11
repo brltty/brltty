@@ -865,7 +865,7 @@ typedef enum {
 } SCFTest;
 
 static int
-scfJumpIf (SCFObject *scf, SCFJump *jump, uint32_t value, SCFTest test) {
+scfJumpIf (SCFObject *scf, SCFTest test, uint32_t value, SCFJump *jump) {
   struct sock_filter instruction = BPF_STMT(BPF_JMP|BPF_K, value);
   int invert = 0;
 
@@ -899,12 +899,12 @@ scfJumpIf (SCFObject *scf, SCFJump *jump, uint32_t value, SCFTest test) {
 
 static int
 scfVerifyArchitecture (SCFObject *scf, const struct sock_filter *deny) {
-  SCFJump jump;
+  SCFJump eqArch;
 
   return scfLoadArchitecture(scf)
-      && scfJumpIf(scf, &jump, SCF_ARCHITECTURE, SCF_TEST_EQ)
+      && scfJumpIf(scf, SCF_TEST_EQ, SCF_ARCHITECTURE, &eqArch)
       && scfAddInstruction(scf, deny)
-      && scfEndJump(scf, &jump);
+      && scfEndJump(scf, &eqArch);
 }
 
 static int
@@ -935,22 +935,22 @@ scfJumpToArgument (SCFObject *scf, uint8_t index, const SCFTableEntry *table) {
 static int
 scfAllowTableEntry (SCFObject *scf, const SCFTableEntry *entry) {
   if (entry->argument.table) {
-    SCFJump jump;
+    SCFJump neValue;
 
-    return scfJumpIf(scf, &jump, entry->value, SCF_TEST_NE)
+    return scfJumpIf(scf, SCF_TEST_NE, entry->value, &neValue)
         && scfJumpToArgument(scf, entry->argument.index, entry->argument.table)
-        && scfEndJump(scf, &jump);
+        && scfEndJump(scf, &neValue);
   } else {
-    SCFJump *jump;
+    SCFJump *eqValue;
 
-    if ((jump = malloc(sizeof(*jump)))) {
-      if (scfJumpIf(scf, jump, entry->value, SCF_TEST_EQ)) {
-        jump->next = scf->jumps.allow;
-        scf->jumps.allow = jump;
+    if ((eqValue = malloc(sizeof(*eqValue)))) {
+      if (scfJumpIf(scf, SCF_TEST_EQ, entry->value, eqValue)) {
+        eqValue->next = scf->jumps.allow;
+        scf->jumps.allow = eqValue;
         return 1;
       }
 
-      free(jump);
+      free(eqValue);
     } else {
       logMallocError();
     }
@@ -974,12 +974,12 @@ scfAllowTableEntries (SCFObject *scf, const SCFTableEntry *entries, size_t count
   }
 
   const SCFTableEntry *entry = entries + (count / 2);
-  SCFJump jump;
-  if (!scfJumpIf(scf, &jump, entry->value, SCF_TEST_GT)) return 0;
+  SCFJump gtValue;
+  if (!scfJumpIf(scf, SCF_TEST_GT, entry->value, &gtValue)) return 0;
   if (!scfAllowTableEntry(scf, entry)) return 0;
 
   if (!scfAllowTableEntries(scf, entries, (entry - entries), deny)) return 0;
-  if (!scfEndJump(scf, &jump)) return 0;
+  if (!scfEndJump(scf, &gtValue)) return 0;
 
   const SCFTableEntry *end = entries + count;
   entry += 1;
@@ -1023,22 +1023,28 @@ scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_fil
 }
 
 static int
-scfAllowSyscalls (SCFObject *scf, const struct sock_filter *deny) {
+scfCheckSyscall (SCFObject *scf, const struct sock_filter *deny) {
   return scfLoadSyscall(scf)
       && scfAllowTable(scf, syscallTable, deny);
 }
 
 static int
-scfAllowArgument (SCFObject *scf, const SCFArgument *argument, const struct sock_filter *deny) {
+scfCheckArgument (SCFObject *scf, const SCFArgument *argument, const struct sock_filter *deny) {
   return scfEndJump(scf, &argument->jump)
       && scfLoadArgument(scf, argument->index)
       && scfAllowTable(scf, argument->table, deny);
 }
 
 static int
-scfAllowArguments (SCFObject *scf, const struct sock_filter *deny) {
+scfCheckArguments (SCFObject *scf, const struct sock_filter *deny) {
+  /* An argument's table of approved values can include the specifications
+   * of more arguments and their associated approved value tables. The
+   * following iteration, therefore, needs to handle the possibility that
+   * the pending argument count may increase as each table is processed.
+   */
+
   while (scf->argument.count > 0) {
-    if (!scfAllowArgument(scf, &scf->argument.array[--scf->argument.count], deny)) {
+    if (!scfCheckArgument(scf, &scf->argument.array[--scf->argument.count], deny)) {
       return 0;
     }
   }
@@ -1444,8 +1450,8 @@ makeSecureComputingFilter (const struct sock_filter *deny) {
 
   if ((scf = scfNewObject())) {
     if (scfVerifyArchitecture(scf, deny)) {
-      if (scfAllowSyscalls(scf, deny)) {
-        if (scfAllowArguments(scf, deny)) {
+      if (scfCheckSyscall(scf, deny)) {
+        if (scfCheckArguments(scf, deny)) {
           scfLogInstructions(scf);
           return scf;
         }
