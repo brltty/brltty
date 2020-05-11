@@ -129,7 +129,12 @@ removeDuplicateGroups (gid_t *groups, size_t *count) {
     const gid_t *end = to + *count;
 
     while (from < end) {
-      if (*from != *to) *++to = *from;
+      if (*from != *to) {
+        if (++to != from) {
+          *to = *from;
+        }
+      }
+
       from += 1;
     }
 
