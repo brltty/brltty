@@ -674,7 +674,7 @@ typedef struct {
   SCFJump jump;
   const SCFTableEntry *table;
   uint8_t index;
-} SCFArgumentTable;
+} SCFArgument;
 
 typedef struct {
   struct {
@@ -688,10 +688,10 @@ typedef struct {
   } jumps;
 
   struct {
-    SCFArgumentTable *array;
+    SCFArgument *array;
     size_t size;
     size_t count;
-  } subtable;
+  } argument;
 } SCFObject;
 
 static SCFObject *
@@ -728,7 +728,7 @@ static void
 scfDestroyObject (SCFObject *scf) {
   scfDestroyJumps(scf->jumps.allow);
   if (scf->instruction.array) free(scf->instruction.array);
-  if (scf->subtable.array) free(scf->subtable.array);
+  if (scf->argument.array) free(scf->argument.array);
   free(scf);
 }
 
@@ -908,27 +908,27 @@ scfVerifyArchitecture (SCFObject *scf, const struct sock_filter *deny) {
 }
 
 static int
-scfAddArgumentTable (SCFObject *scf, uint8_t index, const SCFTableEntry *table) {
-  if (scf->subtable.count == scf->subtable.size) {
-    size_t newSize = scf->subtable.size? scf->subtable.size<<1: 0X10;
-    SCFArgumentTable *newArray;
+scfJumpToArgument (SCFObject *scf, uint8_t index, const SCFTableEntry *table) {
+  if (scf->argument.count == scf->argument.size) {
+    size_t newSize = scf->argument.size? scf->argument.size<<1: 0X10;
+    SCFArgument *newArray;
 
-    if (!(newArray = realloc(scf->subtable.array, ARRAY_SIZE(newArray, newSize)))) {
+    if (!(newArray = realloc(scf->argument.array, ARRAY_SIZE(newArray, newSize)))) {
       logMallocError();
       return 0;
     }
 
-    scf->subtable.array = newArray;
-    scf->subtable.size = newSize;
+    scf->argument.array = newArray;
+    scf->argument.size = newSize;
   }
 
-  SCFArgumentTable argument = {
+  SCFArgument argument = {
     .index = index,
     .table = table
   };
 
   if (!scfJumpTo(scf, &argument.jump)) return 0;
-  scf->subtable.array[scf->subtable.count++] = argument;
+  scf->argument.array[scf->argument.count++] = argument;
   return 1;
 }
 
@@ -938,7 +938,7 @@ scfAllowTableEntry (SCFObject *scf, const SCFTableEntry *entry) {
     SCFJump jump;
 
     return scfJumpIf(scf, &jump, entry->value, SCF_TEST_NE)
-        && scfAddArgumentTable(scf, entry->argument.index, entry->argument.table)
+        && scfJumpToArgument(scf, entry->argument.index, entry->argument.table)
         && scfEndJump(scf, &jump);
   } else {
     SCFJump *jump;
@@ -1023,18 +1023,24 @@ scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_fil
 }
 
 static int
-scfAllowSyscallTable (SCFObject *scf, const struct sock_filter *deny) {
+scfAllowSyscalls (SCFObject *scf, const struct sock_filter *deny) {
   return scfLoadSyscall(scf)
       && scfAllowTable(scf, syscallTable, deny);
 }
 
 static int
-scfAllowArgumentTables (SCFObject *scf, const struct sock_filter *deny) {
-  for (size_t index=0; index<scf->subtable.count; index+=1) {
-    const SCFArgumentTable *argument = &scf->subtable.array[index];
-    if (!scfEndJump(scf, &argument->jump)) return 0;
-    if (!scfLoadArgument(scf, argument->index)) return 0;
-    if (!scfAllowTable(scf, argument->table, deny)) return 0;
+scfAllowArgument (SCFObject *scf, const SCFArgument *argument, const struct sock_filter *deny) {
+  return scfEndJump(scf, &argument->jump)
+      && scfLoadArgument(scf, argument->index)
+      && scfAllowTable(scf, argument->table, deny);
+}
+
+static int
+scfAllowArguments (SCFObject *scf, const struct sock_filter *deny) {
+  while (scf->argument.count > 0) {
+    if (!scfAllowArgument(scf, &scf->argument.array[--scf->argument.count], deny)) {
+      return 0;
+    }
   }
 
   return 1;
@@ -1368,13 +1374,12 @@ scfLogInstructions (SCFObject *scf) {
     }
 
     for (size_t index=0; index<count; index+=1) {
-      ifd.location = index;
-      ifd.instruction = &scf->instruction.array[index];
-
       char log[0X100];
       STR_BEGIN(log, sizeof(log));
-
       STR_PRINTF("%s: %*zu ", label, ifd.width.decimal, index);
+
+      ifd.instruction = &scf->instruction.array[index];
+      ifd.location = index;
       STR_FORMAT(scfFormatInstruction, &ifd);
 
       STR_END;
@@ -1439,8 +1444,8 @@ makeSecureComputingFilter (const struct sock_filter *deny) {
 
   if ((scf = scfNewObject())) {
     if (scfVerifyArchitecture(scf, deny)) {
-      if (scfAllowSyscallTable(scf, deny)) {
-        if (scfAllowArgumentTables(scf, deny)) {
+      if (scfAllowSyscalls(scf, deny)) {
+        if (scfAllowArguments(scf, deny)) {
           scfLogInstructions(scf);
           return scf;
         }
