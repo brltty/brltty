@@ -447,6 +447,17 @@ Use the ``seccomp`` `privilege parameter`_ to specify how BRLTTY uses it.
 * Specify ``kill`` if you'd like an unapproved system call
   to cause the entire BRLTTY process to be summarily killed.
 
+Installing the filter also includes configuring BRLTTY's process
+so that no external command that it subsequently invokes
+will be able to acquire any additional privileges.
+See the ``PR_SET_NO_NEW_PRIVS`` section of the man page for ``prctl``
+for details.
+The quick summary is that, when executing any host command:
+
+* It's set-user-ID bit will be ignored.
+* It's set-group-ID bit will be ignored.
+* It's file capabilities will be ignored.
+
 The current list of approved system calls
 is in the ``syscalls_linux.h`` header,
 which is in the ``Programs/`` subdirectory of BRLTTY's source tree.
