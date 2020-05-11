@@ -4,6 +4,10 @@ SCF_BEGIN_TABLE(syscall)
   {__NR_clock_gettime},
   #endif /* __NR_clock_gettime */
 
+  #ifdef __NR_clock_getres
+  {__NR_clock_getres},
+  #endif /* __NR_clock_getres */
+
   #ifdef __NR_nanosleep
   {__NR_nanosleep},
   #endif /* __NR_nanosleep */
@@ -27,6 +31,10 @@ SCF_BEGIN_TABLE(syscall)
   #ifdef __NR_select
   {__NR_select},
   #endif /* __NR_select */
+
+  #ifdef __NR_wait4
+  {__NR_wait4},
+  #endif /* __NR_wait4 */
 
   #ifdef __NR_read
   {__NR_read},
@@ -236,6 +244,14 @@ SCF_BEGIN_TABLE(syscall)
   {__NR_getegid},
   #endif /* __NR_getegid */
 
+  #ifdef __NR_getresuid
+  {__NR_getresuid},
+  #endif /* __NR_getresuid */
+
+  #ifdef __NR_getresgid
+  {__NR_getresgid},
+  #endif /* __NR_getresgid */
+
   #ifdef __NR_getpid
   {__NR_getpid},
   #endif /* __NR_getpid */
@@ -255,6 +271,10 @@ SCF_BEGIN_TABLE(syscall)
   #ifdef __NR_rt_sigreturn
   {__NR_rt_sigreturn},
   #endif /* __NR_rt_sigreturn */
+
+  #ifdef __NR_kill
+  {__NR_kill},
+  #endif /* __NR_kill */
 
   #ifdef __NR_tgkill
   {__NR_tgkill},
