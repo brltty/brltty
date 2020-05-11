@@ -986,13 +986,6 @@ scfAllowTableEntries (SCFObject *scf, const SCFTableEntry *entries, size_t count
   return scfAllowTableEntries(scf, entry, (end - entry), deny);
 }
 
-static size_t
-scfGetTableEntryCount (const SCFTableEntry *table) {
-  const SCFTableEntry *end = table;
-  while (end->value != UINT32_MAX) end += 1;
-  return end - table;
-}
-
 static int
 scfTableEntrySorter (const void *element1, const void *element2) {
   const SCFTableEntry *entry1 = element1;
@@ -1003,33 +996,43 @@ scfTableEntrySorter (const void *element1, const void *element2) {
   return 0;
 }
 
+static void
+scfRemoveDuplicateValues (SCFTableEntry *entries, size_t *count) {
+  if (*count > 1) {
+    SCFTableEntry *to = entries;
+    const SCFTableEntry *from = entries + 1;
+    const SCFTableEntry *end = entries + *count;
+
+    while (from < end) {
+      if (from->value != to->value) {
+        if (++to != from) {
+          *to = *from;
+        }
+      }
+
+      from += 1;
+    }
+
+    *count = ++to - entries;
+  }
+}
+
+static size_t
+scfGetTableEntryCount (const SCFTableEntry *table) {
+  const SCFTableEntry *end = table;
+  while (end->value != UINT32_MAX) end += 1;
+  return end - table;
+}
+
 static int
 scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_filter *deny) {
   {
     size_t count = scfGetTableEntryCount(table);
     SCFTableEntry entries[count];
     memcpy(entries, table, sizeof(entries));
+
     qsort(entries, count, sizeof(entries[0]), scfTableEntrySorter);
-
-    if (count > 1) {
-      SCFTableEntry *to = entries;
-      const SCFTableEntry *from = entries + 1;
-      const SCFTableEntry *end = entries + count;
-
-      while (from < end) {
-        if (from->value != to->value) {
-          if (++to != from) {
-            *to = *from;
-          }
-        }
-
-        from += 1;
-      }
-
-      count = ++to - entries;
-    }
-
-    logMessage(SCF_LOG_LEVEL, "syscall count: %zu", count);
+    scfRemoveDuplicateValues(entries, &count);
     if (!scfAllowTableEntries(scf, entries, count, deny)) return 0;
   }
 
