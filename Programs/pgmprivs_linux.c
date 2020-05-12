@@ -638,13 +638,15 @@ isolateNamespaces (void) {
 #ifdef SECCOMP_MODE_FILTER
 typedef struct SCFTableEntryStruct SCFTableEntry;
 
+typedef struct {
+  const char *name;
+  const SCFTableEntry *table;
+  uint8_t index;
+} SCFArgumentEntry;
+
 struct SCFTableEntryStruct {
   uint32_t value;
-
-  struct {
-    const SCFTableEntry *table;
-    uint8_t index;
-  } argument;
+  const SCFArgumentEntry *argument;
 };
 
 #define SCF_BEGIN_TABLE(name) static const SCFTableEntry name##Table[] = {
@@ -671,9 +673,8 @@ struct SCFJumpStruct {
 };
 
 typedef struct {
+  const SCFArgumentEntry *entry;
   SCFJump jump;
-  const SCFTableEntry *table;
-  uint8_t index;
 } SCFArgument;
 
 typedef struct {
@@ -908,7 +909,7 @@ scfVerifyArchitecture (SCFObject *scf, const struct sock_filter *deny) {
 }
 
 static int
-scfJumpToArgument (SCFObject *scf, uint8_t index, const SCFTableEntry *table) {
+scfJumpToArgument (SCFObject *scf, const SCFArgumentEntry *entry) {
   if (scf->argument.count == scf->argument.size) {
     size_t newSize = scf->argument.size? scf->argument.size<<1: 0X10;
     SCFArgument *newArray;
@@ -923,8 +924,7 @@ scfJumpToArgument (SCFObject *scf, uint8_t index, const SCFTableEntry *table) {
   }
 
   SCFArgument argument = {
-    .index = index,
-    .table = table
+    .entry = entry
   };
 
   if (!scfJumpTo(scf, &argument.jump)) return 0;
@@ -934,11 +934,11 @@ scfJumpToArgument (SCFObject *scf, uint8_t index, const SCFTableEntry *table) {
 
 static int
 scfAllowTableEntry (SCFObject *scf, const SCFTableEntry *entry) {
-  if (entry->argument.table) {
+  if (entry->argument) {
     SCFJump neValue;
 
     return scfJumpIf(scf, SCF_TEST_NE, entry->value, &neValue)
-        && scfJumpToArgument(scf, entry->argument.index, entry->argument.table)
+        && scfJumpToArgument(scf, entry->argument)
         && scfEndJump(scf, &neValue);
   } else {
     SCFJump *eqValue;
@@ -997,7 +997,12 @@ scfTableEntrySorter (const void *element1, const void *element2) {
 }
 
 static void
-scfRemoveDuplicateValues (SCFTableEntry *entries, size_t *count) {
+scfSortTableEntries (SCFTableEntry *entries, size_t count) {
+  qsort(entries, count, sizeof(*entries), scfTableEntrySorter);
+}
+
+static void
+scfRemoveDuplicateTableEntries (SCFTableEntry *entries, size_t *count) {
   if (*count > 1) {
     SCFTableEntry *to = entries;
     const SCFTableEntry *from = entries + 1;
@@ -1025,14 +1030,19 @@ scfGetTableEntryCount (const SCFTableEntry *table) {
 }
 
 static int
-scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_filter *deny) {
+scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const char *name, const struct sock_filter *deny) {
   {
     size_t count = scfGetTableEntryCount(table);
     SCFTableEntry entries[count];
     memcpy(entries, table, sizeof(entries));
 
-    qsort(entries, count, sizeof(entries[0]), scfTableEntrySorter);
-    scfRemoveDuplicateValues(entries, &count);
+    scfSortTableEntries(entries, count);
+    scfRemoveDuplicateTableEntries(entries, &count);
+
+    if (name) {
+      logMessage(SCF_LOG_LEVEL, "%s approved value count: %zu", name, count);
+    }
+
     if (!scfAllowTableEntries(scf, entries, count, deny)) return 0;
   }
 
@@ -1048,14 +1058,16 @@ scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const struct sock_fil
 static int
 scfCheckSyscall (SCFObject *scf, const struct sock_filter *deny) {
   return scfLoadSyscall(scf)
-      && scfAllowTable(scf, syscallTable, deny);
+      && scfAllowTable(scf, syscallTable, "syscall", deny);
 }
 
 static int
 scfCheckArgument (SCFObject *scf, const SCFArgument *argument, const struct sock_filter *deny) {
+  const SCFArgumentEntry *entry = argument->entry;
+
   return scfEndJump(scf, &argument->jump)
-      && scfLoadArgument(scf, argument->index)
-      && scfAllowTable(scf, argument->table, deny);
+      && scfLoadArgument(scf, argument->entry->index)
+      && scfAllowTable(scf, entry->table, entry->name, deny);
 }
 
 static int
@@ -1249,7 +1261,7 @@ STR_BEGIN_FORMATTER(scfDisassembleInstruction, const SCFInstructionFormattingDat
         break;
     }
 
-    if (size) STR_PRINTF("-%s", size);
+    if (size) STR_PRINTF("%s", size);
   }
 
   if (hasMode) {
