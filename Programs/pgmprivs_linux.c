@@ -636,23 +636,27 @@ isolateNamespaces (void) {
 #endif /* SCF_ARCHITECTURE */
 
 #ifdef SECCOMP_MODE_FILTER
-typedef struct SCFValueEntryStruct SCFValueEntry;
+typedef struct SCFValueDescriptorStruct SCFValueDescriptor;
 
 typedef struct {
   const char *name;
-  const SCFValueEntry *values;
+  const SCFValueDescriptor *values;
   uint8_t index;
 } SCFArgumentDescriptor;
 
-#define SCF_ARGUMENT(name, index) \
+#define SCF_ARGUMENT(index, name) \
 .argument = &(const SCFArgumentDescriptor){#name, name##Values, index}
 
-struct SCFValueEntryStruct {
+// best to protect each of these with an #ifdef for the value's macro
+struct SCFValueDescriptorStruct {
+  // must be first
   uint32_t value;
+
+  // use SCF_ARGUMENT(index, name)
   const SCFArgumentDescriptor *argument;
 };
 
-#define SCF_BEGIN_VALUES(name) static const SCFValueEntry name##Values[] = {
+#define SCF_BEGIN_VALUES(name) static const SCFValueDescriptor name##Values[] = {
 #define SCF_END_VALUES {UINT32_MAX}};
 #include "syscalls_linux.h"
 
@@ -936,18 +940,18 @@ scfJumpToArgument (SCFObject *scf, const SCFArgumentDescriptor *descriptor) {
 }
 
 static int
-scfAllowTableEntry (SCFObject *scf, const SCFValueEntry *entry) {
-  if (entry->argument) {
+scfAllowValueDescriptor (SCFObject *scf, const SCFValueDescriptor *descriptor) {
+  if (descriptor->argument) {
     SCFJump neValue;
 
-    return scfJumpIf(scf, SCF_TEST_NE, entry->value, &neValue)
-        && scfJumpToArgument(scf, entry->argument)
+    return scfJumpIf(scf, SCF_TEST_NE, descriptor->value, &neValue)
+        && scfJumpToArgument(scf, descriptor->argument)
         && scfEndJump(scf, &neValue);
   } else {
     SCFJump *eqValue;
 
     if ((eqValue = malloc(sizeof(*eqValue)))) {
-      if (scfJumpIf(scf, SCF_TEST_EQ, entry->value, eqValue)) {
+      if (scfJumpIf(scf, SCF_TEST_EQ, descriptor->value, eqValue)) {
         eqValue->next = scf->jumps.allow;
         scf->jumps.allow = eqValue;
         return 1;
@@ -963,53 +967,53 @@ scfAllowTableEntry (SCFObject *scf, const SCFValueEntry *entry) {
 }
 
 static int
-scfAllowTableEntries (SCFObject *scf, const SCFValueEntry *entries, size_t count, const struct sock_filter *deny) {
+scfAllowValueDescriptors (SCFObject *scf, const SCFValueDescriptor *descriptors, size_t count, const struct sock_filter *deny) {
   if (count <= 3) {
-    const SCFValueEntry *cur = entries;
-    const SCFValueEntry *end = cur + count;
+    const SCFValueDescriptor *cur = descriptors;
+    const SCFValueDescriptor *end = cur + count;
 
     while (cur < end) {
-      if (!scfAllowTableEntry(scf, cur)) return 0;
+      if (!scfAllowValueDescriptor(scf, cur)) return 0;
       cur += 1;
     }
 
     return scfAddInstruction(scf, deny);
   }
 
-  const SCFValueEntry *entry = entries + (count / 2);
+  const SCFValueDescriptor *descriptor = descriptors + (count / 2);
   SCFJump gtValue;
-  if (!scfJumpIf(scf, SCF_TEST_GT, entry->value, &gtValue)) return 0;
-  if (!scfAllowTableEntry(scf, entry)) return 0;
+  if (!scfJumpIf(scf, SCF_TEST_GT, descriptor->value, &gtValue)) return 0;
+  if (!scfAllowValueDescriptor(scf, descriptor)) return 0;
 
-  if (!scfAllowTableEntries(scf, entries, (entry - entries), deny)) return 0;
+  if (!scfAllowValueDescriptors(scf, descriptors, (descriptor - descriptors), deny)) return 0;
   if (!scfEndJump(scf, &gtValue)) return 0;
 
-  const SCFValueEntry *end = entries + count;
-  entry += 1;
-  return scfAllowTableEntries(scf, entry, (end - entry), deny);
+  const SCFValueDescriptor *end = descriptors + count;
+  descriptor += 1;
+  return scfAllowValueDescriptors(scf, descriptor, (end - descriptor), deny);
 }
 
 static int
-scfTableEntrySorter (const void *element1, const void *element2) {
-  const SCFValueEntry *entry1 = element1;
-  const SCFValueEntry *entry2 = element2;
+scfValueDescriptorSorter (const void *element1, const void *element2) {
+  const SCFValueDescriptor *descriptor1 = element1;
+  const SCFValueDescriptor *descriptor2 = element2;
 
-  if (entry1->value < entry2->value) return -1;
-  if (entry1->value > entry2->value) return 1;
+  if (descriptor1->value < descriptor2->value) return -1;
+  if (descriptor1->value > descriptor2->value) return 1;
   return 0;
 }
 
 static void
-scfSortTableEntries (SCFValueEntry *entries, size_t count) {
-  qsort(entries, count, sizeof(*entries), scfTableEntrySorter);
+scfSortValues (SCFValueDescriptor *values, size_t count) {
+  qsort(values, count, sizeof(*values), scfValueDescriptorSorter);
 }
 
 static void
-scfRemoveDuplicateTableEntries (SCFValueEntry *entries, size_t *count) {
+scfRemoveDuplicateValues (SCFValueDescriptor *values, size_t *count) {
   if (*count > 1) {
-    SCFValueEntry *to = entries;
-    const SCFValueEntry *from = entries + 1;
-    const SCFValueEntry *end = entries + *count;
+    SCFValueDescriptor *to = values;
+    const SCFValueDescriptor *from = values + 1;
+    const SCFValueDescriptor *end = values + *count;
 
     while (from < end) {
       if (from->value != to->value) {
@@ -1021,32 +1025,29 @@ scfRemoveDuplicateTableEntries (SCFValueEntry *entries, size_t *count) {
       from += 1;
     }
 
-    *count = ++to - entries;
+    *count = ++to - values;
   }
 }
 
 static size_t
-scfGetTableEntryCount (const SCFValueEntry *table) {
-  const SCFValueEntry *end = table;
+scfGetValueCount (const SCFValueDescriptor *values) {
+  const SCFValueDescriptor *end = values;
   while (end->value != UINT32_MAX) end += 1;
-  return end - table;
+  return end - values;
 }
 
 static int
-scfAllowValues (SCFObject *scf, const SCFValueEntry *table, const char *name, const struct sock_filter *deny) {
+scfAllowValues (SCFObject *scf, const SCFValueDescriptor *values, const char *name, const struct sock_filter *deny) {
   {
-    size_t count = scfGetTableEntryCount(table);
-    SCFValueEntry entries[count];
-    memcpy(entries, table, sizeof(entries));
+    size_t count = scfGetValueCount(values);
+    SCFValueDescriptor descriptors[count];
+    memcpy(descriptors, values, sizeof(descriptors));
 
-    scfSortTableEntries(entries, count);
-    scfRemoveDuplicateTableEntries(entries, &count);
+    scfSortValues(descriptors, count);
+    scfRemoveDuplicateValues(descriptors, &count);
+    logMessage(SCF_LOG_LEVEL, "%s approved value count: %zu", name, count);
 
-    if (name) {
-      logMessage(SCF_LOG_LEVEL, "%s approved value count: %zu", name, count);
-    }
-
-    if (!scfAllowTableEntries(scf, entries, count, deny)) return 0;
+    if (!scfAllowValueDescriptors(scf, descriptors, count, deny)) return 0;
   }
 
   if (scf->jumps.allow) {
@@ -1434,13 +1435,13 @@ scfLogInstructions (SCFObject *scf) {
 }
 
 static const struct sock_filter *
-getDenyInstruction (const char *modeKeyword) {
+getDenyInstruction (const char *keyword) {
   typedef struct {
     const char *keyword;
     struct sock_filter instruction;
-  } ModeEntry;
+  } DenyAction;
 
-  static const ModeEntry modeTable[] = {
+  static const DenyAction denyActions[] = {
     #ifdef SECCOMP_RET_ALLOW
     { .keyword = "no",
       .instruction = SCF_RETURN(ALLOW, 0)
@@ -1469,17 +1470,17 @@ getDenyInstruction (const char *modeKeyword) {
   };
 
   unsigned int choice;
-  int valid = validateChoiceEx(&choice, modeKeyword, modeTable, sizeof(modeTable[0]));
-  const ModeEntry *mode = &modeTable[choice];
+  int valid = validateChoiceEx(&choice, keyword, denyActions, sizeof(denyActions[0]));
+  const DenyAction *action = &denyActions[choice];
 
   if (!valid) {
     logMessage(LOG_WARNING,
-      "unknown SECCOMP mode: %s: assuming %s",
-      modeKeyword, mode->keyword
+      "unknown SECCOMP deny action: %s: assuming %s",
+      keyword, action->keyword
     );
   }
 
-  return &mode->instruction;
+  return &action->instruction;
 }
 
 static SCFObject *
@@ -1503,8 +1504,8 @@ makeSecureComputingFilter (const struct sock_filter *deny) {
 }
 
 static void
-installSecureComputingFilter (const char *modeKeyword) {
-  const struct sock_filter *deny = getDenyInstruction(modeKeyword);
+installSecureComputingFilter (const char *denyKeyword) {
+  const struct sock_filter *deny = getDenyInstruction(denyKeyword);
 
   if ((deny->k & SECCOMP_RET_ACTION_FULL) != SECCOMP_RET_ALLOW) {
     SCFObject *scf;
