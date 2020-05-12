@@ -636,21 +636,24 @@ isolateNamespaces (void) {
 #endif /* SCF_ARCHITECTURE */
 
 #ifdef SECCOMP_MODE_FILTER
-typedef struct SCFTableEntryStruct SCFTableEntry;
+typedef struct SCFValueEntryStruct SCFValueEntry;
 
 typedef struct {
   const char *name;
-  const SCFTableEntry *table;
+  const SCFValueEntry *values;
   uint8_t index;
-} SCFArgumentEntry;
+} SCFArgumentDescriptor;
 
-struct SCFTableEntryStruct {
+#define SCF_ARGUMENT(name, index) \
+.argument = &(const SCFArgumentDescriptor){#name, name##Values, index}
+
+struct SCFValueEntryStruct {
   uint32_t value;
-  const SCFArgumentEntry *argument;
+  const SCFArgumentDescriptor *argument;
 };
 
-#define SCF_BEGIN_TABLE(name) static const SCFTableEntry name##Table[] = {
-#define SCF_END_TABLE {UINT32_MAX}};
+#define SCF_BEGIN_VALUES(name) static const SCFValueEntry name##Values[] = {
+#define SCF_END_VALUES {UINT32_MAX}};
 #include "syscalls_linux.h"
 
 #define SCF_FIELD_OFFSET(field) offsetof(struct seccomp_data, field)
@@ -673,7 +676,7 @@ struct SCFJumpStruct {
 };
 
 typedef struct {
-  const SCFArgumentEntry *entry;
+  const SCFArgumentDescriptor *descriptor;
   SCFJump jump;
 } SCFArgument;
 
@@ -909,7 +912,7 @@ scfVerifyArchitecture (SCFObject *scf, const struct sock_filter *deny) {
 }
 
 static int
-scfJumpToArgument (SCFObject *scf, const SCFArgumentEntry *entry) {
+scfJumpToArgument (SCFObject *scf, const SCFArgumentDescriptor *descriptor) {
   if (scf->argument.count == scf->argument.size) {
     size_t newSize = scf->argument.size? scf->argument.size<<1: 0X10;
     SCFArgument *newArray;
@@ -924,7 +927,7 @@ scfJumpToArgument (SCFObject *scf, const SCFArgumentEntry *entry) {
   }
 
   SCFArgument argument = {
-    .entry = entry
+    .descriptor = descriptor
   };
 
   if (!scfJumpTo(scf, &argument.jump)) return 0;
@@ -933,7 +936,7 @@ scfJumpToArgument (SCFObject *scf, const SCFArgumentEntry *entry) {
 }
 
 static int
-scfAllowTableEntry (SCFObject *scf, const SCFTableEntry *entry) {
+scfAllowTableEntry (SCFObject *scf, const SCFValueEntry *entry) {
   if (entry->argument) {
     SCFJump neValue;
 
@@ -960,10 +963,10 @@ scfAllowTableEntry (SCFObject *scf, const SCFTableEntry *entry) {
 }
 
 static int
-scfAllowTableEntries (SCFObject *scf, const SCFTableEntry *entries, size_t count, const struct sock_filter *deny) {
+scfAllowTableEntries (SCFObject *scf, const SCFValueEntry *entries, size_t count, const struct sock_filter *deny) {
   if (count <= 3) {
-    const SCFTableEntry *cur = entries;
-    const SCFTableEntry *end = cur + count;
+    const SCFValueEntry *cur = entries;
+    const SCFValueEntry *end = cur + count;
 
     while (cur < end) {
       if (!scfAllowTableEntry(scf, cur)) return 0;
@@ -973,7 +976,7 @@ scfAllowTableEntries (SCFObject *scf, const SCFTableEntry *entries, size_t count
     return scfAddInstruction(scf, deny);
   }
 
-  const SCFTableEntry *entry = entries + (count / 2);
+  const SCFValueEntry *entry = entries + (count / 2);
   SCFJump gtValue;
   if (!scfJumpIf(scf, SCF_TEST_GT, entry->value, &gtValue)) return 0;
   if (!scfAllowTableEntry(scf, entry)) return 0;
@@ -981,15 +984,15 @@ scfAllowTableEntries (SCFObject *scf, const SCFTableEntry *entries, size_t count
   if (!scfAllowTableEntries(scf, entries, (entry - entries), deny)) return 0;
   if (!scfEndJump(scf, &gtValue)) return 0;
 
-  const SCFTableEntry *end = entries + count;
+  const SCFValueEntry *end = entries + count;
   entry += 1;
   return scfAllowTableEntries(scf, entry, (end - entry), deny);
 }
 
 static int
 scfTableEntrySorter (const void *element1, const void *element2) {
-  const SCFTableEntry *entry1 = element1;
-  const SCFTableEntry *entry2 = element2;
+  const SCFValueEntry *entry1 = element1;
+  const SCFValueEntry *entry2 = element2;
 
   if (entry1->value < entry2->value) return -1;
   if (entry1->value > entry2->value) return 1;
@@ -997,16 +1000,16 @@ scfTableEntrySorter (const void *element1, const void *element2) {
 }
 
 static void
-scfSortTableEntries (SCFTableEntry *entries, size_t count) {
+scfSortTableEntries (SCFValueEntry *entries, size_t count) {
   qsort(entries, count, sizeof(*entries), scfTableEntrySorter);
 }
 
 static void
-scfRemoveDuplicateTableEntries (SCFTableEntry *entries, size_t *count) {
+scfRemoveDuplicateTableEntries (SCFValueEntry *entries, size_t *count) {
   if (*count > 1) {
-    SCFTableEntry *to = entries;
-    const SCFTableEntry *from = entries + 1;
-    const SCFTableEntry *end = entries + *count;
+    SCFValueEntry *to = entries;
+    const SCFValueEntry *from = entries + 1;
+    const SCFValueEntry *end = entries + *count;
 
     while (from < end) {
       if (from->value != to->value) {
@@ -1023,17 +1026,17 @@ scfRemoveDuplicateTableEntries (SCFTableEntry *entries, size_t *count) {
 }
 
 static size_t
-scfGetTableEntryCount (const SCFTableEntry *table) {
-  const SCFTableEntry *end = table;
+scfGetTableEntryCount (const SCFValueEntry *table) {
+  const SCFValueEntry *end = table;
   while (end->value != UINT32_MAX) end += 1;
   return end - table;
 }
 
 static int
-scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const char *name, const struct sock_filter *deny) {
+scfAllowValues (SCFObject *scf, const SCFValueEntry *table, const char *name, const struct sock_filter *deny) {
   {
     size_t count = scfGetTableEntryCount(table);
-    SCFTableEntry entries[count];
+    SCFValueEntry entries[count];
     memcpy(entries, table, sizeof(entries));
 
     scfSortTableEntries(entries, count);
@@ -1058,16 +1061,16 @@ scfAllowTable (SCFObject *scf, const SCFTableEntry *table, const char *name, con
 static int
 scfCheckSyscall (SCFObject *scf, const struct sock_filter *deny) {
   return scfLoadSyscall(scf)
-      && scfAllowTable(scf, syscallTable, "syscall", deny);
+      && scfAllowValues(scf, syscallValues, "syscall", deny);
 }
 
 static int
 scfCheckArgument (SCFObject *scf, const SCFArgument *argument, const struct sock_filter *deny) {
-  const SCFArgumentEntry *entry = argument->entry;
+  const SCFArgumentDescriptor *descriptor = argument->descriptor;
 
   return scfEndJump(scf, &argument->jump)
-      && scfLoadArgument(scf, argument->entry->index)
-      && scfAllowTable(scf, entry->table, entry->name, deny);
+      && scfLoadArgument(scf, descriptor->index)
+      && scfAllowValues(scf, descriptor->values, descriptor->name, deny);
 }
 
 static int

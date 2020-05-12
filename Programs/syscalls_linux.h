@@ -1,5 +1,5 @@
 #include <linux/unistd.h>
-SCF_BEGIN_TABLE(syscall)
+SCF_BEGIN_VALUES(syscall)
   #ifdef __NR_clock_gettime
   {__NR_clock_gettime},
   #endif /* __NR_clock_gettime */
@@ -307,4 +307,4 @@ SCF_BEGIN_TABLE(syscall)
   #ifdef __NR_exit
   {__NR_exit},
   #endif /* __NR_exit */
-SCF_END_TABLE
+SCF_END_VALUES
