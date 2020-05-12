@@ -782,7 +782,7 @@ scfLoadField (SCFObject *scf, uint32_t offset, uint8_t width) {
       break;
 
     default:
-      logMessage(LOG_ERR, "unsupported field width: %u", width);
+      logMessage(LOG_WARNING, "unsupported field width: %u", width);
       return 0;
   }
 
@@ -834,7 +834,7 @@ scfEndJump (SCFObject *scf, const SCFJump *jump) {
       break;
 
     default:
-      logMessage(LOG_ERR, "unsupported jump type: %u", type);
+      logMessage(LOG_WARNING, "unsupported jump type: %u", type);
       return 0;
   }
 
@@ -897,7 +897,7 @@ scfJumpIf (SCFObject *scf, SCFTest test, uint32_t value, SCFJump *jump) {
       break;
 
     default:
-      logMessage(LOG_ERR, "unsupported value test: %u", test);
+      logMessage(LOG_WARNING, "unsupported value test: %u", test);
       return 0;
   }
 
@@ -1009,17 +1009,20 @@ scfSortValues (SCFValueDescriptor *values, size_t count) {
 }
 
 static void
-scfRemoveDuplicateValues (SCFValueDescriptor *values, size_t *count) {
+scfRemoveDuplicateValues (SCFValueDescriptor *values, size_t *count, const char *name) {
   if (*count > 1) {
     SCFValueDescriptor *to = values;
     const SCFValueDescriptor *from = values + 1;
     const SCFValueDescriptor *end = values + *count;
 
     while (from < end) {
-      if (from->value != to->value) {
-        if (++to != from) {
-          *to = *from;
-        }
+      if (from->value == to->value) {
+        logMessage(LOG_WARNING,
+          "duplicate %s approved value: 0X%08"PRIX32,
+          name, from->value
+        );
+      } else if (++to != from) {
+        *to = *from;
       }
 
       from += 1;
@@ -1044,7 +1047,7 @@ scfAllowValues (SCFObject *scf, const SCFValueDescriptor *values, const char *na
     memcpy(descriptors, values, sizeof(descriptors));
 
     scfSortValues(descriptors, count);
-    scfRemoveDuplicateValues(descriptors, &count);
+    scfRemoveDuplicateValues(descriptors, &count, name);
     logMessage(SCF_LOG_LEVEL, "%s approved value count: %zu", name, count);
 
     if (!scfAllowValueDescriptors(scf, descriptors, count, deny)) return 0;
