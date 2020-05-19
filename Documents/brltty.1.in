@@ -218,6 +218,13 @@ the first available MIDI output port
 \fB\-n\fR (\fB\-\-no\-daemon\fR)
 Remain in the foreground (useful for debugging).
 .TP
+\fB\-o \fIname\fB=\fIvalue\fB,\fR... (\fB\-\-override\-preference=\fR)
+Override a preference setting.
+For the location of the preferences file, see the
+.B \-F
+.RB "(" "\-\-preferences\-file" ")"
+option.
+.TP
 \fB\-p \fIdevice\fR (\fB\-\-pcm\-device=\fR)
 The device to use for digital audio.
 For ALSA it's \fIname\fR[\fB:\fIargument\fB,\fR...].
