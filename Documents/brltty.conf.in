@@ -612,7 +612,7 @@
 
 # Linux Privilege Parameters
 #privilege-parameters lx:path=/usr/sbin:/sbin:/usr/bin:/bin
-#privilege-parameters lx:seccomp=no # [no,log,fail,kill]
+#privilege-parameters lx:scfmode=no # [no,log,fail,kill]
 #privilege-parameters lx:shell=/bin/sh
 #privilege-parameters lx:user=brltty
 

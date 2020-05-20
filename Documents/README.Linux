@@ -86,7 +86,7 @@ BRLTTY takes a number of steps to establish a safer execution environment:
 * Establish the needed `group memberships`_.
 * Set its `required capabilities`_.
 * Relinquish all non-required capabilities.
-* Install the `secure computing filter`_.
+* Install the `system call filter`_.
 
 The Unprivileged User
 `````````````````````
@@ -331,8 +331,8 @@ The following privilege parameters are supported for Linux:
   This parameter sets the `safe command search path`_.
   No attempt is made to validate it.
 
-``seccomp``
-  This parameter sets the mode of the `secure computing filter`_.
+``scfmode``
+  This parameter sets the mode of the `system call filter`_.
   The supported modes are:
 
   ``no``
@@ -414,10 +414,11 @@ mount
 UTS
   This namespace is used to manage the host name and the NIS domain name.
 
-Secure Computing Filter
-~~~~~~~~~~~~~~~~~~~~~~~
+System Call Filter
+~~~~~~~~~~~~~~~~~~
 
-The kernel provides a secure computing filter, known as ``seccomp``,
+The kernel provides a system call filter,
+known as ``seccomp`` (secure computing),
 that verifies that only an approved set of system calls is being used.
 The default is that BRLTTY doesn't actually use it
 because, by nature, using a system call filter
@@ -434,7 +435,7 @@ Reasons for this include:
 Even though the default is that BRLTTY doesn't use the filter,
 access to it is still provided for those users or administrators who prefer
 to avail themselves of the additional protection that it offers.
-Use the ``seccomp`` `privilege parameter`_ to specify how BRLTTY uses it.
+Use the ``scfmode`` `privilege parameter`_ to specify how BRLTTY uses it.
 
 * Specify ``log`` if you'd like BRLTTY to continue executing normally
   but to also record any unapproved system calls in the system log.

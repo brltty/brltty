@@ -1437,57 +1437,8 @@ scfLogInstructions (SCFObject *scf) {
 #endif /* SCF_LOG_INSTRUCTIONS */
 }
 
-static const struct sock_filter *
-getDenyInstruction (const char *keyword) {
-  typedef struct {
-    const char *keyword;
-    struct sock_filter instruction;
-  } DenyAction;
-
-  static const DenyAction denyActions[] = {
-    #ifdef SECCOMP_RET_ALLOW
-    { .keyword = "no",
-      .instruction = SCF_RETURN(ALLOW, 0)
-    },
-    #endif /* SECCOMP_RET_ALLOW */
-
-    #ifdef SECCOMP_RET_LOG
-    { .keyword = "log",
-      .instruction = SCF_RETURN(LOG, 0)
-    },
-    #endif /* SECCOMP_RET_LOG */
-
-    #ifdef SECCOMP_RET_ERRNO
-    { .keyword = "fail",
-      .instruction = SCF_RETURN(ERRNO, EPERM)
-    },
-    #endif /* SECCOMP_RET_ERRNO */
-
-    #ifdef SECCOMP_RET_KILL_PROCESS
-    { .keyword = "kill",
-      .instruction = SCF_RETURN(KILL_PROCESS, 0)
-    },
-    #endif /* SECCOMP_RET_KILL_PROCESS */
-
-    { .keyword = NULL }
-  };
-
-  unsigned int choice;
-  int valid = validateChoiceEx(&choice, keyword, denyActions, sizeof(denyActions[0]));
-  const DenyAction *action = &denyActions[choice];
-
-  if (!valid) {
-    logMessage(LOG_WARNING,
-      "unknown SECCOMP deny action: %s: assuming %s",
-      keyword, action->keyword
-    );
-  }
-
-  return &action->instruction;
-}
-
 static SCFObject *
-makeSecureComputingFilter (const struct sock_filter *deny) {
+scfMakeFilter (const struct sock_filter *deny) {
   SCFObject *scf;
 
   if ((scf = scfNewObject())) {
@@ -1506,9 +1457,58 @@ makeSecureComputingFilter (const struct sock_filter *deny) {
   return NULL;
 }
 
+typedef struct {
+  const char *keyword;
+  struct sock_filter deny;
+} SCFMode;
+
+static const SCFMode *
+scfGetMode (const char *keyword) {
+  static const SCFMode modes[] = {
+    #ifdef SECCOMP_RET_ALLOW
+    { .keyword = "no",
+      .deny = SCF_RETURN(ALLOW, 0)
+    },
+    #endif /* SECCOMP_RET_ALLOW */
+
+    #ifdef SECCOMP_RET_LOG
+    { .keyword = "log",
+      .deny = SCF_RETURN(LOG, 0)
+    },
+    #endif /* SECCOMP_RET_LOG */
+
+    #ifdef SECCOMP_RET_ERRNO
+    { .keyword = "fail",
+      .deny = SCF_RETURN(ERRNO, EPERM)
+    },
+    #endif /* SECCOMP_RET_ERRNO */
+
+    #ifdef SECCOMP_RET_KILL_PROCESS
+    { .keyword = "kill",
+      .deny = SCF_RETURN(KILL_PROCESS, 0)
+    },
+    #endif /* SECCOMP_RET_KILL_PROCESS */
+
+    { .keyword = NULL }
+  };
+
+  unsigned int choice;
+  int valid = validateChoiceEx(&choice, keyword, modes, sizeof(modes[0]));
+  const SCFMode *mode = &modes[choice];
+
+  if (!valid) {
+    logMessage(LOG_WARNING,
+      "unknown system call filter mode: %s: assuming %s",
+      keyword, mode->keyword
+    );
+  }
+
+  return mode;
+}
+
 static void
-installSecureComputingFilter (const char *denyKeyword) {
-  const struct sock_filter *deny = getDenyInstruction(denyKeyword);
+scfInstallFilter (const SCFMode *mode) {
+  const struct sock_filter *deny = &mode->deny;
 
   if ((deny->k & SECCOMP_RET_ACTION_FULL) != SECCOMP_RET_ALLOW) {
     SCFObject *scf;
@@ -1519,7 +1519,7 @@ installSecureComputingFilter (const char *denyKeyword) {
     }
 #endif /* PR_SET_NO_NEW_PRIVS */
 
-    if ((scf = makeSecureComputingFilter(deny))) {
+    if ((scf = scfMakeFilter(deny))) {
       struct sock_fprog program = {
         .filter = scf->instruction.array,
         .len = scf->instruction.count
@@ -1535,9 +1535,9 @@ installSecureComputingFilter (const char *denyKeyword) {
       if (seccomp(SECCOMP_SET_MODE_FILTER, flags, &program) == -1) {
         logSystemError("seccomp[SECCOMP_SET_MODE_FILTER]");
       }
-#else /* install secure computing filter */
-#warning no mechanism for installing the secure computing filter
-#endif /* install secure computing filter */
+#else /* install system call filter */
+#warning no mechanism for installing the system call filter
+#endif /* install system call filter */
 
       scfDestroyObject(scf);
     }
@@ -1978,7 +1978,7 @@ claimStateDirectories (void) {
 
 typedef enum {
   PARM_PATH,
-  PARM_SECCOMP,
+  PARM_SCFMODE,
   PARM_SHELL,
   PARM_USER,
 } Parameters;
@@ -1986,7 +1986,7 @@ typedef enum {
 const char *const *
 getPrivilegeParameterNames (void) {
   static const char *const names[] = NULL_TERMINATED_STRING_ARRAY(
-    "path", "seccomp", "shell", "user"
+    "path", "scfmode", "shell", "user"
   );
 
   return names;
@@ -2045,6 +2045,6 @@ establishProgramPrivileges (char **specifiedParameters, char **configuredParamet
   logCurrentCapabilities("after relinquish");
 
   #ifdef SECCOMP_MODE_FILTER
-  installSecureComputingFilter(specifiedParameters[PARM_SECCOMP]);
+  scfInstallFilter(scfGetMode(specifiedParameters[PARM_SCFMODE]));
   #endif /* SECCOMP_MODE_FILTER */
 }
