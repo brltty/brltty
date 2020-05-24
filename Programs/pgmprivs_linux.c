@@ -636,29 +636,39 @@ isolateNamespaces (void) {
 #endif /* SCF_ARCHITECTURE */
 
 #ifdef SECCOMP_MODE_FILTER
-typedef struct SCFValueDescriptorStruct SCFValueDescriptor;
+typedef struct SCFArgumentDescriptorStruct SCFArgumentDescriptor;
+
+// best to protect each of these with an #ifdef for the value's macro
+typedef struct {
+  // required - must be first
+  uint32_t value;
+
+  // optional - use SCF_ARGUMENT(index, name)
+  const SCFArgumentDescriptor *argument;
+} SCFValueDescriptor;
 
 typedef struct {
   const char *name;
-  const SCFValueDescriptor *values;
+  const SCFValueDescriptor *array;
+  size_t count;
+} SCFApprovedValues;
+
+#define SCF_APPROVED_VALUES(name) \
+{#name, name##Values, ARRAY_COUNT(name##Values)}
+
+struct SCFArgumentDescriptorStruct {
+  SCFApprovedValues values;
   uint8_t index;
-} SCFArgumentDescriptor;
-
-#define SCF_ARGUMENT(index, name) \
-.argument = &(const SCFArgumentDescriptor){#name, name##Values, index}
-
-// best to protect each of these with an #ifdef for the value's macro
-struct SCFValueDescriptorStruct {
-  // must be first
-  uint32_t value;
-
-  // use SCF_ARGUMENT(index, name)
-  const SCFArgumentDescriptor *argument;
 };
 
+#define SCF_ARGUMENT(index, name) \
+.argument = &(const SCFArgumentDescriptor){SCF_APPROVED_VALUES(name), index}
+
 #define SCF_BEGIN_VALUES(name) static const SCFValueDescriptor name##Values[] = {
-#define SCF_END_VALUES {UINT32_MAX}};
+#define SCF_END_VALUES };
+
 #include "syscalls_linux.h"
+static const SCFApprovedValues systemCalls = SCF_APPROVED_VALUES(systemCall);
 
 #define SCF_FIELD_OFFSET(field) offsetof(struct seccomp_data, field)
 
@@ -795,7 +805,7 @@ scfLoadArchitecture (SCFObject *scf) {
 }
 
 static int
-scfLoadSyscall (SCFObject *scf) {
+scfLoadSystemCall (SCFObject *scf) {
   return scfLoadField(scf, SCF_FIELD_OFFSET(nr), 4);
 }
 
@@ -940,7 +950,7 @@ scfJumpToArgument (SCFObject *scf, const SCFArgumentDescriptor *descriptor) {
 }
 
 static int
-scfAllowValueDescriptor (SCFObject *scf, const SCFValueDescriptor *descriptor) {
+scfAllowValue (SCFObject *scf, const SCFValueDescriptor *descriptor) {
   if (descriptor->argument) {
     SCFJump neValue;
 
@@ -967,14 +977,14 @@ scfAllowValueDescriptor (SCFObject *scf, const SCFValueDescriptor *descriptor) {
 }
 
 static int
-scfAllowValueDescriptors (SCFObject *scf, const SCFValueDescriptor *descriptors, size_t count, const struct sock_filter *deny) {
+scfAllowValues (SCFObject *scf, const SCFValueDescriptor *descriptors, size_t count, const struct sock_filter *deny) {
   if (count <= 3) {
-    const SCFValueDescriptor *cur = descriptors;
-    const SCFValueDescriptor *end = cur + count;
+    const SCFValueDescriptor *descriptor = descriptors;
+    const SCFValueDescriptor *end = descriptor + count;
 
-    while (cur < end) {
-      if (!scfAllowValueDescriptor(scf, cur)) return 0;
-      cur += 1;
+    while (descriptor < end) {
+      if (!scfAllowValue(scf, descriptor)) return 0;
+      descriptor += 1;
     }
 
     return scfAddInstruction(scf, deny);
@@ -983,18 +993,18 @@ scfAllowValueDescriptors (SCFObject *scf, const SCFValueDescriptor *descriptors,
   const SCFValueDescriptor *descriptor = descriptors + (count / 2);
   SCFJump gtValue;
   if (!scfJumpIf(scf, SCF_TEST_GT, descriptor->value, &gtValue)) return 0;
-  if (!scfAllowValueDescriptor(scf, descriptor)) return 0;
+  if (!scfAllowValue(scf, descriptor)) return 0;
 
-  if (!scfAllowValueDescriptors(scf, descriptors, (descriptor - descriptors), deny)) return 0;
+  if (!scfAllowValues(scf, descriptors, (descriptor - descriptors), deny)) return 0;
   if (!scfEndJump(scf, &gtValue)) return 0;
 
   const SCFValueDescriptor *end = descriptors + count;
   descriptor += 1;
-  return scfAllowValueDescriptors(scf, descriptor, (end - descriptor), deny);
+  return scfAllowValues(scf, descriptor, (end - descriptor), deny);
 }
 
 static int
-scfValueDescriptorSorter (const void *element1, const void *element2) {
+scfValueSorter (const void *element1, const void *element2) {
   const SCFValueDescriptor *descriptor1 = element1;
   const SCFValueDescriptor *descriptor2 = element2;
 
@@ -1005,7 +1015,7 @@ scfValueDescriptorSorter (const void *element1, const void *element2) {
 
 static void
 scfSortValues (SCFValueDescriptor *values, size_t count) {
-  qsort(values, count, sizeof(*values), scfValueDescriptorSorter);
+  qsort(values, count, sizeof(*values), scfValueSorter);
 }
 
 static void
@@ -1032,25 +1042,20 @@ scfRemoveDuplicateValues (SCFValueDescriptor *values, size_t *count, const char 
   }
 }
 
-static size_t
-scfGetValueCount (const SCFValueDescriptor *values) {
-  const SCFValueDescriptor *end = values;
-  while (end->value != UINT32_MAX) end += 1;
-  return end - values;
-}
-
 static int
-scfAllowValues (SCFObject *scf, const SCFValueDescriptor *values, const char *name, const struct sock_filter *deny) {
+scfApproveValues (SCFObject *scf, const SCFApprovedValues *values, const struct sock_filter *deny) {
+  const char *name = values->name;
+  size_t count = values->count;
+
   {
-    size_t count = scfGetValueCount(values);
     SCFValueDescriptor descriptors[count];
-    memcpy(descriptors, values, sizeof(descriptors));
+    memcpy(descriptors, values->array, sizeof(descriptors));
 
     scfSortValues(descriptors, count);
     scfRemoveDuplicateValues(descriptors, &count, name);
     logMessage(SCF_LOG_LEVEL, "%s approved value count: %zu", name, count);
 
-    if (!scfAllowValueDescriptors(scf, descriptors, count, deny)) return 0;
+    if (!scfAllowValues(scf, descriptors, count, deny)) return 0;
   }
 
   if (scf->jumps.allow) {
@@ -1064,8 +1069,8 @@ scfAllowValues (SCFObject *scf, const SCFValueDescriptor *values, const char *na
 
 static int
 scfCheckSyscall (SCFObject *scf, const struct sock_filter *deny) {
-  return scfLoadSyscall(scf)
-      && scfAllowValues(scf, syscallValues, "syscall", deny);
+  return scfLoadSystemCall(scf)
+      && scfApproveValues(scf, &systemCalls, deny);
 }
 
 static int
@@ -1074,7 +1079,7 @@ scfCheckArgument (SCFObject *scf, const SCFArgument *argument, const struct sock
 
   return scfEndJump(scf, &argument->jump)
       && scfLoadArgument(scf, descriptor->index)
-      && scfAllowValues(scf, descriptor->values, descriptor->name, deny);
+      && scfApproveValues(scf, &descriptor->values, deny);
 }
 
 static int

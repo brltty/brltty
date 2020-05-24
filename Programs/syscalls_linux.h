@@ -18,7 +18,7 @@
 
 #include <linux/unistd.h>
 
-SCF_BEGIN_VALUES(syscall)
+SCF_BEGIN_VALUES(systemCall)
   #ifdef __NR_clock_gettime
   {__NR_clock_gettime},
   #endif /* __NR_clock_gettime */
