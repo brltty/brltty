@@ -643,7 +643,7 @@ typedef struct {
   // required - must be first
   uint32_t value;
 
-  // optional - use SCF_ARGUMENT(index, prefix)
+  // optional - use SCF_ARGUMENT(index, group)
   const SCFArgumentDescriptor *argument;
 } SCFValueDescriptor;
 
@@ -651,30 +651,30 @@ typedef struct {
   const char *name;
   const SCFValueDescriptor *descriptors;
   size_t count;
-} SCFApprovedValues;
+} SCFValueGroup;
 
-#define SCF_APPROVED_VALUES(prefix) { \
-  .name = #prefix, \
-  .descriptors = prefix##Values, \
-  .count = ARRAY_COUNT(prefix##Values), \
+#define SCF_VALUE_GROUP(group) { \
+  .name = #group, \
+  .descriptors = group##Values, \
+  .count = ARRAY_COUNT(group##Values), \
 }
 
 struct SCFArgumentDescriptorStruct {
-  SCFApprovedValues values;
+  SCFValueGroup values;
   uint8_t index;
 };
 
-#define SCF_ARGUMENT(n, prefix) \
+#define SCF_ARGUMENT(n, group) \
 .argument = &(const SCFArgumentDescriptor){ \
-  .values = SCF_APPROVED_VALUES(prefix), \
+  .values = SCF_VALUE_GROUP(group), \
   .index = (n) \
 }
 
-#define SCF_BEGIN_VALUES(prefix) static const SCFValueDescriptor prefix##Values[] = {
+#define SCF_BEGIN_VALUES(group) static const SCFValueDescriptor group##Values[] = {
 #define SCF_END_VALUES };
 
 #include "syscalls_linux.h"
-static const SCFApprovedValues approvedSystemCalls = SCF_APPROVED_VALUES(systemCall);
+static const SCFValueGroup scfSystemCalls = SCF_VALUE_GROUP(systemCall);
 
 #define SCF_FIELD_OFFSET(field) (offsetof(struct seccomp_data, field))
 
@@ -1101,7 +1101,7 @@ scfRemoveDuplicateValues (SCFValueDescriptor *values, size_t *count, const char 
     while (from < end) {
       if (from->value == to->value) {
         logMessage(LOG_WARNING,
-          "duplicate approved value: %s: 0X%08"PRIX32,
+          "SCF duplicate group value: %s: 0X%08"PRIX32,
           name, from->value
         );
       } else if (++to != from) {
@@ -1116,7 +1116,7 @@ scfRemoveDuplicateValues (SCFValueDescriptor *values, size_t *count, const char 
 }
 
 static int
-scfApproveValues (SCFObject *scf, const SCFApprovedValues *values) {
+scfAllowValueGroup (SCFObject *scf, const SCFValueGroup *values) {
   {
     const char *name = values->name;
     size_t count = values->count;
@@ -1126,7 +1126,7 @@ scfApproveValues (SCFObject *scf, const SCFApprovedValues *values) {
 
     scfSortValues(descriptors, count);
     scfRemoveDuplicateValues(descriptors, &count, name);
-    logMessage(SCF_LOG_LEVEL, "approved value count: %s: %zu", name, count);
+    logMessage(SCF_LOG_LEVEL, "SCF value group size: %s: %zu", name, count);
 
     if (!scfAllowValues(scf, descriptors, count)) return 0;
   }
@@ -1142,7 +1142,7 @@ scfApproveValues (SCFObject *scf, const SCFApprovedValues *values) {
 static int
 scfCheckSysemCall (SCFObject *scf) {
   return scfLoadSystemCall(scf)
-      && scfApproveValues(scf, &approvedSystemCalls);
+      && scfAllowValueGroup(scf, &scfSystemCalls);
 }
 
 static int
@@ -1151,15 +1151,15 @@ scfCheckArgument (SCFObject *scf, const SCFArgument *argument) {
 
   return scfEndJump(scf, &argument->jump)
       && scfLoadArgument(scf, descriptor->index)
-      && scfApproveValues(scf, &descriptor->values);
+      && scfAllowValueGroup(scf, &descriptor->values);
 }
 
 static int
 scfCheckArguments (SCFObject *scf) {
-  /* An argument's table of approved values can include the specifications
-   * of more arguments and their associated approved value tables. The
-   * following iteration, therefore, needs to handle the possibility that
-   * the pending argument count may increase as each table is processed.
+  /* An argument's value group can include the specification of another
+   * argument and its associated value group. The following iteration,
+   * therefore, needs to handle the possibility that the pending argument
+   * count may increase as each argument is processed.
    */
 
   while (scf->argument.count > 0) {
@@ -1536,39 +1536,40 @@ scfMakeFilter (const SCFMode *mode) {
 
 static void
 scfInstallFilter (const SCFMode *mode) {
-  const struct sock_filter *deny = &mode->deny;
+  SCFObject *scf;
 
-  if ((deny->k & SECCOMP_RET_ACTION_FULL) != SECCOMP_RET_ALLOW) {
-    SCFObject *scf;
+  {
+    const struct sock_filter *deny = &mode->deny;
+    if ((deny->k & SECCOMP_RET_ACTION_FULL) == SECCOMP_RET_ALLOW) return;
+  }
 
 #ifdef PR_SET_NO_NEW_PRIVS
-    if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1) {
-      logSystemError("prctl[PR_SET_NO_NEW_PRIVS]");
-    }
+  if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1) {
+    logSystemError("prctl[PR_SET_NO_NEW_PRIVS]");
+  }
 #endif /* PR_SET_NO_NEW_PRIVS */
 
-    if ((scf = scfMakeFilter(mode))) {
-      struct sock_fprog program = {
-        .filter = scf->instruction.array,
-        .len = scf->instruction.count
-      };
+  if ((scf = scfMakeFilter(mode))) {
+    struct sock_fprog program = {
+      .filter = scf->instruction.array,
+      .len = scf->instruction.count
+    };
 
 #if defined(PR_SET_SECCOMP)
-      if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program, 0, 0) == -1) {
-        logSystemError("prctl[PR_SET_SECCOMP,SECCOMP_MODE_FILTER]");
-      }
+    if (prctl(PR_SET_SECCOMP, SECCOMP_MODE_FILTER, &program, 0, 0) == -1) {
+      logSystemError("prctl[PR_SET_SECCOMP,SECCOMP_MODE_FILTER]");
+    }
 #elif defined(SECCOMP_SET_MODE_FILTER)
-      unsigned int flags = 0;
+    unsigned int flags = 0;
 
-      if (seccomp(SECCOMP_SET_MODE_FILTER, flags, &program) == -1) {
-        logSystemError("seccomp[SECCOMP_SET_MODE_FILTER]");
-      }
+    if (seccomp(SECCOMP_SET_MODE_FILTER, flags, &program) == -1) {
+      logSystemError("seccomp[SECCOMP_SET_MODE_FILTER]");
+    }
 #else /* install system call filter */
 #warning no mechanism for installing the system call filter
 #endif /* install system call filter */
 
-      scfDestroyObject(scf);
-    }
+    scfDestroyObject(scf);
   }
 }
 #endif /* SECCOMP_MODE_FILTER */
