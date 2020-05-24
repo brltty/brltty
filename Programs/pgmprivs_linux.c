@@ -617,15 +617,15 @@ isolateNamespaces (void) {
 #include <linux/audit.h>
 
 #if defined(__i386__)
-#define SCF_ARCHITECTURE AUDIT_ARCH_I386
+#define SYSTEM_CALL_ARCHITECTURE AUDIT_ARCH_I386
 #elif defined(__x86_64__)
-#define SCF_ARCHITECTURE AUDIT_ARCH_X86_64
-#else /* security filter architecture */
-#warning seccomp not supported on this platform
-#endif /* security filter architecture */
+#define SYSTEM_CALL_ARCHITECTURE AUDIT_ARCH_X86_64
+#else /* system call architecture */
+#warning system call architecture not known for this platform
+#endif /* system call architecture */
 #endif /* HAVE_LINUX_AUDIT_H */
 
-#ifdef SCF_ARCHITECTURE
+#ifdef SYSTEM_CALL_ARCHITECTURE
 #ifdef HAVE_LINUX_FILTER_H
 #include <linux/filter.h>
 
@@ -633,7 +633,7 @@ isolateNamespaces (void) {
 #include <linux/seccomp.h>
 #endif /* HAVE_LINUX_SECCOMP_H */
 #endif /* HAVE_LINUX_FILTER_H */
-#endif /* SCF_ARCHITECTURE */
+#endif /* SYSTEM_CALL_ARCHITECTURE */
 
 #ifdef SECCOMP_MODE_FILTER
 typedef struct SCFArgumentDescriptorStruct SCFArgumentDescriptor;
@@ -643,45 +643,100 @@ typedef struct {
   // required - must be first
   uint32_t value;
 
-  // optional - use SCF_ARGUMENT(index, name)
+  // optional - use SCF_ARGUMENT(index, prefix)
   const SCFArgumentDescriptor *argument;
 } SCFValueDescriptor;
 
 typedef struct {
   const char *name;
-  const SCFValueDescriptor *array;
+  const SCFValueDescriptor *descriptors;
   size_t count;
 } SCFApprovedValues;
 
-#define SCF_APPROVED_VALUES(name) \
-{#name, name##Values, ARRAY_COUNT(name##Values)}
+#define SCF_APPROVED_VALUES(prefix) { \
+  .name = #prefix, \
+  .descriptors = prefix##Values, \
+  .count = ARRAY_COUNT(prefix##Values), \
+}
 
 struct SCFArgumentDescriptorStruct {
   SCFApprovedValues values;
   uint8_t index;
 };
 
-#define SCF_ARGUMENT(index, name) \
-.argument = &(const SCFArgumentDescriptor){SCF_APPROVED_VALUES(name), index}
+#define SCF_ARGUMENT(n, prefix) \
+.argument = &(const SCFArgumentDescriptor){ \
+  .values = SCF_APPROVED_VALUES(prefix), \
+  .index = (n) \
+}
 
-#define SCF_BEGIN_VALUES(name) static const SCFValueDescriptor name##Values[] = {
+#define SCF_BEGIN_VALUES(prefix) static const SCFValueDescriptor prefix##Values[] = {
 #define SCF_END_VALUES };
 
 #include "syscalls_linux.h"
-static const SCFApprovedValues systemCalls = SCF_APPROVED_VALUES(systemCall);
+static const SCFApprovedValues approvedSystemCalls = SCF_APPROVED_VALUES(systemCall);
 
-#define SCF_FIELD_OFFSET(field) offsetof(struct seccomp_data, field)
+#define SCF_FIELD_OFFSET(field) (offsetof(struct seccomp_data, field))
 
-#define SCF_RETURN(action, value) \
+#define SCF_RETURN_INSTRUCTION(action, value) \
 BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
+
+typedef struct {
+  const char *keyword; // must be first
+  struct sock_filter deny;
+} SCFMode;
+
+static const SCFMode *
+scfGetMode (const char *keyword) {
+  static const SCFMode modes[] = {
+    #ifdef SECCOMP_RET_ALLOW
+    { .keyword = "no",
+      .deny = SCF_RETURN_INSTRUCTION(ALLOW, 0)
+    },
+    #endif /* SECCOMP_RET_ALLOW */
+
+    #ifdef SECCOMP_RET_LOG
+    { .keyword = "log",
+      .deny = SCF_RETURN_INSTRUCTION(LOG, 0)
+    },
+    #endif /* SECCOMP_RET_LOG */
+
+    #ifdef SECCOMP_RET_ERRNO
+    { .keyword = "fail",
+      .deny = SCF_RETURN_INSTRUCTION(ERRNO, EPERM)
+    },
+    #endif /* SECCOMP_RET_ERRNO */
+
+    #ifdef SECCOMP_RET_KILL_PROCESS
+    { .keyword = "kill",
+      .deny = SCF_RETURN_INSTRUCTION(KILL_PROCESS, 0)
+    },
+    #endif /* SECCOMP_RET_KILL_PROCESS */
+
+    { .keyword = NULL }
+  };
+
+  unsigned int choice;
+  int valid = validateChoiceEx(&choice, keyword, modes, sizeof(modes[0]));
+  const SCFMode *mode = &modes[choice];
+
+  if (!valid) {
+    logMessage(LOG_WARNING,
+      "unknown system call filter mode: %s: assuming %s",
+      keyword, mode->keyword
+    );
+  }
+
+  return mode;
+}
+
+typedef struct SCFJumpStruct SCFJump;
 
 typedef enum {
   SCF_JUMP_ALWAYS,
   SCF_JUMP_TRUE,
   SCF_JUMP_FALSE
 } SCFJumpType;
-
-typedef struct SCFJumpStruct SCFJump;
 
 struct SCFJumpStruct {
   SCFJump *next;
@@ -695,6 +750,8 @@ typedef struct {
 } SCFArgument;
 
 typedef struct {
+  const SCFMode *mode;
+
   struct {
     struct sock_filter *array;
     size_t size;
@@ -702,28 +759,33 @@ typedef struct {
   } instruction;
 
   struct {
-    SCFJump *allow;
-  } jumps;
-
-  struct {
     SCFArgument *array;
     size_t size;
     size_t count;
   } argument;
+
+  struct {
+    SCFJump *jumps;
+  } allow;
 } SCFObject;
 
 static SCFObject *
-scfNewObject (void) {
+scfNewObject (const SCFMode *mode) {
   SCFObject *scf;
 
   if ((scf = malloc(sizeof(*scf)))) {
     memset(scf, 0, sizeof(*scf));
+    scf->mode = mode;
 
     scf->instruction.array = NULL;
     scf->instruction.size = 0;
     scf->instruction.count = 0;
 
-    scf->jumps.allow = NULL;
+    scf->argument.array = NULL;
+    scf->argument.size = 0;
+    scf->argument.count = 0;
+
+    scf->allow.jumps = NULL;
 
     return scf;
   } else {
@@ -744,7 +806,7 @@ scfDestroyJumps (SCFJump *jump) {
 
 static void
 scfDestroyObject (SCFObject *scf) {
-  scfDestroyJumps(scf->jumps.allow);
+  scfDestroyJumps(scf->allow.jumps);
   if (scf->instruction.array) free(scf->instruction.array);
   if (scf->argument.array) free(scf->argument.array);
   free(scf);
@@ -753,7 +815,7 @@ scfDestroyObject (SCFObject *scf) {
 static int
 scfAddInstruction (SCFObject *scf, const struct sock_filter *instruction) {
   if (scf->instruction.count == BPF_MAXINSNS) {
-    logMessage(LOG_ERR, "syscall filter too large");
+    logMessage(LOG_ERR, "system call filter too large");
     return 0;
   }
 
@@ -772,6 +834,17 @@ scfAddInstruction (SCFObject *scf, const struct sock_filter *instruction) {
 
   scf->instruction.array[scf->instruction.count++] = *instruction;
   return 1;
+}
+
+static int
+scfAddAllowInstruction (SCFObject *scf) {
+  static const struct sock_filter allow = SCF_RETURN_INSTRUCTION(ALLOW, 0);
+  return scfAddInstruction(scf, &allow);
+}
+
+static int
+scfAddDenyInstruction (SCFObject *scf) {
+  return scfAddInstruction(scf, &scf->mode->deny);
 }
 
 static int
@@ -916,12 +989,12 @@ scfJumpIf (SCFObject *scf, SCFTest test, uint32_t value, SCFJump *jump) {
 }
 
 static int
-scfVerifyArchitecture (SCFObject *scf, const struct sock_filter *deny) {
+scfVerifyArchitecture (SCFObject *scf) {
   SCFJump eqArch;
 
   return scfLoadArchitecture(scf)
-      && scfJumpIf(scf, SCF_TEST_EQ, SCF_ARCHITECTURE, &eqArch)
-      && scfAddInstruction(scf, deny)
+      && scfJumpIf(scf, SCF_TEST_EQ, SYSTEM_CALL_ARCHITECTURE, &eqArch)
+      && scfAddDenyInstruction(scf)
       && scfEndJump(scf, &eqArch);
 }
 
@@ -962,8 +1035,8 @@ scfAllowValue (SCFObject *scf, const SCFValueDescriptor *descriptor) {
 
     if ((eqValue = malloc(sizeof(*eqValue)))) {
       if (scfJumpIf(scf, SCF_TEST_EQ, descriptor->value, eqValue)) {
-        eqValue->next = scf->jumps.allow;
-        scf->jumps.allow = eqValue;
+        eqValue->next = scf->allow.jumps;
+        scf->allow.jumps = eqValue;
         return 1;
       }
 
@@ -977,7 +1050,7 @@ scfAllowValue (SCFObject *scf, const SCFValueDescriptor *descriptor) {
 }
 
 static int
-scfAllowValues (SCFObject *scf, const SCFValueDescriptor *descriptors, size_t count, const struct sock_filter *deny) {
+scfAllowValues (SCFObject *scf, const SCFValueDescriptor *descriptors, size_t count) {
   if (count <= 3) {
     const SCFValueDescriptor *descriptor = descriptors;
     const SCFValueDescriptor *end = descriptor + count;
@@ -987,7 +1060,7 @@ scfAllowValues (SCFObject *scf, const SCFValueDescriptor *descriptors, size_t co
       descriptor += 1;
     }
 
-    return scfAddInstruction(scf, deny);
+    return scfAddDenyInstruction(scf);
   }
 
   const SCFValueDescriptor *descriptor = descriptors + (count / 2);
@@ -995,12 +1068,12 @@ scfAllowValues (SCFObject *scf, const SCFValueDescriptor *descriptors, size_t co
   if (!scfJumpIf(scf, SCF_TEST_GT, descriptor->value, &gtValue)) return 0;
   if (!scfAllowValue(scf, descriptor)) return 0;
 
-  if (!scfAllowValues(scf, descriptors, (descriptor - descriptors), deny)) return 0;
+  if (!scfAllowValues(scf, descriptors, (descriptor - descriptors))) return 0;
   if (!scfEndJump(scf, &gtValue)) return 0;
 
   const SCFValueDescriptor *end = descriptors + count;
   descriptor += 1;
-  return scfAllowValues(scf, descriptor, (end - descriptor), deny);
+  return scfAllowValues(scf, descriptor, (end - descriptor));
 }
 
 static int
@@ -1028,7 +1101,7 @@ scfRemoveDuplicateValues (SCFValueDescriptor *values, size_t *count, const char 
     while (from < end) {
       if (from->value == to->value) {
         logMessage(LOG_WARNING,
-          "duplicate %s approved value: 0X%08"PRIX32,
+          "duplicate approved value: %s: 0X%08"PRIX32,
           name, from->value
         );
       } else if (++to != from) {
@@ -1043,47 +1116,46 @@ scfRemoveDuplicateValues (SCFValueDescriptor *values, size_t *count, const char 
 }
 
 static int
-scfApproveValues (SCFObject *scf, const SCFApprovedValues *values, const struct sock_filter *deny) {
-  const char *name = values->name;
-  size_t count = values->count;
-
+scfApproveValues (SCFObject *scf, const SCFApprovedValues *values) {
   {
+    const char *name = values->name;
+    size_t count = values->count;
+
     SCFValueDescriptor descriptors[count];
-    memcpy(descriptors, values->array, sizeof(descriptors));
+    memcpy(descriptors, values->descriptors, sizeof(descriptors));
 
     scfSortValues(descriptors, count);
     scfRemoveDuplicateValues(descriptors, &count, name);
-    logMessage(SCF_LOG_LEVEL, "%s approved value count: %zu", name, count);
+    logMessage(SCF_LOG_LEVEL, "approved value count: %s: %zu", name, count);
 
-    if (!scfAllowValues(scf, descriptors, count, deny)) return 0;
+    if (!scfAllowValues(scf, descriptors, count)) return 0;
   }
 
-  if (scf->jumps.allow) {
-    if (!scfEndJumps(scf, &scf->jumps.allow)) return 0;
-    static const struct sock_filter allow = SCF_RETURN(ALLOW, 0);
-    if (!scfAddInstruction(scf, &allow)) return 0;
+  if (scf->allow.jumps) {
+    if (!scfEndJumps(scf, &scf->allow.jumps)) return 0;
+    if (!scfAddAllowInstruction(scf)) return 0;
   }
 
   return 1;
 }
 
 static int
-scfCheckSyscall (SCFObject *scf, const struct sock_filter *deny) {
+scfCheckSysemCall (SCFObject *scf) {
   return scfLoadSystemCall(scf)
-      && scfApproveValues(scf, &systemCalls, deny);
+      && scfApproveValues(scf, &approvedSystemCalls);
 }
 
 static int
-scfCheckArgument (SCFObject *scf, const SCFArgument *argument, const struct sock_filter *deny) {
+scfCheckArgument (SCFObject *scf, const SCFArgument *argument) {
   const SCFArgumentDescriptor *descriptor = argument->descriptor;
 
   return scfEndJump(scf, &argument->jump)
       && scfLoadArgument(scf, descriptor->index)
-      && scfApproveValues(scf, &descriptor->values, deny);
+      && scfApproveValues(scf, &descriptor->values);
 }
 
 static int
-scfCheckArguments (SCFObject *scf, const struct sock_filter *deny) {
+scfCheckArguments (SCFObject *scf) {
   /* An argument's table of approved values can include the specifications
    * of more arguments and their associated approved value tables. The
    * following iteration, therefore, needs to handle the possibility that
@@ -1091,7 +1163,7 @@ scfCheckArguments (SCFObject *scf, const struct sock_filter *deny) {
    */
 
   while (scf->argument.count > 0) {
-    if (!scfCheckArgument(scf, &scf->argument.array[--scf->argument.count], deny)) {
+    if (!scfCheckArgument(scf, &scf->argument.array[--scf->argument.count])) {
       return 0;
     }
   }
@@ -1443,13 +1515,13 @@ scfLogInstructions (SCFObject *scf) {
 }
 
 static SCFObject *
-scfMakeFilter (const struct sock_filter *deny) {
+scfMakeFilter (const SCFMode *mode) {
   SCFObject *scf;
 
-  if ((scf = scfNewObject())) {
-    if (scfVerifyArchitecture(scf, deny)) {
-      if (scfCheckSyscall(scf, deny)) {
-        if (scfCheckArguments(scf, deny)) {
+  if ((scf = scfNewObject(mode))) {
+    if (scfVerifyArchitecture(scf)) {
+      if (scfCheckSysemCall(scf)) {
+        if (scfCheckArguments(scf)) {
           scfLogInstructions(scf);
           return scf;
         }
@@ -1460,55 +1532,6 @@ scfMakeFilter (const struct sock_filter *deny) {
   }
 
   return NULL;
-}
-
-typedef struct {
-  const char *keyword;
-  struct sock_filter deny;
-} SCFMode;
-
-static const SCFMode *
-scfGetMode (const char *keyword) {
-  static const SCFMode modes[] = {
-    #ifdef SECCOMP_RET_ALLOW
-    { .keyword = "no",
-      .deny = SCF_RETURN(ALLOW, 0)
-    },
-    #endif /* SECCOMP_RET_ALLOW */
-
-    #ifdef SECCOMP_RET_LOG
-    { .keyword = "log",
-      .deny = SCF_RETURN(LOG, 0)
-    },
-    #endif /* SECCOMP_RET_LOG */
-
-    #ifdef SECCOMP_RET_ERRNO
-    { .keyword = "fail",
-      .deny = SCF_RETURN(ERRNO, EPERM)
-    },
-    #endif /* SECCOMP_RET_ERRNO */
-
-    #ifdef SECCOMP_RET_KILL_PROCESS
-    { .keyword = "kill",
-      .deny = SCF_RETURN(KILL_PROCESS, 0)
-    },
-    #endif /* SECCOMP_RET_KILL_PROCESS */
-
-    { .keyword = NULL }
-  };
-
-  unsigned int choice;
-  int valid = validateChoiceEx(&choice, keyword, modes, sizeof(modes[0]));
-  const SCFMode *mode = &modes[choice];
-
-  if (!valid) {
-    logMessage(LOG_WARNING,
-      "unknown system call filter mode: %s: assuming %s",
-      keyword, mode->keyword
-    );
-  }
-
-  return mode;
 }
 
 static void
@@ -1524,7 +1547,7 @@ scfInstallFilter (const SCFMode *mode) {
     }
 #endif /* PR_SET_NO_NEW_PRIVS */
 
-    if ((scf = scfMakeFilter(deny))) {
+    if ((scf = scfMakeFilter(mode))) {
       struct sock_fprog program = {
         .filter = scf->instruction.array,
         .len = scf->instruction.count
