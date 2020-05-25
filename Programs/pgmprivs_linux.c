@@ -676,59 +676,10 @@ struct SCFArgumentDescriptorStruct {
 #include "syscalls_linux.h"
 static const SCFValueGroup scfSystemCalls = SCF_VALUE_GROUP(systemCall);
 
-#define SCF_FIELD_OFFSET(field) (offsetof(struct seccomp_data, field))
-
-#define SCF_RETURN_INSTRUCTION(action, value) \
-BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
-
 typedef struct {
   const char *keyword; // must be first
   struct sock_filter deny;
 } SCFMode;
-
-static const SCFMode *
-scfGetMode (const char *keyword) {
-  static const SCFMode modes[] = {
-    #ifdef SECCOMP_RET_ALLOW
-    { .keyword = "no",
-      .deny = SCF_RETURN_INSTRUCTION(ALLOW, 0)
-    },
-    #endif /* SECCOMP_RET_ALLOW */
-
-    #ifdef SECCOMP_RET_LOG
-    { .keyword = "log",
-      .deny = SCF_RETURN_INSTRUCTION(LOG, 0)
-    },
-    #endif /* SECCOMP_RET_LOG */
-
-    #ifdef SECCOMP_RET_ERRNO
-    { .keyword = "fail",
-      .deny = SCF_RETURN_INSTRUCTION(ERRNO, EPERM)
-    },
-    #endif /* SECCOMP_RET_ERRNO */
-
-    #ifdef SECCOMP_RET_KILL_PROCESS
-    { .keyword = "kill",
-      .deny = SCF_RETURN_INSTRUCTION(KILL_PROCESS, 0)
-    },
-    #endif /* SECCOMP_RET_KILL_PROCESS */
-
-    { .keyword = NULL }
-  };
-
-  unsigned int choice;
-  int valid = validateChoiceEx(&choice, keyword, modes, sizeof(modes[0]));
-  const SCFMode *mode = &modes[choice];
-
-  if (!valid) {
-    logMessage(LOG_WARNING,
-      "unknown system call filter mode: %s: assuming %s",
-      keyword, mode->keyword
-    );
-  }
-
-  return mode;
-}
 
 typedef struct SCFJumpStruct SCFJump;
 
@@ -769,48 +720,10 @@ typedef struct {
   } allow;
 } SCFObject;
 
-static SCFObject *
-scfNewObject (const SCFMode *mode) {
-  SCFObject *scf;
+#define SCF_FIELD_OFFSET(field) (offsetof(struct seccomp_data, field))
 
-  if ((scf = malloc(sizeof(*scf)))) {
-    memset(scf, 0, sizeof(*scf));
-    scf->mode = mode;
-
-    scf->instruction.array = NULL;
-    scf->instruction.size = 0;
-    scf->instruction.count = 0;
-
-    scf->argument.array = NULL;
-    scf->argument.size = 0;
-    scf->argument.count = 0;
-
-    scf->allow.jumps = NULL;
-
-    return scf;
-  } else {
-    logMallocError();
-  }
-
-  return NULL;
-}
-
-static void
-scfDestroyJumps (SCFJump *jump) {
-  while (jump) {
-    SCFJump *next = jump->next;
-    free(jump);
-    jump = next;
-  }
-}
-
-static void
-scfDestroyObject (SCFObject *scf) {
-  scfDestroyJumps(scf->allow.jumps);
-  if (scf->instruction.array) free(scf->instruction.array);
-  if (scf->argument.array) free(scf->argument.array);
-  free(scf);
-}
+#define SCF_RETURN_INSTRUCTION(action, value) \
+BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
 
 static int
 scfAddInstruction (SCFObject *scf, const struct sock_filter *instruction) {
@@ -1514,6 +1427,49 @@ scfLogInstructions (SCFObject *scf) {
 #endif /* SCF_LOG_INSTRUCTIONS */
 }
 
+static void
+scfDestroyJumps (SCFJump *jump) {
+  while (jump) {
+    SCFJump *next = jump->next;
+    free(jump);
+    jump = next;
+  }
+}
+
+static void
+scfDestroyObject (SCFObject *scf) {
+  scfDestroyJumps(scf->allow.jumps);
+  if (scf->instruction.array) free(scf->instruction.array);
+  if (scf->argument.array) free(scf->argument.array);
+  free(scf);
+}
+
+static SCFObject *
+scfNewObject (const SCFMode *mode) {
+  SCFObject *scf;
+
+  if ((scf = malloc(sizeof(*scf)))) {
+    memset(scf, 0, sizeof(*scf));
+    scf->mode = mode;
+
+    scf->instruction.array = NULL;
+    scf->instruction.size = 0;
+    scf->instruction.count = 0;
+
+    scf->argument.array = NULL;
+    scf->argument.size = 0;
+    scf->argument.count = 0;
+
+    scf->allow.jumps = NULL;
+
+    return scf;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
 static SCFObject *
 scfMakeFilter (const SCFMode *mode) {
   SCFObject *scf;
@@ -1571,6 +1527,50 @@ scfInstallFilter (const SCFMode *mode) {
 
     scfDestroyObject(scf);
   }
+}
+
+static const SCFMode *
+scfGetMode (const char *keyword) {
+  static const SCFMode modes[] = {
+    #ifdef SECCOMP_RET_ALLOW
+    { .keyword = "no",
+      .deny = SCF_RETURN_INSTRUCTION(ALLOW, 0)
+    },
+    #endif /* SECCOMP_RET_ALLOW */
+
+    #ifdef SECCOMP_RET_LOG
+    { .keyword = "log",
+      .deny = SCF_RETURN_INSTRUCTION(LOG, 0)
+    },
+    #endif /* SECCOMP_RET_LOG */
+
+    #ifdef SECCOMP_RET_ERRNO
+    { .keyword = "fail",
+      .deny = SCF_RETURN_INSTRUCTION(ERRNO, EPERM)
+    },
+    #endif /* SECCOMP_RET_ERRNO */
+
+    #ifdef SECCOMP_RET_KILL_PROCESS
+    { .keyword = "kill",
+      .deny = SCF_RETURN_INSTRUCTION(KILL_PROCESS, 0)
+    },
+    #endif /* SECCOMP_RET_KILL_PROCESS */
+
+    { .keyword = NULL }
+  };
+
+  unsigned int choice;
+  int valid = validateChoiceEx(&choice, keyword, modes, sizeof(modes[0]));
+  const SCFMode *mode = &modes[choice];
+
+  if (!valid) {
+    logMessage(LOG_WARNING,
+      "unknown system call filter mode: %s: assuming %s",
+      keyword, mode->keyword
+    );
+  }
+
+  return mode;
 }
 #endif /* SECCOMP_MODE_FILTER */
 
