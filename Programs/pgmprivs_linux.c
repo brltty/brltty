@@ -837,13 +837,31 @@ scfEndJump (SCFObject *scf, const SCFJump *jump) {
   return 1;
 }
 
+static void
+scfPushJump (SCFJump **jumps, SCFJump *jump) {
+  jump->next = *jumps;
+  *jumps = jump;
+}
+
+static SCFJump *
+scfPopJump (SCFJump **jumps) {
+  SCFJump *jump = *jumps;
+
+  if (jump) {
+    *jumps = jump->next;
+    jump->next = NULL;
+  }
+
+  return jump;
+}
+
 static int
 scfEndJumps (SCFObject *scf, SCFJump **jumps) {
   int ok = 1;
 
-  while (*jumps) {
-    SCFJump *jump = *jumps;
-    *jumps = jump->next;
+  while (1) {
+    SCFJump *jump = scfPopJump(jumps);
+    if (!jump) break;
 
     if (!scfEndJump(scf, jump)) ok = 0;
     free(jump);
@@ -926,12 +944,16 @@ scfJumpToArgument (SCFObject *scf, const SCFArgumentDescriptor *descriptor) {
     scf->argument.size = newSize;
   }
 
-  SCFArgument argument = {
-    .descriptor = descriptor
-  };
+  {
+    size_t *count = &scf->argument.count;
+    SCFArgument *argument = &scf->argument.array[*count];
 
-  if (!scfJumpTo(scf, &argument.jump)) return 0;
-  scf->argument.array[scf->argument.count++] = argument;
+    argument->descriptor = descriptor;
+    if (!scfJumpTo(scf, &argument->jump)) return 0;
+
+    *count += 1;
+  }
+
   return 1;
 }
 
@@ -948,8 +970,7 @@ scfAllowValue (SCFObject *scf, const SCFValueDescriptor *descriptor) {
 
     if ((eqValue = malloc(sizeof(*eqValue)))) {
       if (scfJumpIf(scf, SCF_TEST_EQ, descriptor->value, eqValue)) {
-        eqValue->next = scf->allow.jumps;
-        scf->allow.jumps = eqValue;
+        scfPushJump(&scf->allow.jumps, eqValue);
         return 1;
       }
 
@@ -1428,17 +1449,17 @@ scfLogInstructions (SCFObject *scf) {
 }
 
 static void
-scfDestroyJumps (SCFJump *jump) {
-  while (jump) {
-    SCFJump *next = jump->next;
+scfDestroyJumps (SCFJump **jumps) {
+  while (1) {
+    SCFJump *jump = scfPopJump(jumps);
+    if (!jump) break;
     free(jump);
-    jump = next;
   }
 }
 
 static void
 scfDestroyObject (SCFObject *scf) {
-  scfDestroyJumps(scf->allow.jumps);
+  scfDestroyJumps(&scf->allow.jumps);
   if (scf->instruction.array) free(scf->instruction.array);
   if (scf->argument.array) free(scf->argument.array);
   free(scf);
