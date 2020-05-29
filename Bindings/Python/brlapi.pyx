@@ -652,7 +652,7 @@ cdef class Connection:
 		if (type(dots) == unicode):
 			dots = dots.encode('latin1')
 		if (len(dots) < dispSize):
-			dots = dots + b"".center(dispSize - len(dots), '\0')
+			dots = dots + b"".center(dispSize - len(dots), b'\0')
 		c_dots = dots
 		c_udots = <unsigned char *>c_dots
 		with nogil:
