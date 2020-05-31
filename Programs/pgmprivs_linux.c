@@ -695,8 +695,6 @@ typedef struct {
   SCFJump jump;
 } SCFArgument;
 
-#define SCF_FIELD_OFFSET(field) (offsetof(struct seccomp_data, field))
-
 #define SCF_INSTRUCTION(code, k) \
 (const struct sock_filter)BPF_STMT((code), (k))
 
@@ -807,7 +805,7 @@ scfAddDenyInstruction (SCFObject *scf) {
 }
 
 static int
-scfLoadField (SCFObject *scf, uint32_t offset, uint8_t width) {
+scfLoadData (SCFObject *scf, uint32_t offset, uint8_t width) {
   struct sock_filter instruction = BPF_STMT(BPF_LD|BPF_ABS, offset);
 
   switch (width) {
@@ -831,19 +829,21 @@ scfLoadField (SCFObject *scf, uint32_t offset, uint8_t width) {
   return scfAddInstruction(scf, &instruction);
 }
 
+#define SCF_DATA_OFFSET(field) (offsetof(struct seccomp_data, field))
+
 static int
 scfLoadArchitecture (SCFObject *scf) {
-  return scfLoadField(scf, SCF_FIELD_OFFSET(arch), 4);
+  return scfLoadData(scf, SCF_DATA_OFFSET(arch), 4);
 }
 
 static int
 scfLoadSystemCall (SCFObject *scf) {
-  return scfLoadField(scf, SCF_FIELD_OFFSET(nr), 4);
+  return scfLoadData(scf, SCF_DATA_OFFSET(nr), 4);
 }
 
 static int
 scfLoadArgument (SCFObject *scf, uint8_t index) {
-  return scfLoadField(scf, SCF_FIELD_OFFSET(args[index]), 4);
+  return scfLoadData(scf, SCF_DATA_OFFSET(args[index]), 4);
 }
 
 static void
