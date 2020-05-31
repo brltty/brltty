@@ -676,11 +676,6 @@ struct SCFArgumentDescriptorStruct {
 #include "syscalls_linux.h"
 static const SCFValueGroup scfSystemCalls = SCF_VALUE_GROUP(systemCall);
 
-typedef struct {
-  const char *keyword; // must be first
-  struct sock_filter deny;
-} SCFMode;
-
 typedef struct SCFJumpStruct SCFJump;
 
 typedef enum {
@@ -699,6 +694,62 @@ typedef struct {
   const SCFArgumentDescriptor *descriptor;
   SCFJump jump;
 } SCFArgument;
+
+#define SCF_FIELD_OFFSET(field) (offsetof(struct seccomp_data, field))
+
+#define SCF_INSTRUCTION(code, k) \
+(const struct sock_filter)BPF_STMT((code), (k))
+
+#define SCF_RETURN_INSTRUCTION(action, value) \
+SCF_INSTRUCTION(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
+
+typedef struct {
+  const char *name; // must be first
+  const struct sock_filter *deny;
+} SCFMode;
+
+static const SCFMode scfModes[] = {
+  // must be first
+  { .name = "no",
+  },
+
+  #ifdef SECCOMP_RET_LOG
+  { .name = "log",
+    .deny = &SCF_RETURN_INSTRUCTION(LOG, 0)
+  },
+  #endif /* SECCOMP_RET_LOG */
+
+  #ifdef SECCOMP_RET_ERRNO
+  { .name = "fail",
+    .deny = &SCF_RETURN_INSTRUCTION(ERRNO, EPERM)
+  },
+  #endif /* SECCOMP_RET_ERRNO */
+
+  #ifdef SECCOMP_RET_KILL_PROCESS
+  { .name = "kill",
+    .deny = &SCF_RETURN_INSTRUCTION(KILL_PROCESS, 0)
+  },
+  #endif /* SECCOMP_RET_KILL_PROCESS */
+
+  // must be last
+  { .name = NULL }
+};
+
+static const SCFMode *
+scfGetMode (const char *name) {
+  unsigned int choice;
+  int valid = validateChoiceEx(&choice, name, scfModes, sizeof(scfModes[0]));
+  const SCFMode *mode = &scfModes[choice];
+
+  if (!valid) {
+    logMessage(LOG_WARNING,
+      "unknown system call filter mode: %s: assuming %s",
+      name, mode->name
+    );
+  }
+
+  return mode;
+}
 
 typedef struct {
   const SCFMode *mode;
@@ -719,11 +770,6 @@ typedef struct {
     SCFJump *jumps;
   } allow;
 } SCFObject;
-
-#define SCF_FIELD_OFFSET(field) (offsetof(struct seccomp_data, field))
-
-#define SCF_RETURN_INSTRUCTION(action, value) \
-BPF_STMT(BPF_RET|BPF_K, (SECCOMP_RET_##action | ((value) & SECCOMP_RET_DATA)))
 
 static int
 scfAddInstruction (SCFObject *scf, const struct sock_filter *instruction) {
@@ -757,7 +803,7 @@ scfAddAllowInstruction (SCFObject *scf) {
 
 static int
 scfAddDenyInstruction (SCFObject *scf) {
-  return scfAddInstruction(scf, &scf->mode->deny);
+  return scfAddInstruction(scf, scf->mode->deny);
 }
 
 static int
@@ -1512,13 +1558,10 @@ scfMakeFilter (const SCFMode *mode) {
 }
 
 static void
-scfInstallFilter (const SCFMode *mode) {
+scfInstallFilter (const char *modeName) {
+  const SCFMode *mode = scfGetMode(modeName);
+  if (!mode->deny) return;
   SCFObject *scf;
-
-  {
-    const struct sock_filter *deny = &mode->deny;
-    if ((deny->k & SECCOMP_RET_ACTION_FULL) == SECCOMP_RET_ALLOW) return;
-  }
 
 #ifdef PR_SET_NO_NEW_PRIVS
   if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == -1) {
@@ -1548,50 +1591,6 @@ scfInstallFilter (const SCFMode *mode) {
 
     scfDestroyObject(scf);
   }
-}
-
-static const SCFMode *
-scfGetMode (const char *keyword) {
-  static const SCFMode modes[] = {
-    #ifdef SECCOMP_RET_ALLOW
-    { .keyword = "no",
-      .deny = SCF_RETURN_INSTRUCTION(ALLOW, 0)
-    },
-    #endif /* SECCOMP_RET_ALLOW */
-
-    #ifdef SECCOMP_RET_LOG
-    { .keyword = "log",
-      .deny = SCF_RETURN_INSTRUCTION(LOG, 0)
-    },
-    #endif /* SECCOMP_RET_LOG */
-
-    #ifdef SECCOMP_RET_ERRNO
-    { .keyword = "fail",
-      .deny = SCF_RETURN_INSTRUCTION(ERRNO, EPERM)
-    },
-    #endif /* SECCOMP_RET_ERRNO */
-
-    #ifdef SECCOMP_RET_KILL_PROCESS
-    { .keyword = "kill",
-      .deny = SCF_RETURN_INSTRUCTION(KILL_PROCESS, 0)
-    },
-    #endif /* SECCOMP_RET_KILL_PROCESS */
-
-    { .keyword = NULL }
-  };
-
-  unsigned int choice;
-  int valid = validateChoiceEx(&choice, keyword, modes, sizeof(modes[0]));
-  const SCFMode *mode = &modes[choice];
-
-  if (!valid) {
-    logMessage(LOG_WARNING,
-      "unknown system call filter mode: %s: assuming %s",
-      keyword, mode->keyword
-    );
-  }
-
-  return mode;
 }
 #endif /* SECCOMP_MODE_FILTER */
 
@@ -2095,6 +2094,6 @@ establishProgramPrivileges (char **specifiedParameters, char **configuredParamet
   logCurrentCapabilities("after relinquish");
 
   #ifdef SECCOMP_MODE_FILTER
-  scfInstallFilter(scfGetMode(specifiedParameters[PARM_SCFMODE]));
+  scfInstallFilter(specifiedParameters[PARM_SCFMODE]);
   #endif /* SECCOMP_MODE_FILTER */
 }
