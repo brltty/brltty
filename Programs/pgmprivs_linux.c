@@ -30,7 +30,7 @@
 #include "parse.h"
 
 #define SCF_LOG_LEVEL LOG_DEBUG
-#define SCF_LOG_INSTRUCTIONS 0
+#define SCF_LOG_PROGRAM 0
 
 //#undef HAVE_PWD_H
 //#undef HAVE_GRP_H
@@ -636,6 +636,8 @@ isolateNamespaces (void) {
 #endif /* SYSTEM_CALL_ARCHITECTURE */
 
 #ifdef SECCOMP_MODE_FILTER
+static const  char scfLogLabel[] = "SCF";
+
 typedef struct SCFArgumentDescriptorStruct SCFArgumentDescriptor;
 
 // best to protect each of these with an #ifdef for the value's macro
@@ -1081,8 +1083,8 @@ scfRemoveDuplicateValues (SCFValueDescriptor *values, size_t *count, const char 
     while (from < end) {
       if (from->value == to->value) {
         logMessage(LOG_WARNING,
-          "SCF duplicate group value: %s: 0X%08"PRIX32,
-          name, from->value
+          "%s: duplicate value: %s: 0X%08"PRIX32,
+          scfLogLabel, name, from->value
         );
       } else if (++to != from) {
         *to = *from;
@@ -1106,7 +1108,10 @@ scfAllowValueGroup (SCFObject *scf, const SCFValueGroup *values) {
 
     scfSortValues(descriptors, count);
     scfRemoveDuplicateValues(descriptors, &count, name);
-    logMessage(SCF_LOG_LEVEL, "SCF value group size: %s: %zu", name, count);
+
+    logMessage(SCF_LOG_LEVEL,
+      "%s: value group size: %s: %zu", scfLogLabel, name, count
+    );
 
     if (!scfAllowValues(scf, descriptors, count)) return 0;
   }
@@ -1151,7 +1156,7 @@ scfCheckArguments (SCFObject *scf) {
   return 1;
 }
 
-#if SCF_LOG_INSTRUCTIONS
+#if SCF_LOG_PROGRAM
 typedef struct {
   const struct sock_filter *instruction;
   size_t location;
@@ -1455,44 +1460,37 @@ STR_BEGIN_FORMATTER(scfFormatInstruction, const SCFInstructionFormattingData *if
 
   STR_FORMAT(scfDisassembleInstruction, ifd);
 STR_END_FORMATTER
-#endif /* SCF_LOG_INSTRUCTIONS */
 
 static void
-scfLogInstructions (SCFObject *scf) {
-  const  char *label = "SCF";
-
+scfLogProgram (SCFObject *scf) {
   size_t count = scf->instruction.count;
-  logMessage(SCF_LOG_LEVEL, "%s instruction count: %zu", label, count);
 
-#if SCF_LOG_INSTRUCTIONS
+  SCFInstructionFormattingData ifd;
+  memset(&ifd, 0, sizeof(ifd));
+
   {
-    SCFInstructionFormattingData ifd;
-    memset(&ifd, 0, sizeof(ifd));
+    size_t index = count;
+    if (index > 0) index -= 1;
 
-    {
-      size_t index = count;
-      if (index > 0) index -= 1;
-
-      char buffer[0X40];
-      ifd.width.decimal = snprintf(buffer, sizeof(buffer), "%zu", index);
-      ifd.width.hexadecimal = snprintf(buffer, sizeof(buffer), "%zx", index);
-    }
-
-    for (size_t index=0; index<count; index+=1) {
-      char log[0X100];
-      STR_BEGIN(log, sizeof(log));
-      STR_PRINTF("%s: %*zu ", label, ifd.width.decimal, index);
-
-      ifd.instruction = &scf->instruction.array[index];
-      ifd.location = index;
-      STR_FORMAT(scfFormatInstruction, &ifd);
-
-      STR_END;
-      logMessage(SCF_LOG_LEVEL, "%s", log);
-    }
+    char buffer[0X40];
+    ifd.width.decimal = snprintf(buffer, sizeof(buffer), "%zu", index);
+    ifd.width.hexadecimal = snprintf(buffer, sizeof(buffer), "%zx", index);
   }
-#endif /* SCF_LOG_INSTRUCTIONS */
+
+  for (size_t index=0; index<count; index+=1) {
+    char log[0X100];
+    STR_BEGIN(log, sizeof(log));
+    STR_PRINTF("%s: instruction: %*zu ", scfLogLabel, ifd.width.decimal, index);
+
+    ifd.instruction = &scf->instruction.array[index];
+    ifd.location = index;
+    STR_FORMAT(scfFormatInstruction, &ifd);
+
+    STR_END;
+    logMessage(SCF_LOG_LEVEL, "%s", log);
+  }
 }
+#endif /* SCF_LOG_PROGRAM */
 
 static void
 scfDestroyJumps (SCFJump **jumps) {
@@ -1545,7 +1543,17 @@ scfMakeFilter (const SCFMode *mode) {
     if (scfVerifyArchitecture(scf)) {
       if (scfCheckSysemCall(scf)) {
         if (scfCheckArguments(scf)) {
-          scfLogInstructions(scf);
+          logMessage(SCF_LOG_LEVEL,
+            "%s: program size: %zu",
+            scfLogLabel, scf->instruction.count
+          );
+
+          #if SCF_LOG_PROGRAM
+          logMessage(SCF_LOG_LEVEL, "%s: begin program", scfLogLabel);
+          scfLogProgram(scf);
+          logMessage(SCF_LOG_LEVEL, "%s: end program", scfLogLabel);
+          #endif /* SCF_LOG_PROGRAM */
+
           return scf;
         }
       }
