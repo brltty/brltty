@@ -1643,7 +1643,7 @@ activateBrailleDriver (int verify) {
 
           case GIO_TYPE_BLUETOOTH: {
             if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_DEVICE_NAME_OBTAIN_TIMEOUT))) {
-              static const char *bluetoothDrivers[] = NULL_TERMINATED_STRING_ARRAY(
+              static const char *const bluetoothDrivers[] = NULL_TERMINATED_STRING_ARRAY(
                 "np", "ht", "al", "bm"
               );
 
