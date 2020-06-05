@@ -563,10 +563,10 @@ static int grabWindows(Window win,int level) {
 }
 
 static void setName(const struct window *window) {
-  if (!window->wm_name)
-    if (window->win==window->root) api_setName("root");
-    else api_setName("unknown");
-  else api_setName(window->wm_name);
+  if (!window->wm_name) {
+    if (window->win!=window->root)
+      api_setName("window without name");
+  } else api_setName(window->wm_name);
 }
 
 static void setFocus(Window win) {
