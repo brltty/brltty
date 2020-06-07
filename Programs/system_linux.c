@@ -167,11 +167,11 @@ processSupplementaryGroups (GroupsProcessor *processGroups, void *data) {
 
 #ifndef input_event_sec
 #define input_event_sec time.tv_sec
-#endif
+#endif /* input_event_sec */
 
 #ifndef input_event_usec
 #define input_event_usec time.tv_usec
-#endif
+#endif /* input_event_usec */
 
 #include "kbd_keycodes.h"
 
@@ -1145,16 +1145,17 @@ enableUinputEventType (UinputObject *uinput, int type) {
 int
 writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t value) {
 #ifdef HAVE_LINUX_UINPUT_H
-  struct input_event event;
-  struct timeval tv;
+  struct timeval now;
+  gettimeofday(&now, NULL);
 
-  memset(&event, 0, sizeof(event));
-  gettimeofday(&tv, NULL);
-  event.input_event_sec = tv.tv_sec;
-  event.input_event_usec = tv.tv_usec;
-  event.type = type;
-  event.code = code;
-  event.value = value;
+  struct input_event event = {
+    .input_event_sec = now.tv_sec,
+    .input_event_usec = now.tv_usec,
+
+    .type = type,
+    .code = code,
+    .value = value,
+  };
 
   if (write(uinput->fileDescriptor, &event, sizeof(event)) != -1) return 1;
   logSystemError("write(struct input_event)");
