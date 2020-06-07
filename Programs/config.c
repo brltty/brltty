@@ -90,6 +90,26 @@ int isWindowsService = 0;
 static const char optionOperand_none[] = "no";
 static const char optionOperand_autodetect[] = "auto";
 
+static const char *const *const fallbackBrailleDrivers =
+  NULL_TERMINATED_STRING_ARRAY(
+    optionOperand_none
+  );
+
+static const char *const *const autodetectableBrailleDrivers_serial =
+  NULL_TERMINATED_STRING_ARRAY(
+    "md", "pm", "ts", "ht", "bn", "al", "bm", "pg", "sk"
+  );
+
+static const char *const *const autodetectableBrailleDrivers_USB =
+  NULL_TERMINATED_STRING_ARRAY(
+    "al", "bm", "bn", "cn", "eu", "fs", "hd", "hm", "ht", "hw", "ic", "mt", "pg", "pm", "sk", "vo"
+  );
+
+static const char *const *const autodetectableBrailleDrivers_Bluetooth =
+  NULL_TERMINATED_STRING_ARRAY(
+    "np", "ht", "al", "bm"
+  );
+
 #define SERVICE_NAME "BrlAPI"
 #define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
 
@@ -1385,7 +1405,7 @@ activateDriver (const DriverActivationData *data, int verify) {
   }
 
   if (!*driver) {
-    driver = NULL_TERMINATED_STRING_ARRAY(optionOperand_none);
+    driver = fallbackBrailleDrivers;
     autodetect = 0;
   }
 
@@ -1623,26 +1643,18 @@ activateBrailleDriver (int verify) {
 
         switch (properties->type.identifier) {
           case GIO_TYPE_SERIAL: {
-            autodetectableDrivers = NULL_TERMINATED_STRING_ARRAY(
-              "md", "pm", "ts", "ht", "bn", "al", "bm", "pg", "sk"
-            );
-
+            autodetectableDrivers = autodetectableBrailleDrivers_serial;
             break;
           }
 
           case GIO_TYPE_USB: {
-            autodetectableDrivers = NULL_TERMINATED_STRING_ARRAY(
-              "al", "bm", "bn", "cn", "eu", "fs", "hd", "hm", "ht", "hw", "ic", "mt", "pg", "pm", "sk", "vo"
-            );
-
+            autodetectableDrivers = autodetectableBrailleDrivers_USB;
             break;
           }
 
           case GIO_TYPE_BLUETOOTH: {
             if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_DEVICE_NAME_OBTAIN_TIMEOUT))) {
-              autodetectableDrivers = NULL_TERMINATED_STRING_ARRAY(
-                "np", "ht", "al", "bm"
-              );
+              autodetectableDrivers = autodetectableBrailleDrivers_Bluetooth;
             }
 
             break;
