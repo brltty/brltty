@@ -109,6 +109,7 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --without-fm-package \
    \
    --without-pgmpath-package \
+   --without-pgmprivs-package \
    --without-service-package \
    --without-params-package \
    --without-charset-package \
