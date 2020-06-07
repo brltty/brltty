@@ -165,6 +165,14 @@ processSupplementaryGroups (GroupsProcessor *processGroups, void *data) {
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 
+#ifndef input_event_sec
+#define input_event_sec time.tv_sec
+#endif
+
+#ifndef input_event_usec
+#define input_event_usec time.tv_usec
+#endif
+
 #include "kbd_keycodes.h"
 
 LINUX_KEY_MAP(xt00) = {
@@ -1138,9 +1146,12 @@ int
 writeInputEvent (UinputObject *uinput, uint16_t type, uint16_t code, int32_t value) {
 #ifdef HAVE_LINUX_UINPUT_H
   struct input_event event;
+  struct timeval tv;
 
   memset(&event, 0, sizeof(event));
-  gettimeofday(&event.time, NULL);
+  gettimeofday(&tv, NULL);
+  event.input_event_sec = tv.tv_sec;
+  event.input_event_usec = tv.tv_usec;
   event.type = type;
   event.code = code;
   event.value = value;
