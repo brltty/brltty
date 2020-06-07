@@ -1385,8 +1385,7 @@ activateDriver (const DriverActivationData *data, int verify) {
   }
 
   if (!*driver) {
-    static const char *const fallbackDrivers[] = NULL_TERMINATED_STRING_ARRAY(optionOperand_none);
-    driver = fallbackDrivers;
+    driver = NULL_TERMINATED_STRING_ARRAY(optionOperand_none);
     autodetect = 0;
   }
 
@@ -1624,30 +1623,26 @@ activateBrailleDriver (int verify) {
 
         switch (properties->type.identifier) {
           case GIO_TYPE_SERIAL: {
-            static const char *const serialDrivers[] = NULL_TERMINATED_STRING_ARRAY(
+            autodetectableDrivers = NULL_TERMINATED_STRING_ARRAY(
               "md", "pm", "ts", "ht", "bn", "al", "bm", "pg", "sk"
             );
 
-            autodetectableDrivers = serialDrivers;
             break;
           }
 
           case GIO_TYPE_USB: {
-            static const char *const usbDrivers[] = NULL_TERMINATED_STRING_ARRAY(
+            autodetectableDrivers = NULL_TERMINATED_STRING_ARRAY(
               "al", "bm", "bn", "cn", "eu", "fs", "hd", "hm", "ht", "hw", "ic", "mt", "pg", "pm", "sk", "vo"
             );
 
-            autodetectableDrivers = usbDrivers;
             break;
           }
 
           case GIO_TYPE_BLUETOOTH: {
             if (!(autodetectableDrivers = bthGetDriverCodes(dev, BLUETOOTH_DEVICE_NAME_OBTAIN_TIMEOUT))) {
-              static const char *const bluetoothDrivers[] = NULL_TERMINATED_STRING_ARRAY(
+              autodetectableDrivers = NULL_TERMINATED_STRING_ARRAY(
                 "np", "ht", "al", "bm"
               );
-
-              autodetectableDrivers = bluetoothDrivers;
             }
 
             break;
