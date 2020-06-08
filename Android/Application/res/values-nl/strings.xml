@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="app_name">BRLTTY</string>
+  <string name="app_description">BRLTTY ondersteunt brailleapparaten.</string>
+
+  <string name="about_activity_label">Over applicatie</string>
+  <string name="application_name_label">Naam</string>
+  <string name="application_version_label">Versie</string>
+  <string name="application_copyright_label">Copyright</string>
+
+  <string name="inputService_name">BRLTTY InvoerService</string>
+  <string name="inputService_type">Toetsenborden op brailleapparaten</string>
+  <string name="inputService_not_enabled">invoerservice niet geactiveerd</string>
+  <string name="inputService_not_selected">invoerservice niet geselecteerd</string>
+  <string name="inputService_not_started">invoerservice niet gestart</string>
+  <string name="inputService_not_connected">invoerservice niet verbonden</string>
+
+  <string name="updateApplication_problem_failed">applicatie niet geüpdate</string>
+
+  <string name="packageInstaller_problem_failed">pakket niet geïnstalleerd</string>
+  <string name="packageInstaller_problem_same">zelfde versie</string>
+  <string name="packageInstaller_problem_downgrade">downgrade niet toegestaan</string>
+
+  <string name="fileDownloader_title">BRLTTY BestandsDownloader</string>
+  <string name="fileDownloader_problem_failed">bestand niet gedownload</string>
+  <string name="fileDownloader_state_connecting">bezig met verbinden</string>
+  <string name="fileDownloader_state_downloading">bezig met downloaden</string>
+
+  <string name="checkbox_state_unchecked">Nee</string>
+  <string name="checkbox_state_checked">Ja</string>
+
+  <string name="braille_channel_name">Toestand Van Braille-apparaat</string>
+  <string name="braille_hint_tap">tik voor acties</string>
+  <string name="braille_state_released">Vrijgegeven</string>
+  <string name="braille_state_waiting">Aan het wachten</string>
+  <string name="braille_state_connected">Verbonden</string>
+
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">Meldingen</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Snelle Instellingen</string>
+  <string name="GLOBAL_BUTTON_BACK">Terug</string>
+  <string name="GLOBAL_BUTTON_HOME">Home</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">Recente Apps</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">Overzicht</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Invoermethode Schakelen</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Gebruikershandleiding</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">WebSite</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Berichten In De Community</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Plaats Een Communitybericht</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Beheer Communitylidmaatschap</string>
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Update Applicatie</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Toegankelijkheidsacties</string>
+
+  <string name="SETTINGS_SCREEN_MAIN">BRLTTY Instellingen</string>
+  <string name="SETTINGS_SCREEN_GENERAL">Algemene Instellingen</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">Instellingen voor berichten</string>
+  <string name="SETTINGS_SCREEN_DEVICES">Beheer Apparaten</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">Geavanceerde Instellingen</string>
+
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Geef Brailleapparaat vrij</string>
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Navigatiemodus</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Spraakondersteuning</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">Teksttabel</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Attributentabel</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Contractietabel</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Toetsenbordtabel</string>
+
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Toon Aankondigingen</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Toon Meldingen</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Toon Alerts</string>
+
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">Logniveau</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Logcategorieën</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Log Toegankelijkheidsgebeurtenissen</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Log Rendered Scherm</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Log Toetsenbordgebeurtenissen</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Log onverwerkte gebeurtenissen</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">Geselecteerd Apparaat</string>
+  <string name="DEVICES_BUTTON_ADD">Voeg Apparaat Toe</string>
+  <string name="DEVICES_BUTTON_REMOVE">Verwijder Apparaat</string>
+
+  <string name="SELECTED_DEVICE_NONE">geen apparaten</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">apparaat niet geselecteerd</string>
+
+  <string name="ADD_DEVICE_NAME">Apparaatnaam</string>
+  <string name="ADD_DEVICE_METHOD">Communicatiemethode</string>
+  <string name="ADD_DEVICE_SELECT">Selecteer Apparaat</string>
+  <string name="ADD_DEVICE_DRIVER">Braille Driver</string>
+  <string name="ADD_DEVICE_DONE">Gereed</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">Communicatiemethode niet geselecteerd</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">apparaat niet geselecteerd</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">braille driver niet geselecteerd</string>
+  <string name="ADD_DEVICE_NO_DEVICES">geen apparaten</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">apparaatnaam al in gebruik</string>
+
+  <string name="REMOVE_DEVICE_ASK">Weet u zeker dat u dit apparaat wilt verwijderen?</string>
+
+  <string name="SET_SELECTION_NONE">niets geselecteerd</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">Verticale Lijst</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">Tweedimensionaal Raster</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_None">Geen</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Standaard</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">Serieel</string>
+
+  <string name="LOG_LEVEL_LABEL_debug">Debug</string>
+  <string name="LOG_LEVEL_LABEL_information">Informatie</string>
+  <string name="LOG_LEVEL_LABEL_notice">Melding</string>
+  <string name="LOG_LEVEL_LABEL_warning">Waarschuwing</string>
+  <string name="LOG_LEVEL_LABEL_error">Fout</string>
+  <string name="LOG_LEVEL_LABEL_critical">Kritiek</string>
+  <string name="LOG_LEVEL_LABEL_alert">Alert</string>
+  <string name="LOG_LEVEL_LABEL_emergency">Alarm</string>
+
+  <string name="LOG_CATEGORY_LABEL_ingio">Generic Input</string>
+  <string name="LOG_CATEGORY_LABEL_inpkts">Input Packets</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">Output Packets</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">Braille Device Key Events</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">Keyboard Key Events</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">Cursor Tracking</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">Cursor Routing</string>
+  <string name="LOG_CATEGORY_LABEL_update">Update Events</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Speech Events</string>
+  <string name="LOG_CATEGORY_LABEL_async">Async Events</string>
+  <string name="LOG_CATEGORY_LABEL_server">Server Events</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Serial I/O</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
+  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth I/O</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">Braille Driver Events</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">Speech Driver Events</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">Screen Driver Events</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">autodetect</string>
+
+  <string name="TEXT_TABLE_LABEL_auto">locaal gebaseerde autoselectie</string>
+  <string name="TEXT_TABLE_LABEL_ar">Arabisch (standaard)</string>
+  <string name="TEXT_TABLE_LABEL_as">Assamees</string>
+  <string name="TEXT_TABLE_LABEL_awa">Awadhi</string>
+  <string name="TEXT_TABLE_LABEL_bg">Bulgaars</string>
+  <string name="TEXT_TABLE_LABEL_bh">Bihari</string>
+  <string name="TEXT_TABLE_LABEL_bn">Bengali</string>
+  <string name="TEXT_TABLE_LABEL_bo">Tibetaans</string>
+  <string name="TEXT_TABLE_LABEL_bra">Braj</string>
+  <string name="TEXT_TABLE_LABEL_brf">Braille Ready Formaat (voor het bekijken van .brf bestanden in een tekstverwerker of pager)</string>
+  <string name="TEXT_TABLE_LABEL_cs">Czechisch</string>
+  <string name="TEXT_TABLE_LABEL_cy">Welsh</string>
+  <string name="TEXT_TABLE_LABEL_da">Deens</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">Deens (Svend Thougaard, 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">Deens (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_de">Duits</string>
+  <string name="TEXT_TABLE_LABEL_dra">Dravidiaans</string>
+  <string name="TEXT_TABLE_LABEL_el">Grieks</string>
+  <string name="TEXT_TABLE_LABEL_en">Engels</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">Engels (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">Engels (Verenigd Koninkrijk)</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc">Engels (North American Braille Computer Code)</string>
+  <string name="TEXT_TABLE_LABEL_en_US">Engels (Verenigde Staten)</string>
+  <string name="TEXT_TABLE_LABEL_eo">Esperanto</string>
+  <string name="TEXT_TABLE_LABEL_es">Spaans</string>
+  <string name="TEXT_TABLE_LABEL_et">Estlands</string>
+  <string name="TEXT_TABLE_LABEL_fi">Fins</string>
+  <string name="TEXT_TABLE_LABEL_fr">Frans</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007">Frans (unified 2007)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">Frans (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">Frans (Code Braille Informatique Français Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">Frans (Frankrijk)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">Frans (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_ga">Iers</string>
+  <string name="TEXT_TABLE_LABEL_gd">Gaelic</string>
+  <string name="TEXT_TABLE_LABEL_gon">Gondi</string>
+  <string name="TEXT_TABLE_LABEL_gu">Gujarati</string>
+  <string name="TEXT_TABLE_LABEL_he">Hebreeuws</string>
+  <string name="TEXT_TABLE_LABEL_hi">Hindi</string>
+  <string name="TEXT_TABLE_LABEL_hr">Croatisch</string>
+  <string name="TEXT_TABLE_LABEL_hu">Hongaars</string>
+  <string name="TEXT_TABLE_LABEL_hy">Armeens</string>
+  <string name="TEXT_TABLE_LABEL_is">Ijslands</string>
+  <string name="TEXT_TABLE_LABEL_it">Italiaans</string>
+  <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kn">Kannada</string>
+  <string name="TEXT_TABLE_LABEL_kok">Konkani</string>
+  <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
+  <string name="TEXT_TABLE_LABEL_lt">Litauws</string>
+  <string name="TEXT_TABLE_LABEL_lv">Lets</string>
+  <string name="TEXT_TABLE_LABEL_mg">Malagasy</string>
+  <string name="TEXT_TABLE_LABEL_mi">Maori</string>
+  <string name="TEXT_TABLE_LABEL_ml">Malayalam</string>
+  <string name="TEXT_TABLE_LABEL_mni">Manipuri</string>
+  <string name="TEXT_TABLE_LABEL_mr">Marathi</string>
+  <string name="TEXT_TABLE_LABEL_mt">Maltees</string>
+  <string name="TEXT_TABLE_LABEL_mun">Munda</string>
+  <string name="TEXT_TABLE_LABEL_mwr">Marwari</string>
+  <string name="TEXT_TABLE_LABEL_ne">Nepali</string>
+  <string name="TEXT_TABLE_LABEL_new">Newari</string>
+  <string name="TEXT_TABLE_LABEL_nl">Nederlands</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">Nederlands (België)</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">Nederlands (Nederland)</string>
+  <string name="TEXT_TABLE_LABEL_no">Noors</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">Noors (met ondersteuning voor andere talen)</string>
+  <string name="TEXT_TABLE_LABEL_no_oup">Noors (Offentlig utvalg for punktskrift)</string>
+  <string name="TEXT_TABLE_LABEL_nwc">Newari (oud)</string>
+  <string name="TEXT_TABLE_LABEL_or">Oriya</string>
+  <string name="TEXT_TABLE_LABEL_pa">Panjabi</string>
+  <string name="TEXT_TABLE_LABEL_pi">Pali</string>
+  <string name="TEXT_TABLE_LABEL_pl">Pools</string>
+  <string name="TEXT_TABLE_LABEL_pt">Portugees</string>
+  <string name="TEXT_TABLE_LABEL_ro">Roemeens</string>
+  <string name="TEXT_TABLE_LABEL_ru">Russisch</string>
+  <string name="TEXT_TABLE_LABEL_sa">Sanskrit</string>
+  <string name="TEXT_TABLE_LABEL_sat">Santali</string>
+  <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
+  <string name="TEXT_TABLE_LABEL_se">Sami (Noordelijk)</string>
+  <string name="TEXT_TABLE_LABEL_sk">Slovaaks</string>
+  <string name="TEXT_TABLE_LABEL_sl">Sloveens</string>
+  <string name="TEXT_TABLE_LABEL_sv">Zweeds</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989">Zweeds (1989 standaard)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996">Zweeds (1996 standaard)</string>
+  <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
+  <string name="TEXT_TABLE_LABEL_ta">Tamil</string>
+  <string name="TEXT_TABLE_LABEL_te">Telugu</string>
+  <string name="TEXT_TABLE_LABEL_tr">Turks</string>
+  <string name="TEXT_TABLE_LABEL_uk">Oekraiens</string>
+  <string name="TEXT_TABLE_LABEL_vi">Vietnamees</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">geïnverteerd voorgrondkleur in de linkerkolom en achtergrondkleur in de rechterkolom</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">voorgrondkleur in de linkerkolom en achtergrondkleur in de rechterkolom</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">voorgrondkleur in bovenste vierkant en achtergrondkleur in onderste vierkant</string>
+
+  <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (Verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_am">Amharic (Onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">Duits (Onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">Duits (standaard samentrekkingen)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Duits (Verkort - 1998 standaard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">Duits (verkort - 1998 standaard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">Duits (verkort - 2015 standaard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Engels (Unified English Braille, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Engels (VS, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">Spaans (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">Frans (onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">Frans (verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_id">Indonesisch (verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa">Internationaal Phonetisch Alfabet</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja">Japans (onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Koreaans (onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1">Koreaans (grade 1)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2">Koreaans (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">Litauws (onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">Malagasy (verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun">Munda (verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">Nederlands (verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt">Portugees (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_th">Thais (verkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinees (Taiwan, onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinees (Taiwan, Unique Chinese Braille)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (verkort)</string>
+
+  <string name="KEYBOARD_TABLE_LABEL_braille">layout voor brailletoetsenborden</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">layout voor volledige toetsenborden</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">layout voor toetsenblokgebaseerde navigatie</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">layout voor toetsenborden zonder keypad</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">layout voor Sun Type 6 toetsenborden</string>
+</resources>
