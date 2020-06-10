@@ -83,6 +83,21 @@ extern "C" {
 #define JAVA_OBJ_UNSATISFIED_LINK_ERROR JAVA_OBJ_LANG("UnsatisfiedLinkError")
 #define JAVA_SIG_UNSATISFIED_LINK_ERROR JAVA_SIG_OBJECT(JAVA_OBJ_UNSATISFIED_LINK_ERROR)
 
+static inline jboolean
+javaHasExceptionOccurred (JNIEnv *env) {
+  return (*env)->ExceptionCheck(env);
+}
+
+static inline jthrowable
+javaGetException (JNIEnv *env) {
+  return (*env)->ExceptionOccurred(env);
+}
+
+static inline void
+javaClearException (JNIEnv *env) {
+  return (*env)->ExceptionClear(env);
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

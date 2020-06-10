@@ -106,12 +106,31 @@ public class Connection extends BasicConnection implements Constants {
     return getGlobalParameter(parameter, 0);
   }
 
+  public void setParameter (int parameter, boolean global, Object value) {
+    setParameter(parameter, 0, global, value);
+  }
+
+  public void setLocalParameter (int parameter, Object value) {
+    setParameter(parameter, false, value);
+  }
+
+  public void setGlobalParameter (int parameter, Object value) {
+    setParameter(parameter, true, value);
+  }
+
   public int getServerVersion () {
     return ((int[])getGlobalParameter(PARAM_SERVER_VERSION))[0];
   }
 
   public int getClientPriority () {
     return ((int[])getLocalParameter(PARAM_CLIENT_PRIORITY))[0];
+  }
+
+  public void setClientPriority (int priority) {
+    setLocalParameter(
+      PARAM_CLIENT_PRIORITY,
+      new int[] {priority}
+    );
   }
 
   public String getDriverName () {
@@ -156,24 +175,66 @@ public class Connection extends BasicConnection implements Constants {
     return ((boolean[])getLocalParameter(PARAM_RETAIN_DOTS))[0];
   }
 
+  public void setRetainDots (boolean yes) {
+    setLocalParameter(
+      PARAM_RETAIN_DOTS,
+      new boolean[] {yes}
+    );
+  }
+
   public byte getComputerBrailleCellSize () {
     return ((byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_CELL_SIZE))[0];
+  }
+
+  public void setComputerBrailleCellSize (byte size) {
+    setGlobalParameter(
+      PARAM_COMPUTER_BRAILLE_CELL_SIZE,
+      new byte[] {size}
+    );
   }
 
   public boolean getLiteraryBraille () {
     return ((boolean[])getGlobalParameter(PARAM_LITERARY_BRAILLE))[0];
   }
 
+  public void setLiteraryBraille (boolean yes) {
+    setGlobalParameter(
+      PARAM_LITERARY_BRAILLE,
+      new boolean[] {yes}
+    );
+  }
+
   public byte getCursorDots () {
     return ((byte[])getGlobalParameter(PARAM_CURSOR_DOTS))[0];
+  }
+
+  public void setCursorDots (byte dots) {
+    setGlobalParameter(
+      PARAM_CURSOR_DOTS,
+      new byte[] {dots}
+    );
   }
 
   public int getCursorBlinkPeriod () {
     return ((int[])getGlobalParameter(PARAM_CURSOR_BLINK_PERIOD))[0];
   }
 
+  public void setCursorBlinkPeriod (int period) {
+    setGlobalParameter(
+      PARAM_CURSOR_BLINK_PERIOD,
+      new int[] {period}
+    );
+  }
+
   public byte getCursorBlinkPercentage () {
     return ((byte[])getGlobalParameter(PARAM_CURSOR_BLINK_PERCENTAGE))[0];
+  }
+
+  public void setCursorBlinkPercentage (byte percentage) {
+    setGlobalParameter(
+      PARAM_CURSOR_BLINK_PERCENTAGE,
+      new byte[] {percentage}
+    );
   }
 
   public byte[] getRenderedCells () {
@@ -184,12 +245,30 @@ public class Connection extends BasicConnection implements Constants {
     return ((boolean[])getGlobalParameter(PARAM_SKIP_IDENTICAL_LINES))[0];
   }
 
+  public void setSkipIdenticalLines (boolean yes) {
+    setGlobalParameter(
+      PARAM_SKIP_IDENTICAL_LINES,
+      new boolean[] {yes}
+    );
+  }
+
   public boolean getAudibleAlerts () {
     return ((boolean[])getGlobalParameter(PARAM_AUDIBLE_ALERTS))[0];
   }
 
+  public void setAudibleAlerts (boolean yes) {
+    setGlobalParameter(
+      PARAM_AUDIBLE_ALERTS,
+      new boolean[] {yes}
+    );
+  }
+
   public String getClipboardContent () {
     return (String)getGlobalParameter(PARAM_CLIPBOARD_CONTENT);
+  }
+
+  public void setClipboardContent (String text) {
+    setGlobalParameter(PARAM_CLIPBOARD_CONTENT, text);
   }
 
   public long[] getBoundCommandCodes () {
@@ -232,11 +311,23 @@ public class Connection extends BasicConnection implements Constants {
     return (String)getGlobalParameter(PARAM_COMPUTER_BRAILLE_TABLE);
   }
 
+  public void setComputerBrailleTable (String name) {
+    setGlobalParameter(PARAM_COMPUTER_BRAILLE_TABLE, name);
+  }
+
   public String getLiteraryBrailleTable () {
     return (String)getGlobalParameter(PARAM_LITERARY_BRAILLE_TABLE);
   }
 
+  public void setLiteraryBrailleTable (String name) {
+    setGlobalParameter(PARAM_LITERARY_BRAILLE_TABLE, name);
+  }
+
   public String getMessageLocale () {
     return (String)getGlobalParameter(PARAM_MESSAGE_LOCALE);
+  }
+
+  public void setMessageLocale (String locale) {
+    setGlobalParameter(PARAM_MESSAGE_LOCALE, locale);
   }
 }

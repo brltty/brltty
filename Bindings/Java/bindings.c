@@ -922,108 +922,268 @@ JAVA_INSTANCE_METHOD(
   return (jint) result;
 }
 
+static int
+checkParameter (
+  JNIEnv *env,
+  jint parameter, jlong subparam, jboolean global,
+  const brlapi_param_properties_t **properties,
+  brlapi_param_flags_t *flags
+) {
+  if (!(*properties = brlapi_getParameterProperties(parameter))) {
+    throwJavaError(env, JAVA_OBJ_ILLEGAL_ARGUMENT_EXCEPTION, "parameter out of range");
+    return 0;
+  }
+
+  if (!(*properties)->hasSubparam && (subparam != 0)) {
+    throwJavaError(env, JAVA_OBJ_ILLEGAL_ARGUMENT_EXCEPTION, "nonzero subparam");
+    return 0;
+  }
+
+  *flags = 0;
+  if (global == JNI_TRUE) {
+    *flags |= BRLAPI_PARAMF_GLOBAL;
+  } else if (global == JNI_FALSE) {
+    *flags |= BRLAPI_PARAMF_LOCAL;
+  }
+
+  return 1;
+}
+
+static void
+setParameter (
+  JNIEnv *env, brlapi_handle_t *handle,
+  jint parameter, jlong subparam, brlapi_param_flags_t flags,
+  const void *data, size_t size
+) {
+  int result = brlapi__setParameter(handle, parameter, subparam, flags, data, size);
+
+  if (result < 0) {
+    throwConnectionError(env);
+  }
+}
+
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, getParameter, jobject,
   jint parameter, jlong subparam, jboolean global
 ) {
   GET_CONNECTION_HANDLE(env, this, NULL);
-  const brlapi_param_properties_t *properties = brlapi_getParameterProperties(parameter);
 
-  if (!properties) {
-    throwJavaError(env, JAVA_OBJ_ILLEGAL_ARGUMENT_EXCEPTION, "parameter");
-    return NULL;
-  }
-
-  if (!properties->hasSubparam && (subparam != 0)) {
-    throwJavaError(env, JAVA_OBJ_ILLEGAL_ARGUMENT_EXCEPTION, "subparam");
-    return NULL;
-  }
-
-  brlapi_param_flags_t flags = 0;
-  void *value;
-  size_t count;
   jobject result = NULL;
+  const brlapi_param_properties_t *properties;
+  brlapi_param_flags_t flags;
 
-  if (global == JNI_TRUE) {
-    flags |= BRLAPI_PARAMF_GLOBAL;
-  } else if (global == JNI_FALSE) {
-    flags |= BRLAPI_PARAMF_LOCAL;
+  if (checkParameter(env, parameter, subparam, global, &properties, &flags)) {
+    void *value;
+    size_t count;
+
+    if ((value = brlapi__getParameterAlloc(handle, parameter, subparam, flags, &count))) {
+      switch (properties->type) {
+        case BRLAPI_PARAM_TYPE_STRING: {
+          result = (*env)->NewStringUTF(env, value);
+          break;
+        }
+
+        case BRLAPI_PARAM_TYPE_BOOLEAN: {
+          const brlapi_param_bool_t *cBooleans = value;
+          count /= sizeof(*cBooleans);
+          result = (*env)->NewBooleanArray(env, count);
+
+          if (result && count) {
+            jboolean jBooleans[count];
+
+            for (jsize i=0; i<count; i+=1) {
+              jBooleans[i] = cBooleans[i]? JNI_TRUE: JNI_FALSE;
+            }
+
+            (*env)->SetBooleanArrayRegion(env, result, 0, count, jBooleans);
+          }
+
+          break;
+        }
+
+        case BRLAPI_PARAM_TYPE_UINT8: {
+          result = (*env)->NewByteArray(env, count);
+
+          if (result && count) {
+            (*env)->SetByteArrayRegion(env, result, 0, count, value);
+          }
+
+          break;
+        }
+
+        case BRLAPI_PARAM_TYPE_UINT16: {
+          count /= 2;
+          result = (*env)->NewShortArray(env, count);
+
+          if (result && count) {
+            (*env)->SetShortArrayRegion(env, result, 0, count, value);
+          }
+
+          break;
+        }
+
+        case BRLAPI_PARAM_TYPE_UINT32: {
+          count /= 4;
+          result = (*env)->NewIntArray(env, count);
+
+          if (result && count) {
+            (*env)->SetIntArrayRegion(env, result, 0, count, value);
+          }
+
+          break;
+        }
+
+        case BRLAPI_PARAM_TYPE_UINT64: {
+          count /= 8;
+          result = (*env)->NewLongArray(env, count);
+
+          if (result && count) {
+            (*env)->SetLongArrayRegion(env, result, 0, count, value);
+          }
+
+          break;
+        }
+      }
+
+      free(value);
+    } else {
+      throwConnectionError(env);
+    }
   }
 
-  if ((value = brlapi__getParameterAlloc(handle, parameter, subparam, flags, &count))) {
+  return result;
+}
+
+JAVA_INSTANCE_METHOD(
+  org_a11y_brlapi_BasicConnection, setParameter, void,
+  jint parameter, jlong subparam, jboolean global, jobject value
+) {
+  GET_CONNECTION_HANDLE(env, this, );
+
+  const brlapi_param_properties_t *properties;
+  brlapi_param_flags_t flags;
+
+  if (checkParameter(env, parameter, subparam, global, &properties, &flags)) {
     switch (properties->type) {
       case BRLAPI_PARAM_TYPE_STRING: {
-        result = (*env)->NewStringUTF(env, value);
+        jboolean isCopy;
+        const char *string = (*env)->GetStringUTFChars(env, value, &isCopy);
+
+        if (string) {
+          setParameter(
+            env, handle,
+            parameter, subparam, flags,
+            string, strlen(string)
+          );
+
+          (*env)->ReleaseStringUTFChars(env, value, string);
+        }
+
         break;
       }
 
       case BRLAPI_PARAM_TYPE_BOOLEAN: {
-        const brlapi_param_bool_t *cBooleans = value;
-        count /= sizeof(*cBooleans);
-        result = (*env)->NewBooleanArray(env, count);
+        jsize count = (*env)->GetArrayLength(env, value);
 
-        if (result && count) {
-          jboolean jBooleans[count];
+        if (!javaHasExceptionOccurred(env)) {
+          jboolean values[count + 1];
+          (*env)->GetBooleanArrayRegion(env, value, 0, count, values);
 
-          for (jsize i=0; i<count; i+=1) {
-            jBooleans[i] = cBooleans[i]? JNI_TRUE: JNI_FALSE;
+          if (!javaHasExceptionOccurred(env)) {
+            brlapi_param_bool_t booleans[count + 1];
+
+            for (unsigned int i=0; i<count; i+=1) {
+              booleans[i] = values[i] != JNI_FALSE;
+            }
+
+            setParameter(
+              env, handle,
+              parameter, subparam, flags,
+              booleans, count
+            );
           }
-
-          (*env)->SetBooleanArrayRegion(env, result, 0, count, jBooleans);
         }
 
         break;
       }
 
       case BRLAPI_PARAM_TYPE_UINT8: {
-        result = (*env)->NewByteArray(env, count);
+        jsize count = (*env)->GetArrayLength(env, value);
 
-        if (result && count) {
-          (*env)->SetByteArrayRegion(env, result, 0, count, value);
+        if (!javaHasExceptionOccurred(env)) {
+          jbyte values[count + 1];
+          (*env)->GetByteArrayRegion(env, value, 0, count, values);
+
+          if (!javaHasExceptionOccurred(env)) {
+            setParameter(
+              env, handle,
+              parameter, subparam, flags,
+              values, count
+            );
+          }
         }
 
         break;
       }
 
       case BRLAPI_PARAM_TYPE_UINT16: {
-        count /= 2;
-        result = (*env)->NewShortArray(env, count);
+        jsize count = (*env)->GetArrayLength(env, value);
 
-        if (result && count) {
-          (*env)->SetShortArrayRegion(env, result, 0, count, value);
+        if (!javaHasExceptionOccurred(env)) {
+          jshort values[count + 1];
+          (*env)->GetShortArrayRegion(env, value, 0, count, values);
+
+          if (!javaHasExceptionOccurred(env)) {
+            setParameter(
+              env, handle,
+              parameter, subparam, flags,
+              values, (count * 2)
+            );
+          }
         }
 
         break;
       }
 
       case BRLAPI_PARAM_TYPE_UINT32: {
-        count /= 4;
-        result = (*env)->NewIntArray(env, count);
+        jsize count = (*env)->GetArrayLength(env, value);
 
-        if (result && count) {
-          (*env)->SetIntArrayRegion(env, result, 0, count, value);
+        if (!javaHasExceptionOccurred(env)) {
+          jint values[count + 1];
+          (*env)->GetIntArrayRegion(env, value, 0, count, values);
+
+          if (!javaHasExceptionOccurred(env)) {
+            setParameter(
+              env, handle,
+              parameter, subparam, flags,
+              values, (count * 4)
+            );
+          }
         }
 
         break;
       }
 
       case BRLAPI_PARAM_TYPE_UINT64: {
-        count /= 8;
-        result = (*env)->NewLongArray(env, count);
+        jsize count = (*env)->GetArrayLength(env, value);
 
-        if (result && count) {
-          (*env)->SetLongArrayRegion(env, result, 0, count, value);
+        if (!javaHasExceptionOccurred(env)) {
+          jlong values[count + 1];
+          (*env)->GetLongArrayRegion(env, value, 0, count, values);
+
+          if (!javaHasExceptionOccurred(env)) {
+            setParameter(
+              env, handle,
+              parameter, subparam, flags,
+              values, (count * 8)
+            );
+          }
         }
 
         break;
       }
     }
-
-    free(value);
-  } else {
   }
-
-  return result;
 }
 
 JAVA_INSTANCE_METHOD(

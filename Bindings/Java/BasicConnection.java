@@ -60,6 +60,7 @@ public class BasicConnection extends NativeLibrary {
   public native int recvRaw (byte[] buffer);
 
   public native Object getParameter (int parameter, long subparam, boolean global);
+  public native void setParameter (int parameter, long subparam, boolean global, Object value);
 
   protected final ConnectionSettings connectionSettings;
   protected final int fileDescriptor;
