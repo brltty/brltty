@@ -923,6 +923,110 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
+  org_a11y_brlapi_BasicConnection, getParameter, jobject,
+  jint parameter, jlong subparam, jboolean global
+) {
+  GET_CONNECTION_HANDLE(env, this, NULL);
+  const brlapi_param_properties_t *properties = brlapi_getParameterProperties(parameter);
+
+  if (!properties) {
+    throwJavaError(env, JAVA_OBJ_ILLEGAL_ARGUMENT_EXCEPTION, "parameter");
+    return NULL;
+  }
+
+  if (!properties->hasSubparam && (subparam != 0)) {
+    throwJavaError(env, JAVA_OBJ_ILLEGAL_ARGUMENT_EXCEPTION, "subparam");
+    return NULL;
+  }
+
+  brlapi_param_flags_t flags = 0;
+  void *value;
+  size_t count;
+  jobject result = NULL;
+
+  if (global == JNI_TRUE) {
+    flags |= BRLAPI_PARAMF_GLOBAL;
+  } else if (global == JNI_FALSE) {
+    flags |= BRLAPI_PARAMF_LOCAL;
+  }
+
+  if ((value = brlapi__getParameterAlloc(handle, parameter, subparam, flags, &count))) {
+    switch (properties->type) {
+      case BRLAPI_PARAM_TYPE_STRING: {
+        result = (*env)->NewStringUTF(env, value);
+        break;
+      }
+
+      case BRLAPI_PARAM_TYPE_BOOLEAN: {
+        const brlapi_param_bool_t *cBooleans = value;
+        count /= sizeof(*cBooleans);
+        result = (*env)->NewBooleanArray(env, count);
+
+        if (result && count) {
+          jboolean jBooleans[count];
+
+          for (jsize i=0; i<count; i+=1) {
+            jBooleans[i] = cBooleans[i]? JNI_TRUE: JNI_FALSE;
+          }
+
+          (*env)->SetBooleanArrayRegion(env, result, 0, count, jBooleans);
+        }
+
+        break;
+      }
+
+      case BRLAPI_PARAM_TYPE_UINT8: {
+        result = (*env)->NewByteArray(env, count);
+
+        if (result && count) {
+          (*env)->SetByteArrayRegion(env, result, 0, count, value);
+        }
+
+        break;
+      }
+
+      case BRLAPI_PARAM_TYPE_UINT16: {
+        count /= 2;
+        result = (*env)->NewShortArray(env, count);
+
+        if (result && count) {
+          (*env)->SetShortArrayRegion(env, result, 0, count, value);
+        }
+
+        break;
+      }
+
+      case BRLAPI_PARAM_TYPE_UINT32: {
+        count /= 4;
+        result = (*env)->NewIntArray(env, count);
+
+        if (result && count) {
+          (*env)->SetIntArrayRegion(env, result, 0, count, value);
+        }
+
+        break;
+      }
+
+      case BRLAPI_PARAM_TYPE_UINT64: {
+        count /= 8;
+        result = (*env)->NewLongArray(env, count);
+
+        if (result && count) {
+          (*env)->SetLongArrayRegion(env, result, 0, count, value);
+        }
+
+        break;
+      }
+    }
+
+    free(value);
+  } else {
+  }
+
+  return result;
+}
+
+JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_ConnectionError, toString, jstring
 ) {
   GET_CLASS(env, class, this, NULL);

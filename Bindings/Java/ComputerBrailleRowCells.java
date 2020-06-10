@@ -19,24 +19,27 @@
 
 package org.a11y.brlapi;
 
-public class DisplaySize {
-  private final int displayWidth;
-  private final int displayHeight;
+public class ComputerBrailleRowCells {
+  private final byte[] cells = new byte[0X100];
+  private final byte[] mask = new byte[0X20];
 
-  public DisplaySize (int width, int height) {
-    displayWidth = width;
-    displayHeight = height; 
+  private final int copyBytes (byte[] to, byte[] from, int index) {
+    int count = to.length;
+    System.arraycopy(from, index, to, 0, count);
+    return index + count;
   }
 
-  public DisplaySize (int[] dimensions) {
-    this(dimensions[0], dimensions[1]);
+  public ComputerBrailleRowCells (byte[] bytes) {
+    int index = 0;
+    index = copyBytes(cells, bytes, index);
+    index = copyBytes(mask, bytes, index);
   }
 
-  public int getWidth () {
-    return displayWidth;
+  public byte[] getCells () {
+    return cells;
   }
 
-  public int getHeight () {
-    return displayHeight;
+  public byte[] getMask () {
+    return mask;
   }
 }

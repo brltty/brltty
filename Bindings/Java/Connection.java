@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public class Connection extends BasicConnection {
+public class Connection extends BasicConnection implements Constants {
   public Connection (ConnectionSettings settings) {
     super(settings);
   }
@@ -84,5 +84,157 @@ public class Connection extends BasicConnection {
 
   public void writeText (String text) {
     writeText(Constants.CURSOR_OFF, text);
+  }
+
+  public Object getParameter (int parameter, boolean global) {
+    return getParameter(parameter, 0, global);
+  }
+
+  public Object getLocalParameter (int parameter, long subparam) {
+    return getParameter(parameter, subparam, false);
+  }
+
+  public Object getLocalParameter (int parameter) {
+    return getLocalParameter(parameter, 0);
+  }
+
+  public Object getGlobalParameter (int parameter, long subparam) {
+    return getParameter(parameter, subparam, true);
+  }
+
+  public Object getGlobalParameter (int parameter) {
+    return getGlobalParameter(parameter, 0);
+  }
+
+  public int getServerVersion () {
+    return ((int[])getGlobalParameter(PARAM_SERVER_VERSION))[0];
+  }
+
+  public int getClientPriority () {
+    return ((int[])getLocalParameter(PARAM_CLIENT_PRIORITY))[0];
+  }
+
+  public String getDriverName () {
+    return (String)getGlobalParameter(PARAM_DRIVER_NAME);
+  }
+
+  public String getDriverCode () {
+    return (String)getGlobalParameter(PARAM_DRIVER_CODE);
+  }
+
+  public String getDriverVersion () {
+    return (String)getGlobalParameter(PARAM_DRIVER_VERSION);
+  }
+
+  public String getDeviceModel () {
+    return (String)getGlobalParameter(PARAM_DEVICE_MODEL);
+  }
+
+  public byte getDeviceCellSize () {
+    return ((byte[])getGlobalParameter(PARAM_DEVICE_CELL_SIZE))[0];
+  }
+
+  public DisplaySize getDisplaySize () {
+    int[] dimensions = (int[])getGlobalParameter(PARAM_DISPLAY_SIZE);
+    if (dimensions == null) return null;
+    return new DisplaySize(dimensions);
+  }
+
+  public String getDeviceIdentifier () {
+    return (String)getGlobalParameter(PARAM_DEVICE_IDENTIFIER);
+  }
+
+  public int getDeviceSpeed () {
+    return ((int[])getGlobalParameter(PARAM_DEVICE_SPEED))[0];
+  }
+
+  public boolean getDeviceOnline () {
+    return ((boolean[])getGlobalParameter(PARAM_DEVICE_ONLINE))[0];
+  }
+
+  public boolean getRetainDots () {
+    return ((boolean[])getLocalParameter(PARAM_RETAIN_DOTS))[0];
+  }
+
+  public byte getComputerBrailleCellSize () {
+    return ((byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_CELL_SIZE))[0];
+  }
+
+  public boolean getLiteraryBraille () {
+    return ((boolean[])getGlobalParameter(PARAM_LITERARY_BRAILLE))[0];
+  }
+
+  public byte getCursorDots () {
+    return ((byte[])getGlobalParameter(PARAM_CURSOR_DOTS))[0];
+  }
+
+  public int getCursorBlinkPeriod () {
+    return ((int[])getGlobalParameter(PARAM_CURSOR_BLINK_PERIOD))[0];
+  }
+
+  public byte getCursorBlinkPercentage () {
+    return ((byte[])getGlobalParameter(PARAM_CURSOR_BLINK_PERCENTAGE))[0];
+  }
+
+  public byte[] getRenderedCells () {
+    return (byte[])getLocalParameter(PARAM_RENDERED_CELLS);
+  }
+
+  public boolean getSkipIdenticalLines () {
+    return ((boolean[])getGlobalParameter(PARAM_SKIP_IDENTICAL_LINES))[0];
+  }
+
+  public boolean getAudibleAlerts () {
+    return ((boolean[])getGlobalParameter(PARAM_AUDIBLE_ALERTS))[0];
+  }
+
+  public String getClipboardContent () {
+    return (String)getGlobalParameter(PARAM_CLIPBOARD_CONTENT);
+  }
+
+  public long[] getBoundCommandCodes () {
+    return (long[])getGlobalParameter(PARAM_BOUND_COMMAND_CODES);
+  }
+
+  public String getCommandShortName (long code) {
+    return (String)getGlobalParameter(PARAM_COMMAND_SHORT_NAME, code);
+  }
+
+  public String getCommandLongName (long code) {
+    return (String)getGlobalParameter(PARAM_COMMAND_LONG_NAME, code);
+  }
+
+  public long[] getDeviceKeyCodes () {
+    return (long[])getGlobalParameter(PARAM_DEVICE_KEY_CODES);
+  }
+
+  public String getKeyShortName (long code) {
+    return (String)getGlobalParameter(PARAM_KEY_SHORT_NAME, code);
+  }
+
+  public String getKeyLongName (long code) {
+    return (String)getGlobalParameter(PARAM_KEY_LONG_NAME, code);
+  }
+
+  public byte[] getComputerBrailleRowsMask () {
+    return (byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROWS_MASK);
+  }
+
+  public ComputerBrailleRowCells getComputerBrailleRowCells (long row) {
+    byte[] bytes = (byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROW_CELLS, row);
+    if (bytes == null) return null;
+    return new ComputerBrailleRowCells(bytes);
+  }
+
+  public String getComputerBrailleTable () {
+    return (String)getGlobalParameter(PARAM_COMPUTER_BRAILLE_TABLE);
+  }
+
+  public String getLiteraryBrailleTable () {
+    return (String)getGlobalParameter(PARAM_LITERARY_BRAILLE_TABLE);
+  }
+
+  public String getMessageLocale () {
+    return (String)getGlobalParameter(PARAM_MESSAGE_LOCALE);
   }
 }

@@ -38,14 +38,15 @@ JAVA_JNI_DESTDIR = $(INSTALL_ROOT)
 all: jar jni doc
 
 JAVA_SOURCES = \
-	$(SRC_DIR)/LibraryVersion.java \
-	$(SRC_DIR)/Connection.java \
 	$(SRC_DIR)/BasicConnection.java \
-	$(SRC_DIR)/ConnectionSettings.java \
-	$(SRC_DIR)/DisplaySize.java \
+	$(SRC_DIR)/ComputerBrailleRowCells.java \
+	$(SRC_DIR)/Connection.java \
 	$(SRC_DIR)/ConnectionError.java \
 	$(SRC_DIR)/ConnectionException.java \
+	$(SRC_DIR)/ConnectionSettings.java \
+	$(SRC_DIR)/DisplaySize.java \
 	$(SRC_DIR)/Key.java \
+	$(SRC_DIR)/LibraryVersion.java \
 	$(SRC_DIR)/NativeLibrary.java \
 	$(SRC_DIR)/TestProgram.java \
 	$(SRC_DIR)/WriteArguments.java \
