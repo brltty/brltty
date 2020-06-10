@@ -216,8 +216,10 @@ public class Connection extends BasicConnection implements Constants {
     return (String)getGlobalParameter(PARAM_KEY_LONG_NAME, code);
   }
 
-  public byte[] getComputerBrailleRowsMask () {
-    return (byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROWS_MASK);
+  public BitMask getComputerBrailleRowsMask () {
+    byte[] bytes = (byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROWS_MASK);
+    if (bytes == null) return null;
+    return new BitMask(bytes);
   }
 
   public ComputerBrailleRowCells getComputerBrailleRowCells (long row) {

@@ -39,6 +39,7 @@ all: jar jni doc
 
 JAVA_SOURCES = \
 	$(SRC_DIR)/BasicConnection.java \
+	$(SRC_DIR)/BitMask.java \
 	$(SRC_DIR)/ComputerBrailleRowCells.java \
 	$(SRC_DIR)/Connection.java \
 	$(SRC_DIR)/ConnectionError.java \

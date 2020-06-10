@@ -20,8 +20,8 @@
 package org.a11y.brlapi;
 
 public class ComputerBrailleRowCells {
-  private final byte[] cells = new byte[0X100];
-  private final byte[] mask = new byte[0X20];
+  private final byte[] cellArray;
+  private final BitMask cellMask;
 
   private final int copyBytes (byte[] to, byte[] from, int index) {
     int count = to.length;
@@ -30,16 +30,25 @@ public class ComputerBrailleRowCells {
   }
 
   public ComputerBrailleRowCells (byte[] bytes) {
-    int index = 0;
-    index = copyBytes(cells, bytes, index);
-    index = copyBytes(mask, bytes, index);
+    cellArray = new byte[0X100];
+    int index = copyBytes(cellArray, bytes, 0);
+
+    {
+      byte[] mask = new byte[cellArray.length / Byte.SIZE];
+      index = copyBytes(mask, bytes, index);
+      cellMask = new BitMask(mask);
+    }
   }
 
-  public byte[] getCells () {
-    return cells;
+  public int getSize () {
+    return cellArray.length;
   }
 
-  public byte[] getMask () {
-    return mask;
+  public boolean isDefined (int index) {
+    return cellMask.isSet(index);
+  }
+
+  public byte getCell (int index) {
+    return isDefined(index)? cellArray[index]: 0;
   }
 }
