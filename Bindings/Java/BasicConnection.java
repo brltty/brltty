@@ -61,6 +61,8 @@ public class BasicConnection extends NativeLibrary {
 
   public native Object getParameter (int parameter, long subparam, boolean global);
   public native void setParameter (int parameter, long subparam, boolean global, Object value);
+  public native long watchParameter (int parameter, long subparam, boolean global, ParameterWatcher watcher);
+  public native static void unwatchParameter (long identifier);
 
   protected final ConnectionSettings connectionSettings;
   protected final int fileDescriptor;

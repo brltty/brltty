@@ -46,5 +46,5 @@ public class ConnectionException extends RuntimeException {
     return failedPacket;
   }
 
-  public static native String getPacketTypeName (int type);
+  public native static String getPacketTypeName (int type);
 }

@@ -71,6 +71,8 @@ extern "C" {
 #define JAVA_OBJ_NULL_POINTER_EXCEPTION JAVA_OBJ_LANG("NullPointerException")
 #define JAVA_SIG_NULL_POINTER_EXCEPTION JAVA_SIG_OBJECT(JAVA_OBJ_NULL_POINTER_EXCEPTION)
 
+#define JAVA_OBJ_OBJECT JAVA_OBJ_LANG("Object")
+
 #define JAVA_OBJ_OUT_OF_MEMORY_ERROR JAVA_OBJ_LANG("OutOfMemoryError")
 #define JAVA_SIG_OUT_OF_MEMORY_ERROR JAVA_SIG_OBJECT(JAVA_OBJ_OUT_OF_MEMORY_ERROR)
 
@@ -91,6 +93,11 @@ javaHasExceptionOccurred (JNIEnv *env) {
 static inline jthrowable
 javaGetException (JNIEnv *env) {
   return (*env)->ExceptionOccurred(env);
+}
+
+static inline void
+javaDescribeException (JNIEnv *env) {
+  return (*env)->ExceptionDescribe(env);
 }
 
 static inline void
