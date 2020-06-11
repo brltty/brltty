@@ -1474,6 +1474,7 @@ brlapi_paramCallbackDescriptor_t BRLAPI_STDCALL brlapi__watchParameter(brlapi_ha
   callback->prev = NULL;
   handle->parameterCallbacks = callback;
 
+  _brlapi_ntohParameter(parameter, &reply, rlen);
   if (data) {
     if (rlen < len) {
       len = rlen;
