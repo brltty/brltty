@@ -2306,6 +2306,7 @@ static void __handleParamUpdate(Connection *dest, brlapi_param_t param, brlapi_p
   paramValue->subparam_hi = htonl(subparam >> 32);
   paramValue->subparam_lo = htonl(subparam & 0xfffffffful);
   memcpy(p, data, size);
+  _brlapi_htonParameter(param, paramValue, size);
   size += sizeof(flags) + sizeof(param) + sizeof(subparam);
   if (!(flags & BRLAPI_PARAMF_GLOBAL)) {
     sendConnectionParamUpdate(dest,param,subparam,flags,paramValue,size);
