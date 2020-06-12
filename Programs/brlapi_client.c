@@ -486,6 +486,8 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
     brlapi_param_flags_t flags = ntohl(value->flags);
     brlapi_param_t param = ntohl(value->param);
     brlapi_param_subparam_t subparam = ((brlapi_param_subparam_t)ntohl(value->subparam_hi) << 32) | ntohl(value->subparam_lo);
+    size_t rlen = size - sizeof(flags) - sizeof(param) - sizeof(subparam);
+    _brlapi_ntohParameter(param, value, rlen);
     pthread_mutex_lock(&handle->callbacks_mutex);
     for(handle->nextCallback = handle->parameterCallbacks;
 	handle->nextCallback; ) {
@@ -494,8 +496,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
       if (callback->parameter == param &&
 	  callback->subparam == subparam &&
 	  (callback->flags & BRLAPI_PARAMF_GLOBAL) == (flags & BRLAPI_PARAMF_GLOBAL)) {
-	callback->func(param, subparam, callback->flags, callback->priv, value->data,
-	    size - sizeof(flags) - sizeof(param) - sizeof(subparam));
+	callback->func(param, subparam, callback->flags, callback->priv, value->data, rlen);
 	/* Note: the callback might have removed this entry */
       }
     }
