@@ -301,10 +301,10 @@ public class Connection extends BasicConnection implements Constants {
     return new BitMask(bytes);
   }
 
-  public ComputerBrailleRowCells getComputerBrailleRowCells (long row) {
+  public RowCells getComputerBrailleRowCells (long row) {
     byte[] bytes = (byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROW_CELLS, row);
     if (bytes == null) return null;
-    return new ComputerBrailleRowCells(bytes);
+    return new RowCells(bytes);
   }
 
   public String getComputerBrailleTable () {

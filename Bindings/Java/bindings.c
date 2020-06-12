@@ -950,7 +950,7 @@ checkParameter (
 }
 
 static jobject
-getParameterValueObject (
+newParameterValueObject (
   JNIEnv *env, const brlapi_param_properties_t *properties,
   const void *value, size_t size
 ) {
@@ -1043,7 +1043,7 @@ JAVA_INSTANCE_METHOD(
     size_t size;
 
     if ((value = brlapi__getParameterAlloc(handle, parameter, subparam, flags, &size))) {
-      result = getParameterValueObject(env, properties, value, size);
+      result = newParameterValueObject(env, properties, value, size);
       free(value);
     } else {
       throwConnectionError(env);
@@ -1218,15 +1218,17 @@ handleWatchedParameter (
   WatchedParameterData *wpd = (WatchedParameterData *)identifier;
   JNIEnv *env = wpd->env;
 
-  jobject value = getParameterValueObject(
+  jobject value = newParameterValueObject(
     env, brlapi_getParameterProperties(parameter),
     data, length
   );
 
-  (*env)->CallVoidMethod(
-    env, wpd->watcher.object, wpd->watcher.method,
-    parameter, subparam, value
-  );
+  if (value) {
+    (*env)->CallVoidMethod(
+      env, wpd->watcher.object, wpd->watcher.method,
+      parameter, subparam, value
+    );
+  }
 }
 
 JAVA_INSTANCE_METHOD(
@@ -1267,11 +1269,8 @@ JAVA_INSTANCE_METHOD(
               handleWatchedParameter, wpd, NULL, 0
             );
 
-            if (wpd->descriptor) {
-              return (intptr_t)wpd;
-            } else {
-              throwConnectionError(env);
-            }
+            if (wpd->descriptor) return (intptr_t)wpd;
+            throwConnectionError(env);
           }
         }
 

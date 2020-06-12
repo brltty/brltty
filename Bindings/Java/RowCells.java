@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public class ComputerBrailleRowCells {
+public class RowCells {
   private final byte[] cellArray;
   private final BitMask cellMask;
 
@@ -29,7 +29,7 @@ public class ComputerBrailleRowCells {
     return index + count;
   }
 
-  public ComputerBrailleRowCells (byte[] bytes) {
+  public RowCells (byte[] bytes) {
     cellArray = new byte[0X100];
     int index = copyBytes(cellArray, bytes, 0);
 

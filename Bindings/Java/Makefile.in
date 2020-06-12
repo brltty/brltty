@@ -40,7 +40,6 @@ all: jar jni doc
 JAVA_SOURCES = \
 	$(SRC_DIR)/BasicConnection.java \
 	$(SRC_DIR)/BitMask.java \
-	$(SRC_DIR)/ComputerBrailleRowCells.java \
 	$(SRC_DIR)/Connection.java \
 	$(SRC_DIR)/ConnectionError.java \
 	$(SRC_DIR)/ConnectionException.java \
@@ -50,6 +49,7 @@ JAVA_SOURCES = \
 	$(SRC_DIR)/LibraryVersion.java \
 	$(SRC_DIR)/NativeLibrary.java \
 	$(SRC_DIR)/ParameterWatcher.java \
+	$(SRC_DIR)/RowCells.java \
 	$(SRC_DIR)/TestProgram.java \
 	$(SRC_DIR)/WriteArguments.java \
 	Constants.java
