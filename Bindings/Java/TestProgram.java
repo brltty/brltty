@@ -20,6 +20,8 @@
 package org.a11y.brlapi;
 
 import java.io.PrintStream;
+import java.io.InterruptedIOException;
+import java.util.concurrent.TimeoutException;
 
 public class TestProgram implements Constants {
   private static void writeProperty (String name, String format, Object... values) {
@@ -111,8 +113,16 @@ public class TestProgram implements Constants {
             connection.writeText(String.format("press keys (timeout is %d seconds)", timeout), Constants.CURSOR_OFF);
 
             while (true) {
-              long code = connection.readKeyWithTimeout((timeout * 1000));
-              if (code < 0) break;
+              long code;
+
+              try {
+                code = connection.readKeyWithTimeout((timeout * 1000));
+              } catch (InterruptedIOException exception) {
+                continue;
+              } catch (TimeoutException exception) {
+                break;
+              }
+
               showKey(new Key(code), connection);
             }
           }
@@ -124,7 +134,7 @@ public class TestProgram implements Constants {
         connection = null;
       }
     } catch (Error error) {
-      System.out.println("got error: " + error);
+      System.err.println("got error: " + error);
       System.exit(3);
     }
   }

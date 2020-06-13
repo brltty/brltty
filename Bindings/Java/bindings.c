@@ -148,35 +148,6 @@ getJavaEnvironment (brlapi_handle_t *handle) {
   return env;
 }
 
-static void BRLAPI_STDCALL
-handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size) {
-  JNIEnv *env = getJavaEnvironment(handle);
-
-  jbyteArray jPacket = (*env)->NewByteArray(env, size);
-  if (!jPacket) return;
-  (*env)->SetByteArrayRegion(env, jPacket, 0, size, (jbyte *) packet);
-
-  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionException"));
-  if (!class) return;
-
-  jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
-    JAVA_SIG_LONG // handle
-    JAVA_SIG_INT // error
-    JAVA_SIG_INT // type
-    JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // packet
-  );
-  if (!constructor) return;
-
-  jclass object = (*env)->NewObject(
-    env, class, constructor,
-    (jlong) (intptr_t) handle, error, type, jPacket
-  );
-  if (!object) return;
-
-  (*env)->ExceptionClear(env);
-  (*env)->Throw(env, object);
-}
-
 static void
 throwJavaError (JNIEnv *env, const char *object, const char *message) {
   (*env)->ExceptionClear(env);
@@ -191,6 +162,26 @@ throwJavaError (JNIEnv *env, const char *object, const char *message) {
 
 static void
 throwConnectionError (JNIEnv *env) {
+  {
+    const char *object = NULL;
+
+    switch (brlapi_errno) {
+      case BRLAPI_ERROR_LIBCERR:
+        switch (brlapi_libcerrno) {
+          case EINTR:
+            object = JAVA_OBJ_INTERRUPTED_IO_EXCEPTION;
+            break;
+        }
+
+        break;
+    }
+
+    if (object) {
+      throwJavaError(env, object, brlapi_errfun);
+      return;
+    }
+  }
+
   jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionError"));
   if (!class) return;
 
@@ -221,6 +212,35 @@ throwConnectionError (JNIEnv *env) {
   } else if (jFunction) {
     (*env)->ReleaseStringUTFChars(env, jFunction, brlapi_errfun);
   }
+}
+
+static void BRLAPI_STDCALL
+handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size) {
+  JNIEnv *env = getJavaEnvironment(handle);
+
+  jbyteArray jPacket = (*env)->NewByteArray(env, size);
+  if (!jPacket) return;
+  (*env)->SetByteArrayRegion(env, jPacket, 0, size, (jbyte *) packet);
+
+  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionException"));
+  if (!class) return;
+
+  jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
+    JAVA_SIG_LONG // handle
+    JAVA_SIG_INT // error
+    JAVA_SIG_INT // type
+    JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // packet
+  );
+  if (!constructor) return;
+
+  jclass object = (*env)->NewObject(
+    env, class, constructor,
+    (jlong) (intptr_t) handle, error, type, jPacket
+  );
+  if (!object) return;
+
+  (*env)->ExceptionClear(env);
+  (*env)->Throw(env, object);
 }
 
 JAVA_STATIC_METHOD(
@@ -691,7 +711,11 @@ JAVA_INSTANCE_METHOD(
     return -1;
   }
 
-  if (!result) return (jlong)(-1);
+  if (!result) {
+    throwJavaError(env, JAVA_OBJ_TIMEOUT_EXCEPTION, __func__);
+    return (jlong)(0);
+  }
+
   return (jlong)code;
 }
 

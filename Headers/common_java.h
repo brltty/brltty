@@ -51,11 +51,14 @@ extern "C" {
 #define JAVA_SIG_CONSTRUCTOR(arguments)    JAVA_SIG_METHOD(JAVA_SIG_VOID, arguments)
 
 #define JAVA_OBJ_LANG(name) "java/lang/" name
+#define JAVA_OBJ_IO(name) "java/io/" name
 #define JAVA_OBJ_UTIL(name) "java/util/" name
+#define JAVA_OBJ_CONCURRENT(name) JAVA_OBJ_UTIL("concurrent/" name)
 
 #define JAVA_OBJ_CLASS JAVA_OBJ_LANG("Class")
 #define JAVA_OBJ_ILLEGAL_ARGUMENT_EXCEPTION JAVA_OBJ_LANG("IllegalArgumentException")
 #define JAVA_OBJ_ILLEGAL_STATE_EXCEPTION JAVA_OBJ_LANG("IllegalStateException")
+#define JAVA_OBJ_INTERRUPTED_IO_EXCEPTION JAVA_OBJ_IO("InterruptedIOException")
 #define JAVA_OBJ_ITERATOR JAVA_OBJ_UTIL("Iterator")
 #define JAVA_OBJ_LOCALE JAVA_OBJ_UTIL("Locale")
 #define JAVA_OBJ_NULL_POINTER_EXCEPTION JAVA_OBJ_LANG("NullPointerException")
@@ -63,6 +66,7 @@ extern "C" {
 #define JAVA_OBJ_OUT_OF_MEMORY_ERROR JAVA_OBJ_LANG("OutOfMemoryError")
 #define JAVA_OBJ_STRING JAVA_OBJ_LANG("String")
 #define JAVA_OBJ_THREAD JAVA_OBJ_LANG("Thread")
+#define JAVA_OBJ_TIMEOUT_EXCEPTION JAVA_OBJ_CONCURRENT("TimeoutException")
 #define JAVA_OBJ_UNSATISFIED_LINK_ERROR JAVA_OBJ_LANG("UnsatisfiedLinkError")
 
 #define JAVA_SIG_CLASS JAVA_SIG_OBJECT(JAVA_OBJ_CLASS)

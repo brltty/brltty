@@ -19,6 +19,9 @@
 
 package org.a11y.brlapi;
 
+import java.io.InterruptedIOException;
+import java.util.concurrent.TimeoutException;
+
 public class BasicConnection extends NativeLibrary {
   protected long connectionHandle;
 
@@ -42,8 +45,11 @@ public class BasicConnection extends NativeLibrary {
   public native void writeDots (byte[] dots);
   public native void write (WriteArguments arguments);
 
-  public native long readKey (boolean wait);
-  public native long readKeyWithTimeout (int milliseconds);
+  public native long readKey (boolean wait)
+         throws InterruptedIOException;
+
+  public native long readKeyWithTimeout (int milliseconds)
+         throws InterruptedIOException, TimeoutException;
 
   public native void ignoreKeys (long type, long[] keys);
   public native void acceptKeys (long type, long[] keys);
