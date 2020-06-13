@@ -463,7 +463,13 @@ JAVA_INSTANCE_METHOD(
   jint milliseconds
 ) {
   GET_CONNECTION_HANDLE(env, this, );
-  brlapi__pasue(handle, milliseconds);
+  int result = brlapi__pause(handle, milliseconds);
+
+  if (result < 0) {
+    throwConnectionError(env);
+  } else if (!result) {
+    throwJavaError(env, JAVA_OBJ_TIMEOUT_EXCEPTION, __func__);
+  }
 }
 
 JAVA_INSTANCE_METHOD(
