@@ -263,7 +263,9 @@ handleMiscellaneousCommands (int command, void *data) {
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
             char description[0X80];
-            formatCharacterDescription(description, sizeof(description), column, row);
+            STR_BEGIN(description, sizeof(description));
+            STR_FORMAT(formatCharacterDescription, column, row);
+            STR_END;
             message(NULL, description, 0);
           } else {
             alert(ALERT_COMMAND_REJECTED);

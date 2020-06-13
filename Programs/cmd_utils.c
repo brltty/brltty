@@ -107,8 +107,16 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
   readScreen(column, row, 1, 1, &character);
 
   {
+    char name[0X40];
+
+    if (getCharacterName(character.text, name, sizeof(name))) {
+      STR_PRINTF(" %s: ", name);
+    }
+  }
+
+  {
     uint32_t text = character.text;
-    STR_PRINTF("char %" PRIu32 " (U+%04" PRIX32 "):", text, text);
+    STR_PRINTF("U+%04" PRIX32 " (%" PRIu32 "):", text, text);
   }
 
   {
@@ -138,13 +146,5 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
 
   if (character.attributes & SCR_ATTR_BLINK) {
     STR_PRINTF(" %s", gettext("blink"));
-  }
-
-  {
-    char name[0X40];
-
-    if (getCharacterName(character.text, name, sizeof(name))) {
-      STR_PRINTF(" [%s]", name);
-    }
   }
 STR_END_FORMATTER

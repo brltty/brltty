@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "embed.h"
+#include "strfmt.h"
 #include "cmd_queue.h"
 #include "cmd_speech.h"
 #include "cmd_utils.h"
@@ -436,7 +437,9 @@ handleSpeechCommands (int command, void *data) {
 
     case BRL_CMD_DESC_CURR_CHAR: {
       char description[0X50];
-      formatCharacterDescription(description, sizeof(description), ses->spkx, ses->spky);
+      STR_BEGIN(description, sizeof(description));
+      STR_FORMAT(formatCharacterDescription, ses->spkx, ses->spky);
+      STR_END;
       sayString(&spk, description, SAY_OPT_MUTE_FIRST);
       break;
     }
