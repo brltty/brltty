@@ -19,6 +19,8 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "strfmt.h"
 #include "alert.h"
@@ -110,6 +112,11 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
     char name[0X40];
 
     if (getCharacterName(character.text, name, sizeof(name))) {
+      {
+        size_t length = strlen(name);
+        for (int i=0; i<length; i+=1) name[i] = tolower(name[i]);
+      }
+
       STR_PRINTF(" %s: ", name);
     }
   }
