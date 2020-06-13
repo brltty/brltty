@@ -41,8 +41,12 @@ public class Connection extends BasicConnection implements Constants {
     return enterTtyMode(null);
   }
 
+  public void enterTtyModeWithPath (int[] ttys, String driver) {
+    enterTtyModeWithPath(driver, ttys);
+  }
+
   public void enterTtyModeWithPath (int... ttys) {
-    enterTtyModeWithPath(ttys, null);
+    enterTtyModeWithPath(null, ttys);
   }
 
   public void writeDots (byte[] dots) {

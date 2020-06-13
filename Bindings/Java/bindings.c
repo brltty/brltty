@@ -499,7 +499,7 @@ JAVA_INSTANCE_METHOD(
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, enterTtyModeWithPath, void,
-  jintArray jttys, jstring jdriver
+  jstring jdriver, jintArray jttys
 ) {
   jint *ttys ;
   char *driver;

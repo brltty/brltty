@@ -40,7 +40,7 @@ public class BasicConnection extends NativeLibrary {
          throws InterruptedIOException;
 
   public native int enterTtyMode (int tty, String driver);
-  public native void enterTtyModeWithPath (int[] ttys, String driver);
+  public native void enterTtyModeWithPath (String driver, int... ttys);
   public native void leaveTtyMode ();
   public native void setFocus (int tty);
 
