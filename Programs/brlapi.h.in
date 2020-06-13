@@ -976,8 +976,9 @@ ssize_t BRLAPI_STDCALL brlapi__sendRaw(brlapi_handle_t *handle, const void *buff
  * \param buffer points on a buffer where the function will store the received
  * data;
  * \param size holds the buffer size.
- * \return its size, -1 on error or interruption by a signal or a parameter
- * change notification. */
+ * \return its size, -1 on error, or on interruption by a signal or a parameter
+ * change notification, in which case brlapi_errno will be BRLAPI_ERROR_LIBCERR
+ * and errno will be EINTR. */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 ssize_t BRLAPI_STDCALL brlapi_recvRaw(void *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
@@ -1165,8 +1166,9 @@ int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_para
 /**
  * Waits until an event is received from the BrlAPI server
  * \param timeout_ms specifies an optional timeout which can be zero for polling, or -1 for infinite wait
- * \return 0 on timeout, -1 on error or interruption by a signal or a parameter
- * change notification. */
+ * \return 0 on timeout, -1 on error, or on interruption by a signal or a parameter
+ * change notification, in which case brlapi_errno will be BRLAPI_ERROR_LIBCERR
+ * and errno will be EINTR. */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_pause(int timeout_ms);
 #endif
