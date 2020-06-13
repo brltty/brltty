@@ -700,20 +700,15 @@ JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, readKeyWithTimeout, jlong,
   jint timeout_ms
 ) {
-  brlapi_keyCode_t code;
-  int result;
   GET_CONNECTION_HANDLE(env, this, -1);
 
-  result = brlapi__readKeyWithTimeout(handle, timeout_ms, &code);
+  brlapi_keyCode_t code;
+  int result = brlapi__readKeyWithTimeout(handle, timeout_ms, &code);
 
   if (result < 0) {
     throwConnectionError(env);
-    return -1;
-  }
-
-  if (!result) {
+  } else if (!result) {
     throwJavaError(env, JAVA_OBJ_TIMEOUT_EXCEPTION, __func__);
-    return (jlong)(0);
   }
 
   return (jlong)code;

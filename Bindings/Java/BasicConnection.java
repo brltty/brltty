@@ -63,7 +63,9 @@ public class BasicConnection extends NativeLibrary {
   public native void enterRawMode (String driver);
   public native void leaveRawMode ();
   public native int sendRaw (byte[] buffer);
-  public native int recvRaw (byte[] buffer);
+
+  public native int recvRaw (byte[] buffer)
+         throws InterruptedIOException;
 
   public native Object getParameter (int parameter, long subparam, boolean global);
   public native void setParameter (int parameter, long subparam, boolean global, Object value);
