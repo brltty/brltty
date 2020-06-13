@@ -1165,12 +1165,12 @@ int BRLAPI_STDCALL brlapi__unwatchParameter(brlapi_handle_t *handle, brlapi_para
 /**
  * Waits until an event is received from the BrlAPI server
  * \param timeout_ms specifies an optional timeout which can be zero for polling, or -1 for infinite wait
- * \return nothing
- */
+ * \return 0 on timeout, -1 on error or interruption by a signal or a parameter
+ * change notification. */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-void BRLAPI_STDCALL brlapi_pause(int timeout_ms);
+int BRLAPI_STDCALL brlapi_pause(int timeout_ms);
 #endif
-void BRLAPI_STDCALL brlapi__pause(brlapi_handle_t *handle, int timeout_ms);
+int BRLAPI_STDCALL brlapi__pause(brlapi_handle_t *handle, int timeout_ms);
 
 /** @} */
 

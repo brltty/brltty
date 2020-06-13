@@ -668,13 +668,24 @@ static int brlapi__writePacketWaitForAck(brlapi_handle_t *handle, brlapi_packetT
 
 /* brlapi__pause */
 /* Wait for an event to be received */
-void BRLAPI_STDCALL brlapi__pause(brlapi_handle_t *handle, int timeout_ms) {
-  brlapi__waitForPacket(handle, 0, NULL, 0, TRY_WAIT_FOR_EXPECTED_PACKET, timeout_ms);
+int BRLAPI_STDCALL brlapi__pause(brlapi_handle_t *handle, int timeout_ms) {
+  ssize_t res = brlapi__waitForPacket(handle, 0, NULL, 0, TRY_WAIT_FOR_EXPECTED_PACKET, timeout_ms);
+  if (res == -3) {
+    brlapi_libcerrno = EINTR;
+    brlapi_errno = BRLAPI_ERROR_LIBCERR;
+    brlapi_errfun = "waitForPacket";
+    res = -1;
+  }
+  if (res == -4) {
+    /* Timeout */
+    res = 0;
+  }
+  return res;
 }
 
 /* brlapi_pause */
-void BRLAPI_STDCALL brlapi_pause(int timeout_ms) {
-  brlapi__pause(&defaultHandle, timeout_ms);
+int BRLAPI_STDCALL brlapi_pause(int timeout_ms) {
+  return brlapi__pause(&defaultHandle, timeout_ms);
 }
 
 /* Function: tryHost */
