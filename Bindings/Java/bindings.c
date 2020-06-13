@@ -459,6 +459,14 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
+  org_a11y_brlapi_BasicConnection, pause, void,
+  jint milliseconds
+) {
+  GET_CONNECTION_HANDLE(env, this, );
+  brlapi__pasue(handle, milliseconds);
+}
+
+JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, enterTtyMode, jint,
   jint jtty, jstring jdriver
 ) {
@@ -698,12 +706,12 @@ JAVA_INSTANCE_METHOD(
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_BasicConnection, readKeyWithTimeout, jlong,
-  jint timeout_ms
+  jint milliseconds
 ) {
   GET_CONNECTION_HANDLE(env, this, -1);
 
   brlapi_keyCode_t code;
-  int result = brlapi__readKeyWithTimeout(handle, timeout_ms, &code);
+  int result = brlapi__readKeyWithTimeout(handle, milliseconds, &code);
 
   if (result < 0) {
     throwConnectionError(env);

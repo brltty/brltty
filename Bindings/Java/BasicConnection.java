@@ -36,6 +36,9 @@ public class BasicConnection extends NativeLibrary {
   public native String getModelIdentifier ();
   public native DisplaySize getDisplaySize ();
   
+  public native void pause (int milliseconds)
+         throws TimeoutException;
+
   public native int enterTtyMode (int tty, String driver);
   public native void enterTtyModeWithPath (int[] ttys, String driver);
   public native void leaveTtyMode ();
