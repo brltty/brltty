@@ -467,8 +467,6 @@ JAVA_INSTANCE_METHOD(
 
   if (result < 0) {
     throwConnectionError(env);
-  } else if (!result) {
-    throwJavaError(env, JAVA_OBJ_TIMEOUT_EXCEPTION, __func__);
   }
 }
 
