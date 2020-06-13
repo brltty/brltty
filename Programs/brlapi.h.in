@@ -767,8 +767,9 @@ int BRLAPI_STDCALL brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describ
  * some of them may be left in libbrlapi's internal key buffer and you wouldn't
  * get them immediately.
  *
- * \note If the read is interrupted by a signal, brlapi_readKey() will return
- * -1, brlapi_errno will be BRLAPI_ERROR_LIBCERR and errno will be EINTR.
+ * \note If the read is interrupted by a signal or by a parameter change
+ * notification, brlapi_readKey() will return -1, brlapi_errno will be
+ * BRLAPI_ERROR_LIBCERR and errno will be EINTR.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_readKey(int wait, brlapi_keyCode_t *code);
@@ -784,8 +785,9 @@ int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int wait, brlapi_key
  * \param timeout_ms specifies how long the function should wait for a keypress.
  * \param code holds the key code if a key press is indeed read.
  *
- * \return -1 on error or signal interrupt and *code is then undefined, 0 if
- * the timeout expired and no key was pressed, or 1 and *code holds the key code.
+ * \return -1 on error, signal interrupt or parameter change notification and
+ * *code is then undefined, 0 if the timeout expired and no key was pressed, or
+ * 1 and *code holds the key code.
  *
  * If the timeout expires without any key being pressed, 0 is returned.
  *
@@ -974,7 +976,8 @@ ssize_t BRLAPI_STDCALL brlapi__sendRaw(brlapi_handle_t *handle, const void *buff
  * \param buffer points on a buffer where the function will store the received
  * data;
  * \param size holds the buffer size.
- * \return its size, -1 on error or signal interruption */
+ * \return its size, -1 on error or interruption by a signal or a parameter
+ * change notification. */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 ssize_t BRLAPI_STDCALL brlapi_recvRaw(void *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
