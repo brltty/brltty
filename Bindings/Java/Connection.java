@@ -90,10 +90,6 @@ public class Connection extends BasicConnection implements Constants {
     writeText(Constants.CURSOR_OFF, text);
   }
 
-  public Object getParameter (int parameter, boolean global) {
-    return getParameter(parameter, 0, global);
-  }
-
   public Object getLocalParameter (int parameter, long subparam) {
     return getParameter(parameter, subparam, false);
   }
@@ -110,16 +106,36 @@ public class Connection extends BasicConnection implements Constants {
     return getGlobalParameter(parameter, 0);
   }
 
-  public void setParameter (int parameter, boolean global, Object value) {
-    setParameter(parameter, 0, global, value);
+  public void setLocalParameter (int parameter, long subparam, Object value) {
+    setParameter(parameter, subparam, false, value);
   }
 
   public void setLocalParameter (int parameter, Object value) {
-    setParameter(parameter, false, value);
+    setLocalParameter(parameter, 0, value);
+  }
+
+  public void setGlobalParameter (int parameter, long subparam, Object value) {
+    setParameter(parameter, subparam, true, value);
   }
 
   public void setGlobalParameter (int parameter, Object value) {
-    setParameter(parameter, true, value);
+    setGlobalParameter(parameter, 0, value);
+  }
+
+  public long watchLocalParameter (int parameter, long subparam, ParameterWatcher watcher) {
+    return watchParameter(parameter, subparam, false, watcher);
+  }
+
+  public long watchLocalParameter (int parameter, ParameterWatcher watcher) {
+    return watchLocalParameter(parameter, 0, watcher);
+  }
+
+  public long watchGlobalParameter (int parameter, long subparam, ParameterWatcher watcher) {
+    return watchParameter(parameter, subparam, true, watcher);
+  }
+
+  public long watchGlobalParameter (int parameter, ParameterWatcher watcher) {
+    return watchGlobalParameter(parameter, 0, watcher);
   }
 
   public int getServerVersion () {
