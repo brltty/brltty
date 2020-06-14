@@ -1321,7 +1321,7 @@ JAVA_STATIC_METHOD(
   org_a11y_brlapi_BasicConnection, unwatchParameter, void,
   jlong identifier
 ) {
-  WatchedParameterData *wpd = (WatchedParameterData *)identifier;
+  WatchedParameterData *wpd = (WatchedParameterData *)(intptr_t)identifier;
 
   if (brlapi__unwatchParameter(wpd->handle, wpd->descriptor) < 0) {
     throwConnectionError(env);
