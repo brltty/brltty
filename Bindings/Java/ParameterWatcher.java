@@ -20,5 +20,5 @@
 package org.a11y.brlapi;
 
 public interface ParameterWatcher {
-  public void handleWatchedParameter (int parameter, long subparam, Object value);
+  public void onParameterUpdated (int parameter, long subparam, Object value);
 }

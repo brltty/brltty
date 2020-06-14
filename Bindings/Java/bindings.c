@@ -1286,7 +1286,7 @@ JAVA_INSTANCE_METHOD(
 
         if (wpd->watcher.class) {
           wpd->watcher.method = (*env)->GetMethodID(
-            env, wpd->watcher.class, "handleWatchedParameter",
+            env, wpd->watcher.class, "onParameterUpdated",
             JAVA_SIG_METHOD(JAVA_SIG_VOID,
               JAVA_SIG_INT // parameter
               JAVA_SIG_LONG // subparam
