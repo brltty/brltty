@@ -23,7 +23,7 @@ import java.io.PrintStream;
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
-public class TestProgram implements Constants {
+public class TestProgram {
   private static void writeProperty (String name, String format, Object... values) {
     PrintStream stream = System.out;
 
