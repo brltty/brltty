@@ -19,6 +19,6 @@
 
 package org.a11y.brlapi;
 
-public interface ParameterWatcher {
-  public void onParameterUpdated (int parameter, long subparam, Object value);
+public abstract class ParameterWatcher extends Parameter {
+  public abstract void onParameterUpdated (int parameter, long subparam, Object value);
 }

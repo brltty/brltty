@@ -139,11 +139,11 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public int getServerVersion () {
-    return ((int[])getGlobalParameter(PARAM_SERVER_VERSION))[0];
+    return Parameter.toInt(getGlobalParameter(PARAM_SERVER_VERSION));
   }
 
   public int getClientPriority () {
-    return ((int[])getLocalParameter(PARAM_CLIENT_PRIORITY))[0];
+    return Parameter.toInt(getLocalParameter(PARAM_CLIENT_PRIORITY));
   }
 
   public void setClientPriority (int priority) {
@@ -154,45 +154,43 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public String getDriverName () {
-    return (String)getGlobalParameter(PARAM_DRIVER_NAME);
+    return Parameter.toString(getGlobalParameter(PARAM_DRIVER_NAME));
   }
 
   public String getDriverCode () {
-    return (String)getGlobalParameter(PARAM_DRIVER_CODE);
+    return Parameter.toString(getGlobalParameter(PARAM_DRIVER_CODE));
   }
 
   public String getDriverVersion () {
-    return (String)getGlobalParameter(PARAM_DRIVER_VERSION);
+    return Parameter.toString(getGlobalParameter(PARAM_DRIVER_VERSION));
   }
 
   public String getDeviceModel () {
-    return (String)getGlobalParameter(PARAM_DEVICE_MODEL);
+    return Parameter.toString(getGlobalParameter(PARAM_DEVICE_MODEL));
   }
 
   public byte getDeviceCellSize () {
-    return ((byte[])getGlobalParameter(PARAM_DEVICE_CELL_SIZE))[0];
+    return Parameter.toByte(getGlobalParameter(PARAM_DEVICE_CELL_SIZE));
   }
 
   public DisplaySize getDisplaySize () {
-    int[] dimensions = (int[])getGlobalParameter(PARAM_DISPLAY_SIZE);
-    if (dimensions == null) return null;
-    return new DisplaySize(dimensions);
+    return Parameter.toDisplaySize(getGlobalParameter(PARAM_DISPLAY_SIZE));
   }
 
   public String getDeviceIdentifier () {
-    return (String)getGlobalParameter(PARAM_DEVICE_IDENTIFIER);
+    return Parameter.toString(getGlobalParameter(PARAM_DEVICE_IDENTIFIER));
   }
 
   public int getDeviceSpeed () {
-    return ((int[])getGlobalParameter(PARAM_DEVICE_SPEED))[0];
+    return Parameter.toInt(getGlobalParameter(PARAM_DEVICE_SPEED));
   }
 
   public boolean getDeviceOnline () {
-    return ((boolean[])getGlobalParameter(PARAM_DEVICE_ONLINE))[0];
+    return Parameter.toBoolean(getGlobalParameter(PARAM_DEVICE_ONLINE));
   }
 
   public boolean getRetainDots () {
-    return ((boolean[])getLocalParameter(PARAM_RETAIN_DOTS))[0];
+    return Parameter.toBoolean(getLocalParameter(PARAM_RETAIN_DOTS));
   }
 
   public void setRetainDots (boolean yes) {
@@ -203,7 +201,7 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public byte getComputerBrailleCellSize () {
-    return ((byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_CELL_SIZE))[0];
+    return Parameter.toByte(getGlobalParameter(PARAM_COMPUTER_BRAILLE_CELL_SIZE));
   }
 
   public void setComputerBrailleCellSize (byte size) {
@@ -214,7 +212,7 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public boolean getLiteraryBraille () {
-    return ((boolean[])getGlobalParameter(PARAM_LITERARY_BRAILLE))[0];
+    return Parameter.toBoolean(getGlobalParameter(PARAM_LITERARY_BRAILLE));
   }
 
   public void setLiteraryBraille (boolean yes) {
@@ -225,7 +223,7 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public byte getCursorDots () {
-    return ((byte[])getGlobalParameter(PARAM_CURSOR_DOTS))[0];
+    return Parameter.toByte(getGlobalParameter(PARAM_CURSOR_DOTS));
   }
 
   public void setCursorDots (byte dots) {
@@ -236,7 +234,7 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public int getCursorBlinkPeriod () {
-    return ((int[])getGlobalParameter(PARAM_CURSOR_BLINK_PERIOD))[0];
+    return Parameter.toInt(getGlobalParameter(PARAM_CURSOR_BLINK_PERIOD));
   }
 
   public void setCursorBlinkPeriod (int period) {
@@ -247,7 +245,7 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public byte getCursorBlinkPercentage () {
-    return ((byte[])getGlobalParameter(PARAM_CURSOR_BLINK_PERCENTAGE))[0];
+    return Parameter.toByte(getGlobalParameter(PARAM_CURSOR_BLINK_PERCENTAGE));
   }
 
   public void setCursorBlinkPercentage (byte percentage) {
@@ -258,11 +256,11 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public byte[] getRenderedCells () {
-    return (byte[])getLocalParameter(PARAM_RENDERED_CELLS);
+    return Parameter.toByteArray(getLocalParameter(PARAM_RENDERED_CELLS));
   }
 
   public boolean getSkipIdenticalLines () {
-    return ((boolean[])getGlobalParameter(PARAM_SKIP_IDENTICAL_LINES))[0];
+    return Parameter.toBoolean(getGlobalParameter(PARAM_SKIP_IDENTICAL_LINES));
   }
 
   public void setSkipIdenticalLines (boolean yes) {
@@ -273,7 +271,7 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public boolean getAudibleAlerts () {
-    return ((boolean[])getGlobalParameter(PARAM_AUDIBLE_ALERTS))[0];
+    return Parameter.toBoolean(getGlobalParameter(PARAM_AUDIBLE_ALERTS));
   }
 
   public void setAudibleAlerts (boolean yes) {
@@ -284,7 +282,7 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public String getClipboardContent () {
-    return (String)getGlobalParameter(PARAM_CLIPBOARD_CONTENT);
+    return Parameter.toString(getGlobalParameter(PARAM_CLIPBOARD_CONTENT));
   }
 
   public void setClipboardContent (String text) {
@@ -292,43 +290,39 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public long[] getBoundCommandCodes () {
-    return (long[])getGlobalParameter(PARAM_BOUND_COMMAND_CODES);
+    return Parameter.toLongArray(getGlobalParameter(PARAM_BOUND_COMMAND_CODES));
   }
 
   public String getCommandShortName (long code) {
-    return (String)getGlobalParameter(PARAM_COMMAND_SHORT_NAME, code);
+    return Parameter.toString(getGlobalParameter(PARAM_COMMAND_SHORT_NAME, code));
   }
 
   public String getCommandLongName (long code) {
-    return (String)getGlobalParameter(PARAM_COMMAND_LONG_NAME, code);
+    return Parameter.toString(getGlobalParameter(PARAM_COMMAND_LONG_NAME, code));
   }
 
   public long[] getDeviceKeyCodes () {
-    return (long[])getGlobalParameter(PARAM_DEVICE_KEY_CODES);
+    return Parameter.toLongArray(getGlobalParameter(PARAM_DEVICE_KEY_CODES));
   }
 
   public String getKeyShortName (long code) {
-    return (String)getGlobalParameter(PARAM_KEY_SHORT_NAME, code);
+    return Parameter.toString(getGlobalParameter(PARAM_KEY_SHORT_NAME, code));
   }
 
   public String getKeyLongName (long code) {
-    return (String)getGlobalParameter(PARAM_KEY_LONG_NAME, code);
+    return Parameter.toString(getGlobalParameter(PARAM_KEY_LONG_NAME, code));
   }
 
   public BitMask getComputerBrailleRowsMask () {
-    byte[] bytes = (byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROWS_MASK);
-    if (bytes == null) return null;
-    return new BitMask(bytes);
+    return Parameter.toBitMask(getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROWS_MASK));
   }
 
   public RowCells getComputerBrailleRowCells (long row) {
-    byte[] bytes = (byte[])getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROW_CELLS, row);
-    if (bytes == null) return null;
-    return new RowCells(bytes);
+    return Parameter.toRowCells(getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROW_CELLS, row));
   }
 
   public String getComputerBrailleTable () {
-    return (String)getGlobalParameter(PARAM_COMPUTER_BRAILLE_TABLE);
+    return Parameter.toString(getGlobalParameter(PARAM_COMPUTER_BRAILLE_TABLE));
   }
 
   public void setComputerBrailleTable (String name) {
@@ -336,7 +330,7 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public String getLiteraryBrailleTable () {
-    return (String)getGlobalParameter(PARAM_LITERARY_BRAILLE_TABLE);
+    return Parameter.toString(getGlobalParameter(PARAM_LITERARY_BRAILLE_TABLE));
   }
 
   public void setLiteraryBrailleTable (String name) {
@@ -344,7 +338,7 @@ public class Connection extends BasicConnection implements Constants {
   }
 
   public String getMessageLocale () {
-    return (String)getGlobalParameter(PARAM_MESSAGE_LOCALE);
+    return Parameter.toString(getGlobalParameter(PARAM_MESSAGE_LOCALE));
   }
 
   public void setMessageLocale (String locale) {

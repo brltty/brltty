@@ -48,6 +48,7 @@ JAVA_SOURCES = \
 	$(SRC_DIR)/Key.java \
 	$(SRC_DIR)/LibraryVersion.java \
 	$(SRC_DIR)/NativeLibrary.java \
+	$(SRC_DIR)/Parameter.java \
 	$(SRC_DIR)/ParameterWatcher.java \
 	$(SRC_DIR)/RowCells.java \
 	$(SRC_DIR)/TestProgram.java \
