@@ -20,6 +20,9 @@
 package org.a11y.brlapi;
 
 public abstract class Parameter {
+  private Parameter () {
+  }
+
   public static String toString (Object value) {
     return (String)value;
   }
