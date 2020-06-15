@@ -91,54 +91,6 @@ public class Connection extends BasicConnection {
     writeText(Constants.CURSOR_OFF, text);
   }
 
-  public Object getLocalParameter (int parameter, long subparam) {
-    return getParameter(parameter, subparam, false);
-  }
-
-  public Object getLocalParameter (int parameter) {
-    return getLocalParameter(parameter, 0);
-  }
-
-  public Object getGlobalParameter (int parameter, long subparam) {
-    return getParameter(parameter, subparam, true);
-  }
-
-  public Object getGlobalParameter (int parameter) {
-    return getGlobalParameter(parameter, 0);
-  }
-
-  public void setLocalParameter (int parameter, long subparam, Object value) {
-    setParameter(parameter, subparam, false, value);
-  }
-
-  public void setLocalParameter (int parameter, Object value) {
-    setLocalParameter(parameter, 0, value);
-  }
-
-  public void setGlobalParameter (int parameter, long subparam, Object value) {
-    setParameter(parameter, subparam, true, value);
-  }
-
-  public void setGlobalParameter (int parameter, Object value) {
-    setGlobalParameter(parameter, 0, value);
-  }
-
-  public long watchLocalParameter (int parameter, long subparam, ParameterWatcher watcher) {
-    return watchParameter(parameter, subparam, false, watcher);
-  }
-
-  public long watchLocalParameter (int parameter, ParameterWatcher watcher) {
-    return watchLocalParameter(parameter, 0, watcher);
-  }
-
-  public long watchGlobalParameter (int parameter, long subparam, ParameterWatcher watcher) {
-    return watchParameter(parameter, subparam, true, watcher);
-  }
-
-  public long watchGlobalParameter (int parameter, ParameterWatcher watcher) {
-    return watchGlobalParameter(parameter, 0, watcher);
-  }
-
   public static class Parameters {
     public final ServerVersionParameter serverVersion;
     public final ClientPriorityParameter clientPriority;
@@ -213,7 +165,9 @@ public class Connection extends BasicConnection {
 
   public Parameters getParameters () {
     synchronized (this) {
-      if (connectionParameters == null) connectionParameters = new Parameters(this);
+      if (connectionParameters == null) {
+        connectionParameters = new Parameters(this);
+      }
     }
 
     return connectionParameters;
