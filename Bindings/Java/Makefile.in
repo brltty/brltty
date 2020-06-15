@@ -37,23 +37,7 @@ JAVA_JNI_DESTDIR = $(INSTALL_ROOT)
 
 all: jar jni doc
 
-JAVA_SOURCES = \
-	$(SRC_DIR)/BasicConnection.java \
-	$(SRC_DIR)/BitMask.java \
-	$(SRC_DIR)/Connection.java \
-	$(SRC_DIR)/ConnectionError.java \
-	$(SRC_DIR)/ConnectionException.java \
-	$(SRC_DIR)/ConnectionSettings.java \
-	$(SRC_DIR)/DisplaySize.java \
-	$(SRC_DIR)/Key.java \
-	$(SRC_DIR)/LibraryVersion.java \
-	$(SRC_DIR)/NativeLibrary.java \
-	$(SRC_DIR)/Parameter.java \
-	$(SRC_DIR)/ParameterWatcher.java \
-	$(SRC_DIR)/RowCells.java \
-	$(SRC_DIR)/TestProgram.java \
-	$(SRC_DIR)/WriteArguments.java \
-	Constants.java
+JAVA_SOURCES = Constants.java $(SRC_DIR)/*.java
 
 JAVA_JNI_FILE = $(LIB_PFX)$(API_NAME)_java.$(LIB_EXT)
 jni: $(JAVA_JNI_FILE)
@@ -72,7 +56,7 @@ $(JAVA_JAR_FILE): classes.made
 
 classes.made: $(JAVA_SOURCES)
 	$(INSTALL_DIRECTORY) classes
-	$(JAVAC) -d classes -classpath . $(JAVA_SOURCES)
+	$(JAVAC) -d classes -classpath . $^
 	touch $@
 
 Constants.java: $(CONSTANTS_DEPENDENCIES)
@@ -82,7 +66,7 @@ doc: doc.made
 
 doc.made: $(JAVA_SOURCES)
 	$(INSTALL_DIRECTORY) doc
-	$(JAVADOC) -quiet -d doc -author -notimestamp -version -use $(JAVA_SOURCES)
+	$(JAVADOC) -quiet -d doc -author -notimestamp -version -use $^
 	touch $@
 
 clean::
