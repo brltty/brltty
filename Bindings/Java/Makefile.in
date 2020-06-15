@@ -37,7 +37,7 @@ JAVA_JNI_DESTDIR = $(INSTALL_ROOT)
 
 all: jar jni doc
 
-JAVA_SOURCES = Constants.java $(SRC_DIR)/*.java
+JAVA_SOURCES = Constants.java $(SRC_DIR)/*.java $(SRC_DIR)/parameters/*.java
 
 JAVA_JNI_FILE = $(LIB_PFX)$(API_NAME)_java.$(LIB_EXT)
 jni: $(JAVA_JNI_FILE)

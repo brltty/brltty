@@ -18,8 +18,9 @@
  */
 
 package org.a11y.brlapi;
+import org.a11y.brlapi.parameters.*;
 
-public class Connection extends BasicConnection implements Constants {
+public class Connection extends BasicConnection {
   public Connection (ConnectionSettings settings) {
     super(settings);
   }
@@ -138,210 +139,83 @@ public class Connection extends BasicConnection implements Constants {
     return watchGlobalParameter(parameter, 0, watcher);
   }
 
-  public int getServerVersion () {
-    return Parameter.toInt(getGlobalParameter(PARAM_SERVER_VERSION));
+  public static class Parameters {
+    public final ServerVersionParameter serverVersion;
+    public final ClientPriorityParameter clientPriority;
+    public final DriverNameParameter driverName;
+    public final DriverCodeParameter driverCode;
+    public final DriverVersionParameter driverVersion;
+    public final DeviceModelParameter deviceModel;
+    public final DeviceCellSizeParameter deviceCellSize;
+    public final DisplaySizeParameter displaySize;
+    public final DeviceIdentifierParameter deviceIdentifier;
+    public final DeviceSpeedParameter deviceSpeed;
+    public final DeviceOnlineParameter deviceOnline;
+    public final RetainDotsParameter retainDots;
+    public final ComputerBrailleCellSizeParameter computerBrailleCellSize;
+    public final LiteraryBrailleParameter literaryBraille;
+    public final CursorDotsParameter cursorDots;
+    public final CursorBlinkPeriodParameter cursorBlinkPeriod;
+    public final CursorBlinkPercentageParameter cursorBlinkPercentage;
+    public final RenderedCellsParameter renderedCells;
+    public final SkipIdenticalLinesParameter skipIdenticalLines;
+    public final AudibleAlertsParameter audibleAlerts;
+    public final ClipboardContentParameter clipboardContent;
+    public final BoundCommandCodesParameter boundCommandCodes;
+    public final CommandShortNameParameter commandShortName;
+    public final CommandLongNameParameter commandLongName;
+    public final DeviceKeyCodesParameter deviceKeyCodes;
+    public final KeyShortNameParameter keyShortName;
+    public final KeyLongNameParameter keyLongName;
+    public final ComputerBrailleRowsMaskParameter computerBrailleRowsMask;
+    public final ComputerBrailleRowCellsParameter computerBrailleRowCells;
+    public final ComputerBrailleTableParameter computerBrailleTable;
+    public final LiteraryBrailleTableParameter literaryBrailleTable;
+    public final MessageLocaleParameter messageLocale;
+
+    private Parameters (Connection connection) {
+      serverVersion = new ServerVersionParameter(connection);
+      clientPriority = new ClientPriorityParameter(connection);
+      driverName = new DriverNameParameter(connection);
+      driverCode = new DriverCodeParameter(connection);
+      driverVersion = new DriverVersionParameter(connection);
+      deviceModel = new DeviceModelParameter(connection);
+      deviceCellSize = new DeviceCellSizeParameter(connection);
+      displaySize = new DisplaySizeParameter(connection);
+      deviceIdentifier = new DeviceIdentifierParameter(connection);
+      deviceSpeed = new DeviceSpeedParameter(connection);
+      deviceOnline = new DeviceOnlineParameter(connection);
+      retainDots = new RetainDotsParameter(connection);
+      computerBrailleCellSize = new ComputerBrailleCellSizeParameter(connection);
+      literaryBraille = new LiteraryBrailleParameter(connection);
+      cursorDots = new CursorDotsParameter(connection);
+      cursorBlinkPeriod = new CursorBlinkPeriodParameter(connection);
+      cursorBlinkPercentage = new CursorBlinkPercentageParameter(connection);
+      renderedCells = new RenderedCellsParameter(connection);
+      skipIdenticalLines = new SkipIdenticalLinesParameter(connection);
+      audibleAlerts = new AudibleAlertsParameter(connection);
+      clipboardContent = new ClipboardContentParameter(connection);
+      boundCommandCodes = new BoundCommandCodesParameter(connection);
+      commandShortName = new CommandShortNameParameter(connection);
+      commandLongName = new CommandLongNameParameter(connection);
+      deviceKeyCodes = new DeviceKeyCodesParameter(connection);
+      keyShortName = new KeyShortNameParameter(connection);
+      keyLongName = new KeyLongNameParameter(connection);
+      computerBrailleRowsMask = new ComputerBrailleRowsMaskParameter(connection);
+      computerBrailleRowCells = new ComputerBrailleRowCellsParameter(connection);
+      computerBrailleTable = new ComputerBrailleTableParameter(connection);
+      literaryBrailleTable = new LiteraryBrailleTableParameter(connection);
+      messageLocale = new MessageLocaleParameter(connection);
+    }
   }
 
-  public int getClientPriority () {
-    return Parameter.toInt(getLocalParameter(PARAM_CLIENT_PRIORITY));
-  }
+  private Parameters connectionParameters = null;
 
-  public void setClientPriority (int priority) {
-    setLocalParameter(
-      PARAM_CLIENT_PRIORITY,
-      new int[] {priority}
-    );
-  }
+  public Parameters getParameters () {
+    synchronized (this) {
+      if (connectionParameters == null) connectionParameters = new Parameters(this);
+    }
 
-  public String getDriverName () {
-    return Parameter.toString(getGlobalParameter(PARAM_DRIVER_NAME));
-  }
-
-  public String getDriverCode () {
-    return Parameter.toString(getGlobalParameter(PARAM_DRIVER_CODE));
-  }
-
-  public String getDriverVersion () {
-    return Parameter.toString(getGlobalParameter(PARAM_DRIVER_VERSION));
-  }
-
-  public String getDeviceModel () {
-    return Parameter.toString(getGlobalParameter(PARAM_DEVICE_MODEL));
-  }
-
-  public byte getDeviceCellSize () {
-    return Parameter.toByte(getGlobalParameter(PARAM_DEVICE_CELL_SIZE));
-  }
-
-  public DisplaySize getDisplaySize () {
-    return Parameter.toDisplaySize(getGlobalParameter(PARAM_DISPLAY_SIZE));
-  }
-
-  public String getDeviceIdentifier () {
-    return Parameter.toString(getGlobalParameter(PARAM_DEVICE_IDENTIFIER));
-  }
-
-  public int getDeviceSpeed () {
-    return Parameter.toInt(getGlobalParameter(PARAM_DEVICE_SPEED));
-  }
-
-  public boolean getDeviceOnline () {
-    return Parameter.toBoolean(getGlobalParameter(PARAM_DEVICE_ONLINE));
-  }
-
-  public boolean getRetainDots () {
-    return Parameter.toBoolean(getLocalParameter(PARAM_RETAIN_DOTS));
-  }
-
-  public void setRetainDots (boolean yes) {
-    setLocalParameter(
-      PARAM_RETAIN_DOTS,
-      new boolean[] {yes}
-    );
-  }
-
-  public byte getComputerBrailleCellSize () {
-    return Parameter.toByte(getGlobalParameter(PARAM_COMPUTER_BRAILLE_CELL_SIZE));
-  }
-
-  public void setComputerBrailleCellSize (byte size) {
-    setGlobalParameter(
-      PARAM_COMPUTER_BRAILLE_CELL_SIZE,
-      new byte[] {size}
-    );
-  }
-
-  public boolean getLiteraryBraille () {
-    return Parameter.toBoolean(getGlobalParameter(PARAM_LITERARY_BRAILLE));
-  }
-
-  public void setLiteraryBraille (boolean yes) {
-    setGlobalParameter(
-      PARAM_LITERARY_BRAILLE,
-      new boolean[] {yes}
-    );
-  }
-
-  public byte getCursorDots () {
-    return Parameter.toByte(getGlobalParameter(PARAM_CURSOR_DOTS));
-  }
-
-  public void setCursorDots (byte dots) {
-    setGlobalParameter(
-      PARAM_CURSOR_DOTS,
-      new byte[] {dots}
-    );
-  }
-
-  public int getCursorBlinkPeriod () {
-    return Parameter.toInt(getGlobalParameter(PARAM_CURSOR_BLINK_PERIOD));
-  }
-
-  public void setCursorBlinkPeriod (int period) {
-    setGlobalParameter(
-      PARAM_CURSOR_BLINK_PERIOD,
-      new int[] {period}
-    );
-  }
-
-  public byte getCursorBlinkPercentage () {
-    return Parameter.toByte(getGlobalParameter(PARAM_CURSOR_BLINK_PERCENTAGE));
-  }
-
-  public void setCursorBlinkPercentage (byte percentage) {
-    setGlobalParameter(
-      PARAM_CURSOR_BLINK_PERCENTAGE,
-      new byte[] {percentage}
-    );
-  }
-
-  public byte[] getRenderedCells () {
-    return Parameter.toByteArray(getLocalParameter(PARAM_RENDERED_CELLS));
-  }
-
-  public boolean getSkipIdenticalLines () {
-    return Parameter.toBoolean(getGlobalParameter(PARAM_SKIP_IDENTICAL_LINES));
-  }
-
-  public void setSkipIdenticalLines (boolean yes) {
-    setGlobalParameter(
-      PARAM_SKIP_IDENTICAL_LINES,
-      new boolean[] {yes}
-    );
-  }
-
-  public boolean getAudibleAlerts () {
-    return Parameter.toBoolean(getGlobalParameter(PARAM_AUDIBLE_ALERTS));
-  }
-
-  public void setAudibleAlerts (boolean yes) {
-    setGlobalParameter(
-      PARAM_AUDIBLE_ALERTS,
-      new boolean[] {yes}
-    );
-  }
-
-  public String getClipboardContent () {
-    return Parameter.toString(getGlobalParameter(PARAM_CLIPBOARD_CONTENT));
-  }
-
-  public void setClipboardContent (String text) {
-    setGlobalParameter(PARAM_CLIPBOARD_CONTENT, text);
-  }
-
-  public long[] getBoundCommandCodes () {
-    return Parameter.toLongArray(getGlobalParameter(PARAM_BOUND_COMMAND_CODES));
-  }
-
-  public String getCommandShortName (long code) {
-    return Parameter.toString(getGlobalParameter(PARAM_COMMAND_SHORT_NAME, code));
-  }
-
-  public String getCommandLongName (long code) {
-    return Parameter.toString(getGlobalParameter(PARAM_COMMAND_LONG_NAME, code));
-  }
-
-  public long[] getDeviceKeyCodes () {
-    return Parameter.toLongArray(getGlobalParameter(PARAM_DEVICE_KEY_CODES));
-  }
-
-  public String getKeyShortName (long code) {
-    return Parameter.toString(getGlobalParameter(PARAM_KEY_SHORT_NAME, code));
-  }
-
-  public String getKeyLongName (long code) {
-    return Parameter.toString(getGlobalParameter(PARAM_KEY_LONG_NAME, code));
-  }
-
-  public BitMask getComputerBrailleRowsMask () {
-    return Parameter.toBitMask(getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROWS_MASK));
-  }
-
-  public RowCells getComputerBrailleRowCells (long row) {
-    return Parameter.toRowCells(getGlobalParameter(PARAM_COMPUTER_BRAILLE_ROW_CELLS, row));
-  }
-
-  public String getComputerBrailleTable () {
-    return Parameter.toString(getGlobalParameter(PARAM_COMPUTER_BRAILLE_TABLE));
-  }
-
-  public void setComputerBrailleTable (String name) {
-    setGlobalParameter(PARAM_COMPUTER_BRAILLE_TABLE, name);
-  }
-
-  public String getLiteraryBrailleTable () {
-    return Parameter.toString(getGlobalParameter(PARAM_LITERARY_BRAILLE_TABLE));
-  }
-
-  public void setLiteraryBrailleTable (String name) {
-    setGlobalParameter(PARAM_LITERARY_BRAILLE_TABLE, name);
-  }
-
-  public String getMessageLocale () {
-    return Parameter.toString(getGlobalParameter(PARAM_MESSAGE_LOCALE));
-  }
-
-  public void setMessageLocale (String locale) {
-    setGlobalParameter(PARAM_MESSAGE_LOCALE, locale);
+    return connectionParameters;
   }
 }

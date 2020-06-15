@@ -20,7 +20,38 @@
 package org.a11y.brlapi;
 
 public abstract class Parameter {
-  private Parameter () {
+  private final Connection clientConnection;
+  private final int parameterValue;
+  private final boolean isGlobal;
+
+  protected Parameter (Connection connection, int parameter, boolean global) {
+    clientConnection = connection;
+    parameterValue = parameter;
+    isGlobal = global;
+  }
+
+  protected final Object getValue (long subparam) {
+    return clientConnection.getParameter(parameterValue, subparam, isGlobal);
+  }
+
+  protected final Object getValue () {
+    return getValue(0);
+  }
+
+  protected final void setValue (long subparam, Object value) {
+    clientConnection.setParameter(parameterValue, subparam, isGlobal, value);
+  }
+
+  protected final void setValue (Object value) {
+    setValue(0, value);
+  }
+
+  public final long watch (long subparam, ParameterWatcher watcher) {
+    return clientConnection.watchParameter(parameterValue, subparam, isGlobal, watcher);
+  }
+
+  public final long watch (ParameterWatcher watcher) {
+    return watch(0, watcher);
   }
 
   public static String toString (Object value) {
