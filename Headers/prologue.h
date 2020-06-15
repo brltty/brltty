@@ -76,7 +76,9 @@ extern "C" {
 #endif /* HAVE_CONFIG_H */
 
 #ifdef __ANDROID__
+#ifndef __ANDROID_API__
 #define __ANDROID_API__ 19
+#endif /* __ANDROID_API__ */
 #endif /* __ANDROID__ */
 
 #if defined(__CYGWIN__) || defined(__MINGW32__)

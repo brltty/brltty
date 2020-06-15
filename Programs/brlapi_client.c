@@ -19,6 +19,10 @@
 
 /* api_client.c handles connection with BrlApi */
 
+#ifdef __ANDROID__
+#define __ANDROID_API__ 21
+#endif /* __ANDROID__ */
+
 #define WIN_ERRNO_STORAGE_CLASS static
 #include "prologue.h"
 
