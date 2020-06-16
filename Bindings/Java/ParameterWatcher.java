@@ -19,7 +19,6 @@
 
 package org.a11y.brlapi;
 
-public interface ParameterWatcher {
-  /* Use the static Parameter.to() methods to convert to the value's type. */
-  public void onParameterUpdated (int parameter, long subparam, Object value);
+public abstract class ParameterWatcher extends ParameterHelper {
+  public abstract void onParameterUpdated (int parameter, long subparam, Object value);
 }

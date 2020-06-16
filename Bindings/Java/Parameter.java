@@ -19,12 +19,14 @@
 
 package org.a11y.brlapi;
 
-public abstract class Parameter {
+public abstract class Parameter extends ParameterHelper {
   private final BasicConnection clientConnection;
   private final int parameterValue;
   private final boolean isGlobal;
 
   protected Parameter (BasicConnection connection, int parameter, boolean global) {
+    super();
+
     clientConnection = connection;
     parameterValue = parameter;
     isGlobal = global;
@@ -52,61 +54,5 @@ public abstract class Parameter {
 
   public final long watch (ParameterWatcher watcher) {
     return watch(0, watcher);
-  }
-
-  public static String toString (Object value) {
-    return (String)value;
-  }
-
-  public static boolean[] toBooleanArray (Object value) {
-    return (boolean[])value;
-  }
-
-  public static byte[] toByteArray (Object value) {
-    return (byte[])value;
-  }
-
-  public static short[] toShortArray (Object value) {
-    return (short[])value;
-  }
-
-  public static int[] toIntArray (Object value) {
-    return (int[])value;
-  }
-
-  public static long[] toLongArray (Object value) {
-    return (long[])value;
-  }
-
-  public static boolean toBoolean (Object value) {
-    return toBooleanArray(value)[0];
-  }
-
-  public static byte toByte (Object value) {
-    return toByteArray(value)[0];
-  }
-
-  public static short toShort (Object value) {
-    return toShortArray(value)[0];
-  }
-
-  public static int toInt (Object value) {
-    return toIntArray(value)[0];
-  }
-
-  public static long toLong (Object value) {
-    return toLongArray(value)[0];
-  }
-
-  public static DisplaySize toDisplaySize (Object value) {
-    return new DisplaySize(toIntArray(value));
-  }
-
-  public static BitMask toBitMask (Object value) {
-    return new BitMask(toByteArray(value));
-  }
-
-  public static RowCells toRowCells (Object value) {
-    return new RowCells(toByteArray(value));
   }
 }
