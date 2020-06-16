@@ -48,10 +48,10 @@ public abstract class Parameter extends ParameterHelper {
     setValue(0, value);
   }
 
-  public final static class WatchIdentifier implements AutoCloseable {
+  public final static class WatchDescriptor implements AutoCloseable {
     private long watchIdentifier;
 
-    public WatchIdentifier (long identifier) {
+    private WatchDescriptor (long identifier) {
       watchIdentifier = identifier;
     }
 
@@ -66,11 +66,11 @@ public abstract class Parameter extends ParameterHelper {
     }
   }
 
-  public final WatchIdentifier watch (long subparam, ParameterWatcher watcher) {
-    return new WatchIdentifier(clientConnection.watchParameter(parameterValue, subparam, isGlobal, watcher));
+  public final WatchDescriptor watch (long subparam, ParameterWatcher watcher) {
+    return new WatchDescriptor(clientConnection.watchParameter(parameterValue, subparam, isGlobal, watcher));
   }
 
-  public final WatchIdentifier watch (ParameterWatcher watcher) {
+  public final WatchDescriptor watch (ParameterWatcher watcher) {
     return watch(0, watcher);
   }
 }
