@@ -22,7 +22,7 @@ package org.a11y.brlapi;
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
-public class BasicConnection extends NativeLibrary {
+public class BasicConnection extends NativeLibrary implements AutoCloseable {
   protected long connectionHandle;
 
   protected native int openConnection (
@@ -31,6 +31,11 @@ public class BasicConnection extends NativeLibrary {
   );
 
   public native void closeConnection ();
+
+  @Override
+  public void close () {
+    closeConnection();
+  }
 
   public native String getDriverName ();
   public native String getModelIdentifier ();
