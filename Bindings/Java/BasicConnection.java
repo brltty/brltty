@@ -30,7 +30,18 @@ public class BasicConnection extends NativeLibrary implements AutoCloseable {
     ConnectionSettings actualSettings
   );
 
-  public native void closeConnection ();
+  private native void closeConnection ();
+  private boolean closed = false;
+
+  @Override
+  public void close () {
+    synchronized (this) {
+      if (!closed) {
+        closeConnection();
+        closed = true;
+      }
+    }
+  }
 
   public native String getDriverName ();
   public native String getModelIdentifier ();
@@ -94,10 +105,5 @@ public class BasicConnection extends NativeLibrary implements AutoCloseable {
 
   public int getFileDescriptor () {
     return fileDescriptor;
-  }
-
-  @Override
-  public void close () {
-    closeConnection();
   }
 }

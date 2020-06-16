@@ -130,7 +130,7 @@ public class TestProgram {
           connection.leaveTtyMode();
         }
       } finally {
-        connection.closeConnection();
+        connection.close();
         connection = null;
       }
     } catch (Error error) {
