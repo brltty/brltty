@@ -48,11 +48,29 @@ public abstract class Parameter extends ParameterHelper {
     setValue(0, value);
   }
 
-  public final long watch (long subparam, ParameterWatcher watcher) {
-    return clientConnection.watchParameter(parameterValue, subparam, isGlobal, watcher);
+  public final static class WatchIdentifier implements AutoCloseable {
+    private long watchIdentifier;
+
+    public WatchIdentifier (long identifier) {
+      watchIdentifier = identifier;
+    }
+
+    @Override
+    public void close () {
+      synchronized (this) {
+        if (watchIdentifier != 0) {
+          BasicConnection.unwatchParameter(watchIdentifier);
+          watchIdentifier = 0;
+        }
+      }
+    }
   }
 
-  public final long watch (ParameterWatcher watcher) {
+  public final WatchIdentifier watch (long subparam, ParameterWatcher watcher) {
+    return new WatchIdentifier(clientConnection.watchParameter(parameterValue, subparam, isGlobal, watcher));
+  }
+
+  public final WatchIdentifier watch (ParameterWatcher watcher) {
     return watch(0, watcher);
   }
 }
