@@ -36,7 +36,7 @@ static int libraryVersion_major = 0;
 static int libraryVersion_minor = 0;
 static int libraryVersion_revision = 0;
 
-JAVA_INSTANCE_METHOD(
+JAVA_STATIC_METHOD(
   org_a11y_brlapi_NativeLibrary, initializeNativeData, void
 ) {
   jniVersion = (*env)->GetVersion(env);

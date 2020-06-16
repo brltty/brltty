@@ -32,11 +32,6 @@ public class BasicConnection extends NativeLibrary implements AutoCloseable {
 
   public native void closeConnection ();
 
-  @Override
-  public void close () {
-    closeConnection();
-  }
-
   public native String getDriverName ();
   public native String getModelIdentifier ();
   public native DisplaySize getDisplaySize ();
@@ -99,5 +94,10 @@ public class BasicConnection extends NativeLibrary implements AutoCloseable {
 
   public int getFileDescriptor () {
     return fileDescriptor;
+  }
+
+  @Override
+  public void close () {
+    closeConnection();
   }
 }
