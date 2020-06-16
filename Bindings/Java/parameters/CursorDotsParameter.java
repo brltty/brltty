@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class CursorDotsParameter extends GlobalParameter {
   public CursorDotsParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_CURSOR_DOTS);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_CURSOR_DOTS;
   }
 
   public final byte get () {

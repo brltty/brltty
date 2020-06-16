@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class ComputerBrailleCellSizeParameter extends GlobalParameter {
   public ComputerBrailleCellSizeParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_COMPUTER_BRAILLE_CELL_SIZE);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_COMPUTER_BRAILLE_CELL_SIZE;
   }
 
   public final byte get () {

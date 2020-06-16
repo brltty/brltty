@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class SkipIdenticalLinesParameter extends GlobalParameter {
   public SkipIdenticalLinesParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_SKIP_IDENTICAL_LINES);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_SKIP_IDENTICAL_LINES;
   }
 
   public final boolean get () {

@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class AudibleAlertsParameter extends GlobalParameter {
   public AudibleAlertsParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_AUDIBLE_ALERTS);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_AUDIBLE_ALERTS;
   }
 
   public final boolean get () {

@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class KeyShortNameParameter extends GlobalParameter {
   public KeyShortNameParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_KEY_SHORT_NAME);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_KEY_SHORT_NAME;
   }
 
   public final String get (long code) {

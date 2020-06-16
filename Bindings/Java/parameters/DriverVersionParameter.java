@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class DriverVersionParameter extends GlobalParameter {
   public DriverVersionParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_DRIVER_VERSION);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_DRIVER_VERSION;
   }
 
   public final String get () {

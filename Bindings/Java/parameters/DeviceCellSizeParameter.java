@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class DeviceCellSizeParameter extends GlobalParameter {
   public DeviceCellSizeParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_DEVICE_CELL_SIZE);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_DEVICE_CELL_SIZE;
   }
 
   public final byte get () {

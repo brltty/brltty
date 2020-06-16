@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class CommandShortNameParameter extends GlobalParameter {
   public CommandShortNameParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_COMMAND_SHORT_NAME);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_COMMAND_SHORT_NAME;
   }
 
   public final String get (long code) {

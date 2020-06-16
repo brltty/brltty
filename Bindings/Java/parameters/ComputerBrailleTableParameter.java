@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class ComputerBrailleTableParameter extends GlobalParameter {
   public ComputerBrailleTableParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_COMPUTER_BRAILLE_TABLE);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_COMPUTER_BRAILLE_TABLE;
   }
 
   public final String get () {

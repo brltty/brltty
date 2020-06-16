@@ -20,5 +20,9 @@
 package org.a11y.brlapi;
 
 public abstract class ParameterWatcher extends ParameterHelper {
-  public abstract void onParameterUpdated (int parameter, long subparam, Object value);
+  public abstract void onParameterUpdated (
+    int parameter,
+    long subparam,
+    Object value
+  );
 }

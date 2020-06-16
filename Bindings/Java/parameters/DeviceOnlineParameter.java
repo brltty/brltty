@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class DeviceOnlineParameter extends GlobalParameter {
   public DeviceOnlineParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_DEVICE_ONLINE);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_DEVICE_ONLINE;
   }
 
   public final boolean get () {

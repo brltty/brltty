@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class DeviceSpeedParameter extends GlobalParameter {
   public DeviceSpeedParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_DEVICE_SPEED);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_DEVICE_SPEED;
   }
 
   public final int get () {

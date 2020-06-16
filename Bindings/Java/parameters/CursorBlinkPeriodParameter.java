@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class CursorBlinkPeriodParameter extends GlobalParameter {
   public CursorBlinkPeriodParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_CURSOR_BLINK_PERIOD);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_CURSOR_BLINK_PERIOD;
   }
 
   public final int get () {

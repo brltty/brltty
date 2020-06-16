@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class BoundCommandCodesParameter extends GlobalParameter {
   public BoundCommandCodesParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_BOUND_COMMAND_CODES);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_BOUND_COMMAND_CODES;
   }
 
   public final long[] get () {

@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class ClipboardContentParameter extends GlobalParameter {
   public ClipboardContentParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_CLIPBOARD_CONTENT);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_CLIPBOARD_CONTENT;
   }
 
   public final String get () {

@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class DisplaySizeParameter extends GlobalParameter {
   public DisplaySizeParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_DISPLAY_SIZE);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_DISPLAY_SIZE;
   }
 
   public final DisplaySize get () {

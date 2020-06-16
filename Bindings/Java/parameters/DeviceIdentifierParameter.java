@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class DeviceIdentifierParameter extends GlobalParameter {
   public DeviceIdentifierParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_DEVICE_IDENTIFIER);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_DEVICE_IDENTIFIER;
   }
 
   public final String get () {

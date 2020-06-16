@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class ComputerBrailleRowsMaskParameter extends GlobalParameter {
   public ComputerBrailleRowsMaskParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_COMPUTER_BRAILLE_ROWS_MASK);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_COMPUTER_BRAILLE_ROWS_MASK;
   }
 
   public final BitMask get () {

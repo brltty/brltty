@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class CursorBlinkPercentageParameter extends GlobalParameter {
   public CursorBlinkPercentageParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_CURSOR_BLINK_PERCENTAGE);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_CURSOR_BLINK_PERCENTAGE;
   }
 
   public final byte get () {

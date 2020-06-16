@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class ServerVersionParameter extends GlobalParameter {
   public ServerVersionParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_SERVER_VERSION);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_SERVER_VERSION;
   }
 
   public final int get () {

@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class LiteraryBrailleParameter extends GlobalParameter {
   public LiteraryBrailleParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_LITERARY_BRAILLE);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_LITERARY_BRAILLE;
   }
 
   public final boolean get () {

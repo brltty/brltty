@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class MessageLocaleParameter extends GlobalParameter {
   public MessageLocaleParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_MESSAGE_LOCALE);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_MESSAGE_LOCALE;
   }
 
   public final String get () {

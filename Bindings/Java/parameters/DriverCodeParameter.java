@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class DriverCodeParameter extends GlobalParameter {
   public DriverCodeParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_DRIVER_CODE);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_DRIVER_CODE;
   }
 
   public final String get () {

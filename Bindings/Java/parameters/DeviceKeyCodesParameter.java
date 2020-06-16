@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class DeviceKeyCodesParameter extends GlobalParameter {
   public DeviceKeyCodesParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_DEVICE_KEY_CODES);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_DEVICE_KEY_CODES;
   }
 
   public final long[] get () {

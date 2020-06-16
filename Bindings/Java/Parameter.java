@@ -21,19 +21,17 @@ package org.a11y.brlapi;
 
 public abstract class Parameter extends ParameterHelper {
   private final BasicConnection clientConnection;
-  private final int parameterValue;
-  private final boolean isGlobal;
 
-  protected Parameter (BasicConnection connection, int parameter, boolean global) {
+  protected Parameter (BasicConnection connection) {
     super();
-
     clientConnection = connection;
-    parameterValue = parameter;
-    isGlobal = global;
   }
 
+  public abstract int getParameter ();
+  public abstract boolean isGlobal ();
+
   protected final Object getValue (long subparam) {
-    return clientConnection.getParameter(parameterValue, subparam, isGlobal);
+    return clientConnection.getParameter(getParameter(), subparam, isGlobal());
   }
 
   protected final Object getValue () {
@@ -41,17 +39,17 @@ public abstract class Parameter extends ParameterHelper {
   }
 
   protected final void setValue (long subparam, Object value) {
-    clientConnection.setParameter(parameterValue, subparam, isGlobal, value);
+    clientConnection.setParameter(getParameter(), subparam, isGlobal(), value);
   }
 
   protected final void setValue (Object value) {
     setValue(0, value);
   }
 
-  public final static class WatchDescriptor implements AutoCloseable {
+  public final static class WatcherHandle implements AutoCloseable {
     private long watchIdentifier;
 
-    private WatchDescriptor (long identifier) {
+    private WatcherHandle (long identifier) {
       watchIdentifier = identifier;
     }
 
@@ -66,11 +64,15 @@ public abstract class Parameter extends ParameterHelper {
     }
   }
 
-  public final WatchDescriptor watch (long subparam, ParameterWatcher watcher) {
-    return new WatchDescriptor(clientConnection.watchParameter(parameterValue, subparam, isGlobal, watcher));
+  public final WatcherHandle watch (long subparam, ParameterWatcher watcher) {
+    return new WatcherHandle(
+      clientConnection.watchParameter(
+        getParameter(), subparam, isGlobal(), watcher
+      )
+    );
   }
 
-  public final WatchDescriptor watch (ParameterWatcher watcher) {
+  public final WatcherHandle watch (ParameterWatcher watcher) {
     return watch(0, watcher);
   }
 }

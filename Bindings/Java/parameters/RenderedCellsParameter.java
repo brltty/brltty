@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class RenderedCellsParameter extends LocalParameter {
   public RenderedCellsParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_RENDERED_CELLS);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_RENDERED_CELLS;
   }
 
   public final byte[] get () {

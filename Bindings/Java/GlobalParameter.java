@@ -20,7 +20,12 @@
 package org.a11y.brlapi;
 
 public abstract class GlobalParameter extends Parameter {
-  protected GlobalParameter (BasicConnection connection, int parameter) {
-    super(connection, parameter, true);
+  protected GlobalParameter (BasicConnection connection) {
+    super(connection);
+  }
+
+  @Override
+  public final boolean isGlobal () {
+    return true;
   }
 }

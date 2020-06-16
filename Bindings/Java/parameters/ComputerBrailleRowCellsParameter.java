@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class ComputerBrailleRowCellsParameter extends GlobalParameter {
   public ComputerBrailleRowCellsParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_COMPUTER_BRAILLE_ROW_CELLS);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_COMPUTER_BRAILLE_ROW_CELLS;
   }
 
   public final RowCells get (long row) {

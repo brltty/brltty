@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class RetainDotsParameter extends LocalParameter {
   public RetainDotsParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_RETAIN_DOTS);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_RETAIN_DOTS;
   }
 
   public final boolean get () {

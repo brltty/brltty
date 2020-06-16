@@ -22,7 +22,12 @@ import org.a11y.brlapi.*;
 
 public class ClientPriorityParameter extends LocalParameter {
   public ClientPriorityParameter (BasicConnection connection) {
-    super(connection, Constants.PARAM_CLIENT_PRIORITY);
+    super(connection);
+  }
+
+  @Override
+  public final int getParameter () {
+    return Constants.PARAM_CLIENT_PRIORITY;
   }
 
   public final int get () {
