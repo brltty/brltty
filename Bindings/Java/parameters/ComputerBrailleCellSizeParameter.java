@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ComputerBrailleCellSizeParameter extends GlobalParameter {
-  public ComputerBrailleCellSizeParameter (Connection connection) {
+  public ComputerBrailleCellSizeParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_COMPUTER_BRAILLE_CELL_SIZE);
   }
 
@@ -29,7 +29,7 @@ public class ComputerBrailleCellSizeParameter extends GlobalParameter {
     return toByte(getValue());
   }
 
-  public void set (byte size) {
+  public final void set (byte size) {
     setValue(new byte[] {size});
   }
 }

@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class DeviceKeyCodesParameter extends GlobalParameter {
-  public DeviceKeyCodesParameter (Connection connection) {
+  public DeviceKeyCodesParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_DEVICE_KEY_CODES);
   }
 

@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class RenderedCellsParameter extends LocalParameter {
-  public RenderedCellsParameter (Connection connection) {
+  public RenderedCellsParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_RENDERED_CELLS);
   }
 

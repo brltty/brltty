@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class CursorBlinkPercentageParameter extends GlobalParameter {
-  public CursorBlinkPercentageParameter (Connection connection) {
+  public CursorBlinkPercentageParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_CURSOR_BLINK_PERCENTAGE);
   }
 
@@ -29,7 +29,7 @@ public class CursorBlinkPercentageParameter extends GlobalParameter {
     return toByte(getValue());
   }
 
-  public void set (byte percentage) {
+  public final void set (byte percentage) {
     setValue(new byte[] {percentage});
   }
 }

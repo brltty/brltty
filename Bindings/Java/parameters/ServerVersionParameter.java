@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ServerVersionParameter extends GlobalParameter {
-  public ServerVersionParameter (Connection connection) {
+  public ServerVersionParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_SERVER_VERSION);
   }
 

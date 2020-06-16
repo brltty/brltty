@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class KeyShortNameParameter extends GlobalParameter {
-  public KeyShortNameParameter (Connection connection) {
+  public KeyShortNameParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_KEY_SHORT_NAME);
   }
 

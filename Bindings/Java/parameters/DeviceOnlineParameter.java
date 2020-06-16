@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class DeviceOnlineParameter extends GlobalParameter {
-  public DeviceOnlineParameter (Connection connection) {
+  public DeviceOnlineParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_DEVICE_ONLINE);
   }
 

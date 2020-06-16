@@ -20,11 +20,11 @@
 package org.a11y.brlapi;
 
 public abstract class Parameter {
-  private final Connection clientConnection;
+  private final BasicConnection clientConnection;
   private final int parameterValue;
   private final boolean isGlobal;
 
-  protected Parameter (Connection connection, int parameter, boolean global) {
+  protected Parameter (BasicConnection connection, int parameter, boolean global) {
     clientConnection = connection;
     parameterValue = parameter;
     isGlobal = global;

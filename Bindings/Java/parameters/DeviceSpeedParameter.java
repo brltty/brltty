@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class DeviceSpeedParameter extends GlobalParameter {
-  public DeviceSpeedParameter (Connection connection) {
+  public DeviceSpeedParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_DEVICE_SPEED);
   }
 

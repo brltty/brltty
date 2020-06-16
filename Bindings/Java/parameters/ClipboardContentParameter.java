@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ClipboardContentParameter extends GlobalParameter {
-  public ClipboardContentParameter (Connection connection) {
+  public ClipboardContentParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_CLIPBOARD_CONTENT);
   }
 
@@ -29,7 +29,7 @@ public class ClipboardContentParameter extends GlobalParameter {
     return toString(getValue());
   }
 
-  public void set (String text) {
+  public final void set (String text) {
     setValue(text);
   }
 }

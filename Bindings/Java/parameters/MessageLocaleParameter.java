@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class MessageLocaleParameter extends GlobalParameter {
-  public MessageLocaleParameter (Connection connection) {
+  public MessageLocaleParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_MESSAGE_LOCALE);
   }
 
@@ -29,7 +29,7 @@ public class MessageLocaleParameter extends GlobalParameter {
     return toString(getValue());
   }
 
-  public void set (String locale) {
+  public final void set (String locale) {
     setValue(locale);
   }
 }

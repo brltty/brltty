@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class DriverCodeParameter extends GlobalParameter {
-  public DriverCodeParameter (Connection connection) {
+  public DriverCodeParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_DRIVER_CODE);
   }
 

@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class BoundCommandCodesParameter extends GlobalParameter {
-  public BoundCommandCodesParameter (Connection connection) {
+  public BoundCommandCodesParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_BOUND_COMMAND_CODES);
   }
 

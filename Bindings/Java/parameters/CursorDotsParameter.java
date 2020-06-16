@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class CursorDotsParameter extends GlobalParameter {
-  public CursorDotsParameter (Connection connection) {
+  public CursorDotsParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_CURSOR_DOTS);
   }
 
@@ -29,7 +29,7 @@ public class CursorDotsParameter extends GlobalParameter {
     return toByte(getValue());
   }
 
-  public void set (byte dots) {
+  public final void set (byte dots) {
     setValue(new byte[] {dots});
   }
 }

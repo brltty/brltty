@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class LiteraryBrailleParameter extends GlobalParameter {
-  public LiteraryBrailleParameter (Connection connection) {
+  public LiteraryBrailleParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_LITERARY_BRAILLE);
   }
 
@@ -29,7 +29,7 @@ public class LiteraryBrailleParameter extends GlobalParameter {
     return toBoolean(getValue());
   }
 
-  public void set (boolean yes) {
+  public final void set (boolean yes) {
     setValue(new boolean[] {yes});
   }
 }

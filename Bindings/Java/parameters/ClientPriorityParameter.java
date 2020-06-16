@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ClientPriorityParameter extends LocalParameter {
-  public ClientPriorityParameter (Connection connection) {
+  public ClientPriorityParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_CLIENT_PRIORITY);
   }
 
@@ -29,7 +29,7 @@ public class ClientPriorityParameter extends LocalParameter {
     return toInt(getValue());
   }
 
-  public void set (int priority) {
+  public final void set (int priority) {
     setValue(new int[] {priority});
   }
 }

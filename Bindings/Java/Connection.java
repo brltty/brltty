@@ -91,7 +91,7 @@ public class Connection extends BasicConnection {
     writeText(Constants.CURSOR_OFF, text);
   }
 
-  public static class Parameters {
+  public final static class Parameters {
     public final ServerVersionParameter serverVersion;
     public final ClientPriorityParameter clientPriority;
     public final DriverNameParameter driverName;
@@ -125,7 +125,7 @@ public class Connection extends BasicConnection {
     public final LiteraryBrailleTableParameter literaryBrailleTable;
     public final MessageLocaleParameter messageLocale;
 
-    private Parameters (Connection connection) {
+    private Parameters (BasicConnection connection) {
       serverVersion = new ServerVersionParameter(connection);
       clientPriority = new ClientPriorityParameter(connection);
       driverName = new DriverNameParameter(connection);

@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class RetainDotsParameter extends LocalParameter {
-  public RetainDotsParameter (Connection connection) {
+  public RetainDotsParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_RETAIN_DOTS);
   }
 
@@ -29,7 +29,7 @@ public class RetainDotsParameter extends LocalParameter {
     return toBoolean(getValue());
   }
 
-  public void set (boolean yes) {
+  public final void set (boolean yes) {
     setValue(new boolean[] {yes});
   }
 }

@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class DisplaySizeParameter extends GlobalParameter {
-  public DisplaySizeParameter (Connection connection) {
+  public DisplaySizeParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_DISPLAY_SIZE);
   }
 

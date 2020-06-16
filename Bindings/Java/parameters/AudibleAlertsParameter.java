@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class AudibleAlertsParameter extends GlobalParameter {
-  public AudibleAlertsParameter (Connection connection) {
+  public AudibleAlertsParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_AUDIBLE_ALERTS);
   }
 
@@ -29,7 +29,7 @@ public class AudibleAlertsParameter extends GlobalParameter {
     return toBoolean(getValue());
   }
 
-  public void set (boolean yes) {
+  public final void set (boolean yes) {
     setValue(new boolean[] {yes});
   }
 }

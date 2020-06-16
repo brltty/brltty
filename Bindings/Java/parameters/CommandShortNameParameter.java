@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class CommandShortNameParameter extends GlobalParameter {
-  public CommandShortNameParameter (Connection connection) {
+  public CommandShortNameParameter (BasicConnection connection) {
     super(connection, Constants.PARAM_COMMAND_SHORT_NAME);
   }
 
