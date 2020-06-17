@@ -30,6 +30,7 @@ public class ComputerBrailleRowsMaskParameter extends GlobalParameter {
     return Constants.PARAM_COMPUTER_BRAILLE_ROWS_MASK;
   }
 
+  @Override
   public final BitMask get () {
     return toBitMask(getValue());
   }

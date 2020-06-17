@@ -30,7 +30,8 @@ public class AudibleAlertsParameter extends GlobalParameter {
     return Constants.PARAM_AUDIBLE_ALERTS;
   }
 
-  public final boolean get () {
+  @Override
+  public final Boolean get () {
     return toBoolean(getValue());
   }
 

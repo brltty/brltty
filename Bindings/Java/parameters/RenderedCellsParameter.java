@@ -30,6 +30,7 @@ public class RenderedCellsParameter extends LocalParameter {
     return Constants.PARAM_RENDERED_CELLS;
   }
 
+  @Override
   public final byte[] get () {
     return toByteArray(getValue());
   }

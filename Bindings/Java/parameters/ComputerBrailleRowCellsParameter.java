@@ -30,6 +30,7 @@ public class ComputerBrailleRowCellsParameter extends GlobalParameter {
     return Constants.PARAM_COMPUTER_BRAILLE_ROW_CELLS;
   }
 
+  @Override
   public final RowCells get (long row) {
     return toRowCells(getValue(row));
   }

@@ -30,7 +30,8 @@ public class ClientPriorityParameter extends LocalParameter {
     return Constants.PARAM_CLIENT_PRIORITY;
   }
 
-  public final int get () {
+  @Override
+  public final Integer get () {
     return toInt(getValue());
   }
 

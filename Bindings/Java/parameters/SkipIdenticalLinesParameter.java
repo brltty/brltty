@@ -30,7 +30,8 @@ public class SkipIdenticalLinesParameter extends GlobalParameter {
     return Constants.PARAM_SKIP_IDENTICAL_LINES;
   }
 
-  public final boolean get () {
+  @Override
+  public final Boolean get () {
     return toBoolean(getValue());
   }
 

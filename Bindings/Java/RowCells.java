@@ -20,6 +20,8 @@
 package org.a11y.brlapi;
 
 public class RowCells {
+  private final static int BYTE_SIZE = Byte.SIZE;
+
   private final byte[] cellArray;
   private final BitMask cellMask;
 
@@ -34,7 +36,7 @@ public class RowCells {
     int index = copyBytes(cellArray, bytes, 0);
 
     {
-      byte[] mask = new byte[cellArray.length / Byte.SIZE];
+      byte[] mask = new byte[cellArray.length / BYTE_SIZE];
       index = copyBytes(mask, bytes, index);
       cellMask = new BitMask(mask);
     }

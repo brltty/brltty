@@ -30,6 +30,7 @@ public class ComputerBrailleTableParameter extends GlobalParameter {
     return Constants.PARAM_COMPUTER_BRAILLE_TABLE;
   }
 
+  @Override
   public final String get () {
     return toString(getValue());
   }

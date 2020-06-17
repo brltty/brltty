@@ -30,6 +30,7 @@ public class DisplaySizeParameter extends GlobalParameter {
     return Constants.PARAM_DISPLAY_SIZE;
   }
 
+  @Override
   public final DisplaySize get () {
     return toDisplaySize(getValue());
   }

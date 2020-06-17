@@ -30,6 +30,7 @@ public class DeviceIdentifierParameter extends GlobalParameter {
     return Constants.PARAM_DEVICE_IDENTIFIER;
   }
 
+  @Override
   public final String get () {
     return toString(getValue());
   }

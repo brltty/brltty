@@ -30,7 +30,8 @@ public class ComputerBrailleCellSizeParameter extends GlobalParameter {
     return Constants.PARAM_COMPUTER_BRAILLE_CELL_SIZE;
   }
 
-  public final byte get () {
+  @Override
+  public final Byte get () {
     return toByte(getValue());
   }
 

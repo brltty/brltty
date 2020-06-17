@@ -30,7 +30,8 @@ public class DeviceSpeedParameter extends GlobalParameter {
     return Constants.PARAM_DEVICE_SPEED;
   }
 
-  public final int get () {
+  @Override
+  public final Integer get () {
     return toInt(getValue());
   }
 }

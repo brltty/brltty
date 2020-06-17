@@ -30,6 +30,7 @@ public class LiteraryBrailleTableParameter extends GlobalParameter {
     return Constants.PARAM_LITERARY_BRAILLE_TABLE;
   }
 
+  @Override
   public final String get () {
     return toString(getValue());
   }

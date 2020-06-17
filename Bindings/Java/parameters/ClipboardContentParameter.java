@@ -30,6 +30,7 @@ public class ClipboardContentParameter extends GlobalParameter {
     return Constants.PARAM_CLIPBOARD_CONTENT;
   }
 
+  @Override
   public final String get () {
     return toString(getValue());
   }

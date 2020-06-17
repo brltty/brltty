@@ -30,7 +30,8 @@ public class DeviceOnlineParameter extends GlobalParameter {
     return Constants.PARAM_DEVICE_ONLINE;
   }
 
-  public final boolean get () {
+  @Override
+  public final Boolean get () {
     return toBoolean(getValue());
   }
 }

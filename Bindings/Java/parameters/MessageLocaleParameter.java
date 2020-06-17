@@ -30,6 +30,7 @@ public class MessageLocaleParameter extends GlobalParameter {
     return Constants.PARAM_MESSAGE_LOCALE;
   }
 
+  @Override
   public final String get () {
     return toString(getValue());
   }

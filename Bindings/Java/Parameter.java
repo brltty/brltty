@@ -46,6 +46,14 @@ public abstract class Parameter extends ParameterHelper {
     setValue(0, value);
   }
 
+  public Object get (long subparam) {
+    return null;
+  }
+
+  public Object get () {
+    return null;
+  }
+
   public final static class WatcherHandle implements AutoCloseable {
     private long watchIdentifier;
 

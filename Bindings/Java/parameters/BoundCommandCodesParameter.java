@@ -30,6 +30,7 @@ public class BoundCommandCodesParameter extends GlobalParameter {
     return Constants.PARAM_BOUND_COMMAND_CODES;
   }
 
+  @Override
   public final long[] get () {
     return toLongArray(getValue());
   }

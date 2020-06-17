@@ -30,6 +30,7 @@ public class DeviceModelParameter extends GlobalParameter {
     return Constants.PARAM_DEVICE_MODEL;
   }
 
+  @Override
   public final String get () {
     return toString(getValue());
   }

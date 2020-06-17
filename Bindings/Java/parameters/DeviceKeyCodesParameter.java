@@ -30,6 +30,7 @@ public class DeviceKeyCodesParameter extends GlobalParameter {
     return Constants.PARAM_DEVICE_KEY_CODES;
   }
 
+  @Override
   public final long[] get () {
     return toLongArray(getValue());
   }

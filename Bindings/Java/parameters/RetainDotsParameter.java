@@ -30,7 +30,8 @@ public class RetainDotsParameter extends LocalParameter {
     return Constants.PARAM_RETAIN_DOTS;
   }
 
-  public final boolean get () {
+  @Override
+  public final Boolean get () {
     return toBoolean(getValue());
   }
 

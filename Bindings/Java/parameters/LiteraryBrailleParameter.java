@@ -30,7 +30,8 @@ public class LiteraryBrailleParameter extends GlobalParameter {
     return Constants.PARAM_LITERARY_BRAILLE;
   }
 
-  public final boolean get () {
+  @Override
+  public final Boolean get () {
     return toBoolean(getValue());
   }
 

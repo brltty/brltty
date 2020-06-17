@@ -30,6 +30,7 @@ public class CommandLongNameParameter extends GlobalParameter {
     return Constants.PARAM_COMMAND_LONG_NAME;
   }
 
+  @Override
   public final String get (long code) {
     return toString(getValue(code));
   }

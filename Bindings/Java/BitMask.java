@@ -20,12 +20,14 @@
 package org.a11y.brlapi;
 
 public class BitMask {
+  private final static int BYTE_SIZE = Byte.SIZE;
+
   private final byte[] maskBytes;
   private final int maskSize;
 
   public BitMask (byte[] bytes) {
     maskBytes = bytes;
-    maskSize = maskBytes.length * Byte.SIZE;
+    maskSize = maskBytes.length * BYTE_SIZE;
   }
 
   public int getSize () {
@@ -36,8 +38,8 @@ public class BitMask {
     if (index < 0) return false;
     if (index >= maskSize) return false;
 
-    int bit = 1 << (index % Byte.SIZE);
-    index /= Byte.SIZE;
+    int bit = 1 << (index % BYTE_SIZE);
+    index /= BYTE_SIZE;
     return (maskBytes[index] & bit) != 0;
   }
 }

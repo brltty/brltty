@@ -30,7 +30,8 @@ public class DeviceCellSizeParameter extends GlobalParameter {
     return Constants.PARAM_DEVICE_CELL_SIZE;
   }
 
-  public final byte get () {
+  @Override
+  public final Byte get () {
     return toByte(getValue());
   }
 }

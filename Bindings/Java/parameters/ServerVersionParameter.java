@@ -30,7 +30,8 @@ public class ServerVersionParameter extends GlobalParameter {
     return Constants.PARAM_SERVER_VERSION;
   }
 
-  public final int get () {
+  @Override
+  public final Integer get () {
     return toInt(getValue());
   }
 }

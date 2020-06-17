@@ -30,7 +30,8 @@ public class CursorBlinkPeriodParameter extends GlobalParameter {
     return Constants.PARAM_CURSOR_BLINK_PERIOD;
   }
 
-  public final int get () {
+  @Override
+  public final Integer get () {
     return toInt(getValue());
   }
 

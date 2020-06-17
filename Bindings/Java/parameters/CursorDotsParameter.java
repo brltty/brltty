@@ -30,7 +30,8 @@ public class CursorDotsParameter extends GlobalParameter {
     return Constants.PARAM_CURSOR_DOTS;
   }
 
-  public final byte get () {
+  @Override
+  public final Byte get () {
     return toByte(getValue());
   }
 

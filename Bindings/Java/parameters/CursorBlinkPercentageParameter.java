@@ -30,7 +30,8 @@ public class CursorBlinkPercentageParameter extends GlobalParameter {
     return Constants.PARAM_CURSOR_BLINK_PERCENTAGE;
   }
 
-  public final byte get () {
+  @Override
+  public final Byte get () {
     return toByte(getValue());
   }
 
