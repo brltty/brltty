@@ -1471,3 +1471,24 @@ JAVA_INSTANCE_METHOD(
     JAVA_SET_FIELD(env, Int, this, field, ekc.flags);
   }
 }
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_KeyCode, isKeyPress, jboolean,
+  jlong code
+) {
+  return (code & BRLAPI_DRV_KEY_PRESS)? JNI_TRUE: JNI_FALSE;
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_KeyCode, getKeyGroup, jbyte,
+  jlong code
+) {
+  return BRLAPI_DRV_KEY_GROUP(code);
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_KeyCode, getKeyNumber, jbyte,
+  jlong code
+) {
+  return BRLAPI_DRV_KEY_NUMBER(code);
+}
