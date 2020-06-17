@@ -52,4 +52,13 @@ public class Key extends NativeLibrary {
   public final int getFlagsValue () {
     return flagsValue;
   }
+
+  @Override
+  public String toString () {
+    return String.format(
+      "Code:%08X Type:%08X Cmd:%04X Arg:%04X Flg:%04X",
+      getKeyCode(), getTypeValue(),
+      getCommandValue(), getArgumentValue(), getFlagsValue()
+    );
+  }
 }

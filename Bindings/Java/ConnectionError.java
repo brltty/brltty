@@ -20,6 +20,7 @@
 package org.a11y.brlapi;
 
 public class ConnectionError extends Error {
+  @Override
   public native String toString ();
 
   private final int apiError;

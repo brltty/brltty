@@ -34,15 +34,7 @@ public class TestProgram {
   }
 
   private static void showKey (Key key, Connection connection) {
-    String text = String.format(
-      "code=0X%X type=%X cmd=%X arg=%X flg=%X",
-      key.getKeyCode(),
-      key.getTypeValue(),
-      key.getCommandValue(),
-      key.getArgumentValue(),
-      key.getFlagsValue()
-    );
-
+    String text = key.toString();
     writeProperty("Key", text);
     if (connection != null) connection.writeText(text);
   }

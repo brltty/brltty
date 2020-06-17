@@ -20,6 +20,7 @@
 package org.a11y.brlapi;
 
 public class ConnectionException extends RuntimeException {
+  @Override
   public native String toString ();
 
   private final long connectionHandle;
