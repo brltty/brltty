@@ -23,22 +23,43 @@ import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
 public class BasicConnection extends NativeLibrary implements AutoCloseable {
-  protected long connectionHandle;
+  private long connectionHandle;
 
-  protected native int openConnection (
+  private native int openConnection (
     ConnectionSettings desiredSettings,
     ConnectionSettings actualSettings
   );
 
+  protected final ConnectionSettings connectionSettings;
+  protected final int fileDescriptor;
+
+  public BasicConnection (ConnectionSettings settings) {
+    super();
+    connectionSettings = new ConnectionSettings();
+    fileDescriptor = openConnection(settings, connectionSettings);
+  }
+
+  public final String getServerHost () {
+    return connectionSettings.getServerHost();
+  }
+
+  public final String getAuthorizationSchemes () {
+    return connectionSettings.getAuthorizationSchemes();
+  }
+
+  public final int getFileDescriptor () {
+    return fileDescriptor;
+  }
+
   private native void closeConnection ();
-  private boolean closed = false;
+  private boolean hasBeenClosed = false;
 
   @Override
   public void close () {
     synchronized (this) {
-      if (!closed) {
+      if (!hasBeenClosed) {
         closeConnection();
-        closed = true;
+        hasBeenClosed = true;
       }
     }
   }
@@ -85,25 +106,4 @@ public class BasicConnection extends NativeLibrary implements AutoCloseable {
   public native void setParameter (int parameter, long subparam, boolean global, Object value);
   public native long watchParameter (int parameter, long subparam, boolean global, ParameterWatcher watcher);
   public native static void unwatchParameter (long identifier);
-
-  protected final ConnectionSettings connectionSettings;
-  protected final int fileDescriptor;
-
-  public BasicConnection (ConnectionSettings settings) {
-    super();
-    connectionSettings = new ConnectionSettings();
-    fileDescriptor = openConnection(settings, connectionSettings);
-  }
-
-  public String getServerHost () {
-    return connectionSettings.getServerHost();
-  }
-
-  public String getAuthorizationSchemes () {
-    return connectionSettings.getAuthorizationSchemes();
-  }
-
-  public int getFileDescriptor () {
-    return fileDescriptor;
-  }
 }
