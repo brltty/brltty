@@ -19,6 +19,8 @@
 
 package org.a11y.brlapi;
 
+import java.util.Arrays;
+
 public class BitMask {
   private final static int BYTE_SIZE = Byte.SIZE;
 
@@ -41,5 +43,45 @@ public class BitMask {
     int bit = 1 << (index % BYTE_SIZE);
     index /= BYTE_SIZE;
     return (maskBytes[index] & bit) != 0;
+  }
+
+  private int[] bitNumbers = null;
+
+  private final int[] newBitNumbers () {
+    int size = getSize();
+    int[] buffer = new int[size];
+    int count = 0;
+    int start = 0;
+
+    for (int bits : maskBytes) {
+      if ((bits &= 0XFF) != 0) {
+        int bit = start;
+
+        while (true) {
+          if ((bits & 1) != 0) buffer[count++] = bit;
+          if ((bits >>= 1) == 0) break;
+          bit += 1;
+        }
+      }
+
+      start += BYTE_SIZE;
+    }
+
+    int[] result = new int[count];
+    System.arraycopy(buffer, 0, result, 0, count);
+    return result;
+  }
+
+  public final int[] getBitNumbers () {
+    synchronized (this) {
+      if (bitNumbers == null) bitNumbers = newBitNumbers();
+    }
+
+    return bitNumbers;
+  }
+
+  @Override
+  public String toString () {
+    return Arrays.toString(getBitNumbers());
   }
 }
