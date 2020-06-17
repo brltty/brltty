@@ -19,6 +19,8 @@
 
 package org.a11y.brlapi;
 
+import java.util.Arrays;
+
 public abstract class Parameter extends ParameterHelper {
   private final BasicConnection clientConnection;
 
@@ -52,6 +54,41 @@ public abstract class Parameter extends ParameterHelper {
 
   public Object get () {
     return null;
+  }
+
+  public static String valueToString (Object value) {
+    if (value.getClass().isArray()) {
+      if (value instanceof boolean[]) {
+        return Arrays.toString((boolean[])value);
+      }
+
+      if (value instanceof byte[]) {
+        return Arrays.toString((byte[])value);
+      }
+
+      if (value instanceof short[]) {
+        return Arrays.toString((short[])value);
+      }
+
+      if (value instanceof int[]) {
+        return Arrays.toString((int[])value);
+      }
+
+      if (value instanceof long[]) {
+        return Arrays.toString((long[])value);
+      }
+    }
+
+    return value.toString();
+  }
+
+  public String toString (long subparam) {
+    return valueToString(getValue(subparam));
+  }
+
+  @Override
+  public String toString () {
+    return toString(0);
   }
 
   public final static class WatcherHandle implements AutoCloseable {
