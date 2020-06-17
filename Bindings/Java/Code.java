@@ -29,4 +29,9 @@ public abstract class Code extends NativeLibrary {
   public final long getCode () {
     return codeValue;
   }
+
+  @Override
+  public String toString () {
+    return String.format("Code:%016X", getCode());
+  }
 }

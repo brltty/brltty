@@ -43,8 +43,8 @@ public class KeyCode extends Code {
   @Override
   public String toString () {
     return String.format(
-      "Code:%08X Act:%s Grp:%02X Num:%02X",
-      getCode(), (isPress()? "press": "release"), getGroup(), getNumber()
+      "%s Act:%s Grp:%02X Num:%02X",
+      super.toString(), (isPress()? "press": "release"), getGroup(), getNumber()
     );
   }
 }

@@ -51,8 +51,8 @@ public class CommandCode extends Code {
   @Override
   public String toString () {
     return String.format(
-      "Code:%08X Type:%08X Cmd:%04X Arg:%04X Flg:%04X",
-      getCode(), getType(), getCommand(), getArgument(), getFlags()
+      "%s Type:%08X Cmd:%04X Arg:%04X Flg:%04X",
+      super.toString(), getType(), getCommand(), getArgument(), getFlags()
     );
   }
 }
