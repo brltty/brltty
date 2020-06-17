@@ -53,4 +53,38 @@ public class RowCells {
   public byte getCell (int index) {
     return isDefined(index)? cellArray[index]: 0;
   }
+
+  @Override
+  public String toString () {
+    StringBuilder sb = new StringBuilder();
+    sb.append('{');
+    boolean first = true;
+
+    for (int index : cellMask.getBitNumbers()) {
+      if (first) {
+        first = false;
+      } else {
+        sb.append(", ");
+      }
+
+      sb.append(String.format("%02X:", index));
+      int cell = cellArray[index];
+
+      if (cell != 0) {
+        cell &= 0XFF;
+        int dot = 1;
+
+        while (true) {
+          if ((cell & 1) != 0) sb.append(dot);
+          if ((cell >>= 1) == 0) break;
+          dot += 1;
+        }
+      } else {
+        sb.append(0);
+      }
+    }
+
+    sb.append('}');
+    return sb.toString();
+  }
 }
