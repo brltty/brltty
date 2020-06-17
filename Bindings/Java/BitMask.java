@@ -77,7 +77,10 @@ public class BitMask {
       if (bitNumbers == null) bitNumbers = newBitNumbers();
     }
 
-    return bitNumbers;
+    int count = bitNumbers.length;
+    int[] result = new int[count];
+    System.arraycopy(bitNumbers, 0, result, 0, count);
+    return result;
   }
 
   @Override
