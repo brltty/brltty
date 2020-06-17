@@ -1444,11 +1444,11 @@ JAVA_STATIC_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_Key, expandKeyCode, void,
+  org_a11y_brlapi_CommandCode, expandCode, void,
   jlong code
 ) {
   brlapi_expandedKeyCode_t ekc;
-  brlapi_expandKeyCode((brlapi_keyCode_t) code, &ekc);
+  brlapi_expandKeyCode((brlapi_keyCode_t)code, &ekc);
   GET_CLASS(env, class, this, );
 
   {

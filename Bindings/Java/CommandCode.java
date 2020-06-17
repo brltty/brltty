@@ -19,37 +19,32 @@
 
 package org.a11y.brlapi;
 
-public class Key extends NativeLibrary {
-  private native void expandKeyCode (long code);
+public class CommandCode extends Code {
+  private native void expandCode (long code);
 
-  private final long keyCode;
   private int typeValue;
   private int commandValue;
   private int argumentValue;
   private int flagsValue;
 
-  public Key (long code) {
-    keyCode = code;
-    expandKeyCode(code);
+  public CommandCode (long code) {
+    super(code);
+    expandCode(code);
   }
 
-  public final long getKeyCode () {
-    return keyCode;
-  }
-
-  public final int getTypeValue () {
+  public final int getType () {
     return typeValue;
   }
 
-  public final int getCommandValue () {
+  public final int getCommand () {
     return commandValue;
   }
 
-  public final int getArgumentValue () {
+  public final int getArgument () {
     return argumentValue;
   }
 
-  public final int getFlagsValue () {
+  public final int getFlags () {
     return flagsValue;
   }
 
@@ -57,8 +52,7 @@ public class Key extends NativeLibrary {
   public String toString () {
     return String.format(
       "Code:%08X Type:%08X Cmd:%04X Arg:%04X Flg:%04X",
-      getKeyCode(), getTypeValue(),
-      getCommandValue(), getArgumentValue(), getFlagsValue()
+      getCode(), getType(), getCommand(), getArgument(), getFlags()
     );
   }
 }
