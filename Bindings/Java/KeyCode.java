@@ -20,30 +20,30 @@
 package org.a11y.brlapi;
 
 public class KeyCode extends Code {
-  private native static boolean isKeyPress (long code);
-  private native static byte getKeyGroup (long code);
-  private native static byte getKeyNumber (long code);
+  public native static boolean isPress (long code);
+  public native static byte getGroup (long code);
+  public native static byte getNumber (long code);
 
   public KeyCode (long code) {
     super(code);
   }
 
   public final boolean isPress () {
-    return isKeyPress(getCode());
+    return isPress(getCode());
   }
 
   public final byte getGroup () {
-    return getKeyGroup(getCode());
+    return getGroup(getCode());
   }
 
   public final byte getNumber () {
-    return getKeyNumber(getCode());
+    return getNumber(getCode());
   }
 
   @Override
   public String toString () {
     return String.format(
-      "%s Act:%s Grp:%02X Num:%02X",
+      "%s %s Grp:%02X Num:%02X",
       super.toString(), (isPress()? "press": "release"), getGroup(), getNumber()
     );
   }
