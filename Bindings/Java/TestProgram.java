@@ -85,9 +85,7 @@ public class TestProgram {
         writeProperty("Authorization Schemes", "%s", connection.getAuthorizationSchemes());
         writeProperty("Driver Name", "%s", connection.getDriverName());
         writeProperty("Model Identifier", "%s", connection.getModelIdentifier());
-
-        DisplaySize size = connection.getDisplaySize();
-        writeProperty("Display Size",  "%dx%d", size.getWidth(), size.getHeight());
+        writeProperty("Display Size",  "%s", connection.getDisplaySize().toString());
 
         int tty = connection.enterTtyMode();
         try {

@@ -39,4 +39,9 @@ public class DisplaySize {
   public int getHeight () {
     return displayHeight;
   }
+
+  @Override
+  public String toString () {
+    return String.format("%dx%d", getWidth(), getHeight());
+  }
 }
