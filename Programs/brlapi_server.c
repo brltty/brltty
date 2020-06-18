@@ -1346,9 +1346,12 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
   return 0;
 }
 
-static brlapi_keyCode_t makeClientKeyCode (KeyGroup group, KeyNumber number, int press)
+static brlapi_keyCode_t makeDriverKeyCode (KeyGroup group, KeyNumber number, int press)
 {
-  brlapi_keyCode_t code = (group << 8) | number;
+  brlapi_keyCode_t code =
+    ((group << BRLAPI_DRV_KEY_GROUP_SHIFT) & BRLAPI_DRV_KEY_GROUP_MASK) |
+    ((number << BRLAPI_DRV_KEY_NUMBER_SHIFT) & BRLAPI_DRV_KEY_NUMBER_MASK);
+
   if (press) code |= BRLAPI_DRV_KEY_PRESS;
   return code;
 }
@@ -1846,7 +1849,7 @@ static int param_addKeyCode (const KeyNameEntry *kne, void *data)
 
     if (akc->next < akc->end) {
       brlapi_param_keyCode_t *key = akc->next;
-      *key = makeClientKeyCode(kne->value.group, kne->value.number, 0);
+      *key = makeDriverKeyCode(kne->value.group, kne->value.number, 0);
       akc->next += sizeof(*key);
     }
   }
@@ -4076,7 +4079,7 @@ static int api__handleKeyEvent(brlapi_keyCode_t clientCode) {
 }
 
 int api_handleKeyEvent(KeyGroup group, KeyNumber number, int press) {
-  brlapi_keyCode_t clientCode = makeClientKeyCode(group, number, press);
+  brlapi_keyCode_t clientCode = makeDriverKeyCode(group, number, press);
   logMessage(LOG_CATEGORY(SERVER_EVENTS), "API got key %02x %02x (press %d), thus client code %016"BRLAPI_PRIxKEYCODE, group, number, press, clientCode);
 
   int ret;
