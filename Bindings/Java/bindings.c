@@ -1480,6 +1480,13 @@ JAVA_STATIC_METHOD(
 }
 
 JAVA_STATIC_METHOD(
+  org_a11y_brlapi_KeyCode, getValue, jlong,
+  jlong code
+) {
+  return code & BRLAPI_DRV_KEY_VALUE_MASK;
+}
+
+JAVA_STATIC_METHOD(
   org_a11y_brlapi_KeyCode, getGroup, jbyte,
   jlong code
 ) {

@@ -171,22 +171,31 @@ typedef uint64_t brlapi_keyCode_t;
 #define BRLAPI_KEY_SYM_UNICODE		UINT64_C(0X01000000)
 
 /**
- * Flag for a raw keycode press vs release
- *
  * When brlapi_enterTtyMode() has been called with a driver name,
  * brlapi_readKey() and brlapi_readKeyWithTimeout() will return
  * driver-specific key codes except for the common BRLAPI_DRV_KEY_PRESS flag
  * which indicates that it's a key press (as opposed to a release) event.
  */
+
+/** Flag for a driver-specific keycode press (not set means a release) */
 #define BRLAPI_DRV_KEY_PRESS BRLAPI_KEYCODE_C(0X8000000000000000)
 
+/** Shift for key number of brlapi_keyCode_t */
 #define BRLAPI_DRV_KEY_NUMBER_SHIFT 0
+/** Mask for key number of brlapi_keyCode_t */
 #define BRLAPI_DRV_KEY_NUMBER_MASK 0XFF
+/** Get key number of brlapi_keyCode_t */
 #define BRLAPI_DRV_KEY_NUMBER(code) (((code) & BRLAPI_DRV_KEY_NUMBER_MASK) >> BRLAPI_DRV_KEY_NUMBER_SHIFT)
 
+/** Shift for key group of brlapi_keyCode_t */
 #define BRLAPI_DRV_KEY_GROUP_SHIFT 8
+/** Mask for key group of brlapi_keyCode_t */
 #define BRLAPI_DRV_KEY_GROUP_MASK 0XFF00
+/** Get key group of brlapi_keyCode_t */
 #define BRLAPI_DRV_KEY_GROUP(code) (((code) & BRLAPI_DRV_KEY_GROUP_MASK) >> BRLAPI_DRV_KEY_GROUP_SHIFT)
+
+/** Mask for key value (group and number) of brlapi_keyCode_t */
+#define BRLAPI_DRV_KEY_VALUE_MASK (BRLAPI_DRV_KEY_GROUP_MASK | BRLAPI_DRV_KEY_NUMBER_MASK)
 
 /** @} */
 

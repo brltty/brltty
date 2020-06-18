@@ -21,6 +21,7 @@ package org.a11y.brlapi;
 
 public class KeyCode extends Code {
   public native static boolean isPress (long code);
+  public native static long getValue (long code);
   public native static byte getGroup (long code);
   public native static byte getNumber (long code);
 
@@ -30,6 +31,10 @@ public class KeyCode extends Code {
 
   public final boolean isPress () {
     return isPress(getCode());
+  }
+
+  public final long getValue () {
+    return getValue(getCode());
   }
 
   public final byte getGroup () {
