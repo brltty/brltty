@@ -1487,14 +1487,14 @@ JAVA_STATIC_METHOD(
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_KeyCode, getGroup, jbyte,
+  org_a11y_brlapi_KeyCode, getGroup, jint,
   jlong code
 ) {
   return BRLAPI_DRV_KEY_GROUP(code);
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_KeyCode, getNumber, jbyte,
+  org_a11y_brlapi_KeyCode, getNumber, jint,
   jlong code
 ) {
   return BRLAPI_DRV_KEY_NUMBER(code);

@@ -22,8 +22,8 @@ package org.a11y.brlapi;
 public class KeyCode extends Code {
   public native static boolean isPress (long code);
   public native static long getValue (long code);
-  public native static byte getGroup (long code);
-  public native static byte getNumber (long code);
+  public native static int getGroup (long code);
+  public native static int getNumber (long code);
 
   public KeyCode (long code) {
     super(code);
@@ -37,18 +37,18 @@ public class KeyCode extends Code {
     return getValue(getCode());
   }
 
-  public final byte getGroup () {
+  public final int getGroup () {
     return getGroup(getCode());
   }
 
-  public final byte getNumber () {
+  public final int getNumber () {
     return getNumber(getCode());
   }
 
   @Override
   public String toString () {
     return String.format(
-      "%s %s Grp:%02X Num:%02X",
+      "%s %s Grp:%d Num:%d",
       super.toString(), (isPress()? "press": "release"), getGroup(), getNumber()
     );
   }
