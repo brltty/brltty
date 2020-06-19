@@ -91,7 +91,6 @@ public class Connection extends BasicConnection {
   }
 
   private Parameters connectionParameters = null;
-
   public Parameters getParameters () {
     synchronized (this) {
       if (connectionParameters == null) {

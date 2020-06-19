@@ -30,8 +30,6 @@ public abstract class Parameter extends ParameterHelper {
   }
 
   private String parameterLabel = null;
-  private String parameterName = null;
-
   public String getLabel () {
     synchronized (this) {
       if (parameterLabel == null) {
@@ -46,6 +44,7 @@ public abstract class Parameter extends ParameterHelper {
     return parameterLabel;
   }
 
+  private String parameterName = null;
   public String getName () {
     synchronized (this) {
       if (parameterName == null) {

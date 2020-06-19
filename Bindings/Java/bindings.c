@@ -1228,7 +1228,6 @@ JAVA_INSTANCE_METHOD(
 }
 
 typedef struct {
-  JNIEnv *env;
   brlapi_handle_t *handle;
   brlapi_paramCallbackDescriptor_t descriptor;
 
@@ -1247,7 +1246,9 @@ handleWatchedParameter (
   void *identifier, const void *data, size_t length
 ) {
   WatchedParameterData *wpd = (WatchedParameterData *)identifier;
-  JNIEnv *env = wpd->env;
+  brlapi_handle_t *handle = wpd->handle;
+  JNIEnv *env = getJavaEnvironment(handle);
+  if (!env) return;
 
   jobject value = newParameterValueObject(
     env, brlapi_getParameterProperties(parameter),
@@ -1277,7 +1278,6 @@ JAVA_INSTANCE_METHOD(
     if ((wpd = malloc(sizeof(*wpd)))) {
       memset(wpd, 0, sizeof(*wpd));
       wpd->handle = handle;
-      wpd->env = env;
 
       if ((wpd->watcher.object = (*env)->NewGlobalRef(env, watcher))) {
         wpd->watcher.class = (*env)->FindClass(
