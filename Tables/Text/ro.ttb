@@ -29,23 +29,29 @@
 include ltr-latin.tti
 
 # lowercase accented letters
-char \u0103	(123 56  )  # ⠷ ă [LATIN SMALL LETTER A WITH BREVE]
-char \xE2	(1    6  )  # ⠡ â [LATIN SMALL LETTER A WITH CIRCUMFLEX]
+char \u0103	(1    6  )  # ⠡ ă [LATIN SMALL LETTER A WITH BREVE]
+char \xE2	(12   6  )  # ⠣ â [LATIN SMALL LETTER A WITH CIRCUMFLEX]
 char \xEE	(1  4 6  )  # ⠩ î [LATIN SMALL LETTER I WITH CIRCUMFLEX]
-char \u015F	(1234 6  )  # ⠯ ş [LATIN SMALL LETTER S WITH CEDILLA]
-char \u0163	( 2 4 6  )  # ⠪ ţ [LATIN SMALL LETTER T WITH CEDILLA]
+char \u0219	(1   56  )  # ⠱ ș [LATIN SMALL LETTER S WITH COMMA BELOW]
+char \u021B	( 2 4 6  )  # ⠪ ț [LATIN SMALL LETTER T WITH COMMA BELOW]
 
 # uppercase accented letters
-char \xC2	(1    67 )  # ⡡ Â [LATIN CAPITAL LETTER A WITH CIRCUMFLEX]
+char \xC2	(12   67 )  # ⡣ Â [LATIN CAPITAL LETTER A WITH CIRCUMFLEX]
 char \xCE	(1  4 67 )  # ⡩ Î [LATIN CAPITAL LETTER I WITH CIRCUMFLEX]
-char \u0102	(123 567 )  # ⡷ Ă [LATIN CAPITAL LETTER A WITH BREVE]
-char \u015E	(1234 67 )  # ⡯ Ş [LATIN CAPITAL LETTER S WITH CEDILLA]
-char \u0162	( 2 4 67 )  # ⡪ Ţ [LATIN CAPITAL LETTER T WITH CEDILLA]
+char \u0102	(1    67 )  # ⡡ Ă [LATIN CAPITAL LETTER A WITH BREVE]
+char \u0218	(1   567 )  # ⡱ Ș [LATIN CAPITAL LETTER S WITH COMMA BELOW]
+char \u021A	( 2 4 67 )  # ⡪ Ț [LATIN CAPITAL LETTER T WITH COMMA BELOW]
 
 # the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include num-dot8.tti
 
 include punc-basic.tti
 char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
+
+# alias the letters with a comma below to their cedilla variants.
+alias \u015F	\u0219	# ⠱ ş [LATIN SMALL LETTER S WITH CEDILLA]
+alias \u0163	\u021B	# ⠪ ţ [LATIN SMALL LETTER T WITH CEDILLA]
+alias \u015E	\u0218	# ⡱ Ş [LATIN CAPITAL LETTER S WITH CEDILLA]
+alias \u0162	\u021A	# ⡪ Ţ [LATIN CAPITAL LETTER T WITH CEDILLA]
 
 include common.tti
