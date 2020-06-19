@@ -29,6 +29,36 @@ public abstract class Parameter extends ParameterHelper {
     clientConnection = connection;
   }
 
+  private String parameterLabel = null;
+  private String parameterName = null;
+
+  public String getLabel () {
+    synchronized (this) {
+      if (parameterLabel == null) {
+        parameterLabel = getClass()
+                        .getSimpleName()
+                        .replaceAll("Parameter$", "")
+                        .replaceAll("(?<=.)(?=\\p{Upper})", " ")
+                        ;
+      }
+    }
+
+    return parameterLabel;
+  }
+
+  public String getName () {
+    synchronized (this) {
+      if (parameterName == null) {
+        parameterName = getLabel()
+                       .replace(' ', '-')
+                       .toLowerCase()
+                       ;
+      }
+    }
+
+    return parameterName;
+  }
+
   public abstract int getParameter ();
   public abstract boolean isGlobal ();
 
