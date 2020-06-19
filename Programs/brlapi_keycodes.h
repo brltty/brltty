@@ -197,6 +197,9 @@ typedef uint64_t brlapi_keyCode_t;
 /** Mask for key value (group and number) of brlapi_keyCode_t */
 #define BRLAPI_DRV_KEY_VALUE_MASK (BRLAPI_DRV_KEY_GROUP_MASK | BRLAPI_DRV_KEY_NUMBER_MASK)
 
+/** Key number representing any key in the group */
+#define BRLAPI_DRV_KEY_NUMBER_ANY 0XFF
+
 /** @} */
 
 #include "brlapi_constants.h"

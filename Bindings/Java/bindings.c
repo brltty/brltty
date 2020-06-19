@@ -1499,3 +1499,9 @@ JAVA_STATIC_METHOD(
 ) {
   return BRLAPI_DRV_KEY_NUMBER(code);
 }
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_KeyCode, getNumberAny, jint
+) {
+  return BRLAPI_DRV_KEY_NUMBER_ANY;
+}

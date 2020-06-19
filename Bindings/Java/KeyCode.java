@@ -25,6 +25,9 @@ public class KeyCode extends Code {
   public native static int getGroup (long code);
   public native static int getNumber (long code);
 
+  private native static int getNumberAny ();
+  public final static int KEY_NUMBER_ANY = getNumberAny();
+
   public KeyCode (long code) {
     super(code);
   }
