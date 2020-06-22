@@ -173,9 +173,9 @@ typedef uint64_t brlapi_keyCode_t;
 /**
  * When brlapi_enterTtyMode() or brlapi_entg$erTtyModeWithPath() is called
  * with a driver name, brlapi_readKey() and brlapi_readKeyWithTimeout()
- * will return driver-specific key codes. From most- to least-significant
- * byte, They have the format ff 00 00 00 00 00 gg nn.
- * ff is a flag byte that is common for all drivers. BxRLAPI_DRV_KEY_PRESS,
+ * will return driver-specific key codes. From most- to least-significant,
+ * the eight bytes are ff 00 00 00 00 00 gg nn.
+ * ff is a flag byte that is common for all drivers. BRLAPI_DRV_KEY_PRESS,
  * which indicates that it's a key press (as opposed to a release) event,
  * is the only currently defined flag. The other flag bits are always 0.
  * gg is the key's group, and nn is the key's number within that group.
