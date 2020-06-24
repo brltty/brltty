@@ -248,7 +248,7 @@ static char *getKeyName (brlapi_keyCode_t key)
 static void listKeys(void)
 {
   size_t length;
-  brlapi_param_keyCode_t *keys = brlapi_getParameterAlloc(BRLAPI_PARAM_DEVICE_KEY_CODES, 0, BRLAPI_PARAMF_GLOBAL, &length);
+  brlapi_param_driverKeycode_t *keys = brlapi_getParameterAlloc(BRLAPI_PARAM_DEVICE_KEY_CODES, 0, BRLAPI_PARAMF_GLOBAL, &length);
 
   if (keys) {
     length /= sizeof(*keys);

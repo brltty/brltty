@@ -27,7 +27,7 @@ public class CommandShortNameParameter extends GlobalParameter {
 
   @Override
   public final int getParameter () {
-    return Constants.PARAM_COMMAND_SHORT_NAME;
+    return Constants.PARAM_COMMAND_KEYCODE_NAME;
   }
 
   @Override

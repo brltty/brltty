@@ -69,22 +69,20 @@ typedef enum {
   BRLAPI_PARAM_CLIPBOARD_CONTENT = 19,		/**< Content of the clipboard: UTF-8 string */
 
 //TTY Mode Parameters
-  BRLAPI_PARAM_BOUND_COMMAND_CODES = 20,	/**< Commands bound for the device:
-						  * uint64_t[], one command code per element */
-  BRLAPI_PARAM_COMMAND_SHORT_NAME = 21,		/**< Short name for a command
+  BRLAPI_PARAM_BOUND_COMMAND_KEYCODES = 20,	/**< Commands bound by the driver:
+						  * uint64_t[], one command keycode per element */
+  BRLAPI_PARAM_COMMAND_KEYCODE_NAME = 21,	/**< Name for a command keycode
 						  * (specified via the subparam argument):
 						  * string (usually a few characters) */
-  BRLAPI_PARAM_COMMAND_LONG_NAME = 22,		/**< Long name for a command
+  BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY = 22,	/**< Description for a command keycode
 						  * (specified via the subparam argument):
 						  * string (usually a few words) */
-
-//Raw Mode Parameters
-  BRLAPI_PARAM_DEVICE_KEY_CODES = 23,		/**< Keys defined for the device:
-						  * uint64_t[], one key code per element */
-  BRLAPI_PARAM_KEY_SHORT_NAME = 24,		/**< Short name for a key
+  BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES = 23,	/**< Keycodes defined by the driver:
+						  * uint64_t[], one keycode per element */
+  BRLAPI_PARAM_DRIVER_KEYCODE_NAME = 24,	/**< Name for a driver keycode
 						  * (specified via the subparam argument):
 						  * string (usually a few characters) */
-  BRLAPI_PARAM_KEY_LONG_NAME = 25,		/**< Long name for a key
+  BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY = 25,	/**< Description for a driver keycode
 						  * (specified via the subparam argument):
 						  * string (usually a few words) */
 
@@ -104,6 +102,13 @@ typedef enum {
 
   BRLAPI_PARAM_COUNT = 32 /** Number of parameters */
 } brlapi_param_t;
+
+#define BRLAPI_PARAM_BOUND_COMMAND_CODES BRLAPI_PARAM_BOUND_COMMAND_KEYCODES
+#define BRLAPI_PARAM_COMMAND_SHORT_NAME BRLAPI_PARAM_COMMAND_KEYCODE_NAME
+#define BRLAPI_PARAM_COMMAND_LONG_NAME BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY
+#define BRLAPI_PARAM_DEVICE_KEY_CODES BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES
+#define BRLAPI_PARAM_KEY_SHORT_NAME BRLAPI_PARAM_DRIVER_KEYCODE_NAME
+#define BRLAPI_PARAM_KEY_LONG_NAME BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY
 
 /* brlapi_param_subparam_t */
 /** Type to be used for specifying a sub-parameter */
@@ -204,29 +209,29 @@ typedef brlapi_param_bool_t brlapi_param_audibleAlerts_t;
 /** Type to be used for BRLAPI_PARAM_CLIPBOARD_CONTENT */
 typedef char *brlapi_param_clipboardContent_t;
 
-/* brlapi_param_commandCode_t */
-/** Type to be used for BRLAPI_PARAM_BOUND_COMMAND_CODES */
-typedef brlapi_keyCode_t brlapi_param_commandCode_t;
+/* brlapi_param_commandKeycode_t */
+/** Type to be used for BRLAPI_PARAM_BOUND_COMMAND_KEYCODES */
+typedef brlapi_keyCode_t brlapi_param_commandKeycode_t;
 
-/* brlapi_param_commandShortName_t */
-/** Type to be used for BRLAPI_PARAM_COMMAND_SHORT_NAME */
-typedef char *brlapi_param_commandShortName_t;
+/* brlapi_param_commandKeycodeName_t */
+/** Type to be used for BRLAPI_PARAM_COMMAND_KEYCODE_NAME */
+typedef char *brlapi_param_commandKeycodeName_t;
 
-/* brlapi_param_commandLongName_t */
-/** Type to be used for BRLAPI_PARAM_COMMAND_LONG_NAME */
-typedef char *brlapi_param_commandLongName_t;
+/* brlapi_param_commandKeycodeSummary_t */
+/** Type to be used for BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY */
+typedef char *brlapi_param_commandKeycodeSummary_t;
 
-/* brlapi_param_keyCode_t */
-/** Type to be used for BRLAPI_PARAM_DEVICE_KEY_CODES */
-typedef brlapi_keyCode_t brlapi_param_keyCode_t;
+/* brlapi_param_driverKeycode_t */
+/** Type to be used for BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES */
+typedef brlapi_keyCode_t brlapi_param_driverKeycode_t;
 
-/* brlapi_param_keyShortName_t */
-/** Type to be used for BRLAPI_PARAM_KEY_SHORT_NAME */
-typedef char *brlapi_param_keyShortName_t;
+/* brlapi_param_driverKeycodeName_t */
+/** Type to be used for BRLAPI_PARAM_DRIVER_KEYCODE_NAME */
+typedef char *brlapi_param_driverKeycodeName_t;
 
-/* brlapi_param_keyLongName_t */
-/** Type to be used for BRLAPI_PARAM_KEY_LONG_NAME */
-typedef char *brlapi_param_keyLongName_t;
+/* brlapi_param_driverKeycodeSummary_t */
+/** Type to be used for BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY */
+typedef char *brlapi_param_driverKeycodeSummary_t;
 
 /* brlapi_param_computerBrailleRowsMask_t */
 /** Type to be used for BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK */

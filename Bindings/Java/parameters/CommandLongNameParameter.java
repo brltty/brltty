@@ -27,7 +27,7 @@ public class CommandLongNameParameter extends GlobalParameter {
 
   @Override
   public final int getParameter () {
-    return Constants.PARAM_COMMAND_LONG_NAME;
+    return Constants.PARAM_COMMAND_KEYCODE_SUMMARY;
   }
 
   @Override

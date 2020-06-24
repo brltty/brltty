@@ -27,7 +27,7 @@ public class KeyShortNameParameter extends GlobalParameter {
 
   @Override
   public final int getParameter () {
-    return Constants.PARAM_KEY_SHORT_NAME;
+    return Constants.PARAM_DRIVER_KEYCODE_NAME;
   }
 
   @Override

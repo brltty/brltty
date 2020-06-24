@@ -27,7 +27,7 @@ public class DeviceKeyCodesParameter extends GlobalParameter {
 
   @Override
   public final int getParameter () {
-    return Constants.PARAM_DEVICE_KEY_CODES;
+    return Constants.PARAM_DEFINED_DRIVER_KEYCODES;
   }
 
   @Override

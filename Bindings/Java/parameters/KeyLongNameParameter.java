@@ -27,7 +27,7 @@ public class KeyLongNameParameter extends GlobalParameter {
 
   @Override
   public final int getParameter () {
-    return Constants.PARAM_KEY_LONG_NAME;
+    return Constants.PARAM_DRIVER_KEYCODE_SUMMARY;
   }
 
   @Override

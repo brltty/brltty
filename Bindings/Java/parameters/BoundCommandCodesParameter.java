@@ -27,7 +27,7 @@ public class BoundCommandCodesParameter extends GlobalParameter {
 
   @Override
   public final int getParameter () {
-    return Constants.PARAM_BOUND_COMMAND_CODES;
+    return Constants.PARAM_BOUND_COMMAND_KEYCODES;
   }
 
   @Override

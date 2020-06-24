@@ -1761,8 +1761,8 @@ PARAM_WRITER(clipboardContent)
   return param_writeString(setMainClipboardContent, data, size);
 }
 
-/* BRLAPI_PARAM_BOUND_COMMAND_CODES */
-PARAM_READER(boundCommandCodes)
+/* BRLAPI_PARAM_BOUND_COMMAND_KEYCODES */
+PARAM_READER(boundCommandKeycodes)
 {
   lockBrailleDriver();
     if (isBrailleDriverConstructed()) {
@@ -1773,8 +1773,8 @@ PARAM_READER(boundCommandCodes)
         int *commands = getBoundCommands(table, &count);
 
         if (commands) {
-          *size /= sizeof(brlapi_param_commandCode_t);
-          *size *= sizeof(brlapi_param_commandCode_t);
+          *size /= sizeof(brlapi_param_commandKeycode_t);
+          *size *= sizeof(brlapi_param_commandKeycode_t);
 
           void *next = data;
           const void *end = next + *size;
@@ -1784,7 +1784,7 @@ PARAM_READER(boundCommandCodes)
             brlapi_keyCode_t keyCode;
 
             if (cmdBrlttyToBrlapi(&keyCode, commands[i], c->retainDots)) {
-              brlapi_param_commandCode_t *commandCode = next;
+              brlapi_param_commandKeycode_t *commandCode = next;
               *commandCode = keyCode;
               next += sizeof(*commandCode);
             }
@@ -1804,8 +1804,8 @@ unlock:
   return NULL;
 }
 
-/* BRLAPI_PARAM_COMMAND_SHORT_NAME */
-PARAM_READER(commandShortName)
+/* BRLAPI_PARAM_COMMAND_KEYCODE_NAME */
+PARAM_READER(commandKeycodeName)
 {
   int command = cmdBrlapiToBrltty(subparam);
 
@@ -1821,8 +1821,8 @@ PARAM_READER(commandShortName)
   return NULL;
 }
 
-/* BRLAPI_PARAM_COMMAND_LONG_NAME */
-PARAM_READER(commandLongName)
+/* BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY */
+PARAM_READER(commandKeycodeSummary)
 {
   int command = cmdBrlapiToBrltty(subparam);
 
@@ -1836,7 +1836,7 @@ PARAM_READER(commandLongName)
   return NULL;
 }
 
-/* BRLAPI_PARAM_DEVICE_KEY_CODES */
+/* BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES */
 typedef struct {
   void *next;
   const void *end;
@@ -1848,7 +1848,7 @@ static int param_addKeyCode (const KeyNameEntry *kne, void *data)
     param_addKeyCode_t *akc = data;
 
     if (akc->next < akc->end) {
-      brlapi_param_keyCode_t *key = akc->next;
+      brlapi_param_driverKeycode_t *key = akc->next;
       *key = makeDriverKeyCode(kne->value.group, kne->value.number, 0);
       akc->next += sizeof(*key);
     }
@@ -1857,15 +1857,15 @@ static int param_addKeyCode (const KeyNameEntry *kne, void *data)
   return 1;
 }
 
-PARAM_READER(deviceKeyCodes)
+PARAM_READER(definedDriverKeycodes)
 {
   lockBrailleDriver();
     if (isBrailleDriverConstructed()) {
       KEY_NAME_TABLES_REFERENCE keys = brl.keyNames;
 
       if (keys) {
-        *size /= sizeof(brlapi_param_keyCode_t);
-        *size *= sizeof(brlapi_param_keyCode_t);
+        *size /= sizeof(brlapi_param_driverKeycode_t);
+        *size *= sizeof(brlapi_param_driverKeycode_t);
 
         param_addKeyCode_t akc = {
           .next = data,
@@ -1885,8 +1885,8 @@ unlock:
   return NULL;
 }
 
-/* BRLAPI_PARAM_KEY_SHORT_NAME */
-PARAM_READER(keyShortName)
+/* BRLAPI_PARAM_DRIVER_KEYCODE_NAME */
+PARAM_READER(driverKeycodeName)
 {
   lockBrailleDriver();
     if (isBrailleDriverConstructed()) {
@@ -1915,8 +1915,8 @@ unlock:
   return NULL;
 }
 
-/* BRLAPI_PARAM_KEY_LONG_NAME */
-PARAM_READER(keyLongName)
+/* BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY */
+PARAM_READER(driverKeycodeSummary)
 {
   *size = 0;
   return NULL;
@@ -2124,39 +2124,38 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
   },
 
 //TTY Mode Parameters
-  [BRLAPI_PARAM_BOUND_COMMAND_CODES] = {
+  [BRLAPI_PARAM_BOUND_COMMAND_KEYCODES] = {
     .global = 1,
-    .read = param_boundCommandCodes_read,
+    .read = param_boundCommandKeycodes_read,
   },
 
-  [BRLAPI_PARAM_COMMAND_SHORT_NAME] = {
+  [BRLAPI_PARAM_COMMAND_KEYCODE_NAME] = {
     .global = 1,
-    .rootParameter = BRLAPI_PARAM_BOUND_COMMAND_CODES,
-    .read = param_commandShortName_read,
+    .rootParameter = BRLAPI_PARAM_BOUND_COMMAND_KEYCODES,
+    .read = param_commandKeycodeName_read,
   },
 
-  [BRLAPI_PARAM_COMMAND_LONG_NAME] = {
+  [BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY] = {
     .global = 1,
-    .rootParameter = BRLAPI_PARAM_BOUND_COMMAND_CODES,
-    .read = param_commandLongName_read,
+    .rootParameter = BRLAPI_PARAM_BOUND_COMMAND_KEYCODES,
+    .read = param_commandKeycodeSummary_read,
   },
 
-//Raw Mode Parameters
-  [BRLAPI_PARAM_DEVICE_KEY_CODES] = {
+  [BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES] = {
     .global = 1,
-    .read = param_deviceKeyCodes_read,
+    .read = param_definedDriverKeycodes_read,
   },
 
-  [BRLAPI_PARAM_KEY_SHORT_NAME] = {
+  [BRLAPI_PARAM_DRIVER_KEYCODE_NAME] = {
     .global = 1,
-    .rootParameter = BRLAPI_PARAM_DEVICE_KEY_CODES,
-    .read = param_keyShortName_read,
+    .rootParameter = BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES,
+    .read = param_driverKeycodeName_read,
   },
 
-  [BRLAPI_PARAM_KEY_LONG_NAME] = {
+  [BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY] = {
     .global = 1,
-    .rootParameter = BRLAPI_PARAM_DEVICE_KEY_CODES,
-    .read = param_keyLongName_read,
+    .rootParameter = BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES,
+    .read = param_driverKeycodeSummary_read,
   },
 
 //Braille Translation Parameters

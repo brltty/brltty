@@ -706,33 +706,32 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
   },
 
 //TTY Mode Parameters
-  [BRLAPI_PARAM_BOUND_COMMAND_CODES] = {
+  [BRLAPI_PARAM_BOUND_COMMAND_KEYCODES] = {
     .type = BRLAPI_PARAM_TYPE_KEYCODE,
     .isArray = 1,
   },
 
-  [BRLAPI_PARAM_COMMAND_SHORT_NAME] = {
+  [BRLAPI_PARAM_COMMAND_KEYCODE_NAME] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
     .hasSubparam = 1,
   },
 
-  [BRLAPI_PARAM_COMMAND_LONG_NAME] = {
+  [BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
     .hasSubparam = 1,
   },
 
-//Raw Mode Parameters
-  [BRLAPI_PARAM_DEVICE_KEY_CODES] = {
+  [BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES] = {
     .type = BRLAPI_PARAM_TYPE_KEYCODE,
     .isArray = 1,
   },
 
-  [BRLAPI_PARAM_KEY_SHORT_NAME] = {
+  [BRLAPI_PARAM_DRIVER_KEYCODE_NAME] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
     .hasSubparam = 1,
   },
 
-  [BRLAPI_PARAM_KEY_LONG_NAME] = {
+  [BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
     .hasSubparam = 1,
   },
