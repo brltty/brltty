@@ -32,6 +32,6 @@ public class DisplaySizeParameter extends GlobalParameter {
 
   @Override
   public final DisplaySize get () {
-    return toDisplaySize(getValue());
+    return asDisplaySize(getValue());
   }
 }

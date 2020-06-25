@@ -32,7 +32,7 @@ public class ComputerBrailleTableParameter extends GlobalParameter {
 
   @Override
   public final String get () {
-    return toString(getValue());
+    return asString(getValue());
   }
 
   public final void set (String name) {

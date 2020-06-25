@@ -32,7 +32,7 @@ public class CursorBlinkPercentageParameter extends GlobalParameter {
 
   @Override
   public final Byte get () {
-    return toByte(getValue());
+    return asByte(getValue());
   }
 
   public final void set (byte percentage) {

@@ -32,6 +32,6 @@ public class RenderedCellsParameter extends LocalParameter {
 
   @Override
   public final byte[] get () {
-    return toByteArray(getValue());
+    return asByteArray(getValue());
   }
 }

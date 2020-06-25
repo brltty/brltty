@@ -32,7 +32,7 @@ public class CursorBlinkPeriodParameter extends GlobalParameter {
 
   @Override
   public final Integer get () {
-    return toInt(getValue());
+    return asInt(getValue());
   }
 
   public final void set (int period) {

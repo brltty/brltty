@@ -32,7 +32,7 @@ public class ClientPriorityParameter extends LocalParameter {
 
   @Override
   public final Integer get () {
-    return toInt(getValue());
+    return asInt(getValue());
   }
 
   public final void set (int priority) {

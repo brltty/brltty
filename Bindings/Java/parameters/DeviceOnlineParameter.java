@@ -32,6 +32,6 @@ public class DeviceOnlineParameter extends GlobalParameter {
 
   @Override
   public final Boolean get () {
-    return toBoolean(getValue());
+    return asBoolean(getValue());
   }
 }

@@ -32,6 +32,6 @@ public class ComputerBrailleRowCellsParameter extends GlobalParameter {
 
   @Override
   public final RowCells get (long row) {
-    return toRowCells(getValue(row));
+    return asRowCells(getValue(row));
   }
 }

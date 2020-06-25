@@ -32,6 +32,6 @@ public class BoundCommandKeycodesParameter extends GlobalParameter {
 
   @Override
   public final long[] get () {
-    return toLongArray(getValue());
+    return asLongArray(getValue());
   }
 }

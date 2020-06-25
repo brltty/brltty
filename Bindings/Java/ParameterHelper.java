@@ -19,63 +19,91 @@
 
 package org.a11y.brlapi;
 
+import java.util.Arrays;
+
 public abstract class ParameterHelper {
   protected ParameterHelper () {
   }
 
-  public static String toString (Object value) {
+  public static String asString (Object value) {
     return (String)value;
   }
 
-  public static boolean[] toBooleanArray (Object value) {
+  public static boolean[] asBooleanArray (Object value) {
     return (boolean[])value;
   }
 
-  public static byte[] toByteArray (Object value) {
+  public static byte[] asByteArray (Object value) {
     return (byte[])value;
   }
 
-  public static short[] toShortArray (Object value) {
+  public static short[] asShortArray (Object value) {
     return (short[])value;
   }
 
-  public static int[] toIntArray (Object value) {
+  public static int[] asIntArray (Object value) {
     return (int[])value;
   }
 
-  public static long[] toLongArray (Object value) {
+  public static long[] asLongArray (Object value) {
     return (long[])value;
   }
 
-  public static boolean toBoolean (Object value) {
-    return toBooleanArray(value)[0];
+  public static boolean asBoolean (Object value) {
+    return asBooleanArray(value)[0];
   }
 
-  public static byte toByte (Object value) {
-    return toByteArray(value)[0];
+  public static byte asByte (Object value) {
+    return asByteArray(value)[0];
   }
 
-  public static short toShort (Object value) {
-    return toShortArray(value)[0];
+  public static short asShort (Object value) {
+    return asShortArray(value)[0];
   }
 
-  public static int toInt (Object value) {
-    return toIntArray(value)[0];
+  public static int asInt (Object value) {
+    return asIntArray(value)[0];
   }
 
-  public static long toLong (Object value) {
-    return toLongArray(value)[0];
+  public static long asLong (Object value) {
+    return asLongArray(value)[0];
   }
 
-  public static DisplaySize toDisplaySize (Object value) {
-    return new DisplaySize(toIntArray(value));
+  public static DisplaySize asDisplaySize (Object value) {
+    return new DisplaySize(asIntArray(value));
   }
 
-  public static BitMask toBitMask (Object value) {
-    return new BitMask(toByteArray(value));
+  public static BitMask asBitMask (Object value) {
+    return new BitMask(asByteArray(value));
   }
 
-  public static RowCells toRowCells (Object value) {
-    return new RowCells(toByteArray(value));
+  public static RowCells asRowCells (Object value) {
+    return new RowCells(asByteArray(value));
+  }
+
+  public static String toString (Object value) {
+    if (value.getClass().isArray()) {
+      if (value instanceof boolean[]) {
+        return Arrays.toString((boolean[])value);
+      }
+
+      if (value instanceof byte[]) {
+        return Arrays.toString((byte[])value);
+      }
+
+      if (value instanceof short[]) {
+        return Arrays.toString((short[])value);
+      }
+
+      if (value instanceof int[]) {
+        return Arrays.toString((int[])value);
+      }
+
+      if (value instanceof long[]) {
+        return Arrays.toString((long[])value);
+      }
+    }
+
+    return value.toString();
   }
 }

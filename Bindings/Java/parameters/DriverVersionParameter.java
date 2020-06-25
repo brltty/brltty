@@ -32,6 +32,6 @@ public class DriverVersionParameter extends GlobalParameter {
 
   @Override
   public final String get () {
-    return toString(getValue());
+    return asString(getValue());
   }
 }

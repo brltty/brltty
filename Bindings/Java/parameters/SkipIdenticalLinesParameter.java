@@ -32,7 +32,7 @@ public class SkipIdenticalLinesParameter extends GlobalParameter {
 
   @Override
   public final Boolean get () {
-    return toBoolean(getValue());
+    return asBoolean(getValue());
   }
 
   public final void set (boolean yes) {

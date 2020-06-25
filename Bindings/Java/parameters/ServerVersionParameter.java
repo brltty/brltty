@@ -32,6 +32,6 @@ public class ServerVersionParameter extends GlobalParameter {
 
   @Override
   public final Integer get () {
-    return toInt(getValue());
+    return asInt(getValue());
   }
 }

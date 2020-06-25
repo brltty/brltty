@@ -32,6 +32,6 @@ public class ComputerBrailleRowsMaskParameter extends GlobalParameter {
 
   @Override
   public final BitMask get () {
-    return toBitMask(getValue());
+    return asBitMask(getValue());
   }
 }

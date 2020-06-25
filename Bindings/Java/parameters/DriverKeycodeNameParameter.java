@@ -32,6 +32,6 @@ public class DriverKeycodeNameParameter extends GlobalParameter {
 
   @Override
   public final String get (long code) {
-    return toString(getValue(code));
+    return asString(getValue(code));
   }
 }

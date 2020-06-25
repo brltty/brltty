@@ -32,7 +32,7 @@ public class ComputerBrailleCellSizeParameter extends GlobalParameter {
 
   @Override
   public final Byte get () {
-    return toByte(getValue());
+    return asByte(getValue());
   }
 
   public final void set (byte size) {
