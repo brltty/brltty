@@ -47,7 +47,6 @@ public abstract class Command extends CommandHelper implements Runnable {
 
   private final Map<String, Option> commandOptions = new HashMap<>();
   private final ConnectionSettings connectionSettings = new ConnectionSettings();
-  private Connection serverConnection = null;
 
   protected final void addOption (String keyword, OptionHandler handler, String... operands) {
     commandOptions.put(keyword, new Option(handler, operands));
@@ -121,19 +120,22 @@ public abstract class Command extends CommandHelper implements Runnable {
     processArguments(arguments);
   }
 
-  public final void run (String[] arguments) {
-    try {
-      serverConnection = new Connection(connectionSettings);
-    } catch (Error error) {
-      System.err.println(("connection error: " + error));
-      System.exit(3);
-    }
+  protected interface Client {
+    public void run (Connection connection);
+  }
 
+  public final void connect (Client client) {
     try {
-      run();
-    } finally {
-      serverConnection.close();
-      serverConnection = null;
+      Connection connection = new Connection(connectionSettings);
+
+      try {
+        client.run(connection);
+      } finally {
+        connection.close();
+        connection = null;
+      }
+    } catch (ConnectionError error) {
+      internalError(("connection error: " + error));
     }
   }
 }

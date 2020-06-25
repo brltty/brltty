@@ -20,6 +20,9 @@
 package org.a11y.brlapi;
 import org.a11y.brlapi.parameters.*;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 public class Parameters {
   public final ServerVersionParameter serverVersion;
   public final ClientPriorityParameter clientPriority;
@@ -87,5 +90,33 @@ public class Parameters {
     computerBrailleTable = new ComputerBrailleTableParameter(connection);
     literaryBrailleTable = new LiteraryBrailleTableParameter(connection);
     messageLocale = new MessageLocaleParameter(connection);
+  }
+
+  public final Parameter[] get () {
+    Class type = Parameters.class;
+
+    Field[] fields = type.getFields();
+    int fieldCount = fields.length;
+
+    Parameter[] parameters = new Parameter[fieldCount];
+    int parameterCount = 0;
+
+    for (Field field : fields) {
+      int modifiers = field.getModifiers();
+      if ((modifiers & Modifier.PUBLIC) == 0) continue;
+      if ((modifiers & Modifier.FINAL) == 0) continue;
+      if (!type.equals(field.getDeclaringClass())) continue;
+
+      try {
+        parameters[parameterCount] = (Parameter)field.get(this);
+        parameterCount += 1;
+      } catch (IllegalAccessException exception) {
+        continue;
+      }
+    }
+
+    Parameter[] result = new Parameter[parameterCount];
+    System.arraycopy(parameters, 0, result, 0, parameterCount);
+    return result;
   }
 }

@@ -61,6 +61,6 @@ public abstract class Commands extends CommandHelper {
       internalError("command construction failed: %s", exception.getCause().getMessage());
     }
 
-    command.run(operands);
+    command.run();
   }
 }

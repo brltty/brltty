@@ -27,5 +27,22 @@ public class ListParameters extends Command {
 
   @Override
   public final void run () {
+    connect(
+      new Client() {
+        @Override
+        public void run (Connection connection) {
+          for (Parameter parameter : connection.getParameters().get()) {
+            Object value = parameter.get();
+            if (value == null) continue;
+
+            System.out.println(
+              String.format(
+                "%s: %s", parameter.getLabel(), ParameterHelper.toString(value)
+              )
+            );
+          }
+        }
+      }
+    );
   }
 }
