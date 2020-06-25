@@ -1444,7 +1444,7 @@ JAVA_STATIC_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_CommandCode, expandCode, void,
+  org_a11y_brlapi_CommandKeycode, expandCode, void,
   jlong code
 ) {
   brlapi_expandedKeyCode_t ekc;
@@ -1473,35 +1473,35 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_KeyCode, isPress, jboolean,
+  org_a11y_brlapi_DriverKeycode, isPress, jboolean,
   jlong code
 ) {
   return (code & BRLAPI_DRV_KEY_PRESS)? JNI_TRUE: JNI_FALSE;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_KeyCode, getValue, jlong,
+  org_a11y_brlapi_DriverKeycode, getValue, jlong,
   jlong code
 ) {
   return code & BRLAPI_DRV_KEY_VALUE_MASK;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_KeyCode, getGroup, jint,
+  org_a11y_brlapi_DriverKeycode, getGroup, jint,
   jlong code
 ) {
   return BRLAPI_DRV_KEY_GROUP(code);
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_KeyCode, getNumber, jint,
+  org_a11y_brlapi_DriverKeycode, getNumber, jint,
   jlong code
 ) {
   return BRLAPI_DRV_KEY_NUMBER(code);
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_KeyCode, getNumberAny, jint
+  org_a11y_brlapi_DriverKeycode, getNumberAny, jint
 ) {
   return BRLAPI_DRV_KEY_NUMBER_ANY;
 }

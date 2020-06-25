@@ -20,14 +20,14 @@
 package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
-public class CommandLongNameParameter extends GlobalParameter {
-  public CommandLongNameParameter (BasicConnection connection) {
+public class DriverKeycodeNameParameter extends GlobalParameter {
+  public DriverKeycodeNameParameter (BasicConnection connection) {
     super(connection);
   }
 
   @Override
   public final int getParameter () {
-    return Constants.PARAM_COMMAND_KEYCODE_SUMMARY;
+    return Constants.PARAM_DRIVER_KEYCODE_NAME;
   }
 
   @Override

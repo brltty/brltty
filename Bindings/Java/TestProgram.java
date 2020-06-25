@@ -33,10 +33,14 @@ public class TestProgram {
     stream.println();
   }
 
-  private static void showCommand (CommandCode cmd, Connection connection) {
+  private static void showCommand (CommandKeycode cmd, Connection connection) {
     String text = cmd.toString();
     writeProperty("Key", text);
     connection.writeText(text);
+  }
+
+  private static void showCommand (long code, Connection connection) {
+    showCommand(new CommandKeycode(code), connection);
   }
 
   private static void syntaxError (String message) {
@@ -109,7 +113,7 @@ public class TestProgram {
                 break;
               }
 
-              showCommand(new CommandCode(code), connection);
+              showCommand(code, connection);
             }
           }
         } finally {

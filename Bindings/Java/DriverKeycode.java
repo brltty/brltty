@@ -19,40 +19,40 @@
 
 package org.a11y.brlapi;
 
-public class CommandCode extends Code {
-  private native void expandCode (long code);
+public class DriverKeycode extends Keycode {
+  public native static boolean isPress (long code);
+  public native static long getValue (long code);
+  public native static int getGroup (long code);
+  public native static int getNumber (long code);
 
-  private int typeValue;
-  private int commandValue;
-  private int argumentValue;
-  private int flagsValue;
+  private native static int getNumberAny ();
+  public final static int KEY_NUMBER_ANY = getNumberAny();
 
-  public CommandCode (long code) {
+  public DriverKeycode (long code) {
     super(code);
-    expandCode(code);
   }
 
-  public final int getType () {
-    return typeValue;
+  public final boolean isPress () {
+    return isPress(getCode());
   }
 
-  public final int getCommand () {
-    return commandValue;
+  public final long getValue () {
+    return getValue(getCode());
   }
 
-  public final int getArgument () {
-    return argumentValue;
+  public final int getGroup () {
+    return getGroup(getCode());
   }
 
-  public final int getFlags () {
-    return flagsValue;
+  public final int getNumber () {
+    return getNumber(getCode());
   }
 
   @Override
   public String toString () {
     return String.format(
-      "%s Type:%08X Cmd:%04X Arg:%04X Flg:%04X",
-      super.toString(), getType(), getCommand(), getArgument(), getFlags()
+      "%s %s Grp:%d Num:%d",
+      super.toString(), (isPress()? "press": "release"), getGroup(), getNumber()
     );
   }
 }

@@ -17,21 +17,21 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi;
+package org.a11y.brlapi.parameters;
+import org.a11y.brlapi.*;
 
-public abstract class Code extends NativeLibrary {
-  private final long codeValue;
-
-  public Code (long code) {
-    codeValue = code;
-  }
-
-  public final long getCode () {
-    return codeValue;
+public class BoundCommandKeycodesParameter extends GlobalParameter {
+  public BoundCommandKeycodesParameter (BasicConnection connection) {
+    super(connection);
   }
 
   @Override
-  public String toString () {
-    return String.format("Code:%016X", getCode());
+  public final int getParameter () {
+    return Constants.PARAM_BOUND_COMMAND_KEYCODES;
+  }
+
+  @Override
+  public final long[] get () {
+    return toLongArray(getValue());
   }
 }

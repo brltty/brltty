@@ -20,18 +20,18 @@
 package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
-public class KeyShortNameParameter extends GlobalParameter {
-  public KeyShortNameParameter (BasicConnection connection) {
+public class DefinedDriverKeycodesParameter extends GlobalParameter {
+  public DefinedDriverKeycodesParameter (BasicConnection connection) {
     super(connection);
   }
 
   @Override
   public final int getParameter () {
-    return Constants.PARAM_DRIVER_KEYCODE_NAME;
+    return Constants.PARAM_DEFINED_DRIVER_KEYCODES;
   }
 
   @Override
-  public final String get (long code) {
-    return toString(getValue(code));
+  public final long[] get () {
+    return toLongArray(getValue());
   }
 }
