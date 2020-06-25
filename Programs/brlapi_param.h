@@ -256,6 +256,13 @@ typedef char *brlapi_param_literaryBrailleTable_t;
 /** Type to be used for BRLAPI_PARAM_MESSAGE_LOCALE      */
 typedef char *brlapi_param_messageLocale_t;
 
+typedef brlapi_param_commandKeycode_t brlapi_param_commandCode_t;
+typedef brlapi_param_commandKeycodeName_t brlapi_param_commandShortName_t;
+typedef brlapi_param_commandKeycodeSummary_t brlapi_param_commandLongName_t;
+typedef brlapi_param_driverKeycode_t brlapi_param_keyCode_t;
+typedef brlapi_param_driverKeycodeName_t brlapi_param_keyShortName_t;
+typedef brlapi_param_driverKeycodeSummary_t brlapi_param_keyLongName_t;
+
 /** Enumeration of parameter value types */
 typedef enum {
   BRLAPI_PARAM_TYPE_STRING,	/**< Parameter is a string of UTF-8 characters */
