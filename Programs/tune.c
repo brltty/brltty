@@ -420,38 +420,33 @@ newTuneRequest (TuneRequestType type) {
   return NULL;
 }
 
+static const NoteMethods *
+tuneGetMethods (TuneDevice device) {
+  switch (device) {
+    #ifdef HAVE_BEEP_SUPPORT
+    case tdBeeper: return &beepNoteMethods;
+    #endif /* HAVE_BEEP_SUPPORT */
+
+    #ifdef HAVE_PCM_SUPPORT
+    case tdPcm: return &pcmNoteMethods;
+    #endif /* HAVE_PCM_SUPPORT */
+
+    #ifdef HAVE_MIDI_SUPPORT
+    case tdMidi: return &midiNoteMethods;
+    #endif /* HAVE_MIDI_SUPPORT */
+
+    #ifdef HAVE_FM_SUPPORT
+    case tdFm: return &fmNoteMethods;
+    #endif /* HAVE_FM_SUPPORT */
+
+    default: return NULL;
+  }
+}
+
 int
 tuneSetDevice (TuneDevice device) {
-  const NoteMethods *methods;
-
-  switch (device) {
-    default:
-      return 0;
-
-#ifdef HAVE_BEEP_SUPPORT
-    case tdBeeper:
-      methods = &beepNoteMethods;
-      break;
-#endif /* HAVE_BEEP_SUPPORT */
-
-#ifdef HAVE_PCM_SUPPORT
-    case tdPcm:
-      methods = &pcmNoteMethods;
-      break;
-#endif /* HAVE_PCM_SUPPORT */
-
-#ifdef HAVE_MIDI_SUPPORT
-    case tdMidi:
-      methods = &midiNoteMethods;
-      break;
-#endif /* HAVE_MIDI_SUPPORT */
-
-#ifdef HAVE_FM_SUPPORT
-    case tdFm:
-      methods = &fmNoteMethods;
-      break;
-#endif /* HAVE_FM_SUPPORT */
-  }
+  const NoteMethods *methods = tuneGetMethods(device);
+  if (!methods) return 0;
 
   {
     TuneRequest *req;
