@@ -20,7 +20,7 @@
 package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
-public class ClipboardContentParameter extends GlobalParameter {
+public class ClipboardContentParameter extends GlobalParameter implements Parameter.StringSettable {
   public ClipboardContentParameter (BasicConnection connection) {
     super(connection);
   }
@@ -35,6 +35,7 @@ public class ClipboardContentParameter extends GlobalParameter {
     return asString(getValue());
   }
 
+  @Override
   public final void set (String text) {
     setValue(text);
   }

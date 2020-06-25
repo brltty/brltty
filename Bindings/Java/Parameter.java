@@ -59,37 +59,12 @@ public abstract class Parameter extends ParameterHelper {
   public abstract int getParameter ();
   public abstract boolean isGlobal ();
 
-  protected final Object getValue (long subparam) {
-    return clientConnection.getParameter(getParameter(), subparam, isGlobal());
-  }
-
-  protected final Object getValue () {
-    return getValue(0);
-  }
-
-  protected final void setValue (long subparam, Object value) {
-    clientConnection.setParameter(getParameter(), subparam, isGlobal(), value);
-  }
-
-  protected final void setValue (Object value) {
-    setValue(0, value);
-  }
-
   public Object get (long subparam) {
     return null;
   }
 
   public Object get () {
     return null;
-  }
-
-  public String toString (long subparam) {
-    return toString(getValue(subparam));
-  }
-
-  @Override
-  public String toString () {
-    return toString(0);
   }
 
   public final static class WatcherHandle implements AutoCloseable {
@@ -120,5 +95,57 @@ public abstract class Parameter extends ParameterHelper {
 
   public final WatcherHandle watch (ParameterWatcher watcher) {
     return watch(0, watcher);
+  }
+
+  protected final Object getValue (long subparam) {
+    return clientConnection.getParameter(getParameter(), subparam, isGlobal());
+  }
+
+  public String toString (long subparam) {
+    return toString(getValue(subparam));
+  }
+
+  protected final Object getValue () {
+    return getValue(0);
+  }
+
+  @Override
+  public String toString () {
+    return toString(getValue());
+  }
+
+  protected final void setValue (long subparam, Object value) {
+    clientConnection.setParameter(getParameter(), subparam, isGlobal(), value);
+  }
+
+  protected final void setValue (Object value) {
+    setValue(0, value);
+  }
+
+  public interface Settable {
+  }
+
+  public interface StringSettable extends Settable {
+    public void set (String value);
+  }
+
+  public interface BooleanSettable extends Settable {
+    public void set (boolean value);
+  }
+
+  public interface ByteSettable extends Settable {
+    public void set (byte value);
+  }
+
+  public interface ShortSettable extends Settable {
+    public void set (short value);
+  }
+
+  public interface IntSettable extends Settable {
+    public void set (int value);
+  }
+
+  public interface LongSettable extends Settable {
+    public void set (long value);
   }
 }

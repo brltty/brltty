@@ -20,7 +20,7 @@
 package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
-public class RetainDotsParameter extends LocalParameter {
+public class RetainDotsParameter extends LocalParameter implements Parameter.BooleanSettable {
   public RetainDotsParameter (BasicConnection connection) {
     super(connection);
   }
@@ -35,6 +35,7 @@ public class RetainDotsParameter extends LocalParameter {
     return asBoolean(getValue());
   }
 
+  @Override
   public final void set (boolean yes) {
     setValue(new boolean[] {yes});
   }

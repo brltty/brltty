@@ -20,7 +20,7 @@
 package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
-public class CursorDotsParameter extends GlobalParameter {
+public class CursorDotsParameter extends GlobalParameter implements Parameter.ByteSettable {
   public CursorDotsParameter (BasicConnection connection) {
     super(connection);
   }
@@ -35,6 +35,7 @@ public class CursorDotsParameter extends GlobalParameter {
     return asByte(getValue());
   }
 
+  @Override
   public final void set (byte dots) {
     setValue(new byte[] {dots});
   }

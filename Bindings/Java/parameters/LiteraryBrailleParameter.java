@@ -20,7 +20,7 @@
 package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
-public class LiteraryBrailleParameter extends GlobalParameter {
+public class LiteraryBrailleParameter extends GlobalParameter implements Parameter.BooleanSettable {
   public LiteraryBrailleParameter (BasicConnection connection) {
     super(connection);
   }
@@ -35,6 +35,7 @@ public class LiteraryBrailleParameter extends GlobalParameter {
     return asBoolean(getValue());
   }
 
+  @Override
   public final void set (boolean yes) {
     setValue(new boolean[] {yes});
   }

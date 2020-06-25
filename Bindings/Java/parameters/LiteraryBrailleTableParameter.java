@@ -20,7 +20,7 @@
 package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
-public class LiteraryBrailleTableParameter extends GlobalParameter {
+public class LiteraryBrailleTableParameter extends GlobalParameter implements Parameter.StringSettable {
   public LiteraryBrailleTableParameter (BasicConnection connection) {
     super(connection);
   }
@@ -35,6 +35,7 @@ public class LiteraryBrailleTableParameter extends GlobalParameter {
     return asString(getValue());
   }
 
+  @Override
   public final void set (String name) {
     setValue(name);
   }
