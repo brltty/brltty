@@ -39,4 +39,9 @@ public class CursorDotsParameter extends GlobalParameter implements Parameter.By
   public final void set (byte dots) {
     setValue(new byte[] {dots});
   }
+
+  @Override
+  public String toString () {
+    return toDotNumbers(get());
+  }
 }

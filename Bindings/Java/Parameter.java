@@ -63,8 +63,17 @@ public abstract class Parameter extends ParameterHelper {
     return null;
   }
 
+  public String toString (long subparam) {
+    return toString(get(subparam));
+  }
+
   public Object get () {
     return null;
+  }
+
+  @Override
+  public String toString () {
+    return toString(get());
   }
 
   public final static class WatcherHandle implements AutoCloseable {
@@ -101,17 +110,8 @@ public abstract class Parameter extends ParameterHelper {
     return clientConnection.getParameter(getParameter(), subparam, isGlobal());
   }
 
-  public String toString (long subparam) {
-    return toString(getValue(subparam));
-  }
-
   protected final Object getValue () {
     return getValue(0);
-  }
-
-  @Override
-  public String toString () {
-    return toString(getValue());
   }
 
   protected final void setValue (long subparam, Object value) {

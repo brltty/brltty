@@ -81,7 +81,25 @@ public abstract class ParameterHelper {
     return new RowCells(asByteArray(value));
   }
 
+  public static String toDotNumbers (byte cell) {
+    if (cell == 0) return "0";
+
+    StringBuilder numbers = new StringBuilder();
+    int dots = cell & 0XFF;
+    int dot = 1;
+
+    while (true) {
+      if ((dots & 1) != 0) numbers.append(dot);
+      if ((dots >>= 1) == 0) break;
+      dot += 1;
+    }
+
+    return numbers.toString();
+  }
+
   public static String toString (Object value) {
+    if (value == null) return null;
+
     if (value.getClass().isArray()) {
       if (value instanceof boolean[]) {
         return Arrays.toString((boolean[])value);
