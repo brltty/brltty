@@ -32,7 +32,7 @@ public abstract class Commands extends CommandHelper {
 
   private final static Map<String, Class<? extends Command>> commands = new HashMap<>();
   static {
-    commands.put("list", ListParameters.class);
+    commands.put("list", ListParametersCommand.class);
   }
 
   public static void main (String arguments[]) {

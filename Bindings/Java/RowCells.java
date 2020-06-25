@@ -32,13 +32,18 @@ public class RowCells {
   }
 
   public RowCells (byte[] bytes) {
-    cellArray = new byte[0X100];
-    int index = copyBytes(cellArray, bytes, 0);
+    if (bytes.length == 0) {
+      cellArray = null;
+      cellMask = new BitMask(new byte[0]);
+    } else {
+      cellArray = new byte[0X100];
+      int index = copyBytes(cellArray, bytes, 0);
 
-    {
-      byte[] mask = new byte[cellArray.length / BYTE_SIZE];
-      index = copyBytes(mask, bytes, index);
-      cellMask = new BitMask(mask);
+      {
+        byte[] mask = new byte[cellArray.length / BYTE_SIZE];
+        index = copyBytes(mask, bytes, index);
+        cellMask = new BitMask(mask);
+      }
     }
   }
 

@@ -52,7 +52,7 @@ public abstract class Command extends CommandHelper implements Runnable {
     commandOptions.put(keyword, new Option(handler, operands));
   }
 
-  private void processParameters (String[] parameters) {
+  protected void processParameters (String[] parameters) {
     if (parameters.length > 0) tooManyParameters();
   }
 
@@ -99,6 +99,8 @@ public abstract class Command extends CommandHelper implements Runnable {
   }
 
   protected Command (String[] arguments) {
+    super();
+
     addOption("server",
       new OptionHandler() {
         @Override

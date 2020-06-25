@@ -45,4 +45,54 @@ public abstract class CommandHelper {
   protected final void tooManyParameters () {
     syntaxError("too many parameters");
   }
+
+  public static Long parseLong (String description, String operand, Long minimum, Long maximum) {
+    long value;
+
+    try {
+      value = Long.valueOf(operand);
+
+      if (minimum != null) {
+        if (value < minimum) {
+          syntaxError(
+            "%s less than %d: %s", description, minimum, operand
+          );
+        }
+      }
+
+      if (maximum != null) {
+        if (value > maximum) {
+          syntaxError(
+            "%s greater than %d: %s", description, maximum, operand
+          );
+        }
+      }
+
+      return value;
+    } catch (NumberFormatException exception) {
+      syntaxError(
+        String.format(
+          "not an integer: %s: %s", description, operand
+        )
+      );
+    }
+
+    return null;
+  }
+
+  public static Long parseLong (String description, String operand, Long maximum) {
+    return parseLong(description, operand, 0L, maximum);
+  }
+
+  public static Long parseLong (String description, String operand) {
+    return parseLong(description, operand, Long.MAX_VALUE);
+  }
+
+  public static void show (String line) {
+    System.out.println(line);
+  }
+
+  public static void show (String label, String value) {
+    show((label + ": " + value));
+  }
 }

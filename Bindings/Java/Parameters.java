@@ -23,6 +23,9 @@ import org.a11y.brlapi.parameters.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 public class Parameters {
   public final ServerVersionParameter serverVersion;
   public final ClientPriorityParameter clientPriority;
@@ -92,7 +95,7 @@ public class Parameters {
     messageLocale = new MessageLocaleParameter(connection);
   }
 
-  public final Parameter[] get () {
+  private final Parameter[] newParametersArray () {
     Class type = Parameters.class;
 
     Field[] fields = type.getFields();
@@ -117,6 +120,38 @@ public class Parameters {
 
     Parameter[] result = new Parameter[parameterCount];
     System.arraycopy(parameters, 0, result, 0, parameterCount);
+
+    Arrays.sort(result,
+      new Comparator<Parameter>() {
+        @Override
+        public int compare (Parameter parameter1, Parameter parameter2) {
+          return parameter1.getName().compareTo(parameter2.getName());
+        }
+      }
+    );
+
     return result;
+  }
+
+  private Parameter[] allParameters = null;
+  public final Parameter[] get () {
+    synchronized (this) {
+      if (allParameters == null) {
+        allParameters = newParametersArray();
+      }
+    }
+
+    int count = allParameters.length;
+    Parameter[] result = new Parameter[count];
+    System.arraycopy(allParameters, 0, result, 0, count);
+    return result;
+  }
+
+  public final Parameter get (String name) {
+    for (Parameter parameter : get()) {
+      if (parameter.getName().equals(name)) return parameter;
+    }
+
+    return null;
   }
 }
