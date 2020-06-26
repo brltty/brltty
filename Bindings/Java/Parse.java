@@ -24,20 +24,28 @@ public abstract class Parse {
     super();
   }
 
+  private final static KeywordMap<Boolean> booleanKeywords = new KeywordMap<>();
+  static {
+    Boolean FALSE = false;
+    Boolean TRUE = true;
+
+    booleanKeywords.put("false", FALSE);
+    booleanKeywords.put("true", TRUE);
+
+    booleanKeywords.put("off", FALSE);
+    booleanKeywords.put("on", TRUE);
+
+    booleanKeywords.put("no", FALSE);
+    booleanKeywords.put("yes", TRUE);
+
+    booleanKeywords.put("0", FALSE);
+    booleanKeywords.put("1", TRUE);
+  }
+
   public static Boolean asBoolean (String description, String operand)
          throws OperandException {
-    if (operand.equals("false")) return false;
-    if (operand.equals("true")) return true;
-
-    if (operand.equals("off")) return false;
-    if (operand.equals("on")) return true;
-
-    if (operand.equals("no")) return false;
-    if (operand.equals("yes")) return true;
-
-    if (operand.equals("0")) return false;
-    if (operand.equals("1")) return true;
-
+    Boolean value = booleanKeywords.get(operand);
+    if (value != null) return value;
     throw new OperandException("not a boolean: %s: %s", description, operand);
   }
 
