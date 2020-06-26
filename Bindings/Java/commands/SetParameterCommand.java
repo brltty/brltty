@@ -60,46 +60,10 @@ public class SetParameterCommand extends Command {
             syntaxError("unknown parameter: %s", parameterName);
           }
 
-          parameterName = parameter.getName();
-
-          if (!parameter.isSettable()) {
-            syntaxError("parameter not settable: %s", parameterName);
-          }
-
-          if (parameter instanceof Parameter.StringSettable) {
-            Parameter.StringSettable settable = (Parameter.StringSettable)parameter;
-            settable.set(parameterValue);
-            return;
-          }
-
-          if (parameter instanceof Parameter.BooleanSettable) {
-            Parameter.BooleanSettable settable = (Parameter.BooleanSettable)parameter;
-            settable.set(parseBoolean(parameterName, parameterValue));
-            return;
-          }
-
-          if (parameter instanceof Parameter.ByteSettable) {
-            Parameter.ByteSettable settable = (Parameter.ByteSettable)parameter;
-            settable.set(parseByte(parameterName, parameterValue, settable.getMinimum(), settable.getMaximum()));
-            return;
-          }
-
-          if (parameter instanceof Parameter.ShortSettable) {
-            Parameter.ShortSettable settable = (Parameter.ShortSettable)parameter;
-            settable.set(parseShort(parameterName, parameterValue, settable.getMinimum(), settable.getMaximum()));
-            return;
-          }
-
-          if (parameter instanceof Parameter.IntSettable) {
-            Parameter.IntSettable settable = (Parameter.IntSettable)parameter;
-            settable.set(parseInt(parameterName, parameterValue, settable.getMinimum(), settable.getMaximum()));
-            return;
-          }
-
-          if (parameter instanceof Parameter.LongSettable) {
-            Parameter.LongSettable settable = (Parameter.LongSettable)parameter;
-            settable.set(parseLong(parameterName, parameterValue, settable.getMinimum(), settable.getMaximum()));
-            return;
+          try {
+            parameter.set(parameterValue);
+          } catch (OperandException exception) {
+            syntaxError(exception.getMessage());
           }
         }
       }

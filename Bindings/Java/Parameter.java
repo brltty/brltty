@@ -155,6 +155,48 @@ public abstract class Parameter extends ParameterHelper {
     }
   }
 
+  public void set (String value) throws OperandException {
+    if (!isSettable()) {
+      throw new OperandException("parameter not settable: %s", getName());
+    }
+
+    if (this instanceof StringSettable) {
+      StringSettable settable = (StringSettable)this;
+      settable.set(value);
+      return;
+    }
+
+    if (this instanceof BooleanSettable) {
+      BooleanSettable settable = (BooleanSettable)this;
+      settable.set(Parse.asBoolean(getName(), value));
+      return;
+    }
+
+    if (this instanceof ByteSettable) {
+      ByteSettable settable = (ByteSettable)this;
+      settable.set(Parse.asByte(getName(), value, settable.getMinimum(), settable.getMaximum()));
+      return;
+    }
+
+    if (this instanceof ShortSettable) {
+      ShortSettable settable = (ShortSettable)this;
+      settable.set(Parse.asShort(getName(), value, settable.getMinimum(), settable.getMaximum()));
+      return;
+    }
+
+    if (this instanceof IntSettable) {
+      IntSettable settable = (IntSettable)this;
+      settable.set(Parse.asInt(getName(), value, settable.getMinimum(), settable.getMaximum()));
+      return;
+    }
+
+    if (this instanceof LongSettable) {
+      LongSettable settable = (LongSettable)this;
+      settable.set(Parse.asLong(getName(), value, settable.getMinimum(), settable.getMaximum()));
+      return;
+    }
+  }
+
   public final static class WatcherHandle implements AutoCloseable {
     private long watchIdentifier;
 

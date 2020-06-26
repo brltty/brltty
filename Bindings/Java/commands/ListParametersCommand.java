@@ -35,7 +35,11 @@ public class ListParametersCommand extends Command {
 
     switch (parameters.length) {
       case 2:
-        subparamValue = parseLong("subparam", parameters[1]);
+        try {
+          subparamValue = Parse.asLong("subparam", parameters[1]);
+        } catch (OperandException exception) {
+          syntaxError(exception.getMessage());
+        }
         /* fall through */
 
       case 1:
