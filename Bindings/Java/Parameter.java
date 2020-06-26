@@ -195,6 +195,21 @@ public abstract class Parameter extends ParameterHelper {
       settable.set(Parse.asLong(getName(), value, settable.getMinimum(), settable.getMaximum()));
       return;
     }
+
+    {
+      Class<?> type = Settable.class;
+
+      for (Class i : getClass().getInterfaces()) {
+        if (type.isAssignableFrom(i)) {
+          type = i;
+          break;
+        }
+      }
+
+      throw new OperandException(
+        "set not suppored: %s: %s", getName(), type.getSimpleName()
+      );
+    }
   }
 
   public final static class WatcherHandle implements AutoCloseable {
