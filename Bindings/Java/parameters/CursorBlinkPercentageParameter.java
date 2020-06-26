@@ -39,4 +39,9 @@ public class CursorBlinkPercentageParameter extends GlobalParameter implements P
   public final void set (byte percentage) {
     setValue(new byte[] {percentage});
   }
+
+  @Override
+  public final byte getMaximum () {
+    return 100;
+  }
 }

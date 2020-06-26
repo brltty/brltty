@@ -39,4 +39,14 @@ public class CursorBlinkPeriodParameter extends GlobalParameter implements Param
   public final void set (int period) {
     setValue(new int[] {period});
   }
+
+  @Override
+  public final int getMinimum () {
+    return 100;
+  }
+
+  @Override
+  public final int getMaximum () {
+    return 2500;
+  }
 }
