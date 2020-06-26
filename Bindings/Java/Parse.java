@@ -43,14 +43,16 @@ public abstract class Parse {
   }
 
   public static Boolean asBoolean (String description, String operand)
-         throws OperandException {
+         throws OperandException
+  {
     Boolean value = booleanKeywords.get(operand);
     if (value != null) return value;
     throw new OperandException("not a boolean: %s: %s", description, operand);
   }
 
-  public static Long asLong (String description, String operand, long minimum, long maximum)
-         throws OperandException {
+  private static Number asNumber (String description, String operand, long minimum, long maximum)
+         throws OperandException
+  {
     long value;
 
     try {
@@ -68,7 +70,7 @@ public abstract class Parse {
         );
       }
 
-      return value;
+      return new Long(value);
     } catch (NumberFormatException exception) {
       throw new OperandException(
         "not an integer: %s: %s", description, operand
@@ -76,63 +78,81 @@ public abstract class Parse {
     }
   }
 
-  public static Long asLong (String description, String operand, long maximum)
-         throws OperandException {
+  public static long asLong (String description, String operand, long minimum, long maximum)
+         throws OperandException
+  {
+    return asNumber(description, operand, minimum, maximum).longValue();
+  }
+
+  public static long asLong (String description, String operand, long maximum)
+         throws OperandException
+  {
     return asLong(description, operand, 0, maximum);
   }
 
-  public static Long asLong (String description, String operand)
-         throws OperandException {
+  public static long asLong (String description, String operand)
+         throws OperandException
+  {
     return asLong(description, operand, Long.MAX_VALUE);
   }
 
-  public static Integer asInt (String description, String operand, int minimum, int maximum)
-         throws OperandException {
-    return asLong(description, operand, minimum, maximum).intValue();
+  public static int asInt (String description, String operand, int minimum, int maximum)
+         throws OperandException
+  {
+    return asNumber(description, operand, minimum, maximum).intValue();
   }
 
-  public static Integer asInt (String description, String operand, int maximum)
-         throws OperandException {
+  public static int asInt (String description, String operand, int maximum)
+         throws OperandException
+  {
     return asInt(description, operand, 0, maximum);
   }
 
-  public static Integer asInt (String description, String operand)
-         throws OperandException {
+  public static int asInt (String description, String operand)
+         throws OperandException
+  {
     return asInt(description, operand, Integer.MAX_VALUE);
   }
 
-  public static Short asShort (String description, String operand, short minimum, short maximum)
-         throws OperandException {
-    return asLong(description, operand, minimum, maximum).shortValue();
+  public static short asShort (String description, String operand, short minimum, short maximum)
+         throws OperandException
+  {
+    return asNumber(description, operand, minimum, maximum).shortValue();
   }
 
-  public static Short asShort (String description, String operand, short maximum)
-         throws OperandException {
+  public static short asShort (String description, String operand, short maximum)
+         throws OperandException
+  {
     return asShort(description, operand, (short)0, maximum);
   }
 
-  public static Short asShort (String description, String operand)
-         throws OperandException {
+  public static short asShort (String description, String operand)
+         throws OperandException
+  {
     return asShort(description, operand, Short.MAX_VALUE);
   }
 
-  public static Byte asByte (String description, String operand, byte minimum, byte maximum)
-         throws OperandException {
-    return asLong(description, operand, minimum, maximum).byteValue();
+  public static byte asByte (String description, String operand, byte minimum, byte maximum)
+         throws OperandException
+  {
+    return asNumber(description, operand, minimum, maximum).byteValue();
   }
 
-  public static Byte asByte (String description, String operand, byte maximum)
-         throws OperandException {
+  public static byte asByte (String description, String operand, byte maximum)
+         throws OperandException
+  {
     return asByte(description, operand, (byte)0, maximum);
   }
 
-  public static Byte asByte (String description, String operand)
-         throws OperandException {
+  public static byte asByte (String description, String operand)
+         throws OperandException
+  {
     return asByte(description, operand, Byte.MAX_VALUE);
   }
 
-  public static Byte asDots (String description, String operand)
-         throws OperandException {
+  public static byte asDots (String description, String operand)
+         throws OperandException
+  {
     if (operand.equals("0")) return 0;
 
     byte dots = 0;
