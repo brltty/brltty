@@ -1611,18 +1611,8 @@ PARAM_WRITER(computerBrailleCellSize)
   const brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
   PARAM_ASSERT_SIZE(computerBrailleCellSize);
 
-  switch (*computerBrailleCellSize) {
-    case 8:
-      setSixDotBraille(0);
-      return NULL;
-
-    case 6:
-      setSixDotBraille(1);
-      return NULL;
-
-    default:
-      return "unsupported computer braille cell size";
-  }
+  setSixDotBraille(*computerBrailleCellSize <= 6);
+  return NULL;
 }
 
 /* BRLAPI_PARAM_LITERARY_BRAILLE */
