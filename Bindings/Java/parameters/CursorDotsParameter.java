@@ -46,6 +46,6 @@ public class CursorDotsParameter extends GlobalParameter implements Parameter.St
 
   @Override
   public String toString () {
-    return asDotNumbers(get());
+    return asDots(get());
   }
 }
