@@ -81,7 +81,7 @@ public abstract class ParameterHelper {
     return new RowCells(asByteArray(value));
   }
 
-  public static String toDotNumbers (byte cell) {
+  public static String asDotNumbers (byte cell) {
     if (cell == 0) return "0";
 
     StringBuilder numbers = new StringBuilder();

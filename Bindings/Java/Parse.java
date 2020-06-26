@@ -130,4 +130,32 @@ public abstract class Parse {
          throws OperandException {
     return asByte(description, operand, Byte.MAX_VALUE);
   }
+
+  public static Byte asDots (String description, String operand)
+         throws OperandException {
+    if (operand.equals("0")) return 0;
+
+    byte dots = 0;
+    String numbers = "12345678";
+
+    for (char number : operand.toCharArray()) {
+      int index = numbers.indexOf(number);
+      if (index < 0) {
+        throw new OperandException(
+          "invalid dot number: %s: %s (%c)", description, operand, number
+        );
+      }
+
+      int dot = 1 << index;
+      if ((dots & dot) != 0) {
+        throw new OperandException(
+          "duplicate dot number: %s: %s (%c)", description, operand, number
+        );
+      }
+
+      dots |= dot;
+    }
+
+    return dots;
+  }
 }

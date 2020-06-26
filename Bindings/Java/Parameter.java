@@ -100,7 +100,7 @@ public abstract class Parameter extends ParameterHelper {
   }
 
   public interface StringSettable extends Settable {
-    public void set (String value);
+    public void set (String value) throws OperandException;
   }
 
   public interface BooleanSettable extends Settable {
