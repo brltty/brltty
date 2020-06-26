@@ -30,6 +30,7 @@ public abstract class Commands extends CommandHelper {
   private final static KeywordMap<Class<? extends Command>> commands = new KeywordMap<>();
   static {
     commands.put("bound-commands", BoundCommandsCommand.class);
+    commands.put("computer-braille", ComputerBrailleCommand.class);
     commands.put("defined-keys", DefinedKeysCommand.class);
     commands.put("list-parameters", ListParametersCommand.class);
     commands.put("set-parameter", SetParameterCommand.class);
