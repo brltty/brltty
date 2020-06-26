@@ -31,6 +31,11 @@ public class DefinedDriverKeycodesParameter extends GlobalParameter {
   }
 
   @Override
+  public boolean isHidable () {
+    return true;
+  }
+
+  @Override
   public final long[] get () {
     return asLongArray(getValue());
   }

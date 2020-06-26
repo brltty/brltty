@@ -59,6 +59,10 @@ public abstract class Parameter extends ParameterHelper {
   public abstract int getParameter ();
   public abstract boolean isGlobal ();
 
+  public boolean isHidable () {
+    return false;
+  }
+
   protected final Object getValue (long subparam) {
     return clientConnection.getParameter(getParameter(), subparam, isGlobal());
   }

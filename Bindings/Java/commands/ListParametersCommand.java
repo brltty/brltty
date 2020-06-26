@@ -66,6 +66,7 @@ public class ListParametersCommand extends Command {
             Parameters.sortByName(parameterArray);
 
             for (Parameter parameter : parameterArray) {
+              if (parameter.isHidable()) continue;
               String value = parameter.toString();
               if (value != null) show(parameter.getLabel(), value);
             }

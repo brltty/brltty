@@ -31,6 +31,11 @@ public class RenderedCellsParameter extends LocalParameter {
   }
 
   @Override
+  public boolean isHidable () {
+    return true;
+  }
+
+  @Override
   public final byte[] get () {
     return asByteArray(getValue());
   }
