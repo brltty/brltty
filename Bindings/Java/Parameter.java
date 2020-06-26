@@ -76,36 +76,6 @@ public abstract class Parameter extends ParameterHelper {
     return toString(get());
   }
 
-  public final static class WatcherHandle implements AutoCloseable {
-    private long watchIdentifier;
-
-    private WatcherHandle (long identifier) {
-      watchIdentifier = identifier;
-    }
-
-    @Override
-    public void close () {
-      synchronized (this) {
-        if (watchIdentifier != 0) {
-          BasicConnection.unwatchParameter(watchIdentifier);
-          watchIdentifier = 0;
-        }
-      }
-    }
-  }
-
-  public final WatcherHandle watch (long subparam, ParameterWatcher watcher) {
-    return new WatcherHandle(
-      clientConnection.watchParameter(
-        getParameter(), subparam, isGlobal(), watcher
-      )
-    );
-  }
-
-  public final WatcherHandle watch (ParameterWatcher watcher) {
-    return watch(0, watcher);
-  }
-
   protected final Object getValue (long subparam) {
     return clientConnection.getParameter(getParameter(), subparam, isGlobal());
   }
@@ -123,6 +93,10 @@ public abstract class Parameter extends ParameterHelper {
   }
 
   public interface Settable {
+  }
+
+  public final boolean isSettable () {
+    return this instanceof Settable;
   }
 
   public interface StringSettable extends Settable {
@@ -179,5 +153,35 @@ public abstract class Parameter extends ParameterHelper {
     public default long getMaximum () {
       return Long.MAX_VALUE;
     }
+  }
+
+  public final static class WatcherHandle implements AutoCloseable {
+    private long watchIdentifier;
+
+    private WatcherHandle (long identifier) {
+      watchIdentifier = identifier;
+    }
+
+    @Override
+    public void close () {
+      synchronized (this) {
+        if (watchIdentifier != 0) {
+          BasicConnection.unwatchParameter(watchIdentifier);
+          watchIdentifier = 0;
+        }
+      }
+    }
+  }
+
+  public final WatcherHandle watch (long subparam, ParameterWatcher watcher) {
+    return new WatcherHandle(
+      clientConnection.watchParameter(
+        getParameter(), subparam, isGlobal(), watcher
+      )
+    );
+  }
+
+  public final WatcherHandle watch (ParameterWatcher watcher) {
+    return watch(0, watcher);
   }
 }

@@ -60,7 +60,9 @@ public class SetParameterCommand extends Command {
             syntaxError("unknown parameter: %s", parameterName);
           }
 
-          if (!(parameter instanceof Parameter.Settable)) {
+          parameterName = parameter.getName();
+
+          if (!parameter.isSettable()) {
             syntaxError("parameter not settable: %s", parameterName);
           }
 
