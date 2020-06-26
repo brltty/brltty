@@ -59,6 +59,22 @@ public abstract class Parameter extends ParameterHelper {
   public abstract int getParameter ();
   public abstract boolean isGlobal ();
 
+  protected final Object getValue (long subparam) {
+    return clientConnection.getParameter(getParameter(), subparam, isGlobal());
+  }
+
+  protected final Object getValue () {
+    return getValue(0);
+  }
+
+  protected final void setValue (long subparam, Object value) {
+    clientConnection.setParameter(getParameter(), subparam, isGlobal(), value);
+  }
+
+  protected final void setValue (Object value) {
+    setValue(0, value);
+  }
+
   public Object get (long subparam) {
     return null;
   }
@@ -74,22 +90,6 @@ public abstract class Parameter extends ParameterHelper {
   @Override
   public String toString () {
     return toString(get());
-  }
-
-  protected final Object getValue (long subparam) {
-    return clientConnection.getParameter(getParameter(), subparam, isGlobal());
-  }
-
-  protected final Object getValue () {
-    return getValue(0);
-  }
-
-  protected final void setValue (long subparam, Object value) {
-    clientConnection.setParameter(getParameter(), subparam, isGlobal(), value);
-  }
-
-  protected final void setValue (Object value) {
-    setValue(0, value);
   }
 
   public interface Settable {
