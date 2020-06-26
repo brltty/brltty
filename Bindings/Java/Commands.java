@@ -23,17 +23,14 @@ import org.a11y.brlapi.commands.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import java.util.Map;
-import java.util.HashMap;
-
 public abstract class Commands extends CommandHelper {
   private Commands () {
   }
 
-  private final static Map<String, Class<? extends Command>> commands = new HashMap<>();
+  private final static KeywordMap<Class<? extends Command>> commands = new KeywordMap<>();
   static {
-    commands.put("list", ListParametersCommand.class);
-    commands.put("set", SetParameterCommand.class);
+    commands.put("list-parameters", ListParametersCommand.class);
+    commands.put("set-parameter", SetParameterCommand.class);
   }
 
   public static void main (String arguments[]) {

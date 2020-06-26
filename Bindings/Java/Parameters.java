@@ -133,25 +133,38 @@ public class Parameters {
     return result;
   }
 
-  private Parameter[] allParameters = null;
+  private Parameter[] parametersArray = null;
   public final Parameter[] get () {
     synchronized (this) {
-      if (allParameters == null) {
-        allParameters = newParametersArray();
+      if (parametersArray == null) {
+        parametersArray = newParametersArray();
       }
     }
 
-    int count = allParameters.length;
+    int count = parametersArray.length;
     Parameter[] result = new Parameter[count];
-    System.arraycopy(allParameters, 0, result, 0, count);
+    System.arraycopy(parametersArray, 0, result, 0, count);
     return result;
   }
 
-  public final Parameter get (String name) {
+  private final KeywordMap<Parameter> newParametersMap () {
+    KeywordMap<Parameter> map = new KeywordMap<>();
+
     for (Parameter parameter : get()) {
-      if (parameter.getName().equals(name)) return parameter;
+      map.put(parameter.getName(), parameter);
     }
 
-    return null;
+    return map;
+  }
+
+  private KeywordMap<Parameter> parametersMap = null;
+  public final Parameter get (String name) {
+    synchronized (this) {
+      if (parametersMap == null) {
+        parametersMap = newParametersMap();
+      }
+    }
+
+    return parametersMap.get(name);
   }
 }

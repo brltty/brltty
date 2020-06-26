@@ -19,9 +19,6 @@
 
 package org.a11y.brlapi;
 
-import java.util.Map;
-import java.util.HashMap;
-
 public abstract class Command extends CommandHelper implements Runnable {
   private interface OptionHandler {
     public void handleOption (String[] operands);
@@ -45,7 +42,7 @@ public abstract class Command extends CommandHelper implements Runnable {
     }
   }
 
-  private final Map<String, Option> commandOptions = new HashMap<>();
+  private final KeywordMap<Option> commandOptions = new KeywordMap<>();
   private final ConnectionSettings connectionSettings = new ConnectionSettings();
 
   protected final void addOption (String keyword, OptionHandler handler, String... operands) {
@@ -101,7 +98,7 @@ public abstract class Command extends CommandHelper implements Runnable {
   protected Command (String[] arguments) {
     super();
 
-    addOption("server",
+    addOption("server-host",
       new OptionHandler() {
         @Override
         public void handleOption (String[] operands) {
@@ -110,7 +107,7 @@ public abstract class Command extends CommandHelper implements Runnable {
       }, "server"
     );
 
-    addOption("auth",
+    addOption("authorization-schemes",
       new OptionHandler() {
         @Override
         public void handleOption (String[] operands) {
