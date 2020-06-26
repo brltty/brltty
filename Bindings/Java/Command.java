@@ -26,19 +26,19 @@ public abstract class Command extends CommandHelper implements Runnable {
 
   private static class Option {
     private final OptionHandler optionHandler;
-    private final String[] operandNames;
+    private final String[] operandDescriptions;
 
     public Option (OptionHandler handler, String... operands) {
       optionHandler = handler;
-      operandNames = operands;
+      operandDescriptions = operands;
     }
 
     public final OptionHandler getHandler () {
       return optionHandler;
     }
 
-    public final String[] getOperandNames () {
-      return operandNames;
+    public final String[] getOperandDescriptions () {
+      return operandDescriptions;
     }
   }
 
@@ -71,14 +71,14 @@ public abstract class Command extends CommandHelper implements Runnable {
       Option option = commandOptions.get(keyword);
       if (option == null) syntaxError("unknown option: %s", argument);
 
-      String[] operandNames = option.getOperandNames();
-      int operandCount = operandNames.length;
+      String[] operandDescriptions = option.getOperandDescriptions();
+      int operandCount = operandDescriptions.length;
 
       {
         int index = argumentCount - argumentIndex - 1;
 
         if (index < operandCount) {
-          syntaxError("missing %s: %s", operandNames[index], argument);
+          syntaxError("missing %s: %s", operandDescriptions[index], argument);
         }
       }
 
@@ -104,7 +104,7 @@ public abstract class Command extends CommandHelper implements Runnable {
         public void handleOption (String[] operands) {
           connectionSettings.setServerHost(operands[0]);
         }
-      }, "server"
+      }, "server host"
     );
 
     addOption("authorization-schemes",
@@ -113,7 +113,7 @@ public abstract class Command extends CommandHelper implements Runnable {
         public void handleOption (String[] operands) {
           connectionSettings.setAuthorizationSchemes(operands[0]);
         }
-      }, "scheme(s)"
+      }, "authorization scheme(s)"
     );
 
     processArguments(arguments);
