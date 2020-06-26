@@ -23,9 +23,6 @@ public class ConnectionSettings {
   private String serverHost;
   private String authorizationSchemes;
 
-  public ConnectionSettings () {
-  }
-
   public String getServerHost () {
     return serverHost;
   }
@@ -42,5 +39,9 @@ public class ConnectionSettings {
   public ConnectionSettings setAuthorizationSchemes (String authorization) {
     authorizationSchemes = authorization;
     return this;
+  }
+
+  public ConnectionSettings () {
+    setServerHost("localhost:0");
   }
 }
