@@ -95,7 +95,7 @@ public class Parameters {
     messageLocale = new MessageLocaleParameter(connection);
   }
 
-  private final Parameter[] newParametersArray () {
+  private final Parameter[] newParameterArray () {
     Class type = Parameters.class;
 
     Field[] fields = type.getFields();
@@ -120,34 +120,24 @@ public class Parameters {
 
     Parameter[] result = new Parameter[parameterCount];
     System.arraycopy(parameters, 0, result, 0, parameterCount);
-
-    Arrays.sort(result,
-      new Comparator<Parameter>() {
-        @Override
-        public int compare (Parameter parameter1, Parameter parameter2) {
-          return parameter1.getName().compareTo(parameter2.getName());
-        }
-      }
-    );
-
     return result;
   }
 
-  private Parameter[] parametersArray = null;
+  private Parameter[] parameterArray = null;
   public final Parameter[] get () {
     synchronized (this) {
-      if (parametersArray == null) {
-        parametersArray = newParametersArray();
+      if (parameterArray == null) {
+        parameterArray = newParameterArray();
       }
     }
 
-    int count = parametersArray.length;
+    int count = parameterArray.length;
     Parameter[] result = new Parameter[count];
-    System.arraycopy(parametersArray, 0, result, 0, count);
+    System.arraycopy(parameterArray, 0, result, 0, count);
     return result;
   }
 
-  private final KeywordMap<Parameter> newParametersMap () {
+  private final KeywordMap<Parameter> newParameterNameMap () {
     KeywordMap<Parameter> map = new KeywordMap<>();
 
     for (Parameter parameter : get()) {
@@ -157,14 +147,25 @@ public class Parameters {
     return map;
   }
 
-  private KeywordMap<Parameter> parametersMap = null;
+  private KeywordMap<Parameter> parameterNameMap = null;
   public final Parameter get (String name) {
     synchronized (this) {
-      if (parametersMap == null) {
-        parametersMap = newParametersMap();
+      if (parameterNameMap == null) {
+        parameterNameMap = newParameterNameMap();
       }
     }
 
-    return parametersMap.get(name);
+    return parameterNameMap.get(name);
+  }
+
+  public static void sortByName (Parameter[] parameters) {
+    Arrays.sort(parameters,
+      new Comparator<Parameter>() {
+        @Override
+        public int compare (Parameter parameter1, Parameter parameter2) {
+          return parameter1.getName().compareTo(parameter2.getName());
+        }
+      }
+    );
   }
 }

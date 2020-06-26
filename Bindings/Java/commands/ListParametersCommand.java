@@ -62,7 +62,10 @@ public class ListParametersCommand extends Command {
           Parameters parameters = connection.getParameters();
 
           if (parameterName == null) {
-            for (Parameter parameter : parameters.get()) {
+            Parameter[] parameterArray = parameters.get();
+            Parameters.sortByName(parameterArray);
+
+            for (Parameter parameter : parameterArray) {
               String value = parameter.toString();
               if (value != null) show(parameter.getLabel(), value);
             }
