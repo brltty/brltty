@@ -135,17 +135,49 @@ public abstract class Parameter extends ParameterHelper {
 
   public interface ByteSettable extends Settable {
     public void set (byte value);
+
+    public default byte getMinimum () {
+      return 0;
+    }
+
+    public default byte getMaximum () {
+      return Byte.MAX_VALUE;
+    }
   }
 
   public interface ShortSettable extends Settable {
     public void set (short value);
+
+    public default short getMinimum () {
+      return 0;
+    }
+
+    public default short getMaximum () {
+      return Short.MAX_VALUE;
+    }
   }
 
   public interface IntSettable extends Settable {
     public void set (int value);
+
+    public default int getMinimum () {
+      return 0;
+    }
+
+    public default int getMaximum () {
+      return Integer.MAX_VALUE;
+    }
   }
 
   public interface LongSettable extends Settable {
     public void set (long value);
+
+    public default long getMinimum () {
+      return 0;
+    }
+
+    public default long getMaximum () {
+      return Long.MAX_VALUE;
+    }
   }
 }

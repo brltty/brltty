@@ -65,32 +65,38 @@ public class SetParameterCommand extends Command {
           }
 
           if (parameter instanceof Parameter.StringSettable) {
-            ((Parameter.StringSettable)parameter).set(parameterValue);
+            Parameter.StringSettable settable = (Parameter.StringSettable)parameter;
+            settable.set(parameterValue);
             return;
           }
 
           if (parameter instanceof Parameter.BooleanSettable) {
-            ((Parameter.BooleanSettable)parameter).set(parseBoolean(parameterName, parameterValue));
-            return;
-          }
-
-          if (parameter instanceof Parameter.LongSettable) {
-            ((Parameter.LongSettable)parameter).set(parseLong(parameterName, parameterValue));
-            return;
-          }
-
-          if (parameter instanceof Parameter.IntSettable) {
-            ((Parameter.IntSettable)parameter).set(parseInt(parameterName, parameterValue));
-            return;
-          }
-
-          if (parameter instanceof Parameter.ShortSettable) {
-            ((Parameter.ShortSettable)parameter).set(parseShort(parameterName, parameterValue));
+            Parameter.BooleanSettable settable = (Parameter.BooleanSettable)parameter;
+            settable.set(parseBoolean(parameterName, parameterValue));
             return;
           }
 
           if (parameter instanceof Parameter.ByteSettable) {
-            ((Parameter.ByteSettable)parameter).set(parseByte(parameterName, parameterValue));
+            Parameter.ByteSettable settable = (Parameter.ByteSettable)parameter;
+            settable.set(parseByte(parameterName, parameterValue, settable.getMinimum(), settable.getMaximum()));
+            return;
+          }
+
+          if (parameter instanceof Parameter.ShortSettable) {
+            Parameter.ShortSettable settable = (Parameter.ShortSettable)parameter;
+            settable.set(parseShort(parameterName, parameterValue, settable.getMinimum(), settable.getMaximum()));
+            return;
+          }
+
+          if (parameter instanceof Parameter.IntSettable) {
+            Parameter.IntSettable settable = (Parameter.IntSettable)parameter;
+            settable.set(parseInt(parameterName, parameterValue, settable.getMinimum(), settable.getMaximum()));
+            return;
+          }
+
+          if (parameter instanceof Parameter.LongSettable) {
+            Parameter.LongSettable settable = (Parameter.LongSettable)parameter;
+            settable.set(parseLong(parameterName, parameterValue, settable.getMinimum(), settable.getMaximum()));
             return;
           }
         }
