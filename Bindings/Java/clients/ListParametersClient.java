@@ -17,11 +17,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi.programs;
+package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
-public class ListParametersProgram extends Program {
-  public ListParametersProgram (String[] arguments) {
+public class ListParametersClient extends Client {
+  public ListParametersClient (String[] arguments) {
     super(arguments);
   }
 
@@ -54,7 +54,7 @@ public class ListParametersProgram extends Program {
   @Override
   protected final void runProgram () {
     connect(
-      new Client() {
+      new ClientTask() {
         @Override
         public void run (Connection connection) {
           if (parameterName == null) {

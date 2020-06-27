@@ -17,17 +17,17 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi.programs;
+package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
-public class EchoProgram extends Program {
+public class EchoClient extends Client {
   private boolean echoDriverKeys = false;
   private int readTimeout = 10;
 
-  public EchoProgram (String[] arguments) {
+  public EchoClient (String[] arguments) {
     super(arguments);
 
     addOption("commands",
@@ -77,12 +77,12 @@ public class EchoProgram extends Program {
   @Override
   protected final void runProgram () {
     connect(
-      new Client() {
+      new ClientTask() {
         @Override
         public void run (Connection connection) {
           ttyMode(
             connection, echoDriverKeys, ttyPath,
-            new Client() {
+            new ClientTask() {
               @Override
               public void run (Connection connection) {
                 String label = echoDriverKeys? "Key": "Cmd";

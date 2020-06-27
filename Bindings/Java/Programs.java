@@ -18,7 +18,7 @@
  */
 
 package org.a11y.brlapi;
-import org.a11y.brlapi.programs.*;
+import org.a11y.brlapi.clients.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -35,12 +35,12 @@ public abstract class Programs extends ProgramComponent {
   }
 
   static {
-    addProgram(BoundCommandsProgram.class);
-    addProgram(ComputerBrailleProgram.class);
-    addProgram(DriverKeysProgram.class);
-    addProgram(EchoProgram.class);
-    addProgram(ListParametersProgram.class);
-    addProgram(SetParameterProgram.class);
+    addProgram(BoundCommandsClient.class);
+    addProgram(ComputerBrailleClient.class);
+    addProgram(DriverKeysClient.class);
+    addProgram(EchoClient.class);
+    addProgram(ListParametersClient.class);
+    addProgram(SetParameterClient.class);
   }
 
   private static class Main extends Program {

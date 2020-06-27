@@ -17,11 +17,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi.programs;
+package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
-public class SetParameterProgram extends Program {
-  public SetParameterProgram (String[] arguments) {
+public class SetParameterClient extends Client {
+  public SetParameterClient (String[] arguments) {
     super(arguments);
   }
 
@@ -51,7 +51,7 @@ public class SetParameterProgram extends Program {
   @Override
   protected final void runProgram () {
     connect(
-      new Client() {
+      new ClientTask() {
         @Override
         public void run (Connection connection) {
           Parameter parameter = getParameter(connection, parameterName);

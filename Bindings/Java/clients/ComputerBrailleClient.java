@@ -17,18 +17,18 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi.programs;
+package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
-public class ComputerBrailleProgram extends Program {
-  public ComputerBrailleProgram (String[] arguments) {
+public class ComputerBrailleClient extends Client {
+  public ComputerBrailleClient (String[] arguments) {
     super(arguments);
   }
 
   @Override
   protected final void runProgram () {
     connect(
-      new Client() {
+      new ClientTask() {
         @Override
         public void run (Connection connection) {
           Parameters parameters = connection.getParameters();

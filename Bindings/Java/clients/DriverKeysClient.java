@@ -17,26 +17,25 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi.programs;
+package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
-public class BoundCommandsProgram extends Program {
-  public BoundCommandsProgram (String[] arguments) {
+public class DriverKeysClient extends Client {
+  public DriverKeysClient (String[] arguments) {
     super(arguments);
   }
 
   @Override
   protected final void runProgram () {
     connect(
-      new Client() {
+      new ClientTask() {
         @Override
         public void run (Connection connection) {
           Parameters parameters = connection.getParameters();
 
-          for (long code : parameters.boundCommandKeycodes.get()) {
+          for (long code : parameters.definedDriverKeycodes.get()) {
             show(
-              parameters.commandKeycodeName.get(code),
-              parameters.commandKeycodeSummary.get(code)
+              parameters.driverKeycodeName.get(code)
             );
           }
         }

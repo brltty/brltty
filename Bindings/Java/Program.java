@@ -45,7 +45,6 @@ public abstract class Program extends ProgramComponent implements Runnable {
   }
 
   private final KeywordMap<Option> programOptions = new KeywordMap<>();
-  private final ConnectionSettings connectionSettings = new ConnectionSettings();
 
   protected final void addOption (String keyword, OptionHandler handler, String... operands) {
     programOptions.put(keyword, new Option(handler, operands));
@@ -54,24 +53,6 @@ public abstract class Program extends ProgramComponent implements Runnable {
   protected Program (String[] arguments) {
     super();
     programArguments = arguments;
-
-    addOption("server-host",
-      new OptionHandler() {
-        @Override
-        public void handleOption (String[] operands) {
-          connectionSettings.setServerHost(operands[0]);
-        }
-      }, "server host"
-    );
-
-    addOption("authorization-schemes",
-      new OptionHandler() {
-        @Override
-        public void handleOption (String[] operands) {
-          connectionSettings.setAuthorizationSchemes(operands[0]);
-        }
-      }, "authorization scheme(s)"
-    );
   }
 
   public String getName () {
@@ -162,63 +143,5 @@ public abstract class Program extends ProgramComponent implements Runnable {
     }
 
     runProgram();
-  }
-
-  protected interface Client {
-    public void run (Connection connection);
-  }
-
-  public final void connect (Client client) {
-    try {
-      Connection connection = new Connection(connectionSettings);
-
-      try {
-        client.run(connection);
-      } finally {
-        connection.close();
-        connection = null;
-      }
-    } catch (ConnectionError error) {
-      internalError(("connection error: " + error));
-    }
-  }
-
-  public final void ttyMode (Connection connection, boolean keys, int[] path, Client client) {
-    try {
-      String driver = keys? connection.getDriverName(): null;
-      connection.enterTtyModeWithPath(driver, path);
-
-      try {
-        client.run(connection);
-      } finally {
-        connection.leaveTtyMode();
-      }
-    } catch (ConnectionError error) {
-      internalError(("tty mode error: " + error));
-    }
-  }
-
-  public final void rawMode (Connection connection, Client client) {
-    try {
-      connection.enterRawMode(connection.getDriverName());
-
-      try {
-        client.run(connection);
-      } finally {
-        connection.leaveRawMode();
-      }
-    } catch (ConnectionError error) {
-      internalError(("raw mode error: " + error));
-    }
-  }
-
-  protected final Parameter getParameter (Connection connection, String name) {
-    Parameter parameter = connection.getParameters().get(name);
-
-    if (parameter == null) {
-      semanticError("unknown parameter: %s", name);
-    }
-
-    return parameter;
   }
 }
