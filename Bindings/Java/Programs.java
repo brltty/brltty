@@ -32,6 +32,7 @@ public abstract class Programs extends ProgramHelper {
     programs.put("bound-commands", BoundCommandsProgram.class);
     programs.put("computer-braille", ComputerBrailleProgram.class);
     programs.put("driver-keys", DriverKeysProgram.class);
+    programs.put("echo", EchoProgram.class);
     programs.put("list-parameters", ListParametersProgram.class);
     programs.put("set-parameter", SetParameterProgram.class);
   }

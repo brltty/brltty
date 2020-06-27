@@ -29,17 +29,15 @@ public class ListParametersProgram extends Program {
   private Long subparamValue;
 
   @Override
-  protected void processParameters (String[] parameters) {
+  protected void processParameters (String[] parameters)
+            throws OperandException
+  {
     parameterName = null;
     subparamValue = null;
 
     switch (parameters.length) {
       case 2:
-        try {
-          subparamValue = Parse.asLong("subparam", parameters[1]);
-        } catch (OperandException exception) {
-          syntaxError(exception.getMessage());
-        }
+        subparamValue = Parse.asLong("subparam", parameters[1]);
         /* fall through */
 
       case 1:
@@ -54,15 +52,13 @@ public class ListParametersProgram extends Program {
   }
 
   @Override
-  public final void run () {
+  protected final void runProgram () {
     connect(
       new Client() {
         @Override
         public void run (Connection connection) {
-          Parameters parameters = connection.getParameters();
-
           if (parameterName == null) {
-            Parameter[] parameterArray = parameters.get();
+            Parameter[] parameterArray = connection.getParameters().get();
             Parameters.sortByName(parameterArray);
 
             for (Parameter parameter : parameterArray) {
@@ -71,12 +67,8 @@ public class ListParametersProgram extends Program {
               if (value != null) show(parameter.getLabel(), value);
             }
           } else {
-            Parameter parameter = parameters.get(parameterName);
+            Parameter parameter = getParameter(connection, parameterName);
             String value;
-
-            if (parameter == null) {
-              syntaxError("unknown parameter: %s", parameterName);
-            }
 
             if (subparamValue == null) {
               value = parameter.toString();

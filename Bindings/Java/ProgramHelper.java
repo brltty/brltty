@@ -23,27 +23,37 @@ public abstract class ProgramHelper {
   protected ProgramHelper () {
   }
 
-  public static void writeCommandMessage (String format, Object... arguments) {
+  public static void writeMessage (String format, Object... arguments) {
     System.err.println(String.format(format, arguments));
   }
 
   public static void syntaxError (String format, Object... arguments) {
-    writeCommandMessage(format, arguments);
+    writeMessage(format, arguments);
     System.exit(2);
   }
 
   public static void semanticError (String format, Object... arguments) {
-    writeCommandMessage(format, arguments);
+    writeMessage(format, arguments);
     System.exit(3);
   }
 
   public static void internalError (String format, Object... arguments) {
-    writeCommandMessage(format, arguments);
+    writeMessage(format, arguments);
     System.exit(4);
   }
 
-  protected final void tooManyParameters () {
-    syntaxError("too many parameters");
+  protected final void tooManyParameters () throws OperandException {
+    throw new OperandException("too many parameters");
+  }
+
+  protected static Parameter getParameter (Connection connection, String name) {
+    Parameter parameter = connection.getParameters().get(name);
+
+    if (parameter == null) {
+      semanticError("unknown parameter: %s", name);
+    }
+
+    return parameter;
   }
 
   public static void show (String line) {

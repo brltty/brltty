@@ -29,15 +29,15 @@ public class SetParameterProgram extends Program {
   private String parameterValue;
 
   @Override
-  protected void processParameters (String[] parameters) {
+  protected void processParameters (String[] parameters)
+            throws OperandException
+  {
     switch (parameters.length) {
       case 0:
-        syntaxError("missing parameter name");
-        return;
+        throw new OperandException("missing parameter name");
 
       case 1:
-        syntaxError ("missing larameter value");
-        return;
+        throw new OperandException ("missing larameter value");
 
       case 2:
         parameterName = parameters[0];
@@ -49,16 +49,12 @@ public class SetParameterProgram extends Program {
   }
 
   @Override
-  public final void run () {
+  protected final void runProgram () {
     connect(
       new Client() {
         @Override
         public void run (Connection connection) {
-          Parameter parameter = connection.getParameters().get(parameterName);
-
-          if (parameter == null) {
-            syntaxError("unknown parameter: %s", parameterName);
-          }
+          Parameter parameter = getParameter(connection, parameterName);
 
           try {
             parameter.set(parameterValue);

@@ -26,7 +26,7 @@ public class ComputerBrailleProgram extends Program {
   }
 
   @Override
-  public final void run () {
+  protected final void runProgram () {
     connect(
       new Client() {
         @Override

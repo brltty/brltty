@@ -20,8 +20,10 @@
 package org.a11y.brlapi;
 
 public abstract class Program extends ProgramHelper implements Runnable {
-  private interface OptionHandler {
-    public void handleOption (String[] operands);
+  private final String[] programArguments;
+
+  protected interface OptionHandler {
+    public void handleOption (String[] operands) throws OperandException;
   }
 
   private static class Option {
@@ -49,11 +51,38 @@ public abstract class Program extends ProgramHelper implements Runnable {
     programOptions.put(keyword, new Option(handler, operands));
   }
 
-  protected void processParameters (String[] parameters) {
+  protected Program (String[] arguments) {
+    super();
+    programArguments = arguments;
+
+    addOption("server-host",
+      new OptionHandler() {
+        @Override
+        public void handleOption (String[] operands) {
+          connectionSettings.setServerHost(operands[0]);
+        }
+      }, "server host"
+    );
+
+    addOption("authorization-schemes",
+      new OptionHandler() {
+        @Override
+        public void handleOption (String[] operands) {
+          connectionSettings.setAuthorizationSchemes(operands[0]);
+        }
+      }, "authorization scheme(s)"
+    );
+  }
+
+  protected void processParameters (String[] parameters)
+            throws OperandException
+  {
     if (parameters.length > 0) tooManyParameters();
   }
 
-  private final void processArguments (String[] arguments) {
+  private final void processArguments (String[] arguments)
+          throws OperandException
+  {
     int argumentCount = arguments.length;
     int argumentIndex = 0;
 
@@ -92,31 +121,25 @@ public abstract class Program extends ProgramHelper implements Runnable {
     int parameterCount = argumentCount - argumentIndex;
     String[] parameters = new String[parameterCount];
     System.arraycopy(arguments, argumentIndex, parameters, 0, parameterCount);
-    processParameters(parameters);
+
+    try {
+      processParameters(parameters);
+    } catch (OperandException exception) {
+      syntaxError(exception.getMessage());
+    }
   }
 
-  protected Program (String[] arguments) {
-    super();
+  protected abstract void runProgram ();
 
-    addOption("server-host",
-      new OptionHandler() {
-        @Override
-        public void handleOption (String[] operands) {
-          connectionSettings.setServerHost(operands[0]);
-        }
-      }, "server host"
-    );
+  @Override
+  public final void run () {
+    try {
+      processArguments(programArguments);
+    } catch (OperandException exception) {
+      syntaxError(exception.getMessage());
+    }
 
-    addOption("authorization-schemes",
-      new OptionHandler() {
-        @Override
-        public void handleOption (String[] operands) {
-          connectionSettings.setAuthorizationSchemes(operands[0]);
-        }
-      }, "authorization scheme(s)"
-    );
-
-    processArguments(arguments);
+    runProgram();
   }
 
   protected interface Client {
@@ -135,6 +158,21 @@ public abstract class Program extends ProgramHelper implements Runnable {
       }
     } catch (ConnectionError error) {
       internalError(("connection error: " + error));
+    }
+  }
+
+  public final void ttyMode (Connection connection, boolean keys, int[] path, Client client) {
+    try {
+      String driver = keys? connection.getDriverName(): null;
+      connection.enterTtyModeWithPath(driver, path);
+
+      try {
+        client.run(connection);
+      } finally {
+        connection.leaveTtyMode();
+      }
+    } catch (ConnectionError error) {
+      internalError(("tty mode error: " + error));
     }
   }
 }
