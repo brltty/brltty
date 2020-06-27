@@ -19,8 +19,9 @@
 
 package org.a11y.brlapi;
 
-public abstract class LibraryVersion extends NativeLibrary {
+public abstract class LibraryVersion extends NativeComponent {
   private LibraryVersion () {
+    super();
   }
 
   public native static int getMajor ();

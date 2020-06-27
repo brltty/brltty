@@ -22,7 +22,7 @@ package org.a11y.brlapi;
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
-public class BasicConnection extends NativeLibrary implements AutoCloseable {
+public class BasicConnection extends NativeComponent implements AutoCloseable {
   private long connectionHandle;
 
   private native int openConnection (

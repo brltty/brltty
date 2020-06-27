@@ -19,10 +19,11 @@
 
 package org.a11y.brlapi;
 
-public abstract class Keycode extends NativeLibrary {
+public abstract class Keycode extends NativeComponent {
   private final long codeValue;
 
   public Keycode (long code) {
+    super();
     codeValue = code;
   }
 

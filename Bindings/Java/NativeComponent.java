@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public class NativeLibrary {
+public class NativeComponent extends Component {
   private native static void initializeNativeData ();
 
   static {
@@ -27,6 +27,7 @@ public class NativeLibrary {
     initializeNativeData();
   }
 
-  protected NativeLibrary () {
+  protected NativeComponent () {
+    super();
   }
 }
