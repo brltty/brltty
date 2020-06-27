@@ -70,8 +70,8 @@ public class KeywordMap<V> {
   }
 
   public final String[] getKeywords () {
-    Set<String> set = valueMap.keySet();
-    return set.toArray(new String[set.size()]);
+    Set<String> keywords = valueMap.keySet();
+    return keywords.toArray(new String[keywords.size()]);
   }
 
   public KeywordMap () {

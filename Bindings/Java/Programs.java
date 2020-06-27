@@ -31,8 +31,15 @@ public abstract class Programs extends ProgramComponent {
   private final static KeywordMap<Class<? extends Program>> programs = new KeywordMap<>();
 
   private static void addProgram (Class<? extends Program> type) {
-    String name = toName(wordify(type.getSimpleName()));
-    programs.put(name, type);
+    String name = type.getSimpleName();
+
+    if (Client.class.isAssignableFrom(type)) {
+      name = name.replaceAll("Client$", "");
+    } else {
+      name = name.replaceAll("Program$", "");
+    }
+
+    programs.put(toName(wordify(name)), type);
   }
 
   static {
