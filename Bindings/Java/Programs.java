@@ -18,6 +18,7 @@
  */
 
 package org.a11y.brlapi;
+import org.a11y.brlapi.programs.*;
 import org.a11y.brlapi.clients.*;
 
 import java.lang.reflect.Constructor;
@@ -35,6 +36,8 @@ public abstract class Programs extends ProgramComponent {
   }
 
   static {
+    addProgram(VersionProgram.class);
+
     addProgram(BoundCommandsClient.class);
     addProgram(ComputerBrailleClient.class);
     addProgram(DriverKeysClient.class);

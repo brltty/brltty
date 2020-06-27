@@ -19,12 +19,17 @@
 
 package org.a11y.brlapi;
 
-public abstract class LibraryVersion extends NativeComponent {
-  private LibraryVersion () {
+public abstract class APIVersion extends NativeComponent {
+  private APIVersion () {
     super();
   }
 
-  public native static int getMajor ();
-  public native static int getMinor ();
-  public native static int getRevision ();
+  private native static int getMajor ();
+  public final static int MAJOR = getMajor();
+
+  private native static int getMinor ();
+  public final static int MINOR = getMinor();
+
+  private native static int getRevision ();
+  public final static int REVISION = getRevision();
 }

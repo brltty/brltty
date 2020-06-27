@@ -244,19 +244,19 @@ handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_LibraryVersion, getMajor, jint
+  org_a11y_brlapi_APIVersion, getMajor, jint
 ) {
   return libraryVersion_major;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_LibraryVersion, getMinor, jint
+  org_a11y_brlapi_APIVersion, getMinor, jint
 ) {
   return libraryVersion_minor;
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_LibraryVersion, getRevision, jint
+  org_a11y_brlapi_APIVersion, getRevision, jint
 ) {
   return libraryVersion_revision;
 }
