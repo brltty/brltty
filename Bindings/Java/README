@@ -1,9 +1,11 @@
 apitest {program | client} [argument ...]
 
 Programs (see the programs/ subdirectory):
+  -help
   version
 
 Clients (see the clients/ subdirectory):
+  -help
   -server host[:port] (default is localhost:0)
   -authorization scheme+...
   bound-commands
@@ -18,7 +20,7 @@ Clients (see the clients/ subdirectory):
 These aren't case sensitive and allow unambiguous truncations:
   program names (e.g. v for version)
   client names (e.g. l for list-parameters)
-  option names (e.g. -s for -server)
+  option names (e.g. -h for -help)
   parameter names (e.g. clip for clipboard-content)
   boolean operands (false/true, off/on, no/yes, 0/1)
 

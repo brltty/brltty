@@ -21,12 +21,12 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class DriverKeysClient extends Client {
-  public DriverKeysClient (String[] arguments) {
+  public DriverKeysClient (String... arguments) {
     super(arguments);
   }
 
   @Override
-  protected final void runProgram () {
+  protected final void runClient () {
     connect(
       new ClientTask() {
         @Override

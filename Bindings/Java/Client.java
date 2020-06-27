@@ -22,7 +22,7 @@ package org.a11y.brlapi;
 public abstract class Client extends Program {
   private final ConnectionSettings connectionSettings = new ConnectionSettings();
 
-  protected Client (String[] arguments) {
+  protected Client (String... arguments) {
     super(arguments);
 
     addOption("server",
@@ -100,5 +100,12 @@ public abstract class Client extends Program {
     }
 
     return parameter;
+  }
+
+  protected abstract void runClient ();
+
+  @Override
+  protected final void runProgram () {
+    runClient();
   }
 }

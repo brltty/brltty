@@ -19,6 +19,7 @@
 
 package org.a11y.brlapi;
 
+import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -65,6 +66,11 @@ public class KeywordMap<V> {
     if (keyword == null) return null;
     if (keyword == AMBIGUOUS) return null;
     return valueMap.get(keyword);
+  }
+
+  public final String[] getKeywords () {
+    Set<String> set = valueMap.keySet();
+    return set.toArray(new String[set.size()]);
   }
 
   public KeywordMap () {

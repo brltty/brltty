@@ -27,8 +27,9 @@ public class EchoClient extends Client {
   private boolean echoDriverKeys = false;
   private int readTimeout = 10;
 
-  public EchoClient (String[] arguments) {
+  public EchoClient (String... arguments) {
     super(arguments);
+    addOptionalParameters("tty(s)");
 
     addOption("commands",
       new Option.Handler() {
@@ -75,7 +76,7 @@ public class EchoClient extends Client {
   }
 
   @Override
-  protected final void runProgram () {
+  protected final void runClient () {
     connect(
       new ClientTask() {
         @Override

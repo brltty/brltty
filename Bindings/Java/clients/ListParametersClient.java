@@ -21,8 +21,9 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class ListParametersClient extends Client {
-  public ListParametersClient (String[] arguments) {
+  public ListParametersClient (String... arguments) {
     super(arguments);
+    addOptionalParameters("parameter", "subparam");
   }
 
   private String parameterName;
@@ -52,7 +53,7 @@ public class ListParametersClient extends Client {
   }
 
   @Override
-  protected final void runProgram () {
+  protected final void runClient () {
     connect(
       new ClientTask() {
         @Override

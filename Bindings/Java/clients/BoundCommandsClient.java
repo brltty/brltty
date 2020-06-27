@@ -21,12 +21,12 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class BoundCommandsClient extends Client {
-  public BoundCommandsClient (String[] arguments) {
+  public BoundCommandsClient (String... arguments) {
     super(arguments);
   }
 
   @Override
-  protected final void runProgram () {
+  protected final void runClient () {
     connect(
       new ClientTask() {
         @Override

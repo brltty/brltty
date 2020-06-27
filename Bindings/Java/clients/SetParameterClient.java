@@ -21,8 +21,9 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class SetParameterClient extends Client {
-  public SetParameterClient (String[] arguments) {
+  public SetParameterClient (String... arguments) {
     super(arguments);
+    addRequiredParameters("parameter", "value");
   }
 
   private String parameterName;
@@ -49,7 +50,7 @@ public class SetParameterClient extends Client {
   }
 
   @Override
-  protected final void runProgram () {
+  protected final void runClient () {
     connect(
       new ClientTask() {
         @Override

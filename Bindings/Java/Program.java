@@ -19,9 +19,11 @@
 
 package org.a11y.brlapi;
 
-public abstract class Program extends ProgramComponent implements Runnable {
-  private final String[] programArguments;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
+public abstract class Program extends ProgramComponent implements Runnable {
   protected static class Option {
     public final static char PREFIX_CHARACTER = '-';
 
@@ -41,24 +43,111 @@ public abstract class Program extends ProgramComponent implements Runnable {
       return optionHandler;
     }
 
-    public final String[] getOperandDescriptions () {
-      return operandDescriptions;
+    public final String[] getOperands () {
+      int count = operandDescriptions.length;
+      String[] result = new String[count];
+      System.arraycopy(operandDescriptions, 0, result, 0, count);
+      return result;
     }
   }
 
+  private final String[] programArguments;
   private final KeywordMap<Option> programOptions = new KeywordMap<>();
+  private List<String> requiredParameters = null;
+  private List<String> optionalParameters = null;
 
   protected final void addOption (String keyword, Option.Handler handler, String... operands) {
     programOptions.put(keyword, new Option(handler, operands));
   }
 
-  protected Program (String[] arguments) {
-    super();
-    programArguments = arguments;
+  protected final void addRequiredParameters (String... parameters) {
+    if (optionalParameters != null) {
+      throw new IllegalStateException("optional parameter(s) already added");
+    }
+
+    if (requiredParameters == null) {
+      requiredParameters = new ArrayList<>();
+    }
+
+    for (String parameter : parameters) {
+      requiredParameters.add(parameter);
+    }
+  }
+
+  protected final void addOptionalParameters (String... parameters) {
+    if (optionalParameters == null) {
+      optionalParameters = new ArrayList<>();
+    }
+
+    for (String parameter : parameters) {
+      optionalParameters.add(parameter);
+    }
   }
 
   public String getName () {
     return getClass().getSimpleName();
+  }
+
+  public final String getUsageSummary () {
+    StringBuilder usage = new StringBuilder();
+    usage.append(getName());
+
+    if (requiredParameters != null) {
+      for (String parameter : requiredParameters) {
+        usage.append(' ');
+        usage.append(toName(parameter));
+      }
+    }
+
+    if (optionalParameters != null) {
+      for (String parameter : optionalParameters) {
+        usage.append(" [");
+        usage.append(toName(parameter));
+      }
+
+      for (int i=optionalParameters.size(); i>0; i-=1) {
+        usage.append(']');
+      }
+    }
+
+    {
+      String[] names = programOptions.getKeywords();
+      Arrays.sort(names);
+
+      for (String name : names) {
+        Option option = programOptions.get(name);
+
+        usage.append('\n');
+        usage.append(Option.PREFIX_CHARACTER);
+        usage.append(name);
+
+        for (String operand : option.getOperands()) {
+          usage.append(' ');
+          usage.append(toName(operand));
+        }
+      }
+    }
+
+    return usage.toString();
+  }
+
+  public final void showUsageSummary () {
+    System.out.println(getUsageSummary());
+    System.exit(0);
+  }
+
+  protected Program (String... arguments) {
+    super();
+    programArguments = arguments;
+
+    addOption("help",
+      new Option.Handler() {
+        @Override
+        public void handleOption (String[] operands) {
+          showUsageSummary();
+        }
+      }
+    );
   }
 
   protected final void writeProgramMessage (String format, Object... arguments) {
@@ -110,7 +199,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
       Option option = programOptions.get(keyword);
       if (option == null) syntaxError("unknown option: %s", argument);
 
-      String[] operandDescriptions = option.getOperandDescriptions();
+      String[] operandDescriptions = option.getOperands();
       int operandCount = operandDescriptions.length;
 
       {

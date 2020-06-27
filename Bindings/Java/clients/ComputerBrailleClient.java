@@ -21,12 +21,12 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class ComputerBrailleClient extends Client {
-  public ComputerBrailleClient (String[] arguments) {
+  public ComputerBrailleClient (String... arguments) {
     super(arguments);
   }
 
   @Override
-  protected final void runProgram () {
+  protected final void runClient () {
     connect(
       new ClientTask() {
         @Override

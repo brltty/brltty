@@ -46,8 +46,10 @@ public abstract class Programs extends ProgramComponent {
   }
 
   private static class MainProgram extends Program {
-    public MainProgram (String[] arguments) {
+    public MainProgram (String... arguments) {
       super(arguments);
+      addRequiredParameters("program/client");
+      addOptionalParameters("arguments");
     }
 
     private Program programObject = null;

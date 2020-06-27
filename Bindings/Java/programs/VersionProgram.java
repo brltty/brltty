@@ -21,7 +21,7 @@ package org.a11y.brlapi.programs;
 import org.a11y.brlapi.*;
 
 public class VersionProgram extends Program {
-  public VersionProgram (String[] arguments) {
+  public VersionProgram (String... arguments) {
     super(arguments);
   }
 
