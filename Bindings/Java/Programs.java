@@ -30,7 +30,7 @@ public abstract class Programs extends ProgramComponent {
   private final static KeywordMap<Class<? extends Program>> programs = new KeywordMap<>();
 
   private static void addProgram (Class<? extends Program> type) {
-    String name = toName(toLabel(type.getSimpleName()));
+    String name = toName(wordify(type.getSimpleName()));
     programs.put(name, type);
   }
 
@@ -43,8 +43,8 @@ public abstract class Programs extends ProgramComponent {
     addProgram(SetParameterClient.class);
   }
 
-  private static class Main extends Program {
-    public Main (String[] arguments) {
+  private static class MainProgram extends Program {
+    public MainProgram (String[] arguments) {
       super(arguments);
     }
 
@@ -84,6 +84,6 @@ public abstract class Programs extends ProgramComponent {
   }
 
   public static void main (String arguments[]) {
-    new Main(arguments).run();
+    new MainProgram(arguments).run();
   }
 }

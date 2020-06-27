@@ -23,11 +23,8 @@ public abstract class Component {
   protected Component () {
   }
 
-  public static String toLabel (String string) {
-    return string
-          .replaceAll("Parameter$", "")
-          .replaceAll("(?<=.)(?=\\p{Upper})", " ")
-          ;
+  public static String wordify (String string) {
+    return string.replaceAll("(?<=.)(?=\\p{Upper})", " ");
   }
 
   public static String toName (String string) {
