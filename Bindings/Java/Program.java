@@ -121,12 +121,7 @@ public abstract class Program extends ProgramHelper implements Runnable {
     int parameterCount = argumentCount - argumentIndex;
     String[] parameters = new String[parameterCount];
     System.arraycopy(arguments, argumentIndex, parameters, 0, parameterCount);
-
-    try {
-      processParameters(parameters);
-    } catch (OperandException exception) {
-      syntaxError(exception.getMessage());
-    }
+    processParameters(parameters);
   }
 
   protected abstract void runProgram ();
@@ -173,6 +168,20 @@ public abstract class Program extends ProgramHelper implements Runnable {
       }
     } catch (ConnectionError error) {
       internalError(("tty mode error: " + error));
+    }
+  }
+
+  public final void rawMode (Connection connection, Client client) {
+    try {
+      connection.enterRawMode(connection.getDriverName());
+
+      try {
+        client.run(connection);
+      } finally {
+        connection.leaveRawMode();
+      }
+    } catch (ConnectionError error) {
+      internalError(("raw mode error: " + error));
     }
   }
 }
