@@ -77,9 +77,8 @@ public abstract class Client extends Program {
     );
   }
 
-  protected final void ttyMode (Connection connection, boolean keys, int[] path, ClientTask task) {
+  protected final void ttyMode (Connection connection, String driver, int[] path, ClientTask task) {
     try {
-      String driver = keys? connection.getDriverName(): null;
       connection.enterTtyModeWithPath(driver, path);
 
       try {
@@ -92,9 +91,13 @@ public abstract class Client extends Program {
     }
   }
 
-  protected final void rawMode (Connection connection, ClientTask task) {
+  protected final void ttyMode (Connection connection, boolean keys, int[] path, ClientTask task) {
+    ttyMode(connection, (keys? connection.getDriverName(): null), path, task);
+  }
+
+  protected final void rawMode (Connection connection, String driver, ClientTask task) {
     try {
-      connection.enterRawMode(connection.getDriverName());
+      connection.enterRawMode(driver);
 
       try {
         task.run(connection);
@@ -104,6 +107,10 @@ public abstract class Client extends Program {
     } catch (ConnectionError error) {
       internalError(("raw mode error: " + error));
     }
+  }
+
+  protected final void rawMode (Connection connection, ClientTask task) {
+    rawMode(connection, connection.getDriverName(), task);
   }
 
   protected final Parameter getParameter (Connection connection, String name) {
