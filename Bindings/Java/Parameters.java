@@ -26,7 +26,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class Parameters {
+public class Parameters extends ParameterComponent {
   public final ServerVersionParameter serverVersion;
   public final ClientPriorityParameter clientPriority;
   public final DriverNameParameter driverName;
@@ -61,6 +61,8 @@ public class Parameters {
   public final MessageLocaleParameter messageLocale;
 
   public Parameters (BasicConnection connection) {
+    super();
+
     serverVersion = new ServerVersionParameter(connection);
     clientPriority = new ClientPriorityParameter(connection);
     driverName = new DriverNameParameter(connection);

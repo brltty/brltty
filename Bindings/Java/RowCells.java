@@ -74,7 +74,7 @@ public class RowCells {
 
       sb.append(
         String.format(
-          "%02X:%s", index, ParameterHelper.asDots(cellArray[index])
+          "%02X:%s", index, ParameterComponent.asDots(cellArray[index])
         )
       );
     }

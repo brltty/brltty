@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public abstract class Program extends ProgramHelper implements Runnable {
+public abstract class Program extends ProgramComponent implements Runnable {
   private final String[] programArguments;
 
   protected interface OptionHandler {
@@ -72,6 +72,29 @@ public abstract class Program extends ProgramHelper implements Runnable {
         }
       }, "authorization scheme(s)"
     );
+  }
+
+  public String getName () {
+    return getClass().getSimpleName();
+  }
+
+  public final void writeMessage (String format, Object... arguments) {
+    System.err.println((getName() + ": " + String.format(format, arguments)));
+  }
+
+  public final void syntaxError (String format, Object... arguments) {
+    writeMessage(format, arguments);
+    System.exit(2);
+  }
+
+  public final void semanticError (String format, Object... arguments) {
+    writeMessage(format, arguments);
+    System.exit(3);
+  }
+
+  public final void internalError (String format, Object... arguments) {
+    writeMessage(format, arguments);
+    System.exit(4);
   }
 
   protected final void tooManyParameters () throws OperandException {
@@ -189,7 +212,7 @@ public abstract class Program extends ProgramHelper implements Runnable {
     }
   }
 
-  protected static Parameter getParameter (Connection connection, String name) {
+  protected final Parameter getParameter (Connection connection, String name) {
     Parameter parameter = connection.getParameters().get(name);
 
     if (parameter == null) {

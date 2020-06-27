@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public abstract class Parameter extends ParameterHelper {
+public abstract class Parameter extends ParameterComponent {
   private final BasicConnection clientConnection;
 
   protected Parameter (BasicConnection connection) {
@@ -31,11 +31,7 @@ public abstract class Parameter extends ParameterHelper {
   public String getLabel () {
     synchronized (this) {
       if (parameterLabel == null) {
-        parameterLabel = getClass()
-                        .getSimpleName()
-                        .replaceAll("Parameter$", "")
-                        .replaceAll("(?<=.)(?=\\p{Upper})", " ")
-                        ;
+        parameterLabel = toLabel(getClass().getSimpleName());
       }
     }
 
@@ -46,10 +42,7 @@ public abstract class Parameter extends ParameterHelper {
   public String getName () {
     synchronized (this) {
       if (parameterName == null) {
-        parameterName = getLabel()
-                       .replace(' ', '-')
-                       .toLowerCase()
-                       ;
+        parameterName = toName(getLabel());
       }
     }
 

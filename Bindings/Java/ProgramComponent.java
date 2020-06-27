@@ -19,34 +19,16 @@
 
 package org.a11y.brlapi;
 
-public abstract class ProgramHelper {
-  protected ProgramHelper () {
+public abstract class ProgramComponent extends Component {
+  protected ProgramComponent () {
+    super();
   }
 
-  public static void writeMessage (String format, Object... arguments) {
-    System.err.println(String.format(format, arguments));
-  }
-
-  public static void syntaxError (String format, Object... arguments) {
-    writeMessage(format, arguments);
-    System.exit(2);
-  }
-
-  public static void semanticError (String format, Object... arguments) {
-    writeMessage(format, arguments);
-    System.exit(3);
-  }
-
-  public static void internalError (String format, Object... arguments) {
-    writeMessage(format, arguments);
-    System.exit(4);
-  }
-
-  public static void show (String line) {
+  public final void show (String line) {
     System.out.println(line);
   }
 
-  public static void show (String label, String value) {
+  public final void show (String label, String value) {
     show((label + ": " + value));
   }
 }

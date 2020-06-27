@@ -21,8 +21,9 @@ package org.a11y.brlapi;
 
 import java.util.Arrays;
 
-public abstract class ParameterHelper {
-  protected ParameterHelper () {
+public abstract class ParameterComponent extends Component {
+  protected ParameterComponent () {
+    super();
   }
 
   public static String asString (Object value) {

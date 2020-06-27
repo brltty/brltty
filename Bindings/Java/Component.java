@@ -19,10 +19,18 @@
 
 package org.a11y.brlapi;
 
-public abstract class ParameterWatcher extends ParameterComponent {
-  public abstract void onParameterUpdated (
-    int parameter,
-    long subparam,
-    Object value
-  );
+public abstract class Component {
+  protected Component () {
+  }
+
+  public static String toLabel (String string) {
+    return string
+          .replaceAll("Parameter$", "")
+          .replaceAll("(?<=.)(?=\\p{Upper})", " ")
+          ;
+  }
+
+  public static String toName (String string) {
+    return string.replace(' ', '-').toLowerCase();
+  }
 }
