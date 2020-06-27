@@ -97,6 +97,17 @@ public abstract class ParameterHelper {
     return numbers.toString();
   }
 
+  public static String asDots (byte[] cells) {
+    int count = cells.length;
+    String[] dots = new String[count];
+
+    for (int i=0; i<count; i+=1) {
+      dots[i] = asDots(cells[i]);
+    }
+
+    return Arrays.toString(dots);
+  }
+
   public static String toString (Object value) {
     if (value == null) return null;
 
