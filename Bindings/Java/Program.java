@@ -74,6 +74,10 @@ public abstract class Program extends ProgramHelper implements Runnable {
     );
   }
 
+  protected final void tooManyParameters () throws OperandException {
+    throw new OperandException("too many parameters");
+  }
+
   protected void processParameters (String[] parameters)
             throws OperandException
   {
@@ -183,5 +187,15 @@ public abstract class Program extends ProgramHelper implements Runnable {
     } catch (ConnectionError error) {
       internalError(("raw mode error: " + error));
     }
+  }
+
+  protected static Parameter getParameter (Connection connection, String name) {
+    Parameter parameter = connection.getParameters().get(name);
+
+    if (parameter == null) {
+      semanticError("unknown parameter: %s", name);
+    }
+
+    return parameter;
   }
 }
