@@ -19,7 +19,6 @@
 
 package org.a11y.brlapi;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -111,15 +110,12 @@ public abstract class Program extends ProgramComponent implements Runnable {
     }
 
     {
-      String[] names = programOptions.getKeywords();
-      Arrays.sort(names);
-
-      for (String name : names) {
-        Option option = programOptions.get(name);
+      for (String keyword : programOptions.getKeywords()) {
+        Option option = programOptions.get(keyword);
 
         usage.append('\n');
         usage.append(Option.PREFIX_CHARACTER);
-        usage.append(name);
+        usage.append(keyword);
 
         for (String operand : option.getOperands()) {
           usage.append(' ');

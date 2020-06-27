@@ -22,9 +22,10 @@ package org.a11y.brlapi;
 import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class KeywordMap<V> {
-  private final Map<String, V> valueMap = new HashMap<>();
+  private final Map<String, V> valueMap = new LinkedHashMap<>();
   private final Map<String, String> aliasMap = new HashMap<>();
   private final static String AMBIGUOUS = "";
 
