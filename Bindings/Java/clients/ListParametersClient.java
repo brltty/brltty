@@ -53,51 +53,44 @@ public class ListParametersClient extends Client {
   }
 
   @Override
-  protected final void runClient () {
-    connect(
-      new ClientTask() {
-        @Override
-        public void run (Connection connection) {
-          if (parameterName == null) {
-            Parameter[] parameterArray = connection.getParameters().get();
-            Parameters.sortByName(parameterArray);
+  protected final void runClient (Connection connection) {
+    if (parameterName == null) {
+      Parameter[] parameterArray = connection.getParameters().get();
+      Parameters.sortByName(parameterArray);
 
-            for (Parameter parameter : parameterArray) {
-              if (parameter.isHidable()) continue;
-              String value = parameter.toString();
-              if (value != null) show(parameter.getLabel(), value);
-            }
-          } else {
-            Parameter parameter = getParameter(connection, parameterName);
-            String value;
-
-            if (subparamValue == null) {
-              value = parameter.toString();
-            } else {
-              long subparam = subparamValue;
-              value = parameter.toString(subparam);
-            }
-
-            if (value == null) {
-              StringBuilder message = new StringBuilder();
-              message.append("no value");
-
-              message.append(": ");
-              message.append(parameterName);
-
-              if (subparamValue != null) {
-                message.append('[');
-                message.append(subparamValue);
-                message.append(']');
-              }
-
-              semanticError("%s", message);
-            }
-
-            show(value);
-          }
-        }
+      for (Parameter parameter : parameterArray) {
+        if (parameter.isHidable()) continue;
+        String value = parameter.toString();
+        if (value != null) show(parameter.getLabel(), value);
       }
-    );
+    } else {
+      Parameter parameter = getParameter(connection, parameterName);
+      String value;
+
+      if (subparamValue == null) {
+        value = parameter.toString();
+      } else {
+        long subparam = subparamValue;
+        value = parameter.toString(subparam);
+      }
+
+      if (value == null) {
+        StringBuilder message = new StringBuilder();
+        message.append("no value");
+
+        message.append(": ");
+        message.append(parameterName);
+
+        if (subparamValue != null) {
+          message.append('[');
+          message.append(subparamValue);
+          message.append(']');
+        }
+
+        semanticError("%s", message);
+      }
+
+      show(value);
+    }
   }
 }

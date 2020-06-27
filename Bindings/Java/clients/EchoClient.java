@@ -76,47 +76,40 @@ public class EchoClient extends Client {
   }
 
   @Override
-  protected final void runClient () {
-    connect(
+  protected final void runClient (Connection connection) {
+    ttyMode(
+      connection, echoDriverKeys, ttyPath,
       new ClientTask() {
         @Override
         public void run (Connection connection) {
-          ttyMode(
-            connection, echoDriverKeys, ttyPath,
-            new ClientTask() {
-              @Override
-              public void run (Connection connection) {
-                String label = echoDriverKeys? "Key": "Cmd";
+          String label = echoDriverKeys? "Key": "Cmd";
 
-                connection.writeText(
-                  String.format(
-                    "press keys (timeout is %d seconds)", readTimeout
-                  ),
-                  Constants.CURSOR_OFF
-                );
-
-                while (true) {
-                  long code;
-
-                  try {
-                    code = connection.readKeyWithTimeout((readTimeout * 1000));
-                  } catch (InterruptedIOException exception) {
-                    continue;
-                  } catch (TimeoutException exception) {
-                    break;
-                  }
-
-                  String text =
-                    echoDriverKeys?
-                    new DriverKeycode(code).toString():
-                    new CommandKeycode(code).toString();
-
-                  show(label, text);
-                  connection.writeText(text);
-                }
-              }
-            }
+          connection.writeText(
+            String.format(
+              "press keys (timeout is %d seconds)", readTimeout
+            ),
+            Constants.CURSOR_OFF
           );
+
+          while (true) {
+            long code;
+
+            try {
+              code = connection.readKeyWithTimeout((readTimeout * 1000));
+            } catch (InterruptedIOException exception) {
+              continue;
+            } catch (TimeoutException exception) {
+              break;
+            }
+
+            String text =
+              echoDriverKeys?
+              new DriverKeycode(code).toString():
+              new CommandKeycode(code).toString();
+
+            show(label, text);
+            connection.writeText(text);
+          }
         }
       }
     );

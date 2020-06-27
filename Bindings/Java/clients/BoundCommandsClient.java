@@ -26,21 +26,14 @@ public class BoundCommandsClient extends Client {
   }
 
   @Override
-  protected final void runClient () {
-    connect(
-      new ClientTask() {
-        @Override
-        public void run (Connection connection) {
-          Parameters parameters = connection.getParameters();
+  protected final void runClient (Connection connection) {
+    Parameters parameters = connection.getParameters();
 
-          for (long code : parameters.boundCommandKeycodes.get()) {
-            show(
-              parameters.commandKeycodeName.get(code),
-              parameters.commandKeycodeSummary.get(code)
-            );
-          }
-        }
-      }
-    );
+    for (long code : parameters.boundCommandKeycodes.get()) {
+      show(
+        parameters.commandKeycodeName.get(code),
+        parameters.commandKeycodeSummary.get(code)
+      );
+    }
   }
 }

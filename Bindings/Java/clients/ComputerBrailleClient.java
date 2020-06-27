@@ -26,21 +26,14 @@ public class ComputerBrailleClient extends Client {
   }
 
   @Override
-  protected final void runClient () {
-    connect(
-      new ClientTask() {
-        @Override
-        public void run (Connection connection) {
-          Parameters parameters = connection.getParameters();
+  protected final void runClient (Connection connection) {
+    Parameters parameters = connection.getParameters();
 
-          for (int row : parameters.computerBrailleRowsMask.get().getBitNumbers()) {
-            show(
-              String.format("U+%04X", (row << 8)),
-              parameters.computerBrailleRowCells.get(row).toString()
-            );
-          }
-        }
-      }
-    );
+    for (int row : parameters.computerBrailleRowsMask.get().getBitNumbers()) {
+      show(
+        String.format("U+%04X", (row << 8)),
+        parameters.computerBrailleRowCells.get(row).toString()
+      );
+    }
   }
 }

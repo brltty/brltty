@@ -50,20 +50,13 @@ public class SetParameterClient extends Client {
   }
 
   @Override
-  protected final void runClient () {
-    connect(
-      new ClientTask() {
-        @Override
-        public void run (Connection connection) {
-          Parameter parameter = getParameter(connection, parameterName);
+  protected final void runClient (Connection connection) {
+    Parameter parameter = getParameter(connection, parameterName);
 
-          try {
-            parameter.set(parameterValue);
-          } catch (OperandException exception) {
-            syntaxError(exception.getMessage());
-          }
-        }
-      }
-    );
+    try {
+      parameter.set(parameterValue);
+    } catch (OperandException exception) {
+      syntaxError(exception.getMessage());
+    }
   }
 }

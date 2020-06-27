@@ -48,7 +48,7 @@ public abstract class Client extends Program {
     public void run (Connection connection);
   }
 
-  public final void connect (ClientTask task) {
+  private final void connect (ClientTask task) {
     try {
       Connection connection = new Connection(connectionSettings);
 
@@ -63,7 +63,21 @@ public abstract class Client extends Program {
     }
   }
 
-  public final void ttyMode (Connection connection, boolean keys, int[] path, ClientTask task) {
+  protected abstract void runClient (Connection connection);
+
+  @Override
+  protected final void runProgram () {
+    connect(
+      new ClientTask() {
+        @Override
+        public void run (Connection connection) {
+          runClient(connection);
+        }
+      }
+    );
+  }
+
+  protected final void ttyMode (Connection connection, boolean keys, int[] path, ClientTask task) {
     try {
       String driver = keys? connection.getDriverName(): null;
       connection.enterTtyModeWithPath(driver, path);
@@ -78,7 +92,7 @@ public abstract class Client extends Program {
     }
   }
 
-  public final void rawMode (Connection connection, ClientTask task) {
+  protected final void rawMode (Connection connection, ClientTask task) {
     try {
       connection.enterRawMode(connection.getDriverName());
 
@@ -100,12 +114,5 @@ public abstract class Client extends Program {
     }
 
     return parameter;
-  }
-
-  protected abstract void runClient ();
-
-  @Override
-  protected final void runProgram () {
-    runClient();
   }
 }
