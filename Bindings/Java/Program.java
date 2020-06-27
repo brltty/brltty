@@ -22,20 +22,22 @@ package org.a11y.brlapi;
 public abstract class Program extends ProgramComponent implements Runnable {
   private final String[] programArguments;
 
-  protected interface OptionHandler {
-    public void handleOption (String[] operands) throws OperandException;
-  }
+  protected static class Option {
+    public final static char PREFIX_CHARACTER = '-';
 
-  private static class Option {
-    private final OptionHandler optionHandler;
+    public interface Handler {
+      public void handleOption (String[] operands) throws OperandException;
+    }
+
+    private final Handler optionHandler;
     private final String[] operandDescriptions;
 
-    public Option (OptionHandler handler, String... operands) {
+    public Option (Handler handler, String... operands) {
       optionHandler = handler;
       operandDescriptions = operands;
     }
 
-    public final OptionHandler getHandler () {
+    public final Handler getHandler () {
       return optionHandler;
     }
 
@@ -46,7 +48,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
   private final KeywordMap<Option> programOptions = new KeywordMap<>();
 
-  protected final void addOption (String keyword, OptionHandler handler, String... operands) {
+  protected final void addOption (String keyword, Option.Handler handler, String... operands) {
     programOptions.put(keyword, new Option(handler, operands));
   }
 
@@ -59,22 +61,22 @@ public abstract class Program extends ProgramComponent implements Runnable {
     return getClass().getSimpleName();
   }
 
-  public final void writeMessage (String format, Object... arguments) {
+  protected final void writeProgramMessage (String format, Object... arguments) {
     System.err.println((getName() + ": " + String.format(format, arguments)));
   }
 
-  public final void syntaxError (String format, Object... arguments) {
-    writeMessage(format, arguments);
+  protected final void syntaxError (String format, Object... arguments) {
+    writeProgramMessage(format, arguments);
     System.exit(2);
   }
 
-  public final void semanticError (String format, Object... arguments) {
-    writeMessage(format, arguments);
+  protected final void semanticError (String format, Object... arguments) {
+    writeProgramMessage(format, arguments);
     System.exit(3);
   }
 
-  public final void internalError (String format, Object... arguments) {
-    writeMessage(format, arguments);
+  protected final void internalError (String format, Object... arguments) {
+    writeProgramMessage(format, arguments);
     System.exit(4);
   }
 
@@ -97,7 +99,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
     while (argumentIndex < argumentCount) {
       String argument = arguments[argumentIndex];
       if (argument.isEmpty()) break;
-      if (argument.charAt(0) != '-') break;
+      if (argument.charAt(0) != Option.PREFIX_CHARACTER) break;
 
       if (argument.length() == 1) {
         argumentIndex += 1;

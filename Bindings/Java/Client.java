@@ -25,17 +25,17 @@ public abstract class Client extends Program {
   protected Client (String[] arguments) {
     super(arguments);
 
-    addOption("server-host",
-      new OptionHandler() {
+    addOption("server",
+      new Option.Handler() {
         @Override
         public void handleOption (String[] operands) {
           connectionSettings.setServerHost(operands[0]);
         }
-      }, "server host"
+      }, "host specification"
     );
 
-    addOption("authorization-schemes",
-      new OptionHandler() {
+    addOption("authorization",
+      new Option.Handler() {
         @Override
         public void handleOption (String[] operands) {
           connectionSettings.setAuthorizationSchemes(operands[0]);

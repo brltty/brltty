@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public class RowCells {
+public class RowCells extends ParameterComponent {
   private final static int BYTE_SIZE = Byte.SIZE;
 
   private final byte[] cellArray;
@@ -74,7 +74,7 @@ public class RowCells {
 
       sb.append(
         String.format(
-          "%02X:%s", index, ParameterComponent.asDots(cellArray[index])
+          "%02X:%s", index, asDots(cellArray[index])
         )
       );
     }

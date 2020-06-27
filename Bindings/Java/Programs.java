@@ -36,14 +36,13 @@ public abstract class Programs extends ProgramComponent {
   }
 
   static {
-    addProgram(VersionProgram.class);
-
     addProgram(BoundCommandsClient.class);
     addProgram(ComputerBrailleClient.class);
     addProgram(DriverKeysClient.class);
     addProgram(EchoClient.class);
     addProgram(ListParametersClient.class);
     addProgram(SetParameterClient.class);
+    addProgram(VersionProgram.class);
   }
 
   private static class MainProgram extends Program {
@@ -56,11 +55,11 @@ public abstract class Programs extends ProgramComponent {
     @Override
     protected final void processParameters (String[] parameters) {
       int count = parameters.length;
-      if (count == 0) syntaxError("missing program name");
+      if (count == 0) syntaxError("missing program/client name");
 
       String name = parameters[0];
       Class<? extends Program> type = programs.get(name);
-      if (type == null) syntaxError("unknown program: %s", name);
+      if (type == null) syntaxError("unknown program/client: %s", name);
 
       count -= 1;
       String[] arguments = new String[count];

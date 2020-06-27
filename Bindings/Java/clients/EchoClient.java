@@ -31,7 +31,7 @@ public class EchoClient extends Client {
     super(arguments);
 
     addOption("commands",
-      new OptionHandler() {
+      new Option.Handler() {
         @Override
         public void handleOption (String[] operands) {
           echoDriverKeys = false;
@@ -40,7 +40,7 @@ public class EchoClient extends Client {
     );
 
     addOption("keys",
-      new OptionHandler() {
+      new Option.Handler() {
         @Override
         public void handleOption (String[] operands) {
           echoDriverKeys = true;
@@ -49,7 +49,7 @@ public class EchoClient extends Client {
     );
 
     addOption("timeout",
-      new OptionHandler() {
+      new Option.Handler() {
         @Override
         public void handleOption (String[] operands)
                throws OperandException

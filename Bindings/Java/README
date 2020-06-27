@@ -1,0 +1,24 @@
+apitest {program | client} [argument ...]
+
+Programs (see the programs/ subdirectory):
+  version
+
+Clients (see the clients/ subdirectory):
+  -server host[:port] (default is localhost:0)
+  -authorization scheme+...
+  bound-commands
+  computer-braille
+  driver-keys
+  echo [tty ...]
+    -commands | -keys
+    -timeout seconds (1-30, default is 10)
+  list-parameters [parameter [subparam]]
+  set-parameter parameter value
+
+These aren't case sensitive and allow unambiguous truncations:
+  program names (e.g. v for version)
+  client names (e.g. l for list-parameters)
+  option names (e.g. -s for -server)
+  parameter names (e.g. clip for clipboard-content)
+  boolean operands (false/true, off/on, no/yes, 0/1)
+
