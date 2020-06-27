@@ -154,11 +154,8 @@ public abstract class Program extends ProgramComponent implements Runnable {
     programArguments = arguments;
 
     addOption("help",
-      new Option.Handler() {
-        @Override
-        public void handleOption (String[] operands) {
-          showUsageSummary();
-        }
+      (operands) -> {
+        showUsageSummary();
       }
     );
   }

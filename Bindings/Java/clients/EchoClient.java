@@ -32,31 +32,20 @@ public class EchoClient extends Client {
     addOptionalParameters("tty(s)");
 
     addOption("commands",
-      new Option.Handler() {
-        @Override
-        public void handleOption (String[] operands) {
-          echoDriverKeys = false;
-        }
+      (operands) -> {
+        echoDriverKeys = false;
       }
     );
 
     addOption("keys",
-      new Option.Handler() {
-        @Override
-        public void handleOption (String[] operands) {
-          echoDriverKeys = true;
-        }
+      (operands) -> {
+        echoDriverKeys = true;
       }
     );
 
     addOption("timeout",
-      new Option.Handler() {
-        @Override
-        public void handleOption (String[] operands)
-               throws OperandException
-        {
-          readTimeout = Parse.asInt("read timeout", operands[0], 1, 30);
-        }
+      (operands) -> {
+        readTimeout = Parse.asInt("read timeout", operands[0], 1, 30);
       }, "read timeout"
     );
   }
@@ -79,37 +68,34 @@ public class EchoClient extends Client {
   protected final void runClient (Connection connection) {
     ttyMode(
       connection, echoDriverKeys, ttyPath,
-      new ClientTask() {
-        @Override
-        public void run (Connection connection) {
-          String label = echoDriverKeys? "Key": "Cmd";
+      (tty) -> {
+        String label = echoDriverKeys? "Key": "Cmd";
 
-          connection.writeText(
-            String.format(
-              "press keys (timeout is %d seconds)", readTimeout
-            ),
-            Constants.CURSOR_OFF
-          );
+        tty.writeText(
+          String.format(
+            "press keys (timeout is %d seconds)", readTimeout
+          ),
+          Constants.CURSOR_OFF
+        );
 
-          while (true) {
-            long code;
+        while (true) {
+          long code;
 
-            try {
-              code = connection.readKeyWithTimeout((readTimeout * 1000));
-            } catch (InterruptedIOException exception) {
-              continue;
-            } catch (TimeoutException exception) {
-              break;
-            }
-
-            String text =
-              echoDriverKeys?
-              new DriverKeycode(code).toString():
-              new CommandKeycode(code).toString();
-
-            show(label, text);
-            connection.writeText(text);
+          try {
+            code = tty.readKeyWithTimeout((readTimeout * 1000));
+          } catch (InterruptedIOException exception) {
+            continue;
+          } catch (TimeoutException exception) {
+            break;
           }
+
+          String text =
+            echoDriverKeys?
+            new DriverKeycode(code).toString():
+            new CommandKeycode(code).toString();
+
+          show(label, text);
+          tty.writeText(text);
         }
       }
     );

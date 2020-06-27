@@ -26,20 +26,14 @@ public abstract class Client extends Program {
     super(arguments);
 
     addOption("server",
-      new Option.Handler() {
-        @Override
-        public void handleOption (String[] operands) {
-          connectionSettings.setServerHost(operands[0]);
-        }
+      (operands) -> {
+        connectionSettings.setServerHost(operands[0]);
       }, "host specification"
     );
 
     addOption("authorization",
-      new Option.Handler() {
-        @Override
-        public void handleOption (String[] operands) {
-          connectionSettings.setAuthorizationSchemes(operands[0]);
-        }
+      (operands) -> {
+        connectionSettings.setAuthorizationSchemes(operands[0]);
       }, "authorization scheme(s)"
     );
   }
@@ -68,11 +62,8 @@ public abstract class Client extends Program {
   @Override
   protected final void runProgram () {
     connect(
-      new ClientTask() {
-        @Override
-        public void run (Connection connection) {
-          runClient(connection);
-        }
+      (connection) -> {
+        runClient(connection);
       }
     );
   }

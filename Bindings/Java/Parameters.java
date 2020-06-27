@@ -162,11 +162,8 @@ public class Parameters extends ParameterComponent {
 
   public static void sortByName (Parameter[] parameters) {
     Arrays.sort(parameters,
-      new Comparator<Parameter>() {
-        @Override
-        public int compare (Parameter parameter1, Parameter parameter2) {
-          return parameter1.getName().compareTo(parameter2.getName());
-        }
+      (parameter1, parameter2) -> {
+        return parameter1.getName().compareTo(parameter2.getName());
       }
     );
   }
