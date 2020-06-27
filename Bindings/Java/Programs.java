@@ -59,6 +59,23 @@ public abstract class Programs extends ProgramComponent {
       addOptionalParameters("arguments");
     }
 
+    @Override
+    protected void extendUsageSummary (StringBuilder usage) {
+      super.extendUsageSummary(usage);
+      usage.append("\n\n");
+
+      if (programs.isEmpty()) {
+        usage.append("No programs or clients have been defined.");
+      } else {
+        usage.append("\n\nThese programs and clients have been defined:");
+
+        for (String name : programs.getKeywords()) {
+          usage.append("\n  ");
+          usage.append(name);
+        }
+      }
+    }
+
     private Program programObject = null;
 
     @Override

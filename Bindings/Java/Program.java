@@ -87,9 +87,23 @@ public abstract class Program extends ProgramComponent implements Runnable {
     return getClass().getSimpleName();
   }
 
+  protected void extendUsageSummary (StringBuilder usage) {
+  }
+
   public final String getUsageSummary () {
     StringBuilder usage = new StringBuilder();
+
+    usage.append("Usage Summary for ");
     usage.append(getName());
+
+    usage.append("\nSyntax:");
+    boolean haveOptions = !programOptions.isEmpty();
+
+    if (haveOptions) {
+      usage.append(" [");
+      usage.append(Option.PREFIX_CHARACTER);
+      usage.append("option ...]");
+    }
 
     if (requiredParameters != null) {
       for (String parameter : requiredParameters) {
@@ -109,11 +123,13 @@ public abstract class Program extends ProgramComponent implements Runnable {
       }
     }
 
-    {
+    if (haveOptions) {
+      usage.append("\n\nThese options may be specified:");
+
       for (String keyword : programOptions.getKeywords()) {
         Option option = programOptions.get(keyword);
 
-        usage.append('\n');
+        usage.append("\n  ");
         usage.append(Option.PREFIX_CHARACTER);
         usage.append(keyword);
 
@@ -124,6 +140,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
       }
     }
 
+    extendUsageSummary(usage);
     return usage.toString();
   }
 

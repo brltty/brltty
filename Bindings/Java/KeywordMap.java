@@ -74,6 +74,10 @@ public class KeywordMap<V> {
     return keywords.toArray(new String[keywords.size()]);
   }
 
+  public final boolean isEmpty () {
+    return valueMap.isEmpty();
+  }
+
   public KeywordMap () {
   }
 }
