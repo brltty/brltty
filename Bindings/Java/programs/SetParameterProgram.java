@@ -17,11 +17,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi.commands;
+package org.a11y.brlapi.programs;
 import org.a11y.brlapi.*;
 
-public class SetParameterCommand extends Command {
-  public SetParameterCommand (String[] arguments) {
+public class SetParameterProgram extends Program {
+  public SetParameterProgram (String[] arguments) {
     super(arguments);
   }
 

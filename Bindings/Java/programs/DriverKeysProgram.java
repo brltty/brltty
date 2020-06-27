@@ -17,11 +17,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi.commands;
+package org.a11y.brlapi.programs;
 import org.a11y.brlapi.*;
 
-public class DefinedKeysCommand extends Command {
-  public DefinedKeysCommand (String[] arguments) {
+public class DriverKeysProgram extends Program {
+  public DriverKeysProgram (String[] arguments) {
     super(arguments);
   }
 

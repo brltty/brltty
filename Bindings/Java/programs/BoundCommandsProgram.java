@@ -17,11 +17,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi.commands;
+package org.a11y.brlapi.programs;
 import org.a11y.brlapi.*;
 
-public class BoundCommandsCommand extends Command {
-  public BoundCommandsCommand (String[] arguments) {
+public class BoundCommandsProgram extends Program {
+  public BoundCommandsProgram (String[] arguments) {
     super(arguments);
   }
 

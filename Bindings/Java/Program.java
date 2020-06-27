@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public abstract class Command extends CommandHelper implements Runnable {
+public abstract class Program extends ProgramHelper implements Runnable {
   private interface OptionHandler {
     public void handleOption (String[] operands);
   }
@@ -42,11 +42,11 @@ public abstract class Command extends CommandHelper implements Runnable {
     }
   }
 
-  private final KeywordMap<Option> commandOptions = new KeywordMap<>();
+  private final KeywordMap<Option> programOptions = new KeywordMap<>();
   private final ConnectionSettings connectionSettings = new ConnectionSettings();
 
   protected final void addOption (String keyword, OptionHandler handler, String... operands) {
-    commandOptions.put(keyword, new Option(handler, operands));
+    programOptions.put(keyword, new Option(handler, operands));
   }
 
   protected void processParameters (String[] parameters) {
@@ -68,7 +68,7 @@ public abstract class Command extends CommandHelper implements Runnable {
       }
 
       String keyword = argument.substring(1).toLowerCase();
-      Option option = commandOptions.get(keyword);
+      Option option = programOptions.get(keyword);
       if (option == null) syntaxError("unknown option: %s", argument);
 
       String[] operandDescriptions = option.getOperandDescriptions();
@@ -95,7 +95,7 @@ public abstract class Command extends CommandHelper implements Runnable {
     processParameters(parameters);
   }
 
-  protected Command (String[] arguments) {
+  protected Program (String[] arguments) {
     super();
 
     addOption("server-host",

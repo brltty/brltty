@@ -19,8 +19,8 @@
 
 package org.a11y.brlapi;
 
-public abstract class CommandHelper {
-  protected CommandHelper () {
+public abstract class ProgramHelper {
+  protected ProgramHelper () {
   }
 
   public static void writeCommandMessage (String format, Object... arguments) {

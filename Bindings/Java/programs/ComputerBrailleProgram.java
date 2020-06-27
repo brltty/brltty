@@ -17,11 +17,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi.commands;
+package org.a11y.brlapi.programs;
 import org.a11y.brlapi.*;
 
-public class ComputerBrailleCommand extends Command {
-  public ComputerBrailleCommand (String[] arguments) {
+public class ComputerBrailleProgram extends Program {
+  public ComputerBrailleProgram (String[] arguments) {
     super(arguments);
   }
 
