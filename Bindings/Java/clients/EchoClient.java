@@ -46,7 +46,8 @@ public class EchoClient extends Client {
     addOption("timeout",
       (operands) -> {
         readTimeout = Parse.asInt("read timeout", operands[0], 1, 30);
-      }, "read timeout"
+      },
+      "sconds"
     );
   }
 

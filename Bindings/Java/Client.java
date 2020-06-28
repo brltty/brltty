@@ -28,13 +28,15 @@ public abstract class Client extends Program {
     addOption("server",
       (operands) -> {
         connectionSettings.setServerHost(operands[0]);
-      }, "host specification"
+      },
+      "host specification"
     );
 
     addOption("authorization",
       (operands) -> {
         connectionSettings.setAuthorizationSchemes(operands[0]);
-      }, "authorization scheme(s)"
+      },
+      "authorization scheme(s)"
     );
   }
 

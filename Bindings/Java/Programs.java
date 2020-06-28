@@ -67,7 +67,7 @@ public abstract class Programs extends ProgramComponent {
       if (programs.isEmpty()) {
         usage.append("No programs or clients have been defined.");
       } else {
-        usage.append("\n\nThese programs and clients have been defined:");
+        usage.append("These programs and clients have been defined:");
 
         for (String name : programs.getKeywords()) {
           usage.append("\n  ");

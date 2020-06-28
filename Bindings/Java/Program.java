@@ -52,12 +52,13 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
   private final String[] programArguments;
   private final KeywordMap<Option> programOptions = new KeywordMap<>();
-  private List<String> requiredParameters = null;
-  private List<String> optionalParameters = null;
 
   protected final void addOption (String keyword, Option.Handler handler, String... operands) {
     programOptions.put(keyword, new Option(handler, operands));
   }
+
+  private List<String> requiredParameters = null;
+  private List<String> optionalParameters = null;
 
   protected final void addRequiredParameters (String... parameters) {
     if (optionalParameters != null) {
