@@ -20,28 +20,28 @@
 package org.a11y.brlapi;
 
 public class ConnectionSettings {
+  public ConnectionSettings () {
+    setServerHost("localhost:0");
+  }
+
   private String serverHost;
   private String authorizationSchemes;
 
-  public String getServerHost () {
+  public final String getServerHost () {
     return serverHost;
   }
 
-  public ConnectionSettings setServerHost (String host) {
+  public final ConnectionSettings setServerHost (String host) {
     serverHost = host;
     return this;
   }
 
-  public String getAuthorizationSchemes () {
+  public final String getAuthorizationSchemes () {
     return authorizationSchemes;
   }
 
-  public ConnectionSettings setAuthorizationSchemes (String authorization) {
-    authorizationSchemes = authorization;
+  public final ConnectionSettings setAuthorizationSchemes (String schemes) {
+    authorizationSchemes = schemes;
     return this;
-  }
-
-  public ConnectionSettings () {
-    setServerHost("localhost:0");
   }
 }
