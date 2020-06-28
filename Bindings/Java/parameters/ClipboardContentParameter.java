@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ClipboardContentParameter extends GlobalParameter implements Parameter.StringSettable {
-  public ClipboardContentParameter (BasicConnection connection) {
+  public ClipboardContentParameter (ConnectionBase connection) {
     super(connection);
   }
 

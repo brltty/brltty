@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class CommandKeycodeSummaryParameter extends GlobalParameter {
-  public CommandKeycodeSummaryParameter (BasicConnection connection) {
+  public CommandKeycodeSummaryParameter (ConnectionBase connection) {
     super(connection);
   }
 

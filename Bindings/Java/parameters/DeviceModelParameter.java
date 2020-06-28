@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class DeviceModelParameter extends GlobalParameter {
-  public DeviceModelParameter (BasicConnection connection) {
+  public DeviceModelParameter (ConnectionBase connection) {
     super(connection);
   }
 

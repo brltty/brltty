@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ComputerBrailleTableParameter extends GlobalParameter implements Parameter.StringSettable {
-  public ComputerBrailleTableParameter (BasicConnection connection) {
+  public ComputerBrailleTableParameter (ConnectionBase connection) {
     super(connection);
   }
 

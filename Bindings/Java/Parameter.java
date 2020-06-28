@@ -20,9 +20,9 @@
 package org.a11y.brlapi;
 
 public abstract class Parameter extends ParameterComponent {
-  private final BasicConnection clientConnection;
+  private final ConnectionBase clientConnection;
 
-  protected Parameter (BasicConnection connection) {
+  protected Parameter (ConnectionBase connection) {
     super();
     clientConnection = connection;
   }
@@ -222,7 +222,7 @@ public abstract class Parameter extends ParameterComponent {
     public void close () {
       synchronized (this) {
         if (watchIdentifier != 0) {
-          BasicConnection.unwatchParameter(watchIdentifier);
+          ConnectionBase.unwatchParameter(watchIdentifier);
           watchIdentifier = 0;
         }
       }

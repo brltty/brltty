@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ClientPriorityParameter extends LocalParameter implements Parameter.IntSettable {
-  public ClientPriorityParameter (BasicConnection connection) {
+  public ClientPriorityParameter (ConnectionBase connection) {
     super(connection);
   }
 

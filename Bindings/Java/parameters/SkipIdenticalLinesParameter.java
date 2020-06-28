@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class SkipIdenticalLinesParameter extends GlobalParameter implements Parameter.BooleanSettable {
-  public SkipIdenticalLinesParameter (BasicConnection connection) {
+  public SkipIdenticalLinesParameter (ConnectionBase connection) {
     super(connection);
   }
 

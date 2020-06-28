@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class DeviceCellSizeParameter extends GlobalParameter {
-  public DeviceCellSizeParameter (BasicConnection connection) {
+  public DeviceCellSizeParameter (ConnectionBase connection) {
     super(connection);
   }
 

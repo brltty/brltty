@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ComputerBrailleRowsMaskParameter extends GlobalParameter {
-  public ComputerBrailleRowsMaskParameter (BasicConnection connection) {
+  public ComputerBrailleRowsMaskParameter (ConnectionBase connection) {
     super(connection);
   }
 

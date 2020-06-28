@@ -20,7 +20,7 @@
 package org.a11y.brlapi;
 
 public abstract class LocalParameter extends Parameter {
-  protected LocalParameter (BasicConnection connection) {
+  protected LocalParameter (ConnectionBase connection) {
     super(connection);
   }
 

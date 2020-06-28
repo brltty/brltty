@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class CursorDotsParameter extends GlobalParameter implements Parameter.StringSettable {
-  public CursorDotsParameter (BasicConnection connection) {
+  public CursorDotsParameter (ConnectionBase connection) {
     super(connection);
   }
 

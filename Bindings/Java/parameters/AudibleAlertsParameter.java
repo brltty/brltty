@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class AudibleAlertsParameter extends GlobalParameter implements Parameter.BooleanSettable {
-  public AudibleAlertsParameter (BasicConnection connection) {
+  public AudibleAlertsParameter (ConnectionBase connection) {
     super(connection);
   }
 

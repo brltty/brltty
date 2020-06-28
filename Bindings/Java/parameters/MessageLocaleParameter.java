@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class MessageLocaleParameter extends GlobalParameter implements Parameter.StringSettable {
-  public MessageLocaleParameter (BasicConnection connection) {
+  public MessageLocaleParameter (ConnectionBase connection) {
     super(connection);
   }
 

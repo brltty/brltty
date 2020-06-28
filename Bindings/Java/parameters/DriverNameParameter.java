@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class DriverNameParameter extends GlobalParameter {
-  public DriverNameParameter (BasicConnection connection) {
+  public DriverNameParameter (ConnectionBase connection) {
     super(connection);
   }
 

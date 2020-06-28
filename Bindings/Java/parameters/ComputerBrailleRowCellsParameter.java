@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ComputerBrailleRowCellsParameter extends GlobalParameter {
-  public ComputerBrailleRowCellsParameter (BasicConnection connection) {
+  public ComputerBrailleRowCellsParameter (ConnectionBase connection) {
     super(connection);
   }
 

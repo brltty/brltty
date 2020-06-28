@@ -295,7 +295,7 @@ JAVA_STATIC_METHOD(
   } while (0)
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, openConnection, jint,
+  org_a11y_brlapi_ConnectionBase, openConnection, jint,
   jobject jRequestedSettings, jobject jActualSettings
 ) {
   brlapi_handle_t *handle;
@@ -395,7 +395,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, closeConnection, void
+  org_a11y_brlapi_ConnectionBase, closeConnection, void
 ) {
   GET_CONNECTION_HANDLE(env, this, );
   brlapi__closeConnection(handle);
@@ -404,7 +404,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, getDriverName, jstring
+  org_a11y_brlapi_ConnectionBase, getDriverName, jstring
 ) {
   GET_CONNECTION_HANDLE(env, this, NULL);
   char name[0X20];
@@ -419,7 +419,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, getModelIdentifier, jstring
+  org_a11y_brlapi_ConnectionBase, getModelIdentifier, jstring
 ) {
   GET_CONNECTION_HANDLE(env, this, NULL);
   char identifier[0X20];
@@ -434,7 +434,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, getDisplaySize, jobject
+  org_a11y_brlapi_ConnectionBase, getDisplaySize, jobject
 ) {
   GET_CONNECTION_HANDLE(env, this, NULL);
 
@@ -459,7 +459,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, pause, void,
+  org_a11y_brlapi_ConnectionBase, pause, void,
   jint milliseconds
 ) {
   GET_CONNECTION_HANDLE(env, this, );
@@ -471,7 +471,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, enterTtyMode, jint,
+  org_a11y_brlapi_ConnectionBase, enterTtyMode, jint,
   jint jtty, jstring jdriver
 ) {
   int tty ;
@@ -498,7 +498,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, enterTtyModeWithPath, void,
+  org_a11y_brlapi_ConnectionBase, enterTtyModeWithPath, void,
   jstring jdriver, jintArray jttys
 ) {
   jint *ttys ;
@@ -531,7 +531,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, leaveTtyMode, void
+  org_a11y_brlapi_ConnectionBase, leaveTtyMode, void
 ) {
   GET_CONNECTION_HANDLE(env, this, );
 
@@ -542,7 +542,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, setFocus, void,
+  org_a11y_brlapi_ConnectionBase, setFocus, void,
   jint jarg1
 ) {
   int arg1 ;
@@ -556,7 +556,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, writeText, void,
+  org_a11y_brlapi_ConnectionBase, writeText, void,
   jint jarg1, jstring jarg2
 ) {
   brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
@@ -587,7 +587,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, writeDots, void,
+  org_a11y_brlapi_ConnectionBase, writeDots, void,
   jbyteArray jarg1
 ) {
   jbyte *arg1;
@@ -614,7 +614,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, write, void,
+  org_a11y_brlapi_ConnectionBase, write, void,
   jobject jArguments
 ) {
   if (!jArguments) {
@@ -690,7 +690,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, readKey, jlong,
+  org_a11y_brlapi_ConnectionBase, readKey, jlong,
   jboolean jblock
 ) {
   brlapi_keyCode_t code;
@@ -709,7 +709,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, readKeyWithTimeout, jlong,
+  org_a11y_brlapi_ConnectionBase, readKeyWithTimeout, jlong,
   jint milliseconds
 ) {
   GET_CONNECTION_HANDLE(env, this, -1);
@@ -727,7 +727,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, ignoreKeys, void,
+  org_a11y_brlapi_ConnectionBase, ignoreKeys, void,
   jlong jrange, jlongArray js
 ) {
   jlong *s;
@@ -754,7 +754,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, acceptKeys, void,
+  org_a11y_brlapi_ConnectionBase, acceptKeys, void,
   jlong jrange, jlongArray js
 ) {
   jlong *s;
@@ -781,7 +781,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, ignoreAllKeys, void
+  org_a11y_brlapi_ConnectionBase, ignoreAllKeys, void
 ) {
   GET_CONNECTION_HANDLE(env, this, );
 
@@ -790,7 +790,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, acceptAllKeys, void
+  org_a11y_brlapi_ConnectionBase, acceptAllKeys, void
 ) {
   GET_CONNECTION_HANDLE(env, this, );
 
@@ -799,7 +799,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, ignoreKeyRanges, void,
+  org_a11y_brlapi_ConnectionBase, ignoreKeyRanges, void,
   jobjectArray js
 ) {
   unsigned int n;
@@ -831,7 +831,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, acceptKeyRanges, void,
+  org_a11y_brlapi_ConnectionBase, acceptKeyRanges, void,
   jobjectArray js
 ) {
   unsigned int n;
@@ -863,7 +863,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, enterRawMode, void,
+  org_a11y_brlapi_ConnectionBase, enterRawMode, void,
   jstring jdriver
 ) {
   char *driver;
@@ -886,7 +886,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, leaveRawMode, void
+  org_a11y_brlapi_ConnectionBase, leaveRawMode, void
 ) {
   GET_CONNECTION_HANDLE(env, this, );
 
@@ -897,7 +897,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, sendRaw, jint,
+  org_a11y_brlapi_ConnectionBase, sendRaw, jint,
   jbyteArray jbuf
 ) {
   jbyte *buf;
@@ -925,7 +925,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, recvRaw, jint,
+  org_a11y_brlapi_ConnectionBase, recvRaw, jint,
   jbyteArray jbuf
 ) {
   jbyte *buf;
@@ -1060,7 +1060,7 @@ newParameterValueObject (
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, getParameter, jobject,
+  org_a11y_brlapi_ConnectionBase, getParameter, jobject,
   jint parameter, jlong subparam, jboolean global
 ) {
   GET_CONNECTION_HANDLE(env, this, NULL);
@@ -1096,7 +1096,7 @@ setParameter (
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, setParameter, void,
+  org_a11y_brlapi_ConnectionBase, setParameter, void,
   jint parameter, jlong subparam, jboolean global, jobject value
 ) {
   GET_CONNECTION_HANDLE(env, this, );
@@ -1264,7 +1264,7 @@ handleWatchedParameter (
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_BasicConnection, watchParameter, jlong,
+  org_a11y_brlapi_ConnectionBase, watchParameter, jlong,
   jint parameter, jlong subparam, jboolean global, jobject watcher
 ) {
   GET_CONNECTION_HANDLE(env, this, 0);
@@ -1318,7 +1318,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_BasicConnection, unwatchParameter, void,
+  org_a11y_brlapi_ConnectionBase, unwatchParameter, void,
   jlong identifier
 ) {
   WatchedParameterData *wpd = (WatchedParameterData *)(intptr_t)identifier;

@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class DriverKeycodeNameParameter extends GlobalParameter {
-  public DriverKeycodeNameParameter (BasicConnection connection) {
+  public DriverKeycodeNameParameter (ConnectionBase connection) {
     super(connection);
   }
 

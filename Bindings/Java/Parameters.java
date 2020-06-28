@@ -60,7 +60,7 @@ public class Parameters extends ParameterComponent {
   public final LiteraryBrailleTableParameter literaryBrailleTable;
   public final MessageLocaleParameter messageLocale;
 
-  public Parameters (BasicConnection connection) {
+  public Parameters (ConnectionBase connection) {
     super();
 
     serverVersion = new ServerVersionParameter(connection);

@@ -22,7 +22,7 @@ package org.a11y.brlapi;
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
-public class BasicConnection extends NativeComponent implements AutoCloseable {
+public class ConnectionBase extends NativeComponent implements AutoCloseable {
   private long connectionHandle;
 
   private native int openConnection (
@@ -33,7 +33,7 @@ public class BasicConnection extends NativeComponent implements AutoCloseable {
   protected final ConnectionSettings connectionSettings;
   protected final int fileDescriptor;
 
-  public BasicConnection (ConnectionSettings settings) {
+  public ConnectionBase (ConnectionSettings settings) {
     super();
     connectionSettings = new ConnectionSettings();
     fileDescriptor = openConnection(settings, connectionSettings);

@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class RetainDotsParameter extends LocalParameter implements Parameter.BooleanSettable {
-  public RetainDotsParameter (BasicConnection connection) {
+  public RetainDotsParameter (ConnectionBase connection) {
     super(connection);
   }
 

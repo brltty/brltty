@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class CursorBlinkPercentageParameter extends GlobalParameter implements Parameter.ByteSettable {
-  public CursorBlinkPercentageParameter (BasicConnection connection) {
+  public CursorBlinkPercentageParameter (ConnectionBase connection) {
     super(connection);
   }
 

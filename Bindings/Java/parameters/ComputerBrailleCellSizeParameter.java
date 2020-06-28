@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class ComputerBrailleCellSizeParameter extends GlobalParameter implements Parameter.ByteSettable {
-  public ComputerBrailleCellSizeParameter (BasicConnection connection) {
+  public ComputerBrailleCellSizeParameter (ConnectionBase connection) {
     super(connection);
   }
 

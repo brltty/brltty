@@ -21,7 +21,7 @@ package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
 public class CursorBlinkPeriodParameter extends GlobalParameter implements Parameter.IntSettable {
-  public CursorBlinkPeriodParameter (BasicConnection connection) {
+  public CursorBlinkPeriodParameter (ConnectionBase connection) {
     super(connection);
   }
 

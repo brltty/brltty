@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public class Connection extends BasicConnection {
+public class Connection extends ConnectionBase {
   public Connection (ConnectionSettings settings) {
     super(settings);
   }
