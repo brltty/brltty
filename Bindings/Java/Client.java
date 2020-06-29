@@ -22,12 +22,14 @@ package org.a11y.brlapi;
 public abstract class Client extends Program {
   private final ConnectionSettings connectionSettings = new ConnectionSettings();
 
-  public final void setServerHost (String host) {
+  public final Client setServerHost (String host) {
     connectionSettings.setServerHost(host);
+    return this;
   }
 
-  public final void setAuthorizationSchemes (String schemes) {
+  public final Client setAuthorizationSchemes (String schemes) {
     connectionSettings.setAuthorizationSchemes(schemes);
+    return this;
   }
 
   protected Client (String... arguments) {
