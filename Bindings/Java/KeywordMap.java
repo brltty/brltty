@@ -51,7 +51,7 @@ public class KeywordMap<V> {
     }
   }
 
-  public KeywordMap put (String keyword, V value) {
+  public KeywordMap<V> put (String keyword, V value) {
     keyword = normalizeKeyword(keyword);
     valueMap.put(keyword, value);
     addAliases(keyword);

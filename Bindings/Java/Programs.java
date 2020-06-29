@@ -92,7 +92,10 @@ public abstract class Programs extends ProgramComponent {
       System.arraycopy(parameters, 1, arguments, 0, count);
 
       try {
-        Constructor constructor = type.getConstructor(arguments.getClass());
+        Constructor<? extends Program> constructor = type.getConstructor(
+          arguments.getClass()
+        );
+
         programObject = (Program)constructor.newInstance((Object)arguments);
       } catch (NoSuchMethodException exception) {
         internalError("program constructor not found: %s", exception.getMessage());

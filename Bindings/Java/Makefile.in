@@ -54,9 +54,11 @@ jar: $(JAVA_JAR_FILE)
 $(JAVA_JAR_FILE): classes.made
 	$(JAR) cf $@ -C classes .
 
+JAVAC_LINT_OPTIONS = cast,deprecation,finally,overrides,rawtypes,unchecked
+
 classes.made: $(JAVA_SOURCES)
 	$(INSTALL_DIRECTORY) classes
-	$(JAVAC) -d classes -classpath . $^
+	$(JAVAC) -Xlint:$(JAVAC_LINT_OPTIONS) -d classes -classpath . $^
 	touch $@
 
 Constants.java: $(CONSTANTS_DEPENDENCIES)

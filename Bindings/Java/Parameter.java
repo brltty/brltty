@@ -198,7 +198,7 @@ public abstract class Parameter extends ParameterComponent {
     {
       Class<?> type = Settable.class;
 
-      for (Class i : getClass().getInterfaces()) {
+      for (Class<?> i : getClass().getInterfaces()) {
         if (type.isAssignableFrom(i)) {
           type = i;
           break;

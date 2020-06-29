@@ -98,7 +98,7 @@ public class Parameters extends ParameterComponent {
   }
 
   private final Parameter[] newParameterArray () {
-    Class type = Parameters.class;
+    Class<Parameters> type = Parameters.class;
 
     Field[] fields = type.getFields();
     int fieldCount = fields.length;
