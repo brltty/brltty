@@ -103,13 +103,6 @@ typedef enum {
   BRLAPI_PARAM_COUNT = 32 /** Number of parameters */
 } brlapi_param_t;
 
-#define BRLAPI_PARAM_BOUND_COMMAND_CODES BRLAPI_PARAM_BOUND_COMMAND_KEYCODES
-#define BRLAPI_PARAM_COMMAND_SHORT_NAME BRLAPI_PARAM_COMMAND_KEYCODE_NAME
-#define BRLAPI_PARAM_COMMAND_LONG_NAME BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY
-#define BRLAPI_PARAM_DEVICE_KEY_CODES BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES
-#define BRLAPI_PARAM_KEY_SHORT_NAME BRLAPI_PARAM_DRIVER_KEYCODE_NAME
-#define BRLAPI_PARAM_KEY_LONG_NAME BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY
-
 /* brlapi_param_subparam_t */
 /** Type to be used for specifying a sub-parameter */
 typedef uint64_t brlapi_param_subparam_t;
@@ -256,11 +249,34 @@ typedef char *brlapi_param_literaryBrailleTable_t;
 /** Type to be used for BRLAPI_PARAM_MESSAGE_LOCALE      */
 typedef char *brlapi_param_messageLocale_t;
 
+/** Deprecated in BRLTTY-6.2 - use BRLAPI_PARAM_BOUND_COMMAND_KEYCODES */
+#define BRLAPI_PARAM_BOUND_COMMAND_CODES BRLAPI_PARAM_BOUND_COMMAND_KEYCODES
+/** Deprecated in BRLTTY-6.2 - use brlapi_param_commandKeycode_t */
 typedef brlapi_param_commandKeycode_t brlapi_param_commandCode_t;
+
+/** Deprecated in BRLTTY-6.2 - use BRLAPI_PARAM_COMMAND_KEYCODE_NAME */
+#define BRLAPI_PARAM_COMMAND_SHORT_NAME BRLAPI_PARAM_COMMAND_KEYCODE_NAME
+/** Deprecated in BRLTTY-6.2 - use brlapi_param_commandKeycodeName_t */
 typedef brlapi_param_commandKeycodeName_t brlapi_param_commandShortName_t;
+
+/** Deprecated in BRLTTY-6.2 - use BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY */
+#define BRLAPI_PARAM_COMMAND_LONG_NAME BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY
+/** Deprecated in BRLTTY-6.2 - use brlapi_param_commandKeycodeSummary_t */
 typedef brlapi_param_commandKeycodeSummary_t brlapi_param_commandLongName_t;
+
+/** Deprecated in BRLTTY-6.2 - use BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES */
+#define BRLAPI_PARAM_DEVICE_KEY_CODES BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES
+/** Deprecated in BRLTTY-6.2 - use brlapi_param_driverKeycode_t */
 typedef brlapi_param_driverKeycode_t brlapi_param_keyCode_t;
+
+/** Deprecated in BRLTTY-6.2 - use BRLAPI_PARAM_DRIVER_KEYCODE_NAME */
+#define BRLAPI_PARAM_KEY_SHORT_NAME BRLAPI_PARAM_DRIVER_KEYCODE_NAME
+/** Deprecated in BRLTTY-6.2 - use brlapi_param_driverKeycodeName_t */
 typedef brlapi_param_driverKeycodeName_t brlapi_param_keyShortName_t;
+
+/** Deprecated in BRLTTY-6.2 - use BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY */
+#define BRLAPI_PARAM_KEY_LONG_NAME BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY
+/** Deprecated in BRLTTY-6.2 - use brlapi_param_driverKeycodeSummary_t */
 typedef brlapi_param_driverKeycodeSummary_t brlapi_param_keyLongName_t;
 
 /** Enumeration of parameter value types */
