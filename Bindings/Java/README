@@ -15,6 +15,8 @@ Clients (see the clients/ subdirectory):
     -commands | -keys
     -timeout seconds (1-30, default is 10)
   list-parameters [parameter [subparam]]
+  pause
+    -timeout seconds (1-30, default is 10)
   set-parameter parameter value
 
 These aren't case sensitive and allow unambiguous truncations:

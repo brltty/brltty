@@ -48,6 +48,7 @@ public abstract class Programs extends ProgramComponent {
     addProgram(DriverKeysClient.class);
     addProgram(EchoClient.class);
     addProgram(ListParametersClient.class);
+    addProgram(PauseClient.class);
     addProgram(SetParameterClient.class);
     addProgram(VersionProgram.class);
   }
