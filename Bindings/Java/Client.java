@@ -51,10 +51,10 @@ public abstract class Client extends Program {
   }
 
   protected interface ClientTask {
-    public void run (Connection connection);
+    public void run (Connection connection) throws OperandException;
   }
 
-  private final void connect (ClientTask task) {
+  private final void connect (ClientTask task) throws OperandException {
     try {
       Connection connection = new Connection(connectionSettings);
 
@@ -69,10 +69,11 @@ public abstract class Client extends Program {
     }
   }
 
-  protected abstract void runClient (Connection connection);
+  protected abstract void runClient (Connection connection)
+            throws OperandException;
 
   @Override
-  protected final void runProgram () {
+  protected final void runProgram () throws OperandException {
     connect(
       (connection) -> {
         runClient(connection);
@@ -80,7 +81,11 @@ public abstract class Client extends Program {
     );
   }
 
-  protected final void ttyMode (Connection connection, String driver, int[] path, ClientTask task) {
+  protected interface TtyModeTask {
+    public void run (Connection connection);
+  }
+
+  protected final void ttyMode (Connection connection, String driver, int[] path, TtyModeTask task) {
     try {
       connection.enterTtyModeWithPath(driver, path);
 
@@ -94,11 +99,15 @@ public abstract class Client extends Program {
     }
   }
 
-  protected final void ttyMode (Connection connection, boolean keys, int[] path, ClientTask task) {
+  protected final void ttyMode (Connection connection, boolean keys, int[] path, TtyModeTask task) {
     ttyMode(connection, (keys? connection.getDriverName(): null), path, task);
   }
 
-  protected final void rawMode (Connection connection, String driver, ClientTask task) {
+  protected interface RawModeTask {
+    public void run (Connection connection);
+  }
+
+  protected final void rawMode (Connection connection, String driver, RawModeTask task) {
     try {
       connection.enterRawMode(driver);
 
@@ -112,7 +121,7 @@ public abstract class Client extends Program {
     }
   }
 
-  protected final void rawMode (Connection connection, ClientTask task) {
+  protected final void rawMode (Connection connection, RawModeTask task) {
     rawMode(connection, connection.getDriverName(), task);
   }
 

@@ -234,16 +234,19 @@ public abstract class Program extends ProgramComponent implements Runnable {
     processParameters(parameters);
   }
 
-  protected abstract void runProgram ();
+  protected abstract void runProgram () throws OperandException;
+
+  protected void onOperandException (OperandException exception) {
+    syntaxError(exception.getMessage());
+  }
 
   @Override
   public final void run () {
     try {
       processArguments(programArguments);
+      runProgram();
     } catch (OperandException exception) {
-      syntaxError(exception.getMessage());
+      onOperandException(exception);
     }
-
-    runProgram();
   }
 }

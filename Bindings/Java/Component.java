@@ -24,7 +24,7 @@ public abstract class Component {
   }
 
   public static void printf (String format, Object... arguments) {
-    System.out.print(String.format(format, arguments));
+    System.out.printf(format, arguments);
   }
 
   public static String wordify (String string) {
