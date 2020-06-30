@@ -82,11 +82,12 @@ public abstract class Programs extends ProgramComponent {
     @Override
     protected final void processParameters (String[] parameters) {
       int count = parameters.length;
-      if (count == 0) syntaxError("missing program/client name");
+      if (count == 0) onSyntaxError("missing program/client name");
 
       String name = parameters[0];
       Class<? extends Program> type = programs.get(name);
-      if (type == null) syntaxError("unknown program/client: %s", name);
+      if (type == null) onSyntaxError("unknown program/client: %s", name);
+      String term = Client.class.isAssignableFrom(type)? "client": "program";
 
       count -= 1;
       String[] arguments = new String[count];
@@ -99,13 +100,13 @@ public abstract class Programs extends ProgramComponent {
 
         programObject = (Program)constructor.newInstance((Object)arguments);
       } catch (NoSuchMethodException exception) {
-        internalError("program constructor not found: %s", exception.getMessage());
+        onInternalError("%s constructor not found: %s", term, exception.getMessage());
       } catch (InstantiationException exception) {
-        internalError("program instantiation failed: %s", exception.getMessage());
+        onInternalError("%s instantiation failed: %s", term, exception.getMessage());
       } catch (IllegalAccessException exception) {
-        internalError("program object access denied: %s", exception.getMessage());
+        onInternalError("%s object access denied: %s", term, exception.getMessage());
       } catch (InvocationTargetException exception) {
-        internalError("program construction failed: %s", exception.getCause().getMessage());
+        onInternalError("%s construction failed: %s", term, exception.getCause().getMessage());
       }
     }
 

@@ -65,7 +65,7 @@ public abstract class Client extends Program {
         connection = null;
       }
     } catch (ConnectionError error) {
-      internalError(("connection error: " + error));
+      onInternalError(("connection error: " + error));
     }
   }
 
@@ -79,6 +79,16 @@ public abstract class Client extends Program {
         runClient(connection);
       }
     );
+  }
+
+  protected final Parameter getParameter (Connection connection, String name) {
+    Parameter parameter = connection.getParameters().get(name);
+
+    if (parameter == null) {
+      onSemanticError("unknown parameter: %s", name);
+    }
+
+    return parameter;
   }
 
   protected interface TtyModeTask {
@@ -95,7 +105,7 @@ public abstract class Client extends Program {
         connection.leaveTtyMode();
       }
     } catch (ConnectionError error) {
-      internalError(("tty mode error: " + error));
+      onInternalError(("tty mode error: " + error));
     }
   }
 
@@ -117,21 +127,11 @@ public abstract class Client extends Program {
         connection.leaveRawMode();
       }
     } catch (ConnectionError error) {
-      internalError(("raw mode error: " + error));
+      onInternalError(("raw mode error: " + error));
     }
   }
 
   protected final void rawMode (Connection connection, RawModeTask task) {
     rawMode(connection, connection.getDriverName(), task);
-  }
-
-  protected final Parameter getParameter (Connection connection, String name) {
-    Parameter parameter = connection.getParameters().get(name);
-
-    if (parameter == null) {
-      semanticError("unknown parameter: %s", name);
-    }
-
-    return parameter;
   }
 }

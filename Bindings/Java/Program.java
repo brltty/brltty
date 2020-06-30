@@ -165,17 +165,17 @@ public abstract class Program extends ProgramComponent implements Runnable {
     System.err.println((getName() + ": " + String.format(format, arguments)));
   }
 
-  protected final void syntaxError (String format, Object... arguments) {
+  protected void onSyntaxError (String format, Object... arguments) {
     writeProgramMessage(format, arguments);
     System.exit(2);
   }
 
-  protected final void semanticError (String format, Object... arguments) {
+  protected void onSemanticError (String format, Object... arguments) {
     writeProgramMessage(format, arguments);
     System.exit(3);
   }
 
-  protected final void internalError (String format, Object... arguments) {
+  protected void onInternalError (String format, Object... arguments) {
     writeProgramMessage(format, arguments);
     System.exit(4);
   }
@@ -208,7 +208,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
       String keyword = argument.substring(1).toLowerCase();
       Option option = programOptions.get(keyword);
-      if (option == null) syntaxError("unknown option: %s", argument);
+      if (option == null) onSyntaxError("unknown option: %s", argument);
 
       String[] operandDescriptions = option.getOperands();
       int operandCount = operandDescriptions.length;
@@ -217,7 +217,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
         int index = argumentCount - argumentIndex - 1;
 
         if (index < operandCount) {
-          syntaxError("missing %s: %s", operandDescriptions[index], argument);
+          onSyntaxError("missing %s: %s", operandDescriptions[index], argument);
         }
       }
 
@@ -236,17 +236,13 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
   protected abstract void runProgram () throws OperandException;
 
-  protected void onOperandException (OperandException exception) {
-    syntaxError(exception.getMessage());
-  }
-
   @Override
   public final void run () {
     try {
       processArguments(programArguments);
       runProgram();
     } catch (OperandException exception) {
-      onOperandException(exception);
+      onSyntaxError(exception.getMessage());
     }
   }
 }

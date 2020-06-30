@@ -76,10 +76,10 @@ public class ListParametersClient extends Client {
 
       if (value == null) {
         StringBuilder message = new StringBuilder();
-        message.append("no value");
+        message.append("parameter has no value");
 
         message.append(": ");
-        message.append(parameterName);
+        message.append(parameter.getName());
 
         if (subparamValue != null) {
           message.append('[');
@@ -87,7 +87,7 @@ public class ListParametersClient extends Client {
           message.append(']');
         }
 
-        semanticError("%s", message);
+        onSemanticError("%s", message);
       }
 
       printf("%s\n", value);
