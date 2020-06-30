@@ -373,14 +373,14 @@ int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int 
  * the server which tty it will handle.
  *
  * The application must also specify how braille keys will be delivered to it.
- * Two ways are possible: key codes and commands:
+ * Two ways are possible:
  *
- * - key codes are specific to each braille driver, since the raw key code, as
- *   defined in the driver will be given for each key press.
+ * - driver-specific keycodes: applications will get values specific to each braille driver, since the keycode, as
+ *   defined in the driver will be given for each key event (press or release).
  *   Using them leads to building highly driver-dependent applications, which
  *   can yet sometimes be useful to mimic existing proprietary applications
  *   for instance.
- * - commands means that applications will get exactly the same values as
+ * - commands: applications will get exactly the same values as
  *   \e brltty. This allows driver-independent clients, which will hopefully
  *   be nice to use with a lot of different terminals.
  * \sa brlapi_readKey()
@@ -396,8 +396,7 @@ int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int 
  *
  * \param driver tells how the application wants brlapi_readKey() to return
  * key presses. NULL or "" means BRLTTY commands are required,
- * whereas a driver name means that raw key codes returned by this
- * driver are expected.
+ * whereas a driver name means that driver-specific keycodes are expected.
  *
  * WINDOWPATH and WINDOWID should be propagated when running remote applications
  * via ssh, for instance, along with BRLAPI_HOST and the authorization key (see
@@ -718,8 +717,8 @@ int BRLAPI_STDCALL brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describ
  * If the application doesn't want to see some command events,
  * it should call brlapi_ignoreKeys()
  *
- * If some driver name was given to brlapi_enterTtyMode(), a raw keycode is returned,
- * as specified by the terminal driver, usually in <brltty/brldefs-xy> where xy
+ * If a driver name was given to brlapi_enterTtyMode(), a driver-specific keycode is returned,
+ * as specified by the braille driver, usually in <brltty/brldefs-xy> where xy
  * is the driver's code. It generally corresponds to the very code that the
  * terminal tells to the driver.
  * This should only be used by applications which are dedicated to a particular
@@ -852,6 +851,9 @@ int BRLAPI_STDCALL brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_
  *
  * This function asks the server to give all keys to \e brltty, rather than
  * returning them to the application via brlapi_readKey().
+ *
+ * \note The given codes should be \e brltty commands (NULL or "" was given to
+ * brlapi_enterTtyMode())
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_ignoreAllKeys(void);
@@ -866,6 +868,9 @@ int BRLAPI_STDCALL brlapi__ignoreAllKeys(brlapi_handle_t *handle);
  * This function asks the server to give all keys to the application, and not
  * give them to \e brltty.
  *
+ * \note The given codes should be \e brltty commands (NULL or "" was given to
+ * brlapi_enterTtyMode())
+ *
  * Warning: after calling this function, make sure to call brlapi_ignoreKeys()
  * for ignoring important keys like BRL_CMD_SWITCHVT_PREV/NEXT and such.
  */
@@ -876,7 +881,7 @@ int BRLAPI_STDCALL brlapi_acceptAllKeys(void);
 int BRLAPI_STDCALL brlapi__acceptAllKeys(brlapi_handle_t *handle);
 #define brlapi__acceptAllKeys(handle) brlapi__acceptKeys(handle, brlapi_rangeType_all, NULL, 0)
 
-/** Type for raw keycode ranges
+/** Type for command keycode ranges
  *
  * Denotes the set of keycodes between \e first and \e last (inclusive)
  */
@@ -894,8 +899,9 @@ typedef struct {
  * \param ranges key ranges, which are inclusive
  * \param count number of ranges
  *
- * \note The given codes should be raw keycodes (i.e. some driver name was given
- * to brlapi_enterTtyMode()) */
+ * \note The given codes should be \e brltty commands (NULL or "" was given to
+ * brlapi_enterTtyMode())
+ */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_ignoreKeyRanges(const brlapi_range_t ranges[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
@@ -910,8 +916,9 @@ int BRLAPI_STDCALL brlapi__ignoreKeyRanges(brlapi_handle_t *handle, const brlapi
  * \param ranges key ranges, which are inclusive
  * \param count number of ranges
  *
- * \note The given codes should be raw keycodes (i.e. some driver name was given
- * to brlapi_enterTtyMode()) */
+ * \note The given codes should be \e brltty commands (NULL or "" was given to
+ * brlapi_enterTtyMode())
+ */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_acceptKeyRanges(const brlapi_range_t ranges[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
