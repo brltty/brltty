@@ -27,10 +27,8 @@ public class VersionProgram extends Program {
 
   @Override
   protected final void runProgram () {
-    show(
-      String.format(
-        "%d.%d.%d", APIVersion.MAJOR, APIVersion.MINOR, APIVersion.REVISION
-      )
+    printf(
+      "%d.%d.%d\n", APIVersion.MAJOR, APIVersion.MINOR, APIVersion.REVISION
     );
   }
 }

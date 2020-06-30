@@ -61,7 +61,7 @@ public class ListParametersClient extends Client {
       for (Parameter parameter : parameterArray) {
         if (parameter.isHidable()) continue;
         String value = parameter.toString();
-        if (value != null) show(parameter.getLabel(), value);
+        if (value != null) printf("%s: %s\n", parameter.getLabel(), value);
       }
     } else {
       Parameter parameter = getParameter(connection, parameterName);
@@ -90,7 +90,7 @@ public class ListParametersClient extends Client {
         semanticError("%s", message);
       }
 
-      show(value);
+      printf("%s\n", value);
     }
   }
 }

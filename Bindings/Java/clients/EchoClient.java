@@ -95,7 +95,7 @@ public class EchoClient extends Client {
             new DriverKeycode(code).toString():
             new CommandKeycode(code).toString();
 
-          show(label, text);
+          printf("%s: %s\n", label, text);
           tty.writeText(text);
         }
       }

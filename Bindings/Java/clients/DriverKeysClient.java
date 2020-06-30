@@ -30,8 +30,8 @@ public class DriverKeysClient extends Client {
     Parameters parameters = connection.getParameters();
 
     for (long code : parameters.definedDriverKeycodes.get()) {
-      show(
-        parameters.driverKeycodeName.get(code)
+      printf(
+        "%s\n", parameters.driverKeycodeName.get(code)
       );
     }
   }

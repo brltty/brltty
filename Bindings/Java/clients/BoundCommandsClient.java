@@ -30,7 +30,8 @@ public class BoundCommandsClient extends Client {
     Parameters parameters = connection.getParameters();
 
     for (long code : parameters.boundCommandKeycodes.get()) {
-      show(
+      printf(
+        "%s: %s\n",
         parameters.commandKeycodeName.get(code),
         parameters.commandKeycodeSummary.get(code)
       );

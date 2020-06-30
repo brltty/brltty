@@ -30,8 +30,9 @@ public class ComputerBrailleClient extends Client {
     Parameters parameters = connection.getParameters();
 
     for (int row : parameters.computerBrailleRowsMask.get().getBitNumbers()) {
-      show(
-        String.format("U+%04X", (row << 8)),
+      printf(
+        "U+%04X: %s\n",
+        (row << 8),
         parameters.computerBrailleRowCells.get(row).toString()
       );
     }

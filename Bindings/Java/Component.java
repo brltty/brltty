@@ -23,6 +23,10 @@ public abstract class Component {
   protected Component () {
   }
 
+  public static void printf (String format, Object... arguments) {
+    System.out.print(String.format(format, arguments));
+  }
+
   public static String wordify (String string) {
     return string.replaceAll("(?<=.)(?=\\p{Upper})", " ");
   }

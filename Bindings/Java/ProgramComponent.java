@@ -23,12 +23,4 @@ public abstract class ProgramComponent extends Component {
   protected ProgramComponent () {
     super();
   }
-
-  public final void show (String line) {
-    System.out.println(line);
-  }
-
-  public final void show (String label, String value) {
-    show((label + ": " + value));
-  }
 }
