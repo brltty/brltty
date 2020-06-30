@@ -242,7 +242,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
       processArguments(programArguments);
       runProgram();
     } catch (OperandException exception) {
-      onSyntaxError(exception.getMessage());
+      onSyntaxError("%s", exception.getMessage());
     }
   }
 }
