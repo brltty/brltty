@@ -205,8 +205,10 @@ public abstract class Parameter extends ParameterComponent {
         }
       }
 
-      throw new OperandException(
-        "set not suppored: %s: %s", getName(), type.getSimpleName()
+      throw new UnsupportedOperationException(
+        String.format(
+          "set not suppored: %s: %s", getName(), type.getSimpleName()
+        )
       );
     }
   }
