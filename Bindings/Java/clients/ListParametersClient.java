@@ -31,7 +31,7 @@ public class ListParametersClient extends Client {
 
   @Override
   protected void processParameters (String[] parameters)
-            throws OperandException
+            throws SyntaxException
   {
     parameterName = null;
     subparamValue = null;
@@ -49,11 +49,11 @@ public class ListParametersClient extends Client {
         return;
     }
 
-    tooManyParameters();
+    throw new TooManyParametersException(parameters, 2);
   }
 
   @Override
-  protected final void runClient (Connection connection) {
+  protected final void runClient (Connection connection) throws SemanticException {
     if (parameterName == null) {
       Parameter[] parameterArray = connection.getParameters().get();
       Parameters.sortByName(parameterArray);
@@ -87,7 +87,7 @@ public class ListParametersClient extends Client {
           message.append(']');
         }
 
-        onSemanticError("%s", message);
+        throw new SemanticException("%s", message);
       }
 
       printf("%s\n", value);

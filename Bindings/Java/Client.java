@@ -51,10 +51,10 @@ public abstract class Client extends Program {
   }
 
   protected interface ClientTask {
-    public void run (Connection connection) throws OperandException;
+    public void run (Connection connection) throws ProgramException;
   }
 
-  private final void connect (ClientTask task) throws OperandException {
+  private final void connect (ClientTask task) throws ProgramException {
     try {
       Connection connection = new Connection(connectionSettings);
 
@@ -65,15 +65,15 @@ public abstract class Client extends Program {
         connection = null;
       }
     } catch (ConnectionError error) {
-      onInternalError(("connection error: " + error));
+      throw new ProgramException(("connection error: " + error));
     }
   }
 
   protected abstract void runClient (Connection connection)
-            throws OperandException;
+            throws ProgramException;
 
   @Override
-  protected final void runProgram () throws OperandException {
+  protected final void runProgram () throws ProgramException {
     connect(
       (connection) -> {
         runClient(connection);
@@ -81,21 +81,21 @@ public abstract class Client extends Program {
     );
   }
 
-  protected final Parameter getParameter (Connection connection, String name) {
+  protected final Parameter getParameter (Connection connection, String name)
+            throws SemanticException
+  {
     Parameter parameter = connection.getParameters().get(name);
-
-    if (parameter == null) {
-      onSemanticError("unknown parameter: %s", name);
-    }
-
-    return parameter;
+    if (parameter != null) return parameter;
+    throw new SemanticException("unknown parameter: %s", name);
   }
 
   protected interface TtyModeTask {
     public void run (Connection connection);
   }
 
-  protected final void ttyMode (Connection connection, String driver, int[] path, TtyModeTask task) {
+  protected final void ttyMode (Connection connection, String driver, TtyModeTask task, int... path)
+            throws ProgramException
+  {
     try {
       connection.enterTtyModeWithPath(driver, path);
 
@@ -105,19 +105,23 @@ public abstract class Client extends Program {
         connection.leaveTtyMode();
       }
     } catch (ConnectionError error) {
-      onInternalError(("tty mode error: " + error));
+      throw new ProgramException(("tty mode error: " + error));
     }
   }
 
-  protected final void ttyMode (Connection connection, boolean keys, int[] path, TtyModeTask task) {
-    ttyMode(connection, (keys? connection.getDriverName(): null), path, task);
+  protected final void ttyMode (Connection connection, boolean keys, TtyModeTask task, int... path)
+            throws ProgramException
+  {
+    ttyMode(connection, (keys? connection.getDriverName(): null), task, path);
   }
 
   protected interface RawModeTask {
     public void run (Connection connection);
   }
 
-  protected final void rawMode (Connection connection, String driver, RawModeTask task) {
+  protected final void rawMode (Connection connection, String driver, RawModeTask task)
+            throws ProgramException
+  {
     try {
       connection.enterRawMode(driver);
 
@@ -127,11 +131,13 @@ public abstract class Client extends Program {
         connection.leaveRawMode();
       }
     } catch (ConnectionError error) {
-      onInternalError(("raw mode error: " + error));
+      throw new ProgramException(("raw mode error: " + error));
     }
   }
 
-  protected final void rawMode (Connection connection, RawModeTask task) {
+  protected final void rawMode (Connection connection, RawModeTask task)
+            throws ProgramException
+  {
     rawMode(connection, connection.getDriverName(), task);
   }
 }

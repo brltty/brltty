@@ -43,15 +43,15 @@ public abstract class Parse {
   }
 
   public static Boolean asBoolean (String description, String operand)
-         throws OperandException
+         throws SyntaxException
   {
     Boolean value = booleanKeywords.get(operand);
     if (value != null) return value;
-    throw new OperandException("not a boolean: %s: %s", description, operand);
+    throw new SyntaxException("not a boolean: %s: %s", description, operand);
   }
 
   private static Number asNumber (String description, String operand, long minimum, long maximum)
-         throws OperandException
+         throws SyntaxException
   {
     long value;
 
@@ -59,99 +59,99 @@ public abstract class Parse {
       value = Long.valueOf(operand);
 
       if (value < minimum) {
-        throw new OperandException(
+        throw new SyntaxException(
           "less than %d: %s: %s", minimum, description, operand
         );
       }
 
       if (value > maximum) {
-        throw new OperandException(
+        throw new SyntaxException(
           "greater than %d: %s: %s", maximum, description, operand
         );
       }
 
       return new Long(value);
     } catch (NumberFormatException exception) {
-      throw new OperandException(
+      throw new SyntaxException(
         "not an integer: %s: %s", description, operand
       );
     }
   }
 
   public static long asLong (String description, String operand, long minimum, long maximum)
-         throws OperandException
+         throws SyntaxException
   {
     return asNumber(description, operand, minimum, maximum).longValue();
   }
 
   public static long asLong (String description, String operand, long maximum)
-         throws OperandException
+         throws SyntaxException
   {
     return asLong(description, operand, 0, maximum);
   }
 
   public static long asLong (String description, String operand)
-         throws OperandException
+         throws SyntaxException
   {
     return asLong(description, operand, Long.MAX_VALUE);
   }
 
   public static int asInt (String description, String operand, int minimum, int maximum)
-         throws OperandException
+         throws SyntaxException
   {
     return asNumber(description, operand, minimum, maximum).intValue();
   }
 
   public static int asInt (String description, String operand, int maximum)
-         throws OperandException
+         throws SyntaxException
   {
     return asInt(description, operand, 0, maximum);
   }
 
   public static int asInt (String description, String operand)
-         throws OperandException
+         throws SyntaxException
   {
     return asInt(description, operand, Integer.MAX_VALUE);
   }
 
   public static short asShort (String description, String operand, short minimum, short maximum)
-         throws OperandException
+         throws SyntaxException
   {
     return asNumber(description, operand, minimum, maximum).shortValue();
   }
 
   public static short asShort (String description, String operand, short maximum)
-         throws OperandException
+         throws SyntaxException
   {
     return asShort(description, operand, (short)0, maximum);
   }
 
   public static short asShort (String description, String operand)
-         throws OperandException
+         throws SyntaxException
   {
     return asShort(description, operand, Short.MAX_VALUE);
   }
 
   public static byte asByte (String description, String operand, byte minimum, byte maximum)
-         throws OperandException
+         throws SyntaxException
   {
     return asNumber(description, operand, minimum, maximum).byteValue();
   }
 
   public static byte asByte (String description, String operand, byte maximum)
-         throws OperandException
+         throws SyntaxException
   {
     return asByte(description, operand, (byte)0, maximum);
   }
 
   public static byte asByte (String description, String operand)
-         throws OperandException
+         throws SyntaxException
   {
     return asByte(description, operand, Byte.MAX_VALUE);
   }
 
   public static byte asDots (String description, String operand)
-         throws OperandException
+         throws SyntaxException
   {
     if (operand.equals("0")) return 0;
 
@@ -161,14 +161,14 @@ public abstract class Parse {
     for (char number : operand.toCharArray()) {
       int index = numbers.indexOf(number);
       if (index < 0) {
-        throw new OperandException(
-          "invalid dot number: %s: %s (%c)", description, operand, number
+        throw new SyntaxException(
+          "not a dot number: %s: %s (%c)", description, operand, number
         );
       }
 
       int dot = 1 << index;
       if ((dots & dot) != 0) {
-        throw new OperandException(
+        throw new SyntaxException(
           "duplicate dot number: %s: %s (%c)", description, operand, number
         );
       }

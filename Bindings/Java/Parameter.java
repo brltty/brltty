@@ -99,7 +99,7 @@ public abstract class Parameter extends ParameterComponent {
   }
 
   public interface StringSettable extends Settable {
-    public void set (String value) throws OperandException;
+    public void set (String value) throws SyntaxException;
   }
 
   public interface BooleanSettable extends Settable {
@@ -156,7 +156,7 @@ public abstract class Parameter extends ParameterComponent {
 
   public void set (String value) throws OperandException {
     if (!isSettable()) {
-      throw new OperandException("parameter not settable: %s", getName());
+      throw new SemanticException("parameter not settable: %s", getName());
     }
 
     if (this instanceof StringSettable) {

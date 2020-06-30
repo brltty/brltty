@@ -55,7 +55,7 @@ public class EchoClient extends Client {
 
   @Override
   protected void processParameters (String[] parameters)
-            throws OperandException
+            throws SyntaxException
   {
     int count = parameters.length;
     ttyPath = new int[count];
@@ -66,9 +66,9 @@ public class EchoClient extends Client {
   }
 
   @Override
-  protected final void runClient (Connection connection) {
+  protected final void runClient (Connection connection) throws ProgramException {
     ttyMode(
-      connection, echoDriverKeys, ttyPath,
+      connection, echoDriverKeys,
       (tty) -> {
         String label = echoDriverKeys? "Key": "Cmd";
 
@@ -98,7 +98,8 @@ public class EchoClient extends Client {
           printf("%s: %s\n", label, text);
           tty.writeText(text);
         }
-      }
+      },
+      ttyPath
     );
   }
 }

@@ -19,8 +19,8 @@
 
 package org.a11y.brlapi;
 
-public class OperandException extends ProgramException {
-  public OperandException (String format, Object... arguments) {
-    super(String.format(format, arguments));
+public class SyntaxException extends OperandException {
+  public SyntaxException (String format, Object... arguments) {
+    super(format, arguments);
   }
 }

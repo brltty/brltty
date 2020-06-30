@@ -31,14 +31,14 @@ public class SetParameterClient extends Client {
 
   @Override
   protected void processParameters (String[] parameters)
-            throws OperandException
+            throws SyntaxException
   {
     switch (parameters.length) {
       case 0:
-        throw new OperandException("missing parameter name");
+        throw new SyntaxException("missing parameter name");
 
       case 1:
-        throw new OperandException ("missing larameter value");
+        throw new SyntaxException("missing larameter value");
 
       case 2:
         parameterName = parameters[0];
@@ -46,7 +46,7 @@ public class SetParameterClient extends Client {
         return;
     }
 
-    tooManyParameters();
+    throw new TooManyParametersException(parameters, 2);
   }
 
   @Override

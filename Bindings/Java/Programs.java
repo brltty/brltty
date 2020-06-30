@@ -77,42 +77,62 @@ public abstract class Programs extends ProgramComponent {
       }
     }
 
-    private Program programObject = null;
+    private String programName = null;
+    private Class<? extends Program> programType = null;
+    private String[] programArguments = null;
 
     @Override
-    protected final void processParameters (String[] parameters) {
+    protected final void processParameters (String[] parameters)
+              throws SyntaxException
+    {
       int count = parameters.length;
-      if (count == 0) onSyntaxError("missing program/client name");
 
-      String name = parameters[0];
-      Class<? extends Program> type = programs.get(name);
-      if (type == null) onSyntaxError("unknown program/client: %s", name);
-      String term = Client.class.isAssignableFrom(type)? "client": "program";
+      if (count == 0) {
+        throw new SyntaxException("missing program/client name");
+      }
+
+      programName = parameters[0];
+      programType = programs.get(programName);
+
+      if (programType == null) {
+        throw new SyntaxException("unknown program/client: %s", programName);
+      }
 
       count -= 1;
-      String[] arguments = new String[count];
-      System.arraycopy(parameters, 1, arguments, 0, count);
-
-      try {
-        Constructor<? extends Program> constructor = type.getConstructor(
-          arguments.getClass()
-        );
-
-        programObject = (Program)constructor.newInstance((Object)arguments);
-      } catch (NoSuchMethodException exception) {
-        onInternalError("%s constructor not found: %s", term, exception.getMessage());
-      } catch (InstantiationException exception) {
-        onInternalError("%s instantiation failed: %s", term, exception.getMessage());
-      } catch (IllegalAccessException exception) {
-        onInternalError("%s object access denied: %s", term, exception.getMessage());
-      } catch (InvocationTargetException exception) {
-        onInternalError("%s construction failed: %s", term, exception.getCause().getMessage());
-      }
+      programArguments = new String[count];
+      System.arraycopy(parameters, 1, programArguments, 0, count);
     }
 
     @Override
-    protected final void runProgram () {
-      programObject.run();
+    protected final void runProgram () throws ProgramException {
+      String term = Client.class.isAssignableFrom(programType)? "client": "program";
+      Program program = null;
+
+      try {
+        Constructor<? extends Program> constructor = programType.getConstructor(
+          programArguments.getClass()
+        );
+
+        program = (Program)constructor.newInstance((Object)programArguments);
+      } catch (NoSuchMethodException exception) {
+        throw new ProgramException(
+          "%s constructor not found: %s", term, programName
+        );
+      } catch (InstantiationException exception) {
+        throw new ProgramException(
+          "%s instantiation failed: %s: %s", term, programName, exception.getMessage()
+        );
+      } catch (IllegalAccessException exception) {
+        throw new ProgramException(
+          "%s object access denied: %s: %s", term, programName, exception.getMessage()
+        );
+      } catch (InvocationTargetException exception) {
+        throw new ProgramException(
+          "%s construction failed: %s: %s", term, programName, exception.getCause().getMessage()
+        );
+      }
+
+      program.run();
     }
   }
 

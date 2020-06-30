@@ -23,11 +23,21 @@ import java.util.List;
 import java.util.ArrayList;
 
 public abstract class Program extends ProgramComponent implements Runnable {
+  protected abstract void runProgram () throws ProgramException;
+
+  public final String getName () {
+    return getClass().getSimpleName();
+  }
+
+  protected final void writeProgramMessage (String format, Object... arguments) {
+    System.err.println((getName() + ": " + String.format(format, arguments)));
+  }
+
   protected static class Option {
     public final static char PREFIX_CHARACTER = '-';
 
     public interface Handler {
-      public void handleOption (String[] operands) throws OperandException;
+      public void handleOption (String[] operands) throws SyntaxException;
     }
 
     private final Handler optionHandler;
@@ -82,10 +92,6 @@ public abstract class Program extends ProgramComponent implements Runnable {
     for (String parameter : parameters) {
       optionalParameters.add(parameter);
     }
-  }
-
-  public String getName () {
-    return getClass().getSimpleName();
   }
 
   protected void extendUsageSummary (StringBuilder usage) {
@@ -161,37 +167,16 @@ public abstract class Program extends ProgramComponent implements Runnable {
     );
   }
 
-  protected final void writeProgramMessage (String format, Object... arguments) {
-    System.err.println((getName() + ": " + String.format(format, arguments)));
-  }
-
-  protected void onSyntaxError (String format, Object... arguments) {
-    writeProgramMessage(format, arguments);
-    System.exit(2);
-  }
-
-  protected void onSemanticError (String format, Object... arguments) {
-    writeProgramMessage(format, arguments);
-    System.exit(3);
-  }
-
-  protected void onInternalError (String format, Object... arguments) {
-    writeProgramMessage(format, arguments);
-    System.exit(4);
-  }
-
-  protected final void tooManyParameters () throws OperandException {
-    throw new OperandException("too many parameters");
-  }
-
   protected void processParameters (String[] parameters)
-            throws OperandException
+            throws SyntaxException
   {
-    if (parameters.length > 0) tooManyParameters();
+    if (parameters.length > 0) {
+      throw new TooManyParametersException(parameters, 0);
+    }
   }
 
   private final void processArguments (String[] arguments)
-          throws OperandException
+          throws SyntaxException
   {
     int argumentCount = arguments.length;
     int argumentIndex = 0;
@@ -208,7 +193,10 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
       String keyword = argument.substring(1).toLowerCase();
       Option option = programOptions.get(keyword);
-      if (option == null) onSyntaxError("unknown option: %s", argument);
+
+      if (option == null) {
+        throw new SyntaxException("unknown option: %s", argument);
+      }
 
       String[] operandDescriptions = option.getOperands();
       int operandCount = operandDescriptions.length;
@@ -217,7 +205,9 @@ public abstract class Program extends ProgramComponent implements Runnable {
         int index = argumentCount - argumentIndex - 1;
 
         if (index < operandCount) {
-          onSyntaxError("missing %s: %s", operandDescriptions[index], argument);
+          throw new SyntaxException(
+            "missing %s: %s", operandDescriptions[index], argument
+          );
         }
       }
 
@@ -234,15 +224,28 @@ public abstract class Program extends ProgramComponent implements Runnable {
     processParameters(parameters);
   }
 
-  protected abstract void runProgram () throws OperandException;
+  protected void onProgramException (ProgramException exception) {
+    writeProgramMessage("%s", exception.getMessage());
+    int exitCode;
+
+    if (exception instanceof SyntaxException) {
+      exitCode = 2;
+    } else if (exception instanceof SemanticException) {
+      exitCode = 3;
+    } else {
+      exitCode = 4;
+    }
+
+    System.exit(exitCode);
+  }
 
   @Override
   public final void run () {
     try {
       processArguments(programArguments);
       runProgram();
-    } catch (OperandException exception) {
-      onSyntaxError("%s", exception.getMessage());
+    } catch (ProgramException exception) {
+      onProgramException(exception);
     }
   }
 }
