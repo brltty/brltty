@@ -44,9 +44,7 @@ public class PauseClient extends Client {
   }
 
   @Override
-  protected void extendUsageSummary (StringBuilder usage) {
-    super.extendUsageSummary(usage);
-
+  protected final void extendUsageSummary (StringBuilder usage) {
     usage.append("The timeout range is ");
     usage.append(MINIMUM_PAUSE_TIMEOUT);
     usage.append(" through ");

@@ -61,9 +61,7 @@ public abstract class Programs extends ProgramComponent {
     }
 
     @Override
-    protected void extendUsageSummary (StringBuilder usage) {
-      super.extendUsageSummary(usage);
-
+    protected final void extendUsageSummary (StringBuilder usage) {
       if (programs.isEmpty()) {
         usage.append("No programs or clients have been defined.");
       } else {

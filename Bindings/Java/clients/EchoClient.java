@@ -59,9 +59,7 @@ public class EchoClient extends Client {
   }
 
   @Override
-  protected void extendUsageSummary (StringBuilder usage) {
-    super.extendUsageSummary(usage);
-
+  protected final void extendUsageSummary (StringBuilder usage) {
     usage.append("The timeout range is ");
     usage.append(MINIMUM_READ_TIMEOUT);
     usage.append(" through ");
