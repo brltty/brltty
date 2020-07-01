@@ -151,28 +151,8 @@ public abstract class Program extends ProgramComponent implements Runnable {
       StringBuilder extension = new StringBuilder();
       extendUsageSummary(extension);
 
-      while (extension.length() > 0) {
-        int last = extension.length() - 1;
-        if (!Character.isWhitespace(extension.charAt(last))) break;
-        extension.setLength(last);
-      }
-
-      {
-        int length = extension.length();
-        int from = 0;
-
-        for (int index=0; index<length; index+=1) {
-          char character = extension.charAt(index);
-
-          if (character == '\n') {
-            from = index + 1;
-          } else if (!Character.isWhitespace(character)) {
-            break;
-          }
-        }
-
-        if (from > 0) extension.delete(0, from);
-      }
+      extension.setLength(findTrailingWhitespace(extension));
+      extension.delete(0, findNonemptyLine(extension));
 
       if (extension.length() > 0) {
         usage.append("\n\n");
