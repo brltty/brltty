@@ -54,7 +54,7 @@ public abstract class Client extends Program {
     public void run (Connection connection) throws ProgramException;
   }
 
-  private final void connect (ClientTask task) throws ProgramException {
+  private final Client connect (ClientTask task) throws ProgramException {
     try {
       Connection connection = new Connection(connectionSettings);
 
@@ -67,6 +67,8 @@ public abstract class Client extends Program {
     } catch (ConnectionError error) {
       throw new ProgramException(("connection error: " + error));
     }
+
+    return this;
   }
 
   protected abstract void runClient (Connection connection)
@@ -93,7 +95,7 @@ public abstract class Client extends Program {
     public void run (Connection connection);
   }
 
-  protected final void ttyMode (Connection connection, String driver, TtyModeTask task, int... path)
+  protected final Client ttyMode (Connection connection, String driver, TtyModeTask task, int... path)
             throws ProgramException
   {
     try {
@@ -107,19 +109,21 @@ public abstract class Client extends Program {
     } catch (ConnectionError error) {
       throw new ProgramException(("tty mode error: " + error));
     }
+
+    return this;
   }
 
-  protected final void ttyMode (Connection connection, boolean keys, TtyModeTask task, int... path)
+  protected final Client ttyMode (Connection connection, boolean keys, TtyModeTask task, int... path)
             throws ProgramException
   {
-    ttyMode(connection, (keys? connection.getDriverName(): null), task, path);
+    return ttyMode(connection, (keys? connection.getDriverName(): null), task, path);
   }
 
   protected interface RawModeTask {
     public void run (Connection connection);
   }
 
-  protected final void rawMode (Connection connection, String driver, RawModeTask task)
+  protected final Client rawMode (Connection connection, String driver, RawModeTask task)
             throws ProgramException
   {
     try {
@@ -133,11 +137,13 @@ public abstract class Client extends Program {
     } catch (ConnectionError error) {
       throw new ProgramException(("raw mode error: " + error));
     }
+
+    return this;
   }
 
-  protected final void rawMode (Connection connection, RawModeTask task)
+  protected final Client rawMode (Connection connection, RawModeTask task)
             throws ProgramException
   {
-    rawMode(connection, connection.getDriverName(), task);
+    return rawMode(connection, connection.getDriverName(), task);
   }
 }
