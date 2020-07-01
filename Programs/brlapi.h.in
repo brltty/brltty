@@ -819,9 +819,6 @@ typedef enum {
  * \param type type of keys to be ignored
  * \param keys array of keys to be ignored
  * \param count number of keys
- *
- * \note The given codes should be \e brltty commands (NULL or "" was given to
- * brlapi_enterTtyMode())
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_ignoreKeys(brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
@@ -837,9 +834,6 @@ int BRLAPI_STDCALL brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_
  * \param type type of keys to be ignored
  * \param keys array of keys to be ignored
  * \param count number of keys
- *
- * \note The given codes should be \e brltty commands (NULL or "" was given to
- * brlapi_enterTtyMode())
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_acceptKeys(brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
@@ -851,9 +845,6 @@ int BRLAPI_STDCALL brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_
  *
  * This function asks the server to give all keys to \e brltty, rather than
  * returning them to the application via brlapi_readKey().
- *
- * \note The given codes should be \e brltty commands (NULL or "" was given to
- * brlapi_enterTtyMode())
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_ignoreAllKeys(void);
@@ -868,9 +859,6 @@ int BRLAPI_STDCALL brlapi__ignoreAllKeys(brlapi_handle_t *handle);
  * This function asks the server to give all keys to the application, and not
  * give them to \e brltty.
  *
- * \note The given codes should be \e brltty commands (NULL or "" was given to
- * brlapi_enterTtyMode())
- *
  * Warning: after calling this function, make sure to call brlapi_ignoreKeys()
  * for ignoring important keys like BRL_CMD_SWITCHVT_PREV/NEXT and such.
  */
@@ -881,7 +869,7 @@ int BRLAPI_STDCALL brlapi_acceptAllKeys(void);
 int BRLAPI_STDCALL brlapi__acceptAllKeys(brlapi_handle_t *handle);
 #define brlapi__acceptAllKeys(handle) brlapi__acceptKeys(handle, brlapi_rangeType_all, NULL, 0)
 
-/** Type for command keycode ranges
+/** Type for keycode ranges
  *
  * Denotes the set of keycodes between \e first and \e last (inclusive)
  */
@@ -898,9 +886,6 @@ typedef struct {
  *
  * \param ranges key ranges, which are inclusive
  * \param count number of ranges
- *
- * \note The given codes should be \e brltty commands (NULL or "" was given to
- * brlapi_enterTtyMode())
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_ignoreKeyRanges(const brlapi_range_t ranges[], unsigned int count);
@@ -915,9 +900,6 @@ int BRLAPI_STDCALL brlapi__ignoreKeyRanges(brlapi_handle_t *handle, const brlapi
  *
  * \param ranges key ranges, which are inclusive
  * \param count number of ranges
- *
- * \note The given codes should be \e brltty commands (NULL or "" was given to
- * brlapi_enterTtyMode())
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_acceptKeyRanges(const brlapi_range_t ranges[], unsigned int count);
