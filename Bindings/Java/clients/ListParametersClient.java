@@ -26,30 +26,23 @@ public class ListParametersClient extends Client {
     addOptionalParameters("parameter", "subparam");
   }
 
-  private String parameterName;
-  private Long subparamValue;
+  private String parameterName = null;
+  private Long subparamValue = null;
 
   @Override
   protected void processParameters (String[] parameters)
             throws SyntaxException
   {
-    parameterName = null;
-    subparamValue = null;
+    int count = parameters.length;
+    int index = 0;
 
-    switch (parameters.length) {
-      case 2:
-        subparamValue = Parse.asLong("subparam", parameters[1]);
-        /* fall through */
+    if (index == count) return;
+    parameterName = parameters[index++];
 
-      case 1:
-        parameterName = parameters[0];
-        /* fall through */
+    if (index == count) return;
+    subparamValue = Parse.asLong("subparam", parameters[index++]);
 
-      case 0:
-        return;
-    }
-
-    throw new TooManyParametersException(parameters, 2);
+    if (index < count) throw new TooManyParametersException(parameters, index);
   }
 
   @Override

@@ -33,20 +33,16 @@ public class SetParameterClient extends Client {
   protected void processParameters (String[] parameters)
             throws SyntaxException
   {
-    switch (parameters.length) {
-      case 0:
-        throw new SyntaxException("missing parameter name");
+    int count = parameters.length;
+    int index = 0;
 
-      case 1:
-        throw new SyntaxException("missing larameter value");
+    if (index == count) throw new SyntaxException("missing parameter name");
+    parameterName = parameters[index++];
 
-      case 2:
-        parameterName = parameters[0];
-        parameterValue = parameters[1];
-        return;
-    }
+    if (index == count) throw new SyntaxException("missing larameter value");
+    parameterValue = parameters[index++];
 
-    throw new TooManyParametersException(parameters, 2);
+    if (index < count) throw new TooManyParametersException(parameters, index);
   }
 
   @Override

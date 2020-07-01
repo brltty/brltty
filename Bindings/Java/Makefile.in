@@ -54,7 +54,7 @@ jar: $(JAVA_JAR_FILE)
 $(JAVA_JAR_FILE): classes.made
 	$(JAR) cf $@ -C classes .
 
-JAVAC_LINT_OPTIONS = cast,deprecation,finally,overrides,rawtypes,unchecked
+JAVAC_LINT_OPTIONS = cast,deprecation,fallthrough,finally,overrides,rawtypes,unchecked
 
 classes.made: $(JAVA_SOURCES)
 	$(INSTALL_DIRECTORY) classes
