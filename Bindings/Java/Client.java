@@ -20,6 +20,9 @@
 package org.a11y.brlapi;
 
 public abstract class Client extends Program {
+  protected abstract void runClient (Connection connection)
+            throws ProgramException;
+
   private final ConnectionSettings connectionSettings = new ConnectionSettings();
 
   public final Client setServerHost (String host) {
@@ -70,9 +73,6 @@ public abstract class Client extends Program {
 
     return this;
   }
-
-  protected abstract void runClient (Connection connection)
-            throws ProgramException;
 
   @Override
   protected final void runProgram () throws ProgramException {

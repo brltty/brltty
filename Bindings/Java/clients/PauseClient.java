@@ -44,6 +44,19 @@ public class PauseClient extends Client {
   }
 
   @Override
+  protected void extendUsageSummary (StringBuilder usage) {
+    super.extendUsageSummary(usage);
+
+    usage.append("The timeout range is ");
+    usage.append(MINIMUM_PAUSE_TIMEOUT);
+    usage.append(" through ");
+    usage.append(MAXIMUM_PAUSE_TIMEOUT);
+    usage.append(" - it defaults to ");
+    usage.append(DEFAULT_PAUSE_TIMEOUT);
+    usage.append('.');
+  }
+
+  @Override
   protected final void runClient (Connection connection) {
     printf("Pausing for %d seconds...", pauseTimeout);
     String result;

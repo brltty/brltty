@@ -147,7 +147,16 @@ public abstract class Program extends ProgramComponent implements Runnable {
       }
     }
 
-    extendUsageSummary(usage);
+    {
+      StringBuilder extension = new StringBuilder();
+      extendUsageSummary(extension);
+
+      if (extension.length() > 0) {
+        usage.append("\n\n");
+        usage.append(extension);
+      }
+    }
+
     return usage.toString();
   }
 

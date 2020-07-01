@@ -58,6 +58,19 @@ public class EchoClient extends Client {
     );
   }
 
+  @Override
+  protected void extendUsageSummary (StringBuilder usage) {
+    super.extendUsageSummary(usage);
+
+    usage.append("The timeout range is ");
+    usage.append(MINIMUM_READ_TIMEOUT);
+    usage.append(" through ");
+    usage.append(MAXIMUM_READ_TIMEOUT);
+    usage.append(" - it defaults to ");
+    usage.append(DEFAULT_READ_TIMEOUT);
+    usage.append('.');
+  }
+
   private int[] ttyPath;
 
   @Override
