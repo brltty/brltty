@@ -23,14 +23,21 @@ import org.a11y.brlapi.*;
 import java.io.InterruptedIOException;
 
 public class PauseClient extends Client {
-  private int pauseTimeout = 10;
+  public final static byte MINIMUM_PAUSE_TIMEOUT =  1;
+  public final static byte DEFAULT_PAUSE_TIMEOUT = 10;
+  public final static byte MAXIMUM_PAUSE_TIMEOUT = 30;
+
+  private byte pauseTimeout = DEFAULT_PAUSE_TIMEOUT;
 
   public PauseClient (String... arguments) {
     super(arguments);
 
     addOption("timeout",
       (operands) -> {
-        pauseTimeout = Parse.asInt("pause timeout", operands[0], 1, 30);
+        pauseTimeout = Parse.asByte(
+          "pause timeout", operands[0],
+          MINIMUM_PAUSE_TIMEOUT, MAXIMUM_PAUSE_TIMEOUT
+        );
       },
       "sconds"
     );

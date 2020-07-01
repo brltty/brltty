@@ -24,8 +24,12 @@ import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
 public class EchoClient extends Client {
+  public final static byte MINIMUM_READ_TIMEOUT =  1;
+  public final static byte DEFAULT_READ_TIMEOUT = 10;
+  public final static byte MAXIMUM_READ_TIMEOUT = 30;
+
   private boolean echoDriverKeys = false;
-  private int readTimeout = 10;
+  private byte readTimeout = DEFAULT_READ_TIMEOUT;
 
   public EchoClient (String... arguments) {
     super(arguments);
@@ -45,7 +49,10 @@ public class EchoClient extends Client {
 
     addOption("timeout",
       (operands) -> {
-        readTimeout = Parse.asInt("read timeout", operands[0], 1, 30);
+        readTimeout = Parse.asByte(
+          "read timeout", operands[0],
+          MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT
+        );
       },
       "sconds"
     );
