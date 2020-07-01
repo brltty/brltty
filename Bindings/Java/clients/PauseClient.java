@@ -45,12 +45,12 @@ public class PauseClient extends Client {
 
   @Override
   protected final void extendUsageSummary (StringBuilder usage) {
-    usage.append("The timeout range is ");
+    usage.append("The timeout defaults to ");
+    usage.append(DEFAULT_PAUSE_TIMEOUT);
+    usage.append(" and must be within the range ");
     usage.append(MINIMUM_PAUSE_TIMEOUT);
     usage.append(" through ");
     usage.append(MAXIMUM_PAUSE_TIMEOUT);
-    usage.append(" - it defaults to ");
-    usage.append(DEFAULT_PAUSE_TIMEOUT);
     usage.append('.');
   }
 

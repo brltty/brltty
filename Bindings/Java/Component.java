@@ -27,37 +27,6 @@ public abstract class Component {
     System.out.printf(format, arguments);
   }
 
-  public static int findNonemptyLine (CharSequence text) {
-    int length = text.length();
-    int at = 0;
-
-    for (int index=0; index<length; index+=1) {
-      char character = text.charAt(index);
-
-      if (character == '\n') {
-        at = index + 1;
-      } else if (!Character.isWhitespace(character)) {
-        break;
-      }
-    }
-
-    return at;
-  }
-
-  public static int findTrailingWhitespace (CharSequence text) {
-    int index = text.length();
-
-    while (--index >= 0) {
-      if (!Character.isWhitespace(text.charAt(index))) break;
-    }
-
-    return index + 1;
-  }
-
-  public static String wordify (String string) {
-    return string.replaceAll("(?<=.)(?=\\p{Upper})", " ");
-  }
-
   public static String toName (String string) {
     return string.replace(' ', '-').toLowerCase();
   }

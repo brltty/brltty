@@ -60,16 +60,16 @@ public class EchoClient extends Client {
 
   @Override
   protected final void extendUsageSummary (StringBuilder usage) {
-    usage.append("The timeout range is ");
+    usage.append("The timeout defaults to ");
+    usage.append(DEFAULT_READ_TIMEOUT);
+    usage.append(" and must be within the range ");
     usage.append(MINIMUM_READ_TIMEOUT);
     usage.append(" through ");
     usage.append(MAXIMUM_READ_TIMEOUT);
-    usage.append(" - it defaults to ");
-    usage.append(DEFAULT_READ_TIMEOUT);
     usage.append('.');
   }
 
-  private int[] ttyPath;
+  private int[] ttyPath = null;
 
   @Override
   protected void processParameters (String[] parameters)

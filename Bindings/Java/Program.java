@@ -99,35 +99,34 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
   public final String getUsageSummary () {
     StringBuilder usage = new StringBuilder();
-
-    usage.append("Usage Summary for ");
-    usage.append(getName());
-
-    usage.append("\nSyntax:");
+    usage.append("Usage Summary for ").append(getName());
     boolean haveOptions = !programOptions.isEmpty();
 
-    if (haveOptions) {
-      usage.append(" [");
-      usage.append(Option.PREFIX_CHARACTER);
-      usage.append("option ...]");
-    }
+    {
+      usage.append("\nSyntax:");
+      int start = usage.length();
 
-    if (requiredParameters != null) {
-      for (String parameter : requiredParameters) {
-        usage.append(' ');
-        usage.append(toName(parameter));
-      }
-    }
-
-    if (optionalParameters != null) {
-      for (String parameter : optionalParameters) {
-        usage.append(" [");
-        usage.append(toName(parameter));
+      if (haveOptions) {
+        usage.append(" [").append(Option.PREFIX_CHARACTER).append("option ...]");
       }
 
-      for (int i=optionalParameters.size(); i>0; i-=1) {
-        usage.append(']');
+      if (requiredParameters != null) {
+        for (String parameter : requiredParameters) {
+          usage.append(' ').append(toName(parameter));
+        }
       }
+
+      if (optionalParameters != null) {
+        for (String parameter : optionalParameters) {
+          usage.append(" [").append(toName(parameter));
+        }
+
+        for (int i=optionalParameters.size(); i>0; i-=1) {
+          usage.append(']');
+        }
+      }
+
+      if (usage.length() == start) usage.append(" (no arguments)");
     }
 
     if (haveOptions) {
@@ -135,14 +134,10 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
       for (String keyword : programOptions.getKeywords()) {
         Option option = programOptions.get(keyword);
-
-        usage.append("\n  ");
-        usage.append(Option.PREFIX_CHARACTER);
-        usage.append(keyword);
+        usage.append("\n  ").append(Option.PREFIX_CHARACTER).append(keyword);
 
         for (String operand : option.getOperands()) {
-          usage.append(' ');
-          usage.append(toName(operand));
+          usage.append(' ').append(toName(operand));
         }
       }
     }
@@ -151,12 +146,11 @@ public abstract class Program extends ProgramComponent implements Runnable {
       StringBuilder extension = new StringBuilder();
       extendUsageSummary(extension);
 
-      extension.setLength(findTrailingWhitespace(extension));
-      extension.delete(0, findNonemptyLine(extension));
+      extension.setLength(Strings.findTrailingWhitespace(extension));
+      extension.delete(0, Strings.findNonemptyLine(extension));
 
       if (extension.length() > 0) {
-        usage.append("\n\n");
-        usage.append(extension);
+        usage.append("\n\n").append(extension);
       }
     }
 

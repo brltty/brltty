@@ -34,12 +34,12 @@ public abstract class Programs extends ProgramComponent {
     String name = type.getSimpleName();
 
     if (Client.class.isAssignableFrom(type)) {
-      name = name.replaceAll("Client$", "");
+      name = Strings.replaceAll(name, "Client$", "");
     } else {
-      name = name.replaceAll("Program$", "");
+      name = Strings.replaceAll(name, "Program$", "");
     }
 
-    programs.put(toName(wordify(name)), type);
+    programs.put(toName(Strings.wordify(name)), type);
   }
 
   static {
@@ -68,8 +68,7 @@ public abstract class Programs extends ProgramComponent {
         usage.append("These programs and clients have been defined:");
 
         for (String name : programs.getKeywords()) {
-          usage.append("\n  ");
-          usage.append(name);
+          usage.append("\n  ").append(name);
         }
       }
     }

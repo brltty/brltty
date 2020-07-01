@@ -31,8 +31,8 @@ public abstract class Parameter extends ParameterComponent {
   public String getLabel () {
     synchronized (this) {
       if (parameterLabel == null) {
-        parameterLabel = wordify(
-          getClass().getSimpleName().replaceAll("Parameter$", "")
+        parameterLabel = Strings.wordify(
+          Strings.replaceAll(getClass().getSimpleName(), "Parameter$", "")
         );
       }
     }

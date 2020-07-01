@@ -26,8 +26,8 @@ public class SetParameterClient extends Client {
     addRequiredParameters("parameter", "value");
   }
 
-  private String parameterName;
-  private String parameterValue;
+  private String parameterName = null;
+  private String parameterValue = null;
 
   @Override
   protected void processParameters (String[] parameters)
