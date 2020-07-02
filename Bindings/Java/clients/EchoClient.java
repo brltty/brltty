@@ -33,7 +33,7 @@ public class EchoClient extends Client {
 
   public EchoClient (String... arguments) {
     super(arguments);
-    addOptionalParameters("tty(s)");
+    addRepeatingParameter("tty");
 
     addOption("commands",
       (operands) -> {
@@ -54,19 +54,23 @@ public class EchoClient extends Client {
           MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT
         );
       },
-      "sconds"
+      "number of seconds"
     );
   }
 
   @Override
   protected final void extendUsageSummary (StringBuilder usage) {
-    usage.append("The timeout defaults to ");
-    usage.append(DEFAULT_READ_TIMEOUT);
-    usage.append(" and must be within the range ");
-    usage.append(MINIMUM_READ_TIMEOUT);
-    usage.append(" through ");
-    usage.append(MAXIMUM_READ_TIMEOUT);
-    usage.append('.');
+    super.extendUsageSummary(usage);
+
+    usage.append('\n')
+         .append("The timeout defaults to ")
+         .append(DEFAULT_READ_TIMEOUT)
+         .append(" and must be within the range ")
+         .append(MINIMUM_READ_TIMEOUT)
+         .append(" through ")
+         .append(MAXIMUM_READ_TIMEOUT)
+         .append('.')
+         ;
   }
 
   private int[] ttyPath = null;

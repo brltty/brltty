@@ -39,7 +39,7 @@ public abstract class Programs extends ProgramComponent {
       name = Strings.replaceAll(name, "Program$", "");
     }
 
-    programs.put(toName(Strings.wordify(name)), type);
+    programs.put(toOperandName(Strings.wordify(name)), type);
   }
 
   static {
@@ -57,15 +57,17 @@ public abstract class Programs extends ProgramComponent {
     public MainProgram (String... arguments) {
       super(arguments);
       addRequiredParameters("program/client");
-      addOptionalParameters("arguments");
+      addRepeatingParameter("argument");
     }
 
     @Override
     protected final void extendUsageSummary (StringBuilder usage) {
+      super.extendUsageSummary(usage);
+
       if (programs.isEmpty()) {
-        usage.append("No programs or clients have been defined.");
+        usage.append("\nNo programs or clients have been defined.");
       } else {
-        usage.append("These programs and clients have been defined:");
+        usage.append("\nThese programs and clients have been defined:");
 
         for (String name : programs.getKeywords()) {
           usage.append("\n  ").append(name);

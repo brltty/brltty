@@ -40,12 +40,18 @@ public abstract class Program extends ProgramComponent implements Runnable {
       public void handleOption (String[] operands) throws SyntaxException;
     }
 
+    private final String optionName;
     private final Handler optionHandler;
     private final String[] operandDescriptions;
 
-    public Option (Handler handler, String... operands) {
+    public Option (String name, Handler handler, String... operands) {
+      optionName = name;
       optionHandler = handler;
       operandDescriptions = operands;
+    }
+
+    public final String getName () {
+      return optionName;
     }
 
     public final Handler getHandler () {
@@ -63,16 +69,17 @@ public abstract class Program extends ProgramComponent implements Runnable {
   private final String[] programArguments;
   private final KeywordMap<Option> programOptions = new KeywordMap<>();
 
-  protected final void addOption (String keyword, Option.Handler handler, String... operands) {
-    programOptions.put(keyword, new Option(handler, operands));
+  protected final void addOption (String name, Option.Handler handler, String... operands) {
+    programOptions.put(name, new Option(name, handler, operands));
   }
 
   private List<String> requiredParameters = null;
   private List<String> optionalParameters = null;
+  private boolean haveRepeatingParameter = false;
 
   protected final void addRequiredParameters (String... parameters) {
     if (optionalParameters != null) {
-      throw new IllegalStateException("optional parameter(s) already added");
+      throw new IllegalStateException("optional parameters already added");
     }
 
     if (requiredParameters == null) {
@@ -85,6 +92,10 @@ public abstract class Program extends ProgramComponent implements Runnable {
   }
 
   protected final void addOptionalParameters (String... parameters) {
+    if (haveRepeatingParameter) {
+      throw new IllegalStateException("repeating parameter already added");
+    }
+
     if (optionalParameters == null) {
       optionalParameters = new ArrayList<>();
     }
@@ -92,6 +103,11 @@ public abstract class Program extends ProgramComponent implements Runnable {
     for (String parameter : parameters) {
       optionalParameters.add(parameter);
     }
+  }
+
+  protected final void addRepeatingParameter (String parameter) {
+    addOptionalParameters(parameter);
+    haveRepeatingParameter = true;
   }
 
   protected void extendUsageSummary (StringBuilder usage) {
@@ -112,13 +128,17 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
       if (requiredParameters != null) {
         for (String parameter : requiredParameters) {
-          usage.append(' ').append(toName(parameter));
+          usage.append(' ').append(toOperandName(parameter));
         }
       }
 
       if (optionalParameters != null) {
         for (String parameter : optionalParameters) {
-          usage.append(" [").append(toName(parameter));
+          usage.append(" [").append(toOperandName(parameter));
+        }
+
+        if (haveRepeatingParameter) {
+          usage.append(" ...");
         }
 
         for (int i=optionalParameters.size(); i>0; i-=1) {
@@ -132,12 +152,12 @@ public abstract class Program extends ProgramComponent implements Runnable {
     if (haveOptions) {
       usage.append("\n\nThese options may be specified:");
 
-      for (String keyword : programOptions.getKeywords()) {
-        Option option = programOptions.get(keyword);
-        usage.append("\n  ").append(Option.PREFIX_CHARACTER).append(keyword);
+      for (String name : programOptions.getKeywords()) {
+        Option option = programOptions.get(name);
+        usage.append("\n  ").append(Option.PREFIX_CHARACTER).append(name);
 
         for (String operand : option.getOperands()) {
-          usage.append(' ').append(toName(operand));
+          usage.append(' ').append(toOperandName(operand));
         }
       }
     }
@@ -157,18 +177,14 @@ public abstract class Program extends ProgramComponent implements Runnable {
     return usage.toString();
   }
 
-  public final void showUsageSummary () {
-    System.out.println(getUsageSummary());
-    System.exit(0);
-  }
-
   protected Program (String... arguments) {
     super();
     programArguments = arguments;
 
     addOption("help",
       (operands) -> {
-        showUsageSummary();
+        System.out.println(getUsageSummary());
+        System.exit(0);
       }
     );
   }
@@ -197,8 +213,8 @@ public abstract class Program extends ProgramComponent implements Runnable {
         break;
       }
 
-      String keyword = argument.substring(1).toLowerCase();
-      Option option = programOptions.get(keyword);
+      String name = argument.substring(1).toLowerCase();
+      Option option = programOptions.get(name);
 
       if (option == null) {
         throw new SyntaxException("unknown option: %s", argument);
@@ -212,7 +228,10 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
         if (index < operandCount) {
           throw new SyntaxException(
-            "missing %s: %s", operandDescriptions[index], argument
+            "missing %s: %c%s",
+            operandDescriptions[index],
+            Option.PREFIX_CHARACTER,
+            option.getName()
           );
         }
       }

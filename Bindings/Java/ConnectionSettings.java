@@ -20,8 +20,10 @@
 package org.a11y.brlapi;
 
 public class ConnectionSettings {
+  public final static String DEFAULT_SERVER_HOST ="localhost:0";
+
   public ConnectionSettings () {
-    setServerHost("localhost:0");
+    setServerHost(DEFAULT_SERVER_HOST);
   }
 
   private String serverHost;

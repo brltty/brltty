@@ -27,7 +27,7 @@ public abstract class Component {
     System.out.printf(format, arguments);
   }
 
-  public static String toName (String string) {
+  public static String toOperandName (String string) {
     return string.replace(' ', '-').toLowerCase();
   }
 }

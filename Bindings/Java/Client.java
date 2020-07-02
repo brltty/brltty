@@ -49,8 +49,19 @@ public abstract class Client extends Program {
       (operands) -> {
         setAuthorizationSchemes(operands[0]);
       },
-      "authorization scheme(s)"
+      "schemes"
     );
+  }
+
+  @Override
+  protected void extendUsageSummary (StringBuilder usage) {
+    super.extendUsageSummary(usage);
+
+    usage.append('\n')
+         .append("The default server host is ")
+         .append(ConnectionSettings.DEFAULT_SERVER_HOST)
+         .append('.')
+         ;
   }
 
   protected interface ClientTask {

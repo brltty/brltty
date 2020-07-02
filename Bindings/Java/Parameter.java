@@ -44,7 +44,7 @@ public abstract class Parameter extends ParameterComponent {
   public String getName () {
     synchronized (this) {
       if (parameterName == null) {
-        parameterName = toName(getLabel());
+        parameterName = toOperandName(getLabel());
       }
     }
 
