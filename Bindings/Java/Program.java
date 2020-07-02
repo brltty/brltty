@@ -110,6 +110,10 @@ public abstract class Program extends ProgramComponent implements Runnable {
     haveRepeatingParameter = true;
   }
 
+  public final static char USAGE_OPTIONAL_BEGIN = '[';
+  public final static char USAGE_OPTIONAL_END = ']';
+  public final static String USAGE_REPEATING_INDICATOR = "...";
+
   protected void extendUsageSummary (StringBuilder usage) {
   }
 
@@ -123,7 +127,10 @@ public abstract class Program extends ProgramComponent implements Runnable {
       int start = usage.length();
 
       if (haveOptions) {
-        usage.append(" [").append(Option.PREFIX_CHARACTER).append("option ...]");
+        usage.append(' ').append(USAGE_OPTIONAL_BEGIN)
+             .append(Option.PREFIX_CHARACTER).append("option")
+             .append(' ').append(USAGE_REPEATING_INDICATOR)
+             .append(USAGE_OPTIONAL_END);
       }
 
       if (requiredParameters != null) {
@@ -134,15 +141,16 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
       if (optionalParameters != null) {
         for (String parameter : optionalParameters) {
-          usage.append(" [").append(toOperandName(parameter));
+          usage.append(' ').append(USAGE_OPTIONAL_BEGIN)
+               .append(toOperandName(parameter));
         }
 
         if (haveRepeatingParameter) {
-          usage.append(" ...");
+          usage.append(' ').append(USAGE_REPEATING_INDICATOR);
         }
 
         for (int i=optionalParameters.size(); i>0; i-=1) {
-          usage.append(']');
+          usage.append(USAGE_OPTIONAL_END);
         }
       }
 
@@ -166,12 +174,8 @@ public abstract class Program extends ProgramComponent implements Runnable {
       StringBuilder extension = new StringBuilder();
       extendUsageSummary(extension);
 
-      extension.setLength(Strings.findTrailingWhitespace(extension));
-      extension.delete(0, Strings.findNonemptyLine(extension));
-
-      if (extension.length() > 0) {
-        usage.append("\n\n").append(extension);
-      }
+      String text = Strings.formatParagraphs(extension.toString());
+      if (!text.isEmpty()) usage.append("\n\n").append(text);
     }
 
     return usage.toString();

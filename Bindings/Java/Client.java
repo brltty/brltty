@@ -30,8 +30,8 @@ public abstract class Client extends Program {
     return this;
   }
 
-  public final Client setAuthorizationSchemes (String schemes) {
-    connectionSettings.setAuthorizationSchemes(schemes);
+  public final Client setAuthorizationScheme (String scheme) {
+    connectionSettings.setAuthorizationScheme(scheme);
     return this;
   }
 
@@ -47,9 +47,9 @@ public abstract class Client extends Program {
 
     addOption("authorization",
       (operands) -> {
-        setAuthorizationSchemes(operands[0]);
+        setAuthorizationScheme(operands[0]);
       },
-      "schemes"
+      "scheme"
     );
   }
 
@@ -60,7 +60,21 @@ public abstract class Client extends Program {
     usage.append('\n')
          .append("The default server host is ")
          .append(ConnectionSettings.DEFAULT_SERVER_HOST)
-         .append('.')
+         .append(". ")
+         ;
+
+    usage.append('\n')
+         .append("The default authorization scheme is ")
+         .append(ConnectionSettings.DEFAULT_AUTHORIZATION_SCHEME)
+         .append(". ")
+
+         .append("More than one scheme, separated by ")
+         .append(ConnectionSettings.AUTHORIZATION_SCHEME_DELIMITER)
+         .append(", may be specified. ")
+
+         .append("These schemes may be specified:")
+         .append("\n  ").append(ConnectionSettings.AUTHORIZATION_SCHEME_NONE)
+         .append("\n  ").append(ConnectionSettings.AUTHORIZATION_SCHEME_KEYFILE).append(":path")
          ;
   }
 

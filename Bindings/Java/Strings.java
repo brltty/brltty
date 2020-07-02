@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public abstract class Strings {
   private Strings () {
@@ -41,8 +42,12 @@ public abstract class Strings {
     }
   }
 
-  public static String replaceAll (String string, String expression, String replacement) {
-    return getPattern(expression).matcher(string).replaceAll(replacement);
+  public static Matcher getMatcher (String expression, String text) {
+    return getPattern(expression).matcher(text);
+  }
+
+  public static String replaceAll (String text, String expression, String replacement) {
+    return getMatcher(expression, text).replaceAll(replacement);
   }
 
   public static String wordify (String string) {
@@ -81,5 +86,68 @@ public abstract class Strings {
     }
 
     return index + 1;
+  }
+
+  public static String removeTrailingWhitespace (String text) {
+    return text.substring(0, findTrailingWhitespace(text));
+  }
+
+  public static String compressWhitespace (String text) {
+    text = removeTrailingWhitespace(text);
+    if (!text.isEmpty()) text = replaceAll(text, "(?<=\\S)\\s+", " ");
+    return text;
+  }
+
+  public static String compressEmptyLines (String text) {
+    return replaceAll(text, "\n{2,}", "\n\n");
+  }
+
+  public static String formatParagraphs (String text, int width) {
+    StringBuilder result = new StringBuilder();
+
+    int length = text.length();
+    int from = 0;
+
+    while (from < length) {
+      int to = text.indexOf('\n', from);
+      if (to < 0) to = length;
+      String line = compressWhitespace(text.substring(from, to));
+
+      if (!line.isEmpty()) {
+        if (Character.isWhitespace(line.charAt(0))) {
+          result.append(line);
+        } else {
+          if (result.length() > 0) result.append('\n');
+
+          while (line.length() > width) {
+            int end;
+
+            if (Character.isWhitespace(line.charAt(width))) {
+              end = width;
+            } else if ((end = line.lastIndexOf(' ', width)) < 0) {
+              end = line.indexOf(' ', width);
+              if (end < 0) break;
+            }
+
+            result.append(line.substring(0, end)).append('\n');
+            line = line.substring(end+1);
+          }
+
+          result.append(line);
+        }
+      }
+
+      result.append('\n');
+      from = to + 1;
+    }
+
+    result.setLength(findTrailingWhitespace(result));
+    result.delete(0, findNonemptyLine(result));
+
+    return compressEmptyLines(result.toString());
+  }
+
+  public static String formatParagraphs (String text) {
+    return formatParagraphs(text, 72);
   }
 }

@@ -315,7 +315,7 @@ JAVA_INSTANCE_METHOD(
       GET_CLASS(env, class, jRequestedSettings, -1);
 
       {
-        FIND_FIELD(env, field, class, "authorizationSchemes", JAVA_SIG_STRING, -1);
+        FIND_FIELD(env, field, class, "authorizationScheme", JAVA_SIG_STRING, -1);
 
         if (!(jRequestedAuth = JAVA_GET_FIELD(env, Object, jRequestedSettings, field))) {
           cRequestedSettings.auth = NULL;
@@ -370,7 +370,7 @@ JAVA_INSTANCE_METHOD(
       jstring auth = (*env)->NewStringUTF(env, cActualSettings.auth);
       if (!auth) return -1;
 
-      FIND_FIELD(env, field, class, "authorizationSchemes", JAVA_SIG_STRING, -1);
+      FIND_FIELD(env, field, class, "authorizationScheme", JAVA_SIG_STRING, -1);
       JAVA_SET_FIELD(env, Object, jActualSettings, field, auth);
     }
 

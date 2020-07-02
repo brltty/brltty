@@ -20,14 +20,18 @@
 package org.a11y.brlapi;
 
 public class ConnectionSettings {
-  public final static String DEFAULT_SERVER_HOST ="localhost:0";
-
   public ConnectionSettings () {
-    setServerHost(DEFAULT_SERVER_HOST);
   }
 
-  private String serverHost;
-  private String authorizationSchemes;
+  public final static char AUTHORIZATION_SCHEME_DELIMITER = '+';
+  public final static String AUTHORIZATION_SCHEME_NONE = "none";
+  public final static String AUTHORIZATION_SCHEME_KEYFILE = "keyfile";
+
+  public final static String DEFAULT_SERVER_HOST = "localhost:0";
+  public final static String DEFAULT_AUTHORIZATION_SCHEME = AUTHORIZATION_SCHEME_NONE;
+
+  private String serverHost = DEFAULT_SERVER_HOST;
+  private String authorizationScheme = DEFAULT_AUTHORIZATION_SCHEME;
 
   public final String getServerHost () {
     return serverHost;
@@ -38,12 +42,19 @@ public class ConnectionSettings {
     return this;
   }
 
-  public final String getAuthorizationSchemes () {
-    return authorizationSchemes;
+  public final String getAuthorizationScheme () {
+    return authorizationScheme;
   }
 
-  public final ConnectionSettings setAuthorizationSchemes (String schemes) {
-    authorizationSchemes = schemes;
+  public final ConnectionSettings setAuthorizationScheme (String scheme) {
+    authorizationScheme = scheme;
     return this;
+  }
+
+  @Override
+  public String toString () {
+    return String.format(
+      "Server:%s Scheme:%s", serverHost, authorizationScheme
+    );
   }
 }
