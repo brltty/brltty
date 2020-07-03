@@ -20,25 +20,72 @@
 package org.a11y.brlapi;
 
 public class ConnectionSettings {
-  public ConnectionSettings () {
+  public final static char HOST_PORT_SEPARATOR = ':';
+  public final static String DEFAULT_HOST_NAME = "localhost";
+
+  public final static int MINIMUM_PORT_NUMBER =  0;
+  public final static int MAXIMUM_PORT_NUMBER = 99;
+  public final static int DEFAULT_PORT_NUMBER = MINIMUM_PORT_NUMBER;
+
+  public final static String DEFAULT_SERVER_HOST =
+    DEFAULT_HOST_NAME + HOST_PORT_SEPARATOR + DEFAULT_PORT_NUMBER;
+
+  private String serverHost = null;
+
+  public static void checkHostSpecification (String specification) {
+    int index = specification.indexOf(HOST_PORT_SEPARATOR);
+
+    if (index == 0) {
+      throw new IllegalArgumentException("missing host name/address");
+    }
+
+    if (index < 0) {
+      specification = String.format(
+        "%s%c%s", specification, HOST_PORT_SEPARATOR, DEFAULT_PORT_NUMBER
+      );
+    } else {
+      String number = specification.substring(index+1);
+
+      if (number.isEmpty()) {
+        throw new IllegalArgumentException("missing port number");
+      }
+
+      try {
+        Parse.asInt(
+          "port number", number,
+          MINIMUM_PORT_NUMBER, MAXIMUM_PORT_NUMBER
+        );
+      } catch (SyntaxException exception) {
+        throw new IllegalArgumentException(exception.getMessage());
+      }
+    }
   }
 
-  public final static char AUTHORIZATION_SCHEME_DELIMITER = '+';
-  public final static String AUTHORIZATION_SCHEME_NONE = "none";
-  public final static String AUTHORIZATION_SCHEME_KEYFILE = "keyfile";
-
-  public final static String DEFAULT_SERVER_HOST = "localhost:0";
-  public final static String DEFAULT_AUTHORIZATION_SCHEME = AUTHORIZATION_SCHEME_NONE;
-
-  private String serverHost = DEFAULT_SERVER_HOST;
-  private String authorizationScheme = DEFAULT_AUTHORIZATION_SCHEME;
+  public final ConnectionSettings setServerHost (String specification) {
+    checkHostSpecification(specification);
+    serverHost = specification;
+    return this;
+  }
 
   public final String getServerHost () {
     return serverHost;
   }
 
-  public final ConnectionSettings setServerHost (String host) {
-    serverHost = host;
+  public final static char AUTHORIZATION_SCHEME_SEPARATOR = '+';
+  public final static char AUTHORIZATION_OPERAND_PREFIX = ':';
+
+  public final static String AUTHORIZATION_SCHEME_NONE = "none";
+  public final static String AUTHORIZATION_SCHEME_KEYFILE = "keyfile";
+
+  public final static String DEFAULT_AUTHORIZATION_SCHEME = AUTHORIZATION_SCHEME_NONE;
+  private String authorizationScheme = null;
+
+  public static void checkAuthorizationScheme (String scheme) {
+  }
+
+  public final ConnectionSettings setAuthorizationScheme (String scheme) {
+    checkAuthorizationScheme(scheme);
+    authorizationScheme = scheme;
     return this;
   }
 
@@ -46,9 +93,9 @@ public class ConnectionSettings {
     return authorizationScheme;
   }
 
-  public final ConnectionSettings setAuthorizationScheme (String scheme) {
-    authorizationScheme = scheme;
-    return this;
+  public ConnectionSettings () {
+    setServerHost(DEFAULT_SERVER_HOST);
+    setAuthorizationScheme(DEFAULT_AUTHORIZATION_SCHEME);
   }
 
   @Override

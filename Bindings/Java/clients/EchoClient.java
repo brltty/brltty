@@ -63,13 +63,14 @@ public class EchoClient extends Client {
     super.extendUsageSummary(usage);
 
     usage.append('\n')
-         .append("The timeout defaults to ")
+         .append("The read timeout must be an integer number of seconds")
+         .append(" within the range ").append(MINIMUM_READ_TIMEOUT)
+         .append(" through ").append(MAXIMUM_READ_TIMEOUT)
+         .append(". ")
+
+         .append("If not specified, ")
          .append(DEFAULT_READ_TIMEOUT)
-         .append(" and must be within the range ")
-         .append(MINIMUM_READ_TIMEOUT)
-         .append(" through ")
-         .append(MAXIMUM_READ_TIMEOUT)
-         .append('.')
+         .append(" is assumed. ")
          ;
   }
 

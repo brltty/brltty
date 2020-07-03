@@ -187,7 +187,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
     addOption("help",
       (operands) -> {
-        System.out.println(getUsageSummary());
+        printf("%s\n", getUsageSummary());
         System.exit(0);
       }
     );

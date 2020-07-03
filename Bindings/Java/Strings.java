@@ -114,17 +114,13 @@ public abstract class Strings {
       String line = compressWhitespace(text.substring(from, to));
 
       if (!line.isEmpty()) {
-        if (Character.isWhitespace(line.charAt(0))) {
-          result.append(line);
-        } else {
+        if (!Character.isWhitespace(line.charAt(0))) {
           if (result.length() > 0) result.append('\n');
 
           while (line.length() > width) {
-            int end;
+            int end = line.lastIndexOf(' ', width);
 
-            if (Character.isWhitespace(line.charAt(width))) {
-              end = width;
-            } else if ((end = line.lastIndexOf(' ', width)) < 0) {
+            if (end < 0) {
               end = line.indexOf(' ', width);
               if (end < 0) break;
             }
@@ -132,9 +128,9 @@ public abstract class Strings {
             result.append(line.substring(0, end)).append('\n');
             line = line.substring(end+1);
           }
-
-          result.append(line);
         }
+
+        result.append(line);
       }
 
       result.append('\n');

@@ -25,13 +25,23 @@ public abstract class Client extends Program {
 
   private final ConnectionSettings connectionSettings = new ConnectionSettings();
 
-  public final Client setServerHost (String host) {
-    connectionSettings.setServerHost(host);
+  public final Client setServerHost (String host) throws SyntaxException {
+    try {
+      connectionSettings.setServerHost(host);
+    } catch (IllegalArgumentException exception) {
+      throw new SyntaxException(exception.getMessage());
+    }
+
     return this;
   }
 
-  public final Client setAuthorizationScheme (String scheme) {
-    connectionSettings.setAuthorizationScheme(scheme);
+  public final Client setAuthorizationScheme (String scheme) throws SyntaxException {
+    try {
+      connectionSettings.setAuthorizationScheme(scheme);
+    } catch (IllegalArgumentException exception) {
+      throw new SyntaxException(exception.getMessage());
+    }
+
     return this;
   }
 
@@ -61,6 +71,24 @@ public abstract class Client extends Program {
          .append("The default server host is ")
          .append(ConnectionSettings.DEFAULT_SERVER_HOST)
          .append(". ")
+
+         .append("The format of a host specification is host")
+         .append(USAGE_OPTIONAL_BEGIN)
+         .append(ConnectionSettings.HOST_PORT_SEPARATOR).append("port")
+         .append(USAGE_OPTIONAL_END)
+         .append(". ")
+
+         .append("The host component may be either a host name or an IPV4 address. ")
+
+         .append("The port component must be an integer within the range ")
+         .append(ConnectionSettings.MINIMUM_PORT_NUMBER)
+         .append(" through ")
+         .append(ConnectionSettings.MAXIMUM_PORT_NUMBER)
+         .append(". ")
+
+         .append("It's optional - if not specified, ")
+         .append(ConnectionSettings.DEFAULT_PORT_NUMBER)
+         .append(" is assumed. ")
          ;
 
     usage.append('\n')
@@ -69,12 +97,13 @@ public abstract class Client extends Program {
          .append(". ")
 
          .append("More than one scheme, separated by ")
-         .append(ConnectionSettings.AUTHORIZATION_SCHEME_DELIMITER)
+         .append(ConnectionSettings.AUTHORIZATION_SCHEME_SEPARATOR)
          .append(", may be specified. ")
 
          .append("These schemes may be specified:")
          .append("\n  ").append(ConnectionSettings.AUTHORIZATION_SCHEME_NONE)
-         .append("\n  ").append(ConnectionSettings.AUTHORIZATION_SCHEME_KEYFILE).append(":path")
+         .append("\n  ").append(ConnectionSettings.AUTHORIZATION_SCHEME_KEYFILE)
+         .append(ConnectionSettings.AUTHORIZATION_OPERAND_PREFIX).append("path")
          ;
   }
 
