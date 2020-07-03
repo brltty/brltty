@@ -33,12 +33,7 @@ public abstract class Strings {
 
   public static Pattern getPattern (String expression) {
     synchronized (patternCache) {
-      Pattern pattern = patternCache.get(expression);
-      if (pattern != null) return pattern;
-
-      pattern = Pattern.compile(expression);
-      patternCache.put(expression, pattern);
-      return pattern;
+      return patternCache.computeIfAbsent(expression, Pattern::compile);
     }
   }
 
