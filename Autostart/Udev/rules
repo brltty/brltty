@@ -268,6 +268,10 @@ ENV{PRODUCT}=="904/6102/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_ru
 # Baum [VarioUltra 32 (32 cells)]
 ENV{PRODUCT}=="904/6103/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
 
+# Device: 0904:6201
+# Baum [Vario 340 (40 cells)]
+ENV{PRODUCT}=="904/6201/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
 # Device: 0921:1200
 # HandyTech [GoHubs chip]
 ENV{PRODUCT}=="921/1200/*", ENV{BRLTTY_BRAILLE_DRIVER}="ht", GOTO="brltty_usb_run"

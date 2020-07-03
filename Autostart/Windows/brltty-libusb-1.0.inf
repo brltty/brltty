@@ -210,6 +210,9 @@ HKR,,Icon,,-20
 ; Device: 0904:6103
 "LibUSB-1.0: Baum [VarioUltra 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6103
 
+; Device: 0904:6201
+"LibUSB-1.0: Baum [Vario 340 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6201
+
 ; Device: 0921:1200
 "LibUSB-1.0: HandyTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200
 
@@ -559,6 +562,9 @@ HKR,,Icon,,-20
 
 ; Device: 0904:6103
 "LibUSB-1.0: Baum [VarioUltra 32 (32 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6103
+
+; Device: 0904:6201
+"LibUSB-1.0: Baum [Vario 340 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_6201
 
 ; Device: 0921:1200
 "LibUSB-1.0: HandyTech [GoHubs chip]"=LIBUSB_DEV, USB\VID_0921&PID_1200

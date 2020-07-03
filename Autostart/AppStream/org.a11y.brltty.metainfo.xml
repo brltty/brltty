@@ -269,6 +269,10 @@
     <!-- Baum [VarioUltra 32 (32 cells)] -->
     <modalias>usb:v0904p6103*</modalias>
 
+    <!-- Device: 0904:6201 -->
+    <!-- Baum [Vario 340 (40 cells)] -->
+    <modalias>usb:v0904p6201*</modalias>
+
     <!-- Device: 0921:1200 -->
     <!-- HandyTech [GoHubs chip] -->
     <modalias>usb:v0921p1200*</modalias>

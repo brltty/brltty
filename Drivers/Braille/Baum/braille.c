@@ -3185,6 +3185,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid2Operations
     },
+
+    { /* Vario 340 (40 cells) */
+      .vendor=0X0904, .product=0X6201,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&baumHid2Operations
+    },
   END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;

@@ -258,6 +258,10 @@ USB_DEVICE_ENTRY(0X0904, 0X6102, "bm"),
 // Baum [VarioUltra 32 (32 cells)]
 USB_DEVICE_ENTRY(0X0904, 0X6103, "bm"),
 
+// Device: 0904:6201
+// Baum [Vario 340 (40 cells)]
+USB_DEVICE_ENTRY(0X0904, 0X6201, "bm"),
+
 // Device: 0921:1200
 // HandyTech [GoHubs chip]
 USB_DEVICE_ENTRY(0X0921, 0X1200, "ht"),
