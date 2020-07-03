@@ -134,7 +134,7 @@ public abstract class Programs extends ProgramComponent {
     }
   }
 
-  public static void main (String arguments[]) {
+  public static void main (String[] arguments) {
     new MainProgram(arguments).run();
   }
 }
