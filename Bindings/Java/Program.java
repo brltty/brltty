@@ -188,7 +188,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
     addOption("help",
       (operands) -> {
         printf("%s\n", getUsageSummary());
-        System.exit(0);
+        throw new ExitException(EXIT_CODE_SUCCESS);
       }
     );
   }
@@ -258,14 +258,14 @@ public abstract class Program extends ProgramComponent implements Runnable {
     int exitCode;
 
     if (exception instanceof SyntaxException) {
-      exitCode = 2;
+      exitCode = EXIT_CODE_SYNTAX;
     } else if (exception instanceof SemanticException) {
-      exitCode = 3;
+      exitCode = EXIT_CODE_SEMANTIC;
     } else {
-      exitCode = 4;
+      exitCode = EXIT_CODE_INTERNAL;
     }
 
-    System.exit(exitCode);
+    throw new ExitException(exitCode);
   }
 
   @Override

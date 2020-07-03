@@ -19,13 +19,15 @@
 
 package org.a11y.brlapi;
 
-public abstract class ProgramComponent extends Component {
-  protected ProgramComponent () {
-    super();
+public class ExitException extends RuntimeException {
+  private final int exitCode;
+
+  public ExitException (int code) {
+    super(Integer.toString(code));
+    exitCode = code;
   }
 
-  public final static int EXIT_CODE_SUCCESS  = 0;
-  public final static int EXIT_CODE_SYNTAX   = 2;
-  public final static int EXIT_CODE_SEMANTIC = 3;
-  public final static int EXIT_CODE_INTERNAL = 4;
+  public final int getExitCode () {
+    return exitCode;
+  }
 }
