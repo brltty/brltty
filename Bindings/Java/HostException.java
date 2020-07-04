@@ -19,22 +19,15 @@
 
 package org.a11y.brlapi;
 
-public abstract class ProgramComponent extends Component {
-  protected ProgramComponent () {
-    super();
+public class HostException extends ConnectException {
+  private final String serverHost;
+
+  public HostException (String host, String cause) {
+    super("%s: %s", cause, host);
+    serverHost = host;
   }
 
-  public static boolean isClient (Class <? extends Program> type) {
-    return Client.class.isAssignableFrom(type);
+  public final String getHost () {
+    return serverHost;
   }
-
-  public static boolean isClient (Program program) {
-    return isClient(program.getClass());
-  }
-
-  public final static int EXIT_CODE_SUCCESS  = 0;
-  public final static int EXIT_CODE_SYNTAX   = 2;
-  public final static int EXIT_CODE_SEMANTIC = 3;
-  public final static int EXIT_CODE_EXTERNAL = 8;
-  public final static int EXIT_CODE_INTERNAL = 9;
 }

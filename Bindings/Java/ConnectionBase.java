@@ -26,14 +26,13 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
   private long connectionHandle;
 
   private native int openConnection (
-    ConnectionSettings desiredSettings,
-    ConnectionSettings actualSettings
-  );
+    ConnectionSettings desiredSettings, ConnectionSettings actualSettings
+  ) throws ConnectException;
 
   protected final ConnectionSettings connectionSettings;
   protected final int fileDescriptor;
 
-  public ConnectionBase (ConnectionSettings settings) {
+  public ConnectionBase (ConnectionSettings settings) throws ConnectException {
     super();
     connectionSettings = new ConnectionSettings();
     fileDescriptor = openConnection(settings, connectionSettings);

@@ -20,7 +20,7 @@
 package org.a11y.brlapi;
 
 public class Connection extends ConnectionBase {
-  public Connection (ConnectionSettings settings) {
+  public Connection (ConnectionSettings settings) throws ConnectException {
     super(settings);
   }
 

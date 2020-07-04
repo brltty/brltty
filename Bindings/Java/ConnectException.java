@@ -19,22 +19,8 @@
 
 package org.a11y.brlapi;
 
-public abstract class ProgramComponent extends Component {
-  protected ProgramComponent () {
-    super();
+public class ConnectException extends ExternalException {
+  public ConnectException (String format, Object... arguments) {
+    super(format, arguments);
   }
-
-  public static boolean isClient (Class <? extends Program> type) {
-    return Client.class.isAssignableFrom(type);
-  }
-
-  public static boolean isClient (Program program) {
-    return isClient(program.getClass());
-  }
-
-  public final static int EXIT_CODE_SUCCESS  = 0;
-  public final static int EXIT_CODE_SYNTAX   = 2;
-  public final static int EXIT_CODE_SEMANTIC = 3;
-  public final static int EXIT_CODE_EXTERNAL = 8;
-  public final static int EXIT_CODE_INTERNAL = 9;
 }

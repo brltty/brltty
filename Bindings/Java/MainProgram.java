@@ -25,18 +25,19 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public class MainProgram extends Program {
-  private final static KeywordMap<Class<? extends Program>> programs = new KeywordMap<>();
+  private final static KeywordMap<Class<? extends Program>> knownPrograms =
+                   new KeywordMap<>();
 
   private static void addProgram (Class<? extends Program> type) {
     String name = type.getSimpleName();
 
-    if (Client.class.isAssignableFrom(type)) {
+    if (isClient(type)) {
       name = Strings.replaceAll(name, "Client$", "");
     } else {
       name = Strings.replaceAll(name, "Program$", "");
     }
 
-    programs.put(toOperandName(Strings.wordify(name)), type);
+    knownPrograms.put(toOperandName(Strings.wordify(name)), type);
   }
 
   static {
@@ -60,12 +61,12 @@ public class MainProgram extends Program {
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    if (programs.isEmpty()) {
+    if (knownPrograms.isEmpty()) {
       usage.append("\nNo programs or clients have been defined.");
     } else {
       usage.append("\nThese programs and clients have been defined:");
 
-      for (String name : programs.getKeywords()) {
+      for (String name : knownPrograms.getKeywords()) {
         usage.append("\n  ").append(name);
       }
     }
@@ -86,7 +87,7 @@ public class MainProgram extends Program {
     }
 
     programName = parameters[0];
-    programType = programs.get(programName);
+    programType = knownPrograms.get(programName);
 
     if (programType == null) {
       throw new SyntaxException("unknown program/client: %s", programName);
@@ -99,7 +100,7 @@ public class MainProgram extends Program {
 
   @Override
   protected final void runProgram () throws ProgramException {
-    String term = Client.class.isAssignableFrom(programType)? "client": "program";
+    String term = isClient(programType)? "client": "program";
     Program program = null;
 
     try {

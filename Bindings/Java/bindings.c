@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <netdb.h>
 #include <pthread.h>
 
 #include "bindings.h"
@@ -166,7 +167,11 @@ throwConnectionError (JNIEnv *env) {
     const char *object = NULL;
 
     switch (brlapi_errno) {
-      case BRLAPI_ERROR_LIBCERR:
+      case BRLAPI_ERROR_NOMEM:
+        object = JAVA_OBJ_OUT_OF_MEMORY_ERROR;
+        break;
+
+      case BRLAPI_ERROR_LIBCERR: {
         switch (brlapi_libcerrno) {
           case EINTR:
             object = JAVA_OBJ_INTERRUPTED_IO_EXCEPTION;
@@ -174,6 +179,7 @@ throwConnectionError (JNIEnv *env) {
         }
 
         break;
+      }
     }
 
     if (object) {
@@ -211,6 +217,73 @@ throwConnectionError (JNIEnv *env) {
     (*env)->Throw(env, object);
   } else if (jFunction) {
     (*env)->ReleaseStringUTFChars(env, jFunction, brlapi_errfun);
+  }
+}
+
+static void
+throwOpenConnectionError (JNIEnv *env, const brlapi_connectionSettings_t *settings) {
+  if (0) {
+    fprintf(stderr,
+      "Open Connection Failure: API:%d Libc:%d GAI:%d\n", 
+      brlapi_errno, brlapi_libcerrno, brlapi_gaierrno
+    );
+  }
+
+  const char *object = NULL;
+  const char *message = NULL;
+
+  const char *host = NULL;
+  const char *auth = NULL;
+
+  if (settings) {
+    host = settings->host;
+    auth = settings->auth;
+  }
+
+  switch (brlapi_errno) {
+    case BRLAPI_ERROR_CONNREFUSED:
+      object = BRLAPI_OBJECT("UnavailableServiceException");
+      message = host;
+      break;
+
+    case BRLAPI_ERROR_AUTHENTICATION:
+      object = BRLAPI_OBJECT("AuthorizationException");
+      message = auth;
+      break;
+
+    case BRLAPI_ERROR_GAIERR: {
+      switch (brlapi_gaierrno) {
+        case EAI_SYSTEM:
+          goto SYSTEM_ERROR;
+
+        case EAI_MEMORY:
+          object = JAVA_OBJ_OUT_OF_MEMORY_ERROR;
+          break;
+
+        case EAI_NODATA:
+        case EAI_NONAME:
+          object = BRLAPI_OBJECT("UnknownHostException");
+          message = host;
+          break;
+      }
+
+      break;
+    }
+
+    SYSTEM_ERROR:
+    case BRLAPI_ERROR_LIBCERR: {
+      switch (brlapi_libcerrno) {
+      }
+
+      break;
+    }
+  }
+
+  if (object) {
+    if (!message) message = "";
+    throwJavaError(env, object, message);
+  } else {
+    throwConnectionError(env);
   }
 }
 
@@ -348,7 +421,7 @@ JAVA_INSTANCE_METHOD(
 
     if ((fileDescriptor = brlapi__openConnection(handle, pRequestedSettings, pActualSettings)) < 0) {
       free(handle);
-      throwConnectionError(env);
+      throwOpenConnectionError(env, pRequestedSettings);
       return -1;
     }
 

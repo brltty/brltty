@@ -25,6 +25,10 @@ import java.util.ArrayList;
 public abstract class Program extends ProgramComponent implements Runnable {
   protected abstract void runProgram () throws ProgramException;
 
+  public final boolean isClient () {
+    return isClient(this);
+  }
+
   public final String getName () {
     return getClass().getSimpleName();
   }
@@ -261,6 +265,8 @@ public abstract class Program extends ProgramComponent implements Runnable {
       exitCode = EXIT_CODE_SYNTAX;
     } else if (exception instanceof SemanticException) {
       exitCode = EXIT_CODE_SEMANTIC;
+    } else if (exception instanceof ExternalException) {
+      exitCode = EXIT_CODE_EXTERNAL;
     } else {
       exitCode = EXIT_CODE_INTERNAL;
     }
