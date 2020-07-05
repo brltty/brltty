@@ -257,7 +257,7 @@ throwOpenConnectionError (JNIEnv *env, const brlapi_connectionSettings_t *settin
       break;
 
     case BRLAPI_ERROR_AUTHENTICATION:
-      object = BRLAPI_OBJECT("AuthorizationException");
+      object = BRLAPI_OBJECT("AuthenticationException");
       message = auth;
       break;
 
@@ -398,7 +398,7 @@ JAVA_INSTANCE_METHOD(
       GET_CLASS(env, class, jRequestedSettings, -1);
 
       {
-        FIND_FIELD(env, field, class, "authorizationScheme", JAVA_SIG_STRING, -1);
+        FIND_FIELD(env, field, class, "authenticationScheme", JAVA_SIG_STRING, -1);
 
         if (!(jRequestedAuth = JAVA_GET_FIELD(env, Object, jRequestedSettings, field))) {
           cRequestedSettings.auth = NULL;
@@ -453,7 +453,7 @@ JAVA_INSTANCE_METHOD(
       jstring auth = (*env)->NewStringUTF(env, cActualSettings.auth);
       if (!auth) return -1;
 
-      FIND_FIELD(env, field, class, "authorizationScheme", JAVA_SIG_STRING, -1);
+      FIND_FIELD(env, field, class, "authenticationScheme", JAVA_SIG_STRING, -1);
       JAVA_SET_FIELD(env, Object, jActualSettings, field, auth);
     }
 

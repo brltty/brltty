@@ -19,15 +19,15 @@
 
 package org.a11y.brlapi;
 
-public class AuthorizationException extends ConnectException {
-  private final String authorizationScheme;
+public class AuthenticationException extends ConnectException {
+  private final String authenticationScheme;
 
-  public AuthorizationException (String scheme) {
-    super("authorization failed: %s", scheme);
-    authorizationScheme = scheme;
+  public AuthenticationException (String scheme) {
+    super("authentication failed: %s", scheme);
+    authenticationScheme = scheme;
   }
 
   public final String getScheme () {
-    return authorizationScheme;
+    return authenticationScheme;
   }
 }

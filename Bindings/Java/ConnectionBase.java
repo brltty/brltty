@@ -43,8 +43,8 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
     return connectionSettings.getServerHost();
   }
 
-  public final String getAuthorizationScheme () {
-    return connectionSettings.getAuthorizationScheme();
+  public final String getAuthenticationScheme () {
+    return connectionSettings.getAuthenticationScheme();
   }
 
   public final int getFileDescriptor () {

@@ -35,9 +35,9 @@ public abstract class Client extends Program {
     return this;
   }
 
-  public final Client setAuthorizationScheme (String scheme) throws SyntaxException {
+  public final Client setAuthenticationScheme (String scheme) throws SyntaxException {
     try {
-      connectionSettings.setAuthorizationScheme(scheme);
+      connectionSettings.setAuthenticationScheme(scheme);
     } catch (IllegalArgumentException exception) {
       throw new SyntaxException(exception.getMessage());
     }
@@ -55,9 +55,9 @@ public abstract class Client extends Program {
       "host specification"
     );
 
-    addOption("authorization",
+    addOption("authentication",
       (operands) -> {
-        setAuthorizationScheme(operands[0]);
+        setAuthenticationScheme(operands[0]);
       },
       "scheme"
     );
@@ -92,18 +92,18 @@ public abstract class Client extends Program {
          ;
 
     usage.append('\n')
-         .append("The default authorization scheme is ")
-         .append(ConnectionSettings.DEFAULT_AUTHORIZATION_SCHEME)
+         .append("The default authentication scheme is ")
+         .append(ConnectionSettings.DEFAULT_AUTHENTICATION_SCHEME)
          .append(". ")
 
          .append("More than one scheme, separated by ")
-         .append(ConnectionSettings.AUTHORIZATION_SCHEME_SEPARATOR)
+         .append(ConnectionSettings.AUTHENTICATION_SCHEME_SEPARATOR)
          .append(", may be specified. ")
 
          .append("These schemes may be specified:")
-         .append("\n  ").append(ConnectionSettings.AUTHORIZATION_SCHEME_NONE)
-         .append("\n  ").append(ConnectionSettings.AUTHORIZATION_SCHEME_KEYFILE)
-         .append(ConnectionSettings.AUTHORIZATION_OPERAND_PREFIX).append("path")
+         .append("\n  ").append(ConnectionSettings.AUTHENTICATION_SCHEME_NONE)
+         .append("\n  ").append(ConnectionSettings.AUTHENTICATION_SCHEME_KEYFILE)
+         .append(ConnectionSettings.AUTHENTICATION_OPERAND_PREFIX).append("path")
          ;
   }
 

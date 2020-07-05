@@ -71,37 +71,37 @@ public class ConnectionSettings {
     return serverHost;
   }
 
-  public final static char AUTHORIZATION_SCHEME_SEPARATOR = '+';
-  public final static char AUTHORIZATION_OPERAND_PREFIX = ':';
+  public final static char AUTHENTICATION_SCHEME_SEPARATOR = '+';
+  public final static char AUTHENTICATION_OPERAND_PREFIX = ':';
 
-  public final static String AUTHORIZATION_SCHEME_NONE = "none";
-  public final static String AUTHORIZATION_SCHEME_KEYFILE = "keyfile";
+  public final static String AUTHENTICATION_SCHEME_NONE = "none";
+  public final static String AUTHENTICATION_SCHEME_KEYFILE = "keyfile";
 
-  public final static String DEFAULT_AUTHORIZATION_SCHEME = AUTHORIZATION_SCHEME_NONE;
-  private String authorizationScheme = null;
+  public final static String DEFAULT_AUTHENTICATION_SCHEME = AUTHENTICATION_SCHEME_NONE;
+  private String authenticationScheme = null;
 
-  public static void checkAuthorizationScheme (String scheme) {
+  public static void checkAuthenticationScheme (String scheme) {
   }
 
-  public final ConnectionSettings setAuthorizationScheme (String scheme) {
-    checkAuthorizationScheme(scheme);
-    authorizationScheme = scheme;
+  public final ConnectionSettings setAuthenticationScheme (String scheme) {
+    checkAuthenticationScheme(scheme);
+    authenticationScheme = scheme;
     return this;
   }
 
-  public final String getAuthorizationScheme () {
-    return authorizationScheme;
+  public final String getAuthenticationScheme () {
+    return authenticationScheme;
   }
 
   public ConnectionSettings () {
     setServerHost(DEFAULT_SERVER_HOST);
-    setAuthorizationScheme(DEFAULT_AUTHORIZATION_SCHEME);
+    setAuthenticationScheme(DEFAULT_AUTHENTICATION_SCHEME);
   }
 
   @Override
   public String toString () {
     return String.format(
-      "Server:%s Scheme:%s", serverHost, authorizationScheme
+      "Server:%s Scheme:%s", serverHost, authenticationScheme
     );
   }
 }
