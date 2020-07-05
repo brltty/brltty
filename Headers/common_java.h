@@ -56,6 +56,7 @@ extern "C" {
 #define JAVA_OBJ_CONCURRENT(name) JAVA_OBJ_UTIL("concurrent/" name)
 
 #define JAVA_OBJ_CLASS JAVA_OBJ_LANG("Class")
+#define JAVA_OBJ_EOF_EXCEPTION JAVA_OBJ_IO("EOFException")
 #define JAVA_OBJ_ILLEGAL_ARGUMENT_EXCEPTION JAVA_OBJ_LANG("IllegalArgumentException")
 #define JAVA_OBJ_ILLEGAL_STATE_EXCEPTION JAVA_OBJ_LANG("IllegalStateException")
 #define JAVA_OBJ_INTERRUPTED_IO_EXCEPTION JAVA_OBJ_IO("InterruptedIOException")

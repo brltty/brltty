@@ -19,6 +19,7 @@
 
 package org.a11y.brlapi;
 
+import java.io.EOFException;
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
@@ -80,7 +81,7 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
   public native void write (WriteArguments arguments);
 
   public native long readKey (boolean wait)
-         throws InterruptedIOException;
+         throws EOFException, InterruptedIOException;
 
   public native long readKeyWithTimeout (int milliseconds)
          throws InterruptedIOException, TimeoutException;

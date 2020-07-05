@@ -151,7 +151,7 @@ getJavaEnvironment (brlapi_handle_t *handle) {
 
 static void
 throwJavaError (JNIEnv *env, const char *object, const char *message) {
-  (*env)->ExceptionClear(env);
+  if ((*env)->ExceptionCheck(env)) return;
   jclass class = (*env)->FindClass(env, object);
 
   if (class) {
@@ -162,13 +162,29 @@ throwJavaError (JNIEnv *env, const char *object, const char *message) {
 }
 
 static void
+logBrlapiError (const char *label) {
+  fprintf(stderr,
+    "%s: API=%d Libc=%d GAI=%d: %s\n",
+    label, brlapi_errno, brlapi_libcerrno, brlapi_gaierrno,
+    brlapi_strerror(&brlapi_error)
+  );
+}
+
+static void
 throwConnectionError (JNIEnv *env) {
+  if (0) logBrlapiError("Connection Error");
+  if ((*env)->ExceptionCheck(env)) return;
+
   {
     const char *object = NULL;
 
     switch (brlapi_errno) {
       case BRLAPI_ERROR_NOMEM:
         object = JAVA_OBJ_OUT_OF_MEMORY_ERROR;
+        break;
+
+      case BRLAPI_ERROR_EOF:
+        object = JAVA_OBJ_EOF_EXCEPTION;
         break;
 
       case BRLAPI_ERROR_LIBCERR: {
@@ -213,7 +229,6 @@ throwConnectionError (JNIEnv *env) {
   );
 
   if (object) {
-    (*env)->ExceptionClear(env);
     (*env)->Throw(env, object);
   } else if (jFunction) {
     (*env)->ReleaseStringUTFChars(env, jFunction, brlapi_errfun);
@@ -222,12 +237,7 @@ throwConnectionError (JNIEnv *env) {
 
 static void
 throwOpenConnectionError (JNIEnv *env, const brlapi_connectionSettings_t *settings) {
-  if (0) {
-    fprintf(stderr,
-      "Open Connection Failure: API:%d Libc:%d GAI:%d\n", 
-      brlapi_errno, brlapi_libcerrno, brlapi_gaierrno
-    );
-  }
+  if (0) logBrlapiError("Connect Error");
 
   const char *object = NULL;
   const char *message = NULL;
@@ -290,6 +300,7 @@ throwOpenConnectionError (JNIEnv *env, const brlapi_connectionSettings_t *settin
 static void BRLAPI_STDCALL
 handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size) {
   JNIEnv *env = getJavaEnvironment(handle);
+  if ((*env)->ExceptionCheck(env)) return;
 
   jbyteArray jPacket = (*env)->NewByteArray(env, size);
   if (!jPacket) return;
@@ -312,7 +323,6 @@ handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType
   );
   if (!object) return;
 
-  (*env)->ExceptionClear(env);
   (*env)->Throw(env, object);
 }
 
@@ -630,33 +640,21 @@ JAVA_INSTANCE_METHOD(
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_ConnectionBase, writeText, void,
-  jint jarg1, jstring jarg2
+  jint cursor, jstring jText
 ) {
-  brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-  int result;
   GET_CONNECTION_HANDLE(env, this, );
   
-  s.cursor = (int)jarg1; 
-
-  if (jarg2) {
-    s.regionBegin = 1;
-    s.regionSize = (*env)->GetStringLength(env, jarg2);
-
-    if (!(s.text = (char *)(*env)->GetStringUTFChars(env, jarg2, NULL))) {
-      throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
-      return;
-    }
-    s.charset = "UTF-8";
-  }
-
-  result = brlapi__write(handle, &s);
-  if (jarg2)
-    (*env)->ReleaseStringUTFChars(env, jarg2, s.text); 
-
-  if (result < 0) {
-    throwConnectionError(env);
+  const char *cText;
+  if (!jText) {
+    cText = NULL;
+  } else if (!(cText = (*env)->GetStringUTFChars(env, jText, NULL))) {
+    throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
     return;
   }
+
+  int result = brlapi__writeText(handle, cursor, cText);
+  if (jText) (*env)->ReleaseStringUTFChars(env, jText, cText); 
+  if (result < 0) throwConnectionError(env);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -764,20 +762,16 @@ JAVA_INSTANCE_METHOD(
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_ConnectionBase, readKey, jlong,
-  jboolean jblock
+  jboolean jWait
 ) {
-  brlapi_keyCode_t code;
-  int result;
   GET_CONNECTION_HANDLE(env, this, -1);
 
-  result = brlapi__readKey(handle, (int) jblock, &code);
+  int cWait = jWait != JNI_FALSE;
+  brlapi_keyCode_t code;
 
-  if (result < 0) {
-    throwConnectionError(env);
-    return -1;
-  }
-
-  if (!result) return (jlong)(-1);
+  int result = brlapi__readKey(handle, cWait, &code);
+  if (result < 0) throwConnectionError(env);
+  if (!result) throwJavaError(env, JAVA_OBJ_EOF_EXCEPTION, __func__);
   return (jlong)code;
 }
 

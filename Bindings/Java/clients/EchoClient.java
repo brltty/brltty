@@ -95,11 +95,11 @@ public class EchoClient extends Client {
       (tty) -> {
         String label = echoDriverKeys? "Key": "Cmd";
 
-        tty.writeText(
+        tty.write(
+          Constants.CURSOR_OFF,
           String.format(
             "press keys (timeout is %d seconds)", readTimeout
-          ),
-          Constants.CURSOR_OFF
+          )
         );
 
         while (true) {
@@ -119,7 +119,7 @@ public class EchoClient extends Client {
             new CommandKeycode(code).toString();
 
           printf("%s: %s\n", label, text);
-          tty.writeText(text);
+          tty.write(text);
         }
       },
       ttyPath

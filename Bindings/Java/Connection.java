@@ -19,6 +19,9 @@
 
 package org.a11y.brlapi;
 
+import java.io.EOFException;
+import java.io.InterruptedIOException;
+
 public class Connection extends ConnectionBase {
   public Connection (ConnectionSettings settings) throws ConnectException {
     super(settings);
@@ -49,45 +52,55 @@ public class Connection extends ConnectionBase {
     enterTtyModeWithPath(null, ttys);
   }
 
-  public void writeDots (byte[] dots) {
+  public final long readKey () {
+    while (true) {
+      try {
+        return readKey(true);
+      } catch (EOFException exception) {
+      } catch (InterruptedIOException exception) {
+      }
+    }
+  }
+
+  public void write (byte[] dots) {
     int count = getCellCount();
 
     if (dots.length != count) {
-      byte[] d = new byte[count];
-      while (count > dots.length) d[--count] = 0;
-      System.arraycopy(dots, 0, d, 0, count);
-      dots = d;
+      byte[] newDots = new byte[count];
+      while (count > dots.length) newDots[--count] = 0;
+      System.arraycopy(dots, 0, newDots, 0, count);
+      dots = newDots;
     }
 
-    super.writeDots(dots);
+    writeDots(dots);
   }
 
-  public void writeText (int cursor, String text) {
+  public void write (int cursor, String text) {
     if (text != null) {
       int count = getCellCount();
 
       {
-        StringBuilder sb = new StringBuilder(text);
-        while (sb.length() < count) sb.append(' ');
-        text = sb.toString();
+        StringBuilder newText = new StringBuilder(text);
+        while (newText.length() < count) newText.append(' ');
+        text = newText.toString();
       }
 
-      text = text.substring(0, count);
+      if (text.length() > count) text = text.substring(0, count);
     }
 
-    super.writeText(cursor, text);
-  }
-
-  public void writeText (String text, int cursor) {
     writeText(cursor, text);
   }
 
-  public void writeText (int cursor) {
-    writeText(cursor, null);
+  public void write (String text, int cursor) {
+    write(cursor, text);
   }
 
-  public void writeText (String text) {
-    writeText(Constants.CURSOR_OFF, text);
+  public void write (int cursor) {
+    write(cursor, null);
+  }
+
+  public void write (String text) {
+    write(Constants.CURSOR_LEAVE, text);
   }
 
   private Parameters connectionParameters = null;
