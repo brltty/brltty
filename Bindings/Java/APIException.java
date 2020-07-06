@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public class ConnectionException extends RuntimeException {
+public class APIException extends RuntimeException {
   @Override
   public native String toString ();
 
@@ -30,7 +30,7 @@ public class ConnectionException extends RuntimeException {
   private final int packetType;
   private final byte[] failedPacket;
 
-  public ConnectionException (long handle, int error, int type, byte[] packet) {
+  public APIException (long handle, int error, int type, byte[] packet) {
     super();
 
     Connection.setUnusable(handle);

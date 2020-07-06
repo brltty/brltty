@@ -125,10 +125,10 @@ public abstract class Client extends Program {
       }
     } catch (LostConnectionException exception) {
       throw new ExternalException("connection lost");
-    } catch (ConnectionError error) {
-      throw new ExternalException(("connection error: " + error));
-    } catch (ConnectionException exception) {
-      throw new ExternalException(("connection exception: " + exception));
+    } catch (APIError error) {
+      throw new ExternalException(("API error: " + error));
+    } catch (APIException exception) {
+      throw new ExternalException(("API exception: " + exception));
     }
 
     return this;
@@ -175,7 +175,7 @@ public abstract class Client extends Program {
       } finally {
         if (!connection.isUnusable()) connection.leaveTtyMode();
       }
-    } catch (ConnectionError error) {
+    } catch (APIError error) {
       throw new ProgramException(("tty mode error: " + error));
     }
 
@@ -203,7 +203,7 @@ public abstract class Client extends Program {
       } finally {
         if (!connection.isUnusable()) connection.leaveRawMode();
       }
-    } catch (ConnectionError error) {
+    } catch (APIError error) {
       throw new ProgramException(("raw mode error: " + error));
     }
 

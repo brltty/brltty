@@ -19,7 +19,7 @@
 
 package org.a11y.brlapi;
 
-public class ConnectionError extends Error {
+public class APIError extends Error {
   @Override
   public native String toString ();
 
@@ -28,7 +28,7 @@ public class ConnectionError extends Error {
   private final int gaiError;
   private final String functionName;
 
-  public ConnectionError (int api, int os, int gai, String function) {
+  public APIError (int api, int os, int gai, String function) {
     apiError = api;
     osError = os;
     gaiError = gai;

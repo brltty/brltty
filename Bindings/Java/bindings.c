@@ -171,7 +171,7 @@ logBrlapiError (const char *label) {
 }
 
 static void
-throwConnectionError (JNIEnv *env) {
+throwAPIError (JNIEnv *env) {
   if (0) logBrlapiError("Connection Error");
   if ((*env)->ExceptionCheck(env)) return;
 
@@ -204,7 +204,7 @@ throwConnectionError (JNIEnv *env) {
     }
   }
 
-  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionError"));
+  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("APIError"));
   if (!class) return;
 
   jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
@@ -293,12 +293,12 @@ throwConnectError (JNIEnv *env, const brlapi_connectionSettings_t *settings) {
     if (!message) message = "";
     throwJavaError(env, object, message);
   } else {
-    throwConnectionError(env);
+    throwAPIError(env);
   }
 }
 
 static void BRLAPI_STDCALL
-handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size) {
+handleAPIException (brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size) {
   JNIEnv *env = getJavaEnvironment(handle);
   if ((*env)->ExceptionCheck(env)) return;
 
@@ -306,7 +306,7 @@ handleConnectionException (brlapi_handle_t *handle, int error, brlapi_packetType
   if (!jPacket) return;
   (*env)->SetByteArrayRegion(env, jPacket, 0, size, (jbyte *) packet);
 
-  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("ConnectionException"));
+  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("APIException"));
   if (!class) return;
 
   jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
@@ -472,7 +472,7 @@ JAVA_INSTANCE_METHOD(
     brlapi__setClientData(handle, vm);
   }
 
-  brlapi__setExceptionHandler(handle, handleConnectionException);
+  brlapi__setExceptionHandler(handle, handleAPIException);
   SET_CONNECTION_HANDLE(env, this, handle, -1);
   return (jint) fileDescriptor;
 }
@@ -493,7 +493,7 @@ JAVA_INSTANCE_METHOD(
   char name[0X20];
 
   if (brlapi__getDriverName(handle, name, sizeof(name)) < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return NULL;
   }
 
@@ -508,7 +508,7 @@ JAVA_INSTANCE_METHOD(
   char identifier[0X20];
 
   if (brlapi__getModelIdentifier(handle, identifier, sizeof(identifier)) < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return NULL;
   }
 
@@ -523,7 +523,7 @@ JAVA_INSTANCE_METHOD(
 
   unsigned int width, height;
   if (brlapi__getDisplaySize(handle, &width, &height) < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return NULL;
   }
 
@@ -549,7 +549,7 @@ JAVA_INSTANCE_METHOD(
   int result = brlapi__pause(handle, milliseconds);
 
   if (result < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
   }
 }
 
@@ -573,7 +573,7 @@ JAVA_INSTANCE_METHOD(
 
   result = brlapi__enterTtyMode(handle, tty,driver);
   if (result < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return -1;
   }
 
@@ -608,7 +608,7 @@ JAVA_INSTANCE_METHOD(
   result = brlapi__enterTtyModeWithPath(handle, ttys,(*env)->GetArrayLength(env,jttys),driver);
   (*env)->ReleaseIntArrayElements(env, jttys, ttys, JNI_ABORT);
   if (result < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return;
   }
 }
@@ -619,7 +619,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__leaveTtyMode(handle) < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return;
   }
 }
@@ -633,7 +633,7 @@ JAVA_INSTANCE_METHOD(
   
   arg1 = (int)jarg1; 
   if (brlapi__setFocus(handle, arg1) < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return;
   }
 }
@@ -654,7 +654,7 @@ JAVA_INSTANCE_METHOD(
 
   int result = brlapi__writeText(handle, cursor, cText);
   if (jText) (*env)->ReleaseStringUTFChars(env, jText, cText); 
-  if (result < 0) throwConnectionError(env);
+  if (result < 0) throwAPIError(env);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -679,7 +679,7 @@ JAVA_INSTANCE_METHOD(
   (*env)->ReleaseByteArrayElements(env, jarg1, arg1, JNI_ABORT); 
   
   if (result < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return;
   }
 }
@@ -757,7 +757,7 @@ JAVA_INSTANCE_METHOD(
   if (jAndMask) (*env)->ReleaseByteArrayElements(env, jAndMask, (jbyte*) cArguments.andMask, JNI_ABORT); 
   if (jOrMask) (*env)->ReleaseByteArrayElements(env, jOrMask, (jbyte*) cArguments.orMask, JNI_ABORT); 
 
-  if (result < 0) throwConnectionError(env);
+  if (result < 0) throwAPIError(env);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -770,7 +770,7 @@ JAVA_INSTANCE_METHOD(
   brlapi_keyCode_t code;
 
   int result = brlapi__readKey(handle, cWait, &code);
-  if (result < 0) throwConnectionError(env);
+  if (result < 0) throwAPIError(env);
   if (!result) throwJavaError(env, JAVA_OBJ_EOF_EXCEPTION, __func__);
   return (jlong)code;
 }
@@ -785,7 +785,7 @@ JAVA_INSTANCE_METHOD(
   int result = brlapi__readKeyWithTimeout(handle, milliseconds, &code);
 
   if (result < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
   } else if (!result) {
     throwJavaError(env, JAVA_OBJ_TIMEOUT_EXCEPTION, __func__);
   }
@@ -815,7 +815,7 @@ JAVA_INSTANCE_METHOD(
   (*env)->ReleaseLongArrayElements(env, js, s, JNI_ABORT);
   
   if (result < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return;
   }
 }
@@ -842,7 +842,7 @@ JAVA_INSTANCE_METHOD(
   (*env)->ReleaseLongArrayElements(env, js, s, JNI_ABORT);
 
   if (result < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return;
   }
 }
@@ -853,7 +853,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__ignoreAllKeys(handle) < 0)
-    throwConnectionError(env);
+    throwAPIError(env);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -862,7 +862,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__acceptAllKeys(handle) < 0)
-    throwConnectionError(env);
+    throwAPIError(env);
 }
 
 JAVA_INSTANCE_METHOD(
@@ -891,7 +891,7 @@ JAVA_INSTANCE_METHOD(
       (*env)->ReleaseLongArrayElements(env, jl, l, JNI_ABORT);
     }
     if (brlapi__ignoreKeyRanges(handle, s, n)) {
-      throwConnectionError(env);
+      throwAPIError(env);
       return;
     }
   }
@@ -923,7 +923,7 @@ JAVA_INSTANCE_METHOD(
       (*env)->ReleaseLongArrayElements(env, jl, l, JNI_ABORT);
     }
     if (brlapi__acceptKeyRanges(handle, s, n)) {
-      throwConnectionError(env);
+      throwAPIError(env);
       return;
     }
   }
@@ -947,7 +947,7 @@ JAVA_INSTANCE_METHOD(
   res = brlapi__enterRawMode(handle, driver);
   if (jdriver) (*env)->ReleaseStringUTFChars(env, jdriver, driver);
   if (res < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return;
   }
 }
@@ -958,7 +958,7 @@ JAVA_INSTANCE_METHOD(
   GET_CONNECTION_HANDLE(env, this, );
 
   if (brlapi__leaveRawMode(handle) < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return;
   }
 }
@@ -984,7 +984,7 @@ JAVA_INSTANCE_METHOD(
   (*env)->ReleaseByteArrayElements(env, jbuf, buf, JNI_ABORT);
 
   if (result < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
     return -1;
   }
 
@@ -1012,7 +1012,7 @@ JAVA_INSTANCE_METHOD(
 
   if (result < 0) {
     (*env)->ReleaseByteArrayElements(env, jbuf, buf, JNI_ABORT);
-    throwConnectionError(env);
+    throwAPIError(env);
     return -1;
   }
 
@@ -1144,7 +1144,7 @@ JAVA_INSTANCE_METHOD(
       result = newParameterValueObject(env, properties, value, size);
       free(value);
     } else {
-      throwConnectionError(env);
+      throwAPIError(env);
     }
   }
 
@@ -1158,7 +1158,7 @@ setParameter (
   const void *data, size_t size
 ) {
   if (brlapi__setParameter(handle, parameter, subparam, flags, data, size) < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
   }
 }
 
@@ -1368,7 +1368,7 @@ JAVA_INSTANCE_METHOD(
             );
 
             if (wpd->descriptor) return (intptr_t)wpd;
-            throwConnectionError(env);
+            throwAPIError(env);
           }
         }
 
@@ -1391,7 +1391,7 @@ JAVA_STATIC_METHOD(
   WatchedParameterData *wpd = (WatchedParameterData *)(intptr_t)identifier;
 
   if (brlapi__unwatchParameter(wpd->handle, wpd->descriptor) < 0) {
-    throwConnectionError(env);
+    throwAPIError(env);
   }
 
   (*env)->DeleteGlobalRef(env, wpd->watcher.object);
@@ -1399,7 +1399,7 @@ JAVA_STATIC_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_ConnectionError, toString, jstring
+  org_a11y_brlapi_APIError, toString, jstring
 ) {
   GET_CLASS(env, class, this, NULL);
   brlapi_error_t error;
@@ -1458,7 +1458,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_ConnectionException, toString, jstring
+  org_a11y_brlapi_APIException, toString, jstring
 ) {
   GET_CONNECTION_HANDLE(env, this, NULL);
   GET_CLASS(env, class, this, NULL);
@@ -1502,7 +1502,7 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_STATIC_METHOD(
-  org_a11y_brlapi_ConnectionException, getPacketTypeName, jstring,
+  org_a11y_brlapi_APIException, getPacketTypeName, jstring,
   jint type
 ) {
   const char *name = brlapi_getPacketTypeName((brlapi_packetType_t) type);

@@ -44,7 +44,7 @@ public class ForceExceptionClient extends PauseClient {
 
         try {
           tty.readKeyWithTimeout(getPauseTimeout());
-        } catch (ConnectionException exception) {
+        } catch (APIException exception) {
           result = "exception received";
         } catch (InterruptedIOException exception) {
           result = "wait for exception interrupted";

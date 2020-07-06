@@ -35,7 +35,7 @@ public class ForceErrorClient extends Client {
       );
 
       result = "error not thrown";
-    } catch (ConnectionError error) {
+    } catch (APIError error) {
       result = "error received";
     }
 
