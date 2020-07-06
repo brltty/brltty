@@ -2516,25 +2516,25 @@ int BRLAPI_STDCALL brlapi_ignoreKeys(brlapi_rangeType_t r, const brlapi_keyCode_
 
 /* brlapi_errlist: error messages */
 const char *brlapi_errlist[] = {
-  "Success",                            /* BRLAPI_ERROR_SUCESS */
-  "Insufficient memory",                /* BRLAPI_ERROR_NOMEM */
-  "Tty is busy",                        /* BRLAPI_ERROR_TTYBUSY */
-  "Device is busy",                     /* BRLAPI_ERROR_DEVICEBUSY */
-  "Unknown instruction",                /* BRLAPI_ERROR_UNKNOWN_INSTRUCTION */
-  "Illegal instruction",                /* BRLAPI_ERROR_ILLEGAL_INSTRUCTION */
-  "Invalid parameter",                  /* BRLAPI_ERROR_INVALID_PARAMETER */
-  "Invalid packet",                     /* BRLAPI_ERROR_INVALID_PACKET */
-  "Connection refused",                 /* BRLAPI_ERROR_CONNREFUSED */
-  "Operation not supported",            /* BRLAPI_ERROR_OPNOTSUPP */
-  "getaddrinfo() error",                /* BRLAPI_ERROR_GAIERR */
-  "libc error",                         /* BRLAPI_ERROR_LIBCERR */
-  "Can't determine tty number",         /* BRLAPI_ERROR_UNKNOWNTTY */
-  "Bad protocol version",               /* BRLAPI_ERROR_PROTOCOL_VERSION */
-  "Unexpected end of file",             /* BRLAPI_ERROR_EOF */
-  "Key file is empty",                  /* BRLAPI_ERROR_EMPTYKEY */
-  "Driver error",                       /* BRLAPI_ERROR_DRIVERERROR */
-  "Authentication failed",              /* BRLAPI_ERROR_AUTHENTICATION */
-  "Parameter can not be changed",       /* BRLAPI_ERROR_READONLY_PARAMETER */
+  [0]                                = "Success",
+  [BRLAPI_ERROR_NOMEM]               = "Insufficient memory",
+  [BRLAPI_ERROR_TTYBUSY]             = "Tty is busy",
+  [BRLAPI_ERROR_DEVICEBUSY]          = "Device is busy",
+  [BRLAPI_ERROR_UNKNOWN_INSTRUCTION] = "Unknown instruction",
+  [BRLAPI_ERROR_ILLEGAL_INSTRUCTION] = "Illegal instruction",
+  [BRLAPI_ERROR_INVALID_PARAMETER]   = "Invalid parameter",
+  [BRLAPI_ERROR_INVALID_PACKET]      = "Invalid packet",
+  [BRLAPI_ERROR_CONNREFUSED]         = "Connection refused",
+  [BRLAPI_ERROR_OPNOTSUPP]           = "Operation not supported",
+  [BRLAPI_ERROR_GAIERR]              = "getaddrinfo() error",
+  [BRLAPI_ERROR_LIBCERR]             = "libc error",
+  [BRLAPI_ERROR_UNKNOWNTTY]          = "Can't determine tty number",
+  [BRLAPI_ERROR_PROTOCOL_VERSION]    = "Bad protocol version",
+  [BRLAPI_ERROR_EOF]                 = "Unexpected end of file",
+  [BRLAPI_ERROR_EMPTYKEY]            = "Key file is empty",
+  [BRLAPI_ERROR_DRIVERERROR]         = "Driver error",
+  [BRLAPI_ERROR_AUTHENTICATION]      = "Authentication failed",
+  [BRLAPI_ERROR_READONLY_PARAMETER]  = "Parameter can not be changed",
 };
 
 /* brlapi_nerr: number of error codes */
