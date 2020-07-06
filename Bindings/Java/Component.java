@@ -23,6 +23,8 @@ public abstract class Component {
   protected Component () {
   }
 
+  public final static char UNICODE_BRAILLE_ROW = 0X2800;
+
   public static void printf (String format, Object... arguments) {
     System.out.printf(format, arguments);
   }

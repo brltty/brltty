@@ -41,7 +41,7 @@ public class WriteDotsClient extends PauseClient {
       byte dots = Parse.asDots("dot numbers", parameters[index]);
       cells[index] = dots;
 
-      char character = 0X2800;
+      char character = UNICODE_BRAILLE_ROW;
       character |= dots & 0XFF;
       characters[index] = character;
     }
