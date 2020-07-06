@@ -26,14 +26,18 @@ public class WriteTextClient extends PauseClient {
     addRepeatingParameter("text");
   }
 
-  private final StringBuilder text = new StringBuilder();
+  private String text = null;
 
   @Override
   protected final void processParameters (String[] parameters) {
+    StringBuilder builder = new StringBuilder();
+
     for (String parameter : parameters) {
-      if (text.length() > 0) text.append(' ');
-      text.append(parameter);
+      if (builder.length() > 0) builder.append(' ');
+      builder.append(parameter);
     }
+
+    text = builder.toString();
   }
 
   @Override
@@ -43,7 +47,8 @@ public class WriteTextClient extends PauseClient {
     ttyMode(
       connection, false,
       (tty) -> {
-        tty.write(text.toString(), Constants.CURSOR_OFF);
+        printf("%s\n", text);
+        tty.write(text, Constants.CURSOR_OFF);
         pause(tty, getPauseTimeout());
       }
     );

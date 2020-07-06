@@ -88,15 +88,17 @@ public class EchoClient extends Client {
     }
   }
 
+  private final void show (Connection connection, String text) {
+    printf("%s\n", text);
+    connection.write(text, Constants.CURSOR_OFF);
+  }
+
   @Override
   protected final void runClient (Connection connection) throws ProgramException {
     ttyMode(
       connection, echoDriverKeys,
       (tty) -> {
-        String label = echoDriverKeys? "Key": "Cmd";
-
-        tty.write(
-          Constants.CURSOR_OFF,
+        show(tty,
           String.format(
             "press keys (timeout is %d seconds)", readTimeout
           )
@@ -118,8 +120,7 @@ public class EchoClient extends Client {
             new DriverKeycode(code).toString():
             new CommandKeycode(code).toString();
 
-          printf("%s: %s\n", label, text);
-          tty.write(text);
+          show(tty, text);
         }
       },
       ttyPath

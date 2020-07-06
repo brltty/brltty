@@ -27,6 +27,7 @@ public class WriteDotsClient extends PauseClient {
   }
 
   private byte[] cells = null;
+  private String text = null;
 
   @Override
   protected final void processParameters (String[] parameters)
@@ -34,10 +35,18 @@ public class WriteDotsClient extends PauseClient {
   {
     int count = parameters.length;
     cells = new byte[count];
+    char[] characters = new char[count];
 
     for (int index=0; index<count; index+=1) {
-      cells[index] = Parse.asDots("dot numbers", parameters[index]);
+      byte dots = Parse.asDots("dot numbers", parameters[index]);
+      cells[index] = dots;
+
+      char character = 0X2800;
+      character |= dots & 0XFF;
+      characters[index] = character;
     }
+
+    text = new String(characters);
   }
 
   @Override
@@ -47,6 +56,7 @@ public class WriteDotsClient extends PauseClient {
     ttyMode(
       connection, false,
       (tty) -> {
+        printf("%s\n", text);
         tty.write(cells);
         pause(tty, getPauseTimeout());
       }
