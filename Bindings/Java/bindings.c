@@ -184,7 +184,7 @@ throwConnectionError (JNIEnv *env) {
         break;
 
       case BRLAPI_ERROR_EOF:
-        object = JAVA_OBJ_EOF_EXCEPTION;
+        object = BRLAPI_OBJECT("LostConnectionException");
         break;
 
       case BRLAPI_ERROR_LIBCERR: {

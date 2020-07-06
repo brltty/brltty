@@ -119,6 +119,8 @@ public abstract class Client extends Program {
 
       try {
         task.run(connection);
+      } catch (LostConnectionException exception) {
+        throw new ExternalException("connection lost");
       } finally {
         connection.close();
         connection = null;

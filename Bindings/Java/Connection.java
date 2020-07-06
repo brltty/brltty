@@ -52,13 +52,11 @@ public class Connection extends ConnectionBase {
     enterTtyModeWithPath(null, ttys);
   }
 
-  public final long readKey () {
-    while (true) {
-      try {
-        return readKey(true);
-      } catch (EOFException exception) {
-      } catch (InterruptedIOException exception) {
-      }
+  public final long readKey () throws InterruptedIOException {
+    try {
+      return readKey(true);
+    } catch (EOFException exception) {
+      throw new IllegalStateException("unexpected end-of-file");
     }
   }
 
