@@ -130,9 +130,9 @@ public abstract class Client extends Program {
     return this;
   }
 
-  public final boolean pause (Connection connection, int seconds) {
+  public final boolean pause (Connection connection, int milliseconds) {
     try {
-      connection.pause(seconds * 1000);
+      connection.pause(milliseconds);
       return true;
     } catch (InterruptedIOException exception) {
       return false;

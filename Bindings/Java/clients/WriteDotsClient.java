@@ -48,7 +48,7 @@ public class WriteDotsClient extends PauseClient {
       connection, false,
       (tty) -> {
         tty.write(cells);
-        pause(tty, pauseTimeout);
+        pause(tty, getPauseTimeout());
       }
     );
   }

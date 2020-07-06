@@ -44,7 +44,7 @@ public class WriteTextClient extends PauseClient {
       connection, false,
       (tty) -> {
         tty.write(text.toString(), Constants.CURSOR_OFF);
-        pause(tty, pauseTimeout);
+        pause(tty, getPauseTimeout());
       }
     );
   }

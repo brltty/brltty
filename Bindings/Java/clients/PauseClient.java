@@ -25,10 +25,15 @@ public class PauseClient extends Client {
   public final static byte DEFAULT_PAUSE_TIMEOUT = 10;
   public final static byte MAXIMUM_PAUSE_TIMEOUT = 30;
 
-  protected byte pauseTimeout = DEFAULT_PAUSE_TIMEOUT;
+  private byte pauseTimeout = DEFAULT_PAUSE_TIMEOUT;
+
+  protected final int getPauseTimeout () {
+    return pauseTimeout * 1000;
+  }
 
   public PauseClient (String... arguments) {
     super(arguments);
+    // don't add parameters to this client because some other clients extend it
 
     addOption("timeout",
       (operands) -> {
@@ -64,7 +69,7 @@ public class PauseClient extends Client {
     printf("Pausing for %d seconds...", pauseTimeout);
     String result;
 
-    if (pause(connection, pauseTimeout)) {
+    if (pause(connection, getPauseTimeout())) {
       result = "timed out";
     } else {
       result = "event occurred";
