@@ -19,7 +19,9 @@
 
 package org.a11y.brlapi;
 
-public class ConnectionSettings {
+import java.io.File;
+
+public class ConnectionSettings extends NativeComponent {
   public final static char HOST_PORT_SEPARATOR = ':';
   public final static String DEFAULT_HOST_NAME = "localhost";
 
@@ -77,7 +79,33 @@ public class ConnectionSettings {
   public final static String AUTHENTICATION_SCHEME_NONE = "none";
   public final static String AUTHENTICATION_SCHEME_KEYFILE = "keyfile";
 
-  public final static String DEFAULT_AUTHENTICATION_SCHEME = AUTHENTICATION_SCHEME_NONE;
+  private native static String getKeyfileDirectory ();
+  public final static String AUTHENTICATION_KEYFILE_DIRECTORY = getKeyfileDirectory();
+
+  private native static String getKeyfileName ();
+  public final static String AUTHENTICATION_KEYFILE_NAME = getKeyfileName();
+
+  public final static String DEFAULT_AUTHENTICATION_SCHEME;
+  static {
+    StringBuilder builder = new StringBuilder();
+
+    {
+      File file = new File(
+        AUTHENTICATION_KEYFILE_DIRECTORY,
+        AUTHENTICATION_KEYFILE_NAME
+      );
+
+      if (file.isFile() && file.canRead()) {
+        builder.append(AUTHENTICATION_SCHEME_KEYFILE)
+               .append(AUTHENTICATION_OPERAND_PREFIX)
+               .append(file.getAbsolutePath());
+      }
+    }
+
+    if (builder.length() == 0) builder.append(AUTHENTICATION_SCHEME_NONE);
+    DEFAULT_AUTHENTICATION_SCHEME = builder.toString();
+  }
+
   private String authenticationScheme = null;
 
   public static void checkAuthenticationScheme (String scheme) {

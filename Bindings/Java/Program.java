@@ -30,7 +30,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
   }
 
   public final String getName () {
-    return getClass().getSimpleName();
+    return getProgramName(getClass());
   }
 
   protected final void writeProgramMessage (String format, Object... arguments) {

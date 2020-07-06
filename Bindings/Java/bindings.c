@@ -377,6 +377,18 @@ JAVA_STATIC_METHOD(
     JAVA_SET_FIELD((env), Long, (object), field, (jlong) (intptr_t) (value)); \
   } while (0)
 
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_ConnectionSettings, getKeyfileDirectory, jstring
+) {
+  return (*env)->NewStringUTF(env, BRLAPI_ETCDIR);
+}
+
+JAVA_STATIC_METHOD(
+  org_a11y_brlapi_ConnectionSettings, getKeyfileName, jstring
+) {
+  return (*env)->NewStringUTF(env, BRLAPI_AUTHKEYFILE);
+}
+
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_ConnectionBase, openConnection, jint,
   jobject jRequestedSettings, jobject jActualSettings

@@ -8,6 +8,9 @@ Clients (see the clients/ subdirectory):
   -help
   -server host[:port] (default is localhost:0)
   -authorization scheme+...
+  api-error
+  api-exception
+    -timeout seconds (1-30, default is 10)
   bound-commands
   computer-braille
   driver-keys
@@ -18,6 +21,10 @@ Clients (see the clients/ subdirectory):
   pause
     -timeout seconds (1-30, default is 10)
   set-parameter parameter value
+  write-dots [dots ...]
+    -timeout seconds (1-30, default is 10)
+  write-text [text ...]
+    -timeout seconds (1-30, default is 10)
 
 These aren't case sensitive and allow unambiguous truncations:
   program names (e.g. v for version)

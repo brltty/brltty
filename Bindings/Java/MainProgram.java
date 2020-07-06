@@ -96,6 +96,7 @@ public class MainProgram extends Program {
     if (programType == null) {
       throw new SyntaxException("unknown program/client: %s", programName);
     }
+    programName = getProgramName(programType);
 
     count -= 1;
     programArguments = new String[count];
@@ -126,8 +127,13 @@ public class MainProgram extends Program {
         "%s object access denied: %s: %s", term, programName, exception.getMessage()
       );
     } catch (InvocationTargetException exception) {
+      Throwable cause = exception.getCause();
+
       throw new ProgramException(
-        "%s construction failed: %s: %s", term, programName, exception.getCause().getMessage()
+        "%s construction failed: %s: %s: %s",
+        term, programName,
+        cause.getClass().getSimpleName(),
+        cause.getMessage()
       );
     }
 
