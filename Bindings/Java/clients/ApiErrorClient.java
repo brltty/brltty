@@ -20,13 +20,14 @@
 package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
-public class ForceErrorClient extends Client {
-  public ForceErrorClient (String... arguments) {
+public class ApiErrorClient extends Client {
+  public ApiErrorClient (String... arguments) {
     super(arguments);
   }
 
   @Override
   protected final void runClient (Connection connection) {
+    String label = "API error";
     String result;
 
     try {
@@ -34,9 +35,9 @@ public class ForceErrorClient extends Client {
         Constants.PARAM_SERVER_VERSION, 0, true, new int[] {0}
       );
 
-      result = "error not thrown";
+      result = String.format("%s not thrown", label);
     } catch (APIError error) {
-      result = "error received";
+      result = String.format("%s received", label);
     }
 
     printf("%s\n", result);

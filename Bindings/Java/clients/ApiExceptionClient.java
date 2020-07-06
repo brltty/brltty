@@ -23,8 +23,8 @@ import org.a11y.brlapi.*;
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
-public class ForceExceptionClient extends PauseClient {
-  public ForceExceptionClient (String... arguments) {
+public class ApiExceptionClient extends PauseClient {
+  public ApiExceptionClient (String... arguments) {
     super(arguments);
   }
 
@@ -40,16 +40,18 @@ public class ForceExceptionClient extends PauseClient {
           .setText("This should fail because the region size is too big.");
 
         tty.write(arguments);
+        String label = "API exception";
         String result = null;
 
         try {
           tty.readKeyWithTimeout(getPauseTimeout());
+          result = String.format("%s not thrown", label);
         } catch (APIException exception) {
-          result = "exception received";
+          result = String.format("%s received", label);
         } catch (InterruptedIOException exception) {
-          result = "wait for exception interrupted";
+          result = String.format("wait for %s interrupted", label);
         } catch (TimeoutException exception) {
-          result = "wait for exception timed out";
+          result = String.format("wait for %s timed out", label);
         }
 
         printf("%s\n", result);

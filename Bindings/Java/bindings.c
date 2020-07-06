@@ -172,7 +172,7 @@ logBrlapiError (const char *label) {
 
 static void
 throwAPIError (JNIEnv *env) {
-  if (0) logBrlapiError("Connection Error");
+  if (0) logBrlapiError("API Error");
   if ((*env)->ExceptionCheck(env)) return;
 
   {
