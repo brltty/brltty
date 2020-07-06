@@ -19,12 +19,16 @@
 
 package org.a11y.brlapi;
 
+import java.util.Map;
+import java.util.HashMap;
+
 import java.io.EOFException;
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
 public class ConnectionBase extends NativeComponent implements AutoCloseable {
   private long connectionHandle;
+  private final static Map<Long, ConnectionBase> connections = new HashMap<>();
 
   private native int openConnection (
     ConnectionSettings desiredSettings, ConnectionSettings actualSettings
@@ -37,6 +41,12 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
     super();
     connectionSettings = new ConnectionSettings();
     fileDescriptor = openConnection(settings, connectionSettings);
+
+    synchronized (connections) {
+      if (connections.putIfAbsent(connectionHandle, this) != null) {
+        throw new IllegalStateException("connection handle already mapped");
+      }
+    }
   }
 
   public final String getServerHost () {
@@ -58,9 +68,19 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
   public void close () {
     synchronized (this) {
       if (!hasBeenClosed) {
+        synchronized (connections) {
+          connections.remove(connectionHandle);
+        }
+
         closeConnection();
         hasBeenClosed = true;
       }
+    }
+  }
+
+  public static ConnectionBase getConnection (long handle) {
+    synchronized (connections) {
+      return connections.get(handle);
     }
   }
 

@@ -24,12 +24,16 @@ public class ConnectionException extends RuntimeException {
   public native String toString ();
 
   private final long connectionHandle;
+  private final ConnectionBase connection;
+
   private final int errorNumber;
   private final int packetType;
   private final byte[] failedPacket;
 
   public ConnectionException (long handle, int error, int type, byte[] packet) {
     connectionHandle = handle;
+    connection = ConnectionBase.getConnection(handle);
+
     errorNumber = error;
     packetType = type;
     failedPacket = packet;
