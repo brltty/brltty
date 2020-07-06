@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
 public class ConnectionBase extends NativeComponent implements AutoCloseable {
   private long connectionHandle;
   private final static Map<Long, ConnectionBase> connections = new HashMap<>();
+  private boolean hasBecomeUnusable = false;
 
   private native int openConnection (
     ConnectionSettings desiredSettings, ConnectionSettings actualSettings
@@ -82,6 +83,15 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
     synchronized (connections) {
       return connections.get(handle);
     }
+  }
+
+  public static void setUnusable (long handle) {
+    ConnectionBase connection = getConnection(handle);
+    connection.hasBecomeUnusable = true;
+  }
+
+  public final boolean isUnusable () {
+    return hasBecomeUnusable;
   }
 
   public native String getDriverName ();

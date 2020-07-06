@@ -171,7 +171,7 @@ public abstract class Client extends Program {
       try {
         task.run(connection);
       } finally {
-        connection.leaveTtyMode();
+        if (!connection.isUnusable()) connection.leaveTtyMode();
       }
     } catch (ConnectionError error) {
       throw new ProgramException(("tty mode error: " + error));
@@ -199,7 +199,7 @@ public abstract class Client extends Program {
       try {
         task.run(connection);
       } finally {
-        connection.leaveRawMode();
+        if (!connection.isUnusable()) connection.leaveRawMode();
       }
     } catch (ConnectionError error) {
       throw new ProgramException(("raw mode error: " + error));
