@@ -19,6 +19,8 @@
 
 package org.a11y.brlapi;
 
+import java.io.InterruptedIOException;
+
 public abstract class Client extends Program {
   protected abstract void runClient (Connection connection)
             throws ProgramException;
@@ -126,6 +128,15 @@ public abstract class Client extends Program {
     }
 
     return this;
+  }
+
+  public final boolean pause (Connection connection, int seconds) {
+    try {
+      connection.pause(seconds * 1000);
+      return true;
+    } catch (InterruptedIOException exception) {
+      return false;
+    }
   }
 
   @Override

@@ -20,14 +20,12 @@
 package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
-import java.io.InterruptedIOException;
-
 public class PauseClient extends Client {
   public final static byte MINIMUM_PAUSE_TIMEOUT =  1;
   public final static byte DEFAULT_PAUSE_TIMEOUT = 10;
   public final static byte MAXIMUM_PAUSE_TIMEOUT = 30;
 
-  private byte pauseTimeout = DEFAULT_PAUSE_TIMEOUT;
+  protected byte pauseTimeout = DEFAULT_PAUSE_TIMEOUT;
 
   public PauseClient (String... arguments) {
     super(arguments);
@@ -60,14 +58,15 @@ public class PauseClient extends Client {
   }
 
   @Override
-  protected final void runClient (Connection connection) {
+  protected void runClient (Connection connection) 
+            throws ProgramException
+  {
     printf("Pausing for %d seconds...", pauseTimeout);
     String result;
 
-    try {
-      connection.pause(pauseTimeout * 1000);
+    if (pause(connection, pauseTimeout)) {
       result = "timed out";
-    } catch (InterruptedIOException exception) {
+    } else {
       result = "event occurred";
     }
 
