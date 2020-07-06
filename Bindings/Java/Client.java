@@ -126,7 +126,9 @@ public abstract class Client extends Program {
         connection = null;
       }
     } catch (ConnectionError error) {
-      throw new ProgramException(("connection error: " + error));
+      throw new ExternalException(("connection error: " + error));
+    } catch (ConnectionException exception) {
+      throw new ExternalException(("connection exception: " + exception));
     }
 
     return this;
