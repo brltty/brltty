@@ -26,15 +26,12 @@ public class ForceErrorClient extends Client {
   }
 
   @Override
-  protected final void runClient (Connection connection)
-            throws ProgramException
-  {
+  protected final void runClient (Connection connection) {
     String result;
 
     try {
       connection.setParameter(
-        connection.getParameters().serverVersion.getParameter(), 0,
-        true, new int[] {0}
+        Constants.PARAM_SERVER_VERSION, 0, true, new int[] {0}
       );
 
       result = "error not thrown";

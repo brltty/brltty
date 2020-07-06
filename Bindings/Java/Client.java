@@ -119,12 +119,12 @@ public abstract class Client extends Program {
 
       try {
         task.run(connection);
-      } catch (LostConnectionException exception) {
-        throw new ExternalException("connection lost");
       } finally {
         connection.close();
         connection = null;
       }
+    } catch (LostConnectionException exception) {
+      throw new ExternalException("connection lost");
     } catch (ConnectionError error) {
       throw new ExternalException(("connection error: " + error));
     } catch (ConnectionException exception) {

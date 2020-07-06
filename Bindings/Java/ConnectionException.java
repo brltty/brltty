@@ -31,9 +31,11 @@ public class ConnectionException extends RuntimeException {
   private final byte[] failedPacket;
 
   public ConnectionException (long handle, int error, int type, byte[] packet) {
+    super();
+
+    Connection.setUnusable(handle);
     connectionHandle = handle;
     connection = ConnectionBase.getConnection(handle);
-    Connection.setUnusable(handle);
 
     errorNumber = error;
     packetType = type;

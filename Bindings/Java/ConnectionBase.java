@@ -86,6 +86,7 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
   }
 
   public static void setUnusable (long handle) {
+    // this needs to be public but it mustn't be easy
     ConnectionBase connection = getConnection(handle);
     connection.hasBecomeUnusable = true;
   }

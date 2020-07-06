@@ -236,7 +236,7 @@ throwConnectionError (JNIEnv *env) {
 }
 
 static void
-throwOpenConnectionError (JNIEnv *env, const brlapi_connectionSettings_t *settings) {
+throwConnectError (JNIEnv *env, const brlapi_connectionSettings_t *settings) {
   if (0) logBrlapiError("Connect Error");
 
   const char *object = NULL;
@@ -431,7 +431,7 @@ JAVA_INSTANCE_METHOD(
 
     if ((fileDescriptor = brlapi__openConnection(handle, pRequestedSettings, pActualSettings)) < 0) {
       free(handle);
-      throwOpenConnectionError(env, pRequestedSettings);
+      throwConnectError(env, pRequestedSettings);
       return -1;
     }
 

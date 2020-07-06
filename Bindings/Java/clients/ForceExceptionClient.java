@@ -23,7 +23,7 @@ import org.a11y.brlapi.*;
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
-public class ForceExceptionClient extends Client {
+public class ForceExceptionClient extends PauseClient {
   public ForceExceptionClient (String... arguments) {
     super(arguments);
   }
@@ -43,13 +43,13 @@ public class ForceExceptionClient extends Client {
         String result = null;
 
         try {
-          tty.readKeyWithTimeout(2000);
+          tty.readKeyWithTimeout(getPauseTimeout());
         } catch (ConnectionException exception) {
           result = "exception received";
         } catch (InterruptedIOException exception) {
           result = "wait for exception interrupted";
         } catch (TimeoutException exception) {
-          result = "exception not thrown";
+          result = "wait for exception timed out";
         }
 
         printf("%s\n", result);
