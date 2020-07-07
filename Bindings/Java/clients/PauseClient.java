@@ -50,16 +50,10 @@ public class PauseClient extends Client {
   protected void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    usage.append('\n')
-         .append("The pause timeout must be an integer number of seconds")
-         .append(" within the range ").append(MINIMUM_PAUSE_TIMEOUT)
-         .append(" through ").append(MAXIMUM_PAUSE_TIMEOUT)
-         .append(". ")
-
-         .append("If not specified, ")
-         .append(DEFAULT_PAUSE_TIMEOUT)
-         .append(" is assumed. ")
-         ;
+    new RangeUsage("pause timeout", MINIMUM_PAUSE_TIMEOUT, MAXIMUM_PAUSE_TIMEOUT)
+      .setDefault(DEFAULT_PAUSE_TIMEOUT)
+      .setClarification("number of seconds")
+      .append(usage);
   }
 
   @Override

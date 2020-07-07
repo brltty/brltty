@@ -84,28 +84,15 @@ public class EchoClient extends Client {
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    usage.append('\n')
-         .append("The number of reads must be an integer")
-         .append(" within the range ").append(MINIMUM_READ_COUNT)
-         .append(" through ").append(MAXIMUM_READ_COUNT)
-         .append(". ")
+    new RangeUsage("number of reads", MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT)
+      .setDefault(DEFAULT_READ_COUNT)
+      .append(usage);
 
-         .append("If not specified, ")
-         .append(DEFAULT_READ_COUNT)
-         .append(" is assumed. ")
-         ;
-
-    usage.append('\n')
-         .append("The read timeout must be an integer number of seconds")
-         .append(" within the range ").append(MINIMUM_READ_TIMEOUT)
-         .append(" through ").append(MAXIMUM_READ_TIMEOUT)
-         .append(" or the word ").append(NO_TIMEOUT)
-         .append(". ")
-
-         .append("If not specified, ")
-         .append(DEFAULT_READ_TIMEOUT)
-         .append(" is assumed. ")
-         ;
+    new RangeUsage("read timeout", MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT)
+      .setDefault(DEFAULT_READ_TIMEOUT)
+      .setClarification("number of seconds")
+      .addKeyword(NO_TIMEOUT, "readKey will be used")
+      .append(usage);
   }
 
   private int[] ttyPath = null;

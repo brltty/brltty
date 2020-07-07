@@ -76,29 +76,15 @@ public class WriteArgumentsClient extends PauseClient {
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    usage.append('\n')
-         .append("The cursor position must be an integer")
-         .append(" within the range ").append(MINIMUM_CURSOR_POSITION)
-         .append(" through ").append(MAXIMUM_CURSOR_POSITION)
-         .append(" or the word ").append(NO_CURSOR)
-         .append(". ")
+    new RangeUsage("cursor position", MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION)
+      .setDefault(NO_CURSOR)
+      .addKeywords(NO_CURSOR)
+      .append(usage);
 
-         .append("If not specified, ")
-         .append(NO_CURSOR)
-         .append(" is assumed. ")
-         ;
-
-    usage.append('\n')
-         .append("The display number must be an integer")
-         .append(" within the range ").append(MINIMUM_DISPLAY_NUMBER)
-         .append(" through ").append(MAXIMUM_DISPLAY_NUMBER)
-         .append(" or the word ").append(DEFAULT_DISPLAY)
-         .append(". ")
-
-         .append("If not specified, ")
-         .append(DEFAULT_DISPLAY)
-         .append(" is assumed. ")
-         ;
+    new RangeUsage("display number", MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER)
+      .setDefault(DEFAULT_DISPLAY)
+      .addKeywords(DEFAULT_DISPLAY)
+      .append(usage);
   }
 
   private final WriteArguments writeArguments = new WriteArguments()
