@@ -24,11 +24,16 @@ import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
 public class EchoClient extends Client {
+  public final static byte MINIMUM_READ_COUNT =   1;
+  public final static byte DEFAULT_READ_COUNT =  10;
+  public final static byte MAXIMUM_READ_COUNT = 100;
+
   public final static byte MINIMUM_READ_TIMEOUT =  1;
   public final static byte DEFAULT_READ_TIMEOUT = 10;
   public final static byte MAXIMUM_READ_TIMEOUT = 30;
 
   private boolean echoDriverKeys = false;
+  private byte readCount = DEFAULT_READ_COUNT;
   private byte readTimeout = DEFAULT_READ_TIMEOUT;
 
   public EchoClient (String... arguments) {
@@ -47,6 +52,16 @@ public class EchoClient extends Client {
       }
     );
 
+    addOption("number",
+      (operands) -> {
+        readCount = Parse.asByte(
+          "read count", operands[0],
+          MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT
+        );
+      },
+      "number of reads"
+    );
+
     addOption("timeout",
       (operands) -> {
         readTimeout = Parse.asByte(
@@ -61,6 +76,17 @@ public class EchoClient extends Client {
   @Override
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
+
+    usage.append('\n')
+         .append("The number of reads must be an integer")
+         .append(" within the range ").append(MINIMUM_READ_COUNT)
+         .append(" through ").append(MAXIMUM_READ_COUNT)
+         .append(". ")
+
+         .append("If not specified, ")
+         .append(DEFAULT_READ_COUNT)
+         .append(" is assumed. ")
+         ;
 
     usage.append('\n')
          .append("The read timeout must be an integer number of seconds")
@@ -104,7 +130,7 @@ public class EchoClient extends Client {
           )
         );
 
-        while (true) {
+        while (readCount-- > 0) {
           long code;
 
           try {

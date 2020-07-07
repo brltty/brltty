@@ -16,6 +16,7 @@ Clients (see the clients/ subdirectory):
   driver-keys
   echo [tty ...]
     -commands | -keys
+    -number count (1-100, default is 10)
     -timeout seconds (1-30, default is 10)
   list-parameters [parameter [subparam]]
   pause
