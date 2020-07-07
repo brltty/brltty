@@ -47,7 +47,7 @@ public class PauseClient extends Client {
   }
 
   @Override
-  protected final void extendUsageSummary (StringBuilder usage) {
+  protected void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
     usage.append('\n')

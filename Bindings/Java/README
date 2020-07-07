@@ -22,6 +22,10 @@ Clients (see the clients/ subdirectory):
   pause
     -timeout seconds (1-30, default is 10)
   set-parameter parameter value
+  write-arguments [text ...]
+    -timeout seconds (1-30, default is 10)
+    -cursor position (1-99 or no, default is no)
+    -display number (1-9 or default, default is default)
   write-dots [dots ...]
     -timeout seconds (1-30, default is 10)
   write-text [text ...]

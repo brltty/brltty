@@ -51,6 +51,7 @@ public class MainProgram extends Program {
     addProgram(PauseClient.class);
     addProgram(SetParameterClient.class);
     addProgram(VersionProgram.class);
+    addProgram(WriteArgumentsClient.class);
     addProgram(WriteDotsClient.class);
     addProgram(WriteTextClient.class);
   }
