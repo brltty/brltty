@@ -28,6 +28,7 @@ public class EchoClient extends Client {
   public final static byte DEFAULT_READ_COUNT =  10;
   public final static byte MAXIMUM_READ_COUNT = 100;
 
+  public final static String NO_TIMEOUT = "none";
   public final static byte MINIMUM_READ_TIMEOUT =  1;
   public final static byte DEFAULT_READ_TIMEOUT = 10;
   public final static byte MAXIMUM_READ_TIMEOUT = 30;
@@ -64,10 +65,16 @@ public class EchoClient extends Client {
 
     addOption("timeout",
       (operands) -> {
-        readTimeout = Parse.asByte(
-          "read timeout", operands[0],
-          MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT
-        );
+        String operand = operands[0];
+
+        if (Strings.isAbbreviation(NO_TIMEOUT, operand)) {
+          readTimeout = 0;
+        } else {
+          readTimeout = Parse.asByte(
+            "read timeout", operand,
+            MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT
+          );
+        }
       },
       "number of seconds"
     );
@@ -92,6 +99,7 @@ public class EchoClient extends Client {
          .append("The read timeout must be an integer number of seconds")
          .append(" within the range ").append(MINIMUM_READ_TIMEOUT)
          .append(" through ").append(MAXIMUM_READ_TIMEOUT)
+         .append(" or the word ").append(NO_TIMEOUT)
          .append(". ")
 
          .append("If not specified, ")
@@ -134,7 +142,11 @@ public class EchoClient extends Client {
           long code;
 
           try {
-            code = tty.readKeyWithTimeout((readTimeout * 1000));
+            if (readTimeout == 0) {
+              code = tty.readKey();
+            } else {
+              code = tty.readKeyWithTimeout((readTimeout * 1000));
+            }
           } catch (InterruptedIOException exception) {
             continue;
           } catch (TimeoutException exception) {

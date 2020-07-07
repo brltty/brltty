@@ -29,6 +29,13 @@ public abstract class Strings {
   private Strings () {
   }
 
+  public static boolean isAbbreviation (String actual, String supplied) {
+    int count = supplied.length();
+    if (count == 0) return false;
+    if (count > actual.length()) return false;
+    return actual.regionMatches(true, 0, supplied, 0, count);
+  }
+
   private final static Map<String, Pattern> patternCache = new HashMap<>();
 
   public static Pattern getPattern (String expression) {
