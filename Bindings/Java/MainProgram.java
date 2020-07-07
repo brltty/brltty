@@ -47,6 +47,9 @@ public class MainProgram extends Program {
     addProgram(ComputerBrailleClient.class);
     addProgram(DriverKeysClient.class);
     addProgram(EchoClient.class);
+    addProgram(GetDriverClient.class);
+    addProgram(GetModelClient.class);
+    addProgram(GetSizeClient.class);
     addProgram(ListParametersClient.class);
     addProgram(PauseClient.class);
     addProgram(SetParameterClient.class);
