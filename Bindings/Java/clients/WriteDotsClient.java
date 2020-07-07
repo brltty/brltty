@@ -58,7 +58,7 @@ public class WriteDotsClient extends PauseClient {
       (tty) -> {
         printf("%s\n", text);
         tty.write(cells);
-        pause(tty, getPauseTimeout());
+        pause(tty);
       }
     );
   }

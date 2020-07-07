@@ -76,15 +76,17 @@ public class WriteArgumentsClient extends PauseClient {
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    new RangeUsage("cursor position", MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION)
+    new OperandUsage("cursor position")
+      .setRange(MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION)
       .setDefault(NO_CURSOR)
-      .addKeywords(NO_CURSOR)
-      .append(usage);
+      .addWord(NO_CURSOR)
+      .appendTo(usage);
 
-    new RangeUsage("display number", MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER)
+    new OperandUsage("display number")
+      .setRange(MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER)
       .setDefault(DEFAULT_DISPLAY)
-      .addKeywords(DEFAULT_DISPLAY)
-      .append(usage);
+      .addWord(DEFAULT_DISPLAY)
+      .appendTo(usage);
   }
 
   private final WriteArguments writeArguments = new WriteArguments()
@@ -121,7 +123,7 @@ public class WriteArgumentsClient extends PauseClient {
       (tty) -> {
         printf("%s\n", writeArguments.getText());
         tty.write(writeArguments);
-        pause(tty, getPauseTimeout());
+        pause(tty);
       }
     );
   }

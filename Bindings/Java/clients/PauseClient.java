@@ -21,28 +21,32 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class PauseClient extends Client {
-  public final static byte MINIMUM_PAUSE_TIMEOUT =  1;
-  public final static byte DEFAULT_PAUSE_TIMEOUT = 10;
-  public final static byte MAXIMUM_PAUSE_TIMEOUT = 30;
+  public final static byte MINIMUM_WAIT_TIME =  1;
+  public final static byte DEFAULT_WAIT_TIME = 10;
+  public final static byte MAXIMUM_WAIT_TIME = 30;
 
-  private byte pauseTimeout = DEFAULT_PAUSE_TIMEOUT;
+  private byte waitTime = DEFAULT_WAIT_TIME;
 
-  protected final int getPauseTimeout () {
-    return pauseTimeout * 1000;
+  protected final int getWaitTime () {
+    return waitTime * 1000;
+  }
+
+  protected final boolean pause (Connection connection) {
+    return pause(connection, getWaitTime());
   }
 
   public PauseClient (String... arguments) {
     super(arguments);
     // don't add parameters to this client because some other clients extend it
 
-    addOption("timeout",
+    addOption("wait",
       (operands) -> {
-        pauseTimeout = Parse.asByte(
-          "pause timeout", operands[0],
-          MINIMUM_PAUSE_TIMEOUT, MAXIMUM_PAUSE_TIMEOUT
+        waitTime = Parse.asByte(
+          "wait time", operands[0],
+          MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME
         );
       },
-      "number of seconds"
+      "duration"
     );
   }
 
@@ -50,23 +54,24 @@ public class PauseClient extends Client {
   protected void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    new RangeUsage("pause timeout", MINIMUM_PAUSE_TIMEOUT, MAXIMUM_PAUSE_TIMEOUT)
-      .setDefault(DEFAULT_PAUSE_TIMEOUT)
-      .setClarification("number of seconds")
-      .append(usage);
+    new OperandUsage("wait time")
+      .setRange(MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME)
+      .setRangeUnits("seconds")
+      .setDefault(DEFAULT_WAIT_TIME)
+      .appendTo(usage);
   }
 
   @Override
   protected void runClient (Connection connection) 
             throws ProgramException
   {
-    printf("Pausing for %d seconds...", pauseTimeout);
+    printf("Pausing for %d seconds...", waitTime);
     String result;
 
-    if (pause(connection, getPauseTimeout())) {
-      result = "timed out";
+    if (pause(connection)) {
+      result = "pause completed";
     } else {
-      result = "event occurred";
+      result = "pause interrupted";
     }
 
     printf(" %s\n", result);

@@ -60,7 +60,7 @@ public class EchoClient extends Client {
           MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT
         );
       },
-      "number of reads"
+      "count"
     );
 
     addOption("timeout",
@@ -76,7 +76,7 @@ public class EchoClient extends Client {
           );
         }
       },
-      "number of seconds"
+      "duration"
     );
   }
 
@@ -84,15 +84,18 @@ public class EchoClient extends Client {
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    new RangeUsage("number of reads", MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT)
+    new OperandUsage("number of reads")
+      .setRange(MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT)
       .setDefault(DEFAULT_READ_COUNT)
-      .append(usage);
+      .appendTo(usage);
 
-    new RangeUsage("read timeout", MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT)
+    new OperandUsage("read timeout")
+      .setRange(MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT)
       .setDefault(DEFAULT_READ_TIMEOUT)
-      .setClarification("number of seconds")
-      .addKeyword(NO_TIMEOUT, "readKey will be used")
-      .append(usage);
+      .setRangeUnits("seconds")
+      .setRangeComment("readKeyWithTimeout is used")
+      .addWord(NO_TIMEOUT, "readKey is used")
+      .appendTo(usage);
   }
 
   private int[] ttyPath = null;

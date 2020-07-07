@@ -49,7 +49,7 @@ public class WriteTextClient extends PauseClient {
       (tty) -> {
         printf("%s\n", text);
         tty.write(text, Constants.CURSOR_OFF);
-        pause(tty, getPauseTimeout());
+        pause(tty);
       }
     );
   }

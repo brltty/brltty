@@ -10,7 +10,7 @@ Clients (see the clients/ subdirectory):
   -authorization scheme+...
   api-error
   api-exception
-    -timeout seconds (1-30, default is 10)
+    -wait seconds (1-30, default is 10)
   bound-commands
   computer-braille
   driver-keys
@@ -23,16 +23,16 @@ Clients (see the clients/ subdirectory):
   get-size
   list-parameters [parameter [subparam]]
   pause
-    -timeout seconds (1-30, default is 10)
+    -wait seconds (1-30, default is 10)
   set-parameter parameter value
   write-arguments [text ...]
-    -timeout seconds (1-30, default is 10)
+    -wait seconds (1-30, default is 10)
     -cursor position (1-99 or no, default is no)
     -display number (1-9 or default, default is default)
   write-dots [dots ...]
-    -timeout seconds (1-30, default is 10)
+    -wait seconds (1-30, default is 10)
   write-text [text ...]
-    -timeout seconds (1-30, default is 10)
+    -wait seconds (1-30, default is 10)
 
 These aren't case sensitive and allow unambiguous truncations:
   program names (e.g. v for version)

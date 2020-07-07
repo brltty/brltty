@@ -44,7 +44,7 @@ public class ApiExceptionClient extends PauseClient {
         String result = null;
 
         try {
-          tty.readKeyWithTimeout(getPauseTimeout());
+          tty.readKeyWithTimeout(getWaitTime());
           result = String.format("%s not thrown", label);
         } catch (APIException exception) {
           result = String.format("%s received", label);
