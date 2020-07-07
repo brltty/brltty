@@ -19,7 +19,6 @@
 
 package org.a11y.brlapi;
 
-import java.io.EOFException;
 import java.io.InterruptedIOException;
 
 public class Connection extends ConnectionBase {
@@ -53,11 +52,7 @@ public class Connection extends ConnectionBase {
   }
 
   public final long readKey () throws InterruptedIOException {
-    try {
-      return readKey(true);
-    } catch (EOFException exception) {
-      throw new IllegalStateException("unexpected end-of-file");
-    }
+    return readKey(true);
   }
 
   public void write (byte[] dots) {

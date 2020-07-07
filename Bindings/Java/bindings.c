@@ -27,6 +27,24 @@
 
 #include "bindings.h"
 
+#define NEW_PRIMITIVE_WRAPPER(name, type, sig) \
+static jobject \
+new##name (JNIEnv *env, type value) { \
+  static JAVA_CLASS_VARIABLE(class); \
+  static JAVA_METHOD_VARIABLE(constructor); \
+  \
+  if (!javaFindClassAndMethod( \
+    env, \
+    &class, JAVA_OBJ_LANG(#name), \
+    &constructor, JAVA_CONSTRUCTOR_NAME, \
+    JAVA_SIG_CONSTRUCTOR(JAVA_SIG_##sig) \
+  )) return NULL; \
+  \
+  return (*env)->NewObject(env, class, constructor, value); \
+}
+
+NEW_PRIMITIVE_WRAPPER(Long, jlong, LONG)
+
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION
 #include "brlapi.h"
@@ -153,12 +171,7 @@ static void
 throwJavaError (JNIEnv *env, const char *object, const char *message) {
   if ((*env)->ExceptionCheck(env)) return;
   jclass class = (*env)->FindClass(env, object);
-
-  if (class) {
-    (*env)->ThrowNew(env, class, message);
-  } else {
-    fprintf(stderr,"couldn't find object: %s: %s!\n", object, message);
-  }
+  if (class) (*env)->ThrowNew(env, class, message);
 }
 
 static void
@@ -204,17 +217,17 @@ throwAPIError (JNIEnv *env) {
     }
   }
 
-  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("APIError"));
-  if (!class) return;
+  static JAVA_CLASS_VARIABLE(class);
+  if (!javaFindClass(env, &class, BRLAPI_OBJECT("APIError"))) return;
 
-  jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
+  static JAVA_METHOD_VARIABLE(constructor);
+  if (!JAVA_FIND_CONSTRUCTOR(env, &constructor, class,
     JAVA_SIG_INT // api error
     JAVA_SIG_INT // os error
     JAVA_SIG_INT // gai error
     JAVA_SIG_STRING // function name
-  );
+  )) return;
 
-  if (!constructor) return;
   jstring jFunction;
 
   if (!brlapi_errfun) {
@@ -306,16 +319,16 @@ handleAPIException (brlapi_handle_t *handle, int error, brlapi_packetType_t type
   if (!jPacket) return;
   (*env)->SetByteArrayRegion(env, jPacket, 0, size, (jbyte *) packet);
 
-  jclass class = (*env)->FindClass(env, BRLAPI_OBJECT("APIException"));
-  if (!class) return;
+  static JAVA_CLASS_VARIABLE(class);
+  if (!javaFindClass(env, &class, BRLAPI_OBJECT("APIException"))) return;
 
-  jmethodID constructor = JAVA_GET_CONSTRUCTOR(env, class,
+  static JAVA_METHOD_VARIABLE(constructor);
+  if (!JAVA_FIND_CONSTRUCTOR(env, &constructor, class,
     JAVA_SIG_LONG // handle
     JAVA_SIG_INT // error
     JAVA_SIG_INT // type
     JAVA_SIG_ARRAY(JAVA_SIG_BYTE) // packet
-  );
-  if (!constructor) return;
+  )) return;
 
   jclass object = (*env)->NewObject(
     env, class, constructor,
@@ -773,18 +786,18 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_ConnectionBase, readKey, jlong,
+  org_a11y_brlapi_ConnectionBase, readKey, jobject,
   jboolean jWait
 ) {
-  GET_CONNECTION_HANDLE(env, this, -1);
+  GET_CONNECTION_HANDLE(env, this, NULL);
 
   int cWait = jWait != JNI_FALSE;
   brlapi_keyCode_t code;
 
   int result = brlapi__readKey(handle, cWait, &code);
   if (result < 0) throwAPIError(env);
-  if (!result) throwJavaError(env, JAVA_OBJ_EOF_EXCEPTION, __func__);
-  return (jlong)code;
+  if (!result) return NULL;
+  return newLong(env, code);
 }
 
 JAVA_INSTANCE_METHOD(

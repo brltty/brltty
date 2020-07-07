@@ -76,6 +76,41 @@ extern "C" {
 #define JAVA_SIG_STRING JAVA_SIG_OBJECT(JAVA_OBJ_STRING)
 #define JAVA_SIG_THREAD JAVA_SIG_OBJECT(JAVA_OBJ_THREAD)
 
+#define JAVA_CLASS_VARIABLE(name) jclass name = NULL
+#define JAVA_METHOD_VARIABLE(name) jmethodID name = 0;
+
+static inline int
+javaFindClass (JNIEnv *env, jclass *class, const char *name) {
+  if (*class) return 1;
+  return !!(*class = (*env)->FindClass(env, name));
+}
+
+static inline int
+javaFindMethod (
+  JNIEnv *env, jmethodID *method, jclass class,
+  const char *name, const char *signature
+) {
+  if (*method) return 1;
+  return !!(*method = (*env)->GetMethodID(env, class, name, signature));
+}
+
+#define JAVA_FIND_METHOD(env, method, class, name, arguments, returns) \
+(javaFindMethod(env, method, class, name, JAVA_SIG_METHOD(returns, arguments)))
+
+#define JAVA_FIND_CONSTRUCTOR(env, constructor, class, arguments) \
+(javaFindMethod(env, constructor, class, JAVA_CONSTRUCTOR_NAME, JAVA_SIG_CONSTRUCTOR(arguments)))
+
+static inline int
+javaFindClassAndMethod (
+  JNIEnv *env,
+  jclass *class, const char *className,
+  jmethodID *method, const char *methodName,
+  const char *signature
+) {
+  return javaFindClass(env, class, className)
+      && javaFindMethod(env, method, *class, methodName, signature);
+}
+
 static inline jboolean
 javaHasExceptionOccurred (JNIEnv *env) {
   return (*env)->ExceptionCheck(env);

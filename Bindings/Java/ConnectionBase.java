@@ -22,7 +22,6 @@ package org.a11y.brlapi;
 import java.util.Map;
 import java.util.HashMap;
 
-import java.io.EOFException;
 import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
@@ -111,8 +110,7 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
   public native void writeDots (byte[] dots);
   public native void write (WriteArguments arguments);
 
-  public native long readKey (boolean wait)
-         throws EOFException, InterruptedIOException;
+  public native Long readKey (boolean wait) throws InterruptedIOException;
 
   public native long readKeyWithTimeout (int milliseconds)
          throws InterruptedIOException, TimeoutException;
