@@ -77,14 +77,14 @@ public class WriteArgumentsClient extends PauseClient {
     super.extendUsageSummary(usage);
 
     new OperandUsage("cursor position")
-      .setRange(MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION)
       .setDefault(NO_CURSOR)
+      .setRange(MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION)
       .addWord(NO_CURSOR)
       .appendTo(usage);
 
     new OperandUsage("display number")
-      .setRange(MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER)
       .setDefault(DEFAULT_DISPLAY)
+      .setRange(MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER)
       .addWord(DEFAULT_DISPLAY)
       .appendTo(usage);
   }

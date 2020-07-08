@@ -84,14 +84,14 @@ public class EchoClient extends Client {
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    new OperandUsage("number of reads")
-      .setRange(MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT)
+    new OperandUsage("read count")
       .setDefault(DEFAULT_READ_COUNT)
+      .setRange(MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT)
       .appendTo(usage);
 
     new OperandUsage("read timeout")
-      .setRange(MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT)
       .setDefault(DEFAULT_READ_TIMEOUT)
+      .setRange(MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT)
       .setRangeUnits("seconds")
       .setRangeComment("readKeyWithTimeout is used")
       .addWord(NO_TIMEOUT, "readKey is used")

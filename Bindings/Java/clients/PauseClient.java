@@ -55,9 +55,9 @@ public class PauseClient extends Client {
     super.extendUsageSummary(usage);
 
     new OperandUsage("wait time")
+      .setDefault(DEFAULT_WAIT_TIME)
       .setRange(MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME)
       .setRangeUnits("seconds")
-      .setDefault(DEFAULT_WAIT_TIME)
       .appendTo(usage);
   }
 

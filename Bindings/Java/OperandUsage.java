@@ -83,7 +83,7 @@ public class OperandUsage {
     return addWord(value, null);
   }
 
-  public final void appendTo (StringBuilder usage) {
+  public final StringBuilder appendTo (StringBuilder usage) {
     usage.append('\n')
          .append("The ").append(operandDescription).append(" must be");
 
@@ -95,8 +95,7 @@ public class OperandUsage {
       }
 
       usage.append(" within the range ").append(rangeMinimum)
-           .append(" through ").append(rangeMaximum)
-           ;
+           .append(" through ").append(rangeMaximum);
 
       if (rangeComment != null) {
         usage.append(" (").append(rangeComment).append(')');
@@ -134,5 +133,12 @@ public class OperandUsage {
            .append(defaultValue)
            .append(" is assumed. ");
     }
+
+    return usage;
+  }
+
+  @Override
+  public String toString () {
+    return appendTo(new StringBuilder()).toString();
   }
 }
