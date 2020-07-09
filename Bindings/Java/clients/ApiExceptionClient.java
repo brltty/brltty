@@ -44,14 +44,13 @@ public class ApiExceptionClient extends PauseClient {
         String result = null;
 
         try {
-          tty.readKeyWithTimeout(getWaitTime());
-          result = String.format("%s not thrown", label);
+          if (pause(tty)) {
+            result = String.format("wait for %s timed out", label);
+          } else {
+            result = String.format("wait for %s interrupted", label);
+          }
         } catch (APIException exception) {
           result = String.format("%s received", label);
-        } catch (InterruptedIOException exception) {
-          result = String.format("wait for %s interrupted", label);
-        } catch (TimeoutException exception) {
-          result = String.format("wait for %s timed out", label);
         }
 
         printf("%s\n", result);
