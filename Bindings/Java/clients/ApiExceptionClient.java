@@ -34,17 +34,17 @@ public class ApiExceptionClient extends PauseClient {
   {
     ttyMode(
       connection, false,
-      (tty) -> {
+      (con) -> {
         WriteArguments arguments = new WriteArguments()
-          .setRegion(1, (tty.getCellCount() + 1))
+          .setRegion(1, (con.getCellCount() + 1))
           .setText("This should fail because the region size is too big.");
 
-        tty.write(arguments);
+        con.write(arguments);
         String label = "API exception";
         String result = null;
 
         try {
-          if (pause(tty)) {
+          if (pause(con)) {
             result = String.format("wait for %s timed out", label);
           } else {
             result = String.format("wait for %s interrupted", label);

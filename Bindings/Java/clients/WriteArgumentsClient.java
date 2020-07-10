@@ -120,10 +120,10 @@ public class WriteArgumentsClient extends PauseClient {
 
     ttyMode(
       connection, false,
-      (tty) -> {
+      (con) -> {
         printf("%s\n", writeArguments.getText());
-        tty.write(writeArguments);
-        pause(tty);
+        con.write(writeArguments);
+        pause(con);
       }
     );
   }

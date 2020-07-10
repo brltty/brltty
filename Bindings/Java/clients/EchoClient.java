@@ -121,8 +121,8 @@ public class EchoClient extends Client {
   protected final void runClient (Connection connection) throws ProgramException {
     ttyMode(
       connection, echoDriverKeys,
-      (tty) -> {
-        show(tty,
+      (con) -> {
+        show(con,
           String.format(
             "press keys (timeout is %d seconds)", readTimeout
           )
@@ -133,9 +133,9 @@ public class EchoClient extends Client {
 
           try {
             if (readTimeout == 0) {
-              code = tty.readKey();
+              code = con.readKey();
             } else {
-              code = tty.readKeyWithTimeout((readTimeout * 1000));
+              code = con.readKeyWithTimeout((readTimeout * 1000));
             }
           } catch (InterruptedIOException exception) {
             continue;
@@ -148,7 +148,7 @@ public class EchoClient extends Client {
             new DriverKeycode(code).toString():
             new CommandKeycode(code).toString();
 
-          show(tty, text);
+          show(con, text);
         }
       },
       ttyPath

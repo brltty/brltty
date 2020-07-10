@@ -46,10 +46,10 @@ public class WriteTextClient extends PauseClient {
   {
     ttyMode(
       connection, false,
-      (tty) -> {
+      (con) -> {
         printf("%s\n", text);
-        tty.write(text, Constants.CURSOR_OFF);
-        pause(tty);
+        con.write(text, Constants.CURSOR_OFF);
+        pause(con);
       }
     );
   }

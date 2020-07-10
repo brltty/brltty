@@ -55,10 +55,10 @@ public class WriteDotsClient extends PauseClient {
   {
     ttyMode(
       connection, false,
-      (tty) -> {
+      (con) -> {
         printf("%s\n", text);
-        tty.write(cells);
-        pause(tty);
+        con.write(cells);
+        pause(con);
       }
     );
   }
