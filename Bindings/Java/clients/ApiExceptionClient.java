@@ -20,9 +20,6 @@
 package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
-import java.io.InterruptedIOException;
-import java.util.concurrent.TimeoutException;
-
 public class ApiExceptionClient extends PauseClient {
   public ApiExceptionClient (String... arguments) {
     super(arguments);
