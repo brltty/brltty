@@ -21,13 +21,16 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class WriteArgumentsClient extends PauseClient {
-  public final static String NO_CURSOR = "no";
-  public final static int MINIMUM_CURSOR_POSITION =  1;
-  public final static int MAXIMUM_CURSOR_POSITION = 99;
+  private final WriteArguments writeArguments = new WriteArguments()
+    .setCursorPosition(Constants.CURSOR_OFF)
+    .setDisplayNumber(Constants.DISPLAY_DEFAULT)
+    ;
 
-  public final static String DEFAULT_DISPLAY = "default";
-  public final static int MINIMUM_DISPLAY_NUMBER = 1;
-  public final static int MAXIMUM_DISPLAY_NUMBER = 9;
+  private final OperandUsage cursorPositionUsage =
+     new CursorPositionUsage(writeArguments.getCursorPosition());
+
+  private final OperandUsage displayNumberUsage =
+      new DisplayNumberUsage(writeArguments.getDisplayNumber());
 
   public WriteArgumentsClient (String... arguments) {
     super(arguments);
@@ -35,38 +38,14 @@ public class WriteArgumentsClient extends PauseClient {
 
     addOption("cursor",
       (operands) -> {
-        String operand = operands[0];
-        int position;
-
-        if (Strings.isAbbreviation(NO_CURSOR, operand)) {
-          position = Constants.CURSOR_OFF;
-        } else {
-          position = Parse.asInt(
-            "cursor position", operand,
-            MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION
-          );
-        }
-
-        writeArguments.setCursorPosition(position);
+        writeArguments.setCursorPosition(Parse.asCursorPosition(operands[0]));
       },
       "position"
     );
 
     addOption("display",
       (operands) -> {
-        String operand = operands[0];
-        int number;
-
-        if (Strings.isAbbreviation(DEFAULT_DISPLAY, operand)) {
-          number = Constants.DISPLAY_DEFAULT;
-        } else {
-          number = Parse.asInt(
-            "display number", operand,
-            MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER
-          );
-        }
-
-        writeArguments.setDisplayNumber(number);
+        writeArguments.setDisplayNumber(Parse.asDisplayNumber(operands[0]));
       },
       "number"
     );
@@ -76,23 +55,9 @@ public class WriteArgumentsClient extends PauseClient {
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    new OperandUsage("cursor position")
-      .setDefault(NO_CURSOR)
-      .setRange(MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION)
-      .addWord(NO_CURSOR)
-      .appendTo(usage);
-
-    new OperandUsage("display number")
-      .setDefault(DEFAULT_DISPLAY)
-      .setRange(MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER)
-      .addWord(DEFAULT_DISPLAY)
-      .appendTo(usage);
+    cursorPositionUsage.appendTo(usage);
+    displayNumberUsage.appendTo(usage);
   }
-
-  private final WriteArguments writeArguments = new WriteArguments()
-    .setCursorPosition(Constants.CURSOR_OFF)
-    .setDisplayNumber(Constants.DISPLAY_DEFAULT)
-    ;
 
   @Override
   protected final void processParameters (String[] parameters) {

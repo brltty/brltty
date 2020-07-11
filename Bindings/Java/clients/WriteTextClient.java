@@ -21,9 +21,20 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class WriteTextClient extends PauseClient {
+  private int cursorPosition = Constants.CURSOR_OFF;
+  private final OperandUsage cursorPositionUsage =
+     new CursorPositionUsage(cursorPosition);
+
   public WriteTextClient (String... arguments) {
     super(arguments);
     addRepeatingParameter("text");
+
+    addOption("cursor",
+      (operands) -> {
+        cursorPosition = Parse.asCursorPosition(operands[0]);
+      },
+      "position"
+    );
   }
 
   private String text = null;
@@ -41,6 +52,13 @@ public class WriteTextClient extends PauseClient {
   }
 
   @Override
+  protected final void extendUsageSummary (StringBuilder usage) {
+    super.extendUsageSummary(usage);
+
+    cursorPositionUsage.appendTo(usage);
+  }
+
+  @Override
   protected final void runClient (Connection connection) 
             throws ProgramException
   {
@@ -48,7 +66,7 @@ public class WriteTextClient extends PauseClient {
       connection, false,
       (con) -> {
         printf("%s\n", text);
-        con.write(text, Constants.CURSOR_OFF);
+        con.write(text, cursorPosition);
         pause(con);
       }
     );

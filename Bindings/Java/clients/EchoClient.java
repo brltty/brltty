@@ -24,18 +24,19 @@ import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
 public class EchoClient extends Client {
-  public final static byte MINIMUM_READ_COUNT =   1;
-  public final static byte DEFAULT_READ_COUNT =  10;
-  public final static byte MAXIMUM_READ_COUNT = 100;
+  public final static int MINIMUM_READ_COUNT =   1;
+  public final static int DEFAULT_READ_COUNT =  10;
+  public final static int MAXIMUM_READ_COUNT = 100;
 
   public final static String NO_TIMEOUT = "none";
-  public final static byte MINIMUM_READ_TIMEOUT =  1;
-  public final static byte DEFAULT_READ_TIMEOUT = 10;
-  public final static byte MAXIMUM_READ_TIMEOUT = 30;
+  public final static int FOREVER_READ_TIMEOUT =  0;
+  public final static int MINIMUM_READ_TIMEOUT =  1;
+  public final static int DEFAULT_READ_TIMEOUT = 10;
+  public final static int MAXIMUM_READ_TIMEOUT = 30;
 
   private boolean echoDriverKeys = false;
-  private byte readCount = DEFAULT_READ_COUNT;
-  private byte readTimeout = DEFAULT_READ_TIMEOUT;
+  private int readCount = DEFAULT_READ_COUNT;
+  private int readTimeout = DEFAULT_READ_TIMEOUT;
 
   public EchoClient (String... arguments) {
     super(arguments);
@@ -55,7 +56,7 @@ public class EchoClient extends Client {
 
     addOption("number",
       (operands) -> {
-        readCount = Parse.asByte(
+        readCount = Parse.asInt(
           "read count", operands[0],
           MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT
         );
@@ -68,9 +69,9 @@ public class EchoClient extends Client {
         String operand = operands[0];
 
         if (Strings.isAbbreviation(NO_TIMEOUT, operand)) {
-          readTimeout = 0;
+          readTimeout = FOREVER_READ_TIMEOUT;
         } else {
-          readTimeout = Parse.asByte(
+          readTimeout = Parse.asInt(
             "read timeout", operand,
             MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT
           );
@@ -94,7 +95,7 @@ public class EchoClient extends Client {
       .setRange(MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT)
       .setRangeUnits("seconds")
       .setRangeComment("readKeyWithTimeout is used")
-      .addWord(NO_TIMEOUT, "readKey is used")
+      .addWord(NO_TIMEOUT, FOREVER_READ_TIMEOUT, "readKey is used")
       .appendTo(usage);
   }
 
@@ -132,7 +133,7 @@ public class EchoClient extends Client {
           long code;
 
           try {
-            if (readTimeout == 0) {
+            if (readTimeout == FOREVER_READ_TIMEOUT) {
               code = con.readKey();
             } else {
               code = con.readKeyWithTimeout((readTimeout * 1000));

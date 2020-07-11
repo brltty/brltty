@@ -178,4 +178,41 @@ public abstract class Parse {
 
     return dots;
   }
+
+  public final static int MINIMUM_CURSOR_POSITION =  1;
+  public final static int MAXIMUM_CURSOR_POSITION = 99;
+
+  public final static String NO_CURSOR = "no";
+  public final static String LEAVE_CURSOR = "leave";
+
+  public static int asCursorPosition (String operand) throws SyntaxException {
+    if (Strings.isAbbreviation(NO_CURSOR, operand)) {
+      return Constants.CURSOR_OFF;
+    }
+
+    if (Strings.isAbbreviation(LEAVE_CURSOR, operand)) {
+      return Constants.CURSOR_LEAVE;
+    }
+
+    return Parse.asInt(
+      "cursor position", operand,
+      MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION
+    );
+  }
+
+  public final static int MINIMUM_DISPLAY_NUMBER = 1;
+  public final static int MAXIMUM_DISPLAY_NUMBER = 9;
+
+  public final static String DEFAULT_DISPLAY = "default";
+
+  public static int asDisplayNumber (String operand) throws SyntaxException {
+    if (Strings.isAbbreviation(DEFAULT_DISPLAY, operand)) {
+      return Constants.DISPLAY_DEFAULT;
+    }
+
+    return Parse.asInt(
+      "display number", operand,
+      MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER
+    );
+  }
 }

@@ -53,34 +53,71 @@ public class OperandUsage {
   }
 
   private static class WordEntry {
-    public final String value;
+    public final String word;
+    public final Integer value;
     public final String comment;
 
-    public WordEntry (String value, String comment) {
+    public WordEntry (String word, Integer value, String comment) {
+      this.word = word;
       this.value = value;
       this.comment = comment;
     }
   }
 
-  private String defaultValue = null;
   private final List<WordEntry> wordList = new LinkedList<>();
 
-  public final OperandUsage setDefault (String text) {
-    defaultValue = text;
+  public final OperandUsage addWord (String word, Integer value, String comment) {
+    wordList.add(new WordEntry(word, value, comment));
+    return this;
+  }
+
+  public final OperandUsage addWord (String word, String comment) {
+    return addWord(word, null, comment);
+  }
+
+  public final OperandUsage addWord (String word, int value) {
+    return addWord(word, value, null);
+  }
+
+  public final OperandUsage addWord (String word) {
+    return addWord(word, null, null);
+  }
+
+  private String defaultWord = null;
+  private Integer defaultValue = null;
+
+  public final OperandUsage setDefault (String word) {
+    defaultWord = word;
+    defaultValue = null;
     return this;
   }
 
   public final OperandUsage setDefault (int value) {
-    return setDefault(Integer.toString(value));
-  }
-
-  public final OperandUsage addWord (String value, String comment) {
-    wordList.add(new WordEntry(value, comment));
+    defaultWord = null;
+    defaultValue = value;
     return this;
   }
 
-  public final OperandUsage addWord (String value) {
-    return addWord(value, null);
+  public final String getDefaultWord () {
+    if (defaultWord != null) return defaultWord;
+    if (defaultValue == null) return null;
+
+    for (WordEntry entry : wordList) {
+      if (entry.value == defaultValue) return entry.word;
+    }
+
+    return defaultValue.toString();
+  }
+
+  public final Integer getDefaultValue () {
+    if (defaultValue != null) return defaultValue;
+    if (defaultWord == null) return null;
+
+    for (WordEntry entry : wordList) {
+      if (entry.word.equals(defaultWord)) return entry.value;
+    }
+
+    return null;
   }
 
   public final StringBuilder appendTo (StringBuilder usage) {
@@ -109,7 +146,7 @@ public class OperandUsage {
       if (count > 1) usage.append(" any of");
       int number = 0;
 
-      for (WordEntry word : wordList) {
+      for (WordEntry entry : wordList) {
         number += 1;
 
         if (number > 1) {
@@ -117,8 +154,8 @@ public class OperandUsage {
           if (number == count) usage.append(" or");
         }
 
-        usage.append(' ').append(word.value);
-        String comment = word.comment;
+        usage.append(' ').append(entry.word);
+        String comment = entry.comment;
 
         if (comment != null) {
           usage.append(" (").append(comment).append(')');
@@ -128,10 +165,12 @@ public class OperandUsage {
 
     usage.append(". ");
 
-    if (defaultValue != null) {
-      usage.append("If not specified, ")
-           .append(defaultValue)
-           .append(" is assumed. ");
+    {
+      String word = getDefaultWord();
+
+      if (word != null) {
+        usage.append("If not specified, ").append(word).append(" is assumed. ");
+      }
     }
 
     return usage;

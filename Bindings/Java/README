@@ -33,6 +33,7 @@ Clients (see the clients/ subdirectory):
     -wait seconds (1-30, default is 10)
   write-text [text ...]
     -wait seconds (1-30, default is 10)
+    -cursor position (1-99 or no, default is no)
 
 These aren't case sensitive and allow unambiguous truncations:
   program names (e.g. v for version)
