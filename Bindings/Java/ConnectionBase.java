@@ -34,8 +34,8 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
     ConnectionSettings desiredSettings, ConnectionSettings actualSettings
   ) throws ConnectException;
 
-  protected final ConnectionSettings connectionSettings;
-  protected final int fileDescriptor;
+  private final ConnectionSettings connectionSettings;
+  private final int fileDescriptor;
 
   public ConnectionBase (ConnectionSettings settings) throws ConnectException {
     super();
@@ -107,7 +107,7 @@ public class ConnectionBase extends NativeComponent implements AutoCloseable {
   public native void setFocus (int tty);
 
   protected native void writeText (int cursor, String text);
-  public native void writeDots (byte[] dots);
+  protected native void writeDots (byte[] dots);
   public native void write (WriteArguments arguments);
 
   public native Long readKey (boolean wait) throws InterruptedIOException;
