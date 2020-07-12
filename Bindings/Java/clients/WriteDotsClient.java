@@ -26,27 +26,18 @@ public class WriteDotsClient extends PauseClient {
     addRepeatingParameter("dots");
   }
 
-  private byte[] cells = null;
-  private String text = null;
+  private byte[] dots = null;
 
   @Override
   protected final void processParameters (String[] parameters)
             throws SyntaxException
   {
     int count = parameters.length;
-    cells = new byte[count];
-    char[] characters = new char[count];
+    dots = new byte[count];
 
     for (int index=0; index<count; index+=1) {
-      byte dots = Parse.asDots("dot numbers", parameters[index]);
-      cells[index] = dots;
-
-      char character = UNICODE_BRAILLE_ROW;
-      character |= dots & BYTE_MASK;
-      characters[index] = character;
+      dots[index] = Parse.asDots("dot numbers", parameters[index]);
     }
-
-    text = new String(characters);
   }
 
   @Override
@@ -56,8 +47,8 @@ public class WriteDotsClient extends PauseClient {
     ttyMode(
       connection, false,
       (con) -> {
-        printf("%s\n", text);
-        con.write(cells);
+        printf("%s\n", toUnicodeBraille(dots));
+        con.write(dots);
         pause(con);
       }
     );
