@@ -32,9 +32,40 @@ public class WriteArgumentsClient extends PauseClient {
   private final OperandUsage displayNumberUsage =
       new DisplayNumberUsage(writeArguments.getDisplayNumber());
 
+  public final static int MINIMUM_REGION_BEGIN =  1;
+  public final static int MAXIMUM_REGION_BEGIN = 99;
+
+  public final static int MINIMUM_REGION_SIZE =  1;
+  public final static int MAXIMUM_REGION_SIZE = 99;
+
   public WriteArgumentsClient (String... arguments) {
     super(arguments);
-    addRepeatingParameter("text");
+
+    addOption("text",
+      (operands) -> {
+        writeArguments.setText(operands[0]);
+      },
+      "text"
+    );
+
+    addOption("region",
+      (operands) -> {
+        writeArguments.setRegionBegin(
+          Parse.asInt(
+            "region begin", operands[0],
+            MINIMUM_REGION_BEGIN, MAXIMUM_REGION_BEGIN
+          )
+        );
+
+        writeArguments.setRegionSize(
+          Parse.asInt(
+            "region Size", operands[1],
+            MINIMUM_REGION_SIZE, MAXIMUM_REGION_SIZE
+          )
+        );
+      },
+      "begin", "size"
+    );
 
     addOption("cursor",
       (operands) -> {
@@ -55,34 +86,22 @@ public class WriteArgumentsClient extends PauseClient {
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
+    new OperandUsage("beginning of the region")
+      .setRange(MINIMUM_REGION_BEGIN, MAXIMUM_REGION_BEGIN)
+      .appendTo(usage);
+
+    new OperandUsage("region size")
+      .setRange(MINIMUM_REGION_SIZE, MAXIMUM_REGION_SIZE)
+      .appendTo(usage);
+
     cursorPositionUsage.appendTo(usage);
     displayNumberUsage.appendTo(usage);
-  }
-
-  @Override
-  protected final void processParameters (String[] parameters) {
-    StringBuilder builder = new StringBuilder();
-
-    for (String parameter : parameters) {
-      if (builder.length() > 0) builder.append(' ');
-      builder.append(parameter);
-    }
-
-    writeArguments.setText(builder.toString());
   }
 
   @Override
   protected final void runClient (Connection connection) 
             throws ProgramException
   {
-    if (writeArguments.getRegionBegin() == 0) {
-      writeArguments.setRegionBegin(1);
-    }
-
-    if (writeArguments.getRegionSize() == 0) {
-      writeArguments.setRegionSize(writeArguments.getText().length());
-    }
-
     ttyMode(
       connection, false,
       (con) -> {
