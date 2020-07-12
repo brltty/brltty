@@ -23,6 +23,7 @@ public abstract class Component {
   protected Component () {
   }
 
+  public final static int BYTE_MASK = (1 << Byte.SIZE) - 1;
   public final static char UNICODE_BRAILLE_ROW = 0X2800;
 
   public static void printf (String format, Object... arguments) {

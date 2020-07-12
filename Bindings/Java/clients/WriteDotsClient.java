@@ -42,7 +42,7 @@ public class WriteDotsClient extends PauseClient {
       cells[index] = dots;
 
       char character = UNICODE_BRAILLE_ROW;
-      character |= dots & 0XFF;
+      character |= dots & BYTE_MASK;
       characters[index] = character;
     }
 

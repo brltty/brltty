@@ -21,7 +21,7 @@ package org.a11y.brlapi;
 
 import java.util.Arrays;
 
-public class BitMask {
+public class BitMask extends Component {
   private final static int BYTE_SIZE = Byte.SIZE;
 
   private final byte[] maskBytes;
@@ -54,7 +54,7 @@ public class BitMask {
     int start = 0;
 
     for (int bits : maskBytes) {
-      if ((bits &= 0XFF) != 0) {
+      if ((bits &= BYTE_MASK) != 0) {
         int bit = start;
 
         while (true) {

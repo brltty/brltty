@@ -86,7 +86,7 @@ public abstract class ParameterComponent extends Component {
     if (cell == 0) return "0";
 
     StringBuilder numbers = new StringBuilder();
-    int dots = cell & 0XFF;
+    int dots = cell & BYTE_MASK;
     int dot = 1;
 
     while (true) {
