@@ -21,9 +21,9 @@ package org.a11y.brlapi;
 
 public class CursorPositionUsage extends OperandUsage {
   public CursorPositionUsage (int defaultValue) {
-    super("cursor position");
+    super(WriteArguments.CURSOR_POSITION);
     setDefault(defaultValue);
-    setRange(Parse.MINIMUM_CURSOR_POSITION, Parse.MAXIMUM_CURSOR_POSITION);
+    setRangeMinimum(Parse.MINIMUM_CURSOR_POSITION);
     addWord(Parse.NO_CURSOR, Constants.CURSOR_OFF);
     addWord(Parse.LEAVE_CURSOR, Constants.CURSOR_LEAVE);
   }

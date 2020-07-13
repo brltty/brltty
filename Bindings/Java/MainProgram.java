@@ -133,12 +133,17 @@ public class MainProgram extends Program {
     } catch (InvocationTargetException exception) {
       Throwable cause = exception.getCause();
 
-      throw new ProgramException(
-        "%s construction failed: %s: %s: %s",
-        term, programName,
-        cause.getClass().getSimpleName(),
-        cause.getMessage()
+      String message = String.format(
+        "%s construction failed: %s: %s",
+        term, programName, cause.getClass().getSimpleName()
       );
+
+      {
+        String problem = cause.getMessage();
+        if (problem != null) message += ": " + problem;
+      }
+
+      throw new ProgramException(message);
     }
 
     program.run();

@@ -21,9 +21,9 @@ package org.a11y.brlapi;
 
 public class DisplayNumberUsage extends OperandUsage {
   public DisplayNumberUsage (int defaultValue) {
-    super("display number");
+    super(WriteArguments.DISPLAY_NUMBER);
     setDefault(defaultValue);
-    setRange(Parse.MINIMUM_DISPLAY_NUMBER, Parse.MAXIMUM_DISPLAY_NUMBER);
+    setRangeMinimum(Parse.MINIMUM_DISPLAY_NUMBER);
     addWord(Parse.DEFAULT_DISPLAY, Constants.DISPLAY_DEFAULT);
   }
 }

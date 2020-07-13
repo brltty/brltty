@@ -20,8 +20,12 @@
 package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
+import java.util.List;
+import java.util.LinkedList;
+
 public class WriteArgumentsClient extends PauseClient {
-  private final WriteArguments writeArguments = new WriteArguments();
+  private final List<WriteArguments> writeArgumentsList = new LinkedList<>();
+  private WriteArguments writeArguments = new WriteArguments();
   private boolean fixWriteArguments = true;
 
   private final OperandUsage cursorPositionUsage =
@@ -30,26 +34,12 @@ public class WriteArgumentsClient extends PauseClient {
   private final OperandUsage displayNumberUsage =
       new DisplayNumberUsage(writeArguments.getDisplayNumber());
 
-  public final static int MINIMUM_REGION_BEGIN =  1;
-  public final static int MAXIMUM_REGION_BEGIN = 99;
-
-  public final static int MINIMUM_REGION_SIZE =  1;
-  public final static int MAXIMUM_REGION_SIZE = 99;
+  public final static int MINIMUM_REGION_BEGIN = 1;
+  public final static int MINIMUM_REGION_SIZE = 1;
 
   public WriteArgumentsClient (String... arguments) {
     super(arguments);
-
-    addOption("fix",
-      (operands) -> {
-        fixWriteArguments = true;
-      }
-    );
-
-    addOption("nofix",
-      (operands) -> {
-        fixWriteArguments = false;
-      }
-    );
+    writeArgumentsList.add(writeArguments);
 
     addOption("text",
       (operands) -> {
@@ -62,15 +52,15 @@ public class WriteArgumentsClient extends PauseClient {
       (operands) -> {
         writeArguments.setRegionBegin(
           Parse.asInt(
-            "region begin", operands[0],
-            MINIMUM_REGION_BEGIN, MAXIMUM_REGION_BEGIN
+            WriteArguments.REGION_BEGIN,
+            operands[0], MINIMUM_REGION_BEGIN
           )
         );
 
         writeArguments.setRegionSize(
           Parse.asInt(
-            "region Size", operands[1],
-            MINIMUM_REGION_SIZE, MAXIMUM_REGION_SIZE
+            WriteArguments.REGION_SIZE,
+            operands[1], MINIMUM_REGION_SIZE
           )
         );
       },
@@ -90,18 +80,38 @@ public class WriteArgumentsClient extends PauseClient {
       },
       "number"
     );
+
+    addOption("fix",
+      (operands) -> {
+        fixWriteArguments = true;
+      }
+    );
+
+    addOption("nofix",
+      (operands) -> {
+        fixWriteArguments = false;
+      }
+    );
+
+    addOption("next",
+      (operands) -> {
+        writeArguments = new WriteArguments();
+        writeArgumentsList.add(writeArguments);
+      }
+    );
   }
 
   @Override
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    new OperandUsage("beginning of the region")
-      .setRange(MINIMUM_REGION_BEGIN, MAXIMUM_REGION_BEGIN)
+    new OperandUsage(WriteArguments.REGION_BEGIN)
+      .setRangeMinimum(MINIMUM_REGION_BEGIN)
       .appendTo(usage);
 
-    new OperandUsage("region size")
-      .setRange(MINIMUM_REGION_SIZE, MAXIMUM_REGION_SIZE)
+    new OperandUsage(WriteArguments.REGION_SIZE)
+      .setRangeMinimum(MINIMUM_REGION_SIZE)
+      .setRangeUnits("cells")
       .appendTo(usage);
 
     cursorPositionUsage.appendTo(usage);
@@ -115,18 +125,18 @@ public class WriteArgumentsClient extends PauseClient {
     ttyMode(
       connection, false,
       (con) -> {
-        try {
-          writeArguments.check(con.getCellCount(), fixWriteArguments);
-        } catch (IllegalStateException exception) {
-          throw new SyntaxException(exception.getMessage());
+        int cellCount = con.getCellCount();
+
+        for (WriteArguments arguments : writeArgumentsList) {
+          try {
+            arguments.check(cellCount, fixWriteArguments);
+          } catch (IllegalStateException exception) {
+            throw new SyntaxException(exception.getMessage());
+          }
+
+          con.write(arguments);
         }
 
-        {
-          String text = writeArguments.getText();
-          if (text != null) printf("%s\n", text);
-        }
-
-        con.write(writeArguments);
         pause(con);
       }
     );

@@ -29,17 +29,27 @@ public class OperandUsage {
     operandDescription = description;
   }
 
-  private boolean haveRange = false;
+  public final String getOperandDescription () {
+    return operandDescription;
+  }
+
   private Integer rangeMinimum = null;
   private Integer rangeMaximum = null;
   private String rangeUnits = null;
   private String rangeComment = null;
 
-  public final OperandUsage setRange (int minimum, int maximum) {
+  public final OperandUsage setRangeMinimum (int minimum) {
     rangeMinimum = minimum;
-    rangeMaximum = maximum;
-    haveRange = true;
     return this;
+  }
+
+  public final OperandUsage setRangeMaximum (int maximum) {
+    rangeMaximum = maximum;
+    return this;
+  }
+
+  public final OperandUsage setRange (int minimum, int maximum) {
+    return setRangeMinimum(minimum).setRangeMaximum(maximum);
   }
 
   public final OperandUsage setRangeUnits (String units) {
@@ -103,7 +113,9 @@ public class OperandUsage {
     if (defaultValue == null) return null;
 
     for (WordEntry entry : wordList) {
-      if (entry.value == defaultValue) return entry.word;
+      if (entry.value == defaultValue) {
+        return (defaultWord = entry.word);
+      }
     }
 
     return defaultValue.toString();
@@ -114,7 +126,9 @@ public class OperandUsage {
     if (defaultWord == null) return null;
 
     for (WordEntry entry : wordList) {
-      if (entry.word.equals(defaultWord)) return entry.value;
+      if (entry.word.equals(defaultWord)) {
+        return (defaultValue = entry.value);
+      }
     }
 
     return null;
@@ -122,17 +136,36 @@ public class OperandUsage {
 
   public final StringBuilder appendTo (StringBuilder usage) {
     usage.append('\n')
-         .append("The ").append(operandDescription).append(" must be");
+         .append("The ").append(operandDescription).append(" operand must be");
+
+    boolean haveRangeMinimum = rangeMinimum != null;
+    boolean haveRangeMaximum = rangeMaximum != null;
+    boolean haveRange = haveRangeMinimum || haveRangeMaximum;
 
     if (haveRange) {
-      usage.append(" an integer");
-
       if (rangeUnits != null) {
-        usage.append(" number of ").append(rangeUnits);
+        usage.append(" a number of ").append(rangeUnits);
+      } else {
+        usage.append(" an integer");
       }
 
-      usage.append(" within the range ").append(rangeMinimum)
-           .append(" through ").append(rangeMaximum);
+      if (haveRangeMinimum) {
+        String phrase =
+          haveRangeMaximum?
+          "within the range":
+          "greater than or equal to";
+
+        usage.append(' ').append(phrase).append(' ').append(rangeMinimum);
+      }
+
+      if (haveRangeMaximum) {
+        String phrase =
+          haveRangeMinimum?
+          "through":
+          "less than or equal to";
+
+        usage.append(' ').append(phrase).append(' ').append(rangeMaximum);
+      }
 
       if (rangeComment != null) {
         usage.append(" (").append(rangeComment).append(')');

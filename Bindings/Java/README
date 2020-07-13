@@ -10,33 +10,34 @@ Clients (see the clients/ subdirectory):
   -authorization scheme+...
   api-error
   api-exception
-    -wait seconds (1-30, default is 10)
+    -wait seconds (default is 5)
   bound-commands
   computer-braille
   driver-keys
   echo [tty ...]
     -commands | -keys
-    -number count (1-100, default is 10)
-    -timeout seconds (1-30 or none, default is 10)
+    -reads count (default is 10)
+    -timeout seconds (default is 10)
   get-driver
   get-model
   get-size
   list-parameters [parameter [subparam]]
   pause
-    -wait seconds (1-30, default is 10)
+    -wait seconds (default is 5)
   set-parameter parameter value
   write-arguments
-    -wait seconds (1-30, default is 10)
-    -fix | -nofix
+    -wait seconds (default is 5)
     -text text
-    -region start size
-    -cursor position (1-99 or no, default is no)
-    -display number (1-9 or default, default is default)
+    -region cell# #cells
+    -cursor {leave | no | cell#}
+    -display {default | number}
+    -fix | -nofix
+    -next
   write-dots [dots ...]
-    -wait seconds (1-30, default is 10)
+    -wait seconds (default is 5)
   write-text [text ...]
-    -wait seconds (1-30, default is 10)
-    -cursor position (1-99 or no, default is no)
+    -wait seconds (default is 5)
+    -cursor {no | leave | cell#}
 
 These aren't case sensitive and allow unambiguous truncations:
   program names (e.g. v for version)

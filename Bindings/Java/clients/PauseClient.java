@@ -21,11 +21,15 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class PauseClient extends Client {
-  public final static byte MINIMUM_WAIT_TIME =  1;
-  public final static byte DEFAULT_WAIT_TIME = 10;
-  public final static byte MAXIMUM_WAIT_TIME = 30;
+  public final static byte MINIMUM_WAIT_TIME = 1;
+  public final static byte DEFAULT_WAIT_TIME = 5;
 
   private byte waitTime = DEFAULT_WAIT_TIME;
+  private final OperandUsage waitTimeUsage = new OperandUsage("wait time")
+    .setDefault(waitTime)
+    .setRangeMinimum(MINIMUM_WAIT_TIME)
+    .setRangeUnits("seconds")
+    ;
 
   protected final int getWaitTime () {
     return waitTime * 1000;
@@ -42,11 +46,11 @@ public class PauseClient extends Client {
     addOption("wait",
       (operands) -> {
         waitTime = Parse.asByte(
-          "wait time", operands[0],
-          MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME
+          waitTimeUsage.getOperandDescription(),
+          operands[0], MINIMUM_WAIT_TIME
         );
       },
-      "duration"
+      "seconds"
     );
   }
 
@@ -54,11 +58,7 @@ public class PauseClient extends Client {
   protected void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    new OperandUsage("wait time")
-      .setDefault(DEFAULT_WAIT_TIME)
-      .setRange(MINIMUM_WAIT_TIME, MAXIMUM_WAIT_TIME)
-      .setRangeUnits("seconds")
-      .appendTo(usage);
+    waitTimeUsage.appendTo(usage);
   }
 
   @Override

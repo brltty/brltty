@@ -102,6 +102,14 @@ public class WriteArguments extends Component {
     return this;
   }
 
+  public final static String TEXT = "text";
+  public final static String AND_MASK = "and-mask";
+  public final static String OR_MASK = "or-mask";
+  public final static String REGION_BEGIN = "region begin";
+  public final static String REGION_SIZE = "region size";
+  public final static String CURSOR_POSITION = "cursor position";
+  public final static String DISPLAY_NUMBER = "display number";
+
   private static void checkRange (String description, long value, long minimum, long maximum) {
     try {
       Parse.checkRange(description, value, minimum, maximum);
@@ -123,18 +131,35 @@ public class WriteArguments extends Component {
     if (haveRegion || haveContent) {
       if (!haveContent) {
         throw new IllegalStateException(
-          "region content (text, and-mask, and/or or-mask) not specified"
+          String.format(
+            "region content (%s, %s, and/or %s) not specified",
+            TEXT, AND_MASK, OR_MASK
+          )
         );
       }
 
       if (!haveRegionBegin) {
-        if (!fix) throw new IllegalStateException("region begin not set");
+        if (!fix) {
+          throw new IllegalStateException(
+            String.format(
+              "%s not set", REGION_BEGIN
+            )
+          );
+        }
+
         regionBegin = 1;
         haveRegion = haveRegionBegin = true;
       }
 
       if (!haveRegionSize) {
-        if (!fix) throw new IllegalStateException("region size not set");
+        if (!fix) {
+          throw new IllegalStateException(
+            String.format(
+              "%s not set", REGION_SIZE
+            )
+          );
+        }
+
         regionSize = 0;
         if (haveText) regionSize = Math.max(regionSize, text.length());
         if (haveAndMask) regionSize = Math.max(regionSize, andMask.length);
@@ -142,8 +167,8 @@ public class WriteArguments extends Component {
         haveRegion = haveRegionSize = true;
       }
 
-      checkRange("region begin", regionBegin, 1, cellCount);
-      checkRange("region size", regionSize, 1, (cellCount + 1 - regionBegin));
+      checkRange(REGION_BEGIN, regionBegin, 1, cellCount);
+      checkRange(REGION_SIZE, regionSize, 1, (cellCount + 1 - regionBegin));
 
       if (haveText) {
         int textLength = text.length();
@@ -151,7 +176,8 @@ public class WriteArguments extends Component {
         if (textLength > regionSize) {
           throw new IllegalStateException(
             String.format(
-              "text length is greater than region size: %d > %d",
+              "%s length is greater than %s: %d > %d",
+              TEXT, REGION_SIZE,
               textLength, regionSize
             )
           );
@@ -161,7 +187,8 @@ public class WriteArguments extends Component {
           if (!fix) {
             throw new IllegalStateException(
               String.format(
-                "text length is less than region size: %d < %d",
+                "%s length is less than %s: %d < %d",
+                TEXT, REGION_SIZE,
                 textLength, regionSize
               )
             );
@@ -179,7 +206,8 @@ public class WriteArguments extends Component {
         if (andSize > regionSize) {
           throw new IllegalStateException(
             String.format(
-              "and-mask size is greater than region size: %d > %d",
+              "%s size is greater than %s: %d > %d",
+              AND_MASK, REGION_SIZE,
               andSize, regionSize
             )
           );
@@ -189,7 +217,8 @@ public class WriteArguments extends Component {
           if (!fix) {
             throw new IllegalStateException(
               String.format(
-                "and-mask size is less than region size: %d < %d",
+                "%s size is less than %s: %d < %d",
+                AND_MASK, REGION_SIZE,
                 andSize, regionSize
               )
             );
@@ -197,7 +226,7 @@ public class WriteArguments extends Component {
 
           byte[] newMask = new byte[regionSize];
           System.arraycopy(andMask, 0, newMask, 0, andSize);
-          Arrays.fill(newMask, andSize, (andSize - regionSize), (byte)BYTE_MASK);
+          Arrays.fill(newMask, andSize, (regionSize - andSize), (byte)BYTE_MASK);
           andMask = newMask;
         }
       }
@@ -208,7 +237,8 @@ public class WriteArguments extends Component {
         if (orSize > regionSize) {
           throw new IllegalStateException(
             String.format(
-              "or-mask size is greater than region size: %d > %d",
+              "%s size is greater than %s: %d > %d",
+              OR_MASK, REGION_SIZE,
               orSize, regionSize
             )
           );
@@ -218,7 +248,8 @@ public class WriteArguments extends Component {
           if (!fix) {
             throw new IllegalStateException(
               String.format(
-                "or-mask size is less than region size: %d < %d",
+                "%s size is less than %s: %d < %d",
+                OR_MASK, REGION_SIZE,
                 orSize, regionSize
               )
             );
@@ -226,7 +257,7 @@ public class WriteArguments extends Component {
 
           byte[] newMask = new byte[regionSize];
           System.arraycopy(orMask, 0, newMask, 0, orSize);
-          Arrays.fill(newMask, orSize, (orSize - regionSize), (byte)0);
+          Arrays.fill(newMask, orSize, (regionSize - orSize), (byte)0);
           orMask = newMask;
         }
       }
@@ -234,7 +265,7 @@ public class WriteArguments extends Component {
 
     if (cursorPosition != Constants.CURSOR_OFF) {
       if (cursorPosition != Constants.CURSOR_LEAVE) {
-        checkRange("cursor position", cursorPosition, 1, cellCount);
+        checkRange(CURSOR_POSITION, cursorPosition, 1, cellCount);
       }
     }
   }

@@ -62,6 +62,11 @@ public class WriteTextClient extends PauseClient {
   protected final void runClient (Connection connection) 
             throws ProgramException
   {
+    Parse.checkMaximum(
+      cursorPositionUsage.getOperandDescription(),
+      cursorPosition, connection.getCellCount()
+    );
+
     ttyMode(
       connection, false,
       (con) -> {

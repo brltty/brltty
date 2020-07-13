@@ -24,19 +24,29 @@ import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
 public class EchoClient extends Client {
-  public final static int MINIMUM_READ_COUNT =   1;
-  public final static int DEFAULT_READ_COUNT =  10;
-  public final static int MAXIMUM_READ_COUNT = 100;
+  public final static int MINIMUM_READ_COUNT =  1;
+  public final static int DEFAULT_READ_COUNT = 10;
 
   public final static String NO_TIMEOUT = "none";
   public final static int FOREVER_READ_TIMEOUT =  0;
   public final static int MINIMUM_READ_TIMEOUT =  1;
   public final static int DEFAULT_READ_TIMEOUT = 10;
-  public final static int MAXIMUM_READ_TIMEOUT = 30;
 
   private boolean echoDriverKeys = false;
   private int readCount = DEFAULT_READ_COUNT;
+  private final OperandUsage readCountUsage = new OperandUsage("read count")
+    .setDefault(readCount)
+    .setRangeMinimum(MINIMUM_READ_COUNT)
+    ;
+
   private int readTimeout = DEFAULT_READ_TIMEOUT;
+  private final OperandUsage readTimeoutUsage = new OperandUsage("read timeout")
+    .setDefault(readTimeout)
+    .setRangeMinimum(MINIMUM_READ_TIMEOUT)
+    .setRangeUnits("seconds")
+    .setRangeComment("readKeyWithTimeout is used")
+    .addWord(NO_TIMEOUT, FOREVER_READ_TIMEOUT, "readKey is used")
+    ;
 
   public EchoClient (String... arguments) {
     super(arguments);
@@ -54,11 +64,11 @@ public class EchoClient extends Client {
       }
     );
 
-    addOption("number",
+    addOption("reads",
       (operands) -> {
         readCount = Parse.asInt(
-          "read count", operands[0],
-          MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT
+          readCountUsage.getOperandDescription(),
+          operands[0], MINIMUM_READ_COUNT
         );
       },
       "count"
@@ -72,12 +82,12 @@ public class EchoClient extends Client {
           readTimeout = FOREVER_READ_TIMEOUT;
         } else {
           readTimeout = Parse.asInt(
-            "read timeout", operand,
-            MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT
+            readTimeoutUsage.getOperandDescription(),
+            operand, MINIMUM_READ_TIMEOUT
           );
         }
       },
-      "duration"
+      "seconds"
     );
   }
 
@@ -85,18 +95,8 @@ public class EchoClient extends Client {
   protected final void extendUsageSummary (StringBuilder usage) {
     super.extendUsageSummary(usage);
 
-    new OperandUsage("read count")
-      .setDefault(DEFAULT_READ_COUNT)
-      .setRange(MINIMUM_READ_COUNT, MAXIMUM_READ_COUNT)
-      .appendTo(usage);
-
-    new OperandUsage("read timeout")
-      .setDefault(DEFAULT_READ_TIMEOUT)
-      .setRange(MINIMUM_READ_TIMEOUT, MAXIMUM_READ_TIMEOUT)
-      .setRangeUnits("seconds")
-      .setRangeComment("readKeyWithTimeout is used")
-      .addWord(NO_TIMEOUT, FOREVER_READ_TIMEOUT, "readKey is used")
-      .appendTo(usage);
+    readCountUsage.appendTo(usage);
+    readTimeoutUsage.appendTo(usage);
   }
 
   private int[] ttyPath = null;

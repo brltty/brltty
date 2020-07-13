@@ -93,22 +93,24 @@ public abstract class Parse {
     }
   }
 
+  public final static byte DEFAULT_RANGE_MINIMUM = 0;
+
   public static long asLong (String description, String operand, long minimum, long maximum)
          throws SyntaxException
   {
     return asNumber(description, operand, minimum, maximum).longValue();
   }
 
-  public static long asLong (String description, String operand, long maximum)
+  public static long asLong (String description, String operand, long minimum)
          throws SyntaxException
   {
-    return asLong(description, operand, 0, maximum);
+    return asLong(description, operand, minimum, Long.MAX_VALUE);
   }
 
   public static long asLong (String description, String operand)
          throws SyntaxException
   {
-    return asLong(description, operand, Long.MAX_VALUE);
+    return asLong(description, operand, DEFAULT_RANGE_MINIMUM);
   }
 
   public static int asInt (String description, String operand, int minimum, int maximum)
@@ -117,16 +119,16 @@ public abstract class Parse {
     return asNumber(description, operand, minimum, maximum).intValue();
   }
 
-  public static int asInt (String description, String operand, int maximum)
+  public static int asInt (String description, String operand, int minimum)
          throws SyntaxException
   {
-    return asInt(description, operand, 0, maximum);
+    return asInt(description, operand, minimum, Integer.MAX_VALUE);
   }
 
   public static int asInt (String description, String operand)
          throws SyntaxException
   {
-    return asInt(description, operand, Integer.MAX_VALUE);
+    return asInt(description, operand, DEFAULT_RANGE_MINIMUM);
   }
 
   public static short asShort (String description, String operand, short minimum, short maximum)
@@ -135,16 +137,16 @@ public abstract class Parse {
     return asNumber(description, operand, minimum, maximum).shortValue();
   }
 
-  public static short asShort (String description, String operand, short maximum)
+  public static short asShort (String description, String operand, short minimum)
          throws SyntaxException
   {
-    return asShort(description, operand, (short)0, maximum);
+    return asShort(description, operand, minimum, Short.MAX_VALUE);
   }
 
   public static short asShort (String description, String operand)
          throws SyntaxException
   {
-    return asShort(description, operand, Short.MAX_VALUE);
+    return asShort(description, operand, DEFAULT_RANGE_MINIMUM);
   }
 
   public static byte asByte (String description, String operand, byte minimum, byte maximum)
@@ -153,16 +155,16 @@ public abstract class Parse {
     return asNumber(description, operand, minimum, maximum).byteValue();
   }
 
-  public static byte asByte (String description, String operand, byte maximum)
+  public static byte asByte (String description, String operand, byte minimum)
          throws SyntaxException
   {
-    return asByte(description, operand, (byte)0, maximum);
+    return asByte(description, operand, minimum, Byte.MAX_VALUE);
   }
 
   public static byte asByte (String description, String operand)
          throws SyntaxException
   {
-    return asByte(description, operand, Byte.MAX_VALUE);
+    return asByte(description, operand, DEFAULT_RANGE_MINIMUM);
   }
 
   public static byte asDots (String description, String operand)
@@ -195,8 +197,6 @@ public abstract class Parse {
   }
 
   public final static int MINIMUM_CURSOR_POSITION =  1;
-  public final static int MAXIMUM_CURSOR_POSITION = 99;
-
   public final static String NO_CURSOR = "no";
   public final static String LEAVE_CURSOR = "leave";
 
@@ -210,14 +210,12 @@ public abstract class Parse {
     }
 
     return asInt(
-      "cursor position", operand,
-      MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION
+      WriteArguments.CURSOR_POSITION,
+      operand, MINIMUM_CURSOR_POSITION
     );
   }
 
   public final static int MINIMUM_DISPLAY_NUMBER = 1;
-  public final static int MAXIMUM_DISPLAY_NUMBER = 9;
-
   public final static String DEFAULT_DISPLAY = "default";
 
   public static int asDisplayNumber (String operand) throws SyntaxException {
@@ -226,8 +224,8 @@ public abstract class Parse {
     }
 
     return asInt(
-      "display number", operand,
-      MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER
+      WriteArguments.DISPLAY_NUMBER,
+      operand, MINIMUM_DISPLAY_NUMBER
     );
   }
 }
