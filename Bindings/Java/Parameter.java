@@ -154,9 +154,13 @@ public abstract class Parameter extends ParameterComponent {
     }
   }
 
+  protected final String getParseDescription () {
+    return getName() + " value";
+  }
+
   public void set (String value) throws OperandException {
     if (!isSettable()) {
-      throw new SemanticException("parameter not settable: %s", getName());
+      throw new SemanticException("parameter is not settable: %s", getName());
     }
 
     if (this instanceof StringSettable) {
@@ -167,31 +171,31 @@ public abstract class Parameter extends ParameterComponent {
 
     if (this instanceof BooleanSettable) {
       BooleanSettable settable = (BooleanSettable)this;
-      settable.set(Parse.asBoolean(getName(), value));
+      settable.set(Parse.asBoolean(getParseDescription(), value));
       return;
     }
 
     if (this instanceof ByteSettable) {
       ByteSettable settable = (ByteSettable)this;
-      settable.set(Parse.asByte(getName(), value, settable.getMinimum(), settable.getMaximum()));
+      settable.set(Parse.asByte(getParseDescription(), value, settable.getMinimum(), settable.getMaximum()));
       return;
     }
 
     if (this instanceof ShortSettable) {
       ShortSettable settable = (ShortSettable)this;
-      settable.set(Parse.asShort(getName(), value, settable.getMinimum(), settable.getMaximum()));
+      settable.set(Parse.asShort(getParseDescription(), value, settable.getMinimum(), settable.getMaximum()));
       return;
     }
 
     if (this instanceof IntSettable) {
       IntSettable settable = (IntSettable)this;
-      settable.set(Parse.asInt(getName(), value, settable.getMinimum(), settable.getMaximum()));
+      settable.set(Parse.asInt(getParseDescription(), value, settable.getMinimum(), settable.getMaximum()));
       return;
     }
 
     if (this instanceof LongSettable) {
       LongSettable settable = (LongSettable)this;
-      settable.set(Parse.asLong(getName(), value, settable.getMinimum(), settable.getMaximum()));
+      settable.set(Parse.asLong(getParseDescription(), value, settable.getMinimum(), settable.getMaximum()));
       return;
     }
 
@@ -207,7 +211,7 @@ public abstract class Parameter extends ParameterComponent {
 
       throw new UnsupportedOperationException(
         String.format(
-          "set not suppored: %s: %s", getName(), type.getSimpleName()
+          "set not supported: %s: %s", getName(), type.getSimpleName()
         )
       );
     }

@@ -21,10 +21,8 @@ package org.a11y.brlapi.clients;
 import org.a11y.brlapi.*;
 
 public class WriteArgumentsClient extends PauseClient {
-  private final WriteArguments writeArguments = new WriteArguments()
-    .setCursorPosition(Constants.CURSOR_OFF)
-    .setDisplayNumber(Constants.DISPLAY_DEFAULT)
-    ;
+  private final WriteArguments writeArguments = new WriteArguments();
+  private boolean fixWriteArguments = true;
 
   private final OperandUsage cursorPositionUsage =
      new CursorPositionUsage(writeArguments.getCursorPosition());
@@ -40,6 +38,18 @@ public class WriteArgumentsClient extends PauseClient {
 
   public WriteArgumentsClient (String... arguments) {
     super(arguments);
+
+    addOption("fix",
+      (operands) -> {
+        fixWriteArguments = true;
+      }
+    );
+
+    addOption("nofix",
+      (operands) -> {
+        fixWriteArguments = false;
+      }
+    );
 
     addOption("text",
       (operands) -> {
@@ -105,7 +115,17 @@ public class WriteArgumentsClient extends PauseClient {
     ttyMode(
       connection, false,
       (con) -> {
-        printf("%s\n", writeArguments.getText());
+        try {
+          writeArguments.check(con.getCellCount(), fixWriteArguments);
+        } catch (IllegalStateException exception) {
+          throw new SyntaxException(exception.getMessage());
+        }
+
+        {
+          String text = writeArguments.getText();
+          if (text != null) printf("%s\n", text);
+        }
+
         con.write(writeArguments);
         pause(con);
       }

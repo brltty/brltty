@@ -27,6 +27,7 @@ Clients (see the clients/ subdirectory):
   set-parameter parameter value
   write-arguments
     -wait seconds (1-30, default is 10)
+    -fix | -nofix
     -text text
     -region start size
     -cursor position (1-99 or no, default is no)

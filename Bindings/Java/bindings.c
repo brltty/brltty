@@ -743,6 +743,7 @@ JAVA_INSTANCE_METHOD(
 
     if ((jText = JAVA_GET_FIELD(env, Object, jArguments, field))) {
       cArguments.text = (char *) (*env)->GetStringUTFChars(env, jText, NULL);
+      cArguments.charset = "UTF-8";
     } else {
       cArguments.text = NULL;
     }
@@ -775,9 +776,7 @@ JAVA_INSTANCE_METHOD(
     cArguments.cursor = JAVA_GET_FIELD(env, Int, jArguments, field);
   }
 
-  cArguments.charset = "UTF-8";
   int result = brlapi__write(handle, &cArguments);
-
   if (jText) (*env)->ReleaseStringUTFChars(env, jText, cArguments.text); 
   if (jAndMask) (*env)->ReleaseByteArrayElements(env, jAndMask, (jbyte*) cArguments.andMask, JNI_ABORT); 
   if (jOrMask) (*env)->ReleaseByteArrayElements(env, jOrMask, (jbyte*) cArguments.orMask, JNI_ABORT); 

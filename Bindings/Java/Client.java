@@ -161,7 +161,7 @@ public abstract class Client extends Program {
   }
 
   protected interface TtyModeTask {
-    public void run (Connection connection);
+    public void run (Connection connection) throws ProgramException;
   }
 
   protected final Client ttyMode (Connection connection, String driver, TtyModeTask task, int... path)
@@ -189,7 +189,7 @@ public abstract class Client extends Program {
   }
 
   protected interface RawModeTask {
-    public void run (Connection connection);
+    public void run (Connection connection) throws ProgramException;
   }
 
   protected final Client rawMode (Connection connection, String driver, RawModeTask task)

@@ -47,33 +47,48 @@ public abstract class Parse {
   {
     Boolean value = booleanKeywords.get(operand);
     if (value != null) return value;
-    throw new SyntaxException("not a boolean: %s: %s", description, operand);
+    throw new SyntaxException("%s is not a boolean: %s", description, operand);
+  }
+
+  public static void checkMinimum (String description, long value, long minimum)
+         throws SyntaxException
+  {
+    if (value < minimum) {
+      throw new SyntaxException(
+        "%s is less than %d: %d", description, minimum, value
+      );
+    }
+  }
+
+  public static void checkMaximum (String description, long value, long maximum)
+         throws SyntaxException
+  {
+    if (value > maximum) {
+      throw new SyntaxException(
+        "%s is greater than %d: %d", description, maximum, value
+      );
+    }
+  }
+
+  public static void checkRange (String description, long value, long minimum, long maximum)
+         throws SyntaxException
+  {
+    checkMinimum(description, value, minimum);
+    checkMaximum(description, value, maximum);
   }
 
   private static Number asNumber (String description, String operand, long minimum, long maximum)
-         throws SyntaxException
+          throws SyntaxException
   {
     long value;
 
     try {
       value = Long.valueOf(operand);
-
-      if (value < minimum) {
-        throw new SyntaxException(
-          "less than %d: %s: %s", minimum, description, operand
-        );
-      }
-
-      if (value > maximum) {
-        throw new SyntaxException(
-          "greater than %d: %s: %s", maximum, description, operand
-        );
-      }
-
+      checkRange(description, value, minimum, maximum);
       return new Long(value);
     } catch (NumberFormatException exception) {
       throw new SyntaxException(
-        "not an integer: %s: %s", description, operand
+        "%s is not an integer: %s", description, operand
       );
     }
   }
@@ -162,14 +177,14 @@ public abstract class Parse {
       int index = numbers.indexOf(number);
       if (index < 0) {
         throw new SyntaxException(
-          "not a dot number: %s: %s (%c)", description, operand, number
+          "%s contains an invalid dot number: %s (%c)", description, operand, number
         );
       }
 
       int dot = 1 << index;
       if ((dots & dot) != 0) {
         throw new SyntaxException(
-          "duplicate dot number: %s: %s (%c)", description, operand, number
+          "%s contains a duplicate dot number: %s (%c)", description, operand, number
         );
       }
 
@@ -194,7 +209,7 @@ public abstract class Parse {
       return Constants.CURSOR_LEAVE;
     }
 
-    return Parse.asInt(
+    return asInt(
       "cursor position", operand,
       MINIMUM_CURSOR_POSITION, MAXIMUM_CURSOR_POSITION
     );
@@ -210,7 +225,7 @@ public abstract class Parse {
       return Constants.DISPLAY_DEFAULT;
     }
 
-    return Parse.asInt(
+    return asInt(
       "display number", operand,
       MINIMUM_DISPLAY_NUMBER, MAXIMUM_DISPLAY_NUMBER
     );

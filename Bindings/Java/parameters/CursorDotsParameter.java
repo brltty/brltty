@@ -41,7 +41,7 @@ public class CursorDotsParameter extends GlobalParameter implements Parameter.St
 
   @Override
   public final void set (String numbers) throws SyntaxException {
-    set(Parse.asDots(getName(), numbers));
+    set(Parse.asDots(getParseDescription(), numbers));
   }
 
   @Override

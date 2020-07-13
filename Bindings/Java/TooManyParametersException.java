@@ -23,4 +23,8 @@ public class TooManyParametersException extends SyntaxException {
   public TooManyParametersException (String[] parameters, int at) {
     super("too many parameters");
   }
+
+  public TooManyParametersException (String[] parameters) {
+    this(parameters, 0);
+  }
 }

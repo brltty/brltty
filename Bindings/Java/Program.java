@@ -201,7 +201,7 @@ public abstract class Program extends ProgramComponent implements Runnable {
             throws SyntaxException
   {
     if (parameters.length > 0) {
-      throw new TooManyParametersException(parameters, 0);
+      throw new TooManyParametersException(parameters);
     }
   }
 

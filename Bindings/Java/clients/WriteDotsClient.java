@@ -36,7 +36,7 @@ public class WriteDotsClient extends PauseClient {
     dots = new byte[count];
 
     for (int index=0; index<count; index+=1) {
-      dots[index] = Parse.asDots("dot numbers", parameters[index]);
+      dots[index] = Parse.asDots("dots parameter", parameters[index]);
     }
   }
 

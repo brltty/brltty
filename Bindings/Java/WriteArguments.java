@@ -19,7 +19,9 @@
 
 package org.a11y.brlapi;
 
-public class WriteArguments {
+import java.util.Arrays;
+
+public class WriteArguments extends Component {
   private String text = null;
   private byte andMask[] = null;
   private byte orMask[] = null;
@@ -98,5 +100,142 @@ public class WriteArguments {
   public WriteArguments setDisplayNumber (int number) {
     displayNumber = number;
     return this;
+  }
+
+  private static void checkRange (String description, long value, long minimum, long maximum) {
+    try {
+      Parse.checkRange(description, value, minimum, maximum);
+    } catch (SyntaxException exception) {
+      throw new IllegalStateException(exception.getMessage());
+    }
+  }
+
+  public final void check (int cellCount, boolean fix) {
+    boolean haveRegionBegin = regionBegin != 0;
+    boolean haveRegionSize = regionSize != 0;
+    boolean haveRegion = haveRegionBegin || haveRegionSize;
+
+    boolean haveText = text != null;
+    boolean haveAndMask = andMask != null;
+    boolean haveOrMask = orMask != null;
+    boolean haveContent = haveText || haveAndMask || haveOrMask;
+
+    if (haveRegion || haveContent) {
+      if (!haveContent) {
+        throw new IllegalStateException(
+          "region content (text, and-mask, and/or or-mask) not specified"
+        );
+      }
+
+      if (!haveRegionBegin) {
+        if (!fix) throw new IllegalStateException("region begin not set");
+        regionBegin = 1;
+        haveRegion = haveRegionBegin = true;
+      }
+
+      if (!haveRegionSize) {
+        if (!fix) throw new IllegalStateException("region size not set");
+        regionSize = 0;
+        if (haveText) regionSize = Math.max(regionSize, text.length());
+        if (haveAndMask) regionSize = Math.max(regionSize, andMask.length);
+        if (haveOrMask) regionSize = Math.max(regionSize, orMask.length);
+        haveRegion = haveRegionSize = true;
+      }
+
+      checkRange("region begin", regionBegin, 1, cellCount);
+      checkRange("region size", regionSize, 1, (cellCount + 1 - regionBegin));
+
+      if (haveText) {
+        int textLength = text.length();
+
+        if (textLength > regionSize) {
+          throw new IllegalStateException(
+            String.format(
+              "text length is greater than region size: %d > %d",
+              textLength, regionSize
+            )
+          );
+        }
+
+        if (textLength < regionSize) {
+          if (!fix) {
+            throw new IllegalStateException(
+              String.format(
+                "text length is less than region size: %d < %d",
+                textLength, regionSize
+              )
+            );
+          }
+
+          StringBuilder builder = new StringBuilder(text);
+          while (builder.length() < regionSize) builder.append(' ');
+          text = builder.toString();
+        }
+      }
+
+      if (haveAndMask) {
+        int andSize = andMask.length;
+
+        if (andSize > regionSize) {
+          throw new IllegalStateException(
+            String.format(
+              "and-mask size is greater than region size: %d > %d",
+              andSize, regionSize
+            )
+          );
+        }
+
+        if (andSize < regionSize) {
+          if (!fix) {
+            throw new IllegalStateException(
+              String.format(
+                "and-mask size is less than region size: %d < %d",
+                andSize, regionSize
+              )
+            );
+          }
+
+          byte[] newMask = new byte[regionSize];
+          System.arraycopy(andMask, 0, newMask, 0, andSize);
+          Arrays.fill(newMask, andSize, (andSize - regionSize), (byte)BYTE_MASK);
+          andMask = newMask;
+        }
+      }
+
+      if (haveOrMask) {
+        int orSize = orMask.length;
+
+        if (orSize > regionSize) {
+          throw new IllegalStateException(
+            String.format(
+              "or-mask size is greater than region size: %d > %d",
+              orSize, regionSize
+            )
+          );
+        }
+
+        if (orSize < regionSize) {
+          if (!fix) {
+            throw new IllegalStateException(
+              String.format(
+                "or-mask size is less than region size: %d < %d",
+                orSize, regionSize
+              )
+            );
+          }
+
+          byte[] newMask = new byte[regionSize];
+          System.arraycopy(orMask, 0, newMask, 0, orSize);
+          Arrays.fill(newMask, orSize, (orSize - regionSize), (byte)0);
+          orMask = newMask;
+        }
+      }
+    }
+
+    if (cursorPosition != Constants.CURSOR_OFF) {
+      if (cursorPosition != Constants.CURSOR_LEAVE) {
+        checkRange("cursor position", cursorPosition, 1, cellCount);
+      }
+    }
   }
 }
