@@ -37,20 +37,19 @@ public class ApiExceptionClient extends PauseClient {
           .setText("This should fail because the region size is too big.");
 
         con.write(arguments);
-        String label = "API exception";
         String result = null;
 
         try {
           if (pause(con)) {
-            result = String.format("wait for %s timed out", label);
+            result = "wait timed out";
           } else {
-            result = String.format("wait for %s interrupted", label);
+            result = "wait was interrupted";
           }
         } catch (APIException exception) {
-          result = String.format("%s received", label);
+          result = "test succeeded";
         }
 
-        printf("%s\n", result);
+        printf("API Exception: %s\n", result);
       }
     );
   }

@@ -27,19 +27,18 @@ public class ApiErrorClient extends Client {
 
   @Override
   protected final void runClient (Connection connection) {
-    String label = "API error";
-    String result;
+    String result = null;
 
     try {
       connection.setParameter(
         Constants.PARAM_SERVER_VERSION, 0, true, new int[] {0}
       );
 
-      result = String.format("%s not thrown", label);
+      result = "not thrown";
     } catch (APIError error) {
-      result = String.format("%s received", label);
+      result = "test succeeded";
     }
 
-    printf("%s\n", result);
+    printf("API Error: %s\n", result);
   }
 }

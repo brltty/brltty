@@ -30,7 +30,7 @@ Clients (see the clients/ subdirectory):
     -text text
     -region cell# #cells
     -cursor {leave | no | cell#}
-    -display {default | number}
+    -display {default | display#}
     -fix | -nofix
     -next
   write-dots [dots ...]
