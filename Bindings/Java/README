@@ -28,11 +28,12 @@ Clients (see the clients/ subdirectory):
   write-arguments
     -wait seconds (default is 5)
     -text text
-    -region cell# #cells
+    -begin cell# (default is 1)
+    -length #cells (default is largest size of: text, and-mask, or-mask)
     -cursor {leave | no | cell#}
     -display {default | display#}
     -fix | -nofix
-    -next
+    -render
   write-dots [dots ...]
     -wait seconds (default is 5)
   write-text [text ...]

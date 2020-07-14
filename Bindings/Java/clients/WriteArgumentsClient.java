@@ -48,7 +48,7 @@ public class WriteArgumentsClient extends PauseClient {
       "text"
     );
 
-    addOption("region",
+    addOption("begin",
       (operands) -> {
         writeArguments.setRegionBegin(
           Parse.asInt(
@@ -56,15 +56,20 @@ public class WriteArgumentsClient extends PauseClient {
             operands[0], MINIMUM_REGION_BEGIN
           )
         );
+      },
+      "region begin"
+    );
 
+    addOption("length",
+      (operands) -> {
         writeArguments.setRegionSize(
           Parse.asInt(
             WriteArguments.REGION_SIZE,
-            operands[1], MINIMUM_REGION_SIZE
+            operands[0], MINIMUM_REGION_SIZE
           )
         );
       },
-      "begin", "size"
+      "region size"
     );
 
     addOption("cursor",
@@ -93,7 +98,7 @@ public class WriteArgumentsClient extends PauseClient {
       }
     );
 
-    addOption("next",
+    addOption("render",
       (operands) -> {
         writeArguments = new WriteArguments();
         writeArgumentsList.add(writeArguments);
@@ -106,10 +111,17 @@ public class WriteArgumentsClient extends PauseClient {
     super.extendUsageSummary(usage);
 
     new OperandUsage(WriteArguments.REGION_BEGIN)
+      .setDefault(MINIMUM_REGION_BEGIN)
       .setRangeMinimum(MINIMUM_REGION_BEGIN)
       .appendTo(usage);
 
     new OperandUsage(WriteArguments.REGION_SIZE)
+      .setDefault(
+        String.format(
+          "the size of the largest content property (%s, %s, %s)",
+          WriteArguments.TEXT, WriteArguments.AND_MASK, WriteArguments.OR_MASK
+        )
+       )
       .setRangeMinimum(MINIMUM_REGION_SIZE)
       .setRangeUnits("cells")
       .appendTo(usage);
