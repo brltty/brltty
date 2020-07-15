@@ -72,6 +72,10 @@ public class WriteTextClient extends PauseClient {
       (con) -> {
         printf("%s\n", text);
         con.write(text, cursorPosition);
+
+        byte[] dots = con.getParameters().renderedCells.get();
+        printf("%s\n", toUnicodeBraille(dots));
+
         pause(con);
       }
     );

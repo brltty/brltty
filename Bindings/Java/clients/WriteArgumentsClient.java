@@ -149,6 +149,9 @@ public class WriteArgumentsClient extends PauseClient {
           con.write(arguments);
         }
 
+        byte[] dots = con.getParameters().renderedCells.get();
+        printf("%s\n", toUnicodeBraille(dots));
+
         pause(con);
       }
     );
