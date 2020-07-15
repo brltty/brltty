@@ -110,9 +110,10 @@ public class WriteArguments extends Component {
   public final static String CURSOR_POSITION = "cursor position";
   public final static String DISPLAY_NUMBER = "display number";
 
-  private static void checkRange (String description, long value, long minimum, long maximum) {
+  private static void checkRange (String description, int value, Integer minimum, Integer maximum) {
     try {
-      Parse.checkRange(description, value, minimum, maximum);
+      if (minimum != null) Parse.checkMinimum(description, value, minimum);
+      if (maximum != null) Parse.checkMaximum(description, value, maximum);
     } catch (SyntaxException exception) {
       throw new IllegalStateException(exception.getMessage());
     }
@@ -168,22 +169,34 @@ public class WriteArguments extends Component {
       }
 
       checkRange(REGION_BEGIN, regionBegin, 1, cellCount);
-      checkRange(REGION_SIZE, regionSize, 1, (cellCount + 1 - regionBegin));
+      checkRange(REGION_SIZE, regionSize, 1, null);
+
+      {
+        int maximum = cellCount + 1 - regionBegin;
+
+        if (!fix) {
+          checkRange(REGION_SIZE, regionSize, null, maximum);
+        } else if (regionSize > maximum) {
+          regionSize = maximum;
+        }
+      }
 
       if (haveText) {
         int textLength = text.length();
 
         if (textLength > regionSize) {
-          throw new IllegalStateException(
-            String.format(
-              "%s length is greater than %s: %d > %d",
-              TEXT, REGION_SIZE,
-              textLength, regionSize
-            )
-          );
-        }
+          if (!fix) {
+            throw new IllegalStateException(
+              String.format(
+                "%s length is greater than %s: %d > %d",
+                TEXT, REGION_SIZE,
+                textLength, regionSize
+              )
+            );
+          }
 
-        if (textLength < regionSize) {
+          text = text.substring(0, regionSize);
+        } else if (textLength < regionSize) {
           if (!fix) {
             throw new IllegalStateException(
               String.format(
@@ -194,9 +207,9 @@ public class WriteArguments extends Component {
             );
           }
 
-          StringBuilder builder = new StringBuilder(text);
-          while (builder.length() < regionSize) builder.append(' ');
-          text = builder.toString();
+          StringBuilder newText = new StringBuilder(text);
+          while (newText.length() < regionSize) newText.append(' ');
+          text = newText.toString();
         }
       }
 
@@ -204,16 +217,20 @@ public class WriteArguments extends Component {
         int andSize = andMask.length;
 
         if (andSize > regionSize) {
-          throw new IllegalStateException(
-            String.format(
-              "%s size is greater than %s: %d > %d",
-              AND_MASK, REGION_SIZE,
-              andSize, regionSize
-            )
-          );
-        }
+          if (!fix) {
+            throw new IllegalStateException(
+              String.format(
+                "%s size is greater than %s: %d > %d",
+                AND_MASK, REGION_SIZE,
+                andSize, regionSize
+              )
+            );
+          }
 
-        if (andSize < regionSize) {
+          byte[] newMask = new byte[regionSize];
+          System.arraycopy(andMask, 0, newMask, 0, regionSize);
+          andMask = newMask;
+        } else if (andSize < regionSize) {
           if (!fix) {
             throw new IllegalStateException(
               String.format(
@@ -235,16 +252,20 @@ public class WriteArguments extends Component {
         int orSize = orMask.length;
 
         if (orSize > regionSize) {
-          throw new IllegalStateException(
-            String.format(
-              "%s size is greater than %s: %d > %d",
-              OR_MASK, REGION_SIZE,
-              orSize, regionSize
-            )
-          );
-        }
+          if (!fix) {
+            throw new IllegalStateException(
+              String.format(
+                "%s size is greater than %s: %d > %d",
+                OR_MASK, REGION_SIZE,
+                orSize, regionSize
+              )
+            );
+          }
 
-        if (orSize < regionSize) {
+          byte[] newMask = new byte[regionSize];
+          System.arraycopy(orMask, 0, newMask, 0, regionSize);
+          orMask = newMask;
+        } else if (orSize < regionSize) {
           if (!fix) {
             throw new IllegalStateException(
               String.format(
