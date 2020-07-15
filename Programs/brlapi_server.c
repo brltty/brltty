@@ -1686,11 +1686,13 @@ PARAM_WRITER(cursorBlinkPercentage)
 /* BRLAPI_PARAM_RENDERED_CELLS */
 PARAM_READER(renderedCells)
 {
-  /* FIXME: should provide local output of the connection only! */
   lockMutex(&apiDriverMutex);
     if (disp) {
+      unsigned char buffer[displaySize];
+      getDots(&c->brailleWindow, buffer);
+
       if (displaySize < *size) *size = displaySize;
-      memcpy(data, disp->buffer, *size);
+      memcpy(data, buffer, *size);
     } else {
       *size = 0;
     }
