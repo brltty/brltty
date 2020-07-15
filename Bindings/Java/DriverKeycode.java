@@ -52,7 +52,7 @@ public class DriverKeycode extends Keycode {
   public String toString () {
     return String.format(
       "%s %s Grp:%d Num:%d",
-      super.toString(), (isPress()? "press": "release"), getGroup(), getNumber()
+      Keycode.toString(getCode()), (isPress()? "press": "release"), getGroup(), getNumber()
     );
   }
 }

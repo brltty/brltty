@@ -139,7 +139,10 @@ public class EchoClient extends Client {
 
       if (echoNames) {
         String name = connection.getParameters().driverKeycodeName.get(keycode.getValue());
-        if (name != null) string += " Name:" + name;
+
+        if ((name != null) && !name.isEmpty()) {
+          string += " Name:" + name;
+        }
       }
 
       return string;
@@ -158,6 +161,18 @@ public class EchoClient extends Client {
       {
         String command = keycode.getCommandName();
         if (command != null) builder.append(" Cmd:").append(command);
+      }
+
+      {
+        int argument = keycode.getArgument();
+
+        if (argument > 0) {
+          builder.append(
+            String.format(
+              " Arg:%04X(%d)", argument, argument
+            )
+          );
+        }
       }
 
       {

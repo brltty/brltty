@@ -54,7 +54,7 @@ public class CommandKeycode extends Keycode {
 
   private final void setNameFields () {
     synchronized (this) {
-      if (typeName == null) setNameFields(getCode());
+      if (flagNames == null) setNameFields(getCode());
     }
   }
 
@@ -77,7 +77,7 @@ public class CommandKeycode extends Keycode {
   public String toString () {
     return String.format(
       "%s Type:%08X Cmd:%04X Arg:%04X Flg:%04X",
-      super.toString(), getType(), getCommand(), getArgument(), getFlags()
+      Keycode.toString(getCode()), getType(), getCommand(), getArgument(), getFlags()
     );
   }
 }
