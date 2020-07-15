@@ -31,8 +31,12 @@ public abstract class Keycode extends NativeComponent {
     return codeValue;
   }
 
+  public static String toString (long code) {
+    return String.format("Code:%016X", code);
+  }
+
   @Override
   public String toString () {
-    return String.format("Code:%016X", getCode());
+    return toString(getCode());
   }
 }

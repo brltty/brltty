@@ -24,6 +24,9 @@ import java.io.InterruptedIOException;
 import java.util.concurrent.TimeoutException;
 
 public class EchoClient extends Client {
+  private boolean echoDriverKeys = false;
+  private boolean echoNames = false;
+
   public final static int MINIMUM_READ_COUNT =  1;
   public final static int DEFAULT_READ_COUNT = 10;
 
@@ -32,7 +35,6 @@ public class EchoClient extends Client {
   public final static int MINIMUM_READ_TIMEOUT =  1;
   public final static int DEFAULT_READ_TIMEOUT = 10;
 
-  private boolean echoDriverKeys = false;
   private int readCount = DEFAULT_READ_COUNT;
   private final OperandUsage readCountUsage = new OperandUsage("read count")
     .setDefault(readCount)
@@ -61,6 +63,18 @@ public class EchoClient extends Client {
     addOption("keys",
       (operands) -> {
         echoDriverKeys = true;
+      }
+    );
+
+    addOption("values",
+      (operands) -> {
+        echoNames = false;
+      }
+    );
+
+    addOption("names",
+      (operands) -> {
+        echoNames = true;
       }
     );
 
@@ -118,6 +132,62 @@ public class EchoClient extends Client {
     connection.write(text, Constants.CURSOR_OFF);
   }
 
+  private final String toString (Connection connection, long code) {
+    if (echoDriverKeys) {
+      DriverKeycode keycode = new DriverKeycode(code);
+      String string = keycode.toString();
+
+      if (echoNames) {
+        String name = connection.getParameters().driverKeycodeName.get(keycode.getValue());
+        if (name != null) string += " Name:" + name;
+      }
+
+      return string;
+    } else {
+      CommandKeycode keycode = new CommandKeycode(code);
+      if (!echoNames) return keycode.toString();
+
+      StringBuilder builder = new StringBuilder();
+      builder.append(Keycode.toString(code));
+
+      {
+        String type = keycode.getTypeName();
+        if (type != null) builder.append(" Type:").append(type);
+      }
+
+      {
+        String command = keycode.getCommandName();
+        if (command != null) builder.append(" Cmd:").append(command);
+      }
+
+      {
+        String[] flags = keycode.getFlagNames();
+
+        if (flags != null) {
+          int count = flags.length;
+          boolean first = true;
+
+          for (int index=0; index<count; index+=1) {
+            String flag = flags[index];
+            if (flag == null) continue;
+            if (flag.isEmpty()) continue;
+
+            if (first) {
+              first = false;
+              builder.append(" Flg:");
+            } else {
+              builder.append(',');
+            }
+
+            builder.append(flag);
+          }
+        }
+      }
+
+      return builder.toString();
+    }
+  }
+
   @Override
   protected final void runClient (Connection connection) throws ProgramException {
     ttyMode(
@@ -144,12 +214,7 @@ public class EchoClient extends Client {
             break;
           }
 
-          String text =
-            echoDriverKeys?
-            new DriverKeycode(code).toString():
-            new CommandKeycode(code).toString();
-
-          show(con, text);
+          show(con, toString(con, code));
         }
       },
       ttyPath

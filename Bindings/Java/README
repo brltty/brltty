@@ -16,6 +16,7 @@ Clients (see the clients/ subdirectory):
   driver-keys
   echo [tty ...]
     -commands | -keys
+    -values | -names
     -reads count (default is 10)
     -timeout seconds (default is 10)
   get-driver

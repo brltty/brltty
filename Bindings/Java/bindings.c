@@ -1535,12 +1535,16 @@ JAVA_STATIC_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_CommandKeycode, expandCode, void,
+  org_a11y_brlapi_CommandKeycode, setValueFields, void,
   jlong code
 ) {
   brlapi_expandedKeyCode_t ekc;
-  brlapi_expandKeyCode((brlapi_keyCode_t)code, &ekc);
   GET_CLASS(env, class, this, );
+
+  if (brlapi_expandKeyCode((brlapi_keyCode_t)code, &ekc) < 0) {
+    throwAPIError(env);
+    return;
+  }
 
   {
     FIND_FIELD(env, field, class, "typeValue", JAVA_SIG_INT, );
@@ -1560,6 +1564,57 @@ JAVA_INSTANCE_METHOD(
   {
     FIND_FIELD(env, field, class, "flagsValue", JAVA_SIG_INT, );
     JAVA_SET_FIELD(env, Int, this, field, ekc.flags);
+  }
+}
+
+JAVA_INSTANCE_METHOD(
+  org_a11y_brlapi_CommandKeycode, setNameFields, void,
+  jlong code
+) {
+  brlapi_describedKeyCode_t dkc;
+  GET_CLASS(env, class, this, );
+
+  if (brlapi_describeKeyCode((brlapi_keyCode_t)code, &dkc) < 0) {
+    throwAPIError(env);
+    return;
+  }
+
+  {
+    jstring name = (*env)->NewStringUTF(env, dkc.type);
+    if (!name) return;
+
+    FIND_FIELD(env, field, class, "typeName", JAVA_SIG_STRING, );
+    JAVA_SET_FIELD(env, Object, this, field, name);
+  }
+
+  {
+    jstring name = (*env)->NewStringUTF(env, dkc.command);
+    if (!name) return;
+
+    FIND_FIELD(env, field, class, "commandName", JAVA_SIG_STRING, );
+    JAVA_SET_FIELD(env, Object, this, field, name);
+  }
+
+  {
+    jclass stringClass = (*env)->FindClass(env, JAVA_OBJ_STRING);
+    if (!stringClass) return;
+
+    jsize count = dkc.flags;
+    jobjectArray names = (*env)->NewObjectArray(env, count, stringClass, NULL);
+    if (!names) return;
+
+    for (unsigned int index=0; index<count; index+=1) {
+      jstring name = (*env)->NewStringUTF(env, dkc.flag[index]);
+      if (!name) return;
+
+      (*env)->SetObjectArrayElement(env, names, index, name);
+      if ((*env)->ExceptionCheck(env)) return;
+    }
+
+    {
+      FIND_FIELD(env, field, class, "flagNames", JAVA_SIG_ARRAY(JAVA_SIG_STRING), );
+      JAVA_SET_FIELD(env, Object, this, field, names);
+    }
   }
 }
 

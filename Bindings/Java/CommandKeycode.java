@@ -20,8 +20,7 @@
 package org.a11y.brlapi;
 
 public class CommandKeycode extends Keycode {
-  private native void expandCode (long code);
-
+  private final native void setValueFields (long code);
   private int typeValue;
   private int commandValue;
   private int argumentValue;
@@ -29,7 +28,7 @@ public class CommandKeycode extends Keycode {
 
   public CommandKeycode (long code) {
     super(code);
-    expandCode(code);
+    setValueFields(code);
   }
 
   public final int getType () {
@@ -46,6 +45,32 @@ public class CommandKeycode extends Keycode {
 
   public final int getFlags () {
     return flagsValue;
+  }
+
+  private final native void setNameFields (long code);
+  private String typeName = null;
+  private String commandName = null;
+  private String[] flagNames = null;
+
+  private final void setNameFields () {
+    synchronized (this) {
+      if (typeName == null) setNameFields(getCode());
+    }
+  }
+
+  public final String getTypeName () {
+    setNameFields();
+    return typeName;
+  }
+
+  public final String getCommandName () {
+    setNameFields();
+    return commandName;
+  }
+
+  public final String[] getFlagNames () {
+    setNameFields();
+    return flagNames;
   }
 
   @Override
