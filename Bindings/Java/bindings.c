@@ -1535,15 +1535,17 @@ JAVA_STATIC_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_CommandKeycode, setValueFields, void,
+  org_a11y_brlapi_CommandKeycode, expandKeycode, void,
   jlong code
 ) {
   brlapi_expandedKeyCode_t ekc;
   GET_CLASS(env, class, this, );
 
   if (brlapi_expandKeyCode((brlapi_keyCode_t)code, &ekc) < 0) {
-    throwAPIError(env);
-    return;
+    memset(&ekc, 0, sizeof(ekc));
+    ekc.type = code & BRLAPI_KEY_TYPE_MASK;
+    ekc.command = code & BRLAPI_KEY_CODE_MASK;
+    ekc.flags = (code & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT;
   }
 
   {
@@ -1568,15 +1570,15 @@ JAVA_INSTANCE_METHOD(
 }
 
 JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_CommandKeycode, setNameFields, void,
+  org_a11y_brlapi_CommandKeycode, describeKeycode, void,
   jlong code
 ) {
   brlapi_describedKeyCode_t dkc;
   GET_CLASS(env, class, this, );
 
   if (brlapi_describeKeyCode((brlapi_keyCode_t)code, &dkc) < 0) {
-    throwAPIError(env);
-    return;
+    memset(&dkc, 0, sizeof(dkc));
+    dkc.type = "UNSUPPORTED";
   }
 
   {
