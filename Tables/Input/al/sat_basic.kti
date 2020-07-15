@@ -95,9 +95,9 @@ bind LeftPadF2+!LeftPadRight SAY_FASTER
 bind LeftPadF2+!LeftPadDown SAY_SOFTER
 bind LeftPadF2+!LeftPadUp SAY_LOUDER
 
-bind HOME BACK
-bind CURSOR HOME
-bind HOME+CURSOR CSRTRK
+bind Home BACK
+bind Cursor HOME
+bind Home+Cursor CSRTRK
 
 bind RightPadF1 HELP
 bind RightPadF2 LEARN
