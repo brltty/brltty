@@ -887,6 +887,7 @@ trackScreenCursor (int place) {
       ScreenCharacter characters[length];
       int onspace = 1;
       readScreenRow(ses->winy, length, characters);
+
       while (length) {
         if ((iswspace(characters[--length].text) != 0) != onspace) {
           if (onspace) {
@@ -897,8 +898,10 @@ trackScreenCursor (int place) {
           }
         }
       }
+
       ses->winx = length;
     }
+
     contractedTrack = 1;
     return 1;
   }

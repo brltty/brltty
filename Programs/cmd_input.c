@@ -227,61 +227,91 @@ handleInputCommands (int command, void *data) {
       switch (command & BRL_MSK_BLK) {
         case BRL_CMD_BLK(PASSKEY): {
           ScreenKey key;
+          int home = 0;
 
           switch (arg) {
             case BRL_KEY_ENTER:
               key = SCR_KEY_ENTER;
               break;
+
             case BRL_KEY_TAB:
               key = SCR_KEY_TAB;
               break;
+
             case BRL_KEY_BACKSPACE:
               key = SCR_KEY_BACKSPACE;
               break;
+
             case BRL_KEY_ESCAPE:
               key = SCR_KEY_ESCAPE;
               break;
+
             case BRL_KEY_CURSOR_LEFT:
               key = SCR_KEY_CURSOR_LEFT;
+              home = 1;
               break;
+
             case BRL_KEY_CURSOR_RIGHT:
               key = SCR_KEY_CURSOR_RIGHT;
+              home = 1;
               break;
+
             case BRL_KEY_CURSOR_UP:
               key = SCR_KEY_CURSOR_UP;
+              home = 1;
               break;
+
             case BRL_KEY_CURSOR_DOWN:
               key = SCR_KEY_CURSOR_DOWN;
+              home = 1;
               break;
+
             case BRL_KEY_PAGE_UP:
               key = SCR_KEY_PAGE_UP;
+              home = 1;
               break;
+
             case BRL_KEY_PAGE_DOWN:
               key = SCR_KEY_PAGE_DOWN;
+              home = 1;
               break;
+
             case BRL_KEY_HOME:
               key = SCR_KEY_HOME;
+              home = 1;
               break;
+
             case BRL_KEY_END:
               key = SCR_KEY_END;
+              home = 1;
               break;
+
             case BRL_KEY_INSERT:
               key = SCR_KEY_INSERT;
               break;
+
             case BRL_KEY_DELETE:
               key = SCR_KEY_DELETE;
               break;
+
             default:
-              if (arg < BRL_KEY_FUNCTION) goto badKey;
+              if (arg < BRL_KEY_FUNCTION) goto REJECT_KEY;
               key = SCR_KEY_FUNCTION + (arg - BRL_KEY_FUNCTION);
               break;
           }
 
-          applyModifierFlags(icd, &flags);
-          if (!insertKey(key, flags)) {
-          badKey:
-            alert(ALERT_COMMAND_REJECTED);
+          if (home && ses->trackScreenCursor) {
+            if (!trackScreenCursor(1)) {
+              goto REJECT_KEY;
+            }
           }
+
+          applyModifierFlags(icd, &flags);
+          if (!insertKey(key, flags)) goto REJECT_KEY;
+          break;
+
+        REJECT_KEY:
+          alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
