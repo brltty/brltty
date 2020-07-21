@@ -144,7 +144,7 @@ CAMLprim value brlapiml_errorCode_of_error(value camlError)
 /* Raises the Brlapi_error exception */
 static void raise_brlapi_error(void)
 {
-  static value *exception = NULL;
+  static const value *exception = NULL;
   CAMLparam0();
   CAMLlocal1(res);
   if (exception==NULL) exception = caml_named_value("Brlapi_error");
@@ -159,7 +159,7 @@ static void raise_brlapi_error(void)
 /* Raises Brlapi_exception */
 static void BRLAPI_STDCALL raise_brlapi_exception(int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
-  static value *exception = NULL;
+  static const value *exception = NULL;
   int i;
   CAMLparam0();
   CAMLlocal2(str, res);
@@ -309,13 +309,13 @@ CAMLprim value brlapiml_write(value handle, value writeArguments)
   wa.displayNumber = Val_int(Field(writeArguments, 0));
   wa.regionBegin = Val_int(Field(writeArguments, 1));
   wa.regionSize = Val_int(Field(writeArguments, 2));
-  wa.text = String_val(Field(writeArguments, 3));
+  wa.text = &Byte(String_val(Field(writeArguments, 3)), 0);
   packDots(Field(writeArguments, 4), andMask, andSize);
   wa.andMask = andMask;
   packDots(Field(writeArguments, 5), orMask, orSize);
   wa.orMask = orMask;
   wa.cursor = Val_int(Field(writeArguments, 6));
-  wa.charset = String_val(Field(writeArguments, 7));
+  wa.charset = &Byte(String_val(Field(writeArguments, 7)), 0);
   brlapiCheckError(write, &wa);
   CAMLreturn(Val_unit);
 }
