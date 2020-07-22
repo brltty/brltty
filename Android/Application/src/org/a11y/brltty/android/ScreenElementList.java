@@ -155,15 +155,19 @@ public class ScreenElementList extends ArrayList<ScreenElement> {
             Rect location1 = getLocation(node1);
             Rect location2 = getLocation(node2);
 
-            return (location1.top < location2.top)? -1:
-                   (location1.top > location2.top)? 1:
-                   (location1.left < location2.left)? -1:
-                   (location1.left > location2.left)? 1:
-                   (location1.right > location2.right)? -1:
-                   (location1.right < location2.right)? 1:
-                   (location1.bottom > location2.bottom)? -1:
-                   (location1.bottom < location2.bottom)? 1:
-                   0;
+            if (location1.top < location2.top) return -1;
+            if (location1.top > location2.top) return 1;
+
+            if (location1.left < location2.left) return -1;
+            if (location1.left > location2.left) return 1;
+
+            if (location1.right > location2.right) return -1;
+            if (location1.right < location2.right) return 1;
+
+            if (location1.bottom > location2.bottom) return -1;
+            if (location1.bottom < location2.bottom) return 1;
+
+            return 0;
           }
         };
 

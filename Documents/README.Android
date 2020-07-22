@@ -347,7 +347,7 @@ focus to that folder's first entry. This eliminates the need to search for it.
 The Cursor Routing Keys
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-The cursor routing keys of the braille device perform their usual function when
+The cursor routing keys of your braille device perform their usual function when
 within an input area if it has input focus - the key above a given
 character brings the cursor to that character. In any other context, however, a
 cursor routing key performs an action on the screen element under it. Starting
@@ -516,6 +516,66 @@ right now.
   ``F12``  3         switch to the previous window          4.0 (Kitkat)
   ``F13``  6         switch to the next window              4.0 (Kitkat)
   =======  ========  =====================================  =====================
+
+Web Pages
+~~~~~~~~~
+
+.. table:: Web Page Annotations
+
+  ==========  =====================================
+  Annotation  Meaning
+  ----------  -------------------------------------
+  btn         button
+  cap         table caption
+  col         start of table column
+  frm         start of form
+  hdg         heading
+  hd1         level 1 heading
+  hd2         level 2 heading
+  hd3         level 3 heading
+  hd4         level 4 heading
+  hd5         level 5 heading
+  hd6         level 6 heading
+  hdr         start of table column header
+  lnk         target of link
+  pop         single or multiple choice pop-up list
+  pwd         password field
+  row         start of table row
+  tbl         start of table
+  txt         text field or area
+  \--------   divider
+  ==========  =====================================
+
+A web page, when browsed with Chrome, can be structurally navigated
+by typing the following characters on your braille device:
+
+.. table:: Web Page Navigation
+
+  =========  ============================
+  Character  Go To
+  ---------  ----------------------------
+  </>        previous/next main
+  (/)        previous/next frame
+  A/a        previous/next article
+  B/b        previous/next button
+  C/c        previous/next control
+  D/d        previous/next ARIA landmark
+  E/e        previous/next editable text
+  F/f        previous/next focusable item
+  G/g        previous/next graphic
+  H/h        previous/next heading
+  I/i        previous/next list item
+  L/l        previous/next link
+  M/m        previous/next media
+  O/o        previous/next list
+  R/r        previous/next radio button
+  S/s        previous/next section
+  T/t        previous/next table
+  U/u        previous/next unvisited link
+  V/v        previous/next visited link
+  X/x        previous/next checkbox
+  Z/z        previous/next combobox
+  =========  ============================
 
 When BRLTTY Crashes
 -------------------

@@ -251,15 +251,33 @@ public abstract class InputHandlers {
       return false;
     }
 
+    protected boolean performWebViewAction (AccessibilityNodeInfo node, AccessibilityNodeInfo webview) {
+      return false;
+    }
+
     public final boolean editText () {
-      if (false && APITests.haveLollipop) {
+      {
         AccessibilityNodeInfo node = getCursorNode();
 
         if (node != null) {
           try {
-            if (node.isEditable()) {
-              if (!node.isPassword()) {
-                return editText(node);
+            if (ScreenUtilities.isEditable(node)) {
+              if (ApplicationParameters.ENABLE_SET_TEXT) {
+                if (APITests.haveLollipop) {
+                  if (!node.isPassword()) {
+                    return editText(node);
+                  }
+                }
+              }
+            } else {
+              AccessibilityNodeInfo webview = ScreenUtilities.findContainingWebView(node);
+              if (webview == null) return false;
+
+              try {
+                return performWebViewAction(node, webview);
+              } finally {
+                webview.recycle();
+                webview = null;
               }
             }
           } finally {
@@ -289,6 +307,13 @@ public abstract class InputHandlers {
       protected Integer editText (Editable editor, int start, int end) {
         editor.replace(start, end, Character.toString(character));
         return start + 1;
+      }
+
+      @Override
+      protected boolean performWebViewAction (AccessibilityNodeInfo node, AccessibilityNodeInfo webview) {
+        Motion motion = Motion.get(character);
+        if (motion == null) return false;
+        return motion.apply(node);
       }
     }.editText();
   }

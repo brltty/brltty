@@ -309,7 +309,8 @@ public class RenderedScreen {
           String label = ChromeRole.getLabel(root);
 
           if (label != null) {
-            if (text != null) label += ' ' + text;
+            if (!label.isEmpty()) label = String.format("(%s) ", label);
+            if (text != null) label += text;
             text = label;
           }
         }

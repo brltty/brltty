@@ -22,14 +22,17 @@ public abstract class ApplicationParameters {
   private ApplicationParameters () {
   }
 
+  public final static boolean ENABLE_SET_TEXT = false;
+  public final static boolean ENABLE_MOTION_LOGGING = true;
+
   public final static int BRAILLE_COLUMN_SPACING = 2;
   public final static int BRAILLE_ROW_SPACING = 0;
 
   public final static int CORE_WAIT_DURATION = Integer.MAX_VALUE;
 
-  public final static int FOCUS_WAIT_TIMEOUT = 1000;
-  public final static int FOCUS_WAIT_INTERVAL = 100;
+  public final static long FOCUS_WAIT_TIMEOUT = 1000;
+  public final static long FOCUS_WAIT_INTERVAL = 100;
 
-  public final static int LONG_PRESS_DELAY = 100;
-  public final static int FOCUS_SETTER_DELAY = 500;
+  public final static long LONG_PRESS_DELAY = 100;
+  public final static long FOCUS_SETTER_DELAY = 500;
 }

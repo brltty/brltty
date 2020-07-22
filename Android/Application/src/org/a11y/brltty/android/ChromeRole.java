@@ -25,6 +25,14 @@ import java.util.Map;
 import java.util.HashMap;
 
 public enum ChromeRole {
+  anchor(),
+  button("btn"),
+  caption("cap"),
+  cell("col"),
+  checkBox(),
+  columnHeader("hdr"),
+  form("frm"),
+
   heading("hdg",
     "heading 1", "hd1",
     "heading 2", "hd2",
@@ -34,15 +42,46 @@ public enum ChromeRole {
     "heading 6", "hd6"
   ),
 
+  lineBreak(),
   link("lnk"),
+  paragraph(),
+  popUpButton("pop"),
+  radioButton(),
+  rootWebArea(),
+  row("row"),
   splitter("--------"),
+  staticText(),
+  table("tbl"),
+
+  textField("txt",
+    new LabelMaker() {
+      @Override
+      public String makeLabel (AccessibilityNodeInfo node) {
+        if ((node.getActions() & AccessibilityNodeInfo.ACTION_EXPAND) == 0) return "";
+        if (node.isPassword()) return "pwd";
+        return null;
+      }
+    }
+  ),
+
   ; // end of enumeration
 
+  public final static String EXTRA_CHROME_ROLE = "AccessibilityNodeInfo.chromeRole";
+  public final static String EXTRA_ROLE_DESCRIPTION = "AccessibilityNodeInfo.roleDescription";
+  public final static String EXTRA_HINT = "AccessibilityNodeInfo.hint";
+  public final static String EXTRA_TARGET_URL = "AccessibilityNodeInfo.targetUrl";
+
+  private interface LabelMaker {
+    public String makeLabel (AccessibilityNodeInfo node);
+  }
+
   private final String genericLabel;
+  private final LabelMaker labelMaker;
   private final Map<String, String> descriptionLabels;
 
-  ChromeRole (String generic, String... descriptions) {
+  ChromeRole (String generic, LabelMaker maker, String... descriptions) {
     genericLabel = generic;
+    labelMaker = maker;
 
     {
       int count = descriptions.length;
@@ -62,38 +101,61 @@ public enum ChromeRole {
     }
   }
 
-  public static String getLabel (Bundle extras) {
-    if (extras == null) return null;
+  ChromeRole (String generic, String... descriptions) {
+    this(generic, null, descriptions);
+  }
 
-    final String name = extras.getString("AccessibilityNodeInfo.chromeRole");
+  ChromeRole () {
+    this(null);
+  }
+
+  private final static Bundle getExtras (AccessibilityNodeInfo node) {
+    if (node != null) {
+      if (APITests.haveKitkat) {
+        return node.getExtras();
+      }
+    }
+
+    return null;
+  }
+
+  public static String getStringExtra (AccessibilityNodeInfo node, String extra) {
+    Bundle extras = getExtras(node);
+    if (extras == null) return null;
+    return extras.getString(extra);
+  }
+
+  public static ChromeRole getChromeRole (AccessibilityNodeInfo node) {
+    String name = getStringExtra(node, EXTRA_CHROME_ROLE);
     if (name == null) return null;
 
-    final ChromeRole role;
     try {
-      role = ChromeRole.valueOf(name);
+      return ChromeRole.valueOf(name);
     } catch (IllegalArgumentException exception) {
       return null;
     }
+  }
+
+  public static String getLabel (AccessibilityNodeInfo node) {
+    if (node == null) return null;
+
+    ChromeRole role = getChromeRole(node);
+    if (role == null) return null;
+
+    if (role.labelMaker != null) {
+      String label = role.labelMaker.makeLabel(node);
+      if (label != null) return label;
+    }
 
     if (role.descriptionLabels != null) {
-      final String description = extras.getString("AccessibilityNodeInfo.roleDescription");
+      final String description = getStringExtra(node, EXTRA_ROLE_DESCRIPTION);
 
       if (description != null) {
-        final String label = role.descriptionLabels.get(description);
+        String label = role.descriptionLabels.get(description);
         if (label != null) return label;
       }
     }
 
     return role.genericLabel;
-  }
-
-  public static String getLabel (AccessibilityNodeInfo node) {
-    if (node != null) {
-      if (APITests.haveKitkat) {
-        return getLabel(node.getExtras());
-      }
-    }
-
-    return null;
   }
 }

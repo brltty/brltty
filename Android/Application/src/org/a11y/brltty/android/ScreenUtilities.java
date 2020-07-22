@@ -22,10 +22,13 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import android.os.Bundle;
+
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.graphics.Rect;
+import android.webkit.WebView;
 
 public abstract class ScreenUtilities {
   private ScreenUtilities () {
@@ -219,22 +222,50 @@ public abstract class ScreenUtilities {
     return null;
   }
 
-  public static AccessibilityNodeInfo findRootNode (AccessibilityNodeInfo node) {
-    if (node != null) {
-      AccessibilityNodeInfo child = AccessibilityNodeInfo.obtain(node);
+  public static AccessibilityNodeInfo findContainingNode (AccessibilityNodeInfo node, NodeTester tester) {
+    if (node == null) return null;
+    node = AccessibilityNodeInfo.obtain(node);
+    boolean haveTester = tester != null;
 
-      while (true) {
-        AccessibilityNodeInfo parent = child.getParent();
-        if (parent == null) break;
+    while (true) {
+      if (haveTester && tester.testNode(node)) return node;
 
-        child.recycle();
-        child = parent;
-      }
+      AccessibilityNodeInfo parent = node.getParent();
+      boolean atRoot = parent == null;
 
-      node = child;
+      if (atRoot && !haveTester) return node;
+      node.recycle();
+      if (atRoot) return null;
+
+      node = parent;
+      parent = null;
     }
+  }
 
-    return node;
+  public static AccessibilityNodeInfo findRootNode (AccessibilityNodeInfo node) {
+    return findContainingNode(node, null);
+  }
+
+  public static AccessibilityNodeInfo findContainingWebView (AccessibilityNodeInfo node) {
+    NodeTester tester = new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        return isSubclassOf(node, WebView.class);
+      }
+    };
+
+    return findContainingNode(node, tester);
+  }
+
+  public static AccessibilityNodeInfo findContainingAccessibilityFocus (AccessibilityNodeInfo node) {
+    NodeTester tester = new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        return node.isAccessibilityFocused();
+      }
+    };
+
+    return findContainingNode(node, tester);
   }
 
   public static AccessibilityNodeInfo findNode (AccessibilityNodeInfo root, NodeTester tester) {
@@ -325,47 +356,32 @@ public abstract class ScreenUtilities {
     return findNode(root, tester);
   }
 
-  public static AccessibilityNodeInfo findActionableNode (AccessibilityNodeInfo node, NodeTester tester) {
-    node = AccessibilityNodeInfo.obtain(node);
-
-    while (true) {
-      if (node.isEnabled()) {
-        if (tester.testNode(node)) {
-          return node;
-        }
-      }
-
-      AccessibilityNodeInfo parent = node.getParent();
-      node.recycle();
-      node = null;
-
-      if (parent == null) return null;
-      node = parent;
-      parent = null;
-    }
-  }
-
   public static AccessibilityNodeInfo findActionableNode (AccessibilityNodeInfo node, final int actions) {
     NodeTester tester = new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
+        if (!node.isEnabled()) return false;
         return (node.getActions() & actions) != 0;
       }
     };
 
-    return findActionableNode(node, tester);
+    return findContainingNode(node, tester);
   }
 
-  public static boolean performAction (AccessibilityNodeInfo node, int action) {
+  public static boolean performAction (AccessibilityNodeInfo node, int action, Bundle arguments) {
     node = findActionableNode(node, action);
     if (node == null) return false;
 
     try {
-      return node.performAction(action);
+      return node.performAction(action, arguments);
     } finally {
       node.recycle();
       node = null;
     }
+  }
+
+  public static boolean performAction (AccessibilityNodeInfo node, int action) {
+    return performAction(node, action, null);
   }
 
   public static boolean performClick (AccessibilityNodeInfo node) {
@@ -405,6 +421,8 @@ public abstract class ScreenUtilities {
     NodeTester tester = new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
+        if (!node.isEnabled()) return false;
+
         for (AccessibilityNodeInfo.AccessibilityAction action : node.getActionList()) {
           if (Arrays.binarySearch(array, 0, array.length, action, comparator) >= 0) return true;
         }
@@ -413,7 +431,7 @@ public abstract class ScreenUtilities {
       }
     };
 
-    return findActionableNode(node, tester);
+    return findContainingNode(node, tester);
   }
 
   public static boolean performAction (
