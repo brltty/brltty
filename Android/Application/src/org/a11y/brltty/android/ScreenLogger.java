@@ -32,7 +32,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.graphics.Rect;
 
 public abstract class ScreenLogger {
-  private static final String LOG_TAG = ScreenLogger.class.getName();
+  private final static String LOG_TAG = ScreenLogger.class.getName();
 
   private ScreenLogger () {
   }
@@ -62,30 +62,30 @@ public abstract class ScreenLogger {
     return text;
   }
 
-  private static final void add (StringBuilder sb, String value) {
+  private final static void add (StringBuilder sb, String value) {
     if (value != null) {
       if (sb.length() > 0) sb.append(' ');
       sb.append(value);
     }
   }
 
-  private static final void add (StringBuilder sb, boolean condition, String trueValue, String falseValue) {
+  private final static void add (StringBuilder sb, boolean condition, String trueValue, String falseValue) {
     add(sb, (condition? trueValue: falseValue));
   }
 
-  private static final void add (StringBuilder sb, boolean condition, String trueValue) {
+  private final static void add (StringBuilder sb, boolean condition, String trueValue) {
     add(sb, condition, trueValue, null);
   }
 
-  private static final void add (StringBuilder sb, String label, CharSequence value) {
+  private final static void add (StringBuilder sb, String label, CharSequence value) {
     if (value != null) add(sb, String.format("%s=%s", label, value));
   }
 
-  private static final void add (StringBuilder sb, String label, int value) {
+  private final static void add (StringBuilder sb, String label, int value) {
     add(sb, label, Integer.toString(value));
   }
 
-  private static final void add (StringBuilder sb, String label, int value, Map<Integer, String> names) {
+  private final static void add (StringBuilder sb, String label, int value, Map<Integer, String> names) {
     String name = names.get(value);
 
     if (name != null) {
@@ -422,7 +422,7 @@ public abstract class ScreenLogger {
     log("end node tree");
   }
 
-  private static final Map<Integer, String> windowTypeNames =
+  private final static Map<Integer, String> windowTypeNames =
                new HashMap<Integer, String>()
   {
     {

@@ -31,7 +31,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
 
 public class InputService extends InputMethodService {
-  private static final String LOG_TAG = InputService.class.getName();
+  private final static String LOG_TAG = InputService.class.getName();
 
   private static volatile InputService inputService = null;
 
@@ -106,7 +106,7 @@ public class InputService extends InputMethodService {
     logKeyEvent(code, press, "sent");
   }
 
-  public native boolean handleKeyEvent (int code, boolean press);
+  public final native boolean handleKeyEvent (int code, boolean press);
 
   public void forwardKeyEvent (int code, boolean press) {
     InputConnection connection = getCurrentInputConnection();

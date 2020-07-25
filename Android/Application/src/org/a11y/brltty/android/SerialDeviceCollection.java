@@ -23,7 +23,7 @@ import java.util.Map;
 import android.content.Context;
 
 public final class SerialDeviceCollection extends DeviceCollection {
-  public static final String DEVICE_QUALIFIER = "serial";
+  public final static String DEVICE_QUALIFIER = "serial";
 
   @Override
   public final String getQualifier () {

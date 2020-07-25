@@ -25,7 +25,7 @@ import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 
 public final class GeneralSettings extends SettingsFragment {
-  private static final String LOG_TAG = GeneralSettings.class.getName();
+  private final static String LOG_TAG = GeneralSettings.class.getName();
 
   private CheckBoxPreference releaseBrailleDeviceCheckBox;
   private ListPreference navigationModeList;

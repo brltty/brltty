@@ -25,7 +25,7 @@ import android.content.Context;
 import android.preference.PreferenceActivity;
 
 public class SettingsActivity extends PreferenceActivity {
-  private static final String LOG_TAG = SettingsActivity.class.getName();
+  private final static String LOG_TAG = SettingsActivity.class.getName();
 
   @Override
   protected void onCreate (Bundle savedInstanceState) {

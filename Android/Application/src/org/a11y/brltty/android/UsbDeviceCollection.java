@@ -25,7 +25,7 @@ import android.content.Context;
 import android.hardware.usb.*;
 
 public final class UsbDeviceCollection extends DeviceCollection {
-  public static final String DEVICE_QUALIFIER = "usb";
+  public final static String DEVICE_QUALIFIER = "usb";
 
   @Override
   public final String getQualifier () {

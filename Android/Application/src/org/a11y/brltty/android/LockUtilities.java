@@ -21,7 +21,7 @@ package org.a11y.brltty.android;
 import android.os.PowerManager;
 
 public final class LockUtilities {
-  private static final PowerManager.WakeLock wakeLock =
+  private final static PowerManager.WakeLock wakeLock =
     ApplicationUtilities.getPowerManager().newWakeLock(
       PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
       BrailleApplication.get().getString(R.string.app_name)

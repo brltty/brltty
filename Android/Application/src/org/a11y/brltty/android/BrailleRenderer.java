@@ -28,7 +28,7 @@ import android.view.KeyEvent;
 import android.graphics.Rect;
 
 public abstract class BrailleRenderer {
-  private static final String LOG_TAG = BrailleRenderer.class.getName();
+  private final static String LOG_TAG = BrailleRenderer.class.getName();
 
   private static volatile BrailleRenderer brailleRenderer = new ListBrailleRenderer();
 

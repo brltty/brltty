@@ -25,7 +25,7 @@ import android.util.Log;
 import android.speech.tts.TextToSpeech;
 
 public class SpeechDriver {
-  private static final String LOG_TAG = SpeechDriver.class.getName();
+  private final static String LOG_TAG = SpeechDriver.class.getName();
 
   enum State {
     STOPPED,
@@ -35,7 +35,7 @@ public class SpeechDriver {
 
   private static volatile State state = State.STOPPED;
   private static TextToSpeech tts = null;
-  private static final HashMap<String, String> parameters = new HashMap<String, String>();
+  private final static HashMap<String, String> parameters = new HashMap<String, String>();
 
   public static boolean start () {
     TextToSpeech.OnInitListener listener = new TextToSpeech.OnInitListener() {

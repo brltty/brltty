@@ -31,7 +31,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Rect;
 
 public class ScreenElementList extends ArrayList<ScreenElement> {
-  private static final String LOG_TAG = ScreenElementList.class.getName();
+  private final static String LOG_TAG = ScreenElementList.class.getName();
 
   public ScreenElementList () {
     super();

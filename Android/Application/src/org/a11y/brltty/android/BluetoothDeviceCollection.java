@@ -26,7 +26,7 @@ import android.content.Context;
 import android.bluetooth.*;
 
 public final class BluetoothDeviceCollection extends DeviceCollection {
-  public static final String DEVICE_QUALIFIER = "bluetooth";
+  public final static String DEVICE_QUALIFIER = "bluetooth";
 
   @Override
   public final String getQualifier () {

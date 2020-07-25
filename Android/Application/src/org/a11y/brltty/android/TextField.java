@@ -64,7 +64,7 @@ public class TextField {
     return setSelection(offset, offset);
   }
 
-  private static final Map<AccessibilityNodeInfo, TextField> textFields =
+  private final static Map<AccessibilityNodeInfo, TextField> textFields =
                new HashMap<AccessibilityNodeInfo, TextField>();
 
   public static TextField get (AccessibilityNodeInfo node, boolean canCreate) {

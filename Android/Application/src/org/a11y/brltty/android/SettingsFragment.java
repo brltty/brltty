@@ -39,7 +39,7 @@ import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 
 public abstract class SettingsFragment extends PreferenceFragment {
-  private static final String LOG_TAG = SettingsFragment.class.getName();
+  private final static String LOG_TAG = SettingsFragment.class.getName();
 
   @Override
   public void onCreate (Bundle savedInstanceState) {

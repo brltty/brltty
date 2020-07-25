@@ -23,7 +23,7 @@ import java.lang.reflect.*;
 import android.util.Log;
 
 public final class LanguageUtilities {
-  private static final String LOG_TAG = LanguageUtilities.class.getName();
+  private final static String LOG_TAG = LanguageUtilities.class.getName();
 
   public static String[] newStringArray (CharSequence[] charSequences) {
     int size = charSequences.length;

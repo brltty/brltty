@@ -44,10 +44,10 @@ public abstract class DeviceCollection {
     return strings.toArray(new String[strings.size()]);
   }
 
-  public static final char IDENTIFIER_SEPARATOR = ',';
-  public static final char QUALIFIER_DELIMITER = ':';
-  public static final char PARAMETER_SEPARATOR = '+';
-  public static final char ASSIGNMENT_DELIMITER = '=';
+  public final static char IDENTIFIER_SEPARATOR = ',';
+  public final static char QUALIFIER_DELIMITER = ':';
+  public final static char PARAMETER_SEPARATOR = '+';
+  public final static char ASSIGNMENT_DELIMITER = '=';
 
   public abstract String getQualifier ();
   public abstract String[] makeValues ();

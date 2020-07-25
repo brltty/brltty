@@ -22,13 +22,13 @@ public abstract class ApplicationParameters {
   private ApplicationParameters () {
   }
 
-  public static final int BRAILLE_COLUMN_SPACING = 2;
-  public static final int BRAILLE_ROW_SPACING = 0;
+  public final static int BRAILLE_COLUMN_SPACING = 2;
+  public final static int BRAILLE_ROW_SPACING = 0;
 
-  public static final int CORE_WAIT_DURATION = Integer.MAX_VALUE;
+  public final static int CORE_WAIT_DURATION = Integer.MAX_VALUE;
 
-  public static final int FOCUS_WAIT_TIMEOUT = 1000;
-  public static final int FOCUS_WAIT_INTERVAL = 100;
+  public final static int FOCUS_WAIT_TIMEOUT = 1000;
+  public final static int FOCUS_WAIT_INTERVAL = 100;
 
-  public static final int LONG_PRESS_DELAY = 100;
+  public final static int LONG_PRESS_DELAY = 100;
 }

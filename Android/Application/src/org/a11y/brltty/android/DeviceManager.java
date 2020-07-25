@@ -37,7 +37,7 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 
 public final class DeviceManager extends SettingsFragment {
-  private static final String LOG_TAG = DeviceManager.class.getName();
+  private final static String LOG_TAG = DeviceManager.class.getName();
 
   private Set<String> deviceNames;
   private DeviceCollection deviceCollection;
@@ -56,13 +56,13 @@ public final class DeviceManager extends SettingsFragment {
   private Preference removeDeviceButton_NO;
   private Preference removeDeviceButton_YES;
 
-  private static final String PREF_KEY_DEVICE_NAMES = "device-names";
-  private static final String PREF_KEY_DEVICE_IDENTIFIER = "device-identifier";
-  private static final String PREF_KEY_DEVICE_QUALIFIER = "device-qualifier";
-  private static final String PREF_KEY_DEVICE_REFERENCE = "device-reference";
-  private static final String PREF_KEY_DEVICE_DRIVER = "device-driver";
+  private final static String PREF_KEY_DEVICE_NAMES = "device-names";
+  private final static String PREF_KEY_DEVICE_IDENTIFIER = "device-identifier";
+  private final static String PREF_KEY_DEVICE_QUALIFIER = "device-qualifier";
+  private final static String PREF_KEY_DEVICE_REFERENCE = "device-reference";
+  private final static String PREF_KEY_DEVICE_DRIVER = "device-driver";
 
-  private static final String[] DEVICE_PROPERTY_KEYS = {
+  private final static String[] DEVICE_PROPERTY_KEYS = {
     PREF_KEY_DEVICE_IDENTIFIER,
     PREF_KEY_DEVICE_QUALIFIER,
     PREF_KEY_DEVICE_REFERENCE,

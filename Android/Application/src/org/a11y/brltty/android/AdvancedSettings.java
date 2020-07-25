@@ -28,7 +28,7 @@ import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 
 public final class AdvancedSettings extends SettingsFragment {
-  private static final String LOG_TAG = AdvancedSettings.class.getName();
+  private final static String LOG_TAG = AdvancedSettings.class.getName();
 
   private ListPreference keyboardTableList;
   private ListPreference attributesTableList;

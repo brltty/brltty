@@ -27,7 +27,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.content.Intent;
 
 public class BrailleService extends AccessibilityService {
-  private static final String LOG_TAG = BrailleService.class.getName();
+  private final static String LOG_TAG = BrailleService.class.getName();
 
   private static volatile BrailleService brailleService = null;
 

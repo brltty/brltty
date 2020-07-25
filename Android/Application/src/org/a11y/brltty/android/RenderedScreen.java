@@ -31,7 +31,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.graphics.Rect;
 
 public class RenderedScreen {
-  private static final String LOG_TAG = RenderedScreen.class.getName();
+  private final static String LOG_TAG = RenderedScreen.class.getName();
 
   private final AccessibilityNodeInfo eventNode;
   private final AccessibilityNodeInfo rootNode;
@@ -115,7 +115,7 @@ public class RenderedScreen {
     }
   };
 
-  private static final int SIGNIFICANT_NODE_ACTIONS
+  private final static int SIGNIFICANT_NODE_ACTIONS
     = AccessibilityNodeInfo.ACTION_CLICK
     | AccessibilityNodeInfo.ACTION_LONG_CLICK
     | AccessibilityNodeInfo.ACTION_SCROLL_FORWARD

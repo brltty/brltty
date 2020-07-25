@@ -24,7 +24,7 @@ import android.preference.Preference;
 import android.preference.CheckBoxPreference;
 
 public final class MessageSettings extends SettingsFragment {
-  private static final String LOG_TAG = MessageSettings.class.getName();
+  private final static String LOG_TAG = MessageSettings.class.getName();
 
   private CheckBoxPreference showNotificationsCheckBox;
   private CheckBoxPreference showToastsCheckBox;

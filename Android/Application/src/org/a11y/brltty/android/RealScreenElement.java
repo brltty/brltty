@@ -28,7 +28,7 @@ import android.graphics.Rect;
 import android.view.KeyEvent;
 
 public class RealScreenElement extends ScreenElement {
-  private static final String LOG_TAG = RealScreenElement.class.getName();
+  private final static String LOG_TAG = RealScreenElement.class.getName();
 
   private final AccessibilityNodeInfo accessibilityNode;
 
