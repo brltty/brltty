@@ -47,8 +47,11 @@ public class WriteDotsClient extends PauseClient {
     ttyMode(
       connection, false,
       (con) -> {
-        printf("%s\n", toUnicodeBraille(dots));
         con.write(dots);
+
+        byte[] dots = con.getParameters().renderedCells.get();
+        printf("%s\n", toUnicodeBraille(dots));
+
         pause(con);
       }
     );

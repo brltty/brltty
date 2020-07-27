@@ -684,24 +684,20 @@ JAVA_INSTANCE_METHOD(
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_ConnectionBase, writeDots, void,
-  jbyteArray jarg1
+  jbyteArray jDots
 ) {
-  jbyte *arg1;
-  int result;
   GET_CONNECTION_HANDLE(env, this, );
   
-  if (!jarg1) {
+  if (!jDots) {
     throwJavaError(env, JAVA_OBJ_NULL_POINTER_EXCEPTION, __func__);
     return;
   }
-  arg1 = (*env)->GetByteArrayElements(env, jarg1, NULL);
-  if (!arg1) {
-    throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
-    return;
-  }
 
-  result = brlapi__writeDots(handle, (const unsigned char *)arg1);
-  (*env)->ReleaseByteArrayElements(env, jarg1, arg1, JNI_ABORT); 
+  jbyte *cDots = (*env)->GetByteArrayElements(env, jDots, NULL);
+  if (!cDots) return;
+
+  int result = brlapi__writeDots(handle, (const unsigned char *)cDots);
+  (*env)->ReleaseByteArrayElements(env, jDots, cDots, JNI_ABORT); 
   
   if (result < 0) {
     throwAPIError(env);
