@@ -212,6 +212,7 @@ typedef struct {
   unsigned char onFirstRelease;
   unsigned char touchNavigation;
 
+  unsigned char homeBeforeCursorNavigation;
   unsigned char cursorTrackingDelay;
   unsigned char trackScreenScroll;
 

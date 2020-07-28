@@ -227,7 +227,7 @@ handleInputCommands (int command, void *data) {
       switch (command & BRL_MSK_BLK) {
         case BRL_CMD_BLK(PASSKEY): {
           ScreenKey key;
-          int home = 0;
+          int homeFirst = 0;
 
           switch (arg) {
             case BRL_KEY_ENTER:
@@ -248,42 +248,42 @@ handleInputCommands (int command, void *data) {
 
             case BRL_KEY_CURSOR_LEFT:
               key = SCR_KEY_CURSOR_LEFT;
-              home = 1;
+              homeFirst = 1;
               break;
 
             case BRL_KEY_CURSOR_RIGHT:
               key = SCR_KEY_CURSOR_RIGHT;
-              home = 1;
+              homeFirst = 1;
               break;
 
             case BRL_KEY_CURSOR_UP:
               key = SCR_KEY_CURSOR_UP;
-              home = 1;
+              homeFirst = 1;
               break;
 
             case BRL_KEY_CURSOR_DOWN:
               key = SCR_KEY_CURSOR_DOWN;
-              home = 1;
+              homeFirst = 1;
               break;
 
             case BRL_KEY_PAGE_UP:
               key = SCR_KEY_PAGE_UP;
-              home = 1;
+              homeFirst = 1;
               break;
 
             case BRL_KEY_PAGE_DOWN:
               key = SCR_KEY_PAGE_DOWN;
-              home = 1;
+              homeFirst = 1;
               break;
 
             case BRL_KEY_HOME:
               key = SCR_KEY_HOME;
-              home = 1;
+              homeFirst = 1;
               break;
 
             case BRL_KEY_END:
               key = SCR_KEY_END;
-              home = 1;
+              homeFirst = 1;
               break;
 
             case BRL_KEY_INSERT:
@@ -300,7 +300,7 @@ handleInputCommands (int command, void *data) {
               break;
           }
 
-          if (home && ses->trackScreenCursor) {
+          if (homeFirst && prefs.homeBeforeCursorNavigation && ses->trackScreenCursor) {
             if (!trackScreenCursor(1)) {
               goto REJECT_KEY;
             }

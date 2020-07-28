@@ -777,6 +777,11 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Home before Cursor Navigation"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.homeBeforeCursorNavigation, &itemName));
+    }
+
+    {
       static const MenuString strings[] = {
         {.label=strtext("None")},
         {.label=strtext("250 milliseconds")},

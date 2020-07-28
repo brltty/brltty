@@ -289,6 +289,12 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.brailleWindowOverlap
   },
 
+  { .name = "home-before-cursor-navigation",
+    .defaultValue = DEFAULT_HOME_BEFORE_CURSOR_NAVIGATION,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.homeBeforeCursorNavigation
+  },
+
   { .name = "cursor-tracking-delay",
     .defaultValue = DEFAULT_CURSOR_TRACKING_DELAY,
     .settingNames = &preferenceStringTable_cursorTrackingDelay,
