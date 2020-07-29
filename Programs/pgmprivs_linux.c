@@ -46,6 +46,14 @@
 #include <sys/prctl.h>
 #endif /* HAVE_SYS_PRCTL_H */
 
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif /* HAVE_PWD_H */
+
+#ifdef HAVE_GRP_H
+#include <grp.h>
+#endif /* HAVE_GRP_H */
+
 static int
 amPrivilegedUser (void) {
   return !geteuid();
@@ -78,8 +86,6 @@ installKernelModules (void) {
 }
 
 #ifdef HAVE_GRP_H
-#include <grp.h>
-
 typedef struct {
   const char *message;
   const gid_t *groups;
@@ -230,8 +236,32 @@ processRequiredGroups (GroupsProcessor *processGroups, void *data) {
   processGroups(groups, count, data);
 }
 
+typedef struct {
+  const gid_t *groups;
+  size_t count;
+} CurrentGroupsData;
+
 static void
 setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
+  const CurrentGroupsData *cgd = data;
+
+  size_t total = count;
+  if (cgd) total += cgd->count;
+  gid_t buffer[total];
+
+  if (cgd && (cgd->count > 0)) {
+    gid_t *gid = buffer;
+    gid = mempcpy(gid, groups, ARRAY_SIZE(groups, count));
+
+    if (cgd) {
+      gid = mempcpy(gid, cgd->groups, ARRAY_SIZE(cgd->groups, cgd->count));
+    }
+
+    groups = buffer;
+    count = gid - groups;
+    removeDuplicateGroups(buffer, &count);
+  }
+
   logGroups(LOG_DEBUG, "setting supplementary groups", groups, count);
 
   if (setgroups(count, groups) == -1) {
@@ -241,13 +271,38 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
 
 static void
 joinRequiredGroups (void) {
+#ifdef HAVE_PWD_H
+  if (!amPrivilegedUser()) {
+    uid_t uid = geteuid();
+    const struct passwd *pwd = getpwuid(uid);
+
+    if (pwd) {
+      const char *user = pwd->pw_name;
+      gid_t group = pwd->pw_gid;
+
+      int count = 0;
+      getgrouplist(user, group, NULL, &count);
+
+      count += 1; // allow for the primary group
+      gid_t groups[count];
+
+      if (getgrouplist(user, group, groups, &count) != -1) {
+        CurrentGroupsData cgd = {
+          .groups = groups,
+          .count = count
+        };
+
+        processRequiredGroups(setSupplementaryGroups, &cgd);
+        return;
+      } else {
+        logSystemError("getgrouplist");
+      }
+    }
+  }
+#endif /* HAVE_PWD_H */
+
   processRequiredGroups(setSupplementaryGroups, NULL);
 }
-
-typedef struct {
-  const gid_t *groups;
-  size_t count;
-} CurrentGroupsData;
 
 static void
 logUnjoinedGroups (const gid_t *groups, size_t count, void *data) {
@@ -1756,8 +1811,6 @@ setDefaultShell (const char *shell) {
 }
 
 #ifdef HAVE_PWD_H
-#include <pwd.h>
-
 static int
 canSwitchGroup (gid_t gid) {
   {
@@ -1857,7 +1910,7 @@ switchUser (const char *specifiedUser, const char *configuredUser, int *haveHome
         name = number;
       }
 
-      logMessage(LOG_NOTICE, "executing as the invoking user: %s", name);
+      logMessage(LOG_NOTICE, "continuing to execute as the invoking user: %s", name);
     }
 
     if (*(user = configuredUser)) {
