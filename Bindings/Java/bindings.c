@@ -651,16 +651,10 @@ JAVA_INSTANCE_METHOD(
 
 JAVA_INSTANCE_METHOD(
   org_a11y_brlapi_ConnectionBase, setFocus, void,
-  jint jarg1
+  jint tty
 ) {
-  int arg1 ;
   GET_CONNECTION_HANDLE(env, this, );
-  
-  arg1 = (int)jarg1; 
-  if (brlapi__setFocus(handle, arg1) < 0) {
-    throwAPIError(env);
-    return;
-  }
+  if (brlapi__setFocus(handle, tty) < 0) throwAPIError(env);
 }
 
 JAVA_INSTANCE_METHOD(
