@@ -31,6 +31,10 @@ note The two round keys are named Home and Cursor.
 # Default Bindings #
 ####################
 
+note Enter the internal menu by pressing:
+note * SpeechPadF1 + SpeechPadF2 + NavPadF1 + NavPadF2
+bind SpeechPadF1+SpeechPadF2+NavPadF1+NavPadF2 NOOP
+
 include sat_speech.kti
 include sat_nav.kti
 

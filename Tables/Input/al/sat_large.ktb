@@ -18,9 +18,5 @@
 
 title Alva Satellite 570,584
 
-context default
-include sat_common.kti
-
-context default
 include sat_tumblers.kti
-
+include sat_common.kti
