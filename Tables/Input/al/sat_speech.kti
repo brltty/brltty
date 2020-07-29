@@ -16,11 +16,19 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This key subtable is for Alva Satellite models which have tumbler keys.
-note The two three-position, sliding keys are named LeftTumbler and RightTumbler.
+# This key subtable is for the Alva Satellite speech keypad.
 
-bind LeftTumblerLeft CHRLT
-bind LeftTumblerRight CHRRT
-bind RightTumblerLeft LNBEG     
-bind RightTumblerRight LNEND
+bind SpeechPadLeft MUTE
+bind SpeechPadRight SAY_LINE
+bind SpeechPadUp SAY_ABOVE
+bind SpeechPadDown SAY_BELOW
+
+bind SpeechPadF2+SpeechPadLeft SAY_SLOWER
+bind SpeechPadF2+SpeechPadRight SAY_FASTER
+bind SpeechPadF2+SpeechPadDown SAY_SOFTER
+bind SpeechPadF2+SpeechPadUp SAY_LOUDER
+
+bind SpeechPadF1 SPKHOME
+bind SpeechPadF2 AUTOSPEAK
+bind SpeechPadF1+SpeechPadF2 RESTARTSPEECH
 

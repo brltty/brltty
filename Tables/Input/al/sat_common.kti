@@ -31,17 +31,15 @@ note The two round keys are named Home and Cursor.
 # Default Bindings #
 ####################
 
+include sat_speech.kti
+include sat_nav.kti
+
 bind !Up LNUP
 bind !Down LNDN
 bind Home+!Up TOP_LEFT
 bind Home+!Down BOT_LEFT
 bind Cursor+!Up TOP
 bind Cursor+!Down BOT
-
-bind NavPadF1+!Up PRDIFLN
-bind NavPadF1+!Down NXDIFLN
-bind NavPadF2+!Up ATTRUP
-bind NavPadF2+!Down ATTRDN
 
 bind !Left FWINLT
 bind !Right FWINRT
@@ -50,24 +48,16 @@ bind Home+!Right LNEND
 bind Cursor+!Left FWINLTSKIP
 bind Cursor+!Right FWINRTSKIP
 
-bind NavPadF1+!Left CHRLT
-bind NavPadF1+!Right CHRRT
-bind NavPadF2+!Left HWINLT
-bind NavPadF2+!Right HWINRT
-
-bind RoutingKey2 DESCCHAR
 bind RoutingKey1 ROUTE
+bind RoutingKey2 DESCCHAR
+
+bind RoutingKey1+!RoutingKey1 CLIP_COPY
+bind RoutingKey2+!RoutingKey2 CLIP_APPEND
+
 bind Home+!RoutingKey2 SETMARK
 bind Home+!RoutingKey1 GOTOMARK
 bind Cursor+!RoutingKey2 PRINDENT
 bind Cursor+!RoutingKey1 NXINDENT
-
-bind RoutingKey1+!RoutingKey1 CLIP_COPY
-bind RoutingKey2+!RoutingKey2 CLIP_APPEND
-bind NavPadF1+!RoutingKey1 CLIP_NEW
-bind NavPadF1+!RoutingKey2 CLIP_ADD
-bind NavPadF2+!RoutingKey1 COPY_RECT
-bind NavPadF2+!RoutingKey2 COPY_LINE
 
 bind !Status1A CSRVIS
 bind !Status2A SKPIDLNS
@@ -76,40 +66,9 @@ bind !Status2B DISPMD
 bind !Status1C CAPBLINK
 bind !Status2C SKPBLNKWINS
 
-bind NavPadLeft PREFMENU
-bind NavPadRight INFO
-bind NavPadF1+NavPadLeft FREEZE
-bind NavPadF1+NavPadRight SIXDOTS
-bind NavPadF2+NavPadLeft PASTE
-bind NavPadF2+NavPadRight CSRJMP_VERT
-
-bind NavPadUp PRPROMPT
-bind NavPadDown NXPROMPT
-bind NavPadF1+NavPadUp PRPGRPH
-bind NavPadF1+NavPadDown NXPGRPH
-bind NavPadF2+NavPadUp PRSEARCH
-bind NavPadF2+NavPadDown NXSEARCH
-
-bind SpeechPadLeft MUTE
-bind SpeechPadRight SAY_LINE
-bind SpeechPadUp SAY_ABOVE
-bind SpeechPadDown SAY_BELOW
-bind SpeechPadF2+SpeechPadLeft SAY_SLOWER
-bind SpeechPadF2+SpeechPadRight SAY_FASTER
-bind SpeechPadF2+SpeechPadDown SAY_SOFTER
-bind SpeechPadF2+SpeechPadUp SAY_LOUDER
-
 bind Home BACK
 bind Cursor HOME
 bind Home+Cursor CSRTRK
-
-bind NavPadF1 HELP
-bind NavPadF2 LEARN
-bind NavPadF1+NavPadF2 RESTARTBRL
-
-bind SpeechPadF1 SPKHOME
-bind SpeechPadF2 AUTOSPEAK
-bind SpeechPadF1+SpeechPadF2 RESTARTSPEECH
 
 
 #################
