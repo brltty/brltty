@@ -18,6 +18,4 @@
 
 title Alva Satellite 544
 
-context default
 include sat_common.kti
-
