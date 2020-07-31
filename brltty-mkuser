@@ -80,6 +80,7 @@ addGroups() {
 }
 
 addProgramOption a flag noALSA "don't allow playing sound via the ALSA framework"
+addProgramOption b flag noBrlapi "don't allow reading BrlAPI's authorization key file"
 addProgramOption c flag noConsoles "don't allow access to the virtual consoles"
 addProgramOption d string.path homeDirectory "set/change the home (login) directory"
 addProgramOption g string.group primaryGroup "set/change the primary (login) group"
@@ -128,6 +129,7 @@ fi
 
 "${noGroups}" || {
    "${noALSA}" || addGroups audio
+   "${noBrlapi}" || addGroups "${BRLAPI_KEY_FILE}"
    "${noConsoles}" || addGroups tty /dev/vcs1 /dev/tty1
    "${noKeyboards}" || addGroups input
    "${noPulse}" || addGroups pulse-access

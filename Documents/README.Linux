@@ -16,6 +16,8 @@ BRLTTY on Linux
 .. |writable directory name| replace:: ``brltty``
 
 .. |configuration file path| replace:: ``/etc/brltty.conf``
+.. |key file path| replace:: ``/etc/brlapi.key``
+
 .. |sockets directory path| replace:: ``/var/lib/BrlAPI/``
 .. |updatable directory path| replace:: ``/var/lib/brltty/``
 .. |writable directory path| replace:: ``/var/run/brltty/``
@@ -28,6 +30,7 @@ BRLTTY on Linux
 .. |default unprivileged user| replace:: default unprivileged user (|default user|)
 .. |speaker| replace:: built-in PC speaker
 .. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
+.. |key file| replace:: authorization key file (usually |key file path|)
 .. |sockets directory| replace:: sockets directory (usually |sockets directory path|)
 .. |updatable directory| replace:: updatable directory (usually |updatable directory path|)
 .. |writable directory| replace:: writable directory (usually |writable directory path|)
@@ -112,15 +115,22 @@ Explicit Specification
 The Default User
   The default unprivileged user is |default user|.
   This can be configured at build time via
-  the ``--with-unprivileged-user`` option.
+  the ``--with-privilege-parameters`` option (``lx:user=``).
   If there's a problem:
 
-  * the user doesn't exist.
-  * BRLTTY wasn't configured with a ``user`` `privilege parameter`_.
+  * The user doesn't exist.
+  * BRLTTY wasn't configured with the ``lx:user`` `privilege parameter`_.
 
   then BRLTTY continues to execute as |the super user|.
-  In this case, it still establishes
-  the rest of its `safer execution environment`_.
+
+Continuing to Run as the Super User
+  This is the last resort!
+  In this case:
+
+  * BRLTTY still establishes the rest of its `safer execution environment`_.
+
+  * Establishing the needed `group memberships`_ replaces
+    (rather than extends) BRLTTY's supplementary group list.
 
 After having successfully switched to executing as an unprivileged user,
 the following is done:
@@ -132,6 +142,8 @@ the following is done:
 * Ensure that all of the group identifiers
   (real, effective, saved, filesystem)
   are set to the primary group of the selected user.
+
+* Extend the supplementary group list with the needed `group memberships`_.
 
 * If the selected user's home directory is defined then switch to it by:
 
@@ -270,6 +282,8 @@ the environment needs to be prepared as follows:
   This isn't necessary, i.e. BRLTTY will join them by itself,
   if the |cap_setgid| (temporary) capability
   has also been assigned to its executable.
+  In this case, BRLTTY will extend the supplementary group list
+  that it inherited from the user with any needed groups that are missing.
 
 * Install the needed `kernel modules`_.
   This isn't necessary, i.e. BRLTTY will install them by itself,
@@ -567,6 +581,8 @@ The user's supplementary group list is used
 to establish the needed `group memberships`_.
 Each of the following options removes a group from the full list,
 and, therefore, also removes that group's associated functionality from BRLTTY.
+If a group's name is shown in *italics* then it's only our recommendation
+as its actual name isn't defined by any standard or convention.
 
 .. table:: ``brltty-mkuser`` Options for Excluding Supplementary Groups
 
@@ -574,6 +590,7 @@ and, therefore, also removes that group's associated functionality from BRLTTY.
   Option  Removes Group     Lost Functionality
   ------  ----------------  ----------------------------------------
   ``-a``  ``audio``         playing sound via the ALSA framework
+  ``-b``  *brlapi*          reading BrlAPI's |key file|
   ``-c``  ``tty``           access to the virtual consoles
   ``-k``  ``input``         keyboard monitoring
   ``-p``  ``pulse-access``  playing sound via the Pulse Audio server
@@ -626,6 +643,9 @@ The following options are primarily for developers:
 
 Assigning Capabilities to the Executable
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Don't do this if you only want BRLTTY to execute successfully
+`when started as the super user`_.**
 
 First, here's a summary of all of the capabilities that BRLTTY needs
 `when started by an unprivileged user`_.
@@ -734,10 +754,19 @@ Group Memberships
 ~~~~~~~~~~~~~~~~~
 
 BRLTTY relies on file system and server (daemon) access
-granted via membership in these groups:
+granted via membership in the owning user groups.
+
+* A group name shown in **bold** is its actual name.
+
+* A group name shown in *italics* is our recommended name for it
+  as its actual name isn't defined by any standard or convention.
 
 **audio**
   For playing sound via the ALSA framework.
+
+*brlapi*
+  For reading BrlAPI's |key file|.
+  In other words, the group that owns that file.
 
 **dialout**
   For serial I/O via these ``/dev/`` devices:

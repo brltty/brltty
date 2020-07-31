@@ -125,7 +125,7 @@ brlttyConfig_defineVariables() {
 
    brlttyConfig_defineVariable BRLAPI_VERSION "${api_version}"
    brlttyConfig_defineVariable BRLAPI_RELEASE "${api_release}"
-   brlttyConfig_defineVariable BRLAPI_AUTHKEYFILE "${api_authkeyfile}"
+   brlttyConfig_defineVariable BRLAPI_KEY_FILE "${sysconfdir}/${api_authkeyfile}"
 }
 
 brlttyConfig_defineVariables
