@@ -558,8 +558,14 @@ extern "C" {
 /* Define this to be a string containing the default parameters for the application programming interface. */
 #undef API_PARAMETERS
 
-/* Define this to be a string containing the path to the local BrlAPI sockets. */
+/* Define this to be a string containing the path to BrlAPI's local sockets directory. */
 #undef BRLAPI_SOCKETPATH
+
+/* Define this to be a string containing the path to BrlAPI's data files directory. */
+#undef BRLAPI_ETCDIR
+
+/* Define this to be a string containing the name of BrlAPI's authorization key file. */
+#undef BRLAPI_AUTHKEYFILE
 
 /* Define this if shared object support is to be included. */
 #undef ENABLE_SHARED_OBJECTS

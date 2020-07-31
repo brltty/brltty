@@ -180,6 +180,11 @@ static const RequiredGroupEntry requiredGroupTable[] = {
     .needRead = 1,
     .needWrite = 1,
   },
+
+  { .reason = "for reading BrlAPI's authorization key file",
+    .path = BRLAPI_ETCDIR "/" BRLAPI_AUTHKEYFILE,
+    .needRead = 1,
+  },
 }; static const uint8_t requiredGroupCount = ARRAY_COUNT(requiredGroupTable);
 
 static void
@@ -257,9 +262,9 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
       gid = mempcpy(gid, cgd->groups, ARRAY_SIZE(cgd->groups, cgd->count));
     }
 
-    groups = buffer;
-    count = gid - groups;
+    count = gid - buffer;
     removeDuplicateGroups(buffer, &count);
+    groups = buffer;
   }
 
   logGroups(LOG_DEBUG, "setting supplementary groups", groups, count);

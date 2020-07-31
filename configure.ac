@@ -763,7 +763,7 @@ AC_SUBST([api_authkeyfile], [brlapi.key])
 AC_SUBST([api_socket_path])
 BRLTTY_SUMMARY_ITEM([api-socket-path], [api_socket_path])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHKEYFILE], ["${api_authkeyfile}"],
-                       [Define this to be a string containing the name of the file containing the authorization key.])
+                       [Define this to be a string containing the name of BrlAPI's authorization key file.])
 
 brltty_curses_libs_save="${LIBS}"
 BRLTTY_PACKAGE_CHOOSE([curses],
@@ -2036,9 +2036,9 @@ BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
-                       [Define this to be a string containing the path to the directory where the authorization key and driver-dependent key names are found.])
+                       [Define this to be a string containing the path to BrlAPI's data files directory.])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
-		       [Define this to be a string containing the path to the local BrlAPI sockets.])
+		       [Define this to be a string containing the path to BrlAPI's local sockets directory.])
 BRLTTY_SUBST_EXPANDED([api_socket_directory], ["${api_socket_path}"])
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
