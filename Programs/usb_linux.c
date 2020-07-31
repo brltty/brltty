@@ -1247,7 +1247,7 @@ usbMakeSysfsPath (const char *usbfsPath) {
     int count = 0;
     while (1) {
       if (tail == usbfsPath) return 0;
-      if (!isPathDelimiter(*--tail)) continue;
+      if (!isPathSeparator(*--tail)) continue;
       if (++count == 2) break;
     }
   }

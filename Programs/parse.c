@@ -394,7 +394,7 @@ hasQualifier (const char **identifier, const char *qualifier) {
   if (!delimiter) return 0;
 
   size_t count = delimiter - *identifier;
-  if (memchr(*identifier, FILE_PATH_DELIMITER, count)) return 0;
+  if (memchr(*identifier, PATH_SEPARATOR_CHARACTER, count)) return 0;
 
   if (qualifier) {
     if (count != strlen(qualifier)) return 0;

@@ -51,7 +51,11 @@ processDirectoryEntry (const char *name, const PathProcessingData *ppd) {
 
   const char *directory = parameters->path;
   char path[strlen(directory) + 1 + strlen(name) + 1];
-  snprintf(path, sizeof(path), "%s%c%s", directory, FILE_PATH_DELIMITER, name);
+
+  snprintf(
+    path, sizeof(path), "%s%c%s",
+    directory, PATH_SEPARATOR_CHARACTER, name
+  );
 
   return processPathTree(path, ppd->processor, parameters->data);
 }

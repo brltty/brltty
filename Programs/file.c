@@ -41,13 +41,13 @@
 
 
 int
-isPathDelimiter (const char character) {
-  return character == FILE_PATH_DELIMITER;
+isPathSeparator (const char character) {
+  return character == PATH_SEPARATOR_CHARACTER;
 }
 
 int
 isAbsolutePath (const char *path) {
-  if (isPathDelimiter(path[0])) return 1;
+  if (isPathSeparator(path[0])) return 1;
 
 #if defined(__MINGW32__) || defined(__MSDOS__)
   if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", toupper(path[0])) && (path[1] == ':')) return 1;
@@ -59,7 +59,7 @@ isAbsolutePath (const char *path) {
 static size_t
 stripPathDelimiter (const char *path, size_t length) {
   while (length) {
-    if (!isPathDelimiter(path[length-1])) break;
+    if (!isPathSeparator(path[length-1])) break;
     length -= 1;
   }
   return length;
@@ -72,7 +72,7 @@ getPathDirectory (const char *path) {
 
   if (end) {
     while (--end) {
-      if (isPathDelimiter(path[end-1])) {
+      if (isPathSeparator(path[end-1])) {
         break;
       }
     }
@@ -104,7 +104,7 @@ locatePathName (const char *path) {
   const char *name = path + strlen(path);
 
   while (name != path) {
-    if (isPathDelimiter(*--name)) {
+    if (isPathSeparator(*--name)) {
       ++name;
       break;
     }
@@ -147,7 +147,7 @@ joinPath (const char *const *components, unsigned int count) {
     const char *next = *--component;
 
     if (next && *next) {
-      if ((first != size) && !isPathDelimiter(next[strlen(next)-1])) {
+      if ((first != size) && !isPathSeparator(next[strlen(next)-1])) {
         strings[--first] = "/";
       }
 
