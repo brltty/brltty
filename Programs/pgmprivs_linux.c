@@ -1867,7 +1867,7 @@ switchToUser (const char *user, int *haveHomeDirectory) {
     if (!uid) {
       logMessage(LOG_WARNING, "not an unprivileged user: %s", user);
     } else if (setProcessOwnership(uid, gid)) {
-      logMessage(LOG_NOTICE, "switched to user: %s", user);
+      logMessage(LOG_NOTICE, "switched to unprivileged user: %s", user);
       if (setHomeDirectory(pwd->pw_dir)) *haveHomeDirectory = 1;
       return 1;
     }
