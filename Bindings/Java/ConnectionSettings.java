@@ -76,8 +76,8 @@ public class ConnectionSettings extends NativeComponent {
   public final static char AUTHENTICATION_SCHEME_SEPARATOR = '+';
   public final static char AUTHENTICATION_OPERAND_PREFIX = ':';
 
-  public final static String AUTHENTICATION_SCHEME_NONE = "none";
   public final static String AUTHENTICATION_SCHEME_KEYFILE = "keyfile";
+  public final static String AUTHENTICATION_SCHEME_NONE = "none";
 
   private native static String getKeyfileDirectory ();
   public final static String AUTHENTICATION_KEYFILE_DIRECTORY = getKeyfileDirectory();

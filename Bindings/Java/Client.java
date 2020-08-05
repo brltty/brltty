@@ -98,6 +98,12 @@ public abstract class Client extends Program {
          .append(ConnectionSettings.DEFAULT_AUTHENTICATION_SCHEME)
          .append(". ")
 
+         .append("The format of a scheme specification is name")
+         .append(USAGE_OPTIONAL_BEGIN)
+         .append(ConnectionSettings.AUTHENTICATION_OPERAND_PREFIX).append("operand")
+         .append(USAGE_OPTIONAL_END)
+         .append(". ")
+
          .append("More than one scheme, separated by ")
          .append(ConnectionSettings.AUTHENTICATION_SCHEME_SEPARATOR)
          .append(", may be specified. ")
