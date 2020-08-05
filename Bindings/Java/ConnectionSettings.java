@@ -102,7 +102,9 @@ public class ConnectionSettings extends NativeComponent {
       }
     }
 
-    if (builder.length() == 0) builder.append(AUTHENTICATION_SCHEME_NONE);
+    if (builder.length() > 0) builder.append(AUTHENTICATION_SCHEME_SEPARATOR);
+    builder.append(AUTHENTICATION_SCHEME_NONE);
+
     DEFAULT_AUTHENTICATION_SCHEME = builder.toString();
   }
 

@@ -102,7 +102,7 @@ public abstract class Client extends Program {
          .append(ConnectionSettings.AUTHENTICATION_SCHEME_SEPARATOR)
          .append(", may be specified. ")
 
-         .append("These schemes may be specified:")
+         .append("The following schemes are supported:")
          .append("\n  ").append(ConnectionSettings.AUTHENTICATION_SCHEME_KEYFILE)
          .append(ConnectionSettings.AUTHENTICATION_OPERAND_PREFIX).append("path")
          .append("\n  ").append(ConnectionSettings.AUTHENTICATION_SCHEME_NONE)
