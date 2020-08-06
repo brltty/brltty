@@ -64,6 +64,11 @@ wordMeansFalse (const char *word) {
 }
 
 static int
+hasExtendableArgument (const OptionEntry *option) {
+  return option->argument && (option->flags & OPT_Extend);
+}
+
+static int
 ensureSetting (
   OptionProcessingInformation *info,
   const OptionEntry *option,
@@ -71,7 +76,7 @@ ensureSetting (
 ) {
   unsigned char *ensured = &info->ensuredSettings[option->letter];
 
-  if (!*ensured) {
+  if (!*ensured || hasExtendableArgument(option)) {
     *ensured = 1;
 
     if (option->argument) {
@@ -93,6 +98,7 @@ ensureSetting (
           info->warning = 1;
         } else {
           int count;
+
           if (isInteger(&count, value) && (count >= 0)) {
             *option->setting.flag = count;
           } else {
@@ -753,7 +759,7 @@ processConfigurationDirective (
     const OptionEntry *option = &conf->info->optionTable[directive->option];
     char **setting = &conf->settings[directive->option];
 
-    if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
+    if (*setting && !hasExtendableArgument(option)) {
       logMessage(LOG_ERR, "%s: %" PRIws, gettext("configuration directive specified more than once"), keyword);
       conf->info->warning = 1;
 

@@ -30,16 +30,15 @@ joinStrings (const char *const *strings, int count) {
   char *string;
   size_t length = 0;
   size_t lengths[count];
-  int index;
 
-  for (index=0; index<count; index+=1) {
+  for (unsigned int index=0; index<count; index+=1) {
     length += lengths[index] = strlen(strings[index]);
   }
 
   if ((string = malloc(length+1))) {
     char *target = string;
 
-    for (index=0; index<count; index+=1) {
+    for (unsigned int index=0; index<count; index+=1) {
       length = lengths[index];
       memcpy(target, strings[index], length);
       target += length;
@@ -208,9 +207,8 @@ int
 isLogLevel (unsigned int *level, const char *string) {
   {
     size_t length = strlen(string);
-    unsigned int index;
 
-    for (index=0; index<logLevelCount; index+=1) {
+    for (unsigned int index=0; index<logLevelCount; index+=1) {
       if (strncasecmp(string, logLevelNames[index], length) == 0) {
         *level = index;
         return 1;
