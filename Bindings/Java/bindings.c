@@ -402,104 +402,125 @@ JAVA_STATIC_METHOD(
   return (*env)->NewStringUTF(env, BRLAPI_AUTHKEYFILE);
 }
 
-JAVA_INSTANCE_METHOD(
-  org_a11y_brlapi_ConnectionBase, openConnection, jint,
-  jobject jRequestedSettings, jobject jActualSettings
+static int
+openConnection (
+  JNIEnv *env, jobject connection,
+  jobject jRequestedSettings, brlapi_connectionSettings_t *cRequestedSettings,
+  jobject jActualSettings, brlapi_connectionSettings_t *cActualSettings,
+  brlapi_handle_t **handle, int *fileDescriptor,
+  jobject *jRequestedHost, jobject *jRequestedAuth
 ) {
-  brlapi_handle_t *handle;
-  int fileDescriptor;
+  if (jRequestedSettings) {
+    GET_CLASS(env, class, jRequestedSettings, 0);
 
-  brlapi_connectionSettings_t cActualSettings, *pActualSettings;
-  pActualSettings = jActualSettings? &cActualSettings: NULL;
+    {
+      FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, 0);
+      *jRequestedHost = JAVA_GET_FIELD(env, Object, jRequestedSettings, field);
 
-  {
-    brlapi_connectionSettings_t cRequestedSettings, *pRequestedSettings;
-    memset(&cRequestedSettings, 0, sizeof(cRequestedSettings));
-
-    jstring jRequestedAuth;
-    jstring jRequestedHost;
-
-    if (jRequestedSettings) {
-      GET_CLASS(env, class, jRequestedSettings, -1);
-
-      {
-        FIND_FIELD(env, field, class, "authenticationScheme", JAVA_SIG_STRING, -1);
-
-        if (!(jRequestedAuth = JAVA_GET_FIELD(env, Object, jRequestedSettings, field))) {
-          cRequestedSettings.auth = NULL;
-        } else if (!(cRequestedSettings.auth = (char *) (*env)->GetStringUTFChars(env, jRequestedAuth, NULL))) {
-          return -1;
+      if (*jRequestedHost) {
+        if (!(cRequestedSettings->host = (*env)->GetStringUTFChars(env, *jRequestedHost, NULL))) {
+          return 0;
         }
       }
+    }
 
-      {
-        FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, -1);
+    {
+      FIND_FIELD(env, field, class, "authenticationScheme", JAVA_SIG_STRING, 0);
+      *jRequestedAuth = JAVA_GET_FIELD(env, Object, jRequestedSettings, field);
 
-        if (!(jRequestedHost = JAVA_GET_FIELD(env, Object, jRequestedSettings, field))) {
-          cRequestedSettings.host = NULL;
-        } else if (!(cRequestedSettings.host = (char *) (*env)->GetStringUTFChars(env, jRequestedHost, NULL))) {
-          return -1;
+      if (*jRequestedAuth) {
+        if (!(cRequestedSettings->auth = (*env)->GetStringUTFChars(env, *jRequestedAuth, NULL))) {
+          return 0;
         }
-      }
-
-      pRequestedSettings = &cRequestedSettings;
-    } else {
-      pRequestedSettings = NULL;
-      jRequestedAuth = NULL;
-      jRequestedHost = NULL;
-    }
-
-    if (!(handle = malloc(brlapi_getHandleSize()))) {
-      throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
-      return -1;
-    }
-
-    if ((fileDescriptor = brlapi__openConnection(handle, pRequestedSettings, pActualSettings)) < 0) {
-      free(handle);
-      throwConnectError(env, pRequestedSettings);
-      return -1;
-    }
-
-    if (pRequestedSettings) {
-      if (cRequestedSettings.auth) {
-        (*env)->ReleaseStringUTFChars(env, jRequestedAuth,  cRequestedSettings.auth); 
-      }
-
-      if (cRequestedSettings.host) {
-        (*env)->ReleaseStringUTFChars(env, jRequestedHost, cRequestedSettings.host); 
       }
     }
   }
 
-  if (pActualSettings) {
-    GET_CLASS(env, class, jActualSettings, -1);
+  if (!(*handle = malloc(brlapi_getHandleSize()))) {
+    throwJavaError(env, JAVA_OBJ_OUT_OF_MEMORY_ERROR, __func__);
+    return 0;
+  }
 
-    if (cActualSettings.auth) {
-      jstring auth = (*env)->NewStringUTF(env, cActualSettings.auth);
-      if (!auth) return -1;
+  *fileDescriptor = brlapi__openConnection(
+    *handle, cRequestedSettings, cActualSettings
+  );
 
-      FIND_FIELD(env, field, class, "authenticationScheme", JAVA_SIG_STRING, -1);
-      JAVA_SET_FIELD(env, Object, jActualSettings, field, auth);
+  if (*fileDescriptor < 0) {
+    throwConnectError(env, cRequestedSettings);
+    return 0;
+  }
+
+  if (cActualSettings) {
+    GET_CLASS(env, class, jActualSettings, 0);
+
+    if (cActualSettings->host) {
+      jstring host = (*env)->NewStringUTF(env, cActualSettings->host);
+      if (!host) return 0;
+
+      FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, 0);
+      JAVA_SET_FIELD(env, Object, jActualSettings, field, host);
+      if ((*env)->ExceptionCheck(env)) return 0;
     }
 
-    if (cActualSettings.host) {
-      jstring host = (*env)->NewStringUTF(env, cActualSettings.host);
-      if (!host) return -1;
+    if (cActualSettings->auth) {
+      jstring auth = (*env)->NewStringUTF(env, cActualSettings->auth);
+      if (!auth) return 0;
 
-      FIND_FIELD(env, field, class, "serverHost", JAVA_SIG_STRING, -1);
-      JAVA_SET_FIELD(env, Object, jActualSettings, field, host);
+      FIND_FIELD(env, field, class, "authenticationScheme", JAVA_SIG_STRING, 0);
+      JAVA_SET_FIELD(env, Object, jActualSettings, field, auth);
+      if ((*env)->ExceptionCheck(env)) return 0;
     }
   }
 
   {
     JavaVM *vm;
     (*env)->GetJavaVM(env, &vm);
-    brlapi__setClientData(handle, vm);
+    brlapi__setClientData(*handle, vm);
   }
 
-  brlapi__setExceptionHandler(handle, handleAPIException);
-  SET_CONNECTION_HANDLE(env, this, handle, -1);
-  return (jint) fileDescriptor;
+  brlapi__setExceptionHandler(*handle, handleAPIException);
+  SET_CONNECTION_HANDLE(env, connection, *handle, 0);
+  return 1;
+}
+
+JAVA_INSTANCE_METHOD(
+  org_a11y_brlapi_ConnectionBase, openConnection, jint,
+  jobject jRequestedSettings, jobject jActualSettings
+) {
+  brlapi_connectionSettings_t cRequestedSettings, *pRequestedSettings;
+  memset(&cRequestedSettings, 0, sizeof(cRequestedSettings));
+  pRequestedSettings = jRequestedSettings? &cRequestedSettings: NULL;
+
+  brlapi_connectionSettings_t cActualSettings, *pActualSettings;
+  memset(&cActualSettings, 0, sizeof(cActualSettings));
+  pActualSettings = jActualSettings? &cActualSettings: NULL;
+
+  brlapi_handle_t *handle = NULL;
+  int fileDescriptor = -1;
+
+  jobject jRequestedHost = NULL;
+  jobject jRequestedAuth = NULL;
+
+  int opened = openConnection(
+    env, this,
+    jRequestedSettings, pRequestedSettings,
+    jActualSettings, pActualSettings,
+    &handle, &fileDescriptor,
+    &jRequestedHost, &jRequestedAuth
+  );
+
+  if (cRequestedSettings.host) {
+    (*env)->ReleaseStringUTFChars(env, jRequestedHost, cRequestedSettings.host); 
+  }
+
+  if (cRequestedSettings.auth) {
+    (*env)->ReleaseStringUTFChars(env, jRequestedAuth,  cRequestedSettings.auth); 
+  }
+
+  if (opened) return fileDescriptor;
+  if (fileDescriptor >= 0) brlapi__closeConnection(handle);
+  if (handle) free(handle);
+  return -1;
 }
 
 JAVA_INSTANCE_METHOD(
