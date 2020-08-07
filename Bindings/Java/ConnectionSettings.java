@@ -23,7 +23,7 @@ import java.io.File;
 
 public class ConnectionSettings extends NativeComponent {
   public final static char HOST_PORT_SEPARATOR = ':';
-  public final static String DEFAULT_HOST_NAME = "localhost";
+  public final static String DEFAULT_HOST_NAME = "";
 
   public final static int MINIMUM_PORT_NUMBER =  0;
   public final static int MAXIMUM_PORT_NUMBER = 99;
@@ -38,7 +38,7 @@ public class ConnectionSettings extends NativeComponent {
     int index = specification.indexOf(HOST_PORT_SEPARATOR);
 
     if (index == 0) {
-      throw new IllegalArgumentException("missing host name/address");
+      return;
     }
 
     if (index < 0) {

@@ -74,21 +74,23 @@ public abstract class Client extends Program {
          .append(ConnectionSettings.DEFAULT_SERVER_HOST)
          .append(". ")
 
-         .append("The format of a host specification is host")
+         .append("The format of a host specification is ")
+         .append(USAGE_OPTIONAL_BEGIN)
+         .append("host")
+         .append(USAGE_OPTIONAL_END)
          .append(USAGE_OPTIONAL_BEGIN)
          .append(ConnectionSettings.HOST_PORT_SEPARATOR).append("port")
          .append(USAGE_OPTIONAL_END)
          .append(". ")
 
-         .append("The host component may be either a host name or an IPV4 address. ")
+         .append("The host component may be either a host name or an IPV4 address")
+         .append(" - if not specified, a local socket is used. ")
 
          .append("The port component must be an integer within the range ")
          .append(ConnectionSettings.MINIMUM_PORT_NUMBER)
          .append(" through ")
          .append(ConnectionSettings.MAXIMUM_PORT_NUMBER)
-         .append(". ")
-
-         .append("It's optional - if not specified, ")
+         .append(" - if not specified, ")
          .append(ConnectionSettings.DEFAULT_PORT_NUMBER)
          .append(" is assumed. ")
          ;
