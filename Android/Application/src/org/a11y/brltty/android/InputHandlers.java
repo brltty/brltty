@@ -641,12 +641,11 @@ public abstract class InputHandlers {
     public boolean performAction ();
   }
 
-  private final static FunctionKeyAction functionKeyAction_activeWindow =
+  private final static FunctionKeyAction functionKeyAction_applicationSettings =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        ScreenDriver.unlockScreenWindow();
-        ScreenDriver.setCurrentNode(ScreenUtilities.getRootNode());
+        ActionsActivity.launch();
         return true;
       }
     };
@@ -684,38 +683,6 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction functionKeyAction_moveBackward =
-    new FunctionKeyAction() {
-      @Override
-      public boolean performAction () {
-        return moveFocus(RenderedScreen.SearchDirection.BACKWARD);
-      }
-    };
-
-  private final static FunctionKeyAction functionKeyAction_moveForward =
-    new FunctionKeyAction() {
-      @Override
-      public boolean performAction () {
-        return moveFocus(RenderedScreen.SearchDirection.FORWARD);
-      }
-    };
-
-  private final static FunctionKeyAction functionKeyAction_nextWindow =
-    new FunctionKeyAction() {
-      @Override
-      public boolean performAction () {
-        Comparator<Integer> comparator =
-          new Comparator<Integer>() {
-            @Override
-            public int compare (Integer id1, Integer id2) {
-              return Integer.compare(id1, id2);
-            }
-          };
-
-        return switchToWindow(comparator);
-      }
-    };
-
   private final static FunctionKeyAction functionKeyAction_notificationsShade =
     new FunctionKeyAction() {
       @Override
@@ -749,22 +716,6 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction functionKeyAction_previousWindow =
-    new FunctionKeyAction() {
-      @Override
-      public boolean performAction () {
-        Comparator<Integer> comparator =
-          new Comparator<Integer>() {
-            @Override
-            public int compare (Integer id1, Integer id2) {
-              return -Integer.compare(id1, id2);
-            }
-          };
-
-        return switchToWindow(comparator);
-      }
-    };
-
   private final static FunctionKeyAction functionKeyAction_quickSettings =
     new FunctionKeyAction() {
       @Override
@@ -789,12 +740,61 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction functionKeyAction_serviceSettings =
+  private final static FunctionKeyAction functionKeyAction_toActiveWindow =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        ActionsActivity.launch();
+        ScreenDriver.unlockScreenWindow();
+        ScreenDriver.setCurrentNode(ScreenUtilities.getRootNode());
         return true;
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_toNextItem =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        return moveFocus(RenderedScreen.SearchDirection.FORWARD);
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_toNextWindow =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        Comparator<Integer> comparator =
+          new Comparator<Integer>() {
+            @Override
+            public int compare (Integer id1, Integer id2) {
+              return Integer.compare(id1, id2);
+            }
+          };
+
+        return switchToWindow(comparator);
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_toPreviousItem =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        return moveFocus(RenderedScreen.SearchDirection.BACKWARD);
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_toPreviousWindow =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        Comparator<Integer> comparator =
+          new Comparator<Integer>() {
+            @Override
+            public int compare (Integer id1, Integer id2) {
+              return -Integer.compare(id1, id2);
+            }
+          };
+
+        return switchToWindow(comparator);
       }
     };
 
@@ -804,15 +804,15 @@ public abstract class InputHandlers {
       /* F2  */ functionKeyAction_backButton,
       /* F3  */ functionKeyAction_notificationsShade,
       /* F4  */ functionKeyAction_recentApplications,
-      /* F5  */ functionKeyAction_serviceSettings,
+      /* F5  */ functionKeyAction_applicationSettings,
       /* F6  */ functionKeyAction_quickSettings,
-      /* F7  */ functionKeyAction_moveBackward,
-      /* F8  */ functionKeyAction_moveForward,
+      /* F7  */ functionKeyAction_toPreviousItem,
+      /* F8  */ functionKeyAction_toNextItem,
       /* F9  */ functionKeyAction_powerDialog,
       /* F10 */ functionKeyAction_optionsMenu,
-      /* F11 */ functionKeyAction_activeWindow,
-      /* F12 */ functionKeyAction_previousWindow,
-      /* F13 */ functionKeyAction_nextWindow,
+      /* F11 */ functionKeyAction_toActiveWindow,
+      /* F12 */ functionKeyAction_toPreviousWindow,
+      /* F13 */ functionKeyAction_toNextWindow,
       /* F14 */ null,
       /* F15 */ null,
       /* F16 */ functionKeyAction_logScreen
