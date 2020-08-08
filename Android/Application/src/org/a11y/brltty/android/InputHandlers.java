@@ -83,6 +83,16 @@ public abstract class InputHandlers {
       try {
         RenderedScreen screen = new RenderedScreen(root);
 
+        {
+          CharSequence title = window.getTitle();
+
+          if ((title == null) || (title.length() == 0)) {
+            title = "unnamed";
+          }
+
+          Message.WINDOW.show(title.toString());
+        }
+
         ScreenDriver.lockScreenWindow(
           ScreenWindow.getScreenWindow(window)
                       .setRenderedScreen(screen)

@@ -19,35 +19,29 @@
 package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
-public abstract class Message {
-  private Message () {
+public enum Message {
+  WINDOW("WIN"),
+  WARNING("WRN"),
+  NOTIFICATION("NTF"),
+  TOAST("ALR"),
+  ANNOUNCEMENT("ANN"),
+  ; // end of enumeration
+
+  private final String messageLabel;
+
+  Message (String label) {
+    messageLabel = label;
   }
 
-  public static enum Type {
-    WARNING("WRN"),
-    NOTIFICATION("NTF"),
-    TOAST("ALR"),
-    ANNOUNCEMENT("ANN"),
-    ; // end of enumeration
-
-    private final String typeLabel;
-
-    Type (String label) {
-      typeLabel = label;
-    }
-
-    public final String getLabel () {
-      return typeLabel;
-    }
+  public final String getLabel () {
+    return messageLabel;
   }
 
-  public static void show (Type type, String text) {
+  public final void show (String text) {
     if (text == null) return;
     text = text.replace('\n', ' ').trim();
     if (text.isEmpty()) return;
-
-    text = type.getLabel() + ": " + text;
-    final String message = text;
+    final String message = getLabel() + ": " + text;
 
     CoreWrapper.runOnCoreThread(
       new Runnable() {
