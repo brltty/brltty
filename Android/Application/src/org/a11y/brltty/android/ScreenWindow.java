@@ -34,7 +34,7 @@ public class ScreenWindow {
     windowIdentifier = identifier;
   }
 
-  public final int getIdentifier () {
+  public final int getWindowIdentifier () {
     return windowIdentifier;
   }
 

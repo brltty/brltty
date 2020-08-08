@@ -184,7 +184,7 @@ public abstract class ScreenDriver {
   private final static Object NODE_LOCK = new Object();
   private volatile static AccessibilityNodeInfo currentNode = null;
 
-  private static void setCurrentNode (AccessibilityNodeInfo newNode) {
+  public static void setCurrentNode (AccessibilityNodeInfo newNode) {
     if (newNode != null) {
       {
         AccessibilityNodeInfo oldNode;
@@ -220,12 +220,23 @@ public abstract class ScreenDriver {
     }
   }
 
+  private static ScreenWindow lockedScreenWindow = null;
+
+  public static void lockScreenWindow (ScreenWindow window) {
+    lockedScreenWindow = window;
+  }
+
+  public static void unlockScreenWindow () {
+    lockScreenWindow(null);
+  }
+
   private static ScreenWindow currentScreenWindow =
     ScreenWindow.getScreenWindow(0)
                 .setRenderedScreen(new RenderedScreen(null))
                 ;
 
   public static ScreenWindow getCurrentScreenWindow () {
+    if (lockedScreenWindow != null) return lockedScreenWindow;
     return currentScreenWindow;
   }
 
@@ -277,7 +288,12 @@ public abstract class ScreenDriver {
 
         if (window != null) {
           try {
-            if (!window.isActive()) {
+            boolean accept =
+              (lockedScreenWindow != null)?
+              (window.getId() == lockedScreenWindow.getWindowIdentifier()):
+              window.isActive();
+
+            if (!accept) {
               node.recycle();
               node = null;
               return;
@@ -428,7 +444,7 @@ public abstract class ScreenDriver {
     }
 
     exportScreenProperties(
-      window.getIdentifier(),
+      window.getWindowIdentifier(),
       screen.getScreenWidth(), screen.getScreenHeight(),
       locationLeft, locationTop, locationRight, locationBottom,
       selectionLeft, selectionTop, selectionRight, selectionBottom

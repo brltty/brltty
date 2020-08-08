@@ -157,7 +157,9 @@ public class RenderedScreen {
     {
       String text = ScreenUtilities.getText(node);
 
-      if (text != null) {
+      if (text == null) {
+        includeDescription = true;
+      } else {
         allowZeroLength = true;
 
         if (text.length() > 0) {

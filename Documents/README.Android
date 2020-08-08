@@ -460,6 +460,9 @@ to the following table:
   ``F8``   Move to Next Item           \*
   ``F9``   Power Off Dialog            5.0 (Lollipop)
   ``F10``  Menu Key                    \*
+  ``F11``  Switch to Active Window     4.0
+  ``F12``  Switch to Previous Window   4.0
+  ``F13``  Switch to Next Window       4.0
   =======  ==========================  ===================
 
 The way a braille device emulates keyboard function keys differs from model to
