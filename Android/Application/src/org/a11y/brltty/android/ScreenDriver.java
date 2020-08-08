@@ -69,7 +69,7 @@ public abstract class ScreenDriver {
     Collection<CharSequence> lines = new ArrayList<CharSequence>();
     CharSequence tickerText = notification.tickerText;
 
-    if (ApplicationUtilities.haveKitkat) {
+    if (APITests.haveKitkat) {
       Bundle extras = notification.extras;
 
       if (extras != null) {
@@ -109,7 +109,7 @@ public abstract class ScreenDriver {
 
     if (notification != null) {
       if (!ApplicationSettings.SHOW_NOTIFICATIONS) return;
-      if (!ApplicationUtilities.haveJellyBean) return;
+      if (!APITests.haveJellyBean) return;
       if (notification.priority < Notification.PRIORITY_DEFAULT) return;
 
       message = BrailleMessage.NOTIFICATION;
@@ -140,7 +140,7 @@ public abstract class ScreenDriver {
   }
 
   private static boolean setFocus (AccessibilityNodeInfo node) {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       if (node.isAccessibilityFocused()) return true;
       node = AccessibilityNodeInfo.obtain(node);
 
@@ -283,7 +283,7 @@ public abstract class ScreenDriver {
     } else {
       if (log) ScreenLogger.log(node);
 
-      if (ApplicationUtilities.haveLollipop) {
+      if (APITests.haveLollipop) {
         AccessibilityWindowInfo window = node.getWindow();
 
         if (window != null) {
@@ -326,7 +326,7 @@ public abstract class ScreenDriver {
           break;
 
         case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
-          if (!ApplicationUtilities.haveJellyBeanMR2) {
+          if (!APITests.haveJellyBeanMR2) {
             TextField field = TextField.get(node, true);
             field.setCursor(event.getFromIndex() + event.getAddedCount());
           }
@@ -335,7 +335,7 @@ public abstract class ScreenDriver {
         }
 
         case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-          if (!ApplicationUtilities.haveJellyBeanMR2) {
+          if (!APITests.haveJellyBeanMR2) {
             TextField field = TextField.get(node, true);
             field.setSelection(event.getFromIndex(), event.getToIndex());
           }
@@ -402,7 +402,7 @@ public abstract class ScreenDriver {
             int start = -1;
             int end = -1;
 
-            if (ApplicationUtilities.haveJellyBeanMR2) {
+            if (APITests.haveJellyBeanMR2) {
               start = node.getTextSelectionStart();
               end = node.getTextSelectionEnd();
             } else {

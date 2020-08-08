@@ -112,7 +112,7 @@ public class FileDownloader extends InternalActivityComponent {
         {
           int layout = R.layout.file_downloader;
 
-          if (ApplicationUtilities.haveLollipop) {
+          if (APITests.haveLollipop) {
             builder.setView(layout);
           } else {
             Context context = builder.getContext();
@@ -219,7 +219,7 @@ public class FileDownloader extends InternalActivityComponent {
                 OutputStream output = new FileOutputStream(file);
 
                 try {
-                  if (ApplicationUtilities.haveNougat) {
+                  if (APITests.haveNougat) {
                     contentLength = connection.getContentLengthLong();
                   } else {
                     contentLength = (long)connection.getContentLength();

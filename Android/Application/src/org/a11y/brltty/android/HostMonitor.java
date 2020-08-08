@@ -83,7 +83,7 @@ public class HostMonitor extends BroadcastReceiver {
     if (action == null) return;
     Log.d(LOG_TAG, ("host event: " + action));
 
-    if (ApplicationUtilities.haveNougat) {
+    if (APITests.haveNougat) {
       if (action.equals(Intent.ACTION_LOCKED_BOOT_COMPLETED)) {
         return;
       }

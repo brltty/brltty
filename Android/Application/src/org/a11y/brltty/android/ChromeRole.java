@@ -89,7 +89,7 @@ public enum ChromeRole {
 
   public static String getLabel (AccessibilityNodeInfo node) {
     if (node != null) {
-      if (ApplicationUtilities.haveKitkat) {
+      if (APITests.haveKitkat) {
         return getLabel(node.getExtras());
       }
     }

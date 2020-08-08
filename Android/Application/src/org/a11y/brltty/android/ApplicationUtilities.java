@@ -19,7 +19,6 @@
 package org.a11y.brltty.android;
 
 import android.util.Log;
-import android.os.Build;
 import android.os.SystemClock;
 
 import android.content.Context;
@@ -40,43 +39,6 @@ public abstract class ApplicationUtilities {
 
   private ApplicationUtilities () {
   }
-
-  private static boolean haveAPILevel (int level) {
-    return Build.VERSION.SDK_INT >= level;
-  }
-
-  public final static boolean haveIceCreamSandwich
-  = haveAPILevel(Build.VERSION_CODES.ICE_CREAM_SANDWICH);
-
-  public final static boolean haveJellyBean
-  = haveAPILevel(Build.VERSION_CODES.JELLY_BEAN);
-
-  public final static boolean haveJellyBeanMR1
-  = haveAPILevel(Build.VERSION_CODES.JELLY_BEAN_MR1);
-
-  public final static boolean haveJellyBeanMR2
-  = haveAPILevel(Build.VERSION_CODES.JELLY_BEAN_MR2);
-
-  public final static boolean haveKitkat
-  = haveAPILevel(Build.VERSION_CODES.KITKAT);
-
-  public final static boolean haveLollipop
-  = haveAPILevel(Build.VERSION_CODES.LOLLIPOP);
-
-  public final static boolean haveLollipopMR1
-  = haveAPILevel(Build.VERSION_CODES.LOLLIPOP_MR1);
-
-  public final static boolean haveMarshmallow
-  = haveAPILevel(Build.VERSION_CODES.M);
-
-  public final static boolean haveNougat
-  = haveAPILevel(Build.VERSION_CODES.N);
-
-  public final static boolean haveNougatMR1
-  = haveAPILevel(Build.VERSION_CODES.N_MR1);
-
-  public final static boolean haveOreo
-  = haveAPILevel(Build.VERSION_CODES.O);
 
   public static long getAbsoluteTime () {
     return SystemClock.uptimeMillis();

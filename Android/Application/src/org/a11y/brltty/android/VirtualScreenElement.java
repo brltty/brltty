@@ -26,7 +26,7 @@ public class VirtualScreenElement extends ScreenElement {
 
   @Override
   public boolean onClick () {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return BrailleService.getBrailleService().performGlobalAction(globalAction);
     }
 

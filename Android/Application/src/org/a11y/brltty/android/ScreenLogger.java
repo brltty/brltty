@@ -139,7 +139,7 @@ public abstract class ScreenLogger {
       put("xpnd", AccessibilityNodeInfo.ACTION_EXPAND);
       put("txs", AccessibilityNodeInfo.ACTION_SET_TEXT);
 
-      if (ApplicationUtilities.haveMarshmallow) {
+      if (APITests.haveMarshmallow) {
         put("cck", AccessibilityNodeInfo.AccessibilityAction.ACTION_CONTEXT_CLICK);
       }
     }
@@ -187,7 +187,7 @@ public abstract class ScreenLogger {
       if (count > 0) add(sb, "cld", count);
     }
 
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       add(sb, !node.isVisibleToUser(), "inv");
     }
 
@@ -197,14 +197,14 @@ public abstract class ScreenLogger {
     add(sb, node.isFocusable(), "ifb");
     add(sb, node.isFocused(), "ifd");
 
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       add(sb, node.isAccessibilityFocused(), "afd");
     }
 
     add(sb, node.isClickable(), "clb");
     add(sb, node.isLongClickable(), "lcb");
 
-    if (ApplicationUtilities.haveMarshmallow) {
+    if (APITests.haveMarshmallow) {
       add(sb, node.isContextClickable(), "ccb");
     }
        
@@ -212,7 +212,7 @@ public abstract class ScreenLogger {
     add(sb, node.isChecked(), "ckd");
     add(sb, node.isPassword(), "pwd");
 
-    if (ApplicationUtilities.haveJellyBeanMR2) {
+    if (APITests.haveJellyBeanMR2) {
       add(sb, ScreenUtilities.isEditable(node), "edt");
 
       {
@@ -234,7 +234,7 @@ public abstract class ScreenLogger {
       }
     }
 
-    if (ApplicationUtilities.haveKitkat) {
+    if (APITests.haveKitkat) {
       {
         AccessibilityNodeInfo.RangeInfo range = node.getRangeInfo();
 
@@ -299,7 +299,7 @@ public abstract class ScreenLogger {
             sb.append("hdg");
           }
 
-          if (ApplicationUtilities.haveLollipop) {
+          if (APITests.haveLollipop) {
             if (item.isSelected()) {
               sb.append(',');
               sb.append("sel");
@@ -311,7 +311,7 @@ public abstract class ScreenLogger {
       }
     }
 
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       for (AccessibilityNodeInfo.AccessibilityAction action : node.getActionList()) {
         String label = actionLabels.get(action.getId());
         if (label != null) add(sb, label);
@@ -326,7 +326,7 @@ public abstract class ScreenLogger {
       }
     }
 
-    if (ApplicationUtilities.haveJellyBeanMR1) {
+    if (APITests.haveJellyBeanMR1) {
       AccessibilityNodeInfo subnode = node.getLabelFor();
 
       if (subnode != null) {
@@ -336,7 +336,7 @@ public abstract class ScreenLogger {
       }
     }
 
-    if (ApplicationUtilities.haveJellyBeanMR1) {
+    if (APITests.haveJellyBeanMR1) {
       AccessibilityNodeInfo subnode = node.getLabeledBy();
 
       if (subnode != null) {
@@ -356,11 +356,11 @@ public abstract class ScreenLogger {
     add(sb, "pkg", node.getPackageName());
     add(sb, "win", node.getWindowId());
 
-    if (ApplicationUtilities.haveJellyBeanMR2) {
+    if (APITests.haveJellyBeanMR2) {
       add(sb, "vrn", node.getViewIdResourceName());
     }
 
-    if (ApplicationUtilities.haveKitkat) {
+    if (APITests.haveKitkat) {
       Bundle extras = node.getExtras();
 
       if (extras != null) {
@@ -371,7 +371,7 @@ public abstract class ScreenLogger {
       }
     }
 
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       List<AccessibilityNodeInfo.AccessibilityAction> actions = node.getActionList();
 
       if (actions != null) {
@@ -438,7 +438,7 @@ public abstract class ScreenLogger {
     StringBuilder sb = new StringBuilder();
     add(sb, "id", window.getId());
 
-    if (ApplicationUtilities.haveNougat) {
+    if (APITests.haveNougat) {
       CharSequence title = window.getTitle();
 
       if (title != null) {
@@ -473,7 +473,7 @@ public abstract class ScreenLogger {
     add(sb, window.isFocused(), "ifd");
     add(sb, window.isAccessibilityFocused(), "afd");
 
-    if (ApplicationUtilities.haveOreo) {
+    if (APITests.haveOreo) {
       add(sb, window.isInPictureInPictureMode(), "pip");
     }
 
@@ -517,14 +517,14 @@ public abstract class ScreenLogger {
   public static void log () {
     log("begin screen log");
 
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       int index = 0;
 
       for (AccessibilityWindowInfo window : ScreenUtilities.getWindows()) {
         log(window, ("window." + index), true, true);
         index += 1;
       }
-    } else if (ApplicationUtilities.haveJellyBean) {
+    } else if (APITests.haveJellyBean) {
       AccessibilityNodeInfo root = ScreenUtilities.getRootNode();
 
       if (root != null) {

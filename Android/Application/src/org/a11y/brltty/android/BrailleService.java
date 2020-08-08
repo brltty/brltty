@@ -62,7 +62,7 @@ public class BrailleService extends AccessibilityService {
     coreThread = new CoreThread(this);
     coreThread.start();
 
-    if (ApplicationUtilities.haveOreo) {
+    if (APITests.haveOreo) {
       accessibilityButton = new AccessibilityButton();
       getAccessibilityButtonController().registerAccessibilityButtonCallback(accessibilityButton);
     }

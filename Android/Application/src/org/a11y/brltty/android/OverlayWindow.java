@@ -49,7 +49,7 @@ public abstract class OverlayWindow {
 
     layoutParameters.flags |= LayoutParams.FLAG_NOT_TOUCHABLE;
 
-    if (ApplicationUtilities.haveLollipopMR1) {
+    if (APITests.haveLollipopMR1) {
       layoutParameters.type = LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
     } else {
       layoutParameters.type = LayoutParams.TYPE_SYSTEM_OVERLAY;

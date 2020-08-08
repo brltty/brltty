@@ -100,7 +100,7 @@ public final class PcmDevice {
   }
 
   private final AudioTrack newAudioTrack () {
-    if (ApplicationUtilities.haveOreo) {
+    if (APITests.haveOreo) {
       AudioAttributes attributes =
         new AudioAttributes.Builder()
                            .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)

@@ -137,7 +137,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean bringCursor () {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return performNodeAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
     }
 
@@ -146,7 +146,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onBringCursor () {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       {
         AccessibilityNodeInfo node = accessibilityNode.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
 
@@ -163,7 +163,7 @@ public class RealScreenElement extends ScreenElement {
       if (performNodeAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS)) return true;
     }
 
-    if (ApplicationUtilities.haveIceCreamSandwich) {
+    if (APITests.haveIceCreamSandwich) {
       AccessibilityNodeInfo node = getFocusableNode();
 
       if (node != null) {
@@ -187,17 +187,17 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onClick () {
-    if (ApplicationUtilities.haveIceCreamSandwich) {
+    if (APITests.haveIceCreamSandwich) {
       if (isEditable()) {
         return performNodeAction(AccessibilityNodeInfo.ACTION_FOCUS);
       }
     }
 
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return performNodeAction(AccessibilityNodeInfo.ACTION_CLICK);
     }
 
-    if (ApplicationUtilities.haveIceCreamSandwich) {
+    if (APITests.haveIceCreamSandwich) {
       return injectKey(KeyEvent.KEYCODE_DPAD_CENTER, false);
     }
 
@@ -206,11 +206,11 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onLongClick () {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return performNodeAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
     }
 
-    if (ApplicationUtilities.haveIceCreamSandwich) {
+    if (APITests.haveIceCreamSandwich) {
       return injectKey(KeyEvent.KEYCODE_DPAD_CENTER, true);
     }
 
@@ -219,11 +219,11 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onScrollBackward () {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return performNodeAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
 
-    if (ApplicationUtilities.haveIceCreamSandwich) {
+    if (APITests.haveIceCreamSandwich) {
       return injectKey(KeyEvent.KEYCODE_PAGE_UP, false);
     }
 
@@ -232,11 +232,11 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onScrollForward () {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return performNodeAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
     }
 
-    if (ApplicationUtilities.haveIceCreamSandwich) {
+    if (APITests.haveIceCreamSandwich) {
       return injectKey(KeyEvent.KEYCODE_PAGE_DOWN, false);
     }
 
@@ -245,7 +245,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onContextClick () {
-    if (ApplicationUtilities.haveMarshmallow) {
+    if (APITests.haveMarshmallow) {
       return performNodeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CONTEXT_CLICK);
     }
 
@@ -254,7 +254,7 @@ public class RealScreenElement extends ScreenElement {
 
   @Override
   public boolean onAccessibilityActions () {
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       List<AccessibilityNodeInfo.AccessibilityAction> actions = accessibilityNode.getActionList();
 
       if (actions != null) {

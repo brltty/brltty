@@ -44,7 +44,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   private final String getManufacturerName (UsbDevice device) {
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       return device.getManufacturerName();
     } else {
       return null;
@@ -52,7 +52,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   private final String getProductName (UsbDevice device) {
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       return device.getProductName();
     } else {
       return null;
@@ -60,7 +60,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
   }
 
   private final String getSerialNumber (UsbDevice device) {
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       return device.getSerialNumber();
     } else {
       UsbDeviceConnection connection = manager.openDevice(device);

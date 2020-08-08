@@ -53,7 +53,7 @@ public abstract class InputHandlers {
   }
 
   private static List<AccessibilityWindowInfo> getVisibleWindows () {
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       return BrailleService.getBrailleService().getWindows();
     } else {
       return Collections.EMPTY_LIST;
@@ -90,7 +90,7 @@ public abstract class InputHandlers {
             title = "unnamed";
           }
 
-          Message.WINDOW.show(title.toString());
+          BrailleMessage.WINDOW.show(title.toString());
         }
 
         ScreenDriver.lockScreenWindow(
@@ -193,7 +193,7 @@ public abstract class InputHandlers {
   }
 
   public static boolean setSelection (AccessibilityNodeInfo node, int start, int end) {
-    if (ApplicationUtilities.haveJellyBeanMR2) {
+    if (APITests.haveJellyBeanMR2) {
       Bundle arguments = new Bundle();
       arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, start);
       arguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, end);
@@ -252,7 +252,7 @@ public abstract class InputHandlers {
     }
 
     public final boolean editText () {
-      if (false && ApplicationUtilities.haveLollipop) {
+      if (false && APITests.haveLollipop) {
         AccessibilityNodeInfo node = getCursorNode();
 
         if (node != null) {
@@ -338,7 +338,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_ENTER) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBean) {
+        if (APITests.haveJellyBean) {
           return ScreenUtilities.performClick(node);
         }
 
@@ -347,7 +347,7 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveLollipop) {
+        if (APITests.haveLollipop) {
           if (node.isMultiLine()) {
             return inputCharacter('\n');
           }
@@ -388,7 +388,7 @@ public abstract class InputHandlers {
   }
 
   public static boolean inputKey_escape () {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
     }
 
@@ -404,7 +404,7 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBeanMR2) {
+        if (APITests.haveJellyBeanMR2) {
           int offset = node.getTextSelectionStart();
           if (offset == NO_SELECTION) return false;
           if (offset == node.getTextSelectionEnd()) offset -= 1;
@@ -426,7 +426,7 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBeanMR2) {
+        if (APITests.haveJellyBeanMR2) {
           int offset = node.getTextSelectionEnd();
           if (offset == NO_SELECTION) return false;
           if (offset == node.getTextSelectionStart()) offset += 1;
@@ -448,7 +448,7 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBeanMR2) {
+        if (APITests.haveJellyBeanMR2) {
           int offset = getTextStartOffset(node);
 
           CharSequence text = node.getText();
@@ -476,7 +476,7 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBeanMR2) {
+        if (APITests.haveJellyBeanMR2) {
           int offset = getTextEndOffset(node);
 
           CharSequence text = node.getText();
@@ -503,7 +503,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_PAGE_UP) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBean) {
+        if (APITests.haveJellyBean) {
           return ScreenUtilities.performScrollBackward(node);
         }
 
@@ -512,7 +512,7 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBeanMR2) {
+        if (APITests.haveJellyBeanMR2) {
           int from = getTextStartOffset(node);
 
           final int to = 0;
@@ -530,7 +530,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_PAGE_DOWN) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBean) {
+        if (APITests.haveJellyBean) {
           return ScreenUtilities.performScrollForward(node);
         }
 
@@ -539,7 +539,7 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBeanMR2) {
+        if (APITests.haveJellyBeanMR2) {
           int from = getTextEndOffset(node);
 
           final int to = node.getText().length();
@@ -562,7 +562,7 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBeanMR2) {
+        if (APITests.haveJellyBeanMR2) {
           int from = getTextStartOffset(node);
           if (from == 0) return false;
 
@@ -587,7 +587,7 @@ public abstract class InputHandlers {
 
       @Override
       protected boolean performEditAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBeanMR2) {
+        if (APITests.haveJellyBeanMR2) {
           int from = getTextEndOffset(node);
 
           CharSequence text = node.getText();
@@ -608,7 +608,7 @@ public abstract class InputHandlers {
     return new KeyHandler(KeyEvent.KEYCODE_INSERT) {
       @Override
       protected boolean performNavigationAction (AccessibilityNodeInfo node) {
-        if (ApplicationUtilities.haveJellyBean) {
+        if (APITests.haveJellyBean) {
           return ScreenUtilities.performLongClick(node);
         }
 
@@ -655,7 +655,7 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        if (ApplicationUtilities.haveJellyBean) {
+        if (APITests.haveJellyBean) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
         }
 
@@ -667,7 +667,7 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        if (ApplicationUtilities.haveJellyBean) {
+        if (APITests.haveJellyBean) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME);
         }
 
@@ -720,7 +720,7 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        if (ApplicationUtilities.haveJellyBean) {
+        if (APITests.haveJellyBean) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS);
         }
 
@@ -741,7 +741,7 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        if (ApplicationUtilities.haveLollipop) {
+        if (APITests.haveLollipop) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
         }
 
@@ -769,7 +769,7 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        if (ApplicationUtilities.haveJellyBeanMR1) {
+        if (APITests.haveJellyBeanMR1) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS);
         }
 
@@ -781,7 +781,7 @@ public abstract class InputHandlers {
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
-        if (ApplicationUtilities.haveJellyBean) {
+        if (APITests.haveJellyBean) {
           return performGlobalAction(AccessibilityService.GLOBAL_ACTION_RECENTS);
         }
 

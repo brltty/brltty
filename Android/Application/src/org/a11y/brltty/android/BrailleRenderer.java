@@ -60,37 +60,37 @@ public abstract class BrailleRenderer {
   }
 
   private void addVirtualElements (ScreenElementList elements) {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       elements.addAtTop(
         R.string.GLOBAL_BUTTON_NOTIFICATIONS,
         AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS
       );
     }
 
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       elements.addAtTop(
         R.string.GLOBAL_BUTTON_QUICK_SETTINGS,
         AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS
       );
     }
 
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       elements.addAtBottom(
         R.string.GLOBAL_BUTTON_BACK,
         AccessibilityService.GLOBAL_ACTION_BACK
       );
     }
 
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       elements.addAtBottom(
         R.string.GLOBAL_BUTTON_HOME,
         AccessibilityService.GLOBAL_ACTION_HOME
       );
     }
 
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       elements.addAtBottom(
-        ApplicationUtilities.haveLollipop?
+        APITests.haveLollipop?
           R.string.GLOBAL_BUTTON_OVERVIEW:
           R.string.GLOBAL_BUTTON_RECENT_APPS,
         AccessibilityService.GLOBAL_ACTION_RECENTS

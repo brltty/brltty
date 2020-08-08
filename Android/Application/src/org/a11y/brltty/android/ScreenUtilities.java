@@ -47,7 +47,7 @@ public abstract class ScreenUtilities {
 
   public static AccessibilityNodeInfo getRefreshedNode (AccessibilityNodeInfo node) {
     if (node != null) {
-      if (ApplicationUtilities.haveJellyBeanMR2) {
+      if (APITests.haveJellyBeanMR2) {
         node = AccessibilityNodeInfo.obtain(node);
 
         if (!node.refresh()) {
@@ -113,7 +113,7 @@ public abstract class ScreenUtilities {
   }
 
   public static boolean isVisible (AccessibilityNodeInfo node) {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return node.isVisibleToUser();
     }
 
@@ -137,7 +137,7 @@ public abstract class ScreenUtilities {
   }
 
   public static int getSelectionMode (AccessibilityNodeInfo node) {
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       if (node.getCollectionItemInfo() != null) {
         AccessibilityNodeInfo parent = node.getParent();
 
@@ -171,7 +171,7 @@ public abstract class ScreenUtilities {
   }
 
   public static boolean isEditable (AccessibilityNodeInfo node) {
-    if (ApplicationUtilities.haveJellyBeanMR2) {
+    if (APITests.haveJellyBeanMR2) {
       return node.isEditable();
     } else {
       return isSubclassOf(node, android.widget.EditText.class);
@@ -212,7 +212,7 @@ public abstract class ScreenUtilities {
   }
 
   public static AccessibilityNodeInfo getRootNode () {
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return BrailleService.getBrailleService().getRootInActiveWindow();
     }
 
@@ -468,7 +468,7 @@ public abstract class ScreenUtilities {
   }
 
   public static String getSelectionModeLabel (AccessibilityNodeInfo.CollectionInfo collection) {
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       switch (collection.getSelectionMode()) {
         case AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_NONE:
           return "none";

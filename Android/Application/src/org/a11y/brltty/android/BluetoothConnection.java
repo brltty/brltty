@@ -99,7 +99,7 @@ public class BluetoothConnection {
   public final BluetoothDevice getDevice () {
     if (!isUp()) return null;
 
-    if (ApplicationUtilities.haveJellyBean) {
+    if (APITests.haveJellyBean) {
       return bluetoothAdapter.getRemoteDevice(remoteAddressBytes);
     } else {
       return bluetoothAdapter.getRemoteDevice(remoteAddressString);

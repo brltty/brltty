@@ -31,7 +31,7 @@ public enum DataType {
       if (dataContext == null) {
         Context context = BrailleApplication.get();
 
-        if (ApplicationUtilities.haveNougat) {
+        if (APITests.haveNougat) {
           dataContext = context.createDeviceProtectedStorageContext();
         } else {
           dataContext = context;

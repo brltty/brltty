@@ -78,7 +78,7 @@ public abstract class BrailleNotification {
   private static void makeBuilder () {
     Context context = getContext();
 
-    if (ApplicationUtilities.haveOreo) {
+    if (APITests.haveOreo) {
       NotificationManager nm = getManager();
       NotificationChannel channel = nm.getNotificationChannel(NOTIFICATION_CHANNEL);
 
@@ -108,11 +108,11 @@ public abstract class BrailleNotification {
       .setContentIntent(newPendingIntent(ActionsActivity.class))
       ;
 
-    if (ApplicationUtilities.haveJellyBeanMR1) {
+    if (APITests.haveJellyBeanMR1) {
       notificationBuilder.setShowWhen(false);
     }
 
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       notificationBuilder.setCategory(Notification.CATEGORY_SERVICE);
     }
   }

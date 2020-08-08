@@ -143,7 +143,7 @@ public class PackageInstaller extends InternalActivityComponent {
           Uri uri;
           int flags;
 
-          if (ApplicationUtilities.haveNougat) {
+          if (APITests.haveNougat) {
             {
               String authority = getClass().getPackage().getName() + ".fileprovider";
               uri = FileProvider.getUriForFile(getActivity(), authority, targetFile);

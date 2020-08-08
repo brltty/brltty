@@ -180,7 +180,7 @@ public class RenderedScreen {
       }
     }
 
-    if (ApplicationUtilities.haveKitkat) {
+    if (APITests.haveKitkat) {
       AccessibilityNodeInfo.RangeInfo range = node.getRangeInfo();
 
       if (range != null) {
@@ -329,7 +329,7 @@ public class RenderedScreen {
     AccessibilityNodeInfo root = getRootNode();
 
     if (root != null) {
-      if (ApplicationUtilities.haveJellyBean) {
+      if (APITests.haveJellyBean) {
         AccessibilityNodeInfo node = root.findFocus(AccessibilityNodeInfo.FOCUS_ACCESSIBILITY);
 
         if (node != null) {
@@ -350,17 +350,17 @@ public class RenderedScreen {
       {
         AccessibilityNodeInfo node;
 
-        if (ApplicationUtilities.haveJellyBean) {
+        if (APITests.haveJellyBean) {
           node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT);
-        } else if (ApplicationUtilities.haveIceCreamSandwich) {
+        } else if (APITests.haveIceCreamSandwich) {
           node = ScreenUtilities.findFocusedNode(root);
         } else {
           node = null;
         }
 
-        if (!ApplicationUtilities.haveJellyBean) {
+        if (!APITests.haveJellyBean) {
           if (node == null) {
-            if (ApplicationUtilities.haveIceCreamSandwich) {
+            if (APITests.haveIceCreamSandwich) {
               if ((node = ScreenUtilities.findFocusableNode(root)) != null) {
                 if (!node.performAction(AccessibilityNodeInfo.ACTION_FOCUS)) {
                   node.recycle();

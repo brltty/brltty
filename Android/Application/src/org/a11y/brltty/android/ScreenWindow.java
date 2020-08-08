@@ -67,7 +67,7 @@ public class ScreenWindow {
   }
 
   public static ScreenWindow getScreenWindow (AccessibilityNodeInfo node) {
-    if (ApplicationUtilities.haveLollipop) {
+    if (APITests.haveLollipop) {
       AccessibilityWindowInfo object = node.getWindow();
 
       if (object != null) {

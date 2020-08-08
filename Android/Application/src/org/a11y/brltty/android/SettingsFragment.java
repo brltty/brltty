@@ -45,7 +45,7 @@ public abstract class SettingsFragment extends PreferenceFragment {
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    if (ApplicationUtilities.haveNougat) {
+    if (APITests.haveNougat) {
       getPreferenceManager().setStorageDeviceProtected();
     }
   }
