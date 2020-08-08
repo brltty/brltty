@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import android.util.Log;
+import android.os.Environment;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -259,25 +260,20 @@ public class CoreThread extends Thread {
     ApplicationSettings.LOG_UNHANDLED_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_UNHANDLED_EVENTS);
   }
 
-  private static void setOverrideDirectories () {
-    StringBuilder sb = new StringBuilder();
+  private final void setOverrideDirectories () {
+    StringBuilder paths = new StringBuilder();
 
-    String[] names = new String[] {
-      "EXTERNAL_STORAGE",
-      "SECONDARY_STORAGE"
+    File[] directories = new File[] {
+      Environment.getExternalStorageDirectory()
     };
 
-    for (String name : names) {
-      String value = System.getenv(name);
-
-      if (value == null) continue;
-      if (value.isEmpty()) continue;
-
-      if (sb.length() > 0) sb.append(':');
-      sb.append(value);
+    for (File directory : directories) {
+      String path = directory.getAbsolutePath();
+      if (paths.length() > 0) paths.append(':');
+      paths.append(path);
     }
 
-    CoreWrapper.setEnvironmentVariable("XDG_CONFIG_DIRS", sb.toString());
+    CoreWrapper.setEnvironmentVariable("XDG_CONFIG_DIRS", paths.toString());
   }
 
   @Override
