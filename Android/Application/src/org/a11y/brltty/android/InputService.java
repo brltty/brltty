@@ -240,7 +240,7 @@ public class InputService extends InputMethodService {
   private static void reportInputProblem (int message) {
     Context context = BrailleApplication.get();
     Log.w(LOG_TAG, context.getResources().getString(message));
-    Message.WARNING.show(context.getString(message));
+    BrailleMessage.WARNING.show(context.getString(message));
   }
 
   public static InputConnection getInputConnection () {

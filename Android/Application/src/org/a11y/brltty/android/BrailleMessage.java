@@ -19,7 +19,7 @@
 package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
-public enum Message {
+public enum BrailleMessage {
   WINDOW("WIN"),
   WARNING("WRN"),
   NOTIFICATION("NTF"),
@@ -29,7 +29,7 @@ public enum Message {
 
   private final String messageLabel;
 
-  Message (String label) {
+  BrailleMessage (String label) {
     messageLabel = label;
   }
 
@@ -51,5 +51,9 @@ public enum Message {
         }
       }
     );
+  }
+
+  public final void show (int text) {
+    show(BrailleApplication.get().getString(text));
   }
 }

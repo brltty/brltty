@@ -98,12 +98,12 @@ public abstract class ScreenDriver {
     return toText(event.getText());
   }
 
-  private static void showEventText (Message message, AccessibilityEvent event) {
+  private static void showEventText (BrailleMessage message, AccessibilityEvent event) {
     message.show(toText(event));
   }
 
   private static void showNotification (AccessibilityEvent event) {
-    Message message;
+    BrailleMessage message;
     String text = null;
     Notification notification = (Notification)event.getParcelableData();
 
@@ -112,11 +112,11 @@ public abstract class ScreenDriver {
       if (!ApplicationUtilities.haveJellyBean) return;
       if (notification.priority < Notification.PRIORITY_DEFAULT) return;
 
-      message = Message.NOTIFICATION;
+      message = BrailleMessage.NOTIFICATION;
       text = toText(notification);
     } else {
       if (!ApplicationSettings.SHOW_TOASTS) return;
-      message = Message.TOAST;
+      message = BrailleMessage.TOAST;
     }
 
     if (text == null) text = toText(event);
@@ -258,7 +258,7 @@ public abstract class ScreenDriver {
           break;
 
         case AccessibilityEvent.TYPE_ANNOUNCEMENT:
-          if (ApplicationSettings.SHOW_ANNOUNCEMENTS) showEventText(Message.ANNOUNCEMENT, event);
+          if (ApplicationSettings.SHOW_ANNOUNCEMENTS) showEventText(BrailleMessage.ANNOUNCEMENT, event);
           break;
 
         case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
