@@ -135,3 +135,7 @@ bind \{chord}Dot8 PASSDOTS+dot8
 
 include menu.kti
 endIf
+
+ifPlatform android
+include chords-android.kti
+endif

@@ -1,0 +1,31 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2020 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+bind \{chord}Dot7+Dot8+Dot1+Dot2+Dot5 KEY_FUNCTION+0
+bind \{chord}Dot7+Dot8+Dot1+Dot2 KEY_FUNCTION+1
+bind \{chord}Dot7+Dot8+Dot1+Dot3+Dot4+Dot5 KEY_FUNCTION+2
+bind \{chord}Dot7+Dot8+Dot1+Dot2+Dot3+Dot5 KEY_FUNCTION+3
+bind \{chord}Dot7+Dot8+Dot2+Dot3+Dot4 KEY_FUNCTION+4
+bind \{chord}Dot7+Dot8+Dot1+Dot2+Dot3+Dot4+Dot5 KEY_FUNCTION+5
+bind \{chord}Dot7+Dot8+Dot2 KEY_FUNCTION+6
+bind \{chord}Dot7+Dot8+Dot5 KEY_FUNCTION+7
+bind \{chord}Dot7+Dot8+Dot1+Dot2+Dot3+Dot4 KEY_FUNCTION+8
+bind \{chord}Dot7+Dot8+Dot1+Dot3+Dot4 KEY_FUNCTION+9
+bind \{chord}Dot7+Dot8+Dot3+Dot6 KEY_FUNCTION+10
+bind \{chord}Dot7+Dot8+Dot3 KEY_FUNCTION+11
+bind \{chord}Dot7+Dot8+Dot6 KEY_FUNCTION+12

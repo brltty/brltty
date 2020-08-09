@@ -443,34 +443,40 @@ BRLTTY also offers a way to perform these actions from your braille device.
 While a better way may be developed in the future, this is how it can be done
 right now.
 
-Since Android doesn't use the keyboard function keys (commonly named ``F1``
-through ``F12``), BRLTTY uses them to perform global Android actions according
-to the following table:
+* Since Android doesn't use the keyboard function keys
+  (commonly named ``F1`` through ``F12``),
+  BRLTTY uses them to perform the global actions.
+  The way a braille device emulates keyboard function keys
+  differs from model to model,
+  so you should check the BRLTTY documentation for your braille device.
+  The most common way is to press the corresponding cursor routing key
+  along with some other key or key combination.
+  For braille devices that have a braille keyboard,
+  the most common key to be used in conjunction with a cursor routing key
+  in order to emulate a keyboard function key is the space bar.
 
-  =======  =============================  ===================
-  Key      Action                         Android Release
-  -------  -----------------------------  -------------------
-  ``F1``   Home Screen                    4.1 (Jelly Bean)
-  ``F2``   Back Button                    4.1 (Jelly Bean)
-  ``F3``   Notifications Shade            4.1 (Jelly Bean)
-  ``F4``   Overview (Recent Apps) Button  4.1 (Jelly Bean)
-  ``F5``   `BRLTTY's Actions Screen`_     \*
-  ``F6``   Quick Settings                 4.2 (Jelly Bean MR1)
-  ``F7``   Move to the Previous Item      \*
-  ``F8``   Move to the Next Item          \*
-  ``F9``   Power Off Dialog               5.0 (Lollipop)
-  ``F10``  Menu Key                       \*
-  ``F11``  Switch to the Focused Window   4.0
-  ``F12``  Switch to the Previous Window  4.0
-  ``F13``  Switch to the Next Window      4.0
-  =======  =============================  ===================
+* If your braille device has a braille keyboard
+  then you can perform the global actions
+  via chords that also include dots 7 and 8.
+  For example, Space + Dots78 + Dots125 (h) goes to the home screen.
 
-The way a braille device emulates keyboard function keys differs from model to
-model, so you should check the BRLTTY documentation for your braille device.
-The most common way is to press the corresponding cursor routing key along with
-some other key or key combination. For braille devices that have a braille
-keyboard, the most common key to be used in conjunction with a cursor routing
-key in order to emulate a keyboard function key is the space bar.
+  =======  ========  =============================  ===================
+  FN-Key   Chord78+  Action                         Android Release
+  -------  --------  -----------------------------  -------------------
+  ``F1``   125       Home Screen                    4.1 (Jelly Bean)
+  ``F2``   12        Back Button                    4.1 (Jelly Bean)
+  ``F3``   1345      Notifications Shade            4.1 (Jelly Bean)
+  ``F4``   1235      Overview (Recent Apps) Button  4.1 (Jelly Bean)
+  ``F5``   234       BRLTTY's Actions Screen`_      \*
+  ``F6``   12345     Quick Settings                 4.2 (Jelly Bean MR1)
+  ``F7``   2         Move to the Previous Item      \*
+  ``F8``   5         Move to the Next Item          \*
+  ``F9``   1234      Power Off Dialog               5.0 (Lollipop)
+  ``F10``  134       Menu Key                       \*
+  ``F11``  36        Switch to the Focused Window   4.0 (Kitkat)
+  ``F12``  3         Switch to the Previous Window  4.0 (Kitkat)
+  ``F13``  6         Switch to the Next Window      4.0 (Kitkat)
+  =======  ========  =============================  ===================
 
 When BRLTTY Crashes
 -------------------
