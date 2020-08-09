@@ -641,15 +641,6 @@ public abstract class InputHandlers {
     public boolean performAction ();
   }
 
-  private final static FunctionKeyAction functionKeyAction_applicationSettings =
-    new FunctionKeyAction() {
-      @Override
-      public boolean performAction () {
-        ActionsActivity.launch();
-        return true;
-      }
-    };
-
   private final static FunctionKeyAction functionKeyAction_backButton =
     new FunctionKeyAction() {
       @Override
@@ -659,6 +650,15 @@ public abstract class InputHandlers {
         }
 
         return false;
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_brailleActions =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        ActionsActivity.launch();
+        return true;
       }
     };
 
@@ -740,7 +740,7 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction functionKeyAction_toActiveWindow =
+  private final static FunctionKeyAction functionKeyAction_toFocusedWindow =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
@@ -804,13 +804,13 @@ public abstract class InputHandlers {
       /* F2  */ functionKeyAction_backButton,
       /* F3  */ functionKeyAction_notificationsShade,
       /* F4  */ functionKeyAction_recentApplications,
-      /* F5  */ functionKeyAction_applicationSettings,
+      /* F5  */ functionKeyAction_brailleActions,
       /* F6  */ functionKeyAction_quickSettings,
       /* F7  */ functionKeyAction_toPreviousItem,
       /* F8  */ functionKeyAction_toNextItem,
       /* F9  */ functionKeyAction_powerDialog,
       /* F10 */ functionKeyAction_optionsMenu,
-      /* F11 */ functionKeyAction_toActiveWindow,
+      /* F11 */ functionKeyAction_toFocusedWindow,
       /* F12 */ functionKeyAction_toPreviousWindow,
       /* F13 */ functionKeyAction_toNextWindow,
       /* F14 */ null,
