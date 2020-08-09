@@ -239,7 +239,7 @@ You can enable BRLTTY's keyboard support in one of the following ways:
   time by adjusting the ``Default`` setting.
 
 * If BRLTTY is running then switching between input methods is much easier.
-  Go to `BRLTTY's Actions Screen`_ and tap ``Switch Input Method``. This
+  Go to BRLTTY's `Actions screen`_ and tap ``Switch Input Method``. This
   brings up Android's Input Method Picker, which presents a set of radio
   buttons - one for each enabled input method. If there's no radio button for
   BRLTTY's input method then it hasn't been enabled yet. To enable it, tap the
@@ -249,10 +249,10 @@ You can enable BRLTTY's keyboard support in one of the following ways:
   find the ``Keyboard and Input Methods`` section, and set the ``Default``
   input method to BRLTTY's input method.
 
-BRLTTY's Actions Screen
-~~~~~~~~~~~~~~~~~~~~~~~
+Actions Screen
+~~~~~~~~~~~~~~
 
-This screen presents several common actions that you may wish to perform:
+BRLTTY's Actions screen presents several common actions that you may wish to perform:
 
 * Switch Input Method
 * BRLTTY Settings
@@ -267,7 +267,7 @@ This screen presents several common actions that you may wish to perform:
 You can get to this screen using any of the following methods:
 
 * From your braille device via global action #5.
-  See `Performing Global Actions`_ for details.
+  See `Global Actions`_ for details.
 
 * From the notifications shade.
   Open it by dragging the status bar downward:
@@ -434,8 +434,8 @@ For example::
 
   Connect <disabled)
 
-Performing Global Actions
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Global Actions
+~~~~~~~~~~~~~~
 
 Android supports a number of global actions that can be performed by pressing
 special hardware buttons and/or by touching reserved areas on the screen.
@@ -460,23 +460,25 @@ right now.
   via chords that also include dots 7 and 8.
   For example, Space + Dots78 + Dots125 (h) goes to the home screen.
 
-  =======  ========  =============================  ===================
-  FN-Key   Chord78+  Action                         Android Release
-  -------  --------  -----------------------------  -------------------
-  ``F1``   125       Home Screen                    4.1 (Jelly Bean)
-  ``F2``   12        Back Button                    4.1 (Jelly Bean)
-  ``F3``   1345      Notifications Shade            4.1 (Jelly Bean)
-  ``F4``   1235      Overview (Recent Apps) Button  4.1 (Jelly Bean)
-  ``F5``   234       BRLTTY's Actions Screen`_      \*
-  ``F6``   12345     Quick Settings                 4.2 (Jelly Bean MR1)
-  ``F7``   2         Move to the Previous Item      \*
-  ``F8``   5         Move to the Next Item          \*
-  ``F9``   1234      Power Off Dialog               5.0 (Lollipop)
-  ``F10``  134       Menu Key                       \*
-  ``F11``  36        Switch to the Focused Window   4.0 (Kitkat)
-  ``F12``  3         Switch to the Previous Window  4.0 (Kitkat)
-  ``F13``  6         Switch to the Next Window      4.0 (Kitkat)
-  =======  ========  =============================  ===================
+.. table:: Global Actions
+
+  =======  ========  =====================================  =====================
+  FN-Key   Chord78+  Action                                 As of Android Release
+  -------  --------  -------------------------------------  ---------------------
+  ``F1``   125       go to the Home screen                  4.1 (Jelly Bean)
+  ``F2``   12        tap the Back button                    4.1 (Jelly Bean)
+  ``F3``   1345      go to the Notifications screen         4.1 (Jelly Bean)
+  ``F4``   1235      tap the Recent Apps (Overview) button  4.1 (Jelly Bean)
+  ``F5``   123456    go to BRLTTY's `Actions screen`_       \*
+  ``F6``   234       go to the Quick Settings screen        4.2 (Jelly Bean MR1)
+  ``F7``   2         move to the previous item              \*
+  ``F8``   5         move to the next item                  \*
+  ``F9``   1234      go to the Power Off screen             5.0 (Lollipop)
+  ``F10``  134       tap the Menu button                    \*
+  ``F11``  36        return to the active window            4.0 (Kitkat)
+  ``F12``  3         switch to the previous window          4.0 (Kitkat)
+  ``F13``  6         switch to the next window              4.0 (Kitkat)
+  =======  ========  =====================================  =====================
 
 When BRLTTY Crashes
 -------------------

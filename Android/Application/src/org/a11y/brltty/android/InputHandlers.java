@@ -740,7 +740,7 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction functionKeyAction_toFocusedWindow =
+  private final static FunctionKeyAction functionKeyAction_toActiveWindow =
     new FunctionKeyAction() {
       @Override
       public boolean performAction () {
@@ -810,7 +810,7 @@ public abstract class InputHandlers {
       /* F8  */ functionKeyAction_toNextItem,
       /* F9  */ functionKeyAction_powerDialog,
       /* F10 */ functionKeyAction_optionsMenu,
-      /* F11 */ functionKeyAction_toFocusedWindow,
+      /* F11 */ functionKeyAction_toActiveWindow,
       /* F12 */ functionKeyAction_toPreviousWindow,
       /* F13 */ functionKeyAction_toNextWindow,
       /* F14 */ null,
