@@ -35,8 +35,9 @@ public class PackageInstaller extends InternalActivityComponent {
 
   public final static String MIME_TYPE = "application/vnd.android.package-archive";
 
-  protected final String sourceURL;
-  protected final File targetFile;
+  private final String sourceURL;
+  private final File targetFile;
+  private boolean allowDowngrade = false;
 
   public PackageInstaller (InternalActivity owner, String url, File file) {
     super(owner);
@@ -46,6 +47,11 @@ public class PackageInstaller extends InternalActivityComponent {
 
   public PackageInstaller (InternalActivity owner, int url, File file) {
     this(owner, owner.getResources().getString(url), file);
+  }
+
+  public final PackageInstaller setAllowDowngrade (boolean yes) {
+    allowDowngrade = yes;
+    return this;
   }
 
   private final PackageManager getPackageManager () {
@@ -90,7 +96,7 @@ public class PackageInstaller extends InternalActivityComponent {
     onInstallFailed(message);
   }
 
-  private final boolean isVersionOK (PackageInfo oldInfo, PackageInfo newInfo) {
+  private final boolean isUpgrade (PackageInfo oldInfo, PackageInfo newInfo) {
     int oldCode = oldInfo.versionCode;
     int newCode = newInfo.versionCode;
 
@@ -128,11 +134,13 @@ public class PackageInstaller extends InternalActivityComponent {
   }
 
   private final boolean canInstallPackage () {
+    if (allowDowngrade) return true;
+
     PackageInfo oldInfo = getPackageInfo();
     PackageInfo newInfo = getPackageInfo(targetFile);
 
     if (oldInfo == null) return true;
-    return isVersionOK(oldInfo, newInfo);
+    return isUpgrade(oldInfo, newInfo);
   }
 
   public final void startInstall () {

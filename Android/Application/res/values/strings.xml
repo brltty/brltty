@@ -49,7 +49,10 @@
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Browse Community Messages</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Post Community Message</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Manage Community Membership</string>
+
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Update Application</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">Developer Build</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">Allow Downgrade</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Accessibility Actions</string>
 

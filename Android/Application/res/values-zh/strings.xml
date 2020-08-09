@@ -49,6 +49,7 @@
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">瀏覽社群訊息</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">張貼社群訊息</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">管理社群會員</string>
+
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">更新軟體</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">無障礙活動</string>

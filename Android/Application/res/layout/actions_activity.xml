@@ -1,71 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_height="match_parent"
   android:layout_width="match_parent"
   android:orientation="vertical"
   >
 
   <Button
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     android:text="@string/GLOBAL_BUTTON_SWITCH_INPUT_METHOD"
     android:onClick="switchInputMethod"
    />
 
   <Button
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     android:text="@string/SETTINGS_SCREEN_MAIN"
     android:onClick="launchSettingsActivity"
    />
 
   <Button
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     android:text="@string/GLOBAL_BUTTON_VIEW_USER_GUIDE"
     android:onClick="viewUserGuide"
    />
 
   <Button
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     android:text="@string/GLOBAL_BUTTON_BROWSE_WEB_SITE"
     android:onClick="browseWebSite"
    />
 
   <Button
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     android:text="@string/GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES"
     android:onClick="browseCommunityMessages"
    />
 
   <Button
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     android:text="@string/GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE"
     android:onClick="postCommunityMessage"
    />
 
   <Button
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     android:text="@string/GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP"
     android:onClick="manageCommunityMembership"
    />
 
   <Button
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
+    android:id="@+id/GLOBAL_BUTTON_UPDATE_APPLICATION"
     android:text="@string/GLOBAL_BUTTON_UPDATE_APPLICATION"
     android:onClick="updateApplication"
    />
 
+  <CheckBox
+    android:id="@+id/GLOBAL_CHECKBOX_DEVELOPER_BUILD"
+    android:text="@string/GLOBAL_CHECKBOX_DEVELOPER_BUILD"
+   />
+
+  <CheckBox
+    android:id="@+id/GLOBAL_CHECKBOX_ALLOW_DOWNGRADE"
+    android:text="@string/GLOBAL_CHECKBOX_ALLOW_DOWNGRADE"
+   />
+
   <Button
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     android:text="@string/about_activity_label"
     android:onClick="launchAboutActivity"
    />
-</LinearLayout>
+</TableLayout>

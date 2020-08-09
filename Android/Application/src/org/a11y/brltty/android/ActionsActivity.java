@@ -19,19 +19,16 @@
 package org.a11y.brltty.android;
 
 import android.os.Bundle;
+
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
 
 import android.content.Intent;
 import android.net.Uri;
 import java.io.File;
 
 public class ActionsActivity extends InternalActivity {
-  @Override
-  protected void onCreate (Bundle savedState) {
-    super.onCreate(savedState);
-    setContentView(R.layout.actions_activity);
-  }
-
   public void switchInputMethod (View view) {
     InputService.switchInputMethod();
   }
@@ -72,12 +69,21 @@ public class ActionsActivity extends InternalActivity {
     launch(R.string.community_membership_url);
   }
 
+  private View[] updateApplicationOptions = null;
+  private CheckBox developerBuild = null;
+  private CheckBox allowDowngrade = null;
+
   public void updateApplication (View view) {
     File directory = new File(getCacheDir(), "public");
     directory.mkdir();
     File file = new File(directory, "latest.apk");
 
-    new PackageInstaller(this, R.string.application_package_url, file) {
+    int url =
+      developerBuild.isChecked()?
+      R.string.developer_package_url:
+      R.string.application_package_url;
+
+    new PackageInstaller(this, url, file) {
       @Override
       protected void onInstallFailed (String message) {
         showMessage(
@@ -88,11 +94,47 @@ public class ActionsActivity extends InternalActivity {
           )
         );
       }
-    }.startInstall();
+    }.setAllowDowngrade(allowDowngrade.isChecked())
+     .startInstall();
   }
 
   public void launchAboutActivity (View view) {
     AboutActivity.launch();
+  }
+
+  @Override
+  protected void onCreate (Bundle savedState) {
+    super.onCreate(savedState);
+    setContentView(R.layout.actions_activity);
+
+    developerBuild = findViewById(R.id.GLOBAL_CHECKBOX_DEVELOPER_BUILD);
+    allowDowngrade = findViewById(R.id.GLOBAL_CHECKBOX_ALLOW_DOWNGRADE);
+
+    updateApplicationOptions = new View[] {
+      developerBuild,
+      allowDowngrade
+    };
+
+    for (View option : updateApplicationOptions) {
+      option.setVisibility(View.GONE);
+    }
+
+    {
+      View button = findViewById(R.id.GLOBAL_BUTTON_UPDATE_APPLICATION);
+
+      button.setOnLongClickListener(
+        new View.OnLongClickListener() {
+          @Override
+          public boolean onLongClick (View view) {
+            for (View option : updateApplicationOptions) {
+              option.setVisibility(View.VISIBLE);
+            }
+
+            return true;
+          }
+        }
+      );
+    }
   }
 
   public static void launch () {

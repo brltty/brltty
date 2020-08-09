@@ -2,6 +2,8 @@
 
 <resources>
   <string name="application_package_url">http://brltty.app/archive/Android/brltty-latest.apk</string>
+  <string name="developer_package_url">http://mielke.cc/~android/brltty-dev.apk</string>
+
   <string name="user_guide_url">http://brltty.app/archive/Android/brltty-on-android.html</string>
   <string name="community_messages_url">http://brltty.app/pipermail/brltty/</string>
   <string name="community_membership_url">http://brltty.app/mailman/listinfo/brltty</string>

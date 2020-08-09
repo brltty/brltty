@@ -49,6 +49,7 @@
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Prebrskaj Sporočila Skupnosti</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Objavi Sporočilo Skupnosti</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Upravljaj Članstvo v Skupnosti</string>
+
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Posodobi Program</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Dejanja Dostopnosti</string>

@@ -38,6 +38,7 @@
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">گشتن در پیام‌های گروه</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">ارسال پیام در گروه</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">مدیریت عضویت در گروه</string>
+
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">به‌روز رسانی نرم‌افزار</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY تنظیمات</string>

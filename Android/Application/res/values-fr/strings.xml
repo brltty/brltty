@@ -49,6 +49,7 @@
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Parcourir les messages de la communauté</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">oster un message à la communauté</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Gérer le statut de membre de la communauté</string>
+
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Mettre à jour l\'application</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Actions d\'accessibilité</string>

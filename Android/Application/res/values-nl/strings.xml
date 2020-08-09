@@ -49,6 +49,7 @@
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Berichten In De Community</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Plaats Een Communitybericht</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Beheer Communitylidmaatschap</string>
+
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Update Applicatie</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Toegankelijkheidsacties</string>
