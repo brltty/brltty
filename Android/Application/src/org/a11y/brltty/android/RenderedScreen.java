@@ -28,6 +28,7 @@ import java.util.HashSet;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import android.widget.ImageView;
 import android.graphics.Rect;
 
 public class RenderedScreen {
@@ -157,15 +158,15 @@ public class RenderedScreen {
     {
       String text = ScreenUtilities.getText(node);
 
-      if (text == null) {
-        includeDescription = true;
-      } else {
+      if (text != null) {
         allowZeroLength = true;
 
         if (text.length() > 0) {
           if (sb.length() > 0) sb.append(' ');
           sb.append(text);
         }
+      } else if (ScreenUtilities.isSubclassOf(node, ImageView.class)) {
+        includeDescription = true;
       }
     }
 
