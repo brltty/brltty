@@ -46,8 +46,8 @@ capabilities. The required permissions are as follows:
    BrlAPI client connection requests.
 
 ``READ_EXTERNAL_STORAGE``
-   This permission is required so that BRLTTY can read customized data files
-   from your SD card.
+   This permission is required so that BRLTTY can read `customized data files`_
+   from your Android device's primary shared/external storage area.
 
 Quick Start
 -----------
@@ -234,7 +234,7 @@ You can enable BRLTTY's keyboard support in one of the following ways:
   The ``Keyboard and Input Methods`` section of this screen shows the
   ``Default`` (currently selected) input method, and contains a check box for
   each installed input method. An input method is enabled if its check box is
-  checked, so, to enable BRLTTY's keyboard support, check the box labeled
+  checked, so, to enable BRLTTY's keyboard support, check the box labelled
   ``BRLTTY Input Service``. Once it's been enabled, you can select it at any
   time by adjusting the ``Default`` setting.
 
@@ -243,8 +243,8 @@ You can enable BRLTTY's keyboard support in one of the following ways:
   brings up Android's Input Method Picker, which presents a set of radio
   buttons - one for each enabled input method. If there's no radio button for
   BRLTTY's input method then it hasn't been enabled yet. To enable it, tap the
-  button labeled ``Set up input methods``. This screen contains a check box for
-  each installed input method. Check the box labeled ``BRLTTY Input Service``.
+  button labelled ``Set up input methods``. This screen contains a check box for
+  each installed input method. Check the box labelled ``BRLTTY Input Service``.
   Then tap the ``Back`` button to return to the ``Language and Input`` screen,
   find the ``Keyboard and Input Methods`` section, and set the ``Default``
   input method to BRLTTY's input method.
@@ -283,6 +283,24 @@ You can get to this screen using any of the following methods:
 
   * The device's system navigation area isn't rendered via software.
   * An application has chosen to hide the system navigation area.
+
+Customized Data Files
+~~~~~~~~~~~~~~~~~~~~~
+
+You can customize any of BRLTTY's data files,
+e.g. a text, contraction, or key table or subtable.
+To do this, add a file with the same name directly into a folder named ``brltty``
+at the top-level of your Android device's primary shared/external storage area.
+This area might be internal (on the device itself)
+or external (on a removal storage device, e.g. an SD card).
+Normally, it's the area that ``/sdcard`` is symbolically linked to.
+
+BRLTTY won't be aware of your customized data files
+if this area has been mounted by a computer.
+
+It's safe to include the original data file from your customized copy.
+If you're only adding lines, therefore, then your customized copy
+need only contain those additions and the include statement.
 
 Navigating the Screen
 ---------------------
@@ -473,7 +491,7 @@ right now.
   ``F6``   234       go to the Quick Settings screen        4.2 (Jelly Bean MR1)
   ``F7``   2         move to the previous item              \*
   ``F8``   5         move to the next item                  \*
-  ``F9``   135       go to the device's Options screen      5.0 (Lollipop)
+  ``F9``   135       go to the Device Options screen        5.0 (Lollipop)
   ``F10``  134       tap the Menu button                    \*
   ``F11``  36        return to the active window            4.0 (Kitkat)
   ``F12``  3         switch to the previous window          4.0 (Kitkat)
