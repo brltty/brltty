@@ -24,7 +24,7 @@ bind \{chord}Dot7+Dot8+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 KEY_FUNCTION+4
 bind \{chord}Dot7+Dot8+Dot2+Dot3+Dot4 KEY_FUNCTION+5
 bind \{chord}Dot7+Dot8+Dot2 KEY_FUNCTION+6
 bind \{chord}Dot7+Dot8+Dot5 KEY_FUNCTION+7
-bind \{chord}Dot7+Dot8+Dot1+Dot2+Dot3+Dot4 KEY_FUNCTION+8
+bind \{chord}Dot7+Dot8+Dot1+Dot3+Dot5 KEY_FUNCTION+8
 bind \{chord}Dot7+Dot8+Dot1+Dot3+Dot4 KEY_FUNCTION+9
 bind \{chord}Dot7+Dot8+Dot3+Dot6 KEY_FUNCTION+10
 bind \{chord}Dot7+Dot8+Dot3 KEY_FUNCTION+11

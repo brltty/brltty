@@ -473,7 +473,7 @@ right now.
   ``F6``   234       go to the Quick Settings screen        4.2 (Jelly Bean MR1)
   ``F7``   2         move to the previous item              \*
   ``F8``   5         move to the next item                  \*
-  ``F9``   1234      go to the Power Off screen             5.0 (Lollipop)
+  ``F9``   135       go to the device's Options screen      5.0 (Lollipop)
   ``F10``  134       tap the Menu button                    \*
   ``F11``  36        return to the active window            4.0 (Kitkat)
   ``F12``  3         switch to the previous window          4.0 (Kitkat)
