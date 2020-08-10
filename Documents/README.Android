@@ -452,6 +452,25 @@ For example::
 
   Connect <disabled)
 
+When There's No Text
+````````````````````
+
+A screen element that has no text of its own,
+and that BRLTTY doesn't explicitly support,
+is normally not rendered.
+Examples of these include:
+
+* A graphic (e.g. an image view).
+* A container used to construct the screen's layout (e.g. a frame layout).
+
+It's still necessary to render it, however, if it implements
+an action (e.g. a tap) which the user needs to be able to perform.
+
+If the application's developer has provided descriptive text
+then that text is rendered.
+If not, then BRLTTY renders a generic description within (parentheses).
+It contains the widget's type, and, if available, it's source code identifier.
+
 Global Actions
 ~~~~~~~~~~~~~~
 

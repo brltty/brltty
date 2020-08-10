@@ -296,7 +296,7 @@ public class RenderedScreen {
               if (text == null) {
                 text = name;
               } else if (name != null) {
-                text += ": " + name;
+                text += " " + name;
               }
 
               if (text == null) text = "?";
