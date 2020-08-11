@@ -247,6 +247,10 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     .parity = SERIAL_PARITY_ODD
   };
 
+  BEGIN_USB_STRING_LIST(usbManufacturers_0403_6001)
+    "Hedo Reha Technik GmbH",
+  END_USB_STRING_LIST
+
   BEGIN_USB_CHANNEL_DEFINITIONS
     { /* ProfiLine */
       .vendor=0X0403, .product=0XDE59,
@@ -266,6 +270,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* MobilLine */
       .vendor=0X0403, .product=0X6001,
+      .manufacturers = usbManufacturers_0403_6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .serial = &serialParameters_MobilLine,
