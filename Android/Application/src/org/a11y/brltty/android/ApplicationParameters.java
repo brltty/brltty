@@ -31,5 +31,5 @@ public abstract class ApplicationParameters {
   public final static int FOCUS_WAIT_INTERVAL = 100;
 
   public final static int LONG_PRESS_DELAY = 100;
-  public final static int FOCUS_SET_DELAY = 500;
+  public final static int FOCUS_SETTER_DELAY = 500;
 }

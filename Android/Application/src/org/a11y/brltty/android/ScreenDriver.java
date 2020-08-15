@@ -180,36 +180,68 @@ public abstract class ScreenDriver {
     return false;
   }
 
-  private static class FocusSetter extends Task {
-    private AccessibilityNodeInfo focusNode = null;
-
+  private static class FocusSetter implements Runnable {
     public FocusSetter () {
-      super();
     }
 
-    public final void setFocus (AccessibilityNodeInfo node) {
+    private AccessibilityNodeInfo focusNode = null;
+    private boolean scheduled = false;
+
+    private final void schedule () {
+      synchronized (this) {
+        if (!scheduled) {
+          BrailleApplication.postIn(ApplicationParameters.FOCUS_SETTER_DELAY, this);
+          scheduled = true;
+        }
+      }
+    }
+
+    private final void cancel () {
+      synchronized (this) {
+        if (scheduled) {
+          BrailleApplication.unpost(this);
+          scheduled = false;
+        }
+      }
+    }
+
+    private final void clear () {
       synchronized (this) {
         if (focusNode != null) {
-          BrailleApplication.unpost(this);
           focusNode.recycle();
           focusNode = null;
         }
+      }
+    }
 
-        if (node != null) {
-          focusNode = AccessibilityNodeInfo.obtain(node);
-          BrailleApplication.postIn(ApplicationParameters.FOCUS_SET_DELAY, this);
-        }
+    public final void restart () {
+      synchronized (this) {
+        cancel();
+        if (focusNode != null) schedule();
+      }
+    }
+
+    public final void start (AccessibilityNodeInfo node) {
+      synchronized (this) {
+        clear();
+        if (node != null) focusNode = AccessibilityNodeInfo.obtain(node);
+        restart();
+      }
+    }
+
+    public final void stop () {
+      synchronized (this) {
+        cancel();
+        clear();
       }
     }
 
     @Override
     public void run () {
       synchronized (this) {
-        if (focusNode != null) {
-          setFocus(focusNode);
-          focusNode.recycle();
-          focusNode = null;
-        }
+        scheduled = false;
+        if (focusNode != null) setFocus(focusNode);
+        clear();
       }
     }
   }
@@ -281,6 +313,8 @@ public abstract class ScreenDriver {
   }
 
   public static void onAccessibilityEvent (AccessibilityEvent event) {
+    focusSetter.restart();
+
     final boolean log = ApplicationSettings.LOG_ACCESSIBILITY_EVENTS;
     if (log) Log.d(LOG_TAG, ("accessibility event: " + event.toString()));
 
@@ -343,7 +377,7 @@ public abstract class ScreenDriver {
 
       switch (eventType) {
         case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-          focusSetter.setFocus(node);
+          focusSetter.start(node);
           break;
 
         case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
@@ -359,7 +393,7 @@ public abstract class ScreenDriver {
           break;
 
         case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
-          focusSetter.setFocus(null);
+          focusSetter.stop();
           break;
 
         case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
