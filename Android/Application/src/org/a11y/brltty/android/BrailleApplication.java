@@ -36,7 +36,19 @@ public class BrailleApplication extends Application {
     return applicationObject;
   }
 
-  public static void post (Runnable runnable) {
-    applicationHandler.post(runnable);
+  public static void unpost (Runnable callback) {
+    applicationHandler.removeCallbacks(callback);
+  }
+
+  public static boolean post (Runnable callback) {
+    return applicationHandler.post(callback);
+  }
+
+  public static boolean postIn (long delay, Runnable callback) {
+    return applicationHandler.postDelayed(callback, delay);
+  }
+
+  public static boolean postAt (long when, Runnable callback) {
+    return applicationHandler.postAtTime(callback, when);
   }
 }

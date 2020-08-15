@@ -180,6 +180,42 @@ public abstract class ScreenDriver {
     return false;
   }
 
+  private static class FocusSetter extends Task {
+    private AccessibilityNodeInfo focusNode = null;
+
+    public FocusSetter () {
+      super();
+    }
+
+    public final void setFocus (AccessibilityNodeInfo node) {
+      synchronized (this) {
+        if (focusNode != null) {
+          BrailleApplication.unpost(this);
+          focusNode.recycle();
+          focusNode = null;
+        }
+
+        if (node != null) {
+          focusNode = AccessibilityNodeInfo.obtain(node);
+          BrailleApplication.postIn(ApplicationParameters.FOCUS_SET_DELAY, this);
+        }
+      }
+    }
+
+    @Override
+    public void run () {
+      synchronized (this) {
+        if (focusNode != null) {
+          setFocus(focusNode);
+          focusNode.recycle();
+          focusNode = null;
+        }
+      }
+    }
+  }
+
+  private final static FocusSetter focusSetter = new FocusSetter();
+
   private native static void screenUpdated ();
   private final static Object NODE_LOCK = new Object();
   private volatile static AccessibilityNodeInfo currentNode = null;
@@ -307,7 +343,7 @@ public abstract class ScreenDriver {
 
       switch (eventType) {
         case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-          setFocus(node);
+          focusSetter.setFocus(node);
           break;
 
         case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
@@ -323,6 +359,7 @@ public abstract class ScreenDriver {
           break;
 
         case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+          focusSetter.setFocus(null);
           break;
 
         case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
