@@ -180,69 +180,37 @@ public abstract class ScreenDriver {
     return false;
   }
 
-  private static class FocusSetter implements Runnable {
-    public FocusSetter () {
-    }
-
+  private static class FocusSetter extends DeferredTask {
     private AccessibilityNodeInfo focusNode = null;
-    private boolean scheduled = false;
 
-    private final void schedule () {
-      synchronized (this) {
-        if (!scheduled) {
-          BrailleApplication.postIn(ApplicationParameters.FOCUS_SETTER_DELAY, this);
-          scheduled = true;
-        }
-      }
+    public FocusSetter () {
+      super(ApplicationParameters.FOCUS_SETTER_DELAY);
     }
 
-    private final void cancel () {
-      synchronized (this) {
-        if (scheduled) {
-          BrailleApplication.unpost(this);
-          scheduled = false;
-        }
-      }
+    @Override
+    protected final boolean isStartable () {
+      return focusNode != null;
     }
 
-    private final void clear () {
-      synchronized (this) {
-        if (focusNode != null) {
-          focusNode.recycle();
-          focusNode = null;
-        }
-      }
-    }
-
-    public final void restart () {
-      synchronized (this) {
-        cancel();
-        if (focusNode != null) schedule();
+    @Override
+    protected final void releaseResources () {
+      if (focusNode != null) {
+        focusNode.recycle();
+        focusNode = null;
       }
     }
 
     public final void start (AccessibilityNodeInfo node) {
       synchronized (this) {
-        clear();
+        releaseResources();
         if (node != null) focusNode = AccessibilityNodeInfo.obtain(node);
         restart();
       }
     }
 
-    public final void stop () {
-      synchronized (this) {
-        cancel();
-        clear();
-      }
-    }
-
     @Override
-    public void run () {
-      synchronized (this) {
-        scheduled = false;
-        if (focusNode != null) setFocus(focusNode);
-        clear();
-      }
+    public void runTask () {
+      if (focusNode != null) setFocus(focusNode);
     }
   }
 
