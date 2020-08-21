@@ -145,6 +145,10 @@ public class ScreenElement {
     return false;
   }
 
+  public boolean onDescribeElement () {
+    return false;
+  }
+
   public boolean performAction (int column, int row) {
     switch (column) {
       case  0: return onBringCursor();
@@ -154,6 +158,7 @@ public class ScreenElement {
       case  4: return onScrollForward();
       case  5: return onContextClick();
       case  6: return onAccessibilityActions();
+      case 15: return onDescribeElement();
       default: return false;
     }
   }

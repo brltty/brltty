@@ -20,11 +20,12 @@ package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
 public enum BrailleMessage {
-  WINDOW("WIN"),
-  WARNING("WRN"),
-  NOTIFICATION("NTF"),
-  TOAST("ALR"),
-  ANNOUNCEMENT("ANN"),
+  WINDOW("win"),
+  WARNING("warn"),
+  NOTIFICATION("ntfc"),
+  TOAST("alrt"),
+  DEBUG("dbg"),
+  ANNOUNCEMENT("ann"),
   ; // end of enumeration
 
   private final String messageLabel;

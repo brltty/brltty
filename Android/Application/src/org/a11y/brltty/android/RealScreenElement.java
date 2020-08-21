@@ -317,6 +317,12 @@ public class RealScreenElement extends ScreenElement {
   }
 
   @Override
+  public boolean onDescribeElement () {
+    BrailleMessage.DEBUG.show(ScreenLogger.toString(accessibilityNode));
+    return true;
+  }
+
+  @Override
   public boolean performAction (int column, int row) {
     if (ScreenUtilities.isEditable(accessibilityNode)) {
       if (!onBringCursor()) return false;

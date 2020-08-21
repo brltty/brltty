@@ -120,10 +120,10 @@ public abstract class ScreenLogger {
       put("lck", AccessibilityNodeInfo.ACTION_LONG_CLICK);
       put("scf", AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
       put("scb", AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
-      put("mvn", AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-      put("mvp", AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
-      put("mhn", AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT);
-      put("mhp", AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT);
+      put("mgp", AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+      put("mgn", AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+      put("mep", AccessibilityNodeInfo.ACTION_PREVIOUS_HTML_ELEMENT);
+      put("men", AccessibilityNodeInfo.ACTION_NEXT_HTML_ELEMENT);
       put("sls", AccessibilityNodeInfo.ACTION_SELECT);
       put("slc", AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
       put("ifs", AccessibilityNodeInfo.ACTION_FOCUS);

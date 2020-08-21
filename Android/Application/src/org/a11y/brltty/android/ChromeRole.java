@@ -28,9 +28,27 @@ public enum ChromeRole {
   anchor(),
   button("btn"),
   caption("cap"),
-  cell("col"),
+
+  cell("col",
+    new LabelMaker() {
+      @Override
+      public String makeLabel (ChromeRole role, AccessibilityNodeInfo node) {
+        return makeCoordinatesLabel(role, node);
+      }
+    }
+  ),
+
   checkBox(),
-  columnHeader("hdr"),
+
+  columnHeader("hdr",
+    new LabelMaker() {
+      @Override
+      public String makeLabel (ChromeRole role, AccessibilityNodeInfo node) {
+        return makeCoordinatesLabel(role, node);
+      }
+    }
+  ),
+
   form("frm"),
 
   heading("hdg",
@@ -43,7 +61,23 @@ public enum ChromeRole {
   ),
 
   lineBreak(),
-  link("lnk"),
+
+  link("lnk",
+    new LabelMaker() {
+      @Override
+      public String makeLabel (ChromeRole role, AccessibilityNodeInfo node) {
+        StringBuilder label = new StringBuilder(role.genericLabel);
+        String url = getStringExtra(node, EXTRA_TARGET_URL);
+
+        if ((url != null) && !url.isEmpty()) {
+          label.append(' ').append(url);
+        }
+
+        return label.toString();
+      }
+    }
+  ),
+
   paragraph(),
   popUpButton("pop"),
   radioButton(),
@@ -51,12 +85,20 @@ public enum ChromeRole {
   row("row"),
   splitter("--------"),
   staticText(),
-  table("tbl"),
+
+  table("tbl",
+    new LabelMaker() {
+      @Override
+      public String makeLabel (ChromeRole role, AccessibilityNodeInfo node) {
+        return makeDimensionsLabel(role, node);
+      }
+    }
+  ),
 
   textField("txt",
     new LabelMaker() {
       @Override
-      public String makeLabel (AccessibilityNodeInfo node) {
+      public String makeLabel (ChromeRole role, AccessibilityNodeInfo node) {
         if ((node.getActions() & AccessibilityNodeInfo.ACTION_EXPAND) == 0) return "";
         if (node.isPassword()) return "pwd";
         return null;
@@ -72,7 +114,7 @@ public enum ChromeRole {
   public final static String EXTRA_TARGET_URL = "AccessibilityNodeInfo.targetUrl";
 
   private interface LabelMaker {
-    public String makeLabel (AccessibilityNodeInfo node);
+    public String makeLabel (ChromeRole role, AccessibilityNodeInfo node);
   }
 
   private final String genericLabel;
@@ -109,6 +151,43 @@ public enum ChromeRole {
     this(null);
   }
 
+  public static String makeCoordinatesLabel (ChromeRole role, AccessibilityNodeInfo node) {
+    if (APITests.haveKitkat) {
+      AccessibilityNodeInfo.CollectionItemInfo item = node.getCollectionItemInfo();
+
+      if (item != null) {
+        StringBuilder label = new StringBuilder(role.genericLabel);
+        label.append(' ')
+             .append(item.getColumnIndex() + 1)
+             .append('@')
+             .append(item.getRowIndex() + 1)
+             ;
+        return label.toString();
+      }
+    }
+
+    return null;
+  }
+
+  public static String makeDimensionsLabel (ChromeRole role, AccessibilityNodeInfo node) {
+    if (APITests.haveKitkat) {
+      AccessibilityNodeInfo.CollectionInfo collection = node.getCollectionInfo();
+
+      if (collection != null) {
+        StringBuilder label = new StringBuilder(role.genericLabel);
+        label.append(' ')
+             .append(collection.getColumnCount())
+             .append('x')
+             .append(collection.getRowCount())
+             ;
+
+        return label.toString();
+      }
+    }
+
+    return null;
+  }
+
   private final static Bundle getExtras (AccessibilityNodeInfo node) {
     if (node != null) {
       if (APITests.haveKitkat) {
@@ -143,7 +222,7 @@ public enum ChromeRole {
     if (role == null) return null;
 
     if (role.labelMaker != null) {
-      String label = role.labelMaker.makeLabel(node);
+      String label = role.labelMaker.makeLabel(role, node);
       if (label != null) return label;
     }
 
