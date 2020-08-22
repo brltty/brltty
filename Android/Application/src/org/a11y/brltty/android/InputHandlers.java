@@ -52,6 +52,33 @@ public abstract class InputHandlers {
     return screen.getCursorNode();
   }
 
+  private static void showWindowTitle (AccessibilityWindowInfo window) {
+    CharSequence title = window.getTitle();
+
+    if ((title == null) || (title.length() == 0)) {
+      title = "unnamed";
+    }
+
+    BrailleMessage.WINDOW.show(title.toString());
+  }
+
+  private static void showWindowTitle (ScreenWindow window) {
+    AccessibilityWindowInfo object = window.getWindowObject();
+
+    if (object != null) {
+      try {
+        showWindowTitle(object);
+      } finally {
+        object.recycle();
+        object = null;
+      }
+    }
+  }
+
+  private static void showWindowTitle () {
+    showWindowTitle(ScreenDriver.getCurrentScreenWindow());
+  }
+
   private static List<AccessibilityWindowInfo> getVisibleWindows () {
     if (APITests.haveLollipop) {
       return BrailleService.getBrailleService().getWindows();
@@ -82,16 +109,7 @@ public abstract class InputHandlers {
     if (root != null) {
       try {
         RenderedScreen screen = new RenderedScreen(root);
-
-        {
-          CharSequence title = window.getTitle();
-
-          if ((title == null) || (title.length() == 0)) {
-            title = "unnamed";
-          }
-
-          BrailleMessage.WINDOW.show(title.toString());
-        }
+        showWindowTitle(window);
 
         ScreenDriver.lockScreenWindow(
           ScreenWindow.getScreenWindow(window)
@@ -687,6 +705,18 @@ public abstract class InputHandlers {
       }
     };
 
+  private final static FunctionKeyAction functionKeyAction_deviceOptions =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        if (APITests.haveLollipop) {
+          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
+        }
+
+        return false;
+      }
+    };
+
   private final static FunctionKeyAction functionKeyAction_homeScreen =
     new FunctionKeyAction() {
       @Override
@@ -729,18 +759,6 @@ public abstract class InputHandlers {
       }
     };
 
-  private final static FunctionKeyAction functionKeyAction_powerDialog =
-    new FunctionKeyAction() {
-      @Override
-      public boolean performAction () {
-        if (APITests.haveLollipop) {
-          return performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
-        }
-
-        return false;
-      }
-    };
-
   private final static FunctionKeyAction functionKeyAction_quickSettings =
     new FunctionKeyAction() {
       @Override
@@ -762,6 +780,15 @@ public abstract class InputHandlers {
         }
 
         return false;
+      }
+    };
+
+  private final static FunctionKeyAction functionKeyAction_showWindowTitle =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        showWindowTitle();
+        return true;
       }
     };
 
@@ -833,12 +860,12 @@ public abstract class InputHandlers {
       /* F6  */ functionKeyAction_quickSettings,
       /* F7  */ functionKeyAction_toPreviousItem,
       /* F8  */ functionKeyAction_toNextItem,
-      /* F9  */ functionKeyAction_powerDialog,
+      /* F9  */ functionKeyAction_deviceOptions,
       /* F10 */ functionKeyAction_optionsMenu,
       /* F11 */ functionKeyAction_toActiveWindow,
       /* F12 */ functionKeyAction_toPreviousWindow,
       /* F13 */ functionKeyAction_toNextWindow,
-      /* F14 */ null,
+      /* F14 */ functionKeyAction_showWindowTitle,
       /* F15 */ null,
       /* F16 */ functionKeyAction_logScreen
     };

@@ -29,3 +29,4 @@ bind \{chord}Dot7+Dot8+Dot1+Dot3+Dot4 KEY_FUNCTION+9
 bind \{chord}Dot7+Dot8+Dot3+Dot6 KEY_FUNCTION+10
 bind \{chord}Dot7+Dot8+Dot3 KEY_FUNCTION+11
 bind \{chord}Dot7+Dot8+Dot6 KEY_FUNCTION+12
+bind \{chord}Dot7+Dot8+Dot2+Dot4+Dot5+Dot6 KEY_FUNCTION+13

@@ -38,6 +38,13 @@ public class ScreenWindow {
     return windowIdentifier;
   }
 
+  public final AccessibilityWindowInfo getWindowObject () {
+    synchronized (this) {
+      if (windowObject == null) return null;
+      return AccessibilityWindowInfo.obtain(windowObject);
+    }
+  }
+
   private final static Map<Integer, ScreenWindow> screenWindowCache =
                new HashMap<Integer, ScreenWindow>();
 
