@@ -153,7 +153,6 @@ static const RequiredGroupEntry requiredGroupTable[] = {
   },
 
   { .reason = "for serial I/O",
-    .name = "dialout",
     .path = "/dev/ttyS0",
   },
 

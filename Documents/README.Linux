@@ -594,7 +594,7 @@ as its actual name isn't defined by any standard or convention.
   ``-c``  ``tty``           access to the virtual consoles
   ``-k``  ``input``         keyboard monitoring
   ``-p``  ``pulse-access``  playing sound via the Pulse Audio server
-  ``-s``  ``dialout``       access to serial devices
+  ``-s``  *dialout*         access to serial devices
   ``-u``  usually ``root``  access to USB devices
   ======  ================  ========================================
 
@@ -768,7 +768,7 @@ granted via membership in the owning user groups.
   For reading BrlAPI's |key file|.
   In other words, the group that owns that file.
 
-**dialout**
+*dialout*
   For serial I/O via these ``/dev/`` devices:
 
   **ttyS<n>**

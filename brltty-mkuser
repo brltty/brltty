@@ -133,7 +133,7 @@ fi
    "${noConsoles}" || addGroups tty /dev/vcs1 /dev/tty1
    "${noKeyboards}" || addGroups input
    "${noPulse}" || addGroups pulse-access
-   "${noSerial}" || addGroups dialout /dev/ttyS0
+   "${noSerial}" || addGroups /dev/ttyS0
    "${noUSB}" || addGroups /dev/bus/usb
 
    groupsOperand="${groupList[*]}"
