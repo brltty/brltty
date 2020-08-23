@@ -29,6 +29,7 @@ import android.graphics.Rect;
 
 public class ScreenWindow {
   private final int windowIdentifier;
+  private AccessibilityWindowInfo windowInfo = null;
 
   private ScreenWindow (int identifier) {
     windowIdentifier = identifier;
@@ -38,17 +39,16 @@ public class ScreenWindow {
     return windowIdentifier;
   }
 
-  public final AccessibilityWindowInfo getWindowObject () {
+  public final AccessibilityWindowInfo getWindowInfo () {
     synchronized (this) {
-      if (windowObject == null) return null;
-      return AccessibilityWindowInfo.obtain(windowObject);
+      if (windowInfo == null) return null;
+      return AccessibilityWindowInfo.obtain(windowInfo);
     }
   }
 
   private final static Map<Integer, ScreenWindow> screenWindowCache =
                new HashMap<Integer, ScreenWindow>();
 
-  private AccessibilityWindowInfo windowObject = null;
   private RenderedScreen renderedScreen = null;
 
   public static ScreenWindow getScreenWindow (Integer identifier) {
@@ -62,12 +62,12 @@ public class ScreenWindow {
     }
   }
 
-  public static ScreenWindow getScreenWindow (AccessibilityWindowInfo object) {
-    ScreenWindow window = getScreenWindow(object.getId());
+  public static ScreenWindow getScreenWindow (AccessibilityWindowInfo info) {
+    ScreenWindow window = getScreenWindow(info.getId());
 
     synchronized (window) {
-      if (window.windowObject != null) window.windowObject.recycle();
-      window.windowObject = AccessibilityWindowInfo.obtain(object);
+      if (window.windowInfo != null) window.windowInfo.recycle();
+      window.windowInfo = AccessibilityWindowInfo.obtain(info);
     }
 
     return window;
@@ -75,14 +75,14 @@ public class ScreenWindow {
 
   public static ScreenWindow getScreenWindow (AccessibilityNodeInfo node) {
     if (APITests.haveLollipop) {
-      AccessibilityWindowInfo object = node.getWindow();
+      AccessibilityWindowInfo info = node.getWindow();
 
-      if (object != null) {
+      if (info != null) {
         try {
-          return getScreenWindow(object);
+          return getScreenWindow(info);
         } finally {
-          object.recycle();
-          object = null;
+          info.recycle();
+          info = null;
         }
       }
     }
@@ -94,8 +94,8 @@ public class ScreenWindow {
     synchronized (this) {
       Rect location = new Rect();
 
-      if (windowObject != null) {
-        windowObject.getBoundsInScreen(location);
+      if (windowInfo != null) {
+        windowInfo.getBoundsInScreen(location);
       } else {
         Point size = new Point();
         ApplicationUtilities.getWindowManager().getDefaultDisplay().getSize(size);

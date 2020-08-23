@@ -63,14 +63,14 @@ public abstract class InputHandlers {
   }
 
   private static void showWindowTitle (ScreenWindow window) {
-    AccessibilityWindowInfo object = window.getWindowObject();
+    AccessibilityWindowInfo info = window.getWindowInfo();
 
-    if (object != null) {
+    if (info != null) {
       try {
-        showWindowTitle(object);
+        showWindowTitle(info);
       } finally {
-        object.recycle();
-        object = null;
+        info.recycle();
+        info = null;
       }
     }
   }
