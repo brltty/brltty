@@ -34,6 +34,7 @@ RefuseManualStop=true
 [Service]
 
 Environment="BRLTTY_SYSTEMD_INSTANCE=%I"
+ExecStartPre=+/usr/bin/install -d -o brltty -g brltty -m0770 @WRITABLE_DIRECTORY@
 ExecStart=/usr/lib/brltty/systemd-wrapper
 
 Type=@SYSTEMD_SERVICE_TYPE@
