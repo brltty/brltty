@@ -18,17 +18,14 @@
 
 package org.a11y.brltty.android;
 
-import android.view.accessibility.AccessibilityNodeInfo;
+import android.util.Log;
 import android.os.Bundle;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.Map;
 import java.util.HashMap;
 
 public enum ChromeRole {
-  anchor(),
-  button("btn"),
-  caption("cap"),
-
   cell("col",
     new LabelMaker() {
       @Override
@@ -37,8 +34,6 @@ public enum ChromeRole {
       }
     }
   ),
-
-  checkBox(),
 
   columnHeader("hdr",
     new LabelMaker() {
@@ -49,8 +44,6 @@ public enum ChromeRole {
     }
   ),
 
-  form("frm"),
-
   heading("hdg",
     "heading 1", "hd1",
     "heading 2", "hd2",
@@ -59,8 +52,6 @@ public enum ChromeRole {
     "heading 5", "hd5",
     "heading 6", "hd6"
   ),
-
-  lineBreak(),
 
   link("lnk",
     new LabelMaker() {
@@ -77,14 +68,6 @@ public enum ChromeRole {
       }
     }
   ),
-
-  paragraph(),
-  popUpButton("pop"),
-  radioButton(),
-  rootWebArea(),
-  row("row"),
-  splitter("--------"),
-  staticText(),
 
   table("tbl",
     new LabelMaker() {
@@ -106,7 +89,22 @@ public enum ChromeRole {
     }
   ),
 
+  anchor(),
+  button("btn"),
+  caption("cap"),
+  checkBox(),
+  form("frm"),
+  lineBreak(),
+  paragraph(),
+  popUpButton("pop"),
+  radioButton(),
+  rootWebArea(),
+  row("row"),
+  splitter("--------"),
+  staticText(),
   ; // end of enumeration
+
+  private final static String LOG_TAG = ChromeRole.class.getName();
 
   public final static String EXTRA_CHROME_ROLE = "AccessibilityNodeInfo.chromeRole";
   public final static String EXTRA_ROLE_DESCRIPTION = "AccessibilityNodeInfo.roleDescription";
@@ -207,12 +205,15 @@ public enum ChromeRole {
   public static ChromeRole getChromeRole (AccessibilityNodeInfo node) {
     String name = getStringExtra(node, EXTRA_CHROME_ROLE);
     if (name == null) return null;
+    if (name.isEmpty()) return null;
 
     try {
       return ChromeRole.valueOf(name);
     } catch (IllegalArgumentException exception) {
-      return null;
+      Log.w(LOG_TAG, ("unrecognized Chrome role: " + name));
     }
+
+    return null;
   }
 
   public static String getLabel (AccessibilityNodeInfo node) {
