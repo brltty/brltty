@@ -26,9 +26,6 @@ ConditionPathExists=%I
 RequiresMountsFor=@UPDATABLE_DIRECTORY@
 RequiresMountsFor=@api_socket_directory@
 
-Wants=systemd-udev-settle.service
-After=systemd-udev-settle.service
-
 StopWhenUnneeded=true
 RefuseManualStart=true
 RefuseManualStop=true
