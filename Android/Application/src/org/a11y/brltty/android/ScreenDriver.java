@@ -227,7 +227,8 @@ public abstract class ScreenDriver {
 
         synchronized (NODE_LOCK) {
           oldNode = currentNode;
-          currentNode = newNode;
+          currentNode = AccessibilityNodeInfo.obtain(newNode);
+          newNode = null;
         }
 
         if (oldNode != null) {
@@ -251,8 +252,13 @@ public abstract class ScreenDriver {
     AccessibilityNodeInfo root = ScreenUtilities.getRootNode();
 
     if (root != null) {
-      setFocus(root);
-      setCurrentNode(root);
+      try {
+        setFocus(root);
+        setCurrentNode(root);
+      } finally {
+        root.recycle();
+        root = null;
+      }
     }
   }
 
@@ -319,88 +325,87 @@ public abstract class ScreenDriver {
           break;
       }
     } else {
-      if (log) ScreenLogger.log(node);
+      try {
+        if (log) ScreenLogger.log(node);
 
-      if (APITests.haveLollipop) {
-        AccessibilityWindowInfo window = node.getWindow();
+        if (APITests.haveLollipop) {
+          AccessibilityWindowInfo window = node.getWindow();
 
-        if (window != null) {
-          try {
-            boolean accept =
-              (lockedScreenWindow != null)?
-              (window.getId() == lockedScreenWindow.getWindowIdentifier()):
-              window.isActive();
+          if (window != null) {
+            try {
+              boolean accept =
+                (lockedScreenWindow != null)?
+                (window.getId() == lockedScreenWindow.getWindowIdentifier()):
+                window.isActive();
 
-            if (!accept) {
-              node.recycle();
-              node = null;
-              return;
+              if (!accept) return;
+            } finally {
+              window.recycle();
+              window = null;
             }
-          } finally {
-            window.recycle();
-            window = null;
           }
         }
-      }
 
-      switch (eventType) {
-        case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-          focusSetter.start(node);
-          break;
+        switch (eventType) {
+          case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
+            focusSetter.start(node);
+            break;
 
-        case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
-          break;
+          case AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED:
+            break;
 
-        case AccessibilityEvent.TYPE_VIEW_SCROLLED:
-          break;
+          case AccessibilityEvent.TYPE_VIEW_SCROLLED:
+            break;
 
-        case AccessibilityEvent.TYPE_VIEW_SELECTED:
-          break;
+          case AccessibilityEvent.TYPE_VIEW_SELECTED:
+            break;
 
-        case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-          break;
+          case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+            break;
 
-        case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
-          focusSetter.stop();
-          break;
+          case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
+            focusSetter.stop();
+            break;
 
-        case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
-          if (!APITests.haveJellyBeanMR2) {
-            TextField field = TextField.get(node, true);
-            field.setCursor(event.getFromIndex() + event.getAddedCount());
+          case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED: {
+            if (!APITests.haveJellyBeanMR2) {
+              TextField field = TextField.get(node, true);
+              field.setCursor(event.getFromIndex() + event.getAddedCount());
+            }
+
+            break;
           }
 
-          break;
-        }
+          case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
+            if (!APITests.haveJellyBeanMR2) {
+              TextField field = TextField.get(node, true);
+              field.setSelection(event.getFromIndex(), event.getToIndex());
+            }
 
-        case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
-          if (!APITests.haveJellyBeanMR2) {
-            TextField field = TextField.get(node, true);
-            field.setSelection(event.getFromIndex(), event.getToIndex());
+            break;
           }
 
-          break;
+          default:
+            logUnhandledEvent(event, node);
+          case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
+          case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT:
+          case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
+          case AccessibilityEvent.TYPE_VIEW_CLICKED:
+          case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
+          case AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY:
+            return;
         }
 
-        default:
-          logUnhandledEvent(event, node);
-        case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
-        case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT:
-        case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
-        case AccessibilityEvent.TYPE_VIEW_CLICKED:
-        case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
-        case AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY:
-          node.recycle();
-          node = null;
-          return;
-      }
+        if (false && node.isPassword()) {
+          TextField field = TextField.get(node, true);
+          field.setAccessibilityText(toText(event));
+        }
 
-      if (false && node.isPassword()) {
-        TextField field = TextField.get(node, true);
-        field.setAccessibilityText(toText(event));
+        setCurrentNode(node);
+      } finally {
+        node.recycle();
+        node = null;
       }
-
-      setCurrentNode(node);
     }
   }
 

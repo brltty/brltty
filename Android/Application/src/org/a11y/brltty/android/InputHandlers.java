@@ -116,7 +116,7 @@ public abstract class InputHandlers {
                       .setRenderedScreen(screen)
         );
 
-        ScreenDriver.setCurrentNode(AccessibilityNodeInfo.obtain(root));
+        ScreenDriver.setCurrentNode(root);
         return true;
       } finally {
         root.recycle();
@@ -797,7 +797,15 @@ public abstract class InputHandlers {
       @Override
       public boolean performAction () {
         ScreenDriver.unlockScreenWindow();
-        ScreenDriver.setCurrentNode(ScreenUtilities.getRootNode());
+        AccessibilityNodeInfo root = ScreenUtilities.getRootNode();
+
+        try {
+          ScreenDriver.setCurrentNode(root);
+        } finally {
+          root.recycle();
+          root = null;
+        }
+
         return true;
       }
     };
