@@ -1077,12 +1077,12 @@ readCommand1 (BrailleDisplay *brl) {
 
       case 0X77: /* satellite keypads */
         if (key <= 0X05) {
-          enqueueKeyEvent(brl, AL_GRP_NavigationKeys, key+AL_KEY_LEFT_PAD, press);
+          enqueueKeyEvent(brl, AL_GRP_NavigationKeys, key+AL_KEY_SPEECH_PAD, press);
           continue;
         }
 
         if ((key >= 0X20) && (key <= 0X25)) {
-          enqueueKeyEvent(brl, AL_GRP_NavigationKeys, key-0X20+AL_KEY_RIGHT_PAD, press);
+          enqueueKeyEvent(brl, AL_GRP_NavigationKeys, key-0X20+AL_KEY_NAV_PAD, press);
           continue;
         }
 
