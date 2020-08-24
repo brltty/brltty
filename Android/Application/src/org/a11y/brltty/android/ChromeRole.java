@@ -58,7 +58,7 @@ public enum ChromeRole {
       @Override
       public String makeLabel (ChromeRole role, AccessibilityNodeInfo node) {
         StringBuilder label = new StringBuilder(role.genericLabel);
-        String url = getStringExtra(node, EXTRA_TARGET_URL);
+        String url = ScreenUtilities.getStringExtra(node, EXTRA_TARGET_URL);
 
         if ((url != null) && !url.isEmpty()) {
           label.append(' ').append(url);
@@ -186,24 +186,8 @@ public enum ChromeRole {
     return null;
   }
 
-  private final static Bundle getExtras (AccessibilityNodeInfo node) {
-    if (node != null) {
-      if (APITests.haveKitkat) {
-        return node.getExtras();
-      }
-    }
-
-    return null;
-  }
-
-  public static String getStringExtra (AccessibilityNodeInfo node, String extra) {
-    Bundle extras = getExtras(node);
-    if (extras == null) return null;
-    return extras.getString(extra);
-  }
-
   public static ChromeRole getChromeRole (AccessibilityNodeInfo node) {
-    String name = getStringExtra(node, EXTRA_CHROME_ROLE);
+    String name = ScreenUtilities.getStringExtra(node, EXTRA_CHROME_ROLE);
     if (name == null) return null;
     if (name.isEmpty()) return null;
 
@@ -228,7 +212,7 @@ public enum ChromeRole {
     }
 
     if (role.descriptionLabels != null) {
-      final String description = getStringExtra(node, EXTRA_ROLE_DESCRIPTION);
+      final String description = ScreenUtilities.getStringExtra(node, EXTRA_ROLE_DESCRIPTION);
 
       if (description != null) {
         String label = role.descriptionLabels.get(description);

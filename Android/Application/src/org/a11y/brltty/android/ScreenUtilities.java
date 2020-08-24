@@ -501,4 +501,20 @@ public abstract class ScreenUtilities {
 
     return null;
   }
+
+  public static Bundle getExtras (AccessibilityNodeInfo node) {
+    if (node != null) {
+      if (APITests.haveKitkat) {
+        return node.getExtras();
+      }
+    }
+
+    return null;
+  }
+
+  public static String getStringExtra (AccessibilityNodeInfo node, String extra) {
+    Bundle extras = getExtras(node);
+    if (extras == null) return null;
+    return extras.getString(extra);
+  }
 }

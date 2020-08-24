@@ -521,31 +521,59 @@ right now.
 Web Pages
 ~~~~~~~~~
 
-.. table:: Web Page Annotations
+Annotations
+```````````
 
-  ==========  =====================================
-  Annotation  Meaning
-  ----------  -------------------------------------
+A number of elements within a web page are annotated
+in order to help distinguish them from the surrounding text.
+Each annotation is placed immediately before
+the text of the element that it describes.
+It consists of a three-letter tag,
+optionally followed by descriptivE data,
+all enclosed within (parentheses).
+Here are some examples:
+
+.. table:: Web Page Annotation Examples
+
+  =================  ====================================================
+  Example            Meaning
+  -----------------  ----------------------------------------------------
+  (btn) Submit       a Submit button
+  (lnk https://...)  the target URL of a link
+  (tbl 4x9)          the start of a table with four columns and nine rows
+  (col 2@3)          the second column of the third row of a table
+  =================  ====================================================
+
+The following table lists all of the annotations:
+
+.. table:: Web Page Annotation List
+
+  ==========  =====================================  ===========
+  Annotation  Meaning                                Data
+  ----------  -------------------------------------  -----------
   btn         button
   cap         table caption
-  col         start of table column
+  col         column of table row                    coordinates
   frm         start of form
-  hdg         heading
-  hd1         level 1 heading
-  hd2         level 2 heading
-  hd3         level 3 heading
-  hd4         level 4 heading
-  hd5         level 5 heading
-  hd6         level 6 heading
-  hdr         start of table column header
-  lnk         target of link
+  hdg         heading (any level)
+  hd1         level one heading
+  hd2         level two heading
+  hd3         level three heading
+  hd4         level four heading
+  hd5         level five heading
+  hd6         level six heading
+  hdr         header of table column                 coordinates
+  lnk         target of link                         URL
   pop         single or multiple choice pop-up list
   pwd         password field
   row         start of table row
-  tbl         start of table
+  tbl         start of table                         dimensions
   txt         text field or area
-  \--------   divider
-  ==========  =====================================
+  \--------   horizontal divider
+  ==========  =====================================  ===========
+
+Navigation
+``````````
 
 A web page, when browsed with Chrome, can be structurally navigated
 by typing the following characters on your braille device:
