@@ -466,7 +466,7 @@ controlCurrentConsole (int operation, void *argument) {
 }
 
 static const int NO_CONSOLE = 0;
-static const int MAIN_CONSOLE = 1;
+static const int MAIN_CONSOLE = 0;
 static int mainConsoleDescriptor;
 
 static void
