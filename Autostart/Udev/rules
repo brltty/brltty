@@ -135,6 +135,10 @@ ENV{PRODUCT}=="798/640/*", ENV{BRLTTY_BRAILLE_DRIVER}="al", GOTO="brltty_usb_run
 # Alva [BC680]
 ENV{PRODUCT}=="798/680/*", ENV{BRLTTY_BRAILLE_DRIVER}="al", GOTO="brltty_usb_run"
 
+# Device: 0904:1016
+# FrankAudiodata [B2K84]
+ENV{PRODUCT}=="904/1016/*", ENV{BRLTTY_BRAILLE_DRIVER}="fa", GOTO="brltty_usb_run"
+
 # Device: 0904:2000
 # Baum [VarioPro 40 (40 cells)]
 ENV{PRODUCT}=="904/2000/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"

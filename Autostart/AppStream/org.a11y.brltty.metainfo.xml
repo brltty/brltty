@@ -136,6 +136,10 @@
     <!-- Alva [BC680] -->
     <modalias>usb:v0798p0680*</modalias>
 
+    <!-- Device: 0904:1016 -->
+    <!-- FrankAudiodata [B2K84] -->
+    <modalias>usb:v0904p1016*</modalias>
+
     <!-- Device: 0904:2000 -->
     <!-- Baum [VarioPro 40 (40 cells)] -->
     <modalias>usb:v0904p2000*</modalias>

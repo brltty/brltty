@@ -125,6 +125,10 @@ USB_DEVICE_ENTRY(0X0798, 0X0640, "al"),
 // Alva [BC680]
 USB_DEVICE_ENTRY(0X0798, 0X0680, "al"),
 
+// Device: 0904:1016
+// FrankAudiodata [B2K84]
+USB_DEVICE_ENTRY(0X0904, 0X1016, "fa"),
+
 // Device: 0904:2000
 // Baum [VarioPro 40 (40 cells)]
 USB_DEVICE_ENTRY(0X0904, 0X2000, "bm"),

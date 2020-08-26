@@ -116,6 +116,10 @@ brltty 0x0003 0x0798 0x0640
 # Alva [BC680]
 brltty 0x0003 0x0798 0x0680
 
+# Device: 0904:1016
+# FrankAudiodata [B2K84]
+brltty 0x0003 0x0904 0x1016
+
 # Device: 0904:2000
 # Baum [VarioPro 40 (40 cells)]
 brltty 0x0003 0x0904 0x2000

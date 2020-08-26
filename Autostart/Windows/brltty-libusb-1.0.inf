@@ -111,6 +111,9 @@ HKR,,Icon,,-20
 ; Device: 0798:0680
 "LibUSB-1.0: Alva [BC680]"=LIBUSB_DEV, USB\VID_0798&PID_0680
 
+; Device: 0904:1016
+"LibUSB-1.0: FrankAudiodata [B2K84]"=LIBUSB_DEV, USB\VID_0904&PID_1016
+
 ; Device: 0904:2000
 "LibUSB-1.0: Baum [VarioPro 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_2000
 
@@ -460,6 +463,9 @@ HKR,,Icon,,-20
 
 ; Device: 0798:0680
 "LibUSB-1.0: Alva [BC680]"=LIBUSB_DEV, USB\VID_0798&PID_0680
+
+; Device: 0904:1016
+"LibUSB-1.0: FrankAudiodata [B2K84]"=LIBUSB_DEV, USB\VID_0904&PID_1016
 
 ; Device: 0904:2000
 "LibUSB-1.0: Baum [VarioPro 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_2000

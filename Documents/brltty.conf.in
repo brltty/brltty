@@ -69,6 +69,7 @@
 #braille-driver	cn	# Canute
 #braille-driver	ec	# EcoBraille
 #braille-driver	eu	# EuroBraille
+#braille-driver	fa	# FrankAudiodata
 #braille-driver	fs	# FreedomScientific
 #braille-driver	hd	# Hedo
 #braille-driver	hm	# HIMS

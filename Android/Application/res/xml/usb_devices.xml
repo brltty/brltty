@@ -101,6 +101,10 @@
   <!-- Alva [BC680] -->
   <usb-device vendor-id="1944" product-id="1664" />
 
+  <!-- Device: 0904:1016 -->
+  <!-- FrankAudiodata [B2K84] -->
+  <usb-device vendor-id="2308" product-id="4118" />
+
   <!-- Device: 0904:2000 -->
   <!-- Baum [VarioPro 40 (40 cells)] -->
   <usb-device vendor-id="2308" product-id="8192" />
