@@ -1513,9 +1513,9 @@ addIncompleteSubbindings (KeyContext *ctx, const KeyValue *keys, unsigned char c
 static int
 addIncompleteBindings (KeyContext *ctx) {
   for (unsigned int index=0; index<ctx->keyBindings.count; index+=1) {
-    const KeyCombination *combination = &ctx->keyBindings.table[index].keyCombination;
-    if (!addIncompleteBinding(ctx, combination->modifierKeys, combination->modifierCount)) return 0;
-    if (!addIncompleteSubbindings(ctx, combination->modifierKeys, combination->modifierCount)) return 0;
+    const KeyCombination combination = ctx->keyBindings.table[index].keyCombination;
+    if (!addIncompleteBinding(ctx, combination.modifierKeys, combination.modifierCount)) return 0;
+    if (!addIncompleteSubbindings(ctx, combination.modifierKeys, combination.modifierCount)) return 0;
   }
 
   return 1;
