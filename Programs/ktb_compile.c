@@ -1512,10 +1512,21 @@ addIncompleteSubbindings (KeyContext *ctx, const KeyValue *keys, unsigned char c
 
 static int
 addIncompleteBindings (KeyContext *ctx) {
-  for (unsigned int index=0; index<ctx->keyBindings.count; index+=1) {
-    const KeyCombination combination = ctx->keyBindings.table[index].keyCombination;
-    if (!addIncompleteBinding(ctx, combination.modifierKeys, combination.modifierCount)) return 0;
-    if (!addIncompleteSubbindings(ctx, combination.modifierKeys, combination.modifierCount)) return 0;
+  size_t count = ctx->keyBindings.count;
+  if (!count) return 1;
+
+  size_t size = count * sizeof(*ctx->keyBindings.table);
+  KeyBinding bindings[size];
+  memcpy(bindings, ctx->keyBindings.table, size);
+
+  const KeyBinding *binding = bindings;
+  const KeyBinding *end = binding + count;
+
+  while (binding < end) {
+    const KeyCombination *combination = &binding->keyCombination;
+    if (!addIncompleteBinding(ctx, combination->modifierKeys, combination->modifierCount)) return 0;
+    if (!addIncompleteSubbindings(ctx, combination->modifierKeys, combination->modifierCount)) return 0;
+    binding += 1;
   }
 
   return 1;
