@@ -16,107 +16,107 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-assign A Dot1
-assign B Dot1+Dot2
-assign C Dot1+Dot4
-assign D Dot1+Dot4+Dot5
-assign E Dot1+Dot5
-assign F Dot1+Dot2+Dot4
-assign G Dot1+Dot2+Dot4+Dot5
-assign H Dot1+Dot2+Dot5
-assign I Dot2+Dot4
-assign J Dot2+Dot4+Dot5
-assign K Dot1+Dot3
-assign L Dot1+Dot2+Dot3
-assign M Dot1+Dot3+Dot4
-assign N Dot1+Dot3+Dot4+Dot5
-assign O Dot1+Dot3+Dot5
-assign P Dot1+Dot2+Dot3+Dot4
-assign Q Dot1+Dot2+Dot3+Dot4+Dot5
-assign R Dot1+Dot2+Dot3+Dot5
-assign S Dot2+Dot3+Dot4
-assign T Dot2+Dot3+Dot4+Dot5
-assign U Dot1+Dot3+Dot6
-assign V Dot1+Dot2+Dot3+Dot6
-assign W Dot2+Dot4+Dot5+Dot6
-assign X Dot1+Dot3+Dot4+Dot6
-assign Y Dot1+Dot3+Dot4+Dot5+Dot6
-assign Z Dot1+Dot3+Dot5+Dot6
+assign a Dot1
+assign b Dot1+Dot2
+assign c Dot1+Dot4
+assign d Dot1+Dot4+Dot5
+assign e Dot1+Dot5
+assign f Dot1+Dot2+Dot4
+assign g Dot1+Dot2+Dot4+Dot5
+assign h Dot1+Dot2+Dot5
+assign i Dot2+Dot4
+assign j Dot2+Dot4+Dot5
+assign k Dot1+Dot3
+assign l Dot1+Dot2+Dot3
+assign m Dot1+Dot3+Dot4
+assign n Dot1+Dot3+Dot4+Dot5
+assign o Dot1+Dot3+Dot5
+assign p Dot1+Dot2+Dot3+Dot4
+assign q Dot1+Dot2+Dot3+Dot4+Dot5
+assign r Dot1+Dot2+Dot3+Dot5
+assign s Dot2+Dot3+Dot4
+assign t Dot2+Dot3+Dot4+Dot5
+assign u Dot1+Dot3+Dot6
+assign v Dot1+Dot2+Dot3+Dot6
+assign w Dot2+Dot4+Dot5+Dot6
+assign x Dot1+Dot3+Dot4+Dot6
+assign y Dot1+Dot3+Dot4+Dot5+Dot6
+assign z Dot1+Dot3+Dot5+Dot6
 
 assign toggleOff Dot7
 assign toggleOn Dot8
 
 beginVariables
-assign toggleKeys \{chord}\{B}
+assign toggleKeys \{chord}\{b}
 assign toggleCommand SKPBLNKWINS
 include toggle.kti
 endVariables
 
 beginVariables
-assign toggleKeys \{chord}\{C}
+assign toggleKeys \{chord}\{c}
 assign toggleCommand CSRVIS
 include toggle.kti
 endVariables
 
 beginVariables
-assign toggleKeys \{chord}\{D}
+assign toggleKeys \{chord}\{d}
 assign toggleCommand DISPMD
 include toggle.kti
 endVariables
 
 beginVariables
-assign toggleKeys \{chord}\{F}
+assign toggleKeys \{chord}\{f}
 assign toggleCommand FREEZE
 include toggle.kti
 endVariables
 
-bind \{chord}\{H} HELP
+bind \{chord}\{h} HELP
 
 beginVariables
-assign toggleKeys \{chord}\{I}
+assign toggleKeys \{chord}\{i}
 assign toggleCommand SKPIDLNS
 include toggle.kti
 endVariables
 
-bind \{chord}\{L} LEARN
+bind \{chord}\{l} LEARN
 
-bind \{chord}\{P} PREFMENU
-bind \{chord}\{P}+\{toggleOff} PREFLOAD
-bind \{chord}\{P}+\{toggleOn} PREFSAVE
+bind \{chord}\{p} PREFMENU
+bind \{chord}\{p}+\{toggleOff} PREFLOAD
+bind \{chord}\{p}+\{toggleOn} PREFSAVE
 
 beginVariables
-assign toggleKeys \{chord}\{R}
+assign toggleKeys \{chord}\{r}
 assign toggleCommand AUTOREPEAT
 include toggle.kti
 endVariables
 
-bind \{chord}\{S} INFO
+bind \{chord}\{s} INFO
 
 beginVariables
-assign toggleKeys \{chord}\{T}
+assign toggleKeys \{chord}\{t}
 assign toggleCommand CSRTRK
 include toggle.kti
 endVariables
 
 beginVariables
-assign toggleKeys \{chord}\{U}
+assign toggleKeys \{chord}\{u}
 assign toggleCommand ATTRVIS
 include toggle.kti
 endVariables
 
-bind \{chord}\{V} CSRJMP_VERT
-bind \{chord}\{V}+\{toggleOff} SWITCHVT_PREV
-bind \{chord}\{V}+\{toggleOn} SWITCHVT_NEXT
+bind \{chord}\{v} CSRJMP_VERT
+bind \{chord}\{v}+\{toggleOff} SWITCHVT_PREV
+bind \{chord}\{v}+\{toggleOn} SWITCHVT_NEXT
 
 beginVariables
-assign toggleKeys \{chord}\{W}
+assign toggleKeys \{chord}\{w}
 assign toggleCommand SLIDEWIN
 include toggle.kti
 endVariables
 
-bind \{chord}\{X} PASTE
-bind \{chord}\{X}+\{toggleOff} CLIP_RESTORE
-bind \{chord}\{X}+\{toggleOn} CLIP_SAVE
+bind \{chord}\{x} PASTE
+bind \{chord}\{x}+\{toggleOff} CLIP_RESTORE
+bind \{chord}\{x}+\{toggleOn} CLIP_SAVE
 
 bind \{chord}Dot2+Dot3+Dot5 SIXDOTS+on
 bind \{chord}Dot2+Dot3+Dot6 SIXDOTS+off

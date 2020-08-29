@@ -17,17 +17,17 @@
 ###############################################################################
 
 assign prefix \{chord}Dot7+Dot8
-bind \{prefix}+\{H} KEY_FUNCTION+0 # home screen
-bind \{prefix}+\{B} KEY_FUNCTION+1 # back key
-bind \{prefix}+\{N} KEY_FUNCTION+2 # notifications screen
-bind \{prefix}+\{R} KEY_FUNCTION+3 # recent apps (overview) screen
+bind \{prefix}+\{h} KEY_FUNCTION+0 # home screen
+bind \{prefix}+\{b} KEY_FUNCTION+1 # back key
+bind \{prefix}+\{n} KEY_FUNCTION+2 # notifications screen
+bind \{prefix}+\{r} KEY_FUNCTION+3 # recent apps (overview) screen
 bind \{prefix}+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 KEY_FUNCTION+4 # actions screen
-bind \{prefix}+\{S} KEY_FUNCTION+5 # quick settings screen
+bind \{prefix}+\{s} KEY_FUNCTION+5 # quick settings screen
 bind \{prefix}+Dot2 KEY_FUNCTION+6 # to previous item
 bind \{prefix}+Dot5 KEY_FUNCTION+7 # to next item
-bind \{prefix}+\{O} KEY_FUNCTION+8 # device options screen
-bind \{prefix}+\{M} KEY_FUNCTION+9 # menu key
+bind \{prefix}+\{o} KEY_FUNCTION+8 # device options screen
+bind \{prefix}+\{m} KEY_FUNCTION+9 # menu key
 bind \{prefix}+Dot3+Dot6 KEY_FUNCTION+10 # to current window
 bind \{prefix}+Dot3 KEY_FUNCTION+11 # to previous window
 bind \{prefix}+Dot6 KEY_FUNCTION+12 # to next window
-bind \{prefix}+\{W} KEY_FUNCTION+13 # show window name
+bind \{prefix}+\{w} KEY_FUNCTION+13 # show window name
