@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "report.h"
+#include "alert.h"
 #include "brl_cmds.h"
 #include "unicode.h"
 
@@ -401,6 +402,48 @@ insertKey_AndroidScreen (ScreenKey key) {
   return 0;
 }
 
+static int
+handleCommand_AndroidScreen (int command) {
+  int blk = command & BRL_MSK_BLK;
+  int arg = command & BRL_MSK_ARG;
+  int cmd = blk | arg;
+
+  switch (cmd) {
+    default: {
+      switch (blk) {
+        case BRL_CMD_BLK(PASSDOTS): {
+          if (command & BRL_FLG_INPUT_META) {
+            if (findInputHandlersClass()) {
+              static jmethodID method = 0;
+
+              if (findJavaStaticMethod(env, &method, inputHandlersClass, "performMotion",
+                                       JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                                       JAVA_SIG_BYTE // dots
+                                                      ))) {
+                jbyte dots = arg;
+                jboolean result = (*env)->CallStaticBooleanMethod(env, inputHandlersClass, method, dots);
+                if (clearJavaException(env, 1)) result = JNI_FALSE;
+                if (result == JNI_FALSE) alert(ALERT_COMMAND_REJECTED);
+              }
+            }
+
+            return 1;
+          }
+
+          break;
+        }
+
+        default:
+          break;
+      }
+
+      break;
+    }
+  }
+
+  return 0;
+}
+
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
@@ -410,6 +453,7 @@ scr_initialize (MainScreen *main) {
   main->base.readCharacters = readCharacters_AndroidScreen;
   main->base.routeCursor = routeCursor_AndroidScreen;
   main->base.insertKey = insertKey_AndroidScreen;
+  main->base.handleCommand = handleCommand_AndroidScreen;
   main->construct = construct_AndroidScreen;
   main->destruct = destruct_AndroidScreen;
   env = getJavaNativeInterface();

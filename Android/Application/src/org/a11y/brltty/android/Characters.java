@@ -17,96 +17,87 @@
  */
 
 package org.a11y.brltty.android;
+import org.a11y.brltty.core.Braille;
 
 public abstract class Characters {
   private Characters () {
   }
 
-  public final static char BRAILLE_ROW  = 0x2800;
-  public final static char BRAILLE_DOT1 = 0x0001;
-  public final static char BRAILLE_DOT2 = 0x0002;
-  public final static char BRAILLE_DOT3 = 0x0004;
-  public final static char BRAILLE_DOT4 = 0x0008;
-  public final static char BRAILLE_DOT5 = 0x0010;
-  public final static char BRAILLE_DOT6 = 0x0020;
-  public final static char BRAILLE_DOT7 = 0x0040;
-  public final static char BRAILLE_DOT8 = 0x0080;
-
-  public final static char CHECKBOX_BEGIN = BRAILLE_ROW
-                                          | BRAILLE_DOT4
-                                          | BRAILLE_DOT1
-                                          | BRAILLE_DOT2
-                                          | BRAILLE_DOT3
-                                          | BRAILLE_DOT7
-                                          | BRAILLE_DOT8
+  public final static char CHECKBOX_BEGIN = Braille.ROW
+                                          | Braille.DOT4
+                                          | Braille.DOT1
+                                          | Braille.DOT2
+                                          | Braille.DOT3
+                                          | Braille.DOT7
+                                          | Braille.DOT8
                                           ;
 
-  public final static char CHECKBOX_MARK = BRAILLE_ROW
-                                         | BRAILLE_DOT2
-                                         | BRAILLE_DOT5
-                                         | BRAILLE_DOT3
-                                         | BRAILLE_DOT6
+  public final static char CHECKBOX_MARK = Braille.ROW
+                                         | Braille.DOT2
+                                         | Braille.DOT5
+                                         | Braille.DOT3
+                                         | Braille.DOT6
                                          ;
 
-  public final static char CHECKBOX_END = BRAILLE_ROW
-                                        | BRAILLE_DOT1
-                                        | BRAILLE_DOT4
-                                        | BRAILLE_DOT5
-                                        | BRAILLE_DOT6
-                                        | BRAILLE_DOT8
-                                        | BRAILLE_DOT7
+  public final static char CHECKBOX_END = Braille.ROW
+                                        | Braille.DOT1
+                                        | Braille.DOT4
+                                        | Braille.DOT5
+                                        | Braille.DOT6
+                                        | Braille.DOT8
+                                        | Braille.DOT7
                                         ;
 
-  public final static char RADIO_BEGIN = BRAILLE_ROW
-                                       | BRAILLE_DOT4
-                                       | BRAILLE_DOT2
-                                       | BRAILLE_DOT3
-                                       | BRAILLE_DOT8
+  public final static char RADIO_BEGIN = Braille.ROW
+                                       | Braille.DOT4
+                                       | Braille.DOT2
+                                       | Braille.DOT3
+                                       | Braille.DOT8
                                        ;
 
-  public final static char RADIO_MARK = BRAILLE_ROW
-                                      | BRAILLE_DOT2
-                                      | BRAILLE_DOT5
-                                      | BRAILLE_DOT3
-                                      | BRAILLE_DOT6
+  public final static char RADIO_MARK = Braille.ROW
+                                      | Braille.DOT2
+                                      | Braille.DOT5
+                                      | Braille.DOT3
+                                      | Braille.DOT6
                                       ;
 
-  public final static char RADIO_END = BRAILLE_ROW
-                                     | BRAILLE_DOT1
-                                     | BRAILLE_DOT5
-                                     | BRAILLE_DOT6
-                                     | BRAILLE_DOT7
+  public final static char RADIO_END = Braille.ROW
+                                     | Braille.DOT1
+                                     | Braille.DOT5
+                                     | Braille.DOT6
+                                     | Braille.DOT7
                                      ;
 
-  public final static char SWITCH_BEGIN = BRAILLE_ROW
-                                        | BRAILLE_DOT4
-                                        | BRAILLE_DOT5
-                                        | BRAILLE_DOT6
-                                        | BRAILLE_DOT8
+  public final static char SWITCH_BEGIN = Braille.ROW
+                                        | Braille.DOT4
+                                        | Braille.DOT5
+                                        | Braille.DOT6
+                                        | Braille.DOT8
                                         ;
 
-  public final static char SWITCH_OFF = BRAILLE_ROW
-                                      | BRAILLE_DOT1
-                                      | BRAILLE_DOT4
-                                      | BRAILLE_DOT3
-                                      | BRAILLE_DOT6
-                                      | BRAILLE_DOT7
-                                      | BRAILLE_DOT8
+  public final static char SWITCH_OFF = Braille.ROW
+                                      | Braille.DOT1
+                                      | Braille.DOT4
+                                      | Braille.DOT3
+                                      | Braille.DOT6
+                                      | Braille.DOT7
+                                      | Braille.DOT8
                                       ;
 
-  public final static char SWITCH_ON = BRAILLE_ROW
-                                     | BRAILLE_DOT1
-                                     | BRAILLE_DOT4
-                                     | BRAILLE_DOT2
-                                     | BRAILLE_DOT5
-                                     | BRAILLE_DOT7
-                                     | BRAILLE_DOT8
+  public final static char SWITCH_ON = Braille.ROW
+                                     | Braille.DOT1
+                                     | Braille.DOT4
+                                     | Braille.DOT2
+                                     | Braille.DOT5
+                                     | Braille.DOT7
+                                     | Braille.DOT8
                                      ;
 
-  public final static char SWITCH_END = BRAILLE_ROW
-                                      | BRAILLE_DOT1
-                                      | BRAILLE_DOT2
-                                      | BRAILLE_DOT3
-                                      | BRAILLE_DOT7
+  public final static char SWITCH_END = Braille.ROW
+                                      | Braille.DOT1
+                                      | Braille.DOT2
+                                      | Braille.DOT3
+                                      | Braille.DOT7
                                       ;
 }

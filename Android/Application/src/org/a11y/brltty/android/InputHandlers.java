@@ -17,6 +17,7 @@
  */
 
 package org.a11y.brltty.android;
+import org.a11y.brltty.core.Braille;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -269,10 +270,6 @@ public abstract class InputHandlers {
       return false;
     }
 
-    protected boolean performWebViewAction (AccessibilityNodeInfo node, AccessibilityNodeInfo webview) {
-      return false;
-    }
-
     public final boolean editText () {
       {
         AccessibilityNodeInfo node = getCursorNode();
@@ -286,16 +283,6 @@ public abstract class InputHandlers {
                     return editText(node);
                   }
                 }
-              }
-            } else {
-              AccessibilityNodeInfo webview = ScreenUtilities.findContainingWebView(node);
-              if (webview == null) return false;
-
-              try {
-                return performWebViewAction(node, webview);
-              } finally {
-                webview.recycle();
-                webview = null;
               }
             }
           } finally {
@@ -326,14 +313,42 @@ public abstract class InputHandlers {
         editor.replace(start, end, Character.toString(character));
         return start + 1;
       }
-
-      @Override
-      protected boolean performWebViewAction (AccessibilityNodeInfo node, AccessibilityNodeInfo webview) {
-        Motion motion = Motion.get(character);
-        if (motion == null) return false;
-        return motion.apply(node);
-      }
     }.editText();
+  }
+
+  private static char motionDirectionDot = Motion.DOT_NEXT;
+
+  public static boolean performMotion (byte dots) {
+    char character = (char)dots;
+    character &= Braille.DOTS_ALL;
+
+    boolean next = (character & Motion.DOT_NEXT) != 0;
+    boolean previous = (character & Motion.DOT_PREVIOUS) != 0;
+
+    if (next && previous) return false;
+    boolean noDirection = !(next || previous);
+
+    if ((character & ~Motion.DOTS_DIRECTION) == 0) {
+      if (noDirection) return false;
+      motionDirectionDot = next? Motion.DOT_NEXT: Motion.DOT_PREVIOUS;
+      return true;
+    }
+
+    if (noDirection) character |= motionDirectionDot;
+    character |= Braille.ROW;
+
+    Motion motion = Motion.get(character);
+    if (motion == null) return false;
+
+    AccessibilityNodeInfo node = getCursorNode();
+    if (node == null) return false;
+
+    try {
+      return motion.apply(node);
+    } finally {
+      node.recycle();
+      node = null;
+    }
   }
 
   private static boolean injectKey (int code) {

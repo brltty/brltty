@@ -17,6 +17,7 @@
  */
 
 package org.a11y.brltty.android;
+import org.a11y.brltty.core.Braille;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -264,12 +265,24 @@ public class Motion {
     addMotion(next, type, Direction.NEXT);
   }
 
-  private static void addMotion (char letter, Type type, Integer key) {
-    addMotion(Character.toUpperCase(letter), Character.toLowerCase(letter), type);
+  public final static char DOT_PREVIOUS   = Braille.DOT7;
+  public final static char DOT_NEXT       = Braille.DOT8;
+  public final static char DOTS_DIRECTION = DOT_PREVIOUS | DOT_NEXT;
+
+  private static void addMotion (char character, Type type, Integer key) {
+    character |= Braille.ROW;
+
+    char previous = character;
+    previous |= DOT_PREVIOUS;
+
+    char next = character;
+    next |= DOT_NEXT;
+
+    addMotion(previous, next, type);
   }
 
-  private static void addMotion (char letter, Type type) {
-    addMotion(letter, type, KeyEvent.KEYCODE_UNKNOWN);
+  private static void addMotion (char character, Type type) {
+    addMotion(character, type, KeyEvent.KEYCODE_UNKNOWN);
   }
 
   static {
@@ -279,24 +292,31 @@ public class Motion {
     addMotion('<', '>', Element.MAIN);
     addMotion('(', ')', Element.FRAME);
 
-    addMotion('a', Element.ARTICLE);
-    addMotion('b', Element.BUTTON, KeyEvent.KEYCODE_B);
-    addMotion('c', Element.CONTROL, KeyEvent.KEYCODE_C);
-    addMotion('d', Element.LANDMARK, KeyEvent.KEYCODE_D);
-    addMotion('e', Element.EDITABLE_TEXT, KeyEvent.KEYCODE_E);
-    addMotion('f', Element.FOCUSABLE, KeyEvent.KEYCODE_F);
-    addMotion('g', Element.GRAPHIC, KeyEvent.KEYCODE_G);
-    addMotion('h', Element.HEADING, KeyEvent.KEYCODE_H);
-    addMotion('i', Element.LIST_ITEM, KeyEvent.KEYCODE_I);
-    addMotion('l', Element.LINK, KeyEvent.KEYCODE_L);
-    addMotion('m', Element.MEDIA);
-    addMotion('o', Element.LIST, KeyEvent.KEYCODE_O);
-    addMotion('r', Element.RADIO_BUTTON);
-    addMotion('s', Element.SECTION);
-    addMotion('t', Element.TABLE, KeyEvent.KEYCODE_T);
-    addMotion('u', Element.UNVISITED_LINK);
-    addMotion('v', Element.VISITED_LINK);
-    addMotion('x', Element.CHECKBOX, KeyEvent.KEYCODE_X);
-    addMotion('z', Element.COMBOBOX, KeyEvent.KEYCODE_Z);
+    addMotion(Braille.DOTS_A, Element.ARTICLE);
+    addMotion(Braille.DOTS_B, Element.BUTTON, KeyEvent.KEYCODE_B);
+    addMotion(Braille.DOTS_C, Element.CONTROL, KeyEvent.KEYCODE_C);
+    addMotion(Braille.DOTS_D, Element.LANDMARK, KeyEvent.KEYCODE_D);
+    addMotion(Braille.DOTS_E, Element.EDITABLE_TEXT, KeyEvent.KEYCODE_E);
+    addMotion(Braille.DOTS_F, Element.FOCUSABLE, KeyEvent.KEYCODE_F);
+    addMotion(Braille.DOTS_G, Element.GRAPHIC, KeyEvent.KEYCODE_G);
+    addMotion(Braille.DOTS_H, Element.HEADING, KeyEvent.KEYCODE_H);
+    addMotion(Braille.DOTS_I, Element.LIST_ITEM, KeyEvent.KEYCODE_I);
+    addMotion(Braille.DOTS_L, Element.LINK, KeyEvent.KEYCODE_L);
+    addMotion(Braille.DOTS_M, Element.MEDIA);
+    addMotion(Braille.DOTS_O, Element.LIST, KeyEvent.KEYCODE_O);
+    addMotion(Braille.DOTS_R, Element.RADIO_BUTTON);
+    addMotion(Braille.DOTS_S, Element.SECTION);
+    addMotion(Braille.DOTS_T, Element.TABLE, KeyEvent.KEYCODE_T);
+    addMotion(Braille.DOTS_U, Element.UNVISITED_LINK);
+    addMotion(Braille.DOTS_V, Element.VISITED_LINK);
+    addMotion(Braille.DOTS_X, Element.CHECKBOX, KeyEvent.KEYCODE_X);
+    addMotion(Braille.DOTS_Z, Element.COMBOBOX, KeyEvent.KEYCODE_Z);
+
+    addMotion(Braille.DOTS_1, Element.HEADING_1, KeyEvent.KEYCODE_1);
+    addMotion(Braille.DOTS_2, Element.HEADING_2, KeyEvent.KEYCODE_2);
+    addMotion(Braille.DOTS_3, Element.HEADING_3, KeyEvent.KEYCODE_3);
+    addMotion(Braille.DOTS_4, Element.HEADING_4, KeyEvent.KEYCODE_4);
+    addMotion(Braille.DOTS_5, Element.HEADING_5, KeyEvent.KEYCODE_5);
+    addMotion(Braille.DOTS_6, Element.HEADING_6, KeyEvent.KEYCODE_6);
   }
 }

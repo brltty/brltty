@@ -31,3 +31,18 @@ bind \{prefix}+Dot3+Dot6 KEY_FUNCTION+10 # to current window
 bind \{prefix}+Dot3 KEY_FUNCTION+11 # to previous window
 bind \{prefix}+Dot6 KEY_FUNCTION+12 # to next window
 bind \{prefix}+\{w} KEY_FUNCTION+13 # show window name
+
+bind \{prefix}+Dot2+Dot5 CONTEXT+chrome
+context chrome Web Page Navigation
+bind Dot7+Dot8 CONTEXT+default
+
+superimpose meta
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+
