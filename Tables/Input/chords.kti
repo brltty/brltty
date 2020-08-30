@@ -164,5 +164,5 @@ include menu.kti
 endIf
 
 ifPlatform android
-include chords-android.kti
+include android-chords.kti
 endif
