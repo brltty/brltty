@@ -775,6 +775,7 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
 
         if (findKeyContext(&context, modifier.characters, modifier.length, ktd)) {
           KeyContext *ctx = getKeyContext(ktd, context);
+          if (!ctx) return 0;
 
           if (ctx->isSpecial) {
             reportDataError(file, "invalid target context: %"PRIws, ctx->name);
