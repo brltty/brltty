@@ -148,15 +148,15 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_MODIFIER_NEXT] = {
-    .tune = "n72@60 n76@60 n79@90"
+    .tune = "n70@60 n74@60 n77@90"
   },
 
   [ALERT_MODIFIER_ON] = {
-    .tune = "n72@60 n76@60 n79@60 n84@90"
+    .tune = "n70@60 n74@60 n77@60 n82@90"
   },
 
   [ALERT_MODIFIER_OFF] = {
-    .tune = "n84@60 n79@60 n76@60 n72@90"
+    .tune = "n82@60 n77@60 n74@60 n70@90"
   },
 
   [ALERT_CONSOLE_BELL] = {
@@ -174,15 +174,15 @@ static const AlertEntry alertTable[] = {
   },
 
   [ALERT_CONTEXT_DEFAULT] = {
-    .tune = "n72@60 n69@60 n65@60 n62@90"
+    .tune = "n76@60 n73@60 n69@60 n66@90"
   },
 
   [ALERT_CONTEXT_PERSISTENT] = {
-    .tune = "n62@60 n65@60 n69@60 n72@90"
+    .tune = "n66@60 n69@60 n73@60 n76@90"
   },
 
   [ALERT_CONTEXT_TEMPORARY] = {
-    .tune = "n62@60 n65@60 n69@90"
+    .tune = "n66@60 n69@60 n73@90"
   },
 };
 
