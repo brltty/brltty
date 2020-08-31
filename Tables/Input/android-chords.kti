@@ -17,20 +17,21 @@
 ###############################################################################
 
 assign prefix \{chord}Dot7+Dot8
-bind \{prefix}+\{h} KEY_FUNCTION+0 # home screen
-bind \{prefix}+\{b} KEY_FUNCTION+1 # back key
-bind \{prefix}+\{n} KEY_FUNCTION+2 # notifications screen
-bind \{prefix}+\{r} KEY_FUNCTION+3 # recent apps (overview) screen
-bind \{prefix}+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 KEY_FUNCTION+4 # actions screen
-bind \{prefix}+\{s} KEY_FUNCTION+5 # quick settings screen
+bind \{prefix}+\{h} KEY_FUNCTION+0 # Home screen
+bind \{prefix}+\{b} KEY_FUNCTION+1 # Back key
+bind \{prefix}+\{n} KEY_FUNCTION+2 # Notifications screen
+bind \{prefix}+\{r} KEY_FUNCTION+3 # Recent Apps (Overview) screen
+bind \{prefix}+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 KEY_FUNCTION+4 # BRLTTY's Actions screen
+bind \{prefix}+\{q} KEY_FUNCTION+5 # Quick Settings screen
 bind \{prefix}+Dot2 KEY_FUNCTION+6 # to previous item
 bind \{prefix}+Dot5 KEY_FUNCTION+7 # to next item
-bind \{prefix}+\{o} KEY_FUNCTION+8 # device options screen
-bind \{prefix}+\{m} KEY_FUNCTION+9 # menu key
+bind \{prefix}+\{o} KEY_FUNCTION+8 # Device Options screen
+bind \{prefix}+\{m} KEY_FUNCTION+9 # Menu button
 bind \{prefix}+Dot3+Dot6 KEY_FUNCTION+10 # to current window
 bind \{prefix}+Dot3 KEY_FUNCTION+11 # to previous window
 bind \{prefix}+Dot6 KEY_FUNCTION+12 # to next window
-bind \{prefix}+\{w} KEY_FUNCTION+13 # show window name
+bind \{prefix}+\{w} KEY_FUNCTION+13 # show window title
+bind \{prefix}+\{s} KEY_FUNCTION+14 # show status summary
 
 bind \{prefix}+Dot2+Dot5 CONTEXT+chrome
 context chrome Web Page Navigation

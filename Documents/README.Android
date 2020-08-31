@@ -499,24 +499,25 @@ right now.
 
 .. table:: Global Android Actions
 
-  =======  ========  =====================================  =====================
-  FN-Key   Chord78+  Action                                 As of Android Release
-  -------  --------  -------------------------------------  ---------------------
-  ``F1``   125 (h)   go to the Home screen                  4.1 (Jelly Bean)
-  ``F2``   12 (b)    tap the Back button                    4.1 (Jelly Bean)
-  ``F3``   1345 (n)  go to the Notifications screen         4.1 (Jelly Bean)
-  ``F4``   1235 (r)  tap the Recent Apps (Overview) button  4.1 (Jelly Bean)
-  ``F5``   123456    go to BRLTTY's `Actions screen`_       \*
-  ``F6``   234 (s)   go to the Quick Settings screen        4.2 (Jelly Bean MR1)
-  ``F7``   2         move to the previous item              \*
-  ``F8``   5         move to the next item                  \*
-  ``F9``   135 (o)   go to the Device Options screen        5.0 (Lollipop)
-  ``F10``  134 (m)   tap the Menu button                    \*
-  ``F11``  36        return to the active window            4.0 (Kitkat)
-  ``F12``  3         switch to the previous window          4.0 (Kitkat)
-  ``F13``  6         switch to the next window              4.0 (Kitkat)
-  ``F14``  2456 (w)  show the window title
-  =======  ========  =====================================  =====================
+  =======  =========  =====================================  =====================
+  FN-Key   Chord78+   Action                                 As of Android Release
+  -------  ---------  -------------------------------------  ---------------------
+  ``F1``   125 (h)    go to the Home screen                  4.1 (Jelly Bean)
+  ``F2``   12 (b)     tap the Back button                    4.1 (Jelly Bean)
+  ``F3``   1345 (n)   go to the Notifications screen         4.1 (Jelly Bean)
+  ``F4``   1235 (r)   tap the Recent Apps (Overview) button  4.1 (Jelly Bean)
+  ``F5``   123456     go to BRLTTY's `Actions screen`_       \*
+  ``F6``   12345 (q)  go to the Quick Settings screen        4.2 (Jelly Bean MR1)
+  ``F7``   2          move to the previous item              \*
+  ``F8``   5          move to the next item                  \*
+  ``F9``   135 (o)    go to the Device Options screen        5.0 (Lollipop)
+  ``F10``  134 (m)    tap the Menu button                    \*
+  ``F11``  36         return to the active window            4.0 (Kitkat)
+  ``F12``  3          switch to the previous window          4.0 (Kitkat)
+  ``F13``  6          switch to the next window              4.0 (Kitkat)
+  ``F14``  2456 (w)   show the window title
+  ``F15``  234 (s)    show a status summary
+  =======  =========  =====================================  =====================
 
 Web Pages
 ~~~~~~~~~
@@ -575,7 +576,7 @@ The following table lists all of the annotations:
 Structural Navigation
 `````````````````````
 
-Pressing Dots2578 enters Web Page Navigation Mode.
+Pressing Dots2578 enters Structural navigation mode.
 When in this mode,
 a web page, when being browsed with Chrome, can be structurally navigated
 by pressing dot combinations on your braille device.
@@ -592,10 +593,11 @@ The current direction defaults to (starts out as) ``next``.
 Pressing dot 7 by itself sets it to ``previous``,
 and pressing dot 8 by itself sets it to ``next``.
 
-If the key table for your braille device defines a key
-to be the Left Alt (meta) modifier
-then you don't need to enter Web Page Navigation Mode.
-Just hold that key while pressing the element type's dot combination.
+If the key table for your braille device defines
+a key to be the Left Alt (meta) modifier
+then you don't need to switch to/from structural navigation mode.
+Just hold that key while pressing
+the desired structural navigation dot combination.
 
 The following element types are supported
 (where possible, a hopefully easy-to-remember character has been chosen):

@@ -20,6 +20,7 @@ package org.a11y.brltty.android;
 import org.a11y.brltty.core.*;
 
 public enum BrailleMessage {
+  PLAIN(null),
   WINDOW("win"),
   WARNING("warn"),
   NOTIFICATION("ntfc"),
@@ -42,7 +43,10 @@ public enum BrailleMessage {
     if (text == null) return;
     text = text.replace('\n', ' ').trim();
     if (text.isEmpty()) return;
-    final String message = getLabel() + ": " + text;
+
+    String label = getLabel();
+    if (!((label == null) || label.isEmpty())) text = label + ": " + text;
+    final String message = text;
 
     CoreWrapper.runOnCoreThread(
       new Runnable() {

@@ -798,6 +798,19 @@ public abstract class InputHandlers {
       }
     };
 
+  private final static FunctionKeyAction functionKeyAction_showStatusSummary =
+    new FunctionKeyAction() {
+      @Override
+      public boolean performAction () {
+        String status = StatusSummary.get();
+        if (status == null) return false;
+        if (status.isEmpty()) return false;
+
+        BrailleMessage.PLAIN.show(status);
+        return true;
+      }
+    };
+
   private final static FunctionKeyAction functionKeyAction_showWindowTitle =
     new FunctionKeyAction() {
       @Override
@@ -889,7 +902,7 @@ public abstract class InputHandlers {
       /* F12 */ functionKeyAction_toPreviousWindow,
       /* F13 */ functionKeyAction_toNextWindow,
       /* F14 */ functionKeyAction_showWindowTitle,
-      /* F15 */ null,
+      /* F15 */ functionKeyAction_showStatusSummary,
       /* F16 */ functionKeyAction_logScreen
     };
 
