@@ -323,15 +323,20 @@ processCommand (KeyTable *table, int command) {
           const KeyContext *ctx = getKeyContext(table, context);
 
           if (ctx) {
-            command = BRL_CMD_NOOP;
             table->context.next = context;
 
             if (isTemporaryKeyContext(table, ctx)) {
-              if (!enqueueCommand(BRL_CMD_ALERT(TOGGLE_ON))) return 0;
+              command = BRL_CMD_ALERT(CONTEXT_TEMPORARY);
             } else {
               table->context.persistent = context;
-              if (!enqueueCommand(BRL_CMD_ALERT(TOGGLE_OFF))) return 0;
+              command =
+                (context == KTB_CTX_DEFAULT)?
+                BRL_CMD_ALERT(CONTEXT_DEFAULT):
+                BRL_CMD_ALERT(CONTEXT_PERSISTENT);
             }
+
+            if (!enqueueCommand(command)) return 0;
+            command = BRL_CMD_NOOP;
           }
 
           break;

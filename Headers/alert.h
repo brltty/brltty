@@ -68,6 +68,10 @@ typedef enum {
   ALERT_KEYS_AUTORELEASED,
 
   ALERT_SCROLL_UP,
+
+  ALERT_CONTEXT_DEFAULT,
+  ALERT_CONTEXT_PERSISTENT,
+  ALERT_CONTEXT_TEMPORARY,
 } AlertIdentifier;
 
 extern void alert (AlertIdentifier identifier);

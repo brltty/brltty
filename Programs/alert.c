@@ -172,6 +172,18 @@ static const AlertEntry alertTable[] = {
   [ALERT_SCROLL_UP] = {
     .tune = "b6@10 d7"
   },
+
+  [ALERT_CONTEXT_DEFAULT] = {
+    .tune = "n72@60 n69@60 n65@60 n62@90"
+  },
+
+  [ALERT_CONTEXT_PERSISTENT] = {
+    .tune = "n62@60 n65@60 n69@60 n72@90"
+  },
+
+  [ALERT_CONTEXT_TEMPORARY] = {
+    .tune = "n62@60 n65@60 n69@90"
+  },
 };
 
 static ToneElement *tuneTable[ARRAY_COUNT(alertTable)] = {NULL};
