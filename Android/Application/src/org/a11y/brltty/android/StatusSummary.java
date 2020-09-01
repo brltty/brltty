@@ -33,64 +33,62 @@ public abstract class StatusSummary {
     return BrailleApplication.get();
   }
 
-  private static Object getService (String name) {
+  private static Object getManager (String name) {
     return getContext().getSystemService(name);
   }
 
-  private interface StatusGetter {
+  private interface Getter {
     public String getLabel ();
     public String getValue ();
   }
 
-  private final static StatusGetter TIME =
-    new StatusGetter() {
-      @Override
-      public String getLabel () {
-        return null;
-      }
+  private final static Getter DEVICE_TIME = new Getter() {
+    @Override
+    public String getLabel () {
+      return null;
+    }
 
-      @Override
-      public String getValue () {
-        Context context = getContext();
-        String format = DateFormat.is24HourFormat(context)? "HH:mm": "h:mma";
-        return new SimpleDateFormat(format).format(new Date());
-      }
-    };
+    @Override
+    public String getValue () {
+      Context context = getContext();
+      String format = DateFormat.is24HourFormat(context)? "HH:mm": "h:mma";
+      return new SimpleDateFormat(format).format(new Date());
+    }
+  };
 
-  private final static StatusGetter BATTERY =
-    new StatusGetter() {
-      private final int INT_NO_VALUE = 0;
-      private final long LONG_NO_VALUE = Long.MIN_VALUE;
+  private final static Getter DEVICE_BATTERY = new Getter() {
+    private final int INT_NO_VALUE = APITests.havePie? Integer.MIN_VALUE: 0;
+    private final long LONG_NO_VALUE = Long.MIN_VALUE;
 
-      @Override
-      public String getLabel () {
-        return "Bat";
-      }
+    @Override
+    public String getLabel () {
+      return "Bat";
+    }
 
-      @Override
-      public String getValue () {
-        BatteryManager bm = (BatteryManager)getService(Context.BATTERY_SERVICE);
+    @Override
+    public String getValue () {
+      BatteryManager bm = (BatteryManager)getManager(Context.BATTERY_SERVICE);
 
-        if (APITests.haveLollipop) {
-          int value = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+      if (APITests.haveLollipop) {
+        int value = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
-          if (value != INT_NO_VALUE) {
-            return Integer.toString(value) + '%';
-          }
+        if (value != INT_NO_VALUE) {
+          return Integer.toString(value) + '%';
         }
-
-        return null;
       }
-    };
 
-  private final static StatusGetter statusGetters[] = {
-    TIME, BATTERY
+      return null;
+    }
+  };
+
+  private final static Getter statusGetters[] = {
+    DEVICE_TIME, DEVICE_BATTERY
   };
 
   public static String get () {
     StringBuilder status = new StringBuilder();
 
-    for (StatusGetter getter : statusGetters) {
+    for (Getter getter : statusGetters) {
       String value = getter.getValue();
       if (value == null) continue;
       if (value.isEmpty()) continue;

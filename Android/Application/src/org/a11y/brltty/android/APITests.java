@@ -60,4 +60,10 @@ public abstract class APITests {
 
   public final static boolean haveOreo
   = haveAPILevel(Build.VERSION_CODES.O);
+
+  public final static boolean haveOreoMR1
+  = haveAPILevel(Build.VERSION_CODES.O_MR1);
+
+  public final static boolean havePie
+  = haveAPILevel(Build.VERSION_CODES.P);
 }
