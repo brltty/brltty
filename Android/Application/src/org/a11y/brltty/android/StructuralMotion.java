@@ -28,8 +28,8 @@ import android.view.KeyEvent;
 import android.os.Bundle;
 import android.util.Log;
 
-public class Motion {
-  private final static String LOG_TAG = Motion.class.getName();
+public class StructuralMotion {
+  private final static String LOG_TAG = StructuralMotion.class.getName();
 
   public abstract static class Type {
     private final String typeName;
@@ -197,11 +197,11 @@ public class Motion {
     }
   }
 
-  private final static Map<Character, Motion> motions =
-               new HashMap<Character, Motion>();
+  private final static Map<Character, StructuralMotion> structuralMotions =
+               new HashMap<Character, StructuralMotion>();
 
-  public static Motion get (char character) {
-    return motions.get(character);
+  public static StructuralMotion get (char character) {
+    return structuralMotions.get(character);
   }
 
   private final Type motionType;
@@ -230,7 +230,7 @@ public class Motion {
           .toString();
   }
 
-  public static String toString (Motion motion) {
+  public static String toString (StructuralMotion motion) {
     return motion.toString();
   }
 
@@ -247,7 +247,7 @@ public class Motion {
     return ScreenUtilities.performAction(node, actionIdentifier, actionArguments);
   }
 
-  private Motion (Type type, Direction direction) {
+  private StructuralMotion (Type type, Direction direction) {
     motionType = type;
     motionDirection = direction;
 
@@ -257,7 +257,7 @@ public class Motion {
   }
 
   private static void addMotion (char character, Type type, Direction direction) {
-    motions.put(character, new Motion(type, direction));
+    structuralMotions.put(character, new StructuralMotion(type, direction));
   }
 
   private static void addMotion (char previous, char next, Type type) {

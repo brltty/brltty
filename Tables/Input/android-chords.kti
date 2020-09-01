@@ -27,7 +27,7 @@ bind \{prefix}+Dot2 KEY_FUNCTION+6 # to previous item
 bind \{prefix}+Dot5 KEY_FUNCTION+7 # to next item
 bind \{prefix}+\{o} KEY_FUNCTION+8 # Device Options screen
 bind \{prefix}+\{m} KEY_FUNCTION+9 # Menu button
-bind \{prefix}+Dot3+Dot6 KEY_FUNCTION+10 # to current window
+bind \{prefix}+Dot3+Dot6 KEY_FUNCTION+10 # return to active window
 bind \{prefix}+Dot3 KEY_FUNCTION+11 # to previous window
 bind \{prefix}+Dot6 KEY_FUNCTION+12 # to next window
 bind \{prefix}+\{w} KEY_FUNCTION+13 # show window title

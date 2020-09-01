@@ -416,7 +416,7 @@ handleCommand_AndroidScreen (int command) {
             if (findInputHandlersClass()) {
               static jmethodID method = 0;
 
-              if (findJavaStaticMethod(env, &method, inputHandlersClass, "performMotion",
+              if (findJavaStaticMethod(env, &method, inputHandlersClass, "performStructuralMotion",
                                        JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                                        JAVA_SIG_BYTE // dots
                                                       ))) {

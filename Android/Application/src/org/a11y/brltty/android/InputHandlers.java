@@ -316,28 +316,28 @@ public abstract class InputHandlers {
     }.editText();
   }
 
-  private static char motionDirectionDot = Motion.DOT_NEXT;
+  private static char structuralMotionDirectionDot = StructuralMotion.DOT_NEXT;
 
-  public static boolean performMotion (byte dots) {
+  public static boolean performStructuralMotion (byte dots) {
     char character = (char)dots;
     character &= Braille.DOTS_ALL;
 
-    boolean next = (character & Motion.DOT_NEXT) != 0;
-    boolean previous = (character & Motion.DOT_PREVIOUS) != 0;
+    boolean next = (character & StructuralMotion.DOT_NEXT) != 0;
+    boolean previous = (character & StructuralMotion.DOT_PREVIOUS) != 0;
 
     if (next && previous) return false;
     boolean noDirection = !(next || previous);
 
-    if ((character & ~Motion.DOTS_DIRECTION) == 0) {
+    if ((character & ~StructuralMotion.DOTS_DIRECTION) == 0) {
       if (noDirection) return false;
-      motionDirectionDot = next? Motion.DOT_NEXT: Motion.DOT_PREVIOUS;
+      structuralMotionDirectionDot = next? StructuralMotion.DOT_NEXT: StructuralMotion.DOT_PREVIOUS;
       return true;
     }
 
-    if (noDirection) character |= motionDirectionDot;
+    if (noDirection) character |= structuralMotionDirectionDot;
     character |= Braille.ROW;
 
-    Motion motion = Motion.get(character);
+    StructuralMotion motion = StructuralMotion.get(character);
     if (motion == null) return false;
 
     AccessibilityNodeInfo node = getCursorNode();
