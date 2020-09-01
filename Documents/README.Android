@@ -61,6 +61,9 @@ The required permissions are as follows:
 ``ACCESS_FINE_LOCATION``
   * For getting the Wi-Fi SSID.
 
+``ACCESS_COARSE_UPDATES``
+  * For getting the cell signal strength.
+
 Quick Start
 -----------
 
@@ -592,7 +595,7 @@ Pressing Dots2578 enters Structural navigation mode.
 When in this mode,
 a web page, when being browsed with Chrome, can be structurally navigated
 by pressing dot combinations on your braille device.
-Press Dots78 to return to the default key bindings.
+Press Dots78 (without Space) to return to the default key bindings.
 
 When in this mode,
 combinations of dots 1 through 6 specify the type of element

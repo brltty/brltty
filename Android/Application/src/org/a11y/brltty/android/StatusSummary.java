@@ -18,12 +18,21 @@
 
 package org.a11y.brltty.android;
 
+import java.util.List;
+
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import android.text.format.DateFormat;
 
 import android.content.Context;
 import android.os.BatteryManager;
+
+import android.telephony.TelephonyManager;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoCdma;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoLte;
+import android.telephony.CellSignalStrength;
 
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
@@ -36,6 +45,9 @@ public abstract class StatusSummary {
 
   private final static BatteryManager batteryManager = (BatteryManager)
           context.getSystemService(Context.BATTERY_SERVICE);
+
+  private final static TelephonyManager telephonyManager = (TelephonyManager)
+          context.getSystemService(Context.TELEPHONY_SERVICE);
 
   private final static WifiManager wifiManager = (WifiManager)
           context.getSystemService(Context.WIFI_SERVICE);
@@ -76,7 +88,7 @@ public abstract class StatusSummary {
 
     @Override
     public String getLabel () {
-      return "Bat%";
+      return "Bat";
     }
 
     @Override
@@ -85,7 +97,54 @@ public abstract class StatusSummary {
         int value = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
         if (value != INT_NO_VALUE) {
-          return Integer.toString(value);
+          return Integer.toString(value) + '%';
+        }
+      }
+
+      return null;
+    }
+  };
+
+  public final static Getter CELL_OPERATOR = new Getter() {
+    @Override
+    public String getLabel () {
+      return "Cell";
+    }
+
+    @Override
+    public String getValue () {
+      String name = telephonyManager.getNetworkOperatorName();
+      return name;
+    }
+  };
+
+  public final static Getter CELL_SIGNAL = new Getter() {
+    @Override
+    public String getLabel () {
+      return null;
+    }
+
+    @Override
+    public String getValue () {
+      if (APITests.haveJellyBeanMR1) {
+        List<CellInfo> infoList = telephonyManager.getAllCellInfo();
+
+        if (infoList != null) {
+          CellInfo info = infoList.get(0);
+          CellSignalStrength css = null;
+
+          if (info instanceof CellInfoCdma) {
+            css = ((CellInfoCdma)info).getCellSignalStrength();
+          } else if (info instanceof CellInfoGsm) {
+            css = ((CellInfoGsm)info).getCellSignalStrength();
+          } else if (info instanceof CellInfoLte) {
+            css = ((CellInfoLte)info).getCellSignalStrength();
+          }
+
+          if (css != null) {
+            int level = css.getLevel();
+            return Integer.toString((level * 100) / 4) + '%';
+          }
         }
       }
 
@@ -103,7 +162,9 @@ public abstract class StatusSummary {
 
     @Override
     public String getValue () {
-      if ((wifiInfo = wifiManager.getConnectionInfo()) != null) {
+      wifiInfo = wifiManager.getConnectionInfo();
+
+      if (wifiInfo != null) {
         String ssid = wifiInfo.getSSID();
         if ((ssid != null) && !ssid.isEmpty()) return ssid;
       }
@@ -115,50 +176,65 @@ public abstract class StatusSummary {
   public final static Getter WIFI_SIGNAL = new Getter() {
     @Override
     public String getLabel () {
-      return "Sig%";
+      return null;
     }
 
     @Override
     public String getValue () {
-      int rssi = wifiInfo.getRssi();
-      int percentage = wifiManager.calculateSignalLevel(rssi, 100);
-      return Integer.toString(percentage);
+      if (wifiInfo != null) {
+        int rssi = wifiInfo.getRssi();
+        int percentage = wifiManager.calculateSignalLevel(rssi, 100);
+        return Integer.toString(percentage) + '%';
+      }
+
+      return null;
     }
   };
 
   public final static Getter WIFI_SPEED = new Getter() {
     @Override
     public String getLabel () {
-      return WifiInfo.LINK_SPEED_UNITS;
+      return null;
     }
 
     @Override
     public String getValue () {
-      int speed = wifiInfo.getLinkSpeed();
-      return Integer.toString(speed);
+      if (wifiInfo != null) {
+        int speed = wifiInfo.getLinkSpeed();
+        return Integer.toString(speed) + WifiInfo.LINK_SPEED_UNITS;
+      }
+
+      return null;
     }
   };
 
   public final static Getter WIFI_FREQUENCY = new Getter() {
-    private final boolean isAvailable = APITests.haveLollipop;
-
     @Override
     public String getLabel () {
-      if (!isAvailable) return null;
-      return WifiInfo.FREQUENCY_UNITS;
+      return null;
     }
 
     @Override
     public String getValue () {
-      if (!isAvailable) return null;
-      int frequency = wifiInfo.getFrequency();
-      return Integer.toString(frequency);
+      if (APITests.haveLollipop) {
+        if (wifiInfo != null) {
+          int frequency = wifiInfo.getFrequency();
+          return Integer.toString(frequency) + WifiInfo.FREQUENCY_UNITS;
+        }
+      }
+
+      return null;
     }
   };
 
   private final static Group GROUP_DEVICE = new Group(
     DEVICE_TIME
   , DEVICE_BATTERY
+  );
+
+  private final static Group GROUP_CELL = new Group(
+    CELL_OPERATOR
+  , CELL_SIGNAL
   );
 
   private final static Group GROUP_WIFI = new Group(
@@ -170,6 +246,7 @@ public abstract class StatusSummary {
 
   private final static Group GROUPS[] = {
     GROUP_DEVICE
+  , GROUP_CELL
   , GROUP_WIFI
   };
 
