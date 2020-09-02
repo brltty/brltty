@@ -19,6 +19,8 @@
 package org.a11y.brltty.android;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;
@@ -115,6 +117,52 @@ public abstract class StatusSummary {
     public String getValue () {
       String name = telephonyManager.getNetworkOperatorName();
       return name;
+    }
+  };
+
+  public final static Getter CELL_ROAMING = new Getter() {
+    @Override
+    public String getLabel () {
+      return null;
+    }
+
+    @Override
+    public String getValue () {
+      return telephonyManager.isNetworkRoaming()? "roam": null;
+    }
+  };
+
+  public final static Getter CELL_TYPE = new Getter() {
+    private final Map<Integer, String> networkTypes = new HashMap<>();
+
+    {
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_1xRTT, "1xRTT");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_CDMA, "CDMA");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_EDGE, "EDGE");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_EHRPD, "eHRPD");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_EVDO_0, "EVDO revision 0");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_EVDO_A, "EVDO revision A");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_EVDO_B, "EVDO revision B");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_GPRS, "GPRS");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_HSDPA, "HSDPA");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_HSPA, "HSPA");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_HSPAP, "HSPA+");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_HSUPA, "HSUPA");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_IDEN, "iDen");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_LTE, "LTE");
+      networkTypes.put(TelephonyManager.NETWORK_TYPE_UMTS, "UMTS");
+    }
+
+    @Override
+    public String getLabel () {
+      return null;
+    }
+
+    @Override
+    public String getValue () {
+      int type = telephonyManager.getNetworkType();
+      if (type == TelephonyManager.NETWORK_TYPE_UNKNOWN) return null;
+      return networkTypes.get(type);
     }
   };
 
@@ -234,6 +282,8 @@ public abstract class StatusSummary {
 
   private final static Group GROUP_CELL = new Group(
     CELL_OPERATOR
+  , CELL_ROAMING
+  , CELL_TYPE
   , CELL_SIGNAL
   );
 
