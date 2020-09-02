@@ -175,6 +175,40 @@ public abstract class StatusSummary {
       return null;
     }
 
+    private final CellSignalStrength getCellSignalStrength (CellInfo info) {
+      if (APITests.haveJellyBeanMR1) {
+        if (info instanceof CellInfoCdma) {
+          return ((CellInfoCdma)info).getCellSignalStrength();
+        }
+
+        if (info instanceof CellInfoGsm) {
+          return ((CellInfoGsm)info).getCellSignalStrength();
+        }
+
+        if (info instanceof CellInfoLte) {
+          return ((CellInfoLte)info).getCellSignalStrength();
+        }
+      }
+
+      if (APITests.haveJellyBeanMR2) {
+        if (info instanceof CellInfoWcdma) {
+          return ((CellInfoWcdma)info).getCellSignalStrength();
+        }
+      }
+
+      if (APITests.haveQ) {
+        if (info instanceof CellInfoNr) {
+          return ((CellInfoNr)info).getCellSignalStrength();
+        }
+
+        if (info instanceof CellInfoTdscdma) {
+          return ((CellInfoTdscdma)info).getCellSignalStrength();
+        }
+      }
+
+      return null;
+    }
+
     @Override
     public String getValue () {
       if (APITests.haveJellyBeanMR1) {
@@ -182,21 +216,7 @@ public abstract class StatusSummary {
 
         if (infoList != null) {
           CellInfo info = infoList.get(0);
-          CellSignalStrength css = null;
-
-          if (info instanceof CellInfoCdma) {
-            css = ((CellInfoCdma)info).getCellSignalStrength();
-          } else if (info instanceof CellInfoGsm) {
-            css = ((CellInfoGsm)info).getCellSignalStrength();
-          } else if (info instanceof CellInfoLte) {
-            css = ((CellInfoLte)info).getCellSignalStrength();
-          } else if (info instanceof CellInfoNr) {
-            css = ((CellInfoNr)info).getCellSignalStrength();
-          } else if (info instanceof CellInfoTdscdma) {
-            css = ((CellInfoTdscdma)info).getCellSignalStrength();
-          } else if (info instanceof CellInfoWcdma) {
-            css = ((CellInfoWcdma)info).getCellSignalStrength();
-          }
+          CellSignalStrength css = getCellSignalStrength(info);
 
           if (css != null) {
             int level = css.getLevel();
