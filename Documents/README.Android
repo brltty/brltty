@@ -2,7 +2,7 @@
 BRLTTY on Android
 ~~~~~~~~~~~~~~~~~
 
-.. |SDK build tools version| replace:: 26.0.1
+.. |SDK build tools version| replace:: 29.0.6
 .. |NDK version| replace:: r16b
 .. |JDK version| replace:: 1.8
 

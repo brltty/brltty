@@ -66,4 +66,7 @@ public abstract class APITests {
 
   public final static boolean havePie
   = haveAPILevel(Build.VERSION_CODES.P);
+
+  public final static boolean haveQ
+  = haveAPILevel(Build.VERSION_CODES.Q);
 }

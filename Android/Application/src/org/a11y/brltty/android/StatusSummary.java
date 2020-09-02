@@ -34,6 +34,9 @@ import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
+import android.telephony.CellInfoNr;
+import android.telephony.CellInfoTdscdma;
+import android.telephony.CellInfoWcdma;
 import android.telephony.CellSignalStrength;
 
 import android.net.wifi.WifiManager;
@@ -187,6 +190,12 @@ public abstract class StatusSummary {
             css = ((CellInfoGsm)info).getCellSignalStrength();
           } else if (info instanceof CellInfoLte) {
             css = ((CellInfoLte)info).getCellSignalStrength();
+          } else if (info instanceof CellInfoNr) {
+            css = ((CellInfoNr)info).getCellSignalStrength();
+          } else if (info instanceof CellInfoTdscdma) {
+            css = ((CellInfoTdscdma)info).getCellSignalStrength();
+          } else if (info instanceof CellInfoWcdma) {
+            css = ((CellInfoWcdma)info).getCellSignalStrength();
           }
 
           if (css != null) {
