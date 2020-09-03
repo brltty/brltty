@@ -38,6 +38,7 @@ import android.telephony.CellInfoWcdma;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -66,7 +67,8 @@ public abstract class StatusSummary {
     private final Item[] groupItems;
 
     public final Item[] getItems () {
-      return groupItems;
+      Item[] array = groupItems;
+      return Arrays.copyOf(array, array.length);
     }
 
     public Group (Item... items) {
@@ -134,55 +136,21 @@ public abstract class StatusSummary {
       }
     };
 
-    public final static Item ROAMING = new Item() {
-      @Override
-      public String getLabel () {
-        return null;
-      }
-
-      @Override
-      public String getValue () {
-        return telephonyManager.isNetworkRoaming()? "roam": null;
-      }
-    };
-
-    public final static Item TECHNOLOGY = new Item() {
-      private final Map<Integer, String> networkTypes = new HashMap<>();
-
-      {
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_1xRTT, "1xRTT");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_CDMA, "CDMA");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_EDGE, "EDGE");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_EHRPD, "eHRPD");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_EVDO_0, "EVDO revision 0");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_EVDO_A, "EVDO revision A");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_EVDO_B, "EVDO revision B");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_GPRS, "GPRS");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_HSDPA, "HSDPA");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_HSPA, "HSPA");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_HSPAP, "HSPA+");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_HSUPA, "HSUPA");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_IDEN, "iDen");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_LTE, "LTE");
-        networkTypes.put(TelephonyManager.NETWORK_TYPE_UMTS, "UMTS");
-      }
-
-      @Override
-      public String getLabel () {
-        return null;
-      }
-
-      @Override
-      public String getValue () {
-        int type = telephonyManager.getNetworkType();
-        if (type == TelephonyManager.NETWORK_TYPE_UNKNOWN) return null;
-        return networkTypes.get(type);
-      }
-    };
-
     public final static Item SIGNAL = new Item() {
       @Override
       public String getLabel () {
+        return "Sig";
+      }
+
+      private final CellInfo getCellInfo () {
+        List<CellInfo> infoList = telephonyManager.getAllCellInfo();
+
+        if (infoList != null) {
+          if (!infoList.isEmpty()) {
+            return infoList.get(0);
+          }
+        }
+
         return null;
       }
 
@@ -220,18 +188,21 @@ public abstract class StatusSummary {
         return null;
       }
 
+      private final String[] levelNames = new String[] {
+        "none", "poor", "fair", "good", "high"
+      };
+
       @Override
       public String getValue () {
         if (APITests.haveJellyBeanMR1) {
-          List<CellInfo> infoList = telephonyManager.getAllCellInfo();
+          CellInfo info = getCellInfo();
 
-          if (infoList != null) {
-            CellInfo info = infoList.get(0);
+          if (info != null) {
             CellSignalStrength css = getCellSignalStrength(info);
 
             if (css != null) {
               int level = css.getLevel();
-              return Integer.toString((level * 100) / 4) + '%';
+              return levelNames[level];
             }
           }
         }
@@ -240,8 +211,54 @@ public abstract class StatusSummary {
       }
     };
 
+    public final static Item TECHNOLOGY = new Item() {
+      private final Map<Integer, String> networkTypes = new HashMap<>();
+
+      {
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_1xRTT, "1xRTT");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_CDMA, "CDMA");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_EDGE, "EDGE");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_EHRPD, "eHRPD");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_EVDO_0, "EVDO revision 0");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_EVDO_A, "EVDO revision A");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_EVDO_B, "EVDO revision B");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_GPRS, "GPRS");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_HSDPA, "HSDPA");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_HSPA, "HSPA");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_HSPAP, "HSPA+");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_HSUPA, "HSUPA");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_IDEN, "iDen");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_LTE, "LTE");
+        networkTypes.put(TelephonyManager.NETWORK_TYPE_UMTS, "UMTS");
+      }
+
+      @Override
+      public String getLabel () {
+        return null;
+      }
+
+      @Override
+      public String getValue () {
+        int type = telephonyManager.getNetworkType();
+        if (type == TelephonyManager.NETWORK_TYPE_UNKNOWN) return null;
+        return networkTypes.get(type);
+      }
+    };
+
+    public final static Item ROAMING = new Item() {
+      @Override
+      public String getLabel () {
+        return null;
+      }
+
+      @Override
+      public String getValue () {
+        return telephonyManager.isNetworkRoaming()? "roam": null;
+      }
+    };
+
     public CellGroup () {
-      super(OPERATOR, ROAMING, TECHNOLOGY, SIGNAL);
+      super(OPERATOR, SIGNAL, TECHNOLOGY, ROAMING);
     }
   }
 
