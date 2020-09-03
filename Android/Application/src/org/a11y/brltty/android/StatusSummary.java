@@ -253,7 +253,7 @@ public abstract class StatusSummary {
 
       @Override
       public String getValue () {
-        return telephonyManager.isNetworkRoaming()? "roam": null;
+        return telephonyManager.isNetworkRoaming()? "roaming": null;
       }
     };
 
@@ -268,7 +268,13 @@ public abstract class StatusSummary {
     @Override
     public boolean prepare () {
       if (!super.prepare()) return false;
-      wifiInfo = wifiManager.getConnectionInfo();
+
+      try {
+        wifiInfo = wifiManager.getConnectionInfo();
+      } catch (SecurityException exception) {
+        wifiInfo = null;
+      }
+
       return wifiInfo != null;
     }
 
