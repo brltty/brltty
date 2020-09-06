@@ -237,14 +237,9 @@ getRowCharacters (ScreenCharacter *characters, jint rowIndex, jint columnIndex, 
           }
         }
 
+        clearScreenCharacters(target, (targetEnd - target));
         (*env)->DeleteLocalRef(env, jCharacters);
         jCharacters = NULL;
-
-        while (target < targetEnd) {
-          target->text = ' ';
-          target->attributes = SCR_COLOUR_DEFAULT;
-          target += 1;
-        }
 
         int top = locationTop + selectionTop;
         int bottom = locationTop + selectionBottom;
