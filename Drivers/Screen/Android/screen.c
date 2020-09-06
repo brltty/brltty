@@ -215,23 +215,35 @@ getRowCharacters (ScreenCharacter *characters, jint rowIndex, jint columnIndex, 
 
       if (!clearJavaException(env, 1)) {
         jint characterCount = (*env)->GetArrayLength(env, jCharacters);
-        jchar cCharacters[characterCount];
-        (*env)->GetCharArrayRegion(env, jCharacters, 0, characterCount, cCharacters);
+
+        ScreenCharacter *target = characters;
+        ScreenCharacter *targetEnd = target + columnCount;
+
+        if (characterCount > 0) {
+          jchar cCharacters[characterCount];
+          (*env)->GetCharArrayRegion(env, jCharacters, 0, characterCount, cCharacters);
+
+          const jchar *source = cCharacters;
+          const jchar *sourceEnd = source + characterCount;
+
+          while (source < sourceEnd) {
+            if (target == targetEnd) break;
+
+            target->text = *source;
+            target->attributes = SCR_COLOUR_DEFAULT;
+
+            target += 1;
+            source += 1;
+          }
+        }
 
         (*env)->DeleteLocalRef(env, jCharacters);
         jCharacters = NULL;
 
-        {
-          const jchar *source = cCharacters;
-          const jchar *sourceEnd = source + characterCount;
-          ScreenCharacter *target = characters;
-          ScreenCharacter *targetEnd = target + columnCount;
-
-          while (target < targetEnd) {
-            target->text = (source < sourceEnd)? *source++: ' ';
-            target->attributes = SCR_COLOUR_DEFAULT;
-            target += 1;
-          }
+        while (target < targetEnd) {
+          target->text = ' ';
+          target->attributes = SCR_COLOUR_DEFAULT;
+          target += 1;
         }
 
         int top = locationTop + selectionTop;
@@ -280,9 +292,7 @@ readCharacters_AndroidScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     if (problemText) {
       setScreenMessage(box, buffer, problemText);
     } else {
-      int rowIndex;
-
-      for (rowIndex=0; rowIndex<box->height; rowIndex+=1) {
+      for (int rowIndex=0; rowIndex<box->height; rowIndex+=1) {
         if (!getRowCharacters(&buffer[rowIndex * box->width], (rowIndex + box->top), box->left, box->width)) return 0;
       }
     }
