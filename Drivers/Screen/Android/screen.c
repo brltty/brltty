@@ -200,7 +200,73 @@ describe_AndroidScreen (ScreenDescription *description) {
 }
 
 static int
-getRowCharacters (ScreenCharacter *characters, jint rowIndex, jint columnIndex, jint columnCount) {
+getRowCharacters (JNIEnv *env, ScreenCharacter *characters, jcharArray jCharacters, jint rowIndex, jint columnIndex, jint columnCount) {
+  jint characterCount = (*env)->GetArrayLength(env, jCharacters);
+  if (clearJavaException(env, 1)) return 0;
+
+  {
+    ScreenCharacter *target = characters;
+    ScreenCharacter *targetEnd = target + columnCount;
+
+    if (characterCount > 0) {
+      jchar cCharacters[characterCount];
+      (*env)->GetCharArrayRegion(env, jCharacters, 0, characterCount, cCharacters);
+      if (clearJavaException(env, 1)) return 0;
+
+      const jchar *source = cCharacters;
+      const jchar *sourceEnd = source + characterCount;
+
+      while (source < sourceEnd) {
+        if (target == targetEnd) break;
+
+        target->text = *source;
+        target->attributes = SCR_COLOUR_DEFAULT;
+
+        target += 1;
+        source += 1;
+      }
+    }
+
+    clearScreenCharacters(target, (targetEnd - target));
+  }
+
+  int top = locationTop + selectionTop;
+  int bottom = locationTop + selectionBottom;
+
+  if ((rowIndex >= top) && (rowIndex < bottom)) {
+    int from = MAX(locationLeft, columnIndex);
+    int to = MIN(locationRight, (columnIndex + columnCount));
+
+    if (rowIndex == top) {
+      int left = locationLeft + selectionLeft;
+      if (left > from) from = left;
+    }
+
+    if ((rowIndex + 1) == bottom) {
+      int right = locationLeft + selectionRight;
+      if (right < to) to = right;
+    }
+
+    if (from < to) {
+      from -= columnIndex;
+      to -= columnIndex;
+      if (to > characterCount) to = characterCount;
+
+      ScreenCharacter *target = characters + from;
+      const ScreenCharacter *targetEnd = characters + to;
+
+      while (target < targetEnd) {
+        target->attributes = SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY;
+        target += 1;
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int
+readRowCharacters (ScreenCharacter *characters, jint rowIndex, jint columnIndex, jint columnCount) {
   if (findScreenDriverClass()) {
     static jmethodID method = 0;
 
@@ -214,66 +280,17 @@ getRowCharacters (ScreenCharacter *characters, jint rowIndex, jint columnIndex, 
       );
 
       if (!clearJavaException(env, 1)) {
-        jint characterCount = (*env)->GetArrayLength(env, jCharacters);
+        if (jCharacters) {
+          int ok = getRowCharacters(
+            env, characters, jCharacters,
+            rowIndex, columnIndex, columnCount
+          );
 
-        ScreenCharacter *target = characters;
-        ScreenCharacter *targetEnd = target + columnCount;
+          (*env)->DeleteLocalRef(env, jCharacters);
+          jCharacters = NULL;
 
-        if (characterCount > 0) {
-          jchar cCharacters[characterCount];
-          (*env)->GetCharArrayRegion(env, jCharacters, 0, characterCount, cCharacters);
-
-          const jchar *source = cCharacters;
-          const jchar *sourceEnd = source + characterCount;
-
-          while (source < sourceEnd) {
-            if (target == targetEnd) break;
-
-            target->text = *source;
-            target->attributes = SCR_COLOUR_DEFAULT;
-
-            target += 1;
-            source += 1;
-          }
+          return ok;
         }
-
-        clearScreenCharacters(target, (targetEnd - target));
-        (*env)->DeleteLocalRef(env, jCharacters);
-        jCharacters = NULL;
-
-        int top = locationTop + selectionTop;
-        int bottom = locationTop + selectionBottom;
-
-        if ((rowIndex >= top) && (rowIndex < bottom)) {
-          int from = MAX(locationLeft, columnIndex);
-          int to = MIN(locationRight, (columnIndex + columnCount));
-
-          if (rowIndex == top) {
-            int left = locationLeft + selectionLeft;
-            if (left > from) from = left;
-          }
-
-          if ((rowIndex + 1) == bottom) {
-            int right = locationLeft + selectionRight;
-            if (right < to) to = right;
-          }
-
-          if (from < to) {
-            from -= columnIndex;
-            to -= columnIndex;
-            if (to > characterCount) to = characterCount;
-
-            ScreenCharacter *target = characters + from;
-            const ScreenCharacter *targetEnd = characters + to;
-
-            while (target < targetEnd) {
-              target->attributes = SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY;
-              target += 1;
-            }
-          }
-        }
-
-        return 1;
       }
     }
   }
@@ -288,7 +305,7 @@ readCharacters_AndroidScreen (const ScreenBox *box, ScreenCharacter *buffer) {
       setScreenMessage(box, buffer, problemText);
     } else {
       for (int rowIndex=0; rowIndex<box->height; rowIndex+=1) {
-        if (!getRowCharacters(&buffer[rowIndex * box->width], (rowIndex + box->top), box->left, box->width)) return 0;
+        if (!readRowCharacters(&buffer[rowIndex * box->width], (rowIndex + box->top), box->left, box->width)) return 0;
       }
     }
 
