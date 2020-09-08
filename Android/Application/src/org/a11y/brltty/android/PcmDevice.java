@@ -28,9 +28,9 @@ import android.media.AudioAttributes;
 public final class PcmDevice implements AutoCloseable {
   private final static String LOG_TAG = PcmDevice.class.getName();
 
-  private final static int streamType = AudioManager.STREAM_NOTIFICATION;
-  private final static int trackMode = AudioTrack.MODE_STREAM;
-  private final static int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
+  private final static int STREAM_TYPE = AudioManager.STREAM_NOTIFICATION;
+  private final static int TRACK_MODE = AudioTrack.MODE_STREAM;
+  private final static int AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
   private int sampleRate = 8000;
   private int channelCount = 1;
@@ -44,12 +44,17 @@ public final class PcmDevice implements AutoCloseable {
     return audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING;
   }
 
+  private final void checkNotStarted () {
+    if (isStarted()) throw new IllegalStateException("track already started");
+  }
+
   public final int getSampleRate () {
     return sampleRate;
   }
 
   public final void setSampleRate (int rate) {
-    if (!isStarted()) sampleRate = rate;
+    checkNotStarted();
+    sampleRate = rate;
   }
 
   public final int getChannelPositionMask () {
@@ -67,18 +72,16 @@ public final class PcmDevice implements AutoCloseable {
         return AudioFormat.CHANNEL_OUT_QUAD;
 
       case 5:
-        return AudioFormat.CHANNEL_OUT_QUAD | AudioFormat.CHANNEL_OUT_FRONT_CENTER;
-
-      case 6:
         return AudioFormat.CHANNEL_OUT_5POINT1;
 
-      case 7:
+      case 6:
         return AudioFormat.CHANNEL_OUT_5POINT1 | AudioFormat.CHANNEL_OUT_BACK_CENTER;
 
-      case 8:
+      case 7:
         return AudioFormat.CHANNEL_OUT_7POINT1_SURROUND;
 
       default:
+        Log.w(LOG_TAG, ("unsupported channel count: " + channelCount));
         return 0;
     }
   }
@@ -88,45 +91,45 @@ public final class PcmDevice implements AutoCloseable {
   }
 
   public final void setChannelCount (int count) {
-    if (!isStarted()) {
-      channelCount = count;
-    }
+    checkNotStarted();
+    channelCount = count;
   }
 
   public final int getBufferSize () {
-    return AudioTrack.getMinBufferSize(getSampleRate(),
-                                       getChannelPositionMask(),
-                                       audioEncoding);
+    return AudioTrack.getMinBufferSize(
+      getSampleRate(),
+      getChannelPositionMask(),
+      AUDIO_ENCODING
+    );
   }
 
   private final AudioTrack newAudioTrack () {
     if (APITests.haveOreo) {
-      AudioAttributes attributes =
-        new AudioAttributes.Builder()
-                           .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
-                           .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                           .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
-                           .build();
+      AudioAttributes attributes = new AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+        .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+        .build();
 
-      AudioFormat format =
-        new AudioFormat.Builder()
-                       .setEncoding(audioEncoding)
-                       .setSampleRate(getSampleRate())
-                       .setChannelMask(getChannelPositionMask())
-                       .build();
+      AudioFormat format = new AudioFormat.Builder()
+        .setEncoding(AUDIO_ENCODING)
+        .setSampleRate(getSampleRate())
+        .setChannelMask(getChannelPositionMask())
+        .build();
 
       return new AudioTrack.Builder()
-                           .setAudioAttributes(attributes)
-                           .setAudioFormat(format)
-                           .setBufferSizeInBytes(getBufferSize())
-                           .setTransferMode(AudioTrack.MODE_STREAM)
-                           .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
-                           .build();
+        .setAudioAttributes(attributes)
+        .setAudioFormat(format)
+        .setBufferSizeInBytes(getBufferSize())
+        .setTransferMode(AudioTrack.MODE_STREAM)
+        .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_LOW_LATENCY)
+        .build();
     }
 
-    return new AudioTrack(streamType, getSampleRate(),
-                          getChannelPositionMask(), audioEncoding,
-                          getBufferSize(), trackMode);
+    return new AudioTrack(STREAM_TYPE, getSampleRate(),
+      getChannelPositionMask(), AUDIO_ENCODING,
+      getBufferSize(), TRACK_MODE
+    );
   }
 
   protected final void start () {
@@ -153,10 +156,10 @@ public final class PcmDevice implements AutoCloseable {
   }
 
   public final void push () {
-    if (isPlaying()) audioTrack.stop();
   }
 
   public final void await () {
+    if (isPlaying()) audioTrack.stop();
   }
 
   public final void cancel () {
@@ -166,7 +169,7 @@ public final class PcmDevice implements AutoCloseable {
 
   @Override
   public final void close () {
-    cancel();
+    await();
     audioTrack.release();
     audioTrack = null;
   }
