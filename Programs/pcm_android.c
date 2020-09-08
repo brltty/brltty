@@ -110,6 +110,7 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
                                               ))) {
       jint size = count / 2;
       jshortArray jSamples = (*pcm->env)->NewShortArray(pcm->env, size);
+
       if (jSamples) {
         typedef union {
           const unsigned char *bytes;
@@ -120,15 +121,22 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
           .bytes = buffer
         };
 
-        jboolean result;
-
-        (*pcm->env)->SetShortArrayRegion(pcm->env, jSamples, 0, size, samples.actual);
-        result = (*pcm->env)->CallBooleanMethod(pcm->env, pcm->device, method, jSamples);
-        (*pcm->env)->DeleteLocalRef(pcm->env, jSamples);
+        (*pcm->env)->SetShortArrayRegion(
+          pcm->env, jSamples, 0, size, samples.actual
+        );
 
         if (!clearJavaException(pcm->env, 1)) {
-          if (result == JNI_TRUE) {
-            return 1;
+          jboolean result = (*pcm->env)->CallBooleanMethod(
+            pcm->env, pcm->device, method, jSamples
+          );
+
+          (*pcm->env)->DeleteLocalRef(pcm->env, jSamples);
+          jSamples = NULL;
+
+          if (!clearJavaException(pcm->env, 1)) {
+            if (result == JNI_TRUE) {
+              return 1;
+            }
           }
         }
       } else {
@@ -150,7 +158,6 @@ getPcmBlockSize (PcmDevice *pcm) {
                                JAVA_SIG_METHOD(JAVA_SIG_INT,
                                               ))) {
       jint result = (*pcm->env)->CallIntMethod(pcm->env, pcm->device, method);
-
       if (!clearJavaException(pcm->env, 1)) return result;
     }
   }
@@ -167,7 +174,6 @@ getPcmSampleRate (PcmDevice *pcm) {
                                JAVA_SIG_METHOD(JAVA_SIG_INT,
                                               ))) {
       jint result = (*pcm->env)->CallIntMethod(pcm->env, pcm->device, method);
-
       if (!clearJavaException(pcm->env, 1)) return result;
     }
   }
@@ -201,7 +207,6 @@ getPcmChannelCount (PcmDevice *pcm) {
                                JAVA_SIG_METHOD(JAVA_SIG_INT,
                                               ))) {
       jint result = (*pcm->env)->CallIntMethod(pcm->env, pcm->device, method);
-
       if (!clearJavaException(pcm->env, 1)) return result;
     }
   }
@@ -252,6 +257,16 @@ pushPcmOutput (PcmDevice *pcm) {
 
 void
 awaitPcmOutput (PcmDevice *pcm) {
+  if (findPcmDeviceClass(pcm->env)) {
+    static jmethodID method = 0;
+
+    if (findJavaInstanceMethod(pcm->env, &method, pcmDeviceClass, "await",
+                               JAVA_SIG_METHOD(JAVA_SIG_VOID,
+                                              ))) {
+      (*pcm->env)->CallVoidMethod(pcm->env, pcm->device, method);
+      clearJavaException(pcm->env, 1);
+    }
+  }
 }
 
 void

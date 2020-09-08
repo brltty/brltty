@@ -25,7 +25,7 @@ import android.media.AudioTrack;
 import android.media.AudioFormat;
 import android.media.AudioAttributes;
 
-public final class PcmDevice {
+public final class PcmDevice implements AutoCloseable {
   private final static String LOG_TAG = PcmDevice.class.getName();
 
   private final static int streamType = AudioManager.STREAM_NOTIFICATION;
@@ -156,11 +156,15 @@ public final class PcmDevice {
     if (isPlaying()) audioTrack.stop();
   }
 
+  public final void await () {
+  }
+
   public final void cancel () {
     if (isPlaying()) audioTrack.pause();
     audioTrack.flush();
   }
 
+  @Override
   public final void close () {
     cancel();
     audioTrack.release();
