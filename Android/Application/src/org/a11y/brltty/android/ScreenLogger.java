@@ -30,6 +30,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import android.graphics.Rect;
+import android.text.Spanned;
 
 public abstract class ScreenLogger {
   private final static String LOG_TAG = ScreenLogger.class.getName();
@@ -44,6 +45,8 @@ public abstract class ScreenLogger {
   }
 
   private static String shrinkText (String text) {
+    if (text == null) return null;
+
     final int threshold = 50;
     final char delimiter = '\n';
 
@@ -60,6 +63,19 @@ public abstract class ScreenLogger {
     }
 
     return text;
+  }
+
+  private static void addText (StringBuilder sb, CharSequence text, String label, char begin, char end) {
+    if (text == null) return;
+    if (text.length() == 0) return;
+
+    if (sb.length() > 0) sb.append(' ');
+    if (label != null) sb.append(label).append(':');
+    sb.append(begin).append(text).append(end);
+  }
+
+  private static void addText (StringBuilder sb, CharSequence text, String label) {
+    addText(sb, text, label, '"', '"');
   }
 
   private final static void add (StringBuilder sb, String value) {
@@ -149,26 +165,23 @@ public abstract class ScreenLogger {
     StringBuilder sb = new StringBuilder();
     add(sb, ScreenUtilities.getClassName(node));
 
-    {
-      String text = ScreenUtilities.getText(node);
+    addText(sb, shrinkText(ScreenUtilities.getText(node)), null);
+    addText(sb, shrinkText(ScreenUtilities.getDescription(node)), null, '(', ')');
 
-      if (text != null) {
-        sb.append(' ');
-        sb.append('"');
-        sb.append(shrinkText(text));
-        sb.append('"');
-      }
+    if (APITests.haveOreo) {
+      addText(sb, node.getHintText(), "hint");
     }
 
-    {
-      String description = ScreenUtilities.getDescription(node);
+    if (APITests.havePie) {
+      addText(sb, node.getTooltipText(), "tip");
+    }
 
-      if (description != null) {
-        sb.append(' ');
-        sb.append('(');
-        sb.append(shrinkText(description));
-        sb.append(')');
-      }
+    if (APITests.havePie) {
+      addText(sb, node.getPaneTitle(), "pane");
+    }
+
+    if (APITests.haveLollipop) {
+      addText(sb, node.getError(), "error");
     }
 
     {
@@ -360,6 +373,38 @@ public abstract class ScreenLogger {
       add(sb, "vrn", node.getViewIdResourceName());
     }
 
+    {
+      CharSequence text = node.getText();
+
+      if (text instanceof Spanned) {
+        Spanned spanned = (Spanned)text;
+        Object[] spans = spanned.getSpans(0, spanned.length(), Object.class);
+
+        if (spans != null) {
+          boolean first = true;
+
+          for (Object span : spans) {
+            if (first) {
+              first = false;
+              sb.append("spans:[");
+            } else {
+              sb.append(", ");
+            }
+
+            sb.append(span.getClass().getSimpleName())
+              .append('(')
+              .append(spanned.getSpanStart(span))
+              .append("..")
+              .append(spanned.getSpanEnd(span))
+              .append(')')
+              ;
+          }
+
+          if (!first) sb.append(']');
+        }
+      }
+    }
+
     if (APITests.haveKitkat) {
       Bundle extras = node.getExtras();
 
@@ -439,16 +484,7 @@ public abstract class ScreenLogger {
     add(sb, "id", window.getId());
 
     if (APITests.haveNougat) {
-      CharSequence title = window.getTitle();
-
-      if (title != null) {
-        if (title.length() > 0) {
-          sb.append(' ');
-          sb.append('"');
-          sb.append(title);
-          sb.append('"');
-        }
-      }
+      addText(sb, window.getTitle(), null);
     }
 
     {
