@@ -53,13 +53,41 @@ public abstract class InputHandlers {
     return screen.getCursorNode();
   }
 
-  private static void showWindowTitle (AccessibilityWindowInfo window) {
+  private static CharSequence getWindowTitle (AccessibilityWindowInfo window) {
     CharSequence title = window.getTitle();
+    if ((title != null) && (title.length() > 0)) return title;
 
-    if ((title == null) || (title.length() == 0)) {
-      title = "unnamed";
+    if (APITests.havePie) {
+      AccessibilityNodeInfo node = window.getRoot();
+
+      if (node != null) {
+        try {
+          while (true) {
+            {
+              title = node.getPaneTitle();
+              if ((title != null) && (title.length() > 0)) return title;
+            }
+
+            if (node.getChildCount() != 1) break;
+            AccessibilityNodeInfo child = node.getChild(0);
+            if (child == null) break;
+
+            node.recycle();
+            node = child;
+            child = null;
+          }
+        } finally {
+          node.recycle();
+          node = null;
+        }
+      }
     }
 
+    return "unnamed";
+  }
+
+  private static void showWindowTitle (AccessibilityWindowInfo window) {
+    CharSequence title = getWindowTitle(window);
     BrailleMessage.WINDOW.show(title.toString());
   }
 
