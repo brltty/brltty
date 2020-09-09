@@ -343,9 +343,12 @@ public abstract class ScreenLogger {
       AccessibilityNodeInfo subnode = node.getLabelFor();
 
       if (subnode != null) {
-        add(sb, "lbf", getText(subnode));
-        subnode.recycle();
-        subnode = null;
+        try {
+          add(sb, "lbf", getText(subnode));
+        } finally {
+          subnode.recycle();
+          subnode = null;
+        }
       }
     }
 
@@ -353,9 +356,12 @@ public abstract class ScreenLogger {
       AccessibilityNodeInfo subnode = node.getLabeledBy();
 
       if (subnode != null) {
-        add(sb, "lbd", getText(subnode));
-        subnode.recycle();
-        subnode = null;
+        try {
+          add(sb, "lbd", getText(subnode));
+        } finally {
+          subnode.recycle();
+          subnode = null;
+        }
       }
     }
 
@@ -529,9 +535,12 @@ public abstract class ScreenLogger {
       AccessibilityNodeInfo root = window.getRoot();
 
       if (root != null) {
-        log(root);
-        root.recycle();
-        root = null;
+        try {
+          log(root);
+        } finally {
+          root.recycle();
+          root = null;
+        }
       }
     }
 
@@ -564,9 +573,12 @@ public abstract class ScreenLogger {
       AccessibilityNodeInfo root = ScreenUtilities.getRootNode();
 
       if (root != null) {
-        log(root);
-        root.recycle();
-        root = null;
+        try {
+          log(root);
+        } finally {
+          root.recycle();
+          root = null;
+        }
       }
     }
 

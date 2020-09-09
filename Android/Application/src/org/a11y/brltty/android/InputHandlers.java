@@ -54,8 +54,10 @@ public abstract class InputHandlers {
   }
 
   private static CharSequence getWindowTitle (AccessibilityWindowInfo window) {
-    CharSequence title = window.getTitle();
-    if ((title != null) && (title.length() > 0)) return title;
+    if (APITests.haveNougat) {
+      CharSequence title = window.getTitle();
+      if ((title != null) && (title.length() > 0)) return title;
+    }
 
     if (APITests.havePie) {
       AccessibilityNodeInfo node = window.getRoot();
@@ -64,7 +66,7 @@ public abstract class InputHandlers {
         try {
           while (true) {
             {
-              title = node.getPaneTitle();
+              CharSequence title = node.getPaneTitle();
               if ((title != null) && (title.length() > 0)) return title;
             }
 
