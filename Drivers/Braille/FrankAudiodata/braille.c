@@ -74,7 +74,7 @@ END_KEY_TABLE_LIST
 typedef struct {
   size_t length;
   unsigned char buffer[8];
-} UsbValues;
+} DeviceResponse;
 
 struct BrailleDataStruct {
   struct {
@@ -92,15 +92,68 @@ struct BrailleDataStruct {
   } status;
 
   struct {
-    UsbValues values1;
-    UsbValues values2;
-    UsbValues values3;
-    UsbValues values4;
-    UsbValues values5;
-    UsbValues values6;
-    UsbValues values7;
-    UsbValues values8;
-  } usb;
+    DeviceResponse response1;
+    DeviceResponse serialNumber[2];
+    DeviceResponse response4;
+    DeviceResponse response5;
+    DeviceResponse response6;
+    DeviceResponse response7;
+    DeviceResponse response8;
+  } device;
+};
+
+typedef struct {
+  int (*prepare) (BrailleDisplay *brl);
+} ProductEntry;
+
+typedef enum {
+  EZL_RW_INTERNAL = 0XA0,
+  EZL_RW_EEPROM   = 0XA2,
+  EZL_RW_MEMORY   = 0XA3,
+} EZLOAD_ControlRequest;
+
+static int
+prepare1016 (BrailleDisplay *brl) {
+  return 0; // force a retry - the product ID should now be 0X1017
+}
+
+static const ProductEntry productEntry_1016 = {
+  .prepare = prepare1016,
+};
+
+static int
+askDevice (UsbDevice *device, uint16_t value, uint16_t index, DeviceResponse *values) {
+  ssize_t result = usbControlRead(
+    device, UsbControlRecipient_Device, UsbControlType_Vendor,
+    0XC0, value, index,
+    values->buffer, sizeof(values->buffer), 1000
+  );
+
+  if (result == -1) return 0;
+  values->length = result;
+  logBytes(LOG_NOTICE, "%04X %04X", values->buffer, values->length, value, index);
+  return 1;
+}
+
+static int
+prepare1017 (BrailleDisplay *brl) {
+  UsbChannel *channel = gioGetResourceObject(brl->gioEndpoint);
+  UsbDevice *device = channel->device;
+
+  if (!askDevice(device, 0X0000, 0X0001, &brl->data->device.response1)) return 0;
+  if (!askDevice(device, 0X0001, 0X0000, &brl->data->device.serialNumber[0])) return 0;
+  if (!askDevice(device, 0X0001, 0X0001, &brl->data->device.serialNumber[1])) return 0;
+  if (!askDevice(device, 0X0001, 0X0002, &brl->data->device.response4)) return 0;
+  if (!askDevice(device, 0X0001, 0X0004, &brl->data->device.response5)) return 0;
+  if (!askDevice(device, 0X0001, 0X0005, &brl->data->device.response6)) return 0;
+  if (!askDevice(device, 0X0001, 0X0006, &brl->data->device.response7)) return 0;
+  if (!askDevice(device, 0X0001, 0X0007, &brl->data->device.response8)) return 0;
+
+  return 1;
+}
+
+static const ProductEntry productEntry_1017 = {
+  .prepare = prepare1017,
 };
 
 static int
@@ -151,48 +204,19 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 }
 
 static int
-usbRequest (UsbDevice *device, uint16_t value, uint16_t index, UsbValues *values) {
-  ssize_t result = usbControlRead(
-    device, UsbControlRecipient_Device, UsbControlType_Vendor,
-    0XC0, value, index,
-    values->buffer, sizeof(values->buffer), 1000
-  );
-
-  if (result == -1) return 0;
-  values->length = result;
-  logBytes(LOG_NOTICE, "%04X %04X", values->buffer, values->length, value, index);
-  return 1;
-}
-
-static int
-usbInitialize (BrailleDisplay *brl) {
-  UsbChannel *channel = gioGetResourceObject(brl->gioEndpoint);
-  UsbDevice *device = channel->device;
-
-  if (!usbRequest(device, 0X0000, 0X0001, &brl->data->usb.values1)) return 0;
-  if (!usbRequest(device, 0X0001, 0X0000, &brl->data->usb.values2)) return 0;
-  if (!usbRequest(device, 0X0001, 0X0001, &brl->data->usb.values3)) return 0;
-  if (!usbRequest(device, 0X0001, 0X0002, &brl->data->usb.values4)) return 0;
-  if (!usbRequest(device, 0X0001, 0X0004, &brl->data->usb.values5)) return 0;
-  if (!usbRequest(device, 0X0001, 0X0005, &brl->data->usb.values6)) return 0;
-  if (!usbRequest(device, 0X0001, 0X0006, &brl->data->usb.values7)) return 0;
-  if (!usbRequest(device, 0X0001, 0X0007, &brl->data->usb.values8)) return 0;
-
-  return 1;
-}
-
-static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   BEGIN_USB_CHANNEL_DEFINITIONS
     { /* B2K84 */
       .vendor=0X0904, .product=0X1016,
-      .configuration=1, .interface=0, .alternative=0
+      .configuration=1, .interface=0, .alternative=0,
+      .data = &productEntry_1016
     },
 
     { /* B2K84 */
       .vendor=0X0904, .product=0X1017,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data = &productEntry_1017
     },
   END_USB_CHANNEL_DEFINITIONS
 
@@ -202,7 +226,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
-    if (1 || usbInitialize(brl)) return 1;
+    const ProductEntry *product = gioGetApplicationData(brl->gioEndpoint);
+    if (product->prepare(brl)) return 1;
     disconnectBrailleResource(brl, NULL);
   }
 
