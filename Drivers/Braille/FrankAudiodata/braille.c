@@ -186,7 +186,12 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   BEGIN_USB_CHANNEL_DEFINITIONS
     { /* B2K84 */
       .vendor=0X0904, .product=0X1016,
-      .configuration=1, .interface=0, .alternative=1,
+      .configuration=1, .interface=0, .alternative=0
+    },
+
+    { /* B2K84 */
+      .vendor=0X0904, .product=0X1017,
+      .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
     },
   END_USB_CHANNEL_DEFINITIONS
@@ -242,15 +247,15 @@ brl_destruct (BrailleDisplay *brl) {
 }
 
 static int
-writeCells (BrailleDisplay *brl, const unsigned char *cells, unsigned int from, unsigned int to) {
-  unsigned char packet[1 + STATUS_CELL_COUNT + TEXT_CELL_COUNT];
+writeCells (BrailleDisplay *brl, const unsigned char *cells, unsigned int from, unsigned int to, unsigned int offset) {
+  unsigned char packet[1 + (to - from)];
 
   while (from < to) {
     unsigned char *byte = packet;
     unsigned int count = to - from;
     count = MIN(count, 62);
 
-    *byte++ = from;
+    *byte++ = from + offset;
     byte = mempcpy(byte, cells, count);
     if (!writeBytes(brl, packet, (byte - packet))) return 0;
 
@@ -267,7 +272,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 
   if (cellsHaveChanged(brl->data->status.cells, cells, brl->statusColumns,
                        &from, &to, &brl->data->status.rewrite)) {
-    if (!writeCells(brl, &cells[from], from, (to - from))) {
+    if (!writeCells(brl, &cells[from], from, to, 0)) {
       return 0;
     }
   }
@@ -285,7 +290,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
     unsigned char cells[count];
 
     translateOutputCells(cells, &brl->data->text.cells[from], count);
-    if (!writeCells(brl, cells, (STATUS_CELL_COUNT + from), count)) return 0;
+    if (!writeCells(brl, cells, from, to, STATUS_CELL_COUNT)) return 0;
   }
 
   return 1;
