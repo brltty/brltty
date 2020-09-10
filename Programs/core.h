@@ -92,6 +92,7 @@ extern void fillStatusSeparator (wchar_t *text, unsigned char *dots);
 extern int writeBrailleText (const char *mode, const char *text);
 extern int showBrailleText (const char *mode, const char *text, int minimumDelay);
 
+extern char *opt_driversDirectory;
 extern char *opt_tablesDirectory;
 extern char *opt_textTable;
 extern char *opt_attributesTable;

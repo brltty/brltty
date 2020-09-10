@@ -16,41 +16,23 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_FA_BRLDEFS
-#define BRLTTY_INCLUDED_FA_BRLDEFS
+#ifndef BRLTTY_INCLUDED_IHEX_TYPES
+#define BRLTTY_INCLUDED_IHEX_TYPES
 
-typedef enum {
-  FA_PKT_SLIDER = 2,
-  FA_PKT_NAV    = 8,
-  FA_PKT_ROUTE  = 9,
-} FA_PacketType;
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-typedef enum {
-  FA_NAV_K1 =  2,
-  FA_NAV_K2 =  1,
-  FA_NAV_K3 =  0,
+typedef struct {
+  const unsigned char *data;
+  uint16_t address;
+  uint8_t count;
+} IhexRecordData;
 
-  FA_NAV_K4 =  8,
-  FA_NAV_K5 =  9,
-  FA_NAV_K6 = 10,
+typedef int IhexRecordHandler (const IhexRecordData *record, void *data);
 
-  FA_NAV_K7 =  3,
-  FA_NAV_K8 =  4,
-  FA_NAV_K9 =  5,
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
-  FA_NAV_F1 = 18,
-  FA_NAV_F2 = 17,
-  FA_NAV_F3 = 16,
-
-  FA_NAV_F4 = 19,
-  FA_NAV_F5 = 20,
-  FA_NAV_F6 = 21,
-} FA_NavigationKey;
-
-typedef enum {
-  FA_GRP_NAV,
-  FA_GRP_ROUTE,
-  FA_GRP_SLIDE,
-} FA_KeyGroup;
-
-#endif /* BRLTTY_INCLUDED_FA_BRLDEFS */ 
+#endif /* BRLTTY_INCLUDED_IHEX_TYPES */

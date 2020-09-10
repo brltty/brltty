@@ -126,8 +126,12 @@ USB_DEVICE_ENTRY(0X0798, 0X0640, "al"),
 USB_DEVICE_ENTRY(0X0798, 0X0680, "al"),
 
 // Device: 0904:1016
-// FrankAudiodata [B2K84]
+// FrankAudiodata [B2K84 (before firmware installation)]
 USB_DEVICE_ENTRY(0X0904, 0X1016, "fa"),
+
+// Device: 0904:1017
+// FrankAudiodata [B2K84 (after firmware installation)]
+USB_DEVICE_ENTRY(0X0904, 0X1017, "fa"),
 
 // Device: 0904:2000
 // Baum [VarioPro 40 (40 cells)]

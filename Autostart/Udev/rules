@@ -136,8 +136,12 @@ ENV{PRODUCT}=="798/640/*", ENV{BRLTTY_BRAILLE_DRIVER}="al", GOTO="brltty_usb_run
 ENV{PRODUCT}=="798/680/*", ENV{BRLTTY_BRAILLE_DRIVER}="al", GOTO="brltty_usb_run"
 
 # Device: 0904:1016
-# FrankAudiodata [B2K84]
+# FrankAudiodata [B2K84 (before firmware installation)]
 ENV{PRODUCT}=="904/1016/*", ENV{BRLTTY_BRAILLE_DRIVER}="fa", GOTO="brltty_usb_run"
+
+# Device: 0904:1017
+# FrankAudiodata [B2K84 (after firmware installation)]
+ENV{PRODUCT}=="904/1017/*", ENV{BRLTTY_BRAILLE_DRIVER}="fa", GOTO="brltty_usb_run"
 
 # Device: 0904:2000
 # Baum [VarioPro 40 (40 cells)]

@@ -199,7 +199,10 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: Alva [BC680]"=LIBUSB_DEV, USB\VID_0798&PID_0680
 
 ; Device: 0904:1016
-"LibUSB-Win32: FrankAudiodata [B2K84]"=LIBUSB_DEV, USB\VID_0904&PID_1016
+"LibUSB-Win32: FrankAudiodata [B2K84 (before firmware installation)]"=LIBUSB_DEV, USB\VID_0904&PID_1016
+
+; Device: 0904:1017
+"LibUSB-Win32: FrankAudiodata [B2K84 (after firmware installation)]"=LIBUSB_DEV, USB\VID_0904&PID_1017
 
 ; Device: 0904:2000
 "LibUSB-Win32: Baum [VarioPro 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_2000
@@ -552,7 +555,10 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: Alva [BC680]"=LIBUSB_DEV, USB\VID_0798&PID_0680
 
 ; Device: 0904:1016
-"LibUSB-Win32: FrankAudiodata [B2K84]"=LIBUSB_DEV, USB\VID_0904&PID_1016
+"LibUSB-Win32: FrankAudiodata [B2K84 (before firmware installation)]"=LIBUSB_DEV, USB\VID_0904&PID_1016
+
+; Device: 0904:1017
+"LibUSB-Win32: FrankAudiodata [B2K84 (after firmware installation)]"=LIBUSB_DEV, USB\VID_0904&PID_1017
 
 ; Device: 0904:2000
 "LibUSB-Win32: Baum [VarioPro 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_2000
@@ -905,7 +911,10 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: Alva [BC680]"=LIBUSB_DEV, USB\VID_0798&PID_0680
 
 ; Device: 0904:1016
-"LibUSB-Win32: FrankAudiodata [B2K84]"=LIBUSB_DEV, USB\VID_0904&PID_1016
+"LibUSB-Win32: FrankAudiodata [B2K84 (before firmware installation)]"=LIBUSB_DEV, USB\VID_0904&PID_1016
+
+; Device: 0904:1017
+"LibUSB-Win32: FrankAudiodata [B2K84 (after firmware installation)]"=LIBUSB_DEV, USB\VID_0904&PID_1017
 
 ; Device: 0904:2000
 "LibUSB-Win32: Baum [VarioPro 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0904&PID_2000

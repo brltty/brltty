@@ -18,6 +18,54 @@
 
 title Frank Audiodata
 
-bind K4 FWINLT
+bind F1 HELP
+bind F2 PREFMENU
+bind F3 LEARN
+
+bind F2+F1 PREFLOAD
+bind F2+F3 PREFSAVE
+
+bind F1+F3 INFO
+bind F1+F2+F3 TIME
+
+bind F6 SIXDOTS
+bind F5 CSRTRK
+bind F4 CSRVIS
+
+bind F5+F4 ATTRVIS
+bind F5+F6 DISPMD
+
+bind F4+F6 AUTOREPEAT
+bind F4+F5+F6 FREEZE
+
 bind K5 HOME
+bind K4+K5+K6 BACK
+
+bind K4 FWINLT
 bind K6 FWINRT
+bind K4+K6 SKPBLNKWINS
+
+bind K5+K4 LNBEG
+bind K5+K6 LNEND
+
+bind K7 LNUP
+bind K9 LNDN
+bind K7+K9 SKPIDLNS
+
+bind K8+K7 TOP
+bind K8+K9 BOT
+
+bind RoutingKey ROUTE
+bind RoutingKey+RoutingKey CLIP_COPY
+
+bind F1+RoutingKey CLIP_NEW
+bind F6+RoutingKey COPY_LINE
+
+bind F2+RoutingKey CLIP_APPEND
+bind F5+RoutingKey COPY_RECT
+bind F1+F6 PASTE
+
+bind F3+RoutingKey SETLEFT
+bind F4+RoutingKey DESCCHAR
+
+bind SLIDER GOTOLINE+scaled

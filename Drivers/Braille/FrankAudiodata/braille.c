@@ -22,17 +22,20 @@
 #include <errno.h>
 
 #include "log.h"
+#include "io_generic.h"
+#include "io_usb.h"
+#include "ezusb.h"
 
+#define BRL_STATUS_FIELDS sfCursorCoordinates, sfWindowCoordinates
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 #include "brldefs-fa.h"
 
-#include "io_generic.h"
-#include "io_usb.h"
-
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
-#define MAXIMUM_RESPONSE_SIZE (0XFF + 4)
+
+#define MAXIMUM_RESPONSE_SIZE 0X20
+#define WRITE_CELLS_LIMIT 62
 
 #define TEXT_CELL_COUNT 80
 #define STATUS_CELL_COUNT 4
@@ -59,6 +62,7 @@ BEGIN_KEY_NAME_TABLE(navigation)
   BRL_KEY_NAME_ENTRY(FA, NAV, F6, "F6"),
 
   BRL_KEY_GROUP_ENTRY(FA, ROUTE, "RoutingKey"),
+  BRL_KEY_GROUP_ENTRY(FA, SLIDE, "Slider"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
@@ -72,13 +76,20 @@ BEGIN_KEY_TABLE_LIST
 END_KEY_TABLE_LIST
 
 typedef struct {
+  int (*prepare) (BrailleDisplay *brl);
+} ProductEntry;
+
+typedef struct {
   size_t length;
   unsigned char buffer[8];
 } DeviceResponse;
 
 struct BrailleDataStruct {
+  const ProductEntry *product;
+
   struct {
     KeyNumberSet navigation;
+    unsigned char routing[TEXT_CELL_COUNT / 8];
   } keys;
 
   struct {
@@ -102,18 +113,79 @@ struct BrailleDataStruct {
   } device;
 };
 
-typedef struct {
-  int (*prepare) (BrailleDisplay *brl);
-} ProductEntry;
+static UsbDevice *
+getDevice (BrailleDisplay *brl) {
+  UsbChannel *channel = gioGetResourceObject(brl->gioEndpoint);
+  return channel->device;
+}
 
-typedef enum {
-  EZL_RW_INTERNAL = 0XA0,
-  EZL_RW_EEPROM   = 0XA2,
-  EZL_RW_MEMORY   = 0XA3,
-} EZLOAD_ControlRequest;
+typedef struct {
+  UsbDevice *device;
+  uint8_t action;
+} RecordProcessingData;
+
+static int
+handleRecord (const IhexRecordData *record, void *data) {
+  const RecordProcessingData *rpd = data;
+
+  {
+    int ok = ezusbWriteData(
+      rpd->device, rpd->action,
+      record->address, record->data, record->count
+    );
+
+    if (!ok) return 0;
+  }
+
+  {
+    int ok = ezusbVerifyData(
+      rpd->device, rpd->action,
+      record->address, record->data, record->count
+    );
+
+    if (!ok) return 0;
+  }
+
+  return 1;
+}
+
+static int
+installStage (UsbDevice *device, unsigned int stage, uint8_t action) {
+  char name[0X40];
+
+  snprintf(
+    name, sizeof(name), "%s-bfa-stage%u",
+    PACKAGE_TARNAME, stage
+  );
+
+  RecordProcessingData rpd = {
+    .device = device,
+    .action = action
+  };
+
+  return ezusbProcessBlob(name, handleRecord, &rpd);
+}
+
+static int
+installFirmware (BrailleDisplay *brl) {
+  UsbDevice *device = getDevice(brl);
+
+  if (!ezusbStopCPU(device)) return 0;
+  if (!installStage(device, 1, EZUSB_REQ_RW_INTERNAL)) return 0;
+
+  if (!ezusbResetCPU(device)) return 0;
+  if (!installStage(device, 2, EZUSB_REQ_RW_MEMORY)) return 0;
+
+  if (!ezusbStopCPU(device)) return 0;
+  if (!installStage(device, 3, EZUSB_REQ_RW_INTERNAL)) return 0;
+
+  if (!ezusbResetCPU(device)) return 0;
+  return 1;
+}
 
 static int
 prepare1016 (BrailleDisplay *brl) {
+  if (!installFirmware(brl)) return 0;
   return 0; // force a retry - the product ID should now be 0X1017
 }
 
@@ -131,14 +203,18 @@ askDevice (UsbDevice *device, uint16_t value, uint16_t index, DeviceResponse *va
 
   if (result == -1) return 0;
   values->length = result;
-  logBytes(LOG_NOTICE, "%04X %04X", values->buffer, values->length, value, index);
+
+  logBytes(LOG_CATEGORY(BRAILLE_DRIVER),
+    "response: %04X %04X",
+    values->buffer, values->length, value, index
+  );
+
   return 1;
 }
 
 static int
 prepare1017 (BrailleDisplay *brl) {
-  UsbChannel *channel = gioGetResourceObject(brl->gioEndpoint);
-  UsbDevice *device = channel->device;
+  UsbDevice *device = getDevice(brl);
 
   if (!askDevice(device, 0X0000, 0X0001, &brl->data->device.response1)) return 0;
   if (!askDevice(device, 0X0001, 0X0000, &brl->data->device.serialNumber[0])) return 0;
@@ -173,15 +249,15 @@ verifyPacket (
     case 1: {
       switch (byte) {
         case FA_PKT_SLIDER:
-          *length = 4;
+          *length += 3;
           break;
 
         case FA_PKT_NAV:
-          *length = 5;
+          *length += 4;
           break;
 
         case FA_PKT_ROUTE:
-          *length = 11;
+          *length += ARRAY_COUNT(brl->data->keys.routing);
           break;
 
         default:
@@ -206,13 +282,13 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   BEGIN_USB_CHANNEL_DEFINITIONS
-    { /* B2K84 */
+    { /* B2K84 (before firmware installation) */
       .vendor=0X0904, .product=0X1016,
       .configuration=1, .interface=0, .alternative=0,
       .data = &productEntry_1016
     },
 
-    { /* B2K84 */
+    { /* B2K84 (after firmware installation) */
       .vendor=0X0904, .product=0X1017,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
@@ -226,8 +302,8 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
-    const ProductEntry *product = gioGetApplicationData(brl->gioEndpoint);
-    if (product->prepare(brl)) return 1;
+    brl->data->product = gioGetApplicationData(brl->gioEndpoint);
+    if (brl->data->product->prepare(brl)) return 1;
     disconnectBrailleResource(brl, NULL);
   }
 
@@ -278,7 +354,7 @@ writeCells (BrailleDisplay *brl, const unsigned char *cells, unsigned int from, 
   while (from < to) {
     unsigned char *byte = packet;
     unsigned int count = to - from;
-    count = MIN(count, 62);
+    count = MIN(count, WRITE_CELLS_LIMIT);
 
     *byte++ = from + offset;
     byte = mempcpy(byte, cells, count);
@@ -329,13 +405,31 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   while ((size = readPacket(brl, packet, sizeof(packet)))) {
     switch (packet[0]) {
       case FA_PKT_NAV: {
-        KeyNumberSet keys = (packet[1] <<  0) |
-                            (packet[2] <<  8) |
-                            (packet[3] << 16) |
-                            (packet[4] << 24);
+        KeyNumberSet keys = (packet[1] <<  0)
+                          | (packet[2] <<  8)
+                          | (packet[3] << 16)
+                          | (packet[4] << 24)
+                          ;
 
         enqueueUpdatedKeys(brl, keys, &brl->data->keys.navigation, FA_GRP_NAV, 0);
-        break;
+        continue;
+      }
+
+      case FA_PKT_ROUTE: {
+        enqueueUpdatedKeyGroup(
+          brl, TEXT_CELL_COUNT,
+          &packet[1], brl->data->keys.routing,
+          FA_GRP_ROUTE
+        );
+
+        continue;
+      }
+
+      case FA_PKT_SLIDER: {
+	int value = (packet[2] * 0XFF) / 0XF4;
+        value = MIN(value, 0XFF);
+        enqueueKey(brl, FA_GRP_SLIDE, value);
+        continue;
       }
 
       default:

@@ -373,7 +373,17 @@ crc_verify.$O:
 
 ###############################################################################
 
-BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) crc_generate.$O
+FIRMWARE_OBJECTS = ihex.$O ezusb.$O
+
+ihex.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ihex.c
+
+ezusb.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ezusb.c
+
+###############################################################################
+
+BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) crc_generate.$O $(FIRMWARE_OBJECTS)
 
 brl.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl.c

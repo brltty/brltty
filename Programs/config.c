@@ -196,7 +196,7 @@ static char *opt_pidFile;
 static char *opt_configurationFile;
 static char *opt_updatableDirectory;
 static char *opt_writableDirectory;
-static char *opt_driversDirectory;
+char *opt_driversDirectory;
 
 char *opt_brailleDevice;
 static char **brailleDevices = NULL;
