@@ -32,12 +32,14 @@ typedef uint8_t  IhexCount;
 typedef uint8_t  IhexByte;
 
 typedef struct {
-  const IhexByte *data;
   IhexAddress address;
-  IhexCount count;
-} IhexRecordData;
+  IhexType type;
 
-typedef int IhexRecordHandler (const IhexRecordData *record, void *data);
+  IhexCount count;
+  IhexByte data[];
+} IhexParsedRecord;
+
+typedef int IhexRecordHandler (const IhexParsedRecord *record, void *data);
 
 #ifdef __cplusplus
 }

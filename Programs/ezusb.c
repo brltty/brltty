@@ -95,6 +95,8 @@ ezusbVerifyData (UsbDevice *device, EzusbAction action, IhexAddress address, con
       address
     );
 
+    logBytes(LOG_DEBUG, "expected", data, length);
+    logBytes(LOG_DEBUG, "actual", buffer, length);
     return 0;
   }
 

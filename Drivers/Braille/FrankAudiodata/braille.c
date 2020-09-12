@@ -125,7 +125,7 @@ typedef struct {
 } RecordProcessingData;
 
 static int
-handleRecord (const IhexRecordData *record, void *data) {
+handleRecord (const IhexParsedRecord *record, void *data) {
   const RecordProcessingData *rpd = data;
 
   {

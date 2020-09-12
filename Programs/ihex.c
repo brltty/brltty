@@ -98,35 +98,34 @@ ihexMakeEndRecord (char *buffer, size_t size) {
 }
 
 typedef struct {
-  struct {
-    const char *path;
-    unsigned int line;
-  } file;
+  const char *record;
+  const char *path;
+  unsigned int line;
 
-  struct {
-    char *text;
-  } record;
+  unsigned char error:1;
+} IhexParseData;
+
+typedef struct {
+  IhexParseData parse;
 
   struct {
     IhexRecordHandler *function;
     void *data;
   } handler;
-
-  unsigned char problemReported:1;
-} IhexData;
+} IhexInputData;
 
 static void
-ihexReportProblem (IhexData *ihex, const char *message) {
-  ihex->problemReported = 1;
+ihexReportProblem (IhexParseData *parse, const char *message) {
+  parse->error = 1;
 
   logMessage(LOG_ERR,
     "ihex error: %s: %s[%u]: %s",
-    message, ihex->file.path, ihex->file.line, ihex->record.text
+    message, parse->path, parse->line, parse->record
   );
 }
 
 static int
-ihexCheckDigit (IhexData *ihex, unsigned char *value, char digit) {
+ihexCheckDigit (IhexParseData *parse, unsigned char *value, char digit) {
   typedef struct {
     char first;
     char last;
@@ -151,17 +150,17 @@ ihexCheckDigit (IhexData *ihex, unsigned char *value, char digit) {
     range += 1;
   }
 
-  ihexReportProblem(ihex, "invalid hexadecimal digit");
+  ihexReportProblem(parse, "invalid hexadecimal digit");
   return 0;
 }
 
-static int
-ihexProcessRecord (IhexData *ihex) {
-  const char *character = ihex->record.text;
+static IhexParsedRecord *
+ihexParseRecord (IhexParseData *parse) {
+  const char *character = parse->record;
 
   if (!*character || (*character != IHEX_RECORD_PREFIX)) {
-    ihexReportProblem(ihex, "not a record");
-    return 0;
+    ihexReportProblem(parse, "not an ihex record");
+    return NULL;
   }
 
   size_t length = strlen(++character);
@@ -171,7 +170,7 @@ ihexProcessRecord (IhexData *ihex) {
 
   while (*character) {
     unsigned char value;
-    if (!ihexCheckDigit(ihex, &value, *character)) return 0;
+    if (!ihexCheckDigit(parse, &value, *character)) return NULL;
 
     if (first) {
       *end = value << 4;
@@ -184,8 +183,8 @@ ihexProcessRecord (IhexData *ihex) {
   }
 
   if (!first) {
-    ihexReportProblem(ihex, "missing hexadecimal digit");
-    return 0;
+    ihexReportProblem(parse, "missing hexadecimal digit");
+    return NULL;
   }
 
   {
@@ -195,8 +194,8 @@ ihexProcessRecord (IhexData *ihex) {
     checksum &= IHEX_BYTE_MASK;
 
     if (checksum) {
-      ihexReportProblem(ihex, "checksum mismatch");
-      return 0;
+      ihexReportProblem(parse, "checksum mismatch");
+      return NULL;
     }
   }
 
@@ -215,48 +214,82 @@ ihexProcessRecord (IhexData *ihex) {
       const char *message = messages[actual];
       if (!message) message = "unknown error";
 
-      ihexReportProblem(ihex, message);
-      return 0;
+      ihexReportProblem(parse, message);
+      return NULL;
     }
   }
 
   IhexCount count = *byte++;
-  IhexAddress address = *byte++ << IHEX_BYTE_WIDTH;
-  address |= *byte++;
-  IhexType type = *byte++;
   size_t expected = ihexByteCount(count);
 
   if (actual < expected) {
-    ihexReportProblem(ihex, "truncated data");
-    return 0;
+    ihexReportProblem(parse, "truncated data");
+    return NULL;
   }
 
   if (actual > expected) {
-    ihexReportProblem(ihex, "excessive data");
-    return 0;
+    ihexReportProblem(parse, "excessive data");
+    return NULL;
   }
 
-  switch (type) {
+  IhexParsedRecord *record;
+  size_t size = sizeof(*record) + actual;
+  record = malloc(size);
+
+  if (!record) {
+    logMallocError();
+    return NULL;
+  }
+
+  memset(record, 0, size);
+  record->count = count;
+  record->address = *byte++ << IHEX_BYTE_WIDTH;
+  record->address |= *byte++;
+  record->type = *byte++;
+  memcpy(record->data, byte, actual);
+
+  if (0) {
+    const char *expected = parse->record;
+    char actual[ihexRecordLength(record->count) + 1];
+
+    ihexMakeRecord(
+      actual, sizeof(actual),
+      record->type, record->address,
+      record->data, record->count
+    );
+
+    if (strcmp(actual, expected) != 0) {
+      ihexReportProblem(parse, "ihex parse mismatch");
+      logMessage(LOG_DEBUG, "expected: %s", expected);
+      logMessage(LOG_DEBUG, "actual: %s", actual);
+
+      free(record);
+      return NULL;
+    }
+  }
+
+  return record;
+}
+
+static int
+ihexCallHandler (IhexInputData *input, const IhexParsedRecord *record) {
+  IhexParseData *parse = &input->parse;
+
+  switch (record->type) {
     case IHEX_TYPE_DATA:
-      if (!count) return 0;
+      if (!record->count) return 0;
       break;
 
     case IHEX_TYPE_END:
       return 0;
 
     default:
-      ihexReportProblem(ihex, "unsupported record type");
+      ihexReportProblem(parse, "unsupported record type");
       return 0;
   }
 
-  const IhexRecordData record = {
-    .address = address,
-    .data = byte,
-    .count = count
-  };
-
-  if (!ihex->handler.function(&record, ihex->handler.data)) {
-    ihexReportProblem(ihex, "record handler failed");
+  if (!input->handler.function(record, input->handler.data)) {
+    ihexReportProblem(parse, "record handler failed");
     return 0;
   }
 
@@ -265,21 +298,33 @@ ihexProcessRecord (IhexData *ihex) {
 
 static int
 ihexProcessLine (char *line, void *data) {
-  IhexData *ihex = data;
-  ihex->file.line += 1;
+  IhexInputData *input = data;
+  IhexParseData *parse = &input->parse;
+  parse->line += 1;
 
   while (*line == ' ') line += 1;
   if (!*line) return 1;
   if (*line == IHEX_COMMENT_PREFIX) return 1;
 
-  ihex->record.text = line;
-  return ihexProcessRecord(ihex);
+  parse->record = line;
+  IhexParsedRecord *record = ihexParseRecord(parse);
+  int ok = 0;
+
+  if (record) {
+    if (ihexCallHandler(input, record)) {
+      ok = 1;
+    }
+
+    free(record);
+  }
+
+  return ok;
 }
 
 int
 ihexProcessFile (const char *path, IhexRecordHandler *handler, void *data) {
-  IhexData ihex = {
-    .file = {
+  IhexInputData input = {
+    .parse = {
       .path = path,
       .line = 0
     },
@@ -294,8 +339,8 @@ ihexProcessFile (const char *path, IhexRecordHandler *handler, void *data) {
   FILE *file = openDataFile(path, "r", 0);
 
   if (file) {
-    if (processLines(file, ihexProcessLine, &ihex)) {
-      if (!ihex.problemReported) {
+    if (processLines(file, ihexProcessLine, &input)) {
+      if (!input.parse.error) {
         ok = 1;
       }
     }
