@@ -128,23 +128,15 @@ static int
 handleRecord (const IhexParsedRecord *record, void *data) {
   const RecordProcessingData *rpd = data;
 
-  {
-    int ok = ezusbWriteData(
-      rpd->device, rpd->action,
-      record->address, record->data, record->count
-    );
+  UsbDevice *const device = rpd->device;
+  const EzusbAction action = rpd->action;
 
-    if (!ok) return 0;
-  }
+  const IhexAddress address = record->address;
+  const IhexByte *const bytes = record->data;
+  const IhexCount count = record->count;
 
-  {
-    int ok = ezusbVerifyData(
-      rpd->device, rpd->action,
-      record->address, record->data, record->count
-    );
-
-    if (!ok) return 0;
-  }
+  if (!ezusbWriteData(device, action, address, bytes, count)) return 0;
+  if (!ezusbVerifyData(device, action, address, bytes, count)) return 0;
 
   return 1;
 }
