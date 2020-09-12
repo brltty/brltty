@@ -233,7 +233,7 @@ ihexParseRecord (IhexParseData *parse) {
   }
 
   IhexParsedRecord *record;
-  size_t size = sizeof(*record) + actual;
+  size_t size = sizeof(*record) + count;
   record = malloc(size);
 
   if (!record) {
@@ -246,7 +246,7 @@ ihexParseRecord (IhexParseData *parse) {
   record->address = *byte++ << IHEX_BYTE_WIDTH;
   record->address |= *byte++;
   record->type = *byte++;
-  memcpy(record->data, byte, actual);
+  memcpy(record->data, byte, count);
 
   if (0) {
     const char *expected = parse->record;
