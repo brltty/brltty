@@ -50,7 +50,6 @@ extern int ezusbVerifyData (
   const unsigned char *data, size_t length
 );
 
-#define EZUSB_CPUCS_DELAY 10
 #define EZUSB_CPUCS_ADDRESS 0X7F92
 #define EZUSB_CPUCS_RESET 0X00
 #define EZUSB_CPUCS_STOP  0X01

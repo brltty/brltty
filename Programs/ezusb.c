@@ -27,6 +27,7 @@
 #include "core.h"
 
 #define EZUSB_REQUEST_TIMEOUT 1000
+#define EZUSB_CPUCS_DELAY 10
 
 int
 ezusbWriteData (UsbDevice *device, EzusbAction action, IhexAddress address, const unsigned char *data, size_t length) {
@@ -43,7 +44,7 @@ ezusbWriteData (UsbDevice *device, EzusbAction action, IhexAddress address, cons
     logMessage(LOG_ERR,
       "firmware write length mismatch:"
       " Address:%04"PRIX16
-      " Expected:%"PRIsize
+      " Expect:%"PRIsize
       " Actual:%zu",
       address, length, count
     );
@@ -67,7 +68,7 @@ ezusbReadData (UsbDevice *device, EzusbAction action, IhexAddress address, unsig
     logMessage(LOG_ERR,
       "firmware read length mismatch:"
       " Address:%04"PRIX16
-      " Expected:%"PRIsize
+      " Expect:%"PRIsize
       " Actual:%zu",
       address, size, count
     );
@@ -95,7 +96,7 @@ ezusbVerifyData (UsbDevice *device, EzusbAction action, IhexAddress address, con
       address
     );
 
-    logBytes(LOG_DEBUG, "expected", data, length);
+    logBytes(LOG_DEBUG, "expect", data, length);
     logBytes(LOG_DEBUG, "actual", buffer, length);
     return 0;
   }
