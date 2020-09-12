@@ -29,10 +29,10 @@
 #define EZUSB_REQUEST_TIMEOUT 1000
 
 int
-ezusbWriteData (UsbDevice *device, uint8_t request, uint16_t address, const unsigned char *data, size_t length) {
+ezusbWriteData (UsbDevice *device, EzusbAction action, IhexAddress address, const unsigned char *data, size_t length) {
   ssize_t result = usbControlWrite(
     device, EZUSB_REQUEST_RECIPIENT, EZUSB_REQUEST_TYPE,
-    request, address, EZUSB_REQUEST_INDEX,
+    action, address, EZUSB_REQUEST_INDEX,
     data, length, EZUSB_REQUEST_TIMEOUT
   );
 
@@ -53,10 +53,10 @@ ezusbWriteData (UsbDevice *device, uint8_t request, uint16_t address, const unsi
 }
 
 int
-ezusbReadData (UsbDevice *device, uint8_t request, uint16_t address, unsigned char *buffer, size_t size) {
+ezusbReadData (UsbDevice *device, EzusbAction action, IhexAddress address, unsigned char *buffer, size_t size) {
   ssize_t result = usbControlRead(
     device, EZUSB_REQUEST_RECIPIENT, EZUSB_REQUEST_TYPE,
-    request, address, EZUSB_REQUEST_INDEX,
+    action, address, EZUSB_REQUEST_INDEX,
     buffer, size, EZUSB_REQUEST_TIMEOUT
   );
 
@@ -77,12 +77,12 @@ ezusbReadData (UsbDevice *device, uint8_t request, uint16_t address, unsigned ch
 }
 
 int
-ezusbVerifyData (UsbDevice *device, uint8_t request, uint16_t address, const unsigned char *data, size_t length) {
-  uint8_t buffer[length];
+ezusbVerifyData (UsbDevice *device, EzusbAction action, IhexAddress address, const unsigned char *data, size_t length) {
+  unsigned char buffer[length];
 
   {
     int ok = ezusbReadData(
-      device, request, address, buffer, length
+      device, action, address, buffer, length
     );
 
     if (!ok) return 0;
@@ -104,7 +104,8 @@ ezusbVerifyData (UsbDevice *device, uint8_t request, uint16_t address, const uns
 int
 ezusbWriteCPUCS (UsbDevice *device, uint8_t state) {
   int ok = ezusbWriteData(
-    device, EZUSB_REQ_RW_INTERNAL, EZUSB_CPUCS_ADDRESS, &state, sizeof(state)
+    device, EZUSB_ACTION_RW_INTERNAL,
+    EZUSB_CPUCS_ADDRESS, &state, sizeof(state)
   );
 
   if (ok) approximateDelay(EZUSB_CPUCS_DELAY);

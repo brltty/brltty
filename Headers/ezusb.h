@@ -30,28 +30,23 @@ extern "C" {
 #define EZUSB_REQUEST_TYPE UsbControlType_Vendor
 #define EZUSB_REQUEST_INDEX 0
 
-typedef enum {
-  EZUSB_REQ_RW_INTERNAL = 0XA0,
-  EZUSB_REQ_RW_EEPROM   = 0XA2,
-  EZUSB_REQ_RW_MEMORY   = 0XA3,
-} EZUSB_ControlRequest;
-
-typedef enum {
-  EZUSB_ADDR_CPUCS = 0X7F92,
-} EZUSB_FirmwareAddress;
+typedef uint8_t EzusbAction;
+#define EZUSB_ACTION_RW_INTERNAL 0XA0
+#define EZUSB_ACTION_RW_EEPROM   0XA2
+#define EZUSB_ACTION_RW_MEMORY   0XA3
 
 extern int ezusbWriteData (
-  UsbDevice *device, uint8_t request, uint16_t address,
+  UsbDevice *device, EzusbAction action, IhexAddress address,
   const unsigned char *data, size_t length
 );
 
 extern int ezusbReadData (
-  UsbDevice *device, uint8_t request, uint16_t address,
+  UsbDevice *device, EzusbAction action, IhexAddress address,
   unsigned char *buffer, size_t size
 );
 
 extern int ezusbVerifyData (
-  UsbDevice *device, uint8_t request, uint16_t address,
+  UsbDevice *device, EzusbAction action, IhexAddress address,
   const unsigned char *data, size_t length
 );
 

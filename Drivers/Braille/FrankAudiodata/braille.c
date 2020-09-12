@@ -121,7 +121,7 @@ getDevice (BrailleDisplay *brl) {
 
 typedef struct {
   UsbDevice *device;
-  uint8_t action;
+  EzusbAction action;
 } RecordProcessingData;
 
 static int
@@ -150,7 +150,7 @@ handleRecord (const IhexRecordData *record, void *data) {
 }
 
 static int
-installStage (UsbDevice *device, unsigned int stage, uint8_t action) {
+installStage (UsbDevice *device, unsigned int stage, EzusbAction action) {
   char name[0X40];
 
   snprintf(
@@ -171,13 +171,13 @@ installFirmware (BrailleDisplay *brl) {
   UsbDevice *device = getDevice(brl);
 
   if (!ezusbStopCPU(device)) return 0;
-  if (!installStage(device, 1, EZUSB_REQ_RW_INTERNAL)) return 0;
+  if (!installStage(device, 1, EZUSB_ACTION_RW_INTERNAL)) return 0;
 
   if (!ezusbResetCPU(device)) return 0;
-  if (!installStage(device, 2, EZUSB_REQ_RW_MEMORY)) return 0;
+  if (!installStage(device, 2, EZUSB_ACTION_RW_MEMORY)) return 0;
 
   if (!ezusbStopCPU(device)) return 0;
-  if (!installStage(device, 3, EZUSB_REQ_RW_INTERNAL)) return 0;
+  if (!installStage(device, 3, EZUSB_ACTION_RW_INTERNAL)) return 0;
 
   if (!ezusbResetCPU(device)) return 0;
   return 1;

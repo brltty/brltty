@@ -23,10 +23,18 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef uint8_t IhexType;
+#define IHEX_TYPE_DATA 0X00
+#define IHEX_TYPE_END  0X01
+
+typedef uint16_t IhexAddress;
+typedef uint8_t  IhexCount;
+typedef uint8_t  IhexByte;
+
 typedef struct {
-  const unsigned char *data;
-  uint16_t address;
-  uint8_t count;
+  const IhexByte *data;
+  IhexAddress address;
+  IhexCount count;
 } IhexRecordData;
 
 typedef int IhexRecordHandler (const IhexRecordData *record, void *data);

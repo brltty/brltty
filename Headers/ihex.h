@@ -25,20 +25,17 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define IHEX_TYPE_DATA 0X00
-#define IHEX_TYPE_END  0X01
-
 extern size_t ihexRecordLength (size_t count);
 
 extern int ihexMakeRecord (
   char *buffer, size_t size,
-  uint8_t type, uint16_t address,
-  const unsigned char *data, uint8_t count
+  IhexType type, IhexAddress address,
+  const IhexByte *data, IhexCount count
 );
 
 extern int ihexMakeDataRecord (
   char *buffer, size_t size,
-  uint16_t address, const unsigned char *data, uint8_t count
+  IhexAddress address, const IhexByte *data, IhexCount count
 );
 
 extern int ihexMakeEndRecord (char *buffer, size_t size);

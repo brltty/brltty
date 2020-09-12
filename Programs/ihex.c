@@ -51,9 +51,9 @@ ihexRecordLength (size_t count) {
 }
 
 int
-ihexMakeRecord (char *buffer, size_t size, uint8_t type, uint16_t address, const unsigned char *data, uint8_t count) {
-  unsigned char bytes[ihexByteCount(count)];
-  unsigned char *end = bytes;
+ihexMakeRecord (char *buffer, size_t size, IhexType type, IhexAddress address, const IhexByte *data, IhexCount count) {
+  IhexByte bytes[ihexByteCount(count)];
+  IhexByte *end = bytes;
 
   *end++ = count;
   *end++ = (address >> IHEX_BYTE_WIDTH) & IHEX_BYTE_MASK;
@@ -65,7 +65,7 @@ ihexMakeRecord (char *buffer, size_t size, uint8_t type, uint16_t address, const
     uint32_t checksum = 0;
 
     {
-      const unsigned char *byte = bytes;
+      const IhexByte *byte = bytes;
       while (byte < end) checksum += *byte++;
     }
 
@@ -79,7 +79,7 @@ ihexMakeRecord (char *buffer, size_t size, uint8_t type, uint16_t address, const
   STR_PRINTF("%c", IHEX_RECORD_PREFIX);
 
   {
-    const unsigned char *byte = bytes;
+    const IhexByte *byte = bytes;
     while (byte < end) STR_PRINTF("%02X", *byte++);
   }
 
@@ -88,7 +88,7 @@ ihexMakeRecord (char *buffer, size_t size, uint8_t type, uint16_t address, const
 }
 
 int
-ihexMakeDataRecord (char *buffer, size_t size, uint16_t address, const unsigned char *data, uint8_t count) {
+ihexMakeDataRecord (char *buffer, size_t size, IhexAddress address, const IhexByte *data, IhexCount count) {
   return ihexMakeRecord(buffer, size, IHEX_TYPE_DATA, address, data, count);
 }
 
@@ -165,8 +165,8 @@ ihexProcessRecord (IhexData *ihex) {
   }
 
   size_t length = strlen(++character);
-  unsigned char bytes[length + 1];
-  unsigned char *end = bytes;
+  IhexByte bytes[length + 1]; // +1 in case length is 0
+  IhexByte *end = bytes;
   int first = 1;
 
   while (*character) {
@@ -190,7 +190,7 @@ ihexProcessRecord (IhexData *ihex) {
 
   {
     uint32_t checksum = 0;
-    const unsigned char *byte = bytes;
+    const IhexByte *byte = bytes;
     while (byte < end) checksum += *byte++;
     checksum &= IHEX_BYTE_MASK;
 
@@ -200,7 +200,7 @@ ihexProcessRecord (IhexData *ihex) {
     }
   }
 
-  const unsigned char *byte = bytes;
+  const IhexByte *byte = bytes;
   size_t actual = end - byte;
 
   {
@@ -220,10 +220,10 @@ ihexProcessRecord (IhexData *ihex) {
     }
   }
 
-  uint8_t count = *byte++;
-  uint16_t address = *byte++ << IHEX_BYTE_WIDTH;
+  IhexCount count = *byte++;
+  IhexAddress address = *byte++ << IHEX_BYTE_WIDTH;
   address |= *byte++;
-  uint8_t type = *byte++;
+  IhexType type = *byte++;
   size_t expected = ihexByteCount(count);
 
   if (actual < expected) {
