@@ -119,28 +119,6 @@ getDevice (BrailleDisplay *brl) {
   return channel->device;
 }
 
-typedef struct {
-  UsbDevice *device;
-  EzusbAction action;
-} RecordProcessingData;
-
-static int
-handleRecord (const IhexParsedRecord *record, void *data) {
-  const RecordProcessingData *rpd = data;
-
-  UsbDevice *const device = rpd->device;
-  const EzusbAction action = rpd->action;
-
-  const IhexAddress address = record->address;
-  const IhexByte *const bytes = record->data;
-  const IhexCount count = record->count;
-
-  if (!ezusbWriteData(device, action, address, bytes, count)) return 0;
-  if (!ezusbVerifyData(device, action, address, bytes, count)) return 0;
-
-  return 1;
-}
-
 static int
 installStage (UsbDevice *device, unsigned int stage, EzusbAction action) {
   char name[0X40];
@@ -150,12 +128,7 @@ installStage (UsbDevice *device, unsigned int stage, EzusbAction action) {
     PACKAGE_TARNAME, stage
   );
 
-  RecordProcessingData rpd = {
-    .device = device,
-    .action = action
-  };
-
-  return ezusbProcessBlob(name, handleRecord, &rpd);
+  return ezusbInstallBlob(device, name, action);
 }
 
 static int

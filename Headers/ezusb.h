@@ -58,6 +58,10 @@ extern int ezusbWriteCPUCS (UsbDevice *device, uint8_t state);
 extern int ezusbStopCPU (UsbDevice *device);
 extern int ezusbResetCPU (UsbDevice *device);
 
+extern int ezusbInstallBlob (
+  UsbDevice *device, const char *name, EzusbAction action
+);
+
 extern int ezusbProcessBlob (
   const char *name, IhexRecordHandler *handler, void *data
 );

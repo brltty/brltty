@@ -140,3 +140,35 @@ ezusbProcessBlob (const char *name, IhexRecordHandler *handler, void *data) {
 
   return ok;
 }
+
+typedef struct {
+  UsbDevice *device;
+  EzusbAction action;
+} EzusbRecordProcessingData;
+
+static int
+ezusbHandleRecord (const IhexParsedRecord *record, void *data) {
+  const EzusbRecordProcessingData *rpd = data;
+
+  UsbDevice *const device = rpd->device;
+  const EzusbAction action = rpd->action;
+
+  const IhexAddress address = record->address;
+  const IhexByte *const bytes = record->data;
+  const IhexCount count = record->count;
+
+  if (!ezusbWriteData(device, action, address, bytes, count)) return 0;
+  if (!ezusbVerifyData(device, action, address, bytes, count)) return 0;
+
+  return 1;
+}
+
+int
+ezusbInstallBlob (UsbDevice *device, const char *name, EzusbAction action) {
+  EzusbRecordProcessingData rpd = {
+    .device = device,
+    .action = action
+  };
+
+  return ezusbProcessBlob(name, ezusbHandleRecord, &rpd);
+}
