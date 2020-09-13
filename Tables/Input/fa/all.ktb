@@ -99,8 +99,8 @@ bind K1+K8+K9 BOT_LEFT
 bind K2+K8+K7 ATTRUP
 bind K2+K8+K9 ATTRDN
 
-bind K3+K8+K7 SWITCHVT_PREV
-bind K3+K8+K9 SWITCHVT_NEXT
+bind K3+K8+K7 NOOP
+bind K3+K8+K9 NOOP
 
 bind K8+K2 AUTOSPEAK
 bind K8+K1 SAY_SOFTER
@@ -123,6 +123,19 @@ bind F5+RoutingKey COPY_RECT
 
 bind F3+RoutingKey SETLEFT
 bind F4+RoutingKey DESCCHAR
+
+bind F4+F6+RoutingKey SWITCHVT
+bind F4+F6+F1 SWITCHVT_PREV
+bind F4+F6+F3 SWITCHVT_NEXT
+
+bind F4+F5+RoutingKey SETMARK
+bind F5+F6+RoutingKey GOTOMARK
+bind F4+F5+F6+RoutingKey KEY_FUNCTION
+
+bind K7+RoutingKey PRINDENT
+bind K9+RoutingKey NXINDENT
+bind K8+K7+RoutingKey PRDIFCHAR
+bind K8+K9+RoutingKey NXDIFCHAR
 
 bind SLIDER GOTOLINE+scaled
 
