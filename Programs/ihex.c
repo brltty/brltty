@@ -199,7 +199,7 @@ ihexParseRecord (IhexRecordProcessingData *rpd) {
   }
 
   const IhexByte *byte = bytes;
-  size_t actual = end - byte;
+  size_t actualCount = end - byte;
 
   {
     static const char *const messages[] = {
@@ -209,8 +209,8 @@ ihexParseRecord (IhexRecordProcessingData *rpd) {
       [3] = "missing record type",
     };
 
-    if (actual < ARRAY_COUNT(messages)) {
-      const char *message = messages[actual];
+    if (actualCount < ARRAY_COUNT(messages)) {
+      const char *message = messages[actualCount];
       if (!message) message = "unknown error";
 
       ihexReportProblem(rpd, message);
@@ -219,14 +219,14 @@ ihexParseRecord (IhexRecordProcessingData *rpd) {
   }
 
   IhexCount count = *byte++;
-  size_t expect = ihexByteCount(count);
+  size_t expectCount = ihexByteCount(count);
 
-  if (actual < expect) {
+  if (actualCount < expectCount) {
     ihexReportProblem(rpd, "truncated data");
     return NULL;
   }
 
-  if (actual > expect) {
+  if (actualCount > expectCount) {
     ihexReportProblem(rpd, "excessive data");
     return NULL;
   }
