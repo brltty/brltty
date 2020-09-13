@@ -54,7 +54,7 @@ bind K5+K4 LNBEG
 bind K5+K6 LNEND
 
 bind K5 HOME
-bind K4+K5+K6 BACK
+bind K4+K5+K6 CSRJMP_VERT
 
 bind K7 LNUP
 bind K9 LNDN
@@ -63,10 +63,12 @@ bind K7+K9 SKPIDLNS
 bind K8+K7 TOP
 bind K8+K9 BOT
 
+bind K8 BACK
+bind K7+K8+K9 PASTE
+
 bind RoutingKey ROUTE
 bind RoutingKey+RoutingKey CLIP_COPY
 
-bind F1+F6 PASTE
 bind F1+RoutingKey CLIP_NEW
 bind F6+RoutingKey COPY_LINE
 
@@ -77,3 +79,14 @@ bind F3+RoutingKey SETLEFT
 bind F4+RoutingKey DESCCHAR
 
 bind SLIDER GOTOLINE+scaled
+
+
+context menu
+bind F4 MENU_PREV_ITEM
+bind F6 MENU_NEXT_ITEM
+bind F5+F4 MENU_FIRST_ITEM
+bind F5+F6 MENU_LAST_ITEM
+bind F5 MENU_NEXT_SETTING
+bind F4+F6 MENU_PREV_SETTING
+bind F4+F5+F6 MENU_PREV_LEVEL
+
