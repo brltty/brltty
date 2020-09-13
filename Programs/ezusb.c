@@ -147,7 +147,7 @@ typedef struct {
 } EzusbRecordProcessingData;
 
 static int
-ezusbHandleRecord (const IhexParsedRecord *record, void *data) {
+ezusbInstallData (const IhexParsedRecord *record, void *data) {
   const EzusbRecordProcessingData *rpd = data;
 
   UsbDevice *const device = rpd->device;
@@ -170,5 +170,5 @@ ezusbInstallBlob (UsbDevice *device, const char *name, EzusbAction action) {
     .action = action
   };
 
-  return ezusbProcessBlob(name, ezusbHandleRecord, &rpd);
+  return ezusbProcessBlob(name, ezusbInstallData, &rpd);
 }

@@ -109,11 +109,8 @@ typedef struct {
 
 typedef struct {
   IhexRecordProcessingData rpd;
-
-  struct {
-    IhexRecordHandler *function;
-    void *data;
-  } handler;
+  IhexRecordHandler *handler;
+  void *data;
 } IhexFileProcessingData;
 
 static void
@@ -290,7 +287,7 @@ ihexCallHandler (IhexFileProcessingData *fpd, const IhexParsedRecord *record) {
       return 0;
   }
 
-  if (!fpd->handler.function(record, fpd->handler.data)) {
+  if (!fpd->handler(record, fpd->data)) {
     ihexReportProblem(rpd, "record handler failed");
     return 0;
   }
@@ -331,10 +328,8 @@ ihexProcessFile (const char *path, IhexRecordHandler *handler, void *data) {
       .line = 0
     },
 
-    .handler = {
-      .function = handler,
-      .data = data
-    }
+    .handler = handler,
+    .data = data
   };
 
   int ok = 0;
