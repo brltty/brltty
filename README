@@ -169,6 +169,7 @@ The following braille displays are supported:
 -  CombiBraille [25/45/85]
 -  EcoBraille [20/40/80]
 -  EuroBraille [AzerBraille, Clio, Esys, Iris, NoteBraille, Scriba]
+-  FrankAudiodata [B2K84]
 -  FreedomScientific [Focus 1 44/70/84, Focus 2 40/80, Focus Blue 14/40/80,
                       PAC Mate 20/40]
 -  HandyTech [Modular 20/40/80, Modular Evolution 64/88, Modular Connect 88,

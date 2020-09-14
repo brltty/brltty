@@ -747,6 +747,9 @@ eSpeak
 .B eu
 EuroBraille
 .TP 4
+.B fa
+FrankAudiodata
+.TP 4
 .B fl
 FestivalLite
 .TP 4
