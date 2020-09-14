@@ -43,7 +43,7 @@
 BrailleDisplay brl;
 
 static char *opt_brailleDevice;
-static char *opt_driversDirectory;
+char *opt_driversDirectory;
 static char *opt_tablesDirectory;
 static char *opt_writableDirectory;
 
