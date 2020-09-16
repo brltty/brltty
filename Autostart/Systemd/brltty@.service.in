@@ -54,11 +54,11 @@ Nice=-10
 OOMScoreAdjust=-900
 
 # for playing alert tunes via the built-in PC speaker (KDMKTONE, KIOCSOUND)
-ExecStartPre=-/sbin/modprobe pcspkr
+ExecStartPre=+/sbin/modprobe pcspkr
 AmbientCapabilities=cap_sys_tty_config
 
 # for creating virtual devices
-ExecStartPre=-/sbin/modprobe uinput
+ExecStartPre=+/sbin/modprobe uinput
 
 # for injecting input characters typed on a braille device (TIOCSTI)
 AmbientCapabilities=cap_sys_admin
