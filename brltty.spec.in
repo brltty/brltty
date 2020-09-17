@@ -68,7 +68,6 @@ BuildRequires: ncurses-devel
 BuildRequires: alsa-lib-devel
 BuildRequires: bluez-libs-devel
 BuildRequires: dbus-devel
-BuildRequires: polkit-devel
 BuildRequires: systemd-devel
 BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
@@ -469,6 +468,7 @@ Group: System Environment/Libraries
 License: LGPL
 
 BuildRequires: java
+BuildRequires: java-devel
 
 AutoProv: no
 AutoReq: yes
