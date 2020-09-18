@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "log.h"
 #include "strfmt.h"
@@ -343,6 +344,13 @@ ihexProcessFile (const char *path, IhexRecordHandler *handler, void *data) {
     }
     ;
     fclose(file);
+  } else if (errno == ENOENT) {
+    const char *url = makePath(PACKAGE_URL, IHEX_FILES_SUBDIRECTORY);
+
+    if (url) {
+      logMessage(LOG_WARNING, "missing firmware blobs can be downloaded from %s", url);
+      free(url);
+    }
   }
 
   return ok;

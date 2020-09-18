@@ -44,7 +44,7 @@ extern int ihexProcessFile (
   const char *path, IhexRecordHandler *handler, void *data
 );
 
-#define IHEX_FILES_SUBDIRECTORY "Firmware"
+#define IHEX_FILES_SUBDIRECTORY "firmware"
 #define IHEX_FILE_EXTENSION ".ihex"
 
 extern char *ihexEnsureExtension (const char *path);
