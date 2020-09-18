@@ -345,7 +345,7 @@ ihexProcessFile (const char *path, IhexRecordHandler *handler, void *data) {
     ;
     fclose(file);
   } else if (errno == ENOENT) {
-    const char *url = makePath(PACKAGE_URL, IHEX_FILES_SUBDIRECTORY);
+    char *url = makePath(PACKAGE_URL, IHEX_FILES_SUBDIRECTORY);
 
     if (url) {
       logMessage(LOG_WARNING, "missing firmware blobs can be downloaded from %s", url);
