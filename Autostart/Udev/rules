@@ -28,7 +28,7 @@
 # *  Keyboard Key Tables                                                    #
 # *  Injecting arbitrary key combinations typed on braille devices.         #
 #############################################################################
-KERNEL=="uinput", ACTION=="add", MODE="0660"
+KERNEL=="uinput", ACTION=="add", RUN+="/usr/bin/setfacl -m u:brltty:rw /dev/$name"
 
 SUBSYSTEM=="usb_device", GOTO="brltty_usb_begin"
 SUBSYSTEM=="usb", KERNEL!="*:*", GOTO="brltty_usb_begin"
