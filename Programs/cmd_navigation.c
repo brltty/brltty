@@ -221,7 +221,7 @@ testPrompt (int column, int row, void *data) {
       while (from < end) *to++ = from++->text;
     }
 
-    if (rgxMatchTextCharacters(promptPatterns, text, length, NULL, NULL)) return 1;
+    return rgxMatchTextCharacters(promptPatterns, text, length, NULL, NULL);
   }
 
   if (!column) return 0;
