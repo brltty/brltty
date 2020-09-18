@@ -221,7 +221,7 @@ testPrompt (int column, int row, void *data) {
       while (from < end) *to++ = from++->text;
     }
 
-    return rgxMatchTextCharacters(promptPatterns, text, length, NULL, NULL);
+    return !!rgxMatchTextCharacters(promptPatterns, text, length, NULL, NULL);
   }
 
   if (!column) return 0;
@@ -488,13 +488,20 @@ handleNavigationCommands (int command, void *data) {
 
     findPrompt:
       {
-        ScreenCharacter characters[scr.cols];
-        readScreenRow(ses->winy, scr.cols, characters);
-        size_t length = 0;
+        size_t size = scr.cols;
+        ScreenCharacter characters[size];
+        readScreenRow(ses->winy, size, characters);
+        size_t length;
 
-        while (length < scr.cols) {
-          if (characters[length].text == WC_C(' ')) break;
-          length += 1;
+        if (promptPatterns) {
+          length = size;
+        } else {
+          length = 0;
+
+          while (length < size) {
+            if (characters[length].text == WC_C(' ')) break;
+            length += 1;
+          }
         }
 
         findRow(length, increment, testPrompt, characters);
