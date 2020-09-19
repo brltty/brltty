@@ -20,7 +20,7 @@
 # keep these synchronized with brltty@.service #
 ################################################
 
-u brltty - "Braille Device Daemon"
+u brltty - "Braille Device Daemon" /var/lib/brltty
 
 # for reading screen content (/dev/vcs*)
 m brltty tty
@@ -30,6 +30,7 @@ m brltty tty
 
 # for serial I/O (/dev/ttyS<n>)
 m brltty dialout
+#m brltty uucp
 
 # for USB I/o (/dev/bus/usb/*/*)
 m brltty root
