@@ -509,7 +509,11 @@ handleNavigationCommands (int command, void *data) {
             column += 1;
           }
 
-          findRow(column, increment, testPromptOriginal, characters);
+          if (column < length) {
+            findRow(column, increment, testPromptOriginal, characters);
+          } else {
+            alert(ALERT_BOUNCE);
+          }
         }
       }
 
