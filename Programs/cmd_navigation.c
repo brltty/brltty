@@ -206,27 +206,34 @@ addPromptPattern (const char *string) {
 }
 
 static int
-testPrompt (int column, int row, void *data) {
-  int length = scr.cols;
+testPromptOriginal (int column, int row, void *data) {
+  if (!column) return 0;
+
+  int length = column + 1;
   ScreenCharacter characters[length];
   readScreenRow(row, length, characters);
 
-  if (promptPatterns) {
-    wchar_t text[length];
+  const ScreenCharacter *prompt = data;
+  return isSameRow(characters, prompt, length, isSameText);
+}
 
-    {
-      wchar_t *to = text;
-      const ScreenCharacter *from = characters;
-      const ScreenCharacter *end = from + length;
-      while (from < end) *to++ = from++->text;
-    }
+static int
+testPromptPatterns (int column, int row, void *data) {
+  int length = scr.cols;
+  wchar_t text[length];
 
-    return !!rgxMatchTextCharacters(promptPatterns, text, length, NULL, NULL);
+  {
+    ScreenCharacter characters[length];
+    readScreenRow(row, length, characters);
+
+    const ScreenCharacter *from = characters;
+    const ScreenCharacter *end = from + length;
+
+    wchar_t *to = text;
+    while (from < end) *to++ = from++->text;
   }
 
-  if (!column) return 0;
-  const ScreenCharacter *prompt = data;
-  return isSameRow(characters, prompt, column+1, isSameText);
+  return !!rgxMatchTextCharacters(promptPatterns, text, length, NULL, NULL);
 }
 
 static void
@@ -488,23 +495,22 @@ handleNavigationCommands (int command, void *data) {
 
     findPrompt:
       {
-        size_t size = scr.cols;
-        ScreenCharacter characters[size];
-        readScreenRow(ses->winy, size, characters);
-        size_t length;
+        size_t length = scr.cols;
+        ScreenCharacter characters[length];
+        readScreenRow(ses->winy, length, characters);
 
         if (promptPatterns) {
-          length = size;
+          findRow(length, increment, testPromptPatterns, characters);
         } else {
-          length = 0;
+          int column = 0;
 
-          while (length < size) {
-            if (characters[length].text == WC_C(' ')) break;
-            length += 1;
+          while (column < length) {
+            if (characters[column].text == WC_C(' ')) break;
+            column += 1;
           }
-        }
 
-        findRow(length, increment, testPrompt, characters);
+          findRow(column, increment, testPromptOriginal, characters);
+        }
       }
 
       break;
