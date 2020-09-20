@@ -41,7 +41,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 
 Requires: dbus-libs
 Requires: polkit-libs
-Requires: libpcre2-utf32
+Requires: pcre2-utf32
 Requires: libicu
 Requires: liblouis
 Requires: expat
