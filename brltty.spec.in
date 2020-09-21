@@ -39,35 +39,37 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _systemdusersdir %{_libdir}/sysusers.d
 %define _udevlibdir %{_libdir}/udev
 
+Requires: cldr-emoji-annotation
 Requires: dbus-libs
-Requires: polkit-libs
-Requires: pcre2-utf32
+Requires: expat
+Requires: libcap
 Requires: libicu
 Requires: liblouis
-Requires: expat
-Requires: cldr-emoji-annotation
+Requires: pcre2-utf32
+Requires: polkit-libs
 
 BuildRequires: /bin/sh
 BuildRequires: /usr/bin/env
 BuildRequires: autoconf >= 2.53
 BuildRequires: automake
 BuildRequires: make
-BuildRequires: gcc
 BuildRequires: coreutils
 BuildRequires: binutils
+BuildRequires: gcc
 BuildRequires: gawk
 BuildRequires: tcl
 BuildRequires: glibc-headers
-BuildRequires: glibc-devel
-BuildRequires: polkit-devel
-BuildRequires: pcre2-devel
-BuildRequires: expat-devel
-BuildRequires: libicu-devel
-BuildRequires: liblouis-devel
-BuildRequires: ncurses-devel
 BuildRequires: alsa-lib-devel
 BuildRequires: bluez-libs-devel
 BuildRequires: dbus-devel
+BuildRequires: expat-devel
+BuildRequires: glibc-devel
+BuildRequires: libcap-devel
+BuildRequires: libicu-devel
+BuildRequires: liblouis-devel
+BuildRequires: ncurses-devel
+BuildRequires: pcre2-devel
+BuildRequires: polkit-devel
 BuildRequires: systemd-devel
 BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
