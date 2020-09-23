@@ -92,7 +92,6 @@ BEGIN_KEY_NAME_TABLE(joystick)
   KEY_NAME_ENTRY(HT_KEY_JoystickRight, "Right"),
   KEY_NAME_ENTRY(HT_KEY_JoystickUp, "Up"),
   KEY_NAME_ENTRY(HT_KEY_JoystickDown, "Down"),
-
   KEY_NAME_ENTRY(HT_KEY_JoystickAction, "Action"),
 END_KEY_NAME_TABLE
 
@@ -180,6 +179,14 @@ BEGIN_KEY_NAME_TABLES(ab)
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(rockers),
   KEY_NAME_TABLE(brailleStar),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(ab_s)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(brailleStar),
+  KEY_NAME_TABLE(joystick),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(cb40)
@@ -281,6 +288,7 @@ DEFINE_KEY_TABLE(bs80)
 DEFINE_KEY_TABLE(brln)
 DEFINE_KEY_TABLE(as40)
 DEFINE_KEY_TABLE(ab)
+DEFINE_KEY_TABLE(ab_s)
 DEFINE_KEY_TABLE(cb40)
 DEFINE_KEY_TABLE(wave)
 DEFINE_KEY_TABLE(easy)
@@ -300,6 +308,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(brln),
   &KEY_TABLE_DEFINITION(as40),
   &KEY_TABLE_DEFINITION(ab),
+  &KEY_TABLE_DEFINITION(ab_s),
   &KEY_TABLE_DEFINITION(cb40),
   &KEY_TABLE_DEFINITION(wave),
   &KEY_TABLE_DEFINITION(easy),
@@ -566,6 +575,20 @@ static const ModelEntry modelTable[] = {
   { /* end of table */
     .name = NULL
   }
+};
+
+static const ModelEntry modelEntry_ab_s = {
+  .identifier = HT_MODEL_ActiveBraille,
+  .name = "Active Braille S",
+  .textCells = 40,
+  .statusCells = 0,
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(ab_s),
+  .interpretByte = interpretByte_key,
+  .writeCells = writeCells_Evolution,
+  .setBrailleFirmness = setBrailleFirmness,
+  .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+  .hasATC = 1,
+  .hasTime = 1
 };
 
 #define MAXIMUM_TEXT_CELLS   160
@@ -1006,6 +1029,34 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
     logMessage(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
                identifier);
     return 0;
+  }
+
+  if (brl->data->model->identifier == HT_MODEL_ActiveBraille) {
+    GioEndpoint *endpoint = brl->gioEndpoint;
+    char *serialNumber = NULL;
+
+    switch (gioGetResourceType(endpoint)) {
+      case GIO_TYPE_USB: {
+        UsbChannel *channel = gioGetResourceObject(endpoint);
+        serialNumber = usbGetSerialNumber(channel->device, 1000);
+        break;
+      }
+
+      default: {
+        serialNumber = gioGetResourceName(endpoint);
+        break;
+      }
+    }
+
+    if (serialNumber) {
+      const char *slash = strchr(serialNumber, '/');
+
+      if (slash) {
+        if (slash[1] == 'S') brl->data->model = &modelEntry_ab_s;
+      }
+
+      free(serialNumber);
+    }
   }
 
   logMessage(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
