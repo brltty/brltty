@@ -299,7 +299,7 @@ extern HANDLE brlapi_fd_mutex;
 extern pthread_mutex_t brlapi_fd_mutex;
 #endif /* __MINGW32__ */
 
-/* @} */
+/** @} */
 
 #ifdef __cplusplus
 }
