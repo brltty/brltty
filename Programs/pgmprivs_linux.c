@@ -370,6 +370,16 @@ static void
 setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
   const CurrentGroupsData *cgd = data;
 
+  {
+    HaveGroupsData hgd = {
+      .groups = groups,
+      .count = count
+    };
+
+    processSupplementaryGroups(haveSupplementaryGroups, &hgd);
+    if (hgd.have) return;
+  }
+
   size_t total = count;
   if (cgd) total += cgd->count;
   gid_t buffer[total];
@@ -385,16 +395,6 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
     count = gid - buffer;
     removeDuplicateGroups(buffer, &count);
     groups = buffer;
-  }
-
-  {
-    HaveGroupsData hgd = {
-      .groups = groups,
-      .count = count
-    };
-
-    processSupplementaryGroups(haveSupplementaryGroups, &hgd);
-    if (hgd.have) return;
   }
 
   {
