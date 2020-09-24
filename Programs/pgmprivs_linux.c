@@ -1924,7 +1924,7 @@ switchToUser (const char *user, int *haveHomeDirectory) {
       return 1;
     }
   } else {
-    logMessage(LOG_WARNING, "user not found: %s", user);
+    logMessage(LOG_WARNING, "unprivileged user not found: %s", user);
   }
 
   return 0;
@@ -1935,19 +1935,23 @@ switchUser (const char *specifiedUser, const char *configuredUser, int *haveHome
   const char *user;
 
   if (amPrivilegedUser()) {
-    if (strcmp(specifiedUser, configuredUser) != 0) {
-      if (*(user = specifiedUser)) {
-        if (switchToUser(user, haveHomeDirectory)) {
-          return 1;
+    if (strcmp(specifiedUser, ":STAY-PRIVILEGED:") == 0) {
+      logMessage(LOG_WARNING, "not switching to an unprivileged user");
+    } else {
+      if (strcmp(specifiedUser, configuredUser) != 0) {
+        if (*(user = specifiedUser)) {
+          if (switchToUser(user, haveHomeDirectory)) {
+            return 1;
+          }
         }
       }
-    }
 
-    if (*(user = configuredUser)) {
-      if (switchToUser(user, haveHomeDirectory)) return 1;
-      logMessage(LOG_WARNING, "couldn't switch to the configured unprivileged user: %s", user);
-    } else {
-      logMessage(LOG_WARNING, "unprivileged user not configured");
+      if (*(user = configuredUser)) {
+        if (switchToUser(user, haveHomeDirectory)) return 1;
+        logMessage(LOG_WARNING, "couldn't switch to the configured unprivileged user: %s", user);
+      } else {
+        logMessage(LOG_WARNING, "unprivileged user not configured");
+      }
     }
   }
 
