@@ -489,8 +489,8 @@ Release: 1
 Group: System Environment/Libraries
 License: LGPL
 
-BuildRequires: python2
-BuildRequires: python2-devel
+BuildRequires: python3
+BuildRequires: python3-devel
 BuildRequires: Cython
 
 AutoProv: no
@@ -531,18 +531,18 @@ which directly accesses a refreshable braille display.
 %setup -n @PACKAGE_TARNAME@-@PACKAGE_VERSION@
 
 %build
-export PYTHON=python2
+export PYTHON=python3
 %configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-mikropuhe --without-swift --without-theta --without-libbraille --with-braille-driver=-tt,-vr
 make
 
 %install
 make install
-make install-documents
 make install-messages
 make install-appstream
 make install-systemd
 make install-udev
 make install-dracut
+make install-documents
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
 %find_lang %{name}
 
