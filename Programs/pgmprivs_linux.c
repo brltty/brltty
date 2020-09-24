@@ -54,6 +54,98 @@
 #include <grp.h>
 #endif /* HAVE_GRP_H */
 
+#ifdef HAVE_LIBCAP
+#ifdef HAVE_SYS_CAPABILITY_H
+#include <sys/capability.h>
+
+static int
+hasCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
+  cap_flag_value_t value;
+  if (cap_get_flag(caps, capability, set, &value) != -1) return value == CAP_SET;
+  logSystemError("cap_get_flag");
+  return 0;
+}
+
+static int
+setCapabilities (cap_t caps) {
+  if (cap_set_proc(caps) != -1) return 1;
+  logSystemError("cap_set_proc");
+  return 0;
+}
+
+static int
+addCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
+  if (cap_set_flag(caps, set, 1, &capability, CAP_SET) != -1) return 1;
+  logSystemError("cap_set_flag");
+  return 0;
+}
+
+static int
+requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
+  if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
+    if (!hasCapability(caps, CAP_PERMITTED, capability)) {
+      logMessage(LOG_WARNING, "capability not permitted: %s", cap_to_name(capability));
+      return 0;
+    }
+
+    if (!addCapability(caps, CAP_EFFECTIVE, capability)) return 0;
+    if (!inheritable) return setCapabilities(caps);
+  } else if (!inheritable) {
+    return 1;
+  }
+
+  if (!hasCapability(caps, CAP_INHERITABLE, capability)) {
+    if (!addCapability(caps, CAP_INHERITABLE, capability)) {
+      return 0;
+    }
+  }
+
+  if (setCapabilities(caps)) {
+#ifdef PR_CAP_AMBIENT_RAISE
+    if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, capability, 0, 0) != -1) return 1;
+    logSystemError("prctl[PR_CAP_AMBIENT_RAISE]");
+#else /* PR_CAP_AMBIENT_RAISE */
+    logMessage(LOG_WARNING, "can't raise ambient capabilities");
+#endif /* PR_CAP_AMBIENT_RAISE */
+  }
+
+  return 0;
+}
+
+static int
+needCapability (cap_value_t capability, int inheritable, const char *reason) {
+  int haveCapability = 0;
+  const char *outcome = NULL;
+  cap_t caps;
+
+  if ((caps = cap_get_proc())) {
+    if (hasCapability(caps, CAP_EFFECTIVE, capability)) {
+      haveCapability = 1;
+      outcome = "already added";
+    } else if (requestCapability(caps, capability, inheritable)) {
+      haveCapability = 1;
+      outcome = "added";
+    } else {
+      outcome = "not granted";
+    }
+
+    cap_free(caps);
+  } else {
+    logSystemError("cap_get_proc");
+  }
+
+  if (outcome) {
+    logMessage(LOG_DEBUG,
+      "temporary capability %s: %s (%s)",
+      outcome, cap_to_name(capability), reason
+    );
+  }
+
+  return haveCapability;
+}
+#endif /* HAVE_SYS_CAPABILITY_H */
+#endif /* HAVE_LIBCAP */
+
 static int
 amPrivilegedUser (void) {
   return !geteuid();
@@ -131,6 +223,35 @@ logGroups (int level, const char *message, const gid_t *groups, size_t count) {
 static void
 logGroup (int level, const char *message, gid_t group) {
   logGroups(level, message, &group, 1);
+}
+
+typedef struct {
+  const gid_t *groups;
+  size_t count;
+  unsigned char have:1;
+} HaveGroupsData;
+
+static void
+haveSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
+  HaveGroupsData *hgd = data;
+
+  const gid_t *need = hgd->groups;
+  const gid_t *needEnd = need + hgd->count;
+
+  const gid_t *have = groups;
+  const gid_t *haveEnd = have + count;
+
+  while (have < haveEnd) {
+    if (*have > *need) break;
+    if (*have++ < *need) continue;
+
+    if (++need == needEnd) {
+      hgd->have = 1;
+      return;
+    }
+  }
+
+  hgd->have = 0;
 }
 
 typedef struct {
@@ -266,6 +387,31 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
     groups = buffer;
   }
 
+  {
+    HaveGroupsData hgd = {
+      .groups = groups,
+      .count = count
+    };
+
+    processSupplementaryGroups(haveSupplementaryGroups, &hgd);
+    if (hgd.have) return;
+  }
+
+  {
+    int canSetSupplementaryGroups = 0;
+
+#ifdef CAP_SETGID
+    if (needCapability(CAP_SETGID, 0, "for joining the required groups")) {
+      canSetSupplementaryGroups = 1;
+    }
+#endif /* CAP_SETGID */
+
+    if (!canSetSupplementaryGroups) {
+      logMessage(LOG_WARNING, "can't set supplementary groups");
+      return;
+    }
+  }
+
   logGroups(LOG_DEBUG, "setting supplementary groups", groups, count);
 
   if (setgroups(count, groups) == -1) {
@@ -276,31 +422,32 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
 static void
 joinRequiredGroups (void) {
 #ifdef HAVE_PWD_H
-  if (!amPrivilegedUser()) {
-    uid_t uid = geteuid();
-    const struct passwd *pwd = getpwuid(uid);
+  uid_t uid = geteuid();
+  const struct passwd *pwd = getpwuid(uid);
 
-    if (pwd) {
-      const char *user = pwd->pw_name;
-      gid_t group = pwd->pw_gid;
+  if (pwd) {
+    const char *user = pwd->pw_name;
+    gid_t group = pwd->pw_gid;
 
-      int count = 0;
-      getgrouplist(user, group, NULL, &count);
+    int count = 0;
+    getgrouplist(user, group, NULL, &count);
 
-      count += 1; // allow for the primary group
-      gid_t groups[count];
+    count += 1; // allow for the primary group
+    gid_t groups[count];
 
-      if (getgrouplist(user, group, groups, &count) != -1) {
-        CurrentGroupsData cgd = {
-          .groups = groups,
-          .count = count
-        };
+    if (getgrouplist(user, group, groups, &count) != -1) {
+      size_t size = count;
+      removeDuplicateGroups(groups, &size);
 
-        processRequiredGroups(setSupplementaryGroups, &cgd);
-        return;
-      } else {
-        logSystemError("getgrouplist");
-      }
+      CurrentGroupsData cgd = {
+        .groups = groups,
+        .count = size
+      };
+
+      processRequiredGroups(setSupplementaryGroups, &cgd);
+      return;
+    } else {
+      logSystemError("getgrouplist");
     }
   }
 #endif /* HAVE_PWD_H */
@@ -350,12 +497,6 @@ closeGroupsDatabase (void) {
   endgrent();
 }
 #endif /* HAVE_GRP_H */
-
-#ifdef HAVE_LIBCAP
-#ifdef HAVE_SYS_CAPABILITY_H
-#include <sys/capability.h>
-#endif /* HAVE_SYS_CAPABILITY_H */
-#endif /* HAVE_LIBCAP */
 
 #ifdef CAP_IS_SUPPORTED
 typedef struct {
@@ -414,28 +555,6 @@ logCapabilities (cap_t caps, const char *label) {
 static void
 logCurrentCapabilities (const char *label) {
   logCapabilities(NULL, label);
-}
-
-static int
-setCapabilities (cap_t caps) {
-  if (cap_set_proc(caps) != -1) return 1;
-  logSystemError("cap_set_proc");
-  return 0;
-}
-
-static int
-hasCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
-  cap_flag_value_t value;
-  if (cap_get_flag(caps, capability, set, &value) != -1) return value == CAP_SET;
-  logSystemError("cap_get_flag");
-  return 0;
-}
-
-static int
-addCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
-  if (cap_set_flag(caps, set, 1, &capability, CAP_SET) != -1) return 1;
-  logSystemError("cap_set_flag");
-  return 0;
 }
 
 typedef struct {
@@ -529,70 +648,6 @@ logMissingCapabilities (void) {
   }
 }
 
-static int
-requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
-  if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
-    if (!hasCapability(caps, CAP_PERMITTED, capability)) {
-      logMessage(LOG_WARNING, "capability not permitted: %s", cap_to_name(capability));
-      return 0;
-    }
-
-    if (!addCapability(caps, CAP_EFFECTIVE, capability)) return 0;
-    if (!inheritable) return setCapabilities(caps);
-  } else if (!inheritable) {
-    return 1;
-  }
-
-  if (!hasCapability(caps, CAP_INHERITABLE, capability)) {
-    if (!addCapability(caps, CAP_INHERITABLE, capability)) {
-      return 0;
-    }
-  }
-
-  if (setCapabilities(caps)) {
-#ifdef PR_CAP_AMBIENT_RAISE
-    if (prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, capability, 0, 0) != -1) return 1;
-    logSystemError("prctl[PR_CAP_AMBIENT_RAISE]");
-#else /* PR_CAP_AMBIENT_RAISE */
-    logMessage(LOG_WARNING, "can't raise ambient capabilities");
-#endif /* PR_CAP_AMBIENT_RAISE */
-  }
-
-  return 0;
-}
-
-static int
-needCapability (cap_value_t capability, int inheritable, const char *reason) {
-  int haveCapability = 0;
-  const char *outcome = NULL;
-  cap_t caps;
-
-  if ((caps = cap_get_proc())) {
-    if (hasCapability(caps, CAP_EFFECTIVE, capability)) {
-      haveCapability = 1;
-      outcome = "already added";
-    } else if (requestCapability(caps, capability, inheritable)) {
-      haveCapability = 1;
-      outcome = "added";
-    } else {
-      outcome = "not granted";
-    }
-
-    cap_free(caps);
-  } else {
-    logSystemError("cap_get_proc");
-  }
-
-  if (outcome) {
-    logMessage(LOG_DEBUG,
-      "temporary capability %s: %s (%s)",
-      outcome, cap_to_name(capability), reason
-    );
-  }
-
-  return haveCapability;
-}
-
 #else /* CAP_IS_SUPPORTED */
 static void
 logCurrentCapabilities (const char *label) {
@@ -667,7 +722,7 @@ isolateNamespaces (void) {
       logSystemError("unshare");
     }
   } else {
-    logMessage(LOG_DEBUG, "can't isolate namespaces");
+    logMessage(LOG_WARNING, "can't isolate namespaces");
   }
 }
 #endif /* HAVE_SCHED_H */
@@ -1692,10 +1747,6 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
     .acquirePrivileges = joinRequiredGroups,
     .logMissingPrivileges = logMissingGroups,
     .releaseResources = closeGroupsDatabase,
-
-    #ifdef CAP_SETGID
-    .capability = CAP_SETGID,
-    #endif /* CAP_SETGID, */
   },
 #endif /* HAVE_GRP_H */
 
