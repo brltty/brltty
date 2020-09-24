@@ -422,32 +422,34 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
 static void
 joinRequiredGroups (void) {
 #ifdef HAVE_PWD_H
-  uid_t uid = geteuid();
-  const struct passwd *pwd = getpwuid(uid);
+  if (!amPrivilegedUser()) {
+    uid_t uid = geteuid();
+    const struct passwd *pwd = getpwuid(uid);
 
-  if (pwd) {
-    const char *user = pwd->pw_name;
-    gid_t group = pwd->pw_gid;
+    if (pwd) {
+      const char *user = pwd->pw_name;
+      gid_t group = pwd->pw_gid;
 
-    int count = 0;
-    getgrouplist(user, group, NULL, &count);
+      int count = 0;
+      getgrouplist(user, group, NULL, &count);
 
-    count += 1; // allow for the primary group
-    gid_t groups[count];
+      count += 1; // allow for the primary group
+      gid_t groups[count];
 
-    if (getgrouplist(user, group, groups, &count) != -1) {
-      size_t size = count;
-      removeDuplicateGroups(groups, &size);
+      if (getgrouplist(user, group, groups, &count) != -1) {
+        size_t size = count;
+        removeDuplicateGroups(groups, &size);
 
-      CurrentGroupsData cgd = {
-        .groups = groups,
-        .count = size
-      };
+        CurrentGroupsData cgd = {
+          .groups = groups,
+          .count = size
+        };
 
-      processRequiredGroups(setSupplementaryGroups, &cgd);
-      return;
-    } else {
-      logSystemError("getgrouplist");
+        processRequiredGroups(setSupplementaryGroups, &cgd);
+        return;
+      } else {
+        logSystemError("getgrouplist");
+      }
     }
   }
 #endif /* HAVE_PWD_H */
