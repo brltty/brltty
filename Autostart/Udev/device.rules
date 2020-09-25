@@ -511,6 +511,7 @@ GOTO="brltty_device_run"
 
 LABEL="brltty_device_run"
 TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_systemd"
+TEST=="/run/systemd/system", GOTO="brltty_systemd"
 ENV{BRLTTY_PID_FILE}="/run/brltty/brltty.$kernel.pid"
 
 TEST=="/etc/init", GOTO="brltty_upstart"
