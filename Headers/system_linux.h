@@ -37,6 +37,7 @@ extern void removeDuplicateGroups (gid_t *groups, size_t *count);
 
 typedef void GroupsProcessor (const gid_t *groups, size_t count, void *data);
 extern void processSupplementaryGroups (GroupsProcessor *processGroups, void *data);
+extern int haveSupplementaryGroups (const gid_t *groups, size_t count);
 
 extern int installKernelModule (const char *name, unsigned char *status);
 extern int installSpeakerModule (void);

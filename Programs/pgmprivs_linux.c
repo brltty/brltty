@@ -226,35 +226,6 @@ logGroup (int level, const char *message, gid_t group) {
 }
 
 typedef struct {
-  const gid_t *groups;
-  size_t count;
-  unsigned char have:1;
-} HaveGroupsData;
-
-static void
-haveSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
-  HaveGroupsData *hgd = data;
-
-  const gid_t *need = hgd->groups;
-  const gid_t *needEnd = need + hgd->count;
-
-  const gid_t *have = groups;
-  const gid_t *haveEnd = have + count;
-
-  while (have < haveEnd) {
-    if (*have > *need) break;
-    if (*have++ < *need) continue;
-
-    if (++need == needEnd) {
-      hgd->have = 1;
-      return;
-    }
-  }
-
-  hgd->have = 0;
-}
-
-typedef struct {
   const char *reason;
   const char *name;
   const char *path;
@@ -366,19 +337,21 @@ typedef struct {
   size_t count;
 } CurrentGroupsData;
 
+static int
+canSetSupplementaryGroups (void) {
+#ifdef CAP_SETGID
+  if (needCapability(CAP_SETGID, 0, "for joining the required groups")) {
+    return 1;
+  }
+#endif /* CAP_SETGID */
+
+  return 0;
+}
+
 static void
 setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
+  if (haveSupplementaryGroups(groups, count)) return;
   const CurrentGroupsData *cgd = data;
-
-  {
-    HaveGroupsData hgd = {
-      .groups = groups,
-      .count = count
-    };
-
-    processSupplementaryGroups(haveSupplementaryGroups, &hgd);
-    if (hgd.have) return;
-  }
 
   size_t total = count;
   if (cgd) total += cgd->count;
@@ -397,25 +370,14 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
     groups = buffer;
   }
 
-  {
-    int canSetSupplementaryGroups = 0;
+  if (canSetSupplementaryGroups()) {
+    logGroups(LOG_DEBUG, "setting supplementary groups", groups, count);
 
-#ifdef CAP_SETGID
-    if (needCapability(CAP_SETGID, 0, "for joining the required groups")) {
-      canSetSupplementaryGroups = 1;
+    if (setgroups(count, groups) == -1) {
+      logSystemError("setgroups");
     }
-#endif /* CAP_SETGID */
-
-    if (!canSetSupplementaryGroups) {
-      logMessage(LOG_WARNING, "can't set supplementary groups");
-      return;
-    }
-  }
-
-  logGroups(LOG_DEBUG, "setting supplementary groups", groups, count);
-
-  if (setgroups(count, groups) == -1) {
-    logSystemError("setgroups");
+  } else {
+    logMessage(LOG_WARNING, "can't set supplementary groups");
   }
 }
 

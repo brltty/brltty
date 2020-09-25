@@ -166,6 +166,46 @@ processSupplementaryGroups (GroupsProcessor *processGroups, void *data) {
   }
 }
 
+typedef struct {
+  const gid_t *groups;
+  size_t count;
+  unsigned char have:1;
+} HaveGroupsData;
+
+static void
+haveGroups (const gid_t *groups, size_t count, void *data) {
+  HaveGroupsData *hgd = data;
+
+  const gid_t *need = hgd->groups;
+  const gid_t *needEnd = need + hgd->count;
+
+  const gid_t *have = groups;
+  const gid_t *haveEnd = have + count;
+
+  while (have < haveEnd) {
+    if (*have > *need) break;
+    if (*have++ < *need) continue;
+
+    if (++need == needEnd) {
+      hgd->have = 1;
+      return;
+    }
+  }
+
+  hgd->have = 0;
+}
+
+int
+haveSupplementaryGroups (const gid_t *groups, size_t count) {
+  HaveGroupsData hgd = {
+    .groups = groups,
+    .count = count
+  };
+
+  processSupplementaryGroups(haveGroups, &hgd);
+  return hgd.have;
+}
+
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
 
