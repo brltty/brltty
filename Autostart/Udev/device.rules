@@ -22,7 +22,7 @@
 
 SUBSYSTEM=="usb_device", GOTO="brltty_usb_begin"
 SUBSYSTEM=="usb", KERNEL!="*:*", GOTO="brltty_usb_begin"
-GOTO="brltty_end"
+GOTO="brltty_device_end"
 
 LABEL="brltty_usb_begin"
 # BEGIN_USB_DEVICES
@@ -503,38 +503,40 @@ ENV{PRODUCT}=="c251/1131/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_r
 ENV{PRODUCT}=="c251/1132/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_run"
 
 # END_USB_DEVICES
-GOTO="brltty_end"
+GOTO="brltty_device_end"
 
 LABEL="brltty_usb_run"
 ENV{BRLTTY_BRAILLE_DEVICE}="usb:vendor=0X$sysfs{idVendor}+product=0X$sysfs{idProduct}+serial=$sysfs{serial}"
-GOTO="brltty_run"
+GOTO="brltty_device_run"
 
-LABEL="brltty_run"
+LABEL="brltty_device_run"
 TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_systemd"
 ENV{BRLTTY_PID_FILE}="/run/brltty/brltty.$kernel.pid"
 
 TEST=="/etc/init", GOTO="brltty_upstart"
 TEST=="/etc/event.d", GOTO="brltty_upstart"
 
-ACTION=="add", GOTO="brltty_add"
-ACTION=="remove", GOTO="brltty_remove"
-GOTO="brltty_end"
+ACTION=="add", GOTO="brltty_udev_add"
+ACTION=="remove", GOTO="brltty_udev_remove"
+GOTO="brltty_device_end"
 
-LABEL="brltty_add"
+LABEL="brltty_udev_add"
 RUN+="/usr/lib/brltty/udev-wrapper"
-GOTO="brltty_end"
+GOTO="brltty_device_end"
 
-LABEL="brltty_remove"
+LABEL="brltty_udev_remove"
 RUN+="/usr/lib/brltty/udev-wrapper -C"
-GOTO="brltty_end"
+GOTO="brltty_device_end"
 
 LABEL="brltty_upstart"
 ACTION=="add", RUN+="/sbin/start brltty"
 ACTION=="change", RUN+="/sbin/start brltty"
 ACTION=="remove", RUN+="/sbin/stop brltty"
-GOTO="brltty_end"
+GOTO="brltty_device_end"
 
 LABEL="brltty_systemd"
-ACTION!="add", GOTO="brltty_end"
+ACTION!="add", GOTO="brltty_device_end"
 TAG+="systemd", ENV{SYSTEMD_WANTS}+="brltty@$env{DEVNAME}.service"
-LABEL="brltty_end"
+GOTO="brltty_device_end"
+
+LABEL="brltty_device_end"
