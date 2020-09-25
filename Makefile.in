@@ -97,12 +97,15 @@ bin-tar-xz: $(BIN_TAR_XZ)
 ITERATE = \
    -for directory in \
    $(PGM_DIR) \
+   $(DOC_DIR) \
    $(MSG_DIR) \
    Autostart/AppStream \
    Autostart/Systemd \
    Autostart/Udev \
+   Autostart/X11 \
    Initramfs/Dracut \
    Android/Application \
+   Android/Core \
    ; do (cd $$directory && $(MAKE) $@); done
 
 clean::
@@ -111,11 +114,8 @@ clean::
 	-rm -f -r -- $(BIN_DIR)
 
 distclean:: clean
-	-cd $(DOC_DIR) && $(MAKE) $@
 	$(ITERATE)
 	-rm -f brltty.spec
-	-rm -f Autostart/Systemd/brltty@.service
-	-rm -f Autostart/X11/90xbrlapi
 	-rm -fr autom4te*.cache
 	-rm -f config.log config.cache config.status
 	-rm -f config.mk config.h brltty-config.sh

@@ -704,7 +704,7 @@ if {[llength $positionalArguments] == 0} {
    lappend positionalArguments "c:[file join $sourceDirectory Programs usb_devices.c]"
    lappend positionalArguments "hotplug:[file join $sourceDirectory Autostart Hotplug brltty.usermap]"
    lappend positionalArguments "metainfo:[file join $sourceDirectory Autostart AppStream org.a11y.brltty.metainfo.xml]"
-   lappend positionalArguments "udev:[file join $sourceDirectory Autostart Udev device.rules]"
+   lappend positionalArguments "udev:[file join $sourceDirectory Autostart Udev device.rules.in]"
    lappend positionalArguments "windows:[file join $sourceDirectory Autostart Windows brltty-libusb.inf]"
    lappend positionalArguments "windows:[file join $sourceDirectory Autostart Windows brltty-libusb-1.0.inf]"
 }

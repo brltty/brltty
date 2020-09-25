@@ -522,11 +522,11 @@ ACTION=="remove", GOTO="brltty_udev_remove"
 GOTO="brltty_device_end"
 
 LABEL="brltty_udev_add"
-RUN+="/usr/lib/brltty/udev-wrapper"
+RUN+="@DRIVERS_DIRECTORY@/udev-wrapper"
 GOTO="brltty_device_end"
 
 LABEL="brltty_udev_remove"
-RUN+="/usr/lib/brltty/udev-wrapper -C"
+RUN+="@DRIVERS_DIRECTORY@/udev-wrapper -C"
 GOTO="brltty_device_end"
 
 LABEL="brltty_upstart"

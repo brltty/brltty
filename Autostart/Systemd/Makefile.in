@@ -17,7 +17,7 @@
 ###############################################################################
 
 SYSTEMD_UNITS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/systemd/system
-SYSTEMD_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/$(PACKAGE_TARNAME)
+SYSTEMD_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)$(DRIVERS_DIRECTORY)
 SYSTEMD_USERS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/sysusers.d
 SYSTEMD_USERS_FILE = $(SYSTEMD_USERS_DIRECTORY)/$(PACKAGE_TARNAME).conf
 
@@ -48,6 +48,9 @@ uninstall:
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME)@.*
 	-rm -f $(SYSTEMD_SCRIPTS_DIRECTORY)/systemd-*
 	-rm -f $(SYSTEMD_USERS_FILE)
+
+distclean::
+	-rm brltty@.service
 
 reload:
 	systemctl daemon-reload

@@ -35,7 +35,7 @@ RefuseManualStop=true
 
 Environment="BRLTTY_SYSTEMD_INSTANCE=%I"
 ExecStartPre=+/usr/bin/install -d -o brltty -g brltty -m0770 @WRITABLE_DIRECTORY@
-ExecStart=/usr/lib/brltty/systemd-wrapper
+ExecStart=@DRIVERS_DIRECTORY@/systemd-wrapper
 SyslogIdentifier=brltty
 
 Type=@SYSTEMD_SERVICE_TYPE@
