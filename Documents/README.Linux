@@ -372,6 +372,9 @@ The following privilege parameters are supported for Linux:
 ``user``
   This parameter sets `the unprivileged user`_.
   It defaults to |default user|.
+  The special value ``:STAY-PRIVILEGED:`` means
+  don't switch to an unprivileged user,
+  i.e. continue to execute as the invoking user.
 
 Safe Command Search Path
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -901,13 +904,13 @@ after having switched to `the unprivileged user`_.
 This situation could be easily resolved
 by granting group read and write permissions to the device.
 This shouldn't be problematic because its owned by the ``root`` group.
-Even better, of course, would be to also give the device its own group
+Even better, of course, would be to give the device its own group
 (e.g. named ``uinput``).
 
 BRLTTY currently gets around this problem by including the following
-Udev rule to add group read and write permissions to the device::
+Udev rule to add an ACL (access control list) entry to the device::
 
-  KERNEL=="uinput", ACTION=="add", MODE="0660"
+  RUN+="/usr/bin/setfacl -m u:brltty:rw /dev/$name"
 
 If BRLTTY finds that it isn't permitted to open the device
 (perhaps because the Udev rule isn't present)
