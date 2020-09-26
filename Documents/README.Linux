@@ -910,6 +910,7 @@ Even better, of course, would be to give the device its own group
 BRLTTY currently gets around this problem by including the following
 Udev rule to add an ACL (access control list) entry to the device::
 
+  KERNEL=="uinput", ACTION=="add", TEST=="/usr/bin/setfacl",
   RUN+="/usr/bin/setfacl -m u:brltty:rw /dev/$name"
 
 If BRLTTY finds that it isn't permitted to open the device
