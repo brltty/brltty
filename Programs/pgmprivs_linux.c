@@ -146,6 +146,19 @@ needCapability (cap_value_t capability, int inheritable, const char *reason) {
 #endif /* HAVE_SYS_CAPABILITY_H */
 #endif /* HAVE_LIBCAP */
 
+#if defined(HAVE_GRP_H) || defined(HAVE_PWD_H)
+static int
+canSetSupplementaryGroups (const char *reason) {
+#ifdef CAP_SETGID
+  if (needCapability(CAP_SETGID, 0, reason)) {
+    return 1;
+  }
+#endif /* CAP_SETGID */
+
+  return 0;
+}
+#endif /* defined(HAVE_GRP_H) || defined(HAVE_PWD_H) */
+
 static int
 amPrivilegedUser (void) {
   return !geteuid();
@@ -337,17 +350,6 @@ typedef struct {
   size_t count;
 } CurrentGroupsData;
 
-static int
-canSetSupplementaryGroups (void) {
-#ifdef CAP_SETGID
-  if (needCapability(CAP_SETGID, 0, "for joining the required groups")) {
-    return 1;
-  }
-#endif /* CAP_SETGID */
-
-  return 0;
-}
-
 static void
 setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
   if (haveSupplementaryGroups(groups, count)) return;
@@ -370,7 +372,7 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
     groups = buffer;
   }
 
-  if (canSetSupplementaryGroups()) {
+  if (canSetSupplementaryGroups("for joining the required groups")) {
     logGroups(LOG_DEBUG, "setting supplementary groups", groups, count);
 
     if (setgroups(count, groups) == -1) {
@@ -1838,13 +1840,7 @@ canSwitchGroup (gid_t gid) {
     if ((gid == rGid) || (gid == eGid) || (gid == sGid)) return 1;
   }
 
-#ifdef CAP_SETGID
-  if (needCapability(CAP_SETGID, 0, "for switching to the writable group")) {
-    return 1;
-  }
-#endif /* CAP_SETGID */
-
-  return 0;
+  return canSetSupplementaryGroups("for switching to the writable group");
 }
 
 static int
