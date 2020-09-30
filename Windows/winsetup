@@ -112,7 +112,7 @@ applyPatch() {
 
       "${dryRun}" || {
          downloadFile "${patch}"
-         executeCommand patch -N -i "${temporaryDirectory}/${name}" -d "${directory}"
+         executeCommand patch -N -i "${temporaryDirectory}/${name}" -d "${directory}" "${file}"
       }
    done
 }
