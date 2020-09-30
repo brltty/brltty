@@ -36,7 +36,7 @@ static int opt_listKeyNames;
 static int opt_listHelpScreen;
 static int opt_listRestructuredText;
 static char *opt_tablesDirectory;
-static char *opt_driversDirectory;
+char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'a',
