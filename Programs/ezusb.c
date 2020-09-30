@@ -45,7 +45,7 @@ ezusbWriteData (UsbDevice *device, EzusbAction action, IhexAddress address, cons
       "firmware write length mismatch:"
       " Address:%04"PRIX16
       " Expect:%"PRIsize
-      " Actual:%zu",
+      " Actual:%"PRIsize,
       address, length, count
     );
   }
@@ -69,7 +69,7 @@ ezusbReadData (UsbDevice *device, EzusbAction action, IhexAddress address, unsig
       "firmware read length mismatch:"
       " Address:%04"PRIX16
       " Expect:%"PRIsize
-      " Actual:%zu",
+      " Actual:%"PRIsize,
       address, size, count
     );
   }
