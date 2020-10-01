@@ -238,20 +238,13 @@ writeStatusCells (void) {
     unsigned int length = getStatusFieldsLength(fields);
 
     if (length > 0) {
-      unsigned char cells[length];        /* status cell buffer */
       unsigned int count = brl.statusColumns * brl.statusRows;
+      if (count < length) count = length;
+      unsigned char cells[count];
 
-      memset(cells, 0, length);
+      memset(cells, 0, count);
       renderStatusFields(fields, cells);
-
-      if (count > length) {
-        unsigned char buffer[count];
-        memcpy(buffer, cells, length);
-        memset(&buffer[length], 0, count-length);
-        if (!braille->writeStatus(&brl, buffer)) return 0;
-      } else if (!braille->writeStatus(&brl, cells)) {
-        return 0;
-      }
+      if (!braille->writeStatus(&brl, cells)) return 0;
     } else if (!clearStatusCells(&brl)) {
       return 0;
     }
