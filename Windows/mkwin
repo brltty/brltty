@@ -458,7 +458,7 @@ then
             then
                case "${extension}"
                in
-                  bat | cat | conf | h | htm | html | inf | nsi | policy | txt | xml | [tack]t[bi])
+                  bat | cat | conf | h | htm | html | inf | nsi | policy | sh | txt | xml | [tack]t[bi])
                      "${unix2dosPath}" -q -o "${path}"
                      ;;
 
