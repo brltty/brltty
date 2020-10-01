@@ -135,7 +135,12 @@ logMessage task "revision identifier: ${revisionIdentifier}"
    fi
 }
 
-[ -z "${cygwinRoot}" ] || {
+[ -n "${cygwinRoot}" ] || {
+   directory=/cygwin
+   [ -e "${directory}" ] && cygwinRoot="${directory}"
+}
+
+[ -n "${cygwinRoot}" ] && {
    if [ -f "${cygwinRoot}/cygwin.ico" ]
    then
       export PATH="${PATH}:${cygwinRoot}/bin"

@@ -640,9 +640,10 @@ More ``mkwin`` Options
    *  libusb-1.0 (for LibUSB-1.0 + WinUSB)
 
 ``-C`` (Cygwin)
-   Specify the root (top-level) directory of a Cygwin installation. Cygwin's
-   ``bin/`` directory is added to the end of the command search path as a last
-   resort for finding needed commands that MinGW may not have.
+   Specify the root (top-level) directory of a Cygwin installation.
+   If it isn't specified then ``/cygwin`` (if it exists) is assumed.
+   Cygwin's ``bin/`` directory is added to the end of the command search path
+   as a last resort for finding needed commands that MinGW may not have.
 
 ``-s`` (shell)
    Invoke an interactive shell just before the archive is created so that you
