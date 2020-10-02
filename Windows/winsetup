@@ -95,26 +95,25 @@ unpackArchive() {
 applyPatch() {
    local patch="${1}"
    local directory="${2}"
-   shift 2
+   local file="${3}"
+   local pattern="${4}"
 
-   while [ "${#}" -gt 0 ]
-   do
-      local file="${1}"
-      local pattern="${2}"
-      shift 2
+   local path="${directory}/${file}"
 
-      local path="${directory}/${file}"
-      [ -f "${path}" ] || continue
-      grep -q "${pattern}" "${path}" && continue
+   if [ -f "${path}" ]
+   then
+      grep -q "${pattern}" "${path}" || {
+         local name="${patch##*/}"
+         logMessage task "applying patch: ${name}"
 
-      local name="${patch##*/}"
-      logMessage task "applying patch: ${name}"
-
-      "${dryRun}" || {
-         downloadFile "${patch}"
-         executeCommand patch -N -i "${temporaryDirectory}/${name}" -d "${directory}" "${file}"
+         "${dryRun}" || {
+            downloadFile "${patch}"
+            executeCommand patch -N -i "${temporaryDirectory}/${name}" -d "${directory}" "${file}"
+         }
       }
-   done
+   else
+      logMessage warning "file not found: ${path}"
+   fi
 }
 
 installFile() {
