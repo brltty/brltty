@@ -300,7 +300,17 @@ ${configureLines}
 cd "${buildRoot}"
 installFile "Documents/brltty.conf" "etc/brltty.conf"
 installFile "Drivers/BrlAPI/WindowEyes/webrloem109.dll" "WindowEyes/"
-installFile "Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.win32.exe" "Python/"
+
+set -- Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.*.exe
+if [ "${#}" -gt 0 ]
+then
+   for file
+   do
+      installFile "${file}" "Python/"
+   done
+else
+   logMessage warning "Python bindings installer not found"
+fi
 
 cd "${sourceRoot}"
 installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
