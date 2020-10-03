@@ -84,7 +84,7 @@ static int
 requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
   if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
     if (!hasCapability(caps, CAP_PERMITTED, capability)) {
-      logMessage(LOG_WARNING, "capability not permitted: %s", cap_to_name(capability));
+      logMessage(LOG_DEBUG, "capability not permitted: %s", cap_to_name(capability));
       return 0;
     }
 
@@ -1777,7 +1777,7 @@ acquirePrivileges (void) {
 static int
 setEnvironmentVariable (const char *name, const char *value) {
   if (setenv(name, value, 1) != -1) {
-    logMessage(LOG_DEBUG, "environment variable set: %s: %s", name, value);
+    logMessage(LOG_INFO, "environment variable set: %s: %s", name, value);
     return 1;
   } else {
     logSystemError("setenv");
@@ -1792,7 +1792,7 @@ setHomeDirectory (const char *directory) {
   if (!*directory) return 0;
 
   if (chdir(directory) != -1) {
-    logMessage(LOG_DEBUG, "working directory changed: %s", directory);
+    logMessage(LOG_INFO, "working directory changed: %s", directory);
     setEnvironmentVariable("HOME", directory);
     return 1;
   } else {
@@ -1894,23 +1894,25 @@ switchUser (const char *specifiedUser, const char *configuredUser, int *haveHome
 
   if (amPrivilegedUser()) {
     if (strcmp(specifiedUser, ":STAY-PRIVILEGED:") == 0) {
-      logMessage(LOG_WARNING, "not switching to an unprivileged user");
-    } else {
-      if (strcmp(specifiedUser, configuredUser) != 0) {
-        if (*(user = specifiedUser)) {
-          if (switchToUser(user, haveHomeDirectory)) {
-            return 1;
-          }
+      logMessage(LOG_NOTICE, "not switching to an unprivileged user");
+      return 0;
+    }
+
+    if (strcmp(specifiedUser, configuredUser) != 0) {
+      if (*(user = specifiedUser)) {
+        if (switchToUser(user, haveHomeDirectory)) {
+          return 1;
         }
       }
-
-      if (*(user = configuredUser)) {
-        if (switchToUser(user, haveHomeDirectory)) return 1;
-        logMessage(LOG_WARNING, "couldn't switch to the configured unprivileged user: %s", user);
-      } else {
-        logMessage(LOG_WARNING, "unprivileged user not configured");
-      }
     }
+
+    if (!*(user = configuredUser)) {
+      logMessage(LOG_NOTICE, "unprivileged user not configured");
+      return 0;
+    }
+
+    if (switchToUser(user, haveHomeDirectory)) return 1;
+    logMessage(LOG_WARNING, "couldn't switch to the configured unprivileged user: %s", user);
   }
 
   {
@@ -2093,7 +2095,7 @@ claimStateDirectories (void) {
       if (strcasecmp(name, sde->expectedName) == 0) {
         processPathTree(path, claimStateDirectory, &sdd);
       } else {
-        logMessage(LOG_WARNING,
+        logMessage(LOG_DEBUG,
           "not claiming %s directory: %s (expecting %s)",
           sde->whichDirectory, path, sde->expectedName
         );
