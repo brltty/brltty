@@ -5,7 +5,7 @@ BRLTTY on Linux
 .. include:: prologue.rst
 
 .. |super user| replace:: ``root``
-.. |default user| replace:: ``brltty``
+.. |recommended user| replace:: ``brltty``
 .. |user information text| replace:: Braille Device Daemon
 .. |nologin shell path| replace:: ``/sbin/nologin``
 .. |safe shell path| replace:: ``/bin/sh``
@@ -27,7 +27,6 @@ BRLTTY on Linux
 .. |configuration directive| replace:: configuration directive (in |configuration file path|)
 .. |environment variable| replace:: environment variable (if the ``-E`` command line option has been specified)
 .. |configure option| replace:: configure option (at build time)
-.. |default unprivileged user| replace:: default unprivileged user (|default user|)
 .. |speaker| replace:: built-in PC speaker
 .. |uinput device| replace:: ``uinput`` device (``/dev/uinput`` or ``/dev/input/uinput``)
 .. |key file| replace:: authorization key file (usually |key file path|)
@@ -112,14 +111,15 @@ Explicit Specification
 
   then the default user is selected.
 
-The Default User
-  The default unprivileged user is |default user|.
-  This can be configured at build time via
-  the ``--with-privilege-parameters`` option (``lx:user=``).
+The Default
+  The default unprivileged user is the one specified at build time
+  via the ``lx:user=`` parameter
+  of the ``--with-privilege-parameters`` option
+  of BRLTTY's ``configure`` command.
   If there's a problem:
 
   * The user doesn't exist.
-  * BRLTTY wasn't configured with the ``lx:user`` `privilege parameter`_.
+  * BRLTTY wasn't configured to have a default unprivileged user.
 
   then BRLTTY continues to execute as |the super user|.
 
@@ -266,9 +266,7 @@ When Started by an Unprivileged User
 
 BRLTTY, as of release 6.2, can be started
 by an unprivileged user (not |super user|).
-The main use case for this is for BRLTTY to be started
-by its |default unprivileged user|.
-Others include system administrators or users
+Use cases for this include system administrators or users
 who'd like BRLTTY to be startable
 by any user, by users who belong to a specific group, etc.
 
@@ -371,7 +369,6 @@ The following privilege parameters are supported for Linux:
 
 ``user``
   This parameter sets `the unprivileged user`_.
-  It defaults to |default user|.
   The special value ``:STAY-PRIVILEGED:`` means
   don't switch to an unprivileged user,
   i.e. continue to execute as the invoking user.
@@ -489,7 +486,7 @@ Preparing the Environment
 Creating the Unprivileged User
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-We recommend that `the unprivileged user`_ be named |default user|,
+We recommend that `the unprivileged user`_ be named |recommended user|,
 and that it be a system user.
 
 The user's primary group should be user-specific.
@@ -561,7 +558,8 @@ The following options require special mention:
 ``-U`` *name*
   This option specifies the name of the user
   that's to be created or changed.
-  It defaults to the |default unprivileged user|.
+  If the default unprivileged user was configured at build time
+  then It defaults to that user.
 
 ``-N``
   This option allows the creation of a new user.

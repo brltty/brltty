@@ -234,7 +234,7 @@ then
 fi
 BRLTTY_SUMMARY_ITEM([init-path], [init_path])
 
-BRLTTY_ARG_PARAMETERS([privilege], [privilege establishment stage], [PLATFORM:], [lx:user=brltty])
+BRLTTY_ARG_PARAMETERS([privilege], [privilege establishment stage], [PLATFORM:], [])
 
 brltty_default_stderr_path=/tmp/brltty.log
 BRLTTY_ARG_WITH(

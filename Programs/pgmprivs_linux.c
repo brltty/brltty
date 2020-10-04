@@ -1907,7 +1907,7 @@ switchUser (const char *specifiedUser, const char *configuredUser, int *haveHome
     }
 
     if (!*(user = configuredUser)) {
-      logMessage(LOG_NOTICE, "unprivileged user not configured");
+      logMessage(LOG_DEBUG, "the default unprivileged user has not been configured");
       return 0;
     }
 
