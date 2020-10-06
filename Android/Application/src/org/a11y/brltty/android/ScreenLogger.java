@@ -32,37 +32,17 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.graphics.Rect;
 import android.text.Spanned;
 
-public abstract class ScreenLogger {
+public abstract class ScreenLogger extends Logger {
   private final static String LOG_TAG = ScreenLogger.class.getName();
 
   private ScreenLogger () {
+    super();
   }
 
   private static String getText (AccessibilityNodeInfo node) {
     String text = ScreenUtilities.getText(node);
     if (text != null) return text;
     return ScreenUtilities.getDescription(node);
-  }
-
-  private static String shrinkText (String text) {
-    if (text == null) return null;
-
-    final int threshold = 50;
-    final char delimiter = '\n';
-
-    int length = text.length();
-    int to = text.lastIndexOf(delimiter);
-    int from = (to == -1)? length: text.indexOf(delimiter);
-    to += 1;
-
-    from = Math.min(from, threshold);
-    to = Math.max(to, (length - threshold));
-
-    if (from < to) {
-      text = text.substring(0, from) + "[...]" + text.substring(to);
-    }
-
-    return text;
   }
 
   private static void addText (StringBuilder sb, CharSequence text, String label, char begin, char end) {

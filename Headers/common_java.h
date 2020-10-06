@@ -55,6 +55,7 @@ extern "C" {
 #define JAVA_OBJ_UTIL(name) "java/util/" name
 #define JAVA_OBJ_CONCURRENT(name) JAVA_OBJ_UTIL("concurrent/" name)
 
+#define JAVA_OBJ_CHAR_SEQUENCE JAVA_OBJ_LANG("CharSequence")
 #define JAVA_OBJ_CLASS JAVA_OBJ_LANG("Class")
 #define JAVA_OBJ_EOF_EXCEPTION JAVA_OBJ_IO("EOFException")
 #define JAVA_OBJ_ILLEGAL_ARGUMENT_EXCEPTION JAVA_OBJ_LANG("IllegalArgumentException")
@@ -70,6 +71,7 @@ extern "C" {
 #define JAVA_OBJ_TIMEOUT_EXCEPTION JAVA_OBJ_CONCURRENT("TimeoutException")
 #define JAVA_OBJ_UNSATISFIED_LINK_ERROR JAVA_OBJ_LANG("UnsatisfiedLinkError")
 
+#define JAVA_SIG_CHAR_SEQUENCE JAVA_SIG_OBJECT(JAVA_OBJ_CHAR_SEQUENCE)
 #define JAVA_SIG_CLASS JAVA_SIG_OBJECT(JAVA_OBJ_CLASS)
 #define JAVA_SIG_ITERATOR JAVA_SIG_OBJECT(JAVA_OBJ_ITERATOR)
 #define JAVA_SIG_LOCALE JAVA_SIG_OBJECT(JAVA_OBJ_LOCALE)
@@ -99,6 +101,9 @@ javaFindMethod (
 
 #define JAVA_FIND_CONSTRUCTOR(env, constructor, class, arguments) \
 (javaFindMethod(env, constructor, class, JAVA_CONSTRUCTOR_NAME, JAVA_SIG_CONSTRUCTOR(arguments)))
+
+#define javaPtrToLong(p) ((jlong)(intptr_t)(p))
+#define javaPtrFromLong(l) ((void *)(intptr_t)(l))
 
 static inline int
 javaFindClassAndMethod (

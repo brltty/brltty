@@ -65,15 +65,33 @@ findDriverMethod (volatile SpeechSynthesizer *spk, jmethodID *method, const char
   return 0;
 }
 
+JAVA_STATIC_METHOD (
+  org_a11y_brltty_android_SpeechDriver, tellLocation, void,
+  jlong synthesizer, jint location
+) {
+  tellSpeechLocation(javaPtrFromLong(synthesizer), location);
+}
+
+JAVA_STATIC_METHOD (
+  org_a11y_brltty_android_SpeechDriver, tellFinished, void,
+  jlong synthesizer
+) {
+  tellSpeechFinished(javaPtrFromLong(synthesizer));
+}
+
 static void
 spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
-  if (findDriverMethod(spk, &spk->driver.data->sayMethod, "say",
+  if (findDriverMethod(spk, &spk->driver.data->sayMethod, "sayText",
                        JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                       JAVA_SIG_STRING // text
+                                       JAVA_SIG_LONG // synthesizer
+                                       JAVA_SIG_CHAR_SEQUENCE // text
                                       ))) {
     jstring string = (*spk->driver.data->env)->NewStringUTF(spk->driver.data->env, (const char *)buffer);
     if (string) {
-      jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->driverClass, spk->driver.data->sayMethod, string);
+      jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(
+        spk->driver.data->env, spk->driver.data->driverClass,
+        spk->driver.data->sayMethod, javaPtrToLong(spk), string
+      );
 
       (*spk->driver.data->env)->DeleteLocalRef(spk->driver.data->env, string);
       string = NULL;
@@ -91,7 +109,7 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
 
 static void
 spk_mute (volatile SpeechSynthesizer *spk) {
-  if (findDriverMethod(spk, &spk->driver.data->muteMethod, "mute",
+  if (findDriverMethod(spk, &spk->driver.data->muteMethod, "stopSpeaking",
                        JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                       ))) {
     jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->driverClass, spk->driver.data->muteMethod);
@@ -168,7 +186,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
     spk->setPitch = spk_setPitch;
 
     if (spk->driver.data->env) {
-      if (findDriverMethod(spk, &spk->driver.data->startMethod, "start",
+      if (findDriverMethod(spk, &spk->driver.data->startMethod, "startEngine",
                            JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                           ))) {
         jboolean result = (*spk->driver.data->env)->CallStaticBooleanMethod(spk->driver.data->env, spk->driver.data->driverClass, spk->driver.data->startMethod);
@@ -192,7 +210,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 
 static void
 spk_destruct (volatile SpeechSynthesizer *spk) {
-  if (findDriverMethod(spk, &spk->driver.data->stopMethod, "stop",
+  if (findDriverMethod(spk, &spk->driver.data->stopMethod, "stopEngine",
                        JAVA_SIG_METHOD(JAVA_SIG_VOID,
                                       ))) {
     (*spk->driver.data->env)->CallStaticVoidMethod(spk->driver.data->env, spk->driver.data->driverClass, spk->driver.data->stopMethod);

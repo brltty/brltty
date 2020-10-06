@@ -18,39 +18,252 @@
 
 package org.a11y.brltty.android;
 
+import java.util.Map;
 import java.util.HashMap;
 
 import android.util.Log;
-
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 
-public class SpeechDriver {
+public class SpeechDriver extends SpeechComponent {
   private final static String LOG_TAG = SpeechDriver.class.getName();
 
-  enum State {
+  protected SpeechDriver () {
+    super();
+  }
+
+  enum EngineState {
     STOPPED,
     STARTED,
     FAILED
   }
 
-  private static volatile State state = State.STOPPED;
-  private static TextToSpeech tts = null;
-  private final static HashMap<String, String> parameters = new HashMap<String, String>();
+  private final static int maximumTextLength = (
+    APITests.haveJellyBeanMR2?  TextToSpeech.getMaxSpeechInputLength():
+    4000
+  ) - 1;
 
-  public static boolean start () {
+  private final static SpeechParadigm ttsParadigm =
+    APITests.haveLollipop? new NewSpeechParadigm():
+    new OldSpeechParadigm();
+
+  private static volatile EngineState engineState = EngineState.STOPPED;
+  private static TextToSpeech ttsObject = null;
+
+  private native static void tellLocation (long synthesizer, int location);
+  private native static void tellFinished (long synthesizer);
+
+  private static class Utterance {
+    private final long speechSynthesizer;
+    private final CharSequence utteranceText;
+
+    public Utterance (long synthesizer, CharSequence text) {
+      speechSynthesizer = synthesizer;
+      utteranceText = text;
+    }
+
+    public final long getSynthesizer () {
+      return speechSynthesizer;
+    }
+
+    public final CharSequence getText () {
+      return utteranceText;
+    }
+
+    private int rangeStart = 0;
+    private int rangeEnd = 0;
+
+    public final int getRangeStart () {
+      return rangeStart;
+    }
+
+    public final int getRangeEnd () {
+      return rangeEnd;
+    }
+
+    public final void setRange (int start, int end) {
+      rangeStart = start;
+      rangeEnd = end;
+      tellLocation(getSynthesizer(), start);
+    }
+  }
+
+  private final static Map<CharSequence, Utterance> activeUtterances = new HashMap<>();
+
+  private static Utterance getUtterance (String identifier) {
+    synchronized (activeUtterances) {
+      return activeUtterances.get(identifier);
+    }
+  }
+
+  private static void logUtteranceState (String identifier, String state, boolean unexpected) {
+    StringBuilder log = new StringBuilder();
+    log.append("utterance ").append(state);
+
+    if ((identifier != null) && !identifier.isEmpty()) {
+      log.append(": ").append(identifier);
+      Utterance utterance = getUtterance(identifier);
+
+      if (utterance != null) {
+        String text = utterance.getText().toString();
+        text = Logger.shrinkText(text);
+        log.append(": ").append(text);
+      }
+    }
+
+    if (unexpected) {
+      Log.w(LOG_TAG, log.toString());
+    } else {
+      Log.d(LOG_TAG, log.toString());
+    }
+  }
+
+  private final static UtteranceProgressListener utteranceProgressListener =
+    new UtteranceProgressListener() {
+      private final void onUtteranceIncomplete (String identifier) {
+        synchronized (activeUtterances) {
+          Utterance utterance = activeUtterances.get(identifier);
+          activeUtterances.clear();
+
+          if (utterance != null) {
+            tellFinished(utterance.getSynthesizer());
+          }
+        }
+      }
+
+      // API Level 15 - called when an utterance starts to be processed
+      @Override
+      public final void onStart (String identifier) {
+        logUtteranceState(identifier, "started", false);
+      }
+
+      // API Level 15 - called when an utterance has successfully completed
+      @Override
+      public final void onDone (String identifier) {
+        logUtteranceState(identifier, "finished", false);
+
+        synchronized (activeUtterances) {
+          Utterance utterance = activeUtterances.remove(identifier);
+
+          if (utterance != null) {
+            if (activeUtterances.isEmpty()) {
+              long synthesizer = utterance.getSynthesizer();
+              tellLocation(synthesizer, utterance.getRangeEnd());
+              tellFinished(synthesizer);
+            }
+          }
+        }
+      }
+
+      // API Level 23 - called when an utterance is stopped or flushed
+      @Override
+      public final void onStop (String identifier, boolean wasInterrupted) {
+        logUtteranceState(identifier, (wasInterrupted? "interrupted": "cancelled"), false);
+        onUtteranceIncomplete(identifier);
+      }
+
+      // API Level 15 - called when an error has occurred
+      @Override
+      public final void onError (String identifier) {
+        logUtteranceState(identifier, "error", true);
+        onUtteranceIncomplete(identifier);
+      }
+
+      // API Level 21 - called when an error has occurred
+      @Override
+      public final void onError (String identifier, int code) {
+        logUtteranceState(identifier, ("error " + code), true);
+        onUtteranceIncomplete(identifier);
+      }
+
+      // API Level 24 - called when the engine begins to synthesize a request
+      @Override
+      public final void onBeginSynthesis (String identifier, int rate, int format, int channels) {
+      }
+
+      // API Level 24 - called when a chunk of audio has been generated
+      @Override
+      public final void onAudioAvailable (String identifier, byte[] audio) {
+      }
+
+      // API Level 26 - called when the specified range is about to be spoken
+      @Override
+      public final void onRangeStart (String identifier, int start, int end, int frame) {
+        Utterance utterance = getUtterance(identifier);
+        if (utterance != null) utterance.setRange(start, end);
+      }
+    };
+
+  public static boolean sayText (long synthesizer, CharSequence text) {
+    synchronized (ttsParadigm) {
+      String identifier = ttsParadigm.setUtteranceIdentifier();
+
+      synchronized (activeUtterances) {
+        activeUtterances.put(identifier, new Utterance(synthesizer, text));
+      }
+
+      if (ttsParadigm.sayText(ttsObject, text, TextToSpeech.QUEUE_ADD)) {
+        return true;
+      }
+
+      synchronized (activeUtterances) {
+        activeUtterances.remove(identifier);
+      }
+
+      logUtteranceState(identifier, "start failed", true);
+      return false;
+    }
+  }
+
+  public static boolean stopSpeaking () {
+    int result = ttsObject.stop();
+    if (result == TextToSpeech.SUCCESS) return true;
+
+    logSpeechError("stop speaking", result);
+    return false;
+  }
+
+  public static boolean setVolume (float volume) {
+    ttsParadigm.setParameter(TextToSpeech.Engine.KEY_PARAM_VOLUME, volume);
+    return true;
+  }
+
+  public static boolean setBalance (float balance) {
+    ttsParadigm.setParameter(TextToSpeech.Engine.KEY_PARAM_PAN, balance);
+    return true;
+  }
+
+  public static boolean setRate (float rate) {
+    int result = ttsObject.setSpeechRate(rate);
+    if (result == TextToSpeech.SUCCESS) return true;
+
+    logSpeechError("set rate", result);
+    return false;
+  }
+
+  public static boolean setPitch (float pitch) {
+    int result = ttsObject.setPitch(pitch);
+    if (result == TextToSpeech.SUCCESS) return true;
+
+    logSpeechError("set pitch", result);
+    return false;
+  }
+
+  public static boolean startEngine () {
     TextToSpeech.OnInitListener listener = new TextToSpeech.OnInitListener() {
       @Override
       public void onInit (int status) {
         synchronized (this) {
           switch (status) {
             case TextToSpeech.SUCCESS:
-              state = state.STARTED;
+              engineState = EngineState.STARTED;
+              ttsObject.setOnUtteranceProgressListener(utteranceProgressListener);
               break;
 
             default:
-              Log.w(LOG_TAG, "unknown text to speech engine startup status: " + status);
+              Log.w(LOG_TAG, ("unknown text to speech engine startup status: " + status));
             case TextToSpeech.ERROR:
-              state = state.FAILED;
+              engineState = EngineState.FAILED;
               break;
           }
 
@@ -61,10 +274,10 @@ public class SpeechDriver {
 
     synchronized (listener) {
       Log.d(LOG_TAG, "starting text to speech engine");
-      state = state.STOPPED;
-      tts = new TextToSpeech(BrailleApplication.get(), listener);
+      engineState = EngineState.STOPPED;
+      ttsObject = new TextToSpeech(BrailleApplication.get(), listener);
 
-      while (state == state.STOPPED) {
+      while (engineState == EngineState.STOPPED) {
         try {
           listener.wait();
         } catch (InterruptedException exception) {
@@ -72,43 +285,23 @@ public class SpeechDriver {
       }
     }
 
-    if (state == state.STARTED) {
-      parameters.clear();
+    if (engineState == EngineState.STARTED) {
+      ttsParadigm.resetParameters();
       Log.d(LOG_TAG, "text to speech engine started");
       return true;
     }
 
     Log.w(LOG_TAG, "text to speech engine failed");
-    tts = null;
+    ttsObject = null;
     return false;
   }
 
-  public static void stop () {
-    if (tts != null) {
-      tts.shutdown();
-      tts = null;
-      state = state.STOPPED;
+  public static void stopEngine () {
+    if (ttsObject != null) {
+      Log.d(LOG_TAG, "stopping text to speech engine");
+      ttsObject.shutdown();
+      ttsObject = null;
+      engineState = EngineState.STOPPED;
     }
-  }
-
-  public static boolean say (String text) {
-    return tts.speak(text, TextToSpeech.QUEUE_ADD, parameters) == TextToSpeech.SUCCESS;
-  }
-
-  public static boolean mute () {
-    return tts.stop() == TextToSpeech.SUCCESS;
-  }
-
-  public static boolean setVolume (float volume) {
-    parameters.put(TextToSpeech.Engine.KEY_PARAM_VOLUME, Float.toString(volume));
-    return true;
-  }
-
-  public static boolean setRate (float rate) {
-    return tts.setSpeechRate(rate) == TextToSpeech.SUCCESS;
-  }
-
-  public static boolean setPitch (float pitch) {
-    return tts.setPitch(pitch) == TextToSpeech.SUCCESS;
   }
 }
