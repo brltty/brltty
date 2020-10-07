@@ -36,15 +36,28 @@
 #ifdef ENABLE_SPEECH_SUPPORT
 static void
 sayScreenRegion (int left, int top, int width, int height, int track, SayMode mode) {
+  if (mode == sayImmediate) muteSpeech(&spk, __func__);
+
   size_t count = width * height;
   ScreenCharacter characters[count];
-
-  if (mode == sayImmediate) muteSpeech(&spk, __func__);
   readScreen(left, top, width, height, characters);
+
+  {
+    ScreenCharacter *character = characters;
+    ScreenCharacter *end = character + count;
+    character += width - 1;
+
+    while (character < end) {
+      if (iswspace(character->text)) character->text = WC_C('\n');
+      character += width;
+    }
+  }
+
   spk.track.isActive = track;
   spk.track.screenNumber = scr.number;
   spk.track.firstLine = top;
   spk.track.speechLocation = SPK_LOC_NONE;
+
   sayScreenCharacters(characters, count, 0);
 }
 
