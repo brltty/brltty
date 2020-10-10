@@ -712,11 +712,15 @@ handleNavigationCommands (int command, void *data) {
       ses->winy = ses->moty;
       break;
 
-    case BRL_CMD_CSRJMP_VERT:
-      alert(routeScreenCursor(-1, ses->winy, scr.number)?
-               ALERT_ROUTING_STARTED:
-               ALERT_COMMAND_REJECTED);
+    case BRL_CMD_CSRJMP_VERT: {
+      if (routeScreenCursor(-1, ses->winy, scr.number)) {
+        alert(ALERT_ROUTING_STARTED);
+      } else {
+        alert(ALERT_COMMAND_REJECTED);
+      }
+
       break;
+    }
 
     default: {
       int blk = command & BRL_MSK_BLK;
@@ -733,6 +737,7 @@ handleNavigationCommands (int command, void *data) {
               break;
             }
           }
+
           alert(ALERT_COMMAND_REJECTED);
           break;
         }

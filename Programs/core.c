@@ -148,9 +148,20 @@ checkRoutingStatus (RoutingStatus ok, int wait) {
   }
 }
 
+static void
+dragScreenCursor (int column, int row) {
+  if (routeScreenCursor(column, row, scr.number)) {
+    alert(ALERT_ROUTING_STARTED);
+    checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
+  }
+}
+
 typedef struct {
   int motionColumn;
   int motionRow;
+
+  int speechColumn;
+  int speechRow;
 } PrecommandState;
 
 static void *
@@ -158,8 +169,13 @@ preprocessCommand (void) {
   PrecommandState *pre;
 
   if ((pre = malloc(sizeof(*pre)))) {
+    memset(pre, 0, sizeof(*pre));
+
     pre->motionColumn = ses->winx;
     pre->motionRow = ses->winy;
+
+    pre->speechColumn = ses->spkx;
+    pre->speechRow = ses->spky;
 
     suspendUpdates();
     return pre;
@@ -188,40 +204,23 @@ postprocessCommand (void *state, int command, int handled) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
       isContracted = 0;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-
-#ifdef ENABLE_SPEECH_SUPPORT
-      if (ses->trackScreenCursor && spk.track.isActive && (scr.number == spk.track.screenNumber)) {
-        ses->trackScreenCursor = 0;
-        alert(ALERT_CURSOR_UNLINKED);
-      }
-#endif /* ENABLE_SPEECH_SUPPORT */
     }
 
     if (!(command & BRL_MSK_BLK)) {
       if (command & BRL_FLG_MOTION_ROUTE) {
-        int left = ses->winx;
-        int right = MIN(left+textCount, scr.cols) - 1;
+        if ((ses->spkx != pre->speechColumn) || (ses->spky != pre->speechRow)) {
+          /* The speech cursor has moved. */
+          dragScreenCursor(ses->spkx, ses->spky);
+        } else {
+          int left = ses->winx;
+          int right = MIN(left+textCount, scr.cols) - 1;
 
-        int top = ses->winy;
-        int bottom = MIN(top+brl.textRows, scr.rows) - 1;
+          int top = ses->winy;
+          int bottom = MIN(top+brl.textRows, scr.rows) - 1;
 
-        if ((scr.posx < left) || (scr.posx > right) ||
-            (scr.posy < top) || (scr.posy > bottom)) {
-          if (routeScreenCursor(MIN(MAX(scr.posx, left), right),
-                          MIN(MAX(scr.posy, top), bottom),
-                          scr.number)) {
-            alert(ALERT_ROUTING_STARTED);
-            checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
-
-            {
-              ScreenDescription description;
-              describeScreen(&description);
-
-              if (description.number == scr.number) {
-                slideBrailleWindowVertically(description.posy);
-                placeBrailleWindowHorizontally(description.posx);
-              }
-            }
+          if ((scr.posx < left) || (scr.posx > right) ||
+              (scr.posy < top) || (scr.posy > bottom)) {
+            dragScreenCursor(left, top);;
           }
         }
       }
