@@ -108,13 +108,16 @@ handleSpeechCommands (int command, void *data) {
       enableSpeechDriver(1);
       break;
 
-    case BRL_CMD_SPKHOME:
+    case BRL_CMD_SPKHOME: {
       if (scr.number == spk.track.screenNumber) {
-        trackSpeech();
-      } else {
-        alert(ALERT_COMMAND_REJECTED);
+        if (bringScreenCursor(ses->spkx, ses->spky, 0)) {
+          break;
+        }
       }
+
+      alert(ALERT_COMMAND_REJECTED);
       break;
+    }
 
     case BRL_CMD_MUTE:
       muteSpeech(&spk, "command");

@@ -120,6 +120,7 @@ extern void slideBrailleWindowVertically (int y);
 
 extern int showScreenCursor (void);
 extern int trackScreenCursor (int place);
+extern int bringScreenCursor (int column, int row, int wait);
 extern void cancelDelayedCursorTrackingAlarm (void);
 
 typedef struct {

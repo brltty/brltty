@@ -137,8 +137,8 @@ onTextStyleUpdated (void) {
 }
 
 static void
-checkRoutingStatus (RoutingStatus ok, int wait) {
-  RoutingStatus status = getRoutingStatus(wait);
+checkRoutingStatus (RoutingStatus ok) {
+  RoutingStatus status = getRoutingStatus(1);
 
   if (status != ROUTING_NONE) {
     alert((status > ok)? ALERT_ROUTING_FAILED: ALERT_ROUTING_SUCCEEDED);
@@ -148,12 +148,16 @@ checkRoutingStatus (RoutingStatus ok, int wait) {
   }
 }
 
-static void
-dragScreenCursor (int column, int row) {
-  if (routeScreenCursor(column, row, scr.number)) {
+int
+bringScreenCursor (int column, int row, int wait) {
+  int started = routeScreenCursor(column, row, scr.number);
+
+  if (started) {
     alert(ALERT_ROUTING_STARTED);
-    checkRoutingStatus(ROUTING_WRONG_COLUMN, 1);
+    if (wait) checkRoutingStatus(ROUTING_WRONG_COLUMN);
   }
+
+  return started;
 }
 
 typedef struct {
@@ -210,7 +214,7 @@ postprocessCommand (void *state, int command, int handled) {
       if (command & BRL_FLG_MOTION_ROUTE) {
         if ((ses->spkx != pre->speechColumn) || (ses->spky != pre->speechRow)) {
           /* The speech cursor has moved. */
-          dragScreenCursor(ses->spkx, ses->spky);
+          bringScreenCursor(ses->spkx, ses->spky, 1);
         } else {
           int left = ses->winx;
           int right = MIN(left+textCount, scr.cols) - 1;
@@ -220,7 +224,7 @@ postprocessCommand (void *state, int command, int handled) {
 
           if ((scr.posx < left) || (scr.posx > right) ||
               (scr.posy < top) || (scr.posy > bottom)) {
-            dragScreenCursor(left, top);;
+            bringScreenCursor(left, top, 1);
           }
         }
       }
