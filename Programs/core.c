@@ -211,22 +211,22 @@ postprocessCommand (void *state, int command, int handled) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
     }
 
-    if (!(command & BRL_MSK_BLK)) {
-      if (command & BRL_FLG_MOTION_ROUTE) {
-        if ((ses->spkx != pre->speechColumn) || (ses->spky != pre->speechRow)) {
-          /* The speech cursor has moved. */
-          bringScreenCursor(ses->spkx, ses->spky);
-        } else {
-          int left = ses->winx;
-          int right = MIN(left+textCount, scr.cols) - 1;
+    if (command & BRL_FLG_MOTION_ROUTE) {
+      if ((ses->spkx != pre->speechColumn) || (ses->spky != pre->speechRow)) {
+        /* The speech cursor has moved. */
+        bringScreenCursor(ses->spkx, ses->spky);
+      } else if (command & BRL_MSK_BLK) {
+        bringScreenCursor((command & BRL_MSK_ARG), ses->winy);
+      } else {
+        int left = ses->winx;
+        int right = MIN(left+textCount, scr.cols) - 1;
 
-          int top = ses->winy;
-          int bottom = MIN(top+brl.textRows, scr.rows) - 1;
+        int top = ses->winy;
+        int bottom = MIN(top+brl.textRows, scr.rows) - 1;
 
-          if ((scr.posx < left) || (scr.posx > right) ||
-              (scr.posy < top) || (scr.posy > bottom)) {
-            bringScreenCursor(left, top);
-          }
+        if ((scr.posx < left) || (scr.posx > right) ||
+            (scr.posy < top) || (scr.posy > bottom)) {
+          bringScreenCursor(left, top);
         }
       }
     }
