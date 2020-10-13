@@ -25,6 +25,7 @@
 #include "cmd_queue.h"
 #include "cmd_enqueue.h"
 #include "brl_cmds.h"
+#include "cmd.h"
 #include "queue.h"
 #include "async_alarm.h"
 #include "prefs.h"
@@ -76,7 +77,7 @@ getCurrentCommandContext (void) {
 }
 
 static int
-getPreferredCommand (int command) {
+toPreferredCommand (int command) {
   int preferred = command;
 
   if (prefs.skipIdenticalLines) {
@@ -203,16 +204,19 @@ ASYNC_ALARM_CALLBACK(handleCommandAlarm) {
     int command = dequeueCommand(queue);
 
     if (command != EOF) {
-      command = getPreferredCommand(command);
+      command = toPreferredCommand(command);
+      const CommandEntry *cmd = findCommandEntry(command);
 
       CommandEnvironment *env = commandEnvironmentStack;
-      void *state;
-      int handled;
-
       env->handlingCommand = 1;
-      state = env->preprocessCommand? env->preprocessCommand(): NULL;
-      handled = handleCommand(command);
-      if (env->postprocessCommand) env->postprocessCommand(state, command, handled);
+
+      void *pre = env->preprocessCommand? env->preprocessCommand(): NULL;
+      int handled = handleCommand(command);
+
+      if (env->postprocessCommand) {
+        env->postprocessCommand(pre, command, cmd, handled);
+      }
+
       env->handlingCommand = 0;
     }
   }

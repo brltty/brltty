@@ -19,6 +19,7 @@
 #ifndef BRLTTY_INCLUDED_CMD_QUEUE
 #define BRLTTY_INCLUDED_CMD_QUEUE
 
+#include "cmd_types.h"
 #include "ktb_types.h"
 
 #ifdef __cplusplus
@@ -32,7 +33,7 @@ extern void suspendCommandQueue (void);
 extern void resumeCommandQueue (void);
 
 typedef void *CommandPreprocessor (void);
-typedef void CommandPostprocessor (void *state, int command, int handled);
+typedef void CommandPostprocessor (void *state, int command, const CommandEntry *cmd, int handled);
 
 extern int pushCommandEnvironment (
   const char *name,
