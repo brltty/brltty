@@ -75,74 +75,75 @@ getCurrentCommandContext (void) {
   return context;
 }
 
-int
-handleCommand (int command) {
-  {
-    int real = command;
+static int
+getPreferredCommand (int command) {
+  int preferred = command;
 
-    if (prefs.skipIdenticalLines) {
-      switch (command & BRL_MSK_CMD) {
-        case BRL_CMD_LNUP:
-          real = BRL_CMD_PRDIFLN;
-          break;
+  if (prefs.skipIdenticalLines) {
+    switch (command & BRL_MSK_CMD) {
+      case BRL_CMD_LNUP:
+        preferred = BRL_CMD_PRDIFLN;
+        break;
 
-        case BRL_CMD_LNDN:
-          real = BRL_CMD_NXDIFLN;
-          break;
+      case BRL_CMD_LNDN:
+        preferred = BRL_CMD_NXDIFLN;
+        break;
 
-        case BRL_CMD_PRDIFLN:
-          real = BRL_CMD_LNUP;
-          break;
+      case BRL_CMD_PRDIFLN:
+        preferred = BRL_CMD_LNUP;
+        break;
 
-        case BRL_CMD_NXDIFLN:
-          real = BRL_CMD_LNDN;
-          break;
+      case BRL_CMD_NXDIFLN:
+        preferred = BRL_CMD_LNDN;
+        break;
 
-        default:
-          break;
-      }
-    }
-
-    if (prefs.skipBlankBrailleWindows) {
-      switch (command & BRL_MSK_CMD) {
-        case BRL_CMD_FWINLT:
-          real = BRL_CMD_FWINLTSKIP;
-          break;
-
-        case BRL_CMD_FWINRT:
-          real = BRL_CMD_FWINRTSKIP;
-          break;
-
-        case BRL_CMD_FWINLTSKIP:
-          real = BRL_CMD_FWINLT;
-          break;
-
-        case BRL_CMD_FWINRTSKIP:
-          real = BRL_CMD_FWINRT;
-          break;
-
-        default:
-          break;
-      }
-    }
-
-    if (real == command) {
-      logCommand(command);
-    } else {
-      real |= (command & ~BRL_MSK_CMD);
-      logTransformedCommand(command, real);
-      command = real;
+      default:
+        break;
     }
   }
 
-  {
-    const CommandEnvironment *env = commandEnvironmentStack;
-    const CommandHandlerLevel *chl = env->handlerStack;
+  if (prefs.skipBlankBrailleWindows) {
+    switch (command & BRL_MSK_CMD) {
+      case BRL_CMD_FWINLT:
+        preferred = BRL_CMD_FWINLTSKIP;
+        break;
 
-    while (chl) {
-      if (chl->handleCommand(command, chl->handlerData)) return 1;
-      chl = chl->previousLevel;
+      case BRL_CMD_FWINRT:
+        preferred = BRL_CMD_FWINRTSKIP;
+        break;
+
+      case BRL_CMD_FWINLTSKIP:
+        preferred = BRL_CMD_FWINLT;
+        break;
+
+      case BRL_CMD_FWINRTSKIP:
+        preferred = BRL_CMD_FWINRT;
+        break;
+
+      default:
+        break;
     }
+  }
+
+  if (preferred == command) {
+    logCommand(command);
+  } else {
+    preferred |= (command & ~BRL_MSK_CMD);
+    logTransformedCommand(command, preferred);
+    command = preferred;
+  }
+
+  return command;
+}
+
+int
+handleCommand (int command) {
+  const CommandEnvironment *env = commandEnvironmentStack;
+  const CommandHandlerLevel *chl = env->handlerStack;
+
+  while (chl) {
+    if (chl->handleCommand(command, chl->handlerData)) return 1;
+    chl = chl->previousLevel;
   }
 
   logMessage(LOG_WARNING, "%s: %04X", gettext("unhandled command"), command);
@@ -202,6 +203,8 @@ ASYNC_ALARM_CALLBACK(handleCommandAlarm) {
     int command = dequeueCommand(queue);
 
     if (command != EOF) {
+      command = getPreferredCommand(command);
+
       CommandEnvironment *env = commandEnvironmentStack;
       void *state;
       int handled;
