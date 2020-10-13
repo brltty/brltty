@@ -713,7 +713,7 @@ handleNavigationCommands (int command, void *data) {
       break;
 
     case BRL_CMD_CSRJMP_VERT: {
-      if (!bringScreenCursor(-1, ses->winy, 0)) {
+      if (!startScreenCursorRouting(-1, ses->winy)) {
         alert(ALERT_COMMAND_REJECTED);
       }
 
@@ -730,7 +730,7 @@ handleNavigationCommands (int command, void *data) {
           int column, row;
 
           if (getCharacterCoordinates(arg, &column, &row, 0, 1)) {
-            if (bringScreenCursor(column, row, 0)) {
+            if (startScreenCursorRouting(column, row)) {
               break;
             }
           }

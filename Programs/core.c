@@ -136,28 +136,29 @@ onTextStyleUpdated (void) {
   api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE, 0);
 }
 
-static void
-checkRoutingStatus (RoutingStatus ok) {
+int
+startScreenCursorRouting (int column, int row) {
+  if (!routeScreenCursor(column, row, scr.number)) return 0;
+  alert(ALERT_ROUTING_STARTED);
+  return 1;
+}
+
+int
+bringScreenCursor (int column, int row) {
+  if (!startScreenCursorRouting(column, row)) return 0;
   RoutingStatus status = getRoutingStatus(1);
 
   if (status != ROUTING_NONE) {
-    alert((status > ok)? ALERT_ROUTING_FAILED: ALERT_ROUTING_SUCCEEDED);
+    alert(
+      (status > ROUTING_WRONG_COLUMN)? ALERT_ROUTING_FAILED:
+      ALERT_ROUTING_SUCCEEDED
+    );
 
     ses->spkx = scr.posx;
     ses->spky = scr.posy;
   }
-}
 
-int
-bringScreenCursor (int column, int row, int wait) {
-  int started = routeScreenCursor(column, row, scr.number);
-
-  if (started) {
-    alert(ALERT_ROUTING_STARTED);
-    if (wait) checkRoutingStatus(ROUTING_WRONG_COLUMN);
-  }
-
-  return started;
+  return 1;
 }
 
 typedef struct {
@@ -214,7 +215,7 @@ postprocessCommand (void *state, int command, int handled) {
       if (command & BRL_FLG_MOTION_ROUTE) {
         if ((ses->spkx != pre->speechColumn) || (ses->spky != pre->speechRow)) {
           /* The speech cursor has moved. */
-          bringScreenCursor(ses->spkx, ses->spky, 1);
+          bringScreenCursor(ses->spkx, ses->spky);
         } else {
           int left = ses->winx;
           int right = MIN(left+textCount, scr.cols) - 1;
@@ -224,7 +225,7 @@ postprocessCommand (void *state, int command, int handled) {
 
           if ((scr.posx < left) || (scr.posx > right) ||
               (scr.posy < top) || (scr.posy > bottom)) {
-            bringScreenCursor(left, top, 1);
+            bringScreenCursor(left, top);
           }
         }
       }

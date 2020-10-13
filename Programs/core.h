@@ -120,8 +120,10 @@ extern void slideBrailleWindowVertically (int y);
 
 extern int showScreenCursor (void);
 extern int trackScreenCursor (int place);
-extern int bringScreenCursor (int column, int row, int wait);
 extern void cancelDelayedCursorTrackingAlarm (void);
+
+extern int startScreenCursorRouting (int column, int row);
+extern int bringScreenCursor (int column, int row);
 
 typedef struct {
   TimeValue value;

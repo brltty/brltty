@@ -110,7 +110,7 @@ handleSpeechCommands (int command, void *data) {
 
     case BRL_CMD_SPKHOME: {
       if (scr.number == spk.track.screenNumber) {
-        if (bringScreenCursor(ses->spkx, ses->spky, 0)) {
+        if (startScreenCursorRouting(ses->spkx, ses->spky)) {
           break;
         }
       }
