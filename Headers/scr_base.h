@@ -31,6 +31,7 @@ extern void setScreenKeyModifiers (ScreenKey *key, ScreenKey which);
 
 typedef struct {
   const char * (*getTitle) (void);
+
   void (*onForeground) (void);
   void (*onBackground) (void);
 
@@ -45,6 +46,10 @@ typedef struct {
   int (*highlightRegion) (int left, int right, int top, int bottom);
   int (*unhighlightRegion) (void);
   int (*getPointer) (int *column, int *row);
+
+  int (*clearSelection) (void);
+  int (*setSelection) (int startColumn, int startRow, int endColumn, int endRow);
+  int (*selectAll) (void);
 
   int (*currentVirtualTerminal) (void);
   int (*selectVirtualTerminal) (int vt);

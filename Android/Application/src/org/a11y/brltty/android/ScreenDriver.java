@@ -433,7 +433,7 @@ public abstract class ScreenDriver {
 
     if (node != null) {
       try {
-        ScreenElement element = screen.findRenderedScreenElement(node);
+        ScreenElement element = screen.findScreenElement(node);
 
         if (element != null) {
           Rect location = element.getBrailleLocation();

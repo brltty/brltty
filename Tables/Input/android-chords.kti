@@ -33,6 +33,11 @@ bind \{prefix}+Dot6 KEY_FUNCTION+12 # to next window
 bind \{prefix}+\{w} KEY_FUNCTION+13 # show window title
 bind \{prefix}+\{s} KEY_FUNCTION+14 # show status summary
 
+bind \{prefix}+\{a} TXTSEL_ALL
+bind \{prefix}+\{c} HOST_COPY
+bind \{prefix}+\{v} HOST_PASTE
+bind \{prefix}+\{x} HOST_CUT
+
 bind \{prefix}+Dot2+Dot5 CONTEXT+chrome
 context chrome Web Page Navigation
 bind Dot7+Dot8 CONTEXT+default

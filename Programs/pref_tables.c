@@ -319,6 +319,12 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.highlightBrailleWindowLocation
   },
 
+  { .name = "start-text-selection",
+    .defaultValue = DEFAULT_START_TEXT_SELECTION,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.startTextSelection
+  },
+
   { .name = "autorelease-time",
     .defaultValue = DEFAULT_AUTORELEASE_TIME,
     .settingNames = &preferenceStringTable_autoreleaseTime,

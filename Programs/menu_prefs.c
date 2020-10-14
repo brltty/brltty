@@ -810,6 +810,11 @@ makePreferencesMenu (void) {
       NAME(strtext("Highlight Braille Window Location"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.highlightBrailleWindowLocation, &itemName));
     }
+
+    {
+      NAME(strtext("Start Text Selection"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.startTextSelection, &itemName));
+    }
   }
 
   {

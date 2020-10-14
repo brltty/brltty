@@ -154,6 +154,33 @@ getScreenPointer (int *column, int *row) {
 }
 
 int
+clearScreenTextSelection (void) {
+  return currentScreen->clearSelection();
+}
+
+int
+setScreenTextSelection (int startColumn, int startRow, int endColumn, int endRow) {
+  if ((endRow < startRow) || ((endRow == startRow) && (endColumn < startColumn))) {
+    int temp;
+
+    temp = endColumn;
+    endColumn = startColumn;
+    startColumn = temp;
+
+    temp = endRow;
+    endRow = startRow;
+    startRow = temp;
+  }
+
+  return currentScreen->setSelection(startColumn, startRow, endColumn, endRow);
+}
+
+int
+setScreenTextSelectionAll (void) {
+  return currentScreen->selectAll();
+}
+
+int
 currentVirtualTerminal (void) {
   return currentScreen->currentVirtualTerminal();
 }

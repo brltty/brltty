@@ -180,6 +180,7 @@ typedef struct {
 
   unsigned char wordWrap;
   unsigned char capitalizationMode;
+  unsigned char startTextSelection;
 
   unsigned char speechUppercaseIndicator;
   unsigned char speechWhitespaceIndicator;

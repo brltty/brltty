@@ -769,7 +769,7 @@ driver.$O:
 
 ###############################################################################
 
-CMD_OBJECTS = cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_clipboard.$O cmd_custom.$O cmd_input.$O cmd_keycodes.$O cmd_learn.$O cmd_miscellaneous.$O cmd_navigation.$O cmd_preferences.$O cmd_speech.$O cmd_toggle.$O cmd_touch.$O clipboard.$O learn.$O
+CMD_OBJECTS = cmd.$O cmd_brlapi.$O cmd_queue.$O cmd_utils.$O cmd_clipboard.$O cmd_custom.$O cmd_input.$O cmd_keycodes.$O cmd_learn.$O cmd_miscellaneous.$O cmd_navigation.$O cmd_override.$O cmd_preferences.$O cmd_speech.$O cmd_toggle.$O cmd_touch.$O clipboard.$O learn.$O
 
 cmd.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd.c
@@ -803,6 +803,9 @@ cmd_miscellaneous.$O:
 
 cmd_navigation.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_navigation.c
+
+cmd_override.$O:
+	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/cmd_override.c
 
 cmd_preferences.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmd_preferences.c

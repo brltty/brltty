@@ -78,12 +78,15 @@ typedef enum {
 } ScreenContentQuality;
 
 typedef struct {
+  const char *unreadable;
+  ScreenContentQuality quality;
+
+  int number;		      /* screen number */
   short cols, rows;	/* screen dimensions */
   short posx, posy;	/* cursor position */
-  int number;		      /* screen number */
-  unsigned cursor:1;
-  ScreenContentQuality quality;
-  const char *unreadable;
+
+  unsigned char hasCursor:1;
+  unsigned char hasSelection:1;
 } ScreenDescription;
 
 typedef struct {

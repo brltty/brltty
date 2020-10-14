@@ -73,7 +73,7 @@ public class RenderedScreen {
     return screenElements.get(node);
   }
 
-  public final ScreenElement findRenderedScreenElement (AccessibilityNodeInfo node) {
+  public final ScreenElement findScreenElement (AccessibilityNodeInfo node) {
     ScreenElement element = getScreenElement(node);
 
     if (element != null) {
@@ -89,7 +89,7 @@ public class RenderedScreen {
         AccessibilityNodeInfo child = node.getChild(childIndex);
 
         if (child != null) {
-          element = findRenderedScreenElement(child);
+          element = findScreenElement(child);
 
           child.recycle();
           child = null;
@@ -102,8 +102,12 @@ public class RenderedScreen {
     return null;
   }
 
+  public final ScreenElement findScreenElement (int column, int row) {
+    return screenElements.findByBrailleLocation(column, row);
+  }
+
   public final boolean performAction (int column, int row) {
-    ScreenElement element = screenElements.findByBrailleLocation(column, row);
+    ScreenElement element = findScreenElement(column, row);
     if (element == null) return false;
 
     Rect location = element.getBrailleLocation();

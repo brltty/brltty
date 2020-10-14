@@ -221,6 +221,24 @@ public class ScreenElement {
     return brailleText;
   }
 
+  public final int getTextOffset (int column, int row) {
+    String[] lines = getBrailleText();
+    String line;
+    int index = 0;
+    int offset = 0;
+
+    while (true) {
+      line = lines[index];
+      if (index == row) break;
+
+      offset += line.length();
+      index += 1;
+    }
+
+    offset += Math.min(column, (line.length() - 1));
+    return offset;
+  }
+
   public final Point getBrailleCoordinates (int offset) {
     String[] lines = getBrailleText();
 

@@ -328,20 +328,7 @@ public class RealScreenElement extends ScreenElement {
       if (!onBringCursor()) return false;
       setInputFocus();
 
-      String[] lines = getBrailleText();
-      String line;
-      int index = 0;
-      int offset = 0;
-
-      while (true) {
-        line = lines[index];
-        if (index == row) break;
-
-        offset += line.length();
-        index += 1;
-      }
-
-      offset += Math.min(column, (line.length() - 1));
+      int offset = getTextOffset(column, row);
       return InputHandlers.placeCursor(accessibilityNode, offset);
     }
 

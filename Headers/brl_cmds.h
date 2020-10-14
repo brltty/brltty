@@ -235,6 +235,12 @@ typedef enum {
 
   BRL_CMD_REFRESH /* refresh braille display */,
 
+  BRL_CMD_TXTSEL_CLEAR /* clear text selection */,
+  BRL_CMD_TXTSEL_ALL /* select all text */,
+  BRL_CMD_HOST_COPY /* copy selected text to host clipboard */,
+  BRL_CMD_HOST_CUT /* cut selected text to host clipboard */,
+  BRL_CMD_HOST_PASTE /* paste from host clipboard */,
+
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
 
@@ -269,8 +275,8 @@ typedef enum {
   BRL_BLK_SET_LANGUAGE_PROFILE /* set language profile */,
   BRL_BLK_ROUTE_LINE /* bring screen cursor to line */,
   BRL_BLK_REFRESH_LINE /* refresh braille line */,
-  BRL_BLK_1A /* (reserved) */,
-  BRL_BLK_1B /* (reserved) */,
+  BRL_BLK_TXTSEL_START /* start text selection */,
+  BRL_BLK_TXTSEL_SET /* set text selection */,
   BRL_BLK_1C /* (reserved) */,
   BRL_BLK_1D /* (reserved) */,
   BRL_BLK_SELECTVT /* bind to specific virtual terminal */,

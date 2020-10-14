@@ -78,6 +78,7 @@ extern "C" {
 #define DEFAULT_TRACK_SCREEN_SCROLL 0		/* 1 for on, 0 for off */
 #define DEFAULT_TRACK_SCREEN_POINTER 0		/* 1 for on, 0 for off */
 #define DEFAULT_HIGHLIGHT_BRAILLE_WINDOW_LOCATION 0		/* 1 for on, 0 for off */
+#define DEFAULT_START_TEXT_SELECTION 0		/* 1 for on, 0 for off */
 
 #define DEFAULT_BRAILLE_KEYBOARD_ENABLED 1
 #define DEFAULT_BRAILLE_TYPING_MODE BRL_TYPING_TEXT

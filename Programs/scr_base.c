@@ -184,6 +184,21 @@ getPointer_BaseScreen (int *column, int *row) {
 }
 
 static int
+clearSelection_BaseScreen (void) {
+  return 0;
+}
+
+static int
+setSelection_BaseScreen (int startColumn, int startRow, int endColumn, int endRow) {
+  return 0;
+}
+
+static int
+selectAll_BaseScreen (void) {
+  return 0;
+}
+
+static int
 handleCommand_BaseScreen (int command) {
   return 0;
 }
@@ -211,6 +226,10 @@ initializeBaseScreen (BaseScreen *base) {
   base->unhighlightRegion = unhighlightRegion_BaseScreen;
   base->getPointer = getPointer_BaseScreen;
 
+  base->clearSelection = clearSelection_BaseScreen;
+  base->setSelection = setSelection_BaseScreen;
+  base->selectAll = selectAll_BaseScreen;
+
   base->currentVirtualTerminal = currentVirtualTerminal_BaseScreen;
   base->selectVirtualTerminal = selectVirtualTerminal_BaseScreen;
   base->switchVirtualTerminal = switchVirtualTerminal_BaseScreen;
@@ -223,16 +242,20 @@ initializeBaseScreen (BaseScreen *base) {
 
 void
 describeBaseScreen (BaseScreen *base, ScreenDescription *description) {
+  description->unreadable = NULL;
+  description->quality = SCQ_GOOD;
+
+  description->number = 0;
   description->cols = description->rows = 1;
   description->posx = description->posy = 0;
-  description->number = 0;
-  description->cursor = 1;
-  description->quality = SCQ_GOOD;
-  description->unreadable = NULL;
+
+  description->hasCursor = 1;
+  description->hasSelection = 0;
+
   base->describe(description);
 
   if (description->unreadable) {
-    description->cursor = 0;
+    description->hasCursor = 0;
   }
 }
 

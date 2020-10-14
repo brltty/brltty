@@ -51,6 +51,27 @@ findInputHandlersClass (void) {
   return findJavaClass(env, &inputHandlersClass, JAVA_OBJ_BRLTTY("InputHandlers"));
 }
 
+static int
+callInputHandlersMethod (jmethodID *method, const char *name) {
+  if (findInputHandlersClass()) {
+    if (findJavaStaticMethod(env, method, inputHandlersClass, name,
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                            ))) {
+      jboolean result = (*env)->CallStaticBooleanMethod(
+        env, inputHandlersClass, *method
+      );
+
+      if (!clearJavaException(env, 1)) {
+        if (result != JNI_FALSE) {
+          return 1;
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
 REPORT_LISTENER(androidScreenDriverReportListener) {
   char *event = parameters->listenerData;
 
@@ -190,12 +211,15 @@ describe_AndroidScreen (ScreenDescription *description) {
     description->number = 0;
   } else {
     description->number = screenNumber;
+
     description->cols = screenColumns;
     description->rows = screenRows;
 
-    description->cursor = selectionLeft == selectionRight;
     description->posx = locationLeft + selectionLeft;
     description->posy = locationTop + selectionTop;
+
+    description->hasCursor = selectionLeft == selectionRight;
+    description->hasSelection = selectionRight > selectionLeft;
   }
 }
 
@@ -431,6 +455,30 @@ handleCommand_AndroidScreen (int command) {
   int cmd = blk | arg;
 
   switch (cmd) {
+    case BRL_CMD_TXTSEL_ALL: {
+      static jmethodID method = 0;
+      if (callInputHandlersMethod(&method, "selectAll")) return 1;
+      break;
+    }
+
+    case BRL_CMD_HOST_COPY: {
+      static jmethodID method = 0;
+      if (callInputHandlersMethod(&method, "copySelection")) return 1;
+      break;
+    }
+
+    case BRL_CMD_HOST_CUT: {
+      static jmethodID method = 0;
+      if (callInputHandlersMethod(&method, "cutSelection")) return 1;
+      break;
+    }
+
+    case BRL_CMD_HOST_PASTE: {
+      static jmethodID method = 0;
+      if (callInputHandlersMethod(&method, "pasteClipboard")) return 1;
+      break;
+    }
+
     default: {
       switch (blk) {
         case BRL_CMD_BLK(PASSDOTS): {
@@ -445,38 +493,86 @@ handleCommand_AndroidScreen (int command) {
                 jbyte dots = arg;
                 jboolean result = (*env)->CallStaticBooleanMethod(env, inputHandlersClass, method, dots);
                 if (clearJavaException(env, 1)) result = JNI_FALSE;
-                if (result == JNI_FALSE) alert(ALERT_COMMAND_REJECTED);
+                if (result == JNI_TRUE) return 1;
               }
             }
-
-            return 1;
           }
 
           break;
         }
 
         default:
-          break;
+          return 0;
       }
 
       break;
     }
   }
 
+  alert(ALERT_COMMAND_REJECTED);
+  return 1;
+}
+
+static int
+setSelection_AndroidScreen (int startColumn, int startRow, int endColumn, int endRow) {
+  if (findInputHandlersClass()) {
+    static jmethodID method = 0;
+
+    if (findJavaStaticMethod(env, &method, inputHandlersClass, "setSelection",
+                             JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                             JAVA_SIG_INT // startColumn
+                                             JAVA_SIG_INT // startRow
+                                             JAVA_SIG_INT // endColumn
+                                             JAVA_SIG_INT // endRow
+                                            ))) {
+      jboolean result = (*env)->CallStaticBooleanMethod(
+        env, inputHandlersClass, method,
+        startColumn, startRow, endColumn, endRow
+      );
+
+      if (!clearJavaException(env, 1)) {
+        if (result != JNI_FALSE) {
+          return 1;
+        }
+      }
+    }
+  }
+
   return 0;
+}
+
+static int
+clearSelection_AndroidScreen (void) {
+  static jmethodID method = 0;
+  return callInputHandlersMethod(&method, "clearSelection");
+}
+
+static int
+selectAll_AndroidScreen (void) {
+  static jmethodID method = 0;
+  return callInputHandlersMethod(&method, "selectAll");
 }
 
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
+
   main->base.poll = poll_AndroidScreen;
   main->base.refresh = refresh_AndroidScreen;
   main->base.describe = describe_AndroidScreen;
+
   main->base.readCharacters = readCharacters_AndroidScreen;
   main->base.routeCursor = routeCursor_AndroidScreen;
+
   main->base.insertKey = insertKey_AndroidScreen;
   main->base.handleCommand = handleCommand_AndroidScreen;
+
+  main->base.setSelection = setSelection_AndroidScreen;
+  main->base.clearSelection = clearSelection_AndroidScreen;
+  main->base.selectAll = selectAll_AndroidScreen;
+
   main->construct = construct_AndroidScreen;
   main->destruct = destruct_AndroidScreen;
+
   env = getJavaNativeInterface();
 }

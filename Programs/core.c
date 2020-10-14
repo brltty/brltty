@@ -35,27 +35,31 @@
 #include "parameters.h"
 #include "embed.h"
 #include "log.h"
+#include "alert.h"
 #include "strfmt.h"
-#include "brl_cmds.h"
+
 #include "cmd_queue.h"
+#include "cmd_clipboard.h"
 #include "cmd_custom.h"
-#include "cmd_navigation.h"
 #include "cmd_input.h"
 #include "cmd_keycodes.h"
-#include "cmd_touch.h"
-#include "cmd_toggle.h"
-#include "cmd_preferences.h"
-#include "cmd_clipboard.h"
-#include "cmd_speech.h"
 #include "cmd_learn.h"
 #include "cmd_miscellaneous.h"
-#include "timing.h"
+#include "cmd_navigation.h"
+#include "cmd_override.h"
+#include "cmd_preferences.h"
+#include "cmd_speech.h"
+#include "cmd_toggle.h"
+#include "cmd_touch.h"
+
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "async_event.h"
 #include "async_signal.h"
 #include "async_task.h"
-#include "alert.h"
+
+#include "brl_cmds.h"
+#include "timing.h"
 #include "ctb.h"
 #include "routing.h"
 #include "utf8.h"
@@ -281,6 +285,8 @@ addCommands (void) {
   addKeycodeCommands();
   addInputCommands();
   addNavigationCommands();
+
+  addOverrideCommands();
   addScreenCommands();
   addCustomCommands();
 
@@ -1166,9 +1172,10 @@ getContractedLength (unsigned int outputLimit) {
 
 int
 showScreenCursor (void) {
-  return scr.cursor &&
-         prefs.showScreenCursor &&
-         !(ses->hideScreenCursor || brl.hideCursor);
+  return scr.hasCursor
+      && prefs.showScreenCursor
+      && !(ses->hideScreenCursor || brl.hideCursor)
+      ;
 }
 
 int

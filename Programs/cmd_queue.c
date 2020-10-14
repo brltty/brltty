@@ -24,6 +24,7 @@
 #include "log.h"
 #include "cmd_queue.h"
 #include "cmd_enqueue.h"
+#include "cmd_utils.h"
 #include "brl_cmds.h"
 #include "cmd.h"
 #include "queue.h"
@@ -80,49 +81,55 @@ static int
 toPreferredCommand (int command) {
   int preferred = command;
 
-  if (prefs.skipIdenticalLines) {
-    switch (command & BRL_MSK_CMD) {
-      case BRL_CMD_LNUP:
-        preferred = BRL_CMD_PRDIFLN;
-        break;
+  int cmd = command & BRL_MSK_CMD;
+  int blk = command & BRL_MSK_BLK;
 
-      case BRL_CMD_LNDN:
-        preferred = BRL_CMD_NXDIFLN;
-        break;
+  if (blk) {
+  } else {
+    if (prefs.skipIdenticalLines) {
+      switch (cmd) {
+        case BRL_CMD_LNUP:
+          preferred = BRL_CMD_PRDIFLN;
+          break;
 
-      case BRL_CMD_PRDIFLN:
-        preferred = BRL_CMD_LNUP;
-        break;
+        case BRL_CMD_LNDN:
+          preferred = BRL_CMD_NXDIFLN;
+          break;
 
-      case BRL_CMD_NXDIFLN:
-        preferred = BRL_CMD_LNDN;
-        break;
+        case BRL_CMD_PRDIFLN:
+          preferred = BRL_CMD_LNUP;
+          break;
 
-      default:
-        break;
+        case BRL_CMD_NXDIFLN:
+          preferred = BRL_CMD_LNDN;
+          break;
+
+        default:
+          break;
+      }
     }
-  }
 
-  if (prefs.skipBlankBrailleWindows) {
-    switch (command & BRL_MSK_CMD) {
-      case BRL_CMD_FWINLT:
-        preferred = BRL_CMD_FWINLTSKIP;
-        break;
+    if (prefs.skipBlankBrailleWindows) {
+      switch (cmd) {
+        case BRL_CMD_FWINLT:
+          preferred = BRL_CMD_FWINLTSKIP;
+          break;
 
-      case BRL_CMD_FWINRT:
-        preferred = BRL_CMD_FWINRTSKIP;
-        break;
+        case BRL_CMD_FWINRT:
+          preferred = BRL_CMD_FWINRTSKIP;
+          break;
 
-      case BRL_CMD_FWINLTSKIP:
-        preferred = BRL_CMD_FWINLT;
-        break;
+        case BRL_CMD_FWINLTSKIP:
+          preferred = BRL_CMD_FWINLT;
+          break;
 
-      case BRL_CMD_FWINRTSKIP:
-        preferred = BRL_CMD_FWINRT;
-        break;
+        case BRL_CMD_FWINRTSKIP:
+          preferred = BRL_CMD_FWINRT;
+          break;
 
-      default:
-        break;
+        default:
+          break;
+      }
     }
   }
 

@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import android.os.Bundle;
+import android.graphics.Rect;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -944,5 +945,104 @@ public abstract class InputHandlers {
     if (action == null) return false;
 
     return action.performAction();
+  }
+
+  public static boolean setSelection (int startColumn, int startRow, int endColumn, int endRow) {
+    RenderedScreen screen = ScreenDriver.getCurrentRenderedScreen();
+    if (screen == null) return false;
+
+    ScreenElement element = screen.findScreenElement(startColumn, startRow);
+    if (element == null) return false;
+
+    {
+      ScreenElement end = screen.findScreenElement(endColumn, endRow);
+      if (end != element) return false;
+    }
+
+    AccessibilityNodeInfo node = element.getAccessibilityNode();
+    if (node == null) return false;
+
+    try {
+      Rect location = element.getBrailleLocation();
+      int left = location.left;
+      int top = location.top;
+
+      int start = element.getTextOffset((startColumn - left), (startRow - top));
+      int end = element.getTextOffset((endColumn - left), (endRow - top)) + 1;
+
+      return setSelection(node, start, end);
+    } finally {
+      node.recycle();
+      node = null;
+    }
+  }
+
+  public abstract static class NodeHandler {
+    public abstract boolean handleNode (AccessibilityNodeInfo node);
+
+    public final boolean handleNode () {
+      AccessibilityNodeInfo node = getCursorNode();
+      if (node == null) return false;
+
+      try {
+        return handleNode(node);
+      } finally {
+        node.recycle();
+        node = null;
+      }
+    }
+
+    public NodeHandler () {
+    }
+  }
+
+  public static boolean selectAll () {
+    return new NodeHandler() {
+      @Override
+      public boolean handleNode (AccessibilityNodeInfo node) {
+        return setSelection(node, 0, node.getText().length());
+      }
+    }.handleNode();
+  }
+
+  private static boolean performNodeAction (final int action) {
+    return new NodeHandler() {
+      @Override
+      public boolean handleNode (AccessibilityNodeInfo node) {
+        return node.performAction(action);
+      }
+    }.handleNode();
+  }
+
+  public static boolean clearSelection () {
+    if (APITests.haveJellyBeanMR2) {
+      return performNodeAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
+    }
+
+    return false;
+  }
+
+  public static boolean copySelection () {
+    if (APITests.haveJellyBeanMR2) {
+      return performNodeAction(AccessibilityNodeInfo.ACTION_COPY);
+    }
+
+    return false;
+  }
+
+  public static boolean cutSelection () {
+    if (APITests.haveJellyBeanMR2) {
+      return performNodeAction(AccessibilityNodeInfo.ACTION_CUT);
+    }
+
+    return false;
+  }
+
+  public static boolean pasteClipboard () {
+    if (APITests.haveJellyBeanMR2) {
+      return performNodeAction(AccessibilityNodeInfo.ACTION_PASTE);
+    }
+
+    return false;
   }
 }
