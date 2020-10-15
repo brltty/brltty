@@ -482,19 +482,19 @@ handleCommand_AndroidScreen (int command) {
     default: {
       switch (blk) {
         case BRL_CMD_BLK(PASSDOTS): {
-          if (command & BRL_FLG_INPUT_META) {
-            if (findInputHandlersClass()) {
-              static jmethodID method = 0;
+          if ((command & BRL_FLG_INPUT_META) == 0) return 0;
 
-              if (findJavaStaticMethod(env, &method, inputHandlersClass, "performStructuralMotion",
-                                       JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
-                                                       JAVA_SIG_BYTE // dots
-                                                      ))) {
-                jbyte dots = arg;
-                jboolean result = (*env)->CallStaticBooleanMethod(env, inputHandlersClass, method, dots);
-                if (clearJavaException(env, 1)) result = JNI_FALSE;
-                if (result == JNI_TRUE) return 1;
-              }
+          if (findInputHandlersClass()) {
+            static jmethodID method = 0;
+
+            if (findJavaStaticMethod(env, &method, inputHandlersClass, "performStructuralMotion",
+                                     JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
+                                                     JAVA_SIG_BYTE // dots
+                                                    ))) {
+              jbyte dots = arg;
+              jboolean result = (*env)->CallStaticBooleanMethod(env, inputHandlersClass, method, dots);
+              if (clearJavaException(env, 1)) result = JNI_FALSE;
+              if (result == JNI_TRUE) return 1;
             }
           }
 

@@ -261,28 +261,30 @@ public class InputService extends InputMethodService {
     return null;
   }
 
-  public static boolean injectKey (int keyCode, boolean longPress) {
-    InputConnection connection = getInputConnection();
+  public static boolean injectKey (InputConnection connection, int keyCode, boolean longPress) {
+    if (connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode))) {
+      logKeyEventSent(keyCode, true);
 
-    if (connection != null) {
-      if (connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, keyCode))) {
-        logKeyEventSent(keyCode, true);
-
-        if (longPress) {
-          try {
-            Thread.sleep(ViewConfiguration.getLongPressTimeout() + ApplicationParameters.LONG_PRESS_DELAY);
-          } catch (InterruptedException exception) {
-          }
+      if (longPress) {
+        try {
+          Thread.sleep(ViewConfiguration.getLongPressTimeout() + ApplicationParameters.LONG_PRESS_DELAY);
+        } catch (InterruptedException exception) {
         }
+      }
 
-        if (connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, keyCode))) {
-          logKeyEventSent(keyCode, false);
-          return true;
-        }
+      if (connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, keyCode))) {
+        logKeyEventSent(keyCode, false);
+        return true;
       }
     }
 
     return false;
+  }
+
+  public static boolean injectKey (int keyCode, boolean longPress) {
+    InputConnection connection = getInputConnection();
+    if (connection == null) return false;
+    return injectKey(connection, keyCode, longPress);
   }
 
   public static boolean injectKey (int keyCode) {

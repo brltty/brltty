@@ -460,7 +460,7 @@ public abstract class InputHandlers {
     return new TextEditor() {
       @Override
       protected boolean editText (InputConnection connection) {
-        return connection.deleteSurroundingText(1, 0);
+        return InputService.injectKey(connection, KeyEvent.KEYCODE_DEL, false);
       }
 
       @Override
@@ -710,7 +710,7 @@ public abstract class InputHandlers {
     return new TextEditor() {
       @Override
       protected boolean editText (InputConnection connection) {
-        return connection.deleteSurroundingText(0, 1);
+        return InputService.injectKey(connection, KeyEvent.KEYCODE_FORWARD_DEL, false);
       }
 
       @Override
