@@ -190,6 +190,7 @@ public class ScreenElement {
   }
 
   private String[] brailleText = null;
+  private int[] lineOffsets = null;
 
   protected String[] makeBrailleText (String text) {
     if (text == null) return null;
@@ -221,22 +222,31 @@ public class ScreenElement {
     return brailleText;
   }
 
-  public final int getTextOffset (int column, int row) {
-    String[] lines = getBrailleText();
-    String line;
+  private final int[] makeLineOffsets (String[] lines) {
+    int[] offsets = new int[lines.length];
+
     int index = 0;
     int offset = 0;
 
-    while (true) {
-      line = lines[index];
-      if (index == row) break;
-
-      offset += line.length();
+    for (String line : lines) {
+      offsets[index] = offset;
+      offset += lines[index].length();
       index += 1;
     }
 
-    offset += Math.min(column, (line.length() - 1));
-    return offset;
+    return offsets;
+  }
+
+  public final int getTextOffset (int column, int row) {
+    String[] lines = getBrailleText();
+
+    synchronized (this) {
+      if (lineOffsets == null) {
+        lineOffsets = makeLineOffsets(lines);
+      }
+    }
+
+    return lineOffsets[row] + Math.min(column, (lines[row].length() - 1));
   }
 
   public final Point getBrailleCoordinates (int offset) {
