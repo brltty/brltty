@@ -42,7 +42,6 @@ extern int unhighlightScreenRegion (void);
 extern int getScreenPointer (int *column, int *row);
 extern int clearScreenTextSelection (void);
 extern int setScreenTextSelection (int startColumn, int startRow, int endColumn, int endRow);
-extern int setScreenTextSelectionAll (void);
 extern int currentVirtualTerminal (void);
 extern int selectScreenVirtualTerminal (int vt);
 extern int switchScreenVirtualTerminal (int vt);

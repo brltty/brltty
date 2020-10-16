@@ -176,11 +176,6 @@ setScreenTextSelection (int startColumn, int startRow, int endColumn, int endRow
 }
 
 int
-setScreenTextSelectionAll (void) {
-  return currentScreen->selectAll();
-}
-
-int
 currentVirtualTerminal (void) {
   return currentScreen->currentVirtualTerminal();
 }

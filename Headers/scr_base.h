@@ -49,7 +49,6 @@ typedef struct {
 
   int (*clearSelection) (void);
   int (*setSelection) (int startColumn, int startRow, int endColumn, int endRow);
-  int (*selectAll) (void);
 
   int (*currentVirtualTerminal) (void);
   int (*selectVirtualTerminal) (int vt);

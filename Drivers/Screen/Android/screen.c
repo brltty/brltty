@@ -52,7 +52,7 @@ findInputHandlersClass (void) {
 }
 
 static int
-callInputHandlersMethod (jmethodID *method, const char *name) {
+callSimpleInputHandler (jmethodID *method, const char *name) {
   if (findInputHandlersClass()) {
     if (findJavaStaticMethod(env, method, inputHandlersClass, name,
                              JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
@@ -389,20 +389,20 @@ insertKey_AndroidScreen (ScreenKey key) {
 #define KEY(key,method) [UNICODE_CELL_NUMBER(SCR_KEY_##key)] = method
 
       static const char *const methodNames[SIZE] = {
-        KEY(ENTER, "inputKey_enter"),
-        KEY(TAB, "inputKey_tab"),
-        KEY(BACKSPACE, "inputKey_backspace"),
-        KEY(ESCAPE, "inputKey_escape"),
-        KEY(CURSOR_LEFT, "inputKey_cursorLeft"),
-        KEY(CURSOR_RIGHT, "inputKey_cursorRight"),
-        KEY(CURSOR_UP, "inputKey_cursorUp"),
-        KEY(CURSOR_DOWN, "inputKey_cursorDown"),
-        KEY(PAGE_UP, "inputKey_pageUp"),
-        KEY(PAGE_DOWN, "inputKey_pageDown"),
-        KEY(HOME, "inputKey_home"),
-        KEY(END, "inputKey_end"),
-        KEY(INSERT, "inputKey_insert"),
-        KEY(DELETE, "inputKey_delete"),
+        KEY(ENTER, "keyHandler_enter"),
+        KEY(TAB, "keyHandler_tab"),
+        KEY(BACKSPACE, "keyHandler_backspace"),
+        KEY(ESCAPE, "keyHandler_escape"),
+        KEY(CURSOR_LEFT, "keyHandler_cursorLeft"),
+        KEY(CURSOR_RIGHT, "keyHandler_cursorRight"),
+        KEY(CURSOR_UP, "keyHandler_cursorUp"),
+        KEY(CURSOR_DOWN, "keyHandler_cursorDown"),
+        KEY(PAGE_UP, "keyHandler_pageUp"),
+        KEY(PAGE_DOWN, "keyHandler_pageDown"),
+        KEY(HOME, "keyHandler_home"),
+        KEY(END, "keyHandler_end"),
+        KEY(INSERT, "keyHandler_insert"),
+        KEY(DELETE, "keyHandler_delete"),
       };
 
       const unsigned int key = UNICODE_CELL_NUMBER(character);
@@ -429,7 +429,7 @@ insertKey_AndroidScreen (ScreenKey key) {
     } else {
       static jmethodID method = 0;
 
-      if (findJavaStaticMethod(env, &method, inputHandlersClass, "inputKey_function",
+      if (findJavaStaticMethod(env, &method, inputHandlersClass, "keyHandler_function",
                                JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                                JAVA_SIG_INT // key
                                               ))) {
@@ -448,6 +448,13 @@ insertKey_AndroidScreen (ScreenKey key) {
   return 0;
 }
 
+#define SIMPLE_INPUT_HANDLER_COMMAND(command, handler) \
+  case BRL_CMD_##command: { \
+    static jmethodID method = 0; \
+    if (callSimpleInputHandler(&method, handler)) return 1; \
+    break; \
+  }
+
 static int
 handleCommand_AndroidScreen (int command) {
   int blk = command & BRL_MSK_BLK;
@@ -455,29 +462,10 @@ handleCommand_AndroidScreen (int command) {
   int cmd = blk | arg;
 
   switch (cmd) {
-    case BRL_CMD_TXTSEL_ALL: {
-      static jmethodID method = 0;
-      if (callInputHandlersMethod(&method, "selectAll")) return 1;
-      break;
-    }
-
-    case BRL_CMD_HOST_COPY: {
-      static jmethodID method = 0;
-      if (callInputHandlersMethod(&method, "copySelection")) return 1;
-      break;
-    }
-
-    case BRL_CMD_HOST_CUT: {
-      static jmethodID method = 0;
-      if (callInputHandlersMethod(&method, "cutSelection")) return 1;
-      break;
-    }
-
-    case BRL_CMD_HOST_PASTE: {
-      static jmethodID method = 0;
-      if (callInputHandlersMethod(&method, "pasteClipboard")) return 1;
-      break;
-    }
+    SIMPLE_INPUT_HANDLER_COMMAND(TXTSEL_ALL, "textHandler_selectAll")
+    SIMPLE_INPUT_HANDLER_COMMAND(HOST_COPY, "textHandler_copySelection")
+    SIMPLE_INPUT_HANDLER_COMMAND(HOST_CUT, "textHandler_cutSelection")
+    SIMPLE_INPUT_HANDLER_COMMAND(HOST_PASTE, "textHandler_pasteClipboard")
 
     default: {
       switch (blk) {
@@ -514,11 +502,17 @@ handleCommand_AndroidScreen (int command) {
 }
 
 static int
+clearSelection_AndroidScreen (void) {
+  static jmethodID method = 0;
+  return callSimpleInputHandler(&method, "textHandler_clearSelection");
+}
+
+static int
 setSelection_AndroidScreen (int startColumn, int startRow, int endColumn, int endRow) {
   if (findInputHandlersClass()) {
     static jmethodID method = 0;
 
-    if (findJavaStaticMethod(env, &method, inputHandlersClass, "setSelection",
+    if (findJavaStaticMethod(env, &method, inputHandlersClass, "textHandler_setSelection",
                              JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                              JAVA_SIG_INT // startColumn
                                              JAVA_SIG_INT // startRow
@@ -541,18 +535,6 @@ setSelection_AndroidScreen (int startColumn, int startRow, int endColumn, int en
   return 0;
 }
 
-static int
-clearSelection_AndroidScreen (void) {
-  static jmethodID method = 0;
-  return callInputHandlersMethod(&method, "clearSelection");
-}
-
-static int
-selectAll_AndroidScreen (void) {
-  static jmethodID method = 0;
-  return callInputHandlersMethod(&method, "selectAll");
-}
-
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
@@ -567,9 +549,8 @@ scr_initialize (MainScreen *main) {
   main->base.insertKey = insertKey_AndroidScreen;
   main->base.handleCommand = handleCommand_AndroidScreen;
 
-  main->base.setSelection = setSelection_AndroidScreen;
   main->base.clearSelection = clearSelection_AndroidScreen;
-  main->base.selectAll = selectAll_AndroidScreen;
+  main->base.setSelection = setSelection_AndroidScreen;
 
   main->construct = construct_AndroidScreen;
   main->destruct = destruct_AndroidScreen;

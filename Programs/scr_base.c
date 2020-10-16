@@ -194,11 +194,6 @@ setSelection_BaseScreen (int startColumn, int startRow, int endColumn, int endRo
 }
 
 static int
-selectAll_BaseScreen (void) {
-  return 0;
-}
-
-static int
 handleCommand_BaseScreen (int command) {
   return 0;
 }
@@ -228,7 +223,6 @@ initializeBaseScreen (BaseScreen *base) {
 
   base->clearSelection = clearSelection_BaseScreen;
   base->setSelection = setSelection_BaseScreen;
-  base->selectAll = selectAll_BaseScreen;
 
   base->currentVirtualTerminal = currentVirtualTerminal_BaseScreen;
   base->selectVirtualTerminal = selectVirtualTerminal_BaseScreen;
