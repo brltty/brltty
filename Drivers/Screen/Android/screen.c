@@ -467,6 +467,25 @@ handleCommand_AndroidScreen (int command) {
     SIMPLE_INPUT_HANDLER_COMMAND(HOST_CUT, "textHandler_cutSelection")
     SIMPLE_INPUT_HANDLER_COMMAND(HOST_PASTE, "textHandler_pasteClipboard")
 
+    SIMPLE_INPUT_HANDLER_COMMAND(DEV_STATUS, "globalAction_showStatusSummary")
+
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_TITLE, "globalAction_showWindowTitle")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_BRL_ACTIONS, "globalAction_brailleActions")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_HOME, "globalAction_homeScreen")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_BACK, "globalAction_backButton")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_DEV_SETTINGS, "globalAction_quickSettings")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_DEV_OPTIONS, "globalAction_deviceOptions")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_APP_LIST, "globalAction_recentApplications")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_APP_MENU, "globalAction_menuButton")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_APP_ALERTS, "globalAction_notificationsShade")
+
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_AREA_ACTV, "globalAction_toActiveWindow")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_AREA_PREV, "globalAction_toPreviousWindow")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_AREA_NEXT, "globalAction_toNextWindow")
+
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_ITEM_PREV, "globalAction_toPreviousItem")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_ITEM_NEXT, "globalAction_toNextItem")
+
     default: {
       switch (blk) {
         case BRL_CMD_BLK(PASSDOTS): {

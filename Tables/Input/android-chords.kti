@@ -17,6 +17,7 @@
 ###############################################################################
 
 assign prefix \{chord}Dot7+Dot8
+bind \{prefix}+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 GUI_BRL_ACTIONS
 
 bind \{prefix}+\{a} TXTSEL_ALL
 bind \{prefix}+Dot4 TXTSEL_CLEAR
@@ -24,21 +25,22 @@ bind \{prefix}+\{c} HOST_COPY
 bind \{prefix}+\{v} HOST_PASTE
 bind \{prefix}+\{x} HOST_CUT
 
-bind \{prefix}+\{h} KEY_FUNCTION+0 # Home screen
-bind \{prefix}+\{b} KEY_FUNCTION+1 # Back key
-bind \{prefix}+\{n} KEY_FUNCTION+2 # Notifications screen
-bind \{prefix}+\{r} KEY_FUNCTION+3 # Recent Apps (Overview) screen
-bind \{prefix}+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 KEY_FUNCTION+4 # BRLTTY's Actions screen
-bind \{prefix}+\{q} KEY_FUNCTION+5 # Quick Settings screen
-bind \{prefix}+Dot2 KEY_FUNCTION+6 # to previous item
-bind \{prefix}+Dot5 KEY_FUNCTION+7 # to next item
-bind \{prefix}+\{o} KEY_FUNCTION+8 # Device Options screen
-bind \{prefix}+\{m} KEY_FUNCTION+9 # Menu button
-bind \{prefix}+Dot3+Dot6 KEY_FUNCTION+10 # return to active window
-bind \{prefix}+Dot3 KEY_FUNCTION+11 # to previous window
-bind \{prefix}+Dot6 KEY_FUNCTION+12 # to next window
-bind \{prefix}+\{w} KEY_FUNCTION+13 # show window title
-bind \{prefix}+\{s} KEY_FUNCTION+14 # show status summary
+bind \{prefix}+\{b} GUI_BACK
+bind \{prefix}+\{d} DEV_STATUS
+bind \{prefix}+\{h} GUI_HOME
+bind \{prefix}+\{m} GUI_APP_MENU
+bind \{prefix}+\{n} GUI_APP_ALERTS
+bind \{prefix}+\{o} GUI_DEV_OPTIONS
+bind \{prefix}+\{r} GUI_APP_LIST
+bind \{prefix}+\{s} GUI_DEV_SETTINGS
+bind \{prefix}+\{t} GUI_TITLE
+
+bind \{prefix}+Dot3+Dot6 GUI_AREA_ACTV
+bind \{prefix}+Dot3 GUI_AREA_PREV
+bind \{prefix}+Dot6 GUI_AREA_NEXT
+
+bind \{prefix}+Dot2 GUI_ITEM_PREV
+bind \{prefix}+Dot5 GUI_ITEM_NEXT
 
 bind \{prefix}+Dot2+Dot5 CONTEXT+chrome
 context chrome Web Page Navigation

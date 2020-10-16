@@ -889,8 +889,8 @@ doUpdate (void) {
         if ((scr.posx != ses->trkx) || (scr.posy != ses->trky)) {
           int oldx = ses->winx;
           int oldy = ses->winy;
-
           trackScreenCursor(0);
+
           logMessage(LOG_CATEGORY(CURSOR_TRACKING),
                      "scr=%u csr=[%u,%u]->[%u,%u] win=[%u,%u]->[%u,%u]",
                      scr.number,

@@ -522,7 +522,7 @@ right now.
   ``F3``   1345 (n)   go to the Notifications screen         4.1 (Jelly Bean)
   ``F4``   1235 (r)   tap the Recent Apps (Overview) button  4.1 (Jelly Bean)
   ``F5``   123456     go to BRLTTY's `Actions screen`_       \*
-  ``F6``   12345 (q)  go to the Quick Settings screen        4.2 (Jelly Bean MR1)
+  ``F6``   234 (s)    go to the Quick Settings screen        4.2 (Jelly Bean MR1)
   ``F7``   2          move to the previous item              \*
   ``F8``   5          move to the next item                  \*
   ``F9``   135 (o)    go to the Device Options screen        5.0 (Lollipop)
@@ -530,8 +530,8 @@ right now.
   ``F11``  36         return to the active window            4.0 (Kitkat)
   ``F12``  3          switch to the previous window          4.0 (Kitkat)
   ``F13``  6          switch to the next window              4.0 (Kitkat)
-  ``F14``  2456 (w)   show the window title
-  ``F15``  234 (s)    show a status summary
+  ``F14``  2345 (t)   show the window title
+  ``F15``  145 (d)    show a device status summary
   =======  =========  =====================================  =====================
 
 Web Pages

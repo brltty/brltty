@@ -234,12 +234,30 @@ typedef enum {
   BRL_CMD_ASPK_INDENT /* set autospeak indent of current line on/off */,
 
   BRL_CMD_REFRESH /* refresh braille display */,
+  BRL_CMD_DEV_STATUS /* show device status summary */,
 
   BRL_CMD_TXTSEL_CLEAR /* clear text selection */,
   BRL_CMD_TXTSEL_ALL /* select all text */,
   BRL_CMD_HOST_COPY /* copy selected text to host clipboard */,
   BRL_CMD_HOST_CUT /* cut selected text to host clipboard */,
   BRL_CMD_HOST_PASTE /* paste from host clipboard */,
+
+  BRL_CMD_GUI_TITLE /* show the window title */,
+  BRL_CMD_GUI_BRL_ACTIONS /* open the braille actions window */,
+  BRL_CMD_GUI_HOME /* go to the home screen */,
+  BRL_CMD_GUI_BACK /* go back to the previous screen */,
+  BRL_CMD_GUI_DEV_SETTINGS /* open the device settings window */,
+  BRL_CMD_GUI_DEV_OPTIONS /* open the device options window */,
+  BRL_CMD_GUI_APP_LIST /* open the application list window */,
+  BRL_CMD_GUI_APP_MENU /* open the application menu */,
+  BRL_CMD_GUI_APP_ALERTS /* open the application alerts window */,
+
+  BRL_CMD_GUI_AREA_ACTV /* return to active screen area */,
+  BRL_CMD_GUI_AREA_PREV /* switch to previous screen area */,
+  BRL_CMD_GUI_AREA_NEXT /* switch to next screen area */,
+
+  BRL_CMD_GUI_ITEM_PREV /* move to previous item in screen area */,
+  BRL_CMD_GUI_ITEM_NEXT /* move to next item in screen area */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
