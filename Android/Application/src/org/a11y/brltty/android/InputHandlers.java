@@ -783,12 +783,20 @@ public abstract class InputHandlers {
     return switchToWindow(comparator);
   }
 
+  public static boolean globalAction_toFirstItem () {
+    return moveFocus(RenderedScreen.SearchDirection.FIRST);
+  }
+
   public static boolean globalAction_toPreviousItem () {
     return moveFocus(RenderedScreen.SearchDirection.BACKWARD);
   }
 
   public static boolean globalAction_toNextItem () {
     return moveFocus(RenderedScreen.SearchDirection.FORWARD);
+  }
+
+  public static boolean globalAction_toLastItem () {
+    return moveFocus(RenderedScreen.SearchDirection.LAST);
   }
 
   public static boolean globalAction_homeScreen () {
@@ -856,17 +864,19 @@ public abstract class InputHandlers {
       case  3: return globalAction_notificationsShade();
       case  4: return globalAction_recentApplications();
       case  5: return globalAction_brailleActions();
-      case  6: return globalAction_quickSettings();
+      case  6: return globalAction_toFirstItem();
       case  7: return globalAction_toPreviousItem();
       case  8: return globalAction_toNextItem();
-      case  9: return globalAction_deviceOptions();
+      case  9: return globalAction_toLastItem();
       case 10: return globalAction_menuButton();
       case 11: return globalAction_toActiveWindow();
       case 12: return globalAction_toPreviousWindow();
       case 13: return globalAction_toNextWindow();
       case 14: return globalAction_showWindowTitle();
       case 15: return globalAction_showStatusSummary();
-      case 16: return globalAction_logScreen();
+      case 16: return globalAction_quickSettings();
+      case 17: return globalAction_deviceOptions();
+      case 19: return globalAction_logScreen();
       default: return false;
     }
   }

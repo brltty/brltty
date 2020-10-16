@@ -42,6 +42,9 @@ bind \{prefix}+Dot6 GUI_AREA_NEXT
 bind \{prefix}+Dot2 GUI_ITEM_PREV
 bind \{prefix}+Dot5 GUI_ITEM_NEXT
 
+bind \{prefix}+Dot2+Dot3 GUI_ITEM_FRST
+bind \{prefix}+Dot5+Dot6 GUI_ITEM_LAST
+
 bind \{prefix}+Dot2+Dot5 CONTEXT+chrome
 context chrome Web Page Navigation
 bind Dot7+Dot8 CONTEXT+default

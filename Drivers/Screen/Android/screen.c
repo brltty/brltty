@@ -483,8 +483,10 @@ handleCommand_AndroidScreen (int command) {
     SIMPLE_INPUT_HANDLER_COMMAND(GUI_AREA_PREV, "globalAction_toPreviousWindow")
     SIMPLE_INPUT_HANDLER_COMMAND(GUI_AREA_NEXT, "globalAction_toNextWindow")
 
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_ITEM_FRST, "globalAction_toFirstItem")
     SIMPLE_INPUT_HANDLER_COMMAND(GUI_ITEM_PREV, "globalAction_toPreviousItem")
     SIMPLE_INPUT_HANDLER_COMMAND(GUI_ITEM_NEXT, "globalAction_toNextItem")
+    SIMPLE_INPUT_HANDLER_COMMAND(GUI_ITEM_LAST, "globalAction_toLastItem")
 
     default: {
       switch (blk) {

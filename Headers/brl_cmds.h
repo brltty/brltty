@@ -234,13 +234,13 @@ typedef enum {
   BRL_CMD_ASPK_INDENT /* set autospeak indent of current line on/off */,
 
   BRL_CMD_REFRESH /* refresh braille display */,
-  BRL_CMD_DEV_STATUS /* show device status summary */,
+  BRL_CMD_DEV_STATUS /* show a device status summary */,
 
-  BRL_CMD_TXTSEL_CLEAR /* clear text selection */,
-  BRL_CMD_TXTSEL_ALL /* select all text */,
-  BRL_CMD_HOST_COPY /* copy selected text to host clipboard */,
-  BRL_CMD_HOST_CUT /* cut selected text to host clipboard */,
-  BRL_CMD_HOST_PASTE /* paste from host clipboard */,
+  BRL_CMD_TXTSEL_CLEAR /* clear the text selection */,
+  BRL_CMD_TXTSEL_ALL /* select all of the text */,
+  BRL_CMD_HOST_COPY /* copy the selected text to the host clipboard */,
+  BRL_CMD_HOST_CUT /* cut the selected text to the host clipboard */,
+  BRL_CMD_HOST_PASTE /* paste from the host clipboard */,
 
   BRL_CMD_GUI_TITLE /* show the window title */,
   BRL_CMD_GUI_BRL_ACTIONS /* open the braille actions window */,
@@ -249,15 +249,17 @@ typedef enum {
   BRL_CMD_GUI_DEV_SETTINGS /* open the device settings window */,
   BRL_CMD_GUI_DEV_OPTIONS /* open the device options window */,
   BRL_CMD_GUI_APP_LIST /* open the application list window */,
-  BRL_CMD_GUI_APP_MENU /* open the application menu */,
+  BRL_CMD_GUI_APP_MENU /* open the application-specific menu */,
   BRL_CMD_GUI_APP_ALERTS /* open the application alerts window */,
 
-  BRL_CMD_GUI_AREA_ACTV /* return to active screen area */,
-  BRL_CMD_GUI_AREA_PREV /* switch to previous screen area */,
-  BRL_CMD_GUI_AREA_NEXT /* switch to next screen area */,
+  BRL_CMD_GUI_AREA_ACTV /* return to the active screen area */,
+  BRL_CMD_GUI_AREA_PREV /* switch to the previous screen area */,
+  BRL_CMD_GUI_AREA_NEXT /* switch to the next screen area */,
 
-  BRL_CMD_GUI_ITEM_PREV /* move to previous item in screen area */,
-  BRL_CMD_GUI_ITEM_NEXT /* move to next item in screen area */,
+  BRL_CMD_GUI_ITEM_FRST /* move to the first item in the screen area */,
+  BRL_CMD_GUI_ITEM_PREV /* move to the previous item in the screen area */,
+  BRL_CMD_GUI_ITEM_NEXT /* move to the next item in the screen area */,
+  BRL_CMD_GUI_ITEM_LAST /* move to the last item in the screen area */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
