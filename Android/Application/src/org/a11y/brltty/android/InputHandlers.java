@@ -940,7 +940,14 @@ public abstract class InputHandlers {
 
   public static boolean textHandler_clearSelection () {
     if (APITests.haveJellyBeanMR2) {
-      return performNodeAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
+      return new NodeHandler() {
+        @Override
+        public boolean handleNode (AccessibilityNodeInfo node) {
+          int start = node.getTextSelectionStart();
+          if (start == -1) return false;
+          return setSelection(node, start, start);
+        }
+      }.handleNode();
     }
 
     return false;
