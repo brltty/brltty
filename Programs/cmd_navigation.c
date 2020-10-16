@@ -740,9 +740,7 @@ handleNavigationCommands (int command, void *data) {
         }
 
         case BRL_CMD_BLK(ROUTE_LINE): {
-          if (routeScreenCursor(-1, arg, scr.number)) {
-            alert(ALERT_ROUTING_STARTED);
-          } else {
+          if (!startScreenCursorRouting(-1, arg)) {
             alert(ALERT_COMMAND_REJECTED);
           }
 

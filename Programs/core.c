@@ -1293,7 +1293,7 @@ static void
 handleRoutingDone (const void *data) {
   const RoutingStatus *status = data;
 
-  alert((*status > ROUTING_DONE)? ALERT_ROUTING_FAILED: ALERT_ROUTING_SUCCEEDED);
+  alert((*status > ROUTING_SUCCEEDED)? ALERT_ROUTING_FAILED: ALERT_ROUTING_SUCCEEDED);
   ses->spkx = scr.posx;
   ses->spky = scr.posy;
 }

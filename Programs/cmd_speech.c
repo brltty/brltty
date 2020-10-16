@@ -460,13 +460,13 @@ handleSpeechCommands (int command, void *data) {
       break;
     }
 
-    case BRL_CMD_ROUTE_CURR_LOCN:
-      if (routeScreenCursor(ses->spkx, ses->spky, scr.number)) {
-        alert(ALERT_ROUTING_STARTED);
-      } else {
+    case BRL_CMD_ROUTE_CURR_LOCN: {
+      if (!startScreenCursorRouting(ses->spkx, ses->spky)) {
         alert(ALERT_COMMAND_REJECTED);
       }
+
       break;
+    }
 
     case BRL_CMD_SPEAK_CURR_LOCN: {
       char buffer[0X50];

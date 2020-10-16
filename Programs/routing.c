@@ -411,7 +411,7 @@ routeCursor (const RoutingParameters *parameters) {
   if (crd.screen.number != parameters->screen) return ROUTING_ERROR;
   if (crd.current.row != parameters->row) return ROUTING_WRONG_ROW;
   if ((parameters->column >= 0) && (crd.current.column != parameters->column)) return ROUTING_WRONG_COLUMN;
-  return ROUTING_DONE;
+  return ROUTING_SUCCEEDED;
 }
 
 #ifdef SIGUSR1
@@ -493,7 +493,7 @@ startRoutingProcess (const RoutingParameters *parameters) {
 
   switch (routingProcess = fork()) {
     case 0: { /* child: cursor routing subprocess */
-      int result = ROUTING_ERROR;
+      RoutingStatus status = ROUTING_ERROR;
 
       if (!ROUTING_INTERVAL) {
         int niceness = nice(ROUTING_NICENESS);
@@ -504,11 +504,11 @@ startRoutingProcess (const RoutingParameters *parameters) {
       }
 
       if (constructRoutingScreen()) {
-        result = routeCursor(parameters);		/* terminate child process */
+        status = routeCursor(parameters);		/* terminate child process */
         destructRoutingScreen();		/* close second thread of screen reading */
       }
 
-      _exit(result);		/* terminate child process */
+      _exit(status);		/* terminate child process */
     }
 
     case -1: /* error: fork() failed */
@@ -516,9 +516,12 @@ startRoutingProcess (const RoutingParameters *parameters) {
       routingProcess = NOT_ROUTING;
       break;
 
-    default: /* parent: continue while cursor is being routed */
+    default: {
+      /* parent: continue while cursor is being routed */
+
       {
         static int first = 1;
+
         if (first) {
           first = 0;
           onProgramExit("cursor-routing", exitCursorRouting, NULL);
@@ -527,6 +530,7 @@ startRoutingProcess (const RoutingParameters *parameters) {
 
       started = 1;
       break;
+    }
   }
 
   return started;
