@@ -261,7 +261,7 @@ handleMiscellaneousCommands (int command, void *data) {
         case BRL_CMD_BLK(DESCCHAR): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+          if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
             char description[0X80];
             STR_BEGIN(description, sizeof(description));
             STR_FORMAT(formatCharacterDescription, column, row);

@@ -729,7 +729,7 @@ handleNavigationCommands (int command, void *data) {
         case BRL_CMD_BLK(ROUTE): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &column, &row, 0, 1)) {
+          if (getCharacterCoordinates(arg, &row, &column, NULL, 1)) {
             if (startScreenCursorRouting(column, row)) {
               break;
             }
@@ -750,7 +750,7 @@ handleNavigationCommands (int command, void *data) {
         case BRL_CMD_BLK(SETLEFT): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+          if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
             ses->winx = column;
             ses->winy = row;
           } else {
@@ -797,7 +797,7 @@ handleNavigationCommands (int command, void *data) {
           increment = 1;
 
         findIndent:
-          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+          if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
             ses->winy = row;
             findRow(column, increment, testIndent, NULL);
           } else {
@@ -809,7 +809,7 @@ handleNavigationCommands (int command, void *data) {
         case BRL_CMD_BLK(PRDIFCHAR): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+          if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
             ses->winy = row;
             upDifferentCharacter(isSameText, column);
           } else {
@@ -821,7 +821,7 @@ handleNavigationCommands (int command, void *data) {
         case BRL_CMD_BLK(NXDIFCHAR): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+          if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
             ses->winy = row;
             downDifferentCharacter(isSameText, column);
           } else {

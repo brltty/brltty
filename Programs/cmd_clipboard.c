@@ -538,7 +538,7 @@ handleClipboardCommands (int command, void *data) {
           goto doClipBegin;
 
         doClipBegin:
-          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+          if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
             if (clear) clearClipboardContent(ccd->clipboard);
             cpbBeginOperation(ccd, column, row);
           } else {
@@ -551,7 +551,7 @@ handleClipboardCommands (int command, void *data) {
         case BRL_CMD_BLK(COPY_RECT): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &column, &row, 1, 1))
+          if (getCharacterCoordinates(arg, &row, NULL, &column, 1))
             if (cpbRectangularCopy(ccd, column, row))
               break;
 
@@ -562,7 +562,7 @@ handleClipboardCommands (int command, void *data) {
         case BRL_CMD_BLK(COPY_LINE): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &column, &row, 1, 1))
+          if (getCharacterCoordinates(arg, &row, NULL, &column, 1))
             if (cpbLinearCopy(ccd, column, row))
               break;
 
@@ -585,10 +585,10 @@ handleClipboardCommands (int command, void *data) {
           if (ext > arg) {
             int column1, row1;
 
-            if (getCharacterCoordinates(arg, &column1, &row1, 0, 0)) {
+            if (getCharacterCoordinates(arg, &row1, &column1, NULL, 0)) {
               int column2, row2;
 
-              if (getCharacterCoordinates(ext, &column2, &row2, 1, 1)) {
+              if (getCharacterCoordinates(ext, &row2, NULL, &column2, 1)) {
                 if (clear) clearClipboardContent(ccd->clipboard);
                 cpbBeginOperation(ccd, column1, row1);
                 if (cpbLinearCopy(ccd, column2, row2)) break;

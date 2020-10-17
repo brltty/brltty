@@ -45,8 +45,8 @@ alertLineSkipped (unsigned int *count) {
 }
 
 int
-isTextOffset (int *arg, int end, int relaxed) {
-  int value = *arg;
+isTextOffset (int arg, int *first, int *last, int relaxed) {
+  int value = arg;
 
   if (value < textStart) return 0;
   if ((value -= textStart) >= textCount) return 0;
@@ -58,7 +58,6 @@ isTextOffset (int *arg, int end, int relaxed) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracted) {
-    int result = 0;
     int index;
 
     for (index=0; index<contractedLength; index+=1) {
@@ -66,17 +65,17 @@ isTextOffset (int *arg, int end, int relaxed) {
 
       if (offset != CTB_NO_OFFSET) {
         if (offset > value) {
-          if (end) result = index - 1;
+          if (last) *last = index - 1;
           break;
         }
 
-        result = index;
+        if (first) *first = index;
       }
     }
 
-    if (end && (index == contractedLength)) result = contractedLength - 1;
-    value = result;
-  } else
+    if (last && (index == contractedLength)) *last = index - 1;
+    return 1;
+  }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   if (prefs.wordWrap) {
@@ -85,20 +84,22 @@ isTextOffset (int *arg, int end, int relaxed) {
     if (value >= length) value = length - 1;
   }
 
-  *arg = value;
+  if (first) *first = value;
+  if (last) *last = value;
   return 1;
 }
 
 int
-getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
+getCharacterCoordinates (int arg, int *row, int *first, int *last, int relaxed) {
   if (arg == BRL_MSK_ARG) {
     if (!SCR_CURSOR_OK()) return 0;
-    *column = scr.posx;
     *row = scr.posy;
+    *first = *last = scr.posx;
   } else {
-    if (!isTextOffset(&arg, end, relaxed)) return 0;
-    *column = ses->winx + arg;
-    *row = ses->winy;
+    if (!isTextOffset(arg, first, last, relaxed)) return 0;
+    if (row) *row = ses->winy;
+    if (first) *first += ses->winx;
+    if (last) *last += ses->winx;
   }
 
   return 1;

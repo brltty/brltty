@@ -139,8 +139,9 @@ handleTouchCommands (int command, void *data) {
 
       if (arg == BRL_MSK_ARG) {
         handleTouchOff(data);
-      } else if (isTextOffset(&arg, 0, 0)) {
-        handleTouchAt(arg, data);
+      } else {
+        int at;
+        if (isTextOffset(arg, &at, NULL, 0)) handleTouchAt(at, data);
       }
 
       break;

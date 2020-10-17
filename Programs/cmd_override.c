@@ -31,39 +31,60 @@
 #include "core.h"
 
 typedef struct {
+  int row;
+  int first;
+  int last;
+} SelectionEndpoint;
+
+typedef struct {
   struct {
-    struct {
-      int column;
-      int row;
-    } start;
-
-    struct {
-      int column;
-      int row;
-    } end;
-
+    SelectionEndpoint start;
+    SelectionEndpoint end;
     unsigned char started:1;
   } selection;
 } OverrideCommandData;
 
 static int
-setSelection (int startColumn, int startRow, int endColumn, int endRow, OverrideCommandData *ocd) {
-  int ok = setScreenTextSelection(startColumn, startRow, endColumn, endRow);
-
-  if (ok) {
-    ocd->selection.start.column = startColumn;
-    ocd->selection.start.row = startRow;
-
-    ocd->selection.end.column = endColumn;
-    ocd->selection.end.row = endRow;
-  }
-
-  return ok;
+getSelectionEndpoint (int arg, SelectionEndpoint *endpoint) {
+  return getCharacterCoordinates(arg, &endpoint->row, &endpoint->first, &endpoint->last, 0);
 }
 
 static int
-startSelection (int column, int row, OverrideCommandData *ocd) {
-  return setSelection(column, row, column, row, ocd);
+compareSelectionEndpoints (const SelectionEndpoint *endpoint1, const SelectionEndpoint *endpoint2) {
+  if (endpoint1->row < endpoint2->row) return -1;
+  if (endpoint1->row > endpoint2->row) return 1;
+
+  if (endpoint1->first < endpoint2->first) return -1;
+  if (endpoint1->first > endpoint2->first) return 1;
+
+  return 0;
+}
+
+static int
+setSelection (const SelectionEndpoint *start, const SelectionEndpoint *end, OverrideCommandData *ocd) {
+  {
+    const SelectionEndpoint *from = start;
+    const SelectionEndpoint *to = end;
+
+    if (compareSelectionEndpoints(from, to) > 0) {
+      const SelectionEndpoint *temp = from;
+      from = to;
+      to = temp;
+    }
+
+    if (!setScreenTextSelection(from->first, from->row, to->last, to->row)) {
+      return 0;
+    }
+  }
+
+  ocd->selection.start = *start;
+  ocd->selection.end = *end;
+  return 1;
+}
+
+static int
+startSelection (const SelectionEndpoint *start, OverrideCommandData *ocd) {
+  return setSelection(start, start, ocd);
 }
 
 static int
@@ -90,17 +111,13 @@ handleOverrideCommands (int command, void *data) {
       switch (blk) {
         case BRL_CMD_BLK(TXTSEL_SET): {
           if (ext > arg) {
-            int startColumn, startRow;
+            SelectionEndpoint start;
 
-            if (getCharacterCoordinates(arg, &startColumn, &startRow, 0, 0)) {
-              int endColumn, endRow;
+            if (getSelectionEndpoint(arg, &start)) {
+              SelectionEndpoint end;
 
-              if (getCharacterCoordinates(ext, &endColumn, &endRow, 1, 1)) {
-                int ok = setSelection(
-                  startColumn, startRow, endColumn, endRow, ocd
-                );
-
-                if (ok) {
+              if (getSelectionEndpoint(ext, &end)) {
+                if (setSelection(&start, &end, ocd)) {
                   ocd->selection.started = 0;
                   break;
                 }
@@ -113,10 +130,10 @@ handleOverrideCommands (int command, void *data) {
         }
 
         case BRL_CMD_BLK(TXTSEL_START): {
-          int column, row;
+          SelectionEndpoint start;
 
-          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
-            if (startSelection(column, row, ocd)) {
+          if (getSelectionEndpoint(arg, &start)) {
+            if (startSelection(&start, ocd)) {
               ocd->selection.started = 1;
               break;
             }
@@ -128,19 +145,14 @@ handleOverrideCommands (int command, void *data) {
 
         case BRL_CMD_BLK(ROUTE): {
           if (!ocd->selection.started && !prefs.startTextSelection) return 0;
-          int column, row;
+          SelectionEndpoint endpoint;
 
-          if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+          if (getSelectionEndpoint(arg, &endpoint)) {
             if (ocd->selection.started) {;
-              int ok = setSelection(
-                ocd->selection.start.column, ocd->selection.start.row,
-                column, row, ocd
-              );
-
-              if (ok) break;
-            } else if ((column != scr.posx) || (row != scr.posy)) {
+              if (setSelection(&ocd->selection.start, &endpoint, ocd)) break;
+            } else if ((endpoint.row != scr.posy) || !((endpoint.first <= scr.posx) && (scr.posx <= endpoint.last))) {
               return 0;
-            } else if (startSelection(column, row, ocd)) {
+            } else if (startSelection(&endpoint, ocd)) {
               ocd->selection.started = 1;
               break;
             }
