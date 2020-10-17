@@ -955,7 +955,7 @@ public abstract class InputHandlers {
         public boolean handleNode (AccessibilityNodeInfo node) {
           int start = node.getTextSelectionStart();
           if (start == -1) return false;
-          return setSelection(node, start, start);
+          return placeCursor(node, start);
         }
       }.handleNode();
     }

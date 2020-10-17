@@ -143,7 +143,7 @@ onTextStyleUpdated (void) {
 int
 startScreenCursorRouting (int column, int row) {
   if (!routeScreenCursor(column, row, scr.number)) return 0;
-  alert(ALERT_ROUTING_STARTED);
+  if (isRouting()) alert(ALERT_ROUTING_STARTED);
   return 1;
 }
 
