@@ -152,9 +152,9 @@ bringScreenCursor (int column, int row) {
   if (!startScreenCursorRouting(column, row)) return 0;
   RoutingStatus status = getRoutingStatus(1);
 
-  if (status != ROUTING_NONE) {
+  if (status != ROUTING_STATUS_NONE) {
     alert(
-      (status > ROUTING_WRONG_COLUMN)? ALERT_ROUTING_FAILED:
+      (status > ROUTING_STATUS_COLUMN)? ALERT_ROUTING_FAILED:
       ALERT_ROUTING_SUCCEEDED
     );
 
@@ -1293,7 +1293,11 @@ static void
 handleRoutingDone (const void *data) {
   const RoutingStatus *status = data;
 
-  alert((*status > ROUTING_SUCCEEDED)? ALERT_ROUTING_FAILED: ALERT_ROUTING_SUCCEEDED);
+  alert(
+    (*status > ROUTING_STATUS_SUCCEESS)? ALERT_ROUTING_FAILED:
+    ALERT_ROUTING_SUCCEEDED
+  );
+
   ses->spkx = scr.posx;
   ses->spky = scr.posy;
 }
@@ -1329,7 +1333,7 @@ ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
   {
     static RoutingStatus status;
 
-    if ((status = getRoutingStatus(0)) != ROUTING_NONE) {
+    if ((status = getRoutingStatus(0)) != ROUTING_STATUS_NONE) {
       ucd->handler = handleRoutingDone;
       ucd->data = &status;
       return 1;
