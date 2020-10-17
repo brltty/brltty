@@ -954,8 +954,9 @@ public abstract class InputHandlers {
         @Override
         public boolean handleNode (AccessibilityNodeInfo node) {
           int start = node.getTextSelectionStart();
-          if (start == -1) return false;
-          return placeCursor(node, start);
+          int end = node.getTextSelectionEnd();
+          if (end <= start) return false;
+          return placeCursor(node, end);
         }
       }.handleNode();
     }
