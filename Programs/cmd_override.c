@@ -32,8 +32,11 @@
 
 typedef struct {
   int row;
-  int first;
-  int last;
+
+  struct {
+    int first;
+    int last;
+  } column;
 } SelectionEndpoint;
 
 typedef struct {
@@ -46,7 +49,7 @@ typedef struct {
 
 static int
 getSelectionEndpoint (int arg, SelectionEndpoint *endpoint) {
-  return getCharacterCoordinates(arg, &endpoint->row, &endpoint->first, &endpoint->last, 0);
+  return getCharacterCoordinates(arg, &endpoint->row, &endpoint->column.first, &endpoint->column.last, 0);
 }
 
 static int
@@ -54,8 +57,8 @@ compareSelectionEndpoints (const SelectionEndpoint *endpoint1, const SelectionEn
   if (endpoint1->row < endpoint2->row) return -1;
   if (endpoint1->row > endpoint2->row) return 1;
 
-  if (endpoint1->first < endpoint2->first) return -1;
-  if (endpoint1->first > endpoint2->first) return 1;
+  if (endpoint1->column.first < endpoint2->column.first) return -1;
+  if (endpoint1->column.first > endpoint2->column.first) return 1;
 
   return 0;
 }
@@ -72,7 +75,7 @@ setSelection (const SelectionEndpoint *start, const SelectionEndpoint *end, Over
       to = temp;
     }
 
-    if (!setScreenTextSelection(from->first, from->row, to->last, to->row)) {
+    if (!setScreenTextSelection(from->column.first, from->row, to->column.last, to->row)) {
       return 0;
     }
   }
@@ -150,7 +153,7 @@ handleOverrideCommands (int command, void *data) {
           if (getSelectionEndpoint(arg, &endpoint)) {
             if (ocd->selection.started) {;
               if (setSelection(&ocd->selection.start, &endpoint, ocd)) break;
-            } else if ((endpoint.row != scr.posy) || !((endpoint.first <= scr.posx) && (scr.posx <= endpoint.last))) {
+            } else if ((endpoint.row != scr.posy) || !((endpoint.column.first <= scr.posx) && (scr.posx <= endpoint.column.last))) {
               return 0;
             } else if (startSelection(&endpoint, ocd)) {
               ocd->selection.started = 1;

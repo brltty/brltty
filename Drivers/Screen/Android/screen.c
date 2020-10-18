@@ -222,9 +222,9 @@ describe_AndroidScreen (ScreenDescription *description) {
     description->hasSelection = 0;
 
     if (selectionLeft >= 0) {
-      if (selectionRight == selectionLeft) {
+      if ((selectionLeft == selectionRight) && (selectionTop == selectionBottom)) {
         description->hasCursor = 1;
-      } else if (selectionRight > selectionLeft) {
+      } else {
         description->hasSelection = 1;
       }
     }
