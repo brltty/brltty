@@ -467,7 +467,7 @@ handleCommand_AndroidScreen (int command) {
     SIMPLE_INPUT_HANDLER_COMMAND(HOST_CUT, "textHandler_cutSelection")
     SIMPLE_INPUT_HANDLER_COMMAND(HOST_PASTE, "textHandler_pasteClipboard")
 
-    SIMPLE_INPUT_HANDLER_COMMAND(DEV_STATUS, "globalAction_showStatusSummary")
+    SIMPLE_INPUT_HANDLER_COMMAND(INDICATORS, "globalAction_showStatusIndicators")
 
     SIMPLE_INPUT_HANDLER_COMMAND(GUI_TITLE, "globalAction_showWindowTitle")
     SIMPLE_INPUT_HANDLER_COMMAND(GUI_BRL_ACTIONS, "globalAction_brailleActions")

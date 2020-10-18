@@ -731,12 +731,12 @@ public abstract class InputHandlers {
     return true;
   }
 
-  public static boolean globalAction_showStatusSummary () {
-    String status = StatusSummary.get();
-    if (status == null) return false;
-    if (status.isEmpty()) return false;
+  public static boolean globalAction_showStatusIndicators () {
+    String indicators = StatusIndicators.get();
+    if (indicators == null) return false;
+    if (indicators.isEmpty()) return false;
 
-    BrailleMessage.PLAIN.show(status);
+    BrailleMessage.PLAIN.show(indicators);
     return true;
   }
 
@@ -873,7 +873,7 @@ public abstract class InputHandlers {
       case 12: return globalAction_toPreviousWindow();
       case 13: return globalAction_toNextWindow();
       case 14: return globalAction_showWindowTitle();
-      case 15: return globalAction_showStatusSummary();
+      case 15: return globalAction_showStatusIndicators();
       case 16: return globalAction_quickSettings();
       case 17: return globalAction_deviceOptions();
       case 19: return globalAction_logScreen();

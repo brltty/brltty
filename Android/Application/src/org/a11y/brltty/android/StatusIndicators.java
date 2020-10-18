@@ -43,8 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-public abstract class StatusSummary {
-  private StatusSummary () {
+public abstract class StatusIndicators {
+  private StatusIndicators () {
   }
 
   private final static Context context = BrailleApplication.get();

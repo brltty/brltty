@@ -26,8 +26,8 @@ bind \{prefix}+\{v} HOST_PASTE
 bind \{prefix}+\{x} HOST_CUT
 
 bind \{prefix}+\{b} GUI_BACK
-bind \{prefix}+\{d} DEV_STATUS
 bind \{prefix}+\{h} GUI_HOME
+bind \{prefix}+\{i} INDICATORS
 bind \{prefix}+\{m} GUI_APP_MENU
 bind \{prefix}+\{n} GUI_APP_ALERTS
 bind \{prefix}+\{o} GUI_DEV_OPTIONS

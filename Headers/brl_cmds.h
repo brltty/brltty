@@ -234,7 +234,7 @@ typedef enum {
   BRL_CMD_ASPK_INDENT /* set autospeak indent of current line on/off */,
 
   BRL_CMD_REFRESH /* refresh braille display */,
-  BRL_CMD_DEV_STATUS /* show a device status summary */,
+  BRL_CMD_INDICATORS /* show various device status indicators */,
 
   BRL_CMD_TXTSEL_CLEAR /* clear the text selection */,
   BRL_CMD_TXTSEL_ALL /* select all of the text */,

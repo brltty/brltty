@@ -531,7 +531,7 @@ right now.
   ``F12``  3          switch to the previous window          4.0 (Kitkat)
   ``F13``  6          switch to the next window              4.0 (Kitkat)
   ``F14``  2345 (t)   show the window title                  6.0 (Nougat)
-  ``F15``  145 (d)    show a device status summary           \*
+  ``F15``  24 (i)     show various device status indicators           \*
   ``F16``  234 (s)    go to the Quick Settings screen        4.2 (Jelly Bean MR1)
   ``F17``  135 (o)    go to the Device Options screen        5.0 (Lollipop)
   =======  =========  =====================================  =====================
