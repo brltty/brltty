@@ -730,11 +730,14 @@ static void
 readBrailleWindow (ScreenCharacter *characters, size_t count) {
   int screenColumns = MIN(textCount, scr.cols-ses->winx);
   int screenRows = MIN(brl.textRows, scr.rows-ses->winy);
-  readScreen(ses->winx, ses->winy, screenColumns, screenRows, characters);
 
   if (prefs.wordWrap) {
-    int columns = getWordWrapLength(ses->winy, ses->winx, screenColumns);
-    if (columns < screenColumns) screenColumns = columns;
+    int length = getWordWrapLength(ses->winy, ses->winx, screenColumns);
+    if (length < screenColumns) screenColumns = length;
+  }
+
+  if (screenColumns > 0) {
+    readScreen(ses->winx, ses->winy, screenColumns, screenRows, characters);
   }
 
   if (screenColumns < textCount) {
