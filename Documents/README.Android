@@ -536,6 +536,92 @@ right now.
   ``F17``  135 (o)    go to the Device Options screen        5.0 (Lollipop)
   =======  =========  =====================================  =====================
 
+Text Selection and the Clipboard
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As with the `global actions`_,
+if your braille device has a braille keyboard
+then you can perform text selection actions
+via chords that also include dots 7 and 8.
+For example, Space + Dots78 + Dots14 (c)
+copies the selected text to Adroid's clipboard.
+This works as of Android release 4.3 (Jelly Bean MR2).
+
+.. table:: Text Selection and Clipboard Actions
+
+  ========  =======================================
+  Chord78+  Action
+  --------  ---------------------------------------
+  1 (a)     select all of the text
+  4         clear the text selection
+  14 (c)    copy the selected text to the clipboard
+  1236 (v)  paste the text on the clipboard
+  1346 (x)  cut the selected text to the clipboard
+  ========  =======================================
+
+The text selection extends inclusively
+from its first endpoint through its second one.
+The attribute underlining feature (see the Show Attributes preference)
+is used to show which text has currently been selected.
+It may be helpful to set the attribute underline to blink
+if the cursor isn't set to blink, and vice versa.
+
+In addition to being able to select all of the text,
+there are ways to select a specific portion of the text.
+Exactly how this is done depends on which braille device you're using.
+There is, however, one way to do it that works
+on any braille device that has cursor routing keys.
+
+The cursor routing key where the cursor is
+normally doesn't serve any useful purpose.
+If, however, you enable the Start Text Selection preference
+(which can be found within the Navigation Options submenu),
+then it enters `text selection mode`_
+with that character being both the first and second endpoints.
+This method has the constraint that the first endpoint of the text selection
+must be a character that the cursor can get to.
+
+.. _text selection mode:
+
+When in text selection mode,
+pressing a cursor routing key changes the second endpoint of the selection.
+This may be done any number of times.
+The second endpoint may be either after or before the first one.
+
+Commands
+````````
+
+HOST_COPY
+  Copy the selected text to the host clipboard.
+
+HOST_CUT
+  Cut the selected text to the host clipboard.
+
+HOST_PASTE
+  Paste the text on the host clipboard into the current input area.
+
+TXTSEL_ALL
+  Select all of the text.
+
+TXTSEL_CLEAR
+  Clear (deselect) the current text selection.
+
+TXTSEL_SET
+  Select a specific portion of the text.
+  This command requires that both endpoints of the text
+  are within the current braille window.
+  The key combination needs two cursor routing (or equivalent) keys.
+  We recommend a long press of two cursor routing keys
+  (if the braille device supports it).
+
+TXTSEL_START
+  Enter `text selection mode`_ with that character being both endpoints.
+  With this method, the first endpoint of the text selection can be anywehre,
+  i.e. it isn't constrained to be a character that the cursor can get to.
+  The key combination needs a cursor routing (or equivalent) key.
+  We recommend a long press of a cursor routing key
+  (if the braille device supports it).
+
 Web Pages
 ~~~~~~~~~
 
