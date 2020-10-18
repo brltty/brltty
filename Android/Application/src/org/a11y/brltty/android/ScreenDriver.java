@@ -410,10 +410,9 @@ public abstract class ScreenDriver {
   }
 
   private native static void exportScreenProperties (
-    int number,
-    int columns, int rows,
-    int locationLeft, int locationTop, int locationRight, int locationBottom,
-    int selectionLeft, int selectionTop, int selectionRight, int selectionBottom
+    int number, int columns, int rows,
+    int locLeft, int locTop, int locRight, int locBottom,
+    int selLeft, int selTop, int selRight, int selBottom
   );
 
   private static void exportScreenProperties () {

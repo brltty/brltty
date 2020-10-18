@@ -218,8 +218,16 @@ describe_AndroidScreen (ScreenDescription *description) {
     description->posx = locationLeft + selectionLeft;
     description->posy = locationTop + selectionTop;
 
-    description->hasCursor = selectionLeft == selectionRight;
-    description->hasSelection = selectionRight > selectionLeft;
+    description->hasCursor = 0;
+    description->hasSelection = 0;
+
+    if (selectionLeft >= 0) {
+      if (selectionRight == selectionLeft) {
+        description->hasCursor = 1;
+      } else if (selectionRight > selectionLeft) {
+        description->hasSelection = 1;
+      }
+    }
   }
 }
 
