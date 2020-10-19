@@ -581,7 +581,7 @@ with that character being both the first and second endpoints.
 This method has the constraint that the first endpoint of the text selection
 must be a character that the cursor can get to.
 
-.. _text selection mode:
+.. _Text Selection Mode:
 
 When in text selection mode,
 pressing a cursor routing key changes the second endpoint of the selection.
@@ -592,10 +592,12 @@ Commands
 ````````
 
 HOST_COPY
-  Copy the selected text to the host clipboard.
+  Copy the selected text to the host clipboard
+  and then deselect it.
 
 HOST_CUT
-  Cut the selected text to the host clipboard.
+  Copy the selected text to the host clipboard
+  and then delete it.
 
 HOST_PASTE
   Insert the text on the host clipboard after the screen cursor.
