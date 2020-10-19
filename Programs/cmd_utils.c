@@ -22,6 +22,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "log.h"
 #include "strfmt.h"
 #include "alert.h"
 #include "brl_cmds.h"
@@ -51,32 +52,42 @@ isTextOffset (int arg, int *first, int *last, int relaxed) {
   if (value < textStart) return 0;
   if ((value -= textStart) >= textCount) return 0;
 
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  if (isContracted) {
+    int start = 0;
+    int end = 0;
+
+    {
+      int textIndex = 0;
+
+      while (textIndex < contractedLength) {
+        int cellIndex = contractedOffsets[textIndex];
+
+        if (cellIndex != CTB_NO_OFFSET) {
+          if (cellIndex > value) {
+            end = textIndex - 1;
+            break;
+          }
+
+          start = textIndex;
+        }
+
+        textIndex += 1;
+      }
+
+      if (textIndex == contractedLength) end = textIndex - 1;
+    }
+
+    if (first) *first = start;
+    if (last) *last = end;
+    return 1;
+  }
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
   if ((ses->winx + value) >= scr.cols) {
     if (!relaxed) return 0;
     value = scr.cols - 1 - ses->winx;
   }
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  if (isContracted) {
-    int index;
-
-    for (index=0; index<contractedLength; index+=1) {
-      int offset = contractedOffsets[index];
-
-      if (offset != CTB_NO_OFFSET) {
-        if (offset > value) {
-          if (last) *last = index - 1;
-          break;
-        }
-
-        if (first) *first = index;
-      }
-    }
-
-    if (last && (index == contractedLength)) *last = index - 1;
-    return 1;
-  }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   if (prefs.wordWrap) {
     int length = getWordWrapLength(ses->winy, ses->winx, textCount);
