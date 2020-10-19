@@ -598,7 +598,7 @@ HOST_CUT
   Cut the selected text to the host clipboard.
 
 HOST_PASTE
-  Paste the text on the host clipboard into the current input area.
+  Insert the text on the host clipboard after the screen cursor.
 
 TXTSEL_ALL
   Select all of the text.

@@ -30,6 +30,7 @@ static const CommandListEntry commandList_modes[] = {
   { .code = BRL_CMD_FREEZE },
   { .code = BRL_CMD_BLK(DESCCHAR) },
   { .code = BRL_CMD_TIME },
+  { .code = BRL_CMD_INDICATORS },
   { .code = BRL_CMD_BLK(CONTEXT) },
 };
 
@@ -83,6 +84,25 @@ static const CommandListEntry commandList_horizontal[] = {
   { .code = BRL_CMD_BLK(SETLEFT) },
 };
 
+static const CommandListEntry commandList_window[] = {
+  { .code = BRL_CMD_GUI_TITLE },
+  { .code = BRL_CMD_GUI_BRL_ACTIONS },
+  { .code = BRL_CMD_GUI_HOME },
+  { .code = BRL_CMD_GUI_BACK },
+  { .code = BRL_CMD_GUI_DEV_SETTINGS },
+  { .code = BRL_CMD_GUI_DEV_OPTIONS },
+  { .code = BRL_CMD_GUI_APP_LIST },
+  { .code = BRL_CMD_GUI_APP_MENU },
+  { .code = BRL_CMD_GUI_APP_ALERTS },
+  { .code = BRL_CMD_GUI_AREA_ACTV },
+  { .code = BRL_CMD_GUI_AREA_PREV },
+  { .code = BRL_CMD_GUI_AREA_NEXT },
+  { .code = BRL_CMD_GUI_ITEM_FRST },
+  { .code = BRL_CMD_GUI_ITEM_PREV },
+  { .code = BRL_CMD_GUI_ITEM_NEXT },
+  { .code = BRL_CMD_GUI_ITEM_LAST },
+};
+
 static const CommandListEntry commandList_clipboard[] = {
   { .code = BRL_CMD_BLK(CLIP_NEW) },
   { .code = BRL_CMD_BLK(CLIP_ADD) },
@@ -96,6 +116,16 @@ static const CommandListEntry commandList_clipboard[] = {
   { .code = BRL_CMD_NXSEARCH },
   { .code = BRL_CMD_CLIP_SAVE },
   { .code = BRL_CMD_CLIP_RESTORE },
+};
+
+static const CommandListEntry commandList_text[] = {
+  { .code = BRL_CMD_TXTSEL_CLEAR },
+  { .code = BRL_CMD_BLK(TXTSEL_SET) },
+  { .code = BRL_CMD_BLK(TXTSEL_START) },
+  { .code = BRL_CMD_TXTSEL_ALL },
+  { .code = BRL_CMD_HOST_COPY },
+  { .code = BRL_CMD_HOST_CUT },
+  { .code = BRL_CMD_HOST_PASTE },
 };
 
 static const CommandListEntry commandList_feature[] = {
@@ -257,8 +287,16 @@ const CommandGroupEntry commandGroupTable[] = {
     .name = "Horizontal Navigation"
   },
 
+  { COMMAND_LIST(window),
+    .name = "Window Navigation"
+  },
+
   { COMMAND_LIST(clipboard),
     .name = "Clipboard Functions"
+  },
+
+  { COMMAND_LIST(text),
+    .name = "Text Selection and the Host Clipboard"
   },
 
   { COMMAND_LIST(feature),

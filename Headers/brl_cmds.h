@@ -238,9 +238,9 @@ typedef enum {
 
   BRL_CMD_TXTSEL_CLEAR /* clear the text selection */,
   BRL_CMD_TXTSEL_ALL /* select all of the text */,
-  BRL_CMD_HOST_COPY /* copy the selected text to the host clipboard */,
-  BRL_CMD_HOST_CUT /* cut the selected text to the host clipboard */,
-  BRL_CMD_HOST_PASTE /* paste from the host clipboard */,
+  BRL_CMD_HOST_COPY /* copy selected text to host clipboard */,
+  BRL_CMD_HOST_CUT /* cut selected text to host clipboard */,
+  BRL_CMD_HOST_PASTE /* insert host clipboard text after screen cursor */,
 
   BRL_CMD_GUI_TITLE /* show the window title */,
   BRL_CMD_GUI_BRL_ACTIONS /* open the braille actions window */,
