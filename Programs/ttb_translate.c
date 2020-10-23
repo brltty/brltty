@@ -191,10 +191,9 @@ setBrailleRepresentation (wchar_t character, void *data) {
 
 unsigned char
 convertCharacterToDots (TextTable *table, wchar_t character) {
-  switch (character & ~UNICODE_CELL_MASK) {
-    case UNICODE_BRAILLE_ROW:
-      return character & UNICODE_CELL_MASK;
+  wchar_t row = character & ~UNICODE_CELL_MASK;
 
+  switch (row) {
     case 0XF000: {
       wint_t wc = convertCharToWchar(character & UNICODE_CELL_MASK);
       if (wc == WEOF) break;
@@ -222,6 +221,10 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
 
       break;
     }
+  }
+
+  if (row == UNICODE_BRAILLE_ROW) {
+    return character & UNICODE_CELL_MASK;
   }
 
   {
