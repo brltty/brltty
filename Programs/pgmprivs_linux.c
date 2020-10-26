@@ -1913,24 +1913,23 @@ switchUser (const char *specifiedUser, const char *configuredUser, int *haveHome
   if (amPrivilegedUser()) {
     if (strcmp(specifiedUser, ":STAY-PRIVILEGED:") == 0) {
       logMessage(LOG_NOTICE, "not switching to an unprivileged user");
-      return 0;
-    }
-
-    if (strcmp(specifiedUser, configuredUser) != 0) {
-      if (*(user = specifiedUser)) {
-        if (switchToUser(user, haveHomeDirectory)) {
-          return 1;
+    } else {
+      if (strcmp(specifiedUser, configuredUser) != 0) {
+        if (*(user = specifiedUser)) {
+          if (switchToUser(user, haveHomeDirectory)) {
+            return 1;
+          }
         }
       }
-    }
 
-    if (!*(user = configuredUser)) {
-      logMessage(LOG_DEBUG, "the default unprivileged user has not been configured");
-      return 0;
+      if (!*(user = configuredUser)) {
+        logMessage(LOG_DEBUG, "the default unprivileged user hasn't been configured");
+      } else if (switchToUser(user, haveHomeDirectory)) {
+        return 1;
+      } else {
+        logMessage(LOG_WARNING, "couldn't switch to the configured unprivileged user: %s", user);
+      }
     }
-
-    if (switchToUser(user, haveHomeDirectory)) return 1;
-    logMessage(LOG_WARNING, "couldn't switch to the configured unprivileged user: %s", user);
   }
 
   {
@@ -1949,7 +1948,7 @@ switchUser (const char *specifiedUser, const char *configuredUser, int *haveHome
         name = number;
       }
 
-      logMessage(LOG_NOTICE, "continuing to execute as the invoking user: %s", name);
+      logMessage(LOG_NOTICE, "executing as invoking user: %s", name);
     }
 
     if (*(user = configuredUser)) {
