@@ -418,9 +418,25 @@ openCurrentConsole (void) {
 }
 
 static int
-controlCurrentConsole (int operation, void *argument) {
+controlCurrentConsole (int operation, void *argument, unsigned char *isNotImplemented) {
   if (consoleDescriptor != -1) {
-    return controlConsole(&consoleDescriptor, virtualTerminalNumber, operation, argument);
+    if (isNotImplemented) {
+      if (*isNotImplemented) {
+        errno = ENOSYS;
+        return -1;
+      }
+    }
+
+    int result = controlConsole(&consoleDescriptor, virtualTerminalNumber, operation, argument);
+    if (result != -1) return result;
+
+    if (errno == ENOSYS) {
+      if (isNotImplemented) {
+        *isNotImplemented = 1;
+      }
+    }
+
+    return result;
   }
 
   switch (operation) {
@@ -869,7 +885,7 @@ setScreenFontMap (int force) {
       return 0;
     }
 
-    if (controlCurrentConsole(GIO_UNIMAP, &sfm) != -1) break;
+    if (controlCurrentConsole(GIO_UNIMAP, &sfm, NULL) != -1) break;
     free(sfm.entries);
 
     if (errno != ENOMEM) {
@@ -926,7 +942,8 @@ setVgaCharacterCount (int force) {
       .op = KD_FONT_OP_GET
     };
 
-    if (controlCurrentConsole(KDFONTOP, &cfo) != -1) {
+    static unsigned char isNotImplemented = 0;
+    if (controlCurrentConsole(KDFONTOP, &cfo, &isNotImplemented) != -1) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "Font Properties: %ux%u*%u",
                  cfo.width, cfo.height, cfo.charcount);
@@ -993,7 +1010,7 @@ determineAttributesMasks (void) {
     {
       unsigned short mask;
 
-      if (controlCurrentConsole(VT_GETHIFONTMASK, &mask) == -1) {
+      if (controlCurrentConsole(VT_GETHIFONTMASK, &mask, NULL) == -1) {
         if (errno != EINVAL) logSystemError("ioctl[VT_GETHIFONTMASK]");
       } else if (mask & 0XFF) {
         logMessage(LOG_ERR, "high font mask has bit set in low-order byte: %04X", mask);
@@ -1514,7 +1531,7 @@ testTextMode (void) {
   if (problemText) return 0;
   int mode;
 
-  if (controlCurrentConsole(KDGETMODE, &mode) == -1) {
+  if (controlCurrentConsole(KDGETMODE, &mode, NULL) == -1) {
     logSystemError("ioctl[KDGETMODE]");
   } else if (mode == KD_TEXT) {
     if (afterTimePeriod(&mappingRecalculationTimer, NULL)) setTranslationTable(0);
@@ -1650,7 +1667,7 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 static int
 getCapsLockState (void) {
   char leds;
-  if (controlCurrentConsole(KDGETLED, &leds) != -1)
+  if (controlCurrentConsole(KDGETLED, &leds, NULL) != -1)
     if (leds & LED_CAP)
       return 1;
   return 0;
@@ -1734,7 +1751,7 @@ insertUinput (
 
 static int
 insertByte (char byte) {
-  if (controlCurrentConsole(TIOCSTI, &byte) != -1) return 1;
+  if (controlCurrentConsole(TIOCSTI, &byte, NULL) != -1) return 1;
   logSystemError("ioctl[TIOCSTI]");
   return 0;
 }
@@ -2131,7 +2148,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
     if (hasModAltLeft(key)) {
       int meta;
 
-      if (controlCurrentConsole(KDGKBMETA, &meta) == -1) return 0;
+      if (controlCurrentConsole(KDGKBMETA, &meta, NULL) == -1) return 0;
 
       switch (meta) {
         case K_ESCPREFIX:
@@ -2169,7 +2186,7 @@ insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
   int mode;
 
-  if (controlCurrentConsole(KDGKBMODE, &mode) != -1) {
+  if (controlCurrentConsole(KDGKBMODE, &mode, NULL) != -1) {
     switch (mode) {
       case K_RAW:
         if (insertCode(key, 1)) ok = 1;
@@ -2211,7 +2228,7 @@ typedef struct {
 
 static int
 selectRegion (RegionSelectionArgument *argument) {
-  if (controlCurrentConsole(TIOCLINUX, argument) != -1) return 1;
+  if (controlCurrentConsole(TIOCLINUX, argument, NULL) != -1) return 1;
   if (errno != EINVAL) logSystemError("ioctl[TIOCLINUX]");
   return 0;
 }
