@@ -143,6 +143,10 @@ the following is done:
   (real, effective, saved, filesystem)
   are set to the primary group of the selected user.
 
+* Change the XDG runtime directory
+  (set the ``XDG_RUNTIME_DIR`` environment variable)
+  to that of the selected user.
+
 * Extend the supplementary group list with the needed `group memberships`_.
 
 * If the selected user's home directory is defined then switch to it by:

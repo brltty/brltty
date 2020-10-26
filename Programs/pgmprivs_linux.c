@@ -1844,12 +1844,30 @@ canSwitchGroup (gid_t gid) {
 }
 
 static int
+setXDGRuntimeDirectory (uid_t uid) {
+  const char *variable = "XDG_RUNTIME_DIR";
+
+  const char *path = getenv(variable);
+  if (!path) return 1;
+
+  const char *name = locatePathName(path);
+  if (!name) return 1;
+
+  int length = name - path;
+  char value[length + 0X20];
+  snprintf(value, sizeof(value), "%.*s%d", length, path, uid);
+
+  return setEnvironmentVariable(variable, value);
+}
+
+static int
 setProcessOwnership (uid_t uid, gid_t gid) {
   gid_t oldRgid, oldEgid, oldSgid;
 
   if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
     if (setresgid(gid, gid, gid) != -1) {
       if (setresuid(uid, uid, uid) != -1) {
+        setXDGRuntimeDirectory(uid);
         return 1;
       } else {
         logSystemError("setresuid");
