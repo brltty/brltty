@@ -40,7 +40,10 @@ struct SpeechDataStruct {
 
 static int
 findDriverClass (volatile SpeechSynthesizer *spk) {
-  return findJavaClass(spk->driver.data->env, &spk->driver.data->driverClass, JAVA_OBJ_BRLTTY("SpeechDriver"));
+  return findJavaClass(
+    spk->driver.data->env, &spk->driver.data->driverClass,
+    JAVA_OBJ_BRLTTY("speech/SpeechDriver")
+  );
 }
 
 static void
@@ -66,14 +69,14 @@ findDriverMethod (volatile SpeechSynthesizer *spk, jmethodID *method, const char
 }
 
 JAVA_STATIC_METHOD (
-  org_a11y_brltty_android_SpeechDriver, tellLocation, void,
+  org_a11y_brltty_android_speech_SpeechDriver, tellLocation, void,
   jlong synthesizer, jint location
 ) {
   tellSpeechLocation(javaPtrFromLong(synthesizer), location);
 }
 
 JAVA_STATIC_METHOD (
-  org_a11y_brltty_android_SpeechDriver, tellFinished, void,
+  org_a11y_brltty_android_speech_SpeechDriver, tellFinished, void,
   jlong synthesizer
 ) {
   tellSpeechFinished(javaPtrFromLong(synthesizer));

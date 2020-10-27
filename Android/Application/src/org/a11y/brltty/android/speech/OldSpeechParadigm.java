@@ -16,23 +16,24 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brltty.android;
+package org.a11y.brltty.android.speech;
+import org.a11y.brltty.android.*;
 
 import android.util.Log;
 import android.speech.tts.TextToSpeech;
-import android.os.Bundle;
+import java.util.HashMap;
 
-public class NewSpeechParadigm extends SpeechParadigm {
-  private final static String LOG_TAG = NewSpeechParadigm.class.getName();
+public class OldSpeechParadigm extends SpeechParadigm {
+  private final static String LOG_TAG = OldSpeechParadigm.class.getName();
 
-  public NewSpeechParadigm () {
+  public OldSpeechParadigm () {
     super();
   }
 
-  private final Bundle parameters = new Bundle();
+  private final HashMap<String, String> parameters = new HashMap<>();
 
   @Override
-  public final NewSpeechParadigm resetParameters () {
+  public final OldSpeechParadigm resetParameters () {
     synchronized (parameters) {
       parameters.clear();
     }
@@ -41,7 +42,7 @@ public class NewSpeechParadigm extends SpeechParadigm {
   }
 
   @Override
-  public final NewSpeechParadigm resetParameter (String key) {
+  public final OldSpeechParadigm resetParameter (String key) {
     synchronized (parameters) {
       parameters.remove(key);
     }
@@ -50,56 +51,54 @@ public class NewSpeechParadigm extends SpeechParadigm {
   }
 
   @Override
-  public final NewSpeechParadigm setParameter (String key, String value) {
+  public final OldSpeechParadigm setParameter (String key, String value) {
     synchronized (parameters) {
-      parameters.putString(key, value);
+      parameters.put(key, value);
     }
 
     return this;
   }
 
   @Override
-  public final NewSpeechParadigm setParameter (String key, int value) {
-    synchronized (parameters) {
-      parameters.putInt(key, value);
-    }
-
-    return this;
+  public final OldSpeechParadigm setParameter (String key, int value) {
+    return setParameter(key, Integer.toString(value));
   }
 
   @Override
-  public final NewSpeechParadigm setParameter (String key, float value) {
-    synchronized (parameters) {
-      parameters.putFloat(key, value);
-    }
+  public final OldSpeechParadigm setParameter (String key, float value) {
+    return setParameter(key, Float.toString(value));
+  }
 
-    return this;
+  private final String getParameter (String key) {
+    synchronized (parameters) {
+      return parameters.get(key);
+    }
   }
 
   @Override
   public final String getParameter (String key, String defaultValue) {
-    synchronized (parameters) {
-      return parameters.getString(key, defaultValue);
-    }
+    String string = getParameter(key);
+    if (string == null) return defaultValue;
+    return string;
   }
 
   @Override
   public final int getParameter (String key, int defaultValue) {
-    synchronized (parameters) {
-      return parameters.getInt(key, defaultValue);
-    }
+    String string = getParameter(key);
+    if (string == null) return defaultValue;
+    return Integer.valueOf(string);
   }
 
   @Override
   public final float getParameter (String key, float defaultValue) {
-    synchronized (parameters) {
-      return parameters.getFloat(key, defaultValue);
-    }
+    String string = getParameter(key);
+    if (string == null) return defaultValue;
+    return Float.valueOf(string);
   }
 
   @Override
   public final boolean sayText (TextToSpeech tts, CharSequence text, int queueMode) {
-    int result = tts.speak(text, queueMode, parameters, getUtteranceIdentifier());
+    int result = tts.speak((String)text, queueMode, parameters);
     if (result == TextToSpeech.SUCCESS) return true;
 
     logSpeechError("speak", result);
