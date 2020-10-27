@@ -17,6 +17,7 @@
  */
 
 package org.a11y.brltty.android;
+import org.a11y.brltty.android.activities.ActionsActivity;
 import org.a11y.brltty.core.Braille;
 
 import java.util.Arrays;
