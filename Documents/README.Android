@@ -33,10 +33,10 @@ The required permissions are as follows:
     each time you interact with a control on your braille device.
 
 ``BLUETOOTH``
-  * For communicating with your braille device via Bluetooth.
+  * For communicating with a braille device via Bluetooth.
 
 ``BLUETOOTH_ADMIN``
-  * For communicating with your braille device via Bluetooth
+  * For communicating with a braille device via Bluetooth
     on Android 4.0 (Ice Cream Sandwich).
 
 ``INTERNET``
@@ -56,13 +56,13 @@ The required permissions are as follows:
   * For upgrading to a newer release.
 
 ``ACCESS_WIFI_STATE``
-  * For getting Wi-Fi status values.
+  * For getting Wi-Fi status values (for the INDICATORS command).
 
 ``ACCESS_FINE_LOCATION``
-  * For getting the Wi-Fi SSID.
+  * For getting the Wi-Fi SSID (for the INDICATORS command).
 
 ``ACCESS_COARSE_UPDATES``
-  * For getting the cell signal strength.
+  * For getting the cell signal strength (for the INDICATORS command).
 
 Quick Start
 -----------

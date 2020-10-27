@@ -12,7 +12,7 @@
   <!-- for resetting the device's lock timer -->
   <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-  <!-- for communicating with the braille device via Bluetooth -->
+  <!-- for communicating with a braille device via Bluetooth -->
   <uses-permission android:name="android.permission.BLUETOOTH" />
   <!-- also required by Android 4.0 (Ice Cream Sandwich) -->
   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -32,13 +32,13 @@
   <!-- for upgrading to a newer release -->
   <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
-  <!-- for getting Wi-Fi status values -->
+  <!-- for getting Wi-Fi status values (for the INDICATORS command) -->
   <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-  <!-- for getting the Wi-Fi SSID -->
+  <!-- for getting the Wi-Fi SSID (for the INDICATORS command) -->
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-  <!-- for getting the cell signal strength -->
+  <!-- for getting the cell signal strength (for the INDICATORS command) -->
   <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES" />
 
   <application
