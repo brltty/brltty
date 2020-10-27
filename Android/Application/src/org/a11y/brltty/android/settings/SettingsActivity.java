@@ -16,35 +16,30 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brltty.android;
+package org.a11y.brltty.android.settings;
+import org.a11y.brltty.android.*;
 
-import java.util.Map;
+import java.util.List;
 
+import android.os.Bundle;
 import android.content.Context;
+import android.preference.PreferenceActivity;
 
-public final class SerialDeviceCollection extends DeviceCollection {
-  public final static String DEVICE_QUALIFIER = "serial";
-
-  @Override
-  public final String getQualifier () {
-    return DEVICE_QUALIFIER;
-  }
-
-  public SerialDeviceCollection (Context context) {
-    super();
-  }
+public class SettingsActivity extends PreferenceActivity {
+  private final static String LOG_TAG = SettingsActivity.class.getName();
 
   @Override
-  public final String[] makeValues () {
-    return new String[0];
+  protected void onCreate (Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setTitle(R.string.SETTINGS_SCREEN_MAIN);
   }
 
   @Override
-  public final String[] makeLabels () {
-    return new String[0];
+  public void onBuildHeaders (List<Header> headers) {
+    loadHeadersFromResource(R.xml.settings_headers, headers);
   }
 
-  @Override
-  protected final void putParameters (Map<String, String> parameters, String value) {
+  public static void launch () {
+    ApplicationUtilities.launch(SettingsActivity.class);
   }
 }

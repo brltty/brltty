@@ -16,8 +16,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brltty.android;
-import org.a11y.brltty.core.*;
+package org.a11y.brltty.android.settings;
+import org.a11y.brltty.android.*;
+import org.a11y.brltty.core.CoreWrapper;
 
 import android.os.Bundle;
 import android.preference.Preference;

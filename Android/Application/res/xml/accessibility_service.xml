@@ -7,5 +7,5 @@
   android:accessibilityFeedbackType="feedbackGeneric"
   android:notificationTimeout="100"
   android:canRetrieveWindowContent="true"
-  android:settingsActivity="org.a11y.brltty.android.SettingsActivity"
+  android:settingsActivity="org.a11y.brltty.android.settings.SettingsActivity"
  />

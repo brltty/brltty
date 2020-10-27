@@ -17,6 +17,7 @@
  */
 
 package org.a11y.brltty.android;
+import org.a11y.brltty.android.settings.DeviceManager;
 import org.a11y.brltty.core.*;
 
 import java.util.Collections;

@@ -98,7 +98,7 @@
     </activity>
 
     <activity
-      android:name=".SettingsActivity"
+      android:name=".settings.SettingsActivity"
       android:label="@string/SETTINGS_SCREEN_MAIN"
       >
     </activity>
