@@ -154,7 +154,7 @@ public class PackageInstaller extends InternalActivityComponent {
 
           if (APITests.haveNougat) {
             {
-              String authority = getClass().getPackage().getName() + ".fileprovider";
+              String authority = "org.a11y.brltty.android.fileprovider";
               uri = FileProvider.getUriForFile(getActivity(), authority, targetFile);
             }
 
