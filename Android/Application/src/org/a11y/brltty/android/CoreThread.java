@@ -17,8 +17,10 @@
  */
 
 package org.a11y.brltty.android;
-import org.a11y.brltty.android.settings.DeviceManager;
 import org.a11y.brltty.core.*;
+
+import org.a11y.brltty.android.settings.DeviceManager;
+import org.a11y.brltty.android.settings.DeviceDescriptor;
 
 import java.util.Collections;
 import java.util.ArrayList;
