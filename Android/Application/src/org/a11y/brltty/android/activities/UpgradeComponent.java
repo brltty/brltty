@@ -21,10 +21,10 @@ import org.a11y.brltty.android.*;
 
 import android.content.res.Resources;
 
-public abstract class InternalActivityComponent {
+public abstract class UpgradeComponent {
   private final InternalActivity owningActivity;
 
-  protected InternalActivityComponent (InternalActivity owner) {
+  protected UpgradeComponent (InternalActivity owner) {
     owningActivity = owner;
   }
 
@@ -32,16 +32,16 @@ public abstract class InternalActivityComponent {
     return owningActivity;
   }
 
+  protected final Resources getResources () {
+    return getActivity().getResources();
+  }
+
   protected final String getString (int resource, boolean untranslated) {
-    if (untranslated) getActivity().getResourceString(resource);
+    if (untranslated) getResources().getString(resource);
     return getActivity().getString(resource);
   }
 
   protected final String getString (int resource) {
     return getString(resource, false);
-  }
-
-  protected final Resources getResources () {
-    return getActivity().getResources();
   }
 }

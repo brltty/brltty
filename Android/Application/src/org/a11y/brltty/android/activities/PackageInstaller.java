@@ -31,9 +31,10 @@ import android.support.v4.content.FileProvider;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
 
-public class PackageInstaller extends InternalActivityComponent {
+public class PackageInstaller extends UpgradeComponent {
   private final static String LOG_TAG = PackageInstaller.class.getName();
 
+  public final static String PROVIDER_AUTHORITY = "org.a11y.brltty.android.fileprovider";
   public final static String MIME_TYPE = "application/vnd.android.package-archive";
 
   private final String sourceURL;
@@ -153,11 +154,7 @@ public class PackageInstaller extends InternalActivityComponent {
           int flags;
 
           if (APITests.haveNougat) {
-            {
-              String authority = "org.a11y.brltty.android.fileprovider";
-              uri = FileProvider.getUriForFile(getActivity(), authority, targetFile);
-            }
-
+            uri = FileProvider.getUriForFile(getActivity(), PROVIDER_AUTHORITY, targetFile);
             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
           } else {
             uri = Uri.fromFile(targetFile);

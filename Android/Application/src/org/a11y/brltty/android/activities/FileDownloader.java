@@ -40,7 +40,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 
-public class FileDownloader extends InternalActivityComponent {
+public class FileDownloader extends UpgradeComponent {
   private final static String LOG_TAG = FileDownloader.class.getName();
 
   protected final String sourceURL;
