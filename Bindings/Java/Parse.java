@@ -85,7 +85,7 @@ public abstract class Parse {
     try {
       value = Long.valueOf(operand);
       checkRange(description, value, minimum, maximum);
-      return new Long(value);
+      return Long.valueOf(value);
     } catch (NumberFormatException exception) {
       throw new SyntaxException(
         "%s is not an integer: %s", description, operand
