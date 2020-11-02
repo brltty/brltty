@@ -409,7 +409,14 @@ static void route(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   int index = atoi(params[0]);
   logMessage(LOG_DEBUG,"route(%u)", index);
-  enqueueCommand(BRL_CMD_BLK(ROUTE) | (index&BRL_MSK_ARG));
+
+  if (event->xbutton.state & ControlMask) {
+    enqueueCommand(BRL_CMD_BLK(CLIP_NEW) | (index&BRL_MSK_ARG));
+  } else if (event->xbutton.state & Mod1Mask) {
+    enqueueCommand(BRL_CMD_BLK(COPY_LINE) | (index&BRL_MSK_ARG));
+  } else {
+    enqueueCommand(BRL_CMD_BLK(ROUTE) | (index&BRL_MSK_ARG));
+  }
 }
 
 static void quit(Widget w, XEvent *event, String *params, Cardinal *num_params)
@@ -472,6 +479,7 @@ static struct button buttons_simple[] = {
   { "Dot8",   BRL_CMD_BLK(PASSDOTS)  | BRL_DOT8  , 0, 1, 3 },
   { "`",      BRL_CMD_TOP_LEFT, 0, 3, 0 },
   { "^",      BRL_CMD_LNUP,   1, 4, 0 },
+  { "Paste",  BRL_CMD_PASTE,  0, 5, 0 },
   { "<",      BRL_CMD_FWINLT, 1, 3, 1 },
   { "Home",   BRL_CMD_HOME,   0, 4, 1 },
   { ">",      BRL_CMD_FWINRT, 1, 5, 1 },
