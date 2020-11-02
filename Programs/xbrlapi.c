@@ -621,6 +621,7 @@ static void XClipboardContentChanged(const char *data, unsigned long size) {
   if (data) {
     clipboardData = strndup(data, size);
     brlapi_setParameter(BRLAPI_PARAM_CLIPBOARD_CONTENT, 0, BRLAPI_PARAMF_GLOBAL, clipboardData, size);
+    debugf("new clipboard content from X: '%s'\n", (const char *) clipboardData);
   } else
     clipboardData = NULL;
 }
