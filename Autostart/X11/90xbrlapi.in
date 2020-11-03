@@ -1,5 +1,7 @@
 # startup script for /etc/X11/Xsession.d
 
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
 program_directory="@program_directory@"
 xbrlapi="$program_directory/xbrlapi"
 brltty="$program_directory/brltty"
