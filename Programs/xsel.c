@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 2019 by Samuel Thibault <Samuel.Thibault@ens-lyon.org>
+ * Copyright (C) 2019-2020 by Samuel Thibault <Samuel.Thibault@ens-lyon.org>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -47,6 +47,7 @@ void XSelInit(Display *dpy, XSelData *data) {
 
 void XSelSet(Display *dpy, XSelData *data) {
   XSetSelectionOwner(dpy, data->sel, data->selWindow, CurrentTime);
+  XFlush(dpy);
 }
 
 int XSelProcess(Display *dpy, XSelData *data, XEvent *ev, const char *content, XSelUpdate update) {
