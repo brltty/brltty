@@ -27,7 +27,7 @@
 
 #ifdef HAVE_ATSPI_GET_A11Y_BUS
 #include <atspi/atspi.h>
-#endif
+#endif /* HAVE_ATSPI_GET_A11Y_BUS */
 
 #ifdef __MINGW32__
 #include "win_pthread.h"
@@ -1173,7 +1173,7 @@ void a2DropX(void) {
   close(XConnectionNumber(dpy));
   dpy = NULL;
 }
-#endif
+#endif /* HAVE_PTHREAD_ATFORK */
 
 /* Called when X events are available, process them */
 ASYNC_MONITOR_CALLBACK(a2ProcessX) {
@@ -1431,7 +1431,7 @@ construct_AtSpi2Screen (void) {
 #ifdef HAVE_ATSPI_GET_A11Y_BUS
   bus = atspi_get_a11y_bus();
   if (!bus)
-#endif
+#endif /* HAVE_ATSPI_GET_A11Y_BUS */
   {
     bus = dbus_bus_get(DBUS_BUS_SESSION, &error);
     if (dbus_error_is_set(&error)) {
@@ -1467,7 +1467,7 @@ construct_AtSpi2Screen (void) {
     XFlush(dpy);
 #ifdef HAVE_PTHREAD_ATFORK
     pthread_atfork(NULL, NULL, a2DropX);
-#endif
+#endif /* HAVE_PTHREAD_ATFORK */
     asyncMonitorFileInput(&a2XWatch, XConnectionNumber(dpy), a2ProcessX, NULL);
     coreSelUpdatedListener = registerReportListener(REPORT_API_PARAMETER_UPDATED, a2CoreSelUpdated , NULL);
   }

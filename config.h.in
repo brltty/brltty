@@ -125,6 +125,9 @@ extern "C" {
 /* Define this if the function pthread_getname_np exists. */
 #undef HAVE_PTHREAD_GETNAME_NP
 
+/* Define this if the function pthread_atfork exists. */
+#undef HAVE_PTHREAD_ATFORK
+
 /* Define this if the function nanosleep exists. */
 #undef HAVE_NANOSLEEP
 
