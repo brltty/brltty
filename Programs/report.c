@@ -131,6 +131,16 @@ report (ReportIdentifier identifier, const void *data) {
   }
 }
 
+void
+reportParameterUpdated (brlapi_param_t parameter, brlapi_param_subparam_t subparam) {
+  const ApiParameterUpdatedReport data = {
+    .parameter = parameter,
+    .subparam = subparam
+  };
+
+  report(REPORT_API_PARAMETER_UPDATED, &data);
+}
+
 static int
 testListener (void *item, void *data) {
   ReportListenerInstance *rli = item;

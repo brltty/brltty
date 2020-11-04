@@ -36,6 +36,10 @@ typedef enum {
 
 extern void report (ReportIdentifier identiier, const void *data);
 
+extern void reportParameterUpdated (
+  brlapi_param_t parameter, brlapi_param_subparam_t subparam
+);
+
 typedef struct {
   ReportIdentifier reportIdentifier;
   const void *reportData;

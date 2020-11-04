@@ -21,6 +21,7 @@
 #include "log.h"
 #include "api_control.h"
 #include "api_server.h"
+#include "report.h"
 #include "core.h"
 
 #ifndef ENABLE_API
@@ -201,7 +202,11 @@ apiFlushOutput (void) {
 
 static void
 apiUpdateParameter (brlapi_param_t parameter, brlapi_param_subparam_t subparam) {
-  if (isRunning) api_updateParameter(parameter, subparam);
+  if (isRunning) {
+    api_updateParameter(parameter, subparam);
+  } else {
+    reportParameterUpdated(parameter, subparam);
+  }
 }
 
 const ApiMethods api = {
