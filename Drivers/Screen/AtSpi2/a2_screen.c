@@ -1166,6 +1166,14 @@ void a2XSelUpdated(const char *data, unsigned long size) {
   setMainClipboardContent(content);
 }
 
+#ifdef HAVE_PTHREAD_ATFORK
+/* Drop X connection without shutting down its resources. Needed at fork. */
+void a2DropX(void) {
+  close(XConnectionNumber(dpy));
+  dpy = NULL;
+}
+#endif
+
 /* Called when X events are available, process them */
 ASYNC_MONITOR_CALLBACK(a2ProcessX) {
   XEvent ev;
@@ -1455,6 +1463,9 @@ construct_AtSpi2Screen (void) {
   if (dpy) {
     XSelInit(dpy, &xselData);
     XFlush(dpy);
+#ifdef HAVE_PTHREAD_ATFORK
+    pthread_atfork(NULL, NULL, a2DropX);
+#endif
     asyncMonitorFileInput(&a2XWatch, XConnectionNumber(dpy), a2ProcessX, NULL);
     coreSelUpdatedListener = registerReportListener(REPORT_API_PARAMETER_UPDATED, a2CoreSelUpdated , NULL);
   }

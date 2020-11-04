@@ -856,6 +856,7 @@ BRLTTY_CHECK_FUNCTION([clock_gettime], [time.h], [rt])
 BRLTTY_CHECK_FUNCTION([clock_settime], [time.h], [rt])
 
 BRLTTY_CHECK_FUNCTION([pthread_getname_np], [pthread.h], [pthread])
+BRLTTY_CHECK_FUNCTION([pthread_atfork], [pthread.h], [pthread])
 
 AC_CHECK_DECLS([localtime_r], [], [], [dnl
 #include <time.h>
