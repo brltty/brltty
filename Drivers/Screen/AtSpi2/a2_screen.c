@@ -1163,6 +1163,7 @@ void a2XSelUpdated(const char *data, unsigned long size) {
   memcpy(content, data, size);
   content[size] = 0;
 
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "X Selection got '%s'", content);
   setMainClipboardContent(content);
 }
 
@@ -1195,6 +1196,7 @@ REPORT_LISTENER(a2CoreSelUpdated) {
   if (newContent) {
     if (!clipboardContent || (strcmp(clipboardContent, newContent) != 0)) {
       free(clipboardContent);
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER), "core Selection got '%s'", newContent);
       clipboardContent = newContent;
       XSelSet(dpy, &xselData);
     } else {
