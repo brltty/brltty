@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 6.1\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2020-11-12 18:19-0500\n"
+"POT-Creation-Date: 2020-11-13 10:33-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -169,10 +169,6 @@ msgstr ""
 
 #: Programs/midi.c:117
 msgid "Alto Sax"
-msgstr ""
-
-#: Drivers/Screen/Android/screen.c:184
-msgid "Android locked"
 msgstr ""
 
 #: Programs/midi.c:185
@@ -3176,6 +3172,10 @@ msgstr ""
 
 #: Programs/cmd_miscellaneous.c:186
 msgid "screen driver stopped"
+msgstr ""
+
+#: Drivers/Screen/Android/screen.c:184
+msgid "screen locked"
 msgstr ""
 
 #: Drivers/Screen/Linux/screen.c:1531

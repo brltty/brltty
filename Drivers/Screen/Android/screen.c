@@ -181,7 +181,7 @@ refresh_AndroidScreen (void) {
         problemText = gettext("Java exception occurred");
       } else {
         if (result == 'l') {
-          setBrailleOff(gettext("Android locked"));
+          setBrailleOff(gettext("screen locked"));
           return 1;
         }
 
