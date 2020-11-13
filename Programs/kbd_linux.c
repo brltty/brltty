@@ -585,10 +585,17 @@ prepareUinputInstance (UinputObject *uinput, int keyboard) {
       int count = size * 8;
 
       {
-        int key = KEY_ENTER;
+        static const int keys[] = {KEY_ENTER, KEY_SPACE, KEY_BRL_DOT1};
+        const int *key = keys;
+        const int *end = key + ARRAY_COUNT(keys);
 
-        if (key >= count) return 0;
-        if (!BITMASK_TEST(mask, key)) return 0;
+        while (key < end) {
+          if (*key >= count) continue;
+          if (BITMASK_TEST(mask, *key)) break;
+          key += 1;
+        }
+
+        if (key == end) return 0;
       }
 
       if (!enableUinputEventType(uinput, type)) return 0;
