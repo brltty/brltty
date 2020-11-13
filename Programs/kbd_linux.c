@@ -665,8 +665,12 @@ monitorKeyboard (KeyboardInstanceObject *kio) {
   #endif /* BUS_USB */
 
   #ifdef BUS_BLUETOOTH
-                  [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
+                  [BUS_BLUETOOTH] = KBD_TYPE_BLUETOOTH,
   #endif /* BUS_BLUETOOTH */
+
+  #ifdef BUS_HOST
+                  [BUS_HOST] = KBD_TYPE_INTERNAL,
+  #endif /* BUS_HOST */
                 };
 
                 if (identity.bustype < ARRAY_COUNT(typeTable)) {

@@ -26,10 +26,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  KBD_TYPE_Any = 0,
+  KBD_TYPE_ANY = 0,
   KBD_TYPE_PS2,
   KBD_TYPE_USB,
-  KBD_TYPE_Bluetooth
+  KBD_TYPE_BLUETOOTH,
+  KBD_TYPE_INTERNAL,
 } KeyboardType;
 
 typedef struct {
