@@ -19,7 +19,11 @@
 
 set -e
 readonly defaultInstance="/etc/brltty.conf"
-readonly programName="${0##*/}"
+
+readonly programPrefix="brltty-"
+programName="${0##*/}"
+[ "${programName#${programPrefix}}" = "${programName}" ] && programName="${programPrefix}${programName}"
+readonly programName
 
 programMessage() {
   local message="${1}"
@@ -56,13 +60,13 @@ readonly currentInstance="${BRLTTY_SYSTEMD_INSTANCE:-${defaultInstance}}"
 
 if [ -c "${currentInstance}" ]
 then
-  udevMaintained=false
+  udevManaged=false
 
   while read line
   do
     if [[ "${line}" =~ ^'N: ' ]]
     then
-      udevMaintained=true
+      udevManaged=true
     elif [[ "${line}" =~ ^'E: '([^ =]+)=(.*) ]]
     then
       name="${BASH_REMATCH[1]}"
@@ -75,7 +79,7 @@ then
     fi
   done < <((udevadm info --name="${currentInstance}" --export 2>/dev/null))
 
-  "${udevMaintained}" || semanticError "instance not maintained by udev: ${currentInstance}"
+  "${udevManaged}" || semanticError "instance not managed by udev: ${currentInstance}"
 elif [ -f "${currentInstance}" ]
 then
   export BRLTTY_CONFIGURATION_FILE="${currentInstance}"
@@ -84,6 +88,6 @@ else
 fi
 
 set -- "${BRLTTY_EXECUTABLE_PATH:-brltty}" -E ${BRLTTY_EXECUTABLE_ARGUMENTS} "${@}"
-programMessage "starting executable: ${*}" info
+programMessage "executing command: ${*}" info
 exec "${@}"
 exit "${?}"
