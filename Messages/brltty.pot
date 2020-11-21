@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 6.1\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2020-11-13 10:33-0500\n"
+"POT-Creation-Date: 2020-11-28 05:06-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -783,10 +783,6 @@ msgstr ""
 msgid "Highlight Braille Window Location"
 msgstr ""
 
-#: Programs/menu_prefs.c:780
-msgid "Home before Cursor Navigation"
-msgstr ""
-
 #: Programs/midi.c:47
 msgid "Honkytonk Piano"
 msgstr ""
@@ -1523,6 +1519,10 @@ msgstr ""
 msgid "Screen driver code (%s, %s, or one of {%s})."
 msgstr ""
 
+#: Programs/menu_prefs.c:780
+msgid "Scroll-aware Cursor Navigation"
+msgstr ""
+
 #: Programs/midi.c:181
 msgid "Seashore"
 msgstr ""
@@ -1728,7 +1728,7 @@ msgid "Standard Error Log Level"
 msgstr ""
 
 #: Programs/menu_prefs.c:815
-msgid "Start Text Selection"
+msgid "Start Selection with Routing Key"
 msgstr ""
 
 #: Programs/menu_prefs.c:465
@@ -2892,7 +2892,7 @@ msgstr ""
 msgid "invalid message hold timeout"
 msgstr ""
 
-#: Programs/brlapi_server.c:4408
+#: Programs/brlapi_server.c:4406
 msgid "invalid thread stack size"
 msgstr ""
 

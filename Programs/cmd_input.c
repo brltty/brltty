@@ -227,7 +227,7 @@ handleInputCommands (int command, void *data) {
       switch (command & BRL_MSK_BLK) {
         case BRL_CMD_BLK(PASSKEY): {
           ScreenKey key;
-          int homeFirst = 0;
+          int mightScroll = 0;
 
           switch (arg) {
             case BRL_KEY_ENTER:
@@ -248,42 +248,42 @@ handleInputCommands (int command, void *data) {
 
             case BRL_KEY_CURSOR_LEFT:
               key = SCR_KEY_CURSOR_LEFT;
-              homeFirst = 1;
+              mightScroll = 1;
               break;
 
             case BRL_KEY_CURSOR_RIGHT:
               key = SCR_KEY_CURSOR_RIGHT;
-              homeFirst = 1;
+              mightScroll = 1;
               break;
 
             case BRL_KEY_CURSOR_UP:
               key = SCR_KEY_CURSOR_UP;
-              homeFirst = 1;
+              mightScroll = 1;
               break;
 
             case BRL_KEY_CURSOR_DOWN:
               key = SCR_KEY_CURSOR_DOWN;
-              homeFirst = 1;
+              mightScroll = 1;
               break;
 
             case BRL_KEY_PAGE_UP:
               key = SCR_KEY_PAGE_UP;
-              homeFirst = 1;
+              mightScroll = 1;
               break;
 
             case BRL_KEY_PAGE_DOWN:
               key = SCR_KEY_PAGE_DOWN;
-              homeFirst = 1;
+              mightScroll = 1;
               break;
 
             case BRL_KEY_HOME:
               key = SCR_KEY_HOME;
-              homeFirst = 1;
+              mightScroll = 1;
               break;
 
             case BRL_KEY_END:
               key = SCR_KEY_END;
-              homeFirst = 1;
+              mightScroll = 1;
               break;
 
             case BRL_KEY_INSERT:
@@ -300,7 +300,7 @@ handleInputCommands (int command, void *data) {
               break;
           }
 
-          if (homeFirst && prefs.homeBeforeCursorNavigation && ses->trackScreenCursor) {
+          if (mightScroll && prefs.scrollAwareCursorNavigation && ses->trackScreenCursor) {
             if (!trackScreenCursor(1)) {
               goto REJECT_KEY;
             }

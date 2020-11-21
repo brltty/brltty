@@ -147,7 +147,7 @@ handleOverrideCommands (int command, void *data) {
         }
 
         case BRL_CMD_BLK(ROUTE): {
-          if (!ocd->selection.started && !prefs.startTextSelection) return 0;
+          if (!ocd->selection.started && !prefs.startSelectionWithRoutingKey) return 0;
           SelectionEndpoint endpoint;
 
           if (getSelectionEndpoint(arg, &endpoint)) {

@@ -289,10 +289,10 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.brailleWindowOverlap
   },
 
-  { .name = "home-before-cursor-navigation",
-    .defaultValue = DEFAULT_HOME_BEFORE_CURSOR_NAVIGATION,
+  { .name = "scrollaware-cursor-navigation",
+    .defaultValue = DEFAULT_SCROLL_AWARE_CURSOR_NAVIGATION,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.homeBeforeCursorNavigation
+    .setting = &prefs.scrollAwareCursorNavigation
   },
 
   { .name = "cursor-tracking-delay",
@@ -319,10 +319,10 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.highlightBrailleWindowLocation
   },
 
-  { .name = "start-text-selection",
-    .defaultValue = DEFAULT_START_TEXT_SELECTION,
+  { .name = "routing-key-start-selection",
+    .defaultValue = DEFAULT_START_SELECTION_WITH_ROUTING_KEY,
     .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.startTextSelection
+    .setting = &prefs.startSelectionWithRoutingKey
   },
 
   { .name = "autorelease-time",

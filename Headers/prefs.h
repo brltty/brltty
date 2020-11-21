@@ -180,7 +180,7 @@ typedef struct {
 
   unsigned char wordWrap;
   unsigned char capitalizationMode;
-  unsigned char startTextSelection;
+  unsigned char startSelectionWithRoutingKey;
 
   unsigned char speechUppercaseIndicator;
   unsigned char speechWhitespaceIndicator;
@@ -213,7 +213,7 @@ typedef struct {
   unsigned char onFirstRelease;
   unsigned char touchNavigation;
 
-  unsigned char homeBeforeCursorNavigation;
+  unsigned char scrollAwareCursorNavigation;
   unsigned char cursorTrackingDelay;
   unsigned char trackScreenScroll;
 

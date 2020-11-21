@@ -777,8 +777,8 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Home before Cursor Navigation"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.homeBeforeCursorNavigation, &itemName));
+      NAME(strtext("Scroll-aware Cursor Navigation"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.scrollAwareCursorNavigation, &itemName));
     }
 
     {
@@ -812,8 +812,8 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Start Text Selection"));
-      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.startTextSelection, &itemName));
+      NAME(strtext("Start Selection with Routing Key"));
+      ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.startSelectionWithRoutingKey, &itemName));
     }
   }
 
