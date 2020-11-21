@@ -420,12 +420,6 @@ The namespaces that it currently isolates are:
 cgroup
   This namespace is used to manage control groups.
 
-IPC
-  This namespace is used to manage:
-
-  * System V interprocess communication objects
-  * POSIX message queues
-
 mount
   This namespace is used to manage mount points.
 

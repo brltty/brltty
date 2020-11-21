@@ -637,13 +637,6 @@ static const IsolatedNamespaceEntry isolatedNamespaceTable[] = {
   },
   #endif /* CLONE_NEWCGROUP */
 
-  #ifdef CLONE_NEWIPC
-  { .unshareFlag = CLONE_NEWIPC,
-    .name = "IPC",
-    .summary = "System V interprocess communication objects and POSIX message queues",
-  },
-  #endif /* CLONE_NEWIPC */
-
   #ifdef CLONE_NEWNS
   { .unshareFlag = CLONE_NEWNS,
     .name = "mount",
