@@ -263,7 +263,6 @@ CONTRACTION_TABLE_LABEL_si Sinhalese (uncontracted)
 CONTRACTION_TABLE_LABEL_sw Swahili (contracted)
 CONTRACTION_TABLE_LABEL_th Thai (contracted)
 CONTRACTION_TABLE_LABEL_zh_tw Chinese (Taiwan, uncontracted)
-CONTRACTION_TABLE_LABEL_zh_tw_ucb Chinese (Taiwan, Unique Chinese Braille)
 CONTRACTION_TABLE_LABEL_zu Zulu (contracted)
 
 KEYBOARD_TABLE_LABEL_braille bindings for braille keyboards

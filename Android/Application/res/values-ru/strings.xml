@@ -264,7 +264,6 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Суахили (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Тайский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">Китайский (Тайвань, несокращённый)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Китайский (уникальный тайваньский шрифт Брайля)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Зулу (сокращённый)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">привязки для брайлевских клавиатур</string>

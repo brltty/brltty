@@ -16,6 +16,7 @@
   <string name="BRAILLE_DRIVER_LABEL_cn">Canute</string>
   <string name="BRAILLE_DRIVER_LABEL_ec">EcoBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_eu">EuroBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_fa">FrankAudiodata</string>
   <string name="BRAILLE_DRIVER_LABEL_fs">FreedomScientific</string>
   <string name="BRAILLE_DRIVER_LABEL_hd">Hedo</string>
   <string name="BRAILLE_DRIVER_LABEL_hm">HIMS</string>
@@ -59,6 +60,7 @@
     <item>@string/BRAILLE_DRIVER_LABEL_cn</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ec</item>
     <item>@string/BRAILLE_DRIVER_LABEL_eu</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_fa</item>
     <item>@string/BRAILLE_DRIVER_LABEL_fs</item>
     <item>@string/BRAILLE_DRIVER_LABEL_hd</item>
     <item>@string/BRAILLE_DRIVER_LABEL_hm</item>
@@ -103,6 +105,7 @@
     <item>cn</item>
     <item>ec</item>
     <item>eu</item>
+    <item>fa</item>
     <item>fs</item>
     <item>hd</item>
     <item>hm</item>
@@ -450,7 +453,6 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinese (Taiwan, uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinese (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contracted)</string>
 
   <string-array name="CONTRACTION_TABLE_LABELS">
@@ -483,7 +485,6 @@
     <item>@string/CONTRACTION_TABLE_LABEL_sw</item>
     <item>@string/CONTRACTION_TABLE_LABEL_th</item>
     <item>@string/CONTRACTION_TABLE_LABEL_zh_tw</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_zh_tw_ucb</item>
     <item>@string/CONTRACTION_TABLE_LABEL_zu</item>
   </string-array>
 
@@ -517,7 +518,6 @@
     <item>sw</item>
     <item>th</item>
     <item>zh-tw</item>
-    <item>zh-tw-ucb</item>
     <item>zu</item>
   </string-array>
 

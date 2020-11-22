@@ -264,7 +264,6 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Tajska(s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">Kitajska (Tajvan, brez krajšav)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Kitajska (Tajvan, Edinstvena Kitajska Brajica)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (s krajšavami)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">bližnjice za brajeve tipkovnice</string>

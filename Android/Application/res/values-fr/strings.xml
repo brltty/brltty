@@ -264,7 +264,6 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thaïlandais (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinois (Taiwan, désabrégé)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinois (Taiwan, Braille chinois Unique)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zoulou (abrégé)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">associations pour les claviers brailles</string>

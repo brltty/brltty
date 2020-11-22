@@ -251,7 +251,6 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinese (Taiwan, uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Chinese (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contracted)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">پیوست بریل برای صفحه کلید بریل</string>

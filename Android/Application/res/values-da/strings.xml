@@ -264,7 +264,6 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thailandsk (Forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">Kinesisk (Taiwan, uforkortet)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Kinesisk (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (forkortet)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">genveje for braille tastaturer</string>

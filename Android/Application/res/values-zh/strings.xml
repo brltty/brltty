@@ -264,7 +264,6 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">斯瓦希裡語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_th">泰國語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">中文</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">中文（高點，一對一中文點字，餵完成）</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">祖魯語縮寫</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">點字鍵盤對應</string>

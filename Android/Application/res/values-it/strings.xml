@@ -264,7 +264,6 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">Cinese (Taiwan, non contratto)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">Cinese (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contratto)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">combinazioni tasti per tastiere braille</string>

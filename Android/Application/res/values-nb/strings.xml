@@ -266,7 +266,6 @@
   <string name="CONTRACTION_TABLE_LABEL_sw">swahili (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">thai (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_tw">kinesisk (Taiwan, fullskrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw_ucb">kinesisk (Taiwan, Unique Chinese Braille)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">zulu (kortskrift)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">alternativ for punktskrifttastatur</string>

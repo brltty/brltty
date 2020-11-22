@@ -262,7 +262,6 @@
 #contraction-table	sw	# Swahili (contracted)
 #contraction-table	th	# Thai (contracted)
 #contraction-table	zh-tw	# Chinese (Taiwan, uncontracted)
-#contraction-table	zh-tw-ucb	# Chinese (Taiwan, Unique Chinese Braille)
 #contraction-table	zu	# Zulu (contracted)
 
 
