@@ -541,10 +541,7 @@ ACTION=="remove", GOTO="brltty_systemd_remove"
 GOTO="brltty_device_end"
 
 LABEL="brltty_systemd_add"
-TAG+="systemd"
 ENV{SYSTEMD_WANTS}+="brltty@$env{DEVNAME}.service"
-GOTO="brltty_device_end"
-
 LABEL="brltty_systemd_remove"
 TAG+="systemd"
 GOTO="brltty_device_end"
