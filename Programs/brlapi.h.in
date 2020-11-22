@@ -152,10 +152,25 @@ size_t BRLAPI_STDCALL brlapi_getHandleSize(void);
 #define BRLAPI_DEFAUTH BRLAPI_DEFAUTH_KEYFILE BRLAPI_DEFAUTH_POLKIT
 #endif /* BRLAPI_WIN32 */
 
+/** OS-dependent file descriptor type
+ *
+ * This is the type for file descriptors returned by brlapi_openConnection() and
+ * brlapi_getFileDescriptor().
+ */
 #ifdef __MINGW32__
 typedef HANDLE brlapi_fileDescriptor;
 #else /* __MINGW32__ */
 typedef int brlapi_fileDescriptor;
+#endif /* __MINGW32__ */
+
+/** Invalid value for brlapi_fileDescriptor
+ *
+ * This is returned by brlapi_getFileDescriptor() when the connection is closed.
+ */
+#ifdef __MINGW32__
+#define BRLAPI_INVALID_FILE_DESCRIPTOR INVALID_HANDLE_VALUE
+#else /* __MINGW32__ */
+#define BRLAPI_INVALID_FILE_DESCRIPTOR -1
 #endif /* __MINGW32__ */
 
 /** \brief Settings structure for \e BrlAPI connection
@@ -222,7 +237,7 @@ typedef struct {
  * the specified port. It writes the authorization key on the socket and
  * waits for acknowledgement.
  *
- * \return the file descriptor, or -1 on error
+ * \return the file descriptor, or BRLAPI_INVALID_FILE_DESCRIPTOR on error
  *
  * \note The file descriptor is returned in case the client wants to
  * communicate with the server without using \e libbrlapi functions. If it uses
@@ -263,6 +278,20 @@ typedef struct {
 brlapi_fileDescriptor BRLAPI_STDCALL brlapi_openConnection(const brlapi_connectionSettings_t *desiredSettings, brlapi_connectionSettings_t *actualSettings);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *desiredSettings, brlapi_connectionSettings_t *actualSettings);
+
+/* brlapi_fileDescriptor */
+/** Return the file descriptor used by the BrlAPI connection
+ *
+ * This allows to use it with \c select(), \c g_io_add_watch(), \c
+ * XtAppAddInput(), etc.
+ *
+ * BRLAPI_INVALID_FILE_DESCRIPTOR is returned when the connection was closed.
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+brlapi_fileDescriptor BRLAPI_STDCALL brlapi_getFileDescriptor(void);
+#endif /* BRLAPI_NO_SINGLE_SESSION */
+brlapi_fileDescriptor BRLAPI_STDCALL brlapi__getFileDescriptor(brlapi_handle_t *handle);
+
 
 /* brlapi_closeConnection */
 /** Cleanly close the socket
@@ -743,7 +772,8 @@ int BRLAPI_STDCALL brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describ
  * keypresses.
  *
  * Else, you'll probably want to use the file descriptor returned by
- * brlapi_openConnection() in your "big polling loop". For instance:
+ * brlapi_openConnection() or brlapi_getFileDescriptor() in your "big polling loop".
+ * For instance:
  *
  * - in a \c select() loop, just add it to the \c readfds and \c exceptfds file
  *   descriptor sets;

@@ -321,7 +321,7 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
 {
   handle->brlx = 0;
   handle->brly = 0;
-  handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
+  handle->fileDescriptor = BRLAPI_INVALID_FILE_DESCRIPTOR;
   handle->addrfamily = 0;
   pthread_mutex_init(&handle->fileDescriptor_mutex, NULL);
   pthread_mutex_init(&handle->req_mutex, NULL);
@@ -527,7 +527,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
 
     pthread_mutex_lock(&handle->fileDescriptor_mutex);
     closeFileDescriptor(handle->fileDescriptor);
-    handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
+    handle->fileDescriptor = BRLAPI_INVALID_FILE_DESCRIPTOR;
     pthread_mutex_unlock(&handle->fileDescriptor_mutex);
 
     if (handle==&defaultHandle)
@@ -1018,7 +1018,7 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
     goto outfd;
 
   if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, &serverPacket, sizeof(serverPacket), WAIT_FOR_EXPECTED_PACKET, WAIT_FOREVER)) < 0)
-    return INVALID_FILE_DESCRIPTOR;
+    return BRLAPI_INVALID_FILE_DESCRIPTOR;
 
   for (type = &authServer->type[0]; type < &authServer->type[len / sizeof(authServer->type[0])]; type++) {
     auth->type = *type;
@@ -1055,9 +1055,9 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
   brlapi_errno = BRLAPI_ERROR_AUTHENTICATION;
 outfd:
   closeFileDescriptor(handle->fileDescriptor);
-  handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
+  handle->fileDescriptor = BRLAPI_INVALID_FILE_DESCRIPTOR;
 out:
-  return INVALID_FILE_DESCRIPTOR;
+  return BRLAPI_INVALID_FILE_DESCRIPTOR;
 
 done:
   pthread_mutex_lock(&handle->state_mutex);
@@ -1071,6 +1071,16 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi_openConnection(const brlapi_connecti
   return brlapi__openConnection(&defaultHandle, clientSettings, usedSettings);
 }
 
+brlapi_fileDescriptor BRLAPI_STDCALL brlapi__getFileDescriptor(brlapi_handle_t *handle)
+{
+  return handle->fileDescriptor;
+}
+
+brlapi_fileDescriptor BRLAPI_STDCALL brlapi_getFileDescriptor(void)
+{
+  return brlapi__getFileDescriptor(&defaultHandle);
+}
+
 /* brlapi_closeConnection */
 /* Cleanly close the socket */
 void BRLAPI_STDCALL brlapi__closeConnection(brlapi_handle_t *handle)
@@ -1080,7 +1090,7 @@ void BRLAPI_STDCALL brlapi__closeConnection(brlapi_handle_t *handle)
   pthread_mutex_unlock(&handle->state_mutex);
   pthread_mutex_lock(&handle->fileDescriptor_mutex);
   closeFileDescriptor(handle->fileDescriptor);
-  handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
+  handle->fileDescriptor = BRLAPI_INVALID_FILE_DESCRIPTOR;
   pthread_mutex_unlock(&handle->fileDescriptor_mutex);
 
 #ifdef LC_GLOBAL_LOCALE
