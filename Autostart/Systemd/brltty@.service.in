@@ -36,6 +36,9 @@ RefuseManualStop=true
 SyslogIdentifier=brltty
 Environment="BRLTTY_SYSTEMD_INSTANCE=%I"
 
+StandardOutput=null
+StandardError=inherit
+
 PIDFile=%t/brltty/brltty-%i.pid
 Environment="BRLTTY_PID_FILE=%t/brltty/brltty-%i.pid"
 
