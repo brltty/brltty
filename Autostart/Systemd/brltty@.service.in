@@ -81,7 +81,9 @@ SupplementaryGroups=tty
 SupplementaryGroups=tty
 
 # for serial I/O (/dev/ttyS<n>)
+# probably only one of these should be uncommented
 SupplementaryGroups=dialout
+#SupplementaryGroups=uucp
 
 # for USB I/o via USBFS (/dev/bus/usb/*/*)
 SupplementaryGroups=root

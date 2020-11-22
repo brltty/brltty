@@ -29,6 +29,7 @@ m brltty tty
 m brltty tty
 
 # for serial I/O (/dev/ttyS<n>)
+# probably only one of these should be uncommented
 m brltty dialout
 #m brltty uucp
 
