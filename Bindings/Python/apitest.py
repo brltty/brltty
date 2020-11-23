@@ -65,6 +65,11 @@ if __name__ == "__main__":
   import errno
 
   def writeProperty (name, value):
+    try:
+      value = value.decode("utf-8")
+    except AttributeError:
+      pass
+
     sys.stdout.write(name + ": " + value + "\n")
 
   writeProperty("BrlAPI Version", ".".join(map(str, brlapi.getLibraryVersion())))
