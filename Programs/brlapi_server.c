@@ -357,7 +357,7 @@ static int isKeyCapable(const BrailleDriver *brl)
 {
   int ret;
   lockMutex(&apiDriverMutex);
-  ret = ((brl->readKey!=NULL) && (brl->keyToCommand!=NULL)) || (disp && disp->keyNames!=NULL);
+  ret = (disp && (disp->keyNames != NULL));
   unlockMutex(&apiDriverMutex);
   return ret;
 }
@@ -4324,8 +4324,6 @@ void api_linkServer(BrailleDisplay *brl)
   memcpy(&ApiBraille,braille,sizeof(BrailleDriver));
   ApiBraille.writeWindow=api_writeWindow;
   ApiBraille.readCommand=api_readCommand;
-  ApiBraille.readKey = NULL;
-  ApiBraille.keyToCommand = NULL;
   ApiBraille.readPacket = NULL;
   ApiBraille.writePacket = NULL;
   braille=&ApiBraille;

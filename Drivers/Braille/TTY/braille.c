@@ -78,7 +78,6 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "baud", BRLPARM_TERM "lines", "columns", BRLPARM_CHARSET "locale"
 
-#define BRL_HAVE_KEY_CODES
 #include "brl_driver.h"
 #include "braille.h"
 #include "io_serial.h"
@@ -348,7 +347,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 int
-brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) {
+keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) {
   switch (key) {
     case EOF: return EOF;
 
@@ -400,7 +399,7 @@ brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) 
 }
 
 static int
-brl_readKey (BrailleDisplay *brl) {
+readKey (BrailleDisplay *brl) {
   int key = getch();
 
 #ifdef GOT_CURSES
@@ -416,7 +415,7 @@ brl_readKey (BrailleDisplay *brl) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  int command = brl_keyToCommand(brl, context, brl_readKey(brl));
+  int command = keyToCommand(brl, context, readKey(brl));
 
   if (command != EOF) {
     logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "command: 0X%04X", command);

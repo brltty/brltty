@@ -67,14 +67,6 @@ static int brl_reset (BrailleDisplay *brl);
 #define brl_reset NULL
 #endif /* BRL_HAVE_PACKET_IO */
 
-#ifdef BRL_HAVE_KEY_CODES
-static int brl_readKey (BrailleDisplay *brl);
-static int brl_keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key);
-#else /* BRL_HAVE_KEY_CODES */
-#define brl_readKey NULL
-#define brl_keyToCommand NULL
-#endif /* BRL_HAVE_KEY_CODES */
-
 #ifndef BRLSYMBOL
 #define BRLSYMBOL CONCATENATE(brl_driver_,DRIVER_CODE)
 #endif /* BRLSYMBOL */
@@ -95,10 +87,7 @@ const BrailleDriver BRLSYMBOL = {
 
   brl_readPacket,
   brl_writePacket,
-  brl_reset,
-
-  brl_readKey,
-  brl_keyToCommand
+  brl_reset
 };
 
 DRIVER_VERSION_DECLARATION(brl);

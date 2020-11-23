@@ -34,7 +34,6 @@ typedef enum {
 #define BRLPARMS "displaysize", "promversion", "baud"
 
 #define BRL_HAVE_PACKET_IO
-#define BRL_HAVE_KEY_CODES
 #include "brl_driver.h"
 #include "braille.h"
 #include "brldefs-vs.h"
@@ -283,9 +282,9 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
   return 1;
 }
 
-/* Function : brl_keyToCommand */
+/* Function : keyToCommand */
 /* Converts a key code to a brltty command according to the context */
-int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int code)
+int keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int code)
 {
   static int ctrlpressed = 0; 
   static int altpressed = 0;
@@ -380,7 +379,7 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
   return EOF; 
 }
 
-/* Function : brl_readKey */
+/* Function : readKey */
 /* Reads a key. The result is context-independent */
 /* The intermediate value contains a keycode, masked with the key type */
 /* the keytype is one of BRL_NORMALCHAR, BRL_FUNCTIONKEY or BRL_ROUTING */
@@ -388,7 +387,7 @@ int brl_keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int co
 /* for function-keys, codes 0 to 31 are reserved for A1 to D8 keys */
 /* codes after 32 are for ~~* combinations, the order has to be determined */
 /* for BRL_ROUTING, the code is the ofset to route, starting from 0 */
-static int brl_readKey(BrailleDisplay *brl)
+static int readKey(BrailleDisplay *brl)
 {
   unsigned char ch, packet[MAXPACKETSIZE];
   static int routing = 0;
@@ -440,5 +439,5 @@ static int brl_readKey(BrailleDisplay *brl)
 /* Reads a command from the braille keyboard */
 static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
 {
-  return brl_keyToCommand(brl,context,brl_readKey(brl));
+  return keyToCommand(brl,context,readKey(brl));
 }
