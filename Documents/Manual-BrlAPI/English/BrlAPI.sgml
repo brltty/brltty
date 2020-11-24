@@ -1111,47 +1111,6 @@ For each feature presented below, only a short description of each
 concerned macro and function will be given. For a more complete description
 of concepts used here, please refer to chapters <ref id="sec-intro" name="Introduction"> and <ref id="sec-general" name="General description">.
 
-<sect2>Reading braille key codes
-
-<p>
-When a client takes control of a tty and asks for getting raw key codes, it
-has, like in command mode, the possibility to mask some keys. The masked
-keys will then be passed to <em/brltty/. This assumes the existence of a
-conversion mechanism from key codes to <em/brltty/ commands.
-This conversion mechanism can only be implemented by the braille driver,
-since 
-it is the only piece of code that knows about braille terminal specific key
-codes. So, to make it possible for client applications to read raw key
-codes, the driver has to define the following macro:
-<verb>
-#define BRL_HAVE_KEY_CODES
-</verb>
-and the following functions:
-<verb>
-static int brl_readKey(BrailleDisplay *)
-int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
-</verb>
-
-The semantics of <tt>brl_readKey()</tt> is very similar to
-<tt>brl_readCommand()</tt>'s, with one essential difference: a key code
-is not context-dependant, so no context argument needs to be given to this
-function. Moreover, the code this function returns is driver-specific, and
-has to be properly defined by the driver's author so that client applications
-can rely on it.
-
-The <tt>brl_keyToCommand()</tt> function's purpose is to convert a key code
-as delivered by <tt>brl_readKey()</tt> into a <em/brltty/ command. As explained
-above, this function is called by brlapi when a key is pressed on the
-braille keyboard that is ignored by the client application. The
-corresponding command is then returned to <em/brltty/.
-
-<sect3>Remarks
-
-<p>When these two functions are present, the only thing
-<tt>brl_readCommand()</tt> has to do is to call <tt>brl_readKey()</tt> and then
-call <tt>brl_keyToCommand()</tt> with the value returned by the first function
-as argument.
-
 <sect2>Exchanging raw data packets
 
 <p>Under some circumstances, an application running on the PC
