@@ -37,6 +37,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _pkglibdir %{_libdir}/%{name}
 %define _systemdunitsdir %{_libdir}/systemd/system
 %define _systemdusersdir %{_libdir}/sysusers.d
+%define _systemdfilesdir %{_libdir}/tmpfiles.d
 %define _udevlibdir %{_libdir}/udev
 
 Requires: cldr-emoji-annotation
@@ -616,6 +617,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brltty-systemd
 %{_systemdunitsdir}/*
 %{_systemdusersdir}/*
+%{_systemdfilesdir}/*
 %{_pkglibdir}/systemd-*
 
 %files -n brltty-udev

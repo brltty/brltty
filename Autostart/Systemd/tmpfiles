@@ -20,34 +20,15 @@
 # keep these synchronized with brltty@.service #
 ################################################
 
-u brltty - "Braille Device Daemon" /var/lib/brltty
+# BRLTTY's runtime (writable) directory
+d /run/brltty 0750 brltty brltty
 
-# for reading screen content (/dev/vcs*)
-m brltty tty
+# BRLTTY's state (updatable) directory
+d /var/lib/brltty 2775 brltty brltty
 
-# for virtual console monitoring and control (/dev/tty<n>)
-m brltty tty
+# where BrlAPI sockets are created
+d /var/lib/BrlAPI 3777 brltty brltty
 
-# for serial I/O (/dev/ttyS<n>)
-# probably only one of these should be uncommented
-m brltty dialout
-#m brltty uucp
-
-# for USB I/o (/dev/bus/usb/*/*)
-m brltty root
-
-# for playing sound via the ALSA framework
-m brltty audio
-
-# for playing sound via the Pulse Audio daemon
-m brltty pulse-access
-
-# for monitoring keyboard input (/dev/input/*)
-m brltty input
-
-# for creating virtual devices (/dev/uinput)
-m brltty root
-
-# for reading the BrlAPI authorization key file
-m brltty brlapi
+# the BrlAPI authorization key file
+z /etc/brlapi.key 0640 root brlapi
 

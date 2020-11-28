@@ -103,3 +103,6 @@ SupplementaryGroups=input
 # for creating virtual devices (/dev/uinput or /dev/input/uinput)
 SupplementaryGroups=root
 
+# for reading the BrlAPI authorization key file
+SupplementaryGroups=brlapi
+

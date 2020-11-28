@@ -18,10 +18,14 @@
 
 SYSTEMD_UNITS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/systemd/system
 SYSTEMD_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)$(DRIVERS_DIRECTORY)
+
 SYSTEMD_USERS_DIRECTORY = $(INSTALL_ROOT)$(libdir)/sysusers.d
 SYSTEMD_USERS_FILE = $(SYSTEMD_USERS_DIRECTORY)/$(PACKAGE_TARNAME).conf
 
-install: install-units install-scripts install-users
+SYSTEMD_FILES_DIRECTORY = $(INSTALL_ROOT)$(libdir)/tmpfiles.d
+SYSTEMD_FILES_FILE = $(SYSTEMD_FILES_DIRECTORY)/$(PACKAGE_TARNAME).conf
+
+install: install-units install-scripts install-users install-files
 
 install-units-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_UNITS_DIRECTORY)
@@ -43,11 +47,18 @@ install-users-directory:
 install-users: install-users-directory
 	$(INSTALL_DATA) $(SRC_DIR)/sysusers $(SYSTEMD_USERS_FILE)
 
+install-files-directory:
+	$(INSTALL_DIRECTORY) $(SYSTEMD_FILES_DIRECTORY)
+
+install-files: install-files-directory
+	$(INSTALL_DATA) $(SRC_DIR)/tmpfiles $(SYSTEMD_FILES_FILE)
+
 uninstall:
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME).*
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME)@.*
 	-rm -f $(SYSTEMD_SCRIPTS_DIRECTORY)/systemd-*
 	-rm -f $(SYSTEMD_USERS_FILE)
+	-rm -f $(SYSTEMD_FILES_FILE)
 
 distclean::
 	-rm brltty@.service

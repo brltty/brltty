@@ -8,6 +8,7 @@ Using Systemd Service Management
 .. |unit directory| replace:: |configuration directory|/systemd/system
 .. |scripts directory| replace:: |configuration directory|/brltty
 .. |users directory| replace:: |configuration directory|/sysusers.d
+.. |files directory| replace:: |configuration directory|/tmpfiles.d
 .. |build subdirectory| replace:: Autostart/Systemd
 .. |default configuration file| replace:: ``/etc/brltty.conf``
 
@@ -25,6 +26,9 @@ The following steps need to be performed:
 * A file defining the non-root user that BRLTTY is to run as,
   including the supplementary groups that it needs access to,
   needs to be installed into the |users directory| directory.
+
+* A file defining the files and directories that should exist
+  needs to be installed into the |files directory| directory.
 
 A make file has been provided in order to make this easy to do.
 It can be found within the |build subdirectory| subdirectory
