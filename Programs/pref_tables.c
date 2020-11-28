@@ -319,7 +319,7 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.highlightBrailleWindowLocation
   },
 
-  { .name = "routing-key-start-selection",
+  { .name = "routingkey-start-selection",
     .defaultValue = DEFAULT_START_SELECTION_WITH_ROUTING_KEY,
     .settingNames = &preferenceStringTable_boolean,
     .setting = &prefs.startSelectionWithRoutingKey
