@@ -62,6 +62,7 @@ uninstall:
 
 distclean::
 	-rm brltty@.service
+	-rm tmpfiles
 
 reload:
 	systemctl daemon-reload

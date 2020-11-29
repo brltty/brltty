@@ -45,7 +45,6 @@ Environment="BRLTTY_PID_FILE=%t/brltty/brltty-%i.pid"
 Type=@SYSTEMD_SERVICE_TYPE@
 Environment="BRLTTY_EXECUTABLE_ARGUMENTS=@SYSTEMD_SERVICE_ARGUMENTS@"
 
-ExecStartPre=+/usr/bin/install -d -o brltty -g brltty -m0770 @WRITABLE_DIRECTORY@
 ExecStart=@DRIVERS_DIRECTORY@/systemd-wrapper
 ExecStop=@DRIVERS_DIRECTORY@/systemd-wrapper -C
 

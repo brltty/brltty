@@ -2067,6 +2067,7 @@ AC_OUTPUT([
    Bindings/Lisp/brlapi_config.lisp
    Bindings/Python/setup.py
    Autostart/Systemd/brltty@.service
+   Autostart/Systemd/tmpfiles
    Autostart/Udev/device.rules
    Autostart/X11/90xbrlapi
    Android/Application/res/values/configured.xml:Android/Application/res.strings.in

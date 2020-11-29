@@ -16,19 +16,15 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-################################################
-# keep these synchronized with brltty@.service #
-################################################
+# BRLTTY's runtime directory
+d @WRITABLE_DIRECTORY@ 0750 brltty brltty
 
-# BRLTTY's runtime (writable) directory
-d /run/brltty 0750 brltty brltty
-
-# BRLTTY's state (updatable) directory
-d /var/lib/brltty 2775 brltty brltty
+# BRLTTY's state directory
+d @UPDATABLE_DIRECTORY@ 2775 brltty brltty
 
 # where BrlAPI sockets are created
-d /var/lib/BrlAPI 3777 brltty brltty
+d @api_socket_directory@ 3777 brltty brltty
 
 # the BrlAPI authorization key file
-z /etc/brlapi.key 0640 root brlapi
+z @CONFIGURATION_DIRECTORY@/@api_authkeyfile@ 0640 root brlapi
 
