@@ -53,7 +53,7 @@ brltty_build_directories=". Programs Documents Messages"
 brltty_source_directory="`dirname "${0}"`"
 brltty_manual_directories=""
 
-for brltty_directory in Autostart Initramfs Android
+for brltty_directory in Autostart Authorization Initramfs Android
 do
    for brltty_subdirectory in `cd "${brltty_source_directory}/${brltty_directory}" && echo *`
    do

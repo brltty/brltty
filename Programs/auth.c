@@ -511,6 +511,7 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
     logMessage(LOG_DEBUG, "attempting to authenticate pid %d via polkit", cred.pid);
 
     PolkitSubject *subject = polkit_unix_process_new_for_owner(cred.pid, 0, cred.uid);
+
     if (subject) {
       GError *error_local = NULL;
 
@@ -534,6 +535,8 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
         logMessage(LOG_ERR, "polkit_authority_check_authorization_sync error: %s", error_local->message);
         g_error_free(error_local);
       }
+
+      g_object_unref(subject);
     } else {
       logSystemError("polkit_unix_process_new_for_owner");
     }

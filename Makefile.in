@@ -31,6 +31,9 @@ install-systemd uninstall-systemd:
 install-udev uninstall-udev:
 	cd Autostart/Udev && $(MAKE) $(@:-udev=)
 
+install-polkit uninstall-polkit:
+	cd Authorization/Polkit && $(MAKE) $(@:-polkit=)
+
 install-dracut uninstall-dracut:
 	cd Initramfs/Dracut && $(MAKE) $(@:-dracut=)
 
@@ -103,6 +106,7 @@ ITERATE = \
    Autostart/Systemd \
    Autostart/Udev \
    Autostart/X11 \
+   Authorization/Polkit \
    Initramfs/Dracut \
    Android/Application \
    Android/Core \

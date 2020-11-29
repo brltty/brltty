@@ -1,0 +1,7 @@
+polkit.addRule(function(action, subject) {
+  if (action.id == "org.a11y.brlapi.write-display") {
+    if (subject.isInGroup("brlapi")) {
+      return polkit.Result.YES;
+    }
+  }
+});
