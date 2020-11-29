@@ -18,5 +18,6 @@
       <allow_inactive>no</allow_inactive>
       <allow_any>no</allow_any>
     </defaults>
+    <annotate key="org.freedesktop.policykit.owner">unix-user:brltty</annotate>
   </action>
 </policyconfig>
