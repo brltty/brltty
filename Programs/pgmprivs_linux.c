@@ -1851,23 +1851,36 @@ setXDGRuntimeDirectory (uid_t uid, gid_t gid) {
   char newPath[length + 0X20];
   snprintf(newPath, sizeof(newPath), "%.*s%d", length, oldPath, uid);
 
-  if (ensureDirectory(newPath, 0)) {
-    if (chmod(newPath, S_IRWXU)) {
-      if (chown(newPath, uid, gid) != 01) {
-        if (setEnvironmentVariable(variable, newPath)) {
-          return 1;
+  {
+    logMessage(LOG_DEBUG, "checking XDG runtime directory: %s", newPath);
+    int exists = 0;
+
+    if (access(newPath, F_OK) != -1) {
+      exists = 1;
+      logMessage(LOG_DEBUG, "XDG runtime directory exists: %s", newPath);
+    } else if (errno == ENOENT) {
+      if (mkdir(newPath, S_IRWXU) != -1) {
+        if (chown(newPath, uid, gid) != 01) {
+          exists = 1;
+          logMessage(LOG_INFO, "XDG runtime directory created: %s", newPath);
+        } else {
+          logSystemError("chown");
         }
+
+        unlink(newPath);
       } else {
-        logSystemError("chown");
+        logSystemError("mkdir");
       }
     } else {
-      logSystemError("chmod");
+      logSystemError("access");
     }
 
-    unlink(newPath);
+    if (!exists) {
+      logMessage(LOG_WARNING, "XDG runtime directory access problem: %s", newPath);
+    }
   }
 
-  return 0;
+  return setEnvironmentVariable(variable, newPath);
 }
 
 static int
