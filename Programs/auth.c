@@ -316,7 +316,7 @@ authKeyfile_client (AuthDescriptor *auth, FileDescriptor fd, void *data) {
 static int
 authKeyfile_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   MethodDescriptor_keyfile *keyfile = data;
-  logMessage(LOG_DEBUG, "checking key file: %s", keyfile->path);
+  logMessage(LOG_CATEGORY(SERVER_EVENTS), "checking key file: %s", keyfile->path);
   return 1;
 }
 
@@ -508,7 +508,10 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   socklen_t length = sizeof(cred);
 
   if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &cred, &length) != -1) {
-    logMessage(LOG_DEBUG, "attempting to authenticate pid %d via polkit", cred.pid);
+    logMessage(LOG_CATEGORY(SERVER_EVENTS),
+      "attempting to authorize client (pid %d, uid %d) via polkit",
+      cred.pid, cred.uid
+    );
 
     PolkitSubject *subject = polkit_unix_process_new_for_owner(cred.pid, 0, cred.uid);
 
@@ -529,7 +532,11 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
         int isAuthorized = polkit_authorization_result_get_is_authorized(result);
         g_object_unref(result);
 
-        logMessage(LOG_DEBUG, "polkit_authority_check_authorization_sync returned %d", isAuthorized);
+        logMessage(LOG_CATEGORY(SERVER_EVENTS),
+          "polkit_authority_check_authorization_sync returned %d",
+          isAuthorized
+        );
+
         return isAuthorized;
       } else {
         logMessage(LOG_ERR, "polkit_authority_check_authorization_sync error: %s", error_local->message);
@@ -628,7 +635,7 @@ initializeMethodDescriptor (MethodDescriptor *method, const char *parameter) {
     }
   }
 
-  logMessage(LOG_WARNING, "unknown authentication/authorization method: %.*s", nameLength, name);
+  logMessage(LOG_WARNING, "unknown authorization method: %.*s", nameLength, name);
   return 0;
 }
 
