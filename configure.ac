@@ -169,7 +169,7 @@ then
    writable_directory=""
 elif test "${writable_directory}" = "yes"
 then
-   writable_directory="${localstatedir}/run/${PACKAGE_TARNAME}"
+   writable_directory="/run/${PACKAGE_TARNAME}"
 fi
 AC_SUBST([writable_directory])
 BRLTTY_SUMMARY_ITEM([writable-directory], [writable_directory])

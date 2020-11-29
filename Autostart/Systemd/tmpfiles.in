@@ -19,12 +19,12 @@
 # BRLTTY's runtime directory
 d @WRITABLE_DIRECTORY@ 0750 brltty brltty
 
-# BRLTTY's state directory
-d @UPDATABLE_DIRECTORY@ 2775 brltty brltty
+# BRLTTY's local state directory
+d @UPDATABLE_DIRECTORY@ 2770 brltty brltty
 
-# where BrlAPI sockets are created
+# BrlAPI's sockets directory
 d @api_socket_directory@ 3777 brltty brltty
 
-# the BrlAPI authorization key file
+# BrlAPI's authorization key file
 z @CONFIGURATION_DIRECTORY@/@api_authkeyfile@ 0640 root brlapi
 
