@@ -263,7 +263,7 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *text, size_t leng
     .text = text,
     .length = length,
     .count = count,
-    .priority = SPD_TEXT
+    .priority = SPD_MESSAGE
   };
 
   speechdAction(sayText, &say);
