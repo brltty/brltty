@@ -542,6 +542,7 @@ make install-messages
 make install-appstream
 make install-systemd
 make install-udev
+make install-polkit
 make install-dracut
 make install-documents
 install -m 644 Documents/brltty.conf "${RPM_BUILD_ROOT}%{_sysconfdir}"
@@ -632,7 +633,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
-%{_datadir}/polkit-1/actions/org.a11y.brlapi.policy
+%{_datadir}/polkit-1/*/org.a11y.brlapi.*
 %doc %{_docdir}/*/Manual-BrlAPI
 
 %files -n brlapi-utils

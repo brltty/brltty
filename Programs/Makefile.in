@@ -1149,7 +1149,7 @@ install-documents: install-document-directory brltty-ktb$X $(BRAILLE_DRIVERS)
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) all
 	$(SRC_TOP)mkdocs -o $(INSTALL_DOCUMENT_DIRECTORY) -s $(SRC_TOP) -b $(BLD_TOP) -d $(DOC_DIR) -t $(TBL_DIR)
 
-install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key install-api-policy install-api-commands $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
+install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key install-api-commands $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 
 install-api-libraries: $(API_LIB) $(API_ARC) install-apilib-directory install-apisoc-directory
 	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_RELEASE)
@@ -1184,10 +1184,6 @@ install-api-key:
 	file=$(sysconfdir)/$(API_AUTHFILE) && \
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
 	then $(SRC_TOP)brltty-genkey -f $$file; fi
-
-API_POLICY_FILE = org.a11y.brlapi.policy
-install-api-policy: install-apipol-directory
-	$(INSTALL_DATA) $(SRC_TOP)Authorization/Polkit/$(API_POLICY_FILE) $(INSTALL_APIPOL_DIRECTORY)
 
 install-api-commands: all-brltty-clip
 	$(INSTALL_PROGRAM) brltty-clip$X $(INSTALL_PROGRAM_DIRECTORY) 
