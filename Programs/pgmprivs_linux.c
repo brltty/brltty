@@ -1837,41 +1837,59 @@ canSwitchGroup (gid_t gid) {
 }
 
 static int
-setXDGRuntimeDirectory (uid_t uid) {
+setXDGRuntimeDirectory (uid_t uid, gid_t gid) {
   const char *variable = "XDG_RUNTIME_DIR";
 
-  const char *path = getenv(variable);
-  if (!path) return 1;
+  const char *oldPath = getenv(variable);
+  if (!oldPath) return 1;
+  if (!*oldPath) return 1;
 
-  const char *name = locatePathName(path);
-  if (!name) return 1;
+  const char *oldName = locatePathName(oldPath);
+  if (!oldName) return 1;
 
-  int length = name - path;
-  char value[length + 0X20];
-  snprintf(value, sizeof(value), "%.*s%d", length, path, uid);
+  int length = oldName - oldPath;
+  char newPath[length + 0X20];
+  snprintf(newPath, sizeof(newPath), "%.*s%d", length, oldPath, uid);
 
-  return setEnvironmentVariable(variable, value);
+  if (ensureDirectory(newPath, 0)) {
+    if (chmod(newPath, S_IRWXU)) {
+      if (chown(newPath, uid, gid) != 01) {
+        if (setEnvironmentVariable(variable, newPath)) {
+          return 1;
+        }
+      } else {
+        logSystemError("chown");
+      }
+    } else {
+      logSystemError("chmod");
+    }
+
+    unlink(newPath);
+  }
+
+  return 0;
 }
 
 static int
 setProcessOwnership (uid_t uid, gid_t gid) {
-  gid_t oldRgid, oldEgid, oldSgid;
+  if (setXDGRuntimeDirectory(uid, gid)) {
+    gid_t oldRgid, oldEgid, oldSgid;
 
-  if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
-    if (setresgid(gid, gid, gid) != -1) {
-      if (setresuid(uid, uid, uid) != -1) {
-        setXDGRuntimeDirectory(uid);
-        return 1;
+    if (getresgid(&oldRgid, &oldEgid, &oldSgid) != -1) {
+      if (setresgid(gid, gid, gid) != -1) {
+        if (setresuid(uid, uid, uid) != -1) {
+          return 1;
+        } else {
+          logSystemError("setresuid");
+        }
+
+        setresgid(oldRgid, oldEgid, oldSgid);
       } else {
-        logSystemError("setresuid");
+        logSystemError("setresgid");
       }
-
-      setresgid(oldRgid, oldEgid, oldSgid);
     } else {
-      logSystemError("setresgid");
+      logSystemError("getresgid");
     }
-  } else {
-    logSystemError("getresgid");
   }
 
   return 0;
