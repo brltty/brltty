@@ -1190,7 +1190,7 @@ install-api-commands: all-brltty-clip
 
 ###############################################################################
 
-uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-messages uninstall-manpages uninstall-documents uninstall-headers uninstall-api-bindings uninstall-api-files
+uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-messages uninstall-manpages uninstall-documents uninstall-headers uninstall-api-bindings
 
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
@@ -1241,9 +1241,6 @@ uninstall-api-libraries-windows:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB_VERSIONED)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_DEF)
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/$(API_DLL)
-
-uninstall-api-files:
-	-rm -f $(INSTALL_APIPOL_DIRECTORY)/$(API_POLICY_FILE)
 
 ###############################################################################
 
