@@ -284,7 +284,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 
 /* Function : keyToCommand */
 /* Converts a key code to a brltty command according to the context */
-int keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int code)
+static int keyToCommand(BrailleDisplay *brl, KeyTableCommandContext context, int code)
 {
   static int ctrlpressed = 0; 
   static int altpressed = 0;

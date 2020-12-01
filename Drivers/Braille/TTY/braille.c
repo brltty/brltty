@@ -346,7 +346,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
-int
+static int
 keyToCommand (BrailleDisplay *brl, KeyTableCommandContext context, int key) {
   switch (key) {
     case EOF: return EOF;
