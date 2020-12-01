@@ -10,14 +10,15 @@
   <vendor_url>http://brltty.app/</vendor_url>
 
   <action id="org.a11y.brlapi.write-display">
-    <description>Write to the braille display</description>
-    <message>Privileges are required to access the braille display</message>
+    <description>Access to the braille device via BrlAPI</description>
+    <message>Privileges are required to access the braille device via BrlAPI</message>
 
     <defaults>
       <allow_active>yes</allow_active>
       <allow_inactive>no</allow_inactive>
       <allow_any>no</allow_any>
     </defaults>
+
     <annotate key="org.freedesktop.policykit.owner">unix-user:brltty</annotate>
   </action>
 </policyconfig>
