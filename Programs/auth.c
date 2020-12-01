@@ -513,39 +513,45 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
       cred.pid, cred.uid
     );
 
-    PolkitSubject *subject = polkit_unix_process_new_for_owner(cred.pid, 0, cred.uid);
-
-    if (subject) {
-      GError *error_local = NULL;
-
-      PolkitAuthorizationResult *result = polkit_authority_check_authorization_sync(
-        polkit->authority,			/* authority */
-        subject,				/* PolkitSubject for client */
-        "org.a11y.brlapi.write-display",		/* name of polkit action */
-        NULL,					/* details */
-        POLKIT_CHECK_AUTHORIZATION_FLAGS_NONE,	/* disallow interaction */
-        NULL,					/* GCancellable */
-        &error_local				/* returned error */
+    if (cred.uid == -1) {
+      logMessage(LOG_CATEGORY(SERVER_EVENTS),
+        "user not specified in credentials"
       );
+    } else {
+      PolkitSubject *subject = polkit_unix_process_new_for_owner(cred.pid, 0, cred.uid);
 
-      if (result) {
-        int isAuthorized = polkit_authorization_result_get_is_authorized(result);
-        g_object_unref(result);
+      if (subject) {
+        GError *error_local = NULL;
 
-        logMessage(LOG_CATEGORY(SERVER_EVENTS),
-          "polkit_authority_check_authorization_sync returned %d",
-          isAuthorized
+        PolkitAuthorizationResult *result = polkit_authority_check_authorization_sync(
+          polkit->authority,			/* authority */
+          subject,				/* PolkitSubject for client */
+          "org.a11y.brlapi.write-display",		/* name of polkit action */
+          NULL,					/* details */
+          POLKIT_CHECK_AUTHORIZATION_FLAGS_NONE,	/* disallow interaction */
+          NULL,					/* GCancellable */
+          &error_local				/* returned error */
         );
 
-        return isAuthorized;
-      } else {
-        logMessage(LOG_ERR, "polkit_authority_check_authorization_sync error: %s", error_local->message);
-        g_error_free(error_local);
-      }
+        if (result) {
+          int isAuthorized = polkit_authorization_result_get_is_authorized(result);
+          g_object_unref(result);
 
-      g_object_unref(subject);
-    } else {
-      logSystemError("polkit_unix_process_new_for_owner");
+          logMessage(LOG_CATEGORY(SERVER_EVENTS),
+            "polkit_authority_check_authorization_sync returned %d",
+            isAuthorized
+          );
+
+          return isAuthorized;
+        } else {
+          logMessage(LOG_ERR, "polkit_authority_check_authorization_sync error: %s", error_local->message);
+          g_error_free(error_local);
+        }
+
+        g_object_unref(subject);
+      } else {
+        logSystemError("polkit_unix_process_new_for_owner");
+      }
     }
   } else {
     logSystemError("getsockopt[SO_PEERCRED]");
