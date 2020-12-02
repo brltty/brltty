@@ -26,8 +26,8 @@ UDEV_RULES_DIRECTORY = $(UDEV_LIBRARY_DIRECTORY)/rules.d
 
 UDEV_PATH_PREFIX = $(UDEV_RULES_DIRECTORY)/$(UDEV_RULES_SEQUENCE)-$(PACKAGE_TARNAME)-
 UDEV_RULES_EXTENSION = rules
-UDEV_NAME_DEVICE = device.$(UDEV_RULES_EXTENSION)
-UDEV_NAME_UINPUT = uinput.$(UDEV_RULES_EXTENSION)
+UDEV_NAME_DEVICE = device
+UDEV_NAME_UINPUT = uinput
 
 install-scripts-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_SCRIPTS_DIRECTORY)
@@ -38,17 +38,14 @@ install-wrapper: install-scripts-directory
 install-rules-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_RULES_DIRECTORY)
 
-$(UDEV_PATH_PREFIX)%: % install-rules-directory
-	$(INSTALL_DATA) $< $@
+install-rules: install-rules-directory
+	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_DEVICE).$(UDEV_RULES_EXTENSION) $(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE).$(UDEV_RULES_EXTENSION)
+	$(INSTALL_DATA) $(SRC_DIR)/$(UDEV_NAME_UINPUT).$(UDEV_RULES_EXTENSION) $(UDEV_PATH_PREFIX)$(UDEV_NAME_UINPUT).$(UDEV_RULES_EXTENSION)
 
-install-device-rules: $(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE)
-
-install-uinput-rules: $(UDEV_PATH_PREFIX)$(UDEV_NAME_UINPUT)
-
-install-rules-all: install-wrapper install-device-rules install-uinput-rules
+install-rules-all: install-wrapper install-rules
 
 install-rules-no-generic: install-rules-all
-	$(SRC_TOP)updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE)
+	$(SRC_TOP)updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE).$(UDEV_RULES_EXTENSION)
 
 install: install-rules-$(UDEV_RULES_TYPE)
 
