@@ -31,9 +31,9 @@ install-units-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_UNITS_DIRECTORY)
 
 install-units: install-units-directory
-	for extension in service path; do \
-	$(INSTALL_DATA) $(SRC_DIR)/*.$$extension $(SYSTEMD_UNITS_DIRECTORY); \
-	done
+	$(INSTALL_DATA) $(BLD_DIR)/brltty@.service $(SYSTEMD_UNITS_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/brltty@.path $(SYSTEMD_UNITS_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/brltty.path $(SYSTEMD_UNITS_DIRECTORY)
 
 install-scripts-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_SCRIPTS_DIRECTORY)
@@ -51,7 +51,7 @@ install-files-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_FILES_DIRECTORY)
 
 install-files: install-files-directory
-	$(INSTALL_DATA) $(SRC_DIR)/tmpfiles $(SYSTEMD_FILES_FILE)
+	$(INSTALL_DATA) $(BLD_DIR)/tmpfiles $(SYSTEMD_FILES_FILE)
 
 uninstall:
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME).*
