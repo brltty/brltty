@@ -23,7 +23,7 @@ install-metainfo-directory:
 	$(INSTALL_DIRECTORY) $(METAINFO_DIRECTORY)
 
 install: install-metainfo-directory
-	$(INSTALL_DATA) $(SRC_TOP)Autostart/AppStream/$(METAINFO_FILE) $(METAINFO_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/$(METAINFO_FILE) $(METAINFO_DIRECTORY)
 
 uninstall:
 	-rm -f $(METAINFO_DIRECTORY)/$(METAINFO_FILE)
