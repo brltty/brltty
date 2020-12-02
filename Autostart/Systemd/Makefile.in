@@ -64,6 +64,14 @@ distclean::
 	-rm brltty@.service
 	-rm tmpfiles
 
-reload:
+reload: reload-units reload-users reload-files
+
+reload-units:
 	systemctl daemon-reload
+
+reload-users:
+	systemd-sysusers $(SYSTEMD_USERS_FILE)
+
+reload-files:
+	systemd-tmpfiles --create $(SYSTEMD_FILES_FILE)
 
