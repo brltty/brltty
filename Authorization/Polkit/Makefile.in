@@ -18,7 +18,7 @@
 ###############################################################################
 
 POLKIT_PACKAGE_NAME = org.a11y.brlapi
-POLKIT_DATA_DIRECTORY = $(INSTALL_ROOT)/usr/share/polkit-1
+POLKIT_DATA_DIRECTORY = $(INSTALL_ROOT)$(datadir)/polkit-1
 
 POLKIT_ACTIONS_DIRECTORY = $(POLKIT_DATA_DIRECTORY)/actions
 POLKIT_ACTIONS_EXTENSION = policy
@@ -26,7 +26,7 @@ POLKIT_ACTIONS_EXTENSION = policy
 POLKIT_RULES_DIRECTORY = $(POLKIT_DATA_DIRECTORY)/rules.d
 POLKIT_RULES_EXTENSION = rules
 
-install:: install-actions install-rules
+install: install-actions install-rules
 
 install-actions-directory:
 	$(INSTALL_DIRECTORY) $(POLKIT_ACTIONS_DIRECTORY)
