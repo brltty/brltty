@@ -480,7 +480,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
       syslog(LOG_WARNING,"lost key: 0X%8lx%8lx\n",(unsigned long)ntohl(uint32Packet[0]),(unsigned long)ntohl(uint32Packet[1]));
     } else {
       handle->keybuf[(handle->keybuf_next+handle->keybuf_nb++)%BRL_KEYBUF_SIZE]
-          = ((brlapi_keyCode_t)ntohl(uint32Packet[0]) << 32) | ntohl(uint32Packet[1]);
+          = brlapi_packetToKeyCode(uint32Packet);
     }
     pthread_mutex_unlock(&handle->read_mutex);
     return -3;
@@ -2265,7 +2265,7 @@ int BRLAPI_STDCALL brlapi__readKeyWithTimeout(brlapi_handle_t *handle, int timeo
     return 0;
   }
   if (res < 0) return -1;
-  *code = ((brlapi_keyCode_t)ntohl(buf[0]) << 32) | ntohl(buf[1]);
+  *code = brlapi_packetToKeyCode(buf);
   return 1;
 }
 

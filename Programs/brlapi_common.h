@@ -550,6 +550,14 @@ BRLAPI(getArgumentWidth) (brlapi_keyCode_t keyCode) {
   return -1;
 }
 
+/* Function brlapi_uint32ToKeyCode */
+/* Translate keycodes stored in a packet to a keycode */
+static brlapi_keyCode_t
+BRLAPI(packetToKeyCode)(uint32_t t[2])
+{
+  return (((brlapi_keyCode_t)ntohl(t[0])) << 32) | ntohl(t[1]);
+}
+
 /* Function : brlapi_getKeyrangeMask */
 /* returns the keyCode mask for a given range type */
 static int

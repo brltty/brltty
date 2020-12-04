@@ -997,8 +997,8 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
   CHECKERR(!(size%(2*sizeof(brlapi_keyCode_t))),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
   lockMutex(&c->acceptedKeysMutex);
   for (i=0; i<size/(2*sizeof(brlapi_keyCode_t)); i++) {
-    x = ((brlapi_keyCode_t)ntohl(ints[i][0]) << 32) | ntohl(ints[i][1]);
-    y = ((brlapi_keyCode_t)ntohl(ints[i][2]) << 32) | ntohl(ints[i][3]);
+    x = brlapiserver_packetToKeyCode(&ints[i][0]);
+    y = brlapiserver_packetToKeyCode(&ints[i][2]);
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",c->fd,x,y);
     if (type==BRLAPI_PACKET_IGNOREKEYRANGES) res = removeKeyrange(x,y,&c->acceptedKeys);
     else res = addKeyrange(x,y,&c->acceptedKeys);
