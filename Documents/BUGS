@@ -1,3 +1,2 @@
 systemd restart of a path unit doesn't work
 SELECTVT doesn't redirect input
-reading key events with FS devices yields bogus events
