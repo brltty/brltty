@@ -1319,12 +1319,18 @@ ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
   UnmonitoredConditionDescriptor *ucd = data;
 
   if (interruptPending) {
+    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "interrupt pending");
     ucd->data = &waitResult;
     interruptPending = 0;
     return 1;
   }
 
   if (programTerminationRequestCount) {
+    logMessage(LOG_CATEGORY(ASYNC_EVENTS),
+      "program termination request count: %u",
+      programTerminationRequestCount
+    );
+
     static const WaitResult result = WAIT_STOP;
     ucd->data = &result;
     return 1;
@@ -1334,6 +1340,7 @@ ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
     static RoutingStatus status;
 
     if ((status = getRoutingStatus(0)) != ROUTING_STATUS_NONE) {
+      logMessage(LOG_CATEGORY(ASYNC_EVENTS), "routing status: %u", status);
       ucd->handler = handleRoutingDone;
       ucd->data = &status;
       return 1;
@@ -1341,6 +1348,7 @@ ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
   }
 
   if (brl.hasFailed) {
+    logMessage(LOG_CATEGORY(ASYNC_EVENTS), "braille driver failed");
     ucd->handler = handleBrailleDriverFailed;
     return 1;
   }

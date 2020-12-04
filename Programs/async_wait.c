@@ -159,6 +159,7 @@ asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *dat
     awaitAction(timeout - elapsed);
   }
 
+  logSymbol(LOG_CATEGORY(ASYNC_EVENTS), testCondition, "condition satisfied");
   return 1;
 }
 
