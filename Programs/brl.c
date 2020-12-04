@@ -201,9 +201,11 @@ clearStatusCells (BrailleDisplay *brl) {
 
 static void
 brailleBufferResized (BrailleDisplay *brl, int infoLevel) {
-  logMessage(infoLevel, "Braille Display Dimensions: %d %s, %d %s",
-             brl->textRows, (brl->textRows == 1)? "row": "rows",
-             brl->textColumns, (brl->textColumns == 1)? "column": "columns");
+  logMessage(infoLevel,
+    "Braille Display Dimensions: %d %s, %d %s",
+    brl->textColumns, ((brl->textColumns == 1)? "column": "columns"),
+    brl->textRows, ((brl->textRows == 1)? "row": "rows")
+  );
 
   memset(brl->buffer, 0, brl->textColumns*brl->textRows);
   if (brl->bufferResized) brl->bufferResized(brl->textRows, brl->textColumns);
