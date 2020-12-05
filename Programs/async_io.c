@@ -589,7 +589,11 @@ invokeMonitorCallback (OperationEntry *operation) {
       .data = operation->data
     };
 
-    if (callback(&parameters)) return 1;
+    if (callback(&parameters)) {
+      if (!operation->error) {
+        return 1;
+      }
+    }
   }
 
   return 0;
