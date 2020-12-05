@@ -464,6 +464,7 @@ static void resetDevice(void) {
 
 static int flushBrailleOutput(BrailleDisplay *brl) {
   int flushed = api_flushOutput(brl);
+  if (!flushed) brl->hasFailed = 1;
   resetAllBlinkDescriptors();
   return flushed;
 }
@@ -4217,7 +4218,7 @@ int api_flushOutput(BrailleDisplay *brl) {
       disp->buffer = buf;
       getDots(&c->brailleWindow, buf);
       brl->cursor = c->brailleWindow.cursor-1;
-      ok = trueBraille->writeWindow(brl, c->brailleWindow.text);
+      if (!trueBraille->writeWindow(brl, c->brailleWindow.text)) ok = 0;
       /* FIXME: the client should have gotten the notification when the write
        * was received, rather than only when it eventually gets displayed
        * (possibly only because of focus change) */
@@ -4237,7 +4238,7 @@ int api_flushOutput(BrailleDisplay *brl) {
 	unsigned char *oldbuf = disp->buffer;
 	disp->buffer = coreWindowDots;
 	brl->cursor = coreWindowCursor;
-	trueBraille->writeWindow(brl, coreWindowText);
+	if (!trueBraille->writeWindow(brl, coreWindowText)) ok = 0;
 	disp->buffer = oldbuf;
 	suspendBrailleDriver();
       }
