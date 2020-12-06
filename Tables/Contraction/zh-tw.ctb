@@ -244,6 +244,7 @@ always \u2196 23467-348
 always \u2197 23467-3568
 always \u2198 23467-268
 always \u2199 23467-1568
+always \u21D2 123456-345
 always \u21B8 235678-2456
 always \u21B9 235678-1346
 always \u21E7 235678-1236
@@ -508,6 +509,7 @@ always \u2605 16
 always \u2606 16
 always \u2713 12378-67
 always \u2714 2467-1346-124567
+always \u276F 345
 always \u2794 36-36-345
 always \u2E1F 5-4-156-146-16-12456
 always \u2F08 1245-136-2
@@ -1272,6 +1274,9 @@ always \u33FB 23-236-145
 always \u33FC 23-35-145
 always \u33FD 25-356-145
 always \u33FE 25-2-145
+always \u67D0 134-12356-4
+always \uFB01 124-24
+always \uFB02 124-123
 
 include zh-tw.cti
 
@@ -3082,7 +3087,6 @@ always \u7f72\u540d 24-34-5-134-13456-2
 always \u7f79\u96e3 14-16-2-1345-1236-5
 always \u7f9e\u602f 15-234-3-245-236-5
 always \u7f9e\u60e1 15-234-3-34-5
-always \u7fa9\u884c 16-5-15-13456-5
 always \u7ff9\u695a 245-246-2-12-34-4
 always \u7ff9\u9996 245-246-2-24-12356-4
 always \u8001\u5c07 14-146-4-13-46-5

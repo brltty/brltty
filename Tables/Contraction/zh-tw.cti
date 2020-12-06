@@ -19,6 +19,7 @@
 # Chinese characters contains Traditional and Simpilified
 # Any comment please contact to Coscell Kao <coscell@gmail.com> (2019-2)
 
+always \u2ebc 1245-12356-5
 always \u3400 245-234-3
 always \u3401 124-2345-5
 always \u3404 123-35-5
@@ -6503,7 +6504,7 @@ always \u4EF3 1234-16-4
 always \u4EF4 12456-5
 always \u4EF5 34-4
 always \u4EF6 13-2345-5
-always \u4EF7 13-346-5
+always \u4EF7 13-23456-5
 always \u4EF8 246-4
 always \u4EF9 12345-1356-3
 always \u4EFA 245-1346-3
@@ -7087,7 +7088,7 @@ always \u513B 124-1346-4
 always \u513C 2345-4
 always \u513D 14-356-4
 always \u513E 1345-1346-5
-always \u513F 1245-136-2
+always \u513F 156-2
 always \u5140 34-5
 always \u5141 256-4
 always \u5142 125-1236-3
@@ -7159,6 +7160,7 @@ always \u5183 134-146-5
 always \u5184 1245-1236-4
 always \u5185 1345-356-5
 always \u5186 45-2
+always \u5187 234-4
 always \u5188 13-1346-3
 always \u5189 1245-1236-4
 always \u518A 245-2346-5
@@ -7594,7 +7596,7 @@ always \u5337 245-1256-2
 always \u5338 15-16-5
 always \u5339 1234-16-4
 always \u533A 245-1256-3
-always \u533B 16-5
+always \u533B 16-3
 always \u533C 1236-4
 always \u533D 2345-4
 always \u533E 135-2345-4
@@ -7665,7 +7667,7 @@ always \u537E 2346-5
 always \u537F 245-13456-3
 always \u5380 15-16-3
 always \u5381 15-1236-3
-always \u5382 1235-1236-4
+always \u5382 12-1346-4
 always \u5383 1-1236-3
 always \u5384 2346-5
 always \u5385 124-13456-3
@@ -7835,7 +7837,7 @@ always \u5428 124-123456-2
 always \u5429 12345-136-3
 always \u542A 2346-2
 always \u542B 1235-1236-2
-always \u542C 1456-4
+always \u542C 124-13456-3
 always \u542D 123-1356-3
 always \u542E 24-123456-4
 always \u542F 245-16-4
@@ -8054,7 +8056,7 @@ always \u5503 13-34-4
 always \u5504 135-356-1
 always \u5505 1235-1236-3
 always \u5506 15-25-3
-always \u5507 1-136-3
+always \u5507 12-123456-2
 always \u5508 16-5
 always \u5509 2456-3
 always \u550A 13-23456-2
@@ -8594,7 +8596,7 @@ always \u571F 124-34-4
 always \u5720 23456-5
 always \u5721 124-34-4
 always \u5722 124-13456-4
-always \u5723 123-34-3
+always \u5723 24-1356-5
 always \u5724 1234-34-2
 always \u5725 14-34-5
 always \u5726 123-2356-5
@@ -8638,7 +8640,7 @@ always \u574B 12345-136-5
 always \u574C 135-136-5
 always \u574D 124-1236-3
 always \u574E 123-1236-4
-always \u574F 1234-356-2
+always \u574F 1235-2356-5
 always \u5750 125-25-5
 always \u5751 123-1356-3
 always \u5752 135-16-5
@@ -9610,7 +9612,7 @@ always \u5B17 24-1236-5
 always \u5B18 15-1246-5
 always \u5B19 245-46-2
 always \u5B1A 14-2345-2
-always \u5B1B 15-45-3
+always \u5B1B 1235-12456-2
 always \u5B1C 15-1456-3
 always \u5B1D 1345-246-4
 always \u5B1E 145-12346-4
@@ -9900,7 +9902,7 @@ always \u5C39 1456-4
 always \u5C3A 12-156-4
 always \u5C3B 123-146-3
 always \u5C3C 1345-16-2
-always \u5C3D 13-1456-4
+always \u5C3D 13-1456-5
 always \u5C3E 1246-4
 always \u5C3F 1345-246-5
 always \u5C40 13-1256-2
@@ -10478,7 +10480,7 @@ always \u5E7B 1235-12456-5
 always \u5E7C 234-5
 always \u5E7D 234-3
 always \u5E7E 13-16-4
-always \u5E7F 2345-4
+always \u5E7F 13-456-4
 always \u5E80 1234-16-4
 always \u5E81 124-13456-3
 always \u5E82 125-2346-5
@@ -10779,7 +10781,7 @@ always \u5FA8 1235-456-2
 always \u5FA9 12345-34-5
 always \u5FAA 15-256-2
 always \u5FAB 1246-4
-always \u5FAC 135-1346-5
+always \u5FAC 1234-1346-2
 always \u5FAD 246-2
 always \u5FAE 1246-2
 always \u5FAF 15-16-3
@@ -10863,7 +10865,7 @@ always \u5FFC 123-1346-3
 always \u5FFD 1235-34-3
 always \u5FFE 123-2456-4
 always \u5FFF 12345-136-5
-always \u6000 12345-34-5
+always \u6000 1235-2356-2
 always \u6001 124-2456-5
 always \u6002 15-12346-4
 always \u6003 34-4
@@ -12787,7 +12789,7 @@ always \u6780 15-12346-3
 always \u6781 13-16-2
 always \u6782 236-5
 always \u6783 13-1456-5
-always \u6784 13-12356-3
+always \u6784 13-12356-5
 always \u6785 13-16-3
 always \u6786 134-146-2
 always \u6787 1234-16-2
@@ -12863,6 +12865,7 @@ always \u67CC 245-156-2
 always \u67CD 46-3
 always \u67CE 12345-34-3
 always \u67CF 135-126-2
+always \u67D0 134-12356-4
 always \u67D1 13-1236-3
 always \u67D2 245-16-3
 always \u67D3 1245-1236-4
@@ -14191,7 +14194,7 @@ always \u6CFD 125-2346-2
 always \u6CFE 13-13456-3
 always \u6CFF 1456-2
 always \u6D00 1-12356-3
-always \u6D01 13-16-2
+always \u6D01 13-346-2
 always \u6D02 16-5
 always \u6D03 1235-1246-3
 always \u6D04 1235-1246-2
@@ -15373,7 +15376,7 @@ always \u719B 135-246-3
 always \u719C 125-12346-4
 always \u719D 14-34-5
 always \u719E 13-2345-3
-always \u719F 24-12356-2
+always \u719F 24-34-2
 always \u71A0 16-5
 always \u71A1 14-12356-2
 always \u71A2 12345-1356-3
@@ -15885,7 +15888,7 @@ always \u739B 134-345-4
 always \u739C 13-12346-3
 always \u739D 34-4
 always \u739E 12345-34-3
-always \u739F 134-1456-2
+always \u739F 123456-2
 always \u73A0 13-346-5
 always \u73A1 23456-5
 always \u73A2 135-1456-3
@@ -17467,7 +17470,7 @@ always \u79C9 135-13456-4
 always \u79CA 1345-2345-2
 always \u79CB 245-234-3
 always \u79CC 245-234-3
-always \u79CD 12-12346-2
+always \u79CD 1-12346-4
 always \u79CE 12345-136-5
 always \u79CF 1235-146-5
 always \u79D0 256-2
@@ -18794,7 +18797,7 @@ always \u7EF8 12-12356-2
 always \u7EF9 124-146-2
 always \u7EFA 14-234-4
 always \u7EFB 245-45-4
-always \u7EFC 125-1356-3
+always \u7EFC 125-12346-5
 always \u7EFD 1-1236-5
 always \u7EFE 12456-4
 always \u7EFF 14-1256-5
@@ -19274,7 +19277,7 @@ always \u80D8 15-2345-2
 always \u80D9 125-25-5
 always \u80DA 1234-356-3
 always \u80DB 13-23456-4
-always \u80DC 24-1356-3
+always \u80DC 24-1356-5
 always \u80DD 1-156-3
 always \u80DE 135-146-3
 always \u80DF 134-34-4
@@ -19300,7 +19303,7 @@ always \u80F2 13-2456-3
 always \u80F3 13-2346-3
 always \u80F4 145-12346-5
 always \u80F5 12-156-5
-always \u80F6 15-246-2
+always \u80F6 13-246-3
 always \u80F7 15-235-3
 always \u80F8 15-235-3
 always \u80F9 156-2
@@ -19384,7 +19387,7 @@ always \u8146 124-2345-4
 always \u8147 1345-356-4
 always \u8148 13-13456-3
 always \u8149 1345-2456-2
-always \u814A 15-16-2
+always \u814A 14-345-5
 always \u814B 346-5
 always \u814C 2345-3
 always \u814D 1245-136-4
@@ -20697,7 +20700,7 @@ always \u8667 123-1246-3
 always \u8668 135-1236-3
 always \u8669 15-16-5
 always \u866A 24-34-2
-always \u866B 1235-1246-4
+always \u866B 12-12346-2
 always \u866C 245-234-2
 always \u866D 145-246-3
 always \u866E 13-16-4
@@ -21588,7 +21591,7 @@ always \u89E2 24-156-5
 always \u89E3 13-346-4
 always \u89E4 13-1246-4
 always \u89E5 13-12346-3
-always \u89E6 1235-12346-2
+always \u89E6 12-34-5
 always \u89E7 13-346-4
 always \u89E8 1235-123456-5
 always \u89E9 245-234-2
@@ -23152,7 +23155,7 @@ always \u8FFE 14-346-5
 always \u8FFF 15-256-5
 always \u9000 124-1246-5
 always \u9001 15-12346-5
-always \u9002 123-25-5
+always \u9002 24-156-5
 always \u9003 124-146-2
 always \u9004 1234-1346-2
 always \u9005 13-12356-5
@@ -25333,7 +25336,7 @@ always \u9883 1235-1346-2
 always \u9884 1256-5
 always \u9885 14-34-2
 always \u9886 14-13456-4
-always \u9887 1234-126-3
+always \u9887 1234-126-4
 always \u9888 13-13456-4
 always \u9889 13-346-2
 always \u988A 13-23456-2
