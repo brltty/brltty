@@ -2665,7 +2665,7 @@ brlapi_exceptionHandler_t BRLAPI_STDCALL brlapi_setExceptionHandler(brlapi_excep
 
 int BRLAPI_STDCALL brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
-  int chars = 16; /* Number of bytes to dump */
+  int chars = 128; /* Number of bytes to dump */
   char hexString[3*chars+1];
   int i, nbChars = MIN(chars, size);
   char *p = hexString;
