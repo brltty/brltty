@@ -64,7 +64,6 @@
 #include "log.h"
 #include "report.h"
 #include "parse.h"
-#include "unicode.h"
 #include "thread.h"
 #include "brl_cmds.h"
 #include "async_io.h"
@@ -1568,17 +1567,7 @@ readCharacters_AtSpi2Screen (const ScreenBox *box, ScreenCharacter *buffer) {
     if (curRowLengths[box->top+y]) {
       for (unsigned int x=0; x<box->width; x+=1) {
         if (box->left+x < curRowLengths[box->top+y] - (curRows[box->top+y][curRowLengths[box->top+y]-1]==WC_C('\n'))) {
-          wchar_t wc = curRows[box->top+y][box->left+x];
-          if (wc == 0 || wc > UNICODE_LAST_CHARACTER) {
-            /* This is not a valid unicode character, rather return a replacement character */
-            logMessage(LOG_ERR,
-                "replacing invalid character U+%lx at (%u/%ld,%u/%ld)",
-                (unsigned long) wc,
-                box->left+x, curRowLengths[box->top+y],
-                box->top+y, curNumRows);
-            wc = UNICODE_REPLACEMENT_CHARACTER;
-          }
-          buffer[y*box->width+x].text = wc;
+          buffer[y*box->width+x].text = curRows[box->top+y][box->left+x];
         }
       }
     }

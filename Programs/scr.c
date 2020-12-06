@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "unicode.h"
 #include "scr.h"
 #include "scr_real.h"
 #include "driver.h"
@@ -105,12 +106,40 @@ describeScreen (ScreenDescription *description) {
 
 int
 readScreen (short left, short top, short width, short height, ScreenCharacter *buffer) {
-  ScreenBox box;
-  box.left = left;
-  box.top = top;
-  box.width = width;
-  box.height = height;
-  return currentScreen->readCharacters(&box, buffer);
+  const ScreenBox box = {
+    .left = left,
+    .top = top,
+    .width = width,
+    .height = height,
+  };
+
+  if (!currentScreen->readCharacters(&box, buffer)) return 0;
+
+  ScreenCharacter *character = buffer;
+  const ScreenCharacter *end = character + (box.width * box.height);
+
+  while (character < end) {
+    wchar_t *text = &character->text;
+
+    if (!*text || (*text > UNICODE_LAST_CHARACTER)) {
+      // This is not a valid Unicode character - return the replacement character.
+
+      size_t index = character - buffer;
+      unsigned int column = box.left + (index % box.width);
+      unsigned int row = box.top + (index / box.width);
+
+      logMessage(LOG_ERR,
+        "replacing invalid character U+%lX at (%u,%u)",
+        (unsigned long)*text, column, row
+      );
+
+      *text = UNICODE_REPLACEMENT_CHARACTER;
+    }
+
+    character += 1;
+  }
+
+  return 1;
 }
 
 int
