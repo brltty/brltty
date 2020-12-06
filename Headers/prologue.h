@@ -345,6 +345,9 @@ mbsinit (const mbstate_t *ps) {
 #define iswLatin1(wc) (1)
 #endif /* HAVE_WCHAR_H */
 
+#define WCHAR_REPLACEMENT 0xFFFD
+#define WCHAR_LAST 0x10FFFF
+
 #ifdef WORDS_BIGENDIAN
 #define CHARSET_ENDIAN_SUFFIX "BE"
 #else /* WORDS_BIGENDIAN */
