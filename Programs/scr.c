@@ -129,7 +129,7 @@ readScreen (short left, short top, short width, short height, ScreenCharacter *b
       unsigned int row = box.top + (index / box.width);
 
       logMessage(LOG_ERR,
-        "replacing invalid character U+%lX at (%u,%u)",
+        "invalid character U+%04lX on screen at [%u,%u]",
         (unsigned long)*text, column, row
       );
 
