@@ -18,7 +18,7 @@
 ###############################################################################
 
 set -e
-readonly defaultInstance="/etc/brltty.conf"
+readonly defaultPath="/etc/brltty.conf"
 
 readonly programPrefix="brltty-"
 programName="${0##*/}"
@@ -54,37 +54,37 @@ semanticError() {
   errorMessage "${message}" 3
 }
 
-currentInstance="${BRLTTY_SYSTEMD_INSTANCE:-${defaultInstance}}"
-[ "${currentInstance#/}" = "${currentInstance}" ] && currentInstance="/${currentInstance}"
-readonly currentInstance
+instancePath="${BRLTTY_SYSTEMD_INSTANCE:-${defaultPath}}"
+[ "${instancePath#/}" = "${instancePath}" ] && instancePath="/${instancePath}"
+readonly instancePath
 
-[ -e "${currentInstance}" ] || semanticError "instance not found: ${currentInstance}"
-[ -r "${currentInstance}" ] || semanticError "instance not readable: ${currentInstance}"
+[ -e "${instancePath}" ] || semanticError "instance path not found: ${instancePath}"
+[ -r "${instancePath}" ] || semanticError "instance path not readable: ${instancePath}"
 
-if [ -c "${currentInstance}" ]
+if [ -c "${instancePath}" ]
 then
   isDeviceInstance=true
   udevOption="name"
-elif [ "${currentInstance#/sys/}" != "${currentInstance}" ]
+elif [ "${instancePath#/sys/}" != "${instancePath}" ]
 then
   isDeviceInstance=true
   udevOption="path"
-elif [ -f "${currentInstance}" ]
+elif [ -f "${instancePath}" ]
 then
   isDeviceInstance=false
 else
-  semanticError "unrecognized instance type: ${currentInstance}"
+  semanticError "unsupported instance path: ${instancePath}"
 fi
 
 if "${isDeviceInstance}"
 then
-  udevManaged=false
+  isUdevManaged=false
 
   while read line
   do
     if [[ "${line}" =~ ^'N: ' ]]
     then
-      udevManaged=true
+      isUdevManaged=true
     elif [[ "${line}" =~ ^'E: '([^ =]+)=(.*) ]]
     then
       name="${BASH_REMATCH[1]}"
@@ -95,11 +95,11 @@ then
 
       export "${name}=${value}"
     fi
-  done < <((udevadm info --"${udevOption}"="${currentInstance}" --export 2>/dev/null))
+  done < <((udevadm info --"${udevOption}"="${instancePath}" --export 2>/dev/null))
 
-  "${udevManaged}" || semanticError "instance not managed by udev: ${currentInstance}"
+  "${isUdevManaged}" || semanticError "instance path not managed by udev: ${instancePath}"
 else
-  export BRLTTY_CONFIGURATION_FILE="${currentInstance}"
+  export BRLTTY_CONFIGURATION_FILE="${instancePath}"
 fi
 
 set -- "${BRLTTY_EXECUTABLE_PATH:-brltty}" -E ${BRLTTY_EXECUTABLE_ARGUMENTS} "${@}"
