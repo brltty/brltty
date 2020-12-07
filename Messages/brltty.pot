@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 6.1\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2020-11-28 05:06-0500\n"
+"POT-Creation-Date: 2020-12-07 17:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2892,7 +2892,7 @@ msgstr ""
 msgid "invalid message hold timeout"
 msgstr ""
 
-#: Programs/brlapi_server.c:4406
+#: Programs/brlapi_server.c:4407
 msgid "invalid thread stack size"
 msgstr ""
 
