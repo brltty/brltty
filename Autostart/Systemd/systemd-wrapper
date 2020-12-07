@@ -54,11 +54,29 @@ semanticError() {
   errorMessage "${message}" 3
 }
 
-readonly currentInstance="${BRLTTY_SYSTEMD_INSTANCE:-${defaultInstance}}"
+currentInstance="${BRLTTY_SYSTEMD_INSTANCE:-${defaultInstance}}"
+[ "${currentInstance#/}" = "${currentInstance}" ] && currentInstance="/${currentInstance}"
+readonly currentInstance
+
 [ -e "${currentInstance}" ] || semanticError "instance not found: ${currentInstance}"
 [ -r "${currentInstance}" ] || semanticError "instance not readable: ${currentInstance}"
 
 if [ -c "${currentInstance}" ]
+then
+  isDeviceInstance=true
+  udevOption="name"
+elif [ "${currentInstance#/sys/}" != "${currentInstance}" ]
+then
+  isDeviceInstance=true
+  udevOption="path"
+elif [ -f "${currentInstance}" ]
+then
+  isDeviceInstance=false
+else
+  semanticError "unrecognized instance type: ${currentInstance}"
+fi
+
+if "${isDeviceInstance}"
 then
   udevManaged=false
 
@@ -77,14 +95,11 @@ then
 
       export "${name}=${value}"
     fi
-  done < <((udevadm info --name="${currentInstance}" --export 2>/dev/null))
+  done < <((udevadm info --"${udevOption}"="${currentInstance}" --export 2>/dev/null))
 
   "${udevManaged}" || semanticError "instance not managed by udev: ${currentInstance}"
-elif [ -f "${currentInstance}" ]
-then
-  export BRLTTY_CONFIGURATION_FILE="${currentInstance}"
 else
-  semanticError "unrecognized instance type: ${currentInstance}"
+  export BRLTTY_CONFIGURATION_FILE="${currentInstance}"
 fi
 
 set -- "${BRLTTY_EXECUTABLE_PATH:-brltty}" -E ${BRLTTY_EXECUTABLE_ARGUMENTS} "${@}"
