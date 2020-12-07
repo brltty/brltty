@@ -209,9 +209,8 @@ msgid "Autorelease Time"
 msgstr "Délai avant le relâchement automatique"
 
 #: Programs/menu_prefs.c:873
-#, fuzzy
 msgid "Autorepeat Enabled"
-msgstr "Intervalle de la répétition automatique"
+msgstr "Répétition Automatique Activée"
 
 #: Programs/menu_prefs.c:879
 msgid "Autorepeat Interval"
@@ -363,9 +362,8 @@ msgid "Bright Acoustic Piano"
 msgstr "Piano accoustique brillant"
 
 #: Programs/xbrlapi.c:97
-#, fuzzy
 msgid "BrlAPI authorization/authentication schemes"
-msgstr "Chaîne d'autorisation/authentification de BrlAPI"
+msgstr "Schémas d'autorisation/authentification de BrlAPI"
 
 #: Programs/xbrlapi.c:90
 msgid "BrlAPI host and/or port to connect to"
@@ -703,9 +701,8 @@ msgid "Force immediate output."
 msgstr "Forcer une sortie immédiate."
 
 #: Programs/brltty-cldr.c:42
-#, fuzzy
 msgid "Format of each output line."
-msgstr "Format du fichier de sortie."
+msgstr "Format de chacune des lignes de sortie."
 
 #: Programs/brltty-ttb.c:165
 msgid "Format of input file."
@@ -823,15 +820,15 @@ msgstr "Janvier"
 
 #: Drivers/Screen/Android/screen.c:197
 msgid "Java class not found"
-msgstr ""
+msgstr "Classe Java non trouvée"
 
 #: Drivers/Screen/Android/screen.c:181
 msgid "Java exception occurred"
-msgstr ""
+msgstr "Une exception Java s'est produite"
 
 #: Drivers/Screen/Android/screen.c:194
 msgid "Java method not found"
-msgstr ""
+msgstr "Méthode Java non trouvée"
 
 #: Programs/cmd_miscellaneous.c:63
 msgid "July"
@@ -858,9 +855,8 @@ msgid "Key Table"
 msgstr "Table de touches"
 
 #: Programs/menu_prefs.c:824
-#, fuzzy
 msgid "Keyboard Enabled"
-msgstr "Tables des touches du clavier"
+msgstr "Clavier Activé"
 
 #: Programs/log.c:86
 msgid "Keyboard Key Events"
@@ -936,9 +932,8 @@ msgid "List key table in reStructuredText format."
 msgstr "Liste la table de touches au format reStructuredText"
 
 #: Programs/menu_prefs.c:616
-#, fuzzy
 msgid "Literary Braille"
-msgstr "Braille abrégé"
+msgstr "Braille Littéraire"
 
 #: Programs/menu_prefs.c:1366
 msgid "Locale Directory"
@@ -1131,7 +1126,7 @@ msgstr "Ancien fichier des préférences"
 
 #: Programs/menu_prefs.c:862
 msgid "On First Release"
-msgstr ""
+msgstr "Au Premier Relâchement"
 
 #: Programs/midi.c:105
 msgid "Orchestra Hit"
@@ -1227,9 +1222,8 @@ msgid "Parameters for the braille driver."
 msgstr "Paramètres pour le pilote braille."
 
 #: Programs/config.c:348
-#, fuzzy
 msgid "Parameters for the privilege establishment stage."
-msgstr "Paramètres pour le pilote braille."
+msgstr "Paramètres pour la phase d'établissement de privilège."
 
 #: Programs/config.c:601
 msgid "Parameters for the screen driver."
@@ -1289,9 +1283,8 @@ msgid "Path to process identifier file."
 msgstr "Chemin du fichier d'identifiants de processus."
 
 #: Programs/config.c:400
-#, fuzzy
 msgid "Patterns that match command prompts."
-msgstr "Descend à l'invite de commande suivant"
+msgstr "Motifs pour reconnaître les invites de commandes."
 
 #: Programs/midi.c:38
 msgid "Percussive Instruments"
@@ -1339,9 +1332,8 @@ msgid "Print a usage summary (commonly used options only), and then exit."
 msgstr "Affiche un résumé de l'utilisation (seulement les options couramment utilisées), puis quitte."
 
 #: Programs/config.c:773
-#, fuzzy
 msgid "Privilege Parameter"
-msgstr "Paramètre braille"
+msgstr "Paramètre de Privilège"
 
 #: Programs/menu_prefs.c:1297
 msgid "Profiles"
@@ -1352,9 +1344,8 @@ msgid "Properties of eligible keyboards."
 msgstr "Propriétés des claviers éligibles."
 
 #: Programs/menu_prefs.c:839
-#, fuzzy
 msgid "Quick Space"
-msgstr "Espace"
+msgstr "Espace Rapide"
 
 #: Programs/menu_prefs.c:1047
 msgid "Raise Pitch"
@@ -1385,9 +1376,8 @@ msgid "Release braille device when screen or window is unreadable."
 msgstr "Abandonne le périphérique braille quand il n'est pas possible de lire l'écran ou la fenêtre."
 
 #: Programs/xbrlapi.c:110
-#, fuzzy
 msgid "Remain a foreground process"
-msgstr "Rappelle un processus en tâche de fond."
+msgstr "Rester un processus interactif"
 
 #: Programs/config.c:323
 msgid "Remain a foreground process."
@@ -1511,7 +1501,7 @@ msgstr "Code du pilote de l'écran : (%s, %s, ou un parmi {%s})."
 
 #: Programs/menu_prefs.c:780
 msgid "Scroll-aware Cursor Navigation"
-msgstr ""
+msgstr "Navigation du curseur sensible au défilement"
 
 #: Programs/midi.c:181
 msgid "Seashore"
@@ -1632,9 +1622,8 @@ msgid "Speak Inserted Characters"
 msgstr "Dire les caractères insérés"
 
 #: Programs/menu_prefs.c:1116
-#, fuzzy
 msgid "Speak Line Indent"
-msgstr "Mode Dire la ligne"
+msgstr "Énoncer l'indentation de la ligne"
 
 #: Programs/menu_prefs.c:1104
 msgid "Speak Replaced Characters"
@@ -1720,7 +1709,7 @@ msgstr "Niveau standard de journalisation des erreurs"
 
 #: Programs/menu_prefs.c:815
 msgid "Start Selection with Routing Key"
-msgstr ""
+msgstr "Commence la sélection avec touche de routage"
 
 #: Programs/menu_prefs.c:465
 msgid "State Dots"
@@ -1955,9 +1944,8 @@ msgid "Tune Device"
 msgstr "Périphérique pour les sons"
 
 #: Programs/menu_prefs.c:834
-#, fuzzy
 msgid "Typing Mode"
-msgstr "Mode Dire la ligne"
+msgstr "Mode de saisie"
 
 #: Programs/log.c:134
 msgid "USB I/O"
@@ -2111,7 +2099,7 @@ msgstr "noir"
 
 #: Programs/core.c:1120
 msgid "blank line"
-msgstr ""
+msgstr "ligne vierge"
 
 #: Programs/cmd_utils.c:167
 msgid "blink"
@@ -2140,19 +2128,16 @@ msgid "braille driver not loadable"
 msgstr "Impossible de charger le pilote braille"
 
 #: Programs/config.c:1877
-#, fuzzy
 msgid "braille driver restarting"
-msgstr "Affichage braille"
+msgstr "le pilote braille redémarre"
 
 #: Programs/cmd_miscellaneous.c:178
-#, fuzzy
 msgid "braille driver stopped"
-msgstr "Braille arrêté"
+msgstr "pilote braille arrêté"
 
 #: Drivers/Screen/Android/screen.c:189
-#, fuzzy
 msgid "braille released"
-msgstr "Braille arrêté"
+msgstr "braille libéré"
 
 #: Programs/cmds.auto.h:1019
 msgid "bring screen cursor to character"
@@ -2163,9 +2148,8 @@ msgid "bring screen cursor to current line"
 msgstr "Amène le curseur de l'écran sur la ligne actuelle"
 
 #: Programs/cmds.auto.h:1193
-#, fuzzy
 msgid "bring screen cursor to line"
-msgstr "Amène le curseur de l'écran sur la ligne actuelle"
+msgstr "amène le curseur de l'écran sur la ligne"
 
 #: Programs/cmds.auto.h:730
 msgid "bring screen cursor to speech cursor"
@@ -2178,22 +2162,19 @@ msgstr "marron"
 
 #: Drivers/Screen/Linux/screen.c:1432
 msgid "can't get console state"
-msgstr ""
+msgstr "ne peut obtenir l'état de la console"
 
 #: Drivers/Screen/Linux/screen.c:1510
-#, fuzzy
 msgid "can't open console"
-msgstr "Ne peut pas compiler la table de braille abrégé"
+msgstr "ne peut ouvrir la console"
 
 #: Drivers/Screen/Linux/screen.c:1556
-#, fuzzy
 msgid "can't read screen content"
-msgstr "Ne peut pas lire le fichier des préférences"
+msgstr "ne peut lire le contenu de l'écran"
 
 #: Drivers/Screen/Linux/screen.c:1601
-#, fuzzy
 msgid "can't read screen header"
-msgstr "Démarre le pilote de l'écran"
+msgstr "ne peut lire l'en-tête de l'écran"
 
 #: Programs/atb_translate.c:70
 msgid "cannot compile attributes table"
@@ -2286,9 +2267,8 @@ msgid "cannot load text table"
 msgstr "Ne peut pas charger la table de texte"
 
 #: Programs/file.c:339
-#, fuzzy
 msgid "cannot make world writable"
-msgstr "Ne peut pas compiler la table des touches"
+msgstr "ne peut donner la permission d'écrire à tout le monde"
 
 #: Programs/config.c:1056
 msgid "cannot open key help"
@@ -2339,7 +2319,7 @@ msgstr "Vider les modificateurs d'entrée polluants"
 
 #: Programs/cmds.auto.h:889
 msgid "clear the text selection"
-msgstr ""
+msgstr "réinitialiser la sélection de texxte"
 
 #: Programs/cmd_speech.c:475
 msgid "column"
@@ -2367,9 +2347,8 @@ msgid "copy characters to clipboard"
 msgstr "Copie les caractères dans le presse-papier"
 
 #: Programs/cmds.auto.h:901
-#, fuzzy
 msgid "copy selected text to host clipboard"
-msgstr "Copie les caractères dans le presse-papier"
+msgstr "copie le texte sélectionné vers le presse-papier hôte"
 
 #: Programs/config.c:627 Programs/menu_prefs.c:503
 msgid "csecs"
@@ -2397,7 +2376,7 @@ msgstr "Touche curseur vers le haut"
 
 #: Programs/cmds.auto.h:907
 msgid "cut selected text to host clipboard"
-msgstr ""
+msgstr "coupe le texte sélectionné vers le presse-papier hôte"
 
 #. GB
 #: Programs/cmd_utils.c:146
@@ -2579,9 +2558,8 @@ msgid "go back after cursor tracking"
 msgstr "Revenir après la poursuite du curseur"
 
 #: Programs/cmds.auto.h:939
-#, fuzzy
 msgid "go back to the previous screen"
-msgstr "Remonte à l'élément précédent"
+msgstr "retourne à l'écran précédent"
 
 #: Programs/cmds.auto.h:186
 msgid "go backward one braille window"
@@ -2748,9 +2726,8 @@ msgid "go to selected line"
 msgstr "Va à la ligne sélectionnée"
 
 #: Programs/cmds.auto.h:932
-#, fuzzy
 msgid "go to the home screen"
-msgstr "Arrête le pilote de l'écran"
+msgstr "va à l'écran d'accueil"
 
 #: Programs/cmds.auto.h:76
 msgid "go to top line"
@@ -2831,7 +2808,7 @@ msgstr "Augmente le volume de la parole"
 
 #: Programs/core.c:1123
 msgid "indent"
-msgstr ""
+msgstr "indentation"
 
 #: Programs/cmds.auto.h:1149
 msgid "insert clipboard history entry after screen cursor"
@@ -2839,12 +2816,11 @@ msgstr "Insère l'entrée de l'historique du presse-papiers après le curseur de
 
 #: Programs/cmds.auto.h:526
 msgid "insert clipboard text after screen cursor"
-msgstr "Insère le texte du presse-papiers après le curseur de l'écran"
+msgstr "insère le texte du presse-papier après le curseur de l'écran"
 
 #: Programs/cmds.auto.h:913
-#, fuzzy
 msgid "insert host clipboard text after screen cursor"
-msgstr "Insère le texte du presse-papiers après le curseur de l'écran"
+msgstr "insère le texte du presse-papier hôte après le curseur de l'écran"
 
 #: Programs/cmds.auto.h:1371
 msgid "insert key"
@@ -2949,20 +2925,19 @@ msgstr "Valeur du paramètre manquante"
 
 #: Programs/cmds.auto.h:993
 msgid "move to the first item in the screen area"
-msgstr ""
+msgstr "va au premier élément de la zone de l'écran"
 
 #: Programs/cmds.auto.h:1011
 msgid "move to the last item in the screen area"
-msgstr ""
+msgstr "va au dernier élément de la zone de l'écran"
 
 #: Programs/cmds.auto.h:1005
 msgid "move to the next item in the screen area"
-msgstr ""
+msgstr "va au prochain élément de la zone de l'écran"
 
 #: Programs/cmds.auto.h:999
-#, fuzzy
 msgid "move to the previous item in the screen area"
-msgstr "Envoie au terminal virtuel précédent"
+msgstr "va à l'élément précédent de la zone de l'écran"
 
 #: Programs/config.c:345 Programs/config.c:390 Programs/config.c:444
 #: Programs/config.c:466 Programs/config.c:544 Programs/config.c:563
@@ -2992,28 +2967,27 @@ msgstr "Non enregistré"
 
 #: Programs/cmds.auto.h:969
 msgid "open the application alerts window"
-msgstr ""
+msgstr "ouvre la fenêtre des alertes de l'application"
 
 #: Programs/cmds.auto.h:957
 msgid "open the application list window"
-msgstr ""
+msgstr "ouvre la fenêtre de liste des applications"
 
 #: Programs/cmds.auto.h:963
 msgid "open the application-specific menu"
-msgstr ""
+msgstr "ouvre le menu spécifique à l'application"
 
 #: Programs/cmds.auto.h:925
-#, fuzzy
 msgid "open the braille actions window"
-msgstr "Va d'une demi-fenêtre braille à gauche"
+msgstr "ouvre la fenêtre des actions brailles"
 
 #: Programs/cmds.auto.h:951
 msgid "open the device options window"
-msgstr ""
+msgstr "ouvre la fenêtre des options de l'appareil"
 
 #: Programs/cmds.auto.h:945
 msgid "open the device settings window"
-msgstr ""
+msgstr "ouvre la fenêtre des réglages de l'appareil"
 
 #: Programs/options.c:145
 msgid "option"
@@ -3065,19 +3039,16 @@ msgid "red"
 msgstr "rouge"
 
 #: Programs/cmds.auto.h:877
-#, fuzzy
 msgid "refresh braille display"
-msgstr "Périphérique d'accès à l'afficheur braille."
+msgstr "rafraîchit l'afficheur braille"
 
 #: Programs/cmds.auto.h:1201
-#, fuzzy
 msgid "refresh braille line"
-msgstr "Redémarre le pilote braille"
+msgstr "rafraîchit la ligne braille"
 
 #: Programs/config.c:398
-#, fuzzy
 msgid "regexp,..."
-msgstr "pilote,..."
+msgstr "regexp,..."
 
 #: Programs/config.c:1881
 #, c-format
@@ -3126,9 +3097,8 @@ msgid "restore preferences from disk"
 msgstr "Restaure les préférences à partir du disque"
 
 #: Programs/cmds.auto.h:975
-#, fuzzy
 msgid "return to the active screen area"
-msgstr "Démarre le pilote de l'écran"
+msgstr "retourne à la zone active de l'écran"
 
 #: Programs/cmds.auto.h:749
 msgid "save clipboard to disk"
@@ -3140,25 +3110,23 @@ msgstr "Enregistre les préférences sur le disque"
 
 #: Programs/xbrlapi.c:95
 msgid "scheme+..."
-msgstr ""
+msgstr "schéma+..."
 
 #: Programs/config.c:2270
 msgid "screen driver not loadable"
 msgstr "Pilote d'écran non chargeable"
 
 #: Programs/config.c:2391
-#, fuzzy
 msgid "screen driver restarting"
-msgstr "Pilote d'écran non chargeable"
+msgstr "le pilote de l'écran redémarre"
 
 #: Programs/cmd_miscellaneous.c:186
-#, fuzzy
 msgid "screen driver stopped"
-msgstr "Pilote d'écran non chargeable"
+msgstr "pilote de l'écran arrêté"
 
 #: Drivers/Screen/Android/screen.c:184
 msgid "screen locked"
-msgstr ""
+msgstr "écran verrouillé"
 
 #: Drivers/Screen/Linux/screen.c:1531
 msgid "screen not in text mode"
@@ -3180,7 +3148,7 @@ msgstr[1] "secondes"
 
 #: Programs/cmds.auto.h:895
 msgid "select all of the text"
-msgstr ""
+msgstr "sélectionne tout le texte"
 
 #: Programs/cmds.auto.h:446
 msgid "select next choice"
@@ -3219,9 +3187,8 @@ msgid "set autospeak deleted characters on/off"
 msgstr "Activer/désactiver la diction automatique des mots effacés"
 
 #: Programs/cmds.auto.h:871
-#, fuzzy
 msgid "set autospeak indent of current line on/off"
-msgstr "Activer/désactiver la diction automatique de la ligne sélectionnée"
+msgstr "active/désactive l'énonciation automatique de l'indentation de la ligne courante"
 
 #: Programs/cmds.auto.h:602
 msgid "set autospeak inserted characters on/off"
@@ -3248,9 +3215,8 @@ msgid "set braille keyboard enabled/disabled"
 msgstr "Active ou désactive le clavier braille"
 
 #: Programs/cmds.auto.h:762
-#, fuzzy
 msgid "set braille typing mode dots/text"
-msgstr "Définit le mode de saisie de texte/points braille"
+msgstr "définit le mode de saisie braille à texte/points"
 
 #: Programs/cmds.auto.h:345
 msgid "set capital letter blinking on/off"
@@ -3309,9 +3275,8 @@ msgid "set speech cursor visibility on/off"
 msgstr "Rend le curseur de synthèse visible ou invisible"
 
 #: Programs/cmds.auto.h:1215
-#, fuzzy
 msgid "set text selection"
-msgstr "Définit la table du texte"
+msgstr "définit la sélection de texte"
 
 #: Programs/cmds.auto.h:268
 msgid "set text style 6-dot/8-dot"
@@ -3335,11 +3300,11 @@ msgstr "Affiche la date et l'heure actuelles"
 
 #: Programs/cmds.auto.h:919
 msgid "show the window title"
-msgstr ""
+msgstr "affiche le titre de la fenêtre"
 
 #: Programs/cmds.auto.h:883
 msgid "show various device status indicators"
-msgstr ""
+msgstr "affiche divers indicateurs de status de l'appareil"
 
 #: Programs/menu_prefs.c:946
 msgid "soundcard digital audio"
@@ -3374,9 +3339,8 @@ msgid "speak from top of screen through current line"
 msgstr "Lit vocalement du haut de l'écran jusquà la ligne actuelle"
 
 #: Programs/cmds.auto.h:864
-#, fuzzy
 msgid "speak indent of current line"
-msgstr "Lit vocalement la ligne actuelle"
+msgstr "énonce l'indentation de la ligne courante"
 
 #: Programs/cmds.auto.h:736
 msgid "speak speech cursor location"
@@ -3387,14 +3351,12 @@ msgid "speech driver not loadable"
 msgstr "Pilote de synthèse vocale non chargeable"
 
 #: Programs/config.c:2191
-#, fuzzy
 msgid "speech driver restarting"
-msgstr "Pilote de synthèse vocale non chargeable"
+msgstr "le pilote de la synthèse vocale redémarre"
 
 #: Programs/cmd_speech.c:104
-#, fuzzy
 msgid "speech driver stopped"
-msgstr "Pilote de synthèse vocale non chargeable"
+msgstr "pilote de la synthèse vocale arrêté"
 
 #: Programs/cmds.auto.h:723
 msgid "spell current word"
@@ -3405,9 +3367,8 @@ msgid "start new clipboard at character"
 msgstr "Démarre un nouveau presse-papier au caractère"
 
 #: Programs/cmds.auto.h:1208
-#, fuzzy
 msgid "start text selection"
-msgstr "Démarre le pilote de synthèse vocale"
+msgstr "commence la sélection de texte"
 
 #: Programs/cmds.auto.h:799
 msgid "start the braille driver"
@@ -3442,9 +3403,8 @@ msgid "strange old error handler\n"
 msgstr "ancien gestionnaire d'erreurs étrange\n"
 
 #: Programs/brltty-cldr.c:39
-#, fuzzy
 msgid "string"
-msgstr "Cordes"
+msgstr "chaîne"
 
 #: Programs/cmds.auto.h:1273
 msgid "switch to command context"
@@ -3455,18 +3415,16 @@ msgid "switch to specific virtual terminal"
 msgstr "Va à un terminal virtuel spécifique"
 
 #: Programs/cmds.auto.h:987
-#, fuzzy
 msgid "switch to the next screen area"
-msgstr "Va au terminal virtuel suivant"
+msgstr "passe à la zone suivante de l'écran"
 
 #: Programs/cmds.auto.h:513
 msgid "switch to the next virtual terminal"
 msgstr "Va au terminal virtuel suivant"
 
 #: Programs/cmds.auto.h:981
-#, fuzzy
 msgid "switch to the previous screen area"
-msgstr "Va au terminal virtuel précédent"
+msgstr "passe à la zone précédente de l'écran"
 
 #: Programs/cmds.auto.h:507
 msgid "switch to the previous virtual terminal"
