@@ -388,7 +388,7 @@ msgstr "黑管"
 
 #: Programs/midi.c:51
 msgid "Clavi"
-msgstr "Clave"
+msgstr "拍手"
 
 #: Programs/menu.c:811
 msgid "Close"
@@ -527,7 +527,7 @@ msgstr "驅動程式目錄"
 
 #: Programs/midi.c:60
 msgid "Dulcimer"
-msgstr "Dulcimer"
+msgstr "洋琴"
 
 #: Programs/menu_prefs.c:697
 msgid "Eager Sliding Braille Window"
@@ -819,7 +819,7 @@ msgstr "按鍵表"
 
 #: Programs/midi.c:164
 msgid "Koto"
-msgstr "Koto"
+msgstr "日本十三弦箏"
 
 #: Programs/config.c:2777
 msgid "Language"
@@ -828,7 +828,7 @@ msgstr "語言"
 #. Synth Lead
 #: Programs/midi.c:134
 msgid "Lead 1 (square)"
-msgstr "Lead"
+msgstr "Lead 1 (方波)"
 
 #: Programs/midi.c:135
 msgid "Lead 2 (sawtooth)"
@@ -836,7 +836,7 @@ msgstr "Hauptstimme 2 （鋸齒）"
 
 #: Programs/midi.c:136
 msgid "Lead 3 (calliope)"
-msgstr "Lead 3 (calliope)"
+msgstr "Lead 3 (氣笛風琴)"
 
 #: Programs/midi.c:137
 msgid "Lead 4 (chiff)"
@@ -1279,11 +1279,11 @@ msgstr "錄音機"
 
 #: Programs/midi.c:32
 msgid "Reed"
-msgstr "reed"
+msgstr "簧片"
 
 #: Programs/midi.c:66
 msgid "Reed Organ"
-msgstr "Reed Organ"
+msgstr "簧片風琴"
 
 #: Programs/brltty-ctb.c:86
 msgid "Reformat input."
@@ -1439,7 +1439,7 @@ msgstr "三弦"
 
 #: Programs/midi.c:168
 msgid "Shanai"
-msgstr "Shanai"
+msgstr "山奈琴"
 
 #: Programs/menu_prefs.c:534
 msgid "Show Advanced Submenus"
@@ -1677,47 +1677,47 @@ msgstr "取消啟動訊息"
 
 #: Programs/midi.c:86
 msgid "Synth Bass 1"
-msgstr "Synth Bass 1"
+msgstr "合成被司 1"
 
 #: Programs/midi.c:87
 msgid "Synth Bass 2"
-msgstr "Synth Bass 2"
+msgstr "合成被司 2"
 
 #: Programs/midi.c:176
 msgid "Synth Drum"
-msgstr "Synth Trommel"
+msgstr "合成 Trommel"
 
 #: Programs/midi.c:36
 msgid "Synth FM"
-msgstr "Synth FM"
+msgstr "合成 FM"
 
 #: Programs/midi.c:34
 msgid "Synth Lead"
-msgstr "Synth Lead"
+msgstr "合成 Lead"
 
 #: Programs/midi.c:35
 msgid "Synth Pad"
-msgstr "Synth pad"
+msgstr "合成 pad"
 
 #: Programs/midi.c:104
 msgid "Synth Voice"
-msgstr "Synth voice"
+msgstr "合成 voice"
 
 #: Programs/midi.c:113
 msgid "SynthBrass 1"
-msgstr "SynthBrass 1"
+msgstr "合成銅管 1"
 
 #: Programs/midi.c:114
-msgid "SynthBrass 2"
+msgid "合成銅管 2"
 msgstr "SynthBrass 2"
 
 #: Programs/midi.c:100
 msgid "SynthStrings 1"
-msgstr "SynthStrings 1"
+msgstr "合成弦樂 1"
 
 #: Programs/midi.c:101
 msgid "SynthStrings 2"
-msgstr "SynthStrings 2"
+msgstr "合成弦樂 2"
 
 #: Programs/menu_prefs.c:1264
 msgid "System Log Level"
@@ -1729,11 +1729,11 @@ msgstr "對照表目錄"
 
 #: Programs/midi.c:174
 msgid "Taiko Drum"
-msgstr "Taiko Drum"
+msgstr "太鼓"
 
 #: Programs/midi.c:69
 msgid "Tango Accordion"
-msgstr "Tango Accordion"
+msgstr "探戈手風琴"
 
 #: Programs/midi.c:183
 msgid "Telephone Ring"
@@ -1781,7 +1781,7 @@ msgstr "時間區隔符號"
 
 #: Programs/midi.c:96
 msgid "Timpani"
-msgstr "Timpani"
+msgstr "定音鼓"
 
 #. Percussive Instruments
 #: Programs/midi.c:170
@@ -1871,7 +1871,7 @@ msgstr "中提琴"
 
 #. Strings
 #: Programs/midi.c:89
-msgid "Violin"
+msgid "小提琴"
 msgstr "小提琴"
 
 #: Programs/midi.c:103
@@ -1925,7 +1925,7 @@ msgstr "XT (set 1) 鍵盤掃描碼"
 
 #: Programs/midi.c:58
 msgid "Xylophone"
-msgstr "Xylophon"
+msgstr "木琴"
 
 #: Programs/menu_prefs.c:1070
 msgid "Year Month Day"
