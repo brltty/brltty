@@ -18,17 +18,28 @@ Initial Setup
 The following steps need to be performed:
 
 * Systemd service and path units need to be installed
-  into the |unit directory| directory.
+  into the |unit directory| directory:
+
+  + brltty@.service
+  + brltty-device@.service
+  + brltty.path
+  + brltty@.path
 
 * A wrapper script needs to be installed
-  into the |scripts directory| directory.
+  into the |scripts directory| directory:
+
+  + systemd-wrapper
 
 * A file defining the non-root user that BRLTTY is to run as,
   including the supplementary groups that it needs access to,
-  needs to be installed into the |users directory| directory.
+  needs to be installed into the |users directory| directory:
+
+  + sysusers -> brltty.conf
 
 * A file defining the files and directories that should exist
-  needs to be installed into the |files directory| directory.
+  needs to be installed into the |files directory| directory:
+
+  + tmpfiles -> brltty.conf
 
 A make file has been provided in order to make this easy to do.
 It can be found within the |build subdirectory| subdirectory

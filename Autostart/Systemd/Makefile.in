@@ -32,6 +32,7 @@ install-units-directory:
 
 install-units: install-units-directory
 	$(INSTALL_DATA) $(BLD_DIR)/brltty@.service $(SYSTEMD_UNITS_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/brltty-device@.service $(SYSTEMD_UNITS_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brltty@.path $(SYSTEMD_UNITS_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brltty.path $(SYSTEMD_UNITS_DIRECTORY)
 
@@ -56,6 +57,7 @@ install-files: install-files-directory
 uninstall:
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME).*
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME)@.*
+	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME)-*
 	-rm -f $(SYSTEMD_SCRIPTS_DIRECTORY)/systemd-*
 	-rm -f $(SYSTEMD_USERS_FILE)
 	-rm -f $(SYSTEMD_FILES_FILE)

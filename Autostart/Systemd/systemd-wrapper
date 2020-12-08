@@ -58,22 +58,22 @@ instancePath="${BRLTTY_SYSTEMD_INSTANCE:-${defaultPath}}"
 [ "${instancePath#/}" = "${instancePath}" ] && instancePath="/${instancePath}"
 readonly instancePath
 
-[ -e "${instancePath}" ] || semanticError "instance path not found: ${instancePath}"
-[ -r "${instancePath}" ] || semanticError "instance path not readable: ${instancePath}"
-
-if [ -c "${instancePath}" ]
-then
-  isDeviceInstance=true
-  udevOption="name"
-elif [ "${instancePath#/sys/}" != "${instancePath}" ]
+if [ "${instancePath#/sys/}" != "${instancePath}" ]
 then
   isDeviceInstance=true
   udevOption="path"
+elif [ -c "${instancePath}" ]
+then
+  isDeviceInstance=true
+  udevOption="name"
 elif [ -f "${instancePath}" ]
 then
   isDeviceInstance=false
-else
+elif [ -e "${instancePath}" ]
+then
   semanticError "unsupported instance path: ${instancePath}"
+else
+  semanticError "instance path not found: ${instancePath}"
 fi
 
 if "${isDeviceInstance}"
