@@ -671,7 +671,7 @@ cdef class Connection:
 		* text : points to the string to be displayed"""
 		w = WriteStruct()
 		w.cursor = cursor
-		if (text):
+		if text is not None:
 			(x, y) = self.displaySize
 			dispSize = x * y
 			if (len(text) < dispSize):
