@@ -537,12 +537,11 @@ GOTO="brltty_device_end"
 
 LABEL="brltty_systemd"
 ACTION=="add", GOTO="brltty_systemd_add"
-ACTION=="remove", GOTO="brltty_systemd_remove"
-GOTO="brltty_device_end"
+GOTO="brltty_device_default"
 
 LABEL="brltty_systemd_add"
 ENV{SYSTEMD_WANTS}+="brltty-device@.service"
-LABEL="brltty_systemd_remove"
+LABEL="brltty_systemd_default"
 TAG+="systemd"
 GOTO="brltty_device_end"
 
