@@ -385,7 +385,12 @@ AC_PATH_TOOL([RANLIB], [ranlib])
 AC_PROG_AWK
 AC_PROG_LN_S
 
-PKG_PROG_PKG_CONFIG
+m4_ifdef([PKG_PROG_PKG_CONFIG], [dnl
+   PKG_PROG_PKG_CONFIG
+], [dnl
+   AC_PATH_PROG([PKG_CONFIG], [pkg-config])
+])
+
 if test -z "${PKG_CONFIG}"
 then
    PKG_CONFIG=false
