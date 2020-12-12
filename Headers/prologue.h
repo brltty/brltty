@@ -86,14 +86,38 @@ extern "C" {
 
 #ifndef HAVE_SDKDDKVER_H
 #include <w32api.h>
+
+#ifndef _WIN32_WINNT_NT4
 #define _WIN32_WINNT_NT4 WindowsNT4
+#endif /* _WIN32_WINNT_NT4 */
+
+#ifndef _WIN32_WINNT_WIN95
 #define _WIN32_WINNT_WIN95 Windows95
+#endif /* _WIN32_WINNT_WIN95 */
+
+#ifndef _WIN32_WINNT_WIN98
 #define _WIN32_WINNT_WIN98 Windows98
+#endif /* _WIN32_WINNT_WIN98 */
+
+#ifndef _WIN32_WINNT_WINME
 #define _WIN32_WINNT_WINME WindowsME
+#endif /* _WIN32_WINNT_WINME */
+
+#ifndef _WIN32_WINNT_WIN2K
 #define _WIN32_WINNT_WIN2K Windows2000
+#endif /* _WIN32_WINNT_WIN2K */
+
+#ifndef _WIN32_WINNT_WINXP
 #define _WIN32_WINNT_WINXP WindowsXP
+#endif /* _WIN32_WINNT_WINXP */
+
+#ifndef _WIN32_WINNT_WS03
 #define _WIN32_WINNT_WS03 Windows2003
+#endif /* _WIN32_WINNT_WS03 */
+
+#ifndef _WIN32_WINNT_VISTA
 #define _WIN32_WINNT_VISTA WindowsVista
+#endif /* _WIN32_WINNT_VISTA */
 #endif /* HAVE_SDKDDKVER_H */
 
 #ifndef _WIN32_WINNT
