@@ -50,6 +50,9 @@ extern WIN_PROC_STUB(NtSetInformationProcess);
 
 
 /* kernel32.dll: console */
+#ifdef RC_INVOKED
+#include <wincon.h>
+#endif /* RC_INVOKED */
 extern WIN_PROC_STUB(AttachConsole);
 
 extern WINBASEAPI int WINAPI GetLocaleInfoEx (LPCWSTR, LCTYPE, LPWSTR, int);
@@ -71,7 +74,9 @@ extern WIN_PROC_STUB(SendInput);
 
 /* ws2_32.dll */
 #ifdef __MINGW32__
+#ifndef RC_INVOKED
 #include <ws2tcpip.h>
+#endif /* RC_INVOKED */
 
 extern WIN_PROC_STUB(getaddrinfo);
 extern WIN_PROC_STUB(freeaddrinfo);
