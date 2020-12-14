@@ -58,6 +58,24 @@
 #ifdef HAVE_SYS_CAPABILITY_H
 #include <sys/capability.h>
 
+static
+STR_BEGIN_FORMATTER(formatCapabilityName, cap_value_t capability)
+  char *name = cap_to_name(capability);
+
+  if (name) {
+    STR_PRINTF("%s", name);
+    cap_free(name);
+  } else {
+    STR_PRINTF("CAP#%d", capability);
+  }
+STR_END_FORMATTER
+
+#define MAKE_CAPABILITY_NAME(name,capability) \
+char name[0X20]; \
+STR_BEGIN(name, sizeof(name)); \
+STR_FORMAT(formatCapabilityName, capability); \
+STR_END;
+
 static int
 hasCapability (cap_t caps, cap_flag_t set, cap_value_t capability) {
   cap_flag_value_t value;
@@ -84,7 +102,8 @@ static int
 requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
   if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
     if (!hasCapability(caps, CAP_PERMITTED, capability)) {
-      logMessage(LOG_DEBUG, "capability not permitted: %s", cap_to_name(capability));
+      MAKE_CAPABILITY_NAME(name, capability);
+      logMessage(LOG_DEBUG, "capability not permitted: %s", name);
       return 0;
     }
 
@@ -135,9 +154,11 @@ needCapability (cap_value_t capability, int inheritable, const char *reason) {
   }
 
   if (outcome) {
+    MAKE_CAPABILITY_NAME(name, capability);
+
     logMessage(LOG_DEBUG,
       "temporary capability %s: %s (%s)",
-      outcome, cap_to_name(capability), reason
+      outcome, name, reason
     );
   }
 
@@ -599,9 +620,11 @@ logMissingCapabilities (void) {
       cap_value_t capability = rce->value;
 
       if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
+        MAKE_CAPABILITY_NAME(name, capability);
+
         logMessage(LOG_WARNING,
           "required capability not granted: %s (%s)",
-          cap_to_name(capability), rce->reason
+          name, rce->reason
         );
       }
 
