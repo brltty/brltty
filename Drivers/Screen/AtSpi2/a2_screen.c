@@ -414,6 +414,7 @@ static void caretPosition(long caret) {
 }
 
 static void finiTerm(void) {
+  unsigned i;
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "end of term %s:%s",curSender,curPath);
   free(curSender);
@@ -423,8 +424,14 @@ static void finiTerm(void) {
   free(curRole);
   curRole = NULL;
   curPosX = curPosY = 0;
-  free(curRows);
+  if (curRows) {
+    for (i=0;i<curNumRows;i++)
+      free(curRows[i]);
+    free(curRows);
+  }
   curRows = NULL;
+  free(curRowLengths);
+  curRowLengths = NULL;
   curNumCols = curNumRows = 0;
 }
 
@@ -1503,6 +1510,7 @@ destruct_AtSpi2Screen (void) {
   dbus_connection_unref(bus);
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "SPI2 stopped");
+  finiTerm();
 }
 
 static int
