@@ -409,6 +409,9 @@ static long findCoordinates(long xx, long yy) {
 }
 
 static void caretPosition(long caret) {
+  if (caret < 0) {
+    caret = 0;
+  }
   findPosition(caret,&curPosX,&curPosY);
   curCaret = caret;
 }
@@ -1005,6 +1008,14 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
     logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                "delete %d from %d",detail2,detail1);
+    if (detail1 < 0) {
+      logMessage(LOG_ERR,"deleting %ld %d before beginning of text!", toDelete, detail1);
+      toDelete -= -detail1;
+      detail1 = 0;
+    }
+    if (toDelete <= 0) {
+      return;
+    }
     findPosition(detail1,&x,&y);
     if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_STRING) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -1024,13 +1035,17 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
       else {
 	/* imaginary extra line doesn't provide more length, and shouldn't need to ! */
 	if (x+toDelete > length) {
-	  logMessage(LOG_ERR,"deleting past end of text !");
+	  logMessage(LOG_ERR,"deleting %ld %ld past end of text !", toDelete, x+toDelete - length);
 	  /* discarding */
+	  if (x > length)
+	    x = length;
 	  toDelete = length - x;
 	}
 	break; /* deleting up to end */
       }
     }
+    if (toDelete <= 0)
+      return;
     if (length-toDelete>0) {
       /* still something on line y */
       if (y!=downTo) {
@@ -1065,10 +1080,18 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
                  "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
       return;
     }
+    if (detail1 < 0) {
+      logMessage(LOG_ERR,"adding %ld %d before beginning of text!", len, detail1);
+      detail1 = 0;
+    }
     dbus_message_iter_get_basic(&iter_variant, &added);
     logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                "'%s'",added);
     adding = c = added;
+    if (y < curNumRows && x > curRowLengths[y]) {
+      logMessage(LOG_ERR,"adding %ld %ld past end of text!", len, x - curRowLengths[y]);
+      x = curRowLengths[y];
+    }
     if (x && (c = strchr(adding,'\n'))) {
       /* splitting line */
       addRows(y,1);
