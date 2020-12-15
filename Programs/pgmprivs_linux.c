@@ -60,14 +60,16 @@
 
 static
 STR_BEGIN_FORMATTER(formatCapabilityName, cap_value_t capability)
-  char *name = cap_to_name(capability);
+  {
+    char *name = cap_to_name(capability);
 
-  if (name) {
-    STR_PRINTF("%s", name);
-    cap_free(name);
-  } else {
-    STR_PRINTF("CAP#%d", capability);
+    if (name) {
+      STR_PRINTF("%s", name);
+      cap_free(name);
+    }
   }
+
+  if (!STR_LENGTH) STR_PRINTF("CAP#%d", capability);
 STR_END_FORMATTER
 
 #define MAKE_CAPABILITY_NAME(name,capability) \
@@ -102,8 +104,8 @@ static int
 requestCapability (cap_t caps, cap_value_t capability, int inheritable) {
   if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
     if (!hasCapability(caps, CAP_PERMITTED, capability)) {
-      MAKE_CAPABILITY_NAME(name, capability);
-      logMessage(LOG_DEBUG, "capability not permitted: %s", name);
+      MAKE_CAPABILITY_NAME(nameBuffer, capability);
+      logMessage(LOG_DEBUG, "capability not permitted: %s", nameBuffer);
       return 0;
     }
 
@@ -154,11 +156,11 @@ needCapability (cap_value_t capability, int inheritable, const char *reason) {
   }
 
   if (outcome) {
-    MAKE_CAPABILITY_NAME(name, capability);
+    MAKE_CAPABILITY_NAME(nameBuffer, capability);
 
     logMessage(LOG_DEBUG,
       "temporary capability %s: %s (%s)",
-      outcome, name, reason
+      outcome, nameBuffer, reason
     );
   }
 
@@ -620,11 +622,11 @@ logMissingCapabilities (void) {
       cap_value_t capability = rce->value;
 
       if (!hasCapability(caps, CAP_EFFECTIVE, capability)) {
-        MAKE_CAPABILITY_NAME(name, capability);
+        MAKE_CAPABILITY_NAME(nameBuffer, capability);
 
         logMessage(LOG_WARNING,
           "required capability not granted: %s (%s)",
-          name, rce->reason
+          nameBuffer, rce->reason
         );
       }
 
