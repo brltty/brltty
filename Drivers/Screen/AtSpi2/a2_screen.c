@@ -1065,7 +1065,9 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     if (downTo>=curNumRows)
       /* imaginary extra lines don't need to be deleted */
       downTo=curNumRows-1;
-    delRows(y+1,downTo-y);
+    if (downTo>y) {
+      delRows(y+1,downTo-y);
+    }
     caretPosition(curCaret);
   } else if (!strcmp(interface, "Object") && !strcmp(member, "TextChanged") && !strcmp(detail, "insert")) {
     long len=detail2,semilen,x,y;
