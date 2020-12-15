@@ -673,7 +673,7 @@ static void restartTerm(const char *sender, const char *path) {
 	logMessage(LOG_ERR,"unterminated sequence %s",c);
       else if (len==-1)
 	logSystemError("mbrlen");
-      curRowLengths[i] = (len = -1) + (d != NULL);
+      curRowLengths[i] = (len = 0) + (d != NULL);
     }
     curRows[i] = malloc((len + (d!=NULL)) * sizeof(*curRows[i]));
     e = c;
