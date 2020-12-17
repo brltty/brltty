@@ -530,9 +530,16 @@ RUN+="@DRIVERS_DIRECTORY@/udev-wrapper -C"
 GOTO="brltty_device_end"
 
 LABEL="brltty_upstart"
-ACTION=="add", RUN+="/sbin/start brltty"
-ACTION=="change", RUN+="/sbin/start brltty"
-ACTION=="remove", RUN+="/sbin/stop brltty"
+ACTION=="add", GOTO="brltty_upstart_add"
+ACTION=="remove", GOTO="brltty_upstart_remove"
+GOTO="brltty_device_end"
+
+LABEL="brltty_upstart_add"
+RUN+="/sbin/start brltty 'BRLTTY_BRAILLE_DEVICE=$env{BRLTTY_BRAILLE_DEVICE}' 'BRLTTY_BRAILLE_DRIVER=$env{BRLTTY_BRAILLE_DRIVER}'"
+GOTO="brltty_device_end"
+
+LABEL="brltty_upstart_remove"
+RUN+="/sbin/stop brltty"
 GOTO="brltty_device_end"
 
 LABEL="brltty_systemd"
