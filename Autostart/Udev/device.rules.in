@@ -535,11 +535,11 @@ ACTION=="remove", GOTO="brltty_upstart_remove"
 GOTO="brltty_device_end"
 
 LABEL="brltty_upstart_add"
-RUN+="/sbin/start brltty 'BRLTTY_BRAILLE_DEVICE=$env{BRLTTY_BRAILLE_DEVICE}' 'BRLTTY_BRAILLE_DRIVER=$env{BRLTTY_BRAILLE_DRIVER}'"
+RUN+="/sbin/initctl start --quiet --no-wait brltty 'BRLTTY_BRAILLE_DEVICE=$env{BRLTTY_BRAILLE_DEVICE}' 'BRLTTY_BRAILLE_DRIVER=$env{BRLTTY_BRAILLE_DRIVER}'"
 GOTO="brltty_device_end"
 
 LABEL="brltty_upstart_remove"
-RUN+="/sbin/stop brltty"
+RUN+="/sbin/initctl stop --quiet --no-wait brltty"
 GOTO="brltty_device_end"
 
 LABEL="brltty_systemd"
