@@ -72,9 +72,9 @@ STR_BEGIN_FORMATTER(formatCapabilityName, cap_value_t capability)
   if (!STR_LENGTH) STR_PRINTF("CAP#%d", capability);
 STR_END_FORMATTER
 
-#define MAKE_CAPABILITY_NAME(name,capability) \
-char name[0X20]; \
-STR_BEGIN(name, sizeof(name)); \
+#define MAKE_CAPABILITY_NAME(buffer,capability) \
+char buffer[0X20]; \
+STR_BEGIN(buffer, sizeof(buffer)); \
 STR_FORMAT(formatCapabilityName, capability); \
 STR_END;
 
