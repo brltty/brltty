@@ -576,7 +576,7 @@ handleInput (GioHandleInputObject *hio, int error) {
   return hio->handler(&parameters);
 }
 
-ASYNC_MONITOR_CALLBACK(handleInputMonitor) {
+ASYNC_MONITOR_CALLBACK(gioInputMonitor) {
   GioHandleInputObject *hio = parameters->data;
 
   handleInput(hio, parameters->error);
@@ -606,7 +606,7 @@ gioNewHandleInputObject (
     hio->data = data;
 
     if (endpoint) {
-      if (gioMonitorInput(endpoint, handleInputMonitor, hio)) {
+      if (gioMonitorInput(endpoint, gioInputMonitor, hio)) {
         handleInput(hio, 0);
         return hio;
       }
