@@ -1186,6 +1186,7 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
 /* Integration of X11 events with brltty monitors */
 static AsyncHandle a2XWatch;
 static ReportListenerInstance *coreSelUpdatedListener;
+static int settingClipboard;
 
 /* Called when X selection got updated, update the BRLTTY clipboard content */
 void a2XSelUpdated(const char *data, unsigned long size) {
@@ -1196,7 +1197,9 @@ void a2XSelUpdated(const char *data, unsigned long size) {
   content[size] = 0;
 
   logMessage(LOG_CATEGORY(SCREEN_DRIVER), "X Selection got '%s'", content);
+  settingClipboard = 1;
   setMainClipboardContent(content);
+  settingClipboard = 0;
 }
 
 #ifdef HAVE_PTHREAD_ATFORK
@@ -1223,6 +1226,7 @@ ASYNC_MONITOR_CALLBACK(a2ProcessX) {
 REPORT_LISTENER(a2CoreSelUpdated) {
   const ApiParameterUpdatedReport *report = parameters->reportData;
   if (report->parameter != BRLAPI_PARAM_CLIPBOARD_CONTENT) return;
+  if (settingClipboard) return;
   char *newContent = getMainClipboardContent();
 
   if (newContent) {
