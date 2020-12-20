@@ -3698,7 +3698,10 @@ THREAD_FUNCTION(runServer) {
 #ifdef __MINGW32__
         }
 #endif /* __MINGW32__ */
-        logMessage(LOG_INFO, "BrlAPI connection fd=%"PRIfd" accepted: %s", resfd, source);
+
+        logMessage(LOG_CATEGORY(SERVER_EVENTS),
+          "BrlAPI connection fd=%"PRIfd" accepted: %s", resfd, source
+        );
 
         if (unauthConnections >= UNAUTH_LIMIT) {
           writeError(resfd, BRLAPI_ERROR_CONNREFUSED);
