@@ -61,12 +61,7 @@
 
 #include "options.h"
 
-//#define DEBUG
-#ifdef DEBUG
-#define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__)
-#else /* DEBUG */
-#define debugf(fmt, ...) (void)0
-#endif /* DEBUG */
+#define debugf(fmt, ...) do { if (verbose) fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 
 /******************************************************************************
  * option handling
@@ -77,6 +72,7 @@ static char *host;
 static char *xDisplay;
 static int no_daemon;
 static int quiet;
+static int verbose;
 
 static int brlapi_fd;
 
@@ -114,6 +110,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "quiet",
     .setting.flag = &quiet,
     .description = strtext("Do not write any text to the braille device")
+  },
+
+  { .letter = 'v',
+    .word = "verbose",
+    .setting.flag = &verbose,
+    .description = strtext("Write debugging output to stdout")
   },
 END_OPTION_TABLE
 
