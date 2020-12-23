@@ -4109,11 +4109,9 @@ static int api__handleCommand(int command) {
       if (!cmdBrlttyToBrlapi(&alternate, command, 0)) {
 	logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x could not be converted to BrlAPI without retainDots", command);
       } else {
-	if (alternate != code) {
-	  logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, alternate);
-	  c = whoGetsKey(&ttys, alternate, BRL_COMMANDS, 0);
-	  if (c) code = alternate;
-	}
+	logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, alternate);
+	c = whoGetsKey(&ttys, alternate, BRL_COMMANDS, 0);
+	if (c) code = alternate;
       }
     }
 
