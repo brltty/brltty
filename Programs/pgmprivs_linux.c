@@ -1795,7 +1795,7 @@ acquirePrivileges (void) {
 static int
 setEnvironmentVariable (const char *name, const char *value) {
   if (setenv(name, value, 1) != -1) {
-    logMessage(LOG_INFO, "environment variable set: %s: %s", name, value);
+    logMessage(LOG_DEBUG, "environment variable set: %s: %s", name, value);
     return 1;
   } else {
     logSystemError("setenv");
