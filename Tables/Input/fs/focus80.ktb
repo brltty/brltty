@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title FreedomScientific Focus2 (Blue) 80
+title FreedomScientific Focus 80
 
 assign frontKeysLeft pan\sleft,\sleft\srocker,\sleft\sselector,\sleft\sbumper,\sleft\sbumper,\sleft\sshift
 assign frontKeysRight right\sshift,\sright\sbumper,\sright\sbumper,\sright\sselector,\sright\srocker,\span\sright
