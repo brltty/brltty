@@ -99,7 +99,7 @@ addProgramOption U string.user userName "the user to be created/changed" "${defa
 parseProgramArguments "${@}"
 
 [ -n "${userName}" ] || userName="${defaultUserName}"
-[ -n "${userName}" ] || syntaxError "user not specified - use -U (user)"
+[ -n "${userName}" ] || syntaxError "unprivileged user not configured - use -U (user) to specify"
 
 if id -u "${userName}" >/dev/null 2>&1
 then
