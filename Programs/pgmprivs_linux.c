@@ -203,7 +203,7 @@ static const KernelModuleEntry kernelModuleTable[] = {
 }; static const uint8_t kernelModuleCount = ARRAY_COUNT(kernelModuleTable);
 
 static void
-installKernelModules (void) {
+installKernelModules (int stayPrivileged) {
   const KernelModuleEntry *kme = kernelModuleTable;
   const KernelModuleEntry *end = kme + kernelModuleCount;
 
@@ -407,9 +407,9 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
 }
 
 static void
-joinRequiredGroups (void) {
+joinRequiredGroups (int stayPrivileged) {
 #ifdef HAVE_PWD_H
-  if (!amPrivilegedUser()) {
+  if (stayPrivileged || !amPrivilegedUser()) {
     uid_t uid = geteuid();
     const struct passwd *pwd = getpwuid(uid);
 
@@ -566,7 +566,7 @@ static const RequiredCapabilityEntry requiredCapabilityTable[] = {
 }; static const uint8_t requiredCapabilityCount = ARRAY_COUNT(requiredCapabilityTable);
 
 static void
-setRequiredCapabilities (void) {
+setRequiredCapabilities (int stayPrivileged) {
   cap_t newCaps, oldCaps;
 
   if (amPrivilegedUser()) {
@@ -576,7 +576,22 @@ setRequiredCapabilities (void) {
     return;
   }
 
-  if ((newCaps = cap_init())) {
+  {
+    cap_t (*function) (void);
+    const char *name;
+
+    if (stayPrivileged) {
+      function = cap_get_proc;
+      name = "cap_get_proc";
+    } else {
+      function = cap_init;
+      name = "cap_init";
+    }
+
+    if (!(newCaps = function())) logSystemError(name);
+  }
+
+  if (newCaps) {
     {
       const RequiredCapabilityEntry *rce = requiredCapabilityTable;
       const RequiredCapabilityEntry *end = rce + requiredCapabilityCount;
@@ -595,8 +610,6 @@ setRequiredCapabilities (void) {
 
     setCapabilities(newCaps);
     cap_free(newCaps);
-  } else {
-    logSystemError("cap_init");
   }
 
 #ifdef PR_CAP_AMBIENT_CLEAR_ALL
@@ -1700,7 +1713,7 @@ scfInstallFilter (const char *modeName) {
 }
 #endif /* SECCOMP_MODE_FILTER */
 
-typedef void PrivilegesAcquisitionFunction (void);
+typedef void PrivilegesAcquisitionFunction (int stayPrivileged);
 typedef void MissingPrivilegesLogger (void);
 typedef void ReleaseResourcesFunction (void);
 
@@ -1744,13 +1757,13 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 }; static const uint8_t privilegesAcquisitionCount = ARRAY_COUNT(privilegesAcquisitionTable);
 
 static void
-acquirePrivileges (void) {
+acquirePrivileges (int stayPrivileged) {
   if (amPrivilegedUser()) {
     const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
     const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
 
     while (pae < end) {
-      pae->acquirePrivileges();
+      pae->acquirePrivileges(stayPrivileged);
       pae += 1;
     }
   }
@@ -1764,7 +1777,7 @@ acquirePrivileges (void) {
       cap_value_t capability = pae->capability;
 
       if (!capability || needCapability(capability, pae->inheritable, pae->reason)) {
-        pae->acquirePrivileges();
+        pae->acquirePrivileges(0);
       }
 
       pae += 1;
@@ -1959,9 +1972,9 @@ switchToUser (const char *user, int *haveHomeDirectory) {
 }
 
 static int
-switchUser (const char *user, int *haveHomeDirectory) {
+switchUser (const char *user, int stayPrivileged, int *haveHomeDirectory) {
   if (amPrivilegedUser()) {
-    if (strcmp(user, ":STAY-PRIVILEGED:") == 0) {
+    if (stayPrivileged) {
       logMessage(LOG_NOTICE, "not switching to an unprivileged user");
     } else if (!*user) {
       logMessage(LOG_DEBUG, "default unprivileged user not configured");
@@ -2202,11 +2215,18 @@ establishProgramPrivileges (char **parameters) {
   isolateNamespaces();
 #endif /* HAVE_SCHED_H */
 
+  const char *unprivilegedUser = parameters[PARM_USER];
+  int stayPrivileged = strcmp(unprivilegedUser, ":STAY-PRIVILEGED:") == 0;
+
   {
     int haveHomeDirectory = 0;
 
 #ifdef HAVE_PWD_H
-    int switched = switchUser(parameters[PARM_USER], &haveHomeDirectory);
+    int switched = switchUser(
+      unprivilegedUser,
+      stayPrivileged,
+      &haveHomeDirectory
+    );
 
     if (switched) {
       umask(umask(0) & ~S_IRWXG);
@@ -2225,7 +2245,7 @@ establishProgramPrivileges (char **parameters) {
     }
   }
 
-  acquirePrivileges();
+  acquirePrivileges(stayPrivileged);
   logCurrentCapabilities("after relinquish");
 
 #ifdef SECCOMP_MODE_FILTER
