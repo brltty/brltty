@@ -25,7 +25,7 @@ extern "C" {
 
 extern const char *const *getPrivilegeParameterNames (void);
 extern const char *getPrivilegeParametersPlatform (void);
-extern void establishProgramPrivileges (char **specifiedParameters, char **configuredParameters);
+extern void establishProgramPrivileges (char **parameters);
 
 #ifdef __cplusplus
 }

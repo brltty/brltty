@@ -767,18 +767,12 @@ static void
 establishPrivileges (void) {
   const char *platform = getPrivilegeParametersPlatform();
   const char *const *names = getPrivilegeParameterNames();
-  char **specifiedParameters = getParameters(names, platform, opt_privilegeParameters);
+  char **parameters = getParameters(names, platform, opt_privilegeParameters);
 
-  if (specifiedParameters) {
-    logParameters(names, specifiedParameters, gettext("Privilege Parameter"));
-    char **configuredParameters = getParameters(names, platform, PRIVILEGE_PARAMETERS);
-
-    if (configuredParameters) {
-      establishProgramPrivileges(specifiedParameters, configuredParameters);
-      deallocateStrings(configuredParameters);
-    }
-
-    deallocateStrings(specifiedParameters);
+  if (parameters) {
+    logParameters(names, parameters, gettext("Privilege Parameter"));
+    establishProgramPrivileges(parameters);
+    deallocateStrings(parameters);
   }
 }
 

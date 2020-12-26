@@ -1959,28 +1959,16 @@ switchToUser (const char *user, int *haveHomeDirectory) {
 }
 
 static int
-switchUser (const char *specifiedUser, const char *configuredUser, int *haveHomeDirectory) {
-  const char *user;
-
+switchUser (const char *user, int *haveHomeDirectory) {
   if (amPrivilegedUser()) {
-    if (strcmp(specifiedUser, ":STAY-PRIVILEGED:") == 0) {
+    if (strcmp(user, ":STAY-PRIVILEGED:") == 0) {
       logMessage(LOG_NOTICE, "not switching to an unprivileged user");
+    } else if (!*user) {
+      logMessage(LOG_DEBUG, "default unprivileged user not configured");
+    } else if (switchToUser(user, haveHomeDirectory)) {
+      return 1;
     } else {
-      if (strcmp(specifiedUser, configuredUser) != 0) {
-        if (*(user = specifiedUser)) {
-          if (switchToUser(user, haveHomeDirectory)) {
-            return 1;
-          }
-        }
-      }
-
-      if (!*(user = configuredUser)) {
-        logMessage(LOG_DEBUG, "the default unprivileged user hasn't been configured");
-      } else if (switchToUser(user, haveHomeDirectory)) {
-        return 1;
-      } else {
-        logMessage(LOG_WARNING, "couldn't switch to the configured unprivileged user: %s", user);
-      }
+      logMessage(LOG_WARNING, "couldn't switch to the unprivileged user: %s", user);
     }
   }
 
@@ -2000,10 +1988,10 @@ switchUser (const char *specifiedUser, const char *configuredUser, int *haveHome
         name = number;
       }
 
-      logMessage(LOG_NOTICE, "executing as invoking user: %s", name);
+      logMessage(LOG_NOTICE, "executing as the invoking user: %s", name);
     }
 
-    if (*(user = configuredUser)) {
+    if (*user) {
       struct passwd *pwd;
 
       if ((pwd = getpwnam(user))) {
@@ -2198,11 +2186,11 @@ getPrivilegeParametersPlatform (void) {
 }
 
 void
-establishProgramPrivileges (char **specifiedParameters, char **configuredParameters) {
+establishProgramPrivileges (char **parameters) {
   logCurrentCapabilities("at start");
 
-  setCommandSearchPath(specifiedParameters[PARM_PATH]);
-  setDefaultShell(specifiedParameters[PARM_SHELL]);
+  setCommandSearchPath(parameters[PARM_PATH]);
+  setDefaultShell(parameters[PARM_SHELL]);
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
@@ -2218,11 +2206,7 @@ establishProgramPrivileges (char **specifiedParameters, char **configuredParamet
     int haveHomeDirectory = 0;
 
 #ifdef HAVE_PWD_H
-    int switched = switchUser(
-      specifiedParameters[PARM_USER],
-      configuredParameters[PARM_USER],
-      &haveHomeDirectory
-    );
+    int switched = switchUser(parameters[PARM_USER], &haveHomeDirectory);
 
     if (switched) {
       umask(umask(0) & ~S_IRWXG);
@@ -2244,7 +2228,7 @@ establishProgramPrivileges (char **specifiedParameters, char **configuredParamet
   acquirePrivileges();
   logCurrentCapabilities("after relinquish");
 
-  #ifdef SECCOMP_MODE_FILTER
-  scfInstallFilter(specifiedParameters[PARM_SCFMODE]);
-  #endif /* SECCOMP_MODE_FILTER */
+#ifdef SECCOMP_MODE_FILTER
+  scfInstallFilter(parameters[PARM_SCFMODE]);
+#endif /* SECCOMP_MODE_FILTER */
 }
