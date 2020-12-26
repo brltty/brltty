@@ -315,7 +315,7 @@ static const RequiredGroupEntry requiredGroupTable[] = {
 }; static const uint8_t requiredGroupCount = ARRAY_COUNT(requiredGroupTable);
 
 static void
-processRequiredGroups (GroupsProcessor *processGroups, void *data) {
+processRequiredGroups (GroupsProcessor *processGroups, int logProblems, void *data) {
   gid_t groups[requiredGroupCount * 2];
   size_t count = 0;
 
@@ -332,7 +332,7 @@ processRequiredGroups (GroupsProcessor *processGroups, void *data) {
 
           if ((grp = getgrnam(name))) {
             groups[count++] = grp->gr_gid;
-          } else {
+          } else if (logProblems) {
             logMessage(LOG_WARNING, "unknown group: %s", name);
           }
         }
@@ -347,14 +347,16 @@ processRequiredGroups (GroupsProcessor *processGroups, void *data) {
           if (stat(path, &status) != -1) {
             groups[count++] = status.st_gid;
 
-            if (rge->needRead && !(status.st_mode & S_IRGRP)) {
-              logMessage(LOG_WARNING, "path not group readable: %s", path);
-            }
+            if (logProblems) {
+              if (rge->needRead && !(status.st_mode & S_IRGRP)) {
+                logMessage(LOG_WARNING, "path not group readable: %s", path);
+              }
 
-            if (rge->needWrite && !(status.st_mode & S_IWGRP)) {
-              logMessage(LOG_WARNING, "path not group writable: %s", path);
+              if (rge->needWrite && !(status.st_mode & S_IWGRP)) {
+                logMessage(LOG_WARNING, "path not group writable: %s", path);
+              }
             }
-          } else {
+          } else if (logProblems) {
             logMessage(LOG_WARNING, "path access error: %s: %s", path, strerror(errno));
           }
         }
@@ -432,7 +434,7 @@ joinRequiredGroups (int stayPrivileged) {
           .count = size
         };
 
-        processRequiredGroups(setSupplementaryGroups, &cgd);
+        processRequiredGroups(setSupplementaryGroups, 1, &cgd);
         return;
       } else {
         logSystemError("getgrouplist");
@@ -441,7 +443,7 @@ joinRequiredGroups (int stayPrivileged) {
   }
 #endif /* HAVE_PWD_H */
 
-  processRequiredGroups(setSupplementaryGroups, NULL);
+  processRequiredGroups(setSupplementaryGroups, 1, NULL);
 }
 
 static void
@@ -473,7 +475,7 @@ logWantedGroups (const gid_t *groups, size_t count, void *data) {
     .count = count
   };
 
-  processRequiredGroups(logUnjoinedGroups, &cgd);
+  processRequiredGroups(logUnjoinedGroups, 0, &cgd);
 }
 
 static void
@@ -1777,7 +1779,7 @@ acquirePrivileges (int stayPrivileged) {
       cap_value_t capability = pae->capability;
 
       if (!capability || needCapability(capability, pae->inheritable, pae->reason)) {
-        pae->acquirePrivileges(0);
+        pae->acquirePrivileges(stayPrivileged);
       }
 
       pae += 1;
