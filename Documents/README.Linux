@@ -379,10 +379,10 @@ The following privilege parameters are supported for Linux:
     i.e. continue to execute as the invoking user.
 
   * Don't relinquish any capabilities.
-    The required ones are still added.
+    Missing `required capabilities`_ are, if possible, still acquired.
 
   * Don't relinquish any group memberships.
-    The required ones are still joined.
+    Missing needed `group memberships`_ are, if possible, still established.
 
 Safe Command Search Path
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -760,7 +760,7 @@ Group Memberships
 ~~~~~~~~~~~~~~~~~
 
 BRLTTY relies on file system and server (daemon) access
-granted via membership in the owning user groups.
+granted via membership in the following owning user groups.
 
 * A group name shown in **bold** is its actual name.
 
@@ -774,7 +774,7 @@ granted via membership in the owning user groups.
   For reading BrlAPI's |key file|.
   In other words, the group that owns that file.
 
-*dialout*
+**dialout** (some distributions use **uucp**)
   For serial I/O via these ``/dev/`` devices:
 
   **ttyS<n>**
@@ -806,6 +806,12 @@ granted via membership in the owning user groups.
 
   * Reading screen content via the ``/dev/vcs`` devices.
   * Virtual console monitoring and control via the ``/dev/tty<n>`` devices.
+
+* `When started by the super user`_,
+  existing group memberships are relinquished.
+
+* `When started by an unprivileged user`_,
+  existing group memberships are retained.
 
 Required Capabilities
 ~~~~~~~~~~~~~~~~~~~~~
