@@ -1717,13 +1717,13 @@ scfInstallFilter (const char *modeName) {
 }
 #endif /* SECCOMP_MODE_FILTER */
 
-typedef void PrivilegesAcquisitionFunction (int stayPrivileged);
+typedef void PrivilegesEstablishmentFunction (int stayPrivileged);
 typedef void MissingPrivilegesLogger (void);
 typedef void ReleaseResourcesFunction (void);
 
 typedef struct {
   const char *reason;
-  PrivilegesAcquisitionFunction *acquirePrivileges;
+  PrivilegesEstablishmentFunction *establishPrivileges;
   MissingPrivilegesLogger *logMissingPrivileges;
   ReleaseResourcesFunction *releaseResources;
 
@@ -1731,11 +1731,11 @@ typedef struct {
   cap_value_t capability;
   unsigned char inheritable:1;
   #endif /* CAP_IS_SUPPORTED */
-} PrivilegesAcquisitionEntry;
+} PrivilegesMechanismEntry;
 
-static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
+static const PrivilegesMechanismEntry privilegesMechanismTable[] = {
   { .reason = "for installing kernel modules",
-    .acquirePrivileges = installKernelModules,
+    .establishPrivileges = installKernelModules,
 
     #ifdef CAP_SYS_MODULE
     .capability = CAP_SYS_MODULE,
@@ -1745,7 +1745,7 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 
 #ifdef HAVE_GRP_H
   { .reason = "for joining the required groups",
-    .acquirePrivileges = joinRequiredGroups,
+    .establishPrivileges = joinRequiredGroups,
     .logMissingPrivileges = logMissingGroups,
     .releaseResources = closeGroupsDatabase,
   },
@@ -1754,57 +1754,57 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 // This one must be last because it relinquishes the temporary capabilities.
 #ifdef CAP_IS_SUPPORTED
   { .reason = "for assigning required capabilities",
-    .acquirePrivileges = setRequiredCapabilities,
+    .establishPrivileges = setRequiredCapabilities,
     .logMissingPrivileges = logMissingCapabilities,
   }
 #endif /* CAP_IS_SUPPORTED */
-}; static const uint8_t privilegesAcquisitionCount = ARRAY_COUNT(privilegesAcquisitionTable);
+}; static const uint8_t privilegesMechanismCount = ARRAY_COUNT(privilegesMechanismTable);
 
 static void
-acquirePrivileges (int stayPrivileged) {
+establishPrivileges (int stayPrivileged) {
   if (amPrivilegedUser()) {
-    const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-    const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
+    const PrivilegesMechanismEntry *pme = privilegesMechanismTable;
+    const PrivilegesMechanismEntry *end = pme + privilegesMechanismCount;
 
-    while (pae < end) {
-      pae->acquirePrivileges(stayPrivileged);
-      pae += 1;
+    while (pme < end) {
+      pme->establishPrivileges(stayPrivileged);
+      pme += 1;
     }
   }
 
 #ifdef CAP_IS_SUPPORTED
   else {
-    const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-    const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
+    const PrivilegesMechanismEntry *pme = privilegesMechanismTable;
+    const PrivilegesMechanismEntry *end = pme + privilegesMechanismCount;
 
-    while (pae < end) {
-      cap_value_t capability = pae->capability;
+    while (pme < end) {
+      cap_value_t capability = pme->capability;
 
-      if (!capability || needCapability(capability, pae->inheritable, pae->reason)) {
-        pae->acquirePrivileges(stayPrivileged);
+      if (!capability || needCapability(capability, pme->inheritable, pme->reason)) {
+        pme->establishPrivileges(stayPrivileged);
       }
 
-      pae += 1;
+      pme += 1;
     }
   }
 #endif /* CAP_IS_SUPPORTED */
 
   {
-    const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-    const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
+    const PrivilegesMechanismEntry *pme = privilegesMechanismTable;
+    const PrivilegesMechanismEntry *end = pme + privilegesMechanismCount;
 
-    while (pae < end) {
+    while (pme < end) {
       {
-        MissingPrivilegesLogger *log = pae->logMissingPrivileges;
+        MissingPrivilegesLogger *log = pme->logMissingPrivileges;
         if (log) log();
       }
 
       {
-        ReleaseResourcesFunction *release = pae->releaseResources;
+        ReleaseResourcesFunction *release = pme->releaseResources;
         if (release) release();
       }
 
-      pae += 1;
+      pme += 1;
     }
   }
 }
@@ -2249,7 +2249,7 @@ establishProgramPrivileges (char **parameters) {
     }
   }
 
-  acquirePrivileges(stayPrivileged);
+  establishPrivileges(stayPrivileged);
   logCurrentCapabilities("after relinquish");
 
 #ifdef SECCOMP_MODE_FILTER
