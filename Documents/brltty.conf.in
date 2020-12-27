@@ -616,6 +616,7 @@
 #privilege-parameters lx:scfmode=no # [no,log,fail,kill]
 #privilege-parameters lx:shell=/bin/sh
 #privilege-parameters lx:user=brltty
+#privilege-parameters lx:user=:STAY-PRIVILEGED:
 
 
 ################################################
