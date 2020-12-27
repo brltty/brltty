@@ -373,9 +373,16 @@ The following privilege parameters are supported for Linux:
 
 ``user``
   This parameter sets `the unprivileged user`_.
-  The special value ``:STAY-PRIVILEGED:`` means
-  don't switch to an unprivileged user,
-  i.e. continue to execute as the invoking user.
+  The special value ``:STAY-PRIVILEGED:`` means:
+
+  * Don't switch to an unprivileged user,
+    i.e. continue to execute as the invoking user.
+
+  * Don't relinquish any capabilities.
+    The required ones are still added.
+
+  * Don't relinquish any group memberships.
+    The required ones are still joined.
 
 Safe Command Search Path
 ~~~~~~~~~~~~~~~~~~~~~~~~
