@@ -333,7 +333,7 @@ processRequiredGroups (GroupsProcessor *processGroups, int logProblems, void *da
           if ((grp = getgrnam(name))) {
             groups[count++] = grp->gr_gid;
           } else if (logProblems) {
-            logMessage(LOG_WARNING, "unknown group: %s", name);
+            logMessage(LOG_DEBUG, "unknown group: %s", name);
           }
         }
       }
@@ -349,15 +349,15 @@ processRequiredGroups (GroupsProcessor *processGroups, int logProblems, void *da
 
             if (logProblems) {
               if (rge->needRead && !(status.st_mode & S_IRGRP)) {
-                logMessage(LOG_WARNING, "path not group readable: %s", path);
+                logMessage(LOG_DEBUG, "path not group readable: %s", path);
               }
 
               if (rge->needWrite && !(status.st_mode & S_IWGRP)) {
-                logMessage(LOG_WARNING, "path not group writable: %s", path);
+                logMessage(LOG_DEBUG, "path not group writable: %s", path);
               }
             }
           } else if (logProblems) {
-            logMessage(LOG_WARNING, "path access error: %s: %s", path, strerror(errno));
+            logMessage(LOG_DEBUG, "path access error: %s: %s", path, strerror(errno));
           }
         }
       }
@@ -410,6 +410,8 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
 
 static void
 joinRequiredGroups (int stayPrivileged) {
+  int logProblems = 1;
+
 #ifdef HAVE_PWD_H
   if (stayPrivileged || !amPrivilegedUser()) {
     uid_t uid = geteuid();
@@ -434,7 +436,7 @@ joinRequiredGroups (int stayPrivileged) {
           .count = size
         };
 
-        processRequiredGroups(setSupplementaryGroups, 1, &cgd);
+        processRequiredGroups(setSupplementaryGroups, logProblems, &cgd);
         return;
       } else {
         logSystemError("getgrouplist");
@@ -443,7 +445,7 @@ joinRequiredGroups (int stayPrivileged) {
   }
 #endif /* HAVE_PWD_H */
 
-  processRequiredGroups(setSupplementaryGroups, 1, NULL);
+  processRequiredGroups(setSupplementaryGroups, logProblems, NULL);
 }
 
 static void
