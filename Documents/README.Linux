@@ -48,7 +48,7 @@ BRLTTY on Linux
 .. |cap_sys_tty_config| replace:: **cap_sys_tty_config**
 .. |cap_mknod| replace:: **cap_mknod**
 
-.. |cap_setgid reason| replace:: switching to the primary group of `the unprivileged user`_ and establishing the needed `group memberships`_
+.. |cap_setgid reason| replace:: switching to the primary group of `the unprivileged user`_ and establishing the `needed group memberships`_
 .. |cap_chown reason| replace:: claiming ownership of the `state directories`_
 .. |cap_fowner reason| replace:: adding group permissions to the `state directories`_
 .. |cap_dac_override reason| replace:: creating missing `state directories`_
@@ -85,7 +85,7 @@ BRLTTY takes a number of steps to establish a safer execution environment:
 * `Namespace isolation`_.
 * Switch to executing as `the unprivileged user`_.
 * Install the needed `kernel modules`_.
-* Establish the needed `group memberships`_.
+* Establish the `needed group memberships`_.
 * Set its `required capabilities`_.
 * Relinquish all non-required capabilities.
 * Install the `system call filter`_.
@@ -129,8 +129,8 @@ Continuing to Run as the Super User
 
   * BRLTTY still establishes the rest of its `safer execution environment`_.
 
-  * Establishing the needed `group memberships`_ replaces
-    (rather than extends) BRLTTY's supplementary group list.
+  * Establishing the `needed group memberships`_ replaces
+    (rather than extends) the supplementary group list.
 
 After having successfully switched to executing as an unprivileged user,
 the following is done:
@@ -147,7 +147,7 @@ the following is done:
   (set the ``XDG_RUNTIME_DIR`` environment variable)
   to that of the selected user.
 
-* Extend the supplementary group list with the needed `group memberships`_.
+* Extend the supplementary group list with the `needed group memberships`_.
 
 * If the selected user's home directory is defined then switch to it by:
 
@@ -280,7 +280,7 @@ the environment needs to be prepared as follows:
 * Assign the `required capabilities`_ to BRLTTY's executable.
 
 * Give the user that's to be able to start BRLTTY
-  the needed `group memberships`_.
+  the `needed group memberships`_.
   This isn't necessary, i.e. BRLTTY will join them by itself,
   if the |cap_setgid| (temporary) capability
   has also been assigned to its executable.
@@ -382,7 +382,7 @@ The following privilege parameters are supported for Linux:
     Missing `required capabilities`_ are, if possible, still acquired.
 
   * Don't relinquish any group memberships.
-    Missing needed `group memberships`_ are, if possible, still established.
+    Missing `needed group memberships`_ are, if possible, still established.
 
 Safe Command Search Path
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -500,7 +500,7 @@ Ideally, it should have the same name as the user.
 The user's supplementary group list should include
 all of the groups that own the various system resources
 that BRLTTY needs access to in order for it to do its job properly.
-See `Group Memberships`_ for details.
+See `Needed Group Memberships`_ for details.
 
 The user should have a home directory.
 It should be on a local file system
@@ -584,7 +584,7 @@ must be explicitly allowed.
 These options aren't mutually exclusive - both may be specified.
 
 The user's supplementary group list is used
-to establish the needed `group memberships`_.
+to establish the `needed group memberships`_.
 Each of the following options removes a group from the full list,
 and, therefore, also removes that group's associated functionality from BRLTTY.
 If a group's name is shown in *italics* then it's only our recommendation
@@ -756,8 +756,8 @@ BRLTTY relies on functionality provided by these kernel modules:
 **uinput**
   For creating virtual devices via the |uinput device|.
 
-Group Memberships
-~~~~~~~~~~~~~~~~~
+Needed Group Memberships
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 BRLTTY relies on file system and server (daemon) access
 granted via membership in the following owning user groups.
@@ -867,8 +867,8 @@ and are relinquished right after this has been done.
 
 |cap_setgid|
   If this capability has also been assigned to BRLTTY's executable
-  then it ignores the invoking user's group memberships
-  and internally establishes the actually needed `group memberships`_.
+  then it internally extends its supplementary group list
+  with any `needed group memberships`_ that are missing.
 
 |cap_sys_admin|
   While this is one of the `required capabilities`_,
