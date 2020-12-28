@@ -38,8 +38,11 @@ BrlAPIref:
 %.h:
 	cd $(@D) && $(MAKE) $(@F)
 
+%.html: $(SRC_DIR)/README.%
+	rst2html --config "$(SRC_TOP)docutils.conf" $< $@
+
 clean::
-	-rm -f *.made
+	-rm -f *.made *.html
 	-rm -f -r BrlAPIref
 
 distclean::
