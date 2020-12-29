@@ -276,7 +276,7 @@ then
 fi
 AC_PROG_CXX
 
-brltty_gcc_cflags="-std=gnu99 -Wall -Werror=format-security -Wno-address-of-packed-member"
+brltty_gcc_cflags="-std=gnu99 -Wall -Werror=format-security -Wno-address-of-packed-member -Wno-stringop-truncation"
 brltty_gcc_cppflags=""
 
 case "${host_os}"
