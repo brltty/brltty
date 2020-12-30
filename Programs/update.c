@@ -978,17 +978,16 @@ doUpdate (void) {
 
           readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
 
-          {
-            int i;
-            for (i=0; i<inputLength; ++i) {
-              inputText[i] = inputCharacters[i].text;
-            }
+          for (int i=0; i<inputLength; ++i) {
+            inputText[i] = inputCharacters[i].text;
           }
 
-          contractText(contractionTable,
-                       inputText, &inputLength,
-                       outputBuffer, &outputLength,
-                       contractedOffsets, getContractedCursor());
+          contractText(
+            contractionTable,
+            inputText, &inputLength,
+            outputBuffer, &outputLength,
+            contractedOffsets, getContractedCursor()
+          );
 
           {
             int inputEnd = inputLength;
@@ -996,8 +995,10 @@ doUpdate (void) {
             if (contractedTrack) {
               if (outputLength == textLength) {
                 int inputIndex = inputEnd;
+
                 while (inputIndex) {
                   int offset = contractedOffsets[--inputIndex];
+
                   if (offset != CTB_NO_OFFSET) {
                     if (offset != outputLength) break;
                     inputEnd = inputIndex;
@@ -1015,11 +1016,12 @@ doUpdate (void) {
                     if (onspace) break;
                     onspace = 1;
                   }
-                  ++offset;
+
+                  offset += 1;
                 }
 
                 if ((offset += ses->winx) > scr.posx) {
-                  ses->winx = (ses->winx + scr.posx) / 2;
+                  ses->winx = scr.posx;
                 } else {
                   ses->winx = offset;
                 }
