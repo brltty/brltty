@@ -39,36 +39,36 @@ static char *opt_tablesDirectory;
 char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'a',
-    .word = "audit",
+  { .word = "audit",
+    .letter = 'a',
     .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_audit,
     .description = strtext("Report problems with the key table.")
   },
 
-  { .letter = 'k',
-    .word = "keys",
+  { .word = "keys",
+    .letter = 'k',
     .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_listKeyNames,
     .description = strtext("List key names.")
   },
 
-  { .letter = 'l',
-    .word = "list",
+  { .word = "list",
+    .letter = 'l',
     .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_listHelpScreen,
     .description = strtext("List key table in help screen format.")
   },
 
-  { .letter = 'r',
-    .word = "reStructuredText",
+  { .word = "reStructuredText",
+    .letter = 'r',
     .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_listRestructuredText,
     .description = strtext("List key table in reStructuredText format.")
   },
 
-  { .letter = 'T',
-    .word = "tables-directory",
+  { .word = "tables-directory",
+    .letter = 'T',
     .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
@@ -77,8 +77,8 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory containing tables.")
   },
 
-  { .letter = 'D',
-    .word = "drivers-directory",
+  { .word = "drivers-directory",
+    .letter = 'D',
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,

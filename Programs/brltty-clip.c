@@ -34,35 +34,35 @@ static char *opt_setContent;
 static int opt_removeNewline;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'b',
-    .word = "brlapi",
+  { .word = "brlapi",
+    .letter = 'b',
     .argument = "[host][:port]",
     .setting.string = &opt_apiHost,
     .description = "BrlAPIa host and/or port to connect to."
   },
 
-  { .letter = 'a',
-    .word = "auth",
+  { .word = "auth",
+    .letter = 'a',
     .argument = "scheme+...",
     .setting.string = &opt_authSchemes,
     .description = "BrlAPI authorization/authentication schemes."
   },
 
-  { .letter = 'g',
-    .word = "get",
+  { .word = "get",
+    .letter = 'g',
     .setting.flag = &opt_getContent,
     .description = "Write the content of the clipboard to standard output."
   },
 
-  { .letter = 's',
-    .word = "set",
+  { .word = "set",
+    .letter = 's',
     .argument = "content",
     .setting.string = &opt_setContent,
     .description = "Set the content of the clipboard."
   },
 
-  { .letter = 'r',
-    .word = "remove",
+  { .word = "remove",
+    .letter = 'r',
     .setting.flag = &opt_removeNewline,
     .description = "Remove a trailing newline."
   },

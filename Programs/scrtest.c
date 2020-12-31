@@ -37,8 +37,8 @@ static char *opt_screenDriver;
 static char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'D',
-    .word = "drivers-directory",
+  { .word = "drivers-directory",
+    .letter = 'D',
     .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
@@ -47,37 +47,37 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Path to directory for loading drivers."
   },
 
-  { .letter = 'x',
-    .word = "screen-driver",
+  { .word = "screen-driver",
+    .letter = 'x',
     .argument = "driver",
     .setting.string = &opt_screenDriver,
     .internal.setting = DEFAULT_SCREEN_DRIVER,
     .description = "Screen driver: one of {" SCREEN_DRIVER_CODES "}"
   },
 
-  { .letter = 'l',
-    .word = "left",
+  { .word = "left",
+    .letter = 'l',
     .argument = "column",
     .setting.string = &opt_boxLeft,
     .description = "Left edge of region (from 0)."
   },
 
-  { .letter = 'c',
-    .word = "columns",
+  { .word = "columns",
+    .letter = 'c',
     .argument = "count",
     .setting.string = &opt_boxWidth,
     .description = "Width of region."
   },
 
-  { .letter = 't',
-    .word = "top",
+  { .word = "top",
+    .letter = 't',
     .argument = "row",
     .setting.string = &opt_boxTop,
     .description = "Top edge of region (from 0)."
   },
 
-  { .letter = 'r',
-    .word = "rows",
+  { .word = "rows",
+    .letter = 'r',
     .argument = "count",
     .setting.string = &opt_boxHeight,
     .description = "Height of region."

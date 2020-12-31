@@ -34,71 +34,71 @@ static char *opt_checkValue;
 static char *opt_residue;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'n',
-    .word = "name",
+  { .word = "name",
+    .letter = 'n',
     .argument = "string",
     .setting.string = &opt_algorithmName,
     .description = "the algorithm name"
   },
 
-  { .letter = 'c',
-    .word = "class",
+  { .word = "class",
+    .letter = 'c',
     .argument = "string",
     .setting.string = &opt_algorithmClass,
     .description = "the algorithm class"
   },
 
-  { .letter = 'w',
-    .word = "width",
+  { .word = "width",
+    .letter = 'w',
     .argument = "integer",
     .setting.string = &opt_checksumWidth,
     .description = "the checksum width"
   },
 
-  { .letter = 'd',
-    .word = "reflect-data",
+  { .word = "reflect-data",
+    .letter = 'd',
     .argument = "boolean",
     .setting.string = &opt_reflectData,
     .description = "reflect the data"
   },
 
-  { .letter = 'r',
-    .word = "reflect-result",
+  { .word = "reflect-result",
+    .letter = 'r',
     .argument = "boolean",
     .setting.string = &opt_reflectResult,
     .description = "reflect the result"
   },
 
-  { .letter = 'p',
-    .word = "polynomial",
+  { .word = "polynomial",
+    .letter = 'p',
     .argument = "integer",
     .setting.string = &opt_generatorPolynomial,
     .description = "the generator polynomial"
   },
 
-  { .letter = 'i',
-    .word = "initial-value",
+  { .word = "initial-value",
+    .letter = 'i',
     .argument = "integer",
     .setting.string = &opt_initialValue,
     .description = "the initial value"
   },
 
-  { .letter = 'x',
-    .word = "xor-mask",
+  { .word = "xor-mask",
+    .letter = 'x',
     .argument = "integer",
     .setting.string = &opt_xorMask,
     .description = "the final xor mask"
   },
 
-  { .letter = 'C',
-    .word = "check-value",
+  { .word = "check-value",
+    .letter = 'C',
     .argument = "integer",
     .setting.string = &opt_checkValue,
     .description = "the check value"
   },
 
-  { .letter = 'R',
-    .word = "residue",
+  { .word = "residue",
+    .letter = 'R',
     .argument = "integer",
     .setting.string = &opt_residue,
     .description = "the residue"

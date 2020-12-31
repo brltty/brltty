@@ -142,8 +142,8 @@ static int opt_undefined;
 #endif /* HAVE_UNDEFINED_CHARACTERS_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'T',
-    .word = "tables-directory",
+  { .word = "tables-directory",
+    .letter = 'T',
     .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_tablesDirectory,
@@ -152,36 +152,36 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory containing text tables.")
   },
 
-  { .letter = 'e',
-    .word = "edit",
+  { .word = "edit",
+    .letter = 'e',
     .setting.flag = &opt_edit,
     .description = strtext("Edit table.")
   },
 
-  { .letter = 'i',
-    .word = "input-format",
+  { .word = "input-format",
+    .letter = 'i',
     .argument = "format",
     .setting.string = &opt_inputFormat,
     .description = strtext("Format of input file.")
   },
 
-  { .letter = 'o',
-    .word = "output-format",
+  { .word = "output-format",
+    .letter = 'o',
     .argument = "format",
     .setting.string = &opt_outputFormat,
     .description = strtext("Format of output file.")
   },
 
-  { .letter = 'c',
-    .word = "charset",
+  { .word = "charset",
+    .letter = 'c',
     .argument = "charset",
     .setting.string = &opt_charset,
     .description = strtext("8-bit character set to use.")
   },
 
 #ifdef HAVE_UNDEFINED_CHARACTERS_SUPPORT
-  { .letter = 'u',
-    .word = "undefined",
+  { .word = "undefined",
+    .letter = 'u',
     .setting.flag = &opt_undefined,
     .description = strtext("Report the characters within the current screen font that aren't defined within the text table.")
   },

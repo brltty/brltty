@@ -65,13 +65,13 @@ typedef struct {
 
 #define BEGIN_OPTION_TABLE(name) static const OptionEntry name[] = {
 #define END_OPTION_TABLE \
-  { .letter = 'h', \
-    .word = "help", \
+  { .word = "help", \
+    .letter = 'h', \
     .description = strtext("Print a usage summary (commonly used options only), and then exit.") \
   } \
   , \
-  { .letter = 'H', \
-    .word = "full-help", \
+  { .word = "full-help", \
+    .letter = 'H', \
     .description = strtext("Print a usage summary (all options), and then exit.") \
   } \
 };

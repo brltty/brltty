@@ -41,8 +41,8 @@ static const char tableName_autoselect[] = "auto";
 static const char tableName_unicode[] = "unicode";
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'T',
-    .word = "tables-directory",
+  { .word = "tables-directory",
+    .letter = 'T',
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
@@ -51,8 +51,8 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory for text tables.")
   },
 
-  { .letter = 'i',
-    .word = "input-table",
+  { .word = "input-table",
+    .letter = 'i',
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_inputTable,
@@ -60,8 +60,8 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to input text table.")
   },
 
-  { .letter = 'o',
-    .word = "output-table",
+  { .word = "output-table",
+    .letter = 'o',
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_outputTable,
@@ -69,15 +69,15 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to output text table.")
   },
 
-  { .letter = '6',
-    .word = "six-dots",
+  { .word = "six-dots",
+    .letter = '6',
     .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_sixDots,
     .description = strtext("Remove dots seven and eight.")
   },
 
-  { .letter = 'b',
-    .word = "no-base-characters",
+  { .word = "no-base-characters",
+    .letter = 'b',
     .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_noBaseCharacters,
     .description = strtext("Don't fall back to the Unicode base character.")

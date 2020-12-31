@@ -79,41 +79,41 @@ static int brlapi_fd;
 static void *clipboardData;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'b',
-    .word = "brlapi",
+  { .word = "brlapi",
+    .letter = 'b',
     .argument = strtext("[host][:port]"),
     .setting.string = &host,
     .description = strtext("BrlAPI host and/or port to connect to")
   },
 
-  { .letter = 'a',
-    .word = "auth",
+  { .word = "auth",
+    .letter = 'a',
     .argument = strtext("scheme+..."),
     .setting.string = &auth,
     .description = strtext("BrlAPI authorization/authentication schemes")
   },
 
-  { .letter = 'd',
-    .word = "display",
+  { .word = "display",
+    .letter = 'd',
     .argument = strtext("display"),
     .setting.string = &xDisplay,
     .description = strtext("X display to connect to")
   },
 
-  { .letter = 'n',
-    .word = "no-daemon",
+  { .word = "no-daemon",
+    .letter = 'n',
     .setting.flag = &no_daemon,
     .description = strtext("Remain a foreground process")
   },
 
-  { .letter = 'q',
-    .word = "quiet",
+  { .word = "quiet",
+    .letter = 'q',
     .setting.flag = &quiet,
     .description = strtext("Do not write any text to the braille device")
   },
 
-  { .letter = 'v',
-    .word = "verbose",
+  { .word = "verbose",
+    .letter = 'v',
     .setting.flag = &verbose,
     .description = strtext("Write debugging output to stdout")
   },

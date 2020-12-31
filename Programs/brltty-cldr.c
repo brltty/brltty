@@ -34,8 +34,8 @@
 static char *opt_outputFormat;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'f',
-    .word = "output-format",
+  { .word = "output-format",
+    .letter = 'f',
     .argument = strtext("string"),
     .setting.string = &opt_outputFormat,
     .internal.setting = DEFAULT_OUTPUT_FORMAT,
