@@ -410,7 +410,7 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
 
 static void
 joinRequiredGroups (int stayPrivileged) {
-  int logProblems = 1;
+  const int logProblems = 1;
 
 #ifdef HAVE_PWD_H
   if (stayPrivileged || !amPrivilegedUser()) {

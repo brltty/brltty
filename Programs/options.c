@@ -43,10 +43,9 @@
 #endif /* HAVE_GETOPT_H */
 
 typedef struct {
-  const OptionEntry *optionTable;
-  unsigned int optionCount;
-
-  uint8_t *ensuredSettings;
+  const OptionEntry *const optionTable;
+  unsigned int const optionCount;
+  uint8_t *const ensuredSettings;
 
   uint8_t exitImmediately:1;
   uint8_t warning:1;
