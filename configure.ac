@@ -2,7 +2,7 @@
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2020 by The BRLTTY Developers.
+# Copyright (C) 1995-2021 by The BRLTTY Developers.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -27,7 +27,7 @@ m4_include([Bindings/OCaml/bindings.m4])
 m4_include([Bindings/Python/bindings.m4])
 m4_include([Bindings/Tcl/bindings.m4])
 
-copyright="© 1995-2020 by The BRLTTY Developers"
+copyright="© 1995-2021 by The BRLTTY Developers"
 AC_SUBST([PACKAGE_COPYRIGHT], ["${copyright}"])
 AC_DEFINE_UNQUOTED([PACKAGE_COPYRIGHT], ["${copyright}"],
                    [Define this to be a string containing the copyright notice.])
