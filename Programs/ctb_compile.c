@@ -626,6 +626,7 @@ static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
     wchar_t *character = findCharacters;
     convertUtf8ToWchars(&byte, &character, findSize);
     size_t length = character - findCharacters;
+    if (!isEmojiSequence(findCharacters, length)) return 1;
 
     if (length > ARRAY_COUNT(find.characters)) {
       reportDataError(file, "CLDR sequence too long");

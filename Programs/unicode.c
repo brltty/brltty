@@ -166,6 +166,21 @@ isBrailleCharacter (wchar_t character) {
   return (character & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW;
 }
 
+int
+isEmojiSequence (const wchar_t *characters, size_t count) {
+#ifdef HAVE_ICU
+  const wchar_t *character = characters;
+  const wchar_t *end = character + count;
+
+  while (character < end) {
+    if (u_hasBinaryProperty(*character, UCHAR_EMOJI)) return 1;
+    character += 1;
+  }
+#endif /* HAVE_ICU */
+
+  return 0;
+}
+
 wchar_t
 getReplacementCharacter (void) {
 #ifdef HAVE_WCHAR_H
