@@ -105,7 +105,8 @@ getCharacterCoordinates (int arg, int *row, int *first, int *last, int relaxed) 
   if (arg == BRL_MSK_ARG) {
     if (!SCR_CURSOR_OK()) return 0;
     *row = scr.posy;
-    *first = *last = scr.posx;
+    if (first) *first = scr.posx;
+    if (last) *last = scr.posx;
   } else {
     if (!isTextOffset(arg, first, last, relaxed)) return 0;
     if (row) *row = ses->winy;
