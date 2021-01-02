@@ -1239,13 +1239,16 @@ DATA_OPERANDS_PROCESSOR(processIncludeOperands) {
 static int
 processDataLine (char *line, void *dataAddress) {
   DataFile *file = dataAddress;
+  file->line += 1;
+
   size_t size = strlen(line) + 1;
   const char *byte = line;
+
   wchar_t characters[size];
   wchar_t *character = characters;
 
-  file->line += 1;
   convertUtf8ToWchars(&byte, &character, size);
+  character = characters;
 
   if (*byte) {
     unsigned int offset = byte - line;
@@ -1253,7 +1256,13 @@ processDataLine (char *line, void *dataAddress) {
     return 1;
   }
 
-  return processDataCharacters(file, characters);
+  if (file->line == 1) {
+    if (*character == UNICODE_BYTE_ORDER_MARK) {
+      character += 1;
+    }
+  }
+
+  return processDataCharacters(file, character);
 }
 
 int

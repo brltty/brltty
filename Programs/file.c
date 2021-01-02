@@ -953,20 +953,11 @@ readLine (FILE *file, char **buffer, size_t *size) {
  */
 int
 processLines (FILE *file, LineHandler handleLine, void *data) {
-  unsigned int lineNumber = 0;
   char *buffer = NULL;
   size_t bufferSize = 0;
 
   while (readLine(file, &buffer, &bufferSize)) {
-    char *line = buffer;
-
-    if (!lineNumber++) {
-      static const char utf8ByteOrderMark[] = {0XEF, 0XBB, 0XBF};
-      static const unsigned int length = sizeof(utf8ByteOrderMark);
-      if (strncmp(line, utf8ByteOrderMark, length) == 0) line += length;
-    }
-
-    if (!handleLine(line, data)) break;
+    if (!handleLine(buffer, data)) break;
   }
 
   if (buffer) free(buffer);
