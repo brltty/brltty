@@ -31,4 +31,4 @@ always 'b 23
 always gq 126
 
 # inline contraction of emoji descriptions
-cldr zu
+emoji zu

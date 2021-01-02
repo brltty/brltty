@@ -31,4 +31,4 @@ always oe 246
 always sch 156
 
 # inline contraction of emoji descriptions
-cldr nl
+emoji nl

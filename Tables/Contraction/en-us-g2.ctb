@@ -1540,4 +1540,4 @@ literal .zip
 # number sign followed by a decimal point, followed by the number.
 
 # inline contraction of emoji descriptions
-cldr en
+emoji en

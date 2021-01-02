@@ -118,4 +118,4 @@ always ๘ 1258	  	THAI DIGIT EIGHT
 always ๙ 248	  	THAI DIGIT NINE
 
 # inline contraction of emoji descriptions
-cldr th
+emoji th
