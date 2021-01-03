@@ -396,14 +396,17 @@ static int resumeBrailleDriver(BrailleDisplay *brl) {
   lockMutex(&apiSuspendMutex);
   driverConstructed = constructBrailleDriver();
   if (driverConstructed) {
+    disp = brl;
+  }
+  unlockMutex(&apiSuspendMutex);
+  if (driverConstructed) {
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver resumed");
     handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_NAME, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.name, strlen(braille->definition.name));
     handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_CODE, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.code, strlen(braille->definition.code));
     handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_VERSION, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.version, strlen(braille->definition.version));
-    if (disp) handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DEVICE_MODEL, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
+    handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DEVICE_MODEL, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
     brlResize(brl);
   }
-  unlockMutex(&apiSuspendMutex);
   driverConstructing = 0;
   return driverConstructed;
 }
@@ -4301,7 +4304,6 @@ static void brlResize(BrailleDisplay *brl)
   coreWindowText = realloc(coreWindowText, displaySize * sizeof(*coreWindowText));
   coreWindowDots = realloc(coreWindowDots, displaySize * sizeof(*coreWindowDots));
   coreWindowCursor = 0;
-  disp = brl;
   handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DISPLAY_SIZE, 0, BRLAPI_PARAMF_GLOBAL, displayDimensions, sizeof(displayDimensions));
 }
 
@@ -4329,9 +4331,10 @@ void api_linkServer(BrailleDisplay *brl)
   ApiBraille.writePacket = NULL;
   braille=&ApiBraille;
   lockMutex(&apiDriverMutex);
-  brlResize(brl);
+  disp = brl;
   driverConstructed=1;
   unlockMutex(&apiDriverMutex);
+  brlResize(brl);
   lockMutex(&apiConnectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
   unlockMutex(&apiConnectionsMutex);
