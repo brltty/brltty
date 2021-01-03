@@ -962,14 +962,17 @@ processLines (FILE *file, LineHandler handleLine, void *data) {
   size_t bufferSize = 0;
 
   LineHandlerParameters parameters = {
-    .number = 0,
-    .data = data
+    .data = data,
+
+    .line = {
+      .number = 0,
+    },
   };
 
   while (1) {
-    parameters.number += 1;
-    if (!readLine(file, &buffer, &bufferSize, &parameters.length)) break;
-    parameters.line = buffer;
+    parameters.line.number += 1;
+    if (!readLine(file, &buffer, &bufferSize, &parameters.line.length)) break;
+    parameters.line.text = buffer;
     if (!handleLine(&parameters)) break;
   }
 

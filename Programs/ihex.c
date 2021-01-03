@@ -302,7 +302,7 @@ ihexProcessLine (const LineHandlerParameters *parameters) {
   IhexRecordProcessingData *rpd = &fpd->rpd;
   rpd->line += 1;
 
-  const char *line = parameters->line;
+  const char *line = parameters->line.text;
   while (*line == ' ') line += 1;
   if (!*line) return 1;
   if (*line == IHEX_COMMENT_PREFIX) return 1;

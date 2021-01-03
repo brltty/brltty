@@ -1241,8 +1241,8 @@ processDataLine (const LineHandlerParameters *parameters) {
   DataFile *file = parameters->data;
   file->line += 1;
 
-  const char *byte = parameters->line;
-  size_t size = parameters->length + 1;
+  const char *byte = parameters->line.text;
+  size_t size = parameters->line.length + 1;
   wchar_t characters[size];
   wchar_t *character = characters;
 
@@ -1250,7 +1250,7 @@ processDataLine (const LineHandlerParameters *parameters) {
   character = characters;
 
   if (*byte) {
-    unsigned int offset = byte - parameters->line;
+    unsigned int offset = byte - parameters->line.text;
     reportDataError(file, "illegal UTF-8 character at offset %u", offset);
     return 1;
   }

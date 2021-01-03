@@ -80,10 +80,13 @@ extern void registerProgramStream (const char *name, FILE **stream);
 extern FILE *openFile (const char *path, const char *mode, int optional);
 
 typedef struct {
-  char *line;
-  size_t length;
-  unsigned int number;
   void *data;
+
+  struct {
+    char *text;
+    size_t length;
+    unsigned int number;
+  } line;
 } LineHandlerParameters;
 
 typedef int LineHandler (const LineHandlerParameters *parameters);

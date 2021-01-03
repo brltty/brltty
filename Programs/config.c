@@ -1007,8 +1007,8 @@ handleWcharHelpLine (const wchar_t *line, void *data UNUSED) {
 
 static int
 handleUtf8HelpLine (const LineHandlerParameters *parameters) {
-  const char *utf8 = parameters->line;
-  size_t size = parameters->length + 1;
+  const char *utf8 = parameters->line.text;
+  size_t size = parameters->line.length + 1;
   wchar_t characters[size];
   wchar_t *character = characters;
 

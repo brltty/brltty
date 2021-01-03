@@ -91,7 +91,7 @@ static int
 sayLine (const LineHandlerParameters *parameters) {
   volatile SpeechSynthesizer *spk = parameters->data;
 
-  say(spk, parameters->line);
+  say(spk, parameters->line.text);
   return 1;
 }
 
