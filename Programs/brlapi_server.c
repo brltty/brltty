@@ -683,18 +683,18 @@ static void freeConnection(Connection *c)
 {
   struct Subscription *s, *next;
 
-  lockMutex(&apiParamMutex);
-  for (s=c->subscriptions.next; s!=&c->subscriptions; s=next) {
-    if (s->flags & BRLAPI_PARAMF_GLOBAL)
-      paramState[s->parameter].global_subscriptions--;
-    else
-      paramState[s->parameter].local_subscriptions--;
-    next = s->next;
-    free(s);
-  }
-  unlockMutex(&apiParamMutex);
-
   if (c->fd != INVALID_FILE_DESCRIPTOR) {
+    lockMutex(&apiParamMutex);
+    for (s=c->subscriptions.next; s!=&c->subscriptions; s=next) {
+      if (s->flags & BRLAPI_PARAMF_GLOBAL)
+	paramState[s->parameter].global_subscriptions--;
+      else
+	paramState[s->parameter].local_subscriptions--;
+      next = s->next;
+      free(s);
+    }
+    unlockMutex(&apiParamMutex);
+
     if (c->auth != 1) unauthConnections--;
     closeFileDescriptor(c->fd);
   }
