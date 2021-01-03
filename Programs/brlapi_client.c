@@ -377,7 +377,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
 
   uint32_t size;
   brlapi_packetType_t type;
-  int ret;
+  int ret = 0;
 
   struct timeval now;
   int delay = 0;
