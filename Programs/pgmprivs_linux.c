@@ -2002,22 +2002,13 @@ switchUser (const char *user, int stayPrivileged, int *haveHomeDirectory) {
 
       if ((pwd = getpwuid(uid))) {
         name = pwd->pw_name;
+        if (canSwitchGroup(pwd->pw_gid)) gid = pwd->pw_gid;
       } else {
         snprintf(number, sizeof(number), "%d", uid);
         name = number;
       }
 
       logMessage(LOG_NOTICE, "executing as the invoking user: %s", name);
-    }
-
-    if (*user) {
-      struct passwd *pwd;
-
-      if ((pwd = getpwnam(user))) {
-        if (canSwitchGroup(pwd->pw_gid)) {
-          gid = pwd->pw_gid;
-        }
-      }
     }
 
     setProcessOwnership(uid, gid);
