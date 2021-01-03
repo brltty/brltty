@@ -260,10 +260,11 @@ pthread_mutex_t apiParamMutex;
 static Connection *paramUpdateConnection;
 
 /* mutex lock order is as follows:
- * 1. apiConnectionsMutex
- * 2. apiRawMutex
- * 3. acceptedKeysMutex or brailleWindowMutex
- * 4. apiDriverMutex
+ * 1. apiParamMutex
+ * 2. apiConnectionsMutex
+ * 3. apiRawMutex
+ * 4. acceptedKeysMutex or brailleWindowMutex
+ * 5. apiDriverMutex
 */
 
 static Tty notty;
