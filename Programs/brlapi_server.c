@@ -4279,7 +4279,6 @@ int api_claimDriver (BrailleDisplay *brl)
   int ret;
   lockMutex(&apiSuspendMutex);
   ret = driverConstructed;
-  unlockMutex(&apiSuspendMutex);
   return ret;
 }
 
