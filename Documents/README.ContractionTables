@@ -297,6 +297,8 @@ The Emoji Directive
 Translate an emoji character sequence into its description in the specified
 language. The language operand is an ISO 639 two-letter language code.
 
+This directive only works if at least ICU version 57 is installed.
+
 This directive relies on data provided by the CLDR package.
 CLDR stands for the Common Locale Data Repository project.
 Knoqwn names for this package include:
