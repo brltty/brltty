@@ -4188,6 +4188,7 @@ int api_flushOutput(BrailleDisplay *brl) {
   int drain = 0;
   int update = 0;
 
+  lockMutex(&apiParamMutex);
   lockMutex(&apiConnectionsMutex);
   lockMutex(&apiRawMutex);
   if (suspendConnection) {
@@ -4261,6 +4262,7 @@ int api_flushOutput(BrailleDisplay *brl) {
   unlockMutex(&apiRawMutex);
 out:
   unlockMutex(&apiConnectionsMutex);
+  unlockMutex(&apiParamMutex);
   return ok;
 }
 
