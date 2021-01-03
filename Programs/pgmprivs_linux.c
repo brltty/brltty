@@ -1910,8 +1910,10 @@ setXDGRuntimeDirectory (uid_t uid, gid_t gid) {
           logSystemError("chown");
         }
 
-        if (unlink(newPath) == -1) {
-          logSystemError("unlink");
+        if (!exists) {
+          if (rmdir(newPath) == -1) {
+            logSystemError("rmdir");
+          }
         }
       } else {
         logSystemError("mkdir");
