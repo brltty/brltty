@@ -890,7 +890,7 @@ openFile (const char *path, const char *mode, int optional) {
 }
 
 int
-readLine (FILE *file, char **buffer, size_t *size, size_t *used) {
+readLine (FILE *file, char **buffer, size_t *size, size_t *length) {
   char *line;
 
   if (ferror(file)) return 0;
@@ -904,12 +904,12 @@ readLine (FILE *file, char **buffer, size_t *size, size_t *used) {
   }
 
   if ((line = fgets(*buffer, *size, file))) {
-    size_t length = strlen(line); /* Line length including new-line. */
+    size_t count = strlen(line); /* Line length including new-line. */
 
     /* No trailing new-line means that the buffer isn't big enough. */
-    while (line[length-1] != '\n') {
+    while (line[count-1] != '\n') {
       /* If necessary, extend the buffer. */
-      if ((*size - (length + 1)) == 0) {
+      if ((*size - (count + 1)) == 0) {
         size_t newSize = *size << 1;
         char *newBuffer = realloc(*buffer, newSize);
 
@@ -923,25 +923,25 @@ readLine (FILE *file, char **buffer, size_t *size, size_t *used) {
       }
 
       /* Read the rest of the line into the end of the buffer. */
-      if (!(line = fgets(&(*buffer)[length], *size-length, file))) {
+      if (!(line = fgets(&(*buffer)[count], (*size -count), file))) {
         if (!ferror(file)) goto done;
         logSystemError("fgets");
         return 0;
       }
 
-      length += strlen(line); /* New total line length. */
+      count += strlen(line); /* New total line length. */
       line = *buffer; /* Point to the beginning of the line. */
     }
 
-    if (--length > 0) {
-      if (line[length-1] == '\r') {
-        length -= 1;
+    if (--count > 0) {
+      if (line[count-1] == '\r') {
+        count -= 1;
       }
     }
 
-    line[length] = 0; /* Remove trailing new-line. */
+    line[count] = 0; /* Remove trailing new-line. */
   done:
-    if (used) *used = length;
+    if (length) *length = count;
     return 1;
   } else if (ferror(file)) {
     logSystemError("fgets");

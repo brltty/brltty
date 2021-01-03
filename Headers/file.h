@@ -88,7 +88,7 @@ typedef struct {
 
 typedef int LineHandler (const LineHandlerParameters *parameters);
 extern int processLines (FILE *file, LineHandler handleLine, void *data);
-extern int readLine (FILE *file, char **buffer, size_t *size, size_t *used);
+extern int readLine (FILE *file, char **buffer, size_t *size, size_t *length);
 
 extern STR_DECLARE_FORMATTER(formatInputError, const char *file, const int *line, const char *format, va_list arguments);
 
