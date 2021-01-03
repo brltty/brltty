@@ -32,5 +32,5 @@ getPrivilegeParametersPlatform (void) {
 }
 
 void
-establishProgramPrivileges (char **parameters) {
+establishProgramPrivileges (char **parameters, int stayPrivileged) {
 }

@@ -2196,7 +2196,7 @@ getPrivilegeParametersPlatform (void) {
 }
 
 void
-establishProgramPrivileges (char **parameters) {
+establishProgramPrivileges (char **parameters, int stayPrivileged) {
   logCurrentCapabilities("at start");
 
   setCommandSearchPath(parameters[PARM_PATH]);
@@ -2212,10 +2212,8 @@ establishProgramPrivileges (char **parameters) {
   isolateNamespaces();
 #endif /* HAVE_SCHED_H */
 
-  const char *unprivilegedUser = parameters[PARM_USER];
-  int stayPrivileged = strcmp(unprivilegedUser, ":STAY-PRIVILEGED:") == 0;
-
   {
+    const char *unprivilegedUser = parameters[PARM_USER];
     int haveHomeDirectory = 0;
 
 #ifdef HAVE_PWD_H

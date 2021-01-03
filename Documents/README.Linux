@@ -321,7 +321,7 @@ Privilege parameters control how BRLTTY establishes
 its `safer execution environment`_.
 From highest to lowest precedence, they can be specified via:
 
-* The ``--privilege-parameters`` command line option.
+* The ``--privilege-parameters`` (or ``-z``) command line option.
 * The ``privilege-parameters`` |configuration directive|.
 * The ``BRLTTY_PRIVILEGE_PARAMETERS`` |environment variable|.
 * The ``--with-privilege-parameters`` |configure option|.
@@ -373,16 +373,23 @@ The following privilege parameters are supported for Linux:
 
 ``user``
   This parameter sets `the unprivileged user`_.
-  The special value ``:STAY-PRIVILEGED:`` means:
 
-  * Don't switch to an unprivileged user,
-    i.e. continue to execute as the invoking user.
+Staying Privileged
+~~~~~~~~~~~~~~~~~~
 
-  * Don't relinquish any capabilities.
-    Missing `required capabilities`_ are, if possible, still acquired.
+If the ``--stay-privileged`` (or ``-Z``) command line option is specified
+then BRLTTY will retain all of the privileges
+that it had when it was invoked.
+It won't:
 
-  * Don't relinquish any group memberships.
-    Missing `needed group memberships`_ are, if possible, still established.
+* Switch to an unprivileged user
+  (i.e. it'll continue to execute as the invoking user).
+
+* Relinquish any group memberships.
+  Missing `needed group memberships`_ are, if possible, still established.
+
+* Relinquish any capabilities.
+  Missing `required capabilities`_ are, if possible, still acquired.
 
 Safe Command Search Path
 ~~~~~~~~~~~~~~~~~~~~~~~~

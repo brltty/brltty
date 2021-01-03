@@ -191,9 +191,11 @@ static const char *const optionStrings_CancelExecution[] = {
 static char *opt_promptPatterns;
 
 static char *opt_privilegeParameters;
-static char *opt_pidFile;
+static int opt_stayPrivileged;
 
+static char *opt_pidFile;
 static char *opt_configurationFile;
+
 static char *opt_updatableDirectory;
 static char *opt_writableDirectory;
 char *opt_driversDirectory;
@@ -294,7 +296,6 @@ static const char *const optionStrings_SpeechDriver[] = {
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "start-message",
-    .letter = 'Y',
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("text"),
     .setting.string = &opt_startMessage,
@@ -302,7 +303,6 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
   { .word = "stop-message",
-    .letter = 'Z',
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("text"),
     .setting.string = &opt_stopMessage,
@@ -340,12 +340,19 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
   { .word = "privilege-parameters",
-    .letter = 'y',
+    .letter = 'z',
     .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_Environ,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_privilegeParameters,
     .internal.setting = PRIVILEGE_PARAMETERS,
     .description = strtext("Parameters for the privilege establishment stage.")
+  },
+
+  { .word = "stay-privileged",
+    .letter = 'Z',
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .setting.flag = &opt_stayPrivileged,
+    .description = strtext("Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc).")
   },
 
   { .word = "cancel-execution",
@@ -393,7 +400,6 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
   { .word = "prompt-patterns",
-    .letter = 'z',
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
     .argument = strtext("regexp,..."),
     .setting.string = &opt_promptPatterns,
@@ -621,9 +627,9 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 #endif /* HAVE_MIDI_SUPPORT */
 
-  { .word = "message-timeout",
+  { .word = "message-time",
     .letter = 'M',
-    .flags = OPT_Hidden,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .argument = strtext("csecs"),
     .setting.string = &opt_messageHoldTimeout,
     .description = strtext("Message hold timeout (in 10ms units).")
@@ -771,7 +777,7 @@ establishPrivileges (void) {
 
   if (parameters) {
     logParameters(names, parameters, gettext("Privilege Parameter"));
-    establishProgramPrivileges(parameters);
+    establishProgramPrivileges(parameters, opt_stayPrivileged);
     deallocateStrings(parameters);
   }
 }
