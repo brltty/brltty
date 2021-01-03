@@ -890,14 +890,14 @@ openFile (const char *path, const char *mode, int optional) {
 }
 
 int
-readLine (FILE *file, char **buffer, size_t *size) {
+readLine (FILE *file, char **buffer, size_t *size, size_t *used) {
   char *line;
 
   if (ferror(file)) return 0;
   if (feof(file)) return 0;
 
   if (!*size) {
-    if (!(*buffer = malloc(*size = 0X80))) {
+    if (!(*buffer = malloc((*size = 0X80)))) {
       logMallocError();
       return 0;
     }
@@ -924,8 +924,8 @@ readLine (FILE *file, char **buffer, size_t *size) {
 
       /* Read the rest of the line into the end of the buffer. */
       if (!(line = fgets(&(*buffer)[length], *size-length, file))) {
-        if (!ferror(file)) return 1;
-        logSystemError("read");
+        if (!ferror(file)) goto done;
+        logSystemError("fgets");
         return 0;
       }
 
@@ -933,13 +933,18 @@ readLine (FILE *file, char **buffer, size_t *size) {
       line = *buffer; /* Point to the beginning of the line. */
     }
 
-    if (--length > 0)
-      if (line[length-1] == '\r')
-        --length;
+    if (--length > 0) {
+      if (line[length-1] == '\r') {
+        length -= 1;
+      }
+    }
+
     line[length] = 0; /* Remove trailing new-line. */
+  done:
+    if (used) *used = length;
     return 1;
   } else if (ferror(file)) {
-    logSystemError("read");
+    logSystemError("fgets");
   }
 
   return 0;
@@ -956,8 +961,16 @@ processLines (FILE *file, LineHandler handleLine, void *data) {
   char *buffer = NULL;
   size_t bufferSize = 0;
 
-  while (readLine(file, &buffer, &bufferSize)) {
-    if (!handleLine(buffer, data)) break;
+  LineHandlerParameters parameters = {
+    .number = 0,
+    .data = data
+  };
+
+  while (1) {
+    parameters.number += 1;
+    if (!readLine(file, &buffer, &bufferSize, &parameters.length)) break;
+    parameters.line = buffer;
+    if (!handleLine(&parameters)) break;
   }
 
   if (buffer) free(buffer);

@@ -88,10 +88,10 @@ say (volatile SpeechSynthesizer *spk, const char *string) {
 }
 
 static int
-sayLine (char *line, void *data) {
-  volatile SpeechSynthesizer *spk = data;
+sayLine (const LineHandlerParameters *parameters) {
+  volatile SpeechSynthesizer *spk = parameters->data;
 
-  say(spk, line);
+  say(spk, parameters->line);
   return 1;
 }
 

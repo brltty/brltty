@@ -328,7 +328,8 @@ makePreferencesFilePath (const char *name) {
 }
 
 static int
-processPreferenceLine (char *line, void *data) {
+processPreferenceLine (const LineHandlerParameters *parameters) {
+  char *line = parameters->line;
   while (isspace(*line)) line += 1;
   if (!*line) return 1;
   if (*line == PREFS_COMMENT_CHARACTER) return 1;

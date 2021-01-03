@@ -296,7 +296,7 @@ static int
 getExternalResponses (BrailleContractionData *bcd) {
   FILE *stream = bcd->table->data.external.standardOutput;
 
-  while (readLine(stream, &bcd->table->data.external.input.buffer, &bcd->table->data.external.input.size)) {
+  while (readLine(stream, &bcd->table->data.external.input.buffer, &bcd->table->data.external.input.size, NULL)) {
     int ok = 0;
     int stop = 0;
     char *delimiter = strchr(bcd->table->data.external.input.buffer, '=');

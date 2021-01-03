@@ -79,9 +79,16 @@ extern void registerProgramStream (const char *name, FILE **stream);
 
 extern FILE *openFile (const char *path, const char *mode, int optional);
 
-typedef int LineHandler (char *line, void *data);
+typedef struct {
+  char *line;
+  size_t length;
+  unsigned int number;
+  void *data;
+} LineHandlerParameters;
+
+typedef int LineHandler (const LineHandlerParameters *parameters);
 extern int processLines (FILE *file, LineHandler handleLine, void *data);
-extern int readLine (FILE *file, char **buffer, size_t *size);
+extern int readLine (FILE *file, char **buffer, size_t *size, size_t *used);
 
 extern STR_DECLARE_FORMATTER(formatInputError, const char *file, const int *line, const char *format, va_list arguments);
 

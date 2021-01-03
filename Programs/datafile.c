@@ -1237,13 +1237,12 @@ DATA_OPERANDS_PROCESSOR(processIncludeOperands) {
 }
 
 static int
-processDataLine (char *line, void *dataAddress) {
-  DataFile *file = dataAddress;
+processDataLine (const LineHandlerParameters *parameters) {
+  DataFile *file = parameters->data;
   file->line += 1;
 
-  size_t size = strlen(line) + 1;
-  const char *byte = line;
-
+  const char *byte = parameters->line;
+  size_t size = parameters->length + 1;
   wchar_t characters[size];
   wchar_t *character = characters;
 
@@ -1251,7 +1250,7 @@ processDataLine (char *line, void *dataAddress) {
   character = characters;
 
   if (*byte) {
-    unsigned int offset = byte - line;
+    unsigned int offset = byte - parameters->line;
     reportDataError(file, "illegal UTF-8 character at offset %u", offset);
     return 1;
   }

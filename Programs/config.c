@@ -1006,14 +1006,14 @@ handleWcharHelpLine (const wchar_t *line, void *data UNUSED) {
 }
 
 static int
-handleUtf8HelpLine (char *line, void *data) {
-  const char *utf8 = line;
-  size_t count = strlen(utf8) + 1;
-  wchar_t buffer[count];
-  wchar_t *characters = buffer;
+handleUtf8HelpLine (const LineHandlerParameters *parameters) {
+  const char *utf8 = parameters->line;
+  size_t size = parameters->length + 1;
+  wchar_t characters[size];
+  wchar_t *character = characters;
 
-  convertUtf8ToWchars(&utf8, &characters, count);
-  return handleWcharHelpLine(buffer, data);
+  convertUtf8ToWchars(&utf8, &character, size);
+  return handleWcharHelpLine(characters, parameters->data);
 }
 
 static int
