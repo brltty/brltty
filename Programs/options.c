@@ -329,12 +329,16 @@ processCommandLine (
       int letter = entry->letter;
 
       if (letter) {
-        *opt++ = letter;
-        if (entry->argument) *opt++ = ':';
-      } else {
-        letter = nextNonLetter++;
+        if (optionEntries[letter]) {
+          logMessage(LOG_WARNING, "duplicate short option: -%c", letter);
+          letter = 0;
+        } else {
+          *opt++ = letter;
+          if (entry->argument) *opt++ = ':';
+        }
       }
 
+      if (!letter) letter = nextNonLetter++;
       optionLetters[index] = letter;
       optionEntries[letter] = entry;
 
