@@ -1022,7 +1022,7 @@ msgstr "尋覽選向"
 
 #: Programs/menu.c:443
 msgid "No"
-msgstr "不用"
+msgstr "否"
 
 #: Programs/menu_prefs.c:567
 msgid "No Capitalization"
@@ -2169,7 +2169,7 @@ msgstr "無法寫入視窗名稱 %s\n"
 #. It is spoken just before an uppercase letter, e.g. "cap A".
 #: Programs/core.c:827
 msgid "cap"
-msgstr "cap"
+msgstr "大寫"
 
 #: Programs/menu_prefs.c:704 Programs/menu_prefs.c:1111
 msgid "cells"
