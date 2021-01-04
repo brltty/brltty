@@ -43,7 +43,7 @@ static const char tableName_unicode[] = "unicode";
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "tables-directory",
     .letter = 'T',
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,
@@ -53,7 +53,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "input-table",
     .letter = 'i',
-    .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_inputTable,
     .internal.setting = tableName_autoselect,
@@ -62,7 +61,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "output-table",
     .letter = 'o',
-    .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_outputTable,
     .internal.setting = tableName_unicode,
@@ -71,14 +69,12 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "six-dots",
     .letter = '6',
-    .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_sixDots,
     .description = strtext("Remove dots seven and eight.")
   },
 
   { .word = "no-base-characters",
     .letter = 'b',
-    .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_noBaseCharacters,
     .description = strtext("Don't fall back to the Unicode base character.")
   },

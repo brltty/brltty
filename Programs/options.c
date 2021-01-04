@@ -671,7 +671,7 @@ processEnvironmentVariable (
 ) {
   size_t prefixLength = strlen(prefix);
 
-  if ((option->flags & OPT_Environ) && option->word) {
+  if ((option->flags & OPT_EnvVar) && option->word) {
     size_t nameSize = prefixLength + 1 + strlen(option->word) + 1;
     char name[nameSize];
 

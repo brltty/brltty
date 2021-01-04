@@ -31,7 +31,7 @@ typedef enum {
   OPT_Hidden	= 0X01,
   OPT_Extend	= 0X02,
   OPT_Config	= 0X04,
-  OPT_Environ	= 0X08,
+  OPT_EnvVar	= 0X08,
   OPT_Format  	= 0X10
 } OptionFlag;
 

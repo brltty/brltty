@@ -271,6 +271,7 @@
 
 # The braille-parameters directive passes driver-specific parameters
 # through to the braille driver.
+# (can be specified more than once)
 # (can be overridden with the --braille-parameters= [-B] option)
 #braille-parameters driver:name=value,...
 
@@ -379,6 +380,7 @@
 
 # The speech-parameters directive passes driver-specific parameters through
 # to the speech driver.
+# (can be specified more than once)
 # (can be overridden with the --speech-parameters= [-S] option)
 #speech-parameters driver:name=value,...
 
@@ -461,6 +463,7 @@
 
 # The keyboard-properties directive specifies which keyboards to monitor.
 # If not specified, all keyboards are monitored.
+# (can be specified more than once)
 # (can be overridden with the --keyboard-properties= [-K] option)
 #keyboard-properties	Type=any	# [any,ps2,usb,bluetooth,internal]
 #keyboard-properties	Vendor=0X0000	# [0X0000-0XFFFF]
@@ -551,6 +554,7 @@
 # The override-preference directive can be used to explicitly specify the
 # initial setting of any preference. More than one preference may be overridden
 # by separating them by commas and/or by using this directive multiple times.
+# (can be specified more than once)
 # (can be overridden with the --override-preference= [-o] option)
 #override-preference preference=setting,...
 
@@ -603,6 +607,7 @@
 # that are to be used by the NXPROMPT and PRPROMPT navigation commands.
 # If not specified, then an exact match of the content of the current line,
 # up to and including the first space, will be used.
+# (can be specified more than once)
 # (can be overridden with the --prompt-patterns= option)
 #prompt-patterns	regexp,...
 
@@ -627,6 +632,7 @@
 # establishment parameters to use when BRLTTY is started by a privileged
 # user (e.g. by root on a Linux/Unix system). The configured defaults are:
 # "@privilege_parameters@".
+# (can be specified more than once)
 # (can be overridden with the --privilege-parameters= [-z] option)
 #privilege-parameters platform:name=value,...
 
@@ -647,6 +653,7 @@
 
 # The api-parameters directive passes parameters to the Application
 # Programming Interface.
+# (can be specified more than once)
 # (can be overridden with the --api-parameters= [-A] option)
 #api-parameters name=value,...
 
@@ -682,6 +689,7 @@
 
 # The screen-parameters directive passes driver-specific parameters through
 # to the screen driver.
+# (can be specified more than once)
 # (can be overridden with the --screen-parameters= [-X] option)
 #screen-parameters driver:name=value,...
 
