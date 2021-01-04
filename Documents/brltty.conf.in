@@ -551,12 +551,12 @@
 # (can be overridden with the --preferences-file= [-F] option)
 #preferences-file	@PREFERENCES_FILE@
 
-# The override-preference directive can be used to explicitly specify the
+# The override-preferences directive can be used to explicitly specify the
 # initial setting of any preference. More than one preference may be overridden
 # by separating them by commas and/or by using this directive multiple times.
 # (can be specified more than once)
-# (can be overridden with the --override-preference= [-o] option)
-#override-preference preference=setting,...
+# (can be overridden with the --override-preferences= [-o] option)
+#override-preferences preference=setting,...
 
 
 ##########################
