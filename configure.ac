@@ -517,7 +517,12 @@ AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_make_objec
 case "${host_os}"
 in
    *)
-      brltty_cv_prog_make_object_relocatable="\$(LD) -r -o"
+      if test "${GCC}" = "yes"
+      then
+         brltty_cv_prog_make_object_relocatable="\$(CC) -shared -o"
+      else
+         brltty_cv_prog_make_object_relocatable="\$(LD) -r -o"
+      fi
       ;;
 esac])
 MKREL="${brltty_cv_prog_make_object_relocatable}"
