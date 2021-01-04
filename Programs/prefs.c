@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -328,7 +328,8 @@ makePreferencesFilePath (const char *name) {
 }
 
 static int
-processPreferenceLine (char *line, void *data) {
+processPreferenceLine (const LineHandlerParameters *parameters) {
+  char *line = parameters->line.text;
   while (isspace(*line)) line += 1;
   if (!*line) return 1;
   if (*line == PREFS_COMMENT_CHARACTER) return 1;

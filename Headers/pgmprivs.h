@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -25,7 +25,7 @@ extern "C" {
 
 extern const char *const *getPrivilegeParameterNames (void);
 extern const char *getPrivilegeParametersPlatform (void);
-extern void establishProgramPrivileges (char **specifiedParameters, char **configuredParameters);
+extern void establishProgramPrivileges (char **parameters, int stayPrivileged);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -44,8 +44,8 @@ static char *opt_outputWidth;
 static int opt_forceOutput;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'T',
-    .word = "tables-directory",
+  { .word = "tables-directory",
+    .letter = 'T',
     .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
@@ -54,44 +54,44 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory containing tables.")
   },
 
-  { .letter = 'c',
-    .word = "contraction-table",
+  { .word = "contraction-table",
+    .letter = 'c',
     .argument = "file",
     .setting.string = &opt_contractionTable,
     .internal.setting = "en-us-g2",
     .description = strtext("Contraction table.")
   },
 
-  { .letter = 't',
-    .word = "text-table",
+  { .word = "text-table",
+    .letter = 't',
     .argument = "file",
     .setting.string = &opt_textTable,
     .description = strtext("Text table.")
   },
 
-  { .letter = 'v',
-    .word = "verification-table",
+  { .word = "verification-table",
+    .letter = 'v',
     .argument = "file",
     .setting.string = &opt_verificationTable,
     .description = strtext("Contraction verification table.")
   },
 
-  { .letter = 'r',
-    .word = "reformat-text",
+  { .word = "reformat-text",
+    .letter = 'r',
     .setting.flag = &opt_reformatText,
     .description = strtext("Reformat input.")
   },
 
-  { .letter = 'w',
-    .word = "output-width",
+  { .word = "output-width",
+    .letter = 'w',
     .argument = "columns",
     .setting.string = &opt_outputWidth,
     .internal.setting = "",
     .description = strtext("Maximum length of an output line.")
   },
 
-  { .letter = 'f',
-    .word = "force-output",
+  { .word = "force-output",
+    .letter = 'f',
     .setting.flag = &opt_forceOutput,
     .description = strtext("Force immediate output.")
   },

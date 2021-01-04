@@ -1,7 +1,7 @@
 ###############################################################################
 # libbrlapi - A library providing access to braille terminals for applications.
 #
-# Copyright (C) 1995-2020 by Dave Mielke <dave@mielke.cc>
+# Copyright (C) 1995-2021 by Dave Mielke <dave@mielke.cc>
 #
 # libbrlapi comes with ABSOLUTELY NO WARRANTY.
 #

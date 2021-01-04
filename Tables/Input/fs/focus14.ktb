@@ -2,7 +2,7 @@
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2020 by The BRLTTY Developers.
+# Copyright (C) 1995-2021 by The BRLTTY Developers.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title FreedomScientific Focus2 (Blue) 14
+title FreedomScientific Focus 14
 
 assign frontKeysLeft left\sselector,\sleft\srocker,\span\sleft,\sleft\sshift
 assign frontKeysRight right\sshift,\span\sright,\sright\srocker,\sright\sselector

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -34,8 +34,8 @@
 static char *opt_outputFormat;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'f',
-    .word = "output-format",
+  { .word = "output-format",
+    .letter = 'f',
     .argument = strtext("string"),
     .setting.string = &opt_outputFormat,
     .internal.setting = DEFAULT_OUTPUT_FORMAT,

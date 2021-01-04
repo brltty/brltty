@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -492,8 +492,9 @@ static struct button buttons_simple[] = {
   { "A",      BRL_CMD_BLK(PASSCHAR)                        | 'A', 0, 6, 3 },
   { "Alt-F1", BRL_FLG_INPUT_META | BRL_KEY_FUNCTION | BRL_CMD_BLK(PASSKEY) , 0, 7, 3 },
   { "Frez",   BRL_CMD_FREEZE,   0, 6, 0 },
+  { "Bksp",   BRL_CMD_KEY(BACKSPACE),   0, 6, 1 },
   { "Help",   BRL_CMD_HELP,     0, 7, 0 },
-  { "Pref",   BRL_CMD_PREFMENU, 0, 6, 1 },
+  { "Pref",   BRL_CMD_PREFMENU, 0, 7, 1 },
   { "PL",     BRL_CMD_PREFLOAD, 0, 6, 2 },
   { "PS",     BRL_CMD_PREFSAVE, 0, 7, 2 },
   { NULL,     0,                0, 0, 0},

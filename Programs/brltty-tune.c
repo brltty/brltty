@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -38,29 +38,29 @@ static char *opt_midiInstrument;
 #endif /* HAVE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'f',
-    .word = "files",
+  { .word = "files",
+    .letter = 'f',
     .setting.flag = &opt_fromFiles,
     .description = "Use files rather than command line arguments."
   },
 
-  { .letter = 'v',
-    .word = "volume",
+  { .word = "volume",
+    .letter = 'v',
     .argument = "loudness",
     .setting.string = &opt_outputVolume,
     .description = "Output volume (percentage)."
   },
 
-  { .letter = 'd',
-    .word = "device",
+  { .word = "device",
+    .letter = 'd',
     .argument = "device",
     .setting.string = &opt_tuneDevice,
     .description = "Name of tune device."
   },
 
 #ifdef HAVE_PCM_SUPPORT
-  { .letter = 'p',
-    .word = "pcm-device",
+  { .word = "pcm-device",
+    .letter = 'p',
     .flags = OPT_Hidden,
     .argument = "device",
     .setting.string = &opt_pcmDevice,
@@ -69,16 +69,16 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_PCM_SUPPORT */
 
 #ifdef HAVE_MIDI_SUPPORT
-  { .letter = 'm',
-    .word = "midi-device",
+  { .word = "midi-device",
+    .letter = 'm',
     .flags = OPT_Hidden,
     .argument = "device",
     .setting.string = &opt_midiDevice,
     .description = "Device specifier for the Musical Instrument Digital Interface."
   },
 
-  { .letter = 'i',
-    .word = "instrument",
+  { .word = "instrument",
+    .letter = 'i',
     .argument = "instrument",
     .setting.string = &opt_midiInstrument,
     .description = "Name of MIDI instrument."

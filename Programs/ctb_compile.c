@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -626,6 +626,7 @@ static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
     wchar_t *character = findCharacters;
     convertUtf8ToWchars(&byte, &character, findSize);
     size_t length = character - findCharacters;
+    if (!isEmojiSequence(findCharacters, length)) return 1;
 
     if (length > ARRAY_COUNT(find.characters)) {
       reportDataError(file, "CLDR sequence too long");
@@ -652,7 +653,7 @@ static CLDR_ANNOTATION_HANDLER(handleAnnotation) {
   return !!addByteRule(file, CTO_Replace, &find, &replace, 0, 0, ctd);
 }
 
-static DATA_OPERANDS_PROCESSOR(processCLDROperands) {
+static DATA_OPERANDS_PROCESSOR(processEmojiOperands) {
   ContractionTableData *ctd = data;
   DataOperand operand;
 
@@ -676,7 +677,7 @@ static DATA_OPERANDS_PROCESSOR(processCLDROperands) {
 static DATA_OPERANDS_PROCESSOR(processContractionTableOperands) {
   BEGIN_DATA_DIRECTIVE_TABLE
     DATA_NESTING_DIRECTIVES,
-    {.name=WS_C("cldr"), .processor=processCLDROperands},
+    {.name=WS_C("emoji"), .processor=processEmojiOperands},
     {.name=NULL, .processor=processContractionTableDirective},
   END_DATA_DIRECTIVE_TABLE
 

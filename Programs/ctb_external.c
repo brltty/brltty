@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -296,7 +296,7 @@ static int
 getExternalResponses (BrailleContractionData *bcd) {
   FILE *stream = bcd->table->data.external.standardOutput;
 
-  while (readLine(stream, &bcd->table->data.external.input.buffer, &bcd->table->data.external.input.size)) {
+  while (readLine(stream, &bcd->table->data.external.input.buffer, &bcd->table->data.external.input.size, NULL)) {
     int ok = 0;
     int stop = 0;
     char *delimiter = strchr(bcd->table->data.external.input.buffer, '=');

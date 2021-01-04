@@ -3,7 +3,7 @@
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2020 by The BRLTTY Developers.
+# Copyright (C) 1995-2021 by The BRLTTY Developers.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -22,7 +22,7 @@
 # requirements.
 
 # BRLTTY expects to find its configuration file in "@CONFIGURATION_DIRECTORY@/@CONFIGURATION_FILE@"
-# (can be overridden with the -f [--configuration-file=] option).
+# (can be overridden with the --configuration-file= [-f] option).
 # If it doesn't exist, then BRLTTY silently continues but may require
 # that certain command line options be explicitly supplied.
 
@@ -44,16 +44,16 @@
 # directory of the source tree.
 
 
-############################
-# Generic Braille Settings #
-############################
+####################
+# Braille Settings #
+####################
 
 # The braille-driver directive specifies the two-letter driver
 # identification code of the driver for the braille display.
 # If not specified, autodetection will be performed.
 # If more than one driver, separated by commas, is specified,
 # then autodetection will be performed amongst them.
-# (can be overridden with the -b [--braille-driver=] option)
+# (can be overridden with the --braille-driver= [-b] option)
 #braille-driver	auto	# autodetect
 #braille-driver	al	# Alva
 #braille-driver	at	# Albatross
@@ -107,7 +107,7 @@
 # If not specified, "@braille_device@" will be used.
 # If more than one device, separated by commas, is specified,
 # then each of them will be probed in turn.
-# (can be overridden with the -d [--braille-device=] option)
+# (can be overridden with the --braille-device= [-d] option)
 #braille-device	serial:@serial_first_device@	# First serial device.
 #braille-device	usb:		# First USB device matching braille driver.
 #braille-device	usb:nnnnn	# Specific USB device by serial number.
@@ -123,14 +123,14 @@
 # braille display is connected is to be released when the current screen or
 # window can't be read by BRLTTY. If not specified, "on" will be used on Windows
 # platforms and "off" will be used on all other platforms.
-# (can be overridden with the -r [--release-device] option)
+# (can be overridden with the --release-device [-r] option)
 #release-device	on	# Release the device.
 #release-device	off	# Don't release the device.
 
 # The text-table directive specifies which text table to use. Relative paths
 # are anchored at "@TABLES_DIRECTORY@/@TEXT_TABLES_SUBDIRECTORY@". If not specified, locale-based
 # autoselection with fallback to "@text_table@" will be performed.
-# (can be overridden with the -t [--text-table=] option)
+# (can be overridden with the --text-table= [-t] option)
 #text-table	auto	# locale-based autoselection
 #text-table	ar	# Arabic (generic)
 #text-table	as	# Assamese
@@ -224,7 +224,7 @@
 # The attributes-table directive specifies which attributes table to use.
 # Relative paths are anchored at "@TABLES_DIRECTORY@/@ATTRIBUTES_TABLES_SUBDIRECTORY@". If not specified,
 # "@attributes_table@" will be used.
-# (can be overridden with the -a [--attributes-table=] option)
+# (can be overridden with the --attributes-table= [-a] option)
 #attributes-table	left_right	# foreground colour in the left column and background colour in the right column
 #attributes-table	invleft_right	# inverse foreground colour in the left column and background colour in the right column
 #attributes-table	upper_lower	# foreground colour in the upper square and background colour in the lower square
@@ -232,7 +232,7 @@
 # The contraction-table directive specifies which contraction table to use.
 # Relative paths are anchored at "@TABLES_DIRECTORY@/@CONTRACTION_TABLES_SUBDIRECTORY@". If not specified, no
 # contraction table will be available.
-# (can be overridden with the -c [--contraction-table=] option)
+# (can be overridden with the --contraction-table= [-c] option)
 #contraction-table	af	# Afrikaans (contracted)
 #contraction-table	am	# Amharic (uncontracted)
 #contraction-table	de-g0	# German (uncontracted)
@@ -269,9 +269,9 @@
 # Braille Driver Parameters #
 #############################
 
-# The braille-parameters directive passes non-generic parameters through
-# to the braille driver.
-# (can be overridden with the -B [--braille-parameters=] option)
+# The braille-parameters directive passes driver-specific parameters
+# through to the braille driver.
+# (can be overridden with the --braille-parameters= [-B] option)
 #braille-parameters driver:name=value,...
 
 # Alva Braille Driver Parameters
@@ -332,16 +332,16 @@
 #braille-parameters xw:TkParms= # 
 
 
-###########################
-# Generic Speech Settings #
-###########################
+###################
+# Speech Settings #
+###################
 
 # The speech-driver directive specifies the two-letter driver
 # identification code of the driver for the speech synthesizer.
 # If not specified, autodetection will be performed.
 # If more than one driver, separated by commas, is specified,
 # then autodetection will be performed amongst them.
-# (can be overridden with the -s [--speech-driver=] option)
+# (can be overridden with the --speech-driver= [-s] option)
 #speech-driver	auto	# autodetect
 #speech-driver	al	# Alva
 #speech-driver	an	# Android (text to speech engine)
@@ -361,7 +361,7 @@
 
 # The quiet-if-no-braille directive fully disables the autospeak feature.
 # Screen content won't be automatically spoken when braille isn't being used.
-# (can be overridden with the -Q [--quiet-if-no-braille=] option)
+# (can be overridden with the --quiet-if-no-braille= [-Q] option)
 #quiet-if-no-braille	off	# [off,on]
 
 # The speech-input directive specifies the name of the file system object
@@ -369,7 +369,7 @@
 # applications for text-to-speech conversion via BRLTTY's speech driver.
 # Relative paths are anchored at the current working directory. If not
 # specified, the file system object isn't created.
-# (can be overridden with the -i [--speech-input=] option)
+# (can be overridden with the --speech-input= [-i] option)
 #speech-input	/path/to/file-system-object
 
 
@@ -377,9 +377,9 @@
 # Speech Driver Parameters #
 ############################
 
-# The speech-parameters directive passes non-generic parameters through
+# The speech-parameters directive passes driver-specific parameters through
 # to the speech driver.
-# (can be overridden with the -S [--speech-parameters=] option)
+# (can be overridden with the --speech-parameters= [-S] option)
 #speech-parameters driver:name=value,...
 
 # eSpeak Speech Driver Parameters
@@ -414,7 +414,8 @@
 # SpeechDispatcher Speech Driver Parameters
 #speech-parameters sd:Language= # [two-letter language code]
 #speech-parameters sd:Module= # [flite,festival,epos-generic,dtk-generic,...]
-#speech-parameters sd:Port=6560 # [1-65535] # [1-65535]
+#speech-parameters sd:Name= # 
+#speech-parameters sd:Port=6560 # [1-65535]
 #speech-parameters sd:Voice= # [male1,female1,male2,female2,male3,female3,child_male,child_female]
 
 # Swift Speech Driver Parameters
@@ -451,7 +452,7 @@
 
 # The keyboard-table directive specifies which keyboard table to use. Relative paths are
 # anchored at "@TABLES_DIRECTORY@/@KEYBOARD_TABLES_SUBDIRECTORY@". If not specified, no keyboard table is used.
-# (can be overridden with the -k [--keyboard-table=] option)
+# (can be overridden with the --keyboard-table= [-k] option)
 #keyboard-table	braille	# bindings for braille keyboards
 #keyboard-table	desktop	# bindings for full keyboards
 #keyboard-table	keypad	# bindings for keypad-based navigation
@@ -460,7 +461,7 @@
 
 # The keyboard-properties directive specifies which keyboards to monitor.
 # If not specified, all keyboards are monitored.
-# (can be overridden with the -K [--keyboard-properties=] option)
+# (can be overridden with the --keyboard-properties= [-K] option)
 #keyboard-properties	Type=any	# [any,ps2,usb,bluetooth,internal]
 #keyboard-properties	Vendor=0X0000	# [0X0000-0XFFFF]
 #keyboard-properties	Product=0X0000	# [0X0000-0XFFFF]
@@ -473,14 +474,14 @@
 # The pcm-device directive specifies the device to use for soundcard
 # digital audio. If not specified, a method- and system-dependent
 # default will be used.
-# (can be overridden with the -p [--pcm-device=] option)
+# (can be overridden with the --pcm-device= [-p] option)
 #pcm-device	/path/to/device	# most methods
 #pcm-device	pcm-handle-id	# ALSA (see second parameter of snd_pcm_open)
 
 # The midi-device directive specifies the device to use for the Musical
 # Instrument Digital Interface. If not specified, a method- and
 # system-dependent default will be used.
-# (can be overridden with the -m [--midi-device=] option)
+# (can be overridden with the --midi-device= [-m] option)
 #midi-device	/path/to/device	# most methods
 #midi-device	client:port	# ALSA (may use number or case-sensitive substring of name)
 
@@ -492,13 +493,13 @@
 # The log-file directive specifies the file to which diagnostics are written.
 # Relative paths are anchored at the current working directory. If not
 # specified, diagnostics are written to the system log.
-# (can be overridden with the -L [--log-file=] option)
+# (can be overridden with the --log-file= [-L] option)
 #log-file	/tmp/brltty.log
 
 # The log-level directive specifies which event categories are to be
 # logged as well as the severity threshold for uncategorized events.
 # The category names and severity threshold are separated by commas.
-# (can be overridden with the -l [--log-level=] option)
+# (can be overridden with the --log-level= [-l] option)
 #log-level	notice
 
 # Only one severity threshold may be specified. Less severe uncategorized
@@ -544,13 +545,13 @@
 # preferences. Relative paths are usually anchored at "@UPDATABLE_DIRECTORY@"
 # (can be changed via the updatable-directory directive).
 # If not specified, "@PREFERENCES_FILE@" will be used.
-# (can be overridden with the -F [--preferences-file=] option)
+# (can be overridden with the --preferences-file= [-F] option)
 #preferences-file	@PREFERENCES_FILE@
 
 # The override-preference directive can be used to explicitly specify the
 # initial setting of any preference. More than one preference may be overridden
 # by separating them by commas and/or by using this directive multiple times.
-# (can be overridden with the -o [--override-preference=] option)
+# (can be overridden with the --override-preference= [-o] option)
 #override-preference preference=setting,...
 
 
@@ -560,54 +561,73 @@
 
 # The pid-file directive specifies the absolute path to a file that will
 # contain BRLTTY's process identifier. It is removed when BRLTTY terminates.
-# (can be overridden with the -P [--pid-file=] option)
+# (can be overridden with the --pid-file= [-P] option)
 #pid-file @WRITABLE_DIRECTORY@/brltty.pid
 
 # The updatable-directory directive specifies the absolute path to a directory
 # which contains files that can be updated (preferences, saved clipboard, etc).
 # If not specified, "@UPDATABLE_DIRECTORY@" will be used.
-# (can be overridden with the -U [--updatable-directory=] option)
+# (can be overridden with the --updatable-directory= [-U] option)
 #updatable-directory @UPDATABLE_DIRECTORY@
 
 # The writable-directory directive specifies the absolute path to a directory
 # which can be written to (creation of missing but needed resources, etc). If
 # not specified, "@WRITABLE_DIRECTORY@" will be used.
-# (can be overridden with the -W [--writable-directory=] option)
+# (can be overridden with the --writable-directory= [-W] option)
 #writable-directory @WRITABLE_DIRECTORY@
 
 # The drivers-directory directive specifies the absolute path to the
 # directory which contains the dynamically loadable drivers. If not
 # specified, @DRIVERS_DIRECTORY@ will be used.
-# (can be overridden with the -D [--drivers-directory=] option)
+# (can be overridden with the --drivers-directory= [-D] option)
 #drivers-directory @DRIVERS_DIRECTORY@
 
 # The tables-directory directive specifies the absolute path to the directory
 # which contains the text, attributes, contraction, keyboard, and input tables.
 # If not specified, "@TABLES_DIRECTORY@" will be used.
-# (can be overridden with the -T [--tables-directory=] option)
+# (can be overridden with the --tables-directory= [-T] option)
 #tables-directory @TABLES_DIRECTORY@
 
 # The start-message directive specifies the text to be shown when the braille
 # driver starts and to be spoken when the speech driver starts. If not
 # specified, "@PACKAGE_NAME@ @PACKAGE_VERSION@" will be used.
-# (can be overridden with the -Y [--start-message=] option)
+# (can be overridden with the --start-message= option)
 #start-message @PACKAGE_NAME@\s@PACKAGE_VERSION@
 
 # The stop-message directive specifies the text to be shown when the braille
 # driver stops. If not specified, "@PACKAGE_NAME@ stopped" will be used.
-# (can be overridden with the -Z [--stop-message=] option)
+# (can be overridden with the --stop-message= option)
 #stop-message @PACKAGE_NAME@\sstopped
 
+# The prompt-patterns directive specifies a list of regular expressions
+# that are to be used by the NXPROMPT and PRPROMPT navigation commands.
+# If not specified, then an exact match of the content of the current line,
+# up to and including the first space, will be used.
+# (can be overridden with the --prompt-patterns= option)
+#prompt-patterns	regexp,...
 
-######################################
-# Privilege Establishment Parameters #
-######################################
+# The message-time directive specifies how long a message is to be displayed
+# before it's automatically cleared. If not specified, four seconds will be
+# used.
+# (can be overridden with the --message-time= [-M] option)
+#message-time	400	# hundredths of a second
+
+
+########################
+# Privilege Parameters #
+########################
+
+# The stay-privileged directive disables switching to an unprivilegdd user
+# as well as the relinquishing of any privileges (group memberships,
+# capabilities, etc).
+# (can be overridden with the --stay-privileged= [-Z] option)
+#stay-privileged	off	# [off,on]
 
 # The privilege-parameters directive specifies the default privilege
 # establishment parameters to use when BRLTTY is started by a privileged
 # user (e.g. by root on a Linux/Unix system). The configured defaults are:
 # "@privilege_parameters@".
-# (can be overridden with the -y [--privilege-parameters=] option)
+# (can be overridden with the --privilege-parameters= [-z] option)
 #privilege-parameters platform:name=value,...
 
 # Linux Privilege Parameters
@@ -622,12 +642,12 @@
 ################################################
 
 # The no-api directive disables the Application Programming Interface (API).
-# (can be overridden with the -N [--no-api=] option)
+# (can be overridden with the --no-api= [-N] option)
 #no-api	off	# [off,on]
 
 # The api-parameters directive passes parameters to the Application
 # Programming Interface.
-# (can be overridden with the -A [--api-parameters=] option)
+# (can be overridden with the --api-parameters= [-A] option)
 #api-parameters name=value,...
 
 #api-parameters Auth=keyfile:@CONFIGURATION_DIRECTORY@/@api_authkeyfile@	# Require authentication key
@@ -639,13 +659,13 @@
 #api-parameters StackSize=65536
 
 
-###########################
-# Generic Screen Settings #
-###########################
+###################
+# Screen Settings #
+###################
 
 # The screen-driver directive specifies the two-letter driver
 # identification code of the driver for the console screen.
-# (can be overridden with the -x [--screen-driver=] option)
+# (can be overridden with the --screen-driver= [-x] option)
 #screen-driver	an	# Android
 #screen-driver	as	# AtSpi
 #screen-driver	a2	# AtSpi2
@@ -660,9 +680,9 @@
 # Screen Driver Parameters #
 ############################
 
-# The screen-parameters directive passes non-generic parameters through
+# The screen-parameters directive passes driver-specific parameters through
 # to the screen driver.
-# (can be overridden with the -X [--screen-parameters=] option)
+# (can be overridden with the --screen-parameters= [-X] option)
 #screen-parameters driver:name=value,...
 
 # AtSpi Screen Driver Parameters

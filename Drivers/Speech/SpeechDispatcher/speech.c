@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -28,9 +28,10 @@ typedef enum {
   PARM_PORT,
   PARM_MODULE,
   PARM_LANGUAGE,
-  PARM_VOICE
+  PARM_VOICE,
+  PARM_NAME
 } DriverParameter;
-#define SPKPARMS "port", "module", "language", "voice"
+#define SPKPARMS "port", "module", "language", "voice", "name"
 
 #include "spk_driver.h"
 
@@ -40,8 +41,9 @@ static SPDConnection *connectionHandle = NULL;
 static const char *moduleName;
 static const char *languageName;
 static SPDVoiceType voiceType;
-static signed int relativeRate;
+static const char *voiceName;
 static signed int relativeVolume;
+static signed int relativeRate;
 static signed int relativePitch;
 static SPDPunctuation punctuationVerbosity;
 
@@ -50,8 +52,9 @@ clearSettings (void) {
   moduleName = NULL;
   languageName = NULL;
   voiceType = -1;
-  relativeRate = 0;
+  voiceName = NULL;
   relativeVolume = 0;
+  relativeRate = 0;
   relativePitch = 0;
   punctuationVerbosity = -1;
 }
@@ -85,8 +88,13 @@ setLanguage (const void *data) {
 }
 
 static void
-setVoice (const void *data) {
+setVoiceType (const void *data) {
   if (voiceType != -1) spd_set_voice_type(connectionHandle, voiceType);
+}
+
+static void
+setVoiceName (const void *data) {
+  if (voiceName) spd_set_synthesis_voice(connectionHandle, voiceName);
 }
 
 static void
@@ -156,7 +164,8 @@ openConnection (void) {
       static const SpeechdAction actions[] = {
         setModule,
         setLanguage,
-        setVoice,
+        setVoiceType,
+        setVoiceName,
         setVolume,
         setRate,
         setPitch,
@@ -225,6 +234,10 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
     } else {
       logMessage(LOG_WARNING, "%s: %s", "invalid voice type", parameters[PARM_VOICE]);
     }
+  }
+
+  if (parameters[PARM_NAME] && *parameters[PARM_NAME]) {
+    voiceName = parameters[PARM_NAME];
   }
 
   return openConnection();

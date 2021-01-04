@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -25,6 +25,7 @@
 #include "ascii.h"
 
 #ifdef HAVE_ICU
+#include <unicode/uversion.h>
 #include <unicode/uchar.h>
 
 #ifdef HAVE_UNICODE_UNORM2_H
@@ -164,6 +165,24 @@ getCharacterWidth (wchar_t character) {
 int
 isBrailleCharacter (wchar_t character) {
   return (character & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW;
+}
+
+int
+isEmojiSequence (const wchar_t *characters, size_t count) {
+#ifdef HAVE_ICU
+  const wchar_t *character = characters;
+  const wchar_t *end = character + count;
+
+  while (character < end) {
+    #if U_ICU_VERSION_MAJOR_NUM >= 57
+    if (u_hasBinaryProperty(*character, UCHAR_EMOJI)) return 1;
+    #endif /* U_ICU_VERSION_MAJOR_NUM >= 57 */
+
+    character += 1;
+  }
+#endif /* HAVE_ICU */
+
+  return 0;
 }
 
 wchar_t
