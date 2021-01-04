@@ -343,7 +343,7 @@ ihexProcessFile (const char *path, IhexRecordHandler *handler, void *data) {
         ok = 1;
       }
     }
-    ;
+
     fclose(file);
   } else if (errno == ENOENT) {
     char *url = makePath(PACKAGE_URL, IHEX_FILES_SUBDIRECTORY);
