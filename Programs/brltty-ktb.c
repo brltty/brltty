@@ -41,28 +41,24 @@ char *opt_driversDirectory;
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "audit",
     .letter = 'a',
-    .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_audit,
     .description = strtext("Report problems with the key table.")
   },
 
   { .word = "keys",
     .letter = 'k',
-    .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_listKeyNames,
     .description = strtext("List key names.")
   },
 
   { .word = "list",
     .letter = 'l',
-    .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_listHelpScreen,
     .description = strtext("List key table in help screen format.")
   },
 
   { .word = "reStructuredText",
     .letter = 'r',
-    .flags = OPT_Config | OPT_Environ,
     .setting.flag = &opt_listRestructuredText,
     .description = strtext("List key table in reStructuredText format.")
   },
@@ -79,7 +75,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "drivers-directory",
     .letter = 'D',
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
     .internal.setting = DRIVERS_DIRECTORY,
