@@ -180,7 +180,7 @@ static char *opt_logLevel;
 static char *opt_logFile;
 static int opt_bootParameters = 1;
 static int opt_environmentVariables;
-static char *opt_messageHoldTimeout;
+static char *opt_messageTime;
 
 static int opt_cancelExecution;
 static const char *const optionStrings_CancelExecution[] = {
@@ -216,7 +216,7 @@ static char *brailleParameters = NULL;
 static char **brailleDriverParameters = NULL;
 
 static char *opt_preferencesFile;
-static char *opt_preferenceOverrides;
+static char *opt_overridePreferences;
 
 static char *oldPreferencesFile = NULL;
 static int oldPreferencesEnabled = 1;
@@ -391,11 +391,11 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Name of or path to default preferences file.")
   },
 
-  { .word = "override-preference",
+  { .word = "override-preferences",
     .letter = 'o',
     .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
-    .setting.string = &opt_preferenceOverrides,
+    .setting.string = &opt_overridePreferences,
     .description = strtext("Explicit preference settings.")
   },
 
@@ -631,7 +631,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'M',
     .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("csecs"),
-    .setting.string = &opt_messageHoldTimeout,
+    .setting.string = &opt_messageTime,
     .description = strtext("Message hold timeout (in 10ms units).")
   },
 
@@ -1274,7 +1274,7 @@ ensureStatusFields (void) {
 static void
 setPreferenceOverrides (void) {
   int count;
-  char **settings = splitString(opt_preferenceOverrides, PARAMETER_SEPARATOR_CHARACTER, &count);
+  char **settings = splitString(opt_overridePreferences, PARAMETER_SEPARATOR_CHARACTER, &count);
 
   if (settings) {
     char **setting = settings;
@@ -2659,8 +2659,8 @@ brlttyStart (void) {
     if (stop) return PROG_EXIT_FORCE;
   }
 
-  if (!validateInterval(&messageHoldTimeout, opt_messageHoldTimeout)) {
-    logMessage(LOG_ERR, "%s: %s", gettext("invalid message hold timeout"), opt_messageHoldTimeout);
+  if (!validateInterval(&messageHoldTimeout, opt_messageTime)) {
+    logMessage(LOG_ERR, "%s: %s", gettext("invalid message hold timeout"), opt_messageTime);
   }
 
   if (opt_version) {
