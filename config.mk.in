@@ -323,6 +323,7 @@ psdir = @psdir@
 UPDATABLE_DIRECTORY = @updatable_directory@
 PROGRAM_DIRECTORY = @program_directory@
 DRIVERS_DIRECTORY = @drivers_directory@
+SCRIPTS_DIRECTORY = @scripts_directory@
 WRITABLE_DIRECTORY = @writable_directory@
 TABLES_DIRECTORY = @tables_directory@
 MANPAGE_DIRECTORY = @manpage_directory@

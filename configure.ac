@@ -144,6 +144,12 @@ BRLTTY_ARG_REQUIRED(
    [drivers_directory], ["${libdir}/${PACKAGE_TARNAME}"]
 )
 
+BRLTTY_ARG_REQUIRED(
+   [scripts-directory], [DIRECTORY],
+   [path to directory containing helper scripts],
+   [scripts_directory], ["${libexecdir}/${PACKAGE_TARNAME}"]
+)
+
 BRLTTY_ARG_WITH(
    [updatable-directory], [DIRECTORY],
    [path to directory which contains files that can be updated],
@@ -2038,14 +2044,22 @@ fi
 
 BRLTTY_DEFINE_DIRECTORY([TABLES_DIRECTORY], [${execute_root}${tables_directory}],
                         [Define this to be a string containing the path to the data files directory.])
+
 BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory}],
                         [Define this to be a string containing the path to the drivers directory.])
+
+BRLTTY_DEFINE_DIRECTORY([SCRIPTS_DIRECTORY], [${execute_root}${scripts_directory}],
+                        [Define this to be a string containing the path to the scripts directory.])
+
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
+
 BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
                        [Define this to be a string containing the path to BrlAPI's data files directory.])
+
 BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
 		       [Define this to be a string containing the path to BrlAPI's local sockets directory.])
+
 BRLTTY_SUBST_EXPANDED([api_socket_directory], ["${api_socket_path}"])
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
