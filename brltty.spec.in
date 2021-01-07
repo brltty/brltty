@@ -35,10 +35,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _datadir /usr/share
 %define _sysconfdir /etc
 %define _pkglibdir %{_libdir}/%{name}
-%define _systemdunitsdir %{_libdir}/systemd/system
-%define _systemdusersdir %{_libdir}/sysusers.d
-%define _systemdfilesdir %{_libdir}/tmpfiles.d
-%define _udevlibdir %{_libdir}/udev
+%define _pkglibexecdir %{_libexecdir}/%{name}
 
 Requires: cldr-emoji-annotation
 Requires: dbus-libs
@@ -48,6 +45,8 @@ Requires: libicu
 Requires: liblouis
 Requires: pcre2-utf32
 Requires: polkit-libs
+
+BuildRequires: systemd-rpm-macros
 
 BuildRequires: /bin/sh
 BuildRequires: /usr/bin/env
@@ -60,6 +59,7 @@ BuildRequires: gcc
 BuildRequires: gawk
 BuildRequires: tcl
 BuildRequires: glibc-headers
+
 BuildRequires: alsa-lib-devel
 BuildRequires: bluez-libs-devel
 BuildRequires: dbus-devel
@@ -565,8 +565,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 %exclude %{_pkglibdir}/libbrlttyssd.so
 %exclude %{_pkglibdir}/libbrlttyxa2.so
 %exclude %{_pkglibdir}/libbrlttyxsc.so
-%exclude %{_pkglibdir}/systemd-*
-%exclude %{_pkglibdir}/udev-*
+%exclude %{_unitdir}
+%exclude %{_udevrulesdir}
 %{_sysconfdir}/brltty
 %exclude %{_sysconfdir}/brltty/Initramfs/dracut.conf
 %exclude %{_sysconfdir}/brltty/Initramfs/cmdline
@@ -616,14 +616,14 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_includedir}/brltty
 
 %files -n brltty-systemd
-%{_systemdunitsdir}/*
-%{_systemdusersdir}/*
-%{_systemdfilesdir}/*
-%{_pkglibdir}/systemd-*
+%{_unitdir}/*
+%{_sysusersdir}/*
+%{_tmpfilesdir}/*
+%{_pkglibexecdir}/systemd-*
 
 %files -n brltty-udev
-%{_udevlibdir}/*
-%{_pkglibdir}/udev-*
+%{_udevrulesdir}/*
+%{_pkglibexecdir}/udev-*
 
 %files -n brltty-dracut
 /usr/lib/dracut/modules.d/99brltty
