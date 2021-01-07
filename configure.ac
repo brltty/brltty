@@ -1261,13 +1261,32 @@ BRLTTY_ARG_PACKAGE([service], [system service], [libsystemd], [dnl
 AC_SUBST([SYSTEMD_SERVICE_TYPE], ["forking"])
 AC_SUBST([SYSTEMD_SERVICE_ARGUMENTS], [""])
 
+SYSTEMD_UNIT_DIR=""
+SYSTEMD_SYSUSERS_DIR=""
+SYSTEMD_TMPFILES_DIR=""
+
 case "${service_package}"
 in
    libsystemd)
       SYSTEMD_SERVICE_TYPE="notify"
       SYSTEMD_SERVICE_ARGUMENTS="-n"
+      SYSTEMD_UNIT_DIR=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)
+      SYSTEMD_SYSUSERS_DIR=$($PKG_CONFIG --variable=sysusersdir systemd)
+      SYSTEMD_TMPFILES_DIR=$($PKG_CONFIG --variable=tmpfilesdir systemd)
       ;;
 esac
+
+test -n "${SYSTEMD_UNIT_DIR}" || SYSTEMD_UNIT_DIR="/usr/lib/systemd/system"
+test -n "${SYSTEMD_SYSUSERS_DIR}" || SYSTEMD_SYSUSERS_DIR="/usr/lib/sysusers.d"
+test -n "${SYSTEMD_TMPFILES_DIR}" || SYSTEMD_TMPFILES_DIR="/usr/lib/tmpfiles.d"
+
+AC_SUBST([SYSTEMD_UNIT_DIR])
+AC_SUBST([SYSTEMD_SYSUSERS_DIR])
+AC_SUBST([SYSTEMD_TMPFILES_DIR])
+
+UDEV_DIR=$($PKG_CONFIG --variable=udevdir udev)
+test -n "${UDEV_DIR}" || UDEV_DIR="/usr/lib/udev"
+AC_SUBST([UDEV_DIR])
 
 BRLTTY_HAVE_PACKAGE([systemd], [libsystemd], [
     brltty_libs_save="${LIBS}"
