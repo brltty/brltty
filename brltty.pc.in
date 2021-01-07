@@ -1,0 +1,88 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2021 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+Name: @PACKAGE_TARNAME@
+Version: @PACKAGE_VERSION@
+URL: @PACKAGE_URL@
+Description: Braille Device Daemon
+
+package_name=@PACKAGE_TARNAME@
+package_title=@PACKAGE_NAME@
+package_version=@PACKAGE_VERSION@
+package_url=@PACKAGE_URL@
+bugreport_email=@PACKAGE_BUGREPORT@
+
+prefix=@prefix@
+sysconfdir=@sysconfdir@
+datarootdir=@datarootdir@
+
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+sbindir=@sbindir@
+libdir=@libdir@
+libexecdir=@libexecdir@
+
+execute_root=@execute_root@
+program_directory=${execute_root}@program_directory@
+drivers_directory=${execute_root}@drivers_directory@
+scripts_directory=${execute_root}@scripts_directory@
+tables_directory=${execute_root}@tables_directory@
+
+updatable_directory=@updatable_directory@
+writable_directory=@writable_directory@
+manpage_directory=@manpage_directory@
+include_directory=@include_directory@
+
+all_braille_driver_codes=@brltty_item_codes_braille@
+all_braille_driver_names=@brltty_item_names_braille@
+internal_braille_driver_codes=@brltty_internal_codes_braille@
+internal_braille_driver_names=@brltty_internal_names_braille@
+external_braille_driver_codes=@brltty_external_codes_braille@
+external_braille_driver_names=@brltty_external_names_braille@
+
+all_speech_driver_codes=@brltty_item_codes_speech@
+all_speech_driver_names=@brltty_item_names_speech@
+internal_speech_driver_codes=@brltty_internal_codes_speech@
+internal_speech_driver_names=@brltty_internal_names_speech@
+external_speech_driver_codes=@brltty_external_codes_speech@
+external_speech_driver_names=@brltty_external_names_speech@
+
+all_screen_driver_codes=@brltty_item_codes_screen@
+all_screen_driver_names=@brltty_item_names_screen@
+internal_screen_driver_codes=@brltty_internal_codes_screen@
+internal_screen_driver_names=@brltty_internal_names_screen@
+external_screen_driver_codes=@brltty_external_codes_screen@
+external_screen_driver_names=@brltty_external_names_screen@
+
+privilege_parameters=@privilege_parameters@
+braille_parameters=@braille_parameters@
+speech_parameters=@speech_parameters@
+screen_parameters=@screen_parameters@
+
+api_name=@api_name@
+api_version=@api_version@
+api_release=@api_release@
+
+api_major=@api_major@
+api_minor=@api_minor@
+api_revision=@api_revision@
+
+api_parameters=@api_parameters@
+api_sockets_directory=@BRLAPI_SOCKETPATH@
+api_authkey_file=@BRLAPI_ETCDIR@/@api_authkeyfile@
+

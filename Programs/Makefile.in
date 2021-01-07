@@ -1064,7 +1064,7 @@ check-all: check-text-tables check-attributes-tables check-contraction-tables ch
 
 ###############################################################################
 
-install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages $(INSTALL_API)
+install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-headers $(INSTALL_MESSAGES) install-manpages install-pkgconfig $(INSTALL_API)
 
 install-programs: install-commands install-tools
 
@@ -1145,6 +1145,9 @@ install-messages:
 install-manpages: install-man1-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/*.1 $(INSTALL_MAN1_DIRECTORY)
 
+install-pkgconfig: install-pkgconfig-directory
+	$(INSTALL_DATA) $(BLD_TOP)brltty.pc $(INSTALL_PKGCONFIG_DIRECTORY)
+
 install-documents: install-document-directory brltty-ktb$X $(BRAILLE_DRIVERS)
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) all
 	$(SRC_TOP)mkdocs -o $(INSTALL_DOCUMENT_DIRECTORY) -s $(SRC_TOP) -b $(BLD_TOP) -d $(DOC_DIR) -t $(TBL_DIR)
@@ -1190,7 +1193,7 @@ install-api-commands: all-brltty-clip
 
 ###############################################################################
 
-uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-messages uninstall-manpages uninstall-documents uninstall-headers uninstall-api-bindings
+uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-messages uninstall-manpages uninstall-pkgconfig uninstall-documents uninstall-headers uninstall-api-bindings
 
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
@@ -1218,6 +1221,9 @@ uninstall-messages:
 uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
 	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
+
+uninstall-pkgconfig:
+	-rm -f $(INSTALL_PKGCONFIG_DIRECTORY)/brltty.pc
 
 uninstall-documents:
 	-rm -r -f $(INSTALL_DOCUMENT_DIRECTORY)

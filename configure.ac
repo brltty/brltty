@@ -2086,6 +2086,7 @@ AC_OUTPUT([
    config.mk
    brltty.spec
    brltty-config.sh
+   brltty.pc
    Documents/brltty.conf
    Documents/brltty.1
    Documents/BrlAPIref.doxy
