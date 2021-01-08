@@ -1122,6 +1122,13 @@ esac])
 libsearch_variable="${brltty_cv_env_libsearch}"
 AC_SUBST([libsearch_variable])
 
+BRLTTY_PKGCONFIG_VARIABLE([POLKIT_POLICY_DIR], [polkit-gobject-1], [policydir], [/usr/share/polkit-1/actions])
+BRLTTY_PKGCONFIG_VARIABLE([POLKIT_RULE_DIR], [polkit-gobject-1], [ruledir], [/usr/share/polkit-1/rules.d])
+BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_SYSUSERS_DIR], [systemd], [sysusersdir], [/usr/lib/sysusers.d])
+BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_TMPFILES_DIR], [systemd], [tmpfilesdir], [/usr/lib/tmpfiles.d])
+BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_UNIT_DIR], [systemd], [systemdsystemunitdir], [/usr/lib/systemd/system])
+BRLTTY_PKGCONFIG_VARIABLE([UDEV_DIR], [udev], [udevdir], [/usr/lib/udev])
+
 BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
    *android*)
       system_package="java"
@@ -1268,14 +1275,6 @@ in
       SYSTEMD_SERVICE_ARGUMENTS="-n"
       ;;
 esac
-
-
-BRLTTY_PKGCONFIG_VARIABLE([POLKIT_POLICY_DIR], [polkit-gobject-1], [policydir], [/usr/share/polkit-1/actions])
-BRLTTY_PKGCONFIG_VARIABLE([POLKIT_RULE_DIR], [polkit-gobject-1], [ruledir], [/usr/share/polkit-1/rules.d])
-BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_SYSUSERS_DIR], [systemd], [sysusersdir], [/usr/lib/sysusers.d])
-BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_TMPFILES_DIR], [systemd], [tmpfilesdir], [/usr/lib/tmpfiles.d])
-BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_UNIT_DIR], [systemd], [systemdsystemunitdir], [/usr/lib/systemd/system])
-BRLTTY_PKGCONFIG_VARIABLE([UDEV_DIR], [udev], [udevdir], [/usr/lib/udev])
 
 BRLTTY_HAVE_PACKAGE([systemd], [libsystemd], [
     brltty_libs_save="${LIBS}"
