@@ -18,21 +18,19 @@
 ###############################################################################
 
 POLKIT_PACKAGE_NAME = org.a11y.brlapi
-POLKIT_DATA_DIRECTORY = $(INSTALL_ROOT)$(datadir)/polkit-1
-
-POLKIT_ACTIONS_DIRECTORY = $(POLKIT_DATA_DIRECTORY)/actions
-POLKIT_ACTIONS_EXTENSION = policy
-
-POLKIT_RULES_DIRECTORY = $(POLKIT_DATA_DIRECTORY)/rules.d
+POLKIT_POLICIES_EXTENSION = policy
 POLKIT_RULES_EXTENSION = rules
 
-install: install-actions install-rules
+POLKIT_POLICIES_DIRECTORY = $(INSTALL_ROOT)$(POLKIT_POLICY_DIR)
+POLKIT_RULES_DIRECTORY = $(INSTALL_ROOT)$(POLKIT_RULE_DIR)
 
-install-actions-directory:
-	$(INSTALL_DIRECTORY) $(POLKIT_ACTIONS_DIRECTORY)
+install: install-policies install-rules
 
-install-actions: install-actions-directory
-	$(INSTALL_DATA) $(SRC_DIR)/actions $(POLKIT_ACTIONS_DIRECTORY)/$(POLKIT_PACKAGE_NAME).$(POLKIT_ACTIONS_EXTENSION)
+install-policies-directory:
+	$(INSTALL_DIRECTORY) $(POLKIT_POLICIES_DIRECTORY)
+
+install-policies: install-policies-directory
+	$(INSTALL_DATA) $(SRC_DIR)/policies $(POLKIT_POLICIES_DIRECTORY)/$(POLKIT_PACKAGE_NAME).$(POLKIT_POLICIES_EXTENSION)
 
 install-rules-directory:
 	$(INSTALL_DIRECTORY) $(POLKIT_RULES_DIRECTORY)
@@ -41,6 +39,6 @@ install-rules: install-rules-directory
 	$(INSTALL_DATA) $(SRC_DIR)/rules $(POLKIT_RULES_DIRECTORY)/$(POLKIT_PACKAGE_NAME).$(POLKIT_RULES_EXTENSION)
 
 uninstall::
-	-rm $(POLKIT_ACTIONS_DIRECTORY)/$(POLKIT_PACKAGE_NAME).*
+	-rm $(POLKIT_POLICIES_DIRECTORY)/$(POLKIT_PACKAGE_NAME).*
 	-rm $(POLKIT_RULES_DIRECTORY)/$(POLKIT_PACKAGE_NAME).*
 
