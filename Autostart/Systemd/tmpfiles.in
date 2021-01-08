@@ -23,7 +23,7 @@ d @WRITABLE_DIRECTORY@ 0750 brltty brltty
 d @UPDATABLE_DIRECTORY@ 2770 brltty brltty
 
 # BrlAPI's sockets directory
-d @api_socket_directory@ 3777 brltty brltty
+d @BRLAPI_SOCKETPATH@ 3777 brltty brltty
 
 # BrlAPI's authorization key file
 z @CONFIGURATION_DIRECTORY@/@api_authkeyfile@ 0640 root brlapi

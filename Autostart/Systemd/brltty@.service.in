@@ -25,7 +25,7 @@ Documentation=@PACKAGE_URL@
 ConditionPathExists=%I
 RequiresMountsFor=@WRITABLE_DIRECTORY@
 RequiresMountsFor=@UPDATABLE_DIRECTORY@
-RequiresMountsFor=@api_socket_directory@
+RequiresMountsFor=@BRLAPI_SOCKETPATH@
 
 StopWhenUnneeded=true
 RefuseManualStart=true

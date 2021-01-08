@@ -1260,10 +1260,9 @@ BRLTTY_ARG_PACKAGE([service], [system service], [libsystemd], [dnl
 
 AC_SUBST([SYSTEMD_SERVICE_TYPE], ["forking"])
 AC_SUBST([SYSTEMD_SERVICE_ARGUMENTS], [""])
-
-SYSTEMD_UNIT_DIR=""
-SYSTEMD_SYSUSERS_DIR=""
-SYSTEMD_TMPFILES_DIR=""
+AC_SUBST([SYSTEMD_UNIT_DIR], [""])
+AC_SUBST([SYSTEMD_SYSUSERS_DIR], [""])
+AC_SUBST([SYSTEMD_TMPFILES_DIR], [""])
 
 case "${service_package}"
 in
@@ -1279,10 +1278,6 @@ esac
 test -n "${SYSTEMD_UNIT_DIR}" || SYSTEMD_UNIT_DIR="/usr/lib/systemd/system"
 test -n "${SYSTEMD_SYSUSERS_DIR}" || SYSTEMD_SYSUSERS_DIR="/usr/lib/sysusers.d"
 test -n "${SYSTEMD_TMPFILES_DIR}" || SYSTEMD_TMPFILES_DIR="/usr/lib/tmpfiles.d"
-
-AC_SUBST([SYSTEMD_UNIT_DIR])
-AC_SUBST([SYSTEMD_SYSUSERS_DIR])
-AC_SUBST([SYSTEMD_TMPFILES_DIR])
 
 UDEV_DIR=$($PKG_CONFIG --variable=udevdir udev)
 test -n "${UDEV_DIR}" || UDEV_DIR="/usr/lib/udev"
@@ -2073,13 +2068,12 @@ BRLTTY_DEFINE_DIRECTORY([SCRIPTS_DIRECTORY], [${execute_root}${scripts_directory
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
 
-BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
-                       [Define this to be a string containing the path to BrlAPI's data files directory.])
+BRLTTY_DEFINE_DIRECTORY([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
+                        [Define this to be a string containing the path to BrlAPI's data files directory.])
 
-BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
-		       [Define this to be a string containing the path to BrlAPI's local sockets directory.])
+BRLTTY_DEFINE_DIRECTORY([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
+		        [Define this to be a string containing the path to BrlAPI's local sockets directory.])
 
-BRLTTY_SUBST_EXPANDED([api_socket_directory], ["${api_socket_path}"])
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
 
