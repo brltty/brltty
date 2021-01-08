@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -1237,23 +1237,31 @@ DATA_OPERANDS_PROCESSOR(processIncludeOperands) {
 }
 
 static int
-processDataLine (char *line, void *dataAddress) {
-  DataFile *file = dataAddress;
-  size_t size = strlen(line) + 1;
-  const char *byte = line;
+processDataLine (const LineHandlerParameters *parameters) {
+  DataFile *file = parameters->data;
+  file->line += 1;
+
+  const char *byte = parameters->line.text;
+  size_t size = parameters->line.length + 1;
   wchar_t characters[size];
   wchar_t *character = characters;
 
-  file->line += 1;
   convertUtf8ToWchars(&byte, &character, size);
+  character = characters;
 
   if (*byte) {
-    unsigned int offset = byte - line;
+    unsigned int offset = byte - parameters->line.text;
     reportDataError(file, "illegal UTF-8 character at offset %u", offset);
     return 1;
   }
 
-  return processDataCharacters(file, characters);
+  if (file->line == 1) {
+    if (*character == UNICODE_BYTE_ORDER_MARK) {
+      character += 1;
+    }
+  }
+
+  return processDataCharacters(file, character);
 }
 
 int

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -29,7 +29,7 @@
 #endif /* PTHREAD_STACK_MIN */
 
 #define RELEASE "BrlAPI Server: release " BRLAPI_RELEASE
-#define COPYRIGHT "   Copyright (C) 2002-2020 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
+#define COPYRIGHT "   Copyright (C) 2002-2021 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #include "prologue.h"
@@ -260,10 +260,11 @@ pthread_mutex_t apiParamMutex;
 static Connection *paramUpdateConnection;
 
 /* mutex lock order is as follows:
- * 1. apiConnectionsMutex
- * 2. apiRawMutex
- * 3. acceptedKeysMutex or brailleWindowMutex
- * 4. apiDriverMutex
+ * 1. apiParamMutex
+ * 2. apiConnectionsMutex
+ * 3. apiRawMutex
+ * 4. acceptedKeysMutex or brailleWindowMutex
+ * 5. apiDriverMutex
 */
 
 static Tty notty;
@@ -396,14 +397,17 @@ static int resumeBrailleDriver(BrailleDisplay *brl) {
   lockMutex(&apiSuspendMutex);
   driverConstructed = constructBrailleDriver();
   if (driverConstructed) {
+    disp = brl;
+  }
+  unlockMutex(&apiSuspendMutex);
+  if (driverConstructed) {
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "driver resumed");
     handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_NAME, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.name, strlen(braille->definition.name));
     handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_CODE, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.code, strlen(braille->definition.code));
     handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DRIVER_VERSION, 0, BRLAPI_PARAMF_GLOBAL, braille->definition.version, strlen(braille->definition.version));
-    if (disp) handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DEVICE_MODEL, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
+    handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DEVICE_MODEL, 0, BRLAPI_PARAMF_GLOBAL, disp->keyBindings, strlen(disp->keyBindings));
     brlResize(brl);
   }
-  unlockMutex(&apiSuspendMutex);
   driverConstructing = 0;
   return driverConstructed;
 }
@@ -683,18 +687,18 @@ static void freeConnection(Connection *c)
 {
   struct Subscription *s, *next;
 
-  lockMutex(&apiParamMutex);
-  for (s=c->subscriptions.next; s!=&c->subscriptions; s=next) {
-    if (s->flags & BRLAPI_PARAMF_GLOBAL)
-      paramState[s->parameter].global_subscriptions--;
-    else
-      paramState[s->parameter].local_subscriptions--;
-    next = s->next;
-    free(s);
-  }
-  unlockMutex(&apiParamMutex);
-
   if (c->fd != INVALID_FILE_DESCRIPTOR) {
+    lockMutex(&apiParamMutex);
+    for (s=c->subscriptions.next; s!=&c->subscriptions; s=next) {
+      if (s->flags & BRLAPI_PARAMF_GLOBAL)
+	paramState[s->parameter].global_subscriptions--;
+      else
+	paramState[s->parameter].local_subscriptions--;
+      next = s->next;
+      free(s);
+    }
+    unlockMutex(&apiParamMutex);
+
     if (c->auth != 1) unauthConnections--;
     closeFileDescriptor(c->fd);
   }
@@ -4109,11 +4113,9 @@ static int api__handleCommand(int command) {
       if (!cmdBrlttyToBrlapi(&alternate, command, 0)) {
 	logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x could not be converted to BrlAPI without retainDots", command);
       } else {
-	if (alternate != code) {
-	  logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, alternate);
-	  c = whoGetsKey(&ttys, alternate, BRL_COMMANDS, 0);
-	  if (c) code = alternate;
-	}
+	logMessage(LOG_CATEGORY(SERVER_EVENTS), "command %08x -> client code %016"BRLAPI_PRIxKEYCODE, command, alternate);
+	c = whoGetsKey(&ttys, alternate, BRL_COMMANDS, 0);
+	if (c) code = alternate;
       }
     }
 
@@ -4187,6 +4189,7 @@ int api_flushOutput(BrailleDisplay *brl) {
   int drain = 0;
   int update = 0;
 
+  lockMutex(&apiParamMutex);
   lockMutex(&apiConnectionsMutex);
   lockMutex(&apiRawMutex);
   if (suspendConnection) {
@@ -4260,6 +4263,7 @@ int api_flushOutput(BrailleDisplay *brl) {
   unlockMutex(&apiRawMutex);
 out:
   unlockMutex(&apiConnectionsMutex);
+  unlockMutex(&apiParamMutex);
   return ok;
 }
 
@@ -4281,7 +4285,6 @@ int api_claimDriver (BrailleDisplay *brl)
   int ret;
   lockMutex(&apiSuspendMutex);
   ret = driverConstructed;
-  unlockMutex(&apiSuspendMutex);
   return ret;
 }
 
@@ -4304,7 +4307,6 @@ static void brlResize(BrailleDisplay *brl)
   coreWindowText = realloc(coreWindowText, displaySize * sizeof(*coreWindowText));
   coreWindowDots = realloc(coreWindowDots, displaySize * sizeof(*coreWindowDots));
   coreWindowCursor = 0;
-  disp = brl;
   handleParamUpdate(NULL, NULL, BRLAPI_PARAM_DISPLAY_SIZE, 0, BRLAPI_PARAMF_GLOBAL, displayDimensions, sizeof(displayDimensions));
 }
 
@@ -4332,9 +4334,10 @@ void api_linkServer(BrailleDisplay *brl)
   ApiBraille.writePacket = NULL;
   braille=&ApiBraille;
   lockMutex(&apiDriverMutex);
-  brlResize(brl);
+  disp = brl;
   driverConstructed=1;
   unlockMutex(&apiDriverMutex);
+  brlResize(brl);
   lockMutex(&apiConnectionsMutex);
   broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
   unlockMutex(&apiConnectionsMutex);

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -41,8 +41,8 @@ static char *opt_pcmDevice;
 static char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'D',
-    .word = "drivers-directory",
+  { .word = "drivers-directory",
+    .letter = 'D',
     .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
@@ -51,29 +51,29 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Path to directory for loading drivers."
   },
 
-  { .letter = 't',
-    .word = "text-string",
+  { .word = "text-string",
+    .letter = 't',
     .argument = "string",
     .setting.string = &opt_textString,
     .description = "Text to be spoken."
   },
 
-  { .letter = 'v',
-    .word = "volume",
+  { .word = "volume",
+    .letter = 'v',
     .argument = "loudness",
     .setting.string = &opt_speechVolume,
     .description = "Floating-point speech volume multiplier."
   },
 
-  { .letter = 'r',
-    .word = "rate",
+  { .word = "rate",
+    .letter = 'r',
     .argument = "speed",
     .setting.string = &opt_speechRate,
     .description = "Floating-point speech rate multiplier."
   },
 
-  { .letter = 'd',
-    .word = "device",
+  { .word = "device",
+    .letter = 'd',
     .argument = "device",
     .setting.string = &opt_pcmDevice,
     .description = "Digital audio soundcard device specifier."
@@ -88,10 +88,10 @@ say (volatile SpeechSynthesizer *spk, const char *string) {
 }
 
 static int
-sayLine (char *line, void *data) {
-  volatile SpeechSynthesizer *spk = data;
+sayLine (const LineHandlerParameters *parameters) {
+  volatile SpeechSynthesizer *spk = parameters->data;
 
-  say(spk, line);
+  say(spk, parameters->line.text);
   return 1;
 }
 

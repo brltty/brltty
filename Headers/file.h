@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -79,9 +79,19 @@ extern void registerProgramStream (const char *name, FILE **stream);
 
 extern FILE *openFile (const char *path, const char *mode, int optional);
 
-typedef int LineHandler (char *line, void *data);
+typedef struct {
+  void *data;
+
+  struct {
+    char *text;
+    size_t length;
+    unsigned int number;
+  } line;
+} LineHandlerParameters;
+
+typedef int LineHandler (const LineHandlerParameters *parameters);
 extern int processLines (FILE *file, LineHandler handleLine, void *data);
-extern int readLine (FILE *file, char **buffer, size_t *size);
+extern int readLine (FILE *file, char **buffer, size_t *size, size_t *length);
 
 extern STR_DECLARE_FORMATTER(formatInputError, const char *file, const int *line, const char *format, va_list arguments);
 

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -41,9 +41,9 @@ static const char tableName_autoselect[] = "auto";
 static const char tableName_unicode[] = "unicode";
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'T',
-    .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "tables-directory",
+    .letter = 'T',
+    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,
@@ -51,34 +51,30 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory for text tables.")
   },
 
-  { .letter = 'i',
-    .word = "input-table",
-    .flags = OPT_Config | OPT_Environ,
+  { .word = "input-table",
+    .letter = 'i',
     .argument = strtext("file"),
     .setting.string = &opt_inputTable,
     .internal.setting = tableName_autoselect,
     .description = strtext("Path to input text table.")
   },
 
-  { .letter = 'o',
-    .word = "output-table",
-    .flags = OPT_Config | OPT_Environ,
+  { .word = "output-table",
+    .letter = 'o',
     .argument = strtext("file"),
     .setting.string = &opt_outputTable,
     .internal.setting = tableName_unicode,
     .description = strtext("Path to output text table.")
   },
 
-  { .letter = '6',
-    .word = "six-dots",
-    .flags = OPT_Config | OPT_Environ,
+  { .word = "six-dots",
+    .letter = '6',
     .setting.flag = &opt_sixDots,
     .description = strtext("Remove dots seven and eight.")
   },
 
-  { .letter = 'b',
-    .word = "no-base-characters",
-    .flags = OPT_Config | OPT_Environ,
+  { .word = "no-base-characters",
+    .letter = 'b',
     .setting.flag = &opt_noBaseCharacters,
     .description = strtext("Don't fall back to the Unicode base character.")
   },

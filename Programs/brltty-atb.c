@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -26,8 +26,8 @@
 static char *opt_tablesDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'T',
-    .word = "tables-directory",
+  { .word = "tables-directory",
+    .letter = 'T',
     .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,

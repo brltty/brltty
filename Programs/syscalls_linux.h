@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -223,6 +223,10 @@ SCF_BEGIN_VALUES(systemCall)
   {__NR_mkdir},
   #endif /* __NR_mkdir */
   
+  #ifdef __NR_mknod
+  {__NR_mknod},
+  #endif /* __NR_mknod */
+  
   #ifdef __NR_mmap
   {__NR_mmap},
   #endif /* __NR_mmap */
@@ -230,6 +234,10 @@ SCF_BEGIN_VALUES(systemCall)
   #ifdef __NR_mprotect
   {__NR_mprotect},
   #endif /* __NR_mprotect */
+  
+  #ifdef __NR_mremap
+  {__NR_mremap},
+  #endif /* __NR_mremap */
   
   #ifdef __NR_munmap
   {__NR_munmap},
@@ -294,6 +302,10 @@ SCF_BEGIN_VALUES(systemCall)
   #ifdef __NR_recvmsg
   {__NR_recvmsg},
   #endif /* __NR_recvmsg */
+  
+  #ifdef __NR_restart_syscall
+  {__NR_restart_syscall},
+  #endif /* __NR_restart_syscall */
   
   #ifdef __NR_rt_sigaction
   {__NR_rt_sigaction},
@@ -362,6 +374,10 @@ SCF_BEGIN_VALUES(systemCall)
   #ifdef __NR_stat
   {__NR_stat},
   #endif /* __NR_stat */
+  
+  #ifdef __NR_statfs
+  {__NR_statfs},
+  #endif /* __NR_statfs */
   
   #ifdef __NR_symlink
   {__NR_symlink},

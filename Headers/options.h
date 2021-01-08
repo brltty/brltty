@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -31,7 +31,7 @@ typedef enum {
   OPT_Hidden	= 0X01,
   OPT_Extend	= 0X02,
   OPT_Config	= 0X04,
-  OPT_Environ	= 0X08,
+  OPT_EnvVar	= 0X08,
   OPT_Format  	= 0X10
 } OptionFlag;
 
@@ -65,13 +65,13 @@ typedef struct {
 
 #define BEGIN_OPTION_TABLE(name) static const OptionEntry name[] = {
 #define END_OPTION_TABLE \
-  { .letter = 'h', \
-    .word = "help", \
+  { .word = "help", \
+    .letter = 'h', \
     .description = strtext("Print a usage summary (commonly used options only), and then exit.") \
   } \
   , \
-  { .letter = 'H', \
-    .word = "full-help", \
+  { .word = "full-help", \
+    .letter = 'H', \
     .description = strtext("Print a usage summary (all options), and then exit.") \
   } \
 };

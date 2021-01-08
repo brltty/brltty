@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -890,26 +890,26 @@ openFile (const char *path, const char *mode, int optional) {
 }
 
 int
-readLine (FILE *file, char **buffer, size_t *size) {
+readLine (FILE *file, char **buffer, size_t *size, size_t *length) {
   char *line;
 
   if (ferror(file)) return 0;
   if (feof(file)) return 0;
 
   if (!*size) {
-    if (!(*buffer = malloc(*size = 0X80))) {
+    if (!(*buffer = malloc((*size = 0X80)))) {
       logMallocError();
       return 0;
     }
   }
 
   if ((line = fgets(*buffer, *size, file))) {
-    size_t length = strlen(line); /* Line length including new-line. */
+    size_t count = strlen(line); /* Line length including new-line. */
 
     /* No trailing new-line means that the buffer isn't big enough. */
-    while (line[length-1] != '\n') {
+    while (line[count-1] != '\n') {
       /* If necessary, extend the buffer. */
-      if ((*size - (length + 1)) == 0) {
+      if ((*size - (count + 1)) == 0) {
         size_t newSize = *size << 1;
         char *newBuffer = realloc(*buffer, newSize);
 
@@ -923,23 +923,28 @@ readLine (FILE *file, char **buffer, size_t *size) {
       }
 
       /* Read the rest of the line into the end of the buffer. */
-      if (!(line = fgets(&(*buffer)[length], *size-length, file))) {
-        if (!ferror(file)) return 1;
-        logSystemError("read");
+      if (!(line = fgets(&(*buffer)[count], (*size -count), file))) {
+        if (!ferror(file)) goto done;
+        logSystemError("fgets");
         return 0;
       }
 
-      length += strlen(line); /* New total line length. */
+      count += strlen(line); /* New total line length. */
       line = *buffer; /* Point to the beginning of the line. */
     }
 
-    if (--length > 0)
-      if (line[length-1] == '\r')
-        --length;
-    line[length] = 0; /* Remove trailing new-line. */
+    if (--count > 0) {
+      if (line[count-1] == '\r') {
+        count -= 1;
+      }
+    }
+
+    line[count] = 0; /* Remove trailing new-line. */
+  done:
+    if (length) *length = count;
     return 1;
   } else if (ferror(file)) {
-    logSystemError("read");
+    logSystemError("fgets");
   }
 
   return 0;
@@ -953,20 +958,22 @@ readLine (FILE *file, char **buffer, size_t *size) {
  */
 int
 processLines (FILE *file, LineHandler handleLine, void *data) {
-  unsigned int lineNumber = 0;
   char *buffer = NULL;
   size_t bufferSize = 0;
 
-  while (readLine(file, &buffer, &bufferSize)) {
-    char *line = buffer;
+  LineHandlerParameters parameters = {
+    .data = data,
 
-    if (!lineNumber++) {
-      static const char utf8ByteOrderMark[] = {0XEF, 0XBB, 0XBF};
-      static const unsigned int length = sizeof(utf8ByteOrderMark);
-      if (strncmp(line, utf8ByteOrderMark, length) == 0) line += length;
-    }
+    .line = {
+      .number = 0,
+    },
+  };
 
-    if (!handleLine(line, data)) break;
+  while (1) {
+    parameters.line.number += 1;
+    if (!readLine(file, &buffer, &bufferSize, &parameters.line.length)) break;
+    parameters.line.text = buffer;
+    if (!handleLine(&parameters)) break;
   }
 
   if (buffer) free(buffer);

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -203,7 +203,7 @@ static const KernelModuleEntry kernelModuleTable[] = {
 }; static const uint8_t kernelModuleCount = ARRAY_COUNT(kernelModuleTable);
 
 static void
-installKernelModules (void) {
+installKernelModules (int stayPrivileged) {
   const KernelModuleEntry *kme = kernelModuleTable;
   const KernelModuleEntry *end = kme + kernelModuleCount;
 
@@ -315,7 +315,7 @@ static const RequiredGroupEntry requiredGroupTable[] = {
 }; static const uint8_t requiredGroupCount = ARRAY_COUNT(requiredGroupTable);
 
 static void
-processRequiredGroups (GroupsProcessor *processGroups, void *data) {
+processRequiredGroups (GroupsProcessor *processGroups, int logProblems, void *data) {
   gid_t groups[requiredGroupCount * 2];
   size_t count = 0;
 
@@ -332,8 +332,8 @@ processRequiredGroups (GroupsProcessor *processGroups, void *data) {
 
           if ((grp = getgrnam(name))) {
             groups[count++] = grp->gr_gid;
-          } else {
-            logMessage(LOG_WARNING, "unknown group: %s", name);
+          } else if (logProblems) {
+            logMessage(LOG_DEBUG, "unknown group: %s", name);
           }
         }
       }
@@ -347,15 +347,17 @@ processRequiredGroups (GroupsProcessor *processGroups, void *data) {
           if (stat(path, &status) != -1) {
             groups[count++] = status.st_gid;
 
-            if (rge->needRead && !(status.st_mode & S_IRGRP)) {
-              logMessage(LOG_WARNING, "path not group readable: %s", path);
-            }
+            if (logProblems) {
+              if (rge->needRead && !(status.st_mode & S_IRGRP)) {
+                logMessage(LOG_DEBUG, "path not group readable: %s", path);
+              }
 
-            if (rge->needWrite && !(status.st_mode & S_IWGRP)) {
-              logMessage(LOG_WARNING, "path not group writable: %s", path);
+              if (rge->needWrite && !(status.st_mode & S_IWGRP)) {
+                logMessage(LOG_DEBUG, "path not group writable: %s", path);
+              }
             }
-          } else {
-            logMessage(LOG_WARNING, "path access error: %s: %s", path, strerror(errno));
+          } else if (logProblems) {
+            logMessage(LOG_DEBUG, "path access error: %s: %s", path, strerror(errno));
           }
         }
       }
@@ -407,9 +409,11 @@ setSupplementaryGroups (const gid_t *groups, size_t count, void *data) {
 }
 
 static void
-joinRequiredGroups (void) {
+joinRequiredGroups (int stayPrivileged) {
+  const int logProblems = 1;
+
 #ifdef HAVE_PWD_H
-  if (!amPrivilegedUser()) {
+  if (stayPrivileged || !amPrivilegedUser()) {
     uid_t uid = geteuid();
     const struct passwd *pwd = getpwuid(uid);
 
@@ -432,7 +436,7 @@ joinRequiredGroups (void) {
           .count = size
         };
 
-        processRequiredGroups(setSupplementaryGroups, &cgd);
+        processRequiredGroups(setSupplementaryGroups, logProblems, &cgd);
         return;
       } else {
         logSystemError("getgrouplist");
@@ -441,7 +445,7 @@ joinRequiredGroups (void) {
   }
 #endif /* HAVE_PWD_H */
 
-  processRequiredGroups(setSupplementaryGroups, NULL);
+  processRequiredGroups(setSupplementaryGroups, logProblems, NULL);
 }
 
 static void
@@ -473,7 +477,7 @@ logWantedGroups (const gid_t *groups, size_t count, void *data) {
     .count = count
   };
 
-  processRequiredGroups(logUnjoinedGroups, &cgd);
+  processRequiredGroups(logUnjoinedGroups, 0, &cgd);
 }
 
 static void
@@ -566,7 +570,7 @@ static const RequiredCapabilityEntry requiredCapabilityTable[] = {
 }; static const uint8_t requiredCapabilityCount = ARRAY_COUNT(requiredCapabilityTable);
 
 static void
-setRequiredCapabilities (void) {
+setRequiredCapabilities (int stayPrivileged) {
   cap_t newCaps, oldCaps;
 
   if (amPrivilegedUser()) {
@@ -576,7 +580,22 @@ setRequiredCapabilities (void) {
     return;
   }
 
-  if ((newCaps = cap_init())) {
+  {
+    cap_t (*function) (void);
+    const char *name;
+
+    if (stayPrivileged) {
+      function = cap_get_proc;
+      name = "cap_get_proc";
+    } else {
+      function = cap_init;
+      name = "cap_init";
+    }
+
+    if (!(newCaps = function())) logSystemError(name);
+  }
+
+  if (newCaps) {
     {
       const RequiredCapabilityEntry *rce = requiredCapabilityTable;
       const RequiredCapabilityEntry *end = rce + requiredCapabilityCount;
@@ -595,8 +614,6 @@ setRequiredCapabilities (void) {
 
     setCapabilities(newCaps);
     cap_free(newCaps);
-  } else {
-    logSystemError("cap_init");
   }
 
 #ifdef PR_CAP_AMBIENT_CLEAR_ALL
@@ -1700,13 +1717,13 @@ scfInstallFilter (const char *modeName) {
 }
 #endif /* SECCOMP_MODE_FILTER */
 
-typedef void PrivilegesAcquisitionFunction (void);
+typedef void PrivilegesEstablishmentFunction (int stayPrivileged);
 typedef void MissingPrivilegesLogger (void);
 typedef void ReleaseResourcesFunction (void);
 
 typedef struct {
   const char *reason;
-  PrivilegesAcquisitionFunction *acquirePrivileges;
+  PrivilegesEstablishmentFunction *establishPrivileges;
   MissingPrivilegesLogger *logMissingPrivileges;
   ReleaseResourcesFunction *releaseResources;
 
@@ -1714,11 +1731,11 @@ typedef struct {
   cap_value_t capability;
   unsigned char inheritable:1;
   #endif /* CAP_IS_SUPPORTED */
-} PrivilegesAcquisitionEntry;
+} PrivilegesMechanismEntry;
 
-static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
+static const PrivilegesMechanismEntry privilegesMechanismTable[] = {
   { .reason = "for installing kernel modules",
-    .acquirePrivileges = installKernelModules,
+    .establishPrivileges = installKernelModules,
 
     #ifdef CAP_SYS_MODULE
     .capability = CAP_SYS_MODULE,
@@ -1728,7 +1745,7 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 
 #ifdef HAVE_GRP_H
   { .reason = "for joining the required groups",
-    .acquirePrivileges = joinRequiredGroups,
+    .establishPrivileges = joinRequiredGroups,
     .logMissingPrivileges = logMissingGroups,
     .releaseResources = closeGroupsDatabase,
   },
@@ -1737,57 +1754,57 @@ static const PrivilegesAcquisitionEntry privilegesAcquisitionTable[] = {
 // This one must be last because it relinquishes the temporary capabilities.
 #ifdef CAP_IS_SUPPORTED
   { .reason = "for assigning required capabilities",
-    .acquirePrivileges = setRequiredCapabilities,
+    .establishPrivileges = setRequiredCapabilities,
     .logMissingPrivileges = logMissingCapabilities,
   }
 #endif /* CAP_IS_SUPPORTED */
-}; static const uint8_t privilegesAcquisitionCount = ARRAY_COUNT(privilegesAcquisitionTable);
+}; static const uint8_t privilegesMechanismCount = ARRAY_COUNT(privilegesMechanismTable);
 
 static void
-acquirePrivileges (void) {
+establishPrivileges (int stayPrivileged) {
   if (amPrivilegedUser()) {
-    const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-    const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
+    const PrivilegesMechanismEntry *pme = privilegesMechanismTable;
+    const PrivilegesMechanismEntry *end = pme + privilegesMechanismCount;
 
-    while (pae < end) {
-      pae->acquirePrivileges();
-      pae += 1;
+    while (pme < end) {
+      pme->establishPrivileges(stayPrivileged);
+      pme += 1;
     }
   }
 
 #ifdef CAP_IS_SUPPORTED
   else {
-    const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-    const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
+    const PrivilegesMechanismEntry *pme = privilegesMechanismTable;
+    const PrivilegesMechanismEntry *end = pme + privilegesMechanismCount;
 
-    while (pae < end) {
-      cap_value_t capability = pae->capability;
+    while (pme < end) {
+      cap_value_t capability = pme->capability;
 
-      if (!capability || needCapability(capability, pae->inheritable, pae->reason)) {
-        pae->acquirePrivileges();
+      if (!capability || needCapability(capability, pme->inheritable, pme->reason)) {
+        pme->establishPrivileges(stayPrivileged);
       }
 
-      pae += 1;
+      pme += 1;
     }
   }
 #endif /* CAP_IS_SUPPORTED */
 
   {
-    const PrivilegesAcquisitionEntry *pae = privilegesAcquisitionTable;
-    const PrivilegesAcquisitionEntry *end = pae + privilegesAcquisitionCount;
+    const PrivilegesMechanismEntry *pme = privilegesMechanismTable;
+    const PrivilegesMechanismEntry *end = pme + privilegesMechanismCount;
 
-    while (pae < end) {
+    while (pme < end) {
       {
-        MissingPrivilegesLogger *log = pae->logMissingPrivileges;
+        MissingPrivilegesLogger *log = pme->logMissingPrivileges;
         if (log) log();
       }
 
       {
-        ReleaseResourcesFunction *release = pae->releaseResources;
+        ReleaseResourcesFunction *release = pme->releaseResources;
         if (release) release();
       }
 
-      pae += 1;
+      pme += 1;
     }
   }
 }
@@ -1795,7 +1812,7 @@ acquirePrivileges (void) {
 static int
 setEnvironmentVariable (const char *name, const char *value) {
   if (setenv(name, value, 1) != -1) {
-    logMessage(LOG_INFO, "environment variable set: %s: %s", name, value);
+    logMessage(LOG_DEBUG, "environment variable set: %s: %s", name, value);
     return 1;
   } else {
     logSystemError("setenv");
@@ -1893,8 +1910,10 @@ setXDGRuntimeDirectory (uid_t uid, gid_t gid) {
           logSystemError("chown");
         }
 
-        if (unlink(newPath) == -1) {
-          logSystemError("unlink");
+        if (!exists) {
+          if (rmdir(newPath) == -1) {
+            logSystemError("rmdir");
+          }
         }
       } else {
         logSystemError("mkdir");
@@ -1959,28 +1978,16 @@ switchToUser (const char *user, int *haveHomeDirectory) {
 }
 
 static int
-switchUser (const char *specifiedUser, const char *configuredUser, int *haveHomeDirectory) {
-  const char *user;
-
+switchUser (const char *user, int stayPrivileged, int *haveHomeDirectory) {
   if (amPrivilegedUser()) {
-    if (strcmp(specifiedUser, ":STAY-PRIVILEGED:") == 0) {
+    if (stayPrivileged) {
       logMessage(LOG_NOTICE, "not switching to an unprivileged user");
+    } else if (!*user) {
+      logMessage(LOG_DEBUG, "default unprivileged user not configured");
+    } else if (switchToUser(user, haveHomeDirectory)) {
+      return 1;
     } else {
-      if (strcmp(specifiedUser, configuredUser) != 0) {
-        if (*(user = specifiedUser)) {
-          if (switchToUser(user, haveHomeDirectory)) {
-            return 1;
-          }
-        }
-      }
-
-      if (!*(user = configuredUser)) {
-        logMessage(LOG_DEBUG, "the default unprivileged user hasn't been configured");
-      } else if (switchToUser(user, haveHomeDirectory)) {
-        return 1;
-      } else {
-        logMessage(LOG_WARNING, "couldn't switch to the configured unprivileged user: %s", user);
-      }
+      logMessage(LOG_WARNING, "couldn't switch to the unprivileged user: %s", user);
     }
   }
 
@@ -1995,22 +2002,13 @@ switchUser (const char *specifiedUser, const char *configuredUser, int *haveHome
 
       if ((pwd = getpwuid(uid))) {
         name = pwd->pw_name;
+        if (canSwitchGroup(pwd->pw_gid)) gid = pwd->pw_gid;
       } else {
         snprintf(number, sizeof(number), "%d", uid);
         name = number;
       }
 
-      logMessage(LOG_NOTICE, "executing as invoking user: %s", name);
-    }
-
-    if (*(user = configuredUser)) {
-      struct passwd *pwd;
-
-      if ((pwd = getpwnam(user))) {
-        if (canSwitchGroup(pwd->pw_gid)) {
-          gid = pwd->pw_gid;
-        }
-      }
+      logMessage(LOG_NOTICE, "executing as the invoking user: %s", name);
     }
 
     setProcessOwnership(uid, gid);
@@ -2198,11 +2196,11 @@ getPrivilegeParametersPlatform (void) {
 }
 
 void
-establishProgramPrivileges (char **specifiedParameters, char **configuredParameters) {
+establishProgramPrivileges (char **parameters, int stayPrivileged) {
   logCurrentCapabilities("at start");
 
-  setCommandSearchPath(specifiedParameters[PARM_PATH]);
-  setDefaultShell(specifiedParameters[PARM_SHELL]);
+  setCommandSearchPath(parameters[PARM_PATH]);
+  setDefaultShell(parameters[PARM_SHELL]);
 
 #ifdef PR_SET_KEEPCAPS
   if (prctl(PR_SET_KEEPCAPS, 1, 0, 0, 0) == -1) {
@@ -2215,12 +2213,13 @@ establishProgramPrivileges (char **specifiedParameters, char **configuredParamet
 #endif /* HAVE_SCHED_H */
 
   {
+    const char *unprivilegedUser = parameters[PARM_USER];
     int haveHomeDirectory = 0;
 
 #ifdef HAVE_PWD_H
     int switched = switchUser(
-      specifiedParameters[PARM_USER],
-      configuredParameters[PARM_USER],
+      unprivilegedUser,
+      stayPrivileged,
       &haveHomeDirectory
     );
 
@@ -2241,10 +2240,10 @@ establishProgramPrivileges (char **specifiedParameters, char **configuredParamet
     }
   }
 
-  acquirePrivileges();
+  establishPrivileges(stayPrivileged);
   logCurrentCapabilities("after relinquish");
 
-  #ifdef SECCOMP_MODE_FILTER
-  scfInstallFilter(specifiedParameters[PARM_SCFMODE]);
-  #endif /* SECCOMP_MODE_FILTER */
+#ifdef SECCOMP_MODE_FILTER
+  scfInstallFilter(parameters[PARM_SCFMODE]);
+#endif /* SECCOMP_MODE_FILTER */
 }

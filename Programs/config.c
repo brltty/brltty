@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -191,9 +191,11 @@ static const char *const optionStrings_CancelExecution[] = {
 static char *opt_promptPatterns;
 
 static char *opt_privilegeParameters;
-static char *opt_pidFile;
+static int opt_stayPrivileged;
 
+static char *opt_pidFile;
 static char *opt_configurationFile;
+
 static char *opt_updatableDirectory;
 static char *opt_writableDirectory;
 char *opt_driversDirectory;
@@ -293,81 +295,86 @@ static const char *const optionStrings_SpeechDriver[] = {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'Y',
-    .word = "start-message",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "start-message",
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("text"),
     .setting.string = &opt_startMessage,
     .description = strtext("The text to be shown when the braille driver starts and to be spoken when the speech driver starts.")
   },
 
-  { .letter = 'Z',
-    .word = "stop-message",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "stop-message",
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("text"),
     .setting.string = &opt_stopMessage,
     .description = strtext("The text to be shown when the braille driver stops.")
   },
 
-  { .letter = 'E',
-    .word = "environment-variables",
+  { .word = "environment-variables",
+    .letter = 'E',
     .flags = OPT_Hidden,
     .setting.flag = &opt_environmentVariables,
     .description = strtext("Recognize environment variables.")
   },
 
-  { .letter = 'n',
-    .word = "no-daemon",
+  { .word = "no-daemon",
+    .letter = 'n',
     .flags = OPT_Hidden,
     .setting.flag = &opt_noDaemon,
     .description = strtext("Remain a foreground process.")
   },
 
-  { .letter = 'I',
-    .word = "install-service",
+  { .word = "install-service",
+    .letter = 'I',
     .flags = OPT_Hidden,
     .setting.flag = &opt_installService,
     .description = strtext("Install the %s service, and then exit."),
     .strings.array = optionStrings_InstallService
   },
 
-  { .letter = 'R',
-    .word = "remove-service",
+  { .word = "remove-service",
+    .letter = 'R',
     .flags = OPT_Hidden,
     .setting.flag = &opt_removeService,
     .description = strtext("Remove the %s service, and then exit."),
     .strings.array = optionStrings_RemoveService
   },
 
-  { .letter = 'y',
-    .word = "privilege-parameters",
-    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_Environ,
+  { .word = "privilege-parameters",
+    .letter = 'z',
+    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_privilegeParameters,
     .internal.setting = PRIVILEGE_PARAMETERS,
     .description = strtext("Parameters for the privilege establishment stage.")
   },
 
-  { .letter = 'C',
-    .word = "cancel-execution",
+  { .word = "stay-privileged",
+    .letter = 'Z',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .setting.flag = &opt_stayPrivileged,
+    .description = strtext("Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc).")
+  },
+
+  { .word = "cancel-execution",
+    .letter = 'C',
     .flags = OPT_Hidden,
     .setting.flag = &opt_cancelExecution,
     .description = strtext("Stop an existing instance of %s, and then exit."),
     .strings.array = optionStrings_CancelExecution
   },
 
-  { .letter = 'P',
-    .word = "pid-file",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "pid-file",
+    .letter = 'P',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_pidFile,
     .internal.adjust = fixInstallPath,
     .description = strtext("Path to process identifier file.")
   },
 
-  { .letter = 'f',
-    .word = "configuration-file",
-    .flags = OPT_Environ,
+  { .word = "configuration-file",
+    .letter = 'f',
+    .flags = OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_configurationFile,
     .internal.setting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
@@ -375,34 +382,33 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to default settings file.")
   },
 
-  { .letter = 'F',
-    .word = "preferences-file",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "preferences-file",
+    .letter = 'F',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_preferencesFile,
     .internal.setting = PREFERENCES_FILE,
     .description = strtext("Name of or path to default preferences file.")
   },
 
-  { .letter = 'o',
-    .word = "override-preference",
-    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+  { .word = "override-preference",
+    .letter = 'o',
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_preferenceOverrides,
     .description = strtext("Explicit preference settings.")
   },
 
-  { .letter = 'z',
-    .word = "prompt-patterns",
-    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+  { .word = "prompt-patterns",
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("regexp,..."),
     .setting.string = &opt_promptPatterns,
     .description = strtext("Patterns that match command prompts.")
   },
 
-  { .letter = 'U',
-    .word = "updatable-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "updatable-directory",
+    .letter = 'U',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("directory"),
     .setting.string = &opt_updatableDirectory,
     .internal.setting = UPDATABLE_DIRECTORY,
@@ -410,9 +416,9 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory which contains files that can be updated.")
   },
 
-  { .letter = 'W',
-    .word = "writable-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "writable-directory",
+    .letter = 'W',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("directory"),
     .setting.string = &opt_writableDirectory,
     .internal.setting = WRITABLE_DIRECTORY,
@@ -420,9 +426,9 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory which can be written to.")
   },
 
-  { .letter = 'D',
-    .word = "drivers-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "drivers-directory",
+    .letter = 'D',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
     .internal.setting = DRIVERS_DIRECTORY,
@@ -431,16 +437,16 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
 #ifdef ENABLE_API
-  { .letter = 'N',
-    .word = "no-api",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "no-api",
+    .letter = 'N',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_noApi,
     .description = strtext("Disable the application programming interface.")
   },
 
-  { .letter = 'A',
-    .word = "api-parameters",
-    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+  { .word = "api-parameters",
+    .letter = 'A',
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_apiParameters,
     .internal.setting = API_PARAMETERS,
@@ -448,10 +454,10 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 #endif /* ENABLE_API */
 
-  { .letter = 'b',
-    .word = "braille-driver",
+  { .word = "braille-driver",
+    .letter = 'b',
     .bootParameter = 1,
-    .flags = OPT_Config | OPT_Environ,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("driver,..."),
     .setting.string = &opt_brailleDriver,
     .internal.setting = optionOperand_autodetect,
@@ -459,29 +465,29 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.array = optionStrings_BrailleDriver
   },
 
-  { .letter = 'B',
-    .word = "braille-parameters",
+  { .word = "braille-parameters",
+    .letter = 'B',
     .bootParameter = 4,
-    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_brailleParameters,
     .internal.setting = BRAILLE_PARAMETERS,
     .description = strtext("Parameters for the braille driver.")
   },
 
-  { .letter = 'd',
-    .word = "braille-device",
+  { .word = "braille-device",
+    .letter = 'd',
     .bootParameter = 2,
-    .flags = OPT_Config | OPT_Environ,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("identifier,..."),
     .setting.string = &opt_brailleDevice,
     .internal.setting = BRAILLE_DEVICE,
     .description = strtext("Device for accessing braille display.")
   },
 
-  { .letter = 'r',
-    .word = "release-device",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "release-device",
+    .letter = 'r',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_releaseDevice,
 #ifdef WINDOWS
     .internal.setting = FLAG_TRUE_WORD,
@@ -491,9 +497,9 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Release braille device when screen or window is unreadable.")
   },
 
-  { .letter = 'T',
-    .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "tables-directory",
+    .letter = 'T',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,
@@ -501,10 +507,10 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory containing tables.")
   },
 
-  { .letter = 't',
-    .word = "text-table",
+  { .word = "text-table",
+    .letter = 't',
     .bootParameter = 3,
-    .flags = OPT_Config | OPT_Environ,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_textTable,
     .internal.setting = optionOperand_autodetect,
@@ -512,44 +518,44 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.array = optionStrings_TextTable
   },
 
-  { .letter = 'a',
-    .word = "attributes-table",
-    .flags = OPT_Config | OPT_Environ,
+  { .word = "attributes-table",
+    .letter = 'a',
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_attributesTable,
     .description = strtext("Name of or path to attributes table.")
   },
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  { .letter = 'c',
-    .word = "contraction-table",
-    .flags = OPT_Config | OPT_Environ,
+  { .word = "contraction-table",
+    .letter = 'c',
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_contractionTable,
     .description = strtext("Name of or path to contraction table.")
   },
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  { .letter = 'k',
-    .word = "keyboard-table",
-    .flags = OPT_Config | OPT_Environ,
+  { .word = "keyboard-table",
+    .letter = 'k',
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_keyboardTable,
     .description = strtext("Name of or path to keyboard table.")
   },
 
-  { .letter = 'K',
-    .word = "keyboard-properties",
-    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_Environ,
+  { .word = "keyboard-properties",
+    .letter = 'K',
+    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_keyboardProperties,
     .description = strtext("Properties of eligible keyboards.")
   },
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  { .letter = 's',
-    .word = "speech-driver",
-    .flags = OPT_Config | OPT_Environ,
+  { .word = "speech-driver",
+    .letter = 's',
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("driver,..."),
     .setting.string = &opt_speechDriver,
     .internal.setting = optionOperand_autodetect,
@@ -557,34 +563,34 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.array = optionStrings_SpeechDriver
   },
 
-  { .letter = 'S',
-    .word = "speech-parameters",
-    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+  { .word = "speech-parameters",
+    .letter = 'S',
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_speechParameters,
     .internal.setting = SPEECH_PARAMETERS,
     .description = strtext("Parameters for the speech driver.")
   },
 
-  { .letter = 'i',
-    .word = "speech-input",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "speech-input",
+    .letter = 'i',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_speechInput,
     .description = strtext("Name of or path to speech input object.")
   },
 
-  { .letter = 'Q',
-    .word = "quiet-if-no-braille",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "quiet-if-no-braille",
+    .letter = 'Q',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_quietIfNoBraille,
     .description = strtext("Do not autospeak when braille is not being used.")
   },
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  { .letter = 'x',
-    .word = "screen-driver",
-    .flags = OPT_Config | OPT_Environ,
+  { .word = "screen-driver",
+    .letter = 'x',
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("driver,..."),
     .setting.string = &opt_screenDriver,
     .internal.setting = DEFAULT_SCREEN_DRIVER,
@@ -592,9 +598,9 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.array = optionStrings_ScreenDriver
   },
 
-  { .letter = 'X',
-    .word = "screen-parameters",
-    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+  { .word = "screen-parameters",
+    .letter = 'X',
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_screenParameters,
     .internal.setting = SCREEN_PARAMETERS,
@@ -602,9 +608,9 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
 #ifdef HAVE_PCM_SUPPORT
-  { .letter = 'p',
-    .word = "pcm-device",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "pcm-device",
+    .letter = 'p',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("device"),
     .setting.string = &opt_pcmDevice,
     .description = strtext("PCM (soundcard digital audio) device specifier.")
@@ -612,61 +618,61 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_PCM_SUPPORT */
 
 #ifdef HAVE_MIDI_SUPPORT
-  { .letter = 'm',
-    .word = "midi-device",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "midi-device",
+    .letter = 'm',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("device"),
     .setting.string = &opt_midiDevice,
     .description = strtext("MIDI (Musical Instrument Digital Interface) device specifier.")
   },
 #endif /* HAVE_MIDI_SUPPORT */
 
-  { .letter = 'M',
-    .word = "message-timeout",
-    .flags = OPT_Hidden,
+  { .word = "message-time",
+    .letter = 'M',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("csecs"),
     .setting.string = &opt_messageHoldTimeout,
     .description = strtext("Message hold timeout (in 10ms units).")
   },
 
-  { .letter = 'e',
-    .word = "standard-error",
+  { .word = "standard-error",
+    .letter = 'e',
     .flags = OPT_Hidden,
     .setting.flag = &opt_standardError,
     .description = strtext("Log to standard error rather than to the system log.")
   },
 
-  { .letter = 'q',
-    .word = "quiet",
+  { .word = "quiet",
+    .letter = 'q',
     .setting.flag = &opt_quiet,
     .description = strtext("Suppress start-up messages.")
   },
 
-  { .letter = 'l',
-    .word = "log-level",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ | OPT_Format,
+  { .word = "log-level",
+    .letter = 'l',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar | OPT_Format,
     .argument = strtext("lvl|cat,..."),
     .setting.string = &opt_logLevel,
     .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)"),
     .strings.format = formatLogLevelString
   },
 
-  { .letter = 'L',
-    .word = "log-file",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+  { .word = "log-file",
+    .letter = 'L',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_logFile,
     .description = strtext("Path to log file.")
   },
 
-  { .letter = 'v',
-    .word = "verify",
+  { .word = "verify",
+    .letter = 'v',
     .setting.flag = &opt_verify,
     .description = strtext("Write the start-up logs, and then exit.")
   },
 
-  { .letter = 'V',
-    .word = "version",
+  { .word = "version",
+    .letter = 'V',
     .setting.flag = &opt_version,
     .description = strtext("Log the versions of the core, API, and built-in drivers, and then exit.")
   },
@@ -767,18 +773,12 @@ static void
 establishPrivileges (void) {
   const char *platform = getPrivilegeParametersPlatform();
   const char *const *names = getPrivilegeParameterNames();
-  char **specifiedParameters = getParameters(names, platform, opt_privilegeParameters);
+  char **parameters = getParameters(names, platform, opt_privilegeParameters);
 
-  if (specifiedParameters) {
-    logParameters(names, specifiedParameters, gettext("Privilege Parameter"));
-    char **configuredParameters = getParameters(names, platform, PRIVILEGE_PARAMETERS);
-
-    if (configuredParameters) {
-      establishProgramPrivileges(specifiedParameters, configuredParameters);
-      deallocateStrings(configuredParameters);
-    }
-
-    deallocateStrings(specifiedParameters);
+  if (parameters) {
+    logParameters(names, parameters, gettext("Privilege Parameter"));
+    establishProgramPrivileges(parameters, opt_stayPrivileged);
+    deallocateStrings(parameters);
   }
 }
 
@@ -1012,14 +1012,14 @@ handleWcharHelpLine (const wchar_t *line, void *data UNUSED) {
 }
 
 static int
-handleUtf8HelpLine (char *line, void *data) {
-  const char *utf8 = line;
-  size_t count = strlen(utf8) + 1;
-  wchar_t buffer[count];
-  wchar_t *characters = buffer;
+handleUtf8HelpLine (const LineHandlerParameters *parameters) {
+  const char *utf8 = parameters->line.text;
+  size_t size = parameters->line.length + 1;
+  wchar_t characters[size];
+  wchar_t *character = characters;
 
-  convertUtf8ToWchars(&utf8, &characters, count);
-  return handleWcharHelpLine(buffer, data);
+  convertUtf8ToWchars(&utf8, &character, size);
+  return handleWcharHelpLine(characters, parameters->data);
 }
 
 static int

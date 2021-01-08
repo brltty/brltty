@@ -278,6 +278,37 @@ The NumSign Directive
 
 Define the symbol which marks the beginning of a number.
 
+Special Directives
+==================
+
+The Replace Directive
+---------------------
+
+.. parsed-literal:: replace *characters* *characters*
+
+Translate the first character sequence into the second character sequence.
+The replacement characters are then recontracted.
+
+The Emoji Directive
+-------------------
+
+.. parsed-literal:: emoji *language*
+
+Translate an emoji character sequence into its description in the specified
+language. The language operand is an ISO 639 two-letter language code.
+
+This directive only works if at least ICU version 57 is installed.
+
+This directive relies on data provided by the CLDR package.
+CLDR stands for the Common Locale Data Repository project.
+Knoqwn names for this package include:
+
+* cldr-emoji-annotation
+* unicode-cldr
+
+At the time of this writing, this project is maintained at
+`<https://github.com/unicode-org/cldr>`_.
+
 Standard Directives
 ===================
 

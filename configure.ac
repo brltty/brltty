@@ -2,7 +2,7 @@
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
-# Copyright (C) 1995-2020 by The BRLTTY Developers.
+# Copyright (C) 1995-2021 by The BRLTTY Developers.
 #
 # BRLTTY comes with ABSOLUTELY NO WARRANTY.
 #
@@ -17,7 +17,7 @@
 ###############################################################################
 
 AC_PREREQ([2.64])
-AC_INIT([BRLTTY], [6.1], [BRLTTY@brltty.app], [brltty], [http://brltty.app/])
+AC_INIT([BRLTTY], [6.2], [BRLTTY@brltty.app], [brltty], [http://brltty.app/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -27,14 +27,14 @@ m4_include([Bindings/OCaml/bindings.m4])
 m4_include([Bindings/Python/bindings.m4])
 m4_include([Bindings/Tcl/bindings.m4])
 
-copyright="© 1995-2020 by The BRLTTY Developers"
+copyright="© 1995-2021 by The BRLTTY Developers"
 AC_SUBST([PACKAGE_COPYRIGHT], ["${copyright}"])
 AC_DEFINE_UNQUOTED([PACKAGE_COPYRIGHT], ["${copyright}"],
                    [Define this to be a string containing the copyright notice.])
 
 AC_SUBST([api_major], [0])
 AC_SUBST([api_minor], [8])
-AC_SUBST([api_revision], [0])
+AC_SUBST([api_revision], [1])
 
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
@@ -276,7 +276,7 @@ then
 fi
 AC_PROG_CXX
 
-brltty_gcc_cflags="-std=gnu99 -Wall -Werror=format-security -Wno-address-of-packed-member"
+brltty_gcc_cflags="-std=gnu99 -Wall -Werror=format-security -Wno-address-of-packed-member -Wno-stringop-truncation"
 brltty_gcc_cppflags=""
 
 case "${host_os}"

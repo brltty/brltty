@@ -1,7 +1,7 @@
 /*
  * XBrlAPI - A background process tinkering with X for proper BrlAPI behavior
  *
- * Copyright (C) 2003-2020 by Samuel Thibault <Samuel.Thibault@ens-lyon.org>
+ * Copyright (C) 2003-2021 by Samuel Thibault <Samuel.Thibault@ens-lyon.org>
  *
  * XBrlAPI comes with ABSOLUTELY NO WARRANTY.
  *
@@ -61,12 +61,7 @@
 
 #include "options.h"
 
-//#define DEBUG
-#ifdef DEBUG
-#define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__)
-#else /* DEBUG */
-#define debugf(fmt, ...) (void)0
-#endif /* DEBUG */
+#define debugf(fmt, ...) do { if (verbose) fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 
 /******************************************************************************
  * option handling
@@ -77,43 +72,50 @@ static char *host;
 static char *xDisplay;
 static int no_daemon;
 static int quiet;
+static int verbose;
 
 static int brlapi_fd;
 
 static void *clipboardData;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'b',
-    .word = "brlapi",
+  { .word = "brlapi",
+    .letter = 'b',
     .argument = strtext("[host][:port]"),
     .setting.string = &host,
     .description = strtext("BrlAPI host and/or port to connect to")
   },
 
-  { .letter = 'a',
-    .word = "auth",
+  { .word = "auth",
+    .letter = 'a',
     .argument = strtext("scheme+..."),
     .setting.string = &auth,
     .description = strtext("BrlAPI authorization/authentication schemes")
   },
 
-  { .letter = 'd',
-    .word = "display",
+  { .word = "display",
+    .letter = 'd',
     .argument = strtext("display"),
     .setting.string = &xDisplay,
     .description = strtext("X display to connect to")
   },
 
-  { .letter = 'n',
-    .word = "no-daemon",
+  { .word = "no-daemon",
+    .letter = 'n',
     .setting.flag = &no_daemon,
     .description = strtext("Remain a foreground process")
   },
 
-  { .letter = 'q',
-    .word = "quiet",
+  { .word = "quiet",
+    .letter = 'q',
     .setting.flag = &quiet,
     .description = strtext("Do not write any text to the braille device")
+  },
+
+  { .word = "verbose",
+    .letter = 'v',
+    .setting.flag = &verbose,
+    .description = strtext("Write debugging output to stdout")
   },
 END_OPTION_TABLE
 

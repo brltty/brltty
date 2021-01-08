@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -297,11 +297,12 @@ ihexCallHandler (IhexFileProcessingData *fpd, const IhexParsedRecord *record) {
 }
 
 static int
-ihexProcessLine (char *line, void *data) {
-  IhexFileProcessingData *fpd = data;
+ihexProcessLine (const LineHandlerParameters *parameters) {
+  IhexFileProcessingData *fpd = parameters->data;
   IhexRecordProcessingData *rpd = &fpd->rpd;
   rpd->line += 1;
 
+  const char *line = parameters->line.text;
   while (*line == ' ') line += 1;
   if (!*line) return 1;
   if (*line == IHEX_COMMENT_PREFIX) return 1;

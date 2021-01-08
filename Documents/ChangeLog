@@ -1,6 +1,94 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+December 23, 2020:
+ - BRLTTY 6.2 released:
+   General changes:
+      Problems related to the system waking up from suspend have been resolved.
+      The format of the DESCCHAR command's output has been improved.
+      The representation of any Unicode braille pattern can now be overridden.
+      Prompt patterns no longer fall back to the default algorithm.
+      The +route modifier now works for block commands.
+      The Scroll-aware Cursor Navigation preference has been added.
+      The Start Selection with Routing Key preference has been added.
+      The Frank Audiodata braille device is now supported.
+      The Java bindings have been significantly enhanced.
+   Alva braille driver changes:
+      Satellite models:
+         The Left/Right pads have been respectively renamed to Speech/Nav.
+         The CLIP_COPY and CLIP_APPEND commands have been bound.
+   Hedo braille driver changes:
+      Detection of The MobilLine model via USB has been improved.
+   Seika braille driver changes:
+      The left space bar has been remapped to being the Meta (left alt) key.
+   XWindow braille driver changes:
+      X clipboard support has been added.
+   AtSpi2 screen driver changes:
+      Cursor routing problems have been resolved.
+   BrlAPI changes:
+      The version is now 0.8.1 (it was 0.8.0).
+      A problem with reading raw keycodes has been fixed.
+      The server now also listens for localhost connections via IPV6.
+      Byte reordering is now done for watched parameter values.
+      Setting the computer braille cell size is no longer strict.
+      Reading the RENDERED_CELLS parameter now works.
+      These have been added for getting the underlying file descriptor:
+         brlapi_getFileDescriptor()
+         brlapi__getFileDescriptor(handle)
+         BRLAPI_INVALID_FILE_DESCRIPTOR
+      These parameters have been renamed:
+         BRLAPI_PARAM_BOUND_COMMAND_CODES -> BRLAPI_PARAM_BOUND_COMMAND_KEYCODES
+         BRLAPI_PARAM_COMMAND_SHORT_NAME  -> BRLAPI_PARAM_COMMAND_KEYCODE_NAME
+         BRLAPI_PARAM_COMMAND_LONG_NAME   -> BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY
+         BRLAPI_PARAM_DEVICE_KEY_CODES    -> BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES
+         BRLAPI_PARAM_KEY_SHORT_NAME      -> BRLAPI_PARAM_DRIVER_KEYCODE_NAME
+         BRLAPI_PARAM_KEY_LONG_NAME       -> BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY
+      And their corresponding parameter types have also been renamed:
+         brlapi_param_commandCode_t      -> brlapi_param_commandKeycode_t
+         brlapi_param_commandShortName_t -> brlapi_param_commandKeycodeName_t
+         brlapi_param_commandLongName_t  -> brlapi_param_commandKeycodeSummary_t
+         brlapi_param_keyCode_t          -> brlapi_param_driverKeycode_t
+         brlapi_param_keyShortName_t     -> brlapi_param_driverKeycodeName_t
+         brlapi_param_keyLongName_t      -> brlapi_param_driverKeycodeSummary_t
+   Linux security enhancements:
+      BRLTTY can now run as an unprivileged user.
+      Some namespaces are now being isolated.
+      A system call filter can be enabled.
+      The --privilege-parameters command line option has been added.
+      The privilege-parameters configuration file directive has been added.
+      The --with-privilege-parameters configure option has been added.
+      Full details in README.Linux (online at http://brltty.app/doc/Linux.html).
+   Android changes:
+      Finding user customization files in /sdcard/brltty/ has bee fixed.
+      Text selection and host clipboard interactions have been implemented.
+      The screen element ordering algorithm has been improved.
+      Speech tracking has been implemented.
+      Commands for each of the global actions have been added.
+      Global actions can now also be performed via chords.
+      Global actions for moving to the first/last screen element have been added.
+      Navigation among the visible screen windows is now supported.
+      A global action to show the window title has been added.
+      A global action to show various device status indicators has been added.
+      Support for structural web page navigation has been added.
+   Systemd management changes:
+      The brltty-device@.service instance unit has been added.
+      BRLTTY is now run as an unprivileged user with perks.
+      The BRLTTY instance is now stopped correctly on USB disconnect.
+      A USB device management problem introduced in Systemd 247 has been fixed.
+      BRLTTY's needed directories are now created (if necessary).
+      The brlapi group is now assumed (e.g. for /etc/brlapi.key ownership).
+   Upstart udev rules changes:
+      The initctl command (rather than start and stop) is now used.
+      The --quiet and --no-wait options are now used.
+      The udev rules now restart the job on connect if it's already running.
+   Polkit changes:
+      Members of the brlapi group are now authorized.
+      The rules/actions can now be (un)installed via the Polkit make file.
+   Command installation changes:
+      The brltty-config script has been renamed to brltty-config.sh.
+      The brltty-prologue.sh script is now installed.
+      The brltty-genkey script is now installed.
+
 April 6, 2020:
  - BRLTTY 6.1 released:
    New commands:
@@ -10,6 +98,7 @@ April 6, 2020:
    New braille drivers:
       Canute: A 40 column, 9 line display from Bristol Braille.
    BrlAPI braille driver changes:
+      The version is now 0.8.0 (it was 0.7.0).
       Increase/decrease the client priority based on the screen content quality.
       A quality of "good" overrides Orca rendering - lower ones don't.
    HandyTech braille driver changes:
@@ -135,6 +224,7 @@ February 22, 2019:
       Determining which widget is currently active has been fixed.
       BRLTTY is now automatically stopped when the session is closed.
    BrlAPI changes:
+      The version is now 0.7.0 (it was 0.6.7).
       The server now starts immediately rather than when the braille driver starts.
       The following new client functions have been added:
          void brlapi_getLibraryVersion(int *major, int *minor, int *revision)
@@ -3253,7 +3343,7 @@ March 2001:
      loadconfig()
      startbrl()     -- pm: autodetection, changes name of help file
      intscr(helpfile)
-	
+
 08 April 2000:
   - Released BRLTTY 2.50 (beta)
   - Added Installation Bootdisk Hacking Mini-HowTo (SD, NP)

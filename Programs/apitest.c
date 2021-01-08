@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2020 by The BRLTTY Developers.
+ * Copyright (C) 1995-2021 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -55,70 +55,70 @@ static int opt_parameters;
 static int opt_threadMode;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'n',
-    .word = "name",
+  { .word = "name",
+    .letter = 'n',
     .setting.flag = &opt_showName,
     .description = "Show the name of the braille driver."
   },
 
-  { .letter = 'm',
-    .word = "model",
+  { .word = "model",
+    .letter = 'm',
     .setting.flag = &opt_showModelIdentifier,
     .description = "Show the model identifier of the braille device."
   },
 
 
-  { .letter = 'w',
-    .word = "window",
+  { .word = "window",
+    .letter = 'w',
     .setting.flag = &opt_showSize,
     .description = "Show the dimensions of the braille window."
   },
 
-  { .letter = 'd',
-    .word = "dots",
+  { .word = "dots",
+    .letter = 'd',
     .setting.flag = &opt_showDots,
     .description = "Show dot pattern."
   },
 
-  { .letter = 'l',
-    .word = "learn",
+  { .word = "learn",
+    .letter = 'l',
     .setting.flag = &opt_learnMode,
     .description = "Enter interactive command learn mode."
   },
 
-  { .letter = 'k',
-    .word = "keycodes",
+  { .word = "keycodes",
+    .letter = 'k',
     .setting.flag = &opt_showKeyCodes,
     .description = "Enter interactive keycode learn mode."
   },
 
-  { .letter = 's',
-    .word = "suspend",
+  { .word = "suspend",
+    .letter = 's',
     .setting.flag = &opt_suspendMode,
     .description = "Suspend the braille driver (press ^C or send SIGUSR1 to resume)."
   },
 
-  { .letter = 'p',
-    .word = "parameters",
+  { .word = "parameters",
+    .letter = 'p',
     .setting.flag = &opt_parameters,
     .description = "Test parameters"
   },
 
-  { .letter = 't',
-    .word = "thread",
+  { .word = "thread",
+    .letter = 't',
     .setting.flag = &opt_threadMode,
     .description = "Exercise threaded use"
   },
 
-  { .letter = 'b',
-    .word = "brlapi",
+  { .word = "brlapi",
+    .letter = 'b',
     .argument = "[host][:port]",
     .setting.string = &opt_host,
     .description = "BrlAPIa host and/or port to connect to."
   },
 
-  { .letter = 'a',
-    .word = "auth",
+  { .word = "auth",
+    .letter = 'a',
     .argument = "scheme+...",
     .setting.string = &opt_auth,
     .description = "BrlAPI authorization/authentication schemes."
