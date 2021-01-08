@@ -793,3 +793,10 @@ BRLTTY_ARG_DISABLE(
    ]
 )dnl
 ])])
+
+AC_DEFUN([BRLTTY_PKGCONFIG_VARIABLE], [dnl
+$1=$($PKG_CONFIG --variable=$3 $2)
+test -n "${$1}" || $1="$4"
+AC_SUBST([$1])
+])
+
