@@ -1,6 +1,46 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+January 28, 2021:
+ - BRLTTY 6.3 released:
+   Core changes:
+      The CLIP_NEW command when performed via a keyboard table no longer crashes.
+      Message localization now works on Windows and Android.
+      Non-UTF8 consoles on Linux and Windows are now supported.
+   Command line option changes:
+      --start-message no longer has a short option (was -Y).
+      --stop-message no longer has a short option (was -Z).
+      --prompt-patterns no longer has a short option (was -z).
+      The short option for --privilege-parameters is now -z (was -y).
+      The --stay-privileged [-Z] option has been added.
+      Setting the unprivileged user to :STAY-PRIVILEGED: is no longer supported.
+      The override-preference option has been renamed to override-preferences.
+      The --locale-directory option has been added.
+   Build changes:
+      The Systemd and Udev wrapper scripts are now in libexec/ (not lib/brltty/).
+      BRLTTY now has a .pc (pkgconfig) file.
+      The revision identifier for the build is now stored within the tarball.
+   Systemd changes:
+      The brlapi group is created during boot if it doesn't already exist.
+   FreedomScientific braille driver changes:
+      Focus models: The SETMARK an GOTOMARK commands have been bound.
+   XWindow braille driver changes:
+      A backspace key has been added.
+   SpeechDispatcher speech driver changes:
+      The name= parameter has been added.
+   BrlAPI changes:
+      The version is now 0.8.2 (it was 0.8.1).
+      Some locking issues have been resolved.
+   Contraction table changes:
+      The cldr directive has been renamed to emoji.
+      Emoji translation is no longer applied to (some) non-emoji characters.
+      A (rare) problem that could cause an infinite loop has been resolved.
+   Developer changes:
+      The versioned symbolic link for libbrlapi.so is now created by make api.
+      The run-* scripts now work when the build and source trees aren't the same.
+      The run-brltty script now uses the message catalogs within the build tree.
+      The msgtest command has been added.
+
 December 23, 2020:
  - BRLTTY 6.2 released:
    General changes:

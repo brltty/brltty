@@ -667,90 +667,42 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 
 %changelog
-* wed Dec 23 2020 Dave Mielke <Dave@Mielke.cc> 6.2
-General changes:
-   Problems related to the system waking up from suspend have been resolved.
-   The format of the DESCCHAR command's output has been improved.
-   The representation of any Unicode braille pattern can now be overridden.
-   Prompt patterns no longer fall back to the default algorithm.
-   The +route modifier now works for block commands.
-   The Scroll-aware Cursor Navigation preference has been added.
-   The Start Selection with Routing Key preference has been added.
-   The Frank Audiodata braille device is now supported.
-   The Java bindings have been significantly enhanced.
-Alva braille driver changes:
-   Satellite models:
-      The Left/Right pads have been respectively renamed to Speech/Nav.
-      The CLIP_COPY and CLIP_APPEND commands have been bound.
-Hedo braille driver changes:
-   Detection of The MobilLine model via USB has been improved.
-Seika braille driver changes:
-   The left space bar has been remapped to being the Meta (left alt) key.
+* Thu Jan 28 2021 Dave Mielke <Dave@Mielke.cc> 6.3
+Core changes:
+   The CLIP_NEW command when performed via a keyboard table no longer crashes.
+   Message localization now works on Windows and Android.
+   Non-UTF8 consoles on Linux and Windows are now supported.
+Command line option changes:
+   --start-message no longer has a short option (was -Y).
+   --stop-message no longer has a short option (was -Z).
+   --prompt-patterns no longer has a short option (was -z).
+   The short option for --privilege-parameters is now -z (was -y).
+   The --stay-privileged [-Z] option has been added.
+   Setting the unprivileged user to :STAY-PRIVILEGED: is no longer supported.
+   The override-preference option has been renamed to override-preferences.
+   The --locale-directory option has been added.
+Build changes:
+   The Systemd and Udev wrapper scripts are now in libexec/ (not lib/brltty/).
+   BRLTTY now has a .pc (pkgconfig) file.
+   The revision identifier for the build is now stored within the tarball.
+Systemd changes:
+   The brlapi group is created during boot if it doesn't already exist.
+FreedomScientific braille driver changes:
+   Focus models: The SETMARK an GOTOMARK commands have been bound.
 XWindow braille driver changes:
-   X clipboard support has been added.
-AtSpi2 screen driver changes:
-   Cursor routing problems have been resolved.
+   A backspace key has been added.
+SpeechDispatcher speech driver changes:
+   The name= parameter has been added.
 BrlAPI changes:
-   The version is now 0.8.1 (it was 0.8.0).
-   A problem with reading raw keycodes has been fixed.
-   The server now also listens for localhost connections via IPV6.
-   Byte reordering is now done for watched parameter values.
-   Setting the computer braille cell size is no longer strict.
-   Reading the RENDERED_CELLS parameter now works.
-   These have been added for getting the underlying file descriptor:
-      brlapi_getFileDescriptor()
-      brlapi__getFileDescriptor(handle)
-      BRLAPI_INVALID_FILE_DESCRIPTOR
-   These parameters have been renamed:
-      BRLAPI_PARAM_BOUND_COMMAND_CODES -> BRLAPI_PARAM_BOUND_COMMAND_KEYCODES
-      BRLAPI_PARAM_COMMAND_SHORT_NAME  -> BRLAPI_PARAM_COMMAND_KEYCODE_NAME
-      BRLAPI_PARAM_COMMAND_LONG_NAME   -> BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY
-      BRLAPI_PARAM_DEVICE_KEY_CODES    -> BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES
-      BRLAPI_PARAM_KEY_SHORT_NAME      -> BRLAPI_PARAM_DRIVER_KEYCODE_NAME
-      BRLAPI_PARAM_KEY_LONG_NAME       -> BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY
-   And their corresponding parameter types have also been renamed:
-      brlapi_param_commandCode_t      -> brlapi_param_commandKeycode_t
-      brlapi_param_commandShortName_t -> brlapi_param_commandKeycodeName_t
-      brlapi_param_commandLongName_t  -> brlapi_param_commandKeycodeSummary_t
-      brlapi_param_keyCode_t          -> brlapi_param_driverKeycode_t
-      brlapi_param_keyShortName_t     -> brlapi_param_driverKeycodeName_t
-      brlapi_param_keyLongName_t      -> brlapi_param_driverKeycodeSummary_t
-Linux security enhancements:
-   BRLTTY can now run as an unprivileged user.
-   Some namespaces are now being isolated.
-   A system call filter can be enabled.
-   The --privilege-parameters command line option has been added.
-   The privilege-parameters configuration file directive has been added.
-   The --with-privilege-parameters configure option has been added.
-   Full details in README.Linux (online at http://brltty.app/doc/Linux.html).
-Android changes:
-   Finding user customization files in /sdcard/brltty/ has bee fixed.
-   Text selection and host clipboard interactions have been implemented.
-   The screen element ordering algorithm has been improved.
-   Speech tracking has been implemented.
-   Commands for each of the global actions have been added.
-   Global actions can now also be performed via chords.
-   Global actions for moving to the first/last screen element have been added.
-   Navigation among the visible screen windows is now supported.
-   A global action to show the window title has been added.
-   A global action to show various device status indicators has been added.
-   Support for structural web page navigation has been added.
-Systemd management changes:
-   The brltty-device@.service instance unit has been added.
-   BRLTTY is now run as an unprivileged user with perks.
-   The BRLTTY instance is now stopped correctly on USB disconnect.
-   A USB device management problem introduced in Systemd 247 has been fixed.
-   BRLTTY's needed directories are now created (if necessary).
-   The brlapi group is now assumed (e.g. for /etc/brlapi.key ownership).
-Upstart udev rules changes:
-   The initctl command (rather than start and stop) is now used.
-   The --quiet and --no-wait options are now used.
-   The udev rules now restart the job on connect if it's already running.
-Polkit changes:
-   Members of the brlapi group are now authorized.
-   The rules/actions can now be (un)installed via the Polkit make file.
-Command installation changes:
-   The brltty-config script has been renamed to brltty-config.sh.
-   The brltty-prologue.sh script is now installed.
-   The brltty-genkey script is now installed.
+   The version is now 0.8.2 (it was 0.8.1).
+   Some locking issues have been resolved.
+Contraction table changes:
+   The cldr directive has been renamed to emoji.
+   Emoji translation is no longer applied to (some) non-emoji characters.
+   A (rare) problem that could cause an infinite loop has been resolved.
+Developer changes:
+   The versioned symbolic link for libbrlapi.so is now created by make api.
+   The run-* scripts now work when the build and source trees aren't the same.
+   The run-brltty script now uses the message catalogs within the build tree.
+   The msgtest command has been added.
 
