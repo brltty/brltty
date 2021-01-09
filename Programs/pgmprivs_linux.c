@@ -1827,7 +1827,7 @@ setHomeDirectory (const char *directory) {
   if (!*directory) return 0;
 
   if (chdir(directory) != -1) {
-    logMessage(LOG_INFO, "working directory changed: %s", directory);
+    logMessage(LOG_INFO, "%s: %s", gettext("working directory changed"), directory);
     setEnvironmentVariable("HOME", directory);
     return 1;
   } else {
@@ -1894,18 +1894,17 @@ setXDGRuntimeDirectory (uid_t uid, gid_t gid) {
   snprintf(newPath, sizeof(newPath), "%.*s%d", length, oldPath, uid);
 
   {
-    const char *label = "XDG runtime directory";
-    logMessage(LOG_DEBUG, "checking %s: %s", label, newPath);
+    logMessage(LOG_DEBUG, "checking XDG runtime directory: %s", newPath);
     int exists = 0;
 
     if (access(newPath, F_OK) != -1) {
       exists = 1;
-      logMessage(LOG_DEBUG, "%s exists: %s", label, newPath);
+      logMessage(LOG_DEBUG, "%s: %s", gettext("XDG runtime directory exists"), newPath);
     } else if (errno == ENOENT) {
       if (mkdir(newPath, S_IRWXU) != -1) {
         if (chown(newPath, uid, gid) != 01) {
           exists = 1;
-          logMessage(LOG_INFO, "%s created: %s", label, newPath);
+          logMessage(LOG_INFO, "%s: %s", gettext("XDG runtime directory created"), newPath);
         } else {
           logSystemError("chown");
         }
@@ -1923,7 +1922,7 @@ setXDGRuntimeDirectory (uid_t uid, gid_t gid) {
     }
 
     if (!exists) {
-      logMessage(LOG_WARNING, "%s access problem: %s", label, newPath);
+      logMessage(LOG_WARNING, "%s: %s", gettext("XDG runtime directory access problem"), newPath);
     }
   }
 
@@ -1966,7 +1965,7 @@ switchToUser (const char *user, int *haveHomeDirectory) {
     if (!uid) {
       logMessage(LOG_WARNING, "not an unprivileged user: %s", user);
     } else if (setProcessOwnership(uid, gid)) {
-      logMessage(LOG_NOTICE, "switched to unprivileged user: %s", user);
+      logMessage(LOG_NOTICE, "%s: %s", gettext("switched to unprivileged user"), user);
       if (setHomeDirectory(pwd->pw_dir)) *haveHomeDirectory = 1;
       return 1;
     }
@@ -1981,7 +1980,7 @@ static int
 switchUser (const char *user, int stayPrivileged, int *haveHomeDirectory) {
   if (amPrivilegedUser()) {
     if (stayPrivileged) {
-      logMessage(LOG_NOTICE, "not switching to an unprivileged user");
+      logMessage(LOG_NOTICE, "%s", gettext("not switching to an unprivileged user"));
     } else if (!*user) {
       logMessage(LOG_DEBUG, "default unprivileged user not configured");
     } else if (switchToUser(user, haveHomeDirectory)) {
@@ -2008,7 +2007,7 @@ switchUser (const char *user, int stayPrivileged, int *haveHomeDirectory) {
         name = number;
       }
 
-      logMessage(LOG_NOTICE, "executing as the invoking user: %s", name);
+      logMessage(LOG_NOTICE, "%s: %s", gettext("executing as the invoking user"), name);
     }
 
     setProcessOwnership(uid, gid);
@@ -2115,7 +2114,7 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
     } else if (chown(path, user, group) == -1) {
       logSystemError("chown");
     } else {
-      logMessage(LOG_INFO, "ownership claimed: %s", path);
+      logMessage(LOG_INFO, "%s: %s", gettext("ownership claimed"), path);
       ownershipClaimed = 1;
     }
 
@@ -2130,7 +2129,7 @@ claimStateDirectory (const PathProcessorParameters *parameters) {
         if (!canChangePathPermissions(path)) {
           logMessage(LOG_WARNING, "can't add group permissions: %s", path);
         } else if (chmod(path, newMode) != -1) {
-          logMessage(LOG_INFO, "group permissions added: %s", path);
+          logMessage(LOG_INFO, "%s: %s", gettext("group permissions added"), path);
         } else {
           logSystemError("chmod");
         }
