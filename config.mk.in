@@ -37,13 +37,38 @@ TARGET_CPU = @target_cpu@
 TARGET_VENDOR = @target_vendor@
 TARGET_OS = @target_os@
 
+prefix = @prefix@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+includedir = @includedir@
+oldincludedir = @oldincludedir@
+
+datarootdir = @datarootdir@
+datadir = @datadir@
+localedir = @localedir@
+mandir = @mandir@
+infodir = @infodir@
+
+docdir = @docdir@
+psdir = @psdir@
+pdfdir = @pdfdir@
+htmldir = @htmldir@
+dvidir = @dvidir@
+
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+sbindir = @sbindir@
+libdir = @libdir@
+libexecdir = @libexecdir@
+
 O = @OBJEXT@
 X = @EXEEXT@
 
-PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PACKAGE_STRING = @PACKAGE_STRING@
+PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 
@@ -52,15 +77,61 @@ HDR_DIR = Headers
 DOC_DIR = Documents
 MSG_DIR = Messages
 TBL_DIR = Tables
+BND_DIR = Bindings
 BRL_DIR = Drivers/Braille
 SPK_DIR = Drivers/Speech
 SCR_DIR = Drivers/Screen
+
 DRV_DIR = lib
-BND_DIR = Bindings
 API_LIBS = -L$(BLD_TOP)$(PGM_DIR) -lbrlapi
 
 INSTALL_ROOT = @install_root@
 EXECUTE_ROOT = @execute_root@
+
+PROGRAM_DIRECTORY = @program_directory@
+DRIVERS_DIRECTORY = @drivers_directory@
+SCRIPTS_DIRECTORY = @scripts_directory@
+UPDATABLE_DIRECTORY = @updatable_directory@
+WRITABLE_DIRECTORY = @writable_directory@
+TABLES_DIRECTORY = @tables_directory@
+MANPAGE_DIRECTORY = @manpage_directory@
+INCLUDE_DIRECTORY = @include_directory@
+
+GDM_AUTOSTART_DIRECTORY = @gdm_autostart_directory@
+MANUAL_DIRECTORIES = @brltty_manual_directories@
+
+POLKIT_POLICY_DIR = @POLKIT_POLICY_DIR@
+POLKIT_RULE_DIR = @POLKIT_RULE_DIR@
+SYSTEMD_SYSUSERS_DIR = @SYSTEMD_SYSUSERS_DIR@
+SYSTEMD_TMPFILES_DIR = @SYSTEMD_TMPFILES_DIR@
+SYSTEMD_UNIT_DIR = @SYSTEMD_UNIT_DIR@
+UDEV_DIR = @UDEV_DIR@
+
+EXPAT_INCLUDES = @expat_includes@
+EXPAT_LIBS = @expat_libs@
+
+ICU_INCLUDES = @icu_includes@
+ICU_LIBS = @icu_libs@
+
+LOUIS_INCLUDES = @louis_includes@
+LOUIS_LIBS = @louis_libs@
+
+GLIB2_PACKAGE = @glib2_package@
+GLIB2_INCLUDES = @glib2_includes@
+GLIB2_LIBS = @glib2_libs@
+
+DBUS_PACKAGE = @dbus_package@
+DBUS_INCLUDES = @dbus_includes@
+DBUS_LIBS = @dbus_libs@
+
+POLKIT_PACKAGE = @polkit_package@
+POLKIT_INCLUDES = @polkit_includes@
+POLKIT_LIBS = @polkit_libs@
+
+CURSES_PACKAGE = @curses_package@
+CURSES_LIBS = @curses_libs@
+
+GUI_TOOLKIT_PACKAGE = @gui_toolkit_package@
 
 X11_PACKAGE = @x11_package@
 X11_INCLUDES = @x11_includes@
@@ -82,11 +153,6 @@ XKB_LIBS = @xkb_libs@
 XTK_LIBS = @xtk_libs@
 XFIXES_LIBS = @xfixes_libs@
 
-CURSES_PACKAGE = @curses_package@
-CURSES_LIBS = @curses_libs@
-
-GUI_TOOLKIT_PACKAGE = @gui_toolkit_package@
-
 CSPI_PACKAGE = @cspi_package@
 CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBS = @cspi_libs@
@@ -94,27 +160,6 @@ CSPI_LIBS = @cspi_libs@
 ATSPI2_PACKAGE = @atspi2_package@
 ATSPI2_INCLUDES = @atspi2_includes@
 ATSPI2_LIBS = @atspi2_libs@
-
-GLIB2_PACKAGE = @glib2_package@
-GLIB2_INCLUDES = @glib2_includes@
-GLIB2_LIBS = @glib2_libs@
-
-DBUS_PACKAGE = @dbus_package@
-DBUS_INCLUDES = @dbus_includes@
-DBUS_LIBS = @dbus_libs@
-
-POLKIT_PACKAGE = @polkit_package@
-POLKIT_INCLUDES = @polkit_includes@
-POLKIT_LIBS = @polkit_libs@
-
-EXPAT_INCLUDES = @expat_includes@
-EXPAT_LIBS = @expat_libs@
-
-LOUIS_INCLUDES = @louis_includes@
-LOUIS_LIBS = @louis_libs@
-
-ICU_INCLUDES = @icu_includes@
-ICU_LIBS = @icu_libs@
 
 SYSTEM_PACKAGE = @system_package@
 SYSTEM_OBJECT = system_$(SYSTEM_PACKAGE)
@@ -248,14 +293,6 @@ PORTS_OBJECTS = $(PORTS_OBJECT).$O
 PORTS_INCLUDES = @ports_includes@
 PORTS_LIBS = @ports_libs@
 
-MOUNT_OBJECTS = $(MNTPT_OBJECTS) $(MNTFS_OBJECTS)
-IO_OBJECTS = io_misc.$O gio.$O gio_null.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(MOUNT_OBJECTS)
-TUNE_OBJECTS = tune.$O notes.$O $(BEEP_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
-ASYNC_OBJECTS = async_handle.$O async_data.$O async_wait.$O async_alarm.$O async_task.$O async_io.$O async_event.$O async_signal.$O thread.$O
-BASE_OBJECTS = log.$O log_history.$O addresses.$O file.$O device.$O parse.$O variables.$O datafile.$O unicode.$O utf8.$O timing.$O $(ASYNC_OBJECTS) queue.$O lock.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS) $(SYSTEM_OBJECTS)
-OPTIONS_OBJECTS = options.$O $(PARAMS_OBJECTS)
-PROGRAM_OBJECTS = program.$O $(PGMPATH_OBJECTS) pid.$O $(OPTIONS_OBJECTS) $(BASE_OBJECTS)
-
 CC = @CC@
 CPPFLAGS = -I$(BLD_DIR) -I$(SRC_DIR) -I$(BLD_TOP:/=)/$(PGM_DIR) -I$(SRC_TOP:/=)/$(PGM_DIR) -I$(SRC_TOP:/=)/$(HDR_DIR) -I$(BLD_TOP:/=) -I$(SRC_TOP:/=) @CPPFLAGS@ @DEFS@
 CFLAGS = $(CPPFLAGS) @CFLAGS@
@@ -272,7 +309,7 @@ LDLIBS = $(ICU_LIBS) $(SYSTEM_LIBS) @LIBS@
 MKSHR = @MKSHR@
 MKREL = @MKREL@
 MKLIB = @MKLIB@
-CONFLIBDIR = @CONFLIBDIR@
+
 STRIP = @STRIP@
 RANLIB = @RANLIB@
 
@@ -292,52 +329,15 @@ INSTALL_DIRECTORY = $(INSTALL) -d
 
 ARC_PFX = @archive_prefix@
 ARC_EXT = @archive_extension@
+
 LIB_PFX = @library_prefix@
 LIB_EXT = @library_extension@
+
 MOD_NAME = @module_name@
 MOD_EXT = @module_extension@
+
+CONFLIBDIR = @CONFLIBDIR@
 LIB_VAR = @libsearch_variable@
-
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-datarootdir = @datarootdir@
-bindir = @bindir@
-sbindir = @sbindir@
-libexecdir = @libexecdir@
-datadir = @datadir@
-sysconfdir = @sysconfdir@
-sharedstatedir = @sharedstatedir@
-localstatedir = @localstatedir@
-libdir = @libdir@
-includedir = @includedir@
-oldincludedir = @oldincludedir@
-localedir = @localedir@
-infodir = @infodir@
-mandir = @mandir@
-docdir = @docdir@
-htmldir = @htmldir@
-dvidir = @dvidir@
-pdfdir = @pdfdir@
-psdir = @psdir@
-
-UPDATABLE_DIRECTORY = @updatable_directory@
-PROGRAM_DIRECTORY = @program_directory@
-DRIVERS_DIRECTORY = @drivers_directory@
-SCRIPTS_DIRECTORY = @scripts_directory@
-WRITABLE_DIRECTORY = @writable_directory@
-TABLES_DIRECTORY = @tables_directory@
-MANPAGE_DIRECTORY = @manpage_directory@
-INCLUDE_DIRECTORY = @include_directory@
-GDM_AUTOSTART_DIRECTORY = @gdm_autostart_directory@
-
-POLKIT_POLICY_DIR = @POLKIT_POLICY_DIR@
-POLKIT_RULE_DIR = @POLKIT_RULE_DIR@
-SYSTEMD_SYSUSERS_DIR = @SYSTEMD_SYSUSERS_DIR@
-SYSTEMD_TMPFILES_DIR = @SYSTEMD_TMPFILES_DIR@
-SYSTEMD_UNIT_DIR = @SYSTEMD_UNIT_DIR@
-UDEV_DIR = @UDEV_DIR@
-
-MANUAL_DIRECTORIES = @brltty_manual_directories@
 
 TEXT_TABLES_SUBDIRECTORY = @TEXT_TABLES_SUBDIRECTORY@
 ATTRIBUTES_TABLES_SUBDIRECTORY = @ATTRIBUTES_TABLES_SUBDIRECTORY@
@@ -371,8 +371,6 @@ BRAILLE_DRIVER_OBJECTS = @braille_driver_objects@
 BRAILLE_DRIVER_LIBRARIES = @braille_driver_libraries@
 BRAILLE_DRIVERS = @braille_drivers@
 
-LIBBRAILLE_ROOT = @libbraille_root@
-
 SPEECH_DRIVER_CODES = @brltty_item_codes_speech@
 SPEECH_DRIVER_NAMES = @brltty_item_names_speech@
 SPEECH_INTERNAL_DRIVER_CODES = @brltty_internal_codes_speech@
@@ -393,6 +391,7 @@ SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
 SCREEN_DRIVER_LIBRARIES = @screen_driver_libraries@
 SCREEN_DRIVERS = @screen_drivers@
 
+LIBBRAILLE_ROOT = @libbraille_root@
 ESPEAK_ROOT = @espeak_root@
 ESPEAK_NG_ROOT = @espeak_ng_root@
 FLITE_ROOT = @flite_root@
@@ -414,10 +413,12 @@ INSTALL_MESSAGES = @install_messages@
 TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 
-CTB_OBJECTS = @contracted_braille_objects@
-
 SPEECH_OBJECT = @speech_support_object@
 XSEL_OBJECT = @xsel_object@
+
+CTB_OBJECTS = @contracted_braille_objects@
+ALL_BRLTTY_CTB = @all_brltty_ctb@
+INSTALL_BRLTTY_CTB = @install_brltty_ctb@
 
 API_VERSION = @api_version@
 API_RELEASE = @api_release@
@@ -440,6 +441,11 @@ INSTALL_API_BINDINGS = @install_api_bindings@
 ALL_XBRLAPI = @all_xbrlapi@
 INSTALL_XBRLAPI = @install_xbrlapi@
 
-ALL_BRLTTY_CTB = @all_brltty_ctb@
-INSTALL_BRLTTY_CTB = @install_brltty_ctb@
+MOUNT_OBJECTS = $(MNTPT_OBJECTS) $(MNTFS_OBJECTS)
+IO_OBJECTS = io_misc.$O gio.$O gio_null.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(MOUNT_OBJECTS)
+TUNE_OBJECTS = tune.$O notes.$O $(BEEP_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $(FM_OBJECTS)
+ASYNC_OBJECTS = async_handle.$O async_data.$O async_wait.$O async_alarm.$O async_task.$O async_io.$O async_event.$O async_signal.$O thread.$O
+BASE_OBJECTS = log.$O log_history.$O addresses.$O file.$O device.$O parse.$O variables.$O datafile.$O unicode.$O utf8.$O timing.$O $(ASYNC_OBJECTS) queue.$O lock.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS) $(SYSTEM_OBJECTS)
+OPTIONS_OBJECTS = options.$O $(PARAMS_OBJECTS)
+PROGRAM_OBJECTS = program.$O $(PGMPATH_OBJECTS) pid.$O $(OPTIONS_OBJECTS) $(BASE_OBJECTS)
 
