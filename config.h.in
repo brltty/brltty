@@ -23,29 +23,162 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* Define this if the compiler doesn't fully support the const keyword. */
-#undef const
+/* Define this to be a string containing the copyright notice. */
+#undef PACKAGE_COPYRIGHT
 
-/* Define this if the compiler doesn't fully support the inline keyword. */
-#undef inline
+/* Define this to be a string containing the full name of the package. */
+#undef PACKAGE_NAME
 
-/* Define this if the printf format attribute is supported. */
-#undef HAVE_ATTRIBUTE_FORMAT_PRINTF
+/* Define this to be a string containing the version of the package. */
+#undef PACKAGE_VERSION
 
-/* Define this if the noreturn attribute is supported. */
-#undef HAVE_ATTRIBUTE_NORETURN
+/* Define this to be a string containing the full name and version of the package. */
+#undef PACKAGE_STRING
 
-/* Define this if the packed attribute is supported. */
-#undef HAVE_ATTRIBUTE_PACKED
+/* Define this to be a string containing the URL of the home page of the package. */
+#undef PACKAGE_URL
 
-/* Define this if the unused attribute is supported. */
-#undef HAVE_ATTRIBUTE_UNUSED
+/* Define this to be a string containing the short name of the package. */
+#undef PACKAGE_TARNAME
 
-/* Define this if the __alignof__ operator is supported. */
-#undef HAVE_OPERATOR_ALIGNOF
-#ifndef HAVE_OPERATOR_ALIGNOF
-#define __alignof__(x) 8
-#endif /* HAVE_OPERATOR_ALIGNOF */
+/* Define this to be a string containing the address where bug reports should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define this to be a string containing the base module name. */
+#undef MODULE_NAME
+
+/* Define this to be a string containing the module extension. */
+#undef MODULE_EXTENSION
+
+/* Define this to be a string containing the library extension. */
+#undef LIBRARY_EXTENSION
+
+/* Define only one of the following program path packages. */
+#undef USE_PKG_PGMPATH_NONE
+#undef USE_PKG_PGMPATH_LINUX
+#undef USE_PKG_PGMPATH_SOLARIS
+#undef USE_PKG_PGMPATH_WINDOWS
+
+/* Define only one of the following system service packages. */
+#undef USE_PKG_SERVICE_NONE
+#undef USE_PKG_SERVICE_WINDOWS
+
+/* Define only one of the following boot parameters packages. */
+#undef USE_PKG_PARAMS_NONE
+#undef USE_PKG_PARAMS_LINUX
+
+/* Define only one of the following dynamic loading packages. */
+#undef USE_PKG_DYNLD_NONE
+#undef USE_PKG_DYNLD_DLFCN
+#undef USE_PKG_DYNLD_DYLD
+#undef USE_PKG_DYNLD_GRUB
+#undef USE_PKG_DYNLD_SHL
+#undef USE_PKG_DYNLD_WINDOWS
+
+/* Define only one of the following regular expression packages. */
+#undef USE_PKG_RGX_NONE
+#undef USE_PKG_RGX_LIBPCRE32
+#undef USE_PKG_RGX_LIBPCRE2_32
+
+/* Define only one of the following character set packages. */
+#undef USE_PKG_CHARSET_NONE
+#undef USE_PKG_CHARSET_GRUB
+#undef USE_PKG_CHARSET_ICONV
+#undef USE_PKG_CHARSET_MSDOS
+#undef USE_PKG_CHARSET_WINDOWS
+
+/* Define only one of the following host command packages. */
+#undef USE_PKG_HOSTCMD_NONE
+#undef USE_PKG_HOSTCMD_UNIX
+#undef USE_PKG_HOSTCMD_WINDOWS
+
+/* Define only one of the following mount point packages. */
+#undef USE_PKG_MNTPT_NONE
+#undef USE_PKG_MNTPT_MNTENT
+#undef USE_PKG_MNTPT_MNTTAB
+
+/* Define only one of the following mount file system packages. */
+#undef USE_PKG_MNTFS_NONE
+#undef USE_PKG_MNTFS_LINUX
+
+/* Define only one of the following keyboard packages. */
+#undef USE_PKG_KBD_NONE
+#undef USE_PKG_KBD_ANDROID
+#undef USE_PKG_KBD_LINUX
+
+/* Define only one of the following console bell packages. */
+#undef USE_PKG_BELL_NONE
+#undef USE_PKG_BELL_LINUX
+
+/* Define only one of the following keyboard LEDs packages. */
+#undef USE_PKG_LEDS_NONE
+#undef USE_PKG_LEDS_LINUX
+
+/* Define only one of the following beeper packages. */
+#undef USE_PKG_BEEP_NONE
+#undef USE_PKG_BEEP_LINUX
+#undef USE_PKG_BEEP_MSDOS
+#undef USE_PKG_BEEP_SOLARIS
+#undef USE_PKG_BEEP_SPKR
+#undef USE_PKG_BEEP_WINDOWS
+#undef USE_PKG_BEEP_WSKBD
+
+/* Define only one of the following PCM packages. */
+#undef USE_PKG_PCM_NONE
+#undef USE_PKG_PCM_ALSA
+#undef USE_PKG_PCM_ANDROID
+#undef USE_PKG_PCM_AUDIO
+#undef USE_PKG_PCM_HPUX
+#undef USE_PKG_PCM_OSS
+#undef USE_PKG_PCM_QSA
+#undef USE_PKG_PCM_WINDOWS
+
+/* Define only one of the following MIDI packages. */
+#undef USE_PKG_MIDI_NONE
+#undef USE_PKG_MIDI_ALSA
+#undef USE_PKG_MIDI_DARWIN
+#undef USE_PKG_MIDI_OSS
+#undef USE_PKG_MIDI_WINDOWS
+
+/* Define only one of the following FM packages. */
+#undef USE_PKG_FM_NONE
+#undef USE_PKG_FM_ADLIB
+
+/* Define only one of the following serial I/O packages. */
+#undef USE_PKG_SERIAL_NONE
+#undef USE_PKG_SERIAL_GRUB
+#undef USE_PKG_SERIAL_MSDOS
+#undef USE_PKG_SERIAL_TERMIOS
+#undef USE_PKG_SERIAL_WINDOWS
+
+/* Define only one of the following USB I/O packages. */
+#undef USE_PKG_USB_NONE
+#undef USE_PKG_USB_ANDROID
+#undef USE_PKG_USB_DARWIN
+#undef USE_PKG_USB_FREEBSD
+#undef USE_PKG_USB_GRUB
+#undef USE_PKG_USB_KFREEBSD
+#undef USE_PKG_USB_LIBUSB
+#undef USE_PKG_USB_LIBUSB_1_0
+#undef USE_PKG_USB_LINUX
+#undef USE_PKG_USB_NETBSD
+#undef USE_PKG_USB_OPENBSD
+#undef USE_PKG_USB_SOLARIS
+
+/* Define only one of the following Bluetooth I/O packages. */
+#undef USE_PKG_BLUETOOTH_NONE
+#undef USE_PKG_BLUETOOTH_ANDROID
+#undef USE_PKG_BLUETOOTH_DARWIN
+#undef USE_PKG_BLUETOOTH_LINUX
+#undef USE_PKG_BLUETOOTH_WINDOWS
+
+/* Define only one of the following I/O ports packages. */
+#undef USE_PKG_PORTS_NONE
+#undef USE_PKG_PORTS_GLIBC
+#undef USE_PKG_PORTS_GRUB
+#undef USE_PKG_PORTS_KFREEBSD
+#undef USE_PKG_PORTS_MSDOS
+#undef USE_PKG_PORTS_WINDOWS
 
 /* Define this if the function addmntent exists. */
 #undef HAVE_ADDMNTENT
@@ -221,6 +354,12 @@ extern "C" {
 #undef HAVE_SYS_WAIT_H
 #endif /* __MSDOS__ */
 
+/* Define this if the header file dev/speaker/speaker.h exists. */
+#undef HAVE_DEV_SPEAKER_SPEAKER_H
+
+/* Define this if the header file legacy/dev/usb/usb.h exists. */
+#undef HAVE_LEGACY_DEV_USB_USB_H
+
 /* Define this if the header file linux/audit.h exists. */
 #undef HAVE_LINUX_AUDIT_H
 
@@ -242,11 +381,8 @@ extern "C" {
 /* Define this if the header file machine/speaker.h exists. */
 #undef HAVE_MACHINE_SPEAKER_H
 
-/* Define this if the header file dev/speaker/speaker.h exists. */
-#undef HAVE_DEV_SPEAKER_SPEAKER_H
-
-/* Define this if the header file legacy/dev/usb/usb.h exists. */
-#undef HAVE_LEGACY_DEV_USB_USB_H
+/* Define this if the header file X11/extensions/Xfixes.h exists. */
+#undef HAVE_X11_EXTENSIONS_XFIXES_H
 
 /* Define this if the header file X11/extensions/XKB.h exists. */
 #undef HAVE_X11_EXTENSIONS_XKB_H
@@ -254,17 +390,11 @@ extern "C" {
 /* Define this if the header file X11/extensions/XTest.h exists. */
 #undef HAVE_X11_EXTENSIONS_XTEST_H
 
-/* Define this if the header file X11/extensions/Xfixes.h exists. */
-#undef HAVE_X11_EXTENSIONS_XFIXES_H
-
 /* Define this if the header file X11/keysym.h exists. */
 #undef HAVE_X11_KEYSYM_H
 
 /* Define this if the function atspi_get_a11y_bus exists in atspi2. */
 #undef HAVE_ATSPI_GET_A11Y_BUS
-
-/* Define this if the function sd_session_get_vt is available in libsystemd. */
-#undef HAVE_SD_SESSION_GET_VT
 
 /* Define this if XML parsing support is to be included. */
 #undef HAVE_EXPAT
@@ -274,6 +404,9 @@ extern "C" {
 
 /* Define this if the header file unicode/unorm2.h exists. */
 #undef HAVE_UNICODE_UNORM2_H
+
+/* Define this if the Polkit authorization manager is to be used. */
+#undef HAVE_POLKIT
 
 /* Define this if posix threads are supported. */
 #undef HAVE_POSIX_THREADS
@@ -287,6 +420,9 @@ extern "C" {
 /* Define this if the function pthread_getname_np exists. */
 #undef HAVE_PTHREAD_GETNAME_NP
 
+/* Define this if the function sd_session_get_vt is available in libsystemd. */
+#undef HAVE_SD_SESSION_GET_VT
+
 /* Define this if the bluetooth library is available. */
 #undef HAVE_LIBBLUETOOTH
 
@@ -299,9 +435,6 @@ extern "C" {
 /* Define this if the package dbus is available. */
 #undef HAVE_PKG_DBUS
 
-/* Define this if the package x11 is available. */
-#undef HAVE_PKG_X11
-
 /* Define only one of the following curses packages. */
 #undef HAVE_PKG_CURSES
 #undef HAVE_PKG_NCURSES
@@ -310,6 +443,12 @@ extern "C" {
 #undef HAVE_PKG_PDCURSESU
 #undef HAVE_PKG_PDCURSESW
 
+/* Define this if the package x11 is available. */
+#undef HAVE_PKG_X11
+
+/* Define this if X is not available. */
+#undef X_DISPLAY_MISSING
+
 /* Define only one of the following Xaw packages. */
 #undef HAVE_PKG_XAW
 #undef HAVE_PKG_XAW3D
@@ -317,135 +456,29 @@ extern "C" {
 #undef HAVE_PKG_XAWPLUS
 #undef HAVE_PKG_XM
 
-/* Define only one of the following program path packages. */
-#undef USE_PKG_PGMPATH_NONE
-#undef USE_PKG_PGMPATH_LINUX
-#undef USE_PKG_PGMPATH_SOLARIS
-#undef USE_PKG_PGMPATH_WINDOWS
+/* Define this if the compiler doesn't fully support the const keyword. */
+#undef const
 
-/* Define only one of the following system service packages. */
-#undef USE_PKG_SERVICE_NONE
-#undef USE_PKG_SERVICE_WINDOWS
+/* Define this if the compiler doesn't fully support the inline keyword. */
+#undef inline
 
-/* Define only one of the following boot parameters packages. */
-#undef USE_PKG_PARAMS_NONE
-#undef USE_PKG_PARAMS_LINUX
+/* Define this if the printf format attribute is supported. */
+#undef HAVE_ATTRIBUTE_FORMAT_PRINTF
 
-/* Define only one of the following dynamic loading packages. */
-#undef USE_PKG_DYNLD_NONE
-#undef USE_PKG_DYNLD_DLFCN
-#undef USE_PKG_DYNLD_DYLD
-#undef USE_PKG_DYNLD_GRUB
-#undef USE_PKG_DYNLD_SHL
-#undef USE_PKG_DYNLD_WINDOWS
+/* Define this if the noreturn attribute is supported. */
+#undef HAVE_ATTRIBUTE_NORETURN
 
-/* Define only one of the following regular expression packages. */
-#undef USE_PKG_RGX_NONE
-#undef USE_PKG_RGX_LIBPCRE32
-#undef USE_PKG_RGX_LIBPCRE2_32
+/* Define this if the packed attribute is supported. */
+#undef HAVE_ATTRIBUTE_PACKED
 
-/* Define only one of the following character set packages. */
-#undef USE_PKG_CHARSET_NONE
-#undef USE_PKG_CHARSET_GRUB
-#undef USE_PKG_CHARSET_ICONV
-#undef USE_PKG_CHARSET_MSDOS
-#undef USE_PKG_CHARSET_WINDOWS
+/* Define this if the unused attribute is supported. */
+#undef HAVE_ATTRIBUTE_UNUSED
 
-/* Define only one of the following host command packages. */
-#undef USE_PKG_HOSTCMD_NONE
-#undef USE_PKG_HOSTCMD_UNIX
-#undef USE_PKG_HOSTCMD_WINDOWS
-
-/* Define only one of the following mount point packages. */
-#undef USE_PKG_MNTPT_NONE
-#undef USE_PKG_MNTPT_MNTENT
-#undef USE_PKG_MNTPT_MNTTAB
-
-/* Define only one of the following mount file system packages. */
-#undef USE_PKG_MNTFS_NONE
-#undef USE_PKG_MNTFS_LINUX
-
-/* Define only one of the following keyboard packages. */
-#undef USE_PKG_KBD_NONE
-#undef USE_PKG_KBD_ANDROID
-#undef USE_PKG_KBD_LINUX
-
-/* Define only one of the following console bell packages. */
-#undef USE_PKG_BELL_NONE
-#undef USE_PKG_BELL_LINUX
-
-/* Define only one of the following keyboard LEDs packages. */
-#undef USE_PKG_LEDS_NONE
-#undef USE_PKG_LEDS_LINUX
-
-/* Define only one of the following beeper packages. */
-#undef USE_PKG_BEEP_NONE
-#undef USE_PKG_BEEP_LINUX
-#undef USE_PKG_BEEP_MSDOS
-#undef USE_PKG_BEEP_SOLARIS
-#undef USE_PKG_BEEP_SPKR
-#undef USE_PKG_BEEP_WINDOWS
-#undef USE_PKG_BEEP_WSKBD
-
-/* Define only one of the following PCM packages. */
-#undef USE_PKG_PCM_NONE
-#undef USE_PKG_PCM_ALSA
-#undef USE_PKG_PCM_ANDROID
-#undef USE_PKG_PCM_AUDIO
-#undef USE_PKG_PCM_HPUX
-#undef USE_PKG_PCM_OSS
-#undef USE_PKG_PCM_QSA
-#undef USE_PKG_PCM_WINDOWS
-
-/* Define only one of the following MIDI packages. */
-#undef USE_PKG_MIDI_NONE
-#undef USE_PKG_MIDI_ALSA
-#undef USE_PKG_MIDI_DARWIN
-#undef USE_PKG_MIDI_OSS
-#undef USE_PKG_MIDI_WINDOWS
-
-/* Define only one of the following FM packages. */
-#undef USE_PKG_FM_NONE
-#undef USE_PKG_FM_ADLIB
-
-/* Define only one of the following serial I/O packages. */
-#undef USE_PKG_SERIAL_NONE
-#undef USE_PKG_SERIAL_GRUB
-#undef USE_PKG_SERIAL_MSDOS
-#undef USE_PKG_SERIAL_TERMIOS
-#undef USE_PKG_SERIAL_WINDOWS
-
-/* Define only one of the following USB I/O packages. */
-#undef USE_PKG_USB_NONE
-#undef USE_PKG_USB_ANDROID
-#undef USE_PKG_USB_DARWIN
-#undef USE_PKG_USB_FREEBSD
-#undef USE_PKG_USB_GRUB
-#undef USE_PKG_USB_KFREEBSD
-#undef USE_PKG_USB_LIBUSB
-#undef USE_PKG_USB_LIBUSB_1_0
-#undef USE_PKG_USB_LINUX
-#undef USE_PKG_USB_NETBSD
-#undef USE_PKG_USB_OPENBSD
-#undef USE_PKG_USB_SOLARIS
-
-/* Define only one of the following Bluetooth I/O packages. */
-#undef USE_PKG_BLUETOOTH_NONE
-#undef USE_PKG_BLUETOOTH_ANDROID
-#undef USE_PKG_BLUETOOTH_DARWIN
-#undef USE_PKG_BLUETOOTH_LINUX
-#undef USE_PKG_BLUETOOTH_WINDOWS
-
-/* Define only one of the following I/O ports packages. */
-#undef USE_PKG_PORTS_NONE
-#undef USE_PKG_PORTS_GLIBC
-#undef USE_PKG_PORTS_GRUB
-#undef USE_PKG_PORTS_KFREEBSD
-#undef USE_PKG_PORTS_MSDOS
-#undef USE_PKG_PORTS_WINDOWS
-
-/* Define this if the Polkit authorization manager is to be used. */
-#undef USE_POLKIT
+/* Define this if the __alignof__ operator is supported. */
+#undef HAVE_OPERATOR_ALIGNOF
+#ifndef HAVE_OPERATOR_ALIGNOF
+#define __alignof__(x) 8
+#endif /* HAVE_OPERATOR_ALIGNOF */
 
 /* Define this if the host is big endian. */
 #undef WORDS_BIGENDIAN
@@ -461,36 +494,6 @@ extern "C" {
 
 /* Define this if the value ProcessUserModeIOPL exists. */
 #undef HAVE_PROCESSUSERMODEIOPL
-
-/* Define this to be a string containing the base module name. */
-#undef MODULE_NAME
-
-/* Define this to be a string containing the module extension. */
-#undef MODULE_EXTENSION
-
-/* Define this to be a string containing the library extension. */
-#undef LIBRARY_EXTENSION
-
-/* Define this to be a string containing the copyright notice. */
-#undef PACKAGE_COPYRIGHT
-
-/* Define this to be a string containing the full name of the package. */
-#undef PACKAGE_NAME
-
-/* Define this to be a string containing the version of the package. */
-#undef PACKAGE_VERSION
-
-/* Define this to be a string containing the full name and version of the package. */
-#undef PACKAGE_STRING
-
-/* Define this to be a string containing the short name of the package. */
-#undef PACKAGE_TARNAME
-
-/* Define this to be a string containing the URL of the home page of the package. */
-#undef PACKAGE_URL
-
-/* Define this to be a string containing the address where bug reports should be sent. */
-#undef PACKAGE_BUGREPORT
 
 /* Define this if BRLTTY is to be run as init. */
 #undef INIT_PATH
@@ -546,26 +549,26 @@ extern "C" {
 /* Define this to be a string containing the path to the first serial device. */
 #undef SERIAL_FIRST_DEVICE
 
-/* Define this to be a string containing the path to the default text table. */
-#undef TEXT_TABLE
-
-/* Define this to be a string containing the path to the default attributes table. */
-#undef ATTRIBUTES_TABLE
-
 /* Define this to be a string containing a list of the speech driver codes. */
 #undef SPEECH_DRIVER_CODES
 
 /* Define this to be a string containing the default parameters for the speech driver(s). */
 #undef SPEECH_PARAMETERS
 
-/* Define this to be a string containing the default screen driver code. */
-#undef DEFAULT_SCREEN_DRIVER
-
 /* Define this to be a string containing a list of the screen driver codes. */
 #undef SCREEN_DRIVER_CODES
 
+/* Define this to be a string containing the default screen driver code. */
+#undef DEFAULT_SCREEN_DRIVER
+
 /* Define this to be a string containing the default parameters for the screen driver(s). */
 #undef SCREEN_PARAMETERS
+
+/* Define this to be a string containing the path to the default text table. */
+#undef TEXT_TABLE
+
+/* Define this to be a string containing the path to the default attributes table. */
+#undef ATTRIBUTES_TABLE
 
 /* Define this to include contraction table support. */
 #undef ENABLE_CONTRACTED_BRAILLE
@@ -585,9 +588,6 @@ extern "C" {
 /* Define this to be a string containing the path to the root of the Theta package. */
 #undef THETA_ROOT
 
-/* Define this if internationalization support is to be included. */
-#undef ENABLE_I18N_SUPPORT
-
 /* Define this if the application programming interface is to be included. */
 #undef ENABLE_API
 
@@ -603,14 +603,14 @@ extern "C" {
 /* Define this to be a string containing the name of BrlAPI's authorization key file. */
 #undef BRLAPI_AUTHKEYFILE
 
+/* Define this if internationalization support is to be included. */
+#undef ENABLE_I18N_SUPPORT
+
 /* Define this if shared object support is to be included. */
 #undef ENABLE_SHARED_OBJECTS
 
 /* Define this if HP-UX audio support is available. */
 #undef HAVE_HPUX_AUDIO
-
-/* Define this if X is not available. */
-#undef X_DISPLAY_MISSING
 
 /* Define this to be a string containing the subdirectory for text tables. */
 #undef TEXT_TABLES_SUBDIRECTORY

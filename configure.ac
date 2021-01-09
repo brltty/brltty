@@ -696,7 +696,7 @@ BRLTTY_ARG_DISABLE(
    [],
 [dnl
    BRLTTY_HAVE_PACKAGE([polkit], [polkit-gobject-1], [dnl
-      AC_DEFINE(USE_POLKIT, 1, [if the Polkit authorization manager should be used])
+      AC_DEFINE(HAVE_POLKIT, 1, [if the Polkit authorization manager should be used])
    ])
 ])
 
