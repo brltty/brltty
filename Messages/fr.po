@@ -536,7 +536,7 @@ msgstr "Ne se rabat pas sur des caractères en unicode"
 
 #: Programs/config.c:355
 msgid "Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc)."
-msgstr ""
+msgstr "Ne pas passer à un utilisateur non privilégié ou renoncer à tous les privilèges (appartenance à des groupes, capacités, etc.)."
 
 #: Programs/alert.c:52
 msgid "Done"
@@ -2026,7 +2026,7 @@ msgstr "Répertoire accessible en écriture"
 
 #: Programs/xbrlapi.c:118
 msgid "Write debugging output to stdout"
-msgstr ""
+msgstr "Écrire sortie de débogage sur stdout"
 
 #: Programs/config.c:671
 msgid "Write the start-up logs, and then exit."
@@ -2038,15 +2038,15 @@ msgstr "Afficheur X auquel se connecter"
 
 #: Programs/pgmprivs_linux.c:1925
 msgid "XDG runtime directory access problem"
-msgstr ""
+msgstr "problème d'accès au répertoire XDG utilisé lors de l'exécution"
 
 #: Programs/pgmprivs_linux.c:1907
 msgid "XDG runtime directory created"
-msgstr ""
+msgstr "Répertoire XDG utilisé lors de l'exécution créé"
 
 #: Programs/pgmprivs_linux.c:1902
 msgid "XDG runtime directory exists"
-msgstr ""
+msgstr "Le répertoire XDG utilisé lors de l'exécution existe"
 
 #: Programs/xbrlapi.c:786
 msgid "XFree(wm_name) for change"
@@ -2543,7 +2543,7 @@ msgstr "exécution de \"%s\" (à partir de \"%s\")\n"
 
 #: Programs/pgmprivs_linux.c:2010
 msgid "executing as the invoking user"
-msgstr ""
+msgstr "exécution en tant que l'utilisateur appelant"
 
 #. execv() shouldn't return
 #: Programs/brltty.c:184
@@ -2804,7 +2804,7 @@ msgstr "vert"
 
 #: Programs/pgmprivs_linux.c:2132
 msgid "group permissions added"
-msgstr ""
+msgstr "permissions de groupe ajoutées"
 
 #: Programs/cmd_miscellaneous.c:228
 msgid "help not available"
@@ -2876,9 +2876,8 @@ msgstr "Délai d'apparition du message non valide"
 
 #. the operand for an option is invalid
 #: Programs/options.c:588
-#, fuzzy
 msgid "invalid operand"
-msgstr "Opérande manquant"
+msgstr "opérande invalide"
 
 #: Programs/brlapi_server.c:4413
 msgid "invalid thread stack size"
@@ -3001,7 +3000,7 @@ msgstr "Non enregistré"
 
 #: Programs/pgmprivs_linux.c:1983
 msgid "not switching to an unprivileged user"
-msgstr ""
+msgstr "ne passe pas à un utilisateur non privilégié"
 
 #: Programs/cmds.auto.h:969
 msgid "open the application alerts window"
@@ -3033,7 +3032,7 @@ msgstr "option"
 
 #: Programs/pgmprivs_linux.c:2117
 msgid "ownership claimed"
-msgstr ""
+msgstr "propriété obtenue"
 
 #: Programs/cmds.auto.h:1350
 msgid "page-down key"
@@ -3474,7 +3473,7 @@ msgstr "Va au terminal virtuel précédent"
 
 #: Programs/pgmprivs_linux.c:1968
 msgid "switched to unprivileged user"
-msgstr ""
+msgstr "passé à un utilisateur non privilégié"
 
 #: Programs/cmds.auto.h:1294
 msgid "tab key"
@@ -3535,9 +3534,8 @@ msgid "white"
 msgstr "blanc"
 
 #: Programs/pgmprivs_linux.c:1830
-#, fuzzy
 msgid "working directory changed"
-msgstr "Répertoire de travail"
+msgstr "répertoire courant changé"
 
 #: Programs/xbrlapi.c:911
 #, c-format
