@@ -36,6 +36,7 @@ AC_SUBST([api_major], [0])
 AC_SUBST([api_minor], [8])
 AC_SUBST([api_revision], [1])
 
+AC_SUBST([api_name], [BrlAPI])
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
 
