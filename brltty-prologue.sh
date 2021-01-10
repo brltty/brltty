@@ -56,6 +56,32 @@ defineEnumeration() {
    done
 }
 
+parseParameterString() {
+   local valuesArray="${1}"
+   local parameters="${2}"
+   local code="${3}"
+
+   set -- ${parameters//,/ }
+   local parameter
+
+   for parameter
+   do
+      local name="${parameter%%=*}"
+      [ "${name}" = "${parameter}" ] && continue
+      [ -n "${name}" ] || continue
+      local value="${parameter#*=}"
+
+      local qualifier="${name%%:*}"
+      [ "${qualifier}" = "${name}" ] || {
+         [ -n "${qualifier}" ] || continue
+         [ "${qualifier}" = "${code}" ] || continue
+         name="${name#*:}"
+      }
+
+      setVariable "${valuesArray}[${name^^*}]" "${value}"
+   done
+}
+
 stringHead() {
    local string="${1}"
    local length="${2}"
@@ -193,32 +219,6 @@ verifyOutputDirectory() {
    else
       mkdir -p "${path}"
    fi
-}
-
-parseParameterString() {
-   local valuesArray="${1}"
-   local parameters="${2}"
-   local code="${3}"
-
-   set -- ${parameters//,/ }
-   local parameter
-
-   for parameter
-   do
-      local name="${parameter%%=*}"
-      [ "${name}" = "${parameter}" ] && continue
-      [ -n "${name}" ] || continue
-      local value="${parameter#*=}"
-
-      local qualifier="${name%%:*}"
-      [ "${qualifier}" = "${name}" ] || {
-         [ -n "${qualifier}" ] || continue
-         [ "${qualifier}" = "${code}" ] || continue
-         name="${name#*:}"
-      }
-
-      setVariable "${valuesArray}[${name^^*}]" "${value}"
-   done
 }
 
 needTemporaryDirectory() {
