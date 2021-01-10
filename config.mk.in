@@ -45,10 +45,10 @@ includedir = @includedir@
 oldincludedir = @oldincludedir@
 
 datarootdir = @datarootdir@
-datadir = @datadir@
 localedir = @localedir@
 mandir = @mandir@
 infodir = @infodir@
+datadir = @datadir@
 
 docdir = @docdir@
 psdir = @psdir@
