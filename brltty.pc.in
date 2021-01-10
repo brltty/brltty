@@ -22,10 +22,11 @@ URL: @PACKAGE_URL@
 Description: Braille Device Daemon
 
 package_name=@PACKAGE_TARNAME@
-package_title=@PACKAGE_NAME@
 package_version=@PACKAGE_VERSION@
 package_url=@PACKAGE_URL@
-bugreport_email=@PACKAGE_BUGREPORT@
+
+display_name=@PACKAGE_NAME@
+mailing_list=@PACKAGE_BUGREPORT@
 
 prefix=@prefix@
 sysconfdir=@sysconfdir@
@@ -37,16 +38,35 @@ sbindir=@sbindir@
 libdir=@libdir@
 libexecdir=@libexecdir@
 
+updatable_directory=@updatable_directory@
+writable_directory=@writable_directory@
+
 execute_root=@execute_root@
 program_directory=${execute_root}@program_directory@
 drivers_directory=${execute_root}@drivers_directory@
 scripts_directory=${execute_root}@scripts_directory@
 tables_directory=${execute_root}@tables_directory@
+include_directory=${execute_root}@include_directory@
+manpage_directory=${execute_root}@manpage_directory@
 
-updatable_directory=@updatable_directory@
-writable_directory=@writable_directory@
-manpage_directory=@manpage_directory@
-include_directory=@include_directory@
+configuration_file=@CONFIGURATION_FILE@
+preferences_file=@PREFERENCES_FILE@
+
+internal_text_table=@text_table@
+internal_attributes_table=@attributes_table@
+
+have_contracted_braille=@brltty_enabled_contracted_braille@
+have_liblouis=@brltty_enabled_liblouis@
+liblouis_tables_directory=@louis_tables_directory@
+
+braille_parameters=@braille_parameters@
+default_braille_device=@braille_device@
+
+speech_parameters=@speech_parameters@
+have_speech_support=@brltty_enabled_speech_support@
+
+screen_parameters=@screen_parameters@
+default_screen_driver=@default_screen_driver@
 
 all_braille_driver_codes=@brltty_item_codes_braille@
 all_braille_driver_names=@brltty_item_names_braille@
@@ -70,9 +90,29 @@ external_screen_driver_codes=@brltty_external_codes_screen@
 external_screen_driver_names=@brltty_external_names_screen@
 
 privilege_parameters=@privilege_parameters@
-braille_parameters=@braille_parameters@
-speech_parameters=@speech_parameters@
-screen_parameters=@screen_parameters@
+relocatable_install=@brltty_enabled_relocatable_install@
+static_executables=@brltty_enabled_standalone_programs@
+stripped_executables=@brltty_enabled_stripping@
+
+have_expat=@brltty_enabled_expat@
+have_gpm=@brltty_enabled_gpm@
+have_i18n=@brltty_enabled_i18n@
+have_iconv=@brltty_enabled_iconv@
+have_icu=@brltty_enabled_icu@
+have_polkit=@brltty_enabled_polkit@
+have_x=@brltty_enabled_x@
+
+libbraille_root=@libbraille_root@
+espeak_root=@espeak_root@
+espeak_ng_root=@espeak_ng_root@
+flite_root=@flite_root@
+flite_language=@flite_language@
+flite_lexicon=@flite_lexicon@
+flite_voice=@flite_voice@
+mikropuhe_root=@mikropuhe_root@
+speechd_root=@speechd_root@
+swift_root=@swift_root@
+theta_root=@theta_root@
 
 api_name=@api_name@
 api_version=@api_version@
@@ -85,4 +125,11 @@ api_revision=@api_revision@
 api_parameters=@api_parameters@
 api_sockets_directory=@BRLAPI_SOCKETPATH@
 api_authkey_file=@BRLAPI_ETCDIR@/@api_authkeyfile@
+
+have_api=@brltty_enabled_api@
+have_java_bindings=@brltty_enabled_java_bindings@
+have_lisp_bindings=@brltty_enabled_lisp_bindings@
+have_ocaml_bindings=@brltty_enabled_ocaml_bindings@
+have_python_bindings=@brltty_enabled_python_bindings@
+have_tcl_bindings=@brltty_enabled_tcl_bindings@
 

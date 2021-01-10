@@ -1223,7 +1223,7 @@ uninstall-manpages:
 	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
 
 uninstall-pkgconfig:
-	-rm -f $(INSTALL_PKGCONFIG_DIRECTORY)/brltty.pc
+	-rm -f $(INSTALL_PKGCONFIG_DIRECTORY)/brltty.*
 
 uninstall-documents:
 	-rm -r -f $(INSTALL_DOCUMENT_DIRECTORY)

@@ -571,6 +571,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %exclude %{_sysconfdir}/brltty/Initramfs/dracut.conf
 %exclude %{_sysconfdir}/brltty/Initramfs/cmdline
 %{_datadir}/metainfo/org.a11y.brltty.metainfo.xml
+%{_libdir}/pkgconfig/brltty.*
 %doc %{_mandir}/man1/brltty.1.gz
 %doc %{_docdir}/*/LICENSE*
 %doc %{_docdir}/*/README*

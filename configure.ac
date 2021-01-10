@@ -1207,6 +1207,7 @@ BRLTTY_ARG_DISABLE(
          louisTablesDirectory=`${PKG_CONFIG} --variable=tablesdir ${louis_package}`
          if test -n "${louisTablesDirectory}"
          then
+            AC_SUBST([louis_tables_directory], ["${louisTablesDirectory}"])
             AC_DEFINE_UNQUOTED([LOUIS_TABLES_DIRECTORY], ["${louisTablesDirectory}"],
                                [Define this to be a string containing the path to the LibLouis tables directory.])
             contracted_braille_objects="${contracted_braille_objects} ctb_louis.\$O"

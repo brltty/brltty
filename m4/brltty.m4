@@ -202,7 +202,7 @@ AC_DEFUN([BRLTTY_ARG_FEATURE], [dnl
 AC_ARG_ENABLE([$1], BRLTTY_HELP_STRING([--$3-$1], [$2]), [], [enableval="$4"])
 
 pushdef([var], brltty_enabled_[]translit([$1], [-], [_]))dnl
-var="${enableval}"
+AC_SUBST(var, ["${enableval}"])
 BRLTTY_SUMMARY_ITEM([$1], var)dnl
 popdef([var])
 
@@ -553,8 +553,8 @@ then
    $2_root=""
 elif test "${$2_root}" = "yes"
 then
+   $2_root=""
    "${$2_found}" || {
-      $2_root=""
       roots="/usr /usr/local /usr/local/$1 /usr/local/$2 /opt/$1 /opt/$2 /mingw /mingw/$1 /mingw/$2"
 
       for root in ${roots}
