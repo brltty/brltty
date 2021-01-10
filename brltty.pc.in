@@ -140,6 +140,9 @@ usb_package=@usb_package@
 bluetooth_package=@bluetooth_package@
 ports_package=@ports_package@
 
+init_path=@init_path@
+stderr_path=@stderr_path@
+
 have_api=@brltty_enabled_api@
 have_java_bindings=@brltty_enabled_java_bindings@
 have_lisp_bindings=@brltty_enabled_lisp_bindings@

@@ -240,6 +240,7 @@ then
                       [Define this if BRLTTY is to be run as init.])
 fi
 BRLTTY_SUMMARY_ITEM([init-path], [init_path])
+AC_SUBST([init_path])
 
 BRLTTY_ARG_PARAMETERS([privilege], [privilege establishment stage], [PLATFORM:], [])
 
@@ -262,6 +263,7 @@ then
                       [Define this if standard error is to be redirected to a file.])
 fi
 BRLTTY_SUMMARY_ITEM([stderr-path], [stderr_path])
+AC_SUBST([stderr_path])
 
 AC_PROG_MAKE_SET
 
