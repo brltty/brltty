@@ -49,5 +49,6 @@ m brltty input
 m brltty root
 
 # for reading the BrlAPI authorization key file
+g brlapi
 m brltty brlapi
 

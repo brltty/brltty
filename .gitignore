@@ -12,6 +12,7 @@ reldeps.mk
 /config.mk
 /config.h
 /brltty-config.sh
+/brltty.pc
 
 /forbuild.log
 /forbuild.status

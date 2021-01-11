@@ -439,7 +439,7 @@ authGroup_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
          checkPeerGroup(&auth->peerCredentials, group);
 }
 
-#ifdef USE_POLKIT
+#ifdef HAVE_POLKIT
 #include <polkit/polkit.h>
 
 typedef struct {
@@ -559,7 +559,7 @@ authPolkit_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
 
   return 0;
 }
-#endif /* USE_POLKIT */
+#endif /* HAVE_POLKIT */
 #endif /* CAN_CHECK_CREDENTIALS */
 
 /* general functions */
@@ -587,14 +587,14 @@ static const MethodDefinition methodDefinitions[] = {
     .server = authGroup_server
   },
 
-#ifdef USE_POLKIT
+#ifdef HAVE_POLKIT
   { .name = "polkit",
     .initialize = authPolkit_initialize,
     .release = authPolkit_release,
     .client = NULL,
     .server = authPolkit_server
   },
-#endif /* USE_POLKIT */
+#endif /* HAVE_POLKIT */
 #endif /* CAN_CHECK_CREDENTIALS */
 
   {.name = NULL}

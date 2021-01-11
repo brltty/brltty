@@ -143,11 +143,11 @@ size_t BRLAPI_STDCALL brlapi_getHandleSize(void);
 #else /* BRLAPI_WIN32 */
 #define BRLAPI_DEFAUTH_KEYFILE "keyfile:" BRLAPI_ETCDIR "/" BRLAPI_AUTHKEYFILE
 
-#ifdef USE_POLKIT
+#ifdef HAVE_POLKIT
 #define BRLAPI_DEFAUTH_POLKIT "+polkit"
-#else /* USE_POLKIT */
+#else /* HAVE_POLKIT */
 #define BRLAPI_DEFAUTH_POLKIT ""
-#endif /* USE_POLKIT */
+#endif /* HAVE_POLKIT */
 
 #define BRLAPI_DEFAUTH BRLAPI_DEFAUTH_KEYFILE BRLAPI_DEFAUTH_POLKIT
 #endif /* BRLAPI_WIN32 */

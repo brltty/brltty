@@ -36,6 +36,7 @@ AC_SUBST([api_major], [0])
 AC_SUBST([api_minor], [8])
 AC_SUBST([api_revision], [1])
 
+AC_SUBST([api_name], [BrlAPI])
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
 
@@ -144,6 +145,12 @@ BRLTTY_ARG_REQUIRED(
    [drivers_directory], ["${libdir}/${PACKAGE_TARNAME}"]
 )
 
+BRLTTY_ARG_REQUIRED(
+   [scripts-directory], [DIRECTORY],
+   [path to directory containing helper scripts],
+   [scripts_directory], ["${libexecdir}/${PACKAGE_TARNAME}"]
+)
+
 BRLTTY_ARG_WITH(
    [updatable-directory], [DIRECTORY],
    [path to directory which contains files that can be updated],
@@ -233,6 +240,7 @@ then
                       [Define this if BRLTTY is to be run as init.])
 fi
 BRLTTY_SUMMARY_ITEM([init-path], [init_path])
+AC_SUBST([init_path])
 
 BRLTTY_ARG_PARAMETERS([privilege], [privilege establishment stage], [PLATFORM:], [])
 
@@ -255,6 +263,7 @@ then
                       [Define this if standard error is to be redirected to a file.])
 fi
 BRLTTY_SUMMARY_ITEM([stderr-path], [stderr_path])
+AC_SUBST([stderr_path])
 
 AC_PROG_MAKE_SET
 
@@ -690,7 +699,7 @@ BRLTTY_ARG_DISABLE(
    [],
 [dnl
    BRLTTY_HAVE_PACKAGE([polkit], [polkit-gobject-1], [dnl
-      AC_DEFINE(USE_POLKIT, 1, [if the Polkit authorization manager should be used])
+      AC_DEFINE(HAVE_POLKIT, 1, [if the Polkit authorization manager should be used])
    ])
 ])
 
@@ -1116,6 +1125,13 @@ esac])
 libsearch_variable="${brltty_cv_env_libsearch}"
 AC_SUBST([libsearch_variable])
 
+BRLTTY_PKGCONFIG_VARIABLE([POLKIT_POLICY_DIR], [polkit-gobject-1], [policydir], [/usr/share/polkit-1/actions])
+BRLTTY_PKGCONFIG_VARIABLE([POLKIT_RULE_DIR], [polkit-gobject-1], [ruledir], [/usr/share/polkit-1/rules.d])
+BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_SYSUSERS_DIR], [systemd], [sysusersdir], [/usr/lib/sysusers.d])
+BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_TMPFILES_DIR], [systemd], [tmpfilesdir], [/usr/lib/tmpfiles.d])
+BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_UNIT_DIR], [systemd], [systemdsystemunitdir], [/usr/lib/systemd/system])
+BRLTTY_PKGCONFIG_VARIABLE([UDEV_DIR], [udev], [udevdir], [/usr/lib/udev])
+
 BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
    *android*)
       system_package="java"
@@ -1193,6 +1209,7 @@ BRLTTY_ARG_DISABLE(
          louisTablesDirectory=`${PKG_CONFIG} --variable=tablesdir ${louis_package}`
          if test -n "${louisTablesDirectory}"
          then
+            AC_SUBST([louis_tables_directory], ["${louisTablesDirectory}"])
             AC_DEFINE_UNQUOTED([LOUIS_TABLES_DIRECTORY], ["${louisTablesDirectory}"],
                                [Define this to be a string containing the path to the LibLouis tables directory.])
             contracted_braille_objects="${contracted_braille_objects} ctb_louis.\$O"
@@ -2038,15 +2055,22 @@ fi
 
 BRLTTY_DEFINE_DIRECTORY([TABLES_DIRECTORY], [${execute_root}${tables_directory}],
                         [Define this to be a string containing the path to the data files directory.])
+
 BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory}],
                         [Define this to be a string containing the path to the drivers directory.])
+
+BRLTTY_DEFINE_DIRECTORY([SCRIPTS_DIRECTORY], [${execute_root}${scripts_directory}],
+                        [Define this to be a string containing the path to the scripts directory.])
+
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
-BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
-                       [Define this to be a string containing the path to BrlAPI's data files directory.])
-BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
-		       [Define this to be a string containing the path to BrlAPI's local sockets directory.])
-BRLTTY_SUBST_EXPANDED([api_socket_directory], ["${api_socket_path}"])
+
+BRLTTY_DEFINE_DIRECTORY([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
+                        [Define this to be a string containing the path to BrlAPI's data files directory.])
+
+BRLTTY_DEFINE_DIRECTORY([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
+		        [Define this to be a string containing the path to BrlAPI's local sockets directory.])
+
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
 
@@ -2065,6 +2089,7 @@ AC_OUTPUT([
    config.mk
    brltty.spec
    brltty-config.sh
+   brltty.pc
    Documents/brltty.conf
    Documents/brltty.1
    Documents/BrlAPIref.doxy
