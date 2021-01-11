@@ -29,11 +29,6 @@ URL: @PACKAGE_URL@
 Source: @PACKAGE_URL@/archive/%{name}-%{version}.tar.gz
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
-%define _bindir /bin
-%define _sbindir /sbin
-%define _libdir /lib
-%define _datadir /usr/share
-%define _sysconfdir /etc
 %define _pkglibdir %{_libdir}/%{name}
 %define _pkglibexecdir %{_libexecdir}/%{name}
 
@@ -533,7 +528,7 @@ which directly accesses a refreshable braille display.
 
 %build
 export PYTHON=python3
-%configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-mikropuhe --without-swift --without-theta --without-libbraille --with-braille-driver=-tt,-vr
+%configure --disable-relocatable-install --with-install-root="${RPM_BUILD_ROOT}" --disable-gpm --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --with-braille-driver=-tt,-vr
 make
 
 %install
