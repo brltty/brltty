@@ -553,8 +553,8 @@ then
    $2_root=""
 elif test "${$2_root}" = "yes"
 then
-   $2_root=""
    "${$2_found}" || {
+      $2_root=""
       roots="/usr /usr/local /usr/local/$1 /usr/local/$2 /opt/$1 /opt/$2 /mingw /mingw/$1 /mingw/$2"
 
       for root in ${roots}
@@ -577,15 +577,18 @@ AC_SUBST([$2_root])
 BRLTTY_SUMMARY_ITEM([$2-root], [$2_root])
 
 test -n "${$2_root}" && {
-   AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$2_root]), ["${$2_root}"],
-                      [Define this to be a string containing the path to the root of the $1 package.])
-
    ifelse($2_find, [true], [dnl
-      test "${$2_root}" = "yes" || {
+      if test "${$2_root}" = "yes"
+      then
+         $2_root="/usr"
+      else
          $2_includes="BRLTTY_WORDS_PREPEND([$5], [-I${$2_root}/])"
          $2_libs="BRLTTY_WORDS_PREPEND([$6], [-L${$2_root}/]) BRLTTY_WORDS_PREPEND([$7], [-l])"
-      }
+      fi
    ])
+
+   AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$2_root]), ["${$2_root}"],
+                      [Define this to be a string containing the path to the root of the $1 package.])
 
    $4
 }
