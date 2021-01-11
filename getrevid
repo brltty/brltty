@@ -42,8 +42,11 @@ export GIT_DIR="${GIT_WORK_TREE}/.git"
      revisionIdentifier="`svnversion -n "${sourceRoot}" 2>/dev/null`"
      [ "${revisionIdentifier}" != "exported" ] || revisionIdentifier=""
   else
-     logMessage warning "unrecognized source repository type: ${sourceRoot}"
+     revisionFile="${sourceRoot}/REVISION"
+     [ -f "${revisionFile}" ] && read <"${revisionFile}" revisionIdentifier
   fi
+
+  [ -n "${revisionIdentifier}" ] || logMessage warning "unrecognized source repository type: ${sourceRoot}"
 }
 
 [ -n "${revisionIdentifier}" ] || {

@@ -50,6 +50,7 @@ set -e
 cp -p -r -- "${sourceRoot}" "${archiveName}"
 cd "${archiveName}"
 
+"${sourceRoot}/getrevid" "${sourceRoot}" >REVISION
 ./autogen
 ./configure --quiet --without-libbraille --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta
 
