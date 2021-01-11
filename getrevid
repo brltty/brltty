@@ -21,6 +21,7 @@
 addProgramOption d string.anything defaultIdentifier "the default revision identifier"
 addProgramOption f string.file outputFile "the file in which to write the revision identifier" "standard output"
 addProgramOption i flag asInteger "render the revision identifier as a 32-bit integer"
+addProgramOption p string.anything revisionPrefix "prefix for the revision identifier"
 addProgramOption r string.anything revisionIdentifier "the revision identifier"
 addProgramOption s flag asString "render the revision identifier as a quoted string"
 addProgramParameter source sourceRoot "the top-level directory of the source tree"
@@ -72,6 +73,7 @@ export GIT_DIR="${GIT_WORK_TREE}/.git"
   makeInteger
 }
 
+[ -n "${revisionPrefix}" ] && revisionIdentifier="${revisionPrefix}${revisionIdentifier}"
 "${asString}" && revisionIdentifier='"'"${revisionIdentifier}"'"'
 
 if [ -z "${outputFile}" ]
