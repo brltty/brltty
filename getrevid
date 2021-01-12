@@ -18,9 +18,11 @@
 ###############################################################################
 
 . "`dirname "${0}"`/brltty-prologue.sh"
+addProgramOption a string.anything appendText "text to append to the revision identifier"
 addProgramOption d string.anything defaultIdentifier "the default revision identifier"
 addProgramOption f string.file outputFile "the file in which to write the revision identifier" "standard output"
 addProgramOption i flag asInteger "render the revision identifier as a 32-bit integer"
+addProgramOption p string.anything prependText "text to prepend to the revision identifier"
 addProgramOption r string.anything revisionIdentifier "the revision identifier"
 addProgramOption s flag asString "render the revision identifier as a quoted string"
 addProgramParameter source sourceRoot "the top-level directory of the source tree"
@@ -41,8 +43,11 @@ export GIT_DIR="${GIT_WORK_TREE}/.git"
      revisionIdentifier="`svnversion -n "${sourceRoot}" 2>/dev/null`"
      [ "${revisionIdentifier}" != "exported" ] || revisionIdentifier=""
   else
-     logMessage warning "unrecognized source repository type: ${sourceRoot}"
+     revisionFile="${sourceRoot}/REVISION"
+     [ -f "${revisionFile}" ] && read <"${revisionFile}" revisionIdentifier
   fi
+
+  [ -n "${revisionIdentifier}" ] || logMessage warning "unrecognized source repository type: ${sourceRoot}"
 }
 
 [ -n "${revisionIdentifier}" ] || {
@@ -72,6 +77,8 @@ export GIT_DIR="${GIT_WORK_TREE}/.git"
   makeInteger
 }
 
+[ -n "${prependText}" ] && revisionIdentifier="${prependText}${revisionIdentifier}"
+[ -n "${appendText}" ] && revisionIdentifier="${revisionIdentifier}${appendText}"
 "${asString}" && revisionIdentifier='"'"${revisionIdentifier}"'"'
 
 if [ -z "${outputFile}" ]
