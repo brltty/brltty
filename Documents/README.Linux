@@ -143,6 +143,9 @@ the following is done:
   (real, effective, saved, filesystem)
   are set to the primary group of the selected user.
 
+* Set the ``USER`` and ``LOGNAME`` environment variables
+  to the name of the selected user.
+
 * Change the XDG runtime directory
   (set the ``XDG_RUNTIME_DIR`` environment variable)
   to that of the selected user.
