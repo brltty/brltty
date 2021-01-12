@@ -1810,6 +1810,26 @@ establishPrivileges (int stayPrivileged) {
 }
 
 static int
+isEnvironmentVariableSet (const char *name) {
+  const char *value = getenv(name);
+  return value && *value;
+}
+
+static int
+unsetEnvironmentVariable (const char *name) {
+  if (!isEnvironmentVariableSet(name)) return 1;
+
+  if (unsetenv(name) != -1) {
+    logMessage(LOG_DEBUG, "environment variable unset: %s", name);
+    return 1;
+  } else {
+    logSystemError("unsetenv");
+  }
+
+  return 0;
+}
+
+static int
 setEnvironmentVariable (const char *name, const char *value) {
   if (setenv(name, value, 1) != -1) {
     logMessage(LOG_DEBUG, "environment variable set: %s: %s", name, value);
@@ -1819,6 +1839,12 @@ setEnvironmentVariable (const char *name, const char *value) {
   }
 
   return 0;
+}
+
+static int
+changeEnvironmentVariable (const char *name, const char *value) {
+  if (!isEnvironmentVariableSet(name)) return 1;
+  return setEnvironmentVariable(name, value);
 }
 
 static int
@@ -1967,8 +1993,11 @@ switchToUser (const char *user, int *haveHomeDirectory) {
     } else if (setProcessOwnership(uid, gid)) {
       logMessage(LOG_NOTICE, "%s: %s", gettext("switched to unprivileged user"), user);
 
-      setEnvironmentVariable("USER", user);
-      setEnvironmentVariable("LOGNAME", user);
+      changeEnvironmentVariable("USER", user);
+      changeEnvironmentVariable("LOGNAME", user);
+
+      unsetEnvironmentVariable("XDG_CONFIG_HOME");
+      unsetEnvironmentVariable("XDG_DATA_DIRS");
 
       if (setHomeDirectory(pwd->pw_dir)) *haveHomeDirectory = 1;
       return 1;
