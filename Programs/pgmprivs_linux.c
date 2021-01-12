@@ -2000,6 +2000,8 @@ switchToUser (const char *user, int *haveHomeDirectory) {
       unsetEnvironmentVariable("XDG_DATA_DIRS");
 
       if (setHomeDirectory(pwd->pw_dir)) *haveHomeDirectory = 1;
+      forgetOverrideDirectories();
+
       return 1;
     }
   } else {

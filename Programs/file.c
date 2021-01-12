@@ -533,10 +533,10 @@ addOverridePath (char **paths, size_t *index, const char *base, int xdg) {
   return 1;
 }
 
+static char **overrideDirectories = NULL;
+
 const char *const *
 getAllOverrideDirectories (void) {
-  static const char *const *overrideDirectories = NULL;
-
   if (!overrideDirectories) {
     const char *secondaryList = getenv("XDG_CONFIG_DIRS");
     int secondaryCount;
@@ -627,7 +627,7 @@ done:
         paths[index] = NULL;
 
         if (index == count) {
-          overrideDirectories = (const char *const *)paths;
+          overrideDirectories = paths;
         } else {
           deallocateStrings(paths);
         }
@@ -641,7 +641,7 @@ done:
     if (!overrideDirectories) logMessage(LOG_WARNING, "no override directories");
   }
 
-  return overrideDirectories;
+  return (const char *const *)overrideDirectories;
 }
 
 const char *
@@ -656,6 +656,15 @@ getPrimaryOverrideDirectory (void) {
 
   logMessage(LOG_WARNING, "no primary override directory");
   return NULL;
+}
+
+void
+forgetOverrideDirectories (void) {
+  if (overrideDirectories) {
+    logMessage(LOG_INFO, "forgetting override directories");
+    deallocateStrings(overrideDirectories);
+    overrideDirectories = NULL;
+  }
 }
 
 #if defined(F_SETLK)

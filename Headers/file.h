@@ -68,8 +68,10 @@ extern char *getWorkingDirectory (void);
 extern int setWorkingDirectory (const char *path);
 
 extern char *getHomeDirectory (void);
+
 extern const char *const *getAllOverrideDirectories (void);
 extern const char *getPrimaryOverrideDirectory (void);
+extern void forgetOverrideDirectories (void);
 
 extern int acquireFileLock (int file, int exclusive);
 extern int attemptFileLock (int file, int exclusive);
