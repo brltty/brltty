@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
-"Report-Msgid-Bugs-To: brltty@mielke.cc\n"
-"POT-Creation-Date: 2015-12-12 20:06+0100\n"
+"Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
+"POT-Creation-Date: 2021-01-09 16:30-0500\n"
 "PO-Revision-Date: 2012-12-19 17:03+0100\n"
 "Last-Translator: 高生旺 <coscell@molerat.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,49 +31,87 @@ msgstr ""
 msgid "\"%s\" started as \"%s\"\n"
 msgstr "\"%s\" 啟動為 \"%s\"\n"
 
-#: Programs/menu_prefs.c:433 Programs/menu_prefs.c:434
-#: Programs/menu_prefs.c:436 Programs/menu_prefs.c:437
-#: Programs/menu_prefs.c:440 Programs/menu_prefs.c:441
-#: Programs/menu_prefs.c:442 Programs/menu_prefs.c:444
-#: Programs/menu_prefs.c:445
+#: Programs/menu_prefs.c:457 Programs/menu_prefs.c:458
+#: Programs/menu_prefs.c:460 Programs/menu_prefs.c:461
+#: Programs/menu_prefs.c:464 Programs/menu_prefs.c:465
+#: Programs/menu_prefs.c:466 Programs/menu_prefs.c:468
+#: Programs/menu_prefs.c:469
 msgid "1 cell"
 msgstr "1 方"
 
-#: Programs/menu_prefs.c:1035
+#: Programs/menu_prefs.c:789
+#, fuzzy
+msgid "1 second"
+msgstr "1 秒"
+
+#: Programs/menu_prefs.c:851
+#, fuzzy
+msgid "10 seconds"
+msgstr "10 秒"
+
+#: Programs/menu_prefs.c:1158
 msgid "12 Hour"
 msgstr "12 小時"
 
-#: Programs/menu_prefs.c:432 Programs/menu_prefs.c:435
-#: Programs/menu_prefs.c:438 Programs/menu_prefs.c:439
-#: Programs/menu_prefs.c:443
+#: Programs/menu_prefs.c:456 Programs/menu_prefs.c:459
+#: Programs/menu_prefs.c:462 Programs/menu_prefs.c:463
+#: Programs/menu_prefs.c:467
 msgid "2 cells"
 msgstr "2 方"
 
-#: Programs/menu_prefs.c:1034
+#: Programs/menu_prefs.c:790
+#, fuzzy
+msgid "2 seconds"
+msgstr "2 秒"
+
+#: Programs/menu_prefs.c:852
+#, fuzzy
+msgid "20 seconds"
+msgstr "20 秒"
+
+#: Programs/menu_prefs.c:1157
 msgid "24 Hour"
 msgstr "24 小時"
 
-#: Programs/menu_prefs.c:551
+#: Programs/menu_prefs.c:787
+msgid "250 milliseconds"
+msgstr "250 毫秒"
+
+#: Programs/menu_prefs.c:853
+#, fuzzy
+msgid "40 seconds"
+msgstr "40 秒"
+
+#: Programs/menu_prefs.c:850
+#, fuzzy
+msgid "5 seconds"
+msgstr "5 秒"
+
+#: Programs/menu_prefs.c:788
+msgid "500 milliseconds"
+msgstr "500 毫秒"
+
+#: Programs/menu_prefs.c:615
 msgid "6-Dot Computer Braille"
 msgstr "六點電腦點字"
 
-#: Programs/menu_prefs.c:549
+#: Programs/menu_prefs.c:613
 msgid "8-Dot Computer Braille"
 msgstr "八點電腦點字"
 
-#: Programs/brltty-ttb.c:178
+#: Programs/brltty-ttb.c:179
 msgid "8-bit character set to use."
 msgstr "要用的八位元字元集"
 
-#: Programs/scr_menu.c:93
+#: Programs/scr_menu.c:104
 msgid "<off>"
 msgstr "<關>"
 
-#: Programs/config.c:2646
+#: Programs/config.c:1367
 msgid "API Parameter"
 msgstr "API 參數"
 
-#: Programs/cmds.auto.h:1068
+#: Programs/cmds.auto.h:1252
 msgid "AT (set 2) keyboard scan code"
 msgstr "AT (set 2) 鍵盤掃描碼"
 
@@ -100,91 +138,102 @@ msgstr "尼龍吉他"
 msgid "Acoustic Guitar (steel)"
 msgstr "鋼弦吉他"
 
-#: Programs/menu_prefs.c:1061
+#: Programs/menu_prefs.c:1184
 msgid "After Time"
-msgstr "時間之後"
+msgstr "後時間"
 
 #: Programs/midi.c:171
 msgid "Agogo"
 msgstr "Agogo"
 
-#: Programs/menu_prefs.c:1251
+#: Programs/menu_prefs.c:1374
 msgid "Alert"
 msgstr "警示"
 
-#: Programs/menu_prefs.c:876
+#: Programs/menu_prefs.c:993
 msgid "Alert Dots"
 msgstr "警示點"
 
-#: Programs/menu_prefs.c:881
+#: Programs/menu_prefs.c:998
 msgid "Alert Messages"
 msgstr "警示訊息"
 
-#: Programs/menu_prefs.c:822
+#: Programs/menu_prefs.c:938
 msgid "Alert Tunes"
 msgstr "警示音"
 
-#: Programs/menu_prefs.c:682 Programs/menu_prefs.c:915
+#: Programs/menu_prefs.c:753 Programs/menu_prefs.c:1032
 msgid "All"
 msgstr "全部"
 
-#: Programs/menu_prefs.c:444
+#: Programs/menu_prefs.c:468
 msgid "Alphabetic Braille Window Coordinates"
 msgstr "字母點字視窗座標"
 
-#: Programs/menu_prefs.c:445
+#: Programs/menu_prefs.c:469
 msgid "Alphabetic Screen Cursor Coordinates"
 msgstr "字母游標位置"
 
 #: Programs/midi.c:117
 msgid "Alto Sax"
-msgstr "薩克斯風"
+msgstr "中音薩克斯風"
 
 #: Programs/midi.c:185
 msgid "Applause"
 msgstr "掌聲"
 
-#: Programs/cmd_miscellaneous.c:61
+#: Programs/cmd_miscellaneous.c:60
 msgid "April"
 msgstr "四月"
 
-#: Programs/log.c:113
+#: Programs/log.c:116
 msgid "Async Events"
 msgstr "非同步事件"
 
-#: Programs/menu_prefs.c:644
+#: Programs/menu_prefs.c:710
 msgid "Attributes Invisible Time"
 msgstr "屬性隱藏時間"
 
-#: Programs/config.c:2611 Programs/menu_prefs.c:1157
+#: Programs/config.c:2812 Programs/menu_prefs.c:1280
 msgid "Attributes Table"
 msgstr "屬性表"
 
-#: Programs/menu_prefs.c:638
+#: Programs/menu_prefs.c:704
 msgid "Attributes Visible Time"
 msgstr "屬性顯示時間"
 
-#: Programs/cmd_miscellaneous.c:65
+#: Programs/cmd_miscellaneous.c:64
 msgid "August"
 msgstr "八月"
 
-#: Programs/menu_prefs.c:731
-msgid "Autorepeat"
-msgstr "自動重複"
+#: Programs/alert.c:168
+#, fuzzy
+msgid "Autorelease"
+msgstr "自動釋放"
 
-#: Programs/menu_prefs.c:743
+#: Programs/menu_prefs.c:856
+#, fuzzy
+msgid "Autorelease Time"
+msgstr "自動釋放時間"
+
+#: Programs/menu_prefs.c:873
+#, fuzzy
+msgid "Autorepeat Enabled"
+msgstr "自動重複啟用"
+
+#: Programs/menu_prefs.c:879
 msgid "Autorepeat Interval"
 msgstr "自動重複間隔"
 
-#: Programs/menu_prefs.c:737
+#: Programs/menu_prefs.c:886
 msgid "Autorepeat Panning"
 msgstr "自動重複移動"
 
-#: Programs/menu_prefs.c:958
+#: Programs/menu_prefs.c:1075
 msgid "Autospeak"
 msgstr "自動朗讀"
 
-#: Programs/config.c:1589
+#: Programs/config.c:1812
 msgid "BRLTTY stopped"
 msgstr "BRLTTY 停止"
 
@@ -208,35 +257,35 @@ msgstr "被私"
 msgid "Bassoon"
 msgstr "低音管"
 
-#: Programs/menu_prefs.c:828
+#: Programs/menu_prefs.c:945
 msgid "Beeper"
 msgstr "翁鳴器"
 
-#: Programs/menu_prefs.c:1060
+#: Programs/menu_prefs.c:1183
 msgid "Before Time"
-msgstr "時間之前"
+msgstr "前時間"
 
 #: Programs/midi.c:182
 msgid "Bird Tweet"
 msgstr "鳥鳴"
 
-#: Programs/menu_prefs.c:632
+#: Programs/menu_prefs.c:698
 msgid "Blinking Attributes"
 msgstr "跳動屬性"
 
-#: Programs/menu_prefs.c:650
+#: Programs/menu_prefs.c:716
 msgid "Blinking Capitals"
-msgstr "大寫字母跳動"
+msgstr "跳動大寫字母"
 
-#: Programs/menu_prefs.c:609
+#: Programs/menu_prefs.c:675
 msgid "Blinking Screen Cursor"
-msgstr "游標跳動"
+msgstr "跳動游標"
 
-#: Programs/menu_prefs.c:1010
+#: Programs/menu_prefs.c:1133
 msgid "Blinking Speech Cursor"
-msgstr "語音游標跳動"
+msgstr "跳動語音游標"
 
-#: Programs/menu_prefs.c:512 Programs/menu_prefs.c:1120
+#: Programs/menu_prefs.c:576 Programs/menu_prefs.c:1243
 msgid "Block"
 msgstr "區快"
 
@@ -244,78 +293,71 @@ msgstr "區快"
 msgid "Blown Bottle"
 msgstr "瓶子"
 
-#: Programs/log.c:137
+#: Programs/log.c:140
 msgid "Bluetooth I/O"
 msgstr "藍芽輸入/輸出"
 
-#: Programs/config.c:1394
+#: Programs/config.c:1588
 msgid "Braille Device"
 msgstr "點字設備"
 
-#: Programs/menu_prefs.c:791
-msgid "Braille Display Orientation"
-msgstr "點字顯示器導向"
-
-#: Programs/config.c:1390
+#: Programs/config.c:1584
 msgid "Braille Driver"
 msgstr "點字驅動"
 
-#: Programs/log.c:143
+#: Programs/log.c:146
 msgid "Braille Driver Events"
 msgstr "點字驅動事件"
 
-#: Programs/menu_prefs.c:587
+#: Programs/menu_prefs.c:653
 msgid "Braille Firmness"
 msgstr "點字強度"
 
-#: Programs/menu_prefs.c:781
-msgid "Braille Input Mode"
-msgstr "點字輸入模式"
-
-#: Programs/log.c:77
+#: Programs/log.c:80
 msgid "Braille Key Events"
 msgstr "點字按鍵事件"
 
-#: Programs/menu_prefs.c:771
-msgid "Braille Keyboard Enabled"
-msgstr "點字鍵盤啟用"
-
-#: Programs/config.c:1393
+#: Programs/config.c:1587
 msgid "Braille Parameter"
 msgstr "點字參數"
 
-#: Programs/menu_prefs.c:545
+#: Programs/menu_prefs.c:609
 msgid "Braille Presentation"
-msgstr "點字符號"
+msgstr "點字顯示"
 
-#: Programs/menu_prefs.c:1147
+#: Programs/menu_prefs.c:1270
 msgid "Braille Tables"
 msgstr "點字表"
 
-#: Programs/menu_prefs.c:433
+#: Programs/menu_prefs.c:821
+#, fuzzy
+msgid "Braille Typing"
+msgstr "點字輸入"
+
+#: Programs/menu_prefs.c:457
 msgid "Braille Window Column"
 msgstr "點字視窗欄位"
 
-#: Programs/menu_prefs.c:432
+#: Programs/menu_prefs.c:456
 msgid "Braille Window Coordinates"
 msgstr "點字視窗座標"
 
-#: Programs/menu_prefs.c:703
+#: Programs/menu_prefs.c:774
 msgid "Braille Window Overlap"
 msgstr "點字視窗重疊"
 
-#: Programs/menu_prefs.c:434
+#: Programs/menu_prefs.c:458
 msgid "Braille Window Row"
 msgstr "點字視窗行"
 
-#: Programs/config.c:384
+#: Programs/config.c:464
 #, c-format
 msgid "Braille driver code (%s, %s, or one of {%s})."
 msgstr "點字驅動碼 (%s, %s, 或 {%s} 之一"
 
 #: Programs/midi.c:31
 msgid "Brass"
-msgstr "銅管樂"
+msgstr "銅管"
 
 #: Programs/midi.c:112
 msgid "Brass Section"
@@ -329,37 +371,38 @@ msgstr "呼吸聲"
 msgid "Bright Acoustic Piano"
 msgstr "明亮鋼琴"
 
-#: Programs/xbrlapi.c:90
-msgid "BrlAPI authorization/authentication string"
-msgstr "BrlAPI 全縣/通關字串"
+#: Programs/xbrlapi.c:93
+#, fuzzy
+msgid "BrlAPI authorization/authentication schemes"
+msgstr "BrlAPI 授權/身份驗證方案"
 
-#: Programs/xbrlapi.c:83
+#: Programs/xbrlapi.c:86
 msgid "BrlAPI host and/or port to connect to"
-msgstr "BrlAPI 主機 與/或 連接埠"
+msgstr "要連接的 BrlAPI 主機和/或埠口"
 
-#: Programs/menu_prefs.c:1203
+#: Programs/menu_prefs.c:1326
 msgid "Bug Reports"
 msgstr "錯誤報告"
 
-#: Programs/menu_prefs.c:1184
+#: Programs/menu_prefs.c:1307
 msgid "Build Information"
 msgstr "建立資訊"
 
-#: Programs/menu_prefs.c:572
+#: Programs/menu_prefs.c:638
 msgid "Capitalization Mode"
 msgstr "大寫模式"
 
-#: Programs/menu_prefs.c:661
+#: Programs/menu_prefs.c:727
 msgid "Capitals Invisible Time"
 msgstr "大寫隱藏時間"
 
-#: Programs/menu_prefs.c:655
+#: Programs/menu_prefs.c:721
 msgid "Capitals Visible Time"
 msgstr "大寫顯示時間"
 
-#: Programs/menu_prefs.c:1274
+#: Programs/menu_prefs.c:1397
 msgid "Category Log Level"
-msgstr "範圍記錄等級"
+msgstr "分類記錄等級"
 
 #. Chromatic Percussion
 #: Programs/midi.c:53
@@ -376,7 +419,7 @@ msgstr "和聲阿"
 
 #: Programs/midi.c:25
 msgid "Chromatic Percussion"
-msgstr "打擊樂"
+msgstr "有音調的打擊樂"
 
 #: Programs/midi.c:65
 msgid "Church Organ"
@@ -388,107 +431,102 @@ msgstr "黑管"
 
 #: Programs/midi.c:51
 msgid "Clavi"
-msgstr "拍手"
+msgstr "大鍵琴"
 
-#: Programs/menu.c:811
+#: Programs/menu.c:820
 msgid "Close"
 msgstr "關閉"
 
-#: Programs/menu_prefs.c:1044
+#: Programs/menu_prefs.c:1167
 msgid "Colon"
 msgstr "冒號"
 
-#: Programs/menu_prefs.c:1208
+#: Programs/menu_prefs.c:1331
 msgid "Configuration Directory"
 msgstr "設定檔目錄"
 
-#: Programs/config.c:2565 Programs/menu_prefs.c:1213
+#: Programs/config.c:2755 Programs/menu_prefs.c:1336
 msgid "Configuration File"
 msgstr "設定檔"
 
-#: Programs/alert.c:412
+#: Programs/alert.c:163
 msgid "Console Bell"
-msgstr "主控台響鈴"
+msgstr "主控台嗶聲"
 
-#: Programs/menu_prefs.c:808
+#: Programs/menu_prefs.c:924
 msgid "Console Bell Alert"
-msgstr "主控台響鈴警示"
+msgstr "主控台嗶聲警示"
 
 #: Programs/midi.c:92
 msgid "Contrabass"
 msgstr "倍低音"
 
-#: Programs/menu_prefs.c:550
+#: Programs/menu_prefs.c:614
 msgid "Contracted Braille"
 msgstr "縮寫點字"
 
-#: Programs/config.c:2618 Programs/menu_prefs.c:1165
+#: Programs/config.c:2819 Programs/menu_prefs.c:1288
 msgid "Contraction Table"
 msgstr "縮寫表"
 
-#: Programs/brltty-ctb.c:66
+#: Programs/brltty-ctb.c:62
 msgid "Contraction table."
 msgstr "縮寫表"
 
-#: Programs/brltty-ctb.c:80
+#: Programs/brltty-ctb.c:76
 msgid "Contraction verification table."
 msgstr "縮寫檢查表"
 
-#: Programs/xbrlapi.c:754
-#, c-format
-msgid "Couldn't find modifiers to apply to %d for getting keysym %08X\n"
-msgstr "找不到休市子可套用到 %d 以取得鍵碼 %08X\n"
-
-#: Programs/xbrlapi.c:730
-#, c-format
-msgid "Couldn't translate keysym %08X to keycode.\n"
-msgstr "無法翻譯鍵碼 %08X 到鍵碼\n"
-
-#: Programs/menu_prefs.c:1252
+#: Programs/menu_prefs.c:1375
 msgid "Critical"
 msgstr "關鍵"
 
-#: Programs/log.c:95
+#: Programs/log.c:98
 msgid "Cursor Routing"
-msgstr "游標歸位"
+msgstr "游標定位"
 
-#: Programs/log.c:89
+#: Programs/log.c:92
 msgid "Cursor Tracking"
 msgstr "游標追蹤"
 
-#: Programs/menu_prefs.c:1082
-msgid "Dash"
-msgstr "短線"
+#: Programs/menu_prefs.c:793
+#, fuzzy
+msgid "Cursor Tracking Delay"
+msgstr "游標追蹤延遲"
 
-#: Programs/menu_prefs.c:1075
+#: Programs/menu_prefs.c:1205
+msgid "Dash"
+msgstr "聯字符號"
+
+#: Programs/menu_prefs.c:1198
 msgid "Date Format"
 msgstr "日期格式"
 
-#: Programs/menu_prefs.c:1064
+#: Programs/menu_prefs.c:1187
 msgid "Date Position"
 msgstr "日期位置"
 
-#: Programs/menu_prefs.c:1087
+#: Programs/menu_prefs.c:1210
 msgid "Date Separator"
-msgstr "日期區隔符號"
+msgstr "日期分隔符號"
 
-#: Programs/menu_prefs.c:1072
+#: Programs/menu_prefs.c:1195
 msgid "Day Month Year"
 msgstr "日 月 年"
 
-#: Programs/menu_prefs.c:1257
+#: Programs/menu_prefs.c:1380
 msgid "Debug"
 msgstr "除錯"
 
-#: Programs/cmd_miscellaneous.c:69
+#: Programs/cmd_miscellaneous.c:68
 msgid "December"
 msgstr "十二月"
 
-#: Programs/config.c:405
+#: Programs/config.c:485
 msgid "Device for accessing braille display."
 msgstr "處理點字顯示的設備"
 
-#: Programs/config.c:364
+#: Programs/config.c:444
 msgid "Disable the application programming interface."
 msgstr "取消程式設計界面"
 
@@ -496,32 +534,40 @@ msgstr "取消程式設計界面"
 msgid "Distortion Guitar"
 msgstr "噪音吉他"
 
-#: Programs/config.c:506
+#: Programs/config.c:587
 msgid "Do not autospeak when braille is not being used."
 msgstr "點字未啟用十不要自動朗讀"
 
-#: Programs/xbrlapi.c:103
+#: Programs/xbrlapi.c:112
 msgid "Do not write any text to the braille device"
 msgstr "不要寫入任何文字到點字設備"
 
-#: Programs/alert.c:301
+#: Programs/brltty-trtxt.c:79
+msgid "Don't fall back to the Unicode base character."
+msgstr "不返回 Unicode 字元"
+
+#: Programs/config.c:355
+msgid "Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc)."
+msgstr "不要切換為未授權的使用者或放棄權限（群組成員身份、功能等等）"
+
+#: Programs/alert.c:52
 msgid "Done"
 msgstr "完成"
 
-#: Programs/menu_prefs.c:1045 Programs/menu_prefs.c:1084
+#: Programs/menu_prefs.c:1168 Programs/menu_prefs.c:1207
 msgid "Dot"
 msgstr "點"
 
-#: Programs/menu_prefs.c:778
+#: Programs/menu_prefs.c:831
 msgid "Dots via Unicode Braille"
-msgstr "通用碼點字"
+msgstr "Unicode 點字碼的點"
 
 #. Organ
 #: Programs/midi.c:62
 msgid "Drawbar Organ"
 msgstr "拉把風琴"
 
-#: Programs/config.c:2569 Programs/menu_prefs.c:1233
+#: Programs/config.c:2776 Programs/menu_prefs.c:1356
 msgid "Drivers Directory"
 msgstr "驅動程式目錄"
 
@@ -529,11 +575,11 @@ msgstr "驅動程式目錄"
 msgid "Dulcimer"
 msgstr "洋琴"
 
-#: Programs/menu_prefs.c:697
+#: Programs/menu_prefs.c:768
 msgid "Eager Sliding Braille Window"
 msgstr "即時拉動點字視窗"
 
-#: Programs/brltty-ttb.c:157
+#: Programs/brltty-ttb.c:158
 msgid "Edit table."
 msgstr "編輯表"
 
@@ -570,15 +616,15 @@ msgstr "電鋼琴 1"
 msgid "Electric Piano 2"
 msgstr "電鋼琴 2"
 
-#: Programs/menu_prefs.c:1250
+#: Programs/menu_prefs.c:1373
 msgid "Emergency"
 msgstr "緊急"
 
-#: Programs/menu_prefs.c:431
+#: Programs/menu_prefs.c:455
 msgid "End"
 msgstr "結尾"
 
-#: Programs/menu_prefs.c:683
+#: Programs/menu_prefs.c:754
 msgid "End of Line"
 msgstr "行尾"
 
@@ -586,7 +632,7 @@ msgstr "行尾"
 msgid "English Horn"
 msgstr "英國管"
 
-#: Programs/menu_prefs.c:950
+#: Programs/menu_prefs.c:1067
 msgid "Enqueue"
 msgstr "排隊"
 
@@ -594,7 +640,7 @@ msgstr "排隊"
 msgid "Ensemble"
 msgstr "弦樂組"
 
-#: Programs/menu_prefs.c:1253
+#: Programs/menu_prefs.c:1376
 msgid "Error"
 msgstr "錯誤"
 
@@ -602,19 +648,23 @@ msgstr "錯誤"
 msgid "Ethnic Instruments"
 msgstr "民族樂器"
 
-#: Programs/menu_prefs.c:805
+#: Programs/menu_prefs.c:921
 msgid "Event Alerts"
 msgstr "事件警示"
 
-#: Programs/menu_prefs.c:560
+#: Programs/menu_prefs.c:626
 msgid "Expand Current Word"
 msgstr "展開目前單字"
 
-#: Programs/menu_prefs.c:831
+#: Programs/config.c:399
+msgid "Explicit preference settings."
+msgstr "顯示偏好設定"
+
+#: Programs/menu_prefs.c:948
 msgid "FM"
 msgstr "FM"
 
-#: Programs/menu_prefs.c:869
+#: Programs/menu_prefs.c:986
 msgid "FM Volume"
 msgstr "FM 音量"
 
@@ -651,7 +701,7 @@ msgstr "FX 7 （回音）"
 msgid "FX 8 (sci-fi)"
 msgstr "FX 8 （科幻）"
 
-#: Programs/cmd_miscellaneous.c:59
+#: Programs/cmd_miscellaneous.c:58
 msgid "February"
 msgstr "二月"
 
@@ -663,15 +713,20 @@ msgstr "提琴"
 msgid "Flute"
 msgstr "長笛"
 
-#: Programs/brltty-ctb.c:100
+#: Programs/brltty-ctb.c:96
 msgid "Force immediate output."
 msgstr "強迫立即輸出"
 
-#: Programs/brltty-ttb.c:164
+#: Programs/brltty-cldr.c:42
+#, fuzzy
+msgid "Format of each output line."
+msgstr "每一輸出行的格式"
+
+#: Programs/brltty-ttb.c:165
 msgid "Format of input file."
 msgstr "輸入檔案格式"
 
-#: Programs/brltty-ttb.c:171
+#: Programs/brltty-ttb.c:172
 msgid "Format of output file."
 msgstr "輸出檔案格式"
 
@@ -683,15 +738,15 @@ msgstr "法國號"
 msgid "Fretless Bass"
 msgstr "純被私"
 
-#: Programs/alert.c:346
+#: Programs/alert.c:97
 msgid "Frozen"
 msgstr "凍結"
 
-#: Programs/menu_prefs.c:446
+#: Programs/menu_prefs.c:470
 msgid "Generic"
 msgstr "一般"
 
-#: Programs/log.c:59
+#: Programs/log.c:62
 msgid "Generic Input"
 msgstr "一般輸入"
 
@@ -728,15 +783,15 @@ msgstr "大鍵琴"
 msgid "Helicopter"
 msgstr "直升機"
 
-#: Programs/scr_help.c:217
+#: Programs/scr_help.c:215
 msgid "Help Screen"
-msgstr "求助畫面"
+msgstr "說明畫面"
 
-#: Programs/menu_prefs.c:583 Programs/menu_prefs.c:760
+#: Programs/menu_prefs.c:649 Programs/menu_prefs.c:902
 msgid "High"
 msgstr "高"
 
-#: Programs/menu_prefs.c:716
+#: Programs/menu_prefs.c:810
 msgid "Highlight Braille Window Location"
 msgstr "反白點字視窗位置"
 
@@ -744,48 +799,60 @@ msgstr "反白點字視窗位置"
 msgid "Honkytonk Piano"
 msgstr "酒吧鋼琴"
 
-#: Programs/menu_prefs.c:949
+#: Programs/menu_prefs.c:1066
 msgid "Immediate"
 msgstr "立刻"
 
-#: Programs/xbrlapi.c:536
+#: Programs/xbrlapi.c:665
 msgid "Incompatible XKB library\n"
-msgstr "不相容的 XKB 程式庫\n"
+msgstr "不相容的 XKB 含式庫\n"
 
-#: Programs/xbrlapi.c:538
+#: Programs/xbrlapi.c:667
 msgid "Incompatible XKB server support\n"
 msgstr "不相容的 XKB 服務支援\n"
 
-#: Programs/menu_prefs.c:1256
+#: Programs/menu_prefs.c:1379
 msgid "Information"
 msgstr "資訊"
 
-#: Programs/menu_prefs.c:722
+#: Programs/menu_prefs.c:845
 msgid "Input Options"
 msgstr "輸入選向"
 
-#: Programs/log.c:65
+#: Programs/log.c:68
 msgid "Input Packets"
 msgstr "輸入風包"
 
-#: Programs/config.c:290
+#: Programs/config.c:330
 #, c-format
 msgid "Install the %s service, and then exit."
-msgstr "安裝 %s 服務然後跳出"
+msgstr "安裝 %s 服務然後退出"
 
-#: Programs/menu_prefs.c:1260
+#: Programs/menu_prefs.c:1383
 msgid "Internal Parameters"
 msgstr "內部參數"
 
-#: Programs/cmd_miscellaneous.c:58
+#: Programs/cmd_miscellaneous.c:57
 msgid "January"
 msgstr "一月"
 
-#: Programs/cmd_miscellaneous.c:64
+#: Drivers/Screen/Android/screen.c:197
+msgid "Java class not found"
+msgstr "沒有 Java 類別"
+
+#: Drivers/Screen/Android/screen.c:181
+msgid "Java exception occurred"
+msgstr "發生 Java 錯誤"
+
+#: Drivers/Screen/Android/screen.c:194
+msgid "Java method not found"
+msgstr "沒有 Java 函數"
+
+#: Programs/cmd_miscellaneous.c:63
 msgid "July"
 msgstr "七月"
 
-#: Programs/cmd_miscellaneous.c:63
+#: Programs/cmd_miscellaneous.c:62
 msgid "June"
 msgstr "六月"
 
@@ -793,27 +860,32 @@ msgstr "六月"
 msgid "Kalimba"
 msgstr "卡淋巴"
 
-#: Programs/config.c:1317
+#: Programs/config.c:1510
 msgid "Key Bindings"
-msgstr "按鍵設定"
+msgstr "按鍵榜定"
 
-#: Programs/config.c:980
+#: Programs/config.c:1054
 msgid "Key Help"
 msgstr "按鍵說明"
 
-#: Programs/config.c:1322 Programs/ktb_list.c:668
+#: Programs/config.c:1515 Programs/ktb_list.c:737
 msgid "Key Table"
 msgstr "按鍵表"
 
-#: Programs/log.c:83
+#: Programs/menu_prefs.c:824
+#, fuzzy
+msgid "Keyboard Enabled"
+msgstr "鍵盤啟用"
+
+#: Programs/log.c:86
 msgid "Keyboard Key Events"
 msgstr "鍵盤按鍵事件"
 
-#: Programs/menu_prefs.c:815
+#: Programs/menu_prefs.c:931
 msgid "Keyboard LED Alerts"
-msgstr "鍵盤燈號事件"
+msgstr "鍵盤燈號警示"
 
-#: Programs/config.c:2625 Programs/menu_prefs.c:797
+#: Programs/config.c:2826 Programs/menu_prefs.c:913
 msgid "Keyboard Table"
 msgstr "按鍵表"
 
@@ -821,7 +893,7 @@ msgstr "按鍵表"
 msgid "Koto"
 msgstr "日本十三弦箏"
 
-#: Programs/config.c:2777
+#: Programs/config.c:2958
 msgid "Language"
 msgstr "語言"
 
@@ -832,7 +904,7 @@ msgstr "Lead 1 (方波)"
 
 #: Programs/midi.c:135
 msgid "Lead 2 (sawtooth)"
-msgstr "Hauptstimme 2 （鋸齒）"
+msgstr "Lead 2 （鋸齒）"
 
 #: Programs/midi.c:136
 msgid "Lead 3 (calliope)"
@@ -848,7 +920,7 @@ msgstr "Lead 5 (charang)"
 
 #: Programs/midi.c:139
 msgid "Lead 6 (voice)"
-msgstr "Lead 6 (voice)"
+msgstr "Lead 6 (人聲)"
 
 #: Programs/midi.c:140
 msgid "Lead 7 (fifths)"
@@ -858,84 +930,94 @@ msgstr "Lead 7 (fifths)"
 msgid "Lead 8 (bass + lead)"
 msgstr "Lead 8 (bass + lead)"
 
-#: Programs/learn.c:94
+#: Programs/learn.c:101
 msgid "Learn Mode"
 msgstr "學習模式"
 
-#: Programs/menu_prefs.c:1099
+#: Programs/menu_prefs.c:1222
 msgid "Left"
 msgstr "左"
 
-#: Programs/brltty-ktb.c:45
+#: Programs/brltty-ktb.c:51
 msgid "List key names."
 msgstr "列出按鍵名稱"
 
-#: Programs/brltty-ktb.c:52
+#: Programs/brltty-ktb.c:57
 msgid "List key table in help screen format."
 msgstr "以說明畫面格式列出按鍵表"
 
-#: Programs/brltty-ktb.c:59
+#: Programs/brltty-ktb.c:63
 msgid "List key table in reStructuredText format."
 msgstr "以重新架構文字格式列出按鍵表"
 
-#: Programs/menu_prefs.c:1243
+#: Programs/menu_prefs.c:616
+#, fuzzy
+msgid "Literary Braille"
+msgstr "書面點字"
+
+#: Programs/menu_prefs.c:1366
 msgid "Locale Directory"
 msgstr "本土化目錄"
 
-#: Programs/menu_prefs.c:1279
+#: Programs/menu_prefs.c:1402
 msgid "Log Categories"
-msgstr "紀錄種類"
+msgstr "紀錄分類"
 
-#: Programs/config.c:739
+#: Programs/config.c:824
 msgid "Log Level"
 msgstr "記錄等級"
 
-#: Programs/config.c:605
+#: Programs/menu_prefs.c:1463
+#, fuzzy
+msgid "Log Messages"
+msgstr "記錄訊息"
+
+#: Programs/config.c:677
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
-msgstr "記錄核心、API, 與內見驅動程式等的版本然後跳出"
+msgstr "記錄核心、API, 與內見驅動程式等的版本然後退出"
 
-#: Programs/config.c:561
+#: Programs/config.c:642
 msgid "Log to standard error rather than to the system log."
-msgstr "記錄到標準錯誤而非到系統記錄"
+msgstr "輸出到標準錯誤而非系統記錄"
 
-#: Programs/config.c:575
+#: Programs/config.c:656
 #, c-format
-msgid "Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)"
-msgstr "紀錄等級 (%s 或 {%s} 之一）"
+msgid "Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable) "
+msgstr "啟用紀錄等級 (%s 或 {%s} 之一）和/或紀錄分類（任何 {%s} 的組合或每個以 %s 開頭的都可停用）"
 
-#: Programs/menu_prefs.c:725
+#: Programs/menu_prefs.c:867
 msgid "Long Press Time"
 msgstr "長按時間"
 
-#: Programs/menu_prefs.c:581 Programs/menu_prefs.c:758
+#: Programs/menu_prefs.c:647 Programs/menu_prefs.c:900
 msgid "Low"
 msgstr "低"
 
-#: Programs/menu_prefs.c:513
+#: Programs/menu_prefs.c:577
 msgid "Lower Left Dot"
 msgstr "左下方的點"
 
-#: Programs/menu_prefs.c:514
+#: Programs/menu_prefs.c:578
 msgid "Lower Right Dot"
 msgstr "右下方的點"
 
-#: Programs/menu_prefs.c:830
+#: Programs/menu_prefs.c:947
 msgid "MIDI"
 msgstr "MIDI"
 
-#: Programs/config.c:545
+#: Programs/config.c:626
 msgid "MIDI (Musical Instrument Digital Interface) device specifier."
 msgstr "MIDI （樂器數位界面）設備指定"
 
-#: Programs/menu_prefs.c:860
+#: Programs/menu_prefs.c:977
 msgid "MIDI Instrument"
 msgstr "MIDI 樂器"
 
-#: Programs/menu_prefs.c:850
+#: Programs/menu_prefs.c:967
 msgid "MIDI Volume"
 msgstr "MIDI 音量"
 
-#: Programs/cmd_miscellaneous.c:60
+#: Programs/cmd_miscellaneous.c:59
 msgid "March"
 msgstr "三月"
 
@@ -943,19 +1025,19 @@ msgstr "三月"
 msgid "Marimba"
 msgstr "碼淋巴"
 
-#: Programs/menu_prefs.c:584 Programs/menu_prefs.c:761
+#: Programs/menu_prefs.c:650 Programs/menu_prefs.c:903
 msgid "Maximum"
 msgstr "最大"
 
-#: Programs/brltty-ctb.c:94
+#: Programs/brltty-ctb.c:90
 msgid "Maximum length of an output line."
 msgstr "一行顯示的最大長度"
 
-#: Programs/cmd_miscellaneous.c:62
+#: Programs/cmd_miscellaneous.c:61
 msgid "May"
 msgstr "五嶽"
 
-#: Programs/menu_prefs.c:582 Programs/menu_prefs.c:759
+#: Programs/menu_prefs.c:648 Programs/menu_prefs.c:901
 msgid "Medium"
 msgstr "中等"
 
@@ -963,19 +1045,19 @@ msgstr "中等"
 msgid "Melodic Tom"
 msgstr "定音鼓"
 
-#: Programs/menu_prefs.c:526
+#: Programs/menu_prefs.c:590
 msgid "Menu Options"
 msgstr "選單選向"
 
-#: Programs/config.c:554
+#: Programs/config.c:635
 msgid "Message hold timeout (in 10ms units)."
 msgstr "訊息保留時間（以 10ms 為單位）"
 
-#: Programs/menu_prefs.c:580 Programs/menu_prefs.c:757
+#: Programs/menu_prefs.c:646 Programs/menu_prefs.c:899
 msgid "Minimum"
 msgstr "最小"
 
-#: Programs/menu_prefs.c:1071
+#: Programs/menu_prefs.c:1194
 msgid "Month Day Year"
 msgstr "月 日 年"
 
@@ -983,7 +1065,7 @@ msgstr "月 日 年"
 msgid "Music Box"
 msgstr "音樂盒"
 
-#: Programs/menu_prefs.c:830
+#: Programs/menu_prefs.c:947
 msgid "Musical Instrument Digital Interface"
 msgstr "樂器數位界面"
 
@@ -991,58 +1073,55 @@ msgstr "樂器數位界面"
 msgid "Muted Trumpet"
 msgstr "加若音器的小喇叭"
 
-#: Programs/config.c:446
+#: Programs/config.c:526
 msgid "Name of or path to attributes table."
 msgstr "屬性表的名稱或路徑"
 
-#: Programs/config.c:455
+#: Programs/config.c:535
 msgid "Name of or path to contraction table."
 msgstr "縮寫表的名稱或路徑"
 
-#: Programs/config.c:336
+#: Programs/config.c:391
 msgid "Name of or path to default preferences file."
-msgstr "內定偏好設定檔的名稱或路徑"
+msgstr "預設偏好設定檔的名稱或路徑"
 
-#: Programs/config.c:464
+#: Programs/config.c:544
 msgid "Name of or path to keyboard table."
 msgstr "按鍵表的名稱或路徑"
 
-#: Programs/config.c:500
+#: Programs/config.c:580
 msgid "Name of or path to speech input object."
 msgstr "語音輸入物件的名稱或路徑"
 
-#: Programs/config.c:437
+#: Programs/config.c:517
 #, c-format
 msgid "Name of or path to text table (or %s)."
 msgstr "文字表 (或 %s) 的名稱或路徑"
 
-#: Programs/menu_prefs.c:668
+#: Programs/menu_prefs.c:734
 msgid "Navigation Options"
-msgstr "尋覽選向"
+msgstr "導覽選向"
 
-#: Programs/menu.c:443
+#: Programs/menu.c:449
 msgid "No"
 msgstr "否"
 
-#: Programs/menu_prefs.c:567
+#: Programs/menu_prefs.c:633
 msgid "No Capitalization"
-msgstr "不用大寫"
+msgstr "沒有大寫"
 
-#: Programs/menu_prefs.c:913 Programs/menu_prefs.c:926
-#: Programs/menu_prefs.c:939 Programs/menu_prefs.c:1059
-#: Programs/menu_prefs.c:1098 Programs/menu_prefs.c:1118
+#: Programs/menu_prefs.c:786 Programs/menu_prefs.c:1030
+#: Programs/menu_prefs.c:1043 Programs/menu_prefs.c:1056
+#: Programs/menu_prefs.c:1182 Programs/menu_prefs.c:1221
+#: Programs/menu_prefs.c:1241
 msgid "None"
 msgstr "沒有"
 
-#: Programs/menu_prefs.c:787
-msgid "Normal"
-msgstr "正常"
-
-#: Programs/menu_prefs.c:1255
+#: Programs/menu_prefs.c:1378
 msgid "Notice"
 msgstr "注意"
 
-#: Programs/cmd_miscellaneous.c:68
+#: Programs/cmd_miscellaneous.c:67
 msgid "November"
 msgstr "十一月"
 
@@ -1054,13 +1133,21 @@ msgstr "雙簧管"
 msgid "Ocarina"
 msgstr "陶笛"
 
-#: Programs/cmd_miscellaneous.c:67
+#: Programs/cmd_miscellaneous.c:66
 msgid "October"
 msgstr "十月"
 
-#: Programs/config.c:1407
+#: Programs/menu_prefs.c:849
+msgid "Off"
+msgstr "關"
+
+#: Programs/config.c:1601
 msgid "Old Preferences File"
 msgstr "舊的偏好設定檔"
+
+#: Programs/menu_prefs.c:862
+msgid "On First Release"
+msgstr "在第一版"
 
 #: Programs/midi.c:105
 msgid "Orchestra Hit"
@@ -1074,7 +1161,7 @@ msgstr "豎琴"
 msgid "Organ"
 msgstr "管風琴"
 
-#: Programs/log.c:71
+#: Programs/log.c:74
 msgid "Output Packets"
 msgstr "輸出風包"
 
@@ -1086,29 +1173,29 @@ msgstr "超音吉他"
 msgid "PC mode"
 msgstr "PC 模式"
 
-#: Programs/menu_prefs.c:829
+#: Programs/menu_prefs.c:946
 msgid "PCM"
 msgstr "PCM"
 
-#: Programs/config.c:535
+#: Programs/config.c:616
 msgid "PCM (soundcard digital audio) device specifier."
 msgstr "PCM （音效卡數位音效）設備指定"
 
-#: Programs/menu_prefs.c:842
+#: Programs/menu_prefs.c:959
 msgid "PCM Volume"
 msgstr "PCM 音量"
 
-#: Programs/cmds.auto.h:1082
+#: Programs/cmds.auto.h:1266
 msgid "PS/2 (set 3) keyboard scan code"
 msgstr "PS/2 (set 3) 鍵盤掃描碼"
 
-#: Programs/menu_prefs.c:1193
+#: Programs/menu_prefs.c:1316
 msgid "Package Revision"
-msgstr "軟體修訂版本"
+msgstr "套件修訂版本"
 
-#: Programs/menu_prefs.c:1188
+#: Programs/menu_prefs.c:1311
 msgid "Package Version"
-msgstr "軟體版本"
+msgstr "套件版本"
 
 #. Synth Pad
 #: Programs/midi.c:143
@@ -1147,52 +1234,57 @@ msgstr "pad 8 (Sweep)"
 msgid "Pan Flute"
 msgstr "排笛"
 
-#: Programs/config.c:373
+#: Programs/config.c:453
 msgid "Parameters for the application programming interface."
 msgstr "程式設計界面參數"
 
-#: Programs/config.c:395
+#: Programs/config.c:475
 msgid "Parameters for the braille driver."
 msgstr "點字驅動參數"
 
-#: Programs/config.c:526
+#: Programs/config.c:348
+#, fuzzy
+msgid "Parameters for the privilege establishment stage."
+msgstr "權限建立階段的參數"
+
+#: Programs/config.c:607
 msgid "Parameters for the screen driver."
 msgstr "螢幕驅動參數"
 
-#: Programs/config.c:492
+#: Programs/config.c:572
 msgid "Parameters for the speech driver."
 msgstr "語音驅動參數"
 
-#: Programs/config.c:317
+#: Programs/config.c:382
 msgid "Path to default settings file."
-msgstr "內定設定檔案路徑"
+msgstr "預設設定檔案路徑"
 
-#: Programs/config.c:356
+#: Programs/config.c:436
 msgid "Path to directory containing drivers."
 msgstr "包含驅動的目錄路徑"
 
-#: Programs/brltest.c:72 Programs/brltty-atb.c:36 Programs/brltty-ctb.c:58
-#: Programs/brltty-ktb.c:79 Programs/config.c:427
+#: Programs/brltest.c:68 Programs/brltty-atb.c:36 Programs/brltty-ctb.c:54
+#: Programs/brltty-ktb.c:73 Programs/config.c:507
 msgid "Path to directory containing tables."
 msgstr "對照表所在目錄路徑"
 
-#: Programs/brltty-ttb.c:151
+#: Programs/brltty-ttb.c:152
 msgid "Path to directory containing text tables."
 msgstr "包含文字表的目錄路徑"
 
-#: Programs/brltty-ktb.c:69
+#: Programs/brltty-ktb.c:83
 msgid "Path to directory for loading drivers."
 msgstr "驅動程式所在目錄路徑"
 
-#: Programs/brltty-trtxt.c:50
+#: Programs/brltty-trtxt.c:51
 msgid "Path to directory for text tables."
 msgstr "文字表所在目錄路徑"
 
-#: Programs/brltest.c:82 /tmp/src/brltty/Programs/config.c:346
+#: Programs/brltest.c:78 Programs/config.c:426
 msgid "Path to directory which can be written to."
 msgstr "可寫入的目錄路徑"
 
-#: Programs/config.c:327
+#: Programs/config.c:416
 msgid "Path to directory which contains files that can be updated."
 msgstr "包含可升級檔案的目錄路徑"
 
@@ -1200,17 +1292,22 @@ msgstr "包含可升級檔案的目錄路徑"
 msgid "Path to input text table."
 msgstr "輸入文字表路徑"
 
-#: Programs/config.c:584
+#: Programs/config.c:665
 msgid "Path to log file."
-msgstr "記錄表路徑"
+msgstr "記錄檔路徑"
 
-#: Programs/brltty-trtxt.c:68
+#: Programs/brltty-trtxt.c:67
 msgid "Path to output text table."
 msgstr "輸出文字表路徑"
 
-#: Programs/config.c:593
+#: Programs/config.c:372
 msgid "Path to process identifier file."
 msgstr "處理程序代號檔的路徑"
+
+#: Programs/config.c:406
+#, fuzzy
+msgid "Patterns that match command prompts."
+msgstr "符合命令提示的樣式"
 
 #: Programs/midi.c:38
 msgid "Percussive Instruments"
@@ -1235,41 +1332,51 @@ msgstr "管線"
 
 #: Programs/midi.c:94
 msgid "Pizzicato Strings"
-msgstr "玻弦樂"
+msgstr "玻弦"
 
-#: Drivers/Braille/Baum/braille.c:1075
+#: Drivers/Braille/Baum/braille.c:1119
 msgid "Powerdown"
 msgstr "降壓"
 
-#: Programs/config.c:2567 Programs/menu_prefs.c:1223
+#: Programs/config.c:2756 Programs/menu_prefs.c:1346
 msgid "Preferences File"
-msgstr "偏好檔案"
+msgstr "偏好設定檔"
 
-#: Programs/scr_menu.c:264
+#: Programs/scr_menu.c:271
 msgid "Preferences Menu"
 msgstr "偏好設定"
 
-#: Headers/options.h:74
+#: Headers/options.h:75
 msgid "Print a usage summary (all options), and then exit."
-msgstr "印出用法摘要（所有選向）alle Optionen) 然後跳出"
+msgstr "印出用法摘要（所有選向）alle Optionen) 然後退出"
 
-#: Headers/options.h:69
+#: Headers/options.h:70
 msgid "Print a usage summary (commonly used options only), and then exit."
 msgstr "印出用法摘要（只有共用選向）然後跳出"
 
-#: Programs/menu_prefs.c:1174
+#: Programs/config.c:779
+#, fuzzy
+msgid "Privilege Parameter"
+msgstr "權限參數"
+
+#: Programs/menu_prefs.c:1297
 msgid "Profiles"
 msgstr "設定檔"
 
-#: Programs/config.c:472
+#: Programs/config.c:552
 msgid "Properties of eligible keyboards."
-msgstr "合格鍵盤的內容"
+msgstr "合格鍵盤的屬性"
 
-#: Programs/menu_prefs.c:930
+#: Programs/menu_prefs.c:839
+#, fuzzy
+msgid "Quick Space"
+msgstr "空白"
+
+#: Programs/menu_prefs.c:1047
 msgid "Raise Pitch"
 msgstr "提高音調"
 
-#: Programs/config.c:276
+#: Programs/config.c:316
 msgid "Recognize environment variables."
 msgstr "認識環境變數"
 
@@ -1285,52 +1392,61 @@ msgstr "簧片"
 msgid "Reed Organ"
 msgstr "簧片風琴"
 
-#: Programs/brltty-ctb.c:86
+#: Programs/brltty-ctb.c:82
 msgid "Reformat input."
 msgstr "重新格式輸入"
 
-#: Programs/config.c:417
+#: Programs/config.c:497
 msgid "Release braille device when screen or window is unreadable."
 msgstr "當螢幕或視窗無法閱讀時釋放點字設備"
 
-#: Programs/config.c:283
+#: Programs/xbrlapi.c:106
+#, fuzzy
+msgid "Remain a foreground process"
+msgstr "保留前景處理程序"
+
+#: Programs/config.c:323
 msgid "Remain a foreground process."
 msgstr "保留前景處理程序"
 
-#: Programs/brltty-trtxt.c:75
+#: Programs/brltty-trtxt.c:73
 msgid "Remove dots seven and eight."
 msgstr "宜除七八點"
 
-#: Programs/config.c:298
+#: Programs/config.c:338
 #, c-format
 msgid "Remove the %s service, and then exit."
-msgstr "宜除 %s 服務然後跳出"
+msgstr "宜除 %s 服務然後退出"
 
-#: Programs/brltty-ttb.c:185
+#: Programs/brltty-ktb.c:45
+msgid "Report problems with the key table."
+msgstr "回報按鍵表問題"
+
+#: Programs/brltty-ttb.c:186
 msgid "Report the characters within the current screen font that aren't defined within the text table."
-msgstr "報告目前螢幕字形李的字元在文字表李沒有定義"
+msgstr "回報目前螢幕字形李的字元在文字表李沒有定義"
 
-#: Programs/menu_prefs.c:684
+#: Programs/menu_prefs.c:755
 msgid "Rest of Line"
 msgstr "盛夏的行"
 
-#: Programs/menu_prefs.c:1322
+#: Programs/menu_prefs.c:1445
 msgid "Restart Braille Driver"
 msgstr "重新啟動點字驅動"
 
-#: Programs/menu_prefs.c:1334
+#: Programs/menu_prefs.c:1457
 msgid "Restart Screen Driver"
 msgstr "重新啟動螢幕驅動"
 
-#: Programs/menu_prefs.c:1328
+#: Programs/menu_prefs.c:1451
 msgid "Restart Speech Driver"
 msgstr "重新啟動語音驅動"
 
 #: Programs/midi.c:177
 msgid "Reverse Cymbal"
-msgstr "反轉記號"
+msgstr "Reverse Cymbal"
 
-#: Programs/menu_prefs.c:1100
+#: Programs/menu_prefs.c:1223
 msgid "Right"
 msgstr "右"
 
@@ -1338,96 +1454,96 @@ msgstr "右"
 msgid "Rock Organ"
 msgstr "搖滾管風琴"
 
-#: Programs/menu_prefs.c:788
-msgid "Rotated"
-msgstr "循環"
-
-#: Programs/menu_prefs.c:521
+#: Programs/menu_prefs.c:585
 msgid "Save on Exit"
-msgstr "存檔跳出"
+msgstr "退出十存檔"
 
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
-#: Programs/menu_prefs.c:929
+#: Programs/menu_prefs.c:1046
 msgid "Say Cap"
 msgstr "說大寫"
 
-#: Programs/menu_prefs.c:953
+#: Programs/menu_prefs.c:1070
 msgid "Say Line Mode"
 msgstr "說行模式"
 
-#: Programs/menu_prefs.c:940
+#: Programs/menu_prefs.c:1057
 msgid "Say Space"
 msgstr "說空白"
 
-#: Programs/menu_prefs.c:436
+#: Programs/menu_prefs.c:460
 msgid "Screen Cursor Column"
-msgstr "游標欄位"
+msgstr "螢幕游標欄位"
 
-#: Programs/menu_prefs.c:435
+#: Programs/menu_prefs.c:459
 msgid "Screen Cursor Coordinates"
-msgstr "游標座標"
+msgstr "螢幕游標座標"
 
-#: Programs/menu_prefs.c:621
+#: Programs/menu_prefs.c:687
 msgid "Screen Cursor Invisible Time"
-msgstr "游標隱藏時間"
+msgstr "螢幕游標隱藏時間"
 
-#: Programs/menu_prefs.c:437
+#: Programs/menu_prefs.c:461
 msgid "Screen Cursor Row"
-msgstr "游標行"
+msgstr "螢幕游標行"
 
-#: Programs/menu_prefs.c:603
+#: Programs/menu_prefs.c:669
 msgid "Screen Cursor Style"
-msgstr "游標形狀"
+msgstr "螢幕游標形狀"
 
-#: Programs/menu_prefs.c:615
+#: Programs/menu_prefs.c:681
 msgid "Screen Cursor Visible Time"
-msgstr "游標顯示時間"
+msgstr "螢幕游標顯示時間"
 
-#: Programs/menu_prefs.c:438
+#: Programs/menu_prefs.c:462
 msgid "Screen Cursor and Braille Window Column"
-msgstr "游標與點字視窗欄位"
+msgstr "螢幕游標與點字視窗欄位"
 
-#: Programs/menu_prefs.c:439
+#: Programs/menu_prefs.c:463
 msgid "Screen Cursor and Braille Window Row"
-msgstr "游標與點字視窗行"
+msgstr "螢幕游標與點字視窗行"
 
-#: Programs/config.c:2057
+#: Programs/config.c:2253
 msgid "Screen Driver"
 msgstr "螢幕驅動"
 
-#: Programs/log.c:155
+#: Programs/log.c:158
 msgid "Screen Driver Events"
 msgstr "螢幕驅動事件"
 
-#: Programs/menu_prefs.c:440
+#: Programs/menu_prefs.c:464
 msgid "Screen Number"
 msgstr "螢幕編號"
 
-#: Programs/config.c:2063
+#: Programs/config.c:2259
 msgid "Screen Parameter"
 msgstr "螢幕參數"
 
-#: Programs/config.c:516
+#: Programs/config.c:597
 #, c-format
 msgid "Screen driver code (%s, %s, or one of {%s})."
 msgstr "螢幕驅動碼: (%s, %s, 或 {%s} 之一"
+
+#: Programs/menu_prefs.c:780
+msgid "Scroll-aware Cursor Navigation"
+msgstr "滾動式游標導覽"
 
 #: Programs/midi.c:181
 msgid "Seashore"
 msgstr "海浪"
 
-#: Programs/cmd_miscellaneous.c:66
+#: Programs/cmd_miscellaneous.c:65
 msgid "September"
 msgstr "九月"
 
-#: Programs/log.c:125
+#: Programs/log.c:128
 msgid "Serial I/O"
 msgstr "序列輸入/輸出"
 
-#: Programs/log.c:119
+#: Programs/log.c:122
 msgid "Server Events"
-msgstr "伺服器事件"
+msgstr "服務程序事件"
 
 #: Programs/midi.c:130
 msgid "Shakuhachi"
@@ -1441,48 +1557,48 @@ msgstr "三弦"
 msgid "Shanai"
 msgstr "山奈琴"
 
-#: Programs/menu_prefs.c:534
+#: Programs/menu_prefs.c:598
 msgid "Show Advanced Submenus"
 msgstr "顯示進階子選單"
 
-#: Programs/menu_prefs.c:539
+#: Programs/menu_prefs.c:603
 msgid "Show All Items"
 msgstr "顯示所有項目"
 
-#: Programs/menu_prefs.c:627
+#: Programs/menu_prefs.c:693
 msgid "Show Attributes"
 msgstr "顯示屬性"
 
-#: Programs/menu_prefs.c:598
+#: Programs/menu_prefs.c:664
 msgid "Show Screen Cursor"
-msgstr "顯示游標"
+msgstr "顯示螢幕游標"
 
-#: Programs/menu_prefs.c:1053
+#: Programs/menu_prefs.c:1176
 msgid "Show Seconds"
 msgstr "顯示秒數"
 
-#: Programs/menu_prefs.c:999
+#: Programs/menu_prefs.c:1122
 msgid "Show Speech Cursor"
 msgstr "顯示語音游標"
 
-#: Programs/menu_prefs.c:529
+#: Programs/menu_prefs.c:593
 msgid "Show Submenu Sizes"
-msgstr "顯示子選單大小"
+msgstr "顯示子選單項數"
 
 #. Ethnic Instruments
 #: Programs/midi.c:161
 msgid "Sitar"
 msgstr "西塔琴"
 
-#: Programs/menu_prefs.c:676
+#: Programs/menu_prefs.c:747
 msgid "Skip Blank Braille Windows"
 msgstr "跳過空白點字視窗"
 
-#: Programs/menu_prefs.c:671
+#: Programs/menu_prefs.c:741
 msgid "Skip Identical Lines"
 msgstr "跳過相同的行"
 
-#: Programs/menu_prefs.c:687
+#: Programs/menu_prefs.c:758
 msgid "Skip Which Blank Braille Windows"
 msgstr "跳過何種空白點字視窗"
 
@@ -1494,15 +1610,15 @@ msgstr "Slap Bass 1"
 msgid "Slap Bass 2"
 msgstr "Slap Bass 2"
 
-#: Programs/menu_prefs.c:1083
+#: Programs/menu_prefs.c:1206
 msgid "Slash"
-msgstr "砍入"
+msgstr "削減"
 
-#: Programs/menu_prefs.c:692
+#: Programs/menu_prefs.c:763
 msgid "Sliding Braille Window"
-msgstr "拖拉點字視窗"
+msgstr "滑動點字視窗"
 
-#: Programs/menu_prefs.c:914
+#: Programs/menu_prefs.c:1031
 msgid "Some"
 msgstr "一些"
 
@@ -1515,144 +1631,153 @@ msgstr "高音薩克斯風"
 msgid "Sound Effects"
 msgstr "音效"
 
-#: Programs/menu_prefs.c:1119
+#: Programs/menu_prefs.c:1242
 msgid "Space"
 msgstr "空白"
 
-#: Programs/menu_prefs.c:993
+#: Programs/menu_prefs.c:1110
 msgid "Speak Completed Words"
 msgstr "朗讀完整的單字"
 
-#: Programs/menu_prefs.c:981
+#: Programs/menu_prefs.c:1098
 msgid "Speak Deleted Characters"
 msgstr "朗讀刪除的字元"
 
-#: Programs/menu_prefs.c:975
+#: Programs/menu_prefs.c:1092
 msgid "Speak Inserted Characters"
 msgstr "朗讀插入的字元"
 
-#: Programs/menu_prefs.c:987
+#: Programs/menu_prefs.c:1116
+#, fuzzy
+msgid "Speak Line Indent"
+msgstr "朗讀內縮行"
+
+#: Programs/menu_prefs.c:1104
 msgid "Speak Replaced Characters"
 msgstr "朗讀取代的字元"
 
-#: Programs/menu_prefs.c:969
+#: Programs/menu_prefs.c:1086
 msgid "Speak Selected Character"
 msgstr "朗讀選取的字元"
 
-#: Programs/menu_prefs.c:963
+#: Programs/menu_prefs.c:1080
 msgid "Speak Selected Line"
 msgstr "朗讀選取的行"
 
-#: Programs/menu_prefs.c:1022
+#: Programs/menu_prefs.c:1145
 msgid "Speech Cursor Invisible Time"
 msgstr "語音游標隱藏時間"
 
-#: Programs/menu_prefs.c:1004
+#: Programs/menu_prefs.c:1127
 msgid "Speech Cursor Style"
 msgstr "語音游標形狀"
 
-#: Programs/menu_prefs.c:1016
+#: Programs/menu_prefs.c:1139
 msgid "Speech Cursor Visible Time"
 msgstr "語音游標顯示時間"
 
-#: Programs/config.c:1825
+#: Programs/config.c:2028
 msgid "Speech Driver"
 msgstr "語音驅動"
 
-#: Programs/log.c:149
+#: Programs/log.c:152
 msgid "Speech Driver Events"
 msgstr "語音驅動事件"
 
-#: Programs/log.c:107
+#: Programs/log.c:110
 msgid "Speech Events"
 msgstr "語音事件"
 
 #. Create the file system object for speech input.
-#: Programs/config.c:2687
+#: Programs/config.c:2867
 msgid "Speech Input"
 msgstr "語音輸入"
 
-#: Programs/menu_prefs.c:888
+#: Programs/menu_prefs.c:1005
 msgid "Speech Options"
 msgstr "語音選向"
 
-#: Programs/config.c:1828
+#: Programs/config.c:2031
 msgid "Speech Parameter"
 msgstr "語音參數"
 
-#: Programs/menu_prefs.c:905
+#: Programs/menu_prefs.c:1022
 msgid "Speech Pitch"
 msgstr "語音音調"
 
-#: Programs/menu_prefs.c:918
+#: Programs/menu_prefs.c:1035
 msgid "Speech Punctuation"
 msgstr "朗讀標點"
 
-#: Programs/menu_prefs.c:898
+#: Programs/menu_prefs.c:1015
 msgid "Speech Rate"
 msgstr "語音速率"
 
-#: Programs/menu_prefs.c:933
+#: Programs/menu_prefs.c:1050
 msgid "Speech Uppercase Indicator"
 msgstr "說出大寫符號"
 
-#: Programs/menu_prefs.c:891
+#: Programs/menu_prefs.c:1008
 msgid "Speech Volume"
 msgstr "語音音量"
 
-#: Programs/menu_prefs.c:943
+#: Programs/menu_prefs.c:1060
 msgid "Speech Whitespace Indicator"
 msgstr "說出空白記號"
 
-#: Programs/config.c:482
+#: Programs/config.c:562
 #, c-format
 msgid "Speech driver code (%s, %s, or one of {%s})."
 msgstr "語音驅動碼: (%s, %s 或 {%s} 之一)"
 
-#: Programs/menu_prefs.c:1269
+#: Programs/menu_prefs.c:1392
 msgid "Standard Error Log Level"
 msgstr "標準錯誤記錄等級"
 
-#: Programs/menu_prefs.c:441
+#: Programs/menu_prefs.c:815
+msgid "Start Selection with Routing Key"
+msgstr "用定位鍵開始選取"
+
+#: Programs/menu_prefs.c:465
 msgid "State Dots"
 msgstr "狀態點"
 
-#: Programs/menu_prefs.c:442
+#: Programs/menu_prefs.c:466
 msgid "State Letter"
 msgstr "狀態字母"
 
-#: Programs/menu_prefs.c:1094
+#: Programs/menu_prefs.c:1217
 msgid "Status Cells"
 msgstr "狀態方"
 
-#: Programs/menu_prefs.c:1110
+#: Programs/menu_prefs.c:1233
 msgid "Status Count"
-msgstr "狀態計算"
+msgstr "狀態計數"
 
-#: Programs/menu_prefs.c:450
+#: Programs/menu_prefs.c:474
 msgid "Status Field"
 msgstr "狀態欄位"
 
-#: Programs/menu_prefs.c:1103
+#: Programs/menu_prefs.c:1226
 msgid "Status Position"
 msgstr "狀態位置"
 
-#: Programs/menu_prefs.c:1125
+#: Programs/menu_prefs.c:1248
 msgid "Status Separator"
-msgstr "狀態區符號"
+msgstr "狀態分隔符號"
 
-#: Programs/menu_prefs.c:1121
+#: Programs/menu_prefs.c:1244
 msgid "Status Side"
-msgstr "狀態側"
+msgstr "狀態邊側"
 
 #: Programs/midi.c:172
 msgid "Steel Drums"
 msgstr "鋼鼓"
 
-#: Programs/config.c:306
+#: Programs/config.c:362
 #, c-format
 msgid "Stop an existing instance of %s, and then exit."
-msgstr "停止存在的 %s 程序然後跳出"
+msgstr "停止存在的 %s 程序然後退出"
 
 #. Ensemble
 #: Programs/midi.c:98
@@ -1667,11 +1792,11 @@ msgstr "弦樂組 2"
 msgid "Strings"
 msgstr "弦樂"
 
-#: Programs/menu_prefs.c:569
+#: Programs/menu_prefs.c:635
 msgid "Superimpose Dot 7"
 msgstr "加上第七點"
 
-#: Programs/config.c:567
+#: Programs/config.c:648
 msgid "Suppress start-up messages."
 msgstr "取消啟動訊息"
 
@@ -1685,7 +1810,7 @@ msgstr "合成被司 2"
 
 #: Programs/midi.c:176
 msgid "Synth Drum"
-msgstr "合成 Trommel"
+msgstr "合成鼓"
 
 #: Programs/midi.c:36
 msgid "Synth FM"
@@ -1701,15 +1826,16 @@ msgstr "合成 pad"
 
 #: Programs/midi.c:104
 msgid "Synth Voice"
-msgstr "合成 voice"
+msgstr "合成人聲"
 
 #: Programs/midi.c:113
 msgid "SynthBrass 1"
 msgstr "合成銅管 1"
 
 #: Programs/midi.c:114
-msgid "合成銅管 2"
-msgstr "SynthBrass 2"
+#, fuzzy
+msgid "SynthBrass 2"
+msgstr "合成銅管 2"
 
 #: Programs/midi.c:100
 msgid "SynthStrings 1"
@@ -1719,11 +1845,11 @@ msgstr "合成弦樂 1"
 msgid "SynthStrings 2"
 msgstr "合成弦樂 2"
 
-#: Programs/menu_prefs.c:1264
+#: Programs/menu_prefs.c:1387
 msgid "System Log Level"
 msgstr "系統記錄等級"
 
-#: Programs/config.c:2570 Programs/menu_prefs.c:1238
+#: Programs/config.c:2777 Programs/menu_prefs.c:1361
 msgid "Tables Directory"
 msgstr "對照表目錄"
 
@@ -1743,41 +1869,49 @@ msgstr "電話鈴生"
 msgid "Tenor Sax"
 msgstr "中音薩克斯風"
 
-#: Programs/menu_prefs.c:595
+#: Programs/menu_prefs.c:661
 msgid "Text Indicators"
 msgstr "文字標記"
 
-#: Programs/menu_prefs.c:1122
+#: Programs/menu_prefs.c:1245
 msgid "Text Side"
-msgstr "文字邊"
+msgstr "文字邊側"
 
-#: Programs/menu_prefs.c:554
+#: Programs/menu_prefs.c:619
 msgid "Text Style"
 msgstr "文自行太"
 
-#: Programs/config.c:2597 Programs/menu_prefs.c:1150
+#: Programs/config.c:2798 Programs/menu_prefs.c:1273
 msgid "Text Table"
 msgstr "文字表"
 
-#: Programs/brltty-ctb.c:73
+#: Programs/brltty-ctb.c:69
 msgid "Text table."
 msgstr "文字表"
 
-#: Programs/menu_prefs.c:443
+#: Programs/config.c:302
+msgid "The text to be shown when the braille driver starts and to be spoken when the speech driver starts."
+msgstr "點字啟動顯示何語音啟動朗讀的文字"
+
+#: Programs/config.c:309
+msgid "The text to be shown when the braille driver stops."
+msgstr "點字停用顯示的文字"
+
+#: Programs/menu_prefs.c:467
 msgid "Time"
 msgstr "時間"
 
-#: Programs/menu_prefs.c:1038
+#: Programs/menu_prefs.c:1161
 msgid "Time Format"
 msgstr "時間格式"
 
-#: Programs/menu_prefs.c:1030
+#: Programs/menu_prefs.c:1153
 msgid "Time Presentation"
-msgstr "時間符號"
+msgstr "時間表示法"
 
-#: Programs/menu_prefs.c:1048
+#: Programs/menu_prefs.c:1171
 msgid "Time Separator"
-msgstr "時間區隔符號"
+msgstr "時間分隔符號"
 
 #: Programs/midi.c:96
 msgid "Timpani"
@@ -1788,23 +1922,28 @@ msgstr "定音鼓"
 msgid "Tinkle Bell"
 msgstr "牛零"
 
-#: Programs/menu_prefs.c:1318
+#: Programs/menu_prefs.c:1441
 msgid "Tools"
 msgstr "工具"
 
-#: Programs/menu_prefs.c:750
+#: Programs/menu_prefs.c:892
 msgid "Touch Navigation"
 msgstr "觸控導覽"
 
-#: Programs/menu_prefs.c:764
+#: Programs/menu_prefs.c:906
 msgid "Touch Sensitivity"
-msgstr "觸控敏感度"
+msgstr "觸控靈敏度"
 
-#: Programs/menu_prefs.c:710
+#: Programs/menu_prefs.c:804
 msgid "Track Screen Pointer"
 msgstr "追蹤螢幕指標"
 
-#: Programs/menu_prefs.c:777
+#: Programs/menu_prefs.c:798
+#, fuzzy
+msgid "Track Screen Scroll"
+msgstr "追蹤螢幕捲動"
+
+#: Programs/menu_prefs.c:830
 msgid "Translated via Text Table"
 msgstr "由文字表翻譯"
 
@@ -1829,41 +1968,46 @@ msgstr "大號"
 msgid "Tubular Bells"
 msgstr "管中"
 
-#: Programs/menu_prefs.c:834
+#: Programs/menu_prefs.c:951
 msgid "Tune Device"
 msgstr "聲音設備"
 
-#: Programs/log.c:131
+#: Programs/menu_prefs.c:834
+#, fuzzy
+msgid "Typing Mode"
+msgstr "輸入模式"
+
+#: Programs/log.c:134
 msgid "USB I/O"
 msgstr "USB 輸入/輸出"
 
-#: Programs/menu_prefs.c:511
+#: Programs/menu_prefs.c:575
 msgid "Underline"
 msgstr "底線"
 
-#: Programs/alert.c:351
+#: Programs/alert.c:102
 msgid "Unfrozen"
 msgstr "解凍"
 
-#: Programs/config.c:2566 Programs/menu_prefs.c:1218
+#: Programs/config.c:2774 Programs/menu_prefs.c:1341
 msgid "Updatable Directory"
 msgstr "可更新的目錄"
 
-#: Programs/log.c:101
+#: Programs/log.c:104
 msgid "Update Events"
 msgstr "更新事件"
 
-#: Programs/options.c:136
+#: Programs/options.c:151
 msgid "Usage"
 msgstr "用法"
 
-#: Programs/menu_prefs.c:568
+#: Programs/menu_prefs.c:634
 msgid "Use Capital Sign"
 msgstr "使用大寫記號"
 
 #: Programs/midi.c:56
 msgid "Vibraphone"
-msgstr "Vibraphon"
+msgstr "顫音"
 
 #: Programs/midi.c:90
 msgid "Viola"
@@ -1871,18 +2015,19 @@ msgstr "中提琴"
 
 #. Strings
 #: Programs/midi.c:89
-msgid "小提琴"
+#, fuzzy
+msgid "Violin"
 msgstr "小提琴"
 
 #: Programs/midi.c:103
 msgid "Voice Oohs"
 msgstr "人聲喔"
 
-#: Programs/menu_prefs.c:1254
+#: Programs/menu_prefs.c:1377
 msgid "Warning"
 msgstr "警告"
 
-#: Programs/menu_prefs.c:1198
+#: Programs/menu_prefs.c:1321
 msgid "Web Site"
 msgstr "網站"
 
@@ -1892,34 +2037,49 @@ msgstr "口哨"
 
 #: Programs/midi.c:173
 msgid "Woodblock"
-msgstr "文字區快"
+msgstr "木魚"
 
-#: Programs/config.c:2558
+#: Programs/menu_prefs.c:737
+msgid "Word Wrap"
+msgstr "換行"
+
+#: Programs/config.c:2748
 msgid "Working Directory"
 msgstr "工作目錄"
 
-#: Programs/config.c:2568 Programs/menu_prefs.c:1228
+#: Programs/config.c:2775 Programs/menu_prefs.c:1351
 msgid "Writable Directory"
-msgstr "寫入的目錄"
+msgstr "可寫入的目錄"
 
-#: Programs/config.c:599
+#: Programs/xbrlapi.c:118
+msgid "Write debugging output to stdout"
+msgstr "把除錯訊息顯示到標準輸出"
+
+#: Programs/config.c:671
 msgid "Write the start-up logs, and then exit."
-msgstr "寫入啟動記錄然後跳出"
+msgstr "寫好啟動記錄然後退出"
 
-#: Programs/xbrlapi.c:312
-#, c-format
-msgid "X Error %d, %s on display %s\n"
-msgstr "X 錯誤 %d, %s 在顯示 %s\n"
-
-#: Programs/xbrlapi.c:97
+#: Programs/xbrlapi.c:100
 msgid "X display to connect to"
 msgstr "X 顯示連接到"
 
-#: Programs/xbrlapi.c:644
+#: Programs/pgmprivs_linux.c:1925
+msgid "XDG runtime directory access problem"
+msgstr "XDG 執行時期目錄處理問題"
+
+#: Programs/pgmprivs_linux.c:1907
+msgid "XDG runtime directory created"
+msgstr "XDG 執行時期目錄建立"
+
+#: Programs/pgmprivs_linux.c:1902
+msgid "XDG runtime directory exists"
+msgstr "XDG 執行時期目錄存在"
+
+#: Programs/xbrlapi.c:786
 msgid "XFree(wm_name) for change"
 msgstr "XFree(wm_name) 變更"
 
-#: Programs/cmds.auto.h:1075
+#: Programs/cmds.auto.h:1259
 msgid "XT (set 1) keyboard scan code"
 msgstr "XT (set 1) 鍵盤掃描碼"
 
@@ -1927,58 +2087,49 @@ msgstr "XT (set 1) 鍵盤掃描碼"
 msgid "Xylophone"
 msgstr "木琴"
 
-#: Programs/menu_prefs.c:1070
+#: Programs/menu_prefs.c:1193
 msgid "Year Month Day"
 msgstr "年 月 日"
 
-#: Programs/menu.c:444
+#: Programs/menu.c:450
 msgid "Yes"
 msgstr "是"
 
-#: Programs/xbrlapi.c:81
+#: Programs/xbrlapi.c:84
 msgid "[host][:port]"
 msgstr "[Host][:Port]"
 
-#: Programs/menu_prefs.c:512
+#: Programs/menu_prefs.c:576
 msgid "all dots"
 msgstr "滿點"
 
-#: Programs/cmd_miscellaneous.c:132
+#: Programs/cmd_miscellaneous.c:121
 msgid "and"
 msgstr "與"
 
-#: Programs/cmds.auto.h:989
+#: Programs/cmds.auto.h:1142
 msgid "append characters to clipboard"
 msgstr "附加字元到剪貼不"
 
-#: Programs/cmds.auto.h:880
+#: Programs/cmds.auto.h:1033
 msgid "append to clipboard from character"
 msgstr "從字元附加到剪貼不"
 
-#: Programs/cmd.c:296
+#: Programs/cmd.c:290
 msgid "at cursor"
 msgstr "在游標"
 
-#: Programs/cmds.auto.h:1117
+#: Programs/cmds.auto.h:1301
 msgid "backspace key"
 msgstr "倒除鍵"
 
-#: Programs/xbrlapi.c:354
-#, c-format
-msgid "bad format for VT number\n"
-msgstr "錯誤 VT 格式編號\n"
-
-#: Programs/xbrlapi.c:357
-#, c-format
-msgid "bad type for VT number\n"
-msgstr "錯誤 VT 編號型態\n"
-
-#: Drivers/Braille/Baum/braille.c:1065 Drivers/Braille/TSI/braille.c:869
+#: Drivers/Braille/Baum/braille.c:1110 Drivers/Braille/TSI/braille.c:869
 msgid "battery low"
 msgstr "電量低"
 
-#: Programs/cmds.auto.h:1038
-msgid "bind to a specific virtual terminal"
+#: Programs/cmds.auto.h:1222
+#, fuzzy
+msgid "bind to specific virtual terminal"
 msgstr "榜定到特定的虛擬終端機"
 
 #: Programs/cmds.auto.h:835
@@ -1990,20 +2141,24 @@ msgid "bind to the previous virtual terminal"
 msgstr "榜定到前一個虛擬終端機"
 
 #.
-#: Programs/cmd_utils.c:96
+#: Programs/cmd_utils.c:144
 msgid "black"
 msgstr "黑"
 
-#: Programs/cmd_utils.c:120
+#: Programs/core.c:1120
+msgid "blank line"
+msgstr "空白行"
+
+#: Programs/cmd_utils.c:168
 msgid "blink"
 msgstr "跳動"
 
 #. B
-#: Programs/cmd_utils.c:97
+#: Programs/cmd_utils.c:145
 msgid "blue"
 msgstr "藍"
 
-#: Programs/config.c:2659
+#: Programs/config.c:2838
 #, c-format
 msgid "braille device not specified"
 msgstr "點字設備未指定"
@@ -2012,75 +2167,115 @@ msgstr "點字設備未指定"
 msgid "braille display temporarily unavailable"
 msgstr "點字設備暫時無作用"
 
-#: Programs/config.c:1347
+#: Programs/config.c:1538
 msgid "braille driver initialization failed"
 msgstr "點字驅動出使化失敗"
 
-#: Programs/config.c:1421
+#: Programs/config.c:1617
 msgid "braille driver not loadable"
 msgstr "點字驅動無法載入"
 
-#: Programs/cmd_miscellaneous.c:194
-msgid "braille stopped"
+#: Programs/config.c:1877
+#, fuzzy
+msgid "braille driver restarting"
+msgstr "點字驅動正在啟動"
+
+#: Programs/cmd_miscellaneous.c:178
+#, fuzzy
+msgid "braille driver stopped"
 msgstr "點字停止"
 
-#: Programs/cmds.auto.h:866
+#: Drivers/Screen/Android/screen.c:189
+#, fuzzy
+msgid "braille released"
+msgstr "點字停止"
+
+#: Programs/cmds.auto.h:1019
 msgid "bring screen cursor to character"
-msgstr "移動游標到字元"
+msgstr "帶動螢幕游標到字元"
 
 #: Programs/cmds.auto.h:520
 msgid "bring screen cursor to current line"
-msgstr "移動游標到目前行"
+msgstr "帶動螢幕游標到目前行"
+
+#: Programs/cmds.auto.h:1193
+#, fuzzy
+msgid "bring screen cursor to line"
+msgstr "帶動螢幕游標到行"
 
 #: Programs/cmds.auto.h:730
 msgid "bring screen cursor to speech cursor"
-msgstr "移動游標到語音游標"
+msgstr "帶動螢幕游標到語音游標"
 
 #. RG
-#: Programs/cmd_utils.c:102
+#: Programs/cmd_utils.c:150
 msgid "brown"
 msgstr "棕"
 
-#: Programs/atb_translate.c:53
+#: Drivers/Screen/Linux/screen.c:1432
+msgid "can't get console state"
+msgstr "無法取得主控台狀態"
+
+#: Drivers/Screen/Linux/screen.c:1510
+#, fuzzy
+msgid "can't open console"
+msgstr "無法打開主控台"
+
+#: Drivers/Screen/Linux/screen.c:1556
+#, fuzzy
+msgid "can't read screen content"
+msgstr "無法讀取螢幕內容"
+
+#: Drivers/Screen/Linux/screen.c:1601
+#, fuzzy
+msgid "can't read screen header"
+msgstr "無法讀取畫面表頭"
+
+#: Programs/atb_translate.c:70
 msgid "cannot compile attributes table"
 msgstr "無法編譯屬性表"
 
-#: Programs/config.c:784
+#: Programs/ctb_translate.c:365
 msgid "cannot compile contraction table"
 msgstr "無法編譯縮寫表"
 
-#: Programs/config.c:1328
+#: Programs/config.c:1521
 msgid "cannot compile key table"
 msgstr "無法編譯按鍵表"
 
-#: Programs/config.c:1025
+#: Programs/config.c:1098
 msgid "cannot compile keyboard table"
-msgstr "無法編譯按鍵表"
+msgstr "無法編譯鍵盤表"
 
-#: Programs/ttb_translate.c:216
+#: Programs/ttb_translate.c:256
 msgid "cannot compile text table"
 msgstr "無法編譯文字表"
 
-#: Programs/xbrlapi.c:178
-#, c-format
-msgid "cannot connect to brltty at %s\n"
-msgstr "無法連接 brltty 到 %s\n"
+#. This is the first attempt to connect to BRLTTY, and it failed.
+#. * Return the error immediately to the user, to provide feedback to users
+#. * running xbrlapi by hand, but not fill logs, eat battery, spam
+#. * 127.0.0.1 with reconnection attempts.
+#.
+#: Programs/xbrlapi.c:204
+#, fuzzy, c-format
+msgid "cannot connect to braille devices daemon brltty at %s\n"
+msgstr "無法連接點字設備服務程序 brltty 於 %s\n"
 
-#: Programs/xbrlapi.c:524
+#: Programs/xbrlapi.c:654
 #, c-format
 msgid "cannot connect to display %s\n"
 msgstr "無法連接點顯器 %s\n"
 
-#: Programs/file.c:333
+#: Programs/file.c:350
 msgid "cannot create directory"
 msgstr "無法建立目錄"
 
-#: Programs/program.c:164
+#: Programs/program.c:162
 #, c-format
 msgid "cannot determine program directory"
 msgstr "無法定義程式目錄"
 
-#: Programs/config.c:2561 /tmp/src/brltty/Programs/menu.c:538
+#: Programs/config.c:2751 Programs/menu.c:544
 msgid "cannot determine working directory"
 msgstr "無法定義工作目錄"
 
@@ -2088,50 +2283,50 @@ msgstr "無法定義工作目錄"
 msgid "cannot find procedure"
 msgstr "無法找到程序"
 
-#: Programs/program.c:172
+#: Programs/program.c:170
 msgid "cannot fix install path"
 msgstr "無法修復安裝路徑"
 
-#: Programs/xbrlapi.c:336
-#, c-format
-msgid "cannot get root window XFree86_VT property\n"
-msgstr "無法獲取跟視窗 XFree86_VT 內容\n"
-
-#: Programs/xbrlapi.c:196
+#: Programs/xbrlapi.c:259
 msgid "cannot get tty\n"
 msgstr "無法取得 tty\n"
 
-#: Programs/xbrlapi.c:199
+#: Programs/xbrlapi.c:265
 #, c-format
 msgid "cannot get tty %d\n"
 msgstr "無法取得 tty %d\n"
 
-#: Programs/file.c:456
+#: Programs/file.c:487
 msgid "cannot get working directory"
 msgstr "無法取得工作目錄"
 
-#: Programs/xbrlapi.c:568
+#: Programs/xbrlapi.c:702
 #, c-format
 msgid "cannot grab windows on screen %d\n"
 msgstr "無法擷取視窗在螢幕 %d\n"
 
-#: Programs/xbrlapi.c:203
+#: Programs/xbrlapi.c:272
 msgid "cannot ignore keys\n"
 msgstr "無法忽略按鍵\n"
 
-#: Programs/atb_translate.c:70
+#: Programs/atb_translate.c:90
 msgid "cannot load attributes table"
 msgstr "無法載入屬性表"
 
 #: Programs/system_windows.c:53
 msgid "cannot load library"
-msgstr "無法載入程式庫"
+msgstr "無法載入含式庫"
 
-#: Programs/ttb_translate.c:233
+#: Programs/ttb_translate.c:276
 msgid "cannot load text table"
 msgstr "無法載入文字表"
 
-#: Programs/config.c:982
+#: Programs/file.c:339
+#, fuzzy
+msgid "cannot make world writable"
+msgstr "無法讓環境可寫入"
+
+#: Programs/config.c:1056
 msgid "cannot open key help"
 msgstr "無法開啟按鍵說明"
 
@@ -2139,43 +2334,38 @@ msgstr "無法開啟按鍵說明"
 msgid "cannot open process identifier file"
 msgstr "無法開啟程序編號檔"
 
-#: Programs/menu.c:536
+#: Programs/menu.c:542
 msgid "cannot open working directory"
 msgstr "無法開啟工作目錄"
 
-#: Programs/prefs.c:326
+#: Programs/prefs.c:350
 msgid "cannot read preferences file"
 msgstr "無法讀取偏好設定檔"
 
-#: Programs/xbrlapi.c:243
+#: Programs/xbrlapi.c:337
 #, c-format
 msgid "cannot set focus to %#010x\n"
 msgstr "無法設定焦點到 %#010x\n"
 
-#: Programs/file.c:470 /tmp/src/brltty/Programs/menu.c:525
+#: Programs/file.c:501 Programs/menu.c:531
 msgid "cannot set working directory"
 msgstr "無法設定工作目錄"
 
-#: Programs/prefs.c:501
+#: Programs/prefs.c:525
 msgid "cannot write to preferences file"
 msgstr "無法寫入偏好設定檔"
 
-#: Programs/xbrlapi.c:236
-#, c-format
-msgid "cannot write window name %s\n"
-msgstr "無法寫入視窗名稱 %s\n"
-
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
-#: Programs/core.c:827
+#: Programs/core.c:1065
 msgid "cap"
 msgstr "大寫"
 
-#: Programs/menu_prefs.c:704 Programs/menu_prefs.c:1111
+#: Programs/menu_prefs.c:775 Programs/menu_prefs.c:1234
 msgid "cells"
 msgstr "點字方"
 
-#: Programs/cmd_preferences.c:80
+#: Programs/cmd_preferences.c:87
 msgid "changes discarded"
 msgstr "放棄變更"
 
@@ -2183,7 +2373,11 @@ msgstr "放棄變更"
 msgid "clear all sticky input modifiers"
 msgstr "清除所有相黏的輸入設定"
 
-#: Programs/cmd_speech.c:465
+#: Programs/cmds.auto.h:889
+msgid "clear the text selection"
+msgstr "清除文字選取"
+
+#: Programs/cmd_speech.c:475
 msgid "column"
 msgstr "欄"
 
@@ -2192,49 +2386,58 @@ msgstr "欄"
 msgid "config"
 msgstr "設定"
 
-#: Programs/options.c:751
+#: Programs/options.c:806
 msgid "configuration directive specified more than once"
 msgstr "設定敘述指定超過一次"
 
-#: Drivers/Screen/Linux/screen.c:1280
+#: Drivers/Screen/Linux/screen.c:1508
 #, fuzzy
 msgid "console not in use"
-msgstr "工作台未使用"
+msgstr "主控台未使用"
 
-#: Programs/menu_prefs.c:828
+#: Programs/menu_prefs.c:945
 msgid "console tone generator"
-msgstr "工作台音響產生器"
+msgstr "主控台音響產生器"
 
-#: Programs/cmds.auto.h:982
+#: Programs/cmds.auto.h:1135
 msgid "copy characters to clipboard"
 msgstr "複製字元到剪貼不"
 
-#: Programs/config.c:552 Programs/menu_prefs.c:479
+#: Programs/cmds.auto.h:901
+#, fuzzy
+msgid "copy selected text to host clipboard"
+msgstr "複製選取的文字到主機剪貼不"
+
+#: Programs/config.c:633 Programs/menu_prefs.c:503
 msgid "csecs"
 msgstr "csecs"
 
-#: Programs/cmds.auto.h:1096
+#: Programs/cmds.auto.h:1280
 msgid "current reading location"
 msgstr "目前的閱讀位置"
 
-#: Programs/cmds.auto.h:1152
+#: Programs/cmds.auto.h:1336
 msgid "cursor-down key"
 msgstr "游標往下鍵"
 
-#: Programs/cmds.auto.h:1131
+#: Programs/cmds.auto.h:1315
 msgid "cursor-left key"
 msgstr "游標往左鍵"
 
-#: Programs/cmds.auto.h:1138
+#: Programs/cmds.auto.h:1322
 msgid "cursor-right key"
 msgstr "游標往右鍵"
 
-#: Programs/cmds.auto.h:1145
+#: Programs/cmds.auto.h:1329
 msgid "cursor-up key"
 msgstr "游標往上鍵"
 
+#: Programs/cmds.auto.h:907
+msgid "cut selected text to host clipboard"
+msgstr "剪下選取的文字到主機剪貼簿"
+
 #. GB
-#: Programs/cmd_utils.c:99
+#: Programs/cmd_utils.c:147
 msgid "cyan"
 msgstr "青"
 
@@ -2264,7 +2467,7 @@ msgid "cycle the Upper sticky input modifier (next, on, off)"
 msgstr "循環 Upper 相黏輸入設定 (下一個, 開, 關)"
 
 #. L
-#: Programs/cmd_utils.c:104
+#: Programs/cmd_utils.c:152
 msgid "dark grey"
 msgstr "暗灰"
 
@@ -2276,11 +2479,11 @@ msgstr "降低與因素率"
 msgid "decrease speaking volume"
 msgstr "降低語音音量"
 
-#: Programs/cmds.auto.h:1194
+#: Programs/cmds.auto.h:1378
 msgid "delete key"
 msgstr "刪除鍵"
 
-#: Programs/cmds.auto.h:926
+#: Programs/cmds.auto.h:1079
 msgid "describe character"
 msgstr "描述字元"
 
@@ -2288,71 +2491,54 @@ msgstr "描述字元"
 msgid "describe current character"
 msgstr "描述目前字元"
 
-#: Programs/config.c:533 /tmp/src/brltty/Programs/config.c:543
+#: Programs/config.c:614 Programs/config.c:624
 msgid "device"
 msgstr "設備"
 
-#: Programs/xbrlapi.c:622
-#, c-format
-msgid "didn't grab parent of %#010lx\n"
-msgstr "無法擷取 %#010lx 的上層\n"
-
-#: Programs/xbrlapi.c:640
-#, c-format
-msgid "didn't grab window %#010lx\n"
-msgstr "無法擷取視窗 %#010lx\n"
-
-#: Programs/xbrlapi.c:479
-#, c-format
-msgid "didn't grab window %#010lx but got focus\n"
-msgstr "無法擷取視窗 %#010lx 不過得到焦點\n"
-
-#: Programs/brltest.c:68 /tmp/src/brltty/Programs/brltest.c:78
-#: Programs/brltty-atb.c:32 Programs/brltty-ctb.c:54 Programs/brltty-ktb.c:65
-#: Programs/brltty-ktb.c:75 Programs/brltty-trtxt.c:46 Programs/config.c:323
-#: /tmp/src/brltty/Programs/config.c:342 Programs/config.c:352
-#: /tmp/src/brltty/Programs/config.c:423
+#: Programs/brltest.c:64 Programs/brltest.c:74 Programs/brltty-atb.c:32
+#: Programs/brltty-ctb.c:50 Programs/brltty-ktb.c:69 Programs/brltty-ktb.c:79
+#: Programs/brltty-trtxt.c:47 Programs/config.c:412 Programs/config.c:422
+#: Programs/config.c:432 Programs/config.c:503
 msgid "directory"
 msgstr "目錄"
 
-#: Programs/xbrlapi.c:95
+#: Programs/xbrlapi.c:98
 msgid "display"
-msgstr "點顯器"
+msgstr "顯示"
 
 #: Programs/cmds.auto.h:4
 msgid "do nothing"
-msgstr "沒事"
+msgstr "無作為"
 
-#: Programs/learn.c:101
+#: Programs/learn.c:108
 msgid "done"
 msgstr "完成"
 
-#: Programs/menu_prefs.c:513
+#: Programs/menu_prefs.c:577
 msgid "dot 7"
 msgstr "第七點"
 
-#: Programs/menu_prefs.c:514
+#: Programs/menu_prefs.c:578
 msgid "dot 8"
 msgstr "地八點"
 
-#: Programs/menu_prefs.c:511
+#: Programs/menu_prefs.c:575
 msgid "dots 7 and 8"
 msgstr "七八點"
 
-#: Drivers/Braille/Baum/braille.c:1062
+#: Drivers/Braille/Baum/braille.c:1107
 msgid "driver request"
 msgstr "驅動要求"
 
-#: Programs/config.c:381 /tmp/src/brltty/Programs/config.c:479
-#: Programs/config.c:513
+#: Programs/config.c:461 Programs/config.c:559 Programs/config.c:594
 msgid "driver,..."
 msgstr "驅動,..."
 
-#: Programs/cmds.auto.h:1180
+#: Programs/cmds.auto.h:1364
 msgid "end key"
 msgstr "End 鍵"
 
-#: Programs/cmds.auto.h:1103
+#: Programs/cmds.auto.h:1287
 msgid "enter key"
 msgstr "Enter 鍵"
 
@@ -2362,17 +2548,17 @@ msgstr "進入/離開指令學習模式"
 
 #: Programs/cmds.auto.h:372
 msgid "enter/leave help display"
-msgstr "進入/離開求助顯示"
+msgstr "進入/離開說明畫面"
 
 #: Programs/cmds.auto.h:390
 msgid "enter/leave preferences menu"
-msgstr "進入/離開偏好設定選單"
+msgstr "進入/離開偏好設定"
 
 #: Programs/cmds.auto.h:378
 msgid "enter/leave status display"
-msgstr "進入/離開狀態顯示"
+msgstr "進入/離開狀態畫面"
 
-#: Programs/cmds.auto.h:1124
+#: Programs/cmds.auto.h:1308
 msgid "escape key"
 msgstr "Escape 鍵"
 
@@ -2380,11 +2566,11 @@ msgstr "Escape 鍵"
 msgid "eurobraille"
 msgstr "Eurobraille"
 
-#: Programs/cmd_miscellaneous.c:129
+#: Programs/cmd_miscellaneous.c:118
 msgid "exactly"
 msgstr "精確的"
 
-#: Programs/config.c:723
+#: Programs/config.c:808
 msgid "excess argument"
 msgstr "過多引述"
 
@@ -2394,26 +2580,28 @@ msgstr "過多引述"
 msgid "executing \"%s\" (from \"%s\")\n"
 msgstr "（從 \"%s\"）執行 \"%s\"\n"
 
+#: Programs/pgmprivs_linux.c:2010
+msgid "executing as the invoking user"
+msgstr "以調用的使用者身份執行"
+
 #. execv() shouldn't return
 #: Programs/brltty.c:184
 #, c-format
 msgid "execution of \"%s\" failed: %s\n"
 msgstr "\"%s\" 執行失敗: %s\n"
 
-#: Programs/xbrlapi.c:575
+#: Programs/xbrlapi.c:709
 msgid "failed to get first focus\n"
 msgstr "或取締一個焦點失敗\n"
 
-#: Programs/brltty-trtxt.c:56 Programs/brltty-trtxt.c:65 Programs/config.c:313
-#: /tmp/src/brltty/Programs/config.c:333 Programs/config.c:434
-#: /tmp/src/brltty/Programs/config.c:444 Programs/config.c:453
-#: /tmp/src/brltty/Programs/config.c:462 Programs/config.c:498
-#: /tmp/src/brltty/Programs/config.c:582 Programs/config.c:590
-#: /tmp/src/brltty/Programs/xbrlapi.c:88
+#: Programs/brltty-trtxt.c:56 Programs/brltty-trtxt.c:64 Programs/config.c:369
+#: Programs/config.c:378 Programs/config.c:388 Programs/config.c:514
+#: Programs/config.c:524 Programs/config.c:533 Programs/config.c:542
+#: Programs/config.c:578 Programs/config.c:663
 msgid "file"
 msgstr "檔案"
 
-#: Programs/options.c:929
+#: Programs/options.c:992
 #, c-format
 msgid "file '%s' processing error."
 msgstr "檔案 '%s' 處理錯誤"
@@ -2422,15 +2610,20 @@ msgstr "檔案 '%s' 處理錯誤"
 #: Programs/brltty.c:172
 #, c-format
 msgid "fork of \"%s\" failed: %s\n"
-msgstr "\"%s\" 轉入失敗: %s\n"
+msgstr "\"%s\" 分叉失敗: %s\n"
 
-#: Programs/cmds.auto.h:1202
+#: Programs/cmds.auto.h:1386
 msgid "function key"
 msgstr "功能鍵"
 
 #: Programs/cmds.auto.h:240
 msgid "go back after cursor tracking"
 msgstr "游標追蹤後返回"
+
+#: Programs/cmds.auto.h:939
+#, fuzzy
+msgid "go back to the previous screen"
+msgstr "跳回上一個畫面"
 
 #: Programs/cmds.auto.h:186
 msgid "go backward one braille window"
@@ -2442,7 +2635,7 @@ msgstr "倒退跳過空白點字視窗"
 
 #: Programs/cmds.auto.h:843
 msgid "go backward to nearest non-blank braille window"
-msgstr "倒退道第一個非空白點字視窗"
+msgstr "倒退道最近的非空白點字視窗"
 
 #: Programs/cmds.auto.h:20
 msgid "go down one line"
@@ -2461,7 +2654,7 @@ msgstr "移到下一段第一行"
 msgid "go down to last item"
 msgstr "跳到最後一項"
 
-#: Programs/cmds.auto.h:975
+#: Programs/cmds.auto.h:1128
 msgid "go down to nearest line with different character"
 msgstr "下移到最近的不同字元行"
 
@@ -2473,9 +2666,9 @@ msgstr "下移到最近的不同內容行"
 msgid "go down to nearest line with different highlighting"
 msgstr "下移到最近的不同反白行"
 
-#: Programs/cmds.auto.h:919
+#: Programs/cmds.auto.h:1072
 msgid "go down to nearest line with less indent than character"
-msgstr "下移到最近的不同內縮行"
+msgstr "下移到最近的內縮少於字元的行"
 
 #: Programs/cmds.auto.h:134
 msgid "go down to next command prompt"
@@ -2582,21 +2775,26 @@ msgstr "跳到行尾"
 msgid "go to previous menu level"
 msgstr "跳道上一曾選單"
 
-#: Programs/cmds.auto.h:948
+#: Programs/cmds.auto.h:1101
 msgid "go to remembered braille window position"
 msgstr "跳到濟助的點字視窗位置"
 
 #: Programs/cmds.auto.h:233
 msgid "go to screen cursor"
-msgstr "跳到游標"
+msgstr "跳到螢幕游標"
 
 #: Programs/cmds.auto.h:247
 msgid "go to screen cursor or go back after cursor tracking"
-msgstr "跳到游標或游標追蹤後跳回"
+msgstr "跳到螢幕游標或游標追蹤後反回"
 
-#: Programs/cmds.auto.h:957
+#: Programs/cmds.auto.h:1110
 msgid "go to selected line"
 msgstr "跳到選取的行"
+
+#: Programs/cmds.auto.h:932
+#, fuzzy
+msgid "go to the home screen"
+msgstr "跳到主畫面"
 
 #: Programs/cmds.auto.h:76
 msgid "go to top line"
@@ -2617,23 +2815,23 @@ msgstr "跳到第一項"
 
 #: Programs/cmds.auto.h:110
 msgid "go up to first line of paragraph"
-msgstr "移到上一段第一行"
+msgstr "跳到本段第一行"
 
-#: Programs/cmds.auto.h:966
+#: Programs/cmds.auto.h:1119
 msgid "go up to nearest line with different character"
 msgstr "往上跳到最近的不同字元行"
 
 #: Programs/cmds.auto.h:44
 msgid "go up to nearest line with different content"
-msgstr "往上跳到最近的不同行"
+msgstr "往上跳到最近的不同內容行"
 
 #: Programs/cmds.auto.h:60
 msgid "go up to nearest line with different highlighting"
 msgstr "往上跳到最近的不同反白行"
 
-#: Programs/cmds.auto.h:910
+#: Programs/cmds.auto.h:1063
 msgid "go up to nearest line with less indent than character"
-msgstr "往上跳到最近的內縮行"
+msgstr "往上跳到最近的內縮內縮少於字元的行"
 
 #: Programs/cmds.auto.h:126
 msgid "go up to previous command prompt"
@@ -2645,27 +2843,31 @@ msgid "go up to previous item"
 msgstr "跳到上一項"
 
 #. G
-#: Programs/cmd_utils.c:98
+#: Programs/cmd_utils.c:146
 msgid "green"
 msgstr "綠"
 
-#: Programs/cmd_miscellaneous.c:246
+#: Programs/pgmprivs_linux.c:2132
+msgid "group permissions added"
+msgstr "以加入群組權限"
+
+#: Programs/cmd_miscellaneous.c:228
 msgid "help not available"
-msgstr "沒有求助說明"
+msgstr "沒有說明"
 
-#: Programs/scr_help.c:234
+#: Programs/scr_help.c:229
 msgid "help screen not readable"
-msgstr "求助畫面無法讀取"
+msgstr "說明畫面無法讀取"
 
-#: Programs/cmds.auto.h:1173
+#: Programs/cmds.auto.h:1357
 msgid "home key"
 msgstr "home 鍵"
 
-#: Programs/config.c:402
+#: Programs/config.c:482
 msgid "identifier,..."
 msgstr "相同,..."
 
-#: Drivers/Braille/Baum/braille.c:1064
+#: Drivers/Braille/Baum/braille.c:1109
 msgid "idle timeout"
 msgstr "閒置逾時"
 
@@ -2677,39 +2879,54 @@ msgstr "增加與因素率"
 msgid "increase speaking volume"
 msgstr "增加語音音量"
 
-#: Programs/cmds.auto.h:996
+#: Programs/core.c:1123
+msgid "indent"
+msgstr "內縮"
+
+#: Programs/cmds.auto.h:1149
 msgid "insert clipboard history entry after screen cursor"
-msgstr "從游標處插入剪貼不的先前內容"
+msgstr "在螢幕游標處插入剪貼不的先前內容"
 
 #: Programs/cmds.auto.h:526
 msgid "insert clipboard text after screen cursor"
-msgstr "從游標處插入剪貼不的文字"
+msgstr "在螢幕游標處插入剪貼不的文字"
 
-#: Programs/cmds.auto.h:1187
+#: Programs/cmds.auto.h:913
+#, fuzzy
+msgid "insert host clipboard text after screen cursor"
+msgstr "在螢幕游標處插入主機剪貼不的文字"
+
+#: Programs/cmds.auto.h:1371
 msgid "insert key"
 msgstr "insert 鍵"
 
-#: Programs/program.c:180
+#: Programs/program.c:178
 msgid "install path not absolute"
 msgstr "安裝路徑不是絕對"
 
-#: Programs/options.c:99
+#: Programs/options.c:104
 msgid "invalid counter setting"
 msgstr "無效的計數器設定"
 
-#: Programs/datafile.c:434
+#: Programs/datafile.c:318
 msgid "invalid escape sequence"
 msgstr "無效的跳脫序列"
 
-#: Programs/options.c:92
+#: Programs/options.c:113
 msgid "invalid flag setting"
 msgstr "無效的旗標設定"
 
-#: Programs/config.c:2459
+#: Programs/config.c:2663
 msgid "invalid message hold timeout"
 msgstr "無效的訊息保留時間"
 
-#: Programs/brlapi_server.c:3062
+#. the operand for an option is invalid
+#: Programs/options.c:588
+#, fuzzy
+msgid "invalid operand"
+msgstr "無效的運算員"
+
+#: Programs/brlapi_server.c:4413
 msgid "invalid thread stack size"
 msgstr "無效的線程堆疊大小"
 
@@ -2723,77 +2940,89 @@ msgid "keyboard emu on"
 msgstr "鍵盤模擬開"
 
 #. L  B
-#: Programs/cmd_utils.c:105
+#: Programs/cmd_utils.c:153
 msgid "light blue"
 msgstr "淡藍"
 
 #. L GB
-#: Programs/cmd_utils.c:107
+#: Programs/cmd_utils.c:155
 msgid "light cyan"
 msgstr "淡青"
 
 #. L G
-#: Programs/cmd_utils.c:106
+#: Programs/cmd_utils.c:154
 msgid "light green"
 msgstr "淡率"
 
 #. RGB
-#: Programs/cmd_utils.c:103
+#: Programs/cmd_utils.c:151
 msgid "light grey"
 msgstr "淡灰"
 
 #. LR B
-#: Programs/cmd_utils.c:109
+#: Programs/cmd_utils.c:157
 msgid "light magenta"
 msgstr "淡紫"
 
 #. LR
-#: Programs/cmd_utils.c:108
+#: Programs/cmd_utils.c:156
 msgid "light red"
 msgstr "淡紅"
 
-#: Programs/cmd_speech.c:464
+#: Programs/cmd_speech.c:474
 msgid "line"
 msgstr "行"
 
-#: Programs/cmds.auto.h:894
+#: Programs/cmds.auto.h:1047
 msgid "linear copy to character"
 msgstr "直線拷貝字元"
 
-#: Programs/config.c:573
+#: Programs/config.c:654
 msgid "lvl|cat,..."
 msgstr "lvl|cat,..."
 
 #. R B
-#: Programs/cmd_utils.c:101
+#: Programs/cmd_utils.c:149
 msgid "magenta"
 msgstr "紫紅"
 
-#. An invalid option has been specified.
-#: Programs/options.c:533
+#. the operand for a string option hasn't been specified
+#: Programs/options.c:582
 msgid "missing operand"
 msgstr "缺少運算員"
 
-#: Programs/parse.c:367
+#: Programs/parse.c:472
 msgid "missing parameter name"
 msgstr "缺少參數名稱"
 
-#: Programs/parse.c:353
+#: Programs/parse.c:458
 msgid "missing parameter qualifier"
-msgstr "缺少參數說說明"
+msgstr "缺少參數指定符號"
 
-#: Programs/parse.c:329
+#: Programs/parse.c:434
 msgid "missing parameter value"
 msgstr "缺少餐數值"
 
-#: Programs/xbrlapi.c:345
-#, c-format
-msgid "more than one item for VT number\n"
-msgstr "超過一個 VT 編號\n"
+#: Programs/cmds.auto.h:993
+msgid "move to the first item in the screen area"
+msgstr "移到畫面中的第一個項目"
 
-#: Programs/config.c:370 /tmp/src/brltty/Programs/config.c:392
-#: Programs/config.c:470 /tmp/src/brltty/Programs/config.c:489
-#: Programs/config.c:523
+#: Programs/cmds.auto.h:1011
+msgid "move to the last item in the screen area"
+msgstr "移到畫面中的最後一個項目"
+
+#: Programs/cmds.auto.h:1005
+msgid "move to the next item in the screen area"
+msgstr "移到畫面中的下一個項目"
+
+#: Programs/cmds.auto.h:999
+#, fuzzy
+msgid "move to the previous item in the screen area"
+msgstr "移到畫面中的上一個項目"
+
+#: Programs/config.c:345 Programs/config.c:397 Programs/config.c:450
+#: Programs/config.c:472 Programs/config.c:550 Programs/config.c:569
+#: Programs/config.c:604
 msgid "name=value,..."
 msgstr "名稱=數值,..."
 
@@ -2801,49 +3030,72 @@ msgstr "名稱=數值,..."
 msgid "native"
 msgstr "內部"
 
-#: Programs/xbrlapi.c:330
-#, c-format
-msgid "no XFree86_VT atom\n"
-msgstr "沒有 XFree86_VT atom\n"
-
-#: Programs/xbrlapi.c:341
-#, c-format
-msgid "no items for VT number\n"
-msgstr "沒有 VT 編號\n"
-
-#: Programs/config.c:993
+#: Programs/config.c:1065
 msgid "no key bindings"
-msgstr "沒有按鍵設定"
+msgstr "沒有按鍵綁定"
 
-#: Programs/scr_driver.c:41
+#: Programs/scr_driver.c:39
 msgid "no screen"
 msgstr "沒有螢幕"
 
-#: Programs/config.c:634
+#: Programs/config.c:706
 msgid "none"
 msgstr "沒有"
 
-#: Programs/config.c:1234
+#: Programs/config.c:1338
 msgid "not saved"
 msgstr "未存檔"
 
-#: Programs/options.c:140
+#: Programs/pgmprivs_linux.c:1983
+msgid "not switching to an unprivileged user"
+msgstr "未切換到未授權的使用者"
+
+#: Programs/cmds.auto.h:969
+msgid "open the application alerts window"
+msgstr "打開軟體警示視窗"
+
+#: Programs/cmds.auto.h:957
+msgid "open the application list window"
+msgstr "打開軟體列表視窗"
+
+#: Programs/cmds.auto.h:963
+msgid "open the application-specific menu"
+msgstr "打開軟體指定的選單"
+
+#: Programs/cmds.auto.h:925
+#, fuzzy
+msgid "open the braille actions window"
+msgstr "打開點字活動視窗"
+
+#: Programs/cmds.auto.h:951
+msgid "open the device options window"
+msgstr "打開設備選項視窗"
+
+#: Programs/cmds.auto.h:945
+msgid "open the device settings window"
+msgstr "打開設備設定視窗"
+
+#: Programs/options.c:155
 msgid "option"
 msgstr "選向"
 
-#: Programs/cmds.auto.h:1166
+#: Programs/pgmprivs_linux.c:2117
+msgid "ownership claimed"
+msgstr "所有權主張"
+
+#: Programs/cmds.auto.h:1350
 msgid "page-down key"
 msgstr "page-down 鍵"
 
-#: Programs/cmds.auto.h:1159
+#: Programs/cmds.auto.h:1343
 msgid "page-up key"
 msgstr "page-up 鍵"
 
-#: Programs/menu_prefs.c:485
+#: Programs/menu_prefs.c:509
 msgid "percentage"
 msgstr "百分比"
 
-#: Programs/config.c:2432
+#: Programs/config.c:2636
 msgid "pid file not specified"
 msgstr "pid 檔案未指定"
 
@@ -2855,11 +3107,11 @@ msgstr "pid 檔案開啟錯誤"
 msgid "pitch"
 msgstr "音調"
 
-#: Programs/cmds.auto.h:933
+#: Programs/cmds.auto.h:1086
 msgid "place left end of braille window at character"
-msgstr "定位點字視窗左邊界"
+msgstr "把點字視窗的最左端對齊字元"
 
-#: Drivers/Braille/Baum/braille.c:1063
+#: Drivers/Braille/Baum/braille.c:1108
 msgid "power switch"
 msgstr "電源開關"
 
@@ -2867,35 +3119,50 @@ msgstr "電源開關"
 msgid "rate"
 msgstr "速率"
 
-#: Programs/cmds.auto.h:887
+#: Programs/cmds.auto.h:1040
 msgid "rectangular copy to character"
-msgstr "方塊複製字元"
+msgstr "區塊複製字元"
 
 #. R
-#: Programs/cmd_utils.c:100
+#: Programs/cmd_utils.c:148
 msgid "red"
 msgstr "紅"
 
-#: Programs/config.c:1634
+#: Programs/cmds.auto.h:877
+#, fuzzy
+msgid "refresh braille display"
+msgstr "刷新點字顯示"
+
+#: Programs/cmds.auto.h:1201
+#, fuzzy
+msgid "refresh braille line"
+msgstr "刷新點字顯示行"
+
+#: Programs/config.c:404
+#, fuzzy
+msgid "regexp,..."
+msgstr "regexp,..."
+
+#: Programs/config.c:1881
 #, c-format
 msgid "reinitializing braille driver"
 msgstr "重新出使化點字驅動"
 
-#: Programs/config.c:2194
+#: Programs/config.c:2394
 #, c-format
 msgid "reinitializing screen driver"
 msgstr "重新出使化螢幕驅動"
 
-#: Programs/config.c:1975
+#: Programs/config.c:2194
 #, c-format
 msgid "reinitializing speech driver"
 msgstr "重新出使化語音驅動"
 
-#: Programs/cmds.auto.h:940
+#: Programs/cmds.auto.h:1093
 msgid "remember current braille window position"
 msgstr "濟助目前點字視窗位置"
 
-#: Programs/cmds.auto.h:1045
+#: Programs/cmds.auto.h:1229
 msgid "render an alert"
 msgstr "發出警報"
 
@@ -2904,12 +3171,7 @@ msgstr "發出警報"
 #: Drivers/Braille/BrailleLite/braille.c:782
 #: Drivers/Braille/BrailleLite/braille.c:791
 msgid "repeat count"
-msgstr "重複計算"
-
-#: Programs/xbrlapi.c:313
-#, c-format
-msgid "resource %#010lx, req %u:%u\n"
-msgstr "資源 %#010lx, req %u:%u\n"
+msgstr "重複計數"
 
 #: Programs/cmds.auto.h:532
 msgid "restart braille driver"
@@ -2927,6 +3189,11 @@ msgstr "從磁碟還原剪貼簿"
 msgid "restore preferences from disk"
 msgstr "從磁碟還原偏好設定"
 
+#: Programs/cmds.auto.h:975
+#, fuzzy
+msgid "return to the active screen area"
+msgstr "回歸運作中的畫面"
+
 #: Programs/cmds.auto.h:749
 msgid "save clipboard to disk"
 msgstr "儲存剪貼簿到磁碟"
@@ -2935,11 +3202,29 @@ msgstr "儲存剪貼簿到磁碟"
 msgid "save preferences to disk"
 msgstr "儲存偏好設定到磁碟"
 
-#: Programs/config.c:2074
+#: Programs/xbrlapi.c:91
+msgid "scheme+..."
+msgstr "scheme+..."
+
+#: Programs/config.c:2270
 msgid "screen driver not loadable"
 msgstr "螢幕驅動無法載入"
 
-#: Drivers/Screen/Linux/screen.c:1303
+#: Programs/config.c:2391
+#, fuzzy
+msgid "screen driver restarting"
+msgstr "螢幕驅動重新啟動"
+
+#: Programs/cmd_miscellaneous.c:186
+#, fuzzy
+msgid "screen driver stopped"
+msgstr "螢幕驅動停止"
+
+#: Drivers/Screen/Android/screen.c:184
+msgid "screen locked"
+msgstr "螢幕鎖定"
+
+#: Drivers/Screen/Linux/screen.c:1531
 msgid "screen not in text mode"
 msgstr "螢幕不在文字模式"
 
@@ -2951,11 +3236,15 @@ msgstr "往回尋找剪貼不文字"
 msgid "search forward for clipboard text"
 msgstr "往前尋找剪貼不文字"
 
-#: Programs/cmd_miscellaneous.c:133
+#: Programs/cmd_miscellaneous.c:122
 msgid "second"
 msgid_plural "seconds"
 msgstr[0] "秒"
 msgstr[1] "秒"
+
+#: Programs/cmds.auto.h:895
+msgid "select all of the text"
+msgstr "全選文字"
 
 #: Programs/cmds.auto.h:446
 msgid "select next choice"
@@ -2977,7 +3266,7 @@ msgstr "設定屬性跳動開關"
 msgid "set attribute underlining on/off"
 msgstr "設定屬性家底線開關"
 
-#: Programs/cmds.auto.h:1010
+#: Programs/cmds.auto.h:1163
 msgid "set attributes table"
 msgstr "設定屬性表"
 
@@ -2993,6 +3282,11 @@ msgstr "設定自動朗讀完成的單字開關"
 msgid "set autospeak deleted characters on/off"
 msgstr "設定自動朗讀刪除的字元開關"
 
+#: Programs/cmds.auto.h:871
+#, fuzzy
+msgid "set autospeak indent of current line on/off"
+msgstr "設定自動朗讀內縮行開關"
+
 #: Programs/cmds.auto.h:602
 msgid "set autospeak inserted characters on/off"
 msgstr "設定自動朗讀插入的字元開關"
@@ -3003,7 +3297,7 @@ msgstr "設定自動朗讀開關"
 
 #: Programs/cmds.auto.h:616
 msgid "set autospeak replaced characters on/off"
-msgstr "設定自動朗讀選取的字元開關"
+msgstr "設定自動朗讀重複的字元開關"
 
 #: Programs/cmds.auto.h:595
 msgid "set autospeak selected character on/off"
@@ -3011,55 +3305,56 @@ msgstr "設定自動朗讀選取的字元開關"
 
 #: Programs/cmds.auto.h:588
 msgid "set autospeak selected line on/off"
-msgstr "設定自動朗讀選取的文字開關"
-
-#: Programs/cmds.auto.h:762
-msgid "set braille input mode dots/text"
-msgstr "設定點字輸入模式 點位/文字"
+msgstr "設定自動朗讀選取的行開關"
 
 #: Programs/cmds.auto.h:769
 msgid "set braille keyboard enabled/disabled"
 msgstr "設定點字鍵盤 啟用/停用"
 
+#: Programs/cmds.auto.h:762
+#, fuzzy
+msgid "set braille typing mode dots/text"
+msgstr "設定點字輸入模式 點位/文字"
+
 #: Programs/cmds.auto.h:345
 msgid "set capital letter blinking on/off"
 msgstr "設定大寫字母跳動開關"
 
-#: Programs/cmds.auto.h:1017
+#: Programs/cmds.auto.h:1170
 msgid "set contraction table"
 msgstr "設定縮寫表"
 
 #: Programs/cmds.auto.h:261
 msgid "set display mode attributes/text"
-msgstr "設定顯示模式為屬性或文字"
+msgstr "設定顯示模式 屬性/文字"
 
 #: Programs/cmds.auto.h:303
 msgid "set hidden screen cursor on/off"
-msgstr "設定隱藏游標開關"
+msgstr "設定隱藏螢幕游標開關"
 
-#: Programs/cmds.auto.h:1024
+#: Programs/cmds.auto.h:1177
 msgid "set keyboard table"
 msgstr "設定按鍵表"
 
-#: Programs/cmds.auto.h:1031
+#: Programs/cmds.auto.h:1184
 msgid "set language profile"
-msgstr "設定語言參考檔"
+msgstr "設定語言設定檔"
 
 #: Programs/cmds.auto.h:324
 msgid "set screen cursor blinking on/off"
-msgstr "設定游標跳動開關"
+msgstr "設定螢幕游標跳動開關"
 
 #: Programs/cmds.auto.h:317
 msgid "set screen cursor style block/underline"
-msgstr "設定游標形狀為區快或底線"
+msgstr "設定螢幕游標形狀 區快/底線"
 
 #: Programs/cmds.auto.h:296
 msgid "set screen cursor visibility on/off"
-msgstr "設定游標顯示開關"
+msgstr "設定螢幕游標顯示開關"
 
 #: Programs/cmds.auto.h:254
 msgid "set screen image frozen/unfrozen"
-msgstr "設定畫面映像 凍結/不動節"
+msgstr "設定畫面圖像 凍結/不動節"
 
 #: Programs/cmds.auto.h:289
 msgid "set skipping of blank braille windows on/off"
@@ -3067,21 +3362,26 @@ msgstr "設定跳過空白點字視窗開關"
 
 #: Programs/cmds.auto.h:282
 msgid "set skipping of lines with identical content on/off"
-msgstr "設定跳過同內容的行開關"
+msgstr "設定跳過相同內容的行開關"
 
 #: Programs/cmds.auto.h:275
 msgid "set sliding braille window on/off"
-msgstr "設定拖拉點字視窗開關"
+msgstr "設定滑動點字視窗開關"
 
 #: Programs/cmds.auto.h:743
 msgid "set speech cursor visibility on/off"
 msgstr "設定語音游標顯示開關"
 
+#: Programs/cmds.auto.h:1215
+#, fuzzy
+msgid "set text selection"
+msgstr "設定文字選取"
+
 #: Programs/cmds.auto.h:268
 msgid "set text style 6-dot/8-dot"
-msgstr "設定文自行太為六點或八點"
+msgstr "設定文自行太 六點/八點"
 
-#: Programs/cmds.auto.h:1003
+#: Programs/cmds.auto.h:1156
 msgid "set text table"
 msgstr "設定文字表"
 
@@ -3091,21 +3391,29 @@ msgstr "設定觸控導覽開關"
 
 #: Programs/cmds.auto.h:310
 msgid "set track screen cursor on/off"
-msgstr "設定追蹤游標開關"
+msgstr "設定追蹤螢幕游標開關"
 
 #: Programs/cmds.auto.h:574
 msgid "show current date and time"
 msgstr "顯示目前日期與時間"
 
-#: Programs/menu_prefs.c:829
+#: Programs/cmds.auto.h:919
+msgid "show the window title"
+msgstr "顯示視窗標題"
+
+#: Programs/cmds.auto.h:883
+msgid "show various device status indicators"
+msgstr "顯示各種設備狀態指示燈"
+
+#: Programs/menu_prefs.c:946
 msgid "soundcard digital audio"
 msgstr "音效卡數位音效"
 
-#: Programs/menu_prefs.c:831
+#: Programs/menu_prefs.c:948
 msgid "soundcard synthesizer"
 msgstr "音效卡合成器"
 
-#: Programs/cmd.c:283 /tmp/src/brltty/Programs/core.c:808
+#: Programs/cmd.c:277 Programs/core.c:1046
 msgid "space"
 msgstr "空白"
 
@@ -3123,27 +3431,47 @@ msgstr "朗讀目前單字"
 
 #: Programs/cmds.auto.h:477
 msgid "speak from current line through bottom of screen"
-msgstr "從本行開始朗讀到螢幕底部"
+msgstr "從本行開始朗讀到畫面底部"
 
 #: Programs/cmds.auto.h:471
 msgid "speak from top of screen through current line"
-msgstr "從螢幕頂端開始朗獨到本行"
+msgstr "從畫面頂端開始朗獨到本行"
+
+#: Programs/cmds.auto.h:864
+#, fuzzy
+msgid "speak indent of current line"
+msgstr "朗讀內縮行"
 
 #: Programs/cmds.auto.h:736
 msgid "speak speech cursor location"
 msgstr "朗讀語音游標位置"
 
-#: Programs/config.c:1839
+#: Programs/config.c:2042
 msgid "speech driver not loadable"
 msgstr "語音驅動無法載入"
+
+#: Programs/config.c:2191
+#, fuzzy
+msgid "speech driver restarting"
+msgstr "語音驅動重新啟動"
+
+#: Programs/cmd_speech.c:104
+#, fuzzy
+msgid "speech driver stopped"
+msgstr "語音驅動停止"
 
 #: Programs/cmds.auto.h:723
 msgid "spell current word"
 msgstr "拼出目前的單字"
 
-#: Programs/cmds.auto.h:873
+#: Programs/cmds.auto.h:1026
 msgid "start new clipboard at character"
 msgstr "以字元開始新的剪貼不"
+
+#: Programs/cmds.auto.h:1208
+#, fuzzy
+msgid "start text selection"
+msgstr "開始文字選取"
 
 #: Programs/cmds.auto.h:799
 msgid "start the braille driver"
@@ -3173,73 +3501,92 @@ msgstr "停止螢幕驅動"
 msgid "stop the speech driver"
 msgstr "停止語音驅動"
 
-#: Programs/xbrlapi.c:526
+#: Programs/xbrlapi.c:656
 msgid "strange old error handler\n"
-msgstr "奇怪的舊型錯誤處理\n"
+msgstr "奇怪的老舊錯誤處理程序\n"
 
-#: Programs/cmds.auto.h:901
-msgid "switch to a specific virtual terminal"
+#: Programs/brltty-cldr.c:39
+#, fuzzy
+msgid "string"
+msgstr "弦樂"
+
+#: Programs/cmds.auto.h:1273
+msgid "switch to command context"
+msgstr "切換到命令關聯"
+
+#: Programs/cmds.auto.h:1054
+#, fuzzy
+msgid "switch to specific virtual terminal"
 msgstr "切換到特定的虛擬終端機"
 
-#: Programs/cmds.auto.h:1089
-msgid "switch to command context"
-msgstr "切換到命令區"
+#: Programs/cmds.auto.h:987
+#, fuzzy
+msgid "switch to the next screen area"
+msgstr "切換到下一個畫面"
 
 #: Programs/cmds.auto.h:513
 msgid "switch to the next virtual terminal"
 msgstr "切換到下一個虛擬終端機"
 
+#: Programs/cmds.auto.h:981
+#, fuzzy
+msgid "switch to the previous screen area"
+msgstr "切換到上一個畫面"
+
 #: Programs/cmds.auto.h:507
 msgid "switch to the previous virtual terminal"
-msgstr "切換到前一個虛擬終端機"
+msgstr "切換到上一個虛擬終端機"
 
-#: Programs/cmds.auto.h:1110
+#: Programs/pgmprivs_linux.c:1968
+msgid "switched to unprivileged user"
+msgstr "切換到未授權使用者"
+
+#: Programs/cmds.auto.h:1294
 msgid "tab key"
 msgstr "tab 鍵"
 
-#: Programs/cmds.auto.h:1061
-msgid "type braille dots"
-msgstr "輸入點字點位"
+#: Programs/config.c:300 Programs/config.c:307
+msgid "text"
+msgstr "文字"
 
-#: Programs/cmds.auto.h:1053
+#: Programs/cmds.auto.h:1245
+msgid "type braille dots"
+msgstr "輸入點字點"
+
+#: Programs/cmds.auto.h:1237
 msgid "type unicode character"
 msgstr "輸入 unicode 字元"
 
-#: Programs/xbrlapi.c:771
+#: Programs/xbrlapi.c:974
 msgid "unexpected block type"
-msgstr "不預期的區快型態"
+msgstr "未預期的阻擋輸入"
 
-#: Programs/xbrlapi.c:721
+#: Programs/xbrlapi.c:864
 msgid "unexpected cmd"
 msgstr "不預期的指令"
 
-#: Programs/cmd_queue.c:148
+#: Programs/cmd_queue.c:157
 msgid "unhandled command"
-msgstr "未知的命令"
+msgstr "無法掌控的命令"
 
-#. "shouldn't happen" events
-#: Programs/xbrlapi.c:669
-#, c-format
-msgid "unhandled event type: %d\n"
-msgstr "無法處理的事件型態: %d\n"
-
-#: Programs/cmd.c:204
+#: Programs/cmd.c:198
 msgid "unknown command"
 msgstr "未知的命令"
 
-#: Programs/options.c:767
+#: Programs/options.c:822
 msgid "unknown configuration directive"
 msgstr "未知的設定敘述"
 
-#: Programs/config.c:654
+#: Programs/config.c:726
 msgid "unknown log level or category"
-msgstr "未知的記錄等級或項目"
+msgstr "未知的記錄等級或分類"
 
-#: Programs/options.c:528
+#. an unknown option has been specified
+#: Programs/options.c:569
 msgid "unknown option"
 msgstr "未知的選向"
 
-#: Programs/parse.c:396
+#: Programs/parse.c:501
 msgid "unsupported parameter"
 msgstr "不支援的參數"
 
@@ -3248,19 +3595,126 @@ msgid "volume"
 msgstr "音量"
 
 #. LRGB
-#: Programs/cmd_utils.c:111
+#: Programs/cmd_utils.c:159
 msgid "white"
 msgstr "白"
 
-#: Programs/xbrlapi.c:648
-#, c-format
-msgid "window %#010lx changed to NULL name\n"
-msgstr "視窗 %#010lx 變更為空名稱\n"
+#: Programs/pgmprivs_linux.c:1830
+#, fuzzy
+msgid "working directory changed"
+msgstr "工作目錄變更"
+
+#: Programs/xbrlapi.c:911
+#, fuzzy, c-format
+msgid "xbrlapi: Couldn't find a keycode to remap for simulating unbound keysym %08X\n"
+msgstr "xbrlapi: 無法找到按鍵碼來重設模擬未綁定的按鍵符號 %08X\n"
+
+#: Programs/xbrlapi.c:898
+#, fuzzy, c-format
+msgid "xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"
+msgstr "xbrlapi: 無法找到組合見來套用到 %d 以取得按鍵符號 %08X\n"
+
+#: Programs/xbrlapi.c:874
+#, fuzzy, c-format
+msgid "xbrlapi: Couldn't translate keysym %08X to keycode.\n"
+msgstr "xbrlapi: 無法翻譯按鍵符號 %08X 到按鍵碼\n"
+
+#: Programs/xbrlapi.c:415
+#, fuzzy, c-format
+msgid "xbrlapi: X Error %d, %s on display %s\n"
+msgstr "xbrlapi: X 錯誤 %d, %s 在顯示 %s\n"
+
+#: Programs/xbrlapi.c:457
+#, fuzzy, c-format
+msgid "xbrlapi: bad format for VT number\n"
+msgstr "xbrlapi: 不良的 VT 編號格式\n"
+
+#: Programs/xbrlapi.c:460
+#, fuzzy, c-format
+msgid "xbrlapi: bad type for VT number\n"
+msgstr "xbrlapi: 不良的 VT 編號類型\n"
+
+#: Programs/xbrlapi.c:439
+#, fuzzy, c-format
+msgid "xbrlapi: cannot get root window XFree86_VT property\n"
+msgstr "xbrlapi: 無法獲取跟視窗 XFree86_VT 內容\n"
+
+#: Programs/xbrlapi.c:316
+#, fuzzy, c-format
+msgid "xbrlapi: cannot write window name %s\n"
+msgstr "xbrlapi: 無法寫入視窗名稱 %s\n"
+
+#: Programs/xbrlapi.c:764
+#, fuzzy, c-format
+msgid "xbrlapi: didn't grab parent of %#010lx\n"
+msgstr "xbrlapi: 無法擷取 %#010lx 的上層\n"
+
+#: Programs/xbrlapi.c:782
+#, fuzzy, c-format
+msgid "xbrlapi: didn't grab window %#010lx\n"
+msgstr "xbrlapi: 沒有擷取視窗 %#010lx\n"
+
+#: Programs/xbrlapi.c:582
+#, fuzzy, c-format
+msgid "xbrlapi: didn't grab window %#010lx but got focus\n"
+msgstr "xbrlapi: 沒有擷取視窗 %#010lx 不過得到焦點\n"
+
+#: Programs/xbrlapi.c:448
+#, fuzzy, c-format
+msgid "xbrlapi: more than one item for VT number\n"
+msgstr "xbrlapi: 多了一個 VT 編號\n"
+
+#: Programs/xbrlapi.c:433
+#, fuzzy, c-format
+msgid "xbrlapi: no XFree86_VT atom\n"
+msgstr "xbrlapi: 沒有 XFree86_VT atom\n"
+
+#: Programs/xbrlapi.c:444
+#, fuzzy, c-format
+msgid "xbrlapi: no items for VT number\n"
+msgstr "xbrlapi: 沒有 VT 編號\n"
+
+#: Programs/xbrlapi.c:416
+#, fuzzy, c-format
+msgid "xbrlapi: resource %#010lx, req %u:%u\n"
+msgstr "xbrlapi: 資源 %#010lx, req %u:%u\n"
+
+#. "shouldn't happen" events
+#: Programs/xbrlapi.c:811
+#, fuzzy, c-format
+msgid "xbrlapi: unhandled event type: %d\n"
+msgstr "xbrlapi: 無法處理的事件型態: %d\n"
+
+#: Programs/xbrlapi.c:790
+#, fuzzy, c-format
+msgid "xbrlapi: window %#010lx changed to NULL name\n"
+msgstr "xbrlapi: 視窗 %#010lx 變更為空名稱\n"
 
 #. LRG
-#: Programs/cmd_utils.c:110
+#: Programs/cmd_utils.c:158
 msgid "yellow"
 msgstr "黃"
+
+#~ msgid "Braille Display Orientation"
+#~ msgstr "點字顯示器導向"
+
+#~ msgid "Braille Input Mode"
+#~ msgstr "點字輸入模式"
+
+#~ msgid "Braille Keyboard Enabled"
+#~ msgstr "點字鍵盤啟用"
+
+#~ msgid "Normal"
+#~ msgstr "正常"
+
+#~ msgid "Rotated"
+#~ msgstr "循環"
+
+#~ msgid "合成銅管 2"
+#~ msgstr "SynthBrass 2"
+
+#~ msgid "小提琴"
+#~ msgstr "小提琴"
 
 #~ msgid "Check for undefined characters."
 #~ msgstr "檢查未定義的字元"
@@ -3325,14 +3779,8 @@ msgstr "黃"
 #~ msgid "Help Path"
 #~ msgstr "求助管道"
 
-#~ msgid "cannot open help file"
-#~ msgstr "無法開啟求助檔"
-
 #~ msgid "emulate special key"
 #~ msgstr "模擬特殊鍵"
-
-#~ msgid "Autorepeat Delay"
-#~ msgstr "自動重複延遲"
 
 #~ msgid "Braille window update interval [4]."
 #~ msgstr "點字視窗更新間隔 [4]."
@@ -3360,9 +3808,6 @@ msgstr "黃"
 
 #~ msgid "Path to text translation table file."
 #~ msgstr "文字翻譯檔路徑"
-
-#~ msgid "arg,..."
-#~ msgstr "Arg,..."
 
 #~ msgid "freeze/unfreeze screen image"
 #~ msgstr "凍結/解動螢幕映像"
