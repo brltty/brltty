@@ -526,18 +526,20 @@ makeOverridePath (const char *base, int xdg) {
 static int
 addOverridePath (char **paths, size_t *index, const char *base, int xdg) {
   char *path = makeOverridePath(base, xdg);
-
   if (!path) return 0;
-  logMessage(LOG_INFO, "Override Directory: %s", path);
+
+  logMessage(LOG_DEBUG, "override directory: %s", path);
   paths[(*index)++] = path;
   return 1;
 }
 
+static char **overrideDirectories = NULL;
+
 const char *const *
 getAllOverrideDirectories (void) {
-  static const char *const *overrideDirectories = NULL;
-
   if (!overrideDirectories) {
+    logMessage(LOG_DEBUG, "determining override directories");
+
     const char *secondaryList = getenv("XDG_CONFIG_DIRS");
     int secondaryCount;
     char **secondaryBases = splitString(((secondaryList && *secondaryList)? secondaryList: "/etc/xdg"), ':', &secondaryCount);
@@ -627,7 +629,7 @@ done:
         paths[index] = NULL;
 
         if (index == count) {
-          overrideDirectories = (const char *const *)paths;
+          overrideDirectories = paths;
         } else {
           deallocateStrings(paths);
         }
@@ -641,7 +643,7 @@ done:
     if (!overrideDirectories) logMessage(LOG_WARNING, "no override directories");
   }
 
-  return overrideDirectories;
+  return (const char *const *)overrideDirectories;
 }
 
 const char *
@@ -656,6 +658,15 @@ getPrimaryOverrideDirectory (void) {
 
   logMessage(LOG_WARNING, "no primary override directory");
   return NULL;
+}
+
+void
+forgetOverrideDirectories (void) {
+  if (overrideDirectories) {
+    logMessage(LOG_DEBUG, "forgetting override directories");
+    deallocateStrings(overrideDirectories);
+    overrideDirectories = NULL;
+  }
 }
 
 #if defined(F_SETLK)
