@@ -3688,7 +3688,7 @@ msgstr "xbrlapi: 無法處理的事件型態: %d\n"
 #: Programs/xbrlapi.c:790
 #, fuzzy, c-format
 msgid "xbrlapi: window %#010lx changed to NULL name\n"
-msgstr "xbrlapi: 視窗 %#010lx 變更為空名稱\n"
+msgstr "xbrlapi: 視窗 %#010lx 變更為沒有名稱\n"
 
 #. LRG
 #: Programs/cmd_utils.c:158
