@@ -70,13 +70,13 @@ eval '$1="`"${AWK}" -v path="'"$2"'" -v reference="'"$3"'" -f "${srcdir}/relpath
 
 AC_DEFUN([BRLTTY_DEFINE_DIRECTORY], [dnl
 BRLTTY_VAR_EXPAND([$1], [$2])
+brltty_path="${$1}"
 
-if test "${brltty_enabled_relocatable_install}" = "yes"
-then
-   BRLTTY_RELATIVE_PATH([brltty_path], [${$1}], [${brltty_reference_directory}])
-else
-   brltty_path="${$1}"
-fi
+test "${brltty_enabled_relocatable_install}" = "yes" && {
+   test "${$1}" = "${$1#\\}" && {
+      BRLTTY_RELATIVE_PATH([brltty_path], [${$1}], [${brltty_reference_directory}])
+   }
+}
 
 BRLTTY_DEFINE_EXPANDED([$1], [${brltty_path}], [$3])
 # resolve escaped characters
