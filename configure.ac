@@ -731,7 +731,7 @@ BRLTTY_ARG_DISABLE(
          cygwin*|mingw*)
             AC_DEFINE([BRLAPI_WIN32], [1],
                       [Define this if the Win32 programming interface is available.])
-	    default_api_socket_path='\\\\\\\\.\\\\pipe\\\\BrlAPI'
+            default_api_socket_path='\\\\.\\pipe\\BrlAPI'
             api_dynamic_library="api-dynamic-library-windows"
             install_api_libraries="install-api-libraries-windows"
             uninstall_api_libraries="uninstall-api-libraries-windows"
@@ -741,7 +741,7 @@ BRLTTY_ARG_DISABLE(
       BRLTTY_ARG_WITH(
           [api-socket-path], [PATH],
           [where local sockets for teh api are stored],
-          [api_socket_path], [${default_api_socket_path}]
+          [api_socket_path], ["${default_api_socket_path}"]
       )
 
       BRLTTY_BINDINGS([Java])
@@ -823,7 +823,7 @@ BRLTTY_ARG_DISABLE(
          ])
 
          BRLTTY_HAVE_PACKAGE([xfixes], [xfixes], [dnl
-	    AC_CHECK_HEADERS([X11/extensions/Xfixes.h])
+            AC_CHECK_HEADERS([X11/extensions/Xfixes.h])
          ])
       ])
 
@@ -2039,7 +2039,7 @@ test "${prefix}" = "NONE" && prefix=""
 original_exec_prefix="${exec_prefix}"
 test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
 BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_directory}])
-BRLTTY_DEFINE_DIRECTORY([LOCALE_DIRECTORY], ["${execute_root}${localedir}"],
+BRLTTY_DEFINE_DIRECTORY([LOCALE_DIRECTORY], [${execute_root}${localedir}],
                         [Define this to be a string containing the path to the locale directory.])
 if test -n "${updatable_directory}"
 then
@@ -2065,11 +2065,11 @@ BRLTTY_DEFINE_DIRECTORY([SCRIPTS_DIRECTORY], [${execute_root}${scripts_directory
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
 
-BRLTTY_DEFINE_DIRECTORY([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
+BRLTTY_DEFINE_DIRECTORY([BRLAPI_ETCDIR], [${CONFIGURATION_DIRECTORY}],
                         [Define this to be a string containing the path to BrlAPI's data files directory.])
 
-BRLTTY_DEFINE_DIRECTORY([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
-		        [Define this to be a string containing the path to BrlAPI's local sockets directory.])
+BRLTTY_DEFINE_DIRECTORY([BRLAPI_SOCKETPATH], [${api_socket_path}],
+                        [Define this to be a string containing the path to BrlAPI's local sockets directory.])
 
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"

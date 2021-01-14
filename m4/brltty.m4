@@ -44,7 +44,12 @@ $1="`echo "${$1}" | sed -e 's/^ *//' -e 's/ *$//'`"
 ])
 
 AC_DEFUN([BRLTTY_VAR_EXPAND], [dnl
-eval '$1="'"$2"'"'])
+$1='$2'
+while test "${$1}" != "${$1%\$?*}"
+do
+   eval '$1="'"${$1}"'"'
+done
+])
 
 AC_DEFUN([BRLTTY_SUBST_EXPANDED], [dnl
 BRLTTY_VAR_EXPAND([brltty_expanded], [$2])
@@ -65,14 +70,19 @@ eval '$1="`"${AWK}" -v path="'"$2"'" -v reference="'"$3"'" -f "${srcdir}/relpath
 
 AC_DEFUN([BRLTTY_DEFINE_DIRECTORY], [dnl
 BRLTTY_VAR_EXPAND([$1], [$2])
-AC_SUBST([$1])
+
 if test "${brltty_enabled_relocatable_install}" = "yes"
 then
    BRLTTY_RELATIVE_PATH([brltty_path], [${$1}], [${brltty_reference_directory}])
 else
    brltty_path="${$1}"
 fi
-BRLTTY_DEFINE_EXPANDED([$1], [${brltty_path}], [$3])])
+
+BRLTTY_DEFINE_EXPANDED([$1], [${brltty_path}], [$3])
+# resolve escaped characters
+eval '$1="'"${$1}"'"'
+AC_SUBST([$1])
+])
 
 AC_DEFUN([BRLTTY_ARG_WITH], [dnl
 AC_ARG_WITH([$1], BRLTTY_HELP_STRING([--with-$1=$2], [$3]), [$4="${withval}"], [$4=$5])])
