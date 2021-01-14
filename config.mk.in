@@ -431,7 +431,7 @@ API_DYNAMIC_LIBRARY = @api_dynamic_library@
 INSTALL_API_LIBRARIES = @install_api_libraries@
 UNINSTALL_API_LIBRARIES = @uninstall_api_libraries@
 API_AUTHFILE = @api_authkeyfile@
-API_SOCKET_DIRECTORY = @BRLAPI_SOCKETPATH@
+API_SOCKET_PATH = @BRLAPI_SOCKETPATH@
 
 API_BINDINGS = @api_bindings@
 ALL_API_BINDINGS = @all_api_bindings@

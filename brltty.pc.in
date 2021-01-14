@@ -159,6 +159,6 @@ api_minor=@api_minor@
 api_revision=@api_revision@
 
 api_parameters=@api_parameters@
-api_sockets_directory=@BRLAPI_SOCKETPATH@
+api_socket_path=@BRLAPI_SOCKETPATH@
 api_authkey_file=@BRLAPI_ETCDIR@/@api_authkeyfile@
 

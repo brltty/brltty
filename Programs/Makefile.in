@@ -1068,7 +1068,7 @@ install:: install-programs install-tables $(INSTALL_DRIVERS) install-core-header
 
 install-programs: install-commands install-tools
 
-install-program-directories: install-program-directory install-writable-directory
+install-program-directories: install-program-directory
 
 install-commands: all-commands $(INSTALL_BRLTTY_CTB) install-program-directories
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -1097,6 +1097,7 @@ XBRLAPI_GDM_AUTOSTART_FILE = xbrlapi.desktop
 
 install-xbrlapi: xbrlapi$X install-program-directory install-x11-autostart-directory install-gdm-autostart-directory
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/xbrlapi.1 $(INSTALL_MAN1_DIRECTORY)
 	$(INSTALL_DATA) $(BLD_TOP)Autostart/X11/$(XBRLAPI_X11_AUTOSTART_FILE) $(INSTALL_X11_AUTOSTART_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_TOP)Autostart/gdm/$(XBRLAPI_GDM_AUTOSTART_FILE) $(INSTALL_GDM_AUTOSTART_DIRECTORY)
 
@@ -1143,7 +1144,7 @@ install-messages:
 	cd $(BLD_TOP)$(MSG_DIR) && $(MAKE) install
 
 install-manpages: install-man1-directory
-	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/*.1 $(INSTALL_MAN1_DIRECTORY)
+	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/brltty.1 $(INSTALL_MAN1_DIRECTORY)
 
 PKGCONFIG_FILE_NAME = brltty.pc
 PKGCONFIG_FILE_PATH = $(INSTALL_PKGCONFIG_DIRECTORY)/$(PKGCONFIG_FILE_NAME)
@@ -1212,7 +1213,6 @@ uninstall-tables:
 	-rm -f -r $(INSTALL_KEYBOARD_TABLES_DIRECTORY)
 	-rm -f -r $(INSTALL_INPUT_TABLES_DIRECTORY)
 	-[ ! -d $(INSTALL_TABLES_DIRECTORY) ] || rmdir $(INSTALL_TABLES_DIRECTORY)
-	-[ ! -d $(INSTALL_WRITABLE_DIRECTORY) ] || rmdir $(INSTALL_WRITABLE_DIRECTORY)
 
 uninstall-drivers: $(UNINSTALL_API_LIBRARIES)
 	-rm -f $(INSTALL_DRIVERS_DIRECTORY)/$(LIB_NAME)*
@@ -1223,6 +1223,7 @@ uninstall-messages:
 
 uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
+	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/xbrlapi.1
 	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
 
 uninstall-pkgconfig-file:
@@ -1237,12 +1238,12 @@ uninstall-headers:
 	-[ ! -d $(INSTALL_INCLUDE_DIRECTORY) ] || rm -f -r $(INSTALL_INCLUDE_DIRECTORY)
 
 uninstall-api-libraries:
+	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_ARC)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_VERSION)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_RELEASE)
 	$(CONFLIBDIR) $(INSTALL_APILIB_DIRECTORY)
-	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_ARC)
-	-rm -f -r $(API_SOCKET_DIRECTORY)
+	-rm -f -r $(INSTALL_APISOC_DIRECTORY)
 
 uninstall-api-libraries-windows:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_ARC)
