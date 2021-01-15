@@ -170,6 +170,7 @@ static const char *const optionStrings_RemoveService[] = {
 
 static char *opt_startMessage;
 static char *opt_stopMessage;
+static char *opt_localeDirectory;
 
 static int opt_version;
 static int opt_verify;
@@ -314,6 +315,15 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden,
     .setting.flag = &opt_environmentVariables,
     .description = strtext("Recognize environment variables.")
+  },
+
+  { .word = "locale-directory",
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("directory"),
+    .setting.string = &opt_localeDirectory,
+    .internal.setting = LOCALE_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory which contains message translations.")
   },
 
   { .word = "no-daemon",
@@ -808,6 +818,7 @@ brlttyPrepare (int argc, char *argv[]) {
     logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
   }
 
+  setLocaleDirectory(opt_localeDirectory);
   setUpdatableDirectory(opt_updatableDirectory);
   setWritableDirectory(opt_writableDirectory);
 

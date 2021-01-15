@@ -44,6 +44,8 @@ extern const char standardErrorName[];
 extern void beginProgram (int argumentCount, char **argumentVector);
 extern void endProgram (void);
 
+extern void setLocaleDirectory (const char *directory);
+
 typedef void ProgramExitHandler (void *data);
 extern void onProgramExit (const char *name, ProgramExitHandler *handler, void *data);
 extern void registerProgramMemory (const char *name, void *pointer);

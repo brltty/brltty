@@ -21,7 +21,8 @@
 
 BRLTTY_DRIVERS_DIRECTORY="${programDirectory}/lib"
 BRLTTY_TABLES_DIRECTORY="${programDirectory}/Tables"
-export BRLTTY_DRIVERS_DIRECTORY BRLTTY_TABLES_DIRECTORY
+BRLTTY_LOCALE_DIRECTORY="${programDirectory}/Messages/locale"
+export BRLTTY_DRIVERS_DIRECTORY BRLTTY_TABLES_DIRECTORY BRLTTY_LOCALE_DIRECTORY
 
 exec "${programDirectory}/run-command" "${programDirectory}/Programs/brltty" -E "${@}"
 exit "${?}"

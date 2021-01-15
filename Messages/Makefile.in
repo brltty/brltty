@@ -21,47 +21,54 @@ all:: objects languages
 COPYRIGHT_HOLDER = The BRLTTY Developers
 LANGUAGE_CODES = de fr it zh
 
+LOCALE_SUBDIRECTORY = locale
+MESSAGES_SUBDIRECTORY = LC_MESSAGES
+
 TEMPLATE_EXTENSION = pot
 SOURCE_EXTENSION = po
 OBJECT_EXTENSION = mo
 
 LANGUAGES_FILE = LINGUAS
-languages: $(LANGUAGES_FILE)
+TEMPLATE_FILE = $(SRC_DIR)/$(PACKAGE_TARNAME).$(TEMPLATE_EXTENSION)
+OBJECT_FILE = $(PACKAGE_TARNAME).$(OBJECT_EXTENSION)
 
+SOURCE_FILES = $(LANGUAGE_CODES:=.$(SOURCE_EXTENSION))
+OBJECT_FILES = $(LANGUAGE_CODES:=.$(OBJECT_EXTENSION))
+
+languages: $(LANGUAGES_FILE)
 $(LANGUAGES_FILE): FORCE
 	: >$@; \
 	for language in $(LANGUAGE_CODES); do \
 	echo $$language >>$@; \
 	done
 
-TEMPLATE_FILE = $(SRC_DIR)/$(PACKAGE_TARNAME).$(TEMPLATE_EXTENSION)
 template $(TEMPLATE_EXTENSION): $(TEMPLATE_FILE)
-
 $(TEMPLATE_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h FORCE
-	$(SRC_TOP)mkpot -p "$(PACKAGE_TARNAME)" -n "$(PACKAGE_VERSION)" -o $@ -b "$(PACKAGE_BUGREPORT)" -c "$(COPYRIGHT_HOLDER)" $(SRC_TOP) $(BLD_TOP)
+	$(SRC_TOP)mkpot -p "$(PACKAGE_TARNAME)" -n "$(PACKAGE_VERSION)" -b "$(PACKAGE_BUGREPORT)" -c "$(COPYRIGHT_HOLDER)" -o $@ -- $(SRC_TOP) $(BLD_TOP)
 
-SOURCE_FILES = $(LANGUAGE_CODES:=.$(SOURCE_EXTENSION))
 sources: $(SOURCE_FILES)
-
 %.$(SOURCE_EXTENSION): FORCE
 	$(MSGMERGE) --quiet --force-po --no-wrap --update -- $(SRC_DIR)/$@ $(TEMPLATE_FILE)
 
-OBJECT_FILES = $(LANGUAGE_CODES:=.$(OBJECT_EXTENSION))
 objects: $(OBJECT_FILES)
-
-%.$(OBJECT_EXTENSION):
-	$(MSGFMT) --output-file $@ $(SRC_DIR)/$(@F:.$(OBJECT_EXTENSION)=.$(SOURCE_EXTENSION))
+%.$(OBJECT_EXTENSION): FORCE
+	$(MSGFMT) --output-file $@ -- $(SRC_DIR)/$(@F:.$(OBJECT_EXTENSION)=.$(SOURCE_EXTENSION))
+	directory="$(LOCALE_SUBDIRECTORY)/$(@:.$(OBJECT_EXTENSION)=)/$(MESSAGES_SUBDIRECTORY)"; \
+	$(INSTALL_DIRECTORY) $${directory}; \
+	file="$${directory}/$(OBJECT_FILE)"; \
+	test -f $${file} || $(SYMLINK) ../../../$@ $${file};
 
 clean::
 	-rm -f -- *.$(OBJECT_EXTENSION) *~
+	-rm -f -r -- $(LOCALE_SUBDIRECTORY)
 
 install:: objects install-locale-directory
 	for language in $(LANGUAGE_CODES); do \
-	directory="$(INSTALL_LOCALE_DIRECTORY)/$${language}/LC_MESSAGES" && \
+	directory="$(INSTALL_LOCALE_DIRECTORY)/$${language}/$(MESSAGES_SUBDIRECTORY)" && \
         $(INSTALL_DIRECTORY) "$${directory}" && \
-	$(INSTALL_DATA) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(PACKAGE_TARNAME).$(OBJECT_EXTENSION)"; \
+	$(INSTALL_DATA) "$${language}.$(OBJECT_EXTENSION)" "$${directory}/$(OBJECT_FILE)"; \
 	done
 
 uninstall::
-	-rm -f -- $(INSTALL_LOCALE_DIRECTORY)/*/*/$(PACKAGE_TARNAME).$(OBJECT_EXTENSION)
+	-rm -f -- $(INSTALL_LOCALE_DIRECTORY)/*/*/$(OBJECT_FILE)
 

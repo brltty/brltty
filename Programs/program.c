@@ -47,14 +47,24 @@ const char standardInputName[] = "<standard-input>";
 const char standardOutputName[] = "<standard-output>";
 const char standardErrorName[] = "<standard-error>";
 
+void
+setLocaleDirectory (const char *directory) {
+#ifdef ENABLE_I18N_SUPPORT
+  if (!bindtextdomain(PACKAGE_TARNAME, directory)) {
+    logSystemError("bindtextdomain");
+  }
+#endif /* ENABLE_I18N_SUPPORT */
+}
+
 static void
 prepareLocale (void) {
   setlocale(LC_ALL, "");
 
 #ifdef ENABLE_I18N_SUPPORT
-  bindtextdomain(PACKAGE_TARNAME, LOCALE_DIRECTORY);
-  textdomain(PACKAGE_TARNAME);
+  if (!textdomain(PACKAGE_TARNAME)) logSystemError("textdomain");
 #endif /* ENABLE_I18N_SUPPORT */
+
+  setLocaleDirectory(LOCALE_DIRECTORY);
 }
 
 static char *
