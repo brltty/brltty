@@ -187,6 +187,39 @@ internalError() {
    exit 4
 }
 
+testContainingDirectory() {
+   local directory="${1}"
+   shift 1
+
+   local path
+   for path
+   do
+      [ -e "${directory}/${path}" ] || return 1
+   done
+
+   return 0
+}
+
+findContainingDirectory() {
+   local variable="${1}"
+   local directory="${2}"
+   shift 2
+
+   local value
+   getVariable "${variable}" value
+   [ -n "${value}" ] && return 0
+
+   while :
+   do
+      testContainingDirectory "${directory}" "${@}" && break
+      local parent="$(dirname "${directory}")"
+      [ "${parent}" = "${directory}" ] && return 1
+      directory="${parent}"
+   done
+
+   export "${variable}"="${directory}"
+}
+
 verifyExecutable() {
    local path="${1}"
 

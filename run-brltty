@@ -17,12 +17,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/brltty-prologue.sh"
+. "`dirname "${0}"`/prologue.sh"
+setSourceRoot
+setBuildRoot
 
-BRLTTY_DRIVERS_DIRECTORY="${programDirectory}/lib"
-BRLTTY_TABLES_DIRECTORY="${programDirectory}/Tables"
-BRLTTY_LOCALE_DIRECTORY="${programDirectory}/Messages/locale"
-export BRLTTY_DRIVERS_DIRECTORY BRLTTY_TABLES_DIRECTORY BRLTTY_LOCALE_DIRECTORY
+export BRLTTY_TABLES_DIRECTORY="${BRLTTY_SOURCE_ROOT}/Tables"
+export BRLTTY_DRIVERS_DIRECTORY="${BRLTTY_BUILD_ROOT}/lib"
+export BRLTTY_LOCALE_DIRECTORY="${BRLTTY_BUILD_ROOT}/Messages/locale"
 
-exec "${programDirectory}/run-command" "${programDirectory}/Programs/brltty" -E "${@}"
+exec "${programDirectory}/run-command" "${BRLTTY_BUILD_ROOT}/Programs/brltty" -E "${@}"
 exit "${?}"

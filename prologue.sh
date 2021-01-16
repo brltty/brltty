@@ -1,4 +1,3 @@
-#!/bin/sh
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -17,8 +16,22 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/prologue.sh"
-setBuildRoot
+. "$(dirname "${0}")/brltty-prologue.sh"
 
-exec "${programDirectory}/run-command" "${BRLTTY_BUILD_ROOT}/Programs/xbrlapi" "$@"
-exit "${?}"
+setSourceRoot() {
+   findContainingDirectory BRLTTY_SOURCE_ROOT "${programDirectory}" brltty.pc.in || {
+      semanticError "source tree not found"
+   }
+}
+
+setBuildRoot() {
+   local variable=BRLTTY_BUILD_ROOT
+   set -- brltty.pc
+
+   findContainingDirectory "${variable}" "${initialDirectory}" "${@}" || {
+      findContainingDirectory "${variable}" "${programDirectory}" "${@}" || {
+         semanticError "build tree not found"
+      }
+   }
+}
+

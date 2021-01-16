@@ -17,7 +17,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "$(dirname "${0}")/brltty-prologue.sh"
+. "$(dirname "${0}")/prologue.sh"
+setBuildRoot
 
 [ "${#}" -eq 0 ] && {
 cat <<END_OF_USAGE
@@ -46,8 +47,7 @@ readonly variablePrefix="${commandName^^?}"
 getVariable "${variablePrefix}_VALGRIND_DIRECTORY" vgDirectory
 
 [ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
-LD_LIBRARY_PATH="${programDirectory}/Programs${LD_LIBRARY_PATH}"
-export LD_LIBRARY_PATH
+export LD_LIBRARY_PATH="${BRLTTY_BUILD_ROOT}/Programs${LD_LIBRARY_PATH}"
 
 [ -n "${vgDirectory}" ] && {
    [ -e "${vgDirectory}" ] || semanticError "directory not found: ${vgDirectory}"
