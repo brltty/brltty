@@ -52,21 +52,21 @@ manpage_directory=${execute_root}@manpage_directory@
 configuration_file=@CONFIGURATION_FILE@
 preferences_file=@PREFERENCES_FILE@
 
-internal_text_table=@text_table@
-internal_attributes_table=@attributes_table@
+text_table=@text_table@
+attributes_table=@attributes_table@
 
 have_contracted_braille=@brltty_enabled_contracted_braille@
 have_liblouis=@brltty_enabled_liblouis@
 liblouis_tables_directory=@louis_tables_directory@
 
 braille_parameters=@braille_parameters@
-default_braille_device=@braille_device@
+braille_device=@braille_device@
 
 speech_parameters=@speech_parameters@
-have_speech_support=@brltty_enabled_speech_support@
+have_speech=@brltty_enabled_speech_support@
 
 screen_parameters=@screen_parameters@
-default_screen_driver=@default_screen_driver@
+screen_driver=@default_screen_driver@
 
 all_braille_driver_codes=@brltty_item_codes_braille@
 all_braille_driver_names=@brltty_item_names_braille@
