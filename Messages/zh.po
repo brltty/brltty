@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-09 16:30-0500\n"
+"POT-Creation-Date: 2021-01-16 20:56+0800\n"
 "PO-Revision-Date: 2012-12-19 17:03+0100\n"
 "Last-Translator: 高生旺 <coscell@molerat.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,7 +101,7 @@ msgstr "八點電腦點字"
 
 #: Programs/brltty-ttb.c:179
 msgid "8-bit character set to use."
-msgstr "要用的八位元字元集"
+msgstr "使用八位元字元集"
 
 #: Programs/scr_menu.c:104
 msgid "<off>"
@@ -140,7 +140,7 @@ msgstr "鋼弦吉他"
 
 #: Programs/menu_prefs.c:1184
 msgid "After Time"
-msgstr "後時間"
+msgstr "之後時間"
 
 #: Programs/midi.c:171
 msgid "Agogo"
@@ -172,7 +172,7 @@ msgstr "字母點字視窗座標"
 
 #: Programs/menu_prefs.c:469
 msgid "Alphabetic Screen Cursor Coordinates"
-msgstr "字母游標位置"
+msgstr "字母螢幕游標座標A"
 
 #: Programs/midi.c:117
 msgid "Alto Sax"
@@ -227,7 +227,7 @@ msgstr "自動重複間隔"
 
 #: Programs/menu_prefs.c:886
 msgid "Autorepeat Panning"
-msgstr "自動重複移動"
+msgstr "自動連續平移"
 
 #: Programs/menu_prefs.c:1075
 msgid "Autospeak"
@@ -263,7 +263,7 @@ msgstr "翁鳴器"
 
 #: Programs/menu_prefs.c:1183
 msgid "Before Time"
-msgstr "前時間"
+msgstr "之前時間"
 
 #: Programs/midi.c:182
 msgid "Bird Tweet"
@@ -279,7 +279,7 @@ msgstr "跳動大寫字母"
 
 #: Programs/menu_prefs.c:675
 msgid "Blinking Screen Cursor"
-msgstr "跳動游標"
+msgstr "跳動螢幕游標"
 
 #: Programs/menu_prefs.c:1133
 msgid "Blinking Speech Cursor"
@@ -361,7 +361,7 @@ msgstr "銅管"
 
 #: Programs/midi.c:112
 msgid "Brass Section"
-msgstr "銅管樂組"
+msgstr "銅管組"
 
 #: Programs/midi.c:180
 msgid "Breath Noise"
@@ -419,7 +419,7 @@ msgstr "和聲阿"
 
 #: Programs/midi.c:25
 msgid "Chromatic Percussion"
-msgstr "有音調的打擊樂"
+msgstr "旋律打擊樂"
 
 #: Programs/midi.c:65
 msgid "Church Organ"
@@ -427,11 +427,11 @@ msgstr "教堂風琴"
 
 #: Programs/midi.c:123
 msgid "Clarinet"
-msgstr "黑管"
+msgstr "單簧管"
 
 #: Programs/midi.c:51
 msgid "Clavi"
-msgstr "大鍵琴"
+msgstr "古鋼琴"
 
 #: Programs/menu.c:820
 msgid "Close"
@@ -459,7 +459,7 @@ msgstr "主控台嗶聲警示"
 
 #: Programs/midi.c:92
 msgid "Contrabass"
-msgstr "倍低音"
+msgstr "低音提琴"
 
 #: Programs/menu_prefs.c:614
 msgid "Contracted Braille"
@@ -528,7 +528,7 @@ msgstr "處理點字顯示的設備"
 
 #: Programs/config.c:444
 msgid "Disable the application programming interface."
-msgstr "取消程式設計界面"
+msgstr "停用程式設計界面"
 
 #: Programs/midi.c:77
 msgid "Distortion Guitar"
@@ -536,11 +536,11 @@ msgstr "噪音吉他"
 
 #: Programs/config.c:587
 msgid "Do not autospeak when braille is not being used."
-msgstr "點字未啟用十不要自動朗讀"
+msgstr "點字未啟用十不自動朗讀"
 
 #: Programs/xbrlapi.c:112
 msgid "Do not write any text to the braille device"
-msgstr "不要寫入任何文字到點字設備"
+msgstr "不寫入任何文字到點字設備"
 
 #: Programs/brltty-trtxt.c:79
 msgid "Don't fall back to the Unicode base character."
@@ -548,7 +548,7 @@ msgstr "不返回 Unicode 字元"
 
 #: Programs/config.c:355
 msgid "Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc)."
-msgstr "不要切換為未授權的使用者或放棄權限（群組成員身份、功能等等）"
+msgstr "不切換為未授權的使用者或放棄權限（群組成員身份、功能等等）"
 
 #: Programs/alert.c:52
 msgid "Done"
@@ -560,7 +560,7 @@ msgstr "點"
 
 #: Programs/menu_prefs.c:831
 msgid "Dots via Unicode Braille"
-msgstr "Unicode 點字碼的點"
+msgstr "用 Unicode 點字表示點位"
 
 #. Organ
 #: Programs/midi.c:62
@@ -724,11 +724,11 @@ msgstr "每一輸出行的格式"
 
 #: Programs/brltty-ttb.c:165
 msgid "Format of input file."
-msgstr "輸入檔案格式"
+msgstr "輸入檔格式"
 
 #: Programs/brltty-ttb.c:172
 msgid "Format of output file."
-msgstr "輸出檔案格式"
+msgstr "輸出檔格式"
 
 #: Programs/midi.c:111
 msgid "French Horn"
@@ -981,8 +981,8 @@ msgid "Log to standard error rather than to the system log."
 msgstr "輸出到標準錯誤而非系統記錄"
 
 #: Programs/config.c:656
-#, c-format
-msgid "Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable) "
+#, fuzzy, c-format
+msgid "Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)"
 msgstr "啟用紀錄等級 (%s 或 {%s} 之一）和/或紀錄分類（任何 {%s} 的組合或每個以 %s 開頭的都可停用）"
 
 #: Programs/menu_prefs.c:867
@@ -1039,7 +1039,7 @@ msgstr "五嶽"
 
 #: Programs/menu_prefs.c:648 Programs/menu_prefs.c:901
 msgid "Medium"
-msgstr "中等"
+msgstr "中"
 
 #: Programs/midi.c:175
 msgid "Melodic Tom"
@@ -2063,15 +2063,15 @@ msgstr "寫好啟動記錄然後退出"
 msgid "X display to connect to"
 msgstr "X 顯示連接到"
 
-#: Programs/pgmprivs_linux.c:1925
+#: Programs/pgmprivs_linux.c:1951
 msgid "XDG runtime directory access problem"
 msgstr "XDG 執行時期目錄處理問題"
 
-#: Programs/pgmprivs_linux.c:1907
+#: Programs/pgmprivs_linux.c:1933
 msgid "XDG runtime directory created"
 msgstr "XDG 執行時期目錄建立"
 
-#: Programs/pgmprivs_linux.c:1902
+#: Programs/pgmprivs_linux.c:1928
 msgid "XDG runtime directory exists"
 msgstr "XDG 執行時期目錄存在"
 
@@ -2580,7 +2580,7 @@ msgstr "過多引述"
 msgid "executing \"%s\" (from \"%s\")\n"
 msgstr "（從 \"%s\"）執行 \"%s\"\n"
 
-#: Programs/pgmprivs_linux.c:2010
+#: Programs/pgmprivs_linux.c:2045
 msgid "executing as the invoking user"
 msgstr "以調用的使用者身份執行"
 
@@ -2847,7 +2847,7 @@ msgstr "跳到上一項"
 msgid "green"
 msgstr "綠"
 
-#: Programs/pgmprivs_linux.c:2132
+#: Programs/pgmprivs_linux.c:2167
 msgid "group permissions added"
 msgstr "以加入群組權限"
 
@@ -3046,7 +3046,7 @@ msgstr "沒有"
 msgid "not saved"
 msgstr "未存檔"
 
-#: Programs/pgmprivs_linux.c:1983
+#: Programs/pgmprivs_linux.c:2018
 msgid "not switching to an unprivileged user"
 msgstr "未切換到未授權的使用者"
 
@@ -3079,7 +3079,7 @@ msgstr "打開設備設定視窗"
 msgid "option"
 msgstr "選向"
 
-#: Programs/pgmprivs_linux.c:2117
+#: Programs/pgmprivs_linux.c:2152
 msgid "ownership claimed"
 msgstr "所有權主張"
 
@@ -3537,7 +3537,7 @@ msgstr "切換到上一個畫面"
 msgid "switch to the previous virtual terminal"
 msgstr "切換到上一個虛擬終端機"
 
-#: Programs/pgmprivs_linux.c:1968
+#: Programs/pgmprivs_linux.c:1994
 msgid "switched to unprivileged user"
 msgstr "切換到未授權使用者"
 
@@ -3599,7 +3599,7 @@ msgstr "音量"
 msgid "white"
 msgstr "白"
 
-#: Programs/pgmprivs_linux.c:1830
+#: Programs/pgmprivs_linux.c:1856
 #, fuzzy
 msgid "working directory changed"
 msgstr "工作目錄變更"
