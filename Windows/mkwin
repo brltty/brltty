@@ -238,7 +238,7 @@ make -s -C Documents
 
 logMessage task "installing files"
 installRoot="${temporaryDirectory}/install/${buildName}"
-make -s install \
+make -s install install-messages \
    JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib \
    PYTHON_PREFIX="Python" \
    INSTALL_ROOT="${installRoot}"
