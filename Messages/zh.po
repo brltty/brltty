@@ -17,7 +17,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-16 20:56+0800\n"
+"POT-Creation-Date: 2021-01-17 17:23+0800\n"
 "PO-Revision-Date: 2012-12-19 17:03+0100\n"
 "Last-Translator: 高生旺 <coscell@molerat.net>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,7 +101,7 @@ msgstr "八點電腦點字"
 
 #: Programs/brltty-ttb.c:179
 msgid "8-bit character set to use."
-msgstr "使用八位元字元集"
+msgstr "要用的八位元字元集"
 
 #: Programs/scr_menu.c:104
 msgid "<off>"
@@ -140,7 +140,7 @@ msgstr "鋼弦吉他"
 
 #: Programs/menu_prefs.c:1184
 msgid "After Time"
-msgstr "之後時間"
+msgstr "後時間"
 
 #: Programs/midi.c:171
 msgid "Agogo"
@@ -172,7 +172,7 @@ msgstr "字母點字視窗座標"
 
 #: Programs/menu_prefs.c:469
 msgid "Alphabetic Screen Cursor Coordinates"
-msgstr "字母螢幕游標座標A"
+msgstr "字母游標位置"
 
 #: Programs/midi.c:117
 msgid "Alto Sax"
@@ -209,12 +209,12 @@ msgstr "八月"
 #: Programs/alert.c:168
 #, fuzzy
 msgid "Autorelease"
-msgstr "自動釋放"
+msgstr "自動放開"
 
 #: Programs/menu_prefs.c:856
 #, fuzzy
 msgid "Autorelease Time"
-msgstr "自動釋放時間"
+msgstr "自動放開時間"
 
 #: Programs/menu_prefs.c:873
 #, fuzzy
@@ -227,7 +227,7 @@ msgstr "自動重複間隔"
 
 #: Programs/menu_prefs.c:886
 msgid "Autorepeat Panning"
-msgstr "自動連續平移"
+msgstr "自動重複移動"
 
 #: Programs/menu_prefs.c:1075
 msgid "Autospeak"
@@ -263,7 +263,7 @@ msgstr "翁鳴器"
 
 #: Programs/menu_prefs.c:1183
 msgid "Before Time"
-msgstr "之前時間"
+msgstr "前時間"
 
 #: Programs/midi.c:182
 msgid "Bird Tweet"
@@ -279,7 +279,7 @@ msgstr "跳動大寫字母"
 
 #: Programs/menu_prefs.c:675
 msgid "Blinking Screen Cursor"
-msgstr "跳動螢幕游標"
+msgstr "跳動游標"
 
 #: Programs/menu_prefs.c:1133
 msgid "Blinking Speech Cursor"
@@ -419,7 +419,7 @@ msgstr "和聲阿"
 
 #: Programs/midi.c:25
 msgid "Chromatic Percussion"
-msgstr "旋律打擊樂"
+msgstr "有音調的打擊樂"
 
 #: Programs/midi.c:65
 msgid "Church Organ"
@@ -431,7 +431,7 @@ msgstr "單簧管"
 
 #: Programs/midi.c:51
 msgid "Clavi"
-msgstr "古鋼琴"
+msgstr "大鍵琴"
 
 #: Programs/menu.c:820
 msgid "Close"
@@ -459,7 +459,7 @@ msgstr "主控台嗶聲警示"
 
 #: Programs/midi.c:92
 msgid "Contrabass"
-msgstr "低音提琴"
+msgstr "倍低音"
 
 #: Programs/menu_prefs.c:614
 msgid "Contracted Braille"
@@ -528,7 +528,7 @@ msgstr "處理點字顯示的設備"
 
 #: Programs/config.c:444
 msgid "Disable the application programming interface."
-msgstr "停用程式設計界面"
+msgstr "取消程式設計界面"
 
 #: Programs/midi.c:77
 msgid "Distortion Guitar"
@@ -560,7 +560,7 @@ msgstr "點"
 
 #: Programs/menu_prefs.c:831
 msgid "Dots via Unicode Braille"
-msgstr "用 Unicode 點字表示點位"
+msgstr "Unicode 點字碼的點"
 
 #. Organ
 #: Programs/midi.c:62
@@ -724,11 +724,11 @@ msgstr "每一輸出行的格式"
 
 #: Programs/brltty-ttb.c:165
 msgid "Format of input file."
-msgstr "輸入檔格式"
+msgstr "輸入檔案格式"
 
 #: Programs/brltty-ttb.c:172
 msgid "Format of output file."
-msgstr "輸出檔格式"
+msgstr "輸出檔案格式"
 
 #: Programs/midi.c:111
 msgid "French Horn"
@@ -1039,7 +1039,7 @@ msgstr "五嶽"
 
 #: Programs/menu_prefs.c:648 Programs/menu_prefs.c:901
 msgid "Medium"
-msgstr "中"
+msgstr "中等"
 
 #: Programs/midi.c:175
 msgid "Melodic Tom"
@@ -1147,7 +1147,7 @@ msgstr "舊的偏好設定檔"
 
 #: Programs/menu_prefs.c:862
 msgid "On First Release"
-msgstr "在第一版"
+msgstr "第一個按鍵放開"
 
 #: Programs/midi.c:105
 msgid "Orchestra Hit"
