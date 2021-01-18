@@ -55,8 +55,8 @@ objects: $(OBJECT_FILES)
 	$(MSGFMT) --output-file $@ -- $(SRC_DIR)/$(@F:.$(OBJECT_EXTENSION)=.$(SOURCE_EXTENSION))
 	directory="$(LOCALE_SUBDIRECTORY)/$(@:.$(OBJECT_EXTENSION)=)/$(MESSAGES_SUBDIRECTORY)"; \
 	$(INSTALL_DIRECTORY) $${directory}; \
-	file="$${directory}/$(OBJECT_FILE)"; \
-	test -f $${file} || $(SYMLINK) ../../../$@ $${file};
+	cd $${directory}; \
+	test -f $(OBJECT_FILE) || $(SYMLINK) ../../../$@ $(OBJECT_FILE);
 
 clean::
 	-rm -f -- *.$(OBJECT_EXTENSION) *~
