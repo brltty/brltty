@@ -111,13 +111,14 @@
 #braille-device	serial:@serial_first_device@	# First serial device.
 #braille-device	usb:		# First USB device matching braille driver.
 #braille-device	usb:nnnnn	# Specific USB device by serial number.
+#braille-device	bluetooth:		# First paired Bluetooth device matching braille driver.
 #braille-device	bluetooth:xx:xx:xx:xx:xx:xx	# Specific bluetooth device by address.
 #
 # NOTE: If the device is connected via a serial-to-USB adapter then setting
 # braille-device to usb: will not work. In this case it needs to identify the
 # virtual serial device which the kernel has created for the adapter, i.e. to
-# something like serial:ttyUSB0 (see the kernel messages on device plug to get
-# the actual device name).
+# something like serial:ttyUSB0 or ttyACM0 (see the kernel messages on device
+# plug to get the actual device name).
 
 # The release-device directive specifies whether or not the device to which the
 # braille display is connected is to be released when the current screen or
@@ -567,6 +568,12 @@
 # contain BRLTTY's process identifier. It is removed when BRLTTY terminates.
 # (can be overridden with the --pid-file= [-P] option)
 #pid-file @WRITABLE_DIRECTORY@/brltty.pid
+
+# The locale-directory directive specifies the absolute path to the directory
+# which contains the compiled message translations for other languages. If not
+# specified, "@LOCALE_DIRECTORY@" will be used.
+# (can be overridden with the --locale-directory= option)
+#locale-directory @LOCALE_DIRECTORY@
 
 # The updatable-directory directive specifies the absolute path to a directory
 # which contains files that can be updated (preferences, saved clipboard, etc).
