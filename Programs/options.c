@@ -145,7 +145,7 @@ showUsage (
     }
 
     if (option->letter) letterWidth = 3;
-    if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
+    if (option->argument) argumentWidth = MAX(argumentWidth, strlen(gettext(option->argument)));
   }
 
   fputs(gettext("Usage"), outputStream);
@@ -198,9 +198,10 @@ showUsage (
       unsigned int end = lineLength + argumentWidth;
 
       if (option->argument) {
-        size_t argumentLength = strlen(option->argument);
+        const char *argument = gettext(option->argument);
+        size_t argumentLength = strlen(argument);
 
-        memcpy(line+lineLength, option->argument, argumentLength);
+        memcpy(line+lineLength, argument, argumentLength);
         lineLength += argumentLength;
       }
 
