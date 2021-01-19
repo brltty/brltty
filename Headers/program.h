@@ -25,6 +25,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern const char standardStreamArgument[];
+extern const char standardInputName[];
+extern const char standardOutputName[];
+extern const char standardErrorName[];
+
 typedef enum {
   PROG_EXIT_SUCCESS  = 0,
   PROG_EXIT_FORCE    = 1,
@@ -35,11 +40,6 @@ typedef enum {
 
 extern const char *programPath;
 extern const char *programName;
-
-extern const char standardStreamArgument[];
-extern const char standardInputName[];
-extern const char standardOutputName[];
-extern const char standardErrorName[];
 
 extern void beginProgram (int argumentCount, char **argumentVector);
 extern void endProgram (void);
