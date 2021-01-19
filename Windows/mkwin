@@ -222,8 +222,11 @@ mkdir -p "${buildRoot}"
 cd "${buildRoot}"
 
 logMessage task "configuring build"
-configureOptions="--enable-relocatable-install --with-usb-package="${usbPackage}" --disable-expat --disable-i18n --disable-icu --disable-liblouis --disable-polkit --disable-x --without-pgmprivs-package --without-params-package --without-rgx-package --without-mntpt-package --without-mntfs-package --without-kbd-package --without-bell-package --without-leds-package --without-libbraille --disable-speech-support --disable-java-bindings --disable-ocaml-bindings --disable-tcl-bindings"
-"../source/configure" --quiet --prefix=/ ${configureOptions}
+"../source/cfg-windows" \
+   --prefix=/ \
+   --enable-relocatable-install \
+   --with-usb-package="${usbPackage}" \
+   --quiet
 
 . ./brltty-config.sh
 buildVersion="${BRLTTY_VERSION}-${buildRevision}"
