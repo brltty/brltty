@@ -25,13 +25,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <limits.h>
-#include <locale.h>
-
-#ifdef ENABLE_I18N_SUPPORT
-#include <libintl.h>
-#endif /* ENABLE_I18N_SUPPORT */
 
 #include "program.h"
+#include "pgmlocale.h"
 #include "pgmpath.h"
 #include "pid.h"
 #include "log.h"
@@ -46,26 +42,6 @@ const char standardErrorName[] = "<standard-error>";
 
 const char *programPath;
 const char *programName;
-
-void
-setLocaleDirectory (const char *directory) {
-#ifdef ENABLE_I18N_SUPPORT
-  if (!bindtextdomain(PACKAGE_TARNAME, directory)) {
-    logSystemError("bindtextdomain");
-  }
-#endif /* ENABLE_I18N_SUPPORT */
-}
-
-static void
-prepareLocale (void) {
-  setlocale(LC_ALL, "");
-
-#ifdef ENABLE_I18N_SUPPORT
-  if (!textdomain(PACKAGE_TARNAME)) logSystemError("textdomain");
-#endif /* ENABLE_I18N_SUPPORT */
-
-  setLocaleDirectory(LOCALE_DIRECTORY);
-}
 
 static char *
 testProgram (const char *directory, const char *name) {
@@ -112,7 +88,7 @@ beginProgram (int argumentCount, char **argumentVector) {
 #endif /* at exit */
 
   initializeSystemObject();
-  prepareLocale();
+  setProgramLocale();
 
   if ((programPath = getProgramPath())) {
     registerProgramMemory("program-path", &programPath);

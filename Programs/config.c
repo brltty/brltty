@@ -64,6 +64,7 @@
 #include "dynld.h"
 #include "async_alarm.h"
 #include "program.h"
+#include "pgmlocale.h"
 #include "revision.h"
 #include "service.h"
 #include "options.h"

@@ -429,8 +429,8 @@ mempcpy (void *dest, const void *src, size_t size) {
 #ifdef ENABLE_I18N_SUPPORT
 #include <libintl.h>
 #else /* ENABLE_I18N_SUPPORT */
-#define gettext(string) (string)
-#define ngettext(singular, plural, count) (((count) == 1)? (singular): (plural))
+extern char *gettext (const char *text);
+extern char *ngettext (const char *singular, const char *plural, unsigned long int count);
 #endif /* ENABLE_I18N_SUPPORT */
 #define strtext(string) string
 

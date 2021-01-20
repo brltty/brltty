@@ -446,5 +446,5 @@ TUNE_OBJECTS = tune.$O notes.$O $(BEEP_OBJECTS) $(PCM_OBJECTS) $(MIDI_OBJECTS) $
 ASYNC_OBJECTS = async_handle.$O async_data.$O async_wait.$O async_alarm.$O async_task.$O async_io.$O async_event.$O async_signal.$O thread.$O
 BASE_OBJECTS = log.$O log_history.$O addresses.$O file.$O device.$O parse.$O variables.$O datafile.$O unicode.$O utf8.$O timing.$O $(ASYNC_OBJECTS) queue.$O lock.$O $(DYNLD_OBJECTS) $(PORTS_OBJECTS) $(SYSTEM_OBJECTS)
 OPTIONS_OBJECTS = options.$O $(PARAMS_OBJECTS)
-PROGRAM_OBJECTS = program.$O $(PGMPATH_OBJECTS) pid.$O $(OPTIONS_OBJECTS) $(BASE_OBJECTS)
+PROGRAM_OBJECTS = program.$O pgmlocale.$O $(PGMPATH_OBJECTS) pid.$O $(OPTIONS_OBJECTS) $(BASE_OBJECTS)
 
