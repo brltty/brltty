@@ -3184,7 +3184,7 @@ msgstr "Recherche en avant du texte dans le presse papier"
 #: Programs/cmd_miscellaneous.c:122
 msgid "second"
 msgid_plural "seconds"
-msgstr[0] "secondes"
+msgstr[0] "seconde"
 msgstr[1] "secondes"
 
 #: Programs/cmds.auto.h:895
