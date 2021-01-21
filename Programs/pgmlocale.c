@@ -125,17 +125,17 @@ makeLocaleRootPath (void) {
   if (localeString && localeDomain && localeDirectory) {
     size_t length = strlen(localeString);
 
-    char territory[length + 1];
-    strcpy(territory, localeString);
-    length = strcspn(territory, ".@");
-    territory[length] = 0;
+    char dialect[length + 1];
+    strcpy(dialect, localeString);
+    length = strcspn(dialect, ".@");
+    dialect[length] = 0;
 
     char language[length + 1];
-    strcpy(language, territory);
-    length = strcspn(territory, "_");
+    strcpy(language, dialect);
+    length = strcspn(language, "_");
     language[length] = 0;
 
-    char *names[] = {territory, language, NULL};
+    char *names[] = {dialect, language, NULL};
     char **name = names;
 
     while (*name) {

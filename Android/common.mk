@@ -4,16 +4,18 @@ ANDROID_LIBRARIES_DIRECTORY = libs
 ANDROID_PLATFORM_NAME = armeabi
 
 ANDROID_PACKAGE_FILE = $(ANDROID_BINARIES_DIRECTORY)/$(ANDROID_PACKAGE_NAME)-debug.apk
-ANDROID_LOCAL_FILES = local.properties
 ANDROID_PLATFORM_DIRECTORY = $(ANDROID_LIBRARIES_DIRECTORY)/$(ANDROID_PLATFORM_NAME)
+
+ANDROID_LOCAL_FILES = local.properties
+local-files: $(ANDROID_LOCAL_FILES)
+
+local.properties:
+	android update project --path .
 
 all: $(ANDROID_PACKAGE_FILE)
 
-$(ANDROID_PACKAGE_FILE): $(ANDROID_LOCAL_FILES)
+$(ANDROID_PACKAGE_FILE): local-files
 	ant debug
-
-$(ANDROID_LOCAL_FILES):
-	android update project --path .
 
 clean::
 	-rm -f $(ANDROID_LOCAL_FILES)

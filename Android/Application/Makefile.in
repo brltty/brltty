@@ -2,27 +2,26 @@ ANDROID_PACKAGE_NAME = BRLTTY_App
 ANDROID_PACKAGE_PATH = org.a11y.brltty.android
 include $(SRC_TOP)Android/common.mk
 
+ANDROID_LOCALE_DIRECTORY = $(ANDROID_ASSETS_DIRECTORY)/locale
 ANDROID_TABLES_DIRECTORY = $(ANDROID_ASSETS_DIRECTORY)/tables
 ANDROID_DRIVERS_DIRECTORY = $(ANDROID_ASSETS_DIRECTORY)/drivers
 
-$(ANDROID_PACKAGE_FILE): core tables $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
+$(ANDROID_PACKAGE_FILE): core locale tables $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 
 core:
 	cd ../Core && $(MAKE)
+
+locale-directory:
+	$(INSTALL_DIRECTORY) $(ANDROID_LOCALE_DIRECTORY)
+
+locale: locale-directory
+	$(SRC_DIR)/mklocale $(SRC_TOP)$(MSG_DIR) $(ANDROID_LOCALE_DIRECTORY) $(PACKAGE_TARNAME)
 
 tables-directory:
 	$(INSTALL_DIRECTORY) $(ANDROID_TABLES_DIRECTORY)
 
 tables: tables-directory
-	install=`pwd`/$(ANDROID_TABLES_DIRECTORY) && \
-	cd $(SRC_TOP)$(TBL_DIR) && \
-	find . -type f -name '?*.?*' -print | \
-	while read file; do \
-	source=`dirname $$file` && \
-	target=$$install/$$source && \
-	$(INSTALL_DIRECTORY) $$target && \
-	$(INSTALL_DATA) $$file $$target; \
-	done
+	$(SRC_DIR)/mktables $(SRC_TOP)$(TBL_DIR) $(ANDROID_TABLES_DIRECTORY)
 
 drivers-directory:
 	$(INSTALL_DIRECTORY) $(ANDROID_DRIVERS_DIRECTORY)
@@ -37,6 +36,7 @@ screen-drivers: drivers-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)x?*.$(MOD_EXT) $(ANDROID_DRIVERS_DIRECTORY)
 
 clean::
+	-rm -f -r $(ANDROID_LOCALE_DIRECTORY)
 	-rm -f -r $(ANDROID_TABLES_DIRECTORY)
 	-rm -f -r $(ANDROID_DRIVERS_DIRECTORY)
 
