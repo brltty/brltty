@@ -64,7 +64,7 @@
 #include "dynld.h"
 #include "async_alarm.h"
 #include "program.h"
-#include "pgmlocale.h"
+#include "msg_locale.h"
 #include "revision.h"
 #include "service.h"
 #include "options.h"
@@ -819,7 +819,7 @@ brlttyPrepare (int argc, char *argv[]) {
     logMessage(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
   }
 
-  setLocaleDirectory(opt_localeDirectory);
+  setMessageLocaleDirectory(opt_localeDirectory);
   setUpdatableDirectory(opt_updatableDirectory);
   setWritableDirectory(opt_writableDirectory);
 
@@ -834,6 +834,9 @@ brlttyPrepare (int argc, char *argv[]) {
 
   logProgramBanner();
   logProperty(opt_logLevel, "logLevel", gettext("Log Level"));
+  logProperty(getMessageLocaleSpecifier(), "messageLocale", gettext("Message Locale"));
+  logProperty(getMessageLocaleDomain(), "messageDomain", gettext("Message Domain"));
+  logProperty(getMessageLocaleDirectory(), "messageDirectory", gettext("Message Directory"));
 
   establishPrivileges();
   return PROG_EXIT_SUCCESS;

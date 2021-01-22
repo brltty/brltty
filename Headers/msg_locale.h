@@ -16,24 +16,24 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_PGMLOCALE
-#define BRLTTY_INCLUDED_PGMLOCALE
+#ifndef BRLTTY_INCLUDED_MSG_LOCALE
+#define BRLTTY_INCLUDED_MSG_LOCALE
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern void setProgramLocale (void);
+extern void setMessageLocale (void);
 
-extern const char *getLocaleString (void);
-extern const char *getLocaleDomain (void);
-extern const char *getLocaleDirectory (void);
+extern const char *getMessageLocaleSpecifier (void);
+extern const char *getMessageLocaleDomain (void);
+extern const char *getMessageLocaleDirectory (void);
 
-extern const char *setLocaleDomain (const char *domain);
-extern const char *setLocaleDirectory (const char *directory);
+extern const char *setMessageLocaleDomain (const char *domain);
+extern const char *setMessageLocaleDirectory (const char *directory);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_PGMLOCALE */
+#endif /* BRLTTY_INCLUDED_MSG_LOCALE */

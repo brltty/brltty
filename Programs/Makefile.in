@@ -60,9 +60,6 @@ revision.$O:
 program.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/program.c
 
-pgmlocale.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/pgmlocale.c
-
 $(PGMPATH_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(PGMPATH_INCLUDES) -c $(SRC_DIR)/$(PGMPATH_OBJECT).c
 
@@ -286,6 +283,9 @@ thread.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/thread.c
 
 ###############################################################################
+
+msg_locale.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/msg_locale.c
 
 log.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log.c

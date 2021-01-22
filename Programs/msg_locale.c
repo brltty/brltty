@@ -24,39 +24,39 @@
 #include <sys/stat.h>
 #include <locale.h>
 
-#include "pgmlocale.h"
+#include "msg_locale.h"
 #include "log.h"
 #include "file.h"
 
-static const char *localeString = NULL;
+static const char *localeSpecifier = NULL;
 static const char *localeDomain = NULL;
 static const char *localeDirectory = NULL;
 
 const char *
-getLocaleString (void) {
-  return localeString;
+getMessageLocaleSpecifier (void) {
+  return localeSpecifier;
 }
 
 const char *
-getLocaleDomain (void) {
+getMessageLocaleDomain (void) {
   return localeDomain;
 }
 
 const char *
-getLocaleDirectory (void) {
+getMessageLocaleDirectory (void) {
   return localeDirectory;
 }
 
 #ifdef ENABLE_I18N_SUPPORT
 const char *
-setLocaleDomain (const char *domain) {
+setMessageLocaleDomain (const char *domain) {
   localeDomain = textdomain(domain);
   if (!localeDomain) logSystemError("textdomain");
   return localeDomain;
 }
 
 const char *
-setLocaleDirectory (const char *directory) {
+setMessageLocaleDirectory (const char *directory) {
   localeDirectory = bindtextdomain(localeDomain, directory);
   if (!localeDirectory) logSystemError("bindtextdomain");
   return localeDirectory;
@@ -105,7 +105,7 @@ releaseLocaleData (void) {
 }
 
 const char *
-setLocaleDomain (const char *domain) {
+setMessageLocaleDomain (const char *domain) {
   releaseLocaleData();
   localeDomain = strdup(domain);
   if (!localeDomain) logSystemError("strdup");
@@ -113,7 +113,7 @@ setLocaleDomain (const char *domain) {
 }
 
 const char *
-setLocaleDirectory (const char *directory) {
+setMessageLocaleDirectory (const char *directory) {
   releaseLocaleData();
   localeDirectory = strdup(directory);
   if (!localeDirectory) logSystemError("strdup");
@@ -122,11 +122,11 @@ setLocaleDirectory (const char *directory) {
 
 static char *
 makeLocaleRootPath (void) {
-  if (localeString && localeDomain && localeDirectory) {
-    size_t length = strlen(localeString);
+  if (localeSpecifier && localeDomain && localeDirectory) {
+    size_t length = strlen(localeSpecifier);
 
     char dialect[length + 1];
-    strcpy(dialect, localeString);
+    strcpy(dialect, localeSpecifier);
     length = strcspn(dialect, ".@");
     dialect[length] = 0;
 
@@ -419,8 +419,8 @@ ngettext (const char *singular, const char *plural, unsigned long int count) {
 #endif /* ENABLE_I18N_SUPPORT */
 
 void
-setProgramLocale (void) {
-  localeString = setlocale(LC_MESSAGES, "");
-  setLocaleDomain(PACKAGE_TARNAME);
-  setLocaleDirectory(LOCALE_DIRECTORY);
+setMessageLocale (void) {
+  localeSpecifier = setlocale(LC_MESSAGES, "");
+  setMessageLocaleDomain(PACKAGE_TARNAME);
+  setMessageLocaleDirectory(LOCALE_DIRECTORY);
 }

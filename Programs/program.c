@@ -27,7 +27,7 @@
 #include <limits.h>
 
 #include "program.h"
-#include "pgmlocale.h"
+#include "msg_locale.h"
 #include "pgmpath.h"
 #include "pid.h"
 #include "log.h"
@@ -88,7 +88,7 @@ beginProgram (int argumentCount, char **argumentVector) {
 #endif /* at exit */
 
   initializeSystemObject();
-  setProgramLocale();
+  setMessageLocale();
 
   if ((programPath = getProgramPath())) {
     registerProgramMemory("program-path", &programPath);
