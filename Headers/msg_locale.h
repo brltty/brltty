@@ -25,12 +25,14 @@ extern "C" {
 
 extern void setMessageLocale (void);
 
+extern int setMessageLocaleSpecifier (const char *specifier);
 extern const char *getMessageLocaleSpecifier (void);
-extern const char *getMessageLocaleDomain (void);
-extern const char *getMessageLocaleDirectory (void);
 
-extern const char *setMessageLocaleDomain (const char *domain);
-extern const char *setMessageLocaleDirectory (const char *directory);
+extern int setMessageLocaleDomain (const char *domain);
+extern const char *getMessageLocaleDomain (void);
+
+extern int setMessageLocaleDirectory (const char *directory);
+extern const char *getMessageLocaleDirectory (void);
 
 #ifdef __cplusplus
 }

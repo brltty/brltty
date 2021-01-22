@@ -409,6 +409,47 @@ getJavaLocaleName (void) {
   return name;
 }
 
+#if defined(__ANDROID__)
+#include <locale.h>
+#include "msg_locale.h"
+
+static void
+initializeAndroidEnvironment (JNIEnv *env) {
+  {
+    static jclass class = NULL;
+
+    if (findJavaClass(env, &class, JAVA_OBJ_BRLTTY("BrailleApplication"))) {
+      static jmethodID method = 0;
+
+      if (findJavaStaticMethod(env, &method, class, "getCurrentLocale",
+                               JAVA_SIG_METHOD(JAVA_SIG_STRING, 
+                                              ))) {
+        jstring jLocale = (*env)->CallStaticObjectMethod(env, class, method);
+
+        if (!clearJavaException(env, 1)) {
+          if (jLocale) {
+            jboolean isCopy;
+            const char *cLocale = (*env)->GetStringUTFChars(env, jLocale, &isCopy);
+
+            if (cLocale) {
+              if (setMessageLocaleSpecifier(cLocale)) {
+              }
+
+              (*env)->ReleaseStringUTFChars(env, jLocale, cLocale);
+            }
+
+            (*env)->DeleteLocalRef(env, jLocale);
+          }
+        }
+      }
+    }
+  }
+}
+#endif /* platform-speciofic initialization */
+
 void
 initializeSystemObject (void) {
+#if defined(__ANDROID__)
+  initializeAndroidEnvironment(getJavaNativeInterface());
+#endif /* platform-speciofic initialization */
 }

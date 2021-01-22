@@ -18,6 +18,8 @@
 
 package org.a11y.brltty.android;
 
+import java.util.Locale;
+
 import android.app.Application;
 import android.os.Handler;
 
@@ -50,5 +52,18 @@ public class BrailleApplication extends Application {
 
   public static boolean postAt (long when, Runnable callback) {
     return applicationHandler.postAtTime(callback, when);
+  }
+
+  public static String getCurrentLocale () {
+    Locale locale;
+
+    if (APITests.haveNougat) {
+      locale = get().getResources().getConfiguration().getLocales().get(0);
+    } else {
+      locale = get().getResources().getConfiguration().locale;
+    }
+
+    if (locale == null) return null;
+    return locale.toString();
   }
 }

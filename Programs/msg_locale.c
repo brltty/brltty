@@ -28,9 +28,9 @@
 #include "log.h"
 #include "file.h"
 
-static const char *localeSpecifier = NULL;
-static const char *localeDomain = NULL;
-static const char *localeDirectory = NULL;
+static char *localeSpecifier = NULL;
+static char *localeDomain = NULL;
+static char *localeDirectory = NULL;
 
 const char *
 getMessageLocaleSpecifier (void) {
@@ -48,18 +48,26 @@ getMessageLocaleDirectory (void) {
 }
 
 #ifdef ENABLE_I18N_SUPPORT
-const char *
-setMessageLocaleDomain (const char *domain) {
-  localeDomain = textdomain(domain);
-  if (!localeDomain) logSystemError("textdomain");
-  return localeDomain;
+static void
+releaseLocaleData (void) {
 }
 
-const char *
-setMessageLocaleDirectory (const char *directory) {
-  localeDirectory = bindtextdomain(localeDomain, directory);
-  if (!localeDirectory) logSystemError("bindtextdomain");
-  return localeDirectory;
+static int
+setDomain (const char *domain) {
+  const char *result = textdomain(domain);
+  if (result) return 1;
+
+  logSystemError("textdomain");
+  return 0;
+}
+
+static int
+bindDomain (const char *directory) {
+  const char *result = bindtextdomain(localeDomain, directory);
+  if (result) return 1;
+
+  logSystemError("bindtextdomain");
+  return 0;
 }
 #else /* ENABLE_I18N_SUPPORT */
 static const uint32_t magicNumber = UINT32_C(0X950412DE);
@@ -104,20 +112,14 @@ releaseLocaleData (void) {
   localeData.getInteger = NULL;
 }
 
-const char *
-setMessageLocaleDomain (const char *domain) {
-  releaseLocaleData();
-  localeDomain = strdup(domain);
-  if (!localeDomain) logSystemError("strdup");
-  return localeDomain;
+static int
+setDomain (const char *domain) {
+  return 1;
 }
 
-const char *
-setMessageLocaleDirectory (const char *directory) {
-  releaseLocaleData();
-  localeDirectory = strdup(directory);
-  if (!localeDirectory) logSystemError("strdup");
-  return localeDirectory;
+static int
+bindDomain (const char *directory) {
+  return 1;
 }
 
 static char *
@@ -418,9 +420,50 @@ ngettext (const char *singular, const char *plural, unsigned long int count) {
 }
 #endif /* ENABLE_I18N_SUPPORT */
 
+static int
+updateProperty (char **property, const char *value, int (*updater) (const char *value)) {
+  char *copy = strdup(value);
+
+  if (copy) {
+    if (!updater || updater(value)) {
+      if (*property) free(*property);
+      *property = copy;
+      return 1;
+    }
+
+    free(copy);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
+
+int
+setMessageLocaleSpecifier (const char *specifier) {
+  releaseLocaleData();
+  return updateProperty(&localeSpecifier, specifier, NULL);
+}
+
+int
+setMessageLocaleDomain (const char *domain) {
+  releaseLocaleData();
+  return updateProperty(&localeDomain, domain, setDomain);
+}
+
+int
+setMessageLocaleDirectory (const char *directory) {
+  releaseLocaleData();
+  return updateProperty(&localeDirectory, directory, bindDomain);
+}
+
 void
 setMessageLocale (void) {
-  localeSpecifier = setlocale(LC_MESSAGES, "");
+  if (!localeSpecifier) {
+    const char *specifier = setlocale(LC_MESSAGES, "");
+    if (specifier) setMessageLocaleSpecifier(specifier);
+  }
+
   setMessageLocaleDomain(PACKAGE_TARNAME);
   setMessageLocaleDirectory(LOCALE_DIRECTORY);
 }
