@@ -25,6 +25,7 @@
 #include "log_history.h"
 #include "embed.h"
 #include "revision.h"
+#include "msg_locale.h"
 #include "api_control.h"
 #include "menu.h"
 #include "menu_prefs.h"
@@ -1323,8 +1324,23 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Bug Reports"));
+      NAME(strtext("Mailing List"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, PACKAGE_BUGREPORT));
+    }
+
+    {
+      NAME(strtext("Message Locale"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, getMessageLocaleSpecifier()));
+    }
+
+    {
+      NAME(strtext("Message Domain"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, getMessageLocaleDomain()));
+    }
+
+    {
+      NAME(strtext("Message Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, getMessageLocaleDirectory()));
     }
 
     {
