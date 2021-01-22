@@ -24,9 +24,9 @@ poExtension="po"
 moExtension="mo"
 
 . "$(dirname "${0}")/../../brltty-prologue.sh"
-addProgramParameter "${poExtension} directory" poDirectory "the directory containing the .${poExtension} files"
-addProgramParameter "${moExtension} directory" moDirectory "the directory in which to create the .${moExtension} files"
-addProgramParameter "${moExtension} name" moName "the name of the .${moExtension} files"
+addProgramParameter "source" poDirectory "the directory containing the .${poExtension} files"
+addProgramParameter "target" moDirectory "the directory in which to create the .${moExtension} files"
+addProgramParameter "domain" moName "the domain name for the .${moExtension} files"
 parseProgramArguments "${@}"
 
 for poPath in "${poDirectory}/"*".${poExtension}"
