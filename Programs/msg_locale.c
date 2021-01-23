@@ -358,6 +358,9 @@ findOriginalString (const char *text, size_t textLength, unsigned int *index) {
 
 static const char *
 findTranslation (const char *text, size_t length) {
+  if (!text) return NULL;
+  if (!length) return NULL;
+
   if (loadLocaleData()) {
     unsigned int index;
 
