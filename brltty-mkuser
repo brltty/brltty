@@ -89,6 +89,7 @@ addProgramOption k flag noKeyboards "don't allow keyboard monitoring"
 addProgramOption l string.path loginShell "set/change the login shell"
 addProgramOption p flag noPulse "don't allow playing sound via the Pulse Audio server"
 addProgramOption s flag noSerial "don't allow access to serial devices"
+addProgramOption t flag noBluetooth "don't allow access to bluetooth devices"
 addProgramOption u flag noUSB "don't allow access to USB devices"
 addProgramOption E flag allowChanges "allow changes to an existing user"
 addProgramOption G flag noGroups "don't set/change the supplementary group list"
@@ -132,9 +133,20 @@ fi
    "${noBrlapi}" || addGroups "${BRLAPI_KEY_FILE}"
    "${noConsoles}" || addGroups tty /dev/vcs1 /dev/tty1
    "${noKeyboards}" || addGroups input
-   "${noPulse}" || addGroups pulse-access
+   "${noPulse}" || {
+       if grep -E '^pulse:' < /etc/group 2> /dev/null; then
+           addGroups pulse
+       else
+           addGroups pulse-access
+       fi
+   }
    "${noSerial}" || addGroups /dev/ttyS0
    "${noUSB}" || addGroups /dev/bus/usb
+   "${noBluetooth}" || {
+       if grep -E '^bluetooth:' < /etc/group 2> /dev/null > /dev/null; then
+           addGroups bluetooth
+       fi
+   }
 
    groupsOperand="${groupList[*]}"
    groupsOperand="${groupsOperand// /,}"
