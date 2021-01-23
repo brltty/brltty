@@ -48,7 +48,7 @@ $(TEMPLATE_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h FORCE
 
 sources: $(SOURCE_FILES)
 %.$(SOURCE_EXTENSION): FORCE
-	$(MSGMERGE) --quiet --force-po --no-wrap --update -- $(SRC_DIR)/$@ $(TEMPLATE_FILE)
+	$(MSGMERGE) --quiet --update --force-po --no-wrap --no-fuzzy-matching -- $(SRC_DIR)/$@ $(TEMPLATE_FILE)
 
 objects: $(OBJECT_FILES)
 %.$(OBJECT_EXTENSION): FORCE
