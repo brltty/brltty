@@ -28,9 +28,15 @@
 #include "log.h"
 #include "file.h"
 
+// MinGW doesn't define LC_MESSAGES
 #ifndef LC_MESSAGES
 #define LC_MESSAGES LC_ALL
 #endif /* LC_MESSAGES */
+
+// Windows needs O_BINARY
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif /* O_BINARY */
 
 static char *localeSpecifier = NULL;
 static char *localeDomain = NULL;
@@ -229,7 +235,7 @@ loadLocaleData (void) {
   char *path = makeLocaleDataPath();
 
   if (path) {
-    int fd = open(path, O_RDONLY);
+    int fd = open(path, (O_RDONLY | O_BINARY));
 
     if (fd != -1) {
       struct stat info;
