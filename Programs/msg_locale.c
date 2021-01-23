@@ -452,6 +452,7 @@ updateProperty (char **property, const char *value, int (*updater) (const char *
 int
 setMessageLocaleSpecifier (const char *specifier) {
   releaseLocaleData();
+  if (!specifier) specifier = "C.UTF-8";
   return updateProperty(&localeSpecifier, specifier, NULL);
 }
 
@@ -470,9 +471,7 @@ setMessageLocaleDirectory (const char *directory) {
 void
 setMessageLocale (void) {
   if (!localeSpecifier) {
-    const char *specifier = setlocale(LC_MESSAGES, "");
-    if (!specifier) specifier = "C.UTF-8";
-    setMessageLocaleSpecifier(specifier);
+    setMessageLocaleSpecifier(setlocale(LC_MESSAGES, ""));
   }
 
   setMessageLocaleDomain(PACKAGE_TARNAME);

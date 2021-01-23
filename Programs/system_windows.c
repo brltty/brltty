@@ -175,12 +175,18 @@ loadLibraries (void) {
 
 static void
 setLocale (void) {
-  char *locale = getWindowsLocaleName();
+  {
+    const char *locale = getenv("LANG");
 
-  if (locale) {
-    setMessageLocaleSpecifier(locale);
-    free(locale);
+    if (locale && *locale) {
+      setMessageLocaleSpecifier(locale);
+      return;
+    }
   }
+
+  char *locale = getWindowsLocaleName();
+  setMessageLocaleSpecifier(locale);
+  if (locale) free(locale);
 }
 
 void
