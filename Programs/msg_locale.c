@@ -461,7 +461,8 @@ void
 setMessageLocale (void) {
   if (!localeSpecifier) {
     const char *specifier = setlocale(LC_MESSAGES, "");
-    if (specifier) setMessageLocaleSpecifier(specifier);
+    if (!specifier) specifier = "C.UTF-8";
+    setMessageLocaleSpecifier(specifier);
   }
 
   setMessageLocaleDomain(PACKAGE_TARNAME);
