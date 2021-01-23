@@ -22,6 +22,7 @@
    \
    --disable-expat \
    --disable-gpm \
+   --disable-i18n \
    --disable-icu \
    --disable-liblouis \
    --disable-polkit \

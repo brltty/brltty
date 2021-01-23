@@ -22,9 +22,10 @@
 #include <errno.h>
 
 #include "log.h"
-#include "timing.h"
 #include "system.h"
 #include "system_windows.h"
+#include "timing.h"
+#include "msg_locale.h"
 
 /* ntdll.dll */
 WIN_PROC_STUB(NtSetInformationProcess);
@@ -143,8 +144,8 @@ error:
   return NULL;
 }
 
-void
-initializeSystemObject (void) {
+static void
+loadLibraries (void) {
   HMODULE library;
 
 #define LOAD_LIBRARY(name) (library = loadLibrary(name))
@@ -170,6 +171,22 @@ initializeSystemObject (void) {
     GET_PROC(freeaddrinfo);
   }
 #endif /* __MINGW32__ */
+}
+
+static void
+setLocale (void) {
+  char *locale = getWindowsLocaleName();
+
+  if (locale) {
+    setMessageLocaleSpecifier(locale);
+    free(locale);
+  }
+}
+
+void
+initializeSystemObject (void) {
+  setLocale();
+  loadLibraries();
 }
 
 #ifdef __MINGW32__

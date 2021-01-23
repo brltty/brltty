@@ -28,6 +28,10 @@
 #include "log.h"
 #include "file.h"
 
+#ifndef LC_MESSAGES
+#define LC_MESSAGES LC_ALL
+#endif /* LC_MESSAGES */
+
 static char *localeSpecifier = NULL;
 static char *localeDomain = NULL;
 static char *localeDirectory = NULL;
@@ -241,7 +245,10 @@ loadLocaleData (void) {
             if (count == -1) {
               logMessage(LOG_DEBUG, "locale data read error: %s: %s", path, strerror(errno));
             } else if (count < size) {
-              logMessage(LOG_DEBUG, "locale data truncated: %zu < %zu: %s", count, size, path);
+              logMessage(LOG_DEBUG,
+                "locale data truncated: %"PRIsize" < %"PRIsize": %s",
+                count, size, path
+              );
             } else {
               LocaleData data = {
                 .view.area = area,
