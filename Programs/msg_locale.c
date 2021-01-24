@@ -64,18 +64,16 @@ releaseLocaleData (void) {
 
 static int
 setDomain (const char *domain) {
-  const char *result = textdomain(domain);
-
-  if (result) {
-    if (!bind_textdomain_codeset(domain, "UTF-8")) {
-      logSystemError("bind_textdomain_codeset");
-    }
-
-    return 1;
+  if (!textdomain(domain)) {
+    logSystemError("textdomain");
+    return 0;
   }
 
-  logSystemError("textdomain");
-  return 0;
+  if (!bind_textdomain_codeset(domain, "UTF-8")) {
+    logSystemError("bind_textdomain_codeset");
+  }
+
+  return 1;
 }
 
 static int
@@ -444,7 +442,11 @@ ngettext (const char *singular, const char *plural, unsigned long int count) {
 #endif /* ENABLE_I18N_SUPPORT */
 
 static int
-updateProperty (char **property, const char *value, int (*updater) (const char *value)) {
+updateProperty (
+  char **property, const char *value, const char *defaultValue,
+  int (*updater) (const char *value)
+) {
+  if (!(value && *value)) value = defaultValue;
   char *copy = strdup(value);
 
   if (copy) {
@@ -465,20 +467,19 @@ updateProperty (char **property, const char *value, int (*updater) (const char *
 int
 setMessageLocaleSpecifier (const char *specifier) {
   releaseLocaleData();
-  if (!specifier) specifier = "C.UTF-8";
-  return updateProperty(&localeSpecifier, specifier, NULL);
+  return updateProperty(&localeSpecifier, specifier, "C.UTF-8", NULL);
 }
 
 int
 setMessageLocaleDomain (const char *domain) {
   releaseLocaleData();
-  return updateProperty(&localeDomain, domain, setDomain);
+  return updateProperty(&localeDomain, domain, PACKAGE_TARNAME, setDomain);
 }
 
 int
 setMessageLocaleDirectory (const char *directory) {
   releaseLocaleData();
-  return updateProperty(&localeDirectory, directory, bindDomain);
+  return updateProperty(&localeDirectory, directory, LOCALE_DIRECTORY, bindDomain);
 }
 
 void
@@ -487,6 +488,6 @@ setMessageLocale (void) {
     setMessageLocaleSpecifier(setlocale(LC_MESSAGES, ""));
   }
 
-  setMessageLocaleDomain(PACKAGE_TARNAME);
-  setMessageLocaleDirectory(LOCALE_DIRECTORY);
+  setMessageLocaleDomain(NULL);
+  setMessageLocaleDirectory(NULL);
 }
