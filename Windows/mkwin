@@ -480,7 +480,7 @@ then
                      "${unix2dosPath}" -q -o "${path}"
                      ;;
 
-                  a | def | dll | doc | egg-info | exe | exp | lib | pdf | pyd | sys | ttf);;
+                  a | def | dll | doc | egg-info | exe | exp | lib | mo | pdf | pyd | sys | ttf);;
                   *) logMessage warning "unexpected file extension: ${handle}";;
                esac
             fi
