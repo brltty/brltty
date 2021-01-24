@@ -20,13 +20,10 @@
 
 #include <string.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 #include <locale.h>
 
 #include "messages.h"
 #include "log.h"
-#include "file.h"
 
 // MinGW doesn't define LC_MESSAGES
 #ifndef LC_MESSAGES
@@ -83,6 +80,11 @@ setDirectory (const char *directory) {
   return 0;
 }
 #else /* ENABLE_I18N_SUPPORT */
+#include <fcntl.h>
+#include <sys/stat.h>
+
+#include "file.h"
+
 static const uint32_t magicNumber = UINT32_C(0X950412DE);
 typedef uint32_t GetIntegerFunction (uint32_t value);
 
@@ -92,6 +94,8 @@ typedef struct {
   uint32_t stringCount;
   uint32_t originalStrings;
   uint32_t translatedStrings;
+  uint32_t hashSize;
+  uint32_t hashOffset;
 } MessagesHeader;
 
 typedef struct {
@@ -106,10 +110,7 @@ typedef struct {
 } MessagesData;
 
 static MessagesData messagesData = {
-  .view = {
-    .area = NULL
-  },
-
+  .view.area = NULL,
   .areaSize = 0,
   .getInteger = NULL,
 };
@@ -214,7 +215,12 @@ verifyData (MessagesData *data) {
   const MessagesHeader *header = data->view.header;
 
   {
-    static GetIntegerFunction *const functions[] = {getNativeInteger, getFlippedInteger, NULL};
+    static GetIntegerFunction *const functions[] = {
+      getNativeInteger,
+      getFlippedInteger,
+      NULL
+    };
+
     GetIntegerFunction *const *function = functions;
 
     while (*function) {
@@ -252,10 +258,10 @@ loadData (void) {
             ssize_t count = read(fd, area, size);
 
             if (count == -1) {
-              logMessage(LOG_DEBUG, "messages data read error: %s: %s", path, strerror(errno));
+              logMessage(LOG_WARNING, "messages data read error: %s: %s", path, strerror(errno));
             } else if (count < size) {
-              logMessage(LOG_DEBUG,
-                "messages data truncated: %"PRIsize" < %"PRIsize": %s",
+              logMessage(LOG_WARNING,
+                "truncated messages data: %"PRIssize" < %"PRIsize": %s",
                 count, size, path
               );
             } else {
@@ -276,12 +282,12 @@ loadData (void) {
           }
         }
       } else {
-        logMessage(LOG_DEBUG, "messages data stat error: %s: %s", path, strerror(errno));
+        logMessage(LOG_WARNING, "messages file stat error: %s: %s", path, strerror(errno));
       }
 
       close(fd);
     } else {
-      logMessage(LOG_DEBUG, "messages data open error: %s: %s", path, strerror(errno));
+      logMessage(LOG_WARNING, "messages file open error: %s: %s", path, strerror(errno));
     }
 
     free(path);
@@ -381,8 +387,8 @@ findTranslation (const char *text, size_t length) {
     unsigned int index;
 
     if (findOriginalString(text, length, &index)) {
-      const MessagesString *string = getTranslatedString(index);
-      return getStringText(string);
+      const MessagesString *translation = getTranslatedString(index);
+      return getStringText(translation);
     }
   }
 
@@ -400,6 +406,7 @@ static const char *
 getTranslation (unsigned int index, const char *const *strings) {
   unsigned int count = 0;
   while (strings[count]) count += 1;
+  if (!count) return NULL;
 
   size_t size = 0;
   size_t lengths[count];
@@ -442,13 +449,13 @@ ngettext (const char *singular, const char *plural, unsigned long int count) {
 static int
 updateProperty (
   char **property, const char *value, const char *defaultValue,
-  int (*updater) (const char *value)
+  int (*setter) (const char *value)
 ) {
   if (!(value && *value)) value = defaultValue;
   char *copy = strdup(value);
 
   if (copy) {
-    if (!updater || updater(value)) {
+    if (!setter || setter(value)) {
       if (*property) free(*property);
       *property = copy;
       return 1;
