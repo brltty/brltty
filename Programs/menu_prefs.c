@@ -1329,21 +1329,6 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Message Locale"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, getMessageLocaleSpecifier()));
-    }
-
-    {
-      NAME(strtext("Message Domain"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, getMessageLocaleDomain()));
-    }
-
-    {
-      NAME(strtext("Message Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, getMessageLocaleDirectory()));
-    }
-
-    {
       NAME(strtext("Configuration Directory"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, CONFIGURATION_DIRECTORY));
     }
