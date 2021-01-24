@@ -21,9 +21,12 @@
 #include <string.h>
 #include <errno.h>
 #include <locale.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
-#include "messages.h"
 #include "log.h"
+#include "messages.h"
+#include "file.h"
 
 // MinGW doesn't define LC_MESSAGES
 #ifndef LC_MESSAGES
@@ -53,37 +56,6 @@ const char *
 getMessagesDirectory (void) {
   return messagesDirectory;
 }
-
-#ifdef ENABLE_I18N_SUPPORT
-static void
-releaseData (void) {
-}
-
-static int
-setDomain (const char *domain) {
-  if (!textdomain(domain)) {
-    logSystemError("textdomain");
-    return 0;
-  }
-
-  if (!bind_textdomain_codeset(domain, "UTF-8")) {
-    logSystemError("bind_textdomain_codeset");
-  }
-
-  return 1;
-}
-
-static int
-setDirectory (const char *directory) {
-  if (bindtextdomain(messagesDomain, directory)) return 1;
-  logSystemError("bindtextdomain");
-  return 0;
-}
-#else /* ENABLE_I18N_SUPPORT */
-#include <fcntl.h>
-#include <sys/stat.h>
-
-#include "file.h"
 
 static const uint32_t magicNumber = UINT32_C(0X950412DE);
 typedef uint32_t GetIntegerFunction (uint32_t value);
@@ -115,25 +87,48 @@ static MessagesData messagesData = {
   .getInteger = NULL,
 };
 
-static void
-releaseData (void) {
-  if (messagesData.view.area) {
-    free(messagesData.view.area);
-    messagesData.view.area = NULL;
+static uint32_t
+getNativeInteger (uint32_t value) {
+  return value;
+}
+
+static uint32_t
+getFlippedInteger (uint32_t value) {
+  uint32_t result = 0;
+
+  while (value) {
+    result <<= 8;
+    result |= value & UINT8_MAX;
+    value >>= 8;
   }
 
-  messagesData.areaSize = 0;
-  messagesData.getInteger = NULL;
+  return result;
 }
 
 static int
-setDomain (const char *domain) {
-  return 1;
-}
+checkMagicNumber (MessagesData *data) {
+  const MessagesHeader *header = data->view.header;
 
-static int
-setDirectory (const char *directory) {
-  return 1;
+  {
+    static GetIntegerFunction *const functions[] = {
+      getNativeInteger,
+      getFlippedInteger,
+      NULL
+    };
+
+    GetIntegerFunction *const *function = functions;
+
+    while (*function) {
+      if ((*function)(header->magicNumber) == magicNumber) {
+        data->getInteger = *function;
+        return 1;
+      }
+
+      function += 1;
+    }
+  }
+
+  return 0;
 }
 
 static char *
@@ -192,52 +187,8 @@ makeDataPath (void) {
   return NULL;
 }
 
-static uint32_t
-getNativeInteger (uint32_t value) {
-  return value;
-}
-
-static uint32_t
-getFlippedInteger (uint32_t value) {
-  uint32_t result = 0;
-
-  while (value) {
-    result <<= 8;
-    result |= value & UINT8_MAX;
-    value >>= 8;
-  }
-
-  return result;
-}
-
-static int
-verifyData (MessagesData *data) {
-  const MessagesHeader *header = data->view.header;
-
-  {
-    static GetIntegerFunction *const functions[] = {
-      getNativeInteger,
-      getFlippedInteger,
-      NULL
-    };
-
-    GetIntegerFunction *const *function = functions;
-
-    while (*function) {
-      if ((*function)(header->magicNumber) == magicNumber) {
-        data->getInteger = *function;
-        return 1;
-      }
-
-      function += 1;
-    }
-  }
-
-  return 0;
-}
-
-static int
-loadData (void) {
+int
+loadMessagesData (void) {
   if (messagesData.view.area) return 1;
 
   int loaded = 0;
@@ -270,7 +221,7 @@ loadData (void) {
                 .areaSize = size
               };
 
-              if (verifyData(&data)) {
+              if (checkMagicNumber(&data)) {
                 messagesData = data;
                 loaded = 1;
               }
@@ -294,6 +245,17 @@ loadData (void) {
   }
 
   return loaded;
+}
+
+void
+releaseMessagesData (void) {
+  if (messagesData.view.area) {
+    free(messagesData.view.area);
+    messagesData.view.area = NULL;
+  }
+
+  messagesData.areaSize = 0;
+  messagesData.getInteger = NULL;
 }
 
 static inline const MessagesHeader *
@@ -346,7 +308,7 @@ getTranslatedString (unsigned int index) {
   return &getTranslatedStrings()[index];
 }
 
-static int
+int
 findOriginalString (const char *text, size_t textLength, unsigned int *index) {
   const MessagesString *strings = getOriginalStrings();
   int from = 0;
@@ -378,12 +340,12 @@ findOriginalString (const char *text, size_t textLength, unsigned int *index) {
   return 0;
 }
 
-static const char *
-findTranslation (const char *text, size_t length) {
+const char *
+findBasicTranslation (const char *text, size_t length) {
   if (!text) return NULL;
   if (!length) return NULL;
 
-  if (loadData()) {
+  if (loadMessagesData()) {
     unsigned int index;
 
     if (findOriginalString(text, length, &index)) {
@@ -395,15 +357,15 @@ findTranslation (const char *text, size_t length) {
   return NULL;
 }
 
-char *
-gettext (const char *text) {
-  const char *translation = findTranslation(text, strlen(text));
+const char *
+getBasicTranslation (const char *text) {
+  const char *translation = findBasicTranslation(text, strlen(text));
   if (!translation) translation = text;
   return (char *)translation;
 }
 
-static const char *
-getTranslation (unsigned int index, const char *const *strings) {
+const char *
+findPluralTranslation (unsigned int index, const char *const *strings) {
   unsigned int count = 0;
   while (strings[count]) count += 1;
   if (!count) return NULL;
@@ -425,7 +387,7 @@ getTranslation (unsigned int index, const char *const *strings) {
   }
 
   byte -= 1; // the length mustn't include the final NUL
-  const char *translation = findTranslation(text, (byte - text));
+  const char *translation = findBasicTranslation(text, (byte - text));
   if (!translation) return strings[index];
 
   while (index > 0) {
@@ -436,13 +398,55 @@ getTranslation (unsigned int index, const char *const *strings) {
   return translation;
 }
 
-char *
-ngettext (const char *singular, const char *plural, unsigned long int count) {
+const char *
+getPluralTranslation (const char *singular, const char *plural, unsigned long int count) {
   unsigned int index = 0;
   if (count != 1) index += 1;
 
   const char *const strings[] = {singular, plural, NULL};
-  return (char *)getTranslation(index, strings);
+  return (char *)findPluralTranslation(index, strings);
+}
+
+#ifdef ENABLE_I18N_SUPPORT
+static int
+setDomain (const char *domain) {
+  if (!textdomain(domain)) {
+    logSystemError("textdomain");
+    return 0;
+  }
+
+  if (!bind_textdomain_codeset(domain, "UTF-8")) {
+    logSystemError("bind_textdomain_codeset");
+  }
+
+  return 1;
+}
+
+static int
+setDirectory (const char *directory) {
+  if (bindtextdomain(messagesDomain, directory)) return 1;
+  logSystemError("bindtextdomain");
+  return 0;
+}
+#else /* ENABLE_I18N_SUPPORT */
+static int
+setDomain (const char *domain) {
+  return 1;
+}
+
+static int
+setDirectory (const char *directory) {
+  return 1;
+}
+
+char *
+gettext (const char *text) {
+  return (char *)getBasicTranslation(text);
+}
+
+char *
+ngettext (const char *singular, const char *plural, unsigned long int count) {
+  return (char *)getPluralTranslation(singular, plural, count);
 }
 #endif /* ENABLE_I18N_SUPPORT */
 
@@ -471,19 +475,19 @@ updateProperty (
 
 int
 setMessagesLocale (const char *locale) {
-  releaseData();
+  releaseMessagesData();
   return updateProperty(&messagesLocale, locale, "C.UTF-8", NULL);
 }
 
 int
 setMessagesDomain (const char *domain) {
-  releaseData();
+  releaseMessagesData();
   return updateProperty(&messagesDomain, domain, PACKAGE_TARNAME, setDomain);
 }
 
 int
 setMessagesDirectory (const char *directory) {
-  releaseData();
+  releaseMessagesData();
   return updateProperty(&messagesDirectory, directory, LOCALE_DIRECTORY, setDirectory);
 }
 

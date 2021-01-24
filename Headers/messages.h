@@ -34,6 +34,16 @@ extern const char *getMessagesDirectory (void);
 
 extern void ensureAllMessagesProperties (void);
 
+extern int loadMessagesData (void);
+extern void releaseMessagesData (void);
+
+extern int findOriginalString (const char *text, size_t textLength, unsigned int *index);
+extern const char *findBasicTranslation (const char *text, size_t length);
+extern const char *findPluralTranslation (unsigned int index, const char *const *strings);
+
+extern const char *getBasicTranslation (const char *text);
+extern const char *getPluralTranslation (const char *singular, const char *plural, unsigned long int count);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
