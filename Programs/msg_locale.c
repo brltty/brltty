@@ -65,7 +65,14 @@ releaseLocaleData (void) {
 static int
 setDomain (const char *domain) {
   const char *result = textdomain(domain);
-  if (result) return 1;
+
+  if (result) {
+    if (!bind_textdomain_codeset(domain, "UTF-8")) {
+      logSystemError("bind_textdomain_codeset");
+    }
+
+    return 1;
+  }
 
   logSystemError("textdomain");
   return 0;
