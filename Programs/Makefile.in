@@ -284,8 +284,8 @@ thread.$O:
 
 ###############################################################################
 
-msg_locale.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/msg_locale.c
+messages.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/messages.c
 
 log.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/log.c

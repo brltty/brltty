@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 #include <locale.h>
 
-#include "msg_locale.h"
+#include "messages.h"
 #include "log.h"
 #include "file.h"
 
@@ -38,28 +38,28 @@
 #define O_BINARY 0
 #endif /* O_BINARY */
 
-static char *localeSpecifier = NULL;
-static char *localeDomain = NULL;
-static char *localeDirectory = NULL;
+static char *messagesLocale = NULL;
+static char *messagesDomain = NULL;
+static char *messagesDirectory = NULL;
 
 const char *
-getMessageLocaleSpecifier (void) {
-  return localeSpecifier;
+getMessagesLocale (void) {
+  return messagesLocale;
 }
 
 const char *
-getMessageLocaleDomain (void) {
-  return localeDomain;
+getMessagesDomain (void) {
+  return messagesDomain;
 }
 
 const char *
-getMessageLocaleDirectory (void) {
-  return localeDirectory;
+getMessagesDirectory (void) {
+  return messagesDirectory;
 }
 
 #ifdef ENABLE_I18N_SUPPORT
 static void
-releaseLocaleData (void) {
+releaseData (void) {
 }
 
 static int
@@ -78,7 +78,7 @@ setDomain (const char *domain) {
 
 static int
 setDirectory (const char *directory) {
-  if (bindtextdomain(localeDomain, directory)) return 1;
+  if (bindtextdomain(messagesDomain, directory)) return 1;
   logSystemError("bindtextdomain");
   return 0;
 }
@@ -92,20 +92,20 @@ typedef struct {
   uint32_t stringCount;
   uint32_t originalStrings;
   uint32_t translatedStrings;
-} LocaleDataHeader;
+} MessagesHeader;
 
 typedef struct {
   union {
     void *area;
     const unsigned char *bytes;
-    const LocaleDataHeader *header;
+    const MessagesHeader *header;
   } view;
 
   size_t areaSize;
   GetIntegerFunction *getInteger;
-} LocaleData;
+} MessagesData;
 
-static LocaleData localeData = {
+static MessagesData messagesData = {
   .view = {
     .area = NULL
   },
@@ -115,14 +115,14 @@ static LocaleData localeData = {
 };
 
 static void
-releaseLocaleData (void) {
-  if (localeData.view.area) {
-    free(localeData.view.area);
-    localeData.view.area = NULL;
+releaseData (void) {
+  if (messagesData.view.area) {
+    free(messagesData.view.area);
+    messagesData.view.area = NULL;
   }
 
-  localeData.areaSize = 0;
-  localeData.getInteger = NULL;
+  messagesData.areaSize = 0;
+  messagesData.getInteger = NULL;
 }
 
 static int
@@ -136,12 +136,12 @@ setDirectory (const char *directory) {
 }
 
 static char *
-makeLocaleRootPath (void) {
-  if (localeSpecifier && localeDomain && localeDirectory) {
-    size_t length = strlen(localeSpecifier);
+makeLocalesPath (void) {
+  if (messagesLocale && messagesDomain && messagesDirectory) {
+    size_t length = strlen(messagesLocale);
 
     char dialect[length + 1];
-    strcpy(dialect, localeSpecifier);
+    strcpy(dialect, messagesLocale);
     length = strcspn(dialect, ".@");
     dialect[length] = 0;
 
@@ -154,7 +154,7 @@ makeLocaleRootPath (void) {
     char **name = names;
 
     while (*name) {
-      char *path = makePath(localeDirectory, *name);
+      char *path = makePath(messagesDirectory, *name);
 
       if (path) {
         if (testDirectoryPath(path)) return path;
@@ -169,20 +169,20 @@ makeLocaleRootPath (void) {
 }
 
 static char *
-makeLocaleDataPath (void) {
-  char *directory = makeLocaleRootPath();
+makeDataPath (void) {
+  char *locales = makeLocalesPath();
 
-  if (directory) {
-    char *subdirectory = makePath(directory, "LC_MESSAGES");
+  if (locales) {
+    char *category = makePath(locales, "LC_MESSAGES");
 
-    free(directory);
-    directory = NULL;
+    free(locales);
+    locales = NULL;
 
-    if (subdirectory) {
-      char *file = makeFilePath(subdirectory, localeDomain, ".mo");
+    if (category) {
+      char *file = makeFilePath(category, messagesDomain, ".mo");
 
-      free(subdirectory);
-      subdirectory = NULL;
+      free(category);
+      category = NULL;
 
       if (file) return file;
     }
@@ -210,8 +210,8 @@ getFlippedInteger (uint32_t value) {
 }
 
 static int
-verifyLocaleData (LocaleData *data) {
-  const LocaleDataHeader *header = data->view.header;
+verifyData (MessagesData *data) {
+  const MessagesHeader *header = data->view.header;
 
   {
     static GetIntegerFunction *const functions[] = {getNativeInteger, getFlippedInteger, NULL};
@@ -231,11 +231,11 @@ verifyLocaleData (LocaleData *data) {
 }
 
 static int
-loadLocaleData (void) {
-  if (localeData.view.area) return 1;
+loadData (void) {
+  if (messagesData.view.area) return 1;
 
   int loaded = 0;
-  char *path = makeLocaleDataPath();
+  char *path = makeDataPath();
 
   if (path) {
     int fd = open(path, (O_RDONLY | O_BINARY));
@@ -252,20 +252,20 @@ loadLocaleData (void) {
             ssize_t count = read(fd, area, size);
 
             if (count == -1) {
-              logMessage(LOG_DEBUG, "locale data read error: %s: %s", path, strerror(errno));
+              logMessage(LOG_DEBUG, "messages data read error: %s: %s", path, strerror(errno));
             } else if (count < size) {
               logMessage(LOG_DEBUG,
-                "locale data truncated: %"PRIsize" < %"PRIsize": %s",
+                "messages data truncated: %"PRIsize" < %"PRIsize": %s",
                 count, size, path
               );
             } else {
-              LocaleData data = {
+              MessagesData data = {
                 .view.area = area,
                 .areaSize = size
               };
 
-              if (verifyLocaleData(&data)) {
-                localeData = data;
+              if (verifyData(&data)) {
+                messagesData = data;
                 loaded = 1;
               }
             }
@@ -276,12 +276,12 @@ loadLocaleData (void) {
           }
         }
       } else {
-        logMessage(LOG_DEBUG, "locale data stat error: %s: %s", path, strerror(errno));
+        logMessage(LOG_DEBUG, "messages data stat error: %s: %s", path, strerror(errno));
       }
 
       close(fd);
     } else {
-      logMessage(LOG_DEBUG, "locale data open error: %s: %s", path, strerror(errno));
+      logMessage(LOG_DEBUG, "messages data open error: %s: %s", path, strerror(errno));
     }
 
     free(path);
@@ -290,65 +290,65 @@ loadLocaleData (void) {
   return loaded;
 }
 
-static inline const LocaleDataHeader *
+static inline const MessagesHeader *
 getHeader (void) {
-  return localeData.view.header;
+  return messagesData.view.header;
 }
 
 static inline const void *
 getItem (uint32_t offset) {
-  return &localeData.view.bytes[localeData.getInteger(offset)];
+  return &messagesData.view.bytes[messagesData.getInteger(offset)];
 }
 
 static inline uint32_t
 getStringCount (void) {
-  return localeData.getInteger(getHeader()->stringCount);
+  return messagesData.getInteger(getHeader()->stringCount);
 }
 
 typedef struct {
   uint32_t length;
   uint32_t offset;
-} LocaleDataString;
+} MessagesString;
 
 static inline uint32_t
-getStringLength (const LocaleDataString *string) {
-  return localeData.getInteger(string->length);
+getStringLength (const MessagesString *string) {
+  return messagesData.getInteger(string->length);
 }
 
 static inline const char *
-getStringText (const LocaleDataString *string) {
+getStringText (const MessagesString *string) {
   return getItem(string->offset);
 }
 
-static inline const LocaleDataString *
+static inline const MessagesString *
 getOriginalStrings (void) {
   return getItem(getHeader()->originalStrings);
 }
 
-static inline const LocaleDataString *
+static inline const MessagesString *
 getOriginalString (unsigned int index) {
   return &getOriginalStrings()[index];
 }
 
-static inline const LocaleDataString *
+static inline const MessagesString *
 getTranslatedStrings (void) {
   return getItem(getHeader()->translatedStrings);
 }
 
-static inline const LocaleDataString *
+static inline const MessagesString *
 getTranslatedString (unsigned int index) {
   return &getTranslatedStrings()[index];
 }
 
 static int
 findOriginalString (const char *text, size_t textLength, unsigned int *index) {
-  const LocaleDataString *strings = getOriginalStrings();
+  const MessagesString *strings = getOriginalStrings();
   int from = 0;
   int to = getStringCount();
 
   while (from < to) {
     int current = (from + to) / 2;
-    const LocaleDataString *string = &strings[current];
+    const MessagesString *string = &strings[current];
 
     uint32_t stringLength = getStringLength(string);
     int relation = memcmp(text, getStringText(string), MIN(textLength, stringLength));
@@ -377,11 +377,11 @@ findTranslation (const char *text, size_t length) {
   if (!text) return NULL;
   if (!length) return NULL;
 
-  if (loadLocaleData()) {
+  if (loadData()) {
     unsigned int index;
 
     if (findOriginalString(text, length, &index)) {
-      const LocaleDataString *string = getTranslatedString(index);
+      const MessagesString *string = getTranslatedString(index);
       return getStringText(string);
     }
   }
@@ -463,29 +463,29 @@ updateProperty (
 }
 
 int
-setMessageLocaleSpecifier (const char *specifier) {
-  releaseLocaleData();
-  return updateProperty(&localeSpecifier, specifier, "C.UTF-8", NULL);
+setMessagesLocale (const char *locale) {
+  releaseData();
+  return updateProperty(&messagesLocale, locale, "C.UTF-8", NULL);
 }
 
 int
-setMessageLocaleDomain (const char *domain) {
-  releaseLocaleData();
-  return updateProperty(&localeDomain, domain, PACKAGE_TARNAME, setDomain);
+setMessagesDomain (const char *domain) {
+  releaseData();
+  return updateProperty(&messagesDomain, domain, PACKAGE_TARNAME, setDomain);
 }
 
 int
-setMessageLocaleDirectory (const char *directory) {
-  releaseLocaleData();
-  return updateProperty(&localeDirectory, directory, LOCALE_DIRECTORY, setDirectory);
+setMessagesDirectory (const char *directory) {
+  releaseData();
+  return updateProperty(&messagesDirectory, directory, LOCALE_DIRECTORY, setDirectory);
 }
 
 void
-setMessageLocale (void) {
-  if (!localeSpecifier) {
-    setMessageLocaleSpecifier(setlocale(LC_MESSAGES, ""));
+ensureAllMessagesProperties (void) {
+  if (!messagesLocale) {
+    setMessagesLocale(setlocale(LC_MESSAGES, ""));
   }
 
-  if (!localeDomain) setMessageLocaleDomain(NULL);
-  if (!localeDirectory) setMessageLocaleDirectory(NULL);
+  if (!messagesDomain) setMessagesDomain(NULL);
+  if (!messagesDirectory) setMessagesDirectory(NULL);
 }

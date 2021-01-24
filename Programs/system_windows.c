@@ -25,7 +25,7 @@
 #include "system.h"
 #include "system_windows.h"
 #include "timing.h"
-#include "msg_locale.h"
+#include "messages.h"
 
 /* ntdll.dll */
 WIN_PROC_STUB(NtSetInformationProcess);
@@ -179,13 +179,13 @@ setLocale (void) {
     const char *locale = getenv("LANG");
 
     if (locale && *locale) {
-      setMessageLocaleSpecifier(locale);
+      setMessagesLocale(locale);
       return;
     }
   }
 
   char *locale = getWindowsLocaleName();
-  setMessageLocaleSpecifier(locale);
+  setMessagesLocale(locale);
   if (locale) free(locale);
 }
 

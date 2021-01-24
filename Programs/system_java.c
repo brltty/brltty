@@ -411,7 +411,7 @@ getJavaLocaleName (void) {
 
 #if defined(__ANDROID__)
 #include <locale.h>
-#include "msg_locale.h"
+#include "messages.h"
 
 static void
 initializeAndroidEnvironment (JNIEnv *env) {
@@ -432,7 +432,7 @@ initializeAndroidEnvironment (JNIEnv *env) {
             const char *cLocale = (*env)->GetStringUTFChars(env, jLocale, &isCopy);
 
             if (cLocale) {
-              if (setMessageLocaleSpecifier(cLocale)) {
+              if (setMessagesLocale(cLocale)) {
               }
 
               (*env)->ReleaseStringUTFChars(env, jLocale, cLocale);

@@ -25,7 +25,6 @@
 #include "log_history.h"
 #include "embed.h"
 #include "revision.h"
-#include "msg_locale.h"
 #include "api_control.h"
 #include "menu.h"
 #include "menu_prefs.h"
