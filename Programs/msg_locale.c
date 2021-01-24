@@ -63,7 +63,7 @@ releaseLocaleData (void) {
 }
 
 static int
-setDomain (const char *domain) {
+setMessagesDomain (const char *domain) {
   if (!textdomain(domain)) {
     logSystemError("textdomain");
     return 0;
@@ -77,10 +77,8 @@ setDomain (const char *domain) {
 }
 
 static int
-bindDomain (const char *directory) {
-  const char *result = bindtextdomain(localeDomain, directory);
-  if (result) return 1;
-
+setMessagesDirectory (const char *directory) {
+  if (bindtextdomain(localeDomain, directory)) return 1;
   logSystemError("bindtextdomain");
   return 0;
 }
@@ -128,12 +126,12 @@ releaseLocaleData (void) {
 }
 
 static int
-setDomain (const char *domain) {
+setMessagesDomain (const char *domain) {
   return 1;
 }
 
 static int
-bindDomain (const char *directory) {
+setMessagesDirectory (const char *directory) {
   return 1;
 }
 
@@ -473,13 +471,13 @@ setMessageLocaleSpecifier (const char *specifier) {
 int
 setMessageLocaleDomain (const char *domain) {
   releaseLocaleData();
-  return updateProperty(&localeDomain, domain, PACKAGE_TARNAME, setDomain);
+  return updateProperty(&localeDomain, domain, PACKAGE_TARNAME, setMessagesDomain);
 }
 
 int
 setMessageLocaleDirectory (const char *directory) {
   releaseLocaleData();
-  return updateProperty(&localeDirectory, directory, LOCALE_DIRECTORY, bindDomain);
+  return updateProperty(&localeDirectory, directory, LOCALE_DIRECTORY, setMessagesDirectory);
 }
 
 void
