@@ -432,7 +432,7 @@ logData (int level, LogDataFormatter *formatLogData, const void *data) {
           }
         }
 
-        fputs(record, stream);
+        writeWithConsoleEncoding(stream, record, strlen(record));
         fputc('\n', stream);
 
         flushStream(stream);

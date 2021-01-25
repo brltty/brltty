@@ -277,8 +277,8 @@ showUsage (
             memcpy(line+lineLength, description, charCount);
             lineLength += charCount;
 
-            line[lineLength] = 0;
-            fprintf(outputStream, "%s\n", line);
+            writeWithConsoleEncoding(outputStream, line, lineLength);
+            fputc('\n', outputStream);
           }
 
           while (charCount < charsLeft) {
