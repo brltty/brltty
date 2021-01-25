@@ -3,17 +3,19 @@
 /brltty
 /brltty-atb
 /brltty-cldr
+/brltty-clip
 /brltty-ctb
 /brltty-ktb
-/brltty-morse
 /brltty-lscmds
 /brltty-lsinc
+/brltty-morse
 /brltty-trtxt
 /brltty-ttb
 /brltty-tune
 
 /brltest
 /crctest
+/msgtest
 /scrtest
 /spktest
 
@@ -23,4 +25,3 @@
 
 /apitest
 /xbrlapi
-/brltty-clip
