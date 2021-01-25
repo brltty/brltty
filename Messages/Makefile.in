@@ -49,6 +49,8 @@ $(TEMPLATE_FILE): $(BLD_TOP)$(PGM_DIR)/cmds.auto.h FORCE
 sources: $(SOURCE_FILES)
 %.$(SOURCE_EXTENSION): FORCE
 	$(MSGMERGE) --quiet --update --force-po --no-wrap --no-fuzzy-matching -- $(SRC_DIR)/$@ $(TEMPLATE_FILE)
+	set -- `date --utc +"%Y %m %d %H %M %z"` && \
+	sed -e "/^.PO-Revision-Date:/s/....-..-.. ..:..[+-]..../$$1-$$2-$$3 $$4:$$5$$6/" -i $(SRC_DIR)/$@
 
 objects: $(OBJECT_FILES)
 %.$(OBJECT_EXTENSION): FORCE
