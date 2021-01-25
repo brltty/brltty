@@ -1080,7 +1080,17 @@ getConsoleEncoding (void) {
 
   if (!encoding) {
     setlocale(LC_ALL, "");
-    encoding = strdup(nl_langinfo(CODESET));
+
+#ifdef HAVE_NL_LANGINFO
+    encoding = nl_langinfo(CODESET);
+#endif /* HAVE_NL_LANGINFO */
+
+    if (encoding) {
+      if (!(encoding = strdup(encoding))) {
+        logMallocError();
+      }
+    }
+
     if (!encoding) encoding = "";
   }
 
@@ -1121,7 +1131,10 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
 void
 writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
   const char *consoleEncoding = getConsoleEncoding();
-  if (isCharsetUTF8(consoleEncoding)) consoleEncoding = "";
+
+  if (!consoleEncoding || isCharsetUTF8(consoleEncoding)) {
+    consoleEncoding = "";
+  }
 
   if (*consoleEncoding) {
 #ifdef HAVE_ICONV_H
