@@ -368,7 +368,7 @@ askUser (const unsigned char *prompt) {
             insertCharacters(&character, 1);
             ++to;
          } else {
-            ringBell();
+            ringConsoleBell();
          }
       } else {
          switch (key) {
@@ -392,7 +392,7 @@ askUser (const unsigned char *prompt) {
                   deleteCharacters(1);
                   --to;
                } else {
-                  ringBell();
+                  ringConsoleBell();
                }
                break;
             case DEL:
@@ -400,39 +400,39 @@ askUser (const unsigned char *prompt) {
                   deleteCharacters(1);
                   --to;
                } else {
-                  ringBell();
+                  ringConsoleBell();
                }
                break;
             case KEY_FUNCTION_CURSOR_LEFT:
                if (cursorColumn > from) {
                   --cursorColumn;
                } else {
-                  ringBell();
+                  ringConsoleBell();
                }
                break;
             case KEY_FUNCTION_CURSOR_LEFT_JUMP:
                if (cursorColumn > from) {
                   cursorColumn = from;
                } else {
-                  ringBell();
+                  ringConsoleBell();
                }
                break;
             case KEY_FUNCTION_CURSOR_RIGHT:
                if (cursorColumn < to) {
                   ++cursorColumn;
                } else {
-                  ringBell();
+                  ringConsoleBell();
                }
                break;
             case KEY_FUNCTION_CURSOR_RIGHT_JUMP:
                if (cursorColumn < to) {
                   cursorColumn = to;
                } else {
-                  ringBell();
+                  ringConsoleBell();
                }
                break;
             default:
-               ringBell();
+               ringConsoleBell();
                break;
          }
       }
