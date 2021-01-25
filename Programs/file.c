@@ -1021,6 +1021,8 @@ getConsoleEncoding (void) {
     } else {
       snprintf(encoding, sizeof(encoding), "CP%u", cp);
     }
+
+    logMessage(LOG_DEBUG, "Console Encoding: %s", encoding);
   }
 
   return encoding;
@@ -1092,6 +1094,7 @@ getConsoleEncoding (void) {
     }
 
     if (!encoding) encoding = "";
+    logMessage(LOG_DEBUG, "Console Encoding: %s", encoding);
   }
 
   return encoding;
