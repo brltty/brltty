@@ -28,8 +28,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern FILE *getConsole (void);
-extern int writeConsole (const unsigned char *bytes, size_t count);
-extern int ringBell (void);
+extern int writeToConsole (const unsigned char *bytes, size_t count);
+extern int ringConsoleBell (void);
 
 extern const char *getDeviceDirectory (void);
 extern char *getDevicePath (const char *device);

@@ -21,10 +21,20 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <ctype.h>
 #include <errno.h>
+#include <ctype.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <limits.h>
+#include <locale.h>
+
+#ifdef HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif /* HAVE_LANGINFO_H */
+
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#endif /* HAVE_ICONV_H */
 
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
@@ -999,6 +1009,23 @@ STR_BEGIN_FORMATTER(formatInputError, const char *file, const int *line, const c
 STR_END_FORMATTER
 
 #ifdef __MINGW32__
+const char *
+getConsoleEncoding (void) {
+  static char encoding[0X10];
+
+  if (!encoding[0]) {
+    unsigned cp = GetConsoleOutputCP();
+
+    if (cp == CP_UTF8) {
+      strcpy(encoding, "UTF-8");
+    } else {
+      snprintf(encoding, sizeof(encoding), "CP%u", cp);
+    }
+  }
+
+  return encoding;
+}
+
 ssize_t
 readFileDescriptor (FileDescriptor fileDescriptor, void *buffer, size_t size) {
   {
@@ -1047,6 +1074,19 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
 }
 
 #else /* unix file/socket descriptor operations */
+const char *
+getConsoleEncoding (void) {
+  static const char *encoding = NULL;
+
+  if (!encoding) {
+    setlocale(LC_ALL, "");
+    encoding = strdup(nl_langinfo(CODESET));
+    if (!encoding) encoding = "";
+  }
+
+  return encoding;
+}
+
 ssize_t
 readFileDescriptor (FileDescriptor fileDescriptor, void *buffer, size_t size) {
   return read(fileDescriptor, buffer, size);
@@ -1077,6 +1117,55 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
   return 0;
 }
 #endif /* basic file/socket descriptor operations */
+
+void
+writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
+  const char *consoleEncoding = getConsoleEncoding();
+  if (isCharsetUTF8(consoleEncoding)) consoleEncoding = "";
+
+  if (*consoleEncoding) {
+#ifdef HAVE_ICONV_H
+    static const char internalEncoding[] = "UTF-8";
+    static iconv_t iconvHandle = (iconv_t)-1;
+
+    if (iconvHandle == (iconv_t)-1) {
+      if ((iconvHandle = iconv_open(consoleEncoding, internalEncoding)) == (iconv_t)-1) {
+        logMessage(LOG_WARNING,
+          "iconv open error: %s -> %s: %s",
+          internalEncoding, consoleEncoding, strerror(errno)
+        );
+
+        consoleEncoding = "";
+        goto noTranslation;
+      }
+    }
+
+    const char *inputNext = bytes;
+    size_t inputLeft = count;
+
+    char outputBuffer[inputLeft * MB_LEN_MAX];
+    char *outputNext = outputBuffer;
+    size_t outputLeft = sizeof(outputBuffer);
+
+    ssize_t result = iconv(
+      iconvHandle,
+      (char **)&inputNext, &inputLeft,
+      &outputNext, &outputLeft
+    );
+
+    if (result != -1) {
+      size_t length = outputNext - outputBuffer;
+      outputBuffer[length] = 0;
+      fputs(outputBuffer, stream);
+    }
+
+    return;
+#endif /* HAVE_ICONV_H */
+  }
+
+noTranslation:
+  fwrite(bytes, 1, count, stream);
+}
 
 #ifdef GOT_SOCKETS
 ssize_t

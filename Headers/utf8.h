@@ -46,6 +46,8 @@ extern int writeUtf8Character (FILE *stream, wchar_t character);
 extern int writeUtf8Characters (FILE *stream, const wchar_t *characters, size_t count);
 extern int writeUtf8ByteOrderMark (FILE *stream);
 
+extern int isCharsetUTF8 (const char *name);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

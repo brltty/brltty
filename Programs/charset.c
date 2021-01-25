@@ -46,19 +46,6 @@ isCharsetLatin1 (const char *name) {
   return strcmp(name, "1") == 0;
 }
 
-int
-isCharsetUTF8 (const char *name) {
-  {
-    const char *substring = "utf";
-    size_t length = strlen(substring);
-    if (strncasecmp(name, substring, length) != 0) return 0;
-    name += length;
-    if (*name == '-') name += 1;
-  }
-
-  return strcmp(name, "8") == 0;
-}
-
 #if defined(__MINGW32__)
 #include "system_windows.h"
 

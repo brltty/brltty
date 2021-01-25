@@ -247,3 +247,16 @@ int
 writeUtf8ByteOrderMark (FILE *stream) {
   return writeUtf8Character(stream, UNICODE_BYTE_ORDER_MARK);
 }
+
+int
+isCharsetUTF8 (const char *name) {
+  {
+    const char *substring = "utf";
+    size_t length = strlen(substring);
+    if (strncasecmp(name, substring, length) != 0) return 0;
+    name += length;
+    if (*name == '-') name += 1;
+  }
+
+  return strcmp(name, "8") == 0;
+}

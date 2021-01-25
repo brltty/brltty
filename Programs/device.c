@@ -51,7 +51,7 @@ getConsole (void) {
 }
 
 int
-writeConsole (const unsigned char *bytes, size_t count) {
+writeToConsole (const unsigned char *bytes, size_t count) {
   FILE *console = getConsole();
   if (!console) return 0;
 
@@ -72,9 +72,9 @@ writeConsole (const unsigned char *bytes, size_t count) {
 }
 
 int
-ringBell (void) {
+ringConsoleBell (void) {
   static unsigned char bellSequence[] = {0X07};
-  return writeConsole(bellSequence, sizeof(bellSequence));
+  return writeToConsole(bellSequence, sizeof(bellSequence));
 }
 
 const char *
