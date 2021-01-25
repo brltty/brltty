@@ -13,11 +13,12 @@
 # Web Page: http://brltty.app/
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
+#
 msgid ""
-msgstr "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-09 16:30-0500\n"
+"POT-Creation-Date: 2021-01-25 08:46-0500\n"
 "PO-Revision-Date: 2018-08-16 10:59+0200\n"
 "Last-Translator: Jean-Philippe MENGUAL (de Traduc.org) <jpmengual@debian.org>\n"
 "Language-Team: Friends of BRLTTY <BRLTTY@brlttY.app>\n"
@@ -25,6 +26,7 @@ msgstr "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: Programs/brltty.c:167
 #, c-format
@@ -101,7 +103,7 @@ msgstr "Utilisation de caractères 8 bits"
 msgid "<off>"
 msgstr "<Inactif>"
 
-#: Programs/config.c:1367
+#: Programs/config.c:1382
 msgid "API Parameter"
 msgstr "Paramètre de l'API"
 
@@ -180,7 +182,7 @@ msgstr "Applaudissements"
 msgid "April"
 msgstr "Avril"
 
-#: Programs/log.c:116
+#: Programs/log.c:118
 msgid "Async Events"
 msgstr "Événements asynchrones"
 
@@ -188,7 +190,7 @@ msgstr "Événements asynchrones"
 msgid "Attributes Invisible Time"
 msgstr "Durée de l'invisibilité des attributs"
 
-#: Programs/config.c:2812 Programs/menu_prefs.c:1280
+#: Programs/config.c:2827 Programs/menu_prefs.c:1280
 msgid "Attributes Table"
 msgstr "Table d'attributs"
 
@@ -224,7 +226,7 @@ msgstr "Répétition automatique du défilement"
 msgid "Autospeak"
 msgstr "Parole automatique"
 
-#: Programs/config.c:1812
+#: Programs/config.c:1827
 msgid "BRLTTY stopped"
 msgstr "Arrêt de BRLTTY"
 
@@ -284,19 +286,19 @@ msgstr "Pavé"
 msgid "Blown Bottle"
 msgstr "Bouteille cassée"
 
-#: Programs/log.c:140
+#: Programs/log.c:142
 msgid "Bluetooth I/O"
 msgstr "E/S Bluetooth"
 
-#: Programs/config.c:1588
+#: Programs/config.c:1603
 msgid "Braille Device"
 msgstr "Périphérique braille"
 
-#: Programs/config.c:1584
+#: Programs/config.c:1599
 msgid "Braille Driver"
 msgstr "Pilote braille"
 
-#: Programs/log.c:146
+#: Programs/log.c:148
 msgid "Braille Driver Events"
 msgstr "Événements liés au pilote braille"
 
@@ -304,11 +306,11 @@ msgstr "Événements liés au pilote braille"
 msgid "Braille Firmness"
 msgstr "Rugosité du braille"
 
-#: Programs/log.c:80
+#: Programs/log.c:82
 msgid "Braille Key Events"
 msgstr "Événements liés au clavier braille"
 
-#: Programs/config.c:1587
+#: Programs/config.c:1602
 msgid "Braille Parameter"
 msgstr "Paramètre braille"
 
@@ -340,7 +342,7 @@ msgstr "Chevauchement de fenêtre braille"
 msgid "Braille Window Row"
 msgstr "Ligne de la fenêtre braille"
 
-#: Programs/config.c:464
+#: Programs/config.c:475
 #, c-format
 msgid "Braille driver code (%s, %s, or one of {%s})."
 msgstr "Code du pilote braille : (%s, %s, ou un parmi {%s})."
@@ -368,10 +370,6 @@ msgstr "Schémas d'autorisation/authentification de BrlAPI"
 #: Programs/xbrlapi.c:86
 msgid "BrlAPI host and/or port to connect to"
 msgstr "Hôte de BrlAPI et port auquel se connecter"
-
-#: Programs/menu_prefs.c:1326
-msgid "Bug Reports"
-msgstr "Rapports de bug"
 
 #: Programs/menu_prefs.c:1307
 msgid "Build Information"
@@ -434,7 +432,7 @@ msgstr "Deux-points"
 msgid "Configuration Directory"
 msgstr "Répertoire de configuration"
 
-#: Programs/config.c:2755 Programs/menu_prefs.c:1336
+#: Programs/config.c:2770 Programs/menu_prefs.c:1336
 msgid "Configuration File"
 msgstr "Fichier de configuration"
 
@@ -454,7 +452,7 @@ msgstr "Contrebasse"
 msgid "Contracted Braille"
 msgstr "Braille abrégé"
 
-#: Programs/config.c:2819 Programs/menu_prefs.c:1288
+#: Programs/config.c:2834 Programs/menu_prefs.c:1288
 msgid "Contraction Table"
 msgstr "Table de braille abrégé"
 
@@ -470,11 +468,11 @@ msgstr "Table de vérification du braille abrégé."
 msgid "Critical"
 msgstr "Critique"
 
-#: Programs/log.c:98
+#: Programs/log.c:100
 msgid "Cursor Routing"
 msgstr "Déplacement du curseur"
 
-#: Programs/log.c:92
+#: Programs/log.c:94
 msgid "Cursor Tracking"
 msgstr "Poursuite du curseur"
 
@@ -510,11 +508,11 @@ msgstr "Débogage"
 msgid "December"
 msgstr "Décembre"
 
-#: Programs/config.c:485
+#: Programs/config.c:496
 msgid "Device for accessing braille display."
 msgstr "Périphérique d'accès à l'afficheur braille."
 
-#: Programs/config.c:444
+#: Programs/config.c:455
 msgid "Disable the application programming interface."
 msgstr "Désactiver l'interface de programmation de l'application (API)."
 
@@ -522,7 +520,7 @@ msgstr "Désactiver l'interface de programmation de l'application (API)."
 msgid "Distortion Guitar"
 msgstr "Guitare avec distortion"
 
-#: Programs/config.c:587
+#: Programs/config.c:598
 msgid "Do not autospeak when braille is not being used."
 msgstr "Pas de parole automatique quand le braille ne sera pas utilisé"
 
@@ -534,7 +532,7 @@ msgstr "Ne pas écrire de texte sur le périphérique braille"
 msgid "Don't fall back to the Unicode base character."
 msgstr "Ne se rabat pas sur des caractères en unicode"
 
-#: Programs/config.c:355
+#: Programs/config.c:366
 msgid "Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc)."
 msgstr "Ne pas passer à un utilisateur non privilégié ou renoncer à tous les privilèges (appartenance à des groupes, capacités, etc.)."
 
@@ -555,7 +553,7 @@ msgstr "Points en braille unicode"
 msgid "Drawbar Organ"
 msgstr "Orgue drawbar"
 
-#: Programs/config.c:2776 Programs/menu_prefs.c:1356
+#: Programs/config.c:2791 Programs/menu_prefs.c:1356
 msgid "Drivers Directory"
 msgstr "Répertoire des pilotes"
 
@@ -643,7 +641,7 @@ msgstr "Signaux d'événements"
 msgid "Expand Current Word"
 msgstr "Extension du mot actuel"
 
-#: Programs/config.c:399
+#: Programs/config.c:410
 msgid "Explicit preference settings."
 msgstr "Paramètres explicites d'une préférence."
 
@@ -732,7 +730,7 @@ msgstr "Gelé"
 msgid "Generic"
 msgstr "Générique"
 
-#: Programs/log.c:62
+#: Programs/log.c:64
 msgid "Generic Input"
 msgstr "Entrée générique"
 
@@ -805,11 +803,11 @@ msgstr "Informations"
 msgid "Input Options"
 msgstr "Options d'entrée"
 
-#: Programs/log.c:68
+#: Programs/log.c:70
 msgid "Input Packets"
 msgstr "Paquets entrants"
 
-#: Programs/config.c:330
+#: Programs/config.c:341
 #, c-format
 msgid "Install the %s service, and then exit."
 msgstr "Installez le service %s et quittez."
@@ -846,15 +844,15 @@ msgstr "Juin"
 msgid "Kalimba"
 msgstr "Kalimba"
 
-#: Programs/config.c:1510
+#: Programs/config.c:1525
 msgid "Key Bindings"
 msgstr "Associations de touches"
 
-#: Programs/config.c:1054
+#: Programs/config.c:1069
 msgid "Key Help"
 msgstr "Touche Aide"
 
-#: Programs/config.c:1515 Programs/ktb_list.c:737
+#: Programs/config.c:1530 Programs/ktb_list.c:737
 msgid "Key Table"
 msgstr "Table de touches"
 
@@ -862,7 +860,7 @@ msgstr "Table de touches"
 msgid "Keyboard Enabled"
 msgstr "Clavier Activé"
 
-#: Programs/log.c:86
+#: Programs/log.c:88
 msgid "Keyboard Key Events"
 msgstr "Événements liés aux touches du clavier"
 
@@ -870,7 +868,7 @@ msgstr "Événements liés aux touches du clavier"
 msgid "Keyboard LED Alerts"
 msgstr "Alertes lumineuses du clavier"
 
-#: Programs/config.c:2826 Programs/menu_prefs.c:913
+#: Programs/config.c:2841 Programs/menu_prefs.c:913
 msgid "Keyboard Table"
 msgstr "Tables des touches du clavier"
 
@@ -878,7 +876,7 @@ msgstr "Tables des touches du clavier"
 msgid "Koto"
 msgstr "Koto"
 
-#: Programs/config.c:2958
+#: Programs/config.c:2973
 msgid "Language"
 msgstr "Langue"
 
@@ -947,7 +945,7 @@ msgstr "Répertoire de la locale"
 msgid "Log Categories"
 msgstr "Catégories de journal"
 
-#: Programs/config.c:824
+#: Programs/config.c:836
 msgid "Log Level"
 msgstr "Niveau de journalisation"
 
@@ -955,15 +953,15 @@ msgstr "Niveau de journalisation"
 msgid "Log Messages"
 msgstr "Messages du journal"
 
-#: Programs/config.c:677
+#: Programs/config.c:688
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
 msgstr "Enregistre les versions de l'application principale, de l'API, des pilotes intégrés puis quitter"
 
-#: Programs/config.c:642
+#: Programs/config.c:653
 msgid "Log to standard error rather than to the system log."
 msgstr "Enregistre sur l'erreur standard plutôt que sur le journal du système."
 
-#: Programs/config.c:656
+#: Programs/config.c:667
 #, c-format
 msgid "Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)"
 msgstr "Niveau de journalisation (%s ou un parmi {%s}) et/ou catégories de journal à activer (n'importe quelle combinaison de {%s}, chacune précédée éventuellement de %s pour la désactiver)"
@@ -988,7 +986,7 @@ msgstr "Point en bas à droite"
 msgid "MIDI"
 msgstr "MIDI"
 
-#: Programs/config.c:626
+#: Programs/config.c:637
 msgid "MIDI (Musical Instrument Digital Interface) device specifier."
 msgstr "Identifiant du périphérique MIDI (Musical Instrument Digital Interface)."
 
@@ -999,6 +997,10 @@ msgstr "Instrument MIDI"
 #: Programs/menu_prefs.c:967
 msgid "MIDI Volume"
 msgstr "Volume MIDI"
+
+#: Programs/menu_prefs.c:1326
+msgid "Mailing List"
+msgstr ""
 
 #: Programs/cmd_miscellaneous.c:59
 msgid "March"
@@ -1032,9 +1034,21 @@ msgstr "tom mélodique"
 msgid "Menu Options"
 msgstr "Options du menu"
 
-#: Programs/config.c:635
+#: Programs/config.c:646
 msgid "Message hold timeout (in 10ms units)."
 msgstr "Durée d'apparition du message (par unités de 10ms)."
+
+#: Programs/config.c:839
+msgid "Messages Directory"
+msgstr ""
+
+#: Programs/config.c:838
+msgid "Messages Domain"
+msgstr ""
+
+#: Programs/config.c:837
+msgid "Messages Locale"
+msgstr ""
 
 #: Programs/menu_prefs.c:646 Programs/menu_prefs.c:899
 msgid "Minimum"
@@ -1056,27 +1070,27 @@ msgstr "Interface numérique d'instrument de musique"
 msgid "Muted Trumpet"
 msgstr "Trompette bouchée"
 
-#: Programs/config.c:526
+#: Programs/config.c:537
 msgid "Name of or path to attributes table."
 msgstr "Nom ou chemin vers la table d'attributs."
 
-#: Programs/config.c:535
+#: Programs/config.c:546
 msgid "Name of or path to contraction table."
 msgstr "Nom ou chemin vers la table de braille abrégé."
 
-#: Programs/config.c:391
+#: Programs/config.c:402
 msgid "Name of or path to default preferences file."
 msgstr "Nom ou chemin vers le fichier des préférences par défaut."
 
-#: Programs/config.c:544
+#: Programs/config.c:555
 msgid "Name of or path to keyboard table."
 msgstr "Nom ou chemin vers le fichier de la table de touches."
 
-#: Programs/config.c:580
+#: Programs/config.c:591
 msgid "Name of or path to speech input object."
 msgstr "Nom ou chemin vers l'objet d'entrée de la synthèse."
 
-#: Programs/config.c:517
+#: Programs/config.c:528
 #, c-format
 msgid "Name of or path to text table (or %s)."
 msgstr "Nom ou chemin vers la table de caractères"
@@ -1124,7 +1138,7 @@ msgstr "Octobre"
 msgid "Off"
 msgstr "Inactif"
 
-#: Programs/config.c:1601
+#: Programs/config.c:1616
 msgid "Old Preferences File"
 msgstr "Ancien fichier des préférences"
 
@@ -1144,7 +1158,7 @@ msgstr "Harpe d'orchestre"
 msgid "Organ"
 msgstr "Orgue"
 
-#: Programs/log.c:74
+#: Programs/log.c:76
 msgid "Output Packets"
 msgstr "Paquets sortants"
 
@@ -1160,7 +1174,7 @@ msgstr "Mode PC"
 msgid "PCM"
 msgstr "PCM"
 
-#: Programs/config.c:616
+#: Programs/config.c:627
 msgid "PCM (soundcard digital audio) device specifier."
 msgstr "Identifiant du périphérique PCM (carte son numérique)"
 
@@ -1217,36 +1231,36 @@ msgstr "Bloc 8 (coup de balai)"
 msgid "Pan Flute"
 msgstr "Flûte de pan"
 
-#: Programs/config.c:453
+#: Programs/config.c:464
 msgid "Parameters for the application programming interface."
 msgstr "Paramètres pour l'interface de programmation pour applications."
 
-#: Programs/config.c:475
+#: Programs/config.c:486
 msgid "Parameters for the braille driver."
 msgstr "Paramètres pour le pilote braille."
 
-#: Programs/config.c:348
+#: Programs/config.c:359
 msgid "Parameters for the privilege establishment stage."
 msgstr "Paramètres pour la phase d'établissement de privilège."
 
-#: Programs/config.c:607
+#: Programs/config.c:618
 msgid "Parameters for the screen driver."
 msgstr "Paramètres pour le pilote de l'écran."
 
-#: Programs/config.c:572
+#: Programs/config.c:583
 msgid "Parameters for the speech driver."
 msgstr "Paramètres pour le pilote de synthèse vocale."
 
-#: Programs/config.c:382
+#: Programs/config.c:393
 msgid "Path to default settings file."
 msgstr "Chemin du fichier des paramètres par défaut."
 
-#: Programs/config.c:436
+#: Programs/config.c:447
 msgid "Path to directory containing drivers."
 msgstr "Chemin vers le répertoire contenant les pilotes."
 
 #: Programs/brltest.c:68 Programs/brltty-atb.c:36 Programs/brltty-ctb.c:54
-#: Programs/brltty-ktb.c:73 Programs/config.c:507
+#: Programs/brltty-ktb.c:73 Programs/config.c:518
 msgid "Path to directory containing tables."
 msgstr "Chemin du répertoire contenant les tables."
 
@@ -1262,19 +1276,23 @@ msgstr "Chemin du répertoire de chargement des pilotes."
 msgid "Path to directory for text tables."
 msgstr "Chemin du répertoire des tables de texte"
 
-#: Programs/brltest.c:78 Programs/config.c:426
+#: Programs/brltest.c:78 Programs/config.c:437
 msgid "Path to directory which can be written to."
 msgstr "Chemin du répertoire où il est possible d'écrire."
 
-#: Programs/config.c:416
+#: Programs/config.c:427
 msgid "Path to directory which contains files that can be updated."
 msgstr "Chemin du répertoire où des fichiers peuvent être mis à jour."
+
+#: Programs/config.c:327
+msgid "Path to directory which contains message translations."
+msgstr ""
 
 #: Programs/brltty-trtxt.c:59
 msgid "Path to input text table."
 msgstr "Chemin de la table de saisie de texte."
 
-#: Programs/config.c:665
+#: Programs/config.c:676
 msgid "Path to log file."
 msgstr "Chemin du fichier journal."
 
@@ -1282,11 +1300,11 @@ msgstr "Chemin du fichier journal."
 msgid "Path to output text table."
 msgstr "Chemin de la table de texte affiché"
 
-#: Programs/config.c:372
+#: Programs/config.c:383
 msgid "Path to process identifier file."
 msgstr "Chemin du fichier d'identifiants de processus."
 
-#: Programs/config.c:406
+#: Programs/config.c:417
 msgid "Patterns that match command prompts."
 msgstr "Motifs pour reconnaître les invites de commandes."
 
@@ -1319,7 +1337,7 @@ msgstr "Pizzicati"
 msgid "Powerdown"
 msgstr "Extinction"
 
-#: Programs/config.c:2756 Programs/menu_prefs.c:1346
+#: Programs/config.c:2771 Programs/menu_prefs.c:1346
 msgid "Preferences File"
 msgstr "Fichier des préférences"
 
@@ -1335,7 +1353,7 @@ msgstr "Afficher un résumé de l'utilisation (toutes les options) et quitter."
 msgid "Print a usage summary (commonly used options only), and then exit."
 msgstr "Affiche un résumé de l'utilisation (seulement les options couramment utilisées), puis quitte."
 
-#: Programs/config.c:779
+#: Programs/config.c:790
 msgid "Privilege Parameter"
 msgstr "Paramètre de Privilège"
 
@@ -1343,7 +1361,7 @@ msgstr "Paramètre de Privilège"
 msgid "Profiles"
 msgstr "Profils"
 
-#: Programs/config.c:552
+#: Programs/config.c:563
 msgid "Properties of eligible keyboards."
 msgstr "Propriétés des claviers éligibles."
 
@@ -1355,7 +1373,7 @@ msgstr "Espace Rapide"
 msgid "Raise Pitch"
 msgstr "Augmenter le ton"
 
-#: Programs/config.c:316
+#: Programs/config.c:318
 msgid "Recognize environment variables."
 msgstr "Reconnaît les variables d'environnement."
 
@@ -1375,7 +1393,7 @@ msgstr "Orgue à hanche"
 msgid "Reformat input."
 msgstr "Entrée de reformatage."
 
-#: Programs/config.c:497
+#: Programs/config.c:508
 msgid "Release braille device when screen or window is unreadable."
 msgstr "Abandonne le périphérique braille quand il n'est pas possible de lire l'écran ou la fenêtre."
 
@@ -1383,7 +1401,7 @@ msgstr "Abandonne le périphérique braille quand il n'est pas possible de lire 
 msgid "Remain a foreground process"
 msgstr "Rester un processus interactif"
 
-#: Programs/config.c:323
+#: Programs/config.c:334
 msgid "Remain a foreground process."
 msgstr "Rappelle un processus en tâche de fond."
 
@@ -1391,7 +1409,7 @@ msgstr "Rappelle un processus en tâche de fond."
 msgid "Remove dots seven and eight."
 msgstr "Supprime les points sept et huit"
 
-#: Programs/config.c:338
+#: Programs/config.c:349
 #, c-format
 msgid "Remove the %s service, and then exit."
 msgstr "Supprime le service %s et quitte."
@@ -1482,11 +1500,11 @@ msgstr "Colonne du curseur de l'écran et de la fenêtre braille"
 msgid "Screen Cursor and Braille Window Row"
 msgstr "Ligne du curseur de l'écran et de la fenêtre braille"
 
-#: Programs/config.c:2253
+#: Programs/config.c:2268
 msgid "Screen Driver"
 msgstr "Pilote de l'écran"
 
-#: Programs/log.c:158
+#: Programs/log.c:160
 msgid "Screen Driver Events"
 msgstr "Événements du pilote de l'écran"
 
@@ -1494,11 +1512,11 @@ msgstr "Événements du pilote de l'écran"
 msgid "Screen Number"
 msgstr "Numéro de l'écran"
 
-#: Programs/config.c:2259
+#: Programs/config.c:2274
 msgid "Screen Parameter"
 msgstr "Paramètre de l'écran"
 
-#: Programs/config.c:597
+#: Programs/config.c:608
 #, c-format
 msgid "Screen driver code (%s, %s, or one of {%s})."
 msgstr "Code du pilote de l'écran : (%s, %s, ou un parmi {%s})."
@@ -1515,11 +1533,11 @@ msgstr "Bord de mer"
 msgid "September"
 msgstr "Septembre"
 
-#: Programs/log.c:128
+#: Programs/log.c:130
 msgid "Serial I/O"
 msgstr "E/S série"
 
-#: Programs/log.c:122
+#: Programs/log.c:124
 msgid "Server Events"
 msgstr "Événements du serveur"
 
@@ -1653,20 +1671,20 @@ msgstr "Apparence du curseur de la synthèse"
 msgid "Speech Cursor Visible Time"
 msgstr "Durée de visibilité du curseur de la synthèse"
 
-#: Programs/config.c:2028
+#: Programs/config.c:2043
 msgid "Speech Driver"
 msgstr "Pilote de synthèse vocale"
 
-#: Programs/log.c:152
+#: Programs/log.c:154
 msgid "Speech Driver Events"
 msgstr "Événements du pilote de synthèse vocale"
 
-#: Programs/log.c:110
+#: Programs/log.c:112
 msgid "Speech Events"
 msgstr "Événements liés à la parole"
 
 #. Create the file system object for speech input.
-#: Programs/config.c:2867
+#: Programs/config.c:2882
 msgid "Speech Input"
 msgstr "Entrée de la parole"
 
@@ -1674,7 +1692,7 @@ msgstr "Entrée de la parole"
 msgid "Speech Options"
 msgstr "Options de la synthèse"
 
-#: Programs/config.c:2031
+#: Programs/config.c:2046
 msgid "Speech Parameter"
 msgstr "Paramètre de synthèse vocale"
 
@@ -1702,7 +1720,7 @@ msgstr "Volume de la synthèse"
 msgid "Speech Whitespace Indicator"
 msgstr "Indicateur vocal d'espace insécable"
 
-#: Programs/config.c:562
+#: Programs/config.c:573
 #, c-format
 msgid "Speech driver code (%s, %s, or one of {%s})."
 msgstr "Code du pilote de synthèse : (%s, %s, ou un parmi {%s})."
@@ -1751,7 +1769,7 @@ msgstr "Limite de l'état"
 msgid "Steel Drums"
 msgstr "Batterie métal"
 
-#: Programs/config.c:362
+#: Programs/config.c:373
 #, c-format
 msgid "Stop an existing instance of %s, and then exit."
 msgstr "Arrêter une session de %s en cours et quitter."
@@ -1773,7 +1791,7 @@ msgstr "Cordes"
 msgid "Superimpose Dot 7"
 msgstr "Point 7 superposé"
 
-#: Programs/config.c:648
+#: Programs/config.c:659
 msgid "Suppress start-up messages."
 msgstr "Supprime les messages au démarrage."
 
@@ -1825,7 +1843,7 @@ msgstr "Cordes synthétiques 2"
 msgid "System Log Level"
 msgstr "Niveau de journalisation du système"
 
-#: Programs/config.c:2777 Programs/menu_prefs.c:1361
+#: Programs/config.c:2792 Programs/menu_prefs.c:1361
 msgid "Tables Directory"
 msgstr "Répertoire des tables"
 
@@ -1857,7 +1875,7 @@ msgstr "Limite du texte"
 msgid "Text Style"
 msgstr "Apparence du texte"
 
-#: Programs/config.c:2798 Programs/menu_prefs.c:1273
+#: Programs/config.c:2813 Programs/menu_prefs.c:1273
 msgid "Text Table"
 msgstr "Table de texte"
 
@@ -1865,11 +1883,11 @@ msgstr "Table de texte"
 msgid "Text table."
 msgstr "Table de caractères."
 
-#: Programs/config.c:302
+#: Programs/config.c:304
 msgid "The text to be shown when the braille driver starts and to be spoken when the speech driver starts."
 msgstr "Texte à afficher au démarrage du pilote braille ou à dire quand le pilote de synthèse vocal se lance."
 
-#: Programs/config.c:309
+#: Programs/config.c:311
 msgid "The text to be shown when the braille driver stops."
 msgstr "Texte à afficher quand le pilote braille s'arrête."
 
@@ -1951,7 +1969,7 @@ msgstr "Périphérique pour les sons"
 msgid "Typing Mode"
 msgstr "Mode de saisie"
 
-#: Programs/log.c:134
+#: Programs/log.c:136
 msgid "USB I/O"
 msgstr "E/S USB"
 
@@ -1963,11 +1981,11 @@ msgstr "Souligné"
 msgid "Unfrozen"
 msgstr "Dégelé"
 
-#: Programs/config.c:2774 Programs/menu_prefs.c:1341
+#: Programs/config.c:2789 Programs/menu_prefs.c:1341
 msgid "Updatable Directory"
 msgstr "Répertoire qu'on peut mettre à jour"
 
-#: Programs/log.c:104
+#: Programs/log.c:106
 msgid "Update Events"
 msgstr "Événements de mise à jour"
 
@@ -2016,11 +2034,11 @@ msgstr "bloc de boip"
 msgid "Word Wrap"
 msgstr "Césure par mot"
 
-#: Programs/config.c:2748
+#: Programs/config.c:2763
 msgid "Working Directory"
 msgstr "Répertoire de travail"
 
-#: Programs/config.c:2775 Programs/menu_prefs.c:1351
+#: Programs/config.c:2790 Programs/menu_prefs.c:1351
 msgid "Writable Directory"
 msgstr "Répertoire accessible en écriture"
 
@@ -2028,7 +2046,7 @@ msgstr "Répertoire accessible en écriture"
 msgid "Write debugging output to stdout"
 msgstr "Écrire sortie de débogage sur stdout"
 
-#: Programs/config.c:671
+#: Programs/config.c:682
 msgid "Write the start-up logs, and then exit."
 msgstr "Écrit les journaux de démarrage et quitte."
 
@@ -2036,15 +2054,15 @@ msgstr "Écrit les journaux de démarrage et quitte."
 msgid "X display to connect to"
 msgstr "Afficheur X auquel se connecter"
 
-#: Programs/pgmprivs_linux.c:1925
+#: Programs/pgmprivs_linux.c:1951
 msgid "XDG runtime directory access problem"
 msgstr "problème d'accès au répertoire XDG utilisé lors de l'exécution"
 
-#: Programs/pgmprivs_linux.c:1907
+#: Programs/pgmprivs_linux.c:1933
 msgid "XDG runtime directory created"
 msgstr "Répertoire XDG utilisé lors de l'exécution créé"
 
-#: Programs/pgmprivs_linux.c:1902
+#: Programs/pgmprivs_linux.c:1928
 msgid "XDG runtime directory exists"
 msgstr "Le répertoire XDG utilisé lors de l'exécution existe"
 
@@ -2130,7 +2148,7 @@ msgstr "clignotant"
 msgid "blue"
 msgstr "bleu"
 
-#: Programs/config.c:2838
+#: Programs/config.c:2853
 #, c-format
 msgid "braille device not specified"
 msgstr "Périphérique braille non spécifié"
@@ -2139,15 +2157,15 @@ msgstr "Périphérique braille non spécifié"
 msgid "braille display temporarily unavailable"
 msgstr "Afficheur braille temporairement non disponible"
 
-#: Programs/config.c:1538
+#: Programs/config.c:1553
 msgid "braille driver initialization failed"
 msgstr "Échec de l'initialisation du pilote braille"
 
-#: Programs/config.c:1617
+#: Programs/config.c:1632
 msgid "braille driver not loadable"
 msgstr "Impossible de charger le pilote braille"
 
-#: Programs/config.c:1877
+#: Programs/config.c:1892
 msgid "braille driver restarting"
 msgstr "le pilote braille redémarre"
 
@@ -2204,11 +2222,11 @@ msgstr "Ne peut pas compiler la table des attributs"
 msgid "cannot compile contraction table"
 msgstr "Ne peut pas compiler la table de braille abrégé"
 
-#: Programs/config.c:1521
+#: Programs/config.c:1536
 msgid "cannot compile key table"
 msgstr "Ne peut pas compiler la table des touches"
 
-#: Programs/config.c:1098
+#: Programs/config.c:1113
 msgid "cannot compile keyboard table"
 msgstr "Ne peut pas compiler la table des touches"
 
@@ -2231,24 +2249,24 @@ msgstr "Ne peut pas se connecter au démon des périphériques braille de brltty
 msgid "cannot connect to display %s\n"
 msgstr "Ne peut pas se connecter à l'afficheur %s\n"
 
-#: Programs/file.c:350
+#: Programs/file.c:360
 msgid "cannot create directory"
 msgstr "Ne peut pas créer de répertoire"
 
-#: Programs/program.c:162
+#: Programs/program.c:148
 #, c-format
 msgid "cannot determine program directory"
 msgstr "Ne peut pas déterminer le répertoire du programme"
 
-#: Programs/config.c:2751 Programs/menu.c:544
+#: Programs/config.c:2766 Programs/menu.c:544
 msgid "cannot determine working directory"
 msgstr "Ne peut pas déterminer le répertoire de travail"
 
-#: Programs/system_windows.c:60
+#: Programs/system_windows.c:61
 msgid "cannot find procedure"
 msgstr "Ne peut pas trouver la procédure"
 
-#: Programs/program.c:170
+#: Programs/program.c:156
 msgid "cannot fix install path"
 msgstr "Ne peut pas corriger le chemin d'installation"
 
@@ -2261,7 +2279,7 @@ msgstr "Ne peut pas récupérer de tty\n"
 msgid "cannot get tty %d\n"
 msgstr "Ne peut pas récupérer le tty %d\n"
 
-#: Programs/file.c:487
+#: Programs/file.c:497
 msgid "cannot get working directory"
 msgstr "Ne peut pas obtenir de répertoire de travail"
 
@@ -2278,7 +2296,7 @@ msgstr "Ne peut pas ignorer des touches\n"
 msgid "cannot load attributes table"
 msgstr "Ne peut pas charger la table des attributs"
 
-#: Programs/system_windows.c:53
+#: Programs/system_windows.c:54
 msgid "cannot load library"
 msgstr "Ne peut pas charger la bibliothèque"
 
@@ -2286,15 +2304,15 @@ msgstr "Ne peut pas charger la bibliothèque"
 msgid "cannot load text table"
 msgstr "Ne peut pas charger la table de texte"
 
-#: Programs/file.c:339
+#: Programs/file.c:349
 msgid "cannot make world writable"
 msgstr "ne peut donner la permission d'écrire à tout le monde"
 
-#: Programs/config.c:1056
+#: Programs/config.c:1071
 msgid "cannot open key help"
 msgstr "Ne peut pas ouvrir l'aide de la touche"
 
-#: Programs/program.c:274
+#: Programs/program.c:260
 msgid "cannot open process identifier file"
 msgstr "Ne peut pas ouvrir le fichier d'identifiants de processus"
 
@@ -2311,7 +2329,7 @@ msgstr "Ne peut pas lire le fichier des préférences"
 msgid "cannot set focus to %#010x\n"
 msgstr "Ne peut pas paramétrer le focus sur %#010x\n"
 
-#: Programs/file.c:501 Programs/menu.c:531
+#: Programs/file.c:511 Programs/menu.c:531
 msgid "cannot set working directory"
 msgstr "Ne peut pas paramétrer le répertoire de travail"
 
@@ -2350,7 +2368,7 @@ msgstr "colonne"
 msgid "config"
 msgstr "Config"
 
-#: Programs/options.c:806
+#: Programs/options.c:807
 msgid "configuration directive specified more than once"
 msgstr "Ligne de configuration spécifiée plus d'une fois"
 
@@ -2370,7 +2388,7 @@ msgstr "Copie les caractères dans le presse-papier"
 msgid "copy selected text to host clipboard"
 msgstr "copie le texte sélectionné vers le presse-papier hôte"
 
-#: Programs/config.c:633 Programs/menu_prefs.c:503
+#: Programs/config.c:644 Programs/menu_prefs.c:503
 msgid "csecs"
 msgstr "csecs"
 
@@ -2452,14 +2470,14 @@ msgstr "Décrire le caractère"
 msgid "describe current character"
 msgstr "Décrire le caractère actuel"
 
-#: Programs/config.c:614 Programs/config.c:624
+#: Programs/config.c:625 Programs/config.c:635
 msgid "device"
 msgstr "périphérique"
 
 #: Programs/brltest.c:64 Programs/brltest.c:74 Programs/brltty-atb.c:32
 #: Programs/brltty-ctb.c:50 Programs/brltty-ktb.c:69 Programs/brltty-ktb.c:79
-#: Programs/brltty-trtxt.c:47 Programs/config.c:412 Programs/config.c:422
-#: Programs/config.c:432 Programs/config.c:503
+#: Programs/brltty-trtxt.c:47 Programs/config.c:323 Programs/config.c:423
+#: Programs/config.c:433 Programs/config.c:443 Programs/config.c:514
 msgid "directory"
 msgstr "répertoire"
 
@@ -2491,7 +2509,7 @@ msgstr "Points 7 et 8"
 msgid "driver request"
 msgstr "Requête du pilote"
 
-#: Programs/config.c:461 Programs/config.c:559 Programs/config.c:594
+#: Programs/config.c:472 Programs/config.c:570 Programs/config.c:605
 msgid "driver,..."
 msgstr "pilote,..."
 
@@ -2531,7 +2549,7 @@ msgstr "Eurobraille"
 msgid "exactly"
 msgstr "exactement"
 
-#: Programs/config.c:808
+#: Programs/config.c:819
 msgid "excess argument"
 msgstr "Trop d'arguments"
 
@@ -2541,7 +2559,7 @@ msgstr "Trop d'arguments"
 msgid "executing \"%s\" (from \"%s\")\n"
 msgstr "exécution de \"%s\" (à partir de \"%s\")\n"
 
-#: Programs/pgmprivs_linux.c:2010
+#: Programs/pgmprivs_linux.c:2045
 msgid "executing as the invoking user"
 msgstr "exécution en tant que l'utilisateur appelant"
 
@@ -2555,14 +2573,14 @@ msgstr "Échec de l'exécution de \"%s\" : %s\n"
 msgid "failed to get first focus\n"
 msgstr "échec de la récupération du premier focus\n"
 
-#: Programs/brltty-trtxt.c:56 Programs/brltty-trtxt.c:64 Programs/config.c:369
-#: Programs/config.c:378 Programs/config.c:388 Programs/config.c:514
-#: Programs/config.c:524 Programs/config.c:533 Programs/config.c:542
-#: Programs/config.c:578 Programs/config.c:663
+#: Programs/brltty-trtxt.c:56 Programs/brltty-trtxt.c:64 Programs/config.c:380
+#: Programs/config.c:389 Programs/config.c:399 Programs/config.c:525
+#: Programs/config.c:535 Programs/config.c:544 Programs/config.c:553
+#: Programs/config.c:589 Programs/config.c:674
 msgid "file"
 msgstr "fichier"
 
-#: Programs/options.c:992
+#: Programs/options.c:993
 #, c-format
 msgid "file '%s' processing error."
 msgstr "Erreur de traitement du fichier '%s'"
@@ -2802,7 +2820,7 @@ msgstr "Remonte à l'élément précédent"
 msgid "green"
 msgstr "vert"
 
-#: Programs/pgmprivs_linux.c:2132
+#: Programs/pgmprivs_linux.c:2167
 msgid "group permissions added"
 msgstr "permissions de groupe ajoutées"
 
@@ -2818,7 +2836,7 @@ msgstr "Écran d'aide illisible"
 msgid "home key"
 msgstr "Touche origine"
 
-#: Programs/config.c:482
+#: Programs/config.c:493
 msgid "identifier,..."
 msgstr "identifiant,..."
 
@@ -2854,7 +2872,7 @@ msgstr "insère le texte du presse-papier hôte après le curseur de l'écran"
 msgid "insert key"
 msgstr "touche Insère"
 
-#: Programs/program.c:178
+#: Programs/program.c:164
 msgid "install path not absolute"
 msgstr "Chemin d'installation non absolu"
 
@@ -2870,12 +2888,12 @@ msgstr "Séquence d'échappement non valide"
 msgid "invalid flag setting"
 msgstr "Paramètre du drapeau invalide"
 
-#: Programs/config.c:2663
+#: Programs/config.c:2678
 msgid "invalid message hold timeout"
 msgstr "Délai d'apparition du message non valide"
 
 #. the operand for an option is invalid
-#: Programs/options.c:588
+#: Programs/options.c:589
 msgid "invalid operand"
 msgstr "opérande invalide"
 
@@ -2930,7 +2948,7 @@ msgstr "ligne"
 msgid "linear copy to character"
 msgstr "copie linéaire jusqu'au caractère"
 
-#: Programs/config.c:654
+#: Programs/config.c:665
 msgid "lvl|cat,..."
 msgstr "lvl|cat,..."
 
@@ -2940,7 +2958,7 @@ msgid "magenta"
 msgstr "magenta"
 
 #. the operand for a string option hasn't been specified
-#: Programs/options.c:582
+#: Programs/options.c:583
 msgid "missing operand"
 msgstr "Opérande manquant"
 
@@ -2972,9 +2990,9 @@ msgstr "va au prochain élément de la zone de l'écran"
 msgid "move to the previous item in the screen area"
 msgstr "va à l'élément précédent de la zone de l'écran"
 
-#: Programs/config.c:345 Programs/config.c:397 Programs/config.c:450
-#: Programs/config.c:472 Programs/config.c:550 Programs/config.c:569
-#: Programs/config.c:604
+#: Programs/config.c:356 Programs/config.c:408 Programs/config.c:461
+#: Programs/config.c:483 Programs/config.c:561 Programs/config.c:580
+#: Programs/config.c:615
 msgid "name=value,..."
 msgstr "nom=valeur,..."
 
@@ -2982,7 +3000,7 @@ msgstr "nom=valeur,..."
 msgid "native"
 msgstr "natif"
 
-#: Programs/config.c:1065
+#: Programs/config.c:1080
 msgid "no key bindings"
 msgstr "Pas de raccourci clavier"
 
@@ -2990,15 +3008,15 @@ msgstr "Pas de raccourci clavier"
 msgid "no screen"
 msgstr "pas d'écran"
 
-#: Programs/config.c:706
+#: Programs/config.c:717
 msgid "none"
 msgstr "Aucun"
 
-#: Programs/config.c:1338
+#: Programs/config.c:1353
 msgid "not saved"
 msgstr "Non enregistré"
 
-#: Programs/pgmprivs_linux.c:1983
+#: Programs/pgmprivs_linux.c:2018
 msgid "not switching to an unprivileged user"
 msgstr "ne passe pas à un utilisateur non privilégié"
 
@@ -3030,7 +3048,7 @@ msgstr "ouvre la fenêtre des réglages de l'appareil"
 msgid "option"
 msgstr "option"
 
-#: Programs/pgmprivs_linux.c:2117
+#: Programs/pgmprivs_linux.c:2152
 msgid "ownership claimed"
 msgstr "propriété obtenue"
 
@@ -3046,11 +3064,11 @@ msgstr "touche page précédente"
 msgid "percentage"
 msgstr "Pourcentage"
 
-#: Programs/config.c:2636
+#: Programs/config.c:2651
 msgid "pid file not specified"
 msgstr "Fichier pid non spécifié"
 
-#: Programs/program.c:320
+#: Programs/program.c:306
 msgid "pid file open error"
 msgstr "Erreur à l'ouverture du fichier pid"
 
@@ -3087,21 +3105,21 @@ msgstr "rafraîchit l'afficheur braille"
 msgid "refresh braille line"
 msgstr "rafraîchit la ligne braille"
 
-#: Programs/config.c:404
+#: Programs/config.c:415
 msgid "regexp,..."
 msgstr "regexp,..."
 
-#: Programs/config.c:1881
+#: Programs/config.c:1896
 #, c-format
 msgid "reinitializing braille driver"
 msgstr "Réinitialisation du pilote braille"
 
-#: Programs/config.c:2394
+#: Programs/config.c:2409
 #, c-format
 msgid "reinitializing screen driver"
 msgstr "Réinitialisation du pilote de l'écran"
 
-#: Programs/config.c:2194
+#: Programs/config.c:2209
 #, c-format
 msgid "reinitializing speech driver"
 msgstr "Réinitialisation de la synthèse vocale"
@@ -3153,11 +3171,11 @@ msgstr "Enregistre les préférences sur le disque"
 msgid "scheme+..."
 msgstr "schéma+..."
 
-#: Programs/config.c:2270
+#: Programs/config.c:2285
 msgid "screen driver not loadable"
 msgstr "Pilote d'écran non chargeable"
 
-#: Programs/config.c:2391
+#: Programs/config.c:2406
 msgid "screen driver restarting"
 msgstr "le pilote de l'écran redémarre"
 
@@ -3387,11 +3405,11 @@ msgstr "énonce l'indentation de la ligne courante"
 msgid "speak speech cursor location"
 msgstr "Lit là où est le curseur de synthèse"
 
-#: Programs/config.c:2042
+#: Programs/config.c:2057
 msgid "speech driver not loadable"
 msgstr "Pilote de synthèse vocale non chargeable"
 
-#: Programs/config.c:2191
+#: Programs/config.c:2206
 msgid "speech driver restarting"
 msgstr "le pilote de la synthèse vocale redémarre"
 
@@ -3471,7 +3489,7 @@ msgstr "passe à la zone précédente de l'écran"
 msgid "switch to the previous virtual terminal"
 msgstr "Va au terminal virtuel précédent"
 
-#: Programs/pgmprivs_linux.c:1968
+#: Programs/pgmprivs_linux.c:1994
 msgid "switched to unprivileged user"
 msgstr "passé à un utilisateur non privilégié"
 
@@ -3479,7 +3497,7 @@ msgstr "passé à un utilisateur non privilégié"
 msgid "tab key"
 msgstr "Touche tab"
 
-#: Programs/config.c:300 Programs/config.c:307
+#: Programs/config.c:302 Programs/config.c:309
 msgid "text"
 msgstr "Texte"
 
@@ -3507,16 +3525,16 @@ msgstr "Commande non prise en charge"
 msgid "unknown command"
 msgstr "Commande inconnue"
 
-#: Programs/options.c:822
+#: Programs/options.c:823
 msgid "unknown configuration directive"
 msgstr "Ligne de configuration non reconnue"
 
-#: Programs/config.c:726
+#: Programs/config.c:737
 msgid "unknown log level or category"
 msgstr "Niveau ou catégorie de journalisation inconnu"
 
 #. an unknown option has been specified
-#: Programs/options.c:569
+#: Programs/options.c:570
 msgid "unknown option"
 msgstr "Option non reconnue"
 
@@ -3533,7 +3551,7 @@ msgstr "Volume"
 msgid "white"
 msgstr "blanc"
 
-#: Programs/pgmprivs_linux.c:1830
+#: Programs/pgmprivs_linux.c:1856
 msgid "working directory changed"
 msgstr "répertoire courant changé"
 
@@ -3628,6 +3646,9 @@ msgstr "xbrlapi : Le nom de la fenêtre %#010lx est devenu NULL\n"
 #: Programs/cmd_utils.c:158
 msgid "yellow"
 msgstr "jaune"
+
+#~ msgid "Bug Reports"
+#~ msgstr "Rapports de bug"
 
 #~ msgid "Autorepeat"
 #~ msgstr "Répétition automatique"

@@ -13,11 +13,12 @@
 # Web Page: http://brltty.app/
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
+#
 msgid ""
-msgstr "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+msgstr ""
 "Project-Id-Version: brltty 4.5\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-25 09:48+0100\n"
+"POT-Creation-Date: 2021-01-25 09:02-0500\n"
 "PO-Revision-Date: 2021-01-25 10:04+0100\n"
 "Last-Translator: Angela Engel <angela.engel@gmx.at>\n"
 "Language-Team: Friends of BRLTTY <BRLTTY@brlttY.app>\n"
@@ -25,6 +26,7 @@ msgstr "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: Programs/brltty.c:167
 #, c-format
@@ -3667,4 +3669,3 @@ msgstr ""
 #: Programs/cmd_utils.c:158
 msgid "yellow"
 msgstr "Gelb"
-
