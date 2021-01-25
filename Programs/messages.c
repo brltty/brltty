@@ -268,22 +268,22 @@ getItem (uint32_t offset) {
   return &messagesData.view.bytes[messagesData.getInteger(offset)];
 }
 
-static inline uint32_t
+uint32_t
 getStringCount (void) {
   return messagesData.getInteger(getHeader()->stringCount);
 }
 
-typedef struct {
+struct MessagesStringStruct {
   uint32_t length;
   uint32_t offset;
-} MessagesString;
+};
 
-static inline uint32_t
+uint32_t
 getStringLength (const MessagesString *string) {
   return messagesData.getInteger(string->length);
 }
 
-static inline const char *
+const char *
 getStringText (const MessagesString *string) {
   return getItem(string->offset);
 }
@@ -293,7 +293,7 @@ getOriginalStrings (void) {
   return getItem(getHeader()->originalStrings);
 }
 
-static inline const MessagesString *
+const MessagesString *
 getOriginalString (unsigned int index) {
   return &getOriginalStrings()[index];
 }
@@ -303,7 +303,7 @@ getTranslatedStrings (void) {
   return getItem(getHeader()->translatedStrings);
 }
 
-static inline const MessagesString *
+const MessagesString *
 getTranslatedString (unsigned int index) {
   return &getTranslatedStrings()[index];
 }

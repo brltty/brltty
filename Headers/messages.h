@@ -37,6 +37,14 @@ extern void ensureAllMessagesProperties (void);
 extern int loadMessagesData (void);
 extern void releaseMessagesData (void);
 
+typedef struct MessagesStringStruct MessagesString;
+extern const char *getStringText (const MessagesString *string);
+extern uint32_t getStringLength (const MessagesString *string);
+
+extern uint32_t getStringCount (void);
+extern const MessagesString *getOriginalString (unsigned int index);
+extern const MessagesString *getTranslatedString (unsigned int index);
+
 extern int findOriginalString (const char *text, size_t textLength, unsigned int *index);
 extern const char *findBasicTranslation (const char *text, size_t length);
 extern const char *findPluralTranslation (unsigned int index, const char *const *strings);
