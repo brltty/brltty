@@ -44,6 +44,7 @@ extern size_t countUtf8Characters (const char *text);
 
 extern int writeUtf8Character (FILE *stream, wchar_t character);
 extern int writeUtf8Characters (FILE *stream, const wchar_t *characters, size_t count);
+extern int writeUtf8ByteOrderMark (FILE *stream);
 
 #ifdef __cplusplus
 }

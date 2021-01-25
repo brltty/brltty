@@ -282,12 +282,7 @@ void
 openLogFile (const char *path) {
   closeLogFile();
   logFile = fopen(path, "w");
-
-  if (logFile) {
-    Utf8Buffer utf8;
-    convertWcharToUtf8(UNICODE_BYTE_ORDER_MARK, utf8);
-    fputs(utf8, logFile);
-  }
+  if (logFile) writeUtf8ByteOrderMark(logFile);
 }
 
 static void

@@ -242,3 +242,8 @@ writeUtf8Characters (FILE *stream, const wchar_t *characters, size_t count) {
 
   return 1;
 }
+
+int
+writeUtf8ByteOrderMark (FILE *stream) {
+  return writeUtf8Character(stream, UNICODE_BYTE_ORDER_MARK);
+}
