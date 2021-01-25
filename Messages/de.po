@@ -14,7 +14,7 @@
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 msgid ""
-msgstr ""
+msgstr "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Project-Id-Version: brltty 4.5\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
 "POT-Creation-Date: 2021-01-25 09:48+0100\n"
