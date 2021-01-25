@@ -340,7 +340,7 @@ findOriginalString (const char *text, size_t textLength, unsigned int *index) {
   return 0;
 }
 
-const char *
+const MessagesString *
 findBasicTranslation (const char *text, size_t length) {
   if (!text) return NULL;
   if (!length) return NULL;
@@ -349,8 +349,7 @@ findBasicTranslation (const char *text, size_t length) {
     unsigned int index;
 
     if (findOriginalString(text, length, &index)) {
-      const MessagesString *translation = getTranslatedString(index);
-      return getStringText(translation);
+      return getTranslatedString(index);
     }
   }
 
@@ -359,13 +358,13 @@ findBasicTranslation (const char *text, size_t length) {
 
 const char *
 getBasicTranslation (const char *text) {
-  const char *translation = findBasicTranslation(text, strlen(text));
-  if (!translation) translation = text;
-  return (char *)translation;
+  const MessagesString *translation = findBasicTranslation(text, strlen(text));
+  if (translation) return getStringText(translation);
+  return text;
 }
 
-const char *
-findPluralTranslation (unsigned int index, const char *const *strings) {
+const MessagesString *
+findPluralTranslation (const char *const *strings) {
   unsigned int count = 0;
   while (strings[count]) count += 1;
   if (!count) return NULL;
@@ -387,24 +386,20 @@ findPluralTranslation (unsigned int index, const char *const *strings) {
   }
 
   byte -= 1; // the length mustn't include the final NUL
-  const char *translation = findBasicTranslation(text, (byte - text));
-  if (!translation) return strings[index];
-
-  while (index > 0) {
-    translation += strlen(translation) + 1;
-    index -= 1;
-  }
-
-  return translation;
+  return findBasicTranslation(text, (byte - text));
 }
 
 const char *
 getPluralTranslation (const char *singular, const char *plural, unsigned long int count) {
-  unsigned int index = 0;
-  if (count != 1) index += 1;
+  int useSingular = count == 1;
 
   const char *const strings[] = {singular, plural, NULL};
-  return (char *)findPluralTranslation(index, strings);
+  const MessagesString *string = findPluralTranslation(strings);
+  if (!string) return useSingular? singular: plural;
+
+  const char *translation = getStringText(string);
+  if (!useSingular) translation += strlen(translation) + 1;
+  return translation;
 }
 
 #ifdef ENABLE_I18N_SUPPORT
