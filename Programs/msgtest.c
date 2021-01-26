@@ -184,7 +184,7 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "msgtest",
-      .argumentsSummary = "phrase [plural quantity]"
+      .argumentsSummary = "message [plural quantity]"
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);
