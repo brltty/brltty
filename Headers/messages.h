@@ -23,10 +23,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int setMessagesLocale (const char *locale);
-extern const char *getMessagesLocale (void);
+extern int setMessagesLanguage (const char *code);
+extern const char *getMessagesLanguage (void);
 
-extern int setMessagesDomain (const char *domain);
+extern int setMessagesDomain (const char *name);
 extern const char *getMessagesDomain (void);
 
 extern int setMessagesDirectory (const char *directory);
@@ -37,19 +37,19 @@ extern void ensureAllMessagesProperties (void);
 extern int loadMessagesData (void);
 extern void releaseMessagesData (void);
 
-typedef struct MessagesStringStruct MessagesString;
-extern const char *getStringText (const MessagesString *string);
-extern uint32_t getStringLength (const MessagesString *string);
+typedef struct MessageStruct Message;
+extern const char *getMessageText (const Message *message);
+extern uint32_t getMessageLength (const Message *message);
 
-extern uint32_t getStringCount (void);
-extern const MessagesString *getOriginalString (unsigned int index);
-extern const MessagesString *getTranslatedString (unsigned int index);
+extern uint32_t getMessageCount (void);
+extern const Message *getOriginalMessage (unsigned int index);
+extern const Message *getTranslatedMessage (unsigned int index);
 
-extern int findOriginalString (const char *text, size_t textLength, unsigned int *index);
-extern const MessagesString *findBasicTranslation (const char *text, size_t length);
-extern const MessagesString *findPluralTranslation (const char *const *strings);
+extern int findOriginalMessage (const char *text, size_t textLength, unsigned int *index);
+extern const Message *findSimpleTranslation (const char *text, size_t length);
+extern const Message *findPluralTranslation (const char *const *strings);
 
-extern const char *getBasicTranslation (const char *text);
+extern const char *getSimpleTranslation (const char *text);
 extern const char *getPluralTranslation (const char *singular, const char *plural, unsigned long int count);
 
 #ifdef __cplusplus

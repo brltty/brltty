@@ -29,43 +29,43 @@
 #include "parse.h"
 #include "file.h"
 
-static char *opt_locale;
-static char *opt_domain;
-static char *opt_directory;
-static int opt_utf8;
+static char *opt_languageCode;
+static char *opt_domainName;
+static char *opt_localeDirectory;
+static int opt_utf8Output;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "locale",
+  { .word = "language",
     .letter = 'l',
-    .argument = strtext("locale"),
-    .setting.string = &opt_locale,
-    .description = strtext("locale specifier for message translations")
+    .argument = strtext("code"),
+    .setting.string = &opt_languageCode,
+    .description = strtext("ISO 639 language code - language[_TERRITORY]")
   },
 
   { .word = "domain",
     .letter = 'n',
     .argument = strtext("name"),
-    .setting.string = &opt_domain,
-    .description = strtext("domain name for message translations")
+    .setting.string = &opt_domainName,
+    .description = strtext("the name of the domain containing the translations")
   },
 
   { .word = "directory",
     .letter = 'd',
-    .argument = strtext("directory"),
-    .setting.string = &opt_directory,
+    .argument = strtext("path"),
+    .setting.string = &opt_localeDirectory,
     .internal.adjust = fixInstallPath,
-    .description = strtext("locales directory containing message translations")
+    .description = strtext("the locale directory containing the translations")
   },
 
   { .word = "utf8",
     .letter = 'u',
-    .setting.flag = &opt_utf8,
-    .description = strtext("encode output with UTF-8 (not console encoding)")
+    .setting.flag = &opt_utf8Output,
+    .description = strtext("encode output with UTF-8 (not the console's encoding)")
   },
 END_OPTION_TABLE
 
 static int
-checkForOutputError (void) {
+noOutputErrorYet (void) {
   if (!ferror(stdout)) return 1;
   logMessage(LOG_ERR, "output error: %s", strerror(errno));
   return 0;
@@ -74,7 +74,7 @@ checkForOutputError (void) {
 static int
 putCharacter (char c) {
   fputc(c, stdout);
-  return checkForOutputError();
+  return noOutputErrorYet();
 }
 
 static int
@@ -84,24 +84,24 @@ putNewline (void) {
 
 static int
 putBytes (const char *bytes, size_t count) {
-  if (opt_utf8) {
+  if (opt_utf8Output) {
     fwrite(bytes, 1, count, stdout);
   } else {
     writeWithConsoleEncoding(stdout, bytes, count);
   }
 
-  return checkForOutputError();
+  return noOutputErrorYet();
 }
 
 static int
-putText (const char *text) {
-  return putBytes(text, strlen(text));
+putString (const char *string) {
+  return putBytes(string, strlen(string));
 }
 
 static int
-putString (const MessagesString *string) {
-  const char *text = getStringText(string);
-  uint32_t length = getStringLength(string);
+putMessage (const Message *message) {
+  const char *text = getMessageText(message);
+  uint32_t length = getMessageLength(message);
 
   while (length) {
     uint32_t last = length - 1;
@@ -112,15 +112,36 @@ putString (const MessagesString *string) {
   return putBytes(text, length);
 }
 
+static int
+listTranslation (const Message *original, const Message *translation) {
+  return putMessage(original)
+      && putString(" -> ")
+      && putMessage(translation)
+      && putNewline();
+}
+
 static ProgramExitStatus
-showBasicTranslation (const char *text) {
+listTranslations (void) {
+  uint32_t count = getMessageCount();
+
+  for (unsigned int index=0; index<count; index+=1) {
+    const Message *original = getOriginalMessage(index);
+    if (getMessageLength(original) == 0) continue;
+
+    const Message *translation = getTranslatedMessage(index);
+    if (!listTranslation(original, translation)) return PROG_EXIT_FATAL;
+  }
+
+  return PROG_EXIT_SUCCESS;
+}
+
+static ProgramExitStatus
+showSimpleTranslation (const char *text) {
   {
     unsigned int index;
 
-    if (findOriginalString(text, strlen(text), &index)) {
-      int ok = putString(getTranslatedString(index))
-            && putNewline();
-
+    if (findOriginalMessage(text, strlen(text), &index)) {
+      int ok = putMessage(getTranslatedMessage(index)) && putNewline();
       return ok? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
     }
   }
@@ -147,33 +168,8 @@ showPluralTranslation (const char *singular, const char *plural, const char *qua
   char text[0X10000];
   snprintf(text, sizeof(text), translation, count);
 
-  int ok = putText(text)
-        && putNewline();
-
+  int ok = putString(text) && putNewline();
   return ok? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
-}
-
-static int
-listTranslation (const MessagesString *original, const MessagesString *translation) {
-  return putString(original)
-      && putText(" -> ")
-      && putString(translation)
-      && putNewline();
-}
-
-static ProgramExitStatus
-listTranslations (void) {
-  uint32_t count = getStringCount();
-
-  for (unsigned int index=0; index<count; index+=1) {
-    const MessagesString *original = getOriginalString(index);
-    if (getStringLength(original) == 0) continue;
-
-    const MessagesString *translation = getTranslatedString(index);
-    if (!listTranslation(original, translation)) return PROG_EXIT_FATAL;
-  }
-
-  return PROG_EXIT_SUCCESS;
 }
 
 int
@@ -191,7 +187,7 @@ main (int argc, char *argv[]) {
   }
 
   {
-    const char *directory = opt_directory;
+    const char *directory = opt_localeDirectory;
 
     if (*directory) {
       if (testDirectoryPath(directory)) {
@@ -203,15 +199,14 @@ main (int argc, char *argv[]) {
     }
   }
 
-  if (*opt_locale) setMessagesLocale(opt_locale);
-  if (*opt_domain) setMessagesDomain(opt_domain);
-  if (problemEncountered) return PROG_EXIT_SEMANTIC;
+  if (*opt_languageCode) setMessagesLanguage(opt_languageCode);
+  if (*opt_domainName) setMessagesDomain(opt_domainName);
 
-  ensureAllMessagesProperties();
+  if (problemEncountered) return PROG_EXIT_SEMANTIC;
   if (!loadMessagesData()) return PROG_EXIT_FATAL;
 
   if (argc == 0) return listTranslations();
-  if (argc == 1) return showBasicTranslation(argv[0]);
+  if (argc == 1) return showSimpleTranslation(argv[0]);
   if (argc == 3) return showPluralTranslation(argv[0], argv[1], argv[2]);
 
   if (argc == 2) {

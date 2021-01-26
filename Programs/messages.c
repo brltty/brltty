@@ -38,23 +38,23 @@
 #define O_BINARY 0
 #endif /* O_BINARY */
 
-static char *messagesLocale = NULL;
-static char *messagesDomain = NULL;
-static char *messagesDirectory = NULL;
+static char *languageCode = NULL;
+static char *domainName = NULL;
+static char *localeDirectory = NULL;
 
 const char *
-getMessagesLocale (void) {
-  return messagesLocale;
+getMessagesLanguage (void) {
+  return languageCode;
 }
 
 const char *
 getMessagesDomain (void) {
-  return messagesDomain;
+  return domainName;
 }
 
 const char *
 getMessagesDirectory (void) {
-  return messagesDirectory;
+  return localeDirectory;
 }
 
 static const uint32_t magicNumber = UINT32_C(0X950412DE);
@@ -63,9 +63,9 @@ typedef uint32_t GetIntegerFunction (uint32_t value);
 typedef struct {
   uint32_t magicNumber;
   uint32_t versionNumber;
-  uint32_t stringCount;
-  uint32_t originalStrings;
-  uint32_t translatedStrings;
+  uint32_t messageCount;
+  uint32_t originalMessages;
+  uint32_t translatedMessages;
   uint32_t hashSize;
   uint32_t hashOffset;
 } MessagesHeader;
@@ -132,55 +132,53 @@ checkMagicNumber (MessagesData *data) {
 }
 
 static char *
-makeLocalesPath (void) {
-  if (messagesLocale && messagesDomain && messagesDirectory) {
-    size_t length = strlen(messagesLocale);
+makeLocaleDirectoryPath (void) {
+  size_t length = strlen(languageCode);
 
-    char dialect[length + 1];
-    strcpy(dialect, messagesLocale);
-    length = strcspn(dialect, ".@");
-    dialect[length] = 0;
+  char dialect[length + 1];
+  strcpy(dialect, languageCode);
+  length = strcspn(dialect, ".@");
+  dialect[length] = 0;
 
-    char language[length + 1];
-    strcpy(language, dialect);
-    length = strcspn(language, "_");
-    language[length] = 0;
+  char language[length + 1];
+  strcpy(language, dialect);
+  length = strcspn(language, "_");
+  language[length] = 0;
 
-    char *names[] = {dialect, language, NULL};
-    char **name = names;
+  char *codes[] = {dialect, language, NULL};
+  char **code = codes;
 
-    while (*name) {
-      char *path = makePath(messagesDirectory, *name);
+  while (*code) {
+    char *path = makePath(localeDirectory, *code);
 
-      if (path) {
-        if (testDirectoryPath(path)) return path;
-        free(path);
-      }
-
-      name += 1;
+    if (path) {
+      if (testDirectoryPath(path)) return path;
+      free(path);
     }
 
-    logMessage(LOG_WARNING,
-      "message translations not found: %s: %s",
-      messagesDomain, dialect
-    );
+    code += 1;
   }
+
+  logMessage(LOG_WARNING,
+    "message translations not found: %s: %s",
+    domainName, dialect
+  );
 
   return NULL;
 }
 
 static char *
-makeDataPath (void) {
-  char *locales = makeLocalesPath();
+makeMessagesFilePath (void) {
+  char *locale = makeLocaleDirectoryPath();
 
-  if (locales) {
-    char *category = makePath(locales, "LC_MESSAGES");
+  if (locale) {
+    char *category = makePath(locale, "LC_MESSAGES");
 
-    free(locales);
-    locales = NULL;
+    free(locale);
+    locale = NULL;
 
     if (category) {
-      char *file = makeFilePath(category, messagesDomain, ".mo");
+      char *file = makeFilePath(category, domainName, ".mo");
 
       free(category);
       category = NULL;
@@ -195,9 +193,10 @@ makeDataPath (void) {
 int
 loadMessagesData (void) {
   if (messagesData.view.area) return 1;
+  ensureAllMessagesProperties();
 
   int loaded = 0;
-  char *path = makeDataPath();
+  char *path = makeMessagesFilePath();
 
   if (path) {
     int fd = open(path, (O_RDONLY | O_BINARY));
@@ -214,7 +213,10 @@ loadMessagesData (void) {
             ssize_t count = read(fd, area, size);
 
             if (count == -1) {
-              logMessage(LOG_WARNING, "messages data read error: %s: %s", path, strerror(errno));
+              logMessage(LOG_WARNING,
+                "messages data read error: %s: %s",
+                path, strerror(errno)
+              );
             } else if (count < size) {
               logMessage(LOG_WARNING,
                 "truncated messages data: %"PRIssize" < %"PRIsize": %s",
@@ -228,6 +230,7 @@ loadMessagesData (void) {
 
               if (checkMagicNumber(&data)) {
                 messagesData = data;
+                area = NULL;
                 loaded = 1;
               }
             }
@@ -236,14 +239,22 @@ loadMessagesData (void) {
           } else {
             logMallocError();
           }
+        } else {
+          logMessage(LOG_WARNING, "no messages data");
         }
       } else {
-        logMessage(LOG_WARNING, "messages file stat error: %s: %s", path, strerror(errno));
+        logMessage(LOG_WARNING,
+          "messages file stat error: %s: %s",
+          path, strerror(errno)
+        );
       }
 
       close(fd);
     } else {
-      logMessage(LOG_WARNING, "messages file open error: %s: %s", path, strerror(errno));
+      logMessage(LOG_WARNING,
+        "messages file open error: %s: %s",
+        path, strerror(errno)
+      );
     }
 
     free(path);
@@ -254,13 +265,8 @@ loadMessagesData (void) {
 
 void
 releaseMessagesData (void) {
-  if (messagesData.view.area) {
-    free(messagesData.view.area);
-    messagesData.view.area = NULL;
-  }
-
-  messagesData.areaSize = 0;
-  messagesData.getInteger = NULL;
+  if (messagesData.view.area) free(messagesData.view.area);
+  memset(&messagesData, 0, sizeof(messagesData));
 }
 
 static inline const MessagesHeader *
@@ -274,65 +280,65 @@ getItem (uint32_t offset) {
 }
 
 uint32_t
-getStringCount (void) {
-  return messagesData.getInteger(getHeader()->stringCount);
+getMessageCount (void) {
+  return messagesData.getInteger(getHeader()->messageCount);
 }
 
-struct MessagesStringStruct {
+struct MessageStruct {
   uint32_t length;
   uint32_t offset;
 };
 
 uint32_t
-getStringLength (const MessagesString *string) {
-  return messagesData.getInteger(string->length);
+getMessageLength (const Message *message) {
+  return messagesData.getInteger(message->length);
 }
 
 const char *
-getStringText (const MessagesString *string) {
-  return getItem(string->offset);
+getMessageText (const Message *message) {
+  return getItem(message->offset);
 }
 
-static inline const MessagesString *
-getOriginalStrings (void) {
-  return getItem(getHeader()->originalStrings);
+static inline const Message *
+getOriginalMessages (void) {
+  return getItem(getHeader()->originalMessages);
 }
 
-const MessagesString *
-getOriginalString (unsigned int index) {
-  return &getOriginalStrings()[index];
+static inline const Message *
+getTranslatedMessages (void) {
+  return getItem(getHeader()->translatedMessages);
 }
 
-static inline const MessagesString *
-getTranslatedStrings (void) {
-  return getItem(getHeader()->translatedStrings);
+const Message *
+getOriginalMessage (unsigned int index) {
+  return &getOriginalMessages()[index];
 }
 
-const MessagesString *
-getTranslatedString (unsigned int index) {
-  return &getTranslatedStrings()[index];
+const Message *
+getTranslatedMessage (unsigned int index) {
+  return &getTranslatedMessages()[index];
 }
 
 int
-findOriginalString (const char *text, size_t textLength, unsigned int *index) {
-  const MessagesString *strings = getOriginalStrings();
+findOriginalMessage (const char *text, size_t textLength, unsigned int *index) {
+  const Message *messages = getOriginalMessages();
   int from = 0;
-  int to = getStringCount();
+  int to = getMessageCount();
 
   while (from < to) {
     int current = (from + to) / 2;
-    const MessagesString *string = &strings[current];
+    const Message *message = &messages[current];
 
-    uint32_t stringLength = getStringLength(string);
-    int relation = memcmp(text, getStringText(string), MIN(textLength, stringLength));
+    uint32_t messageLength = getMessageLength(message);
+    int relation = memcmp(text, getMessageText(message), MIN(textLength, messageLength));
 
     if (relation == 0) {
-      if (textLength == stringLength) {
+      if (textLength == messageLength) {
         *index = current;
         return 1;
       }
 
-      relation = (textLength < stringLength)? -1: 1;
+      relation = (textLength < messageLength)? -1: 1;
     }
 
     if (relation < 0) {
@@ -345,16 +351,16 @@ findOriginalString (const char *text, size_t textLength, unsigned int *index) {
   return 0;
 }
 
-const MessagesString *
-findBasicTranslation (const char *text, size_t length) {
+const Message *
+findSimpleTranslation (const char *text, size_t length) {
   if (!text) return NULL;
   if (!length) return NULL;
 
   if (loadMessagesData()) {
     unsigned int index;
 
-    if (findOriginalString(text, length, &index)) {
-      return getTranslatedString(index);
+    if (findOriginalMessage(text, length, &index)) {
+      return getTranslatedMessage(index);
     }
   }
 
@@ -362,13 +368,13 @@ findBasicTranslation (const char *text, size_t length) {
 }
 
 const char *
-getBasicTranslation (const char *text) {
-  const MessagesString *translation = findBasicTranslation(text, strlen(text));
-  if (translation) return getStringText(translation);
+getSimpleTranslation (const char *text) {
+  const Message *translation = findSimpleTranslation(text, strlen(text));
+  if (translation) return getMessageText(translation);
   return text;
 }
 
-const MessagesString *
+const Message *
 findPluralTranslation (const char *const *strings) {
   unsigned int count = 0;
   while (strings[count]) count += 1;
@@ -391,7 +397,7 @@ findPluralTranslation (const char *const *strings) {
   }
 
   byte -= 1; // the length mustn't include the final NUL
-  return findBasicTranslation(text, (byte - text));
+  return findSimpleTranslation(text, (byte - text));
 }
 
 const char *
@@ -399,10 +405,10 @@ getPluralTranslation (const char *singular, const char *plural, unsigned long in
   int useSingular = count == 1;
 
   const char *const strings[] = {singular, plural, NULL};
-  const MessagesString *string = findPluralTranslation(strings);
-  if (!string) return useSingular? singular: plural;
+  const Message *message = findPluralTranslation(strings);
+  if (!message) return useSingular? singular: plural;
 
-  const char *translation = getStringText(string);
+  const char *translation = getMessageText(message);
   if (!useSingular) translation += strlen(translation) + 1;
   return translation;
 }
@@ -424,7 +430,7 @@ setDomain (const char *domain) {
 
 static int
 setDirectory (const char *directory) {
-  if (bindtextdomain(messagesDomain, directory)) return 1;
+  if (bindtextdomain(domainName, directory)) return 1;
   logSystemError("bindtextdomain");
   return 0;
 }
@@ -441,7 +447,7 @@ setDirectory (const char *directory) {
 
 char *
 gettext (const char *text) {
-  return (char *)getBasicTranslation(text);
+  return (char *)getSimpleTranslation(text);
 }
 
 char *
@@ -455,6 +461,8 @@ updateProperty (
   char **property, const char *value, const char *defaultValue,
   int (*setter) (const char *value)
 ) {
+  releaseMessagesData();
+
   if (!(value && *value)) value = defaultValue;
   char *copy = strdup(value);
 
@@ -474,29 +482,26 @@ updateProperty (
 }
 
 int
-setMessagesLocale (const char *locale) {
-  releaseMessagesData();
-  return updateProperty(&messagesLocale, locale, "C.UTF-8", NULL);
+setMessagesLanguage (const char *code) {
+  return updateProperty(&languageCode, code, "C.UTF-8", NULL);
 }
 
 int
-setMessagesDomain (const char *domain) {
-  releaseMessagesData();
-  return updateProperty(&messagesDomain, domain, PACKAGE_TARNAME, setDomain);
+setMessagesDomain (const char *name) {
+  return updateProperty(&domainName, name, PACKAGE_TARNAME, setDomain);
 }
 
 int
 setMessagesDirectory (const char *directory) {
-  releaseMessagesData();
-  return updateProperty(&messagesDirectory, directory, LOCALE_DIRECTORY, setDirectory);
+  return updateProperty(&localeDirectory, directory, LOCALE_DIRECTORY, setDirectory);
 }
 
 void
 ensureAllMessagesProperties (void) {
-  if (!messagesLocale) {
-    setMessagesLocale(setlocale(LC_MESSAGES, ""));
+  if (!languageCode) {
+    setMessagesLanguage(setlocale(LC_MESSAGES, ""));
   }
 
-  if (!messagesDomain) setMessagesDomain(NULL);
-  if (!messagesDirectory) setMessagesDirectory(NULL);
+  if (!domainName) setMessagesDomain(NULL);
+  if (!localeDirectory) setMessagesDirectory(NULL);
 }
