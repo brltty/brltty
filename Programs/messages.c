@@ -38,23 +38,23 @@
 #define O_BINARY 0
 #endif /* O_BINARY */
 
-static char *languageCode = NULL;
-static char *domainName = NULL;
 static char *localeDirectory = NULL;
+static char *localeSpecifier = NULL;
+static char *domainName = NULL;
 
 const char *
-getMessagesLanguage (void) {
-  return languageCode;
+getMessagesDirectory (void) {
+  return localeDirectory;
+}
+
+const char *
+getMessagesLocale (void) {
+  return localeSpecifier;
 }
 
 const char *
 getMessagesDomain (void) {
   return domainName;
-}
-
-const char *
-getMessagesDirectory (void) {
-  return localeDirectory;
 }
 
 static const uint32_t magicNumber = UINT32_C(0X950412DE);
@@ -133,10 +133,10 @@ checkMagicNumber (MessagesData *data) {
 
 static char *
 makeLocaleDirectoryPath (void) {
-  size_t length = strlen(languageCode);
+  size_t length = strlen(localeSpecifier);
 
   char dialect[length + 1];
-  strcpy(dialect, languageCode);
+  strcpy(dialect, localeSpecifier);
   length = strcspn(dialect, ".@");
   dialect[length] = 0;
 
@@ -159,11 +159,7 @@ makeLocaleDirectoryPath (void) {
     code += 1;
   }
 
-  logMessage(LOG_WARNING,
-    "message translations not found: %s: %s",
-    domainName, languageCode
-  );
-
+  logMessage(LOG_WARNING, "messages locale not found: %s", localeSpecifier);
   return NULL;
 }
 
@@ -415,6 +411,13 @@ getPluralTranslation (const char *singular, const char *plural, unsigned long in
 
 #ifdef ENABLE_I18N_SUPPORT
 static int
+setDirectory (const char *directory) {
+  if (bindtextdomain(domainName, directory)) return 1;
+  logSystemError("bindtextdomain");
+  return 0;
+}
+
+static int
 setDomain (const char *domain) {
   if (!textdomain(domain)) {
     logSystemError("textdomain");
@@ -427,21 +430,14 @@ setDomain (const char *domain) {
 
   return 1;
 }
-
-static int
-setDirectory (const char *directory) {
-  if (bindtextdomain(domainName, directory)) return 1;
-  logSystemError("bindtextdomain");
-  return 0;
-}
 #else /* ENABLE_I18N_SUPPORT */
 static int
-setDomain (const char *domain) {
+setDirectory (const char *directory) {
   return 1;
 }
 
 static int
-setDirectory (const char *directory) {
+setDomain (const char *domain) {
   return 1;
 }
 
@@ -482,8 +478,13 @@ updateProperty (
 }
 
 int
-setMessagesLanguage (const char *code) {
-  return updateProperty(&languageCode, code, "C.UTF-8", NULL);
+setMessagesDirectory (const char *directory) {
+  return updateProperty(&localeDirectory, directory, LOCALE_DIRECTORY, setDirectory);
+}
+
+int
+setMessagesLocale (const char *specifier) {
+  return updateProperty(&localeSpecifier, specifier, "C.UTF-8", NULL);
 }
 
 int
@@ -491,15 +492,10 @@ setMessagesDomain (const char *name) {
   return updateProperty(&domainName, name, PACKAGE_TARNAME, setDomain);
 }
 
-int
-setMessagesDirectory (const char *directory) {
-  return updateProperty(&localeDirectory, directory, LOCALE_DIRECTORY, setDirectory);
-}
-
 void
 ensureAllMessagesProperties (void) {
-  if (!languageCode) {
-    setMessagesLanguage(setlocale(LC_MESSAGES, ""));
+  if (!localeSpecifier) {
+    setMessagesLocale(setlocale(LC_MESSAGES, ""));
   }
 
   if (!domainName) setMessagesDomain(NULL);

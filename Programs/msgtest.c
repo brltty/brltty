@@ -29,17 +29,25 @@
 #include "parse.h"
 #include "file.h"
 
-static char *opt_languageCode;
-static char *opt_domainName;
 static char *opt_localeDirectory;
+static char *opt_localeSpecifier;
+static char *opt_domainName;
 static int opt_utf8Output;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "language",
+  { .word = "directory",
+    .letter = 'd',
+    .argument = strtext("path"),
+    .setting.string = &opt_localeDirectory,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("the locale directory containing the translations")
+  },
+
+  { .word = "locale",
     .letter = 'l',
-    .argument = strtext("code"),
-    .setting.string = &opt_languageCode,
-    .description = strtext("ISO 639 language code - language[_TERRITORY]")
+    .argument = strtext("specifier"),
+    .setting.string = &opt_localeSpecifier,
+    .description = strtext("the loale in which to look up a translation")
   },
 
   { .word = "domain",
@@ -49,18 +57,10 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("the name of the domain containing the translations")
   },
 
-  { .word = "directory",
-    .letter = 'd',
-    .argument = strtext("path"),
-    .setting.string = &opt_localeDirectory,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("the locale directory containing the translations")
-  },
-
   { .word = "utf8",
     .letter = 'u',
     .setting.flag = &opt_utf8Output,
-    .description = strtext("encode output with UTF-8 (not the console's encoding)")
+    .description = strtext("write the translations using UTF-8")
   },
 END_OPTION_TABLE
 
@@ -199,7 +199,7 @@ main (int argc, char *argv[]) {
     }
   }
 
-  if (*opt_languageCode) setMessagesLanguage(opt_languageCode);
+  if (*opt_localeSpecifier) setMessagesLocale(opt_localeSpecifier);
   if (*opt_domainName) setMessagesDomain(opt_domainName);
 
   if (problemEncountered) return PROG_EXIT_SEMANTIC;

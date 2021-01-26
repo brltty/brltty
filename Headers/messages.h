@@ -23,14 +23,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int setMessagesLanguage (const char *code);
-extern const char *getMessagesLanguage (void);
+extern int setMessagesDirectory (const char *directory);
+extern const char *getMessagesDirectory (void);
+
+extern int setMessagesLocale (const char *specifier);
+extern const char *getMessagesLocale (void);
 
 extern int setMessagesDomain (const char *name);
 extern const char *getMessagesDomain (void);
-
-extern int setMessagesDirectory (const char *directory);
-extern const char *getMessagesDirectory (void);
 
 extern void ensureAllMessagesProperties (void);
 
