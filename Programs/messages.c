@@ -159,6 +159,11 @@ makeLocalesPath (void) {
 
       name += 1;
     }
+
+    logMessage(LOG_WARNING,
+      "message translations not found: %s: %s",
+      messagesDomain, dialect
+    );
   }
 
   return NULL;
