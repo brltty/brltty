@@ -32,20 +32,21 @@
 static char *opt_locale;
 static char *opt_domain;
 static char *opt_directory;
+static int opt_utf8;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "locale",
     .letter = 'l',
     .argument = strtext("locale"),
     .setting.string = &opt_locale,
-    .description = strtext("locale for message translations")
+    .description = strtext("locale specifier for message translations")
   },
 
   { .word = "domain",
     .letter = 'n',
     .argument = strtext("name"),
     .setting.string = &opt_domain,
-    .description = strtext("domain for translations")
+    .description = strtext("domain name for message translations")
   },
 
   { .word = "directory",
@@ -53,7 +54,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_directory,
     .internal.adjust = fixInstallPath,
-    .description = strtext("path to directory containing message translations")
+    .description = strtext("locales directory containing message translations")
+  },
+
+  { .word = "utf8",
+    .letter = 'u',
+    .setting.flag = &opt_utf8,
+    .description = strtext("encode output with UTF-8 (not console encoding)")
   },
 END_OPTION_TABLE
 
@@ -76,15 +83,24 @@ putNewline (void) {
 }
 
 static int
-putText (const char *text) {
-  fputs(text, stdout);
+putBytes (const char *bytes, size_t count) {
+  if (opt_utf8) {
+    fwrite(bytes, 1, count, stdout);
+  } else {
+    writeWithConsoleEncoding(stdout, bytes, count);
+  }
+
   return checkForOutputError();
 }
 
 static int
+putText (const char *text) {
+  return putBytes(text, strlen(text));
+}
+
+static int
 putString (const MessagesString *string) {
-  writeWithConsoleEncoding(stdout, getStringText(string), getStringLength(string));
-  return 1;
+  return putBytes(getStringText(string), getStringLength(string));
 }
 
 static ProgramExitStatus
