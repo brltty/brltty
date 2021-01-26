@@ -148,7 +148,7 @@ makeLocaleDirectoryPath (void) {
   char *codes[] = {dialect, language, NULL};
   char **code = codes;
 
-  while (*code) {
+  while (*code && **code) {
     char *path = makePath(localeDirectory, *code);
 
     if (path) {
@@ -161,7 +161,7 @@ makeLocaleDirectoryPath (void) {
 
   logMessage(LOG_WARNING,
     "message translations not found: %s: %s",
-    domainName, dialect
+    domainName, languageCode
   );
 
   return NULL;
