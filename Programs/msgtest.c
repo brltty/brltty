@@ -100,7 +100,16 @@ putText (const char *text) {
 
 static int
 putString (const MessagesString *string) {
-  return putBytes(getStringText(string), getStringLength(string));
+  const char *text = getStringText(string);
+  uint32_t length = getStringLength(string);
+
+  while (length) {
+    uint32_t last = length - 1;
+    if (text[last] != '\n') break;
+    length = last;
+  }
+
+  return putBytes(text, length);
 }
 
 static ProgramExitStatus
