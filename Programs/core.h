@@ -42,7 +42,7 @@ extern int isContractedBraille (void);
 extern int isSixDotBraille (void);
 extern void setContractedBraille (int contracted);
 extern void setSixDotBraille (int sixDot);
-extern void onTextStyleUpdated (void);
+extern void onBrailleTypeUpdated (void);
 
 extern ScreenDescription scr;
 #define SCR_COLUMN_OK(column) IS_WITHIN_BOUNDS((column), scr.cols)

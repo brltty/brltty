@@ -30,11 +30,12 @@ typedef struct {
 
 struct PreferenceDefinitionStruct {
   const char *name;
-  unsigned char *encountered;
-  const PreferenceStringTable *settingNames;
-  unsigned char defaultValue;
-  unsigned char settingCount;
   unsigned char *setting;
+  const PreferenceStringTable *settingNames;
+  unsigned char *encountered;
+  unsigned char settingCount;
+  unsigned char defaultValue;
+  unsigned char dontSave:1;
 };
 
 extern unsigned char statusFieldsSet;

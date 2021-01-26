@@ -498,21 +498,23 @@ savePreferencesFile (const char *path) {
     if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_NAME) < 0) goto done;
 
     while (pref < end) {
-      if (!putPreferenceComment(file, pref)) break;
-      if (fputs(pref->name, file) == EOF) break;
+      if (!pref->dontSave) {
+        if (!putPreferenceComment(file, pref)) break;
+        if (fputs(pref->name, file) == EOF) break;
 
-      if (pref->settingCount) {
-        unsigned char count = pref->settingCount;
-        unsigned char *setting = pref->setting;
+        if (pref->settingCount) {
+          unsigned char count = pref->settingCount;
+          unsigned char *setting = pref->setting;
 
-        while (count-- && *setting) {
-          if (!putPreferenceSetting(file, *setting++, pref->settingNames)) goto done;
+          while (count-- && *setting) {
+            if (!putPreferenceSetting(file, *setting++, pref->settingNames)) goto done;
+          }
+        } else if (!putPreferenceSetting(file, *pref->setting, pref->settingNames)) {
+          goto done;
         }
-      } else if (!putPreferenceSetting(file, *pref->setting, pref->settingNames)) {
-        goto done;
-      }
 
-      if (fputs("\n", file) == EOF) goto done;
+        if (fputs("\n", file) == EOF) goto done;
+      }
 
       pref += 1;
     }

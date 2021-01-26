@@ -120,8 +120,8 @@ handleToggleCommands (int command, void *data) {
       break;
 
     case BRL_CMD_SIXDOTS:
-      togglePreferenceSetting(&prefs.textStyle, command);
-      onTextStyleUpdated();
+      togglePreferenceSetting(&prefs.brailleType, command);
+      onBrailleTypeUpdated();
       break;
 
     case BRL_CMD_CSRTRK:

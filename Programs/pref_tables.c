@@ -38,7 +38,11 @@ PREFERENCE_STRING_TABLE(boolean,
 )
 
 PREFERENCE_STRING_TABLE(textStyle,
-  "8dot-computer", "6dot-contracted", "6dot-computer", "8dot-contracted"
+  "8dot", "contracted", "6dot", "literary"
+)
+
+PREFERENCE_STRING_TABLE(brailleType,
+  "computer8", "contracted6", "computer6", "contracted8"
 )
 
 PREFERENCE_STRING_TABLE(capitalizationMode,
@@ -158,10 +162,19 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.showAllItems
   },
 
+  // text-style is an old entry which should be before braille-type
   { .name = "text-style",
-    .defaultValue = DEFAULT_TEXT_STYLE,
+    .dontSave = 1,
+    .defaultValue = DEFAULT_BRAILLE_TYPE,
     .settingNames = &preferenceStringTable_textStyle,
-    .setting = &prefs.textStyle
+    .setting = &prefs.brailleType
+  },
+
+  // braille-type is a new entry which should be after text-style
+  { .name = "braille-type",
+    .defaultValue = DEFAULT_BRAILLE_TYPE,
+    .settingNames = &preferenceStringTable_brailleType,
+    .setting = &prefs.brailleType
   },
 
   { .name = "expand-current-word",
