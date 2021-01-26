@@ -474,7 +474,7 @@ putPreferenceComment (FILE *file, const PreferenceDefinition *pref) {
 }
 
 static int
-putPreferenceSetting (FILE *file, unsigned char setting, const PreferenceStringTable *names) {
+putSetting (FILE *file, unsigned char setting, const PreferenceStringTable *names) {
   if (fputc(' ', file) == EOF) return 0;
 
   if (names && (setting < names->count)) {
@@ -487,7 +487,7 @@ putPreferenceSetting (FILE *file, unsigned char setting, const PreferenceStringT
 }
 
 static int
-savePreference (FILE *file, const PreferenceDefinition *pref) {
+putPreference (FILE *file, const PreferenceDefinition *pref) {
   if (pref->dontSave) return 1;
 
   if (!putPreferenceComment(file, pref)) return 0;
@@ -498,13 +498,26 @@ savePreference (FILE *file, const PreferenceDefinition *pref) {
     unsigned char *setting = pref->setting;
 
     while (count-- && *setting) {
-      if (!putPreferenceSetting(file, *setting++, pref->settingNames)) return 0;
+      if (!putSetting(file, *setting++, pref->settingNames)) return 0;
     }
-  } else if (!putPreferenceSetting(file, *pref->setting, pref->settingNames)) {
+  } else if (!putSetting(file, *pref->setting, pref->settingNames)) {
     return 0;
   }
 
   if (fputs("\n", file) == EOF) return 0;
+  return 1;
+}
+
+static int
+putPreferences (FILE *file) {
+  const PreferenceDefinition *pref = preferenceDefinitionTable;
+  const PreferenceDefinition *const end = pref + preferenceDefinitionCount;
+
+  while (pref < end) {
+    if (!putPreference(file, pref)) return 0;
+    pref += 1;
+  }
+
   return 1;
 }
 
@@ -514,20 +527,12 @@ savePreferencesFile (const char *path) {
   FILE *file = openDataFile(path, "w", 0);
 
   if (file) {
-    if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_NAME) < 0) {
-      goto error;
+    if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_NAME) >= 0) {
+      if (putPreferences(file)) {
+        ok = 1;
+      }
     }
 
-    const PreferenceDefinition *pref = preferenceDefinitionTable;
-    const PreferenceDefinition *const end = pref + preferenceDefinitionCount;
-
-    while (pref < end) {
-      if (!savePreference(file, pref)) goto error;
-      pref += 1;
-    }
-
-    ok = 1;
-  error:
     if (!ok) {
       if (!ferror(file)) errno = EIO;
       logMessage(LOG_ERR,
