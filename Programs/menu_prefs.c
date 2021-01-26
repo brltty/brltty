@@ -611,9 +611,9 @@ makePreferencesMenu (void) {
     {
       static const MenuString strings[] = {
         {.label=strtext("8-Dot Computer Braille")},
-        {.label=strtext("Contracted Braille")},
+        {.label=strtext("6-Dot Contracted Braille")},
         {.label=strtext("6-Dot Computer Braille")},
-        {.label=strtext("Literary Braille")}
+        {.label=strtext("8-Dot Contracted Braille")}
       };
 
       NAME(strtext("Text Style"));

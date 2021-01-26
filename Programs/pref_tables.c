@@ -38,7 +38,7 @@ PREFERENCE_STRING_TABLE(boolean,
 )
 
 PREFERENCE_STRING_TABLE(textStyle,
-  "8dot", "contracted", "6dot", "literary"
+  "8dot-computer", "6dot-contracted", "6dot-computer", "8dot-contracted"
 )
 
 PREFERENCE_STRING_TABLE(capitalizationMode,
