@@ -834,7 +834,7 @@ brlttyPrepare (int argc, char *argv[]) {
 
   logProgramBanner();
   logProperty(opt_logLevel, "logLevel", gettext("Log Level"));
-  logProperty(getMessagesLocale(), "messagesLocale", gettext("Messages Locale"));
+  logProperty(getMessagesLanguage(), "messagesLanguage", gettext("Messages Language"));
   logProperty(getMessagesDomain(), "messagesDomain", gettext("Messages Domain"));
   logProperty(getMessagesDirectory(), "messagesDirectory", gettext("Messages Directory"));
 
