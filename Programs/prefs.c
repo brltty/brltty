@@ -486,45 +486,55 @@ putPreferenceSetting (FILE *file, unsigned char setting, const PreferenceStringT
   return 1;
 }
 
+static int
+savePreference (FILE *file, const PreferenceDefinition *pref) {
+  if (pref->dontSave) return 1;
+
+  if (!putPreferenceComment(file, pref)) return 0;
+  if (fputs(pref->name, file) == EOF) return 0;
+
+  if (pref->settingCount) {
+    unsigned char count = pref->settingCount;
+    unsigned char *setting = pref->setting;
+
+    while (count-- && *setting) {
+      if (!putPreferenceSetting(file, *setting++, pref->settingNames)) return 0;
+    }
+  } else if (!putPreferenceSetting(file, *pref->setting, pref->settingNames)) {
+    return 0;
+  }
+
+  if (fputs("\n", file) == EOF) return 0;
+  return 1;
+}
+
 int
 savePreferencesFile (const char *path) {
   int ok = 0;
   FILE *file = openDataFile(path, "w", 0);
 
   if (file) {
+    if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_NAME) < 0) {
+      goto error;
+    }
+
     const PreferenceDefinition *pref = preferenceDefinitionTable;
     const PreferenceDefinition *const end = pref + preferenceDefinitionCount;
 
-    if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_NAME) < 0) goto done;
-
     while (pref < end) {
-      if (!pref->dontSave) {
-        if (!putPreferenceComment(file, pref)) break;
-        if (fputs(pref->name, file) == EOF) break;
-
-        if (pref->settingCount) {
-          unsigned char count = pref->settingCount;
-          unsigned char *setting = pref->setting;
-
-          while (count-- && *setting) {
-            if (!putPreferenceSetting(file, *setting++, pref->settingNames)) goto done;
-          }
-        } else if (!putPreferenceSetting(file, *pref->setting, pref->settingNames)) {
-          goto done;
-        }
-
-        if (fputs("\n", file) == EOF) goto done;
-      }
-
+      if (!savePreference(file, pref)) goto error;
       pref += 1;
     }
 
     ok = 1;
-  done:
+  error:
     if (!ok) {
       if (!ferror(file)) errno = EIO;
-      logMessage(LOG_ERR, "%s: %s: %s",
-                 gettext("cannot write to preferences file"), path, strerror(errno));
+      logMessage(LOG_ERR,
+        "%s: %s: %s",
+        gettext("cannot write to preferences file"),
+        path, strerror(errno)
+      );
     }
 
     fclose(file);
