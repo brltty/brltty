@@ -40,6 +40,7 @@ extern void releaseMessagesData (void);
 extern uint32_t getMessageCount (void);
 extern const char *getMessagesMetadata (void);
 extern char *getMessagesProperty (const char *name);
+extern char *getMessagesAttribute (const char *property, const char *name);
 
 #define MESSAGES_PROPERTY_MIME_VERSION "MIME-Version"
 #define MESSAGES_PROPERTY_CONTENT_TYPE "Content-Type"

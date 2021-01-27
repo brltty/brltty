@@ -362,6 +362,51 @@ getMessagesProperty (const char *name) {
   return NULL;
 }
 
+char *
+getMessagesAttribute (const char *property, const char *name) {
+  size_t nameLength = strlen(name);
+  const char *byte = property;
+
+  while (*byte) {
+    while (iswspace(*byte)) byte += 1;
+    const char *nameStart = byte;
+
+    while (iswalpha(*byte)) byte += 1;
+    const char *nameEnd = byte;
+
+    while (iswspace(*byte)) byte += 1;
+    if (!*byte) break;
+
+    if (*byte != '=') continue;
+    byte += 1;
+
+    while (iswspace(*byte)) byte += 1;
+    const char *valueStart = byte;
+
+    while (*byte && (*byte != ';')) byte += 1;
+    const char *valueEnd = byte;
+    if (*byte) byte += 1;
+
+    if ((nameEnd - nameStart) == nameLength) {
+      if (memcmp(name, nameStart, nameLength) == 0) {
+        size_t length = valueEnd - valueStart;
+        char *value = malloc(length + 1);
+
+        if (value) {
+          memcpy(value, valueStart, length);
+          value[length] = 0;
+        } else {
+          logMallocError();
+        }
+
+        return value;
+      }
+    }
+  }
+
+  return NULL;
+}
+
 int
 findOriginalMessage (const char *text, size_t textLength, unsigned int *index) {
   const Message *messages = getOriginalMessages();
