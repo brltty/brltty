@@ -106,6 +106,12 @@ putNewline (void) {
 
 static int
 putBytes (const char *bytes, size_t count) {
+  while (count) {
+    uint32_t last = count - 1;
+    if (bytes[last] != '\n') break;
+    count = last;
+  }
+
   if (opt_utf8Output) {
     fwrite(bytes, 1, count, stdout);
   } else {
@@ -122,16 +128,7 @@ putString (const char *string) {
 
 static int
 putMessage (const Message *message) {
-  const char *text = getMessageText(message);
-  uint32_t length = getMessageLength(message);
-
-  while (length) {
-    uint32_t last = length - 1;
-    if (text[last] != '\n') break;
-    length = last;
-  }
-
-  return putBytes(text, length);
+  return putBytes(getMessageText(message), getMessageLength(message));
 }
 
 static int
@@ -174,10 +171,7 @@ showSimpleTranslation (const char *text) {
 static int
 showPluralTranslation (const char *singular, const char *plural, int count) {
   const char *translation = getPluralTranslation(singular, plural, count);
-  char text[0X10000];
-  snprintf(text, sizeof(text), translation, count);
-
-  return putString(text) && putNewline();
+  return putString(translation) && putNewline();
 }
 
 static int
