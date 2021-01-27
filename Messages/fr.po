@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-25 08:46-0500\n"
-"PO-Revision-Date: 2018-08-16 10:59+0200\n"
+"POT-Creation-Date: 2021-01-27 14:41+0100\n"
+"PO-Revision-Date: 2021-01-27 13:50+0000\n"
 "Last-Translator: Jean-Philippe MENGUAL (de Traduc.org) <jpmengual@debian.org>\n"
 "Language-Team: Friends of BRLTTY <BRLTTY@brlttY.app>\n"
 "Language: fr\n"
@@ -88,12 +88,20 @@ msgid "500 milliseconds"
 msgstr "500 millisecondes"
 
 #: Programs/menu_prefs.c:615
-msgid "6-Dot Computer Braille"
-msgstr "Braille informatique 6 points"
+msgid "6-Dot Computer"
+msgstr ""
+
+#: Programs/menu_prefs.c:614
+msgid "6-Dot Contracted"
+msgstr ""
 
 #: Programs/menu_prefs.c:613
-msgid "8-Dot Computer Braille"
-msgstr "Braille informatique 8 points"
+msgid "8-Dot Computer"
+msgstr ""
+
+#: Programs/menu_prefs.c:616
+msgid "8-Dot Contracted"
+msgstr ""
 
 #: Programs/brltty-ttb.c:179
 msgid "8-bit character set to use."
@@ -322,6 +330,10 @@ msgstr "Affichage braille"
 msgid "Braille Tables"
 msgstr "Tables braille"
 
+#: Programs/menu_prefs.c:619
+msgid "Braille Type"
+msgstr ""
+
 #: Programs/menu_prefs.c:821
 msgid "Braille Typing"
 msgstr "Saisie Braille"
@@ -447,10 +459,6 @@ msgstr "Beep d'alerte de la console"
 #: Programs/midi.c:92
 msgid "Contrabass"
 msgstr "Contrebasse"
-
-#: Programs/menu_prefs.c:614
-msgid "Contracted Braille"
-msgstr "Braille abrégé"
 
 #: Programs/config.c:2834 Programs/menu_prefs.c:1288
 msgid "Contraction Table"
@@ -932,10 +940,6 @@ msgstr "Liste la table de touches au format écran d'aide"
 #: Programs/brltty-ktb.c:63
 msgid "List key table in reStructuredText format."
 msgstr "Liste la table de touches au format reStructuredText"
-
-#: Programs/menu_prefs.c:616
-msgid "Literary Braille"
-msgstr "Braille Littéraire"
 
 #: Programs/menu_prefs.c:1366
 msgid "Locale Directory"
@@ -1871,10 +1875,6 @@ msgstr "Indicateurs de texte"
 msgid "Text Side"
 msgstr "Limite du texte"
 
-#: Programs/menu_prefs.c:619
-msgid "Text Style"
-msgstr "Apparence du texte"
-
 #: Programs/config.c:2813 Programs/menu_prefs.c:1273
 msgid "Text Table"
 msgstr "Table de texte"
@@ -2333,7 +2333,7 @@ msgstr "Ne peut pas paramétrer le focus sur %#010x\n"
 msgid "cannot set working directory"
 msgstr "Ne peut pas paramétrer le répertoire de travail"
 
-#: Programs/prefs.c:525
+#: Programs/prefs.c:540
 msgid "cannot write to preferences file"
 msgstr "Ne peut pas écrire dans le fichier des préférences"
 
@@ -2948,6 +2948,10 @@ msgstr "ligne"
 msgid "linear copy to character"
 msgstr "copie linéaire jusqu'au caractère"
 
+#: Programs/msgtest.c:85
+msgid "list all of the translations (the default)"
+msgstr ""
+
 #: Programs/config.c:665
 msgid "lvl|cat,..."
 msgstr "lvl|cat,..."
@@ -2989,6 +2993,10 @@ msgstr "va au prochain élément de la zone de l'écran"
 #: Programs/cmds.auto.h:999
 msgid "move to the previous item in the screen area"
 msgstr "va à l'élément précédent de la zone de l'écran"
+
+#: Programs/msgtest.c:59
+msgid "name"
+msgstr ""
 
 #: Programs/config.c:356 Programs/config.c:408 Programs/config.c:461
 #: Programs/config.c:483 Programs/config.c:561 Programs/config.c:580
@@ -3059,6 +3067,10 @@ msgstr "Touche page suivante"
 #: Programs/cmds.auto.h:1343
 msgid "page-up key"
 msgstr "touche page précédente"
+
+#: Programs/msgtest.c:44
+msgid "path"
+msgstr ""
 
 #: Programs/menu_prefs.c:509
 msgid "percentage"
@@ -3357,6 +3369,14 @@ msgstr "Active ou désacti(e la poursuite du curseur de l'écran"
 msgid "show current date and time"
 msgstr "Affiche la date et l'heure actuelles"
 
+#: Programs/msgtest.c:73
+msgid "show the message count"
+msgstr ""
+
+#: Programs/msgtest.c:79
+msgid "show the translation metadata"
+msgstr ""
+
 #: Programs/cmds.auto.h:919
 msgid "show the window title"
 msgstr "affiche le titre de la fenêtre"
@@ -3404,6 +3424,10 @@ msgstr "énonce l'indentation de la ligne courante"
 #: Programs/cmds.auto.h:736
 msgid "speak speech cursor location"
 msgstr "Lit là où est le curseur de synthèse"
+
+#: Programs/msgtest.c:52
+msgid "specifier"
+msgstr ""
 
 #: Programs/config.c:2057
 msgid "speech driver not loadable"
@@ -3501,6 +3525,18 @@ msgstr "Touche tab"
 msgid "text"
 msgstr "Texte"
 
+#: Programs/msgtest.c:47
+msgid "the locale directory containing the translations"
+msgstr ""
+
+#: Programs/msgtest.c:54
+msgid "the locale in which to look up a translation"
+msgstr ""
+
+#: Programs/msgtest.c:61
+msgid "the name of the domain containing the translations"
+msgstr ""
+
 #: Programs/cmds.auto.h:1245
 msgid "type braille dots"
 msgstr "Saisie de points braille"
@@ -3554,6 +3590,10 @@ msgstr "blanc"
 #: Programs/pgmprivs_linux.c:1856
 msgid "working directory changed"
 msgstr "répertoire courant changé"
+
+#: Programs/msgtest.c:67
+msgid "write the translations using UTF-8"
+msgstr ""
 
 #: Programs/xbrlapi.c:911
 #, c-format
@@ -3646,6 +3686,21 @@ msgstr "xbrlapi : Le nom de la fenêtre %#010lx est devenu NULL\n"
 #: Programs/cmd_utils.c:158
 msgid "yellow"
 msgstr "jaune"
+
+#~ msgid "6-Dot Computer Braille"
+#~ msgstr "Braille informatique 6 points"
+
+#~ msgid "8-Dot Computer Braille"
+#~ msgstr "Braille informatique 8 points"
+
+#~ msgid "Contracted Braille"
+#~ msgstr "Braille abrégé"
+
+#~ msgid "Literary Braille"
+#~ msgstr "Braille Littéraire"
+
+#~ msgid "Text Style"
+#~ msgstr "Apparence du texte"
 
 #~ msgid "Bug Reports"
 #~ msgstr "Rapports de bug"
