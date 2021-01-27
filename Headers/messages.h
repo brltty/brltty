@@ -37,8 +37,9 @@ extern void ensureAllMessagesProperties (void);
 extern int loadMessagesData (void);
 extern void releaseMessagesData (void);
 
-extern const char *getMessagesMetadata (void);
 extern uint32_t getMessageCount (void);
+extern const char *getMessagesMetadata (void);
+extern char *getMessagesProperty (const char *name);
 
 typedef struct MessageStruct Message;
 extern const char *getMessageText (const Message *message);

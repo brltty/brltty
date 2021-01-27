@@ -325,6 +325,43 @@ getMessagesMetadata (void) {
   return getMessageText(getTranslatedMessage(0));
 }
 
+char *
+getMessagesProperty (const char *name) {
+  size_t nameLength = strlen(name);
+  const char *metadata = getMessagesMetadata();
+
+  while (metadata) {
+    const char *line = metadata;
+    size_t lineLength = strcspn(line, "\n\x00");
+
+    const char *end = line + lineLength;
+    metadata = *end? (line + lineLength + 1): NULL;
+
+    if (nameLength < lineLength) {
+      if (memcmp(line, name, nameLength) == 0) {
+        if (line[nameLength] == ':') {
+          const char *value = line + nameLength + 1;
+          while (iswspace(*value)) value += 1;
+
+          size_t valueLength = end - value;
+          char *copy = malloc(valueLength + 1);
+
+          if (copy) {
+            memcpy(copy, value, valueLength);
+            copy[valueLength] = 0;
+          } else {
+            logMallocError();
+          }
+
+          return copy;
+        }
+      }
+    }
+  }
+
+  return NULL;
+}
+
 int
 findOriginalMessage (const char *text, size_t textLength, unsigned int *index) {
   const Message *messages = getOriginalMessages();
