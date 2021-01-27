@@ -32,7 +32,11 @@
 static char *opt_localeDirectory;
 static char *opt_localeSpecifier;
 static char *opt_domainName;
+
 static int opt_utf8Output;
+static int opt_showCount;
+static int opt_showMetadata;
+static int opt_listTranslations;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "directory",
@@ -61,6 +65,24 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'u',
     .setting.flag = &opt_utf8Output,
     .description = strtext("write the translations using UTF-8")
+  },
+
+  { .word = "count",
+    .letter = 'c',
+    .setting.flag = &opt_showCount,
+    .description = strtext("show the message count")
+  },
+
+  { .word = "metadata",
+    .letter = 'm',
+    .setting.flag = &opt_showMetadata,
+    .description = strtext("show the translation metadata")
+  },
+
+  { .word = "translations",
+    .letter = 't',
+    .setting.flag = &opt_listTranslations,
+    .description = strtext("list all of the translations (the default)")
   },
 END_OPTION_TABLE
 
@@ -180,7 +202,7 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "msgtest",
-      .argumentsSummary = "message [plural quantity]"
+      .argumentsSummary = "[message [plural quantity]]"
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);
@@ -205,15 +227,27 @@ main (int argc, char *argv[]) {
   if (problemEncountered) return PROG_EXIT_SEMANTIC;
   if (!loadMessagesData()) return PROG_EXIT_FATAL;
 
-  if (argc == 0) return listTranslations();
-  if (argc == 1) return showSimpleTranslation(argv[0]);
-  if (argc == 3) return showPluralTranslation(argv[0], argv[1], argv[2]);
+  if (opt_showCount || opt_showMetadata || opt_listTranslations) {
+    if (!argc) {
+      ProgramExitStatus status = PROG_EXIT_SUCCESS;
 
-  if (argc == 2) {
-    logMessage(LOG_ERR, "missing quantity");
+      if (opt_showCount) printf("%u\n", getMessageCount());
+      if (opt_showMetadata) printf("%s\n", getMessagesMetadata());
+      if (opt_listTranslations) status = listTranslations();
+
+      return status;
+    }
   } else {
-    logMessage(LOG_ERR, "too many parameters");
+    if (argc == 0) return listTranslations();
+    if (argc == 1) return showSimpleTranslation(argv[0]);
+    if (argc == 3) return showPluralTranslation(argv[0], argv[1], argv[2]);
+
+    if (argc == 2) {
+      logMessage(LOG_ERR, "missing quantity");
+      return PROG_EXIT_SYNTAX;
+    }
   }
 
+  logMessage(LOG_ERR, "too many parameters");
   return PROG_EXIT_SYNTAX;
 }

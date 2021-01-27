@@ -315,6 +315,16 @@ getTranslatedMessage (unsigned int index) {
   return &getTranslatedMessages()[index];
 }
 
+const char *
+getMessagesMetadata (void) {
+  if (getMessageCount() == 0) return "";
+
+  const Message *original = getOriginalMessage(0);
+  if (getMessageLength(original) != 0) return "";
+
+  return getMessageText(getTranslatedMessage(0));
+}
+
 int
 findOriginalMessage (const char *text, size_t textLength, unsigned int *index) {
   const Message *messages = getOriginalMessages();
