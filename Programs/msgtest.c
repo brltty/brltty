@@ -142,7 +142,7 @@ listTranslation (const Message *original, const Message *translation) {
       && putNewline();
 }
 
-static ProgramExitStatus
+static int
 listTranslations (void) {
   uint32_t count = getMessageCount();
 
@@ -151,47 +151,43 @@ listTranslations (void) {
     if (getMessageLength(original) == 0) continue;
 
     const Message *translation = getTranslatedMessage(index);
-    if (!listTranslation(original, translation)) return PROG_EXIT_FATAL;
+    if (!listTranslation(original, translation)) return 0;
   }
 
-  return PROG_EXIT_SUCCESS;
+  return 1;
 }
 
-static ProgramExitStatus
+static int
 showSimpleTranslation (const char *text) {
   {
     unsigned int index;
 
     if (findOriginalMessage(text, strlen(text), &index)) {
-      int ok = putMessage(getTranslatedMessage(index)) && putNewline();
-      return ok? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
+      return putMessage(getTranslatedMessage(index)) && putNewline();
     }
   }
 
   logMessage(LOG_WARNING, "translation not found: %s", text);
-  return PROG_EXIT_SEMANTIC;
+  return 0;
 }
 
-static ProgramExitStatus
-showPluralTranslation (const char *singular, const char *plural, const char *quantity) {
-  int count;
-
-  {
-    const static int minimum = 0;
-    const static int maximum = 999999999;
-
-    if (!validateInteger(&count, quantity, &minimum, &maximum)) {
-      logMessage(LOG_ERR, "invalid quantity: %s", quantity);
-      return PROG_EXIT_SYNTAX;
-    }
-  }
-
+static int
+showPluralTranslation (const char *singular, const char *plural, int count) {
   const char *translation = getPluralTranslation(singular, plural, count);
   char text[0X10000];
   snprintf(text, sizeof(text), translation, count);
 
-  int ok = putString(text) && putNewline();
-  return ok? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
+  return putString(text) && putNewline();
+}
+
+static int
+parseQuantity (int *count, const char *quantity) {
+  static const int minimum = 0;
+  static const int maximum = 999999999;
+
+  if (validateInteger(count, quantity, &minimum, &maximum)) return 1;
+  logMessage(LOG_ERR, "invalid quantity: %s", quantity);
+  return 0;
 }
 
 int
@@ -227,27 +223,64 @@ main (int argc, char *argv[]) {
   if (problemEncountered) return PROG_EXIT_SEMANTIC;
   if (!loadMessagesData()) return PROG_EXIT_FATAL;
 
-  if (opt_showCount || opt_showMetadata || opt_listTranslations) {
-    if (!argc) {
-      ProgramExitStatus status = PROG_EXIT_SUCCESS;
+  if (!(opt_showCount || opt_showMetadata || opt_listTranslations)) {
+    int ok;
 
-      if (opt_showCount) printf("%u\n", getMessageCount());
-      if (opt_showMetadata) printf("%s\n", getMessagesMetadata());
-      if (opt_listTranslations) status = listTranslations();
+    switch (argc) {
+      case 0:
+        ok = listTranslations();
+        break;
 
-      return status;
+      case 1:
+        ok = showSimpleTranslation(argv[0]);
+        break;
+
+      case 2:
+        logMessage(LOG_ERR, "missing quantity");
+        return PROG_EXIT_SYNTAX;
+
+      case 3: {
+        int count;
+        if (!parseQuantity(&count, argv[2])) return PROG_EXIT_SYNTAX;
+
+         ok = showPluralTranslation(argv[0], argv[1], count);
+         break;
+      }
+
+      default:
+        goto TOO_MANY_PARAMETERS;
     }
-  } else {
-    if (argc == 0) return listTranslations();
-    if (argc == 1) return showSimpleTranslation(argv[0]);
-    if (argc == 3) return showPluralTranslation(argv[0], argv[1], argv[2]);
 
-    if (argc == 2) {
-      logMessage(LOG_ERR, "missing quantity");
-      return PROG_EXIT_SYNTAX;
+    if (ok) return PROG_EXIT_SUCCESS;
+    if (ferror(stdout)) return PROG_EXIT_FATAL;
+    return PROG_EXIT_SEMANTIC;
+  } else if (!argc) {
+    int ok = 1;
+
+    if (ok) {
+      if (opt_showCount) {
+        printf("%u\n", getMessageCount());
+        ok = noOutputErrorYet();
+      }
     }
+
+    if (ok) {
+      if (opt_showMetadata) {
+        printf("%s\n", getMessagesMetadata());
+        ok = noOutputErrorYet();
+      }
+    }
+
+    if (ok) {
+      if (opt_listTranslations) {
+        ok = listTranslations();
+      }
+    }
+
+    return ok? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
   }
 
+TOO_MANY_PARAMETERS:
   logMessage(LOG_ERR, "too many parameters");
   return PROG_EXIT_SYNTAX;
 }
