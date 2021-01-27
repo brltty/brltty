@@ -51,7 +51,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'l',
     .argument = strtext("specifier"),
     .setting.string = &opt_localeSpecifier,
-    .description = strtext("the loale in which to look up a translation")
+    .description = strtext("the locale in which to look up a translation")
   },
 
   { .word = "domain",
