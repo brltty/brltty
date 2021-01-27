@@ -41,6 +41,20 @@ extern uint32_t getMessageCount (void);
 extern const char *getMessagesMetadata (void);
 extern char *getMessagesProperty (const char *name);
 
+#define MESSAGES_PROPERTY_MIME_VERSION "MIME-Version"
+#define MESSAGES_PROPERTY_CONTENT_TYPE "Content-Type"
+#define MESSAGES_PROPERTY_CONTENT_TRANSFER_ENCODING "Content-Transfer-Encoding"
+
+#define MESSAGES_PROPERTY_PROJECT_VERSION "Project-Id-Version"
+#define MESSAGES_PROPERTY_LANGUAGE_TEAM "Language-Team"
+#define MESSAGES_PROPERTY_MSGID_BUGS "Report-Msgid-Bugs-To"
+
+#define MESSAGES_PROPERTY_LANGUAGE_CODE "Language"
+#define MESSAGES_PROPERTY_PLURAL_FORMS "Plural-Forms"
+
+#define MESSAGES_PROPERTY_LAST_TRANSLATOR "Last-Translator"
+#define MESSAGES_PROPERTY_REVISION_DATE "PO-Revision-Date"
+
 typedef struct MessageStruct Message;
 extern const char *getMessageText (const Message *message);
 extern uint32_t getMessageLength (const Message *message);
