@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 6.2\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-25 09:07-0500\n"
+"POT-Creation-Date: 2021-01-27 08:14-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -84,11 +84,19 @@ msgid "500 milliseconds"
 msgstr ""
 
 #: Programs/menu_prefs.c:615
-msgid "6-Dot Computer Braille"
+msgid "6-Dot Computer"
+msgstr ""
+
+#: Programs/menu_prefs.c:614
+msgid "6-Dot Contracted"
 msgstr ""
 
 #: Programs/menu_prefs.c:613
-msgid "8-Dot Computer Braille"
+msgid "8-Dot Computer"
+msgstr ""
+
+#: Programs/menu_prefs.c:616
+msgid "8-Dot Contracted"
 msgstr ""
 
 #: Programs/brltty-ttb.c:179
@@ -321,6 +329,10 @@ msgstr ""
 msgid "Braille Tables"
 msgstr ""
 
+#: Programs/menu_prefs.c:619
+msgid "Braille Type"
+msgstr ""
+
 #: Programs/menu_prefs.c:821
 msgid "Braille Typing"
 msgstr ""
@@ -446,10 +458,6 @@ msgstr ""
 
 #: Programs/midi.c:92
 msgid "Contrabass"
-msgstr ""
-
-#: Programs/menu_prefs.c:614
-msgid "Contracted Braille"
 msgstr ""
 
 #: Programs/config.c:2834
@@ -937,10 +945,6 @@ msgstr ""
 
 #: Programs/brltty-ktb.c:63
 msgid "List key table in reStructuredText format."
-msgstr ""
-
-#: Programs/menu_prefs.c:616
-msgid "Literary Braille"
 msgstr ""
 
 #: Programs/menu_prefs.c:1366
@@ -1890,10 +1894,6 @@ msgstr ""
 msgid "Text Side"
 msgstr ""
 
-#: Programs/menu_prefs.c:619
-msgid "Text Style"
-msgstr ""
-
 #: Programs/config.c:2813
 #: Programs/menu_prefs.c:1273
 msgid "Text Table"
@@ -2358,7 +2358,7 @@ msgstr ""
 msgid "cannot set working directory"
 msgstr ""
 
-#: Programs/prefs.c:525
+#: Programs/prefs.c:540
 msgid "cannot write to preferences file"
 msgstr ""
 
@@ -2993,6 +2993,10 @@ msgstr ""
 msgid "linear copy to character"
 msgstr ""
 
+#: Programs/msgtest.c:85
+msgid "list all of the translations (the default)"
+msgstr ""
+
 #: Programs/config.c:665
 msgid "lvl|cat,..."
 msgstr ""
@@ -3033,6 +3037,10 @@ msgstr ""
 
 #: Programs/cmds.auto.h:999
 msgid "move to the previous item in the screen area"
+msgstr ""
+
+#: Programs/msgtest.c:59
+msgid "name"
 msgstr ""
 
 #: Programs/config.c:356
@@ -3107,6 +3115,10 @@ msgstr ""
 
 #: Programs/cmds.auto.h:1343
 msgid "page-up key"
+msgstr ""
+
+#: Programs/msgtest.c:44
+msgid "path"
 msgstr ""
 
 #: Programs/menu_prefs.c:509
@@ -3406,6 +3418,14 @@ msgstr ""
 msgid "show current date and time"
 msgstr ""
 
+#: Programs/msgtest.c:73
+msgid "show the message count"
+msgstr ""
+
+#: Programs/msgtest.c:79
+msgid "show the translation metadata"
+msgstr ""
+
 #: Programs/cmds.auto.h:919
 msgid "show the window title"
 msgstr ""
@@ -3454,6 +3474,10 @@ msgstr ""
 
 #: Programs/cmds.auto.h:736
 msgid "speak speech cursor location"
+msgstr ""
+
+#: Programs/msgtest.c:52
+msgid "specifier"
 msgstr ""
 
 #: Programs/config.c:2057
@@ -3553,6 +3577,18 @@ msgstr ""
 msgid "text"
 msgstr ""
 
+#: Programs/msgtest.c:54
+msgid "the loale in which to look up a translation"
+msgstr ""
+
+#: Programs/msgtest.c:47
+msgid "the locale directory containing the translations"
+msgstr ""
+
+#: Programs/msgtest.c:61
+msgid "the name of the domain containing the translations"
+msgstr ""
+
 #: Programs/cmds.auto.h:1245
 msgid "type braille dots"
 msgstr ""
@@ -3605,6 +3641,10 @@ msgstr ""
 
 #: Programs/pgmprivs_linux.c:1856
 msgid "working directory changed"
+msgstr ""
+
+#: Programs/msgtest.c:67
+msgid "write the translations using UTF-8"
 msgstr ""
 
 #: Programs/xbrlapi.c:911
