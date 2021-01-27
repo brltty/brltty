@@ -103,39 +103,39 @@ int contractedTrack = 0;
 
 int
 isContractedBraille (void) {
-  return (prefs.brailleType == btContracted6)
-      || (prefs.brailleType == btContracted8)
+  return (prefs.brailleVariant == bvContracted6)
+      || (prefs.brailleVariant == bvContracted8)
       ;
 }
 
 int
 isSixDotBraille (void) {
-  return (prefs.brailleType == btComputer6)
-      || (prefs.brailleType == btContracted6)
+  return (prefs.brailleVariant == bvComputer6)
+      || (prefs.brailleVariant == bvContracted6)
       ;
 }
 
 static void
-setBrailleType (int contracted, int sixDot) {
-  prefs.brailleType = contracted?
-                      (sixDot? btContracted6: btContracted8):
-                      (sixDot? btComputer6: btComputer8);
+setBrailleVariant (int contracted, int sixDot) {
+  prefs.brailleVariant = contracted?
+                         (sixDot? bvContracted6: bvContracted8):
+                         (sixDot? bvComputer6: bvComputer8);
 }
 
 void
 setContractedBraille (int contracted) {
-  setBrailleType(contracted, isSixDotBraille());
+  setBrailleVariant(contracted, isSixDotBraille());
   api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE, 0);
 }
 
 void
 setSixDotBraille (int sixDot) {
-  setBrailleType(isContractedBraille(), sixDot);
+  setBrailleVariant(isContractedBraille(), sixDot);
   api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE, 0);
 }
 
 void
-onBrailleTypeUpdated (void) {
+onBrailleVariantUpdated (void) {
   api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE, 0);
   api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE, 0);
 }

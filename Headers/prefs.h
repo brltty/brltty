@@ -31,11 +31,11 @@ typedef enum {
 } CursorStyles;
 
 typedef enum {
-  btComputer8,
-  btContracted6,
-  btComputer6,
-  btContracted8,
-} BrailleType;
+  bvComputer8,
+  bvContracted6,
+  bvComputer6,
+  bvContracted8,
+} BrailleVariant;
 
 typedef enum {
   sbwAll,
@@ -143,7 +143,7 @@ typedef struct {
   unsigned char highlightBrailleWindowLocation;
   unsigned char attributesInvisibleTime;
   unsigned char trackScreenPointer;
-  unsigned char brailleType;
+  unsigned char brailleVariant;
   unsigned char autorepeatPanning;
   unsigned char slidingBrailleWindow;
   unsigned char eagerSlidingBrailleWindow;

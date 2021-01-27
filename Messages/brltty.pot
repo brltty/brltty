@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 6.2\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-27 14:41+0100\n"
+"POT-Creation-Date: 2021-01-27 11:28-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -329,12 +329,12 @@ msgstr ""
 msgid "Braille Tables"
 msgstr ""
 
-#: Programs/menu_prefs.c:619
-msgid "Braille Type"
-msgstr ""
-
 #: Programs/menu_prefs.c:821
 msgid "Braille Typing"
+msgstr ""
+
+#: Programs/menu_prefs.c:619
+msgid "Braille Variant"
 msgstr ""
 
 #: Programs/menu_prefs.c:457

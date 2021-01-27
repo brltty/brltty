@@ -373,8 +373,8 @@ STATUS_FIELD_HANDLERS(9)
 #undef STATUS_FIELD_HANDLERS
 
 static int
-changedBrailleType (const MenuItem *item, unsigned char setting UNUSED) {
-  onBrailleTypeUpdated();
+changedBrailleVariant (const MenuItem *item, unsigned char setting UNUSED) {
+  onBrailleVariantUpdated();
   return 1;
 }
 
@@ -616,9 +616,9 @@ makePreferencesMenu (void) {
         {.label=strtext("8-Dot Contracted")}
       };
 
-      NAME(strtext("Braille Type"));
-      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.brailleType, &itemName, strings));
-      CHANGED(BrailleType);
+      NAME(strtext("Braille Variant"));
+      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.brailleVariant, &itemName, strings));
+      CHANGED(BrailleVariant);
     }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
