@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 6.2\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-27 08:14-0500\n"
+"POT-Creation-Date: 2021-01-27 14:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3577,12 +3577,12 @@ msgstr ""
 msgid "text"
 msgstr ""
 
-#: Programs/msgtest.c:54
-msgid "the loale in which to look up a translation"
-msgstr ""
-
 #: Programs/msgtest.c:47
 msgid "the locale directory containing the translations"
+msgstr ""
+
+#: Programs/msgtest.c:54
+msgid "the locale in which to look up a translation"
 msgstr ""
 
 #: Programs/msgtest.c:61
