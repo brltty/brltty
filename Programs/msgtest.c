@@ -32,11 +32,7 @@
 static char *opt_localeDirectory;
 static char *opt_localeSpecifier;
 static char *opt_domainName;
-
 static int opt_utf8Output;
-static int opt_showCount;
-static int opt_showMetadata;
-static int opt_listTranslations;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "directory",
@@ -65,24 +61,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'u',
     .setting.flag = &opt_utf8Output,
     .description = strtext("write the translations using UTF-8")
-  },
-
-  { .word = "count",
-    .letter = 'c',
-    .setting.flag = &opt_showCount,
-    .description = strtext("show the message count")
-  },
-
-  { .word = "metadata",
-    .letter = 'm',
-    .setting.flag = &opt_showMetadata,
-    .description = strtext("show the translation metadata")
-  },
-
-  { .word = "translations",
-    .letter = 't',
-    .setting.flag = &opt_listTranslations,
-    .description = strtext("list all of the translations (the default)")
   },
 END_OPTION_TABLE
 
@@ -175,6 +153,38 @@ showPluralTranslation (const char *singular, const char *plural, int count) {
 }
 
 static int
+showProperty (const char *propertyName, const char *attributeName) {
+  int ok = 0;
+  char *propertyValue = getMessagesProperty(propertyName);
+
+  if (propertyValue) {
+    if (!attributeName) {
+      printf("%s\n", propertyValue);
+      ok = noOutputErrorYet();
+    } else {
+      char *attributeValue = getMessagesAttribute(propertyValue, attributeName);
+
+      if (attributeValue) {
+        printf("%s\n", attributeValue);
+        ok = noOutputErrorYet();
+        free(attributeValue);
+      } else {
+        logMessage(LOG_WARNING,
+          "attribute not defined: %s: %s",
+          propertyName, attributeName
+        );
+      }
+    }
+
+    free(propertyValue);
+  } else {
+    logMessage(LOG_WARNING, "property not defined: %s", propertyName);
+  }
+
+  return ok;
+}
+
+static int
 parseQuantity (int *count, const char *quantity) {
   static const int minimum = 0;
   static const int maximum = 999999999;
@@ -184,97 +194,107 @@ parseQuantity (int *count, const char *quantity) {
   return 0;
 }
 
-int
-main (int argc, char *argv[]) {
-  int problemEncountered = 0;
-
-  {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
-      .applicationName = "msgtest",
-      .argumentsSummary = "[message [plural quantity]]"
-    };
-
-    PROCESS_OPTIONS(descriptor, argc, argv);
+static const char *
+nextParameter (char ***argv, int *argc, const char *description) {
+  if (*argc) {
+    *argc -= 1;
+    return *(*argv)++;
   }
+
+  if (!description) return NULL;
+  logMessage(LOG_ERR, "missing %s", description);
+  exit(PROG_EXIT_SYNTAX);
+}
+
+static void
+noMoreParameters (char ***argv, int *argc) {
+  if (*argc) {
+    logMessage(LOG_ERR, "too many parameters");
+    exit(PROG_EXIT_SYNTAX);
+  }
+}
+
+static void
+beginAction (char ***argv, int *argc) {
+  noMoreParameters(argv, argc);
 
   {
     const char *directory = opt_localeDirectory;
 
     if (*directory) {
-      if (testDirectoryPath(directory)) {
-        setMessagesDirectory(directory);
-      } else {
+      if (!testDirectoryPath(directory)) {
         logMessage(LOG_WARNING, "not a directory: %s", directory);
-        problemEncountered = 1;
+        exit(PROG_EXIT_SEMANTIC);
       }
+
+      setMessagesDirectory(directory);
     }
   }
 
   if (*opt_localeSpecifier) setMessagesLocale(opt_localeSpecifier);
   if (*opt_domainName) setMessagesDomain(opt_domainName);
+  if (!loadMessagesData()) exit(PROG_EXIT_FATAL);
+}
 
-  if (problemEncountered) return PROG_EXIT_SEMANTIC;
-  if (!loadMessagesData()) return PROG_EXIT_FATAL;
+int
+main (int argc, char *argv[]) {
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE(programOptions),
+      .applicationName = "msgtest",
+      .argumentsSummary = "action [argument ...]"
+    };
 
-  if (!(opt_showCount || opt_showMetadata || opt_listTranslations)) {
-    int ok;
-
-    switch (argc) {
-      case 0:
-        ok = listTranslations();
-        break;
-
-      case 1:
-        ok = showSimpleTranslation(argv[0]);
-        break;
-
-      case 2:
-        logMessage(LOG_ERR, "missing quantity");
-        return PROG_EXIT_SYNTAX;
-
-      case 3: {
-        int count;
-        if (!parseQuantity(&count, argv[2])) return PROG_EXIT_SYNTAX;
-
-         ok = showPluralTranslation(argv[0], argv[1], count);
-         break;
-      }
-
-      default:
-        goto TOO_MANY_PARAMETERS;
-    }
-
-    if (ok) return PROG_EXIT_SUCCESS;
-    if (ferror(stdout)) return PROG_EXIT_FATAL;
-    return PROG_EXIT_SEMANTIC;
-  } else if (!argc) {
-    int ok = 1;
-
-    if (ok) {
-      if (opt_showCount) {
-        printf("%u\n", getMessageCount());
-        ok = noOutputErrorYet();
-      }
-    }
-
-    if (ok) {
-      if (opt_showMetadata) {
-        printf("%s\n", getMessagesMetadata());
-        ok = noOutputErrorYet();
-      }
-    }
-
-    if (ok) {
-      if (opt_listTranslations) {
-        ok = listTranslations();
-      }
-    }
-
-    return ok? PROG_EXIT_SUCCESS: PROG_EXIT_FATAL;
+    PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
-TOO_MANY_PARAMETERS:
-  logMessage(LOG_ERR, "too many parameters");
-  return PROG_EXIT_SYNTAX;
+  if (!argc) {
+    logMessage(LOG_ERR, "missing action");
+    exit(PROG_EXIT_SYNTAX);
+  }
+
+  const char *action = *argv++;
+  argc -= 1;
+  int ok = 1;
+
+  if (isAbbreviation("translate", action)) {
+    const char *message = nextParameter(&argv, &argc, "message");
+    const char *plural = nextParameter(&argv, &argc, NULL);
+
+    if (plural) {
+      const char *quantity = nextParameter(&argv, &argc, "quantity");
+
+      int count;
+      if (!parseQuantity(&count, quantity)) return PROG_EXIT_SYNTAX;
+
+      beginAction(&argv, &argc);
+      ok = showPluralTranslation(message, plural, count);
+    } else {
+      beginAction(&argv, &argc);
+      ok = showSimpleTranslation(message);
+    }
+  } else if (isAbbreviation("count", action)) {
+    beginAction(&argv, &argc);
+    printf("%u\n", getMessageCount());
+    ok = noOutputErrorYet();
+  } else if (isAbbreviation("list", action)) {
+    beginAction(&argv, &argc);
+    ok = listTranslations();
+  } else if (isAbbreviation("metadata", action)) {
+    beginAction(&argv, &argc);
+    printf("%s\n", getMessagesMetadata());
+    ok = noOutputErrorYet();
+  } else if (isAbbreviation("property", action)) {
+    const char *property = nextParameter(&argv, &argc, "property name");
+    const char *attribute = nextParameter(&argv, &argc, NULL);
+
+    beginAction(&argv, &argc);
+    ok = showProperty(property, attribute);
+  } else {
+    logMessage(LOG_ERR, "unknown action: %s", action);
+    return PROG_EXIT_SYNTAX;
+  }
+
+  if (ferror(stdout)) return PROG_EXIT_FATAL;
+  return ok? PROG_EXIT_SUCCESS: PROG_EXIT_SEMANTIC;
 }
