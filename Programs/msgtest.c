@@ -32,6 +32,8 @@
 static char *opt_localeDirectory;
 static char *opt_localeSpecifier;
 static char *opt_domainName;
+
+static FILE *outputStream;
 static int opt_utf8Output;
 
 BEGIN_OPTION_TABLE(programOptions)
@@ -66,14 +68,14 @@ END_OPTION_TABLE
 
 static int
 noOutputErrorYet (void) {
-  if (!ferror(stdout)) return 1;
+  if (!ferror(outputStream)) return 1;
   logMessage(LOG_ERR, "output error: %s", strerror(errno));
   return 0;
 }
 
 static int
 putCharacter (char c) {
-  fputc(c, stdout);
+  fputc(c, outputStream);
   return noOutputErrorYet();
 }
 
@@ -91,9 +93,9 @@ putBytes (const char *bytes, size_t count) {
   }
 
   if (opt_utf8Output) {
-    fwrite(bytes, 1, count, stdout);
+    fwrite(bytes, 1, count, outputStream);
   } else {
-    writeWithConsoleEncoding(stdout, bytes, count);
+    writeWithConsoleEncoding(outputStream, bytes, count);
   }
 
   return noOutputErrorYet();
@@ -159,13 +161,13 @@ showProperty (const char *propertyName, const char *attributeName) {
 
   if (propertyValue) {
     if (!attributeName) {
-      printf("%s\n", propertyValue);
+      fprintf(outputStream, "%s\n", propertyValue);
       ok = noOutputErrorYet();
     } else {
       char *attributeValue = getMessagesAttribute(propertyValue, attributeName);
 
       if (attributeValue) {
-        printf("%s\n", attributeValue);
+        fprintf(outputStream, "%s\n", attributeValue);
         ok = noOutputErrorYet();
         free(attributeValue);
       } else {
@@ -238,6 +240,8 @@ beginAction (char ***argv, int *argc) {
 
 int
 main (int argc, char *argv[]) {
+  outputStream = stdout;
+
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
@@ -275,14 +279,14 @@ main (int argc, char *argv[]) {
     }
   } else if (isAbbreviation("count", action)) {
     beginAction(&argv, &argc);
-    printf("%u\n", getMessageCount());
+    fprintf(outputStream, "%u\n", getMessageCount());
     ok = noOutputErrorYet();
   } else if (isAbbreviation("list", action)) {
     beginAction(&argv, &argc);
     ok = listTranslations();
   } else if (isAbbreviation("metadata", action)) {
     beginAction(&argv, &argc);
-    printf("%s\n", getMessagesMetadata());
+    fprintf(outputStream, "%s\n", getMessagesMetadata());
     ok = noOutputErrorYet();
   } else if (isAbbreviation("property", action)) {
     const char *property = nextParameter(&argv, &argc, "property name");
@@ -295,6 +299,6 @@ main (int argc, char *argv[]) {
     return PROG_EXIT_SYNTAX;
   }
 
-  if (ferror(stdout)) return PROG_EXIT_FATAL;
+  if (ferror(outputStream)) return PROG_EXIT_FATAL;
   return ok? PROG_EXIT_SUCCESS: PROG_EXIT_SEMANTIC;
 }
