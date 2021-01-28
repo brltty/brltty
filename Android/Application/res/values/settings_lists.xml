@@ -424,23 +424,29 @@
     <item>upper_lower</item>
   </string-array>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">locale-based autoselection</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">German</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">German (contracted - 1998 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">German (contracted - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">German (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">German (basic contractions)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">German (contracted - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">English</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">English (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (US, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">English (United States)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Spanish (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">French</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">French (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">French (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesian (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">International Phonetic Alphabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japanese (uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Korean (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Korean</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Korean (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korean (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korean (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Lithuanian (uncontracted)</string>
@@ -452,20 +458,25 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinese (Taiwan, uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Chinese (Taiwan, uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contracted)</string>
 
   <string-array name="CONTRACTION_TABLE_LABELS">
+    <item>@string/CONTRACTION_TABLE_LABEL_auto</item>
     <item>@string/CONTRACTION_TABLE_LABEL_af</item>
     <item>@string/CONTRACTION_TABLE_LABEL_am</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de_1998</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de_2015</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de_g0</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de_g1</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_en</item>
     <item>@string/CONTRACTION_TABLE_LABEL_en_ueb_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_en_us_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_en_US</item>
     <item>@string/CONTRACTION_TABLE_LABEL_es</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_fr</item>
     <item>@string/CONTRACTION_TABLE_LABEL_fr_g1</item>
     <item>@string/CONTRACTION_TABLE_LABEL_fr_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ha</item>
@@ -473,6 +484,7 @@
     <item>@string/CONTRACTION_TABLE_LABEL_ipa</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ja</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ko</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ko_g0</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ko_g1</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ko_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_lt</item>
@@ -484,21 +496,26 @@
     <item>@string/CONTRACTION_TABLE_LABEL_si</item>
     <item>@string/CONTRACTION_TABLE_LABEL_sw</item>
     <item>@string/CONTRACTION_TABLE_LABEL_th</item>
-    <item>@string/CONTRACTION_TABLE_LABEL_zh_tw</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_zh_TW</item>
     <item>@string/CONTRACTION_TABLE_LABEL_zu</item>
   </string-array>
 
   <string-array name="CONTRACTION_TABLE_VALUES">
+    <item>auto</item>
     <item>af</item>
     <item>am</item>
+    <item>de</item>
     <item>de-1998</item>
     <item>de-2015</item>
     <item>de-g0</item>
     <item>de-g1</item>
     <item>de-g2</item>
+    <item>en</item>
     <item>en-ueb-g2</item>
     <item>en-us-g2</item>
+    <item>en_US</item>
     <item>es</item>
+    <item>fr</item>
     <item>fr-g1</item>
     <item>fr-g2</item>
     <item>ha</item>
@@ -506,6 +523,7 @@
     <item>ipa</item>
     <item>ja</item>
     <item>ko</item>
+    <item>ko-g0</item>
     <item>ko-g1</item>
     <item>ko-g2</item>
     <item>lt</item>
@@ -517,7 +535,7 @@
     <item>si</item>
     <item>sw</item>
     <item>th</item>
-    <item>zh-tw</item>
+    <item>zh_TW</item>
     <item>zu</item>
   </string-array>
 

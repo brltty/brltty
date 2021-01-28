@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">barva ospredja (črke in drugo) v levem stolpcu in barva ozadja v desnem stolpcu</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">barva ospredja v zgornjem prostoru in barva ozadja v spodnjem prostoru</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">locale-based samodejna izbira</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikanska (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharijska (brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Nemška (brez krajšav)</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">Indonezijska(s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Mednarodna Fonetična Abeceda</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japonska(brez krajšav)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Korejska (brez krajšav)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Korejska (brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korejska (razvrstitev 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korejska (razvrstitev 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Letonska (neskrajšana)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalska(brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Tajska(s krajšavami)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Kitajska (Tajvan, brez krajšav)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Kitajska (Tajvan, brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (s krajšavami)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">bližnjice za brajeve tipkovnice</string>

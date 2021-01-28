@@ -46,6 +46,9 @@ extern int convertWcharToChar (wchar_t wc);
 extern int lockCharset (LockOptions options);
 extern void unlockCharset (void);
 
+typedef char *PathMaker (const char *directory, const char *name);
+extern char *findLocalizedFile (const char *directory, PathMaker *pathMaker);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">forgrundsfarve i venstre søjle og baggrundsfarve i højre søjle</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">forgrundsfarve i øverste firkant og baggrundsfarve i nederste firkant</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">lokal-baseret autovælg</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Tysk (uforkortet)</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesisk (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Intertionale aonetiske alfabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japansk (uforkortet)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Koreansk (uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Koreansk (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Koreansk (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Koreansk (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Litauisk (uforkortet)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thailandsk (Forkortet)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Kinesisk (Taiwan, uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Kinesisk (Taiwan, uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (forkortet)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">genveje for braille tastaturer</string>

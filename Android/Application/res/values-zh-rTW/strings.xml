@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">左邊欄位為前景顏色 右邊欄位為背景顏色</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">上框為前景顏色 下框為背景顏色</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">依照語言設定自動選擇</string>
   <string name="CONTRACTION_TABLE_LABEL_af">南非的荷蘭語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_am">阿比西尼亞官話無縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">德文無縮寫</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">印尼語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">國際拼音字母</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">日文無縮寫</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">韓文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">韓文無縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">韓文一級</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">韓文二級</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">立陶宛語 (沒縮寫)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">錫蘭語無縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">斯瓦希裡語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_th">泰國語縮寫</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">中文</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">中文</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">祖魯語縮寫</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">點字鍵盤對應</string>

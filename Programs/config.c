@@ -543,6 +543,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_contractionTable,
+    .internal.setting = optionOperand_autodetect,
     .description = strtext("Name of or path to contraction table.")
   },
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -1305,8 +1306,7 @@ setPreferenceOverrides (void) {
 }
 
 static void
-finishPreferencesLoad (int ok) {
-  if (!ok) resetPreferences();
+finishPreferencesLoad (void) {
   setPreferenceOverrides();
   applyAllPreferences();
 }
@@ -1332,7 +1332,7 @@ loadPreferences (void) {
     if (loadPreferencesFile(oldPreferencesFile)) ok = 1;
   }
 
-  finishPreferencesLoad(ok);
+  finishPreferencesLoad();
   return ok;
 }
 
@@ -1737,7 +1737,8 @@ startBrailleDriver (void) {
 
   if (activateBrailleDriver(0)) {
     if (oldPreferencesEnabled) {
-      finishPreferencesLoad(loadPreferencesFile(oldPreferencesFile));
+      loadPreferencesFile(oldPreferencesFile);
+      finishPreferencesLoad();
     } else {
       applyBraillePreferences();
     }
@@ -2770,7 +2771,7 @@ brlttyStart (void) {
   logProperty(opt_configurationFile, "configurationFile", gettext("Configuration File"));
   logProperty(opt_preferencesFile, "preferencesFile", gettext("Preferences File"));
 
-  constructBrailleDisplay(&brl);
+  resetPreferences();
   loadPreferences();
 
   if (opt_promptPatterns && *opt_promptPatterns) {
@@ -2792,12 +2793,14 @@ brlttyStart (void) {
   logProperty(opt_tablesDirectory, "tablesDirectory", gettext("Tables Directory"));
 
   /* handle text table option */
+  int usingInternalTextTable = 0;
   if (*opt_textTable) {
     if (strcmp(opt_textTable, optionOperand_autodetect) == 0) {
       changeStringSetting(&opt_textTable, "");
-      char *name = selectTextTable(opt_tablesDirectory);
+      char *name = findLocalizedTextTable(opt_tablesDirectory);
 
       if (name) {
+        logMessage(LOG_DEBUG, "using autoselected text table: %s", name);
         changeTextTable(name);
         free(name);
       }
@@ -2807,7 +2810,9 @@ brlttyStart (void) {
   }
 
   if (!*opt_textTable) {
+    logMessage(LOG_DEBUG, "using internal text table: %s", TEXT_TABLE);
     changeStringSetting(&opt_textTable, TEXT_TABLE);
+    usingInternalTextTable = 1;
   }
 
   logProperty(opt_textTable, "textTable", gettext("Text Table"));
@@ -2829,9 +2834,30 @@ brlttyStart (void) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
-  onProgramExit("contraction-table", exitContractionTable, NULL);
-  if (*opt_contractionTable) changeContractionTable(opt_contractionTable);
+  if (*opt_contractionTable) {
+    if (strcmp(opt_contractionTable, optionOperand_autodetect) == 0) {
+      changeStringSetting(&opt_contractionTable, "");
+      char *name = findLocalizedContractionTable(opt_tablesDirectory);
+
+      if (name) {
+        logMessage(LOG_DEBUG, "using autoselected contraction table: %s", name);
+        changeContractionTable(name);
+        free(name);
+
+        if (usingInternalTextTable) {
+          if (!isContractedBraille()) {
+            setContractedBraille(1);
+            logMessage(LOG_DEBUG, "contracted braille has been enabled");
+          }
+        }
+      }
+    } else if (!changeContractionTable(opt_contractionTable)) {
+      changeStringSetting(&opt_contractionTable, "");
+    }
+  }
+
   logProperty(opt_contractionTable, "contractionTable", gettext("Contraction Table"));
+  onProgramExit("contraction-table", exitContractionTable, NULL);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties);
@@ -2854,6 +2880,7 @@ brlttyStart (void) {
     return PROG_EXIT_SYNTAX;
   }
 
+  constructBrailleDisplay(&brl);
   changeBrailleDriver(opt_brailleDriver);
   changeBrailleParameters(opt_brailleParameters);
   changeBrailleDevice(opt_brailleDevice);

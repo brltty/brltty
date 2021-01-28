@@ -35,7 +35,7 @@ extern void destroyTextTable (TextTable *table);
 extern char *ensureTextTableExtension (const char *path);
 extern char *makeTextTablePath (const char *directory, const char *name);
 
-extern char *selectTextTable (const char *directory);
+extern char *findLocalizedTextTable (const char *directory);
 extern int replaceTextTable (const char *directory, const char *name);
 
 extern unsigned char convertCharacterToDots (TextTable *table, wchar_t character);

@@ -46,7 +46,7 @@ public final class GeneralSettings extends SettingsFragment {
     speechSupportList = getListPreference(R.string.PREF_KEY_SPEECH_SUPPORT);
 
     sortList(textTableList, 1);
-    sortList(contractionTableList);
+    sortList(contractionTableList, 1);
 
     showSelection(releaseBrailleDeviceCheckBox);
     showSelection(navigationModeList);

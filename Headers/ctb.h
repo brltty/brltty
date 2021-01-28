@@ -37,6 +37,7 @@ extern void destroyContractionTable (ContractionTable *table);
 extern char *ensureContractionTableExtension (const char *path);
 extern char *makeContractionTablePath (const char *directory, const char *name);
 
+extern char *findLocalizedContractionTable (const char *directory);
 extern int replaceContractionTable (const char *directory, const char *name);
 
 extern void contractText (

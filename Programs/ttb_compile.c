@@ -392,54 +392,7 @@ makeTextTablePath (const char *directory, const char *name) {
   return NULL;
 }
 
-static int
-testTextTable (const char *directory, char *name) {
-  int exists = 0;
-  char *path;
-
-  if ((path = makeTextTablePath(directory, name))) {
-    logMessage(LOG_DEBUG, "checking for text table: %s", path);
-    if (testFilePath(path)) exists = 1;
-    free(path);
-  }
-
-  return exists;
-}
-
 char *
-selectTextTable (const char *directory) {
-  char *locale = getLocaleName();
-
-  if (locale) {
-    char name[strlen(locale) + 1];
-
-    {
-      size_t length = strcspn(locale, ".@");
-      strncpy(name, locale, length);
-      name[length] = 0;
-    }
-
-    free(locale);
-    locale = NULL;
-
-    if (isPosixLocale(name)) {
-      name[0] = 0;
-    } else if (!testTextTable(directory, name)) {
-      char *delimiter = strchr(name, '_');
-
-      if (delimiter) {
-        *delimiter = 0;
-        if (!testTextTable(directory, name)) name[0] = 0;
-      }
-    }
-
-    if (name[0]) {
-      char *textTableName = strdup(name);
-
-      if (textTableName) return textTableName;
-      logMallocError();
-    }
-  }
-
-  return NULL;
+findLocalizedTextTable (const char *directory) {
+  return findLocalizedFile(directory, makeTextTablePath);
 }

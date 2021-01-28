@@ -234,23 +234,29 @@ ATTRIBUTES_TABLE_LABEL_invleft_right inverse foreground colour in the left colum
 ATTRIBUTES_TABLE_LABEL_left_right foreground colour in the left column and background colour in the right column
 ATTRIBUTES_TABLE_LABEL_upper_lower foreground colour in the upper square and background colour in the lower square
 
+CONTRACTION_TABLE_LABEL_auto locale-based autoselection
 CONTRACTION_TABLE_LABEL_af Afrikaans (contracted)
 CONTRACTION_TABLE_LABEL_am Amharic (uncontracted)
+CONTRACTION_TABLE_LABEL_de German
 CONTRACTION_TABLE_LABEL_de_g0 German (uncontracted)
 CONTRACTION_TABLE_LABEL_de_g1 German (basic contractions)
 CONTRACTION_TABLE_LABEL_de_g2 German (contracted - 1998 standard)
 CONTRACTION_TABLE_LABEL_de_1998 German (contracted - 1998 standard)
 CONTRACTION_TABLE_LABEL_de_2015 German (contracted - 2015 standard)
+CONTRACTION_TABLE_LABEL_en English
+CONTRACTION_TABLE_LABEL_en_US English (United States)
 CONTRACTION_TABLE_LABEL_en_ueb_g2 English (Unified English Braille, grade 2)
 CONTRACTION_TABLE_LABEL_en_us_g2 English (US, grade 2)
 CONTRACTION_TABLE_LABEL_es Spanish (grade 2)
+CONTRACTION_TABLE_LABEL_fr French
 CONTRACTION_TABLE_LABEL_fr_g1 French (uncontracted)
 CONTRACTION_TABLE_LABEL_fr_g2 French (contracted)
 CONTRACTION_TABLE_LABEL_ha Hausa (contracted)
 CONTRACTION_TABLE_LABEL_id Indonesian (contracted)
 CONTRACTION_TABLE_LABEL_ipa International Phonetic Alphabet
 CONTRACTION_TABLE_LABEL_ja Japanese (uncontracted)
-CONTRACTION_TABLE_LABEL_ko Korean (uncontracted)
+CONTRACTION_TABLE_LABEL_ko Korean
+CONTRACTION_TABLE_LABEL_ko_g0 Korean (uncontracted)
 CONTRACTION_TABLE_LABEL_ko_g1 Korean (grade 1)
 CONTRACTION_TABLE_LABEL_ko_g2 Korean (grade 2)
 CONTRACTION_TABLE_LABEL_lt Lithuanian (uncontracted)
@@ -262,7 +268,7 @@ CONTRACTION_TABLE_LABEL_pt Portuguese (grade 2)
 CONTRACTION_TABLE_LABEL_si Sinhalese (uncontracted)
 CONTRACTION_TABLE_LABEL_sw Swahili (contracted)
 CONTRACTION_TABLE_LABEL_th Thai (contracted)
-CONTRACTION_TABLE_LABEL_zh_tw Chinese (Taiwan, uncontracted)
+CONTRACTION_TABLE_LABEL_zh_TW Chinese (Taiwan, uncontracted)
 CONTRACTION_TABLE_LABEL_zu Zulu (contracted)
 
 KEYBOARD_TABLE_LABEL_braille bindings for braille keyboards

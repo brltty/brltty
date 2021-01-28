@@ -222,6 +222,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">رنگ پیش زمینه در ستون چپ و رنگ پس زمینه در ستون راست</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">رنگ پیش زمینه در مربع بالایی و رنگ پس زمینه در مربع پایینی</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">انتخاب اتوماتیک بر مبنای محل</string>
   <string name="CONTRACTION_TABLE_LABEL_af">آفریقایی (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">German (uncontracted)</string>
@@ -240,7 +241,7 @@
   <string name="CONTRACTION_TABLE_LABEL_ja">Japanese (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korean (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korean (grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Korean (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Korean (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Lithuanian (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg">Malagasy (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun">Munda (contracted)</string>
@@ -250,7 +251,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinese (Taiwan, uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Chinese (Taiwan, uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contracted)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">پیوست بریل برای صفحه کلید بریل</string>

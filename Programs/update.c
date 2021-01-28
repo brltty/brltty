@@ -278,7 +278,7 @@ getScreenTypeCharacter (void) {
 }
 
 static inline char
-getTextStyleCharacter (void) {
+getBrailleVariantCharacter (void) {
   return isSixDotBraille()? '6': '8';
 }
 
@@ -336,7 +336,7 @@ showInfo (void) {
     getScreenCursorVisibilityCharacter(),
     getDisplayModeCharacter(),
     getScreenTypeCharacter(),
-    getTextStyleCharacter(),
+    getBrailleVariantCharacter(),
     getUppercaseIndicatorCharacter()
   );
 

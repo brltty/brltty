@@ -25,14 +25,15 @@
 #include "log.h"
 #include "parse.h"
 #include "file.h"
-#include "ctb.h"
-#include "ctb_internal.h"
 #include "datafile.h"
 #include "dataarea.h"
-#include "brl_dots.h"
-#include "cldr.h"
 #include "unicode.h"
 #include "utf8.h"
+#include "charset.h"
+#include "ctb.h"
+#include "ctb_internal.h"
+#include "brl_dots.h"
+#include "cldr.h"
 #include "hostcmd.h"
 
 static const wchar_t *const characterClassNames[] = {
@@ -1021,4 +1022,9 @@ makeContractionTablePath (const char *directory, const char *name) {
   }
 
   return NULL;
+}
+
+char *
+findLocalizedContractionTable (const char *directory) {
+  return findLocalizedFile(directory, makeContractionTablePath);
 }

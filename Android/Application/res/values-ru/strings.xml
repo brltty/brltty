@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">цвет переднего плана в левой колонке и цвет фона в правой колонке</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">цвет переднего плана в верхнем квадрате и цвет фона в нижнем квадрате</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">автовыбор языковой основы</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Африкаанс (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Амхарский (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Немецкий (несокращённый)</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">Индонезийский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Международный фонетический алфавит</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Японский (несокращённый)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Корейский (несокращённый)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Корейский (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Корейский (ступень 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Корейский (ступень 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Литовский (несокращённый)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Сингальский (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Суахили (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Тайский (сокращённый)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Китайский (Тайвань, несокращённый)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Китайский (Тайвань, несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Зулу (сокращённый)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">привязки для брайлевских клавиатур</string>

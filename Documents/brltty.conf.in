@@ -234,24 +234,30 @@
 # Relative paths are anchored at "@TABLES_DIRECTORY@/@CONTRACTION_TABLES_SUBDIRECTORY@". If not specified, no
 # contraction table will be available.
 # (can be overridden with the --contraction-table= [-c] option)
+#contraction-table	auto	# locale-based autoselection
 #contraction-table	af	# Afrikaans (contracted)
 #contraction-table	am	# Amharic (uncontracted)
+#contraction-table	de	# German
 #contraction-table	de-g0	# German (uncontracted)
 #contraction-table	de-g1	# German (basic contractions)
 #contraction-table	de-g2	# German (contracted - 1998 standard)
 #contraction-table	de-1998	# German (contracted - 1998 standard)
 #contraction-table	de-2015	# German (contracted - 2015 standard)
+#contraction-table	en	# English
+#contraction-table	en_US	# English (United States)
 #contraction-table	en-ueb-g2	# English (Unified English Braille, grade 2)
 #contraction-table	en-us-g2	# English (US, grade 2)
 #contraction-table	es	# Spanish (grade 2)
+#contraction-table	fr	# French
 #contraction-table	fr-g1	# French (uncontracted)
 #contraction-table	fr-g2	# French (contracted)
 #contraction-table	ha	# Hausa (contracted)
 #contraction-table	id	# Indonesian (contracted)
 #contraction-table	ja	# Japanese (uncontracted)
+#contraction-table	ko	# Korean
+#contraction-table	ko-g0	# Korean (uncontracted)
 #contraction-table	ko-g1	# Korean (grade 1)
 #contraction-table	ko-g2	# Korean (grade 2)
-#contraction-table	ko	# Korean (uncontracted)
 #contraction-table	lt	# Lithuanian (uncontracted)
 #contraction-table	mg	# Malagasy (contracted)
 #contraction-table	mun	# Munda (contracted)
@@ -262,7 +268,7 @@
 #contraction-table	si	# Sinhalese (uncontracted)
 #contraction-table	sw	# Swahili (contracted)
 #contraction-table	th	# Thai (contracted)
-#contraction-table	zh-tw	# Chinese (Taiwan, uncontracted)
+#contraction-table	zh_TW	# Chinese (Taiwan, uncontracted)
 #contraction-table	zu	# Zulu (contracted)
 
 

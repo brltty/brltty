@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">couleur de premier plan dans la colonne de gauche et de fond dans la colonne de droite</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">couleur de premier plan dans le carré en majuscule et de fond dans le carré en minuscule</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">Sélection automatique basée sur la locale</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (désabrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Allemand (désabrégé)</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">Indonésien (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Alphabet Phonétique international</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japonais (désabrégé)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Coréen (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Coréen (désabrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Coréen (1er degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Coréen (2ème degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Lituanien (non abrégé)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Cinhalais (désabrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thaïlandais (abrégé)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinois (Taiwan, désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Chinois (Taiwan, désabrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zoulou (abrégé)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">associations pour les claviers brailles</string>

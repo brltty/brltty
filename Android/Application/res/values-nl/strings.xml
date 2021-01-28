@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">voorgrondkleur in de linkerkolom en achtergrondkleur in de rechterkolom</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">voorgrondkleur in bovenste vierkant en achtergrondkleur in onderste vierkant</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">locaal gebaseerde autoselectie</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (Verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (Onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Duits (Onverkort)</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesisch (verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Internationaal Phonetisch Alfabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japans (onverkort)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Koreaans (onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Koreaans (onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Koreaans (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Koreaans (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Litauws (onverkort)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thais (verkort)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinees (Taiwan, onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Chinees (Taiwan, onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (verkort)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">layout voor brailletoetsenborden</string>

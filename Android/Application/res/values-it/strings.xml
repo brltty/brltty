@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">colore primo piano nella colonna sinistra e colore sfondo nella colonna destra</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">colore primo piano nel riquadro superiore e colore sfondo nel riquadro inferiore</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">Selezione Automatica in base al locale</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amarico (non contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Tedesco (non contratto)</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesiano (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Alfabeto Fonetico Internazionale</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Giapponese (non contratto)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Coreano (non contratto)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Coreano (non contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Coreano (grado 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Coreano (grado 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Lituano (non contratto)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (non contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contratto)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Cinese (Taiwan, non contratto)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Cinese (Taiwan, non contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (contratto)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">combinazioni tasti per tastiere braille</string>

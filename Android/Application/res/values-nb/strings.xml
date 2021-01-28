@@ -237,6 +237,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">forgrunnsfarge i venstre kolonne og bakgrunnsfarge i høyre kolonne</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">forgrunnsfarge i øverste del og bakgrunnsfarge i nederste del</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">lokalitetsbasert, automatisk valg</string>
   <string name="CONTRACTION_TABLE_LABEL_af">afrikaans (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">amharisk (fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">tysk (fullskrift)</string>
@@ -253,7 +254,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">indonesisk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">internasjonalt fonetisk alfabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">japansk (fullskrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">koreansk (fullskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">koreansk (fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">koreansk (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">koreansk (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">latvisk (uforkortet)</string>
@@ -265,7 +266,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">singalesisk (fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">swahili (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">thai (kortskrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">kinesisk (Taiwan, fullskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">kinesisk (Taiwan, fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">zulu (kortskrift)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">alternativ for punktskrifttastatur</string>

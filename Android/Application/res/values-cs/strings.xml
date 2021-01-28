@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">Barva popředí v levém sloupci a barva pozadí v pravém sloupci</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">Barva popředí v horním čtyřbodu a barva pozadí v dolním čtyřbodu</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">Automatický výběr dle národního prostředí</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikánština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharština (plnopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Němčina (plnopis)</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">Indonéština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">International Phonetic Alphabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japonština (plnopis)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Korejština (plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Korejština (plnopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korejština (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korejština (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Litevština (plnopis)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalština (plnopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Svahilština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thajština (zkratkopis)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Čínština (Tchaj-wan, plnopis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Čínština (Tchaj-wan, plnopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulština (zkratkopis)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">Pravidla pro braillské klávesnice</string>

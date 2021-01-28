@@ -1,21 +1,27 @@
+auto|sélection automatique basée sur la locale@
 af|Afrikaans (abrégé)@
 am|Amharic (désabrégé)@
+de|Allemand@
 de-g0|Allemand (désabrégé)@
 de-g1|Allemand (abréviations de base)@
 de-g2|Allemand (abrégé - standard 1998)@
 de-1998|Allemand (abrégé - standard 1998)@
 de-2015|Allemand (abrégé - standard 2015)@
+en|Anglais@
+en_US|Anglais (USA)@
 en-ueb-g2|Anglais (Braille anglais unifié, 2ème degré)@
 en-us-g2|Anglais (USA, 2ème degré)@
 es|Espagnol (2ème degré)@
+fr|Français@
 fr-g1|Français (désabrégé)@
 fr-g2|Français (abrégé)@
 ha|Hausa (abrégé)@
 id|Indonésien (abrégé)@
 ja|Japoneais (désabrégé)@
+ko|Coréen@
+ko-g0|Coréen (désabrégé)@
 ko-g1|Coréen (1er degré)@
 ko-g2|Coréen (2ème degré)@
-ko|Coréen (désabrégé)@
 lt|Lituanien@
 mg|Malagasky (abrégé)@
 mun|Munda (abrégé)@
@@ -26,5 +32,5 @@ pt|Portuguais (2ème degré)@
 si|Cingalais (désabrégé)@
 sw|Swahili (abrégé)@
 th|Thaïlandais (abrégé)@
-zh-tw|Chinois (Taiwan, désabrégé)@
+zh_TW|Chinois (Taiwan, désabrégé)@
 zu|Zoulou (abrégé)@

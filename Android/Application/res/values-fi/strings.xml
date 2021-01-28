@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">edustan väri vasemmassa sarakkeessa ja taustaväri oikeassa sarakkeessa</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">edustan väri yläosassa ja taustaväri alaosassa</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">automaattinen valinta kieliasetusten mukaan</string>
   <string name="CONTRACTION_TABLE_LABEL_af">afrikaans (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">amhara (tavallinen kirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">saksa (tavallinen kirjoitus)</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">indonesia (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Kansainvälinen foneettinen aakkosto</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">japani (tavallinen kirjoitus)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">korea (tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">korea (tavallinen kirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">korea (taso 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">korea (taso 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">liettua (tavallinen kirjoitus)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">singaleesi (tavallinen kirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">swahili (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">thai (lyhennekirjoitus)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">kiina (Taiwan, tavallinen kirjoitus)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">kiina (Taiwan, tavallinen kirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (lyhennekirjoitus)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">pistenäppäimistöjen näppäinmääritykset</string>

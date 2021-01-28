@@ -339,6 +339,8 @@ processPreferenceLine (const LineHandlerParameters *parameters) {
 int
 loadPreferencesFile (const char *path) {
   int ok = 0;
+
+  logMessage(LOG_DEBUG, "loading preferences file: %s", path);
   FILE *file = openDataFile(path, "rb", 1);
 
   if (file) {

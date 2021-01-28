@@ -204,7 +204,7 @@ getTable (TextTable **table, const char *name) {
     char *allocated = NULL;
 
     if (strcmp(name, tableName_autoselect) == 0) {
-      if (!(name = allocated = selectTextTable(directory))) {
+      if (!(name = allocated = findLocalizedTextTable(directory))) {
         logMessage(LOG_ERR, "cannot find text table for current locale");
       }
     }

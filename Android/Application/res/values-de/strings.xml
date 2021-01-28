@@ -235,6 +235,7 @@
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">Fordergrundfarbe in der linken Spalte und Hintergrundfarbe in der rechten Spalte</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">Fordergrundfarbe im oberen Quadrat und Hintergrundfarbe im unteren Quadrat</string>
 
+  <string name="CONTRACTION_TABLE_LABEL_auto">Automatisch anhand der Landeseinstellung</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikanisch (Kurzschrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharisch (ungekürzt)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Deutsch (Vollschrift)</string>
@@ -251,7 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesisch (Kurzschrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Internationales Phonetisches Alphabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japanisch (ungekürzt)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko">Koreanisch (ungekürzt)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Koreanisch (ungekürzt)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Koreanisch (Grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Koreanisch (Grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt">Lituaisch (ungekürzt)</string>
@@ -263,7 +264,7 @@
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (ungekürzt)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (Kurzschrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thailändisch (Kurzschrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_zh_tw">Chinesisch (Taiwan, ungekürzt)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Chinesisch (Taiwan, ungekürzt)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (Kurzschrift)</string>
 
   <string name="KEYBOARD_TABLE_LABEL_braille">Tastenzuweisungen für Braille Tastaturen</string>
