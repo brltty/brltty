@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-25 09:02-0500\n"
-"PO-Revision-Date: 2012-12-19 17:03+0100\n"
+"POT-Creation-Date: 2021-01-27 11:28-0500\n"
+"PO-Revision-Date: 2021-01-28 03:18+0000\n"
 "Last-Translator: 高生旺 <coscell@molerat.net>\n"
 "Language-Team: Friends of BRLTTY <BRLTTY@brlttY.app>\n"
 "Language: zh\n"
@@ -88,12 +88,20 @@ msgid "500 milliseconds"
 msgstr "500 毫秒"
 
 #: Programs/menu_prefs.c:615
-msgid "6-Dot Computer Braille"
+msgid "6-Dot Computer"
 msgstr "六點電腦點字"
 
+#: Programs/menu_prefs.c:614
+msgid "6-Dot Contracted"
+msgstr "六點縮寫點字"
+
 #: Programs/menu_prefs.c:613
-msgid "8-Dot Computer Braille"
+msgid "8-Dot Computer"
 msgstr "八點電腦點字"
+
+#: Programs/menu_prefs.c:616
+msgid "8-Dot Contracted"
+msgstr "八點縮寫點字"
 
 #: Programs/brltty-ttb.c:179
 msgid "8-bit character set to use."
@@ -148,7 +156,7 @@ msgstr "警示"
 
 #: Programs/menu_prefs.c:993
 msgid "Alert Dots"
-msgstr "警示點"
+msgstr "警示點位"
 
 #: Programs/menu_prefs.c:998
 msgid "Alert Messages"
@@ -326,6 +334,10 @@ msgstr "點字表"
 msgid "Braille Typing"
 msgstr "點字輸入"
 
+#: Programs/menu_prefs.c:619
+msgid "Braille Variant"
+msgstr "點字種類"
+
 #: Programs/menu_prefs.c:457
 msgid "Braille Window Column"
 msgstr "點字視窗欄位"
@@ -447,10 +459,6 @@ msgstr "主控台嗶聲警示"
 #: Programs/midi.c:92
 msgid "Contrabass"
 msgstr "倍低音"
-
-#: Programs/menu_prefs.c:614
-msgid "Contracted Braille"
-msgstr "縮寫點字"
 
 #: Programs/config.c:2834 Programs/menu_prefs.c:1288
 msgid "Contraction Table"
@@ -934,10 +942,6 @@ msgstr "以說明畫面格式列出按鍵表"
 msgid "List key table in reStructuredText format."
 msgstr "以重新架構文字格式列出按鍵表"
 
-#: Programs/menu_prefs.c:616
-msgid "Literary Braille"
-msgstr "書面點字"
-
 #: Programs/menu_prefs.c:1366
 msgid "Locale Directory"
 msgstr "本土化目錄"
@@ -1001,7 +1005,7 @@ msgstr "MIDI 音量"
 
 #: Programs/menu_prefs.c:1326
 msgid "Mailing List"
-msgstr ""
+msgstr "郵件論壇"
 
 #: Programs/cmd_miscellaneous.c:59
 msgid "March"
@@ -1041,15 +1045,15 @@ msgstr "訊息保留時間（以 10ms 為單位）"
 
 #: Programs/config.c:839
 msgid "Messages Directory"
-msgstr ""
+msgstr "訊息目錄"
 
 #: Programs/config.c:838
 msgid "Messages Domain"
-msgstr ""
+msgstr "訊息種類"
 
 #: Programs/config.c:837
 msgid "Messages Locale"
-msgstr ""
+msgstr "訊息語言"
 
 #: Programs/menu_prefs.c:646 Programs/menu_prefs.c:899
 msgid "Minimum"
@@ -1872,10 +1876,6 @@ msgstr "文字標記"
 msgid "Text Side"
 msgstr "文字邊側"
 
-#: Programs/menu_prefs.c:619
-msgid "Text Style"
-msgstr "文自行太"
-
 #: Programs/config.c:2813 Programs/menu_prefs.c:1273
 msgid "Text Table"
 msgstr "文字表"
@@ -2033,7 +2033,7 @@ msgstr "木魚"
 
 #: Programs/menu_prefs.c:737
 msgid "Word Wrap"
-msgstr "換行"
+msgstr "段字"
 
 #: Programs/config.c:2763
 msgid "Working Directory"
@@ -2334,7 +2334,7 @@ msgstr "無法設定焦點到 %#010x\n"
 msgid "cannot set working directory"
 msgstr "無法設定工作目錄"
 
-#: Programs/prefs.c:525
+#: Programs/prefs.c:540
 msgid "cannot write to preferences file"
 msgstr "無法寫入偏好設定檔"
 
@@ -2949,6 +2949,10 @@ msgstr "行"
 msgid "linear copy to character"
 msgstr "直線拷貝字元"
 
+#: Programs/msgtest.c:85
+msgid "list all of the translations (the default)"
+msgstr "列出所有翻譯（預設）"
+
 #: Programs/config.c:665
 msgid "lvl|cat,..."
 msgstr "lvl|cat,..."
@@ -2990,6 +2994,10 @@ msgstr "移到畫面中的下一個項目"
 #: Programs/cmds.auto.h:999
 msgid "move to the previous item in the screen area"
 msgstr "移到畫面中的上一個項目"
+
+#: Programs/msgtest.c:59
+msgid "name"
+msgstr "名稱"
 
 #: Programs/config.c:356 Programs/config.c:408 Programs/config.c:461
 #: Programs/config.c:483 Programs/config.c:561 Programs/config.c:580
@@ -3060,6 +3068,10 @@ msgstr "page-down 鍵"
 #: Programs/cmds.auto.h:1343
 msgid "page-up key"
 msgstr "page-up 鍵"
+
+#: Programs/msgtest.c:44
+msgid "path"
+msgstr "路徑"
 
 #: Programs/menu_prefs.c:509
 msgid "percentage"
@@ -3358,6 +3370,14 @@ msgstr "設定追蹤螢幕游標開關"
 msgid "show current date and time"
 msgstr "顯示目前日期與時間"
 
+#: Programs/msgtest.c:73
+msgid "show the message count"
+msgstr "顯示訊息數量"
+
+#: Programs/msgtest.c:79
+msgid "show the translation metadata"
+msgstr "顯示翻譯原始資料"
+
 #: Programs/cmds.auto.h:919
 msgid "show the window title"
 msgstr "顯示視窗標題"
@@ -3405,6 +3425,10 @@ msgstr "朗讀內縮行"
 #: Programs/cmds.auto.h:736
 msgid "speak speech cursor location"
 msgstr "朗讀語音游標位置"
+
+#: Programs/msgtest.c:52
+msgid "specifier"
+msgstr "指定符號"
 
 #: Programs/config.c:2057
 msgid "speech driver not loadable"
@@ -3502,6 +3526,18 @@ msgstr "tab 鍵"
 msgid "text"
 msgstr "文字"
 
+#: Programs/msgtest.c:47
+msgid "the locale directory containing the translations"
+msgstr "含有翻譯的語言目錄"
+
+#: Programs/msgtest.c:54
+msgid "the locale in which to look up a translation"
+msgstr "查詢翻譯的語言"
+
+#: Programs/msgtest.c:61
+msgid "the name of the domain containing the translations"
+msgstr "含有翻譯的種類名稱"
+
 #: Programs/cmds.auto.h:1245
 msgid "type braille dots"
 msgstr "輸入點字點"
@@ -3555,6 +3591,10 @@ msgstr "白"
 #: Programs/pgmprivs_linux.c:1856
 msgid "working directory changed"
 msgstr "工作目錄變更"
+
+#: Programs/msgtest.c:67
+msgid "write the translations using UTF-8"
+msgstr "用 UTF-8 撰寫翻譯"
 
 #: Programs/xbrlapi.c:911
 #, c-format
@@ -3646,6 +3686,21 @@ msgstr "xbrlapi: 視窗 %#010lx 變更為沒有名稱\n"
 #: Programs/cmd_utils.c:158
 msgid "yellow"
 msgstr "黃"
+
+#~ msgid "6-Dot Computer Braille"
+#~ msgstr "六點電腦點字"
+
+#~ msgid "8-Dot Computer Braille"
+#~ msgstr "八點電腦點字"
+
+#~ msgid "Contracted Braille"
+#~ msgstr "縮寫點字"
+
+#~ msgid "Literary Braille"
+#~ msgstr "書面點字"
+
+#~ msgid "Text Style"
+#~ msgstr "文自行太"
 
 #~ msgid "Bug Reports"
 #~ msgstr "錯誤報告"
