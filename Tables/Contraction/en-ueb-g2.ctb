@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Contraction Table - English (Unified English Braille, grade 2)
-#By Michael Curran <mick@kulgan.net>
+# BRLTTY Contraction Table - English (UEB, grade 2)
+# Created by Michael Curran <mick@kulgan.net>
 
 #This is by no means complete, but at least all the important ascii symbols and general grade 2 contractions are here.
 #I am trying to compress space as much as possible so a lot of syllable boundary rules havn't been included.

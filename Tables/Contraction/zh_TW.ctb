@@ -16,7 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Contraction Table - Chinese (Taiwan, uncontracted) by Coscell Kao <coscell@gmail.com> (2019-2)
+# BRLTTY Contraction Table - Chinese (Taiwan, uncontracted)
+# Created by Coscell Kao <coscell@gmail.com> (2019-2)
 
 #English characters
 include nabcc.cti

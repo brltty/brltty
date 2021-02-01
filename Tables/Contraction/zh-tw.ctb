@@ -17,6 +17,6 @@
 ###############################################################################
 
 # BRLTTY Contraction Table - Chinese (Taiwan, uncontracted)
+# Deprecated - renamed to zh_TW
 
-# for backward compatibility
 include zh_TW.ctb
