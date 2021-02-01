@@ -123,4 +123,5 @@ export LDFLAGS="-Wl,--fix-cortex-a8"
    --host="${hostSystem}" \
    --quiet \
    "${@}"
+
 exit "${?}"

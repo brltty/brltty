@@ -17,14 +17,15 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+. "`dirname "${0}"`/brltty-prologue.sh"
+
 # Braille drivers already disabled:
 # ba (by --disable-api)
 # il (not on Linux)
 # lb (by --without-libbraille)
 # xw (by --disable-x)
 
-directory=`dirname "${0}"`
-"${directory}/configure" \
+"${programDirectory}/configure" \
    --disable-api \
    --disable-icu \
    --disable-gpm \
