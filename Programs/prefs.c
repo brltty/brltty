@@ -523,13 +523,23 @@ putPreferences (FILE *file) {
   return 1;
 }
 
+static int
+putHeader (FILE *file) {
+  fprintf(file,
+    "%c %s Preferences File\n",
+    PREFS_COMMENT_CHARACTER, PACKAGE_NAME
+  );
+
+  return !ferror(file);
+}
+
 int
 savePreferencesFile (const char *path) {
   int ok = 0;
   FILE *file = openDataFile(path, "w", 0);
 
   if (file) {
-    if (fprintf(file, "%c %s Preferences File\n", PREFS_COMMENT_CHARACTER, PACKAGE_NAME) >= 0) {
+    if (putHeader(file)) {
       if (putPreferences(file)) {
         ok = 1;
       }
