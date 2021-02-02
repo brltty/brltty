@@ -71,7 +71,7 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kortskrifttabell</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastaturtabell</string>
 
-  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Vis kunngjøringer</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Vis meldinger</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Vis varsler</string>
   <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Vis advarsler</string>
 
@@ -240,20 +240,25 @@
   <string name="CONTRACTION_TABLE_LABEL_auto">lokalitetsbasert, automatisk valg</string>
   <string name="CONTRACTION_TABLE_LABEL_af">afrikaans (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">amharisk (fullskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">tysk</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">tysk (fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">tysk (enkel kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">tysk (kortskrift - 1998-standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">tysk (kortskrift - 1998-standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">tysk (kortskrift - 2015-standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">engelsk</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">engelsk (USA)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">engelsk (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">engelsk (US, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">spansk (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">fransk</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">fransk (fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">fransk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">hausa (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">indonesisk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">internasjonalt fonetisk alfabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">japansk (fullskrift)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">koreansk</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0">koreansk (fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">koreansk (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">koreansk (grade 2)</string>
