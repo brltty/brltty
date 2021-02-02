@@ -1025,6 +1025,6 @@ makeContractionTablePath (const char *directory, const char *name) {
 }
 
 char *
-findLocalizedContractionTable (const char *directory) {
-  return findLocalizedFile(directory, makeContractionTablePath);
+getContractionTableForLocale (const char *directory) {
+  return getFileForLocale(directory, makeContractionTablePath);
 }

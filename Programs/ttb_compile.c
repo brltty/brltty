@@ -393,6 +393,6 @@ makeTextTablePath (const char *directory, const char *name) {
 }
 
 char *
-findLocalizedTextTable (const char *directory) {
-  return findLocalizedFile(directory, makeTextTablePath);
+getTextTableForLocale (const char *directory) {
+  return getFileForLocale(directory, makeTextTablePath);
 }

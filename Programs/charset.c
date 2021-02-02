@@ -199,7 +199,7 @@ testFileExists (const char *directory, char *name, PathMaker *pathMaker) {
 }
 
 char *
-findLocalizedFile (const char *directory, PathMaker *pathMaker) {
+getFileForLocale (const char *directory, PathMaker *pathMaker) {
   char *locale = getLocaleName();
 
   if (locale) {

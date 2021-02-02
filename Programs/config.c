@@ -2797,7 +2797,7 @@ brlttyStart (void) {
   if (*opt_textTable) {
     if (strcmp(opt_textTable, optionOperand_autodetect) == 0) {
       changeStringSetting(&opt_textTable, "");
-      char *name = findLocalizedTextTable(opt_tablesDirectory);
+      char *name = getTextTableForLocale(opt_tablesDirectory);
 
       if (name) {
         logMessage(LOG_DEBUG, "using autoselected text table: %s", name);
@@ -2837,7 +2837,7 @@ brlttyStart (void) {
   if (*opt_contractionTable) {
     if (strcmp(opt_contractionTable, optionOperand_autodetect) == 0) {
       changeStringSetting(&opt_contractionTable, "");
-      char *name = findLocalizedContractionTable(opt_tablesDirectory);
+      char *name = getContractionTableForLocale(opt_tablesDirectory);
 
       if (name) {
         logMessage(LOG_DEBUG, "using autoselected contraction table: %s", name);
