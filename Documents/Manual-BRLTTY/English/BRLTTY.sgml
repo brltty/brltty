@@ -1141,7 +1141,7 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     If this option isn't specified, then this feature isn't activated.
     This option is primarily intended for building a braillified installer image.
   <tag><tt/--with-stderr-path=/<em/path/<label id="build-stderr-path"></tag>
-    Specify the path to the file or device where standard erorr output is to be written.
+    Specify the path to the file or device where standard error output is to be written.
     The absolute path should be supplied.
     If this option isn't specified, then this feature isn't activated.
     This option is primarily intended for building a braillified installer image.

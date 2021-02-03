@@ -101,7 +101,7 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
     }
   else
     {
-      logMessage(LOG_DEBUG, "Libbraille initialization erorr: %s", braille_geterror());
+      logMessage(LOG_DEBUG, "Libbraille initialization error: %s", braille_geterror());
     }
   
   return 0;

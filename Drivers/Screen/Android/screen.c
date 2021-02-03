@@ -452,7 +452,7 @@ insertKey_AndroidScreen (ScreenKey key) {
     }
   }
 
-  logMessage(LOG_WARNING, "unsuported key: %04X", key);
+  logMessage(LOG_WARNING, "unsupported key: %04X", key);
   return 0;
 }
 

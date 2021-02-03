@@ -257,7 +257,7 @@ insertKey_ScreenScreen (ScreenKey key) {
       KEY(SCR_KEY_FUNCTION+19, "\x1b[34~");
 
       default:
-        logMessage(LOG_WARNING, "unsuported key: %04X", key);
+        logMessage(LOG_WARNING, "unsupported key: %04X", key);
         return 0;
     }
 

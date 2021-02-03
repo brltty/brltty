@@ -32,7 +32,7 @@ openMountsTable (int update) {
   FILE *table = setmntent(MOUNTS_TABLE_PATH, (update? "a": "r"));
   if (!table)
     logMessage((errno == ENOENT)? LOG_WARNING: LOG_ERR,
-               "mounted file systems table open erorr: %s: %s",
+               "mounted file systems table open error: %s: %s",
                MOUNTS_TABLE_PATH, strerror(errno));
   return table;
 }
