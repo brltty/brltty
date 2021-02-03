@@ -285,11 +285,14 @@ then
 fi
 AC_PROG_CXX
 
-brltty_gcc_cflags="-std=gnu99 -Wall -Werror=format-security -Wno-address-of-packed-member -Wno-stringop-truncation"
+brltty_gcc_cflags="-std=gnu99 -Wall -Werror=format-security"
 brltty_gcc_cppflags=""
 
 case "${host_os}"
 in
+   linux*)
+      brltty_gcc_cflags="${brltty_gcc_cflags} -Wno-address-of-packed-member -Wno-stringop-truncation"
+      ;;
    darwin*)
       brltty_gcc_cflags="${brltty_gcc_cflags} -Wno-initializer-overrides -Wno-unused-const-variable -Wno-pointer-bool-conversion"
       ;;
