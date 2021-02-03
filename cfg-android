@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -17,16 +17,57 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+# Braille drivers already disabled:
+# lb (by --without-libbraille)
+# xw (by --disable-x)
+readonly configureOptions=(
+   --disable-expat
+   --disable-gpm
+   --disable-iconv
+   --disable-icu
+   --disable-liblouis
+   --disable-polkit
+   --disable-x
+
+   --without-libbraille
+   --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo
+
+   --without-espeak
+   --without-espeak-ng
+   --without-flite
+   --without-mikropuhe
+   --without-speechd
+   --without-swift
+   --without-theta
+   --with-speech-driver=an,-all
+
+   --with-screen-driver=an,-all
+
+   --without-pgmpath-package
+   --without-pgmprivs-package
+   --without-service-package
+   --without-params-package
+   --without-charset-package
+   --without-rgx-package
+   --without-hostcmd-package
+   --without-mntpt-package
+   --without-mntfs-package
+   --without-bell-package
+   --without-leds-package
+   --without-beep-package
+   --without-midi-package
+   --without-fm-package
+   --without-ports-package
+)
+
 . "`dirname "${0}"`/brltty-prologue.sh"
+set -e
 
-androidPlatform=android-21
-androidArchitecture=arm
-hostSystem=arm-linux-androideabi
-
-buildRoot="${initialDirectory}"
 sourceRoot="${programDirectory}"
+buildRoot="${initialDirectory}"
 
-ndkRoot="${buildRoot}/Android/NDK"
+androidRoot="${buildRoot}/Android"
+ndkRoot="${androidRoot}/NDK"
 
 [ -d "${ndkRoot}" ] || {
    [ -n "${ANDROID_NDK}" ] || {
@@ -41,87 +82,73 @@ ndkRoot="${buildRoot}/Android/NDK"
    ln -s "${ANDROID_NDK}" "${ndkRoot}" || exit "${?}"
 }
 
-toolchainRoot="${buildRoot}/Android/ToolChain"
-[ -d "${toolchainRoot}" ] || {
-   "${ndkRoot}/build/tools/make-standalone-toolchain.sh" \
-      --platform="${androidPlatform}" \
-      --arch="${androidArchitecture}" \
-      --install-dir="${toolchainRoot}" || exit "${?}"
+architecturesRoot="${androidRoot}/ABI"
+androidPlatform=android-21
 
-   buildInclude="/usr/include"
-   hostInclude="${toolchainRoot}/sysroot${buildInclude}"
+prepareArchitecture() {
+   local architecture="${1}"
+   local system="${2}"
+   local abi="${3}"
+   local cFlags="${4}"
+   local ldFlags="${5}"
 
-   for header in bluetooth
-   do
-      hostHeader="${hostInclude}/${header}"
-      [ ! -e "${hostHeader}" ] || continue;
+   local abiRoot="${architecturesRoot}/${abi}"
+   mkdir -p -- "${abiRoot}"
+   local toolchainRoot="${abiRoot}/ToolChain"
 
-      buildHeader="${buildInclude}/${header}"
-      [ -e "${buildHeader}" ] || continue;
+   [ -d "${toolchainRoot}" ] || {
+      "${ndkRoot}/build/tools/make-standalone-toolchain.sh" \
+         --platform="${androidPlatform}" \
+         --arch="${architecture}" \
+         --install-dir="${toolchainRoot}" || exit "${?}"
 
-      ln -s "${buildHeader}" "${hostHeader}" || exit "${?}"
-   done
+      local buildInclude="/usr/include"
+      local hostInclude="${toolchainRoot}/sysroot${buildInclude}"
+
+      local header
+      for header in bluetooth
+      do
+         local hostHeader="${hostInclude}/${header}"
+         [ ! -e "${hostHeader}" ] || continue
+
+         local buildHeader="${buildInclude}/${header}"
+         [ -e "${buildHeader}" ] || continue
+
+         ln -s "${buildHeader}" "${hostHeader}" || exit "${?}"
+      done
+   }
+
+   (  set -e
+      cd "${abiRoot}"
+
+      set -- SOURCE "${sourceRoot}" PLATFORM "${androidPlatform}" ARCH "${architecture}" ABI "${abi}" SYSTEM "${system}" TOOLCHAIN "${toolchainRoot}"
+      local variablesFile="build.properties"
+      : >"${variablesFile}"
+
+      while [ "${#}" -gt 0 ]
+      do
+         local variable="${1}"
+         local value="${2}"
+         shift 2
+         echo >>"${variablesFile}" "BRLTTY_ANDROID_${variable}=${value}"
+      done
+
+      checkTool() {
+         eval export "${1}=\`set -- \"${toolchainBinaries}/\"*\"-$2\" && echo \"\${1}\"\`"
+      }
+
+      export toolchainBinaries="${toolchainRoot}/bin"
+      export PATH="${PATH}:${toolchainBinaries}"
+      checkTool CC gcc
+
+      export CFLAGS="${cFlags}"
+      export LDFLAGS="${ldFlags}"
+      "${sourceRoot}/configure" --quiet --host="${system}" "${configureOptions[@]}"
+   )
 }
 
-export toolchainBinaries="${toolchainRoot}/bin"
-export PATH="${PATH}:${toolchainBinaries}"
-
-checkTool() {
-   eval export "${1}=\`set -- \"${toolchainBinaries}/\"*\"-$2\" && echo \"\${1}\"\`"
-}
-checkTool CC gcc
-
-export CFLAGS="-mthumb"
-export LDFLAGS="-Wl,--fix-cortex-a8"
-
-# Braille drivers already disabled:
-# lb (by --without-libbraille)
-# xw (by --disable-x)
-
-"${sourceRoot}/configure" \
-   --disable-expat \
-   --disable-gpm \
-   --disable-iconv \
-   --disable-icu \
-   --disable-liblouis \
-   --disable-polkit \
-   --disable-x \
-   \
-   --without-libbraille \
-   --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo \
-   \
-   --without-espeak \
-   --without-espeak-ng \
-   --without-flite \
-   --without-mikropuhe \
-   --without-speechd \
-   --without-swift \
-   --without-theta \
-   --with-speech-driver=an,-all \
-   \
-   --with-screen-driver=an,-all \
-   \
-   --without-bell-package \
-   --without-leds-package \
-   \
-   --without-beep-package \
-   --without-midi-package \
-   --without-fm-package \
-   \
-   --without-pgmpath-package \
-   --without-pgmprivs-package \
-   --without-service-package \
-   --without-params-package \
-   --without-charset-package \
-   --without-rgx-package \
-   --without-hostcmd-package \
-   --without-mntpt-package \
-   --without-mntfs-package \
-   \
-   --without-ports-package \
-   \
-   --host="${hostSystem}" \
-   --quiet \
-   "${@}"
-
-exit "${?}"
+prepareArchitecture arm arm-linux-androideabi armeabi-v7a "-mthumb" "-Wl,--fix-cortex-a8"
+prepareArchitecture arm64 aarch64-linux-android arm64-v8a
+prepareArchitecture x86 i686-linux-android x86
+prepareArchitecture x86_64 x86_64-linux-android x86_64
+exit 0
