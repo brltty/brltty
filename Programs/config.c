@@ -1894,7 +1894,7 @@ restartBrailleDriver (void) {
   awaitActivityStopped(brailleDriverActivity);
   brl.hasFailed = 0;
 
-  logMessage(LOG_INFO, gettext("reinitializing braille driver"));
+  logMessage(LOG_INFO, "reinitializing braille driver");
   enableBrailleDriver();
 }
 
@@ -2207,7 +2207,7 @@ restartSpeechDriver (void) {
   disableSpeechDriver(gettext("speech driver restarting"));
   awaitActivityStopped(speechDriverActivity);
 
-  logMessage(LOG_INFO, gettext("reinitializing speech driver"));
+  logMessage(LOG_INFO, "reinitializing speech driver");
   enableSpeechDriver(1);
 }
 
@@ -2407,7 +2407,7 @@ restartScreenDriver (void) {
   disableScreenDriver(gettext("screen driver restarting"));
   awaitActivityStopped(screenDriverActivity);
 
-  logMessage(LOG_INFO, gettext("reinitializing screen driver"));
+  logMessage(LOG_INFO, "reinitializing screen driver");
   enableScreenDriver();
 }
 
@@ -2876,7 +2876,7 @@ brlttyStart (void) {
   
   /* The device(s) the braille display might be connected to. */
   if (!*opt_brailleDevice) {
-    logMessage(LOG_ERR, gettext("braille device not specified"));
+    logMessage(LOG_ERR, "%s", gettext("braille device not specified"));
     return PROG_EXIT_SYNTAX;
   }
 
