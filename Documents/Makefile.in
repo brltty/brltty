@@ -41,6 +41,9 @@ BrlAPIref:
 %.html: $(SRC_DIR)/README.%
 	rst2html --config "$(SRC_TOP)docutils.conf" $< $@
 
+%.txt: $(SRC_DIR)/README.%
+	rst2txt --config "$(SRC_TOP)docutils.conf" $< $@
+
 clean::
 	-rm -f *.made *.html
 	-rm -f -r BrlAPIref

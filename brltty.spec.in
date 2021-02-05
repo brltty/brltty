@@ -70,6 +70,7 @@ BuildRequires: systemd-devel
 BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
 BuildRequires: python3-docutils
+BuildRequires: rst2txt
 
 AutoProv: no
 AutoReq: yes
