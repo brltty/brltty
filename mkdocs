@@ -43,9 +43,8 @@ outputRoot=""
 sourceRoot=""
 buildRoot=""
 documentsSubdirectory=""
-tablesSubdirectory=""
 
-while getopts ":o:s:b:d:t:" option
+while getopts ":o:s:b:d:" option
 do
    case "${option}"
    in
@@ -53,14 +52,13 @@ do
       s) sourceRoot="${OPTARG}";;
       b) buildRoot="${OPTARG}";;
       d) documentsSubdirectory="${OPTARG}";;
-      t) tablesSubdirectory="${OPTARG}";;
       :) syntaxError "missing value: -${OPTARG}";;
      \?) syntaxError "unknown option: -${OPTARG}";;
       *) syntaxError "unimplemented option: -${option}";;
    esac
 done
-shift `expr "${OPTIND}" - 1`
 
+shift `expr "${OPTIND}" - 1`
 [ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
 [ -n "${outputRoot}" ] || outputRoot="doc"
@@ -81,10 +79,18 @@ fi
 updateFiles "${sourceRoot}" "." "." "README" "LICENSE-*"
 
 [ -z "${documentsSubdirectory}" ] || {
-   updateFiles "${sourceRoot}" "${documentsSubdirectory}" "." "ChangeLog" "CONTRIBUTORS" "README.*" "TODO"
-   updateFiles "${buildRoot}" "${documentsSubdirectory}" "." "brltty.conf"
+   sourceDocuments="${sourceRoot}/${documentsSubdirectory}"
+   buildDocuments="${buildRoot}/${documentsSubdirectory}"
 
-   for manual in `cd "${sourceRoot}/${documentsSubdirectory}" && echo Manual-*/*`
+   for document in `cd "${sourceDocuments}" && echo README.*`
+   do
+      make -s -C "${buildDocuments}" "${document#README.}.html"
+   done
+
+   updateFiles "${sourceRoot}" "${documentsSubdirectory}" "." "BUGS" "ChangeLog" "CONTRIBUTORS" "HISTORY" "TODO"
+   updateFiles "${buildRoot}" "${documentsSubdirectory}" "." "brltty.conf" "*.html"
+
+   for manual in `cd "${sourceDocuments}" && echo Manual-*/*`
    do
       for documentExtension in doc htm html pdf sgml txt
       do
@@ -98,9 +104,6 @@ updateFiles "${sourceRoot}" "." "." "README" "LICENSE-*"
    done
 }
 
-[ -z "${tablesSubdirectory}" ] || {
-   updateFiles "${sourceRoot}" "${tablesSubdirectory}" "." "README-*"
-   executeCommand "${sourceRoot}/mkdocktb" -o "${outputRoot}/KeyTables" -s "${sourceRoot}" -b "${buildRoot}"
-}
+executeCommand "${sourceRoot}/mkdocktb" -o "${outputRoot}/KeyTables" -s "${sourceRoot}" -b "${buildRoot}"
 
 exit 0
