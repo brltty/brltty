@@ -69,6 +69,7 @@ BuildRequires: polkit-devel
 BuildRequires: systemd-devel
 BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
+BuildRequires: python3-docutils
 
 AutoProv: no
 AutoReq: yes
