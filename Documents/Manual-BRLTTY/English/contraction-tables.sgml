@@ -8,7 +8,7 @@ de-g2|German (contracted - 1998 standard)@
 de-1998|German (contracted - 1998 standard)@
 de-2015|German (contracted - 2015 standard)@
 en|English@
-en_US|English (United States)@
+en&lowbar;US|English (United States)@
 en-ueb-g2|English (Unified English Braille, grade 2)@
 en-us-g2|English (US, grade 2)@
 es|Spanish (grade 2)@
@@ -32,5 +32,5 @@ pt|Portuguese (grade 2)@
 si|Sinhalese (uncontracted)@
 sw|Swahili (contracted)@
 th|Thai (contracted)@
-zh_TW|Chinese (Taiwan, uncontracted)@
+zh&lowbar;TW|Chinese (Taiwan, uncontracted)@
 zu|Zulu (contracted)@

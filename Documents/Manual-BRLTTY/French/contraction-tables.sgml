@@ -8,7 +8,7 @@ de-g2|Allemand (abrégé - standard 1998)@
 de-1998|Allemand (abrégé - standard 1998)@
 de-2015|Allemand (abrégé - standard 2015)@
 en|Anglais@
-en_US|Anglais (USA)@
+en&lowbar;US|Anglais (USA)@
 en-ueb-g2|Anglais (Braille anglais unifié, 2ème degré)@
 en-us-g2|Anglais (USA, 2ème degré)@
 es|Espagnol (2ème degré)@
@@ -32,5 +32,5 @@ pt|Portuguais (2ème degré)@
 si|Cingalais (désabrégé)@
 sw|Swahili (abrégé)@
 th|Thaïlandais (abrégé)@
-zh_TW|Chinois (Taiwan, désabrégé)@
+zh&lowbar;TW|Chinois (Taiwan, désabrégé)@
 zu|Zoulou (abrégé)@
