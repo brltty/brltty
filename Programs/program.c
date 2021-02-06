@@ -145,7 +145,7 @@ fixInstallPath (char **path) {
     if ((programDirectory = getPathDirectory(programPath))) {
       registerProgramMemory("program-directory", &programDirectory);
     } else {
-      logMessage(LOG_WARNING, "cannot determine program directory");
+      logMessage(LOG_WARNING, gettext("cannot determine program directory"));
       programDirectory = CURRENT_DIRECTORY_NAME;
     }
 
