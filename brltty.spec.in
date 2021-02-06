@@ -67,6 +67,8 @@ BuildRequires: ncurses-devel
 BuildRequires: pcre2-devel
 BuildRequires: polkit-devel
 BuildRequires: systemd-devel
+
+BuildRequires: gettext
 BuildRequires: linuxdoc-tools
 BuildRequires: doxygen
 BuildRequires: python3-docutils
