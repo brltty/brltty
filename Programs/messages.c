@@ -159,12 +159,12 @@ makeLocaleDirectoryPath (void) {
     code += 1;
   }
 
-  logMessage(LOG_WARNING, "messages locale not found: %s", localeSpecifier);
+  logMessage(LOG_DEBUG, "messages locale not found: %s", localeSpecifier);
   return NULL;
 }
 
 static char *
-makeMessagesFilePath (void) {
+makeMessageCatalogPath (void) {
   char *locale = makeLocaleDirectoryPath();
 
   if (locale) {
@@ -174,12 +174,12 @@ makeMessagesFilePath (void) {
     locale = NULL;
 
     if (category) {
-      char *file = makeFilePath(category, domainName, ".mo");
+      char *catalog = makeFilePath(category, domainName, ".mo");
 
       free(category);
       category = NULL;
 
-      if (file) return file;
+      if (catalog) return catalog;
     }
   }
 
@@ -192,7 +192,7 @@ loadMessagesData (void) {
   ensureAllMessagesProperties();
 
   int loaded = 0;
-  char *path = makeMessagesFilePath();
+  char *path = makeMessageCatalogPath();
 
   if (path) {
     int fd = open(path, (O_RDONLY | O_BINARY));
@@ -210,12 +210,12 @@ loadMessagesData (void) {
 
             if (count == -1) {
               logMessage(LOG_WARNING,
-                "messages data read error: %s: %s",
+                "message catalog read error: %s: %s",
                 path, strerror(errno)
               );
             } else if (count < size) {
               logMessage(LOG_WARNING,
-                "truncated messages data: %"PRIssize" < %"PRIsize": %s",
+                "truncated message catalog: %"PRIssize" < %"PRIsize": %s",
                 count, size, path
               );
             } else {
@@ -236,11 +236,11 @@ loadMessagesData (void) {
             logMallocError();
           }
         } else {
-          logMessage(LOG_WARNING, "no messages data");
+          logMessage(LOG_WARNING, "empty message catalog");
         }
       } else {
         logMessage(LOG_WARNING,
-          "messages file stat error: %s: %s",
+          "message catalog stat error: %s: %s",
           path, strerror(errno)
         );
       }
@@ -248,7 +248,7 @@ loadMessagesData (void) {
       close(fd);
     } else {
       logMessage(LOG_WARNING,
-        "messages file open error: %s: %s",
+        "message catalog open error: %s: %s",
         path, strerror(errno)
       );
     }
