@@ -23,6 +23,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifdef __GNUC__
+#define FORMAT_ARG(n) __attribute__((format_arg((n))))
+#else /* __GNUC__ */
+#define FORMAT_ARG(n)
+#endif /* __GNUC__ */
+
 #undef HAVE_BUILTIN_POPCOUNT
 #ifdef __has_builtin
 #if __has_builtin(__builtin_popcount)
@@ -429,8 +435,11 @@ mempcpy (void *dest, const void *src, size_t size) {
 #ifdef ENABLE_I18N_SUPPORT
 #include <libintl.h>
 #else /* ENABLE_I18N_SUPPORT */
-extern char *gettext (const char *text);
-extern char *ngettext (const char *singular, const char *plural, unsigned long int count);
+extern char *gettext (const char *text) FORMAT_ARG(1);
+
+extern char *ngettext (
+  const char *singular, const char *plural, unsigned long int count
+) FORMAT_ARG(1) FORMAT_ARG(2);
 #endif /* ENABLE_I18N_SUPPORT */
 #define strtext(string) string
 
