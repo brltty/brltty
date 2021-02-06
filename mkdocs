@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "${0%/*}/brltty-prologue.sh"
+. "${0%/*}/prologue.sh"
 
 executeCommand() {
    "${@}"
@@ -42,16 +42,15 @@ updateFiles() {
 outputRoot=""
 sourceRoot=""
 buildRoot=""
-documentsSubdirectory=""
 
-while getopts ":o:s:b:d:" option
+while getopts ":o:s:b:" option
 do
    case "${option}"
    in
       o) outputRoot="${OPTARG}";;
       s) sourceRoot="${OPTARG}";;
       b) buildRoot="${OPTARG}";;
-      d) documentsSubdirectory="${OPTARG}";;
+
       :) syntaxError "missing value: -${OPTARG}";;
      \?) syntaxError "unknown option: -${OPTARG}";;
       *) syntaxError "unimplemented option: -${option}";;
@@ -78,31 +77,29 @@ fi
 
 updateFiles "${sourceRoot}" "." "." "README" "LICENSE-*"
 
-[ -z "${documentsSubdirectory}" ] || {
-   sourceDocuments="${sourceRoot}/${documentsSubdirectory}"
-   buildDocuments="${buildRoot}/${documentsSubdirectory}"
+sourceDocuments="${sourceRoot}/${documentsSubdirectory}"
+buildDocuments="${buildRoot}/${documentsSubdirectory}"
 
-   for document in `cd "${sourceDocuments}" && echo README.*`
+for document in `cd "${sourceDocuments}" && echo README.*`
+do
+   make -s -C "${buildDocuments}" "${document#README.}.html"
+done
+
+updateFiles "${sourceRoot}" "${documentsSubdirectory}" "." "BUGS" "ChangeLog" "CONTRIBUTORS" "HISTORY" "TODO"
+updateFiles "${buildRoot}" "${documentsSubdirectory}" "." "brltty.conf" "*.html"
+
+for manual in `cd "${sourceDocuments}" && echo Manual-*/*`
+do
+   for documentExtension in doc htm html pdf sgml txt
    do
-      make -s -C "${buildDocuments}" "${document#README.}.html"
+      updateFiles "${sourceRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.${documentExtension}"
    done
+done
 
-   updateFiles "${sourceRoot}" "${documentsSubdirectory}" "." "BUGS" "ChangeLog" "CONTRIBUTORS" "HISTORY" "TODO"
-   updateFiles "${buildRoot}" "${documentsSubdirectory}" "." "brltty.conf" "*.html"
-
-   for manual in `cd "${sourceDocuments}" && echo Manual-*/*`
-   do
-      for documentExtension in doc htm html pdf sgml txt
-      do
-         updateFiles "${sourceRoot}" "${documentsSubdirectory}/${manual}" "${manual}" "*.${documentExtension}"
-      done
-   done
-
-   for manual in BrlAPIref
-   do
-      updateFiles "${buildRoot}" "${documentsSubdirectory}/${manual}/html" "${manual}" "*.html"
-   done
-}
+for manual in BrlAPIref
+do
+   updateFiles "${buildRoot}" "${documentsSubdirectory}/${manual}/html" "${manual}" "*.html"
+done
 
 executeCommand "${sourceRoot}/mkdocktb" -o "${outputRoot}/KeyTables" -s "${sourceRoot}" -b "${buildRoot}"
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -17,7 +17,16 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/brltty-prologue.sh"
+readonly configureOptions=(
+   --without-libbraille
+   --without-flite
+   --without-mikropuhe
+   --without-speechd
+   --without-swift
+   --without-theta
+)
+
+. "`dirname "${0}"`/prologue.sh"
 
 [ "${#}" -gt 0 ] || syntaxError "missing source root"
 sourceRoot="${1}"
@@ -52,22 +61,14 @@ cd "${archiveName}"
 
 "${sourceRoot}/getrevid" "${sourceRoot}" >REVISION
 ./autogen
-./configure --quiet --without-libbraille --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta
+./configure --quiet "${configureOptions[@]}"
 
-cd Documents
-make -s clean
-make -s
-cd ..
-
-cd Messages
-make -s clean
-make -s
-make -s clean
-cd ..
-
-cd Programs
-make -s revision_identifier.h
-cd ..
+(  set -e
+   cd "${documentsSubdirectory}"
+   make -s clean
+   make -s all
+)
+"${sourceRoot}/mkdocs" -o "doc" -s "${sourceRoot}" -b "."
 
 specFile="brltty.spec"
 mv -- "${specFile}" "${temporaryDirectory}"

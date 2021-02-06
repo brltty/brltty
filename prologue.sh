@@ -35,3 +35,5 @@ setBuildRoot() {
    }
 }
 
+readonly documentsSubdirectory="Documents"
+
