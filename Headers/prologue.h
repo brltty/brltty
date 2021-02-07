@@ -75,12 +75,6 @@ extern "C" {
 #endif /* FOR_BUILD */
 #endif /* HAVE_CONFIG_H */
 
-#ifdef HAVE_FUNC_ATTRIBUTE_FORMAT_ARG
-#define FORMAT_ARG(n) __attribute__((format_arg((n))))
-#else /* HAVE_FUNC_ATTRIBUTE_FORMAT_ARG */
-#define FORMAT_ARG(n)
-#endif /* HAVE_FUNC_ATTRIBUTE_FORMAT_ARG */
-
 #ifdef __ANDROID__
 #ifndef __ANDROID_API__
 #define __ANDROID_API__ 19
@@ -400,37 +394,35 @@ mempcpy (void *dest, const void *src, size_t size) {
 #define WRITABLE_DIRECTORY ""
 #endif /* WRITABLE_DIRECTORY */
 
-#ifndef PRINTF
-#ifdef HAVE_ATTRIBUTE_FORMAT_PRINTF
-#define PRINTF(fmt,var) __attribute__((format(__printf__, fmt, var)))
-#else /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
-#define PRINTF(fmt,var)
-#endif /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
-#endif /* PRINTF */
-
-#ifndef NORETURN
-#ifdef HAVE_ATTRIBUTE_NORETURN
-#define NORETURN __attribute__((noreturn))
-#else /* HAVE_ATTRIBUTE_NORETURN */
-#define NORETURN
-#endif /* HAVE_ATTRIBUTE_NORETURN */
-#endif /* NORETURN */
-
-#ifndef PACKED
-#ifdef HAVE_ATTRIBUTE_PACKED
+#ifdef HAVE_VAR_ATTRIBUTE_PACKED
 #define PACKED __attribute__((packed))
-#else /* HAVE_ATTRIBUTE_PACKED */
+#else /* HAVE_VAR_ATTRIBUTE_PACKED */
 #define PACKED
-#endif /* HAVE_ATTRIBUTE_PACKED */
-#endif /* PACKED */
+#endif /* HAVE_VAR_ATTRIBUTE_PACKED */
 
-#ifndef UNUSED
-#ifdef HAVE_ATTRIBUTE_UNUSED
+#ifdef HAVE_FUNC_ATTRIBUTE_FORMAT
+#define PRINTF(fmt,var) __attribute__((format(__printf__, fmt, var)))
+#else /* HAVE_FUNC_ATTRIBUTE_FORMAT */
+#define PRINTF(fmt,var)
+#endif /* HAVE_FUNC_ATTRIBUTE_FORMAT */
+
+#ifdef HAVE_FUNC_ATTRIBUTE_FORMAT_ARG
+#define FORMAT_ARG(n) __attribute__((format_arg((n))))
+#else /* HAVE_FUNC_ATTRIBUTE_FORMAT_ARG */
+#define FORMAT_ARG(n)
+#endif /* HAVE_FUNC_ATTRIBUTE_FORMAT_ARG */
+
+#ifdef HAVE_FUNC_ATTRIBUTE_NORETURN
+#define NORETURN __attribute__((noreturn))
+#else /* HAVE_FUNC_ATTRIBUTE_NORETURN */
+#define NORETURN
+#endif /* HAVE_FUNC_ATTRIBUTE_NORETURN */
+
+#ifdef HAVE_FUNC_ATTRIBUTE_UNUSED
 #define UNUSED __attribute__((unused))
-#else /* HAVE_ATTRIBUTE_UNUSED */
+#else /* HAVE_FUNC_ATTRIBUTE_UNUSED */
 #define UNUSED
-#endif /* HAVE_ATTRIBUTE_UNUSED */
-#endif /* UNUSED */
+#endif /* HAVE_FUNC_ATTRIBUTE_UNUSED */
 
 #ifdef ENABLE_I18N_SUPPORT
 #include <libintl.h>

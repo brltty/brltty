@@ -456,26 +456,29 @@ extern "C" {
 #undef HAVE_PKG_XAWPLUS
 #undef HAVE_PKG_XM
 
-/* Define this if the format_arg gcc function attribute is supported. */
-#undef HAVE_FUNC_ATTRIBUTE_FORMAT_ARG
-
 /* Define this if the compiler doesn't fully support the const keyword. */
 #undef const
 
 /* Define this if the compiler doesn't fully support the inline keyword. */
 #undef inline
 
-/* Define this if the printf format attribute is supported. */
-#undef HAVE_ATTRIBUTE_FORMAT_PRINTF
+/* Define this if the packed variable attribute is supported. */
+#undef HAVE_VAR_ATTRIBUTE_PACKED
 
-/* Define this if the noreturn attribute is supported. */
-#undef HAVE_ATTRIBUTE_NORETURN
+/* Define this if the unused variable attribute is supported. */
+#undef HAVE_VAR_ATTRIBUTE_UNUSED
 
-/* Define this if the packed attribute is supported. */
-#undef HAVE_ATTRIBUTE_PACKED
+/* Define this if the format function attribute is supported. */
+#undef HAVE_FUNC_ATTRIBUTE_FORMAT
 
-/* Define this if the unused attribute is supported. */
-#undef HAVE_ATTRIBUTE_UNUSED
+/* Define this if the format_arg function attribute is supported. */
+#undef HAVE_FUNC_ATTRIBUTE_FORMAT_ARG
+
+/* Define this if the noreturn function attribute is supported. */
+#undef HAVE_FUNC_ATTRIBUTE_NORETURN
+
+/* Define this if the unused function attribute is supported. */
+#undef HAVE_FUNC_ATTRIBUTE_UNUSED
 
 /* Define this if the __alignof__ operator is supported. */
 #undef HAVE_OPERATOR_ALIGNOF

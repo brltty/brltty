@@ -319,7 +319,13 @@ test "${GCC}" = "yes" && {
    CFLAGS="${CFLAGS} ${brltty_gcc_cflags}"
    CPPFLAGS="${CPPFLAGS} ${brltty_gcc_cppflags}"
 
+   AX_GCC_VAR_ATTRIBUTE([packed])
+   AX_GCC_VAR_ATTRIBUTE([unused])
+
+   AX_GCC_FUNC_ATTRIBUTE([format])
    AX_GCC_FUNC_ATTRIBUTE([format_arg])
+   AX_GCC_FUNC_ATTRIBUTE([noreturn])
+   AX_GCC_FUNC_ATTRIBUTE([unused])
 }
 
 test "${GXX}" = "yes" && {
@@ -966,72 +972,6 @@ if test "${brltty_cv_c_operator_alignof}" = "yes"
 then
    AC_DEFINE([HAVE_OPERATOR_ALIGNOF],  [1],
              [Define this if the __alignof__ operator is supported.])
-fi
-
-AC_CACHE_CHECK(
-   [if the compiler understands __attribute__((format(__printf__)))],
-   [brltty_cv_c_attribute_format_printf],
-   [AC_TRY_COMPILE([
-extern void conf_attribute_format_printf(const char *format, ...)
-       __attribute__((format(__printf__, 1, 2)));
-],
-[],
-[brltty_cv_c_attribute_format_printf=yes],
-[brltty_cv_c_attribute_format_printf=no])])
-if test "${brltty_cv_c_attribute_format_printf}" = "yes"
-then
-   AC_DEFINE([HAVE_ATTRIBUTE_FORMAT_PRINTF], [1],
-             [Define this if the printf format attribute is supported.])
-fi
-
-AC_CACHE_CHECK(
-   [if the compiler understands __attribute__((noreturn))],
-   [brltty_cv_c_attribute_noreturn],
-   [AC_TRY_COMPILE([
-extern void conf_attribute_noreturn(void)
-       __attribute__((noreturn));
-],
-[],
-[brltty_cv_c_attribute_noreturn=yes],
-[brltty_cv_c_attribute_noreturn=no])])
-if test "${brltty_cv_c_attribute_noreturn}" = "yes"
-then
-   AC_DEFINE([HAVE_ATTRIBUTE_NORETURN], [1],
-             [Define this if the noreturn attribute is supported.])
-fi
-
-AC_CACHE_CHECK(
-   [if the compiler understands __attribute__((packed))],
-   [brltty_cv_c_attribute_packed],
-   [AC_TRY_COMPILE([
-typedef struct {
-  char c;
-  int i;
-} __attribute__((packed)) conf_attribute_packed;
-],
-[],
-[brltty_cv_c_attribute_packed=yes],
-[brltty_cv_c_attribute_packed=no])])
-if test "${brltty_cv_c_attribute_packed}" = "yes"
-then
-   AC_DEFINE([HAVE_ATTRIBUTE_PACKED], [1],
-             [Define this if the packed attribute is supported.])
-fi
-
-AC_CACHE_CHECK(
-   [if the compiler understands __attribute__((unused))],
-   [brltty_cv_c_attribute_unused],
-   [AC_TRY_COMPILE([
-static void conf_attribute_unused (void)
-       __attribute__((unused));
-],
-[],
-[brltty_cv_c_attribute_unused=yes],
-[brltty_cv_c_attribute_unused=no])])
-if test "${brltty_cv_c_attribute_unused}" = "yes"
-then
-   AC_DEFINE([HAVE_ATTRIBUTE_UNUSED], [1],
-             [Define this if the unused attribute is supported.])
 fi
 
 AC_CACHE_CHECK(
