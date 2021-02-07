@@ -23,12 +23,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef __GNUC__
-#define FORMAT_ARG(n) __attribute__((format_arg((n))))
-#else /* __GNUC__ */
-#define FORMAT_ARG(n)
-#endif /* __GNUC__ */
-
 #undef HAVE_BUILTIN_POPCOUNT
 #ifdef __has_builtin
 #if __has_builtin(__builtin_popcount)
@@ -80,6 +74,12 @@ extern "C" {
 #include "config.h"
 #endif /* FOR_BUILD */
 #endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_FUNC_ATTRIBUTE_FORMAT_ARG
+#define FORMAT_ARG(n) __attribute__((format_arg((n))))
+#else /* HAVE_FUNC_ATTRIBUTE_FORMAT_ARG */
+#define FORMAT_ARG(n)
+#endif /* HAVE_FUNC_ATTRIBUTE_FORMAT_ARG */
 
 #ifdef __ANDROID__
 #ifndef __ANDROID_API__

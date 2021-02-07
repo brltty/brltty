@@ -19,10 +19,11 @@
 
 set -e
 cd `dirname "${0}"`
+directory="`pwd`"
 
 ./gendeps
 [ ! -f Makefile ] || make -s distclean
-aclocal
+aclocal -I "${directory}/m4"
 autoconf
 rm -fr autom4te*.cache || :
 

@@ -456,6 +456,9 @@ extern "C" {
 #undef HAVE_PKG_XAWPLUS
 #undef HAVE_PKG_XM
 
+/* Define this if the format_arg gcc function attribute is supported. */
+#undef HAVE_FUNC_ATTRIBUTE_FORMAT_ARG
+
 /* Define this if the compiler doesn't fully support the const keyword. */
 #undef const
 

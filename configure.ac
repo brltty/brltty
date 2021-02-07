@@ -290,9 +290,6 @@ brltty_gcc_cppflags=""
 
 case "${host_os}"
 in
-   linux*)
-      brltty_gcc_cflags="${brltty_gcc_cflags} -Wno-address-of-packed-member -Wno-stringop-truncation"
-      ;;
    darwin*)
       brltty_gcc_cflags="${brltty_gcc_cflags} -Wno-initializer-overrides -Wno-unused-const-variable -Wno-pointer-bool-conversion"
       ;;
@@ -312,8 +309,17 @@ in
 esac
 
 test "${GCC}" = "yes" && {
+   for flag in address-of-packed-member stringop-truncation
+   do
+      AX_CHECK_COMPILE_FLAG([-Werror=${flag}], [dnl
+         brltty_gcc_cflags="${brltty_gcc_cflags} -Wno-${flag}"
+      ])
+   done
+
    CFLAGS="${CFLAGS} ${brltty_gcc_cflags}"
    CPPFLAGS="${CPPFLAGS} ${brltty_gcc_cppflags}"
+
+   AX_GCC_FUNC_ATTRIBUTE([format_arg])
 }
 
 test "${GXX}" = "yes" && {
