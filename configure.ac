@@ -285,7 +285,7 @@ then
 fi
 AC_PROG_CXX
 
-brltty_gcc_cflags="-std=gnu99 -Wall -Werror=format-security"
+brltty_gcc_cflags="-std=gnu99 -Wall"
 brltty_gcc_cppflags=""
 
 case "${host_os}"
@@ -309,15 +309,32 @@ in
 esac
 
 test "${GCC}" = "yes" && {
-   for flag in address-of-packed-member stringop-truncation
+   CFLAGS="${CFLAGS} ${brltty_gcc_cflags}"
+   CPPFLAGS="${CPPFLAGS} ${brltty_gcc_cppflags}"
+
+   extraCFlags=""
+   for flag in unknown-warning-option
    do
       AX_CHECK_COMPILE_FLAG([-Werror=${flag}], [dnl
-         brltty_gcc_cflags="${brltty_gcc_cflags} -Wno-${flag}"
+         extraCFlags="${extraCFlags} -Werror=${flag}"
       ])
    done
 
-   CFLAGS="${CFLAGS} ${brltty_gcc_cflags}"
-   CPPFLAGS="${CPPFLAGS} ${brltty_gcc_cppflags}"
+   # warnings that should be errors
+   for flag in  format-security
+   do
+      AX_CHECK_COMPILE_FLAG([-Werror=${flag}], [dnl
+         CFLAGS="${CFLAGS} -Werror=${flag}"
+      ], [:], [${extraCFlags}])
+   done
+
+   # warnings that should be suppressed
+   for flag in address-of-packed-member stringop-truncation
+   do
+      AX_CHECK_COMPILE_FLAG([-Werror=${flag}], [dnl
+         CFLAGS="${CFLAGS} -Wno-${flag}"
+      ], [:], [${extraCFlags}])
+   done
 
    AX_GCC_VAR_ATTRIBUTE([packed])
    AX_GCC_VAR_ATTRIBUTE([unused])
