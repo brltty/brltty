@@ -1,0 +1,3601 @@
+#: Programs/brltty.c:167
+#, c-format
+msgid "\"%s\" started as \"%s\"\n"
+msgstr "\"%s\" запущено от имени \"%s\"\n"
+
+#: Programs/menu_prefs.c:457 Programs/menu_prefs.c:458
+#: Programs/menu_prefs.c:460 Programs/menu_prefs.c:461
+#: Programs/menu_prefs.c:464 Programs/menu_prefs.c:465
+#: Programs/menu_prefs.c:466 Programs/menu_prefs.c:468
+#: Programs/menu_prefs.c:469
+msgid "1 cell"
+msgstr "1 клетка"
+
+#: Programs/menu_prefs.c:789
+msgid "1 second"
+msgstr "1 секунда"
+
+#: Programs/menu_prefs.c:851
+msgid "10 seconds"
+msgstr "10 секунд"
+
+#: Programs/menu_prefs.c:1158
+msgid "12 Hour"
+msgstr "12 часов"
+
+#: Programs/menu_prefs.c:456 Programs/menu_prefs.c:459
+#: Programs/menu_prefs.c:462 Programs/menu_prefs.c:463
+#: Programs/menu_prefs.c:467
+msgid "2 cells"
+msgstr "2 клетки"
+
+#: Programs/menu_prefs.c:790
+msgid "2 seconds"
+msgstr "2 секунды"
+
+#: Programs/menu_prefs.c:852
+msgid "20 seconds"
+msgstr "20 секунд"
+
+#: Programs/menu_prefs.c:1157
+msgid "24 Hour"
+msgstr "24 часа"
+
+#: Programs/menu_prefs.c:787
+msgid "250 milliseconds"
+msgstr "250 миллисекунд"
+
+#: Programs/menu_prefs.c:853
+msgid "40 seconds"
+msgstr "40 секунд"
+
+#: Programs/menu_prefs.c:850
+msgid "5 seconds"
+msgstr "5 секунд"
+
+#: Programs/menu_prefs.c:788
+msgid "500 milliseconds"
+msgstr "500 миллисекунд"
+
+#: Programs/menu_prefs.c:615
+msgid "6-Dot Computer Braille"
+msgstr "Шеститочечный компьютерный брайль"
+
+#: Programs/menu_prefs.c:613
+msgid "8-Dot Computer Braille"
+msgstr "восьмиточечный компьютерный брайль"
+
+#: Programs/brltty-ttb.c:179
+msgid "8-bit character set to use."
+msgstr "используется 8-битная кодировка"
+
+#: Programs/scr_menu.c:104
+msgid "<off>"
+msgstr "выкл."
+
+#: Programs/config.c:1367
+msgid "API Parameter"
+msgstr "Параметр API"
+
+#: Programs/cmds.auto.h:1252
+msgid "AT (set 2) keyboard scan code"
+msgstr "AT (set 2) скан-код клавиатуры"
+
+#: Programs/midi.c:67
+msgid "Accordion"
+msgstr "аккордеон"
+
+#. Bass
+#: Programs/midi.c:80
+msgid "Acoustic Bass"
+msgstr "акустический бас"
+
+#. Piano
+#: Programs/midi.c:44
+msgid "Acoustic Grand Piano"
+msgstr "акустический рояль"
+
+#. Guitar
+#: Programs/midi.c:71
+msgid "Acoustic Guitar (nylon)"
+msgstr "акустическая гитара (нейлон)"
+
+#: Programs/midi.c:72
+msgid "Acoustic Guitar (steel)"
+msgstr "акустическая гитара (сталь)"
+
+#: Programs/menu_prefs.c:1184
+msgid "After Time"
+msgstr "По истечении времени"
+
+#: Programs/midi.c:171
+msgid "Agogo"
+msgstr "Агого"
+
+#: Programs/menu_prefs.c:1374
+msgid "Alert"
+msgstr "уведомление"
+
+#: Programs/menu_prefs.c:993
+msgid "Alert Dots"
+msgstr "уведомление  точек"
+
+#: Programs/menu_prefs.c:998
+msgid "Alert Messages"
+msgstr "уведомление сообщения"
+
+#: Programs/menu_prefs.c:938
+msgid "Alert Tunes"
+msgstr "уведомление тоны/звуки"
+
+#: Programs/menu_prefs.c:753 Programs/menu_prefs.c:1032
+msgid "All"
+msgstr "всё"
+
+#: Programs/menu_prefs.c:468
+msgid "Alphabetic Braille Window Coordinates"
+msgstr "алфавитные координаты окна Брайля"
+
+#: Programs/menu_prefs.c:469
+msgid "Alphabetic Screen Cursor Coordinates"
+msgstr "алфавитные координаты экранного курсора"
+
+#: Programs/midi.c:117
+msgid "Alto Sax"
+msgstr "саксофон-альт"
+
+#: Programs/midi.c:185
+msgid "Applause"
+msgstr "аплодисменты"
+
+#: Programs/cmd_miscellaneous.c:60
+msgid "April"
+msgstr "апрель"
+
+#: Programs/log.c:116
+msgid "Async Events"
+msgstr "асинхронные события"
+
+#: Programs/menu_prefs.c:710
+msgid "Attributes Invisible Time"
+msgstr "атрибуты - скрытое время"
+
+#: Programs/config.c:2812 Programs/menu_prefs.c:1280
+msgid "Attributes Table"
+msgstr "атрибуты таблица"
+
+#: Programs/menu_prefs.c:704
+msgid "Attributes Visible Time"
+msgstr "атрибуты время видимости"
+
+#: Programs/cmd_miscellaneous.c:64
+msgid "August"
+msgstr "август"
+
+#: Programs/alert.c:168
+msgid "Autorelease"
+msgstr "автоматическая разблокировка"
+
+#: Programs/menu_prefs.c:856
+msgid "Autorelease Time"
+msgstr "время автоматической разблокировки"
+
+#: Programs/menu_prefs.c:873
+msgid "Autorepeat Enabled"
+msgstr "автоповтор включён"
+
+#: Programs/menu_prefs.c:879
+msgid "Autorepeat Interval"
+msgstr "интервал автоповтора"
+
+#: Programs/menu_prefs.c:886
+msgid "Autorepeat Panning"
+msgstr "панорамный автоповтор"
+
+#: Programs/menu_prefs.c:1075
+msgid "Autospeak"
+msgstr "автопроговаривание"
+
+#: Programs/config.c:1812
+msgid "BRLTTY stopped"
+msgstr "BRLTTY остановлено"
+
+#: Programs/midi.c:166
+msgid "Bag Pipe"
+msgstr "волынка"
+
+#: Programs/midi.c:162
+msgid "Banjo"
+msgstr "Банджо"
+
+#: Programs/midi.c:119
+msgid "Baritone Sax"
+msgstr "саксофон-баритон"
+
+#: Programs/midi.c:28
+msgid "Bass"
+msgstr "бас"
+
+#: Programs/midi.c:122
+msgid "Bassoon"
+msgstr "фагот"
+
+#: Programs/menu_prefs.c:945
+msgid "Beeper"
+msgstr "пейджер"
+
+#: Programs/menu_prefs.c:1183
+msgid "Before Time"
+msgstr "до начала"
+
+#: Programs/midi.c:182
+msgid "Bird Tweet"
+msgstr "птичий щебет"
+
+#: Programs/menu_prefs.c:698
+msgid "Blinking Attributes"
+msgstr "атрибуты мигания"
+
+#: Programs/menu_prefs.c:716
+msgid "Blinking Capitals"
+msgstr "мигающие заглавные буквы"
+
+#: Programs/menu_prefs.c:675
+msgid "Blinking Screen Cursor"
+msgstr "мигающий экранный курсор"
+
+#: Programs/menu_prefs.c:1133
+msgid "Blinking Speech Cursor"
+msgstr "мигающий речевой курсор"
+
+#: Programs/menu_prefs.c:576 Programs/menu_prefs.c:1243
+msgid "Block"
+msgstr "заблокировать"
+
+#: Programs/midi.c:129
+msgid "Blown Bottle"
+msgstr "выдувная бутылка"
+
+#: Programs/log.c:140
+msgid "Bluetooth I/O"
+msgstr "Bluetooth вкл/выкл"
+
+#: Programs/config.c:1588
+msgid "Braille Device"
+msgstr "устройство Брайля"
+
+#: Programs/config.c:1584
+msgid "Braille Driver"
+msgstr "драйвер Брайля"
+
+#: Programs/log.c:146
+msgid "Braille Driver Events"
+msgstr "события драйвера Брайля"
+
+#: Programs/menu_prefs.c:653
+msgid "Braille Firmness"
+msgstr "твёрдость точек Брайля"
+
+#: Programs/log.c:80
+msgid "Braille Key Events"
+msgstr "события клавиши ввода Брайля"
+
+#: Programs/config.c:1587
+msgid "Braille Parameter"
+msgstr "Параметр Брайля"
+
+#: Programs/menu_prefs.c:609
+msgid "Braille Presentation"
+msgstr "представление Брайля"
+
+#: Programs/menu_prefs.c:1270
+msgid "Braille Tables"
+msgstr "Таблицы Брайля"
+
+#: Programs/menu_prefs.c:821
+msgid "Braille Typing"
+msgstr "ввод Брайля"
+
+#: Programs/menu_prefs.c:457
+msgid "Braille Window Column"
+msgstr "окно Брайля по вертикали"
+
+#: Programs/menu_prefs.c:456
+msgid "Braille Window Coordinates"
+msgstr "координаты окна Брайля"
+
+#: Programs/menu_prefs.c:774
+msgid "Braille Window Overlap"
+msgstr "окно Брайля поверх других"
+
+#: Programs/menu_prefs.c:458
+msgid "Braille Window Row"
+msgstr "окно Брайля по горизонтали"
+
+#: Programs/config.c:464
+#, c-format
+msgid "Braille driver code (%s, %s, or one of {%s})."
+msgstr "код драйвера Брайля (%s, %s, или один из {%s})."
+
+#: Programs/midi.c:31
+msgid "Brass"
+msgstr "духовые инструменты"
+
+#: Programs/midi.c:112
+msgid "Brass Section"
+msgstr "духовые инструменты"
+
+#: Programs/midi.c:180
+msgid "Breath Noise"
+msgstr "звук дыхания"
+
+#: Programs/midi.c:45
+msgid "Bright Acoustic Piano"
+msgstr "мощное акустическое пианино"
+
+#: Programs/xbrlapi.c:93
+msgid "BrlAPI authorization/authentication schemes"
+msgstr "Схемы авторизации/аутентификации BrlApi"
+
+#: Programs/xbrlapi.c:86
+msgid "BrlAPI host and/or port to connect to"
+msgstr "хост и/или port для подключения BrlApi"
+
+#: Programs/menu_prefs.c:1326
+msgid "Bug Reports"
+msgstr "отчёты о неполадках"
+
+#: Programs/menu_prefs.c:1307
+msgid "Build Information"
+msgstr "информация о сборке программы"
+
+#: Programs/menu_prefs.c:638
+msgid "Capitalization Mode"
+msgstr "режим заглавных букв"
+
+#: Programs/menu_prefs.c:727
+msgid "Capitals Invisible Time"
+msgstr "заглавные буквы - скрытое время"
+
+#: Programs/menu_prefs.c:721
+msgid "Capitals Visible Time"
+msgstr "заглавные буквы - время видимости"
+
+#: Programs/menu_prefs.c:1397
+msgid "Category Log Level"
+msgstr "категория Уровень ведения журнала об ошибках"
+
+#. Chromatic Percussion
+#: Programs/midi.c:53
+msgid "Celesta"
+msgstr "челеста"
+
+#: Programs/midi.c:91
+msgid "Cello"
+msgstr "виолончель"
+
+#: Programs/midi.c:102
+msgid "Choir Aahs"
+msgstr "хоровые придыхания"
+
+#: Programs/midi.c:25
+msgid "Chromatic Percussion"
+msgstr "хроматическая перкуссия"
+
+#: Programs/midi.c:65
+msgid "Church Organ"
+msgstr "церковный орган"
+
+#: Programs/midi.c:123
+msgid "Clarinet"
+msgstr "кларнет"
+
+#: Programs/midi.c:51
+msgid "Clavi"
+msgstr "клавир"
+
+#: Programs/menu.c:820
+msgid "Close"
+msgstr "закрыть"
+
+#: Programs/menu_prefs.c:1167
+msgid "Colon"
+msgstr "двоеточие"
+
+#: Programs/menu_prefs.c:1331
+msgid "Configuration Directory"
+msgstr "Каталог конфигурации"
+
+#: Programs/config.c:2755 Programs/menu_prefs.c:1336
+msgid "Configuration File"
+msgstr "файл конфигурации"
+
+#: Programs/alert.c:163
+msgid "Console Bell"
+msgstr "консольный звуковой сигнал"
+
+#: Programs/menu_prefs.c:924
+msgid "Console Bell Alert"
+msgstr "консольный звуковой сигнал уведомление"
+
+#: Programs/midi.c:92
+msgid "Contrabass"
+msgstr "контрабас"
+
+#: Programs/menu_prefs.c:614
+msgid "Contracted Braille"
+msgstr "Краткопись"
+
+#: Programs/config.c:2819 Programs/menu_prefs.c:1288
+msgid "Contraction Table"
+msgstr "таблица краткописных сокращений"
+
+#: Programs/brltty-ctb.c:62
+msgid "Contraction table."
+msgstr "таблица краткописных сокращений."
+
+#: Programs/brltty-ctb.c:76
+msgid "Contraction verification table."
+msgstr "верификационная таблица сокращений."
+
+#: Programs/menu_prefs.c:1375
+msgid "Critical"
+msgstr "ключевое"
+
+#: Programs/log.c:98
+msgid "Cursor Routing"
+msgstr "направление курсора"
+
+#: Programs/log.c:92
+msgid "Cursor Tracking"
+msgstr "отслеживание курсора"
+
+#: Programs/menu_prefs.c:793
+msgid "Cursor Tracking Delay"
+msgstr "задержка отслеживания курсора"
+
+#: Programs/menu_prefs.c:1205
+msgid "Dash"
+msgstr "тире"
+
+#: Programs/menu_prefs.c:1198
+msgid "Date Format"
+msgstr "формат данных"
+
+#: Programs/menu_prefs.c:1187
+msgid "Date Position"
+msgstr "Позиционирование  данных"
+
+#: Programs/menu_prefs.c:1210
+msgid "Date Separator"
+msgstr "разделитель данных"
+
+#: Programs/menu_prefs.c:1195
+msgid "Day Month Year"
+msgstr "День Месяц Год"
+
+#: Programs/menu_prefs.c:1380
+msgid "Debug"
+msgstr "устранить неполадки"
+
+#: Programs/cmd_miscellaneous.c:68
+msgid "December"
+msgstr "декабрь"
+
+#: Programs/config.c:485
+msgid "Device for accessing braille display."
+msgstr "устройство доступа к дисплею Брайля"
+
+#: Programs/config.c:444
+msgid "Disable the application programming interface."
+msgstr "отключить програмный интерфейс  приложения"
+
+#: Programs/midi.c:77
+msgid "Distortion Guitar"
+msgstr "дисторшн-гитара"
+
+#: Programs/config.c:587
+msgid "Do not autospeak when braille is not being used."
+msgstr "не проговаривать автоматически, когда Брайль не используется"
+
+#: Programs/xbrlapi.c:112
+msgid "Do not write any text to the braille device"
+msgstr "не пишите никакого текста на устройство Брайля"
+
+#: Programs/brltty-trtxt.c:79
+msgid "Don't fall back to the Unicode base character."
+msgstr "не возвращайтесь к основной кодировке Unicode"
+
+#: Programs/config.c:355
+msgid "Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc)."
+msgstr "не переключайтесь в режим обычного пользователя и не отказывайтесь от каких бы то ни было преимуществ (совместное использование, дополнительные возможности и Т. Д.)."
+
+#: Programs/alert.c:52
+msgid "Done"
+msgstr "готово"
+
+#: Programs/menu_prefs.c:1168 Programs/menu_prefs.c:1207
+msgid "Dot"
+msgstr "точка"
+
+#: Programs/menu_prefs.c:831
+msgid "Dots via Unicode Braille"
+msgstr "точки посредством Unicode Брайля"
+
+#. Organ
+#: Programs/midi.c:62
+msgid "Drawbar Organ"
+msgstr "тяговый орган"
+
+#: Programs/config.c:2776 Programs/menu_prefs.c:1356
+msgid "Drivers Directory"
+msgstr "каталог драйверов"
+
+#: Programs/midi.c:60
+msgid "Dulcimer"
+msgstr "цимбалы"
+
+#: Programs/menu_prefs.c:768
+msgid "Eager Sliding Braille Window"
+msgstr "быстрое скольжение окна Брайля"
+
+#: Programs/brltty-ttb.c:158
+msgid "Edit table."
+msgstr "редактировать таблицу."
+
+#: Programs/midi.c:81
+msgid "Electric Bass (finger)"
+msgstr "электробас (палец)"
+
+#: Programs/midi.c:82
+msgid "Electric Bass (pick)"
+msgstr "электробас (щипок)"
+
+#: Programs/midi.c:46
+msgid "Electric Grand Piano"
+msgstr "электрический рояль"
+
+#: Programs/midi.c:74
+msgid "Electric Guitar (clean)"
+msgstr "электрогитара (чистое звучание)"
+
+#: Programs/midi.c:73
+msgid "Electric Guitar (jazz)"
+msgstr "электрогитара (джаз)"
+
+#: Programs/midi.c:75
+msgid "Electric Guitar (muted)"
+msgstr "электрогитара (приглушённый звук)"
+
+#: Programs/midi.c:48
+msgid "Electric Piano 1"
+msgstr "электрическое пианино 1"
+
+#: Programs/midi.c:49
+msgid "Electric Piano 2"
+msgstr "электрическое пианино 2"
+
+#: Programs/menu_prefs.c:1373
+msgid "Emergency"
+msgstr "сигнализация экстренных служб"
+
+#: Programs/menu_prefs.c:455
+msgid "End"
+msgstr "конец"
+
+#: Programs/menu_prefs.c:754
+msgid "End of Line"
+msgstr "конец строки"
+
+#: Programs/midi.c:121
+msgid "English Horn"
+msgstr "английский рожок"
+
+#: Programs/menu_prefs.c:1067
+msgid "Enqueue"
+msgstr "поставить в очередь"
+
+#: Programs/midi.c:30
+msgid "Ensemble"
+msgstr "ансамбль"
+
+#: Programs/menu_prefs.c:1376
+msgid "Error"
+msgstr "ошибка"
+
+#: Programs/midi.c:37
+msgid "Ethnic Instruments"
+msgstr "народные инструменты"
+
+#: Programs/menu_prefs.c:921
+msgid "Event Alerts"
+msgstr "уведомление о событиях"
+
+#: Programs/menu_prefs.c:626
+msgid "Expand Current Word"
+msgstr "Развернуть текущее слово"
+
+#: Programs/config.c:399
+msgid "Explicit preference settings."
+msgstr "расширенные настройки"
+
+#: Programs/menu_prefs.c:948
+msgid "FM"
+msgstr "FM"
+
+#: Programs/menu_prefs.c:986
+msgid "FM Volume"
+msgstr "громкость FM"
+
+#. Synth FM
+#: Programs/midi.c:152
+msgid "FX 1 (rain)"
+msgstr "звуковая схема 1 (дождь)"
+
+#: Programs/midi.c:153
+msgid "FX 2 (soundtrack)"
+msgstr "звуковая схема 2 (саундтрек)"
+
+#: Programs/midi.c:154
+msgid "FX 3 (crystal)"
+msgstr "звуковая схема 3 (кристалл)"
+
+#: Programs/midi.c:155
+msgid "FX 4 (atmosphere)"
+msgstr "звуковая схема 4 (атмосфера)"
+
+#: Programs/midi.c:156
+msgid "FX 5 (brightness)"
+msgstr "звуковая схема 5 (яркость)"
+
+#: Programs/midi.c:157
+msgid "FX 6 (goblins)"
+msgstr "звуковая схема 6 (гоблины)"
+
+#: Programs/midi.c:158
+msgid "FX 7 (echoes)"
+msgstr "звуковая схема 7 (множественное эхо)"
+
+#: Programs/midi.c:159
+msgid "FX 8 (sci-fi)"
+msgstr "звуковая схема 8 (научная фантастика)"
+
+#: Programs/cmd_miscellaneous.c:58
+msgid "February"
+msgstr "февраль"
+
+#: Programs/midi.c:167
+msgid "Fiddle"
+msgstr "скрипка"
+
+#: Programs/midi.c:126
+msgid "Flute"
+msgstr "флейта"
+
+#: Programs/brltty-ctb.c:96
+msgid "Force immediate output."
+msgstr "запросить немедленный вывод"
+
+#: Programs/brltty-cldr.c:42
+msgid "Format of each output line."
+msgstr "формат каждой выводимой строки"
+
+#: Programs/brltty-ttb.c:165
+msgid "Format of input file."
+msgstr "формат входного файла"
+
+#: Programs/brltty-ttb.c:172
+msgid "Format of output file."
+msgstr "формат выходного файла"
+
+#: Programs/midi.c:111
+msgid "French Horn"
+msgstr "французский рожок"
+
+#: Programs/midi.c:83
+msgid "Fretless Bass"
+msgstr "безладовая бас-гитара"
+
+#: Programs/alert.c:97
+msgid "Frozen"
+msgstr "Приостановлено"
+
+#: Programs/menu_prefs.c:470
+msgid "Generic"
+msgstr "основное"
+
+#: Programs/log.c:62
+msgid "Generic Input"
+msgstr "основной ввод"
+
+#: Programs/midi.c:54
+msgid "Glockenspiel"
+msgstr "куранты"
+
+#: Programs/midi.c:27
+msgid "Guitar"
+msgstr "гитара"
+
+#. Sound Effects
+#: Programs/midi.c:179
+msgid "Guitar Fret Noise"
+msgstr "гитарные переборы"
+
+#: Programs/midi.c:78
+msgid "Guitar Harmonics"
+msgstr "гитарная гармоника"
+
+#: Programs/midi.c:186
+msgid "Gunshot"
+msgstr "пушечный выстрел"
+
+#: Programs/midi.c:68
+msgid "Harmonica"
+msgstr "гармоника"
+
+#: Programs/midi.c:50
+msgid "Harpsichord"
+msgstr "клавесин"
+
+#: Programs/midi.c:184
+msgid "Helicopter"
+msgstr "вертолёт"
+
+#: Programs/scr_help.c:215
+msgid "Help Screen"
+msgstr "экран справки"
+
+#: Programs/menu_prefs.c:649 Programs/menu_prefs.c:902
+msgid "High"
+msgstr "высоко"
+
+#: Programs/menu_prefs.c:810
+msgid "Highlight Braille Window Location"
+msgstr "выделить расположение окна Брайля"
+
+#: Programs/midi.c:47
+msgid "Honkytonk Piano"
+msgstr "расстроенное пианино"
+
+#: Programs/menu_prefs.c:1066
+msgid "Immediate"
+msgstr "немедленно"
+
+#: Programs/xbrlapi.c:665
+msgid "Incompatible XKB library\n"
+msgstr "Несовместимая библиотека XKB\n"
+
+#: Programs/xbrlapi.c:667
+msgid "Incompatible XKB server support\n"
+msgstr "Несовместимая поддержка сервера XKB\n"
+
+#: Programs/menu_prefs.c:1379
+msgid "Information"
+msgstr "информация"
+
+#: Programs/menu_prefs.c:845
+msgid "Input Options"
+msgstr "опции ввода"
+
+#: Programs/log.c:68
+msgid "Input Packets"
+msgstr "пакетный ввод"
+
+#: Programs/config.c:330
+#, c-format
+msgid "Install the %s service, and then exit."
+msgstr "Установить сервис %s и выйти."
+
+#: Programs/menu_prefs.c:1383
+msgid "Internal Parameters"
+msgstr "внутренние параметры"
+
+#: Programs/cmd_miscellaneous.c:57
+msgid "January"
+msgstr "январь"
+
+#: Drivers/Screen/Android/screen.c:197
+msgid "Java class not found"
+msgstr "класс Java не найден"
+
+#: Drivers/Screen/Android/screen.c:181
+msgid "Java exception occurred"
+msgstr "произошло исключение Java"
+
+#: Drivers/Screen/Android/screen.c:194
+msgid "Java method not found"
+msgstr "метод Java не найден"
+
+#: Programs/cmd_miscellaneous.c:63
+msgid "July"
+msgstr "июль"
+
+#: Programs/cmd_miscellaneous.c:62
+msgid "June"
+msgstr "июнь"
+
+#: Programs/midi.c:165
+msgid "Kalimba"
+msgstr "калимба"
+
+#: Programs/config.c:1510
+msgid "Key Bindings"
+msgstr "привязки клавиш"
+
+#: Programs/config.c:1054
+msgid "Key Help"
+msgstr "справка по клавишам"
+
+#: Programs/config.c:1515 Programs/ktb_list.c:737
+msgid "Key Table"
+msgstr "таблица клавиш"
+
+#: Programs/menu_prefs.c:824
+msgid "Keyboard Enabled"
+msgstr "клавиатура включена"
+
+#: Programs/log.c:86
+msgid "Keyboard Key Events"
+msgstr "события клавиатурных команд"
+
+#: Programs/menu_prefs.c:931
+msgid "Keyboard LED Alerts"
+msgstr "световые клавиатурные уведомления"
+
+#: Programs/config.c:2826 Programs/menu_prefs.c:913
+msgid "Keyboard Table"
+msgstr "клавиатурная таблица"
+
+#: Programs/midi.c:164
+msgid "Koto"
+msgstr "кото"
+
+#: Programs/config.c:2958
+msgid "Language"
+msgstr "язык"
+
+#. Synth Lead
+#: Programs/midi.c:134
+msgid "Lead 1 (square)"
+msgstr "волна 1 (квадратная)"
+
+#: Programs/midi.c:135
+msgid "Lead 2 (sawtooth)"
+msgstr "волна 2 (пилообразная)"
+
+#: Programs/midi.c:136
+msgid "Lead 3 (calliope)"
+msgstr "волна 3 (каллиопа)"
+
+#: Programs/midi.c:137
+msgid "Lead 4 (chiff)"
+msgstr "волна 4 (основная)"
+
+#: Programs/midi.c:138
+msgid "Lead 5 (charang)"
+msgstr "волна 5 (чаран)"
+
+#: Programs/midi.c:139
+msgid "Lead 6 (voice)"
+msgstr "волна 6 (голос)"
+
+#: Programs/midi.c:140
+msgid "Lead 7 (fifths)"
+msgstr "волна 7 (пятая)"
+
+#: Programs/midi.c:141
+msgid "Lead 8 (bass + lead)"
+msgstr "волна 8 (бас + свинец)"
+
+#: Programs/learn.c:101
+msgid "Learn Mode"
+msgstr "режим обучения"
+
+#: Programs/menu_prefs.c:1222
+msgid "Left"
+msgstr "лево"
+
+#: Programs/brltty-ktb.c:51
+msgid "List key names."
+msgstr "вывести названия клавиш в списке."
+
+#: Programs/brltty-ktb.c:57
+msgid "List key table in help screen format."
+msgstr "вывести таблицу клавиш списком в формате справочного окна."
+
+#: Programs/brltty-ktb.c:63
+msgid "List key table in reStructuredText format."
+msgstr "вывести таблицу клавиш списком в формате текста с изменённой структурой."
+
+#: Programs/menu_prefs.c:616
+msgid "Literary Braille"
+msgstr "литературный Брайль"
+
+#: Programs/menu_prefs.c:1366
+msgid "Locale Directory"
+msgstr "локальный каталог"
+
+#: Programs/menu_prefs.c:1402
+msgid "Log Categories"
+msgstr "категории журнала"
+
+#: Programs/config.c:824
+msgid "Log Level"
+msgstr "уровень ведения журнала"
+
+#: Programs/menu_prefs.c:1463
+msgid "Log Messages"
+msgstr "сообщения журнала"
+
+#: Programs/config.c:677
+msgid "Log the versions of the core, API, and built-in drivers, and then exit."
+msgstr "сохранить в журнале версии процессора, API и встроенных драйверов, а затем выйти."
+
+#: Programs/config.c:642
+msgid "Log to standard error rather than to the system log."
+msgstr "предпочитать журнал стандартных ошибок системному журналу"
+
+#: Programs/config.c:656
+#, c-format
+msgid "Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)"
+msgstr "уровень ведения журнала (%s или один из {%s}) и/или категории журнала для предоставления доступа (к любым сочетаниям {%s}, каждое из которых опционально предваряется %s для отключения)"
+
+#: Programs/menu_prefs.c:867
+msgid "Long Press Time"
+msgstr "время долгого нажатия"
+
+#: Programs/menu_prefs.c:647 Programs/menu_prefs.c:900
+msgid "Low"
+msgstr "низко"
+
+#: Programs/menu_prefs.c:577
+msgid "Lower Left Dot"
+msgstr "понизить левую точку"
+
+#: Programs/menu_prefs.c:578
+msgid "Lower Right Dot"
+msgstr "понизить правую точку"
+
+#: Programs/menu_prefs.c:947
+msgid "MIDI"
+msgstr "MIDI"
+
+#: Programs/config.c:626
+msgid "MIDI (Musical Instrument Digital Interface) device specifier."
+msgstr "спецификатор устройств MIDI (Musical Instrument Digital Interface)."
+
+#: Programs/menu_prefs.c:977
+msgid "MIDI Instrument"
+msgstr "инструмент MIDI"
+
+#: Programs/menu_prefs.c:967
+msgid "MIDI Volume"
+msgstr "громкость MIDI"
+
+#: Programs/cmd_miscellaneous.c:59
+msgid "March"
+msgstr "март"
+
+#: Programs/midi.c:57
+msgid "Marimba"
+msgstr "Маримба"
+
+#: Programs/menu_prefs.c:650 Programs/menu_prefs.c:903
+msgid "Maximum"
+msgstr "максимальное"
+
+#: Programs/brltty-ctb.c:90
+msgid "Maximum length of an output line."
+msgstr "максимальная длина выводимой строки."
+
+#: Programs/cmd_miscellaneous.c:61
+msgid "May"
+msgstr "май"
+
+#: Programs/menu_prefs.c:648 Programs/menu_prefs.c:901
+msgid "Medium"
+msgstr "среднее"
+
+#: Programs/midi.c:175
+msgid "Melodic Tom"
+msgstr "мелодичный Том"
+
+#: Programs/menu_prefs.c:590
+msgid "Menu Options"
+msgstr "меню опций"
+
+#: Programs/config.c:635
+msgid "Message hold timeout (in 10ms units)."
+msgstr "сообщение время задержки (шаг в 10ms)."
+
+#: Programs/menu_prefs.c:646 Programs/menu_prefs.c:899
+msgid "Minimum"
+msgstr "минимальное"
+
+#: Programs/menu_prefs.c:1194
+msgid "Month Day Year"
+msgstr "месяц день год"
+
+#: Programs/midi.c:55
+msgid "Music Box"
+msgstr "музыкальная шкатулка"
+
+#: Programs/menu_prefs.c:947
+msgid "Musical Instrument Digital Interface"
+msgstr "цифровой интерфейс музыкальных инструментов"
+
+#: Programs/midi.c:110
+msgid "Muted Trumpet"
+msgstr "приглушённая труба"
+
+#: Programs/config.c:526
+msgid "Name of or path to attributes table."
+msgstr "имя или путь к таблице атрибутов."
+
+#: Programs/config.c:535
+msgid "Name of or path to contraction table."
+msgstr "имя или путь к таблице сокращений."
+
+#: Programs/config.c:391
+msgid "Name of or path to default preferences file."
+msgstr "имя или путь к файлу настроек по умолчанию."
+
+#: Programs/config.c:544
+msgid "Name of or path to keyboard table."
+msgstr "имя или путь к клавиатурной таблице."
+
+#: Programs/config.c:580
+msgid "Name of or path to speech input object."
+msgstr "имя или путь к объекту речевого ввода"
+
+#: Programs/config.c:517
+#, c-format
+msgid "Name of or path to text table (or %s)."
+msgstr "имя или путь к таблице текстов (или %s)."
+
+#: Programs/menu_prefs.c:734
+msgid "Navigation Options"
+msgstr "опции навигации"
+
+#: Programs/menu.c:449
+msgid "No"
+msgstr "нет"
+
+#: Programs/menu_prefs.c:633
+msgid "No Capitalization"
+msgstr "все буквы строчные"
+
+#: Programs/menu_prefs.c:786 Programs/menu_prefs.c:1030
+#: Programs/menu_prefs.c:1043 Programs/menu_prefs.c:1056
+#: Programs/menu_prefs.c:1182 Programs/menu_prefs.c:1221
+#: Programs/menu_prefs.c:1241
+msgid "None"
+msgstr "никакие"
+
+#: Programs/menu_prefs.c:1378
+msgid "Notice"
+msgstr "заметка"
+
+#: Programs/cmd_miscellaneous.c:67
+msgid "November"
+msgstr "ноябрь"
+
+#: Programs/midi.c:120
+msgid "Oboe"
+msgstr "гобой"
+
+#: Programs/midi.c:132
+msgid "Ocarina"
+msgstr "окарина"
+
+#: Programs/cmd_miscellaneous.c:66
+msgid "October"
+msgstr "октябрь"
+
+#: Programs/menu_prefs.c:849
+msgid "Off"
+msgstr "выкл."
+
+#: Programs/config.c:1601
+msgid "Old Preferences File"
+msgstr "файл старых настроек"
+
+#: Programs/menu_prefs.c:862
+msgid "On First Release"
+msgstr "при первом запуске"
+
+#: Programs/midi.c:105
+msgid "Orchestra Hit"
+msgstr "оркестровый хит"
+
+#: Programs/midi.c:95
+msgid "Orchestral Harp"
+msgstr "оркестровая арфа"
+
+#: Programs/midi.c:26
+msgid "Organ"
+msgstr "орган"
+
+#: Programs/log.c:74
+msgid "Output Packets"
+msgstr "пакетный выход"
+
+#: Programs/midi.c:76
+msgid "Overdriven Guitar"
+msgstr "перегруженная гитара"
+
+#: Drivers/Braille/Iris/braille.c:1545
+msgid "PC mode"
+msgstr "режим ПК"
+
+#: Programs/menu_prefs.c:946
+msgid "PCM"
+msgstr "PCM"
+
+#: Programs/config.c:616
+msgid "PCM (soundcard digital audio) device specifier."
+msgstr "PCM спецификатор устройства (звуковая карта)."
+
+#: Programs/menu_prefs.c:959
+msgid "PCM Volume"
+msgstr "громкость PCM"
+
+#: Programs/cmds.auto.h:1266
+msgid "PS/2 (set 3) keyboard scan code"
+msgstr "PS/2 (set 3) клавиатурный скан-код"
+
+#: Programs/menu_prefs.c:1316
+msgid "Package Revision"
+msgstr "ревизия сборки"
+
+#: Programs/menu_prefs.c:1311
+msgid "Package Version"
+msgstr "версия сборки"
+
+#. Synth Pad
+#: Programs/midi.c:143
+msgid "Pad 1 (new age)"
+msgstr "заслонка 1 (нью-эйдж)"
+
+#: Programs/midi.c:144
+msgid "Pad 2 (warm)"
+msgstr "заслонка 2 (тёплый)"
+
+#: Programs/midi.c:145
+msgid "Pad 3 (polysynth)"
+msgstr "заслонка 3 (многотембровый глухой звук)"
+
+#: Programs/midi.c:146
+msgid "Pad 4 (choir)"
+msgstr "заслонка 4 (хор)"
+
+#: Programs/midi.c:147
+msgid "Pad 5 (bowed)"
+msgstr "заслонка 5 (кривизна)"
+
+#: Programs/midi.c:148
+msgid "Pad 6 (metallic)"
+msgstr "заслонка 6 (металлик)"
+
+#: Programs/midi.c:149
+msgid "Pad 7 (halo)"
+msgstr "заслонка 7 (ореол)"
+
+#: Programs/midi.c:150
+msgid "Pad 8 (sweep)"
+msgstr "заслонка 8 (метла)"
+
+#: Programs/midi.c:128
+msgid "Pan Flute"
+msgstr "пан флейта"
+
+#: Programs/config.c:453
+msgid "Parameters for the application programming interface."
+msgstr "параметры для программирования интерфейса приложения."
+
+#: Programs/config.c:475
+msgid "Parameters for the braille driver."
+msgstr "параметры драйвера Брайля."
+
+#: Programs/config.c:348
+msgid "Parameters for the privilege establishment stage."
+msgstr "параметры для преимущественной установки"
+
+#: Programs/config.c:607
+msgid "Parameters for the screen driver."
+msgstr "параметры для экранного драйвера"
+
+#: Programs/config.c:572
+msgid "Parameters for the speech driver."
+msgstr "параметры для речевого драйвера"
+
+#: Programs/config.c:382
+msgid "Path to default settings file."
+msgstr "путь к файлу настроек по умолчанию"
+
+#: Programs/config.c:436
+msgid "Path to directory containing drivers."
+msgstr "путь к каталогу с драйверами"
+
+#: Programs/brltest.c:68 Programs/brltty-atb.c:36 Programs/brltty-ctb.c:54
+#: Programs/brltty-ktb.c:73 Programs/config.c:507
+msgid "Path to directory containing tables."
+msgstr "путь к каталогу с таблицами"
+
+#: Programs/brltty-ttb.c:152
+msgid "Path to directory containing text tables."
+msgstr "путь к каталогу с таблицами текстов"
+
+#: Programs/brltty-ktb.c:83
+msgid "Path to directory for loading drivers."
+msgstr "путь к каталогу загрузки драйверов"
+
+#: Programs/brltty-trtxt.c:51
+msgid "Path to directory for text tables."
+msgstr "путь к каталогу загрузки таблиц текстов"
+
+#: Programs/brltest.c:78 Programs/config.c:426
+msgid "Path to directory which can be written to."
+msgstr "путь к каталогу для адресации."
+
+#: Programs/config.c:416
+msgid "Path to directory which contains files that can be updated."
+msgstr "путь к каталогу с файлами, доступными для обновления."
+
+#: Programs/brltty-trtxt.c:59
+msgid "Path to input text table."
+msgstr "путь к таблице ввода текста."
+
+#: Programs/config.c:665
+msgid "Path to log file."
+msgstr "путь к файлу журнала."
+
+#: Programs/brltty-trtxt.c:67
+msgid "Path to output text table."
+msgstr "путь к таблице вывода текста."
+
+#: Programs/config.c:372
+msgid "Path to process identifier file."
+msgstr "путь к файлу идентификации процесса."
+
+#: Programs/config.c:406
+msgid "Patterns that match command prompts."
+msgstr "образцы, подходящие  для подсказок."
+
+#: Programs/midi.c:38
+msgid "Percussive Instruments"
+msgstr "перкуссионные инструменты"
+
+#: Programs/midi.c:63
+msgid "Percussive Organ"
+msgstr "перкуссионный орган"
+
+#: Programs/midi.c:24
+msgid "Piano"
+msgstr "пианино"
+
+#. Pipe
+#: Programs/midi.c:125
+msgid "Piccolo"
+msgstr "маленькая флейта пикколо"
+
+#: Programs/midi.c:33
+msgid "Pipe"
+msgstr "труба"
+
+#: Programs/midi.c:94
+msgid "Pizzicato Strings"
+msgstr "защемлённые струны"
+
+#: Drivers/Braille/Baum/braille.c:1119
+msgid "Powerdown"
+msgstr "выключить"
+
+#: Programs/config.c:2756 Programs/menu_prefs.c:1346
+msgid "Preferences File"
+msgstr "файл настроек"
+
+#: Programs/scr_menu.c:271
+msgid "Preferences Menu"
+msgstr "меню настроек"
+
+#: Headers/options.h:75
+msgid "Print a usage summary (all options), and then exit."
+msgstr "Распечатать отчёт по использованию (всех опций) и выйти."
+
+#: Headers/options.h:70
+msgid "Print a usage summary (commonly used options only), and then exit."
+msgstr "Распечатать отчёт по использованию (только  часто   применяемых опций) и выйти."
+
+#: Programs/config.c:779
+msgid "Privilege Parameter"
+msgstr "параметр преимущественного использования"
+
+#: Programs/menu_prefs.c:1297
+msgid "Profiles"
+msgstr "профили"
+
+#: Programs/config.c:552
+msgid "Properties of eligible keyboards."
+msgstr "свойства допустимых к использованию клавиатур."
+
+#: Programs/menu_prefs.c:839
+msgid "Quick Space"
+msgstr "быстрый пробел"
+
+#: Programs/menu_prefs.c:1047
+msgid "Raise Pitch"
+msgstr "повысить тон"
+
+#: Programs/config.c:316
+msgid "Recognize environment variables."
+msgstr "распознать переменные  системной среды"
+
+#: Programs/midi.c:127
+msgid "Recorder"
+msgstr "диктофон"
+
+#: Programs/midi.c:32
+msgid "Reed"
+msgstr "свирель"
+
+#: Programs/midi.c:66
+msgid "Reed Organ"
+msgstr "Язычковый орган"
+
+#: Programs/brltty-ctb.c:82
+msgid "Reformat input."
+msgstr "переформатировать ввод"
+
+#: Programs/config.c:497
+msgid "Release braille device when screen or window is unreadable."
+msgstr "запустить устройство Брайля, если экран или окно не читается."
+
+#: Programs/xbrlapi.c:106
+msgid "Remain a foreground process"
+msgstr "Процесс остаётся в приоретете"
+
+#: Programs/config.c:323
+msgid "Remain a foreground process."
+msgstr "Процесс остаётся в приоретете."
+
+#: Programs/brltty-trtxt.c:73
+msgid "Remove dots seven and eight."
+msgstr "убрать точки семь и восемь."
+
+#: Programs/config.c:338
+#, c-format
+msgid "Remove the %s service, and then exit."
+msgstr "Убрать сервис %s и выйти."
+
+#: Programs/brltty-ktb.c:45
+msgid "Report problems with the key table."
+msgstr "Сообщить о проблемах с таблицей клавиш."
+
+#: Programs/brltty-ttb.c:186
+msgid "Report the characters within the current screen font that aren't defined within the text table."
+msgstr "Сообщить о символах, неопределяемых в данной таблице текстов текущего экранного шрифта."
+
+#: Programs/menu_prefs.c:755
+msgid "Rest of Line"
+msgstr "остаток строки"
+
+#: Programs/menu_prefs.c:1445
+msgid "Restart Braille Driver"
+msgstr "перезапустить драйвер Брайля"
+
+#: Programs/menu_prefs.c:1457
+msgid "Restart Screen Driver"
+msgstr "Перезапустить экранный драйвер"
+
+#: Programs/menu_prefs.c:1451
+msgid "Restart Speech Driver"
+msgstr "Перезапустить речевой драйвер"
+
+#: Programs/midi.c:177
+msgid "Reverse Cymbal"
+msgstr "тарелка реверс"
+
+#: Programs/menu_prefs.c:1223
+msgid "Right"
+msgstr "право"
+
+#: Programs/midi.c:64
+msgid "Rock Organ"
+msgstr "Рок-орган"
+
+#: Programs/menu_prefs.c:585
+msgid "Save on Exit"
+msgstr "Сохранить при выходе"
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/menu_prefs.c:1046
+msgid "Say Cap"
+msgstr "Проговаривать заглавную букву"
+
+#: Programs/menu_prefs.c:1070
+msgid "Say Line Mode"
+msgstr "проговаривать режим строки"
+
+#: Programs/menu_prefs.c:1057
+msgid "Say Space"
+msgstr "проговаривать пробел"
+
+#: Programs/menu_prefs.c:460
+msgid "Screen Cursor Column"
+msgstr "Вертикальный экранный курсор"
+
+#: Programs/menu_prefs.c:459
+msgid "Screen Cursor Coordinates"
+msgstr "Координаты экранного курсора"
+
+#: Programs/menu_prefs.c:687
+msgid "Screen Cursor Invisible Time"
+msgstr "время скрытия экранного курсора"
+
+#: Programs/menu_prefs.c:461
+msgid "Screen Cursor Row"
+msgstr "Горизонтальный экранный курсор"
+
+#: Programs/menu_prefs.c:669
+msgid "Screen Cursor Style"
+msgstr "Стиль экранного курсора"
+
+#: Programs/menu_prefs.c:681
+msgid "Screen Cursor Visible Time"
+msgstr "время видимости экранного курсора"
+
+#: Programs/menu_prefs.c:462
+msgid "Screen Cursor and Braille Window Column"
+msgstr "экранный курсор и окно Брайля по вертикали"
+
+#: Programs/menu_prefs.c:463
+msgid "Screen Cursor and Braille Window Row"
+msgstr "Экранный курсор и окно Брайля по горизонтали"
+
+#: Programs/config.c:2253
+msgid "Screen Driver"
+msgstr "Экранный драйвер"
+
+#: Programs/log.c:158
+msgid "Screen Driver Events"
+msgstr "События экранного драйвера"
+
+#: Programs/menu_prefs.c:464
+msgid "Screen Number"
+msgstr "Номер экрана"
+
+#: Programs/config.c:2259
+msgid "Screen Parameter"
+msgstr "Параметр экрана"
+
+#: Programs/config.c:597
+#, c-format
+msgid "Screen driver code (%s, %s, or one of {%s})."
+msgstr "Код экранного драйвера (%s, %s, или один из {%s})."
+
+#: Programs/menu_prefs.c:780
+msgid "Scroll-aware Cursor Navigation"
+msgstr "Курсорная навигация с учётом прокрутки"
+
+#: Programs/midi.c:181
+msgid "Seashore"
+msgstr "Морское побережье"
+
+#: Programs/cmd_miscellaneous.c:65
+msgid "September"
+msgstr "Сентябрь"
+
+#: Programs/log.c:128
+msgid "Serial I/O"
+msgstr "Серийно вкл/выкл"
+
+#: Programs/log.c:122
+msgid "Server Events"
+msgstr "События сервера"
+
+#: Programs/midi.c:130
+msgid "Shakuhachi"
+msgstr "сякухати"
+
+#: Programs/midi.c:163
+msgid "Shamisen"
+msgstr "сямисен"
+
+#: Programs/midi.c:168
+msgid "Shanai"
+msgstr "санаи"
+
+#: Programs/menu_prefs.c:598
+msgid "Show Advanced Submenus"
+msgstr "Показать дополнительные подменю"
+
+#: Programs/menu_prefs.c:603
+msgid "Show All Items"
+msgstr "Показать все элементы"
+
+#: Programs/menu_prefs.c:693
+msgid "Show Attributes"
+msgstr "Показать атрибуты"
+
+#: Programs/menu_prefs.c:664
+msgid "Show Screen Cursor"
+msgstr "Показать экранный курсор"
+
+#: Programs/menu_prefs.c:1176
+msgid "Show Seconds"
+msgstr "Показать секунды"
+
+#: Programs/menu_prefs.c:1122
+msgid "Show Speech Cursor"
+msgstr "Показать речевой курсор"
+
+#: Programs/menu_prefs.c:593
+msgid "Show Submenu Sizes"
+msgstr "Показать масштабы подменю"
+
+#. Ethnic Instruments
+#: Programs/midi.c:161
+msgid "Sitar"
+msgstr "ситар"
+
+#: Programs/menu_prefs.c:747
+msgid "Skip Blank Braille Windows"
+msgstr "Пропустить пустые окна Брайля"
+
+#: Programs/menu_prefs.c:741
+msgid "Skip Identical Lines"
+msgstr "Пропустить одинаковые строки"
+
+#: Programs/menu_prefs.c:758
+msgid "Skip Which Blank Braille Windows"
+msgstr "Пропустить пустые окна Брайля"
+
+#: Programs/midi.c:84
+msgid "Slap Bass 1"
+msgstr "слэп-бас 1"
+
+#: Programs/midi.c:85
+msgid "Slap Bass 2"
+msgstr "слэп-бас 2"
+
+#: Programs/menu_prefs.c:1206
+msgid "Slash"
+msgstr "косая черта"
+
+#: Programs/menu_prefs.c:763
+msgid "Sliding Braille Window"
+msgstr "скользящее окно Брайля"
+
+#: Programs/menu_prefs.c:1031
+msgid "Some"
+msgstr "некоторые"
+
+#. Reed
+#: Programs/midi.c:116
+msgid "Soprano Sax"
+msgstr "саксофон-сопрано"
+
+#: Programs/midi.c:39
+msgid "Sound Effects"
+msgstr "звуковые эффекты"
+
+#: Programs/menu_prefs.c:1242
+msgid "Space"
+msgstr "Пробел"
+
+#: Programs/menu_prefs.c:1110
+msgid "Speak Completed Words"
+msgstr "Проговаривать законченные слова"
+
+#: Programs/menu_prefs.c:1098
+msgid "Speak Deleted Characters"
+msgstr "Проговаривать удалённые символы"
+
+#: Programs/menu_prefs.c:1092
+msgid "Speak Inserted Characters"
+msgstr "Проговаривать вставленные символы"
+
+#: Programs/menu_prefs.c:1116
+msgid "Speak Line Indent"
+msgstr "Проговаривать отступ"
+
+#: Programs/menu_prefs.c:1104
+msgid "Speak Replaced Characters"
+msgstr "проговаривать заменённые символы"
+
+#: Programs/menu_prefs.c:1086
+msgid "Speak Selected Character"
+msgstr "проговаривать выбранный символ"
+
+#: Programs/menu_prefs.c:1080
+msgid "Speak Selected Line"
+msgstr "проговаривать выбранную строку"
+
+#: Programs/menu_prefs.c:1145
+msgid "Speech Cursor Invisible Time"
+msgstr "время скрытия речевого курсора"
+
+#: Programs/menu_prefs.c:1127
+msgid "Speech Cursor Style"
+msgstr "стиль речевого курсора"
+
+#: Programs/menu_prefs.c:1139
+msgid "Speech Cursor Visible Time"
+msgstr "время видимости речевого курсора"
+
+#: Programs/config.c:2028
+msgid "Speech Driver"
+msgstr "речевой драйвер"
+
+#: Programs/log.c:152
+msgid "Speech Driver Events"
+msgstr "события речевого драйвера"
+
+#: Programs/log.c:110
+msgid "Speech Events"
+msgstr "речевые события"
+
+#. Create the file system object for speech input.
+#: Programs/config.c:2867
+msgid "Speech Input"
+msgstr "речевой ввод"
+
+#: Programs/menu_prefs.c:1005
+msgid "Speech Options"
+msgstr "свойства речи"
+
+#: Programs/config.c:2031
+msgid "Speech Parameter"
+msgstr "параметр речи"
+
+#: Programs/menu_prefs.c:1022
+msgid "Speech Pitch"
+msgstr "высота тона"
+
+#: Programs/menu_prefs.c:1035
+msgid "Speech Punctuation"
+msgstr "Речевая пунктуация"
+
+#: Programs/menu_prefs.c:1015
+msgid "Speech Rate"
+msgstr "Скорость речи"
+
+#: Programs/menu_prefs.c:1050
+msgid "Speech Uppercase Indicator"
+msgstr "речевой индикатор заглавных букв"
+
+#: Programs/menu_prefs.c:1008
+msgid "Speech Volume"
+msgstr "Громкость речи"
+
+#: Programs/menu_prefs.c:1060
+msgid "Speech Whitespace Indicator"
+msgstr "Речевой индикатор пробела"
+
+#: Programs/config.c:562
+#, c-format
+msgid "Speech driver code (%s, %s, or one of {%s})."
+msgstr "Код речевого драйвера (%s, %s, или один из {%s})."
+
+#: Programs/menu_prefs.c:1392
+msgid "Standard Error Log Level"
+msgstr "Стандартный способ  ведения журнала  ошибок"
+
+#: Programs/menu_prefs.c:815
+msgid "Start Selection with Routing Key"
+msgstr "начать выделение, используя  клавишу маршрутизации"
+
+#: Programs/menu_prefs.c:465
+msgid "State Dots"
+msgstr "зафиксировать точки"
+
+#: Programs/menu_prefs.c:466
+msgid "State Letter"
+msgstr "зафиксировать букву"
+
+#: Programs/menu_prefs.c:1217
+msgid "Status Cells"
+msgstr "ячейки с информацией о статусе"
+
+#: Programs/menu_prefs.c:1233
+msgid "Status Count"
+msgstr "счётчик статуса"
+
+#: Programs/menu_prefs.c:474
+msgid "Status Field"
+msgstr "область статуса"
+
+#: Programs/menu_prefs.c:1226
+msgid "Status Position"
+msgstr "положение статуса"
+
+#: Programs/menu_prefs.c:1248
+msgid "Status Separator"
+msgstr "разделитель статуса"
+
+#: Programs/menu_prefs.c:1244
+msgid "Status Side"
+msgstr "граница строки статуса"
+
+#: Programs/midi.c:172
+msgid "Steel Drums"
+msgstr "стальные барабаны"
+
+#: Programs/config.c:362
+#, c-format
+msgid "Stop an existing instance of %s, and then exit."
+msgstr "Остановить текущее действие по %s и выйти."
+
+#. Ensemble
+#: Programs/midi.c:98
+msgid "String Ensemble 1"
+msgstr "Струнный ансамбль 1"
+
+#: Programs/midi.c:99
+msgid "String Ensemble 2"
+msgstr "Струнный ансамбль 2"
+
+#: Programs/midi.c:29
+msgid "Strings"
+msgstr "Струнные инструменты"
+
+#: Programs/menu_prefs.c:635
+msgid "Superimpose Dot 7"
+msgstr "Наложить точку 7 поверх"
+
+#: Programs/config.c:648
+msgid "Suppress start-up messages."
+msgstr "Сократить стартовые сообщения"
+
+#: Programs/midi.c:86
+msgid "Synth Bass 1"
+msgstr "синтезаторный бас 1"
+
+#: Programs/midi.c:87
+msgid "Synth Bass 2"
+msgstr "синтезаторный бас 2"
+
+#: Programs/midi.c:176
+msgid "Synth Drum"
+msgstr "синтезаторный барабан"
+
+#: Programs/midi.c:36
+msgid "Synth FM"
+msgstr "синтезатор FM"
+
+#: Programs/midi.c:34
+msgid "Synth Lead"
+msgstr "синтезаторный свинец"
+
+#: Programs/midi.c:35
+msgid "Synth Pad"
+msgstr "синтезаторная заслонка"
+
+#: Programs/midi.c:104
+msgid "Synth Voice"
+msgstr "синтезированный голос"
+
+#: Programs/midi.c:113
+msgid "SynthBrass 1"
+msgstr "синтезаторные духовые инструменты 1"
+
+#: Programs/midi.c:114
+msgid "SynthBrass 2"
+msgstr "синтезаторные духовые инструменты 2"
+
+#: Programs/midi.c:100
+msgid "SynthStrings 1"
+msgstr "синтезаторные струнные инструменты 1"
+
+#: Programs/midi.c:101
+msgid "SynthStrings 2"
+msgstr "синтезаторные струнные инструменты 2"
+
+#: Programs/menu_prefs.c:1387
+msgid "System Log Level"
+msgstr "уровень ведения системного журнала"
+
+#: Programs/config.c:2777 Programs/menu_prefs.c:1361
+msgid "Tables Directory"
+msgstr "каталог таблиц"
+
+#: Programs/midi.c:174
+msgid "Taiko Drum"
+msgstr "барабан тайко"
+
+#: Programs/midi.c:69
+msgid "Tango Accordion"
+msgstr "танго-аккордеон"
+
+#: Programs/midi.c:183
+msgid "Telephone Ring"
+msgstr "телефонный звонок"
+
+#: Programs/midi.c:118
+msgid "Tenor Sax"
+msgstr "саксофон-тенор"
+
+#: Programs/menu_prefs.c:661
+msgid "Text Indicators"
+msgstr "индикаторы текста"
+
+#: Programs/menu_prefs.c:1245
+msgid "Text Side"
+msgstr "строка текста"
+
+#: Programs/menu_prefs.c:619
+msgid "Text Style"
+msgstr "стиль текста"
+
+#: Programs/config.c:2798 Programs/menu_prefs.c:1273
+msgid "Text Table"
+msgstr "таблица текстов"
+
+#: Programs/brltty-ctb.c:69
+msgid "Text table."
+msgstr "таблица текстов."
+
+#: Programs/config.c:302
+msgid "The text to be shown when the braille driver starts and to be spoken when the speech driver starts."
+msgstr "текст, выводимый при запуске драйвера Брайля и произносимый при запуске речевого драйвера."
+
+#: Programs/config.c:309
+msgid "The text to be shown when the braille driver stops."
+msgstr "текст, выводимый при остановке драйвера Брайля."
+
+#: Programs/menu_prefs.c:467
+msgid "Time"
+msgstr "время"
+
+#: Programs/menu_prefs.c:1161
+msgid "Time Format"
+msgstr "формат времени"
+
+#: Programs/menu_prefs.c:1153
+msgid "Time Presentation"
+msgstr "представление времени"
+
+#: Programs/menu_prefs.c:1171
+msgid "Time Separator"
+msgstr "разделитель времени"
+
+#: Programs/midi.c:96
+msgid "Timpani"
+msgstr "литавры"
+
+#. Percussive Instruments
+#: Programs/midi.c:170
+msgid "Tinkle Bell"
+msgstr "звонкий колокольчик"
+
+#: Programs/menu_prefs.c:1441
+msgid "Tools"
+msgstr "инструменты"
+
+#: Programs/menu_prefs.c:892
+msgid "Touch Navigation"
+msgstr "Жестовая навигация "
+
+#: Programs/menu_prefs.c:906
+msgid "Touch Sensitivity"
+msgstr "чувствительность к выполнению жестов"
+
+#: Programs/menu_prefs.c:804
+msgid "Track Screen Pointer"
+msgstr "отслеживать экранный указатель"
+
+#: Programs/menu_prefs.c:798
+msgid "Track Screen Scroll"
+msgstr "отслеживать прокрутку экрана"
+
+#: Programs/menu_prefs.c:830
+msgid "Translated via Text Table"
+msgstr "переведено посредством таблицы текстов"
+
+#: Programs/midi.c:93
+msgid "Tremolo Strings"
+msgstr "дрожание струн"
+
+#: Programs/midi.c:108
+msgid "Trombone"
+msgstr "тромбон"
+
+#. Brass
+#: Programs/midi.c:107
+msgid "Trumpet"
+msgstr "труба"
+
+#: Programs/midi.c:109
+msgid "Tuba"
+msgstr "туба"
+
+#: Programs/midi.c:59
+msgid "Tubular Bells"
+msgstr "трубчатые колокола"
+
+#: Programs/menu_prefs.c:951
+msgid "Tune Device"
+msgstr "настроить устройство"
+
+#: Programs/menu_prefs.c:834
+msgid "Typing Mode"
+msgstr "режим набора"
+
+#: Programs/log.c:134
+msgid "USB I/O"
+msgstr "USB вкл/выкл"
+
+#: Programs/menu_prefs.c:575
+msgid "Underline"
+msgstr "подчёркнутый"
+
+#: Programs/alert.c:102
+msgid "Unfrozen"
+msgstr "возобновлено"
+
+#: Programs/config.c:2774 Programs/menu_prefs.c:1341
+msgid "Updatable Directory"
+msgstr "Обновляемый каталог"
+
+#: Programs/log.c:104
+msgid "Update Events"
+msgstr "Обновить события"
+
+#: Programs/options.c:151
+msgid "Usage"
+msgstr "Использование"
+
+#: Programs/menu_prefs.c:634
+msgid "Use Capital Sign"
+msgstr "использовать знак заглавной буквы"
+
+#: Programs/midi.c:56
+msgid "Vibraphone"
+msgstr "Вибрафон"
+
+#: Programs/midi.c:90
+msgid "Viola"
+msgstr "виола"
+
+#. Strings
+#: Programs/midi.c:89
+msgid "Violin"
+msgstr "скрипка"
+
+#: Programs/midi.c:103
+msgid "Voice Oohs"
+msgstr "звуки \"ох!\""
+
+#: Programs/menu_prefs.c:1377
+msgid "Warning"
+msgstr "предупреждение"
+
+#: Programs/menu_prefs.c:1321
+msgid "Web Site"
+msgstr "вебсайт"
+
+#: Programs/midi.c:131
+msgid "Whistle"
+msgstr "свист"
+
+#: Programs/midi.c:173
+msgid "Woodblock"
+msgstr "колода"
+
+#: Programs/menu_prefs.c:737
+msgid "Word Wrap"
+msgstr "перенос слов"
+
+#: Programs/config.c:2748
+msgid "Working Directory"
+msgstr "активный каталог"
+
+#: Programs/config.c:2775 Programs/menu_prefs.c:1351
+msgid "Writable Directory"
+msgstr "каталог с доступом для записи"
+
+#: Programs/xbrlapi.c:118
+msgid "Write debugging output to stdout"
+msgstr "Записать результат отладки в stdout"
+
+#: Programs/config.c:671
+msgid "Write the start-up logs, and then exit."
+msgstr "Записать стартовые сообщения в журнал и выйти."
+
+#: Programs/xbrlapi.c:100
+msgid "X display to connect to"
+msgstr "X дисплей для подключения"
+
+#: Programs/pgmprivs_linux.c:1925
+msgid "XDG runtime directory access problem"
+msgstr "проблема доступа к каталогу выполнения XDG"
+
+#: Programs/pgmprivs_linux.c:1907
+msgid "XDG runtime directory created"
+msgstr "каталог выполнения XDG создан"
+
+#: Programs/pgmprivs_linux.c:1902
+msgid "XDG runtime directory exists"
+msgstr "каталог выполнения XDG уже существует"
+
+#: Programs/xbrlapi.c:786
+msgid "XFree(wm_name) for change"
+msgstr "XFree(wm_name) для изменения"
+
+#: Programs/cmds.auto.h:1259
+msgid "XT (set 1) keyboard scan code"
+msgstr "клавиатурный скан-код XT (set 1)"
+
+#: Programs/midi.c:58
+msgid "Xylophone"
+msgstr "ксилофон"
+
+#: Programs/menu_prefs.c:1193
+msgid "Year Month Day"
+msgstr "год месяц день"
+
+#: Programs/menu.c:450
+msgid "Yes"
+msgstr "Да"
+
+#: Programs/xbrlapi.c:84
+msgid "[host][:port]"
+msgstr "[хост][:порт]"
+
+#: Programs/menu_prefs.c:576
+msgid "all dots"
+msgstr "все точки"
+
+#: Programs/cmd_miscellaneous.c:121
+msgid "and"
+msgstr "и"
+
+#: Programs/cmds.auto.h:1142
+msgid "append characters to clipboard"
+msgstr "Присоединить символы к буферу обмена"
+
+#: Programs/cmds.auto.h:1033
+msgid "append to clipboard from character"
+msgstr "присоединить содержимое символа к буферу обмена"
+
+#: Programs/cmd.c:290
+msgid "at cursor"
+msgstr "Под курсором"
+
+#: Programs/cmds.auto.h:1301
+msgid "backspace key"
+msgstr "Клавиша Пробел"
+
+#: Drivers/Braille/Baum/braille.c:1110 Drivers/Braille/TSI/braille.c:869
+msgid "battery low"
+msgstr "Низкий заряд батареи"
+
+#: Programs/cmds.auto.h:1222
+msgid "bind to specific virtual terminal"
+msgstr "связать с выбранным виртуальным терминалом"
+
+#: Programs/cmds.auto.h:835
+msgid "bind to the next virtual terminal"
+msgstr "связать со следующим виртуальным терминалом"
+
+#: Programs/cmds.auto.h:829
+msgid "bind to the previous virtual terminal"
+msgstr "Связать с предыдущим виртуальным терминалом"
+
+#.
+#: Programs/cmd_utils.c:144
+msgid "black"
+msgstr "чёрный"
+
+#: Programs/core.c:1120
+msgid "blank line"
+msgstr "пустая строка"
+
+#: Programs/cmd_utils.c:168
+msgid "blink"
+msgstr "мигание"
+
+#. B
+#: Programs/cmd_utils.c:145
+msgid "blue"
+msgstr "синий"
+
+#: Programs/config.c:2838
+#, c-format
+msgid "braille device not specified"
+msgstr "устройство Брайля не определено"
+
+#: Programs/cmds.auto.h:544
+msgid "braille display temporarily unavailable"
+msgstr "Дисплей Брайля временно недоступен"
+
+#: Programs/config.c:1538
+msgid "braille driver initialization failed"
+msgstr "Ошибка инициализации драйвера Брайля"
+
+#: Programs/config.c:1617
+msgid "braille driver not loadable"
+msgstr "Драйвер Брайля недоступен для загрузки"
+
+#: Programs/config.c:1877
+msgid "braille driver restarting"
+msgstr "драйвер Брайля перезапускается"
+
+#: Programs/cmd_miscellaneous.c:178
+msgid "braille driver stopped"
+msgstr "Драйвер Брайля остановлен"
+
+#: Drivers/Screen/Android/screen.c:189
+msgid "braille released"
+msgstr "Брайль запущен"
+
+#: Programs/cmds.auto.h:1019
+msgid "bring screen cursor to character"
+msgstr "Привести экранный курсор к символу"
+
+#: Programs/cmds.auto.h:520
+msgid "bring screen cursor to current line"
+msgstr "Привести экранный курсор к текущей строке"
+
+#: Programs/cmds.auto.h:1193
+msgid "bring screen cursor to line"
+msgstr "Привести экранный курсор к строке"
+
+#: Programs/cmds.auto.h:730
+msgid "bring screen cursor to speech cursor"
+msgstr "привести экранный курсор к речевому курсору"
+
+#. RG
+#: Programs/cmd_utils.c:150
+msgid "brown"
+msgstr "коричневый"
+
+#: Drivers/Screen/Linux/screen.c:1432
+msgid "can't get console state"
+msgstr "Невозможно определить состояние панели управления"
+
+#: Drivers/Screen/Linux/screen.c:1510
+msgid "can't open console"
+msgstr "Невозможно открыть панель управления"
+
+#: Drivers/Screen/Linux/screen.c:1556
+msgid "can't read screen content"
+msgstr "Невозможно прочитать содержимое экрана"
+
+#: Drivers/Screen/Linux/screen.c:1601
+msgid "can't read screen header"
+msgstr "Невозможно прочитать заголовок экрана"
+
+#: Programs/atb_translate.c:70
+msgid "cannot compile attributes table"
+msgstr "Невозможно скомпилировать таблицу атрибутов"
+
+#: Programs/ctb_translate.c:365
+msgid "cannot compile contraction table"
+msgstr "Невозможно скомпилировать таблицу сокращений"
+
+#: Programs/config.c:1521
+msgid "cannot compile key table"
+msgstr "Невозможно скомпилировать таблицу клавиш"
+
+#: Programs/config.c:1098
+msgid "cannot compile keyboard table"
+msgstr "Невозможно скомпилировать клавиатурную таблицу"
+
+#: Programs/ttb_translate.c:256
+msgid "cannot compile text table"
+msgstr "Невозможно скомпилировать таблицу текстов"
+
+#. This is the first attempt to connect to BRLTTY, and it failed.
+#. * Return the error immediately to the user, to provide feedback to users
+#. * running xbrlapi by hand, but not fill logs, eat battery, spam
+#. * 127.0.0.1 with reconnection attempts.
+#.
+#: Programs/xbrlapi.c:204
+#, c-format
+msgid "cannot connect to braille devices daemon brltty at %s\n"
+msgstr "не могу подключиться к устройствам Брайля daemon brltty в течение %s\n"
+
+#: Programs/xbrlapi.c:654
+#, c-format
+msgid "cannot connect to display %s\n"
+msgstr "Невозможно  подключиться к дисплею %s\n"
+
+#: Programs/file.c:350
+msgid "cannot create directory"
+msgstr "Каталог не может быть создан"
+
+#: Programs/program.c:162
+#, c-format
+msgid "cannot determine program directory"
+msgstr "Каталог программ не обнаружен"
+
+#: Programs/config.c:2751 Programs/menu.c:544
+msgid "cannot determine working directory"
+msgstr "Активный каталог не обнаружен"
+
+#: Programs/system_windows.c:60
+msgid "cannot find procedure"
+msgstr "Выполняемое действие не обнаружено"
+
+#: Programs/program.c:170
+msgid "cannot fix install path"
+msgstr "не могу скорректировать путь установки"
+
+#: Programs/xbrlapi.c:259
+msgid "cannot get tty\n"
+msgstr "не могу получить tty\n"
+
+#: Programs/xbrlapi.c:265
+#, c-format
+msgid "cannot get tty %d\n"
+msgstr "не могу получить tty %d\n"
+
+#: Programs/file.c:487
+msgid "cannot get working directory"
+msgstr "не могу получить активный каталог"
+
+#: Programs/xbrlapi.c:702
+#, c-format
+msgid "cannot grab windows on screen %d\n"
+msgstr "не могу захватить окна на экране%d\n"
+
+#: Programs/xbrlapi.c:272
+msgid "cannot ignore keys\n"
+msgstr "не могу проигнорировать клавиши\n"
+
+#: Programs/atb_translate.c:90
+msgid "cannot load attributes table"
+msgstr "не могу загрузить таблицу атрибутов"
+
+#: Programs/system_windows.c:53
+msgid "cannot load library"
+msgstr "не могу загрузить библиотеку"
+
+#: Programs/ttb_translate.c:276
+msgid "cannot load text table"
+msgstr "не могу загрузить таблицу текстов"
+
+#: Programs/file.c:339
+msgid "cannot make world writable"
+msgstr "не могу открыть среду для записи"
+
+#: Programs/config.c:1056
+msgid "cannot open key help"
+msgstr "не могу открыть справку по клавишам"
+
+#: Programs/program.c:274
+msgid "cannot open process identifier file"
+msgstr "не могу открыть файл идентификации процесса"
+
+#: Programs/menu.c:542
+msgid "cannot open working directory"
+msgstr "не могу открыть активный каталог"
+
+#: Programs/prefs.c:350
+msgid "cannot read preferences file"
+msgstr "не могу прочитать файл настроек"
+
+#: Programs/xbrlapi.c:337
+#, c-format
+msgid "cannot set focus to %#010x\n"
+msgstr "не могу установить фокус на %#010x\n"
+
+#: Programs/file.c:501 Programs/menu.c:531
+msgid "cannot set working directory"
+msgstr "не могу установить активный каталог"
+
+#: Programs/prefs.c:525
+msgid "cannot write to preferences file"
+msgstr "не могу сделать запись в файле настроек"
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/core.c:1065
+msgid "cap"
+msgstr "заглавная буква"
+
+#: Programs/menu_prefs.c:775 Programs/menu_prefs.c:1234
+msgid "cells"
+msgstr "ячейки"
+
+#: Programs/cmd_preferences.c:87
+msgid "changes discarded"
+msgstr "изменения отменены"
+
+#: Programs/cmds.auto.h:775
+msgid "clear all sticky input modifiers"
+msgstr "убрать все залипающие модификаторы ввода"
+
+#: Programs/cmds.auto.h:889
+msgid "clear the text selection"
+msgstr "убрать выделение текста"
+
+#: Programs/cmd_speech.c:475
+msgid "column"
+msgstr "столбец"
+
+#. configuration menu
+#: Drivers/Braille/BrailleLite/braille.c:607
+msgid "config"
+msgstr "конфигурация"
+
+#: Programs/options.c:806
+msgid "configuration directive specified more than once"
+msgstr "свойство конфигурации определено более одного раза"
+
+#: Drivers/Screen/Linux/screen.c:1508
+msgid "console not in use"
+msgstr "консоль не используется"
+
+#: Programs/menu_prefs.c:945
+msgid "console tone generator"
+msgstr "Консоль генерирования звуков"
+
+#: Programs/cmds.auto.h:1135
+msgid "copy characters to clipboard"
+msgstr "скопировать символы в буфер обмена"
+
+#: Programs/cmds.auto.h:901
+msgid "copy selected text to host clipboard"
+msgstr "скопировать выделенный текст в основной буфер обмена"
+
+#: Programs/config.c:633 Programs/menu_prefs.c:503
+msgid "csecs"
+msgstr "csecs"
+
+#: Programs/cmds.auto.h:1280
+msgid "current reading location"
+msgstr "текущее место чтения"
+
+#: Programs/cmds.auto.h:1336
+msgid "cursor-down key"
+msgstr "клавиша курсор вниз"
+
+#: Programs/cmds.auto.h:1315
+msgid "cursor-left key"
+msgstr "клавиша курсор влево"
+
+#: Programs/cmds.auto.h:1322
+msgid "cursor-right key"
+msgstr "клавиша курсор вправо"
+
+#: Programs/cmds.auto.h:1329
+msgid "cursor-up key"
+msgstr "клавиша курсор вверх"
+
+#: Programs/cmds.auto.h:907
+msgid "cut selected text to host clipboard"
+msgstr "вырезать выделенный текст в основной буфер обмена"
+
+#. GB
+#: Programs/cmd_utils.c:147
+msgid "cyan"
+msgstr "голубой"
+
+#: Programs/cmds.auto.h:781
+msgid "cycle the AltGr (Right Alt) sticky input modifier (next, on, off)"
+msgstr "Цикличное залипание/разлипание клавиши (правый Alt)"
+
+#: Programs/cmds.auto.h:562
+msgid "cycle the Control sticky input modifier (next, on, off)"
+msgstr "Цикличное залипание/разлипание клавиши Control"
+
+#: Programs/cmds.auto.h:787
+msgid "cycle the GUI (Windows) sticky input modifier (next, on, off)"
+msgstr "Цикличное залипание/разлипание клавиши   (Windows)"
+
+#: Programs/cmds.auto.h:568
+msgid "cycle the Meta (Left Alt) sticky input modifier (next, on, off)"
+msgstr "Цикличное залипание/разлипание клавиши  (левый Alt"
+
+#: Programs/cmds.auto.h:550
+msgid "cycle the Shift sticky input modifier (next, on, off)"
+msgstr "Цикличное залипание/разлипание клавиши Shift"
+
+#: Programs/cmds.auto.h:556
+msgid "cycle the Upper sticky input modifier (next, on, off)"
+msgstr "цикличное  залипание/разлипание верхнего модификатора "
+
+#. L
+#: Programs/cmd_utils.c:152
+msgid "dark grey"
+msgstr "тёмно-серый"
+
+#: Programs/cmds.auto.h:483
+msgid "decrease speaking rate"
+msgstr "уменьшить скорость речи"
+
+#: Programs/cmds.auto.h:495
+msgid "decrease speaking volume"
+msgstr "уменьшить громкость речи"
+
+#: Programs/cmds.auto.h:1378
+msgid "delete key"
+msgstr "клавиша Del"
+
+#: Programs/cmds.auto.h:1079
+msgid "describe character"
+msgstr "описать символ"
+
+#: Programs/cmds.auto.h:717
+msgid "describe current character"
+msgstr "описать текущий символ"
+
+#: Programs/config.c:614 Programs/config.c:624
+msgid "device"
+msgstr "устройство"
+
+#: Programs/brltest.c:64 Programs/brltest.c:74 Programs/brltty-atb.c:32
+#: Programs/brltty-ctb.c:50 Programs/brltty-ktb.c:69 Programs/brltty-ktb.c:79
+#: Programs/brltty-trtxt.c:47 Programs/config.c:412 Programs/config.c:422
+#: Programs/config.c:432 Programs/config.c:503
+msgid "directory"
+msgstr "каталог"
+
+#: Programs/xbrlapi.c:98
+msgid "display"
+msgstr "дисплей"
+
+#: Programs/cmds.auto.h:4
+msgid "do nothing"
+msgstr "не делать ничего"
+
+#: Programs/learn.c:108
+msgid "done"
+msgstr "готово"
+
+#: Programs/menu_prefs.c:577
+msgid "dot 7"
+msgstr "точка 7"
+
+#: Programs/menu_prefs.c:578
+msgid "dot 8"
+msgstr "точка 8"
+
+#: Programs/menu_prefs.c:575
+msgid "dots 7 and 8"
+msgstr "точки 7 и 8"
+
+#: Drivers/Braille/Baum/braille.c:1107
+msgid "driver request"
+msgstr "запрос драйвера"
+
+#: Programs/config.c:461 Programs/config.c:559 Programs/config.c:594
+msgid "driver,..."
+msgstr "драйвер,..."
+
+#: Programs/cmds.auto.h:1364
+msgid "end key"
+msgstr "клавиша End"
+
+#: Programs/cmds.auto.h:1287
+msgid "enter key"
+msgstr "клавиша Ввод"
+
+#: Programs/cmds.auto.h:384
+msgid "enter/leave command learn mode"
+msgstr "открыть/закрыть режим изучения команд"
+
+#: Programs/cmds.auto.h:372
+msgid "enter/leave help display"
+msgstr "открыть/закрыть экран справки"
+
+#: Programs/cmds.auto.h:390
+msgid "enter/leave preferences menu"
+msgstr "открыть/закрыть меню настроек"
+
+#: Programs/cmds.auto.h:378
+msgid "enter/leave status display"
+msgstr "открыть/закрыть строку состояния дисплея"
+
+#: Programs/cmds.auto.h:1308
+msgid "escape key"
+msgstr "клавиша Escape"
+
+#: Drivers/Braille/Iris/braille.c:1494
+msgid "eurobraille"
+msgstr "европейский Брайль"
+
+#: Programs/cmd_miscellaneous.c:118
+msgid "exactly"
+msgstr "точно"
+
+#: Programs/config.c:808
+msgid "excess argument"
+msgstr "добавочный аргумент"
+
+#. parent
+#: Programs/brltty.c:177
+#, c-format
+msgid "executing \"%s\" (from \"%s\")\n"
+msgstr "выполняется \"%s\" (из \"%s\")\n"
+
+#: Programs/pgmprivs_linux.c:2010
+msgid "executing as the invoking user"
+msgstr "выполняется от вызывающего пользователя"
+
+#. execv() shouldn't return
+#: Programs/brltty.c:184
+#, c-format
+msgid "execution of \"%s\" failed: %s\n"
+msgstr "выполнение \"%s\" не удалось: %s\n"
+
+#: Programs/xbrlapi.c:709
+msgid "failed to get first focus\n"
+msgstr "не удалось получить первичный фокус\n"
+
+#: Programs/brltty-trtxt.c:56 Programs/brltty-trtxt.c:64 Programs/config.c:369
+#: Programs/config.c:378 Programs/config.c:388 Programs/config.c:514
+#: Programs/config.c:524 Programs/config.c:533 Programs/config.c:542
+#: Programs/config.c:578 Programs/config.c:663
+msgid "file"
+msgstr "файл"
+
+#: Programs/options.c:992
+#, c-format
+msgid "file '%s' processing error."
+msgstr "ошибка обработки файла '%s' ."
+
+#. failed
+#: Programs/brltty.c:172
+#, c-format
+msgid "fork of \"%s\" failed: %s\n"
+msgstr "создание обходного пути для \"%s\" не удалось: %s\n"
+
+#: Programs/cmds.auto.h:1386
+msgid "function key"
+msgstr "клавиша Function"
+
+#: Programs/cmds.auto.h:240
+msgid "go back after cursor tracking"
+msgstr "Вернуться назад  на место  слежения курсора"
+
+#: Programs/cmds.auto.h:939
+msgid "go back to the previous screen"
+msgstr "Вернуться назад на предыдущий экран"
+
+#: Programs/cmds.auto.h:186
+msgid "go backward one braille window"
+msgstr "Вернуться назад на одно окно Брайля"
+
+#: Programs/cmds.auto.h:202
+msgid "go backward skipping blank braille windows"
+msgstr "Вернуться назад, пропуская пустые окна Брайля"
+
+#: Programs/cmds.auto.h:843
+msgid "go backward to nearest non-blank braille window"
+msgstr "Вернуться назад, на ближайшее заполненное  окно Брайля"
+
+#: Programs/cmds.auto.h:20
+msgid "go down one line"
+msgstr "Перейти на одну строку вниз"
+
+#: Programs/cmds.auto.h:36
+msgid "go down several lines"
+msgstr "Перейти на несколько строк вниз"
+
+#: Programs/cmds.auto.h:118
+msgid "go down to first line of next paragraph"
+msgstr "Перейти вниз на первую строку следующего абзаца"
+
+#: Programs/cmds.auto.h:418
+msgid "go down to last item"
+msgstr "Перейти вниз к последнему элементу"
+
+#: Programs/cmds.auto.h:1128
+msgid "go down to nearest line with different character"
+msgstr "Перейти вниз к ближайшей строке с другим символом"
+
+#: Programs/cmds.auto.h:52
+msgid "go down to nearest line with different content"
+msgstr "Перейти вниз к ближайшей строке с другим содержимым"
+
+#: Programs/cmds.auto.h:68
+msgid "go down to nearest line with different highlighting"
+msgstr "перейти вниз к ближайшей строке с другим выделением"
+
+#: Programs/cmds.auto.h:1072
+msgid "go down to nearest line with less indent than character"
+msgstr "перейти вниз к ближайшей строке с отступом менее чем в один символ"
+
+#: Programs/cmds.auto.h:134
+msgid "go down to next command prompt"
+msgstr "перейти  к следующей  подсказке"
+
+#: Programs/cmds.auto.h:434
+msgid "go down to next item"
+msgstr "перейти  к следующему элементу"
+
+#: Programs/cmds.auto.h:194
+msgid "go forward one braille window"
+msgstr "Перейти вперёд на одно окно Брайля"
+
+#: Programs/cmds.auto.h:210
+msgid "go forward skipping blank braille windows"
+msgstr "Перейти вперёд, пропуская пустые окна Брайля"
+
+#: Programs/cmds.auto.h:851
+msgid "go forward to nearest non-blank braille window"
+msgstr "Перейти вперёд, к ближайшему заполненному окну Брайля"
+
+#: Programs/cmds.auto.h:170
+msgid "go left half a braille window"
+msgstr "Перейти влево на половину окна Брайля"
+
+#: Programs/cmds.auto.h:154
+msgid "go left one character"
+msgstr "Перейти влево на один символ"
+
+#: Programs/cmds.auto.h:178
+msgid "go right half a braille window"
+msgstr "Перейти вправо на половину окна Брайля"
+
+#: Programs/cmds.auto.h:162
+msgid "go right one character"
+msgstr "Перейти вправо на один символ"
+
+#: Programs/cmds.auto.h:690
+msgid "go to and speak first non-blank character on line"
+msgstr "Перейти к ближайшему незаполненному символу в строке и проговорить его"
+
+#: Programs/cmds.auto.h:704
+msgid "go to and speak first non-blank line on screen"
+msgstr "Перейти к ближайшей незаполненной строке на экране и проговорить её"
+
+#: Programs/cmds.auto.h:697
+msgid "go to and speak last non-blank character on line"
+msgstr "Перейти к последнему незаполненному символу в строке и проговорить его"
+
+#: Programs/cmds.auto.h:711
+msgid "go to and speak last non-blank line on screen"
+msgstr "Перейти к последней незаполненной строке на экране и проговорить её"
+
+#: Programs/cmds.auto.h:643
+msgid "go to and speak next character"
+msgstr "Перейти к следующему символу и проговорить его"
+
+#: Programs/cmds.auto.h:683
+msgid "go to and speak next line"
+msgstr "Перейти к следующей строке и проговорить её"
+
+#: Programs/cmds.auto.h:663
+msgid "go to and speak next word"
+msgstr "Перейти к следующему слову и проговорить его"
+
+#: Programs/cmds.auto.h:636
+msgid "go to and speak previous character"
+msgstr "Перейти к предыдущему символу и проговорить его"
+
+#: Programs/cmds.auto.h:676
+msgid "go to and speak previous line"
+msgstr "Перейти к предыдущей строке и проговорить её"
+
+#: Programs/cmds.auto.h:656
+msgid "go to and speak previous word"
+msgstr "Перейти к предыдущему слову и проговорить его"
+
+#: Programs/cmds.auto.h:102
+msgid "go to beginning of bottom line"
+msgstr "Перейти к началу нижней строки"
+
+#: Programs/cmds.auto.h:218
+msgid "go to beginning of line"
+msgstr "Перейти к началу строки"
+
+#: Programs/cmds.auto.h:93
+msgid "go to beginning of top line"
+msgstr "Перейти к началу верхней строки"
+
+#: Programs/cmds.auto.h:84
+msgid "go to bottom line"
+msgstr "Перейти вниз"
+
+#: Programs/cmds.auto.h:459
+msgid "go to current speaking position"
+msgstr "Перейти к текущему месту проговаривания"
+
+#: Programs/cmds.auto.h:226
+msgid "go to end of line"
+msgstr "Перейти в конец строки"
+
+#: Programs/cmds.auto.h:581
+msgid "go to previous menu level"
+msgstr "Перейти на предыдущий уровень меню"
+
+#: Programs/cmds.auto.h:1101
+msgid "go to remembered braille window position"
+msgstr "Перейти к сохраненной позиции окна Брайля"
+
+#: Programs/cmds.auto.h:233
+msgid "go to screen cursor"
+msgstr "Перейти к экранному курсору"
+
+#: Programs/cmds.auto.h:247
+msgid "go to screen cursor or go back after cursor tracking"
+msgstr "Перейти к экранному курсору или вернуться назад к месту слежения курсора "
+
+#: Programs/cmds.auto.h:1110
+msgid "go to selected line"
+msgstr "Перейти к выделенной строке"
+
+#: Programs/cmds.auto.h:932
+msgid "go to the home screen"
+msgstr "Перейти на главный экран"
+
+#: Programs/cmds.auto.h:76
+msgid "go to top line"
+msgstr "Перейти к началу  "
+
+#: Programs/cmds.auto.h:12
+msgid "go up one line"
+msgstr "Перейти  на одну строку вверх"
+
+#: Programs/cmds.auto.h:28
+msgid "go up several lines"
+msgstr "перейти  на несколько строк"
+
+#: Programs/cmds.auto.h:410
+msgid "go up to first item"
+msgstr "перейти  к первому элементу"
+
+#: Programs/cmds.auto.h:110
+msgid "go up to first line of paragraph"
+msgstr "Перейти  к первой строке абзаца"
+
+#: Programs/cmds.auto.h:1119
+msgid "go up to nearest line with different character"
+msgstr "Перейти  к ближайшей строке с другим символом"
+
+#: Programs/cmds.auto.h:44
+msgid "go up to nearest line with different content"
+msgstr "Перейти  к ближайшей строке с другим содержимым"
+
+#: Programs/cmds.auto.h:60
+msgid "go up to nearest line with different highlighting"
+msgstr "Перейти  к ближайшей строке с другим выделением"
+
+#: Programs/cmds.auto.h:1063
+msgid "go up to nearest line with less indent than character"
+msgstr "Перейти  к ближайшей строке с отступом менее чем в 1 символ"
+
+#: Programs/cmds.auto.h:126
+msgid "go up to previous command prompt"
+msgstr "Перейти  к предыдущей подсказке"
+
+#: Programs/cmds.auto.h:426
+msgid "go up to previous item"
+msgstr "Перейти  к предыдущему элементу"
+
+#. G
+#: Programs/cmd_utils.c:146
+msgid "green"
+msgstr "зелёный"
+
+#: Programs/pgmprivs_linux.c:2132
+msgid "group permissions added"
+msgstr "Групповые разрешения добавлены"
+
+#: Programs/cmd_miscellaneous.c:228
+msgid "help not available"
+msgstr "Справка недоступна"
+
+#: Programs/scr_help.c:229
+msgid "help screen not readable"
+msgstr "Невозможно прочитать экран справки"
+
+#: Programs/cmds.auto.h:1357
+msgid "home key"
+msgstr "Клавиша Home"
+
+#: Programs/config.c:482
+msgid "identifier,..."
+msgstr "идентификатор,..."
+
+#: Drivers/Braille/Baum/braille.c:1109
+msgid "idle timeout"
+msgstr " Нет активности -  перерыв"
+
+#: Programs/cmds.auto.h:489
+msgid "increase speaking rate"
+msgstr "Увеличить скорость речи"
+
+#: Programs/cmds.auto.h:501
+msgid "increase speaking volume"
+msgstr "Увеличить громкость речи"
+
+#: Programs/core.c:1123
+msgid "indent"
+msgstr "Отступ"
+
+#: Programs/cmds.auto.h:1149
+msgid "insert clipboard history entry after screen cursor"
+msgstr "Вставить историю  поисковых запросов к буферу обмена после экранного курсора"
+
+#: Programs/cmds.auto.h:526
+msgid "insert clipboard text after screen cursor"
+msgstr "Вставить текст из буфера обмена после экранного курсора"
+
+#: Programs/cmds.auto.h:913
+msgid "insert host clipboard text after screen cursor"
+msgstr "Вставить текст из главного буфера обмена после экранного курсора"
+
+#: Programs/cmds.auto.h:1371
+msgid "insert key"
+msgstr "Вставить команду"
+
+#: Programs/program.c:178
+msgid "install path not absolute"
+msgstr "Путь установки не уточнён"
+
+#: Programs/options.c:104
+msgid "invalid counter setting"
+msgstr "Некорректная установка счётчика"
+
+#: Programs/datafile.c:318
+msgid "invalid escape sequence"
+msgstr "Недопустимая последовательность выхода"
+
+#: Programs/options.c:113
+msgid "invalid flag setting"
+msgstr "Некорректная установка флага"
+
+#: Programs/config.c:2663
+msgid "invalid message hold timeout"
+msgstr "недопустимое время задержки сообщения"
+
+#. the operand for an option is invalid
+#: Programs/options.c:588
+msgid "invalid operand"
+msgstr "Недопустимый оперант"
+
+#: Programs/brlapi_server.c:4413
+msgid "invalid thread stack size"
+msgstr "Недопустимый размер хранилища цепочек"
+
+#: Drivers/Braille/BrailleLite/braille.c:590
+#: Drivers/Braille/BrailleLite/braille.c:668
+msgid "keyboard emu off"
+msgstr "Эмулятор клавиатуры выключен"
+
+#: Drivers/Braille/BrailleLite/braille.c:589
+msgid "keyboard emu on"
+msgstr "Эмулятор клавиатуры включён"
+
+#. L  B
+#: Programs/cmd_utils.c:153
+msgid "light blue"
+msgstr "светло-синий"
+
+#. L GB
+#: Programs/cmd_utils.c:155
+msgid "light cyan"
+msgstr "небесно-голубой"
+
+#. L G
+#: Programs/cmd_utils.c:154
+msgid "light green"
+msgstr "светло-зелёный"
+
+#. RGB
+#: Programs/cmd_utils.c:151
+msgid "light grey"
+msgstr "светло-серый"
+
+#. LR B
+#: Programs/cmd_utils.c:157
+msgid "light magenta"
+msgstr "Светло-пурпурный"
+
+#. LR
+#: Programs/cmd_utils.c:156
+msgid "light red"
+msgstr "Ярко-красный"
+
+#: Programs/cmd_speech.c:474
+msgid "line"
+msgstr "Строка"
+
+#: Programs/cmds.auto.h:1047
+msgid "linear copy to character"
+msgstr "Построчно копировать в кодировку"
+
+#: Programs/config.c:654
+msgid "lvl|cat,..."
+msgstr "lvl|cat,..."
+
+#. R B
+#: Programs/cmd_utils.c:149
+msgid "magenta"
+msgstr "Пурпурный"
+
+#. the operand for a string option hasn't been specified
+#: Programs/options.c:582
+msgid "missing operand"
+msgstr "Отсутствует оперант"
+
+#: Programs/parse.c:472
+msgid "missing parameter name"
+msgstr "Отсутствует имя параметра"
+
+#: Programs/parse.c:458
+msgid "missing parameter qualifier"
+msgstr "Отсутствует спецификатор параметра"
+
+#: Programs/parse.c:434
+msgid "missing parameter value"
+msgstr "Отсутствует значение параметра"
+
+#: Programs/cmds.auto.h:993
+msgid "move to the first item in the screen area"
+msgstr "Перейти к первому элементу в экранной области"
+
+#: Programs/cmds.auto.h:1011
+msgid "move to the last item in the screen area"
+msgstr "Перейти к последнему элементу в экранной области"
+
+#: Programs/cmds.auto.h:1005
+msgid "move to the next item in the screen area"
+msgstr "Перейти к следующему элементу в экранной области"
+
+#: Programs/cmds.auto.h:999
+msgid "move to the previous item in the screen area"
+msgstr "Перейти к предыдущему элементу в экранной области"
+
+#: Programs/config.c:345 Programs/config.c:397 Programs/config.c:450
+#: Programs/config.c:472 Programs/config.c:550 Programs/config.c:569
+#: Programs/config.c:604
+msgid "name=value,..."
+msgstr "имя=значение,..."
+
+#: Drivers/Braille/Iris/braille.c:1510
+msgid "native"
+msgstr "исходное"
+
+#: Programs/config.c:1065
+msgid "no key bindings"
+msgstr "нет привязки клавиш"
+
+#: Programs/scr_driver.c:39
+msgid "no screen"
+msgstr "нет экрана"
+
+#: Programs/config.c:706
+msgid "none"
+msgstr "никакие"
+
+#: Programs/config.c:1338
+msgid "not saved"
+msgstr "не сохранено"
+
+#: Programs/pgmprivs_linux.c:1983
+msgid "not switching to an unprivileged user"
+msgstr "нет перехода в статус обычного пользователя"
+
+#: Programs/cmds.auto.h:969
+msgid "open the application alerts window"
+msgstr "открыть окно оповещений"
+
+#: Programs/cmds.auto.h:957
+msgid "open the application list window"
+msgstr "открыть окно списка приложений"
+
+#: Programs/cmds.auto.h:963
+msgid "open the application-specific menu"
+msgstr "открыть контекстное меню для данного приложения"
+
+#: Programs/cmds.auto.h:925
+msgid "open the braille actions window"
+msgstr "открыть окно действий Брайля"
+
+#: Programs/cmds.auto.h:951
+msgid "open the device options window"
+msgstr "Открыть окно свойств устройства"
+
+#: Programs/cmds.auto.h:945
+msgid "open the device settings window"
+msgstr "Открыть окно настроек устройства"
+
+#: Programs/options.c:155
+msgid "option"
+msgstr "свойство"
+
+#: Programs/pgmprivs_linux.c:2117
+msgid "ownership claimed"
+msgstr "заявление о правах собственности"
+
+#: Programs/cmds.auto.h:1350
+msgid "page-down key"
+msgstr "клавиша Страница вниз"
+
+#: Programs/cmds.auto.h:1343
+msgid "page-up key"
+msgstr "клавиша Страница вверх"
+
+#: Programs/menu_prefs.c:509
+msgid "percentage"
+msgstr "Процентное соотношение"
+
+#: Programs/config.c:2636
+msgid "pid file not specified"
+msgstr "pid-файл не выбран"
+
+#: Programs/program.c:320
+msgid "pid file open error"
+msgstr "ошибка открытия pid-файла"
+
+#: Programs/spk.c:200
+msgid "pitch"
+msgstr "высота тона"
+
+#: Programs/cmds.auto.h:1086
+msgid "place left end of braille window at character"
+msgstr "Поместить левый конец окна Брайля возле символа"
+
+#: Drivers/Braille/Baum/braille.c:1108
+msgid "power switch"
+msgstr "включить электропитание"
+
+#: Programs/spk.c:186
+msgid "rate"
+msgstr "скорость"
+
+#: Programs/cmds.auto.h:1040
+msgid "rectangular copy to character"
+msgstr "Превращение   символа в прямоугольник"
+
+#. R
+#: Programs/cmd_utils.c:148
+msgid "red"
+msgstr "красный"
+
+#: Programs/cmds.auto.h:877
+msgid "refresh braille display"
+msgstr "обновить дисплей Брайля"
+
+#: Programs/cmds.auto.h:1201
+msgid "refresh braille line"
+msgstr "обновить строку Брайля"
+
+#: Programs/config.c:404
+msgid "regexp,..."
+msgstr "regexp,..."
+
+#: Programs/config.c:1881
+#, c-format
+msgid "reinitializing braille driver"
+msgstr "Повторная инициализация драйвера Брайля"
+
+#: Programs/config.c:2394
+#, c-format
+msgid "reinitializing screen driver"
+msgstr "Повторная инициализация экранного драйвера"
+
+#: Programs/config.c:2194
+#, c-format
+msgid "reinitializing speech driver"
+msgstr "Повторная инициализация речевого драйвера"
+
+#: Programs/cmds.auto.h:1093
+msgid "remember current braille window position"
+msgstr "Запомнить текущую позицию окна Брайля"
+
+#: Programs/cmds.auto.h:1229
+msgid "render an alert"
+msgstr "Вывести оповещение на экран"
+
+#: Drivers/Braille/BrailleLite/braille.c:601
+#: Drivers/Braille/BrailleLite/braille.c:780
+#: Drivers/Braille/BrailleLite/braille.c:782
+#: Drivers/Braille/BrailleLite/braille.c:791
+msgid "repeat count"
+msgstr "повторить отсчёт"
+
+#: Programs/cmds.auto.h:532
+msgid "restart braille driver"
+msgstr "перезапустить драйвер Брайля"
+
+#: Programs/cmds.auto.h:538
+msgid "restart speech driver"
+msgstr "Перезапустить речевой драйвер"
+
+#: Programs/cmds.auto.h:755
+msgid "restore clipboard from disk"
+msgstr "восстановить буфер обмена с диска"
+
+#: Programs/cmds.auto.h:402
+msgid "restore preferences from disk"
+msgstr "восстановить настройки с диска"
+
+#: Programs/cmds.auto.h:975
+msgid "return to the active screen area"
+msgstr "вернуться в активную область экрана"
+
+#: Programs/cmds.auto.h:749
+msgid "save clipboard to disk"
+msgstr "сохранить буфер обмена на диск"
+
+#: Programs/cmds.auto.h:396
+msgid "save preferences to disk"
+msgstr "сохранить настройки на диск"
+
+#: Programs/xbrlapi.c:91
+msgid "scheme+..."
+msgstr "схема+..."
+
+#: Programs/config.c:2270
+msgid "screen driver not loadable"
+msgstr "экранный драйвер недоступен для загрузки"
+
+#: Programs/config.c:2391
+msgid "screen driver restarting"
+msgstr "перезапуск экранного драйвера"
+
+#: Programs/cmd_miscellaneous.c:186
+msgid "screen driver stopped"
+msgstr "экранный драйвер остановлен"
+
+#: Drivers/Screen/Android/screen.c:184
+msgid "screen locked"
+msgstr "экран заблокирован"
+
+#: Drivers/Screen/Linux/screen.c:1531
+msgid "screen not in text mode"
+msgstr "экран не в текстовом режиме"
+
+#: Programs/cmds.auto.h:140
+msgid "search backward for clipboard text"
+msgstr "обратный поиск текста в буфере обмена"
+
+#: Programs/cmds.auto.h:146
+msgid "search forward for clipboard text"
+msgstr "прямой поиск текста в буфере обмена"
+
+#: Programs/cmd_miscellaneous.c:122
+msgid "second"
+msgid_plural "seconds"
+msgstr[0] "секунд"
+msgstr[1] "секунда"
+
+#: Programs/cmds.auto.h:895
+msgid "select all of the text"
+msgstr "выделить весь текст"
+
+#: Programs/cmds.auto.h:446
+msgid "select next choice"
+msgstr "выделить следующий выбранный"
+
+#: Programs/cmds.auto.h:440
+msgid "select previous choice"
+msgstr "выделить предыдущий выбранный"
+
+#: Programs/cmds.auto.h:352
+msgid "set alert tunes on/off"
+msgstr "включить/выключить звуковые оповещения"
+
+#: Programs/cmds.auto.h:338
+msgid "set attribute blinking on/off"
+msgstr "включить/выключить атрибут мигания"
+
+#: Programs/cmds.auto.h:331
+msgid "set attribute underlining on/off"
+msgstr "включить/выключить атрибут подчёркивания"
+
+#: Programs/cmds.auto.h:1163
+msgid "set attributes table"
+msgstr "настроить таблицу атрибутов"
+
+#: Programs/cmds.auto.h:359
+msgid "set autorepeat on/off"
+msgstr "включить/выключить автоповтор"
+
+#: Programs/cmds.auto.h:623
+msgid "set autospeak completed words on/off"
+msgstr "включить/выключить автопроговаривание введённых слов"
+
+#: Programs/cmds.auto.h:609
+msgid "set autospeak deleted characters on/off"
+msgstr "включить/выключить автопроговаривание удалённых символов"
+
+#: Programs/cmds.auto.h:871
+msgid "set autospeak indent of current line on/off"
+msgstr "включить/выключить автопроговаривание отступа текущей строки"
+
+#: Programs/cmds.auto.h:602
+msgid "set autospeak inserted characters on/off"
+msgstr "включить/выключить автопроговаривание вставленных символов"
+
+#: Programs/cmds.auto.h:366
+msgid "set autospeak on/off"
+msgstr "включить/выключить автопроговаривание"
+
+#: Programs/cmds.auto.h:616
+msgid "set autospeak replaced characters on/off"
+msgstr "включить/выключить автопроговаривание заменённых символов"
+
+#: Programs/cmds.auto.h:595
+msgid "set autospeak selected character on/off"
+msgstr "включить/выключить автопроговаривание выделенного символа"
+
+#: Programs/cmds.auto.h:588
+msgid "set autospeak selected line on/off"
+msgstr "включить/выключить автопроговаривание выделенной строки"
+
+#: Programs/cmds.auto.h:769
+msgid "set braille keyboard enabled/disabled"
+msgstr "включить/отключить клавиатуру Брайля"
+
+#: Programs/cmds.auto.h:762
+msgid "set braille typing mode dots/text"
+msgstr "режим брайлевского ввода: точки/текст"
+
+#: Programs/cmds.auto.h:345
+msgid "set capital letter blinking on/off"
+msgstr "включить/выключить мигание заглавной буквы"
+
+#: Programs/cmds.auto.h:1170
+msgid "set contraction table"
+msgstr "настроить таблицу сокращений"
+
+#: Programs/cmds.auto.h:261
+msgid "set display mode attributes/text"
+msgstr "режим дисплея: атрибуты/текст"
+
+#: Programs/cmds.auto.h:303
+msgid "set hidden screen cursor on/off"
+msgstr "включить/отключить скрытый экранный курсор"
+
+#: Programs/cmds.auto.h:1177
+msgid "set keyboard table"
+msgstr "настроить клавиатурную таблицу"
+
+#: Programs/cmds.auto.h:1184
+msgid "set language profile"
+msgstr "настроить языковой профиль"
+
+#: Programs/cmds.auto.h:324
+msgid "set screen cursor blinking on/off"
+msgstr "включить/выключить мигание экранного курсора"
+
+#: Programs/cmds.auto.h:317
+msgid "set screen cursor style block/underline"
+msgstr "Перевести экранный курсор в режим подчёркивания"
+
+#: Programs/cmds.auto.h:296
+msgid "set screen cursor visibility on/off"
+msgstr "включить/выключить видимость экранного курсора"
+
+#: Programs/cmds.auto.h:254
+msgid "set screen image frozen/unfrozen"
+msgstr "изображение на экране: приостановить/возобновить"
+
+#: Programs/cmds.auto.h:289
+msgid "set skipping of blank braille windows on/off"
+msgstr "включить/выключить пропуск пустых окон Брайля"
+
+#: Programs/cmds.auto.h:282
+msgid "set skipping of lines with identical content on/off"
+msgstr "включить/выключить пропуск строк с одинаковым содержимым"
+
+#: Programs/cmds.auto.h:275
+msgid "set sliding braille window on/off"
+msgstr "включить/выключить скольжение окна Брайля"
+
+#: Programs/cmds.auto.h:743
+msgid "set speech cursor visibility on/off"
+msgstr "включить/выключить видимость речевого курсора"
+
+#: Programs/cmds.auto.h:1215
+msgid "set text selection"
+msgstr "настроить выделение текста"
+
+#: Programs/cmds.auto.h:268
+msgid "set text style 6-dot/8-dot"
+msgstr "стиль текста: шеститочечный/восьмиточечный"
+
+#: Programs/cmds.auto.h:1156
+msgid "set text table"
+msgstr "настроить таблицу текстов"
+
+#: Programs/cmds.auto.h:858
+msgid "set touch navigation on/off"
+msgstr "включить/выключить жестовую навигацию"
+
+#: Programs/cmds.auto.h:310
+msgid "set track screen cursor on/off"
+msgstr "включить/выключить отслеживание экранного курсора"
+
+#: Programs/cmds.auto.h:574
+msgid "show current date and time"
+msgstr "показать текущие дату и время"
+
+#: Programs/cmds.auto.h:919
+msgid "show the window title"
+msgstr "показать заголовок окна"
+
+#: Programs/cmds.auto.h:883
+msgid "show various device status indicators"
+msgstr "показать индикаторы состояния устройства"
+
+#: Programs/menu_prefs.c:946
+msgid "soundcard digital audio"
+msgstr "звуковая карта - цифровое аудио"
+
+#: Programs/menu_prefs.c:948
+msgid "soundcard synthesizer"
+msgstr "звуковая карта синтезатор"
+
+#: Programs/cmd.c:277 Programs/core.c:1046
+msgid "space"
+msgstr "пробел"
+
+#: Programs/cmds.auto.h:629
+msgid "speak current character"
+msgstr "проговаривать текущий символ"
+
+#: Programs/cmds.auto.h:465 Programs/cmds.auto.h:669
+msgid "speak current line"
+msgstr "проговаривать текущую строку"
+
+#: Programs/cmds.auto.h:649
+msgid "speak current word"
+msgstr "проговаривать текущее слово"
+
+#: Programs/cmds.auto.h:477
+msgid "speak from current line through bottom of screen"
+msgstr "проговаривать от текущей строки до конца экрана"
+
+#: Programs/cmds.auto.h:471
+msgid "speak from top of screen through current line"
+msgstr "проговаривать от начала экрана до текущей строки"
+
+#: Programs/cmds.auto.h:864
+msgid "speak indent of current line"
+msgstr "проговаривать отступ текущей строки"
+
+#: Programs/cmds.auto.h:736
+msgid "speak speech cursor location"
+msgstr "проговаривать положение речевого курсора"
+
+#: Programs/config.c:2042
+msgid "speech driver not loadable"
+msgstr "невозможно загрузить речевой драйвер"
+
+#: Programs/config.c:2191
+msgid "speech driver restarting"
+msgstr "перезапуск речевого драйвера"
+
+#: Programs/cmd_speech.c:104
+msgid "speech driver stopped"
+msgstr "речевой драйвер остановлен"
+
+#: Programs/cmds.auto.h:723
+msgid "spell current word"
+msgstr "произнести текущее слово по буквам"
+
+#: Programs/cmds.auto.h:1026
+msgid "start new clipboard at character"
+msgstr "создать новый буфер обмена после символа"
+
+#: Programs/cmds.auto.h:1208
+msgid "start text selection"
+msgstr "начать выделение текста"
+
+#: Programs/cmds.auto.h:799
+msgid "start the braille driver"
+msgstr "запустить драйвер Брайля"
+
+#: Programs/cmds.auto.h:823
+msgid "start the screen driver"
+msgstr "запустить экранный драйвер"
+
+#: Programs/cmds.auto.h:811
+msgid "start the speech driver"
+msgstr "запустить речевой драйвер"
+
+#: Programs/cmds.auto.h:452
+msgid "stop speaking"
+msgstr "остановить проговаривание"
+
+#: Programs/cmds.auto.h:793
+msgid "stop the braille driver"
+msgstr "остановить драйвер Брайля"
+
+#: Programs/cmds.auto.h:817
+msgid "stop the screen driver"
+msgstr "остановить экранный драйвер"
+
+#: Programs/cmds.auto.h:805
+msgid "stop the speech driver"
+msgstr "остановить речевой драйвер"
+
+#: Programs/xbrlapi.c:656
+msgid "strange old error handler\n"
+msgstr "мастер по исправлению  старых ошибок\n"
+
+#: Programs/brltty-cldr.c:39
+msgid "string"
+msgstr "цепочка"
+
+#: Programs/cmds.auto.h:1273
+msgid "switch to command context"
+msgstr "переключиться в командную строку"
+
+#: Programs/cmds.auto.h:1054
+msgid "switch to specific virtual terminal"
+msgstr "переключиться на выбранный виртуальный терминал"
+
+#: Programs/cmds.auto.h:987
+msgid "switch to the next screen area"
+msgstr "перейти к следующей экранной области"
+
+#: Programs/cmds.auto.h:513
+msgid "switch to the next virtual terminal"
+msgstr "переключиться на следующий виртуальный терминал"
+
+#: Programs/cmds.auto.h:981
+msgid "switch to the previous screen area"
+msgstr "перейти к предыдущей экранной области"
+
+#: Programs/cmds.auto.h:507
+msgid "switch to the previous virtual terminal"
+msgstr "переключиться на предыдущий виртуальный терминал"
+
+#: Programs/pgmprivs_linux.c:1968
+msgid "switched to unprivileged user"
+msgstr " переход к  обычному пользователю "
+
+#: Programs/cmds.auto.h:1294
+msgid "tab key"
+msgstr "клавиша табуляции"
+
+#: Programs/config.c:300 Programs/config.c:307
+msgid "text"
+msgstr "текст"
+
+#: Programs/cmds.auto.h:1245
+msgid "type braille dots"
+msgstr "ввести точки Брайля"
+
+#: Programs/cmds.auto.h:1237
+msgid "type unicode character"
+msgstr "ввести символ в формате Unicode"
+
+#: Programs/xbrlapi.c:974
+msgid "unexpected block type"
+msgstr "внезапная блокировка ввода"
+
+#: Programs/xbrlapi.c:864
+msgid "unexpected cmd"
+msgstr "непредвиденное cmd"
+
+#: Programs/cmd_queue.c:157
+msgid "unhandled command"
+msgstr "необработанная команда"
+
+#: Programs/cmd.c:198
+msgid "unknown command"
+msgstr "неизвестная команда"
+
+#: Programs/options.c:822
+msgid "unknown configuration directive"
+msgstr "неизвестная директива  конфигурации"
+
+#: Programs/config.c:726
+msgid "unknown log level or category"
+msgstr "неизвестная запись в журнале или категория"
+
+#. an unknown option has been specified
+#: Programs/options.c:569
+msgid "unknown option"
+msgstr "неизвестная опция"
+
+#: Programs/parse.c:501
+msgid "unsupported parameter"
+msgstr "неподдерживаемый параметр"
+
+#: Programs/spk.c:172
+msgid "volume"
+msgstr "громкость"
+
+#. LRGB
+#: Programs/cmd_utils.c:159
+msgid "white"
+msgstr "белый"
+
+#: Programs/pgmprivs_linux.c:1830
+msgid "working directory changed"
+msgstr "активный каталог изменён"
+
+#: Programs/xbrlapi.c:911
+#, c-format
+msgid "xbrlapi: Couldn't find a keycode to remap for simulating unbound  keysym %08X\n"
+msgstr "xbrlapi: Не могу найти код для перезаписи   и копирования  значений отдельных клавиш %08X\n"
+
+#: Programs/xbrlapi.c:898
+#, c-format
+msgid "xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"
+msgstr "xbrlapi: Не удалось найти годные к применению модификаторы %d для получения значения клавиши %08X\n"
+
+#: Programs/xbrlapi.c:874
+#, c-format
+msgid "xbrlapi: Couldn't translate keysym %08X to keycode.\n"
+msgstr "xbrlapi: Не удалось перевести значение клавиши %08X в kкодовый ключ.\n"
+
+#: Programs/xbrlapi.c:415
+#, c-format
+msgid "xbrlapi: X Error %d, %s on display %s\n"
+msgstr "xbrlapi: неизвестная Ошибка %d, %s на дисплее %s\n"
+
+#: Programs/xbrlapi.c:457
+#, c-format
+msgid "xbrlapi: bad format for VT number\n"
+msgstr "xbrlapi: неподходящий формат числа VT\n"
+
+#: Programs/xbrlapi.c:460
+#, c-format
+msgid "xbrlapi: bad type for VT number\n"
+msgstr "xbrlapi: неподходящий вид числа VT\n"
+
+#: Programs/xbrlapi.c:439
+#, c-format
+msgid "xbrlapi: cannot get root window XFree86_VT property\n"
+msgstr "xbrlapi: не могу получить исходное окно XFree86_VT свойство\n"
+
+#: Programs/xbrlapi.c:316
+#, c-format
+msgid "xbrlapi: cannot write window name %s\n"
+msgstr "xbrlapi: не могу записать имя окна %s\n"
+
+#: Programs/xbrlapi.c:764
+#, c-format
+msgid "xbrlapi: didn't grab parent of %#010lx\n"
+msgstr "xbrlapi: не удалось перехватить источник %#010lx\n"
+
+#: Programs/xbrlapi.c:782
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx\n"
+msgstr "xbrlapi: не удалось перехватить окно %#010lx\n"
+
+#: Programs/xbrlapi.c:582
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx but got focus\n"
+msgstr "xbrlapi: не удалось перехватить окно %#010lx однако удалось получить фокус\n"
+
+#: Programs/xbrlapi.c:448
+#, c-format
+msgid "xbrlapi: more than one item for VT number\n"
+msgstr "xbrlapi: более одного элемента для числа VT\n"
+
+#: Programs/xbrlapi.c:433
+#, c-format
+msgid "xbrlapi: no XFree86_VT atom\n"
+msgstr "xbrlapi: нет XFree86_VT atom\n"
+
+#: Programs/xbrlapi.c:444
+#, c-format
+msgid "xbrlapi: no items for VT number\n"
+msgstr "xbrlapi: нет элементов для числа VT\n"
+
+#: Programs/xbrlapi.c:416
+#, c-format
+msgid "xbrlapi: resource %#010lx, req %u:%u\n"
+msgstr "xbrlapi: источник %#010lx, req %u:%u\n"
+
+#. "shouldn't happen" events
+#: Programs/xbrlapi.c:811
+#, c-format
+msgid "xbrlapi: unhandled event type: %d\n"
+msgstr "xbrlapi: необработанный вид события: %d\n"
+
+#: Programs/xbrlapi.c:790
+#, c-format
+msgid "xbrlapi: window %#010lx changed to NULL name\n"
+msgstr "xbrlapi: окно %#010lx изменено на нулевое имя\n"
+
+#. LRG
+#: Programs/cmd_utils.c:158
+msgid "yellow"
+msgstr "жёлтый"

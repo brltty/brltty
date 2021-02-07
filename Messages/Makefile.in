@@ -19,7 +19,7 @@
 all:: objects languages
 
 COPYRIGHT_HOLDER = The BRLTTY Developers
-LANGUAGE_CODES = de fr it zh
+LANGUAGE_CODES = de fr it ru zh
 
 LOCALE_SUBDIRECTORY = locale
 MESSAGES_SUBDIRECTORY = LC_MESSAGES
