@@ -136,6 +136,7 @@ cpbRectangularCopy (ClipboardCommandData *ccd, int column, int row) {
 
           case WC_C('\r'):
             spaces = 0;
+            break;
 
           default:
             break;
@@ -173,6 +174,7 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
     if (buffer) {
       if (column < rightColumn) {
         wchar_t *start = buffer + length;
+
         while (start != buffer) {
           if (*--start == WC_C('\r')) {
             start += 1;
@@ -229,6 +231,7 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
           *to++ = character;
         }
 
+        if (spaces || newlines) *to++ = WC_C(' ');
         length = to - buffer;
       }
 
