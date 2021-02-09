@@ -168,6 +168,15 @@ isBrailleCharacter (wchar_t character) {
 }
 
 int
+isIdeographicCharacter (wchar_t character) {
+#ifdef HAVE_ICU
+  if (u_hasBinaryProperty(character, UCHAR_IDEOGRAPHIC)) return 1;
+#endif /* HAVE_ICU */
+
+  return 0;
+}
+
+int
 isEmojiSequence (const wchar_t *characters, size_t count) {
 #ifdef HAVE_ICU
   const wchar_t *character = characters;

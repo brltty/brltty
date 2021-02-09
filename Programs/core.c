@@ -63,6 +63,7 @@
 #include "ctb.h"
 #include "routing.h"
 #include "utf8.h"
+#include "unicode.h"
 #include "scr.h"
 #include "update.h"
 #include "ses.h"
@@ -797,17 +798,28 @@ shiftBrailleWindowLeft (unsigned int amount) {
       readScreenRow(ses->winy, reference, characters);
 
       if (!isWordBreak(characters, first-1)) {
+        int wasIdeographic = isIdeographicCharacter(characters[first-1].text);
+
         for (int i=first; i<reference; i+=1) {
-          if (isWordBreak(characters, i)) {
-            first = i;
-            break;
+          int isIdeographic = isIdeographicCharacter(characters[first].text);
+
+          if (!(isIdeographic && wasIdeographic)) {
+            if (!isWordBreak(characters, i)) {
+              wasIdeographic = isIdeographic;
+              continue;
+            }
           }
+
+          first = i;
+          break;
         }
       }
 
-      while (first < reference) {
-        if (!isWordBreak(characters, first)) break;
-        first += 1;
+      for (int i=first; i<reference; i+=1) {
+        if (!isWordBreak(characters, i)) {
+          first = i;
+          break;
+        }
       }
     }
 

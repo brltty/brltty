@@ -82,6 +82,7 @@ extern int getCharacterByAlias (wchar_t *character, const char *alias);
 extern int getCharacterWidth (wchar_t character);
 
 extern int isBrailleCharacter (wchar_t character);
+extern int isIdeographicCharacter (wchar_t character);
 extern int isEmojiSequence (const wchar_t *characters, size_t count);
 extern wchar_t getReplacementCharacter (void);
 
