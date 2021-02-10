@@ -780,55 +780,56 @@ shiftBrailleWindowLeft (unsigned int amount) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
     int reference = ses->winx;
-    int first = 0;
-    int last = ses->winx - 1;
+    if (!reference) return 0;
 
-    while (first <= last) {
-      int end = (ses->winx = (first + last) / 2) + getContractedLength(amount);
+    {
+      int from = 0;
+      int to = ses->winx;
 
-      if (end < reference) {
-        first = ses->winx + 1;
-      } else {
-        last = ses->winx - 1;
+      while (from < to) {
+        int end = (ses->winx = ((from + to) / 2)) + getContractedLength(amount);
+
+        if (end < reference) {
+          from = ses->winx + 1;
+        } else {
+          to = ses->winx;
+        }
       }
+
+      if (!(ses->winx = from)) return 1;
     }
 
-    if (first > 0) {
-      ScreenCharacter characters[reference];
-      readScreenRow(ses->winy, reference, characters);
+    ScreenCharacter characters[reference];
+    readScreenRow(ses->winy, reference, characters);
+    int x = ses->winx;
 
-      if (!isWordBreak(characters, first-1)) {
-        int wasIdeographic = isIdeographicCharacter(characters[first-1].text);
+    if (!isWordBreak(characters, x-1)) {
+      int wasIdeographic = isIdeographicCharacter(characters[x-1].text);
 
-        for (int i=first; i<reference; i+=1) {
-          int isIdeographic = isIdeographicCharacter(characters[first].text);
+      for (int i=x; i<reference; i+=1) {
+        int isIdeographic = isIdeographicCharacter(characters[i].text);
 
-          if (!(isIdeographic && wasIdeographic)) {
-            if (!isWordBreak(characters, i)) {
-              wasIdeographic = isIdeographic;
-              continue;
-            }
+        if (!(isIdeographic && wasIdeographic)) {
+          if (!isWordBreak(characters, i)) {
+            wasIdeographic = isIdeographic;
+            continue;
           }
-
-          first = i;
-          break;
         }
-      }
 
-      for (int i=first; i<reference; i+=1) {
-        if (!isWordBreak(characters, i)) {
-          first = i;
-          break;
-        }
+        x = i;
+        break;
       }
     }
 
-    if (first == reference) {
-      if (!first) return 0;
-      first -= 1;
+    for (int i=x; i<reference; i+=1) {
+      if (!isWordBreak(characters, i)) {
+        x = i;
+        break;
+      }
     }
 
-    ses->winx = first;
+    if (x == reference) x -= 1;
+    ses->winx = x;
     return 1;
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -915,28 +916,18 @@ trackScreenCursor (int place) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracted) {
-    ses->winy = scr.posy;
-    if (scr.posx < ses->winx) {
-      int length = scr.posx + 1;
-      ScreenCharacter characters[length];
-      int onspace = 1;
-      readScreenRow(ses->winy, length, characters);
+    contractedTrack = 1;
 
-      while (length) {
-        if ((iswspace(characters[--length].text) != 0) != onspace) {
-          if (onspace) {
-            onspace = 0;
-          } else {
-            ++length;
-            break;
-          }
-        }
+    if (scr.posy != ses->winy) {
+      ses->winy = scr.posy;
+    } else if (scr.posx >= ses->winx) {
+      if (scr.posx < (ses->winx + getContractedLength(fullWindowShift))) {
+        return 1;
       }
-
-      ses->winx = length;
     }
 
-    contractedTrack = 1;
+    ses->winx = scr.posx;
+    shiftBrailleWindowLeft(halfWindowShift);
     return 1;
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
