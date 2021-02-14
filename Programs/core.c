@@ -918,20 +918,16 @@ trackScreenCursor (int place) {
   if (isContracted) {
     contractedTrack = 1;
 
-    int newRow = scr.posy != ses->winy;
-    ses->winy = scr.posy;
-    int length = getContractedLength(textCount);
-
-    if (!newRow) {
-      if (scr.posx >= ses->winx) {
-        if (scr.posx < (ses->winx + length)) {
-          return 1;
-        }
+    if (scr.posy != ses->winy) {
+      ses->winy = scr.posy;
+    } else if (scr.posx >= ses->winx) {
+      if (scr.posx < (ses->winx + getContractedLength(textCount))) {
+        return 1;
       }
     }
 
     ses->winx = scr.posx;
-    shiftBrailleWindowLeft(length/2);
+    shiftBrailleWindowLeft(halfWindowShift);
     return 1;
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -1187,7 +1183,7 @@ getContractedLength (unsigned int outputLimit) {
     outputOffsets, getContractedCursor()
   );
 
-  for (int length=0; length<offsetCount; length+=1) {
+  for (int length=0; length<inputLength; length+=1) {
     int offset = outputOffsets[length];
 
     if (offset != CTB_NO_OFFSET) {
