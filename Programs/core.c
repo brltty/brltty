@@ -917,7 +917,7 @@ trackScreenCursor (int place) {
 
     if (scr.posy != ses->winy) {
       ses->winy = scr.posy;
-    } else if (scr.posx >= ses->winx) {
+    } else if (scr.posx > ses->winx) {
       if (scr.posx < (ses->winx + getContractedLength(textCount))) {
         return 1;
       }
