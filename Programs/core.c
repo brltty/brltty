@@ -821,15 +821,12 @@ shiftBrailleWindowLeft (unsigned int amount) {
       }
     }
 
-    for (int i=x; i<reference; i+=1) {
-      if (!isWordBreak(characters, i)) {
-        x = i;
-        break;
-      }
+    while (x < reference) {
+      if (!isWordBreak(characters, x)) break;
+      x += 1;
     }
 
-    if (x == reference) x -= 1;
-    ses->winx = x;
+    if (x < reference) ses->winx = x;
     return 1;
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
