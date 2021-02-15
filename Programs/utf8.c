@@ -37,30 +37,36 @@ allocateCharacters (size_t count) {
 }
 
 size_t
-convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {
-  size_t utfs;
+convertWcharToUtf8 (wchar_t character, Utf8Buffer utf8) {
+  size_t utfs = 0;
 
-  if (!(wc & ~0X7F)) {
-    *utf8 = wc;
-    utfs = 1;
+  if (!(character & ~0X7F)) {
+    utf8[utfs++] = character;
   } else {
-    Utf8Buffer buffer;
-    char *end = &buffer[0] + sizeof(buffer);
-    char *byte = end;
-    static const wchar_t mask = (1 << ((sizeof(wchar_t) * 8) - 6)) - 1;
+    char *end = &utf8[2];
 
-    do {
-      *--byte = (wc & 0X3F) | 0X80;
-    } while ((wc = (wc >> 6) & mask));
+    {
+      uint32_t value = character;
+      uint32_t mask = ~((1 << 11) - 1);
 
-    utfs = end - byte;
-    if ((*byte & 0X7F) >= (1 << (7 - utfs))) {
-      *--byte = 0;
-      utfs++;
+      while ((value &= mask)) {
+        mask <<= 5;
+        end += 1;
+      }
+
+      utfs = end - utf8;
     }
 
-    *byte |= ~((1 << (8 - utfs)) - 1);
-    memcpy(utf8, byte, utfs);
+    {
+      uint32_t value = character;
+
+      do {
+        *--end = (value & 0X3F) | 0X80;
+        value >>= 6;
+      } while (end > utf8);
+    }
+
+    *end |= ~((1 << (8 - utfs)) - 1);
   }
 
   utf8[utfs] = 0;
@@ -92,19 +98,16 @@ convertUtf8ToWchar (const char **utf8, size_t *utfs) {
     } else if (!first) {
       goto truncated;
     } else {
-      if (!(byte & 0X20)) {
-        state = 1;
-      } else if (!(byte & 0X10)) {
-        state = 2;
-      } else if (!(byte & 0X08)) {
-        state = 3;
-      } else if (!(byte & 0X04)) {
-        state = 4;
-      } else if (!(byte & 0X02)) {
-        state = 5;
-      } else {
-        character = initial;
-        break;
+      state = 1;
+      uint8_t bit = 0X20;
+
+      while (byte & bit) {
+        if (!(bit >>= 1)) {
+          character = initial;
+          break;
+        }
+
+        state += 1;
       }
 
       character = byte & ((1 << (6 - state)) - 1);
