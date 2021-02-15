@@ -1139,8 +1139,8 @@ writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
     consoleEncoding = "";
   }
 
-  if (*consoleEncoding) {
 #ifdef HAVE_ICONV_H
+  if (*consoleEncoding) {
     static const char internalEncoding[] = "UTF-8";
     static iconv_t iconvHandle = (iconv_t)-1;
 
@@ -1152,7 +1152,7 @@ writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
         );
 
         consoleEncoding = "";
-        goto noTranslation;
+        goto ENCODING_NOT_SUPPORTED;
       }
     }
 
@@ -1176,10 +1176,10 @@ writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
     }
 
     return;
-#endif /* HAVE_ICONV_H */
   }
+ENCODING_NOT_SUPPORTED:
+#endif /* HAVE_ICONV_H */
 
-noTranslation:
   fwrite(bytes, 1, count, stream);
 }
 
