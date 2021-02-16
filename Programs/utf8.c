@@ -37,16 +37,16 @@ allocateCharacters (size_t count) {
 }
 
 size_t
-convertWcharToUtf8 (wchar_t character, Utf8Buffer utf8) {
-  size_t utfs = 0;
+convertCodepointToUtf8 (uint32_t codepoint, Utf8Buffer utf8) {
+  size_t length = 0;
 
-  if (!(character & ~0X7F)) {
-    utf8[utfs++] = character;
+  if (!(codepoint & ~0X7F)) {
+    utf8[length++] = codepoint;
   } else {
     char *end = &utf8[2];
 
     {
-      uint32_t value = character;
+      uint32_t value = codepoint;
       uint32_t mask = ~((1 << 11) - 1);
 
       while ((value &= mask)) {
@@ -54,11 +54,11 @@ convertWcharToUtf8 (wchar_t character, Utf8Buffer utf8) {
         end += 1;
       }
 
-      utfs = end - utf8;
+      length = end - utf8;
     }
 
     {
-      uint32_t value = character;
+      uint32_t value = codepoint;
 
       do {
         *--end = (value & 0X3F) | 0X80;
@@ -66,70 +66,89 @@ convertWcharToUtf8 (wchar_t character, Utf8Buffer utf8) {
       } while (end > utf8);
     }
 
-    *end |= ~((1 << (8 - utfs)) - 1);
+    *end |= ~((1 << (8 - length)) - 1);
   }
 
-  utf8[utfs] = 0;
-  return utfs;
+  utf8[length] = 0;
+  return length;
 }
 
-wint_t
-convertUtf8ToWchar (const char **utf8, size_t *utfs) {
-  const uint32_t initial = UINT32_MAX;
-  uint32_t character = initial;
+int
+convertUtf8ToCodepoint (uint32_t *codepoint, const char **utf8, size_t *utfs) {
+  int ok = 0;
+  uint32_t cp = 0;
+
+  int first = 1;
   int state = 0;
 
   while (*utfs) {
-    const int first = character == initial;
-
     unsigned char byte = *(*utf8)++;
-    (*utfs) -= 1;
+    *utfs -= 1;
 
     if (!(byte & 0X80)) {
-      if (!first) goto truncated;
-      character = byte;
+      if (!first) goto unexpected;
+      cp = byte;
+      ok = 1;
       break;
     }
 
     if (!(byte & 0X40)) {
       if (first) break;
-      character = (character << 6) | (byte & 0X3F);
-      if (!--state) break;
-    } else if (!first) {
-      goto truncated;
+      cp = (cp << 6) | (byte & 0X3F);
+
+      if (!--state) {
+        ok = 1;
+        break;
+      }
     } else {
+      if (!first) goto unexpected;
+
       state = 1;
       uint8_t bit = 0X20;
 
       while (byte & bit) {
-        if (!(bit >>= 1)) {
-          character = initial;
-          break;
-        }
-
+        if (!(bit >>= 1)) break;
         state += 1;
       }
 
-      character = byte & ((1 << (6 - state)) - 1);
+      cp = byte & ((1 << (6 - state)) - 1);
     }
+
+    first = 0;
   }
 
   while (*utfs) {
     if ((**utf8 & 0XC0) != 0X80) break;
-    (*utf8) += 1;
-    (*utfs) -= 1;
-    character = initial;
+    ok = 0;
+
+    *utf8 += 1;
+    *utfs -= 1;
   }
 
-  if (character == initial) goto error;
-  if (character > WCHAR_MAX) character = UNICODE_REPLACEMENT_CHARACTER;
-  return character;
+  if (!ok) goto error;
+  *codepoint = cp;
+  return 1;
 
-truncated:
-  (*utf8) -= 1;
-  (*utfs) += 1;
+unexpected:
+  *utf8 -= 1;
+  *utfs += 1;
 error:
-  return WEOF;
+  return 0;
+}
+
+size_t
+convertWcharToUtf8 (wchar_t character, Utf8Buffer utf8) {
+  return convertCodepointToUtf8(character, utf8);
+}
+
+wint_t
+convertUtf8ToWchar (const char **utf8, size_t *utfs) {
+  uint32_t codepoint;
+  int ok = convertUtf8ToCodepoint(&codepoint, utf8, utfs);
+  if (!ok) return WEOF;
+
+  if (codepoint > WCHAR_MAX) codepoint = UNICODE_REPLACEMENT_CHARACTER;
+  return codepoint;
 }
 
 void

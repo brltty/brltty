@@ -31,6 +31,9 @@ wchar_t *allocateCharacters (size_t count);
 #define UTF8_LEN_MAX UTF8_SIZE(32)
 typedef char Utf8Buffer[UTF8_LEN_MAX + 1];
 
+extern size_t convertCodepointToUtf8 (uint32_t codepoint, Utf8Buffer utf8);
+extern int convertUtf8ToCodepoint (uint32_t *codepoint, const char **utf8, size_t *utfs);
+
 extern size_t convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8);
 extern wint_t convertUtf8ToWchar (const char **utf8, size_t *utfs);
 
