@@ -21,8 +21,20 @@
 bind LeftRockerUp KEY_CURSOR_UP
 bind LeftRockerDown KEY_CURSOR_DOWN
 
+bind LeftRockerUp+PanRight KEY_HOME
+bind LeftRockerDown+PanRight KEY_END
+
+bind LeftRockerUp+RightSelector KEY_PAGE_UP
+bind LeftRockerDown+RightSelector KEY_PAGE_DOWN
+
+bind LeftRockerUp+PanLeft CHRLT
+bind LeftRockerDown+PanLeft CHRRT
+
 bind RightRockerUp LNUP
 bind RightRockerDown LNDN
+
+bind RightRockerUp+PanLeft LNBEG
+bind RightRockerDown+PanLeft LNEND
 
 bind RightRockerUp+RoutingKey SETMARK
 bind RightRockerDown+RoutingKey GOTOMARK

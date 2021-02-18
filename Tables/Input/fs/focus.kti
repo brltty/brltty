@@ -63,13 +63,11 @@ map RightShift META
 assign chord Space+
 include ../chords.kti
 
-bind Space+LeftShift KEY_BACKSPACE
-bind Space+RightShift KEY_ENTER
+bind Space+RoutingKey KEY_FUNCTION
 
-bind Space+!RoutingKey KEY_FUNCTION
-bind RightShift+!RoutingKey SWITCHVT
-
-bind !NavrowKey DESCCHAR
-bind PanLeft+!NavrowKey PRINDENT
-bind PanRight+!NavrowKey NXINDENT
-bind LeftSelector+!NavrowKey SETLEFT
+bind NavrowKey DESCCHAR
+bind NavRowKey+!NavRowKey CLIP_APPEND
+bind PanLeft+NavrowKey PRINDENT
+bind PanRight+NavrowKey NXINDENT
+bind LeftSelector+NavrowKey SETLEFT
+bind RightSelector+NavrowKey SWITCHVT

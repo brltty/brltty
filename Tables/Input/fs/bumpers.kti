@@ -18,13 +18,28 @@
 
 # This key subtable is for FreedomScientific displays which have bumper bars.
 
-bind LeftBumperUp KEY_CURSOR_UP
-bind LeftBumperDown KEY_CURSOR_DOWN
-bind RightBumperUp LNUP
-bind RightBumperDown LNDN
+bind LeftBumperUp FWINLT
+bind LeftBumperDown FWINRT
+bind RightBumperUp FWINLT
+bind RightBumperDown FWINRT
 
-bind LeftSelector+LeftBumperUp TOP
-bind LeftSelector+LeftBumperDown BOT
-bind RightSelector+RightBumperUp TOP
-bind RightSelector+RightBumperDown BOT
+bind LeftBumperUp+RoutingKey PRDIFCHAR
+bind LeftBumperDown+RoutingKey NXDIFCHAR
+bind RightBumperUp+RoutingKey PRINDENT
+bind RightBumperDown+RoutingKey NXINDENT
+
+bind LeftSelector+LeftBumperUp TOP_LEFT
+bind LeftSelector+LeftBumperDown BOT_LEFT
+bind LeftSelector+RightBumperUp TOP
+bind LeftSelector+RightBumperDown BOT
+
+bind RightSelector+LeftBumperUp PRPROMPT
+bind RightSelector+LeftBumperDown NXPROMPT
+bind RightSelector+RightBumperUp PRPGRPH
+bind RightSelector+RightBumperDown NXPGRPH
+
+bind Panleft+LeftBumperUp HWINLT
+bind Panleft+LeftBumperDown HWINRT
+bind Panleft+RightBumperUp HWINLT
+bind Panleft+RightBumperDown HWINRT
 

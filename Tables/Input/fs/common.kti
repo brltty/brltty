@@ -25,6 +25,7 @@ bind LeftSelector+RightSelector PASTE
 
 bind PanLeft FWINLT
 bind PanRight FWINRT
+bind PanLeft+PanRight CSRJMP_VERT
 
 bind LeftSelector+PanLeft TOP_LEFT
 bind LeftSelector+PanRight BOT_LEFT
@@ -61,7 +62,7 @@ bind Left\{navKeyType}Press+!RoutingKey SETLEFT
 bind Right\{navKeyType}Press+!RoutingKey DESCCHAR
 
 bind RoutingKey+!RoutingKey CLIP_COPY
-bind PanLeft+!RoutingKey CLIP_NEW
-bind PanRight+!RoutingKey COPY_RECT
-bind LeftSelector+!RoutingKey CLIP_ADD
-bind RightSelector+!RoutingKey COPY_LINE
+bind PanLeft+RoutingKey CLIP_NEW
+bind PanRight+RoutingKey COPY_RECT
+bind LeftSelector+RoutingKey CLIP_ADD
+bind RightSelector+RoutingKey COPY_LINE
