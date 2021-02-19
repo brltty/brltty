@@ -19,6 +19,7 @@
 # This key subtable is for FreedomScientific displays which have bumper bars.
 
 note The left and right bumpers are long, up/down, rocker bars.
+note * Newer models refer to them as panning rockers.
 note * On some models, each bumper is a pair of shorter bars.
 
 bind LeftBumperUp FWINLT

@@ -53,3 +53,6 @@ bind RightRockerDown+PanRight SIXDOTS+on
 bind RightRockerUp+RoutingKey SETMARK
 bind RightRockerDown+RoutingKey GOTOMARK
 
+bind LeftRockerUp+RightRockerUp INFO
+bind LeftRockerDown+RightRockerDown TIME
+
