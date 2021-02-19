@@ -18,8 +18,8 @@
 
 # This key subtable is for FreedomScientific displays which have bumper bars.
 
-note There indeed are two left and two right bumper keys.
-note * Both left ones perform the same functions, as do both right ones.
+note The left and right bumpers are long, up/down, rocker bars.
+note * On some models, each bumper is a pair of shorter bars.
 
 bind LeftBumperUp FWINLT
 bind LeftBumperDown FWINRT

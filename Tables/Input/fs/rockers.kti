@@ -18,6 +18,8 @@
 
 # This key subtable is for FreedomScientific displays which have rockers.
 
+note The left and right rockers are short, up/down, rocker keys.
+
 bind LeftRockerUp KEY_CURSOR_UP
 bind LeftRockerDown KEY_CURSOR_DOWN
 
