@@ -39,11 +39,6 @@ note The left and right panning keys are long and flat with a raised double-arro
 note The left and right selector keys are round and concave.
 note * On older models, they're known as GDF (General Display Function) keys.
 
-ifKey LeftBumperUp
-  note There indeed are two left and two right bumper keys.
-  note * Both left ones perform the same functions, as do both right ones.
-endIf
-
 assign navKeyType Nav
 include common.kti
 
