@@ -61,7 +61,7 @@ include ../chords.kti
 bind Space+RoutingKey KEY_FUNCTION
 
 bind NavrowKey DESCCHAR
-bind NavRowKey+!NavRowKey CLIP_APPEND
+bind NavrowKey+!NavrowKey CLIP_APPEND
 bind PanLeft+NavrowKey PRINDENT
 bind PanRight+NavrowKey NXINDENT
 bind LeftSelector+NavrowKey SETLEFT

@@ -17,7 +17,7 @@
 ###############################################################################
 
 # This key subtable is for FreedomScientific displays which have bumper bars.
-#
+
 note There indeed are two left and two right bumper keys.
 note * Both left ones perform the same functions, as do both right ones.
 
@@ -26,23 +26,23 @@ bind LeftBumperDown FWINRT
 bind RightBumperUp FWINLT
 bind RightBumperDown FWINRT
 
-bind LeftBumperUp+RightSelector PRNBWIN
-bind LeftBumperDown+RightSelector NXNBWIN
-bind RightBumperUp+RightSelector FWINLTSKIP
-bind RightBumperDown+RightSelector FWINRTSKIP
+bind LeftBumperUp+PanLeft CHRLT
+bind LeftBumperDown+PanLeft CHRRT
+bind RightBumperUp+PanLeft HWINLT
+bind RightBumperDown+PanLeft HWINRT
+
+bind LeftBumperUp+LeftSelector FWINLTSKIP
+bind LeftBumperDown+LeftSelector FWINRTSKIP
+bind RightBumperUp+LeftSelector PRNBWIN
+bind RightBumperDown+LeftSelector NXNBWIN
+
+bind LeftBumperUp+RightSelector PRPROMPT
+bind LeftBumperDown+RightSelector NXPROMPT
+bind RightBumperUp+RightSelector PRPGRPH
+bind RightBumperDown+RightSelector NXPGRPH
 
 bind LeftBumperUp+RoutingKey PRDIFCHAR
 bind LeftBumperDown+RoutingKey NXDIFCHAR
 bind RightBumperUp+RoutingKey PRINDENT
 bind RightBumperDown+RoutingKey NXINDENT
-
-bind LeftSelector+LeftBumperUp PRPROMPT
-bind LeftSelector+LeftBumperDown NXPROMPT
-bind LeftSelector+RightBumperUp PRPGRPH
-bind LeftSelector+RightBumperDown NXPGRPH
-
-bind Panleft+LeftBumperUp HWINLT
-bind Panleft+LeftBumperDown HWINRT
-bind Panleft+RightBumperUp HWINLT
-bind Panleft+RightBumperDown HWINRT
 
