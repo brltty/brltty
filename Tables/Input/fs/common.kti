@@ -58,8 +58,8 @@ bind RightSelector+!Left\{navKeyType}Up PRSEARCH
 bind RightSelector+!Left\{navKeyType}Down NXSEARCH
 
 bind RoutingKey ROUTE
-bind Left\{navKeyType}Press+!RoutingKey SETLEFT
-bind Right\{navKeyType}Press+!RoutingKey DESCCHAR
+bind Left\{navKeyType}Press+RoutingKey SETLEFT
+bind Right\{navKeyType}Press+RoutingKey DESCCHAR
 
 bind RoutingKey+!RoutingKey CLIP_COPY
 bind PanLeft+RoutingKey CLIP_NEW
