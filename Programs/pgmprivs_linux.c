@@ -2215,13 +2215,15 @@ typedef enum {
   PARM_USER,
 } Parameters;
 
-const char *const *
-getPrivilegeParameterNames (void) {
-  static const char *const names[] = NULL_TERMINATED_STRING_ARRAY(
+
+static const char *const *const pgmprivs_names =
+  NULL_TERMINATED_STRING_ARRAY(
     "path", "scfmode", "shell", "user"
   );
 
-  return names;
+const char *const *
+getPrivilegeParameterNames (void) {
+  return pgmprivs_names;
 }
 
 const char *
