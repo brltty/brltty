@@ -50,7 +50,7 @@ static const brlapi_param_clientPriority_t qualityPriorities[] = {
   [SCQ_GOOD] = BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT + 10,
   [SCQ_FAIR] = BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT - 10,
   [SCQ_POOR] = BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT - 20,
-  [SCQ_NONE] = 0,
+  [SCQ_NONE] = BRLAPI_PARAM_CLIENT_PRIORITY_DISABLE,
 };
 
 static int displaySize;

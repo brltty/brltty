@@ -123,6 +123,11 @@ typedef uint32_t brlapi_param_clientPriority_t;
 /** Default value for BRLAPI_PARAM_CLIENT_PRIORITY */
 #define BRLAPI_PARAM_CLIENT_PRIORITY_DEFAULT 50
 
+/* BRLAPI_PARAM_CLIENT_PRIORITY_DISABLE */
+/** Value for BRLAPI_PARAM_CLIENT_PRIORITY which actually disables input and
+ * output */
+#define BRLAPI_PARAM_CLIENT_PRIORITY_DISABLE 0
+
 /* brlapi_param_driverName_t */
 /** Type to be used for BRLAPI_PARAM_DRIVER_NAME */
 typedef char *brlapi_param_driverName_t;

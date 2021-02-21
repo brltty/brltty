@@ -3975,7 +3975,10 @@ static Connection *whoFillsTty(Tty *tty) {
   Connection *c;
   Tty *t;
   for (c=tty->connections->next; c!=tty->connections; c = c->next)
-    if (c->brlbufstate!=EMPTY) goto found;
+    if (c->brlbufstate!=EMPTY
+        && c->client_priority != BRLAPI_PARAM_CLIENT_PRIORITY_DISABLE) {
+      goto found;
+    }
 
   c = NULL;
 found:
