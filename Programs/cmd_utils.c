@@ -160,11 +160,17 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
     };
 
     unsigned char attributes = character.attributes;
-    STR_PRINTF(" %s", gettext(colours[attributes & SCR_MASK_FG]));
-    STR_PRINTF(" on %s", gettext(colours[(attributes & SCR_MASK_BG) >> 4]));
+    const char *foreground = gettext(colours[attributes & SCR_MASK_FG]);
+    const char *background = gettext(colours[(attributes & SCR_MASK_BG) >> 4]);
+
+    STR_PRINTF(" ");
+    // xgettext: This phrase describes the colour of a character on the screen.
+    // xgettext: %1$s is the (already translated) foreground colour.
+    // xgettext: %2$s is the (already translated) background colour.
+    STR_PRINTF(gettext("%1$s on %2$s"), foreground, background);
   }
 
   if (character.attributes & SCR_ATTR_BLINK) {
-    STR_PRINTF(" %s", gettext("blink"));
+    STR_PRINTF(" %s", gettext("blinking"));
   }
 STR_END_FORMATTER
