@@ -117,9 +117,10 @@ STR_BEGIN_FORMATTER(formatSpeechTime, const TimeFormattingData *fmt)
     if (fmt->components.second == 0) {
       STR_PRINTF("%s", gettext("exactly"));
     } else {
-      STR_PRINTF("%s %u %s",
-                 gettext("and"), fmt->components.second,
-                 ngettext("second", "seconds", fmt->components.second));
+      unsigned int seconds = fmt->components.second;
+      STR_PRINTF("%s", gettext("and"));
+      // xgettext: This is a number (%u) of seconds (time units).
+      STR_PRINTF(ngettext("%u second", "%u seconds", seconds), seconds);
     }
   }
 STR_END_FORMATTER
