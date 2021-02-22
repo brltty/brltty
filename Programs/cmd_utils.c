@@ -140,6 +140,8 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
   }
 
   {
+    STR_PRINTF(" ");
+
     static const char *const colours[] = {
       /*      */ strtext("black"),
       /*    B */ strtext("blue"),
@@ -163,7 +165,6 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
     const char *foreground = gettext(colours[attributes & SCR_MASK_FG]);
     const char *background = gettext(colours[(attributes & SCR_MASK_BG) >> 4]);
 
-    STR_PRINTF(" ");
     // xgettext: This phrase describes the colour of a character on the screen.
     // xgettext: %1$s is the (already translated) foreground colour.
     // xgettext: %2$s is the (already translated) background colour.
