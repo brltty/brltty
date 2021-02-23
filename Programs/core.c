@@ -936,6 +936,7 @@ trackScreenCursor (int place) {
   if (prefs.slidingBrailleWindow) {
     int reset = textCount * 3 / 10;
     int trigger = prefs.eagerSlidingBrailleWindow? textCount*3/20: 0;
+    if (scr.posx == ses->winx) trigger = 1;
 
     if (scr.posx < (ses->winx + trigger)) {
       ses->winx = MAX(scr.posx-reset, 0);
