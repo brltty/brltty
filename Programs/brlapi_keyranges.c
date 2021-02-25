@@ -105,7 +105,10 @@ int addKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l)
   KeyrangeElem min = KeyrangeElem(minFlags, minVal);
   KeyrangeElem max = KeyrangeElem(maxFlags, maxVal);
 
-  logMessage(LOG_DEBUG, "adding range [%"PRIx32"(%"PRIx32")..%"PRIx32"(%"PRIx32")]", minVal, minFlags, maxVal, maxFlags);
+  logMessage(LOG_CATEGORY(SERVER_EVENTS) | LOG_DEBUG,
+    "adding range [%"PRIx32"(%"PRIx32")..%"PRIx32"(%"PRIx32")]",
+    minVal, minFlags, maxVal, maxFlags
+  );
 
   c = *l;
   while (c) {
@@ -146,7 +149,10 @@ int removeKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l)
 
   if ((l==NULL) || (*l==NULL)) return 0;
 
-  logMessage(LOG_DEBUG, "removing range [%"PRIx32"(%"PRIx32")..%"PRIx32"(%"PRIx32")]", minVal, minFlags, maxVal, maxFlags);
+  logMessage(LOG_CATEGORY(SERVER_EVENTS) | LOG_DEBUG,
+    "removing range [%"PRIx32"(%"PRIx32")..%"PRIx32"(%"PRIx32")]",
+    minVal, minFlags, maxVal, maxFlags
+  );
 
   /* Need to intersect with every range */
   p = l; c = *p;
