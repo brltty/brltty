@@ -50,11 +50,11 @@ typedef enum {
 extern const char *const logLevelNames[];
 extern const unsigned int logLevelCount;
 
-#define LOG_FLG_CATEGORY 0X80
-#define LOG_MSK_CATEGORY (LOG_FLG_CATEGORY - 1)
+#define LOG_LEVEL_WIDTH 8
+#define LOG_LEVEL_MASK (LOG_LEVEL_WIDTH - 1)
 
 #define LOG_CATEGORY_INDEX(name) LOG_CTG_##name
-#define LOG_CATEGORY(name) (LOG_FLG_CATEGORY | LOG_CATEGORY_INDEX(name))
+#define LOG_CATEGORY(name) ((LOG_CATEGORY_INDEX(name) + 1) << LOG_LEVEL_WIDTH)
 
 typedef enum {
   LOG_CATEGORY_INDEX(GENERIC_INPUT),

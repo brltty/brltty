@@ -367,17 +367,23 @@ closeSystemLog (void) {
 
 void
 logData (int level, LogDataFormatter *formatLogData, const void *data) {
-  const char *prefix = NULL;
-  int push = 0;
+  LogCategoryIndex category = level >> LOG_LEVEL_WIDTH;
+  level &= LOG_LEVEL_MASK;
 
-  if (level & LOG_FLG_CATEGORY) {
-    int category = level & LOG_MSK_CATEGORY;
+  const char *prefix;
+  int push;
+
+  if (category) {
+    category -= 1;
+
     if (!logCategoryFlags[category]) return;
-    const LogCategoryEntry *ctg = &logCategoryTable[category];
+    if (!level) level = categoryLogLevel;
 
+    const LogCategoryEntry *ctg = &logCategoryTable[category];
     prefix = ctg->prefix;
-    level = categoryLogLevel;
+    push = 0;
   } else {
+    prefix = NULL;
     push = level <= LOG_WARNING;
   }
 
