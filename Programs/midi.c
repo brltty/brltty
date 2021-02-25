@@ -52,12 +52,16 @@ static const char *const midiInstrumentTypes[] = {
   [0X9] = strtext("Pipe"),
 
   // xgettext: This is a MIDI sound category.
+  // xgettext: (synth is a common short form for synthesizer)
   [0XA] = strtext("Synth Lead"),
 
   // xgettext: This is a MIDI sound category.
+  // xgettext: (synth is a common short form for synthesizer)
   [0XB] = strtext("Synth Pad"),
 
   // xgettext: This is a MIDI sound category.
+  // xgettext: (synth is a common short form for synthesizer)
+  // xgettext: (FM is the acronym for Frequency Modulation)
   [0XC] = strtext("Synth FM"),
 
   // xgettext: This is a MIDI sound category.
@@ -273,15 +277,19 @@ const char *const midiInstrumentTable[] = {
 
 /* Reed */
   // xgettext: This is a MIDI musical instrument name (reed).
+  // xgettext: (sax is a common short form for saxophone)
   [0X40] = strtext("Soprano Sax"),
 
   // xgettext: This is a MIDI musical instrument name (reed).
+  // xgettext: (sax is a common short form for saxophone)
   [0X41] = strtext("Alto Sax"),
 
   // xgettext: This is a MIDI musical instrument name (reed).
+  // xgettext: (sax is a common short form for saxophone)
   [0X42] = strtext("Tenor Sax"),
 
   // xgettext: This is a MIDI musical instrument name (reed).
+  // xgettext: (sax is a common short form for saxophone)
   [0X43] = strtext("Baritone Sax"),
 
   // xgettext: This is a MIDI musical instrument name (reed).
@@ -394,6 +402,7 @@ const char *const midiInstrumentTable[] = {
   [0X66] = strtext("FX 7 (echoes)"),
 
   // xgettext: This is a MIDI musical instrument name (synth FM).
+  // xgettext: (sci-fi is a common short form for science fiction)
   [0X67] = strtext("FX 8 (sci-fi)"),
 
 /* Ethnic Instruments */
