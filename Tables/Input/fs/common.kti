@@ -19,8 +19,8 @@
 bind Left\{navKeyType}Press LNBEG
 bind Right\{navKeyType}Press LNEND
 
-bind LeftSelector BACK
-bind RightSelector HOME
+bind LeftSelector BACK:TOP_LEFT
+bind RightSelector HOME:BOT_LEFT
 bind LeftSelector+RightSelector PASTE
 
 bind PanLeft FWINLT

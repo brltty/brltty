@@ -32,10 +32,10 @@ bind LeftBumperDown+PanLeft CHRRT
 bind RightBumperUp+PanLeft HWINLT
 bind RightBumperDown+PanLeft HWINRT
 
-bind LeftBumperUp+LeftSelector PRNBWIN
-bind LeftBumperDown+LeftSelector NXNBWIN
-bind RightBumperUp+LeftSelector FWINLTSKIP
-bind RightBumperDown+LeftSelector FWINRTSKIP
+bind LeftBumperUp+LeftSelector FWINLTSKIP
+bind LeftBumperDown+LeftSelector FWINRTSKIP
+bind RightBumperUp+LeftSelector PRNBWIN
+bind RightBumperDown+LeftSelector NXNBWIN
 
 bind LeftBumperUp+RightSelector PRPROMPT
 bind LeftBumperDown+RightSelector NXPROMPT
