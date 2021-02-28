@@ -51,6 +51,8 @@
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Beheer Communitylidmaatschap</string>
 
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Update Applicatie</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">Ontwikkelaars-build</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">Sta Downgraden Toe</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Toegankelijkheidsacties</string>
 
@@ -238,20 +240,25 @@
   <string name="CONTRACTION_TABLE_LABEL_auto">locaal gebaseerde autoselectie</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (Verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (Onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">Duits</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Duits (Onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Duits (standaard samentrekkingen)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Duits (Verkort - 1998 standaard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Duits (verkort - 1998 standaard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Duits (verkort - 2015 standaard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">Engels</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">Engels (Verenigde Staten)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Engels (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Engels (VS, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Spaans (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">Frans</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">Frans (onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">Frans (verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesisch (verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Internationaal Phonetisch Alfabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japans (onverkort)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Koreaans</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0">Koreaans (onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Koreaans (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Koreaans (grade 2)</string>
