@@ -51,6 +51,8 @@
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Управление членством в сообществе</string>
 
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Обновление приложения</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">Сборка разработчика</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">Разрешить переход на более раннюю версию</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Действия специальных возможностей</string>
 
@@ -238,20 +240,25 @@
   <string name="CONTRACTION_TABLE_LABEL_auto">автовыбор языковой основы</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Африкаанс (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Амхарский (несокращённый)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">Немецкий</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Немецкий (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Немецкий (базовые сокращения)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Немецкий (сокращённый - стандарт 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Немецкий (сокращённый - стандарт 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Немецкий (сокращённый - стандарт 2015)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">Английский</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">Английский (США)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Английский (унифицированный английский Брайль, ступень 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Английский (США, ступень 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Испанский (ступень 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">Французский</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">Французский (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">Французский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Хауса (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Индонезийский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Международный фонетический алфавит</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Японский (несокращённый)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Корейский</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0">Корейский (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Корейский (ступень 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Корейский (ступень 2)</string>
