@@ -51,6 +51,8 @@
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Gestisci Iscrizione alla Community</string>
 
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Aggiorna Applicazione</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">Build di Sviluppo</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">Consenti Downgrade</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Azioni Accessibilità</string>
 
@@ -238,20 +240,25 @@
   <string name="CONTRACTION_TABLE_LABEL_auto">Selezione Automatica in base al locale</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amarico (non contratto)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">Tedesco</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Tedesco (non contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Tesesco(contrazioni di base)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Tesesco (contratto - standard 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Tesesco (contratto - standard 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Tesesco (contratto - standard 2015)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">Inglese</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">Inglese (Stati Uniti)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Inglese (Unified English Braille, grado 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Inglese (USA, gradO 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Spagnolo (grado 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">Francese</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">Francese (non contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">Francese (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesiano (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Alfabeto Fonetico Internazionale</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Giapponese (non contratto)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Coreano</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0">Coreano (non contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Coreano (grado 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Coreano (grado 2)</string>
