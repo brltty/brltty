@@ -51,6 +51,8 @@
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Ændre Fællesskabs Indstillinger</string>
 
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Updater Applikation</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">Udvikler version</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">Tillad nedgradering</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Tilgængelighedshandlinger</string>
 
@@ -238,20 +240,25 @@
   <string name="CONTRACTION_TABLE_LABEL_auto">lokal-baseret autovælg</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">Tysk</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Tysk (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Tysk (basis forkortelser)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Tysk (forkortet - 1998 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Tysk (forkortet - 1998 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Tysk (forkortet - 2015 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">Engelsk</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">Engelsk (Forenede stater)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Engelsk (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Engelsk (US, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Spansk (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">Fransk</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">Fransk (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">Fransk (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesisk (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Intertionale aonetiske alfabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japansk (uforkortet)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Koreansk</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0">Koreansk (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Koreansk (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Koreansk (grade 2)</string>
