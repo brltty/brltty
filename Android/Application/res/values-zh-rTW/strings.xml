@@ -51,6 +51,8 @@
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">管理社群會員</string>
 
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">更新軟體</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">開發者建制</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">允許降級</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">無障礙活動</string>
 
@@ -238,20 +240,25 @@
   <string name="CONTRACTION_TABLE_LABEL_auto">依照語言設定自動選擇</string>
   <string name="CONTRACTION_TABLE_LABEL_af">南非的荷蘭語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_am">阿比西尼亞官話無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">德文</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">德文無縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">德文基本縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">德文縮寫 1998 標準</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">德文縮寫 1998 標準</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">德文縮寫 2015 標準</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">英文</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">英文（美國）</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">英文統一二級點字</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">英文二級</string>
   <string name="CONTRACTION_TABLE_LABEL_es">西班牙語二級</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">法文</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">法文無縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">法文縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">豪撒語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_id">印尼語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">國際拼音字母</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">日文無縮寫</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">韓文</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0">韓文無縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">韓文一級</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">韓文二級</string>
