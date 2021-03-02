@@ -76,8 +76,13 @@ STR_END_FORMATTER
 static
 STR_BEGIN_FORMATTER(formatSpeechTime, const TimeFormattingData *fmt)
   STR_PRINTF("%u", fmt->components.hour);
-  if (fmt->components.minute < 10) STR_PRINTF(" 0");
-  STR_PRINTF(" %u", fmt->components.minute);
+
+  if (fmt->components.minute > 0) {
+    if (fmt->components.minute < 10) STR_PRINTF(" 0");
+    STR_PRINTF(" %u", fmt->components.minute);
+  } else if (!fmt->meridian) {
+    STR_PRINTF(" %s", ngettext("o'clock", "o-clock", fmt->components.hour));
+  }
 
   if (fmt->meridian) {
     const char *character = fmt->meridian;
