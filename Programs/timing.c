@@ -178,26 +178,26 @@ makeTimeValue (TimeValue *value, const TimeComponents *components) {
 void
 expandTimeValue (const TimeValue *value, TimeComponents *components) {
   time_t seconds = value->seconds;
-  struct tm time;
-
-  localtime_r(&seconds, &time);
   components->nanosecond = value->nanoseconds;
 
+  struct tm *time = &components->time;
+  localtime_r(&seconds, time);
+
 #if defined(GRUB_RUNTIME)
-  components->year = time.tm.year;
-  components->month = time.tm.month - 1;
-  components->day = time.tm.day - 1;
-  components->hour = time.tm.hour;
-  components->minute = time.tm.minute;
-  components->second = time.tm.second;
+  components->year = time->tm.year;
+  components->month = time->tm.month - 1;
+  components->day = time->tm.day - 1;
+  components->hour = time->tm.hour;
+  components->minute = time->tm.minute;
+  components->second = time->tm.second;
 
 #else /* expand seconds */
-  components->year = time.tm_year + 1900;
-  components->month = time.tm_mon;
-  components->day = time.tm_mday - 1;
-  components->hour = time.tm_hour;
-  components->minute = time.tm_min;
-  components->second = time.tm_sec;
+  components->year = time->tm_year + 1900;
+  components->month = time->tm_mon;
+  components->day = time->tm_mday - 1;
+  components->hour = time->tm_hour;
+  components->minute = time->tm_min;
+  components->second = time->tm_sec;
 #endif /* expand seconds */
 }
 

@@ -39,38 +39,11 @@ STR_BEGIN_FORMATTER(formatSpeechDate, const TimeFormattingData *fmt)
   const char *dayFormat = "%u";
 
   uint16_t year = fmt->components.year;
-  const char *month;
   uint8_t day = fmt->components.day + 1;
 
-#ifdef MON_1
-  {
-    static const int months[] = {
-      MON_1, MON_2, MON_3, MON_4, MON_5, MON_6,
-      MON_7, MON_8, MON_9, MON_10, MON_11, MON_12
-    };
-
-    month = (fmt->components.month < ARRAY_COUNT(months))? nl_langinfo(months[fmt->components.month]): "?";
-  }
-#else /* MON_1 */
-  {
-    static const char *const months[] = {
-      strtext("January"),
-      strtext("February"),
-      strtext("March"),
-      strtext("April"),
-      strtext("May"),
-      strtext("June"),
-      strtext("July"),
-      strtext("August"),
-      strtext("September"),
-      strtext("October"),
-      strtext("November"),
-      strtext("December")
-    };
-
-    month = (fmt->components.month < ARRAY_COUNT(months))? gettext(months[fmt->components.month]): "?";
-  }
-#endif /* MON_1 */
+  char month[0X20];
+  size_t length = strftime(month, sizeof(month), "%B", &fmt->components.time);
+  month[length] = 0;
 
   switch (prefs.dateFormat) {
     default:

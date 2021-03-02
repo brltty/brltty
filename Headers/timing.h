@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_TIMING
 #define BRLTTY_INCLUDED_TIMING
 
+#include <time.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -47,12 +49,16 @@ typedef struct {
 } TimeValue;
 
 typedef struct {
+  struct tm time;
+
   uint16_t year;
   uint8_t month;
   uint8_t day;
+
   uint8_t hour;
   uint8_t minute;
   uint8_t second;
+
   int32_t nanosecond;
 } TimeComponents;
 
