@@ -184,7 +184,11 @@ isEmojiSequence (const wchar_t *characters, size_t count) {
 
   while (character < end) {
     #if U_ICU_VERSION_MAJOR_NUM >= 57
-    if (u_hasBinaryProperty(*character, UCHAR_EMOJI)) return 1;
+    if (u_hasBinaryProperty(*character, UCHAR_EMOJI)) {
+      if (u_hasBinaryProperty(*character, UCHAR_EMOJI_PRESENTATION)) {
+        return 1;
+      }
+    }
     #endif /* U_ICU_VERSION_MAJOR_NUM >= 57 */
 
     character += 1;
