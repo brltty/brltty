@@ -32,6 +32,7 @@
 #include "profile.h"
 #include "status_types.h"
 #include "timing.h"
+#include "blink.h"
 #include "ttb.h"
 #include "atb.h"
 #include "ctb.h"
@@ -61,6 +62,13 @@ PREFS_MENU_ITEM_APPLY(PREFS_MENU_ITEM_GETTER_DECLARE)
   NAME(name); \
   Menu *variable = newSubmenuMenuItem(parent, &itemName); \
   if (!variable) goto noItem
+
+#define PROPERTY(variable, value) \
+  static unsigned char variable; \
+  variable = (value)
+
+#define PERIOD(blink) PROPERTY(period, MSECS2PREFS(getBlinkPeriod((blink))))
+#define PERCENTAGE(blink) PROPERTY(percentage, getBlinkPercentage((blink)))
 
 static int
 testAdvancedSubmenu (void) {
@@ -143,6 +151,17 @@ testBlinkingScreenCursor (void) {
 }
 
 static int
+changedScreenCursorBlinkPeriod (const MenuItem *item UNUSED, unsigned char setting) {
+  setBlinkPeriod(&screenCursorBlinkDescriptor, PREFS2MSECS(setting));
+  return 1;
+}
+
+static int
+changedScreenCursorBlinkPercentage (const MenuItem *item UNUSED, unsigned char setting) {
+  return setBlinkPercentage(&screenCursorBlinkDescriptor, setting);
+}
+
+static int
 testShowAttributes (void) {
   return prefs.showAttributes;
 }
@@ -153,8 +172,30 @@ testBlinkingAttributes (void) {
 }
 
 static int
+changedAttributesUnderlineBlinkPeriod (const MenuItem *item UNUSED, unsigned char setting) {
+  setBlinkPeriod(&attributesUnderlineBlinkDescriptor, PREFS2MSECS(setting));
+  return 1;
+}
+
+static int
+changedAttributesUnderlineBlinkPercentage (const MenuItem *item UNUSED, unsigned char setting) {
+  return setBlinkPercentage(&attributesUnderlineBlinkDescriptor, setting);
+}
+
+static int
 testBlinkingCapitals (void) {
   return prefs.blinkingCapitals;
+}
+
+static int
+changedUppercaseLettersBlinkPeriod (const MenuItem *item UNUSED, unsigned char setting) {
+  setBlinkPeriod(&uppercaseLettersBlinkDescriptor, PREFS2MSECS(setting));
+  return 1;
+}
+
+static int
+changedUppercaseLettersBlinkPercentage (const MenuItem *item UNUSED, unsigned char setting) {
+  return setBlinkPercentage(&uppercaseLettersBlinkDescriptor, setting);
 }
 
 static int
@@ -288,6 +329,17 @@ testShowSpeechCursor (void) {
 static int
 testBlinkingSpeechCursor (void) {
   return testShowSpeechCursor() && prefs.blinkingSpeechCursor;
+}
+
+static int
+changedSpeechCursorBlinkPeriod (const MenuItem *item UNUSED, unsigned char setting) {
+  setBlinkPeriod(&speechCursorBlinkDescriptor, PREFS2MSECS(setting));
+  return 1;
+}
+
+static int
+changedSpeechCursorBlinkPercentage (const MenuItem *item UNUSED, unsigned char setting) {
+  return setBlinkPercentage(&speechCursorBlinkDescriptor, setting);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -518,7 +570,12 @@ newStatusFieldMenuItem (
 
 static MenuItem *
 newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 1, 100, 4, strtext("csecs"));
+  return newNumericMenuItem(menu, setting, name, 10, 200, 10, strtext("csecs"));
+}
+
+static MenuItem *
+newPercentageMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
+  return newNumericMenuItem(menu, setting, name, 10, 100, 10, strtext("percentage"));
 }
 
 #if defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT)
@@ -633,10 +690,8 @@ makePreferencesMenu (void) {
         {.label=strtext("Contracted Braille")}
       };
 
-      static unsigned char yes;
-      yes = isContractedBraille();
-
       NAME(strtext("Braille Variant"));
+      PROPERTY(yes, isContractedBraille());
       ITEM(newEnumeratedMenuItem(presentationSubmenu, &yes, &itemName, strings));
       CHANGED(ContractedBraille);
     }
@@ -666,10 +721,8 @@ makePreferencesMenu (void) {
         {.label=strtext("6-dot")}
       };
 
-      static unsigned char yes;
-      yes = isSixDotComputerBraille();
-
       NAME(strtext("Cell Type"));
+      PROPERTY(yes, isSixDotComputerBraille());
       ITEM(newEnumeratedMenuItem(presentationSubmenu, &yes, &itemName, strings));
       TEST(ComputerBraille);
       CHANGED(ComputerBraille);
@@ -712,15 +765,19 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Screen Cursor Visible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.screenCursorVisibleTime, &itemName));
+      NAME(strtext("Screen Cursor Blink Period"));
+      PERIOD(&screenCursorBlinkDescriptor);
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &period, &itemName));
       TEST(BlinkingScreenCursor);
+      CHANGED(ScreenCursorBlinkPeriod);
     }
 
     {
-      NAME(strtext("Screen Cursor Invisible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.screenCursorInvisibleTime, &itemName));
+      NAME(strtext("Screen Cursor Visible Ratio"));
+      PERCENTAGE(&screenCursorBlinkDescriptor);
+      ITEM(newPercentageMenuItem(indicatorsSubmenu, &percentage, &itemName));
       TEST(BlinkingScreenCursor);
+      CHANGED(ScreenCursorBlinkPercentage);
     }
 
     {
@@ -735,15 +792,19 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Attributes Visible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.attributesVisibleTime, &itemName));
+      NAME(strtext("Attributes Blink Period"));
+      PERIOD(&attributesUnderlineBlinkDescriptor);
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &period, &itemName));
       TEST(BlinkingAttributes);
+      CHANGED(AttributesUnderlineBlinkPeriod);
     }
 
     {
-      NAME(strtext("Attributes Invisible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.attributesInvisibleTime, &itemName));
+      NAME(strtext("Attributes Visible Ratio"));
+      PERCENTAGE(&attributesUnderlineBlinkDescriptor);
+      ITEM(newPercentageMenuItem(indicatorsSubmenu, &percentage, &itemName));
       TEST(BlinkingAttributes);
+      CHANGED(AttributesUnderlineBlinkPercentage);
     }
 
     {
@@ -752,15 +813,19 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Capitals Visible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.capitalsVisibleTime, &itemName));
+      NAME(strtext("Capitals Blink Period"));
+      PERIOD(&uppercaseLettersBlinkDescriptor);
+      ITEM(newTimeMenuItem(indicatorsSubmenu, &period, &itemName));
       TEST(BlinkingCapitals);
+      CHANGED(UppercaseLettersBlinkPeriod);
     }
 
     {
-      NAME(strtext("Capitals Invisible Time"));
-      ITEM(newTimeMenuItem(indicatorsSubmenu, &prefs.capitalsInvisibleTime, &itemName));
+      NAME(strtext("Capitals Visible Ratio"));
+      PERCENTAGE(&uppercaseLettersBlinkDescriptor);
+      ITEM(newPercentageMenuItem(indicatorsSubmenu, &percentage, &itemName));
       TEST(BlinkingCapitals);
+      CHANGED(UppercaseLettersBlinkPercentage);
     }
   }
 
@@ -1170,15 +1235,19 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Speech Cursor Visible Time"));
-      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorVisibleTime, &itemName));
+      NAME(strtext("Speech Cursor Blink Period"));
+      PERIOD(&speechCursorBlinkDescriptor);
+      ITEM(newTimeMenuItem(speechSubmenu, &period, &itemName));
       TEST(BlinkingSpeechCursor);
+      CHANGED(SpeechCursorBlinkPeriod);
     }
 
     {
-      NAME(strtext("Speech Cursor Invisible Time"));
-      ITEM(newTimeMenuItem(speechSubmenu, &prefs.speechCursorInvisibleTime, &itemName));
+      NAME(strtext("Speech Cursor Visible Ratio"));
+      PERCENTAGE(&speechCursorBlinkDescriptor);
+      ITEM(newPercentageMenuItem(speechSubmenu, &percentage, &itemName));
       TEST(BlinkingSpeechCursor);
+      CHANGED(SpeechCursorBlinkPercentage);
     }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
