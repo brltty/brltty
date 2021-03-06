@@ -43,8 +43,13 @@ typedef void NumericMenuItemFormatter (
 
 extern MenuItem *newNumericMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
-  unsigned char minimum, unsigned char maximum, unsigned char divisor,
+  unsigned char minimum, unsigned char maximum, unsigned char step,
   const char *unit, NumericMenuItemFormatter *formatter
+);
+
+extern MenuItem *newPercentMenuItem (
+  Menu *menu, unsigned char *setting,
+  const MenuString *name, unsigned char step
 );
 
 extern MenuItem *newStringsMenuItem (

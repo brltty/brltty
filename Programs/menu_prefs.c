@@ -67,8 +67,8 @@ PREFS_MENU_ITEM_APPLY(PREFS_MENU_ITEM_GETTER_DECLARE)
   static unsigned char variable; \
   variable = (value)
 
-#define PERIOD(blink) PROPERTY(period, MSECS2PREFS(getBlinkPeriod((blink))))
-#define PERCENTAGE(blink) PROPERTY(percentage, getBlinkPercentage((blink)))
+#define BLINK_PERIOD(blink) PROPERTY(period, MSECS2PREFS(getBlinkPeriod((blink))))
+#define BLINK_VISIBLE(blink) PROPERTY(visible, getBlinkPercentage((blink)))
 
 static int
 testAdvancedSubmenu (void) {
@@ -575,7 +575,8 @@ formatTime (Menu *menu, unsigned char time, char *buffer, size_t size) {
   unsigned int seconds = milliseconds / MSECS_PER_SEC;
   milliseconds %= MSECS_PER_SEC;
 
-  char *end = buffer + snprintf(buffer, size, "%u.%03u", seconds, milliseconds);
+  snprintf(buffer, size, "%u.%03u", seconds, milliseconds);
+  char *end = buffer + strlen(buffer);
   while (*--end == '0');
   if (*end == '.') end -= 1;
   *++end = 0;
@@ -587,14 +588,14 @@ newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
 }
 
 static MenuItem *
-newPercentageMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 0, 100, 10, strtext("%"), NULL);
+newBlinkVisibleMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
+  return newPercentMenuItem(menu, setting, name, 10);
 }
 
 #if defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT)
 static MenuItem *
 newVolumeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 0, 100, 5, strtext("%"), NULL);
+  return newPercentMenuItem(menu, setting, name, 5);
 }
 #endif /* defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT) */
 
@@ -779,7 +780,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Screen Cursor Blink Period"));
-      PERIOD(&screenCursorBlinkDescriptor);
+      BLINK_PERIOD(&screenCursorBlinkDescriptor);
       ITEM(newTimeMenuItem(indicatorsSubmenu, &period, &itemName));
       TEST(BlinkingScreenCursor);
       CHANGED(ScreenCursorBlinkPeriod);
@@ -787,8 +788,8 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Screen Cursor Percent Visible"));
-      PERCENTAGE(&screenCursorBlinkDescriptor);
-      ITEM(newPercentageMenuItem(indicatorsSubmenu, &percentage, &itemName));
+      BLINK_VISIBLE(&screenCursorBlinkDescriptor);
+      ITEM(newBlinkVisibleMenuItem(indicatorsSubmenu, &visible, &itemName));
       TEST(BlinkingScreenCursor);
       CHANGED(ScreenCursorBlinkPercentage);
     }
@@ -806,7 +807,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Attributes Blink Period"));
-      PERIOD(&attributesUnderlineBlinkDescriptor);
+      BLINK_PERIOD(&attributesUnderlineBlinkDescriptor);
       ITEM(newTimeMenuItem(indicatorsSubmenu, &period, &itemName));
       TEST(BlinkingAttributes);
       CHANGED(AttributesUnderlineBlinkPeriod);
@@ -814,8 +815,8 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Attributes Percent Visible"));
-      PERCENTAGE(&attributesUnderlineBlinkDescriptor);
-      ITEM(newPercentageMenuItem(indicatorsSubmenu, &percentage, &itemName));
+      BLINK_VISIBLE(&attributesUnderlineBlinkDescriptor);
+      ITEM(newBlinkVisibleMenuItem(indicatorsSubmenu, &visible, &itemName));
       TEST(BlinkingAttributes);
       CHANGED(AttributesUnderlineBlinkPercentage);
     }
@@ -827,7 +828,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Capitals Blink Period"));
-      PERIOD(&uppercaseLettersBlinkDescriptor);
+      BLINK_PERIOD(&uppercaseLettersBlinkDescriptor);
       ITEM(newTimeMenuItem(indicatorsSubmenu, &period, &itemName));
       TEST(BlinkingCapitals);
       CHANGED(UppercaseLettersBlinkPeriod);
@@ -835,8 +836,8 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Capitals Percent Visible"));
-      PERCENTAGE(&uppercaseLettersBlinkDescriptor);
-      ITEM(newPercentageMenuItem(indicatorsSubmenu, &percentage, &itemName));
+      BLINK_VISIBLE(&uppercaseLettersBlinkDescriptor);
+      ITEM(newBlinkVisibleMenuItem(indicatorsSubmenu, &visible, &itemName));
       TEST(BlinkingCapitals);
       CHANGED(UppercaseLettersBlinkPercentage);
     }
@@ -1249,7 +1250,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Speech Cursor Blink Period"));
-      PERIOD(&speechCursorBlinkDescriptor);
+      BLINK_PERIOD(&speechCursorBlinkDescriptor);
       ITEM(newTimeMenuItem(speechSubmenu, &period, &itemName));
       TEST(BlinkingSpeechCursor);
       CHANGED(SpeechCursorBlinkPeriod);
@@ -1257,8 +1258,8 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Speech Cursor Percent Visible"));
-      PERCENTAGE(&speechCursorBlinkDescriptor);
-      ITEM(newPercentageMenuItem(speechSubmenu, &percentage, &itemName));
+      BLINK_VISIBLE(&speechCursorBlinkDescriptor);
+      ITEM(newBlinkVisibleMenuItem(speechSubmenu, &visible, &itemName));
       TEST(BlinkingSpeechCursor);
       CHANGED(SpeechCursorBlinkPercentage);
     }

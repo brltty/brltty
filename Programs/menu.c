@@ -113,7 +113,7 @@ struct MenuItemStruct {
 
   unsigned char minimum;                  /* lowest valid value */
   unsigned char maximum;                  /* highest valid value */
-  unsigned char divisor;                  /* present only multiples of this value */
+  unsigned char step;                  /* present only multiples of this value */
 
   union {
     const char *text;
@@ -333,7 +333,7 @@ newMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
 
     item->minimum = 0;
     item->maximum = 0;
-    item->divisor = 1;
+    item->step = 1;
 
     return item;
   }
@@ -403,7 +403,7 @@ defaultNumericMenuItemFormatter (
 MenuItem *
 newNumericMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
-  unsigned char minimum, unsigned char maximum, unsigned char divisor,
+  unsigned char minimum, unsigned char maximum, unsigned char step,
   const char *unit, NumericMenuItemFormatter *formatter
 ) {
   if (!formatter) formatter = defaultNumericMenuItemFormatter;
@@ -414,12 +414,20 @@ newNumericMenuItem (
     item->methods = &menuItemMethods_numeric;
     item->minimum = minimum;
     item->maximum = maximum;
-    item->divisor = divisor;
+    item->step = step;
     item->data.numeric.unit = unit;
     item->data.numeric.formatter = formatter;
   }
 
   return item;
+}
+
+MenuItem *
+newPercentMenuItem (
+  Menu *menu, unsigned char *setting,
+  const MenuString *name, unsigned char step
+) {
+  return newNumericMenuItem(menu, setting, name, 0, 100, step, "%", NULL);
 }
 
 static const char *
@@ -445,7 +453,7 @@ setMenuItemStrings (MenuItem *item, const MenuString *strings, unsigned char cou
   item->data.strings = strings;
   item->minimum = 0;
   item->maximum = count - 1;
-  item->divisor = 1;
+  item->step = 1;
 }
 
 MenuItem *
@@ -991,7 +999,7 @@ adjustMenuSetting (const MenuItem *item, int (*adjust) (const MenuItem *item, in
       *item->setting = setting;
       return 0;
     }
-  } while ((*item->setting % item->divisor) || (item->changed && !item->changed(item, *item->setting)));
+  } while ((*item->setting % item->step) || (item->changed && !item->changed(item, *item->setting)));
 
   return 1;
 }
