@@ -575,7 +575,7 @@ newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
 
 static MenuItem *
 newPercentageMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 10, 100, 10, strtext("percentage"));
+  return newNumericMenuItem(menu, setting, name, 0, 100, 10, strtext("%"));
 }
 
 #if defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT)
@@ -773,7 +773,7 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Screen Cursor Visible Ratio"));
+      NAME(strtext("Screen Cursor Percent Visible"));
       PERCENTAGE(&screenCursorBlinkDescriptor);
       ITEM(newPercentageMenuItem(indicatorsSubmenu, &percentage, &itemName));
       TEST(BlinkingScreenCursor);
@@ -800,7 +800,7 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Attributes Visible Ratio"));
+      NAME(strtext("Attributes Percent Visible"));
       PERCENTAGE(&attributesUnderlineBlinkDescriptor);
       ITEM(newPercentageMenuItem(indicatorsSubmenu, &percentage, &itemName));
       TEST(BlinkingAttributes);
@@ -821,7 +821,7 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Capitals Visible Ratio"));
+      NAME(strtext("Capitals Percent Visible"));
       PERCENTAGE(&uppercaseLettersBlinkDescriptor);
       ITEM(newPercentageMenuItem(indicatorsSubmenu, &percentage, &itemName));
       TEST(BlinkingCapitals);
@@ -1243,7 +1243,7 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Speech Cursor Visible Ratio"));
+      NAME(strtext("Speech Cursor Percent Visible"));
       PERCENTAGE(&speechCursorBlinkDescriptor);
       ITEM(newPercentageMenuItem(speechSubmenu, &percentage, &itemName));
       TEST(BlinkingSpeechCursor);
