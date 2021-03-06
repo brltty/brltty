@@ -56,12 +56,15 @@ extern int sayString (
 
 extern int canSetSpeechVolume (volatile SpeechSynthesizer *spk);
 extern int setSpeechVolume (volatile SpeechSynthesizer *spk, int setting, int say);
+extern int toNormalizedSpeechVolume (unsigned char volume);
 
 extern int canSetSpeechRate (volatile SpeechSynthesizer *spk);
 extern int setSpeechRate (volatile SpeechSynthesizer *spk, int setting, int say);
+extern int toNormalizedSpeechRate (unsigned char rate);
 
 extern int canSetSpeechPitch (volatile SpeechSynthesizer *spk);
 extern int setSpeechPitch (volatile SpeechSynthesizer *spk, int setting, int say);
+extern int toNormalizedSpeechPitch (unsigned char pitch);
 
 extern int canSetSpeechPunctuation (volatile SpeechSynthesizer *spk);
 extern int setSpeechPunctuation (volatile SpeechSynthesizer *spk, SpeechPunctuation setting, int say);

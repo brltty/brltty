@@ -286,6 +286,13 @@ changedSpeechVolume (const MenuItem *item UNUSED, unsigned char setting) {
   return setSpeechVolume(&spk, setting, !prefs.autospeak);
 }
 
+static void
+formatSpeechVolume (Menu *menu, unsigned char volume, char *buffer, size_t size) {
+  snprintf(
+    buffer, size, "%d", toNormalizedSpeechVolume(volume)
+  );
+}
+
 static int
 testSpeechRate (void) {
   return canSetSpeechRate(&spk);
@@ -296,6 +303,13 @@ changedSpeechRate (const MenuItem *item UNUSED, unsigned char setting) {
   return setSpeechRate(&spk, setting, !prefs.autospeak);
 }
 
+static void
+formatSpeechRate (Menu *menu, unsigned char rate, char *buffer, size_t size) {
+  snprintf(
+    buffer, size, "%d", toNormalizedSpeechRate(rate)
+  );
+}
+
 static int
 testSpeechPitch (void) {
   return canSetSpeechPitch(&spk);
@@ -304,6 +318,13 @@ testSpeechPitch (void) {
 static int
 changedSpeechPitch (const MenuItem *item UNUSED, unsigned char setting) {
   return setSpeechPitch(&spk, setting, !prefs.autospeak);
+}
+
+static void
+formatSpeechPitch (Menu *menu, unsigned char pitch, char *buffer, size_t size) {
+  snprintf(
+    buffer, size, "%d", toNormalizedSpeechPitch(pitch)
+  );
 }
 
 static int
@@ -1119,21 +1140,21 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Speech Volume"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1, NULL, NULL));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1, "%", formatSpeechVolume));
       TEST(SpeechVolume);
       CHANGED(SpeechVolume);
     }
 
     {
       NAME(strtext("Speech Rate"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1, NULL, NULL));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1, NULL, formatSpeechRate));
       TEST(SpeechRate);
       CHANGED(SpeechRate);
     }
 
     {
       NAME(strtext("Speech Pitch"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1, NULL, NULL));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1, NULL, formatSpeechPitch));
       TEST(SpeechPitch);
       CHANGED(SpeechPitch);
     }

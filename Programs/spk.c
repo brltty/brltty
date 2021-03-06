@@ -165,11 +165,23 @@ canSetSpeechVolume (volatile SpeechSynthesizer *spk) {
 }
 
 int
+toNormalizedSpeechVolume (unsigned char volume) {
+  return rescaleInteger(volume, SPK_VOLUME_DEFAULT, 100);
+}
+
+int
 setSpeechVolume (volatile SpeechSynthesizer *spk, int setting, int say) {
   if (!canSetSpeechVolume(spk)) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set volume: %d", setting);
   speechRequest_setVolume(spk->driver.thread, setting);
-  if (say) sayIntegerSetting(spk, gettext("volume"), setting);
+
+  if (say) {
+    sayIntegerSetting(
+      spk, gettext("volume"),
+      toNormalizedSpeechVolume(setting)
+    );
+  }
+
   return 1;
 }
 
@@ -179,11 +191,23 @@ canSetSpeechRate (volatile SpeechSynthesizer *spk) {
 }
 
 int
+toNormalizedSpeechRate (unsigned char rate) {
+  return rate - SPK_RATE_DEFAULT;
+}
+
+int
 setSpeechRate (volatile SpeechSynthesizer *spk, int setting, int say) {
   if (!canSetSpeechRate(spk)) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set rate: %d", setting);
   speechRequest_setRate(spk->driver.thread, setting);
-  if (say) sayIntegerSetting(spk, gettext("rate"), setting);
+
+  if (say) {
+    sayIntegerSetting(
+      spk, gettext("rate"),
+      toNormalizedSpeechRate(setting)
+    );
+  }
+
   return 1;
 }
 
@@ -193,11 +217,23 @@ canSetSpeechPitch (volatile SpeechSynthesizer *spk) {
 }
 
 int
+toNormalizedSpeechPitch (unsigned char pitch) {
+  return pitch - SPK_PITCH_DEFAULT;
+}
+
+int
 setSpeechPitch (volatile SpeechSynthesizer *spk, int setting, int say) {
   if (!canSetSpeechPitch(spk)) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set pitch: %d", setting);
   speechRequest_setPitch(spk->driver.thread, setting);
-  if (say) sayIntegerSetting(spk, gettext("pitch"), setting);
+
+  if (say) {
+    sayIntegerSetting(
+      spk, gettext("pitch"),
+      toNormalizedSpeechPitch(setting)
+    );
+  }
+
   return 1;
 }
 
