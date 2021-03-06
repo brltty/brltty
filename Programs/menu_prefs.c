@@ -568,20 +568,33 @@ newStatusFieldMenuItem (
   return NULL;
 }
 
+static void
+formatTime (Menu *menu, unsigned char time, char *buffer, size_t size) {
+  unsigned int milliseconds = PREFS2MSECS(time);
+
+  unsigned int seconds = milliseconds / MSECS_PER_SEC;
+  milliseconds %= MSECS_PER_SEC;
+
+  char *end = buffer + snprintf(buffer, size, "%u.%03u", seconds, milliseconds);
+  while (*--end == '0');
+  if (*end == '.') end -= 1;
+  *++end = 0;
+}
+
 static MenuItem *
 newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 10, 200, 10, strtext("csecs"));
+  return newNumericMenuItem(menu, setting, name, 10, 200, 10, strtext("seconds"), formatTime);
 }
 
 static MenuItem *
 newPercentageMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 0, 100, 10, strtext("%"));
+  return newNumericMenuItem(menu, setting, name, 0, 100, 10, strtext("%"), NULL);
 }
 
 #if defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT)
 static MenuItem *
 newVolumeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 0, 100, 5, strtext("percentage"));
+  return newNumericMenuItem(menu, setting, name, 0, 100, 5, strtext("%"), NULL);
 }
 #endif /* defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT) */
 
@@ -871,7 +884,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Braille Window Overlap"));
-      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.brailleWindowOverlap, &itemName, 0, 20, 1, strtext("cells")));
+      ITEM(newNumericMenuItem(navigationSubmenu, &prefs.brailleWindowOverlap, &itemName, 0, 20, 1, strtext("cells"), NULL));
       CHANGED(BrailleWindowOverlap);
     }
 
@@ -1105,21 +1118,21 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Speech Volume"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1, NULL));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechVolume, &itemName, 0, SPK_VOLUME_MAXIMUM, 1, NULL, NULL));
       TEST(SpeechVolume);
       CHANGED(SpeechVolume);
     }
 
     {
       NAME(strtext("Speech Rate"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1, NULL));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechRate, &itemName, 0, SPK_RATE_MAXIMUM, 1, NULL, NULL));
       TEST(SpeechRate);
       CHANGED(SpeechRate);
     }
 
     {
       NAME(strtext("Speech Pitch"));
-      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1, NULL));
+      ITEM(newNumericMenuItem(speechSubmenu, &prefs.speechPitch, &itemName, 0, SPK_PITCH_MAXIMUM, 1, NULL, NULL));
       TEST(SpeechPitch);
       CHANGED(SpeechPitch);
     }
@@ -1334,7 +1347,7 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Status Count"));
-      ITEM(newNumericMenuItem(statusSubmenu, &prefs.statusCount, &itemName, 0, MAX((int)brl.textColumns/2-1, 0), 1, strtext("cells")));
+      ITEM(newNumericMenuItem(statusSubmenu, &prefs.statusCount, &itemName, 0, MAX((int)brl.textColumns/2-1, 0), 1, strtext("cells"), NULL));
       TEST(StatusCount);
       CHANGED(StatusCount);
     }

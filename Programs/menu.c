@@ -123,6 +123,7 @@ struct MenuItemStruct {
 
     struct {
       const char *unit;
+      NumericMenuItemFormatter *formatter;
     } numeric;
 
     struct {
@@ -371,7 +372,14 @@ newTextMenuItem (Menu *menu, const MenuString *name, const char *text) {
 
 static const char *
 getValue_numeric (const MenuItem *item) {
-  return formatValue(item->menu, "%u", *item->setting);
+  Menu *menu = item->menu;
+
+  item->data.numeric.formatter(
+    menu, *item->setting,
+    menu->valueBuffer, sizeof(menu->valueBuffer)
+  );
+
+  return menu->valueBuffer;
 }
 
 static const char *
@@ -384,12 +392,22 @@ static const MenuItemMethods menuItemMethods_numeric = {
   .getComment = getComment_numeric
 };
 
+static void
+defaultNumericMenuItemFormatter (
+  Menu *menu, unsigned char value,
+  char *buffer, size_t size
+) {
+  snprintf(buffer, size, "%u", value);
+}
+
 MenuItem *
 newNumericMenuItem (
   Menu *menu, unsigned char *setting, const MenuString *name,
   unsigned char minimum, unsigned char maximum, unsigned char divisor,
-  const char *unit
+  const char *unit, NumericMenuItemFormatter *formatter
 ) {
+  if (!formatter) formatter = defaultNumericMenuItemFormatter;
+
   MenuItem *item = newMenuItem(menu, setting, name);
 
   if (item) {
@@ -398,6 +416,7 @@ newNumericMenuItem (
     item->maximum = maximum;
     item->divisor = divisor;
     item->data.numeric.unit = unit;
+    item->data.numeric.formatter = formatter;
   }
 
   return item;
