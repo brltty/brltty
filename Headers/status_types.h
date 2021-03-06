@@ -56,7 +56,7 @@ typedef enum {
   /* flags */
   gscFrozenScreen,
   gscDisplayMode,
-  gscSixDotBraille,
+  gscSixDotComputerBraille,
   gscContractedBraille,
   gscSlidingBrailleWindow,
   gscSkipIdenticalLines,

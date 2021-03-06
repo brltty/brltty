@@ -39,9 +39,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern int isContractedBraille (void);
-extern int isSixDotBraille (void);
+extern int isSixDotComputerBraille (void);
 extern void setContractedBraille (int contracted);
-extern void setSixDotBraille (int sixDot);
+extern void setSixDotComputerBraille (int sixDot);
 extern void onBrailleVariantUpdated (void);
 
 extern ScreenDescription scr;

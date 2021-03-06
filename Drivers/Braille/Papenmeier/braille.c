@@ -1206,7 +1206,7 @@ initializeGenericStatusCodes (BrailleDisplay *brl) {
 
         SET(BRL_CMD_FREEZE, PM_GSC_FLAG, gscFrozenScreen);
         SET(BRL_CMD_DISPMD, PM_GSC_FLAG, gscDisplayMode);
-        SET(BRL_CMD_SIXDOTS, PM_GSC_FLAG, gscSixDotBraille);
+        SET(BRL_CMD_SIXDOTS, PM_GSC_FLAG, gscSixDotComputerBraille);
         SET(BRL_CMD_SLIDEWIN, PM_GSC_FLAG, gscSlidingBrailleWindow);
         SET(BRL_CMD_SKPIDLNS, PM_GSC_FLAG, gscSkipIdenticalLines);
         SET(BRL_CMD_SKPBLNKWINS, PM_GSC_FLAG, gscSkipBlankBrailleWindows);

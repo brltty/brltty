@@ -195,7 +195,7 @@ renderStatusField_generic (unsigned char *cells) {
   cells[gscScreenNumber] = scr.number;
   cells[gscFrozenScreen] = isSpecialScreen(SCR_FROZEN);
   cells[gscDisplayMode] = ses->displayMode;
-  cells[gscSixDotBraille] = isSixDotBraille();
+  cells[gscSixDotComputerBraille] = isSixDotComputerBraille();
   cells[gscContractedBraille] = isContractedBraille();
   cells[gscSlidingBrailleWindow] = prefs.slidingBrailleWindow;
   cells[gscSkipIdenticalLines] = prefs.skipIdenticalLines;

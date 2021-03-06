@@ -373,12 +373,6 @@ STATUS_FIELD_HANDLERS(9)
 #undef STATUS_FIELD_HANDLERS
 
 static int
-changedBrailleVariant (const MenuItem *item, unsigned char setting UNUSED) {
-  onBrailleVariantUpdated();
-  return 1;
-}
-
-static int
 changedSkipIdenticalLines (const MenuItem *item, unsigned char setting UNUSED) {
   api.updateParameter(BRLAPI_PARAM_SKIP_IDENTICAL_LINES, 0);
   return 1;
@@ -401,15 +395,39 @@ changedKeyboardTable (const MenuItem *item, unsigned char setting UNUSED) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static int
+testComputerBraille (void) {
+  return !isContractedBraille();
+}
+
+static int
 testContractedBraille (void) {
   return isContractedBraille();
+}
+
+static int
+changedContractedBraille (const MenuItem *item, unsigned char setting UNUSED) {
+  setContractedBraille(setting);
+  api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE, 0);
+  return 1;
 }
 
 static int
 changedContractionTable (const MenuItem *item, unsigned char setting UNUSED) {
   return changeContractionTable(getMenuItemValue(item));
 }
+#else /* ENABLE_CONTRACTED_BRAILLE */
+static int
+testComputerBraille (void) {
+  return 1;
+}
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+static int
+changedComputerBraille (const MenuItem *item, unsigned char setting UNUSED) {
+  setSixDotComputerBraille(setting);
+  api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE, 0);
+  return 1;
+}
 
 static int
 testInputTable (void) {
@@ -608,20 +626,21 @@ makePreferencesMenu (void) {
   {
     SUBMENU(presentationSubmenu, rootMenu, strtext("Braille Presentation"));
 
+#ifdef ENABLE_CONTRACTED_BRAILLE
     {
       static const MenuString strings[] = {
-        {.label=strtext("8-Dot Computer")},
-        {.label=strtext("6-Dot Contracted")},
-        {.label=strtext("6-Dot Computer")},
-        {.label=strtext("8-Dot Contracted")}
+        {.label=strtext("Computer Braille")},
+        {.label=strtext("Contracted Braille")}
       };
 
+      static unsigned char yes;
+      yes = isContractedBraille();
+
       NAME(strtext("Braille Variant"));
-      ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.brailleVariant, &itemName, strings));
-      CHANGED(BrailleVariant);
+      ITEM(newEnumeratedMenuItem(presentationSubmenu, &yes, &itemName, strings));
+      CHANGED(ContractedBraille);
     }
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
     {
       NAME(strtext("Expand Current Word"));
       ITEM(newBooleanMenuItem(presentationSubmenu, &prefs.expandCurrentWord, &itemName));
@@ -640,6 +659,21 @@ makePreferencesMenu (void) {
       TEST(ContractedBraille);
     }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+    {
+      static const MenuString strings[] = {
+        {.label=strtext("8-dot")},
+        {.label=strtext("6-dot")}
+      };
+
+      static unsigned char yes;
+      yes = isSixDotComputerBraille();
+
+      NAME(strtext("Cell Type"));
+      ITEM(newEnumeratedMenuItem(presentationSubmenu, &yes, &itemName, strings));
+      TEST(ComputerBraille);
+      CHANGED(ComputerBraille);
+    }
 
     {
       static const MenuString strings[] = {

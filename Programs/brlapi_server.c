@@ -1607,7 +1607,7 @@ PARAM_READER(computerBrailleCellSize)
 {
   brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
   *size = sizeof(*computerBrailleCellSize);
-  *computerBrailleCellSize = isSixDotBraille()? 6: 8;
+  *computerBrailleCellSize = isSixDotComputerBraille()? 6: 8;
   return NULL;
 }
 
@@ -1616,7 +1616,7 @@ PARAM_WRITER(computerBrailleCellSize)
   const brlapi_param_computerBrailleCellSize_t *computerBrailleCellSize = data;
   PARAM_ASSERT_SIZE(computerBrailleCellSize);
 
-  setSixDotBraille(*computerBrailleCellSize <= 6);
+  setSixDotComputerBraille(*computerBrailleCellSize <= 6);
   return NULL;
 }
 

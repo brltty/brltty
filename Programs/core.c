@@ -110,7 +110,7 @@ isContractedBraille (void) {
 }
 
 int
-isSixDotBraille (void) {
+isSixDotComputerBraille (void) {
   return (prefs.brailleVariant == bvComputer6)
       || (prefs.brailleVariant == bvContracted6)
       ;
@@ -125,12 +125,12 @@ setBrailleVariant (int contracted, int sixDot) {
 
 void
 setContractedBraille (int contracted) {
-  setBrailleVariant(contracted, isSixDotBraille());
+  setBrailleVariant(contracted, isSixDotComputerBraille());
   api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE, 0);
 }
 
 void
-setSixDotBraille (int sixDot) {
+setSixDotComputerBraille (int sixDot) {
   setBrailleVariant(isContractedBraille(), sixDot);
   api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE, 0);
 }

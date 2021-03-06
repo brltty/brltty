@@ -1149,7 +1149,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
             [gscScreenNumber] = "SCRNUM",
             [gscFrozenScreen] = "FREEZE",
             [gscDisplayMode] = "DISPMD",
-            [gscSixDotBraille] = "SIXDOTS",
+            [gscSixDotComputerBraille] = "SIXDOTS",
             [gscContractedBraille] = "CONTRACTED",
             [gscSlidingBrailleWindow] = "SLIDEWIN",
             [gscSkipIdenticalLines] = "SKPIDLNS",

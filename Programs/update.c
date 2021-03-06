@@ -279,7 +279,8 @@ getScreenTypeCharacter (void) {
 
 static inline char
 getBrailleVariantCharacter (void) {
-  return isSixDotBraille()? '6': '8';
+  return isContractedBraille()? 'c':
+         isSixDotComputerBraille()? '6': '8';
 }
 
 static inline char
@@ -788,7 +789,7 @@ translateScreenCharacterText (
   *cell = convertCharacterToDots(textTable, character->text);
   *text = character->text;
 
-  if (isSixDotBraille()) *cell &= ~(BRL_DOT_7 | BRL_DOT_8);
+  if (isSixDotComputerBraille()) *cell &= ~(BRL_DOT_7 | BRL_DOT_8);
   if (prefs.showAttributes) overlayAttributesUnderline(cell, character->attributes);
 
   if (iswupper(character->text)) {
