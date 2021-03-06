@@ -20,12 +20,6 @@
 
 note This description is general because the key layout differs from model to model.
 
-note An eight-dot, Perkins-style, braille keyboard is near the rear of the top.
-note * Its keys, From left to right, are: Dot7, Dot3, Dot2, Dot1 - Dot4, Dot5, Dot6, Dot8.
-note * The space bar is in front of the braille cells.
-note * On some models, the eight dot keys are in a straight line
-note * behind the space bar but in front of the braille cells.
-
 note There is a routing key immediately behind each braille cell.
 note * Some models have a navrow key immediately behind each routing key.
 note * On others, a navrow key can be emulated by long-pressing the corresponding routing key.
@@ -38,10 +32,6 @@ note * On older models, each is a wheel that can be both rolled and pressed.
 note The keys on the front, from left to right, are:
 note * \{frontKeysLeft} - \{frontKeysRight}.
 
-note The left and right shift keys are squarish.
-note * On some models, they're at the center of the front.
-note * On others, they're on either side of the space bar.
-
 note The left and right pan keys are short bars.
 note * On some models, each has a raised double-arrow.
 
@@ -50,24 +40,12 @@ note * On older models, they're known as GDF (General Display Function) keys.
 
 assign navKeyType Nav
 include common.kti
+include keyboard.kti
+include speech.kti
 
-map Dot1 DOT1
-map Dot2 DOT2
-map Dot3 DOT3
-map Dot4 DOT4
-map Dot5 DOT5
-map Dot6 DOT6
-map Dot7 DOT7
-map Dot8 DOT8
-
-map Space SPACE
-map LeftShift CONTROL
-map RightShift META
-
-assign chord Space+
-include ../chords.kti
-
-bind Space+RoutingKey KEY_FUNCTION
+bind LeftShift MUTE
+bind RightShift SAY_LINE
+bind LeftShift+RightShift AUTOSPEAK
 
 bind NavrowKey DESCCHAR
 bind PanLeft+NavrowKey PRINDENT
