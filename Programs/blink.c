@@ -119,10 +119,10 @@ setBlinkProperties (BlinkDescriptor *blink, int period, int percentVisible) {
     invisibleTime = period - visibleTime;
   }
 
-  if (visibleTime < minimumTime) {
+  if (visibleTime && (visibleTime < minimumTime)) {
     visibleTime = minimumTime;
     invisibleTime = period - visibleTime;
-  } else if (invisibleTime < minimumTime) {
+  } else if (invisibleTime && (invisibleTime < minimumTime)) {
     invisibleTime = minimumTime;
     visibleTime = period - invisibleTime;
   }

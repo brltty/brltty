@@ -612,7 +612,7 @@ newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
 
 static MenuItem *
 newBlinkVisibleMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newPercentMenuItem(menu, setting, name, 10);
+  return newPercentMenuItem(menu, setting, name, 5);
 }
 
 #if defined(HAVE_PCM_SUPPORT) || defined(HAVE_MIDI_SUPPORT) || defined(HAVE_FM_SUPPORT)
