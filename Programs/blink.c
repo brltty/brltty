@@ -37,28 +37,28 @@ struct BlinkDescriptorStruct {
 };
 
 BlinkDescriptor screenCursorBlinkDescriptor = {
-  .name = "screen cursor",
+  .name = "Screen Cursor",
   .isEnabled = &prefs.blinkingScreenCursor,
   .visibleTime = &prefs.screenCursorVisibleTime,
   .invisibleTime = &prefs.screenCursorInvisibleTime
 };
 
 BlinkDescriptor attributesUnderlineBlinkDescriptor = {
-  .name = "attributes underline",
+  .name = "Attributes Underline",
   .isEnabled = &prefs.blinkingAttributes,
   .visibleTime = &prefs.attributesVisibleTime,
   .invisibleTime = &prefs.attributesInvisibleTime
 };
 
 BlinkDescriptor uppercaseLettersBlinkDescriptor = {
-  .name = "uppercase letters",
+  .name = "Uppercase Letters",
   .isEnabled = &prefs.blinkingCapitals,
   .visibleTime = &prefs.capitalsVisibleTime,
   .invisibleTime = &prefs.capitalsInvisibleTime
 };
 
 BlinkDescriptor speechCursorBlinkDescriptor = {
-  .name = "speech cursor",
+  .name = "Speech Cursor",
   .isEnabled = &prefs.blinkingSpeechCursor,
   .visibleTime = &prefs.speechCursorVisibleTime,
   .invisibleTime = &prefs.speechCursorInvisibleTime
@@ -77,6 +77,11 @@ toPercentage (int numerator, int denominator) {
   return (numerator * 100) / denominator;
 }
 
+const char *
+getBlinkName (BlinkDescriptor *blink) {
+  return blink->name;
+}
+
 int
 getBlinkVisibleTime (BlinkDescriptor *blink) {
   return PREFS2MSECS(*blink->visibleTime);
@@ -85,6 +90,11 @@ getBlinkVisibleTime (BlinkDescriptor *blink) {
 int
 getBlinkInvisibleTime (BlinkDescriptor *blink) {
   return PREFS2MSECS(*blink->invisibleTime);
+}
+
+int
+isBlinkEnabled (BlinkDescriptor *blink) {
+  return *blink->isEnabled;
 }
 
 int
