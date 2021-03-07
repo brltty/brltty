@@ -41,6 +41,7 @@
 #include "log.h"
 #include "menu.h"
 #include "prefs.h"
+#include "timing.h"
 #include "parse.h"
 #include "file.h"
 
@@ -420,6 +421,28 @@ newNumericMenuItem (
   }
 
   return item;
+}
+
+static void
+formatTime (Menu *menu, unsigned char time, char *buffer, size_t size) {
+  unsigned int milliseconds = PREFS2MSECS(time);
+
+  unsigned int seconds = milliseconds / MSECS_PER_SEC;
+  milliseconds %= MSECS_PER_SEC;
+
+  snprintf(buffer, size, "%u.%03u", seconds, milliseconds);
+  char *end = buffer + strlen(buffer);
+  while (*--end == '0');
+  if (*end == '.') end -= 1;
+  *++end = 0;
+}
+
+MenuItem *
+newTimeMenuItem (
+  Menu *menu, unsigned char *setting,
+  const MenuString *name
+) {
+  return newNumericMenuItem(menu, setting, name, 10, 250, 10, strtext("seconds"), formatTime);
 }
 
 MenuItem *

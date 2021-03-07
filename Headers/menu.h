@@ -47,6 +47,11 @@ extern MenuItem *newNumericMenuItem (
   const char *unit, NumericMenuItemFormatter *formatter
 );
 
+extern MenuItem *newTimeMenuItem (
+  Menu *menu, unsigned char *setting,
+  const MenuString *name
+);
+
 extern MenuItem *newPercentMenuItem (
   Menu *menu, unsigned char *setting,
   const MenuString *name, unsigned char step

@@ -591,25 +591,6 @@ newStatusFieldMenuItem (
   return NULL;
 }
 
-static void
-formatTime (Menu *menu, unsigned char time, char *buffer, size_t size) {
-  unsigned int milliseconds = PREFS2MSECS(time);
-
-  unsigned int seconds = milliseconds / MSECS_PER_SEC;
-  milliseconds %= MSECS_PER_SEC;
-
-  snprintf(buffer, size, "%u.%03u", seconds, milliseconds);
-  char *end = buffer + strlen(buffer);
-  while (*--end == '0');
-  if (*end == '.') end -= 1;
-  *++end = 0;
-}
-
-static MenuItem *
-newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 10, 250, 10, strtext("seconds"), formatTime);
-}
-
 static MenuItem *
 newBlinkVisibleMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
   return newPercentMenuItem(menu, setting, name, 5);
