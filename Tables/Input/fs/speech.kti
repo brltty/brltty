@@ -40,9 +40,12 @@ bind PanRight+RightShift SAY_LINE
 bind PanRight+LeftShift+Space SAY_ABOVE
 bind PanRight+RightShift+Space SAY_BELOW
 
-bind Left\{navKeyType}Down+Space SAY_SOFTER
-bind Left\{navKeyType}Up+Space SAY_Louder
+bind Space+Left\{navKeyType}Down SAY_SOFTER
+bind Space+Left\{navKeyType}Up SAY_Louder
 
-bind Right\{navKeyType}Down+Space SAY_SLOWER
-bind Right\{navKeyType}Up+Space SAY_FASTER
+bind LeftShift+Left\{navKeyType}Down SAY_SLOWER
+bind LeftShift+Left\{navKeyType}Up SAY_FASTER
+
+bind RightShift+Left\{navKeyType}Down SAY_LOWER
+bind RightShift+Left\{navKeyType}Up SAY_HIGHER
 

@@ -261,6 +261,9 @@ typedef enum {
   BRL_CMD_GUI_ITEM_NEXT /* move to the next item in the screen area */,
   BRL_CMD_GUI_ITEM_LAST /* move to the last item in the screen area */,
 
+  BRL_CMD_SAY_LOWER /* decrease speaking pitch */,
+  BRL_CMD_SAY_HIGHER /* increase speaking pitch */,
+  
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
 

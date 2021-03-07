@@ -133,6 +133,26 @@ handleSpeechCommands (int command, void *data) {
       sayScreenLines(ses->winy, scr.rows-ses->winy, 1, sayImmediate);
       break;
 
+    case BRL_CMD_SAY_SOFTER:
+      if (!canSetSpeechVolume(&spk)) {
+        alert(ALERT_COMMAND_REJECTED);
+      } else if (prefs.speechVolume > 0) {
+        setSpeechVolume(&spk, --prefs.speechVolume, 1);
+      } else {
+        alert(ALERT_NO_CHANGE);
+      }
+      break;
+
+    case BRL_CMD_SAY_LOUDER:
+      if (!canSetSpeechVolume(&spk)) {
+        alert(ALERT_COMMAND_REJECTED);
+      } else if (prefs.speechVolume < SPK_VOLUME_MAXIMUM) {
+        setSpeechVolume(&spk, ++prefs.speechVolume, 1);
+      } else {
+        alert(ALERT_NO_CHANGE);
+      }
+      break;
+
     case BRL_CMD_SAY_SLOWER:
       if (!canSetSpeechRate(&spk)) {
         alert(ALERT_COMMAND_REJECTED);
@@ -153,21 +173,21 @@ handleSpeechCommands (int command, void *data) {
       }
       break;
 
-    case BRL_CMD_SAY_SOFTER:
-      if (!canSetSpeechVolume(&spk)) {
+    case BRL_CMD_SAY_LOWER:
+      if (!canSetSpeechPitch(&spk)) {
         alert(ALERT_COMMAND_REJECTED);
-      } else if (prefs.speechVolume > 0) {
-        setSpeechVolume(&spk, --prefs.speechVolume, 1);
+      } else if (prefs.speechPitch > 0) {
+        setSpeechPitch(&spk, --prefs.speechPitch, 1);
       } else {
         alert(ALERT_NO_CHANGE);
       }
       break;
 
-    case BRL_CMD_SAY_LOUDER:
-      if (!canSetSpeechVolume(&spk)) {
+    case BRL_CMD_SAY_HIGHER:
+      if (!canSetSpeechPitch(&spk)) {
         alert(ALERT_COMMAND_REJECTED);
-      } else if (prefs.speechVolume < SPK_VOLUME_MAXIMUM) {
-        setSpeechVolume(&spk, ++prefs.speechVolume, 1);
+      } else if (prefs.speechPitch < SPK_PITCH_MAXIMUM) {
+        setSpeechPitch(&spk, ++prefs.speechPitch, 1);
       } else {
         alert(ALERT_NO_CHANGE);
       }
