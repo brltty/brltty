@@ -111,8 +111,8 @@ int
 setBlinkProperties (BlinkDescriptor *blink, int period, int percentVisible) {
   if (period < 1) return 0;
 
-  if (percentVisible < 0) return 0;
-  if (percentVisible > 100) return 0;
+  if (percentVisible < 1) return 0;
+  if (percentVisible > 99) return 0;
 
   int minimumTime = SCREEN_UPDATE_SCHEDULE_DELAY;
   period = MAX(period, (minimumTime * 2));
