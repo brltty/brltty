@@ -31,14 +31,14 @@ extern BlinkDescriptor speechCursorBlinkDescriptor;
 
 extern int getBlinkPeriod (BlinkDescriptor *blink);
 extern int getBlinkPercentVisible (BlinkDescriptor *blink);
-extern int setBlinkProperties (BlinkDescriptor *blink, int period, int percentage);
+extern int setBlinkProperties (BlinkDescriptor *blink, int period, int percentVisible);
 
 static inline int setBlinkPeriod (BlinkDescriptor *blink, int period) {
   return setBlinkProperties(blink, period, getBlinkPercentVisible(blink));
 }
 
-static inline int setBlinkPercentVisible (BlinkDescriptor *blink, int percentage) {
-  return setBlinkProperties(blink, getBlinkPeriod(blink), percentage);
+static inline int setBlinkPercentVisible (BlinkDescriptor *blink, int percentVisible) {
+  return setBlinkProperties(blink, getBlinkPeriod(blink), percentVisible);
 }
 
 extern int isBlinkVisible (const BlinkDescriptor *blink);

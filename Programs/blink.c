@@ -98,41 +98,41 @@ getBlinkPercentVisible (BlinkDescriptor *blink) {
 }
 
 int
-setBlinkProperties (BlinkDescriptor *blink, int period, int percentage) {
+setBlinkProperties (BlinkDescriptor *blink, int period, int percentVisible) {
   if (period < 1) return 0;
 
-  if (percentage < 0) return 0;
-  if (percentage > 100) return 0;
+  if (percentVisible < 0) return 0;
+  if (percentVisible > 100) return 0;
 
-  int minimum = SCREEN_UPDATE_SCHEDULE_DELAY;
-  period = MAX(period, (minimum * 2));
+  int minimumTime = SCREEN_UPDATE_SCHEDULE_DELAY;
+  period = MAX(period, (minimumTime * 2));
 
-  int visible;
-  int invisible;
+  int visibleTime;
+  int invisibleTime;
 
   // let the visible time round toward 50%
-  if (percentage < 50) {
-    invisible = (period * (100 - percentage)) / 100;
-    visible = period - invisible;
+  if (percentVisible < 50) {
+    invisibleTime = (period * (100 - percentVisible)) / 100;
+    visibleTime = period - invisibleTime;
   } else {
-    visible = (period * percentage) / 100;
-    invisible = period - visible;
+    visibleTime = (period * percentVisible) / 100;
+    invisibleTime = period - visibleTime;
   }
 
-  if (visible < minimum) {
-    visible = minimum;
-    invisible = period - visible;
-  } else if (invisible < minimum) {
-    invisible = minimum;
-    visible = period - invisible;
+  if (visibleTime < minimumTime) {
+    visibleTime = minimumTime;
+    invisibleTime = period - visibleTime;
+  } else if (invisibleTime < minimumTime) {
+    invisibleTime = minimumTime;
+    visibleTime = period - invisibleTime;
   }
 
-  visible = MSECS2PREFS(visible);
-  invisible = MSECS2PREFS(invisible);
-  if ((visible + invisible) > UINT8_MAX) return 0;
+  visibleTime = MSECS2PREFS(visibleTime);
+  invisibleTime = MSECS2PREFS(invisibleTime);
+  if ((visibleTime + invisibleTime) > UINT8_MAX) return 0;
 
-  *blink->visibleTime = visible;
-  *blink->invisibleTime = invisible;
+  *blink->visibleTime = visibleTime;
+  *blink->invisibleTime = invisibleTime;
   return 1;
 }
 
