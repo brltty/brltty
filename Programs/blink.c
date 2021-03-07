@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "parameters.h"
 #include "blink.h"
 #include "prefs.h"
 #include "async_alarm.h"
@@ -71,12 +72,17 @@ static BlinkDescriptor *const blinkDescriptors[] = {
   NULL
 };
 
-static int
+static inline int
+toPercentage (int numerator, int denominator) {
+  return (numerator * 100) / denominator;
+}
+
+static inline int
 getBlinkVisibleTime (BlinkDescriptor *blink) {
   return PREFS2MSECS(*blink->visibleTime);
 }
 
-static int
+static inline int
 getBlinkInvisibleTime (BlinkDescriptor *blink) {
   return PREFS2MSECS(*blink->invisibleTime);
 }
@@ -87,21 +93,43 @@ getBlinkPeriod (BlinkDescriptor *blink) {
 }
 
 int
-getBlinkPercentage (BlinkDescriptor *blink) {
-  return (getBlinkVisibleTime(blink) * 100) / getBlinkPeriod(blink);
+getBlinkPercentVisible (BlinkDescriptor *blink) {
+  return toPercentage(getBlinkVisibleTime(blink), getBlinkPeriod(blink));
 }
 
 int
 setBlinkProperties (BlinkDescriptor *blink, int period, int percentage) {
   if (period < 1) return 0;
-  period = MSECS2PREFS(period);
-  if (period > UINT8_MAX) return 0;
 
   if (percentage < 0) return 0;
   if (percentage > 100) return 0;
 
-  int visible = (period * percentage) / 100;
-  int invisible = period - visible;
+  int minimum = SCREEN_UPDATE_SCHEDULE_DELAY;
+  period = MAX(period, (minimum * 2));
+
+  int visible;
+  int invisible;
+
+  // let the visible time round toward 50%
+  if (percentage < 50) {
+    invisible = (period * (100 - percentage)) / 100;
+    visible = period - invisible;
+  } else {
+    visible = (period * percentage) / 100;
+    invisible = period - visible;
+  }
+
+  if (visible < minimum) {
+    visible = minimum;
+    invisible = period - visible;
+  } else if (invisible < minimum) {
+    invisible = minimum;
+    visible = period - invisible;
+  }
+
+  visible = MSECS2PREFS(visible);
+  invisible = MSECS2PREFS(invisible);
+  if ((visible + invisible) > UINT8_MAX) return 0;
 
   *blink->visibleTime = visible;
   *blink->invisibleTime = invisible;

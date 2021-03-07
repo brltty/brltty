@@ -31,8 +31,10 @@
 #include "prefs.h"
 #include "profile.h"
 #include "status_types.h"
-#include "timing.h"
 #include "blink.h"
+#include "timing.h"
+#include "brl.h"
+#include "spk.h"
 #include "ttb.h"
 #include "atb.h"
 #include "ctb.h"
@@ -68,7 +70,7 @@ PREFS_MENU_ITEM_APPLY(PREFS_MENU_ITEM_GETTER_DECLARE)
   variable = (value)
 
 #define BLINK_PERIOD(blink) PROPERTY(period, MSECS2PREFS(getBlinkPeriod((blink))))
-#define BLINK_VISIBLE(blink) PROPERTY(visible, getBlinkPercentage((blink)))
+#define BLINK_VISIBLE(blink) PROPERTY(visible, getBlinkPercentVisible((blink)))
 
 static int
 testAdvancedSubmenu (void) {
@@ -158,7 +160,7 @@ changedScreenCursorBlinkPeriod (const MenuItem *item UNUSED, unsigned char setti
 
 static int
 changedScreenCursorBlinkPercentage (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBlinkPercentage(&screenCursorBlinkDescriptor, setting);
+  return setBlinkPercentVisible(&screenCursorBlinkDescriptor, setting);
 }
 
 static int
@@ -179,7 +181,7 @@ changedAttributesUnderlineBlinkPeriod (const MenuItem *item UNUSED, unsigned cha
 
 static int
 changedAttributesUnderlineBlinkPercentage (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBlinkPercentage(&attributesUnderlineBlinkDescriptor, setting);
+  return setBlinkPercentVisible(&attributesUnderlineBlinkDescriptor, setting);
 }
 
 static int
@@ -195,7 +197,7 @@ changedUppercaseLettersBlinkPeriod (const MenuItem *item UNUSED, unsigned char s
 
 static int
 changedUppercaseLettersBlinkPercentage (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBlinkPercentage(&uppercaseLettersBlinkDescriptor, setting);
+  return setBlinkPercentVisible(&uppercaseLettersBlinkDescriptor, setting);
 }
 
 static int
@@ -360,7 +362,7 @@ changedSpeechCursorBlinkPeriod (const MenuItem *item UNUSED, unsigned char setti
 
 static int
 changedSpeechCursorBlinkPercentage (const MenuItem *item UNUSED, unsigned char setting) {
-  return setBlinkPercentage(&speechCursorBlinkDescriptor, setting);
+  return setBlinkPercentVisible(&speechCursorBlinkDescriptor, setting);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 

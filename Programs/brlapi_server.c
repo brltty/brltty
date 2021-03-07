@@ -1676,7 +1676,7 @@ PARAM_READER(cursorBlinkPercentage)
 {
   brlapi_param_cursorBlinkPercentage_t *cursorBlinkPercentage = data;
   *size = sizeof(*cursorBlinkPercentage);
-  *cursorBlinkPercentage = getBlinkPercentage(&screenCursorBlinkDescriptor);
+  *cursorBlinkPercentage = getBlinkPercentVisible(&screenCursorBlinkDescriptor);
   return NULL;
 }
 
@@ -1684,7 +1684,7 @@ PARAM_WRITER(cursorBlinkPercentage)
 {
   const brlapi_param_cursorBlinkPercentage_t *cursorBlinkPercentage = data;
   PARAM_ASSERT_SIZE(cursorBlinkPercentage);
-  if (!setBlinkPercentage(&screenCursorBlinkDescriptor, *cursorBlinkPercentage)) return "unsupported cursor blink percentage";
+  if (!setBlinkPercentVisible(&screenCursorBlinkDescriptor, *cursorBlinkPercentage)) return "unsupported cursor blink percentage";
   return NULL;
 }
 
