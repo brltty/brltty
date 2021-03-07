@@ -607,7 +607,7 @@ formatTime (Menu *menu, unsigned char time, char *buffer, size_t size) {
 
 static MenuItem *
 newTimeMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  return newNumericMenuItem(menu, setting, name, 10, 200, 10, strtext("seconds"), formatTime);
+  return newNumericMenuItem(menu, setting, name, 10, 250, 10, strtext("seconds"), formatTime);
 }
 
 static MenuItem *
