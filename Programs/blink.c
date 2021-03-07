@@ -77,12 +77,12 @@ toPercentage (int numerator, int denominator) {
   return (numerator * 100) / denominator;
 }
 
-static inline int
+int
 getBlinkVisibleTime (BlinkDescriptor *blink) {
   return PREFS2MSECS(*blink->visibleTime);
 }
 
-static inline int
+int
 getBlinkInvisibleTime (BlinkDescriptor *blink) {
   return PREFS2MSECS(*blink->invisibleTime);
 }

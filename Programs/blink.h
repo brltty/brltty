@@ -41,6 +41,9 @@ static inline int setBlinkPercentVisible (BlinkDescriptor *blink, int percentVis
   return setBlinkProperties(blink, getBlinkPeriod(blink), percentVisible);
 }
 
+extern int getBlinkVisibleTime (BlinkDescriptor *blink);
+extern int getBlinkInvisibleTime (BlinkDescriptor *blink);
+
 extern int isBlinkVisible (const BlinkDescriptor *blink);
 extern void setBlinkState (BlinkDescriptor *blink, int visible);
 
