@@ -946,34 +946,74 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data = &resourceData_HID_touch
     },
 
-    { /* APH Chameleon 20 (HID protocol) */
+    { /* APH Chameleon 20 (HID protocol, firmware 1.0) */
       .vendor=0X1C71, .product=0XC101, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=4, .outputEndpoint=5,
+      .verifyInterface = 1,
       .data = &resourceData_HID_C20,
       .resetDevice = 1
     },
 
-    { /* APH Mantis Q40 (HID protocol) */
+    { /* APH Chameleon 20 (HID protocol, firmware 1.1) */
+      .vendor=0X1C71, .product=0XC101, 
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .verifyInterface = 1,
+      .data = &resourceData_HID_C20,
+      .resetDevice = 1
+    },
+
+    { /* APH Mantis Q40 (HID protocol, firmware 1.0) */
       .vendor=0X1C71, .product=0XC111, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=4, .outputEndpoint=5,
+      .verifyInterface = 1,
       .data = &resourceData_HID_M40,
       .resetDevice = 1
     },
 
-    { /* NLS eReader (HID protocol) */
+    { /* APH Mantis Q40 (HID protocol, firmware 1.1) */
+      .vendor=0X1C71, .product=0XC111, 
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .verifyInterface = 1,
+      .data = &resourceData_HID_M40,
+      .resetDevice = 1
+    },
+
+    { /* NLS eReader (HID protocol, firmware 1.0) */
       .vendor=0X1C71, .product=0XCE01, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=4, .outputEndpoint=5,
+      .verifyInterface = 1,
       .data = &resourceData_HID_NLS,
       .resetDevice = 1
     },
 
-    { /* Humanware BrailleOne (HID protocol) */
+    { /* NLS eReader (HID protocol, firmware 1.1) */
+      .vendor=0X1C71, .product=0XCE01, 
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .verifyInterface = 1,
+      .data = &resourceData_HID_NLS,
+      .resetDevice = 1
+    },
+
+    { /* Humanware BrailleOne (HID protocol, firmware 1.0) */
       .vendor=0X1C71, .product=0XC121, 
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=4, .outputEndpoint=5,
+      .verifyInterface = 1,
+      .data = &resourceData_HID_one,
+      .resetDevice = 1
+    },
+
+    { /* Humanware BrailleOne (HID protocol, firmware 1.1) */
+      .vendor=0X1C71, .product=0XC121, 
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .verifyInterface = 1,
       .data = &resourceData_HID_one,
       .resetDevice = 1
     },
