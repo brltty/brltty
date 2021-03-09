@@ -51,6 +51,8 @@
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Administra membresía de comunidad</string>
 
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Actualiza aplicación</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">Build de Desarrolladores</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">permitir bajar de categoría</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Acciones de la accesibilidad</string>
 
@@ -238,20 +240,25 @@
   <string name="CONTRACTION_TABLE_LABEL_auto">Selección Automática Basada en la Configuración Regional</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Africaans (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharico (sin contracciones)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">Alemán</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Alemán (sin contracciones)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Alemán (contracciones básicas)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Alemán (contraccionado - estándar de 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Alemán (contraccionado - estándar de 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Alemán (contraccionado - estándar de 2015)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">Inglés</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">Inglés (Estados Unidos)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Inglés (Braille Inglés unificado, grado 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Inglés (Estados Unidos, grado 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Español (grado 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">Francés  </string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">Francés (sin contracciones)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">Francés (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesio (contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Alfabeto Fonético Internacional</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japonés (sin contracciones)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Coreano</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0">Coreano (sin contracciones)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Coreano (grado 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Coreano (grado 2)</string>
