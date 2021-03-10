@@ -94,13 +94,11 @@ unsigned int fullWindowShift;                /* Full window horizontal distance 
 unsigned int halfWindowShift;                /* Half window horizontal distance */
 unsigned int verticalWindowShift;                /* Window vertical distance */
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
 int isContracted = 0;
 int contractedLength;
 int contractedStart;
 int contractedOffsets[0X100];
 int contractedTrack = 0;
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 int
 isContractedBraille (void) {
@@ -211,9 +209,7 @@ postprocessCommand (void *state, int command, const CommandEntry *cmd, int handl
       ses->motx = ses->winx;
       ses->moty = ses->winy;
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
       isContracted = 0;
-#endif /* ENABLE_CONTRACTED_BRAILLE */
     }
 
     if (cmd) {
@@ -732,7 +728,6 @@ placeBrailleWindowHorizontally (int x) {
 
 void
 placeRightEdge (int column) {
-#ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
     ses->winx = 0;
 
@@ -744,9 +739,7 @@ placeRightEdge (int column) {
       if (end == ses->winx) break;
       ses->winx = end;
     }
-  } else
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-  {
+  } else {
     ses->winx = column / textCount * textCount;
   }
 }
@@ -777,7 +770,6 @@ moveBrailleWindowRight (unsigned int amount) {
 
 int
 shiftBrailleWindowLeft (unsigned int amount) {
-#ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
     int reference = ses->winx;
     if (!reference) return 0;
@@ -829,7 +821,6 @@ shiftBrailleWindowLeft (unsigned int amount) {
     if (x < reference) ses->winx = x;
     return 1;
   }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   if (prefs.wordWrap) {
     if (ses->winx < 1) return 0;
@@ -842,12 +833,9 @@ shiftBrailleWindowLeft (unsigned int amount) {
 
 int
 shiftBrailleWindowRight (unsigned int amount) {
-#ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
     amount = getContractedLength(amount);
-  } else
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-  if (prefs.wordWrap) {
+  } else if (prefs.wordWrap) {
     amount = getWordWrapLength(ses->winy, ses->winx, amount);
   }
 
@@ -911,7 +899,6 @@ trackScreenCursor (int place) {
   ses->dctx = 0;
   ses->dcty = 0;
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracted) {
     contractedTrack = 1;
 
@@ -927,7 +914,6 @@ trackScreenCursor (int place) {
     shiftBrailleWindowLeft(halfWindowShift);
     return 1;
   }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   if (place && !isWithinBrailleWindow(scr.posx, scr.posy)) {
     placeBrailleWindowHorizontally(scr.posx);
@@ -1140,7 +1126,6 @@ speakIndent (const ScreenCharacter *characters, int count, int evenIfNoIndent) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
 int
 isContracting (void) {
   return isContractedBraille() && contractionTable;
@@ -1193,7 +1178,6 @@ getContractedLength (unsigned int outputLimit) {
 
   return inputLength;
 }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 int
 showScreenCursor (void) {

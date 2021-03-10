@@ -134,7 +134,6 @@ typedef struct {
 extern void getTimeFormattingData (TimeFormattingData *fmt);
 extern STR_DECLARE_FORMATTER(formatBrailleTime, const TimeFormattingData *fmt);
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
 extern int isContracted;
 extern int contractedLength;
 extern int contractedStart;
@@ -145,7 +144,6 @@ extern int isContracting (void);
 extern int getUncontractedCursorOffset (int x, int y);
 extern int getContractedCursor (void);
 extern int getContractedLength (unsigned int outputLimit);
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 extern ContractionTable *contractionTable;
 

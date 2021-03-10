@@ -37,10 +37,7 @@
 
 static int
 getWindowLength (void) {
-#ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) return getContractedLength(textCount);
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-
   return textCount;
 }
 

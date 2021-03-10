@@ -468,7 +468,6 @@ changedKeyboardTable (const MenuItem *item, unsigned char setting UNUSED) {
   return changeKeyboardTable(getMenuItemValue(item));
 }
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
 static int
 testComputerBraille (void) {
   return !isContractedBraille();
@@ -490,12 +489,6 @@ static int
 changedContractionTable (const MenuItem *item, unsigned char setting UNUSED) {
   return changeContractionTable(getMenuItemValue(item));
 }
-#else /* ENABLE_CONTRACTED_BRAILLE */
-static int
-testComputerBraille (void) {
-  return 1;
-}
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 static int
 changedComputerBraille (const MenuItem *item, unsigned char setting UNUSED) {
@@ -701,7 +694,6 @@ makePreferencesMenu (void) {
   {
     SUBMENU(presentationSubmenu, rootMenu, strtext("Braille Presentation"));
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
     {
       static const MenuString strings[] = {
         {.label=strtext("Computer Braille")},
@@ -731,7 +723,6 @@ makePreferencesMenu (void) {
       ITEM(newEnumeratedMenuItem(presentationSubmenu, &prefs.capitalizationMode, &itemName, strings));
       TEST(ContractedBraille);
     }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
     {
       static const MenuString strings[] = {
@@ -1404,14 +1395,12 @@ makePreferencesMenu (void) {
       SET(attributesTable);
     }
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
     {
       NAME(strtext("Contraction Table"));
       ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, CONTRACTION_TABLES_SUBDIRECTORY, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
       CHANGED(ContractionTable);
       SET(contractionTable);
     }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
   }
 
   {

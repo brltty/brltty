@@ -576,9 +576,6 @@ extern "C" {
 /* Define this to be a string containing the path to the default attributes table. */
 #undef ATTRIBUTES_TABLE
 
-/* Define this to include contraction table support. */
-#undef ENABLE_CONTRACTED_BRAILLE
-
 /* Define this to include speech synthesizer and text-to-speech engine support. */
 #undef ENABLE_SPEECH_SUPPORT
 

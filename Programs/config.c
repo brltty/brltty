@@ -226,10 +226,7 @@ static int oldPreferencesEnabled = 1;
 char *opt_tablesDirectory;
 char *opt_textTable;
 char *opt_attributesTable;
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
 char *opt_contractionTable;
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 char *opt_keyboardTable;
 KeyTable *keyboardTable = NULL;
@@ -537,7 +534,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Name of or path to attributes table.")
   },
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
   { .word = "contraction-table",
     .letter = 'c',
     .flags = OPT_Config | OPT_EnvVar,
@@ -546,7 +542,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.setting = optionOperand_autodetect,
     .description = strtext("Name of or path to contraction table.")
   },
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   { .word = "keyboard-table",
     .letter = 'k',
@@ -872,7 +867,6 @@ exitAttributesTable (void *data) {
   changeAttributesTable(NULL);
 }
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
 int
 changeContractionTable (const char *name) {
   if (!name) name = "";
@@ -887,7 +881,6 @@ static void
 exitContractionTable (void *data) {
   changeContractionTable(NULL);
 }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 static KeyTableState
 handleKeyboardEvent (KeyGroup group, KeyNumber number, int press) {
@@ -2832,7 +2825,6 @@ brlttyStart (void) {
   logProperty(opt_attributesTable, "attributesTable", gettext("Attributes Table"));
   onProgramExit("attributes-table", exitAttributesTable, NULL);
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
   if (*opt_contractionTable) {
     if (strcmp(opt_contractionTable, optionOperand_autodetect) == 0) {
@@ -2858,7 +2850,6 @@ brlttyStart (void) {
 
   logProperty(opt_contractionTable, "contractionTable", gettext("Contraction Table"));
   onProgramExit("contraction-table", exitContractionTable, NULL);
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties);
 
@@ -2954,12 +2945,10 @@ static const ProfileProperty languageProfileProperties[] = {
     .change = changeTextTable
   },
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
   { .name = WS_C("contraction-table"),
     .defaultValue = &opt_contractionTable,
     .change = changeContractionTable
   },
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 };
 
 static int

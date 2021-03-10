@@ -52,7 +52,6 @@ isTextOffset (int arg, int *first, int *last, int relaxed) {
   if (value < textStart) return 0;
   if ((value -= textStart) >= textCount) return 0;
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracted) {
     int start = 0;
     int end = 0;
@@ -82,7 +81,6 @@ isTextOffset (int arg, int *first, int *last, int relaxed) {
     if (last) *last = end;
     return 1;
   }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   if ((ses->winx + value) >= scr.cols) {
     if (!relaxed) return 0;

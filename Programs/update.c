@@ -164,7 +164,6 @@ static int
 getScreenCursorPosition (int x, int y) {
   int position = BRL_NO_CURSOR;
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracted) {
     int uncontractedOffset = getUncontractedCursorOffset(x, y);
 
@@ -187,10 +186,7 @@ getScreenCursorPosition (int x, int y) {
         }
       }
     }
-  } else
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-
-  {
+  } else {
     if ((x >= ses->winx) && (x < (int)(ses->winx + textCount)) &&
         (y >= ses->winy) && (y < (int)(ses->winy + brl.textRows)) &&
         (x < scr.cols) && (y < scr.rows)) {
@@ -958,15 +954,14 @@ doUpdate (void) {
     if (infoMode) {
       if (!showInfo()) brl.hasFailed = 1;
     } else {
-      const unsigned int windowLength = brl.textColumns * brl.textRows;
       const unsigned int textLength = textCount * brl.textRows;
-      wchar_t textBuffer[windowLength];
-
-      memset(brl.buffer, 0, windowLength);
-      wmemset(textBuffer, WC_C(' '), windowLength);
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
       isContracted = 0;
+
+      const unsigned int windowLength = brl.textColumns * brl.textRows;
+      memset(brl.buffer, 0, windowLength);
+
+      wchar_t textBuffer[windowLength];
+      wmemset(textBuffer, WC_C(' '), windowLength);
 
       if (isContracting()) {
         while (1) {
@@ -1076,9 +1071,7 @@ doUpdate (void) {
         }
       }
 
-      if (!isContracted)
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-      {
+      if (!isContracted) {
         ScreenCharacter characters[textLength];
         readBrailleWindow(characters, ARRAY_COUNT(characters));
         translateBrailleWindow(characters, textBuffer);
