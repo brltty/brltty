@@ -413,10 +413,9 @@ TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 CONTRACTION_TABLE = @contraction_table@
 
+CTB_OBJECTS = @contracted_braille_objects@
 SPEECH_OBJECT = @speech_support_object@
 XSEL_OBJECT = @xsel_object@
-
-CTB_OBJECTS = @contracted_braille_objects@
 
 API_VERSION = @api_version@
 API_RELEASE = @api_release@

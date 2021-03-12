@@ -1150,34 +1150,27 @@ BRLTTY_ARG_DISABLE(
 AC_SUBST([expat_includes])
 AC_SUBST([expat_libs])
 
+contracted_braille_objects='ctb_compile.$O cldr.$O ctb_translate.$O ctb_native.$O ctb_external.$O'
+louis_includes=""
+louis_libs=""
 BRLTTY_ARG_DISABLE(
-   [contracted-braille],
-   [in-line contracted braille],
+   [liblouis],
+   [support for LibLouis-based contracted braille],
    [],
 [dnl
-   contracted_braille_objects='ctb_compile.$O cldr.$O ctb_translate.$O ctb_native.$O ctb_external.$O'
-
-   louis_includes=""
-   louis_libs=""
-   BRLTTY_ARG_DISABLE(
-      [liblouis],
-      [support for LibLouis-based contracted braille],
-      [],
-   [dnl
-      BRLTTY_HAVE_PACKAGE([louis], [liblouis], [dnl
-         louisTablesDirectory=`${PKG_CONFIG} --variable=tablesdir ${louis_package}`
-         if test -n "${louisTablesDirectory}"
-         then
-            AC_SUBST([louis_tables_directory], ["${louisTablesDirectory}"])
-            AC_DEFINE_UNQUOTED([LOUIS_TABLES_DIRECTORY], ["${louisTablesDirectory}"],
-                               [Define this to be a string containing the path to the LibLouis tables directory.])
-            contracted_braille_objects="${contracted_braille_objects} ctb_louis.\$O"
-         fi
-      ])
+   BRLTTY_HAVE_PACKAGE([louis], [liblouis], [dnl
+      louisTablesDirectory=`${PKG_CONFIG} --variable=tablesdir ${louis_package}`
+      if test -n "${louisTablesDirectory}"
+      then
+         AC_SUBST([louis_tables_directory], ["${louisTablesDirectory}"])
+         AC_DEFINE_UNQUOTED([LOUIS_TABLES_DIRECTORY], ["${louisTablesDirectory}"],
+                            [Define this to be a string containing the path to the LibLouis tables directory.])
+         contracted_braille_objects="${contracted_braille_objects} ctb_louis.\$O"
+      fi
    ])
-   AC_SUBST([louis_includes])
-   AC_SUBST([louis_libs])
 ])
+AC_SUBST([louis_includes])
+AC_SUBST([louis_libs])
 AC_SUBST([contracted_braille_objects])
 
 BRLTTY_ARG_DISABLE(
