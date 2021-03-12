@@ -27,15 +27,6 @@
 #include "unicode.h"
 #include "prefs.h"
 
-static const unsigned char internalContractionTableBytes[] = {
-#include "ctb.auto.h"
-};
-
-static InternalContractionTable internalContractionTable = {
-  .header.bytes = internalContractionTableBytes,
-  .size = 0
-};
-
 ContractionTable *contractionTable = NULL;
 
 static LockDescriptor *
@@ -362,7 +353,7 @@ contractText (
 
 int
 replaceContractionTable (const char *directory, const char *name) {
-  ContractionTable *table = NULL;
+  ContractionTable *newTable = NULL;
 
   if (*name) {
     char *path = makeContractionTablePath(directory, name);
@@ -370,25 +361,27 @@ replaceContractionTable (const char *directory, const char *name) {
     if (path) {
       logMessage(LOG_DEBUG, "compiling contraction table: %s", path);
 
-      if (!(table = compileContractionTable(path))) {
+      if (!(newTable = compileContractionTable(path))) {
         logMessage(LOG_ERR, "%s: %s", gettext("cannot compile contraction table"), path);
       }
 
       free(path);
     }
-
-    if (!table) return 0;
+  } else if (!(newTable = compileContractionTable(name))) {
+    logMessage(LOG_ERR, "%s: %s", gettext("cannot access internal contraction table"), CONTRACTION_TABLE);
   }
 
-  {
+  if (newTable) {
     ContractionTable *oldTable = contractionTable;
 
     lockContractionTable();
-      contractionTable = table;
+      contractionTable = newTable;
     unlockContractionTable();
 
     if (oldTable) destroyContractionTable(oldTable);
+    return 1;
   }
 
-  return 1;
+  logMessage(LOG_ERR, "%s: %s", gettext("cannot load contraction table"), name);
+  return 0;
 }

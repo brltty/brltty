@@ -843,7 +843,9 @@ changeTextTable (const char *name) {
   if (!name) name = "";
   if (!replaceTextTable(opt_tablesDirectory, name)) return 0;
 
+  if (!*name) name = TEXT_TABLE;
   changeStringSetting(&opt_textTable, name);
+
   api.updateParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE, 0);
   return 1;
 }
@@ -858,7 +860,9 @@ changeAttributesTable (const char *name) {
   if (!name) name = "";
   if (!replaceAttributesTable(opt_tablesDirectory, name)) return 0;
 
+  if (!*name) name = ATTRIBUTES_TABLE;
   changeStringSetting(&opt_attributesTable, name);
+
   return 1;
 }
 
@@ -872,7 +876,9 @@ changeContractionTable (const char *name) {
   if (!name) name = "";
   if (!replaceContractionTable(opt_tablesDirectory, name)) return 0;
 
+  if (!*name) name = CONTRACTION_TABLE;
   changeStringSetting(&opt_contractionTable, name);
+
   api.updateParameter(BRLAPI_PARAM_LITERARY_BRAILLE_TABLE, 0);
   return 1;
 }
@@ -2845,6 +2851,12 @@ brlttyStart (void) {
       }
     } else if (!changeContractionTable(opt_contractionTable)) {
       changeStringSetting(&opt_contractionTable, "");
+    }
+  }
+
+  if (!*opt_contractionTable) {
+    if (changeContractionTable(NULL)) {
+      logMessage(LOG_DEBUG, "using internal contraction table: %s", CONTRACTION_TABLE);
     }
   }
 

@@ -31,7 +31,7 @@ extern ContractionTable *contractionTable;
 extern void lockContractionTable (void);
 extern void unlockContractionTable (void);
 
-extern ContractionTable *compileContractionTable (const char *fileName);
+extern ContractionTable *compileContractionTable (const char *name);
 extern void destroyContractionTable (ContractionTable *table);
 
 extern char *ensureContractionTableExtension (const char *path);
