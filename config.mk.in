@@ -411,13 +411,12 @@ INSTALL_MESSAGES = @install_messages@
 
 TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
+CONTRACTION_TABLE = @contraction_table@
 
 SPEECH_OBJECT = @speech_support_object@
 XSEL_OBJECT = @xsel_object@
 
 CTB_OBJECTS = @contracted_braille_objects@
-ALL_BRLTTY_CTB = @all_brltty_ctb@
-INSTALL_BRLTTY_CTB = @install_brltty_ctb@
 
 API_VERSION = @api_version@
 API_RELEASE = @api_release@

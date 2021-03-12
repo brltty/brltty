@@ -103,7 +103,7 @@ AC_DEFUN([BRLTTY_ARG_TABLE], [dnl
 brltty_default_table="$2"
 BRLTTY_ARG_WITH(
    [$1-table], [FILE],
-   [built-in (fallback) $1 table]brltty_tables_$1,
+   [built-in $1 table],
    [$1_table], ["${brltty_default_table}"]
 )
 install_$1_tables=install-$1-tables
@@ -497,14 +497,6 @@ AC_SUBST([$1_driver_objects])
 AC_SUBST([$1_drivers])
 AC_SUBST([$1_help])
 ])
-
-AC_DEFUN([BRLTTY_TEXT_TABLE], [dnl
-define([brltty_tables_text], ifdef([brltty_tables_text], [brltty_tables_text])[
-m4_text_wrap([$2], [           ], [- ]m4_format([%-8s ], [$1]), brltty_help_width)])])
-
-AC_DEFUN([BRLTTY_ATTRIBUTES_TABLE], [dnl
-define([brltty_tables_attributes], ifdef([brltty_tables_attributes], [brltty_tables_attributes])[
-m4_text_wrap([$2], [             ], [- ]m4_format([%-10s ], [$1]), brltty_help_width)])])
 
 AC_DEFUN([BRLTTY_SUMMARY_BEGIN], [dnl
 brltty_summary_lines="Options Summary:"

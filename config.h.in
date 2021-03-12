@@ -570,11 +570,14 @@ extern "C" {
 /* Define this to be a string containing the default parameters for the screen driver(s). */
 #undef SCREEN_PARAMETERS
 
-/* Define this to be a string containing the path to the default text table. */
+/* Define this to be a string containing the name of the default text table. */
 #undef TEXT_TABLE
 
-/* Define this to be a string containing the path to the default attributes table. */
+/* Define this to be a string containing the name of the default attributes table. */
 #undef ATTRIBUTES_TABLE
+
+/* Define this to be a string containing the name of the default contraction table. */
+#undef CONTRACTION_TABLE
 
 /* Define this to include speech synthesizer and text-to-speech engine support. */
 #undef ENABLE_SPEECH_SUPPORT

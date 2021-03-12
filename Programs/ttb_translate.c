@@ -30,7 +30,7 @@
 #include "brl_dots.h"
 
 static const unsigned char internalTextTableBytes[] = {
-#include "text.auto.h"
+#include "ttb.auto.h"
 };
 
 static TextTable internalTextTable = {

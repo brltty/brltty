@@ -1155,14 +1155,7 @@ BRLTTY_ARG_DISABLE(
    [in-line contracted braille],
    [],
 [dnl
-   AC_DEFINE([ENABLE_CONTRACTED_BRAILLE], [1],
-             [Define this to include contraction table support.])
-
-   all_brltty_ctb="all-brltty-ctb"
-   install_brltty_ctb="install-brltty-ctb"
-
    contracted_braille_objects='ctb_compile.$O cldr.$O ctb_translate.$O ctb_native.$O ctb_external.$O'
-   install_contraction_tables=install-contraction-tables
 
    louis_includes=""
    louis_libs=""
@@ -1185,10 +1178,7 @@ BRLTTY_ARG_DISABLE(
    AC_SUBST([louis_includes])
    AC_SUBST([louis_libs])
 ])
-AC_SUBST([all_brltty_ctb])
-AC_SUBST([install_brltty_ctb])
 AC_SUBST([contracted_braille_objects])
-AC_SUBST([install_contraction_tables])
 
 BRLTTY_ARG_DISABLE(
    [gpm],
@@ -1703,7 +1693,7 @@ AC_DEFINE_UNQUOTED([SERIAL_FIRST_DEVICE], ["${serial_first_device}"],
 
 BRLTTY_ARG_WITH(
    [braille-device], [DEVICE],
-   [default braille display device],
+   [default braille device],
    [braille_device], ["yes"]
 )
 if test "${braille_device}" = "no"
@@ -1727,101 +1717,9 @@ AC_DEFINE_UNQUOTED([BRAILLE_DEVICE], ["${braille_device}"],
                    [Define this to be a string containing the path to the default braille device.])
 BRLTTY_SUMMARY_ITEM([braille-device], [braille_device])
 
-BRLTTY_TEXT_TABLE([auto], [locale-based autoselection])
-BRLTTY_TEXT_TABLE([ar], [Arabic (generic)])
-BRLTTY_TEXT_TABLE([as], [Assamese])
-BRLTTY_TEXT_TABLE([awa], [Awadhi])
-BRLTTY_TEXT_TABLE([bg], [Bulgarian])
-BRLTTY_TEXT_TABLE([bh], [Bihari])
-BRLTTY_TEXT_TABLE([bn], [Bengali])
-BRLTTY_TEXT_TABLE([bo], [Tibetan])
-BRLTTY_TEXT_TABLE([bra], [Braj])
-BRLTTY_TEXT_TABLE([brf], [Braille Ready Format (for viewing .brf files within an editor or pager)])
-BRLTTY_TEXT_TABLE([cs], [Czech])
-BRLTTY_TEXT_TABLE([cy], [Welsh])
-BRLTTY_TEXT_TABLE([da], [Danish])
-BRLTTY_TEXT_TABLE([da-1252], [Danish (Svend Thougaard, 2002-11-18)])
-BRLTTY_TEXT_TABLE([da-lt], [Danish (LogText)])
-BRLTTY_TEXT_TABLE([de], [German])
-BRLTTY_TEXT_TABLE([dra], [Dravidian])
-BRLTTY_TEXT_TABLE([el], [Greek])
-BRLTTY_TEXT_TABLE([en], [English])
-BRLTTY_TEXT_TABLE([en_CA], [English (Canada)])
-BRLTTY_TEXT_TABLE([en_GB], [English (United Kingdom)])
-BRLTTY_TEXT_TABLE([en_US], [English (United States)])
-BRLTTY_TEXT_TABLE([en-nabcc], [English (North American Braille Computer Code)])
-BRLTTY_TEXT_TABLE([eo], [Esperanto])
-BRLTTY_TEXT_TABLE([es], [Spanish])
-BRLTTY_TEXT_TABLE([et], [Estonian])
-BRLTTY_TEXT_TABLE([fi], [Finnish])
-BRLTTY_TEXT_TABLE([fr], [French])
-BRLTTY_TEXT_TABLE([fr_CA], [French (Canada)])
-BRLTTY_TEXT_TABLE([fr_FR], [French (France)])
-BRLTTY_TEXT_TABLE([fr-2007], [French (unified 2007)])
-BRLTTY_TEXT_TABLE([fr-cbifs], [French (Code Braille Informatique Français Standard)])
-BRLTTY_TEXT_TABLE([fr-vs], [French (VisioBraille)])
-BRLTTY_TEXT_TABLE([ga], [Irish])
-BRLTTY_TEXT_TABLE([gd], [Gaelic])
-BRLTTY_TEXT_TABLE([gon], [Gondi])
-BRLTTY_TEXT_TABLE([gu], [Gujarati])
-BRLTTY_TEXT_TABLE([he], [Hebrew])
-BRLTTY_TEXT_TABLE([hi], [Hindi])
-BRLTTY_TEXT_TABLE([hr], [Croatian])
-BRLTTY_TEXT_TABLE([hu], [Hungarian])
-BRLTTY_TEXT_TABLE([hy], [Armenian])
-BRLTTY_TEXT_TABLE([is], [Icelandic])
-BRLTTY_TEXT_TABLE([it], [Italian])
-BRLTTY_TEXT_TABLE([kha], [Khasi])
-BRLTTY_TEXT_TABLE([kn], [Kannada])
-BRLTTY_TEXT_TABLE([kok], [Konkani])
-BRLTTY_TEXT_TABLE([kru], [Kurukh])
-BRLTTY_TEXT_TABLE([lt], [Lituanian])
-BRLTTY_TEXT_TABLE([lv], [Latvian])
-BRLTTY_TEXT_TABLE([mg], [Malagasy])
-BRLTTY_TEXT_TABLE([mi], [Maori])
-BRLTTY_TEXT_TABLE([ml], [Malayalam])
-BRLTTY_TEXT_TABLE([mni], [Manipuri])
-BRLTTY_TEXT_TABLE([mr], [Marathi])
-BRLTTY_TEXT_TABLE([mt], [Maltese])
-BRLTTY_TEXT_TABLE([mun], [Munda])
-BRLTTY_TEXT_TABLE([mwr], [Marwari])
-BRLTTY_TEXT_TABLE([ne], [Nepali])
-BRLTTY_TEXT_TABLE([new], [Newari])
-BRLTTY_TEXT_TABLE([nl], [Dutch])
-BRLTTY_TEXT_TABLE([nl_BE], [Dutch (Belgium)])
-BRLTTY_TEXT_TABLE([nl_NL], [Dutch (Netherlands)])
-BRLTTY_TEXT_TABLE([no], [Norwegian])
-BRLTTY_TEXT_TABLE([no-generic], [Norwegian (with support for other languages)])
-BRLTTY_TEXT_TABLE([no-oup], [Norwegian (Offentlig utvalg for punktskrift)])
-BRLTTY_TEXT_TABLE([nwc], [Newari (old)])
-BRLTTY_TEXT_TABLE([or], [Oriya])
-BRLTTY_TEXT_TABLE([pa], [Panjabi])
-BRLTTY_TEXT_TABLE([pi], [Pali])
-BRLTTY_TEXT_TABLE([pl], [Polish])
-BRLTTY_TEXT_TABLE([pt], [Portuguese])
-BRLTTY_TEXT_TABLE([ro], [Romanian])
-BRLTTY_TEXT_TABLE([ru], [Russian])
-BRLTTY_TEXT_TABLE([se], [Sami (Northern)])
-BRLTTY_TEXT_TABLE([sa], [Sanskrit])
-BRLTTY_TEXT_TABLE([sat], [Santali])
-BRLTTY_TEXT_TABLE([sd], [Sindhi])
-BRLTTY_TEXT_TABLE([sk], [Slovak])
-BRLTTY_TEXT_TABLE([sl], [Slovenian])
-BRLTTY_TEXT_TABLE([sv], [Swedish])
-BRLTTY_TEXT_TABLE([sv-1989], [Swedish (1989 standard)])
-BRLTTY_TEXT_TABLE([sv-1996], [Swedish (1996 standard)])
-BRLTTY_TEXT_TABLE([sw], [Swahili])
-BRLTTY_TEXT_TABLE([ta], [Tamil])
-BRLTTY_TEXT_TABLE([te], [Telugu])
-BRLTTY_TEXT_TABLE([tr], [Turkish])
-BRLTTY_TEXT_TABLE([uk], [Ukrainian])
-BRLTTY_TEXT_TABLE([vi], [Vietnamese])
 BRLTTY_ARG_TABLE([text], [en-nabcc], [ttb])
-
-BRLTTY_ATTRIBUTES_TABLE([left_right], [foreground colour in the left column and background colour in the right column])
-BRLTTY_ATTRIBUTES_TABLE([invleft_right], [inverse foreground colour in the left column and background colour in the right column])
-BRLTTY_ATTRIBUTES_TABLE([upper_lower], [foreground colour in the upper square and background colour in the lower square])
 BRLTTY_ARG_TABLE([attributes], [left_right], [atb])
+BRLTTY_ARG_TABLE([contraction], [none], [ctb])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],

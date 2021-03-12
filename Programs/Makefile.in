@@ -18,7 +18,7 @@
 
 all: all-commands all-tools $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 
-all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-atb $(ALL_BRLTTY_CTB) all-brltty-ktb all-brltty-tune all-brltty-morse
+all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-atb all-brltty-ctb all-brltty-ktb all-brltty-tune all-brltty-morse
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltty-lscmds: brltty-lscmds$X
 all-brltty-trtxt: brltty-trtxt$X
@@ -1001,12 +1001,16 @@ screen-drivers:
 ###############################################################################
 
 TEXT_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/$(TEXT_TABLE)$(TEXT_TABLE_EXTENSION)
-text.auto.h: $(TEXT_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
+ttb.auto.h: $(TEXT_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
 	./tbl2hex$(X_FOR_BUILD) -- $(TEXT_TABLE_FILE) >$@
 
 ATTRIBUTES_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/$(ATTRIBUTES_TABLE)$(ATTRIBUTES_TABLE_EXTENSION)
-attr.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
+atb.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
 	./tbl2hex$(X_FOR_BUILD) -- $(ATTRIBUTES_TABLE_FILE) >$@
+
+CONTRACTION_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/$(CONTRACTION_TABLE)$(CONTRACTION_TABLE_EXTENSION)
+ctb.auto.h: $(CONTRACTION_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
+	./tbl2hex$(X_FOR_BUILD) -- $(CONTRACTION_TABLE_FILE) >$@
 
 cmds.auto.h: $(SRC_DIR)/cmds.awk $(COMMANDS_DEPENDENCIES)
 	$(AWK) -f $(SRC_DIR)/cmds.awk $(COMMANDS_ARGUMENTS) >$@
@@ -1084,18 +1088,16 @@ install-programs: install-commands install-tools
 
 install-program-directories: install-program-directory
 
-install-commands: all-commands $(INSTALL_BRLTTY_CTB) install-program-directories
+install-commands: all-commands install-program-directories
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-atb$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ktb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-tune$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-morse$X $(INSTALL_PROGRAM_DIRECTORY) 
-
-install-brltty-ctb: brltty-ctb$X install-program-directories
-	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
 
 install-tools: all-tools install-program-directories
 	$(INSTALL_PROGRAM) brltty-cldr$X $(INSTALL_PROGRAM_DIRECTORY) 

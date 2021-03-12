@@ -25,7 +25,7 @@
 #include "atb_internal.h"
 
 static const unsigned char internalAttributesTableBytes[] = {
-#include "attr.auto.h"
+#include "atb.auto.h"
 };
 
 static AttributesTable internalAttributesTable = {

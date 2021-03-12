@@ -133,6 +133,15 @@ extern GetContractionTableTranslationMethodsFunction getContractionTableTranslat
 extern GetContractionTableTranslationMethodsFunction getContractionTableTranslationMethods_external;
 extern GetContractionTableTranslationMethodsFunction getContractionTableTranslationMethods_louis;
 
+typedef struct {
+  union {
+    ContractionTableHeader *fields;
+    const unsigned char *bytes;
+  } header;
+
+  size_t size;
+} InternalContractionTable;
+
 struct ContractionTableStruct {
   const ContractionTableManagementMethods *managementMethods;
   const ContractionTableTranslationMethods *translationMethods;
@@ -170,14 +179,7 @@ struct ContractionTableStruct {
   } cache;
 
   union {
-    struct {
-      union {
-        ContractionTableHeader *fields;
-        const unsigned char *bytes;
-      } header;
-
-      size_t size;
-    } internal;
+    InternalContractionTable internal;
 
     struct {
       char *command;
