@@ -134,7 +134,7 @@ PREFERENCE_STRING_TABLE(statusField,
   "dots", "letter",
   "time",
   "wxya", "cxya",
-  "generic"
+  "generic", "space",
 )
 
 const PreferenceDefinition preferenceDefinitionTable[] = {

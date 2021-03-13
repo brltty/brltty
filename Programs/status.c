@@ -214,6 +214,11 @@ renderStatusField_generic (unsigned char *cells) {
   cells[gscBrailleTypingMode] = prefs.brailleTypingMode;
 }
 
+static void
+renderStatusField_space (unsigned char *cells) {
+  cells[0] = 0;
+}
+
 typedef struct {
   RenderStatusField render;
   unsigned char length;
@@ -298,7 +303,12 @@ static const StatusFieldEntry statusFieldTable[] = {
   [sfGeneric] = {
     .render = renderStatusField_generic,
     .length = GSC_COUNT
-  }
+  },
+
+  [sfSpace] = {
+    .render = renderStatusField_space,
+    .length = 1
+  },
 };
 
 static const unsigned int statusFieldCount = ARRAY_COUNT(statusFieldTable);

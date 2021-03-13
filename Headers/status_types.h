@@ -24,7 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  sfEnd,
+  sfEnd = 0,
   sfWindowCoordinates,
   sfWindowColumn,
   sfWindowRow,
@@ -39,7 +39,8 @@ typedef enum {
   sfTime,
   sfAlphabeticWindowCoordinates,
   sfAlphabeticCursorCoordinates,
-  sfGeneric
+  sfGeneric,
+  sfSpace,
 } StatusField;
 
 #define GSC_MARKER 0XFF /* must be in GSC_FIRST */

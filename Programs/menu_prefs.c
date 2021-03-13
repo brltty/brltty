@@ -553,7 +553,8 @@ newStatusFieldMenuItem (
     {.label=strtext("Time"), .comment=strtext("2 cells")},
     {.label=strtext("Alphabetic Braille Window Coordinates"), .comment=strtext("1 cell")},
     {.label=strtext("Alphabetic Screen Cursor Coordinates"), .comment=strtext("1 cell")},
-    {.label=strtext("Generic")}
+    {.label=strtext("Generic")},
+    {.label=strtext("Space"), .comment=strtext("1 cell")},
   };
 
   MenuString name = {
