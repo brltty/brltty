@@ -102,7 +102,7 @@ BRLTTY_SUMMARY_ITEM([$1], [$4])])
 AC_DEFUN([BRLTTY_ARG_TABLE], [dnl
 brltty_default_table="$2"
 BRLTTY_ARG_WITH(
-   [$1-table], [FILE],
+   [$1-table], [NAME],
    [built-in $1 table],
    [$1_table], ["${brltty_default_table}"]
 )
