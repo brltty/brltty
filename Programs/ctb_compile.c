@@ -36,10 +36,6 @@
 #include "cldr.h"
 #include "hostcmd.h"
 
-static const unsigned char internalContractionTableBytes[] = {
-#include "ctb.auto.h"
-};
-
 static const wchar_t *const characterClassNames[] = {
   WS_C("space"),
   WS_C("letter"),
@@ -796,17 +792,8 @@ compileContractionTable_native (const char *name) {
 
             if (processDataFile(name, &parameters)) {
               if (saveCharacterTable(&ctd)) {
-                if ((table = malloc(sizeof(*table)))) {
-                  table->managementMethods = &nativeManagementMethods;
-                  table->translationMethods = getContractionTableTranslationMethods_native();
-                  initializeCommonFields(table);
-
-                  table->data.internal.header.fields = getContractionTableHeader(&ctd);
-                  table->data.internal.size = getDataSize(ctd.area);
-                  resetDataArea(ctd.area);
-                } else {
-                  logMallocError();
-                }
+                table = newContractionTable(getDataItem(ctd.area, 0), getDataSize(ctd.area));
+                resetDataArea(ctd.area);
               }
             }
           }
@@ -814,7 +801,7 @@ compileContractionTable_native (const char *name) {
           destroyDataArea(ctd.area);
         }
       } else {
-        table = newContractionTable(internalContractionTableBytes, 0);
+        table = newContractionTable(getInternalContractionTableBytes(), 0);
       }
 
       deallocateCharacterClasses(&ctd);

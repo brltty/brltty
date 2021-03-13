@@ -27,6 +27,15 @@
 #include "unicode.h"
 #include "prefs.h"
 
+static const unsigned char internalContractionTableBytes[] = {
+#include "ctb.auto.h"
+};
+
+const unsigned char *
+getInternalContractionTableBytes (void) {
+  return internalContractionTableBytes;
+}
+
 ContractionTable *contractionTable = NULL;
 
 static LockDescriptor *

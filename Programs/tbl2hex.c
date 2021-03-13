@@ -254,6 +254,11 @@ main (int argc, char *argv[]) {
 
 #include "ctb_internal.h"
 
+const unsigned char *
+getInternalContractionTableBytes (void) {
+  return NULL;
+}
+
 const ContractionTableTranslationMethods *
 getContractionTableTranslationMethods_native (void) {
   return NULL;

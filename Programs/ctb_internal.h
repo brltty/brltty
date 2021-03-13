@@ -204,6 +204,8 @@ struct ContractionTableStruct {
 extern int startContractionCommand (ContractionTable *table);
 extern void stopContractionCommand (ContractionTable *table);
 
+extern const unsigned char *getInternalContractionTableBytes (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
