@@ -132,7 +132,8 @@ PREFERENCE_STRING_TABLE(speechWhitespaceIndicator,
 )
 
 PREFERENCE_STRING_TABLE(sayLineMode,
-  "immediate", "enqueue"
+  [sayImmediate] = "immediate",
+  [sayEnqueue] = "enqueue",
 )
 
 PREFERENCE_STRING_TABLE(timeFormat,

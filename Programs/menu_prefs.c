@@ -1172,8 +1172,8 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("Immediate")},
-        {.label=strtext("Enqueue")}
+        [sayImmediate] = {.label=strtext("Immediate")},
+        [sayEnqueue] = {.label=strtext("Enqueue")},
       };
 
       NAME(strtext("Say Line Mode"));
@@ -1481,14 +1481,14 @@ makePreferencesMenu (void) {
 
   {
     static const MenuString logLevels[] = {
-      {.label=strtext("Emergency")},
-      {.label=strtext("Alert")},
-      {.label=strtext("Critical")},
-      {.label=strtext("Error")},
-      {.label=strtext("Warning")},
-      {.label=strtext("Notice")},
-      {.label=strtext("Information")},
-      {.label=strtext("Debug")}
+      [LOG_EMERG] = {.label=strtext("Emergency")},
+      [LOG_ALERT] = {.label=strtext("Alert")},
+      [LOG_CRIT] = {.label=strtext("Critical")},
+      [LOG_ERR] = {.label=strtext("Error")},
+      [LOG_WARNING] = {.label=strtext("Warning")},
+      [LOG_NOTICE] = {.label=strtext("Notice")},
+      [LOG_INFO] = {.label=strtext("Information")},
+      [LOG_DEBUG] = {.label=strtext("Debug")},
     };
 
     SUBMENU(internalSubmenu, rootMenu, strtext("Internal Parameters"));
