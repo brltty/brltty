@@ -64,11 +64,19 @@ PREFERENCE_STRING_TABLE(skipBlankWindowsMode,
 )
 
 PREFERENCE_STRING_TABLE(cursorTrackingDelay,
-  "0", "25", "50", "100", "200"
+  [ctdNone] = "0",
+  [ctd250ms] = "25",
+  [ctd500ms] = "50",
+  [ctd1s] = "100",
+  [ctd2s] = "200",
 )
 
 PREFERENCE_STRING_TABLE(autoreleaseTime,
-  "0", "5", "10", "20", "40"
+  [atOff] = "0",
+  [at5s] = "5",
+  [at10s] = "10",
+  [at20s] = "20",
+  [at40s] = "40",
 )
 
 PREFERENCE_STRING_TABLE(cursorStyle,
@@ -113,11 +121,14 @@ PREFERENCE_STRING_TABLE(speechPunctuation,
 )
 
 PREFERENCE_STRING_TABLE(speechUppercaseIndicator,
-  "none", "cap", "higher"
+  [sucNone] = "none",
+  [sucSayCap] = "cap",
+  [sucRaisePitch] = "higher",
 )
 
 PREFERENCE_STRING_TABLE(speechWhitespaceIndicator,
-  "none", "space"
+  [swsNone] = "none",
+  [swsSaySpace] = "space",
 )
 
 PREFERENCE_STRING_TABLE(sayLineMode,
@@ -125,31 +136,45 @@ PREFERENCE_STRING_TABLE(sayLineMode,
 )
 
 PREFERENCE_STRING_TABLE(timeFormat,
-  "24hour", "12hour"
+  [tf24Hour] = "24hour",
+  [tf12Hour] = "12hour",
 )
 
 PREFERENCE_STRING_TABLE(timeSeparator,
-  "colon", "dot"
+  [tsColon] = "colon",
+  [tsDot] = "dot",
 )
 
 PREFERENCE_STRING_TABLE(datePosition,
-  "no", "before", "after"
+  [dpNone] = "no",
+  [dpBeforeTime] = "before",
+  [dpAfterTime] = "after",
 )
 
 PREFERENCE_STRING_TABLE(dateFormat,
-  "ymd", "mdy", "dmy"
+  [dfYearMonthDay] = "ymd",
+  [dfMonthDayYear] = "mdy",
+  [dfDayMonthYear] = "dmy",
 )
 
 PREFERENCE_STRING_TABLE(dateSeparator,
-  "dash", "slash", "dot"
+  [dsDash] = "dash",
+  [dsSlash] = "slash",
+  [dsDot] = "dot",
 )
 
 PREFERENCE_STRING_TABLE(statusPosition,
-  "none", "left", "right"
+  [spNone] = "none",
+  [spLeft] = "left",
+  [spRight] = "right",
 )
 
 PREFERENCE_STRING_TABLE(statusSeparator,
-  "none", "space", "block", "status", "text"
+  [ssNone] = "none",
+  [ssSpace] = "space",
+  [ssBlock] = "block",
+  [ssStatusSide] = "status",
+  [ssTextSide] = "text",
 )
 
 PREFERENCE_STRING_TABLE(statusField,

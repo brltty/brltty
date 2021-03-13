@@ -892,11 +892,11 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("None")},
-        {.label=strtext("250 milliseconds")},
-        {.label=strtext("500 milliseconds")},
-        {.label=strtext("1 second")},
-        {.label=strtext("2 seconds")}
+        [ctdNone] = {.label=strtext("None")},
+        [ctd250ms] = {.label=strtext("250 milliseconds")},
+        [ctd500ms] = {.label=strtext("500 milliseconds")},
+        [ctd1s] = {.label=strtext("1 second")},
+        [ctd2s] = {.label=strtext("2 seconds")},
       };
 
       NAME(strtext("Cursor Tracking Delay"));
@@ -955,11 +955,11 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("Off")},
-        {.label=strtext("5 seconds")},
-        {.label=strtext("10 seconds")},
-        {.label=strtext("20 seconds")},
-        {.label=strtext("40 seconds")}
+        [atOff] = {.label=strtext("Off")},
+        [at5s] = {.label=strtext("5 seconds")},
+        [at10s] = {.label=strtext("10 seconds")},
+        [at20s] = {.label=strtext("20 seconds")},
+        [at40s] = {.label=strtext("40 seconds")},
       };
 
       NAME(strtext("Autorelease Time"));
@@ -1149,11 +1149,11 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("None")},
+        [sucNone] = {.label=strtext("None")},
         // "cap" here, used during speech output, is short for "capital".
         // It is spoken just before an uppercase letter, e.g. "cap A".
-        {.label=strtext("Say Cap")},
-        {.label=strtext("Raise Pitch")}
+        [sucSayCap] = {.label=strtext("Say Cap")},
+        [sucRaisePitch] = {.label=strtext("Raise Pitch")},
       };
 
       NAME(strtext("Speech Uppercase Indicator"));
@@ -1162,8 +1162,8 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("None")},
-        {.label=strtext("Say Space")},
+        [swsNone] = {.label=strtext("None")},
+        [swsSaySpace] = {.label=strtext("Say Space")},
       };
 
       NAME(strtext("Speech Whitespace Indicator"));
@@ -1267,8 +1267,8 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("24 Hour")},
-        {.label=strtext("12 Hour")}
+        [tf24Hour] = {.label=strtext("24 Hour")},
+        [tf12Hour] = {.label=strtext("12 Hour")},
       };
 
       NAME(strtext("Time Format"));
@@ -1277,8 +1277,8 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("Colon"), ":"},
-        {.label=strtext("Dot"), "."},
+        [tsColon] = {.label=strtext("Colon"), ":"},
+        [tsDot] = {.label=strtext("Dot"), "."},
       };
 
       NAME(strtext("Time Separator"));
@@ -1292,9 +1292,9 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("None")},
-        {.label=strtext("Before Time")},
-        {.label=strtext("After Time")}
+        [dpNone] = {.label=strtext("None")},
+        [dpBeforeTime] = {.label=strtext("Before Time")},
+        [dpAfterTime] = {.label=strtext("After Time")},
       };
 
       NAME(strtext("Date Position"));
@@ -1303,9 +1303,9 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("Year Month Day")},
-        {.label=strtext("Month Day Year")},
-        {.label=strtext("Day Month Year")},
+        [dfYearMonthDay] = {.label=strtext("Year Month Day")},
+        [dfMonthDayYear] = {.label=strtext("Month Day Year")},
+        [dfDayMonthYear] = {.label=strtext("Day Month Year")},
       };
 
       NAME(strtext("Date Format"));
@@ -1315,9 +1315,9 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("Dash"), "-"},
-        {.label=strtext("Slash"), "/"},
-        {.label=strtext("Dot"), "."}
+        [dsDash] = {.label=strtext("Dash"), "-"},
+        [dsSlash] = {.label=strtext("Slash"), "/"},
+        [dsDot] = {.label=strtext("Dot"), "."},
       };
 
       NAME(strtext("Date Separator"));
@@ -1331,9 +1331,9 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("None")},
-        {.label=strtext("Left")},
-        {.label=strtext("Right")}
+        [spNone] = {.label=strtext("None")},
+        [spLeft] = {.label=strtext("Left")},
+        [spRight] = {.label=strtext("Right")},
       };
 
       NAME(strtext("Status Position"));
@@ -1351,11 +1351,11 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("None")},
-        {.label=strtext("Space")},
-        {.label=strtext("Block")},
-        {.label=strtext("Status Side")},
-        {.label=strtext("Text Side")}
+        [ssNone] = {.label=strtext("None")},
+        [ssSpace] = {.label=strtext("Space")},
+        [ssBlock] = {.label=strtext("Block")},
+        [ssStatusSide] = {.label=strtext("Status Side")},
+        [ssTextSide] = {.label=strtext("Text Side")},
       };
 
       NAME(strtext("Status Separator"));
