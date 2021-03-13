@@ -26,8 +26,6 @@ export CC="gcc -m32"
    --without-dynld-package \
    \
    --disable-api \
-   --disable-contracted-braille \
-   \
    --disable-gpm \
    --disable-icu \
    --disable-polkit \
