@@ -55,7 +55,6 @@ preferences_file=@PREFERENCES_FILE@
 text_table=@text_table@
 attributes_table=@attributes_table@
 
-have_contracted_braille=@brltty_enabled_contracted_braille@
 have_liblouis=@brltty_enabled_liblouis@
 liblouis_tables_directory=@louis_tables_directory@
 
