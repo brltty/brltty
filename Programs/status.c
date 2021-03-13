@@ -29,6 +29,11 @@
 #include "ttb.h"
 
 static void
+renderCharacter (unsigned char *cell, char character) {
+  *cell = convertCharacterToDots(textTable, character);
+}
+
+static void
 renderDigitUpper (unsigned char *cell, int digit) {
   *cell |= portraitDigits[digit];
 }
@@ -136,30 +141,42 @@ renderStatusField_cursorAndWindowRow (unsigned char *cells) {
 
 static void
 renderStatusField_screenNumber (unsigned char *cells) {
-  renderNumberVertical(cells, scr.number);
+  char character =
+    isSpecialScreen(SCR_HELP)  ? 'h':
+    isSpecialScreen(SCR_MENU)  ? 'm':
+    isSpecialScreen(SCR_FROZEN)? 'f':
+    0;
+
+  if (character) {
+    renderCharacter(cells, character);
+  } else {
+    renderNumberVertical(cells, scr.number);
+  }
 }
 
 static void
 renderStatusField_stateDots (unsigned char *cells) {
-  *cells = (isSpecialScreen(SCR_FROZEN) ? BRL_DOT_1: 0) |
-           (prefs.showScreenCursor      ? BRL_DOT_4: 0) |
-           (ses->displayMode            ? BRL_DOT_2: 0) |
-           (prefs.screenCursorStyle     ? BRL_DOT_5: 0) |
-           (prefs.alertTunes            ? BRL_DOT_3: 0) |
-           (prefs.blinkingScreenCursor  ? BRL_DOT_6: 0) |
-           (ses->trackScreenCursor      ? BRL_DOT_7: 0) |
-           (prefs.slidingBrailleWindow  ? BRL_DOT_8: 0);
+  cells[0] = (isSpecialScreen(SCR_FROZEN) ? BRL_DOT_1: 0)
+           | (prefs.showScreenCursor      ? BRL_DOT_4: 0)
+           | (ses->displayMode            ? BRL_DOT_2: 0)
+           | (prefs.screenCursorStyle     ? BRL_DOT_5: 0)
+           | (prefs.alertTunes            ? BRL_DOT_3: 0)
+           | (prefs.blinkingScreenCursor  ? BRL_DOT_6: 0)
+           | (ses->trackScreenCursor      ? BRL_DOT_7: 0)
+           | (prefs.slidingBrailleWindow  ? BRL_DOT_8: 0)
+           ;
 }
 
 static void
 renderStatusField_stateLetter (unsigned char *cells) {
-  *cells = convertCharacterToDots(textTable,
-                                  ses->displayMode            ? WC_C('a'):
-                                  isSpecialScreen(SCR_HELP)   ? WC_C('h'):
-                                  isSpecialScreen(SCR_MENU)   ? WC_C('m'):
-                                  isSpecialScreen(SCR_FROZEN) ? WC_C('f'):
-                                  ses->trackScreenCursor      ? WC_C('t'):
-                                                                WC_C(' '));
+  renderCharacter(cells,
+    ses->displayMode            ? WC_C('a'):
+    isSpecialScreen(SCR_HELP)   ? WC_C('h'):
+    isSpecialScreen(SCR_MENU)   ? WC_C('m'):
+    isSpecialScreen(SCR_FROZEN) ? WC_C('f'):
+    ses->trackScreenCursor      ? WC_C('t'):
+    WC_C(' ')
+  );
 }
 
 static void
