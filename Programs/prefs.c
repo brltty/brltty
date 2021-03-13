@@ -241,6 +241,14 @@ resetPreferences (void) {
   }
 }
 
+static const char *
+getSettingName (const PreferenceDefinition *pref, unsigned char index) {
+  const PreferenceStringTable *names = pref->settingNames;
+  if (!names) return NULL;
+  if (index >= names->count) return NULL;
+  return names->table[index];
+}
+
 static int
 changePreferenceSetting (
   const char *name, const char *operand,
@@ -248,7 +256,10 @@ changePreferenceSetting (
 ) {
   if (names) {
     for (unsigned int index=0; index<names->count; index+=1) {
-      if (strcmp(operand, names->table[index]) == 0) {
+      const char *name = names->table[index];
+      if (!name) continue;
+
+      if (strcmp(operand, name) == 0) {
         *setting = index;
         return 1;
       }
@@ -448,24 +459,36 @@ putPreferenceComment (FILE *file, const PreferenceDefinition *pref) {
   }
 
   if (fputs(": ", file) == EOF) return 0;
+  const char *name = getSettingName(pref, pref->defaultValue);
 
-  if (pref->settingNames && (pref->defaultValue < pref->settingNames->count)) {
-    if (fputs(pref->settingNames->table[pref->defaultValue], file) == EOF) return 0;
+  if (name) {
+    if (fputs(name, file) == EOF) return 0;
   } else {
     if (fprintf(file, "%u", pref->defaultValue) < 0) return 0;
   }
 
-  if (pref->settingNames && (pref->settingNames->count > 0)) {
-    unsigned int index;
-
+  if (pref->settingNames) {
     if (fputs(" {", file) == EOF) return 0;
 
-    for (index=0; index<pref->settingNames->count; index+=1) {
-      if (index > 0) {
-        if (fputc(' ', file) == EOF) return 0;
-      }
+    unsigned char count = pref->settingNames->count;
+    int first = 1;
 
-      if (fputs(pref->settingNames->table[index], file) == EOF) return 0;
+    for (unsigned char index=0; index<count; index+=1) {
+      const char *name = getSettingName(pref, index);
+      if (name) {
+        if (first) {
+          first = 0;
+        } else if (fputc(' ', file) == EOF) {
+          return 0;
+        }
+
+        if (fputs(name, file) == EOF) return 0;
+      } else {
+        logMessage(LOG_WARNING,
+          "unnamed preference setting: %s: %u",
+          pref->name, index
+        );
+      }
     }
 
     if (fputc('}', file) == EOF) return 0;
@@ -476,11 +499,12 @@ putPreferenceComment (FILE *file, const PreferenceDefinition *pref) {
 }
 
 static int
-putSetting (FILE *file, unsigned char setting, const PreferenceStringTable *names) {
+putSetting (FILE *file, const PreferenceDefinition *pref, unsigned char setting) {
   if (fputc(' ', file) == EOF) return 0;
+  const char *name = getSettingName(pref, setting);
 
-  if (names && (setting < names->count)) {
-    if (fputs(names->table[setting], file) == EOF) return 0;
+  if (name) {
+    if (fputs(name, file) == EOF) return 0;
   } else {
     if (fprintf(file, "%u", setting) < 0) return 0;
   }
@@ -500,9 +524,9 @@ putPreference (FILE *file, const PreferenceDefinition *pref) {
     unsigned char *setting = pref->setting;
 
     while (count-- && *setting) {
-      if (!putSetting(file, *setting++, pref->settingNames)) return 0;
+      if (!putSetting(file, pref, *setting++)) return 0;
     }
-  } else if (!putSetting(file, *pref->setting, pref->settingNames)) {
+  } else if (!putSetting(file, pref, *pref->setting)) {
     return 0;
   }
 
