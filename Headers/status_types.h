@@ -40,6 +40,14 @@ typedef enum {
   sfAlphabeticWindowCoordinates,
   sfAlphabeticCursorCoordinates,
   sfGeneric,
+
+  /*****************************************************************************/
+  /* No fields above this point should be added, removed, or reordered so that */
+  /* backward compatibility with old binary preference files will be retained. */
+  /*                                                                           */
+  /* Fields below this point may be modified as desired.                       */
+  /*****************************************************************************/
+
   sfSpace,
 } StatusField;
 

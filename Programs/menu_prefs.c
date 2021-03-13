@@ -538,23 +538,23 @@ newStatusFieldMenuItem (
   MenuItemTester *test, MenuItemChanged *changed
 ) {
   static const MenuString strings[] = {
-    {.label=strtext("End")},
-    {.label=strtext("Braille Window Coordinates"), .comment=strtext("2 cells")},
-    {.label=strtext("Braille Window Column"), .comment=strtext("1 cell")},
-    {.label=strtext("Braille Window Row"), .comment=strtext("1 cell")},
-    {.label=strtext("Screen Cursor Coordinates"), .comment=strtext("2 cells")},
-    {.label=strtext("Screen Cursor Column"), .comment=strtext("1 cell")},
-    {.label=strtext("Screen Cursor Row"), .comment=strtext("1 cell")},
-    {.label=strtext("Screen Cursor and Braille Window Column"), .comment=strtext("2 cells")},
-    {.label=strtext("Screen Cursor and Braille Window Row"), .comment=strtext("2 cells")},
-    {.label=strtext("Screen Number"), .comment=strtext("1 cell")},
-    {.label=strtext("State Dots"), .comment=strtext("1 cell")},
-    {.label=strtext("State Letter"), .comment=strtext("1 cell")},
-    {.label=strtext("Time"), .comment=strtext("2 cells")},
-    {.label=strtext("Alphabetic Braille Window Coordinates"), .comment=strtext("1 cell")},
-    {.label=strtext("Alphabetic Screen Cursor Coordinates"), .comment=strtext("1 cell")},
-    {.label=strtext("Generic")},
-    {.label=strtext("Space"), .comment=strtext("1 cell")},
+    [sfEnd] = {.label=strtext("End")},
+    [sfWindowCoordinates] = {.label=strtext("Window Coordinates"), .comment=strtext("2 cells")},
+    [sfWindowColumn] = {.label=strtext("Window Column"), .comment=strtext("1 cell")},
+    [sfWindowRow] = {.label=strtext("Window Row"), .comment=strtext("1 cell")},
+    [sfCursorCoordinates] = {.label=strtext("Cursor Coordinates"), .comment=strtext("2 cells")},
+    [sfCursorColumn] = {.label=strtext("Cursor Column"), .comment=strtext("1 cell")},
+    [sfCursorRow] = {.label=strtext("Cursor Row"), .comment=strtext("1 cell")},
+    [sfCursorAndWindowColumn] = {.label=strtext("Cursor and Window Column"), .comment=strtext("2 cells")},
+    [sfCursorAndWindowRow] = {.label=strtext("Cursor and Window Row"), .comment=strtext("2 cells")},
+    [sfScreenNumber] = {.label=strtext("Screen Number"), .comment=strtext("1 cell")},
+    [sfStateDots] = {.label=strtext("State Dots"), .comment=strtext("1 cell")},
+    [sfStateLetter] = {.label=strtext("State Letter"), .comment=strtext("1 cell")},
+    [sfTime] = {.label=strtext("Time"), .comment=strtext("2 cells")},
+    [sfAlphabeticWindowCoordinates] = {.label=strtext("Alphabetic Window Coordinates"), .comment=strtext("1 cell")},
+    [sfAlphabeticCursorCoordinates] = {.label=strtext("Alphabetic Cursor Coordinates"), .comment=strtext("1 cell")},
+    [sfGeneric] = {.label=strtext("Generic")},
+    [sfSpace] = {.label=strtext("Space"), .comment=strtext("1 cell")},
   };
 
   MenuString name = {
@@ -659,10 +659,10 @@ updateLogMessagesSubmenu (void) {
 static Menu *
 makePreferencesMenu (void) {
   static const MenuString cursorStyles[] = {
-    {.label=strtext("Underline"), .comment=strtext("dots 7 and 8")},
-    {.label=strtext("Block"), .comment=strtext("all dots")},
-    {.label=strtext("Lower Left Dot"), .comment=strtext("dot 7")},
-    {.label=strtext("Lower Right Dot"), .comment=strtext("dot 8")}
+    [csUnderline] = {.label=strtext("Underline"), .comment=strtext("dots 7 and 8")},
+    [csBlock] = {.label=strtext("Block"), .comment=strtext("all dots")},
+    [csLowerLeftDot] = {.label=strtext("Lower Left Dot"), .comment=strtext("dot 7")},
+    [csLowerRightDot] = {.label=strtext("Lower Right Dot"), .comment=strtext("dot 8")},
   };
 
   Menu *rootMenu = newMenu();
@@ -715,9 +715,9 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("No Capitalization")},
-        {.label=strtext("Use Capital Sign")},
-        {.label=strtext("Superimpose Dot 7")}
+        [CTB_CAP_NONE] = {.label=strtext("No Capitalization")},
+        [CTB_CAP_SIGN] = {.label=strtext("Use Capital Sign")},
+        [CTB_CAP_DOT7] = {.label=strtext("Superimpose Dot 7")},
       };
 
       NAME(strtext("Capitalization Mode"));
@@ -740,11 +740,11 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("Minimum")},
-        {.label=strtext("Low")},
-        {.label=strtext("Medium")},
-        {.label=strtext("High")},
-        {.label=strtext("Maximum")}
+        [BRL_FIRMNESS_MINIMUM] = {.label=strtext("Minimum")},
+        [BRL_FIRMNESS_LOW] = {.label=strtext("Low")},
+        [BRL_FIRMNESS_MEDIUM] = {.label=strtext("Medium")},
+        [BRL_FIRMNESS_HIGH] = {.label=strtext("High")},
+        [BRL_FIRMNESS_MAXIMUM] = {.label=strtext("Maximum")},
       };
 
       NAME(strtext("Braille Firmness"));
@@ -859,9 +859,9 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("All")},
-        {.label=strtext("End of Line")},
-        {.label=strtext("Rest of Line")}
+        [sbwAll] = {.label=strtext("All")},
+        [sbwEndOfLine] = {.label=strtext("End of Line")},
+        [sbwRestOfLine] = {.label=strtext("Rest of Line")},
       };
 
       NAME(strtext("Skip Which Blank Braille Windows"));
@@ -936,8 +936,8 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("Translated via Text Table")},
-        {.label=strtext("Dots via Unicode Braille")}
+        [BRL_TYPING_TEXT] = {.label=strtext("Translated via Text Table")},
+        [BRL_TYPING_DOTS] = {.label=strtext("Dots via Unicode Braille")},
       };
 
       NAME(strtext("Typing Mode"));
@@ -1005,11 +1005,11 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("Minimum")},
-        {.label=strtext("Low")},
-        {.label=strtext("Medium")},
-        {.label=strtext("High")},
-        {.label=strtext("Maximum")}
+        [BRL_SENSITIVITY_MINIMUM] = {.label=strtext("Minimum")},
+        [BRL_SENSITIVITY_LOW] = {.label=strtext("Low")},
+        [BRL_SENSITIVITY_MEDIUM] = {.label=strtext("Medium")},
+        [BRL_SENSITIVITY_HIGH] = {.label=strtext("High")},
+        [BRL_SENSITIVITY_MAXIMUM] = {.label=strtext("Maximum")},
       };
 
       NAME(strtext("Touch Sensitivity"));
@@ -1051,10 +1051,10 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("Beeper"), .comment=strtext("console tone generator")},
-        {.label=strtext("PCM"), .comment=strtext("soundcard digital audio")},
-        {.label=strtext("MIDI"), .comment=strtext("Musical Instrument Digital Interface")},
-        {.label=strtext("FM"), .comment=strtext("soundcard synthesizer")}
+        [tdBeeper] = {.label=strtext("Beeper"), .comment=strtext("console tone generator")},
+        [tdPcm] = {.label=strtext("PCM"), .comment=strtext("soundcard digital audio")},
+        [tdMidi] = {.label=strtext("MIDI"), .comment=strtext("Musical Instrument Digital Interface")},
+        [tdFm] = {.label=strtext("FM"), .comment=strtext("soundcard synthesizer")},
       };
 
       NAME(strtext("Tune Device"));
@@ -1136,9 +1136,9 @@ makePreferencesMenu (void) {
 
     {
       static const MenuString strings[] = {
-        {.label=strtext("None")},
-        {.label=strtext("Some")},
-        {.label=strtext("All")}
+        [SPK_PUNCTUATION_NONE] = {.label=strtext("None")},
+        [SPK_PUNCTUATION_SOME] = {.label=strtext("Some")},
+        [SPK_PUNCTUATION_ALL] = {.label=strtext("All")},
       };
 
       NAME(strtext("Speech Punctuation"));

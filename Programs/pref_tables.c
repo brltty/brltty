@@ -38,19 +38,29 @@ PREFERENCE_STRING_TABLE(boolean,
 )
 
 PREFERENCE_STRING_TABLE(textStyle,
-  "8dot", "contracted", "6dot", "literary"
+  [bvComputer8] = "8dot",
+  [bvContracted6] = "contracted",
+  [bvComputer6] = "6dot",
+  [bvContracted8] = "literary"
 )
 
 PREFERENCE_STRING_TABLE(brailleVariant,
-  "computer8", "contracted6", "computer6", "contracted8"
+  [bvComputer8] = "computer8",
+  [bvContracted6] = "contracted6",
+  [bvComputer6] = "computer6",
+  [bvContracted8] = "contracted8"
 )
 
 PREFERENCE_STRING_TABLE(capitalizationMode,
-  "none", "sign", "dot7"
+  [CTB_CAP_NONE] = "none",
+  [CTB_CAP_SIGN] = "sign",
+  [CTB_CAP_DOT7] = "dot7",
 )
 
 PREFERENCE_STRING_TABLE(skipBlankWindowsMode,
-  "all", "end", "rest"
+  [sbwAll] = "all",
+  [sbwEndOfLine] = "end",
+  [sbwRestOfLine] = "rest",
 )
 
 PREFERENCE_STRING_TABLE(cursorTrackingDelay,
@@ -62,27 +72,44 @@ PREFERENCE_STRING_TABLE(autoreleaseTime,
 )
 
 PREFERENCE_STRING_TABLE(cursorStyle,
-  "underline", "block", "dot7", "dot8"
+  [csUnderline] = "underline",
+  [csBlock] = "block",
+  [csLowerLeftDot] = "dot7",
+  [csLowerRightDot] = "dot8",
 )
 
 PREFERENCE_STRING_TABLE(brailleFirmness,
-  "minimum", "low", "medium", "high", "maximum"
+  [BRL_FIRMNESS_MINIMUM] = "minimum",
+  [BRL_FIRMNESS_LOW] = "low",
+  [BRL_FIRMNESS_MEDIUM] = "medium",
+  [BRL_FIRMNESS_HIGH] = "high",
+  [BRL_FIRMNESS_MAXIMUM] = "maximum",
 )
 
 PREFERENCE_STRING_TABLE(touchSensitivity,
-  "minimum", "low", "medium", "high", "maximum"
+  [BRL_SENSITIVITY_MINIMUM] = "minimum",
+  [BRL_SENSITIVITY_LOW] = "low",
+  [BRL_SENSITIVITY_MEDIUM] = "medium",
+  [BRL_SENSITIVITY_HIGH] = "high",
+  [BRL_SENSITIVITY_MAXIMUM] = "maximum"
 )
 
 PREFERENCE_STRING_TABLE(brailleTypingMode,
-  "text", "dots"
+  [BRL_TYPING_TEXT] = "text",
+  [BRL_TYPING_DOTS] = "dots",
 )
 
 PREFERENCE_STRING_TABLE(tuneDevice,
-  "beeper", "pcm", "midi", "fm"
+  [tdBeeper] = "beeper",
+  [tdPcm] = "pcm",
+  [tdMidi] = "midi",
+  [tdFm] = "fm",
 )
 
 PREFERENCE_STRING_TABLE(speechPunctuation,
-  "none", "some", "all"
+  [SPK_PUNCTUATION_NONE] = "none",
+  [SPK_PUNCTUATION_SOME] = "some",
+  [SPK_PUNCTUATION_ALL] = "all",
 )
 
 PREFERENCE_STRING_TABLE(speechUppercaseIndicator,
@@ -126,15 +153,23 @@ PREFERENCE_STRING_TABLE(statusSeparator,
 )
 
 PREFERENCE_STRING_TABLE(statusField,
-  "end",
-  "wxy", "wx", "wy",
-  "cxy", "cx", "cy",
-  "cwx", "cwy",
-  "sn",
-  "dots", "letter",
-  "time",
-  "wxya", "cxya",
-  "generic", "space",
+  [sfEnd] = "end",
+  [sfWindowCoordinates] = "wxy",
+  [sfWindowColumn] = "wx",
+  [sfWindowRow] = "wy",
+  [sfCursorCoordinates] = "cxy",
+  [sfCursorColumn] = "cx",
+  [sfCursorRow] = "cy",
+  [sfCursorAndWindowColumn] = "cwx",
+  [sfCursorAndWindowRow] = "cwy",
+  [sfScreenNumber] = "sn",
+  [sfStateDots] = "dots",
+  [sfStateLetter] = "letter",
+  [sfTime] = "time",
+  [sfAlphabeticWindowCoordinates] = "wxya",
+  [sfAlphabeticCursorCoordinates] = "cxya",
+  [sfGeneric] = "generic",
+  [sfSpace] = "space",
 )
 
 const PreferenceDefinition preferenceDefinitionTable[] = {
