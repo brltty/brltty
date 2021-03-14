@@ -156,14 +156,14 @@ renderStatusField_screenNumber (unsigned char *cells) {
 
 static void
 renderStatusField_stateDots (unsigned char *cells) {
-  cells[0] = (isSpecialScreen(SCR_FROZEN) ? BRL_DOT_1: 0)
-           | (prefs.showScreenCursor      ? BRL_DOT_4: 0)
-           | (ses->displayMode            ? BRL_DOT_2: 0)
-           | (prefs.screenCursorStyle     ? BRL_DOT_5: 0)
-           | (prefs.alertTunes            ? BRL_DOT_3: 0)
-           | (prefs.blinkingScreenCursor  ? BRL_DOT_6: 0)
-           | (ses->trackScreenCursor      ? BRL_DOT_7: 0)
-           | (prefs.slidingBrailleWindow  ? BRL_DOT_8: 0)
+  cells[0] = (isSpecialScreen(SCR_FROZEN)  ? BRL_DOT_1: 0)
+           | (prefs.showScreenCursor       ? BRL_DOT_4: 0)
+           | (ses->displayMode             ? BRL_DOT_2: 0)
+           | (prefs.showAttributes         ? BRL_DOT_5: 0)
+           | (prefs.alertTunes             ? BRL_DOT_3: 0)
+           | (prefs.brailleTypingMode      ? BRL_DOT_6: 0)
+           | (ses->trackScreenCursor       ? BRL_DOT_7: 0)
+           | (prefs.brailleKeyboardEnabled ? BRL_DOT_8: 0)
            ;
 }
 
