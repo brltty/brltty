@@ -795,12 +795,19 @@ translateScreenCharacterText (
     }
   }
 
-  if (prefs.showAttributes) overlayAttributesUnderline(cell, character->attributes);
+  if (prefs.showAttributes) {
+    overlayAttributesUnderline(cell, character->attributes);
+  }
 
-  if (iswupper(character->text)) {
+  {
     BlinkDescriptor *blink = &uppercaseLettersBlinkDescriptor;
-    requireBlinkDescriptor(blink);
-    if (!isBlinkVisible(blink)) *cell = 0;
+
+    if (isBlinkEnabled(blink)) {
+      if (iswupper(character->text)) {
+        requireBlinkDescriptor(blink);
+        if (!isBlinkVisible(blink)) *cell = 0;
+      }
+    }
   }
 }
 
