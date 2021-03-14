@@ -785,7 +785,16 @@ translateScreenCharacterText (
   *cell = convertCharacterToDots(textTable, character->text);
   *text = character->text;
 
-  if (isSixDotComputerBraille()) *cell &= ~(BRL_DOT_7 | BRL_DOT_8);
+  {
+    const unsigned char dots = BRL_DOT_7 | BRL_DOT_8;
+
+    if (*cell & dots) {
+      if (isSixDotComputerBraille()) {
+        *cell &= ~dots;
+      }
+    }
+  }
+
   if (prefs.showAttributes) overlayAttributesUnderline(cell, character->attributes);
 
   if (iswupper(character->text)) {

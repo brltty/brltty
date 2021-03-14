@@ -114,7 +114,7 @@ setBlinkProperties (BlinkDescriptor *blink, int period, int percentVisible) {
   if (percentVisible < 1) return 0;
   if (percentVisible > 99) return 0;
 
-  int minimumTime = SCREEN_UPDATE_SCHEDULE_DELAY;
+  const int minimumTime = SCREEN_UPDATE_SCHEDULE_DELAY;
   period = MAX(period, (minimumTime * 2));
 
   int visibleTime;
