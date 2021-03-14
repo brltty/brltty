@@ -25,6 +25,10 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#ifdef HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif /* HAVE_LANGINFO_H */
+
 #undef CAN_GLOB
 #if defined(HAVE_GLOB)
 #define CAN_GLOB
@@ -430,11 +434,26 @@ formatTime (Menu *menu, unsigned char time, char *buffer, size_t size) {
   unsigned int seconds = milliseconds / MSECS_PER_SEC;
   milliseconds %= MSECS_PER_SEC;
 
-  snprintf(buffer, size, "%u.%03u", seconds, milliseconds);
-  char *end = buffer + strlen(buffer);
-  while (*--end == '0');
-  if (*end == '.') end -= 1;
-  *++end = 0;
+  const char *decimalPoint;
+#ifdef RADIXCHAR
+  decimalPoint = nl_langinfo(RADIXCHAR);
+#else /* RADIXCHAR */
+  decimalPoint = NULL;
+#endif /* RADIXCHAR */
+  if (!decimalPoint) decimalPoint = ".";
+
+  int end;
+  int decimalFrom;
+  int decimalTo;
+
+  snprintf(
+    buffer, size, "%u%n%s%n%03u%n",
+    seconds, &decimalFrom, decimalPoint, &decimalTo, milliseconds, &end
+  );
+
+  while (buffer[--end] == '0');
+  if (++end == decimalTo) end = decimalFrom;
+  buffer[end] = 0;
 }
 
 MenuItem *
