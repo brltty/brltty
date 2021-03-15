@@ -1166,7 +1166,7 @@ PKGCONFIG_FILE_NAME = brltty.pc
 PKGCONFIG_FILE_PATH = $(INSTALL_PKGCONFIG_DIRECTORY)/$(PKGCONFIG_FILE_NAME)
 install-pkgconfig-file: install-pkgconfig-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(PKGCONFIG_FILE_NAME) $(PKGCONFIG_FILE_PATH)
-	$(SRC_TOP)getrevid -p "revision_identifier=" $(BLD_TOP) >>$(PKGCONFIG_FILE_PATH)
+	$(SRC_TOP)getrevid -p "revision_identifier=" $(SRC_TOP) >>$(PKGCONFIG_FILE_PATH)
 
 install-documents: install-document-directory brltty-ktb$X $(BRAILLE_DRIVERS)
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) all
