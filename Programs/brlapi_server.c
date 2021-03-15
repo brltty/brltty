@@ -3107,6 +3107,8 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   }
 
   while (mkdir(BRLAPI_SOCKETPATH, (permissions | S_ISVTX)) == -1) {
+    if (!running) goto outfd;
+
     if (errno == EEXIST) {
       break;
     }
@@ -3136,6 +3138,8 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
 
   while ((lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL,
                       (permissions & (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)))) == -1) {
+    if (!running) goto outfd;
+
     if (errno == EROFS) {
       approximateDelay(1000);
       continue;
@@ -3167,6 +3171,8 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   done = 0;
 
   while ((res = write(lock,pids+done,n)) < n) {
+    if (!running) goto outfd;
+
     if (res == -1) {
       if (errno != ENOSPC) {
 	logSystemError("writing pid in local socket lock");
@@ -3181,6 +3187,8 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   }
 
   while (1) {
+    if (!running) goto outtmp;
+
     if (link(tmppath, lockpath) == -1) {
       logMessage(LOG_CATEGORY(SERVER_EVENTS), "linking local socket lock: %s", strerror(errno));
       /* but no action: link() might erroneously return errors, see manpage */
