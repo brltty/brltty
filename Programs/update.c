@@ -256,17 +256,16 @@ getScreenCursorTrackingCharacter (void) {
 
 static inline char
 getScreenCursorVisibilityCharacter (void) {
-  return prefs.showScreenCursor? (prefs.blinkingScreenCursor? 'b': 'v'):
-                                 (prefs.blinkingScreenCursor? 'B': ' ');
+  return prefs.showScreenCursor? 'c': ' ';
 }
 
 static inline char
-getDisplayModeCharacter (void) {
-  return ses->displayMode? 'a': 't';
+getAttributesUnderlineVisibilityCharacter (void) {
+  return prefs.showAttributes? 'u': ' ';
 }
 
 static inline char
-getScreenTypeCharacter (void) {
+getSpecialScreenCharacter (void) {
   if (isSpecialScreen(SCR_FROZEN)) return 'f';
   if (isSpecialScreen(SCR_HELP)) return 'h';
   if (isSpecialScreen(SCR_MENU)) return 'm';
@@ -275,17 +274,25 @@ getScreenTypeCharacter (void) {
 
 static inline char
 getBrailleVariantCharacter (void) {
-  return isContractedBraille()? 'c':
+  return ses->displayMode? 'a':
+         isContractedBraille()? 'c':
          isSixDotComputerBraille()? '6': '8';
 }
 
 static inline char
-getUppercaseIndicatorCharacter (void) {
-  return prefs.blinkingCapitals? 'B': ' ';
+getBrailleKeyboardCharacter (void) {
+  if (!prefs.brailleKeyboardEnabled) return 'd';
+  if (prefs.brailleTypingMode) return 'b';
+  return ' ';
+}
+
+static inline char
+getSpeechCursorVisibilityCharacter (void) {
+  return prefs.showSpeechCursor? 's': ' ';
 }
 
 static int
-showInfo (void) {
+renderInfoLine (void) {
   brl.cursor = BRL_NO_CURSOR;
 
   static const char mode[] = "info";
@@ -296,7 +303,7 @@ showInfo (void) {
    * Also, some displays (e.g. Braille Me) have only six dots per cell.
    */
   const size_t size = brl.textColumns * brl.textRows;
-  int compact = (size < 21) && hasEightDotCells(&brl);
+  int compact = (size < 22) && hasEightDotCells(&brl);
 
   static const unsigned char compactFields[] = {
     sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
@@ -327,14 +334,15 @@ showInfo (void) {
   }
 
   STR_PRINTF(
-    " %02d %c%c%c%c%c%c",
+    " %02d %c%c%c%c%c%c%c",
     scr.number, 
     getScreenCursorTrackingCharacter(),
     getScreenCursorVisibilityCharacter(),
-    getDisplayModeCharacter(),
-    getScreenTypeCharacter(),
+    getAttributesUnderlineVisibilityCharacter(),
+    getSpeechCursorVisibilityCharacter(),
+    getSpecialScreenCharacter(),
     getBrailleVariantCharacter(),
-    getUppercaseIndicatorCharacter()
+    getBrailleKeyboardCharacter()
   );
 
   if ((STR_LENGTH + 6) <= size) {
@@ -968,7 +976,7 @@ doUpdate (void) {
     api.claimDriver();
 
     if (infoMode) {
-      if (!showInfo()) brl.hasFailed = 1;
+      if (!renderInfoLine()) brl.hasFailed = 1;
     } else {
       const unsigned int textLength = textCount * brl.textRows;
       isContracted = 0;
