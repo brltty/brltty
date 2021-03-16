@@ -51,6 +51,8 @@
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Gérer le statut de membre de la communauté</string>
 
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Mettre à jour l\'application</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">Version de développement</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">Autoriser les mises à jour descendantes</string>
 
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Actions d\'accessibilité</string>
 
@@ -238,20 +240,25 @@
   <string name="CONTRACTION_TABLE_LABEL_auto">Sélection automatique basée sur la locale</string>
   <string name="CONTRACTION_TABLE_LABEL_af">Afrikaans (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">Allemand</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Allemand (désabrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Allemand (abréviations de base)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">Allemand (abrégé - standard 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Allemand (abrégé - standard 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Allemand (abrégé - standard 2015)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">Anglais</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">Anglais (États-Unis)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Anglais (Braille anglais unifié, 2ème degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Anglais (EU, 2ème degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Espagnol (2ème deghé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">Français</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">Français (désabrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">Français (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonésien (abrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">Alphabet Phonétique international</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japonais (désabrégé)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Coréen</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0">Coréen (désabrégé)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Coréen (1er degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Coréen (2ème degré)</string>
