@@ -77,7 +77,7 @@ extern "C" {
 
 #ifdef __ANDROID__
 #ifndef __ANDROID_API__
-#define __ANDROID_API__ 26
+#define __ANDROID_API__ 19
 #endif /* __ANDROID_API__ */
 #endif /* __ANDROID__ */
 

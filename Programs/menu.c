@@ -435,11 +435,11 @@ formatTime (Menu *menu, unsigned char time, char *buffer, size_t size) {
   milliseconds %= MSECS_PER_SEC;
 
   const char *decimalPoint;
-#ifdef RADIXCHAR
+#ifdef HAVE_NL_LANGINFO
   decimalPoint = nl_langinfo(RADIXCHAR);
-#else /* RADIXCHAR */
+#else /* HAVE_NL_LANGINFO */
   decimalPoint = NULL;
-#endif /* RADIXCHAR */
+#endif /* HAVE_NL_LANGINFO */
   if (!decimalPoint) decimalPoint = ".";
 
   int end;
