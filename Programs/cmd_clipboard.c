@@ -276,6 +276,12 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
       characters = getClipboardContent(ccd->clipboard, &length);
     }
 
+    while (length > 0) {
+      size_t last = length - 1;
+      if (characters[last] != WC_C(' ')) break;
+      length = last;
+    }
+
     pasted = pasteCharacters(characters, length);
   unlockMainClipboard();
 
