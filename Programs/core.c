@@ -920,6 +920,16 @@ trackScreenCursor (int place) {
   }
 
   if (prefs.slidingBrailleWindow) {
+    {
+      int width = scr.cols;
+      ScreenCharacter characters[width];
+      readScreenRow(scr.posy, width, characters);
+
+      int column = findLastNonSpaceCharacter(characters, width);
+      if (column < 0) column = 0;
+      if (column < textCount) ses->winx = 0;
+    }
+
     int reset = textCount * 3 / 10;
     int trigger = prefs.eagerSlidingBrailleWindow? textCount*3/20: 0;
     if (scr.posx == ses->winx) trigger = 1;
