@@ -20,7 +20,7 @@
 
 #include "midi.h"
 
-static const char *const midiInstrumentTypes[] = {
+static const char *const midiInstrumentGroups[] = {
   // xgettext: This is the name of MIDI musical instrument group #1.
   [0X0] = strtext("Piano"),
 
@@ -483,6 +483,6 @@ const char *const midiInstrumentTable[] = {
 const unsigned int midiInstrumentCount = ARRAY_COUNT(midiInstrumentTable);
 
 const char *
-midiGetInstrumentType (unsigned char instrument) {
-  return midiInstrumentTypes[instrument >> 3];
+midiGetInstrumentGroup (unsigned char instrument) {
+  return midiInstrumentGroups[instrument >> 3];
 }

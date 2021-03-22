@@ -607,12 +607,10 @@ makeMidiInstrumentMenuStrings (void) {
   MenuString *strings = malloc(midiInstrumentCount * sizeof(*strings));
 
   if (strings) {
-    unsigned int instrument;
-
-    for (instrument=0; instrument<midiInstrumentCount; instrument+=1) {
+    for (unsigned int instrument=0; instrument<midiInstrumentCount; instrument+=1) {
       MenuString *string = &strings[instrument];
       string->label = midiInstrumentTable[instrument];
-      string->comment = midiGetInstrumentType(instrument);
+      string->comment = midiGetInstrumentGroup(instrument);
     }
   }
 
