@@ -168,6 +168,10 @@ function makeDoxygenComment(text) {
   return "/** " text " */"
 }
 
+function makeTranslatorNote(text) {
+  return "// xgettext: " text
+}
+
 function beginDoxygenFile() {
   print "/** \\file"
   print " */"

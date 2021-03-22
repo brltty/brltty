@@ -76,6 +76,7 @@ function writeCommandEntry(name, symbol, value, help) {
     }
   }
 
+  print "  " makeTranslatorNote("This is the description of the " name " command.")
   writeCommandField("description", "strtext(\"" help "\")")
   print "},"
   print ""
