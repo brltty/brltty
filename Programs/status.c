@@ -62,6 +62,12 @@ renderNumberLower2 (unsigned char *cells, int number) {
 }
 
 static void
+renderNumbers2 (unsigned char *cells, int upper, int lower) {
+  renderNumberUpper2(&cells[0], upper);
+  renderNumberLower2(&cells[0], lower);
+}
+
+static void
 renderNumberUpper3 (unsigned char *cells, int number) {
   renderDigitUpper(&cells[0], number/100);
   renderDigitUpper(&cells[1], number/10);
@@ -76,15 +82,19 @@ renderNumberLower3 (unsigned char *cells, int number) {
 }
 
 static void
+renderNumbers3 (unsigned char *cells, int upper, int lower) {
+  renderNumberUpper3(&cells[0], upper);
+  renderNumberLower3(&cells[0], lower);
+}
+
+static void
 renderCoordinates2 (unsigned char *cells, int column, int row) {
-  renderNumberUpper2(&cells[0], row);
-  renderNumberLower2(&cells[0], column);
+  renderNumbers2(&cells[0], row, column);
 }
 
 static void
 renderCoordinates3 (unsigned char *cells, int column, int row) {
-  renderNumberUpper3(&cells[0], row);
-  renderNumberLower3(&cells[0], column);
+  renderNumbers3(&cells[0], row, column);
 }
 
 static void
@@ -159,26 +169,34 @@ renderStatusField_windowCoordinates3 (unsigned char *cells) {
 
 static void
 renderStatusField_cursorAndWindowColumn2 (unsigned char *cells) {
-  renderNumberUpper2(cells, SCR_COLUMN_NUMBER(scr.posx));
-  renderNumberLower2(cells, SCR_COLUMN_NUMBER(ses->winx));
+  renderNumbers2(cells,
+    SCR_COLUMN_NUMBER(scr.posx),
+    SCR_COLUMN_NUMBER(ses->winx)
+  );
 }
 
 static void
 renderStatusField_cursorAndWindowRow2 (unsigned char *cells) {
-  renderNumberUpper2(cells, SCR_ROW_NUMBER(scr.posy));
-  renderNumberLower2(cells, SCR_ROW_NUMBER(ses->winy));
+  renderNumbers2(cells,
+    SCR_ROW_NUMBER(scr.posy),
+    SCR_ROW_NUMBER(ses->winy)
+  );
 }
 
 static void
 renderStatusField_cursorAndWindowColumn3 (unsigned char *cells) {
-  renderNumberUpper3(cells, SCR_COLUMN_NUMBER(scr.posx));
-  renderNumberLower3(cells, SCR_COLUMN_NUMBER(ses->winx));
+  renderNumbers3(cells,
+    SCR_COLUMN_NUMBER(scr.posx),
+    SCR_COLUMN_NUMBER(ses->winx)
+  );
 }
 
 static void
 renderStatusField_cursorAndWindowRow3 (unsigned char *cells) {
-  renderNumberUpper3(cells, SCR_ROW_NUMBER(scr.posy));
-  renderNumberLower3(cells, SCR_ROW_NUMBER(ses->winy));
+  renderNumbers3(cells,
+    SCR_ROW_NUMBER(scr.posy),
+    SCR_ROW_NUMBER(ses->winy)
+  );
 }
 
 static void
@@ -224,14 +242,12 @@ renderStatusField_stateLetter (unsigned char *cells) {
 static void
 renderStatusField_time (unsigned char *cells) {
   TimeValue value;
-  TimeComponents components;
-
   getCurrentTime(&value);
   scheduleUpdateIn("time status field", millisecondsTillNextMinute(&value));
 
+  TimeComponents components;
   expandTimeValue(&value, &components);
-  renderNumberUpper2(cells, components.hour);
-  renderNumberLower2(cells, components.minute);
+  renderNumbers2(cells, components.hour, components.minute);
 }
 
 static void
