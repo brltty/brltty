@@ -539,14 +539,14 @@ newStatusFieldMenuItem (
 ) {
   static const MenuString strings[] = {
     [sfEnd] = {.label=strtext("End")},
-    [sfWindowCoordinates] = {.label=strtext("Window Coordinates"), .comment=strtext("2 cells")},
+    [sfWindowCoordinates2] = {.label=strtext("Window Coordinates"), .comment=strtext("2 cells")},
     [sfWindowColumn] = {.label=strtext("Window Column"), .comment=strtext("1 cell")},
     [sfWindowRow] = {.label=strtext("Window Row"), .comment=strtext("1 cell")},
-    [sfCursorCoordinates] = {.label=strtext("Cursor Coordinates"), .comment=strtext("2 cells")},
+    [sfCursorCoordinates2] = {.label=strtext("Cursor Coordinates"), .comment=strtext("2 cells")},
     [sfCursorColumn] = {.label=strtext("Cursor Column"), .comment=strtext("1 cell")},
     [sfCursorRow] = {.label=strtext("Cursor Row"), .comment=strtext("1 cell")},
-    [sfCursorAndWindowColumn] = {.label=strtext("Cursor and Window Column"), .comment=strtext("2 cells")},
-    [sfCursorAndWindowRow] = {.label=strtext("Cursor and Window Row"), .comment=strtext("2 cells")},
+    [sfCursorAndWindowColumn2] = {.label=strtext("Cursor and Window Column"), .comment=strtext("2 cells")},
+    [sfCursorAndWindowRow2] = {.label=strtext("Cursor and Window Row"), .comment=strtext("2 cells")},
     [sfScreenNumber] = {.label=strtext("Screen Number"), .comment=strtext("1 cell")},
     [sfStateDots] = {.label=strtext("State Dots"), .comment=strtext("1 cell")},
     [sfStateLetter] = {.label=strtext("State Letter"), .comment=strtext("1 cell")},
@@ -554,6 +554,10 @@ newStatusFieldMenuItem (
     [sfAlphabeticWindowCoordinates] = {.label=strtext("Alphabetic Window Coordinates"), .comment=strtext("1 cell")},
     [sfAlphabeticCursorCoordinates] = {.label=strtext("Alphabetic Cursor Coordinates"), .comment=strtext("1 cell")},
     [sfGeneric] = {.label=strtext("Generic")},
+    [sfCursorCoordinates3] = {.label=strtext("Cursor Coordinates"), .comment=strtext("3 cells")},
+    [sfWindowCoordinates3] = {.label=strtext("Window Coordinates"), .comment=strtext("3 cells")},
+    [sfCursorAndWindowColumn3] = {.label=strtext("Cursor and Window Column"), .comment=strtext("3 cells")},
+    [sfCursorAndWindowRow3] = {.label=strtext("Cursor and Window Row"), .comment=strtext("3 cells")},
     [sfSpace] = {.label=strtext("Space"), .comment=strtext("1 cell")},
   };
 

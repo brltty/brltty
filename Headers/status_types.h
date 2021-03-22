@@ -25,14 +25,14 @@ extern "C" {
 
 typedef enum {
   sfEnd = 0,
-  sfWindowCoordinates,
+  sfWindowCoordinates2,
   sfWindowColumn,
   sfWindowRow,
-  sfCursorCoordinates,
+  sfCursorCoordinates2,
   sfCursorColumn,
   sfCursorRow,
-  sfCursorAndWindowColumn,
-  sfCursorAndWindowRow,
+  sfCursorAndWindowColumn2,
+  sfCursorAndWindowRow2,
   sfScreenNumber,
   sfStateDots,
   sfStateLetter,
@@ -47,6 +47,11 @@ typedef enum {
   /*                                                                           */
   /* Fields below this point may be modified as desired.                       */
   /*****************************************************************************/
+
+  sfCursorCoordinates3,
+  sfWindowCoordinates3,
+  sfCursorAndWindowColumn3,
+  sfCursorAndWindowRow3,
 
   sfSpace,
 } StatusField;

@@ -306,7 +306,7 @@ renderInfoLine (void) {
   int compact = (size < 22) && hasEightDotCells(&brl);
 
   static const unsigned char compactFields[] = {
-    sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+    sfCursorAndWindowColumn2, sfCursorAndWindowRow2, sfStateDots, sfEnd
   };
 
   static unsigned int compactLength = 0;

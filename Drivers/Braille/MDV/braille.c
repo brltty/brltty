@@ -24,7 +24,7 @@
 #include "log.h"
 #include "ascii.h"
 
-#define BRL_STATUS_FIELDS sfWindowCoordinates
+#define BRL_STATUS_FIELDS sfWindowCoordinates2
 #define BRL_HAVE_STATUS_CELLS
 
 #include "brl_driver.h"

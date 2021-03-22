@@ -63,7 +63,7 @@ setStatusStyle (unsigned char style) {
   };
 
   static const unsigned char styleTieman[] = {
-    sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+    sfCursorAndWindowColumn2, sfCursorAndWindowRow2, sfStateDots, sfEnd
   };
 
   static const unsigned char stylePB80[] = {
@@ -75,7 +75,7 @@ setStatusStyle (unsigned char style) {
   };
 
   static const unsigned char styleMDV[] = {
-    sfWindowCoordinates, sfEnd
+    sfWindowCoordinates2, sfEnd
   };
 
   static const unsigned char styleVoyager[] = {

@@ -26,7 +26,7 @@
 #include "async_wait.h"
 #include "ascii.h"
 
-#define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots
+#define BRL_STATUS_FIELDS sfCursorAndWindowColumn2, sfCursorAndWindowRow2, sfStateDots
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 #include "brldefs-cb.h"

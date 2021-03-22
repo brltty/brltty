@@ -1257,20 +1257,20 @@ ensureStatusFields (void) {
     };
 
     static const unsigned char fields4[] = {
-      sfWindowCoordinates, sfCursorCoordinates, sfEnd
+      sfWindowCoordinates2, sfCursorCoordinates2, sfEnd
     };
 
     static const unsigned char fields5[] = {
-      sfWindowCoordinates, sfCursorCoordinates, sfStateDots, sfEnd
+      sfWindowCoordinates2, sfCursorCoordinates2, sfStateDots, sfEnd
     };
 
     static const unsigned char fields6[] = {
-      sfWindowCoordinates, sfCursorCoordinates, sfStateDots, sfScreenNumber,
+      sfWindowCoordinates2, sfCursorCoordinates2, sfStateDots, sfScreenNumber,
       sfEnd
     };
 
     static const unsigned char fields7[] = {
-      sfWindowCoordinates, sfCursorCoordinates, sfStateDots, sfTime,
+      sfWindowCoordinates2, sfCursorCoordinates2, sfStateDots, sfTime,
       sfEnd
     };
 

@@ -35,36 +35,56 @@ renderCharacter (unsigned char *cell, char character) {
 
 static void
 renderDigitUpper (unsigned char *cell, int digit) {
-  *cell |= portraitDigits[digit];
+  *cell |= portraitDigits[digit % 10];
 }
 
 static void
 renderDigitLower (unsigned char *cell, int digit) {
-  *cell |= toLowerDigit(portraitDigits[digit]);
-}
-
-static void
-renderNumberUpper (unsigned char *cells, int number) {
-  renderDigitUpper(&cells[0], (number / 10) % 10);
-  renderDigitUpper(&cells[1], number % 10);
-}
-
-static void
-renderNumberLower (unsigned char *cells, int number) {
-  renderDigitLower(&cells[0], (number / 10) % 10);
-  renderDigitLower(&cells[1], number % 10);
+  *cell |= toLowerDigit(portraitDigits[digit % 10]);
 }
 
 static void
 renderNumberVertical (unsigned char *cell, int number) {
-  renderDigitUpper(cell, (number / 10) % 10);
-  renderDigitLower(cell, number % 10);
+  renderDigitUpper(cell, number/10);
+  renderDigitLower(cell, number);
 }
 
 static void
-renderCoordinatesVertical (unsigned char *cells, int column, int row) {
-  renderNumberUpper(&cells[0], row);
-  renderNumberLower(&cells[0], column);
+renderNumberUpper2 (unsigned char *cells, int number) {
+  renderDigitUpper(&cells[0], number/10);
+  renderDigitUpper(&cells[1], number);
+}
+
+static void
+renderNumberLower2 (unsigned char *cells, int number) {
+  renderDigitLower(&cells[0], number/10);
+  renderDigitLower(&cells[1], number);
+}
+
+static void
+renderNumberUpper3 (unsigned char *cells, int number) {
+  renderDigitUpper(&cells[0], number/100);
+  renderDigitUpper(&cells[1], number/10);
+  renderDigitUpper(&cells[2], number);
+}
+
+static void
+renderNumberLower3 (unsigned char *cells, int number) {
+  renderDigitLower(&cells[0], number/100);
+  renderDigitLower(&cells[1], number/10);
+  renderDigitLower(&cells[2], number);
+}
+
+static void
+renderCoordinates2 (unsigned char *cells, int column, int row) {
+  renderNumberUpper2(&cells[0], row);
+  renderNumberLower2(&cells[0], column);
+}
+
+static void
+renderCoordinates3 (unsigned char *cells, int column, int row) {
+  renderNumberUpper3(&cells[0], row);
+  renderNumberLower3(&cells[0], column);
 }
 
 static void
@@ -98,8 +118,13 @@ renderCoordinatesAlphabetic (unsigned char *cell, int column, int row) {
 typedef void (*RenderStatusField) (unsigned char *cells);
 
 static void
-renderStatusField_windowCoordinates (unsigned char *cells) {
-  renderCoordinatesVertical(cells, SCR_COLUMN_NUMBER(ses->winx), SCR_ROW_NUMBER(ses->winy));
+renderStatusField_cursorColumn (unsigned char *cells) {
+  renderNumberVertical(cells, SCR_COLUMN_NUMBER(scr.posx));
+}
+
+static void
+renderStatusField_cursorRow (unsigned char *cells) {
+  renderNumberVertical(cells, SCR_ROW_NUMBER(scr.posy));
 }
 
 static void
@@ -113,30 +138,47 @@ renderStatusField_windowRow (unsigned char *cells) {
 }
 
 static void
-renderStatusField_cursorCoordinates (unsigned char *cells) {
-  renderCoordinatesVertical(cells, SCR_COLUMN_NUMBER(scr.posx), SCR_ROW_NUMBER(scr.posy));
+renderStatusField_cursorCoordinates2 (unsigned char *cells) {
+  renderCoordinates2(cells, SCR_COLUMN_NUMBER(scr.posx), SCR_ROW_NUMBER(scr.posy));
 }
 
 static void
-renderStatusField_cursorColumn (unsigned char *cells) {
-  renderNumberVertical(cells, SCR_COLUMN_NUMBER(scr.posx));
+renderStatusField_windowCoordinates2 (unsigned char *cells) {
+  renderCoordinates2(cells, SCR_COLUMN_NUMBER(ses->winx), SCR_ROW_NUMBER(ses->winy));
 }
 
 static void
-renderStatusField_cursorRow (unsigned char *cells) {
-  renderNumberVertical(cells, SCR_ROW_NUMBER(scr.posy));
+renderStatusField_cursorCoordinates3 (unsigned char *cells) {
+  renderCoordinates3(cells, SCR_COLUMN_NUMBER(scr.posx), SCR_ROW_NUMBER(scr.posy));
 }
 
 static void
-renderStatusField_cursorAndWindowColumn (unsigned char *cells) {
-  renderNumberUpper(cells, SCR_COLUMN_NUMBER(scr.posx));
-  renderNumberLower(cells, SCR_COLUMN_NUMBER(ses->winx));
+renderStatusField_windowCoordinates3 (unsigned char *cells) {
+  renderCoordinates3(cells, SCR_COLUMN_NUMBER(ses->winx), SCR_ROW_NUMBER(ses->winy));
 }
 
 static void
-renderStatusField_cursorAndWindowRow (unsigned char *cells) {
-  renderNumberUpper(cells, SCR_ROW_NUMBER(scr.posy));
-  renderNumberLower(cells, SCR_ROW_NUMBER(ses->winy));
+renderStatusField_cursorAndWindowColumn2 (unsigned char *cells) {
+  renderNumberUpper2(cells, SCR_COLUMN_NUMBER(scr.posx));
+  renderNumberLower2(cells, SCR_COLUMN_NUMBER(ses->winx));
+}
+
+static void
+renderStatusField_cursorAndWindowRow2 (unsigned char *cells) {
+  renderNumberUpper2(cells, SCR_ROW_NUMBER(scr.posy));
+  renderNumberLower2(cells, SCR_ROW_NUMBER(ses->winy));
+}
+
+static void
+renderStatusField_cursorAndWindowColumn3 (unsigned char *cells) {
+  renderNumberUpper3(cells, SCR_COLUMN_NUMBER(scr.posx));
+  renderNumberLower3(cells, SCR_COLUMN_NUMBER(ses->winx));
+}
+
+static void
+renderStatusField_cursorAndWindowRow3 (unsigned char *cells) {
+  renderNumberUpper3(cells, SCR_ROW_NUMBER(scr.posy));
+  renderNumberLower3(cells, SCR_ROW_NUMBER(ses->winy));
 }
 
 static void
@@ -188,8 +230,8 @@ renderStatusField_time (unsigned char *cells) {
   scheduleUpdateIn("time status field", millisecondsTillNextMinute(&value));
 
   expandTimeValue(&value, &components);
-  renderNumberUpper(cells, components.hour);
-  renderNumberLower(cells, components.minute);
+  renderNumberUpper2(cells, components.hour);
+  renderNumberLower2(cells, components.minute);
 }
 
 static void
@@ -247,8 +289,8 @@ static const StatusFieldEntry statusFieldTable[] = {
     .length = 0
   }
   ,
-  [sfWindowCoordinates] = {
-    .render = renderStatusField_windowCoordinates,
+  [sfWindowCoordinates2] = {
+    .render = renderStatusField_windowCoordinates2,
     .length = 2
   }
   ,
@@ -262,8 +304,8 @@ static const StatusFieldEntry statusFieldTable[] = {
     .length = 1
   }
   ,
-  [sfCursorCoordinates] = {
-    .render = renderStatusField_cursorCoordinates,
+  [sfCursorCoordinates2] = {
+    .render = renderStatusField_cursorCoordinates2,
     .length = 2
   }
   ,
@@ -277,13 +319,13 @@ static const StatusFieldEntry statusFieldTable[] = {
     .length = 1
   }
   ,
-  [sfCursorAndWindowColumn] = {
-    .render = renderStatusField_cursorAndWindowColumn,
+  [sfCursorAndWindowColumn2] = {
+    .render = renderStatusField_cursorAndWindowColumn2,
     .length = 2
   }
   ,
-  [sfCursorAndWindowRow] = {
-    .render = renderStatusField_cursorAndWindowRow,
+  [sfCursorAndWindowRow2] = {
+    .render = renderStatusField_cursorAndWindowRow2,
     .length = 2
   }
   ,
@@ -322,6 +364,26 @@ static const StatusFieldEntry statusFieldTable[] = {
     .length = GSC_COUNT
   },
 
+  [sfCursorCoordinates3] = {
+    .render = renderStatusField_cursorCoordinates3,
+    .length = 3
+  }
+  ,
+  [sfWindowCoordinates3] = {
+    .render = renderStatusField_windowCoordinates3,
+    .length = 3
+  }
+  ,
+  [sfCursorAndWindowColumn3] = {
+    .render = renderStatusField_cursorAndWindowColumn3,
+    .length = 3
+  }
+  ,
+  [sfCursorAndWindowRow3] = {
+    .render = renderStatusField_cursorAndWindowRow3,
+    .length = 3
+  }
+  ,
   [sfSpace] = {
     .render = renderStatusField_space,
     .length = 1
