@@ -456,28 +456,28 @@ const char *const midiInstrumentTable[] = {
   [0X77] = strtext("Reverse Cymbal"),
 
 /* Sound Effects */
-  // xgettext: This is the name of MIDI sound effect #121.
+  // xgettext: This is the name of MIDI musical instrument #121 (in the Sound Effects group).
   [0X78] = strtext("Guitar Fret Noise"),
 
-  // xgettext: This is the name of MIDI sound effect #122.
+  // xgettext: This is the name of MIDI musical instrument #122 (in the Sound Effects group).
   [0X79] = strtext("Breath Noise"),
 
-  // xgettext: This is the name of MIDI sound effect #123.
+  // xgettext: This is the name of MIDI musical instrument #123 (in the Sound Effects group).
   [0X7A] = strtext("Seashore"),
 
-  // xgettext: This is the name of MIDI sound effect #124.
+  // xgettext: This is the name of MIDI musical instrument #124 (in the Sound Effects group).
   [0X7B] = strtext("Bird Tweet"),
 
-  // xgettext: This is the name of MIDI sound effect #125.
+  // xgettext: This is the name of MIDI musical instrument #125 (in the Sound Effects group).
   [0X7C] = strtext("Telephone Ring"),
 
-  // xgettext: This is the name of MIDI sound effect #126.
+  // xgettext: This is the name of MIDI musical instrument #126 (in the Sound Effects group).
   [0X7D] = strtext("Helicopter"),
 
-  // xgettext: This is the name of MIDI sound effect #127.
+  // xgettext: This is the name of MIDI musical instrument #127 (in the Sound Effects group).
   [0X7E] = strtext("Applause"),
 
-  // xgettext: This is the name of MIDI sound effect #128.
+  // xgettext: This is the name of MIDI musical instrument #128 (in the Sound Effects group).
   [0X7F] = strtext("Gunshot")
 };
 const unsigned int midiInstrumentCount = ARRAY_COUNT(midiInstrumentTable);
