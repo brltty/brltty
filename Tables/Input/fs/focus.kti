@@ -43,10 +43,6 @@ include common.kti
 include keyboard.kti
 include speech.kti
 
-bind LeftShift MUTE
-bind RightShift SAY_LINE
-bind LeftShift+RightShift AUTOSPEAK
-
 bind NavrowKey DESCCHAR
 bind PanLeft+NavrowKey PRINDENT
 bind PanRight+NavrowKey NXINDENT
