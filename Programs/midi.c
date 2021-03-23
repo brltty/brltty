@@ -277,20 +277,16 @@ const char *const midiInstrumentTable[] = {
 
 /* Reed */
   // xgettext: This is the name of MIDI musical instrument #65 (in the Reed group).
-  // xgettext: (sax is a common short form for saxophone)
-  [0X40] = strtext("Soprano Sax"),
+  [0X40] = strtext("Soprano Saxophone"),
 
   // xgettext: This is the name of MIDI musical instrument #66 (in the Reed group).
-  // xgettext: (sax is a common short form for saxophone)
-  [0X41] = strtext("Alto Sax"),
+  [0X41] = strtext("Alto Saxophone"),
 
   // xgettext: This is the name of MIDI musical instrument #67 (in the Reed group).
-  // xgettext: (sax is a common short form for saxophone)
-  [0X42] = strtext("Tenor Sax"),
+  [0X42] = strtext("Tenor Saxophone"),
 
   // xgettext: This is the name of MIDI musical instrument #68 (in the Reed group).
-  // xgettext: (sax is a common short form for saxophone)
-  [0X43] = strtext("Baritone Sax"),
+  [0X43] = strtext("Baritone Saxophone"),
 
   // xgettext: This is the name of MIDI musical instrument #69 (in the Reed group).
   [0X44] = strtext("Oboe"),
