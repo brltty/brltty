@@ -27,55 +27,55 @@ extern "C" {
 
 #ifdef ENABLE_SPEECH_SUPPORT
 extern int constructSpeechDriverThread (
-  volatile SpeechSynthesizer *spk,
+  SpeechSynthesizer *spk,
   char **parameters
 );
 
 extern void destroySpeechDriverThread (
-  volatile SpeechSynthesizer *spk
+  SpeechSynthesizer *spk
 );
 
 extern int speechRequest_sayText (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   const char *text, size_t length,
   size_t count, const unsigned char *attributes,
   SayOptions options
 );
 
 extern int speechRequest_muteSpeech (
-  volatile SpeechDriverThread *sdt
+  SpeechDriverThread *sdt
 );
 
 extern int speechRequest_drainSpeech (
-  volatile SpeechDriverThread *sdt
+  SpeechDriverThread *sdt
 );
 
 extern int speechRequest_setVolume (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   unsigned char setting
 );
 
 extern int speechRequest_setRate (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   unsigned char setting
 );
 
 extern int speechRequest_setPitch (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   unsigned char setting
 );
 
 extern int speechRequest_setPunctuation (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   SpeechPunctuation setting
 );
 
 extern int speechMessage_speechFinished (
-  volatile SpeechDriverThread *sdt
+  SpeechDriverThread *sdt
 );
 
 extern int speechMessage_speechLocation (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   int location
 );
 #endif /* ENABLE_SPEECH_SUPPORT */

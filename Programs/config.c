@@ -1943,7 +1943,7 @@ cancelAutospeakDelayAlarm (void) {
 }
 
 static void
-endAutospeakDelay (volatile SpeechSynthesizer *spk) {
+endAutospeakDelay (SpeechSynthesizer *spk) {
   cancelAutospeakDelayAlarm();
 
   if (!spk->canAutospeak) {
@@ -1968,7 +1968,7 @@ beginAutospeakDelay (int duration) {
 }
 
 static void
-setSpeechFinished (volatile SpeechSynthesizer *spk) {
+setSpeechFinished (SpeechSynthesizer *spk) {
   spk->track.isActive = 0;
   spk->track.speechLocation = SPK_LOC_NONE;
 
@@ -1976,7 +1976,7 @@ setSpeechFinished (volatile SpeechSynthesizer *spk) {
 }
 
 static void
-setSpeechLocation (volatile SpeechSynthesizer *spk, int location) {
+setSpeechLocation (SpeechSynthesizer *spk, int location) {
   if (spk->track.isActive) {
     if (scr.number == spk->track.screenNumber) {
       if (location != spk->track.speechLocation) {

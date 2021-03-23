@@ -31,20 +31,20 @@
 #include "spk.auto.h"
 
 static int
-spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   return 1;
 }
 
 static void
-spk_destruct (volatile SpeechSynthesizer *spk) {
+spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (volatile SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes) {
 }
 
 static void
-spk_mute (volatile SpeechSynthesizer *spk) {
+spk_mute (SpeechSynthesizer *spk) {
 }
 
 const SpeechDriver *speech = &noSpeech;

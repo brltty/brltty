@@ -81,7 +81,7 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static int
-say (volatile SpeechSynthesizer *spk, const char *string) {
+say (SpeechSynthesizer *spk, const char *string) {
   if (!sayString(spk, string, 0)) return 0;
   asyncWait(250);
   return 1;
@@ -89,7 +89,7 @@ say (volatile SpeechSynthesizer *spk, const char *string) {
 
 static int
 sayLine (const LineHandlerParameters *parameters) {
-  volatile SpeechSynthesizer *spk = parameters->data;
+  SpeechSynthesizer *spk = parameters->data;
 
   say(spk, parameters->line.text);
   return 1;
@@ -98,7 +98,7 @@ sayLine (const LineHandlerParameters *parameters) {
 int
 main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus;
-  volatile SpeechSynthesizer spk;
+  SpeechSynthesizer spk;
 
 
   const char *driver = NULL;

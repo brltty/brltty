@@ -82,7 +82,7 @@ struct SpeechDriverThreadStruct {
   ThreadState threadState;
   Queue *requestQueue;
 
-  volatile SpeechSynthesizer *speechSynthesizer;
+  SpeechSynthesizer *speechSynthesizer;
   char **driverParameters;
 
 #ifdef GOT_PTHREADS
@@ -247,14 +247,14 @@ logSpeechMessage (SpeechMessage *msg, const char *action) {
 }
 
 static int
-testThreadValidity (volatile SpeechDriverThread *sdt) {
+testThreadValidity (SpeechDriverThread *sdt) {
   if (!sdt) return 0;
 
 #ifdef GOT_PTHREADS
   if (sdt->isBeingDestroyed) return 0;
 #endif /* GOT_PTHREADS */
 
-  volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+  SpeechSynthesizer *spk = sdt->speechSynthesizer;
   if (!spk) return 0;
   if (sdt != spk->driver.thread) return 0;
 
@@ -263,7 +263,7 @@ testThreadValidity (volatile SpeechDriverThread *sdt) {
 }
 
 static void
-setThreadState (volatile SpeechDriverThread *sdt, ThreadState state) {
+setThreadState (SpeechDriverThread *sdt, ThreadState state) {
   const ThreadStateEntry *entry = getThreadStateEntry(state);
   const char *name = entry? entry->name: NULL;
 
@@ -306,31 +306,31 @@ moveSpeechData (unsigned char *target, SpeechDatum *data) {
 }
 
 static inline void
-setResponsePending (volatile SpeechDriverThread *sdt) {
+setResponsePending (SpeechDriverThread *sdt) {
   sdt->response.type = RSP_PENDING;
 }
 
 static void
-setIntegerResponse (volatile SpeechDriverThread *sdt, int value) {
+setIntegerResponse (SpeechDriverThread *sdt, int value) {
   sdt->response.type = RSP_INTEGER;
   sdt->response.value.INTEGER = value;
 }
 
 ASYNC_CONDITION_TESTER(testSpeechResponseReceived) {
-  volatile SpeechDriverThread *sdt = data;
+  SpeechDriverThread *sdt = data;
 
   return sdt->response.type != RSP_PENDING;
 }
 
 static int
-awaitSpeechResponse (volatile SpeechDriverThread *sdt, int timeout) {
+awaitSpeechResponse (SpeechDriverThread *sdt, int timeout) {
   return asyncAwaitCondition(timeout, testSpeechResponseReceived, (void *)sdt);
 }
 
-static void sendSpeechRequest (volatile SpeechDriverThread *sdt);
+static void sendSpeechRequest (SpeechDriverThread *sdt);
 
 static void
-handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
+handleSpeechMessage (SpeechDriverThread *sdt, SpeechMessage *msg) {
   logSpeechMessage(msg, "handling");
 
   if (msg) {
@@ -341,7 +341,7 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
         break;
 
       case MSG_SPEECH_FINISHED: {
-        volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+        SpeechSynthesizer *spk = sdt->speechSynthesizer;
         SetSpeechFinishedMethod *setFinished = spk->setFinished;
 
         if (setFinished) setFinished(spk);
@@ -349,7 +349,7 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
       }
 
       case MSG_SPEECH_LOCATION: {
-        volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+        SpeechSynthesizer *spk = sdt->speechSynthesizer;
         SetSpeechLocationMethod *setLocation = spk->setLocation;
 
         if (setLocation) setLocation(spk, msg->arguments.speechLocation.location);
@@ -366,7 +366,7 @@ handleSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
 }
 
 static int
-sendSpeechMessage (volatile SpeechDriverThread *sdt, SpeechMessage *msg) {
+sendSpeechMessage (SpeechDriverThread *sdt, SpeechMessage *msg) {
   logSpeechMessage(msg, "sending");
 
 #ifdef GOT_PTHREADS
@@ -396,7 +396,7 @@ newSpeechMessage (SpeechMessageType type, SpeechDatum *data) {
 
 static int
 speechMessage_requestFinished (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   int result
 ) {
   SpeechMessage *msg;
@@ -413,7 +413,7 @@ speechMessage_requestFinished (
 
 int
 speechMessage_speechFinished (
-  volatile SpeechDriverThread *sdt
+  SpeechDriverThread *sdt
 ) {
   SpeechMessage *msg;
 
@@ -428,7 +428,7 @@ speechMessage_speechFinished (
 
 int
 speechMessage_speechLocation (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   int location
 ) {
   SpeechMessage *msg;
@@ -444,13 +444,13 @@ speechMessage_speechLocation (
 }
 
 static int
-sendIntegerResponse (volatile SpeechDriverThread *sdt, int result) {
+sendIntegerResponse (SpeechDriverThread *sdt, int result) {
   return speechMessage_requestFinished(sdt, result);
 }
 
 static void
-handleSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
-  volatile SpeechSynthesizer *spk = sdt->speechSynthesizer;
+handleSpeechRequest (SpeechDriverThread *sdt, SpeechRequest *req) {
+  SpeechSynthesizer *spk = sdt->speechSynthesizer;
 
   logSpeechRequest(req, "handling");
 
@@ -567,7 +567,7 @@ testSpeechRequest (const void *item, void *data) {
 }
 
 static Element *
-findSpeechRequestElement (volatile SpeechDriverThread *sdt, SpeechRequestType type) {
+findSpeechRequestElement (SpeechDriverThread *sdt, SpeechRequestType type) {
   TestSpeechRequestData tsr = {
     .type = type
   };
@@ -577,20 +577,20 @@ findSpeechRequestElement (volatile SpeechDriverThread *sdt, SpeechRequestType ty
 }
 
 static void
-removeSpeechRequests (volatile SpeechDriverThread *sdt, SpeechRequestType type) {
+removeSpeechRequests (SpeechDriverThread *sdt, SpeechRequestType type) {
   Element *element;
 
   while ((element = findSpeechRequestElement(sdt, type))) deleteElement(element);
 }
 
 static void
-muteSpeechRequestQueue (volatile SpeechDriverThread *sdt) {
+muteSpeechRequestQueue (SpeechDriverThread *sdt) {
   removeSpeechRequests(sdt, REQ_SAY_TEXT);
   removeSpeechRequests(sdt, REQ_MUTE_SPEECH);
 }
 
 static void
-sendSpeechRequest (volatile SpeechDriverThread *sdt) {
+sendSpeechRequest (SpeechDriverThread *sdt) {
   while (getQueueSize(sdt->requestQueue) > 0) {
     SpeechRequest *req = dequeueItem(sdt->requestQueue);
 
@@ -612,7 +612,7 @@ sendSpeechRequest (volatile SpeechDriverThread *sdt) {
 }
 
 static int
-enqueueSpeechRequest (volatile SpeechDriverThread *sdt, SpeechRequest *req) {
+enqueueSpeechRequest (SpeechDriverThread *sdt, SpeechRequest *req) {
   if (testThreadValidity(sdt)) {
     logSpeechRequest(req, "enqueuing");
 
@@ -649,7 +649,7 @@ newSpeechRequest (SpeechRequestType type, SpeechDatum *data) {
 
 int
 speechRequest_sayText (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   const char *text, size_t length,
   size_t count, const unsigned char *attributes,
   SayOptions options
@@ -679,7 +679,7 @@ speechRequest_sayText (
 
 int
 speechRequest_muteSpeech (
-  volatile SpeechDriverThread *sdt
+  SpeechDriverThread *sdt
 ) {
   SpeechRequest *req;
 
@@ -695,7 +695,7 @@ speechRequest_muteSpeech (
 
 int
 speechRequest_drainSpeech (
-  volatile SpeechDriverThread *sdt
+  SpeechDriverThread *sdt
 ) {
   SpeechRequest *req;
 
@@ -713,7 +713,7 @@ speechRequest_drainSpeech (
 
 int
 speechRequest_setVolume (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   unsigned char setting
 ) {
   SpeechRequest *req;
@@ -730,7 +730,7 @@ speechRequest_setVolume (
 
 int
 speechRequest_setRate (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   unsigned char setting
 ) {
   SpeechRequest *req;
@@ -747,7 +747,7 @@ speechRequest_setRate (
 
 int
 speechRequest_setPitch (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   unsigned char setting
 ) {
   SpeechRequest *req;
@@ -764,7 +764,7 @@ speechRequest_setPitch (
 
 int
 speechRequest_setPunctuation (
-  volatile SpeechDriverThread *sdt,
+  SpeechDriverThread *sdt,
   SpeechPunctuation setting
 ) {
   SpeechRequest *req;
@@ -780,53 +780,53 @@ speechRequest_setPunctuation (
 }
 
 static void
-setThreadReady (volatile SpeechDriverThread *sdt) {
+setThreadReady (SpeechDriverThread *sdt) {
   setThreadState(sdt, THD_READY);
   sendIntegerResponse(sdt, 1);
 }
 
 static int
-startSpeechDriver (volatile SpeechDriverThread *sdt) {
+startSpeechDriver (SpeechDriverThread *sdt) {
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "starting driver");
   return speech->construct(sdt->speechSynthesizer, sdt->driverParameters);
 }
 
 static void
-stopSpeechDriver (volatile SpeechDriverThread *sdt) {
+stopSpeechDriver (SpeechDriverThread *sdt) {
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "stopping driver");
   speech->destruct(sdt->speechSynthesizer);
 }
 
 #ifdef GOT_PTHREADS
 ASYNC_CONDITION_TESTER(testSpeechDriverThreadStopping) {
-  volatile SpeechDriverThread *sdt = data;
+  SpeechDriverThread *sdt = data;
 
   return sdt->threadState == THD_STOPPING;
 }
 
 ASYNC_EVENT_CALLBACK(handleSpeechMessageEvent) {
-  volatile SpeechDriverThread *sdt = parameters->eventData;
+  SpeechDriverThread *sdt = parameters->eventData;
   SpeechMessage *msg = parameters->signalData;
 
   handleSpeechMessage(sdt, msg);
 }
 
 ASYNC_EVENT_CALLBACK(handleSpeechRequestEvent) {
-  volatile SpeechDriverThread *sdt = parameters->eventData;
+  SpeechDriverThread *sdt = parameters->eventData;
   SpeechRequest *req = parameters->signalData;
 
   handleSpeechRequest(sdt, req);
 }
 
 static void
-awaitSpeechDriverThreadTermination (volatile SpeechDriverThread *sdt) {
+awaitSpeechDriverThreadTermination (SpeechDriverThread *sdt) {
   void *result;
 
   pthread_join(sdt->threadIdentifier, &result);
 }
 
 THREAD_FUNCTION(runSpeechDriverThread) {
-  volatile SpeechDriverThread *sdt = argument;
+  SpeechDriverThread *sdt = argument;
 
   setThreadState(sdt, THD_STARTING);
 
@@ -866,10 +866,10 @@ deallocateSpeechRequest (void *item, void *data) {
 
 int
 constructSpeechDriverThread (
-  volatile SpeechSynthesizer *spk,
+  SpeechSynthesizer *spk,
   char **parameters
 ) {
-  volatile SpeechDriverThread *sdt;
+  SpeechDriverThread *sdt;
 
   if ((sdt = malloc(sizeof(*sdt)))) {
     memset((void *)sdt, 0, sizeof(*sdt));
@@ -934,8 +934,8 @@ constructSpeechDriverThread (
 }
 
 void
-destroySpeechDriverThread (volatile SpeechSynthesizer *spk) {
-  volatile SpeechDriverThread *sdt = spk->driver.thread;
+destroySpeechDriverThread (SpeechSynthesizer *spk) {
+  SpeechDriverThread *sdt = spk->driver.thread;
 
   deleteElements(sdt->requestQueue);
 

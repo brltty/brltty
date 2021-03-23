@@ -25,8 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int tellSpeechFinished (volatile SpeechSynthesizer *spk);
-extern int tellSpeechLocation (volatile SpeechSynthesizer *spk, int index);
+extern int tellSpeechFinished (SpeechSynthesizer *spk);
+extern int tellSpeechLocation (SpeechSynthesizer *spk, int index);
 
 extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
 extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);

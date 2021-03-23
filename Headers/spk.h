@@ -25,49 +25,49 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void constructSpeechSynthesizer (volatile SpeechSynthesizer *spk);
-extern void destructSpeechSynthesizer (volatile SpeechSynthesizer *spk);
+extern void constructSpeechSynthesizer (SpeechSynthesizer *spk);
+extern void destructSpeechSynthesizer (SpeechSynthesizer *spk);
 
-extern int startSpeechDriverThread (volatile SpeechSynthesizer *spk, char **parameters);
-extern void stopSpeechDriverThread (volatile SpeechSynthesizer *spk);
+extern int startSpeechDriverThread (SpeechSynthesizer *spk, char **parameters);
+extern void stopSpeechDriverThread (SpeechSynthesizer *spk);
 
-extern int muteSpeech (volatile SpeechSynthesizer *spk, const char *reason);
+extern int muteSpeech (SpeechSynthesizer *spk, const char *reason);
 
-extern int canDrainSpeech (volatile SpeechSynthesizer *spk);
-extern int drainSpeech (volatile SpeechSynthesizer *spk);
+extern int canDrainSpeech (SpeechSynthesizer *spk);
+extern int drainSpeech (SpeechSynthesizer *spk);
 
 extern int sayUtf8Characters (
-  volatile SpeechSynthesizer *spk,
+  SpeechSynthesizer *spk,
   const char *text, const unsigned char *attributes,
   size_t length, size_t count,
   SayOptions options
 );
 
 extern int sayWideCharacters (
-  volatile SpeechSynthesizer *spk,
+  SpeechSynthesizer *spk,
   const wchar_t *characters, const unsigned char *attributes,
   size_t count, SayOptions options
 );
 
 extern int sayString (
-  volatile SpeechSynthesizer *spk,
+  SpeechSynthesizer *spk,
   const char *string, SayOptions options
 );
 
-extern int canSetSpeechVolume (volatile SpeechSynthesizer *spk);
-extern int setSpeechVolume (volatile SpeechSynthesizer *spk, int setting, int say);
+extern int canSetSpeechVolume (SpeechSynthesizer *spk);
+extern int setSpeechVolume (SpeechSynthesizer *spk, int setting, int say);
 extern int toNormalizedSpeechVolume (unsigned char volume);
 
-extern int canSetSpeechRate (volatile SpeechSynthesizer *spk);
-extern int setSpeechRate (volatile SpeechSynthesizer *spk, int setting, int say);
+extern int canSetSpeechRate (SpeechSynthesizer *spk);
+extern int setSpeechRate (SpeechSynthesizer *spk, int setting, int say);
 extern int toNormalizedSpeechRate (unsigned char rate);
 
-extern int canSetSpeechPitch (volatile SpeechSynthesizer *spk);
-extern int setSpeechPitch (volatile SpeechSynthesizer *spk, int setting, int say);
+extern int canSetSpeechPitch (SpeechSynthesizer *spk);
+extern int setSpeechPitch (SpeechSynthesizer *spk, int setting, int say);
 extern int toNormalizedSpeechPitch (unsigned char pitch);
 
-extern int canSetSpeechPunctuation (volatile SpeechSynthesizer *spk);
-extern int setSpeechPunctuation (volatile SpeechSynthesizer *spk, SpeechPunctuation setting, int say);
+extern int canSetSpeechPunctuation (SpeechSynthesizer *spk);
+extern int setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say);
 
 extern int haveSpeechDriver (const char *code);
 extern const char *getDefaultSpeechDriver (void);

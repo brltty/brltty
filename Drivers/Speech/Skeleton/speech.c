@@ -23,31 +23,31 @@
 #include "spk_driver.h"
 
 static void
-spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
 }
 
 static void
-spk_mute (volatile SpeechSynthesizer *spk) {
+spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static void
-spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static void
-spk_setPitch (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static void
-spk_setPunctuation (volatile SpeechSynthesizer *spk, SpeechPunctuation setting) {
+spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
 }
 
 static int
-spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   spk->setVolume = spk_setVolume;
   spk->setRate = spk_setRate;
   spk->setPitch = spk_setPitch;
@@ -57,5 +57,5 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 }
 
 static void
-spk_destruct (volatile SpeechSynthesizer *spk) {
+spk_destruct (SpeechSynthesizer *spk) {
 }

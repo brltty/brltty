@@ -103,7 +103,7 @@ setVolume (const void *data) {
 }
 
 static void
-spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
   relativeVolume = getIntegerSpeechVolume(setting, 100) - 100;
   speechdAction(setVolume, NULL);
   logMessage(LOG_DEBUG, "set volume: %u -> %d", setting, relativeVolume);
@@ -115,7 +115,7 @@ setRate (const void *data) {
 }
 
 static void
-spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
   relativeRate = getIntegerSpeechRate(setting, 100) - 100;
   speechdAction(setRate, NULL);
   logMessage(LOG_DEBUG, "set rate: %u -> %d", setting, relativeRate);
@@ -127,7 +127,7 @@ setPitch (const void *data) {
 }
 
 static void
-spk_setPitch (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
   relativePitch = getIntegerSpeechPitch(setting, 100) - 100;
   speechdAction(setPitch, NULL);
   logMessage(LOG_DEBUG, "set pitch: %u -> %d", setting, relativePitch);
@@ -139,7 +139,7 @@ setPunctuation (const void *data) {
 }
 
 static void
-spk_setPunctuation (volatile SpeechSynthesizer *spk, SpeechPunctuation setting) {
+spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
   punctuationVerbosity = (setting <= SPK_PUNCTUATION_NONE)? SPD_PUNCT_NONE: 
                          (setting >= SPK_PUNCTUATION_ALL)? SPD_PUNCT_ALL: 
                          SPD_PUNCT_SOME;
@@ -181,7 +181,7 @@ openConnection (void) {
 }
 
 static int
-spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   spk->setVolume = spk_setVolume;
   spk->setRate = spk_setRate;
   spk->setPitch = spk_setPitch;
@@ -244,7 +244,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 }
 
 static void
-spk_destruct (volatile SpeechSynthesizer *spk) {
+spk_destruct (SpeechSynthesizer *spk) {
   closeConnection();
   clearSettings();
 }
@@ -271,7 +271,7 @@ sayText (const void *data) {
 }
 
 static void
-spk_say (volatile SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes) {
   const SayData say = {
     .text = text,
     .length = length,
@@ -288,6 +288,6 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *text, size_t leng
 }
 
 static void
-spk_mute (volatile SpeechSynthesizer *spk) {
+spk_mute (SpeechSynthesizer *spk) {
   speechdAction(cancelSpeech, NULL);
 }

@@ -993,7 +993,7 @@ isAllSpaceCharacters (const ScreenCharacter *characters, int count) {
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
-volatile SpeechSynthesizer spk;
+SpeechSynthesizer spk;
 
 void
 trackSpeech (void) {

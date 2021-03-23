@@ -53,7 +53,7 @@ static uint16_t totalCharacterCount;
 static AsyncHandle trackHandle = NULL;
 
 #define ERRBUFLEN 200
-static void myerror(volatile SpeechSynthesizer *spk, const char *fmt, ...)
+static void myerror(SpeechSynthesizer *spk, const char *fmt, ...)
 {
   char buf[ERRBUFLEN];
   int offs;
@@ -68,7 +68,7 @@ static void myerror(volatile SpeechSynthesizer *spk, const char *fmt, ...)
   logMessage(LOG_ERR, "%s", buf);
   spk_destruct(spk);
 }
-static void myperror(volatile SpeechSynthesizer *spk, const char *fmt, ...)
+static void myperror(SpeechSynthesizer *spk, const char *fmt, ...)
 {
   char buf[ERRBUFLEN];
   int offs;
@@ -86,7 +86,7 @@ static void myperror(volatile SpeechSynthesizer *spk, const char *fmt, ...)
   spk_destruct(spk);
 }
 
-static void mywrite(volatile SpeechSynthesizer *spk, int fd, const void *buf, int len)
+static void mywrite(SpeechSynthesizer *spk, int fd, const void *buf, int len)
 {
   char *pos = (char *)buf;
   int w;
@@ -108,7 +108,7 @@ static void mywrite(volatile SpeechSynthesizer *spk, int fd, const void *buf, in
     myerror(spk, "ExternalSpeech: pipe to helper program: write timed out");
 }
 
-static void spk_say(volatile SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
+static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
 {
   unsigned char l[5];
   if(helper_fd < 0) return;
@@ -128,7 +128,7 @@ static void spk_say(volatile SpeechSynthesizer *spk, const unsigned char *text, 
   totalCharacterCount = count;
 }
 
-static void spk_mute (volatile SpeechSynthesizer *spk)
+static void spk_mute (SpeechSynthesizer *spk)
 {
   unsigned char c = 1;
   if(helper_fd < 0) return;
@@ -136,7 +136,7 @@ static void spk_mute (volatile SpeechSynthesizer *spk)
   mywrite(spk, helper_fd, &c,1);
 }
 
-static void spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting)
+static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
 {
   float expand = 1.0 / getFloatSpeechRate(setting); 
   unsigned char *p = (unsigned char *)&expand;
@@ -153,7 +153,7 @@ static void spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting)
 }
 
 ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
-  volatile SpeechSynthesizer *spk = parameters->data;
+  SpeechSynthesizer *spk = parameters->data;
 
   if (parameters->error) {
     logMessage(LOG_WARNING, "speech tracking input error: %s", strerror(parameters->error));
@@ -175,7 +175,7 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
   return 0;
 }
 
-static int spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
+static int spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
   const char *extSockPath = parameters[PARM_SOCK_PATH];
 
@@ -210,7 +210,7 @@ static int spk_construct (volatile SpeechSynthesizer *spk, char **parameters)
   return 1;
 }
 
-static void spk_destruct (volatile SpeechSynthesizer *spk)
+static void spk_destruct (SpeechSynthesizer *spk)
 {
   if(trackHandle)
     asyncCancelRequest(trackHandle);

@@ -205,7 +205,7 @@ extern int findLastNonSpaceCharacter (const ScreenCharacter *characters, int cou
 extern int isAllSpaceCharacters (const ScreenCharacter *characters, int count);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-extern volatile SpeechSynthesizer spk;
+extern SpeechSynthesizer spk;
 extern int opt_quietIfNoBraille;
 
 extern int isAutospeakActive (void);

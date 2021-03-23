@@ -39,7 +39,7 @@ struct SpeechDataStruct {
 };
 
 static int
-findDriverClass (volatile SpeechSynthesizer *spk) {
+findDriverClass (SpeechSynthesizer *spk) {
   return findJavaClass(
     spk->driver.data->env, &spk->driver.data->driverClass,
     JAVA_OBJ_BRLTTY("speech/SpeechDriver")
@@ -47,7 +47,7 @@ findDriverClass (volatile SpeechSynthesizer *spk) {
 }
 
 static void
-releaseDriverClass (volatile SpeechSynthesizer *spk) {
+releaseDriverClass (SpeechSynthesizer *spk) {
   jclass class = spk->driver.data->driverClass;
 
   if (class) {
@@ -58,7 +58,7 @@ releaseDriverClass (volatile SpeechSynthesizer *spk) {
 }
 
 static int
-findDriverMethod (volatile SpeechSynthesizer *spk, jmethodID *method, const char *name, const char *signature) {
+findDriverMethod (SpeechSynthesizer *spk, jmethodID *method, const char *name, const char *signature) {
   if (findDriverClass(spk)) {
     if (findJavaStaticMethod(spk->driver.data->env, method, spk->driver.data->driverClass, name, signature)) {
       return 1;
@@ -83,7 +83,7 @@ JAVA_STATIC_METHOD (
 }
 
 static void
-spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
   if (findDriverMethod(spk, &spk->driver.data->sayMethod, "sayText",
                        JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                        JAVA_SIG_LONG // synthesizer
@@ -111,7 +111,7 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
 }
 
 static void
-spk_mute (volatile SpeechSynthesizer *spk) {
+spk_mute (SpeechSynthesizer *spk) {
   if (findDriverMethod(spk, &spk->driver.data->muteMethod, "stopSpeaking",
                        JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                       ))) {
@@ -125,7 +125,7 @@ spk_mute (volatile SpeechSynthesizer *spk) {
 }
 
 static void
-spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
   if (findDriverMethod(spk, &spk->driver.data->setVolumeMethod, "setVolume",
                        JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                        JAVA_SIG_FLOAT // volume
@@ -140,7 +140,7 @@ spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static void
-spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
   if (findDriverMethod(spk, &spk->driver.data->setRateMethod, "setRate",
                        JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                        JAVA_SIG_FLOAT // rate
@@ -155,7 +155,7 @@ spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static void
-spk_setPitch (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
   if (findDriverMethod(spk, &spk->driver.data->setPitchMethod, "setPitch",
                        JAVA_SIG_METHOD(JAVA_SIG_BOOLEAN,
                                        JAVA_SIG_FLOAT // pitch
@@ -170,7 +170,7 @@ spk_setPitch (volatile SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static int
-spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   if ((spk->driver.data = malloc(sizeof(*spk->driver.data)))) {
     memset(spk->driver.data, 0, sizeof(*spk->driver.data));
 
@@ -212,7 +212,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 }
 
 static void
-spk_destruct (volatile SpeechSynthesizer *spk) {
+spk_destruct (SpeechSynthesizer *spk) {
   if (findDriverMethod(spk, &spk->driver.data->stopMethod, "stopEngine",
                        JAVA_SIG_METHOD(JAVA_SIG_VOID,
                                       ))) {

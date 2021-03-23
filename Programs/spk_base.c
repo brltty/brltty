@@ -26,12 +26,12 @@
 
 #ifdef ENABLE_SPEECH_SUPPORT
 int
-tellSpeechFinished (volatile SpeechSynthesizer *spk) {
+tellSpeechFinished (SpeechSynthesizer *spk) {
   return speechMessage_speechFinished(spk->driver.thread);
 }
 
 int
-tellSpeechLocation (volatile SpeechSynthesizer *spk, int index) {
+tellSpeechLocation (SpeechSynthesizer *spk, int index) {
   if (!spk->track.isActive) return 1;
   return speechMessage_speechLocation(spk->driver.thread, index);
 }

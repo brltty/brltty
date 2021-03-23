@@ -57,7 +57,7 @@ typedef enum {
 
 #define MAXIMUM_SAMPLES 0X800
 
-typedef void SaveSettingFunction (volatile SpeechSynthesizer *spk, int setting);
+typedef void SaveSettingFunction (SpeechSynthesizer *spk, int setting);
 
 typedef struct {
    const char *name; // must be first
@@ -182,17 +182,17 @@ struct SpeechDataStruct {
 };
 
 static void
-saveLanguageSetting (volatile SpeechSynthesizer *spk, int setting) {
+saveLanguageSetting (SpeechSynthesizer *spk, int setting) {
    spk->driver.data->setting.language = &languageChoices[setting];
 }
 
 static void
-saveVoiceSetting (volatile SpeechSynthesizer *spk, int setting) {
+saveVoiceSetting (SpeechSynthesizer *spk, int setting) {
    spk->driver.data->setting.voice = &voiceChoices[setting];
 }
 
 static void
-reportError (volatile SpeechSynthesizer *spk, const char *routine) {
+reportError (SpeechSynthesizer *spk, const char *routine) {
    int status = eciProgStatus(spk->driver.data->eci.handle);
    char message[100];
    eciErrorMessage(spk->driver.data->eci.handle, message);
@@ -239,7 +239,7 @@ reportParameter (const char *type, const char *description, int setting, const v
 }
 
 static int
-getEnvironmentParameter (volatile SpeechSynthesizer *spk, enum ECIParam parameter) {
+getEnvironmentParameter (SpeechSynthesizer *spk, enum ECIParam parameter) {
    return eciGetParam(spk->driver.data->eci.handle, parameter);
 }
 
@@ -252,19 +252,19 @@ getEnvironmentParameterUnit (enum ECIParam parameter) {
 }
 
 static void
-reportEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, const void *choices, size_t size) {
+reportEnvironmentParameter (SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, const void *choices, size_t size) {
    int setting = getEnvironmentParameter(spk, parameter);
    reportParameter("environment", description, setting, choices, size, getEnvironmentParameterUnit(parameter));
 }
 
 static int
-setEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting) {
+setEnvironmentParameter (SpeechSynthesizer *spk, const char *description, enum ECIParam parameter, int setting) {
    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set environment parameter: %s: %d=%d", description, parameter, setting);
    return eciSetParam(spk->driver.data->eci.handle, parameter, setting) >= 0;
 }
 
 static int
-choiceEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *description, const char *value, enum ECIParam parameter, const void *choices, size_t size, SaveSettingFunction *save) {
+choiceEnvironmentParameter (SpeechSynthesizer *spk, const char *description, const char *value, enum ECIParam parameter, const void *choices, size_t size, SaveSettingFunction *save) {
    int ok = !*value;
 
    if (!ok) {
@@ -289,7 +289,7 @@ choiceEnvironmentParameter (volatile SpeechSynthesizer *spk, const char *descrip
 }
 
 static int
-setUnitType (volatile SpeechSynthesizer *spk, int newUnits) {
+setUnitType (SpeechSynthesizer *spk, int newUnits) {
    if (newUnits != spk->driver.data->current.unitType) {
       if (!setEnvironmentParameter(spk, "real world units", eciRealWorldUnits, newUnits)) return 0;
       spk->driver.data->current.unitType = newUnits;
@@ -299,17 +299,17 @@ setUnitType (volatile SpeechSynthesizer *spk, int newUnits) {
 }
 
 static int
-useInternalUnits (volatile SpeechSynthesizer *spk) {
+useInternalUnits (SpeechSynthesizer *spk) {
    return setUnitType(spk, 0);
 }
 
 static int
-useExternalUnits (volatile SpeechSynthesizer *spk) {
+useExternalUnits (SpeechSynthesizer *spk) {
    return setUnitType(spk, 1);
 }
 
 static int
-useParameterUnit (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter) {
+useParameterUnit (SpeechSynthesizer *spk, enum ECIVoiceParam parameter) {
    switch (parameter) {
       case eciVolume:
          if (!useInternalUnits(spk)) return 0;
@@ -328,7 +328,7 @@ useParameterUnit (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter)
 }
 
 static int
-getVoiceParameter (volatile SpeechSynthesizer *spk, enum ECIVoiceParam parameter) {
+getVoiceParameter (SpeechSynthesizer *spk, enum ECIVoiceParam parameter) {
    if (!useParameterUnit(spk, parameter)) return 0;
    return eciGetVoiceParam(spk->driver.data->eci.handle, VOICE_TYPE_CURRENT, parameter);
 }
@@ -351,19 +351,19 @@ getVoiceParameterUnit (enum ECIVoiceParam parameter) {
 }
 
 static void
-reportVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIVoiceParam parameter, const char *const *choices) {
+reportVoiceParameter (SpeechSynthesizer *spk, const char *description, enum ECIVoiceParam parameter, const char *const *choices) {
    reportParameter("voice", description, getVoiceParameter(spk, parameter), choices, sizeof(*choices), getVoiceParameterUnit(parameter));
 }
 
 static int
-setVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, enum ECIVoiceParam parameter, int setting) {
+setVoiceParameter (SpeechSynthesizer *spk, const char *description, enum ECIVoiceParam parameter, int setting) {
    if (!useParameterUnit(spk, parameter)) return 0;
    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "set voice parameter: %s: %d=%d%s", description, parameter, setting, getVoiceParameterUnit(parameter));
    return eciSetVoiceParam(spk->driver.data->eci.handle, VOICE_TYPE_CURRENT, parameter, setting) >= 0;
 }
 
 static int
-choiceVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, const char *value, enum ECIVoiceParam parameter, const char *const *choices) {
+choiceVoiceParameter (SpeechSynthesizer *spk, const char *description, const char *value, enum ECIVoiceParam parameter, const char *const *choices) {
    int ok = !*value;
 
    if (!ok) {
@@ -385,7 +385,7 @@ choiceVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, 
 }
 
 static int
-rangeVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, const char *value, enum ECIVoiceParam parameter, int minimum, int maximum) {
+rangeVoiceParameter (SpeechSynthesizer *spk, const char *description, const char *value, enum ECIVoiceParam parameter, int minimum, int maximum) {
    int ok = 0;
 
    if (*value) {
@@ -405,12 +405,12 @@ rangeVoiceParameter (volatile SpeechSynthesizer *spk, const char *description, c
 }
 
 static void
-spk_setVolume (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
    setVoiceParameter(spk, "volume", eciVolume, getIntegerSpeechVolume(setting, 100));
 }
 
 static void
-spk_setRate (volatile SpeechSynthesizer *spk, unsigned char setting) {
+spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
    setVoiceParameter(spk, "rate", eciSpeed, (int)(getFloatSpeechRate(setting) * 210.0));
 }
 
@@ -428,13 +428,13 @@ findLanguage (int identifier) {
 }
 
 static const LanguageChoice *
-getLanguage (volatile SpeechSynthesizer *spk) {
+getLanguage (SpeechSynthesizer *spk) {
    int identifier = getEnvironmentParameter(spk, eciLanguageDialect);
    return findLanguage(identifier);
 }
 
 static void
-stopSpeech (volatile SpeechSynthesizer *spk) {
+stopSpeech (SpeechSynthesizer *spk) {
    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "stop");
 
    if (eciStop(spk->driver.data->eci.handle)) {
@@ -444,12 +444,12 @@ stopSpeech (volatile SpeechSynthesizer *spk) {
 }
 
 static void
-spk_mute (volatile SpeechSynthesizer *spk) {
+spk_mute (SpeechSynthesizer *spk) {
    stopSpeech(spk);
 }
 
 static int
-pcmMakeCommand (volatile SpeechSynthesizer *spk) {
+pcmMakeCommand (SpeechSynthesizer *spk) {
    int rate = getEnvironmentParameter(spk, eciSampleRate);
    char buffer[0X100];
 
@@ -467,7 +467,7 @@ pcmMakeCommand (volatile SpeechSynthesizer *spk) {
 }
 
 static int
-pcmOpenStream (volatile SpeechSynthesizer *spk) {
+pcmOpenStream (SpeechSynthesizer *spk) {
    if (!spk->driver.data->pcm.stream) {
       if (!spk->driver.data->pcm.command) {
          if (!pcmMakeCommand(spk)) {
@@ -487,7 +487,7 @@ pcmOpenStream (volatile SpeechSynthesizer *spk) {
 }
 
 static void
-pcmCloseStream (volatile SpeechSynthesizer *spk) {
+pcmCloseStream (SpeechSynthesizer *spk) {
    if (spk->driver.data->pcm.stream) {
       pclose(spk->driver.data->pcm.stream);
       spk->driver.data->pcm.stream = NULL;
@@ -496,7 +496,7 @@ pcmCloseStream (volatile SpeechSynthesizer *spk) {
 
 static enum ECICallbackReturn
 clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data) {
-   volatile SpeechSynthesizer *spk = data;
+   SpeechSynthesizer *spk = data;
 
    switch (message) {
       case eciWaveformBuffer:
@@ -518,7 +518,7 @@ clientCallback (ECIHand eci, enum ECIMessage message, long parameter, void *data
 }
 
 static int
-addText (volatile SpeechSynthesizer *spk, const char *text) {
+addText (SpeechSynthesizer *spk, const char *text) {
    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "add text: \"%s\"", text);
    if (eciAddText(spk->driver.data->eci.handle, text)) return 1;
    reportError(spk, "eciAddText");
@@ -526,7 +526,7 @@ addText (volatile SpeechSynthesizer *spk, const char *text) {
 }
 
 static int
-insertIndex (volatile SpeechSynthesizer *spk, int index) {
+insertIndex (SpeechSynthesizer *spk, int index) {
    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "insert index: %d", index);
    if (eciInsertIndex(spk->driver.data->eci.handle, index)) return 1;
    reportError(spk, "eciInsertIndex");
@@ -534,7 +534,7 @@ insertIndex (volatile SpeechSynthesizer *spk, int index) {
 }
 
 static int
-setInputType (volatile SpeechSynthesizer *spk, int newInputType) {
+setInputType (SpeechSynthesizer *spk, int newInputType) {
    if (newInputType != spk->driver.data->current.inputType) {
       if (!setEnvironmentParameter(spk, "input type", eciInputType, newInputType)) return 0;
       spk->driver.data->current.inputType = newInputType;
@@ -544,17 +544,17 @@ setInputType (volatile SpeechSynthesizer *spk, int newInputType) {
 }
 
 static int
-disableAnnotations (volatile SpeechSynthesizer *spk) {
+disableAnnotations (SpeechSynthesizer *spk) {
    return setInputType(spk, 0);
 }
 
 static int
-enableAnnotations (volatile SpeechSynthesizer *spk) {
+enableAnnotations (SpeechSynthesizer *spk) {
    return setInputType(spk, 1);
 }
 
 static int
-writeAnnotation (volatile SpeechSynthesizer *spk, const char *annotation) {
+writeAnnotation (SpeechSynthesizer *spk, const char *annotation) {
    if (!enableAnnotations(spk)) return 0;
 
    char text[0X100];
@@ -564,7 +564,7 @@ writeAnnotation (volatile SpeechSynthesizer *spk, const char *annotation) {
 
 #ifdef ICONV_NULL
 static int
-prepareTextConversion (volatile SpeechSynthesizer *spk) {
+prepareTextConversion (SpeechSynthesizer *spk) {
    spk->driver.data->iconv.handle = ICONV_NULL;
 
    const LanguageChoice *choice = getLanguage(spk);
@@ -583,7 +583,7 @@ prepareTextConversion (volatile SpeechSynthesizer *spk) {
 #endif /* ICONV_NULL */
 
 static int
-ensureSayBufferSize (volatile SpeechSynthesizer *spk, size_t size) {
+ensureSayBufferSize (SpeechSynthesizer *spk, size_t size) {
    if (size > spk->driver.data->say.size) {
       size |= 0XFF;
       size += 1;
@@ -603,7 +603,7 @@ ensureSayBufferSize (volatile SpeechSynthesizer *spk, size_t size) {
 }
 
 static int
-addCharacters (volatile SpeechSynthesizer *spk, const unsigned char *buffer, int from, int to) {
+addCharacters (SpeechSynthesizer *spk, const unsigned char *buffer, int from, int to) {
    int length = to - from;
    if (!length) return 1;
 
@@ -614,7 +614,7 @@ addCharacters (volatile SpeechSynthesizer *spk, const unsigned char *buffer, int
 }
 
 static int
-addSegment (volatile SpeechSynthesizer *spk, const unsigned char *buffer, int from, int to, const int *indexMap) {
+addSegment (SpeechSynthesizer *spk, const unsigned char *buffer, int from, int to, const int *indexMap) {
    if (spk->driver.data->eci.useSSML) {
       for (int index=from; index<to; index+=1) {
          const char *entity = NULL;
@@ -678,7 +678,7 @@ addSegment (volatile SpeechSynthesizer *spk, const unsigned char *buffer, int fr
 }
 
 static int
-addSegments (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, const int *indexMap) {
+addSegments (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, const int *indexMap) {
    if (spk->driver.data->eci.useSSML && !addText(spk, "<speak>")) return 0;
 
    int wasSpace = 1;
@@ -704,7 +704,7 @@ addSegments (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_
 }
 
 static void
-spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
    int ok = 0;
 
    if (pcmOpenStream(spk)) {
@@ -746,7 +746,7 @@ spk_say (volatile SpeechSynthesizer *spk, const unsigned char *buffer, size_t le
 }
 
 static void
-setLanguageAndVoice (volatile SpeechSynthesizer *spk) {
+setLanguageAndVoice (SpeechSynthesizer *spk) {
    const LanguageChoice *language = spk->driver.data->setting.language;
    const VoiceChoice *voice = spk->driver.data->setting.voice;
 
@@ -780,7 +780,7 @@ setLanguageAndVoice (volatile SpeechSynthesizer *spk) {
 }
 
 static void
-setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
+setParameters (SpeechSynthesizer *spk, char **parameters) {
    choiceEnvironmentParameter(spk, "quality (sample rate)", parameters[PARM_Quality], eciSampleRate, qualityChoices, sizeof(*qualityChoices), NULL);
    choiceEnvironmentParameter(spk, "mode (text mode)", parameters[PARM_Mode], eciTextMode, modeChoices, sizeof(*modeChoices), NULL);
    choiceEnvironmentParameter(spk, "synthesize (synth mode)", parameters[PARM_Synthesize], eciSynthMode, synthesizeChoices, sizeof(*synthesizeChoices), NULL);
@@ -812,7 +812,7 @@ setParameters (volatile SpeechSynthesizer *spk, char **parameters) {
 }
 
 static void
-writeAnnotations (volatile SpeechSynthesizer *spk) {
+writeAnnotations (SpeechSynthesizer *spk) {
    if (spk->driver.data->eci.useSSML) {
       writeAnnotation(spk, "gfa1"); // enable SSML
       writeAnnotation(spk, "gfa2");
@@ -842,7 +842,7 @@ parseVersion (const char *text) {
 }
 
 static int
-spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
    spk->setVolume = spk_setVolume;
    spk->setRate = spk_setRate;
 
@@ -901,7 +901,7 @@ spk_construct (volatile SpeechSynthesizer *spk, char **parameters) {
 }
 
 static void
-spk_destruct (volatile SpeechSynthesizer *spk) {
+spk_destruct (SpeechSynthesizer *spk) {
    if (spk->driver.data) {
       if (spk->driver.data->eci.handle) eciDelete(spk->driver.data->eci.handle);
       if (spk->driver.data->say.buffer) free(spk->driver.data->say.buffer);
