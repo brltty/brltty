@@ -356,7 +356,7 @@ static Atom netWmNameAtom, utf8StringAtom;
 
 static XSelData xselData;
 
-static volatile int grabFailed;
+static volatile sig_atomic_t grabFailed;
 
 #ifdef HAVE_ICONV_H
 iconv_t utf8Conv = (iconv_t)(-1);
