@@ -75,13 +75,18 @@ STR_END_FORMATTER
 
 static
 STR_BEGIN_FORMATTER(formatSpeechTime, const TimeFormattingData *fmt)
-  STR_PRINTF("%u", fmt->components.hour);
+  unsigned int hours = fmt->components.hour;
+  unsigned int minutes = fmt->components.minute;
+  unsigned int seconds = fmt->components.second;
 
-  if (fmt->components.minute > 0) {
-    if (fmt->components.minute < 10) STR_PRINTF(" 0");
-    STR_PRINTF(" %u", fmt->components.minute);
+  if (minutes > 0) {
+    STR_PRINTF("%u", hours);
+    if (minutes < 10) STR_PRINTF(" 0");
+    STR_PRINTF(" %u", minutes);
   } else if (!fmt->meridian) {
-    STR_PRINTF(" %s", ngettext("o'clock", "o-clock", fmt->components.hour));
+    // xgettext: This is how to say when the time is exactly on (i.e. zero minutes after) an hour.
+    // xgettext: (%u represents the number of hours)
+    STR_PRINTF(ngettext("%u o'clock", "%u o-clock", hours), hours);
   }
 
   if (fmt->meridian) {
@@ -92,11 +97,12 @@ STR_BEGIN_FORMATTER(formatSpeechTime, const TimeFormattingData *fmt)
   if (prefs.showSeconds) {
     STR_PRINTF(", ");
 
-    if (fmt->components.second == 0) {
+    if (seconds == 0) {
+      // xgettext: This is the term used when the time is exactly on (i.e. zero seconds after) a minute.
       STR_PRINTF("%s", gettext("exactly"));
     } else {
-      unsigned int seconds = fmt->components.second;
       STR_PRINTF("%s", gettext("and"));
+
       // xgettext: This is a number (%u) of seconds (time units).
       STR_PRINTF(ngettext("%u second", "%u seconds", seconds), seconds);
     }
