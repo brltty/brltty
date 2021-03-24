@@ -86,7 +86,7 @@ STR_BEGIN_FORMATTER(formatSpeechTime, const TimeFormattingData *fmt)
   } else if (!fmt->meridian) {
     // xgettext: This is how to say when the time is exactly on (i.e. zero minutes after) an hour.
     // xgettext: (%u represents the number of hours)
-    STR_PRINTF(ngettext("%u o'clock", "%u o-clock", hours), hours);
+    STR_PRINTF(ngettext("%u o'clock", "%u o'clock", hours), hours);
   }
 
   if (fmt->meridian) {

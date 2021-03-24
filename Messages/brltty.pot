@@ -36,7 +36,7 @@ msgstr ""
 #: Programs/cmd_miscellaneous.c:89
 #, c-format
 msgid "%u o'clock"
-msgid_plural "%u o-clock"
+msgid_plural "%u o'clock"
 msgstr[0] ""
 msgstr[1] ""
 
