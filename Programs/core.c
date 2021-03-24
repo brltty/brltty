@@ -1346,6 +1346,10 @@ ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
   }
 
   if (programTerminationRequestCount) {
+    // This is a memory read barrier to ensure that the most recent
+    // time and number for the program termination signal are seen.
+    __sync_synchronize();
+
     logMessage(LOG_CATEGORY(ASYNC_EVENTS),
       "program termination requested: Count=%u Signal=%d",
       programTerminationRequestCount, programTerminationRequestSignal
@@ -1543,6 +1547,10 @@ ASYNC_SIGNAL_HANDLER(handleProgramTerminationRequest) {
 
   programTerminationRequestTime = now;
   programTerminationRequestSignal = signalNumber;
+
+  // This is a memory write barrier to ensure that the time and number
+  // for this signal will be visible before its count is incremented.
+  __sync_synchronize();
 
   if (++programTerminationRequestCount > PROGRAM_TERMINATION_REQUEST_COUNT_THRESHOLD) {
     exit(1);

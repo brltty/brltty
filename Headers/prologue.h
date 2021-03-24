@@ -24,11 +24,21 @@ extern "C" {
 #endif /* __cplusplus */
 
 #undef HAVE_BUILTIN_POPCOUNT
+#undef HAVE_SYNC_SYNCHRONIZE
+
 #ifdef __has_builtin
 #if __has_builtin(__builtin_popcount)
 #define HAVE_BUILTIN_POPCOUNT
 #endif /* __has_builtin(__builtin_popcount) */
+
+#if __has_builtin(__sync_synchronize)
+#define HAVE_SYNC_SYNCHRONIZE
+#endif /* __has_builtin(__sync_synchronize) */
 #endif /* __has_builtin */
+
+#ifndef HAVE_SYNC_SYNCHRONIZE
+static inline void __sync_synchronize (void) {}
+#endif /* HAVE_SYNC_SYNCHRONIZE */
 
 #define CONCATENATE_1(a,b) a##b
 #define CONCATENATE(a,b) CONCATENATE_1(a,b)
