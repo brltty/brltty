@@ -39,7 +39,7 @@ msgstr "\"%s\" démarré par \"%s\"\n"
 #: Programs/cmd_utils.c:169
 #, c-format
 msgid "%1$s on %2$s"
-msgstr ""
+msgstr "%1$s sur %2$s"
 
 #. xgettext: This is how to say when the time is exactly on (i.e. zero minutes after) an hour.
 #. xgettext: (%u represents the number of hours)
@@ -47,16 +47,16 @@ msgstr ""
 #, c-format
 msgid "%u o'clock"
 msgid_plural "%u o-clock"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%u heure"
+msgstr[1] "%u heures"
 
 #. xgettext: This is a number (%u) of seconds (time units).
 #: Programs/cmd_miscellaneous.c:107
 #, c-format
 msgid "%u second"
 msgid_plural "%u seconds"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%u seconde"
+msgstr[1] "%u secondes"
 
 #: Programs/menu_prefs.c:543 Programs/menu_prefs.c:544
 #: Programs/menu_prefs.c:546 Programs/menu_prefs.c:547
@@ -103,7 +103,7 @@ msgstr "250 millisecondes"
 #: Programs/menu_prefs.c:557 Programs/menu_prefs.c:558
 #: Programs/menu_prefs.c:559 Programs/menu_prefs.c:560
 msgid "3 cells"
-msgstr ""
+msgstr "3 cellules"
 
 #: Programs/menu_prefs.c:964
 msgid "40 seconds"
@@ -119,7 +119,7 @@ msgstr "500 millisecondes"
 
 #: Programs/menu_prefs.c:733
 msgid "6-dot"
-msgstr ""
+msgstr "6 points"
 
 #: Programs/brltty-ttb.c:179
 msgid "8-bit character set to use."
@@ -127,7 +127,7 @@ msgstr "Utilisation de caractères 8 bits"
 
 #: Programs/menu_prefs.c:732
 msgid "8-dot"
-msgstr ""
+msgstr "8 points"
 
 #: Programs/scr_menu.c:104
 msgid "<off>"
@@ -201,16 +201,16 @@ msgstr "Toutes"
 
 #: Programs/menu_prefs.c:555
 msgid "Alphabetic Cursor Coordinates"
-msgstr ""
+msgstr "Coordonnées Alphabétiques du Curseur"
 
 #: Programs/menu_prefs.c:554
 msgid "Alphabetic Window Coordinates"
-msgstr ""
+msgstr "Coordonnées Alphabétiques de la Fenêtre"
 
 #. xgettext: This is the name of MIDI musical instrument #66 (in the Reed group).
 #: Programs/midi.c:283
 msgid "Alto Saxophone"
-msgstr ""
+msgstr "Saxophone Alto"
 
 #. xgettext: This is the name of MIDI musical instrument #127 (in the Sound Effects group).
 #: Programs/midi.c:474
@@ -223,11 +223,11 @@ msgstr "Événements asynchrones"
 
 #: Programs/menu_prefs.c:807
 msgid "Attributes Blink Period"
-msgstr ""
+msgstr "Période de Clignottement des Attributs"
 
 #: Programs/menu_prefs.c:815
 msgid "Attributes Percent Visible"
-msgstr ""
+msgstr "Pourcentage de Visibilité des Attributs"
 
 #: Programs/config.c:2831 Programs/menu_prefs.c:1395
 msgid "Attributes Table"
@@ -274,7 +274,7 @@ msgstr "Banjo"
 #. xgettext: This is the name of MIDI musical instrument #68 (in the Reed group).
 #: Programs/midi.c:289
 msgid "Baritone Saxophone"
-msgstr ""
+msgstr "Saxophone Baryton"
 
 #. xgettext: This is the name of MIDI musical instrument group #5.
 #: Programs/midi.c:37
@@ -415,11 +415,11 @@ msgstr "Mode de majuscules"
 
 #: Programs/menu_prefs.c:828
 msgid "Capitals Blink Period"
-msgstr ""
+msgstr "Période de Clignottement des Majuscules"
 
 #: Programs/menu_prefs.c:836
 msgid "Capitals Percent Visible"
-msgstr ""
+msgstr "Pourcentage de Visibilité des Majuscules"
 
 #: Programs/menu_prefs.c:1510
 msgid "Category Log Level"
@@ -433,7 +433,7 @@ msgstr "Celesta"
 
 #: Programs/menu_prefs.c:736
 msgid "Cell Type"
-msgstr ""
+msgstr "Type de Cellule"
 
 #. xgettext: This is the name of MIDI musical instrument #43 (in the Strings group).
 #: Programs/midi.c:211
@@ -463,7 +463,7 @@ msgstr "Clarinette"
 #. xgettext: This is the name of MIDI musical instrument #8 (in the Piano group).
 #: Programs/midi.c:101
 msgid "Clavinet"
-msgstr ""
+msgstr "Clavinet"
 
 #: Programs/menu.c:889
 msgid "Close"
@@ -475,7 +475,7 @@ msgstr "Deux-points"
 
 #: Programs/menu_prefs.c:702
 msgid "Computer Braille"
-msgstr ""
+msgstr "Braille Informatique"
 
 #: Programs/menu_prefs.c:1444
 msgid "Configuration Directory"
@@ -520,11 +520,11 @@ msgstr "Critique"
 
 #: Programs/menu_prefs.c:546
 msgid "Cursor Column"
-msgstr ""
+msgstr "Colonne du Curseur"
 
 #: Programs/menu_prefs.c:545 Programs/menu_prefs.c:557
 msgid "Cursor Coordinates"
-msgstr ""
+msgstr "Coordonnées du Curseur"
 
 #: Programs/log.c:100
 msgid "Cursor Routing"
@@ -532,7 +532,7 @@ msgstr "Déplacement du curseur"
 
 #: Programs/menu_prefs.c:547
 msgid "Cursor Row"
-msgstr ""
+msgstr "Ligne du Curseur"
 
 #: Programs/log.c:94
 msgid "Cursor Tracking"
@@ -544,11 +544,11 @@ msgstr "Durée de la poursuite du curseur"
 
 #: Programs/menu_prefs.c:548 Programs/menu_prefs.c:559
 msgid "Cursor and Window Column"
-msgstr ""
+msgstr "Colonne du Curseur et de la Fenêtre"
 
 #: Programs/menu_prefs.c:549 Programs/menu_prefs.c:560
 msgid "Cursor and Window Row"
-msgstr ""
+msgstr "Ligne du Curseur et de la Fenêtre"
 
 #: Programs/menu_prefs.c:1320
 msgid "Dash"
@@ -1577,11 +1577,11 @@ msgstr "Dire les espaces"
 
 #: Programs/menu_prefs.c:780
 msgid "Screen Cursor Blink Period"
-msgstr ""
+msgstr "Période de Clignottement du Curseur de l'écran"
 
 #: Programs/menu_prefs.c:788
 msgid "Screen Cursor Percent Visible"
-msgstr ""
+msgstr "Pourcentage de Visibilité du Curseur de l'écran"
 
 #: Programs/menu_prefs.c:768
 msgid "Screen Cursor Style"
@@ -1712,7 +1712,7 @@ msgstr "Quelques"
 #. xgettext: This is the name of MIDI musical instrument #65 (in the Reed group).
 #: Programs/midi.c:280
 msgid "Soprano Saxophone"
-msgstr ""
+msgstr "Saxophone Soprano"
 
 #. xgettext: This is the name of MIDI musical instrument group #16.
 #: Programs/midi.c:74
@@ -1753,11 +1753,11 @@ msgstr "Lire la ligne sélectionnée"
 
 #: Programs/menu_prefs.c:1250
 msgid "Speech Cursor Blink Period"
-msgstr ""
+msgstr "Période de Clignottement du Curseur Vocal"
 
 #: Programs/menu_prefs.c:1258
 msgid "Speech Cursor Percent Visible"
-msgstr ""
+msgstr "Pourcentage de Visibilité du Curseur Vocal"
 
 #: Programs/menu_prefs.c:1238
 msgid "Speech Cursor Style"
@@ -1976,7 +1976,7 @@ msgstr "Sonnerie de téléphone"
 #. xgettext: This is the name of MIDI musical instrument #67 (in the Reed group).
 #: Programs/midi.c:286
 msgid "Tenor Saxophone"
-msgstr ""
+msgstr "Saxophone Ténor"
 
 #: Programs/menu_prefs.c:760
 msgid "Text Indicators"
@@ -2151,15 +2151,15 @@ msgstr "sifflet"
 
 #: Programs/menu_prefs.c:543
 msgid "Window Column"
-msgstr ""
+msgstr "Colonne de la Fenêtre"
 
 #: Programs/menu_prefs.c:542 Programs/menu_prefs.c:558
 msgid "Window Coordinates"
-msgstr ""
+msgstr "Coordonnées de la Fenêtre"
 
 #: Programs/menu_prefs.c:544
 msgid "Window Row"
-msgstr ""
+msgstr "Ligne de la Fenêtre"
 
 #. xgettext: This is the name of MIDI musical instrument #116 (in the Percussive group).
 #: Programs/midi.c:440
@@ -2285,7 +2285,7 @@ msgstr "ligne vierge"
 
 #: Programs/cmd_utils.c:173
 msgid "blinking"
-msgstr ""
+msgstr "clignottant"
 
 #. B
 #: Programs/cmd_utils.c:145
@@ -2365,7 +2365,7 @@ msgstr "ne peut lire l'en-tête de l'écran"
 
 #: Programs/ctb_translate.c:380
 msgid "cannot access internal contraction table"
-msgstr ""
+msgstr "ne peut accéder à la table d'abrègement interne"
 
 #: Programs/atb_translate.c:70
 msgid "cannot compile attributes table"
@@ -2451,7 +2451,7 @@ msgstr "Ne peut pas charger la table des attributs"
 
 #: Programs/ctb_translate.c:394
 msgid "cannot load contraction table"
-msgstr ""
+msgstr "ne peut charger la table d'abrègement"
 
 #: Programs/system_windows.c:54
 msgid "cannot load library"
@@ -2626,7 +2626,7 @@ msgstr "gris foncé"
 #. xgettext: This is the description of the SAY_LOWER command.
 #: Programs/cmds.auto.h:1168
 msgid "decrease speaking pitch"
-msgstr ""
+msgstr "diminuer la hauteur de la voix"
 
 #. xgettext: This is the description of the SAY_SLOWER command.
 #: Programs/cmds.auto.h:550
@@ -3096,7 +3096,7 @@ msgstr "Délai d'inactivité"
 #. xgettext: This is the description of the SAY_HIGHER command.
 #: Programs/cmds.auto.h:1175
 msgid "increase speaking pitch"
-msgstr ""
+msgstr "augmenter la hauteur de la voix"
 
 #. xgettext: This is the description of the SAY_FASTER command.
 #: Programs/cmds.auto.h:557
@@ -3493,7 +3493,7 @@ msgstr "Recherche en avant du texte dans le presse papier"
 
 #: Programs/menu.c:464
 msgid "seconds"
-msgstr ""
+msgstr "secondes"
 
 #. xgettext: This is the description of the TXTSEL_ALL command.
 #: Programs/cmds.auto.h:1026
