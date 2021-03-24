@@ -1541,20 +1541,20 @@ runCoreTask (CoreTaskCallback *callback, void *data, int wait) {
 ASYNC_SIGNAL_HANDLER(handleProgramTerminationRequest) {
   time_t now = time(NULL);
 
-  if (difftime(now, programTerminationRequestTime) > PROGRAM_TERMINATION_REQUEST_RESET_SECONDS) {
-    programTerminationRequestCount = 0;
-  }
+  int reset = difftime(now, programTerminationRequestTime)
+            > PROGRAM_TERMINATION_REQUEST_RESET_SECONDS;
+
+  int count = reset? 0: programTerminationRequestCount;
+  if (++count > PROGRAM_TERMINATION_REQUEST_COUNT_THRESHOLD) exit(1);
 
   programTerminationRequestTime = now;
   programTerminationRequestSignal = signalNumber;
 
   // This is a memory write barrier to ensure that the time and number
-  // for this signal will be visible before its count is incremented.
+  // for this signal will be visible before its count is adjusted.
   __sync_synchronize();
 
-  if (++programTerminationRequestCount > PROGRAM_TERMINATION_REQUEST_COUNT_THRESHOLD) {
-    exit(1);
-  }
+  programTerminationRequestCount = count;
 }
 
 #ifdef SIGCHLD
