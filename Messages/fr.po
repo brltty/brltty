@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-27 11:28-0500\n"
-"PO-Revision-Date: 2021-01-27 16:32+0000\n"
+"POT-Creation-Date: 2021-03-24 21:07+0100\n"
+"PO-Revision-Date: 2021-03-24 20:11+0000\n"
 "Last-Translator: Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>\n"
 "Language-Team: Friends of BRLTTY <BRLTTY@brlttY.app>\n"
 "Language: fr\n"
@@ -33,204 +33,227 @@ msgstr ""
 msgid "\"%s\" started as \"%s\"\n"
 msgstr "\"%s\" démarré par \"%s\"\n"
 
-#: Programs/menu_prefs.c:457 Programs/menu_prefs.c:458
-#: Programs/menu_prefs.c:460 Programs/menu_prefs.c:461
-#: Programs/menu_prefs.c:464 Programs/menu_prefs.c:465
-#: Programs/menu_prefs.c:466 Programs/menu_prefs.c:468
-#: Programs/menu_prefs.c:469
+#. xgettext: This phrase describes the colour of a character on the screen.
+#. xgettext: %1$s is the (already translated) foreground colour.
+#. xgettext: %2$s is the (already translated) background colour.
+#: Programs/cmd_utils.c:169
+#, c-format
+msgid "%1$s on %2$s"
+msgstr ""
+
+#. xgettext: This is how to say when the time is exactly on (i.e. zero minutes after) an hour.
+#. xgettext: (%u represents the number of hours)
+#: Programs/cmd_miscellaneous.c:89
+#, c-format
+msgid "%u o'clock"
+msgid_plural "%u o-clock"
+msgstr[0] ""
+msgstr[1] ""
+
+#. xgettext: This is a number (%u) of seconds (time units).
+#: Programs/cmd_miscellaneous.c:107
+#, c-format
+msgid "%u second"
+msgid_plural "%u seconds"
+msgstr[0] ""
+msgstr[1] ""
+
+#: Programs/menu_prefs.c:543 Programs/menu_prefs.c:544
+#: Programs/menu_prefs.c:546 Programs/menu_prefs.c:547
+#: Programs/menu_prefs.c:550 Programs/menu_prefs.c:551
+#: Programs/menu_prefs.c:552 Programs/menu_prefs.c:554
+#: Programs/menu_prefs.c:555 Programs/menu_prefs.c:561
 msgid "1 cell"
 msgstr "1 cellule"
 
-#: Programs/menu_prefs.c:789
+#: Programs/menu_prefs.c:900
 msgid "1 second"
 msgstr "1 seconde"
 
-#: Programs/menu_prefs.c:851
+#: Programs/menu_prefs.c:962
 msgid "10 seconds"
 msgstr "10 secondes"
 
-#: Programs/menu_prefs.c:1158
+#: Programs/menu_prefs.c:1273
 msgid "12 Hour"
 msgstr "12 heures"
 
-#: Programs/menu_prefs.c:456 Programs/menu_prefs.c:459
-#: Programs/menu_prefs.c:462 Programs/menu_prefs.c:463
-#: Programs/menu_prefs.c:467
+#: Programs/menu_prefs.c:542 Programs/menu_prefs.c:545
+#: Programs/menu_prefs.c:548 Programs/menu_prefs.c:549
+#: Programs/menu_prefs.c:553
 msgid "2 cells"
 msgstr "2 cellules"
 
-#: Programs/menu_prefs.c:790
+#: Programs/menu_prefs.c:901
 msgid "2 seconds"
 msgstr "2 secondes"
 
-#: Programs/menu_prefs.c:852
+#: Programs/menu_prefs.c:963
 msgid "20 seconds"
 msgstr "20 secondes"
 
-#: Programs/menu_prefs.c:1157
+#: Programs/menu_prefs.c:1272
 msgid "24 Hour"
 msgstr "24 heures"
 
-#: Programs/menu_prefs.c:787
+#: Programs/menu_prefs.c:898
 msgid "250 milliseconds"
 msgstr "250 millisecondes"
 
-#: Programs/menu_prefs.c:853
+#: Programs/menu_prefs.c:557 Programs/menu_prefs.c:558
+#: Programs/menu_prefs.c:559 Programs/menu_prefs.c:560
+msgid "3 cells"
+msgstr ""
+
+#: Programs/menu_prefs.c:964
 msgid "40 seconds"
 msgstr "40 secondes"
 
-#: Programs/menu_prefs.c:850
+#: Programs/menu_prefs.c:961
 msgid "5 seconds"
 msgstr "5 secondes"
 
-#: Programs/menu_prefs.c:788
+#: Programs/menu_prefs.c:899
 msgid "500 milliseconds"
 msgstr "500 millisecondes"
 
-#: Programs/menu_prefs.c:615
-msgid "6-Dot Computer"
-msgstr "Informatique 6 Points"
-
-#: Programs/menu_prefs.c:614
-msgid "6-Dot Contracted"
-msgstr "Abrégé 6 Points"
-
-#: Programs/menu_prefs.c:613
-msgid "8-Dot Computer"
-msgstr "Informatique 8 Points"
-
-#: Programs/menu_prefs.c:616
-msgid "8-Dot Contracted"
-msgstr "Abrégé 8 Points"
+#: Programs/menu_prefs.c:733
+msgid "6-dot"
+msgstr ""
 
 #: Programs/brltty-ttb.c:179
 msgid "8-bit character set to use."
 msgstr "Utilisation de caractères 8 bits"
 
+#: Programs/menu_prefs.c:732
+msgid "8-dot"
+msgstr ""
+
 #: Programs/scr_menu.c:104
 msgid "<off>"
 msgstr "<Inactif>"
 
-#: Programs/config.c:1382
+#: Programs/config.c:1381
 msgid "API Parameter"
 msgstr "Paramètre de l'API"
 
-#: Programs/cmds.auto.h:1252
+#. xgettext: This is the description of the PASSAT command.
+#: Programs/cmds.auto.h:1448
 msgid "AT (set 2) keyboard scan code"
 msgstr "Scancode AT du clavier (set 2)"
 
-#: Programs/midi.c:67
+#. xgettext: This is the name of MIDI musical instrument #22 (in the Organ group).
+#: Programs/midi.c:145
 msgid "Accordion"
 msgstr "Accordéon"
 
 #. Bass
-#: Programs/midi.c:80
+#. xgettext: This is the name of MIDI musical instrument #33 (in the Bass group).
+#: Programs/midi.c:180
 msgid "Acoustic Bass"
 msgstr "Basse accoustique"
 
 #. Piano
-#: Programs/midi.c:44
+#. xgettext: This is the name of MIDI musical instrument #1 (in the Piano group).
+#: Programs/midi.c:80
 msgid "Acoustic Grand Piano"
 msgstr "Piano à queue accoustique"
 
 #. Guitar
-#: Programs/midi.c:71
+#. xgettext: This is the name of MIDI musical instrument #25 (in the Guitar group).
+#: Programs/midi.c:155
 msgid "Acoustic Guitar (nylon)"
 msgstr "Guitare accoustique (nylon)"
 
-#: Programs/midi.c:72
+#. xgettext: This is the name of MIDI musical instrument #26 (in the Guitar group).
+#: Programs/midi.c:158
 msgid "Acoustic Guitar (steel)"
 msgstr "Guitare accoustique (métal)"
 
-#: Programs/menu_prefs.c:1184
+#: Programs/menu_prefs.c:1299
 msgid "After Time"
 msgstr "Après l'heure"
 
-#: Programs/midi.c:171
+#. xgettext: This is the name of MIDI musical instrument #114 (in the Percussive group).
+#: Programs/midi.c:434
 msgid "Agogo"
 msgstr "Agogo"
 
-#: Programs/menu_prefs.c:1374
+#: Programs/menu_prefs.c:1487
 msgid "Alert"
 msgstr "Alerte"
 
-#: Programs/menu_prefs.c:993
+#: Programs/menu_prefs.c:1104
 msgid "Alert Dots"
 msgstr "Points d'avertissement"
 
-#: Programs/menu_prefs.c:998
+#: Programs/menu_prefs.c:1109
 msgid "Alert Messages"
 msgstr "Messages d'avertissement"
 
-#: Programs/menu_prefs.c:938
+#: Programs/menu_prefs.c:1049
 msgid "Alert Tunes"
 msgstr "Sons d'avertissement"
 
-#: Programs/menu_prefs.c:753 Programs/menu_prefs.c:1032
+#: Programs/menu_prefs.c:864 Programs/menu_prefs.c:1143
 msgid "All"
 msgstr "Toutes"
 
-#: Programs/menu_prefs.c:468
-msgid "Alphabetic Braille Window Coordinates"
-msgstr "Coordonnées alphabétiques de la fenêtre braille"
+#: Programs/menu_prefs.c:555
+msgid "Alphabetic Cursor Coordinates"
+msgstr ""
 
-#: Programs/menu_prefs.c:469
-msgid "Alphabetic Screen Cursor Coordinates"
-msgstr "Coordonnées alphabétiques du curseur à l'écran"
+#: Programs/menu_prefs.c:554
+msgid "Alphabetic Window Coordinates"
+msgstr ""
 
-#: Programs/midi.c:117
-msgid "Alto Sax"
-msgstr "Saxo Alto"
+#. xgettext: This is the name of MIDI musical instrument #66 (in the Reed group).
+#: Programs/midi.c:283
+msgid "Alto Saxophone"
+msgstr ""
 
-#: Programs/midi.c:185
+#. xgettext: This is the name of MIDI musical instrument #127 (in the Sound Effects group).
+#: Programs/midi.c:474
 msgid "Applause"
 msgstr "Applaudissements"
-
-#: Programs/cmd_miscellaneous.c:60
-msgid "April"
-msgstr "Avril"
 
 #: Programs/log.c:118
 msgid "Async Events"
 msgstr "Événements asynchrones"
 
-#: Programs/menu_prefs.c:710
-msgid "Attributes Invisible Time"
-msgstr "Durée de l'invisibilité des attributs"
+#: Programs/menu_prefs.c:807
+msgid "Attributes Blink Period"
+msgstr ""
 
-#: Programs/config.c:2827 Programs/menu_prefs.c:1280
+#: Programs/menu_prefs.c:815
+msgid "Attributes Percent Visible"
+msgstr ""
+
+#: Programs/config.c:2831 Programs/menu_prefs.c:1395
 msgid "Attributes Table"
 msgstr "Table d'attributs"
-
-#: Programs/menu_prefs.c:704
-msgid "Attributes Visible Time"
-msgstr "Durée de visibilité des attributs"
-
-#: Programs/cmd_miscellaneous.c:64
-msgid "August"
-msgstr "Août"
 
 #: Programs/alert.c:168
 msgid "Autorelease"
 msgstr "Relâchement automatique"
 
-#: Programs/menu_prefs.c:856
+#: Programs/menu_prefs.c:967
 msgid "Autorelease Time"
 msgstr "Délai avant le relâchement automatique"
 
-#: Programs/menu_prefs.c:873
+#: Programs/menu_prefs.c:984
 msgid "Autorepeat Enabled"
 msgstr "Répétition Automatique Activée"
 
-#: Programs/menu_prefs.c:879
+#: Programs/menu_prefs.c:990
 msgid "Autorepeat Interval"
 msgstr "Intervalle de la répétition automatique"
 
-#: Programs/menu_prefs.c:886
+#: Programs/menu_prefs.c:997
 msgid "Autorepeat Panning"
 msgstr "Répétition automatique du défilement"
 
-#: Programs/menu_prefs.c:1075
+#: Programs/menu_prefs.c:1186
 msgid "Autospeak"
 msgstr "Parole automatique"
 
@@ -238,59 +261,66 @@ msgstr "Parole automatique"
 msgid "BRLTTY stopped"
 msgstr "Arrêt de BRLTTY"
 
-#: Programs/midi.c:166
+#. xgettext: This is the name of MIDI musical instrument #110 (in the Ethnic group).
+#: Programs/midi.c:421
 msgid "Bag Pipe"
 msgstr "Cornemuse"
 
-#: Programs/midi.c:162
+#. xgettext: This is the name of MIDI musical instrument #106 (in the Ethnic group).
+#: Programs/midi.c:409
 msgid "Banjo"
 msgstr "Banjo"
 
-#: Programs/midi.c:119
-msgid "Baritone Sax"
-msgstr "Saxo bariton"
+#. xgettext: This is the name of MIDI musical instrument #68 (in the Reed group).
+#: Programs/midi.c:289
+msgid "Baritone Saxophone"
+msgstr ""
 
-#: Programs/midi.c:28
+#. xgettext: This is the name of MIDI musical instrument group #5.
+#: Programs/midi.c:37
 msgid "Bass"
 msgstr "Basse"
 
-#: Programs/midi.c:122
+#. xgettext: This is the name of MIDI musical instrument #71 (in the Reed group).
+#: Programs/midi.c:298
 msgid "Bassoon"
 msgstr "Basson"
 
-#: Programs/menu_prefs.c:945
+#: Programs/menu_prefs.c:1056
 msgid "Beeper"
 msgstr "Beepeur"
 
-#: Programs/menu_prefs.c:1183
+#: Programs/menu_prefs.c:1298
 msgid "Before Time"
 msgstr "Avant l'heure"
 
-#: Programs/midi.c:182
+#. xgettext: This is the name of MIDI musical instrument #124 (in the Sound Effects group).
+#: Programs/midi.c:465
 msgid "Bird Tweet"
 msgstr "Gazouillement d'oiseaux"
 
-#: Programs/menu_prefs.c:698
+#: Programs/menu_prefs.c:801
 msgid "Blinking Attributes"
 msgstr "Clignotement des attributs"
 
-#: Programs/menu_prefs.c:716
+#: Programs/menu_prefs.c:823
 msgid "Blinking Capitals"
 msgstr "Clignotement des majuscules"
 
-#: Programs/menu_prefs.c:675
+#: Programs/menu_prefs.c:774
 msgid "Blinking Screen Cursor"
 msgstr "Clignotement du curseur de l'écran"
 
-#: Programs/menu_prefs.c:1133
+#: Programs/menu_prefs.c:1244
 msgid "Blinking Speech Cursor"
 msgstr "Clignotement du curseur de la synthèse"
 
-#: Programs/menu_prefs.c:576 Programs/menu_prefs.c:1243
+#: Programs/menu_prefs.c:665 Programs/menu_prefs.c:1358
 msgid "Block"
 msgstr "Pavé"
 
-#: Programs/midi.c:129
+#. xgettext: This is the name of MIDI musical instrument #77 (in the Pipe group).
+#: Programs/midi.c:317
 msgid "Blown Bottle"
 msgstr "Bouteille cassée"
 
@@ -298,11 +328,11 @@ msgstr "Bouteille cassée"
 msgid "Bluetooth I/O"
 msgstr "E/S Bluetooth"
 
-#: Programs/config.c:1603
+#: Programs/config.c:1602
 msgid "Braille Device"
 msgstr "Périphérique braille"
 
-#: Programs/config.c:1599
+#: Programs/config.c:1598
 msgid "Braille Driver"
 msgstr "Pilote braille"
 
@@ -310,7 +340,7 @@ msgstr "Pilote braille"
 msgid "Braille Driver Events"
 msgstr "Événements liés au pilote braille"
 
-#: Programs/menu_prefs.c:653
+#: Programs/menu_prefs.c:752
 msgid "Braille Firmness"
 msgstr "Rugosité du braille"
 
@@ -318,60 +348,52 @@ msgstr "Rugosité du braille"
 msgid "Braille Key Events"
 msgstr "Événements liés au clavier braille"
 
-#: Programs/config.c:1602
+#: Programs/config.c:1601
 msgid "Braille Parameter"
 msgstr "Paramètre braille"
 
-#: Programs/menu_prefs.c:609
+#: Programs/menu_prefs.c:698
 msgid "Braille Presentation"
 msgstr "Affichage braille"
 
-#: Programs/menu_prefs.c:1270
+#: Programs/menu_prefs.c:1385
 msgid "Braille Tables"
 msgstr "Tables braille"
 
-#: Programs/menu_prefs.c:821
+#: Programs/menu_prefs.c:932
 msgid "Braille Typing"
 msgstr "Saisie Braille"
 
-#: Programs/menu_prefs.c:619
+#: Programs/menu_prefs.c:706
 msgid "Braille Variant"
 msgstr "Variante de Braille"
 
-#: Programs/menu_prefs.c:457
-msgid "Braille Window Column"
-msgstr "Colonne de la fenêtre braille"
-
-#: Programs/menu_prefs.c:456
-msgid "Braille Window Coordinates"
-msgstr "Coordonnées de la fenêtre braille"
-
-#: Programs/menu_prefs.c:774
+#: Programs/menu_prefs.c:885
 msgid "Braille Window Overlap"
 msgstr "Chevauchement de fenêtre braille"
 
-#: Programs/menu_prefs.c:458
-msgid "Braille Window Row"
-msgstr "Ligne de la fenêtre braille"
-
-#: Programs/config.c:475
+#: Programs/config.c:472
 #, c-format
 msgid "Braille driver code (%s, %s, or one of {%s})."
 msgstr "Code du pilote braille : (%s, %s, ou un parmi {%s})."
 
-#: Programs/midi.c:31
+#. xgettext: This is the name of MIDI musical instrument group #8.
+#: Programs/midi.c:46
 msgid "Brass"
 msgstr "Cuivres"
 
-#: Programs/midi.c:112
+#. xgettext: This is the name of MIDI musical instrument #62 (in the Brass group).
+#: Programs/midi.c:270
 msgid "Brass Section"
 msgstr "Section cuivres"
 
-#: Programs/midi.c:180
+#. xgettext: This is the name of MIDI musical instrument #122 (in the Sound Effects group).
+#: Programs/midi.c:459
 msgid "Breath Noise"
 msgstr "Bruit de souffle"
 
-#: Programs/midi.c:45
+#. xgettext: This is the name of MIDI musical instrument #2 (in the Piano group).
+#: Programs/midi.c:83
 msgid "Bright Acoustic Piano"
 msgstr "Piano accoustique brillant"
 
@@ -383,68 +405,83 @@ msgstr "Schémas d'autorisation/authentification de BrlAPI"
 msgid "BrlAPI host and/or port to connect to"
 msgstr "Hôte de BrlAPI et port auquel se connecter"
 
-#: Programs/menu_prefs.c:1307
+#: Programs/menu_prefs.c:1420
 msgid "Build Information"
 msgstr "Informations de construction"
 
-#: Programs/menu_prefs.c:638
+#: Programs/menu_prefs.c:725
 msgid "Capitalization Mode"
 msgstr "Mode de majuscules"
 
-#: Programs/menu_prefs.c:727
-msgid "Capitals Invisible Time"
-msgstr "Durée d'invisibilité des majuscules"
+#: Programs/menu_prefs.c:828
+msgid "Capitals Blink Period"
+msgstr ""
 
-#: Programs/menu_prefs.c:721
-msgid "Capitals Visible Time"
-msgstr "Durée de visibilité des majuscules"
+#: Programs/menu_prefs.c:836
+msgid "Capitals Percent Visible"
+msgstr ""
 
-#: Programs/menu_prefs.c:1397
+#: Programs/menu_prefs.c:1510
 msgid "Category Log Level"
 msgstr "Niveau de journalisation par catégorie"
 
 #. Chromatic Percussion
-#: Programs/midi.c:53
+#. xgettext: This is the name of MIDI musical instrument #9 (in the Chromatic Percussion group).
+#: Programs/midi.c:105
 msgid "Celesta"
 msgstr "Celesta"
 
-#: Programs/midi.c:91
+#: Programs/menu_prefs.c:736
+msgid "Cell Type"
+msgstr ""
+
+#. xgettext: This is the name of MIDI musical instrument #43 (in the Strings group).
+#: Programs/midi.c:211
 msgid "Cello"
 msgstr "violoncelle"
 
-#: Programs/midi.c:102
+#. xgettext: This is the name of MIDI musical instrument #53 (in the Ensemble group).
+#: Programs/midi.c:242
 msgid "Choir Aahs"
 msgstr "Haha de choeur"
 
-#: Programs/midi.c:25
+#. xgettext: This is the name of MIDI musical instrument group #2.
+#: Programs/midi.c:28
 msgid "Chromatic Percussion"
 msgstr "Percussions chromatiques"
 
-#: Programs/midi.c:65
+#. xgettext: This is the name of MIDI musical instrument #20 (in the Organ group).
+#: Programs/midi.c:139
 msgid "Church Organ"
 msgstr "Orgue d'église"
 
-#: Programs/midi.c:123
+#. xgettext: This is the name of MIDI musical instrument #72 (in the Reed group).
+#: Programs/midi.c:301
 msgid "Clarinet"
 msgstr "Clarinette"
 
-#: Programs/midi.c:51
-msgid "Clavi"
-msgstr "Claviers"
+#. xgettext: This is the name of MIDI musical instrument #8 (in the Piano group).
+#: Programs/midi.c:101
+msgid "Clavinet"
+msgstr ""
 
-#: Programs/menu.c:820
+#: Programs/menu.c:889
 msgid "Close"
 msgstr "Fermer"
 
-#: Programs/menu_prefs.c:1167
+#: Programs/menu_prefs.c:1282
 msgid "Colon"
 msgstr "Deux-points"
 
-#: Programs/menu_prefs.c:1331
+#: Programs/menu_prefs.c:702
+msgid "Computer Braille"
+msgstr ""
+
+#: Programs/menu_prefs.c:1444
 msgid "Configuration Directory"
 msgstr "Répertoire de configuration"
 
-#: Programs/config.c:2770 Programs/menu_prefs.c:1336
+#: Programs/config.c:2770 Programs/menu_prefs.c:1449
 msgid "Configuration File"
 msgstr "Fichier de configuration"
 
@@ -452,15 +489,20 @@ msgstr "Fichier de configuration"
 msgid "Console Bell"
 msgstr "Beep de la console"
 
-#: Programs/menu_prefs.c:924
+#: Programs/menu_prefs.c:1035
 msgid "Console Bell Alert"
 msgstr "Beep d'alerte de la console"
 
-#: Programs/midi.c:92
+#. xgettext: This is the name of MIDI musical instrument #44 (in the Strings group).
+#: Programs/midi.c:214
 msgid "Contrabass"
 msgstr "Contrebasse"
 
-#: Programs/config.c:2834 Programs/menu_prefs.c:1288
+#: Programs/menu_prefs.c:703
+msgid "Contracted Braille"
+msgstr "Braille abrégé"
+
+#: Programs/config.c:2863 Programs/menu_prefs.c:1402
 msgid "Contraction Table"
 msgstr "Table de braille abrégé"
 
@@ -472,63 +514,80 @@ msgstr "Table de braille abrégé."
 msgid "Contraction verification table."
 msgstr "Table de vérification du braille abrégé."
 
-#: Programs/menu_prefs.c:1375
+#: Programs/menu_prefs.c:1488
 msgid "Critical"
 msgstr "Critique"
+
+#: Programs/menu_prefs.c:546
+msgid "Cursor Column"
+msgstr ""
+
+#: Programs/menu_prefs.c:545 Programs/menu_prefs.c:557
+msgid "Cursor Coordinates"
+msgstr ""
 
 #: Programs/log.c:100
 msgid "Cursor Routing"
 msgstr "Déplacement du curseur"
 
+#: Programs/menu_prefs.c:547
+msgid "Cursor Row"
+msgstr ""
+
 #: Programs/log.c:94
 msgid "Cursor Tracking"
 msgstr "Poursuite du curseur"
 
-#: Programs/menu_prefs.c:793
+#: Programs/menu_prefs.c:904
 msgid "Cursor Tracking Delay"
 msgstr "Durée de la poursuite du curseur"
 
-#: Programs/menu_prefs.c:1205
+#: Programs/menu_prefs.c:548 Programs/menu_prefs.c:559
+msgid "Cursor and Window Column"
+msgstr ""
+
+#: Programs/menu_prefs.c:549 Programs/menu_prefs.c:560
+msgid "Cursor and Window Row"
+msgstr ""
+
+#: Programs/menu_prefs.c:1320
 msgid "Dash"
 msgstr "Tiret"
 
-#: Programs/menu_prefs.c:1198
+#: Programs/menu_prefs.c:1313
 msgid "Date Format"
 msgstr "Format de la date"
 
-#: Programs/menu_prefs.c:1187
+#: Programs/menu_prefs.c:1302
 msgid "Date Position"
 msgstr "Position de la date"
 
-#: Programs/menu_prefs.c:1210
+#: Programs/menu_prefs.c:1325
 msgid "Date Separator"
 msgstr "Séparateur de la date"
 
-#: Programs/menu_prefs.c:1195
+#: Programs/menu_prefs.c:1310
 msgid "Day Month Year"
 msgstr "Jour Mois Année"
 
-#: Programs/menu_prefs.c:1380
+#: Programs/menu_prefs.c:1493
 msgid "Debug"
 msgstr "Débogage"
 
-#: Programs/cmd_miscellaneous.c:68
-msgid "December"
-msgstr "Décembre"
-
-#: Programs/config.c:496
+#: Programs/config.c:493
 msgid "Device for accessing braille display."
 msgstr "Périphérique d'accès à l'afficheur braille."
 
-#: Programs/config.c:455
+#: Programs/config.c:452
 msgid "Disable the application programming interface."
 msgstr "Désactiver l'interface de programmation de l'application (API)."
 
-#: Programs/midi.c:77
+#. xgettext: This is the name of MIDI musical instrument #31 (in the Guitar group).
+#: Programs/midi.c:173
 msgid "Distortion Guitar"
 msgstr "Guitare avec distortion"
 
-#: Programs/config.c:598
+#: Programs/config.c:594
 msgid "Do not autospeak when braille is not being used."
 msgstr "Pas de parole automatique quand le braille ne sera pas utilisé"
 
@@ -540,7 +599,7 @@ msgstr "Ne pas écrire de texte sur le périphérique braille"
 msgid "Don't fall back to the Unicode base character."
 msgstr "Ne se rabat pas sur des caractères en unicode"
 
-#: Programs/config.c:366
+#: Programs/config.c:363
 msgid "Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc)."
 msgstr "Ne pas passer à un utilisateur non privilégié ou renoncer à tous les privilèges (appartenance à des groupes, capacités, etc.)."
 
@@ -548,28 +607,30 @@ msgstr "Ne pas passer à un utilisateur non privilégié ou renoncer à tous les
 msgid "Done"
 msgstr "Fait"
 
-#: Programs/menu_prefs.c:1168 Programs/menu_prefs.c:1207
+#: Programs/menu_prefs.c:1283 Programs/menu_prefs.c:1322
 msgid "Dot"
 msgstr "Point"
 
-#: Programs/menu_prefs.c:831
+#: Programs/menu_prefs.c:942
 msgid "Dots via Unicode Braille"
 msgstr "Points en braille unicode"
 
 #. Organ
-#: Programs/midi.c:62
+#. xgettext: This is the name of MIDI musical instrument #17 (in the Organ group).
+#: Programs/midi.c:130
 msgid "Drawbar Organ"
 msgstr "Orgue drawbar"
 
-#: Programs/config.c:2791 Programs/menu_prefs.c:1356
+#: Programs/config.c:2791 Programs/menu_prefs.c:1469
 msgid "Drivers Directory"
 msgstr "Répertoire des pilotes"
 
-#: Programs/midi.c:60
+#. xgettext: This is the name of MIDI musical instrument #16 (in the Chromatic Percussion group).
+#: Programs/midi.c:126
 msgid "Dulcimer"
 msgstr "Dulcimer"
 
-#: Programs/menu_prefs.c:768
+#: Programs/menu_prefs.c:879
 msgid "Eager Sliding Braille Window"
 msgstr "Défilement dynamique de la fenêtre braille"
 
@@ -577,132 +638,150 @@ msgstr "Défilement dynamique de la fenêtre braille"
 msgid "Edit table."
 msgstr "Éditer la table"
 
-#: Programs/midi.c:81
+#. xgettext: This is the name of MIDI musical instrument #34 (in the Bass group).
+#: Programs/midi.c:183
 msgid "Electric Bass (finger)"
 msgstr "Basse électrique (doigt)"
 
-#: Programs/midi.c:82
+#. xgettext: This is the name of MIDI musical instrument #35 (in the Bass group).
+#: Programs/midi.c:186
 msgid "Electric Bass (pick)"
 msgstr "Basse électrique (plectre)"
 
-#: Programs/midi.c:46
+#. xgettext: This is the name of MIDI musical instrument #3 (in the Piano group).
+#: Programs/midi.c:86
 msgid "Electric Grand Piano"
 msgstr "Piano à queue électrique"
 
-#: Programs/midi.c:74
+#. xgettext: This is the name of MIDI musical instrument #28 (in the Guitar group).
+#: Programs/midi.c:164
 msgid "Electric Guitar (clean)"
 msgstr "Guitare électrique (propre)"
 
-#: Programs/midi.c:73
+#. xgettext: This is the name of MIDI musical instrument #27 (in the Guitar group).
+#: Programs/midi.c:161
 msgid "Electric Guitar (jazz)"
 msgstr "Guitare électrique (jazz)"
 
-#: Programs/midi.c:75
+#. xgettext: This is the name of MIDI musical instrument #29 (in the Guitar group).
+#: Programs/midi.c:167
 msgid "Electric Guitar (muted)"
 msgstr "Guitare électrique (étouffée)"
 
-#: Programs/midi.c:48
+#. xgettext: This is the name of MIDI musical instrument #5 (in the Piano group).
+#: Programs/midi.c:92
 msgid "Electric Piano 1"
 msgstr "Piano électrique 1"
 
-#: Programs/midi.c:49
+#. xgettext: This is the name of MIDI musical instrument #6 (in the Piano group).
+#: Programs/midi.c:95
 msgid "Electric Piano 2"
 msgstr "Piano électrique 2"
 
-#: Programs/menu_prefs.c:1373
+#: Programs/menu_prefs.c:1486
 msgid "Emergency"
 msgstr "Urgence"
 
-#: Programs/menu_prefs.c:455
+#: Programs/menu_prefs.c:541
 msgid "End"
 msgstr "Fin"
 
-#: Programs/menu_prefs.c:754
+#: Programs/menu_prefs.c:865
 msgid "End of Line"
 msgstr "Fin de la ligne"
 
-#: Programs/midi.c:121
+#. xgettext: This is the name of MIDI musical instrument #70 (in the Reed group).
+#: Programs/midi.c:295
 msgid "English Horn"
 msgstr "Corne anglaise"
 
-#: Programs/menu_prefs.c:1067
+#: Programs/menu_prefs.c:1178
 msgid "Enqueue"
 msgstr "Dans la file"
 
-#: Programs/midi.c:30
+#. xgettext: This is the name of MIDI musical instrument group #7.
+#: Programs/midi.c:43
 msgid "Ensemble"
 msgstr "Ensemble"
 
-#: Programs/menu_prefs.c:1376
+#: Programs/menu_prefs.c:1489
 msgid "Error"
 msgstr "Erreur"
 
-#: Programs/midi.c:37
+#. xgettext: This is the name of MIDI musical instrument group #14.
+#: Programs/midi.c:68
 msgid "Ethnic Instruments"
 msgstr "Instruments folkloriques"
 
-#: Programs/menu_prefs.c:921
+#: Programs/menu_prefs.c:1032
 msgid "Event Alerts"
 msgstr "Signaux d'événements"
 
-#: Programs/menu_prefs.c:626
+#: Programs/menu_prefs.c:713
 msgid "Expand Current Word"
 msgstr "Extension du mot actuel"
 
-#: Programs/config.c:410
+#: Programs/config.c:407
 msgid "Explicit preference settings."
 msgstr "Paramètres explicites d'une préférence."
 
-#: Programs/menu_prefs.c:948
+#: Programs/menu_prefs.c:1059
 msgid "FM"
 msgstr "FM"
 
-#: Programs/menu_prefs.c:986
+#: Programs/menu_prefs.c:1097
 msgid "FM Volume"
 msgstr "Volume FM"
 
 #. Synth FM
-#: Programs/midi.c:152
+#. xgettext: This is the name of MIDI musical instrument #97 (in the Synth FM group).
+#: Programs/midi.c:380
 msgid "FX 1 (rain)"
 msgstr "FX 1 (pluie)"
 
-#: Programs/midi.c:153
+#. xgettext: This is the name of MIDI musical instrument #98 (in the Synth FM group).
+#: Programs/midi.c:383
 msgid "FX 2 (soundtrack)"
 msgstr "FX 2 (piste son)"
 
-#: Programs/midi.c:154
+#. xgettext: This is the name of MIDI musical instrument #99 (in the Synth FM group).
+#: Programs/midi.c:386
 msgid "FX 3 (crystal)"
 msgstr "FX 3 (cristal)"
 
-#: Programs/midi.c:155
+#. xgettext: This is the name of MIDI musical instrument #100 (in the Synth FM group).
+#: Programs/midi.c:389
 msgid "FX 4 (atmosphere)"
 msgstr "FX 4 (atmosphère)"
 
-#: Programs/midi.c:156
+#. xgettext: This is the name of MIDI musical instrument #101 (in the Synth FM group).
+#: Programs/midi.c:392
 msgid "FX 5 (brightness)"
 msgstr "FX 5 (éclat)"
 
-#: Programs/midi.c:157
+#. xgettext: This is the name of MIDI musical instrument #102 (in the Synth FM group).
+#: Programs/midi.c:395
 msgid "FX 6 (goblins)"
 msgstr "FX 6 (lutin)"
 
-#: Programs/midi.c:158
+#. xgettext: This is the name of MIDI musical instrument #103 (in the Synth FM group).
+#: Programs/midi.c:398
 msgid "FX 7 (echoes)"
 msgstr "FX 7 (échos)"
 
-#: Programs/midi.c:159
+#. xgettext: This is the name of MIDI musical instrument #104 (in the Synth FM group).
+#. xgettext: (sci-fi is a common short form for science fiction)
+#: Programs/midi.c:402
 msgid "FX 8 (sci-fi)"
 msgstr "FX 8 (SF)"
 
-#: Programs/cmd_miscellaneous.c:58
-msgid "February"
-msgstr "Février"
-
-#: Programs/midi.c:167
+#. xgettext: This is the name of MIDI musical instrument #111 (in the Ethnic group).
+#: Programs/midi.c:424
 msgid "Fiddle"
 msgstr "violon"
 
-#: Programs/midi.c:126
+#. xgettext: This is the name of MIDI musical instrument #74 (in the Pipe group).
+#: Programs/midi.c:308
 msgid "Flute"
 msgstr "flûte"
 
@@ -722,11 +801,13 @@ msgstr "Format du fichier d'entrée."
 msgid "Format of output file."
 msgstr "Format du fichier de sortie."
 
-#: Programs/midi.c:111
+#. xgettext: This is the name of MIDI musical instrument #61 (in the Brass group).
+#: Programs/midi.c:267
 msgid "French Horn"
 msgstr "Corne française"
 
-#: Programs/midi.c:83
+#. xgettext: This is the name of MIDI musical instrument #36 (in the Bass group).
+#: Programs/midi.c:189
 msgid "Fretless Bass"
 msgstr "Basse glissée"
 
@@ -734,7 +815,7 @@ msgstr "Basse glissée"
 msgid "Frozen"
 msgstr "Gelé"
 
-#: Programs/menu_prefs.c:470
+#: Programs/menu_prefs.c:556
 msgid "Generic"
 msgstr "Générique"
 
@@ -742,36 +823,44 @@ msgstr "Générique"
 msgid "Generic Input"
 msgstr "Entrée générique"
 
-#: Programs/midi.c:54
+#. xgettext: This is the name of MIDI musical instrument #10 (in the Chromatic Percussion group).
+#: Programs/midi.c:108
 msgid "Glockenspiel"
 msgstr "Glockenspiel"
 
-#: Programs/midi.c:27
+#. xgettext: This is the name of MIDI musical instrument group #4.
+#: Programs/midi.c:34
 msgid "Guitar"
 msgstr "Guitare"
 
 #. Sound Effects
-#: Programs/midi.c:179
+#. xgettext: This is the name of MIDI musical instrument #121 (in the Sound Effects group).
+#: Programs/midi.c:456
 msgid "Guitar Fret Noise"
 msgstr "Bruit de glissement sur une guitare"
 
-#: Programs/midi.c:78
+#. xgettext: This is the name of MIDI musical instrument #32 (in the Guitar group).
+#: Programs/midi.c:176
 msgid "Guitar Harmonics"
 msgstr "Harmoniques de guitare"
 
-#: Programs/midi.c:186
+#. xgettext: This is the name of MIDI musical instrument #128 (in the Sound Effects group).
+#: Programs/midi.c:477
 msgid "Gunshot"
 msgstr "Coup de feu"
 
-#: Programs/midi.c:68
+#. xgettext: This is the name of MIDI musical instrument #23 (in the Organ group).
+#: Programs/midi.c:148
 msgid "Harmonica"
 msgstr "Harmonica"
 
-#: Programs/midi.c:50
+#. xgettext: This is the name of MIDI musical instrument #7 (in the Piano group).
+#: Programs/midi.c:98
 msgid "Harpsichord"
 msgstr "Clavecin"
 
-#: Programs/midi.c:184
+#. xgettext: This is the name of MIDI musical instrument #126 (in the Sound Effects group).
+#: Programs/midi.c:471
 msgid "Helicopter"
 msgstr "Hélicoptère"
 
@@ -779,19 +868,20 @@ msgstr "Hélicoptère"
 msgid "Help Screen"
 msgstr "Écran d'aide"
 
-#: Programs/menu_prefs.c:649 Programs/menu_prefs.c:902
+#: Programs/menu_prefs.c:748 Programs/menu_prefs.c:1013
 msgid "High"
 msgstr "Forte"
 
-#: Programs/menu_prefs.c:810
+#: Programs/menu_prefs.c:921
 msgid "Highlight Braille Window Location"
 msgstr "Surlignement de l'emplacement de la fenêtre braille"
 
-#: Programs/midi.c:47
+#. xgettext: This is the name of MIDI musical instrument #4 (in the Piano group).
+#: Programs/midi.c:89
 msgid "Honkytonk Piano"
 msgstr "Piano bastringue"
 
-#: Programs/menu_prefs.c:1066
+#: Programs/menu_prefs.c:1177
 msgid "Immediate"
 msgstr "Immédiat"
 
@@ -803,11 +893,11 @@ msgstr "Bibliothèque XKB incompatible\n"
 msgid "Incompatible XKB server support\n"
 msgstr "Support du serveur XKB incompatible\n"
 
-#: Programs/menu_prefs.c:1379
+#: Programs/menu_prefs.c:1492
 msgid "Information"
 msgstr "Informations"
 
-#: Programs/menu_prefs.c:845
+#: Programs/menu_prefs.c:956
 msgid "Input Options"
 msgstr "Options d'entrée"
 
@@ -815,18 +905,14 @@ msgstr "Options d'entrée"
 msgid "Input Packets"
 msgstr "Paquets entrants"
 
-#: Programs/config.c:341
+#: Programs/config.c:338
 #, c-format
 msgid "Install the %s service, and then exit."
 msgstr "Installez le service %s et quittez."
 
-#: Programs/menu_prefs.c:1383
+#: Programs/menu_prefs.c:1496
 msgid "Internal Parameters"
 msgstr "Paramètres internes"
-
-#: Programs/cmd_miscellaneous.c:57
-msgid "January"
-msgstr "Janvier"
 
 #: Drivers/Screen/Android/screen.c:197
 msgid "Java class not found"
@@ -840,19 +926,12 @@ msgstr "Une exception Java s'est produite"
 msgid "Java method not found"
 msgstr "Méthode Java non trouvée"
 
-#: Programs/cmd_miscellaneous.c:63
-msgid "July"
-msgstr "Juillet"
-
-#: Programs/cmd_miscellaneous.c:62
-msgid "June"
-msgstr "Juin"
-
-#: Programs/midi.c:165
+#. xgettext: This is the name of MIDI musical instrument #109 (in the Ethnic group).
+#: Programs/midi.c:418
 msgid "Kalimba"
 msgstr "Kalimba"
 
-#: Programs/config.c:1525
+#: Programs/config.c:1524
 msgid "Key Bindings"
 msgstr "Associations de touches"
 
@@ -860,11 +939,11 @@ msgstr "Associations de touches"
 msgid "Key Help"
 msgstr "Touche Aide"
 
-#: Programs/config.c:1530 Programs/ktb_list.c:737
+#: Programs/config.c:1529 Programs/ktb_list.c:737
 msgid "Key Table"
 msgstr "Table de touches"
 
-#: Programs/menu_prefs.c:824
+#: Programs/menu_prefs.c:935
 msgid "Keyboard Enabled"
 msgstr "Clavier Activé"
 
@@ -872,52 +951,61 @@ msgstr "Clavier Activé"
 msgid "Keyboard Key Events"
 msgstr "Événements liés aux touches du clavier"
 
-#: Programs/menu_prefs.c:931
+#: Programs/menu_prefs.c:1042
 msgid "Keyboard LED Alerts"
 msgstr "Alertes lumineuses du clavier"
 
-#: Programs/config.c:2841 Programs/menu_prefs.c:913
+#: Programs/config.c:2870 Programs/menu_prefs.c:1024
 msgid "Keyboard Table"
 msgstr "Tables des touches du clavier"
 
-#: Programs/midi.c:164
+#. xgettext: This is the name of MIDI musical instrument #108 (in the Ethnic group).
+#: Programs/midi.c:415
 msgid "Koto"
 msgstr "Koto"
 
-#: Programs/config.c:2973
+#: Programs/config.c:3001
 msgid "Language"
 msgstr "Langue"
 
 #. Synth Lead
-#: Programs/midi.c:134
+#. xgettext: This is the name of MIDI musical instrument #81 (in the Synth Lead group).
+#: Programs/midi.c:330
 msgid "Lead 1 (square)"
 msgstr "Position 1 (carré)"
 
-#: Programs/midi.c:135
+#. xgettext: This is the name of MIDI musical instrument #82 (in the Synth Lead group).
+#: Programs/midi.c:333
 msgid "Lead 2 (sawtooth)"
 msgstr "Position 2 (en dents de scie)"
 
-#: Programs/midi.c:136
+#. xgettext: This is the name of MIDI musical instrument #83 (in the Synth Lead group).
+#: Programs/midi.c:336
 msgid "Lead 3 (calliope)"
 msgstr "Position 3 (Calliope)"
 
-#: Programs/midi.c:137
+#. xgettext: This is the name of MIDI musical instrument #84 (in the Synth Lead group).
+#: Programs/midi.c:339
 msgid "Lead 4 (chiff)"
 msgstr "Position 4 (chiff)"
 
-#: Programs/midi.c:138
+#. xgettext: This is the name of MIDI musical instrument #85 (in the Synth Lead group).
+#: Programs/midi.c:342
 msgid "Lead 5 (charang)"
 msgstr "Position 5 (charang)"
 
-#: Programs/midi.c:139
+#. xgettext: This is the name of MIDI musical instrument #86 (in the Synth Lead group).
+#: Programs/midi.c:345
 msgid "Lead 6 (voice)"
 msgstr "Position 6 (voix)"
 
-#: Programs/midi.c:140
+#. xgettext: This is the name of MIDI musical instrument #87 (in the Synth Lead group).
+#: Programs/midi.c:348
 msgid "Lead 7 (fifths)"
 msgstr "Position 7 (cinquièmes)"
 
-#: Programs/midi.c:141
+#. xgettext: This is the name of MIDI musical instrument #88 (in the Synth Lead group).
+#: Programs/midi.c:351
 msgid "Lead 8 (bass + lead)"
 msgstr "Position 8 (basse + position)"
 
@@ -925,7 +1013,7 @@ msgstr "Position 8 (basse + position)"
 msgid "Learn Mode"
 msgstr "mode d'apprentissage"
 
-#: Programs/menu_prefs.c:1222
+#: Programs/menu_prefs.c:1337
 msgid "Left"
 msgstr "Gauche"
 
@@ -941,80 +1029,77 @@ msgstr "Liste la table de touches au format écran d'aide"
 msgid "List key table in reStructuredText format."
 msgstr "Liste la table de touches au format reStructuredText"
 
-#: Programs/menu_prefs.c:1366
+#: Programs/menu_prefs.c:1479
 msgid "Locale Directory"
 msgstr "Répertoire de la locale"
 
-#: Programs/menu_prefs.c:1402
+#: Programs/menu_prefs.c:1515
 msgid "Log Categories"
 msgstr "Catégories de journal"
 
-#: Programs/config.c:836
+#: Programs/config.c:832
 msgid "Log Level"
 msgstr "Niveau de journalisation"
 
-#: Programs/menu_prefs.c:1463
+#: Programs/menu_prefs.c:1576
 msgid "Log Messages"
 msgstr "Messages du journal"
 
-#: Programs/config.c:688
+#: Programs/config.c:684
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
 msgstr "Enregistre les versions de l'application principale, de l'API, des pilotes intégrés puis quitter"
 
-#: Programs/config.c:653
+#: Programs/config.c:649
 msgid "Log to standard error rather than to the system log."
 msgstr "Enregistre sur l'erreur standard plutôt que sur le journal du système."
 
-#: Programs/config.c:667
+#: Programs/config.c:663
 #, c-format
 msgid "Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)"
 msgstr "Niveau de journalisation (%s ou un parmi {%s}) et/ou catégories de journal à activer (n'importe quelle combinaison de {%s}, chacune précédée éventuellement de %s pour la désactiver)"
 
-#: Programs/menu_prefs.c:867
+#: Programs/menu_prefs.c:978
 msgid "Long Press Time"
 msgstr "Durée d'appui prolongée"
 
-#: Programs/menu_prefs.c:647 Programs/menu_prefs.c:900
+#: Programs/menu_prefs.c:746 Programs/menu_prefs.c:1011
 msgid "Low"
 msgstr "Faible"
 
-#: Programs/menu_prefs.c:577
+#: Programs/menu_prefs.c:666
 msgid "Lower Left Dot"
 msgstr "Point en bas à gauche"
 
-#: Programs/menu_prefs.c:578
+#: Programs/menu_prefs.c:667
 msgid "Lower Right Dot"
 msgstr "Point en bas à droite"
 
-#: Programs/menu_prefs.c:947
+#: Programs/menu_prefs.c:1058
 msgid "MIDI"
 msgstr "MIDI"
 
-#: Programs/config.c:637
+#: Programs/config.c:633
 msgid "MIDI (Musical Instrument Digital Interface) device specifier."
 msgstr "Identifiant du périphérique MIDI (Musical Instrument Digital Interface)."
 
-#: Programs/menu_prefs.c:977
+#: Programs/menu_prefs.c:1088
 msgid "MIDI Instrument"
 msgstr "Instrument MIDI"
 
-#: Programs/menu_prefs.c:967
+#: Programs/menu_prefs.c:1078
 msgid "MIDI Volume"
 msgstr "Volume MIDI"
 
-#: Programs/menu_prefs.c:1326
+#: Programs/menu_prefs.c:1439
 msgid "Mailing List"
 msgstr "Liste de Diffusion"
 
-#: Programs/cmd_miscellaneous.c:59
-msgid "March"
-msgstr "Mars"
-
-#: Programs/midi.c:57
+#. xgettext: This is the name of MIDI musical instrument #13 (in the Chromatic Percussion group).
+#: Programs/midi.c:117
 msgid "Marimba"
 msgstr "Marimba"
 
-#: Programs/menu_prefs.c:650 Programs/menu_prefs.c:903
+#: Programs/menu_prefs.c:749 Programs/menu_prefs.c:1014
 msgid "Maximum"
 msgstr "Maximum"
 
@@ -1022,143 +1107,139 @@ msgstr "Maximum"
 msgid "Maximum length of an output line."
 msgstr "Longueur maximale d'une ligne d'affichage"
 
-#: Programs/cmd_miscellaneous.c:61
-msgid "May"
-msgstr "Mai"
-
-#: Programs/menu_prefs.c:648 Programs/menu_prefs.c:901
+#: Programs/menu_prefs.c:747 Programs/menu_prefs.c:1012
 msgid "Medium"
 msgstr "Moyenne"
 
-#: Programs/midi.c:175
+#. xgettext: This is the name of MIDI musical instrument #118 (in the Percussive group).
+#: Programs/midi.c:446
 msgid "Melodic Tom"
 msgstr "tom mélodique"
 
-#: Programs/menu_prefs.c:590
+#: Programs/menu_prefs.c:679
 msgid "Menu Options"
 msgstr "Options du menu"
 
-#: Programs/config.c:646
+#: Programs/config.c:642
 msgid "Message hold timeout (in 10ms units)."
 msgstr "Durée d'apparition du message (par unités de 10ms)."
 
-#: Programs/config.c:839
+#: Programs/config.c:835
 msgid "Messages Directory"
 msgstr "Répertoire des Messages"
 
-#: Programs/config.c:838
+#: Programs/config.c:834
 msgid "Messages Domain"
 msgstr "Domaine des Messages"
 
-#: Programs/config.c:837
+#: Programs/config.c:833
 msgid "Messages Locale"
 msgstr "Locale des Messages"
 
-#: Programs/menu_prefs.c:646 Programs/menu_prefs.c:899
+#: Programs/menu_prefs.c:745 Programs/menu_prefs.c:1010
 msgid "Minimum"
 msgstr "Minimum"
 
-#: Programs/menu_prefs.c:1194
+#: Programs/menu_prefs.c:1309
 msgid "Month Day Year"
 msgstr "Mois Jour Année"
 
-#: Programs/midi.c:55
+#. xgettext: This is the name of MIDI musical instrument #11 (in the Chromatic Percussion group).
+#: Programs/midi.c:111
 msgid "Music Box"
 msgstr "Boîte à musique"
 
-#: Programs/menu_prefs.c:947
+#: Programs/menu_prefs.c:1058
 msgid "Musical Instrument Digital Interface"
 msgstr "Interface numérique d'instrument de musique"
 
-#: Programs/midi.c:110
+#. xgettext: This is the name of MIDI musical instrument #60 (in the Brass group).
+#: Programs/midi.c:264
 msgid "Muted Trumpet"
 msgstr "Trompette bouchée"
 
-#: Programs/config.c:537
+#: Programs/config.c:534
 msgid "Name of or path to attributes table."
 msgstr "Nom ou chemin vers la table d'attributs."
 
-#: Programs/config.c:546
+#: Programs/config.c:543
 msgid "Name of or path to contraction table."
 msgstr "Nom ou chemin vers la table de braille abrégé."
 
-#: Programs/config.c:402
+#: Programs/config.c:399
 msgid "Name of or path to default preferences file."
 msgstr "Nom ou chemin vers le fichier des préférences par défaut."
 
-#: Programs/config.c:555
+#: Programs/config.c:551
 msgid "Name of or path to keyboard table."
 msgstr "Nom ou chemin vers le fichier de la table de touches."
 
-#: Programs/config.c:591
+#: Programs/config.c:587
 msgid "Name of or path to speech input object."
 msgstr "Nom ou chemin vers l'objet d'entrée de la synthèse."
 
-#: Programs/config.c:528
+#: Programs/config.c:525
 #, c-format
 msgid "Name of or path to text table (or %s)."
 msgstr "Nom ou chemin vers la table de caractères"
 
-#: Programs/menu_prefs.c:734
+#: Programs/menu_prefs.c:845
 msgid "Navigation Options"
 msgstr "Options de navigation"
 
-#: Programs/menu.c:449
+#: Programs/menu.c:518
 msgid "No"
 msgstr "Non"
 
-#: Programs/menu_prefs.c:633
+#: Programs/menu_prefs.c:720
 msgid "No Capitalization"
 msgstr "Pas de mise en majuscule"
 
-#: Programs/menu_prefs.c:786 Programs/menu_prefs.c:1030
-#: Programs/menu_prefs.c:1043 Programs/menu_prefs.c:1056
-#: Programs/menu_prefs.c:1182 Programs/menu_prefs.c:1221
-#: Programs/menu_prefs.c:1241
+#: Programs/menu_prefs.c:897 Programs/menu_prefs.c:1141
+#: Programs/menu_prefs.c:1154 Programs/menu_prefs.c:1167
+#: Programs/menu_prefs.c:1297 Programs/menu_prefs.c:1336
+#: Programs/menu_prefs.c:1356
 msgid "None"
 msgstr "Aucune"
 
-#: Programs/menu_prefs.c:1378
+#: Programs/menu_prefs.c:1491
 msgid "Notice"
 msgstr "Remarque"
 
-#: Programs/cmd_miscellaneous.c:67
-msgid "November"
-msgstr "Novembre"
-
-#: Programs/midi.c:120
+#. xgettext: This is the name of MIDI musical instrument #69 (in the Reed group).
+#: Programs/midi.c:292
 msgid "Oboe"
 msgstr "Hautbois"
 
-#: Programs/midi.c:132
+#. xgettext: This is the name of MIDI musical instrument #80 (in the Pipe group).
+#: Programs/midi.c:326
 msgid "Ocarina"
 msgstr "Ocarina"
 
-#: Programs/cmd_miscellaneous.c:66
-msgid "October"
-msgstr "Octobre"
-
-#: Programs/menu_prefs.c:849
+#: Programs/menu_prefs.c:960
 msgid "Off"
 msgstr "Inactif"
 
-#: Programs/config.c:1616
+#: Programs/config.c:1615
 msgid "Old Preferences File"
 msgstr "Ancien fichier des préférences"
 
-#: Programs/menu_prefs.c:862
+#: Programs/menu_prefs.c:973
 msgid "On First Release"
 msgstr "Au Premier Relâchement"
 
-#: Programs/midi.c:105
+#. xgettext: This is the name of MIDI musical instrument #56 (in the Ensemble group).
+#: Programs/midi.c:251
 msgid "Orchestra Hit"
 msgstr "Orchestre de percussions"
 
-#: Programs/midi.c:95
+#. xgettext: This is the name of MIDI musical instrument #47 (in the Strings group).
+#: Programs/midi.c:223
 msgid "Orchestral Harp"
 msgstr "Harpe d'orchestre"
 
-#: Programs/midi.c:26
+#. xgettext: This is the name of MIDI musical instrument group #3.
+#: Programs/midi.c:31
 msgid "Organ"
 msgstr "Orgue"
 
@@ -1166,7 +1247,8 @@ msgstr "Orgue"
 msgid "Output Packets"
 msgstr "Paquets sortants"
 
-#: Programs/midi.c:76
+#. xgettext: This is the name of MIDI musical instrument #30 (in the Guitar group).
+#: Programs/midi.c:170
 msgid "Overdriven Guitar"
 msgstr "Guitare overdriven"
 
@@ -1174,97 +1256,107 @@ msgstr "Guitare overdriven"
 msgid "PC mode"
 msgstr "Mode PC"
 
-#: Programs/menu_prefs.c:946
+#: Programs/menu_prefs.c:1057
 msgid "PCM"
 msgstr "PCM"
 
-#: Programs/config.c:627
+#: Programs/config.c:623
 msgid "PCM (soundcard digital audio) device specifier."
 msgstr "Identifiant du périphérique PCM (carte son numérique)"
 
-#: Programs/menu_prefs.c:959
+#: Programs/menu_prefs.c:1070
 msgid "PCM Volume"
 msgstr "Volume PCM"
 
-#: Programs/cmds.auto.h:1266
+#. xgettext: This is the description of the PASSPS2 command.
+#: Programs/cmds.auto.h:1464
 msgid "PS/2 (set 3) keyboard scan code"
 msgstr "Scancode de clavier PS/2 (réglé à 3)"
 
-#: Programs/menu_prefs.c:1316
+#: Programs/menu_prefs.c:1429
 msgid "Package Revision"
 msgstr "Révision du paquet"
 
-#: Programs/menu_prefs.c:1311
+#: Programs/menu_prefs.c:1424
 msgid "Package Version"
 msgstr "Version du paquet"
 
 #. Synth Pad
-#: Programs/midi.c:143
+#. xgettext: This is the name of MIDI musical instrument #89 (in the Synth Pad group).
+#: Programs/midi.c:355
 msgid "Pad 1 (new age)"
 msgstr "bloc 1 (new age)"
 
-#: Programs/midi.c:144
+#. xgettext: This is the name of MIDI musical instrument #90 (in the Synth Pad group).
+#: Programs/midi.c:358
 msgid "Pad 2 (warm)"
 msgstr "bloc 2 (chaud)"
 
-#: Programs/midi.c:145
+#. xgettext: This is the name of MIDI musical instrument #91 (in the Synth Pad group).
+#: Programs/midi.c:361
 msgid "Pad 3 (polysynth)"
 msgstr "Bloc 3 (polysynthé)"
 
-#: Programs/midi.c:146
+#. xgettext: This is the name of MIDI musical instrument #92 (in the Synth Pad group).
+#: Programs/midi.c:364
 msgid "Pad 4 (choir)"
 msgstr "Bloc 4 (choeur)"
 
-#: Programs/midi.c:147
+#. xgettext: This is the name of MIDI musical instrument #93 (in the Synth Pad group).
+#: Programs/midi.c:367
 msgid "Pad 5 (bowed)"
 msgstr "Bloc 5 (huées)"
 
-#: Programs/midi.c:148
+#. xgettext: This is the name of MIDI musical instrument #94 (in the Synth Pad group).
+#: Programs/midi.c:370
 msgid "Pad 6 (metallic)"
 msgstr "Bloc 6 (métallique)"
 
-#: Programs/midi.c:149
+#. xgettext: This is the name of MIDI musical instrument #95 (in the Synth Pad group).
+#: Programs/midi.c:373
 msgid "Pad 7 (halo)"
 msgstr "Bloc 7 (acclamations)"
 
-#: Programs/midi.c:150
+#. xgettext: This is the name of MIDI musical instrument #96 (in the Synth Pad group).
+#: Programs/midi.c:376
 msgid "Pad 8 (sweep)"
 msgstr "Bloc 8 (coup de balai)"
 
-#: Programs/midi.c:128
+#. xgettext: This is the name of MIDI musical instrument #76 (in the Pipe group).
+#: Programs/midi.c:314
 msgid "Pan Flute"
 msgstr "Flûte de pan"
 
-#: Programs/config.c:464
+#: Programs/config.c:461
 msgid "Parameters for the application programming interface."
 msgstr "Paramètres pour l'interface de programmation pour applications."
 
-#: Programs/config.c:486
+#: Programs/config.c:483
 msgid "Parameters for the braille driver."
 msgstr "Paramètres pour le pilote braille."
 
-#: Programs/config.c:359
+#: Programs/config.c:356
 msgid "Parameters for the privilege establishment stage."
 msgstr "Paramètres pour la phase d'établissement de privilège."
 
-#: Programs/config.c:618
+#: Programs/config.c:614
 msgid "Parameters for the screen driver."
 msgstr "Paramètres pour le pilote de l'écran."
 
-#: Programs/config.c:583
+#: Programs/config.c:579
 msgid "Parameters for the speech driver."
 msgstr "Paramètres pour le pilote de synthèse vocale."
 
-#: Programs/config.c:393
+#: Programs/config.c:390
 msgid "Path to default settings file."
 msgstr "Chemin du fichier des paramètres par défaut."
 
-#: Programs/config.c:447
+#: Programs/config.c:444
 msgid "Path to directory containing drivers."
 msgstr "Chemin vers le répertoire contenant les pilotes."
 
 #: Programs/brltest.c:68 Programs/brltty-atb.c:36 Programs/brltty-ctb.c:54
-#: Programs/brltty-ktb.c:73 Programs/config.c:518
+#: Programs/brltty-ktb.c:73 Programs/config.c:515
 msgid "Path to directory containing tables."
 msgstr "Chemin du répertoire contenant les tables."
 
@@ -1280,15 +1372,15 @@ msgstr "Chemin du répertoire de chargement des pilotes."
 msgid "Path to directory for text tables."
 msgstr "Chemin du répertoire des tables de texte"
 
-#: Programs/brltest.c:78 Programs/config.c:437
+#: Programs/brltest.c:78 Programs/config.c:434
 msgid "Path to directory which can be written to."
 msgstr "Chemin du répertoire où il est possible d'écrire."
 
-#: Programs/config.c:427
+#: Programs/config.c:424
 msgid "Path to directory which contains files that can be updated."
 msgstr "Chemin du répertoire où des fichiers peuvent être mis à jour."
 
-#: Programs/config.c:327
+#: Programs/config.c:324
 msgid "Path to directory which contains message translations."
 msgstr "Chemin du répertoire contenant les traductions des messages"
 
@@ -1296,7 +1388,7 @@ msgstr "Chemin du répertoire contenant les traductions des messages"
 msgid "Path to input text table."
 msgstr "Chemin de la table de saisie de texte."
 
-#: Programs/config.c:676
+#: Programs/config.c:672
 msgid "Path to log file."
 msgstr "Chemin du fichier journal."
 
@@ -1304,36 +1396,42 @@ msgstr "Chemin du fichier journal."
 msgid "Path to output text table."
 msgstr "Chemin de la table de texte affiché"
 
-#: Programs/config.c:383
+#: Programs/config.c:380
 msgid "Path to process identifier file."
 msgstr "Chemin du fichier d'identifiants de processus."
 
-#: Programs/config.c:417
+#: Programs/config.c:414
 msgid "Patterns that match command prompts."
 msgstr "Motifs pour reconnaître les invites de commandes."
 
-#: Programs/midi.c:38
+#. xgettext: This is the name of MIDI musical instrument group #15.
+#: Programs/midi.c:71
 msgid "Percussive Instruments"
 msgstr "Instruments à percussions"
 
-#: Programs/midi.c:63
+#. xgettext: This is the name of MIDI musical instrument #18 (in the Organ group).
+#: Programs/midi.c:133
 msgid "Percussive Organ"
 msgstr "Orgue à percussion"
 
-#: Programs/midi.c:24
+#. xgettext: This is the name of MIDI musical instrument group #1.
+#: Programs/midi.c:25
 msgid "Piano"
 msgstr "Piano"
 
 #. Pipe
-#: Programs/midi.c:125
+#. xgettext: This is the name of MIDI musical instrument #73 (in the Pipe group).
+#: Programs/midi.c:305
 msgid "Piccolo"
 msgstr "Piccolo"
 
-#: Programs/midi.c:33
+#. xgettext: This is the name of MIDI musical instrument group #10.
+#: Programs/midi.c:52
 msgid "Pipe"
 msgstr "Tuyau"
 
-#: Programs/midi.c:94
+#. xgettext: This is the name of MIDI musical instrument #46 (in the Strings group).
+#: Programs/midi.c:220
 msgid "Pizzicato Strings"
 msgstr "Pizzicati"
 
@@ -1341,7 +1439,7 @@ msgstr "Pizzicati"
 msgid "Powerdown"
 msgstr "Extinction"
 
-#: Programs/config.c:2771 Programs/menu_prefs.c:1346
+#: Programs/config.c:2771 Programs/menu_prefs.c:1459
 msgid "Preferences File"
 msgstr "Fichier des préférences"
 
@@ -1357,39 +1455,42 @@ msgstr "Afficher un résumé de l'utilisation (toutes les options) et quitter."
 msgid "Print a usage summary (commonly used options only), and then exit."
 msgstr "Affiche un résumé de l'utilisation (seulement les options couramment utilisées), puis quitte."
 
-#: Programs/config.c:790
+#: Programs/config.c:786
 msgid "Privilege Parameter"
 msgstr "Paramètre de Privilège"
 
-#: Programs/menu_prefs.c:1297
+#: Programs/menu_prefs.c:1410
 msgid "Profiles"
 msgstr "Profils"
 
-#: Programs/config.c:563
+#: Programs/config.c:559
 msgid "Properties of eligible keyboards."
 msgstr "Propriétés des claviers éligibles."
 
-#: Programs/menu_prefs.c:839
+#: Programs/menu_prefs.c:950
 msgid "Quick Space"
 msgstr "Espace Rapide"
 
-#: Programs/menu_prefs.c:1047
+#: Programs/menu_prefs.c:1158
 msgid "Raise Pitch"
 msgstr "Augmenter le ton"
 
-#: Programs/config.c:318
+#: Programs/config.c:315
 msgid "Recognize environment variables."
 msgstr "Reconnaît les variables d'environnement."
 
-#: Programs/midi.c:127
+#. xgettext: This is the name of MIDI musical instrument #75 (in the Pipe group).
+#: Programs/midi.c:311
 msgid "Recorder"
 msgstr "Magnétophone"
 
-#: Programs/midi.c:32
+#. xgettext: This is the name of MIDI musical instrument group #9.
+#: Programs/midi.c:49
 msgid "Reed"
 msgstr "Anche"
 
-#: Programs/midi.c:66
+#. xgettext: This is the name of MIDI musical instrument #21 (in the Organ group).
+#: Programs/midi.c:142
 msgid "Reed Organ"
 msgstr "Orgue à hanche"
 
@@ -1397,7 +1498,7 @@ msgstr "Orgue à hanche"
 msgid "Reformat input."
 msgstr "Entrée de reformatage."
 
-#: Programs/config.c:508
+#: Programs/config.c:505
 msgid "Release braille device when screen or window is unreadable."
 msgstr "Abandonne le périphérique braille quand il n'est pas possible de lire l'écran ou la fenêtre."
 
@@ -1405,7 +1506,7 @@ msgstr "Abandonne le périphérique braille quand il n'est pas possible de lire 
 msgid "Remain a foreground process"
 msgstr "Rester un processus interactif"
 
-#: Programs/config.c:334
+#: Programs/config.c:331
 msgid "Remain a foreground process."
 msgstr "Rappelle un processus en tâche de fond."
 
@@ -1413,7 +1514,7 @@ msgstr "Rappelle un processus en tâche de fond."
 msgid "Remove dots seven and eight."
 msgstr "Supprime les points sept et huit"
 
-#: Programs/config.c:349
+#: Programs/config.c:346
 #, c-format
 msgid "Remove the %s service, and then exit."
 msgstr "Supprime le service %s et quitte."
@@ -1426,83 +1527,65 @@ msgstr "Signaler des problèmes avec la table de touches."
 msgid "Report the characters within the current screen font that aren't defined within the text table."
 msgstr "Signale les caractères dans une police à l'écran n'ayant pas été définis dans la table de caractères"
 
-#: Programs/menu_prefs.c:755
+#: Programs/menu_prefs.c:866
 msgid "Rest of Line"
 msgstr "Reste de la ligne"
 
-#: Programs/menu_prefs.c:1445
+#: Programs/menu_prefs.c:1558
 msgid "Restart Braille Driver"
 msgstr "Redémarre le pilote braille"
 
-#: Programs/menu_prefs.c:1457
+#: Programs/menu_prefs.c:1570
 msgid "Restart Screen Driver"
 msgstr "Redémarre le pilote de l'écran"
 
-#: Programs/menu_prefs.c:1451
+#: Programs/menu_prefs.c:1564
 msgid "Restart Speech Driver"
 msgstr "Redémarre le pilote de synthèse vocale"
 
-#: Programs/midi.c:177
+#. xgettext: This is the name of MIDI musical instrument #120 (in the Percussive group).
+#: Programs/midi.c:452
 msgid "Reverse Cymbal"
 msgstr "Cymbales renversées"
 
-#: Programs/menu_prefs.c:1223
+#: Programs/menu_prefs.c:1338
 msgid "Right"
 msgstr "Droite"
 
-#: Programs/midi.c:64
+#. xgettext: This is the name of MIDI musical instrument #19 (in the Organ group).
+#: Programs/midi.c:136
 msgid "Rock Organ"
 msgstr "Orgue de rock"
 
-#: Programs/menu_prefs.c:585
+#: Programs/menu_prefs.c:674
 msgid "Save on Exit"
 msgstr "Enregistrer en quittant"
 
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
-#: Programs/menu_prefs.c:1046
+#: Programs/menu_prefs.c:1157
 msgid "Say Cap"
 msgstr "Dire l'état du verrouillage majuscule"
 
-#: Programs/menu_prefs.c:1070
+#: Programs/menu_prefs.c:1181
 msgid "Say Line Mode"
 msgstr "Mode Dire la ligne"
 
-#: Programs/menu_prefs.c:1057
+#: Programs/menu_prefs.c:1168
 msgid "Say Space"
 msgstr "Dire les espaces"
 
-#: Programs/menu_prefs.c:460
-msgid "Screen Cursor Column"
-msgstr "Colonne du curseur de l'écran"
+#: Programs/menu_prefs.c:780
+msgid "Screen Cursor Blink Period"
+msgstr ""
 
-#: Programs/menu_prefs.c:459
-msgid "Screen Cursor Coordinates"
-msgstr "Coordonnées du curseur de l'écran"
+#: Programs/menu_prefs.c:788
+msgid "Screen Cursor Percent Visible"
+msgstr ""
 
-#: Programs/menu_prefs.c:687
-msgid "Screen Cursor Invisible Time"
-msgstr "Durée d'invisibilité du curseur d'écran"
-
-#: Programs/menu_prefs.c:461
-msgid "Screen Cursor Row"
-msgstr "Ligne du curseur de l'écran"
-
-#: Programs/menu_prefs.c:669
+#: Programs/menu_prefs.c:768
 msgid "Screen Cursor Style"
 msgstr "Apparence du curseur de l'écran"
-
-#: Programs/menu_prefs.c:681
-msgid "Screen Cursor Visible Time"
-msgstr "Durée de visibilité du curseur de l'écran"
-
-#: Programs/menu_prefs.c:462
-msgid "Screen Cursor and Braille Window Column"
-msgstr "Colonne du curseur de l'écran et de la fenêtre braille"
-
-#: Programs/menu_prefs.c:463
-msgid "Screen Cursor and Braille Window Row"
-msgstr "Ligne du curseur de l'écran et de la fenêtre braille"
 
 #: Programs/config.c:2268
 msgid "Screen Driver"
@@ -1512,7 +1595,7 @@ msgstr "Pilote de l'écran"
 msgid "Screen Driver Events"
 msgstr "Événements du pilote de l'écran"
 
-#: Programs/menu_prefs.c:464
+#: Programs/menu_prefs.c:550
 msgid "Screen Number"
 msgstr "Numéro de l'écran"
 
@@ -1520,22 +1603,19 @@ msgstr "Numéro de l'écran"
 msgid "Screen Parameter"
 msgstr "Paramètre de l'écran"
 
-#: Programs/config.c:608
+#: Programs/config.c:604
 #, c-format
 msgid "Screen driver code (%s, %s, or one of {%s})."
 msgstr "Code du pilote de l'écran : (%s, %s, ou un parmi {%s})."
 
-#: Programs/menu_prefs.c:780
+#: Programs/menu_prefs.c:891
 msgid "Scroll-aware Cursor Navigation"
 msgstr "Navigation du curseur sensible au défilement"
 
-#: Programs/midi.c:181
+#. xgettext: This is the name of MIDI musical instrument #123 (in the Sound Effects group).
+#: Programs/midi.c:462
 msgid "Seashore"
 msgstr "Bord de mer"
-
-#: Programs/cmd_miscellaneous.c:65
-msgid "September"
-msgstr "Septembre"
 
 #: Programs/log.c:130
 msgid "Serial I/O"
@@ -1545,135 +1625,143 @@ msgstr "E/S série"
 msgid "Server Events"
 msgstr "Événements du serveur"
 
-#: Programs/midi.c:130
+#. xgettext: This is the name of MIDI musical instrument #78 (in the Pipe group).
+#: Programs/midi.c:320
 msgid "Shakuhachi"
 msgstr "Shakuhachi"
 
-#: Programs/midi.c:163
+#. xgettext: This is the name of MIDI musical instrument #107 (in the Ethnic group).
+#: Programs/midi.c:412
 msgid "Shamisen"
 msgstr "Shamisen"
 
-#: Programs/midi.c:168
+#. xgettext: This is the name of MIDI musical instrument #112 (in the Ethnic group).
+#: Programs/midi.c:427
 msgid "Shanai"
 msgstr "Shanai"
 
-#: Programs/menu_prefs.c:598
+#: Programs/menu_prefs.c:687
 msgid "Show Advanced Submenus"
 msgstr "Afficher les sous-menus avancés"
 
-#: Programs/menu_prefs.c:603
+#: Programs/menu_prefs.c:692
 msgid "Show All Items"
 msgstr "Afficher tous les éléments"
 
-#: Programs/menu_prefs.c:693
+#: Programs/menu_prefs.c:796
 msgid "Show Attributes"
 msgstr "Afficher les attributs"
 
-#: Programs/menu_prefs.c:664
+#: Programs/menu_prefs.c:763
 msgid "Show Screen Cursor"
 msgstr "Afficher le curseur de l'écran"
 
-#: Programs/menu_prefs.c:1176
+#: Programs/menu_prefs.c:1291
 msgid "Show Seconds"
 msgstr "Afficher les secondes"
 
-#: Programs/menu_prefs.c:1122
+#: Programs/menu_prefs.c:1233
 msgid "Show Speech Cursor"
 msgstr "Afficher le curseur de la synthèse"
 
-#: Programs/menu_prefs.c:593
+#: Programs/menu_prefs.c:682
 msgid "Show Submenu Sizes"
 msgstr "Afficher la taille des sous-menus"
 
 #. Ethnic Instruments
-#: Programs/midi.c:161
+#. xgettext: This is the name of MIDI musical instrument #105 (in the Ethnic group).
+#: Programs/midi.c:406
 msgid "Sitar"
 msgstr "Cithare"
 
-#: Programs/menu_prefs.c:747
+#: Programs/menu_prefs.c:858
 msgid "Skip Blank Braille Windows"
 msgstr "Passer les fenêtres braille vierges"
 
-#: Programs/menu_prefs.c:741
+#: Programs/menu_prefs.c:852
 msgid "Skip Identical Lines"
 msgstr "Passer les lignes identiques"
 
-#: Programs/menu_prefs.c:758
+#: Programs/menu_prefs.c:869
 msgid "Skip Which Blank Braille Windows"
 msgstr "Quelles fenêtres braille vierges sauter."
 
-#: Programs/midi.c:84
+#. xgettext: This is the name of MIDI musical instrument #37 (in the Bass group).
+#: Programs/midi.c:192
 msgid "Slap Bass 1"
 msgstr "Basse frappée 1"
 
-#: Programs/midi.c:85
+#. xgettext: This is the name of MIDI musical instrument #38 (in the Bass group).
+#: Programs/midi.c:195
 msgid "Slap Bass 2"
 msgstr "Basse frappée 2"
 
-#: Programs/menu_prefs.c:1206
+#: Programs/menu_prefs.c:1321
 msgid "Slash"
 msgstr "Barre oblique"
 
-#: Programs/menu_prefs.c:763
+#: Programs/menu_prefs.c:874
 msgid "Sliding Braille Window"
 msgstr "Faire défiler la fenêtre"
 
-#: Programs/menu_prefs.c:1031
+#: Programs/menu_prefs.c:1142
 msgid "Some"
 msgstr "Quelques"
 
 #. Reed
-#: Programs/midi.c:116
-msgid "Soprano Sax"
-msgstr "Saxo soprano"
+#. xgettext: This is the name of MIDI musical instrument #65 (in the Reed group).
+#: Programs/midi.c:280
+msgid "Soprano Saxophone"
+msgstr ""
 
-#: Programs/midi.c:39
+#. xgettext: This is the name of MIDI musical instrument group #16.
+#: Programs/midi.c:74
 msgid "Sound Effects"
 msgstr "Effets sonore"
 
-#: Programs/menu_prefs.c:1242
+#: Programs/menu_prefs.c:561 Programs/menu_prefs.c:1357
 msgid "Space"
 msgstr "Espace"
 
-#: Programs/menu_prefs.c:1110
+#: Programs/menu_prefs.c:1221
 msgid "Speak Completed Words"
 msgstr "Dire les mots complétés"
 
-#: Programs/menu_prefs.c:1098
+#: Programs/menu_prefs.c:1209
 msgid "Speak Deleted Characters"
 msgstr "Dire les caractères effacés"
 
-#: Programs/menu_prefs.c:1092
+#: Programs/menu_prefs.c:1203
 msgid "Speak Inserted Characters"
 msgstr "Dire les caractères insérés"
 
-#: Programs/menu_prefs.c:1116
+#: Programs/menu_prefs.c:1227
 msgid "Speak Line Indent"
 msgstr "Énoncer l'indentation de la ligne"
 
-#: Programs/menu_prefs.c:1104
+#: Programs/menu_prefs.c:1215
 msgid "Speak Replaced Characters"
 msgstr "Dire les caractères remplacés"
 
-#: Programs/menu_prefs.c:1086
+#: Programs/menu_prefs.c:1197
 msgid "Speak Selected Character"
 msgstr "Dire le caractère sélectionné"
 
-#: Programs/menu_prefs.c:1080
+#: Programs/menu_prefs.c:1191
 msgid "Speak Selected Line"
 msgstr "Lire la ligne sélectionnée"
 
-#: Programs/menu_prefs.c:1145
-msgid "Speech Cursor Invisible Time"
-msgstr "Durée d'invisibilité du curseur"
+#: Programs/menu_prefs.c:1250
+msgid "Speech Cursor Blink Period"
+msgstr ""
 
-#: Programs/menu_prefs.c:1127
+#: Programs/menu_prefs.c:1258
+msgid "Speech Cursor Percent Visible"
+msgstr ""
+
+#: Programs/menu_prefs.c:1238
 msgid "Speech Cursor Style"
 msgstr "Apparence du curseur de la synthèse"
-
-#: Programs/menu_prefs.c:1139
-msgid "Speech Cursor Visible Time"
-msgstr "Durée de visibilité du curseur de la synthèse"
 
 #: Programs/config.c:2043
 msgid "Speech Driver"
@@ -1688,11 +1776,11 @@ msgid "Speech Events"
 msgstr "Événements liés à la parole"
 
 #. Create the file system object for speech input.
-#: Programs/config.c:2882
+#: Programs/config.c:2912
 msgid "Speech Input"
 msgstr "Entrée de la parole"
 
-#: Programs/menu_prefs.c:1005
+#: Programs/menu_prefs.c:1116
 msgid "Speech Options"
 msgstr "Options de la synthèse"
 
@@ -1700,182 +1788,205 @@ msgstr "Options de la synthèse"
 msgid "Speech Parameter"
 msgstr "Paramètre de synthèse vocale"
 
-#: Programs/menu_prefs.c:1022
+#: Programs/menu_prefs.c:1133
 msgid "Speech Pitch"
 msgstr "Ton de la voix"
 
-#: Programs/menu_prefs.c:1035
+#: Programs/menu_prefs.c:1146
 msgid "Speech Punctuation"
 msgstr "Ponctuation pour la synthèse"
 
-#: Programs/menu_prefs.c:1015
+#: Programs/menu_prefs.c:1126
 msgid "Speech Rate"
 msgstr "Vitesse de la synthèse"
 
-#: Programs/menu_prefs.c:1050
+#: Programs/menu_prefs.c:1161
 msgid "Speech Uppercase Indicator"
 msgstr "Indicateur vocal de majuscules"
 
-#: Programs/menu_prefs.c:1008
+#: Programs/menu_prefs.c:1119
 msgid "Speech Volume"
 msgstr "Volume de la synthèse"
 
-#: Programs/menu_prefs.c:1060
+#: Programs/menu_prefs.c:1171
 msgid "Speech Whitespace Indicator"
 msgstr "Indicateur vocal d'espace insécable"
 
-#: Programs/config.c:573
+#: Programs/config.c:569
 #, c-format
 msgid "Speech driver code (%s, %s, or one of {%s})."
 msgstr "Code du pilote de synthèse : (%s, %s, ou un parmi {%s})."
 
-#: Programs/menu_prefs.c:1392
+#: Programs/menu_prefs.c:1505
 msgid "Standard Error Log Level"
 msgstr "Niveau standard de journalisation des erreurs"
 
-#: Programs/menu_prefs.c:815
+#: Programs/menu_prefs.c:926
 msgid "Start Selection with Routing Key"
 msgstr "Commence la sélection avec touche de routage"
 
-#: Programs/menu_prefs.c:465
+#: Programs/menu_prefs.c:551
 msgid "State Dots"
 msgstr "Points d'état"
 
-#: Programs/menu_prefs.c:466
+#: Programs/menu_prefs.c:552
 msgid "State Letter"
 msgstr "Lettre d'état"
 
-#: Programs/menu_prefs.c:1217
+#: Programs/menu_prefs.c:1332
 msgid "Status Cells"
 msgstr "Cellules d'état"
 
-#: Programs/menu_prefs.c:1233
+#: Programs/menu_prefs.c:1348
 msgid "Status Count"
 msgstr "Nombre d'états"
 
-#: Programs/menu_prefs.c:474
+#: Programs/menu_prefs.c:565
 msgid "Status Field"
 msgstr "Champ de l'état"
 
-#: Programs/menu_prefs.c:1226
+#: Programs/menu_prefs.c:1341
 msgid "Status Position"
 msgstr "Position de l'état"
 
-#: Programs/menu_prefs.c:1248
+#: Programs/menu_prefs.c:1363
 msgid "Status Separator"
 msgstr "Séparateur de l'état"
 
-#: Programs/menu_prefs.c:1244
+#: Programs/menu_prefs.c:1359
 msgid "Status Side"
 msgstr "Limite de l'état"
 
-#: Programs/midi.c:172
+#. xgettext: This is the name of MIDI musical instrument #115 (in the Percussive group).
+#: Programs/midi.c:437
 msgid "Steel Drums"
 msgstr "Batterie métal"
 
-#: Programs/config.c:373
+#: Programs/config.c:370
 #, c-format
 msgid "Stop an existing instance of %s, and then exit."
 msgstr "Arrêter une session de %s en cours et quitter."
 
 #. Ensemble
-#: Programs/midi.c:98
+#. xgettext: This is the name of MIDI musical instrument #49 (in the Ensemble group).
+#: Programs/midi.c:230
 msgid "String Ensemble 1"
 msgstr "Ensemble de cordes 1"
 
-#: Programs/midi.c:99
+#. xgettext: This is the name of MIDI musical instrument #50 (in the Ensemble group).
+#: Programs/midi.c:233
 msgid "String Ensemble 2"
 msgstr "Ensemble de cordes 2"
 
-#: Programs/midi.c:29
+#. xgettext: This is the name of MIDI musical instrument group #6.
+#: Programs/midi.c:40
 msgid "Strings"
 msgstr "Cordes"
 
-#: Programs/menu_prefs.c:635
+#: Programs/menu_prefs.c:722
 msgid "Superimpose Dot 7"
 msgstr "Point 7 superposé"
 
-#: Programs/config.c:659
+#: Programs/config.c:655
 msgid "Suppress start-up messages."
 msgstr "Supprime les messages au démarrage."
 
-#: Programs/midi.c:86
+#. xgettext: This is the name of MIDI musical instrument #39 (in the Bass group).
+#: Programs/midi.c:198
 msgid "Synth Bass 1"
 msgstr "Basse synthétique 1"
 
-#: Programs/midi.c:87
+#. xgettext: This is the name of MIDI musical instrument #40 (in the Bass group).
+#: Programs/midi.c:201
 msgid "Synth Bass 2"
 msgstr "Basse synthétique 2"
 
-#: Programs/midi.c:176
+#. xgettext: This is the name of MIDI musical instrument #119 (in the Percussive group).
+#: Programs/midi.c:449
 msgid "Synth Drum"
 msgstr "Batterie synthétique"
 
-#: Programs/midi.c:36
+#. xgettext: This is the name of MIDI musical instrument group #13.
+#. xgettext: (synth is a common short form for synthesizer)
+#. xgettext: (FM is the acronym for Frequency Modulation)
+#: Programs/midi.c:65
 msgid "Synth FM"
 msgstr "FM synthétique"
 
-#: Programs/midi.c:34
+#. xgettext: This is the name of MIDI musical instrument group #11.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:56
 msgid "Synth Lead"
 msgstr "Position synthé"
 
-#: Programs/midi.c:35
+#. xgettext: This is the name of MIDI musical instrument group #12.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:60
 msgid "Synth Pad"
 msgstr "Bloc synthé"
 
-#: Programs/midi.c:104
+#. xgettext: This is the name of MIDI musical instrument #55 (in the Ensemble group).
+#: Programs/midi.c:248
 msgid "Synth Voice"
 msgstr "Voix synthétique"
 
-#: Programs/midi.c:113
+#. xgettext: This is the name of MIDI musical instrument #63 (in the Brass group).
+#: Programs/midi.c:273
 msgid "SynthBrass 1"
 msgstr "Cuivre synthétique 1"
 
-#: Programs/midi.c:114
+#. xgettext: This is the name of MIDI musical instrument #64 (in the Brass group).
+#: Programs/midi.c:276
 msgid "SynthBrass 2"
 msgstr "Cuivre synthétique 2"
 
-#: Programs/midi.c:100
+#. xgettext: This is the name of MIDI musical instrument #51 (in the Ensemble group).
+#: Programs/midi.c:236
 msgid "SynthStrings 1"
 msgstr "Cordes synthétiques 1"
 
-#: Programs/midi.c:101
+#. xgettext: This is the name of MIDI musical instrument #52 (in the Ensemble group).
+#: Programs/midi.c:239
 msgid "SynthStrings 2"
 msgstr "Cordes synthétiques 2"
 
-#: Programs/menu_prefs.c:1387
+#: Programs/menu_prefs.c:1500
 msgid "System Log Level"
 msgstr "Niveau de journalisation du système"
 
-#: Programs/config.c:2792 Programs/menu_prefs.c:1361
+#: Programs/config.c:2792 Programs/menu_prefs.c:1474
 msgid "Tables Directory"
 msgstr "Répertoire des tables"
 
-#: Programs/midi.c:174
+#. xgettext: This is the name of MIDI musical instrument #117 (in the Percussive group).
+#: Programs/midi.c:443
 msgid "Taiko Drum"
 msgstr "Batterie Taiko"
 
-#: Programs/midi.c:69
+#. xgettext: This is the name of MIDI musical instrument #24 (in the Organ group).
+#: Programs/midi.c:151
 msgid "Tango Accordion"
 msgstr "Accordéon tango"
 
-#: Programs/midi.c:183
+#. xgettext: This is the name of MIDI musical instrument #125 (in the Sound Effects group).
+#: Programs/midi.c:468
 msgid "Telephone Ring"
 msgstr "Sonnerie de téléphone"
 
-#: Programs/midi.c:118
-msgid "Tenor Sax"
-msgstr "Saxo tenor"
+#. xgettext: This is the name of MIDI musical instrument #67 (in the Reed group).
+#: Programs/midi.c:286
+msgid "Tenor Saxophone"
+msgstr ""
 
-#: Programs/menu_prefs.c:661
+#: Programs/menu_prefs.c:760
 msgid "Text Indicators"
 msgstr "Indicateurs de texte"
 
-#: Programs/menu_prefs.c:1245
+#: Programs/menu_prefs.c:1360
 msgid "Text Side"
 msgstr "Limite du texte"
 
-#: Programs/config.c:2813 Programs/menu_prefs.c:1273
+#: Programs/config.c:2817 Programs/menu_prefs.c:1388
 msgid "Text Table"
 msgstr "Table de texte"
 
@@ -1883,89 +1994,96 @@ msgstr "Table de texte"
 msgid "Text table."
 msgstr "Table de caractères."
 
-#: Programs/config.c:304
+#: Programs/config.c:301
 msgid "The text to be shown when the braille driver starts and to be spoken when the speech driver starts."
 msgstr "Texte à afficher au démarrage du pilote braille ou à dire quand le pilote de synthèse vocal se lance."
 
-#: Programs/config.c:311
+#: Programs/config.c:308
 msgid "The text to be shown when the braille driver stops."
 msgstr "Texte à afficher quand le pilote braille s'arrête."
 
-#: Programs/menu_prefs.c:467
+#: Programs/menu_prefs.c:553
 msgid "Time"
 msgstr "Heure"
 
-#: Programs/menu_prefs.c:1161
+#: Programs/menu_prefs.c:1276
 msgid "Time Format"
 msgstr "Format de l'heure"
 
-#: Programs/menu_prefs.c:1153
+#: Programs/menu_prefs.c:1268
 msgid "Time Presentation"
 msgstr "Présentation de l'heure"
 
-#: Programs/menu_prefs.c:1171
+#: Programs/menu_prefs.c:1286
 msgid "Time Separator"
 msgstr "Séparateur de l'heure"
 
-#: Programs/midi.c:96
+#. xgettext: This is the name of MIDI musical instrument #48 (in the Strings group).
+#: Programs/midi.c:226
 msgid "Timpani"
 msgstr "Timbales"
 
 #. Percussive Instruments
-#: Programs/midi.c:170
+#. xgettext: This is the name of MIDI musical instrument #113 (in the Percussive group).
+#: Programs/midi.c:431
 msgid "Tinkle Bell"
 msgstr "Tintement de cloches"
 
-#: Programs/menu_prefs.c:1441
+#: Programs/menu_prefs.c:1554
 msgid "Tools"
 msgstr "Outils"
 
-#: Programs/menu_prefs.c:892
+#: Programs/menu_prefs.c:1003
 msgid "Touch Navigation"
 msgstr "Navigation tactile"
 
-#: Programs/menu_prefs.c:906
+#: Programs/menu_prefs.c:1017
 msgid "Touch Sensitivity"
 msgstr "Sensibilité du tactile"
 
-#: Programs/menu_prefs.c:804
+#: Programs/menu_prefs.c:915
 msgid "Track Screen Pointer"
 msgstr "Poursuivre le pointeur de l'écran"
 
-#: Programs/menu_prefs.c:798
+#: Programs/menu_prefs.c:909
 msgid "Track Screen Scroll"
 msgstr "Suivre le défilement de l'écran"
 
-#: Programs/menu_prefs.c:830
+#: Programs/menu_prefs.c:941
 msgid "Translated via Text Table"
 msgstr "Traduit via la table de caractères"
 
-#: Programs/midi.c:93
+#. xgettext: This is the name of MIDI musical instrument #45 (in the Strings group).
+#: Programs/midi.c:217
 msgid "Tremolo Strings"
 msgstr "Cordes avec tremolo"
 
-#: Programs/midi.c:108
+#. xgettext: This is the name of MIDI musical instrument #58 (in the Brass group).
+#: Programs/midi.c:258
 msgid "Trombone"
 msgstr "Trombone"
 
 #. Brass
-#: Programs/midi.c:107
+#. xgettext: This is the name of MIDI musical instrument #57 (in the Brass group).
+#: Programs/midi.c:255
 msgid "Trumpet"
 msgstr "Trompette"
 
-#: Programs/midi.c:109
+#. xgettext: This is the name of MIDI musical instrument #59 (in the Brass group).
+#: Programs/midi.c:261
 msgid "Tuba"
 msgstr "Tuba"
 
-#: Programs/midi.c:59
+#. xgettext: This is the name of MIDI musical instrument #15 (in the Chromatic Percussion group).
+#: Programs/midi.c:123
 msgid "Tubular Bells"
 msgstr "Cloches tubulaires"
 
-#: Programs/menu_prefs.c:951
+#: Programs/menu_prefs.c:1062
 msgid "Tune Device"
 msgstr "Périphérique pour les sons"
 
-#: Programs/menu_prefs.c:834
+#: Programs/menu_prefs.c:945
 msgid "Typing Mode"
 msgstr "Mode de saisie"
 
@@ -1973,7 +2091,7 @@ msgstr "Mode de saisie"
 msgid "USB I/O"
 msgstr "E/S USB"
 
-#: Programs/menu_prefs.c:575
+#: Programs/menu_prefs.c:664
 msgid "Underline"
 msgstr "Souligné"
 
@@ -1981,7 +2099,7 @@ msgstr "Souligné"
 msgid "Unfrozen"
 msgstr "Dégelé"
 
-#: Programs/config.c:2789 Programs/menu_prefs.c:1341
+#: Programs/config.c:2789 Programs/menu_prefs.c:1454
 msgid "Updatable Directory"
 msgstr "Répertoire qu'on peut mettre à jour"
 
@@ -1993,44 +2111,62 @@ msgstr "Événements de mise à jour"
 msgid "Usage"
 msgstr "Utilisation"
 
-#: Programs/menu_prefs.c:634
+#: Programs/menu_prefs.c:721
 msgid "Use Capital Sign"
 msgstr "Utilisation du signe majuscule"
 
-#: Programs/midi.c:56
+#. xgettext: This is the name of MIDI musical instrument #12 (in the Chromatic Percussion group).
+#: Programs/midi.c:114
 msgid "Vibraphone"
 msgstr "Vibraphone"
 
-#: Programs/midi.c:90
+#. xgettext: This is the name of MIDI musical instrument #42 (in the Strings group).
+#: Programs/midi.c:208
 msgid "Viola"
 msgstr "Alto"
 
 #. Strings
-#: Programs/midi.c:89
+#. xgettext: This is the name of MIDI musical instrument #41 (in the Strings group).
+#: Programs/midi.c:205
 msgid "Violin"
 msgstr "Violon"
 
-#: Programs/midi.c:103
+#. xgettext: This is the name of MIDI musical instrument #54 (in the Ensemble group).
+#: Programs/midi.c:245
 msgid "Voice Oohs"
 msgstr "Hoos vocaux"
 
-#: Programs/menu_prefs.c:1377
+#: Programs/menu_prefs.c:1490
 msgid "Warning"
 msgstr "Attention"
 
-#: Programs/menu_prefs.c:1321
+#: Programs/menu_prefs.c:1434
 msgid "Web Site"
 msgstr "Site Öeb"
 
-#: Programs/midi.c:131
+#. xgettext: This is the name of MIDI musical instrument #79 (in the Pipe group).
+#: Programs/midi.c:323
 msgid "Whistle"
 msgstr "sifflet"
 
-#: Programs/midi.c:173
+#: Programs/menu_prefs.c:543
+msgid "Window Column"
+msgstr ""
+
+#: Programs/menu_prefs.c:542 Programs/menu_prefs.c:558
+msgid "Window Coordinates"
+msgstr ""
+
+#: Programs/menu_prefs.c:544
+msgid "Window Row"
+msgstr ""
+
+#. xgettext: This is the name of MIDI musical instrument #116 (in the Percussive group).
+#: Programs/midi.c:440
 msgid "Woodblock"
 msgstr "bloc de boip"
 
-#: Programs/menu_prefs.c:737
+#: Programs/menu_prefs.c:848
 msgid "Word Wrap"
 msgstr "Césure par mot"
 
@@ -2038,7 +2174,7 @@ msgstr "Césure par mot"
 msgid "Working Directory"
 msgstr "Répertoire de travail"
 
-#: Programs/config.c:2790 Programs/menu_prefs.c:1351
+#: Programs/config.c:2790 Programs/menu_prefs.c:1464
 msgid "Writable Directory"
 msgstr "Répertoire accessible en écriture"
 
@@ -2046,7 +2182,7 @@ msgstr "Répertoire accessible en écriture"
 msgid "Write debugging output to stdout"
 msgstr "Écrire sortie de débogage sur stdout"
 
-#: Programs/config.c:682
+#: Programs/config.c:678
 msgid "Write the start-up logs, and then exit."
 msgstr "Écrit les journaux de démarrage et quitte."
 
@@ -2070,19 +2206,21 @@ msgstr "Le répertoire XDG utilisé lors de l'exécution existe"
 msgid "XFree(wm_name) for change"
 msgstr "XFree(wm_name) pour changer"
 
-#: Programs/cmds.auto.h:1259
+#. xgettext: This is the description of the PASSXT command.
+#: Programs/cmds.auto.h:1456
 msgid "XT (set 1) keyboard scan code"
 msgstr "Scancode de clavier XT (set 1)"
 
-#: Programs/midi.c:58
+#. xgettext: This is the name of MIDI musical instrument #14 (in the Chromatic Percussion group).
+#: Programs/midi.c:120
 msgid "Xylophone"
 msgstr "Xylophone"
 
-#: Programs/menu_prefs.c:1193
+#: Programs/menu_prefs.c:1308
 msgid "Year Month Day"
 msgstr "Année Mois Jour"
 
-#: Programs/menu.c:450
+#: Programs/menu.c:519
 msgid "Yes"
 msgstr "Oui"
 
@@ -2090,19 +2228,21 @@ msgstr "Oui"
 msgid "[host][:port]"
 msgstr "[hôte][:port]"
 
-#: Programs/menu_prefs.c:576
+#: Programs/menu_prefs.c:665
 msgid "all dots"
 msgstr "Tous les points"
 
-#: Programs/cmd_miscellaneous.c:121
+#: Programs/cmd_miscellaneous.c:104
 msgid "and"
 msgstr "et"
 
-#: Programs/cmds.auto.h:1142
+#. xgettext: This is the description of the CLIP_APPEND command.
+#: Programs/cmds.auto.h:1323
 msgid "append characters to clipboard"
 msgstr "envoie des caractères dans le presse-papier"
 
-#: Programs/cmds.auto.h:1033
+#. xgettext: This is the description of the CLIP_ADD command.
+#: Programs/cmds.auto.h:1200
 msgid "append to clipboard from character"
 msgstr "ajoute le caractère au presse-papier"
 
@@ -2110,7 +2250,8 @@ msgstr "ajoute le caractère au presse-papier"
 msgid "at cursor"
 msgstr "au curseur"
 
-#: Programs/cmds.auto.h:1301
+#. xgettext: This is the description of the KEY_BACKSPACE command.
+#: Programs/cmds.auto.h:1504
 msgid "backspace key"
 msgstr "Touche retour arrière"
 
@@ -2118,15 +2259,18 @@ msgstr "Touche retour arrière"
 msgid "battery low"
 msgstr "Batterie faible"
 
-#: Programs/cmds.auto.h:1222
+#. xgettext: This is the description of the SELECTVT command.
+#: Programs/cmds.auto.h:1414
 msgid "bind to specific virtual terminal"
 msgstr "Envoie dans un terminal virtuel particulier"
 
-#: Programs/cmds.auto.h:835
+#. xgettext: This is the description of the SELECTVT_NEXT command.
+#: Programs/cmds.auto.h:957
 msgid "bind to the next virtual terminal"
 msgstr "Envoie au terminal virtuel suivant"
 
-#: Programs/cmds.auto.h:829
+#. xgettext: This is the description of the SELECTVT_PREV command.
+#: Programs/cmds.auto.h:950
 msgid "bind to the previous virtual terminal"
 msgstr "Envoie au terminal virtuel précédent"
 
@@ -2135,33 +2279,34 @@ msgstr "Envoie au terminal virtuel précédent"
 msgid "black"
 msgstr "noir"
 
-#: Programs/core.c:1120
+#: Programs/core.c:1125
 msgid "blank line"
 msgstr "ligne vierge"
 
-#: Programs/cmd_utils.c:168
-msgid "blink"
-msgstr "clignotant"
+#: Programs/cmd_utils.c:173
+msgid "blinking"
+msgstr ""
 
 #. B
 #: Programs/cmd_utils.c:145
 msgid "blue"
 msgstr "bleu"
 
-#: Programs/config.c:2853
+#: Programs/config.c:2882
 #, c-format
 msgid "braille device not specified"
 msgstr "Périphérique braille non spécifié"
 
-#: Programs/cmds.auto.h:544
+#. xgettext: This is the description of the OFFLINE command.
+#: Programs/cmds.auto.h:621
 msgid "braille display temporarily unavailable"
 msgstr "Afficheur braille temporairement non disponible"
 
-#: Programs/config.c:1553
+#: Programs/config.c:1552
 msgid "braille driver initialization failed"
 msgstr "Échec de l'initialisation du pilote braille"
 
-#: Programs/config.c:1632
+#: Programs/config.c:1631
 msgid "braille driver not loadable"
 msgstr "Impossible de charger le pilote braille"
 
@@ -2169,7 +2314,7 @@ msgstr "Impossible de charger le pilote braille"
 msgid "braille driver restarting"
 msgstr "le pilote braille redémarre"
 
-#: Programs/cmd_miscellaneous.c:178
+#: Programs/cmd_miscellaneous.c:163
 msgid "braille driver stopped"
 msgstr "pilote braille arrêté"
 
@@ -2177,19 +2322,23 @@ msgstr "pilote braille arrêté"
 msgid "braille released"
 msgstr "braille libéré"
 
-#: Programs/cmds.auto.h:1019
+#. xgettext: This is the description of the ROUTE command.
+#: Programs/cmds.auto.h:1184
 msgid "bring screen cursor to character"
 msgstr "Amener le curseur de l'écran au caractère"
 
-#: Programs/cmds.auto.h:520
+#. xgettext: This is the description of the CSRJMP_VERT command.
+#: Programs/cmds.auto.h:593
 msgid "bring screen cursor to current line"
 msgstr "Amène le curseur de l'écran sur la ligne actuelle"
 
-#: Programs/cmds.auto.h:1193
+#. xgettext: This is the description of the ROUTE_LINE command.
+#: Programs/cmds.auto.h:1381
 msgid "bring screen cursor to line"
 msgstr "amène le curseur de l'écran sur la ligne"
 
-#: Programs/cmds.auto.h:730
+#. xgettext: This is the description of the ROUTE_CURR_LOCN command.
+#: Programs/cmds.auto.h:835
 msgid "bring screen cursor to speech cursor"
 msgstr "Amène le curseur de l'écran au curseur de synthèse"
 
@@ -2214,15 +2363,19 @@ msgstr "ne peut lire le contenu de l'écran"
 msgid "can't read screen header"
 msgstr "ne peut lire l'en-tête de l'écran"
 
+#: Programs/ctb_translate.c:380
+msgid "cannot access internal contraction table"
+msgstr ""
+
 #: Programs/atb_translate.c:70
 msgid "cannot compile attributes table"
 msgstr "Ne peut pas compiler la table des attributs"
 
-#: Programs/ctb_translate.c:365
+#: Programs/ctb_translate.c:374
 msgid "cannot compile contraction table"
 msgstr "Ne peut pas compiler la table de braille abrégé"
 
-#: Programs/config.c:1536
+#: Programs/config.c:1535
 msgid "cannot compile key table"
 msgstr "Ne peut pas compiler la table des touches"
 
@@ -2258,7 +2411,7 @@ msgstr "Ne peut pas créer de répertoire"
 msgid "cannot determine program directory"
 msgstr "Ne peut pas déterminer le répertoire du programme"
 
-#: Programs/config.c:2766 Programs/menu.c:544
+#: Programs/config.c:2766 Programs/menu.c:613
 msgid "cannot determine working directory"
 msgstr "Ne peut pas déterminer le répertoire de travail"
 
@@ -2296,6 +2449,10 @@ msgstr "Ne peut pas ignorer des touches\n"
 msgid "cannot load attributes table"
 msgstr "Ne peut pas charger la table des attributs"
 
+#: Programs/ctb_translate.c:394
+msgid "cannot load contraction table"
+msgstr ""
+
 #: Programs/system_windows.c:54
 msgid "cannot load library"
 msgstr "Ne peut pas charger la bibliothèque"
@@ -2316,11 +2473,11 @@ msgstr "Ne peut pas ouvrir l'aide de la touche"
 msgid "cannot open process identifier file"
 msgstr "Ne peut pas ouvrir le fichier d'identifiants de processus"
 
-#: Programs/menu.c:542
+#: Programs/menu.c:611
 msgid "cannot open working directory"
 msgstr "Ne peut pas ouvrir le répertoire de travail"
 
-#: Programs/prefs.c:350
+#: Programs/prefs.c:363
 msgid "cannot read preferences file"
 msgstr "Ne peut pas lire le fichier des préférences"
 
@@ -2329,21 +2486,21 @@ msgstr "Ne peut pas lire le fichier des préférences"
 msgid "cannot set focus to %#010x\n"
 msgstr "Ne peut pas paramétrer le focus sur %#010x\n"
 
-#: Programs/file.c:511 Programs/menu.c:531
+#: Programs/file.c:511 Programs/menu.c:600
 msgid "cannot set working directory"
 msgstr "Ne peut pas paramétrer le répertoire de travail"
 
-#: Programs/prefs.c:540
+#: Programs/prefs.c:576
 msgid "cannot write to preferences file"
 msgstr "Ne peut pas écrire dans le fichier des préférences"
 
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
-#: Programs/core.c:1065
+#: Programs/core.c:1070
 msgid "cap"
 msgstr "Verr.maj"
 
-#: Programs/menu_prefs.c:775 Programs/menu_prefs.c:1234
+#: Programs/menu_prefs.c:886 Programs/menu_prefs.c:1349
 msgid "cells"
 msgstr "cellules"
 
@@ -2351,15 +2508,17 @@ msgstr "cellules"
 msgid "changes discarded"
 msgstr "Changements annulés"
 
-#: Programs/cmds.auto.h:775
+#. xgettext: This is the description of the UNSTICK command.
+#: Programs/cmds.auto.h:887
 msgid "clear all sticky input modifiers"
 msgstr "Vider les modificateurs d'entrée polluants"
 
-#: Programs/cmds.auto.h:889
+#. xgettext: This is the description of the TXTSEL_CLEAR command.
+#: Programs/cmds.auto.h:1019
 msgid "clear the text selection"
 msgstr "réinitialiser la sélection de texxte"
 
-#: Programs/cmd_speech.c:475
+#: Programs/cmd_speech.c:495
 msgid "column"
 msgstr "colonne"
 
@@ -2376,43 +2535,51 @@ msgstr "Ligne de configuration spécifiée plus d'une fois"
 msgid "console not in use"
 msgstr "La console n'est pas utilisée"
 
-#: Programs/menu_prefs.c:945
+#: Programs/menu_prefs.c:1056
 msgid "console tone generator"
 msgstr "Générateur de beep de console"
 
-#: Programs/cmds.auto.h:1135
+#. xgettext: This is the description of the CLIP_COPY command.
+#: Programs/cmds.auto.h:1315
 msgid "copy characters to clipboard"
 msgstr "Copie les caractères dans le presse-papier"
 
-#: Programs/cmds.auto.h:901
+#. xgettext: This is the description of the HOST_COPY command.
+#: Programs/cmds.auto.h:1033
 msgid "copy selected text to host clipboard"
 msgstr "copie le texte sélectionné vers le presse-papier hôte"
 
-#: Programs/config.c:644 Programs/menu_prefs.c:503
+#: Programs/config.c:640
 msgid "csecs"
 msgstr "csecs"
 
-#: Programs/cmds.auto.h:1280
+#. xgettext: This is the description of the TOUCH_AT command.
+#: Programs/cmds.auto.h:1480
 msgid "current reading location"
 msgstr "Emplacement courant de la lecture"
 
-#: Programs/cmds.auto.h:1336
+#. xgettext: This is the description of the KEY_CURSOR_DOWN command.
+#: Programs/cmds.auto.h:1544
 msgid "cursor-down key"
 msgstr "Touche curseur vers le bas"
 
-#: Programs/cmds.auto.h:1315
+#. xgettext: This is the description of the KEY_CURSOR_LEFT command.
+#: Programs/cmds.auto.h:1520
 msgid "cursor-left key"
 msgstr "Touche curseur à gauche"
 
-#: Programs/cmds.auto.h:1322
+#. xgettext: This is the description of the KEY_CURSOR_RIGHT command.
+#: Programs/cmds.auto.h:1528
 msgid "cursor-right key"
 msgstr "Touche curseur à droite"
 
-#: Programs/cmds.auto.h:1329
+#. xgettext: This is the description of the KEY_CURSOR_UP command.
+#: Programs/cmds.auto.h:1536
 msgid "cursor-up key"
 msgstr "Touche curseur vers le haut"
 
-#: Programs/cmds.auto.h:907
+#. xgettext: This is the description of the HOST_CUT command.
+#: Programs/cmds.auto.h:1040
 msgid "cut selected text to host clipboard"
 msgstr "coupe le texte sélectionné vers le presse-papier hôte"
 
@@ -2421,27 +2588,33 @@ msgstr "coupe le texte sélectionné vers le presse-papier hôte"
 msgid "cyan"
 msgstr "cyan"
 
-#: Programs/cmds.auto.h:781
+#. xgettext: This is the description of the ALTGR command.
+#: Programs/cmds.auto.h:894
 msgid "cycle the AltGr (Right Alt) sticky input modifier (next, on, off)"
 msgstr "Change le cycle de l'action d'AltGr (Alt Droite) (la prochaine fois, activé, désactivé)"
 
-#: Programs/cmds.auto.h:562
+#. xgettext: This is the description of the CONTROL command.
+#: Programs/cmds.auto.h:642
 msgid "cycle the Control sticky input modifier (next, on, off)"
 msgstr "Change le cycle du modificateur Contrôle (la prochaine fois, activé, désactivé)"
 
-#: Programs/cmds.auto.h:787
+#. xgettext: This is the description of the GUI command.
+#: Programs/cmds.auto.h:901
 msgid "cycle the GUI (Windows) sticky input modifier (next, on, off)"
 msgstr "Change le cycle du modificateur Touche Windows (La prochaine fois, activé, désactivé)"
 
-#: Programs/cmds.auto.h:568
+#. xgettext: This is the description of the META command.
+#: Programs/cmds.auto.h:649
 msgid "cycle the Meta (Left Alt) sticky input modifier (next, on, off)"
 msgstr "Change le cycle du modificateur Meta (Alt Gauche) (La prochaine fois, activé, désactivé)"
 
-#: Programs/cmds.auto.h:550
+#. xgettext: This is the description of the SHIFT command.
+#: Programs/cmds.auto.h:628
 msgid "cycle the Shift sticky input modifier (next, on, off)"
 msgstr "Change le cycle de la touche Majuscule (Shift), (La prochaine fois, activé, désactivé)"
 
-#: Programs/cmds.auto.h:556
+#. xgettext: This is the description of the UPPER command.
+#: Programs/cmds.auto.h:635
 msgid "cycle the Upper sticky input modifier (next, on, off)"
 msgstr "Change le cycle de la touche Verrmaj (Upper), (La prochaine fois, activé, désactivé)"
 
@@ -2450,34 +2623,44 @@ msgstr "Change le cycle de la touche Verrmaj (Upper), (La prochaine fois, activ�
 msgid "dark grey"
 msgstr "gris foncé"
 
-#: Programs/cmds.auto.h:483
+#. xgettext: This is the description of the SAY_LOWER command.
+#: Programs/cmds.auto.h:1168
+msgid "decrease speaking pitch"
+msgstr ""
+
+#. xgettext: This is the description of the SAY_SLOWER command.
+#: Programs/cmds.auto.h:550
 msgid "decrease speaking rate"
 msgstr "Diminuer la vitesse de la parole"
 
-#: Programs/cmds.auto.h:495
+#. xgettext: This is the description of the SAY_SOFTER command.
+#: Programs/cmds.auto.h:564
 msgid "decrease speaking volume"
 msgstr "Diminuer le volume de la parole"
 
-#: Programs/cmds.auto.h:1378
+#. xgettext: This is the description of the KEY_DELETE command.
+#: Programs/cmds.auto.h:1592
 msgid "delete key"
 msgstr "Touche supprimer"
 
-#: Programs/cmds.auto.h:1079
+#. xgettext: This is the description of the DESCCHAR command.
+#: Programs/cmds.auto.h:1252
 msgid "describe character"
 msgstr "Décrire le caractère"
 
-#: Programs/cmds.auto.h:717
+#. xgettext: This is the description of the DESC_CURR_CHAR command.
+#: Programs/cmds.auto.h:820
 msgid "describe current character"
 msgstr "Décrire le caractère actuel"
 
-#: Programs/config.c:625 Programs/config.c:635
+#: Programs/config.c:621 Programs/config.c:631
 msgid "device"
 msgstr "périphérique"
 
 #: Programs/brltest.c:64 Programs/brltest.c:74 Programs/brltty-atb.c:32
 #: Programs/brltty-ctb.c:50 Programs/brltty-ktb.c:69 Programs/brltty-ktb.c:79
-#: Programs/brltty-trtxt.c:47 Programs/config.c:323 Programs/config.c:423
-#: Programs/config.c:433 Programs/config.c:443 Programs/config.c:514
+#: Programs/brltty-trtxt.c:47 Programs/config.c:320 Programs/config.c:420
+#: Programs/config.c:430 Programs/config.c:440 Programs/config.c:511
 msgid "directory"
 msgstr "répertoire"
 
@@ -2485,7 +2668,8 @@ msgstr "répertoire"
 msgid "display"
 msgstr "écran"
 
-#: Programs/cmds.auto.h:4
+#. xgettext: This is the description of the NOOP command.
+#: Programs/cmds.auto.h:5
 msgid "do nothing"
 msgstr "Ne fait rien"
 
@@ -2493,15 +2677,15 @@ msgstr "Ne fait rien"
 msgid "done"
 msgstr "Fait"
 
-#: Programs/menu_prefs.c:577
+#: Programs/menu_prefs.c:666
 msgid "dot 7"
 msgstr "point 7"
 
-#: Programs/menu_prefs.c:578
+#: Programs/menu_prefs.c:667
 msgid "dot 8"
 msgstr "point 8"
 
-#: Programs/menu_prefs.c:575
+#: Programs/menu_prefs.c:664
 msgid "dots 7 and 8"
 msgstr "Points 7 et 8"
 
@@ -2509,35 +2693,42 @@ msgstr "Points 7 et 8"
 msgid "driver request"
 msgstr "Requête du pilote"
 
-#: Programs/config.c:472 Programs/config.c:570 Programs/config.c:605
+#: Programs/config.c:469 Programs/config.c:566 Programs/config.c:601
 msgid "driver,..."
 msgstr "pilote,..."
 
-#: Programs/cmds.auto.h:1364
+#. xgettext: This is the description of the KEY_END command.
+#: Programs/cmds.auto.h:1576
 msgid "end key"
 msgstr "touche fin"
 
-#: Programs/cmds.auto.h:1287
+#. xgettext: This is the description of the KEY_ENTER command.
+#: Programs/cmds.auto.h:1488
 msgid "enter key"
 msgstr "touche entrée"
 
-#: Programs/cmds.auto.h:384
+#. xgettext: This is the description of the LEARN command.
+#: Programs/cmds.auto.h:436
 msgid "enter/leave command learn mode"
 msgstr "entrer/quitter le mode d'apprentissage des commandes"
 
-#: Programs/cmds.auto.h:372
+#. xgettext: This is the description of the HELP command.
+#: Programs/cmds.auto.h:422
 msgid "enter/leave help display"
 msgstr "entrer/quitter l'affichage de l'aide"
 
-#: Programs/cmds.auto.h:390
+#. xgettext: This is the description of the PREFMENU command.
+#: Programs/cmds.auto.h:443
 msgid "enter/leave preferences menu"
 msgstr "entrer/quitter le menu des préférences"
 
-#: Programs/cmds.auto.h:378
+#. xgettext: This is the description of the INFO command.
+#: Programs/cmds.auto.h:429
 msgid "enter/leave status display"
 msgstr "entrer/quitter l'affichage de l'état"
 
-#: Programs/cmds.auto.h:1308
+#. xgettext: This is the description of the KEY_ESCAPE command.
+#: Programs/cmds.auto.h:1512
 msgid "escape key"
 msgstr "Touche Échap"
 
@@ -2545,11 +2736,12 @@ msgstr "Touche Échap"
 msgid "eurobraille"
 msgstr "Eurobraille"
 
-#: Programs/cmd_miscellaneous.c:118
+#. xgettext: This is the term used when the time is exactly on (i.e. zero seconds after) a minute.
+#: Programs/cmd_miscellaneous.c:102
 msgid "exactly"
 msgstr "exactement"
 
-#: Programs/config.c:819
+#: Programs/config.c:815
 msgid "excess argument"
 msgstr "Trop d'arguments"
 
@@ -2573,10 +2765,10 @@ msgstr "Échec de l'exécution de \"%s\" : %s\n"
 msgid "failed to get first focus\n"
 msgstr "échec de la récupération du premier focus\n"
 
-#: Programs/brltty-trtxt.c:56 Programs/brltty-trtxt.c:64 Programs/config.c:380
-#: Programs/config.c:389 Programs/config.c:399 Programs/config.c:525
-#: Programs/config.c:535 Programs/config.c:544 Programs/config.c:553
-#: Programs/config.c:589 Programs/config.c:674
+#: Programs/brltty-trtxt.c:56 Programs/brltty-trtxt.c:64 Programs/config.c:377
+#: Programs/config.c:386 Programs/config.c:396 Programs/config.c:522
+#: Programs/config.c:532 Programs/config.c:540 Programs/config.c:549
+#: Programs/config.c:585 Programs/config.c:670
 msgid "file"
 msgstr "fichier"
 
@@ -2591,227 +2783,283 @@ msgstr "Erreur de traitement du fichier '%s'"
 msgid "fork of \"%s\" failed: %s\n"
 msgstr "Échec du fork de \"%s\" : %s\n"
 
-#: Programs/cmds.auto.h:1386
+#. xgettext: This is the description of the KEY_FUNCTION command.
+#: Programs/cmds.auto.h:1601
 msgid "function key"
 msgstr "Touche de fonction"
 
-#: Programs/cmds.auto.h:240
+#. xgettext: This is the description of the BACK command.
+#: Programs/cmds.auto.h:271
 msgid "go back after cursor tracking"
 msgstr "Revenir après la poursuite du curseur"
 
-#: Programs/cmds.auto.h:939
+#. xgettext: This is the description of the GUI_BACK command.
+#: Programs/cmds.auto.h:1077
 msgid "go back to the previous screen"
 msgstr "retourne à l'écran précédent"
 
-#: Programs/cmds.auto.h:186
+#. xgettext: This is the description of the FWINLT command.
+#: Programs/cmds.auto.h:210
 msgid "go backward one braille window"
 msgstr "Recule d'une fenêtre braille"
 
-#: Programs/cmds.auto.h:202
+#. xgettext: This is the description of the FWINLTSKIP command.
+#: Programs/cmds.auto.h:228
 msgid "go backward skipping blank braille windows"
 msgstr "Recule en sautant les fenêtres braille vides"
 
-#: Programs/cmds.auto.h:843
+#. xgettext: This is the description of the PRNBWIN command.
+#: Programs/cmds.auto.h:966
 msgid "go backward to nearest non-blank braille window"
 msgstr "Recule à la fenêtre braille non vide la plus proche"
 
-#: Programs/cmds.auto.h:20
+#. xgettext: This is the description of the LNDN command.
+#: Programs/cmds.auto.h:23
 msgid "go down one line"
 msgstr "Descendre d'une ligne"
 
-#: Programs/cmds.auto.h:36
+#. xgettext: This is the description of the WINDN command.
+#: Programs/cmds.auto.h:41
 msgid "go down several lines"
 msgstr "Descend de plusieurs lignes"
 
-#: Programs/cmds.auto.h:118
+#. xgettext: This is the description of the NXPGRPH command.
+#: Programs/cmds.auto.h:133
 msgid "go down to first line of next paragraph"
 msgstr "Descend à la première ligne du paragraphe suivant"
 
-#: Programs/cmds.auto.h:418
+#. xgettext: This is the description of the MENU_LAST_ITEM command.
+#: Programs/cmds.auto.h:475
 msgid "go down to last item"
 msgstr "Descend au dernier élément"
 
-#: Programs/cmds.auto.h:1128
+#. xgettext: This is the description of the NXDIFCHAR command.
+#: Programs/cmds.auto.h:1307
 msgid "go down to nearest line with different character"
 msgstr "Descend à la ligne la plus proche ayant un caractère différent"
 
-#: Programs/cmds.auto.h:52
+#. xgettext: This is the description of the NXDIFLN command.
+#: Programs/cmds.auto.h:59
 msgid "go down to nearest line with different content"
 msgstr "Descend à la ligne la plus proche ayant un contenu différent"
 
-#: Programs/cmds.auto.h:68
+#. xgettext: This is the description of the ATTRDN command.
+#: Programs/cmds.auto.h:77
 msgid "go down to nearest line with different highlighting"
 msgstr "Descend à la ligne la plus proche ayant un surlignement différent"
 
-#: Programs/cmds.auto.h:1072
+#. xgettext: This is the description of the NXINDENT command.
+#: Programs/cmds.auto.h:1244
 msgid "go down to nearest line with less indent than character"
 msgstr "Descend à la ligne la plus proche ayant moins d'indentation que de caractère"
 
-#: Programs/cmds.auto.h:134
+#. xgettext: This is the description of the NXPROMPT command.
+#: Programs/cmds.auto.h:151
 msgid "go down to next command prompt"
 msgstr "Descend à l'invite de commande suivant"
 
-#: Programs/cmds.auto.h:434
+#. xgettext: This is the description of the MENU_NEXT_ITEM command.
+#: Programs/cmds.auto.h:493
 msgid "go down to next item"
 msgstr "Descend à l'élément suivant"
 
-#: Programs/cmds.auto.h:194
+#. xgettext: This is the description of the FWINRT command.
+#: Programs/cmds.auto.h:219
 msgid "go forward one braille window"
 msgstr "Avance d'une fenêtre braille"
 
-#: Programs/cmds.auto.h:210
+#. xgettext: This is the description of the FWINRTSKIP command.
+#: Programs/cmds.auto.h:237
 msgid "go forward skipping blank braille windows"
 msgstr "Avance en sautant les fenêtres braille vides"
 
-#: Programs/cmds.auto.h:851
+#. xgettext: This is the description of the NXNBWIN command.
+#: Programs/cmds.auto.h:975
 msgid "go forward to nearest non-blank braille window"
 msgstr "Va à la prochaine fenêtre braille non vide"
 
-#: Programs/cmds.auto.h:170
+#. xgettext: This is the description of the HWINLT command.
+#: Programs/cmds.auto.h:192
 msgid "go left half a braille window"
 msgstr "Va d'une demi-fenêtre braille à gauche"
 
-#: Programs/cmds.auto.h:154
+#. xgettext: This is the description of the CHRLT command.
+#: Programs/cmds.auto.h:174
 msgid "go left one character"
 msgstr "Va au caractère à gauche"
 
-#: Programs/cmds.auto.h:178
+#. xgettext: This is the description of the HWINRT command.
+#: Programs/cmds.auto.h:201
 msgid "go right half a braille window"
 msgstr "Va d'une demi-fenêtre braille à droite"
 
-#: Programs/cmds.auto.h:162
+#. xgettext: This is the description of the CHRRT command.
+#: Programs/cmds.auto.h:183
 msgid "go right one character"
 msgstr "Va à droite d'un caractère"
 
-#: Programs/cmds.auto.h:690
+#. xgettext: This is the description of the SPEAK_FRST_CHAR command.
+#: Programs/cmds.auto.h:789
 msgid "go to and speak first non-blank character on line"
 msgstr "Aller et lire le premier caractère non-vide de la ligne"
 
-#: Programs/cmds.auto.h:704
+#. xgettext: This is the description of the SPEAK_FRST_LINE command.
+#: Programs/cmds.auto.h:805
 msgid "go to and speak first non-blank line on screen"
 msgstr "Aller et lire la première ligne non-vide de l'écran"
 
-#: Programs/cmds.auto.h:697
+#. xgettext: This is the description of the SPEAK_LAST_CHAR command.
+#: Programs/cmds.auto.h:797
 msgid "go to and speak last non-blank character on line"
 msgstr "Aller et lire le dernier caractère non-vide de la ligne"
 
-#: Programs/cmds.auto.h:711
+#. xgettext: This is the description of the SPEAK_LAST_LINE command.
+#: Programs/cmds.auto.h:813
 msgid "go to and speak last non-blank line on screen"
 msgstr "Aller et lire la dernière ligne non-vide de l'écran"
 
-#: Programs/cmds.auto.h:643
+#. xgettext: This is the description of the SPEAK_NEXT_CHAR command.
+#: Programs/cmds.auto.h:735
 msgid "go to and speak next character"
 msgstr "Va et lit le caractère suivant"
 
-#: Programs/cmds.auto.h:683
+#. xgettext: This is the description of the SPEAK_NEXT_LINE command.
+#: Programs/cmds.auto.h:781
 msgid "go to and speak next line"
 msgstr "Va et lit la ligne suivante"
 
-#: Programs/cmds.auto.h:663
+#. xgettext: This is the description of the SPEAK_NEXT_WORD command.
+#: Programs/cmds.auto.h:758
 msgid "go to and speak next word"
 msgstr "Aller et lire le mot suivant"
 
-#: Programs/cmds.auto.h:636
+#. xgettext: This is the description of the SPEAK_PREV_CHAR command.
+#: Programs/cmds.auto.h:727
 msgid "go to and speak previous character"
 msgstr "Va et lit le caractère précédent"
 
-#: Programs/cmds.auto.h:676
+#. xgettext: This is the description of the SPEAK_PREV_LINE command.
+#: Programs/cmds.auto.h:773
 msgid "go to and speak previous line"
 msgstr "Va et lit la ligne précédente"
 
-#: Programs/cmds.auto.h:656
+#. xgettext: This is the description of the SPEAK_PREV_WORD command.
+#: Programs/cmds.auto.h:750
 msgid "go to and speak previous word"
 msgstr "Va et lit le mot précédent"
 
-#: Programs/cmds.auto.h:102
+#. xgettext: This is the description of the BOT_LEFT command.
+#: Programs/cmds.auto.h:115
 msgid "go to beginning of bottom line"
 msgstr "Va au début de la toute dernière ligne"
 
-#: Programs/cmds.auto.h:218
+#. xgettext: This is the description of the LNBEG command.
+#: Programs/cmds.auto.h:246
 msgid "go to beginning of line"
 msgstr "Va au début de la ligne"
 
-#: Programs/cmds.auto.h:93
+#. xgettext: This is the description of the TOP_LEFT command.
+#: Programs/cmds.auto.h:105
 msgid "go to beginning of top line"
 msgstr "Va au début de la toute première ligne"
 
-#: Programs/cmds.auto.h:84
+#. xgettext: This is the description of the BOT command.
+#: Programs/cmds.auto.h:95
 msgid "go to bottom line"
 msgstr "Va à la toute dernière ligne"
 
-#: Programs/cmds.auto.h:459
+#. xgettext: This is the description of the SPKHOME command.
+#: Programs/cmds.auto.h:522
 msgid "go to current speaking position"
 msgstr "Va à la position actuelle de la synthèse vocale"
 
-#: Programs/cmds.auto.h:226
+#. xgettext: This is the description of the LNEND command.
+#: Programs/cmds.auto.h:255
 msgid "go to end of line"
 msgstr "Va à la fin de la ligne"
 
-#: Programs/cmds.auto.h:581
+#. xgettext: This is the description of the MENU_PREV_LEVEL command.
+#: Programs/cmds.auto.h:664
 msgid "go to previous menu level"
 msgstr "Va au niveau de menu précédent"
 
-#: Programs/cmds.auto.h:1101
+#. xgettext: This is the description of the GOTOMARK command.
+#: Programs/cmds.auto.h:1277
 msgid "go to remembered braille window position"
 msgstr "Va à la position de la fenêtre braille dont on se rappelle"
 
-#: Programs/cmds.auto.h:233
+#. xgettext: This is the description of the HOME command.
+#: Programs/cmds.auto.h:263
 msgid "go to screen cursor"
 msgstr "Va au curseur de l'écran"
 
-#: Programs/cmds.auto.h:247
+#. xgettext: This is the description of the RETURN command.
+#: Programs/cmds.auto.h:279
 msgid "go to screen cursor or go back after cursor tracking"
 msgstr "Va au curseur de l'écran ou revient d'une poursuite du curseur"
 
-#: Programs/cmds.auto.h:1110
+#. xgettext: This is the description of the GOTOLINE command.
+#: Programs/cmds.auto.h:1287
 msgid "go to selected line"
 msgstr "Va à la ligne sélectionnée"
 
-#: Programs/cmds.auto.h:932
+#. xgettext: This is the description of the GUI_HOME command.
+#: Programs/cmds.auto.h:1069
 msgid "go to the home screen"
 msgstr "va à l'écran d'accueil"
 
-#: Programs/cmds.auto.h:76
+#. xgettext: This is the description of the TOP command.
+#: Programs/cmds.auto.h:86
 msgid "go to top line"
 msgstr "Va à la toute première ligne"
 
-#: Programs/cmds.auto.h:12
+#. xgettext: This is the description of the LNUP command.
+#: Programs/cmds.auto.h:14
 msgid "go up one line"
 msgstr "Remonte d'une ligne"
 
-#: Programs/cmds.auto.h:28
+#. xgettext: This is the description of the WINUP command.
+#: Programs/cmds.auto.h:32
 msgid "go up several lines"
 msgstr "Remonte de plusieurs ligne"
 
-#: Programs/cmds.auto.h:410
+#. xgettext: This is the description of the MENU_FIRST_ITEM command.
+#: Programs/cmds.auto.h:466
 msgid "go up to first item"
 msgstr "Remonte au premier élément"
 
-#: Programs/cmds.auto.h:110
+#. xgettext: This is the description of the PRPGRPH command.
+#: Programs/cmds.auto.h:124
 msgid "go up to first line of paragraph"
 msgstr "Monte à la première ligne du paragraphe"
 
-#: Programs/cmds.auto.h:1119
+#. xgettext: This is the description of the PRDIFCHAR command.
+#: Programs/cmds.auto.h:1297
 msgid "go up to nearest line with different character"
 msgstr "Remonte à la ligne la plus proche ayant un caractère différent"
 
-#: Programs/cmds.auto.h:44
+#. xgettext: This is the description of the PRDIFLN command.
+#: Programs/cmds.auto.h:50
 msgid "go up to nearest line with different content"
 msgstr "Remonte à la ligne la plus proche ayant un contenu différent"
 
-#: Programs/cmds.auto.h:60
+#. xgettext: This is the description of the ATTRUP command.
+#: Programs/cmds.auto.h:68
 msgid "go up to nearest line with different highlighting"
 msgstr "Remonte à la ligne la plus proche ayant un surlignement différent"
 
-#: Programs/cmds.auto.h:1063
+#. xgettext: This is the description of the PRINDENT command.
+#: Programs/cmds.auto.h:1234
 msgid "go up to nearest line with less indent than character"
 msgstr "Remonte à la ligne la plus proche ayant moins d'indentation que de caractère"
 
-#: Programs/cmds.auto.h:126
+#. xgettext: This is the description of the PRPROMPT command.
+#: Programs/cmds.auto.h:142
 msgid "go up to previous command prompt"
 msgstr "Remonte à l'invite de commande précédent"
 
-#: Programs/cmds.auto.h:426
+#. xgettext: This is the description of the MENU_PREV_ITEM command.
+#: Programs/cmds.auto.h:484
 msgid "go up to previous item"
 msgstr "Remonte à l'élément précédent"
 
@@ -2824,7 +3072,7 @@ msgstr "vert"
 msgid "group permissions added"
 msgstr "permissions de groupe ajoutées"
 
-#: Programs/cmd_miscellaneous.c:228
+#: Programs/cmd_miscellaneous.c:213
 msgid "help not available"
 msgstr "Aide non disponible"
 
@@ -2832,11 +3080,12 @@ msgstr "Aide non disponible"
 msgid "help screen not readable"
 msgstr "Écran d'aide illisible"
 
-#: Programs/cmds.auto.h:1357
+#. xgettext: This is the description of the KEY_HOME command.
+#: Programs/cmds.auto.h:1568
 msgid "home key"
 msgstr "Touche origine"
 
-#: Programs/config.c:493
+#: Programs/config.c:490
 msgid "identifier,..."
 msgstr "identifiant,..."
 
@@ -2844,31 +3093,42 @@ msgstr "identifiant,..."
 msgid "idle timeout"
 msgstr "Délai d'inactivité"
 
-#: Programs/cmds.auto.h:489
+#. xgettext: This is the description of the SAY_HIGHER command.
+#: Programs/cmds.auto.h:1175
+msgid "increase speaking pitch"
+msgstr ""
+
+#. xgettext: This is the description of the SAY_FASTER command.
+#: Programs/cmds.auto.h:557
 msgid "increase speaking rate"
 msgstr "Augmente le débit de la parole"
 
-#: Programs/cmds.auto.h:501
+#. xgettext: This is the description of the SAY_LOUDER command.
+#: Programs/cmds.auto.h:571
 msgid "increase speaking volume"
 msgstr "Augmente le volume de la parole"
 
-#: Programs/core.c:1123
+#: Programs/core.c:1128
 msgid "indent"
 msgstr "indentation"
 
-#: Programs/cmds.auto.h:1149
+#. xgettext: This is the description of the PASTE_HISTORY command.
+#: Programs/cmds.auto.h:1331
 msgid "insert clipboard history entry after screen cursor"
 msgstr "Insère l'entrée de l'historique du presse-papiers après le curseur de l'écran"
 
-#: Programs/cmds.auto.h:526
+#. xgettext: This is the description of the PASTE command.
+#: Programs/cmds.auto.h:600
 msgid "insert clipboard text after screen cursor"
 msgstr "insère le texte du presse-papier après le curseur de l'écran"
 
-#: Programs/cmds.auto.h:913
+#. xgettext: This is the description of the HOST_PASTE command.
+#: Programs/cmds.auto.h:1047
 msgid "insert host clipboard text after screen cursor"
 msgstr "insère le texte du presse-papier hôte après le curseur de l'écran"
 
-#: Programs/cmds.auto.h:1371
+#. xgettext: This is the description of the KEY_INSERT command.
+#: Programs/cmds.auto.h:1584
 msgid "insert key"
 msgstr "touche Insère"
 
@@ -2897,7 +3157,7 @@ msgstr "Délai d'apparition du message non valide"
 msgid "invalid operand"
 msgstr "opérande invalide"
 
-#: Programs/brlapi_server.c:4413
+#: Programs/brlapi_server.c:4420
 msgid "invalid thread stack size"
 msgstr "Taille de la pile du thread invalide"
 
@@ -2940,19 +3200,16 @@ msgstr "magenta clair"
 msgid "light red"
 msgstr "rouge clair"
 
-#: Programs/cmd_speech.c:474
+#: Programs/cmd_speech.c:494
 msgid "line"
 msgstr "ligne"
 
-#: Programs/cmds.auto.h:1047
+#. xgettext: This is the description of the COPY_LINE command.
+#: Programs/cmds.auto.h:1216
 msgid "linear copy to character"
 msgstr "copie linéaire jusqu'au caractère"
 
-#: Programs/msgtest.c:85
-msgid "list all of the translations (the default)"
-msgstr "liste toutes les traductions (action par défaut)"
-
-#: Programs/config.c:665
+#: Programs/config.c:661
 msgid "lvl|cat,..."
 msgstr "lvl|cat,..."
 
@@ -2978,29 +3235,33 @@ msgstr "Qualifieur du paramètre manquant"
 msgid "missing parameter value"
 msgstr "Valeur du paramètre manquante"
 
-#: Programs/cmds.auto.h:993
+#. xgettext: This is the description of the GUI_ITEM_FRST command.
+#: Programs/cmds.auto.h:1140
 msgid "move to the first item in the screen area"
 msgstr "va au premier élément de la zone de l'écran"
 
-#: Programs/cmds.auto.h:1011
+#. xgettext: This is the description of the GUI_ITEM_LAST command.
+#: Programs/cmds.auto.h:1161
 msgid "move to the last item in the screen area"
 msgstr "va au dernier élément de la zone de l'écran"
 
-#: Programs/cmds.auto.h:1005
+#. xgettext: This is the description of the GUI_ITEM_NEXT command.
+#: Programs/cmds.auto.h:1154
 msgid "move to the next item in the screen area"
 msgstr "va au prochain élément de la zone de l'écran"
 
-#: Programs/cmds.auto.h:999
+#. xgettext: This is the description of the GUI_ITEM_PREV command.
+#: Programs/cmds.auto.h:1147
 msgid "move to the previous item in the screen area"
 msgstr "va à l'élément précédent de la zone de l'écran"
 
-#: Programs/msgtest.c:59
+#: Programs/msgtest.c:57
 msgid "name"
 msgstr "nom"
 
-#: Programs/config.c:356 Programs/config.c:408 Programs/config.c:461
-#: Programs/config.c:483 Programs/config.c:561 Programs/config.c:580
-#: Programs/config.c:615
+#: Programs/config.c:353 Programs/config.c:405 Programs/config.c:458
+#: Programs/config.c:480 Programs/config.c:557 Programs/config.c:576
+#: Programs/config.c:611
 msgid "name=value,..."
 msgstr "nom=valeur,..."
 
@@ -3016,11 +3277,11 @@ msgstr "Pas de raccourci clavier"
 msgid "no screen"
 msgstr "pas d'écran"
 
-#: Programs/config.c:717
+#: Programs/config.c:713
 msgid "none"
 msgstr "Aucun"
 
-#: Programs/config.c:1353
+#: Programs/config.c:1352
 msgid "not saved"
 msgstr "Non enregistré"
 
@@ -3028,27 +3289,33 @@ msgstr "Non enregistré"
 msgid "not switching to an unprivileged user"
 msgstr "ne passe pas à un utilisateur non privilégié"
 
-#: Programs/cmds.auto.h:969
+#. xgettext: This is the description of the GUI_APP_ALERTS command.
+#: Programs/cmds.auto.h:1112
 msgid "open the application alerts window"
 msgstr "ouvre la fenêtre des alertes de l'application"
 
-#: Programs/cmds.auto.h:957
+#. xgettext: This is the description of the GUI_APP_LIST command.
+#: Programs/cmds.auto.h:1098
 msgid "open the application list window"
 msgstr "ouvre la fenêtre de liste des applications"
 
-#: Programs/cmds.auto.h:963
+#. xgettext: This is the description of the GUI_APP_MENU command.
+#: Programs/cmds.auto.h:1105
 msgid "open the application-specific menu"
 msgstr "ouvre le menu spécifique à l'application"
 
-#: Programs/cmds.auto.h:925
+#. xgettext: This is the description of the GUI_BRL_ACTIONS command.
+#: Programs/cmds.auto.h:1061
 msgid "open the braille actions window"
 msgstr "ouvre la fenêtre des actions brailles"
 
-#: Programs/cmds.auto.h:951
+#. xgettext: This is the description of the GUI_DEV_OPTIONS command.
+#: Programs/cmds.auto.h:1091
 msgid "open the device options window"
 msgstr "ouvre la fenêtre des options de l'appareil"
 
-#: Programs/cmds.auto.h:945
+#. xgettext: This is the description of the GUI_DEV_SETTINGS command.
+#: Programs/cmds.auto.h:1084
 msgid "open the device settings window"
 msgstr "ouvre la fenêtre des réglages de l'appareil"
 
@@ -3060,21 +3327,19 @@ msgstr "option"
 msgid "ownership claimed"
 msgstr "propriété obtenue"
 
-#: Programs/cmds.auto.h:1350
+#. xgettext: This is the description of the KEY_PAGE_DOWN command.
+#: Programs/cmds.auto.h:1560
 msgid "page-down key"
 msgstr "Touche page suivante"
 
-#: Programs/cmds.auto.h:1343
+#. xgettext: This is the description of the KEY_PAGE_UP command.
+#: Programs/cmds.auto.h:1552
 msgid "page-up key"
 msgstr "touche page précédente"
 
-#: Programs/msgtest.c:44
+#: Programs/msgtest.c:42
 msgid "path"
 msgstr "chemin"
-
-#: Programs/menu_prefs.c:509
-msgid "percentage"
-msgstr "Pourcentage"
 
 #: Programs/config.c:2651
 msgid "pid file not specified"
@@ -3084,11 +3349,12 @@ msgstr "Fichier pid non spécifié"
 msgid "pid file open error"
 msgstr "Erreur à l'ouverture du fichier pid"
 
-#: Programs/spk.c:200
+#: Programs/spk.c:232
 msgid "pitch"
 msgstr "Ton"
 
-#: Programs/cmds.auto.h:1086
+#. xgettext: This is the description of the SETLEFT command.
+#: Programs/cmds.auto.h:1260
 msgid "place left end of braille window at character"
 msgstr "met le coin gauche de la fenêtre braille sur le caractère"
 
@@ -3096,11 +3362,12 @@ msgstr "met le coin gauche de la fenêtre braille sur le caractère"
 msgid "power switch"
 msgstr "Changement d'état d'alimentation"
 
-#: Programs/spk.c:186
+#: Programs/spk.c:206
 msgid "rate"
 msgstr "Débit"
 
-#: Programs/cmds.auto.h:1040
+#. xgettext: This is the description of the COPY_RECT command.
+#: Programs/cmds.auto.h:1208
 msgid "rectangular copy to character"
 msgstr "copie rectangulaire jusqu'au caractère"
 
@@ -3109,15 +3376,17 @@ msgstr "copie rectangulaire jusqu'au caractère"
 msgid "red"
 msgstr "rouge"
 
-#: Programs/cmds.auto.h:877
+#. xgettext: This is the description of the REFRESH command.
+#: Programs/cmds.auto.h:1005
 msgid "refresh braille display"
 msgstr "rafraîchit l'afficheur braille"
 
-#: Programs/cmds.auto.h:1201
+#. xgettext: This is the description of the REFRESH_LINE command.
+#: Programs/cmds.auto.h:1390
 msgid "refresh braille line"
 msgstr "rafraîchit la ligne braille"
 
-#: Programs/config.c:415
+#: Programs/config.c:412
 msgid "regexp,..."
 msgstr "regexp,..."
 
@@ -3136,11 +3405,13 @@ msgstr "Réinitialisation du pilote de l'écran"
 msgid "reinitializing speech driver"
 msgstr "Réinitialisation de la synthèse vocale"
 
-#: Programs/cmds.auto.h:1093
+#. xgettext: This is the description of the SETMARK command.
+#: Programs/cmds.auto.h:1268
 msgid "remember current braille window position"
 msgstr "Mémorise la position actuelle de la fenêtre braille"
 
-#: Programs/cmds.auto.h:1229
+#. xgettext: This is the description of the ALERT command.
+#: Programs/cmds.auto.h:1422
 msgid "render an alert"
 msgstr "Émettre une alerte"
 
@@ -3151,31 +3422,38 @@ msgstr "Émettre une alerte"
 msgid "repeat count"
 msgstr "Répétition du comptage"
 
-#: Programs/cmds.auto.h:532
+#. xgettext: This is the description of the RESTARTBRL command.
+#: Programs/cmds.auto.h:607
 msgid "restart braille driver"
 msgstr "Redémarre le pilote braille"
 
-#: Programs/cmds.auto.h:538
+#. xgettext: This is the description of the RESTARTSPEECH command.
+#: Programs/cmds.auto.h:614
 msgid "restart speech driver"
 msgstr "Redémarre le pilote de synthèse vocale"
 
-#: Programs/cmds.auto.h:755
+#. xgettext: This is the description of the CLIP_RESTORE command.
+#: Programs/cmds.auto.h:864
 msgid "restore clipboard from disk"
 msgstr "Restaure le presse-papier à partir du disque"
 
-#: Programs/cmds.auto.h:402
+#. xgettext: This is the description of the PREFLOAD command.
+#: Programs/cmds.auto.h:457
 msgid "restore preferences from disk"
 msgstr "Restaure les préférences à partir du disque"
 
-#: Programs/cmds.auto.h:975
+#. xgettext: This is the description of the GUI_AREA_ACTV command.
+#: Programs/cmds.auto.h:1119
 msgid "return to the active screen area"
 msgstr "retourne à la zone active de l'écran"
 
-#: Programs/cmds.auto.h:749
+#. xgettext: This is the description of the CLIP_SAVE command.
+#: Programs/cmds.auto.h:857
 msgid "save clipboard to disk"
 msgstr "Enregistre le presse-papier sur le disque"
 
-#: Programs/cmds.auto.h:396
+#. xgettext: This is the description of the PREFSAVE command.
+#: Programs/cmds.auto.h:450
 msgid "save preferences to disk"
 msgstr "Enregistre les préférences sur le disque"
 
@@ -3191,7 +3469,7 @@ msgstr "Pilote d'écran non chargeable"
 msgid "screen driver restarting"
 msgstr "le pilote de l'écran redémarre"
 
-#: Programs/cmd_miscellaneous.c:186
+#: Programs/cmd_miscellaneous.c:171
 msgid "screen driver stopped"
 msgstr "pilote de l'écran arrêté"
 
@@ -3203,229 +3481,269 @@ msgstr "écran verrouillé"
 msgid "screen not in text mode"
 msgstr "L'écran n'est pas en mode texte"
 
-#: Programs/cmds.auto.h:140
+#. xgettext: This is the description of the PRSEARCH command.
+#: Programs/cmds.auto.h:158
 msgid "search backward for clipboard text"
 msgstr "Recherche en arrière du texte dans le presse papier"
 
-#: Programs/cmds.auto.h:146
+#. xgettext: This is the description of the NXSEARCH command.
+#: Programs/cmds.auto.h:165
 msgid "search forward for clipboard text"
 msgstr "Recherche en avant du texte dans le presse papier"
 
-#: Programs/cmd_miscellaneous.c:122
-msgid "second"
-msgid_plural "seconds"
-msgstr[0] "seconde"
-msgstr[1] "secondes"
+#: Programs/menu.c:464
+msgid "seconds"
+msgstr ""
 
-#: Programs/cmds.auto.h:895
+#. xgettext: This is the description of the TXTSEL_ALL command.
+#: Programs/cmds.auto.h:1026
 msgid "select all of the text"
 msgstr "sélectionne tout le texte"
 
-#: Programs/cmds.auto.h:446
+#. xgettext: This is the description of the MENU_NEXT_SETTING command.
+#: Programs/cmds.auto.h:507
 msgid "select next choice"
 msgstr "Sélection du choix suivant"
 
-#: Programs/cmds.auto.h:440
+#. xgettext: This is the description of the MENU_PREV_SETTING command.
+#: Programs/cmds.auto.h:500
 msgid "select previous choice"
 msgstr "Sélection du choix précédent"
 
-#: Programs/cmds.auto.h:352
+#. xgettext: This is the description of the TUNES command.
+#: Programs/cmds.auto.h:399
 msgid "set alert tunes on/off"
 msgstr "Active ou désactive les sons d'avertissement"
 
-#: Programs/cmds.auto.h:338
+#. xgettext: This is the description of the ATTRBLINK command.
+#: Programs/cmds.auto.h:383
 msgid "set attribute blinking on/off"
 msgstr "Active ou désactive le clignottement des attributs"
 
-#: Programs/cmds.auto.h:331
+#. xgettext: This is the description of the ATTRVIS command.
+#: Programs/cmds.auto.h:375
 msgid "set attribute underlining on/off"
 msgstr "Active ou désactive le soulignement des attributs"
 
-#: Programs/cmds.auto.h:1163
+#. xgettext: This is the description of the SET_ATTRIBUTES_TABLE command.
+#: Programs/cmds.auto.h:1347
 msgid "set attributes table"
 msgstr "Définit la table des attributs"
 
-#: Programs/cmds.auto.h:359
+#. xgettext: This is the description of the AUTOREPEAT command.
+#: Programs/cmds.auto.h:407
 msgid "set autorepeat on/off"
 msgstr "Active ou désactive la répétition automatique"
 
-#: Programs/cmds.auto.h:623
+#. xgettext: This is the description of the ASPK_CMP_WORDS command.
+#: Programs/cmds.auto.h:712
 msgid "set autospeak completed words on/off"
 msgstr "Activer/désactiver la diction automatique des mots complétés"
 
-#: Programs/cmds.auto.h:609
+#. xgettext: This is the description of the ASPK_DEL_CHARS command.
+#: Programs/cmds.auto.h:696
 msgid "set autospeak deleted characters on/off"
 msgstr "Activer/désactiver la diction automatique des mots effacés"
 
-#: Programs/cmds.auto.h:871
+#. xgettext: This is the description of the ASPK_INDENT command.
+#: Programs/cmds.auto.h:998
 msgid "set autospeak indent of current line on/off"
 msgstr "active/désactive l'énonciation automatique de l'indentation de la ligne courante"
 
-#: Programs/cmds.auto.h:602
+#. xgettext: This is the description of the ASPK_INS_CHARS command.
+#: Programs/cmds.auto.h:688
 msgid "set autospeak inserted characters on/off"
 msgstr "Activer/désactiver la diction automatique des caractères insérés"
 
-#: Programs/cmds.auto.h:366
+#. xgettext: This is the description of the AUTOSPEAK command.
+#: Programs/cmds.auto.h:415
 msgid "set autospeak on/off"
 msgstr "Active ou désactive la parle automatique"
 
-#: Programs/cmds.auto.h:616
+#. xgettext: This is the description of the ASPK_REP_CHARS command.
+#: Programs/cmds.auto.h:704
 msgid "set autospeak replaced characters on/off"
 msgstr "Active ou désactive la diction automatique des caractères remplacés"
 
-#: Programs/cmds.auto.h:595
+#. xgettext: This is the description of the ASPK_SEL_CHAR command.
+#: Programs/cmds.auto.h:680
 msgid "set autospeak selected character on/off"
 msgstr "Activer/désactiver la diction automatique du caractère sélectionné"
 
-#: Programs/cmds.auto.h:588
+#. xgettext: This is the description of the ASPK_SEL_LINE command.
+#: Programs/cmds.auto.h:672
 msgid "set autospeak selected line on/off"
 msgstr "Activer/désactiver la diction automatique de la ligne sélectionnée"
 
-#: Programs/cmds.auto.h:769
+#. xgettext: This is the description of the BRLKBD command.
+#: Programs/cmds.auto.h:880
 msgid "set braille keyboard enabled/disabled"
 msgstr "Active ou désactive le clavier braille"
 
-#: Programs/cmds.auto.h:762
+#. xgettext: This is the description of the BRLUCDOTS command.
+#: Programs/cmds.auto.h:872
 msgid "set braille typing mode dots/text"
 msgstr "définit le mode de saisie braille à texte/points"
 
-#: Programs/cmds.auto.h:345
+#. xgettext: This is the description of the CAPBLINK command.
+#: Programs/cmds.auto.h:391
 msgid "set capital letter blinking on/off"
 msgstr "Active ou désactive le clignottement des lettres majuscules"
 
-#: Programs/cmds.auto.h:1170
+#. xgettext: This is the description of the SET_CONTRACTION_TABLE command.
+#: Programs/cmds.auto.h:1355
 msgid "set contraction table"
 msgstr "Définit la table de braille abrégé"
 
-#: Programs/cmds.auto.h:261
+#. xgettext: This is the description of the DISPMD command.
+#: Programs/cmds.auto.h:295
 msgid "set display mode attributes/text"
 msgstr "Bascule l'affichage entre les modes attributs-texte"
 
-#: Programs/cmds.auto.h:303
+#. xgettext: This is the description of the CSRHIDE command.
+#: Programs/cmds.auto.h:343
 msgid "set hidden screen cursor on/off"
 msgstr "Cache ou fait apparaître le curseur de l'écran"
 
-#: Programs/cmds.auto.h:1177
+#. xgettext: This is the description of the SET_KEYBOARD_TABLE command.
+#: Programs/cmds.auto.h:1363
 msgid "set keyboard table"
 msgstr "Définit la table de touches"
 
-#: Programs/cmds.auto.h:1184
+#. xgettext: This is the description of the SET_LANGUAGE_PROFILE command.
+#: Programs/cmds.auto.h:1371
 msgid "set language profile"
 msgstr "Définir le profil de la langue"
 
-#: Programs/cmds.auto.h:324
+#. xgettext: This is the description of the CSRBLINK command.
+#: Programs/cmds.auto.h:367
 msgid "set screen cursor blinking on/off"
 msgstr "Active ou désactive le clignotement du curseur de l'écran"
 
-#: Programs/cmds.auto.h:317
+#. xgettext: This is the description of the CSRSIZE command.
+#: Programs/cmds.auto.h:359
 msgid "set screen cursor style block/underline"
 msgstr "Bascule entre un style de curseur souligné ou en bloc"
 
-#: Programs/cmds.auto.h:296
+#. xgettext: This is the description of the CSRVIS command.
+#: Programs/cmds.auto.h:335
 msgid "set screen cursor visibility on/off"
 msgstr "Rend le curseur visible ou invisible"
 
-#: Programs/cmds.auto.h:254
+#. xgettext: This is the description of the FREEZE command.
+#: Programs/cmds.auto.h:287
 msgid "set screen image frozen/unfrozen"
 msgstr "Geler/dégeler l'image de l'écran"
 
-#: Programs/cmds.auto.h:289
+#. xgettext: This is the description of the SKPBLNKWINS command.
+#: Programs/cmds.auto.h:327
 msgid "set skipping of blank braille windows on/off"
 msgstr "Active ou désactive le saut des fenêtres braille vides"
 
-#: Programs/cmds.auto.h:282
+#. xgettext: This is the description of the SKPIDLNS command.
+#: Programs/cmds.auto.h:319
 msgid "set skipping of lines with identical content on/off"
 msgstr "Activation/désactivation du saut de ligne ayant un contenu identique"
 
-#: Programs/cmds.auto.h:275
+#. xgettext: This is the description of the SLIDEWIN command.
+#: Programs/cmds.auto.h:311
 msgid "set sliding braille window on/off"
 msgstr "Active ou désactive le glissement de la fenêtre braille"
 
-#: Programs/cmds.auto.h:743
+#. xgettext: This is the description of the SHOW_CURR_LOCN command.
+#: Programs/cmds.auto.h:850
 msgid "set speech cursor visibility on/off"
 msgstr "Rend le curseur de synthèse visible ou invisible"
 
-#: Programs/cmds.auto.h:1215
+#. xgettext: This is the description of the TXTSEL_SET command.
+#: Programs/cmds.auto.h:1406
 msgid "set text selection"
 msgstr "définit la sélection de texte"
 
-#: Programs/cmds.auto.h:268
+#. xgettext: This is the description of the SIXDOTS command.
+#: Programs/cmds.auto.h:303
 msgid "set text style 6-dot/8-dot"
 msgstr "Bascule l'apparencu de texte entre 6 et 8 points"
 
-#: Programs/cmds.auto.h:1156
+#. xgettext: This is the description of the SET_TEXT_TABLE command.
+#: Programs/cmds.auto.h:1339
 msgid "set text table"
 msgstr "Définit la table du texte"
 
-#: Programs/cmds.auto.h:858
+#. xgettext: This is the description of the TOUCH_NAV command.
+#: Programs/cmds.auto.h:983
 msgid "set touch navigation on/off"
 msgstr "Active ou désactive la navigation tactile"
 
-#: Programs/cmds.auto.h:310
+#. xgettext: This is the description of the CSRTRK command.
+#: Programs/cmds.auto.h:351
 msgid "set track screen cursor on/off"
 msgstr "Active ou désacti(e la poursuite du curseur de l'écran"
 
-#: Programs/cmds.auto.h:574
+#. xgettext: This is the description of the TIME command.
+#: Programs/cmds.auto.h:656
 msgid "show current date and time"
 msgstr "Affiche la date et l'heure actuelles"
 
-#: Programs/msgtest.c:73
-msgid "show the message count"
-msgstr "affiche le nombre de messages"
-
-#: Programs/msgtest.c:79
-msgid "show the translation metadata"
-msgstr "affiche les métadonnées de traduction"
-
-#: Programs/cmds.auto.h:919
+#. xgettext: This is the description of the GUI_TITLE command.
+#: Programs/cmds.auto.h:1054
 msgid "show the window title"
 msgstr "affiche le titre de la fenêtre"
 
-#: Programs/cmds.auto.h:883
+#. xgettext: This is the description of the INDICATORS command.
+#: Programs/cmds.auto.h:1012
 msgid "show various device status indicators"
 msgstr "affiche divers indicateurs de status de l'appareil"
 
-#: Programs/menu_prefs.c:946
+#: Programs/menu_prefs.c:1057
 msgid "soundcard digital audio"
 msgstr "Son numérique de la carte son"
 
-#: Programs/menu_prefs.c:948
+#: Programs/menu_prefs.c:1059
 msgid "soundcard synthesizer"
 msgstr "Synthétiseur de la carte son"
 
-#: Programs/cmd.c:277 Programs/core.c:1046
+#: Programs/cmd.c:277 Programs/core.c:1051
 msgid "space"
 msgstr "Espace"
 
-#: Programs/cmds.auto.h:629
+#. xgettext: This is the description of the SPEAK_CURR_CHAR command.
+#: Programs/cmds.auto.h:719
 msgid "speak current character"
 msgstr "Lire le caractère actuel"
 
-#: Programs/cmds.auto.h:465 Programs/cmds.auto.h:669
+#. xgettext: This is the description of the SAY_LINE command.
+#. xgettext: This is the description of the SPEAK_CURR_LINE command.
+#: Programs/cmds.auto.h:529 Programs/cmds.auto.h:765
 msgid "speak current line"
 msgstr "Lit vocalement la ligne actuelle"
 
-#: Programs/cmds.auto.h:649
+#. xgettext: This is the description of the SPEAK_CURR_WORD command.
+#: Programs/cmds.auto.h:742
 msgid "speak current word"
 msgstr "Lire le mot actuel"
 
-#: Programs/cmds.auto.h:477
+#. xgettext: This is the description of the SAY_BELOW command.
+#: Programs/cmds.auto.h:543
 msgid "speak from current line through bottom of screen"
 msgstr "Lit vocalement depuis la ligne actuelle jusqu'au bas de l'écran"
 
-#: Programs/cmds.auto.h:471
+#. xgettext: This is the description of the SAY_ABOVE command.
+#: Programs/cmds.auto.h:536
 msgid "speak from top of screen through current line"
 msgstr "Lit vocalement du haut de l'écran jusquà la ligne actuelle"
 
-#: Programs/cmds.auto.h:864
+#. xgettext: This is the description of the SPEAK_INDENT command.
+#: Programs/cmds.auto.h:990
 msgid "speak indent of current line"
 msgstr "énonce l'indentation de la ligne courante"
 
-#: Programs/cmds.auto.h:736
+#. xgettext: This is the description of the SPEAK_CURR_LOCN command.
+#: Programs/cmds.auto.h:842
 msgid "speak speech cursor location"
 msgstr "Lit là où est le curseur de synthèse"
 
-#: Programs/msgtest.c:52
+#: Programs/msgtest.c:50
 msgid "specifier"
 msgstr "spécificateur"
 
@@ -3441,43 +3759,53 @@ msgstr "le pilote de la synthèse vocale redémarre"
 msgid "speech driver stopped"
 msgstr "pilote de la synthèse vocale arrêté"
 
-#: Programs/cmds.auto.h:723
+#. xgettext: This is the description of the SPELL_CURR_WORD command.
+#: Programs/cmds.auto.h:827
 msgid "spell current word"
 msgstr "Épelle le mot actuel"
 
-#: Programs/cmds.auto.h:1026
+#. xgettext: This is the description of the CLIP_NEW command.
+#: Programs/cmds.auto.h:1192
 msgid "start new clipboard at character"
 msgstr "Démarre un nouveau presse-papier au caractère"
 
-#: Programs/cmds.auto.h:1208
+#. xgettext: This is the description of the TXTSEL_START command.
+#: Programs/cmds.auto.h:1398
 msgid "start text selection"
 msgstr "commence la sélection de texte"
 
-#: Programs/cmds.auto.h:799
+#. xgettext: This is the description of the BRL_START command.
+#: Programs/cmds.auto.h:915
 msgid "start the braille driver"
 msgstr "Démarre le pilote braille"
 
-#: Programs/cmds.auto.h:823
+#. xgettext: This is the description of the SCR_START command.
+#: Programs/cmds.auto.h:943
 msgid "start the screen driver"
 msgstr "Démarre le pilote de l'écran"
 
-#: Programs/cmds.auto.h:811
+#. xgettext: This is the description of the SPK_START command.
+#: Programs/cmds.auto.h:929
 msgid "start the speech driver"
 msgstr "Démarre le pilote de synthèse vocale"
 
-#: Programs/cmds.auto.h:452
+#. xgettext: This is the description of the MUTE command.
+#: Programs/cmds.auto.h:514
 msgid "stop speaking"
 msgstr "Arrêt de la parole"
 
-#: Programs/cmds.auto.h:793
+#. xgettext: This is the description of the BRL_STOP command.
+#: Programs/cmds.auto.h:908
 msgid "stop the braille driver"
 msgstr "Démarre le pilote braille"
 
-#: Programs/cmds.auto.h:817
+#. xgettext: This is the description of the SCR_STOP command.
+#: Programs/cmds.auto.h:936
 msgid "stop the screen driver"
 msgstr "Arrête le pilote de l'écran"
 
-#: Programs/cmds.auto.h:805
+#. xgettext: This is the description of the SPK_STOP command.
+#: Programs/cmds.auto.h:922
 msgid "stop the speech driver"
 msgstr "Arrête le pilote de synthèse vocale"
 
@@ -3489,27 +3817,33 @@ msgstr "ancien gestionnaire d'erreurs étrange\n"
 msgid "string"
 msgstr "chaîne"
 
-#: Programs/cmds.auto.h:1273
+#. xgettext: This is the description of the CONTEXT command.
+#: Programs/cmds.auto.h:1472
 msgid "switch to command context"
 msgstr "Va au contexte de la commande"
 
-#: Programs/cmds.auto.h:1054
+#. xgettext: This is the description of the SWITCHVT command.
+#: Programs/cmds.auto.h:1224
 msgid "switch to specific virtual terminal"
 msgstr "Va à un terminal virtuel spécifique"
 
-#: Programs/cmds.auto.h:987
+#. xgettext: This is the description of the GUI_AREA_NEXT command.
+#: Programs/cmds.auto.h:1133
 msgid "switch to the next screen area"
 msgstr "passe à la zone suivante de l'écran"
 
-#: Programs/cmds.auto.h:513
+#. xgettext: This is the description of the SWITCHVT_NEXT command.
+#: Programs/cmds.auto.h:585
 msgid "switch to the next virtual terminal"
 msgstr "Va au terminal virtuel suivant"
 
-#: Programs/cmds.auto.h:981
+#. xgettext: This is the description of the GUI_AREA_PREV command.
+#: Programs/cmds.auto.h:1126
 msgid "switch to the previous screen area"
 msgstr "passe à la zone précédente de l'écran"
 
-#: Programs/cmds.auto.h:507
+#. xgettext: This is the description of the SWITCHVT_PREV command.
+#: Programs/cmds.auto.h:578
 msgid "switch to the previous virtual terminal"
 msgstr "Va au terminal virtuel précédent"
 
@@ -3517,31 +3851,34 @@ msgstr "Va au terminal virtuel précédent"
 msgid "switched to unprivileged user"
 msgstr "passé à un utilisateur non privilégié"
 
-#: Programs/cmds.auto.h:1294
+#. xgettext: This is the description of the KEY_TAB command.
+#: Programs/cmds.auto.h:1496
 msgid "tab key"
 msgstr "Touche tab"
 
-#: Programs/config.c:302 Programs/config.c:309
+#: Programs/config.c:299 Programs/config.c:306
 msgid "text"
 msgstr "Texte"
 
-#: Programs/msgtest.c:47
+#: Programs/msgtest.c:45
 msgid "the locale directory containing the translations"
 msgstr "le répertoire de la locale contenant les traductions"
 
-#: Programs/msgtest.c:54
+#: Programs/msgtest.c:52
 msgid "the locale in which to look up a translation"
 msgstr "la locale dans laquelle chercher une traduction"
 
-#: Programs/msgtest.c:61
+#: Programs/msgtest.c:59
 msgid "the name of the domain containing the translations"
 msgstr "le nom du domaine contenant les traductions"
 
-#: Programs/cmds.auto.h:1245
+#. xgettext: This is the description of the PASSDOTS command.
+#: Programs/cmds.auto.h:1440
 msgid "type braille dots"
 msgstr "Saisie de points braille"
 
-#: Programs/cmds.auto.h:1237
+#. xgettext: This is the description of the PASSCHAR command.
+#: Programs/cmds.auto.h:1431
 msgid "type unicode character"
 msgstr "Caractère de type unicode"
 
@@ -3565,7 +3902,7 @@ msgstr "Commande inconnue"
 msgid "unknown configuration directive"
 msgstr "Ligne de configuration non reconnue"
 
-#: Programs/config.c:737
+#: Programs/config.c:733
 msgid "unknown log level or category"
 msgstr "Niveau ou catégorie de journalisation inconnu"
 
@@ -3578,7 +3915,7 @@ msgstr "Option non reconnue"
 msgid "unsupported parameter"
 msgstr "Paramètre non supporté"
 
-#: Programs/spk.c:172
+#: Programs/spk.c:180
 msgid "volume"
 msgstr "Volume"
 
@@ -3591,7 +3928,7 @@ msgstr "blanc"
 msgid "working directory changed"
 msgstr "répertoire courant changé"
 
-#: Programs/msgtest.c:67
+#: Programs/msgtest.c:65
 msgid "write the translations using UTF-8"
 msgstr "écrire les traductions en utilisant UTF-8"
 
@@ -3687,6 +4024,143 @@ msgstr "xbrlapi : Le nom de la fenêtre %#010lx est devenu NULL\n"
 msgid "yellow"
 msgstr "jaune"
 
+#~ msgid "Alto Sax"
+#~ msgstr "Saxo Alto"
+
+#~ msgid "Baritone Sax"
+#~ msgstr "Saxo bariton"
+
+#~ msgid "Clavi"
+#~ msgstr "Claviers"
+
+#~ msgid "Soprano Sax"
+#~ msgstr "Saxo soprano"
+
+#~ msgid "Tenor Sax"
+#~ msgstr "Saxo tenor"
+
+#~ msgid "6-Dot Computer"
+#~ msgstr "Informatique 6 Points"
+
+#~ msgid "6-Dot Contracted"
+#~ msgstr "Abrégé 6 Points"
+
+#~ msgid "8-Dot Computer"
+#~ msgstr "Informatique 8 Points"
+
+#~ msgid "8-Dot Contracted"
+#~ msgstr "Abrégé 8 Points"
+
+#~ msgid "Alphabetic Braille Window Coordinates"
+#~ msgstr "Coordonnées alphabétiques de la fenêtre braille"
+
+#~ msgid "Alphabetic Screen Cursor Coordinates"
+#~ msgstr "Coordonnées alphabétiques du curseur à l'écran"
+
+#~ msgid "April"
+#~ msgstr "Avril"
+
+#~ msgid "Attributes Invisible Time"
+#~ msgstr "Durée de l'invisibilité des attributs"
+
+#~ msgid "Attributes Visible Time"
+#~ msgstr "Durée de visibilité des attributs"
+
+#~ msgid "August"
+#~ msgstr "Août"
+
+#~ msgid "Braille Window Column"
+#~ msgstr "Colonne de la fenêtre braille"
+
+#~ msgid "Braille Window Coordinates"
+#~ msgstr "Coordonnées de la fenêtre braille"
+
+#~ msgid "Braille Window Row"
+#~ msgstr "Ligne de la fenêtre braille"
+
+#~ msgid "Capitals Invisible Time"
+#~ msgstr "Durée d'invisibilité des majuscules"
+
+#~ msgid "Capitals Visible Time"
+#~ msgstr "Durée de visibilité des majuscules"
+
+#~ msgid "December"
+#~ msgstr "Décembre"
+
+#~ msgid "February"
+#~ msgstr "Février"
+
+#~ msgid "January"
+#~ msgstr "Janvier"
+
+#~ msgid "July"
+#~ msgstr "Juillet"
+
+#~ msgid "June"
+#~ msgstr "Juin"
+
+#~ msgid "March"
+#~ msgstr "Mars"
+
+#~ msgid "May"
+#~ msgstr "Mai"
+
+#~ msgid "November"
+#~ msgstr "Novembre"
+
+#~ msgid "October"
+#~ msgstr "Octobre"
+
+#~ msgid "Screen Cursor Column"
+#~ msgstr "Colonne du curseur de l'écran"
+
+#~ msgid "Screen Cursor Coordinates"
+#~ msgstr "Coordonnées du curseur de l'écran"
+
+#~ msgid "Screen Cursor Invisible Time"
+#~ msgstr "Durée d'invisibilité du curseur d'écran"
+
+#~ msgid "Screen Cursor Row"
+#~ msgstr "Ligne du curseur de l'écran"
+
+#~ msgid "Screen Cursor Visible Time"
+#~ msgstr "Durée de visibilité du curseur de l'écran"
+
+#~ msgid "Screen Cursor and Braille Window Column"
+#~ msgstr "Colonne du curseur de l'écran et de la fenêtre braille"
+
+#~ msgid "Screen Cursor and Braille Window Row"
+#~ msgstr "Ligne du curseur de l'écran et de la fenêtre braille"
+
+#~ msgid "September"
+#~ msgstr "Septembre"
+
+#~ msgid "Speech Cursor Invisible Time"
+#~ msgstr "Durée d'invisibilité du curseur"
+
+#~ msgid "Speech Cursor Visible Time"
+#~ msgstr "Durée de visibilité du curseur de la synthèse"
+
+#~ msgid "blink"
+#~ msgstr "clignotant"
+
+#~ msgid "list all of the translations (the default)"
+#~ msgstr "liste toutes les traductions (action par défaut)"
+
+#~ msgid "percentage"
+#~ msgstr "Pourcentage"
+
+#~ msgid "second"
+#~ msgid_plural "seconds"
+#~ msgstr[0] "seconde"
+#~ msgstr[1] "secondes"
+
+#~ msgid "show the message count"
+#~ msgstr "affiche le nombre de messages"
+
+#~ msgid "show the translation metadata"
+#~ msgstr "affiche les métadonnées de traduction"
+
 #~ msgid "Braille Type"
 #~ msgstr "Type de Braille"
 
@@ -3695,9 +4169,6 @@ msgstr "jaune"
 
 #~ msgid "8-Dot Computer Braille"
 #~ msgstr "Braille informatique 8 points"
-
-#~ msgid "Contracted Braille"
-#~ msgstr "Braille abrégé"
 
 #~ msgid "Literary Braille"
 #~ msgstr "Braille Littéraire"
