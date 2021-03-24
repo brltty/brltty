@@ -1326,9 +1326,9 @@ handleBrailleDriverFailed (const void *data) {
   restartBrailleDriver();
 }
 
-static volatile unsigned int programTerminationRequestCount;
 static volatile time_t programTerminationRequestTime;
-static volatile int programTerminationRequestSignal;
+static volatile sig_atomic_t programTerminationRequestSignal;
+static volatile sig_atomic_t programTerminationRequestCount;
 
 typedef struct {
   UnmonitoredConditionHandler *handler;
@@ -1541,12 +1541,12 @@ ASYNC_SIGNAL_HANDLER(handleProgramTerminationRequest) {
     programTerminationRequestCount = 0;
   }
 
+  programTerminationRequestTime = now;
+  programTerminationRequestSignal = signalNumber;
+
   if (++programTerminationRequestCount > PROGRAM_TERMINATION_REQUEST_COUNT_THRESHOLD) {
     exit(1);
   }
-
-  programTerminationRequestTime = now;
-  programTerminationRequestSignal = signalNumber;
 }
 
 #ifdef SIGCHLD
@@ -1568,9 +1568,9 @@ brlttyConstruct (int argc, char *argv[]) {
     if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus;
   }
 
-  programTerminationRequestCount = 0;
   programTerminationRequestTime = time(NULL);
   programTerminationRequestSignal = 0;
+  programTerminationRequestCount = 0;
 
 #ifdef ASYNC_CAN_BLOCK_SIGNALS
   asyncBlockObtainableSignals();
