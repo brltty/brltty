@@ -1326,8 +1326,8 @@ handleBrailleDriverFailed (const void *data) {
   restartBrailleDriver();
 }
 
-static volatile time_t programTerminationRequestTime;
-static volatile sig_atomic_t programTerminationRequestSignal;
+static time_t programTerminationRequestTime;
+static int programTerminationRequestSignal;
 static volatile sig_atomic_t programTerminationRequestCount;
 
 typedef struct {
