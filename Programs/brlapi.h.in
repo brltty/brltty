@@ -464,9 +464,9 @@ int BRLAPI_STDCALL brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const 
  * \sa brlapi_enterTtyMode()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int BRLAPI_STDCALL brlapi_enterTtyModeWithPath(int *ttys, int count, const char *driver);
+int BRLAPI_STDCALL brlapi_enterTtyModeWithPath(const int *ttys, int count, const char *driver);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int count, const char *driver);
+int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, const int *ttys, int count, const char *driver);
 
 /* brlapi_leaveTtyMode */
 /** Stop controlling the tty

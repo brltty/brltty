@@ -1631,7 +1631,7 @@ int BRLAPI_STDCALL brlapi_enterTtyMode(int tty, const char *how)
 
 /* Function : brlapi_enterTtyModeWithPath */
 /* Takes control of a tty path */
-int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *driverName)
+int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, const int *ttys, int nttys, const char *driverName)
 {
   int res;
   void *packet;
@@ -1782,7 +1782,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *tt
   return res;
 }
 
-int BRLAPI_STDCALL brlapi_enterTtyModeWithPath(int *ttys, int nttys, const char *how)
+int BRLAPI_STDCALL brlapi_enterTtyModeWithPath(const int *ttys, int nttys, const char *how)
 {
   return brlapi__enterTtyModeWithPath(&defaultHandle, ttys, nttys, how);
 }
