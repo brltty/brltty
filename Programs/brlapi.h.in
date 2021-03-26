@@ -461,6 +461,8 @@ int BRLAPI_STDCALL brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const 
  *
  * Providing nttys == 0 means to get the root.
  *
+ * \return 0 on success, -1 on error.
+ *
  * \sa brlapi_enterTtyMode()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
