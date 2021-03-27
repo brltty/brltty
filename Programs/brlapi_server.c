@@ -3171,7 +3171,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   done = 0;
 
   while ((res = write(lock,pids+done,n)) < n) {
-    if (!running) goto outfd;
+    if (!running) goto outlockfd;
 
     if (res == -1) {
       if (errno != ENOSPC) {
