@@ -3226,7 +3226,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
 
   if (unlink(sa.sun_path) && errno != ENOENT) {
     logSystemError("removing old socket");
-    goto outtmp;
+    goto outfd;
   }
 
   if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa)) == -1) {
