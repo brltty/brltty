@@ -1754,6 +1754,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, const i
   p = (unsigned char *) t;
   if (driverName==NULL) n = 0; else n = strlen(driverName);
   if (n>BRLAPI_MAXNAMELENGTH) {
+    pthread_mutex_unlock(&handle->state_mutex);
     brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
     return -1;
   }
