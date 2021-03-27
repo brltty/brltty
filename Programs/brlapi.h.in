@@ -459,7 +459,12 @@ int BRLAPI_STDCALL brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const 
  * \param count gives the number of elements in ttys.
  * \param driver has the same meaning as in brlapi_enterTtyMode()
  *
- * Providing nttys == 0 means to get the root.
+ * Providing nttys == 0 means to get the root, which is usually what a screen
+ * readers wants to use.
+ *
+ * The content of WINDOWPATH or XDG_VTNR will always be prepended to the given
+ * \p ttys array, so the application does not need to determine by itself where
+ * it is running.
  *
  * \return 0 on success, -1 on error.
  *
