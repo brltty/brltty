@@ -265,7 +265,9 @@ typedef struct {
  * brlapi_connectionSettings_t structure when the user gave parameters to the program
  * for instance;
  * \param actualSettings if not \c NULL, parameters which were actually used are
- * stored here, if the application ever needs them.
+ * stored here, if the application ever needs them. Since they are constant
+ * strings, or come from a getenv call, these must not be freed by the
+ * application.
  *
  * \sa
  * brlapi_connectionSettings_t
@@ -1310,7 +1312,8 @@ extern const char *brlapi_errfun;
 /** Get plain error message
  *
  * brlapi_strerror() returns the plain error message corresponding to its
- * argument.
+ * argument. Since the message is a constant string, the application must not
+ * free it.
  */
 const char * BRLAPI_STDCALL brlapi_strerror(const brlapi_error_t *error);
 
