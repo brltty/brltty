@@ -385,7 +385,7 @@ static void testParameters(void)
   if (brlapi_watchParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, BRLAPI_PARAMF_LOCAL, brailleRetainDotsChanged, NULL, NULL, 0) == 0) {
     brlapi_perror("watchParameter");
   }
-  val = 0;
+  val = 1;
   printf("setting retain dots parameter to %d\n", val);
   if (brlapi_setParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, BRLAPI_PARAMF_LOCAL, &val, sizeof(val)) < 0) {
     brlapi_perror("setParameter");
@@ -394,7 +394,7 @@ static void testParameters(void)
     brlapi_perror("getParameter");
   }
   printf("retain dots now %d\n", val);
-  val = 1;
+  val = 0;
   printf("setting retain dots parameter to %d\n", val);
   if (brlapi_setParameter(BRLAPI_PARAM_RETAIN_DOTS, 0, BRLAPI_PARAMF_LOCAL, &val, sizeof(val)) < 0) {
     brlapi_perror("setParameter");

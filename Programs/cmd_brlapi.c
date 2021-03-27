@@ -23,6 +23,8 @@
 #include "cmd_brlapi.h"
 #include "brl_cmds.h"
 #include "ttb.h"
+#include "prefs.h"
+#include "brl_types.h"
 
 #ifdef ENABLE_API
 static brlapi_keyCode_t
@@ -42,7 +44,12 @@ cmdBrlttyToBrlapi (brlapi_keyCode_t *code, int command, int retainDots) {
       break;
 
     case BRL_CMD_BLK(PASSDOTS):
+      /* The client may prefer dots */
       if (retainDots) goto doDefault;
+
+      /* The user may prefer dots */
+      if (prefs.brailleTypingMode == BRL_TYPING_DOTS) goto doDefault;
+
       *code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, arg));
       break;
 

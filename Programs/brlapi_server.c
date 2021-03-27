@@ -659,7 +659,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   }
 
   c->how = 0;
-  c->retainDots = 1;
+  c->retainDots = 0;
   c->acceptedKeys = NULL;
   c->upTime = currentTime;
   c->brailleWindow.text = NULL;
