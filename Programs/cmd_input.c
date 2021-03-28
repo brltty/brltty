@@ -32,6 +32,7 @@
 #include "ttb.h"
 #include "scr.h"
 #include "async_alarm.h"
+#include "prefs.h"
 #include "core.h"
 
 typedef struct {
@@ -138,6 +139,20 @@ selectVirtualTerminal (int vt) {
   }
 
   return selected;
+}
+
+static wchar_t
+getTypedCharacter (unsigned char dots) {
+  switch (prefs.brailleTypingMode) {
+    case BRL_TYPING_TEXT:
+      return convertDotsToCharacter(textTable, dots);
+
+    default:
+      logMessage(LOG_WARNING, "unknown braille typing mode: %u", prefs.brailleTypingMode);
+      /* fall through */
+    case BRL_TYPING_DOTS:
+      return UNICODE_BRAILLE_ROW | dots;
+  }
 }
 
 static int
@@ -323,21 +338,7 @@ handleInputCommands (int command, void *data) {
 
         case BRL_CMD_BLK(PASSDOTS): {
           applyModifierFlags(icd, &flags);
-          wchar_t character;
-
-          switch (prefs.brailleTypingMode) {
-            case BRL_TYPING_TEXT:
-              character = convertDotsToCharacter(textTable, arg);
-              break;
-
-            default:
-              logMessage(LOG_WARNING, "unknown braille typing mode: %u", prefs.brailleTypingMode);
-              /* fall through */
-
-            case BRL_TYPING_DOTS:
-              character = UNICODE_BRAILLE_ROW | arg;
-              break;
-          }
+          wchar_t character = getTypedCharacter(arg);
 
           if (!insertKey(character, flags)) {
             alert(ALERT_COMMAND_REJECTED);

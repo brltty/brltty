@@ -25,9 +25,11 @@
 #include "strfmt.h"
 #include "alert.h"
 #include "prefs.h"
+#include "unicode.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "ktb_inspect.h"
+#include "brl_types.h"
 #include "brl_cmds.h"
 #include "cmd.h"
 #include "cmd_enqueue.h"
@@ -343,6 +345,18 @@ processCommand (KeyTable *table, int command) {
         }
 
         case BRL_CMD_BLK(PASSDOTS):
+          switch (prefs.brailleTypingMode) {
+            case BRL_TYPING_DOTS: {
+              wchar_t character = UNICODE_BRAILLE_ROW | arg;
+              int flags = command & BRL_MSK_FLG;
+              command = BRL_CMD_BLK(PASSCHAR) | BRL_ARG_SET(character) | flags;
+              break;
+            }
+          }
+
+          isInput = 1;
+          break;
+
         case BRL_CMD_BLK(PASSCHAR):
           isInput = 1;
           break;
