@@ -268,21 +268,6 @@ AC_SUBST([stderr_path])
 AC_PROG_MAKE_SET
 
 AC_PROG_CC
-if test -z "${CXX}"
-then
-   if test "${GCC}" = "yes"
-   then
-      AC_SEARCH_LIBS([__cxa_pure_virtual], [supc++])
-      AC_CACHE_CHECK([if the C compiler can compile C++], [brltty_cv_prog_cc_cxx], [dnl
-      brltty_save_ac_ext="${ac_ext}"
-      ac_ext="cc"
-      AC_TRY_LINK([], [class c {};],
-                  [brltty_cv_prog_cc_cxx="yes"],
-                  [brltty_cv_prog_cc_cxx="no"])
-      ac_ext="${brltty_save_ac_ext}"])
-      test "${brltty_cv_prog_cc_cxx}" = "yes" && CXX="${CC}"
-   fi
-fi
 AC_PROG_CXX
 
 brltty_gcc_cflags="-std=gnu99 -Wall"
