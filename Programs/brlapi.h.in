@@ -591,12 +591,12 @@ typedef struct {
   int displayNumber /** Display number ::BRLAPI_DISPLAY_DEFAULT == unspecified */;
   unsigned int regionBegin /** Region of display to update, 1st character of display is 1 */;
   unsigned int regionSize /** Number of characters held in text, andMask and orMask. */;
-  char *text /** Text to display, must hold as many characters as the region fields expresses. */;
+  const char *text /** Text to display, must hold as many characters as the region fields expresses. */;
   int textSize /** Size of text in bytes. If -1, strlen() is used for computing it. */;
-  unsigned char *andMask /** And attributes; applied first */;
-  unsigned char *orMask /** Or attributes; applied \e after ANDing */;
+  const unsigned char *andMask /** And attributes; applied first */;
+  const unsigned char *orMask /** Or attributes; applied \e after ANDing */;
   int cursor /** ::BRLAPI_CURSOR_LEAVE == don't touch, ::BRLAPI_CURSOR_OFF == turn off, 1 = 1st char of display, ... */;
-  char *charset /** Text charset. NULL means it is assumed to be 8bits, and the same as the server's. "" means current locale's charset. If no locale was selected, defaults to NULL's meaning. */;
+  const char *charset /** Text charset. NULL means it is assumed to be 8bits, and the same as the server's. "" means current locale's charset. If no locale was selected, defaults to NULL's meaning. */;
 } brlapi_writeArguments_t;
 
 /** Write to the default display on the braille device.
@@ -1444,12 +1444,12 @@ typedef struct {
   int displayNumber;
   unsigned int regionBegin;
   unsigned int regionSize;
-  char *text;
+  const char *text;
   int textSize;
-  unsigned char *attrAnd;
-  unsigned char *attrOr;
+  const unsigned char *attrAnd;
+  const unsigned char *attrOr;
   int cursor;
-  char *charset;
+  const char *charset;
 } brlapi_writeStruct;
 #define BRLAPI_WRITESTRUCT_INITIALIZER BRLAPI_WRITEARGUMENTS_INITIALIZER
 
