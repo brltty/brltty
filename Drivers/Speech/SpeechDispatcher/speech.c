@@ -266,7 +266,7 @@ sayText (const void *data) {
     string[say->length] = 0;
     spd_char(connectionHandle, say->priority, string);
   } else {
-    spd_sayf(connectionHandle, say->priority, "%.*s", say->length, say->text);
+    spd_sayf(connectionHandle, say->priority, "%.*s", (int)say->length, say->text);
   }
 }
 
