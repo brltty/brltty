@@ -22,7 +22,7 @@
 
 #include "cmd_brlapi.h"
 #include "brl_cmds.h"
-#include "ttb.h"
+#include "cmd_input.h"
 
 #ifdef ENABLE_API
 static brlapi_keyCode_t
@@ -43,7 +43,7 @@ cmdBrlttyToBrlapi (brlapi_keyCode_t *code, int command, int retainDots) {
 
     case BRL_CMD_BLK(PASSDOTS):
       if (retainDots) goto doDefault;
-      *code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, arg));
+      *code = cmdWCharToBrlapi(getTypedCharacter(arg));
       break;
 
     case BRL_CMD_BLK(PASSKEY):

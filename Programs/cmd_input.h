@@ -25,6 +25,8 @@ extern "C" {
 
 extern int addInputCommands (void);
 
+extern wchar_t getTypedCharacter (unsigned char dots);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

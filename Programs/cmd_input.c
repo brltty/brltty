@@ -141,7 +141,7 @@ selectVirtualTerminal (int vt) {
   return selected;
 }
 
-static wchar_t
+wchar_t
 getTypedCharacter (unsigned char dots) {
   switch (prefs.brailleTypingMode) {
     case BRL_TYPING_TEXT:
