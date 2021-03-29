@@ -40,6 +40,7 @@ extern int replaceTextTable (const char *directory, const char *name);
 
 extern unsigned char convertCharacterToDots (TextTable *table, wchar_t character);
 extern wchar_t convertDotsToCharacter (TextTable *table, unsigned char dots);
+extern wchar_t convertInputToCharacter (unsigned char dots);
 
 extern void setTryBaseCharacter (TextTable *table, unsigned char yes);
 

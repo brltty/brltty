@@ -28,6 +28,8 @@
 #include "ttb.h"
 #include "ttb_internal.h"
 #include "brl_dots.h"
+#include "brl_types.h"
+#include "prefs.h"
 
 static const unsigned char internalTextTableBytes[] = {
 #include "ttb.auto.h"
@@ -240,6 +242,20 @@ convertDotsToCharacter (TextTable *table, unsigned char dots) {
   const TextTableHeader *header = table->header.fields;
   if (BITMASK_TEST(header->dotsCharacterDefined, dots)) return header->dotsToCharacter[dots];
   return UNICODE_REPLACEMENT_CHARACTER;
+}
+
+wchar_t
+convertInputToCharacter (unsigned char dots) {
+  switch (prefs.brailleTypingMode) {
+    case BRL_TYPING_TEXT:
+      return convertDotsToCharacter(textTable, dots);
+
+    default:
+      logMessage(LOG_WARNING, "unknown braille typing mode: %u", prefs.brailleTypingMode);
+      /* fall through */
+    case BRL_TYPING_DOTS:
+      return UNICODE_BRAILLE_ROW | dots;
+  }
 }
 
 int
