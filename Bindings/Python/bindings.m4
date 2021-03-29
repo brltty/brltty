@@ -30,7 +30,7 @@ PYTHON_OK=true
 #
 export PYTHONCOERCECLOCALE=0
 
-AC_PATH_PROG([PYTHON], [python3 python])
+AC_CHECK_PROGS([PYTHON], [python3 python python2], [python])
 if test -z "${PYTHON}"
 then
    AC_MSG_WARN([Python interpreter not found])
