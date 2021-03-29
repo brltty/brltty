@@ -314,17 +314,19 @@ cdef class WriteStruct:
 		def __set__(self, val):
 			cdef c_brlapi.size_t size
 			cdef char *c_val
+			cdef char *text
 			if (type(val) == unicode):
 				val = val.encode('UTF-8')
 				self.charset = 'UTF-8'.encode("ASCII")
 			if (self.props.text):
-				c_brlapi.free(self.props.text)
+				c_brlapi.free(<char*>self.props.text)
 			if (val):
 				size = len(val)
 				c_val = val
-				self.props.text = <char*>c_brlapi.malloc(size+1)
-				c_brlapi.memcpy(<void*>self.props.text,<void*>c_val,size)
-				self.props.text[size] = 0
+				text = <char*>c_brlapi.malloc(size+1)
+				c_brlapi.memcpy(<void*>text,<void*>c_val,size)
+				text[size] = 0
+				self.props.text = text
 				self.props.textSize = size
 			else:
 				self.props.text = NULL
@@ -346,16 +348,18 @@ cdef class WriteStruct:
 		def __set__(self, val):
 			cdef c_brlapi.size_t size
 			cdef char *c_val
+			cdef char *charset
 			if (self.props.charset):
-				c_brlapi.free(self.props.charset)
+				c_brlapi.free(<char*>self.props.charset)
 			if (val):
 				if (type(val) == unicode):
 					val = val.encode('ASCII')
 				size = len(val)
 				c_val = val
-				self.props.charset = <char*>c_brlapi.malloc(size+1)
-				c_brlapi.memcpy(<void*>self.props.charset,<void*>c_val,size)
-				self.props.charset[size] = 0
+				charset = <char*>c_brlapi.malloc(size+1)
+				c_brlapi.memcpy(<void*>charset,<void*>c_val,size)
+				charset[size] = 0
+				self.props.charset = charset
 			else:
 				self.props.charset = NULL
 
@@ -372,7 +376,7 @@ cdef class WriteStruct:
 			cdef c_brlapi.size_t size
 			cdef char *c_val
 			if (self.props.andMask):
-				c_brlapi.free(self.props.andMask)
+				c_brlapi.free(<char*>self.props.andMask)
 			if (val):
 				if (type(val) == unicode):
 					val = val.encode('latin1')
@@ -396,7 +400,7 @@ cdef class WriteStruct:
 			cdef c_brlapi.size_t size
 			cdef char *c_val
 			if (self.props.orMask):
-				c_brlapi.free(self.props.orMask)
+				c_brlapi.free(<char*>self.props.orMask)
 			if (val):
 				if (type(val) == unicode):
 					val = val.encode('latin1')
