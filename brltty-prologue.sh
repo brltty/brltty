@@ -298,6 +298,10 @@ optionalProgramParameters() {
    fi
 }
 
+tooManyProgramParameters() {
+   syntaxError "too many parameters"
+}
+
 programOptionLetters=""
 programOptionString=""
 programOptionOperandWidth=0
@@ -517,22 +521,32 @@ parseProgramArguments() {
    local programParameterIndex=0
    while [ "${#}" -gt 0 ]
    do
-      [ "${programParameterIndex}" -lt "${programParameterCount}" ] || syntaxError "too many parameters"
+      [ "${programParameterIndex}" -lt "${programParameterCount}" ] || break
       setVariable "$(getVariable "programParameterVariable_${programParameterIndex}")" "${1}"
       shift 1
       programParameterIndex=$((programParameterIndex + 1))
    done
 
-   [ "${programParameterIndex}" -ge "${programParameterCountMinimum}" ] || syntaxError "$(getVariable "programParameterLabel_${programParameterIndex}") not specified"
+   [ "${programParameterIndex}" -ge "${programParameterCountMinimum}" ] || {
+      syntaxError "$(getVariable "programParameterLabel_${programParameterIndex}") not specified"
+   }
+
    readonly programLogLevel=$((programLogLevel + programOption_verboseCount - programOption_quietCount))
+   processExtraProgramParameters "${@}"
 }
 
-##############################################################################
-# The following functions are stubs that can be copied into the main script. #
-##############################################################################
+####################################################################
+# The following functions are stubs that may be copied into the    #
+# main script and augmented. They need to be defined after this    #
+# prologue is embeded and before the program arguments are parsed. #
+####################################################################
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
 END_OF_PROGRAM_USAGE_NOTES
+}
+
+processExtraProgramParameters() {
+   [ "${#}" -eq 0 ] || tooManyProgramParameters
 }
 

@@ -45,21 +45,26 @@ BuildRequires: systemd-rpm-macros
 
 BuildRequires: /bin/sh
 BuildRequires: /usr/bin/env
+
+BuildRequires: bash
+BuildRequires: gawk
+BuildRequires: coreutils
+BuildRequires: binutils
+BuildRequires: tcl
+
 BuildRequires: autoconf >= 2.53
 BuildRequires: automake
 BuildRequires: make
-BuildRequires: coreutils
-BuildRequires: binutils
+BuildRequires: pkgconf-pkg-config
 BuildRequires: gcc
-BuildRequires: gawk
-BuildRequires: tcl
-BuildRequires: glibc-headers
 
 BuildRequires: alsa-lib-devel
 BuildRequires: bluez-libs-devel
 BuildRequires: dbus-devel
 BuildRequires: expat-devel
 BuildRequires: glibc-devel
+BuildRequires: glib2-devel
+BuildRequires: gpm-devel
 BuildRequires: libcap-devel
 BuildRequires: libicu-devel
 BuildRequires: liblouis-devel
@@ -69,8 +74,9 @@ BuildRequires: polkit-devel
 BuildRequires: systemd-devel
 
 BuildRequires: gettext
-BuildRequires: linuxdoc-tools
+BuildRequires: groff
 BuildRequires: doxygen
+BuildRequires: linuxdoc-tools
 BuildRequires: python3-docutils
 BuildRequires: rst2txt
 
@@ -248,7 +254,6 @@ License: LGPL
 
 Requires: dbus-libs
 
-BuildRequires: at-spi2-core-devel
 BuildRequires: xorg-x11-proto-devel
 BuildRequires: dbus-devel
 
@@ -491,7 +496,7 @@ License: LGPL
 
 BuildRequires: python3
 BuildRequires: python3-devel
-BuildRequires: Cython
+BuildRequires: python3-Cython
 
 AutoProv: no
 AutoReq: yes
