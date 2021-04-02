@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -26,6 +26,9 @@ then
 elif [ -x /usr/bin/dpkg ]
 then
    platformName="debian"
+elif [ -x /usr/sbin/pkg ]
+then
+   platformName="freebsd"
 else
    semanticError "host platform not recognized"
 fi
@@ -97,6 +100,14 @@ listInstalledPackages_debian() {
 
 installPackages_debian() {
    apt-get --quiet install "${@}"
+}
+
+listInstalledPackages_freebsd() {
+   pkg query --all "%n"
+}
+
+installPackages_freebsd() {
+   pkg --quiet install "${@}"
 }
 
 neededPackages=(
