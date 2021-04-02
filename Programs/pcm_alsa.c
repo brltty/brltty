@@ -219,6 +219,7 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
           }
           continue;
 
+#if ESTRPIPE != EPIPE
         case -ESTRPIPE:
           while ((result = snd_pcm_resume(pcm->handle)) == -EAGAIN) approximateDelay(1);
 
@@ -229,6 +230,7 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
             }
           }
           continue;
+#endif /* ESTRPIPE != EPIPE */
       }
     }
   }

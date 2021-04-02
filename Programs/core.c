@@ -1351,7 +1351,7 @@ ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
     __sync_synchronize();
 
     logMessage(LOG_CATEGORY(ASYNC_EVENTS),
-      "program termination requested: Count=%u Signal=%d",
+      "program termination requested: Count=%ld Signal=%d",
       programTerminationRequestCount, programTerminationRequestSignal
     );
 

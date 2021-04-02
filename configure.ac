@@ -904,11 +904,13 @@ AC_CHECK_HEADERS([signal.h sys/signalfd.h])
 AC_CHECK_FUNCS([sigaction])
 
 AC_CHECK_HEADERS([alloca.h getopt.h regex.h])
-AC_CHECK_HEADERS([syslog.h execinfo.h])
+AC_CHECK_HEADERS([syslog.h])
 AC_CHECK_HEADERS([sys/file.h sys/socket.h])
 AC_CHECK_HEADERS([pwd.h grp.h])
 AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h dev/speaker/speaker.h linux/vt.h])
 AC_CHECK_HEADERS([sdkddkver.h])
+
+AC_CHECK_HEADERS([execinfo.h], [AC_HAVE_LIBRARY([execinfo])])
 
 AC_CHECK_HEADERS([linux/input.h], [
    AC_CHECK_HEADERS([linux/uinput.h], [], [], [

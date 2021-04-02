@@ -269,6 +269,8 @@ WIN_ERRNO_STORAGE_CLASS int win_toErrno (DWORD error);
 
 #if defined(__CYGWIN__)
 #define PRIkey "llX"
+#elif defined(__FreeBSD__)
+#define PRIkey "lX"
 #else /* format for key_t */
 #define PRIkey PRIX32
 #endif /* format for key_t */

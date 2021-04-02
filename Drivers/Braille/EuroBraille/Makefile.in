@@ -30,8 +30,14 @@ OBJ_FILES = $(SRC_FILES:.c=.$O)
 braille.$O: $(OBJ_FILES)
 	$(MKREL) $@ $(OBJ_FILES)
 
-%.$O: $(SRC_DIR)/%.c
-	$(CC) $(BRL_CFLAGS) -o $@ -c $<
+eu_braille.$O:
+	$(CC) $(BRL_CFLAGS) -o $@ -c $(SRC_DIR)/eu_braille.c
+
+eu_clio.$O:
+	$(CC) $(BRL_CFLAGS) -o $@ -c $(SRC_DIR)/eu_clio.c
+
+eu_esysiris.$O:
+	$(CC) $(BRL_CFLAGS) -o $@ -c $(SRC_DIR)/eu_esysiris.c
 
 ###############################################################################
 

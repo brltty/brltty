@@ -34,6 +34,6 @@ screen.$O: $(OBJ_FILES)
 xsel.$O: $(SRC_TOP)$(PGM_DIR)/xsel.c
 	$(CC) $(SCR_CFLAGS) -c $<
 
-%.$O: $(SRC_DIR)/%.c
-	$(CC) $(SCR_CFLAGS) $(DBUS_INCLUDES) $(ATSPI2_INCLUDES) $(GLIB2_INCLUDES) -c $<
+a2_screen.$O:
+	$(CC) $(SCR_CFLAGS) $(ATSPI2_INCLUDES) $(DBUS_INCLUDES) $(GLIB2_INCLUDES) -c $(SRC_DIR)/a2_screen.c
 
