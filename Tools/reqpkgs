@@ -18,7 +18,7 @@
 ###############################################################################
 
 set -e
-. "`dirname "${0}"`/brltty-prologue.sh"
+. "`dirname "${0}"`/../brltty-prologue.sh"
 
 if [ -x /usr/bin/dnf ]
 then
@@ -73,19 +73,6 @@ addProgramOption l flag listNeededPackages "list the needed packages"
 optionalProgramParameters
 parseProgramArguments "${@}"
 
-normalizePackageList() {
-   sort | uniq
-}
-
-listRequiredPackages() {
-   local name
-
-   for name in "${requiredPackageNames[@]}"
-   do
-      echo "${name}"
-   done
-}
-
 listInstalledPackages_fedora() {
    rpm --query --all --queryformat '%{NAME}\n'
 }
@@ -110,9 +97,26 @@ installPackages_freebsd() {
    pkg --quiet install "${@}"
 }
 
+normalizePackageList() {
+   sort | uniq
+}
+
+listInstalledPackages() {
+   "listInstalledPackages_${platformName}"
+}
+
+listRequiredPackages() {
+   local name
+
+   for name in "${requiredPackageNames[@]}"
+   do
+      echo "${name}"
+   done
+}
+
 neededPackages=(
    $(
-      diff <("listInstalledPackages_${platformName}" | normalizePackageList) \
+      diff <(listInstalledPackages | normalizePackageList) \
            <(listRequiredPackages | normalizePackageList) |
       sed -n -e 's/^> //p'
    )
