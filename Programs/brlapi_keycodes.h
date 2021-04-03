@@ -49,6 +49,9 @@ extern "C" {
  * command number, while bits 15-0 (BRLAPI_KEY_CMD_ARG_MASK) hold the command
  * value.
  *
+ * The brlapi_expandKeyCode() function may be used for splitting key codes into
+ * these parts.
+ *
  * For a X keysym, if it is a unicode keysym (0x1uvwxyz), then the command
  * number part is 0x1000000 and the value part is 0xuvwxyz. Else, the command
  * part is held by bits 28-8 and the value part is held by bits 7-0. This
@@ -82,9 +85,6 @@ extern "C" {
  * (key & BRLAPI_KEY_CODE_MASK) == XK_Abelowdot
  * - (key & BRLAPI_KEY_FLAGS_MASK) == 0, so no modifier key was pressed during
  * the command, and no particular flag applies to the command.
- *
- * The brlapi_expandKeyCode() function may be used for splitting key codes into
- * these parts.
  * @{
  */
 typedef uint64_t brlapi_keyCode_t;
