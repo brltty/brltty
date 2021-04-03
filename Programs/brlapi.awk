@@ -21,8 +21,14 @@ BEGIN {
   apiParameterTypeCount = 0
 }
 
-/#define[[:space:]]+BRLAPI_(CURSOR|DISPLAY|ERROR|TTY)_/ {
+/#define[[:space:]]+BRLAPI_(CURSOR|DISPLAY|TTY)_/ {
   apiConstant(substr($2, 8), $2, getDefineValue(), "")
+  next
+}
+
+/^[[:space:]]*BRLAPI_(ERROR)_[^[:space:]]+[[:space:]]+=[[:space:]]/ {
+  gsub(",", "", $3)
+  apiConstant(substr($1, 8), $1, $3, getComment($0))
   next
 }
 

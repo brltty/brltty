@@ -192,6 +192,9 @@ throwAPIError (JNIEnv *env) {
     const char *object = NULL;
 
     switch (brlapi_errno) {
+      case BRLAPI_ERROR_SUCCESS:
+        break;
+
       case BRLAPI_ERROR_NOMEM:
         object = JAVA_OBJ_OUT_OF_MEMORY_ERROR;
         break;
@@ -209,6 +212,9 @@ throwAPIError (JNIEnv *env) {
 
         break;
       }
+
+      default:
+        break;
     }
 
     if (object) {
@@ -264,6 +270,9 @@ throwConnectError (JNIEnv *env, const brlapi_connectionSettings_t *settings) {
   }
 
   switch (brlapi_errno) {
+    case BRLAPI_ERROR_SUCCESS:
+      break;
+
     case BRLAPI_ERROR_CONNREFUSED:
       object = BRLAPI_OBJECT("UnavailableServiceException");
       message = host;
@@ -300,6 +309,9 @@ throwConnectError (JNIEnv *env, const brlapi_connectionSettings_t *settings) {
 
       break;
     }
+
+    default:
+      break;
   }
 
   if (object) {

@@ -1225,26 +1225,47 @@ int BRLAPI_STDCALL brlapi__pause(brlapi_handle_t *handle, int timeout_ms);
  *
  * @{ */
 
-/* Error codes */
-#define BRLAPI_ERROR_SUCCESS               0  /**< Success */
-#define BRLAPI_ERROR_NOMEM                 1  /**< Not enough memory */
-#define BRLAPI_ERROR_TTYBUSY               2  /**< A connection is already running in this tty */
-#define BRLAPI_ERROR_DEVICEBUSY            3  /**< A connection is already using RAW or suspend mode */
-#define BRLAPI_ERROR_UNKNOWN_INSTRUCTION   4  /**< Not implemented in protocol */
-#define BRLAPI_ERROR_ILLEGAL_INSTRUCTION   5  /**< Forbiden in current mode */
-#define BRLAPI_ERROR_INVALID_PARAMETER     6  /**< Out of range or have no sense */
-#define BRLAPI_ERROR_INVALID_PACKET        7  /**< Invalid size */
-#define BRLAPI_ERROR_CONNREFUSED           8  /**< Connection refused */
-#define BRLAPI_ERROR_OPNOTSUPP             9  /**< Operation not supported */
-#define BRLAPI_ERROR_GAIERR               10  /**< Getaddrinfo error */
-#define BRLAPI_ERROR_LIBCERR              11  /**< Libc error */
-#define BRLAPI_ERROR_UNKNOWNTTY           12  /**< Couldn't find out the tty number */
-#define BRLAPI_ERROR_PROTOCOL_VERSION     13  /**< Bad protocol version */
-#define BRLAPI_ERROR_EOF                  14  /**< Unexpected end of file */
-#define BRLAPI_ERROR_EMPTYKEY             15  /**< Key file empty */
-#define BRLAPI_ERROR_DRIVERERROR          16  /**< Packet returned by driver too large */
-#define BRLAPI_ERROR_AUTHENTICATION       17  /**< Authentication failed */
-#define BRLAPI_ERROR_READONLY_PARAMETER   18  /**< Parameter can not be changed */
+/** BrlAPI Error codes */
+enum brlapi_error {
+  BRLAPI_ERROR_SUCCESS             =  0,  /**< Success */
+#define  BRLAPI_ERROR_SUCCESS              0
+  BRLAPI_ERROR_NOMEM               =  1,  /**< Not enough memory */
+#define BRLAPI_ERROR_NOMEM                BRLAPI_ERROR_NOMEM
+  BRLAPI_ERROR_TTYBUSY             =  2,  /**< A connection is already running in this tty */
+#define BRLAPI_ERROR_TTYBUSY              BRLAPI_ERROR_TTYBUSY
+  BRLAPI_ERROR_DEVICEBUSY          =  3,  /**< A connection is already using RAW or suspend mode */
+#define BRLAPI_ERROR_DEVICEBUSY           BRLAPI_ERROR_DEVICEBUSY
+  BRLAPI_ERROR_UNKNOWN_INSTRUCTION =  4,  /**< Not implemented in protocol */
+#define BRLAPI_ERROR_UNKNOWN_INSTRUCTION  BRLAPI_ERROR_UNKNOWN_INSTRUCTION
+  BRLAPI_ERROR_ILLEGAL_INSTRUCTION =  5,  /**< Forbiden in current mode */
+#define BRLAPI_ERROR_ILLEGAL_INSTRUCTION  BRLAPI_ERROR_ILLEGAL_INSTRUCTION
+  BRLAPI_ERROR_INVALID_PARAMETER   =  6,  /**< Out of range or have no sense */
+#define BRLAPI_ERROR_INVALID_PARAMETER    BRLAPI_ERROR_INVALID_PARAMETER
+  BRLAPI_ERROR_INVALID_PACKET      =  7,  /**< Invalid size */
+#define BRLAPI_ERROR_INVALID_PACKET       BRLAPI_ERROR_INVALID_PACKET
+  BRLAPI_ERROR_CONNREFUSED         =  8,  /**< Connection refused */
+#define BRLAPI_ERROR_CONNREFUSED          BRLAPI_ERROR_CONNREFUSED
+  BRLAPI_ERROR_OPNOTSUPP           =  9,  /**< Operation not supported */
+#define BRLAPI_ERROR_OPNOTSUPP            BRLAPI_ERROR_OPNOTSUPP
+  BRLAPI_ERROR_GAIERR              = 10,  /**< Getaddrinfo error */
+#define BRLAPI_ERROR_GAIERR               BRLAPI_ERROR_GAIERR
+  BRLAPI_ERROR_LIBCERR             = 11,  /**< Libc error */
+#define BRLAPI_ERROR_LIBCERR              BRLAPI_ERROR_LIBCERR
+  BRLAPI_ERROR_UNKNOWNTTY          = 12,  /**< Couldn't find out the tty number */
+#define BRLAPI_ERROR_UNKNOWNTTY           BRLAPI_ERROR_UNKNOWNTTY
+  BRLAPI_ERROR_PROTOCOL_VERSION    = 13,  /**< Bad protocol version */
+#define BRLAPI_ERROR_PROTOCOL_VERSION     BRLAPI_ERROR_PROTOCOL_VERSION
+  BRLAPI_ERROR_EOF                 = 14,  /**< Unexpected end of file */
+#define BRLAPI_ERROR_EOF                  BRLAPI_ERROR_EOF
+  BRLAPI_ERROR_EMPTYKEY            = 15,  /**< Key file empty */
+#define BRLAPI_ERROR_EMPTYKEY             BRLAPI_ERROR_EMPTYKEY
+  BRLAPI_ERROR_DRIVERERROR         = 16,  /**< Packet returned by driver too large */
+#define BRLAPI_ERROR_DRIVERERROR          BRLAPI_ERROR_DRIVERERROR
+  BRLAPI_ERROR_AUTHENTICATION      = 17,  /**< Authentication failed */
+#define BRLAPI_ERROR_AUTHENTICATION       BRLAPI_ERROR_AUTHENTICATION
+  BRLAPI_ERROR_READONLY_PARAMETER  = 18,  /**< Parameter can not be changed */
+#define BRLAPI_ERROR_READONLY_PARAMETER   BRLAPI_ERROR_READONLY_PARAMETER
+};
 
 /* brlapi_errlist */
 /** Error message list
@@ -1267,7 +1288,7 @@ void BRLAPI_STDCALL brlapi_perror(const char *s);
 /* brlapi_error_t */
 /** All information that is needed to describe brlapi errors */
 typedef struct {
-  int brlerrno;
+  enum brlapi_error brlerrno;
   int libcerrno;
   int gaierrno;
   const char *errfun;
@@ -1294,7 +1315,7 @@ brlapi_error_t * BRLAPI_STDCALL brlapi_error_location(void);
 extern brlapi_error_t brlapi_error;
 
 /** Shorthand for brlapi_error.errno */
-extern int brlapi_errno;
+extern enum brlapi_error brlapi_errno;
 /** Shorthand for brlapi_error.libcerrno */
 extern int brlapi_libcerrno;
 /** Shorthand for brlapi_error.gaierrno */
