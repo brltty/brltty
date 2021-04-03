@@ -1,5 +1,6 @@
 alsa-lib-devel
 #at-spi-devel
+at-spi2-core-devel
 autoconf
 automake
 binutils

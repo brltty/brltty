@@ -1826,6 +1826,7 @@ BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
       BRLTTY_HAVE_PACKAGE([atspi2], [atspi-2], [dnl
          brltty_cppflags_save="${CPPFLAGS}"
          CPPFLAGS="${CPPFLAGS} ${atspi2_cflags}"
+         BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBS) $(ATSPI2_LIBS) $(GLIB2_LIBS) $(X11_LIBS) $(XFIXES_LIBS)])
 
          brltty_libs_save="${LIBS}"
          LIBS="${atspi2_libs} ${LIBS}"
@@ -1837,8 +1838,6 @@ BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
 
          BRLTTY_HAVE_PACKAGE([glib2], [glib-2.0])
       ])
-
-      BRLTTY_SCREEN_DRIVER([a2], [AtSpi2], [$(DBUS_LIBS) $(ATSPI2_LIBS) $(GLIB2_LIBS) $(X11_LIBS) $(XFIXES_LIBS)])
    ])
 ])
 
