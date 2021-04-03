@@ -25,4 +25,5 @@ BLD_TOP = ./@top_builddir@/
 BLD_DIR = @builddir@
 
 include $(SRC_TOP)common.mk
+include $(SRC_DIR)/reldeps.mk
 
