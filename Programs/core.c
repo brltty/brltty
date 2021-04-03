@@ -1352,7 +1352,7 @@ ASYNC_CONDITION_TESTER(checkUnmonitoredConditions) {
 
     logMessage(LOG_CATEGORY(ASYNC_EVENTS),
       "program termination requested: Count=%ld Signal=%d",
-      programTerminationRequestCount, programTerminationRequestSignal
+      (long)programTerminationRequestCount, programTerminationRequestSignal
     );
 
     static const WaitResult result = WAIT_STOP;
