@@ -26,37 +26,23 @@ TCL_DIR=""
 if test -n "${TCLSH}"
 then
    AC_MSG_NOTICE([Tcl shell: ${TCLSH}])
-   tcl_config_name="tclConfig.sh"
+   tcl_configuration_script=`${TCLSH} Tools/tclcmd config`
 
-m4_changequote([(((], [)))])
-tcl_config_script=`
-${TCLSH} <<END_OF_TCL_SCRIPT
-foreach directory [concat \\$tcl_library [lindex [::tcl::pkgconfig get libdir,install] 0] \\$auto_path] {
-   set file [file join \\$directory ${tcl_config_name}]
-   if {[file isfile \\\$file]} {
-      puts \\$file
-      break
-   }
-}
-END_OF_TCL_SCRIPT
-`
-m4_changequote([, ])
-
-   if test -n "${tcl_config_script}"
+   if test -n "${tcl_configuration_script}"
    then
-      AC_MSG_NOTICE([Tcl configuration script: ${tcl_config_script}])
+      AC_MSG_NOTICE([Tcl configuration script: ${tcl_configuration_script}])
 
-      if test ! -r "${tcl_config_script}"
+      if test ! -r "${tcl_configuration_script}"
       then
-         AC_MSG_WARN([Tcl configuration script not readable: ${tcl_config_script}])
-      elif . "${tcl_config_script}"
+         AC_MSG_WARN([Tcl configuration script not readable: ${tcl_configuration_script}])
+      elif . "${tcl_configuration_script}"
       then
          TCL_OK=true
          TCL_CPPFLAGS="${TCL_INCLUDE_SPEC}"
          TCL_LIBS="${TCL_LIB_SPEC}"
       fi
    else
-      AC_MSG_WARN([Tcl configuration script not found: ${tcl_config_name}])
+      AC_MSG_WARN([Tcl configuration script not found])
    fi
 else
    AC_MSG_WARN([Tcl shell not found])
