@@ -292,7 +292,10 @@ throwConnectError (JNIEnv *env, const brlapi_connectionSettings_t *settings) {
           object = JAVA_OBJ_OUT_OF_MEMORY_ERROR;
           break;
 
-        case EAI_NODATA:
+        #ifdef EAI_NODATA
+        case EAI_NODATA: // obsoleted on RFC 2553bis-02
+        #endif /* EAI_NODATA */
+
         case EAI_NONAME:
           object = BRLAPI_OBJECT("UnknownHostException");
           message = host;
