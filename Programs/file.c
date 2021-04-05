@@ -1194,3 +1194,41 @@ writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, si
   return send(socketDescriptor, buffer, size, 0);
 }
 #endif /* GOT_SOCKETS */
+
+char *
+readSymbolicLink (const char *path) {
+  char *content = NULL;
+  size_t size = 0X80;
+  char *buffer = NULL;
+
+  while (1) {
+    {
+      char *newBuffer = realloc(buffer, size<<=1);
+
+      if (!newBuffer) {
+        logMallocError();
+        break;
+      }
+
+      buffer = newBuffer;
+    }
+
+    {
+      int length = readlink(path, buffer, size);
+
+      if (length == -1) {
+        if (errno != ENOENT) logSystemError("readlink");
+        break;
+      }
+
+      if (length < size) {
+        buffer[length] = 0;
+        if (!(content = strdup(buffer))) logMallocError();
+        break;
+      }
+    }
+  }
+
+  if (buffer) free(buffer);
+  return content;
+}

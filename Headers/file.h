@@ -111,6 +111,8 @@ extern void writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t co
 extern const char *getNamedPipeDirectory (void);
 extern int createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput);
 
+extern char *readSymbolicLink (const char *path);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
