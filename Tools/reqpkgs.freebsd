@@ -26,7 +26,7 @@ libXtst
 linuxdoc-tools
 ocaml
 ocaml-findlib
-openjdk
+openjdk11
 pcre2
 pkgconf
 polkit

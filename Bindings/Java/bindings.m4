@@ -40,25 +40,40 @@ fi
 if test -n "${java_compiler_path}"
 then
    JAVA_OK=true
-
    brltty_path=`realpath -- "${java_compiler_path}"` && java_compiler_path="${brltty_path}"
+   brltty_name="${java_compiler_path##*/}"
+
+   test "${brltty_name}" = "javavm" && {
+      AC_MSG_CHECKING([JVM path])
+
+      export JAVA_VERSION=11+
+      brltty_path=`Tools/javacmd jvmpath`
+
+      if test -n "${brltty_path}"
+      then
+         AC_MSG_RESULT([${brltty_path}])
+
+         brltty_name="${java_compiler_name}"
+         java_compiler_path="${brltty_path%/*}/${brltty_name}"
+      else
+         AC_MSG_RESULT([not found])
+      fi
+   }
+
    AC_MSG_NOTICE([Java compiler: ${java_compiler_path}])
-
    java_source_encoding="UTF-8"
-   java_compiler_name="${java_compiler_path##*/}"
-   test "${java_compiler_name}" = "javavm" && java_compiler_name=javac
 
-   case "${java_compiler_name}"
+   case "${brltty_name}"
    in
       javac) java_compiler_options="-encoding ${java_source_encoding}";;
       gcj)   java_compiler_options="-C --encoding=${java_source_encoding}";;
 
       *)     java_compiler_options=""
-             AC_MSG_WARN([Java compiler name not handled: ${java_compiler_name}])
+             AC_MSG_WARN([Java compiler name not handled: ${brltty_name}])
              ;;
    esac
-   JAVAC="'${java_compiler_path}' ${java_compiler_options}"
 
+   JAVAC="'${java_compiler_path}' ${java_compiler_options}"
    java_commands_directory=`AS_DIRNAME("${java_compiler_path}")`
    java_home_directory=`AS_DIRNAME("${java_commands_directory}")`
 
