@@ -30,5 +30,24 @@ proc putLibraryDirectory {} {
   }
 }
 
-putLibraryDirectory
+set optionDefinitions {
+}
+
+processProgramArguments optionValues $optionDefinitions positionalArguments "\{config\}"
+
+if {![nextElement positionalArguments action]} {
+  syntaxError "action not specified"
+}
+
+switch -exact "$action" {
+  config {
+    noMorePositionalArguments $positionalArguments
+    putLibraryDirectory
+  }
+
+  default {
+    syntaxError "unknown action: $action"
+  }
+}
+
 exit 0
