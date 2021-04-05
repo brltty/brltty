@@ -18,93 +18,112 @@
 ###############################################################################
 
 AC_DEFUN([BRLTTY_JAVA_BINDINGS], [dnl
+AC_SUBST([JAVA_OK], [false])
+AC_SUBST([JAVAC], [JAVA_COMPILER_NOT_FOUND_BY_CONFIGURE])
+AC_SUBST([JAVADOC], [JAVA_DOCUMENT_COMMAND_NOT_FOUND_BY_CONFIGURE])
+AC_SUBST([JAR], [JAVA_ARCHIVE_COMMAND_NOT_FOUND_BY_CONFIGURE])
+
+java_compiler_name="javac"
+java_compiler_path=""
+
 if test -n "${JAVA_HOME}"
 then
-   BRLTTY_JAVA_COMPILER([javac], ["${JAVA_HOME}/bin"])
+   BRLTTY_CHECK_JAVA_HOME(["${JAVA_HOME}"])
 else
-   BRLTTY_JAVA_COMPILER([javac], [], [dnl
-      BRLTTY_JAVA_COMPILER([javac], [/usr/java/bin /usr/java/jdk*/bin], [dnl
-         BRLTTY_JAVA_COMPILER([gcj])
-      ])
-   ])
+   BRLTTY_CHECK_JAVA_COMPILER([${java_compiler_name}])
+   BRLTTY_CHECK_JAVA_HOME(["/usr/java"])
+   BRLTTY_CHECK_JAVA_HOME(["/usr/lib/jvm/default-java"])
+   BRLTTY_CHECK_JAVA_HOME(["/usr/lib/jvm/java"])
+   BRLTTY_CHECK_JAVA_COMPILER([gcj])
 fi
 
-JAVA_OK=false
-if test -n "${JAVAC_PATH}"
+if test -n "${java_compiler_path}"
 then
-   path=`realpath -- "${JAVAC_PATH}"` && JAVAC_PATH="${path}"
-   AC_MSG_NOTICE([Java compiler is ${JAVAC_PATH}])
    JAVA_OK=true
 
-   JAVA_ENCODING="UTF-8"
-   case "${JAVAC_NAME}"
+   brltty_path=`realpath -- "${java_compiler_path}"` && java_compiler_path="${brltty_path}"
+   AC_MSG_NOTICE([Java compiler: ${java_compiler_path}])
+
+   java_source_encoding="UTF-8"
+   java_compiler_name="${java_compiler_path##*/}"
+   test "${java_compiler_name}" = "javavm" && java_compiler_name=javac
+
+   case "${java_compiler_name}"
    in
-      javac) JAVAC_OPTIONS="-encoding ${JAVA_ENCODING}";;
-      gcj)   JAVAC_OPTIONS="-C --encoding=${JAVA_ENCODING}";;
-      *)     JAVAC_OPTIONS="";;
+      javac) java_compiler_options="-encoding ${java_source_encoding}";;
+      gcj)   java_compiler_options="-C --encoding=${java_source_encoding}";;
+
+      *)     java_compiler_options=""
+             AC_MSG_WARN([Java compiler name not handled: ${java_compiler_name}])
+             ;;
    esac
-   AC_SUBST([JAVAC], ["'${JAVAC_PATH}' ${JAVAC_OPTIONS}"])
+   JAVAC="'${java_compiler_path}' ${java_compiler_options}"
 
-   JAVA_BIN=`AS_DIRNAME("${JAVAC_PATH}")`
-   JAVA_ROOT=`AS_DIRNAME("${JAVA_BIN}")`
+   java_commands_directory=`AS_DIRNAME("${java_compiler_path}")`
+   java_home_directory=`AS_DIRNAME("${java_commands_directory}")`
 
-   AC_CHECK_PROGS([JAVADOC_NAME], [javadoc gjdoc], [], ["${JAVA_BIN}"])
-   if test -n "${JAVADOC_NAME}"
-   then
-      JAVADOC_PATH="${JAVA_BIN}/${JAVADOC_NAME}"
-   else
-      JAVADOC_PATH=":"
-   fi
-   AC_SUBST([JAVADOC], ["'${JAVADOC_PATH}' -encoding ${JAVA_ENCODING}"])
+   BRLTTY_CHECK_JAVA_COMMAND([java_document_command], [javadoc gjdoc])
+   test -n "${java_document_command}" || java_document_command=":"
+   JAVADOC="'${java_document_command}' -encoding ${java_source_encoding}"
 
-   AC_CHECK_PROGS([JAR_NAME], [jar gjar], [JAR_NOT_FOUND_BY_CONFIGURE], ["${JAVA_BIN}"])
-   AC_SUBST([JAR], ["'${JAVA_BIN}/${JAR_NAME}'"])
+   BRLTTY_CHECK_JAVA_COMMAND([java_archive_command], [jar gjar])
+   JAR="'${java_archive_command}'"
+
    BRLTTY_JAVA_DIRECTORY([JAR], [/usr/share/java /mingw])
+   BRLTTY_JAVA_DIRECTORY([JNI], [/usr/lib*/java /usr/lib*/jni /usr/lib/*/jni /mingw])
 
-   JAVA_JNI_INC="${JAVA_ROOT}/include"
+   JAVA_JNI_INC="${java_home_directory}/include"
    JAVA_JNI_HDR="jni.h"
    JAVA_JNI_FLAGS=""
    AC_CHECK_HEADER([${JAVA_JNI_HDR}], [], [AC_CHECK_FILE(["${JAVA_JNI_INC}/${JAVA_JNI_HDR}"], [JAVA_JNI_FLAGS="-I${JAVA_JNI_INC}"], [JAVA_OK=false])])
 
    "${JAVA_OK}" && {
-     set -- "${JAVA_JNI_INC}"/*/jni_md.h
+      set -- "${JAVA_JNI_INC}"/*/jni_md.h
 
-     if test ${#} -eq 1
-     then
-        directory=`AS_DIRNAME("${1}")`
-        JAVA_JNI_FLAGS="${JAVA_JNI_FLAGS} -I${directory}"
-     elif test ${#} -gt 0
-     then
-        AC_MSG_WARN([more than one machine-dependent Java header found: ${*}])
-        JAVA_OK=false
-     fi
+      if test ${#} -eq 1
+      then
+         brltty_directory=`AS_DIRNAME("${1}")`
+         JAVA_JNI_FLAGS="${JAVA_JNI_FLAGS} -I${brltty_directory}"
+      elif test ${#} -gt 0
+      then
+         AC_MSG_WARN([more than one machine-dependent Java header found: ${*}])
+         JAVA_OK=false
+      fi
    }
 
    AC_SUBST([JAVA_JNI_HDR])
    AC_SUBST([JAVA_JNI_INC], ["'${JAVA_JNI_INC}'"])
    AC_SUBST([JAVA_JNI_FLAGS])
-   BRLTTY_JAVA_DIRECTORY([JNI], [/usr/lib*/java /usr/lib*/jni /usr/lib/*/jni /mingw])
 else
    AC_MSG_WARN([Java compiler not found])
 fi
-
-AC_SUBST([JAVA_OK])
 ])
 
-AC_DEFUN([BRLTTY_JAVA_COMPILER], [dnl
-AC_PATH_PROG([JAVAC_PATH], [$1], [], [$2])
-if test -n "${JAVAC_PATH}"
-then
-   JAVAC_NAME="$1"
-ifelse(len([$3]), 0, [], [dnl
-else
-   $3
-])dnl
-fi])
+AC_DEFUN([BRLTTY_CHECK_JAVA_COMPILER], [dnl
+   AC_PATH_PROG([java_compiler_path], [$1], [])
+])
+
+AC_DEFUN([BRLTTY_CHECK_JAVA_HOME], [dnl
+test -n "${java_compiler_path}" || {
+   AC_MSG_CHECKING([if $1 is a JDK])
+   brltty_path="$1/bin/${java_compiler_name}"
+
+   if test -f "${brltty_path}" -a -x "${brltty_path}"
+   then
+      java_compiler_path="${brltty_path}"
+      AC_MSG_RESULT([yes])
+   else
+      AC_MSG_RESULT([no])
+   fi
+}
+])
+
+AC_DEFUN([BRLTTY_CHECK_JAVA_COMMAND], [dnl
+   AC_PATH_PROGS([$1], [$2], [], ["${java_commands_directory}"])
+])
 
 AC_DEFUN([BRLTTY_JAVA_DIRECTORY], [dnl
-if test -z "${JAVA_$1_DIR}"
-then
+test -n "${JAVA_$1_DIR}" || {
    for directory in $2
    do
       test -d "${directory}" && {
@@ -112,12 +131,12 @@ then
 	 break
       }
    done
-fi
+}
 
 if test -n "${JAVA_$1_DIR}"
 then
    JAVA_$1="yes"
-   AC_MSG_NOTICE([Java] m4_tolower([$1]) [installation directory is ${JAVA_$1_DIR}])
+   AC_MSG_NOTICE([Java] m4_tolower([$1]) [installation directory: ${JAVA_$1_DIR}])
 else
    JAVA_$1="no"
    AC_MSG_WARN([no commonly used] m4_tolower([$1]) [installation directory])
