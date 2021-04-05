@@ -25,9 +25,9 @@ TCL_DIR=""
 
 if test -n "${TCLSH}"
 then
-   AC_MSG_NOTICE([Tcl shell is ${TCLSH}])
+   AC_MSG_NOTICE([Tcl shell: ${TCLSH}])
+   tcl_config_name="tclConfig.sh"
 
-tcl_config_name="tclConfig.sh"
 m4_changequote([(((], [)))])
 tcl_config_script=`
 ${TCLSH} <<END_OF_TCL_SCRIPT
@@ -44,7 +44,7 @@ m4_changequote([, ])
 
    if test -n "${tcl_config_script}"
    then
-      AC_MSG_NOTICE([Tcl configuration script is ${tcl_config_script}])
+      AC_MSG_NOTICE([Tcl configuration script: ${tcl_config_script}])
 
       if test ! -r "${tcl_config_script}"
       then
@@ -60,6 +60,7 @@ m4_changequote([, ])
    fi
 else
    AC_MSG_WARN([Tcl shell not found])
+   TCLSH="TCL_SHELL_NOT_FOUND_BY_CONFIGURE"
 fi
 
 ${TCL_OK} && {
@@ -75,7 +76,7 @@ ${TCL_OK} && {
 
    if test -n "${TCL_DIR}"
    then
-      AC_MSG_NOTICE([Tcl packages directory is ${TCL_DIR}])
+      AC_MSG_NOTICE([Tcl packages directory: ${TCL_DIR}])
    else
       AC_MSG_WARN([Tcl packages directory not found])
       TCL_DIR="TCL_PACKAGES_DIRECTORY_NOT_FOUND_BY_CONFIGURE"

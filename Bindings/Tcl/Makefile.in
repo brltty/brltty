@@ -17,8 +17,8 @@
 
 include $(SRC_TOP)bindings.mk
 
-TCL_OK = @TCL_OK@
 TCLSH = @TCLSH@
+TCL_OK = @TCL_OK@
 TCL_CPPFLAGS = @TCL_CPPFLAGS@
 TCL_LIBS = @TCL_LIBS@
 
