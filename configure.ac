@@ -1181,6 +1181,9 @@ BRLTTY_ARG_PACKAGE([pgmpath], [program path], [], [dnl
    cygwin*)
       pgmpath_package="windows"
       ;;
+   freebsd*)
+      pgmpath_package="freebsd"
+      ;;
    linux*)
       pgmpath_package="linux"
       ;;
