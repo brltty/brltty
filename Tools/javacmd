@@ -67,7 +67,7 @@ public class ScriptHelper {
     syntaxError("too many operands");
   }
 
-  public static void verifyNoMoreOperands (ArrayList<String> operands) {
+  public static void verifyNoMoreOperands (ScriptOperands operands) {
     if (!operands.isEmpty()) putTooManyOperands();
   }
 }
