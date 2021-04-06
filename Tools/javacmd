@@ -20,41 +20,25 @@
 import java.util.Arrays;
 import java.util.ArrayList;
 
-public class MainProgram {
-  public static void putMessage (String format, Object... arguments) {
-    System.err.println(String.format(format, arguments));
-  }
-
-  public static void syntaxError (String format, Object... arguments) {
-    putMessage(format, arguments);
-    System.exit(2);
-  }
-
-  public static void tooManyOperands () {
-    syntaxError("too many operands");
-  }
-
-  public static void noMoreOperands (ArrayList<String> operands) {
-    if (!operands.isEmpty()) tooManyOperands();
-  }
-
+public class ScriptImplementation extends ScriptHelper {
   public static String getJavaPath () {
     return ProcessHandle
-      .current()
-      .info()
-      .command()
-      .orElseThrow();
+          .current()
+          .info()
+          .command()
+          .orElseThrow();
   }
 
   public static void main (String[] arguments) {
-    ArrayList<String> operands = new ArrayList<>(Arrays.asList(arguments));
-    if (operands.isEmpty()) syntaxError("action not specified");
-    String action = operands.remove(0);
+    var operands = new ScriptOperands(arguments);
+
+    String action = operands.next();
+    if (action == null) syntaxError("action not specified");
 
     switch (action) {
       case "jvmpath": {
-        noMoreOperands(operands);
-        System.out.println(getJavaPath());
+        verifyNoMoreOperands(operands);
+        putOutputLine("%s", getJavaPath());
         break;
       }
 
@@ -62,5 +46,39 @@ public class MainProgram {
         syntaxError("unknown action: %s", action);
       }
     }
+  }
+}
+
+public class ScriptHelper {
+  public static void putOutputLine (String format, Object... arguments) {
+    System.out.println(String.format(format, arguments));
+  }
+
+  public static void putScriptMessage (String format, Object... arguments) {
+    System.err.println(String.format(format, arguments));
+  }
+
+  public static void syntaxError (String format, Object... arguments) {
+    putScriptMessage(format, arguments);
+    System.exit(2);
+  }
+
+  public static void putTooManyOperands () {
+    syntaxError("too many operands");
+  }
+
+  public static void verifyNoMoreOperands (ArrayList<String> operands) {
+    if (!operands.isEmpty()) putTooManyOperands();
+  }
+}
+
+public class ScriptOperands extends ArrayList<String> {
+  public ScriptOperands (String... operands) {
+    super(Arrays.asList(operands));
+  }
+
+  public String next () {
+    if (isEmpty()) return null;
+    return remove(0);
   }
 }
