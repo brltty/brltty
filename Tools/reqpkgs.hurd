@@ -10,15 +10,15 @@ gawk
 gcc
 gettext
 groff
-libasound2-dev
 libatspi2.0-dev
-libc6-dev
+libc0.3-dev
 libdbus-1-dev
 libespeak-ng-libespeak-dev
 libexpat1-dev
 libicu-dev
 liblouis-dev
 libncursesw5-dev
+liboss4-salsa-dev
 libpcre3-dev
 libpolkit-gobject-1-dev
 libspeechd-dev
