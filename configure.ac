@@ -1187,6 +1187,9 @@ BRLTTY_ARG_PACKAGE([pgmpath], [program path], [], [dnl
    linux*)
       pgmpath_package="linux"
       ;;
+   gnu*)
+      pgmpath_package="hurd"
+      ;;
    mingw*)
       pgmpath_package="windows"
       ;;
