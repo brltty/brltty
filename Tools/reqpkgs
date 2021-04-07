@@ -22,19 +22,40 @@ set -e
 
 if [ -x /usr/bin/dnf ]
 then
-   platformName="fedora"
+   packageManager="dnf"
 elif [ -x /usr/bin/dpkg ]
 then
-   platformName="debian"
+   packageManager="dpkg"
 elif [ -x /usr/sbin/pkg ]
 then
-   platformName="freebsd"
+   packageManager="pkg"
 else
-   semanticError "host platform not recognized"
+   semanticError "unknown package manager"
 fi
 
-requiredPackageNames=()
+case "${packageManager}"
+in
+   dnf)
+      platformName="fedora"
+      ;;
 
+   dpkg)
+      if [ "$(uname -s)" = "GNU" ]
+      then
+         platformName="hurd"
+      else
+         platformName="debian"
+      fi
+      ;;
+
+   pkg)
+      platformName="freebsd"
+      ;;
+
+   *) semanticError "unknown host platform: ${packageManager}";;
+esac
+
+requiredPackageNames=()
 addRequiredPackage() {
    local name="${1}"
 
@@ -73,27 +94,27 @@ addProgramOption l flag listNeededPackages "list the needed packages"
 optionalProgramParameters
 parseProgramArguments "${@}"
 
-listInstalledPackages_fedora() {
+listInstalledPackages_dnf() {
    rpm --query --all --queryformat '%{NAME}\n'
 }
 
-installPackages_fedora() {
+installPackages_dnf() {
    dnf --quiet install "${@}"
 }
 
-listInstalledPackages_debian() {
+listInstalledPackages_dpkg() {
    dpkg-query --show --showformat '${Package}\n'
 }
 
-installPackages_debian() {
+installPackages_dpkg() {
    apt-get --quiet install "${@}"
 }
 
-listInstalledPackages_freebsd() {
+listInstalledPackages_pkg() {
    pkg query --all "%n"
 }
 
-installPackages_freebsd() {
+installPackages_pkg() {
    pkg --quiet install "${@}"
 }
 
@@ -102,7 +123,7 @@ normalizePackageList() {
 }
 
 listInstalledPackages() {
-   "listInstalledPackages_${platformName}"
+   "listInstalledPackages_${packageManager}"
 }
 
 listRequiredPackages() {
@@ -134,7 +155,7 @@ then
    }
 
    "${installNeededPackages}" && {
-      "installPackages_${platformName}" "${neededPackages[@]}"
+      "installPackages_${packageManager}" "${neededPackages[@]}"
    }
 else
    logMessage task "no needed packages"
