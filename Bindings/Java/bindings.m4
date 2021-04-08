@@ -37,8 +37,10 @@ else
    BRLTTY_CHECK_JAVA_COMPILER([gcj])
 fi
 
-brltty_path=`realpath -- "${java_compiler_path}"` && java_compiler_path="${brltty_path}"
-test "${java_compiler_path##*/}" = "javavm" && java_compiler_path=""
+test -n "${java_compiler_path}" && {
+   brltty_path=`realpath -- "${java_compiler_path}"` && java_compiler_path="${brltty_path}"
+   test "${java_compiler_path##*/}" = "javavm" && java_compiler_path=""
+}
 
 BRLTTY_CHECK_JAVA_PATH([dnl
    test -n "${JAVA_VERSION}" || export JAVA_VERSION=11+
