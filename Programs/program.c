@@ -87,6 +87,7 @@ beginProgram (int argumentCount, char **argumentVector) {
   atexit(endProgram);
 #endif /* at exit */
 
+  setlocale(LC_ALL, "");
   initializeSystemObject();
   ensureAllMessagesProperties();
 
