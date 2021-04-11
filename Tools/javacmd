@@ -59,19 +59,36 @@ public class ScriptHelper {
     return arguments[index];
   }
 
-  public static String getScriptName () {
+  public static File getScriptFile () {
     String path = getScriptPath();
     if (path == null) return null;
-    return new File(path).getName();
+    return new File(path);
+  }
+
+  public static String getScriptName () {
+    File file = getScriptFile();
+    if (file == null) return null;
+    return file.getName();
   }
 
   public static void putScriptMessage (String format, Object... arguments) {
-    var stream = System.err;
+    final var stream = System.err;
+    String message = String.format(format, arguments);
 
-    String name = getScriptName();
-    if (name != null) stream.print(String.format("%s: ", name));
+    {
+      String name = getScriptName();
 
-    stream.println(String.format(format, arguments));
+      if (name != null) {
+        String prefix = String.format("%s: ", name);
+        int indent = prefix.length();
+        stream.print(prefix);
+
+        prefix = " ".repeat(indent);
+        message = message.replaceAll("(\n)", ("$1" + prefix));
+      }
+    }
+
+    stream.println(message);
   }
 
   public static void syntaxError (String format, Object... arguments) {
