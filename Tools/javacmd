@@ -38,7 +38,7 @@ public class ScriptImplementation extends ScriptHelper {
     switch (action) {
       case "jvmpath": {
         verifyNoMoreOperands(operands);
-        putOutputLine("%s", getJavaPath());
+        putScriptOutput("%s", getJavaPath());
         break;
       }
 
@@ -50,7 +50,7 @@ public class ScriptImplementation extends ScriptHelper {
 }
 
 public class ScriptHelper {
-  public static void putOutputLine (String format, Object... arguments) {
+  public static void putScriptOutput (String format, Object... arguments) {
     System.out.println(String.format(format, arguments));
   }
 
@@ -78,7 +78,6 @@ public class ScriptOperands extends ArrayList<String> {
   }
 
   public String next () {
-    if (isEmpty()) return null;
-    return remove(0);
+    return isEmpty()? null: remove(0);
   }
 }
