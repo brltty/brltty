@@ -17,6 +17,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.ArrayList;
 
@@ -37,7 +38,7 @@ public class ScriptImplementation extends ScriptHelper {
 
     switch (action) {
       case "jvmpath": {
-        verifyNoMoreOperands(operands);
+        verifyNoMoreParameters(operands);
         putScriptOutput("%s", getJavaPath());
         break;
       }
@@ -50,12 +51,27 @@ public class ScriptImplementation extends ScriptHelper {
 }
 
 public class ScriptHelper {
+  public static String getScriptName () {
+    String[] arguments = ProcessHandle.current().info().arguments().orElse(null);
+    if (arguments == null) return null;
+
+    final int index = 2;
+    if (arguments.length <= index) return null;
+    String path = arguments[index];
+    return new File(path).getName();
+  }
+
   public static void putScriptOutput (String format, Object... arguments) {
     System.out.println(String.format(format, arguments));
   }
 
   public static void putScriptMessage (String format, Object... arguments) {
-    System.err.println(String.format(format, arguments));
+    var stream = System.err;
+
+    String name = getScriptName();
+    if (name != null) stream.print(String.format("%s: ", name));
+
+    stream.println(String.format(format, arguments));
   }
 
   public static void syntaxError (String format, Object... arguments) {
@@ -63,12 +79,12 @@ public class ScriptHelper {
     System.exit(2);
   }
 
-  public static void putTooManyOperands () {
-    syntaxError("too many operands");
+  public static void putTooManyParameters () {
+    syntaxError("too many parameters");
   }
 
-  public static void verifyNoMoreOperands (ScriptOperands operands) {
-    if (!operands.isEmpty()) putTooManyOperands();
+  public static void verifyNoMoreParameters (ScriptOperands operands) {
+    if (!operands.isEmpty()) putTooManyParameters();
   }
 }
 
