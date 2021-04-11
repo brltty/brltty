@@ -58,7 +58,7 @@ JAVAC_LINT_OPTIONS = cast,deprecation,fallthrough,finally,overrides,rawtypes,unc
 
 classes.made: $(JAVA_SOURCES)
 	$(INSTALL_DIRECTORY) classes
-	$(JAVAC) -Xlint:$(JAVAC_LINT_OPTIONS) -d classes -classpath . $(JAVA_SOURCES)
+	$(JAVAC) -Xlint:$(JAVAC_LINT_OPTIONS) -d classes -classpath . $^
 	touch $@
 
 Constants.java: $(CONSTANTS_DEPENDENCIES)
@@ -68,7 +68,7 @@ doc: doc.made
 
 doc.made: $(JAVA_SOURCES)
 	$(INSTALL_DIRECTORY) doc
-	$(JAVADOC) -quiet -d doc -author -notimestamp -version -use $(JAVA_SOURCES)
+	$(JAVADOC) -quiet -d doc -author -notimestamp -version -use $^
 	touch $@
 
 clean::
