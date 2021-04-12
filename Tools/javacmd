@@ -21,6 +21,11 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.ArrayList;
 
+/* This is the class that contains the main() method.
+ * Don't be misled by the fact that it seems to have a required name.
+ * It can actually have any name so we chose to give it a descriptive one.
+ * The only rule is that the main() method must be within the first class.
+ */
 public class ScriptImplementation extends ScriptHelper {
   public static void main (String[] arguments) {
     var operands = new ScriptOperands(arguments);
@@ -72,23 +77,18 @@ public class ScriptHelper {
   }
 
   public static void putScriptMessage (String format, Object... arguments) {
-    final var stream = System.err;
     String message = String.format(format, arguments);
+    String tag = getScriptName();
 
-    {
-      String name = getScriptName();
+    if ((tag != null) && !tag.isEmpty()) {
+      String prefix = tag + ": ";
+      message = prefix + message;
 
-      if (name != null) {
-        String prefix = String.format("%s: ", name);
-        int indent = prefix.length();
-        stream.print(prefix);
-
-        prefix = " ".repeat(indent);
-        message = message.replaceAll("(\n)", ("$1" + prefix));
-      }
+      prefix = " ".repeat(prefix.length());
+      message = message.replaceAll("(\n)", ("$1" + prefix));
     }
 
-    stream.println(message);
+    System.err.println(message);
   }
 
   public static void syntaxError (String format, Object... arguments) {
