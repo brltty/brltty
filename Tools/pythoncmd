@@ -1,0 +1,107 @@
+#!/usr/bin/env python
+###############################################################################
+# libbrlapi - A library providing access to braille terminals for applications.
+#
+# Copyright (C) 2005-2021 by
+#   Alexis Robert <alexissoft@free.fr>
+#   Samuel Thibault <Samuel.Thibault@ens-lyon.org>
+#
+# libbrlapi comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+import sys
+import os
+
+def nextProgramArgument():
+  return sys.argv.pop(0)
+
+def putProgramMessage(message):
+  print("%s: %s" % (programName, message))
+
+def syntaxError(message):
+  putProgramMessage(message)
+  sys.exit(2)
+
+def verifyNoMoreProgramArguments():
+  if (len(sys.argv) > 0):
+    syntaxError("too many parameters")
+
+try:
+  import sysconfig
+# print("sysconfig")
+
+  def getIncludeDirectory():
+    return sysconfig.get_path("include")
+
+  def getLibraryDirectory():
+    return sysconfig.get_path("stdlib")
+
+  def getPackageDirectory():
+    return sysconfig.get_path("platlib")
+
+  def getConfigurationVariable(name):
+    return sysconfig.get_config_var(name)
+except ModuleNotFoundError:
+  import distutils.sysconfig
+# print("distutils")
+
+  def getIncludeDirectory():
+    return distutils.sysconfig.get_python_inc()
+
+  def getLibraryDirectory():
+    return distutils.sysconfig.get_python_lib(0, 1)
+
+  def getPackageDirectory():
+    return distutils.sysconfig.get_python_lib(True, False)
+
+  def getConfigurationVariable(name):
+    return distutils.sysconfig.get_config_var(name)
+
+programPath = nextProgramArgument()
+programName = os.path.basename(programPath)
+
+class ProgramActions:
+  def version():
+    verifyNoMoreProgramArguments()
+    print(sys.version_info[0])
+
+  def incdir():
+    verifyNoMoreProgramArguments()
+    print(getIncludeDirectory())
+
+  def libdir():
+    verifyNoMoreProgramArguments()
+    print(getLibraryDirectory())
+
+  def pkgdir():
+    verifyNoMoreProgramArguments()
+    print(getPackageDirectory())
+
+  def libopts():
+    verifyNoMoreProgramArguments()
+    print(getConfigurationVariable("LIBS"))
+
+  def linkopts():
+    verifyNoMoreProgramArguments()
+    print(getConfigurationVariable("LINKFORSHARED"))
+
+try:
+  programAction = nextProgramArgument()
+
+  try:
+    getattr(globals()["ProgramActions"], programAction)()
+  except AttributeError:
+    syntaxError("unknown action: %s" % programAction)
+except IndexError:
+  syntaxError("action not specified")
+
+sys.exit(0)

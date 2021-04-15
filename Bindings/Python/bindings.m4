@@ -31,100 +31,79 @@ PYTHON_OK=true
 export PYTHONCOERCECLOCALE=0
 
 AC_PATH_PROGS([PYTHON], [python3 python python2], [python])
-if test -z "${PYTHON}"
+if test -n "${PYTHON}"
 then
+   test -n "${PYTHON_VERSION}" || {
+      BRLTTY_PYTHON_QUERY([PYTHON_VERSION], [version])
+
+      test -n "${PYTHON_VERSION}" || {
+         AC_MSG_WARN([Python version not defined])
+         PYTHON_OK=false
+      }
+   }
+   AC_SUBST([PYTHON_VERSION])
+
+   test -n "${PYTHON_CPPFLAGS}" || {
+      BRLTTY_PYTHON_QUERY([python_include_directory], [incdir])
+
+      if test -n "${python_include_directory}"
+      then
+         PYTHON_CPPFLAGS="-I${python_include_directory}"
+
+         test -f "${python_include_directory}/Python.h" || {
+            AC_MSG_WARN([Python developer environment not installed])
+            PYTHON_OK=false
+         }
+      else
+         AC_MSG_WARN([Python include directory not found])
+         PYTHON_OK=false
+      fi
+   }
+   AC_SUBST([PYTHON_CPPFLAGS])
+
+   test -n "${PYTHON_LIBS}" || {
+      PYTHON_LIBS="-lpython${PYTHON_VERSION}"
+      BRLTTY_PYTHON_QUERY([python_library_directory], [libdir])
+
+      if test -n "${python_library_directory}"
+      then
+         PYTHON_LIBS="-L${python_library_directory}/config ${PYTHON_LIBS}"
+      else
+         AC_MSG_WARN([Python library directory not found])
+         PYTHON_OK=false
+      fi
+   }
+   AC_SUBST([PYTHON_LIBS])
+
+   test -n "${PYTHON_EXTRA_LIBS}" || {
+      BRLTTY_PYTHON_QUERY([PYTHON_EXTRA_LIBS], [libopts])
+   }
+   AC_SUBST([PYTHON_EXTRA_LIBS])
+
+   test -n "${PYTHON_EXTRA_LDFLAGS}" || {
+      BRLTTY_PYTHON_QUERY([PYTHON_EXTRA_LDFLAGS], [linkopts])
+   }
+   AC_SUBST([PYTHON_EXTRA_LDFLAGS])
+
+   test -n "${PYTHON_SITE_PKG}" || {
+      BRLTTY_PYTHON_QUERY([PYTHON_SITE_PKG], [pkgdir])
+
+      test -n "${PYTHON_SITE_PKG}" || {
+         AC_MSG_WARN([Python packages directory not found])
+         PYTHON_OK=false
+      }
+   }
+   AC_SUBST([PYTHON_SITE_PKG])
+else
    AC_MSG_WARN([Python interpreter not found])
    PYTHON_OK=false
-else
-   PYTHON_PROLOGUE=""
-   for python_module in sys distutils.sysconfig
-   do
-      python_error="`"${PYTHON}" -c "import ${python_module};" 2>&1`"
-      if test -n "${python_error}"
-      then
-         AC_MSG_WARN([Python module not found: ${python_module}: ${python_error}])
-         PYTHON_OK=false
-      else
-         PYTHON_PROLOGUE="${PYTHON_PROLOGUE}import ${python_module}; "
-      fi
-   done
-   AC_SUBST([PYTHON_PROLOGUE])
-
-   if "${PYTHON_OK}"
-   then
-      if test -z "${PYTHON_VERSION}"
-      then
-         [PYTHON_VERSION="`"${PYTHON}" -c "${PYTHON_PROLOGUE} print(sys.version_info[0]);"`"]
-         if test -z "${PYTHON_VERSION}"
-         then
-            AC_MSG_WARN([Python version not defined])
-         fi
-      fi
-      AC_SUBST([PYTHON_VERSION])
-
-      if test -z "${PYTHON_CPPFLAGS}"
-      then
-         [python_include_directory="`"${PYTHON}" -c "${PYTHON_PROLOGUE} print(distutils.sysconfig.get_python_inc());"`"]
-         if test -z "${python_include_directory}"
-         then
-            AC_MSG_WARN([Python include directory not found])
-            PYTHON_OK=false
-         else
-            PYTHON_CPPFLAGS="-I${python_include_directory}"
-
-            if test ! -f "${python_include_directory}/Python.h"
-            then
-               AC_MSG_WARN([Python developer environment not installed])
-               PYTHON_OK=false
-            fi
-         fi
-      fi
-      AC_SUBST([PYTHON_CPPFLAGS])
-
-      if test -z "${PYTHON_LIBS}"
-      then
-         PYTHON_LIBS="-lpython${PYTHON_VERSION}"
-
-         [python_library_directory="`"${PYTHON}" -c "${PYTHON_PROLOGUE} print(distutils.sysconfig.get_python_lib(0,1));"`"]
-         if test -z "${python_library_directory}"
-         then
-            AC_MSG_WARN([Python library directory not found])
-         else
-            PYTHON_LIBS="-L${python_library_directory}/config ${PYTHON_LIBS}"
-         fi
-      fi
-      AC_SUBST([PYTHON_LIBS])
-
-      if test -z "${PYTHON_EXTRA_LIBS}"
-      then
-         [PYTHON_EXTRA_LIBS="`"${PYTHON}" -c "${PYTHON_PROLOGUE} print(distutils.sysconfig.get_config_var('LOCALMODLIBS'), distutils.sysconfig.get_config_var('LIBS'));"`"]
-      fi
-      AC_SUBST([PYTHON_EXTRA_LIBS])
-
-      if test -z "${PYTHON_EXTRA_LDFLAGS}"
-      then
-         [PYTHON_EXTRA_LDFLAGS="`"${PYTHON}" -c "${PYTHON_PROLOGUE} print(distutils.sysconfig.get_config_var('LINKFORSHARED'));"`"]
-      fi
-      AC_SUBST([PYTHON_EXTRA_LDFLAGS])
-
-      if test -z "${PYTHON_SITE_PKG}"
-      then
-         [PYTHON_SITE_PKG="`"${PYTHON}" -c "${PYTHON_PROLOGUE} print(distutils.sysconfig.get_python_lib(1,0));"`"]
-         if test -z "${PYTHON_SITE_PKG}"
-         then
-            AC_MSG_WARN([Python package directory not found])
-         fi
-      fi
-      AC_SUBST([PYTHON_SITE_PKG])
-   fi
 fi
 
-AC_PATH_PROGS([CYTHON], [cython cython3])
-if test -z "${CYTHON}"
-then
+AC_PATH_PROGS([CYTHON], [cython3 cython])
+test -n "${CYTHON}" || {
    AC_MSG_WARN([Cython compiler not found])
    PYTHON_OK=false
-fi
+}
 
 if test "${GCC}" = "yes"
 then
@@ -140,4 +119,8 @@ fi
 AC_SUBST([CYTHON_CFLAGS])
 
 AC_SUBST([PYTHON_OK])
+])
+
+AC_DEFUN([BRLTTY_PYTHON_QUERY], [dnl
+   $1="`${PYTHON} Tools/pythoncmd $2`"
 ])
