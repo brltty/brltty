@@ -69,7 +69,7 @@ except ModuleNotFoundError:
 programPath = nextProgramArgument()
 programName = os.path.basename(programPath)
 
-class ProgramActions:
+class ActionHanlers:
   def version():
     verifyNoMoreProgramArguments()
     print(sys.version_info[0])
@@ -95,12 +95,15 @@ class ProgramActions:
     print(getConfigurationVariable("LINKFORSHARED"))
 
 try:
-  programAction = nextProgramArgument()
+  actionName = nextProgramArgument()
+  actionHandlers = globals()["ActionHanlers"]
 
   try:
-    getattr(globals()["ProgramActions"], programAction)()
+    actionHandler = getattr(actionHandlers, actionName)
   except AttributeError:
-    syntaxError("unknown action: %s" % programAction)
+    syntaxError("unknown action: %s" % actionName)
+
+  actionHandler()
 except IndexError:
   syntaxError("action not specified")
 
