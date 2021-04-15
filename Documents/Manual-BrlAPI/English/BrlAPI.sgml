@@ -1434,9 +1434,21 @@ packets to tell ranges
 of key codes which should be sent to it, and not given to
 <tt/brltty/. The server keeps a dynamic list of ranges, so that arbitrary
 sequences of such packets can be sent.
-For ranges, Data are 2 pairs of integers: the lower and the
-upper boundaries; lower and upper must be equal to tell one key, for instance.
-For Sets, Data simply consists of pairs of integers, one per key in the set.
+A range is composed of 2 keycodes: the "first" and the "last" boundaries.
+Each keycode is composed of 2 integers: the key flags then the command code.
+The range expressed by these two keycodes is the set of keycodes whose command
+codes are between the command code of the "first" keycode and the "last" keycode
+(inclusive), and whose flags contain at least the flags of the "first" keycode
+and at most the flags of the "last" keycode. Setting the "first" and "last"
+keycode to the same value express only one keycode, for instance. Setting the
+first and last keycode to the same command code but setting no flags in the
+"first" keycode and setting one flag in the "last" keycode expresses only two
+keycode, with the same command code and no flags set except possibly the flag
+that is set in the "last" keycode. Setting one flag <em/i/ in the "first"
+keycode and setting the same flag plus another flag <em/j/ in the "last" keycode
+expresses that the keycodes in the range have flag <em/i/ set and possibly flag
+<em/j/ set, but no other flag. Several such ranges can be provided one after the
+other.
 
 <sect2><tt/BRLAPI_PACKET_WRITE/ (see <em/brlapi_write()/)
 <p>
