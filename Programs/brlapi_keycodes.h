@@ -42,6 +42,9 @@ extern "C" {
  * X11 documentation, a complete list is probably available on your system in
  * /usr/include/X11/keysymdef.h
  *
+ * The second and third part are thus mandatory to tell the type of keycode and
+ * the value of the keycode, and the first part contains optional flags.
+ *
  * The third part is itself split into two parts: a command number and a command
  * value.  The relative sizes of these parts vary according to the key type.
  *
