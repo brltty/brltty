@@ -25,7 +25,7 @@ def nextProgramArgument():
   return sys.argv.pop(0)
 
 def putProgramMessage(message):
-  print("%s: %s" % (programName, message))
+  sys.stderr.write("%s: %s%s" % (programName, message, os.linesep))
 
 def syntaxError(message):
   putProgramMessage(message)
