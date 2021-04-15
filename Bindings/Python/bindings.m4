@@ -40,7 +40,7 @@ else
    for python_module in sys distutils.sysconfig
    do
       python_error="`"${PYTHON}" -c "import ${python_module};" 2>&1`"
-      if test -n "${python_error}"
+      if test $? -ne 0
       then
          AC_MSG_WARN([Python module not found: ${python_module}: ${python_error}])
          PYTHON_OK=false
