@@ -21,9 +21,6 @@
 import sys
 import os
 
-def nextProgramArgument():
-  return sys.argv.pop(0)
-
 def putProgramMessage(message):
   sys.stderr.write("%s: %s%s" % (programName, message, os.linesep))
 
@@ -31,13 +28,24 @@ def syntaxError(message):
   putProgramMessage(message)
   sys.exit(2)
 
+def nextProgramArgument():
+  return sys.argv.pop(0)
+
 def verifyNoMoreProgramArguments():
   if (len(sys.argv) > 0):
     syntaxError("too many parameters")
 
+programPath = nextProgramArgument()
+programName = os.path.basename(programPath)
+
+try:
+  actionName = nextProgramArgument()
+except IndexError:
+  syntaxError("action not specified")
+
 try:
   import sysconfig
-# print("sysconfig")
+# putProgramMessage("sysconfig")
 
   def getIncludeDirectory():
     return sysconfig.get_path("include")
@@ -50,24 +58,22 @@ try:
 
   def getConfigurationVariable(name):
     return sysconfig.get_config_var(name)
+
 except ModuleNotFoundError:
-  import distutils.sysconfig
-# print("distutils")
+  from distutils import sysconfig
+# putProgramMessage("distutils")
 
   def getIncludeDirectory():
-    return distutils.sysconfig.get_python_inc()
+    return sysconfig.get_python_inc()
 
   def getLibraryDirectory():
-    return distutils.sysconfig.get_python_lib(0, 1)
+    return sysconfig.get_python_lib(0, 1)
 
   def getPackageDirectory():
-    return distutils.sysconfig.get_python_lib(True, False)
+    return sysconfig.get_python_lib(True, False)
 
   def getConfigurationVariable(name):
-    return distutils.sysconfig.get_config_var(name)
-
-programPath = nextProgramArgument()
-programName = os.path.basename(programPath)
+    return sysconfig.get_config_var(name)
 
 class ActionHanlers:
   def version():
@@ -94,17 +100,12 @@ class ActionHanlers:
     verifyNoMoreProgramArguments()
     print(getConfigurationVariable("LINKFORSHARED"))
 
+actionHandlers = globals()["ActionHanlers"]
+
 try:
-  actionName = nextProgramArgument()
-  actionHandlers = globals()["ActionHanlers"]
+  actionHandler = getattr(actionHandlers, actionName)
+except AttributeError:
+  syntaxError("unknown action: %s" % actionName)
 
-  try:
-    actionHandler = getattr(actionHandlers, actionName)
-  except AttributeError:
-    syntaxError("unknown action: %s" % actionName)
-
-  actionHandler()
-except IndexError:
-  syntaxError("action not specified")
-
+actionHandler()
 sys.exit(0)
