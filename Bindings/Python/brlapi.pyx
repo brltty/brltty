@@ -237,6 +237,8 @@ class OperationError(Exception):
 
 	def __str__(self):
 		cdef c_brlapi.brlapi_error_t error
+		cdef c_brlapi.size_t size
+		cdef char *buf
 		if self.exception:
 			return self.exception
 		error.brlerrno = self.brlerrno
@@ -244,7 +246,12 @@ class OperationError(Exception):
 		error.gaierrno = self.gaierrno
 		str = self.errfun
 		error.errfun = str
-		return c_brlapi.brlapi_strerror(&error)
+		size = c_brlapi.brlapi_strerror_r(&error, NULL, 0)
+		buf = <char*>c_brlapi.malloc(size+1)
+		c_brlapi.brlapi_strerror_r(&error, buf, size+1)
+		ret = buf.decode("ASCII", errors="replace")
+		c_brlapi.free(buf)
+		return ret
 
 class ConnectionError(OperationError):
 	"""Error while connecting to BrlTTY"""

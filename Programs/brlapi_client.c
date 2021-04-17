@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <stddef.h>
+#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -2552,38 +2553,73 @@ const char *brlapi_errlist[] = {
 /* brlapi_nerr: number of error codes */
 const int brlapi_nerr = (sizeof(brlapi_errlist)/sizeof(char*));
 
+/* _brlapi_strerror_cpy: store constant-string error message */
+static size_t _brlapi_strerror_cpy(char *buf, size_t buflen, const char *msg)
+{
+  size_t totsize = strlen(msg);
+
+  if (buflen == 0)
+    return totsize;
+
+  if (buflen > totsize+1) {
+    buflen = totsize+1;
+  }
+  memcpy(buf, msg, buflen-1);
+  buf[buflen-1] = '\0';
+
+  return totsize;
+}
+
+/* _brlapi_strerror_snprintf: store formatted error message */
+static size_t _brlapi_strerror_snprintf(char *buf, size_t buflen, const char *fmt, ...)
+{
+  va_list va;
+  int totsize;
+
+  va_start(va, fmt);
+  totsize = vsnprintf(buf, buflen, fmt, va);
+  va_end(va);
+
+  return totsize;
+}
+
+/* brlapi_strerror_r: store error message */
+size_t BRLAPI_STDCALL brlapi_strerror_r(const brlapi_error_t *error, char *buf, size_t buflen)
+{
+  if (error->brlerrno>=brlapi_nerr)
+    return _brlapi_strerror_cpy(buf, buflen, "Unknown error");
+  else if (error->brlerrno==BRLAPI_ERROR_GAIERR) {
+#if defined(EAI_SYSTEM)
+    if (error->gaierrno == EAI_SYSTEM)
+      return _brlapi_strerror_snprintf(buf,buflen,"resolve: %s", strerror(error->libcerrno));
+    else
+#endif /* EAI_SYSTEM */
+      return _brlapi_strerror_snprintf(buf,buflen,"resolve: "
+#if defined(HAVE_GETADDRINFO)
+#if defined(HAVE_GAI_STRERROR)
+	"%s", gai_strerror(error->gaierrno)
+#else
+	"%d", error->gaierrno
+#endif
+#elif defined(HAVE_HSTRERROR) && !defined(__MINGW32__)
+	"%s", hstrerror(error->gaierrno)
+#else
+	"%x", error->gaierrno
+#endif
+	);
+  }
+  else if (error->brlerrno==BRLAPI_ERROR_LIBCERR) {
+    return _brlapi_strerror_snprintf(buf,buflen,"%s: %s", error->errfun?error->errfun:"(null)", strerror(error->libcerrno));
+  } else
+    return _brlapi_strerror_cpy(buf, buflen, brlapi_errlist[error->brlerrno]);
+}
+
 /* brlapi_strerror: return error message */
 const char * BRLAPI_STDCALL brlapi_strerror(const brlapi_error_t *error)
 {
   static char errmsg[128];
-  if (error->brlerrno>=brlapi_nerr)
-    return "Unknown error";
-  else if (error->brlerrno==BRLAPI_ERROR_GAIERR) {
-#if defined(EAI_SYSTEM)
-    if (error->gaierrno == EAI_SYSTEM)
-      snprintf(errmsg,sizeof(errmsg),"resolve: %s", strerror(error->libcerrno));
-    else
-#endif /* EAI_SYSTEM */
-      snprintf(errmsg,sizeof(errmsg),"resolve: "
-#if defined(HAVE_GETADDRINFO)
-#if defined(HAVE_GAI_STRERROR)
-	"%s\n", gai_strerror(error->gaierrno)
-#else
-	"%d\n", error->gaierrno
-#endif
-#elif defined(HAVE_HSTRERROR) && !defined(__MINGW32__)
-	"%s\n", hstrerror(error->gaierrno)
-#else
-	"%x\n", error->gaierrno
-#endif
-	);
-    return errmsg;
-  }
-  else if (error->brlerrno==BRLAPI_ERROR_LIBCERR) {
-    snprintf(errmsg,sizeof(errmsg),"%s: %s", error->errfun?error->errfun:"(null)", strerror(error->libcerrno));
-    return errmsg;
-  } else
-    return brlapi_errlist[error->brlerrno];
+  brlapi_strerror_r(error, errmsg, sizeof(errmsg));
+  return errmsg;
 }
 
 /* brlapi_perror: error message printing */

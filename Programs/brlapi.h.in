@@ -1354,9 +1354,29 @@ extern const char *brlapi_errfun;
  *
  * brlapi_strerror() returns the plain error message corresponding to its
  * argument. Since the message is a constant string, the application must not
- * free it.
+ * free it. Also, this makes it unsafe in threaded environments,
+ * brlapi_strerror_r() should be used instead in that case.
  */
 const char * BRLAPI_STDCALL brlapi_strerror(const brlapi_error_t *error);
+
+/* brlapi_strerror_r */
+/** Store plain error message
+ *
+ * brlapi_strerror_r() stores the plain error message corresponding to its
+ * \p error argument. \p buflen has to be set to the size of \p buf, and
+ * brlapi_strerror_r() will store at most \p buflen bytes in \p buf. If \p
+ * buflen is not large enough for the whole error message, it will be truncated,
+ * but a trailing \0 character will still be set at buf[buflen-1].
+ *
+ * \returns the number of characters that should have been stored in \p buf
+ * (without the trailing \0 character). A value greater or equal to \p buflen
+ * thus means that the output was truncated.
+ *
+ * If \p buflen is set to 0, \p buf can be set to NULL, and brlapi_strerror_r
+ * will thus only return the number of characters that would have been stored
+ * (without the trailing \0 character).
+ */
+size_t BRLAPI_STDCALL brlapi_strerror_r(const brlapi_error_t *error, char *buf, size_t buflen);
 
 /** Type for packet type. Only unsigned can cross networks, 32bits */
 typedef uint32_t brlapi_packetType_t;

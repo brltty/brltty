@@ -133,7 +133,7 @@ cdef extern from "Programs/brlapi.h":
 	brlapi_paramCallbackDescriptor_t)
 
 	brlapi_error_t* brlapi_error_location()
-	char* brlapi_strerror(brlapi_error_t*)
+	size_t brlapi_strerror_r(brlapi_error_t*, char *buf, size_t buflen)
 	brlapi_keyCode_t BRLAPI_KEY_MAX
 	brlapi_keyCode_t BRLAPI_KEY_FLAGS_MASK
 	brlapi_keyCode_t BRLAPI_KEY_TYPE_MASK

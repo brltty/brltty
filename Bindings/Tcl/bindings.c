@@ -91,9 +91,12 @@ setByteArrayResult (Tcl_Interp *interp, const unsigned char *bytes, int count) {
 
 static void
 setBrlapiError (Tcl_Interp *interp) {
-  const char *text = brlapi_strerror(&brlapi_error);
+  size_t size = brlapi_strerror_r(&brlapi_error, NULL, 0);
+  char text[size+1];
   const char *name;
   int number;
+
+  brlapi_strerror_r(&brlapi_error, text, sizeof(text));
 
   switch (brlapi_error.brlerrno) {
     case BRLAPI_ERROR_LIBCERR:
@@ -125,15 +128,7 @@ setBrlapiError (Tcl_Interp *interp) {
 
   Tcl_Obj *result = Tcl_GetObjResult(interp);
   Tcl_SetStringObj(result, "BrlAPI error: ", -1);
-  size_t length = strlen(text);
-
-  while (length > 0) {
-    size_t end = length - 1;
-    if (text[end] != '\n') break;
-    length = end;
-  }
-
-  Tcl_AppendToObj(result, text, length);
+  Tcl_AppendToObj(result, text, -1);
 }
 
 #define TEST_BRLAPI_OK(expression) \

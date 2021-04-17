@@ -176,10 +176,12 @@ throwJavaError (JNIEnv *env, const char *object, const char *message) {
 
 static void
 logBrlapiError (const char *label) {
+  size_t size = brlapi_strerror_r(&brlapi_error, NULL, 0);
+  char msg[size+1];
+  brlapi_strerror_r(&brlapi_error, msg, sizeof(msg));
   fprintf(stderr,
     "%s: API=%d Libc=%d GAI=%d: %s\n",
-    label, brlapi_errno, brlapi_libcerrno, brlapi_gaierrno,
-    brlapi_strerror(&brlapi_error)
+    label, brlapi_errno, brlapi_libcerrno, brlapi_gaierrno, msg
   );
 }
 
@@ -1483,26 +1485,11 @@ JAVA_INSTANCE_METHOD(
     }
   }
 
-  const char *cMessage = brlapi_strerror(&error);
+  size_t size = brlapi_strerror_r(&error, NULL, 0);
+  char cMessage[size+1];
+
+  brlapi_strerror_r(&error, cMessage, sizeof(cMessage));
   if (jFunction) (*env)->ReleaseStringUTFChars(env, jFunction, error.errfun);
-  if (!cMessage) return NULL;
-
-  size_t length = strlen(cMessage);
-  char buffer[length + 1];
-  int copy = 0;
-
-  while (length > 0) {
-    size_t last = length - 1;
-    if (cMessage[last] != '\n') break;
-    length = last;
-    copy = 1;
-  }
-
-  if (copy) {
-    memcpy(buffer, cMessage, length);
-    buffer[length] = 0;
-    cMessage = buffer;
-  }
 
   return (*env)->NewStringUTF(env, cMessage);
 }
