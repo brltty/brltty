@@ -36,6 +36,7 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #include <stdio.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -1035,7 +1036,7 @@ logConversionResult (Connection *connection, unsigned int chars, unsigned int by
 }
 
 static void
-convertFromLatin1 (Connection *c, unsigned int rbeg, unsigned int rsiz, const unsigned char *text, unsigned int textLen) {
+convertFromLatin1 (Connection *c, unsigned int rbeg, unsigned int rsiz, const unsigned char *text) {
   for (int i=0; i<rsiz; i+=1) {
     c->brailleWindow.text[rbeg-1+i] = text[i];
   }
@@ -1065,6 +1066,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   brlapi_writeArgumentsPacket_t *wa = &packet->writeArguments;
   unsigned char *text = NULL, *orAttr = NULL, *andAttr = NULL;
   unsigned int rbeg, rsiz, textLen = 0;
+  bool fill;
   int cursor = -1;
   unsigned char *p = &wa->data;
   int remaining = size;
@@ -1081,11 +1083,19 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   remaining -= sizeof(wa->flags); /* flags */
   CHECKEXC((wa->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLAPI_ERROR_OPNOTSUPP, "display number not yet supported");
   if (wa->flags & BRLAPI_WF_REGION) {
+    int regionSize;
     CHECKEXC(remaining>2*sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for region");
     rbeg = ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region begin */
-    rsiz = ntohl( *((uint32_t *) p) );
+    regionSize = (int32_t) ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region size */
+    if (regionSize < 0) {
+      rsiz = -regionSize;
+      fill = true;
+    } else {
+      rsiz = regionSize;
+      fill = false;
+    }
 
     CHECKEXC(
       (rbeg >= 1) && (rbeg <= displaySize),
@@ -1093,18 +1103,19 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     );
 
     CHECKEXC(
-      (rsiz > 0) && (rsiz <= displaySize),
+      (rsiz > 0) && (fill || rsiz <= displaySize),
       BRLAPI_ERROR_INVALID_PARAMETER, "invalid region size"
     );
 
     CHECKEXC(
-      ((rbeg + rsiz - 1) <= displaySize),
+      (fill || (rbeg + rsiz - 1) <= displaySize),
       BRLAPI_ERROR_INVALID_PARAMETER, "invalid region"
     );
   } else {
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "warning: fd %"PRIfd" uses deprecated regionBegin=0 and regionSize = 0",c->fd);
     rbeg = 1;
     rsiz = displaySize;
+    fill = true;
   }
   if (wa->flags & BRLAPI_WF_TEXT) {
     CHECKEXC(remaining>=sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for text length");
@@ -1142,6 +1153,8 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   }
   CHECKEXC(remaining==0, BRLAPI_ERROR_INVALID_PACKET, "packet too big");
   /* Here the whole packet has been checked */
+
+  unsigned int rsiz_filled = fill ? displaySize - rbeg + 1 : rsiz;
 
   if (text) {
     int isUTF8 = 0;
@@ -1189,10 +1202,11 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       }
     }
 
+    size_t end;
     if (isUTF8) {
       logConversionDecision(c, "UTF-8", "internal conversion");
 
-      size_t outLeft = rsiz;
+      size_t outLeft = rsiz_filled;
       wchar_t outBuff[outLeft];
 
       size_t inLeft = textLen;
@@ -1203,22 +1217,22 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
         BRLAPI_ERROR_INVALID_PACKET, "invalid charset conversion"
       );
 
-      CHECKEXC(!inLeft, BRLAPI_ERROR_INVALID_PACKET, "text too big");
-      CHECKEXC(!outLeft, BRLAPI_ERROR_INVALID_PACKET, "text too small");
+      if (!fill) {
+	CHECKEXC(!inLeft, BRLAPI_ERROR_INVALID_PACKET, "text too big");
+	CHECKEXC(!outLeft, BRLAPI_ERROR_INVALID_PACKET, "text too small");
+      }
 
       lockMutex(&c->brailleWindowMutex);
-      wmemcpy(c->brailleWindow.text+rbeg-1, outBuff, rsiz);
-    } else if (isLatin1) {
-      logConversionDecision(c, "ISO_8859-1", "internal conversion");
-      lockMutex(&c->brailleWindowMutex);
-      convertFromLatin1(c, rbeg, rsiz, text, textLen);
+      wmemcpy(c->brailleWindow.text+rbeg-1, outBuff, rsiz_filled - outLeft);
+      end = rbeg-1 + rsiz_filled - outLeft;
     }
 
 #ifdef HAVE_ICONV_H
-    else if (charset) {
+    else if (charset && !isLatin1) {
       logConversionDecision(c, charset, "iconv conversion");
 
-      wchar_t textBuf[rsiz];
+      size_t len = fill ? textLen : rsiz;
+      wchar_t textBuf[len];
       char *in = (char *) text, *out = (char *) textBuf;
       size_t sin = textLen, sout = sizeof(textBuf);
 
@@ -1228,34 +1242,57 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       iconv_close(conv);
 
       CHECKEXC((res != (size_t)-1), BRLAPI_ERROR_INVALID_PACKET, "invalid charset conversion");
-      CHECKEXC(!sin, BRLAPI_ERROR_INVALID_PACKET, "text too big");
-      CHECKEXC(!sout, BRLAPI_ERROR_INVALID_PACKET, "text too small");
+      if (!fill) {
+	CHECKEXC(!sin, BRLAPI_ERROR_INVALID_PACKET, "text too big");
+	CHECKEXC(!sout, BRLAPI_ERROR_INVALID_PACKET, "text too small");
+      }
       logConversionResult(c, rsiz, textLen);
+      len -= sout / sizeof(wchar_t);
+      if (len > displaySize - rbeg + 1)
+	len = displaySize - rbeg + 1;
 
       lockMutex(&c->brailleWindowMutex);
-      wmemcpy(c->brailleWindow.text+rbeg-1, textBuf, rsiz);
+      wmemcpy(c->brailleWindow.text+rbeg-1, textBuf, len);
+      end = rbeg-1 + len;
     }
 #endif /* HAVE_ICONV_H */
 
     else {
-      logConversionDecision(c, "ISO_8859-1", "assumed");
+      logConversionDecision(c, "ISO_8859-1", isLatin1 ? "internal conversion" : "assumed");
       lockMutex(&c->brailleWindowMutex);
-      convertFromLatin1(c, rbeg, rsiz, text, textLen);
+      size_t len = textLen;
+      if (!fill) {
+	CHECKEXC(len <= rsiz, BRLAPI_ERROR_INVALID_PACKET, "text too big");
+	CHECKEXC(len >= rsiz, BRLAPI_ERROR_INVALID_PACKET, "text too small");
+      } else {
+	if (len > rsiz_filled)
+	  len = rsiz_filled;
+      }
+      convertFromLatin1(c, rbeg, len, text);
+      end = rbeg-1 + len;
     }
+    if (fill)
+      wmemset(c->brailleWindow.text+end, L' ', displaySize - end);
 
     // Forget the charset in case it's pointing to a local buffer.
     // This occurs when getCharset() is saved and alloca() isn't available.
     charset = NULL;
     charsetLen = 0;
 
-    if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz);
-    if (!orAttr)  memset(c->brailleWindow.orAttr+rbeg-1,0x00,rsiz);
+    if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz_filled);
+    if (!orAttr)  memset(c->brailleWindow.orAttr+rbeg-1,0x00,rsiz_filled);
   } else {
     lockMutex(&c->brailleWindowMutex);
   }
 
-  if (andAttr) memcpy(c->brailleWindow.andAttr+rbeg-1,andAttr,rsiz);
-  if (orAttr) memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
+  if (andAttr) {
+    memcpy(c->brailleWindow.andAttr+rbeg-1,andAttr,rsiz);
+    memset(c->brailleWindow.andAttr+rbeg-1+rsiz,0XFF,rsiz_filled-rsiz);
+  }
+  if (orAttr) {
+    memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
+    memset(c->brailleWindow.orAttr+rbeg-1+rsiz,0X00,rsiz_filled-rsiz);
+  }
   if (cursor >= 0) c->brailleWindow.cursor = cursor;
 
   c->brlbufstate = TODISPLAY;

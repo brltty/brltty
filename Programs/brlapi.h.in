@@ -593,7 +593,7 @@ int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned cha
 typedef struct {
   int displayNumber /** Display number ::BRLAPI_DISPLAY_DEFAULT == unspecified */;
   unsigned int regionBegin /** Region of display to update, 1st character of display is 1 */;
-  unsigned int regionSize /** Number of characters held in text, andMask and orMask. */;
+  int regionSize /** Number of characters held in andMask and orMask. If negative, its absolute value is taken into account, and the output is padded or truncated to fill the rest of the display. */;
   const char *text /** Text to display, must hold as many characters as the region fields expresses. */;
   int textSize /** Size of text in bytes. If -1, strlen() is used for computing it. */;
   const unsigned char *andMask /** And attributes; applied first */;

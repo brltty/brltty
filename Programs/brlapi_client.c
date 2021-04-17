@@ -1876,11 +1876,9 @@ static size_t getCharset(brlapi_handle_t *handle, void *buffer, int wide) {
 static int brlapi___writeText(brlapi_handle_t *handle, int cursor, const void *str, int wide)
 {
   int dispSize = handle->brlx * handle->brly;
-  unsigned int min;
   brlapi_packet_t packet;
   brlapi_writeArgumentsPacket_t *wa = &packet.writeArguments;
   unsigned char *p = &wa->data;
-  const char *locale;
   int res;
   size_t len;
 
@@ -1892,19 +1890,16 @@ static int brlapi___writeText(brlapi_handle_t *handle, int cursor, const void *s
     old_locale = uselocale(handle->default_locale);
   }
 
-  locale = "default locale";
 #else /* LC_GLOBAL_LOCALE */
-  locale = setlocale(LC_CTYPE,NULL);
+  setlocale(LC_CTYPE,NULL);
 #endif /* LC_GLOBAL_LOCALE */
 
   wa->flags = BRLAPI_WF_REGION;
   *((uint32_t *) p) = htonl(1); p += sizeof(uint32_t);
-  *((uint32_t *) p) = htonl(dispSize); p += sizeof(uint32_t);
+  *((uint32_t *) p) = htonl(-dispSize); p += sizeof(uint32_t);
+
   if (str) {
-    uint32_t *size;
     wa->flags |= BRLAPI_WF_TEXT;
-    size = (uint32_t *) p;
-    p += sizeof(*size);
 #if defined(__MINGW32__)
     if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
       len = sizeof(wchar_t) * wcslenProc(str);
@@ -1914,56 +1909,9 @@ static int brlapi___writeText(brlapi_handle_t *handle, int cursor, const void *s
 #endif /* __MINGW32__ */
     else
       len = strlen(str);
-    if (!wide && locale && strcmp(locale,"C")) {
-      mbstate_t ps;
-      size_t eaten;
-      unsigned i;
-      memset(&ps,0,sizeof(ps));
-      for (min=0;min<dispSize;min++) {
-	if (!*(char*)str)
-	  goto endcount;
-	eaten = mbrlen(str,len,&ps);
-	switch(eaten) {
-	  case (size_t)(-2):
-	    errno = EILSEQ;
-	    /* fall through */
-	  case (size_t)(-1):
-	    brlapi_libcerrno = errno;
-	    brlapi_errfun = "mbrlen";
-	    brlapi_errno = BRLAPI_ERROR_LIBCERR;
-#ifdef LC_GLOBAL_LOCALE
-	    if (handle->default_locale != LC_GLOBAL_LOCALE) {
-	      /* Restore application locale */
-	      uselocale(old_locale);
-            }
-#endif /* LC_GLOBAL_LOCALE */
-	    return -1;
-	  case 0:
-	    goto endcount;
-	}
-	memcpy(p, str, eaten);
-	p += eaten;
-	str += eaten;
-	len -= eaten;
-      }
-endcount:
-      for (i = min; i<dispSize; i++) p += wcrtomb((char *)p, L' ', &ps);
-    } else if (wide) {
-      int extra;
-      min = MIN(len, sizeof(wchar_t) * dispSize);
-      extra = dispSize - min / sizeof(wchar_t);
-      memcpy(p, str, min);
-      p += min;
-      wmemset((wchar_t *) p, L' ', extra);
-      p += sizeof(wchar_t) * extra;
-    } else {
-      min = MIN(len, dispSize);
-      memcpy(p, str, min);
-      p += min;
-      memset(p, ' ', dispSize-min);
-      p += dispSize-min;
-    }
-    *size = htonl((p-(unsigned char *)(size+1)));
+    *((uint32_t *) p) = htonl(len); p += sizeof(uint32_t);
+    memcpy(p, str, len);
+    p += len;
   }
   if (cursor!=BRLAPI_CURSOR_LEAVE) {
     wa->flags |= BRLAPI_WF_CURSOR;
@@ -2075,7 +2023,7 @@ int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned cha
   }
 
   wa.regionBegin = 1;
-  wa.regionSize = size;
+  wa.regionSize = -size;
   wa.cursor = BRLAPI_CURSOR_OFF;
 
   return brlapi__write(handle, &wa);
@@ -2095,7 +2043,8 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
 #endif /* WINDOWS */
 {
   int dispSize = handle->brlx * handle->brly;
-  unsigned int rbeg, rsiz, strLen;
+  unsigned int rbeg, strLen;
+  int rsiz;
   brlapi_packet_t packet;
   brlapi_writeArgumentsPacket_t *wa = &packet.writeArguments;
   unsigned char *p = &wa->data;
@@ -2112,11 +2061,13 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
     if (rsiz == 0) return 0;
     wa->flags |= BRLAPI_WF_REGION;
     *((uint32_t *) p) = htonl(rbeg); p += sizeof(uint32_t);
-    *((uint32_t *) p) = htonl(rsiz); p += sizeof(uint32_t);
+    *((uint32_t *) p) = htonl((int32_t) rsiz); p += sizeof(uint32_t);
   } else {
     /* DEPRECATED */
-    rsiz = dispSize;
+    rsiz = -dispSize;
   }
+  if (rsiz < 0)
+    rsiz = -rsiz;
   if (s->text) {
     if (s->textSize != -1)
       strLen = s->textSize;

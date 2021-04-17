@@ -1461,10 +1461,12 @@ flag weight):
 display has several. If not given, usual display is used.
 <item> A region must be given as two integers indicating the beginning and the
 number of characters of the part of the braille display which is to be updated,
-the first cell of the display being numbered 1.
+the first cell of the display being numbered 1. If the number is negative, its
+absolute value is taken into account, and the update is padded or truncated to
+fill the rest of the display.
 <item> The text to display can then be given, preceded by its size in bytes
 expressed as an integer. It will erase the corresponding region in the AND and
-OR fields. The text's length in characters must exactly match the region
+OR fields. If the region size is positive, the text's length in characters must exactly match the region
 size. For multibyte text, this is the number of wide characters. Notably,
 combining and double-width characters count for 1.
 <item> Then an AND field can be given, one byte per character: the 8-dot

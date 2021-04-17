@@ -38,7 +38,7 @@ cdef extern from "Programs/brlapi.h":
 	ctypedef struct brlapi_writeArguments_t:
 		int displayNumber
 		unsigned int regionBegin
-		unsigned int regionSize
+		int regionSize
 		char *text
 		int textSize
 		unsigned char *andMask
