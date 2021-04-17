@@ -1283,8 +1283,6 @@ or raw mode. The client can send either of these types of packet:
 no power on it any more, masked keys excepted. It's up to the client to manage
 display and keypresses. For this, it can send either of these types of packet:
   <itemize>
-  <item><tt/BRLAPI_PACKET_ENTERTY/MODE to switch to another tty, but how key presses
-  should be sent mustn't change,
   <item><tt/BRLAPI_PACKET_LEAVETTYMODE/ to leave tty handling mode and go back to
   normal mode,
   <item><tt/BRLAPI_PACKET_IGNOREKEYRANGE/ and <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/ to mask and unmask keys,

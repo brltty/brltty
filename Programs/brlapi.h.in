@@ -429,11 +429,14 @@ int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int 
  * key presses. NULL or "" means BRLTTY commands are required,
  * whereas a driver name means that driver-specific keycodes are expected.
  *
+ * \return the used tty number on success, -1 on error
+ *
  * WINDOWPATH and WINDOWID should be propagated when running remote applications
  * via ssh, for instance, along with BRLAPI_HOST and the authorization key (see
  * SendEnv in ssh_config(5) and AcceptEnv in sshd_config(5))
  *
- * \return the used tty number on success, -1 on error
+ * Once brlapi_enterTtyMode() is called, brlapi_leaveTtyMode() has to be called
+ * before calling brlapi_enterTtyMode() again.
  *
  * \sa brlapi_leaveTtyMode() brlapi_readKey()
  */
