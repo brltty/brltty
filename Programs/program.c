@@ -22,6 +22,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <locale.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <limits.h>
