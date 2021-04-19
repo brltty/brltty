@@ -855,6 +855,7 @@ public abstract class InputHandlers {
 
   public static boolean globalAction_logScreen () {
     ScreenLogger.log();
+    BrailleMessage.PLAIN.show("screen logged");
     return true;
   }
 
@@ -875,9 +876,7 @@ public abstract class InputHandlers {
       case 13: return globalAction_toNextWindow();
       case 14: return globalAction_showWindowTitle();
       case 15: return globalAction_showStatusIndicators();
-      case 16: return globalAction_quickSettings();
-      case 17: return globalAction_deviceOptions();
-      case 19: return globalAction_logScreen();
+      case 16: return globalAction_logScreen();
       default: return false;
     }
   }
