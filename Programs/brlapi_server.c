@@ -1073,8 +1073,8 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   char *charset = NULL;
   unsigned int charsetLen = 0;
   CHECKEXC(remaining>=sizeof(wa->flags), BRLAPI_ERROR_INVALID_PACKET, "packet too small for flags");
-  CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
-  CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
+  CHECKEXC(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  CHECKEXC(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   wa->flags = ntohl(wa->flags);
   if ((remaining==sizeof(wa->flags))&&(wa->flags==0)) {
     c->brlbufstate = EMPTY;

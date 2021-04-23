@@ -1596,4 +1596,10 @@ for the corresponding parameter.
 
 It is structured exactly like a <tt/BRLAPI_PACKET_PARAM_VALUE/ packet.
 
+<sect2><tt/BRLAPI_PACKET_SYNCHRONIZE/
+
+This packet is sent by the client and just acknowledged by the server. This
+allows the client to perform a round-try with the server, thus collecting any
+pending exception notification.
+
 </article>
