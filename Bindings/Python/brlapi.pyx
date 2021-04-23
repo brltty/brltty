@@ -1090,3 +1090,9 @@ cdef class Connection:
 
 		descr = entry
 		c_brlapi.brlapi_python_unwatchParameter(self.h, <c_brlapi.brlapi_python_paramCallbackDescriptor_t *>descr)
+
+	def pause(self, timeout_ms):
+		"""Wait until an event is received from the BrlAPI server.
+		See brlapi_pause(3).
+		"""
+		c_brlapi.brlapi__pause(self.h, timeout_ms)
