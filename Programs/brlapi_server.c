@@ -1281,13 +1281,14 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 
     if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz_filled);
     if (!orAttr)  memset(c->brailleWindow.orAttr+rbeg-1,0x00,rsiz_filled);
+    if (fill)     memset(c->brailleWindow.andAttr+rbeg-1+rsiz,0x00,rsiz_filled-rsiz);
   } else {
     lockMutex(&c->brailleWindowMutex);
   }
 
   if (andAttr) {
     memcpy(c->brailleWindow.andAttr+rbeg-1,andAttr,rsiz);
-    memset(c->brailleWindow.andAttr+rbeg-1+rsiz,0XFF,rsiz_filled-rsiz);
+    memset(c->brailleWindow.andAttr+rbeg-1+rsiz,0X00,rsiz_filled-rsiz);
   }
   if (orAttr) {
     memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
