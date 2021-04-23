@@ -285,6 +285,8 @@ struct brlapi_handle_t { /* Connection-specific information */
     brlapi_exceptionHandler_t withoutHandle;
     brlapi__exceptionHandler_t withHandle;
   } exceptionHandler;
+  int exception_sync;
+  int exception_error;
   pthread_mutex_t exceptionHandler_mutex;
 
   struct brlapi_parameterCallback_t *parameterCallbacks;
@@ -349,6 +351,8 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
     handle->exceptionHandler.withoutHandle = brlapi_defaultExceptionHandler;
   else
     handle->exceptionHandler.withHandle = brlapi__defaultExceptionHandler;
+  handle->exception_sync = 0;
+  handle->exception_error = BRLAPI_ERROR_SUCCESS;
   pthread_mutex_init(&handle->exceptionHandler_mutex, NULL);
   handle->parameterCallbacks = NULL;
   {
@@ -521,21 +525,29 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
   if (type==BRLAPI_PACKET_EXCEPTION) {
     size_t esize;
     int hdrSize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
+    int err = ntohl(errorPacket->code);
 
     if (size<hdrSize)
       esize = 0;
     else
       esize = size-hdrSize;
 
+    pthread_mutex_lock(&handle->exceptionHandler_mutex);
+    if (handle->exception_sync) {
+      handle->exception_error = err;
+      pthread_mutex_unlock(&handle->exceptionHandler_mutex);
+      return -3;
+    }
+    if (handle==&defaultHandle)
+      defaultHandle.exceptionHandler.withoutHandle(err, ntohl(errorPacket->type), &errorPacket->packet, esize);
+    else
+      handle->exceptionHandler.withHandle(handle, err, ntohl(errorPacket->type), &errorPacket->packet, esize);
+    pthread_mutex_unlock(&handle->exceptionHandler_mutex);
+
     pthread_mutex_lock(&handle->fileDescriptor_mutex);
     closeFileDescriptor(handle->fileDescriptor);
     handle->fileDescriptor = BRLAPI_INVALID_FILE_DESCRIPTOR;
     pthread_mutex_unlock(&handle->fileDescriptor_mutex);
-
-    if (handle==&defaultHandle)
-      defaultHandle.exceptionHandler.withoutHandle(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
-    else
-      handle->exceptionHandler.withHandle(handle, ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
 
     return -2;
   }
@@ -558,7 +570,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
  * Never returns -2. If loop is WAIT_FOR_EXPECTED_PACKET, never returns -3.
  */
 static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t size, int loop, int timeout_ms) {
-  int doread = 0;
+  int doread;
   ssize_t res;
   sem_t sem;
   struct timeval deadline, *pdeadline = NULL;
@@ -573,6 +585,7 @@ static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_
     pdeadline = &deadline;
   }
 again:
+  doread = 0;
   pthread_mutex_lock(&handle->read_mutex);
   if (!handle->reading) {
     doread = handle->reading = 1;
@@ -692,6 +705,52 @@ int BRLAPI_STDCALL brlapi__pause(brlapi_handle_t *handle, int timeout_ms) {
 /* brlapi_pause */
 int BRLAPI_STDCALL brlapi_pause(int timeout_ms) {
   return brlapi__pause(&defaultHandle, timeout_ms);
+}
+
+
+/* brlapi__sync */
+int BRLAPI_STDCALL brlapi__sync(brlapi_handle_t *handle) {
+  int res, error;
+
+  pthread_mutex_lock(&handle->exceptionHandler_mutex);
+  handle->exception_sync++;
+  error = handle->exception_error;
+  handle->exception_error = BRLAPI_ERROR_SUCCESS;
+  pthread_mutex_unlock(&handle->exceptionHandler_mutex);
+
+  if (error != BRLAPI_ERROR_SUCCESS) {
+    pthread_mutex_lock(&handle->exceptionHandler_mutex);
+    handle->exception_sync--;
+    pthread_mutex_unlock(&handle->exceptionHandler_mutex);
+    brlapi_errno = error;
+    return -1;
+  }
+
+  res = brlapi__writePacketWaitForAck(handle,BRLAPI_PACKET_SYNCHRONIZE,NULL,0);
+
+  if (res == -1) {
+    pthread_mutex_lock(&handle->exceptionHandler_mutex);
+    handle->exception_sync--;
+    pthread_mutex_unlock(&handle->exceptionHandler_mutex);
+    return -1;
+  }
+
+  pthread_mutex_lock(&handle->exceptionHandler_mutex);
+  handle->exception_sync--;
+  error = handle->exception_error;
+  handle->exception_error = BRLAPI_ERROR_SUCCESS;
+  pthread_mutex_unlock(&handle->exceptionHandler_mutex);
+
+  if (error != BRLAPI_ERROR_SUCCESS) {
+    brlapi_errno = error;
+    return -1;
+  }
+  return 0;
+}
+
+/* brlapi_sync */
+int BRLAPI_STDCALL brlapi_sync(void) {
+  return brlapi__sync(&defaultHandle);
 }
 
 /* Function: tryHost */

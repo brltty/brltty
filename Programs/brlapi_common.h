@@ -502,6 +502,7 @@ static const brlapi_packetTypeEntry_t brlapi_packetTypeTable[] = {
   { BRLAPI_PACKET_RESUMEDRIVER, "ResumeDriver" },
   { BRLAPI_PACKET_PARAM_VALUE, "ParameterValue" },
   { BRLAPI_PACKET_PARAM_REQUEST, "ParameterRequest" },
+  { BRLAPI_PACKET_SYNCHRONIZE, "Synchronize" },
   { BRLAPI_PACKET_ACK, "Ack" },
   { BRLAPI_PACKET_ERROR, "Error" },
   { BRLAPI_PACKET_EXCEPTION, "Exception" },

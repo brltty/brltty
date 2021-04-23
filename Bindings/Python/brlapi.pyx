@@ -1096,3 +1096,14 @@ cdef class Connection:
 		See brlapi_pause(3).
 		"""
 		c_brlapi.brlapi__pause(self.h, timeout_ms)
+
+	def sync(self):
+		"""Synchronize against any pending exception, and raise it.
+		See brlapi_sync(3).
+		"""
+		cdef int retval
+
+		with nogil:
+			retval = c_brlapi.brlapi__sync(self.h)
+		if retval == -1:
+			raise OperationError()

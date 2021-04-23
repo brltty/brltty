@@ -555,6 +555,7 @@ typedef struct { /* packet handlers */
   PacketHandler resumeDriver;
   PacketHandler parameterValue;
   PacketHandler parameterRequest;
+  PacketHandler sync;
 } PacketHandlers;
 
 /****************************************************************************/
@@ -2514,6 +2515,12 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   return 0;
 }
 
+static int handleSync(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
+{
+  writeAck(c->fd);
+  return 0;
+}
+
 static PacketHandlers packetHandlers = {
   handleGetDriverName, handleGetModelIdentifier, handleGetDisplaySize,
   handleEnterTtyMode, handleSetFocus, handleLeaveTtyMode,
@@ -2521,6 +2528,7 @@ static PacketHandlers packetHandlers = {
   handleEnterRawMode, handleLeaveRawMode, handlePacket,
   handleSuspendDriver, handleResumeDriver,
   handleParamValue, handleParamRequest,
+  handleSync,
 };
 
 static void handleNewConnection(Connection *c)
@@ -2714,6 +2722,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     case BRLAPI_PACKET_RESUMEDRIVER: p = handlers->resumeDriver; break;
     case BRLAPI_PACKET_PARAM_VALUE: p = handlers->parameterValue; break;
     case BRLAPI_PACKET_PARAM_REQUEST: p = handlers->parameterRequest; break;
+    case BRLAPI_PACKET_SYNCHRONIZE: p = handlers->sync; break;
   }
   if (p!=NULL) {
     logRequest(type, c->fd);

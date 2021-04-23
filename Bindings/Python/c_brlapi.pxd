@@ -128,9 +128,11 @@ cdef extern from "Programs/brlapi.h":
 	void *brlapi__getParameterAlloc(brlapi_handle_t *, brlapi_param_t, unsigned long long, brlapi_param_flags_t, size_t *) nogil
 	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, brlapi_param_flags_t, void*, size_t) nogil
 	const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter) nogil
-	brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, brlapi_param_flags_t, brlapi_paramCallback_t, void *, void*, size_t);
-	int brlapi__unwatchParameter(brlapi_handle_t *,
-	brlapi_paramCallbackDescriptor_t)
+	brlapi_paramCallbackDescriptor_t brlapi__watchParameter(brlapi_handle_t *, brlapi_param_t, uint64_t, brlapi_param_flags_t, brlapi_paramCallback_t, void *, void*, size_t)
+	int brlapi__unwatchParameter(brlapi_handle_t *, brlapi_paramCallbackDescriptor_t)
+
+	int brlapi__pause(brlapi_handle_t *handle, int timeout_ms) nogil
+	int brlapi__sync(brlapi_handle_t *handle) nogil
 
 	brlapi_error_t* brlapi_error_location()
 	size_t brlapi_strerror_r(brlapi_error_t*, char *buf, size_t buflen)

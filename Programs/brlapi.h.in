@@ -1217,6 +1217,19 @@ int BRLAPI_STDCALL brlapi_pause(int timeout_ms);
 #endif
 int BRLAPI_STDCALL brlapi__pause(brlapi_handle_t *handle, int timeout_ms);
 
+/* brlapi_sync */
+/**
+ * Synchronize against any pending exception, and returns it. This allows to
+ * synchronously catch exception raised by brlapi_write calls.
+ * This works by temporarily replacing the current exception handler by its own
+ * handler.
+ * \return 0 if no exception was pending, -1 if an exception was caught.
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int BRLAPI_STDCALL brlapi_sync(void);
+#endif
+int BRLAPI_STDCALL brlapi__sync(brlapi_handle_t *handle);
+
 /** @} */
 
 /** \defgroup brlapi_error Error handling
