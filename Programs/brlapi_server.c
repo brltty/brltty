@@ -1221,6 +1221,8 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       if (!fill) {
 	CHECKEXC(!inLeft, BRLAPI_ERROR_INVALID_PACKET, "text too big");
 	CHECKEXC(!outLeft, BRLAPI_ERROR_INVALID_PACKET, "text too small");
+      } else {
+	CHECKEXC(inLeft || (!andAttr && !orAttr) || rsiz_filled - outLeft == rsiz, BRLAPI_ERROR_INVALID_PACKET, "text length does not match and/or mask length");
       }
 
       lockMutex(&c->brailleWindowMutex);
@@ -1246,6 +1248,8 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       if (!fill) {
 	CHECKEXC(!sin, BRLAPI_ERROR_INVALID_PACKET, "text too big");
 	CHECKEXC(!sout, BRLAPI_ERROR_INVALID_PACKET, "text too small");
+      } else {
+	CHECKEXC(sin || (!andAttr && !orAttr) || len - sout / sizeof(wchar_t) == rsiz, BRLAPI_ERROR_INVALID_PACKET, "text length does not match and/or mask length");
       }
       logConversionResult(c, rsiz, textLen);
       len -= sout / sizeof(wchar_t);
@@ -1268,6 +1272,8 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       } else {
 	if (len > rsiz_filled)
 	  len = rsiz_filled;
+	else
+	  CHECKEXC((!andAttr && !orAttr) || len == rsiz, BRLAPI_ERROR_INVALID_PACKET, "text length does not match and/or mask length");
       }
       convertFromLatin1(c, rbeg, len, text);
       end = rbeg-1 + len;
