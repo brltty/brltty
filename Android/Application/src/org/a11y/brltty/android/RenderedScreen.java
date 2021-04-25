@@ -19,16 +19,16 @@
 package org.a11y.brltty.android;
 
 import android.util.Log;
+import android.text.TextUtils;
 
 import java.util.List;
 import java.util.ArrayList;
 
-import java.util.Set;
-import java.util.HashSet;
-
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+
 import android.graphics.Rect;
 
 public class RenderedScreen {
@@ -114,9 +114,15 @@ public class RenderedScreen {
     return element.performAction((column - location.left), (row - location.top));
   }
 
-  private final static Set<String> significantElements = new HashSet<String>() {
-    {
-      add("com.samsung.android.messaging:id/base_list_item_data");
+  private static NodeTester[] significantNodeFilters = new NodeTester[] {
+    new NodeTester() {
+      @Override
+      public boolean testNode (AccessibilityNodeInfo node) {
+        if (!TextUtils.equals(node.getPackageName(), "com.samsung.android.messaging")) return false;
+        if (!ScreenUtilities.isSubclassOf(node, LinearLayout.class)) return false;
+        if (node.getChildCount() != 1) return false;
+        return true;
+      }
     }
   };
 
@@ -208,12 +214,11 @@ public class RenderedScreen {
     }
 
     if (!(allowZeroLength || (sb.length() > 0))) {
-      String name = node.getViewIdResourceName();
-
-      if (name != null) {
-        if (significantElements.contains(name)) {
+      for (NodeTester filter : significantNodeFilters) {
+        if (filter.testNode(node)) {
           String description = ScreenUtilities.getDescription(node);
           if (description != null) sb.append(description);
+          break;
         }
       }
 
