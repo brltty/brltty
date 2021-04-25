@@ -1,0 +1,81 @@
+~~~~~~~~~~~~~~
+Privacy Policy
+~~~~~~~~~~~~~~
+
+.. include:: prologue.rst
+
+General Statements
+==================
+
+BRLTTY is a screen reader for braille users.
+It doesn't introduce any content of its own
+- it just renders, in braille, whatever is on the user's screen.
+It's just as safe to use by anyone of any age, therefore,
+as the host (computer, phone, tablet, etc) itself is.
+
+We're unaware of any law anywhere which would consider it inappropriate for a  child to be using BRLTTY.
+In fact, we believe that blind children should be encouraged to use it
+because we believe that literacy, i.e. the ability to read and write,
+is just as important for them as speech is.
+
+BRLTTY doesn't filter the screen's content.
+Any content that can be read on the screen by a sighted child
+is presented in braille and, therefore, is just as readable by a blind child.
+It's the responsibility of the developers of any given program, app, website, etc
+to control access to any questionable or reprehensible content
+that they feel the need to present.
+Likewise, if a parent has any concerns in this area
+then he/she should make use of any applicable parental controls
+that the host platform offers.
+
+If the braille device has a keyboard then it can be used for typing.
+This necessarily means that BRLTTY is transiently aware of
+any information that's being typed,
+including sensitive information such as passwords.
+This information is only retained long enough for,
+and exclusively for the purpose of,
+forwarding it through to the host as typed input.
+
+In addition to primarily being a screen reader for braille users,
+BRLTTY also contains support for reviewing the screen's content via speech.
+Unlike braille, where it's in direct control of the rendering,
+a third-party TTS (Text to Speech) engine is used to translate screen content into speech.
+We have no control over the privacy policies that apply to any of the third-party TTS engines.
+If a user wishes to use the speech capabilities of BRLTTY
+then he/she should become familiar with the privacy policy of the TTS being used.
+
+BRLTTY is an open source project.
+Suppliers (manufacturers, vendours, distributors, etc)
+should be aware that any code in any of its drivers
+that's necessary for the successful and effective operation of a braille device
+has necessarily become public.
+All other information that we (BRLTTY's developers) learn or become aware of
+(future plans, proprietary features, etc)
+while in discussions with or by reading documentation provided by any supplier
+isn't shared with the public.
+
+BRLTTY neither requests nor in any other way tries to obtain
+information about its users.
+Also, no information about its users, their host devices, etc
+that BRLTTY is either actively or passively aware of
+is shared with others (yes, this includes not even with us).
+
+While BRLTTY doesn't transmit any data,
+it does preserve the following as local data:
+
+* User configuration (also known as settings or preferences).
+* Operational logs that, by default, don't contain sensitive data like screen content, typed input, etc.
+
+If we, BRLTTY's developers, would like to have a look at
+debugging information in order to find the cause of a problem
+then we explain to the user which of BRLTTY's log categories would need to be enabled
+and what sensitive information would, therefore, become visible to us.
+It's still his/her own decision to enable the logging and to send the log to us.
+
+Android
+=======
+
+BRLTTY requests the following Android permissions:
+
+.. include:: android-permissions.rst
+
