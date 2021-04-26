@@ -455,6 +455,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">Dutch (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Portuguese (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Russian (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contracted)</string>
@@ -493,6 +494,7 @@
     <item>@string/CONTRACTION_TABLE_LABEL_nl</item>
     <item>@string/CONTRACTION_TABLE_LABEL_ny</item>
     <item>@string/CONTRACTION_TABLE_LABEL_pt</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ru</item>
     <item>@string/CONTRACTION_TABLE_LABEL_si</item>
     <item>@string/CONTRACTION_TABLE_LABEL_sw</item>
     <item>@string/CONTRACTION_TABLE_LABEL_th</item>
@@ -532,6 +534,7 @@
     <item>nl</item>
     <item>ny</item>
     <item>pt</item>
+    <item>ru</item>
     <item>si</item>
     <item>sw</item>
     <item>th</item>

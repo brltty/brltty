@@ -253,6 +253,7 @@
 #contraction-table	fr-g2	# French (contracted)
 #contraction-table	ha	# Hausa (contracted)
 #contraction-table	id	# Indonesian (contracted)
+#contraction-table	ipa	# International Phonetic Alphabet
 #contraction-table	ja	# Japanese (uncontracted)
 #contraction-table	ko	# Korean
 #contraction-table	ko-g0	# Korean (uncontracted)
@@ -263,8 +264,8 @@
 #contraction-table	mun	# Munda (contracted)
 #contraction-table	nl	# Dutch (contracted)
 #contraction-table	ny	# Chichewa (contracted)
-#contraction-table	ipa	# International Phonetic Alphabet
 #contraction-table	pt	# Portuguese (grade 2)
+#contraction-table	ru	# Russian (grade 1)
 #contraction-table	si	# Sinhalese (uncontracted)
 #contraction-table	sw	# Swahili (contracted)
 #contraction-table	th	# Thai (contracted)
