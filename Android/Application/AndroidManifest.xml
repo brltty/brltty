@@ -6,7 +6,7 @@
   android:versionName="@string/app_version"
   >
 
-  <uses-sdk android:targetSdkVersion="21" />
+  <uses-sdk android:targetSdkVersion="29" />
   <uses-sdk android:minSdkVersion="14" />
 
   <!-- for resetting the device's lock timer -->
