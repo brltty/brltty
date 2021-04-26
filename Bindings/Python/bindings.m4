@@ -122,5 +122,5 @@ AC_SUBST([PYTHON_OK])
 ])
 
 AC_DEFUN([BRLTTY_PYTHON_QUERY], [dnl
-   $1="`${PYTHON} Tools/pythoncmd $2`"
+   $1="`${PYTHON} ${srcdir}/Tools/pythoncmd $2`"
 ])

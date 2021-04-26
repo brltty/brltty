@@ -47,7 +47,7 @@ BRLTTY_CHECK_JAVA_PATH([dnl
    AC_MSG_NOTICE([Java version: ${JAVA_VERSION}])
 
    AC_MSG_CHECKING([JVM path])
-   brltty_path=`Tools/javacmd jvmpath`
+   brltty_path="`${srcdir}/Tools/javacmd jvmpath`"
 
    if test -n "${brltty_path}"
    then

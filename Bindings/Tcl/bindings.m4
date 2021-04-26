@@ -26,7 +26,7 @@ TCL_DIR=""
 if test -n "${TCLSH}"
 then
    AC_MSG_NOTICE([Tcl shell: ${TCLSH}])
-   tcl_configuration_script=`${TCLSH} Tools/tclcmd config`
+   tcl_configuration_script="`${TCLSH} ${srcdir}/Tools/tclcmd config`"
 
    if test -n "${tcl_configuration_script}"
    then
