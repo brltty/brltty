@@ -26,7 +26,7 @@ import android.content.ActivityNotFoundException;
 
 import android.net.Uri;
 import java.io.File;
-import android.support.v4.content.FileProvider;
+import androidx.core.content.FileProvider;
 
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;

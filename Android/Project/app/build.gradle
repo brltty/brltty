@@ -1,0 +1,42 @@
+description = """
+"${project.name}" implements the accessibility service for "${rootProject.name}" on Android.
+"""
+
+apply plugin: "android"
+
+android {
+    compileSdkVersion "android-29"
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        targetSdkVersion 29
+        minSdkVersion 16
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    signingConfigs {
+        release {
+            storeFile rootProject.file(signingProperties["storeFile"])
+            storePassword signingProperties["storePassword"]
+            keyAlias signingProperties["keyAlias"]
+            keyPassword signingProperties["keyPassword"]
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFile getDefaultProguardFile("proguard-android.txt")
+        }
+    }
+}
+
+dependencies {
+    implementation project(":core")
+    implementation "androidx.core:core:1.1.0"
+}

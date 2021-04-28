@@ -7,7 +7,6 @@
   >
 
   <uses-sdk android:targetSdkVersion="29" />
-  <uses-sdk android:minSdkVersion="14" />
 
   <!-- for resetting the device's lock timer -->
   <uses-permission android:name="android.permission.WAKE_LOCK" />

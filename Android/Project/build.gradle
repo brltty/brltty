@@ -1,36 +1,30 @@
+description = """
+"${project.name}" is a screen reader for braille users.
+"""
+
+ext {
+    signingProperties = new Properties()
+}
+
 def signingPropertiesFile = rootProject.file("signing/gradle.properties")
-def signingProperties = new Properties()
 signingProperties.load(new FileInputStream(signingPropertiesFile))
 
 buildscript {
     repositories {
+        google()
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
+        classpath "com.android.tools.build:gradle:4.0.1"
     }
 }
-apply plugin: 'android'
 
-android {
-    compileSdkVersion 'android-29'
-    buildToolsVersion '29.0.3'
-
-    signingConfigs {
-        release {
-            storeFile file(signingProperties["storeFile"])
-            storePassword signingProperties["storePassword"]
-            keyAlias signingProperties["keyAlias"]
-            keyPassword signingProperties["keyPassword"]
-        }
-    }
-
-    buildTypes {
-        release {
-            signingConfig signingConfigs.release
-            minifyEnabled false
-            proguardFile getDefaultProguardFile('proguard-android.txt')
-        }
+subprojects {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
     }
 }
