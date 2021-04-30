@@ -69,11 +69,19 @@ proc makeResources {properties} {
       }
 
       foreach code [lsort -command [list compareKeys $property] [dict keys $property]] {
-         set label "${prefix}LABEL_[string map {- _} $code]"
-         lappend lines "  <string name=\"$label\">[dict get $property $code]</string>"
+         set translatable "true"
 
-         lappend values $code
+         if {![string equal $code "auto"]} {
+            if {[string equal $name "braille-driver"]} {
+               set translatable "false"
+            }
+         }
+
+         set label "${prefix}LABEL_[string map {- _} $code]"
          lappend labels "@string/$label"
+         lappend values $code
+
+         lappend lines "  <string name=\"$label\" translatable=\"$translatable\">[dict get $property $code]</string>"
       }
 
       lappend lines ""
