@@ -18,11 +18,12 @@
 
 package org.a11y.brltty.android;
 
-import android.util.Log;
-import android.text.TextUtils;
-
+import java.util.Locale;
 import java.util.List;
 import java.util.ArrayList;
+
+import android.util.Log;
+import android.text.TextUtils;
 
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -436,7 +437,7 @@ public class RenderedScreen {
 
     for (ScreenElement element : screenElements) {
       log(
-        String.format(
+        String.format(Locale.ROOT,
           "screen element %d: %s", elementIndex++, element.getElementText()
         )
       );
@@ -450,7 +451,7 @@ public class RenderedScreen {
 
     for (String row : screenRows) {
       log(
-        String.format(
+        String.format(Locale.ROOT,
           "screen row %d: %s", rowIndex++, row.toString()
         )
       );

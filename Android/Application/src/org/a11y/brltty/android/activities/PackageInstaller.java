@@ -19,6 +19,8 @@
 package org.a11y.brltty.android.activities;
 import org.a11y.brltty.android.*;
 
+import java.util.Locale;
+
 import android.util.Log;
 
 import android.content.Intent;
@@ -107,7 +109,7 @@ public class PackageInstaller extends UpgradeComponent {
 
     if (newCode == oldCode) {
       onInstallFailed(
-        String.format(
+        String.format(Locale.ROOT,
           "%s: %s (%d)",
           getString(R.string.packageInstaller_problem_same),
           newName, newCode
@@ -121,7 +123,7 @@ public class PackageInstaller extends UpgradeComponent {
       final String operator = "<";
 
       onInstallFailed(
-        String.format(
+        String.format(Locale.ROOT,
           "%s: %s %s %s (%d %s %d)",
           getString(R.string.packageInstaller_problem_downgrade),
           newName, operator, oldName,

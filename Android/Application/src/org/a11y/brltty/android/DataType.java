@@ -1,8 +1,9 @@
 package org.a11y.brltty.android;
 
+import java.util.Locale;
 import java.io.File;
-import android.content.Context;
 
+import android.content.Context;
 import android.preference.PreferenceManager;
 import android.content.SharedPreferences;
 
@@ -17,7 +18,7 @@ public enum DataType {
   private final String typeName;
 
   DataType () {
-    typeName = name().toLowerCase();
+    typeName = name().toLowerCase(Locale.ROOT);
   }
 
   public final String getName () {

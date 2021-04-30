@@ -19,6 +19,7 @@
 package org.a11y.brltty.android;
 import org.a11y.brltty.core.Braille;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -222,8 +223,8 @@ public class StructuralMotion {
   public String toString () {
     return new StringBuilder()
           .append(getClass().getSimpleName()).append('{')
-          .append("Dir:").append(motionDirection.name().toLowerCase())
-          .append(" Type:").append(motionType.getTypeName().toLowerCase())
+          .append("Dir:").append(motionDirection.name().toLowerCase(Locale.ROOT))
+          .append(" Type:").append(motionType.getTypeName().toLowerCase(Locale.ROOT))
           .append(" Act:").append(actionIdentifier)
           .append(" Args:").append(actionArguments.toString())
           .append('}')
