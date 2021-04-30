@@ -2,7 +2,7 @@ description = """
 "${project.name}" is a Java wrapper for the native "${rootProject.name}" code.
 """
 
-apply plugin: "android-library"
+apply plugin: "com.android.library"
 android {
     compileSdkVersion "android-29"
     buildToolsVersion "29.0.3"
