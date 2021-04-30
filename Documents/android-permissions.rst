@@ -36,7 +36,11 @@
 
 ``ACCESS_FINE_LOCATION``
   * For getting the Wi-Fi SSID (for the INDICATORS command).
+  * For getting cell information (for the INDICATORS command).
 
 ``ACCESS_COARSE_UPDATES``
   * For getting the cell signal strength (for the INDICATORS command).
+
+``READ_PHONE_STATE``
+  * For getting the cell data network type (for the INDICATORS command).
 

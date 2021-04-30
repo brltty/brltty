@@ -35,10 +35,14 @@
   <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
   <!-- for getting the Wi-Fi SSID (for the INDICATORS command) -->
+  <!-- for getting cell information (for the INDICATORS command) -->
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
   <!-- for getting the cell signal strength (for the INDICATORS command) -->
   <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES" />
+
+  <!-- for getting the cell data network type (for the INDICATORS command) -->
+  <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
   <application
     android:label="@string/app_name"

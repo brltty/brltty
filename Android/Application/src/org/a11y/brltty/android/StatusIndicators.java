@@ -143,8 +143,13 @@ public abstract class StatusIndicators {
       }
 
       private final CellInfo getCellInfo () {
-        //noinspection NewApi
-        List<CellInfo> infoList = telephonyManager.getAllCellInfo();
+        List<CellInfo> infoList = null;
+
+        try {
+          //noinspection NewApi
+          infoList = telephonyManager.getAllCellInfo();
+        } catch (SecurityException exception) {
+        }
 
         if (infoList != null) {
           if (!infoList.isEmpty()) {
@@ -240,7 +245,13 @@ public abstract class StatusIndicators {
 
       @Override
       public String getValue () {
-        int type = telephonyManager.getNetworkType();
+        int type = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+
+        try {
+          type = telephonyManager.getNetworkType();
+        } catch (SecurityException exception) {
+        }
+
         if (type == TelephonyManager.NETWORK_TYPE_UNKNOWN) return null;
         return networkTypes.get(type);
       }
