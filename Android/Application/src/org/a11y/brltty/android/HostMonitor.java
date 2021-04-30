@@ -63,6 +63,7 @@ public class HostMonitor extends BroadcastReceiver {
     Context toContext = DataType.getContext();
 
     if (toContext != fromContext) {
+      //noinspection NewApi
       toContext.moveSharedPreferencesFrom(
         fromContext,
         PreferenceManager.getDefaultSharedPreferencesName(fromContext)

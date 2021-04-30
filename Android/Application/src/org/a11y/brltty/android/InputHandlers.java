@@ -102,6 +102,7 @@ public abstract class InputHandlers {
       try {
         showWindowTitle(info);
       } finally {
+        //noinspection NewApi
         info.recycle();
         info = null;
       }
@@ -128,6 +129,7 @@ public abstract class InputHandlers {
       new Comparator<AccessibilityWindowInfo>() {
         @Override
         public int compare (AccessibilityWindowInfo window1, AccessibilityWindowInfo window2) {
+          //noinspection NewApi
           return comparator.compare(window1.getId(), window2.getId());
         }
       }
@@ -137,6 +139,7 @@ public abstract class InputHandlers {
   }
 
   private static boolean switchToWindow (AccessibilityWindowInfo window) {
+    //noinspection NewApi
     AccessibilityNodeInfo root = window.getRoot();
 
     if (root != null) {
@@ -171,6 +174,7 @@ public abstract class InputHandlers {
         for (AccessibilityWindowInfo window : getVisibleWindows(comparator)) {
           try {
             if (!found) {
+              //noinspection NewApi
               if (comparator.compare(window.getId(), referenceIdentifier) > 0) {
                 if (switchToWindow(window)) {
                   found = true;
@@ -178,6 +182,7 @@ public abstract class InputHandlers {
               }
             }
           } finally {
+            //noinspection NewApi
             window.recycle();
             window = null;
           }
@@ -204,12 +209,14 @@ public abstract class InputHandlers {
   }
 
   private static int getTextStartOffset (AccessibilityNodeInfo node) {
+    //noinspection NewApi
     int offset = node.getTextSelectionStart();
     if (offset == NO_SELECTION) return 0;
     return offset;
   }
 
   private static int getTextEndOffset (AccessibilityNodeInfo node) {
+    //noinspection NewApi
     int offset = node.getTextSelectionEnd();
     if (offset == NO_SELECTION) return 0;
     if (offset != getTextStartOffset(node)) offset -= 1;
@@ -273,7 +280,9 @@ public abstract class InputHandlers {
     private final boolean editText (AccessibilityNodeInfo node) {
       if (node.isFocused()) {
         CharSequence text = node.getText();
+        //noinspection NewApi
         int start = node.getTextSelectionStart();
+        //noinspection NewApi
         int end = node.getTextSelectionEnd();
 
         if (start == NO_SELECTION) text = null;
@@ -408,6 +417,7 @@ public abstract class InputHandlers {
 
         if (node != null) {
           try {
+            //noinspection NewApi
             return node.isEditable()?
                    performEditAction(node):
                    performNavigationAction(node);
@@ -765,6 +775,7 @@ public abstract class InputHandlers {
       new Comparator<Integer>() {
         @Override
         public int compare (Integer id1, Integer id2) {
+          //noinspection NewApi
           return -Integer.compare(id1, id2);
         }
       };
@@ -777,6 +788,7 @@ public abstract class InputHandlers {
       new Comparator<Integer>() {
         @Override
         public int compare (Integer id1, Integer id2) {
+          //noinspection NewApi
           return Integer.compare(id1, id2);
         }
       };

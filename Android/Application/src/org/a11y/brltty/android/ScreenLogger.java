@@ -105,6 +105,7 @@ public abstract class ScreenLogger extends Logger {
     }
 
     public final void put (String name, AccessibilityNodeInfo.AccessibilityAction action) {
+      //noinspection NewApi
       put(name, action.getId());
     }
   }
@@ -467,6 +468,7 @@ public abstract class ScreenLogger extends Logger {
 
   public static String toString (AccessibilityWindowInfo window) {
     StringBuilder sb = new StringBuilder();
+    //noinspection NewApi
     add(sb, "id", window.getId());
 
     if (APITests.haveNougat) {
@@ -474,9 +476,11 @@ public abstract class ScreenLogger extends Logger {
     }
 
     {
+      //noinspection NewApi
       AccessibilityWindowInfo parent = window.getParent();
 
       if (parent != null) {
+        //noinspection NewApi
         parent.recycle();
         parent = null;
       } else {
@@ -485,14 +489,20 @@ public abstract class ScreenLogger extends Logger {
     }
 
     {
+      //noinspection NewApi
       int count = window.getChildCount();
       if (count > 0) add(sb, "cld", count);
     }
 
+    //noinspection NewApi
     add(sb, "type", window.getType(), windowTypeNames);
+    //noinspection NewApi
     add(sb, "layer", window.getLayer());
+    //noinspection NewApi
     add(sb, window.isActive(), "act");
+    //noinspection NewApi
     add(sb, window.isFocused(), "ifd");
+    //noinspection NewApi
     add(sb, window.isAccessibilityFocused(), "afd");
 
     if (APITests.haveOreo) {
@@ -501,6 +511,7 @@ public abstract class ScreenLogger extends Logger {
 
     {
       Rect location = new Rect();
+      //noinspection NewApi
       window.getBoundsInScreen(location);
       add(sb, location.toShortString());
     }
@@ -512,6 +523,7 @@ public abstract class ScreenLogger extends Logger {
     log(name, toString(window));
 
     if (nodes) {
+      //noinspection NewApi
       AccessibilityNodeInfo root = window.getRoot();
 
       if (root != null) {
@@ -525,13 +537,16 @@ public abstract class ScreenLogger extends Logger {
     }
 
     if (descend) {
+      //noinspection NewApi
       int childCount = window.getChildCount();
 
       for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+        //noinspection NewApi
         AccessibilityWindowInfo child = window.getChild(childIndex);
 
         if (child != null) {
           log(child, (name + '.' + childIndex), true, nodes);
+          //noinspection NewApi
           child.recycle();
           child = null;
         }

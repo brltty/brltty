@@ -64,6 +64,7 @@ public class BrailleService extends AccessibilityService {
 
     if (APITests.haveOreo) {
       accessibilityButton = new AccessibilityButton();
+      //noinspection NewApi
       getAccessibilityButtonController().registerAccessibilityButtonCallback(accessibilityButton);
     }
   }
@@ -73,6 +74,7 @@ public class BrailleService extends AccessibilityService {
     Log.d(LOG_TAG, "braille service disconnected");
 
     if (accessibilityButton != null) {
+      //noinspection NewApi
       getAccessibilityButtonController().unregisterAccessibilityButtonCallback(accessibilityButton);
       accessibilityButton = null;
     }

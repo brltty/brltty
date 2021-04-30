@@ -411,6 +411,7 @@ public abstract class ScreenUtilities {
           AccessibilityNodeInfo.AccessibilityAction action1,
           AccessibilityNodeInfo.AccessibilityAction action2
         ) {
+          //noinspection NewApi
           return Integer.compare(action1.getId(), action2.getId());
         }
       };
@@ -423,6 +424,7 @@ public abstract class ScreenUtilities {
       public boolean testNode (AccessibilityNodeInfo node) {
         if (!node.isEnabled()) return false;
 
+        //noinspection NewApi
         for (AccessibilityNodeInfo.AccessibilityAction action : node.getActionList()) {
           if (Arrays.binarySearch(array, 0, array.length, action, comparator) >= 0) return true;
         }
@@ -442,6 +444,7 @@ public abstract class ScreenUtilities {
     if (node == null) return false;
 
     try {
+      //noinspection NewApi
       return node.performAction(action.getId());
     } finally {
       node.recycle();
@@ -450,6 +453,7 @@ public abstract class ScreenUtilities {
   }
 
   public static List<AccessibilityWindowInfo> getWindows () {
+    //noinspection NewApi
     return BrailleService.getBrailleService().getWindows();
   }
 
@@ -458,12 +462,14 @@ public abstract class ScreenUtilities {
 
     for (AccessibilityWindowInfo window : getWindows()) {
       if (found == null) {
+        //noinspection NewApi
         if (window.getId() == identifier) {
           found = window;
           continue;
         }
       }
 
+      //noinspection NewApi
       window.recycle();
       window = null;
     }
@@ -472,6 +478,7 @@ public abstract class ScreenUtilities {
   }
 
   public static String getRangeValueFormat (AccessibilityNodeInfo.RangeInfo range) {
+    //noinspection NewApi
     switch (range.getType()) {
       case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
         return "%.0f";

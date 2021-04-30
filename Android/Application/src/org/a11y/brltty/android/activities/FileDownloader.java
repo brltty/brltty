@@ -148,6 +148,7 @@ public class FileDownloader extends UpgradeComponent {
               progressRemaining.setVisibility(View.GONE);
             } else {
               progressBar.setIndeterminate(false);
+              //noinspection NewApi
               progressBar.setMin(0);
               progressBar.setMax((int)(long)contentLength);
             }

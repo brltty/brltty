@@ -143,6 +143,7 @@ public abstract class StatusIndicators {
       }
 
       private final CellInfo getCellInfo () {
+        //noinspection NewApi
         List<CellInfo> infoList = telephonyManager.getAllCellInfo();
 
         if (infoList != null) {

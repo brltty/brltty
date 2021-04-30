@@ -42,6 +42,7 @@ public class ScreenWindow {
   public final AccessibilityWindowInfo getWindowInfo () {
     synchronized (this) {
       if (windowInfo == null) return null;
+      //noinspection NewApi
       return AccessibilityWindowInfo.obtain(windowInfo);
     }
   }
@@ -63,10 +64,13 @@ public class ScreenWindow {
   }
 
   public static ScreenWindow getScreenWindow (AccessibilityWindowInfo info) {
+    //noinspection NewApi
     ScreenWindow window = getScreenWindow(info.getId());
 
     synchronized (window) {
+      //noinspection NewApi
       if (window.windowInfo != null) window.windowInfo.recycle();
+      //noinspection NewApi
       window.windowInfo = AccessibilityWindowInfo.obtain(info);
     }
 
@@ -95,6 +99,7 @@ public class ScreenWindow {
       Rect location = new Rect();
 
       if (windowInfo != null) {
+        //noinspection NewApi
         windowInfo.getBoundsInScreen(location);
       } else {
         Point size = new Point();

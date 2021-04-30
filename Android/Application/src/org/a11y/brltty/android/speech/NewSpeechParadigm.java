@@ -100,6 +100,7 @@ public class NewSpeechParadigm extends SpeechParadigm {
 
   @Override
   public final boolean sayText (TextToSpeech tts, CharSequence text, int queueMode) {
+    //noinspection NewApi
     int result = tts.speak(text, queueMode, parameters, getUtteranceIdentifier());
     if (result == TextToSpeech.SUCCESS) return true;
 

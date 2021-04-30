@@ -19,12 +19,14 @@
 package org.a11y.brltty.android;
 
 import android.util.Log;
+import android.annotation.SuppressLint;
 
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.AudioFormat;
 import android.media.AudioAttributes;
 
+@SuppressLint("NewApi")
 public final class PcmDevice implements AutoCloseable {
   private final static String LOG_TAG = PcmDevice.class.getName();
 

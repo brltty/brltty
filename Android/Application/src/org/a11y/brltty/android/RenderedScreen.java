@@ -294,6 +294,7 @@ public class RenderedScreen {
           if (hasActions) {
             if ((text = getDescription(root)) == null) {
               text = ScreenUtilities.getClassName(root);
+              //noinspection NewApi
               String name = root.getViewIdResourceName();
 
               if (name != null) {
