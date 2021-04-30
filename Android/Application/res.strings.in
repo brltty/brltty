@@ -2,8 +2,8 @@
 <!-- @configure_input@ -->
 
 <resources>
-  <string name="PACKAGE_COPYRIGHT">@PACKAGE_COPYRIGHT@</string>
-  <string name="app_version">@PACKAGE_VERSION@</string>
-  <string name="web_site_url">@PACKAGE_URL@</string>
-  <string name="community_message_address">@PACKAGE_BUGREPORT@</string>
+  <string name="PACKAGE_COPYRIGHT" translatable="false">@PACKAGE_COPYRIGHT@</string>
+  <string name="app_version" translatable="false">@PACKAGE_VERSION@</string>
+  <string name="web_site_url" translatable="false">@PACKAGE_URL@</string>
+  <string name="community_message_address" translatable="false">@PACKAGE_BUGREPORT@</string>
 </resources>
