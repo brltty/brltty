@@ -17,6 +17,11 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    lintOptions {
+        warning "MissingTranslation"
+        error "Untranslatable"
+    }
+
     signingConfigs {
         release {
             storeFile rootProject.file(signingProperties["storeFile"])
