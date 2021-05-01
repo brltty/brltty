@@ -8,6 +8,9 @@
 
   <uses-sdk android:targetSdkVersion="29" />
 
+  <!-- for creating a foreground notification -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
   <!-- for resetting the device's lock timer -->
   <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -124,7 +127,7 @@
     </receiver>
 
     <provider
-      android:name="android.support.v4.content.FileProvider"
+      android:name="androidx.core.content.FileProvider"
       android:authorities="org.a11y.brltty.android.fileprovider"
       android:exported="false"
       android:grantUriPermissions="true"

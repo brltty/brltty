@@ -4,6 +4,9 @@
 ``BIND_INPUT_METHOD``
   * For Android to accept input via BRLTTY from your braille device's keyboard.
 
+``FOREGROUND_SERVICE``
+  * For creating a foreground notification.
+
 ``WAKE_LOCK``
   * For resetting the Android device's lock timer
     each time you interact with a control on your braille device.
