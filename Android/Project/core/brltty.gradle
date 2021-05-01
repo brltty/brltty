@@ -9,40 +9,64 @@ ext {
   nativeCoreClient = 'libbrlapi.so'
 
   nativeBindingsDirectory = nativeRootDirectory + "/Bindings/Java"
-  nativeBindingsLibrary = 'libbrltty_java.so'
+  nativeBindingsLibrary = 'libbrlapi_java.so'
+  nativeBindingsClasses = 'libbrlapi.jar'
 }
 
-task makeCoreComponents(type:Exec) {
+task makeCoreComponents (type: Exec) {
   workingDir nativeCoreDirectory
   commandLine 'make', nativeCoreLibrary, nativeCoreWrapper, nativeCoreClient
   ignoreExitValue false
 }
 
-task cleanCoreComponents(type:Exec) {
+task cleanCoreComponents (type: Exec) {
   workingDir nativeCoreDirectory
   commandLine 'make', 'clean'
   ignoreExitValue true
 }
 
-task makeBindingsComponents(type:Exec) {
+task installCoreComponents (type: Copy) {
+  into "src/main/jniLibs/armeabi"
+  from nativeCoreDirectory
+  include "*.so"
+}
+
+task makeBindingsComponents (type: Exec) {
   workingDir nativeBindingsDirectory
   commandLine 'make', 'all'
   ignoreExitValue false
 }
 
-task cleanBindingsComponents(type:Exec) {
+task cleanBindingsComponents (type: Exec) {
   workingDir nativeBindingsDirectory
   commandLine 'make', 'clean'
   ignoreExitValue true
 }
 
+task installBindingsComponents (type: Copy) {
+  into "src/main"
+
+  from(nativeBindingsDirectory) {
+    into "libs"
+    include "*.jar"
+  }
+
+  from(nativeBindingsDirectory) {
+      into "jniLibs/armeabi"
+      include "*.so"
+  }
+}
+
+installCoreComponents.dependsOn makeCoreComponents
+installBindingsComponents.dependsOn makeBindingsComponents
+
 android {
   tasks.withType(JavaCompile) {
-    compileTask -> compileTask.dependsOn(makeCoreComponents)
+    compileTask -> compileTask.dependsOn(installCoreComponents)
   }
 
   tasks.withType(JavaCompile) {
-    compileTask -> compileTask.dependsOn(makeBindingsComponents)
+    compileTask -> compileTask.dependsOn(installBindingsComponents)
   }
 
   clean.dependsOn(cleanCoreComponents)
