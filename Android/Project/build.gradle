@@ -3,28 +3,28 @@ description = """
 """
 
 ext {
-    signingProperties = new Properties()
+  signingProperties = new Properties()
 }
 
 def signingPropertiesFile = rootProject.file("signing/gradle.properties")
 signingProperties.load(new FileInputStream(signingPropertiesFile))
 
 buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()
-    }
+  repositories {
+    google()
+    mavenCentral()
+    jcenter()
+  }
 
-    dependencies {
-        classpath "com.android.tools.build:gradle:4.0.1"
-    }
+  dependencies {
+    classpath "com.android.tools.build:gradle:4.0.1"
+  }
 }
 
 subprojects {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()
-    }
+  repositories {
+    google()
+    mavenCentral()
+    jcenter()
+  }
 }
