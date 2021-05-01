@@ -3,6 +3,8 @@ description = """
 """
 
 apply plugin: "com.android.application"
+apply from: "brltty.gradle"
+
 android {
     compileSdkVersion "android-29"
     buildToolsVersion "29.0.3"

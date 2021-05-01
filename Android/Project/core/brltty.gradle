@@ -1,0 +1,51 @@
+ext {
+  nativeRootDirectory = "${rootDir.absolutePath}/../.."
+}
+
+ext {
+  nativeCoreDirectory = nativeRootDirectory + "/Programs"
+  nativeCoreWrapper = 'libbrltty_jni.so'
+  nativeCoreLibrary = 'libbrltty_core.so'
+  nativeCoreClient = 'libbrlapi.so'
+
+  nativeBindingsDirectory = nativeRootDirectory + "/Bindings/Java"
+  nativeBindingsLibrary = 'libbrltty_java.so'
+}
+
+task makeCoreComponents(type:Exec) {
+  workingDir nativeCoreDirectory
+  commandLine 'make', nativeCoreLibrary, nativeCoreWrapper, nativeCoreClient
+  ignoreExitValue false
+}
+
+task cleanCoreComponents(type:Exec) {
+  workingDir nativeCoreDirectory
+  commandLine 'make', 'clean'
+  ignoreExitValue true
+}
+
+task makeBindingsComponents(type:Exec) {
+  workingDir nativeBindingsDirectory
+  commandLine 'make', 'all'
+  ignoreExitValue false
+}
+
+task cleanBindingsComponents(type:Exec) {
+  workingDir nativeBindingsDirectory
+  commandLine 'make', 'clean'
+  ignoreExitValue true
+}
+
+android {
+  tasks.withType(JavaCompile) {
+    compileTask -> compileTask.dependsOn(makeCoreComponents)
+  }
+
+  tasks.withType(JavaCompile) {
+    compileTask -> compileTask.dependsOn(makeBindingsComponents)
+  }
+
+  clean.dependsOn(cleanCoreComponents)
+  clean.dependsOn(cleanBindingsComponents)
+}
+
