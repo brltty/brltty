@@ -39,6 +39,11 @@ public class SettingsActivity extends PreferenceActivity {
     loadHeadersFromResource(R.xml.settings_headers, headers);
   }
 
+  @Override
+  protected boolean isValidFragment (String name) {
+    return true;
+  }
+
   public static void launch () {
     ApplicationUtilities.launch(SettingsActivity.class);
   }
