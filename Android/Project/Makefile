@@ -46,6 +46,17 @@ lint:
 clean:
 	./gradlew -q clean
 
+uninstall-assets: uninstall-drivers uninstall-messages uninstall-tables
+
+uninstall-drivers:
+	./gradlew -q :app:uninstallDrivers
+
+uninstall-messages:
+	./gradlew -q :app:uninstallMessages
+
+uninstall-tables:
+	./gradlew -q :app:uninstallTables
+
 purge: clean
 	-rm -f -r .gradle
 

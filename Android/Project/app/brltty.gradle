@@ -1,8 +1,11 @@
 def assetsDirectory = projectDir.absolutePath + "/src/main/assets"
+def driversDirectory = assetsDirectory + File.separator + "drivers"
+def messagesDirectory = assetsDirectory + File.separator + "locale"
+def tablesDirectory = assetsDirectory + File.separator + "tables"
 
 task installTables (type: Copy) {
   from nativeProperties.tablesDirectory
-  into assetsDirectory + "/tables"
+  into tablesDirectory
   include 'Text/**/*.tt?'
   include 'Attributes/**/*.at?'
   include 'Contraction/**/*.ct?'
@@ -10,12 +13,20 @@ task installTables (type: Copy) {
   include 'Input/**/*.kt?'
 }
 
+task uninstallTables (type: Delete) {
+  delete tablesDirectory
+}
+
 task installDrivers (type: Copy) {
   from nativeProperties.driversDirectory
-  into assetsDirectory + "/drivers"
+  into driversDirectory
   include 'libbrlttyb??.so'
   include 'libbrlttys??.so'
   include 'libbrlttyx??.so'
+}
+
+task uninstallDrivers (type: Delete) {
+  delete driversDirectory
 }
 
 tasks.register("installMessages") {
@@ -23,7 +34,6 @@ tasks.register("installMessages") {
     def commandProcesses = []
 
     try {
-      def targetRoot = assetsDirectory + File.separator + "locale"
       def sourceDirectory = new File(nativeProperties.messagesDirectory)
       def sourceFiles = layout.files {sourceDirectory.listFiles()}
 
@@ -32,7 +42,7 @@ tasks.register("installMessages") {
 
         if (sourceName.endsWith(".po")) {
           def languageCode = sourceName.replaceAll(/\..+?$/, '')
-          def targetDirectory = new File(targetRoot + File.separator + languageCode + File.separator + "LC_MESSAGES")
+          def targetDirectory = new File(messagesDirectory + File.separator + languageCode + File.separator + "LC_MESSAGES")
 
           if (targetDirectory.isDirectory() || targetDirectory.mkdirs()) {
             def targetFile = new File(targetDirectory, "brltty.mo")
@@ -55,7 +65,6 @@ tasks.register("installMessages") {
       def ok = true
 
       commandProcesses.each { process ->
-        if (!ok) process.destroy();
         int exitValue = process.waitFor()
         if (exitValue) ok = false
       }
@@ -63,6 +72,10 @@ tasks.register("installMessages") {
       if (!ok) throw new RuntimeException("installing messages failed")
     }
   }
+}
+
+task uninstallMessages (type: Delete) {
+  delete messagesDirectory
 }
 
 void addAssembleTask (Task task) {
@@ -77,4 +90,5 @@ afterEvaluate {
   }
 
   installDrivers.dependsOn ":core:makeCoreComponents"
+  clean.dependsOn uninstallDrivers, uninstallMessages, uninstallTables
 }
