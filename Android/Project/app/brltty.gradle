@@ -1,12 +1,4 @@
-def assetsDirectory = "src/main/assets"
-
-task installDrivers (type: Copy) {
-  from nativeProperties.driversDirectory
-  into assetsDirectory + "/drivers"
-  include 'libbrlttyb??.so'
-  include 'libbrlttys??.so'
-  include 'libbrlttyx??.so'
-}
+def assetsDirectory = projectDir.absolutePath + "/src/main/assets"
 
 task installTables (type: Copy) {
   from nativeProperties.tablesDirectory
@@ -18,6 +10,61 @@ task installTables (type: Copy) {
   include 'Input/**/*.kt?'
 }
 
+task installDrivers (type: Copy) {
+  from nativeProperties.driversDirectory
+  into assetsDirectory + "/drivers"
+  include 'libbrlttyb??.so'
+  include 'libbrlttys??.so'
+  include 'libbrlttyx??.so'
+}
+
+tasks.register("installMessages") {
+  doLast {
+    def commandProcesses = []
+
+    try {
+      def targetRoot = assetsDirectory + File.separator + "locale"
+      def sourceDirectory = new File(nativeProperties.messagesDirectory)
+      def sourceFiles = layout.files {sourceDirectory.listFiles()}
+
+      sourceFiles.each { sourceFile ->
+        def sourceName = sourceFile.name
+
+        if (sourceName.endsWith(".po")) {
+          def languageCode = sourceName.replaceAll(/\..+?$/, '')
+          def targetDirectory = new File(targetRoot + File.separator + languageCode + File.separator + "LC_MESSAGES")
+
+          if (targetDirectory.isDirectory() || targetDirectory.mkdirs()) {
+            def targetFile = new File(targetDirectory, "brltty.mo")
+
+            def commandArguments = [
+              "msgfmt", "--no-hash",
+              "--output-file=" + targetFile.absolutePath,
+              "--", sourceFile.absolutePath
+            ]
+
+            def commandProcess = commandArguments.execute()
+            commandProcess.waitForProcessOutput(new StringBuffer(), System.err)
+            commandProcesses += commandProcess
+          } else {
+            throw new IOException("messages directory not created: " + targetDirectory.absolutePath)
+          }
+        }
+      }
+    } finally {
+      def ok = true
+
+      commandProcesses.each { process ->
+        if (!ok) process.destroy();
+        int exitValue = process.waitFor()
+        if (exitValue) ok = false
+      }
+
+      if (!ok) throw new RuntimeException("installing messages failed")
+    }
+  }
+}
+
 void addAssembleTask (Task task) {
   ["assembleDebug", "assembleRelease"].each { taskName ->
     tasks[taskName].dependsOn task
@@ -25,7 +72,9 @@ void addAssembleTask (Task task) {
 }
 
 afterEvaluate {
-  addAssembleTask installTables
-  addAssembleTask installDrivers
+  [installTables, installDrivers, installMessages].each {
+    task -> addAssembleTask task
+  }
+
   installDrivers.dependsOn ":core:makeCoreComponents"
 }
