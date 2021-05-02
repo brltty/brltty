@@ -1,22 +1,12 @@
-ext {
-  nativeRootDirectory = "${rootDir.absolutePath}/../.."
-}
-
-ext {
-  nativeDriversDirectory = "${nativeRootDirectory}/lib"
-  nativeTablesDirectory = "${nativeRootDirectory}/Tables"
-  nativeMessagesDirectory = "${nativeRootDirectory}/Messages"
-}
-
 task installAssets (type: Copy) {
   into "src/main/assets"
 
-  from(nativeDriversDirectory) { 
+  from(nativeProperties.driversDirectory) { 
     into "drivers"
     include 'libbrltty[bsx]??.so'
   }
 
-  from(nativeTablesDirectory) { 
+  from(nativeProperties.tablesDirectory) { 
     into 'tables'
     include 'Text'
     include 'Attributes'

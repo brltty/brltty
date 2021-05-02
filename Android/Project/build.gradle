@@ -2,12 +2,7 @@ description = """
 "${project.name}" is a screen reader for braille users.
 """
 
-ext {
-  signingProperties = new Properties()
-}
-
-def signingPropertiesFile = rootProject.file("signing/gradle.properties")
-signingProperties.load(new FileInputStream(signingPropertiesFile))
+apply from: "brltty-properties.gradle"
 
 buildscript {
   repositories {

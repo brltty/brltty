@@ -1,44 +1,29 @@
-ext {
-  nativeRootDirectory = "${rootDir.absolutePath}/../.."
-}
-
-ext {
-  nativeCoreDirectory = nativeRootDirectory + "/Programs"
-  nativeCoreWrapper = 'libbrltty_jni.so'
-  nativeCoreLibrary = 'libbrltty_core.so'
-  nativeCoreClient = 'libbrlapi.so'
-
-  nativeBindingsDirectory = nativeRootDirectory + "/Bindings/Java"
-  nativeBindingsLibrary = 'libbrlapi_java.so'
-  nativeBindingsClasses = 'libbrlapi.jar'
-}
-
 task makeCoreComponents (type: Exec) {
-  workingDir nativeCoreDirectory
-  commandLine 'make', nativeCoreLibrary, nativeCoreWrapper, nativeCoreClient
+  workingDir nativeProperties.coreDirectory
+  commandLine 'make', nativeProperties.coreLibrary, nativeProperties.coreWrapper, nativeProperties.coreBindings
   ignoreExitValue false
 }
 
 task cleanCoreComponents (type: Exec) {
-  workingDir nativeCoreDirectory
+  workingDir nativeProperties.coreDirectory
   commandLine 'make', 'clean'
   ignoreExitValue true
 }
 
 task installCoreComponents (type: Copy) {
   into "src/main/jniLibs/armeabi"
-  from nativeCoreDirectory
+  from nativeProperties.coreDirectory
   include "*.so"
 }
 
 task makeBindingsComponents (type: Exec) {
-  workingDir nativeBindingsDirectory
+  workingDir nativeProperties.javaDirectory
   commandLine 'make', 'all'
   ignoreExitValue false
 }
 
 task cleanBindingsComponents (type: Exec) {
-  workingDir nativeBindingsDirectory
+  workingDir nativeProperties.javaDirectory
   commandLine 'make', 'clean'
   ignoreExitValue true
 }
@@ -46,12 +31,12 @@ task cleanBindingsComponents (type: Exec) {
 task installBindingsComponents (type: Copy) {
   into "src/main"
 
-  from(nativeBindingsDirectory) {
+  from(nativeProperties.javaDirectory) {
     into "libs"
     include "*.jar"
   }
 
-  from(nativeBindingsDirectory) {
+  from(nativeProperties.javaDirectory) {
     into "jniLibs/armeabi"
     include "*.so"
   }

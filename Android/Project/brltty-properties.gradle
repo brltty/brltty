@@ -1,0 +1,38 @@
+def nativePropertiesFile = "native.properties"
+def signingPropertiesFile = "signing/gradle.properties"
+
+Properties loadProperties (String file) {
+  def properties = new Properties()
+  properties.load(new FileInputStream(rootProject.file(file)))
+  return properties
+}
+
+ext {
+  nativeProperties = loadProperties(nativePropertiesFile)
+  signingProperties = loadProperties(signingPropertiesFile)
+}
+
+void fixFileProperty (Properties properties, String name) {
+  properties[name] = rootProject.file(properties[name])
+}
+
+void fixPathProperty (Properties properties, String name) {
+  fixFileProperty(properties, name)
+  properties[name] = properties[name].absolutePath
+}
+
+void fixSubdirectoryProperty (Properties properties, String prefix) {
+  def directoryName = prefix + "Directory"
+  def subdirectoryName = prefix + "Subdirectory"
+  properties[directoryName] = properties.rootDirectory + "/" + properties[subdirectoryName]
+}
+
+fixPathProperty(nativeProperties, "rootDirectory")
+fixFileProperty(signingProperties, "storeFile")
+
+fixSubdirectoryProperty(nativeProperties, "core")
+fixSubdirectoryProperty(nativeProperties, "drivers")
+fixSubdirectoryProperty(nativeProperties, "java")
+fixSubdirectoryProperty(nativeProperties, "messages")
+fixSubdirectoryProperty(nativeProperties, "tables")
+
