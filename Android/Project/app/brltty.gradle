@@ -1,18 +1,31 @@
-task installAssets (type: Copy) {
-  into "src/main/assets"
+def assetsDirectory = "src/main/assets"
 
-  from(nativeProperties.driversDirectory) { 
-    into "drivers"
-    include 'libbrltty[bsx]??.so'
-  }
+task installDrivers (type: Copy) {
+  from nativeProperties.driversDirectory
+  into assetsDirectory + "/drivers"
+  include 'libbrlttyb??.so'
+  include 'libbrlttys??.so'
+  include 'libbrlttyx??.so'
+}
 
-  from(nativeProperties.tablesDirectory) { 
-    into 'tables'
-    include 'Text'
-    include 'Attributes'
-    include 'Contraction'
-    include 'Keyboard'
-    include 'Input'
+task installTables (type: Copy) {
+  from nativeProperties.tablesDirectory
+  into assetsDirectory + "/tables"
+  include 'Text/**/*.tt?'
+  include 'Attributes/**/*.at?'
+  include 'Contraction/**/*.ct?'
+  include 'Keyboard/**/*.kt?'
+  include 'Input/**/*.kt?'
+}
+
+void addAssembleTask (Task task) {
+  ["assembleDebug", "assembleRelease"].each { taskName ->
+    tasks[taskName].dependsOn task
   }
 }
 
+afterEvaluate {
+  addAssembleTask installTables
+  addAssembleTask installDrivers
+  installDrivers.dependsOn ":core:makeCoreComponents"
+}

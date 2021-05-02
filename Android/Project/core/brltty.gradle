@@ -11,8 +11,8 @@ task cleanCoreComponents (type: Exec) {
 }
 
 task installCoreComponents (type: Copy) {
-  into "src/main/jniLibs/armeabi"
   from nativeProperties.coreDirectory
+  into "src/main/jniLibs/armeabi"
   include "*.so"
 }
 
