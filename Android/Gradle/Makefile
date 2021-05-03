@@ -66,8 +66,11 @@ remove-messages:
 remove-tables:
 	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):removeTables
 
-badging configurations permissions resources strings xmlstrings xmltree: app-debug
-	aapt dump $@ $(GRADLE_DEBUG_PACKAGE) >$(GRADLE_ROOT_NAME)-$@.txt
+badging-dump configurations-dump permissions-dump resources-dump strings-dump xmlstrings-dump xmltree-dump: app-debug
+	$(GRADLE_DUMP_COMMAND) --values $(@:-dump=) $(GRADLE_DEBUG_PACKAGE) >$(GRADLE_ROOT_NAME)-$(@:-dump=).$(GRADLE_DUMP_EXTENSION)
+
+clean-dumps:
+	-rm -f $(GRADLE_ROOT_NAME)-*.$(GRADLE_DUMP_EXTENSION)
 
 clean:
 	$(GRADLE_COMMAND) clean

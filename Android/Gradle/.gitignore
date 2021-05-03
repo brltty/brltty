@@ -7,4 +7,4 @@ build/
 /*.apk
 /*.aab
 /*.html
-/*.txt
+/*.dump
