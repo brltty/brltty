@@ -1,15 +1,15 @@
 def nativePropertiesFile = "native.properties"
 def signingPropertiesFile = "signing/gradle.properties"
 
-Properties loadProperties (String file) {
+Properties loadPropertiesFromFile (String file) {
   def properties = new Properties()
   properties.load(new FileInputStream(rootProject.file(file)))
   return properties
 }
 
 ext {
-  nativeProperties = loadProperties(nativePropertiesFile)
-  signingProperties = loadProperties(signingPropertiesFile)
+  nativeProperties = loadPropertiesFromFile(nativePropertiesFile)
+  signingProperties = loadPropertiesFromFile(signingPropertiesFile)
 }
 
 void fixFileProperty (Properties properties, String name) {
