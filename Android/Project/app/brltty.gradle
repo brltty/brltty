@@ -3,6 +3,25 @@ def driversDirectory = assetsDirectory + File.separator + "drivers"
 def messagesDirectory = assetsDirectory + File.separator + "locale"
 def tablesDirectory = assetsDirectory + File.separator + "tables"
 
+ext {
+  appVersionString = [
+    nativeProperties.rootDirectory + File.separator + "getrevid",
+    nativeProperties.rootDirectory
+  ].execute().text.trim()
+}
+
+ext {
+  appVersionName = appVersionString.replaceAll(/^.+?-/, "").replaceAll(/-g.*$/, "")
+}
+
+ext {
+  appVersionCode = [
+    nativeProperties.rootDirectory + File.separator + "getrevid",
+    "-r", appVersionString, "-i",
+    nativeProperties.rootDirectory
+  ].execute().text.trim()
+}
+
 task installTables (type: Copy) {
   from nativeProperties.tablesDirectory
   into tablesDirectory
