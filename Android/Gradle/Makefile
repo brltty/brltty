@@ -72,6 +72,6 @@ badging configurations permissions resources strings xmlstrings xmltree: app-deb
 clean:
 	$(GRADLE_COMMAND) clean
 
-purge: clean
+clean-more: clean
 	-rm -f -r .gradle
 

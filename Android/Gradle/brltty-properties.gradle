@@ -1,3 +1,4 @@
+def configuredPropertiesFile = "config.properties"
 def nativePropertiesFile = "native.properties"
 def signingPropertiesFile = "signing/gradle.properties"
 
@@ -8,6 +9,7 @@ Properties loadPropertiesFromFile (String file) {
 }
 
 ext {
+  configuredProperties = loadPropertiesFromFile(configuredPropertiesFile)
   nativeProperties = loadPropertiesFromFile(nativePropertiesFile)
   signingProperties = loadPropertiesFromFile(signingPropertiesFile)
 }

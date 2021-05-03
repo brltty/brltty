@@ -17,7 +17,7 @@
 ###############################################################################
 
 AC_PREREQ([2.64])
-AC_INIT([BRLTTY], [6.3], [BRLTTY@brltty.app], [brltty], [http://brltty.app/])
+AC_INIT([BRLTTY], [6.3], [BRLTTY@brltty.app], [brltty], [https://brltty.app/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -1951,5 +1951,6 @@ AC_OUTPUT([
    Autostart/Udev/device.rules
    Autostart/X11/90xbrlapi
    Android/Application/res/values/configured.xml:Android/Application/res.strings.in
+   Android/Gradle/config.properties
    ${brltty_make_files}
 ])

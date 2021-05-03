@@ -16,6 +16,10 @@ android {
     versionName appVersionName
     versionCode appVersionCode
 
+    resValue "string", "app_copyrightNotice", configuredProperties.copyrightNotice
+    resValue "string", "app_webSite", configuredProperties.webSite
+    resValue "string", "app_mailingList", configuredProperties.mailingList
+
     ndk {
       abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
     }
