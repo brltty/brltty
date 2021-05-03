@@ -11,7 +11,7 @@ ext {
 }
 
 ext {
-  appVersionName = appVersionIdentifier.replaceAll(/^.+?-/, "").replaceAll(/-g.*$/, "")
+  appVersionName = appVersionIdentifier.replaceAll(/^.*?-(\d)/, /$1/).replaceAll(/-g.*$/, "")
 }
 
 ext {
