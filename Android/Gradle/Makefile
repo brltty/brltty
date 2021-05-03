@@ -1,4 +1,5 @@
 all: debug
+core: core-debug
 debug: app-debug
 release: app-release
 bundle: bundle-release
@@ -36,14 +37,6 @@ install-debug:
 install-release:
 	adb install -r $(GRADLE_RELEASE_PACKAGE)
 
-useful-links:
-	ln -s -f $(GRADLE_DEBUG_PACKAGE) $(GRADLE_ROOT_NAME)-$(GRADLE_DEBUG_VARIANT).$(GRADLE_PACKAGE_EXTENSION)
-	ln -s -f $(GRADLE_RELEASE_PACKAGE) $(GRADLE_ROOT_NAME)-$(GRADLE_RELEASE_VARIANT).$(GRADLE_PACKAGE_EXTENSION)
-	ln -s -f $(GRADLE_DEBUG_BUNDLE) $(GRADLE_ROOT_NAME)-$(GRADLE_DEBUG_VARIANT).$(GRADLE_BUNDLE_EXTENSION)
-	ln -s -f $(GRADLE_RELEASE_BUNDLE) $(GRADLE_ROOT_NAME)-$(GRADLE_RELEASE_VARIANT).$(GRADLE_BUNDLE_EXTENSION)
-	ln -s -f $(GRADLE_DEBUG_REPORT) $(GRADLE_REPORT_NAME)-$(GRADLE_DEBUG_VARIANT).$(GRADLE_REPORT_EXTENSION)
-	ln -s -f $(GRADLE_RELEASE_REPORT) $(GRADLE_REPORT_NAME)-$(GRADLE_RELEASE_VARIANT).$(GRADLE_REPORT_EXTENSION)
-
 assets: drivers messages tables
 
 drivers:
@@ -66,15 +59,23 @@ remove-messages:
 remove-tables:
 	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):removeTables
 
+clean:
+	$(GRADLE_COMMAND) clean
+
+clean-more: clean
+	-rm -f -r .gradle
+
 badging-dump configurations-dump permissions-dump resources-dump strings-dump xmlstrings-dump xmltree-dump: app-debug
 	$(GRADLE_DUMP_COMMAND) --values $(@:-dump=) $(GRADLE_DEBUG_PACKAGE) >$(GRADLE_ROOT_NAME)-$(@:-dump=).$(GRADLE_DUMP_EXTENSION)
 
 clean-dumps:
 	-rm -f $(GRADLE_ROOT_NAME)-*.$(GRADLE_DUMP_EXTENSION)
 
-clean:
-	$(GRADLE_COMMAND) clean
-
-clean-more: clean
-	-rm -f -r .gradle
+useful-links:
+	ln -s -f $(GRADLE_DEBUG_PACKAGE) $(GRADLE_ROOT_NAME)-$(GRADLE_DEBUG_VARIANT).$(GRADLE_PACKAGE_EXTENSION)
+	ln -s -f $(GRADLE_RELEASE_PACKAGE) $(GRADLE_ROOT_NAME)-$(GRADLE_RELEASE_VARIANT).$(GRADLE_PACKAGE_EXTENSION)
+	ln -s -f $(GRADLE_DEBUG_BUNDLE) $(GRADLE_ROOT_NAME)-$(GRADLE_DEBUG_VARIANT).$(GRADLE_BUNDLE_EXTENSION)
+	ln -s -f $(GRADLE_RELEASE_BUNDLE) $(GRADLE_ROOT_NAME)-$(GRADLE_RELEASE_VARIANT).$(GRADLE_BUNDLE_EXTENSION)
+	ln -s -f $(GRADLE_DEBUG_REPORT) $(GRADLE_REPORT_NAME)-$(GRADLE_DEBUG_VARIANT).$(GRADLE_REPORT_EXTENSION)
+	ln -s -f $(GRADLE_RELEASE_REPORT) $(GRADLE_REPORT_NAME)-$(GRADLE_RELEASE_VARIANT).$(GRADLE_REPORT_EXTENSION)
 
