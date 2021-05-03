@@ -19,7 +19,7 @@ ext {
     nativeProperties.rootDirectory + File.separator + "getrevid",
     "-r", appVersionString, "-i",
     nativeProperties.rootDirectory
-  ].execute().text.trim()
+  ].execute().text.trim() as int
 }
 
 task installTables (type: Copy) {
