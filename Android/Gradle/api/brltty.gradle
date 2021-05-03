@@ -1,0 +1,41 @@
+task makeBindingsComponents (type: Exec) {
+  workingDir nativeProperties.javaDirectory
+  commandLine 'make', 'all'
+  ignoreExitValue false
+}
+
+task cleanBindingsComponents (type: Exec) {
+  workingDir nativeProperties.javaDirectory
+  commandLine 'make', 'clean'
+  ignoreExitValue true
+}
+
+task adBindingsComponents (type: Copy) {
+  into "src/main"
+
+  from(nativeProperties.javaDirectory) {
+    into "libs"
+    include "*.jar"
+  }
+
+  from(nativeProperties.javaDirectory) {
+    into "jniLibs/armeabi-v7a"
+    include "*.so"
+  }
+
+  from(nativeProperties.coreDirectory) {
+    into "jniLibs/armeabi-v7a"
+    include "libbrlapi*.so"
+  }
+}
+
+makeBindingsComponents.dependsOn ":core:makeCoreComponents"
+adBindingsComponents.dependsOn makeBindingsComponents
+
+android {
+  tasks.withType(JavaCompile) {
+    compileTask -> compileTask.dependsOn(adBindingsComponents)
+  }
+
+  clean.dependsOn(cleanBindingsComponents)
+}

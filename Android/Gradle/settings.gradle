@@ -1,4 +1,4 @@
 rootProject.name = "brltty"
 
-include ":core"
+include ":core", "api"
 include ":app"

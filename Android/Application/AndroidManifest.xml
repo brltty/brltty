@@ -7,6 +7,7 @@
   >
 
   <uses-sdk android:targetSdkVersion="29" />
+  <uses-sdk android:minSdkVersion="16" />
 
   <!-- for creating a foreground notification -->
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />

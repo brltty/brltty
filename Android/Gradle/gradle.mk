@@ -2,6 +2,7 @@ GRADLE_COMMAND = ./gradlew -q
 
 GRADLE_ROOT_NAME = brltty
 GRADLE_CORE_NAME = core
+GRADLE_API_NAME = api
 GRADLE_APP_NAME = app
 
 GRADLE_DEBUG_VARIANT = debug

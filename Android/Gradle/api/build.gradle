@@ -1,0 +1,20 @@
+description = """
+"${project.name}" provides the Java client bindings for "${rootProject.name}" code.
+"""
+
+apply plugin: "com.android.library"
+apply from: "brltty.gradle"
+
+android {
+  compileSdkVersion "android-29"
+  buildToolsVersion "29.0.3"
+
+  defaultConfig {
+    targetSdkVersion 29
+    minSdkVersion 24
+  }
+}
+
+dependencies {
+  api files("src/main/libs/brlapi.jar")
+}

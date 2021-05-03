@@ -1,5 +1,6 @@
 all: debug
 core: core-debug
+api: api-debug
 debug: app-debug
 release: app-release
 bundle: bundle-release
@@ -12,6 +13,12 @@ core-debug:
 
 core-release:
 	$(GRADLE_COMMAND) :$(GRADLE_CORE_NAME):assembleRelease
+
+api-debug:
+	$(GRADLE_COMMAND) :$(GRADLE_API_NAME):assembleDebug
+
+api-release:
+	$(GRADLE_COMMAND) :$(GRADLE_API_NAME):assembleRelease
 
 app-debug:
 	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):assembleDebug
