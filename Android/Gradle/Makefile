@@ -44,19 +44,33 @@ useful-links:
 	ln -s -f $(GRADLE_DEBUG_REPORT) $(GRADLE_REPORT_NAME)-$(GRADLE_DEBUG_VARIANT).$(GRADLE_REPORT_EXTENSION)
 	ln -s -f $(GRADLE_RELEASE_REPORT) $(GRADLE_REPORT_NAME)-$(GRADLE_RELEASE_VARIANT).$(GRADLE_REPORT_EXTENSION)
 
+assets: drivers messages tables
+
+drivers:
+	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):addDrivers
+
+messages:
+	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):addMessages
+
+tables:
+	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):addTables
+
+remove-assets: remove-drivers remove-messages remove-tables
+
+remove-drivers:
+	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):removeDrivers
+
+remove-messages:
+	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):removeMessages
+
+remove-tables:
+	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):removeTables
+
+badging configurations permissions resources strings xmlstrings xmltree: app-debug
+	aapt dump $@ $(GRADLE_DEBUG_PACKAGE) >$(GRADLE_ROOT_NAME)-$@.txt
+
 clean:
 	$(GRADLE_COMMAND) clean
-
-uninstall-assets: uninstall-drivers uninstall-messages uninstall-tables
-
-uninstall-drivers:
-	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):uninstallDrivers
-
-uninstall-messages:
-	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):uninstallMessages
-
-uninstall-tables:
-	$(GRADLE_COMMAND) :$(GRADLE_APP_NAME):uninstallTables
 
 purge: clean
 	-rm -f -r .gradle

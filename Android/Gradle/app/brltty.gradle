@@ -22,7 +22,7 @@ ext {
   ].execute().text.trim() as int
 }
 
-task installTables (type: Copy) {
+task addTables (type: Copy) {
   from nativeProperties.tablesDirectory
   into tablesDirectory
   include 'Text/**/*.tt?'
@@ -32,11 +32,11 @@ task installTables (type: Copy) {
   include 'Input/**/*.kt?'
 }
 
-task uninstallTables (type: Delete) {
+task removeTables (type: Delete) {
   delete tablesDirectory
 }
 
-task installDrivers (type: Copy) {
+task addDrivers (type: Copy) {
   from nativeProperties.driversDirectory
   into driversDirectory
   include 'libbrlttyb??.so'
@@ -44,11 +44,11 @@ task installDrivers (type: Copy) {
   include 'libbrlttyx??.so'
 }
 
-task uninstallDrivers (type: Delete) {
+task removeDrivers (type: Delete) {
   delete driversDirectory
 }
 
-tasks.register("installMessages") {
+tasks.register("addMessages") {
   doLast {
     def commandProcesses = []
 
@@ -93,7 +93,7 @@ tasks.register("installMessages") {
   }
 }
 
-task uninstallMessages (type: Delete) {
+task removeMessages (type: Delete) {
   delete messagesDirectory
 }
 
@@ -104,10 +104,10 @@ void addAssembleTask (Task task) {
 }
 
 afterEvaluate {
-  [installTables, installDrivers, installMessages].each {
+  [addTables, addDrivers, addMessages].each {
     task -> addAssembleTask task
   }
 
-  installDrivers.dependsOn ":core:makeCoreComponents"
-  clean.dependsOn uninstallDrivers, uninstallMessages, uninstallTables
+  addDrivers.dependsOn ":core:makeCoreComponents"
+  clean.dependsOn removeDrivers, removeMessages, removeTables
 }
