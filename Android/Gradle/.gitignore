@@ -1,3 +1,7 @@
 /local.properties
 /.gradle/
 build/
+
+/*.apk
+/*.aab
+/*.html

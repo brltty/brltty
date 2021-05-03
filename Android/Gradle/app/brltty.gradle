@@ -4,20 +4,20 @@ def messagesDirectory = assetsDirectory + File.separator + "locale"
 def tablesDirectory = assetsDirectory + File.separator + "tables"
 
 ext {
-  appVersionString = [
+  appVersionIdentifier = [
     nativeProperties.rootDirectory + File.separator + "getrevid",
     nativeProperties.rootDirectory
   ].execute().text.trim()
 }
 
 ext {
-  appVersionName = appVersionString.replaceAll(/^.+?-/, "").replaceAll(/-g.*$/, "")
+  appVersionName = appVersionIdentifier.replaceAll(/^.+?-/, "").replaceAll(/-g.*$/, "")
 }
 
 ext {
   appVersionCode = [
     nativeProperties.rootDirectory + File.separator + "getrevid",
-    "-r", appVersionString, "-i",
+    "-r", appVersionIdentifier, "-i",
     nativeProperties.rootDirectory
   ].execute().text.trim() as int
 }
