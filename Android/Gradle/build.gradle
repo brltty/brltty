@@ -3,6 +3,7 @@ description = """
 """
 
 apply from: "brltty-properties.gradle"
+apply from: "brltty-native.gradle"
 
 buildscript {
   repositories {

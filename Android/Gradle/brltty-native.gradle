@@ -1,0 +1,40 @@
+ext.nativeTasks = new HashMap<String, String>()
+ext.nativeTasks.ABI = new HashMap<String, String>()
+
+void addNativeComponentTasks (String abi) {
+  def makeTask = tasks.register("makeComponents_${abi}", Exec) {
+    workingDir nativeProperties.coreDirectory
+    commandLine 'make', nativeProperties.coreLibrary, nativeProperties.coreWrapper, nativeProperties.coreBindings
+    ignoreExitValue false
+  }
+
+  def cleanTask = tasks.register("cleanComponents_${abi}", Exec) {
+    workingDir nativeProperties.coreDirectory
+    commandLine 'make', 'clean'
+    ignoreExitValue true
+  }
+
+  def addTask = tasks.register("addComponents_${abi}", Copy) {
+    from nativeProperties.coreDirectory
+    into "src/main/jniLibs/armeabi-v7a"
+    include "libbrltty*.so"
+  }
+
+  nativeTasks.ABI[abi] = [
+    make: makeTask,
+    clean: cleanTask,
+    add: addTask
+  ]
+}
+
+addNativeComponentTasks "armeabi-v71"
+addNativeComponentTasks "arm64-v81"
+addNativeComponentTasks "x86"
+addNativeComponentTasks "x86_64"
+
+def abiMap = nativeTasks.ABI
+abiMap.valeus.each { abi ->
+  def tasks = abiMap[abi]
+  tasks.add.dependsOn tasks.make
+  clean.dependsOn tasks.clean
+}
