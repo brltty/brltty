@@ -1,6 +1,8 @@
-def configuredPropertiesFile = "config.properties"
-def nativePropertiesFile = "native.properties"
-def signingPropertiesFile = "signing/gradle.properties"
+def propertyFiles = [
+  configuredProperties: "config.properties",
+  nativeProperties: "native.properties",
+  signingProperties: "signing/gradle.properties"
+]
 
 void normalizeFileProperty (Properties properties, String name) {
   properties[name] = rootProject.file(properties[name])
@@ -49,8 +51,7 @@ Properties loadPropertiesFromFile (String file) {
   return properties
 }
 
-ext {
-  configuredProperties = loadPropertiesFromFile(configuredPropertiesFile)
-  nativeProperties = loadPropertiesFromFile(nativePropertiesFile)
-  signingProperties = loadPropertiesFromFile(signingPropertiesFile)
+propertyFiles.keySet().each { name ->
+  def path = propertyFiles[name]
+  ext[name] = loadPropertiesFromFile(path)
 }
