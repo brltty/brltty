@@ -63,6 +63,24 @@ readonly configureOptions=(
 . "`dirname "${0}"`/brltty-prologue.sh"
 set -e
 
+checkTool() {
+   eval export "${1}=\`set -- \"${toolchainBinaries}/\"*\"-$2\" && echo \"\${1}\"\`"
+}
+
+configureABI() {
+   local abiRoot="${1}"
+   . "${abiRoot}/build.properties"
+
+   export toolchainBinaries="${BRLTTY_ANDROID_TOOLCHAIN}/bin"
+   export PATH="${PATH}:${toolchainBinaries}"
+   checkTool CC gcc
+
+   export CFLAGS="${BRLTTY_ANDROID_CFLAGS}"
+   export LDFLAGS="${BRLTTY_ANDROID_LDFLAGS}"
+
+   "${BRLTTY_ANDROID_SOURCE}/configure" --quiet --host="${BRLTTY_ANDROID_SYSTEM}" "${configureOptions[@]}"
+}
+
 sourceRoot="${programDirectory}"
 buildRoot="${initialDirectory}"
 
@@ -121,7 +139,7 @@ prepareArchitecture() {
    (  set -e
       cd "${abiRoot}"
 
-      set -- SOURCE "${sourceRoot}" PLATFORM "${androidPlatform}" ARCH "${architecture}" ABI "${abi}" SYSTEM "${system}" TOOLCHAIN "${toolchainRoot}"
+      set -- SOURCE "${sourceRoot}" PLATFORM "${androidPlatform}" ARCH "${architecture}" ABI "${abi}" SYSTEM "${system}" TOOLCHAIN "${toolchainRoot}" CFLAGS "${cFlags}" LDFLAGS "${ldFlags}"
       local variablesFile="build.properties"
       : >"${variablesFile}"
 
@@ -132,18 +150,6 @@ prepareArchitecture() {
          shift 2
          echo >>"${variablesFile}" "BRLTTY_ANDROID_${variable}=${value}"
       done
-
-      checkTool() {
-         eval export "${1}=\`set -- \"${toolchainBinaries}/\"*\"-$2\" && echo \"\${1}\"\`"
-      }
-
-      export toolchainBinaries="${toolchainRoot}/bin"
-      export PATH="${PATH}:${toolchainBinaries}"
-      checkTool CC gcc
-
-      export CFLAGS="${cFlags}"
-      export LDFLAGS="${ldFlags}"
-      "${sourceRoot}/configure" --quiet --host="${system}" "${configureOptions[@]}"
    )
 }
 
@@ -151,4 +157,6 @@ prepareArchitecture arm arm-linux-androideabi armeabi-v7a "-mthumb" "-Wl,--fix-c
 prepareArchitecture arm64 aarch64-linux-android arm64-v8a
 prepareArchitecture x86 i686-linux-android x86
 prepareArchitecture x86_64 x86_64-linux-android x86_64
+
+configureABI "${architecturesRoot}/armeabi-v7a"
 exit 0
