@@ -67,13 +67,29 @@ findTool() {
    eval export "${1}=\`set -- \"${BRLTTY_ANDROID_BINARIES}/\"*\"-$2\" && echo \"\${1}\"\`"
 }
 
+addProgramOption f flag forceReconfigure "force a reconfigure"
 addProgramParameter ABI abiName "name of ABI to configure" "the source tree"
 parseProgramArguments "${@}"
 
 abiRoot="${programDirectory}/Android/ABI/${abiName}"
 abiPropertiesFile="${abiRoot}/build.properties"
+abiMakeFile="${abiRoot}/Makefile"
+
 [ -f "${abiPropertiesFile}" ] || syntaxError "unrecognized ABI: ${abiName}"
 . "${abiPropertiesFile}"
+
+if [ -f "${abiMakeFile}" ]
+then
+   if "${forceReconfigure}"
+   then
+      logMessage task "reconfiguring ABI: ${abiName}"
+   else
+      logMessage task "ABI already configured: ${abiName}"
+      exit 0
+   fi
+else
+   logMessage task "configuring ABI: ${abiName}"
+fi
 
 export BRLTTY_ANDROID_BINARIES="${BRLTTY_ANDROID_TOOLCHAIN}/bin"
 export PATH="${PATH}:${BRLTTY_ANDROID_BINARIES}"
