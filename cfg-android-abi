@@ -1,0 +1,86 @@
+#!/bin/bash
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2021 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Braille drivers already disabled:
+# lb (by --without-libbraille)
+# xw (by --disable-x)
+readonly configureOptions=(
+   --disable-expat
+   --disable-gpm
+   --disable-iconv
+   --disable-icu
+   --disable-liblouis
+   --disable-polkit
+   --disable-x
+
+   --without-libbraille
+   --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo
+
+   --without-espeak
+   --without-espeak-ng
+   --without-flite
+   --without-mikropuhe
+   --without-speechd
+   --without-swift
+   --without-theta
+   --with-speech-driver=an,-all
+
+   --with-screen-driver=an,-all
+
+   --without-pgmpath-package
+   --without-pgmprivs-package
+   --without-service-package
+   --without-params-package
+   --without-charset-package
+   --without-rgx-package
+   --without-hostcmd-package
+   --without-mntpt-package
+   --without-mntfs-package
+   --without-bell-package
+   --without-leds-package
+   --without-beep-package
+   --without-midi-package
+   --without-fm-package
+   --without-ports-package
+)
+
+. "`dirname "${0}"`/brltty-prologue.sh"
+set -e
+
+findTool() {
+   eval export "${1}=\`set -- \"${BRLTTY_ANDROID_BINARIES}/\"*\"-$2\" && echo \"\${1}\"\`"
+}
+
+addProgramParameter ABI abiName "name of ABI to configure" "the source tree"
+parseProgramArguments "${@}"
+
+abiRoot="${programDirectory}/Android/ABI/${abiName}"
+abiPropertiesFile="${abiRoot}/build.properties"
+[ -f "${abiPropertiesFile}" ] || syntaxError "unrecognized ABI: ${abiName}"
+. "${abiPropertiesFile}"
+
+export BRLTTY_ANDROID_BINARIES="${BRLTTY_ANDROID_TOOLCHAIN}/bin"
+export PATH="${PATH}:${BRLTTY_ANDROID_BINARIES}"
+findTool CC gcc
+
+export CFLAGS="${BRLTTY_ANDROID_CFLAGS}"
+export LDFLAGS="${BRLTTY_ANDROID_LDFLAGS}"
+
+"${BRLTTY_ANDROID_SOURCE}/configure" --quiet --host="${BRLTTY_ANDROID_SYSTEM}" "${configureOptions[@]}"
+exit 0

@@ -17,69 +17,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Braille drivers already disabled:
-# lb (by --without-libbraille)
-# xw (by --disable-x)
-readonly configureOptions=(
-   --disable-expat
-   --disable-gpm
-   --disable-iconv
-   --disable-icu
-   --disable-liblouis
-   --disable-polkit
-   --disable-x
-
-   --without-libbraille
-   --with-braille-driver=-ba,-bg,-tt,-vr,al,at,bm,bn,ce,eu,fs,hm,ht,hw,ic,ir,md,mm,mt,np,pg,pm,sk,vo
-
-   --without-espeak
-   --without-espeak-ng
-   --without-flite
-   --without-mikropuhe
-   --without-speechd
-   --without-swift
-   --without-theta
-   --with-speech-driver=an,-all
-
-   --with-screen-driver=an,-all
-
-   --without-pgmpath-package
-   --without-pgmprivs-package
-   --without-service-package
-   --without-params-package
-   --without-charset-package
-   --without-rgx-package
-   --without-hostcmd-package
-   --without-mntpt-package
-   --without-mntfs-package
-   --without-bell-package
-   --without-leds-package
-   --without-beep-package
-   --without-midi-package
-   --without-fm-package
-   --without-ports-package
-)
-
 . "`dirname "${0}"`/brltty-prologue.sh"
 set -e
 
-checkTool() {
-   eval export "${1}=\`set -- \"${toolchainBinaries}/\"*\"-$2\" && echo \"\${1}\"\`"
-}
-
-configureABI() {
-   local abiRoot="${1}"
-   . "${abiRoot}/build.properties"
-
-   export toolchainBinaries="${BRLTTY_ANDROID_TOOLCHAIN}/bin"
-   export PATH="${PATH}:${toolchainBinaries}"
-   checkTool CC gcc
-
-   export CFLAGS="${BRLTTY_ANDROID_CFLAGS}"
-   export LDFLAGS="${BRLTTY_ANDROID_LDFLAGS}"
-
-   "${BRLTTY_ANDROID_SOURCE}/configure" --quiet --host="${BRLTTY_ANDROID_SYSTEM}" "${configureOptions[@]}"
-}
+parseProgramArguments "${@}"
 
 sourceRoot="${programDirectory}"
 buildRoot="${initialDirectory}"
@@ -158,5 +99,5 @@ prepareArchitecture arm64 aarch64-linux-android arm64-v8a
 prepareArchitecture x86 i686-linux-android x86
 prepareArchitecture x86_64 x86_64-linux-android x86_64
 
-configureABI "${architecturesRoot}/armeabi-v7a"
+"${sourceRoot}/cfg-android-abi" "armeabi-v7a"
 exit 0
