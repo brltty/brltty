@@ -1,40 +1,132 @@
-ext.nativeTasks = new HashMap<String, String>()
-ext.nativeTasks.ABI = new HashMap<String, String>()
+String getProjectPath (Map properties) {
+  return properties.project.projectDir.path
+}
 
-void addNativeComponentTasks (String abi) {
-  def makeTask = tasks.register("makeComponents_${abi}", Exec) {
-    workingDir nativeProperties.coreDirectory
-    commandLine 'make', nativeProperties.coreLibrary, nativeProperties.coreWrapper, nativeProperties.coreBindings
+String getProjectPath (Map properties, String path) {
+  return getProjectPath(properties) + File.separator + path
+}
+
+String getJarPath (Map properties) {
+  return getProjectPath(properties, nativeProperties.jarPath)
+}
+
+String getJNIPath (Map properties) {
+  return getProjectPath(properties, nativeProperties.jniPath)
+}
+
+String getABIPath (Map properties, String abi) {
+  return getJNIPath(properties) + File.separator + abi
+}
+
+void addCompileDependency (Task dependency) {
+  tasks.withType(JavaCompile) { compileTask ->
+    compileTask.dependsOn(dependency)
+  }
+}
+
+void addNativeComponentTasks (Map properties, String abi) {
+  def name = properties.name
+  def taskNameSuffix = "_${name}_${abi}"
+  def makeDirectory = properties.topDirectory + File.separator + properties.subdirectory
+
+  def components = properties.components
+  if (components == null) components = "all"
+  if (components instanceof String) components = [components]
+
+  def makeTask = tasks.register("makeNativeComponents${taskNameSuffix}", Exec) {
+    description "make the ${abi} components of the ${name}"
+    dependsOn properties.configureTask
+
+    workingDir makeDirectory
     ignoreExitValue false
-  }
 
-  def cleanTask = tasks.register("cleanComponents_${abi}", Exec) {
-    workingDir nativeProperties.coreDirectory
-    commandLine 'make', 'clean'
+    commandLine "make"
+    args components
+  }.get()
+
+  def cleanTask = tasks.register("cleanNativeComponents${taskNameSuffix}", Exec) {
+    description "remove (make clean) the ${abi} components of the ${name}"
+    dependsOn properties.configureTask
+
+    workingDir makeDirectory
     ignoreExitValue true
+    commandLine "make", "clean"
+  }.get()
+
+  def removeTask = tasks.register("removeNativeComponents${taskNameSuffix}", Delete) {
+    description "remove the ${name}'s ${abi} libraries from the build"
+    delete getABIPath(properties, abi)
+  }.get()
+
+  clean.dependsOn cleanTask
+  clean.dependsOn removeTask
+
+  def libraries = properties.libs
+  def jars = properties.jars
+
+  if ((libraries != null) && !libraries.isEmpty()) {
+    def addLibrariesTask = tasks.register("libNativeComponents${taskNameSuffix}", Copy) {
+      description "add the ${name}'s ${abi} libraries to the build"
+      dependsOn makeTask
+
+      into getABIPath(properties, abi)
+      from makeDirectory
+
+      libraries.each { library ->
+        include "lib${library}.so"
+      }
+    }.get()
+
+    addCompileDependency addLibrariesTask
   }
 
-  def addTask = tasks.register("addComponents_${abi}", Copy) {
-    from nativeProperties.coreDirectory
-    into "src/main/jniLibs/armeabi-v7a"
-    include "libbrltty*.so"
+  if ((jars != null) && !jars.isEmpty()) {
+    def addJarsTask = tasks.register("jarNativeComponents${taskNameSuffix}", Copy) {
+      description "add the ${name}'s ${abi} jars to the build"
+      dependsOn makeTask
+
+      into getJarPath(properties)
+      from makeDirectory
+
+      jars.each { jar ->
+        include "${jar}.jar"
+      }
+    }.get()
+
+    addCompileDependency addJarsTask
+  }
+}
+
+void addNativeComponentTasks (Map properties) {
+  def name = properties.name
+  def taskNameSuffix = "_${name}"
+
+  nativeProperties.abiList.each { abi ->
+    properties.topDirectory = nativeProperties.abiDirectory + File.separator + abi
+
+    properties.configureTask = tasks.register("configureNativeComponents${taskNameSuffix}_${abi}", Exec) {
+      description "configure the ${name} for the ${abi} ABI"
+
+      workingDir properties.topDirectory
+      ignoreExitValue false
+      commandLine "${nativeProperties.rootDirectory}/cfg-android-abi", abi
+    }.get()
+
+    addNativeComponentTasks(properties, abi)
   }
 
-  nativeTasks.ABI[abi] = [
-    make: makeTask,
-    clean: cleanTask,
-    add: addTask
-  ]
+  def removeTask = tasks.register("removeNativeComponents${taskNameSuffix}", Delete) {
+    description "remove the ${name}'s jars from the build"
+    delete getJarPath(properties)
+  }.get()
+
+  clean.dependsOn removeTask
 }
 
-addNativeComponentTasks "armeabi-v71"
-addNativeComponentTasks "arm64-v81"
-addNativeComponentTasks "x86"
-addNativeComponentTasks "x86_64"
-
-def abiMap = nativeTasks.ABI
-abiMap.valeus.each { abi ->
-  def tasks = abiMap[abi]
-  tasks.add.dependsOn tasks.make
-  clean.dependsOn tasks.clean
+def addTasks = { properties ->
+  addNativeComponentTasks(properties)
 }
+
+ext.nativeComponentMethods = [
+  addTasks: addTasks,
+]

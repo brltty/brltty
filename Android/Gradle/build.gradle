@@ -2,6 +2,7 @@ description = """
 "${project.name}" is a screen reader for braille users.
 """
 
+apply plugin: "base"
 apply from: "brltty-properties.gradle"
 apply from: "brltty-native.gradle"
 

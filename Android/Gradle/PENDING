@@ -1,0 +1,5 @@
+compile dependencies for add tasks
+add libbrlapi.so to api from core
+add the jar only once (not once per ABI)
+publish the app
+public the api

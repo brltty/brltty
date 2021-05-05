@@ -1,6 +1,6 @@
 copyrightNotice=@PACKAGE_COPYRIGHT@
 webSite=@PACKAGE_URL@
-mailingList=@PACKAGE_BUGREPORT@
+emailAddress=@PACKAGE_BUGREPORT@
 
 apiVersion=@api_version@
 apiRelease=@api_release@

@@ -1,7 +1,7 @@
 def propertyFiles = [
   configuredProperties: "config.properties",
   nativeProperties: "native.properties",
-  signingProperties: "signing/gradle.properties"
+  signingProperties: "signing/gradle.properties",
 ]
 
 void normalizeFileProperty (Properties properties, String name) {
@@ -18,6 +18,10 @@ void normalizeSubdirectoryProperty (Properties properties, String subdirectoryNa
   properties[directoryName] = properties.rootDirectory + File.separator + properties[subdirectoryName]
 }
 
+void normalizeListProperty (Properties properties, String name) {
+  properties[name] = properties[name].split(',').collect{it as String}
+}
+
 Properties loadPropertiesFromFile (String file) {
   def properties = new Properties()
   properties.load(new FileInputStream(rootProject.file(file)))
@@ -25,6 +29,7 @@ Properties loadPropertiesFromFile (String file) {
   def directoryProperties = []
   def subdirectoryProperties = []
   def fileProperties = []
+  def listProperties = []
 
   properties.propertyNames().each { name ->
     if (name.endsWith("Directory")) {
@@ -33,6 +38,8 @@ Properties loadPropertiesFromFile (String file) {
       subdirectoryProperties += name
     } else if (name.endsWith("File")) {
       fileProperties += name
+    } else if (name.endsWith("List")) {
+      listProperties += name
     }
   }
 
@@ -46,6 +53,10 @@ Properties loadPropertiesFromFile (String file) {
 
   fileProperties.each { name ->
     normalizeFileProperty(properties, name)
+  }
+
+  listProperties.each { name ->
+    normalizeListProperty(properties, name)
   }
 
   return properties

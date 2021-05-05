@@ -97,6 +97,8 @@ task removeMessages (type: Delete) {
   delete messagesDirectory
 }
 
+clean.dependsOn removeDrivers, removeMessages, removeTables
+
 void addAssembleTask (Task task) {
   ["assembleDebug", "assembleRelease"].each { taskName ->
     tasks[taskName].dependsOn task
@@ -104,10 +106,7 @@ void addAssembleTask (Task task) {
 }
 
 afterEvaluate {
-  [addTables, addDrivers, addMessages].each {
-    task -> addAssembleTask task
+  [addTables, addDrivers, addMessages].each { task ->
+    addAssembleTask task
   }
-
-  addDrivers.dependsOn ":core:makeCoreComponents"
-  clean.dependsOn removeDrivers, removeMessages, removeTables
 }

@@ -1,27 +1,12 @@
-task makeCoreComponents (type: Exec) {
-  workingDir nativeProperties.coreDirectory
-  commandLine 'make', nativeProperties.coreLibrary, nativeProperties.coreWrapper, nativeProperties.coreBindings
-  ignoreExitValue false
-}
+nativeComponentMethods.addTasks([
+  name: "core",
+  project: project,
+  subdirectory: nativeProperties.coreSubdirectory,
+  libs: ["brltty_core", "brltty_jni"],
 
-task cleanCoreComponents (type: Exec) {
-  workingDir nativeProperties.coreDirectory
-  commandLine 'make', 'clean'
-  ignoreExitValue true
-}
-
-task addCoreComponents (type: Copy) {
-  from nativeProperties.coreDirectory
-  into "src/main/jniLibs/armeabi-v7a"
-  include "libbrltty*.so"
-}
-
-addCoreComponents.dependsOn makeCoreComponents
-
-android {
-  tasks.withType(JavaCompile) {
-    compileTask -> compileTask.dependsOn(addCoreComponents)
-  }
-
-  clean.dependsOn(cleanCoreComponents)
-}
+  components: [
+    nativeProperties.coreLibrary,
+    nativeProperties.coreWrapper,
+    nativeProperties.coreBindings,
+  ],
+])
