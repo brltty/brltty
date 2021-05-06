@@ -1,10 +1,10 @@
 nativeComponentMethods.addTasks([
-  name: "core",
+  component: "core",
   project: project,
   subdirectory: nativeProperties.coreSubdirectory,
   libs: ["brltty_core", "brltty_jni"],
 
-  components: [
+  make: [
     nativeProperties.coreLibrary,
     nativeProperties.coreWrapper,
     nativeProperties.coreBindings,

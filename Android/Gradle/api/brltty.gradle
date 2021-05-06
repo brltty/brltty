@@ -1,5 +1,5 @@
 nativeComponentMethods.addTasks([
-  name: "api",
+  component: "api",
   project: project,
   subdirectory: nativeProperties.javaSubdirectory,
   libs: ["brlapi_java"],
