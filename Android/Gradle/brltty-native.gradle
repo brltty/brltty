@@ -1,5 +1,3 @@
-ext.nativeComponents = [:]
-
 Map getABI (String abi) {
   if (!nativeComponents.containsKey("ABI")) {
     nativeComponents.ABI = [:]
@@ -34,6 +32,26 @@ String getABIPath (Map properties, String abi) {
   return getJNIPath(properties) + File.separator + abi
 }
 
+Task newAssembleTask (Map properties) {
+  return tasks.register("assembleNativeComponents${properties.taskNameSuffix}") {
+    description "assemble all of the ${properties.component}'s components"
+  }.get()
+}
+
+void addAssembleDependency (Task dependentTask) {
+  nativeComponents.assembleTask.dependsOn dependentTask
+}
+
+Task newCleanTask (Map properties) {
+  return tasks.register("cleanNativeComponents${properties.taskNameSuffix}") {
+    description "Clean all of the ${properties.component}'s components"
+  }.get()
+}
+
+void addCleanDependency (Task dependentTask) {
+  nativeComponents.cleanTask.dependsOn dependentTask
+}
+
 Task newConfigureTask (Map properties) {
   return tasks.register("configureNativeComponents${properties.taskNameSuffix}", Exec) {
     description "configure the ${properties.component} for the ${properties.ABI} ABI"
@@ -54,7 +72,7 @@ Task getConfigureTask (Map properties) {
   return abi.configureTask
 }
 
-Task newMakeTask (Map properties) {
+Task newMakeComponentsTask (Map properties) {
   return tasks.register("makeNativeComponents${properties.taskNameSuffix}", Exec) {
     description "make the ${properties.ABI} components of the ${properties.component}"
     dependsOn properties.configureTask
@@ -95,7 +113,7 @@ Task newAddLibrariesTask (Map properties) {
   }.get()
 }
 
-Task newCleanTask (Map properties) {
+Task newMakeCleanTask (Map properties) {
   return tasks.register("cleanNativeComponents${properties.taskNameSuffix}", Exec) {
     description "remove (make clean) the ${properties.ABI} components of the ${properties.component}"
     dependsOn properties.configureTask
@@ -120,16 +138,6 @@ Task newRemoveLibrariesTask (Map properties) {
   }.get()
 }
 
-Task newAssembleTask (Map properties) {
-  return tasks.register("assembleNativeComponents${properties.taskNameSuffix}") {
-    description "assemble all of the native components"
-  }.get()
-}
-
-void addAssembleDependency (Task dependentTask) {
-  nativeComponents.assembleTask.dependsOn dependentTask
-}
-
 void addNativeComponentTasks (Map properties, String abi) {
   properties.ABI = abi
 
@@ -137,7 +145,7 @@ void addNativeComponentTasks (Map properties, String abi) {
   properties.configureTask = getConfigureTask(properties)
 
   properties.makeDirectory = properties.topDirectory + File.separator + properties.subdirectory
-  properties.makeTask = newMakeTask(properties)
+  properties.makeTask = newMakeComponentsTask(properties)
 
   def jars = properties.jars
   if ((jars != null) && !jars.isEmpty()) {
@@ -151,23 +159,22 @@ void addNativeComponentTasks (Map properties, String abi) {
     addAssembleDependency addLibrariesTask
   }
 
-  def cleanTask = newCleanTask(properties)
-  clean.dependsOn cleanTask
+  def makeCleanTask = newMakeCleanTask(properties)
+  addCleanDependency makeCleanTask
 
   def removeLibrariesTask = newRemoveLibrariesTask(properties)
-  clean.dependsOn removeLibrariesTask
+  addCleanDependency removeLibrariesTask
 }
 
 void addNativeComponentTasks (Map properties) {
   def taskNameSuffix = "_${properties.component}"
   properties.taskNameSuffix = taskNameSuffix
-  nativeComponents.assembleTask = newAssembleTask(properties)
 
   if (properties.make == null) properties.make = "all"
   if (properties.make instanceof String) properties.make = [properties.make]
 
   def removeJarsTask = newRemoveJarsTask(properties)
-  clean.dependsOn removeJarsTask
+  addCleanDependency removeJarsTask
 
   nativeProperties.abiList.each { abi ->
     properties.taskNameSuffix = "${taskNameSuffix}_${abi}"
@@ -179,4 +186,7 @@ def addTasks = { properties ->
   addNativeComponentTasks(properties)
 }
 
+ext.nativeComponents = [:]
 nativeComponents.addTasks = addTasks
+nativeComponents.assembleTask = newAssembleTask(properties)
+nativeComponents.cleanTask = newCleanTask(properties)

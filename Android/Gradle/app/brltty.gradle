@@ -98,7 +98,7 @@ task removeMessages (type: Delete) {
 }
 
 nativeComponents.assembleTask.dependsOn addDrivers, addMessages, addTables
-clean.dependsOn removeDrivers, removeMessages, removeTables
+nativeComponents.cleanTask.dependsOn removeDrivers, removeMessages, removeTables
 
 void addAssembleTask (Task task) {
   ["assembleDebug", "assembleRelease"].each { taskName ->
