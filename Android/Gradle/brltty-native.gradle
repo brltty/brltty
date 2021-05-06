@@ -1,3 +1,19 @@
+ext.nativeComponents = [:]
+
+Map getABI (String abi) {
+  if (!nativeComponents.containsKey("ABI")) {
+    nativeComponents.ABI = [:]
+  }
+
+  def ABI = nativeComponents.ABI
+  if (!ABI.containsKey(abi)) ABI[abi] = [:]
+  return ABI[abi]
+}
+
+Map getABI (Map properties) {
+  return getABI(properties.ABI)
+}
+
 String getProjectPath (Map properties) {
   return properties.project.projectDir.path
 }
@@ -26,6 +42,16 @@ Task newConfigureTask (Map properties) {
     ignoreExitValue false
     commandLine "${nativeProperties.rootDirectory}/cfg-android-abi", properties.ABI
   }.get()
+}
+
+Task getConfigureTask (Map properties) {
+  def abi = getABI(properties)
+
+  if (!abi.containsKey("configureTask")) {
+    abi.configureTask = newConfigureTask(properties)
+  }
+
+  return abi.configureTask
 }
 
 Task newMakeTask (Map properties) {
@@ -101,6 +127,11 @@ void addCompileDependency (Task dependency) {
 }
 
 void addNativeComponentTasks (Map properties, String abi) {
+  properties.ABI = abi
+
+  properties.topDirectory = nativeProperties.abiDirectory + File.separator + properties.ABI
+  properties.configureTask = getConfigureTask(properties)
+
   properties.makeDirectory = properties.topDirectory + File.separator + properties.subdirectory
   properties.makeTask = newMakeTask(properties)
 
@@ -134,11 +165,7 @@ void addNativeComponentTasks (Map properties) {
   clean.dependsOn removeJarsTask
 
   nativeProperties.abiList.each { abi ->
-    properties.ABI = abi
     properties.taskNameSuffix = "${taskNameSuffix}_${abi}"
-    properties.topDirectory = nativeProperties.abiDirectory + File.separator + abi
-
-    properties.configureTask = newConfigureTask(properties)
     addNativeComponentTasks(properties, abi)
   }
 }
