@@ -97,6 +97,7 @@ task removeMessages (type: Delete) {
   delete messagesDirectory
 }
 
+nativeComponents.assembleTask.dependsOn addDrivers, addMessages, addTables
 clean.dependsOn removeDrivers, removeMessages, removeTables
 
 void addAssembleTask (Task task) {
@@ -106,7 +107,7 @@ void addAssembleTask (Task task) {
 }
 
 afterEvaluate {
-  [addTables, addDrivers, addMessages].each { task ->
+  [nativeComponents.assembleTask].each { task ->
     addAssembleTask task
   }
 }

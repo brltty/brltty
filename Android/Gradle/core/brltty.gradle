@@ -1,4 +1,4 @@
-nativeComponentMethods.addTasks([
+nativeComponents.addTasks([
   component: "core",
   project: project,
   subdirectory: nativeProperties.coreSubdirectory,

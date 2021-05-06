@@ -89,7 +89,7 @@ Task newAddLibrariesTask (Map properties) {
     into getABIPath(properties, properties.ABI)
     from properties.makeDirectory
 
-    properties.libraries.each { library ->
+    properties.libs.each { library ->
       include "lib${library}.so"
     }
   }.get()
@@ -120,10 +120,14 @@ Task newRemoveLibrariesTask (Map properties) {
   }.get()
 }
 
-void addCompileDependency (Task dependency) {
-  tasks.withType(JavaCompile) { compileTask ->
-    compileTask.dependsOn(dependency)
-  }
+Task newAssembleTask (Map properties) {
+  return tasks.register("assembleNativeComponents${properties.taskNameSuffix}") {
+    description "assemble all of the native components"
+  }.get()
+}
+
+void addAssembleDependency (Task dependentTask) {
+  nativeComponents.assembleTask.dependsOn dependentTask
 }
 
 void addNativeComponentTasks (Map properties, String abi) {
@@ -138,13 +142,13 @@ void addNativeComponentTasks (Map properties, String abi) {
   def jars = properties.jars
   if ((jars != null) && !jars.isEmpty()) {
     def addJarsTask = newAddJarsTask(properties)
-    addCompileDependency addJarsTask
+    addAssembleDependency addJarsTask
   }
 
   def libraries = properties.libs
   if ((libraries != null) && !libraries.isEmpty()) {
     def addLibrariesTask = newAddLibrariesTask(properties)
-    addCompileDependency addLibrariesTask
+    addAssembleDependency addLibrariesTask
   }
 
   def cleanTask = newCleanTask(properties)
@@ -157,6 +161,7 @@ void addNativeComponentTasks (Map properties, String abi) {
 void addNativeComponentTasks (Map properties) {
   def taskNameSuffix = "_${properties.component}"
   properties.taskNameSuffix = taskNameSuffix
+  nativeComponents.assembleTask = newAssembleTask(properties)
 
   if (properties.make == null) properties.make = "all"
   if (properties.make instanceof String) properties.make = [properties.make]
@@ -174,6 +179,4 @@ def addTasks = { properties ->
   addNativeComponentTasks(properties)
 }
 
-ext.nativeComponentMethods = [
-  addTasks: addTasks,
-]
+nativeComponents.addTasks = addTasks
