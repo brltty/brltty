@@ -29,10 +29,42 @@ Task newConfigureTask (Map properties) {
 }
 
 Task newMakeTask (Map properties) {
+  return tasks.register("makeNativeComponents${properties.taskNameSuffix}", Exec) {
+    description "make the ${properties.ABI} components of the ${properties.component}"
+    dependsOn properties.configureTask
+
+    workingDir properties.makeDirectory
+    ignoreExitValue false
+
+    commandLine "make"
+    args properties.make
+  }.get()
+}
+
+Task newAddJarsTask (Map properties) {
+  return null
+}
+
+Task newAddLibrariesTask (Map properties) {
   return null
 }
 
 Task newCleanTask (Map properties) {
+  return tasks.register("cleanNativeComponents${properties.taskNameSuffix}", Exec) {
+    description "remove (make clean) the ${properties.ABI} components of the ${properties.component}"
+    dependsOn properties.configureTask
+
+    workingDir properties.makeDirectory
+    ignoreExitValue true
+    commandLine "make", "clean"
+  }.get()
+}
+
+Task newRemoveJarsTask (Map properties) {
+  return null
+}
+
+Task newRemoveLibrariesTask (Map properties) {
   return null
 }
 
@@ -43,35 +75,18 @@ void addCompileDependency (Task dependency) {
 }
 
 void addNativeComponentTasks (Map properties, String abi) {
-  def name = properties.name
-  def makeDirectory = properties.topDirectory + File.separator + properties.subdirectory
+  properties.makeDirectory = properties.topDirectory + File.separator + properties.subdirectory
 
-  def makeTask = tasks.register("makeNativeComponents${properties.taskNameSuffix}", Exec) {
-    description "make the ${abi} components of the ${properties.component}"
-    dependsOn properties.configureTask
+  def makeTask = newMakeTask(properties)
 
-    workingDir makeDirectory
-    ignoreExitValue false
-
-    commandLine "make"
-    args properties.make
-  }.get()
-
-  def cleanTask = tasks.register("cleanNativeComponents${properties.taskNameSuffix}", Exec) {
-    description "remove (make clean) the ${abi} components of the ${properties.component}"
-    dependsOn properties.configureTask
-
-    workingDir makeDirectory
-    ignoreExitValue true
-    commandLine "make", "clean"
-  }.get()
+  def cleanTask = newCleanTask(properties)
+  clean.dependsOn cleanTask
 
   def removeTask = tasks.register("removeNativeComponents${properties.taskNameSuffix}", Delete) {
-    description "remove the ${properties.component}'s ${abi} libraries from the build"
+    description "remove the ${properties.component}'s ${properties.ABI} libraries from the build"
     delete getABIPath(properties, abi)
   }.get()
 
-  clean.dependsOn cleanTask
   clean.dependsOn removeTask
 
   def libraries = properties.libs
@@ -79,11 +94,11 @@ void addNativeComponentTasks (Map properties, String abi) {
 
   if ((libraries != null) && !libraries.isEmpty()) {
     def addLibrariesTask = tasks.register("libNativeComponents${properties.taskNameSuffix}", Copy) {
-      description "add the ${properties.component}'s ${abi} libraries to the build"
+      description "add the ${properties.component}'s ${properties.ABI} libraries to the build"
       dependsOn makeTask
 
       into getABIPath(properties, abi)
-      from makeDirectory
+      from properties.makeDirectory
 
       libraries.each { library ->
         include "lib${library}.so"
@@ -95,11 +110,11 @@ void addNativeComponentTasks (Map properties, String abi) {
 
   if ((jars != null) && !jars.isEmpty()) {
     def addJarsTask = tasks.register("jarNativeComponents${properties.taskNameSuffix}", Copy) {
-      description "add the ${properties.component}'s ${abi} jars to the build"
+      description "add the ${properties.component}'s ${properties.ABI} jars to the build"
       dependsOn makeTask
 
       into getJarPath(properties)
-      from makeDirectory
+      from properties.makeDirectory
 
       jars.each { jar ->
         include "${jar}.jar"
