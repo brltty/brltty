@@ -42,11 +42,31 @@ Task newMakeTask (Map properties) {
 }
 
 Task newAddJarsTask (Map properties) {
-  return null
+  return tasks.register("jarNativeComponents${properties.taskNameSuffix}", Copy) {
+    description "add the ${properties.component}'s ${properties.ABI} jars to the build"
+    dependsOn properties.makeTask
+
+    into getJarPath(properties)
+    from properties.makeDirectory
+
+    properties.jars.each { jar ->
+      include "${jar}.jar"
+    }
+  }.get()
 }
 
 Task newAddLibrariesTask (Map properties) {
-  return null
+  return tasks.register("jniNativeComponents${properties.taskNameSuffix}", Copy) {
+    description "add the ${properties.component}'s ${properties.ABI} libraries to the build"
+    dependsOn properties.makeTask
+
+    into getABIPath(properties, properties.ABI)
+    from properties.makeDirectory
+
+    properties.libraries.each { library ->
+      include "lib${library}.so"
+    }
+  }.get()
 }
 
 Task newCleanTask (Map properties) {
@@ -61,11 +81,17 @@ Task newCleanTask (Map properties) {
 }
 
 Task newRemoveJarsTask (Map properties) {
-  return null
+  return tasks.register("removeNativeComponents${properties.taskNameSuffix}", Delete) {
+    description "remove the ${properties.component}'s jars from the build"
+    delete getJarPath(properties)
+  }.get()
 }
 
 Task newRemoveLibrariesTask (Map properties) {
-  return null
+  return tasks.register("removeNativeComponents${properties.taskNameSuffix}", Delete) {
+    description "remove the ${properties.component}'s ${properties.ABI} libraries from the build"
+    delete getABIPath(properties, properties.ABI)
+  }.get()
 }
 
 void addCompileDependency (Task dependency) {
@@ -76,53 +102,25 @@ void addCompileDependency (Task dependency) {
 
 void addNativeComponentTasks (Map properties, String abi) {
   properties.makeDirectory = properties.topDirectory + File.separator + properties.subdirectory
+  properties.makeTask = newMakeTask(properties)
 
-  def makeTask = newMakeTask(properties)
+  def jars = properties.jars
+  if ((jars != null) && !jars.isEmpty()) {
+    def addJarsTask = newAddJarsTask(properties)
+    addCompileDependency addJarsTask
+  }
+
+  def libraries = properties.libs
+  if ((libraries != null) && !libraries.isEmpty()) {
+    def addLibrariesTask = newAddLibrariesTask(properties)
+    addCompileDependency addLibrariesTask
+  }
 
   def cleanTask = newCleanTask(properties)
   clean.dependsOn cleanTask
 
-  def removeTask = tasks.register("removeNativeComponents${properties.taskNameSuffix}", Delete) {
-    description "remove the ${properties.component}'s ${properties.ABI} libraries from the build"
-    delete getABIPath(properties, abi)
-  }.get()
-
-  clean.dependsOn removeTask
-
-  def libraries = properties.libs
-  def jars = properties.jars
-
-  if ((libraries != null) && !libraries.isEmpty()) {
-    def addLibrariesTask = tasks.register("libNativeComponents${properties.taskNameSuffix}", Copy) {
-      description "add the ${properties.component}'s ${properties.ABI} libraries to the build"
-      dependsOn makeTask
-
-      into getABIPath(properties, abi)
-      from properties.makeDirectory
-
-      libraries.each { library ->
-        include "lib${library}.so"
-      }
-    }.get()
-
-    addCompileDependency addLibrariesTask
-  }
-
-  if ((jars != null) && !jars.isEmpty()) {
-    def addJarsTask = tasks.register("jarNativeComponents${properties.taskNameSuffix}", Copy) {
-      description "add the ${properties.component}'s ${properties.ABI} jars to the build"
-      dependsOn makeTask
-
-      into getJarPath(properties)
-      from properties.makeDirectory
-
-      jars.each { jar ->
-        include "${jar}.jar"
-      }
-    }.get()
-
-    addCompileDependency addJarsTask
-  }
+  def removeLibrariesTask = newRemoveLibrariesTask(properties)
+  clean.dependsOn removeLibrariesTask
 }
 
 void addNativeComponentTasks (Map properties) {
@@ -132,10 +130,8 @@ void addNativeComponentTasks (Map properties) {
   if (properties.make == null) properties.make = "all"
   if (properties.make instanceof String) properties.make = [properties.make]
 
-  def removeTask = tasks.register("removeNativeComponents${properties.taskNameSuffix}", Delete) {
-    description "remove the ${properties.component}'s jars from the build"
-    delete getJarPath(properties)
-  }.get()
+  def removeJarsTask = newRemoveJarsTask(properties)
+  clean.dependsOn removeJarsTask
 
   nativeProperties.abiList.each { abi ->
     properties.ABI = abi
@@ -145,8 +141,6 @@ void addNativeComponentTasks (Map properties) {
     properties.configureTask = newConfigureTask(properties)
     addNativeComponentTasks(properties, abi)
   }
-
-  clean.dependsOn removeTask
 }
 
 def addTasks = { properties ->
