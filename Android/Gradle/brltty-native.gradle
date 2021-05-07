@@ -64,9 +64,9 @@ Map getABI (Map properties) {
   return getABI(properties.ABI)
 }
 
-Task newAssembleTask (Map properties) {
-  return tasks.register("assembleNativeComponents${properties.taskNameSuffix}") {
-    description "assemble all of the ${properties.component}'s components"
+Task newAssembleTask () {
+  return tasks.register("assembleNativeComponents") {
+    description "assemble all of the native jars, libraries, assets, etc"
   }.get()
 }
 
@@ -74,9 +74,9 @@ void addAssembleDependency (Task dependentTask) {
   nativeComponents.assembleTask.dependsOn dependentTask
 }
 
-Task newCleanTask (Map properties) {
-  return tasks.register("cleanNativeComponents${properties.taskNameSuffix}") {
-    description "Clean all of the ${properties.component}'s components"
+Task newCleanTask () {
+  return tasks.register("cleanNativeComponents") {
+    description "clean all of the native jars, libraries, assets, etc"
   }.get()
 }
 
@@ -217,14 +217,13 @@ void addNativeComponentTasks (Map properties) {
   }
 }
 
-def addTasks = { properties ->
-  addNativeComponentTasks(properties)
-}
-
 ext.nativeComponents = [
-  addTasks: addTasks,
-  assembleTask: newAssembleTask(properties),
-  cleanTask: newCleanTask(properties),
+  assembleTask: newAssembleTask(),
+  cleanTask: newCleanTask(),
+
+  addTasks: { Map properties ->
+    addNativeComponentTasks(properties)
+  },
 ]
 
 clean.dependsOn nativeComponents.cleanTask
