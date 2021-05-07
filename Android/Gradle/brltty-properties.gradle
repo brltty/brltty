@@ -22,9 +22,11 @@ void normalizeListProperty (Properties properties, String name) {
   properties[name] = properties[name].split(',').collect{it as String}
 }
 
-Properties loadPropertiesFromFile (String file) {
+Properties loadPropertiesFromFile (String path) {
   def properties = new Properties()
-  properties.load(new FileInputStream(rootProject.file(file)))
+
+  def file = rootProject.file(path)
+  if (file.exists()) properties.load(new FileInputStream(file))
 
   def directoryProperties = []
   def subdirectoryProperties = []
