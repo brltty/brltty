@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project name="custom_rules" default="help">
+  <property name="custom.dir.top" location="../.." />
+
+  <target name="custom-get-version-string">
+    <exec
+      executable="${custom.dir.top}/getrevid"
+      outputproperty="custom.version.string"
+      >
+
+      <arg value="${custom.dir.top}" />
+    </exec>
+  </target>
+
+  <target name="custom-get-version-name" depends="custom-get-version-string">
+    <exec
+      executable="sed"
+      inputstring="${custom.version.string}"
+      outputproperty="custom.version.name"
+      >
+
+      <arg value="-e" />
+      <arg value="s/^[^-]*-//" />
+
+      <arg value="-e" />
+      <arg value="s/-g.*$//" />
+    </exec>
+
+    <echo>Version Name: ${custom.version.name}</echo>
+  </target>
+
+  <target name="custom-get-version-code" depends="custom-get-version-string">
+    <exec
+      executable="${custom.dir.top}/getrevid"
+      outputproperty="custom.version.code"
+      >
+
+      <arg value="-r" />
+      <arg value="${custom.version.string}" />
+
+      <arg value="-i" />
+
+      <arg value="${custom.dir.top}" />
+    </exec>
+
+    <echo>Version Code: ${custom.version.code}</echo>
+  </target>
+
+  <target name="custom-update-manifest" depends="custom-get-version-name, custom-get-version-code">
+    <exec executable="sed">
+      <arg value="-e" />
+      <arg value='/android:versionName=/s/".*"/"${custom.version.name}"/' />
+
+      <arg value="-e" />
+      <arg value='/android:versionCode=/s/".*"/"${custom.version.code}"/' />
+
+      <arg value="-i" />
+      <arg value="${out.manifest.abs.file}" />
+    </exec>
+  </target>
+
+  <target name="-pre-compile" depends="custom-update-manifest" />
+</project>

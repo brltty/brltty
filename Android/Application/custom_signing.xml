@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <project name="custom_rules" default="help">
-  <import file="custom_signing.xml" />
-  <import file="custom_version.xml" />
+  <property file="credentials/ant.properties" />
 </project>

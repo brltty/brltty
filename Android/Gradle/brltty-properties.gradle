@@ -1,7 +1,7 @@
 def propertyFiles = [
   configuredProperties: "config.properties",
   nativeProperties: "native.properties",
-  signingProperties: "signing/gradle.properties",
+  credentialProperties: "credentials/gradle.properties",
 ]
 
 void normalizeFileProperty (Properties properties, String name) {

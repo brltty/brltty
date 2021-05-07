@@ -37,10 +37,10 @@ android {
 
   signingConfigs {
     release {
-      storeFile     signingProperties.storeFile
-      storePassword signingProperties.storePassword
-      keyAlias      signingProperties.keyAlias
-      keyPassword   signingProperties.keyPassword
+      storeFile     credentialProperties.storeFile
+      storePassword credentialProperties.storePassword
+      keyAlias      credentialProperties.keyAlias
+      keyPassword   credentialProperties.keyPassword
     }
   }
 
