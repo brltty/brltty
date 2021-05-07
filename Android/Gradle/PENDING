@@ -1,5 +1,4 @@
 add libbrlapi.so to api from core
-add the jar only once (not once per ABI)
 publish the app
 publish the api
 x86_64: unrecognized relocation (0x2a) in section `.text

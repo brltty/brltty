@@ -124,22 +124,17 @@ Task newMakeCleanTask (Map properties) {
   }.get()
 }
 
-Task newRemoveJarsTask (Map properties) {
+Task newRemoveTask (Map properties) {
   return tasks.register("removeNativeComponents${properties.taskNameSuffix}", Delete) {
-    description "remove the ${properties.component}'s jars from the build"
+    description "remove the ${properties.component}'s jars and libraries from the build"
     delete getJarPath(properties)
-  }.get()
-}
-
-Task newRemoveLibrariesTask (Map properties) {
-  return tasks.register("removeNativeComponents${properties.taskNameSuffix}", Delete) {
-    description "remove the ${properties.component}'s ${properties.ABI} libraries from the build"
-    delete getABIPath(properties, properties.ABI)
+    delete getJNIPath(properties)
   }.get()
 }
 
 void addNativeComponentTasks (Map properties, String abi) {
   properties.ABI = abi
+  def isPrimaryABI = abi.equals(nativeProperties.abiList[0])
 
   properties.topDirectory = nativeProperties.abiDirectory + File.separator + properties.ABI
   properties.configureTask = getConfigureTask(properties)
@@ -147,10 +142,13 @@ void addNativeComponentTasks (Map properties, String abi) {
   properties.makeDirectory = properties.topDirectory + File.separator + properties.subdirectory
   properties.makeTask = newMakeComponentsTask(properties)
 
-  def jars = properties.jars
-  if ((jars != null) && !jars.isEmpty()) {
-    def addJarsTask = newAddJarsTask(properties)
-    addAssembleDependency addJarsTask
+  if (isPrimaryABI) {
+    def jars = properties.jars
+
+    if ((jars != null) && !jars.isEmpty()) {
+      def jarsTask = newAddJarsTask(properties)
+      addAssembleDependency jarsTask
+    }
   }
 
   def libraries = properties.libs
@@ -161,9 +159,6 @@ void addNativeComponentTasks (Map properties, String abi) {
 
   def makeCleanTask = newMakeCleanTask(properties)
   addCleanDependency makeCleanTask
-
-  def removeLibrariesTask = newRemoveLibrariesTask(properties)
-  addCleanDependency removeLibrariesTask
 }
 
 void addNativeComponentTasks (Map properties) {
@@ -173,8 +168,8 @@ void addNativeComponentTasks (Map properties) {
   if (properties.make == null) properties.make = "all"
   if (properties.make instanceof String) properties.make = [properties.make]
 
-  def removeJarsTask = newRemoveJarsTask(properties)
-  addCleanDependency removeJarsTask
+  def removeTask = newRemoveTask(properties)
+  addCleanDependency removeTask
 
   nativeProperties.abiList.each { abi ->
     properties.taskNameSuffix = "${taskNameSuffix}_${abi}"
