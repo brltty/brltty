@@ -1,1 +1,140 @@
-ant/AndroidManifest.xml
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="org.a11y.brltty.android"
+  android:versionCode="0"
+  android:versionName="@string/app_version"
+  >
+
+  <!-- for creating a foreground notification -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+  <!-- for resetting the device's lock timer -->
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+  <!-- for communicating with a braille device via Bluetooth -->
+  <uses-permission android:name="android.permission.BLUETOOTH" />
+  <!-- also required by Android 4.0 (Ice Cream Sandwich) -->
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+  <!-- for listening on a TCP/IP port for BrlAPI client connection requests -->
+  <uses-permission android:name="android.permission.INTERNET" />
+
+  <!-- for reading customized data files -->
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+  <!-- for presenting the Accessibility Actions chooser -->
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+  <!-- for knowing when locked storage can be accessed after a reboot -->
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+  <!-- for upgrading to a newer release -->
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+  <!-- for getting Wi-Fi status values (for the INDICATORS command) -->
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+  <!-- for getting the Wi-Fi SSID (for the INDICATORS command) -->
+  <!-- for getting cell information (for the INDICATORS command) -->
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+  <!-- for getting the cell signal strength (for the INDICATORS command) -->
+  <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES" />
+
+  <!-- for getting the cell data network type (for the INDICATORS command) -->
+  <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+  <application
+    android:label="@string/app_name"
+    android:icon="@drawable/braille_service"
+    android:name=".BrailleApplication"
+    android:persistent="true"
+    >
+
+    <service
+      android:name=".BrailleService"
+      android:label="@string/app_name"
+      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+      android:directBootAware="true"
+      >
+
+      <intent-filter>
+        <action android:name="android.accessibilityservice.AccessibilityService" />
+      </intent-filter>
+
+      <meta-data
+        android:name="android.accessibilityservice"
+        android:resource="@xml/accessibility_service"
+       />
+
+      <intent-filter>
+        <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+      </intent-filter>
+
+      <meta-data
+        android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+         android:resource="@xml/usb_devices"
+       />
+    </service>
+
+    <service
+      android:name=".InputService"
+      android:label="@string/inputService_name"
+      android:permission="android.permission.BIND_INPUT_METHOD"
+      android:directBootAware="true"
+      >
+
+      <intent-filter>
+        <action android:name="android.view.InputMethod" />
+      </intent-filter>
+
+      <meta-data
+        android:name="android.view.im"
+        android:resource="@xml/input_service"
+       />
+    </service>
+
+    <activity
+      android:name=".activities.ActionsActivity"
+      android:label="@string/app_name"
+      >
+    </activity>
+
+    <activity
+      android:name=".settings.SettingsActivity"
+      android:label="@string/SETTINGS_SCREEN_MAIN"
+      >
+    </activity>
+
+    <activity
+      android:name=".activities.AboutActivity"
+      android:label="@string/about_activity_label"
+      >
+    </activity>
+
+    <receiver
+      android:name=".HostMonitor"
+      android:exported="false"
+      >
+
+      <intent-filter>
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+        <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+      </intent-filter>
+    </receiver>
+
+    <provider
+      android:name="androidx.core.content.FileProvider"
+      android:authorities="org.a11y.brltty.android.fileprovider"
+      android:exported="false"
+      android:grantUriPermissions="true"
+      >
+
+      <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_provider_paths"
+       />
+    </provider>
+  </application>
+</manifest>
