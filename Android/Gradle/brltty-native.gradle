@@ -16,8 +16,8 @@ String getProjectPath (Map properties) {
   return properties.project.projectDir.path
 }
 
-String getProjectPath (Map properties, String path) {
-  return getProjectPath(properties) + File.separator + path
+String getProjectPath (Map properties, String subpath) {
+  return getProjectPath(properties) + File.separator + subpath
 }
 
 String getJarPath (Map properties) {
@@ -58,7 +58,7 @@ Task newConfigureTask (Map properties) {
 
     workingDir properties.topDirectory
     ignoreExitValue false
-    commandLine "${nativeProperties.rootDirectory}/cfg-android-abi", properties.ABI
+    commandLine "${nativeProperties.rootDirectory}/cfg-android-abi", "-q", properties.ABI
   }.get()
 }
 
@@ -186,7 +186,10 @@ def addTasks = { properties ->
   addNativeComponentTasks(properties)
 }
 
-ext.nativeComponents = [:]
-nativeComponents.addTasks = addTasks
-nativeComponents.assembleTask = newAssembleTask(properties)
-nativeComponents.cleanTask = newCleanTask(properties)
+ext.nativeComponents = [
+  addTasks: addTasks,
+  assembleTask: newAssembleTask(properties),
+  cleanTask: newCleanTask(properties),
+]
+
+clean.dependsOn nativeComponents.cleanTask

@@ -1,6 +1,4 @@
-compile dependencies for add tasks
 add libbrlapi.so to api from core
 add the jar only once (not once per ABI)
-make tries to remove core
 publish the app
-public the api
+publish the api

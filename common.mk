@@ -130,7 +130,8 @@ install-gdm-autostart-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_GDM_AUTOSTART_DIRECTORY)
 
 clean::
-	-rm -f *.$O *.auto.h *.auto.c core implib.a
+	-test -f core && rm -f core
+	-rm -f *.$O *.auto.h *.auto.c implib.a
 
 distclean::
 	-rm -f *~ *orig \#*\# *.rej ? a.out
