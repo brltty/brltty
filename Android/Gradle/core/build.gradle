@@ -1,8 +1,11 @@
+plugins {
+  id "com.android.library"
+}
+
 description = """
 "${project.name}" is a Java wrapper for the native "${rootProject.name}" code.
 """
 
-apply plugin: "com.android.library"
 apply from: "brltty.gradle"
 
 android {

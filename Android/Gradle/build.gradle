@@ -1,11 +1,3 @@
-description = """
-"${project.name}" is a screen reader for braille users.
-"""
-
-apply plugin: "base"
-apply from: "brltty-properties.gradle"
-apply from: "brltty-native.gradle"
-
 buildscript {
   repositories {
     google()
@@ -17,6 +9,17 @@ buildscript {
     classpath "com.android.tools.build:gradle:4.0.1"
   }
 }
+
+plugins {
+  id "base"
+}
+
+description = """
+"${project.name}" is a screen reader for braille users.
+"""
+
+apply from: "brltty-properties.gradle"
+apply from: "brltty-native.gradle"
 
 subprojects {
   repositories {

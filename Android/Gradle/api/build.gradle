@@ -1,9 +1,17 @@
+plugins {
+  id "com.android.library"
+}
+
 description = """
 "${project.name}" provides the Java client bindings for "${rootProject.name}" code.
 """
 
-apply plugin: "com.android.library"
 apply from: "brltty.gradle"
+
+dependencies {
+  api files("src/main/libs/brlapi.jar")
+  implementation project(":core")
+}
 
 android {
   compileSdkVersion "android-29"
@@ -13,9 +21,4 @@ android {
     targetSdkVersion 29
     minSdkVersion 24
   }
-}
-
-dependencies {
-  api files("src/main/libs/brlapi.jar")
-  implementation project(":core")
 }

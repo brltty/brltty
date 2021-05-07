@@ -1,9 +1,17 @@
+plugins {
+  id "com.android.application"
+}
+
 description = """
 "${project.name}" implements the accessibility service for "${rootProject.name}" on Android.
 """
 
-apply plugin: "com.android.application"
 apply from: "brltty.gradle"
+
+dependencies {
+  implementation project(":core")
+  implementation "androidx.core:core:1.1.0"
+}
 
 android {
   compileSdkVersion "android-29"
@@ -51,9 +59,4 @@ android {
       proguardFile getDefaultProguardFile("proguard-android.txt")
     }
   }
-}
-
-dependencies {
-  implementation project(":core")
-  implementation "androidx.core:core:1.1.0"
 }
