@@ -1,3 +1,55 @@
+String getProjectPath (Project project) {
+  return project.projectDir.path
+}
+
+String getProjectPath (Project project, String subpath) {
+  return getProjectPath(project) + File.separator + subpath
+}
+
+String getAssetsPath (Project project) {
+  return getProjectPath(project, nativeProperties.assetsPath)
+}
+
+String getJarPath (Project project) {
+  return getProjectPath(project, nativeProperties.jarPath)
+}
+
+String getJNIPath (Project project) {
+  return getProjectPath(project, nativeProperties.jniPath)
+}
+
+String getABIPath (Project project, String abi) {
+  return getJNIPath(project) + File.separator + abi
+}
+
+String getProjectPath (Map properties) {
+  return getProjectPath(properties.project)
+}
+
+String getProjectPath (Map properties, String subpath) {
+  return getProjectPath(properties.project, subpath)
+}
+
+String getAssetsPath (Map properties) {
+  return getAssetsPath(properties.project)
+}
+
+String getJarPath (Map properties) {
+  return getJarPath(properties.project)
+}
+
+String getJNIPath (Map properties) {
+  return getJNIPath(properties.project)
+}
+
+String getABIPath (Map properties, String abi) {
+  return getABIPath(properties.project, abi)
+}
+
+String getABIPath (Map properties) {
+  return getABIPath(properties, properties.ABI)
+}
+
 Map getABI (String abi) {
   if (!nativeComponents.containsKey("ABI")) {
     nativeComponents.ABI = [:]
@@ -10,26 +62,6 @@ Map getABI (String abi) {
 
 Map getABI (Map properties) {
   return getABI(properties.ABI)
-}
-
-String getProjectPath (Map properties) {
-  return properties.project.projectDir.path
-}
-
-String getProjectPath (Map properties, String subpath) {
-  return getProjectPath(properties) + File.separator + subpath
-}
-
-String getJarPath (Map properties) {
-  return getProjectPath(properties, nativeProperties.jarPath)
-}
-
-String getJNIPath (Map properties) {
-  return getProjectPath(properties, nativeProperties.jniPath)
-}
-
-String getABIPath (Map properties, String abi) {
-  return getJNIPath(properties) + File.separator + abi
 }
 
 Task newAssembleTask (Map properties) {
