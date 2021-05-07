@@ -1,4 +1,4 @@
-def assetsDirectory = projectDir.absolutePath + "/src/main/assets"
+def assetsDirectory = projectDir.absolutePath + File.separator + nativeProperties.assetsPath
 def driversDirectory = assetsDirectory + File.separator + "drivers"
 def messagesDirectory = assetsDirectory + File.separator + "locale"
 def tablesDirectory = assetsDirectory + File.separator + "tables"
