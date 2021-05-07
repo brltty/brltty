@@ -77,7 +77,7 @@ Task newMakeComponentsTask (Map properties) {
     description "make the ${properties.ABI} components of the ${properties.component}"
     dependsOn properties.configureTask
 
-    workingDir properties.makeDirectory
+    workingDir properties.componentsDirectory
     ignoreExitValue false
 
     commandLine "make"
@@ -88,10 +88,10 @@ Task newMakeComponentsTask (Map properties) {
 Task newAddJarsTask (Map properties) {
   return tasks.register("jarNativeComponents${properties.taskNameSuffix}", Copy) {
     description "add the ${properties.component}'s ${properties.ABI} jars to the build"
-    dependsOn properties.makeTask
+    dependsOn properties.makeComponentsTask
 
     into getJarPath(properties)
-    from properties.makeDirectory
+    from properties.componentsDirectory
 
     properties.jars.each { jar ->
       include "${jar}.jar"
@@ -102,10 +102,17 @@ Task newAddJarsTask (Map properties) {
 Task newAddLibrariesTask (Map properties) {
   return tasks.register("jniNativeComponents${properties.taskNameSuffix}", Copy) {
     description "add the ${properties.component}'s ${properties.ABI} libraries to the build"
-    dependsOn properties.makeTask
+    dependsOn properties.makeComponentsTask
+
+    def componentsDirectory =  properties.componentsDirectory
+    def coreDirectory = properties.coreComponentsDirectory
 
     into getABIPath(properties, properties.ABI)
-    from properties.makeDirectory
+    from componentsDirectory
+
+    if (!coreDirectory.equals(componentsDirectory)) {
+      from coreDirectory
+    }
 
     properties.libs.each { library ->
       include "lib${library}.so"
@@ -118,7 +125,7 @@ Task newMakeCleanTask (Map properties) {
     description "remove (make clean) the ${properties.ABI} components of the ${properties.component}"
     dependsOn properties.configureTask
 
-    workingDir properties.makeDirectory
+    workingDir properties.componentsDirectory
     ignoreExitValue true
     commandLine "make", "clean"
   }.get()
@@ -139,8 +146,9 @@ void addNativeComponentTasks (Map properties, String abi) {
   properties.topDirectory = nativeProperties.abiDirectory + File.separator + properties.ABI
   properties.configureTask = getConfigureTask(properties)
 
-  properties.makeDirectory = properties.topDirectory + File.separator + properties.subdirectory
-  properties.makeTask = newMakeComponentsTask(properties)
+  properties.componentsDirectory = properties.topDirectory + File.separator + properties.subdirectory
+  properties.coreComponentsDirectory = properties.topDirectory + File.separator + nativeProperties.coreSubdirectory
+  properties.makeComponentsTask = newMakeComponentsTask(properties)
 
   if (isPrimaryABI) {
     def jars = properties.jars

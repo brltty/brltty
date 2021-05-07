@@ -3,5 +3,5 @@ nativeComponents.addTasks([
   project: project,
   subdirectory: nativeProperties.javaSubdirectory,
   jars: ["brlapi"],
-  libs: ["brlapi_java"],
+  libs: ["brlapi_java", "brlapi"],
 ])
