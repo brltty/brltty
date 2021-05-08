@@ -28,8 +28,8 @@ android {
       abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
     }
 
-    configuredProperties.propertyNames().each { name ->
-      resValue "string", "appConfig_${name}", configuredProperties[name]
+    brltty.config.propertyNames().each { name ->
+      resValue "string", "appConfig_${name}", brltty.config[name]
     }
   }
 
@@ -45,10 +45,10 @@ android {
 
   signingConfigs {
     release {
-      storeFile     credentialProperties.storeFile
-      storePassword credentialProperties.storePassword
-      keyAlias      credentialProperties.keyAlias
-      keyPassword   credentialProperties.keyPassword
+      storeFile     brltty.credentials.storeFile
+      storePassword brltty.credentials.storePassword
+      keyAlias      brltty.credentials.keyAlias
+      keyPassword   brltty.credentials.keyPassword
     }
   }
 

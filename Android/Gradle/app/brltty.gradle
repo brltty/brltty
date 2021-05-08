@@ -1,12 +1,12 @@
-def assetsDirectory = projectDir.absolutePath + File.separator + nativeProperties.assetsPath
+def assetsDirectory = brltty.getAssetsPath(project)
 def driversDirectory = assetsDirectory + File.separator + "drivers"
 def messagesDirectory = assetsDirectory + File.separator + "locale"
 def tablesDirectory = assetsDirectory + File.separator + "tables"
 
 ext {
   appVersionIdentifier = [
-    nativeProperties.rootDirectory + File.separator + "getrevid",
-    nativeProperties.rootDirectory
+    brltty.native.rootDirectory + File.separator + "getrevid",
+    brltty.native.rootDirectory
   ].execute().text.trim()
 }
 
@@ -16,14 +16,14 @@ ext {
 
 ext {
   appVersionCode = [
-    nativeProperties.rootDirectory + File.separator + "getrevid",
+    brltty.native.rootDirectory + File.separator + "getrevid",
     "-r", appVersionIdentifier, "-i",
-    nativeProperties.rootDirectory
+    brltty.native.rootDirectory
   ].execute().text.trim() as int
 }
 
-task addTables (type: Copy) {
-  from nativeProperties.tablesDirectory
+task brlttyAddTables (type: Copy) {
+  from brltty.native.tablesDirectory
   into tablesDirectory
   include 'Text/**/*.tt?'
   include 'Attributes/**/*.at?'
@@ -32,28 +32,28 @@ task addTables (type: Copy) {
   include 'Input/**/*.kt?'
 }
 
-task removeTables (type: Delete) {
+task brlttyRemoveTables (type: Delete) {
   delete tablesDirectory
 }
 
-task addDrivers (type: Copy) {
-  from nativeProperties.driversDirectory
+task brlttyAddDrivers (type: Copy) {
+  from brltty.native.driversDirectory
   into driversDirectory
   include 'libbrlttyb??.so'
   include 'libbrlttys??.so'
   include 'libbrlttyx??.so'
 }
 
-task removeDrivers (type: Delete) {
+task brlttyRemoveDrivers (type: Delete) {
   delete driversDirectory
 }
 
-tasks.register("addMessages") {
+tasks.register("brlttyAddMessages") {
   doLast {
     def commandProcesses = []
 
     try {
-      def sourceDirectory = new File(nativeProperties.messagesDirectory)
+      def sourceDirectory = new File(brltty.native.messagesDirectory)
       def sourceFiles = layout.files {sourceDirectory.listFiles()}
 
       sourceFiles.each { sourceFile ->
@@ -93,12 +93,12 @@ tasks.register("addMessages") {
   }
 }
 
-task removeMessages (type: Delete) {
+task brlttyRemoveMessages (type: Delete) {
   delete messagesDirectory
 }
 
-nativeComponents.assembleTask.dependsOn addDrivers, addMessages, addTables
-nativeComponents.cleanTask.dependsOn removeDrivers, removeMessages, removeTables
+brltty.assembleTask.dependsOn brlttyAddDrivers, brlttyAddMessages, brlttyAddTables
+brltty.cleanTask.dependsOn brlttyRemoveDrivers, brlttyRemoveMessages, brlttyRemoveTables
 
 void addAssembleTask (Task task) {
   ["assembleDebug", "assembleRelease"].each { taskName ->
@@ -107,7 +107,7 @@ void addAssembleTask (Task task) {
 }
 
 afterEvaluate {
-  [nativeComponents.assembleTask].each { task ->
+  [brltty.assembleTask].each { task ->
     addAssembleTask task
   }
 }

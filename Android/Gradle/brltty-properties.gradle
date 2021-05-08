@@ -1,7 +1,7 @@
 def propertyFiles = [
-  configuredProperties: "config.properties",
-  nativeProperties: "native.properties",
-  credentialProperties: "credentials/gradle.properties",
+  config: "config.properties",
+  native: "native.properties",
+  credentials: "credentials/gradle.properties",
 ]
 
 void normalizeFileProperty (Properties properties, String name) {
@@ -66,5 +66,5 @@ Properties loadPropertiesFromFile (String path) {
 
 propertyFiles.keySet().each { name ->
   def path = propertyFiles[name]
-  ext[name] = loadPropertiesFromFile(path)
+  brltty[name] = loadPropertiesFromFile(path)
 }

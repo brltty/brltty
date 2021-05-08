@@ -1,61 +1,21 @@
-String getProjectPath (Project project) {
-  return project.projectDir.path
-}
-
-String getProjectPath (Project project, String subpath) {
-  return getProjectPath(project) + File.separator + subpath
-}
-
-String getAssetsPath (Project project) {
-  return getProjectPath(project, nativeProperties.assetsPath)
-}
-
-String getJarPath (Project project) {
-  return getProjectPath(project, nativeProperties.jarPath)
-}
-
-String getJNIPath (Project project) {
-  return getProjectPath(project, nativeProperties.jniPath)
-}
-
-String getABIPath (Project project, String abi) {
-  return getJNIPath(project) + File.separator + abi
-}
-
-String getProjectPath (Map properties) {
-  return getProjectPath(properties.project)
-}
-
-String getProjectPath (Map properties, String subpath) {
-  return getProjectPath(properties.project, subpath)
-}
-
-String getAssetsPath (Map properties) {
-  return getAssetsPath(properties.project)
-}
-
 String getJarPath (Map properties) {
-  return getJarPath(properties.project)
+  return brltty.getJarPath(properties.project)
 }
 
 String getJNIPath (Map properties) {
-  return getJNIPath(properties.project)
-}
-
-String getABIPath (Map properties, String abi) {
-  return getABIPath(properties.project, abi)
+  return brltty.getJNIPath(properties.project)
 }
 
 String getABIPath (Map properties) {
-  return getABIPath(properties, properties.ABI)
+  return brltty.getABIPath(properties.project, properties.ABI)
 }
 
 Map getABI (String abi) {
-  if (!nativeComponents.containsKey("ABI")) {
-    nativeComponents.ABI = [:]
+  if (!brltty.containsKey("ABI")) {
+    brltty.ABI = [:]
   }
 
-  def ABI = nativeComponents.ABI
+  def ABI = brltty.ABI
   if (!ABI.containsKey(abi)) ABI[abi] = [:]
   return ABI[abi]
 }
@@ -65,32 +25,32 @@ Map getABI (Map properties) {
 }
 
 Task newAssembleTask () {
-  return tasks.register("assembleNativeComponents") {
+  return tasks.register("brlttyAssembleAllComponents") {
     description "assemble all of the native jars, libraries, assets, etc"
   }.get()
 }
 
 void addAssembleDependency (Task dependentTask) {
-  nativeComponents.assembleTask.dependsOn dependentTask
+  brltty.assembleTask.dependsOn dependentTask
 }
 
 Task newCleanTask () {
-  return tasks.register("cleanNativeComponents") {
+  return tasks.register("brlttyCleanAllComponents") {
     description "clean all of the native jars, libraries, assets, etc"
   }.get()
 }
 
 void addCleanDependency (Task dependentTask) {
-  nativeComponents.cleanTask.dependsOn dependentTask
+  brltty.cleanTask.dependsOn dependentTask
 }
 
 Task newConfigureTask (Map properties) {
-  return tasks.register("configureNativeComponents${properties.taskNameSuffix}", Exec) {
+  return tasks.register("brlttyConfigureABI${properties.taskNameSuffix}", Exec) {
     description "configure the ${properties.component} for the ${properties.ABI} ABI"
 
     workingDir properties.topDirectory
     ignoreExitValue false
-    commandLine "${nativeProperties.rootDirectory}/cfg-android-abi", "-q", properties.ABI
+    commandLine "${brltty.native.rootDirectory}/cfg-android-abi", "-q", properties.ABI
   }.get()
 }
 
@@ -105,7 +65,7 @@ Task getConfigureTask (Map properties) {
 }
 
 Task newMakeComponentsTask (Map properties) {
-  return tasks.register("makeNativeComponents${properties.taskNameSuffix}", Exec) {
+  return tasks.register("brlttyMakeABI${properties.taskNameSuffix}", Exec) {
     description "make the ${properties.ABI} components of the ${properties.component}"
     dependsOn properties.configureTask
 
@@ -118,7 +78,7 @@ Task newMakeComponentsTask (Map properties) {
 }
 
 Task newAddJarsTask (Map properties) {
-  return tasks.register("jarNativeComponents${properties.taskNameSuffix}", Copy) {
+  return tasks.register("brlttyAddJars${properties.taskNameSuffix}", Copy) {
     description "add the ${properties.component}'s ${properties.ABI} jars to the build"
     dependsOn properties.makeComponentsTask
 
@@ -132,14 +92,14 @@ Task newAddJarsTask (Map properties) {
 }
 
 Task newAddLibrariesTask (Map properties) {
-  return tasks.register("jniNativeComponents${properties.taskNameSuffix}", Copy) {
+  return tasks.register("brlttyAddLibraries${properties.taskNameSuffix}", Copy) {
     description "add the ${properties.component}'s ${properties.ABI} libraries to the build"
     dependsOn properties.makeComponentsTask
 
     def componentsDirectory =  properties.componentsDirectory
     def coreDirectory = properties.coreComponentsDirectory
 
-    into getABIPath(properties, properties.ABI)
+    into getABIPath(properties)
     from componentsDirectory
 
     if (!coreDirectory.equals(componentsDirectory)) {
@@ -153,7 +113,7 @@ Task newAddLibrariesTask (Map properties) {
 }
 
 Task newMakeCleanTask (Map properties) {
-  return tasks.register("cleanNativeComponents${properties.taskNameSuffix}", Exec) {
+  return tasks.register("brlttyCleanABI${properties.taskNameSuffix}", Exec) {
     description "remove (make clean) the ${properties.ABI} components of the ${properties.component}"
     dependsOn properties.configureTask
 
@@ -164,22 +124,22 @@ Task newMakeCleanTask (Map properties) {
 }
 
 Task newRemoveTask (Map properties) {
-  return tasks.register("removeNativeComponents${properties.taskNameSuffix}", Delete) {
+  return tasks.register("brlttyRemoveAllComponents${properties.taskNameSuffix}", Delete) {
     description "remove the ${properties.component}'s jars and libraries from the build"
     delete getJarPath(properties)
     delete getJNIPath(properties)
   }.get()
 }
 
-void addNativeComponentTasks (Map properties, String abi) {
+void addTasks (Map properties, String abi) {
   properties.ABI = abi
-  def isPrimaryABI = abi.equals(nativeProperties.abiList[0])
+  def isPrimaryABI = abi.equals(brltty.native.abiList[0])
 
-  properties.topDirectory = nativeProperties.abiDirectory + File.separator + properties.ABI
+  properties.topDirectory = brltty.native.abiDirectory + File.separator + properties.ABI
   properties.configureTask = getConfigureTask(properties)
 
   properties.componentsDirectory = properties.topDirectory + File.separator + properties.subdirectory
-  properties.coreComponentsDirectory = properties.topDirectory + File.separator + nativeProperties.coreSubdirectory
+  properties.coreComponentsDirectory = properties.topDirectory + File.separator + brltty.native.coreSubdirectory
   properties.makeComponentsTask = newMakeComponentsTask(properties)
 
   if (isPrimaryABI) {
@@ -201,7 +161,7 @@ void addNativeComponentTasks (Map properties, String abi) {
   addCleanDependency makeCleanTask
 }
 
-void addNativeComponentTasks (Map properties) {
+void addTasks (Map properties) {
   def taskNameSuffix = "_${properties.component}"
   properties.taskNameSuffix = taskNameSuffix
 
@@ -211,19 +171,17 @@ void addNativeComponentTasks (Map properties) {
   def removeTask = newRemoveTask(properties)
   addCleanDependency removeTask
 
-  nativeProperties.abiList.each { abi ->
+  brltty.native.abiList.each { abi ->
     properties.taskNameSuffix = "${taskNameSuffix}_${abi}"
-    addNativeComponentTasks(properties, abi)
+    addTasks(properties, abi)
   }
 }
 
-ext.nativeComponents = [
-  assembleTask: newAssembleTask(),
-  cleanTask: newCleanTask(),
+brltty.assembleTask = newAssembleTask()
+brltty.cleanTask = newCleanTask()
 
-  addTasks: { Map properties ->
-    addNativeComponentTasks(properties)
-  },
-]
+brltty.addTasks = { Map properties ->
+  addTasks(properties)
+}
 
-clean.dependsOn nativeComponents.cleanTask
+clean.dependsOn brltty.cleanTask

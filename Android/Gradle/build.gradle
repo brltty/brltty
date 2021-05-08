@@ -18,8 +18,7 @@ description = """
 "${project.name}" is a screen reader for braille users.
 """
 
-apply from: "brltty-properties.gradle"
-apply from: "brltty-native.gradle"
+apply from: "brltty.gradle"
 
 subprojects {
   repositories {
