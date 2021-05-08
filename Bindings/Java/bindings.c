@@ -153,7 +153,15 @@ getJavaEnvironment (brlapi_handle_t *handle) {
           .group = NULL
         };
 
-        if ((result = (*vm)->AttachCurrentThread(vm, &env, &args)) == JNI_OK) {
+        #ifdef __ANDROID__
+          JNIEnv *e = env;
+          result = (*vm)->AttachCurrentThread(vm, &e, &args);
+          env = e;
+        #else /* __ANDROID__ */
+          result = (*vm)->AttachCurrentThread(vm, &env, &args);
+        #endif /* __ANDROID__ */
+
+        if (result == JNI_OK) {
           setThreadExitHandler(env);
         } else {
           logJavaVirtualMachineError(result, "AttachCurrentThread");
