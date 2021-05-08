@@ -100,14 +100,8 @@ task brlttyRemoveMessages (type: Delete) {
 brltty.assembleTask.dependsOn brlttyAddDrivers, brlttyAddMessages, brlttyAddTables
 brltty.cleanTask.dependsOn brlttyRemoveDrivers, brlttyRemoveMessages, brlttyRemoveTables
 
-void addAssembleTask (Task task) {
-  ["assembleDebug", "assembleRelease"].each { taskName ->
-    tasks[taskName].dependsOn task
-  }
-}
-
 afterEvaluate {
-  [brltty.assembleTask].each { task ->
-    addAssembleTask task
+  ["assembleDebug", "assembleRelease"].each { taskName ->
+    tasks[taskName].dependsOn brltty.assembleTask
   }
 }

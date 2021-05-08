@@ -45,10 +45,11 @@ android {
 
   signingConfigs {
     release {
-      storeFile     brltty.credentials.storeFile
-      storePassword brltty.credentials.storePassword
-      keyAlias      brltty.credentials.keyAlias
-      keyPassword   brltty.credentials.keyPassword
+      def signingProperties = brltty.loadProperties("credentials/sign-gradle.properties")
+      storeFile     signingProperties.storeFile
+      storePassword signingProperties.storePassword
+      keyAlias      signingProperties.keyAlias
+      keyPassword   signingProperties.keyPassword
     }
   }
 

@@ -4,20 +4,20 @@ brltty.getProjectPath = { Project project ->
   project.projectDir.path
 }
 
-brltty.getProjectSubpath = { Project project, String subpath ->
-  brltty.getProjectPath(project) + File.separator + subpath
+String getProjectPath (Project project, String subpath) {
+  return brltty.getProjectPath(project) + File.separator + subpath
 }
 
 brltty.getAssetsPath = { Project project ->
-  brltty.getProjectSubpath(project, brltty.native.assetsPath)
+  return getProjectPath(project, brltty.native.assetsPath)
 }
 
 brltty.getJarPath = { Project project ->
-  brltty.getProjectSubpath(project, brltty.native.jarPath)
+  return getProjectPath(project, brltty.native.jarPath)
 }
 
 brltty.getJNIPath = { Project project ->
-  brltty.getProjectSubpath(project, brltty.native.jniPath)
+  return getProjectPath(project, brltty.native.jniPath)
 }
 
 brltty.getABIPath = { Project project, String abi ->
