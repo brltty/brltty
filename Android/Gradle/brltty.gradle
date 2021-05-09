@@ -12,16 +12,16 @@ brltty.getAssetsPath = { Project project ->
   return getProjectPath(project, brltty.native.assetsPath)
 }
 
-brltty.getJarPath = { Project project ->
-  return getProjectPath(project, brltty.native.jarPath)
+brltty.getJarsPath = { Project project ->
+  return getProjectPath(project, brltty.native.jarsPath)
 }
 
-brltty.getJNIPath = { Project project ->
-  return getProjectPath(project, brltty.native.jniPath)
+brltty.getLibrariesPath = { Project project ->
+  return getProjectPath(project, brltty.native.librariesPath)
 }
 
 brltty.getABIPath = { Project project, String abi ->
-  brltty.getJNIPath(project) + File.separator + abi
+  brltty.getLibrariesPath(project) + File.separator + abi
 }
 
 apply from: "brltty-properties.gradle"

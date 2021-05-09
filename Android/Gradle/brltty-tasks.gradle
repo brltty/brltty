@@ -1,9 +1,9 @@
-String getJarPath (Map properties) {
-  return brltty.getJarPath(properties.project)
+String getJarsPath (Map properties) {
+  return brltty.getJarsPath(properties.project)
 }
 
-String getJNIPath (Map properties) {
-  return brltty.getJNIPath(properties.project)
+String getLibrariesPath (Map properties) {
+  return brltty.getLibrariesPath(properties.project)
 }
 
 String getABIPath (Map properties) {
@@ -35,7 +35,7 @@ Task newTask (Map properties, String name, Class<DefaultTask> type=DefaultTask, 
 
 Task newAssembleTask () {
   return newTask(rootProject, "brlttyAssembleAllComponents") {
-    description "Assemble all of the native jars, libraries, assets, etc"
+    description "Assemble all of the native jars, libraries, assets, etc."
   }
 }
 
@@ -45,7 +45,7 @@ void addAssembleDependency (Task dependentTask) {
 
 Task newCleanTask () {
   return newTask(rootProject, "brlttyCleanAllComponents") {
-    description "Clean all of the native jars, libraries, assets, etc"
+    description "Clean all of the native jars, libraries, assets, etc."
   }
 }
 
@@ -55,7 +55,7 @@ void addCleanDependency (Task dependentTask) {
 
 Task newConfigureTask (Map properties) {
   return newTask(properties, "brlttyConfigureABI", Exec) {
-    description "Configure the ${properties.component} for the ${properties.ABI} ABI"
+    description "Configure the ${properties.component} for the ${properties.ABI} ABI."
 
     workingDir properties.topDirectory
     ignoreExitValue false
@@ -75,7 +75,7 @@ Task getConfigureTask (Map properties) {
 
 Task newMakeComponentsTask (Map properties) {
   return newTask(properties, "brlttyMakeABI", Exec) {
-    description "Make the ${properties.ABI} components of the ${properties.component}"
+    description "Make the ${properties.ABI} components of the ${properties.component}."
     dependsOn properties.configureTask
 
     workingDir properties.componentsDirectory
@@ -88,10 +88,10 @@ Task newMakeComponentsTask (Map properties) {
 
 Task newAddJarsTask (Map properties) {
   return newTask(properties, "brlttyAddJars", Copy) {
-    description "Add the ${properties.component}'s ${properties.ABI} jars to the build"
+    description "Add the ${properties.component}'s ${properties.ABI} jars to the build."
     dependsOn properties.makeComponentsTask
 
-    into getJarPath(properties)
+    into getJarsPath(properties)
     from properties.componentsDirectory
 
     properties.jars.each { jar ->
@@ -102,7 +102,7 @@ Task newAddJarsTask (Map properties) {
 
 Task newAddLibrariesTask (Map properties) {
   return newTask(properties, "brlttyAddLibraries", Copy) {
-    description "Add the ${properties.component}'s ${properties.ABI} libraries to the build"
+    description "Add the ${properties.component}'s ${properties.ABI} libraries to the build."
     dependsOn properties.makeComponentsTask
 
     def componentsDirectory =  properties.componentsDirectory
@@ -123,7 +123,7 @@ Task newAddLibrariesTask (Map properties) {
 
 Task newMakeCleanTask (Map properties) {
   return newTask(properties, "brlttyCleanABI", Exec) {
-    description "Remove (make clean) the ${properties.ABI} components of the ${properties.component}"
+    description "Remove (make clean) the ${properties.ABI} components of the ${properties.component}."
     dependsOn properties.configureTask
 
     workingDir properties.componentsDirectory
@@ -134,9 +134,9 @@ Task newMakeCleanTask (Map properties) {
 
 Task newRemoveTask (Map properties) {
   return newTask(properties, "brlttyRemoveAllComponents", Delete) {
-    description "Remove the ${properties.component}'s jars and libraries from the build"
-    delete getJarPath(properties)
-    delete getJNIPath(properties)
+    description "Remove the ${properties.component}'s jars and libraries from the build."
+    delete getJarsPath(properties)
+    delete getLibrariesPath(properties)
   }
 }
 
