@@ -25,12 +25,22 @@ android {
     versionName appVersionName
     versionCode appVersionCode
 
-    ndk {
-      abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
-    }
-
     brltty.config.propertyNames().each { name ->
       resValue "string", "appConfig_${name}", brltty.config[name]
+    }
+
+    ndk {
+      splits {
+        abi {
+          enable true
+          universalApk true
+          reset()
+
+          brltty.native.abiList.each { abi ->
+            include abi
+          }
+        }
+      }
     }
   }
 
