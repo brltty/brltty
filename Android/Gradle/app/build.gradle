@@ -18,6 +18,19 @@ android {
   compileSdkVersion "android-29"
   buildToolsVersion "29.0.3"
 
+//ndkVersion "21.4.7075529" // r21e - LTS
+//ndkVersion "22.1.7171670" // r22b - stable
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
+
+  lintOptions {
+    warning "MissingTranslation"
+    error "Untranslatable"
+  }
+
   defaultConfig {
     targetSdkVersion 29
     minSdkVersion 16
@@ -28,30 +41,6 @@ android {
     brltty.config.propertyNames().each { name ->
       resValue "string", "appConfig_${name}", brltty.config[name]
     }
-
-    ndk {
-      splits {
-        abi {
-          enable true
-          universalApk true
-          reset()
-
-          brltty.native.abiList.each { abi ->
-            include abi
-          }
-        }
-      }
-    }
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
-  }
-
-  lintOptions {
-    warning "MissingTranslation"
-    error "Untranslatable"
   }
 
   signingConfigs {
@@ -65,10 +54,33 @@ android {
   }
 
   buildTypes {
+    debug {
+      ndk {
+        abiFilters "armeabi-v7a"
+      }
+    }
+
     release {
       signingConfig signingConfigs.release
+
       minifyEnabled false
       proguardFile getDefaultProguardFile("proguard-android.txt")
+
+      ndk {
+      //debugSymbolLevel "SYMBOL_TABLE" // full, SYMBOL_TABLE
+
+        splits {
+          abi {
+            enable true
+            universalApk true
+            reset()
+
+            brltty.native.abiList.each { abi ->
+              include abi
+            }
+          }
+        }
+      }
     }
   }
 
