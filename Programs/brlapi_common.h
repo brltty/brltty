@@ -611,164 +611,222 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
 //Connection Parameters
   [BRLAPI_PARAM_SERVER_VERSION] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
   },
 
   [BRLAPI_PARAM_CLIENT_PRIORITY] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
 //Device Parameters
   [BRLAPI_PARAM_DRIVER_NAME] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
+    .canWatch = 1,
   },
 
   [BRLAPI_PARAM_DRIVER_CODE] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
+    .canWatch = 1,
   },
 
   [BRLAPI_PARAM_DRIVER_VERSION] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
+    .canWatch = 1,
   },
 
   [BRLAPI_PARAM_DEVICE_MODEL] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
+    .canWatch = 1,
   },
 
   [BRLAPI_PARAM_DEVICE_CELL_SIZE] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
   },
 
   [BRLAPI_PARAM_DISPLAY_SIZE] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .count = 2,
+    .canRead = 1,
+    .canWatch = 1,
     .isArray = 1,
+    .arraySize = 2,
   },
 
   [BRLAPI_PARAM_DEVICE_IDENTIFIER] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
+    .canWatch = 1,
   },
 
   [BRLAPI_PARAM_DEVICE_SPEED] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
   },
 
   [BRLAPI_PARAM_DEVICE_ONLINE] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
   },
 
 //Input Parameters
   [BRLAPI_PARAM_RETAIN_DOTS] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
 //Braille Rendering Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_CELL_SIZE] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
   [BRLAPI_PARAM_LITERARY_BRAILLE] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
   [BRLAPI_PARAM_CURSOR_DOTS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERIOD] = {
     .type = BRLAPI_PARAM_TYPE_UINT32,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
   [BRLAPI_PARAM_CURSOR_BLINK_PERCENTAGE] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
   [BRLAPI_PARAM_RENDERED_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
+    .canRead = 1,
+    .canWatch = 1,
     .isArray = 1,
   },
 
 //Navigation Parameters
   [BRLAPI_PARAM_SKIP_IDENTICAL_LINES] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
   [BRLAPI_PARAM_AUDIBLE_ALERTS] = {
     .type = BRLAPI_PARAM_TYPE_BOOLEAN,
-    .count = 1,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
 //Clipboard Parameters
   [BRLAPI_PARAM_CLIPBOARD_CONTENT] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
 //TTY Mode Parameters
   [BRLAPI_PARAM_BOUND_COMMAND_KEYCODES] = {
     .type = BRLAPI_PARAM_TYPE_KEYCODE,
+    .canRead = 1,
+    .canWatch = 1,
     .isArray = 1,
   },
 
   [BRLAPI_PARAM_COMMAND_KEYCODE_NAME] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
     .hasSubparam = 1,
   },
 
   [BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
     .hasSubparam = 1,
   },
 
   [BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES] = {
     .type = BRLAPI_PARAM_TYPE_KEYCODE,
+    .canRead = 1,
+    .canWatch = 1,
     .isArray = 1,
   },
 
   [BRLAPI_PARAM_DRIVER_KEYCODE_NAME] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
     .hasSubparam = 1,
   },
 
   [BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
     .hasSubparam = 1,
   },
 
 //Braille Translation Parameters
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROWS_MASK] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .count = 544,
+    .canRead = 1,
     .isArray = 1,
+    .arraySize = 544,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
-    .count = 256,
+    .canRead = 1,
     .isArray = 1,
+    .arraySize = 256,
     .hasSubparam = 1,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
   [BRLAPI_PARAM_LITERARY_BRAILLE_TABLE] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 
   [BRLAPI_PARAM_MESSAGE_LOCALE] = {
     .type = BRLAPI_PARAM_TYPE_STRING,
+    .canRead = 1,
+    .canWatch = 1,
+    .canWrite = 1,
   },
 };
 

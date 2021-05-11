@@ -2442,12 +2442,6 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
   if (flags & BRLAPI_PARAMF_SUBSCRIBE) {
     /* subscribe to parameter updates */
 
-    if (param == BRLAPI_PARAM_SERVER_VERSION) {
-      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "parameter %u not available for watching - it won't change", param);
-      unlockMutex(&apiParamMutex);
-      return 0;
-    }
-
     {
       brlapi_param_t root = paramDispatch[param].rootParameter;
 

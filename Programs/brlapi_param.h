@@ -298,9 +298,15 @@ typedef enum {
 /** Structure that describes the properties of a parameter */
 typedef struct {
   brlapi_param_type_t type;	/**< Type of the parameter's value */
-  uint16_t count;		/**< Number of elements in the parameter's value */
-  uint8_t isArray;		/**< Whether the parameter contains several values, or always only one */
-  uint8_t hasSubparam;		/**< Parameter uses the subparam argument */
+  uint16_t arraySize;		/**< If .isArray is true, the number of elements in the parameter's value;
+				  * if .isArray is false then the number of elements in the parameter's value is always exactly one */
+  uint16_t isArray:1;		/**< True if the parameter's value contains several values;
+				  *< False means always axactly one */
+  uint16_t canRead:1;		/**< True if the parameter is readable */
+  uint16_t canWrite:1;		/**< True if the parameter is writable */
+  uint16_t canWatch:1;		/**< True if the parameter can be watched */
+  uint16_t abiPadding1:4;
+  uint16_t hasSubparam:1;	/**< whether the Parameter uses the subparam argument */
 } brlapi_param_properties_t;
 
 /** Enumeration of parameter types */
