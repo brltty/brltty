@@ -121,9 +121,13 @@ cdef extern from "Programs/brlapi.h":
 	ctypedef int brlapi_param_type_t
 	ctypedef struct brlapi_param_properties_t:
 		brlapi_param_type_t type
-		uint16_t count
-		uint8_t isArray
-		uint8_t hasSubparam
+		uint16_t arraySize
+		uint16_t isArray
+		uint16_t canRead
+		uint16_t canWrite
+		uint16_t canWatch
+		uint16_t abiPadding1
+		uint16_t hasSubparam
 
 	void *brlapi__getParameterAlloc(brlapi_handle_t *, brlapi_param_t, unsigned long long, brlapi_param_flags_t, size_t *) nogil
 	int brlapi__setParameter(brlapi_handle_t *, brlapi_param_t, unsigned long long, brlapi_param_flags_t, void*, size_t) nogil
