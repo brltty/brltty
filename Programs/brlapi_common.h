@@ -797,14 +797,14 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
     .type = BRLAPI_PARAM_TYPE_UINT8,
     .canRead = 1,
     .isArray = 1,
-    .arraySize = 544,
+    .arraySize = (0X10FFFF + 1) / 0X100 / 8,
   },
 
   [BRLAPI_PARAM_COMPUTER_BRAILLE_ROW_CELLS] = {
     .type = BRLAPI_PARAM_TYPE_UINT8,
     .canRead = 1,
     .isArray = 1,
-    .arraySize = (0X100 + (0X100 / 8)),
+    .arraySize = 0X100 + (0X100 / 8),
     .hasSubparam = 1,
   },
 
