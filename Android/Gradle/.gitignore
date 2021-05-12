@@ -5,9 +5,6 @@ credentials
 /.gradle/
 build/
 
-libs/
-jniLibs/
-
 /*.apk
 /*.aab
 /*.html

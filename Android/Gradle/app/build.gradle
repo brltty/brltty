@@ -41,6 +41,20 @@ android {
     brltty.config.propertyNames().each { name ->
       resValue "string", "appConfig_${name}", brltty.config[name]
     }
+
+    ndk {
+      splits {
+        abi {
+          enable true
+          universalApk true
+          reset()
+
+          brltty.native.abiList.each { abi ->
+            include abi
+          }
+        }
+      }
+    }
   }
 
   signingConfigs {
@@ -68,18 +82,6 @@ android {
 
       ndk {
       //debugSymbolLevel "SYMBOL_TABLE" // full, SYMBOL_TABLE
-
-        splits {
-          abi {
-            enable true
-            universalApk true
-            reset()
-
-            brltty.native.abiList.each { abi ->
-              include abi
-            }
-          }
-        }
       }
     }
   }
