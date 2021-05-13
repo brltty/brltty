@@ -196,6 +196,53 @@ public class CoreThread extends Thread {
     }
   }
 
+  private static File getStateFile (File directory, String extension) {
+    String newName = "brltty." + extension;
+    File newFile = new File(directory, newName);
+
+    if (!newFile.exists()) {
+      String oldName = "default." + extension;
+      File oldFile = new File(directory, oldName);
+
+      if (oldFile.exists()) {
+        if (oldFile.renameTo(newFile)) {
+          Log.d(LOG_TAG,
+            String.format(
+              "\"%s\" renamed to \"%s\"",
+              oldName, newName
+            )
+          );
+        } else {
+          Log.w(LOG_TAG,
+            String.format(
+              "couldn't rename \"%s\" to \"%s\"",
+              oldName, newName
+            )
+          );
+        }
+      } else {
+        try {
+          if (!newFile.createNewFile()) {
+            Log.w(LOG_TAG,
+              String.format(
+                "couldn't create \"%s\"", newName
+              )
+            );
+          }
+        } catch (IOException exception) {
+          Log.w(LOG_TAG,
+            String.format(
+              "file creation error: %s: %s",
+              newName, exception.getMessage()
+            )
+          );
+        }
+      }
+    }
+
+    return newFile;
+  }
+
   private String[] makeArguments () {
     ArgumentsBuilder builder = new ArgumentsBuilder();
 
@@ -210,8 +257,9 @@ public class CoreThread extends Thread {
     {
       File directory = DataType.STATE.getDirectory();
       builder.setUpdatableDirectory(directory.getPath());
-      builder.setConfigurationFile(new File(directory, "default.conf").getPath());
-      builder.setPreferencesFile(new File(directory, "default.prefs").getPath());
+
+      builder.setConfigurationFile(getStateFile(directory, "conf").getPath());
+      builder.setPreferencesFile(getStateFile(directory, "prefs").getPath());
     }
 
     builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, R.string.DEFAULT_TEXT_TABLE));
