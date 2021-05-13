@@ -94,12 +94,6 @@ unsigned int fullWindowShift;                /* Full window horizontal distance 
 unsigned int halfWindowShift;                /* Half window horizontal distance */
 unsigned int verticalWindowShift;                /* Window vertical distance */
 
-int isContracted = 0;
-int contractedLength;
-int contractedStart;
-int contractedOffsets[0X100];
-int contractedTrack = 0;
-
 int
 isContractedBraille (void) {
   return (prefs.brailleVariant == bvContracted6)

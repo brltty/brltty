@@ -45,6 +45,34 @@
 #include "api_control.h"
 #include "core.h"
 
+int isContracted = 0;
+int contractedLength;
+int contractedStart;
+int contractedTrack = 0;
+
+int *contractedOffsets = NULL;
+static size_t contractedOffsetsSize = 0;
+
+static int
+ensureContractedOffsetsSize (size_t size) {
+  if (++size > contractedOffsetsSize) {
+    size_t newSize = 1;
+    while (newSize < size) newSize <<= 1;
+    int *newOffsets;
+
+    if (!(newOffsets = malloc(ARRAY_SIZE(newOffsets, newSize)))) {
+      logMallocError();
+      return 0;
+    }
+
+    if (contractedOffsets) free(contractedOffsets);
+    contractedOffsets = newOffsets;
+    contractedOffsetsSize = newSize;
+  }
+
+  return 1;
+}
+
 static int oldwinx;
 static int oldwiny;
 
@@ -1002,6 +1030,7 @@ doUpdate (void) {
             inputText[i] = inputCharacters[i].text;
           }
 
+          ensureContractedOffsetsSize(inputLength);
           contractText(
             contractionTable,
             inputText, &inputLength,
