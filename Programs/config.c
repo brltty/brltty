@@ -838,8 +838,8 @@ brlttyPrepare (int argc, char *argv[]) {
   return PROG_EXIT_SUCCESS;
 }
 
-int
-changeTextTable (const char *name) {
+static int
+setTextTable (const char *name) {
   if (!name) name = "";
   if (!replaceTextTable(opt_tablesDirectory, name)) return 0;
 
@@ -850,9 +850,33 @@ changeTextTable (const char *name) {
   return 1;
 }
 
+static int
+setTextTableForLocale (void) {
+  changeStringSetting(&opt_textTable, "");
+  char *name = getTextTableForLocale(opt_tablesDirectory);
+
+  if (name) {
+    logMessage(LOG_DEBUG, "using autoselected text table: %s", name);
+    int ok = setTextTable(name);
+    free(name);
+    if (ok) return 1;
+  }
+
+  return 0;
+}
+
+int
+changeTextTable (const char *name) {
+  if (strcmp(name, optionOperand_autodetect) == 0) {
+    return setTextTableForLocale();
+  }
+
+  return setTextTable(name);
+}
+
 static void
 exitTextTable (void *data) {
-  changeTextTable(NULL);
+  setTextTable(NULL);
 }
 
 int
@@ -871,8 +895,8 @@ exitAttributesTable (void *data) {
   changeAttributesTable(NULL);
 }
 
-int
-changeContractionTable (const char *name) {
+static int
+setContractionTable (const char *name) {
   if (!name) name = "";
   if (!replaceContractionTable(opt_tablesDirectory, name)) return 0;
 
@@ -883,9 +907,33 @@ changeContractionTable (const char *name) {
   return 1;
 }
 
+static int
+setContractionTableForLocale (void) {
+  changeStringSetting(&opt_contractionTable, "");
+  char *name = getContractionTableForLocale(opt_tablesDirectory);
+
+  if (name) {
+    logMessage(LOG_DEBUG, "using autoselected contraction table: %s", name);
+    int ok = setContractionTable(name);
+    free(name);
+    if (ok) return 1;
+  }
+
+  return 0;
+}
+
+int
+changeContractionTable (const char *name) {
+  if (strcmp(name, optionOperand_autodetect) == 0) {
+    return setContractionTableForLocale();
+  }
+
+  return setContractionTable(name);
+}
+
 static void
 exitContractionTable (void *data) {
-  changeContractionTable(NULL);
+  setContractionTable(NULL);
 }
 
 static KeyTableState
@@ -2795,15 +2843,8 @@ brlttyStart (void) {
   int usingInternalTextTable = 0;
   if (*opt_textTable) {
     if (strcmp(opt_textTable, optionOperand_autodetect) == 0) {
-      changeStringSetting(&opt_textTable, "");
-      char *name = getTextTableForLocale(opt_tablesDirectory);
-
-      if (name) {
-        logMessage(LOG_DEBUG, "using autoselected text table: %s", name);
-        changeTextTable(name);
-        free(name);
-      }
-    } else if (!changeTextTable(opt_textTable)) {
+      setTextTableForLocale();
+    } else if (!setTextTable(opt_textTable)) {
       changeStringSetting(&opt_textTable, "");
     }
   }
@@ -2834,14 +2875,7 @@ brlttyStart (void) {
   /* handle contraction table option */
   if (*opt_contractionTable) {
     if (strcmp(opt_contractionTable, optionOperand_autodetect) == 0) {
-      changeStringSetting(&opt_contractionTable, "");
-      char *name = getContractionTableForLocale(opt_tablesDirectory);
-
-      if (name) {
-        logMessage(LOG_DEBUG, "using autoselected contraction table: %s", name);
-        changeContractionTable(name);
-        free(name);
-
+      if (setContractionTableForLocale()) {
         if (usingInternalTextTable) {
           if (!isContractedBraille()) {
             setContractedBraille(1);
@@ -2849,13 +2883,13 @@ brlttyStart (void) {
           }
         }
       }
-    } else if (!changeContractionTable(opt_contractionTable)) {
+    } else if (!setContractionTable(opt_contractionTable)) {
       changeStringSetting(&opt_contractionTable, "");
     }
   }
 
   if (!*opt_contractionTable) {
-    if (changeContractionTable(NULL)) {
+    if (setContractionTable(NULL)) {
       logMessage(LOG_DEBUG, "using internal contraction table: %s", CONTRACTION_TABLE);
     }
   }
