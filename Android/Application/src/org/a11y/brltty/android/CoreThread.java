@@ -249,17 +249,17 @@ public class CoreThread extends Thread {
     builder.setForegroundExecution(true);
     builder.setReleaseDevice(true);
 
-    builder.setLocaleDirectory(DataType.LOCALE.getDirectory().getPath());
-    builder.setTablesDirectory(DataType.TABLES.getDirectory().getPath());
-    builder.setDriversDirectory(DataType.DRIVERS.getDirectory().getPath());
-    builder.setWritableDirectory(DataType.WRITABLE.getDirectory().getPath());
+    builder.setLocaleDirectory(DataType.LOCALE.getDirectory());
+    builder.setTablesDirectory(DataType.TABLES.getDirectory());
+    builder.setDriversDirectory(DataType.DRIVERS.getDirectory());
+    builder.setWritableDirectory(DataType.WRITABLE.getDirectory());
 
     {
       File directory = DataType.STATE.getDirectory();
-      builder.setUpdatableDirectory(directory.getPath());
+      builder.setUpdatableDirectory(directory);
 
-      builder.setConfigurationFile(getStateFile(directory, "conf").getPath());
-      builder.setPreferencesFile(getStateFile(directory, "prefs").getPath());
+      builder.setConfigurationFile(getStateFile(directory, "conf"));
+      builder.setPreferencesFile(getStateFile(directory, "prefs"));
     }
 
     builder.setTextTable(getStringSetting(R.string.PREF_KEY_TEXT_TABLE, R.string.DEFAULT_TEXT_TABLE));

@@ -18,6 +18,7 @@
 
 package org.a11y.brltty.core;
 
+import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -109,6 +110,10 @@ public class ArgumentsBuilder {
     return this;
   }
 
+  public final ArgumentsBuilder setConfigurationFile (File value) {
+    return setConfigurationFile(value.getAbsolutePath());
+  }
+
   public final String getPreferencesFile () {
     return  preferencesFile;
   }
@@ -116,6 +121,10 @@ public class ArgumentsBuilder {
   public final ArgumentsBuilder setPreferencesFile (String value) {
     preferencesFile = value;
     return this;
+  }
+
+  public final ArgumentsBuilder setPreferencesFile (File value) {
+    return setPreferencesFile(value.getAbsolutePath());
   }
 
   public final String getLocaleDirectory () {
@@ -127,6 +136,10 @@ public class ArgumentsBuilder {
     return this;
   }
 
+  public final ArgumentsBuilder setLocaleDirectory (File value) {
+    return setLocaleDirectory(value.getAbsolutePath());
+  }
+
   public final String getDriversDirectory () {
     return  driversDirectory;
   }
@@ -134,6 +147,10 @@ public class ArgumentsBuilder {
   public final ArgumentsBuilder setDriversDirectory (String value) {
     driversDirectory = value;
     return this;
+  }
+
+  public final ArgumentsBuilder setDriversDirectory (File value) {
+    return setDriversDirectory(value.getAbsolutePath());
   }
 
   public final String getWritableDirectory () {
@@ -145,6 +162,10 @@ public class ArgumentsBuilder {
     return this;
   }
 
+  public final ArgumentsBuilder setWritableDirectory (File value) {
+    return setWritableDirectory(value.getAbsolutePath());
+  }
+
   public final String getUpdatableDirectory () {
     return  updatableDirectory;
   }
@@ -154,6 +175,10 @@ public class ArgumentsBuilder {
     return this;
   }
 
+  public final ArgumentsBuilder setUpdatableDirectory (File value) {
+    return setUpdatableDirectory(value.getAbsolutePath());
+  }
+
   public final String getTablesDirectory () {
     return  tablesDirectory;
   }
@@ -161,6 +186,10 @@ public class ArgumentsBuilder {
   public final ArgumentsBuilder setTablesDirectory (String value) {
     tablesDirectory = value;
     return this;
+  }
+
+  public final ArgumentsBuilder setTablesDirectory (File value) {
+    return setTablesDirectory(value.getAbsolutePath());
   }
 
   public final String getTextTable () {
