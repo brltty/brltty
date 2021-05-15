@@ -20,9 +20,6 @@
 
 #include <string.h>
 
-#ifdef HAVE_ICU
-#endif /* HAVE_ICU */
-
 #include "log.h"
 #include "ctb_translate.h"
 #include "ttb.h"
@@ -55,7 +52,7 @@ findLineBreakOpportunities (
   BrailleContractionData *bcd,
   LineBreakOpportunitiesState *lbo,
   unsigned char *opportunities,
-  const wchar_t *characters, unsigned int limit
+  const wchar_t *characters, unsigned int end
 ) {
   /* UAX #14: Line Breaking Properties
    * http://unicode.org/reports/tr14/
@@ -70,7 +67,7 @@ findLineBreakOpportunities (
    * 9  digits
    */
 
-  while (lbo->index < limit) {
+  while (lbo->index < end) {
     unsigned char *opportunity = &opportunities[lbo->index];
 
     lbo->previous = lbo->before;
@@ -457,9 +454,9 @@ findLineBreakOpportunities (
   BrailleContractionData *bcd,
   LineBreakOpportunitiesState *lbo,
   unsigned char *opportunities,
-  const wchar_t *characters, unsigned int limit
+  const wchar_t *characters, unsigned int end
 ) {
-  while (lbo->index < limit) {
+  while (lbo->index < end) {
     int isSpace = testCharacter(bcd, characters[lbo->index], CTC_Space);
     opportunities[lbo->index] = lbo->wasSpace && !isSpace;
 
@@ -874,20 +871,19 @@ clearRemainingOffsets (BrailleContractionData *bcd) {
 
 static int
 contractText_native (BrailleContractionData *bcd) {
+  bcd->previous.opcode = CTO_None;
+
   const wchar_t *srcword = NULL;
-  BYTE *destword = NULL;
-
   const wchar_t *srcjoin = NULL;
-  BYTE *destjoin = NULL;
-
-  BYTE *destlast = NULL;
   const wchar_t *literal = NULL;
+
+  BYTE *destword = NULL;
+  BYTE *destjoin = NULL;
+  BYTE *destlast = NULL;
 
   unsigned char lineBreakOpportunities[getInputCount(bcd)];
   LineBreakOpportunitiesState lbo;
-
   prepareLineBreakOpportunitiesState(&lbo);
-  bcd->previous.opcode = CTO_None;
 
   while (bcd->input.current < bcd->input.end) {
     int wasLiteral = bcd->input.current == literal;
