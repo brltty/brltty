@@ -70,7 +70,7 @@ findLineBreakOpportunities (
    * 9  digits
    */
 
-  while (lbo->index <= limit) {
+  while (lbo->index < limit) {
     unsigned char *opportunity = &opportunities[lbo->index];
 
     lbo->previous = lbo->before;
@@ -459,7 +459,7 @@ findLineBreakOpportunities (
   unsigned char *opportunities,
   const wchar_t *characters, unsigned int limit
 ) {
-  while (lbo->index <= limit) {
+  while (lbo->index < limit) {
     int isSpace = testCharacter(bcd, characters[lbo->index], CTC_Space);
     opportunities[lbo->index] = lbo->wasSpace && !isSpace;
 

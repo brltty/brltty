@@ -58,14 +58,17 @@ ensureContractedOffsetsSize (size_t size) {
   if (++size > contractedOffsetsSize) {
     size_t newSize = 1;
     while (newSize < size) newSize <<= 1;
-    int *newOffsets;
 
-    if (!(newOffsets = malloc(ARRAY_SIZE(newOffsets, newSize)))) {
+    int *newOffsets = realloc(
+      contractedOffsets,
+      ARRAY_SIZE(contractedOffsets, newSize)
+    );
+
+    if (!newOffsets) {
       logMallocError();
       return 0;
     }
 
-    if (contractedOffsets) free(contractedOffsets);
     contractedOffsets = newOffsets;
     contractedOffsetsSize = newSize;
   }
@@ -1018,23 +1021,23 @@ doUpdate (void) {
       if (isContracting()) {
         while (1) {
           int inputLength = scr.cols - ses->winx;
-          ScreenCharacter inputCharacters[inputLength];
+          ensureContractedOffsetsSize(inputLength);
           wchar_t inputText[inputLength];
 
-          int outputLength = textLength;
-          unsigned char outputBuffer[outputLength];
-
+          ScreenCharacter inputCharacters[inputLength];
           readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
 
-          for (int i=0; i<inputLength; ++i) {
+          for (int i=0; i<inputLength; i+=1) {
             inputText[i] = inputCharacters[i].text;
           }
 
-          ensureContractedOffsetsSize(inputLength);
+          int outputLength = textLength;
+          unsigned char outputCells[outputLength];
+
           contractText(
             contractionTable,
             inputText, &inputLength,
-            outputBuffer, &outputLength,
+            outputCells, &outputLength,
             contractedOffsets, getContractedCursor()
           );
 
@@ -1106,20 +1109,20 @@ doUpdate (void) {
 
             if (ses->displayMode) {
               for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
-                outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
+                outputCells[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
               }
             } else {
               unsigned int i;
 
               for (i=0; i<outputLength; i+=1) {
-                overlayAttributesUnderline(&outputBuffer[i], attributesBuffer[i]);
+                overlayAttributesUnderline(&outputCells[i], attributesBuffer[i]);
               }
             }
           }
 
           fillDotsRegion(textBuffer, brl.buffer,
                          textStart, textCount, brl.textColumns, brl.textRows,
-                         outputBuffer, outputLength);
+                         outputCells, outputLength);
           break;
         }
       }

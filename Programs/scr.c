@@ -148,9 +148,8 @@ readScreenText (short left, short top, short width, short height, wchar_t *buffe
   ScreenCharacter characters[count];
   if (!readScreen(left, top, width, height, characters)) return 0;
 
-  {
-    int i;
-    for (i=0; i<count; ++i) buffer[i] = characters[i].text;
+  for (int i=0; i<count; i+=1) {
+    buffer[i] = characters[i].text;
   }
 
   return 1;

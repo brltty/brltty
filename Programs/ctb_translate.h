@@ -89,8 +89,10 @@ getOutputConsumed (BrailleContractionData *bcd) {
 }
 
 static inline void
-assignOffset (BrailleContractionData *bcd, size_t value) {
-  if (bcd->input.offsets) bcd->input.offsets[getInputConsumed(bcd)] = value;
+assignOffset (BrailleContractionData *bcd, int value) {
+  if (bcd->input.offsets) {
+    bcd->input.offsets[getInputConsumed(bcd)] = value;
+  }
 }
 
 static inline void
