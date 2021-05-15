@@ -667,7 +667,10 @@ static DATA_OPERANDS_PROCESSOR(processEmojiOperands) {
         .ctd = ctd
       };
 
-      cldrParseFile(name, handleAnnotation, &ahd);
+      if (!cldrParseFile(name, handleAnnotation, &ahd)) {
+        logMessage(LOG_WARNING, "emoji substitutiion won't be performed");
+      }
+
       free(name);
     }
   }

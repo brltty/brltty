@@ -27,9 +27,16 @@
 #include "cldr.h"
 #include "file.h"
 
-#ifdef HAVE_EXPAT
+#undef HAVE_XML_PROCESSOR
+
+#if defined(HAVE_EXPAT)
+#define HAVE_XML_PROCESSOR
 #include <expat.h>
 
+#else /* XML processor */
+#endif /* XML processor */
+
+#ifdef HAVE_XML_PROCESSOR
 struct CLDR_DocumentParserObjectStruct {
   struct {
     CLDR_AnnotationHandler *handler;
@@ -159,11 +166,9 @@ handleElementEnd (void *userData, const char *name) {
 
   dpo->document.depth -= 1;
 }
-#endif /* HAVE_EXPAT */
 
 CLDR_DocumentParserObject *
 cldrNewDocumentParser (CLDR_AnnotationHandler *handler, void *data) {
-#ifdef HAVE_EXPAT
   CLDR_DocumentParserObject *dpo;
 
   if ((dpo = malloc(sizeof(*dpo)))) {
@@ -191,16 +196,12 @@ cldrNewDocumentParser (CLDR_AnnotationHandler *handler, void *data) {
   } else {
     logMallocError();
   }
-#else /* HAVE_EXPAT */
-  logMessage(LOG_WARNING, "XML parsing support has not been included");
-#endif /* HAVE_EXPAT */
 
   return NULL;
 }
 
 void
 cldrDestroyDocumentParser (CLDR_DocumentParserObject *dpo) {
-#ifdef HAVE_EXPAT
   if (dpo->annotation.sequence) {
     free(dpo->annotation.sequence);
     dpo->annotation.sequence = NULL;
@@ -213,12 +214,10 @@ cldrDestroyDocumentParser (CLDR_DocumentParserObject *dpo) {
 
   XML_ParserFree(dpo->document.parser);
   free(dpo);
-#endif /* HAVE_EXPAT */
 }
 
 int
 cldrParseText (CLDR_DocumentParserObject *dpo, const char *text, size_t size, int final) {
-#ifdef HAVE_EXPAT
   enum XML_Status status = XML_Parse(dpo->document.parser, text, size, final);
 
   switch (status) {
@@ -233,7 +232,6 @@ cldrParseText (CLDR_DocumentParserObject *dpo, const char *text, size_t size, in
       logMessage(LOG_WARNING, "unrecognized CLDR parse status: %d", status);
       break;
   }
-#endif /* HAVE_EXPAT */
 
   return 0;
 }
@@ -253,6 +251,7 @@ cldrParseDocument (
 
   return ok;
 }
+#endif /* HAVE_XML_PROCESSOR */
 
 const char cldrAnnotationsDirectory[] = "/usr/share/unicode/cldr/common/annotations";
 const char cldrAnnotationsExtension[] = ".xml";
@@ -263,6 +262,8 @@ cldrParseFile (
   CLDR_AnnotationHandler *handler, void *data
 ) {
   int ok = 0;
+
+#ifdef HAVE_XML_PROCESSOR
   char *path = makeFilePath(cldrAnnotationsDirectory, name, cldrAnnotationsExtension);
 
   if (path) {
@@ -312,6 +313,9 @@ cldrParseFile (
 
     free(path);
   }
+#else /* HAVE_XML_PROCESSOR */
+  logMessage(LOG_WARNING, "CLDR data can't be loaded - no supported XML parser");
+#endif /* HAVE_XML_PROCESSOR */
 
   return ok;
 }
