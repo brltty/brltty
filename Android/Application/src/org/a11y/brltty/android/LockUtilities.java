@@ -19,13 +19,19 @@
 package org.a11y.brltty.android;
 
 import android.os.PowerManager;
+import java.util.concurrent.TimeUnit;
 
-public final class LockUtilities {
+public abstract class LockUtilities {
+  private LockUtilities () {
+  }
+
   private final static PowerManager.WakeLock wakeLock =
     ApplicationUtilities.getPowerManager().newWakeLock(
       PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
       BrailleApplication.get().getString(R.string.app_name)
     );
+
+  private final static long LOCK_TIMEOUT = TimeUnit.SECONDS.toMillis(1);
 
   public static boolean isLocked () {
     if (!ApplicationUtilities.getPowerManager().isScreenOn()) {
@@ -38,10 +44,7 @@ public final class LockUtilities {
   }
 
   public static void resetTimer () {
-    wakeLock.acquire();
+    wakeLock.acquire(LOCK_TIMEOUT);
     wakeLock.release();
-  }
-
-  private LockUtilities () {
   }
 }
