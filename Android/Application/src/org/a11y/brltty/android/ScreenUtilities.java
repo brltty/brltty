@@ -18,8 +18,10 @@
 
 package org.a11y.brltty.android;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.Collections;
+
+import java.util.List;
 import java.util.Comparator;
 
 import android.os.Bundle;
@@ -160,7 +162,9 @@ public abstract class ScreenUtilities {
     }
 
     return node.isCheckable()?
+           //noinspection InlinedApi
            AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_MULTIPLE:
+           //noinspection InlinedApi
            AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_NONE;
   }
 
@@ -404,82 +408,101 @@ public abstract class ScreenUtilities {
     AccessibilityNodeInfo node,
     AccessibilityNodeInfo.AccessibilityAction... actions
   ) {
-    final Comparator<AccessibilityNodeInfo.AccessibilityAction> comparator =
-      new Comparator<AccessibilityNodeInfo.AccessibilityAction>() {
+    if (APITests.haveLollipop) {
+      final Comparator<AccessibilityNodeInfo.AccessibilityAction> comparator =
+        new Comparator<AccessibilityNodeInfo.AccessibilityAction>() {
+          @Override
+          public int compare (
+            AccessibilityNodeInfo.AccessibilityAction action1,
+            AccessibilityNodeInfo.AccessibilityAction action2
+          ) {
+            return Integer.compare(action1.getId(), action2.getId());
+          }
+        };
+
+      final AccessibilityNodeInfo.AccessibilityAction[] array = Arrays.copyOf(actions, actions.length);
+      Arrays.sort(array, 0, array.length, comparator);
+
+      NodeTester tester = new NodeTester() {
         @Override
-        public int compare (
-          AccessibilityNodeInfo.AccessibilityAction action1,
-          AccessibilityNodeInfo.AccessibilityAction action2
-        ) {
-          //noinspection NewApi
-          return Integer.compare(action1.getId(), action2.getId());
+        public boolean testNode (AccessibilityNodeInfo node) {
+          if (!node.isEnabled()) return false;
+
+          for (AccessibilityNodeInfo.AccessibilityAction action : node.getActionList()) {
+            if (Arrays.binarySearch(array, 0, array.length, action, comparator) >= 0) {
+              return true;
+            }
+          }
+
+          return false;
         }
       };
 
-    final AccessibilityNodeInfo.AccessibilityAction[] array = Arrays.copyOf(actions, actions.length);
-    Arrays.sort(array, 0, array.length, comparator);
+      return findContainingNode(node, tester);
+    }
 
-    NodeTester tester = new NodeTester() {
-      @Override
-      public boolean testNode (AccessibilityNodeInfo node) {
-        if (!node.isEnabled()) return false;
-
-        //noinspection NewApi
-        for (AccessibilityNodeInfo.AccessibilityAction action : node.getActionList()) {
-          if (Arrays.binarySearch(array, 0, array.length, action, comparator) >= 0) return true;
-        }
-
-        return false;
-      }
-    };
-
-    return findContainingNode(node, tester);
+    return null;
   }
 
   public static boolean performAction (
     AccessibilityNodeInfo node,
     AccessibilityNodeInfo.AccessibilityAction action
   ) {
-    node = findActionableNode(node, action);
-    if (node == null) return false;
+    if (APITests.haveLollipop) {
+      node = findActionableNode(node, action);
 
-    try {
-      //noinspection NewApi
-      return node.performAction(action.getId());
-    } finally {
-      node.recycle();
-      node = null;
+      if (node != null) {
+        try {
+          return node.performAction(action.getId());
+        } finally {
+          node.recycle();
+          node = null;
+        }
+      }
     }
+
+    return false;
   }
 
   public static List<AccessibilityWindowInfo> getWindows () {
-    //noinspection NewApi
-    return BrailleService.getBrailleService().getWindows();
+    if (APITests.haveLollipop) {
+      return BrailleService.getBrailleService().getWindows();
+    }
+
+    return Collections.EMPTY_LIST;
   }
 
   public static AccessibilityWindowInfo findWindow (int identifier) {
     AccessibilityWindowInfo found = null;
 
-    for (AccessibilityWindowInfo window : getWindows()) {
-      if (found == null) {
-        //noinspection NewApi
-        if (window.getId() == identifier) {
-          found = window;
-          continue;
+    if (APITests.haveLollipop) {
+      for (AccessibilityWindowInfo window : getWindows()) {
+        if (found == null) {
+          if (window.getId() == identifier) {
+            found = window;
+            continue;
+          }
         }
-      }
 
-      //noinspection NewApi
-      window.recycle();
-      window = null;
+        window.recycle();
+        window = null;
+      }
     }
 
     return found;
   }
 
   public static String getRangeValueFormat (AccessibilityNodeInfo.RangeInfo range) {
-    //noinspection NewApi
-    switch (range.getType()) {
+    int type;
+
+    if (APITests.haveKitkat) {
+      type = range.getType();
+    } else {
+      //noinspection InlinedApi
+      type = AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT;
+    }
+
+    switch (type) {
       case AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT:
         return "%.0f";
 

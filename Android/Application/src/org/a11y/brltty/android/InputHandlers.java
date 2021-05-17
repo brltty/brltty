@@ -102,8 +102,10 @@ public abstract class InputHandlers {
       try {
         showWindowTitle(info);
       } finally {
-        //noinspection NewApi
-        info.recycle();
+        if (APITests.haveLollipop) {
+          info.recycle();
+        }
+
         info = null;
       }
     }
@@ -122,41 +124,45 @@ public abstract class InputHandlers {
   }
 
   private static AccessibilityWindowInfo[] getVisibleWindows (final Comparator<Integer> comparator) {
-    List<AccessibilityWindowInfo> list = getVisibleWindows();
-    AccessibilityWindowInfo[] array = list.toArray(new AccessibilityWindowInfo[list.size()]);
+    if (APITests.haveLollipop) {
+      List<AccessibilityWindowInfo> list = getVisibleWindows();
+      AccessibilityWindowInfo[] array = list.toArray(new AccessibilityWindowInfo[list.size()]);
 
-    Arrays.sort(array,
-      new Comparator<AccessibilityWindowInfo>() {
-        @Override
-        public int compare (AccessibilityWindowInfo window1, AccessibilityWindowInfo window2) {
-          //noinspection NewApi
-          return comparator.compare(window1.getId(), window2.getId());
+      Arrays.sort(array,
+        new Comparator<AccessibilityWindowInfo>() {
+          @Override
+          public int compare (AccessibilityWindowInfo window1, AccessibilityWindowInfo window2) {
+            return comparator.compare(window1.getId(), window2.getId());
+          }
         }
-      }
-    );
+      );
 
-    return array;
+      return array;
+    }
+
+    return null;
   }
 
   private static boolean switchToWindow (AccessibilityWindowInfo window) {
-    //noinspection NewApi
-    AccessibilityNodeInfo root = window.getRoot();
+    if (APITests.haveLollipop) {
+      AccessibilityNodeInfo root = window.getRoot();
 
-    if (root != null) {
-      try {
-        RenderedScreen screen = new RenderedScreen(root);
-        showWindowTitle(window);
+      if (root != null) {
+        try {
+          RenderedScreen screen = new RenderedScreen(root);
+          showWindowTitle(window);
 
-        ScreenDriver.lockScreenWindow(
-          ScreenWindow.getScreenWindow(window)
-                      .setRenderedScreen(screen)
-        );
+          ScreenDriver.lockScreenWindow(
+            ScreenWindow.getScreenWindow(window)
+                        .setRenderedScreen(screen)
+          );
 
-        ScreenDriver.setCurrentNode(root);
-        return true;
-      } finally {
-        root.recycle();
-        root = null;
+          ScreenDriver.setCurrentNode(root);
+          return true;
+        } finally {
+          root.recycle();
+          root = null;
+        }
       }
     }
 
@@ -165,31 +171,36 @@ public abstract class InputHandlers {
 
   private static boolean switchToWindow (Comparator<Integer> comparator) {
     boolean found = false;
-    AccessibilityNodeInfo cursorNode = getCursorNode();
 
-    if (cursorNode != null) {
-      try {
-        int referenceIdentifier = cursorNode.getWindowId();
+    if (APITests.haveLollipop) {
+      AccessibilityWindowInfo[] windows = getVisibleWindows(comparator);
 
-        for (AccessibilityWindowInfo window : getVisibleWindows(comparator)) {
+      if (windows != null) {
+        AccessibilityNodeInfo cursorNode = getCursorNode();
+
+        if (cursorNode != null) {
           try {
-            if (!found) {
-              //noinspection NewApi
-              if (comparator.compare(window.getId(), referenceIdentifier) > 0) {
-                if (switchToWindow(window)) {
-                  found = true;
+            int referenceIdentifier = cursorNode.getWindowId();
+
+            for (AccessibilityWindowInfo window : windows) {
+              try {
+                if (!found) {
+                  if (comparator.compare(window.getId(), referenceIdentifier) > 0) {
+                    if (switchToWindow(window)) {
+                      found = true;
+                    }
+                  }
                 }
+              } finally {
+                window.recycle();
+                window = null;
               }
             }
           } finally {
-            //noinspection NewApi
-            window.recycle();
-            window = null;
+            cursorNode.recycle();
+            cursorNode = null;
           }
         }
-      } finally {
-        cursorNode.recycle();
-        cursorNode = null;
       }
     }
 
@@ -209,15 +220,27 @@ public abstract class InputHandlers {
   }
 
   private static int getTextStartOffset (AccessibilityNodeInfo node) {
-    //noinspection NewApi
-    int offset = node.getTextSelectionStart();
+    int offset;
+
+    if (APITests.haveJellyBeanMR2) {
+      offset = node.getTextSelectionStart();
+    } else {
+      offset = NO_SELECTION;
+    }
+
     if (offset == NO_SELECTION) return 0;
     return offset;
   }
 
   private static int getTextEndOffset (AccessibilityNodeInfo node) {
-    //noinspection NewApi
-    int offset = node.getTextSelectionEnd();
+    int offset;
+
+    if (APITests.haveJellyBeanMR2) {
+      offset = node.getTextSelectionEnd();
+    } else {
+      offset = NO_SELECTION;
+    }
+
     if (offset == NO_SELECTION) return 0;
     if (offset != getTextStartOffset(node)) offset -= 1;
     return offset;
@@ -278,31 +301,31 @@ public abstract class InputHandlers {
     protected abstract Integer editText (Editable editor, int start, int end);
 
     private final boolean editText (AccessibilityNodeInfo node) {
-      if (node.isFocused()) {
-        CharSequence text = node.getText();
-        //noinspection NewApi
-        int start = node.getTextSelectionStart();
-        //noinspection NewApi
-        int end = node.getTextSelectionEnd();
+      if (APITests.haveLollipop) {
+        if (node.isFocused()) {
+          CharSequence text = node.getText();
+          int start = node.getTextSelectionStart();
+          int end = node.getTextSelectionEnd();
 
-        if (start == NO_SELECTION) text = null;
-        if (text == null) text = "";
-        if (text.length() == 0) start = end = 0;
+          if (start == NO_SELECTION) text = null;
+          if (text == null) text = "";
+          if (text.length() == 0) start = end = 0;
 
-        Editable editor = (text instanceof Editable)?
-                          (Editable)text:
-                          new SpannableStringBuilder(text);
+          Editable editor = (text instanceof Editable)?
+                            (Editable)text:
+                            new SpannableStringBuilder(text);
 
-        if ((0 <= start) && (start <= end) && (end <= text.length())) {
-          Integer offset = editText(editor, start, end);
+          if ((0 <= start) && (start <= end) && (end <= text.length())) {
+            Integer offset = editText(editor, start, end);
 
-          if (offset != null) {
-            Bundle arguments = new Bundle();
-            arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, editor);
+            if (offset != null) {
+              Bundle arguments = new Bundle();
+              arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, editor);
 
-            if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)) {
-              if (offset == editor.length()) return true;
-              return placeCursor(node, offset);
+              if (node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments)) {
+                if (offset == editor.length()) return true;
+                return placeCursor(node, offset);
+              }
             }
           }
         }
@@ -417,8 +440,7 @@ public abstract class InputHandlers {
 
         if (node != null) {
           try {
-            //noinspection NewApi
-            return node.isEditable()?
+            return ScreenUtilities.isEditable(node)?
                    performEditAction(node):
                    performNavigationAction(node);
           } finally {
@@ -771,29 +793,35 @@ public abstract class InputHandlers {
   }
 
   public static boolean globalAction_toPreviousWindow () {
-    Comparator<Integer> comparator =
-      new Comparator<Integer>() {
-        @Override
-        public int compare (Integer id1, Integer id2) {
-          //noinspection NewApi
-          return -Integer.compare(id1, id2);
-        }
-      };
+    if (APITests.haveKitkat) {
+      Comparator<Integer> comparator =
+        new Comparator<Integer>() {
+          @Override
+          public int compare (Integer id1, Integer id2) {
+            return -Integer.compare(id1, id2);
+          }
+        };
 
-    return switchToWindow(comparator);
+      return switchToWindow(comparator);
+    }
+
+    return false;
   }
 
   public static boolean globalAction_toNextWindow () {
-    Comparator<Integer> comparator =
-      new Comparator<Integer>() {
-        @Override
-        public int compare (Integer id1, Integer id2) {
-          //noinspection NewApi
-          return Integer.compare(id1, id2);
-        }
-      };
+    if (APITests.haveKitkat) {
+      Comparator<Integer> comparator =
+        new Comparator<Integer>() {
+          @Override
+          public int compare (Integer id1, Integer id2) {
+            return Integer.compare(id1, id2);
+          }
+        };
 
-    return switchToWindow(comparator);
+      return switchToWindow(comparator);
+    }
+
+    return false;
   }
 
   public static boolean globalAction_toFirstItem () {

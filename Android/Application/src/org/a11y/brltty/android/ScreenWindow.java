@@ -41,10 +41,14 @@ public class ScreenWindow {
 
   public final AccessibilityWindowInfo getWindowInfo () {
     synchronized (this) {
-      if (windowInfo == null) return null;
-      //noinspection NewApi
-      return AccessibilityWindowInfo.obtain(windowInfo);
+      if (windowInfo != null) {
+        if (APITests.haveLollipop) {
+          return AccessibilityWindowInfo.obtain(windowInfo);
+        }
+      }
     }
+
+    return null;
   }
 
   private final static Map<Integer, ScreenWindow> screenWindowCache =
@@ -64,14 +68,15 @@ public class ScreenWindow {
   }
 
   public static ScreenWindow getScreenWindow (AccessibilityWindowInfo info) {
-    //noinspection NewApi
-    ScreenWindow window = getScreenWindow(info.getId());
+    ScreenWindow window = null;
 
-    synchronized (window) {
-      //noinspection NewApi
-      if (window.windowInfo != null) window.windowInfo.recycle();
-      //noinspection NewApi
-      window.windowInfo = AccessibilityWindowInfo.obtain(info);
+    if (APITests.haveLollipop) {
+      window = getScreenWindow(info.getId());
+
+      synchronized (window) {
+        if (window.windowInfo != null) window.windowInfo.recycle();
+        window.windowInfo = AccessibilityWindowInfo.obtain(info);
+      }
     }
 
     return window;
@@ -99,14 +104,15 @@ public class ScreenWindow {
       Rect location = new Rect();
 
       if (windowInfo != null) {
-        //noinspection NewApi
-        windowInfo.getBoundsInScreen(location);
-      } else {
-        Point size = new Point();
-        ApplicationUtilities.getWindowManager().getDefaultDisplay().getSize(size);
-        location.set(0, 0, size.x, size.y);
+        if (APITests.haveLollipop) {
+          windowInfo.getBoundsInScreen(location);
+          return location;
+        }
       }
 
+      Point size = new Point();
+      ApplicationUtilities.getWindowManager().getDefaultDisplay().getSize(size);
+      location.set(0, 0, size.x, size.y);
       return location;
     }
   }

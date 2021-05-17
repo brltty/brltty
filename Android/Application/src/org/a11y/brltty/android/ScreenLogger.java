@@ -105,8 +105,9 @@ public abstract class ScreenLogger extends Logger {
     }
 
     public final void put (String name, AccessibilityNodeInfo.AccessibilityAction action) {
-      //noinspection NewApi
-      put(name, action.getId());
+      if (APITests.haveLollipop) {
+        put(name, action.getId());
+      }
     }
   }
 
@@ -127,14 +128,23 @@ public abstract class ScreenLogger extends Logger {
       put("ifc", AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
       put("afs", AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
       put("afc", AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
-      put("sel", AccessibilityNodeInfo.ACTION_SET_SELECTION);
-      put("cbc", AccessibilityNodeInfo.ACTION_COPY);
-      put("cbx", AccessibilityNodeInfo.ACTION_CUT);
-      put("cbp", AccessibilityNodeInfo.ACTION_PASTE);
-      put("dsms", AccessibilityNodeInfo.ACTION_DISMISS);
-      put("clps", AccessibilityNodeInfo.ACTION_COLLAPSE);
-      put("xpnd", AccessibilityNodeInfo.ACTION_EXPAND);
-      put("txs", AccessibilityNodeInfo.ACTION_SET_TEXT);
+
+      if (APITests.haveJellyBeanMR2) {
+        put("sel", AccessibilityNodeInfo.ACTION_SET_SELECTION);
+        put("cbc", AccessibilityNodeInfo.ACTION_COPY);
+        put("cbx", AccessibilityNodeInfo.ACTION_CUT);
+        put("cbp", AccessibilityNodeInfo.ACTION_PASTE);
+      }
+
+      if (APITests.haveKitkat) {
+        put("dsms", AccessibilityNodeInfo.ACTION_DISMISS);
+        put("clps", AccessibilityNodeInfo.ACTION_COLLAPSE);
+        put("xpnd", AccessibilityNodeInfo.ACTION_EXPAND);
+      }
+
+      if (APITests.haveLollipop) {
+        put("txs", AccessibilityNodeInfo.ACTION_SET_TEXT);
+      }
 
       if (APITests.haveMarshmallow) {
         put("cck", AccessibilityNodeInfo.AccessibilityAction.ACTION_CONTEXT_CLICK);
@@ -458,29 +468,37 @@ public abstract class ScreenLogger extends Logger {
                new HashMap<Integer, String>()
   {
     {
-      put(AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY, "acc");
-      put(AccessibilityWindowInfo.TYPE_APPLICATION, "app");
-      put(AccessibilityWindowInfo.TYPE_INPUT_METHOD, "ime");
-      put(AccessibilityWindowInfo.TYPE_SPLIT_SCREEN_DIVIDER, "ssd");
-      put(AccessibilityWindowInfo.TYPE_SYSTEM, "sys");
+      if (APITests.haveLollipop) {
+        put(AccessibilityWindowInfo.TYPE_SYSTEM, "sys");
+        put(AccessibilityWindowInfo.TYPE_APPLICATION, "app");
+        put(AccessibilityWindowInfo.TYPE_INPUT_METHOD, "ime");
+      }
+
+      if (APITests.haveMarshmallow) {
+        put(AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY, "acc");
+      }
+
+      if (APITests.haveNougat) {
+        put(AccessibilityWindowInfo.TYPE_SPLIT_SCREEN_DIVIDER, "ssd");
+      }
     }
   };
 
   public static String toString (AccessibilityWindowInfo window) {
     StringBuilder sb = new StringBuilder();
-    //noinspection NewApi
-    add(sb, "id", window.getId());
+
+    if (APITests.haveLollipop) {
+      add(sb, "id", window.getId());
+    }
 
     if (APITests.haveNougat) {
       addText(sb, window.getTitle(), null);
     }
 
-    {
-      //noinspection NewApi
+    if (APITests.haveLollipop) {
       AccessibilityWindowInfo parent = window.getParent();
 
       if (parent != null) {
-        //noinspection NewApi
         parent.recycle();
         parent = null;
       } else {
@@ -488,30 +506,25 @@ public abstract class ScreenLogger extends Logger {
       }
     }
 
-    {
-      //noinspection NewApi
+    if (APITests.haveLollipop) {
       int count = window.getChildCount();
       if (count > 0) add(sb, "cld", count);
     }
 
-    //noinspection NewApi
-    add(sb, "type", window.getType(), windowTypeNames);
-    //noinspection NewApi
-    add(sb, "layer", window.getLayer());
-    //noinspection NewApi
-    add(sb, window.isActive(), "act");
-    //noinspection NewApi
-    add(sb, window.isFocused(), "ifd");
-    //noinspection NewApi
-    add(sb, window.isAccessibilityFocused(), "afd");
+    if (APITests.haveLollipop) {
+      add(sb, "type", window.getType(), windowTypeNames);
+      add(sb, "layer", window.getLayer());
+      add(sb, window.isActive(), "act");
+      add(sb, window.isFocused(), "ifd");
+      add(sb, window.isAccessibilityFocused(), "afd");
+    }
 
     if (APITests.haveOreo) {
       add(sb, window.isInPictureInPictureMode(), "pip");
     }
 
-    {
+    if (APITests.haveLollipop) {
       Rect location = new Rect();
-      //noinspection NewApi
       window.getBoundsInScreen(location);
       add(sb, location.toShortString());
     }
@@ -523,32 +536,32 @@ public abstract class ScreenLogger extends Logger {
     log(name, toString(window));
 
     if (nodes) {
-      //noinspection NewApi
-      AccessibilityNodeInfo root = window.getRoot();
+      if (APITests.haveLollipop) {
+        AccessibilityNodeInfo root = window.getRoot();
 
-      if (root != null) {
-        try {
-          log(root);
-        } finally {
-          root.recycle();
-          root = null;
+        if (root != null) {
+          try {
+            log(root);
+          } finally {
+            root.recycle();
+            root = null;
+          }
         }
       }
     }
 
     if (descend) {
-      //noinspection NewApi
-      int childCount = window.getChildCount();
+      if (APITests.haveLollipop) {
+        int childCount = window.getChildCount();
 
-      for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-        //noinspection NewApi
-        AccessibilityWindowInfo child = window.getChild(childIndex);
+        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+          AccessibilityWindowInfo child = window.getChild(childIndex);
 
-        if (child != null) {
-          log(child, (name + '.' + childIndex), true, nodes);
-          //noinspection NewApi
-          child.recycle();
-          child = null;
+          if (child != null) {
+            log(child, (name + '.' + childIndex), true, nodes);
+            child.recycle();
+            child = null;
+          }
         }
       }
     }

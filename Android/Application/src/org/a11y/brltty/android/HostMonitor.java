@@ -60,20 +60,22 @@ public class HostMonitor extends BroadcastReceiver {
   }
 
   private static void migrateData (Context fromContext) {
-    Context toContext = DataType.getContext();
+    if (APITests.haveNougat) {
+      Context toContext = DataType.getContext();
 
-    if (toContext != fromContext) {
-      //noinspection NewApi
-      toContext.moveSharedPreferencesFrom(
-        fromContext,
-        PreferenceManager.getDefaultSharedPreferencesName(fromContext)
-      );
+      if (toContext != fromContext) {
+        {
+          String name = PreferenceManager.getDefaultSharedPreferencesName(fromContext);
+          toContext.moveSharedPreferencesFrom(fromContext, name);
+        }
 
-      for (DataType type : DataType.values()) {
-        migrateData(
-          fromContext.getDir(type.getName(), Context.MODE_PRIVATE),
-          type.getDirectory()
-        );
+        for (DataType type : DataType.values()) {
+          migrateData(
+            fromContext.getDir(type.getName(),
+            Context.MODE_PRIVATE),
+            type.getDirectory()
+          );
+        }
       }
     }
   }

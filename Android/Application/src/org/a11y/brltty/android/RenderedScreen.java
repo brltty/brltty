@@ -295,19 +295,20 @@ public class RenderedScreen {
           if (hasActions) {
             if ((text = getDescription(root)) == null) {
               text = ScreenUtilities.getClassName(root);
-              //noinspection NewApi
-              String name = root.getViewIdResourceName();
+              if (APITests.haveJellyBeanMR2) {
+                String name = root.getViewIdResourceName();
 
-              if (name != null) {
-                String marker = ":id/";
-                int index = name.indexOf(marker);
-                name = (index < 0)? null: name.substring(index + marker.length());
-              }
+                if (name != null) {
+                  String marker = ":id/";
+                  int index = name.indexOf(marker);
+                  name = (index < 0)? null: name.substring(index + marker.length());
+                }
 
-              if (text == null) {
-                text = name;
-              } else if (name != null) {
-                text += " " + name;
+                if (text == null) {
+                  text = name;
+                } else if (name != null) {
+                  text += " " + name;
+                }
               }
 
               if (text == null) text = "?";

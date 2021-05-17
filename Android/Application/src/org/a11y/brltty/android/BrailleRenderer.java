@@ -67,7 +67,7 @@ public abstract class BrailleRenderer {
       );
     }
 
-    if (APITests.haveJellyBean) {
+    if (APITests.haveJellyBeanMR1) {
       elements.addAtTop(
         R.string.GLOBAL_BUTTON_QUICK_SETTINGS,
         AccessibilityService.GLOBAL_ACTION_QUICK_SETTINGS

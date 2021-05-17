@@ -18,7 +18,12 @@
 
 package org.a11y.brltty.android;
 
+import android.util.Log;
+import android.annotation.SuppressLint;
+
 import android.content.Context;
+import java.util.Locale;
+
 import android.os.BatteryManager;
 
 import java.util.Date;
@@ -44,19 +49,18 @@ import java.util.Map;
 import java.util.HashMap;
 
 public abstract class StatusIndicators {
+  private final static String LOG_TAG = StatusIndicators.class.getName();
+
   private StatusIndicators () {
   }
 
   private final static Context context = BrailleApplication.get();
 
-  private final static BatteryManager batteryManager = (BatteryManager)
-          context.getSystemService(Context.BATTERY_SERVICE);
-
   private final static TelephonyManager telephonyManager = (TelephonyManager)
           context.getSystemService(Context.TELEPHONY_SERVICE);
 
   private final static WifiManager wifiManager = (WifiManager)
-          context.getSystemService(Context.WIFI_SERVICE);
+          context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
   public interface Item {
     public String getLabel ();
@@ -87,10 +91,11 @@ public abstract class StatusIndicators {
         return null;
       }
 
+      @SuppressLint("ConstantLocale")
       @Override
       public String getValue () {
         String format = DateFormat.is24HourFormat(context)? "HH:mm": "h:mma";
-        return new SimpleDateFormat(format).format(new Date());
+        return new SimpleDateFormat(format, Locale.getDefault()).format(new Date());
       }
     };
 
@@ -106,6 +111,9 @@ public abstract class StatusIndicators {
       @Override
       public String getValue () {
         if (APITests.haveLollipop) {
+          BatteryManager batteryManager = (BatteryManager)
+            context.getSystemService(Context.BATTERY_SERVICE);
+
           int value = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
 
           if (value != INT_NO_VALUE) {
@@ -145,10 +153,12 @@ public abstract class StatusIndicators {
       private final CellInfo getCellInfo () {
         List<CellInfo> infoList = null;
 
-        try {
-          //noinspection NewApi
-          infoList = telephonyManager.getAllCellInfo();
-        } catch (SecurityException exception) {
+        if (APITests.haveJellyBeanMR1) {
+          try {
+            infoList = telephonyManager.getAllCellInfo();
+          } catch (SecurityException exception) {
+            Log.w(LOG_TAG, ("security exception: " + exception.getMessage()));
+          }
         }
 
         if (infoList != null) {

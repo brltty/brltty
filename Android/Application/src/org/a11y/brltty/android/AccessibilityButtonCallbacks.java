@@ -23,7 +23,7 @@ import android.accessibilityservice.AccessibilityButtonController;
 import android.annotation.SuppressLint;
 
 @SuppressLint("NewApi")
-public class AccessibilityButton extends AccessibilityButtonController.AccessibilityButtonCallback {
+public class AccessibilityButtonCallbacks extends AccessibilityButtonController.AccessibilityButtonCallback {
   @Override
   public void onClicked (AccessibilityButtonController controller) {
     ActionsActivity.launch();

@@ -21,17 +21,19 @@ import org.a11y.brltty.android.*;
 
 import android.util.Log;
 import android.os.AsyncTask;
-import android.content.Context;
 
-import android.app.AlertDialog;
+import android.content.Context;
+import java.util.Locale;
+
 import android.view.LayoutInflater;
+import android.app.AlertDialog;
+
 import android.view.View;
 import android.widget.TextView;
 import android.widget.ProgressBar;
 
-import java.net.URL;
 import java.io.File;
-
+import java.net.URL;
 import java.net.URLConnection;
 import java.net.HttpURLConnection;
 
@@ -101,7 +103,7 @@ public class FileDownloader extends UpgradeComponent {
       }
 
       private void setBytes (TextView view, long value) {
-        view.setText(Long.toString(value));
+        view.setText(String.format(Locale.getDefault(), "%d", value));
       }
 
       private AlertDialog makeDialog () {
@@ -148,9 +150,11 @@ public class FileDownloader extends UpgradeComponent {
               progressRemaining.setVisibility(View.GONE);
             } else {
               progressBar.setIndeterminate(false);
-              //noinspection NewApi
-              progressBar.setMin(0);
               progressBar.setMax((int)(long)contentLength);
+
+              if (APITests.haveOreo) {
+                progressBar.setMin(0);
+              }
             }
 
             progressInitialized = true;

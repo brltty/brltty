@@ -22,6 +22,7 @@ import org.a11y.brltty.core.*;
 import android.util.Log;
 
 import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityButtonController;
 import android.view.accessibility.AccessibilityEvent;
 
 import android.content.Intent;
@@ -53,7 +54,7 @@ public class BrailleService extends AccessibilityService {
   }
 
   private Thread coreThread = null;
-  private AccessibilityButton accessibilityButton = null;
+  private AccessibilityButtonCallbacks accessibilityButtonCallbacks = null;
 
   @Override
   protected void onServiceConnected () {
@@ -63,9 +64,16 @@ public class BrailleService extends AccessibilityService {
     coreThread.start();
 
     if (APITests.haveOreo) {
-      accessibilityButton = new AccessibilityButton();
-      //noinspection NewApi
-      getAccessibilityButtonController().registerAccessibilityButtonCallback(accessibilityButton);
+      AccessibilityButtonController controller = getAccessibilityButtonController();
+
+      if (controller != null) {
+        synchronized (controller) {
+          if (accessibilityButtonCallbacks == null) {
+            accessibilityButtonCallbacks = new AccessibilityButtonCallbacks();
+            controller.registerAccessibilityButtonCallback(accessibilityButtonCallbacks);
+          }
+        }
+      }
     }
   }
 
@@ -73,10 +81,17 @@ public class BrailleService extends AccessibilityService {
   public boolean onUnbind (Intent intent) {
     Log.d(LOG_TAG, "braille service disconnected");
 
-    if (accessibilityButton != null) {
-      //noinspection NewApi
-      getAccessibilityButtonController().unregisterAccessibilityButtonCallback(accessibilityButton);
-      accessibilityButton = null;
+    if (APITests.haveOreo) {
+      AccessibilityButtonController controller = getAccessibilityButtonController();
+
+      if (controller != null) {
+        synchronized (controller) {
+          if (accessibilityButtonCallbacks != null) {
+            controller.unregisterAccessibilityButtonCallback(accessibilityButtonCallbacks);
+            accessibilityButtonCallbacks = null;
+          }
+        }
+      }
     }
 
     try {

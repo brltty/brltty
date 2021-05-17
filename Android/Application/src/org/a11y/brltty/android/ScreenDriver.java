@@ -296,6 +296,7 @@ public abstract class ScreenDriver {
     AccessibilityNodeInfo node = event.getSource();
 
     if (node == null) {
+      //noinspection SwitchIntDef
       switch (eventType) {
         case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
           showNotification(event);
@@ -346,6 +347,7 @@ public abstract class ScreenDriver {
           }
         }
 
+        //noinspection SwitchIntDef
         switch (eventType) {
           case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
             focusSetter.start(node);
