@@ -53,6 +53,8 @@
     android:name=".BrailleApplication"
     android:persistent="true"
     android:supportsRtl="false"
+    android:allowBackup="true"
+    android:fullBackupContent="@xml/backup_rules"
     >
 
     <service
