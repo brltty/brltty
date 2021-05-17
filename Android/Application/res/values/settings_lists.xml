@@ -147,7 +147,7 @@
   <string name="TEXT_TABLE_LABEL_cs" translatable="true">Czech</string>
   <string name="TEXT_TABLE_LABEL_cy" translatable="true">Welsh</string>
   <string name="TEXT_TABLE_LABEL_da" translatable="true">Danish</string>
-  <string name="TEXT_TABLE_LABEL_da_1252" translatable="true">Danish (Svend Thougaard, 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_da_1252" translatable="true">Danish (Svend Thougaard, 2002–11–18)</string>
   <string name="TEXT_TABLE_LABEL_da_lt" translatable="true">Danish (LogText)</string>
   <string name="TEXT_TABLE_LABEL_de" translatable="true">German</string>
   <string name="TEXT_TABLE_LABEL_dra" translatable="true">Dravidian</string>
