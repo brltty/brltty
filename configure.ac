@@ -314,7 +314,7 @@ test "${GCC}" = "yes" && {
    done
 
    # warnings that should be suppressed
-   for flag in address-of-packed-member stringop-truncation
+   for flag in address-of-packed-member stringop-truncation initializer-overrides
    do
       AX_CHECK_COMPILE_FLAG([-Werror=${flag}], [dnl
          CFLAGS="${CFLAGS} -Wno-${flag}"

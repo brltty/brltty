@@ -93,4 +93,5 @@ clean::
 
 distclean::
 	-rm -f config.properties
+	-rm -f -r ../ABI
 
