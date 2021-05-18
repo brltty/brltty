@@ -28,12 +28,6 @@ lint-debug:
 lint-release:
 	$(GRADLE_WRAPPER_COMMAND) lintRelease
 
-publish-package:
-	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):publishApk
-
-publish-bundle:
-	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):publishBundle
-
 clean-build:
 	$(GRADLE_WRAPPER_COMMAND) clean
 

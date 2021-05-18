@@ -10,3 +10,4 @@ install: install-debug
 
 include common.mk
 include targets.mk
+include publish.mk

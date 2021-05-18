@@ -101,7 +101,7 @@ brltty.assembleTask.dependsOn brlttyAddDrivers, brlttyAddMessages, brlttyAddTabl
 brltty.cleanTask.dependsOn brlttyRemoveDrivers, brlttyRemoveMessages, brlttyRemoveTables
 
 afterEvaluate {
-  ["assembleDebug", "assembleRelease"].each { taskName ->
-    tasks[taskName].dependsOn brltty.assembleTask
+  tasks.withType(JavaCompile).each { task ->
+    task.dependsOn brltty.assembleTask
   }
 }

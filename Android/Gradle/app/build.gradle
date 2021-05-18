@@ -1,6 +1,6 @@
 plugins {
   id "com.android.application"
-  id "com.github.triplet.play" version "2.5.0"
+  id "com.github.triplet.play" version "3.4.0"
 }
 
 description = """
@@ -88,6 +88,7 @@ android {
 
   play {
     track = "production" // internal, alpha, beta, production
+    defaultToAppBundles = true
     serviceAccountCredentials = rootProject.file("credentials/publish-play.json")
   }
 }
