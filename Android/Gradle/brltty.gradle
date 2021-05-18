@@ -26,3 +26,4 @@ brltty.getABIPath = { Project project, String abi ->
 
 apply from: "brltty-properties.gradle"
 apply from: "brltty-build.gradle"
+apply from: "brltty-help.gradle"

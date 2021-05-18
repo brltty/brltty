@@ -1,0 +1,43 @@
+void listProperties (Object object, String name, int level=0) {
+  print ("| " * level)
+  level += 1
+  print name
+
+  if (object instanceof Map) {
+    println "[:]"
+    def map = object as Map
+
+    map.keySet().sort().each { key ->
+      listProperties(map[key], key, level)
+    }
+  } else if (object instanceof List) {
+    println "[]"
+    def list = object as List
+    int index = 0
+
+    list.each { element ->
+      listProperties(element, ('[' + index++ + ']'), level)
+    }
+  } else {
+    print ": "
+
+    if (object instanceof Project) {
+      print "object "
+      object = object.name
+    } else if (object instanceof Task) {
+      print "task "
+      object = object.name
+    }
+
+    println object
+  }
+}
+
+tasks.register("brlttyListProperties") {
+  group "help"
+  description "Lists all of brltty's properties."
+
+  doLast {
+    listProperties(rootProject.brltty, "brltty")
+  }
+}
