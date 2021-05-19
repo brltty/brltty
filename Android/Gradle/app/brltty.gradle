@@ -23,6 +23,8 @@ ext {
 }
 
 task brlttyAddTables (type: Copy) {
+  description "Add the tables (text, attributes, contraction, keyboard, input) to the build (as assets)."
+
   from brltty.native.tablesDirectory
   into tablesDirectory
   include 'Text/**/*.tt?'
@@ -33,10 +35,14 @@ task brlttyAddTables (type: Copy) {
 }
 
 task brlttyRemoveTables (type: Delete) {
+  description "Remove the tables (text, attributes, contraction, keyboard, input) from the build."
+
   delete tablesDirectory
 }
 
 task brlttyAddDrivers (type: Copy) {
+  description "Add the drivers (braille, speech, screen) to the build (as assets)."
+
   from brltty.native.driversDirectory
   into driversDirectory
   include 'libbrlttyb??.so'
@@ -45,10 +51,14 @@ task brlttyAddDrivers (type: Copy) {
 }
 
 task brlttyRemoveDrivers (type: Delete) {
+  description "Remove the drivers (braille, speech, screen) from the build."
+
   delete driversDirectory
 }
 
 tasks.register("brlttyAddMessages") {
+  description "Add the message catalogs (.mo files) to the build (as assets)."
+
   doLast {
     def commandProcesses = []
 
@@ -94,6 +104,8 @@ tasks.register("brlttyAddMessages") {
 }
 
 task brlttyRemoveMessages (type: Delete) {
+  description "Remove the message catalogs (.mo files) from the build."
+
   delete messagesDirectory
 }
 
