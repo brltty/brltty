@@ -63,6 +63,35 @@ readonly configureOptions=(
 . "`dirname "${0}"`/brltty-prologue.sh"
 set -e
 
+makeToolChain() {
+   [ -d "${BRLTTY_ANDROID_TOOLCHAIN}" ] || {
+      logMessage step "making tool chain for ABI: ${abiName}"
+
+      "${BRLTTY_ANDROID_NDK}/build/tools/make-standalone-toolchain.sh" \
+         --platform="${BRLTTY_ANDROID_PLATFORM}" \
+         --arch="${BRLTTY_ANDROID_ARCH}" \
+         --install-dir="${BRLTTY_ANDROID_TOOLCHAIN}" || exit "${?}"
+   }
+}
+
+makeHeaderLinks() {
+   local buildInclude="/usr/include"
+   local hostInclude="${BRLTTY_ANDROID_TOOLCHAIN}/sysroot${buildInclude}"
+   local header
+
+   for header in bluetooth
+   do
+      local hostHeader="${hostInclude}/${header}"
+      [ ! -e "${hostHeader}" ] || continue
+
+      local buildHeader="${buildInclude}/${header}"
+      [ -e "${buildHeader}" ] || continue
+
+      logMessage step "adding symbolic link for header: ${abiName}: ${header}"
+      ln -s "${buildHeader}" "${hostHeader}" || exit "${?}"
+   done
+}
+
 findTool() {
    eval export "${1}=\`set -- \"${BRLTTY_ANDROID_BINARIES}/\"*\"-$2\" && echo \"\${1}\"\`"
 }
@@ -77,6 +106,9 @@ abiMakeFile="${abiRoot}/Makefile"
 
 [ -f "${abiPropertiesFile}" ] || syntaxError "unrecognized ABI: ${abiName}"
 . "${abiPropertiesFile}"
+
+makeToolChain
+makeHeaderLinks
 
 if [ -f "${abiMakeFile}" ]
 then
@@ -98,5 +130,6 @@ findTool CC gcc
 export CFLAGS="${BRLTTY_ANDROID_CFLAGS}"
 export LDFLAGS="${BRLTTY_ANDROID_LDFLAGS}"
 
+logMessage step "configuring ABI: ${abiName}"
 "${BRLTTY_ANDROID_SOURCE}/configure" --quiet --host="${BRLTTY_ANDROID_SYSTEM}" "${configureOptions[@]}"
 exit 0

@@ -55,32 +55,10 @@ prepareArchitecture() {
    mkdir -p -- "${abiRoot}"
    local toolchainRoot="${abiRoot}/ToolChain"
 
-   [ -d "${toolchainRoot}" ] || {
-      "${ndkRoot}/build/tools/make-standalone-toolchain.sh" \
-         --platform="${androidPlatform}" \
-         --arch="${architecture}" \
-         --install-dir="${toolchainRoot}" || exit "${?}"
-
-      local buildInclude="/usr/include"
-      local hostInclude="${toolchainRoot}/sysroot${buildInclude}"
-
-      local header
-      for header in bluetooth
-      do
-         local hostHeader="${hostInclude}/${header}"
-         [ ! -e "${hostHeader}" ] || continue
-
-         local buildHeader="${buildInclude}/${header}"
-         [ -e "${buildHeader}" ] || continue
-
-         ln -s "${buildHeader}" "${hostHeader}" || exit "${?}"
-      done
-   }
-
    (  set -e
       cd "${abiRoot}"
 
-      set -- SOURCE "${sourceRoot}" PLATFORM "${androidPlatform}" ARCH "${architecture}" ABI "${abi}" SYSTEM "${system}" TOOLCHAIN "${toolchainRoot}" CFLAGS "${cFlags}" LDFLAGS "${ldFlags}"
+      set -- SOURCE "${sourceRoot}" NDK "${ndkRoot}" PLATFORM "${androidPlatform}" ARCH "${architecture}" ABI "${abi}" SYSTEM "${system}" TOOLCHAIN "${toolchainRoot}" CFLAGS "${cFlags}" LDFLAGS "${ldFlags}"
       local variablesFile="build.properties"
       : >"${variablesFile}"
 
