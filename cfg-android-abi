@@ -143,6 +143,7 @@ findTool() {
    }
 
    setVariable "${variable}" "${1}"
+   export "${variable}"
 }
 
 addProgramOption f flag forceReconfigure "force a reconfigure"
