@@ -63,20 +63,50 @@ readonly configureOptions=(
 . "`dirname "${0}"`/brltty-prologue.sh"
 set -e
 
+setProperties() {
+   declare -g -A properties
+   local ok=true
+   local property
+
+   for property in ARCH -CFLAGS -LDFLAGS NDK PLATFORM SOURCE SYSTEM TOOLCHAIN
+   do
+      local optional=false
+
+      [ "${property:0:1}" != "-" ] || {
+         optional=true
+         property="${property:1}"
+      }
+
+      local variable="BRLTTY_ANDROID_${property}"
+      local value="${!variable}"
+
+      "${optional}" || {
+         [ -n "${value}" ] || {
+            logMessage error "property not set: ${property}"
+            ok=false
+         }
+      }
+
+      properties["${property}"]="${value}"
+   done
+
+   "${ok}" || exit 9
+}
+
 makeToolChain() {
-   [ -d "${BRLTTY_ANDROID_TOOLCHAIN}" ] || {
+   [ -d "${properties[TOOLCHAIN]}" ] || {
       logMessage step "making tool chain for ABI: ${abiName}"
 
-      "${BRLTTY_ANDROID_NDK}/build/tools/make-standalone-toolchain.sh" \
-         --platform="${BRLTTY_ANDROID_PLATFORM}" \
-         --arch="${BRLTTY_ANDROID_ARCH}" \
-         --install-dir="${BRLTTY_ANDROID_TOOLCHAIN}" || exit "${?}"
+      "${properties[NDK]}/build/tools/make-standalone-toolchain.sh" \
+         --platform="${properties[PLATFORM]}" \
+         --arch="${properties[ARCH]}" \
+         --install-dir="${properties[TOOLCHAIN]}" || exit "${?}"
    }
 }
 
-makeHeaderLinks() {
+linkMissingHeaders() {
    local buildInclude="/usr/include"
-   local hostInclude="${BRLTTY_ANDROID_TOOLCHAIN}/sysroot${buildInclude}"
+   local hostInclude="${properties[TOOLCHAIN]}/sysroot${buildInclude}"
    local header
 
    for header in bluetooth
@@ -93,7 +123,7 @@ makeHeaderLinks() {
 }
 
 findTool() {
-   eval export "${1}=\`set -- \"${BRLTTY_ANDROID_BINARIES}/\"*\"-$2\" && echo \"\${1}\"\`"
+   eval export "${1}=\`set -- \"${toolsDirectory}/\"*\"-$2\" && echo \"\${1}\"\`"
 }
 
 addProgramOption f flag forceReconfigure "force a reconfigure"
@@ -106,9 +136,10 @@ abiMakeFile="${abiRoot}/Makefile"
 
 [ -f "${abiPropertiesFile}" ] || syntaxError "unrecognized ABI: ${abiName}"
 . "${abiPropertiesFile}"
+setProperties
 
 makeToolChain
-makeHeaderLinks
+linkMissingHeaders
 
 if [ -f "${abiMakeFile}" ]
 then
@@ -123,13 +154,13 @@ else
    logMessage task "configuring ABI: ${abiName}"
 fi
 
-export BRLTTY_ANDROID_BINARIES="${BRLTTY_ANDROID_TOOLCHAIN}/bin"
-export PATH="${PATH}:${BRLTTY_ANDROID_BINARIES}"
+toolsDirectory="${properties[TOOLCHAIN]}/bin"
+export PATH="${PATH}:${toolsDirectory}"
 findTool CC gcc
 
-export CFLAGS="${BRLTTY_ANDROID_CFLAGS}"
-export LDFLAGS="${BRLTTY_ANDROID_LDFLAGS}"
+export CFLAGS="${properties[CFLAGS]}"
+export LDFLAGS="${properties[LDFLAGS]}"
 
 logMessage step "configuring ABI: ${abiName}"
-"${BRLTTY_ANDROID_SOURCE}/configure" --quiet --host="${BRLTTY_ANDROID_SYSTEM}" "${configureOptions[@]}"
+"${properties[SOURCE]}/configure" --quiet --host="${properties[SYSTEM]}" "${configureOptions[@]}"
 exit 0
