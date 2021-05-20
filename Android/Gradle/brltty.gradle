@@ -25,4 +25,4 @@ brltty.getABIPath = { Project project, String abi ->
 }
 
 apply from: "brltty-properties.gradle"
-apply from: "brltty-tasks.gradle"
+apply from: "brltty-build.gradle"

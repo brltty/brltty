@@ -25,7 +25,13 @@ Map getABI (Map properties) {
 }
 
 Task newTask (Project project, String name, Class<DefaultTask> type=DefaultTask, Closure closure) {
-  return project.tasks.register(name, type, closure).get()
+  Task task = project.tasks.register(name, type, closure).get()
+
+  task.configure {
+    group "build"
+  }
+
+  return task
 }
 
 Task newTask (Map properties, String name, Class<DefaultTask> type=DefaultTask, Closure closure) {

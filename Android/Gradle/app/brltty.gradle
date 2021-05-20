@@ -23,6 +23,7 @@ ext {
 }
 
 task brlttyAddTables (type: Copy) {
+  group "build"
   description "Add the tables (text, attributes, contraction, keyboard, input) to the build (as assets)."
 
   from brltty.native.tablesDirectory
@@ -35,12 +36,14 @@ task brlttyAddTables (type: Copy) {
 }
 
 task brlttyRemoveTables (type: Delete) {
+  group "build"
   description "Remove the tables (text, attributes, contraction, keyboard, input) from the build."
 
   delete tablesDirectory
 }
 
 task brlttyAddDrivers (type: Copy) {
+  group "build"
   description "Add the drivers (braille, speech, screen) to the build (as assets)."
 
   from brltty.native.driversDirectory
@@ -51,12 +54,14 @@ task brlttyAddDrivers (type: Copy) {
 }
 
 task brlttyRemoveDrivers (type: Delete) {
+  group "build"
   description "Remove the drivers (braille, speech, screen) from the build."
 
   delete driversDirectory
 }
 
 tasks.register("brlttyAddMessages") {
+  group "build"
   description "Add the message catalogs (.mo files) to the build (as assets)."
 
   doLast {
@@ -104,6 +109,7 @@ tasks.register("brlttyAddMessages") {
 }
 
 task brlttyRemoveMessages (type: Delete) {
+  group "build"
   description "Remove the message catalogs (.mo files) from the build."
 
   delete messagesDirectory
