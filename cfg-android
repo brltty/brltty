@@ -20,6 +20,7 @@
 . "`dirname "${0}"`/brltty-prologue.sh"
 set -e
 
+addProgramOption n flag noConfigure "don't do the top-level configure"
 parseProgramArguments "${@}"
 
 sourceRoot="${programDirectory}"
@@ -77,7 +78,10 @@ prepareArchitecture arm64 aarch64-linux-android arm64-v8a
 prepareArchitecture x86 i686-linux-android x86
 prepareArchitecture x86_64 x86_64-linux-android x86_64
 
-topLevelABI="armeabi-v7a"
-logMessage step "configuring top-level for ${topLevelABI}"
-"${sourceRoot}/cfg-android-abi" -q -f "${topLevelABI}"
+"${noConfigure}" || {
+   topLevelABI="armeabi-v7a"
+   logMessage step "configuring top-level for ${topLevelABI}"
+   "${sourceRoot}/cfg-android-abi" -q -f "${topLevelABI}"
+}
+
 exit 0
