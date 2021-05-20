@@ -123,7 +123,26 @@ linkMissingHeaders() {
 }
 
 findTool() {
-   eval export "${1}=\`set -- \"${toolsDirectory}/\"*\"-$2\" && echo \"\${1}\"\`"
+   local variable="${1}"
+   local name="${2}"
+
+   set -- "${toolsDirectory}/"*"-${name}"
+   local problem=""
+
+   if [ "${#}" -eq 0 ]
+   then
+      problem="tool not found"
+   elif [ "${#}" -gt 1 ]
+   then
+      problem="ambiguous tool"
+   fi
+
+   [ -z "${problem}" ] || {
+      logMessage error "${problem}: ${abiName}: ${name}"
+      exit 8
+   }
+
+   setVariable "${variable}" "${1}"
 }
 
 addProgramOption f flag forceReconfigure "force a reconfigure"
