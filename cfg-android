@@ -24,6 +24,7 @@ defaultToplevelABI="armeabi-v7a"
 
 addProgramOption a string.ABI toplevelABI "the top-level's ABI" "${defaultToplevelABI}"
 addProgramOption n flag noToplevelConfigure "don't configure the top-level"
+addProgramOption o flag overwriteBuildProperties "overwrite existing ABI build properties"
 parseProgramArguments "${@}"
 
 sourceRoot="${programDirectory}"
@@ -61,17 +62,28 @@ prepareArchitecture() {
 
    (  set -e
       cd "${abiRoot}"
+      local propertiesFile="build.properties"
 
+      if [ -f "${propertiesFile}" ]
+      then
+         if "${overwriteBuildProperties}"
+         then
+            logMessage warning "overwriting build properties: ${abi}"
+         else
+            logMessage task "build properties already exist: ${abi}"
+            return 0
+         fi
+      fi
+
+      : >"${propertiesFile}"
       set -- SOURCE "${sourceRoot}" NDK "${ndkRoot}" PLATFORM "${androidPlatform}" ARCH "${architecture}" ABI "${abi}" SYSTEM "${system}" TOOLCHAIN "${toolchainRoot}" CFLAGS "${cFlags}" LDFLAGS "${ldFlags}"
-      local variablesFile="build.properties"
-      : >"${variablesFile}"
 
       while [ "${#}" -gt 0 ]
       do
          local variable="${1}"
          local value="${2}"
          shift 2
-         echo >>"${variablesFile}" "BRLTTY_ANDROID_${variable}=${value}"
+         echo >>"${propertiesFile}" "BRLTTY_ANDROID_${variable}=${value}"
       done
    )
 }
@@ -84,7 +96,7 @@ prepareArchitecture x86_64 x86_64-linux-android x86_64
 "${noToplevelConfigure}" || {
    [ -n "${toplevelABI}" ] || toplevelABI="${defaultToplevelABI}"
    logMessage step "configuring top-level for ${toplevelABI}"
-   "${sourceRoot}/cfg-android-abi" -q -f "${topLevelABI}"
+   "${sourceRoot}/cfg-android-abi" -q -f "${toplevelABI}"
 }
 
 exit 0
