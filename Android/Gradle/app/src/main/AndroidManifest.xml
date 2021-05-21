@@ -52,6 +52,7 @@
     android:icon="@drawable/braille_service"
     android:name=".BrailleApplication"
     android:persistent="true"
+    android:supportsRtl="false"
     >
 
     <service

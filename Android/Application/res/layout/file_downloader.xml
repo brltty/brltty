@@ -18,7 +18,7 @@
     <ProgressBar android:id="@+id/bar" />
 
     <TableRow>
-      <TextView android:id="@+id/current" />
+      <TextView android:id="@+id/current" android:gravity="left" />
       <Space />
       <TextView android:id="@+id/remaining" android:gravity="right" />
     </TableRow>
