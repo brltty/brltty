@@ -11,7 +11,7 @@ apply from: "brltty.gradle"
 
 dependencies {
   implementation project(":core")
-  implementation "androidx.core:core:1.1.0"
+  implementation "androidx.core:core:1.3.2"
 }
 
 android {
