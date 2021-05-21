@@ -4,10 +4,10 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY podporuje braillské řádky.</string>
 
-  <string name="about_activity_label">O aplikaci</string>
-  <string name="application_name_label">Název</string>
-  <string name="application_version_label">Verze</string>
-  <string name="application_copyright_label">Copyright</string>
+  <string name="about_label_activity">O aplikaci</string>
+  <string name="about_label_name">Název</string>
+  <string name="about_label_version">Verze</string>
+  <string name="about_label_copyright">Copyright</string>
 
   <string name="inputService_name">Služba vstupu BRLTTY</string>
   <string name="inputService_type">Klávesnice braillských zařízení</string>

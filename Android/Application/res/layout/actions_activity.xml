@@ -58,7 +58,7 @@
    />
 
   <Button
-    android:text="@string/about_activity_label"
+    android:text="@string/about_label_activity"
     android:onClick="launchAboutActivity"
    />
 </TableLayout>

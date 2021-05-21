@@ -1,2 +1,4 @@
 publish the app
 publish the api
+strip release libraries
+publish library symbol tables

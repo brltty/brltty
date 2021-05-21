@@ -4,10 +4,10 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY поддерживает брайлевские устройства.</string>
 
-  <string name="about_activity_label">О приложении</string>
-  <string name="application_name_label">Название</string>
-  <string name="application_version_label">Версия</string>
-  <string name="application_copyright_label">Авторские права</string>
+  <string name="about_label_activity">О приложении</string>
+  <string name="about_label_name">Название</string>
+  <string name="about_label_version">Версия</string>
+  <string name="about_label_copyright">Авторские права</string>
 
   <string name="inputService_name">Служба ввода BRLTTY</string>
   <string name="inputService_type">Клавиатуры на брайлевских устройствах</string>

@@ -119,7 +119,7 @@
 
     <activity
       android:name=".activities.AboutActivity"
-      android:label="@string/about_activity_label"
+      android:label="@string/about_label_activity"
       >
     </activity>
 

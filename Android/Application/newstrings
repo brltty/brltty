@@ -25,7 +25,7 @@ proc getStrings {directory args} {
    foreach file $args {
       if {[catch [list open [set path [file join $directory $file]] {RDONLY}] channel] == 0} {
          while {[gets $channel line] >= 0} {
-            if {[regexp {^\s*<\s*string\s+name\s*=\s*"([^"]*)"\s*>(.*)<\s*/string\s*>\s*$} $line x name value]} {
+            if {[regexp {^\s*<\s*string\s+name\s*=\s*"([^"]*)".*>(.*)<\s*/string\s*>\s*$} $line x name value]} {
                dict set strings $name $value
             }
          }

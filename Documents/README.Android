@@ -2,9 +2,9 @@
 BRLTTY on Android
 ~~~~~~~~~~~~~~~~~
 
-.. |SDK build tools version| replace:: 29.0.6
-.. |NDK version| replace:: r16b
-.. |JDK version| replace:: 1.8
+.. |SDK build tools version| replace:: 29.0.3
+.. |NDK version| replace:: r21e
+.. |JDK version| replace:: 1.7
 
 .. include:: prologue.rst
 

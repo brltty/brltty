@@ -4,10 +4,10 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY støtter punktskriftenheter.</string>
 
-  <string name="about_activity_label">Om programmet</string>
-  <string name="application_name_label">Navn</string>
-  <string name="application_version_label">Versjon</string>
-  <string name="application_copyright_label">Opphavsrett</string>
+  <string name="about_label_activity">Om programmet</string>
+  <string name="about_label_name">Navn</string>
+  <string name="about_label_version">Versjon</string>
+  <string name="about_label_copyright">Opphavsrett</string>
 
   <string name="inputService_name">Inndatatjeneste for BRLTTY</string>
   <string name="inputService_type">Tastatur på punktskriftenheter</string>

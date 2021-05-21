@@ -4,10 +4,10 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY tukee pistenäyttöjä.</string>
 
-  <string name="about_activity_label">Tietoa sovelluksesta</string>
-  <string name="application_name_label">Nimi</string>
-  <string name="application_version_label">Versio</string>
-  <string name="application_copyright_label">Tekijänoikeus</string>
+  <string name="about_label_activity">Tietoa sovelluksesta</string>
+  <string name="about_label_name">Nimi</string>
+  <string name="about_label_version">Versio</string>
+  <string name="about_label_copyright">Tekijänoikeus</string>
 
   <string name="inputService_name">BRLTTY:n syötepalvelu</string>
   <string name="inputService_type">Pistenäyttöjen näppäimistöt</string>

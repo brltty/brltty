@@ -32,6 +32,14 @@ import android.widget.TextView;
 public class AboutActivity extends InternalActivity {
   private final static String LOG_TAG = AboutActivity.class.getName();
 
+  public void showUsageDetails (View view) {
+    launch(R.string.usage_details_url);
+  }
+
+  public void showPrivacyPolicy (View view) {
+    launch(R.string.privacy_policy_url);
+  }
+
   private final void setText (int view, CharSequence text) {
     ((TextView)findViewById(view)).setText(text);
   }

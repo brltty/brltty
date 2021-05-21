@@ -4,10 +4,10 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY ondersteunt brailleapparaten.</string>
 
-  <string name="about_activity_label">Over applicatie</string>
-  <string name="application_name_label">Naam</string>
-  <string name="application_version_label">Versie</string>
-  <string name="application_copyright_label">Copyright</string>
+  <string name="about_label_activity">Over applicatie</string>
+  <string name="about_label_name">Naam</string>
+  <string name="about_label_version">Versie</string>
+  <string name="about_label_copyright">Copyright</string>
 
   <string name="inputService_name">BRLTTY InvoerService</string>
   <string name="inputService_type">Toetsenborden op brailleapparaten</string>

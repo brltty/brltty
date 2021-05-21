@@ -4,10 +4,10 @@
   <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY podpira brajeve naprave.</string>
 
-  <string name="about_activity_label">O Programu</string>
-  <string name="application_name_label">Ime</string>
-  <string name="application_version_label">Različica</string>
-  <string name="application_copyright_label">Avtorske Pravice</string>
+  <string name="about_label_activity">O Programu</string>
+  <string name="about_label_name">Ime</string>
+  <string name="about_label_version">Različica</string>
+  <string name="about_label_copyright">Avtorske Pravice</string>
 
   <string name="inputService_name">BRLTTY Storitev Vnosa</string>
   <string name="inputService_type">Tipkovnice na Brajevih Vrsticah</string>
