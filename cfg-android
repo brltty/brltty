@@ -95,7 +95,7 @@ prepareArchitecture x86_64 x86_64-linux-android x86_64
 
 "${noToplevelConfigure}" || {
    [ -n "${toplevelABI}" ] || toplevelABI="${defaultToplevelABI}"
-   logMessage step "configuring top-level for ${toplevelABI}"
+   logMessage task "configuring top-level for ${toplevelABI}"
    "${sourceRoot}/cfg-android-abi" -q -f "${toplevelABI}"
 }
 
