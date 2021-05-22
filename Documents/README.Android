@@ -3,20 +3,26 @@ BRLTTY on Android
 ~~~~~~~~~~~~~~~~~
 
 .. |SDK build tools version| replace:: 29.0.3
-.. |NDK version| replace:: r21e
+.. |NDK version| replace:: r21e (21.4.7075529)
 .. |JDK version| replace:: 1.7
+
+.. _BRLTTY on Google Play: https://play.google.com/store/apps/details?id=org.a11y.brltty.android
 
 .. include:: prologue.rst
 
-Using BRLTTY
-============
+Installing BRLTTY
+=================
 
-System Requirements
--------------------
+BRLTTY has been designed to run on at least Android 4.1 (Jelly Bean).
+While it does run on Android 4.0 (Ice Cream Sandwich),
+many of its highly desirable features won't work.
 
-BRLTTY has been designed to run on at least Android 4.1 (Jelly Bean). While it
-does run on Android 4.0 (Ice Cream Sandwich), many of its highly desirable
-features won't work.
+BRLTTY can be installed via Google Play.
+You can either search for it by name
+or go directly to `BRLTTY on Google Play`_.
+
+Required Permissions
+--------------------
 
 BRLTTY requires access to a number of privileged
 Android operating system capabilities.
@@ -80,6 +86,9 @@ On Your Android Device
    twice - once to download it, and a second time to install it.
 
 4) Tap ``OK`` when installation is complete.
+
+Using BRLTTY
+============
 
 Activation and Configuration
 ----------------------------
