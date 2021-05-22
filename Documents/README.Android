@@ -21,8 +21,8 @@ BRLTTY can be installed via Google Play.
 You can either search for it by name
 or go directly to `BRLTTY on Google Play`_.
 
-Required Permissions
---------------------
+Permissions
+-----------
 
 BRLTTY requires access to a number of privileged
 Android operating system capabilities.
@@ -30,18 +30,19 @@ The required permissions are as follows:
 
 .. include:: android-permissions.rst
 
-Quick Start
+The Old Way
 -----------
 
-If you'd just like to install BRLTTY onto your Android device and get going, 
-then here's what you need to do. These instructions are from the perspective of 
-a Firefox user on Windows, but the process should be much the same when using a 
-different web browser and/or operating system.
+Before it was on Google Play, BRLTTY had to be installed and updated manually.
+For now, this way still works.
+
+These instructions are from the perspective of a Firefox user on Windows,
+but the process should be much the same when using a different web browser and/or operating system.
 
 On Your Computer
 ~~~~~~~~~~~~~~~~
 
-1) Go to `BRLTTY's Web Site`_.
+1) Go to `BRLTTY's web site`_.
 
 2) Find the ``Download`` link and press Enter on it.
 
