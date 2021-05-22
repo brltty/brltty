@@ -8,7 +8,6 @@
   <string name="about_label_name">Name</string>
   <string name="about_label_version">Version</string>
   <string name="about_label_copyright">Copyright</string>
-  <string name="about_label_usage">Usage Details</string>
   <string name="about_label_privacy">Privacy Policy</string>
 
   <string name="inputService_name">BRLTTY Input Service</string>

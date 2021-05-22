@@ -21,12 +21,7 @@
   </TableRow>
 
   <Button
-    android:text="@string/about_label_usage"
-    android:onClick="showUsageDetails"
-   />
-
-  <Button
     android:text="@string/about_label_privacy"
-    android:onClick="showPrivacyPolicy"
+    android:onClick="viewPrivacyPolicy"
    />
 </TableLayout>

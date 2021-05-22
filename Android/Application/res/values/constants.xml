@@ -5,9 +5,8 @@
   <string name="developer_package_url" translatable="false">https://mielke.cc/~android/brltty-dev.apk</string>
 
   <string name="privacy_policy_url" translatable="false">https://brltty.app/doc/PrivacyPolicy.html</string>
-  <string name="usage_details_url" translatable="false">https://brltty.app/doc/Android.html</string>
+  <string name="user_guide_url" translatable="false">https://brltty.app/doc/Android.html</string>
 
-  <string name="user_guide_url" translatable="false">https://brltty.app/archive/Android/brltty-on-android.html</string>
   <string name="community_messages_url" translatable="false">https://brltty.app/pipermail/brltty/</string>
   <string name="community_membership_url" translatable="false">https://brltty.app/mailman/listinfo/brltty</string>
 

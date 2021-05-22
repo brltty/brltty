@@ -8,7 +8,6 @@
   <string name="about_label_name">Navn</string>
   <string name="about_label_version">Versjon</string>
   <string name="about_label_copyright">Opphavsrett</string>
-  <string name="about_label_usage">Bruksdetaljer</string>
   <string name="about_label_privacy">Personvernregler</string>
 
   <string name="inputService_name">Inndatatjeneste for BRLTTY</string>
