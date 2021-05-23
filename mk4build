@@ -63,9 +63,12 @@ then
 
    "${sourceRoot}/configure" \
       --disable-api \
+      --disable-expat \
       --disable-gpm \
       --disable-iconv \
       --disable-icu \
+      --disable-liblouis \
+      --disable-polkit \
       --disable-x \
       \
       --without-libbraille \
@@ -77,9 +80,11 @@ then
       -with-screen-driver=-all \
       \
       --without-pgmpath-package \
+      --without-pgmprivs-package \
       --without-service-package \
       --without-params-package \
       --without-dynld-package \
+      --without-rgx-package \
       --without-charset-package \
       --without-hostcmd-package \
       --without-mntpt-package \
