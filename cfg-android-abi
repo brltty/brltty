@@ -97,7 +97,7 @@ makeToolChain() {
    [ -d "${properties[TOOLCHAIN]}" ] || {
       logMessage step "making tool chain for ABI: ${abiName}"
 
-      "${properties[NDK]}/build/tools/make-standalone-toolchain.sh" \
+      VERBOSE=no "${properties[NDK]}/build/tools/make-standalone-toolchain.sh" \
          --platform="${properties[PLATFORM]}" \
          --arch="${properties[ARCH]}" \
          --install-dir="${properties[TOOLCHAIN]}" || exit "${?}"
