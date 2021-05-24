@@ -54,52 +54,58 @@ then
    needTemporaryDirectory
    objectExtension="build.${objectExtension}"
 
-   for variable in CC CFLAGS CXX CXXFLAGS LDFLAGS LDLIBS PKG_CONFIG
-   do
-      getVariable "${variable}_FOR_BUILD" value
-      setVariable "${variable}" "${value}"
-      export "${variable}"
-   done
+   (
+      for variable in CC CFLAGS CXX CXXFLAGS LDFLAGS LDLIBS PKG_CONFIG
+      do
+         unset "${variable}"
+         getVariable "${variable}_FOR_BUILD" value
 
-   "${sourceRoot}/configure" \
-      --disable-api \
-      --disable-expat \
-      --disable-gpm \
-      --disable-iconv \
-      --disable-icu \
-      --disable-liblouis \
-      --disable-polkit \
-      --disable-x \
-      \
-      --without-libbraille \
-      --with-braille-driver=-all \
-      \
-      --disable-speech-support \
-      --with-speech-driver=-all \
-      \
-      -with-screen-driver=-all \
-      \
-      --without-pgmpath-package \
-      --without-pgmprivs-package \
-      --without-service-package \
-      --without-params-package \
-      --without-dynld-package \
-      --without-rgx-package \
-      --without-charset-package \
-      --without-hostcmd-package \
-      --without-mntpt-package \
-      --without-mntfs-package \
-      --without-kbd-package \
-      --without-beep-package \
-      --without-pcm-package \
-      --without-midi-package \
-      --without-fm-package \
-      --without-serial-package \
-      --without-usb-package \
-      --without-bluetooth-package \
-      --without-ports-package \
-      \
-      --quiet
+         [ -n "${value}" ] && {
+            setVariable "${variable}" "${value}"
+            export "${variable}"
+         }
+      done
+
+      "${sourceRoot}/configure" \
+         --disable-api \
+         --disable-expat \
+         --disable-gpm \
+         --disable-iconv \
+         --disable-icu \
+         --disable-liblouis \
+         --disable-polkit \
+         --disable-x \
+         \
+         --without-libbraille \
+         --with-braille-driver=-all \
+         \
+         --disable-speech-support \
+         --with-speech-driver=-all \
+         \
+         -with-screen-driver=-all \
+         \
+         --without-pgmpath-package \
+         --without-pgmprivs-package \
+         --without-service-package \
+         --without-params-package \
+         --without-dynld-package \
+         --without-rgx-package \
+         --without-charset-package \
+         --without-hostcmd-package \
+         --without-mntpt-package \
+         --without-mntfs-package \
+         --without-kbd-package \
+         --without-beep-package \
+         --without-pcm-package \
+         --without-midi-package \
+         --without-fm-package \
+         --without-serial-package \
+         --without-usb-package \
+         --without-bluetooth-package \
+         --without-ports-package \
+         \
+         --quiet
+   )
 fi
 
 sedScript="${outputName}.${sedExtension}"
