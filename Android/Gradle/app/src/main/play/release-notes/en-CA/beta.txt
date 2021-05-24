@@ -1,0 +1,2 @@
+BRLTTY is an accessibility app (it's a screen reader for braille users) so it won't be in the Apps list. To start/stop it, go to Settings -> Accessibility.
+Full details for using BRLTTY on Android are at: https://brltty.app/doc/Android.html
