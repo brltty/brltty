@@ -1,6 +1,8 @@
 GRADLE_PUBLISH_COMMAND = $(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):publishReleaseBundle
 GRADLE_PROMOTE_COMMAND = $(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):promoteArtifact
 
+GRADLE_LISTING_DIRECTORY = app/src/main/play
+
 publish-alpha:
 	$(GRADLE_PUBLISH_COMMAND) --track alpha --release-status inProgress
 
@@ -21,4 +23,7 @@ download-listing:
 
 publish-listing:
 	$(GRADLE_WRAPPER_COMMAND) publishListing
+
+clean-listing:
+	-rm -f -r $(GRADLE_LISTING_DIRECTORY)
 

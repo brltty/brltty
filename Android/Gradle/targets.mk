@@ -31,10 +31,10 @@ lint-release:
 clean-build:
 	$(GRADLE_WRAPPER_COMMAND) clean
 
-install-debug:
+install-debug: app-debug
 	adb install -r -d $(GRADLE_DEBUG_PACKAGE)
 
-install-release:
+install-release: app-release
 	adb install -r $(GRADLE_RELEASE_PACKAGE)
 
 assets: drivers messages tables
