@@ -81,7 +81,7 @@ android {
       proguardFile getDefaultProguardFile("proguard-android.txt")
 
       ndk {
-      //debugSymbolLevel "SYMBOL_TABLE" // full, SYMBOL_TABLE
+        debugSymbolLevel "FULL" // FULL, SYMBOL_TABLE
       }
     }
   }
