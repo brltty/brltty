@@ -1,6 +1,7 @@
 all: debug
 
 core: core-debug
+app: app-debug
 api: api-debug
 debug: app-debug
 release: app-release
