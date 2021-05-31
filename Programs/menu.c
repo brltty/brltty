@@ -44,6 +44,7 @@
 
 #include "log.h"
 #include "menu.h"
+#include "strfmt.h"
 #include "prefs.h"
 #include "timing.h"
 #include "parse.h"
@@ -442,14 +443,18 @@ formatTime (Menu *menu, unsigned char time, char *buffer, size_t size) {
 #endif /* HAVE_NL_LANGINFO */
   if (!decimalPoint) decimalPoint = ".";
 
-  int end;
-  int decimalFrom;
-  int decimalTo;
+  size_t end;
+  size_t decimalFrom;
+  size_t decimalTo;
 
-  snprintf(
-    buffer, size, "%u%n%s%n%03u%n",
-    seconds, &decimalFrom, decimalPoint, &decimalTo, milliseconds, &end
-  );
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%u", seconds);
+  decimalFrom = STR_LENGTH;
+  STR_PRINTF("%s", decimalPoint);
+  decimalTo = STR_LENGTH;
+  STR_PRINTF("%03u", milliseconds);
+  end = STR_LENGTH;
+  STR_END;
 
   while (buffer[--end] == '0');
   if (++end == decimalTo) end = decimalFrom;
