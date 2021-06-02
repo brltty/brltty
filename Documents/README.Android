@@ -435,7 +435,7 @@ If a control is currently disabled then the word ``disabled``,
 enclosed within parentheses, appears to the right of its label.
 For example::
 
-  Connect <disabled)
+  Connect (disabled)
 
 When There's No Text
 ````````````````````
