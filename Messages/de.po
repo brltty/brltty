@@ -690,7 +690,7 @@ msgstr "Ende"
 
 #: Programs/menu_prefs.c:865
 msgid "End of Line"
-msgstr "Zeillenende"
+msgstr "Zeilenende"
 
 #. xgettext: This is the name of MIDI musical instrument #70 (in the Reed group).
 #: Programs/midi.c:295
