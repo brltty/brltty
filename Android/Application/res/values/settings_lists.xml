@@ -434,10 +434,10 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g1" translatable="true">German (basic contractions)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2" translatable="true">German (contracted - 1998 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en" translatable="true">English</string>
-  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2" translatable="true">English (Unified English Braille, grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_en_us_g2" translatable="true">English (US, grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2" translatable="true">English (Unified, contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2" translatable="true">English (United States, contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US" translatable="true">English (United States)</string>
-  <string name="CONTRACTION_TABLE_LABEL_es" translatable="true">Spanish (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es" translatable="true">Spanish (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr" translatable="true">French</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1" translatable="true">French (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2" translatable="true">French (contracted)</string>
@@ -447,15 +447,15 @@
   <string name="CONTRACTION_TABLE_LABEL_ja" translatable="true">Japanese (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko" translatable="true">Korean</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0" translatable="true">Korean (uncontracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko_g1" translatable="true">Korean (grade 1)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ko_g2" translatable="true">Korean (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1" translatable="true">Korean (partially contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2" translatable="true">Korean (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_lt" translatable="true">Lithuanian (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_mg" translatable="true">Malagasy (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_mun" translatable="true">Munda (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_nl" translatable="true">Dutch (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny" translatable="true">Chichewa (contracted)</string>
-  <string name="CONTRACTION_TABLE_LABEL_pt" translatable="true">Portuguese (grade 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ru" translatable="true">Russian (grade 1)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt" translatable="true">Portuguese (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru" translatable="true">Russian (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_si" translatable="true">Sinhalese (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw" translatable="true">Swahili (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_th" translatable="true">Thai (contracted)</string>
