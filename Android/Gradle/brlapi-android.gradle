@@ -1,0 +1,16 @@
+// This will fail if minSdkVersion is less than 26.
+// Remember to change the dependency version as needed.
+
+repositories {
+  maven {
+    url "https://brltty.app/archive/Maven2/"
+  }
+}
+
+dependencies {
+  implementation(
+    group: "org.a11y.brltty",
+    name: "brlapi-android",
+    version: "0.8.2"
+  )
+}

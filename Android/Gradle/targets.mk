@@ -10,6 +10,15 @@ api-debug:
 api-release:
 	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_API_NAME):assembleRelease
 
+api-publish:
+	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_API_NAME):publishReleasePublicationToMavenLocal
+
+apitest-debug:
+	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APITEST_NAME):assembleDebug
+
+apitest-release:
+	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APITEST_NAME):assembleRelease
+
 app-debug:
 	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):assembleDebug
 

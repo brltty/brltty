@@ -1,5 +1,6 @@
 plugins {
   id "com.android.library"
+  id "maven-publish"
 }
 
 description = """
@@ -10,7 +11,6 @@ apply from: "brltty.gradle"
 
 dependencies {
   api files("src/main/libs/brlapi.jar")
-  implementation project(":core")
 }
 
 android {
@@ -20,5 +20,18 @@ android {
   defaultConfig {
     targetSdkVersion 29
     minSdkVersion 24
+  }
+}
+
+afterEvaluate {
+  publishing {
+    publications {
+      release(MavenPublication) {
+        from components.release
+        groupId = "org.a11y.brltty"
+        artifactId = "brlapi-android"
+        version = brltty.config.apiRelease
+      }
+    }
   }
 }

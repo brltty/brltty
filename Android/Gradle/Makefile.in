@@ -3,9 +3,12 @@ all: debug
 core: core-debug
 app: app-debug
 api: api-debug
+apitest: apitest-debug
+
 debug: app-debug
 release: app-release
 bundle: bundle-release
+
 lint: lint-debug
 install: install-debug
 

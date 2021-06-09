@@ -1,0 +1,19 @@
+plugins {
+  id "com.android.application"
+}
+
+description = """
+A test program to verify that the Maven dependency on BrlAPI is working.
+"""
+
+apply from: rootProject.file("brlapi-android.gradle")
+
+android {
+  compileSdkVersion "android-29"
+  buildToolsVersion "29.0.3"
+
+  defaultConfig {
+    targetSdkVersion 29
+    minSdkVersion 26
+  }
+}
