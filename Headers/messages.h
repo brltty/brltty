@@ -61,14 +61,14 @@ extern const char *getMessageText (const Message *message);
 extern uint32_t getMessageLength (const Message *message);
 
 extern const Message *getOriginalMessage (unsigned int index);
-extern const Message *getTranslatedMessage (unsigned int index);
+extern const Message *getLocalizedMessage (unsigned int index);
 
 extern int findOriginalMessage (const char *text, size_t textLength, unsigned int *index);
-extern const Message *findSimpleTranslation (const char *text, size_t length);
-extern const Message *findPluralTranslation (const char *const *strings);
+extern const Message *findSimpleLocalization (const char *text, size_t length);
+extern const Message *findPluralLocalization (const char *const *strings);
 
-extern const char *getSimpleTranslation (const char *text);
-extern const char *getPluralTranslation (const char *singular, const char *plural, unsigned long int count);
+extern const char *getSimpleLocalization (const char *text);
+extern const char *getPluralLocalization (const char *singular, const char *plural, unsigned long int count);
 
 #ifdef __cplusplus
 }

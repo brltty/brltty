@@ -321,7 +321,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_localeDirectory,
     .internal.setting = LOCALE_DIRECTORY,
     .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory which contains message translations.")
+    .description = strtext("Path to directory which contains message localizations.")
   },
 
   { .word = "no-daemon",
