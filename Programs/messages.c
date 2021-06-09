@@ -186,6 +186,21 @@ makeMessageCatalogPath (void) {
   return NULL;
 }
 
+static int
+setMessagesData (void *area, size_t size) {
+  MessagesData data = {
+    .view.area = area,
+    .areaSize = size
+  };
+
+  if (checkMagicNumber(&data)) {
+    messagesData = data;
+    return 1;
+  }
+
+  return 0;
+}
+
 int
 loadMessagesData (void) {
   if (messagesData.view.area) return 1;
@@ -218,17 +233,9 @@ loadMessagesData (void) {
                 "truncated message catalog: %"PRIssize" < %"PRIsize": %s",
                 count, size, path
               );
-            } else {
-              MessagesData data = {
-                .view.area = area,
-                .areaSize = size
-              };
-
-              if (checkMagicNumber(&data)) {
-                messagesData = data;
-                area = NULL;
-                loaded = 1;
-              }
+            } else if (setMessagesData(area, size)) {
+              area = NULL;
+              loaded = 1;
             }
 
             if (!loaded) free(area);
@@ -254,6 +261,28 @@ loadMessagesData (void) {
     }
 
     free(path);
+  }
+
+  if (!loaded) {
+    MessagesHeader *header;
+    size_t size = sizeof(*header);
+
+    if ((header = malloc(size))) {
+      memset(header, 0, size);
+      header->magicNumber = magicNumber;
+      header->originalMessages = size;
+      header->translatedMessages = header->originalMessages;
+
+      if (setMessagesData(header, size)) {
+        header = NULL;
+        loaded = 1;
+        logMessage(LOG_DEBUG, "not translating messages");
+      }
+
+      if (!loaded) free(header);
+    } else {
+      logMallocError();
+    }
   }
 
   return loaded;
