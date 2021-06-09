@@ -235,7 +235,7 @@ beginAction (char ***argv, int *argc) {
 
   if (*opt_localeSpecifier) setMessagesLocale(opt_localeSpecifier);
   if (*opt_domainName) setMessagesDomain(opt_domainName);
-  if (!loadMessagesData()) exit(PROG_EXIT_FATAL);
+  if (!loadMessageCatalog()) exit(PROG_EXIT_FATAL);
 }
 
 int

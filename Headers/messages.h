@@ -34,8 +34,8 @@ extern const char *getMessagesDomain (void);
 
 extern void ensureAllMessagesProperties (void);
 
-extern int loadMessagesData (void);
-extern void releaseMessagesData (void);
+extern int loadMessageCatalog (void);
+extern void releaseMessageCatalog (void);
 
 extern uint32_t getMessageCount (void);
 extern const char *getMessagesMetadata (void);

@@ -72,18 +72,18 @@ typedef struct {
 
 typedef struct {
   union {
-    void *area;
+    void *data;
     const unsigned char *bytes;
     const MessagesHeader *header;
   } view;
 
-  size_t areaSize;
+  size_t dataSize;
   GetIntegerFunction *getInteger;
-} MessagesData;
+} MessageCatalog;
 
-static MessagesData messagesData = {
-  .view.area = NULL,
-  .areaSize = 0,
+static MessageCatalog messageCatalog = {
+  .view.data = NULL,
+  .dataSize = 0,
   .getInteger = NULL,
 };
 
@@ -106,8 +106,8 @@ getFlippedInteger (uint32_t value) {
 }
 
 static int
-checkMagicNumber (MessagesData *data) {
-  const MessagesHeader *header = data->view.header;
+checkMagicNumber (MessageCatalog *catalog) {
+  const MessagesHeader *header = catalog->view.header;
 
   {
     static GetIntegerFunction *const functions[] = {
@@ -120,7 +120,7 @@ checkMagicNumber (MessagesData *data) {
 
     while (*function) {
       if ((*function)(header->magicNumber) == magicNumber) {
-        data->getInteger = *function;
+        catalog->getInteger = *function;
         return 1;
       }
 
@@ -164,7 +164,7 @@ makeLocaleDirectoryPath (void) {
 }
 
 static char *
-makeMessageCatalogPath (void) {
+makeCatalogFilePath (void) {
   char *locale = makeLocaleDirectoryPath();
 
   if (locale) {
@@ -187,27 +187,48 @@ makeMessageCatalogPath (void) {
 }
 
 static int
-setMessagesData (void *area, size_t size) {
-  MessagesData data = {
-    .view.area = area,
-    .areaSize = size
+setMessageCatalog (void *data, size_t size) {
+  MessageCatalog catalog = {
+    .view.data = data,
+    .dataSize = size
   };
 
-  if (checkMagicNumber(&data)) {
-    messagesData = data;
+  if (checkMagicNumber(&catalog)) {
+    messageCatalog = catalog;
     return 1;
   }
 
   return 0;
 }
 
+static int
+setEmptyMessageCatalog (void) {
+  MessagesHeader *header;
+  size_t size = sizeof(*header);
+
+  if ((header = malloc(size))) {
+    memset(header, 0, size);
+    header->magicNumber = magicNumber;
+
+    header->originalMessages = size;
+    header->localizedMessages = header->originalMessages;
+
+    if (setMessageCatalog(header, size)) return 1;
+    free(header);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
+
 int
-loadMessagesData (void) {
-  if (messagesData.view.area) return 1;
+loadMessageCatalog (void) {
+  if (messageCatalog.view.data) return 1;
   ensureAllMessagesProperties();
 
   int loaded = 0;
-  char *path = makeMessageCatalogPath();
+  char *path = makeCatalogFilePath();
 
   if (path) {
     int fd = open(path, (O_RDONLY | O_BINARY));
@@ -217,11 +238,11 @@ loadMessagesData (void) {
 
       if (fstat(fd, &info) != -1) {
         size_t size = info.st_size;
-        void *area = NULL;
+        void *data = NULL;
 
         if (size) {
-          if ((area = malloc(size))) {
-            ssize_t count = read(fd, area, size);
+          if ((data = malloc(size))) {
+            ssize_t count = read(fd, data, size);
 
             if (count == -1) {
               logMessage(LOG_WARNING,
@@ -233,12 +254,12 @@ loadMessagesData (void) {
                 "truncated message catalog: %"PRIssize" < %"PRIsize": %s",
                 count, size, path
               );
-            } else if (setMessagesData(area, size)) {
-              area = NULL;
+            } else if (setMessageCatalog(data, size)) {
+              data = NULL;
               loaded = 1;
             }
 
-            if (!loaded) free(area);
+            if (!loaded) free(data);
           } else {
             logMallocError();
           }
@@ -264,24 +285,9 @@ loadMessagesData (void) {
   }
 
   if (!loaded) {
-    MessagesHeader *header;
-    size_t size = sizeof(*header);
-
-    if ((header = malloc(size))) {
-      memset(header, 0, size);
-      header->magicNumber = magicNumber;
-      header->originalMessages = size;
-      header->localizedMessages = header->originalMessages;
-
-      if (setMessagesData(header, size)) {
-        header = NULL;
-        loaded = 1;
-        logMessage(LOG_DEBUG, "not localizing messages");
-      }
-
-      if (!loaded) free(header);
-    } else {
-      logMallocError();
+    if (setEmptyMessageCatalog()) {
+      loaded = 1;
+      logMessage(LOG_DEBUG, "not localizing messages");
     }
   }
 
@@ -289,24 +295,24 @@ loadMessagesData (void) {
 }
 
 void
-releaseMessagesData (void) {
-  if (messagesData.view.area) free(messagesData.view.area);
-  memset(&messagesData, 0, sizeof(messagesData));
+releaseMessageCatalog (void) {
+  if (messageCatalog.view.data) free(messageCatalog.view.data);
+  memset(&messageCatalog, 0, sizeof(messageCatalog));
 }
 
 static inline const MessagesHeader *
 getHeader (void) {
-  return messagesData.view.header;
+  return messageCatalog.view.header;
 }
 
 static inline const void *
 getItem (uint32_t offset) {
-  return &messagesData.view.bytes[messagesData.getInteger(offset)];
+  return &messageCatalog.view.bytes[messageCatalog.getInteger(offset)];
 }
 
 uint32_t
 getMessageCount (void) {
-  return messagesData.getInteger(getHeader()->messageCount);
+  return messageCatalog.getInteger(getHeader()->messageCount);
 }
 
 struct MessageStruct {
@@ -316,7 +322,7 @@ struct MessageStruct {
 
 uint32_t
 getMessageLength (const Message *message) {
-  return messagesData.getInteger(message->length);
+  return messageCatalog.getInteger(message->length);
 }
 
 const char *
@@ -473,7 +479,7 @@ findSimpleLocalization (const char *text, size_t length) {
   if (!text) return NULL;
   if (!length) return NULL;
 
-  if (loadMessagesData()) {
+  if (loadMessageCatalog()) {
     unsigned int index;
 
     if (findOriginalMessage(text, length, &index)) {
@@ -578,7 +584,7 @@ updateProperty (
   char **property, const char *value, const char *defaultValue,
   int (*setter) (const char *value)
 ) {
-  releaseMessagesData();
+  releaseMessageCatalog();
 
   if (!(value && *value)) value = defaultValue;
   char *copy = strdup(value);
