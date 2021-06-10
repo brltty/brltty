@@ -64,17 +64,17 @@ typedef struct {
   uint32_t magicNumber;
   uint32_t versionNumber;
   uint32_t messageCount;
-  uint32_t originalMessages;
-  uint32_t localizedMessages;
+  uint32_t sourceMessages;
+  uint32_t translatedMessages;
   uint32_t hashSize;
   uint32_t hashOffset;
-} MessagesHeader;
+} MessageCatalogHeader;
 
 typedef struct {
   union {
     void *data;
     const unsigned char *bytes;
-    const MessagesHeader *header;
+    const MessageCatalogHeader *header;
   } view;
 
   size_t dataSize;
@@ -107,7 +107,7 @@ getFlippedInteger (uint32_t value) {
 
 static int
 checkMagicNumber (MessageCatalog *catalog) {
-  const MessagesHeader *header = catalog->view.header;
+  const MessageCatalogHeader *header = catalog->view.header;
 
   {
     static GetIntegerFunction *const functions[] = {
@@ -203,15 +203,15 @@ setMessageCatalog (void *data, size_t size) {
 
 static int
 setEmptyMessageCatalog (void) {
-  MessagesHeader *header;
+  MessageCatalogHeader *header;
   size_t size = sizeof(*header);
 
   if ((header = malloc(size))) {
     memset(header, 0, size);
     header->magicNumber = magicNumber;
 
-    header->originalMessages = size;
-    header->localizedMessages = header->originalMessages;
+    header->sourceMessages = size;
+    header->translatedMessages = header->sourceMessages;
 
     if (setMessageCatalog(header, size)) return 1;
     free(header);
@@ -287,7 +287,7 @@ loadMessageCatalog (void) {
   if (!loaded) {
     if (setEmptyMessageCatalog()) {
       loaded = 1;
-      logMessage(LOG_DEBUG, "not localizing messages");
+      logMessage(LOG_DEBUG, "no message translations");
     }
   }
 
@@ -300,7 +300,7 @@ releaseMessageCatalog (void) {
   memset(&messageCatalog, 0, sizeof(messageCatalog));
 }
 
-static inline const MessagesHeader *
+static inline const MessageCatalogHeader *
 getHeader (void) {
   return messageCatalog.view.header;
 }
@@ -331,33 +331,35 @@ getMessageText (const Message *message) {
 }
 
 static inline const Message *
-getOriginalMessages (void) {
-  return getItem(getHeader()->originalMessages);
+getSourceMessages (void) {
+  return getItem(getHeader()->sourceMessages);
 }
 
 static inline const Message *
-getLocalizedMessages (void) {
-  return getItem(getHeader()->localizedMessages);
+getTranslatedMessages (void) {
+  return getItem(getHeader()->translatedMessages);
 }
 
 const Message *
-getOriginalMessage (unsigned int index) {
-  return &getOriginalMessages()[index];
+getSourceMessage (unsigned int index) {
+  return &getSourceMessages()[index];
 }
 
 const Message *
-getLocalizedMessage (unsigned int index) {
-  return &getLocalizedMessages()[index];
+getTranslatedMessage (unsigned int index) {
+  return &getTranslatedMessages()[index];
 }
 
 const char *
 getMessagesMetadata (void) {
   if (getMessageCount() == 0) return "";
 
-  const Message *original = getOriginalMessage(0);
-  if (getMessageLength(original) != 0) return "";
+  {
+    const Message *message = getSourceMessage(0);
+    if (getMessageLength(message) != 0) return "";
+  }
 
-  return getMessageText(getLocalizedMessage(0));
+  return getMessageText(getTranslatedMessage(0));
 }
 
 char *
@@ -443,8 +445,8 @@ getMessagesAttribute (const char *property, const char *name) {
 }
 
 int
-findOriginalMessage (const char *text, size_t textLength, unsigned int *index) {
-  const Message *messages = getOriginalMessages();
+findSourceMessage (const char *text, size_t textLength, unsigned int *index) {
+  const Message *messages = getSourceMessages();
   int from = 0;
   int to = getMessageCount();
 
@@ -475,15 +477,15 @@ findOriginalMessage (const char *text, size_t textLength, unsigned int *index) {
 }
 
 const Message *
-findSimpleLocalization (const char *text, size_t length) {
+findSimpleTranslation (const char *text, size_t length) {
   if (!text) return NULL;
   if (!length) return NULL;
 
   if (loadMessageCatalog()) {
     unsigned int index;
 
-    if (findOriginalMessage(text, length, &index)) {
-      return getLocalizedMessage(index);
+    if (findSourceMessage(text, length, &index)) {
+      return getTranslatedMessage(index);
     }
   }
 
@@ -491,14 +493,14 @@ findSimpleLocalization (const char *text, size_t length) {
 }
 
 const char *
-getSimpleLocalization (const char *text) {
-  const Message *localization = findSimpleLocalization(text, strlen(text));
-  if (localization) return getMessageText(localization);
+getSimpleTranslation (const char *text) {
+  const Message *translation = findSimpleTranslation(text, strlen(text));
+  if (translation) return getMessageText(translation);
   return text;
 }
 
 const Message *
-findPluralLocalization (const char *const *strings) {
+findPluralTranslation (const char *const *strings) {
   unsigned int count = 0;
   while (strings[count]) count += 1;
   if (!count) return NULL;
@@ -520,20 +522,20 @@ findPluralLocalization (const char *const *strings) {
   }
 
   byte -= 1; // the length mustn't include the final NUL
-  return findSimpleLocalization(text, (byte - text));
+  return findSimpleTranslation(text, (byte - text));
 }
 
 const char *
-getPluralLocalization (const char *singular, const char *plural, unsigned long int count) {
+getPluralTranslation (const char *singular, const char *plural, unsigned long int count) {
   int useSingular = count == 1;
 
   const char *const strings[] = {singular, plural, NULL};
-  const Message *message = findPluralLocalization(strings);
+  const Message *message = findPluralTranslation(strings);
   if (!message) return useSingular? singular: plural;
 
-  const char *localization = getMessageText(message);
-  if (!useSingular) localization += strlen(localization) + 1;
-  return localization;
+  const char *translation = getMessageText(message);
+  if (!useSingular) translation += strlen(translation) + 1;
+  return translation;
 }
 
 #ifdef ENABLE_I18N_SUPPORT
@@ -570,12 +572,12 @@ setDomain (const char *domain) {
 
 char *
 gettext (const char *text) {
-  return (char *)getSimpleLocalization(text);
+  return (char *)getSimpleTranslation(text);
 }
 
 char *
 ngettext (const char *singular, const char *plural, unsigned long int count) {
-  return (char *)getPluralLocalization(singular, plural, count);
+  return (char *)getPluralTranslation(singular, plural, count);
 }
 #endif /* ENABLE_I18N_SUPPORT */
 

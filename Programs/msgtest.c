@@ -42,27 +42,27 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("path"),
     .setting.string = &opt_localeDirectory,
     .internal.adjust = fixInstallPath,
-    .description = strtext("the locale directory containing the localizations")
+    .description = strtext("the locale directory containing the translations")
   },
 
   { .word = "locale",
     .letter = 'l',
     .argument = strtext("specifier"),
     .setting.string = &opt_localeSpecifier,
-    .description = strtext("the locale in which to look up a localization")
+    .description = strtext("the locale in which to look up a translation")
   },
 
   { .word = "domain",
     .letter = 'n',
     .argument = strtext("name"),
     .setting.string = &opt_domainName,
-    .description = strtext("the name of the domain containing the localizations")
+    .description = strtext("the name of the domain containing the translations")
   },
 
   { .word = "utf8",
     .letter = 'u',
     .setting.flag = &opt_utf8Output,
-    .description = strtext("write the localizations using UTF-8")
+    .description = strtext("write the translations using UTF-8")
   },
 END_OPTION_TABLE
 
@@ -112,46 +112,46 @@ putMessage (const Message *message) {
 }
 
 static int
-listLocalization (const Message *original, const Message *localization) {
-  return putMessage(original)
+listTranslation (const Message *source, const Message *translation) {
+  return putMessage(source)
       && putString(" -> ")
-      && putMessage(localization)
+      && putMessage(translation)
       && putNewline();
 }
 
 static int
-listLocalizations (void) {
+listAllTranslations (void) {
   uint32_t count = getMessageCount();
 
   for (unsigned int index=0; index<count; index+=1) {
-    const Message *original = getOriginalMessage(index);
-    if (getMessageLength(original) == 0) continue;
+    const Message *source = getSourceMessage(index);
+    if (getMessageLength(source) == 0) continue;
 
-    const Message *localization = getLocalizedMessage(index);
-    if (!listLocalization(original, localization)) return 0;
+    const Message *translation = getTranslatedMessage(index);
+    if (!listTranslation(source, translation)) return 0;
   }
 
   return 1;
 }
 
 static int
-showSimpleLocalization (const char *text) {
+showSimpleTranslation (const char *text) {
   {
     unsigned int index;
 
-    if (findOriginalMessage(text, strlen(text), &index)) {
-      return putMessage(getLocalizedMessage(index)) && putNewline();
+    if (findSourceMessage(text, strlen(text), &index)) {
+      return putMessage(getTranslatedMessage(index)) && putNewline();
     }
   }
 
-  logMessage(LOG_WARNING, "localization not found: %s", text);
+  logMessage(LOG_WARNING, "translation not found: %s", text);
   return 0;
 }
 
 static int
-showPluralLocalization (const char *singular, const char *plural, int count) {
-  const char *localization = getPluralLocalization(singular, plural, count);
-  return putString(localization) && putNewline();
+showPluralTranslation (const char *singular, const char *plural, int count) {
+  const char *translation = getPluralTranslation(singular, plural, count);
+  return putString(translation) && putNewline();
 }
 
 static int
@@ -261,7 +261,7 @@ main (int argc, char *argv[]) {
   argc -= 1;
   int ok = 1;
 
-  if (isAbbreviation("localization", action)) {
+  if (isAbbreviation("translation", action)) {
     const char *message = nextParameter(&argv, &argc, "message");
     const char *plural = nextParameter(&argv, &argc, NULL);
 
@@ -272,10 +272,10 @@ main (int argc, char *argv[]) {
       if (!parseQuantity(&count, quantity)) return PROG_EXIT_SYNTAX;
 
       beginAction(&argv, &argc);
-      ok = showPluralLocalization(message, plural, count);
+      ok = showPluralTranslation(message, plural, count);
     } else {
       beginAction(&argv, &argc);
-      ok = showSimpleLocalization(message);
+      ok = showSimpleTranslation(message);
     }
   } else if (isAbbreviation("count", action)) {
     beginAction(&argv, &argc);
@@ -283,7 +283,7 @@ main (int argc, char *argv[]) {
     ok = noOutputErrorYet();
   } else if (isAbbreviation("all", action)) {
     beginAction(&argv, &argc);
-    ok = listLocalizations();
+    ok = listAllTranslations();
   } else if (isAbbreviation("metadata", action)) {
     beginAction(&argv, &argc);
     fprintf(outputStream, "%s\n", getMessagesMetadata());
