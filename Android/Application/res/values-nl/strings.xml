@@ -243,7 +243,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de">Duits</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Duits (Onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Duits (standaard samentrekkingen)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_g2">Duits (Verkort - 1998 standaard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Duits (Verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Duits (verkort - 1998 standaard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Duits (verkort - 2015 standaard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Engels</string>

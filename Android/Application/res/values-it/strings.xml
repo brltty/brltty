@@ -243,7 +243,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de">Tedesco</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Tedesco (non contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Tesesco(contrazioni di base)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_g2">Tesesco (contratto - standard 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Tesesco (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Tesesco (contratto - standard 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Tesesco (contratto - standard 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Inglese</string>

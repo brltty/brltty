@@ -432,7 +432,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de_2015" translatable="true">German (contracted - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0" translatable="true">German (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1" translatable="true">German (basic contractions)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_g2" translatable="true">German (contracted - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2" translatable="true">German (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_en" translatable="true">English</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2" translatable="true">English (Unified, contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2" translatable="true">English (United States, contracted)</string>

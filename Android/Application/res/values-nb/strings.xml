@@ -244,7 +244,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de">tysk</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">tysk (fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">tysk (enkel kortskrift)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_g2">tysk (kortskrift - 1998-standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">tysk (kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">tysk (kortskrift - 1998-standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">tysk (kortskrift - 2015-standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">engelsk</string>

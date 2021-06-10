@@ -240,7 +240,7 @@
 #contraction-table	de	# German
 #contraction-table	de-g0	# German (uncontracted)
 #contraction-table	de-g1	# German (basic contractions)
-#contraction-table	de-g2	# German (contracted - 1998 standard)
+#contraction-table	de-g2	# German (contracted)
 #contraction-table	de-1998	# German (contracted - 1998 standard)
 #contraction-table	de-2015	# German (contracted - 2015 standard)
 #contraction-table	en	# English

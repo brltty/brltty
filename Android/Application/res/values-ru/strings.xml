@@ -243,7 +243,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de">Немецкий</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">Немецкий (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">Немецкий (базовые сокращения)</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_g2">Немецкий (сокращённый - стандарт 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Немецкий (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Немецкий (сокращённый - стандарт 1998)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Немецкий (сокращённый - стандарт 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Английский</string>

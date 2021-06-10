@@ -243,7 +243,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de">德文</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">德文無縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">德文基本縮寫</string>
-  <string name="CONTRACTION_TABLE_LABEL_de_g2">德文縮寫 1998 標準</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">德文縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">德文縮寫 1998 標準</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">德文縮寫 2015 標準</string>
   <string name="CONTRACTION_TABLE_LABEL_en">英文</string>

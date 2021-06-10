@@ -560,7 +560,7 @@ msgstr "Datumsformat"
 
 #: Programs/menu_prefs.c:1302
 msgid "Date Position"
-msgstr "Position des Datums"
+msgstr "Datumsposition"
 
 #: Programs/menu_prefs.c:1325
 msgid "Date Separator"
@@ -1796,7 +1796,7 @@ msgstr "Sprachausgaben-Parameter"
 
 #: Programs/menu_prefs.c:1133
 msgid "Speech Pitch"
-msgstr "Tonhöhe der Sprache"
+msgstr "Tonhöhe"
 
 #: Programs/menu_prefs.c:1146
 msgid "Speech Punctuation"
