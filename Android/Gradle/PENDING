@@ -1,4 +1,3 @@
-publish the app
-publish the api
+lint deprecated api
+lint unsafe or unchecked operations - InputHandlers
 strip release libraries
-publish library symbol tables

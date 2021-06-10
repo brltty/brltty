@@ -16,6 +16,6 @@
 
   <Button
     android:id="@+id/chooser_dismiss"
-    android:text="@android:string/no"
+    android:text="@android:string/cancel"
    />
 </TableLayout>
