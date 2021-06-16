@@ -316,7 +316,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: FreedomScientific [Focus 2]"=LIBUSB_DEV, USB\VID_0F4E&PID_0112
 
 ; Device: 0F4E:0114
-"LibUSB-Win32: FreedomScientific [Focus Blue]"=LIBUSB_DEV, USB\VID_0F4E&PID_0114
+"LibUSB-Win32: FreedomScientific [Focus 3+]"=LIBUSB_DEV, USB\VID_0F4E&PID_0114
 
 ; Device: 10C4:EA60
 ; Generic Identifier
@@ -339,6 +339,9 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Device: 16C0:05E1
 "LibUSB-Win32: Canute [all models]"=LIBUSB_DEV, USB\VID_16C0&PID_05E1
 
+; Device: 1A86:7523
+"LibUSB-Win32: Baum [NLS eReader Zoomax (20 cells)]"=LIBUSB_DEV, USB\VID_1A86&PID_7523
+
 ; Device: 1C71:C004
 "LibUSB-Win32: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
 
@@ -355,25 +358,25 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HumanWare [Brailliant BI 14 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C021
 
 ; Device: 1C71:C101
-"LibUSB-Win32: HumanWare [APH Chameleon 20 (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C101
+"LibUSB-Win32: HumanWare [APH Chameleon 20 (HID protocol, firmware 1.0)], HumanWare [APH Chameleon 20 (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C101
 
 ; Device: 1C71:C104
 "LibUSB-Win32: HumanWare [APH Chameleon 20 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C104
 
 ; Device: 1C71:C111
-"LibUSB-Win32: HumanWare [APH Mantis Q40 (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C111
+"LibUSB-Win32: HumanWare [APH Mantis Q40 (HID protocol, firmware 1.0)], HumanWare [APH Mantis Q40 (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C111
 
 ; Device: 1C71:C114
 "LibUSB-Win32: HumanWare [APH Mantis Q40 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C114
 
 ; Device: 1C71:C121
-"LibUSB-Win32: HumanWare [Humanware BrailleOne (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C121
+"LibUSB-Win32: HumanWare [Humanware BrailleOne (HID protocol, firmware 1.0)], HumanWare [Humanware BrailleOne (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C121
 
 ; Device: 1C71:C124
 "LibUSB-Win32: HumanWare [Humanware BrailleOne (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C124
 
 ; Device: 1C71:CE01
-"LibUSB-Win32: HumanWare [NLS eReader (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
+"LibUSB-Win32: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
 
 ; Device: 1C71:CE04
 "LibUSB-Win32: HumanWare [NLS eReader (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE04
@@ -672,7 +675,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: FreedomScientific [Focus 2]"=LIBUSB_DEV, USB\VID_0F4E&PID_0112
 
 ; Device: 0F4E:0114
-"LibUSB-Win32: FreedomScientific [Focus Blue]"=LIBUSB_DEV, USB\VID_0F4E&PID_0114
+"LibUSB-Win32: FreedomScientific [Focus 3+]"=LIBUSB_DEV, USB\VID_0F4E&PID_0114
 
 ; Device: 10C4:EA60
 ; Generic Identifier
@@ -695,6 +698,9 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Device: 16C0:05E1
 "LibUSB-Win32: Canute [all models]"=LIBUSB_DEV, USB\VID_16C0&PID_05E1
 
+; Device: 1A86:7523
+"LibUSB-Win32: Baum [NLS eReader Zoomax (20 cells)]"=LIBUSB_DEV, USB\VID_1A86&PID_7523
+
 ; Device: 1C71:C004
 "LibUSB-Win32: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
 
@@ -711,25 +717,25 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HumanWare [Brailliant BI 14 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C021
 
 ; Device: 1C71:C101
-"LibUSB-Win32: HumanWare [APH Chameleon 20 (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C101
+"LibUSB-Win32: HumanWare [APH Chameleon 20 (HID protocol, firmware 1.0)], HumanWare [APH Chameleon 20 (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C101
 
 ; Device: 1C71:C104
 "LibUSB-Win32: HumanWare [APH Chameleon 20 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C104
 
 ; Device: 1C71:C111
-"LibUSB-Win32: HumanWare [APH Mantis Q40 (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C111
+"LibUSB-Win32: HumanWare [APH Mantis Q40 (HID protocol, firmware 1.0)], HumanWare [APH Mantis Q40 (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C111
 
 ; Device: 1C71:C114
 "LibUSB-Win32: HumanWare [APH Mantis Q40 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C114
 
 ; Device: 1C71:C121
-"LibUSB-Win32: HumanWare [Humanware BrailleOne (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C121
+"LibUSB-Win32: HumanWare [Humanware BrailleOne (HID protocol, firmware 1.0)], HumanWare [Humanware BrailleOne (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C121
 
 ; Device: 1C71:C124
 "LibUSB-Win32: HumanWare [Humanware BrailleOne (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C124
 
 ; Device: 1C71:CE01
-"LibUSB-Win32: HumanWare [NLS eReader (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
+"LibUSB-Win32: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
 
 ; Device: 1C71:CE04
 "LibUSB-Win32: HumanWare [NLS eReader (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE04
@@ -1028,7 +1034,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: FreedomScientific [Focus 2]"=LIBUSB_DEV, USB\VID_0F4E&PID_0112
 
 ; Device: 0F4E:0114
-"LibUSB-Win32: FreedomScientific [Focus Blue]"=LIBUSB_DEV, USB\VID_0F4E&PID_0114
+"LibUSB-Win32: FreedomScientific [Focus 3+]"=LIBUSB_DEV, USB\VID_0F4E&PID_0114
 
 ; Device: 10C4:EA60
 ; Generic Identifier
@@ -1051,6 +1057,9 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Device: 16C0:05E1
 "LibUSB-Win32: Canute [all models]"=LIBUSB_DEV, USB\VID_16C0&PID_05E1
 
+; Device: 1A86:7523
+"LibUSB-Win32: Baum [NLS eReader Zoomax (20 cells)]"=LIBUSB_DEV, USB\VID_1A86&PID_7523
+
 ; Device: 1C71:C004
 "LibUSB-Win32: BrailleNote [HumanWare APEX]"=LIBUSB_DEV, USB\VID_1C71&PID_C004
 
@@ -1067,25 +1076,25 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HumanWare [Brailliant BI 14 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C021
 
 ; Device: 1C71:C101
-"LibUSB-Win32: HumanWare [APH Chameleon 20 (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C101
+"LibUSB-Win32: HumanWare [APH Chameleon 20 (HID protocol, firmware 1.0)], HumanWare [APH Chameleon 20 (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C101
 
 ; Device: 1C71:C104
 "LibUSB-Win32: HumanWare [APH Chameleon 20 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C104
 
 ; Device: 1C71:C111
-"LibUSB-Win32: HumanWare [APH Mantis Q40 (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C111
+"LibUSB-Win32: HumanWare [APH Mantis Q40 (HID protocol, firmware 1.0)], HumanWare [APH Mantis Q40 (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C111
 
 ; Device: 1C71:C114
 "LibUSB-Win32: HumanWare [APH Mantis Q40 (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C114
 
 ; Device: 1C71:C121
-"LibUSB-Win32: HumanWare [Humanware BrailleOne (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C121
+"LibUSB-Win32: HumanWare [Humanware BrailleOne (HID protocol, firmware 1.0)], HumanWare [Humanware BrailleOne (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C121
 
 ; Device: 1C71:C124
 "LibUSB-Win32: HumanWare [Humanware BrailleOne (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C124
 
 ; Device: 1C71:CE01
-"LibUSB-Win32: HumanWare [NLS eReader (HID protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
+"LibUSB-Win32: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
 
 ; Device: 1C71:CE04
 "LibUSB-Win32: HumanWare [NLS eReader (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE04

@@ -136,6 +136,7 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   BLUETOOTH_NAME_ENTRY("MB248", "md"),
 
   // HumanWare: NLS eReader
+  BLUETOOTH_NAME_ENTRY("NLS eReader Z", "bm"),
   BLUETOOTH_NAME_ENTRY("NLS eReader", "hw"),
 
   // American Printing House: Orbit Reader

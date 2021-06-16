@@ -170,6 +170,16 @@ BEGIN_KEY_NAME_TABLE(vertical)
   KEY_GROUP_ENTRY(BM_GRP_ScaledRightSensors, "ScaledRightSensor"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(NLS_Zoomax)
+  KEY_NAME_ENTRY(BM_KEY_B9, "BL"),
+  KEY_NAME_ENTRY(BM_KEY_B10, "Space"),
+
+  KEY_NAME_ENTRY(BM_KEY_F1, "S1"),
+  KEY_NAME_ENTRY(BM_KEY_F2, "S2"),
+  KEY_NAME_ENTRY(BM_KEY_F3, "S3"),
+  KEY_NAME_ENTRY(BM_KEY_F4, "S4"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLE(orbit)
   KEY_NAME_ENTRY(BM_KEY_B9, "Space"),
 END_KEY_NAME_TABLE
@@ -195,6 +205,14 @@ BEGIN_KEY_NAME_TABLES(orbit)
   KEY_NAME_TABLE(dots),
   KEY_NAME_TABLE(joystick),
   KEY_NAME_SUBTABLE(display,8),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(NLS_Zoomax)
+  KEY_NAME_TABLE(NLS_Zoomax),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(navpad),
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(b2g)
@@ -289,6 +307,7 @@ END_KEY_NAME_TABLES
 DEFINE_KEY_TABLE(default)
 DEFINE_KEY_TABLE(rb)
 DEFINE_KEY_TABLE(orbit)
+DEFINE_KEY_TABLE(NLS_Zoomax)
 DEFINE_KEY_TABLE(b2g)
 DEFINE_KEY_TABLE(connect)
 DEFINE_KEY_TABLE(conny)
@@ -307,6 +326,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(default),
   &KEY_TABLE_DEFINITION(rb),
   &KEY_TABLE_DEFINITION(orbit),
+  &KEY_TABLE_DEFINITION(NLS_Zoomax),
   &KEY_TABLE_DEFINITION(b2g),
   &KEY_TABLE_DEFINITION(connect),
   &KEY_TABLE_DEFINITION(conny),
@@ -847,6 +867,7 @@ typedef enum {
 
   BAUM_DEVICE_Refreshabraille,
   BAUM_DEVICE_Orbit,
+  BAUM_DEVICE_NLS_Zoomax,
   BAUM_DEVICE_B2G,
 
   BAUM_DEVICE_Conny,
@@ -875,6 +896,10 @@ static const BaumDeviceIdentityEntry baumDeviceIdentityTable[] = {
 
   { .string = "Orbit",
     .type = BAUM_DEVICE_Orbit
+  },
+
+  { .string = "NLS eReader Zoomax",
+    .type = BAUM_DEVICE_NLS_Zoomax
   },
 
   { .string = "Conny (NBP B2G)",
@@ -1149,6 +1174,8 @@ adjustPacketLength (const unsigned char *bytes, size_t size, size_t *length) {
     case BAUM_RSP_DeviceIdentity:
       if (size == 17) {
         if (memcmp(&bytes[1], "Refreshabraille ", (size - 1)) == 0) {
+          *length += 2;
+        } else if (memcmp(&bytes[1], "NLS eReader Zoom", (size - 1)) == 0) {
           *length += 2;
         }
       }
@@ -1440,6 +1467,11 @@ static const BaumDeviceOperations baumDeviceOperations[] = {
 
   [BAUM_DEVICE_Orbit] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(orbit),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_NLS_Zoomax] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(NLS_Zoomax),
     .writeAllCells = writeBaumCells_all
   },
 
@@ -3198,6 +3230,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .data=&baumHid2Operations
+    },
+
+    { /* NLS eReader Zoomax (20 cells) */
+      .vendor=0X1A86, .product=0X7523,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=2,
+      .data=&baumEscapeOperations
     },
   END_USB_CHANNEL_DEFINITIONS
 

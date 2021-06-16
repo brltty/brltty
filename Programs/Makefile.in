@@ -202,6 +202,9 @@ usb_cdc_acm.$O:
 usb_belkin.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_belkin.c
 
+usb_ch340.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_ch340.c
+
 usb_cp2101.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_cp2101.c
 

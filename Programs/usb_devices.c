@@ -283,7 +283,7 @@ USB_DEVICE_ENTRY(0X0F4E, 0X0111, "fs"),
 USB_DEVICE_ENTRY(0X0F4E, 0X0112, "fs"),
 
 // Device: 0F4E:0114
-// FreedomScientific [Focus Blue]
+// FreedomScientific [Focus 3+]
 USB_DEVICE_ENTRY(0X0F4E, 0X0114, "fs"),
 
 // Device: 10C4:EA60
@@ -313,6 +313,10 @@ USB_DEVICE_ENTRY(0X1209, 0XABC0, "ic"),
 // Canute [all models]
 USB_DEVICE_ENTRY(0X16C0, 0X05E1, "cn"),
 
+// Device: 1A86:7523
+// Baum [NLS eReader Zoomax (20 cells)]
+USB_DEVICE_ENTRY(0X1A86, 0X7523, "bm"),
+
 // Device: 1C71:C004
 // BrailleNote [HumanWare APEX]
 USB_DEVICE_ENTRY(0X1C71, 0XC004, "bn"),
@@ -334,7 +338,8 @@ USB_DEVICE_ENTRY(0X1C71, 0XC00A, "hw"),
 USB_DEVICE_ENTRY(0X1C71, 0XC021, "hw"),
 
 // Device: 1C71:C101
-// HumanWare [APH Chameleon 20 (HID protocol)]
+// HumanWare [APH Chameleon 20 (HID protocol, firmware 1.0)]
+// HumanWare [APH Chameleon 20 (HID protocol, firmware 1.1)]
 USB_DEVICE_ENTRY(0X1C71, 0XC101, "hw"),
 
 // Device: 1C71:C104
@@ -342,7 +347,8 @@ USB_DEVICE_ENTRY(0X1C71, 0XC101, "hw"),
 USB_DEVICE_ENTRY(0X1C71, 0XC104, "hw"),
 
 // Device: 1C71:C111
-// HumanWare [APH Mantis Q40 (HID protocol)]
+// HumanWare [APH Mantis Q40 (HID protocol, firmware 1.0)]
+// HumanWare [APH Mantis Q40 (HID protocol, firmware 1.1)]
 USB_DEVICE_ENTRY(0X1C71, 0XC111, "hw"),
 
 // Device: 1C71:C114
@@ -350,7 +356,8 @@ USB_DEVICE_ENTRY(0X1C71, 0XC111, "hw"),
 USB_DEVICE_ENTRY(0X1C71, 0XC114, "hw"),
 
 // Device: 1C71:C121
-// HumanWare [Humanware BrailleOne (HID protocol)]
+// HumanWare [Humanware BrailleOne (HID protocol, firmware 1.0)]
+// HumanWare [Humanware BrailleOne (HID protocol, firmware 1.1)]
 USB_DEVICE_ENTRY(0X1C71, 0XC121, "hw"),
 
 // Device: 1C71:C124
@@ -358,7 +365,8 @@ USB_DEVICE_ENTRY(0X1C71, 0XC121, "hw"),
 USB_DEVICE_ENTRY(0X1C71, 0XC124, "hw"),
 
 // Device: 1C71:CE01
-// HumanWare [NLS eReader (HID protocol)]
+// HumanWare [NLS eReader (HID protocol, firmware 1.0)]
+// HumanWare [NLS eReader (HID protocol, firmware 1.1)]
 USB_DEVICE_ENTRY(0X1C71, 0XCE01, "hw"),
 
 // Device: 1C71:CE04

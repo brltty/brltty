@@ -283,7 +283,7 @@ ENV{PRODUCT}=="f4e/111/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run
 ENV{PRODUCT}=="f4e/112/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run"
 
 # Device: 0F4E:0114
-# FreedomScientific [Focus Blue]
+# FreedomScientific [Focus 3+]
 ENV{PRODUCT}=="f4e/114/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run"
 
 # Device: 10C4:EA60
@@ -313,6 +313,10 @@ ENV{PRODUCT}=="1209/abc0/*", ENV{BRLTTY_BRAILLE_DRIVER}="ic", GOTO="brltty_usb_r
 # Canute [all models]
 ENV{PRODUCT}=="16c0/5e1/*", ENV{BRLTTY_BRAILLE_DRIVER}="cn", GOTO="brltty_usb_run"
 
+# Device: 1A86:7523
+# Baum [NLS eReader Zoomax (20 cells)]
+ENV{PRODUCT}=="1a86/7523/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
 # Device: 1C71:C004
 # BrailleNote [HumanWare APEX]
 ENV{PRODUCT}=="1c71/c004/*", ENV{BRLTTY_BRAILLE_DRIVER}="bn", GOTO="brltty_usb_run"
@@ -334,7 +338,8 @@ ENV{PRODUCT}=="1c71/c00a/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_r
 ENV{PRODUCT}=="1c71/c021/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:C101
-# HumanWare [APH Chameleon 20 (HID protocol)]
+# HumanWare [APH Chameleon 20 (HID protocol, firmware 1.0)]
+# HumanWare [APH Chameleon 20 (HID protocol, firmware 1.1)]
 ENV{PRODUCT}=="1c71/c101/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:C104
@@ -342,7 +347,8 @@ ENV{PRODUCT}=="1c71/c101/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_r
 ENV{PRODUCT}=="1c71/c104/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:C111
-# HumanWare [APH Mantis Q40 (HID protocol)]
+# HumanWare [APH Mantis Q40 (HID protocol, firmware 1.0)]
+# HumanWare [APH Mantis Q40 (HID protocol, firmware 1.1)]
 ENV{PRODUCT}=="1c71/c111/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:C114
@@ -350,7 +356,8 @@ ENV{PRODUCT}=="1c71/c111/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_r
 ENV{PRODUCT}=="1c71/c114/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:C121
-# HumanWare [Humanware BrailleOne (HID protocol)]
+# HumanWare [Humanware BrailleOne (HID protocol, firmware 1.0)]
+# HumanWare [Humanware BrailleOne (HID protocol, firmware 1.1)]
 ENV{PRODUCT}=="1c71/c121/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:C124
@@ -358,7 +365,8 @@ ENV{PRODUCT}=="1c71/c121/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_r
 ENV{PRODUCT}=="1c71/c124/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:CE01
-# HumanWare [NLS eReader (HID protocol)]
+# HumanWare [NLS eReader (HID protocol, firmware 1.0)]
+# HumanWare [NLS eReader (HID protocol, firmware 1.1)]
 ENV{PRODUCT}=="1c71/ce01/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
 # Device: 1C71:CE04

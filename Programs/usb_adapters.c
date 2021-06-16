@@ -163,6 +163,12 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
     .vendor=0X16C0, .product=0X05E1,
     .operations = &usbSerialOperations_CDC_ACM
   },
+
+  { /* NLS eReader Zoomax */
+    .vendor=0X1A86, .product=0X7523,
+    .generic = 1,
+    .operations = &usbSerialOperations_CH340
+  },
 };
 
 const size_t usbSerialAdapterCount = ARRAY_COUNT(usbSerialAdapterTable);

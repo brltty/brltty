@@ -294,7 +294,7 @@
     <modalias>usb:v0F4Ep0112*</modalias>
 
     <!-- Device: 0F4E:0114 -->
-    <!-- FreedomScientific [Focus Blue] -->
+    <!-- FreedomScientific [Focus 3+] -->
     <modalias>usb:v0F4Ep0114*</modalias>
 
     <!-- Device: 10C4:EA60 -->
@@ -324,6 +324,10 @@
     <!-- Canute [all models] -->
     <modalias>usb:v16C0p05E1*</modalias>
 
+    <!-- Device: 1A86:7523 -->
+    <!-- Baum [NLS eReader Zoomax (20 cells)] -->
+    <modalias>usb:v1A86p7523*</modalias>
+
     <!-- Device: 1C71:C004 -->
     <!-- BrailleNote [HumanWare APEX] -->
     <modalias>usb:v1C71pC004*</modalias>
@@ -345,7 +349,8 @@
     <modalias>usb:v1C71pC021*</modalias>
 
     <!-- Device: 1C71:C101 -->
-    <!-- HumanWare [APH Chameleon 20 (HID protocol)] -->
+    <!-- HumanWare [APH Chameleon 20 (HID protocol, firmware 1.0)] -->
+    <!-- HumanWare [APH Chameleon 20 (HID protocol, firmware 1.1)] -->
     <modalias>usb:v1C71pC101*</modalias>
 
     <!-- Device: 1C71:C104 -->
@@ -353,7 +358,8 @@
     <modalias>usb:v1C71pC104*</modalias>
 
     <!-- Device: 1C71:C111 -->
-    <!-- HumanWare [APH Mantis Q40 (HID protocol)] -->
+    <!-- HumanWare [APH Mantis Q40 (HID protocol, firmware 1.0)] -->
+    <!-- HumanWare [APH Mantis Q40 (HID protocol, firmware 1.1)] -->
     <modalias>usb:v1C71pC111*</modalias>
 
     <!-- Device: 1C71:C114 -->
@@ -361,7 +367,8 @@
     <modalias>usb:v1C71pC114*</modalias>
 
     <!-- Device: 1C71:C121 -->
-    <!-- HumanWare [Humanware BrailleOne (HID protocol)] -->
+    <!-- HumanWare [Humanware BrailleOne (HID protocol, firmware 1.0)] -->
+    <!-- HumanWare [Humanware BrailleOne (HID protocol, firmware 1.1)] -->
     <modalias>usb:v1C71pC121*</modalias>
 
     <!-- Device: 1C71:C124 -->
@@ -369,7 +376,8 @@
     <modalias>usb:v1C71pC124*</modalias>
 
     <!-- Device: 1C71:CE01 -->
-    <!-- HumanWare [NLS eReader (HID protocol)] -->
+    <!-- HumanWare [NLS eReader (HID protocol, firmware 1.0)] -->
+    <!-- HumanWare [NLS eReader (HID protocol, firmware 1.1)] -->
     <modalias>usb:v1C71pCE01*</modalias>
 
     <!-- Device: 1C71:CE04 -->

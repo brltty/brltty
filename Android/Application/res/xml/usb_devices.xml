@@ -259,7 +259,7 @@
   <usb-device vendor-id="3918" product-id="274" />
 
   <!-- Device: 0F4E:0114 -->
-  <!-- FreedomScientific [Focus Blue] -->
+  <!-- FreedomScientific [Focus 3+] -->
   <usb-device vendor-id="3918" product-id="276" />
 
   <!-- Device: 10C4:EA60 -->
@@ -289,6 +289,10 @@
   <!-- Canute [all models] -->
   <usb-device vendor-id="5824" product-id="1505" />
 
+  <!-- Device: 1A86:7523 -->
+  <!-- Baum [NLS eReader Zoomax (20 cells)] -->
+  <usb-device vendor-id="6790" product-id="29987" />
+
   <!-- Device: 1C71:C004 -->
   <!-- BrailleNote [HumanWare APEX] -->
   <usb-device vendor-id="7281" product-id="49156" />
@@ -310,7 +314,8 @@
   <usb-device vendor-id="7281" product-id="49185" />
 
   <!-- Device: 1C71:C101 -->
-  <!-- HumanWare [APH Chameleon 20 (HID protocol)] -->
+  <!-- HumanWare [APH Chameleon 20 (HID protocol, firmware 1.0)] -->
+  <!-- HumanWare [APH Chameleon 20 (HID protocol, firmware 1.1)] -->
   <usb-device vendor-id="7281" product-id="49409" />
 
   <!-- Device: 1C71:C104 -->
@@ -318,7 +323,8 @@
   <usb-device vendor-id="7281" product-id="49412" />
 
   <!-- Device: 1C71:C111 -->
-  <!-- HumanWare [APH Mantis Q40 (HID protocol)] -->
+  <!-- HumanWare [APH Mantis Q40 (HID protocol, firmware 1.0)] -->
+  <!-- HumanWare [APH Mantis Q40 (HID protocol, firmware 1.1)] -->
   <usb-device vendor-id="7281" product-id="49425" />
 
   <!-- Device: 1C71:C114 -->
@@ -326,7 +332,8 @@
   <usb-device vendor-id="7281" product-id="49428" />
 
   <!-- Device: 1C71:C121 -->
-  <!-- HumanWare [Humanware BrailleOne (HID protocol)] -->
+  <!-- HumanWare [Humanware BrailleOne (HID protocol, firmware 1.0)] -->
+  <!-- HumanWare [Humanware BrailleOne (HID protocol, firmware 1.1)] -->
   <usb-device vendor-id="7281" product-id="49441" />
 
   <!-- Device: 1C71:C124 -->
@@ -334,7 +341,8 @@
   <usb-device vendor-id="7281" product-id="49444" />
 
   <!-- Device: 1C71:CE01 -->
-  <!-- HumanWare [NLS eReader (HID protocol)] -->
+  <!-- HumanWare [NLS eReader (HID protocol, firmware 1.0)] -->
+  <!-- HumanWare [NLS eReader (HID protocol, firmware 1.1)] -->
   <usb-device vendor-id="7281" product-id="52737" />
 
   <!-- Device: 1C71:CE04 -->
