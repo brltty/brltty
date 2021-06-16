@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 public enum DataType {
   LOCALE,
   TABLES,
-  DRIVERS,
   STATE,
   WRITABLE,
   ;

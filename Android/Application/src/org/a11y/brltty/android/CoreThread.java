@@ -134,7 +134,6 @@ public class CoreThread extends Thread {
     AssetManager assets = coreContext.getAssets();
     extractAssets(assets, DataType.LOCALE, false);
     extractAssets(assets, DataType.TABLES, false);
-    extractAssets(assets, DataType.DRIVERS, true);
     Log.d(LOG_TAG, "assets extracted");
   }
 
@@ -251,7 +250,6 @@ public class CoreThread extends Thread {
 
     builder.setLocaleDirectory(DataType.LOCALE.getDirectory());
     builder.setTablesDirectory(DataType.TABLES.getDirectory());
-    builder.setDriversDirectory(DataType.DRIVERS.getDirectory());
     builder.setWritableDirectory(DataType.WRITABLE.getDirectory());
 
     {

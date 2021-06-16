@@ -1,5 +1,4 @@
 def assetsDirectory = brltty.getAssetsPath(project)
-def driversDirectory = assetsDirectory + File.separator + "drivers"
 def messagesDirectory = assetsDirectory + File.separator + "locale"
 def tablesDirectory = assetsDirectory + File.separator + "tables"
 
@@ -47,24 +46,6 @@ task brlttyRemoveTables (type: Delete) {
   description "Remove the tables (text, attributes, contraction, keyboard, input) from the build."
 
   delete tablesDirectory
-}
-
-task brlttyAddDrivers (type: Copy) {
-  group "build"
-  description "Add the drivers (braille, speech, screen) to the build (as assets)."
-
-  from brltty.native.driversDirectory
-  into driversDirectory
-  include 'libbrlttyb??.so'
-  include 'libbrlttys??.so'
-  include 'libbrlttyx??.so'
-}
-
-task brlttyRemoveDrivers (type: Delete) {
-  group "build"
-  description "Remove the drivers (braille, speech, screen) from the build."
-
-  delete driversDirectory
 }
 
 tasks.register("brlttyAddMessages") {
@@ -122,11 +103,7 @@ task brlttyRemoveMessages (type: Delete) {
   delete messagesDirectory
 }
 
-brltty.assembleTask.dependsOn brlttyAddDrivers, brlttyAddMessages, brlttyAddTables
-brltty.cleanTask.dependsOn brlttyRemoveDrivers, brlttyRemoveMessages, brlttyRemoveTables
-
-afterEvaluate {
-  tasks.withType(JavaCompile).each { task ->
-    task.dependsOn brltty.assembleTask
-  }
-}
+brltty.addAssembleTask project, brlttyAddMessages
+brltty.addAssembleTask project, brlttyAddTables
+clean.dependsOn brlttyRemoveMessages
+clean.dependsOn brlttyRemoveTables

@@ -1,7 +1,16 @@
 brltty.addTasks([
-  component: "api",
   project: project,
-  subdirectory: brltty.native.javaSubdirectory,
+  componentName: "api",
+  makeSubdirectory: brltty.native.javaSubdirectory,
   jars: ["brlapi"],
-  libs: ["brlapi_java", "brlapi"],
+
+  libraries: [
+    "brlapi_java",
+    "brlapi"
+  ],
+
+  librarySubdirectories: [
+    brltty.native.javaSubdirectory,
+    brltty.native.coreSubdirectory
+  ],
 ])

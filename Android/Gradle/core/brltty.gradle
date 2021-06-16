@@ -1,12 +1,29 @@
 brltty.addTasks([
-  component: "core",
   project: project,
-  subdirectory: brltty.native.coreSubdirectory,
-  libs: ["brltty_core", "brltty_jni"],
+  componentName: "core",
+  makeSubdirectory: brltty.native.coreSubdirectory,
 
-  make: [
+  makeTargets: [
     brltty.native.coreLibrary,
     brltty.native.coreWrapper,
     brltty.native.coreBindings,
+
+    "braille-drivers",
+    "speech-drivers",
+    "screen-drivers",
+  ],
+
+  libraries: [
+    "brltty_core",
+    "brltty_jni",
+
+    "brlttyb??",
+    "brlttys??",
+    "brlttyx??"
+  ],
+
+  librarySubdirectories: [
+    brltty.native.coreSubdirectory,
+    brltty.native.driversSubdirectory
   ],
 ])

@@ -46,10 +46,7 @@ install-debug: app-debug
 install-release: app-release
 	adb install -r $(GRADLE_RELEASE_PACKAGE)
 
-assets: drivers messages tables
-
-drivers:
-	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyAddDrivers
+assets: messages tables
 
 messages:
 	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyAddMessages
@@ -57,10 +54,7 @@ messages:
 tables:
 	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyAddTables
 
-remove-assets: remove-drivers remove-messages remove-tables
-
-remove-drivers:
-	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyRemoveDrivers
+remove-assets: remove-messages remove-tables
 
 remove-messages:
 	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyRemoveMessages

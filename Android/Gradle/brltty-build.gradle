@@ -39,31 +39,31 @@ Task newTask (Map properties, String name, Class<DefaultTask> type=DefaultTask, 
   return newTask(properties.project, name, type, closure)
 }
 
-Task newAssembleTask () {
-  return newTask(rootProject, "brlttyAssembleAllComponents") {
+Task newAssembleTask (Map properties) {
+  return newTask(properties.project, "brlttyAssembleAllComponents") {
     description "Assemble all of the native jars, libraries, assets, etc."
   }
 }
 
-void addAssembleDependency (Task dependentTask) {
-  brltty.assembleTask.dependsOn dependentTask
+void addAssembleDependency (Map properties, Task task) {
+  properties.assembleTask.dependsOn task
 }
 
-Task newCleanTask () {
-  return newTask(rootProject, "brlttyCleanAllComponents") {
+Task newCleanTask (Map properties) {
+  return newTask(properties.project, "brlttyCleanAllComponents") {
     description "Clean all of the native jars, libraries, assets, etc."
   }
 }
 
-void addCleanDependency (Task dependentTask) {
-  brltty.cleanTask.dependsOn dependentTask
+void addCleanDependency (Map properties, Task task) {
+  properties.cleanTask.dependsOn task
 }
 
 Task newConfigureTask (Map properties) {
   return newTask(properties, "brlttyConfigureABI", Exec) {
-    description "Configure the ${properties.component} for the ${properties.ABI} ABI."
+    description "Configure the ${properties.componentName} for the ${properties.ABI} ABI."
 
-    workingDir properties.topDirectory
+    workingDir properties.abiDirectory
     ignoreExitValue false
     commandLine "${brltty.native.rootDirectory}/cfg-android-abi", "-q", properties.ABI
   }
@@ -81,24 +81,26 @@ Task getConfigureTask (Map properties) {
 
 Task newMakeComponentsTask (Map properties) {
   return newTask(properties, "brlttyMakeABI", Exec) {
-    description "Make the ${properties.ABI} components of the ${properties.component}."
+    description "Make the ${properties.ABI} components of the ${properties.componentName}."
     dependsOn properties.configureTask
 
-    workingDir properties.componentsDirectory
+    workingDir properties.makeDirectory
     ignoreExitValue false
 
     commandLine "make"
-    args properties.make
+    args properties.makeTargets
   }
 }
 
 Task newAddJarsTask (Map properties) {
   return newTask(properties, "brlttyAddJars", Copy) {
-    description "Add the ${properties.component}'s ${properties.ABI} jars to the build."
+    description "Add the ${properties.componentName}'s ${properties.ABI} jars to the build."
     dependsOn properties.makeComponentsTask
-
     into getJarsPath(properties)
-    from properties.componentsDirectory
+
+    properties.jarSubdirectories.each { subdirectory ->
+      from properties.abiDirectory + File.separator + subdirectory
+    }
 
     properties.jars.each { jar ->
       include "${jar}.jar"
@@ -108,20 +110,15 @@ Task newAddJarsTask (Map properties) {
 
 Task newAddLibrariesTask (Map properties) {
   return newTask(properties, "brlttyAddLibraries", Copy) {
-    description "Add the ${properties.component}'s ${properties.ABI} libraries to the build."
+    description "Add the ${properties.componentName}'s ${properties.ABI} libraries to the build."
     dependsOn properties.makeComponentsTask
-
-    def componentsDirectory =  properties.componentsDirectory
-    def coreDirectory = properties.coreComponentsDirectory
-
     into getABIPath(properties)
-    from componentsDirectory
 
-    if (!coreDirectory.equals(componentsDirectory)) {
-      from coreDirectory
+    properties.librarySubdirectories.each { subdirectory ->
+      from properties.abiDirectory + File.separator + subdirectory
     }
 
-    properties.libs.each { library ->
+    properties.libraries.each { library ->
       include "lib${library}.so"
     }
   }
@@ -129,10 +126,10 @@ Task newAddLibrariesTask (Map properties) {
 
 Task newMakeCleanTask (Map properties) {
   return newTask(properties, "brlttyCleanABI", Exec) {
-    description "Remove (make clean) the ${properties.ABI} components of the ${properties.component}."
+    description "Remove (make clean) the ${properties.ABI} components of the ${properties.componentName}."
     dependsOn properties.configureTask
 
-    workingDir properties.componentsDirectory
+    workingDir properties.makeDirectory
     ignoreExitValue true
     commandLine "make", "clean"
   }
@@ -140,7 +137,7 @@ Task newMakeCleanTask (Map properties) {
 
 Task newRemoveTask (Map properties) {
   return newTask(properties, "brlttyRemoveAllComponents", Delete) {
-    description "Remove the ${properties.component}'s jars and libraries from the build."
+    description "Remove the ${properties.componentName}'s jars and libraries from the build."
     delete getJarsPath(properties)
     delete getLibrariesPath(properties)
   }
@@ -150,41 +147,49 @@ void addTasks (Map properties, String abi) {
   properties.ABI = abi
   def isPrimaryABI = abi.equals(brltty.native.abiList[0])
 
-  properties.topDirectory = brltty.native.abiDirectory + File.separator + properties.ABI
+  properties.abiDirectory = brltty.native.abiDirectory + File.separator + properties.ABI
   properties.configureTask = getConfigureTask(properties)
 
-  properties.componentsDirectory = properties.topDirectory + File.separator + properties.subdirectory
-  properties.coreComponentsDirectory = properties.topDirectory + File.separator + brltty.native.coreSubdirectory
+  properties.makeDirectory = properties.abiDirectory + File.separator + properties.makeSubdirectory
   properties.makeComponentsTask = newMakeComponentsTask(properties)
 
   if (isPrimaryABI) {
     def jars = properties.jars
 
     if ((jars != null) && !jars.isEmpty()) {
-      def jarsTask = newAddJarsTask(properties)
-      addAssembleDependency jarsTask
+      def addJarsTask = newAddJarsTask(properties)
+      addAssembleDependency(properties, addJarsTask)
     }
   }
 
-  def libraries = properties.libs
+  def libraries = properties.libraries
   if ((libraries != null) && !libraries.isEmpty()) {
     def addLibrariesTask = newAddLibrariesTask(properties)
-    addAssembleDependency addLibrariesTask
+    addAssembleDependency(properties, addLibrariesTask)
   }
 
   def makeCleanTask = newMakeCleanTask(properties)
-  addCleanDependency makeCleanTask
+  addCleanDependency(properties, makeCleanTask)
 }
 
 void addTasks (Map properties) {
   def taskNameSuffix = ""
   properties.taskNameSuffix = taskNameSuffix
 
-  if (properties.make == null) properties.make = "all"
-  if (properties.make instanceof String) properties.make = [properties.make]
+  properties.assembleTask = newAssembleTask(properties)
+  properties.cleanTask = newCleanTask(properties)
+
+  if (properties.makeTargets == null) properties.makeTargets = "all"
+  if (properties.makeTargets instanceof String) properties.makeTargets = [properties.makeTargets]
+
+  if (properties.jarSubdirectories == null) properties.jarSubdirectories = properties.makeSubdirectory
+  if (properties.jarSubdirectories instanceof String) properties.jarSubdirectories = [properties.jarSubdirectories]
+
+  if (properties.librarySubdirectories == null) properties.librarySubdirectories = properties.makeSubdirectory
+  if (properties.librarySubdirectories instanceof String) properties.librarySubdirectories = [properties.librarySubdirectories]
 
   def removeTask = newRemoveTask(properties)
-  addCleanDependency removeTask
+  addCleanDependency(properties, removeTask)
 
   brltty.native.abiList.each { abi ->
     properties.taskNameSuffix = "${taskNameSuffix}_${abi}"
@@ -192,11 +197,16 @@ void addTasks (Map properties) {
   }
 }
 
-brltty.assembleTask = newAssembleTask()
-brltty.cleanTask = newCleanTask()
+brltty.addAssembleTask = { Project project, Task assembleTask ->
+  project.afterEvaluate {
+    project.tasks.withType(JavaCompile).each { compileTask ->
+      compileTask.dependsOn assembleTask
+    }
+  }
+}
 
 brltty.addTasks = { Map properties ->
   addTasks(properties)
+  brltty.addAssembleTask(properties.project, properties.assembleTask)
+  clean.dependsOn properties.cleanTask
 }
-
-clean.dependsOn brltty.cleanTask
