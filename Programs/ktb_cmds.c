@@ -166,6 +166,7 @@ static const CommandListEntry commandList_menu[] = {
 static const CommandListEntry commandList_say[] = {
   { .code = BRL_CMD_MUTE },
   { .code = BRL_CMD_SAY_LINE },
+  { .code = BRL_CMD_SAY_ALL },
   { .code = BRL_CMD_SAY_ABOVE },
   { .code = BRL_CMD_SAY_BELOW },
   { .code = BRL_CMD_SPKHOME },

@@ -263,6 +263,7 @@ typedef enum {
 
   BRL_CMD_SAY_LOWER /* decrease speaking pitch */,
   BRL_CMD_SAY_HIGHER /* increase speaking pitch */,
+  BRL_CMD_SAY_ALL /* speak from top of screen through bottom of screen */,
   
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;

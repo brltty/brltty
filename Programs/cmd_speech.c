@@ -126,9 +126,15 @@ handleSpeechCommands (int command, void *data) {
     case BRL_CMD_SAY_LINE:
       sayScreenLines(ses->winy, 1, 0, prefs.sayLineMode);
       break;
+
+    case BRL_CMD_SAY_ALL:
+      sayScreenLines(0, scr.rows, 1, sayImmediate);
+      break;
+
     case BRL_CMD_SAY_ABOVE:
       sayScreenLines(0, ses->winy+1, 1, sayImmediate);
       break;
+
     case BRL_CMD_SAY_BELOW:
       sayScreenLines(ses->winy, scr.rows-ses->winy, 1, sayImmediate);
       break;
