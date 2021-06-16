@@ -88,36 +88,41 @@ BEGIN_KEY_NAME_TABLE(back)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(entry)
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+0, "B9"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+1, "B10"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+2, "B11"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+4, "F1"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+5, "F2"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+6, "F3"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+7, "F4"),
+  KEY_NAME_ENTRY(BM_KEY_B9, "B9"),
+  KEY_NAME_ENTRY(BM_KEY_B10, "B10"),
+  KEY_NAME_ENTRY(BM_KEY_B11, "B11"),
+
+  KEY_NAME_ENTRY(BM_KEY_F1, "F1"),
+  KEY_NAME_ENTRY(BM_KEY_F2, "F2"),
+  KEY_NAME_ENTRY(BM_KEY_F3, "F3"),
+  KEY_NAME_ENTRY(BM_KEY_F4, "F4"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(dots)
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+8, "Dot1"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+9, "Dot2"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+10, "Dot3"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+11, "Dot4"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+12, "Dot5"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+13, "Dot6"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+14, "Dot7"),
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+15, "Dot8"),
+  KEY_NAME_ENTRY(BM_KEY_DOT1, "Dot1"),
+  KEY_NAME_ENTRY(BM_KEY_DOT2, "Dot2"),
+  KEY_NAME_ENTRY(BM_KEY_DOT3, "Dot3"),
+  KEY_NAME_ENTRY(BM_KEY_DOT4, "Dot4"),
+  KEY_NAME_ENTRY(BM_KEY_DOT5, "Dot5"),
+  KEY_NAME_ENTRY(BM_KEY_DOT6, "Dot6"),
+  KEY_NAME_ENTRY(BM_KEY_DOT7, "Dot7"),
+  KEY_NAME_ENTRY(BM_KEY_DOT8, "Dot8"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(joystick)
-  KEY_NAME_ENTRY(BM_KEY_JOYSTICK+0, "Up"),
-  KEY_NAME_ENTRY(BM_KEY_JOYSTICK+1, "Left"),
-  KEY_NAME_ENTRY(BM_KEY_JOYSTICK+2, "Down"),
-  KEY_NAME_ENTRY(BM_KEY_JOYSTICK+3, "Right"),
-  KEY_NAME_ENTRY(BM_KEY_JOYSTICK+4, "Press"),
+  KEY_NAME_ENTRY(BM_KEY_UP, "Up"),
+  KEY_NAME_ENTRY(BM_KEY_LEFT, "Left"),
+  KEY_NAME_ENTRY(BM_KEY_DOWN, "Down"),
+  KEY_NAME_ENTRY(BM_KEY_RIGHT, "Right"),
+  KEY_NAME_ENTRY(BM_KEY_PRESS, "Press"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(orbit)
-  KEY_NAME_ENTRY(BM_KEY_ENTRY+0, "Space"),
+BEGIN_KEY_NAME_TABLE(navpad)
+  KEY_NAME_ENTRY(BM_KEY_UP, "Up"),
+  KEY_NAME_ENTRY(BM_KEY_LEFT, "Left"),
+  KEY_NAME_ENTRY(BM_KEY_DOWN, "Down"),
+  KEY_NAME_ENTRY(BM_KEY_RIGHT, "Right"),
+  KEY_NAME_ENTRY(BM_KEY_PRESS, "Center"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(wheels)
@@ -165,6 +170,10 @@ BEGIN_KEY_NAME_TABLE(vertical)
   KEY_GROUP_ENTRY(BM_GRP_ScaledRightSensors, "ScaledRightSensor"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(orbit)
+  KEY_NAME_ENTRY(BM_KEY_B9, "Space"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLES(default)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(entry),
@@ -173,7 +182,7 @@ BEGIN_KEY_NAME_TABLES(default)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(connect)
+BEGIN_KEY_NAME_TABLES(rb)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(entry),
   KEY_NAME_TABLE(dots),
@@ -181,7 +190,22 @@ BEGIN_KEY_NAME_TABLES(connect)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(orbit)
+  KEY_NAME_TABLE(orbit),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(joystick),
+  KEY_NAME_SUBTABLE(display,8),
+END_KEY_NAME_TABLES
+
 BEGIN_KEY_NAME_TABLES(b2g)
+  KEY_NAME_SUBTABLE(display,6),
+  KEY_NAME_TABLE(entry),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(navpad),
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(connect)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(entry),
   KEY_NAME_TABLE(dots),
@@ -197,13 +221,6 @@ BEGIN_KEY_NAME_TABLES(conny)
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
-BEGIN_KEY_NAME_TABLES(orbit)
-  KEY_NAME_TABLE(orbit),
-  KEY_NAME_TABLE(dots),
-  KEY_NAME_TABLE(joystick),
-  KEY_NAME_SUBTABLE(display,8),
-END_KEY_NAME_TABLES
-
 BEGIN_KEY_NAME_TABLES(pronto)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(entry),
@@ -213,14 +230,6 @@ BEGIN_KEY_NAME_TABLES(pronto)
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(pv)
-  KEY_NAME_SUBTABLE(display,6),
-  KEY_NAME_TABLE(entry),
-  KEY_NAME_TABLE(dots),
-  KEY_NAME_TABLE(joystick),
-  KEY_NAME_TABLE(routing),
-END_KEY_NAME_TABLES
-
-BEGIN_KEY_NAME_TABLES(rb)
   KEY_NAME_SUBTABLE(display,6),
   KEY_NAME_TABLE(entry),
   KEY_NAME_TABLE(dots),
@@ -278,13 +287,13 @@ BEGIN_KEY_NAME_TABLES(vk)
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(default)
-DEFINE_KEY_TABLE(connect)
-DEFINE_KEY_TABLE(b2g)
-DEFINE_KEY_TABLE(conny)
+DEFINE_KEY_TABLE(rb)
 DEFINE_KEY_TABLE(orbit)
+DEFINE_KEY_TABLE(b2g)
+DEFINE_KEY_TABLE(connect)
+DEFINE_KEY_TABLE(conny)
 DEFINE_KEY_TABLE(pronto)
 DEFINE_KEY_TABLE(pv)
-DEFINE_KEY_TABLE(rb)
 DEFINE_KEY_TABLE(sv)
 DEFINE_KEY_TABLE(ultra)
 DEFINE_KEY_TABLE(inka)
@@ -296,13 +305,13 @@ DEFINE_KEY_TABLE(vk)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(default),
-  &KEY_TABLE_DEFINITION(connect),
-  &KEY_TABLE_DEFINITION(b2g),
-  &KEY_TABLE_DEFINITION(conny),
+  &KEY_TABLE_DEFINITION(rb),
   &KEY_TABLE_DEFINITION(orbit),
+  &KEY_TABLE_DEFINITION(b2g),
+  &KEY_TABLE_DEFINITION(connect),
+  &KEY_TABLE_DEFINITION(conny),
   &KEY_TABLE_DEFINITION(pronto),
   &KEY_TABLE_DEFINITION(pv),
-  &KEY_TABLE_DEFINITION(rb),
   &KEY_TABLE_DEFINITION(sv),
   &KEY_TABLE_DEFINITION(ultra),
   &KEY_TABLE_DEFINITION(inka),
@@ -834,13 +843,15 @@ typedef union {
 } PACKED BaumResponsePacket;
 
 typedef enum {
-  BAUM_DEVICE_Default,
-  BAUM_DEVICE_B2G,
-  BAUM_DEVICE_Conny,
+  BAUM_DEVICE_Default = 0,
+
+  BAUM_DEVICE_Refreshabraille,
   BAUM_DEVICE_Orbit,
+  BAUM_DEVICE_B2G,
+
+  BAUM_DEVICE_Conny,
   BAUM_DEVICE_PocketVario,
   BAUM_DEVICE_Pronto,
-  BAUM_DEVICE_Refreshabraille,
   BAUM_DEVICE_SuperVario,
   BAUM_DEVICE_VarioConnect,
   BAUM_DEVICE_VarioUltra,
@@ -858,6 +869,18 @@ typedef struct {
 } BaumDeviceIdentityEntry;
 
 static const BaumDeviceIdentityEntry baumDeviceIdentityTable[] = {
+  { .string = "Refreshabraille",
+    .type = BAUM_DEVICE_Refreshabraille
+  },
+
+  { .string = "Orbit",
+    .type = BAUM_DEVICE_Orbit
+  },
+
+  { .string = "Conny (NBP B2G)",
+    .type = BAUM_DEVICE_B2G
+  },
+
   { .string = "BrailleConnect",
     .type = BAUM_DEVICE_VarioConnect
   },
@@ -866,16 +889,8 @@ static const BaumDeviceIdentityEntry baumDeviceIdentityTable[] = {
     .type = BAUM_DEVICE_SuperVario
   },
 
-  { .string = "Conny (NBP B2G)",
-    .type = BAUM_DEVICE_B2G
-  },
-
   { .string = "Conny",
     .type = BAUM_DEVICE_Conny
-  },
-
-  { .string = "Orbit",
-    .type = BAUM_DEVICE_Orbit
   },
 
   { .string = "PocketVario",
@@ -884,10 +899,6 @@ static const BaumDeviceIdentityEntry baumDeviceIdentityTable[] = {
 
   { .string = "Pronto",
     .type = BAUM_DEVICE_Pronto
-  },
-
-  { .string = "Refreshabraille",
-    .type = BAUM_DEVICE_Refreshabraille
   },
 
   { .string = "SuperVario",
@@ -1422,6 +1433,16 @@ static const BaumDeviceOperations baumDeviceOperations[] = {
     .writeAllCells = writeBaumCells_all
   },
 
+  [BAUM_DEVICE_Refreshabraille] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(rb),
+    .writeAllCells = writeBaumCells_all
+  },
+
+  [BAUM_DEVICE_Orbit] = {
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(orbit),
+    .writeAllCells = writeBaumCells_all
+  },
+
   [BAUM_DEVICE_B2G] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(b2g),
     .writeAllCells = writeBaumCells_all
@@ -1432,11 +1453,6 @@ static const BaumDeviceOperations baumDeviceOperations[] = {
     .writeAllCells = writeBaumCells_all
   },
 
-  [BAUM_DEVICE_Orbit] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(orbit),
-    .writeAllCells = writeBaumCells_all
-  },
-
   [BAUM_DEVICE_PocketVario] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(pv),
     .writeAllCells = writeBaumCells_all
@@ -1444,11 +1460,6 @@ static const BaumDeviceOperations baumDeviceOperations[] = {
 
   [BAUM_DEVICE_Pronto] = {
     .keyTableDefinition = &KEY_TABLE_DEFINITION(pronto),
-    .writeAllCells = writeBaumCells_all
-  },
-
-  [BAUM_DEVICE_Refreshabraille] = {
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(rb),
     .writeAllCells = writeBaumCells_all
   },
 
@@ -1725,6 +1736,9 @@ probeBaumDevice (BrailleDisplay *brl) {
 
       if (size) {
         switch (response.data.code) {
+          case BAUM_RSP_VersionNumber:
+            continue;
+
           case BAUM_RSP_RoutingKeys: /* Inka */
             setInkaSwitches(brl, response.data.values.switches, 1);
             return 1;

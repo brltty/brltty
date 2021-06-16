@@ -20,5 +20,5 @@ note B9 and B10 are the keys immediately to the left and right of the joystick.
 
 map B9 SPACE
 assign space B10
-include keyboard.kti
+include joystick.kti
 bind B9+RoutingKey SETLEFT

@@ -33,7 +33,7 @@ bind B9 FWINLT
 bind B10 FWINRT
 
 assign space B11
-include keyboard.kti
+include navpad.kti
 
 bind B9+RoutingKey SETLEFT
 bind B10+RoutingKey SWITCHVT
@@ -42,5 +42,5 @@ bind B11+Up TOP
 bind B11+Down BOT
 bind B11+Left FWINLTSKIP
 bind B11+Right FWINRTSKIP
-bind B11+Press PASTE
+bind B11+Center PASTE
 

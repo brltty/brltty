@@ -28,4 +28,4 @@ include d6.kti
 include routing6.kti
 
 assign space B9
-include keyboard.kti
+include joystick.kti

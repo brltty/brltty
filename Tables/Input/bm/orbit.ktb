@@ -29,6 +29,6 @@ note Any display key combination can be emulated by pressing the joystick
 note * while typing the corresponding combination of the eight dot keys.
 
 assign space Space
-include keyboard.kti
+include joystick.kti
 
 include d6.kti
