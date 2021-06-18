@@ -3036,32 +3036,28 @@ static int readPid(char *path)
 }
 
 static int
-adjustPermissions (const char *path) {
-  int adjust = !geteuid();
+adjustPermissions (
+  const void *object, const char *container,
+  int (*getStatus) (const void *object, struct stat *status),
+  int (*setPermissions) (const void *object, mode_t permissions)
+) {
+  uid_t user = geteuid();
+  int adjust = !user;
 
   if (!adjust) {
-    char *directory = getPathDirectory(path);
+    struct stat status;
 
-    if (directory) {
-      struct stat status;
-
-      if (stat(directory, &status) == -1) {
-        logSystemError("stat");
-      } else if (status.st_uid == geteuid()) {
-        adjust = 1;
-      }
-
-      free(directory);
+    if (stat(container, &status) == -1) {
+      logSystemError("stat");
+    } else if (status.st_uid == user) {
+      adjust = 1;
     }
   }
 
   if (adjust) {
     struct stat status;
 
-    if (stat(path, &status) == -1) {
-      logSystemError("stat");
-      return 0;
-    }
+    if (!getStatus(object, &status)) return 0;
 
     {
       mode_t oldPermissions = status.st_mode & ~S_IFMT;
@@ -3074,8 +3070,7 @@ adjustPermissions (const char *path) {
 #endif
 
       if (newPermissions != oldPermissions) {
-        if (chmod(path, newPermissions) == -1) {
-          logSystemError("chmod");
+        if (!setPermissions(object, newPermissions)) {
           return 0;
         }
       }
@@ -3083,6 +3078,60 @@ adjustPermissions (const char *path) {
   }
 
   return 1;
+}
+
+static int
+getPathStatus (const void *object, struct stat *status) {
+  const char *path = object;
+  if (stat(path, status) != -1) return 1;
+  logSystemError("stat");
+  return 0;
+}
+
+static int
+setPathPermissions (const void *object, mode_t permissions) {
+  const char *path = object;
+  if (chmod(path, permissions) != -1) return 1;
+  logSystemError("chmod");
+  return 0;
+}
+
+static int
+adjustPathPermissions (const char *path) {
+  int ok = 0;
+  char *parent = getPathDirectory(path);
+
+  if (parent) {
+    if (adjustPermissions(path, parent, getPathStatus, setPathPermissions)) ok = 1;
+    free(parent);
+  }
+
+  return ok;
+}
+
+static int
+getFileStatus (const void *object, struct stat *status) {
+  const int *fd = object;
+  if (fstat(*fd, status) != -1) return 1;
+  logSystemError("fstat");
+  return 0;
+}
+
+static int
+setFilePermissions (const void *object, mode_t permissions) {
+  const int *fd = object;
+  if (fchmod(*fd, permissions) != -1) return 1;
+  logSystemError("fchmod");
+  return 0;
+}
+
+static int
+adjustFilePermissions (int fd, const char *directory) {
+  return adjustPermissions(
+    &fd, directory,
+    getFileStatus,
+    setFilePermissions
+  );
 }
 #endif /* __MINGW32__ */
 
@@ -3169,7 +3218,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     approximateDelay(1000);
   }
 
-  if (!adjustPermissions(BRLAPI_SOCKETPATH)) {
+  if (!adjustPathPermissions(BRLAPI_SOCKETPATH)) {
     goto outfd;
   }
 
@@ -3281,7 +3330,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     goto outfd;
   }
 
-  if (!adjustPermissions(sa.sun_path)) {
+  if (!adjustFilePermissions(fd, BRLAPI_SOCKETPATH)) {
     goto outfd;
   }
 
