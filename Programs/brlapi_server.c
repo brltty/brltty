@@ -3056,18 +3056,18 @@ adjustPermissions (
 
   if (adjust) {
     struct stat status;
-
     if (!getStatus(object, &status)) return 0;
 
     {
       mode_t oldPermissions = status.st_mode & ~S_IFMT;
       mode_t newPermissions = oldPermissions;
 
-#ifdef S_IRGRP
+      #ifdef S_IRGRP
       if (oldPermissions & S_IRUSR) newPermissions |= S_IRGRP | S_IROTH;
       if (oldPermissions & S_IWUSR) newPermissions |= S_IWGRP | S_IWOTH;
       if (oldPermissions & S_IXUSR) newPermissions |= S_IXGRP | S_IXOTH;
-#endif
+      if (S_ISDIR(status.st_mode)) newPermissions |= S_ISVTX | S_IXOTH;
+      #endif
 
       if (newPermissions != oldPermissions) {
         if (!setPermissions(object, newPermissions)) {
