@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY tukee pistenäyttöjä.</string>
 
   <string name="about_label_activity">Tietoa sovelluksesta</string>
-  <string name="about_label_name">Nimi</string>
-  <string name="about_label_version">Versio</string>
   <string name="about_label_copyright">Tekijänoikeus</string>
 
   <string name="inputService_name">BRLTTY:n syötepalvelu</string>

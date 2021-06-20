@@ -12,6 +12,7 @@ ext {
 
 ext {
   appVersionName = appVersionIdentifier.replaceAll(/^.*?-(\d)/, /$1/).replaceAll(/-g.*$/, "")
+  appSourceRevision = appVersionIdentifier.replaceAll(/^.*-g(.*)$/, /$1/)
 }
 
 ext {
@@ -21,6 +22,12 @@ ext {
     brltty.native.rootDirectory
   ].execute().text.trim() as int
 }
+
+brltty.config.sourceRevision = "git:${appSourceRevision}"
+brltty.config.buildTime = Instant.now().toString()
+                                 .replace('T', '@')
+                                 .replaceAll(/:\d{2}\..*/, " UTC")
+println brltty.config.copyrightNotice
 
 task brlttyAddTables (type: Copy) {
   group "build"

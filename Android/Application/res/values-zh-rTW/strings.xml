@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY 支援點字顯示器</string>
 
   <string name="about_label_activity">關於軟體</string>
-  <string name="about_label_name">名稱</string>
-  <string name="about_label_version">版本</string>
   <string name="about_label_copyright">版權</string>
 
   <string name="inputService_name">BRLTTY 點字鍵盤輸入</string>

@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY podpira brajeve naprave.</string>
 
   <string name="about_label_activity">O Programu</string>
-  <string name="about_label_name">Ime</string>
-  <string name="about_label_version">Različica</string>
   <string name="about_label_copyright">Avtorske Pravice</string>
 
   <string name="inputService_name">BRLTTY Storitev Vnosa</string>

@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY поддерживает брайлевские устройства.</string>
 
   <string name="about_label_activity">О приложении</string>
-  <string name="about_label_name">Название</string>
-  <string name="about_label_version">Версия</string>
   <string name="about_label_copyright">Авторские права</string>
 
   <string name="inputService_name">Служба ввода BRLTTY</string>

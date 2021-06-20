@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY از دستگاههای خط بریل پشتیبانی میکند .</string>
 
   <string name="about_label_activity">درباره نرم‌افزار</string>
-  <string name="about_label_name">نام</string>
-  <string name="about_label_version">نسخه</string>
   <string name="about_label_copyright">حق انتشار</string>
 
   <string name="inputService_name">BRLTTY خدمات ورودی</string>

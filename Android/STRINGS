@@ -1,11 +1,11 @@
-app_name BRLTTY
 app_description BRLTTY supports braille devices.
 
 about_label_activity About Application
-about_label_name Name
-about_label_version Version
 about_label_copyright Copyright
+about_label_buildTime Build Time
+about_label_sourceRevision Source Revision
 about_label_privacy Privacy Policy
+about_label_GooglePlay Google Play
 
 inputService_name BRLTTY Input Service
 inputService_type Keyboards on Braille Devices

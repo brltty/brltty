@@ -6,22 +6,37 @@
   >
 
   <TableRow>
-    <TextView android:text="@string/about_label_name" />
-    <TextView android:text="@string/app_name" />
-  </TableRow>
-
-  <TableRow>
-    <TextView android:text="@string/about_label_version" />
-    <TextView android:text="@string/app_version" android:id="@+id/application_version_value" />
-  </TableRow>
-
-  <TableRow>
     <TextView android:text="@string/about_label_copyright" />
-    <TextView android:text="@string/PACKAGE_COPYRIGHT" />
+    <TextView android:text="@string/appConfig_copyrightNotice" />
+  </TableRow>
+
+  <TableRow>
+    <TextView android:text="@string/app_name" />
+    <TextView android:id="@+id/app_version_name" />
+  </TableRow>
+
+  <TableRow>
+    <TextView android:text="@string/api_name" />
+    <TextView android:text="@string/appConfig_apiRelease" />
+  </TableRow>
+
+  <TableRow>
+    <TextView android:text="@string/about_label_buildTime" />
+    <TextView android:text="@string/appConfig_buildTime" />
+  </TableRow>
+
+  <TableRow>
+    <TextView android:text="@string/about_label_sourceRevision" />
+    <TextView android:text="@string/appConfig_sourceRevision" />
   </TableRow>
 
   <Button
-    android:text="@string/about_label_privacy"
+    android:text="@string/about_label_privacyPolicy"
     android:onClick="viewPrivacyPolicy"
+   />
+
+  <Button
+    android:text="@string/about_label_GooglePlay"
+    android:onClick="viewGooglePlay"
    />
 </TableLayout>

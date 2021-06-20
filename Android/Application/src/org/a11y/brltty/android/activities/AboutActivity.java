@@ -36,6 +36,10 @@ public class AboutActivity extends InternalActivity {
     launch(R.string.privacy_policy_url);
   }
 
+  public void viewGooglePlay (View view) {
+    launch(R.string.google_play_url);
+  }
+
   private final void setText (int view, CharSequence text) {
     ((TextView)findViewById(view)).setText(text);
   }
@@ -49,7 +53,7 @@ public class AboutActivity extends InternalActivity {
     try {
       PackageInfo info = getPackageManager().getPackageInfo(name, 0);
 
-      setText(R.id.application_version_value, info.versionName);
+      setText(R.id.app_version_name, info.versionName);
     } catch (PackageManager.NameNotFoundException exception) {
       Log.w(LOG_TAG, ("package information not found: " + name));
     }

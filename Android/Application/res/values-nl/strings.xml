@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY ondersteunt brailleapparaten.</string>
 
   <string name="about_label_activity">Over applicatie</string>
-  <string name="about_label_name">Naam</string>
-  <string name="about_label_version">Versie</string>
   <string name="about_label_copyright">Copyright</string>
 
   <string name="inputService_name">BRLTTY InvoerService</string>

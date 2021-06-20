@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY supports braille devices.</string>
 
   <string name="about_label_activity">About Application</string>
-  <string name="about_label_name">Name</string>
-  <string name="about_label_version">Version</string>
   <string name="about_label_copyright">Copyright</string>
-  <string name="about_label_privacy">Privacy Policy</string>
+  <string name="about_label_buildTime">Build Time</string>
+  <string name="about_label_sourceRevision">Source Revision</string>
+  <string name="about_label_privacyPolicy">Privacy Policy</string>
+  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">BRLTTY Input Service</string>
   <string name="inputService_type">Keyboards on Braille Devices</string>

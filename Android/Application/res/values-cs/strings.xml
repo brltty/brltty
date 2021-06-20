@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="app_name">BRLTTY</string>
   <string name="app_description">BRLTTY podporuje braillské řádky.</string>
 
   <string name="about_label_activity">O aplikaci</string>
-  <string name="about_label_name">Název</string>
-  <string name="about_label_version">Verze</string>
   <string name="about_label_copyright">Copyright</string>
 
   <string name="inputService_name">Služba vstupu BRLTTY</string>
