@@ -23,9 +23,15 @@ void normalizeListProperty (Properties properties, String name) {
 
 Properties loadPropertiesFromFile (String path) {
   def properties = new Properties()
-
   def file = rootProject.file(path)
-  if (file.exists()) properties.load(new FileInputStream(file))
+
+  if (file.exists()) {
+    new FileInputStream(file).withStream { stream ->
+      new InputStreamReader(stream, "UTF-8").withReader { reader ->
+        properties.load(reader)
+      }
+    }
+  }
 
   def directoryProperties = []
   def subdirectoryProperties = []
