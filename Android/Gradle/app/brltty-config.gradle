@@ -1,0 +1,18 @@
+brltty.config.revisionIdentifier = [
+  brltty.native.rootDirectory + File.separator + "getrevid",
+  brltty.native.rootDirectory
+].execute().text.trim()
+
+brltty.config.versionCode = [
+  brltty.native.rootDirectory + File.separator + "getrevid",
+  "-r", brltty.config.revisionIdentifier, "-i",
+  brltty.native.rootDirectory
+].execute().text.trim()
+
+brltty.config.versionName = brltty.config.revisionIdentifier.replaceAll(/^.*?-(\d)/, /$1/).replaceAll(/-g.*$/, "")
+brltty.config.sourceRevision = brltty.config.revisionIdentifier.replaceAll(/^.*-g(.*)$/, /git:$1/)
+
+brltty.config.buildTime = Instant.now().toString()
+                                 .replace('T', '@')
+                                 .replaceAll(/:\d{2}\..*/, " UTC")
+

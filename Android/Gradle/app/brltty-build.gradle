@@ -2,32 +2,6 @@ def assetsDirectory = brltty.getAssetsPath(project)
 def messagesDirectory = assetsDirectory + File.separator + "locale"
 def tablesDirectory = assetsDirectory + File.separator + "tables"
 
-ext {
-  appVersionIdentifier = [
-    brltty.native.rootDirectory + File.separator + "getrevid",
-    brltty.native.rootDirectory
-  ].execute().text.trim()
-}
-
-ext {
-  appVersionName = appVersionIdentifier.replaceAll(/^.*?-(\d)/, /$1/).replaceAll(/-g.*$/, "")
-  appSourceRevision = appVersionIdentifier.replaceAll(/^.*-g(.*)$/, /$1/)
-}
-
-ext {
-  appVersionCode = [
-    brltty.native.rootDirectory + File.separator + "getrevid",
-    "-r", appVersionIdentifier, "-i",
-    brltty.native.rootDirectory
-  ].execute().text.trim() as int
-}
-
-brltty.config.sourceRevision = "git:${appSourceRevision}"
-brltty.config.buildTime = Instant.now().toString()
-                                 .replace('T', '@')
-                                 .replaceAll(/:\d{2}\..*/, " UTC")
-println brltty.config.copyrightNotice
-
 task brlttyAddTables (type: Copy) {
   group "build"
   description "Add the tables (text, attributes, contraction, keyboard, input) to the build (as assets)."

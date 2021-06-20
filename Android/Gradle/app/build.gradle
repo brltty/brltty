@@ -7,7 +7,8 @@ description = """
 "${project.name}" implements the accessibility service for "${rootProject.name}" on Android.
 """
 
-apply from: "brltty.gradle"
+apply from: "brltty-config.gradle"
+apply from: "brltty-build.gradle"
 
 dependencies {
   implementation project(":core")
@@ -35,8 +36,8 @@ android {
     targetSdkVersion 29
     minSdkVersion 16
 
-    versionName appVersionName
-    versionCode appVersionCode
+    versionName brltty.config.versionName
+    versionCode brltty.config.versionCode as int
 
     brltty.config.propertyNames().each { name ->
       resValue "string", "appConfig_${name}", brltty.config[name]
