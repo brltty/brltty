@@ -1,0 +1,49 @@
+#!/bin/sh
+set -e
+
+readonly programName="${0##*/}"
+
+programMessage() {
+  local message="${1}"
+
+  echo "${programName}: ${message}"
+}
+
+syntaxError() {
+  local message="${1}"
+
+  programMessage "${message}"
+  exit 2
+}
+
+semanticError() {
+  local message="${1}"
+
+  programMessage "${message}"
+  exit 3
+}
+
+makeIcon() {
+  local name="${1}"
+  local size="${2}"
+
+  convert "${imageFile}" -resize "${size}" "res/drawable-${name}/${imageName}.png"
+}
+
+[ "${#}" -ge 1 ] || syntaxError "missing image file"
+imageFile="${1}"
+shift 1
+
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
+
+[ -f "${imageFile}" ] || semanticError "image file not found: ${imageFile}"
+[ -r "${imageFile}" ] || semanticError "image file not readable: ${imageFile}"
+
+imageName="${imageFile%.*}"
+
+makeIcon ldpi 36x36
+makeIcon mdpi 48x48
+makeIcon hdpi 72x72
+makeIcon xhdpi 96x96
+
+exit 0
