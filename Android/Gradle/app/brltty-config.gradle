@@ -1,5 +1,6 @@
 brltty.config.revisionIdentifier = [
   brltty.native.rootDirectory + File.separator + "getrevid",
+  "-m", "+",
   brltty.native.rootDirectory
 ].execute().text.trim()
 
@@ -16,3 +17,10 @@ brltty.config.buildTime = Instant.now().toString()
                                  .replace('T', '@')
                                  .replaceAll(/:\d{2}\..*/, " UTC")
 
+android {
+  defaultConfig {
+    brltty.config.propertyNames().each { name ->
+      resValue "string", "appConfig_${name}", brltty.config[name]
+    }
+  }
+}

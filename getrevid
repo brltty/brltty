@@ -17,11 +17,14 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+defaultModifiedIndicator="M"
+
 . "`dirname "${0}"`/brltty-prologue.sh"
 addProgramOption a string.anything appendText "text to append to the revision identifier"
 addProgramOption d string.anything defaultIdentifier "the default revision identifier"
 addProgramOption f string.file outputFile "the file in which to write the revision identifier" "standard output"
 addProgramOption i flag asInteger "render the revision identifier as a 32-bit integer"
+addProgramOption m string.anything modifiedIndicator "the modified indicator" "${defaultModifiedIndicator}"
 addProgramOption p string.anything prependText "text to prepend to the revision identifier"
 addProgramOption r string.anything revisionIdentifier "the revision identifier"
 addProgramOption s flag asString "render the revision identifier as a quoted string"
@@ -31,13 +34,15 @@ parseProgramArguments "${@}"
 [ -e "${sourceRoot}" ] || semanticError "directory not found: ${sourceRoot}"
 [ -d "${sourceRoot}" ] || semanticError "not a directory: ${sourceRoot}"
 
+[ -n "${modifiedIndicator}" ] || modifiedIndicator="${defaultModifiedIndicator}"
+
 export GIT_WORK_TREE="${sourceRoot}"
 export GIT_DIR="${GIT_WORK_TREE}/.git"
 
 [ -n "${revisionIdentifier}" ] || {
   if [ -d "${GIT_DIR}" -o -f "${GIT_DIR}" ]
   then
-     revisionIdentifier="`git describe --tags --abbrev=8 --dirty='M' --match='BRLTTY-*' 2>/dev/null`"
+     revisionIdentifier="`git describe --tags --abbrev=8 --dirty="${modifiedIndicator}" --match="BRLTTY-*" 2>/dev/null`"
   elif [ -d "${sourceRoot}/.svn" ]
   then
      revisionIdentifier="`svnversion -n "${sourceRoot}" 2>/dev/null`"

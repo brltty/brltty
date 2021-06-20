@@ -39,10 +39,6 @@ android {
     versionName brltty.config.versionName
     versionCode brltty.config.versionCode as int
 
-    brltty.config.propertyNames().each { name ->
-      resValue "string", "appConfig_${name}", brltty.config[name]
-    }
-
     ndk {
       splits {
         abi {
