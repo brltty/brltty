@@ -1952,7 +1952,6 @@ AC_OUTPUT([
    Autostart/Systemd/tmpfiles
    Autostart/Udev/device.rules
    Autostart/X11/90xbrlapi
-   Android/Application/res/values/configured.xml:Android/Application/res.strings.in
    Android/Gradle/config.properties
    ${brltty_make_files}
 ])

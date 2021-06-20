@@ -44,7 +44,7 @@ public class ActionsActivity extends InternalActivity {
   }
 
   public void browseWebSite (View view) {
-    launch(R.string.web_site_url);
+    launch(R.string.appConfig_webSite);
   }
 
   public void browseCommunityMessages (View view) {
@@ -59,7 +59,7 @@ public class ActionsActivity extends InternalActivity {
       recipient.append("BRLTTY Mailing List");
       recipient.append(' ');
       recipient.append('<');
-      recipient.append(getResourceString(R.string.community_message_address));
+      recipient.append(getResourceString(R.string.appConfig_emailAddress));
       recipient.append('>');
       intent.putExtra(Intent.EXTRA_EMAIL, new String[] {recipient.toString()});
     }
