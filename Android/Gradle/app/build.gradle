@@ -8,7 +8,7 @@ description = """
 """
 
 apply from: "brltty-config.gradle"
-apply from: "brltty-build.gradle"
+apply from: "brltty-assets.gradle"
 
 dependencies {
   implementation project(":core")
