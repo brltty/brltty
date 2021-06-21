@@ -1,4 +1,4 @@
-GRADLE_WRAPPER_COMMAND = ./gradlew -q
+GRADLE_WRAPPER_COMMAND = ./gradlew --quiet --console plain
 GRADLE_DUMP_COMMAND = aapt dump --values
 GRADLE_SYMLINK_COMMAND = ln -s -f
 

@@ -109,8 +109,6 @@ ITERATE = \
    Authorization/Polkit \
    Initramfs/Dracut \
    Android/Gradle \
-   Android/Application \
-   Android/Core \
    ; do (cd $$directory && $(MAKE) $@); done
 
 clean::

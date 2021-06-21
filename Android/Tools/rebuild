@@ -1,0 +1,73 @@
+#!/usr/bin/env tclsh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2021 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+source [file join [file dirname [info script]] "prologue.tcl"]
+
+set optionDefinitions {
+}
+
+processProgramArguments optionValues $optionDefinitions
+
+proc executeCommand {args} {
+   if {[catch $args response] == 0} {
+      set response ""
+   } elseif {[string equal [lindex $::errorCode 0] CHILDSTATUS]} {
+      set response "host command failed: exit status [lindex $::errorCode 2]"
+   }
+
+   return $response
+}
+
+proc setWorkingDirectory {path} {
+   logMessage information "working directory: $path"
+   set problem [executeCommand cd $path]
+
+   if {[string length $problem] > 0} {
+      semanticError "$problem"
+   }
+}
+
+proc executeHostCommand {args} {
+   set command [join $args " "]
+   logMessage information "executing host command: $command"
+
+   set args [linsert $args 0 exec <@ stdin]
+   lappend args >@ stdout 2>@ stderr
+   set problem [eval executeCommand $args]
+
+   if {[string length $problem] > 0} {
+      semanticError "$problem: $command"
+   }
+}
+
+proc executeGradleTask {task} {
+   executeHostCommand ./gradlew --quiet --console plain -- $task
+}
+
+setWorkingDirectory $sourceDirectory
+executeHostCommand ./autogen
+executeHostCommand ./cfg-android
+
+setWorkingDirectory $gradleDirectory
+executeGradleTask clean
+executeGradleTask :app:assembleDebug
+executeGradleTask :app:assembleRelease
+
+logMessage information "done"
+exit 0
