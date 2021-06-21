@@ -152,8 +152,6 @@ parseProgramArguments "${@}"
 
 abiRoot="${programDirectory}/Android/ABI/${abiName}"
 abiPropertiesFile="${abiRoot}/build.properties"
-abiMakeFile="${abiRoot}/Makefile"
-
 [ -f "${abiPropertiesFile}" ] || syntaxError "unrecognized ABI: ${abiName}"
 . "${abiPropertiesFile}"
 setProperties
@@ -161,17 +159,20 @@ setProperties
 makeToolChain
 linkMissingHeaders
 
-if [ -f "${abiMakeFile}" ]
+buildDirectory="$(pwd)"
+buildMakeFile="${buildDirectory}/Makefile"
+
+if [ -f "${buildMakeFile}" ]
 then
    if "${forceReconfigure}"
    then
-      logMessage task "reconfiguring ABI: ${abiName}"
+      logMessage task "reconfiguring build: ${buildDirectory}"
    else
-      logMessage task "ABI already configured: ${abiName}"
+      logMessage task "build already configured: ${buildDirectory}"
       exit 0
    fi
 else
-   logMessage task "configuring ABI: ${abiName}"
+   logMessage alert "configuring build: ${buildDirectory}"
 fi
 
 toolsDirectory="${properties[TOOLCHAIN]}/bin"
@@ -181,6 +182,5 @@ findTool CC gcc
 export CFLAGS="${properties[CFLAGS]}"
 export LDFLAGS="${properties[LDFLAGS]}"
 
-logMessage step "configuring ABI: ${abiName}"
 "${properties[SOURCE]}/configure" --quiet --host="${properties[SYSTEM]}" "${configureOptions[@]}"
 exit 0
