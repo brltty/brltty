@@ -548,7 +548,7 @@ BRLTTY_ARG_WITH(
 
 $2_found=false
 m4_define([$2_find], ifelse(m4_eval($# > 4), 1, [true], [false]))
-ifelse($2_find, [true], [BRLTTY_HAVE_PACKAGE([$2], [$1], [$2_found=true], [])])
+ifelse($2_find, [true], [BRLTTY_HAVE_PACKAGE([$2], [$1], [$2_found=true], [:])])
 
 if test "${$2_root}" = "no"
 then
