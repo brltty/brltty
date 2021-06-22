@@ -5,6 +5,10 @@
 
   <string name="about_label_activity">Om Applikationen</string>
   <string name="about_label_copyright">Copyright</string>
+  <string name="about_label_buildTime">Kompileringstidspunkt</string>
+  <string name="about_label_sourceRevision">Kildekode Revision</string>
+  <string name="about_label_privacyPolicy">Privatlivspolitik</string>
+  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">BRLTTY Input Service</string>
   <string name="inputService_type">Tastaturer på Braille enheder</string>
@@ -265,6 +269,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">Belgisk (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Portugiskisk (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Russisk (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (uforkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (forkortet)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thailandsk (Forkortet)</string>
