@@ -179,6 +179,11 @@ toolsDirectory="${properties[TOOLCHAIN]}/bin"
 export PATH="${PATH}:${toolsDirectory}"
 findTool CC gcc
 
+sysrootDirectory="${properties[TOOLCHAIN]}/sysroot"
+export PKG_CONFIG_SYSROOT_DIR="${sysrootDirectory}"
+export PKG_CONFIG_LIBDIR="${sysrootDirectory}/usr/lib/pkgconfig:${sysrootDirectory}/usr/share/pkgconfig"
+export PKG_CONFIG_PATH=""
+
 export CFLAGS="${properties[CFLAGS]}"
 export LDFLAGS="${properties[LDFLAGS]}"
 

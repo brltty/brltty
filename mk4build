@@ -54,7 +54,7 @@ then
    needTemporaryDirectory
    objectExtension="build.${objectExtension}"
 
-   for variable in CC CFLAGS CXX CXXFLAGS LDFLAGS LDLIBS PKG_CONFIG
+   for variable in CC CFLAGS CXX CXXFLAGS LDFLAGS LDLIBS PKG_CONFIG PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_LIBDIR PKG_CONFIG_PATH
    do
       unset "${variable}"
       getVariable "${variable}_FOR_BUILD" value
