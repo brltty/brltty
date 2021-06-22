@@ -1520,7 +1520,7 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth I/O], [], [dnl
          bluetooth_package="linux"
          AC_HAVE_LIBRARY([bluetooth])
 
-         BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
+         BRLTTY_IF_DBUS([dnl
             bluetooth_includes="${dbus_includes}"
             bluetooth_libs="${dbus_libs}"
          ])
@@ -1831,7 +1831,7 @@ then
    ])
 fi
 
-BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
+BRLTTY_IF_DBUS([dnl
    AC_CHECK_HEADER([X11/keysym.h], [dnl
       BRLTTY_HAVE_PACKAGE([atspi2], [atspi-2], [dnl
          brltty_cppflags_save="${CPPFLAGS}"

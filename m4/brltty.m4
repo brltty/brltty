@@ -632,6 +632,22 @@ AC_SUBST([$1_includes])
 AC_SUBST([$1_libs])
 ])
 
+AC_DEFUN([BRLTTY_HAVE_DBUS], [dnl
+   AC_CACHE_CHECK([if D-Bus is available], [brltty_cv_have_dbus], [dnl
+      BRLTTY_HAVE_PACKAGE([dbus], ["dbus-1 >= 1.0"], [dnl
+         brltty_cv_have_dbus=yes
+      ], [dnl
+         brltty_cv_have_dbus=no
+      ])
+   ])
+])
+
+AC_DEFUN([BRLTTY_IF_DBUS], [dnl
+AC_REQUIRE([BRLTTY_HAVE_DBUS])
+test "${brltty_cv_have_dbus}" = "yes" && {
+   $1
+}])
+
 AC_DEFUN([BRLTTY_HAVE_PTHREADS], [dnl
    AC_CACHE_CHECK([if pthreads are available], [brltty_cv_have_pthreads], [dnl
       SYSCFLAGS="${SYSCFLAGS} -D_REENTRANT"
