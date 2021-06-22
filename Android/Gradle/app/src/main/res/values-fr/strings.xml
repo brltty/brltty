@@ -5,6 +5,10 @@
 
   <string name="about_label_activity">À propos de l\'application</string>
   <string name="about_label_copyright">Droits d\'auteur</string>
+  <string name="about_label_buildTime">Date de construction</string>
+  <string name="about_label_sourceRevision">Révision des sources</string>
+  <string name="about_label_privacyPolicy">Politique de confidentialité</string>
+  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">Service d\'entrée BRLTTY</string>
   <string name="inputService_type">Claviers des périphériques brailles</string>
