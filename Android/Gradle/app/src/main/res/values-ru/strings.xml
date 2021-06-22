@@ -5,6 +5,10 @@
 
   <string name="about_label_activity">О приложении</string>
   <string name="about_label_copyright">Авторские права</string>
+  <string name="about_label_buildTime">Время сборки</string>
+  <string name="about_label_sourceRevision">Версия исходного кода</string>
+  <string name="about_label_privacyPolicy">Политика конфиденциальности</string>
+  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">Служба ввода BRLTTY</string>
   <string name="inputService_type">Клавиатуры на брайлевских устройствах</string>
@@ -265,6 +269,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">Голландский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">Чичева (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Португальский (ступень 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Русский (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Сингальский (несокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Суахили (сокращённый)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Тайский (сокращённый)</string>
