@@ -5,6 +5,10 @@
 
   <string name="about_label_activity">Over applicatie</string>
   <string name="about_label_copyright">Copyright</string>
+  <string name="about_label_buildTime">Moment Van Build</string>
+  <string name="about_label_sourceRevision">Bronrevisie</string>
+  <string name="about_label_privacyPolicy">Privacyverklaring</string>
+  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">BRLTTY InvoerService</string>
   <string name="inputService_type">Toetsenborden op brailleapparaten</string>
@@ -265,6 +269,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">Nederlands (verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Portugees (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Russisch (verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (verkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thais (verkort)</string>
