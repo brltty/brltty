@@ -65,7 +65,7 @@ Task newConfigureTask (Map properties) {
 
     workingDir properties.abiDirectory
     ignoreExitValue false
-    commandLine "${brltty.native.rootDirectory}/cfg-android-abi", "-q", properties.ABI
+    commandLine "${brltty.native.rootDirectory}/cfg-android-abi", properties.ABI
   }
 }
 

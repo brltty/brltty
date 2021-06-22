@@ -95,7 +95,7 @@ setProperties() {
 
 makeToolChain() {
    [ -d "${properties[TOOLCHAIN]}" ] || {
-      logMessage step "making tool chain for ABI: ${abiName}"
+      logMessage task "installing tool chain for ABI: ${abiName}"
 
       VERBOSE=no "${properties[NDK]}/build/tools/make-standalone-toolchain.sh" \
          --platform="${properties[PLATFORM]}" \
@@ -166,13 +166,13 @@ if [ -f "${buildMakeFile}" ]
 then
    if "${forceReconfigure}"
    then
-      logMessage task "reconfiguring build: ${buildDirectory}"
+      logMessage warning "reconfiguring build: ${buildDirectory}"
    else
-      logMessage task "build already configured: ${buildDirectory}"
+      logMessage step "build already configured: ${buildDirectory}"
       exit 0
    fi
 else
-   logMessage alert "configuring build: ${buildDirectory}"
+   logMessage task "configuring build: ${buildDirectory}"
 fi
 
 toolsDirectory="${properties[TOOLCHAIN]}/bin"

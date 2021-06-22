@@ -35,7 +35,7 @@ proc executeCommand {args} {
 }
 
 proc setWorkingDirectory {path} {
-   logMessage information "working directory: $path"
+   logMessage step "working directory: $path"
    set problem [executeCommand cd $path]
 
    if {[string length $problem] > 0} {
@@ -45,7 +45,7 @@ proc setWorkingDirectory {path} {
 
 proc executeHostCommand {args} {
    set command [join $args " "]
-   logMessage information "executing host command: $command"
+   logMessage step "executing host command: $command"
 
    set args [linsert $args 0 exec <@ stdin]
    lappend args >@ stdout 2>@ stderr
@@ -69,5 +69,5 @@ executeGradleTask clean
 executeGradleTask :app:assembleDebug
 executeGradleTask :app:assembleRelease
 
-logMessage information "done"
+logMessage task "done"
 exit 0

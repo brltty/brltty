@@ -152,7 +152,7 @@ programMessage() {
    [ -z "${message}" ] || echo >&2 "${programName}: ${message}"
 }
 
-defineEnumeration programLogLevel_ error warning alert task step detail
+defineEnumeration programLogLevel_ error warning task step detail
 programLogLevel=$((${programLogLevel_task}))
 
 logMessage() {

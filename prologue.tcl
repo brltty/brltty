@@ -112,17 +112,8 @@ proc writeProgramMessage {message} {
    }
 }
 
-makeEnumeration logLevels {
-   debug
-   information
-   notice
-   warning
-   error
-   alert
-   critical
-   emergency
-}
-set logLevel $logLevels(notice)
+makeEnumeration logLevels {detail step task warning error}
+set logLevel $logLevels(task)
 
 proc logMessage {level message} {
    global logLevels logLevel

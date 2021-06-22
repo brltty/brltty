@@ -266,7 +266,7 @@ proc makeDeviceTable {drivers} {
 
                if {[dict exists $deviceTable vendors $vendor products $product]} {
                   set devices [dict get $deviceTable vendors $vendor products $product devices]
-                  logMessage notice "device specified more than once: $identifier: [formatDeviceDescription [lindex $devices 0]] & [formatDeviceDescription $device]"
+                  logMessage task "device specified more than once: $identifier: [formatDeviceDescription [lindex $devices 0]] & [formatDeviceDescription $device]"
                } else {
                   set devices [list]
                   dict set deviceTable vendors $vendor products $product generic [dict exists $genericDevices $identifier]
@@ -276,7 +276,7 @@ proc makeDeviceTable {drivers} {
                dict set deviceTable vendors $vendor products $product devices $devices
 
                if {[dict get $deviceTable vendors $vendor products $product generic]} {
-                  logMessage notice "generic device identifier: $identifier: [formatDeviceDescription $device]"
+                  logMessage task "generic device identifier: $identifier: [formatDeviceDescription $device]"
                }
             }
          }
