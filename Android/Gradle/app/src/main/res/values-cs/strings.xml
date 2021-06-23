@@ -5,6 +5,10 @@
 
   <string name="about_label_activity">O aplikaci</string>
   <string name="about_label_copyright">Copyright</string>
+  <string name="about_label_buildTime">Čas sestavení</string>
+  <string name="about_label_sourceRevision">Revize zdrojového kódu</string>
+  <string name="about_label_privacyPolicy">Zásady zpracování osobních údajů</string>
+  <string name="about_label_GooglePlay">Obchod Play</string>
 
   <string name="inputService_name">Služba vstupu BRLTTY</string>
   <string name="inputService_type">Klávesnice braillských zařízení</string>
@@ -265,6 +269,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">Nizozemština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">Čičeva (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Portugalština (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Ruština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalština (plnopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Svahilština (zkratkopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thajština (zkratkopis)</string>
