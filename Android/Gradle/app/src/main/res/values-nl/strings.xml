@@ -6,7 +6,7 @@
   <string name="about_label_activity">Over applicatie</string>
   <string name="about_label_copyright">Copyright</string>
   <string name="about_label_buildTime">Moment Van Build</string>
-  <string name="about_label_sourceRevision">Bronrevisie</string>
+  <string name="about_label_sourceRevision">Bronherziening</string>
   <string name="about_label_privacyPolicy">Privacyverklaring</string>
   <string name="about_label_GooglePlay">Google Play</string>
 
