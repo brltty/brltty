@@ -5,6 +5,10 @@
 
   <string name="about_label_activity">關於軟體</string>
   <string name="about_label_copyright">版權</string>
+  <string name="about_label_buildTime">建制時間</string>
+  <string name="about_label_sourceRevision">源碼修訂</string>
+  <string name="about_label_privacyPolicy">隱私政策</string>
+  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">BRLTTY 點字鍵盤輸入</string>
   <string name="inputService_type">點顯器上的鍵盤</string>
@@ -265,6 +269,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">荷蘭語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">奇切瓦 (縮寫)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">葡萄牙語二級</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">俄語（縮寫）</string>
   <string name="CONTRACTION_TABLE_LABEL_si">錫蘭語無縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">斯瓦希裡語縮寫</string>
   <string name="CONTRACTION_TABLE_LABEL_th">泰國語縮寫</string>
