@@ -5,7 +5,10 @@
 
   <string name="about_label_activity">Om programmet</string>
   <string name="about_label_copyright">Opphavsrett</string>
+  <string name="about_label_buildTime">Byggetid</string>
+  <string name="about_label_sourceRevision">kildekodeutgave</string>
   <string name="about_label_privacyPolicy">Personvernregler</string>
+  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">Inndatatjeneste for BRLTTY</string>
   <string name="inputService_type">Tastatur på punktskriftenheter</string>
