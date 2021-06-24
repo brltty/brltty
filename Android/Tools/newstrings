@@ -19,24 +19,145 @@
 
 source [file join [file dirname [info script]] "prologue.tcl"]
 
-proc getStrings {directory args} {
+proc splitNames {names oldNamesVariable sameNamesVariable newNamesVariable} {
+   global baseStrings ignorableNames
+
+   upvar 1 $oldNamesVariable oldNames
+   upvar 1 $sameNamesVariable sameNames
+   upvar 1 $newNamesVariable newNames
+
+   lassign [intersect3 $names [dict keys $baseStrings]] oldNames sameNames newNames
+   lassign [intersect3 $newNames $ignorableNames] newNames x x
+}
+
+proc writeNames {path names} {
+   global baseStrings
+   file delete $path
+
+   if {[llength $names] > 0} {
+      if {[catch [list open $path {WRONLY TRUNC CREAT}] channel] == 0} {
+         foreach name $names {
+            set string [dict get $baseStrings $name]
+            puts $channel "$name [dict get $string text]"
+         }
+
+         close $channel; unset channel
+      } else {
+         semanticError $channel
+      }
+   }
+}
+
+proc loadStringList {} {
+   global androidDirectory
+
+   set strings [dict create]
+   set path [file join $androidDirectory STRINGS]
+   logMessage detail "loading string list: $path"
+
+   set order 0
+   set pattern {^\s*(\S+)\s+(.*?)\s*$}
+
+   if {[catch [list open $path {RDONLY}] channel] == 0} {
+      while {[gets $channel line] >= 0} {
+         if {[regexp $pattern $line x name text]} {
+            set string [dict create text $text order [incr order]]
+            dict set strings $name $string
+         }
+      }
+
+      close $channel; unset channel
+   } else {
+      semanticError $channel
+   }
+
+   return $strings
+}
+
+proc auditStringList {} {
+   global baseStrings
+
+   logMessage step "auditing string list"
+   set listedStrings [loadStringList]
+   splitNames [dict keys $listedStrings] oldNames sameNames newNames
+   writeNames "[getProgramName].txt" $newNames
+
+   foreach name $oldNames {
+      writeProgramMessage "old listed string: $name"
+   }
+
+   foreach name $sameNames {
+      set oldText [dict get $listedStrings $name text]
+      set newText [dict get $baseStrings $name text]
+
+      if {![string equal $newText $oldText]} {
+         putProgramMessage "string changed: $name: $oldText -> $newText"
+      }
+   }
+}
+
+proc loadStringResources {directory} {
+   logMessage detail "loading resource directory: $directory"
    set strings [dict create]
 
-   foreach file $args {
-      if {[catch [list open [set path [file join $directory $file]] {RDONLY}] channel] == 0} {
+   set pattern {^\s*<\s*string}
+   append pattern {\s+name\s*=\s*"([^"]*)"}
+   append pattern {(?:\s+translatable\s*=\s*"true")?}
+   append pattern {(?:\s+tools:ignore\s*=\s*"(MissingTranslation)")?}
+   append pattern {\s*>\s*(.*?)\s*<\s*/string\s*>\s*$}
+
+   foreach path [glob "$directory/*.xml"] {
+      logMessage detail "loading string resources: $path"
+
+      if {[catch [list open $path {RDONLY}] channel] == 0} {
          while {[gets $channel line] >= 0} {
-            if {[regexp {^\s*<\s*string\s+name\s*=\s*"([^"]*)".*>(.*)<\s*/string\s*>\s*$} $line x name value]} {
-               dict set strings $name $value
+            if {[regexp $pattern $line x name ignorable text]} {
+               set ignorable [expr {[string length $ignorable] > 0}]
+               set string [dict create text $text ignorable $ignorable]
+               dict set strings $name $string
             }
          }
 
          close $channel; unset channel
       } else {
-         writeProgramMessage $channel
+         semanticError $channel
       }
    }
 
    return $strings
+}
+
+proc getIgnorableNames {strings} {
+   set names [list]
+
+   foreach name [dict keys $strings] {
+      if {[dict get $strings $name ignorable]} {
+         lappend names $name
+      }
+   }
+
+   return $names
+}
+
+proc auditLanguage {code directory} {
+   logMessage step "auditing language: $code"
+   set languageStrings [loadStringResources $directory]
+   splitNames [dict keys $languageStrings] oldNames sameNames newNames
+   writeNames "[getProgramName]-$code.txt" $newNames
+
+   foreach name $oldNames {
+      writeProgramMessage "old language string: $code: $name"
+   }
+}
+
+proc auditAllLanguages {} {
+   global baseDirectory
+   set languageDelimiter -
+
+   foreach directory [glob -nocomplain -path "$baseDirectory$languageDelimiter" "?*"] {
+      set code [lindex [split [file tail $directory] $languageDelimiter] 1]
+      auditLanguage $code $directory
+   }
 }
 
 set optionDefinitions {
@@ -44,42 +165,10 @@ set optionDefinitions {
 
 processProgramArguments optionValues $optionDefinitions
 
-set stringsDirectory [file join $applicationDirectory res values]
-set defaultStrings [getStrings $stringsDirectory strings.xml settings_lists.xml communication_methods.xml log_categories.xml log_levels.xml navigation_modes.xml speech_support.xml]
+set baseDirectory [file join $applicationDirectory res values]
+set baseStrings [loadStringResources $baseDirectory]
+set ignorableNames [getIgnorableNames $baseStrings]
 
-foreach keyPattern {BRAILLE_DRIVER_LABEL_??} {
-   foreach key [dict keys $defaultStrings $keyPattern] {
-      dict unset defaultStrings $key
-   }
-}
-
-set languageDelimiter -
-foreach languageDirectory [glob -nocomplain -path "$stringsDirectory$languageDelimiter" ?*] {
-   set languageCode [lindex [split [file tail $languageDirectory] $languageDelimiter] 1]
-   set languageStrings($languageCode) [getStrings $languageDirectory strings.xml]
-}
-
-foreach languageCode [lsort [array names languageStrings]] {
-   lassign [intersect3 [dict keys $languageStrings($languageCode)] [dict keys $defaultStrings]] oldStrings sameStrings newStrings
-
-   foreach oldString $oldStrings {
-      writeProgramMessage "old string: $languageCode: $oldString"
-   }
-
-   set languageFile "[getProgramName]-$languageCode.txt"
-   file delete $languageFile
-
-   if {[llength $newStrings] > 0} {
-      if {[catch [list open $languageFile {WRONLY TRUNC CREAT}] languageChannel] == 0} {
-         foreach newString $newStrings {
-            puts $languageChannel "$newString [dict get $defaultStrings $newString]"
-         }
-
-         close $languageChannel; unset languageChannel
-      } else {
-         writeProgramMessage $languageChannel
-      }
-   }
-}
-
+auditStringList
+auditAllLanguages
 exit 0
