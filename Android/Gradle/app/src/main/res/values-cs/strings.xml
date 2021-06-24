@@ -8,7 +8,6 @@
   <string name="about_label_buildTime">Čas sestavení</string>
   <string name="about_label_sourceRevision">Revize zdrojového kódu</string>
   <string name="about_label_privacyPolicy">Zásady zpracování osobních údajů</string>
-  <string name="about_label_GooglePlay">Obchod Play</string>
 
   <string name="inputService_name">Služba vstupu BRLTTY</string>
   <string name="inputService_type">Klávesnice braillských zařízení</string>

@@ -8,7 +8,6 @@
   <string name="about_label_buildTime">Erstellungsdatum</string>
   <string name="about_label_sourceRevision">Quellrevision</string>
   <string name="about_label_privacyPolicy">Datenschutzrichtlinie</string>
-  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">BRLTTY Brailleeingabe Service</string>
   <string name="inputService_type">Tastaturen auf Braillezeilen</string>

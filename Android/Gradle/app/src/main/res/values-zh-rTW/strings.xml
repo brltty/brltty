@@ -8,7 +8,6 @@
   <string name="about_label_buildTime">建制時間</string>
   <string name="about_label_sourceRevision">源碼修訂</string>
   <string name="about_label_privacyPolicy">隱私政策</string>
-  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">BRLTTY 點字鍵盤輸入</string>
   <string name="inputService_type">點顯器上的鍵盤</string>

@@ -10,9 +10,11 @@
   <string name="privacy_policy_url" translatable="false">https://brltty.app/doc/PrivacyPolicy.html</string>
   <string name="user_guide_url" translatable="false">https://brltty.app/doc/Android.html</string>
 
-  <string name="google_play_url" translatable="false">https://play.google.com/store/apps/details?id=org.a11y.brltty.android</string>
   <string name="community_messages_url" translatable="false">https://brltty.app/pipermail/brltty/</string>
   <string name="community_membership_url" translatable="false">https://brltty.app/mailman/listinfo/brltty</string>
+
+  <string name="google_play_url" translatable="false">https://play.google.com/store/apps/details?id=org.a11y.brltty.android</string>
+  <string name="google_play_label" translatable="false">Google Play</string>
 
   <string-array name="EMPTY_STRING_ARRAY">
   </string-array>

@@ -8,7 +8,6 @@
   <string name="about_label_buildTime">Время сборки</string>
   <string name="about_label_sourceRevision">Версия исходного кода</string>
   <string name="about_label_privacyPolicy">Политика конфиденциальности</string>
-  <string name="about_label_GooglePlay">Google Play</string>
 
   <string name="inputService_name">Служба ввода BRLTTY</string>
   <string name="inputService_type">Клавиатуры на брайлевских устройствах</string>

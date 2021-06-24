@@ -36,7 +36,7 @@
    />
 
   <Button
-    android:text="@string/about_label_GooglePlay"
+    android:text="@string/google_play_label"
     android:onClick="viewGooglePlay"
    />
 </TableLayout>
