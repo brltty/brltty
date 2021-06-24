@@ -45,7 +45,7 @@ set optionDefinitions {
 processProgramArguments optionValues $optionDefinitions
 
 set stringsDirectory [file join $applicationDirectory res values]
-set defaultStrings [getStrings $stringsDirectory strings.xml settings_strings.xml settings_lists.xml]
+set defaultStrings [getStrings $stringsDirectory strings.xml settings_lists.xml communication_methods.xml log_categories.xml log_levels.xml navigation_modes.xml speech_support.xml]
 
 foreach keyPattern {BRAILLE_DRIVER_LABEL_??} {
    foreach key [dict keys $defaultStrings $keyPattern] {

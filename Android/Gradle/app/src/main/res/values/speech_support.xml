@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="SPEECH_SUPPORT_LABEL_None">None</string>
+  <string name="SPEECH_SUPPORT_LABEL_Native">Native</string>
+
+  <string-array name="SPEECH_SUPPORT_LABELS">
+    <item>@string/SPEECH_SUPPORT_LABEL_None</item>
+    <item>@string/SPEECH_SUPPORT_LABEL_Native</item>
+  </string-array>
+
+  <string-array name="SPEECH_SUPPORT_VALUES">
+    <item>no</item>
+    <item>an</item>
+  </string-array>
+</resources>

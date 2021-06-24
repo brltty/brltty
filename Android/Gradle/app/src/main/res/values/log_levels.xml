@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="LOG_LEVEL_LABEL_debug">Debug</string>
+  <string name="LOG_LEVEL_LABEL_information">Information</string>
+  <string name="LOG_LEVEL_LABEL_notice">Notice</string>
+  <string name="LOG_LEVEL_LABEL_warning">Warning</string>
+  <string name="LOG_LEVEL_LABEL_error">Error</string>
+  <string name="LOG_LEVEL_LABEL_critical">Critical</string>
+  <string name="LOG_LEVEL_LABEL_alert">Alert</string>
+  <string name="LOG_LEVEL_LABEL_emergency">Emergency</string>
+
+  <string-array name="LOG_LEVEL_LABELS">
+    <item>@string/LOG_LEVEL_LABEL_debug</item>
+    <item>@string/LOG_LEVEL_LABEL_information</item>
+    <item>@string/LOG_LEVEL_LABEL_notice</item>
+    <item>@string/LOG_LEVEL_LABEL_warning</item>
+    <item>@string/LOG_LEVEL_LABEL_error</item>
+    <item>@string/LOG_LEVEL_LABEL_critical</item>
+    <item>@string/LOG_LEVEL_LABEL_alert</item>
+    <item>@string/LOG_LEVEL_LABEL_emergency</item>
+  </string-array>
+
+  <string-array name="LOG_LEVEL_VALUES">
+    <item>debug</item>
+    <item>information</item>
+    <item>notice</item>
+    <item>warning</item>
+    <item>error</item>
+    <item>critical</item>
+    <item>alert</item>
+    <item>emergency</item>
+  </string-array>
+</resources>

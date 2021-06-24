@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">Serial</string>
+
+  <string-array name="DEVICE_METHOD_LABELS">
+    <item>@string/COMMUNICATION_METHOD_LABEL_Bluetooth</item>
+    <item>@string/COMMUNICATION_METHOD_LABEL_Usb</item>
+    <item>@string/COMMUNICATION_METHOD_LABEL_Serial</item>
+  </string-array>
+
+  <string-array name="DEVICE_METHOD_VALUES">
+    <item>Bluetooth</item>
+    <item>Usb</item>
+    <item>Serial</item>
+  </string-array>
+</resources>
