@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="PREF_KEY_PACKAGE_SIZE" translatable="false">package-size</string>
+  <string name="PREF_KEY_PACKAGE_TIME" translatable="false">package-time</string>
+
+  <string name="PREF_KEY_RELEASE_BRAILLE_DEVICE" translatable="false">release-braille-device</string>
+  <string name="PREF_KEY_NAVIGATION_MODE" translatable="false">navigation-mode</string>
+  <string name="PREF_KEY_SPEECH_SUPPORT" translatable="false">speech-support</string>
+
+  <string name="PREF_KEY_TEXT_TABLE" translatable="false">text-table</string>
+  <string name="PREF_KEY_ATTRIBUTES_TABLE" translatable="false">attributes-table</string>
+  <string name="PREF_KEY_CONTRACTION_TABLE" translatable="false">contraction-table</string>
+  <string name="PREF_KEY_KEYBOARD_TABLE" translatable="false">keyboard-table</string>
+
+  <string name="PREF_KEY_SHOW_ANNOUNCEMENTS" translatable="false">show-announcements</string>
+  <string name="PREF_KEY_SHOW_NOTIFICATIONS" translatable="false">show-notifications</string>
+  <string name="PREF_KEY_SHOW_TOASTS" translatable="false">show-toasts</string>
+
+  <string name="PREF_KEY_LOG_LEVEL" translatable="false">log-level</string>
+  <string name="PREF_KEY_LOG_CATEGORIES" translatable="false">log-categories</string>
+
+  <string name="PREF_KEY_LOG_ACCESSIBILITY_EVENTS" translatable="false">log-accessibility-events</string>
+  <string name="PREF_KEY_LOG_RENDERED_SCREEN" translatable="false">log-rendered-screen</string>
+  <string name="PREF_KEY_LOG_KEYBOARD_EVENTS" translatable="false">log-keyboard-events</string>
+  <string name="PREF_KEY_LOG_UNHANDLED_EVENTS" translatable="false">log-unhandled-events</string>
+
+  <string name="PREF_KEY_SELECTED_DEVICE" translatable="false">selected-device</string>
+  <string name="PREF_KEY_ADD_DEVICE" translatable="false">add-device</string>
+  <string name="PREF_KEY_REMOVE_DEVICE" translatable="false">remove-device</string>
+
+  <string name="PREF_KEY_REMOVE_DEVICE_ASK" translatable="false">remove-device-ask</string>
+  <string name="PREF_KEY_REMOVE_DEVICE_NO" translatable="false">remove-device-no</string>
+  <string name="PREF_KEY_REMOVE_DEVICE_YES" translatable="false">remove-device-yes</string>
+
+  <string name="PREF_KEY_DEVICE_NAME" translatable="false">device-name</string>
+  <string name="PREF_KEY_DEVICE_METHOD" translatable="false">device-method</string>
+  <string name="PREF_KEY_DEVICE_IDENTIFIER" translatable="false">device-identifier</string>
+  <string name="PREF_KEY_DEVICE_DRIVER" translatable="false">device-driver</string>
+  <string name="PREF_KEY_DEVICE_ADD" translatable="false">device-add</string>
+</resources>
