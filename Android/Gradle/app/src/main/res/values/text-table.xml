@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- generated from brltty.conf.in by mksettings -->
+<!-- changes made here will be overwritten -->
+
+<resources>
+  <string name="TEXT_TABLE_LABEL_auto" translatable="true">locale-based autoselection</string>
+  <string name="TEXT_TABLE_LABEL_ar" translatable="true">Arabic (generic)</string>
+  <string name="TEXT_TABLE_LABEL_as" translatable="true">Assamese</string>
+  <string name="TEXT_TABLE_LABEL_awa" translatable="true">Awadhi</string>
+  <string name="TEXT_TABLE_LABEL_bg" translatable="true">Bulgarian</string>
+  <string name="TEXT_TABLE_LABEL_bh" translatable="true">Bihari</string>
+  <string name="TEXT_TABLE_LABEL_bn" translatable="true">Bengali</string>
+  <string name="TEXT_TABLE_LABEL_bo" translatable="true">Tibetan</string>
+  <string name="TEXT_TABLE_LABEL_bra" translatable="true">Braj</string>
+  <string name="TEXT_TABLE_LABEL_brf" translatable="true">Braille Ready Format (for viewing .brf files within an editor or pager)</string>
+  <string name="TEXT_TABLE_LABEL_cs" translatable="true">Czech</string>
+  <string name="TEXT_TABLE_LABEL_cy" translatable="true">Welsh</string>
+  <string name="TEXT_TABLE_LABEL_da" translatable="true">Danish</string>
+  <string name="TEXT_TABLE_LABEL_da_1252" translatable="true">Danish (Svend Thougaard, 2002–11–18)</string>
+  <string name="TEXT_TABLE_LABEL_da_lt" translatable="true">Danish (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_de" translatable="true">German</string>
+  <string name="TEXT_TABLE_LABEL_dra" translatable="true">Dravidian</string>
+  <string name="TEXT_TABLE_LABEL_el" translatable="true">Greek</string>
+  <string name="TEXT_TABLE_LABEL_en" translatable="true">English</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc" translatable="true">English (North American Braille Computer Code)</string>
+  <string name="TEXT_TABLE_LABEL_en_CA" translatable="true">English (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_en_GB" translatable="true">English (United Kingdom)</string>
+  <string name="TEXT_TABLE_LABEL_en_US" translatable="true">English (United States)</string>
+  <string name="TEXT_TABLE_LABEL_eo" translatable="true">Esperanto</string>
+  <string name="TEXT_TABLE_LABEL_es" translatable="true">Spanish</string>
+  <string name="TEXT_TABLE_LABEL_et" translatable="true">Estonian</string>
+  <string name="TEXT_TABLE_LABEL_fi" translatable="true">Finnish</string>
+  <string name="TEXT_TABLE_LABEL_fr" translatable="true">French</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007" translatable="true">French (unified 2007)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs" translatable="true">French (Code Braille Informatique Français Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs" translatable="true">French (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA" translatable="true">French (Canada)</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR" translatable="true">French (France)</string>
+  <string name="TEXT_TABLE_LABEL_ga" translatable="true">Irish</string>
+  <string name="TEXT_TABLE_LABEL_gd" translatable="true">Gaelic</string>
+  <string name="TEXT_TABLE_LABEL_gon" translatable="true">Gondi</string>
+  <string name="TEXT_TABLE_LABEL_gu" translatable="true">Gujarati</string>
+  <string name="TEXT_TABLE_LABEL_he" translatable="true">Hebrew</string>
+  <string name="TEXT_TABLE_LABEL_hi" translatable="true">Hindi</string>
+  <string name="TEXT_TABLE_LABEL_hr" translatable="true">Croatian</string>
+  <string name="TEXT_TABLE_LABEL_hu" translatable="true">Hungarian</string>
+  <string name="TEXT_TABLE_LABEL_hy" translatable="true">Armenian</string>
+  <string name="TEXT_TABLE_LABEL_is" translatable="true">Icelandic</string>
+  <string name="TEXT_TABLE_LABEL_it" translatable="true">Italian</string>
+  <string name="TEXT_TABLE_LABEL_kha" translatable="true">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kn" translatable="true">Kannada</string>
+  <string name="TEXT_TABLE_LABEL_kok" translatable="true">Konkani</string>
+  <string name="TEXT_TABLE_LABEL_kru" translatable="true">Kurukh</string>
+  <string name="TEXT_TABLE_LABEL_lt" translatable="true">Lituanian</string>
+  <string name="TEXT_TABLE_LABEL_lv" translatable="true">Latvian</string>
+  <string name="TEXT_TABLE_LABEL_mg" translatable="true">Malagasy</string>
+  <string name="TEXT_TABLE_LABEL_mi" translatable="true">Maori</string>
+  <string name="TEXT_TABLE_LABEL_ml" translatable="true">Malayalam</string>
+  <string name="TEXT_TABLE_LABEL_mni" translatable="true">Manipuri</string>
+  <string name="TEXT_TABLE_LABEL_mr" translatable="true">Marathi</string>
+  <string name="TEXT_TABLE_LABEL_mt" translatable="true">Maltese</string>
+  <string name="TEXT_TABLE_LABEL_mun" translatable="true">Munda</string>
+  <string name="TEXT_TABLE_LABEL_mwr" translatable="true">Marwari</string>
+  <string name="TEXT_TABLE_LABEL_ne" translatable="true">Nepali</string>
+  <string name="TEXT_TABLE_LABEL_new" translatable="true">Newari</string>
+  <string name="TEXT_TABLE_LABEL_nl" translatable="true">Dutch</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE" translatable="true">Dutch (Belgium)</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL" translatable="true">Dutch (Netherlands)</string>
+  <string name="TEXT_TABLE_LABEL_no" translatable="true">Norwegian</string>
+  <string name="TEXT_TABLE_LABEL_no_generic" translatable="true">Norwegian (with support for other languages)</string>
+  <string name="TEXT_TABLE_LABEL_no_oup" translatable="true">Norwegian (Offentlig utvalg for punktskrift)</string>
+  <string name="TEXT_TABLE_LABEL_nwc" translatable="true">Newari (old)</string>
+  <string name="TEXT_TABLE_LABEL_or" translatable="true">Oriya</string>
+  <string name="TEXT_TABLE_LABEL_pa" translatable="true">Panjabi</string>
+  <string name="TEXT_TABLE_LABEL_pi" translatable="true">Pali</string>
+  <string name="TEXT_TABLE_LABEL_pl" translatable="true">Polish</string>
+  <string name="TEXT_TABLE_LABEL_pt" translatable="true">Portuguese</string>
+  <string name="TEXT_TABLE_LABEL_ro" translatable="true">Romanian</string>
+  <string name="TEXT_TABLE_LABEL_ru" translatable="true">Russian</string>
+  <string name="TEXT_TABLE_LABEL_sa" translatable="true">Sanskrit</string>
+  <string name="TEXT_TABLE_LABEL_sat" translatable="true">Santali</string>
+  <string name="TEXT_TABLE_LABEL_sd" translatable="true">Sindhi</string>
+  <string name="TEXT_TABLE_LABEL_se" translatable="true">Sami (Northern)</string>
+  <string name="TEXT_TABLE_LABEL_sk" translatable="true">Slovak</string>
+  <string name="TEXT_TABLE_LABEL_sl" translatable="true">Slovenian</string>
+  <string name="TEXT_TABLE_LABEL_sv" translatable="true">Swedish</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989" translatable="true">Swedish (1989 standard)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996" translatable="true">Swedish (1996 standard)</string>
+  <string name="TEXT_TABLE_LABEL_sw" translatable="true">Swahili</string>
+  <string name="TEXT_TABLE_LABEL_ta" translatable="true">Tamil</string>
+  <string name="TEXT_TABLE_LABEL_te" translatable="true">Telugu</string>
+  <string name="TEXT_TABLE_LABEL_tr" translatable="true">Turkish</string>
+  <string name="TEXT_TABLE_LABEL_uk" translatable="true">Ukrainian</string>
+  <string name="TEXT_TABLE_LABEL_vi" translatable="true">Vietnamese</string>
+
+  <string-array name="TEXT_TABLE_LABELS">
+    <item>@string/TEXT_TABLE_LABEL_auto</item>
+    <item>@string/TEXT_TABLE_LABEL_ar</item>
+    <item>@string/TEXT_TABLE_LABEL_as</item>
+    <item>@string/TEXT_TABLE_LABEL_awa</item>
+    <item>@string/TEXT_TABLE_LABEL_bg</item>
+    <item>@string/TEXT_TABLE_LABEL_bh</item>
+    <item>@string/TEXT_TABLE_LABEL_bn</item>
+    <item>@string/TEXT_TABLE_LABEL_bo</item>
+    <item>@string/TEXT_TABLE_LABEL_bra</item>
+    <item>@string/TEXT_TABLE_LABEL_brf</item>
+    <item>@string/TEXT_TABLE_LABEL_cs</item>
+    <item>@string/TEXT_TABLE_LABEL_cy</item>
+    <item>@string/TEXT_TABLE_LABEL_da</item>
+    <item>@string/TEXT_TABLE_LABEL_da_1252</item>
+    <item>@string/TEXT_TABLE_LABEL_da_lt</item>
+    <item>@string/TEXT_TABLE_LABEL_de</item>
+    <item>@string/TEXT_TABLE_LABEL_dra</item>
+    <item>@string/TEXT_TABLE_LABEL_el</item>
+    <item>@string/TEXT_TABLE_LABEL_en</item>
+    <item>@string/TEXT_TABLE_LABEL_en_nabcc</item>
+    <item>@string/TEXT_TABLE_LABEL_en_CA</item>
+    <item>@string/TEXT_TABLE_LABEL_en_GB</item>
+    <item>@string/TEXT_TABLE_LABEL_en_US</item>
+    <item>@string/TEXT_TABLE_LABEL_eo</item>
+    <item>@string/TEXT_TABLE_LABEL_es</item>
+    <item>@string/TEXT_TABLE_LABEL_et</item>
+    <item>@string/TEXT_TABLE_LABEL_fi</item>
+    <item>@string/TEXT_TABLE_LABEL_fr</item>
+    <item>@string/TEXT_TABLE_LABEL_fr_2007</item>
+    <item>@string/TEXT_TABLE_LABEL_fr_cbifs</item>
+    <item>@string/TEXT_TABLE_LABEL_fr_vs</item>
+    <item>@string/TEXT_TABLE_LABEL_fr_CA</item>
+    <item>@string/TEXT_TABLE_LABEL_fr_FR</item>
+    <item>@string/TEXT_TABLE_LABEL_ga</item>
+    <item>@string/TEXT_TABLE_LABEL_gd</item>
+    <item>@string/TEXT_TABLE_LABEL_gon</item>
+    <item>@string/TEXT_TABLE_LABEL_gu</item>
+    <item>@string/TEXT_TABLE_LABEL_he</item>
+    <item>@string/TEXT_TABLE_LABEL_hi</item>
+    <item>@string/TEXT_TABLE_LABEL_hr</item>
+    <item>@string/TEXT_TABLE_LABEL_hu</item>
+    <item>@string/TEXT_TABLE_LABEL_hy</item>
+    <item>@string/TEXT_TABLE_LABEL_is</item>
+    <item>@string/TEXT_TABLE_LABEL_it</item>
+    <item>@string/TEXT_TABLE_LABEL_kha</item>
+    <item>@string/TEXT_TABLE_LABEL_kn</item>
+    <item>@string/TEXT_TABLE_LABEL_kok</item>
+    <item>@string/TEXT_TABLE_LABEL_kru</item>
+    <item>@string/TEXT_TABLE_LABEL_lt</item>
+    <item>@string/TEXT_TABLE_LABEL_lv</item>
+    <item>@string/TEXT_TABLE_LABEL_mg</item>
+    <item>@string/TEXT_TABLE_LABEL_mi</item>
+    <item>@string/TEXT_TABLE_LABEL_ml</item>
+    <item>@string/TEXT_TABLE_LABEL_mni</item>
+    <item>@string/TEXT_TABLE_LABEL_mr</item>
+    <item>@string/TEXT_TABLE_LABEL_mt</item>
+    <item>@string/TEXT_TABLE_LABEL_mun</item>
+    <item>@string/TEXT_TABLE_LABEL_mwr</item>
+    <item>@string/TEXT_TABLE_LABEL_ne</item>
+    <item>@string/TEXT_TABLE_LABEL_new</item>
+    <item>@string/TEXT_TABLE_LABEL_nl</item>
+    <item>@string/TEXT_TABLE_LABEL_nl_BE</item>
+    <item>@string/TEXT_TABLE_LABEL_nl_NL</item>
+    <item>@string/TEXT_TABLE_LABEL_no</item>
+    <item>@string/TEXT_TABLE_LABEL_no_generic</item>
+    <item>@string/TEXT_TABLE_LABEL_no_oup</item>
+    <item>@string/TEXT_TABLE_LABEL_nwc</item>
+    <item>@string/TEXT_TABLE_LABEL_or</item>
+    <item>@string/TEXT_TABLE_LABEL_pa</item>
+    <item>@string/TEXT_TABLE_LABEL_pi</item>
+    <item>@string/TEXT_TABLE_LABEL_pl</item>
+    <item>@string/TEXT_TABLE_LABEL_pt</item>
+    <item>@string/TEXT_TABLE_LABEL_ro</item>
+    <item>@string/TEXT_TABLE_LABEL_ru</item>
+    <item>@string/TEXT_TABLE_LABEL_sa</item>
+    <item>@string/TEXT_TABLE_LABEL_sat</item>
+    <item>@string/TEXT_TABLE_LABEL_sd</item>
+    <item>@string/TEXT_TABLE_LABEL_se</item>
+    <item>@string/TEXT_TABLE_LABEL_sk</item>
+    <item>@string/TEXT_TABLE_LABEL_sl</item>
+    <item>@string/TEXT_TABLE_LABEL_sv</item>
+    <item>@string/TEXT_TABLE_LABEL_sv_1989</item>
+    <item>@string/TEXT_TABLE_LABEL_sv_1996</item>
+    <item>@string/TEXT_TABLE_LABEL_sw</item>
+    <item>@string/TEXT_TABLE_LABEL_ta</item>
+    <item>@string/TEXT_TABLE_LABEL_te</item>
+    <item>@string/TEXT_TABLE_LABEL_tr</item>
+    <item>@string/TEXT_TABLE_LABEL_uk</item>
+    <item>@string/TEXT_TABLE_LABEL_vi</item>
+  </string-array>
+
+  <string-array name="TEXT_TABLE_VALUES">
+    <item>auto</item>
+    <item>ar</item>
+    <item>as</item>
+    <item>awa</item>
+    <item>bg</item>
+    <item>bh</item>
+    <item>bn</item>
+    <item>bo</item>
+    <item>bra</item>
+    <item>brf</item>
+    <item>cs</item>
+    <item>cy</item>
+    <item>da</item>
+    <item>da-1252</item>
+    <item>da-lt</item>
+    <item>de</item>
+    <item>dra</item>
+    <item>el</item>
+    <item>en</item>
+    <item>en-nabcc</item>
+    <item>en_CA</item>
+    <item>en_GB</item>
+    <item>en_US</item>
+    <item>eo</item>
+    <item>es</item>
+    <item>et</item>
+    <item>fi</item>
+    <item>fr</item>
+    <item>fr-2007</item>
+    <item>fr-cbifs</item>
+    <item>fr-vs</item>
+    <item>fr_CA</item>
+    <item>fr_FR</item>
+    <item>ga</item>
+    <item>gd</item>
+    <item>gon</item>
+    <item>gu</item>
+    <item>he</item>
+    <item>hi</item>
+    <item>hr</item>
+    <item>hu</item>
+    <item>hy</item>
+    <item>is</item>
+    <item>it</item>
+    <item>kha</item>
+    <item>kn</item>
+    <item>kok</item>
+    <item>kru</item>
+    <item>lt</item>
+    <item>lv</item>
+    <item>mg</item>
+    <item>mi</item>
+    <item>ml</item>
+    <item>mni</item>
+    <item>mr</item>
+    <item>mt</item>
+    <item>mun</item>
+    <item>mwr</item>
+    <item>ne</item>
+    <item>new</item>
+    <item>nl</item>
+    <item>nl_BE</item>
+    <item>nl_NL</item>
+    <item>no</item>
+    <item>no-generic</item>
+    <item>no-oup</item>
+    <item>nwc</item>
+    <item>or</item>
+    <item>pa</item>
+    <item>pi</item>
+    <item>pl</item>
+    <item>pt</item>
+    <item>ro</item>
+    <item>ru</item>
+    <item>sa</item>
+    <item>sat</item>
+    <item>sd</item>
+    <item>se</item>
+    <item>sk</item>
+    <item>sl</item>
+    <item>sv</item>
+    <item>sv-1989</item>
+    <item>sv-1996</item>
+    <item>sw</item>
+    <item>ta</item>
+    <item>te</item>
+    <item>tr</item>
+    <item>uk</item>
+    <item>vi</item>
+  </string-array>
+</resources>

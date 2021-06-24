@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- generated from brltty.conf.in by mksettings -->
+<!-- changes made here will be overwritten -->
+
+<resources>
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right" translatable="true">inverse foreground colour in the left column and background colour in the right column</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right" translatable="true">foreground colour in the left column and background colour in the right column</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower" translatable="true">foreground colour in the upper square and background colour in the lower square</string>
+
+  <string-array name="ATTRIBUTES_TABLE_LABELS">
+    <item>@string/ATTRIBUTES_TABLE_LABEL_invleft_right</item>
+    <item>@string/ATTRIBUTES_TABLE_LABEL_left_right</item>
+    <item>@string/ATTRIBUTES_TABLE_LABEL_upper_lower</item>
+  </string-array>
+
+  <string-array name="ATTRIBUTES_TABLE_VALUES">
+    <item>invleft_right</item>
+    <item>left_right</item>
+    <item>upper_lower</item>
+  </string-array>
+</resources>

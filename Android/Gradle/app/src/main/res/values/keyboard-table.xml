@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- generated from brltty.conf.in by mksettings -->
+<!-- changes made here will be overwritten -->
+
+<resources>
+  <string name="KEYBOARD_TABLE_LABEL_braille" translatable="true">bindings for braille keyboards</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop" translatable="true">bindings for full keyboards</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad" translatable="true">bindings for keypad-based navigation</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop" translatable="true">bindings for keyboards without a keypad</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6" translatable="true">bindings for Sun Type 6 keyboards</string>
+
+  <string-array name="KEYBOARD_TABLE_LABELS">
+    <item>@string/KEYBOARD_TABLE_LABEL_braille</item>
+    <item>@string/KEYBOARD_TABLE_LABEL_desktop</item>
+    <item>@string/KEYBOARD_TABLE_LABEL_keypad</item>
+    <item>@string/KEYBOARD_TABLE_LABEL_laptop</item>
+    <item>@string/KEYBOARD_TABLE_LABEL_sun_type6</item>
+  </string-array>
+
+  <string-array name="KEYBOARD_TABLE_VALUES">
+    <item>braille</item>
+    <item>desktop</item>
+    <item>keypad</item>
+    <item>laptop</item>
+    <item>sun_type6</item>
+  </string-array>
+</resources>

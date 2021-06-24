@@ -62,7 +62,7 @@
 #braille-driver	bd	# Braudi
 #braille-driver	bg	# B2G
 #braille-driver	bl	# BrailleLite
-#braille-driver	bm	# Baum
+#braille-driver	bm	# Baum, Refreshabraille, Orbit, NLS eReader Zoomax, B2G
 #braille-driver	bn	# BrailleNote
 #braille-driver	cb	# CombiBraille
 #braille-driver	ce	# Cebra

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- generated from brltty.conf.in by mksettings -->
+<!-- changes made here will be overwritten -->
+
+<resources>
+  <string name="CONTRACTION_TABLE_LABEL_auto" translatable="true">locale-based autoselection</string>
+  <string name="CONTRACTION_TABLE_LABEL_af" translatable="true">Afrikaans (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_am" translatable="true">Amharic (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de" translatable="true">German</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998" translatable="true">German (contracted - 1998 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015" translatable="true">German (contracted - 2015 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0" translatable="true">German (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1" translatable="true">German (basic contractions)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2" translatable="true">German (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en" translatable="true">English</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2" translatable="true">English (Unified, contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2" translatable="true">English (United States, contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US" translatable="true">English (United States)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es" translatable="true">Spanish (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr" translatable="true">French</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1" translatable="true">French (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2" translatable="true">French (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha" translatable="true">Hausa (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_id" translatable="true">Indonesian (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa" translatable="true">International Phonetic Alphabet</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja" translatable="true">Japanese (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko" translatable="true">Korean</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0" translatable="true">Korean (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1" translatable="true">Korean (partially contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2" translatable="true">Korean (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt" translatable="true">Lithuanian (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg" translatable="true">Malagasy (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun" translatable="true">Munda (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl" translatable="true">Dutch (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny" translatable="true">Chichewa (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt" translatable="true">Portuguese (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru" translatable="true">Russian (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_si" translatable="true">Sinhalese (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw" translatable="true">Swahili (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_th" translatable="true">Thai (contracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW" translatable="true">Chinese (Taiwan, uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu" translatable="true">Zulu (contracted)</string>
+
+  <string-array name="CONTRACTION_TABLE_LABELS">
+    <item>@string/CONTRACTION_TABLE_LABEL_auto</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_af</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_am</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_1998</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_2015</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_g0</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_g1</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_de_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_en</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_en_ueb_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_en_us_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_en_US</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_es</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_fr</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_fr_g1</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_fr_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ha</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_id</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ipa</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ja</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ko</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ko_g0</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ko_g1</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ko_g2</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_lt</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_mg</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_mun</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_nl</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ny</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_pt</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_ru</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_si</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_sw</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_th</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_zh_TW</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_zu</item>
+  </string-array>
+
+  <string-array name="CONTRACTION_TABLE_VALUES">
+    <item>auto</item>
+    <item>af</item>
+    <item>am</item>
+    <item>de</item>
+    <item>de-1998</item>
+    <item>de-2015</item>
+    <item>de-g0</item>
+    <item>de-g1</item>
+    <item>de-g2</item>
+    <item>en</item>
+    <item>en-ueb-g2</item>
+    <item>en-us-g2</item>
+    <item>en_US</item>
+    <item>es</item>
+    <item>fr</item>
+    <item>fr-g1</item>
+    <item>fr-g2</item>
+    <item>ha</item>
+    <item>id</item>
+    <item>ipa</item>
+    <item>ja</item>
+    <item>ko</item>
+    <item>ko-g0</item>
+    <item>ko-g1</item>
+    <item>ko-g2</item>
+    <item>lt</item>
+    <item>mg</item>
+    <item>mun</item>
+    <item>nl</item>
+    <item>ny</item>
+    <item>pt</item>
+    <item>ru</item>
+    <item>si</item>
+    <item>sw</item>
+    <item>th</item>
+    <item>zh_TW</item>
+    <item>zu</item>
+  </string-array>
+</resources>

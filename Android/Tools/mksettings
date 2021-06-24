@@ -19,7 +19,7 @@
 
 source [file join [file dirname [info script]] "prologue.tcl"]
 
-proc getProperties {file names} {
+proc loadProperties {file names} {
    set properties [dict create]
 
    set comment #
@@ -48,53 +48,6 @@ proc getProperties {file names} {
    return $properties
 }
 
-proc makeResources {properties} {
-   set lines [list]
-   lappend lines {<?xml version="1.0" encoding="utf-8"?>}
-   lappend lines ""
-   lappend lines "<resources>"
-   set first 1
-
-   foreach name [dict keys $properties] {
-      set property [dict get $properties $name]
-      set prefix "[string toupper [string map {- _} $name]]_"
-
-      set values [list]
-      set labels [list]
-
-      if {$first} {
-         set first 0
-      } else {
-         lappend lines ""
-      }
-
-      foreach code [lsort -command [list compareKeys $property] [dict keys $property]] {
-         set translatable "true"
-
-         if {![string equal $code "auto"]} {
-            if {[string equal $name "braille-driver"]} {
-               set translatable "false"
-            }
-         }
-
-         set label "${prefix}LABEL_[string map {- _} $code]"
-         lappend labels "@string/$label"
-         lappend values $code
-
-         lappend lines "  <string name=\"$label\" translatable=\"$translatable\">[dict get $property $code]</string>"
-      }
-
-      lappend lines ""
-      eval [list lappend lines] [makeArray "${prefix}LABELS" $labels]
-
-      lappend lines ""
-      eval [list lappend lines] [makeArray "${prefix}VALUES" $values]
-   }
-
-   lappend lines "</resources>"
-   return $lines
-}
-
 proc compareKeys {dictionary key1 key2} {
    set value1 [dict get $dictionary $key1]
    set value2 [dict get $dictionary $key2]
@@ -113,7 +66,7 @@ proc compareKeys {dictionary key1 key2} {
    return [string compare $key1 $key2]
 }
 
-proc makeArray {name items} {
+proc makeStringArray {name items} {
    set lines [list]
    lappend lines "  <string-array name=\"$name\">"
 
@@ -125,8 +78,51 @@ proc makeArray {name items} {
    return $lines
 }
 
-proc writeProperties {file lines} {
-   if {[catch [list open $file {WRONLY CREAT TRUNC}] stream] == 0} {
+proc makeResourceLines {properties name} {
+   set property [dict get $properties $name]
+   set prefix "[string toupper [string map {- _} $name]]_"
+
+   set lines [list]
+   lappend lines {<?xml version="1.0" encoding="utf-8"?>}
+
+   lappend lines ""
+   lappend lines "<!-- generated from $::inputFile by [file tail [info script]] -->"
+   lappend lines "<!-- changes made here will be overwritten -->"
+
+   lappend lines ""
+   lappend lines "<resources>"
+
+   set codes [list]
+   set labels [list]
+
+   foreach code [lsort -command [list compareKeys $property] [dict keys $property]] {
+      set translatable "true"
+
+      if {![string equal $code "auto"]} {
+         if {[string equal $name "braille-driver"]} {
+            set translatable "false"
+         }
+      }
+
+      set label "${prefix}LABEL_[string map {- _} $code]"
+      lappend labels "@string/$label"
+      lappend codes $code
+
+      lappend lines "  <string name=\"$label\" translatable=\"$translatable\">[dict get $property $code]</string>"
+   }
+
+   lappend lines ""
+   lvarcat lines [makeStringArray "${prefix}LABELS" $labels]
+
+   lappend lines ""
+   lvarcat lines [makeStringArray "${prefix}VALUES" $codes]
+
+   lappend lines "</resources>"
+   return $lines
+}
+
+proc writeFile {path lines} {
+   if {[catch [list open $path {WRONLY CREAT TRUNC}] stream] == 0} {
       puts $stream [join $lines \n]
       close $stream
    } else {
@@ -134,25 +130,40 @@ proc writeProperties {file lines} {
    }
 }
 
-set inputFile [file join $sourceDirectory "Documents" "brltty.conf.in"]
-set outputFile [file join $applicationDirectory res values settings_lists.xml]
-
 set optionDefinitions {
 }
 
 processProgramArguments optionValues $optionDefinitions positionalArguments "\[property ...\]"
+set propertyNames $positionalArguments
 
-if {[llength $positionalArguments] == 0} {
-   lappend positionalArguments "braille-driver"
-   lappend positionalArguments "text-table"
-   lappend positionalArguments "attributes-table"
-   lappend positionalArguments "contraction-table"
-   lappend positionalArguments "keyboard-table"
+if {[llength $propertyNames] == 0} {
+   lappend propertyNames "braille-driver"
+   lappend propertyNames "text-table"
+   lappend propertyNames "attributes-table"
+   lappend propertyNames "contraction-table"
+   lappend propertyNames "keyboard-table"
 }
 
-if {[llength $positionalArguments] == 0} {
-   syntaxError "properties not specified"
+if {[llength $propertyNames] == 0} {
+   syntaxError "property names not specified"
 }
 
-writeProperties $outputFile [makeResources [getProperties [file join $sourceDirectory $inputFile] $positionalArguments]]
+set inputFile  "brltty.conf.in"
+set inputPath [file join $sourceDirectory Documents $inputFile]
+logMessage step "loading properties: $inputPath"
+set properties [loadProperties $inputPath $propertyNames]
+
+foreach name $propertyNames {
+   if {![dict exists $properties $name]} {
+      syntaxError "unknown property name: $name"
+   }
+}
+
+foreach propertyName $propertyNames {
+   set resourceFile "[string tolower $propertyName].xml"
+   set resourcePath [file join $applicationDirectory res values $resourceFile]
+   logMessage step "writing resource file: $resourcePath"
+   writeFile $resourcePath [makeResourceLines $properties $propertyName]
+}
+
 exit 0

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- generated from brltty.conf.in by mksettings -->
+<!-- changes made here will be overwritten -->
+
+<resources>
+  <string name="BRAILLE_DRIVER_LABEL_auto" translatable="true">autodetect</string>
+  <string name="BRAILLE_DRIVER_LABEL_al" translatable="false">Alva</string>
+  <string name="BRAILLE_DRIVER_LABEL_at" translatable="false">Albatross</string>
+  <string name="BRAILLE_DRIVER_LABEL_ba" translatable="false">BrlAPI</string>
+  <string name="BRAILLE_DRIVER_LABEL_bc" translatable="false">BrailComm</string>
+  <string name="BRAILLE_DRIVER_LABEL_bd" translatable="false">Braudi</string>
+  <string name="BRAILLE_DRIVER_LABEL_bg" translatable="false">B2G</string>
+  <string name="BRAILLE_DRIVER_LABEL_bl" translatable="false">BrailleLite</string>
+  <string name="BRAILLE_DRIVER_LABEL_bm" translatable="false">Baum, Refreshabraille, Orbit, NLS eReader Zoomax, B2G</string>
+  <string name="BRAILLE_DRIVER_LABEL_bn" translatable="false">BrailleNote</string>
+  <string name="BRAILLE_DRIVER_LABEL_cb" translatable="false">CombiBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_ce" translatable="false">Cebra</string>
+  <string name="BRAILLE_DRIVER_LABEL_cn" translatable="false">Canute</string>
+  <string name="BRAILLE_DRIVER_LABEL_ec" translatable="false">EcoBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_eu" translatable="false">EuroBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_fa" translatable="false">FrankAudiodata</string>
+  <string name="BRAILLE_DRIVER_LABEL_fs" translatable="false">FreedomScientific</string>
+  <string name="BRAILLE_DRIVER_LABEL_hd" translatable="false">Hedo</string>
+  <string name="BRAILLE_DRIVER_LABEL_hm" translatable="false">HIMS</string>
+  <string name="BRAILLE_DRIVER_LABEL_ht" translatable="false">HandyTech</string>
+  <string name="BRAILLE_DRIVER_LABEL_hw" translatable="false">HumanWare</string>
+  <string name="BRAILLE_DRIVER_LABEL_ic" translatable="false">Inceptor</string>
+  <string name="BRAILLE_DRIVER_LABEL_ir" translatable="false">Iris</string>
+  <string name="BRAILLE_DRIVER_LABEL_lb" translatable="false">Libbraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_lt" translatable="false">LogText</string>
+  <string name="BRAILLE_DRIVER_LABEL_mb" translatable="false">MultiBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_md" translatable="false">MDV</string>
+  <string name="BRAILLE_DRIVER_LABEL_mm" translatable="false">BrailleMemo</string>
+  <string name="BRAILLE_DRIVER_LABEL_mn" translatable="false">MiniBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_mt" translatable="false">Metec</string>
+  <string name="BRAILLE_DRIVER_LABEL_np" translatable="false">NinePoint</string>
+  <string name="BRAILLE_DRIVER_LABEL_pg" translatable="false">Pegasus</string>
+  <string name="BRAILLE_DRIVER_LABEL_pm" translatable="false">Papenmeier</string>
+  <string name="BRAILLE_DRIVER_LABEL_sk" translatable="false">Seika</string>
+  <string name="BRAILLE_DRIVER_LABEL_tn" translatable="false">TechniBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_ts" translatable="false">TSI</string>
+  <string name="BRAILLE_DRIVER_LABEL_tt" translatable="false">TTY</string>
+  <string name="BRAILLE_DRIVER_LABEL_vd" translatable="false">VideoBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_vo" translatable="false">Voyager, BraillePen/EasyLink</string>
+  <string name="BRAILLE_DRIVER_LABEL_vr" translatable="false">Virtual</string>
+  <string name="BRAILLE_DRIVER_LABEL_vs" translatable="false">VisioBraille</string>
+  <string name="BRAILLE_DRIVER_LABEL_xw" translatable="false">XWindow</string>
+
+  <string-array name="BRAILLE_DRIVER_LABELS">
+    <item>@string/BRAILLE_DRIVER_LABEL_auto</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_al</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_at</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_ba</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bc</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bd</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bg</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bl</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bm</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_bn</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_cb</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_ce</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_cn</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_ec</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_eu</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_fa</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_fs</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_hd</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_hm</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_ht</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_hw</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_ic</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_ir</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_lb</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_lt</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_mb</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_md</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_mm</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_mn</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_mt</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_np</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_pg</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_pm</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_sk</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_tn</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_ts</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_tt</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_vd</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_vo</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_vr</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_vs</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_xw</item>
+  </string-array>
+
+  <string-array name="BRAILLE_DRIVER_VALUES">
+    <item>auto</item>
+    <item>al</item>
+    <item>at</item>
+    <item>ba</item>
+    <item>bc</item>
+    <item>bd</item>
+    <item>bg</item>
+    <item>bl</item>
+    <item>bm</item>
+    <item>bn</item>
+    <item>cb</item>
+    <item>ce</item>
+    <item>cn</item>
+    <item>ec</item>
+    <item>eu</item>
+    <item>fa</item>
+    <item>fs</item>
+    <item>hd</item>
+    <item>hm</item>
+    <item>ht</item>
+    <item>hw</item>
+    <item>ic</item>
+    <item>ir</item>
+    <item>lb</item>
+    <item>lt</item>
+    <item>mb</item>
+    <item>md</item>
+    <item>mm</item>
+    <item>mn</item>
+    <item>mt</item>
+    <item>np</item>
+    <item>pg</item>
+    <item>pm</item>
+    <item>sk</item>
+    <item>tn</item>
+    <item>ts</item>
+    <item>tt</item>
+    <item>vd</item>
+    <item>vo</item>
+    <item>vr</item>
+    <item>vs</item>
+    <item>xw</item>
+  </string-array>
+</resources>
