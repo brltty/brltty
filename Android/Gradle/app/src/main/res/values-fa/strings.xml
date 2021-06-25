@@ -5,6 +5,9 @@
 
   <string name="about_label_activity">درباره نرم‌افزار</string>
   <string name="about_label_copyright">حق انتشار</string>
+  <string name="about_label_buildTime">زمان ساخت</string>
+  <string name="about_label_sourceRevision">بازنگری منبع</string>
+  <string name="about_label_privacyPolicy">حریم شخصی</string>
 
   <string name="inputService_name">BRLTTY خدمات ورودی</string>
   <string name="inputService_type">صفحه کلیدهای دستگاه بریل</string>
@@ -12,6 +15,17 @@
   <string name="inputService_not_selected">خدمات ورودی انتخاب نشده است</string>
   <string name="inputService_not_started">خدمات ورودی اجرا نشده است</string>
   <string name="inputService_not_connected">خدمات ورودی وصل نیست</string>
+
+  <string name="updateApplication_problem_failed">برنامه بروزرسانی نشده</string>
+
+  <string name="packageInstaller_problem_failed">بسته نصب نشد</string>
+  <string name="packageInstaller_problem_same">نسخه یکسان</string>
+  <string name="packageInstaller_problem_downgrade">اجازه عقب‌گرد وجود ندارد</string>
+
+  <string name="fileDownloader_title">BRLTTY File دانلود کننده</string>
+  <string name="fileDownloader_problem_failed">فایل دانلود نشد</string>
+  <string name="fileDownloader_state_connecting">در حال اتصال</string>
+  <string name="fileDownloader_state_downloading">در حال دانلود</string>
 
   <string name="checkbox_state_unchecked">خیر</string>
   <string name="checkbox_state_checked">بله</string>
@@ -37,6 +51,10 @@
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">مدیریت عضویت در گروه</string>
 
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">به‌روز رسانی نرم‌افزار</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">ساخت توسعه دهنده</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">اجازه عقب‌گرد</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">عملیات دسترسی</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY تنظیمات</string>
   <string name="SETTINGS_SCREEN_GENERAL">تنظیمات عمومی</string>
@@ -222,20 +240,25 @@
   <string name="CONTRACTION_TABLE_LABEL_auto">انتخاب اتوماتیک بر مبنای محل</string>
   <string name="CONTRACTION_TABLE_LABEL_af">آفریقایی (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Amharic (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">آلمانی</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g0">German (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g1">German (basic contractions)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2">German (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_1998">German (contracted - 1998 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">German (contracted - 2015 standard)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">انگلیسی</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">انگلیسی (ایالات متحده)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">English (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (US, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Spanish (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">فراسوی</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g1">French (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr_g2">French (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_id">Indonesian (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ipa">International Phonetic Alphabet</string>
   <string name="CONTRACTION_TABLE_LABEL_ja">Japanese (uncontracted)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">کره‌ای</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korean (grade 1)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korean (grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_ko_g0">Korean (uncontracted)</string>
@@ -245,6 +268,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">Dutch (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Portuguese (grade 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">روسی</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contracted)</string>
