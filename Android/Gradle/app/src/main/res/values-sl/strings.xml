@@ -104,8 +104,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">Navpični Seznam</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">Dvodimenzionalna Mreža</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">Brez</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">Naravna</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">Naravna</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>

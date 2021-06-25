@@ -104,8 +104,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">Elenco Verticale</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">Griglia Bidimensionale</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">Nessuno</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">Nativo</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">Nativo</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>

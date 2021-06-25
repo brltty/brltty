@@ -27,6 +27,7 @@
   <string name="fileDownloader_state_connecting">Connexion</string>
   <string name="fileDownloader_state_downloading">Téléchargement</string>
    
+  <string name="setting_state_off">Désactivé</string>
   <string name="checkbox_state_unchecked">Non</string>
   <string name="checkbox_state_checked">Oui</string>
 
@@ -107,8 +108,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">Liste verticale</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">Grille 2D</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">Aucun</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">Natif</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">Natif</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>

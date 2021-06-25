@@ -27,6 +27,7 @@
   <string name="fileDownloader_state_connecting">Verbindungsaufbau</string>
   <string name="fileDownloader_state_downloading">Wird heruntergeladen</string>
 
+  <string name="setting_state_off">Aus</string>
   <string name="checkbox_state_unchecked">Nein</string>
   <string name="checkbox_state_checked">Ja</string>
 
@@ -107,8 +108,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">Vertikale Liste</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">2-Dimensionales Gitter</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">Kein</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">Nativ</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">Nativ</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>

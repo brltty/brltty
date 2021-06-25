@@ -104,8 +104,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">Pystysuuntainen lista</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">Kaksiulotteinen ruudukko</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">Ei mitään</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">Alkuperäinen</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">Alkuperäinen</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>

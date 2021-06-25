@@ -27,6 +27,7 @@
   <string name="fileDownloader_state_connecting">připojování</string>
   <string name="fileDownloader_state_downloading">stahování</string>
 
+  <string name="setting_state_off">Vypnuto</string>
   <string name="checkbox_state_unchecked">Vypnuto</string>
   <string name="checkbox_state_checked">Zapnuto</string>
 
@@ -107,8 +108,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">Svislý seznam</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">Dvourozměrná mřížka</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">Žádná</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">Nativní</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">Nativní</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>

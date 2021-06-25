@@ -27,6 +27,7 @@
   <string name="fileDownloader_state_connecting">подключение</string>
   <string name="fileDownloader_state_downloading">скачивание</string>
 
+  <string name="setting_state_off">Выключено</string>
   <string name="checkbox_state_unchecked">Нет</string>
   <string name="checkbox_state_checked">Да</string>
 
@@ -107,8 +108,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">Вертикальный список</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">Двумерная сетка</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">Ничего</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">Нативная</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">Нативная</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
