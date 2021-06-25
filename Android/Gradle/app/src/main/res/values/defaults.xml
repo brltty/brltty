@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <string name="DEFAULT_NAVIGATION_MODE" translatable="false">List</string>
-
-  <string name="DEFAULT_TEXT_TABLE" tools:ignore="MissingTranslation">auto</string>
   <string name="DEFAULT_ATTRIBUTES_TABLE" translatable="false">upper_lower</string>
-  <string name="DEFAULT_CONTRACTION_TABLE" tools:ignore="MissingTranslation">en-ueb-g2</string>
-  <string name="DEFAULT_KEYBOARD_TABLE" translatable="false">braille</string>
-
   <string name="DEFAULT_BRAILLE_DRIVER" translatable="false">auto</string>
   <string name="DEFAULT_COMMUNICATION_METHOD" translatable="false">Bluetooth</string>
-
-  <string name="DEFAULT_SPEECH_SUPPORT" translatable="false">an</string>
-
+  <string name="DEFAULT_CONTRACTION_TABLE" tools:ignore="MissingTranslation">auto</string>
+  <string name="DEFAULT_KEYBOARD_TABLE" translatable="false">braille</string>
   <string name="DEFAULT_LOG_LEVEL" translatable="false">notice</string>
+  <string name="DEFAULT_NAVIGATION_MODE" translatable="false">List</string>
+  <string name="DEFAULT_SPEECH_SUPPORT" translatable="false">an</string>
+  <string name="DEFAULT_TEXT_TABLE" tools:ignore="MissingTranslation">auto</string>
 </resources>
