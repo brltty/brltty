@@ -27,6 +27,7 @@
   <string name="fileDownloader_state_connecting">連接中</string>
   <string name="fileDownloader_state_downloading">下載中</string>
 
+  <string name="setting_state_off">關閉</string>
   <string name="checkbox_state_unchecked">否</string>
   <string name="checkbox_state_checked">市</string>
 
@@ -107,8 +108,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">縱向清單</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">二維方格</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">無</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">內建</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">內建</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">藍牙</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>

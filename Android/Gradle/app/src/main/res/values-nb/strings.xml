@@ -27,6 +27,7 @@
   <string name="fileDownloader_state_connecting">kobler til</string>
   <string name="fileDownloader_state_downloading">laster ned</string>
 
+  <string name="setting_state_off">av</string>
   <string name="checkbox_state_unchecked">nei</string>
   <string name="checkbox_state_checked">ja</string>
 
@@ -107,8 +108,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">Vertikal liste</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">Todimensjonalt rutenett</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">ingen</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">original</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">original</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>

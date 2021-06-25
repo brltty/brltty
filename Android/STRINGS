@@ -24,6 +24,7 @@ fileDownloader_problem_failed file not downloaded
 fileDownloader_state_connecting connecting
 fileDownloader_state_downloading downloading
 
+setting_state_off Off
 checkbox_state_unchecked No
 checkbox_state_checked Yes
 
@@ -104,8 +105,7 @@ SET_SELECTION_NONE none selected
 NAVIGATION_MODE_LABEL_List Vertical List
 NAVIGATION_MODE_LABEL_Grid Two Dimensional Grid
 
-SPEECH_SUPPORT_LABEL_None None
-SPEECH_SUPPORT_LABEL_Native Native
+SPEECH_SUPPORT_LABEL_native Native
 
 COMMUNICATION_METHOD_LABEL_Bluetooth Bluetooth
 COMMUNICATION_METHOD_LABEL_Usb USB

@@ -27,6 +27,7 @@
   <string name="fileDownloader_state_connecting">در حال اتصال</string>
   <string name="fileDownloader_state_downloading">در حال دانلود</string>
 
+  <string name="setting_state_off">خاموش</string>
   <string name="checkbox_state_unchecked">خیر</string>
   <string name="checkbox_state_checked">بله</string>
 
@@ -107,8 +108,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">لیست عمودی</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">خط کشی دو بعدی</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">هیچ</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">سازگار</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">سازگار</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">بلوتوث</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">یو اس بی</string>

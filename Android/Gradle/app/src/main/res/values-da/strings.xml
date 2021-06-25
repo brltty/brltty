@@ -27,6 +27,7 @@
   <string name="fileDownloader_state_connecting">forbinder</string>
   <string name="fileDownloader_state_downloading">henter</string>
 
+  <string name="setting_state_off">Fra</string>
   <string name="checkbox_state_unchecked">Nej</string>
   <string name="checkbox_state_checked">Ja</string>
 
@@ -107,8 +108,7 @@
   <string name="NAVIGATION_MODE_LABEL_List">Vertikal liste</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">To dimensionelt gitter</string>
 
-  <string name="SPEECH_SUPPORT_LABEL_None">Ingen</string>
-  <string name="SPEECH_SUPPORT_LABEL_Native">Medfødt</string>
+  <string name="SPEECH_SUPPORT_LABEL_native">Medfødt</string>
 
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>

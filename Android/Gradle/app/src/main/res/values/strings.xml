@@ -27,6 +27,7 @@
   <string name="fileDownloader_state_connecting">connecting</string>
   <string name="fileDownloader_state_downloading">downloading</string>
 
+  <string name="setting_state_off">Off</string>
   <string name="checkbox_state_unchecked">No</string>
   <string name="checkbox_state_checked">Yes</string>
 
