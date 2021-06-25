@@ -49,17 +49,17 @@ proc loadProperties {file names} {
 }
 
 proc compareKeys {dictionary key1 key2} {
-   set value1 [dict get $dictionary $key1]
-   set value2 [dict get $dictionary $key2]
+   set text1 [dict get $dictionary $key1]
+   set text2 [dict get $dictionary $key2]
 
-   set upper1 [string is upper -strict [string index $value1 0]]
-   set upper2 [string is upper -strict [string index $value2 0]]
+   set capitalized1 [string is upper -strict [string index $text1 0]]
+   set capitalized2 [string is upper -strict [string index $text2 0]]
 
-   if {!$upper1 && $upper2} {
+   if {!$capitalized1 && $capitalized2} {
       return -1
    }
 
-   if {$upper1 && !$upper2} {
+   if {$capitalized1 && !$capitalized2} {
       return 1
    }
 
@@ -102,6 +102,12 @@ proc makeResourceLines {properties name} {
          if {[string equal $name "braille-driver"]} {
             set translatable "false"
          }
+      }
+
+      if {[string equal $code off]} {
+         lvarpush codes $code
+         lvarpush labels "@string/setting_state_$code"
+         continue
       }
 
       set label "${prefix}LABEL_[string map {- _} $code]"

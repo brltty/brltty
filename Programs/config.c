@@ -90,6 +90,7 @@ int isWindowsService = 0;
 
 static const char optionOperand_none[] = "no";
 static const char optionOperand_autodetect[] = "auto";
+static const char optionOperand_off[] = "off";
 
 static const char *const *const fallbackBrailleDrivers =
   NULL_TERMINATED_STRING_ARRAY(
@@ -548,6 +549,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_keyboardTable,
+    .internal.setting = optionOperand_off,
     .description = strtext("Name of or path to keyboard table.")
   },
 
@@ -1014,18 +1016,14 @@ getKeyboardMonitorActivity (int allocate) {
 static void
 enableKeyboardMonitor (void) {
   ActivityObject *activity = getKeyboardMonitorActivity(1);
-
   if (activity) startActivity(activity);
 }
 
-/*
 static void
 disableKeyboardMonitor (void) {
   ActivityObject *activity = getKeyboardMonitorActivity(0);
-
   if (activity) stopActivity(activity);
 }
-*/
 
 static unsigned int brailleHelpPageNumber = 0;
 static unsigned int keyboardHelpPageNumber = 0;
@@ -1151,6 +1149,9 @@ int
 changeKeyboardTable (const char *name) {
   KeyTable *table = NULL;
 
+  if (!*name) name = "";
+  if (strcmp(name, optionOperand_off) == 0) name = "";
+
   if (*name) {
     char *path = makeKeyboardTablePath(opt_tablesDirectory, name);
 
@@ -1168,18 +1169,24 @@ changeKeyboardTable (const char *name) {
   }
 
   if (keyboardTable) {
-    destroyKeyTable(keyboardTable);
     disableKeyboardHelpPage();
+    disableKeyboardMonitor();
+
+    destroyKeyTable(keyboardTable);
+    keyboardTable = NULL;
   }
 
-  if ((keyboardTable = table)) {
+  if (table) {
+    setKeyTableLogLabel(table, "kbd");
+    setLogKeyEventsFlag(table, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS));
+
+    keyboardTable = table;
     enableKeyboardMonitor();
-
-    setKeyTableLogLabel(keyboardTable, "kbd");
-    setLogKeyEventsFlag(keyboardTable, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS));
-
     makeKeyboardHelpPage();
   }
+
+  if (!*name) name = optionOperand_off;
+  logMessage(LOG_DEBUG, "keyboard table changed: %s -> %s", opt_keyboardTable, name);
 
   changeStringSetting(&opt_keyboardTable, name);
   return 1;

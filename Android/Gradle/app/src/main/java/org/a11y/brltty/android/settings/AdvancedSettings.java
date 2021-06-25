@@ -54,7 +54,7 @@ public final class AdvancedSettings extends SettingsFragment {
     logKeyboardEventsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_KEYBOARD_EVENTS);
     logUnhandledEventsCheckBox = getCheckBoxPreference(R.string.PREF_KEY_LOG_UNHANDLED_EVENTS);
 
-    sortList(keyboardTableList);
+    sortList(keyboardTableList, 1);
     sortList(attributesTableList);
 
     showSelection(keyboardTableList);

@@ -11,6 +11,7 @@
   <string name="KEYBOARD_TABLE_LABEL_sun_type6" translatable="true">bindings for Sun Type 6 keyboards</string>
 
   <string-array name="KEYBOARD_TABLE_LABELS">
+    <item>@string/setting_state_off</item>
     <item>@string/KEYBOARD_TABLE_LABEL_braille</item>
     <item>@string/KEYBOARD_TABLE_LABEL_desktop</item>
     <item>@string/KEYBOARD_TABLE_LABEL_keypad</item>
@@ -19,6 +20,7 @@
   </string-array>
 
   <string-array name="KEYBOARD_TABLE_VALUES">
+    <item>off</item>
     <item>braille</item>
     <item>desktop</item>
     <item>keypad</item>
