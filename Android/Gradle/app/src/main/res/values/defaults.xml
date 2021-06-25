@@ -5,7 +5,7 @@
   <string name="DEFAULT_BRAILLE_DRIVER" translatable="false">auto</string>
   <string name="DEFAULT_COMMUNICATION_METHOD" translatable="false">Bluetooth</string>
   <string name="DEFAULT_CONTRACTION_TABLE" tools:ignore="MissingTranslation">auto</string>
-  <string name="DEFAULT_KEYBOARD_TABLE" translatable="false">braille</string>
+  <string name="DEFAULT_KEYBOARD_TABLE" translatable="false">off</string>
   <string name="DEFAULT_LOG_LEVEL" translatable="false">notice</string>
   <string name="DEFAULT_NAVIGATION_MODE" translatable="false">List</string>
   <string name="DEFAULT_SPEECH_SUPPORT" translatable="false">an</string>

@@ -463,6 +463,7 @@
 # The keyboard-table directive specifies which keyboard table to use. Relative paths are
 # anchored at "@TABLES_DIRECTORY@/@KEYBOARD_TABLES_SUBDIRECTORY@". If not specified, no keyboard table is used.
 # (can be overridden with the --keyboard-table= [-k] option)
+#keyboard-table	off	# no keyboard table
 #keyboard-table	braille	# bindings for braille keyboards
 #keyboard-table	desktop	# bindings for full keyboards
 #keyboard-table	keypad	# bindings for keypad-based navigation
