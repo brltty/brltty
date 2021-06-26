@@ -333,16 +333,14 @@ public class CoreThread extends Thread {
     setOverrideDirectories();
     updateDataFiles();
 
-    BrailleNotification.create();
-    try {
+    {
       UsbHelper.begin();
+
       try {
         CoreWrapper.run(makeArguments(), ApplicationParameters.CORE_WAIT_DURATION);
       } finally {
         UsbHelper.end();
       }
-    } finally {
-      BrailleNotification.destroy();
     }
   }
 }

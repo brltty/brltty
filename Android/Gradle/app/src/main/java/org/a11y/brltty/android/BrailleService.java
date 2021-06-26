@@ -31,38 +31,14 @@ public class BrailleService extends AccessibilityService {
   private final static String LOG_TAG = BrailleService.class.getName();
 
   private static volatile BrailleService brailleService = null;
+  private AccessibilityButtonCallbacks accessibilityButtonCallbacks = null;
+  private Thread coreThread = null;
 
   public static BrailleService getBrailleService () {
     return brailleService;
   }
 
-  @Override
-  public void onCreate () {
-    super.onCreate();
-    brailleService = this;
-    Log.d(LOG_TAG, "braille service started");
-  }
-
-  @Override
-  public void onDestroy () {
-    try {
-      brailleService = null;
-      Log.d(LOG_TAG, "braille service stopped");
-    } finally {
-      super.onDestroy();
-    }
-  }
-
-  private Thread coreThread = null;
-  private AccessibilityButtonCallbacks accessibilityButtonCallbacks = null;
-
-  @Override
-  protected void onServiceConnected () {
-    Log.d(LOG_TAG, "braille service connected");
-
-    coreThread = new CoreThread(this);
-    coreThread.start();
-
+  private final void enableAccessibilityButton () {
     if (APITests.haveOreo) {
       AccessibilityButtonController controller = getAccessibilityButtonController();
 
@@ -77,10 +53,7 @@ public class BrailleService extends AccessibilityService {
     }
   }
 
-  @Override
-  public boolean onUnbind (Intent intent) {
-    Log.d(LOG_TAG, "braille service disconnected");
-
+  private final void disableAccessibilityButton () {
     if (APITests.haveOreo) {
       AccessibilityButtonController controller = getAccessibilityButtonController();
 
@@ -93,22 +66,55 @@ public class BrailleService extends AccessibilityService {
         }
       }
     }
+  }
 
+  private final void startCoreThread () {
+    Log.d(LOG_TAG, "starting core thread");
+    coreThread = new CoreThread(this);
+    coreThread.start();
+  }
+
+  private final void stopCoreThread () {
     try {
+      Log.d(LOG_TAG, "stopping core thread");
       CoreWrapper.stop();
-      Log.d(LOG_TAG, "waiting for core to stop");
+      Log.d(LOG_TAG, "waiting for core thread to stop");
 
       try {
         coreThread.join();
-        Log.d(LOG_TAG, "core stopped");
+        Log.d(LOG_TAG, "core thread stopped");
       } catch (InterruptedException exception) {
         Log.w(LOG_TAG, "core thread join interrupted", exception);
       }
     } finally {
       coreThread = null;
     }
+  }
 
-    return false;
+  @Override
+  public void onCreate () {
+    super.onCreate();
+
+    Log.d(LOG_TAG, "braille service starting");
+    brailleService = this;
+
+    BrailleNotification.create();
+    enableAccessibilityButton();
+    startCoreThread();
+  }
+
+  @Override
+  public void onDestroy () {
+    try {
+      stopCoreThread();
+      disableAccessibilityButton();
+      BrailleNotification.destroy();
+
+      brailleService = null;
+      Log.d(LOG_TAG, "braille service stopped");
+    } finally {
+      super.onDestroy();
+    }
   }
 
   @Override
