@@ -203,6 +203,7 @@ gioDisconnectResource (GioEndpoint *endpoint) {
 
   if (!method) {
     logUnsupportedOperation("disconnectResource");
+    errno = ENOSYS;
   } else if (method(endpoint->handle)) {
     ok = 1;
   }
@@ -224,6 +225,7 @@ gioMakeResourceIdentifier (GioEndpoint *endpoint, char *buffer, size_t size) {
 
   if (!method) {
     logUnsupportedOperation("makeResourceIdentifier");
+    errno = ENOSYS;
   } else {
     identifier = method(endpoint->handle, buffer, size);
   }
@@ -249,6 +251,7 @@ gioGetResourceName (GioEndpoint *endpoint) {
 
   if (!method) {
     logUnsupportedOperation("getResourceName");
+    errno = ENOSYS;
   } else {
     name = method(endpoint->handle, endpoint->options.requestTimeout);
   }
@@ -262,6 +265,7 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
 
   if (!method) {
     logUnsupportedOperation("writeData");
+    errno = ENOSYS;
     return -1;
   }
 
@@ -287,6 +291,7 @@ gioAwaitInput (GioEndpoint *endpoint, int timeout) {
 
   if (!method) {
     logUnsupportedOperation("awaitInput");
+    errno = ENOSYS;
     return 0;
   }
 
@@ -301,6 +306,7 @@ gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait) {
 
   if (!method) {
     logUnsupportedOperation("readData");
+    errno = ENOSYS;
     return -1;
   }
 
@@ -410,6 +416,7 @@ gioTellResource (
 
   if (!method) {
     logUnsupportedOperation("tellResource");
+    errno = ENOSYS;
     return -1;
   }
 
@@ -429,6 +436,7 @@ gioAskResource (
 
   if (!method) {
     logUnsupportedOperation("askResource");
+    errno = ENOSYS;
     return -1;
   }
 
@@ -444,6 +452,7 @@ gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
 
     if (!method) {
       logUnsupportedOperation("getHidReportItems");
+      errno = ENOSYS;
       return 0;
     }
 
@@ -458,6 +467,7 @@ gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
 
     if (!method) {
       logUnsupportedOperation("getHidReportSize");
+      errno = ENOSYS;
       return 0;
     }
 
@@ -474,6 +484,7 @@ gioSetHidReport (
 
   if (!method) {
     logUnsupportedOperation("setHidReport");
+    errno = ENOSYS;
     return -1;
   }
 
@@ -498,6 +509,7 @@ gioGetHidReport (
 
   if (!method) {
     logUnsupportedOperation("getHidReport");
+    errno = ENOSYS;
     return -1;
   }
 
@@ -514,6 +526,7 @@ gioSetHidFeature (
 
   if (!method) {
     logUnsupportedOperation("setHidFeature");
+    errno = ENOSYS;
     return -1;
   }
 
@@ -538,6 +551,7 @@ gioGetHidFeature (
 
   if (!method) {
     logUnsupportedOperation("getHidFeature");
+    errno = ENOSYS;
     return -1;
   }
 
