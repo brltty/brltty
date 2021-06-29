@@ -16,15 +16,15 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#ifndef BRLTTY_INCLUDED_USB_CH341
+#define BRLTTY_INCLUDED_USB_CH341
 
-#include <string.h>
-#include <errno.h>
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#include "log.h"
-#include "usb_serial.h"
-#include "usb_ch340.h"
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
-const UsbSerialOperations usbSerialOperations_CH340 = {
-  .name = "CH340",     
-};
+#endif /* BRLTTY_INCLUDED_USB_CH341 */

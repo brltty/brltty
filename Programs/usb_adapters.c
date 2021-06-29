@@ -167,7 +167,7 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
   { /* NLS eReader Zoomax */
     .vendor=0X1A86, .product=0X7523,
     .generic = 1,
-    .operations = &usbSerialOperations_CH340
+    .operations = &usbSerialOperations_CH341
   },
 };
 

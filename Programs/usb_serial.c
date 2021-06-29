@@ -28,6 +28,16 @@
 #include "usb_serial.h"
 #include "usb_adapters.h"
 
+static void
+usbLogSerialProblem (UsbDevice *device, const char *problem) {
+  logMessage(LOG_CATEGORY(USB_IO),
+    "%s: Vendor:%04X Product:%04X",
+    problem,
+    getLittleEndian16(device->descriptor.idVendor),
+    getLittleEndian16(device->descriptor.idProduct)
+  );
+}
+
 int
 usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count) {
   if (data->length > count) {
@@ -160,28 +170,45 @@ usbGetSerialOperations (UsbDevice *device) {
 
 int
 usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
+  int ok = 0;
   const UsbSerialOperations *serial = usbGetSerialOperations(device);
 
   if (!serial) {
-    logMessage(LOG_CATEGORY(USB_IO), "no serial operations: vendor=%04X product=%04X",
-               getLittleEndian16(device->descriptor.idVendor),
-               getLittleEndian16(device->descriptor.idProduct));
+    usbLogSerialProblem(device, "no serial operations");
     errno = ENOSYS;
-    return 0;
-  }
-
-  if (serial->setLineConfiguration) {
-    if (!serial->setLineConfiguration(device, parameters->baud, parameters->dataBits, parameters->stopBits, parameters->parity, parameters->flowControl)) return 0;
+  } else if (serial->setLineConfiguration) {
+    ok = serial->setLineConfiguration(
+      device, parameters->baud,
+      parameters->dataBits, parameters->stopBits,
+      parameters->parity, parameters->flowControl
+    );
+  } else if (serial->setLineProperties) {
+    ok = serial->setLineProperties(
+      device, parameters->baud,
+      parameters->dataBits, parameters->stopBits,
+      parameters->parity
+    );
   } else {
-    if (serial->setLineProperties) {
-      if (!serial->setLineProperties(device, parameters->baud, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
-    } else {
-      if (!serial->setBaud(device, parameters->baud)) return 0;
-      if (!serial->setDataFormat(device, parameters->dataBits, parameters->stopBits, parameters->parity)) return 0;
+    ok = 1;
+
+    if (!serial->setBaud) {
+      usbLogSerialProblem(device, "setting serial line speed not supported");
+    } else if (!serial->setBaud(device, parameters->baud)) {
+      ok = 0;
     }
 
-    if (!serial->setFlowControl(device, parameters->flowControl)) return 0;
+    if (!serial->setDataFormat) {
+      usbLogSerialProblem(device, "setting serial data format not supported");
+    } else if (!serial->setDataFormat(device, parameters->dataBits, parameters->stopBits, parameters->parity)) {
+      ok = 0;
+    }
+
+    if (!serial->setFlowControl) {
+      usbLogSerialProblem(device, "setting serial flow control not supported");
+    } else if (!serial->setFlowControl(device, parameters->flowControl)) {
+      ok = 0;
+    }
   }
 
-  return 1;
+  return ok;
 }

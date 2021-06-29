@@ -38,7 +38,7 @@ extern int usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count);
 
 extern const UsbSerialOperations usbSerialOperations_CDC_ACM;
 extern const UsbSerialOperations usbSerialOperations_Belkin;
-extern const UsbSerialOperations usbSerialOperations_CH340;
+extern const UsbSerialOperations usbSerialOperations_CH341;
 extern const UsbSerialOperations usbSerialOperations_CP2101;
 extern const UsbSerialOperations usbSerialOperations_CP2110;
 extern const UsbSerialOperations usbSerialOperations_FTDI_SIO;
