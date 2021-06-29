@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_USB_SERIAL
 
 #include "io_usb.h"
+#include "usb_internal.h"
 
 #ifdef __cplusplus
 extern "C" {

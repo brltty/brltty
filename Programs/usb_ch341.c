@@ -25,57 +25,214 @@
 #include "usb_serial.h"
 #include "usb_ch341.h"
 
-typedef enum {
-  CH341_REQ_READ_VERSION      = 0X5F,
-  CH341_REQ_READ_REGISTER     = 0X95,
-  CH341_REQ_WRITE_REGISTER    = 0X9A,
-  CH341_REQ_SERIAL_INITIALIZE = 0XA1,
-  CH341_REQ_MODEM_CCONTROL    = 0XA4,
-} CH341_Request;
-
-typedef enum {
-  CH341_REG_BREAK     = 0X05,
-  CH341_REG_PRESCALER = 0X12,
-  CH341_REG_DIVISOR   = 0X13,
-  CH341_REG_LCR       = 0X18,
-  CH341_REG_LCR2      = 0X25,
-} CH341_Register;
-
-/* The device line speed is given by:
- *   baud = clock / (2^(12 - (3 * ps) - fact) * div)
- *   clock = 48_000_000
- *   0 <= ps <= 3
- *   0 <= fact <= 1
- *   2 <= div <= 256 if fact == 0
- *   9 <= div <= 256 if fact == 1
- */
-
-#define CH341_CLOCK_RATE 48000000
-#define CH341_CLOCK_DIVISOR(ps, fact) (1 << (12 - (3 * (ps)) - (fact)))
-#define CH341_MINIMUM_RATE(ps) (CH341_CLOCK_RATE / (CH341_CLOCK_DIVISOR((ps), 1) * 512))
-
-static const unsigned int CH341_psToMinimumRate[] = {
-  CH341_MINIMUM_RATE(0),
-  CH341_MINIMUM_RATE(1),
-  CH341_MINIMUM_RATE(2),
-  CH341_MINIMUM_RATE(3)
+struct UsbSerialDataStruct {
+  char version[2];
+  char status[2];
 };
 
+typedef struct {
+  uint16_t factor;
+  uint8_t bits;
+} CH341_PrescalerEntry;
+
+static const CH341_PrescalerEntry CH341_prescalerTable[] = {
+  { .factor = 00001, // 1
+    .bits = USB_CH341_PS_DISABLE_2x | USB_CH341_PS_DISABLE_8x | USB_CH341_PS_DISABLE_64x
+  },
+
+  { .factor = 00002, // 2
+    .bits = USB_CH341_PS_DISABLE_8x | USB_CH341_PS_DISABLE_64x
+  },
+
+  { .factor = 00010, // 8
+    .bits = USB_CH341_PS_DISABLE_2x | USB_CH341_PS_DISABLE_64x
+  },
+
+  { .factor = 00020, // 16
+    .bits = USB_CH341_PS_DISABLE_64x
+  },
+
+  { .factor = 00100, // 64
+    .bits = USB_CH341_PS_DISABLE_2x | USB_CH341_PS_DISABLE_8x
+  },
+
+  { .factor = 00200, // 128
+    .bits = USB_CH341_PS_DISABLE_8x
+  },
+
+  { .factor = 01000, // 512
+    .bits = USB_CH341_PS_DISABLE_2x
+  },
+
+  { .factor = 02000, // 1024
+    .bits = 0
+  },
+};
+
+static const uint8_t CH341_prescalerCOUNT = ARRAY_COUNT(CH341_prescalerTable);
+
+static inline unsigned long
+usbTransformValue_CH341 (uint16_t factor, unsigned long value) {
+  return (((2UL * USB_CH341_FREQUENCY) / (factor * value)) + 1UL) / 2UL;
+}
+
 static int
-usbControlWrite_CH341 (UsbDevice *device, unsigned char request, unsigned int value, unsigned int index) {
-  logMessage(LOG_CATEGORY(USB_IO), "CH341 request: %02X %04X %04X", request, value, index);
-  return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
-                         request, value, index, NULL, 0, 1000) != -1;
+usbGetBaudSettings_CH341 (unsigned int baud, uint8_t *prescaler, uint16_t *divisor) {
+  const CH341_PrescalerEntry *ps = CH341_prescalerTable;
+  const CH341_PrescalerEntry *end = ps + CH341_prescalerCOUNT;
+
+  int NOT_FOUND = -1;
+  int nearest = NOT_FOUND;
+
+  while (ps < end) {
+    unsigned long psDivisor = usbTransformValue_CH341(ps->factor, baud);
+
+    if (psDivisor <= USB_CH341_DIVISOR_MAXIMUM) {
+      if (psDivisor >= ((ps->factor == 1)? 9: USB_CH341_DIVISOR_MINIMUM)) {
+        unsigned int psBaud = usbTransformValue_CH341(ps->factor, psDivisor);
+        int distance = psBaud - baud;
+        if (distance < 0) distance = -distance;
+
+        if ((nearest == NOT_FOUND) || (distance <= nearest)) {
+          *divisor = 256 - psDivisor;
+          *prescaler = ps->bits | USB_CH341_PS_IMMEDIATE;
+          nearest = distance;
+        }
+      }
+    }
+
+    ps += 1;
+  }
+
+  return nearest != NOT_FOUND;
+}
+
+static int
+usbControlWrite_CH341 (
+  UsbDevice *device, unsigned char request,
+  unsigned int value, unsigned int index
+) {
+  logMessage(LOG_CATEGORY(USB_IO),
+    "CH341 control write: %02X %04X %04X",
+    request, value, index
+  );
+
+  ssize_t result = usbControlWrite(
+    device, UsbControlRecipient_Device, UsbControlType_Vendor,
+    request, value, index, NULL, 0, 1000
+  );
+
+  return result != -1;
+}
+
+static int
+usbControlRead_CH341 (
+  UsbDevice *device, unsigned char request,
+  unsigned int value, unsigned int index,
+  unsigned char *buffer, size_t size
+) {
+  logMessage(LOG_CATEGORY(USB_IO),
+    "CH341 control read: %02X %04X %04X",
+    request, value, index
+  );
+
+  ssize_t result = usbControlRead(
+    device, UsbControlRecipient_Device, UsbControlType_Vendor,
+    request, value, index, buffer, size, 1000
+  );
+
+  return result != -1;
+}
+
+static int
+usbGetVersion_CH341 (UsbDevice *device) {
+  size_t size = sizeof(device->serial.data->version);
+  unsigned char version[size];
+
+  if (usbControlRead_CH341(device, USB_CH341_REQ_READ_VERSION, 0, 0, version, size)) {
+    memcpy(device->serial.data->version, version, size);
+
+    logBytes(LOG_CATEGORY(USB_IO),
+      "CH341 version", device->serial.data->version, size
+    );
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+usbGetStatus_CH341 (UsbDevice *device) {
+  size_t size = sizeof(device->serial.data->status);
+  unsigned char status[size];
+
+  if (usbControlRead_CH341(device, USB_CH341_REQ_READ_REGISTER, 0X0706, 0, status, size)) {
+    for (unsigned int i=0; i<size; i+=1) {
+      device->serial.data->status[i] = status[i] ^ 0XFF;
+    }
+
+    logBytes(LOG_CATEGORY(USB_IO),
+      "CH341 status", device->serial.data->status, size
+    );
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+usbSetBaud_CH341 (UsbDevice *device, unsigned int baud) {
+  if (baud < USB_CH341_BAUD_MINIMUM) return 0;
+  if (baud > USB_CH341_BAUD_MAXIMUM) return 0;
+
+  uint8_t prescaler;
+  uint16_t divisor;
+  if (!usbGetBaudSettings_CH341(baud, &prescaler, &divisor)) return 0;
+
+  return 1;
 }
 
 static int
 usbEnableAdapter_CH341 (UsbDevice *device) {
-  if (!usbControlWrite_CH341(device, CH341_REQ_SERIAL_INITIALIZE, 0, 0)) return 0;
+  usbGetVersion_CH341(device);
+
+  if (!usbControlWrite_CH341(device, USB_CH341_REQ_INITIALIZE, 0, 0)) {
+    return 0;
+  }
+
+  usbGetStatus_CH341(device);
   return 1;
+}
+
+static int
+usbMakeData_CH341 (UsbDevice *device, UsbSerialData **serialData) {
+  UsbSerialData *usd;
+
+  if ((usd = malloc(sizeof(*usd)))) {
+    memset(usd, 0, sizeof(*usd));
+
+    *serialData = usd;
+    return 1;
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
+
+static void
+usbDestroyData_CH341 (UsbSerialData *usd) {
+  free(usd);
 }
 
 const UsbSerialOperations usbSerialOperations_CH341 = {
   .name = "CH341",     
 
   .enableAdapter = usbEnableAdapter_CH341,     
+  .makeData = usbMakeData_CH341,     
+  .destroyData = usbDestroyData_CH341,     
+
+  .setBaud = usbSetBaud_CH341,
 };
