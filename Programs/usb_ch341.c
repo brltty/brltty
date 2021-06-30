@@ -146,14 +146,15 @@ usbControlRead_CH341 (
 
 static int
 usbGetVersion_CH341 (UsbDevice *device) {
-  size_t size = sizeof(device->serial.data->version);
+  UsbSerialData *usd = usbGetSerialData(device);
+  size_t size = sizeof(usd->version);
   unsigned char version[size];
 
   if (usbControlRead_CH341(device, USB_CH341_REQ_READ_VERSION, 0, 0, version, size)) {
-    memcpy(device->serial.data->version, version, size);
+    memcpy(usd->version, version, size);
 
     logBytes(LOG_CATEGORY(USB_IO),
-      "CH341 version", device->serial.data->version, size
+      "CH341 version", usd->version, size
     );
 
     return 1;
@@ -164,16 +165,17 @@ usbGetVersion_CH341 (UsbDevice *device) {
 
 static int
 usbGetStatus_CH341 (UsbDevice *device) {
-  size_t size = sizeof(device->serial.data->status);
+  UsbSerialData *usd = usbGetSerialData(device);
+  size_t size = sizeof(usd->status);
   unsigned char status[size];
 
   if (usbControlRead_CH341(device, USB_CH341_REQ_READ_REGISTER, 0X0706, 0, status, size)) {
     for (unsigned int i=0; i<size; i+=1) {
-      device->serial.data->status[i] = status[i] ^ 0XFF;
+      usd->status[i] = status[i] ^ 0XFF;
     }
 
     logBytes(LOG_CATEGORY(USB_IO),
-      "CH341 status", device->serial.data->status, size
+      "CH341 status", usd->status, size
     );
 
     return 1;

@@ -168,6 +168,11 @@ usbGetSerialOperations (UsbDevice *device) {
   return device->serial.operations;
 }
 
+UsbSerialData *
+usbGetSerialData (UsbDevice *device) {
+  return device->serial.data;
+}
+
 int
 usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
   int ok = 0;

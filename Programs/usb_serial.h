@@ -20,7 +20,6 @@
 #define BRLTTY_INCLUDED_USB_SERIAL
 
 #include "io_usb.h"
-#include "usb_internal.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,9 +33,6 @@ typedef struct {
 } UsbSerialAdapter;
 
 extern const UsbSerialAdapter *usbFindSerialAdapter (const UsbDeviceDescriptor *descriptor);
-
-extern int usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count);
-
 extern const UsbSerialOperations usbSerialOperations_CDC_ACM;
 extern const UsbSerialOperations usbSerialOperations_Belkin;
 extern const UsbSerialOperations usbSerialOperations_CH341;
@@ -45,6 +41,9 @@ extern const UsbSerialOperations usbSerialOperations_CP2110;
 extern const UsbSerialOperations usbSerialOperations_FTDI_SIO;
 extern const UsbSerialOperations usbSerialOperations_FTDI_FT8U232AM;
 extern const UsbSerialOperations usbSerialOperations_FTDI_FT232BM;
+
+extern UsbSerialData *usbGetSerialData (UsbDevice *devic3e);
+extern int usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count);
 
 #ifdef __cplusplus
 }

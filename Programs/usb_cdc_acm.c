@@ -38,10 +38,13 @@ struct UsbSerialDataStruct {
 
 static int
 usbGetParameters_CDC_ACM (UsbDevice *device, uint8_t request, uint16_t value, void *data, uint16_t size) {
-  ssize_t result = usbControlRead(device, UsbControlRecipient_Interface,
-                                  UsbControlType_Class, request, value,
-                                   device->serial.data->interface->bInterfaceNumber,
-                                   data, size, 1000);
+  UsbSerialData *usd = usbGetSerialData(device);
+
+  ssize_t result = usbControlRead(device,
+    UsbControlRecipient_Interface, UsbControlType_Class,
+    request, value, usd->interface->bInterfaceNumber,
+    data, size, 1000
+  );
 
   return result != -1;
 }
@@ -53,10 +56,13 @@ usbGetParameter_CDC_ACM (UsbDevice *device, uint8_t request, void *data, uint16_
 
 static int
 usbSetParameters_CDC_ACM (UsbDevice *device, uint8_t request, uint16_t value, const void *data, uint16_t size) {
-  ssize_t result = usbControlWrite(device, UsbControlRecipient_Interface,
-                                   UsbControlType_Class, request, value,
-                                   device->serial.data->interface->bInterfaceNumber,
-                                   data, size, 1000);
+  UsbSerialData *usd = usbGetSerialData(device);
+
+  ssize_t result = usbControlWrite(device,
+    UsbControlRecipient_Interface, UsbControlType_Class,
+    request, value, usd->interface->bInterfaceNumber,
+    data, size, 1000
+  );
 
   return result != -1;
 }
@@ -194,7 +200,8 @@ usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int
   }
 
   {
-    USB_CDC_ACM_LineCoding *oldCoding = &device->serial.data->lineCoding;
+    UsbSerialData *usd = usbGetSerialData(device);
+    USB_CDC_ACM_LineCoding *oldCoding = &usd->lineCoding;
 
     if (memcmp(&lineCoding, oldCoding, sizeof(lineCoding)) != 0) {
       if (!usbSetParameters_CDC_ACM(device, USB_CDC_ACM_CTL_SetLineCoding, 0,
@@ -299,7 +306,7 @@ usbDestroyData_CDC_ACM (UsbSerialData *usd) {
 
 static int
 usbEnableAdapter_CDC_ACM (UsbDevice *device) {
-  UsbSerialData *usd = device->serial.data;
+  UsbSerialData *usd = usbGetSerialData(device);
 
   if (!usbSetControlLines_CDC_ACM(device, 0)) return 0;
   if (!usbSetControlLines_CDC_ACM(device, USB_CDC_ACM_LINE_DTR)) return 0;
