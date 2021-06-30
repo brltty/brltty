@@ -45,6 +45,15 @@ extern const UsbSerialOperations usbSerialOperations_FTDI_FT232BM;
 extern UsbSerialData *usbGetSerialData (UsbDevice *devic3e);
 extern int usbSkipInitialBytes (UsbInputFilterData *data, unsigned int count);
 
+static inline int
+usbUpdateByte (uint8_t *byte, uint8_t mask, uint8_t value) {
+  if ((*byte & mask) == value) return 0;
+
+  *byte &= ~mask;
+  *byte |= value;
+  return 1;
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

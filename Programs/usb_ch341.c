@@ -29,8 +29,10 @@ struct UsbSerialDataStruct {
   char version[2];
   char status[2];
 
-  uint8_t prescaler;
-  uint8_t divisor;
+  struct {
+    uint8_t prescaler;
+    uint8_t divisor;
+  } baud;
 
   uint8_t lcr1;
   uint8_t lcr2;
@@ -43,31 +45,31 @@ typedef struct {
 
 static const CH341_PrescalerEntry CH341_prescalerTable[] = {
   { .factor = 00001, // 1
-    .flags = USB_CH341_PSF_DISABLE_2x | USB_CH341_PSF_DISABLE_8x | USB_CH341_PSF_DISABLE_64x
+    .flags = USB_CH341_PSF_BYPASS_2x | USB_CH341_PSF_BYPASS_8x | USB_CH341_PSF_BYPASS_64x
   },
 
   { .factor = 00002, // 2
-    .flags = USB_CH341_PSF_DISABLE_8x | USB_CH341_PSF_DISABLE_64x
+    .flags = USB_CH341_PSF_BYPASS_8x | USB_CH341_PSF_BYPASS_64x
   },
 
   { .factor = 00010, // 8
-    .flags = USB_CH341_PSF_DISABLE_2x | USB_CH341_PSF_DISABLE_64x
+    .flags = USB_CH341_PSF_BYPASS_2x | USB_CH341_PSF_BYPASS_64x
   },
 
   { .factor = 00020, // 16
-    .flags = USB_CH341_PSF_DISABLE_64x
+    .flags = USB_CH341_PSF_BYPASS_64x
   },
 
   { .factor = 00100, // 64
-    .flags = USB_CH341_PSF_DISABLE_2x | USB_CH341_PSF_DISABLE_8x
+    .flags = USB_CH341_PSF_BYPASS_2x | USB_CH341_PSF_BYPASS_8x
   },
 
   { .factor = 00200, // 128
-    .flags = USB_CH341_PSF_DISABLE_8x
+    .flags = USB_CH341_PSF_BYPASS_8x
   },
 
   { .factor = 01000, // 512
-    .flags = USB_CH341_PSF_DISABLE_2x
+    .flags = USB_CH341_PSF_BYPASS_2x
   },
 
   { .factor = 02000, // 1024
@@ -89,7 +91,7 @@ usbControlRead_CH341 (
   );
 
   ssize_t result = usbControlRead(
-    device, UsbControlRecipient_Device, UsbControlType_Vendor,
+    device, USB_CH341_CONTROL_RECIPIENT, USB_CH341_CONTROL_TYPE,
     request, value, index, buffer, size, 1000
   );
 
@@ -176,8 +178,8 @@ usbReadBaud_CH341 (UsbDevice *device) {
   UsbSerialData *usd = usbGetSerialData(device);
 
   int ok = usbReadRegisters_CH341(device,
-    USB_CH341_REG_PRESCALER, &usd->prescaler,
-    USB_CH341_REG_DIVISOR, &usd->divisor
+    USB_CH341_REG_PRESCALER, &usd->baud.prescaler,
+    USB_CH341_REG_DIVISOR, &usd->baud.divisor
   );
 
   return ok;
@@ -194,7 +196,7 @@ usbControlWrite_CH341 (
   );
 
   ssize_t result = usbControlWrite(
-    device, UsbControlRecipient_Device, UsbControlType_Vendor,
+    device, USB_CH341_CONTROL_RECIPIENT, USB_CH341_CONTROL_TYPE,
     request, value, index, NULL, 0, 1000
   );
 
@@ -262,16 +264,16 @@ usbSetBaud_CH341 (UsbDevice *device, unsigned int baud) {
   if (!usbGetBaudParameters(baud, &prescaler, &divisor)) return 0;
 
   UsbSerialData *usd = usbGetSerialData(device);
-  if ((prescaler == usd->prescaler) && (divisor == usd->divisor)) return 1;
+  if ((prescaler == usd->baud.prescaler) && (divisor == usd->baud.divisor)) return 1;
 
   int ok = usbWriteRegisters_CH341(device,
-    USB_CH341_REG_PRESCALER, (prescaler | USB_CH341_PSF_IMMEDIATE),
+    USB_CH341_REG_PRESCALER, (prescaler | USB_CH341_PSF_NO_WAIT),
     USB_CH341_REG_DIVISOR, divisor
   );
 
   if (ok) {
-    usd->prescaler = prescaler;
-    usd->divisor = divisor;
+    usd->baud.prescaler = prescaler;
+    usd->baud.divisor = divisor;
   }
 
   return ok;
@@ -287,11 +289,10 @@ usbSetLCRs_CH341 (UsbDevice *device) {
   );
 }
 
-static void
-usbUpdateLCRs_CH341 (UsbDevice *device, uint8_t clear, uint8_t set) {
+static int
+usbUpdateLCR1_CH341 (UsbDevice *device, uint8_t mask, uint8_t value) {
   UsbSerialData *usd = usbGetSerialData(device);
-  usd->lcr1 &= ~clear;
-  usd->lcr1 |= set;
+  return usbUpdateByte(&usd->lcr1, mask, value);
 }
 
 static int
@@ -299,18 +300,17 @@ usbUpdateDataBits_CH341 (UsbDevice *device, unsigned int dataBits) {
   uint8_t lcrBits = 0;
 
   switch (dataBits) {
-    case 5: lcrBits |= USB_CH341_LCR_DATA_BITS_5; break;
-    case 6: lcrBits |= USB_CH341_LCR_DATA_BITS_6; break;
-    case 7: lcrBits |= USB_CH341_LCR_DATA_BITS_7; break;
-    case 8: lcrBits |= USB_CH341_LCR_DATA_BITS_8; break;
+    case 5: lcrBits |= USB_CH341_LCR1_DATA_BITS_5; break;
+    case 6: lcrBits |= USB_CH341_LCR1_DATA_BITS_6; break;
+    case 7: lcrBits |= USB_CH341_LCR1_DATA_BITS_7; break;
+    case 8: lcrBits |= USB_CH341_LCR1_DATA_BITS_8; break;
 
     default:
       logMessage(LOG_WARNING, "unsupported CH341 data bits: %u", dataBits);
       return 0;
   }
 
-  usbUpdateLCRs_CH341(device, USB_CH341_LCR_DATA_BITS_MASK, lcrBits);
-  return 1;
+  return usbUpdateLCR1_CH341(device, USB_CH341_LCR1_DATA_BITS_MASK, lcrBits);
 }
 
 static int
@@ -319,11 +319,11 @@ usbUpdateStopBits_CH341 (UsbDevice *device, SerialStopBits stopBits) {
 
   switch (stopBits) {
     case SERIAL_STOP_1:
-      lcrBits |= USB_CH341_LCR_STOP_BITS_1;
+      lcrBits |= USB_CH341_LCR1_STOP_BITS_1;
       break;
 
     case SERIAL_STOP_2:
-      lcrBits |= USB_CH341_LCR_STOP_BITS_2;
+      lcrBits |= USB_CH341_LCR1_STOP_BITS_2;
       break;
 
     default:
@@ -331,8 +331,7 @@ usbUpdateStopBits_CH341 (UsbDevice *device, SerialStopBits stopBits) {
       return 0;
   }
 
-  usbUpdateLCRs_CH341(device, USB_CH341_LCR_STOP_BITS_MASK, lcrBits);
-  return 1;
+  return usbUpdateLCR1_CH341(device, USB_CH341_LCR1_STOP_BITS_MASK, lcrBits);
 }
 
 static int
@@ -340,23 +339,23 @@ usbUpdateParity_CH341 (UsbDevice *device, SerialParity parity) {
   uint8_t lcrBits = 0;
 
   if (parity != SERIAL_PARITY_NONE) {
-    lcrBits |= USB_CH341_LCR_PARITY_ENABLE;
+    lcrBits |= USB_CH341_LCR1_PARITY_ENABLE;
 
     switch (parity) {
       case SERIAL_PARITY_EVEN:
-        lcrBits |= USB_CH341_LCR_PARITY_EVEN;
+        lcrBits |= USB_CH341_LCR1_PARITY_EVEN;
         break;
 
       case SERIAL_PARITY_ODD:
-        lcrBits |= USB_CH341_LCR_PARITY_ODD;
+        lcrBits |= USB_CH341_LCR1_PARITY_ODD;
         break;
 
       case SERIAL_PARITY_SPACE:
-        lcrBits |= USB_CH341_LCR_PARITY_SPACE;
+        lcrBits |= USB_CH341_LCR1_PARITY_SPACE;
         break;
 
       case SERIAL_PARITY_MARK:
-        lcrBits |= USB_CH341_LCR_PARITY_MARK;
+        lcrBits |= USB_CH341_LCR1_PARITY_MARK;
         break;
 
       default:
@@ -365,16 +364,18 @@ usbUpdateParity_CH341 (UsbDevice *device, SerialParity parity) {
     }
   }
 
-  usbUpdateLCRs_CH341(device, USB_CH341_LCR_PARITY_MASK, lcrBits);
-  return 1;
+  return usbUpdateLCR1_CH341(device, USB_CH341_LCR1_PARITY_MASK, lcrBits);
 }
 
 static int
 usbSetDataFormat_CH341 (UsbDevice *device, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
-  return usbUpdateParity_CH341(device, parity)
-      && usbUpdateDataBits_CH341(device, dataBits)
-      && usbUpdateStopBits_CH341(device, stopBits)
-      && usbSetLCRs_CH341(device);
+  int changed = usbUpdateDataBits_CH341(device, dataBits)
+             || usbUpdateStopBits_CH341(device, stopBits)
+             || usbUpdateParity_CH341(device, parity)
+             ;
+
+  if (!changed) return 1;
+  return usbSetLCRs_CH341(device);
 }
 
 static int
@@ -399,9 +400,9 @@ usbMakeData_CH341 (UsbDevice *device, UsbSerialData **serialData) {
   if ((usd = malloc(sizeof(*usd)))) {
     memset(usd, 0, sizeof(*usd));
 
-    usd->lcr1 = USB_CH341_LCR_DATA_BITS_8 
-             | USB_CH341_LCR_TRANSMIT_ENABLE
-             | USB_CH341_LCR_RECEIVE_ENABLE
+    usd->lcr1 = USB_CH341_LCR1_DATA_BITS_8 
+             | USB_CH341_LCR1_TRANSMIT_ENABLE
+             | USB_CH341_LCR1_RECEIVE_ENABLE
              ;
 
     *serialData = usd;
