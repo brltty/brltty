@@ -343,6 +343,9 @@ typedef int UsbInputFilter (UsbInputFilterData *data);
 typedef struct {
   const char *name;
 
+  int (*enableAdapter) (UsbDevice *device);
+  void (*disableAdapter) (UsbDevice *device);
+
   int (*makeData) (UsbDevice *device, UsbSerialData **serialData);
   void (*destroyData) (UsbSerialData *usd);
 
@@ -354,9 +357,6 @@ typedef struct {
 
   int (*setDtrState) (UsbDevice *device, int state);
   int (*setRtsState) (UsbDevice *device, int state);
-
-  int (*enableAdapter) (UsbDevice *device);
-  void (*disableAdapter) (UsbDevice *device);
 
   UsbInputFilter *inputFilter;
   ssize_t (*writeData) (UsbDevice *device, const void *data, size_t size);
