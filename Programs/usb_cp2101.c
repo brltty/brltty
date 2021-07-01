@@ -30,7 +30,7 @@ static size_t
 usbGetProperty_CP2101 (UsbDevice *device, uint8_t request, void *data, size_t length) {
   ssize_t result;
 
-  logMessage(LOG_CATEGORY(USB_IO), "getting CP2101 property: %02X", request);
+  logMessage(LOG_CATEGORY(SERIAL_IO), "getting CP2101 property: %02X", request);
   result = usbControlRead(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                           request, 0, 0, data, length, 1000);
   if (result == -1) return 0;
@@ -40,7 +40,7 @@ usbGetProperty_CP2101 (UsbDevice *device, uint8_t request, void *data, size_t le
     memset(&bytes[result], 0, length-result);
   }
 
-  logBytes(LOG_CATEGORY(USB_IO), "CP2101 property input", data, result);
+  logBytes(LOG_CATEGORY(SERIAL_IO), "CP2101 property input", data, result);
   return result;
 }
 
@@ -50,8 +50,8 @@ usbSetComplexProperty_CP2101 (
   uint8_t request, uint16_t value,
   const void *data, size_t length
 ) {
-  logMessage(LOG_CATEGORY(USB_IO), "setting CP2101 property: %02X %04X", request, value);
-  if (length) logBytes(LOG_CATEGORY(USB_IO), "CP2101 property output", data, length);
+  logMessage(LOG_CATEGORY(SERIAL_IO), "setting CP2101 property: %02X %04X", request, value);
+  if (length) logBytes(LOG_CATEGORY(SERIAL_IO), "CP2101 property output", data, length);
 
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                          request, value, 0, data, length, 1000) != -1;
@@ -67,7 +67,7 @@ usbVerifyBaudRate_CP2101 (UsbDevice *device, USB_CP2101_BaudRate expected) {
   USB_CP2101_BaudRate actual;
   ssize_t result;
 
-  logMessage(LOG_CATEGORY(USB_IO), "verifying CP2101 baud rate");
+  logMessage(LOG_CATEGORY(SERIAL_IO), "verifying CP2101 baud rate");
   result = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetBaudRate,
                                  &actual, sizeof(actual));
 
@@ -92,7 +92,7 @@ usbVerifyBaudDivisor_CP2101 (UsbDevice *device, USB_CP2101_BaudDivisor expected)
   USB_CP2101_BaudDivisor actual;
   ssize_t result;
 
-  logMessage(LOG_CATEGORY(USB_IO), "verifying CP2101 baud divisor");
+  logMessage(LOG_CATEGORY(SERIAL_IO), "verifying CP2101 baud divisor");
   result = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetBaudDivisor,
                                  &actual, sizeof(actual));
 
@@ -131,7 +131,7 @@ usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
   {
     USB_CP2101_BaudRate rate;
 
-    logMessage(LOG_CATEGORY(USB_IO), "setting CP2101 baud rate: %u", baud);
+    logMessage(LOG_CATEGORY(SERIAL_IO), "setting CP2101 baud rate: %u", baud);
     putLittleEndian32(&rate, baud);
 
     if (!usbSetComplexProperty_CP2101(device, USB_CP2101_CTL_SetBaudRate, 0,
@@ -143,7 +143,7 @@ usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
   }
 
   {
-    logMessage(LOG_CATEGORY(USB_IO), "setting CP2101 baud divisor: %u", divisor);
+    logMessage(LOG_CATEGORY(SERIAL_IO), "setting CP2101 baud divisor: %u", divisor);
 
     if (!usbSetSimpleProperty_CP2101(device, USB_CP2101_CTL_SetBaudDivisor, divisor)) {
       logMessage(LOG_WARNING, "unable to set CP2101 baud divisor: %s", strerror(errno));
@@ -163,7 +163,7 @@ usbSetModemState_CP2101 (UsbDevice *device, int state, int shift, const char *na
     return 0;
   }
 
-  logMessage(LOG_CATEGORY(USB_IO),
+  logMessage(LOG_CATEGORY(SERIAL_IO),
              "setting CP2101 %s state: %s",
              name, (state? "high": "low"));
 
@@ -185,7 +185,7 @@ usbVerifyFlowControl_CP2101 (UsbDevice *device, const USB_CP2101_FlowControl *ex
   USB_CP2101_FlowControl actual;
   ssize_t result;
 
-  logMessage(LOG_CATEGORY(USB_IO), "verifying CP2101 flow control");
+  logMessage(LOG_CATEGORY(SERIAL_IO), "verifying CP2101 flow control");
   result = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetFlowControl,
                                  &actual, sizeof(actual));
 
@@ -210,7 +210,7 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
   USB_CP2101_FlowControl newSettings;
   size_t size;
 
-  logMessage(LOG_CATEGORY(USB_IO), "getting CP2101 flow control");
+  logMessage(LOG_CATEGORY(SERIAL_IO), "getting CP2101 flow control");
   size = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetFlowControl,
                                &oldSettings, sizeof(oldSettings));
 
@@ -266,10 +266,10 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
   }
 
   if (memcmp(&newSettings, &oldSettings, size) == 0) {
-    logMessage(LOG_CATEGORY(USB_IO), "CP2101 flow control unchanged");
+    logMessage(LOG_CATEGORY(SERIAL_IO), "CP2101 flow control unchanged");
   }
 
-  logMessage(LOG_CATEGORY(USB_IO), "setting CP2101 flow control");
+  logMessage(LOG_CATEGORY(SERIAL_IO), "setting CP2101 flow control");
 
   if (!usbSetComplexProperty_CP2101(device, USB_CP2101_CTL_SetFlowControl, 0,
                                     &newSettings, size)) {
@@ -286,7 +286,7 @@ usbVerifyLineControl_CP2101 (UsbDevice *device, USB_CP2101_LineControl expected)
   USB_CP2101_LineControl actual;
   ssize_t result;
 
-  logMessage(LOG_CATEGORY(USB_IO), "verifying CP2101 line control");
+  logMessage(LOG_CATEGORY(SERIAL_IO), "verifying CP2101 line control");
   result = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetLineControl,
                                  &actual, sizeof(actual));
 
@@ -364,7 +364,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, SerialStopBit
   }
 
   if (ok) {
-    logMessage(LOG_CATEGORY(USB_IO), "setting CP2101 line control: 0X%04X", lineControl);
+    logMessage(LOG_CATEGORY(SERIAL_IO), "setting CP2101 line control: 0X%04X", lineControl);
 
     if (!usbSetSimpleProperty_CP2101(device, USB_CP2101_CTL_SetLineControl, lineControl)) {
       logMessage(LOG_WARNING, "unable to set CP2101 line control: %0X04X", lineControl);
@@ -379,7 +379,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, SerialStopBit
 
 static int
 usbSetInterfaceState_CP2101 (UsbDevice *device, int state) {
-  logMessage(LOG_CATEGORY(USB_IO),
+  logMessage(LOG_CATEGORY(SERIAL_IO),
              "setting CP2101 interface state: %s",
              (state? "enabled": "disabled"));
 

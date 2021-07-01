@@ -128,7 +128,7 @@ case USB_CDC_ACM_PARITY_##value: parity = #name; break;
   }
 
   STR_END;
-  logMessage(LOG_CATEGORY(USB_IO), "%s", log);
+  logMessage(LOG_CATEGORY(SERIAL_IO), "%s", log);
 }
 
 static int

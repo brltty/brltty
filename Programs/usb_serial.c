@@ -30,7 +30,7 @@
 
 static void
 usbLogSerialProblem (UsbDevice *device, const char *problem) {
-  logMessage(LOG_CATEGORY(USB_IO),
+  logMessage(LOG_CATEGORY(SERIAL_IO),
     "%s: Vendor:%04X Product:%04X",
     problem,
     getLittleEndian16(device->descriptor.idVendor),
@@ -147,6 +147,7 @@ usbSetSerialOperations (UsbDevice *device) {
     }
 
     if (uso) {
+      logMessage(LOG_CATEGORY(SERIAL_IO), "USB adapter: %s", uso->name);
       UsbSerialData *usd = NULL;
 
       if (uso->makeData) {
@@ -197,19 +198,19 @@ usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
     ok = 1;
 
     if (!serial->setBaud) {
-      usbLogSerialProblem(device, "setting serial line speed not supported");
+      usbLogSerialProblem(device, "setting line speed not supported");
     } else if (!serial->setBaud(device, parameters->baud)) {
       ok = 0;
     }
 
     if (!serial->setDataFormat) {
-      usbLogSerialProblem(device, "setting serial data format not supported");
+      usbLogSerialProblem(device, "setting data format not supported");
     } else if (!serial->setDataFormat(device, parameters->dataBits, parameters->stopBits, parameters->parity)) {
       ok = 0;
     }
 
     if (!serial->setFlowControl) {
-      usbLogSerialProblem(device, "setting serial flow control not supported");
+      usbLogSerialProblem(device, "setting flow control not supported");
     } else if (!serial->setFlowControl(device, parameters->flowControl)) {
       ok = 0;
     }

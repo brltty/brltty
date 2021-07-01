@@ -85,7 +85,7 @@ usbControlRead_CH341 (
   unsigned int value, unsigned int index,
   unsigned char *buffer, size_t size
 ) {
-  logMessage(LOG_CATEGORY(USB_IO),
+  logMessage(LOG_CATEGORY(SERIAL_IO),
     "CH341 control read: %02X %04X %04X",
     request, value, index
   );
@@ -96,7 +96,7 @@ usbControlRead_CH341 (
   );
 
   if (result == -1) return 0;
-  logBytes(LOG_CATEGORY(USB_IO), "CH341 control response", buffer, result);
+  logBytes(LOG_CATEGORY(SERIAL_IO), "CH341 control response", buffer, result);
   if (result == size) return 1;
 
   logMessage(LOG_WARNING,
@@ -142,7 +142,7 @@ usbReadVersion_CH341 (UsbDevice *device) {
   if (ok) {
     memcpy(usd->version, version, size);
 
-    logBytes(LOG_CATEGORY(USB_IO),
+    logBytes(LOG_CATEGORY(SERIAL_IO),
       "CH341 version", usd->version, size
     );
   }
@@ -165,7 +165,7 @@ usbReadStatus_CH341 (UsbDevice *device) {
       usd->status[i] = status[i] ^ 0XFF;
     }
 
-    logBytes(LOG_CATEGORY(USB_IO),
+    logBytes(LOG_CATEGORY(SERIAL_IO),
       "CH341 status", usd->status, size
     );
   }
@@ -190,7 +190,7 @@ usbControlWrite_CH341 (
   UsbDevice *device, unsigned char request,
   unsigned int value, unsigned int index
 ) {
-  logMessage(LOG_CATEGORY(USB_IO),
+  logMessage(LOG_CATEGORY(SERIAL_IO),
     "CH341 control write: %02X %04X %04X",
     request, value, index
   );
