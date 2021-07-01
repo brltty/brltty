@@ -226,7 +226,7 @@ serialGetStopBits (const SerialAttributes *attributes) {
   if (attributes->StopBits == ONESTOPBIT) return 1;
   if (attributes->StopBits == TWOSTOPBITS) return 2;
 
-  logMessage(LOG_WARNING, "unsupported serial stop bits value: %X", attributes->StopBits);
+  logMessage(LOG_WARNING, "unsupported Windows serial stop bits value: %X", attributes->StopBits);
   return 0;
 }
 

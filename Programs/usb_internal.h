@@ -19,8 +19,10 @@
 #ifndef BRLTTY_INCLUDED_USB_INTERNAL
 #define BRLTTY_INCLUDED_USB_INTERNAL
 
+#include "usb_types.h"
 #include "bitfield.h"
 #include "queue.h"
+#include "async_io.h"
 
 #ifdef __cplusplus
 extern "C" {

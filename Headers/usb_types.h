@@ -329,7 +329,8 @@ typedef struct {
 #define END_USB_CHANNEL_DEFINITIONS { .vendor=0 } };
 
 typedef struct UsbDeviceStruct UsbDevice;
-typedef struct UsbSerialDataStruct UsbSerialData;
+typedef struct UsbChooseChannelDataStruct UsbChooseChannelData;
+typedef int UsbDeviceChooser (UsbDevice *device, UsbChooseChannelData *data);
 
 typedef struct {
   void *const buffer;
@@ -338,6 +339,7 @@ typedef struct {
   ssize_t length;
 } UsbInputFilterData;
 
+typedef struct UsbSerialDataStruct UsbSerialData;
 typedef int UsbInputFilter (UsbInputFilterData *data);
 
 typedef struct {

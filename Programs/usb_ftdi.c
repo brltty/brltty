@@ -57,7 +57,7 @@ usbSetBaud_FTDI_SIO (UsbDevice *device, unsigned int baud) {
     case  57600: divisor = 8; break;
     case 115200: divisor = 9; break;
     default:
-      logMessage(LOG_WARNING, "unsupported FTDI SIO baud: %u", baud);
+      logUnsupportedBaud(baud);
       errno = EINVAL;
       return 0;
   }
@@ -67,7 +67,7 @@ usbSetBaud_FTDI_SIO (UsbDevice *device, unsigned int baud) {
 static int
 usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, unsigned int baud) {
   if (baud > 3000000) {
-    logMessage(LOG_WARNING, "unsupported FTDI FT8U232AM baud: %u", baud);
+    logUnsupportedBaud(baud);
     errno = EINVAL;
     return 0;
   }
@@ -89,7 +89,7 @@ usbSetBaud_FTDI_FT8U232AM (UsbDevice *device, unsigned int baud) {
 static int
 usbSetBaud_FTDI_FT232BM (UsbDevice *device, unsigned int baud) {
   if (baud > 3000000) {
-    logMessage(LOG_WARNING, "unsupported FTDI FT232BM baud: %u", baud);
+    logUnsupportedBaud(baud);
     errno = EINVAL;
     return 0;
   }
@@ -116,7 +116,7 @@ usbSetFlowControl_FTDI (UsbDevice *device, SerialFlowControl flow) {
   FTDI_FLOW(SERIAL_FLOW_OUTPUT_XON|SERIAL_FLOW_INPUT_XON, 0X0400);
 #undef FTDI_FLOW
   if (flow) {
-    logMessage(LOG_WARNING, "unsupported FTDI flow control: %02X", flow);
+    logUnsupportedFlowControl(flow);
   }
   return usbSetAttribute_FTDI(device, 2, ((index & 0X0400)? 0X1311: 0), index);
 }
@@ -126,7 +126,7 @@ usbSetDataFormat_FTDI (UsbDevice *device, unsigned int dataBits, SerialStopBits 
   int ok = 1;
   unsigned int value = dataBits & 0XFF;
   if (dataBits != value) {
-    logMessage(LOG_WARNING, "unsupported FTDI data bits: %u", dataBits);
+    logUnsupportedDataBits(dataBits);
     ok = 0;
   }
   switch (parity) {
@@ -136,7 +136,7 @@ usbSetDataFormat_FTDI (UsbDevice *device, unsigned int dataBits, SerialStopBits 
     case SERIAL_PARITY_MARK:  value |= 0X300; break;
     case SERIAL_PARITY_SPACE: value |= 0X400; break;
     default:
-      logMessage(LOG_WARNING, "unsupported FTDI parity: %u", parity);
+      logUnsupportedParity(parity);
       ok = 0;
       break;
   }
@@ -144,7 +144,7 @@ usbSetDataFormat_FTDI (UsbDevice *device, unsigned int dataBits, SerialStopBits 
     case SERIAL_STOP_1: value |= 0X0000; break;
     case SERIAL_STOP_2: value |= 0X1000; break;
     default:
-      logMessage(LOG_WARNING, "unsupported FTDI stop bits: %u", stopBits);
+      logUnsupportedStopBits(stopBits);
       ok = 0;
       break;
   }

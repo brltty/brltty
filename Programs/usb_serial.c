@@ -23,7 +23,6 @@
 
 #include "log.h"
 #include "program.h"
-#include "io_usb.h"
 #include "usb_internal.h"
 #include "usb_serial.h"
 #include "usb_adapters.h"

@@ -358,7 +358,7 @@ serialGetDataBits (const SerialAttributes *attributes) {
 #endif /* CS8 */
 
     default:
-      logMessage(LOG_WARNING, "unsupported serial data bits value: %lX", (unsigned long)size);
+      logMessage(LOG_WARNING, "unsupported termios data bits: %lX", (unsigned long)size);
       return 0;
   }
 }

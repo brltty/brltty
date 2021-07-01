@@ -243,6 +243,9 @@ $(SYSTEM_OBJECT).$O:
 io_misc.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_misc.c
 
+io_log.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/io_log.c
+
 gio.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio.c
 

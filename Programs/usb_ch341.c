@@ -306,7 +306,7 @@ usbUpdateDataBits_CH341 (UsbDevice *device, unsigned int dataBits) {
     case 8: lcrBits |= USB_CH341_LCR1_DATA_BITS_8; break;
 
     default:
-      logMessage(LOG_WARNING, "unsupported CH341 data bits: %u", dataBits);
+      logUnsupportedDataBits(dataBits);
       return 0;
   }
 
@@ -327,7 +327,7 @@ usbUpdateStopBits_CH341 (UsbDevice *device, SerialStopBits stopBits) {
       break;
 
     default:
-      logMessage(LOG_WARNING, "unsupported CH341 stop bits: %u", stopBits);
+      logUnsupportedStopBits(stopBits);
       return 0;
   }
 
@@ -359,7 +359,7 @@ usbUpdateParity_CH341 (UsbDevice *device, SerialParity parity) {
         break;
 
       default:
-        logMessage(LOG_WARNING, "unsupported CH341 parity: %u", parity);
+        logUnsupportedParity(parity);
         return 0;
     }
   }

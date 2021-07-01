@@ -123,7 +123,7 @@ usbSetBaud_CP2101 (UsbDevice *device, unsigned int baud) {
   USB_CP2101_BaudDivisor divisor = USB_CP2101_BAUD_BASE / baud;
 
   if ((baud * divisor) != USB_CP2101_BAUD_BASE) {
-    logMessage(LOG_WARNING, "unsupported CP2101 baud: %u", baud);
+    logUnsupportedBaud(baud);
     errno = EINVAL;
     return 0;
   }
@@ -260,7 +260,7 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
   putLittleEndian32(&newSettings.dataFlowOptions, newSettings.dataFlowOptions);
 
   if (flow) {
-    logMessage(LOG_WARNING, "unsupported CP2101 flow control: %02X", flow);
+    logUnsupportedFlowControl(flow);
     errno = EINVAL;
     return 0;
   }
@@ -317,7 +317,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, SerialStopBit
         (dataBits <= USB_CP2101_DATA_MAXIMUM)) {
       value = dataBits;
     } else {
-      logMessage(LOG_WARNING, "unsupported CP2101 data bits: %u", dataBits);
+      logUnsupportedDataBits(dataBits);
       ok = 0;
       value = 8;
     }
@@ -336,7 +336,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, SerialStopBit
       case SERIAL_PARITY_SPACE: value = USB_CP2101_PARITY_SPACE; break;
 
       default:
-        logMessage(LOG_WARNING, "unsupported CP2101 parity: %u", parity);
+        logUnsupportedParity(parity);
         ok = 0;
         value = USB_CP2101_PARITY_NONE;
         break;
@@ -354,7 +354,7 @@ usbSetDataFormat_CP2101 (UsbDevice *device, unsigned int dataBits, SerialStopBit
       case SERIAL_STOP_2:   value = USB_CP2101_STOP_2;   break;
 
       default:
-        logMessage(LOG_WARNING, "unsupported CP2101 stop bits: %u", stopBits);
+        logUnsupportedStopBits(stopBits);
         ok = 0;
         value = USB_CP2101_STOP_1;
         break;

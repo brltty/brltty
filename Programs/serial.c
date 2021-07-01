@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "io_log.h"
 #include "strfmt.h"
 #include "parameters.h"
 #include "parse.h"
@@ -110,7 +111,7 @@ serialSetBaud (SerialDevice *serial, unsigned int baud) {
   if (entry) {
     logMessage(LOG_CATEGORY(SERIAL_IO), "set baud: %u", baud);
     if (serialPutSpeed(&serial->pendingAttributes, entry->speed)) return 1;
-    logMessage(LOG_WARNING, "unsupported serial baud: %u", baud);
+    logUnsupportedBaud(baud);
   }
 
   return 0;
@@ -145,7 +146,7 @@ serialSetDataBits (SerialDevice *serial, unsigned int bits) {
   logMessage(LOG_CATEGORY(SERIAL_IO), "set data bits: %u", bits);
   if (serialPutDataBits(&serial->pendingAttributes, bits)) return 1;
 
-  logMessage(LOG_WARNING, "unsupported serial data bit count: %u", bits);
+  logUnsupportedDataBits(bits);
   return 0;
 }
 
@@ -154,7 +155,7 @@ serialSetStopBits (SerialDevice *serial, SerialStopBits bits) {
   logMessage(LOG_CATEGORY(SERIAL_IO), "set stop bits: %u", bits);
   if (serialPutStopBits(&serial->pendingAttributes, bits)) return 1;
 
-  logMessage(LOG_WARNING, "unsupported serial stop bit count: %u", bits);
+  logUnsupportedStopBits(bits);
   return 0;
 }
 
@@ -163,7 +164,7 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
   logMessage(LOG_CATEGORY(SERIAL_IO), "set parity: %u", parity);
   if (serialPutParity(&serial->pendingAttributes, parity)) return 1;
 
-  logMessage(LOG_WARNING, "unsupported serial parity: %u", parity);
+  logUnsupportedParity(parity);
   return 0;
 }
 
@@ -240,7 +241,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 #endif /* HAVE_POSIX_THREADS */
 
   if (!flow) return 1;
-  logMessage(LOG_WARNING, "unsupported serial flow control: 0X%02X", flow);
+  logUnsupportedFlowControl(flow);
   return 0;
 }
 

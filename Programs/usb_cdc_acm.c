@@ -148,7 +148,7 @@ usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int
       break;
 
     default:
-      logMessage(LOG_WARNING, "unsupported CDC ACM data bits: %u", dataBits);
+      logUnsupportedDataBits(dataBits);
       errno = EINVAL;
       return 0;
   }
@@ -167,7 +167,7 @@ usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int
       break;
 
     default:
-      logMessage(LOG_WARNING, "unsupported CDC ACM stop bits: %u", stopBits);
+      logUnsupportedStopBits(stopBits);
       errno = EINVAL;
       return 0;
   }
@@ -194,7 +194,7 @@ usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int
       break;
 
     default:
-      logMessage(LOG_WARNING, "unsupported CDC ACM parity: %u", parity);
+      logUnsupportedParity(parity);
       errno = EINVAL;
       return 0;
   }
@@ -220,7 +220,7 @@ usbSetLineProperties_CDC_ACM (UsbDevice *device, unsigned int baud, unsigned int
 static int
 usbSetFlowControl_CDC_ACM (UsbDevice *device, SerialFlowControl flow) {
   if (flow) {
-    logMessage(LOG_WARNING, "unsupported CDC ACM flow control: %02X", flow);
+    logUnsupportedFlowControl(flow);
     errno = EINVAL;
     return 0;
   }
