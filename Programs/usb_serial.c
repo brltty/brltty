@@ -197,19 +197,19 @@ usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
     ok = 1;
 
     if (!serial->setBaud) {
-      usbLogSerialProblem(device, "setting line speed not supported");
+      usbLogSerialProblem(device, "setting baud is not supported");
     } else if (!serial->setBaud(device, parameters->baud)) {
       ok = 0;
     }
 
     if (!serial->setDataFormat) {
-      usbLogSerialProblem(device, "setting data format not supported");
+      usbLogSerialProblem(device, "setting data format is not supported");
     } else if (!serial->setDataFormat(device, parameters->dataBits, parameters->stopBits, parameters->parity)) {
       ok = 0;
     }
 
     if (!serial->setFlowControl) {
-      usbLogSerialProblem(device, "setting flow control not supported");
+      usbLogSerialProblem(device, "setting flow control is not supported");
     } else if (!serial->setFlowControl(device, parameters->flowControl)) {
       ok = 0;
     }

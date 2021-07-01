@@ -25,23 +25,41 @@ extern "C" {
 
 #define USB_CH341_CONTROL_TYPE UsbControlType_Vendor
 #define USB_CH341_CONTROL_RECIPIENT UsbControlRecipient_Device
+#define USB_CH341_CONTROL_TIMEOUT 1000
 
 typedef enum {
-  USB_CH341_REQ_READ_VERSION    = 0X5F,
-  USB_CH341_REQ_READ_REGISTERS  = 0X95,
-  USB_CH341_REQ_WRITE_REGISTERS = 0X9A,
-  USB_CH341_REQ_INITIALIZE      = 0XA1,
-  USB_CH341_REQ_MODEM_CCONTROL  = 0XA4,
+  USB_CH341_REQ_READ_VERSION      = 0X5F,
+  USB_CH341_REQ_READ_REGISTERS    = 0X95,
+  USB_CH341_REQ_WRITE_REGISTERS   = 0X9A,
+  USB_CH341_REQ_INITIALIZE_SERIAL = 0XA1,
+  USB_CH341_REQ_WRITE_MCR         = 0XA4,
 } USB_CH341_ControlRequest;
 
 typedef enum {
   USB_CH341_REG_BREAK     = 0X05,
+  USB_CH341_REG_MSR       = 0X06,
+  USB_CH341_REG_LSR       = 0X07,
   USB_CH341_REG_PRESCALER = 0X12,
   USB_CH341_REG_DIVISOR   = 0X13,
   USB_CH341_REG_BPS_MOD   = 0X14,
   USB_CH341_REG_LCR1      = 0X18,
   USB_CH341_REG_LCR2      = 0X25,
 } USB_CH341_Register;
+
+#define USB_CH341_FREQUENCY 12000000
+#define USB_CH341_BAUD_MINIMUM 46
+#define USB_CH341_BAUD_MAXIMUM 2000000
+
+typedef enum {
+  USB_CH341_PSF_BYPASS_8x  = 0X01,
+  USB_CH341_PSF_BYPASS_64x = 0X02,
+  USB_CH341_PSF_BYPASS_2x  = 0X04,
+  USB_CH341_PSF_NO_WAIT    = 0X80, // don't wait till there are 32 bytes
+} USB_CH341_PrescalerFlags;
+
+#define USB_CH341_DIVISOR_MINIMUM   2
+#define USB_CH341_DIVISOR_MAXIMUM 256
+#define USB_CH341_DIVISOR_MINUEND 256
 
 typedef enum {
   USB_CH341_LCR1_RECEIVE_ENABLE    = 0X80,
@@ -67,25 +85,16 @@ typedef enum {
 } USB_CH341_LCR1Flags;
 
 typedef enum {
-  USB_CH341_MODEM_CTS = 0X01, // clear to send
-  USB_CH341_MODEM_DSR = 0X02, // data set ready
-  USB_CH341_MODEM_RI  = 0X04, // ring indicator
-  USB_CH341_MODEM_DCD = 0X08, // data carrier detect
-} USB_CH341_ModemFlags;
+  USB_CH341_MCR_DTR = 0X20, // data terminal ready
+  USB_CH341_MCR_RTS = 0X40, // request to send
+} USB_CH341_ModemControl;
 
 typedef enum {
-  USB_CH341_PSF_BYPASS_8x  = 0X01,
-  USB_CH341_PSF_BYPASS_64x = 0X02,
-  USB_CH341_PSF_BYPASS_2x  = 0X04,
-  USB_CH341_PSF_NO_WAIT    = 0X80, // don't wait till there are 32 bytes
-} USB_CH341_PrescalerFlags;
-
-#define USB_CH341_DIVISOR_MINIMUM 2
-#define USB_CH341_DIVISOR_MAXIMUM 256
-
-#define USB_CH341_FREQUENCY 12000000
-#define USB_CH341_BAUD_MINIMUM 46
-#define USB_CH341_BAUD_MAXIMUM 2000000
+  USB_CH341_MSR_CTS = 0X01, // clear to send
+  USB_CH341_MSR_DSR = 0X02, // data set ready
+  USB_CH341_MSR_RI  = 0X04, // ring indicator
+  USB_CH341_MSR_DCD = 0X08, // data carrier detect
+} USB_CH341_ModemStatus;
 
 #ifdef __cplusplus
 }
