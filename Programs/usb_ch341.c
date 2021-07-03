@@ -36,13 +36,13 @@ struct UsbSerialDataStruct {
   struct {
     uint8_t lcr1;
     uint8_t lcr2;
-    uint8_t mcr;
-  } control;
+    uint8_t lsr;
+  } line;
 
   struct {
+    uint8_t mcr;
     uint8_t msr;
-    uint8_t lsr;
-  } status;
+  } modem;
 };
 
 typedef struct {
@@ -129,10 +129,18 @@ usbLogBaud_CH341 (const UsbSerialData *usd) {
 }
 
 static void
+usbLogLineControl_CH341 (const UsbSerialData *usd) {
+  logMessage(LOG_CATEGORY(SERIAL_IO),
+    "CH341 line control: LCR1:%02X LCR2:%02X",
+    usd->line.lcr1, usd->line.lcr2
+  );
+}
+
+static void
 usbLogStatus_CH341 (const UsbSerialData *usd) {
   logMessage(LOG_CATEGORY(SERIAL_IO),
     "CH341 status: MSR:%02X LSR:%02X",
-    usd->status.msr, usd->status.lsr
+    usd->modem.msr, usd->line.lsr
   );
 }
 
@@ -219,17 +227,30 @@ usbReadBaud_CH341 (UsbDevice *device) {
 }
 
 static int
+usbReadLineControl_CH341 (UsbDevice *device) {
+  UsbSerialData *usd = usbGetSerialData(device);
+
+  int ok = usbReadRegisters_CH341(device,
+    USB_CH341_REG_LCR1, &usd->line.lcr1,
+    USB_CH341_REG_LCR2, &usd->line.lcr2
+  );
+
+  if (ok) usbLogLineControl_CH341(usd);
+  return ok;
+}
+
+static int
 usbReadStatus_CH341 (UsbDevice *device) {
   UsbSerialData *usd = usbGetSerialData(device);
 
   int ok = usbReadRegisters_CH341(device,
-    USB_CH341_REG_MSR, &usd->status.msr,
-    USB_CH341_REG_LSR, &usd->status.lsr
+    USB_CH341_REG_MSR, &usd->modem.msr,
+    USB_CH341_REG_LSR, &usd->line.lsr
   );
 
   if (ok) {
-    usd->status.msr ^= 0XFF;
-    usd->status.lsr ^= 0XFF;
+    usd->modem.msr ^= UINT8_MAX;
+    usd->line.lsr ^= UINT8_MAX;
     usbLogStatus_CH341(usd);
   }
 
@@ -340,52 +361,51 @@ usbSetBaud_CH341 (UsbDevice *device, unsigned int baud) {
 }
 
 static int
-usbSetLCRs_CH341 (UsbDevice *device) {
+usbSetLineControl_CH341 (UsbDevice *device) {
   UsbSerialData *usd = usbGetSerialData(device);
 
   return usbWriteRegisters_CH341(device,
-    USB_CH341_REG_LCR1, usd->control.lcr1,
-    USB_CH341_REG_LCR2, usd->control.lcr2
+    USB_CH341_REG_LCR1, usd->line.lcr1,
+    USB_CH341_REG_LCR2, usd->line.lcr2
   );
 }
 
 static int
-usbUpdateLCR1_CH341 (UsbDevice *device, uint8_t mask, uint8_t value) {
-  UsbSerialData *usd = usbGetSerialData(device);
-  return usbUpdateByte(&usd->control.lcr1, mask, value);
+usbUpdateLCR1_CH341 (UsbSerialData *usd, uint8_t mask, uint8_t value) {
+  return usbUpdateByte(&usd->line.lcr1, mask, value);
 }
 
 static int
-usbUpdateDataBits_CH341 (UsbDevice *device, unsigned int dataBits) {
+usbUpdateDataBits_CH341 (UsbSerialData *usd, unsigned int dataBits) {
   const uint8_t mask = USB_CH341_LCR1_DATA_BITS_MASK;
-  uint8_t value = 0;
+  uint8_t value;
 
   switch (dataBits) {
-    case 5: value |= USB_CH341_LCR1_DATA_BITS_5; break;
-    case 6: value |= USB_CH341_LCR1_DATA_BITS_6; break;
-    case 7: value |= USB_CH341_LCR1_DATA_BITS_7; break;
-    case 8: value |= USB_CH341_LCR1_DATA_BITS_8; break;
+    case 5: value = USB_CH341_LCR1_DATA_BITS_5; break;
+    case 6: value = USB_CH341_LCR1_DATA_BITS_6; break;
+    case 7: value = USB_CH341_LCR1_DATA_BITS_7; break;
+    case 8: value = USB_CH341_LCR1_DATA_BITS_8; break;
 
     default:
       logUnsupportedDataBits(dataBits);
       return 0;
   }
 
-  return usbUpdateLCR1_CH341(device, mask, value);
+  return usbUpdateLCR1_CH341(usd, mask, value);
 }
 
 static int
-usbUpdateStopBits_CH341 (UsbDevice *device, SerialStopBits stopBits) {
+usbUpdateStopBits_CH341 (UsbSerialData *usd, SerialStopBits stopBits) {
   const uint8_t mask = USB_CH341_LCR1_STOP_BITS_MASK;
-  uint8_t value = 0;
+  uint8_t value;
 
   switch (stopBits) {
     case SERIAL_STOP_1:
-      value |= USB_CH341_LCR1_STOP_BITS_1;
+      value = USB_CH341_LCR1_STOP_BITS_1;
       break;
 
     case SERIAL_STOP_2:
-      value |= USB_CH341_LCR1_STOP_BITS_2;
+      value = USB_CH341_LCR1_STOP_BITS_2;
       break;
 
     default:
@@ -393,60 +413,62 @@ usbUpdateStopBits_CH341 (UsbDevice *device, SerialStopBits stopBits) {
       return 0;
   }
 
-  return usbUpdateLCR1_CH341(device, mask, value);
+  return usbUpdateLCR1_CH341(usd, mask, value);
 }
 
 static int
-usbUpdateParity_CH341 (UsbDevice *device, SerialParity parity) {
+usbUpdateParity_CH341 (UsbSerialData *usd, SerialParity parity) {
   const uint8_t mask = USB_CH341_LCR1_PARITY_MASK;
-  uint8_t value = 0;
+  uint8_t value;
 
-  if (parity != SERIAL_PARITY_NONE) {
-    value |= USB_CH341_LCR1_PARITY_ENABLE;
+  switch (parity) {
+    case SERIAL_PARITY_NONE:
+      value = USB_CH341_LCR1_PARITY_NONE;
+      break;
 
-    switch (parity) {
-      case SERIAL_PARITY_EVEN:
-        value |= USB_CH341_LCR1_PARITY_EVEN;
-        break;
+    case SERIAL_PARITY_EVEN:
+      value = USB_CH341_LCR1_PARITY_EVEN;
+      break;
 
-      case SERIAL_PARITY_ODD:
-        value |= USB_CH341_LCR1_PARITY_ODD;
-        break;
+    case SERIAL_PARITY_ODD:
+      value = USB_CH341_LCR1_PARITY_ODD;
+      break;
 
-      case SERIAL_PARITY_SPACE:
-        value |= USB_CH341_LCR1_PARITY_SPACE;
-        break;
+    case SERIAL_PARITY_SPACE:
+      value = USB_CH341_LCR1_PARITY_SPACE;
+      break;
 
-      case SERIAL_PARITY_MARK:
-        value |= USB_CH341_LCR1_PARITY_MARK;
-        break;
+    case SERIAL_PARITY_MARK:
+      value = USB_CH341_LCR1_PARITY_MARK;
+      break;
 
-      default:
-        logUnsupportedParity(parity);
-        return 0;
-    }
+    default:
+      logUnsupportedParity(parity);
+      return 0;
   }
 
-  return usbUpdateLCR1_CH341(device, mask, value);
+  return usbUpdateLCR1_CH341(usd, mask, value);
 }
 
 static int
 usbSetDataFormat_CH341 (UsbDevice *device, unsigned int dataBits, SerialStopBits stopBits, SerialParity parity) {
-  int changed = usbUpdateDataBits_CH341(device, dataBits)
-             || usbUpdateStopBits_CH341(device, stopBits)
-             || usbUpdateParity_CH341(device, parity)
-             ;
+  UsbSerialData *usd = usbGetSerialData(device);
+
+  int changed = 0;
+  if (usbUpdateDataBits_CH341(usd, dataBits)) changed = 1;
+  if (usbUpdateStopBits_CH341(usd, stopBits)) changed = 1;
+  if (usbUpdateParity_CH341(usd, parity)) changed = 1;
 
   if (!changed) return 1;
-  return usbSetLCRs_CH341(device);
+  return usbSetLineControl_CH341(device);
 }
 
 static int
-usbSetMCR_CH341 (UsbDevice *device) {
+usbSetModemControl_CH341 (UsbDevice *device) {
   UsbSerialData *usd = usbGetSerialData(device);
 
   return usbControlWrite_CH341(
-    device, USB_CH341_REQ_WRITE_MCR, ~usd->control.mcr, 0
+    device, USB_CH341_REQ_WRITE_MCR, ~usd->modem.mcr, 0
   );
 }
 
@@ -456,17 +478,51 @@ usbInitializeSerial_CH341 (UsbDevice *device) {
 }
 
 static int
-usbEnableAdapter_CH341 (UsbDevice *device) {
-  usbReadVersion_CH341(device);
+usbInitializeBaud_CH341 (UsbDevice *device) {
+  return usbSetBaud_CH341(device, SERIAL_DEFAULT_BAUD);
+}
 
+static int
+usbInitializeLineControl_CH341 (UsbDevice *device) {
+  UsbSerialData *usd = usbGetSerialData(device);
+
+  usd->line.lcr1 = 0;
+  usd->line.lcr2 = 0;
+
+  usd->line.lcr1 |= USB_CH341_LCR1_RECEIVE_ENABLE;
+  usd->line.lcr1 |= USB_CH341_LCR1_TRANSMIT_ENABLE;
+
+  usbUpdateDataBits_CH341(usd, SERIAL_DEFAULT_DATA_BITS);
+  usbUpdateStopBits_CH341(usd, SERIAL_DEFAULT_STOP_BITS);
+  usbUpdateParity_CH341(usd, SERIAL_DEFAULT_PARITY);
+
+  return usbSetLineControl_CH341(device);
+}
+
+static int
+usbInitializeModemControl_CH341 (UsbDevice *device) {
+  UsbSerialData *usd = usbGetSerialData(device);
+  usd->modem.mcr = 0;
+  return usbSetModemControl_CH341(device);
+}
+
+static int
+usbEnableAdapter_CH341 (UsbDevice *device) {
   typedef int Function (UsbDevice *device);
 
   static Function *const functions[] = {
+    &usbReadVersion_CH341,
     &usbInitializeSerial_CH341,
+
     &usbReadBaud_CH341,
-    &usbSetLCRs_CH341,
-    &usbSetMCR_CH341,
+    &usbInitializeBaud_CH341,
+
+    &usbReadLineControl_CH341,
+    &usbInitializeLineControl_CH341,
+
+    &usbInitializeModemControl_CH341,
     &usbReadStatus_CH341,
+
     NULL
   };
 
@@ -486,12 +542,6 @@ usbMakeData_CH341 (UsbDevice *device, UsbSerialData **serialData) {
 
   if ((usd = malloc(sizeof(*usd)))) {
     memset(usd, 0, sizeof(*usd));
-
-    usd->control.lcr1 = USB_CH341_LCR1_DATA_BITS_8 
-                      | USB_CH341_LCR1_TRANSMIT_ENABLE
-                      | USB_CH341_LCR1_RECEIVE_ENABLE
-                      ;
-
     *serialData = usd;
     return 1;
   } else {
