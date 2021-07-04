@@ -44,6 +44,7 @@ typedef enum {
   USB_CH341_REG_BPS_MOD   = 0X14,
   USB_CH341_REG_LCR1      = 0X18,
   USB_CH341_REG_LCR2      = 0X25,
+  USB_CH341_REG_FLOW      = 0X27,
 } USB_CH341_Register;
 
 #define USB_CH341_FREQUENCY 12000000
@@ -99,6 +100,10 @@ typedef enum {
   USB_CH341_MSR_RI  = 0X04, // ring indicator
   USB_CH341_MSR_DCD = 0X08, // data carrier detect
 } USB_CH341_ModemStatusFlags;
+
+typedef enum {
+  USB_CH341_FLOW_RTSCTS = 0X01, // hardware flow control
+} USB_CH341_FlowControlFlags;
 
 #ifdef __cplusplus
 }
