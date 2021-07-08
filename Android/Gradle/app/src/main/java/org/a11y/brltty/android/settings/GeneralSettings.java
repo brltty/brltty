@@ -18,132 +18,25 @@
 
 package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
-import org.a11y.brltty.core.CoreWrapper;
 
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.CheckBoxPreference;
-import android.preference.ListPreference;
 
 public final class GeneralSettings extends SettingsFragment {
-  private final static String LOG_TAG = GeneralSettings.class.getName();
-
-  private CheckBoxPreference releaseBrailleDeviceCheckBox;
-  private ListPreference navigationModeList;
-  private ListPreference textTableList;
-  private ListPreference contractionTableList;
-  private ListPreference speechSupportList;
+  private ReleaseBrailleDeviceSetting releaseBrailleDeviceSetting = null;
+  private NavigationModeSetting navigationModeSetting = null;
+  private TextTableSetting textTableSetting = null;
+  private ContractionTableSetting contractionTableSetting = null;
+  private SpeechSupportSetting speechSupportSetting = null;
 
   @Override
   public void onCreate (Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.settings_general);
 
-    releaseBrailleDeviceCheckBox = getCheckBoxPreference(R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
-    navigationModeList = getListPreference(R.string.PREF_KEY_NAVIGATION_MODE);
-    textTableList = getListPreference(R.string.PREF_KEY_TEXT_TABLE);
-    contractionTableList = getListPreference(R.string.PREF_KEY_CONTRACTION_TABLE);
-    speechSupportList = getListPreference(R.string.PREF_KEY_SPEECH_SUPPORT);
-
-    sortList(textTableList, 1);
-    sortList(contractionTableList, 1);
-
-    showSelection(releaseBrailleDeviceCheckBox);
-    showSelection(navigationModeList);
-    showSelection(textTableList);
-    showSelection(contractionTableList);
-    showSelection(speechSupportList);
-
-    releaseBrailleDeviceCheckBox.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final boolean newSetting = (Boolean)newValue;
-
-          ApplicationSettings.RELEASE_BRAILLE_DEVICE = newSetting;
-          BrailleNotification.updateState();
-
-          showSelection(releaseBrailleDeviceCheckBox, newSetting);
-          return true;
-        }
-      }
-    );
-
-    navigationModeList.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newMode = (String)newValue;
-
-          showSelection(navigationModeList, newMode);
-          BrailleRenderer.setBrailleRenderer(newMode);
-          return true;
-        }
-      }
-    );
-
-    textTableList.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newTable = (String)newValue;
-
-          CoreWrapper.runOnCoreThread(
-            new Runnable() {
-              @Override
-              public void run () {
-                CoreWrapper.changeTextTable(newTable);
-              }
-            }
-          );
-
-          showSelection(textTableList, newTable);
-          return true;
-        }
-      }
-    );
-
-    contractionTableList.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newTable = (String)newValue;
-
-          CoreWrapper.runOnCoreThread(
-            new Runnable() {
-              @Override
-              public void run () {
-                CoreWrapper.changeContractionTable(newTable);
-              }
-            }
-          );
-
-          showSelection(contractionTableList, newTable);
-          return true;
-        }
-      }
-    );
-
-    speechSupportList.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newDriver = (String)newValue;
-
-          CoreWrapper.runOnCoreThread(
-            new Runnable() {
-              @Override
-              public void run () {
-                CoreWrapper.changeSpeechDriver(newDriver);
-                CoreWrapper.restartSpeechDriver();
-              }
-            }
-          );
-
-          showSelection(speechSupportList, newDriver);
-          return true;
-        }
-      }
-    );
+    releaseBrailleDeviceSetting = new ReleaseBrailleDeviceSetting(this);
+    navigationModeSetting = new NavigationModeSetting(this);
+    textTableSetting = new TextTableSetting(this);
+    contractionTableSetting = new ContractionTableSetting(this);
+    speechSupportSetting = new SpeechSupportSetting(this);
   }
 }

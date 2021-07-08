@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabulka zkratkopisu</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabulka klávesnice</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Zobrazovat výstrahy</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Zobrazovat hlášení</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Zobrazovat oznámení</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Zobrazovat výstrahy</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Úroveň protokolu</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorie protokolu událostí</string>

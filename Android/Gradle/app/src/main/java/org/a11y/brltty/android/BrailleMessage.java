@@ -24,7 +24,7 @@ public enum BrailleMessage {
   WINDOW("win"),
   WARNING("warn"),
   NOTIFICATION("ntfc"),
-  TOAST("alrt"),
+  ALERT("alrt"),
   DEBUG("dbg"),
   ANNOUNCEMENT("ann"),
   ; // end of enumeration

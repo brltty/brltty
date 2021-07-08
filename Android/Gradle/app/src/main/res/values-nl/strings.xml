@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Contractietabel</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Toetsenbordtabel</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Toon Alerts</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Toon Aankondigingen</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Toon Meldingen</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Toon Alerts</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Logniveau</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Logcategorieën</string>

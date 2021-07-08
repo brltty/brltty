@@ -19,20 +19,13 @@
 package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
 
-import android.os.Bundle;
-
-public final class MessageSettings extends SettingsFragment {
-  private ShowNotificationsSetting showNotificationsSetting = null;
-  private ShowAlertsSetting showAlertsSetting = null;
-  private ShowAnnouncementsSetting showAnnouncementsSetting = null;
+public class NavigationModeSetting extends SingleSelectionSetting {
+  public NavigationModeSetting (SettingsFragment fragment) {
+    super(fragment, R.string.PREF_KEY_NAVIGATION_MODE);
+  }
 
   @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    addPreferencesFromResource(R.xml.settings_message);
-
-    showNotificationsSetting = new ShowNotificationsSetting(this);
-    showAlertsSetting = new ShowAlertsSetting(this);
-    showAnnouncementsSetting = new ShowAnnouncementsSetting(this);
+  protected final void onSelectionChanged (String newSelection) {
+    BrailleRenderer.setBrailleRenderer(newSelection);
   }
 }

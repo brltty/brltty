@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">縮寫點字</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">鍵盤對應表</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">顯示警示</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">顯示提醒</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">顯示通知</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">顯示警示</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">紀錄等級</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">紀錄分類</string>

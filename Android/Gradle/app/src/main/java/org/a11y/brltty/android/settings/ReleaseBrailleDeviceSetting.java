@@ -19,20 +19,14 @@
 package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
 
-import android.os.Bundle;
-
-public final class MessageSettings extends SettingsFragment {
-  private ShowNotificationsSetting showNotificationsSetting = null;
-  private ShowAlertsSetting showAlertsSetting = null;
-  private ShowAnnouncementsSetting showAnnouncementsSetting = null;
+public class ReleaseBrailleDeviceSetting extends CheckBoxSetting {
+  public ReleaseBrailleDeviceSetting (SettingsFragment fragment) {
+    super(fragment, R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
+  }
 
   @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    addPreferencesFromResource(R.xml.settings_message);
-
-    showNotificationsSetting = new ShowNotificationsSetting(this);
-    showAlertsSetting = new ShowAlertsSetting(this);
-    showAnnouncementsSetting = new ShowAnnouncementsSetting(this);
+  protected final void onSelectionChanged (boolean newSelection) {
+    ApplicationSettings.RELEASE_BRAILLE_DEVICE = newSelection;
+    BrailleNotification.updateState();
   }
 }

@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kurzschrifttabelle</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastaturtabelle</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Zeige Warnungen</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Zeige Ankündigungen</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Zeige Benachrichtigungen</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Zeige Warnungen</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Protokollstufe</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Protokollkategorien</string>

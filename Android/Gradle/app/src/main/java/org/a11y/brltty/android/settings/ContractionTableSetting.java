@@ -18,21 +18,23 @@
 
 package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
+import org.a11y.brltty.core.CoreWrapper;
 
-import android.os.Bundle;
-
-public final class MessageSettings extends SettingsFragment {
-  private ShowNotificationsSetting showNotificationsSetting = null;
-  private ShowAlertsSetting showAlertsSetting = null;
-  private ShowAnnouncementsSetting showAnnouncementsSetting = null;
+public class ContractionTableSetting extends SingleSelectionSetting {
+  public ContractionTableSetting (SettingsFragment fragment) {
+    super(fragment, R.string.PREF_KEY_CONTRACTION_TABLE);
+    sortElements(1);
+  }
 
   @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    addPreferencesFromResource(R.xml.settings_message);
-
-    showNotificationsSetting = new ShowNotificationsSetting(this);
-    showAlertsSetting = new ShowAlertsSetting(this);
-    showAnnouncementsSetting = new ShowAnnouncementsSetting(this);
+  protected final void onSelectionChanged (final String newSelection) {
+    CoreWrapper.runOnCoreThread(
+      new Runnable() {
+        @Override
+        public void run () {
+          CoreWrapper.changeContractionTable(newSelection);
+        }
+      }
+    );
   }
 }

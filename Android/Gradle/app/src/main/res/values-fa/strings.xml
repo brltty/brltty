@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">اختصار جدول</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">جدول صفحه کلید</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">نمایش اخطارها</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">نمایش اعلامیه ها</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">نمایش اعلان ها</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">نمایش اخطارها</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">سطح گزارش</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">دسته بندی های گزارش</string>

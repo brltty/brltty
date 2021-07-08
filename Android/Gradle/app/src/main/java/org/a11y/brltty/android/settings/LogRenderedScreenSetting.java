@@ -19,20 +19,13 @@
 package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
 
-import android.os.Bundle;
-
-public final class MessageSettings extends SettingsFragment {
-  private ShowNotificationsSetting showNotificationsSetting = null;
-  private ShowAlertsSetting showAlertsSetting = null;
-  private ShowAnnouncementsSetting showAnnouncementsSetting = null;
+public class LogRenderedScreenSetting extends CheckBoxSetting {
+  public LogRenderedScreenSetting (SettingsFragment fragment) {
+    super(fragment, R.string.PREF_KEY_LOG_RENDERED_SCREEN);
+  }
 
   @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    addPreferencesFromResource(R.xml.settings_message);
-
-    showNotificationsSetting = new ShowNotificationsSetting(this);
-    showAlertsSetting = new ShowAlertsSetting(this);
-    showAnnouncementsSetting = new ShowAnnouncementsSetting(this);
+  protected final void onSelectionChanged (boolean newSelection) {
+    ApplicationSettings.LOG_RENDERED_SCREEN = newSelection;
   }
 }

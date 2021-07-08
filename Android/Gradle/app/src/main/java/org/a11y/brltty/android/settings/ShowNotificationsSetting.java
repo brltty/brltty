@@ -19,20 +19,13 @@
 package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
 
-import android.os.Bundle;
-
-public final class MessageSettings extends SettingsFragment {
-  private ShowNotificationsSetting showNotificationsSetting = null;
-  private ShowAlertsSetting showAlertsSetting = null;
-  private ShowAnnouncementsSetting showAnnouncementsSetting = null;
+public class ShowNotificationsSetting extends CheckBoxSetting {
+  public ShowNotificationsSetting (SettingsFragment fragment) {
+    super(fragment, R.string.PREF_KEY_SHOW_NOTIFICATIONS);
+  }
 
   @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    addPreferencesFromResource(R.xml.settings_message);
-
-    showNotificationsSetting = new ShowNotificationsSetting(this);
-    showAlertsSetting = new ShowAlertsSetting(this);
-    showAnnouncementsSetting = new ShowAnnouncementsSetting(this);
+  protected final void onSelectionChanged (boolean newSelection) {
+    ApplicationSettings.SHOW_NOTIFICATIONS = newSelection;
   }
 }

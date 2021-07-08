@@ -28,7 +28,7 @@ public abstract class ApplicationSettings {
   public static volatile boolean BRAILLE_DEVICE_ONLINE = false;
 
   public static volatile boolean SHOW_NOTIFICATIONS = false;
-  public static volatile boolean SHOW_TOASTS = false;
+  public static volatile boolean SHOW_ALERTS = false;
   public static volatile boolean SHOW_ANNOUNCEMENTS = false;
 
   public static volatile boolean LOG_ACCESSIBILITY_EVENTS = false;
