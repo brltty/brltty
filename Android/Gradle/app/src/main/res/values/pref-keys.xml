@@ -13,9 +13,9 @@
   <string name="PREF_KEY_CONTRACTION_TABLE" translatable="false">contraction-table</string>
   <string name="PREF_KEY_KEYBOARD_TABLE" translatable="false">keyboard-table</string>
 
+  <string name="PREF_KEY_SHOW_ALERTS" translatable="false">show-alerts</string>
   <string name="PREF_KEY_SHOW_ANNOUNCEMENTS" translatable="false">show-announcements</string>
   <string name="PREF_KEY_SHOW_NOTIFICATIONS" translatable="false">show-notifications</string>
-  <string name="PREF_KEY_SHOW_TOASTS" translatable="false">show-toasts</string>
 
   <string name="PREF_KEY_LOG_LEVEL" translatable="false">log-level</string>
   <string name="PREF_KEY_LOG_CATEGORIES" translatable="false">log-categories</string>

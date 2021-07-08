@@ -11,9 +11,9 @@
    />
 
   <CheckBoxPreference
-    android:key="@string/PREF_KEY_SHOW_TOASTS"
+    android:key="@string/PREF_KEY_SHOW_ALERTS"
     android:persistent="true"
-    android:title="@string/SETTINGS_CHECKBOX_SHOW_TOASTS"
+    android:title="@string/SETTINGS_CHECKBOX_SHOW_ALERTS"
    />
 
   <CheckBoxPreference

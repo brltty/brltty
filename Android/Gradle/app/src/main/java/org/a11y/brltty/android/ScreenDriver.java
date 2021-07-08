@@ -132,8 +132,8 @@ public abstract class ScreenDriver {
       message = BrailleMessage.NOTIFICATION;
       text = toText(notification);
     } else {
-      if (!ApplicationSettings.SHOW_TOASTS) return;
-      message = BrailleMessage.TOAST;
+      if (!ApplicationSettings.SHOW_ALERTS) return;
+      message = BrailleMessage.ALERT;
     }
 
     if (text == null) text = toText(event);

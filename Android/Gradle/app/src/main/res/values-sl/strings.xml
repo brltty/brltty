@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabela Krajšav</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabela Tipk</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Pokaži Opozorila</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Pokaži Naznanila</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Pokaži Obvestila</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Pokaži Opozorila</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Nivo Dnevnika</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Kategorije Dnevnikov</string>

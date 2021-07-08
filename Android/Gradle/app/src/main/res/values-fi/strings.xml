@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Lyhennetaulukko</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Näppäintaulukko</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Näytä hälytykset</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Näytä tiedotukset</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Näytä ilmoitukset</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Näytä hälytykset</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Lokitaso</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Lokikategoriat</string>

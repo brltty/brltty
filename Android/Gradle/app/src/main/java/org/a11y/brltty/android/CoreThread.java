@@ -312,7 +312,7 @@ public class CoreThread extends Thread {
     ApplicationSettings.RELEASE_BRAILLE_DEVICE = getBooleanSetting(R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
 
     ApplicationSettings.SHOW_NOTIFICATIONS = getBooleanSetting(R.string.PREF_KEY_SHOW_NOTIFICATIONS);
-    ApplicationSettings.SHOW_TOASTS = getBooleanSetting(R.string.PREF_KEY_SHOW_TOASTS);
+    ApplicationSettings.SHOW_ALERTS = getBooleanSetting(R.string.PREF_KEY_SHOW_ALERTS);
     ApplicationSettings.SHOW_ANNOUNCEMENTS = getBooleanSetting(R.string.PREF_KEY_SHOW_ANNOUNCEMENTS);
 
     ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = getBooleanSetting(R.string.PREF_KEY_LOG_ACCESSIBILITY_EVENTS);

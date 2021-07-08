@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Table d\'abrégé</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Table des touches du clavier</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Afficher les alertes</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Afficher les annonces</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Afficher les notifications</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Afficher les alertes</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Niveau de journalisation</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Catégorie de journal</string>

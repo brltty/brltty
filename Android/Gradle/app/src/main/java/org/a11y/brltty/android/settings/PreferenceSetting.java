@@ -19,20 +19,25 @@
 package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
 
-import android.os.Bundle;
+import android.preference.Preference;
 
-public final class MessageSettings extends SettingsFragment {
-  private ShowNotificationsSetting showNotificationsSetting = null;
-  private ShowAlertsSetting showAlertsSetting = null;
-  private ShowAnnouncementsSetting showAnnouncementsSetting = null;
+public abstract class PreferenceSetting<P extends Preference> {
+  public abstract void showSelection ();
 
-  @Override
-  public void onCreate (Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    addPreferencesFromResource(R.xml.settings_message);
+  protected final SettingsFragment settingsFragment;
+  protected final P settingPreference;
 
-    showNotificationsSetting = new ShowNotificationsSetting(this);
-    showAlertsSetting = new ShowAlertsSetting(this);
-    showAnnouncementsSetting = new ShowAnnouncementsSetting(this);
+  protected PreferenceSetting (SettingsFragment fragment, int key) {
+    settingsFragment = fragment;
+    settingPreference = (P)settingsFragment.getPreference(key);
+    showSelection();
+  }
+
+  protected final String getString (int string) {
+    return settingsFragment.getString(string);
+  }
+
+  protected final void showSelection (CharSequence text) {
+    settingPreference.setSummary(text);
   }
 }

@@ -74,9 +74,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Contraction Table</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Keyboard Table</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Show Alerts</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Show Announcements</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Show Notifications</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Show Alerts</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Log Level</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Log Categories</string>

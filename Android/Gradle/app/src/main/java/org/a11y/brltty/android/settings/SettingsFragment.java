@@ -35,10 +35,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
-import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
 
 public abstract class SettingsFragment extends PreferenceFragment {
   private final static String LOG_TAG = SettingsFragment.class.getName();
@@ -101,22 +99,6 @@ public abstract class SettingsFragment extends PreferenceFragment {
     return (PreferenceScreen)getPreference(key);
   }
 
-  protected final CheckBoxPreference getCheckBoxPreference (int key) {
-    return (CheckBoxPreference)getPreference(key);
-  }
-
-  protected final void showSelection (CheckBoxPreference checkbox, boolean isChecked) {
-    checkbox.setSummary(
-      isChecked?
-      R.string.checkbox_state_checked:
-      R.string.checkbox_state_unchecked
-    );
-  }
-
-  protected final void showSelection (CheckBoxPreference checkbox) {
-    showSelection(checkbox, checkbox.isChecked());
-  }
-
   protected final EditTextPreference getEditTextPreference (int key) {
     return (EditTextPreference)getPreference(key);
   }
@@ -141,33 +123,6 @@ public abstract class SettingsFragment extends PreferenceFragment {
 
   protected final void showSelection (ListPreference list, String value) {
     showSelection(list, getSelection(list, value));
-  }
-
-  protected final MultiSelectListPreference getMultiSelectListPreference (int key) {
-    return (MultiSelectListPreference)getPreference(key);
-  }
-
-  protected final void showSelection (MultiSelectListPreference set, Set<String> values) {
-    StringBuilder label = new StringBuilder();
-
-    if (values.size() > 0) {
-      CharSequence[] labels = set.getEntries();
-
-      for (String value : values) {
-        if (value.length() > 0) {
-          if (label.length() > 0) label.append('\n');
-          label.append(labels[set.findIndexOfValue(value)]);
-        }
-      }
-    } else {
-      label.append(getString(R.string.SET_SELECTION_NONE));
-    }
-
-    set.setSummary(label.toString());
-  }
-
-  protected final void showSelection (MultiSelectListPreference set) {
-    showSelection(set, set.getValues());
   }
 
   protected final void resetList (ListPreference list) {

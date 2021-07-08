@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kortskrifttabell</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tastaturtabell</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Vis advarsler</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Vis meldinger</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Vis varsler</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Vis advarsler</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Loggenivå</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Loggekategorier</string>

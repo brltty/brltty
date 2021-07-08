@@ -68,9 +68,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Tabella Braille Contratto</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Tabella Tastiera</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Visualizza Avvisi</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Visualizza Annunci</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Visualizza Notifiche</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Visualizza Avvisi</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Livello di Log</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Categorie Log</string>

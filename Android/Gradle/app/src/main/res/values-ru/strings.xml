@@ -72,9 +72,9 @@
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Таблица краткописи</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Клавиатурная таблица</string>
 
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Показывать предупреждения</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Показывать извещения</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Показывать уведомления</string>
-  <string name="SETTINGS_CHECKBOX_SHOW_TOASTS">Показывать предупреждения</string>
 
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Уровень журнала</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Категории журнала</string>
