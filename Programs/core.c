@@ -838,10 +838,16 @@ shiftBrailleWindowRight (unsigned int amount) {
 
 void
 slideBrailleWindowVertically (int y) {
-  if (y < ses->winy) {
+  if ((y < ses->winy) || (y >= (int)(ses->winy + brl.textRows))) {
+    y -= brl.textRows / 2;
+
+    {
+      int maxy = scr.rows - brl.textRows;
+      if (y > maxy) y = maxy;
+    }
+
+    if (y < 0) y = 0;
     ses->winy = y;
-  } else if (y >= (int)(ses->winy + brl.textRows)) {
-    ses->winy = y - (brl.textRows - 1);
   }
 }
 
