@@ -5,6 +5,9 @@
 
   <string name="about_label_activity">O Programu</string>
   <string name="about_label_copyright">Avtorske Pravice</string>
+  <string name="about_label_buildTime">Čas Graditve</string>
+  <string name="about_label_sourceRevision">Različica IzvorneKode</string>
+  <string name="about_label_privacyPolicy">Politika Zasebnosti</string>
 
   <string name="inputService_name">BRLTTY Storitev Vnosa</string>
   <string name="inputService_type">Tipkovnice na Brajevih Vrsticah</string>
@@ -24,6 +27,7 @@
   <string name="fileDownloader_state_connecting">povezovanje</string>
   <string name="fileDownloader_state_downloading">prenašanje</string>
 
+  <string name="setting_state_off">Izključeno</string>
   <string name="checkbox_state_unchecked">Ne</string>
   <string name="checkbox_state_checked">Da</string>
 
@@ -264,6 +268,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">Nizozemska(s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Portugalska (razvrstitev 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Ruska (skrajšana)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalska(brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Tajska(s krajšavami)</string>
