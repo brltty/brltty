@@ -25,7 +25,7 @@ public class LogUnhandledEventsSetting extends CheckBoxSetting {
   }
 
   @Override
-  protected final void onSelectionChanged (boolean newSelection) {
-    ApplicationSettings.LOG_UNHANDLED_EVENTS = newSelection;
+  protected final void onStateChanged (boolean newState) {
+    ApplicationSettings.LOG_UNHANDLED_EVENTS = newState;
   }
 }

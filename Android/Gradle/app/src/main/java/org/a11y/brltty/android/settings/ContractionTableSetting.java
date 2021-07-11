@@ -23,7 +23,7 @@ import org.a11y.brltty.core.CoreWrapper;
 public class ContractionTableSetting extends SingleSelectionSetting {
   public ContractionTableSetting (SettingsFragment fragment) {
     super(fragment, R.string.PREF_KEY_CONTRACTION_TABLE);
-    sortElements(1);
+    sortElementsByLabel(1);
   }
 
   @Override

@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">沒有設備</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">設備名稱以使用</string>
 
-  <string name="REMOVE_DEVICE_ASK">您確定要移除這個點顯器嗎？</string>
+  <string name="REMOVE_DEVICE_PROMPT">您確定要移除這個點顯器嗎？</string>
 
   <string name="SET_SELECTION_NONE">沒有選取</string>
 

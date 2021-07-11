@@ -21,53 +21,79 @@ import org.a11y.brltty.android.*;
 
 import android.preference.Preference;
 import android.preference.MultiSelectListPreference;
-
 import java.util.Set;
 
-public abstract class MultipleSelectionSetting extends PreferenceSetting<MultiSelectListPreference> {
+public abstract class MultipleSelectionSetting extends SelectionSetting<MultiSelectListPreference> {
   protected abstract void onSelectionChanged (Set<String> newSelection);
 
-  protected final void showSelection (Set<String> values) {
-    StringBuilder text = new StringBuilder();
-
-    {
-      CharSequence[] labels = settingPreference.getEntries();
-
-      for (String value : values) {
-        if (value.length() > 0) {
-          if (text.length() > 0) text.append('\n');
-          text.append(labels[settingPreference.findIndexOfValue(value)]);
-        }
-      }
-    }
-
-    if (text.length() == 0) {
-      text.append(getString(R.string.SET_SELECTION_NONE));
-    }
-
-    showSelection(text);
+  @Override
+  public final CharSequence[] getAllValues () {
+    return preference.getEntryValues();
   }
 
   @Override
-  public final void showSelection () {
-    showSelection(settingPreference.getValues());
+  public final CharSequence getValueAt (int index) {
+    return getAllValues()[index];
+  }
+
+  @Override
+  public final int indexOf (String value) {
+    return preference.findIndexOfValue(value);
+  }
+
+  @Override
+  public final CharSequence[] getAllLabels () {
+    return preference.getEntries();
+  }
+
+  @Override
+  public final CharSequence getLabelAt (int index) {
+    return getAllLabels()[index];
+  }
+
+  public final Set<String> getSelectedValues () {
+    return preference.getValues();
+  }
+
+  @Override
+  protected final void setElements (String[] values, String[] labels) {
+    preference.setEntryValues(values);
+    preference.setEntries(labels);
+  }
+
+  protected final void setSummary (Set<String> values) {
+    StringBuilder summary = new StringBuilder();
+
+    for (String value : values) {
+      if (value.length() > 0) {
+        if (summary.length() > 0) summary.append('\n');
+        summary.append(getLabelFor(value));
+      }
+    }
+
+    if (summary.length() == 0) {
+      summary.append(getString(R.string.SET_SELECTION_NONE));
+    }
+
+    setSummary(summary);
+  }
+
+  @Override
+  public final void setSummary () {
+    setSummary(getSelectedValues());
+  }
+
+  @Override
+  public boolean onPreferenceChange (Preference preference, Object newValue) {
+    final Set<String> newSelection = (Set<String>)newValue;
+
+    setSummary(newSelection);
+    onSelectionChanged(newSelection);
+
+    return true;
   }
 
   protected MultipleSelectionSetting (SettingsFragment fragment, int key) {
     super(fragment, key);
-
-    settingPreference.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final Set<String> newSelection = (Set<String>)newValue;
-
-          showSelection(newSelection);
-          onSelectionChanged(newSelection);
-
-          return true;
-        }
-      }
-    );
   }
 }

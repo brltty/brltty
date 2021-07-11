@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">دستگاهی یافت نشد</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">نام دستگاه تکراری است</string>
 
-  <string name="REMOVE_DEVICE_ASK">آیا واقعا مایلید که این دستگاه را حذف کنید؟</string>
+  <string name="REMOVE_DEVICE_PROMPT">آیا واقعا مایلید که این دستگاه را حذف کنید؟</string>
 
   <string name="SET_SELECTION_NONE">چیزی انتخاب نشده</string>
 

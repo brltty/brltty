@@ -23,7 +23,7 @@ import org.a11y.brltty.core.CoreWrapper;
 public class TextTableSetting extends SingleSelectionSetting {
   public TextTableSetting (SettingsFragment fragment) {
     super(fragment, R.string.PREF_KEY_TEXT_TABLE);
-    sortElements(1);
+    sortElementsByLabel(1);
   }
 
   @Override

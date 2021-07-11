@@ -98,7 +98,7 @@ ADD_DEVICE_UNSELECTED_DRIVER braille driver not selected
 ADD_DEVICE_NO_DEVICES no devices
 ADD_DEVICE_DUPLICATE_NAME device name already in use
 
-REMOVE_DEVICE_ASK Would you really like to remove this device?
+REMOVE_DEVICE_PROMPT Would you really like to remove this device?
 
 SET_SELECTION_NONE none selected
 

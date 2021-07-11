@@ -23,7 +23,7 @@ import org.a11y.brltty.core.CoreWrapper;
 public class AttributesTableSetting extends SingleSelectionSetting {
   public AttributesTableSetting (SettingsFragment fragment) {
     super(fragment, R.string.PREF_KEY_ATTRIBUTES_TABLE);
-    sortElements();
+    sortElementsByLabel();
   }
 
   @Override

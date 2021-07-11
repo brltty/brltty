@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">geen apparaten</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">apparaatnaam al in gebruik</string>
 
-  <string name="REMOVE_DEVICE_ASK">Weet u zeker dat u dit apparaat wilt verwijderen?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Weet u zeker dat u dit apparaat wilt verwijderen?</string>
 
   <string name="SET_SELECTION_NONE">niets geselecteerd</string>
 
