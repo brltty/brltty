@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">ingen enheder</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">enhedsnavn allerede i brug</string>
 
-  <string name="REMOVE_DEVICE_ASK">Vil du virkelig gerne fjerne denne enhed ?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Vil du virkelig gerne fjerne denne enhed ?</string>
 
   <string name="SET_SELECTION_NONE">ingen valgt</string>
 

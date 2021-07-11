@@ -104,7 +104,7 @@
   <string name="ADD_DEVICE_DUPLICATE_NAME">device name already in use</string>
   <string name="ADD_DEVICE_NO_PERMISSION">access to device not granted</string>
 
-  <string name="REMOVE_DEVICE_ASK">Would you really like to remove this device?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Would you really like to remove this device?</string>
 
   <string name="SET_SELECTION_NONE">none selected</string>
 </resources>

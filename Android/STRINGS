@@ -99,7 +99,7 @@ ADD_DEVICE_NO_DEVICES no devices
 ADD_DEVICE_DUPLICATE_NAME device name already in use
 ADD_DEVICE_NO_PERMISSION access to device not granted
 
-REMOVE_DEVICE_ASK Would you really like to remove this device?
+REMOVE_DEVICE_PROMPT Would you really like to remove this device?
 
 SET_SELECTION_NONE none selected
 

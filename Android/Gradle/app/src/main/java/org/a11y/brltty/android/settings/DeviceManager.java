@@ -34,8 +34,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
 
 public final class DeviceManager extends SettingsFragment {
   private final static String LOG_TAG = DeviceManager.class.getName();
@@ -43,19 +41,19 @@ public final class DeviceManager extends SettingsFragment {
   private Set<String> deviceNames;
   private DeviceCollection deviceCollection;
 
-  private ListPreference selectedDeviceList;
+  private SingleSelectionSetting selectedDeviceSetting;
   private PreferenceScreen addDeviceScreen;
   private PreferenceScreen removeDeviceScreen;
 
-  private EditTextPreference deviceNameEditor;
-  private ListPreference deviceMethodList;
-  private ListPreference deviceIdentifierList;
-  private ListPreference deviceDriverList;
-  private Preference addDeviceButton;
+  private TextSetting deviceNameSetting;
+  private SingleSelectionSetting deviceMethodSetting;
+  private SingleSelectionSetting deviceIdentifierSetting;
+  private SingleSelectionSetting deviceDriverSetting;
+  private PreferenceButton addDeviceButton;
 
-  private Preference removeDeviceButton_ASK;
-  private Preference removeDeviceButton_NO;
-  private Preference removeDeviceButton_YES;
+  private Preference removeDevicePrompt;
+  private PreferenceButton removeDeviceCancellationButton;
+  private PreferenceButton removeDeviceConfirmationButton;
 
   private final static String PREF_KEY_DEVICE_NAMES = "device-names";
   private final static String PREF_KEY_DEVICE_IDENTIFIER = "device-identifier";
@@ -138,11 +136,11 @@ public final class DeviceManager extends SettingsFragment {
   private void updateRemoveDeviceScreen (String selectedDevice) {
     boolean on = false;
 
-    if (selectedDeviceList.isEnabled()) {
+    if (selectedDeviceSetting.isEnabled()) {
       if (selectedDevice != null) {
         if (selectedDevice.length() > 0) {
           on = true;
-          removeDeviceButton_ASK.setSummary(selectedDevice);
+          removeDevicePrompt.setSummary(selectedDevice);
         }
       }
     }
@@ -151,23 +149,23 @@ public final class DeviceManager extends SettingsFragment {
   }
 
   private void updateRemoveDeviceScreen () {
-    updateRemoveDeviceScreen(selectedDeviceList.getValue());
+    updateRemoveDeviceScreen(selectedDeviceSetting.getSelectedValue());
   }
 
-  private void updateSelectedDeviceList () {
+  private void updateSelectedDeviceSetting () {
     boolean haveDevices = !deviceNames.isEmpty();
-    selectedDeviceList.setEnabled(haveDevices);
+    selectedDeviceSetting.setEnabled(haveDevices);
     CharSequence summary;
 
     if (haveDevices) {
       {
         String[] names = new String[deviceNames.size()];
         deviceNames.toArray(names);
-        setListElements(selectedDeviceList, names);
-        sortList(selectedDeviceList);
+        selectedDeviceSetting.setElements(names);
+        selectedDeviceSetting.sortElementsByLabel();
       }
 
-      summary = selectedDeviceList.getEntry();
+      summary = selectedDeviceSetting.getSelectedLabel();
       if ((summary == null) || (summary.length() == 0)) {
         summary = getString(R.string.SELECTED_DEVICE_UNSELECTED);
       }
@@ -175,12 +173,12 @@ public final class DeviceManager extends SettingsFragment {
       summary = getString(R.string.SELECTED_DEVICE_NONE);
     }
 
-    selectedDeviceList.setSummary(summary);
+    selectedDeviceSetting.setSummary(summary);
     updateRemoveDeviceScreen();
   }
 
   private String getDeviceMethod () {
-    return deviceMethodList.getValue();
+    return deviceMethodSetting.getSelectedValue();
   }
 
   private DeviceCollection makeDeviceCollection (String deviceMethod) {
@@ -199,46 +197,48 @@ public final class DeviceManager extends SettingsFragment {
     );
   }
 
-  private void updateDeviceIdentifierList (String deviceMethod) {
+  private void updateDeviceIdentifierSetting (String deviceMethod) {
     deviceCollection = makeDeviceCollection(deviceMethod);
 
-    setListElements(
-      deviceIdentifierList,
+    deviceIdentifierSetting.setElements(
       deviceCollection.makeValues(), 
       deviceCollection.makeLabels()
     );
 
-    sortList(deviceIdentifierList);
+    deviceIdentifierSetting.sortElementsByLabel();
 
     {
-      boolean haveIdentifiers = deviceIdentifierList.getEntryValues().length > 0;
-      deviceIdentifierList.setEnabled(haveIdentifiers);
+      boolean haveIdentifiers = deviceIdentifierSetting.getElementCount() > 0;
+      deviceIdentifierSetting.setEnabled(haveIdentifiers);
 
       if (haveIdentifiers) {
-        resetList(deviceIdentifierList);
+        deviceIdentifierSetting.selectFirstElement();
       } else {
-        deviceIdentifierList.setSummary(getString(R.string.ADD_DEVICE_NO_DEVICES));
+        deviceIdentifierSetting.setSummary(getString(R.string.ADD_DEVICE_NO_DEVICES));
       }
     }
 
-    resetList(deviceDriverList);
+    deviceDriverSetting.selectFirstElement();
   }
 
   private void updateDeviceName (String name) {
     String problem;
 
-    if (!deviceMethodList.isEnabled()) {
+    if (!deviceMethodSetting.isEnabled()) {
       problem = getString(R.string.ADD_DEVICE_UNSELECTED_METHOD);
-    } else if (!deviceIdentifierList.isEnabled()) {
+    } else if (!deviceIdentifierSetting.isEnabled()) {
       problem = getString(R.string.ADD_DEVICE_UNSELECTED_DEVICE);
-    } else if (!deviceDriverList.isEnabled()) {
+    } else if (!deviceDriverSetting.isEnabled()) {
       problem = getString(R.string.ADD_DEVICE_UNSELECTED_DRIVER);
     } else {
       if (name.length() == 0) {
-        name = deviceDriverList.getSummary()
-             + " " + deviceMethodList.getSummary()
-             + " " + deviceIdentifierList.getSummary()
-             ;
+        name = new StringBuilder()
+              .append(deviceDriverSetting.getSummary())
+              .append(' ')
+              .append(deviceMethodSetting.getSummary())
+              .append(' ')
+              .append(deviceIdentifierSetting.getSummary())
+              .toString();
       }
 
       if (deviceNames.contains(name)) {
@@ -249,12 +249,12 @@ public final class DeviceManager extends SettingsFragment {
     }
 
     addDeviceButton.setSummary(problem);
-    addDeviceButton.setEnabled(problem.length() == 0);
-    deviceNameEditor.setSummary(name);
+    addDeviceButton.setEnabled(problem.isEmpty());
+    deviceNameSetting.setSummary(name);
   }
 
   private void updateDeviceName () {
-    updateDeviceName(deviceNameEditor.getEditText().getText().toString());
+    updateDeviceName(deviceNameSetting.getText().toString());
   }
 
   private static void restartBrailleDriver (final SharedPreferences prefs, final String device) {
@@ -277,190 +277,141 @@ public final class DeviceManager extends SettingsFragment {
     addPreferencesFromResource(R.xml.settings_devices);
     final SharedPreferences prefs = getPreferences();
 
-    selectedDeviceList = getListPreference(R.string.PREF_KEY_SELECTED_DEVICE);
     addDeviceScreen = getPreferenceScreen(R.string.PREF_KEY_ADD_DEVICE);
     removeDeviceScreen = getPreferenceScreen(R.string.PREF_KEY_REMOVE_DEVICE);
+    removeDevicePrompt = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_PROMPT);
 
-    deviceNameEditor = getEditTextPreference(R.string.PREF_KEY_DEVICE_NAME);
-    deviceMethodList = getListPreference(R.string.PREF_KEY_DEVICE_METHOD);
-    deviceIdentifierList = getListPreference(R.string.PREF_KEY_DEVICE_IDENTIFIER);
-    deviceDriverList = getListPreference(R.string.PREF_KEY_DEVICE_DRIVER);
-    addDeviceButton = getPreference(R.string.PREF_KEY_DEVICE_ADD);
-
-    removeDeviceButton_ASK = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_ASK);
-    removeDeviceButton_NO = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_NO);
-    removeDeviceButton_YES = getPreference(R.string.PREF_KEY_REMOVE_DEVICE_YES);
-
-    sortList(deviceDriverList, 1);
-    deviceNames = new TreeSet<String>(prefs.getStringSet(PREF_KEY_DEVICE_NAMES, Collections.EMPTY_SET));
-
-    updateSelectedDeviceList();
-    showSelection(deviceMethodList);
-    updateDeviceIdentifierList(getDeviceMethod());
-    updateDeviceName();
-
-    selectedDeviceList.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newDevice = (String)newValue;
-          BrailleNotification.updateDevice(newDevice);
-          selectedDeviceList.setSummary(newDevice);
-          updateRemoveDeviceScreen(newDevice);
-          restartBrailleDriver(prefs, newDevice);
-          return true;
-        }
+    selectedDeviceSetting = new SingleSelectionSetting(this, R.string.PREF_KEY_SELECTED_DEVICE) {
+      @Override
+      public void onSelectionChanged (String newDevice) {
+        BrailleNotification.updateDevice(newDevice);
+        updateRemoveDeviceScreen(newDevice);
+        restartBrailleDriver(prefs, newDevice);
       }
-    );
+    };
 
-    deviceNameEditor.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newName = (String)newValue;
-
-          updateDeviceName(newName);
-          return true;
-        }
+    deviceNameSetting = new TextSetting(this, R.string.PREF_KEY_DEVICE_NAME) {
+      @Override
+      public void onTextChanged (String newName) {
+        updateDeviceName(newName);
       }
-    );
+    };
 
-    deviceMethodList.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newMethod = (String)newValue;
-
-          showSelection(deviceMethodList, newMethod);
-          updateDeviceIdentifierList(newMethod);
-          updateDeviceName();
-          return true;
-        }
+    deviceMethodSetting = new SingleSelectionSetting(this, R.string.PREF_KEY_DEVICE_METHOD) {
+      @Override
+      public void onSelectionChanged (String newMethod) {
+        updateDeviceIdentifierSetting(newMethod);
+        updateDeviceName();
       }
-    );
+    };
 
-    deviceIdentifierList.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newIdentifier = (String)newValue;
-
-          showSelection(deviceIdentifierList, newIdentifier);
-          updateDeviceName();
-          return true;
-        }
+    deviceIdentifierSetting = new SingleSelectionSetting(this, R.string.PREF_KEY_DEVICE_IDENTIFIER) {
+      @Override
+      public void onSelectionChanged (String newIdentifier) {
+        updateDeviceName();
       }
-    );
+    };
 
-    deviceDriverList.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newDriver = (String)newValue;
-
-          showSelection(deviceDriverList, newDriver);
-          updateDeviceName();
-          return true;
-        }
+    deviceDriverSetting = new SingleSelectionSetting(this, R.string.PREF_KEY_DEVICE_DRIVER) {
+      @Override
+      public void onSelectionChanged (String newDriver) {
+        updateDeviceName();
       }
-    );
+    };
 
-    addDeviceButton.setOnPreferenceClickListener(
-      new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick (final Preference preference) {
-          new AsyncTask<Object, Object, String>() {
-            String name;
+    addDeviceButton = new PreferenceButton(this, R.string.PREF_KEY_DEVICE_ADD) {
+      @Override
+      public void onButtonClicked () {
+        new AsyncTask<Object, Object, String>() {
+          String name;
 
-            @Override
-            protected void onPreExecute () {
-              name = deviceNameEditor.getSummary().toString();
-            }
-
-            @Override
-            protected String doInBackground (Object... arguments) {
-              try {
-                return deviceCollection.makeIdentifier(deviceIdentifierList.getValue());
-              } catch (SecurityException exception) {
-                return null;
-              }
-            }
-
-            @Override
-            protected void onPostExecute (String identifier) {
-              if (identifier == null) {
-                showProblem(R.string.ADD_DEVICE_NO_PERMISSION, name);
-              } else {
-                deviceNames.add(name);
-                updateSelectedDeviceList();
-                updateDeviceName();
-
-                {
-                  final SharedPreferences.Editor editor = preference.getEditor();
-
-                  {
-                    Map<String, String> properties = new LinkedHashMap();
-                    properties.put(PREF_KEY_DEVICE_IDENTIFIER, identifier);
-
-                    properties.put(
-                      PREF_KEY_DEVICE_DRIVER,
-                      deviceDriverList.getValue()
-                    );
-
-                    putProperties(editor, name, properties);
-                  }
-
-                  editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
-                  editor.apply();
-                }
-
-                addDeviceScreen.getDialog().dismiss();
-              }
-            }
-          }.execute();
-
-          return true;
-        }
-      }
-    );
-
-    removeDeviceButton_NO.setOnPreferenceClickListener(
-      new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick (Preference preference) {
-          removeDeviceScreen.getDialog().dismiss();
-          return true;
-        }
-      }
-    );
-
-    removeDeviceButton_YES.setOnPreferenceClickListener(
-      new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick (Preference preference) {
-          String name = selectedDeviceList.getValue();
-
-          if (name != null) {
-            BrailleNotification.updateDevice(null);
-            deviceNames.remove(name);
-            selectedDeviceList.setValue("");
-            updateSelectedDeviceList();
-            updateDeviceName();
-
-            {
-              SharedPreferences.Editor editor = preference.getEditor();
-              editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
-              removeDeviceProperties(editor, name);
-              editor.apply();
-            }
-
-            restartBrailleDriver(prefs, "");
+          @Override
+          protected void onPreExecute () {
+            name = deviceNameSetting.getSummary().toString();
           }
 
-          removeDeviceScreen.getDialog().dismiss();
-          return true;
-        }
+          @Override
+          protected String doInBackground (Object... arguments) {
+            try {
+              return deviceCollection.makeIdentifier(deviceIdentifierSetting.getSelectedValue());
+            } catch (SecurityException exception) {
+              return null;
+            }
+          }
+
+          @Override
+          protected void onPostExecute (String identifier) {
+            if (identifier == null) {
+              showProblem(R.string.ADD_DEVICE_NO_PERMISSION, name);
+            } else {
+              deviceNames.add(name);
+              updateSelectedDeviceSetting();
+              updateDeviceName();
+
+              {
+                final SharedPreferences.Editor editor = preference.getEditor();
+
+                {
+                  Map<String, String> properties = new LinkedHashMap();
+                  properties.put(PREF_KEY_DEVICE_IDENTIFIER, identifier);
+
+                  properties.put(
+                    PREF_KEY_DEVICE_DRIVER,
+                    deviceDriverSetting.getSelectedValue()
+                  );
+
+                  putProperties(editor, name, properties);
+                }
+
+                editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
+                editor.apply();
+              }
+
+              dismissScreen();
+            }
+          }
+        }.execute();
       }
-    );
+    };
+
+    removeDeviceCancellationButton = new PreferenceButton (this, R.string.PREF_KEY_REMOVE_DEVICE_CANCEL) {
+      @Override
+      public void onButtonClicked () {
+        dismissScreen();
+      }
+    };
+
+    removeDeviceConfirmationButton = new PreferenceButton(this, R.string.PREF_KEY_REMOVE_DEVICE_CONFIRM) {
+      @Override
+      public void onButtonClicked () {
+        String name = selectedDeviceSetting.getSelectedValue();
+
+        if (name != null) {
+          BrailleNotification.updateDevice(null);
+          deviceNames.remove(name);
+          selectedDeviceSetting.selectValue("");
+          updateSelectedDeviceSetting();
+          updateDeviceName();
+
+          {
+            SharedPreferences.Editor editor = preference.getEditor();
+            editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
+            removeDeviceProperties(editor, name);
+            editor.apply();
+          }
+
+          restartBrailleDriver(prefs, "");
+        }
+
+        dismissScreen();
+      }
+    };
+
+    deviceDriverSetting.sortElementsByLabel(1);
+    deviceNames = new TreeSet<String>(prefs.getStringSet(PREF_KEY_DEVICE_NAMES, Collections.EMPTY_SET));
+
+    updateSelectedDeviceSetting();
+    updateDeviceIdentifierSetting(getDeviceMethod());
+    updateDeviceName();
   }
 }

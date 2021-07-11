@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">ningunos dispositivos</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">nombre de dispositivo ya está en uso</string>
 
-  <string name="REMOVE_DEVICE_ASK">¿Realmente desea retirar este dispositivo?</string>
+  <string name="REMOVE_DEVICE_PROMPT">¿Realmente desea retirar este dispositivo?</string>
 
   <string name="SET_SELECTION_NONE">ninguno seleccionado</string>
 

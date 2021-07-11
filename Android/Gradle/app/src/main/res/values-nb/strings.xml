@@ -102,7 +102,7 @@
   <string name="ADD_DEVICE_DUPLICATE_NAME">enhetsnavnet er allerede i bruk</string>
   <string name="ADD_DEVICE_NO_PERMISSION">tilgang til enheten er ikke gitt</string>
 
-  <string name="REMOVE_DEVICE_ASK">Vil du virkelig fjerne denne enheten?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Vil du virkelig fjerne denne enheten?</string>
 
   <string name="SET_SELECTION_NONE">ingenting er valgt</string>
 

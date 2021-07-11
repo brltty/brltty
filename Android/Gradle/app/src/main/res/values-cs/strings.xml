@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">Žádná zařízení</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">Jméno zařízení se již používá</string>
 
-  <string name="REMOVE_DEVICE_ASK">Opravdu si přejete odebrat toto zařízení?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Opravdu si přejete odebrat toto zařízení?</string>
 
   <string name="SET_SELECTION_NONE">Nic nevybráno</string>
 

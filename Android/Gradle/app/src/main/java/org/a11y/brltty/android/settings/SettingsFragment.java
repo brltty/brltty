@@ -19,13 +19,8 @@
 package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
 
-import java.util.Arrays;
-import java.util.Set;
 import java.util.Map;
 import java.util.LinkedHashMap;
-
-import java.text.Collator;
-import java.text.CollationKey;
 
 import android.util.Log;
 import android.widget.Toast;
@@ -35,8 +30,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
 
 public abstract class SettingsFragment extends PreferenceFragment {
   private final static String LOG_TAG = SettingsFragment.class.getName();
@@ -97,78 +90,5 @@ public abstract class SettingsFragment extends PreferenceFragment {
 
   protected final PreferenceScreen getPreferenceScreen (int key) {
     return (PreferenceScreen)getPreference(key);
-  }
-
-  protected final EditTextPreference getEditTextPreference (int key) {
-    return (EditTextPreference)getPreference(key);
-  }
-
-  protected final ListPreference getListPreference (int key) {
-    return (ListPreference)getPreference(key);
-  }
-
-  protected final void showSelection (ListPreference list) {
-    CharSequence label = list.getEntry();
-    if (label == null) label = "";
-    list.setSummary(label);
-  }
-
-  protected final void showSelection (ListPreference list, int index) {
-    list.setSummary(list.getEntries()[index]);
-  }
-
-  protected final int getSelection (ListPreference list, String value) {
-    return Arrays.asList(list.getEntryValues()).indexOf(value);
-  }
-
-  protected final void showSelection (ListPreference list, String value) {
-    showSelection(list, getSelection(list, value));
-  }
-
-  protected final void resetList (ListPreference list) {
-    list.setValueIndex(0);
-    showSelection(list);
-  }
-
-  protected final void setListElements (ListPreference list, String[] values, String[] labels) {
-    list.setEntryValues(values);
-    list.setEntries(labels);
-  }
-
-  protected final void setListElements (ListPreference list, String[] values) {
-    setListElements(list, values, values);
-  }
-
-  protected final void sortList (ListPreference list, int fromIndex) {
-    Collator collator = Collator.getInstance();
-    collator.setStrength(Collator.PRIMARY);
-    collator.setDecomposition(Collator.CANONICAL_DECOMPOSITION);
-
-    String[] values = LanguageUtilities.newStringArray(list.getEntryValues());
-    String[] labels = LanguageUtilities.newStringArray(list.getEntries());
-
-    int size = values.length;
-    Map<String, String> map = new LinkedHashMap<String, String>();
-    CollationKey keys[] = new CollationKey[size];
-
-    for (int i=0; i<size; i+=1) {
-      String label = labels[i];
-      map.put(label, values[i]);
-      keys[i] = collator.getCollationKey(label);
-    }
-
-    Arrays.sort(keys, fromIndex, keys.length);
-
-    for (int i=0; i<size; i+=1) {
-      String label = keys[i].getSourceString();
-      labels[i] = label;
-      values[i] = map.get(label);
-    }
-
-    setListElements(list, values, labels);
-  }
-
-  protected final void sortList (ListPreference list) {
-    sortList(list, 0);
   }
 }

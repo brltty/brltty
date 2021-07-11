@@ -23,7 +23,7 @@ import org.a11y.brltty.core.CoreWrapper;
 public class KeyboardTableSetting extends SingleSelectionSetting {
   public KeyboardTableSetting (SettingsFragment fragment) {
     super(fragment, R.string.PREF_KEY_KEYBOARD_TABLE);
-    sortElements(1);
+    sortElementsByLabel(1);
   }
 
   @Override

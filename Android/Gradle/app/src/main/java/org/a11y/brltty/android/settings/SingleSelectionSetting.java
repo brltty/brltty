@@ -22,63 +22,80 @@ import org.a11y.brltty.android.*;
 import android.preference.Preference;
 import android.preference.ListPreference;
 
-import java.util.Arrays;
-
-public abstract class SingleSelectionSetting extends PreferenceSetting<ListPreference> {
+public abstract class SingleSelectionSetting extends SelectionSetting<ListPreference> {
   protected abstract void onSelectionChanged (String newSelection);
 
   @Override
-  public final void showSelection () {
-    CharSequence label = settingPreference.getEntry();
+  public final CharSequence[] getAllValues () {
+    return preference.getEntryValues();
+  }
+
+  @Override
+  public final CharSequence getValueAt (int index) {
+    return getAllValues()[index];
+  }
+
+  @Override
+  public final int indexOf (String value) {
+    return preference.findIndexOfValue(value);
+  }
+
+  @Override
+  public final CharSequence[] getAllLabels () {
+    return preference.getEntries();
+  }
+
+  @Override
+  public final CharSequence getLabelAt (int index) {
+    return getAllLabels()[index];
+  }
+
+  public final String getSelectedValue () {
+    return preference.getValue();
+  }
+
+  public final CharSequence getSelectedLabel () {
+    return preference.getEntry();
+  }
+
+  @Override
+  public final void setSummary () {
+    CharSequence label = getSelectedLabel();
     if (label == null) label = "";
-    showSelection(label);
+    setSummary(label);
   }
 
-  protected final void showSelection (int index) {
-    showSelection(settingPreference.getEntries()[index]);
+  protected final void setSummary (int index) {
+    setSummary(getLabelAt(index));
   }
 
-  private final int toIndex (String value) {
-    return Arrays.asList(settingPreference.getEntryValues()).indexOf(value);
+  @Override
+  public boolean onPreferenceChange (Preference preference, Object newValue) {
+    final String newSelection = (String)newValue;
+
+    setSummary(indexOf(newSelection));
+    onSelectionChanged(newSelection);
+
+    return true;
   }
 
   protected SingleSelectionSetting (SettingsFragment fragment, int key) {
     super(fragment, key);
-
-    settingPreference.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final String newSelection = (String)newValue;
-
-          showSelection(toIndex(newSelection));
-          onSelectionChanged(newSelection);
-
-          return true;
-        }
-      }
-    );
   }
 
-  protected final void resetSelection () {
-    settingPreference.setValueIndex(0);
-    showSelection();
-  }
-
+  @Override
   protected final void setElements (String[] values, String[] labels) {
-    settingPreference.setEntryValues(values);
-    settingPreference.setEntries(labels);
+    preference.setEntryValues(values);
+    preference.setEntries(labels);
   }
 
-  protected final void setElements (String[] values) {
-    setElements(values, values);
+  protected final void selectFirstElement () {
+    preference.setValueIndex(0);
+    setSummary();
   }
 
-  protected final void sortElements (int fromIndex) {
-    settingsFragment.sortList(settingPreference, fromIndex);
-  }
-
-  protected final void sortElements () {
-    sortElements(0);
+  public final void selectValue (String newValue) {
+    preference.setValue(newValue);
+    setSummary();
   }
 }

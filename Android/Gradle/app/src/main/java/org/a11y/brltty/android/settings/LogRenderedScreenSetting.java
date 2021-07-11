@@ -25,7 +25,7 @@ public class LogRenderedScreenSetting extends CheckBoxSetting {
   }
 
   @Override
-  protected final void onSelectionChanged (boolean newSelection) {
-    ApplicationSettings.LOG_RENDERED_SCREEN = newSelection;
+  protected final void onStateChanged (boolean newState) {
+    ApplicationSettings.LOG_RENDERED_SCREEN = newState;
   }
 }

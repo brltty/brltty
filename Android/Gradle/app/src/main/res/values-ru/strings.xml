@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">ни одного устройства</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">имя устройства уже используется</string>
 
-  <string name="REMOVE_DEVICE_ASK">Вы, действительно, хотите удалить это устройство?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Вы, действительно, хотите удалить это устройство?</string>
 
   <string name="SET_SELECTION_NONE">не выбрано</string>
 

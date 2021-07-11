@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">pas de périphériques</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">nom de périphérique déjà utilisé</string>
 
-  <string name="REMOVE_DEVICE_ASK">Voulez-vous vraiment supprimer ce périphérique ?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Voulez-vous vraiment supprimer ce périphérique ?</string>
 
   <string name="SET_SELECTION_NONE">aucune sélection</string>
 

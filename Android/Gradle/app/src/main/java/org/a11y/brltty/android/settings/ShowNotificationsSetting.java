@@ -25,7 +25,7 @@ public class ShowNotificationsSetting extends CheckBoxSetting {
   }
 
   @Override
-  protected final void onSelectionChanged (boolean newSelection) {
-    ApplicationSettings.SHOW_NOTIFICATIONS = newSelection;
+  protected final void onStateChanged (boolean newState) {
+    ApplicationSettings.SHOW_NOTIFICATIONS = newState;
   }
 }

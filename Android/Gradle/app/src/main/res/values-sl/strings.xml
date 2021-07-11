@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">ni naprav</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">ime naprave že v uporabi</string>
 
-  <string name="REMOVE_DEVICE_ASK">Ali res želite odstraniti to napravo?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Ali res želite odstraniti to napravo?</string>
 
   <string name="SET_SELECTION_NONE">nič ni izbrano</string>
 

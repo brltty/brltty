@@ -19,14 +19,32 @@
 package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
 
-public class ReleaseBrailleDeviceSetting extends CheckBoxSetting {
-  public ReleaseBrailleDeviceSetting (SettingsFragment fragment) {
-    super(fragment, R.string.PREF_KEY_RELEASE_BRAILLE_DEVICE);
+import android.preference.Preference;
+import android.preference.EditTextPreference;
+
+public abstract class TextSetting extends PreferenceSetting<EditTextPreference> {
+  protected abstract void onTextChanged (String newText);
+
+  public final CharSequence getText () {
+    return preference.getEditText().getText();
   }
 
   @Override
-  protected final void onStateChanged (boolean newState) {
-    ApplicationSettings.RELEASE_BRAILLE_DEVICE = newState;
-    BrailleNotification.updateState();
+  public final void setSummary () {
+    setSummary(getText());
+  }
+
+  @Override
+  public boolean onPreferenceChange (Preference preference, Object newValue) {
+    final String newText = (String)newValue;
+
+    setSummary(newText);
+    onTextChanged(newText);
+
+    return true;
+  }
+
+  protected TextSetting (SettingsFragment fragment, int key) {
+    super(fragment, key);
   }
 }

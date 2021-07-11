@@ -20,16 +20,37 @@ package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
 
 import android.preference.Preference;
+import android.preference.PreferenceScreen;
 
-public abstract class PreferenceSetting<P extends Preference>
-extends PreferenceWrapper<P>
-implements Preference.OnPreferenceChangeListener
+public abstract class PreferenceButton
+extends PreferenceWrapper<Preference>
+implements Preference.OnPreferenceClickListener
 {
-  public abstract void setSummary ();
+  protected abstract void onButtonClicked ();
 
-  protected PreferenceSetting (SettingsFragment fragment, int key) {
+  @Override
+  public boolean onPreferenceClick (Preference preference) {
+    onButtonClicked();
+    return true;
+  }
+
+  protected PreferenceButton (SettingsFragment fragment, int key) {
     super(fragment, key);
-    setSummary();
-    preference.setOnPreferenceChangeListener(this);
+    preference.setOnPreferenceClickListener(this);
+  }
+
+  protected final PreferenceScreen findScreen () {
+    Preference pref = preference;
+
+    while (pref != null) {
+      if (pref instanceof PreferenceScreen) return (PreferenceScreen)pref;
+      pref = pref.getParent();
+    }
+
+    return null;
+  }
+
+  protected final void dismissScreen () {
+    findScreen().getDialog().dismiss();
   }
 }

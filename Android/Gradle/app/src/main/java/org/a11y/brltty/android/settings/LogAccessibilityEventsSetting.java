@@ -25,7 +25,7 @@ public class LogAccessibilityEventsSetting extends CheckBoxSetting {
   }
 
   @Override
-  protected final void onSelectionChanged (boolean newSelection) {
-    ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = newSelection;
+  protected final void onStateChanged (boolean newState) {
+    ApplicationSettings.LOG_ACCESSIBILITY_EVENTS = newState;
   }
 }

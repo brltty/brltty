@@ -23,10 +23,14 @@ import android.preference.Preference;
 import android.preference.CheckBoxPreference;
 
 public abstract class CheckBoxSetting extends PreferenceSetting<CheckBoxPreference> {
-  protected abstract void onSelectionChanged (boolean newSelection);
+  protected abstract void onStateChanged (boolean newState);
 
-  protected final void showSelection (boolean checked) {
-    showSelection(
+  public final boolean isChecked () {
+    return preference.isChecked();
+  }
+
+  protected final void setSummary (boolean checked) {
+    setSummary(
       getString(
         checked? R.string.checkbox_state_checked: R.string.checkbox_state_unchecked
       )
@@ -34,25 +38,21 @@ public abstract class CheckBoxSetting extends PreferenceSetting<CheckBoxPreferen
   }
 
   @Override
-  public final void showSelection () {
-    showSelection(settingPreference.isChecked());
+  public final void setSummary () {
+    setSummary(isChecked());
+  }
+
+  @Override
+  public boolean onPreferenceChange (Preference preference, Object newValue) {
+    final boolean newState = (Boolean)newValue;
+
+    setSummary(newState);
+    onStateChanged(newState);
+
+    return true;
   }
 
   protected CheckBoxSetting (SettingsFragment fragment, int key) {
     super(fragment, key);
-
-    settingPreference.setOnPreferenceChangeListener(
-      new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange (Preference preference, Object newValue) {
-          final boolean newSelection = (Boolean)newValue;
-
-          showSelection(newSelection);
-          onSelectionChanged(newSelection);
-
-          return true;
-        }
-      }
-    );
   }
 }

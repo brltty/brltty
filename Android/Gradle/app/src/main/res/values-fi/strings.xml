@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">ei laitteita</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">laitenimi on jo käytössä</string>
 
-  <string name="REMOVE_DEVICE_ASK">Haluatko varmasti poistaa tämän laitteen?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Haluatko varmasti poistaa tämän laitteen?</string>
 
   <string name="SET_SELECTION_NONE">ei valintaa</string>
 

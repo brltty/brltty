@@ -29,9 +29,9 @@
   <string name="PREF_KEY_ADD_DEVICE" translatable="false">add-device</string>
   <string name="PREF_KEY_REMOVE_DEVICE" translatable="false">remove-device</string>
 
-  <string name="PREF_KEY_REMOVE_DEVICE_ASK" translatable="false">remove-device-ask</string>
-  <string name="PREF_KEY_REMOVE_DEVICE_NO" translatable="false">remove-device-no</string>
-  <string name="PREF_KEY_REMOVE_DEVICE_YES" translatable="false">remove-device-yes</string>
+  <string name="PREF_KEY_REMOVE_DEVICE_PROMPT" translatable="false">remove-device-prompt</string>
+  <string name="PREF_KEY_REMOVE_DEVICE_CANCEL" translatable="false">remove-device-cancel</string>
+  <string name="PREF_KEY_REMOVE_DEVICE_CONFIRM" translatable="false">remove-device-confirm</string>
 
   <string name="PREF_KEY_DEVICE_NAME" translatable="false">device-name</string>
   <string name="PREF_KEY_DEVICE_METHOD" translatable="false">device-method</string>

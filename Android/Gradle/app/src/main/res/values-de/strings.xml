@@ -101,7 +101,7 @@
   <string name="ADD_DEVICE_NO_DEVICES">keine Geräte</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">Gerätename ist bereits in Verwendung</string>
 
-  <string name="REMOVE_DEVICE_ASK">Möchten Sie dieses Gerät wirklich entfernen?</string>
+  <string name="REMOVE_DEVICE_PROMPT">Möchten Sie dieses Gerät wirklich entfernen?</string>
 
   <string name="SET_SELECTION_NONE">keine ausgewählt</string>
 

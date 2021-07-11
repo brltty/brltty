@@ -17,12 +17,14 @@
 
     <EditTextPreference
       android:key="@string/PREF_KEY_DEVICE_NAME"
+      android:persistent="false"
       android:title="@string/ADD_DEVICE_NAME"
       android:defaultValue=""
      />
 
     <ListPreference
       android:key="@string/PREF_KEY_DEVICE_METHOD"
+      android:persistent="false"
       android:title="@string/ADD_DEVICE_METHOD"
       android:entries="@array/DEVICE_METHOD_LABELS"
       android:entryValues="@array/DEVICE_METHOD_VALUES"
@@ -31,6 +33,7 @@
 
     <ListPreference
       android:key="@string/PREF_KEY_DEVICE_IDENTIFIER"
+      android:persistent="false"
       android:title="@string/ADD_DEVICE_SELECT"
       android:entries="@array/EMPTY_STRING_ARRAY"
       android:entryValues="@array/EMPTY_STRING_ARRAY"
@@ -38,6 +41,7 @@
 
     <ListPreference
       android:key="@string/PREF_KEY_DEVICE_DRIVER"
+      android:persistent="false"
       android:title="@string/ADD_DEVICE_DRIVER"
       android:entries="@array/BRAILLE_DRIVER_LABELS"
       android:entryValues="@array/BRAILLE_DRIVER_VALUES"
@@ -46,6 +50,7 @@
 
     <Preference
       android:key="@string/PREF_KEY_DEVICE_ADD"
+      android:persistent="false"
       android:title="@string/ADD_DEVICE_DONE"
      />
   </PreferenceScreen>
@@ -56,17 +61,20 @@
     >
 
     <Preference
-      android:key="@string/PREF_KEY_REMOVE_DEVICE_ASK"
-      android:title="@string/REMOVE_DEVICE_ASK"
+      android:key="@string/PREF_KEY_REMOVE_DEVICE_PROMPT"
+      android:persistent="false"
+      android:title="@string/REMOVE_DEVICE_PROMPT"
      />
 
     <Preference
-      android:key="@string/PREF_KEY_REMOVE_DEVICE_NO"
+      android:key="@string/PREF_KEY_REMOVE_DEVICE_CANCEL"
+      android:persistent="false"
       android:title="@string/android:no"
      />
 
     <Preference
-      android:key="@string/PREF_KEY_REMOVE_DEVICE_YES"
+      android:key="@string/PREF_KEY_REMOVE_DEVICE_CONFIRM"
+      android:persistent="false"
       android:title="@string/android:yes"
      />
   </PreferenceScreen>
