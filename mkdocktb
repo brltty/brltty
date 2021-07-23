@@ -46,77 +46,102 @@ export XDG_CONFIG_DIRS=/
 
 readonly newLine=$'\n'
 
-declare -a tocLines
+lineGroups=()
+newLineGroup() {
+   local variable="${1}"
 
-addTocLine() {
-   local line="${1}"
+   local group="lineGroup${#lineGroups[*]}"
+   lineGroups+=("${group}")
+   setVariable "${variable}" "${group}"
 
-   tocLines[${#tocLines[*]}]="${line}"
+   declare -g -a "${group}"
+   eval "${group}=()"
+}
+
+addLineToGroup() {
+   local group="${1}"
+   local line="${2}"
+
+   eval "${group}+="'("${line}")'
+}
+
+newDocLines() {
+   newLineGroup docLines
+}
+
+beginTocEntries() {
+   local variable="${1}"
+
+   newLineGroup "${variable}"
+   newDocLines
+
+   addLineToGroup "${!variable}" "<ul>"
+}
+
+endTocEntries() {
+   local group="${1}"
+
+   addLineToGroup "${group}" "</ul>"
 }
 
 addTocEntry() {
-   local title="${1}"
-   local anchor="${2}"
+   local group="${1}"
+   local title="${2}"
+   local anchor="${3}"
 
-   addTocLine "<li><a href=\"#${anchor}\">${title}</a></li>"
+   addLineToGroup "${group}" "<li><a href=\"#${anchor}\">${title}</a></li>"
 }
 
-declare -a documentLines
-
-addLine() {
+addDocLine() {
    local line="${1}"
 
-   documentLines[${#documentLines[*]}]="${line}"
+   addLineToGroup "${docLines}" "${line}"
+}
+
+addSectionTerminator() {
+   addDocLine "<hr />"
 }
 
 addAnchor() {
    local anchor="${1}"
 
-   addLine "<a name=\"${anchor}\"></a>"
+   addDocLine "<a name=\"${anchor}\"></a>"
 }
 
 beginDocument() {
    local title="${1}"
 
+   newDocLines
    headerLevel=0
 
-   addLine "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
-   addLine "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
+   addDocLine "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+   addDocLine "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"
 
-   addLine "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
-   addLine "<head>"
-   addLine "<title>${title}</title>"
-   addLine "</head>"
-   addLine "<body>"
+   addDocLine "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
+   addDocLine "<head>"
+   addDocLine "<title>${title}</title>"
+   addDocLine "</head>"
+   addDocLine "<body>"
 }
 
 endDocument() {
    local file="${1}"
 
-   addLine "</body>"
-   addLine "</html>"
-   addTocLine "<hr />"
-
-   local docCount="${#documentLines[*]}"
-   local docIndex=0
-
-   local tocCount="${#tocLines[*]}"
-   local tocIndex=0
+   addDocLine "</body>"
+   addDocLine "</html>"
 
    exec 3>"${file}"
-      while ((docIndex < tocStart))
-      do
-         echo >&3 "${documentLines[docIndex++]}"
-      done
+      local group
 
-      while ((tocIndex < tocCount))
+      for group in "${lineGroups[@]}"
       do
-         echo >&3 "${tocLines[tocIndex++]}"
-      done
+         eval set -- '"${'"${group}"'[@]}"'
+         local line
 
-      while ((docIndex < docCount))
-      do
-         echo >&3 "${documentLines[docIndex++]}"
+         for line
+         do
+            echo >&3 "${line}"
+         done
       done
    exec 3>&-
 }
@@ -129,19 +154,25 @@ beginSection() {
    addAnchor "${anchor}"
 
    headerLevel=$((headerLevel + 1))
-   addLine "<h${headerLevel}>${title}</h${headerLevel}>"
+   addDocLine "<h${headerLevel}>${title}</h${headerLevel}>"
 
    if ((headerLevel == 1))
    then
-      tocStart="${#documentLines[*]}"
-      addTocLine "<ul>"
+      beginTocEntries tocSections
+      addSectionTerminator
    else
-      addTocEntry "${title}" "${anchor}"
+      addTocEntry "${tocSections}" "${title}" "${anchor}"
    fi
 }
 
 endSection() {
-   ((headerLevel > 1)) || addTocLine "</ul>"
+   if ((headerLevel == 1))
+   then
+      endTocEntries "${tocSections}"
+   else
+      addSectionTerminator
+   fi
+
    headerLevel=$((headerLevel - 1))
 }
 
@@ -151,7 +182,7 @@ beginLayoutList() {
 
 endLayoutList() {
    ! "${layoutListed}" || {
-      addLine "</ul>"
+      addDocLine "</ul>"
    }
 }
 
@@ -191,10 +222,10 @@ endLayoutEntry() {
 
    "${layoutListed}" || {
       layoutListed=true
-      addLine "<ul>"
+      addDocLine "<ul>"
    }
 
-   addLine "<li><a href=\"${outputFile##*/}\">${description}</a></li>"
+   addDocLine "<li><a href=\"${outputFile##*/}\">${description}</a></li>"
 }
 
 listKeyTable() {
@@ -215,6 +246,98 @@ listKeyTable() {
 
    rst2html --config "${sourceRoot}/docutils.conf" "${output}.${reStructuredTextExtension}" "${output}.${hypertextExtension}"
    "${keepFiles}" || rm "${output}.${reStructuredTextExtension}"
+}
+
+listBrailleKeyTables() {
+   beginSection "Braille Device Key Bindings"
+   addDocLine "The driver automatically selects the appropriate key table for the device model being used."
+   addDocLine "Click on the driver's name for general information about it."
+   addDocLine "Click on the device model for its key bindings."
+
+   local tocDrivers
+   beginTocEntries tocDrivers
+
+   addDocLine "<dl>"
+   local driverDirectory
+
+   for driverDirectory in "${driversDirectory}/"*
+   do
+      [ -d "${driverDirectory}" ] || continue
+
+      local driverName="${driverDirectory##*/}"
+      local driverCode="$(sed -n '/^DRIVER_CODE *=/s/^.*= *\([^ ]*\).*$/\1/p' "${driverDirectory}/Makefile.in")"
+
+      local header="${driverName}"
+      local inputFile="${driverDirectory}/README"
+
+      [ ! -f "${inputFile}" ] || {
+         local outputFile="${outputRoot}/${braillePrefix}-${driverCode}.${plainTextExtension}"
+         cp -a -- "${inputFile}" "${outputFile}"
+         header="<a href=\"${outputFile##*/}\">${header}</a>"
+      }
+
+      local anchor="${braillePrefix}-${driverCode}"
+      addTocEntry "${tocDrivers}" "${driverName}" "${anchor}"
+
+      addDocLine "<dt>"
+      addAnchor "${anchor}"
+      addDocLine "${header}"
+      addDocLine "</dt><dd>"
+
+      beginLayoutList
+      set -- "${tablesDirectory}/${brailleSubdirectory}/${driverCode}/"*".${keyTableExtension}"
+
+      if [ "${#}" -gt 0 ]
+      then
+         for inputFile
+         do
+            beginLayoutEntry "${braillePrefix}-${driverCode}" "${hypertextExtension}"
+            listKeyTable "${braillePrefix}-${driverCode}" "${hypertextExtension}" || continue
+            endLayoutEntry "${driverName}"
+         done
+      else
+         set -- "${tablesDirectory}/${brailleSubdirectory}/${driverCode}/"*".${plainTextExtension}"
+
+         for inputFile
+         do
+            beginLayoutEntry "${braillePrefix}-${driverCode}" "${plainTextExtension}"
+            cp -a -- "${inputFile}" "${outputFile}"
+            endLayoutEntry "${driverName}"
+         done
+      fi
+
+      endLayoutList
+      addDocLine "</dd>"
+   done
+
+   addDocLine "</dl>"
+   endTocEntries "${tocDrivers}"
+   endSection
+}
+
+listKeyboardKeyTables() {
+   beginSection "Keyboard Key Tables"
+   addDocLine "In order to use one of these keyboard tables,"
+   addDocLine "you need to explicitly specify it in one of the following ways:"
+
+   addDocLine "<ul>"
+   addDocLine "<li>Use BRLTTY's <tt>-k</tt> (or <tt>--keyboard-table=</tt>) command line option.</li>"
+   addDocLine "<li>Use the <tt>keyboard-table</tt> configuration file (<tt>brltty.conf</tt>) directive.</li>"
+   addDocLine "</ul>"
+
+   beginLayoutList
+   set -- "${tablesDirectory}/${keyboardSubdirectory}/"*".${keyTableExtension}"
+
+   local inputFile
+   for inputFile
+   do
+      beginLayoutEntry "${keyboardPrefix}" "${hypertextExtension}"
+      listKeyTable "${keyboardPrefix}" || continue
+      endLayoutEntry
+   done
+
+   endLayoutList
+   endSection
 }
 
 driversSubdirectory="Drivers/Braille"
@@ -239,88 +362,11 @@ make -C "${keyTableLister%/*}" -s "${keyTableLister##*/}"
 
 documentTitle="Key Binding Lists"
 beginDocument "${documentTitle}"
+
 beginSection "${documentTitle}"
-
-beginSection "Computer Keyboard Bindings"
-addLine "In order to use one of these keyboard tables,"
-addLine "you need to explicitly specify it in one of the following ways:"
-addLine "<ul>"
-addLine "<li>Use BRLTTY's <tt>-k</tt> (or <tt>--keyboard-table=</tt>) command line option.</li>"
-addLine "<li>Use the <tt>keyboard-table</tt> configuration file (<tt>brltty.conf</tt>) directive.</li>"
-addLine "</ul>"
-
-beginLayoutList
-set -- "${tablesDirectory}/${keyboardSubdirectory}/"*".${keyTableExtension}"
-for inputFile
-do
-   beginLayoutEntry "${keyboardPrefix}" "${hypertextExtension}"
-   listKeyTable "${keyboardPrefix}" || continue
-   endLayoutEntry
-done
-endLayoutList
-addLine "<hr />"
+listBrailleKeyTables
+listKeyboardKeyTables
 endSection
 
-beginSection "Braille Device Bindings"
-addLine "The driver automatically selects the appropriate key table for the device model being used."
-addLine "Click on the driver's name for general information about it."
-addLine "Click on the device model for its key bindings."
-
-addTocLine "<li><ul>"
-addLine "<dl>"
-
-for driverDirectory in "${driversDirectory}/"*
-do
-   [ -d "${driverDirectory}" ] || continue
-
-   driverName="${driverDirectory##*/}"
-   driverCode="$(sed -n '/^DRIVER_CODE *=/s/^.*= *\([^ ]*\).*$/\1/p' "${driverDirectory}/Makefile.in")"
-
-   header="${driverName}"
-   inputFile="${driverDirectory}/README"
-   [ ! -f "${inputFile}" ] || {
-      outputFile="${outputRoot}/${braillePrefix}-${driverCode}.${plainTextExtension}"
-      cp -a -- "${inputFile}" "${outputFile}"
-      header="<a href=\"${outputFile##*/}\">${header}</a>"
-   }
-
-   anchor="${braillePrefix}-${driverCode}"
-   addTocEntry "${driverName}" "${anchor}"
-   addLine "<dt>"
-   addAnchor "${anchor}"
-   addLine "${header}"
-   addLine "</dt><dd>"
-
-   beginLayoutList
-   set -- "${tablesDirectory}/${brailleSubdirectory}/${driverCode}/"*".${keyTableExtension}"
-   if [ "${#}" -gt 0 ]
-   then
-      for inputFile
-      do
-         beginLayoutEntry "${braillePrefix}-${driverCode}" "${hypertextExtension}"
-         listKeyTable "${braillePrefix}-${driverCode}" "${hypertextExtension}" || continue
-         endLayoutEntry "${driverName}"
-      done
-   else
-      set -- "${tablesDirectory}/${brailleSubdirectory}/${driverCode}/"*".${plainTextExtension}"
-      for inputFile
-      do
-         beginLayoutEntry "${braillePrefix}-${driverCode}" "${plainTextExtension}"
-         cp -a -- "${inputFile}" "${outputFile}"
-         endLayoutEntry "${driverName}"
-      done
-   fi
-
-   endLayoutList
-   addLine "</dd>"
-done
-
-addLine "</dl>"
-addTocLine "</ul></li>"
-
-addLine "<hr />"
-endSection
-
-endSection
 endDocument "${outputRoot}/index.${hypertextExtension}"
 exit 0
