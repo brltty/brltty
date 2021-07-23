@@ -1,12 +1,22 @@
+accessibility focus built into talkback
+explore by touch built into talkback
+typing on braille keyboard and touch screen simultaneously
+typing PIN on lock screen
+
+automatic scroll at the top/bottom of a page
+switch amongst selected text/contraction tables
+monitor multiple braille devices
+
+messages enqueue while device isn't connected
+removing a device needs its own selector
+contracted braille doesn't count routing keys correctly
+
 show that text is editable
 a way to click on the background
 a way to drag and drop
 contracted braille and routing key associations
-android-specific commands
 support the dynamic loading of non-built-in drivers
 support serial braille devices
-actions on elements with short text
+actions on elements with short text (grid view)
 selecting multiple devices
-gettext()
-scrolling backward/forward on ICS
-list element selection on ICS
+switching between preferred text/contraction tables
