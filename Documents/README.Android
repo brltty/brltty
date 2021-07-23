@@ -10,84 +10,6 @@ BRLTTY on Android
 
 .. include:: prologue.rst
 
-Installing BRLTTY
-=================
-
-BRLTTY has been designed to run on at least Android 4.1 (Jelly Bean).
-While it does run on Android 4.0 (Ice Cream Sandwich),
-many of its highly desirable features won't work.
-
-BRLTTY can be installed via Google Play.
-You can either search for it by name
-or go directly to `BRLTTY on Google Play`_.
-
-Permissions
------------
-
-BRLTTY requires access to a number of privileged
-Android operating system capabilities.
-The required permissions are as follows:
-
-.. include:: android-permissions.rst
-
-The Old Way
------------
-
-Before it was on Google Play, BRLTTY had to be installed and updated manually.
-For now, this way still works.
-
-These instructions are from the perspective of a Firefox user on Windows,
-but the process should be much the same when using a different web browser and/or operating system.
-
-On Your Computer
-~~~~~~~~~~~~~~~~
-
-1) Go to `BRLTTY's web site`_.
-
-2) Find the ``Download`` link and press Enter on it.
-
-3) Go to the ``Android`` section, down-arrow from there to the link that says
-   ``Latest APK``, and press Enter on it.
-
-4) You'll be prompted to open or save the file at this point. Save it.
-
-5) Go to your ``Downloads`` folder (or wherever you save downloads), and
-   find the ``brltty-latest.apk`` file.
-
-6) If the file has been saved on your computer as ``brltty-latest.zip``,
-   then press the ``Context`` key, arrow to and press Enter on ``Rename``,
-   and change the file extension from ``zip`` to ``apk``. Don't worry if you
-   get a warning about the possibility of rendering the file unusable. Go
-   ahead with the rename.
-
-On Your Android Device
-~~~~~~~~~~~~~~~~~~~~~~
-
-1) Go into ``Settings`` -> ``Security``, and ensure that ``Unknown Sources``
-   is enabled. This option says something like:
-   
-      Allow the installation of apps from unknown sources
-      
-   This is a one-time step. Once the box has been checked, it stays checked.
-
-2) Copy the ``apk`` file to your device. There are a number of ways to do this:
-
-   * The easiest way may be to email it to yourself as a file attachment so
-     that it will go to the email on your Android device.
-
-   * Another option is to save the file in Dropbox on your computer, and
-     then wait for it to show up in Dropbox on your Android device.
-
-   * Another option is to connect your Android device to your computer via
-     a USB cable, and then to copy the file to it in the same way that
-     you'd copy a file to a thumb drive.
-
-3) Tap the ``brltty-latest.apk`` file to start its installation, and answer any
-   prompts. If you use the Dropbox method, you might need to tap on the file
-   twice - once to download it, and a second time to install it.
-
-4) Tap ``OK`` when installation is complete.
-
 Using BRLTTY
 ============
 
@@ -750,6 +672,84 @@ Serial devices aren't supported. Even though Android devices don't have serial
 ports, serial devices still can be connected via a USB to Serial adapter. Users
 who have older, serial-only braille devices should still be able to use them
 with their Android devices.
+
+Installing BRLTTY
+=================
+
+BRLTTY has been designed to run on at least Android 4.1 (Jelly Bean).
+While it does run on Android 4.0 (Ice Cream Sandwich),
+many of its highly desirable features won't work.
+
+BRLTTY can be installed via Google Play.
+You can either search for it by name
+or go directly to `BRLTTY on Google Play`_.
+
+Required Permissions
+--------------------
+
+BRLTTY requires access to a number of privileged
+Android operating system capabilities.
+The required permissions are as follows:
+
+.. include:: android-permissions.rst
+
+The Old Way
+-----------
+
+Before it was on Google Play, BRLTTY had to be installed and updated manually.
+For now, this way still works.
+
+These instructions are from the perspective of a Firefox user on Windows,
+but the process should be much the same when using a different web browser and/or operating system.
+
+On Your Computer
+~~~~~~~~~~~~~~~~
+
+1) Go to `BRLTTY's web site`_.
+
+2) Find the ``Download`` link and press Enter on it.
+
+3) Go to the ``Android`` section, down-arrow from there to the link that says
+   ``Latest APK``, and press Enter on it.
+
+4) You'll be prompted to open or save the file at this point. Save it.
+
+5) Go to your ``Downloads`` folder (or wherever you save downloads), and
+   find the ``brltty-latest.apk`` file.
+
+6) If the file has been saved on your computer as ``brltty-latest.zip``,
+   then press the ``Context`` key, arrow to and press Enter on ``Rename``,
+   and change the file extension from ``zip`` to ``apk``. Don't worry if you
+   get a warning about the possibility of rendering the file unusable. Go
+   ahead with the rename.
+
+On Your Android Device
+~~~~~~~~~~~~~~~~~~~~~~
+
+1) Go into ``Settings`` -> ``Security``, and ensure that ``Unknown Sources``
+   is enabled. This option says something like:
+   
+      Allow the installation of apps from unknown sources
+      
+   This is a one-time step. Once the box has been checked, it stays checked.
+
+2) Copy the ``apk`` file to your device. There are a number of ways to do this:
+
+   * The easiest way may be to email it to yourself as a file attachment so
+     that it will go to the email on your Android device.
+
+   * Another option is to save the file in Dropbox on your computer, and
+     then wait for it to show up in Dropbox on your Android device.
+
+   * Another option is to connect your Android device to your computer via
+     a USB cable, and then to copy the file to it in the same way that
+     you'd copy a file to a thumb drive.
+
+3) Tap the ``brltty-latest.apk`` file to start its installation, and answer any
+   prompts. If you use the Dropbox method, you might need to tap on the file
+   twice - once to download it, and a second time to install it.
+
+4) Tap ``OK`` when installation is complete.
 
 Building BRLTTY
 ===============
