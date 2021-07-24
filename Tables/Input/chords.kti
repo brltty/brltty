@@ -70,6 +70,12 @@ assign toggleCommand FREEZE
 include toggle.kti
 endVariables
 
+beginVariables
+assign toggleKeys \{chord}\{g}
+assign toggleCommand CONTRACTED
+include toggle.kti
+endVariables
+
 bind \{chord}\{h} HELP
 
 beginVariables
