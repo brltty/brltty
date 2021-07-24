@@ -103,6 +103,24 @@ toggleModeSetting (unsigned char *setting, int command) {
   return toggleSetting(setting, command, ALERT_NONE, ALERT_NONE);
 }
 
+static ToggleResult
+toggleFunctionalSetting (
+  int command,
+  int (*get) (void),
+  void (*set) (int value)
+) {
+  const int bit = 1;
+  int bits = get()? bit: 0;
+
+  ToggleResult result = toggleBit(
+    &bits, bit, command,
+    ALERT_TOGGLE_OFF, ALERT_TOGGLE_ON
+  );
+
+  set(!!(bits & bit));
+  return result;
+}
+
 static int
 handleToggleCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
@@ -122,6 +140,14 @@ handleToggleCommands (int command, void *data) {
     case BRL_CMD_SIXDOTS:
       togglePreferenceSetting(&prefs.brailleVariant, command);
       onBrailleVariantUpdated();
+      break;
+
+    case BRL_CMD_CONTRACTED:
+      toggleFunctionalSetting(command, isContractedBraille, setContractedBraille);
+      break;
+
+    case BRL_CMD_COMPBRL6:
+      toggleFunctionalSetting(command, isSixDotComputerBraille, setSixDotComputerBraille);
       break;
 
     case BRL_CMD_CSRTRK:

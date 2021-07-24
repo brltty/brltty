@@ -265,6 +265,9 @@ typedef enum {
   BRL_CMD_SAY_HIGHER /* increase speaking pitch */,
   BRL_CMD_SAY_ALL /* speak from top of screen through bottom of screen */,
   
+  BRL_CMD_CONTRACTED /* set contracted/computer braille */,
+  BRL_CMD_COMPBRL6 /* set six/eight dot computer braille */,
+
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
 
