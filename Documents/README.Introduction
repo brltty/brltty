@@ -1,0 +1,351 @@
+~~~~~~~~~~~~~~~~~~~~~~
+Introduction to BRLTTY   
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. include:: prologue.rst
+
+You can look up a full listing of all of your braille device's key bindings at:
+`<https://brltty.app/doc/KeyBindings/index.html>`_
+
+With one exception, this document applies to using BRLTTY with any braille device.
+The exception is that, when key bindings are given,
+it assumes that the braille device has a braille keyboard.
+If it doesn't, then, as mentioned above,
+you can look up your device's corresponding key bindings online.
+
+Many *chords* (combining a dot key combination with the Space key) are toggles.
+Repeatedly pressing any of these key bindings alternately turns the corresponding feature on and off.
+Adding the Dot7 key forces the feature to be turned off,
+and adding the Dot8 key forces the feature to be turned on.
+
+Useful Key Bindings
+===================
+
+Space + h (dots 125)
+  Go to the help screen.
+  It's a toggle, so pressing it again returns to the actual screen.
+  This screen is only shown on the braille display.
+  It contains a full listing of all of your braille device's key bindings.
+
+Space + l (dots 123)
+  Enter learn mode.
+  It's a toggle, so pressing it again leaves learn mode.
+  Additionally, if you don't do anything for 10 seconds then learn mode is automatically terminated.
+  When in learn mode, pressing any key combination shows, on the braille display, what it'll do without actually doing it.
+
+Space + p (dots 1234)
+  Go to `the preferences menu`_.
+  It's a toggle, so pressing it again returns to the actual screen.
+  Adding the Dot8 key saves the current settings.
+  Adding the Dot7 key restores the settings as of the most recent time that they were saved.
+
+Space + g (dots 1245)
+  Toggle between computer braille and contracted braille.
+  Adding the Dot7 key forces computer braille,
+  and adding the Dot8 key forces contracted braille.
+
+Space + t (dots 2345)
+  Toggle cursor tracking on/off.
+  When cursor tracking is on, any motion of the cursor drags the braille display to the new screen location.
+
+Space + i (dots 24)
+  Toggle the skipping of identical lines on/off.
+  This feature is especially useful for compressing multiple contiguous blank lines into a single one.
+
+Space + b (dots 12)
+  Toggle the skipping of blank braille windows on/off.
+  This feature is especially useful for skipping over the blank ends of short lines when panning.
+
+The Preferences Menu
+====================
+
+The preferences menu contains a lot of settings that let you customize how BRLTTY behaves.
+It's internal to BRLTTY so it doesn't show up on the actual screen -
+it's only presented on the braille display.
+
+The Dot Keys
+------------
+
+The dot keys can be used to navigate the preferences menu:
+
+Dots 1 and 4
+  In the same way as they (when combined with the Space key) move the cursor up/down when using a conventional screen reader,
+  these dot keys move up/down within the current submenu.
+  In other words, Dot1 moves to the previous item and Dot4 moves to the next item.
+
+Dots 3 and 6
+  In a similar way to how they (when combined with the Space key) move the cursor left/right when using a conventional screen reader,
+  these dot keys select the previous/next possible setting for the current item.
+  The setting choices wrap,
+  so Dot3, when the first choice is selected, wraps to the last one,
+  and Dot6, when the last choice is selected, wraps to the first one.
+
+Dot 2
+  Move to the first item.
+
+Dot 5
+  Move to the last item.
+
+Dot 7
+  Go up one submenu level.
+  If in the main menu then exit and return to the actual screen.
+
+Dot 8
+  Exit and return to the actual screen.
+
+The Routing Keys
+----------------
+
+The routing keys can be used to change the setting for the current item:
+
+* If the setting is a discrete set of choices, e.g. ``Yes`` or ``No``,
+  then each successive group of routing keys selects those choices.
+  For example:
+
+  * If there are two choices
+    then keys 1,3,5,... select the first one
+    and keys 2,4,6,... select the second one.
+
+  * If there are three choices
+    then keys 1,4,7,... select the first one,
+    keys 2,5,8,... select the second one,
+    and keys 3,6,9,... select the third one.
+
+* If the setting is a number then the routing keys behave like a scroll bar.
+
+  * The leftmost key selects the lowest possible value.
+  * The rightmost key selects the highest possible value.
+  * The inner keys select an evenly distributed value within the range.
+
+Exiting the Preferences Menu
+----------------------------
+
+These are the ways to exit the preferences menu:
+
+Dot7
+  Go up one level when in the main menu.
+
+Dot8
+  Exit the preferences menu.
+
+Space + p  (dots 1234)
+  Preferences Menu enter/exit toggle.
+
+Space + p (dots 1234) + Dot8
+  Save the current settings.
+
+None of these methods close `Submenus`_.
+This means that going back to the preferences menu later resumes at the same place.
+
+The ``Save on Exit`` item is at the top of the main menu.
+It specifies whether or not (``Yes`` or ``No``)
+the current settings are to be saved when exiting the preferences menu.
+If it's set to ``No`` then you can still manually save the current settings with Space + p (dots 1234) + Dot8.
+
+Submenus
+--------
+
+The preferences menu is a tree structure of menus.
+The one at the root (or top) is known as the main menu.
+
+If an item ends with an ASCII right arrow (``-->``)
+then it's the name of a submenu.
+For example::
+
+  Braille Presentation -->
+
+Pressing Dot3, Dot6, or any routing key on this kind of item opens the submenu.
+If it's closed then the braille display is placed on the first item.
+If it's open then the braille display is placed on the current item.
+
+The first item of each submenu always is
+an ASCII left arrow (``<--``),
+followed by the word ``Close``,
+followed by the name of the submenu.
+For example::
+
+  <-- Close Braille Presentation
+
+Pressing Dot3, Dot6, or any routing key on this kind of item closes the submenu.
+
+Another way to leave a submenu is to press Dot7.
+Leaving a submenu this way leaves it open.
+
+Additional Notes
+----------------
+
+The default is that only relevant items are shown.
+In the Braille Presentation submenu, for example,
+Computer Braille Cell Type is only shown when Braille Variant is set to Computer,
+and Expand Current Word is only shown when Braille Variant is set to Contracted.
+This can be changed by setting Show All Items (in the Menu Options submenu) to Yes.
+
+Table selection changes are currently not saved along with the other settings.
+These include:
+
+* The current text (computer braille) table.
+* The current attributes table.
+* The current contraction table.
+* The current keyboard table.
+
+The Braille Keyboard
+====================
+
+Dots 7 and 8
+------------
+
+Dots 7 and 8 are special because
+the Dot7 key is Backspace and the Dot8 key is Enter.
+If either of these keys is pressed together with other dot keys then it functions as itself.
+If you need to type either just dot 7 or just dot 8
+then combine the corresponding key with the Space key.
+So:
+
+Dot7
+  Press the Backspace key.
+
+Dot8
+  Press the Enter key.
+
+Space + Dot7
+  Type dot 7.
+
+Space + Dot8
+  Type dot 8.
+
+Typing
+------
+
+Characters are typed by pressing either the Space key or any combination of the dot keys.
+This can be disabled in order to avoid inadvertently typing a character by accidentally pressing keyboard keys.
+
+Space + Dots13 + Dot7
+  Disable typing.
+
+Space + Dots13 + Dot8
+  Enable typing.
+
+The following typing modes are supported:
+
+Space + Dots46 + Dot7
+  Switch to interpreting the characters being typed as regular text.
+  The dot combination is back-translated through the currently selected text (computer braille) table.
+  This is the default.
+
+Space + Dots46 + Dot8
+  Switch to interpreting the characters being typed as Unicode braille patterns.
+
+Special Keys
+------------
+
+The special keys on a normal keyboard can be individually pressed as follows:
+
+Space + Dots45 (conventional screen reader binding)
+  The Forward Tab key.
+
+Space + Dot3 (conventional screen reader binding)
+  The Cursor Left key.
+
+Space + Dot6 (conventional screen reader binding)
+  The Cursor Right key.
+
+Space + Dot1 (conventional screen reader binding)
+  The Cursor Up key.
+
+Space + Dot4 (conventional screen reader binding)
+  The Cursor Down key.
+
+Space + Dots23 (conventional screen reader binding)
+  The Page Up key.
+
+Space + Dots56 (conventional screen reader binding)
+  The Page Down key.
+
+Space + Dot2
+  The Home key.
+
+Space + Dot5
+  The End key.
+
+Space + Dots35 (low i)
+  The Insert key.
+
+Space + Dots256 (low d)
+  The Delete key.
+
+Space + Dots26 (low e)
+  The Escape key.
+
+Space + a routing key
+  In most cases, a function key can be pressed by pressing the corresponding routing key along with the Space key.
+  For example, the ``F1`` key can be pressed by pressing Space + the leftmost routing key.
+
+Modifier Keys
+-------------
+
+A subset of the modifier keys, the most common being Control and Left Alt, have been defined for most braille devices.
+Especially for those braille devices for which no modifier keys have been defined,
+but also for those for which only some of them have been defined,
+a general scheme for supporting sticky modifiers is provided.
+
+The key combinations for these modifiers all consist of Space + Dot8 + one of the other dot keys.
+They are as follows:
+
+Space + Dot8 + Dot1
+  The GUI (Windows, Command) key.
+
+Space + Dot8 + Dot4
+  The Shift key.
+
+Space + Dot8 + Dot2
+  The Left Alt (Meta) key.
+
+Space + Dot8 + Dot5
+  The Right Alt (AltGr) key.
+
+Space + Dot8 + Dot3
+  The Control key.
+
+Space + Dot8 + Dot6
+  The Uppercase key.
+
+Space + Dot8 + Dot7
+  Unlock and clear all of the modifiers.
+  This is especially useful when you forget how the various modifiers have been set.
+
+Each modifier can be cycled through these three states:
+
+First Press
+  Temporarily set the modifier.
+  It'll only apply to the next typed character.
+
+Second Press
+  Lock the modifier.
+  It'll apply to all typed characters until it's cleared.
+
+Third Press
+  Unlock and clear the modifier.
+
+What does BRLTTY mean?
+======================
+
+Since people are asking, let's answer it here.
+
+The ``BRL`` part means **braille**.
+The ``TTY`` part actually does mean **tty**, which needs a bit of an explanation.
+The most important thing to know, though, is that it has nothing at all to do with the ``tty`` devices that deaf people use to communicate over phone lines.
+
+BRLTTY began its life on the Linux platform.
+That platform has virtual consoles, which, among other things,
+allow multiple, simultaneous login sessions.
+These virtual consoles, way back in the early days, emulated serially-connected terminals.
+They can still do that, of course, but, these days, they can do a whole lot more.
+
+Serially-connected terminals, especially those that used paper (as opposed to a screen), were commonly known as teletypes (or teletypewriters).
+That's where the term ``tty`` comes from.
+This may well also be the reason that the devices that deaf people use to communicate over hone lines are called ``ttys``,
+i.e. they, too, behave very much like serially-connected terminals.
+
+For a historical perspective regarding the term ``tty``, you might read:
+`<https://en.wikipedia.org/wiki/Teleprinter>`_
+

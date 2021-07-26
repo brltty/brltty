@@ -6,6 +6,7 @@
 .. |README.Customize| replace:: `Local Customization`_
 .. |README.Devices| replace:: `Device Identifiers`_
 .. |README.DOS| replace:: `BRLTTY on DOS`_
+.. |README.Introduction| replace:: `Introduction to BRLTTY`_
 .. |README.KeyTables| replace:: `Key Tables`_
 .. |README.Linux| replace:: `BRLTTY on Linux`_
 .. |README.OpenBSD| replace:: `BRLTTY on OpenBSD`_

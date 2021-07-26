@@ -6,6 +6,7 @@
 .. _Local Customization: Customize.html
 .. _Device Identifiers: Devices.html
 .. _BRLTTY on DOS: DOS.html
+.. _Introduction to BRLTTY: Introduction.html
 .. _Key Tables: KeyTables.html
 .. _BRLTTY on Linux: Linux.html
 .. _BRLTTY on OpenBSD: OpenBSD.html
@@ -18,6 +19,6 @@
 .. _BRLTTY on Windows: Windows.html
 .. _BRLTTY with X11: X11.html
 
-.. _BRLTTY's Web Site: http://brltty.app/
-.. _The Android SDK Web Page: http://developer.android.com/sdk/index.html
+.. _BRLTTY's Web Site: https://brltty.app/
+.. _The Android SDK Web Page: https://developer.android.com/sdk/index.html
 .. _The Android NDK Web Page: https://developer.android.com/tools/sdk/ndk/index.html

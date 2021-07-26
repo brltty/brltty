@@ -733,7 +733,7 @@ makePreferencesMenu (void) {
         {.label=strtext("6-dot")}
       };
 
-      NAME(strtext("Cell Type"));
+      NAME(strtext("Computer Braille Cell Type"));
       PROPERTY(yes, isSixDotComputerBraille());
       ITEM(newEnumeratedMenuItem(presentationSubmenu, &yes, &itemName, strings));
       TEST(ComputerBraille);

@@ -149,10 +149,10 @@ bind \{chord}Dot2+Dot6 KEY_ESCAPE
 bind \{chord}Dot3+Dot5 KEY_INSERT
 
 bind \{chord}Dot1+Dot8 GUI
-bind \{chord}Dot2+Dot8 META
-bind \{chord}Dot3+Dot8 CONTROL
 bind \{chord}Dot4+Dot8 SHIFT
+bind \{chord}Dot2+Dot8 META
 bind \{chord}Dot5+Dot8 ALTGR
+bind \{chord}Dot3+Dot8 CONTROL
 bind \{chord}Dot6+Dot8 UPPER
 bind \{chord}Dot7+Dot8 UNSTICK
 
