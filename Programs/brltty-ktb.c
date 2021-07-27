@@ -247,43 +247,35 @@ rstWriteLine (const wchar_t *line, void *data) {
 }
 
 static int
-rstAddHeader (const wchar_t *text, RestructuredTextData *rst) {
+rstWriteHeader (const wchar_t *text, unsigned int level, void *data) {
+  RestructuredTextData *rst = data;
+
+  if (level > (rst->headerLevel + 1)) {
+    level = rst->headerLevel + 1;
+  } else {
+    rst->headerLevel = level;
+  }
+
   static const wchar_t characters[] = {
     WC_C('='), WC_C('-'), WC_C('~')
   };
 
-  int isTitle = rst->headerLevel == 0;
   size_t length = wcslen(text);
   wchar_t underline[length + 1];
 
-  wmemset(underline, characters[rst->headerLevel], length);
+  wmemset(underline, characters[level], length);
   underline[length] = 0;
 
   if (!rstAddLine(text, rst)) return 0;
   if (!rstAddLine(underline, rst)) return 0;
   if (!rstAddBlankLine(rst)) return 0;
 
-  if (isTitle) {
+  if (level == 0) {
     if (!rstAddLine(WS_C(".. contents::"), rst)) return 0;
     if (!rstAddBlankLine(rst)) return 0;
   }
 
   return 1;
-}
-
-static int
-rstWriteHeader (const wchar_t *text, unsigned int level, void *data) {
-  RestructuredTextData *rst = data;
-
-  if (rst->headerLevel < level) {
-    while (++rst->headerLevel < level) {
-      if (!rstAddHeader(WS_C("\\ "), rst)) return 0;
-    }
-  } else if (rst->headerLevel > level) {
-    rst->headerLevel = level;
-  }
-
-  return rstAddHeader(text, rst);
 }
 
 static int

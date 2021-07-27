@@ -750,11 +750,9 @@ listKeyTableTitle (ListGenerationData *lgd) {
 
 static int
 listKeyTableNotes (ListGenerationData *lgd) {
-  unsigned int noteIndex;
-
   if (!beginList(lgd, "Notes")) return 0;
 
-  for (noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
+  for (unsigned int noteIndex=0; noteIndex<lgd->keyTable->notes.count; noteIndex+=1) {
     const wchar_t *line = lgd->keyTable->notes.table[noteIndex];
     unsigned int level;
     int prefixed;
