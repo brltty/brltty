@@ -4,6 +4,16 @@
   >
 
   <header
+    android:title="@string/SETTINGS_SCREEN_INTRODUCTION"
+    >
+
+    <intent
+      android:targetPackage="org.a11y.brltty.android"
+      android:targetClass="org.a11y.brltty.android.activities.IntroductionActivity"
+     />
+  </header>
+
+  <header
     android:fragment="org.a11y.brltty.android.settings.GeneralSettings"
     android:title="@string/SETTINGS_SCREEN_GENERAL"
    />

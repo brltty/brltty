@@ -60,6 +60,7 @@
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Accessibility Actions</string>
 
   <string name="SETTINGS_SCREEN_MAIN">BRLTTY Settings</string>
+  <string name="SETTINGS_SCREEN_INTRODUCTION">Introduction to BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">General Settings</string>
   <string name="SETTINGS_SCREEN_MESSAGE">Message Settings</string>
   <string name="SETTINGS_SCREEN_DEVICES">Manage Devices</string>

@@ -46,7 +46,10 @@ install-debug: app-debug
 install-release: app-release
 	adb install -r $(GRADLE_RELEASE_PACKAGE)
 
-assets: messages tables
+assets: documents messages tables
+
+documents:
+	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyAddDocuments
 
 messages:
 	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyAddMessages
@@ -54,7 +57,10 @@ messages:
 tables:
 	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyAddTables
 
-remove-assets: remove-messages remove-tables
+remove-assets: remove-documents remove-messages remove-tables
+
+remove-documents:
+	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyRemoveDocuments
 
 remove-messages:
 	$(GRADLE_WRAPPER_COMMAND) :$(GRADLE_APP_NAME):brlttyRemoveMessages
