@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import android.util.Log;
+import android.os.Environment;
 import android.os.Bundle;
 
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -32,10 +33,23 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.graphics.Rect;
 import android.text.Spanned;
 
-public abstract class ScreenLogger extends Logger {
+import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.io.Writer;
+import java.io.OutputStreamWriter;
+
+public class ScreenLogger extends Logger {
   private final static String LOG_TAG = ScreenLogger.class.getName();
 
-  private ScreenLogger () {
+  @Override
+  protected String getLogTag () {
+    return LOG_TAG;
+  }
+
+  public ScreenLogger () {
     super();
   }
 
@@ -91,11 +105,7 @@ public abstract class ScreenLogger extends Logger {
     }
   }
 
-  private static void log (String message) {
-    Log.d(LOG_TAG, message);
-  }
-
-  private static void log (String label, String data) {
+  private final void log (String label, String data) throws IOException {
     log((label + ": " + data));
   }
 
@@ -440,7 +450,7 @@ public abstract class ScreenLogger extends Logger {
     return sb.toString();
   }
 
-  private static void log (AccessibilityNodeInfo node, String name, boolean descend) {
+  private final void log (AccessibilityNodeInfo node, boolean descend, String name) throws IOException {
     log(name, toString(node));
 
     if (descend) {
@@ -450,7 +460,7 @@ public abstract class ScreenLogger extends Logger {
         AccessibilityNodeInfo child = node.getChild(childIndex);
 
         if (child != null) {
-          log(child, (name + "." + childIndex), true);
+          log(child, true, (name + "." + childIndex));
           child.recycle();
           child = null;
         }
@@ -458,10 +468,18 @@ public abstract class ScreenLogger extends Logger {
     }
   }
 
-  public static void log (AccessibilityNodeInfo root) {
-    log("begin node tree");
-    log(root, "root", true);
-    log("end node tree");
+  public final void log (AccessibilityNodeInfo root, boolean descend) throws IOException {
+    if (descend) log("begin node tree");
+
+    try {
+      log(root, descend, "root");
+    } finally {
+      if (descend) log("end node tree");
+    }
+  }
+
+  public final void log (AccessibilityNodeInfo root) throws IOException {
+    log(root, true);
   }
 
   private final static Map<Integer, String> windowTypeNames =
@@ -532,7 +550,7 @@ public abstract class ScreenLogger extends Logger {
     return sb.toString();
   }
 
-  private static void log (AccessibilityWindowInfo window, String name, boolean descend, boolean nodes) {
+  private final void log (AccessibilityWindowInfo window, String name, boolean descend, boolean nodes) throws IOException {
     log(name, toString(window));
 
     if (nodes) {
@@ -567,7 +585,7 @@ public abstract class ScreenLogger extends Logger {
     }
   }
 
-  public static void log () {
+  public final void log () throws IOException {
     log("begin screen log");
 
     if (APITests.haveLollipop) {
@@ -591,5 +609,48 @@ public abstract class ScreenLogger extends Logger {
     }
 
     log("end screen log");
+  }
+
+  public static void logToFile (File file) {
+    String path = file.getAbsolutePath();
+    Log.d(LOG_TAG, ("logging screen to file: " + path));
+
+    try {
+      OutputStream stream = new FileOutputStream(file);
+
+      try {
+        final Writer writer = new OutputStreamWriter(stream, "UTF-8");
+
+        try {
+          new ScreenLogger() {
+            @Override
+            protected void log (String message) throws IOException {
+              writer.write(message);
+              writer.write('\n');
+            }
+          }.log();
+        } finally {
+          writer.close();
+        }
+      } finally {
+        stream.close();
+      }
+    } catch (FileNotFoundException exception) {
+      Log.w(LOG_TAG, ("file not found: " + path));
+    } catch (IOException exception) {
+      Log.w(LOG_TAG, String.format("log file error: %s: %s", path, exception.getMessage()));
+    }
+  }
+
+  public static void logToFile (String path) {
+    logToFile(new File(path));
+  }
+
+  public static File logToFile () {
+    File directory = BrailleApplication.get().getExternalFilesDir(null);
+    File file = new File(directory, "screen.log");
+
+    logToFile(file);
+    return file;
   }
 }

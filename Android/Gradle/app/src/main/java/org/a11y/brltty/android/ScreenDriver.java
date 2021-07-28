@@ -35,10 +35,27 @@ import android.graphics.Rect;
 import android.graphics.Point;
 import android.text.TextUtils;
 
+import java.io.IOException;
+
 public abstract class ScreenDriver {
   private final static String LOG_TAG = ScreenDriver.class.getName();
 
   private ScreenDriver () {
+  }
+
+  private static ScreenLogger screenLogger = null;
+
+  private static ScreenLogger getScreenLogger () {
+    if (screenLogger == null) screenLogger = new ScreenLogger();
+    return screenLogger;
+  }
+
+  private static void log (AccessibilityNodeInfo node) {
+    try {
+      getScreenLogger().log(node, false);
+    } catch (IOException exception) {
+      Log.d(LOG_TAG, ("node log failure: " + exception.getMessage()));
+    }
   }
 
   private static String toText (Collection<CharSequence> lines) {
@@ -327,7 +344,7 @@ public abstract class ScreenDriver {
       }
     } else {
       try {
-        if (log) ScreenLogger.log(node);
+        if (log) log(node);
 
         if (APITests.haveLollipop) {
           AccessibilityWindowInfo window = node.getWindow();

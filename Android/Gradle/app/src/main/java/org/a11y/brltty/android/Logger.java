@@ -18,7 +18,20 @@
 
 package org.a11y.brltty.android;
 
+import android.util.Log;
+import java.io.IOException;
+
 public abstract class Logger {
+  private final static String LOG_TAG = Logger.class.getName();
+
+  protected String getLogTag () {
+    return LOG_TAG;
+  }
+
+  protected void log (String message) throws IOException {
+    Log.d(LOG_TAG, message);
+  }
+
   protected Logger () {
   }
 

@@ -894,8 +894,12 @@ public abstract class InputHandlers {
   }
 
   public static boolean globalAction_logScreen () {
-    ScreenLogger.log();
-    BrailleMessage.PLAIN.show("screen logged");
+    try {
+      ScreenLogger.logToFile();
+    } finally {
+      BrailleMessage.PLAIN.show("screen logged");
+    }
+
     return true;
   }
 
