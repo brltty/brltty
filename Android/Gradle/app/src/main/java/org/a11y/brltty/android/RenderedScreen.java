@@ -19,8 +19,11 @@
 package org.a11y.brltty.android;
 
 import java.util.Locale;
+import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 import android.util.Log;
 import android.text.TextUtils;
@@ -39,7 +42,7 @@ public class RenderedScreen {
   private final AccessibilityNodeInfo rootNode;
 
   private final ScreenElementList screenElements = new ScreenElementList();
-  private final List<String> screenRows = new ArrayList<String>();
+  private final List<String> screenRows = new ArrayList<>();
 
   private final int screenWidth;
   private final AccessibilityNodeInfo cursorNode;
@@ -115,7 +118,7 @@ public class RenderedScreen {
     return element.performAction((column - location.left), (row - location.top));
   }
 
-  private static NodeTester[] significantNodeFilters = new NodeTester[] {
+  private final static NodeTester[] significantNodeFilters = new NodeTester[] {
     new NodeTester() {
       @Override
       public boolean testNode (AccessibilityNodeInfo node) {
@@ -127,18 +130,90 @@ public class RenderedScreen {
     }
   };
 
-  private final static int SIGNIFICANT_NODE_ACTIONS
-    = AccessibilityNodeInfo.ACTION_CLICK
-    | AccessibilityNodeInfo.ACTION_LONG_CLICK
-    | AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
-    | AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
-    ;
-
-  private static int getSignificantActions (AccessibilityNodeInfo node) {
-    return node.getActions() & SIGNIFICANT_NODE_ACTIONS;
+  public static interface NodeActionVerifier {
+    public boolean verify (AccessibilityNodeInfo node);
   }
 
-  private static boolean hasSignificantActions (AccessibilityNodeInfo node) {
+  private final static Map<Integer, NodeActionVerifier> nodeActionVerifiers =
+               new HashMap<Integer, NodeActionVerifier>()
+  {
+    {
+      put(
+        AccessibilityNodeInfo.ACTION_CLICK,
+        new NodeActionVerifier() {
+          @Override
+          public boolean verify (AccessibilityNodeInfo node) {
+            return node.isClickable();
+          }
+        }
+      );
+
+      put(
+        AccessibilityNodeInfo.ACTION_LONG_CLICK,
+        new NodeActionVerifier() {
+          @Override
+          public boolean verify (AccessibilityNodeInfo node) {
+            return node.isLongClickable();
+          }
+        }
+      );
+
+      put(
+        AccessibilityNodeInfo.ACTION_SCROLL_FORWARD,
+        new NodeActionVerifier() {
+          @Override
+          public boolean verify (AccessibilityNodeInfo node) {
+            return node.isScrollable();
+          }
+        }
+      );
+
+      put(
+        AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD,
+        new NodeActionVerifier() {
+          @Override
+          public boolean verify (AccessibilityNodeInfo node) {
+            return node.isScrollable();
+          }
+        }
+      );
+    }
+  };
+
+  public static Set<Integer> getVerifiableNodeActions () {
+    return nodeActionVerifiers.keySet();
+  }
+
+  private final static int SIGNIFICANT_NODE_ACTIONS;
+  static {
+    int actions = 0;
+
+    for (Integer action : getVerifiableNodeActions()) {
+      actions |= action;
+    }
+
+    SIGNIFICANT_NODE_ACTIONS = actions;
+  }
+
+  public static int getSignificantActions (AccessibilityNodeInfo node) {
+    int actions = node.getActions() & SIGNIFICANT_NODE_ACTIONS;
+
+    if (actions != 0) {
+      for (Integer action : getVerifiableNodeActions()) {
+        if ((actions & action) != 0) {
+          if (!nodeActionVerifiers.get(action).verify(node)) {
+            if ((actions &= ~action) == 0) {
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    return actions;
+  }
+
+  public static boolean hasSignificantAction (AccessibilityNodeInfo node) {
     return getSignificantActions(node) != 0;
   }
 
@@ -243,7 +318,7 @@ public class RenderedScreen {
         AccessibilityNodeInfo child = node.getChild(childIndex);
 
         if (child != null) {
-          if (!hasSignificantActions(child)) {
+          if (!hasSignificantAction(child)) {
             String description = ScreenUtilities.getDescription(child);
 
             if (description != null) {
@@ -290,11 +365,35 @@ public class RenderedScreen {
 
       if (ScreenUtilities.isVisible(root)) {
         String text = makeText(root);
+        boolean hasText = text != null;
+        boolean isSkippable = false;
 
-        if (text == null) {
-          if (hasActions) {
-            if ((text = getDescription(root)) == null) {
-              text = ScreenUtilities.getClassName(root);
+        {
+          String label = ChromeRole.getLabel(root);
+
+          if (label != null) {
+            if (label.isEmpty()) {
+              isSkippable = true;
+            } else {
+              label = String.format("(%s)", label);
+
+              if (text != null) {
+                label += ' ';
+                label += text;
+              }
+
+              text = label;
+            }
+          }
+        }
+
+        if (hasActions && !hasText) {
+          String description = getDescription(root);
+
+          if (!isSkippable) {
+            if ((description == null) && (text == null)) {
+              description = ScreenUtilities.getClassName(root);
+
               if (APITests.haveJellyBeanMR2) {
                 String name = root.getViewIdResourceName();
 
@@ -304,26 +403,25 @@ public class RenderedScreen {
                   name = (index < 0)? null: name.substring(index + marker.length());
                 }
 
-                if (text == null) {
-                  text = name;
+                if (description == null) {
+                  description = name;
                 } else if (name != null) {
-                  text += " " + name;
+                  description += " " + name;
                 }
               }
 
-              if (text == null) text = "?";
-              text = "(" + text + ")";
+              if (description == null) description = "?";
+              description = "(" + description + ")";
             }
-          }
-        }
 
-        {
-          String label = ChromeRole.getLabel(root);
-
-          if (label != null) {
-            if (!label.isEmpty()) label = String.format("(%s) ", label);
-            if (text != null) label += text;
-            text = label;
+            if (description != null) {
+              if (text == null) {
+                text = description;
+              } else {
+                text += ' ';
+                text += description;
+              }
+            }
           }
         }
 

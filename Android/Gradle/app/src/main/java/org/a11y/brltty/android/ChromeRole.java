@@ -149,7 +149,7 @@ public enum ChromeRole {
   caption("cap"),
   checkBox(),
   form("frm"),
-  genericContainer(),
+  genericContainer(""),
   lineBreak(),
   listMarker("lsm"),
   paragraph(),
