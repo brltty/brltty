@@ -562,6 +562,9 @@ The following table lists all of the annotations:
   hd6         level six heading
   hdr         header of table column                 coordinates
   lnk         target of link                         URL
+  lsi         list item                              coordinates
+  lsm         list marker
+  lst         start of list                          dimensions
   pop         combo box (single or Multiple choice)
   pwd         password field
   row         start of table row

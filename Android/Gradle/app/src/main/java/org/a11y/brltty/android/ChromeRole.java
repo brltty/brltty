@@ -72,6 +72,58 @@ public enum ChromeRole {
     }
   ),
 
+  list("lst",
+    new LabelMaker() {
+      @Override
+      public String makeLabel (ChromeRole role, AccessibilityNodeInfo node) {
+        StringBuilder label = new StringBuilder(role.genericLabel);
+
+        if (APITests.haveKitkat) {
+          AccessibilityNodeInfo.CollectionInfo collection = node.getCollectionInfo();
+
+          if (collection != null) {
+            int columns = collection.getColumnCount();
+            if (columns == 0) columns = 1;
+
+            int rows = collection.getRowCount();
+            if (rows == 0) rows = 1;
+
+            label.append(' ')
+                 .append(columns)
+                 .append('x')
+                 .append(rows)
+                 ;
+          }
+        }
+
+        return label.toString();
+      }
+    }
+  ),
+
+  listItem("lsi",
+    new LabelMaker() {
+      @Override
+      public String makeLabel (ChromeRole role, AccessibilityNodeInfo node) {
+        StringBuilder label = new StringBuilder(role.genericLabel);
+
+        if (APITests.haveKitkat) {
+          AccessibilityNodeInfo.CollectionItemInfo item = node.getCollectionItemInfo();
+
+          if (item != null) {
+            label.append(' ')
+                 .append(item.getColumnIndex() + 1)
+                 .append('@')
+                 .append(item.getRowIndex() + 1)
+                 ;
+          }
+        }
+
+        return label.toString();
+      }
+    }
+  ),
+
   table("tbl",
     new LabelMaker() {
       @Override
@@ -97,7 +149,9 @@ public enum ChromeRole {
   caption("cap"),
   checkBox(),
   form("frm"),
+  genericContainer(),
   lineBreak(),
+  listMarker("lsm"),
   paragraph(),
   popUpButton("pop"),
   radioButton(),
