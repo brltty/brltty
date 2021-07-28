@@ -383,7 +383,7 @@ public abstract class ScreenLogger extends Logger {
           for (Object span : spans) {
             if (first) {
               first = false;
-              sb.append("spans:[");
+              add(sb, "spans:[");
             } else {
               sb.append(", ");
             }
