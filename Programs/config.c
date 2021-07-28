@@ -881,22 +881,6 @@ exitTextTable (void *data) {
   setTextTable(NULL);
 }
 
-int
-changeAttributesTable (const char *name) {
-  if (!name) name = "";
-  if (!replaceAttributesTable(opt_tablesDirectory, name)) return 0;
-
-  if (!*name) name = ATTRIBUTES_TABLE;
-  changeStringSetting(&opt_attributesTable, name);
-
-  return 1;
-}
-
-static void
-exitAttributesTable (void *data) {
-  changeAttributesTable(NULL);
-}
-
 static int
 setContractionTable (const char *name) {
   if (!name) name = "";
@@ -936,6 +920,84 @@ changeContractionTable (const char *name) {
 static void
 exitContractionTable (void *data) {
   setContractionTable(NULL);
+}
+
+static void
+setTextAndContractionTables (void) {
+  int usingInternalTextTable = 0;
+
+  if (*opt_textTable) {
+    if (strcmp(opt_textTable, optionOperand_autodetect) == 0) {
+      setTextTableForLocale();
+    } else if (!setTextTable(opt_textTable)) {
+      changeStringSetting(&opt_textTable, "");
+    }
+  }
+
+  if (!*opt_textTable) {
+    logMessage(LOG_DEBUG, "using internal text table: %s", TEXT_TABLE);
+    changeStringSetting(&opt_textTable, TEXT_TABLE);
+    usingInternalTextTable = 1;
+  }
+
+  logProperty(opt_textTable, "textTable", gettext("Text Table"));
+  onProgramExit("text-table", exitTextTable, NULL);
+
+  if (*opt_contractionTable) {
+    if (strcmp(opt_contractionTable, optionOperand_autodetect) == 0) {
+      if (setContractionTableForLocale()) {
+        if (usingInternalTextTable) {
+          if (!isContractedBraille()) {
+            setContractedBraille(1);
+            logMessage(LOG_DEBUG, "contracted braille has been enabled");
+          }
+        }
+      }
+    } else if (!setContractionTable(opt_contractionTable)) {
+      changeStringSetting(&opt_contractionTable, "");
+    }
+  }
+
+  if (!*opt_contractionTable) {
+    if (setContractionTable(NULL)) {
+      logMessage(LOG_DEBUG, "using internal contraction table: %s", CONTRACTION_TABLE);
+    }
+  }
+
+  logProperty(opt_contractionTable, "contractionTable", gettext("Contraction Table"));
+  onProgramExit("contraction-table", exitContractionTable, NULL);
+}
+
+int
+changeAttributesTable (const char *name) {
+  if (!name) name = "";
+  if (!replaceAttributesTable(opt_tablesDirectory, name)) return 0;
+
+  if (!*name) name = ATTRIBUTES_TABLE;
+  changeStringSetting(&opt_attributesTable, name);
+
+  return 1;
+}
+
+static void
+exitAttributesTable (void *data) {
+  changeAttributesTable(NULL);
+}
+
+static void
+setAttributesTable (void) {
+  if (*opt_attributesTable) {
+    if (!changeAttributesTable(opt_attributesTable)) {
+      changeStringSetting(&opt_attributesTable, "");
+    }
+  }
+
+  if (!*opt_attributesTable) {
+    changeStringSetting(&opt_attributesTable, ATTRIBUTES_TABLE);
+  }
+
+  logProperty(opt_attributesTable, "attributesTable", gettext("Attributes Table"));
+  onProgramExit("attributes-table", exitAttributesTable, NULL);
 }
 
 static KeyTableState
@@ -1190,6 +1252,14 @@ changeKeyboardTable (const char *name) {
 
   changeStringSetting(&opt_keyboardTable, name);
   return 1;
+}
+
+static void
+setKeyboardTable (void) {
+  parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties);
+  onProgramExit("keyboard-table", exitKeyboardTable, NULL);
+  changeKeyboardTable(opt_keyboardTable);
+  logProperty(opt_keyboardTable, "keyboardTable", gettext("Keyboard Table"));
 }
 
 int
@@ -2846,69 +2916,9 @@ brlttyStart (void) {
   logProperty(opt_driversDirectory, "driversDirectory", gettext("Drivers Directory"));
   logProperty(opt_tablesDirectory, "tablesDirectory", gettext("Tables Directory"));
 
-  /* handle text table option */
-  int usingInternalTextTable = 0;
-  if (*opt_textTable) {
-    if (strcmp(opt_textTable, optionOperand_autodetect) == 0) {
-      setTextTableForLocale();
-    } else if (!setTextTable(opt_textTable)) {
-      changeStringSetting(&opt_textTable, "");
-    }
-  }
-
-  if (!*opt_textTable) {
-    logMessage(LOG_DEBUG, "using internal text table: %s", TEXT_TABLE);
-    changeStringSetting(&opt_textTable, TEXT_TABLE);
-    usingInternalTextTable = 1;
-  }
-
-  logProperty(opt_textTable, "textTable", gettext("Text Table"));
-  onProgramExit("text-table", exitTextTable, NULL);
-
-  /* handle attributes table option */
-  if (*opt_attributesTable) {
-    if (!changeAttributesTable(opt_attributesTable)) {
-      changeStringSetting(&opt_attributesTable, "");
-    }
-  }
-
-  if (!*opt_attributesTable) {
-    changeStringSetting(&opt_attributesTable, ATTRIBUTES_TABLE);
-  }
-
-  logProperty(opt_attributesTable, "attributesTable", gettext("Attributes Table"));
-  onProgramExit("attributes-table", exitAttributesTable, NULL);
-
-  /* handle contraction table option */
-  if (*opt_contractionTable) {
-    if (strcmp(opt_contractionTable, optionOperand_autodetect) == 0) {
-      if (setContractionTableForLocale()) {
-        if (usingInternalTextTable) {
-          if (!isContractedBraille()) {
-            setContractedBraille(1);
-            logMessage(LOG_DEBUG, "contracted braille has been enabled");
-          }
-        }
-      }
-    } else if (!setContractionTable(opt_contractionTable)) {
-      changeStringSetting(&opt_contractionTable, "");
-    }
-  }
-
-  if (!*opt_contractionTable) {
-    if (setContractionTable(NULL)) {
-      logMessage(LOG_DEBUG, "using internal contraction table: %s", CONTRACTION_TABLE);
-    }
-  }
-
-  logProperty(opt_contractionTable, "contractionTable", gettext("Contraction Table"));
-  onProgramExit("contraction-table", exitContractionTable, NULL);
-
-  parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties);
-
-  onProgramExit("keyboard-table", exitKeyboardTable, NULL);
-  changeKeyboardTable(opt_keyboardTable);
-  logProperty(opt_keyboardTable, "keyboardTable", gettext("Keyboard Table"));
+  setTextAndContractionTables();
+  setAttributesTable();
+  setKeyboardTable();
 
   /* initialize screen driver */
   if (opt_verify) {
