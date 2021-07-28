@@ -58,10 +58,13 @@ public enum ChromeRole {
       @Override
       public String makeLabel (ChromeRole role, AccessibilityNodeInfo node) {
         StringBuilder label = new StringBuilder(role.genericLabel);
-        String url = ScreenUtilities.getStringExtra(node, EXTRA_TARGET_URL);
 
-        if ((url != null) && !url.isEmpty()) {
-          label.append(' ').append(url);
+        if (false) {
+          String url = ScreenUtilities.getStringExtra(node, EXTRA_TARGET_URL);
+
+          if ((url != null) && !url.isEmpty()) {
+            label.append(' ').append(url);
+          }
         }
 
         return label.toString();
