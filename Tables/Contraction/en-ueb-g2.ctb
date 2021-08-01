@@ -41,6 +41,8 @@ always 8 125
 always 9 24
 always 0 245
 midnum . 256
+midnum , 2
+midnum \s 5
 
 #Largest contractions
 word a =
@@ -329,6 +331,9 @@ always st 34
 always th 1456
 always wh 156
 
+#disambiguation
+always ear 15-345
+
 include letters-latin.cti
 always \s 0  
 repeatable \s\s 0-0
@@ -357,9 +362,6 @@ always [ 46-126
 always ] 46-345
 always { 456-126
 always } 456-345
-
-always + 5-235
-always = 5-2356
 always < 4-126
 always > 4-345
 
@@ -378,38 +380,54 @@ always & 4-12346
 always * 5-35
 always - 36
 always _ 46-36
+always = 5-2356
+always + 5-235
 
+# http://www.brailleauthority.org/ueb/symbols_list.pdf
 always	\xA1	45-56-235	# ¡ ⠘⠰⠖	inverted exclamation mark - 13.5
 always	\xA2	4-14	# ¢ ⠈⠉	cent - 3.10
-always	\xA3	4-123	# £ ⠈⠇	British pound - 3.10
-always	\xA5	4-13456	# ¥ ⠈⠽	yen - 3.10
+always	\xA3	4-123	# £ ⠈⠇	pound (sterling) - 3.10
+always	\xA5	4-13456	# ¥ ⠈⠽	yen (Japan) - 3.10
 always	\xA7	45-234	# § ⠘⠎	section - 3.19
 always	\xA9	45-14	# © ⠘⠉	copyright - 3.8
-always	\xAE	45-1235	# ® ⠘⠗	registered trademark - 3.8
+always	\xAE	45-1235	# ® ⠘⠗	registered - 3.8
 always	\xB0	45-245	# ° ⠘⠚	degree - 3.11
 always	\xB6	45-1234	# ¶ ⠘⠏	paragraph - 3.19
 always	\xBF	45-56-236	# ¿ ⠘⠰⠦	inverted question mark - 13.5
-always	\xD7	5-236	# × ⠐⠦	multiplication - 3.17
-always	\xF7	5-34	# ÷ ⠐⠌	division - 3.17
 always	\u2014	6-36	# — ⠠⠤	dash - 7.2
 always	\u2020	4-6-1456	# † ⠈⠠⠹	dagger - 3.3
 always	\u2021	4-6-12456	# ‡ ⠈⠠⠻	double dagger - 3.3
 always	\u2022	456-256	# • ⠸⠲	bullet - 3.5
-always	\u2032	2356	# ′ ⠶	prime - 3.11,
-always	\u2033	2356-2356	# ″ ⠶⠶	double prime - 3.11,
-always	\u20A3	4-124	# ₣ ⠈⠋	franc - 3.10
-always	\u20A6	4-1345	# ₦ ⠈⠝	naira - 3.10
+always	\u20A3	4-124	# ₣ ⠈⠋	franc (France) - 3.10
+always	\u20A6	4-1345	# ₦ ⠈⠝	naira (Nigeria) - 3.10
 always	\u20AC	4-15	# € ⠈⠑	euro - 3.10
-always	\u2122	45-2345	# ™ ⠘⠞	trademark - 3.8
-always	\u2212	5-36	# − ⠐⠤	minus - 3.17
-always	\u2264	456-4-126	# ≤ ⠸⠈⠣	less than or equal to
-always	\u2265	456-4-345	# ≥ ⠸⠈⠜	greater than or equal to
+always	\u2122	45-2345	# ™ ⠘⠞	trade mark - 3.8
 always	\u2640	45-1346	# ♀ ⠘⠭	female - 3.16
 always	\u2642	45-13456	# ♂ ⠘⠽	male - 3.16
-always	\u3003	5-2	# 〃 ⠐⠂	ditto - 3.12
+always	\u3003	5-2	# 〃 ⠐⠂	ditto mark - 3.12
 
-#disambiguation
-always ear 15-345
+# http://www.brailleauthority.org/ueb/Guidelines_for_Technical_Material_2008-10.pdf
+always	\x2B	5-235	# + ⠐⠖	plus
+always	\xB1	456-235	# ± ⠸⠖	plus or minus (plus over minus)
+always	\xB7	5-256	# · ⠐⠲	multiplication (middle dot)
+always	\xD7	5-236	# × ⠐⠦	multiplication (cross)
+always	\xF7	5-34	# ÷ ⠐⠌	division (horizontal line between dots)
+always	\u2032	2356	# ′ ⠶	prime (feet, minutes)
+always	\u2033	2356-2356	# ″ ⠶⠶	double prime (inches, seconds)
+always	\u2212	5-36	# − ⠐⠤	minus
+always	\u2213	456-36	# ∓ ⠸⠤	minus or plus (minus over plus)
+always	\u221D	456-5-2356	# ∝ ⠸⠐⠶	proportional to
+always	\u2243	456-35	# ≃ ⠸⠔	asymptomatically equal to (tilde over horizontal line)
+always	\u2245	5-456-35	# ≅ ⠐⠸⠔	approximately equal to (tilde over equals sign)
+always	\u2248	45-35	# ≈ ⠘⠔	almost equal to (tilde over tilde)
+always	\u224F	45-5-2356	# ≏ ⠘⠐⠶	difference between (equals sign with bump in top bar)
+always	\u2251	46-5-2356	# ≑ ⠨⠐⠶	geometrically equal to (equals sign dotted above and below)
+always	\u2260	5-2356-4-156	# ≠ ⠐⠶⠈⠱	not equal to (line through equals sign)
+always	\u2261	456-123456	# ≡ ⠸⠿	identical to (three horizontal lines)
+always	\u2264	456-4-126	# ≤ ⠸⠈⠣	less than or equal to
+always	\u2265	456-4-345	# ≥ ⠸⠈⠜	greater than or equal to
+always	\u226A	46-4-126	# ≪ ⠨⠈⠣	much less than
+always	\u226B	46-4-345	# ≫ ⠨⠈⠜	much greater than
 
 # inline contraction of emoji descriptions
 emoji en
