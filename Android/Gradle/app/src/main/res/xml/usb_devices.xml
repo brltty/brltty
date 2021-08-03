@@ -340,6 +340,11 @@
   <!-- HumanWare [Humanware BrailleOne (serial protocol)] -->
   <usb-device vendor-id="7281" product-id="49444" />
 
+  <!-- Device: 1C71:C131 -->
+  <!-- HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)] -->
+  <!-- HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)] -->
+  <usb-device vendor-id="7281" product-id="49457" />
+
   <!-- Device: 1C71:CE01 -->
   <!-- HumanWare [NLS eReader (HID protocol, firmware 1.0)] -->
   <!-- HumanWare [NLS eReader (HID protocol, firmware 1.1)] -->

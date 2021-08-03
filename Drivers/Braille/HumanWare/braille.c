@@ -125,6 +125,13 @@ BEGIN_KEY_NAME_TABLES(one)
   KEY_NAME_TABLE(braille),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(BI40X)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(braille),
+  KEY_NAME_TABLE(command),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(BI14)
 DEFINE_KEY_TABLE(BI32)
 DEFINE_KEY_TABLE(BI40)
@@ -134,6 +141,7 @@ DEFINE_KEY_TABLE(C20)
 DEFINE_KEY_TABLE(M40)
 DEFINE_KEY_TABLE(NLS)
 DEFINE_KEY_TABLE(one)
+DEFINE_KEY_TABLE(BI40X)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(BI14),
@@ -145,6 +153,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(M40),
   &KEY_TABLE_DEFINITION(NLS),
   &KEY_TABLE_DEFINITION(one),
+  &KEY_TABLE_DEFINITION(BI40X),
 END_KEY_TABLE_LIST
 
 typedef struct {
@@ -220,6 +229,13 @@ static const ModelEntry modelEntry_one = {
   .keyTableDefinition = &KEY_TABLE_DEFINITION(one)
 };
 
+static const ModelEntry modelEntry_BI40X = {
+  .modelName = "Brailliant BI 40X",
+  .hasBrailleKeys = 1,
+  .hasCommandKeys = 1,
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(BI40X)
+};
+
 static const ModelEntry *modelTable[] = {
   &modelEntry_BI14,
   &modelEntry_BI32,
@@ -230,6 +246,7 @@ static const ModelEntry *modelTable[] = {
   &modelEntry_M40,
   &modelEntry_NLS,
   &modelEntry_one,
+  &modelEntry_BI40X,
 };
 
 static unsigned char modelCount = ARRAY_COUNT(modelTable);
@@ -869,6 +886,11 @@ static const ResourceData resourceData_HID_one = {
   .protocol = &hidProtocol
 };
 
+static const ResourceData resourceData_HID_BI40X = {
+  .model = &modelEntry_BI40X,
+  .protocol = &hidProtocol
+};
+
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
@@ -1015,6 +1037,24 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=2,
       .verifyInterface = 1,
       .data = &resourceData_HID_one,
+      .resetDevice = 1
+    },
+
+    { /* Humanware Brailliant BI 40X (HID protocol, firmware 1.0) */
+      .vendor=0X1C71, .product=0XC131, 
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=4, .outputEndpoint=5,
+      .verifyInterface = 1,
+      .data = &resourceData_HID_BI40X,
+      .resetDevice = 1
+    },
+
+    { /* Humanware Brailliant BI 40X (HID protocol, firmware 1.1) */
+      .vendor=0X1C71, .product=0XC131, 
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .verifyInterface = 1,
+      .data = &resourceData_HID_BI40X,
       .resetDevice = 1
     },
   END_USB_CHANNEL_DEFINITIONS

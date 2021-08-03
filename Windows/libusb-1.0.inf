@@ -288,6 +288,9 @@ HKR,,Icon,,-20
 ; Device: 1C71:C124
 "LibUSB-1.0: HumanWare [Humanware BrailleOne (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C124
 
+; Device: 1C71:C131
+"LibUSB-1.0: HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C131
+
 ; Device: 1C71:CE01
 "LibUSB-1.0: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
 
@@ -646,6 +649,9 @@ HKR,,Icon,,-20
 
 ; Device: 1C71:C124
 "LibUSB-1.0: HumanWare [Humanware BrailleOne (serial protocol)]"=LIBUSB_DEV, USB\VID_1C71&PID_C124
+
+; Device: 1C71:C131
+"LibUSB-1.0: HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C131
 
 ; Device: 1C71:CE01
 "LibUSB-1.0: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01

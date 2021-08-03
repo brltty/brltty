@@ -364,6 +364,11 @@ ENV{PRODUCT}=="1c71/c121/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_r
 # HumanWare [Humanware BrailleOne (serial protocol)]
 ENV{PRODUCT}=="1c71/c124/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
 
+# Device: 1C71:C131
+# HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)]
+# HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]
+ENV{PRODUCT}=="1c71/c131/*", ENV{BRLTTY_BRAILLE_DRIVER}="hw", GOTO="brltty_usb_run"
+
 # Device: 1C71:CE01
 # HumanWare [NLS eReader (HID protocol, firmware 1.0)]
 # HumanWare [NLS eReader (HID protocol, firmware 1.1)]

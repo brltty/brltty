@@ -364,6 +364,11 @@ USB_DEVICE_ENTRY(0X1C71, 0XC121, "hw"),
 // HumanWare [Humanware BrailleOne (serial protocol)]
 USB_DEVICE_ENTRY(0X1C71, 0XC124, "hw"),
 
+// Device: 1C71:C131
+// HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)]
+// HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]
+USB_DEVICE_ENTRY(0X1C71, 0XC131, "hw"),
+
 // Device: 1C71:CE01
 // HumanWare [NLS eReader (HID protocol, firmware 1.0)]
 // HumanWare [NLS eReader (HID protocol, firmware 1.1)]

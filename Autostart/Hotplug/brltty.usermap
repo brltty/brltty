@@ -355,6 +355,11 @@ brltty 0x0003 0x1c71 0xc121
 # HumanWare [Humanware BrailleOne (serial protocol)]
 brltty 0x0003 0x1c71 0xc124
 
+# Device: 1C71:C131
+# HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)]
+# HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]
+brltty 0x0003 0x1c71 0xc131
+
 # Device: 1C71:CE01
 # HumanWare [NLS eReader (HID protocol, firmware 1.0)]
 # HumanWare [NLS eReader (HID protocol, firmware 1.1)]
