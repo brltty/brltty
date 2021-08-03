@@ -394,6 +394,13 @@ always	\xAE	45-1235	# ® ⠘⠗	registered - 3.8
 always	\xB0	45-245	# ° ⠘⠚	degree - 3.11
 always	\xB6	45-1234	# ¶ ⠘⠏	paragraph - 3.19
 always	\xBF	45-56-236	# ¿ ⠘⠰⠦	inverted question mark - 13.5
+always	\u0300	45-16	# ` ⠘⠡	grave accent (combining) - 4.2
+always	\u0301	45-34	# ´ ⠘⠌	acute accent (combining) - 4.2
+always	\u0302	45-146	# ^ ⠘⠩	circumflex accent (combining) - 4.2
+always	\u0303	45-12456	# ~ ⠘⠽	tilde (combining) - 4.2
+always	\u0308	45-25	# ¨ ⠘⠒	diaeresis (combining) - 4.2
+always	\u030A	45-1246	# ˚ ⠘⠫	ring above (combining) - 4.2
+always	\u0327	45-12346	# ¸ ⠘⠯	cedilla (combining) - 4.2
 always	\u2014	6-36	# — ⠠⠤	dash - 7.2
 always	\u2020	4-6-1456	# † ⠈⠠⠹	dagger - 3.3
 always	\u2021	4-6-12456	# ‡ ⠈⠠⠻	double dagger - 3.3
@@ -402,8 +409,8 @@ always	\u20A3	4-124	# ₣ ⠈⠋	franc (France) - 3.10
 always	\u20A6	4-1345	# ₦ ⠈⠝	naira (Nigeria) - 3.10
 always	\u20AC	4-15	# € ⠈⠑	euro - 3.10
 always	\u2122	45-2345	# ™ ⠘⠞	trade mark - 3.8
-always	\u2640	45-1346	# ♀ ⠘⠭	female - 3.16
-always	\u2642	45-13456	# ♂ ⠘⠽	male - 3.16
+always	\u2640	45-1346	# ♀ ⠘⠭	female (Venus) - 3.16
+always	\u2642	45-13456	# ♂ ⠘⠽	male (Mars) - 3.16
 always	\u3003	5-2	# 〃 ⠐⠂	ditto mark - 3.12
 
 # http://www.brailleauthority.org/ueb/Guidelines_for_Technical_Material_2008-10.pdf
