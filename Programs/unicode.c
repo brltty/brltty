@@ -208,7 +208,7 @@ getReplacementCharacter (void) {
 }
 
 int
-normalizeCharacters (
+composeCharacters (
   size_t *length, const wchar_t *characters,
   wchar_t *buffer, unsigned int *map
 ) {
@@ -279,6 +279,56 @@ normalizeCharacters (
 
   *length = count;
   return 1;
+#else /* HAVE_ICU */
+  return 0;
+#endif /* HAVE_ICU */
+}
+
+size_t
+decomposeCharacter (
+  wchar_t character, wchar_t *buffer, size_t length
+) {
+#ifdef HAVE_ICU
+  UChar source[1] = {character};
+  UChar target[length];
+  int32_t count;
+
+  {
+    UErrorCode error = U_ZERO_ERROR;
+
+#ifdef HAVE_UNICODE_UNORM2_H
+    static const UNormalizer2 *normalizer = NULL;
+
+    if (!normalizer) {
+      normalizer = unorm2_getNFDInstance(&error);
+      if (!U_SUCCESS(error)) return 0;
+    }
+
+    count = unorm2_normalize(normalizer,
+                             source, ARRAY_COUNT(source),
+                             target, ARRAY_COUNT(target),
+                             &error);
+#else /* unorm */
+    count = unorm_normalize(source, ARRAY_COUNT(source),
+                            UNORM_NFD, 0,
+                            target, ARRAY_COUNT(target),
+                            &error);
+#endif /* unorm */
+
+    if (!U_SUCCESS(error)) return 0;
+  }
+
+  {
+    const UChar *trg = target;
+    const UChar *end = target + count;
+    wchar_t *out = buffer;
+
+    while (trg < end) {
+      *out++ = *trg++;
+    }
+  }
+
+  return count;
 #else /* HAVE_ICU */
   return 0;
 #endif /* HAVE_ICU */

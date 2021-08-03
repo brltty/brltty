@@ -272,7 +272,7 @@ contractText (
       wchar_t buffer[length];
       unsigned int map[length + 1];
 
-      if (normalizeCharacters(&length, bcd.input.begin, buffer, map)) {
+      if (composeCharacters(&length, bcd.input.begin, buffer, map)) {
         const wchar_t *oldBegin = bcd.input.begin;
         const wchar_t *oldEnd = bcd.input.end;
 

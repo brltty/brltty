@@ -86,9 +86,13 @@ extern int isIdeographicCharacter (wchar_t character);
 extern int isEmojiSequence (const wchar_t *characters, size_t count);
 extern wchar_t getReplacementCharacter (void);
 
-extern int normalizeCharacters (
+extern int composeCharacters (
   size_t *length, const wchar_t *characters,
   wchar_t *buffer, unsigned int *map
+);
+
+extern size_t decomposeCharacter (
+  wchar_t character, wchar_t *buffer, size_t length
 );
 
 extern wchar_t getBaseCharacter (wchar_t character);
