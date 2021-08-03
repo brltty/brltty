@@ -378,6 +378,9 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Device: 1C71:C131
 "LibUSB-Win32: HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C131
 
+; Device: 1C71:C141
+"LibUSB-Win32: HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C141
+
 ; Device: 1C71:CE01
 "LibUSB-Win32: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
 
@@ -740,6 +743,9 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Device: 1C71:C131
 "LibUSB-Win32: HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C131
 
+; Device: 1C71:C141
+"LibUSB-Win32: HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C141
+
 ; Device: 1C71:CE01
 "LibUSB-Win32: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01
 
@@ -1101,6 +1107,9 @@ ServiceBinary  = %12%\libusb0_x64.sys
 
 ; Device: 1C71:C131
 "LibUSB-Win32: HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C131
+
+; Device: 1C71:C141
+"LibUSB-Win32: HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_C141
 
 ; Device: 1C71:CE01
 "LibUSB-Win32: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=LIBUSB_DEV, USB\VID_1C71&PID_CE01

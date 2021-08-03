@@ -380,6 +380,11 @@
     <!-- HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)] -->
     <modalias>usb:v1C71pC131*</modalias>
 
+    <!-- Device: 1C71:C141 -->
+    <!-- HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.0)] -->
+    <!-- HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.1)] -->
+    <modalias>usb:v1C71pC141*</modalias>
+
     <!-- Device: 1C71:CE01 -->
     <!-- HumanWare [NLS eReader (HID protocol, firmware 1.0)] -->
     <!-- HumanWare [NLS eReader (HID protocol, firmware 1.1)] -->
