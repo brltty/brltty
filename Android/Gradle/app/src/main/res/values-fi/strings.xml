@@ -5,6 +5,9 @@
 
   <string name="about_label_activity">Tietoa sovelluksesta</string>
   <string name="about_label_copyright">Tekijänoikeus</string>
+  <string name="about_label_buildTime">Käännöksen ajankohta</string>
+  <string name="about_label_sourceRevision">Lähdekoodin revisio</string>
+  <string name="about_label_privacyPolicy">Tietoja yksityisyydensuojasta</string>
 
   <string name="inputService_name">BRLTTY:n syötepalvelu</string>
   <string name="inputService_type">Pistenäyttöjen näppäimistöt</string>
@@ -24,6 +27,7 @@
   <string name="fileDownloader_state_connecting">yhdistetään</string>
   <string name="fileDownloader_state_downloading">ladataan</string>
 
+  <string name="setting_state_off">Pois</string>
   <string name="checkbox_state_unchecked">Ei</string>
   <string name="checkbox_state_checked">Kyllä</string>
 
@@ -264,6 +268,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">hollanti (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">chichewa (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">portugali (taso 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Venäläinen (lyhennetty)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">singaleesi (tavallinen kirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">swahili (lyhennekirjoitus)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">thai (lyhennekirjoitus)</string>
