@@ -105,7 +105,7 @@ clearOffset (BrailleContractionData *bcd) {
   assignOffset(bcd, CTB_NO_OFFSET);
 }
 
-extern CharacterEntry *getCharacterEntry (BrailleContractionData *bcd, wchar_t character);
+extern const CharacterEntry *getCharacterEntry (BrailleContractionData *bcd, wchar_t character);
 
 static inline int
 testCharacter (BrailleContractionData *bcd, wchar_t character, ContractionTableCharacterAttributes attributes) {

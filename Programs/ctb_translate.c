@@ -54,24 +54,31 @@ unlockContractionTable (void) {
   releaseLock(getContractionTableLock());
 }
 
-CharacterEntry *
-getCharacterEntry (BrailleContractionData *bcd, wchar_t character) {
-  int first = 0;
-  int last = bcd->table->characters.count - 1;
+static const CharacterEntry *
+findCharacterEntry (BrailleContractionData *bcd, wchar_t character, unsigned int *position) {
+  unsigned int from = 0;
+  unsigned int to = bcd->table->characters.count;
 
-  while (first <= last) {
-    int current = (first + last) / 2;
-    CharacterEntry *entry = &bcd->table->characters.array[current];
+  while (from < to) {
+    unsigned int current = (from + to) / 2;
+    const CharacterEntry *entry = &bcd->table->characters.array[current];
 
     if (entry->value < character) {
-      first = current + 1;
+      from = current + 1;
     } else if (entry->value > character) {
-      last = current - 1;
+      to = current;
     } else {
+      if (position) *position = current;
       return entry;
     }
   }
 
+  if (position) *position = from;
+  return NULL;
+}
+
+static const CharacterEntry *
+addCharacterEntry (BrailleContractionData *bcd, wchar_t character, unsigned int position) {
   if (bcd->table->characters.count == bcd->table->characters.size) {
     int newSize = bcd->table->characters.size;
     newSize = newSize? newSize<<1: 0X80;
@@ -89,39 +96,45 @@ getCharacterEntry (BrailleContractionData *bcd, wchar_t character) {
     }
   }
 
-  memmove(&bcd->table->characters.array[first+1],
-          &bcd->table->characters.array[first],
-          (bcd->table->characters.count - first) * sizeof(*bcd->table->characters.array));
+  memmove(&bcd->table->characters.array[position+1],
+          &bcd->table->characters.array[position],
+          (bcd->table->characters.count - position) * sizeof(*bcd->table->characters.array));
   bcd->table->characters.count += 1;
 
-  {
-    CharacterEntry *entry = &bcd->table->characters.array[first];
-    memset(entry, 0, sizeof(*entry));
-    entry->value = entry->uppercase = entry->lowercase = character;
+  CharacterEntry *entry = &bcd->table->characters.array[position];
+  memset(entry, 0, sizeof(*entry));
+  entry->value = entry->uppercase = entry->lowercase = character;
 
-    if (iswspace(character)) {
-      entry->attributes |= CTC_Space;
-    } else if (iswalpha(character)) {
-      entry->attributes |= CTC_Letter;
+  if (iswspace(character)) {
+    entry->attributes |= CTC_Space;
+  } else if (iswalpha(character)) {
+    entry->attributes |= CTC_Letter;
 
-      if (iswupper(character)) {
-        entry->attributes |= CTC_UpperCase;
-        entry->lowercase = towlower(character);
-      }
-
-      if (iswlower(character)) {
-        entry->attributes |= CTC_LowerCase;
-        entry->uppercase = towupper(character);
-      }
-    } else if (iswdigit(character)) {
-      entry->attributes |= CTC_Digit;
-    } else if (iswpunct(character)) {
-      entry->attributes |= CTC_Punctuation;
+    if (iswupper(character)) {
+      entry->attributes |= CTC_UpperCase;
+      entry->lowercase = towlower(character);
     }
 
-    bcd->table->translationMethods->finishCharacterEntry(bcd, entry);
-    return entry;
+    if (iswlower(character)) {
+      entry->attributes |= CTC_LowerCase;
+      entry->uppercase = towupper(character);
+    }
+  } else if (iswdigit(character)) {
+    entry->attributes |= CTC_Digit;
+  } else if (iswpunct(character)) {
+    entry->attributes |= CTC_Punctuation;
   }
+
+  bcd->table->translationMethods->finishCharacterEntry(bcd, entry);
+  return entry;
+}
+
+const CharacterEntry *
+getCharacterEntry (BrailleContractionData *bcd, wchar_t character) {
+  unsigned int position;
+  const CharacterEntry *entry = findCharacterEntry(bcd, character, &position);
+  if (entry) return entry;
+  return addCharacterEntry(bcd, character, position);
 }
 
 static inline int
