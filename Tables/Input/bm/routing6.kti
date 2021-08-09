@@ -25,6 +25,9 @@ bind Display2+RoutingKey CLIP_ADD
 bind Display4+RoutingKey COPY_LINE
 bind Display5+RoutingKey COPY_RECT
 
+bind RoutingKey+!RoutingKey CLIP_COPY
+bind Display2+RoutingKey+!RoutingKey CLIP_APPEND
+
 bind Display3+RoutingKey DESCCHAR
 bind Display6+RoutingKey SETLEFT
 
