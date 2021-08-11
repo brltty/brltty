@@ -54,7 +54,7 @@ unlockContractionTable (void) {
   releaseLock(getContractionTableLock());
 }
 
-static const CharacterEntry *
+const CharacterEntry *
 findCharacterEntry (BrailleContractionData *bcd, wchar_t character, unsigned int *position) {
   unsigned int from = 0;
   unsigned int to = bcd->table->characters.count;
@@ -79,27 +79,27 @@ findCharacterEntry (BrailleContractionData *bcd, wchar_t character, unsigned int
 
 static const CharacterEntry *
 addCharacterEntry (BrailleContractionData *bcd, wchar_t character, unsigned int position) {
-  if (bcd->table->characters.count == bcd->table->characters.size) {
-    int newSize = bcd->table->characters.size;
+  ContractionTable *table = bcd->table;
+
+  if (table->characters.count == table->characters.size) {
+    int newSize = table->characters.size;
     newSize = newSize? newSize<<1: 0X80;
+    CharacterEntry *newArray = realloc(table->characters.array, ARRAY_SIZE(newArray, newSize));
 
-    {
-      CharacterEntry *newArray = realloc(bcd->table->characters.array, (newSize * sizeof(*newArray)));
-
-      if (!newArray) {
-        logMallocError();
-        return NULL;
-      }
-
-      bcd->table->characters.array = newArray;
-      bcd->table->characters.size = newSize;
+    if (!newArray) {
+      logMallocError();
+      return NULL;
     }
+
+    table->characters.array = newArray;
+    table->characters.size = newSize;
   }
 
-  memmove(&bcd->table->characters.array[position+1],
-          &bcd->table->characters.array[position],
-          (bcd->table->characters.count - position) * sizeof(*bcd->table->characters.array));
-  bcd->table->characters.count += 1;
+  memmove(
+    &table->characters.array[position+1],
+    &table->characters.array[position],
+    ((table->characters.count++ - position) * sizeof(*table->characters.array))
+  );
 
   CharacterEntry *entry = &bcd->table->characters.array[position];
   memset(entry, 0, sizeof(*entry));

@@ -106,6 +106,7 @@ clearOffset (BrailleContractionData *bcd) {
 }
 
 extern const CharacterEntry *getCharacterEntry (BrailleContractionData *bcd, wchar_t character);
+extern const CharacterEntry *findCharacterEntry (BrailleContractionData *bcd, wchar_t character, unsigned int *position);
 
 static inline int
 testCharacter (BrailleContractionData *bcd, wchar_t character, ContractionTableCharacterAttributes attributes) {

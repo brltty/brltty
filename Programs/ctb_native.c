@@ -498,6 +498,57 @@ getContractionTableCharacter (BrailleContractionData *bcd, wchar_t character) {
   return NULL;
 }
 
+static int
+addRule (BrailleContractionData *bcd, ContractionTableRule *rule) {
+  ContractionTable *table = bcd->table;
+
+  if (table->rules.count == table->rules.size) {
+    size_t newSize = table->rules.size + 10;
+    ContractionTableRule **newArray = realloc(table->rules.array, ARRAY_SIZE(newArray, newSize));
+
+    if (!newArray) {
+      logMallocError();
+      return 0;
+    }
+
+    table->rules.array = newArray;
+    table->rules.size = newSize;
+  }
+
+  table->rules.array[table->rules.count++] = rule;
+  return 1;
+}
+
+static size_t
+makeDecomposedBraille (BrailleContractionData *bcd, wchar_t character, BYTE *cells, size_t size) {
+  wchar_t characters[0X10];
+  size_t characterCount = decomposeCharacter(character, characters, ARRAY_COUNT(characters));
+
+  if (characterCount > 1) {
+    BYTE *from = cells;
+    const BYTE *end = from + size;
+    unsigned int characterIndex = 1;
+
+    while (1) {
+      wchar_t character = characters[characterIndex];
+      const CharacterEntry *entry = getCharacterEntry(bcd, character);
+      if (!entry) break;
+      if (character != entry->value) break;
+
+      const ContractionTableRule *rule = entry->always;
+      unsigned int cellCount = rule->replen;
+      if (!cellCount) break;
+      if ((end - from) < cellCount) break;
+      from = mempcpy(from, &rule->findrep[rule->findlen], cellCount);
+
+      if (!characterIndex) return from - cells;
+      if (++characterIndex == characterCount) characterIndex = 0;
+    }
+  }
+
+  return 0;
+}
+
 typedef struct {
   BrailleContractionData *bcd;
   CharacterEntry *character;
@@ -506,43 +557,58 @@ typedef struct {
 static int
 setAlwaysRule (wchar_t character, void *data) {
   SetAlwaysRuleData *sar = data;
-  const ContractionTableCharacter *ctc = getContractionTableCharacter(sar->bcd, character);
+  BrailleContractionData *bcd = sar->bcd;
+
+  CharacterEntry *entry = sar->character;
+  const ContractionTableCharacter *ctc = getContractionTableCharacter(bcd, character);
 
   if (ctc) {
     ContractionTableOffset offset = ctc->always;
 
     if (offset) {
-      const ContractionTableRule *rule = getContractionTableItem(sar->bcd, offset);
+      const ContractionTableRule *rule = getContractionTableItem(bcd, offset);
 
       if (rule->replen) {
-        sar->character->always = rule;
+        entry->always = rule;
         return 1;
       }
     }
   }
 
+  if (character == entry->value) {
+    BYTE cells[0X100];
+    size_t count = makeDecomposedBraille(bcd, character, cells, sizeof(cells));
+
+    {
+      unsigned int position;
+      findCharacterEntry(bcd, character, &position);
+
+      entry = &bcd->table->characters.array[position];
+      sar->character = entry;
+    }
+
+    if (count) {
+      ContractionTableRule *rule;
+      size_t size = sizeof(*rule) + sizeof(character) + count;
+
+      if ((rule = malloc(size))) {
+        memset(rule, 0, sizeof(*rule));
+        rule->opcode = CTO_Always;
+
+        rule->findrep[0] = character;
+        memcpy(&rule->findrep[rule->findlen = 1], cells, (rule->replen = count));
+
+        if (addRule(bcd, rule)) {
+          entry->always = rule;
+          return 1;
+        }
+
+        free(rule);
+      }
+    }
+  }
+
   return 0;
-}
-
-static const ContractionTableRule *
-getAlwaysRule (BrailleContractionData *bcd, wchar_t character) {
-  const CharacterEntry *entry = getCharacterEntry(bcd, character);
-
-  return entry? entry->always: NULL;
-}
-
-static wchar_t
-getBestCharacter (BrailleContractionData *bcd, wchar_t character) {
-  const ContractionTableRule *rule = getAlwaysRule(bcd, character);
-
-  return rule? rule->findrep[0]: 0;
-}
-
-static int
-sameCharacters (BrailleContractionData *bcd, wchar_t character1, wchar_t character2) {
-  wchar_t best1 = getBestCharacter(bcd, character1);
-
-  return best1 && (best1 == getBestCharacter(bcd, character2));
 }
 
 static wchar_t
@@ -551,15 +617,36 @@ toLowerCase (BrailleContractionData *bcd, wchar_t character) {
   return entry? entry->lowercase: character;
 }
 
-static int
-checkCurrentRule (BrailleContractionData *bcd, const wchar_t *source) {
-  const wchar_t *character = bcd->current.rule->findrep;
-  int count = bcd->current.length;
+static const ContractionTableRule *
+getAlwaysRule (BrailleContractionData *bcd, wchar_t character) {
+  const CharacterEntry *entry = getCharacterEntry(bcd, toLowerCase(bcd, character));
+  return entry? entry->always: NULL;
+}
 
-  while (count) {
-    if (toLowerCase(bcd, *source) != toLowerCase(bcd, *character)) return 0;
-    --count, ++source, ++character;
+static wchar_t
+getBestCharacter (BrailleContractionData *bcd, wchar_t character) {
+  const ContractionTableRule *rule = getAlwaysRule(bcd, character);
+  return rule? rule->findrep[0]: 0;
+}
+
+static int
+sameCharacters (BrailleContractionData *bcd, wchar_t character1, wchar_t character2) {
+  wchar_t best1 = getBestCharacter(bcd, character1);
+  return best1 && (best1 == getBestCharacter(bcd, character2));
+}
+
+static int
+matchCurrentRule (BrailleContractionData *bcd) {
+  const wchar_t *input = bcd->input.current;
+  const wchar_t *find = bcd->current.rule->findrep;
+  const wchar_t *findEnd = find + bcd->current.length;
+
+  while (find < findEnd) {
+    if (toLowerCase(bcd, *input++) != toLowerCase(bcd, *find++)) {
+      return 0;
+    }
   }
+
   return 1;
 }
 
@@ -603,35 +690,54 @@ isEnding (BrailleContractionData *bcd) {
   return 1;
 }
 
+static void
+setCurrentRule (BrailleContractionData *bcd, const ContractionTableRule *rule) {
+  bcd->current.rule = rule;
+  bcd->current.opcode = bcd->current.rule->opcode;
+  bcd->current.length = bcd->current.rule->findlen;
+  setAfter(bcd, bcd->current.length);
+}
+
 static int
 selectRule (BrailleContractionData *bcd, int length) {
+  if (length < 1) return 0;
+
   int ruleOffset;
   int maximumLength;
 
-  if (length < 1) return 0;
   if (length == 1) {
-    const ContractionTableCharacter *ctc = getContractionTableCharacter(bcd, toLowerCase(bcd, *bcd->input.current));
-    if (!ctc) return 0;
+    wchar_t character = toLowerCase(bcd, *bcd->input.current);
+    const ContractionTableCharacter *ctc = getContractionTableCharacter(bcd, character);
+
+    if (!ctc) {
+      const CharacterEntry *entry = getCharacterEntry(bcd, character);
+      if (!entry) return 0;
+
+      const ContractionTableRule *rule = entry->always;
+      if (!rule) return 0;
+
+      setCurrentRule(bcd, rule);
+      return 1;
+    }
+
     ruleOffset = ctc->rules;
     maximumLength = 1;
   } else {
-    wchar_t characters[2];
-    characters[0] = toLowerCase(bcd, bcd->input.current[0]);
-    characters[1] = toLowerCase(bcd, bcd->input.current[1]);
+    const wchar_t characters[] = {
+      toLowerCase(bcd, bcd->input.current[0]),
+      toLowerCase(bcd, bcd->input.current[1]),
+    };
+
     ruleOffset = getContractionTableHeader(bcd)->rules[CTH(characters)];
     maximumLength = 0;
   }
 
   while (ruleOffset) {
-    bcd->current.rule = getContractionTableItem(bcd, ruleOffset);
-    bcd->current.opcode = bcd->current.rule->opcode;
-    bcd->current.length = bcd->current.rule->findlen;
+    setCurrentRule(bcd, getContractionTableItem(bcd, ruleOffset));
 
     if ((length == 1) ||
         ((bcd->current.length <= length) &&
-         checkCurrentRule(bcd, bcd->input.current))) {
-      setAfter(bcd, bcd->current.length);
-
+         matchCurrentRule(bcd))) {
       if (!maximumLength) {
         maximumLength = bcd->current.length;
 
@@ -640,9 +746,8 @@ selectRule (BrailleContractionData *bcd, int length) {
 #define STATE(c) (testCharacter(bcd, (c), CTC_UpperCase)? CS_UpperSingle: testCharacter(bcd, (c), CTC_LowerCase)? CS_Lower: CS_Any)
 
           CapitalizationState current = STATE(bcd->current.before);
-          int i;
 
-          for (i=0; i<bcd->current.length; i+=1) {
+          for (int i=0; i<bcd->current.length; i+=1) {
             wchar_t character = bcd->input.current[i];
             CapitalizationState next = STATE(character);
 
@@ -1026,7 +1131,7 @@ contractText_native (BrailleContractionData *bcd) {
             srcbeg = bcd->input.current - bcd->current.length;
             destbeg = destlast;
 
-            while ((bcd->input.current <= srclim) && checkCurrentRule(bcd, bcd->input.current)) {
+            while ((bcd->input.current <= srclim) && matchCurrentRule(bcd)) {
               clearOffset(bcd);
               clearRemainingOffsets(bcd);
             }

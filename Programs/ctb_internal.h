@@ -101,7 +101,7 @@ typedef struct {
   ContractionTableCharacterAttributes before; /*character types which must precede*/
   BYTE findlen; /*length of string to be replaced*/
   BYTE replen; /*length of replacement string*/
-  wchar_t findrep[1]; /*find and replacement strings*/
+  wchar_t findrep[]; /*find and replacement strings*/
 } ContractionTableRule;
 
 typedef struct {
@@ -116,11 +116,12 @@ typedef struct {
 } ContractionTableHeader;
 
 typedef struct {
+  const ContractionTableRule *always;
+  ContractionTableCharacterAttributes attributes;
+
   wchar_t value;
   wchar_t uppercase;
   wchar_t lowercase;
-  ContractionTableCharacterAttributes attributes;
-  const ContractionTableRule *always;
 } CharacterEntry;
 
 typedef struct {
@@ -148,9 +149,15 @@ struct ContractionTableStruct {
 
   struct {
     CharacterEntry *array;
-    int size;
-    int count;
+    unsigned int size;
+    unsigned int count;
   } characters;
+
+  struct {
+    ContractionTableRule **array;
+    unsigned int size;
+    unsigned int count;
+  } rules;
 
   struct {
     struct {

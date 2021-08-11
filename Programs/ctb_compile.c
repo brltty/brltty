@@ -189,7 +189,7 @@ addByteRule (
   ContractionTableData *ctd
 ) {
   DataOffset ruleOffset;
-  int ruleSize = sizeof(ContractionTableRule) - sizeof(find->characters[0]);
+  size_t ruleSize = sizeof(ContractionTableRule);
   if (find) ruleSize += find->length * sizeof(find->characters[0]);
   if (replace) ruleSize += replace->length;
 
@@ -694,6 +694,10 @@ initializeCommonFields (ContractionTable *table) {
   table->characters.size = 0;
   table->characters.count = 0;
 
+  table->rules.array = NULL;
+  table->rules.size = 0;
+  table->rules.count = 0;
+
   table->cache.input.characters = NULL;
   table->cache.input.size = 0;
   table->cache.input.count = 0;
@@ -712,6 +716,17 @@ destroyCommonFields (ContractionTable *table) {
   if (table->characters.array) {
     free(table->characters.array);
     table->characters.array = NULL;
+  }
+
+  if (table->rules.array) {
+    {
+      ContractionTableRule **rule = table->rules.array;
+      ContractionTableRule **end = rule + table->rules.count;
+      while (rule < end) free(*rule++);
+    }
+
+    free(table->rules.array);
+    table->rules.array = NULL;
   }
 
   if (table->cache.input.characters) {
