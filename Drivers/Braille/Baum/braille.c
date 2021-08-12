@@ -640,7 +640,10 @@ typedef enum {
   BAUM_RSP_ServiceRegisters     = 0X52,
   BAUM_RSP_DeviceIdentity       = 0X84,
   BAUM_RSP_SerialNumber         = 0X8A,
-  BAUM_RSP_BluetoothName        = 0X8C
+  BAUM_RSP_BluetoothName        = 0X8C,
+  BAUM_RSP_NLS_ZMX_BD           = 0XBD,
+  BAUM_RSP_NLS_ZMX_BE           = 0XBE,
+  BAUM_RSP_NLS_ZMX_BF           = 0XBF,
 } BaumResponseCode;
 
 typedef enum {
@@ -1299,6 +1302,15 @@ verifyBaumPacket (
         *length = KEY_GROUP_SIZE(brl->textColumns) + 1;
         break;
 
+      case BAUM_RSP_NLS_ZMX_BD:
+      case BAUM_RSP_NLS_ZMX_BE:
+        *length = 2;
+        break;
+
+      case BAUM_RSP_NLS_ZMX_BF:
+        *length = 2;
+        break;
+
       default:
         pvd->state = BAUM_PVS_WAITING;
         return BRL_PVR_INVALID;
@@ -1310,6 +1322,11 @@ verifyBaumPacket (
       case BAUM_RSP_ServiceRegisters:
         if (byte < 4) return BRL_PVR_INVALID;
         *length += byte;
+        break;
+
+      case BAUM_RSP_NLS_ZMX_BD:
+      case BAUM_RSP_NLS_ZMX_BE:
+        if (byte != CR) return BRL_PVR_EXCLUDE;
         break;
 
       default:
@@ -2018,6 +2035,11 @@ processBaumPackets (BrailleDisplay *brl) {
       case BAUM_RSP_ErrorCode:
         if (packet.data.values.errorCode != BAUM_ERR_PacketType) goto unexpectedPacket;
         logMessage(LOG_DEBUG, "unsupported request");
+        continue;
+
+      case BAUM_RSP_NLS_ZMX_BD:
+      case BAUM_RSP_NLS_ZMX_BE:
+      case BAUM_RSP_NLS_ZMX_BF:
         continue;
 
       default:
