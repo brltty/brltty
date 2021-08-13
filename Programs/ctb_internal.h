@@ -54,7 +54,7 @@ typedef enum {
   CTO_BeginCapitalSign, /*dot pattern for beginning capital block*/
   CTO_EndCapitalSign, /*dot pattern for ending capital block*/
 
-  CTO_EnglishLetterSign, /*dot pattern for english letter sign*/
+  CTO_LetterSign, /*dot pattern for letter sign*/
   CTO_NumberSign, /*number sign*/
 
   CTO_Literal, /*don't translate this string*/
@@ -108,7 +108,7 @@ typedef struct {
   ContractionTableOffset capitalSign; /*capitalization sign*/
   ContractionTableOffset beginCapitalSign; /*begin capitals sign*/
   ContractionTableOffset endCapitalSign; /*end capitals sign*/
-  ContractionTableOffset englishLetterSign; /*english letter sign*/
+  ContractionTableOffset letterSign; /*letter sign*/
   ContractionTableOffset numberSign; /*number sign*/
   ContractionTableOffset characters;
   uint32_t characterCount;

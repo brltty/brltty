@@ -1049,7 +1049,7 @@ contractText_native (BrailleContractionData *bcd) {
       if (getContractionTableHeader(bcd)->numberSign && (bcd->previous.opcode != CTO_MidNum) &&
           !testBefore(bcd, CTC_Digit) && testCurrent(bcd, CTC_Digit)) {
         if (!putSequence(bcd, getContractionTableHeader(bcd)->numberSign)) break;
-      } else if (getContractionTableHeader(bcd)->englishLetterSign && testCurrent(bcd, CTC_Letter)) {
+      } else if (getContractionTableHeader(bcd)->letterSign && testCurrent(bcd, CTC_Letter)) {
         if ((bcd->current.opcode == CTO_Contraction) ||
             ((bcd->current.opcode != CTO_EndNum) && testBefore(bcd, CTC_Digit)) ||
             (testCurrent(bcd, CTC_Letter) &&
@@ -1061,7 +1061,7 @@ contractText_native (BrailleContractionData *bcd) {
               (testNext(bcd, CTC_Punctuation) &&
                !sameCharacters(bcd, bcd->input.current[1], WC_C('.')) &&
                !sameCharacters(bcd, bcd->input.current[1], WC_C('\'')))))) {
-          if (!putSequence(bcd, getContractionTableHeader(bcd)->englishLetterSign)) break;
+          if (!putSequence(bcd, getContractionTableHeader(bcd)->letterSign)) break;
         }
       }
 

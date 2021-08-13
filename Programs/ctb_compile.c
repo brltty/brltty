@@ -58,7 +58,7 @@ static const wchar_t *const opcodeNames[CTO_None] = {
   [CTO_BeginCapitalSign] = WS_C("begcaps"),
   [CTO_EndCapitalSign] = WS_C("endcaps"),
 
-  [CTO_EnglishLetterSign] = WS_C("letsign"),
+  [CTO_LetterSign] = WS_C("letsign"),
   [CTO_NumberSign] = WS_C("numsign"),
 
   [CTO_Literal] = WS_C("literal"),
@@ -523,12 +523,12 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
         break;
       }
 
-      case CTO_EnglishLetterSign: {
+      case CTO_LetterSign: {
         ByteOperand cells;
         if (getCellsOperand(file, &cells, "letter sign")) {
           DataOffset offset;
           if (!saveCellsOperand(file, &offset, &cells, ctd)) return 0;
-          getContractionTableHeader(ctd)->englishLetterSign = offset;
+          getContractionTableHeader(ctd)->letterSign = offset;
         }
         break;
       }
