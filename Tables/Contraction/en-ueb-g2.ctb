@@ -329,7 +329,7 @@ always st 34
 always th 1456
 always wh 156
 
-#disambiguation
+#Disambiguation
 always ear 15-345
 
 include letters-latin.cti
@@ -433,6 +433,33 @@ always	\u2264	456-4-126	# ≤ ⠸⠈⠣	less than or equal to
 always	\u2265	456-4-345	# ≥ ⠸⠈⠜	greater than or equal to
 always	\u226A	46-4-126	# ≪ ⠨⠈⠣	much less than
 always	\u226B	46-4-345	# ≫ ⠨⠈⠜	much greater than
+
+# The Greek letters
+always	\u03B1	46-1	# α ⠨⠁	alpha
+always	\u03B2	46-12	# β ⠨⠃	beta
+always	\u03B3	46-1245	# γ ⠨⠛	gamma
+always	\u03B4	46-145	# δ ⠨⠙	delta
+always	\u03B5	46-15	# ε ⠨⠑	epsilon
+always	\u03B6	46-1356	# ζ ⠨⠵	zeta
+always	\u03B7	46-156	# η ⠨⠱	eta
+always	\u03B8	46-1456	# θ ⠨⠹	theta
+always	\u03B9	46-24	# ι ⠨⠊	iota
+always	\u03BA	46-13	# κ ⠨⠅	kappa
+always	\u03BB	46-123	# λ ⠨⠇	lamda
+always	\u03BC	46-134	# μ ⠨⠍	mu
+always	\u03BD	46-1345	# ν ⠨⠝	nu
+always	\u03BE	46-1346	# ξ ⠨⠭	xi
+always	\u03BF	46-135	# ο ⠨⠕	omicron
+always	\u03C0	46-1234	# π ⠨⠏	pi
+always	\u03C1	46-1235	# ρ ⠨⠗	rho
+always	\u03C2	46-234	# ς ⠨⠎	final sigma
+always	\u03C3	46-234	# σ ⠨⠎	sigma
+always	\u03C4	46-2345	# τ ⠨⠞	tau
+always	\u03C5	46-136	# υ ⠨⠥	upsilon
+always	\u03C6	46-124	# φ ⠨⠋	phi
+always	\u03C7	46-12346	# χ ⠨⠯	chi
+always	\u03C8	46-13456	# ψ ⠨⠽	psi
+always	\u03C9	46-2456	# ω ⠨⠺	omega
 
 # inline contraction of emoji descriptions
 emoji en
