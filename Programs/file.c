@@ -60,7 +60,11 @@ isAbsolutePath (const char *path) {
   if (isPathSeparator(path[0])) return 1;
 
 #if defined(__MINGW32__) || defined(__MSDOS__)
-  if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", toupper(path[0])) && (path[1] == ':')) return 1;
+  if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", toupper(path[0]))) {
+    if (path[1] == ':') {
+      return 1;
+    }
+  }
 #endif /* defined(__MINGW32__) || defined(__MSDOS__) */
 
   return 0;
