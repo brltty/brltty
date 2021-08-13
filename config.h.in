@@ -231,6 +231,9 @@ extern "C" {
 /* Define this if the function pause exists. */
 #undef HAVE_PAUSE
 
+/* Define this if the function readlink exists. */
+#undef HAVE_READLINK
+
 /* Define this if the function realpath exists. */
 #undef HAVE_REALPATH
 
