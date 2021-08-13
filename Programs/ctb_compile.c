@@ -989,9 +989,11 @@ compileContractionTable (const char *name) {
   if (ctq) {
     compile = ctq->compile;
   } else {
-    if (!hasNoQualifier(name)) {
-      logMessage(LOG_ERR, "unsupported contraction table: %s", name);
-      return NULL;
+    if (!isAbsolutePath(name)) {
+      if (!hasNoQualifier(name)) {
+        logMessage(LOG_ERR, "unsupported contraction table: %s", name);
+        return NULL;
+      }
     }
 
     if (testProgramPath(name)) {
