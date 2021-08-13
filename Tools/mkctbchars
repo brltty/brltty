@@ -273,7 +273,7 @@ proc processInput {} {
          error $response $::errorInfo $::errorCode
       }
 
-      puts stderr "$problem: $line"
+      writeProgramMessage "$problem: $line"
    }
 }
 
