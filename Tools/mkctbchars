@@ -1,0 +1,257 @@
+#!/usr/bin/env tclsh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2021 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+source [file join [file dirname [info script]] ".." "prologue.tcl"]
+
+set inputStream stdin
+set outputStream stdout
+
+set optionDefinitions {
+}
+
+processProgramArguments optionValues $optionDefinitions positionalArguments "\{config\}"
+
+proc brlCharacterToNumber {character} {
+   if {[string length $character] != 1} {
+      error "not a single character: $character"
+   }
+
+   scan $character "%c" decimal
+   return $decimal
+}
+
+proc brlNumberToCharacter {number} {
+   if {![string is digit -strict $number]} {
+      error "not a decimal value: $number"
+   }
+
+   return [format "%c" "$number"]
+}
+
+set brfTable {
+   0
+   2346
+   5
+   3456
+   1246
+   146
+   12346
+   3
+   12356
+   23456
+   16
+   346
+   6
+   36
+   46
+   34
+   356
+   2
+   23
+   25
+   256
+   26
+   235
+   2356
+   236
+   35
+   156
+   56
+   126
+   123456
+   345
+   1456
+   4
+   1
+   12
+   14
+   145
+   15
+   124
+   1245
+   125
+   24
+   245
+   13
+   123
+   134
+   1345
+   135
+   1234
+   12345
+   1235
+   234
+   2345
+   136
+   1236
+   2456
+   1346
+   13456
+   1356
+   246
+   1256
+   12456
+   45
+   456
+}
+
+proc brlCharacterToDots {character} {
+   if {[string length $character] == 1} {
+      set number [brlCharacterToNumber $character]
+      set bits [expr {$number & 0XFF}]
+
+      if {($number - $bits) == 0X2800} {
+         set dots ""
+         set dot 1
+         set bit 0X01
+
+         while {$bits != 0} {
+            if {($bits & $bit) != 0} {
+               set bits [expr {$bits & ~$bit}]
+               append dots $dot
+            }
+
+            set bit [expr {$bit << 1}]
+            incr dot
+         }
+
+         if {[string length $dots] > 0} {
+            return $dots
+         }
+
+         return "0"
+      }
+
+      global brfTable
+      set index [expr {$number - 0X20}]
+
+      if {($number >= 0X60) && ($number <= 0X7E)} {
+         incr index -0X20
+      }
+
+      if {($index >= 0) && ($index < [string length $brfTable])} {
+         return [lindex $brfTable $index]
+      }
+   }
+
+   error "not a braille character: $character"
+}
+
+proc brlDotsToCharacter {dots} {
+   set number [expr {0X2800 + 0}]
+
+   if {[string length $dots] == 0} {
+      error "no dot numbers"
+   }
+
+   if {![string equal $dots "0"]} {
+      foreach dot [split $dots ""] {
+         if {[string first $dot "12345678"] == -1} {
+            error "Not a dot: $dot"
+         }
+
+         set bit [expr {1 << ($dot - 1)}]
+
+         if {($number & $bit) != 0} {
+            error "duplicate dot: $dot"
+         }
+
+         incr number $bit
+      }
+   }
+
+   return [brlNumberToCharacter $number]
+}
+
+proc brlFormatCodepoint {codepoint} {
+   set result [format "%X" $codepoint]
+   set length [string length $result]
+
+   foreach {count letter} {2 x 4 u 8 U} {
+      if {$length <= $count} {
+         set result "\\$letter[string repeat "0" [expr {$count - $length}]]$result"
+         break
+      }
+   }
+
+   return $result
+}
+
+proc processCharacter {text braille description} {
+   global outputStream
+
+   if {[string length $text] == 1} {
+      set codepoint [brlCharacterToNumber $text]
+   } else {
+      scan $text "%x" codepoint
+      set text [brlNumberToCharacter $codepoint]
+   }
+
+   set numbers ""
+   set cells ""
+
+   foreach character [split $braille ""] {
+      if {[string length $numbers] > 0} {
+         append numbers "-"
+      }
+
+      set dots [brlCharacterToDots $character]
+      append numbers $dots
+      append cells [brlDotsToCharacter $dots]
+   }
+
+   puts $outputStream "always\t[brlFormatCodepoint $codepoint]\t$numbers\t# $text $cells\t$description"
+}
+
+proc processInput {} {
+   global inputStream outputStream
+
+   while {[gets $inputStream line] >= 0} {
+      set line [string trim $line]
+
+      if {[string length $line] == 0} {
+         continue
+      }
+
+      if {[string index $line 0] == "#"} {
+         continue
+      }
+
+      regsub -all {\s+} $line " " line
+      set description [join [lassign [split $line " "] text braille] " "]
+      set problem ""
+
+      if {[string length $text] == 0} {
+         set problem "missing textual representation"
+      } elseif {[string length $braille] == 0} {
+         set problem "missing braille representation"
+      } elseif {[string length $description] == 0} {
+         set problem "missing character description"
+      } elseif {[catch [list processCharacter $text $braille $description] response] != 0} {
+         set problem $response
+      } else {
+         continue
+      }
+
+      puts stderr "$problem: $line"
+   }
+}
+
+processInput
+exit 0
