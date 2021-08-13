@@ -37,7 +37,6 @@
 static int
 isUcharCompatible (wchar_t character) {
   UChar uc = character;
-
   return uc == character;
 }
 
@@ -289,83 +288,58 @@ decomposeCharacter (
   wchar_t character, wchar_t *buffer, size_t length
 ) {
 #ifdef HAVE_ICU
-  UChar source[1] = {character};
-  UChar target[length];
-  int32_t count;
+  if (isUcharCompatible(character)) {
+    UChar source[1] = {character};
+    UChar target[length];
+    int32_t count;
 
-  {
-    UErrorCode error = U_ZERO_ERROR;
+    {
+      UErrorCode error = U_ZERO_ERROR;
 
 #ifdef HAVE_UNICODE_UNORM2_H
-    static const UNormalizer2 *normalizer = NULL;
+      static const UNormalizer2 *normalizer = NULL;
 
-    if (!normalizer) {
-      normalizer = unorm2_getNFDInstance(&error);
+      if (!normalizer) {
+        normalizer = unorm2_getNFDInstance(&error);
+        if (!U_SUCCESS(error)) return 0;
+      }
+
+      count = unorm2_normalize(normalizer,
+                               source, ARRAY_COUNT(source),
+                               target, ARRAY_COUNT(target),
+                               &error);
+#else /* unorm */
+      count = unorm_normalize(source, ARRAY_COUNT(source),
+                              UNORM_NFD, 0,
+                              target, ARRAY_COUNT(target),
+                              &error);
+#endif /* unorm */
+
       if (!U_SUCCESS(error)) return 0;
     }
 
-    count = unorm2_normalize(normalizer,
-                             source, ARRAY_COUNT(source),
-                             target, ARRAY_COUNT(target),
-                             &error);
-#else /* unorm */
-    count = unorm_normalize(source, ARRAY_COUNT(source),
-                            UNORM_NFD, 0,
-                            target, ARRAY_COUNT(target),
-                            &error);
-#endif /* unorm */
+    {
+      const UChar *trg = target;
+      const UChar *end = target + count;
+      wchar_t *out = buffer;
 
-    if (!U_SUCCESS(error)) return 0;
-  }
-
-  {
-    const UChar *trg = target;
-    const UChar *end = target + count;
-    wchar_t *out = buffer;
-
-    while (trg < end) {
-      *out++ = *trg++;
+      while (trg < end) {
+        *out++ = *trg++;
+      }
     }
-  }
 
-  return count;
-#else /* HAVE_ICU */
-  return 0;
+    return count;
+  }
 #endif /* HAVE_ICU */
+
+  return 0;
 }
 
 wchar_t
 getBaseCharacter (wchar_t character) {
-#ifdef HAVE_ICU
-  if (isUcharCompatible(character)) {
-    UChar source[] = {character};
-    const unsigned int resultLength = 0X10;
-    UChar resultBuffer[resultLength];
-    UErrorCode error = U_ZERO_ERROR;
-
-#ifdef HAVE_UNICODE_UNORM2_H
-    static const UNormalizer2 *normalizer = NULL;
-
-    if (!normalizer) {
-      normalizer = unorm2_getNFDInstance(&error);
-      if (!U_SUCCESS(error)) return 0;
-    }
-
-    unorm2_normalize(normalizer,
-                     source, ARRAY_COUNT(source),
-                     resultBuffer, resultLength,
-                     &error);
-#else /* unorm */
-    unorm_normalize(source, ARRAY_COUNT(source),
-                    UNORM_NFD, 0,
-                    resultBuffer, resultLength,
-                    &error);
-#endif /* unorm */
-
-    if (U_SUCCESS(error)) return resultBuffer[0];
-  }
-#endif /* HAVE_ICU */
-
+  wchar_t decomposed[0X10];
+  size_t count = decomposeCharacter(character, decomposed, sizeof(decomposed));
+  if (count) return decomposed[0];
   return 0;
 }
 
