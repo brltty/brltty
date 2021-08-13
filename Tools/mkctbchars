@@ -19,32 +19,52 @@
 
 source [file join [file dirname [info script]] ".." "prologue.tcl"]
 
-set inputStream stdin
-set outputStream stdout
-
 set optionDefinitions {
 }
 
+set inputStream stdin
+set outputStream stdout
 processProgramArguments optionValues $optionDefinitions positionalArguments "\{config\}"
 
-proc brlCharacterToNumber {character} {
-   if {[string length $character] != 1} {
-      error "not a single character: $character"
+proc brlDataError {problem {value ""}} {
+   set message $problem
+
+   if {[string length $value] > 0} {
+      append message ": $value"
    }
 
-   scan $character "%c" decimal
+   error $message "" [list data $problem $value]
+}
+
+proc brlHexadecimalToDecimal {hexadecimal} {
+   if {![string is xdigit -strict $hexadecimal]} {
+      brlDataError "not a hexadecimal number" $hexadecimal
+   }
+
+   scan $hexadecimal "%x" decimal
    return $decimal
 }
 
-proc brlNumberToCharacter {number} {
-   if {![string is digit -strict $number]} {
-      error "not a decimal value: $number"
+proc brlCharacterToCodepoint {character} {
+   if {[string length $character] != 1} {
+      brlDataError "not a single character" $character
    }
 
-   return [format "%c" "$number"]
+   scan $character "%c" codepoint
+   return $codepoint
 }
 
-set brfTable {
+proc brlCodepointToCharacter {codepoint} {
+   if {![string is integer -strict $codepoint]} {
+      brlDataError "not a codepoint" $codepoint
+   }
+
+   return [format "%c" "$codepoint"]
+}
+
+set brlUnicodeRow [expr {0X2800 + 0}]
+
+set brfDotsTable {
    0
    2346
    5
@@ -113,10 +133,12 @@ set brfTable {
 
 proc brlCharacterToDots {character} {
    if {[string length $character] == 1} {
-      set number [brlCharacterToNumber $character]
-      set bits [expr {$number & 0XFF}]
+      global brlUnicodeRow
 
-      if {($number - $bits) == 0X2800} {
+      set codepoint [brlCharacterToCodepoint $character]
+      set bits [expr {$codepoint & 0XFF}]
+
+      if {($codepoint - $bits) == $brlUnicodeRow} {
          set dots ""
          set dot 1
          set bit 0X01
@@ -138,69 +160,69 @@ proc brlCharacterToDots {character} {
          return "0"
       }
 
-      global brfTable
-      set index [expr {$number - 0X20}]
+      global brfDotsTable
+      set index [expr {$codepoint - 0X20}]
 
-      if {($number >= 0X60) && ($number <= 0X7E)} {
+      if {($codepoint >= 0X60) && ($codepoint <= 0X7E)} {
          incr index -0X20
       }
 
-      if {($index >= 0) && ($index < [string length $brfTable])} {
-         return [lindex $brfTable $index]
+      if {($index >= 0) && ($index < [llength $brfDotsTable])} {
+         return [lindex $brfDotsTable $index]
       }
    }
 
-   error "not a braille character: $character"
+   brlDataError "not a braille character" $character
 }
 
 proc brlDotsToCharacter {dots} {
-   set number [expr {0X2800 + 0}]
-
    if {[string length $dots] == 0} {
-      error "no dot numbers"
+      brlDataError "no dot numbers"
    }
+
+   global brlUnicodeRow
+   set codepoint $brlUnicodeRow
 
    if {![string equal $dots "0"]} {
       foreach dot [split $dots ""] {
          if {[string first $dot "12345678"] == -1} {
-            error "Not a dot: $dot"
+            brlDataError "Not a dot number" $dot
          }
 
          set bit [expr {1 << ($dot - 1)}]
 
-         if {($number & $bit) != 0} {
-            error "duplicate dot: $dot"
+         if {($codepoint & $bit) != 0} {
+            brlDataError "duplicate dot number" $dot
          }
 
-         incr number $bit
+         incr codepoint $bit
       }
    }
 
-   return [brlNumberToCharacter $number]
+   return [brlCodepointToCharacter $codepoint]
 }
 
 proc brlFormatCodepoint {codepoint} {
-   set result [format "%X" $codepoint]
-   set length [string length $result]
+   set digits [format "%X" $codepoint]
+   set length [string length $digits]
+   set letter "z"
 
    foreach {count letter} {2 x 4 u 8 U} {
       if {$length <= $count} {
-         set result "\\$letter[string repeat "0" [expr {$count - $length}]]$result"
+         set digits "[string repeat "0" [expr {$count - $length}]]$digits"
          break
       }
    }
 
-   return $result
+   return "\\$letter$digits"
 }
 
 proc processCharacter {text braille description} {
-   global outputStream
-
    if {[string length $text] == 1} {
-      set codepoint [brlCharacterToNumber $text]
+      set codepoint [brlCharacterToCodepoint $text]
    } else {
-      scan $text "%x" codepoint
-      set text [brlNumberToCharacter $codepoint]
+      set codepoint [brlHexadecimalToDecimal $text]
+      set text [brlCodepointToCharacter $codepoint]
    }
 
    set numbers ""
@@ -216,11 +238,12 @@ proc processCharacter {text braille description} {
       append cells [brlDotsToCharacter $dots]
    }
 
+   global outputStream
    puts $outputStream "always\t[brlFormatCodepoint $codepoint]\t$numbers\t# $text $cells\t$description"
 }
 
 proc processInput {} {
-   global inputStream outputStream
+   global inputStream
 
    while {[gets $inputStream line] >= 0} {
       set line [string trim $line]
@@ -235,7 +258,6 @@ proc processInput {} {
 
       regsub -all {\s+} $line " " line
       set description [join [lassign [split $line " "] text braille] " "]
-      set problem ""
 
       if {[string length $text] == 0} {
          set problem "missing textual representation"
@@ -243,10 +265,12 @@ proc processInput {} {
          set problem "missing braille representation"
       } elseif {[string length $description] == 0} {
          set problem "missing character description"
-      } elseif {[catch [list processCharacter $text $braille $description] response] != 0} {
+      } elseif {[catch [list processCharacter $text $braille $description] response] == 0} {
+         continue
+      } elseif {[string equal [lindex $::errorCode 0] data]} {
          set problem $response
       } else {
-         continue
+         error $response $::errorInfo $::errorCode
       }
 
       puts stderr "$problem: $line"
