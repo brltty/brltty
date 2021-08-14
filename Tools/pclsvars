@@ -36,11 +36,12 @@ parseProgramArguments "${@}"
 [ -n "${buildRoot}" ] || buildRoot="${defaultBuildRoot}"
 [ -n "${moduleName}" ] || moduleName="${defaultModuleName}"
 
-export PKG_CONFIG_PATH="${buildRoot}"
-
 pkgConfig() {
-   pkg-config "${@}" -- "${moduleName}"
+   pkg-config "${@}" -- "${moduleName}" || return "${?}"
 }
+
+export PKG_CONFIG_PATH="${buildRoot}"
+pkgConfig --exists || semanticError "module not found: ${moduleName}"
 
 if [ "${#variableNames[*]}" -eq 0 ]
 then
