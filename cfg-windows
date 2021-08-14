@@ -19,7 +19,8 @@
 
 . "`dirname "${0}"`/brltty-prologue.sh"
 
-"${programDirectory}/configure" \
+relativePath "${programDirectory}" configureDirectory
+"${configureDirectory}/configure" \
    --enable-relocatable-install \
    \
    --disable-expat \
