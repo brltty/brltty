@@ -47,7 +47,7 @@ BRLTTY_CHECK_JAVA_PATH([dnl
    AC_MSG_NOTICE([Java version: ${JAVA_VERSION}])
 
    AC_MSG_CHECKING([JVM path])
-   brltty_path="`${srcdir}/Tools/javacmd jvmpath`"
+   BRLTTY_JAVA_QUERY([brltty_path], [jvmpath])
 
    if test -n "${brltty_path}"
    then
@@ -170,4 +170,8 @@ fi
 
 AC_SUBST([JAVA_$1])
 AC_SUBST([JAVA_$1_DIR])
+])
+
+AC_DEFUN([BRLTTY_JAVA_QUERY], [dnl
+   $1=`"${srcdir}/Tools/javacmd" $2`
 ])

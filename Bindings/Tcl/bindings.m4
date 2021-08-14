@@ -26,7 +26,7 @@ TCL_DIR=""
 if test -n "${TCLSH}"
 then
    AC_MSG_NOTICE([Tcl shell: ${TCLSH}])
-   tcl_configuration_script="`${TCLSH} ${srcdir}/Tools/tclcmd config`"
+   BRLTTY_TCL_QUERY([tcl_configuration_script], [config])
 
    if test -n "${tcl_configuration_script}"
    then
@@ -73,4 +73,8 @@ AC_SUBST([TCL_OK])
 AC_SUBST([TCL_CPPFLAGS])
 AC_SUBST([TCL_LIBS])
 AC_SUBST([TCL_DIR])
+])
+
+AC_DEFUN([BRLTTY_TCL_QUERY], [dnl
+   $1=`"${TCLSH}" "${srcdir}/Tools/tclcmd" $2`
 ])

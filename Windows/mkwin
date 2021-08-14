@@ -184,6 +184,7 @@ copyProperties "${1}" usb Name Location Download Version Pattern Filter
    if verifyWindowsPackage python
    then
       export PATH="${pythonRoot}:${pythonRoot}/Scripts:${PATH}"
+      export PYTHON="${pythonRoot}/python"
    fi
 }
 
