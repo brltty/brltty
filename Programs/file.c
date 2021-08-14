@@ -1201,7 +1201,6 @@ writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, si
 
 char *
 readSymbolicLink (const char *path) {
-#ifdef HAVE_READLINK
   char *content = NULL;
   size_t size = 0X80;
   char *buffer = NULL;
@@ -1219,7 +1218,14 @@ readSymbolicLink (const char *path) {
     }
 
     {
-      int length = readlink(path, buffer, size);
+      int length;
+
+      #ifdef HAVE_READLINK
+      length = readlink(path, buffer, size);
+      #else /* HAVE_READLINK */
+      length = -1;
+      errno = ENOSYS;
+      #endif /* HAVE_READLINK */
 
       if (length == -1) {
         if (errno != ENOENT) logSystemError("readlink");
@@ -1236,8 +1242,4 @@ readSymbolicLink (const char *path) {
 
   if (buffer) free(buffer);
   return content;
-#else /* HAVE_READLINK */
-  errno = ENOSYS;
-  return NULL;
-#endif /* HAVE_READLINK */
 }
