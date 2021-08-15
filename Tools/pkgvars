@@ -21,7 +21,7 @@
 setBuildRoot
 
 defaultBuildRoot="${BRLTTY_BUILD_ROOT}"
-defaultModuleName="brltty"
+defaultPackageName="brltty"
 variableNames=()
 
 processExtraProgramParameters() {
@@ -29,19 +29,19 @@ processExtraProgramParameters() {
 }
 
 addProgramOption b string.directory buildRoot "the root directory of the build" "${defaultBuildRoot}"
-addProgramOption m string.moudle moduleName "the name of the module" "${defaultModuleName}"
+addProgramOption p string.name packageName "the name of the package" "${defaultPackageName}"
 optionalProgramParameters
 parseProgramArguments "${@}"
 
 [ -n "${buildRoot}" ] || buildRoot="${defaultBuildRoot}"
-[ -n "${moduleName}" ] || moduleName="${defaultModuleName}"
+[ -n "${packageName}" ] || packageName="${defaultPackageName}"
 
 pkgConfig() {
-   pkg-config "${@}" -- "${moduleName}" || return "${?}"
+   pkg-config "${@}" -- "${packageName}" || return "${?}"
 }
 
 export PKG_CONFIG_PATH="${buildRoot}"
-pkgConfig --exists || semanticError "module not found: ${moduleName}"
+pkgConfig --exists || semanticError "package not found: ${packageName}"
 
 if [ "${#variableNames[*]}" -eq 0 ]
 then
