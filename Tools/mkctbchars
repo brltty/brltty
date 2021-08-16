@@ -25,7 +25,7 @@ set optionDefinitions {
 
 set inputStream stdin
 set outputStream stdout
-processProgramArguments optionValues $optionDefinitions positionalArguments "\{config\}"
+processProgramArguments optionValues $optionDefinitions
 
 proc processCharacter {text braille description} {
    if {[string length $text] == 1} {
@@ -75,12 +75,12 @@ proc processInput {} {
          set problem "missing braille representation"
       } elseif {[string length $description] == 0} {
          set problem "missing character description"
-      } elseif {[catch [list processCharacter $text $braille $description] response] == 0} {
-         continue
-      } elseif {[string equal [lindex $::errorCode 0] $::brlErrorCodeCategory]} {
-         set problem $response
       } else {
-         error $response $::errorInfo $::errorCode
+         try {
+            processCharacter $text $braille $description
+            continue
+         } trap [list $::brlErrorCategory] {problem} {
+         }
       }
 
       writeProgramMessage "$problem: $line"

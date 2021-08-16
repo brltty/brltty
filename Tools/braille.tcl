@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-set brlErrorCodeCategory braille
+set brlErrorCategory braille
 set brlUnicodeRow [expr {0X2800 + 0}]
 
 set brfDotsTable {
@@ -86,19 +86,19 @@ set brfDotsTable {
    456
 }
 
-proc brlThrowError {problem {value ""}} {
+proc brlThrowError {code problem {value ""}} {
    set message $problem
 
    if {[string length $value] > 0} {
       append message ": $value"
    }
 
-   error $message "" [list $::brlErrorCodeCategory $problem $value]
+   return -code error -errorcode [list $::brlErrorCategory $code $problem $value] $message
 }
 
 proc brlHexadecimalToDecimal {hexadecimal} {
    if {![string is xdigit -strict $hexadecimal]} {
-      brlThrowError "not a hexadecimal number" $hexadecimal
+      brlThrowError not-hex "not a hexadecimal number" $hexadecimal
    }
 
    scan $hexadecimal "%x" decimal
@@ -107,7 +107,7 @@ proc brlHexadecimalToDecimal {hexadecimal} {
 
 proc brlCharacterToCodepoint {character} {
    if {[string length $character] != 1} {
-      brlThrowError "not a single character" $character
+      brlThrowError not-char "not a single character" $character
    }
 
    scan $character "%c" codepoint
@@ -116,7 +116,7 @@ proc brlCharacterToCodepoint {character} {
 
 proc brlCodepointToCharacter {codepoint} {
    if {![string is integer -strict $codepoint]} {
-      brlThrowError "not a codepoint" $codepoint
+      brlThrowError not-int "not an integer" $codepoint
    }
 
    return [format "%c" "$codepoint"]
@@ -163,12 +163,12 @@ proc brlCharacterToDots {character} {
       }
    }
 
-   brlThrowError "not a braille character" $character
+   brlThrowError not-brl "not a braille character" $character
 }
 
 proc brlDotsToCharacter {dots} {
    if {[string length $dots] == 0} {
-      brlThrowError "no dot numbers"
+      brlThrowError no-dots "no dot numbers"
    }
 
    global brlUnicodeRow
@@ -177,13 +177,13 @@ proc brlDotsToCharacter {dots} {
    if {![string equal $dots "0"]} {
       foreach dot [split $dots ""] {
          if {[string first $dot "12345678"] == -1} {
-            brlThrowError "Not a dot number" $dot
+            brlThrowError not-dot "Not a dot number" $dot
          }
 
          set bit [expr {1 << ($dot - 1)}]
 
          if {($codepoint & $bit) != 0} {
-            brlThrowError "duplicate dot number" $dot
+            brlThrowError dup-dot "duplicate dot number" $dot
          }
 
          incr codepoint $bit
