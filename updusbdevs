@@ -235,17 +235,17 @@ proc parseDriver {directory} {
 }
 
 proc parseDrivers {} {
-  global sourceDirectory
+   global prologueDirectory
 
-  set drivers [list]
+   set drivers [list]
 
-  foreach directory [lsort [glob -directory [file join $sourceDirectory Drivers Braille] -types {d r x} -nocomplain *]] {
-     if {[llength [dict get [set driver [parseDriver $directory]] channels]] > 0} {
-        lappend drivers $driver
-     }
-  }
+   foreach directory [lsort [glob -directory [file join $prologueDirectory Drivers Braille] -types {d r x} -nocomplain *]] {
+      if {[llength [dict get [set driver [parseDriver $directory]] channels]] > 0} {
+         lappend drivers $driver
+      }
+   }
 
-  return $drivers
+   return $drivers
 }
 
 proc formatDeviceDescription {device} {
@@ -700,13 +700,13 @@ set optionDefinitions {
 processProgramArguments optionValues $optionDefinitions positionalArguments "\[scheme:file ...\]"
 
 if {[llength $positionalArguments] == 0} {
-   lappend positionalArguments "android:[file join $sourceDirectory Android Gradle app src main res xml usb_devices.xml]"
-   lappend positionalArguments "c:[file join $sourceDirectory Programs usb_devices.c]"
-   lappend positionalArguments "hotplug:[file join $sourceDirectory Autostart Hotplug brltty.usermap]"
-   lappend positionalArguments "metainfo:[file join $sourceDirectory Autostart AppStream org.a11y.brltty.metainfo.xml]"
-   lappend positionalArguments "udev:[file join $sourceDirectory Autostart Udev device.rules.in]"
-   lappend positionalArguments "windows:[file join $sourceDirectory Autostart Windows brltty-libusb.inf]"
-   lappend positionalArguments "windows:[file join $sourceDirectory Autostart Windows brltty-libusb-1.0.inf]"
+   lappend positionalArguments "android:[file join $prologueDirectory Android Gradle app src main res xml usb_devices.xml]"
+   lappend positionalArguments "c:[file join $prologueDirectory Programs usb_devices.c]"
+   lappend positionalArguments "hotplug:[file join $prologueDirectory Autostart Hotplug brltty.usermap]"
+   lappend positionalArguments "metainfo:[file join $prologueDirectory Autostart AppStream org.a11y.brltty.metainfo.xml]"
+   lappend positionalArguments "udev:[file join $prologueDirectory Autostart Udev device.rules.in]"
+   lappend positionalArguments "windows:[file join $prologueDirectory Autostart Windows brltty-libusb.inf]"
+   lappend positionalArguments "windows:[file join $prologueDirectory Autostart Windows brltty-libusb-1.0.inf]"
 }
 
 if {[llength $positionalArguments] == 0} {
