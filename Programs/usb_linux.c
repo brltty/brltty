@@ -216,6 +216,7 @@ usbDisconnectInterface (UsbDevice *device, unsigned char interface) {
 
     if (isUsbfs) {
       logPossibleCause("another " PACKAGE_TARNAME " process may be accessing the same device");
+      logPossibleCause("the device may be attached to a virtual machine running on this host");
       errno = EBUSY;
     } else if (usbDisconnectDriver(device, interface)) {
       return 1;
