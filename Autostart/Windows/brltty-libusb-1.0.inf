@@ -40,7 +40,7 @@ HKR,,Icon,,-20
 %ProviderName% = libusbDevice_WinUSB,NTx86,NTamd64
 
 [libusbDevice_WinUSB.NTx86]
-; BEGIN_USB_DEVICES LibUSB-1.0
+; BEGIN_USB_DEVICES LibUSB-1.0 LIBUSB_DEV
 
 ; Device: 0403:6001
 ; Generic Identifier
@@ -399,7 +399,7 @@ HKR,,Icon,,-20
 ; END_USB_DEVICES
 
 [libusbDevice_WinUSB.NTamd64]
-; BEGIN_USB_DEVICES LibUSB-1.0
+; BEGIN_USB_DEVICES LibUSB-1.0 LIBUSB_DEV
 
 ; Device: 0403:6001
 ; Generic Identifier

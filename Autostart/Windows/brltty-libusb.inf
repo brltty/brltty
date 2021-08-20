@@ -127,7 +127,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ;--------------------------------------------------------------------------
 
 [Devices]
-; BEGIN_USB_DEVICES LibUSB-Win32
+; BEGIN_USB_DEVICES LibUSB-Win32 LIBUSB_DEV
 
 ; Device: 0403:6001
 ; Generic Identifier
@@ -486,7 +486,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; END_USB_DEVICES
 
 [Devices.NT]
-; BEGIN_USB_DEVICES LibUSB-Win32
+; BEGIN_USB_DEVICES LibUSB-Win32 LIBUSB_DEV
 
 ; Device: 0403:6001
 ; Generic Identifier
@@ -845,7 +845,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; END_USB_DEVICES
 
 [Devices.NTAMD64]
-; BEGIN_USB_DEVICES LibUSB-Win32
+; BEGIN_USB_DEVICES LibUSB-Win32 LIBUSB_DEV
 
 ; Device: 0403:6001
 ; Generic Identifier

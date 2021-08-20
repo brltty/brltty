@@ -447,7 +447,7 @@ proc makeComment_windows {comment} {
 
 proc makeLines_windows {vendor product drivers descriptions exclude} {
    set lines [list]
-   set line [format "\"\$1: %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
+   set line [format "\"\$1: %s\"=\$2, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
 
    if {$exclude} {
       set line [makeComment_windows $line]
@@ -705,6 +705,7 @@ if {[llength $positionalArguments] == 0} {
    lappend positionalArguments "hotplug:[file join $prologueDirectory Autostart Hotplug brltty.usermap]"
    lappend positionalArguments "metainfo:[file join $prologueDirectory Autostart AppStream org.a11y.brltty.metainfo.xml]"
    lappend positionalArguments "udev:[file join $prologueDirectory Autostart Udev device.rules.in]"
+   lappend positionalArguments "windows:[file join $prologueDirectory Autostart Windows brltty-winusb.inf]"
    lappend positionalArguments "windows:[file join $prologueDirectory Autostart Windows brltty-libusb.inf]"
    lappend positionalArguments "windows:[file join $prologueDirectory Autostart Windows brltty-libusb-1.0.inf]"
 }

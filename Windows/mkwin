@@ -99,7 +99,7 @@ installPackage_winusb() {
 . "`dirname "${0}"`/../brltty-prologue.sh"
 . "${programDirectory}/mingw.sh"
 
-defaultUsbPackage="libusb"
+defaultUsbPackage="winusb"
 defaultTemporaryDirectory="${TMPDIR:-/tmp}/brltty-${programName}"
 
 addProgramOption u string.package usbPackage "which USB package to use" "${defaultUsbPackage}"
@@ -158,10 +158,13 @@ logMessage task "revision identifier: ${revisionIdentifier}"
 
 case "${usbPackage}"
 in
+   winusb) usbWindowsPackages=();;
    libusb) usbWindowsPackages=("libusb0");;
    libusb-1.0) usbWindowsPackages=("libusb1" "winusb");;
    *) syntaxError "unrecognized USB package: ${usbPackage}"
 esac
+
+winusbFilter=""
 
 libusb0Filter="\
     select "USB:", and install ${libusb0Name}'s filter by doing one of the
