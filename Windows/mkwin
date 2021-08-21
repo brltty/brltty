@@ -1,4 +1,4 @@
-#!/bin/bash -p
+#!/bin/bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -48,15 +48,19 @@ installFile() {
    fi
 }
 
-installFiles() {
+installPackages() {
    while [ "${#}" -gt 0 ]
    do
-      "installFiles_${1}"
+      local package="${1}"
       shift 1
+
+      local name="$(getVariable "${package}Name")"
+      logMessage task "installing package files: ${name}"
+      "installPackage_${package}"
    done
 }
 
-installFiles_libusb0() {
+installPackage_libusb0() {
    if [ -n "${libusb0Root}" ]
    then
       cd "${libusb0Root}/bin"
@@ -69,7 +73,7 @@ installFiles_libusb0() {
    fi
 }
 
-installFiles_libusb1() {
+installPackage_libusb1() {
    if [ -n "${libusb1Root}" ]
    then
       cd "${libusb1Root}"
@@ -79,7 +83,7 @@ installFiles_libusb1() {
    fi
 }
 
-installFiles_winusb() {
+installPackage_winusb() {
    if [ -n "${winusbRoot}" ]
    then
       cd "${winusbRoot}"
@@ -154,8 +158,8 @@ logMessage task "revision identifier: ${revisionIdentifier}"
 
 case "${usbPackage}"
 in
-   libusb) usbWindowsPackages="libusb0";;
-   libusb-1.0) usbWindowsPackages="libusb1 winusb";;
+   libusb) usbWindowsPackages=("libusb0");;
+   libusb-1.0) usbWindowsPackages=("libusb1" "winusb");;
    *) syntaxError "unrecognized USB package: ${usbPackage}"
 esac
 
@@ -170,7 +174,7 @@ libusb1Filter="\
     you will need to use ${libusb0Name} instead because
     ${libusb1Name} does not support this requirement."
 
-set -- ${usbWindowsPackages}
+set -- "${usbWindowsPackages[@]}"
 copyProperties "${1}" usb Name Location Download Version Pattern Filter
 
 [ -z "${msvcRoot}" ] || {
@@ -188,7 +192,7 @@ copyProperties "${1}" usb Name Location Download Version Pattern Filter
    fi
 }
 
-verifyWindowsPackages ahk nsis icu ${usbWindowsPackages} || :
+verifyWindowsPackages ahk nsis icu "${usbWindowsPackages[@]}" || :
 verifyWindowsCommands lib python cython || :
 verifyMingwPackages pthreads curses || :
 verifyMingwCommands zip unix2dos linuxdoc doxygen groff || :
@@ -373,7 +377,8 @@ installFile "debug-brltty.bat" "/"
 installFile "enable-brlapi.bat" "/"
 installFile "disable-brlapi.bat" "/"
 
-installFiles ${usbWindowsPackages}
+logMessage task "USB package: ${usbPackage}"
+installPackages "${usbWindowsPackages[@]}"
 
 cd /mingw/bin
 for file in libgcc_s_dw2-1.dll libiconv-2.dll libpdcurses*.dll libintl-8.dll
