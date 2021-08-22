@@ -445,8 +445,20 @@ fi
 # for the installer but before text file conversion
 cd "${installRoot}/.."
 nsisScript="${usbPackage}.nsi"
-cp "${programDirectory}/${usbPackage}.nsi" .
-cp "${programDirectory}/nsistrings.txt" .
+nsisStrings="nsistrings.txt"
+
+for file in "${nsisScript}" "${nsisStrings}"
+do
+   path="${programDirectory}/${file}"
+
+   if [ -f "${path}" ]
+   then
+      cp "${path}" .
+   else
+      logMessage warning "installer source file not found: ${file}"
+      nsisRoot=""
+   fi
+done
 
 cat >"README.txt" <<END-OF-README
 ${readmeHeader}
@@ -524,7 +536,7 @@ if [ -n "${nsisRoot}" ]
 then
    logMessage task "creating installer"
    cd "${installRoot}/.."
-   mv nsistrings.txt "${buildName}"
+   mv "${nsisStrings}" "${buildName}"
    installerFile="${buildName}.exe"
 
    "${nsisRoot}/makensis" -V2 \
