@@ -1,4 +1,4 @@
-!define VARIANT "libusb"
+!define VARIANT "libusb-1.0"
 
 !macro BrlttyInstall
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb-1.0.dll" "$SYSDIR\libusb-1.0.dll" "$SYSDIR"
