@@ -169,10 +169,13 @@ logMessage task "revision identifier: ${revisionIdentifier}"
 
 case "${usbPackage}"
 in
+   winusb) usbWindowsPackages=();;
    libusb) usbWindowsPackages=("libusb0");;
    libusb-1.0) usbWindowsPackages=("libusb1" "winusb");;
    *) syntaxError "unrecognized USB package: ${usbPackage}"
 esac
+
+winusbFilter=""
 
 libusb0Filter="\
     select "USB:", and install the ${libusb0Name} filter by doing one of the

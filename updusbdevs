@@ -447,7 +447,7 @@ proc makeComment_windows {comment} {
 
 proc makeLines_windows {vendor product drivers descriptions exclude} {
    set lines [list]
-   set line [format "\"\$1: %s\"=LIBUSB_DEV, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
+   set line [format "\"\$1: %s\"=\$2, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
 
    if {$exclude} {
       set line [makeComment_windows $line]

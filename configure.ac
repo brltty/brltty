@@ -1460,7 +1460,7 @@ BRLTTY_ARG_PACKAGE([serial], [serial I/O], [termios], [dnl
       ;;
 ])
 
-BRLTTY_ARG_PACKAGE([usb], [USB I/O], [libusb-1.0 libusb], [dnl
+BRLTTY_ARG_PACKAGE([usb], [USB I/O], [winusb libusb-1.0 libusb], [dnl
    *android*)
       usb_package="android"
       ;;
@@ -1493,6 +1493,12 @@ BRLTTY_ARG_PACKAGE([usb], [USB I/O], [libusb-1.0 libusb], [dnl
       AC_HAVE_LIBRARY([rt])
       ;;
 ], [dnl
+   winusb)
+      AC_CHECK_HEADER([winusb.h], [dnl
+         usb_package="winusb"
+         usb_libs="-lwinusb"
+      ], [], [-])
+      ;;
    libusb)
       AC_CHECK_HEADER([usb.h], [dnl
          usb_package="libusb"

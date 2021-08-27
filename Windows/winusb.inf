@@ -1,0 +1,778 @@
+[Version]
+Signature = "$Windows NT$"
+Class     = USBDevice
+ClassGUID = {88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider  = %ManufacturerName%
+CatalogFile = WinUSBInstallation.cat
+DriverVer=09/04/2012,13.54.20.543
+
+; ========== Manufacturer/Models sections ===========
+
+[Manufacturer]
+%ManufacturerName% = Standard,NTx86,NTamd64
+
+[Standard.NTx86]
+; BEGIN_USB_DEVICES winusb USB_Install
+
+; Device: 0403:6001
+; Generic Identifier
+; Vendor: Future Technology Devices International, Ltd
+; Product: FT232 USB-Serial (UART) IC
+"winusb: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=USB_Install, USB\VID_0403&PID_6001
+
+; Device: 0403:DE58
+"winusb: Hedo [MobilLine]"=USB_Install, USB\VID_0403&PID_DE58
+
+; Device: 0403:DE59
+"winusb: Hedo [ProfiLine]"=USB_Install, USB\VID_0403&PID_DE59
+
+; Device: 0403:F208
+"winusb: Papenmeier [all models]"=USB_Install, USB\VID_0403&PID_F208
+
+; Device: 0403:FE70
+"winusb: Baum [Vario 40 (40 cells)]"=USB_Install, USB\VID_0403&PID_FE70
+
+; Device: 0403:FE71
+"winusb: Baum [PocketVario (24 cells)]"=USB_Install, USB\VID_0403&PID_FE71
+
+; Device: 0403:FE72
+"winusb: Baum [SuperVario 40 (40 cells)]"=USB_Install, USB\VID_0403&PID_FE72
+
+; Device: 0403:FE73
+"winusb: Baum [SuperVario 32 (32 cells)]"=USB_Install, USB\VID_0403&PID_FE73
+
+; Device: 0403:FE74
+"winusb: Baum [SuperVario 64 (64 cells)]"=USB_Install, USB\VID_0403&PID_FE74
+
+; Device: 0403:FE75
+"winusb: Baum [SuperVario 80 (80 cells)]"=USB_Install, USB\VID_0403&PID_FE75
+
+; Device: 0403:FE76
+"winusb: Baum [VarioPro 80 (80 cells)]"=USB_Install, USB\VID_0403&PID_FE76
+
+; Device: 0403:FE77
+"winusb: Baum [VarioPro 64 (64 cells)]"=USB_Install, USB\VID_0403&PID_FE77
+
+; Device: 0452:0100
+"winusb: Metec [all models]"=USB_Install, USB\VID_0452&PID_0100
+
+; Device: 045E:930A
+"winusb: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=USB_Install, USB\VID_045E&PID_930A
+
+; Device: 045E:930B
+"winusb: HIMS [Braille Edge]"=USB_Install, USB\VID_045E&PID_930B
+
+; Device: 0483:A1D3
+"winusb: Baum [Orbit 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
+
+; Device: 06B0:0001
+"winusb: Alva [Satellite (5nn)]"=USB_Install, USB\VID_06B0&PID_0001
+
+; Device: 0798:0001
+"winusb: Voyager [all models]"=USB_Install, USB\VID_0798&PID_0001
+
+; Device: 0798:0600
+"winusb: Alva [Voyager Protocol Converter]"=USB_Install, USB\VID_0798&PID_0600
+
+; Device: 0798:0624
+"winusb: Alva [BC624]"=USB_Install, USB\VID_0798&PID_0624
+
+; Device: 0798:0640
+"winusb: Alva [BC640]"=USB_Install, USB\VID_0798&PID_0640
+
+; Device: 0798:0680
+"winusb: Alva [BC680]"=USB_Install, USB\VID_0798&PID_0680
+
+; Device: 0904:1016
+"winusb: FrankAudiodata [B2K84 (before firmware installation)]"=USB_Install, USB\VID_0904&PID_1016
+
+; Device: 0904:1017
+"winusb: FrankAudiodata [B2K84 (after firmware installation)]"=USB_Install, USB\VID_0904&PID_1017
+
+; Device: 0904:2000
+"winusb: Baum [VarioPro 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_2000
+
+; Device: 0904:2001
+"winusb: Baum [EcoVario 24 (24 cells)]"=USB_Install, USB\VID_0904&PID_2001
+
+; Device: 0904:2002
+"winusb: Baum [EcoVario 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_2002
+
+; Device: 0904:2007
+"winusb: Baum [VarioConnect 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_2007
+
+; Device: 0904:2008
+"winusb: Baum [VarioConnect 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_2008
+
+; Device: 0904:2009
+"winusb: Baum [VarioConnect 24 (24 cells)]"=USB_Install, USB\VID_0904&PID_2009
+
+; Device: 0904:2010
+"winusb: Baum [VarioConnect 64 (64 cells)]"=USB_Install, USB\VID_0904&PID_2010
+
+; Device: 0904:2011
+"winusb: Baum [VarioConnect 80 (80 cells)]"=USB_Install, USB\VID_0904&PID_2011
+
+; Device: 0904:2014
+"winusb: Baum [EcoVario 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_2014
+
+; Device: 0904:2015
+"winusb: Baum [EcoVario 64 (64 cells)]"=USB_Install, USB\VID_0904&PID_2015
+
+; Device: 0904:2016
+"winusb: Baum [EcoVario 80 (80 cells)]"=USB_Install, USB\VID_0904&PID_2016
+
+; Device: 0904:3000
+"winusb: Baum [Refreshabraille 18 (18 cells)]"=USB_Install, USB\VID_0904&PID_3000
+
+; Device: 0904:3001
+"winusb: Baum [Orbit in Refreshabraille Emulation Mode (18 cells)], Baum [Refreshabraille 18 (18 cells)]"=USB_Install, USB\VID_0904&PID_3001
+
+; Device: 0904:4004
+"winusb: Baum [Pronto! V3 18 (18 cells)]"=USB_Install, USB\VID_0904&PID_4004
+
+; Device: 0904:4005
+"winusb: Baum [Pronto! V3 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_4005
+
+; Device: 0904:4007
+"winusb: Baum [Pronto! V4 18 (18 cells)]"=USB_Install, USB\VID_0904&PID_4007
+
+; Device: 0904:4008
+"winusb: Baum [Pronto! V4 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_4008
+
+; Device: 0904:6001
+"winusb: Baum [SuperVario2 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_6001
+
+; Device: 0904:6002
+"winusb: Baum [PocketVario2 (24 cells)]"=USB_Install, USB\VID_0904&PID_6002
+
+; Device: 0904:6003
+"winusb: Baum [SuperVario2 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_6003
+
+; Device: 0904:6004
+"winusb: Baum [SuperVario2 64 (64 cells)]"=USB_Install, USB\VID_0904&PID_6004
+
+; Device: 0904:6005
+"winusb: Baum [SuperVario2 80 (80 cells)]"=USB_Install, USB\VID_0904&PID_6005
+
+; Device: 0904:6006
+"winusb: Baum [Brailliant2 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_6006
+
+; Device: 0904:6007
+"winusb: Baum [Brailliant2 24 (24 cells)]"=USB_Install, USB\VID_0904&PID_6007
+
+; Device: 0904:6008
+"winusb: Baum [Brailliant2 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_6008
+
+; Device: 0904:6009
+"winusb: Baum [Brailliant2 64 (64 cells)]"=USB_Install, USB\VID_0904&PID_6009
+
+; Device: 0904:600A
+"winusb: Baum [Brailliant2 80 (80 cells)]"=USB_Install, USB\VID_0904&PID_600A
+
+; Device: 0904:6011
+"winusb: Baum [VarioConnect 24 (24 cells)]"=USB_Install, USB\VID_0904&PID_6011
+
+; Device: 0904:6012
+"winusb: Baum [VarioConnect 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_6012
+
+; Device: 0904:6013
+"winusb: Baum [VarioConnect 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_6013
+
+; Device: 0904:6101
+"winusb: Baum [VarioUltra 20 (20 cells)]"=USB_Install, USB\VID_0904&PID_6101
+
+; Device: 0904:6102
+"winusb: Baum [VarioUltra 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_6102
+
+; Device: 0904:6103
+"winusb: Baum [VarioUltra 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_6103
+
+; Device: 0921:1200
+"winusb: HandyTech [GoHubs chip]"=USB_Install, USB\VID_0921&PID_1200
+
+; Device: 0F4E:0100
+"winusb: FreedomScientific [Focus 1]"=USB_Install, USB\VID_0F4E&PID_0100
+
+; Device: 0F4E:0111
+"winusb: FreedomScientific [PAC Mate]"=USB_Install, USB\VID_0F4E&PID_0111
+
+; Device: 0F4E:0112
+"winusb: FreedomScientific [Focus 2]"=USB_Install, USB\VID_0F4E&PID_0112
+
+; Device: 0F4E:0114
+"winusb: FreedomScientific [Focus 3+]"=USB_Install, USB\VID_0F4E&PID_0114
+
+; Device: 10C4:EA60
+; Generic Identifier
+; Vendor: Cygnal Integrated Products, Inc.
+; Product: CP210x UART Bridge / myAVR mySmartUSB light
+"winusb: BrailleMemo [Pocket], Seika [Braille Display]"=USB_Install, USB\VID_10C4&PID_EA60
+
+; Device: 10C4:EA80
+; Generic Identifier
+; Vendor: Cygnal Integrated Products, Inc.
+; Product: CP210x UART Bridge
+"winusb: Seika [Note Taker]"=USB_Install, USB\VID_10C4&PID_EA80
+
+; Device: 1148:0301
+"winusb: BrailleMemo [Smart]"=USB_Install, USB\VID_1148&PID_0301
+
+; Device: 1209:ABC0
+"winusb: Inceptor [all models]"=USB_Install, USB\VID_1209&PID_ABC0
+
+; Device: 16C0:05E1
+"winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
+
+; Device: 1A86:7523
+"winusb: Baum [NLS eReader Zoomax (20 cells)]"=USB_Install, USB\VID_1A86&PID_7523
+
+; Device: 1C71:C004
+"winusb: BrailleNote [HumanWare APEX]"=USB_Install, USB\VID_1C71&PID_C004
+
+; Device: 1C71:C005
+"winusb: HumanWare [Brailliant BI 32/40, Brailliant B 80 (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C005
+
+; Device: 1C71:C006
+"winusb: HumanWare [non-Touch models (HID protocol)]"=USB_Install, USB\VID_1C71&PID_C006
+
+; Device: 1C71:C00A
+"winusb: HumanWare [BrailleNote Touch (HID protocol)]"=USB_Install, USB\VID_1C71&PID_C00A
+
+; Device: 1C71:C021
+"winusb: HumanWare [Brailliant BI 14 (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C021
+
+; Device: 1C71:C101
+"winusb: HumanWare [APH Chameleon 20 (HID protocol, firmware 1.0)], HumanWare [APH Chameleon 20 (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C101
+
+; Device: 1C71:C104
+"winusb: HumanWare [APH Chameleon 20 (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C104
+
+; Device: 1C71:C111
+"winusb: HumanWare [APH Mantis Q40 (HID protocol, firmware 1.0)], HumanWare [APH Mantis Q40 (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C111
+
+; Device: 1C71:C114
+"winusb: HumanWare [APH Mantis Q40 (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C114
+
+; Device: 1C71:C121
+"winusb: HumanWare [Humanware BrailleOne (HID protocol, firmware 1.0)], HumanWare [Humanware BrailleOne (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C121
+
+; Device: 1C71:C124
+"winusb: HumanWare [Humanware BrailleOne (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C124
+
+; Device: 1C71:C131
+"winusb: HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C131
+
+; Device: 1C71:C141
+"winusb: HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C141
+
+; Device: 1C71:CE01
+"winusb: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_CE01
+
+; Device: 1C71:CE04
+"winusb: HumanWare [NLS eReader (serial protocol)]"=USB_Install, USB\VID_1C71&PID_CE04
+
+; Device: 1FE4:0003
+"winusb: HandyTech [USB-HID adapter]"=USB_Install, USB\VID_1FE4&PID_0003
+
+; Device: 1FE4:0044
+"winusb: HandyTech [Easy Braille (HID)]"=USB_Install, USB\VID_1FE4&PID_0044
+
+; Device: 1FE4:0054
+"winusb: HandyTech [Active Braille]"=USB_Install, USB\VID_1FE4&PID_0054
+
+; Device: 1FE4:0055
+"winusb: HandyTech [Connect Braille 40]"=USB_Install, USB\VID_1FE4&PID_0055
+
+; Device: 1FE4:0061
+"winusb: HandyTech [Actilino]"=USB_Install, USB\VID_1FE4&PID_0061
+
+; Device: 1FE4:0064
+"winusb: HandyTech [Active Star 40]"=USB_Install, USB\VID_1FE4&PID_0064
+
+; Device: 1FE4:0074
+"winusb: HandyTech [Braille Star 40 (HID)]"=USB_Install, USB\VID_1FE4&PID_0074
+
+; Device: 1FE4:0081
+"winusb: HandyTech [Basic Braille 16]"=USB_Install, USB\VID_1FE4&PID_0081
+
+; Device: 1FE4:0082
+"winusb: HandyTech [Basic Braille 20]"=USB_Install, USB\VID_1FE4&PID_0082
+
+; Device: 1FE4:0083
+"winusb: HandyTech [Basic Braille 32]"=USB_Install, USB\VID_1FE4&PID_0083
+
+; Device: 1FE4:0084
+"winusb: HandyTech [Basic Braille 40]"=USB_Install, USB\VID_1FE4&PID_0084
+
+; Device: 1FE4:0086
+"winusb: HandyTech [Basic Braille 64]"=USB_Install, USB\VID_1FE4&PID_0086
+
+; Device: 1FE4:0087
+"winusb: HandyTech [Basic Braille 80]"=USB_Install, USB\VID_1FE4&PID_0087
+
+; Device: 1FE4:008A
+"winusb: HandyTech [Basic Braille 48]"=USB_Install, USB\VID_1FE4&PID_008A
+
+; Device: 1FE4:008B
+"winusb: HandyTech [Basic Braille 160]"=USB_Install, USB\VID_1FE4&PID_008B
+
+; Device: 1FE4:00A4
+"winusb: HandyTech [Activator]"=USB_Install, USB\VID_1FE4&PID_00A4
+
+; Device: 4242:0001
+"winusb: Pegasus [all models]"=USB_Install, USB\VID_4242&PID_0001
+
+; Device: C251:1122
+"winusb: EuroBraille [Esys (version < 3.0, no SD card)]"=USB_Install, USB\VID_C251&PID_1122
+
+; Device: C251:1123
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1123
+
+; Device: C251:1124
+"winusb: EuroBraille [Esys (version < 3.0, with SD card)]"=USB_Install, USB\VID_C251&PID_1124
+
+; Device: C251:1125
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1125
+
+; Device: C251:1126
+"winusb: EuroBraille [Esys (version >= 3.0, no SD card)]"=USB_Install, USB\VID_C251&PID_1126
+
+; Device: C251:1127
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1127
+
+; Device: C251:1128
+"winusb: EuroBraille [Esys (version >= 3.0, with SD card)]"=USB_Install, USB\VID_C251&PID_1128
+
+; Device: C251:1129
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1129
+
+; Device: C251:112A
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112A
+
+; Device: C251:112B
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112B
+
+; Device: C251:112C
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112C
+
+; Device: C251:112D
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112D
+
+; Device: C251:112E
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112E
+
+; Device: C251:112F
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112F
+
+; Device: C251:1130
+"winusb: EuroBraille [Esytime (firmware 1.03, 2014-03-31)], EuroBraille [Esytime]"=USB_Install, USB\VID_C251&PID_1130
+
+; Device: C251:1131
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1131
+
+; Device: C251:1132
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1132
+
+; END_USB_DEVICES
+
+[Standard.NTamd64]
+; BEGIN_USB_DEVICES winusb USB_Install
+
+; Device: 0403:6001
+; Generic Identifier
+; Vendor: Future Technology Devices International, Ltd
+; Product: FT232 USB-Serial (UART) IC
+"winusb: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=USB_Install, USB\VID_0403&PID_6001
+
+; Device: 0403:DE58
+"winusb: Hedo [MobilLine]"=USB_Install, USB\VID_0403&PID_DE58
+
+; Device: 0403:DE59
+"winusb: Hedo [ProfiLine]"=USB_Install, USB\VID_0403&PID_DE59
+
+; Device: 0403:F208
+"winusb: Papenmeier [all models]"=USB_Install, USB\VID_0403&PID_F208
+
+; Device: 0403:FE70
+"winusb: Baum [Vario 40 (40 cells)]"=USB_Install, USB\VID_0403&PID_FE70
+
+; Device: 0403:FE71
+"winusb: Baum [PocketVario (24 cells)]"=USB_Install, USB\VID_0403&PID_FE71
+
+; Device: 0403:FE72
+"winusb: Baum [SuperVario 40 (40 cells)]"=USB_Install, USB\VID_0403&PID_FE72
+
+; Device: 0403:FE73
+"winusb: Baum [SuperVario 32 (32 cells)]"=USB_Install, USB\VID_0403&PID_FE73
+
+; Device: 0403:FE74
+"winusb: Baum [SuperVario 64 (64 cells)]"=USB_Install, USB\VID_0403&PID_FE74
+
+; Device: 0403:FE75
+"winusb: Baum [SuperVario 80 (80 cells)]"=USB_Install, USB\VID_0403&PID_FE75
+
+; Device: 0403:FE76
+"winusb: Baum [VarioPro 80 (80 cells)]"=USB_Install, USB\VID_0403&PID_FE76
+
+; Device: 0403:FE77
+"winusb: Baum [VarioPro 64 (64 cells)]"=USB_Install, USB\VID_0403&PID_FE77
+
+; Device: 0452:0100
+"winusb: Metec [all models]"=USB_Install, USB\VID_0452&PID_0100
+
+; Device: 045E:930A
+"winusb: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=USB_Install, USB\VID_045E&PID_930A
+
+; Device: 045E:930B
+"winusb: HIMS [Braille Edge]"=USB_Install, USB\VID_045E&PID_930B
+
+; Device: 0483:A1D3
+"winusb: Baum [Orbit 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
+
+; Device: 06B0:0001
+"winusb: Alva [Satellite (5nn)]"=USB_Install, USB\VID_06B0&PID_0001
+
+; Device: 0798:0001
+"winusb: Voyager [all models]"=USB_Install, USB\VID_0798&PID_0001
+
+; Device: 0798:0600
+"winusb: Alva [Voyager Protocol Converter]"=USB_Install, USB\VID_0798&PID_0600
+
+; Device: 0798:0624
+"winusb: Alva [BC624]"=USB_Install, USB\VID_0798&PID_0624
+
+; Device: 0798:0640
+"winusb: Alva [BC640]"=USB_Install, USB\VID_0798&PID_0640
+
+; Device: 0798:0680
+"winusb: Alva [BC680]"=USB_Install, USB\VID_0798&PID_0680
+
+; Device: 0904:1016
+"winusb: FrankAudiodata [B2K84 (before firmware installation)]"=USB_Install, USB\VID_0904&PID_1016
+
+; Device: 0904:1017
+"winusb: FrankAudiodata [B2K84 (after firmware installation)]"=USB_Install, USB\VID_0904&PID_1017
+
+; Device: 0904:2000
+"winusb: Baum [VarioPro 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_2000
+
+; Device: 0904:2001
+"winusb: Baum [EcoVario 24 (24 cells)]"=USB_Install, USB\VID_0904&PID_2001
+
+; Device: 0904:2002
+"winusb: Baum [EcoVario 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_2002
+
+; Device: 0904:2007
+"winusb: Baum [VarioConnect 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_2007
+
+; Device: 0904:2008
+"winusb: Baum [VarioConnect 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_2008
+
+; Device: 0904:2009
+"winusb: Baum [VarioConnect 24 (24 cells)]"=USB_Install, USB\VID_0904&PID_2009
+
+; Device: 0904:2010
+"winusb: Baum [VarioConnect 64 (64 cells)]"=USB_Install, USB\VID_0904&PID_2010
+
+; Device: 0904:2011
+"winusb: Baum [VarioConnect 80 (80 cells)]"=USB_Install, USB\VID_0904&PID_2011
+
+; Device: 0904:2014
+"winusb: Baum [EcoVario 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_2014
+
+; Device: 0904:2015
+"winusb: Baum [EcoVario 64 (64 cells)]"=USB_Install, USB\VID_0904&PID_2015
+
+; Device: 0904:2016
+"winusb: Baum [EcoVario 80 (80 cells)]"=USB_Install, USB\VID_0904&PID_2016
+
+; Device: 0904:3000
+"winusb: Baum [Refreshabraille 18 (18 cells)]"=USB_Install, USB\VID_0904&PID_3000
+
+; Device: 0904:3001
+"winusb: Baum [Orbit in Refreshabraille Emulation Mode (18 cells)], Baum [Refreshabraille 18 (18 cells)]"=USB_Install, USB\VID_0904&PID_3001
+
+; Device: 0904:4004
+"winusb: Baum [Pronto! V3 18 (18 cells)]"=USB_Install, USB\VID_0904&PID_4004
+
+; Device: 0904:4005
+"winusb: Baum [Pronto! V3 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_4005
+
+; Device: 0904:4007
+"winusb: Baum [Pronto! V4 18 (18 cells)]"=USB_Install, USB\VID_0904&PID_4007
+
+; Device: 0904:4008
+"winusb: Baum [Pronto! V4 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_4008
+
+; Device: 0904:6001
+"winusb: Baum [SuperVario2 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_6001
+
+; Device: 0904:6002
+"winusb: Baum [PocketVario2 (24 cells)]"=USB_Install, USB\VID_0904&PID_6002
+
+; Device: 0904:6003
+"winusb: Baum [SuperVario2 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_6003
+
+; Device: 0904:6004
+"winusb: Baum [SuperVario2 64 (64 cells)]"=USB_Install, USB\VID_0904&PID_6004
+
+; Device: 0904:6005
+"winusb: Baum [SuperVario2 80 (80 cells)]"=USB_Install, USB\VID_0904&PID_6005
+
+; Device: 0904:6006
+"winusb: Baum [Brailliant2 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_6006
+
+; Device: 0904:6007
+"winusb: Baum [Brailliant2 24 (24 cells)]"=USB_Install, USB\VID_0904&PID_6007
+
+; Device: 0904:6008
+"winusb: Baum [Brailliant2 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_6008
+
+; Device: 0904:6009
+"winusb: Baum [Brailliant2 64 (64 cells)]"=USB_Install, USB\VID_0904&PID_6009
+
+; Device: 0904:600A
+"winusb: Baum [Brailliant2 80 (80 cells)]"=USB_Install, USB\VID_0904&PID_600A
+
+; Device: 0904:6011
+"winusb: Baum [VarioConnect 24 (24 cells)]"=USB_Install, USB\VID_0904&PID_6011
+
+; Device: 0904:6012
+"winusb: Baum [VarioConnect 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_6012
+
+; Device: 0904:6013
+"winusb: Baum [VarioConnect 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_6013
+
+; Device: 0904:6101
+"winusb: Baum [VarioUltra 20 (20 cells)]"=USB_Install, USB\VID_0904&PID_6101
+
+; Device: 0904:6102
+"winusb: Baum [VarioUltra 40 (40 cells)]"=USB_Install, USB\VID_0904&PID_6102
+
+; Device: 0904:6103
+"winusb: Baum [VarioUltra 32 (32 cells)]"=USB_Install, USB\VID_0904&PID_6103
+
+; Device: 0921:1200
+"winusb: HandyTech [GoHubs chip]"=USB_Install, USB\VID_0921&PID_1200
+
+; Device: 0F4E:0100
+"winusb: FreedomScientific [Focus 1]"=USB_Install, USB\VID_0F4E&PID_0100
+
+; Device: 0F4E:0111
+"winusb: FreedomScientific [PAC Mate]"=USB_Install, USB\VID_0F4E&PID_0111
+
+; Device: 0F4E:0112
+"winusb: FreedomScientific [Focus 2]"=USB_Install, USB\VID_0F4E&PID_0112
+
+; Device: 0F4E:0114
+"winusb: FreedomScientific [Focus 3+]"=USB_Install, USB\VID_0F4E&PID_0114
+
+; Device: 10C4:EA60
+; Generic Identifier
+; Vendor: Cygnal Integrated Products, Inc.
+; Product: CP210x UART Bridge / myAVR mySmartUSB light
+"winusb: BrailleMemo [Pocket], Seika [Braille Display]"=USB_Install, USB\VID_10C4&PID_EA60
+
+; Device: 10C4:EA80
+; Generic Identifier
+; Vendor: Cygnal Integrated Products, Inc.
+; Product: CP210x UART Bridge
+"winusb: Seika [Note Taker]"=USB_Install, USB\VID_10C4&PID_EA80
+
+; Device: 1148:0301
+"winusb: BrailleMemo [Smart]"=USB_Install, USB\VID_1148&PID_0301
+
+; Device: 1209:ABC0
+"winusb: Inceptor [all models]"=USB_Install, USB\VID_1209&PID_ABC0
+
+; Device: 16C0:05E1
+"winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
+
+; Device: 1A86:7523
+"winusb: Baum [NLS eReader Zoomax (20 cells)]"=USB_Install, USB\VID_1A86&PID_7523
+
+; Device: 1C71:C004
+"winusb: BrailleNote [HumanWare APEX]"=USB_Install, USB\VID_1C71&PID_C004
+
+; Device: 1C71:C005
+"winusb: HumanWare [Brailliant BI 32/40, Brailliant B 80 (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C005
+
+; Device: 1C71:C006
+"winusb: HumanWare [non-Touch models (HID protocol)]"=USB_Install, USB\VID_1C71&PID_C006
+
+; Device: 1C71:C00A
+"winusb: HumanWare [BrailleNote Touch (HID protocol)]"=USB_Install, USB\VID_1C71&PID_C00A
+
+; Device: 1C71:C021
+"winusb: HumanWare [Brailliant BI 14 (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C021
+
+; Device: 1C71:C101
+"winusb: HumanWare [APH Chameleon 20 (HID protocol, firmware 1.0)], HumanWare [APH Chameleon 20 (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C101
+
+; Device: 1C71:C104
+"winusb: HumanWare [APH Chameleon 20 (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C104
+
+; Device: 1C71:C111
+"winusb: HumanWare [APH Mantis Q40 (HID protocol, firmware 1.0)], HumanWare [APH Mantis Q40 (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C111
+
+; Device: 1C71:C114
+"winusb: HumanWare [APH Mantis Q40 (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C114
+
+; Device: 1C71:C121
+"winusb: HumanWare [Humanware BrailleOne (HID protocol, firmware 1.0)], HumanWare [Humanware BrailleOne (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C121
+
+; Device: 1C71:C124
+"winusb: HumanWare [Humanware BrailleOne (serial protocol)]"=USB_Install, USB\VID_1C71&PID_C124
+
+; Device: 1C71:C131
+"winusb: HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 40X (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C131
+
+; Device: 1C71:C141
+"winusb: HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.0)], HumanWare [Humanware Brailliant BI 20X (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_C141
+
+; Device: 1C71:CE01
+"winusb: HumanWare [NLS eReader (HID protocol, firmware 1.0)], HumanWare [NLS eReader (HID protocol, firmware 1.1)]"=USB_Install, USB\VID_1C71&PID_CE01
+
+; Device: 1C71:CE04
+"winusb: HumanWare [NLS eReader (serial protocol)]"=USB_Install, USB\VID_1C71&PID_CE04
+
+; Device: 1FE4:0003
+"winusb: HandyTech [USB-HID adapter]"=USB_Install, USB\VID_1FE4&PID_0003
+
+; Device: 1FE4:0044
+"winusb: HandyTech [Easy Braille (HID)]"=USB_Install, USB\VID_1FE4&PID_0044
+
+; Device: 1FE4:0054
+"winusb: HandyTech [Active Braille]"=USB_Install, USB\VID_1FE4&PID_0054
+
+; Device: 1FE4:0055
+"winusb: HandyTech [Connect Braille 40]"=USB_Install, USB\VID_1FE4&PID_0055
+
+; Device: 1FE4:0061
+"winusb: HandyTech [Actilino]"=USB_Install, USB\VID_1FE4&PID_0061
+
+; Device: 1FE4:0064
+"winusb: HandyTech [Active Star 40]"=USB_Install, USB\VID_1FE4&PID_0064
+
+; Device: 1FE4:0074
+"winusb: HandyTech [Braille Star 40 (HID)]"=USB_Install, USB\VID_1FE4&PID_0074
+
+; Device: 1FE4:0081
+"winusb: HandyTech [Basic Braille 16]"=USB_Install, USB\VID_1FE4&PID_0081
+
+; Device: 1FE4:0082
+"winusb: HandyTech [Basic Braille 20]"=USB_Install, USB\VID_1FE4&PID_0082
+
+; Device: 1FE4:0083
+"winusb: HandyTech [Basic Braille 32]"=USB_Install, USB\VID_1FE4&PID_0083
+
+; Device: 1FE4:0084
+"winusb: HandyTech [Basic Braille 40]"=USB_Install, USB\VID_1FE4&PID_0084
+
+; Device: 1FE4:0086
+"winusb: HandyTech [Basic Braille 64]"=USB_Install, USB\VID_1FE4&PID_0086
+
+; Device: 1FE4:0087
+"winusb: HandyTech [Basic Braille 80]"=USB_Install, USB\VID_1FE4&PID_0087
+
+; Device: 1FE4:008A
+"winusb: HandyTech [Basic Braille 48]"=USB_Install, USB\VID_1FE4&PID_008A
+
+; Device: 1FE4:008B
+"winusb: HandyTech [Basic Braille 160]"=USB_Install, USB\VID_1FE4&PID_008B
+
+; Device: 1FE4:00A4
+"winusb: HandyTech [Activator]"=USB_Install, USB\VID_1FE4&PID_00A4
+
+; Device: 4242:0001
+"winusb: Pegasus [all models]"=USB_Install, USB\VID_4242&PID_0001
+
+; Device: C251:1122
+"winusb: EuroBraille [Esys (version < 3.0, no SD card)]"=USB_Install, USB\VID_C251&PID_1122
+
+; Device: C251:1123
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1123
+
+; Device: C251:1124
+"winusb: EuroBraille [Esys (version < 3.0, with SD card)]"=USB_Install, USB\VID_C251&PID_1124
+
+; Device: C251:1125
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1125
+
+; Device: C251:1126
+"winusb: EuroBraille [Esys (version >= 3.0, no SD card)]"=USB_Install, USB\VID_C251&PID_1126
+
+; Device: C251:1127
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1127
+
+; Device: C251:1128
+"winusb: EuroBraille [Esys (version >= 3.0, with SD card)]"=USB_Install, USB\VID_C251&PID_1128
+
+; Device: C251:1129
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1129
+
+; Device: C251:112A
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112A
+
+; Device: C251:112B
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112B
+
+; Device: C251:112C
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112C
+
+; Device: C251:112D
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112D
+
+; Device: C251:112E
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112E
+
+; Device: C251:112F
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_112F
+
+; Device: C251:1130
+"winusb: EuroBraille [Esytime (firmware 1.03, 2014-03-31)], EuroBraille [Esytime]"=USB_Install, USB\VID_C251&PID_1130
+
+; Device: C251:1131
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1131
+
+; Device: C251:1132
+"winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1132
+
+; END_USB_DEVICES
+
+; ========== Class definition (for Windows 8 and ealier versions)===========
+
+; =================== Installation ===================
+
+[USB_Install]
+Include = winusb.inf
+Needs   = WINUSB.NT
+
+[USB_Install.Services]
+Include =winusb.inf
+Needs   = WINUSB.NT.Services
+
+[USB_Install.HW]
+AddReg=Dev_AddReg
+
+[USB_Install.Wdf]
+KmdfService=WINUSB, WinUsb_Install
+
+[WinUsb_Install]
+KmdfLibraryVersion=1.11
+
+[Dev_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,"{9f543223-cede-4fa3-b376-a25ce9a30e74}"
+
+; [DestinationDirs]
+; If your INF needs to copy files, you must not use the DefaultDestDir directive here.
+; You must explicitly reference all file-list-section names in this section.
+
+; =================== Strings ===================
+
+[Strings]
+ManufacturerName="brltty"
+ClassName="USB braille devices"
+REG_MULTI_SZ = 0x00010000
+
