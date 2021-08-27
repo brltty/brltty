@@ -325,7 +325,7 @@ installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
 installFile "README" "${documentDirectory}/BRLTTY.txt"
 installFile "Drivers/Braille/XWindow/UBraille.ttf" "Fonts/"
 installFile "Drivers/BrlAPI/WindowEyes/README" "${documentDirectory}/WindowEyes.txt"
-installFile "Autostart/Windows/brltty-${usbPackage}.inf" "bin/"
+installFile "Windows/${usbPackage}.inf" "bin/brltty-${usbPackage}.inf"
 
 for document in ChangeLog HISTORY TODO
 do
