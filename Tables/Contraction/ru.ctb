@@ -62,7 +62,7 @@ sufword важи =
 
 always буди =
 always вельмож =
-always кобыла =
+always кобыл =
 always былое =
 
 
@@ -137,10 +137,12 @@ always я 1246
 
 always ва 3456
 begmidword ве 23456
+begmidword вё 23456
 always во 1236
 sufword вы 3
 always го 12456
 before sch always де 1346
+before sch always дё 1346
 always до 256
 always за 356
 always ка 346
@@ -148,23 +150,27 @@ midendword ки 246
 always ко 1456
 always ла 4
 always ле 26
+always лё 26
 always ли 35
 always ло 456
 always ль 2356
 midword льн 2356
-
 midword льне 2356-16
 always ме 146
+always мё 146
 midendword ми 124
 always на 345
 always не 16
+always нё 16
 always ни 34
 always но 126
 endword ны 46
 always по 235
 sufword при 12346
+begword непри 16-12346
 after con midendword при 12346
 sufword про 12356
+begword непро 16-12356
 midendword ро 12356
 always ра 45
 always ре 2
@@ -190,8 +196,10 @@ word без 12-1356
 before voic before vow begword небез 16-12-1356
 before voic before vow begword без 12-1356
 before voic before vow begword небезыз 16-12-1356-36
+begword безот 12-1356-1256
 before muf begword бес 12-234
 before muf begword небес 16-12-234
+begword беспри 12-234-12346
 word в\sзаключение 2456-356-15
 word вместо 2456-13456
 sufword внутри 2456-1235
@@ -213,6 +221,7 @@ begword пере 46-1234
 begword непере 16-46-1234
 begword переиз 46-1234-36
 sufword пред 1234-145
+begword переот 1234-145-1256
 begword непред 16-1234-145
 before voic before vow begword предыз 1234-145-36
 word предо 1234-256
@@ -408,10 +417,10 @@ word всё-таки 156-36-246
 word все-таки 156-36-246
 word даже 145-245
 word именно 24-126
-endword либо 36-35
+endword -либо 36-35
 word лишь 123
 word неужели 16-35
-endword нибудь 36-34
+endword -нибудь 36-34
 word разве 1235-23456
 word спасибо 234-12
 word только 2356
@@ -596,7 +605,7 @@ midnum - 36
 always ÷ 1256
 always = 2356
 always + 235
-# special character sequences
+#special character sequences
 literal :// URLs
 literal www.
 
@@ -625,27 +634,45 @@ literal .zip
 include letters-latin.cti
 
 #Punctuation
-before letter ( 6-126
-after letter ) 6-345
+
+
 always ( 126
 always ) 345
 always : 25
 always ; 23
-always " 2356
+
+
 always * 35
 always ! 235
 always ? 26
 always , 2
-always . 256
-always “ 236
-always ” 356
+
+
+always \s– 36
+always \s- 36
+always ­ 36
+repeatable ­­­ 36-36-36
+always \s­\s 36
+always \s— 36
+
+
+always … 256-256-256
+always ‹ 246
+always › 135
+prepunc „ 236
+postpunc „ 356
+prepunc “ 236
+postpunc “ 356
+always ‘ 236
+always ’ 356
+
 always « 236
 always » 356
-always ‚ 2356
-always – 6-36
-always \s- 0-6-36
-always -\s 6-36-0
-always ­ 6-36
-repeatable ­­­ 36-36-36
-always \s­\s 0-6-36-0
-always \s\u2014\s 6-36-0
+prepunc ‟ 236
+postpunc ‟ 356
+prepunc ” 236
+prepunc " 236
+postpunc ” 356
+postpunc " 356
+prepunc ' 236
+postpunc ' 356
