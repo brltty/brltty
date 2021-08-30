@@ -48,6 +48,17 @@ installFile() {
    fi
 }
 
+installFiles() {
+   local target="${1}"
+   shift 1
+   local source
+
+   for source
+   do
+      installFile "${source}" "${target}"
+   done
+}
+
 installPackages() {
    while [ "${#}" -gt 0 ]
    do
@@ -164,7 +175,7 @@ in
 esac
 
 libusb0Filter="\
-    select "USB:", and install ${libusb0Name}'s filter by doing one of the
+    select "USB:", and install the ${libusb0Name} filter by doing one of the
     following:
     + run Install ${libusb0Name} Filter from the Start Menu
     + answer yes to the setup prompt for installing the ${libusb0Name} filter
@@ -254,19 +265,11 @@ make -s install install-messages \
 logMessage task "updating files"
 documentDirectory="doc"
 
-configureLines=""
-eval set -- $(stringWrapped "${configureOptions}" 70)
-for line
-do
-   [ -z "${configureLines}" ] || configureLines="${configureLines}"$'\n'
-   configureLines="${configureLines}    ${line}"
-done
-
 readmeHeader="\
 This build of ${BRLTTY_NAME} ${BRLTTY_VERSION} includes Windows-specific patches.
 
 You should probably read doc/BRLTTY.txt and doc/Windows.txt for information
-on BRLTTY.
+about BRLTTY.
 
 Here are some notes on how to get started:
 
@@ -280,8 +283,8 @@ Here are some notes on how to get started:
 
 readmeFooter="\
 
-If you are having problems, please run run-debug.bat and send us the debug.log
-and brltty.conf files.
+If you are having problems, please run debug-brltty.bat and send us the
+debug.log and brltty.conf files.
 
 Documentation can be found in the doc/ subdirectory.
 
@@ -292,8 +295,6 @@ Technical notes on this build:
 - BRLTTY Version: ${BRLTTY_VERSION}
 - BrlAPI Version: ${BRLAPI_RELEASE}
 - Some MinGW-specific path and file name changes have been made.
-- The configure options were:
-${configureLines}
 - To make life easier for Windows users, the BrlAPI server was modified to:
   * not use authentication by default (BRLAPI_DEFAUTH set to none)
   * only use local sockets (:0+127.0.0.1:0 changed to :0)
@@ -325,7 +326,6 @@ installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
 installFile "README" "${documentDirectory}/BRLTTY.txt"
 installFile "Drivers/Braille/XWindow/UBraille.ttf" "Fonts/"
 installFile "Drivers/BrlAPI/WindowEyes/README" "${documentDirectory}/WindowEyes.txt"
-installFile "Windows/${usbPackage}.inf" "bin/brltty-${usbPackage}.inf"
 
 for document in ChangeLog HISTORY TODO
 do
@@ -369,13 +369,9 @@ do
 done
 
 cd "${programDirectory}"
-installFile "msvcr90.dll" "bin/"
-installFile "brltty.cat" "bin/"
-installFile "brltty_x64.cat" "bin/"
-installFile "run-brltty.bat" "/"
-installFile "debug-brltty.bat" "/"
-installFile "enable-brlapi.bat" "/"
-installFile "disable-brlapi.bat" "/"
+installFile "${usbPackage}.inf" "bin/brltty-${usbPackage}.inf"
+installFiles "bin/" *.dll *.cat
+installFiles "/" *.bat
 
 logMessage task "USB package: ${usbPackage}"
 installPackages "${usbWindowsPackages[@]}"
@@ -409,11 +405,11 @@ done
 cat >"README.txt" <<END-OF-README
 ${readmeHeader}
 - To register BRLTTY as a service so that it will get started automatically at
-  boot, run install.bat. To unregister it, run uninstall.bat.
+  boot, run enable-brlapi.bat. To unregister it, run disable-brlapi.bat.
 - If your braille device uses a USB connection:
   * If you either cannot, or would prefer not to, install its
     manufacturer's driver, then you can select "USB:", and install
-    ${usbName}'s driver by doing one of the following:
+    the ${usbName} driver by doing one of the following:
     + right-clicking on bin/brltty-${usbPackage}.inf and selecting install
     + answering yes to the setup prompt for installing the ${usbName} driver
   * If you have installed its manufacturer's driver, and if that driver defines
