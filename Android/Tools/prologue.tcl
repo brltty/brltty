@@ -17,6 +17,6 @@
 ###############################################################################
 
 source [file join [file dirname [info script]] .. .. "prologue.tcl"]
-set androidDirectory [file join $sourceDirectory Android]
+set androidDirectory [file join $prologueDirectory Android]
 set gradleDirectory [file join $androidDirectory Gradle]
 set applicationDirectory [file join $gradleDirectory app src main]

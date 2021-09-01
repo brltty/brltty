@@ -155,7 +155,7 @@ if {[llength $propertyNames] == 0} {
 }
 
 set inputFile  "brltty.conf.in"
-set inputPath [file join $sourceDirectory Documents $inputFile]
+set inputPath [file join $prologueDirectory Documents $inputFile]
 logMessage step "loading properties: $inputPath"
 set properties [loadProperties $inputPath $propertyNames]
 
