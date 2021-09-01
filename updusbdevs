@@ -235,11 +235,11 @@ proc parseDriver {directory} {
 }
 
 proc parseDrivers {} {
-   global prologueDirectory
+   global sourceRoot
 
    set drivers [list]
 
-   foreach directory [lsort [glob -directory [file join $prologueDirectory Drivers Braille] -types {d r x} -nocomplain *]] {
+   foreach directory [lsort [glob -directory [file join $sourceRoot Drivers Braille] -types {d r x} -nocomplain *]] {
       if {[llength [dict get [set driver [parseDriver $directory]] channels]] > 0} {
          lappend drivers $driver
       }
@@ -700,13 +700,15 @@ set optionDefinitions {
 processProgramArguments optionValues $optionDefinitions positionalArguments "\[scheme:file ...\]"
 
 if {[llength $positionalArguments] == 0} {
-   lappend positionalArguments "android:[file join $prologueDirectory Android Gradle app src main res xml usb_devices.xml]"
-   lappend positionalArguments "c:[file join $prologueDirectory Programs usb_devices.c]"
-   lappend positionalArguments "hotplug:[file join $prologueDirectory Autostart Hotplug brltty.usermap]"
-   lappend positionalArguments "metainfo:[file join $prologueDirectory Autostart AppStream org.a11y.brltty.metainfo.xml]"
-   lappend positionalArguments "udev:[file join $prologueDirectory Autostart Udev device.rules.in]"
-   lappend positionalArguments "windows:[file join $prologueDirectory Windows libusb.inf]"
-   lappend positionalArguments "windows:[file join $prologueDirectory Windows libusb-1.0.inf]"
+   lappend positionalArguments "android:[file join $sourceRoot Android Gradle app src main res xml usb_devices.xml]"
+   lappend positionalArguments "c:[file join $sourceRoot Programs usb_devices.c]"
+   lappend positionalArguments "hotplug:[file join $sourceRoot Autostart Hotplug brltty.usermap]"
+   lappend positionalArguments "metainfo:[file join $sourceRoot Autostart AppStream org.a11y.brltty.metainfo.xml]"
+   lappend positionalArguments "udev:[file join $sourceRoot Autostart Udev device.rules.in]"
+
+   foreach file [glob -directory [file join $sourceRoot Windows] -nocomplain "*.inf"] {
+      lappend positionalArguments "windows:$file"
+   }
 }
 
 if {[llength $positionalArguments] == 0} {
