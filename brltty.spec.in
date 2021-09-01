@@ -680,42 +680,124 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 
 %changelog
-* Thu Jan 28 2021 Dave Mielke <Dave@Mielke.cc> 6.3
-Core changes:
-   The CLIP_NEW command when performed via a keyboard table no longer crashes.
-   Message localization now works on Windows and Android.
-   Non-UTF8 consoles on Linux and Windows are now supported.
-Command line option changes:
-   --start-message no longer has a short option (was -Y).
-   --stop-message no longer has a short option (was -Z).
-   --prompt-patterns no longer has a short option (was -z).
-   The short option for --privilege-parameters is now -z (was -y).
-   The --stay-privileged [-Z] option has been added.
-   Setting the unprivileged user to :STAY-PRIVILEGED: is no longer supported.
-   The override-preference option has been renamed to override-preferences.
-   The --locale-directory option has been added.
-Build changes:
-   The Systemd and Udev wrapper scripts are now in libexec/ (not lib/brltty/).
-   BRLTTY now has a .pc (pkgconfig) file.
-   The revision identifier for the build is now stored within the tarball.
-Systemd changes:
-   The brlapi group is created during boot if it doesn't already exist.
+* Fri Sep 24 2021 Dave Mielke <Dave@Mielke.cc> 6.4
+General changes:
+   Dynamically changing the text table to auto now works.
+   The keyboard table can now be explicitly set to off.
+   Vertical scrolling for multi-line displays has been improved.
+   Trailing whitespace (except for the first one) is now trimmed when pasting.
+   The internationalization of date phrases has been improved.
+   Emoji using characters like the hash (#) or asterisk (*) are now ignored.
+Sliding braille window changes:
+   Cursor tracking always moves the window all the way to the left
+   if the whole line is short enough to fit on it.
+   Sliding the window triggers when the screen cursor moves to
+   (rather than beyond) the first/last cell of the text portion of the display.
+Contracted braille changes:
+   Contraction table support can no longer be excluded.
+   An internal contraction table can now be configured.
+   Contracted braille is automatically enabled on startup if:
+      The contraction table has been either specified or automatically selected.
+      The text table hasn't been either specified or automatically selected.
+   Cursor tracking has been improved.
+   Panning left when there are wide characters has been fixed.
+   A buffer overrun that occasionally caused a crash has been fixed.
+Preferences menu changes:
+   The autospeak settings have been moved into their own submenu.
+   Contracted Braille and 6-dot Computer Braille are now configured separately.
+   Blinking properties are now configured by period and percent visible
+   rather than by visible and invisible times.
+   The Space status field type has been added.
+   Three-digit status field types have been added.
+New navigation commands:
+   SAY_ALL: Speak the entire screen (SAY_ABOVE + SAY_BELOW).
+   LOWER and HIGHER: Adjust the speech pitch.
+   CONTRACTED: Toggle between contracted (on) and computer (off) braille.
+   COMPBRL6: Toggle between six- and eight-dot computer braille.
+   Chord-G (Space + dots 1245) is bound to the CONTRACTED toggle.
+Status summary (info line) changes:
+   Indicator character changes:
+      c: The screen cursor is being rendered.
+      s: The speech cursor is being rendered.
+      t: Cursor tracking is on.
+      u: The attributes underline is being rendered.
+      Braille display content:
+         6: six-dot computer braille
+         8: eight-dot computer braille
+         c: contracted braille
+         a: character attributes
+      Braille keyboard mode:
+         space: typing in text mode
+         b: typing in Unicode braille patterns mode
+         d: keyboard is disabled
+   Dot indicator changes:
+      Dot5: rendering the attributes underline (was cursor style)
+      Dot6: typing Unicode braille patterns (was blinking cursor)
+      Dot8: the keyboard is enabled (was sliding window)
+   Screen number when on a special screen:
+      f: frozen host screen
+      h: braille device or keyboard help screen
+      m: preferences menu
+New braille devices:
+   The NLS eReader from Zoomax.
+   The Brailliant BI 20X and 40X from Humanware.
+   The Active Braille S from Help Tech.
 FreedomScientific braille driver changes:
-   Focus models: The SETMARK an GOTOMARK commands have been bound.
-XWindow braille driver changes:
-   A backspace key has been added.
-SpeechDispatcher speech driver changes:
-   The name= parameter has been added.
+   Focus models:
+      Many bindings for the front keys have been added.
+      Bindings for speech navigation have been added.
+HandyTech braille driver changes:
+   Version 1.3 of the Easy Braille's USB-HID firmware is now supported.
+HumanWare braille driver changes:
+   The outer thumb keys now navigate up/down (used to be left/right).
+   The inner thumb keys now navigate left/right (used to be up/down).
+   Support for firmware version 1.1 of the newer models has been added.
 BrlAPI changes:
-   The version is now 0.8.2 (it was 0.8.1).
-   Some locking issues have been resolved.
+   The version is now 0.8.3 (it was 0.8.2).
+   The current braille typing mode is now honoured.
+   Typing Unicode braille patterns has been fixed.
+   Server termination during initialization no longer hangs.
+   New client features:
+      Writes can be automatically padded/truncated (use negative region size).
+      The thread-safe brlapi_strerror_r() function.
+      The brlapi_sync() function.
+      The BRLAPI_PARAM_CLIENT_PRIORITY_DISABLE constant.
+   Security fixes:
+      Use fchmod (not chmod) to adjust local socket permissions.
+      The sticky bit is now set on the local sockets directory.
 Contraction table changes:
-   The cldr directive has been renamed to emoji.
-   Emoji translation is no longer applied to (some) non-emoji characters.
-   A (rare) problem that could cause an infinite loop has been resolved.
-Developer changes:
-   The versioned symbolic link for libbrlapi.so is now created by make api.
-   The run-* scripts now work when the build and source trees aren't the same.
-   The run-brltty script now uses the message catalogs within the build tree.
-   The msgtest command has been added.
+   Locale-based autoselection (set to auto) is now supported.
+   A table for Russian (set to ru) has been added.
+   UEB (Unified English Braille) changes:
+      The Greek letters have been defined.
+      Some math symbols have been added.
+      Common accents are now supported - they are the
+      acute, cedilla, circumflex, diaeresis, grave, and ring.
+Android changes:
+   The four main architectures (arm/x86, 32/64 bits) are now supported.
+   BRLTTY is now an app on Google Play.
+   The Java BrlAPI client objects are now available via a Maven repository.
+   A customized brltty.conf can now be placed in the primary storage area.
+   The default contraction table has been changed to auto (from en-us-g2).
+   Rules specifying which data files should be backed up have been added.
+   Web page rendering changes:
+      Widget types are no longer unnecessarily shown.
+      Annotations for lists and list items have been added.
+      Link annotations no longer contain the link's URL.
+   The about application screen now contains:
+      BRLTTY's app version.
+      The version of the BrlAPI server.
+      The date and time of the build.
+      The repository revision of the source code.
+      A link to BRLTTY's privacy policy.
+      The link to BRLTTY's app page on Google Play.
+   Emulating F16 now logs the screen to a local file for developer debugging.
+Windows changes:
+   The .csv files have been added to the etc/ directory of the archive.
+New command line options:
+   --autospeak-threshold=<screen-content-quality>
+Configure changes:
+   The --disable-contracted-braille option has been removed.
+   The --with-contraction-table option has been added.
+   The --without-contraction-table option has been added.
 
