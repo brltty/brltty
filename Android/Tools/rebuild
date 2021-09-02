@@ -60,7 +60,7 @@ proc executeGradleTask {task} {
    executeHostCommand ./gradlew --quiet --console plain -- $task
 }
 
-setWorkingDirectory $sourceDirectory
+setWorkingDirectory $sourceRoot
 executeHostCommand ./autogen
 executeHostCommand ./cfg-android
 
