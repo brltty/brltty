@@ -267,7 +267,13 @@ writeUtf8Characters (FILE *stream, const wchar_t *characters, size_t count) {
 
 int
 writeUtf8ByteOrderMark (FILE *stream) {
-  return writeUtf8Character(stream, UNICODE_BYTE_ORDER_MARK);
+#if UNICODE_BYTE_ORDER_MARK <= WCHAR_MAX
+  if (!writeUtf8Character(stream, UNICODE_BYTE_ORDER_MARK)) {
+    return 0;
+  }
+#endif /* UNICODE_BYTE_ORDER_MARK <= WCHAR_MAX */
+
+  return 1;
 }
 
 int

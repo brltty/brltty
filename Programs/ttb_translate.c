@@ -193,15 +193,18 @@ setBrailleRepresentation (wchar_t character, void *data) {
 
 unsigned char
 convertCharacterToDots (TextTable *table, wchar_t character) {
-  wchar_t row = character & ~UNICODE_CELL_MASK;
+  uint32_t row = character & ~UNICODE_CELL_MASK;
 
   switch (row) {
+#if WCHAR_MAX >= UINT16_MAX
     case 0XF000: {
       wint_t wc = convertCharToWchar(character & UNICODE_CELL_MASK);
       if (wc == WEOF) break;
       character = wc;
     }
     /* fall through */
+#endif /* WCHAR_MAX >= UINT16_MAX */
+
     default: {
       {
         unsigned char dots;

@@ -114,7 +114,7 @@ setCurrentTime (const TimeValue *now) {
   }
 
 #elif defined(HAVE_SETTIMEOFDAY)
-  const struct timeval tv = {
+  struct timeval tv = {
     .tv_sec = now->seconds,
     .tv_usec = now->nanoseconds / NSECS_PER_USEC
   };
