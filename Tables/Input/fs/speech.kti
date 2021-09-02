@@ -37,8 +37,10 @@ bind RightSelector+RightShift+Space SPEAK_LAST_LINE
 bind PanRight+Space AUTOSPEAK
 bind PanRight+LeftShift MUTE
 bind PanRight+RightShift SAY_LINE
+
 bind PanRight+LeftShift+Space SAY_ABOVE
 bind PanRight+RightShift+Space SAY_BELOW
+bind PanRight+LeftShift+RightShift+Space SAY_ALL
 
 bind Space+Left\{navKeyType}Down SAY_SOFTER
 bind Space+Left\{navKeyType}Up SAY_Louder
