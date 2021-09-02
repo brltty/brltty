@@ -346,8 +346,25 @@ createDirectory (const char *path, int worldWritable) {
 #else /* __MINGW32__ */
   if (mkdir(path, (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) != -1) {
     if (!worldWritable) return 1;
-    if (chmod(path, (S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX)) != -1) return 1;
+    mode_t mode = 0;
 
+    #ifdef S_IRWXU
+    mode |= S_IRWXU;
+    #endif /* S_IRWXU */
+
+    #ifdef S_IRWXG
+    mode |= S_IRWXG;
+    #endif /* S_IRWXG */
+
+    #ifdef S_IRWXO
+    mode |= S_IRWXO;
+    #endif /* S_IRWXO */
+
+    #ifdef S_ISVTX
+    mode |= S_ISVTX;
+    #endif /* S_ISVTX */
+
+    if (chmod(path, mode) != -1) return 1;
     logMessage(LOG_WARNING,
       "%s: %s: %s",
       gettext("cannot make world writable"),
