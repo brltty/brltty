@@ -226,8 +226,8 @@ static int oldPreferencesEnabled = 1;
 
 char *opt_tablesDirectory;
 char *opt_textTable;
-char *opt_attributesTable;
 char *opt_contractionTable;
+char *opt_attributesTable;
 
 char *opt_keyboardTable;
 KeyTable *keyboardTable = NULL;
@@ -527,14 +527,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.array = optionStrings_TextTable
   },
 
-  { .word = "attributes-table",
-    .letter = 'a',
-    .flags = OPT_Config | OPT_EnvVar,
-    .argument = strtext("file"),
-    .setting.string = &opt_attributesTable,
-    .description = strtext("Name of or path to attributes table.")
-  },
-
   { .word = "contraction-table",
     .letter = 'c',
     .flags = OPT_Config | OPT_EnvVar,
@@ -542,6 +534,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_contractionTable,
     .internal.setting = optionOperand_autodetect,
     .description = strtext("Name of or path to contraction table.")
+  },
+
+  { .word = "attributes-table",
+    .letter = 'a',
+    .flags = OPT_Config | OPT_EnvVar,
+    .argument = strtext("file"),
+    .setting.string = &opt_attributesTable,
+    .description = strtext("Name of or path to attributes table.")
   },
 
   { .word = "keyboard-table",

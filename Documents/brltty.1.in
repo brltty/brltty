@@ -398,7 +398,7 @@ then it's only processed if that speech synthesizer driver is being used.
 .TP
 \fB\-T \fIdirectory\fR (\fB\-\-tables\-directory=\fR)
 The path to the directory which contains
-the text, attributes, contraction, keyboard, and input tables.
+the text, contraction, attributes, keyboard, and input tables.
 The built-in default is
 .RB "@TABLES_DIRECTORY@" "."
 .TP

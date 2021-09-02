@@ -18,7 +18,7 @@
 
 all: all-commands all-tools $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 
-all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-atb all-brltty-ctb all-brltty-ktb all-brltty-tune all-brltty-morse
+all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltty-lscmds: brltty-lscmds$X
 all-brltty-trtxt: brltty-trtxt$X
@@ -549,31 +549,6 @@ check-text-tables: brltty-ttb$X $(API_LIB_VERSIONED)
 
 ###############################################################################
 
-ATB_OBJECTS = atb_translate.$O atb_compile.$O
-
-atb_translate.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_translate.c
-
-atb_compile.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_compile.c
-
-BRLTTY_ATB_OBJECTS = brltty-atb.$O $(PROGRAM_OBJECTS) $(ATB_OBJECTS) dataarea.$O
-
-brltty-atb$X: $(BRLTTY_ATB_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_ATB_OBJECTS) $(LDLIBS)
-
-brltty-atb.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-atb.c
-
-check-attributes-tables: brltty-atb$X
-	@echo checking attributes tables
-	set -- $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/*$(ATTRIBUTES_TABLE_EXTENSION) && \
-	for file; do \
-	./brltty-atb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
-	done
-
-###############################################################################
-
 ctb_compile.$O:
 	$(CC) $(LIBCFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_compile.c
 
@@ -603,6 +578,31 @@ check-contraction-tables: brltty-ctb$X
 	for file; do \
 	test -x $${file} || \
 	./brltty-ctb$X -T$(SRC_TOP)$(TBL_DIR) -c$${file##*/} </dev/null; \
+	done
+
+###############################################################################
+
+ATB_OBJECTS = atb_translate.$O atb_compile.$O
+
+atb_translate.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_translate.c
+
+atb_compile.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/atb_compile.c
+
+BRLTTY_ATB_OBJECTS = brltty-atb.$O $(PROGRAM_OBJECTS) $(ATB_OBJECTS) dataarea.$O
+
+brltty-atb$X: $(BRLTTY_ATB_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_ATB_OBJECTS) $(LDLIBS)
+
+brltty-atb.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-atb.c
+
+check-attributes-tables: brltty-atb$X
+	@echo checking attributes tables
+	set -- $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/*$(ATTRIBUTES_TABLE_EXTENSION) && \
+	for file; do \
+	./brltty-atb$X -T$(SRC_TOP)$(TBL_DIR) $${file##*/}; \
 	done
 
 ###############################################################################
@@ -743,7 +743,7 @@ $(RGX_OBJECT).$O:
 
 ###############################################################################
 
-CORE_OBJECTS = core.$O $(PROGRAM_OBJECTS) revision.$O $(PGMPRIVS_OBJECTS) report.$O config.$O $(RGX_OBJECTS) $(SERVICE_OBJECTS) activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O $(CMD_OBJECTS) pipe.$O $(TTB_OBJECTS) $(CHARSET_OBJECTS) $(ATB_OBJECTS) $(CTB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(BELL_OBJECTS) $(LEDS_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
+CORE_OBJECTS = core.$O $(PROGRAM_OBJECTS) revision.$O $(PGMPRIVS_OBJECTS) report.$O config.$O $(RGX_OBJECTS) $(SERVICE_OBJECTS) activity.$O $(PREFS_OBJECTS) profile.$O menu.$O menu_prefs.$O ses.$O status.$O update.$O blink.$O dataarea.$O $(CMD_OBJECTS) pipe.$O $(TTB_OBJECTS) $(CHARSET_OBJECTS) $(CTB_OBJECTS) $(ATB_OBJECTS) $(KTB_OBJECTS) ktb_keyboard.$O $(KBD_OBJECTS) kbd_keycodes.$O $(BELL_OBJECTS) $(LEDS_OBJECTS) $(ALERT_OBJECTS) hidkeys.$O drivers.$O driver.$O $(SCREEN_OBJECTS) $(SPECIAL_SCREEN_OBJECTS) $(BRAILLE_OBJECTS) $(SPEECH_OBJECTS) spk_input.$O api_control.$O $(API_SERVER_OBJECTS)
 CORE_NAME = brltty
 
 brltty-core: $(CORE_OBJECTS)
@@ -1010,13 +1010,13 @@ TEXT_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/$(TEXT_TABLE)
 ttb.auto.h: $(TEXT_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
 	./tbl2hex$(X_FOR_BUILD) -- $(TEXT_TABLE_FILE) >$@
 
-ATTRIBUTES_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/$(ATTRIBUTES_TABLE)$(ATTRIBUTES_TABLE_EXTENSION)
-atb.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
-	./tbl2hex$(X_FOR_BUILD) -- $(ATTRIBUTES_TABLE_FILE) >$@
-
 CONTRACTION_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/$(CONTRACTION_TABLE)$(CONTRACTION_TABLE_EXTENSION)
 ctb.auto.h: $(CONTRACTION_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
 	./tbl2hex$(X_FOR_BUILD) -- $(CONTRACTION_TABLE_FILE) >$@
+
+ATTRIBUTES_TABLE_FILE = $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/$(ATTRIBUTES_TABLE)$(ATTRIBUTES_TABLE_EXTENSION)
+atb.auto.h: $(ATTRIBUTES_TABLE_FILE) tbl2hex$(X_FOR_BUILD)
+	./tbl2hex$(X_FOR_BUILD) -- $(ATTRIBUTES_TABLE_FILE) >$@
 
 cmds.auto.h: $(SRC_DIR)/cmds.awk $(COMMANDS_DEPENDENCIES)
 	$(AWK) -f $(SRC_DIR)/cmds.awk $(COMMANDS_ARGUMENTS) >$@
@@ -1055,7 +1055,7 @@ brltty-clip.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS_FOR_BUILD = tbl2hex.$(O_FOR_BUILD) $(PROGRAM_OBJECTS_FOR_BUILD) dataarea.$(O_FOR_BUILD) ttb_compile.$(O_FOR_BUILD) ttb_native.$(O_FOR_BUILD) $(CHARSET_OBJECTS_FOR_BUILD) atb_compile.$(O_FOR_BUILD) ctb_compile.$(O_FOR_BUILD) cldr.$(O_FOR_BUILD)
+TBL2HEX_OBJECTS_FOR_BUILD = tbl2hex.$(O_FOR_BUILD) $(PROGRAM_OBJECTS_FOR_BUILD) dataarea.$(O_FOR_BUILD) ttb_compile.$(O_FOR_BUILD) ttb_native.$(O_FOR_BUILD) $(CHARSET_OBJECTS_FOR_BUILD) ctb_compile.$(O_FOR_BUILD) cldr.$(O_FOR_BUILD) atb_compile.$(O_FOR_BUILD)
 TBL2HEX_OBJECTS = $(TBL2HEX_OBJECTS_FOR_BUILD:.$(O_FOR_BUILD)=.$B)
 
 tbl2hex$(X_FOR_BUILD): $(TBL2HEX_OBJECTS)
@@ -1084,7 +1084,7 @@ check-public-headers:
 	@echo checking public headers
 	$(SRC_TOP)chkhdrs $(SRC_TOP)$(HDR_DIR)
 
-check-all: check-text-tables check-attributes-tables check-contraction-tables check-keyboard-tables check-input-tables check-braille-drivers check-speech-drivers check-public-headers
+check-all: check-text-tables check-contraction-tables check-attributes-tables check-keyboard-tables check-input-tables check-braille-drivers check-speech-drivers check-public-headers
 
 ###############################################################################
 
@@ -1123,15 +1123,11 @@ install-xbrlapi: xbrlapi$X install-program-directory install-x11-autostart-direc
 	$(INSTALL_DATA) $(BLD_TOP)Autostart/X11/$(XBRLAPI_X11_AUTOSTART_FILE) $(INSTALL_X11_AUTOSTART_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_TOP)Autostart/gdm/$(XBRLAPI_GDM_AUTOSTART_FILE) $(INSTALL_GDM_AUTOSTART_DIRECTORY)
 
-install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES) install-keyboard-tables install-input-tables
+install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_CONTRACTION_TABLES) $(INSTALL_ATTRIBUTES_TABLES) install-keyboard-tables install-input-tables
 
 install-text-tables: install-text-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/*$(TEXT_TABLE_EXTENSION) $(INSTALL_TEXT_TABLES_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(TEXT_TABLES_SUBDIRECTORY)/*$(TEXT_SUBTABLE_EXTENSION) $(INSTALL_TEXT_TABLES_DIRECTORY)
-
-install-attributes-tables: install-attributes-tables-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/*$(ATTRIBUTES_TABLE_EXTENSION) $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
-	#$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/*$(ATTRIBUTES_SUBTABLE_EXTENSION) $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
 
 install-contraction-tables: install-contraction-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/*$(CONTRACTION_TABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
@@ -1139,6 +1135,10 @@ install-contraction-tables: install-contraction-tables-directory
 	$(INSTALL_SCRIPT) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/$$table$(CONTRACTION_TABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY); \
 	done
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(CONTRACTION_TABLES_SUBDIRECTORY)/*$(CONTRACTION_SUBTABLE_EXTENSION) $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
+
+install-attributes-tables: install-attributes-tables-directory
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/*$(ATTRIBUTES_TABLE_EXTENSION) $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
+	#$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(ATTRIBUTES_TABLES_SUBDIRECTORY)/*$(ATTRIBUTES_SUBTABLE_EXTENSION) $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
 
 install-keyboard-tables: install-keyboard-tables-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/$(KEYBOARD_TABLES_SUBDIRECTORY)/*$(KEY_TABLE_EXTENSION) $(INSTALL_KEYBOARD_TABLES_DIRECTORY)
@@ -1230,8 +1230,8 @@ uninstall-programs:
 
 uninstall-tables:
 	-rm -f -r $(INSTALL_TEXT_TABLES_DIRECTORY)
-	-rm -f -r $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
 	-rm -f -r $(INSTALL_CONTRACTION_TABLES_DIRECTORY)
+	-rm -f -r $(INSTALL_ATTRIBUTES_TABLES_DIRECTORY)
 	-rm -f -r $(INSTALL_KEYBOARD_TABLES_DIRECTORY)
 	-rm -f -r $(INSTALL_INPUT_TABLES_DIRECTORY)
 	-[ ! -d $(INSTALL_TABLES_DIRECTORY) ] || rmdir $(INSTALL_TABLES_DIRECTORY)
@@ -1297,7 +1297,7 @@ distclean clean::
 clean::
 	-rm -f brltty$X brltty-cldr$X
 	-rm -f brltty-lscmds$X brltty-lsinc$X
-	-rm -f brltty-trtxt$X brltty-ttb$X brltty-atb$X brltty-ctb$X brltty-ktb$X
+	-rm -f brltty-trtxt$X brltty-ttb$X brltty-ctb$X brltty-atb$X brltty-ktb$X
 	-rm -f brltty-tune$X brltty-morse$X
 	-rm -f xbrlapi$X brltty-clip$X
 	-rm -f tbl2hex$(X_FOR_BUILD) *test$X *-static$X

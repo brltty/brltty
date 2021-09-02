@@ -1392,17 +1392,17 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Attributes Table"));
-      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, ATTRIBUTES_TABLES_SUBDIRECTORY, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
-      CHANGED(AttributesTable);
-      SET(attributesTable);
-    }
-
-    {
       NAME(strtext("Contraction Table"));
       ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, CONTRACTION_TABLES_SUBDIRECTORY, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1));
       CHANGED(ContractionTable);
       SET(contractionTable);
+    }
+
+    {
+      NAME(strtext("Attributes Table"));
+      ITEM(newFilesMenuItem(tablesSubmenu, &itemName, opt_tablesDirectory, ATTRIBUTES_TABLES_SUBDIRECTORY, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0));
+      CHANGED(AttributesTable);
+      SET(attributesTable);
     }
   }
 

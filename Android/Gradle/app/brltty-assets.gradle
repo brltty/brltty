@@ -4,7 +4,7 @@ def tablesDirectory = assetsDirectory + File.separator + "tables"
 
 task brlttyAddTables (type: Copy) {
   group "build"
-  description "Add the tables (text, attributes, contraction, keyboard, input) to the build (as assets)."
+  description "Add the tables (text, contraction, attributes, keyboard, input) to the build (as assets)."
 
   from brltty.native.tablesDirectory
   into tablesDirectory
@@ -17,7 +17,7 @@ task brlttyAddTables (type: Copy) {
 
 task brlttyRemoveTables (type: Delete) {
   group "build"
-  description "Remove the tables (text, attributes, contraction, keyboard, input) from the build."
+  description "Remove the tables (text, contraction, attributes, keyboard, input) from the build."
 
   delete tablesDirectory
 }

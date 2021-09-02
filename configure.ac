@@ -188,19 +188,19 @@ BRLTTY_ARG_REQUIRED(
 )
 
 BRLTTY_DEFINE_STRING([TEXT_TABLES_SUBDIRECTORY], [Text], [the subdirectory for text tables])
-BRLTTY_DEFINE_STRING([ATTRIBUTES_TABLES_SUBDIRECTORY], [Attributes], [the subdirectory for attributes tables])
 BRLTTY_DEFINE_STRING([CONTRACTION_TABLES_SUBDIRECTORY], [Contraction], [the subdirectory for contraction tables])
+BRLTTY_DEFINE_STRING([ATTRIBUTES_TABLES_SUBDIRECTORY], [Attributes], [the subdirectory for attributes tables])
 BRLTTY_DEFINE_STRING([KEYBOARD_TABLES_SUBDIRECTORY], [Keyboard], [the subdirectory for keyboard key tables])
 BRLTTY_DEFINE_STRING([INPUT_TABLES_SUBDIRECTORY], [Input], [the subdirectory for braille device key tables])
 
 BRLTTY_DEFINE_STRING([TEXT_TABLE_EXTENSION], [.ttb], [the extension for text tables])
 BRLTTY_DEFINE_STRING([TEXT_SUBTABLE_EXTENSION], [.tti], [the extension for text subtables])
 
-BRLTTY_DEFINE_STRING([ATTRIBUTES_TABLE_EXTENSION], [.atb], [the extension for attributes tables])
-BRLTTY_DEFINE_STRING([ATTRIBUTES_SUBTABLE_EXTENSION], [.ati], [the extension for attributes subtables])
-
 BRLTTY_DEFINE_STRING([CONTRACTION_TABLE_EXTENSION], [.ctb], [the extension for contraction tables])
 BRLTTY_DEFINE_STRING([CONTRACTION_SUBTABLE_EXTENSION], [.cti], [the extension for contraction subtables])
+
+BRLTTY_DEFINE_STRING([ATTRIBUTES_TABLE_EXTENSION], [.atb], [the extension for attributes tables])
+BRLTTY_DEFINE_STRING([ATTRIBUTES_SUBTABLE_EXTENSION], [.ati], [the extension for attributes subtables])
 
 BRLTTY_DEFINE_STRING([KEY_TABLE_EXTENSION], [.ktb], [the extension for key tables])
 BRLTTY_DEFINE_STRING([KEY_SUBTABLE_EXTENSION], [.kti], [the extension for key subtables])
@@ -1707,8 +1707,8 @@ AC_DEFINE_UNQUOTED([BRAILLE_DEVICE], ["${braille_device}"],
 BRLTTY_SUMMARY_ITEM([braille-device], [braille_device])
 
 BRLTTY_ARG_TABLE([text], [en-nabcc], [ttb])
-BRLTTY_ARG_TABLE([attributes], [left_right], [atb])
 BRLTTY_ARG_TABLE([contraction], [none], [ctb])
+BRLTTY_ARG_TABLE([attributes], [left_right], [atb])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],

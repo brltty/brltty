@@ -3,8 +3,8 @@ Braille Support for Dracut
 
 This module implements braille accessibility within the initramfs (initial
 ramdisk file system). If BRLTTY is installed (``/usr/bin/brltty`` exists) then
-it is added to the image. The braille drivers, text tables, attributes tables,
-contraction tables, keyboard tables, speech drivers, and preferences file
+it is added to the image. The braille drivers, text tables, contraction tables,
+attributes tables, keyboard tables, speech drivers, and preferences file
 configured via ``/etc/brltty.conf`` are included. Local customizations within
 ``/etc/xdg/brltty/`` are also included.
 

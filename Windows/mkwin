@@ -332,7 +332,7 @@ do
    installFile "Documents/${document}" "${documentDirectory}/${document}.txt"
 done
 
-for document in Windows BrailleDots TextTables AttributesTables ContractionTables KeyTables
+for document in Windows BrailleDots TextTables ContractionTables AttributesTables KeyTables
 do
    installFile "Documents/README.${document}" "${documentDirectory}/${document}.txt"
 done

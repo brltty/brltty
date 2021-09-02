@@ -95,8 +95,8 @@ extern int showBrailleText (const char *mode, const char *text, int minimumDelay
 extern char *opt_driversDirectory;
 extern char *opt_tablesDirectory;
 extern char *opt_textTable;
-extern char *opt_attributesTable;
 extern char *opt_contractionTable;
+extern char *opt_attributesTable;
 extern char *opt_keyboardTable;
 
 extern char *opt_brailleDevice;
