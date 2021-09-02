@@ -28,11 +28,13 @@ addProgramOption a string.name archiveName "specify archive name" "${defaultArch
 addProgramOption i string.directory installDirectory "specify installation directory on target system" "${defaultInstallDirectory}"
 addProgramOption o flag overwriteArchive "overwrite existing archive"
 addProgramOption s flag invokeShell "invoke interactive shell to inspect/modify result"
+addProgramOption t string.directory toolsRoot "specify tool chain root directory"
 addProgramParameter source sourceDirectory "top-level directory of source tree"
 parseProgramArguments "${@}"
 
 [ -n "${archiveName}" ] || archiveName="${defaultArchiveName}"
 [ -n "${installDirectory}" ] || installDirectory="${defaultInstallDirectory}"
+[ -n "${toolsRoot}" ] && export DOS_TOOLS_ROOT="${toolsRoot}"
 
 [ -n "${sourceDirectory}" ] || sourceDirectory="."
 verifyInputDirectory "${sourceDirectory}" || semanticError
