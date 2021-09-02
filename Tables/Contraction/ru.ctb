@@ -34,7 +34,7 @@ after vow midendword ы 6-2346
 after con midendword й 6-12346
 midendword ф 6-124
 midendword э 6-246
-always ё 6-16
+always ё 5
 begword ю 6-1256
 
 #va
@@ -64,6 +64,11 @@ always буди =
 always вельмож =
 always кобыл =
 always былое =
+always былого =
+
+always былому =
+always былым =
+always былом =
 
 
 #Letters
@@ -181,9 +186,11 @@ always ст 25
 before con-r begmidword ста 25
 always та 123456
 always те 23
+always тё 23
 always ти 56
 always то 13456
 always че 236
+always чё 236
 before sch begmidword щ 6-1346
 endword щ 6-1346
 midendword ъ 3
@@ -200,13 +207,13 @@ begword безот 12-1356-1256
 before muf begword бес 12-234
 before muf begword небес 16-12-234
 begword беспри 12-234-12346
-word в\sзаключение 2456-356-15
+word в\sзаключение 2456-0-356-15
 word вместо 2456-13456
 sufword внутри 2456-1235
 word вопреки 1236-246
-word в\sпродолжение 12356-15
+word в\sпродолжение 2456-0-12356-15
 word вследствие 2456-26-15
-word в\sтечение 2456-23-15
+word в\sтечение 2456-0-23-15
 word для 145
 word из 36
 before voic before vow  begword из 36
@@ -244,13 +251,13 @@ endword ымся 134-234
 endword им 134
 endword имся 134-234
 endword ами 124
-endword амись 124-234
+endword амися 124-234
 endword ями 124
-endword ямись 124-234
+endword ямися 124-234
 prfword ими 124
-endword имись 124-234
+endword имися 124-234
 endword ыми 124
-endword ымись 124-234
+endword ымися 124-234
 endword ат 6
 endword атся 6-234
 endword ят 6
@@ -298,9 +305,9 @@ endword яемся 235-234
 endword оем 235
 endword оемся 235-234
 prfword ему 146
-endword емусь 146-234
+endword емуся 146-234
 endword ому 146
-endword омусь 146-234
+endword омуся 146-234
 midword ени 34
 endword ет 14
 endword ется 14-234
@@ -573,8 +580,8 @@ before muf begword неис 16-36
 before pred begword пред 1234
 begword предст 1234-25
 before con-r begword предста 1234-25
-before mufs begword рас1235
-before voicz begword рас1235
+before mufs begword рас 1235
+before voicz begword рас 1235
 before mufs begword нерас 16-1235
 midword ска 346
 midendword ски 246
