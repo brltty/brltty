@@ -580,8 +580,11 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc %{_mandir}/man1/brltty.1.gz
 %doc %{_docdir}/*/LICENSE*
 %doc %{_docdir}/*/README*
+%doc %{_docdir}/*/*.html
+%doc %{_docdir}/*/BUGS
 %doc %{_docdir}/*/ChangeLog
 %doc %{_docdir}/*/CONTRIBUTORS
+%doc %{_docdir}/*/HISTORY
 %doc %{_docdir}/*/TODO
 %doc %{_docdir}/*/brltty.conf
 %doc %{_docdir}/*/KeyTables
