@@ -475,7 +475,7 @@ msgstr "Braille Informatique"
 
 #: Programs/menu_prefs.c:736
 msgid "Computer Braille Cell Type"
-msgstr ""
+msgstr "Cellule de type Braille Informatique"
 
 #: Programs/menu_prefs.c:1444
 msgid "Configuration Directory"
@@ -1382,7 +1382,7 @@ msgstr "Chemin du répertoire où des fichiers peuvent être mis à jour."
 
 #: Programs/config.c:325
 msgid "Path to directory which contains message localizations."
-msgstr ""
+msgstr "Chemin vers le répertoire contenant les traductions des messages"
 
 #: Programs/brltty-trtxt.c:59
 msgid "Path to input text table."
@@ -3593,7 +3593,7 @@ msgstr "Active ou désactive le clignottement des lettres majuscules"
 #. xgettext: This is the description of the CONTRACTED command.
 #: Programs/cmds.auto.h:1190
 msgid "set contracted/computer braille"
-msgstr ""
+msgstr "active le braille abrégé/informatique"
 
 #. xgettext: This is the description of the SET_CONTRACTION_TABLE command.
 #: Programs/cmds.auto.h:1378
@@ -3643,7 +3643,7 @@ msgstr "Geler/dégeler l'image de l'écran"
 #. xgettext: This is the description of the COMPBRL6 command.
 #: Programs/cmds.auto.h:1198
 msgid "set six/eight dot computer braille"
-msgstr ""
+msgstr "active le braille informatique six/huit points"
 
 #. xgettext: This is the description of the SKPBLNKWINS command.
 #: Programs/cmds.auto.h:327
@@ -3741,7 +3741,7 @@ msgstr "Lit vocalement depuis la ligne actuelle jusqu'au bas de l'écran"
 #. xgettext: This is the description of the SAY_ALL command.
 #: Programs/cmds.auto.h:1182
 msgid "speak from top of screen through bottom of screen"
-msgstr ""
+msgstr "énonce l'écran de haut en bas"
 
 #. xgettext: This is the description of the SAY_ABOVE command.
 #: Programs/cmds.auto.h:536
