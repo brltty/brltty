@@ -111,10 +111,17 @@ ITERATE = \
    Android/Gradle \
    ; do (cd $$directory && $(MAKE) $@); done
 
-clean::
+clean:: clean-archives
 	$(ITERATE)
-	-rm -f -- *.$(TAR_EXTENSION) *.$(GZIP_EXTENSION) *.$(BZIP2_EXTENSION) *.$(XZ_EXTENSION) *.$(ZIP_EXTENSION) *.rpm
 	-rm -f -r -- $(BIN_DIR)
+
+clean-archives:
+	-rm -f -- *.$(TAR_EXTENSION)
+	-rm -f -- *.$(GZIP_EXTENSION)
+	-rm -f -- *.$(BZIP2_EXTENSION)
+	-rm -f -- *.$(XZ_EXTENSION)
+	-rm -f -- *.$(ZIP_EXTENSION)
+	-rm -f -- *.rpm
 
 distclean:: clean
 	$(ITERATE)
