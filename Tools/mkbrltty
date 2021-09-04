@@ -18,24 +18,22 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../prologue.sh"
+parseProgramArguments "${@}"
+
 set -e
+setBuildRoot
+cd "${BRLTTY_BUILD_ROOT}"
 
-setSourceRoot
-cd "${BRLTTY_SOURCE_ROOT}"
-
-revisionIdentifier="$(./getrevid .)" || {
-   revisionIdentifier="$(sed -e 's/"//g' "Programs/revision_identifier.h")" || {
-      revisionIdentifier="$(date +'%Y%m%d-%H%M%S')"
-   }
-}
-
-configureOptions=(
-   --with-execute-root="/brltty/REV-${revisionIdentifier}"
-   --without-libbraille
-   --without-mikropuhe
-   --without-swift
-   --without-theta
+makeTargets=(
+   brltty braille-drivers speech-drivers screen-drivers
+   brltty-lscmds brltty-lsinc brltty-cldr
+   brltty-trtxt brltty-ttb brltty-ctb brltty-atb brltty-ktb
+   brltty-tune brltty-morse
+   brltest spktest scrtest
+   crctest msgtest
+   xbrlapi brltty-clip apitest
+   all-api-bindings
 )
 
-./configure --quiet "${configureOptions[@]}" "${@}"
+make -s -C "Programs" "${makeTargets[@]}"
 exit 0
