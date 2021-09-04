@@ -209,6 +209,7 @@ extern SpeechSynthesizer spk;
 extern int opt_quietIfNoBraille;
 
 extern int isAutospeakActive (void);
+extern unsigned int autospeakMinimumScreenContentQuality;
 
 extern void sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions options);
 extern void speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int interrupt);

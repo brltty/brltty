@@ -88,6 +88,37 @@ int isWindowsService = 0;
 #include "system_msdos.h"
 #endif /* __MSDOS__ */
 
+static void
+makeProgramBanner (char *buffer, size_t size, int includeRevision) {
+  const char *revision = includeRevision? getRevisionIdentifier(): "";
+  snprintf(buffer, size, "%s %s%s%s",
+           PACKAGE_NAME, PACKAGE_VERSION,
+           (*revision? " rev ": ""), revision);
+}
+
+static void
+logProgramBanner (void) {
+  char banner[0X100];
+  makeProgramBanner(banner, sizeof(banner), 1);
+
+  {
+    int pushed = pushLogPrefix("");
+    logMessage(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
+    if (pushed) popLogPrefix();
+  }
+}
+
+static void
+logProperty (const char *value, const char *variable, const char *label) {
+  if (*value) {
+    if (variable) setGlobalVariable(variable, value);
+  } else {
+    value = gettext("none");
+  }
+
+  logMessage(LOG_INFO, "%s: %s", label, value);
+}
+
 static const char optionOperand_none[] = "no";
 static const char optionOperand_autodetect[] = "auto";
 static const char optionOperand_off[] = "off";
@@ -123,9 +154,7 @@ STR_BEGIN_FORMATTER(formatLogLevelString, unsigned int index)
       break;
 
     case 1: {
-      unsigned int level;
-
-      for (level=0; level<logLevelCount; level+=1) {
+      for (unsigned int level=0; level<logLevelCount; level+=1) {
         if (level) STR_PRINTF(" ");
         STR_PRINTF("%s", logLevelNames[level]);
       }
@@ -152,6 +181,31 @@ STR_BEGIN_FORMATTER(formatLogLevelString, unsigned int index)
     case 3:
       STR_PRINTF("%c", logCategoryPrefix_disable);
       break;
+
+    default:
+      break;
+  }
+STR_END_FORMATTER
+
+static const char *const *const screenContentQualityChoices =
+  NULL_TERMINATED_STRING_ARRAY(
+    "none", "low", "poor", "fair", "good", "high"
+  );
+
+STR_BEGIN_FORMATTER(formatScreenContentQualityChoices, unsigned int index)
+  switch (index) {
+    case 0: {
+      const char *const *choices = screenContentQualityChoices;
+      const char *const *choice = choices;
+
+      while (*choice) {
+        if (choice != choices) STR_PRINTF(" ");
+        STR_PRINTF("%s", *choice);
+        choice += 1;
+      }
+
+      break;
+    }
 
     default:
       break;
@@ -256,6 +310,31 @@ static char *opt_speechInput;
 static SpeechInputObject *speechInputObject;
 
 int opt_quietIfNoBraille;
+static char *opt_autospeakThreshold;
+unsigned int autospeakMinimumScreenContentQuality;
+
+static void
+setAutospeakThreshold (void) {
+  const char *choice = opt_autospeakThreshold;
+
+  int ok = validateChoice(
+    &autospeakMinimumScreenContentQuality,
+    choice, screenContentQualityChoices
+  );
+
+  if (!ok) {
+    logMessage(LOG_ERR, "%s: %s",
+      gettext("unknown screen content quality"),
+      choice
+    );
+  }
+
+  logProperty(
+    screenContentQualityChoices[autospeakMinimumScreenContentQuality],
+    "autospeakThreshold",
+    gettext("Autospeak Threshold")
+  );
+}
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static char *opt_screenDriver;
@@ -595,6 +674,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_quietIfNoBraille,
     .description = strtext("Do not autospeak when braille is not being used.")
   },
+
+  { .word = "autospeak-threshold",
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar | OPT_Format,
+    .argument = strtext("quality"),
+    .setting.string = &opt_autospeakThreshold,
+    .description = strtext("Minimum screen content quality to autospeak (one of {%s})."),
+    .strings.format = formatScreenContentQualityChoices
+  },
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   { .word = "screen-driver",
@@ -662,7 +749,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_EnvVar | OPT_Format,
     .argument = strtext("lvl|cat,..."),
     .setting.string = &opt_logLevel,
-    .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)"),
+    .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)."),
     .strings.format = formatLogLevelString
   },
 
@@ -686,37 +773,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Log the versions of the core, API, and built-in drivers, and then exit.")
   },
 END_OPTION_TABLE
-
-static void
-makeProgramBanner (char *buffer, size_t size, int includeRevision) {
-  const char *revision = includeRevision? getRevisionIdentifier(): "";
-  snprintf(buffer, size, "%s %s%s%s",
-           PACKAGE_NAME, PACKAGE_VERSION,
-           (*revision? " rev ": ""), revision);
-}
-
-static void
-logProgramBanner (void) {
-  char banner[0X100];
-  makeProgramBanner(banner, sizeof(banner), 1);
-
-  {
-    int pushed = pushLogPrefix("");
-    logMessage(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
-    if (pushed) popLogPrefix();
-  }
-}
-
-static void
-logProperty (const char *value, const char *variable, const char *label) {
-  if (*value) {
-    if (variable) setGlobalVariable(variable, value);
-  } else {
-    value = gettext("none");
-  }
-
-  logMessage(LOG_INFO, "%s: %s", label, value);
-}
 
 int
 changeLogLevel (const char *operand) {
@@ -835,6 +891,10 @@ brlttyPrepare (int argc, char *argv[]) {
   logProperty(getMessagesLocale(), "messagesLocale", gettext("Messages Locale"));
   logProperty(getMessagesDomain(), "messagesDomain", gettext("Messages Domain"));
   logProperty(getMessagesDirectory(), "messagesDirectory", gettext("Messages Directory"));
+
+#ifdef ENABLE_SPEECH_SUPPORT
+  setAutospeakThreshold();
+#endif /* ENABLE_SPEECH_SUPPORT */
 
   establishPrivileges();
   return PROG_EXIT_SUCCESS;

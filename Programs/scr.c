@@ -102,6 +102,7 @@ refreshScreen (void) {
 void
 describeScreen (ScreenDescription *description) {
   describeBaseScreen(currentScreen, description);
+  if (description->unreadable) description->quality = SCQ_NONE;
 }
 
 int

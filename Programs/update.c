@@ -702,8 +702,9 @@ autospeak (AutospeakMode mode) {
       }
     }
 
-    if (count) {
+    if (count && (scr.quality >= autospeakMinimumScreenContentQuality)) {
       if (!reason) reason = "unknown reason";
+
       logMessage(LOG_CATEGORY(SPEECH_EVENTS),
                  "autospeak: %s: [%d,%d] %d.%d",
                  reason, ses->winx, ses->winy, column, count);

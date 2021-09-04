@@ -33,7 +33,7 @@
 # Each configuration entry consists of a keyword followed by its operand.
 # An arbitrary amount of white space, (blanks and/or tabs), may occur
 # before the keyword, as well as before and after the operand. Keyword
-# processing is not case sensitive. Examples of valid entries are:
+# processing isn't case sensitive. Examples of valid entries are:
 #
 #	Braille-Driver	pm	# Papenmeier braille displays.
 #	braille-device	serial:@serial_first_device@	# The first serial device.
@@ -368,11 +368,6 @@
 #speech-driver	vv	# ViaVoice (text to speech engine)
 #speech-driver	xs	# ExternalSpeech (executes /usr/local/bin/externalspeech)
 
-# The quiet-if-no-braille directive fully disables the autospeak feature.
-# Screen content won't be automatically spoken when braille isn't being used.
-# (can be overridden with the --quiet-if-no-braille= [-Q] option)
-#quiet-if-no-braille	off	# [off,on]
-
 # The speech-input directive specifies the name of the file system object
 # (FIFO, named pipe, named socket, etc) which can be used by external
 # applications for text-to-speech conversion via BRLTTY's speech driver.
@@ -380,6 +375,16 @@
 # specified, the file system object isn't created.
 # (can be overridden with the --speech-input= [-i] option)
 #speech-input	/path/to/file-system-object
+
+# The quiet-if-no-braille directive specifies that the autospeak feature
+# isn't to be implicitly enabled when the braille driver is not running.
+# (can be overridden with the --quiet-if-no-braille= [-Q] option)
+#quiet-if-no-braille	off	# [off,on]
+
+# The autospeak-threshold directive specifies the minimum screen content
+# quality that will trigger the autospeak feature.
+# (can be overridden with the --autospeak-threshold= option)
+#autospeak-threshold	none
 
 
 ############################
