@@ -24,7 +24,9 @@ setSourceRoot
 cd "${BRLTTY_SOURCE_ROOT}"
 
 revisionIdentifier="$(./getrevid .)" || {
-   revisionIdentifier="$(sed -e 's/"//g' "Programs/revision_identifier.h")" || {
+   revisionHeader="${programsSubdirectory}/revision_identifier.h"
+
+   revisionIdentifier="$(sed -e 's/"//g' "${revisionHeader}")" || {
       revisionIdentifier="$(date +'%Y%m%d-%H%M%S')"
    }
 }

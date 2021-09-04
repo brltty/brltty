@@ -35,5 +35,5 @@ makeTargets=(
    all-api-bindings
 )
 
-make -s -C "Programs" "${makeTargets[@]}"
+make -s -C "${programsSubdirectory}" "${makeTargets[@]}"
 exit 0
