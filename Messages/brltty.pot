@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 6.3\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-08-31 08:45-0400\n"
+"POT-Creation-Date: 2021-09-04 20:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -230,7 +230,7 @@ msgid "Attributes Percent Visible"
 msgstr ""
 
 #: Programs/config.c:999
-#: Programs/menu_prefs.c:1395
+#: Programs/menu_prefs.c:1402
 msgid "Attributes Table"
 msgstr ""
 
@@ -506,7 +506,7 @@ msgid "Contracted Braille"
 msgstr ""
 
 #: Programs/config.c:967
-#: Programs/menu_prefs.c:1402
+#: Programs/menu_prefs.c:1395
 msgid "Contraction Table"
 msgstr ""
 
@@ -1174,11 +1174,11 @@ msgstr ""
 msgid "Muted Trumpet"
 msgstr ""
 
-#: Programs/config.c:535
+#: Programs/config.c:544
 msgid "Name of or path to attributes table."
 msgstr ""
 
-#: Programs/config.c:544
+#: Programs/config.c:536
 msgid "Name of or path to contraction table."
 msgstr ""
 
@@ -1211,7 +1211,6 @@ msgstr ""
 msgid "No Capitalization"
 msgstr ""
 
-#: .c:6
 #: Programs/menu_prefs.c:897
 #: Programs/menu_prefs.c:1141
 #: Programs/menu_prefs.c:1154
@@ -1496,7 +1495,6 @@ msgstr ""
 msgid "Quick Space"
 msgstr ""
 
-#: .c:11
 #: Programs/menu_prefs.c:1158
 msgid "Raise Pitch"
 msgstr ""
@@ -1589,7 +1587,6 @@ msgstr ""
 
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
-#: .c:9 .c:10
 #: Programs/menu_prefs.c:1157
 msgid "Say Cap"
 msgstr ""
@@ -2417,7 +2414,7 @@ msgstr ""
 msgid "cannot compile keyboard table"
 msgstr ""
 
-#: Programs/ttb_translate.c:272
+#: Programs/ttb_translate.c:275
 msgid "cannot compile text table"
 msgstr ""
 
@@ -2436,7 +2433,7 @@ msgstr ""
 msgid "cannot connect to display %s\n"
 msgstr ""
 
-#: Programs/file.c:364
+#: Programs/file.c:381
 msgid "cannot create directory"
 msgstr ""
 
@@ -2467,7 +2464,7 @@ msgstr ""
 msgid "cannot get tty %d\n"
 msgstr ""
 
-#: Programs/file.c:501
+#: Programs/file.c:518
 msgid "cannot get working directory"
 msgstr ""
 
@@ -2492,11 +2489,11 @@ msgstr ""
 msgid "cannot load library"
 msgstr ""
 
-#: Programs/ttb_translate.c:292
+#: Programs/ttb_translate.c:295
 msgid "cannot load text table"
 msgstr ""
 
-#: Programs/file.c:353
+#: Programs/file.c:370
 msgid "cannot make world writable"
 msgstr ""
 
@@ -2521,7 +2518,7 @@ msgstr ""
 msgid "cannot set focus to %#010x\n"
 msgstr ""
 
-#: Programs/file.c:515
+#: Programs/file.c:532
 #: Programs/menu.c:605
 msgid "cannot set working directory"
 msgstr ""
@@ -2820,7 +2817,7 @@ msgstr ""
 #: Programs/config.c:397
 #: Programs/config.c:523
 #: Programs/config.c:533
-#: Programs/config.c:541
+#: Programs/config.c:542
 #: Programs/config.c:550
 #: Programs/config.c:587
 #: Programs/config.c:672
