@@ -70,8 +70,7 @@ public class BrailleService extends AccessibilityService {
 
   private final void startCoreThread () {
     Log.d(LOG_TAG, "starting core thread");
-
-    coreThread = new CoreThread(this).prepare();
+    coreThread = new CoreThread(this);
     coreThread.start();
   }
 

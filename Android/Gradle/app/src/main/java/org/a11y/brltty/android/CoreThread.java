@@ -46,11 +46,6 @@ public class CoreThread extends Thread {
 
   private final Context coreContext;
 
-  public CoreThread (Context context) {
-    super("Core");
-    coreContext = context;
-  }
-
   private final void emptyDirectory (File directory) {
     if (!directory.canWrite()) {
       directory.setWritable(true, true);
@@ -296,6 +291,21 @@ public class CoreThread extends Thread {
     return builder.getArguments();
   }
 
+  @Override
+  public void run () {
+    updateDataFiles();
+
+    {
+      UsbHelper.begin();
+
+      try {
+        CoreWrapper.run(makeArguments(), ApplicationParameters.CORE_WAIT_DURATION);
+      } finally {
+        UsbHelper.end();
+      }
+    }
+  }
+
   private final void restoreSettings () {
     BrailleRenderer.setBrailleRenderer(getStringSetting(R.string.PREF_KEY_NAVIGATION_MODE, R.string.DEFAULT_NAVIGATION_MODE));
 
@@ -327,24 +337,11 @@ public class CoreThread extends Thread {
     CoreWrapper.setEnvironmentVariable("XDG_CONFIG_DIRS", paths.toString());
   }
 
-  public final CoreThread prepare () {
+  public CoreThread (Context context) {
+    super("Core");
+    coreContext = context;
+
     restoreSettings();
     setOverrideDirectories();
-    return this;
-  }
-
-  @Override
-  public void run () {
-    updateDataFiles();
-
-    {
-      UsbHelper.begin();
-
-      try {
-        CoreWrapper.run(makeArguments(), ApplicationParameters.CORE_WAIT_DURATION);
-      } finally {
-        UsbHelper.end();
-      }
-    }
   }
 }
