@@ -327,10 +327,14 @@ public class CoreThread extends Thread {
     CoreWrapper.setEnvironmentVariable("XDG_CONFIG_DIRS", paths.toString());
   }
 
-  @Override
-  public void run () {
+  public final CoreThread prepare () {
     restoreSettings();
     setOverrideDirectories();
+    return this;
+  }
+
+  @Override
+  public void run () {
     updateDataFiles();
 
     {
