@@ -122,7 +122,53 @@ ensureSetting (
 }
 
 static void
-showUsage (
+showUsageLine (
+  FILE *stream, const char *description, char *line,
+  unsigned int offset, unsigned int width
+) {
+  unsigned int limit = width - offset;
+  unsigned int charsLeft = strlen(description);
+
+  while (1) {
+    unsigned int charCount = charsLeft;
+
+    if (charCount > limit) {
+      charCount = limit;
+
+      while (charCount > 0) {
+        if (isspace(description[charCount])) break;
+        charCount -= 1;
+      }
+
+      while (charCount > 0) {
+        if (!isspace(description[--charCount])) {
+          charCount += 1;
+          break;
+        }
+      }
+    }
+
+    if (charCount > 0) {
+      memcpy(line+offset, description, charCount);
+      unsigned int length = offset + charCount;
+
+      writeWithConsoleEncoding(stream, line, length);
+      fputc('\n', stream);
+    }
+
+    while (charCount < charsLeft) {
+      if (!isspace(description[charCount])) break;
+      charCount += 1;
+    }
+
+    if (!(charsLeft -= charCount)) break;
+    description += charCount;
+    memset(line, ' ', offset);
+  }
+}
+
+static void
+showUsageSummary (
   OptionProcessingInformation *info,
   FILE *outputStream,
   unsigned int lineWidth,
@@ -150,6 +196,7 @@ showUsage (
 
   fputs(gettext("Usage"), outputStream);
   fprintf(outputStream, ": %s", programName);
+
   if (info->optionCount) {
     fputs(" [", outputStream);
     fputs(gettext("option"), outputStream);
@@ -211,8 +258,6 @@ showUsage (
 
     line[lineLength++] = ' ';
     {
-      const unsigned int headerWidth = lineLength;
-      const unsigned int descriptionWidth = lineWidth - headerWidth;
       const int formatStrings = !!(option->flags & OPT_Format);
       const char *description = option->description? gettext(option->description): "";
 
@@ -247,52 +292,12 @@ showUsage (
 
         while (index < limit) strings[index++] = "";
         snprintf(from, (to - from),
-                 description, strings[0], strings[1], strings[2], strings[3]);
+          description, strings[0], strings[1], strings[2], strings[3]
+        );
         description = from;
       }
 
-      {
-        unsigned int charsLeft = strlen(description);
-
-        while (1) {
-          unsigned int charCount = charsLeft;
-
-          if (charCount > descriptionWidth) {
-            charCount = descriptionWidth;
-
-            while (charCount > 0) {
-              if (description[charCount] == ' ') break;
-              charCount -= 1;
-            }
-
-            while (charCount > 0) {
-              if (description[--charCount] != ' ') {
-                charCount += 1;
-                break;
-              }
-            }
-          }
-
-          if (charCount > 0) {
-            memcpy(line+lineLength, description, charCount);
-            lineLength += charCount;
-
-            writeWithConsoleEncoding(outputStream, line, lineLength);
-            fputc('\n', outputStream);
-          }
-
-          while (charCount < charsLeft) {
-            if (description[charCount] != ' ') break;
-            charCount += 1;
-          }
-
-          if (!(charsLeft -= charCount)) break;
-          description += charCount;
-
-          lineLength = 0;
-          while (lineLength < headerWidth) line[lineLength++] = ' ';
-        }
-      }
+      showUsageLine(outputStream, description, line, lineLength, lineWidth);
     }
   }
 }
@@ -604,7 +609,7 @@ processCommandLine (
   *argumentCount -= optind;
 
   if (optHelp) {
-    showUsage(info, stdout, 79, argumentsSummary, optHelpAll);
+    showUsageSummary(info, stdout, 79, argumentsSummary, optHelpAll);
     info->exitImmediately = 1;
   }
 
