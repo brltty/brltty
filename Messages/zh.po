@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 4.3\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2021-01-27 11:28-0500\n"
-"PO-Revision-Date: 2021-01-28 03:18+0000\n"
+"POT-Creation-Date: 2021-09-04 20:26+0200\n"
+"PO-Revision-Date: 2021-09-04 21:27+0000\n"
 "Last-Translator: 高生旺 <coscell@molerat.net>\n"
 "Language-Team: Friends of BRLTTY <BRLTTY@brlttY.app>\n"
 "Language: zh\n"
@@ -33,264 +33,292 @@ msgstr ""
 msgid "\"%s\" started as \"%s\"\n"
 msgstr "\"%s\" 啟動為 \"%s\"\n"
 
-#: Programs/menu_prefs.c:457 Programs/menu_prefs.c:458
-#: Programs/menu_prefs.c:460 Programs/menu_prefs.c:461
-#: Programs/menu_prefs.c:464 Programs/menu_prefs.c:465
-#: Programs/menu_prefs.c:466 Programs/menu_prefs.c:468
-#: Programs/menu_prefs.c:469
+#. xgettext: This phrase describes the colour of a character on the screen.
+#. xgettext: %1$s is the (already translated) foreground colour.
+#. xgettext: %2$s is the (already translated) background colour.
+#: Programs/cmd_utils.c:169
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%1$s 在 %2$s"
+
+#. xgettext: This is how to say when the time is exactly on (i.e. zero minutes after) an hour.
+#. xgettext: (%u represents the number of hours)
+#: Programs/cmd_miscellaneous.c:89
+#, c-format
+msgid "%u o'clock"
+msgid_plural "%u o'clock"
+msgstr[0] "%u 點鐘"
+
+#. xgettext: This is a number (%u) of seconds (time units).
+#: Programs/cmd_miscellaneous.c:107
+#, c-format
+msgid "%u second"
+msgid_plural "%u seconds"
+msgstr[0] "%u 秒鐘"
+
+#: Programs/menu_prefs.c:543 Programs/menu_prefs.c:544
+#: Programs/menu_prefs.c:546 Programs/menu_prefs.c:547
+#: Programs/menu_prefs.c:550 Programs/menu_prefs.c:551
+#: Programs/menu_prefs.c:552 Programs/menu_prefs.c:554
+#: Programs/menu_prefs.c:555 Programs/menu_prefs.c:561
 msgid "1 cell"
 msgstr "1 方"
 
-#: Programs/menu_prefs.c:789
+#: Programs/menu_prefs.c:900
 msgid "1 second"
 msgstr "1 秒"
 
-#: Programs/menu_prefs.c:851
+#: Programs/menu_prefs.c:962
 msgid "10 seconds"
 msgstr "10 秒"
 
-#: Programs/menu_prefs.c:1158
+#: Programs/menu_prefs.c:1273
 msgid "12 Hour"
 msgstr "12 小時"
 
-#: Programs/menu_prefs.c:456 Programs/menu_prefs.c:459
-#: Programs/menu_prefs.c:462 Programs/menu_prefs.c:463
-#: Programs/menu_prefs.c:467
+#: Programs/menu_prefs.c:542 Programs/menu_prefs.c:545
+#: Programs/menu_prefs.c:548 Programs/menu_prefs.c:549
+#: Programs/menu_prefs.c:553
 msgid "2 cells"
 msgstr "2 方"
 
-#: Programs/menu_prefs.c:790
+#: Programs/menu_prefs.c:901
 msgid "2 seconds"
 msgstr "2 秒"
 
-#: Programs/menu_prefs.c:852
+#: Programs/menu_prefs.c:963
 msgid "20 seconds"
 msgstr "20 秒"
 
-#: Programs/menu_prefs.c:1157
+#: Programs/menu_prefs.c:1272
 msgid "24 Hour"
 msgstr "24 小時"
 
-#: Programs/menu_prefs.c:787
+#: Programs/menu_prefs.c:898
 msgid "250 milliseconds"
 msgstr "250 毫秒"
 
-#: Programs/menu_prefs.c:853
+#: Programs/menu_prefs.c:557 Programs/menu_prefs.c:558
+#: Programs/menu_prefs.c:559 Programs/menu_prefs.c:560
+msgid "3 cells"
+msgstr "3 方"
+
+#: Programs/menu_prefs.c:964
 msgid "40 seconds"
 msgstr "40 秒"
 
-#: Programs/menu_prefs.c:850
+#: Programs/menu_prefs.c:961
 msgid "5 seconds"
 msgstr "5 秒"
 
-#: Programs/menu_prefs.c:788
+#: Programs/menu_prefs.c:899
 msgid "500 milliseconds"
 msgstr "500 毫秒"
 
-#: Programs/menu_prefs.c:615
-msgid "6-Dot Computer"
-msgstr "六點電腦點字"
-
-#: Programs/menu_prefs.c:614
-msgid "6-Dot Contracted"
-msgstr "六點縮寫點字"
-
-#: Programs/menu_prefs.c:613
-msgid "8-Dot Computer"
-msgstr "八點電腦點字"
-
-#: Programs/menu_prefs.c:616
-msgid "8-Dot Contracted"
-msgstr "八點縮寫點字"
+#: Programs/menu_prefs.c:733
+msgid "6-dot"
+msgstr "6-點"
 
 #: Programs/brltty-ttb.c:179
 msgid "8-bit character set to use."
 msgstr "要用的八位元字元集"
 
+#: Programs/menu_prefs.c:732
+msgid "8-dot"
+msgstr "8-點"
+
 #: Programs/scr_menu.c:104
 msgid "<off>"
 msgstr "<關>"
 
-#: Programs/config.c:1382
+#: Programs/config.c:1506
 msgid "API Parameter"
 msgstr "API 參數"
 
-#: Programs/cmds.auto.h:1252
+#. xgettext: This is the description of the PASSAT command.
+#: Programs/cmds.auto.h:1471
 msgid "AT (set 2) keyboard scan code"
 msgstr "AT (set 2) 鍵盤掃描碼"
 
-#: Programs/midi.c:67
+#. xgettext: This is the name of MIDI musical instrument #22 (in the Organ group).
+#: Programs/midi.c:145
 msgid "Accordion"
 msgstr "風琴"
 
 #. Bass
-#: Programs/midi.c:80
+#. xgettext: This is the name of MIDI musical instrument #33 (in the Bass group).
+#: Programs/midi.c:180
 msgid "Acoustic Bass"
 msgstr "低音被私"
 
 #. Piano
-#: Programs/midi.c:44
+#. xgettext: This is the name of MIDI musical instrument #1 (in the Piano group).
+#: Programs/midi.c:80
 msgid "Acoustic Grand Piano"
 msgstr "平臺鋼琴"
 
 #. Guitar
-#: Programs/midi.c:71
+#. xgettext: This is the name of MIDI musical instrument #25 (in the Guitar group).
+#: Programs/midi.c:155
 msgid "Acoustic Guitar (nylon)"
 msgstr "尼龍吉他"
 
-#: Programs/midi.c:72
+#. xgettext: This is the name of MIDI musical instrument #26 (in the Guitar group).
+#: Programs/midi.c:158
 msgid "Acoustic Guitar (steel)"
 msgstr "鋼弦吉他"
 
-#: Programs/menu_prefs.c:1184
+#: Programs/menu_prefs.c:1299
 msgid "After Time"
 msgstr "後時間"
 
-#: Programs/midi.c:171
+#. xgettext: This is the name of MIDI musical instrument #114 (in the Percussive group).
+#: Programs/midi.c:434
 msgid "Agogo"
 msgstr "Agogo"
 
-#: Programs/menu_prefs.c:1374
+#: Programs/menu_prefs.c:1487
 msgid "Alert"
 msgstr "警示"
 
-#: Programs/menu_prefs.c:993
+#: Programs/menu_prefs.c:1104
 msgid "Alert Dots"
 msgstr "警示點位"
 
-#: Programs/menu_prefs.c:998
+#: Programs/menu_prefs.c:1109
 msgid "Alert Messages"
 msgstr "警示訊息"
 
-#: Programs/menu_prefs.c:938
+#: Programs/menu_prefs.c:1049
 msgid "Alert Tunes"
 msgstr "警示音"
 
-#: Programs/menu_prefs.c:753 Programs/menu_prefs.c:1032
+#: Programs/menu_prefs.c:864 Programs/menu_prefs.c:1143
 msgid "All"
 msgstr "全部"
 
-#: Programs/menu_prefs.c:468
-msgid "Alphabetic Braille Window Coordinates"
-msgstr "字母點字視窗座標"
+#: Programs/menu_prefs.c:555
+msgid "Alphabetic Cursor Coordinates"
+msgstr "字母游標座標"
 
-#: Programs/menu_prefs.c:469
-msgid "Alphabetic Screen Cursor Coordinates"
-msgstr "字母游標位置"
+#: Programs/menu_prefs.c:554
+msgid "Alphabetic Window Coordinates"
+msgstr "字母視窗座標"
 
-#: Programs/midi.c:117
-msgid "Alto Sax"
+#. xgettext: This is the name of MIDI musical instrument #66 (in the Reed group).
+#: Programs/midi.c:283
+msgid "Alto Saxophone"
 msgstr "中音薩克斯風"
 
-#: Programs/midi.c:185
+#. xgettext: This is the name of MIDI musical instrument #127 (in the Sound Effects group).
+#: Programs/midi.c:474
 msgid "Applause"
 msgstr "掌聲"
-
-#: Programs/cmd_miscellaneous.c:60
-msgid "April"
-msgstr "四月"
 
 #: Programs/log.c:118
 msgid "Async Events"
 msgstr "非同步事件"
 
-#: Programs/menu_prefs.c:710
-msgid "Attributes Invisible Time"
-msgstr "屬性隱藏時間"
+#: Programs/menu_prefs.c:807
+msgid "Attributes Blink Period"
+msgstr "屬性跳動其"
 
-#: Programs/config.c:2827 Programs/menu_prefs.c:1280
+#: Programs/menu_prefs.c:815
+msgid "Attributes Percent Visible"
+msgstr "可見的屬性百分比"
+
+#: Programs/config.c:999 Programs/menu_prefs.c:1402
 msgid "Attributes Table"
 msgstr "屬性表"
-
-#: Programs/menu_prefs.c:704
-msgid "Attributes Visible Time"
-msgstr "屬性顯示時間"
-
-#: Programs/cmd_miscellaneous.c:64
-msgid "August"
-msgstr "八月"
 
 #: Programs/alert.c:168
 msgid "Autorelease"
 msgstr "自動放開"
 
-#: Programs/menu_prefs.c:856
+#: Programs/menu_prefs.c:967
 msgid "Autorelease Time"
 msgstr "自動放開時間"
 
-#: Programs/menu_prefs.c:873
+#: Programs/menu_prefs.c:984
 msgid "Autorepeat Enabled"
 msgstr "自動重複啟用"
 
-#: Programs/menu_prefs.c:879
+#: Programs/menu_prefs.c:990
 msgid "Autorepeat Interval"
 msgstr "自動重複間隔"
 
-#: Programs/menu_prefs.c:886
+#: Programs/menu_prefs.c:997
 msgid "Autorepeat Panning"
 msgstr "自動重複移動"
 
-#: Programs/menu_prefs.c:1075
+#: Programs/menu_prefs.c:1186
 msgid "Autospeak"
 msgstr "自動朗讀"
 
-#: Programs/config.c:1827
+#: Programs/config.c:1952
 msgid "BRLTTY stopped"
 msgstr "BRLTTY 停止"
 
-#: Programs/midi.c:166
+#. xgettext: This is the name of MIDI musical instrument #110 (in the Ethnic group).
+#: Programs/midi.c:421
 msgid "Bag Pipe"
 msgstr "水管"
 
-#: Programs/midi.c:162
+#. xgettext: This is the name of MIDI musical instrument #106 (in the Ethnic group).
+#: Programs/midi.c:409
 msgid "Banjo"
 msgstr "斑鳩"
 
-#: Programs/midi.c:119
-msgid "Baritone Sax"
-msgstr "低音薩克斯風"
+#. xgettext: This is the name of MIDI musical instrument #68 (in the Reed group).
+#: Programs/midi.c:289
+msgid "Baritone Saxophone"
+msgstr "男中音薩克斯風"
 
-#: Programs/midi.c:28
+#. xgettext: This is the name of MIDI musical instrument group #5.
+#: Programs/midi.c:37
 msgid "Bass"
 msgstr "被私"
 
-#: Programs/midi.c:122
+#. xgettext: This is the name of MIDI musical instrument #71 (in the Reed group).
+#: Programs/midi.c:298
 msgid "Bassoon"
 msgstr "低音管"
 
-#: Programs/menu_prefs.c:945
+#: Programs/menu_prefs.c:1056
 msgid "Beeper"
 msgstr "翁鳴器"
 
-#: Programs/menu_prefs.c:1183
+#: Programs/menu_prefs.c:1298
 msgid "Before Time"
 msgstr "前時間"
 
-#: Programs/midi.c:182
+#. xgettext: This is the name of MIDI musical instrument #124 (in the Sound Effects group).
+#: Programs/midi.c:465
 msgid "Bird Tweet"
 msgstr "鳥鳴"
 
-#: Programs/menu_prefs.c:698
+#: Programs/menu_prefs.c:801
 msgid "Blinking Attributes"
 msgstr "跳動屬性"
 
-#: Programs/menu_prefs.c:716
+#: Programs/menu_prefs.c:823
 msgid "Blinking Capitals"
 msgstr "跳動大寫字母"
 
-#: Programs/menu_prefs.c:675
+#: Programs/menu_prefs.c:774
 msgid "Blinking Screen Cursor"
 msgstr "跳動游標"
 
-#: Programs/menu_prefs.c:1133
+#: Programs/menu_prefs.c:1244
 msgid "Blinking Speech Cursor"
 msgstr "跳動語音游標"
 
-#: Programs/menu_prefs.c:576 Programs/menu_prefs.c:1243
+#: Programs/menu_prefs.c:665 Programs/menu_prefs.c:1358
 msgid "Block"
 msgstr "區快"
 
-#: Programs/midi.c:129
+#. xgettext: This is the name of MIDI musical instrument #77 (in the Pipe group).
+#: Programs/midi.c:317
 msgid "Blown Bottle"
 msgstr "瓶子"
 
@@ -298,11 +326,11 @@ msgstr "瓶子"
 msgid "Bluetooth I/O"
 msgstr "藍芽輸入/輸出"
 
-#: Programs/config.c:1603
+#: Programs/config.c:1727
 msgid "Braille Device"
 msgstr "點字設備"
 
-#: Programs/config.c:1599
+#: Programs/config.c:1723
 msgid "Braille Driver"
 msgstr "點字驅動"
 
@@ -310,7 +338,7 @@ msgstr "點字驅動"
 msgid "Braille Driver Events"
 msgstr "點字驅動事件"
 
-#: Programs/menu_prefs.c:653
+#: Programs/menu_prefs.c:752
 msgid "Braille Firmness"
 msgstr "點字強度"
 
@@ -318,60 +346,52 @@ msgstr "點字強度"
 msgid "Braille Key Events"
 msgstr "點字按鍵事件"
 
-#: Programs/config.c:1602
+#: Programs/config.c:1726
 msgid "Braille Parameter"
 msgstr "點字參數"
 
-#: Programs/menu_prefs.c:609
+#: Programs/menu_prefs.c:698
 msgid "Braille Presentation"
 msgstr "點字顯示"
 
-#: Programs/menu_prefs.c:1270
+#: Programs/menu_prefs.c:1385
 msgid "Braille Tables"
 msgstr "點字表"
 
-#: Programs/menu_prefs.c:821
+#: Programs/menu_prefs.c:932
 msgid "Braille Typing"
 msgstr "點字輸入"
 
-#: Programs/menu_prefs.c:619
+#: Programs/menu_prefs.c:706
 msgid "Braille Variant"
 msgstr "點字種類"
 
-#: Programs/menu_prefs.c:457
-msgid "Braille Window Column"
-msgstr "點字視窗欄位"
-
-#: Programs/menu_prefs.c:456
-msgid "Braille Window Coordinates"
-msgstr "點字視窗座標"
-
-#: Programs/menu_prefs.c:774
+#: Programs/menu_prefs.c:885
 msgid "Braille Window Overlap"
 msgstr "點字視窗重疊"
 
-#: Programs/menu_prefs.c:458
-msgid "Braille Window Row"
-msgstr "點字視窗行"
-
-#: Programs/config.c:475
+#: Programs/config.c:473
 #, c-format
 msgid "Braille driver code (%s, %s, or one of {%s})."
 msgstr "點字驅動碼 (%s, %s, 或 {%s} 之一"
 
-#: Programs/midi.c:31
+#. xgettext: This is the name of MIDI musical instrument group #8.
+#: Programs/midi.c:46
 msgid "Brass"
 msgstr "銅管"
 
-#: Programs/midi.c:112
+#. xgettext: This is the name of MIDI musical instrument #62 (in the Brass group).
+#: Programs/midi.c:270
 msgid "Brass Section"
 msgstr "銅管組"
 
-#: Programs/midi.c:180
+#. xgettext: This is the name of MIDI musical instrument #122 (in the Sound Effects group).
+#: Programs/midi.c:459
 msgid "Breath Noise"
 msgstr "呼吸聲"
 
-#: Programs/midi.c:45
+#. xgettext: This is the name of MIDI musical instrument #2 (in the Piano group).
+#: Programs/midi.c:83
 msgid "Bright Acoustic Piano"
 msgstr "明亮鋼琴"
 
@@ -383,68 +403,83 @@ msgstr "BrlAPI 授權/身份驗證方案"
 msgid "BrlAPI host and/or port to connect to"
 msgstr "要連接的 BrlAPI 主機和/或埠口"
 
-#: Programs/menu_prefs.c:1307
+#: Programs/menu_prefs.c:1420
 msgid "Build Information"
 msgstr "建立資訊"
 
-#: Programs/menu_prefs.c:638
+#: Programs/menu_prefs.c:725
 msgid "Capitalization Mode"
 msgstr "大寫模式"
 
-#: Programs/menu_prefs.c:727
-msgid "Capitals Invisible Time"
-msgstr "大寫隱藏時間"
+#: Programs/menu_prefs.c:828
+msgid "Capitals Blink Period"
+msgstr "大寫跳動週期"
 
-#: Programs/menu_prefs.c:721
-msgid "Capitals Visible Time"
-msgstr "大寫顯示時間"
+#: Programs/menu_prefs.c:836
+msgid "Capitals Percent Visible"
+msgstr "可見大寫百分比"
 
-#: Programs/menu_prefs.c:1397
+#: Programs/menu_prefs.c:1510
 msgid "Category Log Level"
 msgstr "分類記錄等級"
 
 #. Chromatic Percussion
-#: Programs/midi.c:53
+#. xgettext: This is the name of MIDI musical instrument #9 (in the Chromatic Percussion group).
+#: Programs/midi.c:105
 msgid "Celesta"
 msgstr "鋼片琴"
 
-#: Programs/midi.c:91
+#. xgettext: This is the name of MIDI musical instrument #43 (in the Strings group).
+#: Programs/midi.c:211
 msgid "Cello"
 msgstr "大提琴"
 
-#: Programs/midi.c:102
+#. xgettext: This is the name of MIDI musical instrument #53 (in the Ensemble group).
+#: Programs/midi.c:242
 msgid "Choir Aahs"
 msgstr "和聲阿"
 
-#: Programs/midi.c:25
+#. xgettext: This is the name of MIDI musical instrument group #2.
+#: Programs/midi.c:28
 msgid "Chromatic Percussion"
 msgstr "有音調的打擊樂"
 
-#: Programs/midi.c:65
+#. xgettext: This is the name of MIDI musical instrument #20 (in the Organ group).
+#: Programs/midi.c:139
 msgid "Church Organ"
 msgstr "教堂風琴"
 
-#: Programs/midi.c:123
+#. xgettext: This is the name of MIDI musical instrument #72 (in the Reed group).
+#: Programs/midi.c:301
 msgid "Clarinet"
 msgstr "單簧管"
 
-#: Programs/midi.c:51
-msgid "Clavi"
-msgstr "大鍵琴"
+#. xgettext: This is the name of MIDI musical instrument #8 (in the Piano group).
+#: Programs/midi.c:101
+msgid "Clavinet"
+msgstr "單簧管"
 
-#: Programs/menu.c:820
+#: Programs/menu.c:894
 msgid "Close"
 msgstr "關閉"
 
-#: Programs/menu_prefs.c:1167
+#: Programs/menu_prefs.c:1282
 msgid "Colon"
 msgstr "冒號"
 
-#: Programs/menu_prefs.c:1331
+#: Programs/menu_prefs.c:702
+msgid "Computer Braille"
+msgstr "電腦點字"
+
+#: Programs/menu_prefs.c:736
+msgid "Computer Braille Cell Type"
+msgstr "電腦點字方類型"
+
+#: Programs/menu_prefs.c:1444
 msgid "Configuration Directory"
 msgstr "設定檔目錄"
 
-#: Programs/config.c:2770 Programs/menu_prefs.c:1336
+#: Programs/config.c:2895 Programs/menu_prefs.c:1449
 msgid "Configuration File"
 msgstr "設定檔"
 
@@ -452,15 +487,20 @@ msgstr "設定檔"
 msgid "Console Bell"
 msgstr "主控台嗶聲"
 
-#: Programs/menu_prefs.c:924
+#: Programs/menu_prefs.c:1035
 msgid "Console Bell Alert"
 msgstr "主控台嗶聲警示"
 
-#: Programs/midi.c:92
+#. xgettext: This is the name of MIDI musical instrument #44 (in the Strings group).
+#: Programs/midi.c:214
 msgid "Contrabass"
 msgstr "倍低音"
 
-#: Programs/config.c:2834 Programs/menu_prefs.c:1288
+#: Programs/menu_prefs.c:703
+msgid "Contracted Braille"
+msgstr "縮寫點字"
+
+#: Programs/config.c:967 Programs/menu_prefs.c:1395
 msgid "Contraction Table"
 msgstr "縮寫表"
 
@@ -472,63 +512,80 @@ msgstr "縮寫表"
 msgid "Contraction verification table."
 msgstr "縮寫檢查表"
 
-#: Programs/menu_prefs.c:1375
+#: Programs/menu_prefs.c:1488
 msgid "Critical"
 msgstr "關鍵"
+
+#: Programs/menu_prefs.c:546
+msgid "Cursor Column"
+msgstr "游標欄位"
+
+#: Programs/menu_prefs.c:545 Programs/menu_prefs.c:557
+msgid "Cursor Coordinates"
+msgstr "游標座標"
 
 #: Programs/log.c:100
 msgid "Cursor Routing"
 msgstr "游標定位"
 
+#: Programs/menu_prefs.c:547
+msgid "Cursor Row"
+msgstr "游標行"
+
 #: Programs/log.c:94
 msgid "Cursor Tracking"
 msgstr "游標追蹤"
 
-#: Programs/menu_prefs.c:793
+#: Programs/menu_prefs.c:904
 msgid "Cursor Tracking Delay"
 msgstr "游標追蹤延遲"
 
-#: Programs/menu_prefs.c:1205
+#: Programs/menu_prefs.c:548 Programs/menu_prefs.c:559
+msgid "Cursor and Window Column"
+msgstr "游標與視窗欄位"
+
+#: Programs/menu_prefs.c:549 Programs/menu_prefs.c:560
+msgid "Cursor and Window Row"
+msgstr "游標與視窗行"
+
+#: Programs/menu_prefs.c:1320
 msgid "Dash"
 msgstr "聯字符號"
 
-#: Programs/menu_prefs.c:1198
+#: Programs/menu_prefs.c:1313
 msgid "Date Format"
 msgstr "日期格式"
 
-#: Programs/menu_prefs.c:1187
+#: Programs/menu_prefs.c:1302
 msgid "Date Position"
 msgstr "日期位置"
 
-#: Programs/menu_prefs.c:1210
+#: Programs/menu_prefs.c:1325
 msgid "Date Separator"
 msgstr "日期分隔符號"
 
-#: Programs/menu_prefs.c:1195
+#: Programs/menu_prefs.c:1310
 msgid "Day Month Year"
 msgstr "日 月 年"
 
-#: Programs/menu_prefs.c:1380
+#: Programs/menu_prefs.c:1493
 msgid "Debug"
 msgstr "除錯"
 
-#: Programs/cmd_miscellaneous.c:68
-msgid "December"
-msgstr "十二月"
-
-#: Programs/config.c:496
+#: Programs/config.c:494
 msgid "Device for accessing braille display."
 msgstr "處理點字顯示的設備"
 
-#: Programs/config.c:455
+#: Programs/config.c:453
 msgid "Disable the application programming interface."
 msgstr "取消程式設計界面"
 
-#: Programs/midi.c:77
+#. xgettext: This is the name of MIDI musical instrument #31 (in the Guitar group).
+#: Programs/midi.c:173
 msgid "Distortion Guitar"
 msgstr "噪音吉他"
 
-#: Programs/config.c:598
+#: Programs/config.c:596
 msgid "Do not autospeak when braille is not being used."
 msgstr "點字未啟用十不自動朗讀"
 
@@ -540,7 +597,7 @@ msgstr "不寫入任何文字到點字設備"
 msgid "Don't fall back to the Unicode base character."
 msgstr "不返回 Unicode 字元"
 
-#: Programs/config.c:366
+#: Programs/config.c:364
 msgid "Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc)."
 msgstr "不切換為未授權的使用者或放棄權限（群組成員身份、功能等等）"
 
@@ -548,28 +605,30 @@ msgstr "不切換為未授權的使用者或放棄權限（群組成員身份、
 msgid "Done"
 msgstr "完成"
 
-#: Programs/menu_prefs.c:1168 Programs/menu_prefs.c:1207
+#: Programs/menu_prefs.c:1283 Programs/menu_prefs.c:1322
 msgid "Dot"
 msgstr "點"
 
-#: Programs/menu_prefs.c:831
+#: Programs/menu_prefs.c:942
 msgid "Dots via Unicode Braille"
 msgstr "Unicode 點字碼的點"
 
 #. Organ
-#: Programs/midi.c:62
+#. xgettext: This is the name of MIDI musical instrument #17 (in the Organ group).
+#: Programs/midi.c:130
 msgid "Drawbar Organ"
 msgstr "拉把風琴"
 
-#: Programs/config.c:2791 Programs/menu_prefs.c:1356
+#: Programs/config.c:2916 Programs/menu_prefs.c:1469
 msgid "Drivers Directory"
 msgstr "驅動程式目錄"
 
-#: Programs/midi.c:60
+#. xgettext: This is the name of MIDI musical instrument #16 (in the Chromatic Percussion group).
+#: Programs/midi.c:126
 msgid "Dulcimer"
 msgstr "洋琴"
 
-#: Programs/menu_prefs.c:768
+#: Programs/menu_prefs.c:879
 msgid "Eager Sliding Braille Window"
 msgstr "即時拉動點字視窗"
 
@@ -577,133 +636,151 @@ msgstr "即時拉動點字視窗"
 msgid "Edit table."
 msgstr "編輯表"
 
-#: Programs/midi.c:81
+#. xgettext: This is the name of MIDI musical instrument #34 (in the Bass group).
+#: Programs/midi.c:183
 msgid "Electric Bass (finger)"
 msgstr "電被私（指彈）"
 
 # Elektronischer Bass (Pick)
-#: Programs/midi.c:82
+#. xgettext: This is the name of MIDI musical instrument #35 (in the Bass group).
+#: Programs/midi.c:186
 msgid "Electric Bass (pick)"
 msgstr "電被私（玻片）"
 
-#: Programs/midi.c:46
+#. xgettext: This is the name of MIDI musical instrument #3 (in the Piano group).
+#: Programs/midi.c:86
 msgid "Electric Grand Piano"
 msgstr "電鋼琴"
 
-#: Programs/midi.c:74
+#. xgettext: This is the name of MIDI musical instrument #28 (in the Guitar group).
+#: Programs/midi.c:164
 msgid "Electric Guitar (clean)"
 msgstr "電吉他（清澈）"
 
-#: Programs/midi.c:73
+#. xgettext: This is the name of MIDI musical instrument #27 (in the Guitar group).
+#: Programs/midi.c:161
 msgid "Electric Guitar (jazz)"
 msgstr "電吉他（爵士）"
 
-#: Programs/midi.c:75
+#. xgettext: This is the name of MIDI musical instrument #29 (in the Guitar group).
+#: Programs/midi.c:167
 msgid "Electric Guitar (muted)"
 msgstr "電吉他（悶音）"
 
-#: Programs/midi.c:48
+#. xgettext: This is the name of MIDI musical instrument #5 (in the Piano group).
+#: Programs/midi.c:92
 msgid "Electric Piano 1"
 msgstr "電鋼琴 1"
 
-#: Programs/midi.c:49
+#. xgettext: This is the name of MIDI musical instrument #6 (in the Piano group).
+#: Programs/midi.c:95
 msgid "Electric Piano 2"
 msgstr "電鋼琴 2"
 
-#: Programs/menu_prefs.c:1373
+#: Programs/menu_prefs.c:1486
 msgid "Emergency"
 msgstr "緊急"
 
-#: Programs/menu_prefs.c:455
+#: Programs/menu_prefs.c:541
 msgid "End"
 msgstr "結尾"
 
-#: Programs/menu_prefs.c:754
+#: Programs/menu_prefs.c:865
 msgid "End of Line"
 msgstr "行尾"
 
-#: Programs/midi.c:121
+#. xgettext: This is the name of MIDI musical instrument #70 (in the Reed group).
+#: Programs/midi.c:295
 msgid "English Horn"
 msgstr "英國管"
 
-#: Programs/menu_prefs.c:1067
+#: Programs/menu_prefs.c:1178
 msgid "Enqueue"
 msgstr "排隊"
 
-#: Programs/midi.c:30
+#. xgettext: This is the name of MIDI musical instrument group #7.
+#: Programs/midi.c:43
 msgid "Ensemble"
 msgstr "弦樂組"
 
-#: Programs/menu_prefs.c:1376
+#: Programs/menu_prefs.c:1489
 msgid "Error"
 msgstr "錯誤"
 
-#: Programs/midi.c:37
+#. xgettext: This is the name of MIDI musical instrument group #14.
+#: Programs/midi.c:68
 msgid "Ethnic Instruments"
 msgstr "民族樂器"
 
-#: Programs/menu_prefs.c:921
+#: Programs/menu_prefs.c:1032
 msgid "Event Alerts"
 msgstr "事件警示"
 
-#: Programs/menu_prefs.c:626
+#: Programs/menu_prefs.c:713
 msgid "Expand Current Word"
 msgstr "展開目前單字"
 
-#: Programs/config.c:410
+#: Programs/config.c:408
 msgid "Explicit preference settings."
 msgstr "顯示偏好設定"
 
-#: Programs/menu_prefs.c:948
+#: Programs/menu_prefs.c:1059
 msgid "FM"
 msgstr "FM"
 
-#: Programs/menu_prefs.c:986
+#: Programs/menu_prefs.c:1097
 msgid "FM Volume"
 msgstr "FM 音量"
 
 #. Synth FM
-#: Programs/midi.c:152
+#. xgettext: This is the name of MIDI musical instrument #97 (in the Synth FM group).
+#: Programs/midi.c:380
 msgid "FX 1 (rain)"
 msgstr "FX 1 （雨聲）"
 
-#: Programs/midi.c:153
+#. xgettext: This is the name of MIDI musical instrument #98 (in the Synth FM group).
+#: Programs/midi.c:383
 msgid "FX 2 (soundtrack)"
 msgstr "FX 2 （音軌）"
 
-#: Programs/midi.c:154
+#. xgettext: This is the name of MIDI musical instrument #99 (in the Synth FM group).
+#: Programs/midi.c:386
 msgid "FX 3 (crystal)"
 msgstr "FX 3 （水晶）"
 
-#: Programs/midi.c:155
+#. xgettext: This is the name of MIDI musical instrument #100 (in the Synth FM group).
+#: Programs/midi.c:389
 msgid "FX 4 (atmosphere)"
 msgstr "FX 4 （原子）"
 
-#: Programs/midi.c:156
+#. xgettext: This is the name of MIDI musical instrument #101 (in the Synth FM group).
+#: Programs/midi.c:392
 msgid "FX 5 (brightness)"
 msgstr "FX 5 （明亮）"
 
-#: Programs/midi.c:157
+#. xgettext: This is the name of MIDI musical instrument #102 (in the Synth FM group).
+#: Programs/midi.c:395
 msgid "FX 6 (goblins)"
 msgstr "FX 6 （小妖）"
 
-#: Programs/midi.c:158
+#. xgettext: This is the name of MIDI musical instrument #103 (in the Synth FM group).
+#: Programs/midi.c:398
 msgid "FX 7 (echoes)"
 msgstr "FX 7 （回音）"
 
-#: Programs/midi.c:159
+#. xgettext: This is the name of MIDI musical instrument #104 (in the Synth FM group).
+#. xgettext: (sci-fi is a common short form for science fiction)
+#: Programs/midi.c:402
 msgid "FX 8 (sci-fi)"
 msgstr "FX 8 （科幻）"
 
-#: Programs/cmd_miscellaneous.c:58
-msgid "February"
-msgstr "二月"
-
-#: Programs/midi.c:167
+#. xgettext: This is the name of MIDI musical instrument #111 (in the Ethnic group).
+#: Programs/midi.c:424
 msgid "Fiddle"
 msgstr "提琴"
 
-#: Programs/midi.c:126
+#. xgettext: This is the name of MIDI musical instrument #74 (in the Pipe group).
+#: Programs/midi.c:308
 msgid "Flute"
 msgstr "長笛"
 
@@ -723,11 +800,13 @@ msgstr "輸入檔案格式"
 msgid "Format of output file."
 msgstr "輸出檔案格式"
 
-#: Programs/midi.c:111
+#. xgettext: This is the name of MIDI musical instrument #61 (in the Brass group).
+#: Programs/midi.c:267
 msgid "French Horn"
 msgstr "法國號"
 
-#: Programs/midi.c:83
+#. xgettext: This is the name of MIDI musical instrument #36 (in the Bass group).
+#: Programs/midi.c:189
 msgid "Fretless Bass"
 msgstr "純被私"
 
@@ -735,7 +814,7 @@ msgstr "純被私"
 msgid "Frozen"
 msgstr "凍結"
 
-#: Programs/menu_prefs.c:470
+#: Programs/menu_prefs.c:556
 msgid "Generic"
 msgstr "一般"
 
@@ -743,36 +822,44 @@ msgstr "一般"
 msgid "Generic Input"
 msgstr "一般輸入"
 
-#: Programs/midi.c:54
+#. xgettext: This is the name of MIDI musical instrument #10 (in the Chromatic Percussion group).
+#: Programs/midi.c:108
 msgid "Glockenspiel"
 msgstr "鐘琴"
 
-#: Programs/midi.c:27
+#. xgettext: This is the name of MIDI musical instrument group #4.
+#: Programs/midi.c:34
 msgid "Guitar"
 msgstr "吉他"
 
 #. Sound Effects
-#: Programs/midi.c:179
+#. xgettext: This is the name of MIDI musical instrument #121 (in the Sound Effects group).
+#: Programs/midi.c:456
 msgid "Guitar Fret Noise"
 msgstr "吉他換把聲"
 
-#: Programs/midi.c:78
+#. xgettext: This is the name of MIDI musical instrument #32 (in the Guitar group).
+#: Programs/midi.c:176
 msgid "Guitar Harmonics"
 msgstr "吉他和絃"
 
-#: Programs/midi.c:186
+#. xgettext: This is the name of MIDI musical instrument #128 (in the Sound Effects group).
+#: Programs/midi.c:477
 msgid "Gunshot"
 msgstr "槍聲"
 
-#: Programs/midi.c:68
+#. xgettext: This is the name of MIDI musical instrument #23 (in the Organ group).
+#: Programs/midi.c:148
 msgid "Harmonica"
 msgstr "口琴"
 
-#: Programs/midi.c:50
+#. xgettext: This is the name of MIDI musical instrument #7 (in the Piano group).
+#: Programs/midi.c:98
 msgid "Harpsichord"
 msgstr "大鍵琴"
 
-#: Programs/midi.c:184
+#. xgettext: This is the name of MIDI musical instrument #126 (in the Sound Effects group).
+#: Programs/midi.c:471
 msgid "Helicopter"
 msgstr "直升機"
 
@@ -780,19 +867,20 @@ msgstr "直升機"
 msgid "Help Screen"
 msgstr "說明畫面"
 
-#: Programs/menu_prefs.c:649 Programs/menu_prefs.c:902
+#: Programs/menu_prefs.c:748 Programs/menu_prefs.c:1013
 msgid "High"
 msgstr "高"
 
-#: Programs/menu_prefs.c:810
+#: Programs/menu_prefs.c:921
 msgid "Highlight Braille Window Location"
 msgstr "反白點字視窗位置"
 
-#: Programs/midi.c:47
+#. xgettext: This is the name of MIDI musical instrument #4 (in the Piano group).
+#: Programs/midi.c:89
 msgid "Honkytonk Piano"
 msgstr "酒吧鋼琴"
 
-#: Programs/menu_prefs.c:1066
+#: Programs/menu_prefs.c:1177
 msgid "Immediate"
 msgstr "立刻"
 
@@ -804,11 +892,11 @@ msgstr "不相容的 XKB 含式庫\n"
 msgid "Incompatible XKB server support\n"
 msgstr "不相容的 XKB 服務支援\n"
 
-#: Programs/menu_prefs.c:1379
+#: Programs/menu_prefs.c:1492
 msgid "Information"
 msgstr "資訊"
 
-#: Programs/menu_prefs.c:845
+#: Programs/menu_prefs.c:956
 msgid "Input Options"
 msgstr "輸入選向"
 
@@ -816,18 +904,14 @@ msgstr "輸入選向"
 msgid "Input Packets"
 msgstr "輸入風包"
 
-#: Programs/config.c:341
+#: Programs/config.c:339
 #, c-format
 msgid "Install the %s service, and then exit."
 msgstr "安裝 %s 服務然後退出"
 
-#: Programs/menu_prefs.c:1383
+#: Programs/menu_prefs.c:1496
 msgid "Internal Parameters"
 msgstr "內部參數"
-
-#: Programs/cmd_miscellaneous.c:57
-msgid "January"
-msgstr "一月"
 
 #: Drivers/Screen/Android/screen.c:197
 msgid "Java class not found"
@@ -841,31 +925,24 @@ msgstr "發生 Java 錯誤"
 msgid "Java method not found"
 msgstr "沒有 Java 函數"
 
-#: Programs/cmd_miscellaneous.c:63
-msgid "July"
-msgstr "七月"
-
-#: Programs/cmd_miscellaneous.c:62
-msgid "June"
-msgstr "六月"
-
-#: Programs/midi.c:165
+#. xgettext: This is the name of MIDI musical instrument #109 (in the Ethnic group).
+#: Programs/midi.c:418
 msgid "Kalimba"
 msgstr "卡淋巴"
 
-#: Programs/config.c:1525
+#: Programs/config.c:1649
 msgid "Key Bindings"
 msgstr "按鍵榜定"
 
-#: Programs/config.c:1069
+#: Programs/config.c:1177
 msgid "Key Help"
 msgstr "按鍵說明"
 
-#: Programs/config.c:1530 Programs/ktb_list.c:737
+#: Programs/config.c:1654 Programs/ktb_list.c:737
 msgid "Key Table"
 msgstr "按鍵表"
 
-#: Programs/menu_prefs.c:824
+#: Programs/menu_prefs.c:935
 msgid "Keyboard Enabled"
 msgstr "鍵盤啟用"
 
@@ -873,52 +950,61 @@ msgstr "鍵盤啟用"
 msgid "Keyboard Key Events"
 msgstr "鍵盤按鍵事件"
 
-#: Programs/menu_prefs.c:931
+#: Programs/menu_prefs.c:1042
 msgid "Keyboard LED Alerts"
 msgstr "鍵盤燈號警示"
 
-#: Programs/config.c:2841 Programs/menu_prefs.c:913
+#: Programs/config.c:1262 Programs/menu_prefs.c:1024
 msgid "Keyboard Table"
 msgstr "按鍵表"
 
-#: Programs/midi.c:164
+#. xgettext: This is the name of MIDI musical instrument #108 (in the Ethnic group).
+#: Programs/midi.c:415
 msgid "Koto"
 msgstr "日本十三弦箏"
 
-#: Programs/config.c:2973
+#: Programs/config.c:3052
 msgid "Language"
 msgstr "語言"
 
 #. Synth Lead
-#: Programs/midi.c:134
+#. xgettext: This is the name of MIDI musical instrument #81 (in the Synth Lead group).
+#: Programs/midi.c:330
 msgid "Lead 1 (square)"
 msgstr "Lead 1 (方波)"
 
-#: Programs/midi.c:135
+#. xgettext: This is the name of MIDI musical instrument #82 (in the Synth Lead group).
+#: Programs/midi.c:333
 msgid "Lead 2 (sawtooth)"
 msgstr "Lead 2 （鋸齒）"
 
-#: Programs/midi.c:136
+#. xgettext: This is the name of MIDI musical instrument #83 (in the Synth Lead group).
+#: Programs/midi.c:336
 msgid "Lead 3 (calliope)"
 msgstr "Lead 3 (氣笛風琴)"
 
-#: Programs/midi.c:137
+#. xgettext: This is the name of MIDI musical instrument #84 (in the Synth Lead group).
+#: Programs/midi.c:339
 msgid "Lead 4 (chiff)"
 msgstr "Lead 4 (chiff)"
 
-#: Programs/midi.c:138
+#. xgettext: This is the name of MIDI musical instrument #85 (in the Synth Lead group).
+#: Programs/midi.c:342
 msgid "Lead 5 (charang)"
 msgstr "Lead 5 (charang)"
 
-#: Programs/midi.c:139
+#. xgettext: This is the name of MIDI musical instrument #86 (in the Synth Lead group).
+#: Programs/midi.c:345
 msgid "Lead 6 (voice)"
 msgstr "Lead 6 (人聲)"
 
-#: Programs/midi.c:140
+#. xgettext: This is the name of MIDI musical instrument #87 (in the Synth Lead group).
+#: Programs/midi.c:348
 msgid "Lead 7 (fifths)"
 msgstr "Lead 7 (fifths)"
 
-#: Programs/midi.c:141
+#. xgettext: This is the name of MIDI musical instrument #88 (in the Synth Lead group).
+#: Programs/midi.c:351
 msgid "Lead 8 (bass + lead)"
 msgstr "Lead 8 (bass + lead)"
 
@@ -926,7 +1012,7 @@ msgstr "Lead 8 (bass + lead)"
 msgid "Learn Mode"
 msgstr "學習模式"
 
-#: Programs/menu_prefs.c:1222
+#: Programs/menu_prefs.c:1337
 msgid "Left"
 msgstr "左"
 
@@ -942,80 +1028,77 @@ msgstr "以說明畫面格式列出按鍵表"
 msgid "List key table in reStructuredText format."
 msgstr "以重新架構文字格式列出按鍵表"
 
-#: Programs/menu_prefs.c:1366
+#: Programs/menu_prefs.c:1479
 msgid "Locale Directory"
 msgstr "本土化目錄"
 
-#: Programs/menu_prefs.c:1402
+#: Programs/menu_prefs.c:1515
 msgid "Log Categories"
 msgstr "紀錄分類"
 
-#: Programs/config.c:836
+#: Programs/config.c:834
 msgid "Log Level"
 msgstr "記錄等級"
 
-#: Programs/menu_prefs.c:1463
+#: Programs/menu_prefs.c:1576
 msgid "Log Messages"
 msgstr "記錄訊息"
 
-#: Programs/config.c:688
+#: Programs/config.c:686
 msgid "Log the versions of the core, API, and built-in drivers, and then exit."
 msgstr "記錄核心、API, 與內見驅動程式等的版本然後退出"
 
-#: Programs/config.c:653
+#: Programs/config.c:651
 msgid "Log to standard error rather than to the system log."
 msgstr "輸出到標準錯誤而非系統記錄"
 
-#: Programs/config.c:667
+#: Programs/config.c:665
 #, c-format
 msgid "Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)"
 msgstr "啟用紀錄等級 (%s 或 {%s} 之一）和/或紀錄分類（任何 {%s} 的組合或每個以 %s 開頭的都可停用）"
 
-#: Programs/menu_prefs.c:867
+#: Programs/menu_prefs.c:978
 msgid "Long Press Time"
 msgstr "長按時間"
 
-#: Programs/menu_prefs.c:647 Programs/menu_prefs.c:900
+#: Programs/menu_prefs.c:746 Programs/menu_prefs.c:1011
 msgid "Low"
 msgstr "低"
 
-#: Programs/menu_prefs.c:577
+#: Programs/menu_prefs.c:666
 msgid "Lower Left Dot"
 msgstr "左下方的點"
 
-#: Programs/menu_prefs.c:578
+#: Programs/menu_prefs.c:667
 msgid "Lower Right Dot"
 msgstr "右下方的點"
 
-#: Programs/menu_prefs.c:947
+#: Programs/menu_prefs.c:1058
 msgid "MIDI"
 msgstr "MIDI"
 
-#: Programs/config.c:637
+#: Programs/config.c:635
 msgid "MIDI (Musical Instrument Digital Interface) device specifier."
 msgstr "MIDI （樂器數位界面）設備指定"
 
-#: Programs/menu_prefs.c:977
+#: Programs/menu_prefs.c:1088
 msgid "MIDI Instrument"
 msgstr "MIDI 樂器"
 
-#: Programs/menu_prefs.c:967
+#: Programs/menu_prefs.c:1078
 msgid "MIDI Volume"
 msgstr "MIDI 音量"
 
-#: Programs/menu_prefs.c:1326
+#: Programs/menu_prefs.c:1439
 msgid "Mailing List"
 msgstr "郵件論壇"
 
-#: Programs/cmd_miscellaneous.c:59
-msgid "March"
-msgstr "三月"
-
-#: Programs/midi.c:57
+#. xgettext: This is the name of MIDI musical instrument #13 (in the Chromatic Percussion group).
+#: Programs/midi.c:117
 msgid "Marimba"
 msgstr "碼淋巴"
 
-#: Programs/menu_prefs.c:650 Programs/menu_prefs.c:903
+#: Programs/menu_prefs.c:749 Programs/menu_prefs.c:1014
 msgid "Maximum"
 msgstr "最大"
 
@@ -1023,143 +1106,139 @@ msgstr "最大"
 msgid "Maximum length of an output line."
 msgstr "一行顯示的最大長度"
 
-#: Programs/cmd_miscellaneous.c:61
-msgid "May"
-msgstr "五嶽"
-
-#: Programs/menu_prefs.c:648 Programs/menu_prefs.c:901
+#: Programs/menu_prefs.c:747 Programs/menu_prefs.c:1012
 msgid "Medium"
 msgstr "中等"
 
-#: Programs/midi.c:175
+#. xgettext: This is the name of MIDI musical instrument #118 (in the Percussive group).
+#: Programs/midi.c:446
 msgid "Melodic Tom"
 msgstr "定音鼓"
 
-#: Programs/menu_prefs.c:590
+#: Programs/menu_prefs.c:679
 msgid "Menu Options"
 msgstr "選單選向"
 
-#: Programs/config.c:646
+#: Programs/config.c:644
 msgid "Message hold timeout (in 10ms units)."
 msgstr "訊息保留時間（以 10ms 為單位）"
 
-#: Programs/config.c:839
+#: Programs/config.c:837
 msgid "Messages Directory"
 msgstr "訊息目錄"
 
-#: Programs/config.c:838
+#: Programs/config.c:836
 msgid "Messages Domain"
 msgstr "訊息種類"
 
-#: Programs/config.c:837
+#: Programs/config.c:835
 msgid "Messages Locale"
 msgstr "訊息語言"
 
-#: Programs/menu_prefs.c:646 Programs/menu_prefs.c:899
+#: Programs/menu_prefs.c:745 Programs/menu_prefs.c:1010
 msgid "Minimum"
 msgstr "最小"
 
-#: Programs/menu_prefs.c:1194
+#: Programs/menu_prefs.c:1309
 msgid "Month Day Year"
 msgstr "月 日 年"
 
-#: Programs/midi.c:55
+#. xgettext: This is the name of MIDI musical instrument #11 (in the Chromatic Percussion group).
+#: Programs/midi.c:111
 msgid "Music Box"
 msgstr "音樂盒"
 
-#: Programs/menu_prefs.c:947
+#: Programs/menu_prefs.c:1058
 msgid "Musical Instrument Digital Interface"
 msgstr "樂器數位界面"
 
-#: Programs/midi.c:110
+#. xgettext: This is the name of MIDI musical instrument #60 (in the Brass group).
+#: Programs/midi.c:264
 msgid "Muted Trumpet"
 msgstr "加若音器的小喇叭"
 
-#: Programs/config.c:537
+#: Programs/config.c:544
 msgid "Name of or path to attributes table."
 msgstr "屬性表的名稱或路徑"
 
-#: Programs/config.c:546
+#: Programs/config.c:536
 msgid "Name of or path to contraction table."
 msgstr "縮寫表的名稱或路徑"
 
-#: Programs/config.c:402
+#: Programs/config.c:400
 msgid "Name of or path to default preferences file."
 msgstr "預設偏好設定檔的名稱或路徑"
 
-#: Programs/config.c:555
+#: Programs/config.c:553
 msgid "Name of or path to keyboard table."
 msgstr "按鍵表的名稱或路徑"
 
-#: Programs/config.c:591
+#: Programs/config.c:589
 msgid "Name of or path to speech input object."
 msgstr "語音輸入物件的名稱或路徑"
 
-#: Programs/config.c:528
+#: Programs/config.c:526
 #, c-format
 msgid "Name of or path to text table (or %s)."
 msgstr "文字表 (或 %s) 的名稱或路徑"
 
-#: Programs/menu_prefs.c:734
+#: Programs/menu_prefs.c:845
 msgid "Navigation Options"
 msgstr "導覽選向"
 
-#: Programs/menu.c:449
+#: Programs/menu.c:523
 msgid "No"
 msgstr "否"
 
-#: Programs/menu_prefs.c:633
+#: Programs/menu_prefs.c:720
 msgid "No Capitalization"
 msgstr "沒有大寫"
 
-#: Programs/menu_prefs.c:786 Programs/menu_prefs.c:1030
-#: Programs/menu_prefs.c:1043 Programs/menu_prefs.c:1056
-#: Programs/menu_prefs.c:1182 Programs/menu_prefs.c:1221
-#: Programs/menu_prefs.c:1241
+#: Programs/menu_prefs.c:897 Programs/menu_prefs.c:1141
+#: Programs/menu_prefs.c:1154 Programs/menu_prefs.c:1167
+#: Programs/menu_prefs.c:1297 Programs/menu_prefs.c:1336
+#: Programs/menu_prefs.c:1356
 msgid "None"
 msgstr "沒有"
 
-#: Programs/menu_prefs.c:1378
+#: Programs/menu_prefs.c:1491
 msgid "Notice"
 msgstr "注意"
 
-#: Programs/cmd_miscellaneous.c:67
-msgid "November"
-msgstr "十一月"
-
-#: Programs/midi.c:120
+#. xgettext: This is the name of MIDI musical instrument #69 (in the Reed group).
+#: Programs/midi.c:292
 msgid "Oboe"
 msgstr "雙簧管"
 
-#: Programs/midi.c:132
+#. xgettext: This is the name of MIDI musical instrument #80 (in the Pipe group).
+#: Programs/midi.c:326
 msgid "Ocarina"
 msgstr "陶笛"
 
-#: Programs/cmd_miscellaneous.c:66
-msgid "October"
-msgstr "十月"
-
-#: Programs/menu_prefs.c:849
+#: Programs/menu_prefs.c:960
 msgid "Off"
 msgstr "關"
 
-#: Programs/config.c:1616
+#: Programs/config.c:1740
 msgid "Old Preferences File"
 msgstr "舊的偏好設定檔"
 
-#: Programs/menu_prefs.c:862
+#: Programs/menu_prefs.c:973
 msgid "On First Release"
 msgstr "第一個按鍵放開"
 
-#: Programs/midi.c:105
+#. xgettext: This is the name of MIDI musical instrument #56 (in the Ensemble group).
+#: Programs/midi.c:251
 msgid "Orchestra Hit"
 msgstr "管絃樂其驟"
 
-#: Programs/midi.c:95
+#. xgettext: This is the name of MIDI musical instrument #47 (in the Strings group).
+#: Programs/midi.c:223
 msgid "Orchestral Harp"
 msgstr "豎琴"
 
-#: Programs/midi.c:26
+#. xgettext: This is the name of MIDI musical instrument group #3.
+#: Programs/midi.c:31
 msgid "Organ"
 msgstr "管風琴"
 
@@ -1167,7 +1246,8 @@ msgstr "管風琴"
 msgid "Output Packets"
 msgstr "輸出風包"
 
-#: Programs/midi.c:76
+#. xgettext: This is the name of MIDI musical instrument #30 (in the Guitar group).
+#: Programs/midi.c:170
 msgid "Overdriven Guitar"
 msgstr "超音吉他"
 
@@ -1175,97 +1255,107 @@ msgstr "超音吉他"
 msgid "PC mode"
 msgstr "PC 模式"
 
-#: Programs/menu_prefs.c:946
+#: Programs/menu_prefs.c:1057
 msgid "PCM"
 msgstr "PCM"
 
-#: Programs/config.c:627
+#: Programs/config.c:625
 msgid "PCM (soundcard digital audio) device specifier."
 msgstr "PCM （音效卡數位音效）設備指定"
 
-#: Programs/menu_prefs.c:959
+#: Programs/menu_prefs.c:1070
 msgid "PCM Volume"
 msgstr "PCM 音量"
 
-#: Programs/cmds.auto.h:1266
+#. xgettext: This is the description of the PASSPS2 command.
+#: Programs/cmds.auto.h:1487
 msgid "PS/2 (set 3) keyboard scan code"
 msgstr "PS/2 (set 3) 鍵盤掃描碼"
 
-#: Programs/menu_prefs.c:1316
+#: Programs/menu_prefs.c:1429
 msgid "Package Revision"
 msgstr "套件修訂版本"
 
-#: Programs/menu_prefs.c:1311
+#: Programs/menu_prefs.c:1424
 msgid "Package Version"
 msgstr "套件版本"
 
 #. Synth Pad
-#: Programs/midi.c:143
+#. xgettext: This is the name of MIDI musical instrument #89 (in the Synth Pad group).
+#: Programs/midi.c:355
 msgid "Pad 1 (new age)"
 msgstr "pad 1 (新世紀)"
 
-#: Programs/midi.c:144
+#. xgettext: This is the name of MIDI musical instrument #90 (in the Synth Pad group).
+#: Programs/midi.c:358
 msgid "Pad 2 (warm)"
 msgstr "pad 2 (溫暖)"
 
-#: Programs/midi.c:145
+#. xgettext: This is the name of MIDI musical instrument #91 (in the Synth Pad group).
+#: Programs/midi.c:361
 msgid "Pad 3 (polysynth)"
 msgstr "pad 3 (多音合成)"
 
-#: Programs/midi.c:146
+#. xgettext: This is the name of MIDI musical instrument #92 (in the Synth Pad group).
+#: Programs/midi.c:364
 msgid "Pad 4 (choir)"
 msgstr "pad 4 (合唱)"
 
-#: Programs/midi.c:147
+#. xgettext: This is the name of MIDI musical instrument #93 (in the Synth Pad group).
+#: Programs/midi.c:367
 msgid "Pad 5 (bowed)"
 msgstr "pad 5 (bowed)"
 
-#: Programs/midi.c:148
+#. xgettext: This is the name of MIDI musical instrument #94 (in the Synth Pad group).
+#: Programs/midi.c:370
 msgid "Pad 6 (metallic)"
 msgstr "pad 6 (金屬)"
 
-#: Programs/midi.c:149
+#. xgettext: This is the name of MIDI musical instrument #95 (in the Synth Pad group).
+#: Programs/midi.c:373
 msgid "Pad 7 (halo)"
 msgstr "pad 7 (halo)"
 
-#: Programs/midi.c:150
+#. xgettext: This is the name of MIDI musical instrument #96 (in the Synth Pad group).
+#: Programs/midi.c:376
 msgid "Pad 8 (sweep)"
 msgstr "pad 8 (Sweep)"
 
-#: Programs/midi.c:128
+#. xgettext: This is the name of MIDI musical instrument #76 (in the Pipe group).
+#: Programs/midi.c:314
 msgid "Pan Flute"
 msgstr "排笛"
 
-#: Programs/config.c:464
+#: Programs/config.c:462
 msgid "Parameters for the application programming interface."
 msgstr "程式設計界面參數"
 
-#: Programs/config.c:486
+#: Programs/config.c:484
 msgid "Parameters for the braille driver."
 msgstr "點字驅動參數"
 
-#: Programs/config.c:359
+#: Programs/config.c:357
 msgid "Parameters for the privilege establishment stage."
 msgstr "權限建立階段的參數"
 
-#: Programs/config.c:618
+#: Programs/config.c:616
 msgid "Parameters for the screen driver."
 msgstr "螢幕驅動參數"
 
-#: Programs/config.c:583
+#: Programs/config.c:581
 msgid "Parameters for the speech driver."
 msgstr "語音驅動參數"
 
-#: Programs/config.c:393
+#: Programs/config.c:391
 msgid "Path to default settings file."
 msgstr "預設設定檔案路徑"
 
-#: Programs/config.c:447
+#: Programs/config.c:445
 msgid "Path to directory containing drivers."
 msgstr "包含驅動的目錄路徑"
 
 #: Programs/brltest.c:68 Programs/brltty-atb.c:36 Programs/brltty-ctb.c:54
-#: Programs/brltty-ktb.c:73 Programs/config.c:518
+#: Programs/brltty-ktb.c:73 Programs/config.c:516
 msgid "Path to directory containing tables."
 msgstr "對照表所在目錄路徑"
 
@@ -1281,23 +1371,23 @@ msgstr "驅動程式所在目錄路徑"
 msgid "Path to directory for text tables."
 msgstr "文字表所在目錄路徑"
 
-#: Programs/brltest.c:78 Programs/config.c:437
+#: Programs/brltest.c:78 Programs/config.c:435
 msgid "Path to directory which can be written to."
 msgstr "可寫入的目錄路徑"
 
-#: Programs/config.c:427
+#: Programs/config.c:425
 msgid "Path to directory which contains files that can be updated."
 msgstr "包含可升級檔案的目錄路徑"
 
-#: Programs/config.c:327
-msgid "Path to directory which contains message translations."
-msgstr "包含可升級檔案的目錄路徑"
+#: Programs/config.c:325
+msgid "Path to directory which contains message localizations."
+msgstr "包含訊息本地化的目錄路徑。"
 
 #: Programs/brltty-trtxt.c:59
 msgid "Path to input text table."
 msgstr "輸入文字表路徑"
 
-#: Programs/config.c:676
+#: Programs/config.c:674
 msgid "Path to log file."
 msgstr "記錄檔路徑"
 
@@ -1305,44 +1395,50 @@ msgstr "記錄檔路徑"
 msgid "Path to output text table."
 msgstr "輸出文字表路徑"
 
-#: Programs/config.c:383
+#: Programs/config.c:381
 msgid "Path to process identifier file."
 msgstr "處理程序代號檔的路徑"
 
-#: Programs/config.c:417
+#: Programs/config.c:415
 msgid "Patterns that match command prompts."
 msgstr "符合命令提示的樣式"
 
-#: Programs/midi.c:38
+#. xgettext: This is the name of MIDI musical instrument group #15.
+#: Programs/midi.c:71
 msgid "Percussive Instruments"
 msgstr "打擊樂器"
 
-#: Programs/midi.c:63
+#. xgettext: This is the name of MIDI musical instrument #18 (in the Organ group).
+#: Programs/midi.c:133
 msgid "Percussive Organ"
 msgstr "打擊管風琴"
 
-#: Programs/midi.c:24
+#. xgettext: This is the name of MIDI musical instrument group #1.
+#: Programs/midi.c:25
 msgid "Piano"
 msgstr "鋼琴"
 
 #. Pipe
-#: Programs/midi.c:125
+#. xgettext: This is the name of MIDI musical instrument #73 (in the Pipe group).
+#: Programs/midi.c:305
 msgid "Piccolo"
 msgstr "短笛"
 
-#: Programs/midi.c:33
+#. xgettext: This is the name of MIDI musical instrument group #10.
+#: Programs/midi.c:52
 msgid "Pipe"
 msgstr "管線"
 
-#: Programs/midi.c:94
+#. xgettext: This is the name of MIDI musical instrument #46 (in the Strings group).
+#: Programs/midi.c:220
 msgid "Pizzicato Strings"
 msgstr "玻弦"
 
-#: Drivers/Braille/Baum/braille.c:1119
+#: Drivers/Braille/Baum/braille.c:1158
 msgid "Powerdown"
 msgstr "降壓"
 
-#: Programs/config.c:2771 Programs/menu_prefs.c:1346
+#: Programs/config.c:2896 Programs/menu_prefs.c:1459
 msgid "Preferences File"
 msgstr "偏好設定檔"
 
@@ -1358,39 +1454,42 @@ msgstr "印出用法摘要（所有選向）alle Optionen) 然後退出"
 msgid "Print a usage summary (commonly used options only), and then exit."
 msgstr "印出用法摘要（只有共用選向）然後跳出"
 
-#: Programs/config.c:790
+#: Programs/config.c:788
 msgid "Privilege Parameter"
 msgstr "權限參數"
 
-#: Programs/menu_prefs.c:1297
+#: Programs/menu_prefs.c:1410
 msgid "Profiles"
 msgstr "設定檔"
 
-#: Programs/config.c:563
+#: Programs/config.c:561
 msgid "Properties of eligible keyboards."
 msgstr "合格鍵盤的屬性"
 
-#: Programs/menu_prefs.c:839
+#: Programs/menu_prefs.c:950
 msgid "Quick Space"
 msgstr "空白"
 
-#: Programs/menu_prefs.c:1047
+#: Programs/menu_prefs.c:1158
 msgid "Raise Pitch"
 msgstr "提高音調"
 
-#: Programs/config.c:318
+#: Programs/config.c:316
 msgid "Recognize environment variables."
 msgstr "認識環境變數"
 
-#: Programs/midi.c:127
+#. xgettext: This is the name of MIDI musical instrument #75 (in the Pipe group).
+#: Programs/midi.c:311
 msgid "Recorder"
 msgstr "錄音機"
 
-#: Programs/midi.c:32
+#. xgettext: This is the name of MIDI musical instrument group #9.
+#: Programs/midi.c:49
 msgid "Reed"
 msgstr "簧片"
 
-#: Programs/midi.c:66
+#. xgettext: This is the name of MIDI musical instrument #21 (in the Organ group).
+#: Programs/midi.c:142
 msgid "Reed Organ"
 msgstr "簧片風琴"
 
@@ -1398,7 +1497,7 @@ msgstr "簧片風琴"
 msgid "Reformat input."
 msgstr "重新格式輸入"
 
-#: Programs/config.c:508
+#: Programs/config.c:506
 msgid "Release braille device when screen or window is unreadable."
 msgstr "當螢幕或視窗無法閱讀時釋放點字設備"
 
@@ -1406,7 +1505,7 @@ msgstr "當螢幕或視窗無法閱讀時釋放點字設備"
 msgid "Remain a foreground process"
 msgstr "保留前景處理程序"
 
-#: Programs/config.c:334
+#: Programs/config.c:332
 msgid "Remain a foreground process."
 msgstr "保留前景處理程序"
 
@@ -1414,7 +1513,7 @@ msgstr "保留前景處理程序"
 msgid "Remove dots seven and eight."
 msgstr "宜除七八點"
 
-#: Programs/config.c:349
+#: Programs/config.c:347
 #, c-format
 msgid "Remove the %s service, and then exit."
 msgstr "宜除 %s 服務然後退出"
@@ -1427,85 +1526,67 @@ msgstr "回報按鍵表問題"
 msgid "Report the characters within the current screen font that aren't defined within the text table."
 msgstr "回報目前螢幕字形李的字元在文字表李沒有定義"
 
-#: Programs/menu_prefs.c:755
+#: Programs/menu_prefs.c:866
 msgid "Rest of Line"
 msgstr "盛夏的行"
 
-#: Programs/menu_prefs.c:1445
+#: Programs/menu_prefs.c:1558
 msgid "Restart Braille Driver"
 msgstr "重新啟動點字驅動"
 
-#: Programs/menu_prefs.c:1457
+#: Programs/menu_prefs.c:1570
 msgid "Restart Screen Driver"
 msgstr "重新啟動螢幕驅動"
 
-#: Programs/menu_prefs.c:1451
+#: Programs/menu_prefs.c:1564
 msgid "Restart Speech Driver"
 msgstr "重新啟動語音驅動"
 
-#: Programs/midi.c:177
+#. xgettext: This is the name of MIDI musical instrument #120 (in the Percussive group).
+#: Programs/midi.c:452
 msgid "Reverse Cymbal"
 msgstr "Reverse Cymbal"
 
-#: Programs/menu_prefs.c:1223
+#: Programs/menu_prefs.c:1338
 msgid "Right"
 msgstr "右"
 
-#: Programs/midi.c:64
+#. xgettext: This is the name of MIDI musical instrument #19 (in the Organ group).
+#: Programs/midi.c:136
 msgid "Rock Organ"
 msgstr "搖滾管風琴"
 
-#: Programs/menu_prefs.c:585
+#: Programs/menu_prefs.c:674
 msgid "Save on Exit"
 msgstr "退出十存檔"
 
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
-#: Programs/menu_prefs.c:1046
+#: Programs/menu_prefs.c:1157
 msgid "Say Cap"
 msgstr "說大寫"
 
-#: Programs/menu_prefs.c:1070
+#: Programs/menu_prefs.c:1181
 msgid "Say Line Mode"
 msgstr "說行模式"
 
-#: Programs/menu_prefs.c:1057
+#: Programs/menu_prefs.c:1168
 msgid "Say Space"
 msgstr "說空白"
 
-#: Programs/menu_prefs.c:460
-msgid "Screen Cursor Column"
-msgstr "螢幕游標欄位"
+#: Programs/menu_prefs.c:780
+msgid "Screen Cursor Blink Period"
+msgstr "螢幕游標跳動週期"
 
-#: Programs/menu_prefs.c:459
-msgid "Screen Cursor Coordinates"
-msgstr "螢幕游標座標"
+#: Programs/menu_prefs.c:788
+msgid "Screen Cursor Percent Visible"
+msgstr "可見螢幕游標百分比"
 
-#: Programs/menu_prefs.c:687
-msgid "Screen Cursor Invisible Time"
-msgstr "螢幕游標隱藏時間"
-
-#: Programs/menu_prefs.c:461
-msgid "Screen Cursor Row"
-msgstr "螢幕游標行"
-
-#: Programs/menu_prefs.c:669
+#: Programs/menu_prefs.c:768
 msgid "Screen Cursor Style"
 msgstr "螢幕游標形狀"
 
-#: Programs/menu_prefs.c:681
-msgid "Screen Cursor Visible Time"
-msgstr "螢幕游標顯示時間"
-
-#: Programs/menu_prefs.c:462
-msgid "Screen Cursor and Braille Window Column"
-msgstr "螢幕游標與點字視窗欄位"
-
-#: Programs/menu_prefs.c:463
-msgid "Screen Cursor and Braille Window Row"
-msgstr "螢幕游標與點字視窗行"
-
-#: Programs/config.c:2268
+#: Programs/config.c:2393
 msgid "Screen Driver"
 msgstr "螢幕驅動"
 
@@ -1513,30 +1594,27 @@ msgstr "螢幕驅動"
 msgid "Screen Driver Events"
 msgstr "螢幕驅動事件"
 
-#: Programs/menu_prefs.c:464
+#: Programs/menu_prefs.c:550
 msgid "Screen Number"
 msgstr "螢幕編號"
 
-#: Programs/config.c:2274
+#: Programs/config.c:2399
 msgid "Screen Parameter"
 msgstr "螢幕參數"
 
-#: Programs/config.c:608
+#: Programs/config.c:606
 #, c-format
 msgid "Screen driver code (%s, %s, or one of {%s})."
 msgstr "螢幕驅動碼: (%s, %s, 或 {%s} 之一"
 
-#: Programs/menu_prefs.c:780
+#: Programs/menu_prefs.c:891
 msgid "Scroll-aware Cursor Navigation"
 msgstr "滾動式游標導覽"
 
-#: Programs/midi.c:181
+#. xgettext: This is the name of MIDI musical instrument #123 (in the Sound Effects group).
+#: Programs/midi.c:462
 msgid "Seashore"
 msgstr "海浪"
-
-#: Programs/cmd_miscellaneous.c:65
-msgid "September"
-msgstr "九月"
 
 #: Programs/log.c:130
 msgid "Serial I/O"
@@ -1546,137 +1624,145 @@ msgstr "序列輸入/輸出"
 msgid "Server Events"
 msgstr "服務程序事件"
 
-#: Programs/midi.c:130
+#. xgettext: This is the name of MIDI musical instrument #78 (in the Pipe group).
+#: Programs/midi.c:320
 msgid "Shakuhachi"
 msgstr "尺八"
 
-#: Programs/midi.c:163
+#. xgettext: This is the name of MIDI musical instrument #107 (in the Ethnic group).
+#: Programs/midi.c:412
 msgid "Shamisen"
 msgstr "三弦"
 
-#: Programs/midi.c:168
+#. xgettext: This is the name of MIDI musical instrument #112 (in the Ethnic group).
+#: Programs/midi.c:427
 msgid "Shanai"
 msgstr "山奈琴"
 
-#: Programs/menu_prefs.c:598
+#: Programs/menu_prefs.c:687
 msgid "Show Advanced Submenus"
 msgstr "顯示進階子選單"
 
-#: Programs/menu_prefs.c:603
+#: Programs/menu_prefs.c:692
 msgid "Show All Items"
 msgstr "顯示所有項目"
 
-#: Programs/menu_prefs.c:693
+#: Programs/menu_prefs.c:796
 msgid "Show Attributes"
 msgstr "顯示屬性"
 
-#: Programs/menu_prefs.c:664
+#: Programs/menu_prefs.c:763
 msgid "Show Screen Cursor"
 msgstr "顯示螢幕游標"
 
-#: Programs/menu_prefs.c:1176
+#: Programs/menu_prefs.c:1291
 msgid "Show Seconds"
 msgstr "顯示秒數"
 
-#: Programs/menu_prefs.c:1122
+#: Programs/menu_prefs.c:1233
 msgid "Show Speech Cursor"
 msgstr "顯示語音游標"
 
-#: Programs/menu_prefs.c:593
+#: Programs/menu_prefs.c:682
 msgid "Show Submenu Sizes"
 msgstr "顯示子選單項數"
 
 #. Ethnic Instruments
-#: Programs/midi.c:161
+#. xgettext: This is the name of MIDI musical instrument #105 (in the Ethnic group).
+#: Programs/midi.c:406
 msgid "Sitar"
 msgstr "西塔琴"
 
-#: Programs/menu_prefs.c:747
+#: Programs/menu_prefs.c:858
 msgid "Skip Blank Braille Windows"
 msgstr "跳過空白點字視窗"
 
-#: Programs/menu_prefs.c:741
+#: Programs/menu_prefs.c:852
 msgid "Skip Identical Lines"
 msgstr "跳過相同的行"
 
-#: Programs/menu_prefs.c:758
+#: Programs/menu_prefs.c:869
 msgid "Skip Which Blank Braille Windows"
 msgstr "跳過何種空白點字視窗"
 
-#: Programs/midi.c:84
+#. xgettext: This is the name of MIDI musical instrument #37 (in the Bass group).
+#: Programs/midi.c:192
 msgid "Slap Bass 1"
 msgstr "Slap Bass 1"
 
-#: Programs/midi.c:85
+#. xgettext: This is the name of MIDI musical instrument #38 (in the Bass group).
+#: Programs/midi.c:195
 msgid "Slap Bass 2"
 msgstr "Slap Bass 2"
 
-#: Programs/menu_prefs.c:1206
+#: Programs/menu_prefs.c:1321
 msgid "Slash"
 msgstr "削減"
 
-#: Programs/menu_prefs.c:763
+#: Programs/menu_prefs.c:874
 msgid "Sliding Braille Window"
 msgstr "滑動點字視窗"
 
-#: Programs/menu_prefs.c:1031
+#: Programs/menu_prefs.c:1142
 msgid "Some"
 msgstr "一些"
 
 #. Reed
-#: Programs/midi.c:116
-msgid "Soprano Sax"
+#. xgettext: This is the name of MIDI musical instrument #65 (in the Reed group).
+#: Programs/midi.c:280
+msgid "Soprano Saxophone"
 msgstr "高音薩克斯風"
 
-#: Programs/midi.c:39
+#. xgettext: This is the name of MIDI musical instrument group #16.
+#: Programs/midi.c:74
 msgid "Sound Effects"
 msgstr "音效"
 
-#: Programs/menu_prefs.c:1242
+#: Programs/menu_prefs.c:561 Programs/menu_prefs.c:1357
 msgid "Space"
 msgstr "空白"
 
-#: Programs/menu_prefs.c:1110
+#: Programs/menu_prefs.c:1221
 msgid "Speak Completed Words"
 msgstr "朗讀完整的單字"
 
-#: Programs/menu_prefs.c:1098
+#: Programs/menu_prefs.c:1209
 msgid "Speak Deleted Characters"
 msgstr "朗讀刪除的字元"
 
-#: Programs/menu_prefs.c:1092
+#: Programs/menu_prefs.c:1203
 msgid "Speak Inserted Characters"
 msgstr "朗讀插入的字元"
 
-#: Programs/menu_prefs.c:1116
+#: Programs/menu_prefs.c:1227
 msgid "Speak Line Indent"
 msgstr "朗讀內縮行"
 
-#: Programs/menu_prefs.c:1104
+#: Programs/menu_prefs.c:1215
 msgid "Speak Replaced Characters"
 msgstr "朗讀取代的字元"
 
-#: Programs/menu_prefs.c:1086
+#: Programs/menu_prefs.c:1197
 msgid "Speak Selected Character"
 msgstr "朗讀選取的字元"
 
-#: Programs/menu_prefs.c:1080
+#: Programs/menu_prefs.c:1191
 msgid "Speak Selected Line"
 msgstr "朗讀選取的行"
 
-#: Programs/menu_prefs.c:1145
-msgid "Speech Cursor Invisible Time"
-msgstr "語音游標隱藏時間"
+#: Programs/menu_prefs.c:1250
+msgid "Speech Cursor Blink Period"
+msgstr "語音游標跳動週期"
 
-#: Programs/menu_prefs.c:1127
+#: Programs/menu_prefs.c:1258
+msgid "Speech Cursor Percent Visible"
+msgstr "可見語音游標百分比"
+
+#: Programs/menu_prefs.c:1238
 msgid "Speech Cursor Style"
 msgstr "語音游標形狀"
 
-#: Programs/menu_prefs.c:1139
-msgid "Speech Cursor Visible Time"
-msgstr "語音游標顯示時間"
-
-#: Programs/config.c:2043
+#: Programs/config.c:2168
 msgid "Speech Driver"
 msgstr "語音驅動"
 
@@ -1689,194 +1775,217 @@ msgid "Speech Events"
 msgstr "語音事件"
 
 #. Create the file system object for speech input.
-#: Programs/config.c:2882
+#: Programs/config.c:2963
 msgid "Speech Input"
 msgstr "語音輸入"
 
-#: Programs/menu_prefs.c:1005
+#: Programs/menu_prefs.c:1116
 msgid "Speech Options"
 msgstr "語音選向"
 
-#: Programs/config.c:2046
+#: Programs/config.c:2171
 msgid "Speech Parameter"
 msgstr "語音參數"
 
-#: Programs/menu_prefs.c:1022
+#: Programs/menu_prefs.c:1133
 msgid "Speech Pitch"
 msgstr "語音音調"
 
-#: Programs/menu_prefs.c:1035
+#: Programs/menu_prefs.c:1146
 msgid "Speech Punctuation"
 msgstr "朗讀標點"
 
-#: Programs/menu_prefs.c:1015
+#: Programs/menu_prefs.c:1126
 msgid "Speech Rate"
 msgstr "語音速率"
 
-#: Programs/menu_prefs.c:1050
+#: Programs/menu_prefs.c:1161
 msgid "Speech Uppercase Indicator"
 msgstr "說出大寫符號"
 
-#: Programs/menu_prefs.c:1008
+#: Programs/menu_prefs.c:1119
 msgid "Speech Volume"
 msgstr "語音音量"
 
-#: Programs/menu_prefs.c:1060
+#: Programs/menu_prefs.c:1171
 msgid "Speech Whitespace Indicator"
 msgstr "說出空白記號"
 
-#: Programs/config.c:573
+#: Programs/config.c:571
 #, c-format
 msgid "Speech driver code (%s, %s, or one of {%s})."
 msgstr "語音驅動碼: (%s, %s 或 {%s} 之一)"
 
-#: Programs/menu_prefs.c:1392
+#: Programs/menu_prefs.c:1505
 msgid "Standard Error Log Level"
 msgstr "標準錯誤記錄等級"
 
-#: Programs/menu_prefs.c:815
+#: Programs/menu_prefs.c:926
 msgid "Start Selection with Routing Key"
 msgstr "用定位鍵開始選取"
 
-#: Programs/menu_prefs.c:465
+#: Programs/menu_prefs.c:551
 msgid "State Dots"
 msgstr "狀態點"
 
-#: Programs/menu_prefs.c:466
+#: Programs/menu_prefs.c:552
 msgid "State Letter"
 msgstr "狀態字母"
 
-#: Programs/menu_prefs.c:1217
+#: Programs/menu_prefs.c:1332
 msgid "Status Cells"
 msgstr "狀態方"
 
-#: Programs/menu_prefs.c:1233
+#: Programs/menu_prefs.c:1348
 msgid "Status Count"
 msgstr "狀態計數"
 
-#: Programs/menu_prefs.c:474
+#: Programs/menu_prefs.c:565
 msgid "Status Field"
 msgstr "狀態欄位"
 
-#: Programs/menu_prefs.c:1226
+#: Programs/menu_prefs.c:1341
 msgid "Status Position"
 msgstr "狀態位置"
 
-#: Programs/menu_prefs.c:1248
+#: Programs/menu_prefs.c:1363
 msgid "Status Separator"
 msgstr "狀態分隔符號"
 
-#: Programs/menu_prefs.c:1244
+#: Programs/menu_prefs.c:1359
 msgid "Status Side"
 msgstr "狀態邊側"
 
-#: Programs/midi.c:172
+#. xgettext: This is the name of MIDI musical instrument #115 (in the Percussive group).
+#: Programs/midi.c:437
 msgid "Steel Drums"
 msgstr "鋼鼓"
 
-#: Programs/config.c:373
+#: Programs/config.c:371
 #, c-format
 msgid "Stop an existing instance of %s, and then exit."
 msgstr "停止存在的 %s 程序然後退出"
 
 #. Ensemble
-#: Programs/midi.c:98
+#. xgettext: This is the name of MIDI musical instrument #49 (in the Ensemble group).
+#: Programs/midi.c:230
 msgid "String Ensemble 1"
 msgstr "弦樂組 1"
 
-#: Programs/midi.c:99
+#. xgettext: This is the name of MIDI musical instrument #50 (in the Ensemble group).
+#: Programs/midi.c:233
 msgid "String Ensemble 2"
 msgstr "弦樂組 2"
 
-#: Programs/midi.c:29
+#. xgettext: This is the name of MIDI musical instrument group #6.
+#: Programs/midi.c:40
 msgid "Strings"
 msgstr "弦樂"
 
-#: Programs/menu_prefs.c:635
+#: Programs/menu_prefs.c:722
 msgid "Superimpose Dot 7"
 msgstr "加上第七點"
 
-#: Programs/config.c:659
+#: Programs/config.c:657
 msgid "Suppress start-up messages."
 msgstr "取消啟動訊息"
 
-#: Programs/midi.c:86
+#. xgettext: This is the name of MIDI musical instrument #39 (in the Bass group).
+#: Programs/midi.c:198
 msgid "Synth Bass 1"
 msgstr "合成被司 1"
 
-#: Programs/midi.c:87
+#. xgettext: This is the name of MIDI musical instrument #40 (in the Bass group).
+#: Programs/midi.c:201
 msgid "Synth Bass 2"
 msgstr "合成被司 2"
 
-#: Programs/midi.c:176
+#. xgettext: This is the name of MIDI musical instrument #119 (in the Percussive group).
+#: Programs/midi.c:449
 msgid "Synth Drum"
 msgstr "合成鼓"
 
-#: Programs/midi.c:36
+#. xgettext: This is the name of MIDI musical instrument group #13.
+#. xgettext: (synth is a common short form for synthesizer)
+#. xgettext: (FM is the acronym for Frequency Modulation)
+#: Programs/midi.c:65
 msgid "Synth FM"
 msgstr "合成 FM"
 
-#: Programs/midi.c:34
+#. xgettext: This is the name of MIDI musical instrument group #11.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:56
 msgid "Synth Lead"
 msgstr "合成 Lead"
 
-#: Programs/midi.c:35
+#. xgettext: This is the name of MIDI musical instrument group #12.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:60
 msgid "Synth Pad"
 msgstr "合成 pad"
 
-#: Programs/midi.c:104
+#. xgettext: This is the name of MIDI musical instrument #55 (in the Ensemble group).
+#: Programs/midi.c:248
 msgid "Synth Voice"
 msgstr "合成人聲"
 
-#: Programs/midi.c:113
+#. xgettext: This is the name of MIDI musical instrument #63 (in the Brass group).
+#: Programs/midi.c:273
 msgid "SynthBrass 1"
 msgstr "合成銅管 1"
 
-#: Programs/midi.c:114
+#. xgettext: This is the name of MIDI musical instrument #64 (in the Brass group).
+#: Programs/midi.c:276
 msgid "SynthBrass 2"
 msgstr "合成銅管 2"
 
-#: Programs/midi.c:100
+#. xgettext: This is the name of MIDI musical instrument #51 (in the Ensemble group).
+#: Programs/midi.c:236
 msgid "SynthStrings 1"
 msgstr "合成弦樂 1"
 
-#: Programs/midi.c:101
+#. xgettext: This is the name of MIDI musical instrument #52 (in the Ensemble group).
+#: Programs/midi.c:239
 msgid "SynthStrings 2"
 msgstr "合成弦樂 2"
 
-#: Programs/menu_prefs.c:1387
+#: Programs/menu_prefs.c:1500
 msgid "System Log Level"
 msgstr "系統記錄等級"
 
-#: Programs/config.c:2792 Programs/menu_prefs.c:1361
+#: Programs/config.c:2917 Programs/menu_prefs.c:1474
 msgid "Tables Directory"
 msgstr "對照表目錄"
 
-#: Programs/midi.c:174
+#. xgettext: This is the name of MIDI musical instrument #117 (in the Percussive group).
+#: Programs/midi.c:443
 msgid "Taiko Drum"
 msgstr "太鼓"
 
-#: Programs/midi.c:69
+#. xgettext: This is the name of MIDI musical instrument #24 (in the Organ group).
+#: Programs/midi.c:151
 msgid "Tango Accordion"
 msgstr "探戈手風琴"
 
-#: Programs/midi.c:183
+#. xgettext: This is the name of MIDI musical instrument #125 (in the Sound Effects group).
+#: Programs/midi.c:468
 msgid "Telephone Ring"
 msgstr "電話鈴生"
 
-#: Programs/midi.c:118
-msgid "Tenor Sax"
-msgstr "中音薩克斯風"
+#. xgettext: This is the name of MIDI musical instrument #67 (in the Reed group).
+#: Programs/midi.c:286
+msgid "Tenor Saxophone"
+msgstr "次中音薩克斯風"
 
-#: Programs/menu_prefs.c:661
+#: Programs/menu_prefs.c:760
 msgid "Text Indicators"
 msgstr "文字標記"
 
-#: Programs/menu_prefs.c:1245
+#: Programs/menu_prefs.c:1360
 msgid "Text Side"
 msgstr "文字邊側"
 
-#: Programs/config.c:2813 Programs/menu_prefs.c:1273
+#: Programs/config.c:943 Programs/menu_prefs.c:1388
 msgid "Text Table"
 msgstr "文字表"
 
@@ -1884,89 +1993,96 @@ msgstr "文字表"
 msgid "Text table."
 msgstr "文字表"
 
-#: Programs/config.c:304
+#: Programs/config.c:302
 msgid "The text to be shown when the braille driver starts and to be spoken when the speech driver starts."
 msgstr "點字啟動顯示何語音啟動朗讀的文字"
 
-#: Programs/config.c:311
+#: Programs/config.c:309
 msgid "The text to be shown when the braille driver stops."
 msgstr "點字停用顯示的文字"
 
-#: Programs/menu_prefs.c:467
+#: Programs/menu_prefs.c:553
 msgid "Time"
 msgstr "時間"
 
-#: Programs/menu_prefs.c:1161
+#: Programs/menu_prefs.c:1276
 msgid "Time Format"
 msgstr "時間格式"
 
-#: Programs/menu_prefs.c:1153
+#: Programs/menu_prefs.c:1268
 msgid "Time Presentation"
 msgstr "時間表示法"
 
-#: Programs/menu_prefs.c:1171
+#: Programs/menu_prefs.c:1286
 msgid "Time Separator"
 msgstr "時間分隔符號"
 
-#: Programs/midi.c:96
+#. xgettext: This is the name of MIDI musical instrument #48 (in the Strings group).
+#: Programs/midi.c:226
 msgid "Timpani"
 msgstr "定音鼓"
 
 #. Percussive Instruments
-#: Programs/midi.c:170
+#. xgettext: This is the name of MIDI musical instrument #113 (in the Percussive group).
+#: Programs/midi.c:431
 msgid "Tinkle Bell"
 msgstr "牛零"
 
-#: Programs/menu_prefs.c:1441
+#: Programs/menu_prefs.c:1554
 msgid "Tools"
 msgstr "工具"
 
-#: Programs/menu_prefs.c:892
+#: Programs/menu_prefs.c:1003
 msgid "Touch Navigation"
 msgstr "觸控導覽"
 
-#: Programs/menu_prefs.c:906
+#: Programs/menu_prefs.c:1017
 msgid "Touch Sensitivity"
 msgstr "觸控靈敏度"
 
-#: Programs/menu_prefs.c:804
+#: Programs/menu_prefs.c:915
 msgid "Track Screen Pointer"
 msgstr "追蹤螢幕指標"
 
-#: Programs/menu_prefs.c:798
+#: Programs/menu_prefs.c:909
 msgid "Track Screen Scroll"
 msgstr "追蹤螢幕捲動"
 
-#: Programs/menu_prefs.c:830
+#: Programs/menu_prefs.c:941
 msgid "Translated via Text Table"
 msgstr "由文字表翻譯"
 
-#: Programs/midi.c:93
+#. xgettext: This is the name of MIDI musical instrument #45 (in the Strings group).
+#: Programs/midi.c:217
 msgid "Tremolo Strings"
 msgstr "陣音弦樂"
 
-#: Programs/midi.c:108
+#. xgettext: This is the name of MIDI musical instrument #58 (in the Brass group).
+#: Programs/midi.c:258
 msgid "Trombone"
 msgstr "伸縮喇叭"
 
 #. Brass
-#: Programs/midi.c:107
+#. xgettext: This is the name of MIDI musical instrument #57 (in the Brass group).
+#: Programs/midi.c:255
 msgid "Trumpet"
 msgstr "小喇叭"
 
-#: Programs/midi.c:109
+#. xgettext: This is the name of MIDI musical instrument #59 (in the Brass group).
+#: Programs/midi.c:261
 msgid "Tuba"
 msgstr "大號"
 
-#: Programs/midi.c:59
+#. xgettext: This is the name of MIDI musical instrument #15 (in the Chromatic Percussion group).
+#: Programs/midi.c:123
 msgid "Tubular Bells"
 msgstr "管中"
 
-#: Programs/menu_prefs.c:951
+#: Programs/menu_prefs.c:1062
 msgid "Tune Device"
 msgstr "聲音設備"
 
-#: Programs/menu_prefs.c:834
+#: Programs/menu_prefs.c:945
 msgid "Typing Mode"
 msgstr "輸入模式"
 
@@ -1974,7 +2090,7 @@ msgstr "輸入模式"
 msgid "USB I/O"
 msgstr "USB 輸入/輸出"
 
-#: Programs/menu_prefs.c:575
+#: Programs/menu_prefs.c:664
 msgid "Underline"
 msgstr "底線"
 
@@ -1982,7 +2098,7 @@ msgstr "底線"
 msgid "Unfrozen"
 msgstr "解凍"
 
-#: Programs/config.c:2789 Programs/menu_prefs.c:1341
+#: Programs/config.c:2914 Programs/menu_prefs.c:1454
 msgid "Updatable Directory"
 msgstr "可更新的目錄"
 
@@ -1994,52 +2110,70 @@ msgstr "更新事件"
 msgid "Usage"
 msgstr "用法"
 
-#: Programs/menu_prefs.c:634
+#: Programs/menu_prefs.c:721
 msgid "Use Capital Sign"
 msgstr "使用大寫記號"
 
-#: Programs/midi.c:56
+#. xgettext: This is the name of MIDI musical instrument #12 (in the Chromatic Percussion group).
+#: Programs/midi.c:114
 msgid "Vibraphone"
 msgstr "顫音"
 
-#: Programs/midi.c:90
+#. xgettext: This is the name of MIDI musical instrument #42 (in the Strings group).
+#: Programs/midi.c:208
 msgid "Viola"
 msgstr "中提琴"
 
 #. Strings
-#: Programs/midi.c:89
+#. xgettext: This is the name of MIDI musical instrument #41 (in the Strings group).
+#: Programs/midi.c:205
 msgid "Violin"
 msgstr "小提琴"
 
-#: Programs/midi.c:103
+#. xgettext: This is the name of MIDI musical instrument #54 (in the Ensemble group).
+#: Programs/midi.c:245
 msgid "Voice Oohs"
 msgstr "人聲喔"
 
-#: Programs/menu_prefs.c:1377
+#: Programs/menu_prefs.c:1490
 msgid "Warning"
 msgstr "警告"
 
-#: Programs/menu_prefs.c:1321
+#: Programs/menu_prefs.c:1434
 msgid "Web Site"
 msgstr "網站"
 
-#: Programs/midi.c:131
+#. xgettext: This is the name of MIDI musical instrument #79 (in the Pipe group).
+#: Programs/midi.c:323
 msgid "Whistle"
 msgstr "口哨"
 
-#: Programs/midi.c:173
+#: Programs/menu_prefs.c:543
+msgid "Window Column"
+msgstr "視窗欄位"
+
+#: Programs/menu_prefs.c:542 Programs/menu_prefs.c:558
+msgid "Window Coordinates"
+msgstr "視窗座標"
+
+#: Programs/menu_prefs.c:544
+msgid "Window Row"
+msgstr "視窗行"
+
+#. xgettext: This is the name of MIDI musical instrument #116 (in the Percussive group).
+#: Programs/midi.c:440
 msgid "Woodblock"
 msgstr "木魚"
 
-#: Programs/menu_prefs.c:737
+#: Programs/menu_prefs.c:848
 msgid "Word Wrap"
 msgstr "段字"
 
-#: Programs/config.c:2763
+#: Programs/config.c:2888
 msgid "Working Directory"
 msgstr "工作目錄"
 
-#: Programs/config.c:2790 Programs/menu_prefs.c:1351
+#: Programs/config.c:2915 Programs/menu_prefs.c:1464
 msgid "Writable Directory"
 msgstr "可寫入的目錄"
 
@@ -2047,7 +2181,7 @@ msgstr "可寫入的目錄"
 msgid "Write debugging output to stdout"
 msgstr "把除錯訊息顯示到標準輸出"
 
-#: Programs/config.c:682
+#: Programs/config.c:680
 msgid "Write the start-up logs, and then exit."
 msgstr "寫好啟動記錄然後退出"
 
@@ -2071,19 +2205,21 @@ msgstr "XDG 執行時期目錄存在"
 msgid "XFree(wm_name) for change"
 msgstr "XFree(wm_name) 變更"
 
-#: Programs/cmds.auto.h:1259
+#. xgettext: This is the description of the PASSXT command.
+#: Programs/cmds.auto.h:1479
 msgid "XT (set 1) keyboard scan code"
 msgstr "XT (set 1) 鍵盤掃描碼"
 
-#: Programs/midi.c:58
+#. xgettext: This is the name of MIDI musical instrument #14 (in the Chromatic Percussion group).
+#: Programs/midi.c:120
 msgid "Xylophone"
 msgstr "木琴"
 
-#: Programs/menu_prefs.c:1193
+#: Programs/menu_prefs.c:1308
 msgid "Year Month Day"
 msgstr "年 月 日"
 
-#: Programs/menu.c:450
+#: Programs/menu.c:524
 msgid "Yes"
 msgstr "是"
 
@@ -2091,19 +2227,21 @@ msgstr "是"
 msgid "[host][:port]"
 msgstr "[Host][:Port]"
 
-#: Programs/menu_prefs.c:576
+#: Programs/menu_prefs.c:665
 msgid "all dots"
 msgstr "滿點"
 
-#: Programs/cmd_miscellaneous.c:121
+#: Programs/cmd_miscellaneous.c:104
 msgid "and"
 msgstr "與"
 
-#: Programs/cmds.auto.h:1142
+#. xgettext: This is the description of the CLIP_APPEND command.
+#: Programs/cmds.auto.h:1346
 msgid "append characters to clipboard"
 msgstr "附加字元到剪貼不"
 
-#: Programs/cmds.auto.h:1033
+#. xgettext: This is the description of the CLIP_ADD command.
+#: Programs/cmds.auto.h:1223
 msgid "append to clipboard from character"
 msgstr "從字元附加到剪貼不"
 
@@ -2111,23 +2249,27 @@ msgstr "從字元附加到剪貼不"
 msgid "at cursor"
 msgstr "在游標"
 
-#: Programs/cmds.auto.h:1301
+#. xgettext: This is the description of the KEY_BACKSPACE command.
+#: Programs/cmds.auto.h:1527
 msgid "backspace key"
 msgstr "倒除鍵"
 
-#: Drivers/Braille/Baum/braille.c:1110 Drivers/Braille/TSI/braille.c:869
+#: Drivers/Braille/Baum/braille.c:1149 Drivers/Braille/TSI/braille.c:869
 msgid "battery low"
 msgstr "電量低"
 
-#: Programs/cmds.auto.h:1222
+#. xgettext: This is the description of the SELECTVT command.
+#: Programs/cmds.auto.h:1437
 msgid "bind to specific virtual terminal"
 msgstr "榜定到特定的虛擬終端機"
 
-#: Programs/cmds.auto.h:835
+#. xgettext: This is the description of the SELECTVT_NEXT command.
+#: Programs/cmds.auto.h:957
 msgid "bind to the next virtual terminal"
 msgstr "榜定到下一個虛擬終端機"
 
-#: Programs/cmds.auto.h:829
+#. xgettext: This is the description of the SELECTVT_PREV command.
+#: Programs/cmds.auto.h:950
 msgid "bind to the previous virtual terminal"
 msgstr "榜定到前一個虛擬終端機"
 
@@ -2136,12 +2278,12 @@ msgstr "榜定到前一個虛擬終端機"
 msgid "black"
 msgstr "黑"
 
-#: Programs/core.c:1120
+#: Programs/core.c:1125
 msgid "blank line"
 msgstr "空白行"
 
-#: Programs/cmd_utils.c:168
-msgid "blink"
+#: Programs/cmd_utils.c:173
+msgid "blinking"
 msgstr "跳動"
 
 #. B
@@ -2149,28 +2291,29 @@ msgstr "跳動"
 msgid "blue"
 msgstr "藍"
 
-#: Programs/config.c:2853
+#: Programs/config.c:2933
 #, c-format
 msgid "braille device not specified"
 msgstr "點字設備未指定"
 
-#: Programs/cmds.auto.h:544
+#. xgettext: This is the description of the OFFLINE command.
+#: Programs/cmds.auto.h:621
 msgid "braille display temporarily unavailable"
 msgstr "點字設備暫時無作用"
 
-#: Programs/config.c:1553
+#: Programs/config.c:1677
 msgid "braille driver initialization failed"
 msgstr "點字驅動出使化失敗"
 
-#: Programs/config.c:1632
+#: Programs/config.c:1756
 msgid "braille driver not loadable"
 msgstr "點字驅動無法載入"
 
-#: Programs/config.c:1892
+#: Programs/config.c:2017
 msgid "braille driver restarting"
 msgstr "點字驅動正在啟動"
 
-#: Programs/cmd_miscellaneous.c:178
+#: Programs/cmd_miscellaneous.c:163
 msgid "braille driver stopped"
 msgstr "點字停止"
 
@@ -2178,19 +2321,23 @@ msgstr "點字停止"
 msgid "braille released"
 msgstr "點字停止"
 
-#: Programs/cmds.auto.h:1019
+#. xgettext: This is the description of the ROUTE command.
+#: Programs/cmds.auto.h:1207
 msgid "bring screen cursor to character"
 msgstr "帶動螢幕游標到字元"
 
-#: Programs/cmds.auto.h:520
+#. xgettext: This is the description of the CSRJMP_VERT command.
+#: Programs/cmds.auto.h:593
 msgid "bring screen cursor to current line"
 msgstr "帶動螢幕游標到目前行"
 
-#: Programs/cmds.auto.h:1193
+#. xgettext: This is the description of the ROUTE_LINE command.
+#: Programs/cmds.auto.h:1404
 msgid "bring screen cursor to line"
 msgstr "帶動螢幕游標到行"
 
-#: Programs/cmds.auto.h:730
+#. xgettext: This is the description of the ROUTE_CURR_LOCN command.
+#: Programs/cmds.auto.h:835
 msgid "bring screen cursor to speech cursor"
 msgstr "帶動螢幕游標到語音游標"
 
@@ -2215,23 +2362,27 @@ msgstr "無法讀取螢幕內容"
 msgid "can't read screen header"
 msgstr "無法讀取畫面表頭"
 
+#: Programs/ctb_translate.c:393
+msgid "cannot access internal contraction table"
+msgstr "無法存取內部縮寫表"
+
 #: Programs/atb_translate.c:70
 msgid "cannot compile attributes table"
 msgstr "無法編譯屬性表"
 
-#: Programs/ctb_translate.c:365
+#: Programs/ctb_translate.c:387
 msgid "cannot compile contraction table"
 msgstr "無法編譯縮寫表"
 
-#: Programs/config.c:1536
+#: Programs/config.c:1660
 msgid "cannot compile key table"
 msgstr "無法編譯按鍵表"
 
-#: Programs/config.c:1113
+#: Programs/config.c:1224
 msgid "cannot compile keyboard table"
 msgstr "無法編譯鍵盤表"
 
-#: Programs/ttb_translate.c:256
+#: Programs/ttb_translate.c:275
 msgid "cannot compile text table"
 msgstr "無法編譯文字表"
 
@@ -2250,16 +2401,16 @@ msgstr "無法連接點字設備服務程序 brltty 於 %s\n"
 msgid "cannot connect to display %s\n"
 msgstr "無法連接點顯器 %s\n"
 
-#: Programs/file.c:360
+#: Programs/file.c:381
 msgid "cannot create directory"
 msgstr "無法建立目錄"
 
-#: Programs/program.c:148
+#: Programs/program.c:150
 #, c-format
 msgid "cannot determine program directory"
 msgstr "無法定義程式目錄"
 
-#: Programs/config.c:2766 Programs/menu.c:544
+#: Programs/config.c:2891 Programs/menu.c:618
 msgid "cannot determine working directory"
 msgstr "無法定義工作目錄"
 
@@ -2267,7 +2418,7 @@ msgstr "無法定義工作目錄"
 msgid "cannot find procedure"
 msgstr "無法找到程序"
 
-#: Programs/program.c:156
+#: Programs/program.c:158
 msgid "cannot fix install path"
 msgstr "無法修復安裝路徑"
 
@@ -2280,7 +2431,7 @@ msgstr "無法取得 tty\n"
 msgid "cannot get tty %d\n"
 msgstr "無法取得 tty %d\n"
 
-#: Programs/file.c:497
+#: Programs/file.c:518
 msgid "cannot get working directory"
 msgstr "無法取得工作目錄"
 
@@ -2297,31 +2448,35 @@ msgstr "無法忽略按鍵\n"
 msgid "cannot load attributes table"
 msgstr "無法載入屬性表"
 
+#: Programs/ctb_translate.c:407
+msgid "cannot load contraction table"
+msgstr "無法載入縮寫表"
+
 #: Programs/system_windows.c:54
 msgid "cannot load library"
 msgstr "無法載入含式庫"
 
-#: Programs/ttb_translate.c:276
+#: Programs/ttb_translate.c:295
 msgid "cannot load text table"
 msgstr "無法載入文字表"
 
-#: Programs/file.c:349
+#: Programs/file.c:370
 msgid "cannot make world writable"
 msgstr "無法讓環境可寫入"
 
-#: Programs/config.c:1071
+#: Programs/config.c:1179
 msgid "cannot open key help"
 msgstr "無法開啟按鍵說明"
 
-#: Programs/program.c:260
+#: Programs/program.c:262
 msgid "cannot open process identifier file"
 msgstr "無法開啟程序編號檔"
 
-#: Programs/menu.c:542
+#: Programs/menu.c:616
 msgid "cannot open working directory"
 msgstr "無法開啟工作目錄"
 
-#: Programs/prefs.c:350
+#: Programs/prefs.c:363
 msgid "cannot read preferences file"
 msgstr "無法讀取偏好設定檔"
 
@@ -2330,21 +2485,21 @@ msgstr "無法讀取偏好設定檔"
 msgid "cannot set focus to %#010x\n"
 msgstr "無法設定焦點到 %#010x\n"
 
-#: Programs/file.c:511 Programs/menu.c:531
+#: Programs/file.c:532 Programs/menu.c:605
 msgid "cannot set working directory"
 msgstr "無法設定工作目錄"
 
-#: Programs/prefs.c:540
+#: Programs/prefs.c:576
 msgid "cannot write to preferences file"
 msgstr "無法寫入偏好設定檔"
 
 #. "cap" here, used during speech output, is short for "capital".
 #. It is spoken just before an uppercase letter, e.g. "cap A".
-#: Programs/core.c:1065
+#: Programs/core.c:1070
 msgid "cap"
 msgstr "大寫"
 
-#: Programs/menu_prefs.c:775 Programs/menu_prefs.c:1234
+#: Programs/menu_prefs.c:886 Programs/menu_prefs.c:1349
 msgid "cells"
 msgstr "點字方"
 
@@ -2352,15 +2507,17 @@ msgstr "點字方"
 msgid "changes discarded"
 msgstr "放棄變更"
 
-#: Programs/cmds.auto.h:775
+#. xgettext: This is the description of the UNSTICK command.
+#: Programs/cmds.auto.h:887
 msgid "clear all sticky input modifiers"
 msgstr "清除所有相黏的輸入設定"
 
-#: Programs/cmds.auto.h:889
+#. xgettext: This is the description of the TXTSEL_CLEAR command.
+#: Programs/cmds.auto.h:1019
 msgid "clear the text selection"
 msgstr "清除文字選取"
 
-#: Programs/cmd_speech.c:475
+#: Programs/cmd_speech.c:501
 msgid "column"
 msgstr "欄"
 
@@ -2377,43 +2534,51 @@ msgstr "設定敘述指定超過一次"
 msgid "console not in use"
 msgstr "主控台未使用"
 
-#: Programs/menu_prefs.c:945
+#: Programs/menu_prefs.c:1056
 msgid "console tone generator"
 msgstr "主控台音響產生器"
 
-#: Programs/cmds.auto.h:1135
+#. xgettext: This is the description of the CLIP_COPY command.
+#: Programs/cmds.auto.h:1338
 msgid "copy characters to clipboard"
 msgstr "複製字元到剪貼不"
 
-#: Programs/cmds.auto.h:901
+#. xgettext: This is the description of the HOST_COPY command.
+#: Programs/cmds.auto.h:1033
 msgid "copy selected text to host clipboard"
 msgstr "複製選取的文字到主機剪貼不"
 
-#: Programs/config.c:644 Programs/menu_prefs.c:503
+#: Programs/config.c:642
 msgid "csecs"
 msgstr "csecs"
 
-#: Programs/cmds.auto.h:1280
+#. xgettext: This is the description of the TOUCH_AT command.
+#: Programs/cmds.auto.h:1503
 msgid "current reading location"
 msgstr "目前的閱讀位置"
 
-#: Programs/cmds.auto.h:1336
+#. xgettext: This is the description of the KEY_CURSOR_DOWN command.
+#: Programs/cmds.auto.h:1567
 msgid "cursor-down key"
 msgstr "游標往下鍵"
 
-#: Programs/cmds.auto.h:1315
+#. xgettext: This is the description of the KEY_CURSOR_LEFT command.
+#: Programs/cmds.auto.h:1543
 msgid "cursor-left key"
 msgstr "游標往左鍵"
 
-#: Programs/cmds.auto.h:1322
+#. xgettext: This is the description of the KEY_CURSOR_RIGHT command.
+#: Programs/cmds.auto.h:1551
 msgid "cursor-right key"
 msgstr "游標往右鍵"
 
-#: Programs/cmds.auto.h:1329
+#. xgettext: This is the description of the KEY_CURSOR_UP command.
+#: Programs/cmds.auto.h:1559
 msgid "cursor-up key"
 msgstr "游標往上鍵"
 
-#: Programs/cmds.auto.h:907
+#. xgettext: This is the description of the HOST_CUT command.
+#: Programs/cmds.auto.h:1040
 msgid "cut selected text to host clipboard"
 msgstr "剪下選取的文字到主機剪貼簿"
 
@@ -2422,27 +2587,33 @@ msgstr "剪下選取的文字到主機剪貼簿"
 msgid "cyan"
 msgstr "青"
 
-#: Programs/cmds.auto.h:781
+#. xgettext: This is the description of the ALTGR command.
+#: Programs/cmds.auto.h:894
 msgid "cycle the AltGr (Right Alt) sticky input modifier (next, on, off)"
 msgstr "循環 AltGr (右 Alt) 相黏輸入設定 (下一個, 開, 關)"
 
-#: Programs/cmds.auto.h:562
+#. xgettext: This is the description of the CONTROL command.
+#: Programs/cmds.auto.h:642
 msgid "cycle the Control sticky input modifier (next, on, off)"
 msgstr "循環 Control 相黏輸入設定 (下一個, 開, 關)"
 
-#: Programs/cmds.auto.h:787
+#. xgettext: This is the description of the GUI command.
+#: Programs/cmds.auto.h:901
 msgid "cycle the GUI (Windows) sticky input modifier (next, on, off)"
 msgstr "循環 GUI (Windows) 相黏輸入設定 (下一個, 開, 關)"
 
-#: Programs/cmds.auto.h:568
+#. xgettext: This is the description of the META command.
+#: Programs/cmds.auto.h:649
 msgid "cycle the Meta (Left Alt) sticky input modifier (next, on, off)"
 msgstr "循環 Meta (左 Alt) 相黏輸入設定 (下一個, 開, 關)"
 
-#: Programs/cmds.auto.h:550
+#. xgettext: This is the description of the SHIFT command.
+#: Programs/cmds.auto.h:628
 msgid "cycle the Shift sticky input modifier (next, on, off)"
 msgstr "循環 Shift 相黏輸入設定 (下一個, 開, 關)"
 
-#: Programs/cmds.auto.h:556
+#. xgettext: This is the description of the UPPER command.
+#: Programs/cmds.auto.h:635
 msgid "cycle the Upper sticky input modifier (next, on, off)"
 msgstr "循環 Upper 相黏輸入設定 (下一個, 開, 關)"
 
@@ -2451,34 +2622,44 @@ msgstr "循環 Upper 相黏輸入設定 (下一個, 開, 關)"
 msgid "dark grey"
 msgstr "暗灰"
 
-#: Programs/cmds.auto.h:483
+#. xgettext: This is the description of the SAY_LOWER command.
+#: Programs/cmds.auto.h:1168
+msgid "decrease speaking pitch"
+msgstr "降低語音音調"
+
+#. xgettext: This is the description of the SAY_SLOWER command.
+#: Programs/cmds.auto.h:550
 msgid "decrease speaking rate"
 msgstr "降低與因素率"
 
-#: Programs/cmds.auto.h:495
+#. xgettext: This is the description of the SAY_SOFTER command.
+#: Programs/cmds.auto.h:564
 msgid "decrease speaking volume"
 msgstr "降低語音音量"
 
-#: Programs/cmds.auto.h:1378
+#. xgettext: This is the description of the KEY_DELETE command.
+#: Programs/cmds.auto.h:1615
 msgid "delete key"
 msgstr "刪除鍵"
 
-#: Programs/cmds.auto.h:1079
+#. xgettext: This is the description of the DESCCHAR command.
+#: Programs/cmds.auto.h:1275
 msgid "describe character"
 msgstr "描述字元"
 
-#: Programs/cmds.auto.h:717
+#. xgettext: This is the description of the DESC_CURR_CHAR command.
+#: Programs/cmds.auto.h:820
 msgid "describe current character"
 msgstr "描述目前字元"
 
-#: Programs/config.c:625 Programs/config.c:635
+#: Programs/config.c:623 Programs/config.c:633
 msgid "device"
 msgstr "設備"
 
 #: Programs/brltest.c:64 Programs/brltest.c:74 Programs/brltty-atb.c:32
 #: Programs/brltty-ctb.c:50 Programs/brltty-ktb.c:69 Programs/brltty-ktb.c:79
-#: Programs/brltty-trtxt.c:47 Programs/config.c:323 Programs/config.c:423
-#: Programs/config.c:433 Programs/config.c:443 Programs/config.c:514
+#: Programs/brltty-trtxt.c:47 Programs/config.c:321 Programs/config.c:421
+#: Programs/config.c:431 Programs/config.c:441 Programs/config.c:512
 msgid "directory"
 msgstr "目錄"
 
@@ -2486,7 +2667,8 @@ msgstr "目錄"
 msgid "display"
 msgstr "顯示"
 
-#: Programs/cmds.auto.h:4
+#. xgettext: This is the description of the NOOP command.
+#: Programs/cmds.auto.h:5
 msgid "do nothing"
 msgstr "無作為"
 
@@ -2494,51 +2676,58 @@ msgstr "無作為"
 msgid "done"
 msgstr "完成"
 
-#: Programs/menu_prefs.c:577
+#: Programs/menu_prefs.c:666
 msgid "dot 7"
 msgstr "第七點"
 
-#: Programs/menu_prefs.c:578
+#: Programs/menu_prefs.c:667
 msgid "dot 8"
 msgstr "地八點"
 
-#: Programs/menu_prefs.c:575
+#: Programs/menu_prefs.c:664
 msgid "dots 7 and 8"
 msgstr "七八點"
 
-#: Drivers/Braille/Baum/braille.c:1107
+#: Drivers/Braille/Baum/braille.c:1146
 msgid "driver request"
 msgstr "驅動要求"
 
-#: Programs/config.c:472 Programs/config.c:570 Programs/config.c:605
+#: Programs/config.c:470 Programs/config.c:568 Programs/config.c:603
 msgid "driver,..."
 msgstr "驅動,..."
 
-#: Programs/cmds.auto.h:1364
+#. xgettext: This is the description of the KEY_END command.
+#: Programs/cmds.auto.h:1599
 msgid "end key"
 msgstr "End 鍵"
 
-#: Programs/cmds.auto.h:1287
+#. xgettext: This is the description of the KEY_ENTER command.
+#: Programs/cmds.auto.h:1511
 msgid "enter key"
 msgstr "Enter 鍵"
 
-#: Programs/cmds.auto.h:384
+#. xgettext: This is the description of the LEARN command.
+#: Programs/cmds.auto.h:436
 msgid "enter/leave command learn mode"
 msgstr "進入/離開指令學習模式"
 
-#: Programs/cmds.auto.h:372
+#. xgettext: This is the description of the HELP command.
+#: Programs/cmds.auto.h:422
 msgid "enter/leave help display"
 msgstr "進入/離開說明畫面"
 
-#: Programs/cmds.auto.h:390
+#. xgettext: This is the description of the PREFMENU command.
+#: Programs/cmds.auto.h:443
 msgid "enter/leave preferences menu"
 msgstr "進入/離開偏好設定"
 
-#: Programs/cmds.auto.h:378
+#. xgettext: This is the description of the INFO command.
+#: Programs/cmds.auto.h:429
 msgid "enter/leave status display"
 msgstr "進入/離開狀態畫面"
 
-#: Programs/cmds.auto.h:1308
+#. xgettext: This is the description of the KEY_ESCAPE command.
+#: Programs/cmds.auto.h:1535
 msgid "escape key"
 msgstr "Escape 鍵"
 
@@ -2546,11 +2735,12 @@ msgstr "Escape 鍵"
 msgid "eurobraille"
 msgstr "Eurobraille"
 
-#: Programs/cmd_miscellaneous.c:118
+#. xgettext: This is the term used when the time is exactly on (i.e. zero seconds after) a minute.
+#: Programs/cmd_miscellaneous.c:102
 msgid "exactly"
 msgstr "精確的"
 
-#: Programs/config.c:819
+#: Programs/config.c:817
 msgid "excess argument"
 msgstr "過多引述"
 
@@ -2574,10 +2764,10 @@ msgstr "\"%s\" 執行失敗: %s\n"
 msgid "failed to get first focus\n"
 msgstr "或取締一個焦點失敗\n"
 
-#: Programs/brltty-trtxt.c:56 Programs/brltty-trtxt.c:64 Programs/config.c:380
-#: Programs/config.c:389 Programs/config.c:399 Programs/config.c:525
-#: Programs/config.c:535 Programs/config.c:544 Programs/config.c:553
-#: Programs/config.c:589 Programs/config.c:674
+#: Programs/brltty-trtxt.c:56 Programs/brltty-trtxt.c:64 Programs/config.c:378
+#: Programs/config.c:387 Programs/config.c:397 Programs/config.c:523
+#: Programs/config.c:533 Programs/config.c:542 Programs/config.c:550
+#: Programs/config.c:587 Programs/config.c:672
 msgid "file"
 msgstr "檔案"
 
@@ -2592,227 +2782,283 @@ msgstr "檔案 '%s' 處理錯誤"
 msgid "fork of \"%s\" failed: %s\n"
 msgstr "\"%s\" 分叉失敗: %s\n"
 
-#: Programs/cmds.auto.h:1386
+#. xgettext: This is the description of the KEY_FUNCTION command.
+#: Programs/cmds.auto.h:1624
 msgid "function key"
 msgstr "功能鍵"
 
-#: Programs/cmds.auto.h:240
+#. xgettext: This is the description of the BACK command.
+#: Programs/cmds.auto.h:271
 msgid "go back after cursor tracking"
 msgstr "游標追蹤後返回"
 
-#: Programs/cmds.auto.h:939
+#. xgettext: This is the description of the GUI_BACK command.
+#: Programs/cmds.auto.h:1077
 msgid "go back to the previous screen"
 msgstr "跳回上一個畫面"
 
-#: Programs/cmds.auto.h:186
+#. xgettext: This is the description of the FWINLT command.
+#: Programs/cmds.auto.h:210
 msgid "go backward one braille window"
 msgstr "倒退一個點字視窗"
 
-#: Programs/cmds.auto.h:202
+#. xgettext: This is the description of the FWINLTSKIP command.
+#: Programs/cmds.auto.h:228
 msgid "go backward skipping blank braille windows"
 msgstr "倒退跳過空白點字視窗"
 
-#: Programs/cmds.auto.h:843
+#. xgettext: This is the description of the PRNBWIN command.
+#: Programs/cmds.auto.h:966
 msgid "go backward to nearest non-blank braille window"
 msgstr "倒退道最近的非空白點字視窗"
 
-#: Programs/cmds.auto.h:20
+#. xgettext: This is the description of the LNDN command.
+#: Programs/cmds.auto.h:23
 msgid "go down one line"
 msgstr "下宜一行"
 
-#: Programs/cmds.auto.h:36
+#. xgettext: This is the description of the WINDN command.
+#: Programs/cmds.auto.h:41
 msgid "go down several lines"
 msgstr "下宜若干行"
 
-#: Programs/cmds.auto.h:118
+#. xgettext: This is the description of the NXPGRPH command.
+#: Programs/cmds.auto.h:133
 msgid "go down to first line of next paragraph"
 msgstr "移到下一段第一行"
 
-#: Programs/cmds.auto.h:418
+#. xgettext: This is the description of the MENU_LAST_ITEM command.
+#: Programs/cmds.auto.h:475
 msgid "go down to last item"
 msgstr "跳到最後一項"
 
-#: Programs/cmds.auto.h:1128
+#. xgettext: This is the description of the NXDIFCHAR command.
+#: Programs/cmds.auto.h:1330
 msgid "go down to nearest line with different character"
 msgstr "下移到最近的不同字元行"
 
-#: Programs/cmds.auto.h:52
+#. xgettext: This is the description of the NXDIFLN command.
+#: Programs/cmds.auto.h:59
 msgid "go down to nearest line with different content"
 msgstr "下移到最近的不同內容行"
 
-#: Programs/cmds.auto.h:68
+#. xgettext: This is the description of the ATTRDN command.
+#: Programs/cmds.auto.h:77
 msgid "go down to nearest line with different highlighting"
 msgstr "下移到最近的不同反白行"
 
-#: Programs/cmds.auto.h:1072
+#. xgettext: This is the description of the NXINDENT command.
+#: Programs/cmds.auto.h:1267
 msgid "go down to nearest line with less indent than character"
 msgstr "下移到最近的內縮少於字元的行"
 
-#: Programs/cmds.auto.h:134
+#. xgettext: This is the description of the NXPROMPT command.
+#: Programs/cmds.auto.h:151
 msgid "go down to next command prompt"
 msgstr "移到下一個命令提示"
 
-#: Programs/cmds.auto.h:434
+#. xgettext: This is the description of the MENU_NEXT_ITEM command.
+#: Programs/cmds.auto.h:493
 msgid "go down to next item"
 msgstr "跳到下一項"
 
-#: Programs/cmds.auto.h:194
+#. xgettext: This is the description of the FWINRT command.
+#: Programs/cmds.auto.h:219
 msgid "go forward one braille window"
 msgstr "前進一個點字視窗"
 
-#: Programs/cmds.auto.h:210
+#. xgettext: This is the description of the FWINRTSKIP command.
+#: Programs/cmds.auto.h:237
 msgid "go forward skipping blank braille windows"
 msgstr "往前跳過空白點字視窗"
 
-#: Programs/cmds.auto.h:851
+#. xgettext: This is the description of the NXNBWIN command.
+#: Programs/cmds.auto.h:975
 msgid "go forward to nearest non-blank braille window"
 msgstr "前進道最近的非空白點字視窗"
 
-#: Programs/cmds.auto.h:170
+#. xgettext: This is the description of the HWINLT command.
+#: Programs/cmds.auto.h:192
 msgid "go left half a braille window"
 msgstr "左宜半個點字視窗"
 
-#: Programs/cmds.auto.h:154
+#. xgettext: This is the description of the CHRLT command.
+#: Programs/cmds.auto.h:174
 msgid "go left one character"
 msgstr "左宜一個字元"
 
-#: Programs/cmds.auto.h:178
+#. xgettext: This is the description of the HWINRT command.
+#: Programs/cmds.auto.h:201
 msgid "go right half a braille window"
 msgstr "右移半個點字視窗"
 
-#: Programs/cmds.auto.h:162
+#. xgettext: This is the description of the CHRRT command.
+#: Programs/cmds.auto.h:183
 msgid "go right one character"
 msgstr "右移一個字元"
 
-#: Programs/cmds.auto.h:690
+#. xgettext: This is the description of the SPEAK_FRST_CHAR command.
+#: Programs/cmds.auto.h:789
 msgid "go to and speak first non-blank character on line"
 msgstr "跳到並朗讀本行第一個非空白字元"
 
-#: Programs/cmds.auto.h:704
+#. xgettext: This is the description of the SPEAK_FRST_LINE command.
+#: Programs/cmds.auto.h:805
 msgid "go to and speak first non-blank line on screen"
 msgstr "跳到並朗讀螢幕上帝一非空白行"
 
-#: Programs/cmds.auto.h:697
+#. xgettext: This is the description of the SPEAK_LAST_CHAR command.
+#: Programs/cmds.auto.h:797
 msgid "go to and speak last non-blank character on line"
 msgstr "跳到並朗讀本行最後一個非空白字元"
 
-#: Programs/cmds.auto.h:711
+#. xgettext: This is the description of the SPEAK_LAST_LINE command.
+#: Programs/cmds.auto.h:813
 msgid "go to and speak last non-blank line on screen"
 msgstr "跳到並朗讀螢幕最後一非空白行"
 
-#: Programs/cmds.auto.h:643
+#. xgettext: This is the description of the SPEAK_NEXT_CHAR command.
+#: Programs/cmds.auto.h:735
 msgid "go to and speak next character"
 msgstr "跳到並朗讀下個字元"
 
-#: Programs/cmds.auto.h:683
+#. xgettext: This is the description of the SPEAK_NEXT_LINE command.
+#: Programs/cmds.auto.h:781
 msgid "go to and speak next line"
 msgstr "跳到並朗讀下一行"
 
-#: Programs/cmds.auto.h:663
+#. xgettext: This is the description of the SPEAK_NEXT_WORD command.
+#: Programs/cmds.auto.h:758
 msgid "go to and speak next word"
 msgstr "跳到並朗讀下個單字"
 
-#: Programs/cmds.auto.h:636
+#. xgettext: This is the description of the SPEAK_PREV_CHAR command.
+#: Programs/cmds.auto.h:727
 msgid "go to and speak previous character"
 msgstr "跳到並朗讀上一字元"
 
-#: Programs/cmds.auto.h:676
+#. xgettext: This is the description of the SPEAK_PREV_LINE command.
+#: Programs/cmds.auto.h:773
 msgid "go to and speak previous line"
 msgstr "跳到並朗讀上一行"
 
-#: Programs/cmds.auto.h:656
+#. xgettext: This is the description of the SPEAK_PREV_WORD command.
+#: Programs/cmds.auto.h:750
 msgid "go to and speak previous word"
 msgstr "跳到並朗讀上一單字"
 
-#: Programs/cmds.auto.h:102
+#. xgettext: This is the description of the BOT_LEFT command.
+#: Programs/cmds.auto.h:115
 msgid "go to beginning of bottom line"
 msgstr "跳到最後一行開頭"
 
-#: Programs/cmds.auto.h:218
+#. xgettext: This is the description of the LNBEG command.
+#: Programs/cmds.auto.h:246
 msgid "go to beginning of line"
 msgstr "跳到行首"
 
-#: Programs/cmds.auto.h:93
+#. xgettext: This is the description of the TOP_LEFT command.
+#: Programs/cmds.auto.h:105
 msgid "go to beginning of top line"
 msgstr "跳道地一行開頭"
 
-#: Programs/cmds.auto.h:84
+#. xgettext: This is the description of the BOT command.
+#: Programs/cmds.auto.h:95
 msgid "go to bottom line"
 msgstr "跳到最後一行"
 
-#: Programs/cmds.auto.h:459
+#. xgettext: This is the description of the SPKHOME command.
+#: Programs/cmds.auto.h:522
 msgid "go to current speaking position"
 msgstr "跳到目前與因為至"
 
-#: Programs/cmds.auto.h:226
+#. xgettext: This is the description of the LNEND command.
+#: Programs/cmds.auto.h:255
 msgid "go to end of line"
 msgstr "跳到行尾"
 
-#: Programs/cmds.auto.h:581
+#. xgettext: This is the description of the MENU_PREV_LEVEL command.
+#: Programs/cmds.auto.h:664
 msgid "go to previous menu level"
 msgstr "跳道上一曾選單"
 
-#: Programs/cmds.auto.h:1101
+#. xgettext: This is the description of the GOTOMARK command.
+#: Programs/cmds.auto.h:1300
 msgid "go to remembered braille window position"
 msgstr "跳到濟助的點字視窗位置"
 
-#: Programs/cmds.auto.h:233
+#. xgettext: This is the description of the HOME command.
+#: Programs/cmds.auto.h:263
 msgid "go to screen cursor"
 msgstr "跳到螢幕游標"
 
-#: Programs/cmds.auto.h:247
+#. xgettext: This is the description of the RETURN command.
+#: Programs/cmds.auto.h:279
 msgid "go to screen cursor or go back after cursor tracking"
 msgstr "跳到螢幕游標或游標追蹤後反回"
 
-#: Programs/cmds.auto.h:1110
+#. xgettext: This is the description of the GOTOLINE command.
+#: Programs/cmds.auto.h:1310
 msgid "go to selected line"
 msgstr "跳到選取的行"
 
-#: Programs/cmds.auto.h:932
+#. xgettext: This is the description of the GUI_HOME command.
+#: Programs/cmds.auto.h:1069
 msgid "go to the home screen"
 msgstr "跳到主畫面"
 
-#: Programs/cmds.auto.h:76
+#. xgettext: This is the description of the TOP command.
+#: Programs/cmds.auto.h:86
 msgid "go to top line"
 msgstr "跳道地一行"
 
-#: Programs/cmds.auto.h:12
+#. xgettext: This is the description of the LNUP command.
+#: Programs/cmds.auto.h:14
 msgid "go up one line"
 msgstr "跳上一行"
 
-#: Programs/cmds.auto.h:28
+#. xgettext: This is the description of the WINUP command.
+#: Programs/cmds.auto.h:32
 msgid "go up several lines"
 msgstr "往上跳若干行"
 
-#: Programs/cmds.auto.h:410
+#. xgettext: This is the description of the MENU_FIRST_ITEM command.
+#: Programs/cmds.auto.h:466
 msgid "go up to first item"
 msgstr "跳到第一項"
 
-#: Programs/cmds.auto.h:110
+#. xgettext: This is the description of the PRPGRPH command.
+#: Programs/cmds.auto.h:124
 msgid "go up to first line of paragraph"
 msgstr "跳到本段第一行"
 
-#: Programs/cmds.auto.h:1119
+#. xgettext: This is the description of the PRDIFCHAR command.
+#: Programs/cmds.auto.h:1320
 msgid "go up to nearest line with different character"
 msgstr "往上跳到最近的不同字元行"
 
-#: Programs/cmds.auto.h:44
+#. xgettext: This is the description of the PRDIFLN command.
+#: Programs/cmds.auto.h:50
 msgid "go up to nearest line with different content"
 msgstr "往上跳到最近的不同內容行"
 
-#: Programs/cmds.auto.h:60
+#. xgettext: This is the description of the ATTRUP command.
+#: Programs/cmds.auto.h:68
 msgid "go up to nearest line with different highlighting"
 msgstr "往上跳到最近的不同反白行"
 
-#: Programs/cmds.auto.h:1063
+#. xgettext: This is the description of the PRINDENT command.
+#: Programs/cmds.auto.h:1257
 msgid "go up to nearest line with less indent than character"
 msgstr "往上跳到最近的內縮內縮少於字元的行"
 
-#: Programs/cmds.auto.h:126
+#. xgettext: This is the description of the PRPROMPT command.
+#: Programs/cmds.auto.h:142
 msgid "go up to previous command prompt"
 msgstr "跳到上一個命令提示"
 
-#: Programs/cmds.auto.h:426
+#. xgettext: This is the description of the MENU_PREV_ITEM command.
+#: Programs/cmds.auto.h:484
 msgid "go up to previous item"
 msgstr "跳到上一項"
 
@@ -2825,7 +3071,7 @@ msgstr "綠"
 msgid "group permissions added"
 msgstr "以加入群組權限"
 
-#: Programs/cmd_miscellaneous.c:228
+#: Programs/cmd_miscellaneous.c:213
 msgid "help not available"
 msgstr "沒有說明"
 
@@ -2833,47 +3079,59 @@ msgstr "沒有說明"
 msgid "help screen not readable"
 msgstr "說明畫面無法讀取"
 
-#: Programs/cmds.auto.h:1357
+#. xgettext: This is the description of the KEY_HOME command.
+#: Programs/cmds.auto.h:1591
 msgid "home key"
 msgstr "home 鍵"
 
-#: Programs/config.c:493
+#: Programs/config.c:491
 msgid "identifier,..."
 msgstr "相同,..."
 
-#: Drivers/Braille/Baum/braille.c:1109
+#: Drivers/Braille/Baum/braille.c:1148
 msgid "idle timeout"
 msgstr "閒置逾時"
 
-#: Programs/cmds.auto.h:489
+#. xgettext: This is the description of the SAY_HIGHER command.
+#: Programs/cmds.auto.h:1175
+msgid "increase speaking pitch"
+msgstr "提高語音音調"
+
+#. xgettext: This is the description of the SAY_FASTER command.
+#: Programs/cmds.auto.h:557
 msgid "increase speaking rate"
 msgstr "增加與因素率"
 
-#: Programs/cmds.auto.h:501
+#. xgettext: This is the description of the SAY_LOUDER command.
+#: Programs/cmds.auto.h:571
 msgid "increase speaking volume"
 msgstr "增加語音音量"
 
-#: Programs/core.c:1123
+#: Programs/core.c:1128
 msgid "indent"
 msgstr "內縮"
 
-#: Programs/cmds.auto.h:1149
+#. xgettext: This is the description of the PASTE_HISTORY command.
+#: Programs/cmds.auto.h:1354
 msgid "insert clipboard history entry after screen cursor"
 msgstr "在螢幕游標處插入剪貼不的先前內容"
 
-#: Programs/cmds.auto.h:526
+#. xgettext: This is the description of the PASTE command.
+#: Programs/cmds.auto.h:600
 msgid "insert clipboard text after screen cursor"
 msgstr "在螢幕游標處插入剪貼不的文字"
 
-#: Programs/cmds.auto.h:913
+#. xgettext: This is the description of the HOST_PASTE command.
+#: Programs/cmds.auto.h:1047
 msgid "insert host clipboard text after screen cursor"
 msgstr "在螢幕游標處插入主機剪貼不的文字"
 
-#: Programs/cmds.auto.h:1371
+#. xgettext: This is the description of the KEY_INSERT command.
+#: Programs/cmds.auto.h:1607
 msgid "insert key"
 msgstr "insert 鍵"
 
-#: Programs/program.c:164
+#: Programs/program.c:166
 msgid "install path not absolute"
 msgstr "安裝路徑不是絕對"
 
@@ -2889,7 +3147,7 @@ msgstr "無效的跳脫序列"
 msgid "invalid flag setting"
 msgstr "無效的旗標設定"
 
-#: Programs/config.c:2678
+#: Programs/config.c:2803
 msgid "invalid message hold timeout"
 msgstr "無效的訊息保留時間"
 
@@ -2898,7 +3156,7 @@ msgstr "無效的訊息保留時間"
 msgid "invalid operand"
 msgstr "無效的運算員"
 
-#: Programs/brlapi_server.c:4413
+#: Programs/brlapi_server.c:4516
 msgid "invalid thread stack size"
 msgstr "無效的線程堆疊大小"
 
@@ -2941,19 +3199,16 @@ msgstr "淡紫"
 msgid "light red"
 msgstr "淡紅"
 
-#: Programs/cmd_speech.c:474
+#: Programs/cmd_speech.c:500
 msgid "line"
 msgstr "行"
 
-#: Programs/cmds.auto.h:1047
+#. xgettext: This is the description of the COPY_LINE command.
+#: Programs/cmds.auto.h:1239
 msgid "linear copy to character"
 msgstr "直線拷貝字元"
 
-#: Programs/msgtest.c:85
-msgid "list all of the translations (the default)"
-msgstr "列出所有翻譯（預設）"
-
-#: Programs/config.c:665
+#: Programs/config.c:663
 msgid "lvl|cat,..."
 msgstr "lvl|cat,..."
 
@@ -2979,29 +3234,33 @@ msgstr "缺少參數指定符號"
 msgid "missing parameter value"
 msgstr "缺少餐數值"
 
-#: Programs/cmds.auto.h:993
+#. xgettext: This is the description of the GUI_ITEM_FRST command.
+#: Programs/cmds.auto.h:1140
 msgid "move to the first item in the screen area"
 msgstr "移到畫面中的第一個項目"
 
-#: Programs/cmds.auto.h:1011
+#. xgettext: This is the description of the GUI_ITEM_LAST command.
+#: Programs/cmds.auto.h:1161
 msgid "move to the last item in the screen area"
 msgstr "移到畫面中的最後一個項目"
 
-#: Programs/cmds.auto.h:1005
+#. xgettext: This is the description of the GUI_ITEM_NEXT command.
+#: Programs/cmds.auto.h:1154
 msgid "move to the next item in the screen area"
 msgstr "移到畫面中的下一個項目"
 
-#: Programs/cmds.auto.h:999
+#. xgettext: This is the description of the GUI_ITEM_PREV command.
+#: Programs/cmds.auto.h:1147
 msgid "move to the previous item in the screen area"
 msgstr "移到畫面中的上一個項目"
 
-#: Programs/msgtest.c:59
+#: Programs/msgtest.c:57
 msgid "name"
 msgstr "名稱"
 
-#: Programs/config.c:356 Programs/config.c:408 Programs/config.c:461
-#: Programs/config.c:483 Programs/config.c:561 Programs/config.c:580
-#: Programs/config.c:615
+#: Programs/config.c:354 Programs/config.c:406 Programs/config.c:459
+#: Programs/config.c:481 Programs/config.c:559 Programs/config.c:578
+#: Programs/config.c:613
 msgid "name=value,..."
 msgstr "名稱=數值,..."
 
@@ -3009,7 +3268,7 @@ msgstr "名稱=數值,..."
 msgid "native"
 msgstr "內部"
 
-#: Programs/config.c:1080
+#: Programs/config.c:1188
 msgid "no key bindings"
 msgstr "沒有按鍵綁定"
 
@@ -3017,11 +3276,11 @@ msgstr "沒有按鍵綁定"
 msgid "no screen"
 msgstr "沒有螢幕"
 
-#: Programs/config.c:717
+#: Programs/config.c:715
 msgid "none"
 msgstr "沒有"
 
-#: Programs/config.c:1353
+#: Programs/config.c:1477
 msgid "not saved"
 msgstr "未存檔"
 
@@ -3029,27 +3288,33 @@ msgstr "未存檔"
 msgid "not switching to an unprivileged user"
 msgstr "未切換到未授權的使用者"
 
-#: Programs/cmds.auto.h:969
+#. xgettext: This is the description of the GUI_APP_ALERTS command.
+#: Programs/cmds.auto.h:1112
 msgid "open the application alerts window"
 msgstr "打開軟體警示視窗"
 
-#: Programs/cmds.auto.h:957
+#. xgettext: This is the description of the GUI_APP_LIST command.
+#: Programs/cmds.auto.h:1098
 msgid "open the application list window"
 msgstr "打開軟體列表視窗"
 
-#: Programs/cmds.auto.h:963
+#. xgettext: This is the description of the GUI_APP_MENU command.
+#: Programs/cmds.auto.h:1105
 msgid "open the application-specific menu"
 msgstr "打開軟體指定的選單"
 
-#: Programs/cmds.auto.h:925
+#. xgettext: This is the description of the GUI_BRL_ACTIONS command.
+#: Programs/cmds.auto.h:1061
 msgid "open the braille actions window"
 msgstr "打開點字活動視窗"
 
-#: Programs/cmds.auto.h:951
+#. xgettext: This is the description of the GUI_DEV_OPTIONS command.
+#: Programs/cmds.auto.h:1091
 msgid "open the device options window"
 msgstr "打開設備選項視窗"
 
-#: Programs/cmds.auto.h:945
+#. xgettext: This is the description of the GUI_DEV_SETTINGS command.
+#: Programs/cmds.auto.h:1084
 msgid "open the device settings window"
 msgstr "打開設備設定視窗"
 
@@ -3061,47 +3326,47 @@ msgstr "選向"
 msgid "ownership claimed"
 msgstr "所有權主張"
 
-#: Programs/cmds.auto.h:1350
+#. xgettext: This is the description of the KEY_PAGE_DOWN command.
+#: Programs/cmds.auto.h:1583
 msgid "page-down key"
 msgstr "page-down 鍵"
 
-#: Programs/cmds.auto.h:1343
+#. xgettext: This is the description of the KEY_PAGE_UP command.
+#: Programs/cmds.auto.h:1575
 msgid "page-up key"
 msgstr "page-up 鍵"
 
-#: Programs/msgtest.c:44
+#: Programs/msgtest.c:42
 msgid "path"
 msgstr "路徑"
 
-#: Programs/menu_prefs.c:509
-msgid "percentage"
-msgstr "百分比"
-
-#: Programs/config.c:2651
+#: Programs/config.c:2776
 msgid "pid file not specified"
 msgstr "pid 檔案未指定"
 
-#: Programs/program.c:306
+#: Programs/program.c:308
 msgid "pid file open error"
 msgstr "pid 檔案開啟錯誤"
 
-#: Programs/spk.c:200
+#: Programs/spk.c:232
 msgid "pitch"
 msgstr "音調"
 
-#: Programs/cmds.auto.h:1086
+#. xgettext: This is the description of the SETLEFT command.
+#: Programs/cmds.auto.h:1283
 msgid "place left end of braille window at character"
 msgstr "把點字視窗的最左端對齊字元"
 
-#: Drivers/Braille/Baum/braille.c:1108
+#: Drivers/Braille/Baum/braille.c:1147
 msgid "power switch"
 msgstr "電源開關"
 
-#: Programs/spk.c:186
+#: Programs/spk.c:206
 msgid "rate"
 msgstr "速率"
 
-#: Programs/cmds.auto.h:1040
+#. xgettext: This is the description of the COPY_RECT command.
+#: Programs/cmds.auto.h:1231
 msgid "rectangular copy to character"
 msgstr "區塊複製字元"
 
@@ -3110,38 +3375,42 @@ msgstr "區塊複製字元"
 msgid "red"
 msgstr "紅"
 
-#: Programs/cmds.auto.h:877
+#. xgettext: This is the description of the REFRESH command.
+#: Programs/cmds.auto.h:1005
 msgid "refresh braille display"
 msgstr "刷新點字顯示"
 
-#: Programs/cmds.auto.h:1201
+#. xgettext: This is the description of the REFRESH_LINE command.
+#: Programs/cmds.auto.h:1413
 msgid "refresh braille line"
 msgstr "刷新點字顯示行"
 
-#: Programs/config.c:415
+#: Programs/config.c:413
 msgid "regexp,..."
 msgstr "regexp,..."
 
-#: Programs/config.c:1896
+#: Programs/config.c:2021
 #, c-format
 msgid "reinitializing braille driver"
 msgstr "重新出使化點字驅動"
 
-#: Programs/config.c:2409
+#: Programs/config.c:2534
 #, c-format
 msgid "reinitializing screen driver"
 msgstr "重新出使化螢幕驅動"
 
-#: Programs/config.c:2209
+#: Programs/config.c:2334
 #, c-format
 msgid "reinitializing speech driver"
 msgstr "重新出使化語音驅動"
 
-#: Programs/cmds.auto.h:1093
+#. xgettext: This is the description of the SETMARK command.
+#: Programs/cmds.auto.h:1291
 msgid "remember current braille window position"
 msgstr "濟助目前點字視窗位置"
 
-#: Programs/cmds.auto.h:1229
+#. xgettext: This is the description of the ALERT command.
+#: Programs/cmds.auto.h:1445
 msgid "render an alert"
 msgstr "發出警報"
 
@@ -3152,31 +3421,38 @@ msgstr "發出警報"
 msgid "repeat count"
 msgstr "重複計數"
 
-#: Programs/cmds.auto.h:532
+#. xgettext: This is the description of the RESTARTBRL command.
+#: Programs/cmds.auto.h:607
 msgid "restart braille driver"
 msgstr "重新啟動點字驅動"
 
-#: Programs/cmds.auto.h:538
+#. xgettext: This is the description of the RESTARTSPEECH command.
+#: Programs/cmds.auto.h:614
 msgid "restart speech driver"
 msgstr "重新啟動語音驅動"
 
-#: Programs/cmds.auto.h:755
+#. xgettext: This is the description of the CLIP_RESTORE command.
+#: Programs/cmds.auto.h:864
 msgid "restore clipboard from disk"
 msgstr "從磁碟還原剪貼簿"
 
-#: Programs/cmds.auto.h:402
+#. xgettext: This is the description of the PREFLOAD command.
+#: Programs/cmds.auto.h:457
 msgid "restore preferences from disk"
 msgstr "從磁碟還原偏好設定"
 
-#: Programs/cmds.auto.h:975
+#. xgettext: This is the description of the GUI_AREA_ACTV command.
+#: Programs/cmds.auto.h:1119
 msgid "return to the active screen area"
 msgstr "回歸運作中的畫面"
 
-#: Programs/cmds.auto.h:749
+#. xgettext: This is the description of the CLIP_SAVE command.
+#: Programs/cmds.auto.h:857
 msgid "save clipboard to disk"
 msgstr "儲存剪貼簿到磁碟"
 
-#: Programs/cmds.auto.h:396
+#. xgettext: This is the description of the PREFSAVE command.
+#: Programs/cmds.auto.h:450
 msgid "save preferences to disk"
 msgstr "儲存偏好設定到磁碟"
 
@@ -3184,15 +3460,15 @@ msgstr "儲存偏好設定到磁碟"
 msgid "scheme+..."
 msgstr "scheme+..."
 
-#: Programs/config.c:2285
+#: Programs/config.c:2410
 msgid "screen driver not loadable"
 msgstr "螢幕驅動無法載入"
 
-#: Programs/config.c:2406
+#: Programs/config.c:2531
 msgid "screen driver restarting"
 msgstr "螢幕驅動重新啟動"
 
-#: Programs/cmd_miscellaneous.c:186
+#: Programs/cmd_miscellaneous.c:171
 msgid "screen driver stopped"
 msgstr "螢幕驅動停止"
 
@@ -3204,237 +3480,292 @@ msgstr "螢幕鎖定"
 msgid "screen not in text mode"
 msgstr "螢幕不在文字模式"
 
-#: Programs/cmds.auto.h:140
+#. xgettext: This is the description of the PRSEARCH command.
+#: Programs/cmds.auto.h:158
 msgid "search backward for clipboard text"
 msgstr "往回尋找剪貼不文字"
 
-#: Programs/cmds.auto.h:146
+#. xgettext: This is the description of the NXSEARCH command.
+#: Programs/cmds.auto.h:165
 msgid "search forward for clipboard text"
 msgstr "往前尋找剪貼不文字"
 
-#: Programs/cmd_miscellaneous.c:122
-msgid "second"
-msgid_plural "seconds"
-msgstr[0] "秒"
-msgstr[1] "秒"
+#: Programs/menu.c:469
+msgid "seconds"
+msgstr "秒"
 
-#: Programs/cmds.auto.h:895
+#. xgettext: This is the description of the TXTSEL_ALL command.
+#: Programs/cmds.auto.h:1026
 msgid "select all of the text"
 msgstr "全選文字"
 
-#: Programs/cmds.auto.h:446
+#. xgettext: This is the description of the MENU_NEXT_SETTING command.
+#: Programs/cmds.auto.h:507
 msgid "select next choice"
 msgstr "選取下一向選擇"
 
-#: Programs/cmds.auto.h:440
+#. xgettext: This is the description of the MENU_PREV_SETTING command.
+#: Programs/cmds.auto.h:500
 msgid "select previous choice"
 msgstr "選取前一向選擇"
 
-#: Programs/cmds.auto.h:352
+#. xgettext: This is the description of the TUNES command.
+#: Programs/cmds.auto.h:399
 msgid "set alert tunes on/off"
 msgstr "設定警示音開關"
 
-#: Programs/cmds.auto.h:338
+#. xgettext: This is the description of the ATTRBLINK command.
+#: Programs/cmds.auto.h:383
 msgid "set attribute blinking on/off"
 msgstr "設定屬性跳動開關"
 
-#: Programs/cmds.auto.h:331
+#. xgettext: This is the description of the ATTRVIS command.
+#: Programs/cmds.auto.h:375
 msgid "set attribute underlining on/off"
 msgstr "設定屬性家底線開關"
 
-#: Programs/cmds.auto.h:1163
+#. xgettext: This is the description of the SET_ATTRIBUTES_TABLE command.
+#: Programs/cmds.auto.h:1370
 msgid "set attributes table"
 msgstr "設定屬性表"
 
-#: Programs/cmds.auto.h:359
+#. xgettext: This is the description of the AUTOREPEAT command.
+#: Programs/cmds.auto.h:407
 msgid "set autorepeat on/off"
 msgstr "設定自動重複開關"
 
-#: Programs/cmds.auto.h:623
+#. xgettext: This is the description of the ASPK_CMP_WORDS command.
+#: Programs/cmds.auto.h:712
 msgid "set autospeak completed words on/off"
 msgstr "設定自動朗讀完成的單字開關"
 
-#: Programs/cmds.auto.h:609
+#. xgettext: This is the description of the ASPK_DEL_CHARS command.
+#: Programs/cmds.auto.h:696
 msgid "set autospeak deleted characters on/off"
 msgstr "設定自動朗讀刪除的字元開關"
 
-#: Programs/cmds.auto.h:871
+#. xgettext: This is the description of the ASPK_INDENT command.
+#: Programs/cmds.auto.h:998
 msgid "set autospeak indent of current line on/off"
 msgstr "設定自動朗讀內縮行開關"
 
-#: Programs/cmds.auto.h:602
+#. xgettext: This is the description of the ASPK_INS_CHARS command.
+#: Programs/cmds.auto.h:688
 msgid "set autospeak inserted characters on/off"
 msgstr "設定自動朗讀插入的字元開關"
 
-#: Programs/cmds.auto.h:366
+#. xgettext: This is the description of the AUTOSPEAK command.
+#: Programs/cmds.auto.h:415
 msgid "set autospeak on/off"
 msgstr "設定自動朗讀開關"
 
-#: Programs/cmds.auto.h:616
+#. xgettext: This is the description of the ASPK_REP_CHARS command.
+#: Programs/cmds.auto.h:704
 msgid "set autospeak replaced characters on/off"
 msgstr "設定自動朗讀重複的字元開關"
 
-#: Programs/cmds.auto.h:595
+#. xgettext: This is the description of the ASPK_SEL_CHAR command.
+#: Programs/cmds.auto.h:680
 msgid "set autospeak selected character on/off"
 msgstr "設定自動朗讀選取的字元開關"
 
-#: Programs/cmds.auto.h:588
+#. xgettext: This is the description of the ASPK_SEL_LINE command.
+#: Programs/cmds.auto.h:672
 msgid "set autospeak selected line on/off"
 msgstr "設定自動朗讀選取的行開關"
 
-#: Programs/cmds.auto.h:769
+#. xgettext: This is the description of the BRLKBD command.
+#: Programs/cmds.auto.h:880
 msgid "set braille keyboard enabled/disabled"
 msgstr "設定點字鍵盤 啟用/停用"
 
-#: Programs/cmds.auto.h:762
+#. xgettext: This is the description of the BRLUCDOTS command.
+#: Programs/cmds.auto.h:872
 msgid "set braille typing mode dots/text"
 msgstr "設定點字輸入模式 點位/文字"
 
-#: Programs/cmds.auto.h:345
+#. xgettext: This is the description of the CAPBLINK command.
+#: Programs/cmds.auto.h:391
 msgid "set capital letter blinking on/off"
 msgstr "設定大寫字母跳動開關"
 
-#: Programs/cmds.auto.h:1170
+#. xgettext: This is the description of the CONTRACTED command.
+#: Programs/cmds.auto.h:1190
+msgid "set contracted/computer braille"
+msgstr "設定縮寫或電腦點字"
+
+#. xgettext: This is the description of the SET_CONTRACTION_TABLE command.
+#: Programs/cmds.auto.h:1378
 msgid "set contraction table"
 msgstr "設定縮寫表"
 
-#: Programs/cmds.auto.h:261
+#. xgettext: This is the description of the DISPMD command.
+#: Programs/cmds.auto.h:295
 msgid "set display mode attributes/text"
 msgstr "設定顯示模式 屬性/文字"
 
-#: Programs/cmds.auto.h:303
+#. xgettext: This is the description of the CSRHIDE command.
+#: Programs/cmds.auto.h:343
 msgid "set hidden screen cursor on/off"
 msgstr "設定隱藏螢幕游標開關"
 
-#: Programs/cmds.auto.h:1177
+#. xgettext: This is the description of the SET_KEYBOARD_TABLE command.
+#: Programs/cmds.auto.h:1386
 msgid "set keyboard table"
 msgstr "設定按鍵表"
 
-#: Programs/cmds.auto.h:1184
+#. xgettext: This is the description of the SET_LANGUAGE_PROFILE command.
+#: Programs/cmds.auto.h:1394
 msgid "set language profile"
 msgstr "設定語言設定檔"
 
-#: Programs/cmds.auto.h:324
+#. xgettext: This is the description of the CSRBLINK command.
+#: Programs/cmds.auto.h:367
 msgid "set screen cursor blinking on/off"
 msgstr "設定螢幕游標跳動開關"
 
-#: Programs/cmds.auto.h:317
+#. xgettext: This is the description of the CSRSIZE command.
+#: Programs/cmds.auto.h:359
 msgid "set screen cursor style block/underline"
 msgstr "設定螢幕游標形狀 區快/底線"
 
-#: Programs/cmds.auto.h:296
+#. xgettext: This is the description of the CSRVIS command.
+#: Programs/cmds.auto.h:335
 msgid "set screen cursor visibility on/off"
 msgstr "設定螢幕游標顯示開關"
 
-#: Programs/cmds.auto.h:254
+#. xgettext: This is the description of the FREEZE command.
+#: Programs/cmds.auto.h:287
 msgid "set screen image frozen/unfrozen"
 msgstr "設定畫面圖像 凍結/不動節"
 
-#: Programs/cmds.auto.h:289
+#. xgettext: This is the description of the COMPBRL6 command.
+#: Programs/cmds.auto.h:1198
+msgid "set six/eight dot computer braille"
+msgstr "設定六點或八點電腦點字"
+
+#. xgettext: This is the description of the SKPBLNKWINS command.
+#: Programs/cmds.auto.h:327
 msgid "set skipping of blank braille windows on/off"
 msgstr "設定跳過空白點字視窗開關"
 
-#: Programs/cmds.auto.h:282
+#. xgettext: This is the description of the SKPIDLNS command.
+#: Programs/cmds.auto.h:319
 msgid "set skipping of lines with identical content on/off"
 msgstr "設定跳過相同內容的行開關"
 
-#: Programs/cmds.auto.h:275
+#. xgettext: This is the description of the SLIDEWIN command.
+#: Programs/cmds.auto.h:311
 msgid "set sliding braille window on/off"
 msgstr "設定滑動點字視窗開關"
 
-#: Programs/cmds.auto.h:743
+#. xgettext: This is the description of the SHOW_CURR_LOCN command.
+#: Programs/cmds.auto.h:850
 msgid "set speech cursor visibility on/off"
 msgstr "設定語音游標顯示開關"
 
-#: Programs/cmds.auto.h:1215
+#. xgettext: This is the description of the TXTSEL_SET command.
+#: Programs/cmds.auto.h:1429
 msgid "set text selection"
 msgstr "設定文字選取"
 
-#: Programs/cmds.auto.h:268
+#. xgettext: This is the description of the SIXDOTS command.
+#: Programs/cmds.auto.h:303
 msgid "set text style 6-dot/8-dot"
 msgstr "設定文自行太 六點/八點"
 
-#: Programs/cmds.auto.h:1156
+#. xgettext: This is the description of the SET_TEXT_TABLE command.
+#: Programs/cmds.auto.h:1362
 msgid "set text table"
 msgstr "設定文字表"
 
-#: Programs/cmds.auto.h:858
+#. xgettext: This is the description of the TOUCH_NAV command.
+#: Programs/cmds.auto.h:983
 msgid "set touch navigation on/off"
 msgstr "設定觸控導覽開關"
 
-#: Programs/cmds.auto.h:310
+#. xgettext: This is the description of the CSRTRK command.
+#: Programs/cmds.auto.h:351
 msgid "set track screen cursor on/off"
 msgstr "設定追蹤螢幕游標開關"
 
-#: Programs/cmds.auto.h:574
+#. xgettext: This is the description of the TIME command.
+#: Programs/cmds.auto.h:656
 msgid "show current date and time"
 msgstr "顯示目前日期與時間"
 
-#: Programs/msgtest.c:73
-msgid "show the message count"
-msgstr "顯示訊息數量"
-
-#: Programs/msgtest.c:79
-msgid "show the translation metadata"
-msgstr "顯示翻譯原始資料"
-
-#: Programs/cmds.auto.h:919
+#. xgettext: This is the description of the GUI_TITLE command.
+#: Programs/cmds.auto.h:1054
 msgid "show the window title"
 msgstr "顯示視窗標題"
 
-#: Programs/cmds.auto.h:883
+#. xgettext: This is the description of the INDICATORS command.
+#: Programs/cmds.auto.h:1012
 msgid "show various device status indicators"
 msgstr "顯示各種設備狀態指示燈"
 
-#: Programs/menu_prefs.c:946
+#: Programs/menu_prefs.c:1057
 msgid "soundcard digital audio"
 msgstr "音效卡數位音效"
 
-#: Programs/menu_prefs.c:948
+#: Programs/menu_prefs.c:1059
 msgid "soundcard synthesizer"
 msgstr "音效卡合成器"
 
-#: Programs/cmd.c:277 Programs/core.c:1046
+#: Programs/cmd.c:277 Programs/core.c:1051
 msgid "space"
 msgstr "空白"
 
-#: Programs/cmds.auto.h:629
+#. xgettext: This is the description of the SPEAK_CURR_CHAR command.
+#: Programs/cmds.auto.h:719
 msgid "speak current character"
 msgstr "朗讀目前字元"
 
-#: Programs/cmds.auto.h:465 Programs/cmds.auto.h:669
+#. xgettext: This is the description of the SAY_LINE command.
+#. xgettext: This is the description of the SPEAK_CURR_LINE command.
+#: Programs/cmds.auto.h:529 Programs/cmds.auto.h:765
 msgid "speak current line"
 msgstr "朗讀本行"
 
-#: Programs/cmds.auto.h:649
+#. xgettext: This is the description of the SPEAK_CURR_WORD command.
+#: Programs/cmds.auto.h:742
 msgid "speak current word"
 msgstr "朗讀目前單字"
 
-#: Programs/cmds.auto.h:477
+#. xgettext: This is the description of the SAY_BELOW command.
+#: Programs/cmds.auto.h:543
 msgid "speak from current line through bottom of screen"
 msgstr "從本行開始朗讀到畫面底部"
 
-#: Programs/cmds.auto.h:471
+#. xgettext: This is the description of the SAY_ALL command.
+#: Programs/cmds.auto.h:1182
+msgid "speak from top of screen through bottom of screen"
+msgstr "從畫面開頭報讀到畫面結束"
+
+#. xgettext: This is the description of the SAY_ABOVE command.
+#: Programs/cmds.auto.h:536
 msgid "speak from top of screen through current line"
 msgstr "從畫面頂端開始朗獨到本行"
 
-#: Programs/cmds.auto.h:864
+#. xgettext: This is the description of the SPEAK_INDENT command.
+#: Programs/cmds.auto.h:990
 msgid "speak indent of current line"
 msgstr "朗讀內縮行"
 
-#: Programs/cmds.auto.h:736
+#. xgettext: This is the description of the SPEAK_CURR_LOCN command.
+#: Programs/cmds.auto.h:842
 msgid "speak speech cursor location"
 msgstr "朗讀語音游標位置"
 
-#: Programs/msgtest.c:52
+#: Programs/msgtest.c:50
 msgid "specifier"
 msgstr "指定符號"
 
-#: Programs/config.c:2057
+#: Programs/config.c:2182
 msgid "speech driver not loadable"
 msgstr "語音驅動無法載入"
 
-#: Programs/config.c:2206
+#: Programs/config.c:2331
 msgid "speech driver restarting"
 msgstr "語音驅動重新啟動"
 
@@ -3442,43 +3773,53 @@ msgstr "語音驅動重新啟動"
 msgid "speech driver stopped"
 msgstr "語音驅動停止"
 
-#: Programs/cmds.auto.h:723
+#. xgettext: This is the description of the SPELL_CURR_WORD command.
+#: Programs/cmds.auto.h:827
 msgid "spell current word"
 msgstr "拼出目前的單字"
 
-#: Programs/cmds.auto.h:1026
+#. xgettext: This is the description of the CLIP_NEW command.
+#: Programs/cmds.auto.h:1215
 msgid "start new clipboard at character"
 msgstr "以字元開始新的剪貼不"
 
-#: Programs/cmds.auto.h:1208
+#. xgettext: This is the description of the TXTSEL_START command.
+#: Programs/cmds.auto.h:1421
 msgid "start text selection"
 msgstr "開始文字選取"
 
-#: Programs/cmds.auto.h:799
+#. xgettext: This is the description of the BRL_START command.
+#: Programs/cmds.auto.h:915
 msgid "start the braille driver"
 msgstr "啟動點字驅動"
 
-#: Programs/cmds.auto.h:823
+#. xgettext: This is the description of the SCR_START command.
+#: Programs/cmds.auto.h:943
 msgid "start the screen driver"
 msgstr "啟動螢幕驅動"
 
-#: Programs/cmds.auto.h:811
+#. xgettext: This is the description of the SPK_START command.
+#: Programs/cmds.auto.h:929
 msgid "start the speech driver"
 msgstr "啟動語音驅動"
 
-#: Programs/cmds.auto.h:452
+#. xgettext: This is the description of the MUTE command.
+#: Programs/cmds.auto.h:514
 msgid "stop speaking"
 msgstr "停止朗讀"
 
-#: Programs/cmds.auto.h:793
+#. xgettext: This is the description of the BRL_STOP command.
+#: Programs/cmds.auto.h:908
 msgid "stop the braille driver"
 msgstr "停止點字驅動"
 
-#: Programs/cmds.auto.h:817
+#. xgettext: This is the description of the SCR_STOP command.
+#: Programs/cmds.auto.h:936
 msgid "stop the screen driver"
 msgstr "停止螢幕驅動"
 
-#: Programs/cmds.auto.h:805
+#. xgettext: This is the description of the SPK_STOP command.
+#: Programs/cmds.auto.h:922
 msgid "stop the speech driver"
 msgstr "停止語音驅動"
 
@@ -3490,27 +3831,33 @@ msgstr "奇怪的老舊錯誤處理程序\n"
 msgid "string"
 msgstr "弦樂"
 
-#: Programs/cmds.auto.h:1273
+#. xgettext: This is the description of the CONTEXT command.
+#: Programs/cmds.auto.h:1495
 msgid "switch to command context"
 msgstr "切換到命令關聯"
 
-#: Programs/cmds.auto.h:1054
+#. xgettext: This is the description of the SWITCHVT command.
+#: Programs/cmds.auto.h:1247
 msgid "switch to specific virtual terminal"
 msgstr "切換到特定的虛擬終端機"
 
-#: Programs/cmds.auto.h:987
+#. xgettext: This is the description of the GUI_AREA_NEXT command.
+#: Programs/cmds.auto.h:1133
 msgid "switch to the next screen area"
 msgstr "切換到下一個畫面"
 
-#: Programs/cmds.auto.h:513
+#. xgettext: This is the description of the SWITCHVT_NEXT command.
+#: Programs/cmds.auto.h:585
 msgid "switch to the next virtual terminal"
 msgstr "切換到下一個虛擬終端機"
 
-#: Programs/cmds.auto.h:981
+#. xgettext: This is the description of the GUI_AREA_PREV command.
+#: Programs/cmds.auto.h:1126
 msgid "switch to the previous screen area"
 msgstr "切換到上一個畫面"
 
-#: Programs/cmds.auto.h:507
+#. xgettext: This is the description of the SWITCHVT_PREV command.
+#: Programs/cmds.auto.h:578
 msgid "switch to the previous virtual terminal"
 msgstr "切換到上一個虛擬終端機"
 
@@ -3518,31 +3865,34 @@ msgstr "切換到上一個虛擬終端機"
 msgid "switched to unprivileged user"
 msgstr "切換到未授權使用者"
 
-#: Programs/cmds.auto.h:1294
+#. xgettext: This is the description of the KEY_TAB command.
+#: Programs/cmds.auto.h:1519
 msgid "tab key"
 msgstr "tab 鍵"
 
-#: Programs/config.c:302 Programs/config.c:309
+#: Programs/config.c:300 Programs/config.c:307
 msgid "text"
 msgstr "文字"
 
-#: Programs/msgtest.c:47
+#: Programs/msgtest.c:45
 msgid "the locale directory containing the translations"
 msgstr "含有翻譯的語言目錄"
 
-#: Programs/msgtest.c:54
+#: Programs/msgtest.c:52
 msgid "the locale in which to look up a translation"
 msgstr "查詢翻譯的語言"
 
-#: Programs/msgtest.c:61
+#: Programs/msgtest.c:59
 msgid "the name of the domain containing the translations"
 msgstr "含有翻譯的種類名稱"
 
-#: Programs/cmds.auto.h:1245
+#. xgettext: This is the description of the PASSDOTS command.
+#: Programs/cmds.auto.h:1463
 msgid "type braille dots"
 msgstr "輸入點字點"
 
-#: Programs/cmds.auto.h:1237
+#. xgettext: This is the description of the PASSCHAR command.
+#: Programs/cmds.auto.h:1454
 msgid "type unicode character"
 msgstr "輸入 unicode 字元"
 
@@ -3566,7 +3916,7 @@ msgstr "未知的命令"
 msgid "unknown configuration directive"
 msgstr "未知的設定敘述"
 
-#: Programs/config.c:737
+#: Programs/config.c:735
 msgid "unknown log level or category"
 msgstr "未知的記錄等級或分類"
 
@@ -3579,7 +3929,7 @@ msgstr "未知的選向"
 msgid "unsupported parameter"
 msgstr "不支援的參數"
 
-#: Programs/spk.c:172
+#: Programs/spk.c:180
 msgid "volume"
 msgstr "音量"
 
@@ -3592,7 +3942,7 @@ msgstr "白"
 msgid "working directory changed"
 msgstr "工作目錄變更"
 
-#: Programs/msgtest.c:67
+#: Programs/msgtest.c:65
 msgid "write the translations using UTF-8"
 msgstr "用 UTF-8 撰寫翻譯"
 
@@ -3687,14 +4037,151 @@ msgstr "xbrlapi: 視窗 %#010lx 變更為沒有名稱\n"
 msgid "yellow"
 msgstr "黃"
 
+#~ msgid "6-Dot Computer"
+#~ msgstr "六點電腦點字"
+
+#~ msgid "6-Dot Contracted"
+#~ msgstr "六點縮寫點字"
+
+#~ msgid "8-Dot Computer"
+#~ msgstr "八點電腦點字"
+
+#~ msgid "8-Dot Contracted"
+#~ msgstr "八點縮寫點字"
+
+#~ msgid "Alphabetic Braille Window Coordinates"
+#~ msgstr "字母點字視窗座標"
+
+#~ msgid "Alphabetic Screen Cursor Coordinates"
+#~ msgstr "字母游標位置"
+
+#~ msgid "Alto Sax"
+#~ msgstr "中音薩克斯風"
+
+#~ msgid "April"
+#~ msgstr "四月"
+
+#~ msgid "Attributes Invisible Time"
+#~ msgstr "屬性隱藏時間"
+
+#~ msgid "Attributes Visible Time"
+#~ msgstr "屬性顯示時間"
+
+#~ msgid "August"
+#~ msgstr "八月"
+
+#~ msgid "Baritone Sax"
+#~ msgstr "低音薩克斯風"
+
+#~ msgid "Braille Window Column"
+#~ msgstr "點字視窗欄位"
+
+#~ msgid "Braille Window Coordinates"
+#~ msgstr "點字視窗座標"
+
+#~ msgid "Braille Window Row"
+#~ msgstr "點字視窗行"
+
+#~ msgid "Capitals Invisible Time"
+#~ msgstr "大寫隱藏時間"
+
+#~ msgid "Capitals Visible Time"
+#~ msgstr "大寫顯示時間"
+
+#~ msgid "Clavi"
+#~ msgstr "大鍵琴"
+
+#~ msgid "December"
+#~ msgstr "十二月"
+
+#~ msgid "February"
+#~ msgstr "二月"
+
+#~ msgid "January"
+#~ msgstr "一月"
+
+#~ msgid "July"
+#~ msgstr "七月"
+
+#~ msgid "June"
+#~ msgstr "六月"
+
+#~ msgid "March"
+#~ msgstr "三月"
+
+#~ msgid "May"
+#~ msgstr "五嶽"
+
+#~ msgid "November"
+#~ msgstr "十一月"
+
+#~ msgid "October"
+#~ msgstr "十月"
+
+#~ msgid "Path to directory which contains message translations."
+#~ msgstr "包含可升級檔案的目錄路徑"
+
+#~ msgid "Screen Cursor Column"
+#~ msgstr "螢幕游標欄位"
+
+#~ msgid "Screen Cursor Coordinates"
+#~ msgstr "螢幕游標座標"
+
+#~ msgid "Screen Cursor Invisible Time"
+#~ msgstr "螢幕游標隱藏時間"
+
+#~ msgid "Screen Cursor Row"
+#~ msgstr "螢幕游標行"
+
+#~ msgid "Screen Cursor Visible Time"
+#~ msgstr "螢幕游標顯示時間"
+
+#~ msgid "Screen Cursor and Braille Window Column"
+#~ msgstr "螢幕游標與點字視窗欄位"
+
+#~ msgid "Screen Cursor and Braille Window Row"
+#~ msgstr "螢幕游標與點字視窗行"
+
+#~ msgid "September"
+#~ msgstr "九月"
+
+#~ msgid "Soprano Sax"
+#~ msgstr "高音薩克斯風"
+
+#~ msgid "Speech Cursor Invisible Time"
+#~ msgstr "語音游標隱藏時間"
+
+#~ msgid "Speech Cursor Visible Time"
+#~ msgstr "語音游標顯示時間"
+
+#~ msgid "Tenor Sax"
+#~ msgstr "中音薩克斯風"
+
+#~ msgid "blink"
+#~ msgstr "跳動"
+
+#~ msgid "list all of the translations (the default)"
+#~ msgstr "列出所有翻譯（預設）"
+
+#~ msgid "percentage"
+#~ msgstr "百分比"
+
+#~ msgid "second"
+#~ msgid_plural "seconds"
+#~ msgstr[0] "秒"
+#~ msgstr[1] "秒"
+
+#~ msgid "show the message count"
+#~ msgstr "顯示訊息數量"
+
+#~ msgid "show the translation metadata"
+#~ msgstr "顯示翻譯原始資料"
+
 #~ msgid "6-Dot Computer Braille"
 #~ msgstr "六點電腦點字"
 
 #~ msgid "8-Dot Computer Braille"
 #~ msgstr "八點電腦點字"
-
-#~ msgid "Contracted Braille"
-#~ msgstr "縮寫點字"
 
 #~ msgid "Literary Braille"
 #~ msgstr "書面點字"
