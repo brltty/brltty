@@ -1113,6 +1113,57 @@ makePreferencesMenu (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {
+    SUBMENU(autospeakSubmenu, rootMenu, strtext("Autospeak Options"));
+
+    {
+      NAME(strtext("Autospeak"));
+      ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeak, &itemName));
+    }
+
+    {
+      NAME(strtext("Speak Selected Line"));
+      ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeakSelectedLine, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
+      NAME(strtext("Speak Selected Character"));
+      ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeakSelectedCharacter, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
+      NAME(strtext("Speak Inserted Characters"));
+      ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeakInsertedCharacters, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
+      NAME(strtext("Speak Deleted Characters"));
+      ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeakDeletedCharacters, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
+      NAME(strtext("Speak Replaced Characters"));
+      ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeakReplacedCharacters, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
+      NAME(strtext("Speak Completed Words"));
+      ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeakCompletedWords, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
+      NAME(strtext("Speak Line Indent"));
+      ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeakLineIndent, &itemName));
+      TEST(Autospeak);
+    }
+  }
+
+  {
     SUBMENU(speechSubmenu, rootMenu, strtext("Speech Options"));
 
     {
@@ -1180,53 +1231,6 @@ makePreferencesMenu (void) {
 
       NAME(strtext("Say Line Mode"));
       ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.sayLineMode, &itemName, strings));
-    }
-
-    {
-      NAME(strtext("Autospeak"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeak, &itemName));
-    }
-
-    {
-      NAME(strtext("Speak Selected Line"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakSelectedLine, &itemName));
-      TEST(Autospeak);
-    }
-
-    {
-      NAME(strtext("Speak Selected Character"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakSelectedCharacter, &itemName));
-      TEST(Autospeak);
-    }
-
-    {
-      NAME(strtext("Speak Inserted Characters"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakInsertedCharacters, &itemName));
-      TEST(Autospeak);
-    }
-
-    {
-      NAME(strtext("Speak Deleted Characters"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakDeletedCharacters, &itemName));
-      TEST(Autospeak);
-    }
-
-    {
-      NAME(strtext("Speak Replaced Characters"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakReplacedCharacters, &itemName));
-      TEST(Autospeak);
-    }
-
-    {
-      NAME(strtext("Speak Completed Words"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakCompletedWords, &itemName));
-      TEST(Autospeak);
-    }
-
-    {
-      NAME(strtext("Speak Line Indent"));
-      ITEM(newBooleanMenuItem(speechSubmenu, &prefs.autospeakLineIndent, &itemName));
-      TEST(Autospeak);
     }
 
     {
