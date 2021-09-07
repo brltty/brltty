@@ -259,11 +259,11 @@ msgstr "Parole automatique"
 
 #: Programs/menu_prefs.c:1116
 msgid "Autospeak Options"
-msgstr ""
+msgstr "Options pour l'énonciation automatique"
 
 #: Programs/config.c:335
 msgid "Autospeak Threshold"
-msgstr ""
+msgstr "Seuil d'énonciation automatique"
 
 #: Programs/config.c:2012
 msgid "BRLTTY stopped"
@@ -1064,7 +1064,7 @@ msgstr "Enregistre sur l'erreur standard plutôt que sur le journal du système.
 #: Programs/config.c:752
 #, c-format
 msgid "Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)."
-msgstr ""
+msgstr "Un niveau de journalisation (%s ou une valeur parmi {%s}) et/ou des atégories de journalisation à activer (n'importe quelle combinaison de {%s}, chacune éventuellement préfixée par %s pour la désactiver)."
 
 #: Programs/menu_prefs.c:978
 msgid "Long Press Time"
@@ -1151,7 +1151,7 @@ msgstr "Minimum"
 #: Programs/config.c:682
 #, c-format
 msgid "Minimum screen content quality to autospeak (one of {%s})."
-msgstr ""
+msgstr "Le niveau minimal de qualité du contenu de l'écran à partir duquel activer l'énonciation automatique (une valeur parmi {%s}).""
 
 #: Programs/menu_prefs.c:1313
 msgid "Month Day Year"
@@ -3377,7 +3377,7 @@ msgstr "Changement d'état d'alimentation"
 
 #: Programs/config.c:680
 msgid "quality"
-msgstr ""
+msgstr "qualité"
 
 #: Programs/spk.c:206
 msgid "rate"
@@ -3945,7 +3945,7 @@ msgstr "Option non reconnue"
 
 #: Programs/config.c:327
 msgid "unknown screen content quality"
-msgstr ""
+msgstr "qualité du contenu de l'écran inconnue"
 
 #: Programs/parse.c:501
 msgid "unsupported parameter"
