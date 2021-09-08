@@ -211,7 +211,7 @@ find . -print |
          else
             case "${extension}"
             in
-               txt | html | htm | cfg | [tack]t[bi] | h) convertTextFile "${path}";;
+               txt | html | htm | cfg | [tcak]t[bi] | h) convertTextFile "${path}";;
                exe | pdf | doc);;
                *) logMessage warning "unexpected file extension: ${handle}";;
             esac

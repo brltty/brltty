@@ -9,8 +9,8 @@ task brlttyAddTables (type: Copy) {
   from brltty.native.tablesDirectory
   into tablesDirectory
   include 'Text/**/*.tt?'
-  include 'Attributes/**/*.at?'
   include 'Contraction/**/*.ct?'
+  include 'Attributes/**/*.at?'
   include 'Keyboard/**/*.kt?'
   include 'Input/**/*.kt?'
 }
