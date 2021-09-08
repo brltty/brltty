@@ -31,11 +31,11 @@ map Dot6 DOT6
 map Dot7 DOT7
 map Dot8 DOT8
 map Space SPACE
-map Back META
-map Advance CONTROL
+map ThumbLeft META
+map ThumbRight CONTROL
 
 bind Space+RoutingKey KEY_FUNCTION
-bind Back+Space+RoutingKey KEY_FUNCTION+meta
-bind Advance+Space+RoutingKey KEY_FUNCTION+control
-bind Back+Advance+Space+RoutingKey KEY_FUNCTION+meta+control
+bind ThumbLeft+Space+RoutingKey KEY_FUNCTION+meta
+bind ThumbRight+Space+RoutingKey KEY_FUNCTION+control
+bind ThumbLeft+ThumbRight+Space+RoutingKey KEY_FUNCTION+meta+control
 

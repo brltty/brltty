@@ -63,10 +63,10 @@ BEGIN_KEY_NAME_TABLE(joystick)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(thumb)
-  KEY_NAME_ENTRY(HW_KEY_Thumb1, "Previous"),
-  KEY_NAME_ENTRY(HW_KEY_Thumb2, "Back"),
-  KEY_NAME_ENTRY(HW_KEY_Thumb3, "Advance"),
-  KEY_NAME_ENTRY(HW_KEY_Thumb4, "Next"),
+  KEY_NAME_ENTRY(HW_KEY_ThumbPrevious, "ThumbPrevious"),
+  KEY_NAME_ENTRY(HW_KEY_ThumbLeft, "ThumbLeft"),
+  KEY_NAME_ENTRY(HW_KEY_ThumbRight, "ThumbRight"),
+  KEY_NAME_ENTRY(HW_KEY_ThumbNext, "ThumbNext"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(BI14)
