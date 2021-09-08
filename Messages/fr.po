@@ -1151,7 +1151,7 @@ msgstr "Minimum"
 #: Programs/config.c:682
 #, c-format
 msgid "Minimum screen content quality to autospeak (one of {%s})."
-msgstr "Le niveau minimal de qualité du contenu de l'écran à partir duquel activer l'énonciation automatique (une valeur parmi {%s}).""
+msgstr "Le niveau minimal de qualité du contenu de l'écran à partir duquel activer l'énonciation automatique (une valeur parmi {%s})."
 
 #: Programs/menu_prefs.c:1313
 msgid "Month Day Year"
