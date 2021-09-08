@@ -460,7 +460,7 @@ static const ModelEntry modelTable[] = {
     .statusCells = 0,
     .keyTableDefinition = &KEY_TABLE_DEFINITION(easy),
     .interpretByte = interpretByte_key,
-    .writeCells = writeCells_statusAndText
+    .writeCells = writeCells_Evolution
   },
 
   { .identifier = HT_MODEL_ActiveBraille,
