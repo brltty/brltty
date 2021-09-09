@@ -17,10 +17,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/../brltty-prologue.sh"
+. "`dirname "${0}"`/../prologue.sh"
 parseProgramArguments "${@}"
 
 set -e
+setSourceRoot
+cd "${BRLTTY_SOURCE_ROOT}/${documentsSubdirectory}"
 
 declare -A lists
 readonly newLine=$'\n'
@@ -35,7 +37,7 @@ writeList() {
 while read list name description
 do
    lists["${list}"]+="\"${name}\",\"${description}\"${newLine}"
-done < <(sed <"${programDirectory}/brltty.conf.in" -n -r -e 's/^#(\w+-(driver|table))\s+((\w|-)+)\s*#\s*(.*\S)\s*/\1 \3 \5/p')
+done < <(sed <"brltty.conf.in" -n -r -e 's/^#(\w+-(driver|table))\s+((\w|-)+)\s*#\s*(.*\S)\s*/\1 \3 \5/p')
 
 fileUpdated=false
 set -- "${!lists[@]}"

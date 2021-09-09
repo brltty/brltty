@@ -37,5 +37,8 @@ setBuildRoot() {
 }
 
 readonly documentsSubdirectory="Documents"
+readonly driversSubdirectory="Drivers"
 readonly programsSubdirectory="Programs"
+readonly tablesSubdirectory="Tables"
+readonly toolsSubdirectory="Tools"
 
