@@ -310,7 +310,7 @@ Technical notes on this build:
 "
 
 cd "${buildRoot}"
-installFile "Documents/brltty.conf" "etc/brltty.conf"
+installFile "Documents/brltty.conf" "etc/"
 installFile "Drivers/BrlAPI/WindowEyes/webrloem109.dll" "WindowEyes/"
 
 set -- Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.*.exe
@@ -329,6 +329,7 @@ installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
 installFile "README" "${documentDirectory}/BRLTTY.txt"
 installFile "Drivers/Braille/XWindow/UBraille.ttf" "Fonts/"
 installFile "Drivers/BrlAPI/WindowEyes/README" "${documentDirectory}/WindowEyes.txt"
+installFiles "etc/" Documents/*.csv
 
 for document in ChangeLog HISTORY TODO
 do
@@ -493,7 +494,7 @@ then
             then
                case "${extension}"
                in
-                  bat | cat | conf | h | htm | html | inf | nsi | pc | policy | sh | txt | xml | [tcak]t[bi])
+                  bat | cat | conf | csv | h | htm | html | inf | nsi | pc | policy | sh | txt | xml | [tcak]t[bi])
                      "${unix2dosPath}" -q -o "${path}"
                      ;;
 
