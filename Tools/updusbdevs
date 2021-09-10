@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-source [file join [file dirname [info script]] "prologue.tcl"]
+source [file join [file dirname [info script]] .. prologue.tcl]
 
 proc logDriverWarning {message} {
    logMessage warning $message
@@ -714,6 +714,9 @@ if {[llength $positionalArguments] == 0} {
 if {[llength $positionalArguments] == 0} {
    syntaxError "files not specified"
 }
+
+setSourceRoot
+cd $::env(BRLTTY_SOURCE_ROOT)
 
 set schemes [getSchemes]
 parseFileArguments files $schemes $positionalArguments

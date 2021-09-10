@@ -45,7 +45,7 @@ install-rules: install-rules-directory
 install-rules-all: install-wrapper install-rules
 
 install-rules-no-generic: install-rules-all
-	$(SRC_TOP)updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE)
+	$(SRC_TOP)Tools/updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE)
 
 install: install-rules-$(UDEV_RULES_TYPE)
 
