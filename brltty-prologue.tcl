@@ -136,6 +136,67 @@ proc semanticError {{message ""}} {
    exit 3
 }
 
+proc readFile {file} {
+   set stream [open $file {RDONLY}]
+
+   try {
+      return [read $stream]
+   } finally {
+      close $stream
+   }
+}
+
+proc writeFile {file data} {
+   set stream [open $file {WRONLY CREAT TRUNC}]
+
+   try {
+      puts -nonewline $stream $data
+   } finally {
+      close $stream
+   }
+}
+
+proc replaceFile {file data} {
+   set components [file split $file]
+
+   if {[llength $components] == 0} {
+      return -code error "file argument is empty"
+   }
+
+   set name ".[lindex $components end]"
+   set path "[eval file join [lreplace $components end end] $name]"
+
+   file delete [set oldFile "$path.old"]
+   file delete [set newFile "$path.new"]
+
+   writeFile $newFile $data
+
+   if {[file exists $file]} {
+      file rename $file $oldFile
+   }
+
+   file rename $newFile $file
+   file delete $oldFile
+}
+
+proc forEachLine {lineVariable file code} {
+   upvar 1 $lineVariable line
+
+   try {
+      set stream [open $file {RDONLY}]
+
+      try {
+         while {[gets $stream line] >= 0} {
+            uplevel 1 $code
+         }
+      } finally {
+         close $stream
+      }
+   } trap {POSIX} {problem} {
+      semanticError $problem
+   }
+}
+
 proc testContainingDirectory {directory names} {
    foreach name $names {
       if {![file exists [file join $directory $name]]} {

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env tclsh
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -17,54 +17,74 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/../prologue.sh"
-parseProgramArguments "${@}"
+source [file join [file dirname [info script]] .. prologue.tcl]
 
-set -e
-setSourceRoot
-cd "${BRLTTY_SOURCE_ROOT}/${documentsSubdirectory}"
-
-declare -A lists
-readonly newLine=$'\n'
-
-writeList() {
-   local list="${1}"
-   local file="${2}"
-
-   echo >"${file}" -n -E "${lists["${list}"]}"
+set optionDefinitions {
 }
 
-while read list name description
-do
-   lists["${list}"]+="\"${name}\",\"${description}\"${newLine}"
-done < <(sed <"brltty.conf.in" -n -r -e 's/^#(\w+-(driver|table))\s+((\w|-)+)\s*#\s*(.*\S)\s*/\1 \3 \5/p')
+processProgramArguments optionValues $optionDefinitions
 
-fileUpdated=false
-set -- "${!lists[@]}"
+proc makeLists {} {
+   set file "brltty.conf.in"
+   set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
+   set lists [dict create]
 
-for list
-do
-   file="${list}.csv"
+   forEachLine line $file {
+      if {[regexp $pattern $line x type name description]} {
+         dict lappend lists $type [list $name $description]
+      }
+   }
 
-   if [ -f "${file}" ]
-   then
-      cmp -s "${file}" <(echo -n "${lists["${list}"]}") && continue
-      logMessage task "updating ${file}"
-      fileUpdated=true
+   return $lists
+}
 
-      oldFile="${file}.old"
-      newFile="${file}.new"
+proc quoteColumn {text} {
+   return "\"[regsub -all {(")} $text {\1\1}]\""
+}
 
-      writeList "${list}" "${newFile}"
-      mv "${file}" "${oldFile}"
-      mv "${newFile}" "${file}"
-      rm "${oldFile}"
-   else
-      logMessage task "creating ${file}"
-      fileUpdated=true
-      writeList "${list}" "${file}"
-   fi
-done
+proc makeData {rows} {
+   set data ""
 
-"${fileUpdated}" || logMessage task "no files updated"
+   foreach row $rows {
+      append data "[join [lmap column $row {quoteColumn $column}] ,]\n"
+   }
+
+   return $data
+}
+
+proc updateFile {name rows} {
+   set data [makeData $rows]
+
+   if {![file exists $name]} {
+      logMessage warning "creating file: $name"
+      writeFile $name $data
+   } elseif {![string equal $data [readFile $name]]} {
+      logMessage warning "updating file: $name"
+      replaceFile $name $data
+   } else {
+      return 0
+   }
+
+   return 1
+}
+
+proc updateFiles {lists} {
+   set updated 0
+
+   foreach type [dict keys $lists] {
+      if {[updateFile "$type.csv" [dict get $lists $type]]} {
+         set updated 1
+      }
+   }
+
+   return $updated
+}
+
+setSourceRoot
+cd [file join $env(BRLTTY_SOURCE_ROOT) Documents]
+
+if {![updateFiles [makeLists]]} {
+   logMessage task "no files updated"
+}
+
 exit 0
