@@ -266,7 +266,7 @@ proc makeDeviceTable {drivers} {
 
                if {[dict exists $deviceTable vendors $vendor products $product]} {
                   set devices [dict get $deviceTable vendors $vendor products $product devices]
-                  logMessage task "device specified more than once: $identifier: [formatDeviceDescription [lindex $devices 0]] & [formatDeviceDescription $device]"
+                  logMessage step "device specified more than once: $identifier: [formatDeviceDescription [lindex $devices 0]] & [formatDeviceDescription $device]"
                } else {
                   set devices [list]
                   dict set deviceTable vendors $vendor products $product generic [dict exists $genericDevices $identifier]
@@ -276,7 +276,7 @@ proc makeDeviceTable {drivers} {
                dict set deviceTable vendors $vendor products $product devices $devices
 
                if {[dict get $deviceTable vendors $vendor products $product generic]} {
-                  logMessage task "generic device identifier: $identifier: [formatDeviceDescription $device]"
+                  logMessage step "generic device identifier: $identifier: [formatDeviceDescription $device]"
                }
             }
          }
@@ -516,163 +516,134 @@ proc makeLines {linesArray schemes deviceTable} {
    }
 }
 
-proc readFile {linesVariable file} {
-   upvar 1 $linesVariable lines
-   set lines [list]
-
-   if {[catch [list open $file {RDONLY}] stream] == 0} {
-      while {[gets $stream line] >= 0} {
-         lappend lines $line
-      }
-
-      close $stream
-      return 1
-   } else {
-      writeProgramMessage $stream
-   }
-
-   return 0
-}
-
-proc writeFile {lines file} {
-   if {[catch [list open $file {WRONLY CREAT TRUNC}] stream] == 0} {
-      puts $stream [join $lines \n]
-      close $stream
-      return 1
-   } else {
-      writeProgramMessage $stream
-   }
-
-   return 0
-}
-
 proc updateFile {file newLines} {
    upvar #0 optionValues(test) testMode
 
-   if {[readFile lines $file]} {
-      set markerSuffix "_USB_DEVICES"
-      set beginMarker "BEGIN$markerSuffix"
-      set endMarker "END$markerSuffix"
+   set lines [readLines $file]
+   set markerSuffix "_USB_DEVICES"
+   set beginMarker "BEGIN$markerSuffix"
+   set endMarker "END$markerSuffix"
 
-      set ranges [list]
-      set range [list]
-      set index 0
+   set ranges [list]
+   set range [list]
+   set index 0
 
-      foreach line $lines {
-         set location "$file\[[expr {$index + 1}]\]"
+   foreach line $lines {
+      set location "$file\[[expr {$index + 1}]\]"
 
-         if {[regexp "\\s${beginMarker}(?:\\s+(.*?)\\s*)?\$" $line x arguments]} {
-            if {[llength $range] > 0} {
-               writeProgramMessage "nested begin marker: $location"
-               return 0
-            }
-
-            lappend range $index [lindex [regexp -inline -- {^\s*} $line] 0] [regexp -inline -all {\S+} $arguments]
-         } elseif {[regexp "\\s${endMarker}(?:\\s+.*)?\$" $line]} {
-            if {[llength $range] == 0} {
-               writeProgramMessage "missing begin marker: $location"
-               return 0
-            }
-
-            lappend range $index
-            lappend ranges $range
-            set range [list]
+      if {[regexp "\\s${beginMarker}(?:\\s+(.*?)\\s*)?\$" $line x arguments]} {
+         if {[llength $range] > 0} {
+            writeProgramMessage "nested begin marker: $location"
+            return 0
          }
 
-         incr index
+         lappend range $index [lindex [regexp -inline -- {^\s*} $line] 0] [regexp -inline -all {\S+} $arguments]
+      } elseif {[regexp "\\s${endMarker}(?:\\s+.*)?\$" $line]} {
+         if {[llength $range] == 0} {
+            writeProgramMessage "missing begin marker: $location"
+            return 0
+         }
+
+         lappend range $index
+         lappend ranges $range
+         set range [list]
       }
 
-      if {[llength $range] > 0} {
-         writeProgramMessage "missing end marker: $file\[[lindex $range 0]\]"
-         return 0
-      }
+      incr index
+   }
 
-      if {[llength $ranges] == 0} {
-         writeProgramMessage "no region(s) found: $file"
-         return 0
-      }
+   if {[llength $range] > 0} {
+      writeProgramMessage "missing end marker: $file\[[lindex $range 0]\]"
+      return 0
+   }
 
-      set hasChanged 0
+   if {[llength $ranges] == 0} {
+      writeProgramMessage "no region(s) found: $file"
+      return 0
+   }
 
-      foreach range [lreverse $ranges] {
-         set first [expr {[lindex $range 0] + 1}]
-         set prefix [lindex $range 1]
-         set argumentCount [llength [set argumentList [lindex $range 2]]]
-         set last [expr {[lindex $range 3] - 1}]
-         set count [expr {$last - $first + 1}]
+   set hasChanged 0
 
-         set replacement [list]
-         foreach line $newLines {
-            foreach match [lreverse [regexp -inline -all -indices {\$[1-9][0-9]*} $line]] {
-               set from [lindex $match 0]
-               set to [lindex $match 1]
-               set argumentIndex [string range $line $from+1 $to]
+   foreach range [lreverse $ranges] {
+      set first [expr {[lindex $range 0] + 1}]
+      set prefix [lindex $range 1]
+      set argumentCount [llength [set argumentList [lindex $range 2]]]
+      set last [expr {[lindex $range 3] - 1}]
+      set count [expr {$last - $first + 1}]
 
-               if {[incr argumentIndex -1] < $argumentCount} {
-                  set line [string replace $line $from $to [lindex $argumentList $argumentIndex]]
-               }
-            }
+      set replacement [list]
+      foreach line $newLines {
+         foreach match [lreverse [regexp -inline -all -indices {\$[1-9][0-9]*} $line]] {
+            set from [lindex $match 0]
+            set to [lindex $match 1]
+            set argumentIndex [string range $line $from+1 $to]
 
-            if {[string length $line] > 0} {
-               set line "$prefix$line"
-            }
-
-            lappend replacement "$line"
-         }
-
-         if {!$hasChanged} {
-            if {[llength $newLines] != $count} {
-               set hasChanged 1
-            } else {
-               set index 0
-
-               while {$index < $count} {
-                  if {[string compare [lindex $lines $first+$index] [lindex $replacement $index]] != 0} {
-                     set hasChanged 1
-                     break
-                  }
-
-                  incr index
-               }
+            if {[incr argumentIndex -1] < $argumentCount} {
+               set line [string replace $line $from $to [lindex $argumentList $argumentIndex]]
             }
          }
 
-         if {$hasChanged} {
-            if {$count == 0} {
-               set lines [eval [list linsert $lines $first] $replacement]
-            } else {
-               set lines [eval [list lreplace $lines $first $last] $replacement]
-            }
+         if {[string length $line] > 0} {
+            set line "$prefix$line"
          }
+
+         lappend replacement "$line"
       }
 
       if {!$hasChanged} {
-         return 1
+         if {[llength $newLines] != $count} {
+            set hasChanged 1
+         } else {
+            set index 0
+
+            while {$index < $count} {
+               if {[string compare [lindex $lines $first+$index] [lindex $replacement $index]] != 0} {
+                  set hasChanged 1
+                  break
+               }
+
+               incr index
+            }
+         }
       }
 
-      if {$testMode} {
-         writeProgramMessage "test mode - file not updated: $file"
-         return 1
-      }
-
-      if {[writeFile $lines $file]} {
-         logMessage notice "file updated: $file"
-         return 1
+      if {$hasChanged} {
+         if {$count == 0} {
+            set lines [eval [list linsert $lines $first] $replacement]
+         } else {
+            set lines [eval [list lreplace $lines $first $last] $replacement]
+         }
       }
    }
 
-   return 0
+   if {!$hasChanged} {
+      return 0
+   }
+
+   if {$testMode} {
+      writeProgramMessage "test mode - file not updated: $file"
+   } else {
+      logMessage notice "updating file: $file"
+      replaceFile $file "[join $lines \n]\n"
+   }
+
+   return 1
 }
 
 proc updateFiles {filesArray linesArray} {
    upvar 1 $filesArray files
    upvar 1 $linesArray lines
+   set updated 0
 
    foreach scheme [array names files] {
       foreach file $files($scheme) {
-         updateFile $file $lines($scheme)
+         if {[updateFile $file $lines($scheme)]} {
+            set updated 1
+         }
       }
    }
+
+   return $updated
 }
 
 set genericDevices [makeGenericDeviceTable {
@@ -721,5 +692,9 @@ cd $::env(BRLTTY_SOURCE_ROOT)
 set schemes [getSchemes]
 parseFileArguments files $schemes $positionalArguments
 makeLines lines [array names files] [makeDeviceTable [parseDrivers]]
-updateFiles files lines
+
+if {![updateFiles files lines]} {
+   logMessage task "no files updated"
+}
+
 exit 0

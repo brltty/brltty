@@ -166,12 +166,14 @@ proc replaceFile {file data} {
    set name ".[lindex $components end]"
    set path "[eval file join [lreplace $components end end] $name]"
 
-   file delete [set oldFile "$path.old"]
-   file delete [set newFile "$path.new"]
+   set oldFile "$path.old"
+   set newFile "$path.new"
 
+   file delete $newFile
    writeFile $newFile $data
 
    if {[file exists $file]} {
+      file delete $oldFile
       file rename $file $oldFile
    }
 
@@ -181,20 +183,25 @@ proc replaceFile {file data} {
 
 proc forEachLine {lineVariable file code} {
    upvar 1 $lineVariable line
+   set stream [open $file {RDONLY}]
 
    try {
-      set stream [open $file {RDONLY}]
-
-      try {
-         while {[gets $stream line] >= 0} {
-            uplevel 1 $code
-         }
-      } finally {
-         close $stream
+      while {[gets $stream line] >= 0} {
+         uplevel 1 $code
       }
-   } trap {POSIX} {problem} {
-      semanticError $problem
+   } finally {
+      close $stream
    }
+}
+
+proc readLines {file} {
+   set lines [list]
+
+   forEachLine line $file {
+      lappend lines $line
+   }
+
+   return $lines
 }
 
 proc testContainingDirectory {directory names} {

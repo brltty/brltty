@@ -20,12 +20,12 @@
 source [file join [file dirname [info script]] .. prologue.tcl]
 
 set optionDefinitions {
+   {test      flag "don't update the files"}
 }
 
 processProgramArguments optionValues $optionDefinitions
 
-proc makeLists {} {
-   set file "brltty.conf.in"
+proc makeLists {file} {
    set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
    set lists [dict create]
 
@@ -53,14 +53,23 @@ proc makeData {rows} {
 }
 
 proc updateFile {name rows} {
+   upvar #0 optionValues(test) testMode
    set data [makeData $rows]
 
    if {![file exists $name]} {
-      logMessage warning "creating file: $name"
-      writeFile $name $data
+      if {$testMode} {
+         logMessage warning "test mode - file not created: $name"
+      } else {
+         logMessage warning "creating file: $name"
+         writeFile $name $data
+      }
    } elseif {![string equal $data [readFile $name]]} {
-      logMessage notice "updating file: $name"
-      replaceFile $name $data
+      if {$testMode} {
+         logMessage notice "test mode - file not updated: $name"
+      } else {
+         logMessage notice "updating file: $name"
+         replaceFile $name $data
+      }
    } else {
       return 0
    }
@@ -83,7 +92,7 @@ proc updateFiles {lists} {
 setSourceRoot
 cd [file join $env(BRLTTY_SOURCE_ROOT) Documents]
 
-if {![updateFiles [makeLists]]} {
+if {![updateFiles [makeLists "brltty.conf.in"]]} {
    logMessage task "no files updated"
 }
 
