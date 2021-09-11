@@ -714,9 +714,6 @@ BrailComm
 .B bd
 Braudi
 .TP 4
-.B bg
-B2G
-.TP 4
 .B bl
 BrailleLite
 .TP 4
@@ -834,17 +831,11 @@ TechniBraille Systems Inc.
 .B ts
 Telesensory Systems Inc.
 .TP 4
-.B tt
-TTY
-.TP 4
 .B vd
 VideoBraille
 .TP 4
 .B vo
 Voyager, Part232 (serial adapter), BraillePen/EasyLink
-.TP 4
-.B vr
-Virtual
 .TP 4
 .B vs
 VisioBraille
@@ -854,9 +845,6 @@ ViaVoice
 .TP 4
 .B xs
 ExternalSpeech
-.TP 4
-.B xw
-XWindow
 .PP
 A comma-delimited list of drivers may be specified.
 If this is done then autodetection is performed using each listed driver in sequence.

@@ -152,7 +152,6 @@ The following braille displays are supported:
 -  Albatross [46/80]
 -  Alva [ABT(3nn), Delphi(4nn), Satellite(5nn), Braille System 40,
          Braille Controller 640/680, Easy Link 12]
--  B2G
 -  Baum [BrailleConnect 12/24/32/40/64/80, Brailliant 24/32/40/64/80, Conny 12,
          DM80 Plus, EcoVario 24/32/40/64/80, Inka, NLS eReader Zoomax,
          Orbit 20, PocketVario 24, Pronto! V3 18/40, Pronto! V4 18/40,
@@ -198,12 +197,9 @@ The following braille displays are supported:
 -  Seika [3/4/5 (40), 80, Mini (16)]
 -  TechniBraille
 -  TSI [Navigator 20/40/80, PowerBraille 40/65/80]
--  TTY [terminfo]
 -  VideoBraille [40]
--  Virtual [TCP/Unix, client/server]
 -  VisioBraille [20/40]
 -  Voyager [44/70, Part232 (serial adapter), BraillePen/EasyLink]
--  XWindow [X11, Windows]
 
 The following speech synthesizers are supported:
 
