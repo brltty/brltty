@@ -115,13 +115,13 @@ proc writeProgramMessage {message} {
    }
 }
 
-makeEnumeration logLevels {detail step task notice warning error}
+makeEnumeration logLevels {error warning notice task step detail}
 set logLevel $logLevels(task)
 
 proc logMessage {level message} {
    global logLevels logLevel
 
-   if {$logLevels($level) >= $logLevel} {
+   if {$logLevels($level) <= $logLevel} {
       writeProgramMessage $message
    }
 }
@@ -134,6 +134,34 @@ proc syntaxError {{message ""}} {
 proc semanticError {{message ""}} {
    writeProgramMessage $message
    exit 3
+}
+
+proc toRelativePath {to {from .}} {
+   set variables {from to}
+
+   foreach variable $variables {
+      set $variable [file split [file normalize [set $variable]]]
+   }
+
+   set count [expr {min([llength $from], [llength $to])}]
+
+   while {$count > 0} {
+      if {![string equal [lindex $from 0] [lindex $to 0]]} {
+         break
+      }
+
+      foreach variable $variables {
+         set $variable [lreplace [set $variable] 0 0]
+      }
+
+      incr count -1
+   }
+
+   if {[llength [set to [concat [lrepeat [llength $from] ..] $to]]] == 0} {
+      set to {.}
+   }
+
+   return [eval file join $to]
 }
 
 proc readFile {file} {
@@ -181,13 +209,13 @@ proc replaceFile {file data} {
    file delete $oldFile
 }
 
-proc forEachLine {lineVariable file code} {
+proc forEachLine {lineVariable file body} {
    upvar 1 $lineVariable line
    set stream [open $file {RDONLY}]
 
    try {
       while {[gets $stream line] >= 0} {
-         uplevel 1 $code
+         uplevel 1 $body
       }
    } finally {
       close $stream
@@ -487,8 +515,8 @@ proc processProgramArguments {
    }
 
    global logLevel
-   incr logLevel $optionValues(quiet)
-   incr logLevel -$optionValues(verbose)
+   incr logLevel $optionValues(verbose)
+   incr logLevel -$optionValues(quiet)
 
    if {$optionValues(help)} {
       showCommandUsage [getProgramName] $options $positionalArgumentsUsage
