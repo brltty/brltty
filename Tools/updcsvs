@@ -59,7 +59,7 @@ proc updateFile {name rows} {
       logMessage warning "creating file: $name"
       writeFile $name $data
    } elseif {![string equal $data [readFile $name]]} {
-      logMessage warning "updating file: $name"
+      logMessage notice "updating file: $name"
       replaceFile $name $data
    } else {
       return 0

@@ -656,7 +656,7 @@ proc updateFile {file newLines} {
       }
 
       if {[writeFile $lines $file]} {
-         logMessage warning "file updated: $file"
+         logMessage notice "file updated: $file"
          return 1
       }
    }
