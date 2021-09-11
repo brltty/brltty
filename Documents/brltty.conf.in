@@ -73,7 +73,7 @@
 #braille-driver	hd	# Hedo
 #braille-driver	hm	# HIMS
 #braille-driver	ht	# Handy Tech (Help Tech)
-#braille-driver	hw	# Humanware
+#braille-driver	hw	# Humanware, APH Chameleon, APH Mantis, NLS eReader
 #braille-driver	ic	# Inceptor (Innovision)
 #braille-driver	ir	# Iris
 #braille-driver	lb	# Libbraille
