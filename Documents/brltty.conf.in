@@ -60,36 +60,35 @@
 #braille-driver	ba	# BrlAPI
 #braille-driver	bc	# BrailComm
 #braille-driver	bd	# Braudi
-#braille-driver	bl	# Braille Lite
+#braille-driver	bl	# BrailleLite
 #braille-driver	bm	# Baum; Refreshabraille, Orbit, NLS eReader Zoomax, NBP B2G
-#braille-driver	bn	# Braille Note
+#braille-driver	bn	# BrailleNote
 #braille-driver	cb	# CombiBraille
 #braille-driver	ce	# Cebra
 #braille-driver	cn	# Canute
 #braille-driver	ec	# EcoBraille
 #braille-driver	eu	# EuroBraille
-#braille-driver	fa	# Frank Audiodata
-#braille-driver	fs	# Freedom Scientific (VFO, Vispero)
+#braille-driver	fa	# FrankAudiodata
+#braille-driver	fs	# FreedomScientific;; VFO, Vispero
 #braille-driver	hd	# Hedo
 #braille-driver	hm	# HIMS
-#braille-driver	ht	# Handy Tech (Help Tech)
-#braille-driver	hw	# Humanware; APH Chameleon, APH Mantis, NLS eReader
-#braille-driver	ic	# Inceptor (Innovision)
+#braille-driver	ht	# HandyTech;; HelpTech
+#braille-driver	hw	# HumanWare; APH Chameleon, APH Mantis, NLS eReader
+#braille-driver	ic	# Inceptor;; Innovision
 #braille-driver	ir	# Iris
 #braille-driver	lb	# Libbraille
-#braille-driver	lt	# Log Text
+#braille-driver	lt	# LogText
 #braille-driver	mb	# MultiBraille
 #braille-driver	md	# MDV
-#braille-driver	mm	# Braille Memo
+#braille-driver	mm	# BrailleMemo
 #braille-driver	mn	# MiniBraille
 #braille-driver	mt	# Metec
-#braille-driver	np	# Nine Point
+#braille-driver	np	# NinePoint
 #braille-driver	pg	# Pegasus
 #braille-driver	pm	# Papenmeier
 #braille-driver	sk	# Seika
 #braille-driver	tn	# TechniBraille
 #braille-driver	ts	# TSI
-#braille-driver	tt	# TTY
 #braille-driver	vd	# VideoBraille
 #braille-driver	vo	# Voyager; Braille Pen, Easy Link
 #braille-driver	vs	# VisioBraille

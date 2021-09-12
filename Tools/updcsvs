@@ -27,6 +27,17 @@ set optionDefinitions {
 processProgramArguments optionValues $optionDefinitions
 cd [file join $sourceRoot Documents]
 
+array set tableHeaders {
+   braille-driver {code name models aliases}
+   speech-driver {code name}
+   screen-driver {code name}
+
+   text-table {name title}
+   contraction-table {name title}
+   attributes-table {name description}
+   keyboard-table {name description}
+}
+
 proc makeLists {file} {
    set lists [dict create]
    set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
@@ -35,7 +46,7 @@ proc makeLists {file} {
       if {[regexp $pattern $line x type name description]} {
          set columns [list $name]
          eval lappend columns [lmap column [split $description ";"] {string trim $column}]
-         dict lappend lists $type $columns
+         dict lappend lists [string tolower $type] $columns
       }
    }
 
@@ -44,21 +55,21 @@ proc makeLists {file} {
 
 proc updateFile {name rows} {
    upvar #0 optionValues(test) testMode
-   set data [csvMakeTable $rows]
+   set table [csvMakeTable $rows]
 
    if {![file exists $name]} {
       if {$testMode} {
          logMessage warning "test mode - file not created: $name"
       } else {
          logMessage warning "creating file: $name"
-         writeFile $name $data
+         writeFile $name $table
       }
-   } elseif {![string equal $data [readFile $name]]} {
+   } elseif {![string equal $table [readFile $name]]} {
       if {$testMode} {
          logMessage notice "test mode - file not updated: $name"
       } else {
          logMessage notice "updating file: $name"
-         replaceFile $name $data
+         replaceFile $name $table
       }
    } else {
       return 0
@@ -68,10 +79,11 @@ proc updateFile {name rows} {
 }
 
 proc updateFiles {lists} {
+   global tableHeaders
    set updated 0
 
    foreach type [dict keys $lists] {
-      if {[updateFile "$type.csv" [dict get $lists $type]]} {
+      if {[updateFile "$type.csv" [linsert [dict get $lists $type] 0 $tableHeaders($type)]]} {
          set updated 1
       }
    }
