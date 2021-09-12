@@ -29,7 +29,7 @@ cd [file join $sourceRoot Documents]
 
 array set tableHeaders {
    braille-driver {code name others aliases}
-   speech-driver {code name}
+   speech-driver {code name comment aliases}
    screen-driver {code name usage}
 
    text-table {name description}
