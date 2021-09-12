@@ -686,9 +686,6 @@ if {[llength $positionalArguments] == 0} {
    syntaxError "files not specified"
 }
 
-setSourceRoot
-cd $::env(BRLTTY_SOURCE_ROOT)
-
 set schemes [getSchemes]
 parseFileArguments files $schemes $positionalArguments
 makeLines lines [array names files] [makeDeviceTable [parseDrivers]]
