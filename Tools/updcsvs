@@ -18,17 +18,18 @@
 ###############################################################################
 
 source [file join [file dirname [info script]] .. prologue.tcl]
-cd [file join $sourceRoot Documents]
+source [file join $scriptDirectory csv.tcl]
 
 set optionDefinitions {
    {test      flag "don't update the files"}
 }
 
 processProgramArguments optionValues $optionDefinitions
+cd [file join $sourceRoot Documents]
 
 proc makeLists {file} {
-   set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
    set lists [dict create]
+   set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
 
    forEachLine line $file {
       if {[regexp $pattern $line x type name description]} {
@@ -41,33 +42,9 @@ proc makeLists {file} {
    return $lists
 }
 
-proc csvQuoteText {text} {
-   return "\"[regsub -all {(")} $text {\1\1}]\""
-}
-
-proc csvMakeRow {columns} {
-   return [join [lmap text $columns {csvQuoteText $text}] ,]
-}
-
-proc makeData {rows} {
-   set width 0
-   foreach columns $rows {
-      if {[set count [llength $columns]] > $width} {
-         set width $count
-      }
-   }
-
-   set data ""
-   foreach columns $rows {
-      append data "[csvMakeRow [concat $columns [lrepeat [expr {$width - [llength $columns]}] ""]]]\n"
-   }
-
-   return $data
-}
-
 proc updateFile {name rows} {
    upvar #0 optionValues(test) testMode
-   set data [makeData $rows]
+   set data [csvMakeTable $rows]
 
    if {![file exists $name]} {
       if {$testMode} {
