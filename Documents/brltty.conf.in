@@ -61,7 +61,7 @@
 #braille-driver	bc	# BrailComm
 #braille-driver	bd	# Braudi
 #braille-driver	bl	# Braille Lite
-#braille-driver	bm	# Baum, Refreshabraille, Orbit, NLS eReader Zoomax, NBP B2G
+#braille-driver	bm	# Baum; Refreshabraille, Orbit, NLS eReader Zoomax, NBP B2G
 #braille-driver	bn	# Braille Note
 #braille-driver	cb	# CombiBraille
 #braille-driver	ce	# Cebra
@@ -73,7 +73,7 @@
 #braille-driver	hd	# Hedo
 #braille-driver	hm	# HIMS
 #braille-driver	ht	# Handy Tech (Help Tech)
-#braille-driver	hw	# Humanware, APH Chameleon, APH Mantis, NLS eReader
+#braille-driver	hw	# Humanware; APH Chameleon, APH Mantis, NLS eReader
 #braille-driver	ic	# Inceptor (Innovision)
 #braille-driver	ir	# Iris
 #braille-driver	lb	# Libbraille
@@ -91,7 +91,7 @@
 #braille-driver	ts	# TSI
 #braille-driver	tt	# TTY
 #braille-driver	vd	# VideoBraille
-#braille-driver	vo	# Voyager, Braille Pen, Easy Link
+#braille-driver	vo	# Voyager; Braille Pen, Easy Link
 #braille-driver	vs	# VisioBraille
 
 # The braille-device directive specifies the device to which the braille

@@ -18,6 +18,7 @@
 ###############################################################################
 
 source [file join [file dirname [info script]] .. prologue.tcl]
+cd [file join $sourceRoot Documents]
 
 set optionDefinitions {
    {test      flag "don't update the files"}
@@ -31,22 +32,34 @@ proc makeLists {file} {
 
    forEachLine line $file {
       if {[regexp $pattern $line x type name description]} {
-         dict lappend lists $type [list $name $description]
+         set columns [list $name]
+         eval lappend columns [lmap column [split $description ";"] {string trim $column}]
+         dict lappend lists $type $columns
       }
    }
 
    return $lists
 }
 
-proc quoteColumn {text} {
+proc csvQuoteText {text} {
    return "\"[regsub -all {(")} $text {\1\1}]\""
 }
 
-proc makeData {rows} {
-   set data ""
+proc csvMakeRow {columns} {
+   return [join [lmap text $columns {csvQuoteText $text}] ,]
+}
 
-   foreach row $rows {
-      append data "[join [lmap column $row {quoteColumn $column}] ,]\n"
+proc makeData {rows} {
+   set width 0
+   foreach columns $rows {
+      if {[set count [llength $columns]] > $width} {
+         set width $count
+      }
+   }
+
+   set data ""
+   foreach columns $rows {
+      append data "[csvMakeRow [concat $columns [lrepeat [expr {$width - [llength $columns]}] ""]]]\n"
    }
 
    return $data
@@ -88,9 +101,6 @@ proc updateFiles {lists} {
 
    return $updated
 }
-
-setSourceRoot
-cd [file join $env(BRLTTY_SOURCE_ROOT) Documents]
 
 if {![updateFiles [makeLists "brltty.conf.in"]]} {
    logMessage task "no files updated"
