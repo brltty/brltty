@@ -17,6 +17,23 @@
 ###############################################################################
 
 source [file join [file dirname [info script]] "brltty-prologue.tcl"]
+set sourceRoot [file normalize [file dirname [info script]]]
+
+set documentationSubdirectory Documentation
+set programsSubdirectory Programs
+set toolsSubdirectory Tools
+
+set tablesSubdirectory Tables
+set textTablesSubdirectory [file join $tablesSubdirectory Text]
+set contractionTablesSubdirectory [file join $tablesSubdirectory Contraction]
+set attributesTablesSubdirectory [file join $tablesSubdirectory Attributes]
+set keyboardTablesSubdirectory [file join $tablesSubdirectory Keyboard]
+set inputTablesSubdirectory [file join $tablesSubdirectory Input]
+
+set driversSubdirectory Drivers
+set brailleDriversSubdirectory [file join $driversSubdirectory Braille]
+set speechDriversSubdirectory [file join $driversSubdirectory Speech]
+set screenDriversSubdirectory [file join $driversSubdirectory Screen]
 
 proc setSourceRoot {} {
    if {![findContainingDirectory ::env(BRLTTY_SOURCE_ROOT) [pwd] [list brltty.pc.in]]} {
