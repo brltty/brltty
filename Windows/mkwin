@@ -236,6 +236,11 @@ do
    patch -p0 <"Windows/${patch}.patch"
 done
 
+infFile="${usbPackage}.inf"
+infPath="Windows/${infFile}"
+Tools/updusbdevs -q "c:Programs/usb_devices.c" "inf:${infPath}"
+Tools/updcsvs -q
+
 buildRoot="${temporaryDirectory}/build"
 mkdir -p "${buildRoot}"
 cd "${buildRoot}"
@@ -329,6 +334,7 @@ installFile "LICENSE-LGPL" "LICENSE-LGPL.txt"
 installFile "README" "${documentDirectory}/BRLTTY.txt"
 installFile "Drivers/Braille/XWindow/UBraille.ttf" "Fonts/"
 installFile "Drivers/BrlAPI/WindowEyes/README" "${documentDirectory}/WindowEyes.txt"
+installFile "${infPath}" "bin/brltty-${infFile}"
 installFiles "etc/" Documents/*.csv
 
 for document in ChangeLog HISTORY TODO
@@ -373,7 +379,6 @@ do
 done
 
 cd "${programDirectory}"
-installFile "${usbPackage}.inf" "bin/brltty-${usbPackage}.inf"
 installFiles "bin/" *.dll *.cat
 installFiles "/" *.bat
 

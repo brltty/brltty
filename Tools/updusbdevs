@@ -441,16 +441,16 @@ proc makeLines_udev {vendor product drivers descriptions exclude} {
    return $lines
 }
 
-proc makeComment_windows {comment} {
+proc makeComment_inf {comment} {
    return "; $comment"
 }
 
-proc makeLines_windows {vendor product drivers descriptions exclude} {
+proc makeLines_inf {vendor product drivers descriptions exclude} {
    set lines [list]
    set line [format "\"\$1: %s\"=\$2, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
 
    if {$exclude} {
-      set line [makeComment_windows $line]
+      set line [makeComment_inf $line]
    }
 
    lappend lines $line
@@ -678,7 +678,7 @@ if {[llength $positionalArguments] == 0} {
    lappend positionalArguments "udev:[file join $sourceRoot Autostart Udev device.rules.in]"
 
    foreach file [glob -directory [file join $sourceRoot Windows] -nocomplain "*.inf"] {
-      lappend positionalArguments "windows:$file"
+      lappend positionalArguments "inf:$file"
    }
 }
 
