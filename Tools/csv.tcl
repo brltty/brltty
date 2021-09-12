@@ -20,21 +20,35 @@ proc csvQuoteText {text} {
    return "\"[regsub -all {(")} $text {\1\1}]\""
 }
 
-proc csvMakeRow {columns} {
-   return [join [lmap text $columns {csvQuoteText $text}] ,]
-}
+proc csvMakeRow {columns {width ""}} {
+   if {[string length $width] > 0} {
+      set count [llength $columns]
 
-proc csvMakeTable {rows} {
-   set width 0
-   foreach columns $rows {
-      if {[set count [llength $columns]] > $width} {
-         set width $count
+      if {$count < $width} {
+         eval lappend columns [lrepeat [expr {$width - $count}] ""]
+      } elseif {$count > $width} {
+         set columns [lreplace $columns $width end]
       }
    }
 
+   return [join [lmap text $columns {csvQuoteText $text}] ,]
+}
+
+proc csvMakeTable {rows {width ""}} {
    set table ""
+
+   if {[string length $width] == 0} {
+      set width 0
+
+      foreach columns $rows {
+         if {[set count [llength $columns]] > $width} {
+            set width $count
+         }
+      }
+   }
+
    foreach columns $rows {
-      append table [csvMakeRow [concat $columns [lrepeat [expr {$width - [llength $columns]}] ""]]]
+      append table [csvMakeRow $columns $width]
       append table "\n"
    }
 

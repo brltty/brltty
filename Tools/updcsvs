@@ -28,12 +28,12 @@ processProgramArguments optionValues $optionDefinitions
 cd [file join $sourceRoot Documents]
 
 array set tableHeaders {
-   braille-driver {code name models aliases}
+   braille-driver {code name others aliases}
    speech-driver {code name}
-   screen-driver {code name}
+   screen-driver {code name usage}
 
-   text-table {name title}
-   contraction-table {name title}
+   text-table {name description}
+   contraction-table {name description}
    attributes-table {name description}
    keyboard-table {name description}
 }
@@ -53,9 +53,9 @@ proc makeLists {file} {
    return $lists
 }
 
-proc updateFile {name rows} {
+proc updateFile {name rows {width ""}} {
    upvar #0 optionValues(test) testMode
-   set table [csvMakeTable $rows]
+   set table [csvMakeTable $rows $width]
 
    if {![file exists $name]} {
       if {$testMode} {
@@ -83,8 +83,14 @@ proc updateFiles {lists} {
    set updated 0
 
    foreach type [dict keys $lists] {
-      if {[updateFile "$type.csv" [linsert [dict get $lists $type] 0 $tableHeaders($type)]]} {
-         set updated 1
+      if {[info exists tableHeaders($type)]} {
+         set headers $tableHeaders($type)
+
+         if {[updateFile "$type.csv" [linsert [dict get $lists $type] 0 $headers] [llength $headers]]} {
+            set updated 1
+         }
+      } else {
+         logMessage warning "table headers not defined: $type"
       }
    }
 

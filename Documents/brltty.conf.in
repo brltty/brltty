@@ -689,14 +689,14 @@
 # The screen-driver directive specifies the two-letter driver
 # identification code of the driver for the console screen.
 # (can be overridden with the --screen-driver= [-x] option)
-#screen-driver	an	# Android
-#screen-driver	as	# AtSpi
-#screen-driver	a2	# AtSpi2
-#screen-driver	hd	# Hurd
-#screen-driver	lx	# Linux
-#screen-driver	pb	# PCBIOS
-#screen-driver	sc	# Screen
-#screen-driver	wn	# Windows
+#screen-driver	an	# Android; Android
+#screen-driver	as	# AtSpi; X11 desktop via AT-SPI 1
+#screen-driver	a2	# AtSpi2; X11 desktop via AT-SPI 2
+#screen-driver	hd	# Hurd; The Hurd
+#screen-driver	lx	# Linux; Linux
+#screen-driver	pb	# PCBIOS; MS-DOS
+#screen-driver	sc	# Screen; patched screen program
+#screen-driver	wn	# Windows; Microsoft Windows
 
 
 ############################
