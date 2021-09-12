@@ -32,7 +32,7 @@ resolveDirectory() {
    fi
 }
 
-relativePath() {
+toRelativePath() {
    local toPath="${1}"
    local variable="${2}"
 
