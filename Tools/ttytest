@@ -1,0 +1,156 @@
+#!/usr/bin/env tclsh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2021 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+source [file join [file dirname [info script]] .. brltty-prologue.tcl]
+
+set lineTypeChoices {local modem}
+set bitRateChoices {50 75 110 134 150 200 300 600 1200 1800 2400 4800 9600 19200 38400 57600 115200 230400 460800 500000 576000 921600 1000000 1152000 1500000 2000000 2500000 3000000 3500000 4000000}
+set flowControlChoices {no hardware software}
+set bitParityChoices {none odd even}
+set characterSizeChoices {5 6 7 8}
+set stopBitsChoices {1 2}
+
+set optionDefinitions {
+}
+
+processProgramArguments optionValues $optionDefinitions positionalArguments "\[property ...\]"
+
+proc configureDevice {{settings {-g}}} {
+   global devicePath
+
+   set command [list]
+   lappend command stty -F $devicePath
+   eval lappend command $settings
+   logMessage step "command: [join $command " "]"
+   lappend command 2>@ stderr
+
+   if {[catch [linsert $command 0 exec] response] != 0} {
+      exit 4
+   }
+
+   return $response
+}
+
+set devicePath "/dev/ttyS0"
+set lineType 0
+set bitRate 38400
+set flowControl 0
+set bitParity 0
+set characterSize 8
+set stopBits 1
+
+foreach argument $positionalArguments {
+   if {[cequal [file pathtype $argument] absolute]} {
+      set devicePath $argument
+   } elseif {[set index [lsearch -exact $lineTypeChoices $argument]] >= 0} {
+      set lineType $index
+   } elseif {[lsearch -exact $bitRateChoices $argument] >= 0} {
+      set bitRate $argument
+   } elseif {[set index [lsearch -exact $flowControlChoices $argument]] >= 0} {
+      set flowControl $index
+   } elseif {[set index [lsearch -exact $bitParityChoices $argument]] >= 0} {
+      set bitParity $index
+   } elseif {[lsearch -exact $characterSizeChoices $argument] >= 0} {
+      set characterSize $argument
+   } elseif {[lsearch -exact $stopBitsChoices $argument] >= 0} {
+      set stopBits $argument
+   } else {
+      syntaxError "unrecognized property: $argument"
+   }
+}
+
+foreach {test word} {exists "found" readable "readable" writable "writable"} {
+   if {![file $test $devicePath]} {
+      semanticError "device not $word: $devicePath"
+   }
+}
+
+if {![string equal [file type $devicePath] characterSpecial]} {
+   semanticError "not a serial device: $devicePath"
+}
+
+set message [list "configuration: $devicePath"]
+lappend message "[lindex $lineTypeChoices $lineType] line"
+lappend message "$bitRate baud"
+lappend message "[lindex $flowControlChoices $flowControl] flow control"
+lappend message "[lindex $bitParityChoices $bitParity] parity"
+lappend message "$characterSize data bit[expr {($characterSize == 1)? "": "s"}]"
+lappend message "$stopBits stop bit[expr {($stopBits == 1)? "": "s"}]"
+logMessage task [join $message ", "]
+
+set originalConfiguration [configureDevice]
+set requestedConfiguration [list raw -echo -echoe -echok -echonl]
+
+lappend requestedConfiguration $bitRate
+lappend requestedConfiguration cs$characterSize
+
+foreach {variable operator value option} {
+   lineType != 1 clocal
+   flowControl == 1 crtscts
+   flowControl == 2 ixon
+   stopBits == 2 cstopb
+   bitParity != 0 parenb
+   bitParity == 1 parodd
+} {
+   if "!([list [set $variable] $operator $value])" {
+      set option "-$option"
+   }
+
+   lappend requestedConfiguration $option
+}
+
+try {
+   configureDevice $requestedConfiguration
+
+   try {
+      set deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}]
+
+      try {
+         fconfigure $deviceChannel -buffering none -translation binary
+
+         fileevent $deviceChannel readable {
+            scan [read $deviceChannel 1] %c byte
+            puts -nonewline stdout [format "%2.2x " $byte]
+            flush stdout
+         }
+
+         fileevent stdin readable {
+            if {[set length [gets stdin line]] == 0} {
+               set exitStatus 0
+            } elseif {$length > 0} {
+               puts -nonewline $deviceChannel [subst -nocommands -novariables $line]
+               flush $deviceChannel
+            } elseif {[eof stdin]} {
+               set exitStatus 0
+            }
+         }
+
+         vwait exitStatus
+      } finally {
+         close $deviceChannel
+         unset deviceChannel
+      }
+   } trap {POSIX} {problem} {
+      semanticError $message
+   }
+} finally {
+   configureDevice $originalConfiguration
+}
+
+exit $exitStatus
