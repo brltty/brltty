@@ -51,31 +51,6 @@ proc makeLists {file} {
    return $lists
 }
 
-proc updateFile {name rows {width ""}} {
-   upvar #0 optionValues(test) testMode
-   set table [csvMakeTable $rows $width]
-
-   if {![file exists $name]} {
-      if {$testMode} {
-         logMessage warning "test mode - file not created: $name"
-      } else {
-         logMessage warning "creating file: $name"
-         writeFile $name $table
-      }
-   } elseif {![string equal $table [readFile $name]]} {
-      if {$testMode} {
-         logMessage notice "test mode - file not updated: $name"
-      } else {
-         logMessage notice "updating file: $name"
-         replaceFile $name $table
-      }
-   } else {
-      return 0
-   }
-
-   return 1
-}
-
 proc updateFiles {lists} {
    global tableHeaders
    set updated 0
@@ -83,8 +58,9 @@ proc updateFiles {lists} {
    foreach type [dict keys $lists] {
       if {[info exists tableHeaders($type)]} {
          set headers $tableHeaders($type)
+         set data [csvMakeTable [linsert [dict get $lists $type] 0 $headers] [llength $headers]]
 
-         if {[updateFile "$type.csv" [linsert [dict get $lists $type] 0 $headers] [llength $headers]]} {
+         if {[updateFile "$type.csv" $data $::optionValues(test)]} {
             set updated 1
          }
       } else {

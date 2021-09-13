@@ -208,6 +208,28 @@ proc replaceFile {file data} {
    file delete $oldFile
 }
 
+proc updateFile {file data {inTestMode 0}} {
+   if {![file exists $file]} {
+      if {$inTestMode} {
+         logMessage notice "test mode - file not created: $file"
+      } else {
+         logMessage notice "creating file: $file"
+         writeFile $file $data
+      }
+   } elseif {![string equal $data [readFile $file]]} {
+      if {$inTestMode} {
+         logMessage notice "test mode - file not updated: $file"
+      } else {
+         logMessage notice "updating file: $file"
+         replaceFile $file $data
+      }
+   } else {
+      return 0
+   }
+
+   return 1
+}
+
 proc forEachLine {lineVariable file body} {
    upvar 1 $lineVariable line
    set stream [open $file {RDONLY}]
