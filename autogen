@@ -21,7 +21,7 @@ set -e
 cd `dirname "${0}"`
 directory="`pwd`"
 
-./gendeps
+Tools/gendeps
 [ ! -f Makefile ] || make -s distclean
 aclocal -I "${directory}/m4"
 autoconf
