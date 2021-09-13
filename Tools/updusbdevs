@@ -58,10 +58,6 @@ proc makeGenericDeviceTable {definitions} {
    return $table
 }
 
-proc getDriverCode {name} {
-   return [getBrailleDriverProperty $name DRIVER_CODE]
-}
-
 proc parseChannelDefinition {channelVariable lines location stringsArray} {
    upvar 1 $stringsArray strings
 
@@ -200,7 +196,7 @@ proc parseDriver {directory} {
 
    set channels [list]
 
-   if {[string length [set code [getDriverCode $name]]] > 0} {
+   if {[string length [set code [getBrailleDriverCode $name]]] > 0} {
       dict set driver code $code
       parseSourceFiles channels $directory
    } else {

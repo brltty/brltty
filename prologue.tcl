@@ -80,6 +80,10 @@ proc getBrailleDriverProperty {driver property {variable ""}} {
    return [uplevel 1 [list getMakeFileProperty [file join $::sourceRoot $::brailleDriversSubdirectory $driver Makefile.in] $property $variable]]
 }
 
+proc getBrailleDriverCode {driver {variable ""}} {
+   return [uplevel 1 [list getBrailleDriverProperty $driver DRIVER_CODE $variable]]
+}
+
 proc getBrailleDriverComment {driver {variable ""}} {
    return [uplevel 1 [list getBrailleDriverProperty $driver DRIVER_COMMENT $variable]]
 }
