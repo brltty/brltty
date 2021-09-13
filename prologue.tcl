@@ -19,7 +19,7 @@
 source [file join [file dirname [info script]] "brltty-prologue.tcl"]
 set sourceRoot [file normalize [file dirname [info script]]]
 
-set documentationSubdirectory Documentation
+set documentsSubdirectory Documents
 set programsSubdirectory Programs
 set toolsSubdirectory Tools
 
@@ -51,5 +51,36 @@ proc setBuildRoot {} {
    }
 
    semanticError "build tree not found"
+}
+
+proc getMakeFileProperty {file property {variable ""}} {
+   set pattern {^\s*(\w+)\s*=\s*(.*?)\s*$}
+
+   forEachLine line $file {
+      if {[regexp $pattern $line x name value]} {
+         if {[string equal $name $property]} {
+            if {[string length $variable] == 0} {
+               return -code return $value
+            }
+
+            uplevel 1 [list set $variable $value]
+            return -code return 1
+         }
+      }
+   }
+
+   if {[string length $variable] == 0} {
+      return -code error "property not found: $property"
+   }
+
+   return 0
+}
+
+proc getBrailleDriverProperty {driver property {variable ""}} {
+   return [uplevel 1 [list getMakeFileProperty [file join $::sourceRoot $::brailleDriversSubdirectory $driver Makefile.in] $property $variable]]
+}
+
+proc getBrailleDriverComment {driver {variable ""}} {
+   return [uplevel 1 [list getBrailleDriverProperty $driver DRIVER_COMMENT $variable]]
 }
 

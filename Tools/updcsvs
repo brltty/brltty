@@ -25,7 +25,7 @@ set optionDefinitions {
 }
 
 processProgramArguments optionValues $optionDefinitions
-cd [file join $sourceRoot Documents]
+cd [file join $sourceRoot $documentsSubdirectory]
 
 array set tableHeaders {
    braille-driver {code name others aliases}
@@ -43,10 +43,8 @@ proc makeLists {file} {
    set pattern {^#(\w+-(?:driver|table))\s+([-\w]+)\s*#\s*(.*?)\s*$}
 
    forEachLine line $file {
-      if {[regexp $pattern $line x type name description]} {
-         set columns [list $name]
-         eval lappend columns [lmap column [split $description ";"] {string trim $column}]
-         dict lappend lists [string tolower $type] $columns
+      if {[regexp $pattern $line x directive operand comment]} {
+         dict lappend lists [string tolower $directive] [linsert [lmap column [split $comment ";"] {string trim $column}] 0 $operand]
       }
    }
 
