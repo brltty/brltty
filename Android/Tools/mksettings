@@ -29,22 +29,16 @@ proc loadProperties {file names} {
    append pattern "\\s*(?:${comment}\\s*(.*?))?"
    append pattern {\s*$}
 
-   if {[catch [list open $file {RDONLY}] stream] == 0} {
-      while {[gets $stream record] >= 0} {
-         if {[regexp $pattern $record x name code label]} {
-            if {[string length $label] == 0} {
-               set label $code
-            } elseif {[set index [string first ";" $label]] >= 0} {
-               set label [string replace $label $index end]
-            }
-
-            dict set properties $name $code $label
+   forEachLine record $file {
+      if {[regexp $pattern $record x name code label]} {
+         if {[string length $label] == 0} {
+            set label $code
+         } elseif {[set index [string first ";" $label]] >= 0} {
+            set label [string replace $label $index end]
          }
-      }
 
-      close $stream
-   } else {
-      semanticError $stream
+         dict set properties $name $code $label
+      }
    }
 
    return $properties
