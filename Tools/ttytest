@@ -119,9 +119,7 @@ try {
    configureDevice $requestedConfiguration
 
    try {
-      set deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}]
-
-      try {
+      withChannel deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}] {
          fconfigure $deviceChannel -buffering none -translation binary
 
          fileevent $deviceChannel readable {
@@ -142,9 +140,6 @@ try {
          }
 
          vwait exitStatus
-      } finally {
-         close $deviceChannel
-         unset deviceChannel
       }
    } trap {POSIX} {problem} {
       semanticError $message

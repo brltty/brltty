@@ -163,23 +163,30 @@ proc toRelativePath {to {from .}} {
    return [eval file join $to]
 }
 
-proc readFile {file} {
-   set stream [open $file {RDONLY}]
+proc withChannel {variable channel body} {
+   uplevel 1 [list set $variable $channel]
 
    try {
-      return [read $stream]
+      try {
+         uplevel 1 $body
+      } on return {result} {
+         return -level 2 $result
+      }
    } finally {
-      close $stream
+      close $channel
+      uplevel 1 [list unset $variable]
+   }
+}
+
+proc readFile {file} {
+   withChannel channel [open $file {RDONLY}] {
+      return [read $channel]
    }
 }
 
 proc writeFile {file data} {
-   set stream [open $file {WRONLY CREAT TRUNC}]
-
-   try {
-      puts -nonewline $stream $data
-   } finally {
-      close $stream
+   withChannel channel [open $file {WRONLY CREAT TRUNC}] {
+      puts -nonewline $channel $data
    }
 }
 
@@ -232,14 +239,15 @@ proc updateFile {file data {inTestMode 0}} {
 
 proc forEachLine {lineVariable file body} {
    upvar 1 $lineVariable line
-   set stream [open $file {RDONLY}]
 
    try {
-      while {[gets $stream line] >= 0} {
-         uplevel 1 $body
+      withChannel channel [open $file {RDONLY}] {
+         while {[gets $channel line] >= 0} {
+            uplevel 1 $body
+         }
       }
-   } finally {
-      close $stream
+   } on return {result} {
+      return -level 2 $result
    }
 }
 

@@ -60,11 +60,11 @@ proc getMakeFileProperty {file property {variable ""}} {
       if {[regexp $pattern $line x name value]} {
          if {[string equal $name $property]} {
             if {[string length $variable] == 0} {
-               return -code return $value
+               return $value
             }
 
             uplevel 1 [list set $variable $value]
-            return -code return 1
+            return 1
          }
       }
    }
