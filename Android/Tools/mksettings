@@ -34,6 +34,8 @@ proc loadProperties {file names} {
          if {[regexp $pattern $record x name code label]} {
             if {[string length $label] == 0} {
                set label $code
+            } elseif {[set index [string first ";" $label]] >= 0} {
+               set label [string replace $label $index end]
             }
 
             dict set properties $name $code $label

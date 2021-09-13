@@ -10,38 +10,37 @@
   <string name="BRAILLE_DRIVER_LABEL_ba" translatable="false">BrlAPI</string>
   <string name="BRAILLE_DRIVER_LABEL_bc" translatable="false">BrailComm</string>
   <string name="BRAILLE_DRIVER_LABEL_bd" translatable="false">Braudi</string>
-  <string name="BRAILLE_DRIVER_LABEL_bl" translatable="false">Braille Lite</string>
-  <string name="BRAILLE_DRIVER_LABEL_bm" translatable="false">Baum, Refreshabraille, Orbit, NLS eReader Zoomax, NBP B2G</string>
-  <string name="BRAILLE_DRIVER_LABEL_bn" translatable="false">Braille Note</string>
+  <string name="BRAILLE_DRIVER_LABEL_bl" translatable="false">BrailleLite</string>
+  <string name="BRAILLE_DRIVER_LABEL_bm" translatable="false">Baum</string>
+  <string name="BRAILLE_DRIVER_LABEL_bn" translatable="false">BrailleNote</string>
   <string name="BRAILLE_DRIVER_LABEL_cb" translatable="false">CombiBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_ce" translatable="false">Cebra</string>
   <string name="BRAILLE_DRIVER_LABEL_cn" translatable="false">Canute</string>
   <string name="BRAILLE_DRIVER_LABEL_ec" translatable="false">EcoBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_eu" translatable="false">EuroBraille</string>
-  <string name="BRAILLE_DRIVER_LABEL_fa" translatable="false">Frank Audiodata</string>
-  <string name="BRAILLE_DRIVER_LABEL_fs" translatable="false">Freedom Scientific (VFO, Vispero)</string>
+  <string name="BRAILLE_DRIVER_LABEL_fa" translatable="false">FrankAudiodata</string>
+  <string name="BRAILLE_DRIVER_LABEL_fs" translatable="false">FreedomScientific</string>
   <string name="BRAILLE_DRIVER_LABEL_hd" translatable="false">Hedo</string>
   <string name="BRAILLE_DRIVER_LABEL_hm" translatable="false">HIMS</string>
-  <string name="BRAILLE_DRIVER_LABEL_ht" translatable="false">Handy Tech (Help Tech)</string>
-  <string name="BRAILLE_DRIVER_LABEL_hw" translatable="false">Humanware</string>
-  <string name="BRAILLE_DRIVER_LABEL_ic" translatable="false">Inceptor (Innovision)</string>
+  <string name="BRAILLE_DRIVER_LABEL_ht" translatable="false">HandyTech</string>
+  <string name="BRAILLE_DRIVER_LABEL_hw" translatable="false">HumanWare</string>
+  <string name="BRAILLE_DRIVER_LABEL_ic" translatable="false">Inceptor</string>
   <string name="BRAILLE_DRIVER_LABEL_ir" translatable="false">Iris</string>
   <string name="BRAILLE_DRIVER_LABEL_lb" translatable="false">Libbraille</string>
-  <string name="BRAILLE_DRIVER_LABEL_lt" translatable="false">Log Text</string>
+  <string name="BRAILLE_DRIVER_LABEL_lt" translatable="false">LogText</string>
   <string name="BRAILLE_DRIVER_LABEL_mb" translatable="false">MultiBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_md" translatable="false">MDV</string>
-  <string name="BRAILLE_DRIVER_LABEL_mm" translatable="false">Braille Memo</string>
+  <string name="BRAILLE_DRIVER_LABEL_mm" translatable="false">BrailleMemo</string>
   <string name="BRAILLE_DRIVER_LABEL_mn" translatable="false">MiniBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_mt" translatable="false">Metec</string>
-  <string name="BRAILLE_DRIVER_LABEL_np" translatable="false">Nine Point</string>
+  <string name="BRAILLE_DRIVER_LABEL_np" translatable="false">NinePoint</string>
   <string name="BRAILLE_DRIVER_LABEL_pg" translatable="false">Pegasus</string>
   <string name="BRAILLE_DRIVER_LABEL_pm" translatable="false">Papenmeier</string>
   <string name="BRAILLE_DRIVER_LABEL_sk" translatable="false">Seika</string>
   <string name="BRAILLE_DRIVER_LABEL_tn" translatable="false">TechniBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_ts" translatable="false">TSI</string>
-  <string name="BRAILLE_DRIVER_LABEL_tt" translatable="false">TTY</string>
   <string name="BRAILLE_DRIVER_LABEL_vd" translatable="false">VideoBraille</string>
-  <string name="BRAILLE_DRIVER_LABEL_vo" translatable="false">Voyager, Braille Pen, Easy Link</string>
+  <string name="BRAILLE_DRIVER_LABEL_vo" translatable="false">Voyager</string>
   <string name="BRAILLE_DRIVER_LABEL_vs" translatable="false">VisioBraille</string>
 
   <string-array name="BRAILLE_DRIVER_LABELS">
@@ -80,7 +79,6 @@
     <item>@string/BRAILLE_DRIVER_LABEL_sk</item>
     <item>@string/BRAILLE_DRIVER_LABEL_tn</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ts</item>
-    <item>@string/BRAILLE_DRIVER_LABEL_tt</item>
     <item>@string/BRAILLE_DRIVER_LABEL_vd</item>
     <item>@string/BRAILLE_DRIVER_LABEL_vo</item>
     <item>@string/BRAILLE_DRIVER_LABEL_vs</item>
@@ -122,7 +120,6 @@
     <item>sk</item>
     <item>tn</item>
     <item>ts</item>
-    <item>tt</item>
     <item>vd</item>
     <item>vo</item>
     <item>vs</item>
