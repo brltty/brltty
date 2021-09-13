@@ -58,31 +58,8 @@ proc makeGenericDeviceTable {definitions} {
    return $table
 }
 
-proc getMakeProperty {file property} {
-   set result ""
-
-   if {[catch [list open $file {RDONLY}] stream] == 0} {
-      while {[gets $stream line] >= 0} {
-         if {[regexp "^$property\\s*=\\s*(.*?)\\s*\$" $line x value]} {
-            set result $value
-            break
-         }
-      }
-
-      close $stream
-   } else {
-      writeProgramMessage $stream
-   }
-
-   return $result
-}
-
-proc getDriverProperty {driverDirectory propertyName} {
-   return [getMakeProperty [file join $driverDirectory "Makefile.in"] $propertyName]
-}
-
-proc getDriverCode {driverDirectory} {
-   return [getDriverProperty $driverDirectory DRIVER_CODE]
+proc getDriverCode {name} {
+   return [getBrailleDriverProperty $name DRIVER_CODE]
 }
 
 proc parseChannelDefinition {channelVariable lines location stringsArray} {
@@ -223,7 +200,7 @@ proc parseDriver {directory} {
 
    set channels [list]
 
-   if {[string length [set code [getDriverCode $directory]]] > 0} {
+   if {[string length [set code [getDriverCode $name]]] > 0} {
       dict set driver code $code
       parseSourceFiles channels $directory
    } else {
@@ -401,6 +378,22 @@ proc makeLines_hotplug {vendor product drivers descriptions exclude} {
    return $lines
 }
 
+proc makeComment_inf {comment} {
+   return "; $comment"
+}
+
+proc makeLines_inf {vendor product drivers descriptions exclude} {
+   set lines [list]
+   set line [format "\"\$1: %s\"=\$2, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
+
+   if {$exclude} {
+      set line [makeComment_inf $line]
+   }
+
+   lappend lines $line
+   return $lines
+}
+
 proc makeComment_metainfo {comment} {
    return [xmlMakeComment $comment]
 }
@@ -438,22 +431,6 @@ proc makeLines_udev {vendor product drivers descriptions exclude} {
    }
    lappend lines $line
 
-   return $lines
-}
-
-proc makeComment_inf {comment} {
-   return "; $comment"
-}
-
-proc makeLines_inf {vendor product drivers descriptions exclude} {
-   set lines [list]
-   set line [format "\"\$1: %s\"=\$2, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
-
-   if {$exclude} {
-      set line [makeComment_inf $line]
-   }
-
-   lappend lines $line
    return $lines
 }
 
