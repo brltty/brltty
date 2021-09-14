@@ -155,12 +155,33 @@ proc configureSerialDevice {{options {-g}}} {
    return $response
 }
 
+proc addSettingUsage {linesVariable label specification default} {
+   upvar 1 $linesVariable lines
+   lappend lines "To set the $label, specify $specification (the default is $default)."
+}
+
+proc getArgumentsUsageSummary {} {
+   set lines [list]
+
+   global devicePath
+   addSettingUsage lines "port" "the absolute path to the corresponding serial device" $devicePath
+
+   foreach name [getSerialPropertyNames] {
+      set label [getSerialPropertyLabel $name]
+      set choices [getSerialPropertyChoices $name]
+      set default [getSerialPropertyDefault $name]
+      addSettingUsage lines $label [formatChoicesPhrase $choices] $default
+   }
+
+   return $lines
+}
+
 proc parseCommandLine {} {
    set optionDefinitions {
    }
 
-   processProgramArguments optionValues $optionDefinitions positionalArguments "\[property ...\]"
-   return $positionalArguments
+   processProgramArguments optionValues $optionDefinitions argumentValues "\[setting ...\]" getArgumentsUsageSummary
+   return $argumentValues
 }
 
 proc getRequestedConfiguration {} {

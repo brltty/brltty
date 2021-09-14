@@ -322,19 +322,63 @@ proc findContainingDirectory {variable directory names} {
    return 1
 }
 
-proc nextElement {listVariable {elementVariable ""}} {
-   upvar 1 $listVariable list
+proc isWhitespace {string} {
+   return [string is space $string]
+}
 
-   if {[llength $list] == 0} {
-      return 0
+proc formatLines {lines {width 79}} {
+   set result [list]
+   set paragraph ""
+
+   set finishParagraph {
+      while {[set length [string length [set paragraph [string trimleft $paragraph]]]] > 0} {
+         if {$width < $length} {
+            set index $width
+
+            while {$index >= 0} {
+               if {[isWhitespace [string index $paragraph $index]]} {
+                  break
+               }
+
+               incr index -1
+            }
+
+            if {$index < 0} {
+               set index $width
+
+               while {[incr index] < $length} {
+                  if {[isWhitespace [string index $paragraph $index]]} {
+                     break
+                  }
+               }
+            }
+         } else {
+            set index $length
+         }
+
+         lappend result [string trimright [string range $paragraph 0 $index-1]]
+         set paragraph [string range $paragraph $index end]
+      }
    }
 
-   if {[string length $elementVariable] > 0} {
-      uplevel 1 [list set $elementVariable [lindex $list 0]]
-      set list [lreplace $list 0 0]
+   foreach line $lines {
+      if {[set length [string length [string trimright $line]]] > 0} {
+         if {![string equal [string index $line 0] " "]} {
+            if {[string length $paragraph] > 0} {
+               append paragraph " "
+            }
+
+            append paragraph $line
+            continue
+         }
+      }
+
+      eval $finishParagraph
+      lappend result $line
    }
 
-   return 1
+   eval $finishParagraph
+   return [join $result \n]
 }
 
 proc formatColumns {rows} {
@@ -378,6 +422,35 @@ proc formatColumns {rows} {
    }
 
    return $lines
+}
+
+proc formatChoicesPhrase {choices} {
+   set separator " "
+
+   if {[set count [llength $choices]] > 2} {
+      set separator ",$separator"
+   }
+
+   if {$count > 1} {
+      lappend choices "or [lvarpop choices end]"
+   }
+
+   return [join $choices $separator]
+}
+
+proc nextElement {listVariable {elementVariable ""}} {
+   upvar 1 $listVariable list
+
+   if {[llength $list] == 0} {
+      return 0
+   }
+
+   if {[string length $elementVariable] > 0} {
+      uplevel 1 [list set $elementVariable [lindex $list 0]]
+      set list [lreplace $list 0 0]
+   }
+
+   return 1
 }
 
 proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVariable ""}} {
@@ -530,20 +603,28 @@ proc formatCommandOptionsUsage {options} {
    return [formatColumns $rows]
 }
 
-proc showCommandUsage {name options positional} {
-   set options [formatCommandOptionsUsage $options]
+proc showCommandUsage {name optionsDescriptor argumentsUsage getArgumentsUsageSummary} {
+   set optionsUsage [formatCommandOptionsUsage $optionsDescriptor]
    set usage "Usage: $name"
 
-   if {[string length $options] > 0} {
+   if {[string length $optionsUsage] > 0} {
       append usage " \[-option ...\]"
    }
 
-   if {[string length $positional] > 0} {
-      append usage " $positional"
+   if {[string length $argumentsUsage] > 0} {
+      append usage " $argumentsUsage"
    }
 
-   if {[string length $options] > 0} {
-      append usage "\nThe following options may be specified:\n$options"
+   if {[string length $getArgumentsUsageSummary] > 0} {
+      if {[string length [set lines [formatLines [$getArgumentsUsageSummary]]]] > 0} {
+         append usage \n
+         append usage $lines
+      }
+   }
+
+   if {[string length $optionsUsage] > 0} {
+      append usage \n
+      append usage "The following options may be specified:\n$optionsUsage"
    }
 
    puts stdout $usage
@@ -557,17 +638,18 @@ proc noMorePositionalArguments {arguments} {
 
 proc processProgramArguments {
    optionValuesArray optionDefinitions
-   {positionalArgumentsVariable ""}
-   {positionalArgumentsUsage ""}
+   {argumentValuesList ""}
+   {argumentsUsage ""}
+   {getArgumentsUsageSummary ""}
 } {
    upvar 1 $optionValuesArray optionValues
-   set arguments $::argv
+   set argumentValues $::argv
 
    lappend optionDefinitions {help flag "show this usage summary and then exit"}
    lappend optionDefinitions {quiet counter "decrease verbosity"}
    lappend optionDefinitions {verbose counter "increase verbosity"}
 
-   if {![processCommandOptions optionValues arguments $optionDefinitions options]} {
+   if {![processCommandOptions optionValues argumentValues $optionDefinitions optionsDescriptor]} {
       syntaxError
    }
 
@@ -576,14 +658,14 @@ proc processProgramArguments {
    incr logLevel -$optionValues(quiet)
 
    if {$optionValues(help)} {
-      showCommandUsage [getProgramName] $options $positionalArgumentsUsage
+      showCommandUsage [getProgramName] $optionsDescriptor $argumentsUsage $getArgumentsUsageSummary
       exit 0
    }
 
-   if {[string length $positionalArgumentsVariable] > 0} {
-      uplevel 1 [list set $positionalArgumentsVariable $arguments]
+   if {[string length $argumentValuesList] > 0} {
+      uplevel 1 [list set $argumentValuesList $argumentValues]
    } else {
-      noMorePositionalArguments $arguments
+      noMorePositionalArguments $argumentValues
    }
 }
 
