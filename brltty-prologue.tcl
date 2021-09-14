@@ -20,7 +20,13 @@ set initialDirectory [pwd]
 set scriptDirectory [file normalize [file dirname $::argv0]]
 set prologueDirectory [file normalize [file dirname [info script]]]
 
-if {[catch [list package require Tclx] response] != 0} {
+try {
+   package require Tclx
+} trap {TCL PACKAGE UNFOUND} {} {
+   proc lcontain {list element} {
+      return [expr {[lsearch -exact $list $element] >= 0}]
+   }
+
    proc lvarcat {list elements} {
       uplevel 1 [list lappend $list] $elements
    }
@@ -377,7 +383,7 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
          return -code error "type not specified for $description"
       }
 
-      if {[lsearch -exact {counter flag toggle} $type] >= 0} {
+      if {[lcontain {counter flag toggle} $type]} {
          set values($name) 0
       } else {
          if {[set index [string first . $type]] < 0} {
@@ -387,7 +393,7 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
             set type [string range $type 0 $index-1]
          }
 
-         if {[lsearch -exact {untyped} $type] < 0} {
+         if {![string equal $type untyped]} {
             if {[catch [list string is $type ""]] != 0} {
                return -code error "invalid type for $description: $type"
             }

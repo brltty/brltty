@@ -53,7 +53,7 @@ proc getSerialPropertySetting {name} {
 }
 
 proc verifySerialPropertyChoice {name value} {
-   if {[lsearch -exact [getSerialPropertyChoices $name] $value] < 0} {
+   if {![lcontain [getSerialPropertyChoices $name] $value]} {
       return -code error "unknown serial [getSerialPropertyLabel $name]: $value"
    }
 }
@@ -159,7 +159,7 @@ proc getRequestedConfiguration {} {
       set options [getSerialPropertyOptions $property]
 
       foreach option [dict keys $options] {
-         if {[lsearch -exact [dict get $options $option] $setting] < 0} {
+         if {![lcontain [dict get $options $option] $setting]} {
             set option "-$option"
          }
 
@@ -177,7 +177,7 @@ foreach argument [parseCommandLine] {
       set found 0
 
       foreach name [getSerialPropertyNames] {
-         if {[set index [lsearch -exact [getSerialPropertyChoices $name] $argument]] >= 0} {
+         if {[lcontain [getSerialPropertyChoices $name] $argument]} {
             set found 1
             configureSerialProperty $name $argument
             break

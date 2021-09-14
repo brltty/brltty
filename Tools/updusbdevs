@@ -282,7 +282,7 @@ proc parseFileArguments {filesArray schemes arguments} {
          syntaxError "scheme not specified: $argument"
       }
 
-      if {[lsearch -exact $schemes $scheme] < 0} {
+      if {![lcontain $schemes $scheme]} {
          syntaxError "unknown scheme: $scheme"
       }
 
