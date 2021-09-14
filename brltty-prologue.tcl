@@ -27,8 +27,15 @@ try {
       return [expr {[lsearch -exact $list $element] >= 0}]
    }
 
-   proc lvarcat {list elements} {
-      uplevel 1 [list lappend $list] $elements
+   proc lvarcat {listVariable first args} {
+      upvar 1 $listVariable list
+      eval lappend list $first
+
+      foreach arg $args {
+         eval lappend list $arg
+      }
+
+      return $list
    }
 
    proc intersect3 {list1 list2} {
