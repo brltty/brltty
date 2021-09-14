@@ -27,6 +27,10 @@ proc getSerialPropertyNames {} {
    return [dict keys $serialProperties]
 }
 
+proc isSerialPropertyDefined {name} {
+   return [lcontain [getSerialPropertyNames] $name]
+}
+
 proc getSerialPropertyLabel {name} {
    global serialProperties
    return [dict get $serialProperties $name label]
@@ -64,6 +68,10 @@ proc setSerialPropertyField {name field value} {
 }
 
 proc defineSerialProperty {name label default args} {
+   if {[isSerialPropertyDefined $name]} {
+      return -code error "serial property already defined: $name"
+   }
+
    global serialProperties
    dict set serialProperties $name [dict create label $label choices $args options [dict create]]
    verifySerialPropertyChoice $name $default
@@ -72,6 +80,10 @@ proc defineSerialProperty {name label default args} {
 }
 
 proc addSerialOption {option property args} {
+   if {![isSerialPropertyDefined $property]} {
+      return -code error "serial property not defined: $property"
+   }
+
    global serialProperties
 
    foreach value $args {
@@ -133,8 +145,8 @@ proc configureSerialDevice {{options {-g}}} {
    eval lappend command $options
    logMessage step "command: [join $command " "]"
 
-   lappend command 2>@ stderr
    lvarpush command exec
+   lappend command 2>@ stderr
 
    if {[catch $command response] != 0} {
       exit 9
@@ -206,8 +218,11 @@ try {
          fconfigure $deviceChannel -buffering none -translation binary
 
          fileevent $deviceChannel readable {
-            scan [read $deviceChannel 1] %c byte
-            puts -nonewline stdout [format "%2.2x " $byte]
+            foreach byte [split [read $deviceChannel] ""] {
+               scan $byte %c number
+               puts -nonewline stdout [format "%02x " $number]
+            }
+
             flush stdout
          }
 
