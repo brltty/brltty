@@ -392,8 +392,10 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
                return -code error "invalid type for $description: $type"
             }
          }
+
          dict set options $name operand $operand
       }
+
       dict set options $name type $type
 
       if {[nextElement definition usage]} {

@@ -19,24 +19,54 @@
 
 source [file join [file dirname [info script]] .. brltty-prologue.tcl]
 
-set lineTypeChoices {local modem}
-set bitRateChoices {50 75 110 134 150 200 300 600 1200 1800 2400 4800 9600 19200 38400 57600 115200 230400 460800 500000 576000 921600 1000000 1152000 1500000 2000000 2500000 3000000 3500000 4000000}
-set flowControlChoices {no hardware software}
-set bitParityChoices {none odd even}
-set characterSizeChoices {5 6 7 8}
-set stopBitsChoices {1 2}
+proc addSerialProperty {propertiesVariable name label choices default} {
+   if {[set index [lsearch -exact $choices $default]] < 0} {
+      return -code error "unsupported $label: $default"
+   }
 
-set optionDefinitions {
+   uplevel 1 [list dict set $propertiesVariable $name [dict create label $label choices $choices requested $index]]
 }
 
-processProgramArguments optionValues $optionDefinitions positionalArguments "\[property ...\]"
+proc makeSerialProperties {} {
+   set properties [dict create]
+   addSerialProperty properties lineType "line type" {local modem} local
+   addSerialProperty properties baud "baud" {50 75 110 134 150 200 300 600 1200 1800 2400 4800 9600 19200 38400 57600 115200 230400 460800 500000 576000 921600 1000000 1152000 1500000 2000000 2500000 3000000 3500000 4000000} 38400
+   addSerialProperty properties flowControl "flow control" {no hardware software} no
+   addSerialProperty properties dataParity "data parity" {none odd even} none
+   addSerialProperty properties dataBits "data bits" {5 6 7 8} 8
+   addSerialProperty properties stopBits "stop bits" {1 2} 1
+   return $properties
+}
 
-proc configureDevice {{settings {-g}}} {
+set serialProperties [makeSerialProperties]
+set devicePath "/dev/ttyS0"
+
+proc getPropertyValue {name} {
+   global serialProperties
+   set property [dict get $serialProperties $name]
+   return [lindex [dict get $property choices] [dict get $property requested]]
+}
+
+proc logRequestedConfiguration {} {
+   upvar #0 serialProperties properties
+   global devicePath
+   set log "requested cofiguration: $devicePath"
+
+   foreach name [dict keys $properties] {
+      set property [dict get $properties $name]
+      append log ", [getPropertyValue $name]"
+      append log " [dict get $property label]"
+   }
+
+   logMessage task $log
+}
+
+proc configureDevice {{options {-g}}} {
    global devicePath
 
    set command [list]
    lappend command stty -F $devicePath
-   eval lappend command $settings
+   eval lappend command $options
    logMessage step "command: [join $command " "]"
    lappend command 2>@ stderr
 
@@ -47,31 +77,28 @@ proc configureDevice {{settings {-g}}} {
    return $response
 }
 
-set devicePath "/dev/ttyS0"
-set lineType 0
-set bitRate 38400
-set flowControl 0
-set bitParity 0
-set characterSize 8
-set stopBits 1
+set optionDefinitions {
+}
+
+processProgramArguments optionValues $optionDefinitions positionalArguments "\[property ...\]"
 
 foreach argument $positionalArguments {
    if {[cequal [file pathtype $argument] absolute]} {
       set devicePath $argument
-   } elseif {[set index [lsearch -exact $lineTypeChoices $argument]] >= 0} {
-      set lineType $index
-   } elseif {[lsearch -exact $bitRateChoices $argument] >= 0} {
-      set bitRate $argument
-   } elseif {[set index [lsearch -exact $flowControlChoices $argument]] >= 0} {
-      set flowControl $index
-   } elseif {[set index [lsearch -exact $bitParityChoices $argument]] >= 0} {
-      set bitParity $index
-   } elseif {[lsearch -exact $characterSizeChoices $argument] >= 0} {
-      set characterSize $argument
-   } elseif {[lsearch -exact $stopBitsChoices $argument] >= 0} {
-      set stopBits $argument
    } else {
-      syntaxError "unrecognized property: $argument"
+      set found 0
+
+      foreach name [dict keys $serialProperties] {
+         if {[set index [lsearch -exact [dict get $serialProperties $name choices] $argument]] >= 0} {
+            set found 1
+            dict set serialProperties $name requested $index
+            break
+         }
+      }
+
+      if {!$found} {
+         syntaxError "unrecognized serial property: $argument"
+      }
    }
 }
 
@@ -85,38 +112,30 @@ if {![string equal [file type $devicePath] characterSpecial]} {
    semanticError "not a serial device: $devicePath"
 }
 
-set message [list "configuration: $devicePath"]
-lappend message "[lindex $lineTypeChoices $lineType] line"
-lappend message "$bitRate baud"
-lappend message "[lindex $flowControlChoices $flowControl] flow control"
-lappend message "[lindex $bitParityChoices $bitParity] parity"
-lappend message "$characterSize data bit[expr {($characterSize == 1)? "": "s"}]"
-lappend message "$stopBits stop bit[expr {($stopBits == 1)? "": "s"}]"
-logMessage task [join $message ", "]
+logRequestedConfiguration
+set originalSettings [configureDevice]
+set requestedSettings [list raw -echo -echoe -echok -echonl]
 
-set originalConfiguration [configureDevice]
-set requestedConfiguration [list raw -echo -echoe -echok -echonl]
+lappend requestedSettings [getPropertyValue baud]
+lappend requestedSettings cs[getPropertyValue dataBits]
 
-lappend requestedConfiguration $bitRate
-lappend requestedConfiguration cs$characterSize
-
-foreach {variable operator value option} {
+foreach {name test value option} {
    lineType != 1 clocal
    flowControl == 1 crtscts
    flowControl == 2 ixon
+   dataParity != 0 parenb
+   dataParity == 1 parodd
    stopBits == 2 cstopb
-   bitParity != 0 parenb
-   bitParity == 1 parodd
 } {
-   if "!([list [set $variable] $operator $value])" {
+   if "!([dict get $serialProperties $name requested] $test $value)" {
       set option "-$option"
    }
 
-   lappend requestedConfiguration $option
+   lappend requestedSettings $option
 }
 
 try {
-   configureDevice $requestedConfiguration
+   configureDevice $requestedSettings
 
    try {
       withChannel deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}] {
@@ -145,7 +164,7 @@ try {
       semanticError $message
    }
 } finally {
-   configureDevice $originalConfiguration
+   configureDevice $originalSettings
 }
 
 exit $exitStatus
