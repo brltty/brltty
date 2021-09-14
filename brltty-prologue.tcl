@@ -38,6 +38,19 @@ try {
       return $list
    }
 
+   proc lvarpush {listVariable string {index 0}} {
+      upvar 1 $listVariable list
+      set list [linsert $list $index $string]
+      return ""
+   }
+
+   proc lvarpop {listVariable {index 0}} {
+      upvar 1 $listVariable list
+      set result [lindex $list $index]
+      set list [lreplace $list $index $index]
+      return $result
+   }
+
    proc intersect3 {list1 list2} {
       foreach number {1 2} {
          set length$number [llength [set list$number [lsort [set list$number]]]]

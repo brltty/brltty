@@ -132,9 +132,11 @@ proc configureSerialDevice {{options {-g}}} {
    lappend command stty -F $devicePath
    eval lappend command $options
    logMessage step "command: [join $command " "]"
-   lappend command 2>@ stderr
 
-   if {[catch [linsert $command 0 exec] response] != 0} {
+   lappend command 2>@ stderr
+   lvarpush command exec
+
+   if {[catch $command response] != 0} {
       exit 9
    }
 
