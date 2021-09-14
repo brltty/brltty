@@ -19,9 +19,23 @@
 
 source [file join [file dirname [info script]] .. brltty-prologue.tcl]
 
+set optionDefinitions {
+}
+
+processProgramArguments optionValues $optionDefinitions positionalArguments "\[property ...\]"
+
 foreach path [glob -directory $scriptDirectory *.tcl] {
    source $path
 }
 
-commandloop
+if {[lempty $positionalArguments]} {
+   proc primaryPrompt {} {
+      return "[getProgramName]> "
+   }
+
+   commandloop -prompt1 primaryPrompt
+} else {
+   puts stdout [eval $positionalArguments]
+}
+
 exit 0

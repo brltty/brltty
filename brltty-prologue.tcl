@@ -23,34 +23,6 @@ set prologueDirectory [file normalize [file dirname [info script]]]
 try {
    package require Tclx
 } trap {TCL PACKAGE UNFOUND} {} {
-   proc lcontain {list element} {
-      return [expr {[lsearch -exact $list $element] >= 0}]
-   }
-
-   proc lvarcat {listVariable first args} {
-      upvar 1 $listVariable list
-      eval lappend list $first
-
-      foreach arg $args {
-         eval lappend list $arg
-      }
-
-      return $list
-   }
-
-   proc lvarpush {listVariable string {index 0}} {
-      upvar 1 $listVariable list
-      set list [linsert $list $index $string]
-      return ""
-   }
-
-   proc lvarpop {listVariable {index 0}} {
-      upvar 1 $listVariable list
-      set result [lindex $list $index]
-      set list [lreplace $list $index $index]
-      return $result
-   }
-
    proc intersect3 {list1 list2} {
       foreach number {1 2} {
          set length$number [llength [set list$number [lsort [set list$number]]]]
@@ -95,12 +67,40 @@ try {
       return [list $only1 $both $only2]
    }
 
-   proc lrmdups {list} {
-      return [lsort -unique $list]
+   proc lcontain {list element} {
+      return [expr {[lsearch -exact $list $element] >= 0}]
    }
 
    proc lempty {list} {
       return [expr {[llength $list] == 0}]
+   }
+
+   proc lrmdups {list} {
+      return [lsort -unique $list]
+   }
+
+   proc lvarcat {listVariable first args} {
+      upvar 1 $listVariable list
+      eval lappend list $first
+
+      foreach arg $args {
+         eval lappend list $arg
+      }
+
+      return $list
+   }
+
+   proc lvarpop {listVariable {index 0}} {
+      upvar 1 $listVariable list
+      set result [lindex $list $index]
+      set list [lreplace $list $index $index]
+      return $result
+   }
+
+   proc lvarpush {listVariable string {index 0}} {
+      upvar 1 $listVariable list
+      set list [linsert $list $index $string]
+      return ""
    }
 
    if {[package vcompare $tcl_version 8.4] < 0} {
