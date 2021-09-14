@@ -17,32 +17,32 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "$(dirname "${BASH_SOURCE[0]}")/brltty-prologue.sh"
+. "$(dirname "${0}")/../prologue.sh"
+setSourceRoot
+cd $sourceRoot
 
-setSourceRoot() {
-   findContainingDirectory BRLTTY_SOURCE_ROOT "${programDirectory}" brltty.pc.in || {
-      semanticError "source tree not found"
-   }
+addProgramOption a flag updateAndroid "update the Android string resources"
+addProgramOption c flag updateCSV "update the CSV files"
+addProgramOption u flag updateUSB "update the USB device lists"
+parseProgramArguments "${@}"
 
-   readonly sourceRoot="${BRLTTY_SOURCE_ROOT}"
+updateAll=true
+set -- updateAndroid updateCSV updateUSB
+
+for variable
+do
+   "${!variable}" && updateAll=false
+done
+
+"${updateAll}" && {
+   for variable
+   do
+      setVariable "${variable}" true
+   done
 }
 
-setBuildRoot() {
-   local variable=BRLTTY_BUILD_ROOT
-   set -- brltty.pc
+"${updateAndroid}" && Android/Tools/mksettings
+"${updateCSV}" && Tools/updcsvs
+"${updateUSB}" && Tools/updusbdevs
 
-   findContainingDirectory "${variable}" "${initialDirectory}" "${@}" || {
-      findContainingDirectory "${variable}" "${programDirectory}" "${@}" || {
-         semanticError "build tree not found"
-      }
-   }
-
-   readonly buildRoot="${BRLTTY_BUILD_ROOT}"
-}
-
-readonly documentsSubdirectory="Documents"
-readonly driversSubdirectory="Drivers"
-readonly programsSubdirectory="Programs"
-readonly tablesSubdirectory="Tables"
-readonly toolsSubdirectory="Tools"
-
+exit 0

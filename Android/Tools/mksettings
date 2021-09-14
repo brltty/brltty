@@ -123,15 +123,6 @@ proc makeResourceLines {properties name} {
    return $lines
 }
 
-proc writeFile {path lines} {
-   if {[catch [list open $path {WRONLY CREAT TRUNC}] stream] == 0} {
-      puts $stream [join $lines \n]
-      close $stream
-   } else {
-      semanticError $stream
-   }
-}
-
 set optionDefinitions {
 }
 
@@ -161,11 +152,19 @@ foreach name $propertyNames {
    }
 }
 
+set updated 0
 foreach propertyName $propertyNames {
    set resourceFile "[string tolower $propertyName].xml"
    set resourcePath [file join $applicationDirectory res values $resourceFile]
    logMessage step "writing resource file: $resourcePath"
-   writeFile $resourcePath [makeResourceLines $properties $propertyName]
+
+   if {[updateFile $resourcePath "[join [makeResourceLines $properties $propertyName] \n]\n"]} {
+      set updated 1
+   }
+}
+
+if {!$updated} {
+   logMessage task "no files updated"
 }
 
 exit 0
