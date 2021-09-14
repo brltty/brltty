@@ -19,49 +19,113 @@
 
 source [file join [file dirname [info script]] .. brltty-prologue.tcl]
 
-proc addSerialProperty {propertiesVariable name label choices default} {
-   if {[set index [lsearch -exact $choices $default]] < 0} {
-      return -code error "unsupported $label: $default"
-   }
-
-   uplevel 1 [list dict set $propertiesVariable $name [dict create label $label choices $choices requested $index]]
-}
-
-proc makeSerialProperties {} {
-   set properties [dict create]
-   addSerialProperty properties lineType "line type" {local modem} local
-   addSerialProperty properties baud "baud" {50 75 110 134 150 200 300 600 1200 1800 2400 4800 9600 19200 38400 57600 115200 230400 460800 500000 576000 921600 1000000 1152000 1500000 2000000 2500000 3000000 3500000 4000000} 38400
-   addSerialProperty properties flowControl "flow control" {no hardware software} no
-   addSerialProperty properties dataParity "data parity" {none odd even} none
-   addSerialProperty properties dataBits "data bits" {5 6 7 8} 8
-   addSerialProperty properties stopBits "stop bits" {1 2} 1
-   return $properties
-}
-
-set serialProperties [makeSerialProperties]
+set serialProperties [dict create]
 set devicePath "/dev/ttyS0"
 
-proc getPropertyValue {name} {
+proc getSerialPropertyNames {} {
    global serialProperties
-   set property [dict get $serialProperties $name]
-   return [lindex [dict get $property choices] [dict get $property requested]]
+   return [dict keys $serialProperties]
 }
 
-proc logRequestedConfiguration {} {
-   upvar #0 serialProperties properties
-   global devicePath
-   set log "requested cofiguration: $devicePath"
+proc getSerialPropertyLabel {name} {
+   global serialProperties
+   return [dict get $serialProperties $name label]
+}
 
-   foreach name [dict keys $properties] {
-      set property [dict get $properties $name]
-      append log ", [getPropertyValue $name]"
-      append log " [dict get $property label]"
+proc getSerialPropertyChoices {name} {
+   global serialProperties
+   return [dict get $serialProperties $name choices]
+}
+
+proc getSerialPropertyOptions {name} {
+   global serialProperties
+   return [dict get $serialProperties $name options]
+}
+
+proc getSerialPropertyDefault {name} {
+   global serialProperties
+   return [dict get $serialProperties $name default]
+}
+
+proc getSerialPropertySetting {name} {
+   global serialProperties
+   return [dict get $serialProperties $name setting]
+}
+
+proc verifySerialPropertyChoice {name value} {
+   if {[lsearch -exact [getSerialPropertyChoices $name] $value] < 0} {
+      return -code error "unknown serial [getSerialPropertyLabel $name]: $value"
+   }
+}
+
+proc setSerialPropertyField {name field value} {
+   global serialProperties
+   dict set serialProperties $name $field $value
+}
+
+proc defineSerialProperty {name label default args} {
+   global serialProperties
+   dict set serialProperties $name [dict create label $label choices $args options [dict create]]
+   verifySerialPropertyChoice $name $default
+   setSerialPropertyField $name default $default
+   setSerialPropertyField $name setting $default
+}
+
+proc addSerialOption {option property args} {
+   global serialProperties
+
+   foreach value $args {
+      verifySerialPropertyChoice $property $value
+   }
+
+   dict set serialProperties $property options $option $args
+}
+
+defineSerialProperty lineMode "mode" local local modem
+defineSerialProperty lineBaud "baud" 38400 50 75 110 134 150 200 300 600 1200 1800 2400 4800 9600 19200 38400 57600 115200 230400 460800 500000 576000 921600 1000000 1152000 1500000 2000000 2500000 3000000 3500000 4000000
+defineSerialProperty flowControl "flow control" no no hardware software
+defineSerialProperty dataParity "parity" none none odd even mark space
+defineSerialProperty dataBits "data bits" 8 5 6 7 8
+defineSerialProperty stopBits "stop bits" 1 1 2
+
+addSerialOption clocal lineMode local
+addSerialOption crtscts flowControl hardware
+addSerialOption ixon flowControl software
+addSerialOption parenb dataParity odd even mark space
+addSerialOption parodd dataParity odd mark
+addSerialOption cmspar dataParity mark space
+addSerialOption cstopb stopBits 2
+
+proc logSerialConfiguration {} {
+   global devicePath
+   set log "serial cofiguration: $devicePath"
+
+   foreach name [getSerialPropertyNames] {
+      append log ", [getSerialPropertySetting $name]"
+      append log " [getSerialPropertyLabel $name]"
    }
 
    logMessage task $log
 }
 
-proc configureDevice {{options {-g}}} {
+proc configureSerialProperty {name value} {
+   verifySerialPropertyChoice $name $value
+   setSerialPropertyField $name setting $value
+}
+
+proc verifySerialDevice {path} {
+   foreach {test word} {exists "found" readable "readable" writable "writable"} {
+      if {![file $test $path]} {
+         semanticError "device not $word: $path"
+      }
+   }
+
+   if {![string equal [file type $path] characterSpecial]} {
+      semanticError "not a serial device: $path"
+   }
+}
+
+proc configureSerialDevice {{options {-g}}} {
    global devicePath
 
    set command [list]
@@ -71,27 +135,51 @@ proc configureDevice {{options {-g}}} {
    lappend command 2>@ stderr
 
    if {[catch [linsert $command 0 exec] response] != 0} {
-      exit 4
+      exit 9
    }
 
    return $response
 }
 
-set optionDefinitions {
+proc parseCommandLine {} {
+   set optionDefinitions {
+   }
+
+   processProgramArguments optionValues $optionDefinitions positionalArguments "\[property ...\]"
+   return $positionalArguments
 }
 
-processProgramArguments optionValues $optionDefinitions positionalArguments "\[property ...\]"
+proc getRequestedConfiguration {} {
+   set configuration [list raw -echo -echoe -echok -echonl]
+   lappend configuration [getSerialPropertySetting lineBaud]
+   lappend configuration cs[getSerialPropertySetting dataBits]
 
-foreach argument $positionalArguments {
+   foreach property [getSerialPropertyNames] {
+      set setting [getSerialPropertySetting $property]
+      set options [getSerialPropertyOptions $property]
+
+      foreach option [dict keys $options] {
+         if {[lsearch -exact [dict get $options $option] $setting] < 0} {
+            set option "-$option"
+         }
+
+         lappend configuration $option
+      }
+   }
+
+   return $configuration
+}
+
+foreach argument [parseCommandLine] {
    if {[cequal [file pathtype $argument] absolute]} {
       set devicePath $argument
    } else {
       set found 0
 
-      foreach name [dict keys $serialProperties] {
-         if {[set index [lsearch -exact [dict get $serialProperties $name choices] $argument]] >= 0} {
+      foreach name [getSerialPropertyNames] {
+         if {[set index [lsearch -exact [getSerialPropertyChoices $name] $argument]] >= 0} {
             set found 1
-            dict set serialProperties $name requested $index
+            configureSerialProperty $name $argument
             break
          }
       }
@@ -102,40 +190,14 @@ foreach argument $positionalArguments {
    }
 }
 
-foreach {test word} {exists "found" readable "readable" writable "writable"} {
-   if {![file $test $devicePath]} {
-      semanticError "device not $word: $devicePath"
-   }
-}
+verifySerialDevice $devicePath
+logSerialConfiguration
 
-if {![string equal [file type $devicePath] characterSpecial]} {
-   semanticError "not a serial device: $devicePath"
-}
-
-logRequestedConfiguration
-set originalSettings [configureDevice]
-set requestedSettings [list raw -echo -echoe -echok -echonl]
-
-lappend requestedSettings [getPropertyValue baud]
-lappend requestedSettings cs[getPropertyValue dataBits]
-
-foreach {name test value option} {
-   lineType != 1 clocal
-   flowControl == 1 crtscts
-   flowControl == 2 ixon
-   dataParity != 0 parenb
-   dataParity == 1 parodd
-   stopBits == 2 cstopb
-} {
-   if "!([dict get $serialProperties $name requested] $test $value)" {
-      set option "-$option"
-   }
-
-   lappend requestedSettings $option
-}
+set originalConfiguration [configureSerialDevice]
+set requestedConfiguration [getRequestedConfiguration]
 
 try {
-   configureDevice $requestedSettings
+   configureSerialDevice $requestedConfiguration
 
    try {
       withChannel deviceChannel [open $devicePath {RDWR NOCTTY NONBLOCK}] {
@@ -164,7 +226,7 @@ try {
       semanticError $message
    }
 } finally {
-   configureDevice $originalSettings
+   configureSerialDevice $originalConfiguration
 }
 
 exit $exitStatus
