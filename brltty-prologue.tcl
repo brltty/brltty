@@ -326,38 +326,49 @@ proc isWhitespace {string} {
    return [string is space $string]
 }
 
+proc wrapLine {line width} {
+   set lines [list]
+
+   while {[set length [string length [set line [string trimleft $line]]]] > 0} {
+      if {$width < $length} {
+         set index $width
+
+         while {$index >= 0} {
+            if {[isWhitespace [string index $line $index]]} {
+               break
+            }
+
+            incr index -1
+         }
+
+         if {$index < 0} {
+            set index $width
+
+            while {[incr index] < $length} {
+               if {[isWhitespace [string index $line $index]]} {
+                  break
+               }
+            }
+         }
+      } else {
+         set index $length
+      }
+
+      lappend lines [string trimright [string range $line 0 $index-1]]
+      set line [string range $line $index end]
+   }
+
+   return $lines
+}
+
 proc formatLines {lines {width 79}} {
    set result [list]
    set paragraph ""
 
    set finishParagraph {
-      while {[set length [string length [set paragraph [string trimleft $paragraph]]]] > 0} {
-         if {$width < $length} {
-            set index $width
-
-            while {$index >= 0} {
-               if {[isWhitespace [string index $paragraph $index]]} {
-                  break
-               }
-
-               incr index -1
-            }
-
-            if {$index < 0} {
-               set index $width
-
-               while {[incr index] < $length} {
-                  if {[isWhitespace [string index $paragraph $index]]} {
-                     break
-                  }
-               }
-            }
-         } else {
-            set index $length
-         }
-
-         lappend result [string trimright [string range $paragraph 0 $index-1]]
-         set paragraph [string range $paragraph $index end]
+      if {[string length $paragraph] > 0} {
+         lvarcat result [wrapLine $paragraph $width]
+         set paragraph ""
       }
    }
 
