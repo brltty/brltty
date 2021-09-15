@@ -176,7 +176,7 @@ proc toRelativePath {to {from .}} {
       }
 
       foreach variable $variables {
-         set $variable [lreplace [set $variable] 0 0]
+         lvarpop $variable
       }
 
       incr count -1
@@ -187,6 +187,41 @@ proc toRelativePath {to {from .}} {
    }
 
    return [eval file join $to]
+}
+
+proc testContainingDirectory {directory names} {
+   foreach name $names {
+      if {![file exists [file join $directory $name]]} {
+         return 0
+      }
+   }
+
+   return 1
+}
+
+proc findContainingDirectory {variable directory names} {
+   if {[info exists $variable]} {
+      if {[string length [set $variable]] > 0} {
+         return 1
+      }
+   }
+
+   set directory [file normalize $directory]
+
+   while {1} {
+      if {[testContainingDirectory $directory $names]} {
+         break
+      }
+
+      if {[string equal [set parent [file dirname $directory]] $directory]} {
+         return 0
+      }
+
+      set directory $parent
+   }
+
+   set $variable $directory
+   return 1
 }
 
 proc withChannel {variable channel body} {
@@ -285,41 +320,6 @@ proc readLines {file} {
    }
 
    return $lines
-}
-
-proc testContainingDirectory {directory names} {
-   foreach name $names {
-      if {![file exists [file join $directory $name]]} {
-         return 0
-      }
-   }
-
-   return 1
-}
-
-proc findContainingDirectory {variable directory names} {
-   if {[info exists $variable]} {
-      if {[string length [set $variable]] > 0} {
-         return 1
-      }
-   }
-
-   set directory [file normalize $directory]
-
-   while {1} {
-      if {[testContainingDirectory $directory $names]} {
-         break
-      }
-
-      if {[string equal [set parent [file dirname $directory]] $directory]} {
-         return 0
-      }
-
-      set directory $parent
-   }
-
-   set $variable $directory
-   return 1
 }
 
 proc isWhitespace {string} {
