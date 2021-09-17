@@ -23,8 +23,9 @@
 #include <time.h>
 #include <errno.h>
 
-#include "bitfield.h"
 #include "log.h"
+#include "parameters.h"
+#include "bitfield.h"
 #include "parse.h"
 #include "timing.h"
 #include "async_wait.h"
@@ -706,7 +707,7 @@ getHidFirmwareVersion (BrailleDisplay *brl) {
 
     if (result > 0) {
       hidFirmwareVersion = (report[1] << 8) | report[2];
-      logMessage(LOG_INFO, "Firmware Version: %u.%u", report[1], report[2]);
+      logMessage(LOG_INFO, "USB-HID Firmware Version: %u.%u", report[1], report[2]);
       return 1;
     }
   }
@@ -772,9 +773,9 @@ awaitUsbInput2 (
   UsbDevice *device, const UsbChannelDefinition *definition, int milliseconds
 ) {
   if (hidReportSize_OutData) {
-    TimePeriod period;
-
     if (hidInputOffset < hidInputLength) return 1;
+
+    TimePeriod period;
     startTimePeriod(&period, milliseconds);
 
     while (1) {
@@ -786,7 +787,7 @@ awaitUsbInput2 (
       if (hidInputLength > 0) return 1;
 
       if (afterTimePeriod(&period, NULL)) break;
-      asyncWait(10);
+      asyncWait(BRAILLE_DRIVER_INPUT_POLL_INTERVAL);
     }
   }
 

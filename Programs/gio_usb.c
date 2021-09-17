@@ -247,7 +247,7 @@ monitorUsbInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) 
     UsbChannel *channel = handle->channel;
     unsigned char endpoint = channel->definition->inputEndpoint;
 
-    if (!endpoint) return 1;
+    if (!endpoint) return 0;
     return usbMonitorInputEndpoint(channel->device, endpoint, callback, data);
   }
 
