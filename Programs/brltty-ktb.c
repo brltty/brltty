@@ -31,6 +31,7 @@
 #include "ktb_keyboard.h"
 #include "brl.h"
 
+static char *opt_brailleDriver;
 static int opt_audit;
 static int opt_listKeyNames;
 static int opt_listHelpScreen;
@@ -39,6 +40,13 @@ static char *opt_tablesDirectory;
 char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .word = "braille-driver",
+    .letter = 'b',
+    .argument = strtext("driver"),
+    .setting.string = &opt_brailleDriver,
+    .description = strtext("Braille driver code."),
+  },
+
   { .word = "audit",
     .letter = 'a',
     .setting.flag = &opt_audit,
@@ -92,99 +100,62 @@ typedef struct {
 } KeyTableDescriptor;
 
 static int
-getKeyTableDescriptor (KeyTableDescriptor *ktd, const char *name) {
+getKeyTableDescriptor (KeyTableDescriptor *ktd, const char *tableName) {
   int ok = 0;
-  int componentsLeft;
-  char **nameComponents = splitString(name, '-', &componentsLeft);
 
   memset(ktd, 0, sizeof(*ktd));
   ktd->names = NULL;
   ktd->path = NULL;
 
-  if (nameComponents) {
-    char **currentComponent = nameComponents;
+  if (*opt_brailleDriver) {
+    if (loadBrailleDriver(opt_brailleDriver, &driverObject, opt_driversDirectory)) {
+      char *keyTablesSymbol;
 
-    if (componentsLeft) {
-      const char *tableType = (componentsLeft--, *currentComponent++);
-
-      if (strcmp(tableType, "kbd") == 0) {
-        if (componentsLeft) {
-          const char *keyboardType = (componentsLeft--, *currentComponent++);
-
-          ktd->names = KEY_NAME_TABLES(keyboard);
-          if ((ktd->path = makeKeyboardTablePath(opt_tablesDirectory, keyboardType))) ok = 1;
-        } else {
-          logMessage(LOG_ERR, "missing keyboard type");
-        }
-      } else if (strcmp(tableType, "brl") == 0) {
-        if (componentsLeft) {
-          const char *driverCode = (componentsLeft--, *currentComponent++);
-
-          if (loadBrailleDriver(driverCode, &driverObject, opt_driversDirectory)) {
-            char *keyTablesSymbol;
-
-            {
-              const char *strings[] = {"brl_ktb_", driverCode};
-              keyTablesSymbol = joinStrings(strings, ARRAY_COUNT(strings));
-            }
-
-            if (keyTablesSymbol) {
-              const KeyTableDefinition *const *keyTableDefinitions;
-
-              if (findSharedSymbol(driverObject, keyTablesSymbol, &keyTableDefinitions)) {
-                const KeyTableDefinition *const *currentDefinition = keyTableDefinitions;
-
-                if (componentsLeft) {
-                  const char *deviceType = (componentsLeft--, *currentComponent++);
-
-                  while (*currentDefinition) {
-                    if (strcmp(deviceType, (*currentDefinition)->bindings) == 0) {
-                      ktd->names = (*currentDefinition)->names;
-                      if ((ktd->path = makeInputTablePath(opt_tablesDirectory, driverCode, deviceType))) ok = 1;
-                      break;
-                    }
-
-                    currentDefinition += 1;
-                  }
-
-                  if (!ktd->names) {
-                    logMessage(LOG_ERR, "unknown braille device type: %s-%s",
-                               driverCode, deviceType);
-                  }
-                } else {
-                  logMessage(LOG_ERR, "missing braille device type");
-                }
-              }
-
-              free(keyTablesSymbol);
-            } else {
-              logMallocError();
-            }
-          }
-        } else {
-          logMessage(LOG_ERR, "missing braille driver code");
-        }
-      } else {
-        logMessage(LOG_ERR, "unknown key table type: %s", tableType);
+      {
+        const char *strings[] = {"brl_ktb_", opt_brailleDriver};
+        keyTablesSymbol = joinStrings(strings, ARRAY_COUNT(strings));
       }
-    } else {
-      logMessage(LOG_ERR, "missing key table type");
-    }
 
-    deallocateStrings(nameComponents);
+      if (keyTablesSymbol) {
+        const KeyTableDefinition *const *keyTableDefinitions;
+
+        if (findSharedSymbol(driverObject, keyTablesSymbol, &keyTableDefinitions)) {
+          const KeyTableDefinition *const *currentDefinition = keyTableDefinitions;
+
+          while (*currentDefinition) {
+            if (strcmp(tableName, (*currentDefinition)->bindings) == 0) {
+              ktd->names = (*currentDefinition)->names;
+              if ((ktd->path = makeInputTablePath(opt_tablesDirectory, opt_brailleDriver, tableName))) ok = 1;
+              break;
+            }
+
+            currentDefinition += 1;
+          }
+
+          if (!ktd->names) {
+            logMessage(LOG_ERR,
+              "unknown braille device model: %s-%s",
+              opt_brailleDriver, tableName
+            );
+          }
+        }
+
+        free(keyTablesSymbol);
+      } else {
+        logMallocError();
+      }
+    }
+  } else {
+    ktd->names = KEY_NAME_TABLES(keyboard);
+    if ((ktd->path = makeKeyboardTablePath(opt_tablesDirectory, tableName))) ok = 1;
   }
 
-  if (ok) {
-    if (componentsLeft) {
-      logMessage(LOG_ERR, "too many key table name components");
-      ok = 0;
-    }
+  if (!ok) {
+    if (ktd->path) free(ktd->path);
+    memset(ktd, 0, sizeof(*ktd));
   }
 
-  if (ok) return 1;
-  if (ktd->path) free(ktd->path);
-  memset(ktd, 0, sizeof(*ktd));
-  return 0;
+  return ok;
 }
 
 static int
@@ -316,7 +287,7 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-ktb",
-      .argumentsSummary = "key-table"
+      .argumentsSummary = "table-name"
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
   }

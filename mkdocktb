@@ -229,13 +229,14 @@ endLayoutEntry() {
 }
 
 listKeyTable() {
-   local prefix="${1}"
+   local driver="${1}"
 
-   local input="${prefix}-${inputFile##*/}"
+   local input="${inputFile##*/}"
    local output="${outputFile%.*}"
    local name="${output##*/}"
 
    local command=( "${keyTableLister}" -D"${buildRoot}/lib" -T"${sourceRoot}/${tablesSubdirectory}" )
+   [ -n "${driver}" ] && command+=( -b "${driver}" )
    "${command[@]}" -l "${input}" >"${output}.${plainTextExtension}" || {
       rm -f "${output}.${plainTextExtension}"
       return 1
@@ -292,7 +293,7 @@ listBrailleKeyTables() {
          for inputFile
          do
             beginLayoutEntry "${braillePrefix}-${driverCode}" "${hypertextExtension}"
-            listKeyTable "${braillePrefix}-${driverCode}" "${hypertextExtension}" || continue
+            listKeyTable "${driverCode}" || continue
             endLayoutEntry "${driverName}"
          done
       else
@@ -332,7 +333,7 @@ listKeyboardKeyTables() {
    for inputFile
    do
       beginLayoutEntry "${keyboardPrefix}" "${hypertextExtension}"
-      listKeyTable "${keyboardPrefix}" || continue
+      listKeyTable || continue
       endLayoutEntry
    done
 
