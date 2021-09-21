@@ -410,6 +410,24 @@ writeBrailleMessage (
 }
 
 int
+getBrailleReportSize (BrailleDisplay *brl, unsigned char number, size_t *size) {
+  if (!(*size = gioGetHidReportSize(brl->gioEndpoint, number))) return 0;
+  return 1;
+}
+
+int
+getBrailleReportSizes (BrailleDisplay *brl, const BrailleReportSizeEntry *table) {
+  const BrailleReportSizeEntry *report = table;
+
+  while (report->number) {
+    if (!getBrailleReportSize(brl, report->number, report->size)) return 0;
+    report += 1;
+  }
+
+  return 1;
+}
+
+int
 probeBrailleDisplay (
   BrailleDisplay *brl, unsigned int retryLimit,
   GioEndpoint *endpoint, int inputTimeout,

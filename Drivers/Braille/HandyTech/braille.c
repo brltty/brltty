@@ -664,23 +664,6 @@ getHidReport (
   return result;
 }
 
-typedef struct {
-  HT_HidReportNumber number;
-  size_t *size;
-} ReportEntry;
-
-static int
-getHidReportSizes (BrailleDisplay *brl, const ReportEntry *table) {
-  const ReportEntry *report = table;
-
-  while (report->number) {
-    if (!(*report->size = gioGetHidReportSize(brl->gioEndpoint, report->number))) return 0;
-    report += 1;
-  }
-
-  return 1;
-}
-
 static int
 allocateHidInputBuffer (void) {
   if (hidReportSize_OutData) {
@@ -694,6 +677,14 @@ allocateHidInputBuffer (void) {
   }
 
   return 0;
+}
+
+static void
+deallocateHidInputBuffer (void) {
+  if (hidInputReport) {
+    free(hidInputReport);
+    hidInputReport = NULL;
+  }
 }
 
 static int
@@ -745,7 +736,7 @@ typedef struct {
 
 static int
 initializeUsbSession2 (BrailleDisplay *brl) {
-  static const ReportEntry reportTable[] = {
+  static const BrailleReportSizeEntry reportTable[] = {
     {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
     {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
     {.number=HT_HID_RPT_InCommand, .size=&hidReportSize_InCommand},
@@ -755,13 +746,15 @@ initializeUsbSession2 (BrailleDisplay *brl) {
     {.number=0}
   };
 
-  if (getHidReportSizes(brl, reportTable)) {
+  if (getBrailleReportSizes(brl, reportTable)) {
     if (allocateHidInputBuffer()) {
       if (getHidFirmwareVersion(brl)) {
         if (executeHidFirmwareCommand(brl, HT_HID_CMD_FlushBuffers)) {
           return 1;
         }
       }
+
+      deallocateHidInputBuffer();
     }
   }
 
@@ -868,13 +861,13 @@ static const UsbOperations usbOperations2 = {
 
 static int
 initializeUsbSession3 (BrailleDisplay *brl) {
-  static const ReportEntry reportTable[] = {
+  static const BrailleReportSizeEntry reportTable[] = {
     {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
     {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
     {.number=0}
   };
 
-  return getHidReportSizes(brl, reportTable);
+  return getBrailleReportSizes(brl, reportTable);
 }
 
 static ssize_t
@@ -1459,10 +1452,7 @@ brl_destruct (BrailleDisplay *brl) {
     brl->data = NULL;
   }
 
-  if (hidInputReport) {
-    free(hidInputReport);
-    hidInputReport = NULL;
-  }
+  deallocateHidInputBuffer();
 }
 
 static int
