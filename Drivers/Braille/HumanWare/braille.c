@@ -168,6 +168,7 @@ typedef struct {
   const char *modelName;
   const KeyTableDefinition *keyTableDefinition;
   HW_ModelIdentifier modelIdentifier;
+  unsigned char pressedKeysReportSize;
 
   unsigned char hasBrailleKeys:1;
   unsigned char hasCommandKeys:1;
@@ -239,6 +240,7 @@ static const ModelEntry modelEntry_one = {
 
 static const ModelEntry modelEntry_BI40X = {
   .modelName = "Brailliant BI 40X",
+  .pressedKeysReportSize = 46,
   .hasBrailleKeys = 1,
   .hasCommandKeys = 1,
   .keyTableDefinition = &KEY_TABLE_DEFINITION(BI40X)
@@ -767,11 +769,21 @@ probeHidDisplay (BrailleDisplay *brl) {
 
   {
     unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
-    *size = 1 + THUMB_KEY_COUNT + brl->textColumns;
-    if (brl->data->model->hasBrailleKeys) *size += BRAILLE_KEY_COUNT;
-    if (brl->data->model->hasCommandKeys) *size += COMMAND_KEY_COUNT;
-    if (brl->data->model->hasJoystick) *size += JOYSTICK_KEY_COUNT;
-    if (brl->data->model->hasSecondThumbKeys) *size += THUMB_KEY_COUNT;
+    unsigned char reportSize = brl->data->model->pressedKeysReportSize;
+
+    if (reportSize) {
+      *size = reportSize;
+    } else {
+      *size = 1;
+      *size += brl->textColumns;
+      *size += THUMB_KEY_COUNT;
+      if (brl->data->model->hasBrailleKeys) *size += BRAILLE_KEY_COUNT;
+      if (brl->data->model->hasCommandKeys) *size += COMMAND_KEY_COUNT;
+      if (brl->data->model->hasJoystick) *size += JOYSTICK_KEY_COUNT;
+      if (brl->data->model->hasSecondThumbKeys) *size += THUMB_KEY_COUNT;
+    }
+
+    logMessage(LOG_DEBUG, "pressed keys report size: %u", *size);
   }
 
   return 1;
