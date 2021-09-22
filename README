@@ -179,8 +179,9 @@ The following braille displays are supported:
               Connect Braille 40, Bookworm]
 -  Hedo [ProfiLine, MobilLine]
 -  HIMS [Braille Sense, SyncBraille, Braille Edge, Smart Beetle]
--  HumanWare [Brailliant BI 14/32/40/20X/40X, Brailliant B 80, BrailleNote Touch,
-              BrailleOne, APH Chameleon 20, APH Mantis Q40, NLS eReader]
+-  HumanWare [Brailliant BI 14/32/40, Brailliant BI 20X/40X,
+              Brailliant B 80, BrailleNote Touch, BrailleOne,
+              APH Chameleon 20, APH Mantis Q40, NLS eReader]
 -  Inceptor [BrailleMe (20)]
 -  Iris
 -  Libbraille
