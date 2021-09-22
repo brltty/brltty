@@ -28,14 +28,14 @@ processProgramArguments optionValues $optionDefinitions
 cd [file join $sourceRoot $documentsSubdirectory]
 
 array set tableHeaders {
-   braille-driver {code name others aliases}
-   speech-driver {code name comment aliases}
-   screen-driver {code name usage}
+   braille-driver {Code Name Others Aliases}
+   speech-driver {Code Name Comment Aliases}
+   screen-driver {Code Name Usage}
 
-   text-table {name description}
-   contraction-table {name description}
-   attributes-table {name description}
-   keyboard-table {name description}
+   text-table {Name Description}
+   contraction-table {Name Description}
+   attributes-table {Name Description}
+   keyboard-table {Name Description}
 }
 
 proc makeLists {file} {
