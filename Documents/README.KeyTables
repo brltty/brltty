@@ -541,13 +541,13 @@ Keyboard Table List
 ===================
 
 .. csv-table::
-   :header: "Name", "Description"
+   :header-rows: 1
    :file: keyboard-table.csv
 
 Braille Driver List
 ===================
 
 .. csv-table::
-   :header: "Code", "Name"
+   :header-rows: 1
    :file: braille-driver.csv
 

@@ -337,6 +337,6 @@ Contraction Table List
 ======================
 
 .. csv-table::
-   :header: "Name", "Description"
+   :header-rows: 1
    :file: contraction-table.csv
 

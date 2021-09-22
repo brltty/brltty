@@ -254,6 +254,6 @@ Text Table List
 ===============
 
 .. csv-table::
-   :header: "Name", "Description"
+   :header-rows: 1
    :file: text-table.csv
 

@@ -75,6 +75,6 @@ Attributes Table List
 =====================
 
 .. csv-table::
-   :header: "Name", "Description"
+   :header-rows: 1
    :file: attributes-table.csv
 
