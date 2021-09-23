@@ -18,7 +18,7 @@
 
 DRIVER_CODE = tt
 DRIVER_NAME = TTY
-DRIVER_COMMENT = terminfo
+DRIVER_USAGE = terminal connected via serial port
 DRIVER_VERSION = 0.2 (August, 2004)
 DRIVER_DEVELOPERS = Samuel Thibault <samuel.thibault@ens-lyon.org>
 BRL_OBJS = @braille_libraries_tt@

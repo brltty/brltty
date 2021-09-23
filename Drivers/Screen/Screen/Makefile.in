@@ -18,7 +18,7 @@
 
 DRIVER_CODE = sc
 DRIVER_NAME = Screen
-DRIVER_COMMENT = 
+DRIVER_USAGE = patched screen program
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
 include $(SRC_TOP)screen.mk

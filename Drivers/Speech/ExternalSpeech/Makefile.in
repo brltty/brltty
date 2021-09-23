@@ -18,7 +18,7 @@
 
 DRIVER_CODE = xs
 DRIVER_NAME = ExternalSpeech
-DRIVER_COMMENT = sends speech to external program and receives spoken position indexes, over UNIX socket
+DRIVER_USAGE = sends speech to external program and receives spoken position indexes
 DRIVER_VERSION = 1.0 (April 2019)
 DRIVER_DEVELOPERS = Stéphane Doyon <s.doyon@videotron.ca>
 include $(SRC_TOP)speech.mk

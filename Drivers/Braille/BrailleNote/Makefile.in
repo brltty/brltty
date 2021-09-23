@@ -18,7 +18,7 @@
 
 DRIVER_CODE = bn
 DRIVER_NAME = BrailleNote
-DRIVER_COMMENT = 18/32, Apex
+DRIVER_USAGE = 18/32, Apex
 DRIVER_VERSION = 1.0
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 include $(SRC_TOP)braille.mk

@@ -18,7 +18,7 @@
 
 DRIVER_CODE = vr
 DRIVER_NAME = Virtual
-DRIVER_COMMENT = TCP/Unix, client/server
+DRIVER_USAGE = remote client/server via TCP/IP or local socket
 DRIVER_VERSION = 0.1
 DRIVER_DEVELOPERS = Mario Lang <mlang@delysid.org>
 include $(SRC_TOP)braille.mk

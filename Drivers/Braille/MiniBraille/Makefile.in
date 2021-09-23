@@ -18,7 +18,7 @@
 
 DRIVER_CODE = mn
 DRIVER_NAME = MiniBraille
-DRIVER_COMMENT = 20
+DRIVER_USAGE = 20
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Brailcom o.p.s. <technik@brailcom.cz>
 include $(SRC_TOP)braille.mk

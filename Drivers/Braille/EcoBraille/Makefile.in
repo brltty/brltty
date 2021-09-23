@@ -18,7 +18,7 @@
 
 DRIVER_CODE = ec
 DRIVER_NAME = EcoBraille
-DRIVER_COMMENT = 20/40/80
+DRIVER_USAGE = 20/40/80
 DRIVER_VERSION = 1.00
 DRIVER_DEVELOPERS = Oscar Fernandez <ofa@once.es>
 include $(SRC_TOP)braille.mk

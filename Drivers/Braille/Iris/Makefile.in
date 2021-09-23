@@ -18,7 +18,7 @@
 
 DRIVER_CODE = ir
 DRIVER_NAME = Iris
-DRIVER_COMMENT = 
+DRIVER_USAGE = KB
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
 include $(SRC_TOP)braille.mk

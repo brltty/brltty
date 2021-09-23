@@ -18,7 +18,7 @@
 
 DRIVER_CODE = as
 DRIVER_NAME = AtSpi
-DRIVER_COMMENT = 
+DRIVER_USAGE = X11 desktop via AT-SPI 1
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
 SCR_OBJS = @screen_libraries_as@

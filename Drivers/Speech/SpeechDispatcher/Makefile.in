@@ -18,7 +18,7 @@
 
 DRIVER_CODE = sd
 DRIVER_NAME = SpeechDispatcher
-DRIVER_COMMENT = text to speech server
+DRIVER_USAGE = multi-engine server
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
 SPK_OBJS = $(SPEECHD_LIBS)

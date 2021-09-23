@@ -28,14 +28,14 @@ processProgramArguments optionValues $optionDefinitions
 cd [file join $sourceRoot $documentsSubdirectory]
 
 array set tableHeaders {
-   braille-driver {Code Name Others Aliases}
-   speech-driver {Code Name Comment Aliases}
-   screen-driver {Code Name Usage}
+   braille-driver {code name aliases others}
+   speech-driver  {code name aliases}
+   screen-driver  {code name}
 
-   text-table {Name Description}
-   contraction-table {Name Description}
-   attributes-table {Name Description}
-   keyboard-table {Name Description}
+   text-table        {name description}
+   contraction-table {name description}
+   attributes-table  {name description}
+   keyboard-table    {name description}
 }
 
 proc makeLists {file} {
@@ -51,27 +51,58 @@ proc makeLists {file} {
    return $lists
 }
 
-proc updateFiles {lists} {
+proc updateTable {lists name} {
    global tableHeaders
+
+   if {[info exists tableHeaders($name)]} {
+      set headers $tableHeaders($name)
+      set rows [csvNormalizeRows [linsert [dict get $lists $name] 0 $headers] [llength $headers]]
+
+      if {[regexp {^(.*)-driver$} $name x driverType]} {
+         set usageColumn [list usage]
+         set driversDirectory [file join $::sourceRoot $::driversSubdirectory [string totitle $driverType]]
+
+         foreach columns [lrange $rows 1 end] {
+            set driverName [lindex $columns 1]
+            set makeFile [file join $driversDirectory $driverName Makefile.in]
+
+            if {[file exists $makeFile]} {
+               set driverUsage [getMakeFileProperty $makeFile DRIVER_USAGE]
+            } else {
+               set driverUsage ""
+            }
+
+            lappend usageColumn $driverUsage
+         }
+
+         set rows [lmap columns $rows usage $usageColumn {
+            linsert $columns end $usage
+         }]
+      }
+
+      if {[updateFile "$name.csv" [csvMakeTable $rows] $::optionValues(test)]} {
+         return 1
+      }
+   } else {
+      logMessage warning "table headers not defined: $name"
+   }
+
+   return 0
+}
+
+proc updateTables {lists} {
    set updated 0
 
-   foreach type [dict keys $lists] {
-      if {[info exists tableHeaders($type)]} {
-         set headers $tableHeaders($type)
-         set data [csvMakeTable [linsert [dict get $lists $type] 0 $headers] [llength $headers]]
-
-         if {[updateFile "$type.csv" $data $::optionValues(test)]} {
-            set updated 1
-         }
-      } else {
-         logMessage warning "table headers not defined: $type"
+   foreach name [dict keys $lists] {
+      if {[updateTable $lists $name]} {
+         set updated 1
       }
    }
 
    return $updated
 }
 
-if {![updateFiles [makeLists "brltty.conf.in"]]} {
+if {![updateTables [makeLists "brltty.conf.in"]]} {
    logMessage task "no files updated"
 }
 

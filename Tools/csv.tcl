@@ -16,39 +16,39 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+proc csvNormalizeRow {columns width} {
+   if {[set count [llength $columns]] > $width} {
+      set columns [lrange $columns 0 $width-1]
+   } elseif {$count < $width} {
+      lvarcat columns [lrepeat [expr {$width - $count}] ""]
+   }
+
+   return $columns
+}
+
+proc csvNormalizeRows {rows width} {
+   set result [list]
+
+   foreach columns $rows {
+      lappend result [csvNormalizeRow $columns $width]
+   }
+
+   return $result
+}
+
 proc csvQuoteText {text} {
    return "\"[regsub -all {(")} $text {\1\1}]\""
 }
 
-proc csvMakeRow {columns {width ""}} {
-   if {[string length $width] > 0} {
-      set count [llength $columns]
-
-      if {$count < $width} {
-         eval lappend columns [lrepeat [expr {$width - $count}] ""]
-      } elseif {$count > $width} {
-         set columns [lreplace $columns $width end]
-      }
-   }
-
-   return [join [lmap text $columns {csvQuoteText $text}] ,]
+proc csvMakeLine {columns} {
+   return [join [lmap cell $columns {csvQuoteText $cell}] ,]
 }
 
-proc csvMakeTable {rows {width ""}} {
+proc csvMakeTable {rows} {
    set table ""
 
-   if {[string length $width] == 0} {
-      set width 0
-
-      foreach columns $rows {
-         if {[set count [llength $columns]] > $width} {
-            set width $count
-         }
-      }
-   }
-
    foreach columns $rows {
-      append table [csvMakeRow $columns $width]
+      append table [csvMakeLine $columns]
       append table "\n"
    }
 

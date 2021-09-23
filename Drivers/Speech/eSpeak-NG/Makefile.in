@@ -18,7 +18,7 @@
 
 DRIVER_CODE = en
 DRIVER_NAME = eSpeak-NG
-DRIVER_COMMENT = text to speech engine
+DRIVER_USAGE = software engine
 DRIVER_VERSION = 0.1
 DRIVER_DEVELOPERS = Nicolas Pitre <nico@fluxnic.net>, Ondřej Lysoněk <olysonek@redhat.com>
 SPK_OBJS = @speech_libraries_en@

@@ -61,7 +61,7 @@
 #braille-driver	bc	# BrailComm
 #braille-driver	bd	# Braudi
 #braille-driver	bl	# BrailleLite
-#braille-driver	bm	# Baum; Refreshabraille, Orbit, NLS eReader Zoomax, NBP B2G
+#braille-driver	bm	# Baum;; Refreshabraille, Orbit, NLS eReader Zoomax, NBP B2G
 #braille-driver	bn	# BrailleNote
 #braille-driver	cb	# CombiBraille
 #braille-driver	ce	# Cebra
@@ -69,12 +69,12 @@
 #braille-driver	ec	# EcoBraille
 #braille-driver	eu	# EuroBraille
 #braille-driver	fa	# FrankAudiodata
-#braille-driver	fs	# FreedomScientific;; VFO, Vispero
+#braille-driver	fs	# FreedomScientific; VFO, Vispero
 #braille-driver	hd	# Hedo
 #braille-driver	hm	# HIMS
-#braille-driver	ht	# HandyTech;; HelpTech
-#braille-driver	hw	# HumanWare; APH Chameleon, APH Mantis, NLS eReader
-#braille-driver	ic	# Inceptor;; Innovision
+#braille-driver	ht	# HandyTech; HelpTech
+#braille-driver	hw	# HumanWare;; APH Chameleon, APH Mantis, NLS eReader
+#braille-driver	ic	# Inceptor; Innovision
 #braille-driver	ir	# Iris
 #braille-driver	lb	# Libbraille
 #braille-driver	lt	# LogText
@@ -90,7 +90,7 @@
 #braille-driver	tn	# TechniBraille
 #braille-driver	ts	# TSI
 #braille-driver	vd	# VideoBraille
-#braille-driver	vo	# Voyager; Braille Pen, Easy Link
+#braille-driver	vo	# Voyager;; Braille Pen, Easy Link
 #braille-driver	vs	# VisioBraille
 
 # The braille-device directive specifies the device to which the braille
@@ -348,21 +348,21 @@
 # then autodetection will be performed amongst them.
 # (can be overridden with the --speech-driver= [-s] option)
 #speech-driver	auto	# autodetect
-#speech-driver	al	# Alva; braille device
-#speech-driver	an	# Android; OS-specific
-#speech-driver	bl	# BrailleLite; braille device
-#speech-driver	cb	# CombiBraille; braille device
-#speech-driver	en	# eSpeak-NG; software engine
-#speech-driver	es	# eSpeak; software engine
-#speech-driver	fl	# FestivalLite; software engine
-#speech-driver	fv	# Festival; software engine
-#speech-driver	gs	# GenericSay; pipes to /usr/local/bin/say
-#speech-driver	mp	# Mikropuhe; software engine
-#speech-driver	sd	# SpeechDispatcher; multi-engine server
-#speech-driver	sw	# Swift; software engine
-#speech-driver	th	# Theta; software engine
-#speech-driver	vv	# ViaVoice; software engine; Voxin
-#speech-driver	xs	# ExternalSpeech; executes /usr/local/bin/externalspeech
+#speech-driver	al	# Alva
+#speech-driver	an	# Android
+#speech-driver	bl	# BrailleLite
+#speech-driver	cb	# CombiBraille
+#speech-driver	en	# eSpeak-NG
+#speech-driver	es	# eSpeak
+#speech-driver	fl	# FestivalLite
+#speech-driver	fv	# Festival
+#speech-driver	gs	# GenericSay
+#speech-driver	mp	# Mikropuhe
+#speech-driver	sd	# SpeechDispatcher
+#speech-driver	sw	# Swift
+#speech-driver	th	# Theta
+#speech-driver	vv	# ViaVoice; Voxin
+#speech-driver	xs	# ExternalSpeech
 
 # The speech-input directive specifies the name of the file system object
 # (FIFO, named pipe, named socket, etc) which can be used by external
@@ -689,14 +689,14 @@
 # The screen-driver directive specifies the two-letter driver
 # identification code of the driver for the console screen.
 # (can be overridden with the --screen-driver= [-x] option)
-#screen-driver	an	# Android; Android
-#screen-driver	as	# AtSpi; X11 desktop via AT-SPI 1
-#screen-driver	a2	# AtSpi2; X11 desktop via AT-SPI 2
-#screen-driver	hd	# Hurd; The Hurd
-#screen-driver	lx	# Linux; Linux
-#screen-driver	pb	# PCBIOS; MS-DOS
-#screen-driver	sc	# Screen; patched screen program
-#screen-driver	wn	# Windows; Microsoft Windows
+#screen-driver	an	# Android
+#screen-driver	as	# AtSpi
+#screen-driver	a2	# AtSpi2
+#screen-driver	hd	# Hurd
+#screen-driver	lx	# Linux
+#screen-driver	pb	# PcBios
+#screen-driver	sc	# Screen
+#screen-driver	wn	# Windows
 
 
 ############################

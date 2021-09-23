@@ -18,7 +18,7 @@
 
 DRIVER_CODE = al
 DRIVER_NAME = Alva
-DRIVER_COMMENT = Delphi(4nn)
+DRIVER_USAGE = braille device
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
 include $(SRC_TOP)speech.mk

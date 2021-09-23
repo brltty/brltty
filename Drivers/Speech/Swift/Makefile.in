@@ -18,7 +18,7 @@
 
 DRIVER_CODE = sw
 DRIVER_NAME = Swift
-DRIVER_COMMENT = text to speech engine
+DRIVER_USAGE = software engine
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
 SPK_OBJS = @speech_libraries_sw@

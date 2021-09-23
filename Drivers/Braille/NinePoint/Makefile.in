@@ -18,7 +18,7 @@
 
 DRIVER_CODE = np
 DRIVER_NAME = NinePoint
-DRIVER_COMMENT = 8
+DRIVER_USAGE = 8
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 include $(SRC_TOP)braille.mk

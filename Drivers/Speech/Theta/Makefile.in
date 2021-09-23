@@ -18,7 +18,7 @@
 
 DRIVER_CODE = th
 DRIVER_NAME = Theta
-DRIVER_COMMENT = text to speech engine
+DRIVER_USAGE = software engine
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
 SPK_OBJS = @speech_libraries_th@

@@ -112,7 +112,9 @@ Metec
 MiniBraille
   |20@
 MultiBraille
-  |MB125CR/MB145CR/MB185CR@
+  |MB125CR@
+  |MB145CR@
+  |MB185CR@
 NinePoint
   |8@
 Papenmeier
