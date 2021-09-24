@@ -85,7 +85,7 @@ do
    make -s -C "${buildDocuments}" "${document#README.}.html"
 done
 
-updateFiles "${sourceRoot}" "${documentsSubdirectory}" "." "BUGS" "ChangeLog" "CONTRIBUTORS" "HISTORY" "TODO"
+updateFiles "${sourceRoot}" "${documentsSubdirectory}" "." "BUGS" "ChangeLog" "CONTRIBUTORS" "HISTORY" "TODO" "*.csv"
 updateFiles "${buildRoot}" "${documentsSubdirectory}" "." "brltty.conf" "*.html"
 
 for manual in `cd "${sourceDocuments}" && echo Manual-*/*`

@@ -1,4 +1,4 @@
-#!/bin/bash -p
+#!/bin/bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -23,7 +23,7 @@ shopt -s nullglob
 defaultArchiveName="brltty-dos"
 defaultInstallDirectory="BRLTTY"
 
-. "`dirname "${0}"`/../brltty-prologue.sh"
+. "`dirname "${0}"`/../prologue.sh"
 addProgramOption a string.name archiveName "specify archive name" "${defaultArchiveName}"
 addProgramOption i string.directory installDirectory "specify installation directory on target system" "${defaultInstallDirectory}"
 addProgramOption o flag overwriteArchive "overwrite existing archive"
@@ -60,6 +60,14 @@ function installFile {
    local targetDirectory="${targetFile%/*}"
    mkdir -p "${targetDirectory}"
    cp "${sourceFile}" "${targetFile}"
+}
+
+function installCSV {
+   local oldName="${1}"
+   local newName="${2}"
+
+   local extension="csv"
+   installFile "${sourceDirectory}/${documentsSubdirectory}/${oldName}.${extension}" "${documentSubdirectory}/${newName}.${extension}"
 }
 
 function installManualFiles {
@@ -122,8 +130,8 @@ cd "${installDirectory}/bin"
 mv brltty-lscmds.exe brllscmd.exe
 mv brltty-trtxt.exe brltrtxt.exe
 mv brltty-ttb.exe brlttb.exe
-mv brltty-atb.exe brlatb.exe
 mv brltty-ctb.exe brlctb.exe
+mv brltty-atb.exe brlatb.exe
 mv brltty-ktb.exe brlktb.exe
 mv brltty-tune.exe brltune.exe
 mv brltty-morse.exe brlmorse.exe
@@ -158,10 +166,28 @@ done
 cd "${sourceDirectory}"
 installFile "LICENSE-LGPL" "LIC-LGPL.txt"
 installFile "README" "README.txt"
-installFile "Documents/README.DOS" "${documentSubdirectory}/DOS.txt"
-installFile "Documents/ChangeLog" "${documentSubdirectory}/CHANGES.txt"
-installFile "Documents/HISTORY" "${documentSubdirectory}/HISTORY.txt"
-installFile "Documents/TODO" "${documentSubdirectory}/TODO.txt"
+
+cd "${documentsSubdirectory}"
+installFile "ChangeLog" "${documentSubdirectory}/CHG-LOG.txt"
+
+for file in DOS
+do
+   installFile "README.${file}" "${documentSubdirectory}/${file}.txt"
+done
+
+for file in BUGS CONTRIBUTORS HISTORY TODO
+do
+   installFile "${file}" "${documentSubdirectory}/${file}.txt"
+done
+
+installCSV braille-driver BRL-DRV
+installCSV speech-driver SPK-DRV
+installCSV screen-driver SCR-DRV
+
+installCSV text-table TEXT-TBL
+installCSV contraction-table CONT-TBL
+installCSV attributes-table ATTR-TBL
+installCSV keyboard-table KBD-TBL
 
 installManualFiles "${sourceDirectory}"
 installManualFiles "${buildDirectory}"
@@ -211,7 +237,7 @@ find . -print |
          else
             case "${extension}"
             in
-               txt | html | htm | cfg | [tcak]t[bi] | h) convertTextFile "${path}";;
+               txt | html | htm | csv | cfg | [tcak]t[bi] | h) convertTextFile "${path}";;
                exe | pdf | doc);;
                *) logMessage warning "unexpected file extension: ${handle}";;
             esac
