@@ -586,6 +586,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc %{_docdir}/*/CONTRIBUTORS
 %doc %{_docdir}/*/HISTORY
 %doc %{_docdir}/*/TODO
+%doc %{_docdir}/*/*.csv
 %doc %{_docdir}/*/brltty.conf
 %doc %{_docdir}/*/KeyTables
 %doc %{_docdir}/*/Manual-BRLTTY
