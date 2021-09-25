@@ -16,7 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-note The five joystick motions are named Left, Right, Up, Down, and Press.
-
 assign press Press
+note The five joystick motions are named Left, Right, Up, Down, and \{press}.
 include keyboard.kti

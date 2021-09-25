@@ -16,7 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-note The five navigation pad keys are named Left, Right, Up, Down, and Center.
-
-assign press Center
+assign press Select
+note The five navigation pad keys are named Left, Right, Up, Down, and \{press}.
 include keyboard.kti

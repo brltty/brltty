@@ -43,15 +43,15 @@ bind S2 TIME
 bind S3 INFO
 bind S4 LEARN
 
-bind BL+Center PREFMENU
+bind BL+Select PREFMENU
 bind BL+Up PREFLOAD
 bind BL+Down PREFSAVE
 
 bind BL+Left PRNBWIN
 bind BL+Right NXNBWIN
 
-bind Center+Left FWINLTSKIP
-bind Center+Right FWINRTSKIP
+bind Select+Left FWINLTSKIP
+bind Select+Right FWINRTSKIP
 
 bind Left+Up TOP_LEFT
 bind Left+Down BOT_LEFT
@@ -89,10 +89,10 @@ bind S2+RoutingKey NXDIFCHAR
 bind S3+RoutingKey PRINDENT
 bind S4+RoutingKey NXINDENT
 
-bind Center+S1 ATTRVIS
-bind Center+S2 CSRVIS
-bind Center+S3 CSRTRK
-bind Center+S4 SIXDOTS
+bind Select+S1 ATTRVIS
+bind Select+S2 CSRVIS
+bind Select+S3 CSRTRK
+bind Select+S4 SIXDOTS
 
 bind BL+S3 DISPMD
 bind BL+S4 FREEZE

@@ -42,5 +42,5 @@ bind B11+Up TOP
 bind B11+Down BOT
 bind B11+Left FWINLTSKIP
 bind B11+Right FWINRTSKIP
-bind B11+Center PASTE
+bind B11+Select PASTE
 
