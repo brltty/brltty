@@ -16,8 +16,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+assignDefault previous ThumbPrevious
+assignDefault left ThumbLeft
+assignDefault right ThumbRight
+assignDefault next ThumbNext
+
 note There are four rectangular thumb keys on the front. From left to right:
-note * The outer ones are named ThumbUp and ThumbDown.
+note * The outer ones are named ThumbPrevious and ThumbNext.
 note * The inner ones are named ThumbLeft and ThumbRight.
 note * Some models have a round key in the middle - it's the internal menu key.
 
@@ -26,20 +31,20 @@ note * Some models have a round key in the middle - it's the internal menu key.
 ####################
 
 bind ThumbLeft+ThumbRight HOME
-bind ThumbLeft FWINLT
-bind ThumbRight FWINRT
-bind ThumbPrevious LNUP
-bind ThumbNext LNDN
+bind \{left} FWINLT
+bind \{right} FWINRT
+bind \{previous} LNUP
+bind \{next} LNDN
 
-bind ThumbLeft+ThumbPrevious TOP_LEFT
-bind ThumbLeft+ThumbNext BOT_LEFT
-bind ThumbRight+ThumbPrevious PRDIFLN
-bind ThumbRight+ThumbNext NXDIFLN
+bind \{left}+\{previous} TOP_LEFT
+bind \{left}+\{next} BOT_LEFT
+bind \{right}+\{previous} PRDIFLN
+bind \{right}+\{next} NXDIFLN
 
 bind ThumbPrevious+RoutingKey CLIP_NEW
 bind ThumbLeft+RoutingKey CLIP_ADD
-bind ThumbRight+RoutingKey COPY_LINE
-bind ThumbNext+RoutingKey COPY_RECT
+bind \{right}+RoutingKey COPY_LINE
+bind \{next}+RoutingKey COPY_RECT
 bind ThumbPrevious+ThumbNext PASTE
 
 
@@ -49,14 +54,14 @@ bind ThumbPrevious+ThumbNext PASTE
 
 context menu
 
-bind ThumbLeft FWINLT
-bind ThumbRight FWINRT
-bind ThumbPrevious MENU_PREV_ITEM
-bind ThumbNext MENU_NEXT_ITEM
-bind ThumbPrevious+ThumbLeft MENU_FIRST_ITEM
-bind ThumbPrevious+ThumbRight MENU_LAST_ITEM
-bind ThumbNext+ThumbLeft MENU_PREV_SETTING
-bind ThumbNext+ThumbRight MENU_NEXT_SETTING
+bind \{left} FWINLT
+bind \{right} FWINRT
+bind \{previous} MENU_PREV_ITEM
+bind \{next} MENU_NEXT_ITEM
+bind \{left}+\{previous} MENU_FIRST_ITEM
+bind \{left}+\{next} MENU_LAST_ITEM
+bind \{right}+\{previous} MENU_PREV_SETTING
+bind \{right}+\{next} MENU_NEXT_SETTING
 bind ThumbLeft+ThumbRight PREFMENU
 bind ThumbLeft+ThumbRight+ThumbPrevious PREFLOAD
 bind ThumbLeft+ThumbRight+ThumbNext PREFSAVE
