@@ -38,8 +38,8 @@ bind ThumbRight+ThumbNext NXDIFLN
 
 bind ThumbPrevious+RoutingKey CLIP_NEW
 bind ThumbLeft+RoutingKey CLIP_ADD
-bind ThumbRight+RoutingKey COPY_RECT
-bind ThumbNext+RoutingKey COPY_LINE
+bind ThumbRight+RoutingKey COPY_LINE
+bind ThumbNext+RoutingKey COPY_RECT
 bind ThumbPrevious+ThumbNext PASTE
 
 
