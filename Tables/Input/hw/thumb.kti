@@ -31,10 +31,10 @@ bind ThumbRight FWINRT
 bind ThumbPrevious LNUP
 bind ThumbNext LNDN
 
-bind ThumbPrevious+ThumbLeft TOP_LEFT
-bind ThumbPrevious+ThumbRight BOT_LEFT
-bind ThumbNext+ThumbLeft PRDIFLN
-bind ThumbNext+ThumbRight NXDIFLN
+bind ThumbLeft+ThumbPrevious TOP_LEFT
+bind ThumbLeft+ThumbNext BOT_LEFT
+bind ThumbRight+ThumbPrevious PRDIFLN
+bind ThumbRight+ThumbNext NXDIFLN
 
 bind ThumbPrevious+RoutingKey CLIP_NEW
 bind ThumbLeft+RoutingKey CLIP_ADD
