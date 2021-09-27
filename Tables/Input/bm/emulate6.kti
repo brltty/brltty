@@ -16,6 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-assignDefault press Select
-note The five navigation pad keys are named Left, Right, Up, Down, and \{press}.
-include keyboard.kti
+note Any display key combination can be emulated by holding \{press}
+note * while typing the corresponding combination of dots 1-6.
+include d6.kti

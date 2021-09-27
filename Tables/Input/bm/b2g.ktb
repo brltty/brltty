@@ -33,6 +33,7 @@ bind B9 FWINLT
 bind B10 FWINRT
 
 assign space B11
+assign press Select
 include navpad.kti
 
 bind B9+RoutingKey SETLEFT
