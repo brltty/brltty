@@ -105,6 +105,7 @@ extern ssize_t readSocketDescriptor (SocketDescriptor socketDescriptor, void *bu
 extern ssize_t writeSocketDescriptor (SocketDescriptor socketDescriptor, const void *buffer, size_t size);
 #endif /* GOT_SOCKETS */
 
+extern int getConsoleSize (size_t *width, size_t *height);
 extern const char *getConsoleEncoding (void);
 extern void writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count);
 

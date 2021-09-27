@@ -25,6 +25,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <limits.h>
 #include <locale.h>
 
@@ -1030,6 +1031,11 @@ STR_BEGIN_FORMATTER(formatInputError, const char *file, const int *line, const c
 STR_END_FORMATTER
 
 #ifdef __MINGW32__
+int
+getConsoleSize (size_t *width, size_t *height) {
+  return 0;
+}
+
 const char *
 getConsoleEncoding (void) {
   static char encoding[0X10];
@@ -1097,6 +1103,16 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
 }
 
 #else /* unix file/socket descriptor operations */
+int
+getConsoleSize (size_t *width, size_t *height) {
+  struct winsize size;
+  if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) == -1) return 0;
+
+  if (width) *width = size.ws_col;
+  if (height) *height = size.ws_row;
+  return 1;
+}
+
 const char *
 getConsoleEncoding (void) {
   static const char *encoding = NULL;
