@@ -609,7 +609,9 @@ processCommandLine (
   *argumentCount -= optind;
 
   if (optHelp) {
-    showUsageSummary(info, stdout, 79, argumentsSummary, optHelpAll);
+    size_t width = UINT16_MAX;
+    getConsoleSize(&width, NULL);
+    showUsageSummary(info, stdout, width, argumentsSummary, optHelpAll);
     info->exitImmediately = 1;
   }
 
