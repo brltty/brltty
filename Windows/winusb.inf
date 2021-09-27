@@ -63,7 +63,10 @@ DriverVer=09/04/2012,13.54.20.543
 "winusb: HIMS [Braille Edge]"=USB_Install, USB\VID_045E&PID_930B
 
 ; Device: 0483:A1D3
-"winusb: Baum [Orbit 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
+"winusb: Baum [Orbit Reader 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
+
+; Device: 0483:A366
+"winusb: Baum [Orbit Reader 40 (40 cells)]"=USB_Install, USB\VID_0483&PID_A366
 
 ; Device: 06B0:0001
 "winusb: Alva [Satellite (5nn)]"=USB_Install, USB\VID_06B0&PID_0001
@@ -428,7 +431,10 @@ DriverVer=09/04/2012,13.54.20.543
 "winusb: HIMS [Braille Edge]"=USB_Install, USB\VID_045E&PID_930B
 
 ; Device: 0483:A1D3
-"winusb: Baum [Orbit 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
+"winusb: Baum [Orbit Reader 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
+
+; Device: 0483:A366
+"winusb: Baum [Orbit Reader 40 (40 cells)]"=USB_Install, USB\VID_0483&PID_A366
 
 ; Device: 06B0:0001
 "winusb: Alva [Satellite (5nn)]"=USB_Install, USB\VID_06B0&PID_0001

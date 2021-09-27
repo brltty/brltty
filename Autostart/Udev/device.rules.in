@@ -98,8 +98,12 @@ ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_BRAILLE_DRIVER}="hm", GOTO="brltty_usb_ru
 ENV{PRODUCT}=="45e/930b/*", ENV{BRLTTY_BRAILLE_DRIVER}="hm", GOTO="brltty_usb_run"
 
 # Device: 0483:A1D3
-# Baum [Orbit 20 (20 cells)]
+# Baum [Orbit Reader 20 (20 cells)]
 ENV{PRODUCT}=="483/a1d3/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
+# Device: 0483:A366
+# Baum [Orbit Reader 40 (40 cells)]
+ENV{PRODUCT}=="483/a366/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
 
 # Device: 06B0:0001
 # Alva [Satellite (5nn)]

@@ -178,7 +178,10 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
 ; Device: 0483:A1D3
-"LibUSB-Win32: Baum [Orbit 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
+"LibUSB-Win32: Baum [Orbit Reader 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
+
+; Device: 0483:A366
+"LibUSB-Win32: Baum [Orbit Reader 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A366
 
 ; Device: 06B0:0001
 "LibUSB-Win32: Alva [Satellite (5nn)]"=LIBUSB_DEV, USB\VID_06B0&PID_0001
@@ -543,7 +546,10 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
 ; Device: 0483:A1D3
-"LibUSB-Win32: Baum [Orbit 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
+"LibUSB-Win32: Baum [Orbit Reader 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
+
+; Device: 0483:A366
+"LibUSB-Win32: Baum [Orbit Reader 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A366
 
 ; Device: 06B0:0001
 "LibUSB-Win32: Alva [Satellite (5nn)]"=LIBUSB_DEV, USB\VID_06B0&PID_0001
@@ -908,7 +914,10 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
 ; Device: 0483:A1D3
-"LibUSB-Win32: Baum [Orbit 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
+"LibUSB-Win32: Baum [Orbit Reader 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
+
+; Device: 0483:A366
+"LibUSB-Win32: Baum [Orbit Reader 40 (40 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A366
 
 ; Device: 06B0:0001
 "LibUSB-Win32: Alva [Satellite (5nn)]"=LIBUSB_DEV, USB\VID_06B0&PID_0001

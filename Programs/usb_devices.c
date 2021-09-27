@@ -98,8 +98,12 @@ USB_DEVICE_ENTRY(0X045E, 0X930A, "hm"),
 USB_DEVICE_ENTRY(0X045E, 0X930B, "hm"),
 
 // Device: 0483:A1D3
-// Baum [Orbit 20 (20 cells)]
+// Baum [Orbit Reader 20 (20 cells)]
 USB_DEVICE_ENTRY(0X0483, 0XA1D3, "bm"),
+
+// Device: 0483:A366
+// Baum [Orbit Reader 40 (40 cells)]
+USB_DEVICE_ENTRY(0X0483, 0XA366, "bm"),
 
 // Device: 06B0:0001
 // Alva [Satellite (5nn)]

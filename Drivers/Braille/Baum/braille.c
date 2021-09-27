@@ -2995,8 +2995,15 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&baumEscapeOperations
     },
 
-    { /* Orbit 20 (20 cells) */
+    { /* Orbit Reader 20 (20 cells) */
       .vendor=0X0483, .product=0XA1D3,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&baumHid1Operations,
+    },
+
+    { /* Orbit Reader 40 (40 cells) */
+      .vendor=0X0483, .product=0Xa366,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&baumHid1Operations,

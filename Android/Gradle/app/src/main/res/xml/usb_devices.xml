@@ -74,8 +74,12 @@
   <usb-device vendor-id="1118" product-id="37643" />
 
   <!-- Device: 0483:A1D3 -->
-  <!-- Baum [Orbit 20 (20 cells)] -->
+  <!-- Baum [Orbit Reader 20 (20 cells)] -->
   <usb-device vendor-id="1155" product-id="41427" />
+
+  <!-- Device: 0483:A366 -->
+  <!-- Baum [Orbit Reader 40 (40 cells)] -->
+  <usb-device vendor-id="1155" product-id="41830" />
 
   <!-- Device: 06B0:0001 -->
   <!-- Alva [Satellite (5nn)] -->
