@@ -25,7 +25,6 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <limits.h>
 #include <locale.h>
 
@@ -1033,6 +1032,23 @@ STR_END_FORMATTER
 #ifdef __MINGW32__
 int
 getConsoleSize (size_t *width, size_t *height) {
+  HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+  if (handle) {
+    if (handle != INVALID_HANDLE_VALUE) {
+      if (GetFileType(handle) == FILE_TYPE_CHAR) {
+        CONSOLE_SCREEN_BUFFER_INFO info;
+
+        if (GetConsoleScreenBufferInfo(handle, &info)) {
+          COORD size = info.dwSize;
+          if (width) *width = size.X;
+          if (height) *height = size.Y;
+          return 1;
+        }
+      }
+    }
+  }
+
   return 0;
 }
 
@@ -1103,6 +1119,8 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
 }
 
 #else /* unix file/socket descriptor operations */
+#include <sys/ioctl.h>
+
 int
 getConsoleSize (size_t *width, size_t *height) {
   struct winsize size;
