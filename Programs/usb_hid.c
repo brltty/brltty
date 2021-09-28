@@ -31,9 +31,11 @@ const UsbHidDescriptor *
 usbHidDescriptor (UsbDevice *device) {
   const UsbDescriptor *descriptor = NULL;
 
-  while (usbNextDescriptor(device, &descriptor))
-    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_HID)
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_HID) {
       return &descriptor->hid;
+    }
+  }
 
   logMessage(LOG_WARNING, "USB: HID descriptor not found");
   errno = ENOENT;
@@ -57,11 +59,12 @@ usbHidGetItems (
       void *buffer = malloc(length);
 
       if (buffer) {
-        ssize_t result = usbControlRead(device,
-                                        UsbControlRecipient_Interface, UsbControlType_Standard,
-                                        UsbStandardRequest_GetDescriptor,
-                                        (descriptor->bDescriptorType << 8) | interface,
-                                        number, buffer, length, timeout);
+        ssize_t result = usbControlRead(
+          device, UsbControlRecipient_Interface, UsbControlType_Standard,
+          UsbStandardRequest_GetDescriptor,
+          (descriptor->bDescriptorType << 8) | interface,
+          number, buffer, length, timeout
+        );
 
         if (result != -1) {
           *items = buffer;
@@ -83,8 +86,7 @@ usbHidGetItems (
 
 int
 usbHidFillReportDescription (
-  const unsigned char *items,
-  size_t size,
+  const unsigned char *items, size_t size,
   unsigned char identifier,
   UsbHidReportDescription *description
 ) {
@@ -108,7 +110,7 @@ usbHidFillReportDescription (
     }
 
     switch (type) {
-      case UsbHidItemType_ReportID:
+      case UsbHidItemType_ReportID: {
         if (!found && (value == identifier)) {
           memset(description, 0, sizeof(*description));
           description->reportIdentifier = identifier;
@@ -116,39 +118,50 @@ usbHidFillReportDescription (
           found = 1;
           continue;
         }
-        break;
 
-      case UsbHidItemType_ReportCount:
+        break;
+      }
+
+      case UsbHidItemType_ReportCount: {
         if (found) {
           description->reportCount = value;
           goto defined;
         }
-        break;
 
-      case UsbHidItemType_ReportSize:
+        break;
+      }
+
+      case UsbHidItemType_ReportSize: {
         if (found) {
           description->reportSize = value;
           goto defined;
         }
-        break;
 
-      case UsbHidItemType_LogicalMinimum:
+        break;
+      }
+
+      case UsbHidItemType_LogicalMinimum: {
         if (found) {
           description->logicalMinimum = value;
           goto defined;
         }
-        break;
 
-      case UsbHidItemType_LogicalMaximum:
+        break;
+      }
+
+      case UsbHidItemType_LogicalMaximum: {
         if (found) {
           description->logicalMaximum = value;
           goto defined;
         }
-        break;
 
-      defined:
+        break;
+      }
+
+      defined: {
         description->defined |= USB_HID_ITEM_BIT(type);
         continue;
+      }
 
       default:
         break;
@@ -168,7 +181,6 @@ usbHidGetReportSize (
   size_t *size
 ) {
   UsbHidReportDescription description;
-
   *size = 0;
 
   if (usbHidFillReportDescription(items, length, identifier, &description)) {
@@ -202,10 +214,11 @@ usbHidGetReport (
   int timeout
 ) {
   return usbControlRead(device,
-                        UsbControlRecipient_Interface, UsbControlType_Class,
-                        UsbHidRequest_GetReport,
-                        (UsbHidReportType_Input << 8) | report, interface,
-                        buffer, length, timeout);
+    UsbControlRecipient_Interface, UsbControlType_Class,
+    UsbHidRequest_GetReport,
+    (UsbHidReportType_Input << 8) | report, interface,
+    buffer, length, timeout
+  );
 }
 
 ssize_t
@@ -218,10 +231,11 @@ usbHidSetReport (
   int timeout
 ) {
   return usbControlWrite(device,
-                         UsbControlRecipient_Interface, UsbControlType_Class,
-                         UsbHidRequest_SetReport,
-                         (UsbHidReportType_Output << 8) | report, interface,
-                         buffer, length, timeout);
+    UsbControlRecipient_Interface, UsbControlType_Class,
+    UsbHidRequest_SetReport,
+    (UsbHidReportType_Output << 8) | report, interface,
+    buffer, length, timeout
+  );
 }
 
 ssize_t
@@ -234,10 +248,11 @@ usbHidGetFeature (
   int timeout
 ) {
   return usbControlRead(device,
-                        UsbControlRecipient_Interface, UsbControlType_Class,
-                        UsbHidRequest_GetReport,
-                        (UsbHidReportType_Feature << 8) | report, interface,
-                        buffer, length, timeout);
+    UsbControlRecipient_Interface, UsbControlType_Class,
+    UsbHidRequest_GetReport,
+    (UsbHidReportType_Feature << 8) | report, interface,
+    buffer, length, timeout
+  );
 }
 
 ssize_t
@@ -250,8 +265,9 @@ usbHidSetFeature (
   int timeout
 ) {
   return usbControlWrite(device,
-                         UsbControlRecipient_Interface, UsbControlType_Class,
-                         UsbHidRequest_SetReport,
-                         (UsbHidReportType_Feature << 8) | report, interface,
-                         buffer, length, timeout);
+    UsbControlRecipient_Interface, UsbControlType_Class,
+    UsbHidRequest_SetReport,
+    (UsbHidReportType_Feature << 8) | report, interface,
+    buffer, length, timeout
+  );
 }
