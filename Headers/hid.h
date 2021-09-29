@@ -27,6 +27,9 @@ extern "C" {
 
 extern const unsigned char hidItemLengths[];
 
+extern const char *hidGetItemTypeName (unsigned char type);
+extern void hidLogItems (int level, const unsigned char *items, size_t size);
+
 typedef struct {
   uint64_t definedItemTypes;
   uint32_t reportCount;

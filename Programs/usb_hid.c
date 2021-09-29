@@ -65,6 +65,11 @@ usbHidGetItems (
         );
 
         if (result != -1) {
+          hidLogItems(
+            LOG_CATEGORY(USB_IO) | LOG_DEBUG,
+            buffer, result
+          );
+
           *items = buffer;
           return result;
         }

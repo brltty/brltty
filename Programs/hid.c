@@ -22,8 +22,103 @@
 
 #include "log.h"
 #include "hid.h"
+#include "strfmt.h"
 
 const unsigned char hidItemLengths[] = {0, 1, 2, 4};
+
+#define HID_ITEM_TYPE_NAME(name) [HidItemType_ ## name] = #name
+
+static const char *hidItemTypeNames[] = {
+  HID_ITEM_TYPE_NAME(UsagePage),
+  HID_ITEM_TYPE_NAME(Usage),
+  HID_ITEM_TYPE_NAME(LogicalMinimum),
+  HID_ITEM_TYPE_NAME(UsageMinimum),
+  HID_ITEM_TYPE_NAME(LogicalMaximum),
+  HID_ITEM_TYPE_NAME(UsageMaximum),
+  HID_ITEM_TYPE_NAME(PhysicalMinimum),
+  HID_ITEM_TYPE_NAME(DesignatorIndex),
+  HID_ITEM_TYPE_NAME(PhysicalMaximum),
+  HID_ITEM_TYPE_NAME(DesignatorMinimum),
+  HID_ITEM_TYPE_NAME(UnitExponent),
+  HID_ITEM_TYPE_NAME(DesignatorMaximum),
+  HID_ITEM_TYPE_NAME(Unit),
+  HID_ITEM_TYPE_NAME(ReportSize),
+  HID_ITEM_TYPE_NAME(StringIndex),
+  HID_ITEM_TYPE_NAME(Input),
+  HID_ITEM_TYPE_NAME(ReportID),
+  HID_ITEM_TYPE_NAME(StringMinimum),
+  HID_ITEM_TYPE_NAME(Output),
+  HID_ITEM_TYPE_NAME(ReportCount),
+  HID_ITEM_TYPE_NAME(StringMaximum),
+  HID_ITEM_TYPE_NAME(Collection),
+  HID_ITEM_TYPE_NAME(Push),
+  HID_ITEM_TYPE_NAME(Delimiter),
+  HID_ITEM_TYPE_NAME(Feature),
+  HID_ITEM_TYPE_NAME(Pop),
+  HID_ITEM_TYPE_NAME(EndCollection),
+};
+
+const char *
+hidGetItemTypeName (unsigned char type) {
+  if (type >= ARRAY_COUNT(hidItemTypeNames)) return NULL;
+  return hidItemTypeNames[type];
+}
+
+void
+hidLogItems (int level, const unsigned char *items, size_t size) {
+  const char *label = "HID items log";
+  logMessage(level, "begin %s", label);
+
+  const unsigned char *item = items;
+  const unsigned char *endItems = item + size;
+
+  while (item < endItems) {
+    unsigned char type = HID_ITEM_TYPE(*item);
+    uint32_t length = hidItemLengths[HID_ITEM_LENGTH(*item)];
+    unsigned int offset = item++ - items;
+    char log[0X100];
+
+    {
+      STR_BEGIN(log, sizeof(log));
+
+      STR_PRINTF(
+        "HID item at %" PRIu32 " (0X%" PRIX32 "):",
+        offset, offset
+      );
+
+      {
+        const char *name = hidGetItemTypeName(type);
+        if (!name) name = "<unknown>";
+        STR_PRINTF(" %s", name);
+      }
+
+      if (length > 0) {
+        STR_PRINTF(" = ");
+        const unsigned char *endValue = item + length;
+
+        if (endValue > endItems) {
+          STR_PRINTF("<truncated>");
+        } else {
+          uint32_t value = 0;
+          unsigned int shift = 0;
+
+          do {
+            value |= *item++ << shift;
+            shift += 8;
+          } while (item < endValue);
+
+          STR_PRINTF("%" PRIu32 " (0X%" PRIX32 ")", value, value);
+        }
+      }
+
+      STR_END;
+    }
+
+    logMessage(LOG_NOTICE, "%s", log);
+  }
+
+  logMessage(level, "end %s", label);
+}
 
 int
 hidFillReportDescription (
