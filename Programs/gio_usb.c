@@ -35,6 +35,7 @@
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_usb.h"
+#include "hid.h"
 
 struct GioHandleStruct {
   UsbChannel *channel;

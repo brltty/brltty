@@ -225,17 +225,6 @@ extern ssize_t usbWriteData (
   int timeout
 );
 
-typedef struct {
-  uint64_t defined;
-  uint32_t reportCount;
-  uint32_t reportSize;
-  uint32_t logicalMinimum;
-  uint32_t logicalMaximum;
-  unsigned char reportIdentifier;
-} UsbHidReportDescription;
-
-extern const unsigned char usbHidItemLengths[];
-
 extern const UsbHidDescriptor *usbHidDescriptor (UsbDevice *device);
 
 extern ssize_t usbHidGetItems (
@@ -244,20 +233,6 @@ extern ssize_t usbHidGetItems (
   unsigned char number,
   unsigned char **items,
   int timeout
-);
-
-extern int usbHidFillReportDescription (
-  const unsigned char *items,
-  size_t size,
-  unsigned char identifier,
-  UsbHidReportDescription *description
-);
-
-extern int usbHidGetReportSize (
-  const unsigned char *items,
-  size_t length,
-  unsigned char identifier,
-  size_t *size
 );
 
 extern ssize_t usbHidGetReport (

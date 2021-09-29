@@ -251,55 +251,6 @@ typedef struct {
   uint16_t wLength;     /* Data length in bytes. */
 } PACKED UsbSetupPacket;
 
-typedef enum {
-  UsbHidRequest_GetReport   = 0X01,
-  UsbHidRequest_GetIdle     = 0X02,
-  UsbHidRequest_GetProtocol = 0X03,
-  UsbHidRequest_SetReport   = 0X09,
-  UsbHidRequest_SetIdle     = 0X0A,
-  UsbHidRequest_SetProtocol = 0X0B
-} UsbHidRequest;
-
-typedef enum {
-  UsbHidReportType_Input   = 0X01,
-  UsbHidReportType_Output  = 0X02,
-  UsbHidReportType_Feature = 0X03
-} UsbHidReportType;
-
-typedef enum {
-  UsbHidItemType_UsagePage         = 0X04,
-  UsbHidItemType_Usage             = 0X08,
-  UsbHidItemType_LogicalMinimum    = 0X14,
-  UsbHidItemType_UsageMinimum      = 0X18,
-  UsbHidItemType_LogicalMaximum    = 0X24,
-  UsbHidItemType_UsageMaximum      = 0X28,
-  UsbHidItemType_PhysicalMinimum   = 0X34,
-  UsbHidItemType_DesignatorIndex   = 0X38,
-  UsbHidItemType_PhysicalMaximum   = 0X44,
-  UsbHidItemType_DesignatorMinimum = 0X48,
-  UsbHidItemType_UnitExponent      = 0X54,
-  UsbHidItemType_DesignatorMaximum = 0X58,
-  UsbHidItemType_Unit              = 0X64,
-  UsbHidItemType_ReportSize        = 0X74,
-  UsbHidItemType_StringIndex       = 0X78,
-  UsbHidItemType_Input             = 0X80,
-  UsbHidItemType_ReportID          = 0X84,
-  UsbHidItemType_StringMinimum     = 0X88,
-  UsbHidItemType_Output            = 0X90,
-  UsbHidItemType_ReportCount       = 0X94,
-  UsbHidItemType_StringMaximum     = 0X98,
-  UsbHidItemType_Collection        = 0XA0,
-  UsbHidItemType_Push              = 0XA4,
-  UsbHidItemType_Delimiter         = 0XA8,
-  UsbHidItemType_Feature           = 0XB0,
-  UsbHidItemType_Pop               = 0XB4,
-  UsbHidItemType_EndCollection     = 0XC0,
-  UsbHidItemType_Mask              = 0XFC
-} UsbHidItemType;
-#define USB_HID_ITEM_TYPE(item) ((item) & UsbHidItemType_Mask)
-#define USB_HID_ITEM_LENGTH(item) ((item) & ~UsbHidItemType_Mask)
-#define USB_HID_ITEM_BIT(type) (UINT64_C(1) << ((type) >> 2))
-
 #define BEGIN_USB_STRING_LIST(name) static const char *const name[] = {
 #define END_USB_STRING_LIST NULL};
 

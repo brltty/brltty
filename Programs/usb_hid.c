@@ -24,6 +24,7 @@
 #include "log.h"
 #include "bitfield.h"
 #include "io_usb.h"
+#include "hid.h"
 
 const unsigned char usbHidItemLengths[] = {0, 1, 2, 4};
 
