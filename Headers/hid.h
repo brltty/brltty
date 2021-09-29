@@ -25,25 +25,25 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern const unsigned char usbHidItemLengths[];
+extern const unsigned char HidItemLengths[];
 
 typedef struct {
-  uint64_t defined;
+  uint64_t definedItemTypes;
   uint32_t reportCount;
   uint32_t reportSize;
   uint32_t logicalMinimum;
   uint32_t logicalMaximum;
   unsigned char reportIdentifier;
-} UsbHidReportDescription;
+} HidReportDescription;
 
-extern int usbHidFillReportDescription (
+extern int hidFillReportDescription (
   const unsigned char *items,
   size_t size,
   unsigned char identifier,
-  UsbHidReportDescription *description
+  HidReportDescription *description
 );
 
-extern int usbHidGetReportSize (
+extern int hidGetReportSize (
   const unsigned char *items,
   size_t length,
   unsigned char identifier,

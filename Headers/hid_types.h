@@ -39,84 +39,70 @@ typedef enum {
 } UsbHidReportType;
 
 typedef enum {
-  UsbHidItemType_UsagePage         = 0X04,
-  UsbHidItemType_Usage             = 0X08,
-  UsbHidItemType_LogicalMinimum    = 0X14,
-  UsbHidItemType_UsageMinimum      = 0X18,
-  UsbHidItemType_LogicalMaximum    = 0X24,
-  UsbHidItemType_UsageMaximum      = 0X28,
-  UsbHidItemType_PhysicalMinimum   = 0X34,
-  UsbHidItemType_DesignatorIndex   = 0X38,
-  UsbHidItemType_PhysicalMaximum   = 0X44,
-  UsbHidItemType_DesignatorMinimum = 0X48,
-  UsbHidItemType_UnitExponent      = 0X54,
-  UsbHidItemType_DesignatorMaximum = 0X58,
-  UsbHidItemType_Unit              = 0X64,
-  UsbHidItemType_ReportSize        = 0X74,
-  UsbHidItemType_StringIndex       = 0X78,
-  UsbHidItemType_Input             = 0X80,
-  UsbHidItemType_ReportID          = 0X84,
-  UsbHidItemType_StringMinimum     = 0X88,
-  UsbHidItemType_Output            = 0X90,
-  UsbHidItemType_ReportCount       = 0X94,
-  UsbHidItemType_StringMaximum     = 0X98,
-  UsbHidItemType_Collection        = 0XA0,
-  UsbHidItemType_Push              = 0XA4,
-  UsbHidItemType_Delimiter         = 0XA8,
-  UsbHidItemType_Feature           = 0XB0,
-  UsbHidItemType_Pop               = 0XB4,
-  UsbHidItemType_EndCollection     = 0XC0,
-  UsbHidItemType_Mask              = 0XFC
-} UsbHidItemType;
+  HidItemType_UsagePage         = 0X04,
+  HidItemType_Usage             = 0X08,
+  HidItemType_LogicalMinimum    = 0X14,
+  HidItemType_UsageMinimum      = 0X18,
+  HidItemType_LogicalMaximum    = 0X24,
+  HidItemType_UsageMaximum      = 0X28,
+  HidItemType_PhysicalMinimum   = 0X34,
+  HidItemType_DesignatorIndex   = 0X38,
+  HidItemType_PhysicalMaximum   = 0X44,
+  HidItemType_DesignatorMinimum = 0X48,
+  HidItemType_UnitExponent      = 0X54,
+  HidItemType_DesignatorMaximum = 0X58,
+  HidItemType_Unit              = 0X64,
+  HidItemType_ReportSize        = 0X74,
+  HidItemType_StringIndex       = 0X78,
+  HidItemType_Input             = 0X80,
+  HidItemType_ReportID          = 0X84,
+  HidItemType_StringMinimum     = 0X88,
+  HidItemType_Output            = 0X90,
+  HidItemType_ReportCount       = 0X94,
+  HidItemType_StringMaximum     = 0X98,
+  HidItemType_Collection        = 0XA0,
+  HidItemType_Push              = 0XA4,
+  HidItemType_Delimiter         = 0XA8,
+  HidItemType_Feature           = 0XB0,
+  HidItemType_Pop               = 0XB4,
+  HidItemType_EndCollection     = 0XC0,
+  HidItemType_Mask              = 0XFC
+} HidItemType;
 
-#define USB_HID_ITEM_TYPE(item) ((item) & UsbHidItemType_Mask)
-#define USB_HID_ITEM_LENGTH(item) ((item) & ~UsbHidItemType_Mask)
-#define USB_HID_ITEM_BIT(type) (UINT64_C(1) << ((type) >> 2))
-
-typedef enum {
-  HID_COLLECTION_BEGIN = 0xa1,
-  HID_COLLECTION_END   = 0xc0,
-  HID_USAGE_PAGE       = 0x05,
-  HID_USAGE            = 0x09,
-  HID_USAGE_MINIMUM    = 0x19,
-  HID_USAGE_MAXIMUM    = 0x29,
-  HID_LOGICAL_MINIMUM  = 0x15,
-  HID_LOGICAL_MAXIMUM  = 0x25,
-  HID_REPORT_COUNT     = 0x95,
-  HID_REPORT_SIZE      = 0x75,
-  HID_REPORT_INPUT     = 0x81,
-} HidInstruction;
+#define HID_ITEM_TYPE(item) ((item) & HidItemType_Mask)
+#define HID_ITEM_LENGTH(item) ((item) & ~HidItemType_Mask)
+#define HID_ITEM_BIT(type) (UINT64_C(1) << ((type) >> 2))
 
 typedef enum {
-  HID_COLLECTION_PHYSICAl    = 0X00,
-  HID_COLLECTION_APPLICATION = 0X01,
+  HidCOLLECTION_PhysicaL    = 0X00,
+  HidCOLLECTION_Application = 0X01,
 } HidCollection;
 
 typedef enum {
-  HID_USAGE_PAGE_GENERIC_DESKTOP = 0X01,
-  HID_USAGE_PAGE_BUTTON          = 0X09,
-  HID_USAGE_PAGE_BRAILLE         = 0X41,
+  HidUsagePage_GenericDesktop = 0X01,
+  HidUsagePage_Button         = 0X09,
+  HidUsagePage_Braille        = 0X41,
 } HidUsagePage;
 
 typedef enum {
-  HID_USAGE_GDT_MOUSE   = 0X02,
-  HID_USAGE_GDT_X       = 0X30,
-  HID_USAGE_GDT_Y       = 0X31,
+  HidUsage_GDT_Mouse   = 0X02,
+  HidUsage_GDT_X       = 0X30,
+  HidUsage_GDT_Y       = 0X31,
 
-  HID_USAGE_APP_POINTER = 0X01,
+  HidUsage_APP_Pointer = 0X01,
 
-  HID_USAGE_BRL_DISPLAY = 0X01,
+  HidUsage_BRL_Display = 0X01,
 } HidUsage;
 
 typedef enum {
-  HID_REPORT_ATTRIBUTE_CONSTANT = 0X01,
-  HID_REPORT_ATTRIBUTE_DATA     = 0X00,
+  HidReportAttribute_CONSTANT = 0X01,
+  HidReportAttribute_DATA     = 0X00,
 
-  HID_REPORT_ATTRIBUTE_VARIABLE = 0X02,
-  HID_REPORT_ATTRIBUTE_ARRAY    = 0X00,
+  HidReportAttribute_VARIABLE = 0X02,
+  HidReportAttribute_ARRAY    = 0X00,
 
-  HID_REPORT_ATTRIBUTE_RELATIVE = 0X04,
-  HID_REPORT_ATTRIBUTE_ABSOLUTE = 0X00,
+  HidReportAttribute_RELATIVE = 0X04,
+  HidReportAttribute_ABSOLUTE = 0X00,
 } HidReportAttributes;
 
 #ifdef __cplusplus

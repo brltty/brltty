@@ -26,14 +26,134 @@
 #include "io_usb.h"
 #include "hid.h"
 
-const unsigned char usbHidItemLengths[] = {0, 1, 2, 4};
+const unsigned char HidItemLengths[] = {0, 1, 2, 4};
+
+int
+hidFillReportDescription (
+  const unsigned char *items, size_t size,
+  unsigned char identifier,
+  HidReportDescription *description
+) {
+  int found = 0;
+  int index = 0;
+
+  while (index < size) {
+    unsigned char item = items[index++];
+    HidItemType type = HID_ITEM_TYPE(item);
+    unsigned char length = HidItemLengths[HID_ITEM_LENGTH(item)];
+    uint32_t value = 0;
+
+    if (length) {
+      unsigned char shift = 0;
+
+      do {
+        if (index == size) return 0;
+        value |= items[index++] << shift;
+        shift += 8;
+      } while (--length);
+    }
+
+    switch (type) {
+      case HidItemType_ReportID: {
+        if (!found && (value == identifier)) {
+          memset(description, 0, sizeof(*description));
+          description->reportIdentifier = identifier;
+
+          found = 1;
+          continue;
+        }
+
+        break;
+      }
+
+      case HidItemType_ReportCount: {
+        if (found) {
+          description->reportCount = value;
+          goto defined;
+        }
+
+        break;
+      }
+
+      case HidItemType_ReportSize: {
+        if (found) {
+          description->reportSize = value;
+          goto defined;
+        }
+
+        break;
+      }
+
+      case HidItemType_LogicalMinimum: {
+        if (found) {
+          description->logicalMinimum = value;
+          goto defined;
+        }
+
+        break;
+      }
+
+      case HidItemType_LogicalMaximum: {
+        if (found) {
+          description->logicalMaximum = value;
+          goto defined;
+        }
+
+        break;
+      }
+
+      defined: {
+        description->definedItemTypes |= HID_ITEM_BIT(type);
+        continue;
+      }
+
+      default:
+        break;
+    }
+
+    if (found) break;
+  }
+
+  return found;
+}
+
+int
+hidGetReportSize (
+  const unsigned char *items,
+  size_t length,
+  unsigned char identifier,
+  size_t *size
+) {
+  HidReportDescription description;
+  *size = 0;
+
+  if (hidFillReportDescription(items, length, identifier, &description)) {
+    if (description.definedItemTypes & HID_ITEM_BIT(HidItemType_ReportCount)) {
+      if (description.definedItemTypes & HID_ITEM_BIT(HidItemType_ReportSize)) {
+        uint32_t bytes = ((description.reportCount * description.reportSize) + 7) / 8;
+
+        logMessage(LOG_CATEGORY(USB_IO), "HID report size: %02X = %"PRIu32, identifier, bytes);
+        *size = 1 + bytes;
+        return 1;
+      } else {
+        logMessage(LOG_WARNING, "HID report size not defined: %02X", identifier);
+      }
+    } else {
+      logMessage(LOG_WARNING, "HID report count not defined: %02X", identifier);
+    }
+  } else {
+    logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
+  }
+
+  return 0;
+}
 
 const UsbHidDescriptor *
 usbHidDescriptor (UsbDevice *device) {
   const UsbDescriptor *descriptor = NULL;
 
   while (usbNextDescriptor(device, &descriptor)) {
-    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_HID) {
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_HID) {
       return &descriptor->hid;
     }
   }
@@ -83,126 +203,6 @@ usbHidGetItems (
   }
 
   return -1;
-}
-
-int
-usbHidFillReportDescription (
-  const unsigned char *items, size_t size,
-  unsigned char identifier,
-  UsbHidReportDescription *description
-) {
-  int found = 0;
-  int index = 0;
-
-  while (index < size) {
-    unsigned char item = items[index++];
-    UsbHidItemType type = USB_HID_ITEM_TYPE(item);
-    unsigned char length = usbHidItemLengths[USB_HID_ITEM_LENGTH(item)];
-    uint32_t value = 0;
-
-    if (length) {
-      unsigned char shift = 0;
-
-      do {
-        if (index == size) return 0;
-        value |= items[index++] << shift;
-        shift += 8;
-      } while (--length);
-    }
-
-    switch (type) {
-      case UsbHidItemType_ReportID: {
-        if (!found && (value == identifier)) {
-          memset(description, 0, sizeof(*description));
-          description->reportIdentifier = identifier;
-
-          found = 1;
-          continue;
-        }
-
-        break;
-      }
-
-      case UsbHidItemType_ReportCount: {
-        if (found) {
-          description->reportCount = value;
-          goto defined;
-        }
-
-        break;
-      }
-
-      case UsbHidItemType_ReportSize: {
-        if (found) {
-          description->reportSize = value;
-          goto defined;
-        }
-
-        break;
-      }
-
-      case UsbHidItemType_LogicalMinimum: {
-        if (found) {
-          description->logicalMinimum = value;
-          goto defined;
-        }
-
-        break;
-      }
-
-      case UsbHidItemType_LogicalMaximum: {
-        if (found) {
-          description->logicalMaximum = value;
-          goto defined;
-        }
-
-        break;
-      }
-
-      defined: {
-        description->defined |= USB_HID_ITEM_BIT(type);
-        continue;
-      }
-
-      default:
-        break;
-    }
-
-    if (found) break;
-  }
-
-  return found;
-}
-
-int
-usbHidGetReportSize (
-  const unsigned char *items,
-  size_t length,
-  unsigned char identifier,
-  size_t *size
-) {
-  UsbHidReportDescription description;
-  *size = 0;
-
-  if (usbHidFillReportDescription(items, length, identifier, &description)) {
-    if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportCount)) {
-      if (description.defined & USB_HID_ITEM_BIT(UsbHidItemType_ReportSize)) {
-        uint32_t bytes = ((description.reportCount * description.reportSize) + 7) / 8;
-
-        logMessage(LOG_CATEGORY(USB_IO), "HID report size: %02X = %"PRIu32, identifier, bytes);
-        *size = 1 + bytes;
-        return 1;
-      } else {
-        logMessage(LOG_WARNING, "HID report size not defined: %02X", identifier);
-      }
-    } else {
-      logMessage(LOG_WARNING, "HID report count not defined: %02X", identifier);
-    }
-  } else {
-    logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
-  }
-
-  return 0;
 }
 
 ssize_t

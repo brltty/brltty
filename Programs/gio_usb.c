@@ -193,7 +193,7 @@ getUsbHidReportItems (GioHandle *handle, GioHidReportItemsData *items, int timeo
 static size_t
 getUsbHidReportSize (const GioHidReportItemsData *items, unsigned char report) {
   size_t size;
-  if (usbHidGetReportSize(items->address, items->size, report, &size)) return size;
+  if (hidGetReportSize(items->address, items->size, report, &size)) return size;
   errno = ENOSYS;
   return 0;
 }
