@@ -45,13 +45,17 @@ typedef enum {
 typedef enum {
   HID_USAGE_PAGE_GENERIC_DESKTOP = 0X01,
   HID_USAGE_PAGE_BUTTON          = 0X09,
+  HID_USAGE_PAGE_BRAILLE         = 0X41,
 } HidUsagePage;
 
 typedef enum {
-  HID_USAGE_APP_POINTER = 0X01,
   HID_USAGE_GDT_MOUSE   = 0X02,
   HID_USAGE_GDT_X       = 0X30,
   HID_USAGE_GDT_Y       = 0X31,
+
+  HID_USAGE_APP_POINTER = 0X01,
+
+  HID_USAGE_BRL_DISPLAY = 0X01,
 } HidUsage;
 
 typedef enum {
