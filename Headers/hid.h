@@ -25,7 +25,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern const unsigned char HidItemLengths[];
+extern const unsigned char hidItemLengths[];
 
 typedef struct {
   uint64_t definedItemTypes;

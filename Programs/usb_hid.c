@@ -26,7 +26,7 @@
 #include "io_usb.h"
 #include "hid.h"
 
-const unsigned char HidItemLengths[] = {0, 1, 2, 4};
+const unsigned char hidItemLengths[] = {0, 1, 2, 4};
 
 int
 hidFillReportDescription (
@@ -40,7 +40,7 @@ hidFillReportDescription (
   while (index < size) {
     unsigned char item = items[index++];
     HidItemType type = HID_ITEM_TYPE(item);
-    unsigned char length = HidItemLengths[HID_ITEM_LENGTH(item)];
+    unsigned char length = hidItemLengths[HID_ITEM_LENGTH(item)];
     uint32_t value = 0;
 
     if (length) {

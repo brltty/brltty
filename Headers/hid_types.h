@@ -24,21 +24,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  UsbHidRequest_GetReport   = 0X01,
-  UsbHidRequest_GetIdle     = 0X02,
-  UsbHidRequest_GetProtocol = 0X03,
-  UsbHidRequest_SetReport   = 0X09,
-  UsbHidRequest_SetIdle     = 0X0A,
-  UsbHidRequest_SetProtocol = 0X0B
-} UsbHidRequest;
-
-typedef enum {
-  UsbHidReportType_Input   = 0X01,
-  UsbHidReportType_Output  = 0X02,
-  UsbHidReportType_Feature = 0X03
-} UsbHidReportType;
-
-typedef enum {
   HidItemType_UsagePage         = 0X04,
   HidItemType_Usage             = 0X08,
   HidItemType_LogicalMinimum    = 0X14,

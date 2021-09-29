@@ -225,6 +225,21 @@ extern ssize_t usbWriteData (
   int timeout
 );
 
+typedef enum {
+  UsbHidRequest_GetReport   = 0X01,
+  UsbHidRequest_GetIdle     = 0X02,
+  UsbHidRequest_GetProtocol = 0X03,
+  UsbHidRequest_SetReport   = 0X09,
+  UsbHidRequest_SetIdle     = 0X0A,
+  UsbHidRequest_SetProtocol = 0X0B
+} UsbHidRequest;
+
+typedef enum {
+  UsbHidReportType_Input   = 0X01,
+  UsbHidReportType_Output  = 0X02,
+  UsbHidReportType_Feature = 0X03
+} UsbHidReportType;
+
 extern const UsbHidDescriptor *usbHidDescriptor (UsbDevice *device);
 
 extern ssize_t usbHidGetItems (
