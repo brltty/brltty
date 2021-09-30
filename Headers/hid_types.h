@@ -24,74 +24,79 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  HidItemType_UsagePage         = 0X04,
-  HidItemType_Usage             = 0X08,
-  HidItemType_LogicalMinimum    = 0X14,
-  HidItemType_UsageMinimum      = 0X18,
-  HidItemType_LogicalMaximum    = 0X24,
-  HidItemType_UsageMaximum      = 0X28,
-  HidItemType_PhysicalMinimum   = 0X34,
-  HidItemType_DesignatorIndex   = 0X38,
-  HidItemType_PhysicalMaximum   = 0X44,
-  HidItemType_DesignatorMinimum = 0X48,
-  HidItemType_UnitExponent      = 0X54,
-  HidItemType_DesignatorMaximum = 0X58,
-  HidItemType_Unit              = 0X64,
-  HidItemType_ReportSize        = 0X74,
-  HidItemType_StringIndex       = 0X78,
-  HidItemType_Input             = 0X80,
-  HidItemType_ReportID          = 0X84,
-  HidItemType_StringMinimum     = 0X88,
-  HidItemType_Output            = 0X90,
-  HidItemType_ReportCount       = 0X94,
-  HidItemType_StringMaximum     = 0X98,
-  HidItemType_Collection        = 0XA0,
-  HidItemType_Push              = 0XA4,
-  HidItemType_Delimiter         = 0XA8,
-  HidItemType_Feature           = 0XB0,
-  HidItemType_Pop               = 0XB4,
-  HidItemType_EndCollection     = 0XC0,
-  HidItemType_Mask              = 0XFC
+  HID_ITM_UsagePage         = 0X04,
+  HID_ITM_Usage             = 0X08,
+  HID_ITM_LogicalMinimum    = 0X14,
+  HID_ITM_UsageMinimum      = 0X18,
+  HID_ITM_LogicalMaximum    = 0X24,
+  HID_ITM_UsageMaximum      = 0X28,
+  HID_ITM_PhysicalMinimum   = 0X34,
+  HID_ITM_DesignatorIndex   = 0X38,
+  HID_ITM_PhysicalMaximum   = 0X44,
+  HID_ITM_DesignatorMinimum = 0X48,
+  HID_ITM_UnitExponent      = 0X54,
+  HID_ITM_DesignatorMaximum = 0X58,
+  HID_ITM_Unit              = 0X64,
+  HID_ITM_ReportSize        = 0X74,
+  HID_ITM_StringIndex       = 0X78,
+  HID_ITM_Input             = 0X80,
+  HID_ITM_ReportID          = 0X84,
+  HID_ITM_StringMinimum     = 0X88,
+  HID_ITM_Output            = 0X90,
+  HID_ITM_ReportCount       = 0X94,
+  HID_ITM_StringMaximum     = 0X98,
+  HID_ITM_Collection        = 0XA0,
+  HID_ITM_Push              = 0XA4,
+  HID_ITM_Delimiter         = 0XA8,
+  HID_ITM_Feature           = 0XB0,
+  HID_ITM_Pop               = 0XB4,
+  HID_ITM_EndCollection     = 0XC0,
+
+  HID_ITEM_TYPE_MASK        = 0XFC
 } HidItemType;
 
-#define HID_ITEM_TYPE(item) ((item) & HidItemType_Mask)
-#define HID_ITEM_LENGTH(item) ((item) & ~HidItemType_Mask)
+#define HID_ITEM_TYPE(item) ((item) & HID_ITEM_TYPE_MASK)
+#define HID_ITEM_LENGTH(item) ((item) & ~HID_ITEM_TYPE_MASK)
 #define HID_ITEM_BIT(type) (UINT64_C(1) << ((type) >> 2))
 
 typedef enum {
-  HidCOLLECTION_PhysicaL    = 0X00,
-  HidCOLLECTION_Application = 0X01,
-  HidCOLLECTION_Logical     = 0X02,
-} HidCollection;
+  HID_COL_PhysicaL    = 0X00,
+  HID_COL_Application = 0X01,
+  HID_COL_Logical     = 0X02,
+} HidCollectionType;
 
 typedef enum {
-  HidUsagePage_GenericDesktop = 0X01,
-  HidUsagePage_Button         = 0X09,
-  HidUsagePage_Braille        = 0X41,
+  HID_UPG_GenericDesktop = 0X01,
+  HID_UPG_Buttons        = 0X09,
+  HID_UPG_Braille        = 0X41,
 } HidUsagePage;
 
 typedef enum {
-  HidUsage_GDT_Mouse           = 0X02,
-  HidUsage_GDT_X               = 0X30,
-  HidUsage_GDT_Y               = 0X31,
-
-  HidUsage_APP_Pointer         = 0X01,
-
-  HidUsage_BTN_Button1         = 0X01,
-  HidUsage_BTN_Button2         = 0X02,
-  HidUsage_BTN_Button3         = 0X03,
-} HidUsage;
+  HID_USG_GDT_Mouse = 0X02,
+  HID_USG_GDT_X     = 0X30,
+  HID_USG_GDT_Y     = 0X31,
+} HidGenericDesktopUsage;
 
 typedef enum {
-  HidReportAttribute_CONSTANT = 0X01,
-  HidReportAttribute_DATA     = 0X00,
+  HID_USG_APP_Pointer = 0X01,
+} HidApplicationUsage;
 
-  HidReportAttribute_VARIABLE = 0X02,
-  HidReportAttribute_ARRAY    = 0X00,
+typedef enum {
+  HID_USG_BTN_Button1 = 0X01,
+  HID_USG_BTN_Button2 = 0X02,
+  HID_USG_BTN_Button3 = 0X03,
+} HidButtonUsage;
 
-  HidReportAttribute_RELATIVE = 0X04,
-  HidReportAttribute_ABSOLUTE = 0X00,
-} HidReportAttributes;
+typedef enum {
+  HID_REP_FLG_CONSTANT = 0X01,
+  HID_REP_FLG_DATA     = 0X00,
+
+  HID_REP_FLG_VARIABLE = 0X02,
+  HID_REP_FLG_ARRAY    = 0X00,
+
+  HID_REP_FLG_RELATIVE = 0X04,
+  HID_REP_FLG_ABSOLUTE = 0X00,
+} HidReportFlags;
 
 #ifdef __cplusplus
 }

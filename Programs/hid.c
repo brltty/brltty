@@ -26,7 +26,7 @@
 
 const unsigned char hidItemLengths[] = {0, 1, 2, 4};
 
-#define HID_ITEM_TYPE_NAME(name) [HidItemType_ ## name] = #name
+#define HID_ITEM_TYPE_NAME(name) [HID_ITM_ ## name] = #name
 
 static const char *hidItemTypeNames[] = {
   HID_ITEM_TYPE_NAME(UsagePage),
@@ -146,7 +146,7 @@ hidFillReportDescription (
     }
 
     switch (type) {
-      case HidItemType_ReportID: {
+      case HID_ITM_ReportID: {
         if (!found && (value == identifier)) {
           memset(description, 0, sizeof(*description));
           description->reportIdentifier = identifier;
@@ -158,7 +158,7 @@ hidFillReportDescription (
         break;
       }
 
-      case HidItemType_ReportCount: {
+      case HID_ITM_ReportCount: {
         if (found) {
           description->reportCount = value;
           goto defined;
@@ -167,7 +167,7 @@ hidFillReportDescription (
         break;
       }
 
-      case HidItemType_ReportSize: {
+      case HID_ITM_ReportSize: {
         if (found) {
           description->reportSize = value;
           goto defined;
@@ -176,7 +176,7 @@ hidFillReportDescription (
         break;
       }
 
-      case HidItemType_LogicalMinimum: {
+      case HID_ITM_LogicalMinimum: {
         if (found) {
           description->logicalMinimum = value;
           goto defined;
@@ -185,7 +185,7 @@ hidFillReportDescription (
         break;
       }
 
-      case HidItemType_LogicalMaximum: {
+      case HID_ITM_LogicalMaximum: {
         if (found) {
           description->logicalMaximum = value;
           goto defined;
@@ -220,8 +220,8 @@ hidGetReportSize (
   *size = 0;
 
   if (hidFillReportDescription(items, length, identifier, &description)) {
-    if (description.definedItemTypes & HID_ITEM_BIT(HidItemType_ReportCount)) {
-      if (description.definedItemTypes & HID_ITEM_BIT(HidItemType_ReportSize)) {
+    if (description.definedItemTypes & HID_ITEM_BIT(HID_ITM_ReportCount)) {
+      if (description.definedItemTypes & HID_ITEM_BIT(HID_ITM_ReportSize)) {
         uint32_t bytes = ((description.reportCount * description.reportSize) + 7) / 8;
 
         logMessage(LOG_CATEGORY(USB_IO), "HID report size: %02X = %"PRIu32, identifier, bytes);
