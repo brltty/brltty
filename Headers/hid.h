@@ -25,32 +25,37 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern const unsigned char hidItemLengths[];
+typedef struct {
+  int32_t value;
+  unsigned char type;
+  unsigned char length;
+} HidItemDescription;
 
+extern int hidGetNextItem (
+  HidItemDescription *item,
+  const unsigned char **bytes,
+  size_t *count
+);
+
+extern const unsigned char hidItemLengths[];
 extern const char *hidGetItemTypeName (unsigned char type);
-extern void hidLogItems (int level, const unsigned char *items, size_t size);
+extern void hidLogItems (int level, const unsigned char *bytes, size_t count);
 
 typedef struct {
   uint64_t definedItemTypes;
-  uint32_t reportCount;
-  uint32_t reportSize;
-  uint32_t logicalMinimum;
-  uint32_t logicalMaximum;
-  unsigned char reportIdentifier;
+  int32_t reportSize;
+  uint8_t reportIdentifier;
 } HidReportDescription;
 
 extern int hidFillReportDescription (
-  const unsigned char *items,
-  size_t size,
+  const unsigned char *bytes, size_t count,
   unsigned char identifier,
-  HidReportDescription *description
+  HidReportDescription *report
 );
 
 extern int hidGetReportSize (
-  const unsigned char *items,
-  size_t length,
-  unsigned char identifier,
-  size_t *size
+  const unsigned char *bytes, size_t count,
+  unsigned char identifier, size_t *size
 );
 
 #ifdef __cplusplus
