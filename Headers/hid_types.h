@@ -55,6 +55,21 @@ typedef enum {
   HID_ITEM_TYPE_MASK        = 0XFC
 } HidItemType;
 
+static inline int
+hidHasSignedValue (HidItemType type) {
+  switch (type) {
+    case HID_ITM_LogicalMinimum:
+    case HID_ITM_LogicalMaximum:
+    case HID_ITM_PhysicalMinimum:
+    case HID_ITM_PhysicalMaximum:
+    case HID_ITM_UnitExponent:
+      return 1;
+
+    default:
+      return 0;
+  }
+}
+
 #define HID_ITEM_TYPE(item) ((item) & HID_ITEM_TYPE_MASK)
 #define HID_ITEM_LENGTH(item) ((item) & ~HID_ITEM_TYPE_MASK)
 #define HID_ITEM_BIT(type) (UINT64_C(1) << ((type) >> 2))
@@ -67,7 +82,7 @@ typedef enum {
 
 typedef enum {
   HID_UPG_GenericDesktop = 0X01,
-  HID_UPG_Buttons        = 0X09,
+  HID_UPG_Button         = 0X09,
   HID_UPG_Braille        = 0X41,
 } HidUsagePage;
 
@@ -88,15 +103,15 @@ typedef enum {
 } HidButtonUsage;
 
 typedef enum {
-  HID_REP_FLG_CONSTANT = 0X01,
-  HID_REP_FLG_DATA     = 0X00,
+  HID_USG_FLG_CONSTANT = 0X01,
+  HID_USG_FLG_DATA     = 0X00,
 
-  HID_REP_FLG_VARIABLE = 0X02,
-  HID_REP_FLG_ARRAY    = 0X00,
+  HID_USG_FLG_VARIABLE = 0X02,
+  HID_USG_FLG_ARRAY    = 0X00,
 
-  HID_REP_FLG_RELATIVE = 0X04,
-  HID_REP_FLG_ABSOLUTE = 0X00,
-} HidReportFlags;
+  HID_USG_FLG_RELATIVE = 0X04,
+  HID_USG_FLG_ABSOLUTE = 0X00,
+} HidUsageFlags;
 
 #ifdef __cplusplus
 }

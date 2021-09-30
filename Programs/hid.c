@@ -93,16 +93,10 @@ hidGetNextItem (
       shift += 8;
     }
 
-    switch (item->type) {
-      case HID_ITM_LogicalMinimum:
-      case HID_ITM_LogicalMaximum:
-      case HID_ITM_PhysicalMinimum:
-      case HID_ITM_PhysicalMaximum:
-      case HID_ITM_UnitExponent:
-        shift = 0X20 - shift;
-        item->value <<= shift;
-        item->value >>= shift;
-        break;
+    if (hidHasSignedValue(item->type)) {
+      shift = 0X20 - shift;
+      item->value <<= shift;
+      item->value >>= shift;
     }
   }
 
