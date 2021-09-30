@@ -219,9 +219,12 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
     }
 
     if (item.length > 0) {
+      uint32_t hexValue = item.value & ((UINT64_C(1) << (item.length * 8)) - 1);
+      int hexPrecision = item.length * 2;
+
       STR_PRINTF(
-        " = %" PRId32 " (0X%" PRIX32 ")",
-        item.value, item.value
+        " = %" PRId32 " (0X%.*" PRIX32 ")",
+        item.value, hexPrecision, hexValue
       );
     }
 
