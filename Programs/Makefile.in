@@ -407,7 +407,7 @@ ezusb.$O:
 
 ###############################################################################
 
-BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) crc_generate.$O $(FIRMWARE_OBJECTS)
+BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O hid.$O hid_braille.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) crc_generate.$O $(FIRMWARE_OBJECTS)
 
 brl.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl.c
