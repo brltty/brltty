@@ -187,9 +187,6 @@ usb.$O:
 usb_hid.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_hid.c
 
-hid.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid.c
-
 usb_devices.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/usb_devices.c
 
@@ -423,6 +420,12 @@ brl_driver.$O:
 
 brl_base.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl_base.c
+
+hid.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid.c
+
+hid_braille.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_braille.c
 
 ###############################################################################
 
