@@ -92,6 +92,10 @@ hidGetNextItem (
       item->value |= *byte++ << shift;
       shift += 8;
     }
+
+    shift = 0X20 - shift;
+    item->value <<= shift;
+    item->value >>= shift;
   }
 
   *bytes = byte;
@@ -214,7 +218,7 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
 
     if (item.length > 0) {
       STR_PRINTF(
-        " = %" PRIu32 " (0X%" PRIX32 ")",
+        " = %" PRId32 " (0X%" PRIX32 ")",
         item.value, item.value
       );
     }
