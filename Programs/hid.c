@@ -24,7 +24,16 @@
 #include "hid.h"
 #include "strfmt.h"
 
-#define HID_ITEM_TYPE_NAME(name) [HID_ITM_ ## name] = #name
+#define HID_NAME(prefix, name) [prefix ## _ ## name] = #name
+#define HID_ITEM_TYPE_NAME(name) HID_NAME(HID_ITM, name)
+#define HID_COLLECTION_TYPE_NAME(name) HID_NAME(HID_COL, name)
+#define HID_USAGE_PAGE_NAME(name) HID_NAME(HID_UPG, name)
+
+static inline const char *
+hidGetName (const char *const *names, size_t count, uint16_t index) {
+  if (index >= count) return NULL;
+  return names[index];
+}
 
 static const char *hidItemTypeNames[] = {
   HID_ITEM_TYPE_NAME(UsagePage),
@@ -58,8 +67,49 @@ static const char *hidItemTypeNames[] = {
 
 const char *
 hidGetItemTypeName (unsigned char type) {
-  if (type >= ARRAY_COUNT(hidItemTypeNames)) return NULL;
-  return hidItemTypeNames[type];
+  return hidGetName(hidItemTypeNames, ARRAY_COUNT(hidItemTypeNames), type);
+}
+
+static const char *hidCollectionTypeNames[] = {
+  HID_COLLECTION_TYPE_NAME(Physical),
+  HID_COLLECTION_TYPE_NAME(Application),
+  HID_COLLECTION_TYPE_NAME(Logical),
+};
+
+const char *
+hidGetCollectionTypeName (unsigned char type) {
+  return hidGetName(hidCollectionTypeNames, ARRAY_COUNT(hidCollectionTypeNames), type);
+}
+
+static const char *hidUsagePageNames[] = {
+  HID_USAGE_PAGE_NAME(GenericDesktop),
+  HID_USAGE_PAGE_NAME(Simulation),
+  HID_USAGE_PAGE_NAME(VirtualReality),
+  HID_USAGE_PAGE_NAME(Sport),
+  HID_USAGE_PAGE_NAME(Game),
+  HID_USAGE_PAGE_NAME(GenericDevice),
+  HID_USAGE_PAGE_NAME(KeyboardKeypad),
+  HID_USAGE_PAGE_NAME(LEDs),
+  HID_USAGE_PAGE_NAME(Button),
+  HID_USAGE_PAGE_NAME(Ordinal),
+  HID_USAGE_PAGE_NAME(Telephony),
+  HID_USAGE_PAGE_NAME(Consumer),
+  HID_USAGE_PAGE_NAME(Digitizer),
+  HID_USAGE_PAGE_NAME(PhysicalInterfaceDevice),
+  HID_USAGE_PAGE_NAME(Unicode),
+  HID_USAGE_PAGE_NAME(AlphanumericDisplay),
+  HID_USAGE_PAGE_NAME(MedicalInstruments),
+  HID_USAGE_PAGE_NAME(BarCodeScanner),
+  HID_USAGE_PAGE_NAME(Braille),
+  HID_USAGE_PAGE_NAME(Scale),
+  HID_USAGE_PAGE_NAME(MagneticStripeReader),
+  HID_USAGE_PAGE_NAME(Camera),
+  HID_USAGE_PAGE_NAME(Arcade),
+};
+
+const char *
+hidGetUsagePageName (unsigned char type) {
+  return hidGetName(hidUsagePageNames, ARRAY_COUNT(hidUsagePageNames), type);
 }
 
 const unsigned char hidItemLengths[] = {0, 1, 2, 4};
@@ -227,6 +277,23 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
         " = %" PRId32 " (0X%.*" PRIX32 ")",
         item.value.s, hexPrecision, hexValue
       );
+    }
+
+    {
+      const char *name = NULL;
+      uint32_t value = item.value.u;
+
+      switch (item.type) {
+        case HID_ITM_Collection:
+          name = hidGetCollectionTypeName(value);
+          break;
+
+        case HID_ITM_UsagePage:
+          name = hidGetUsagePageName(value);
+          break;
+      }
+
+      if (name) STR_PRINTF(": %s", name);
     }
 
     STR_END;

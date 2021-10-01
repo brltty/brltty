@@ -75,15 +75,35 @@ hidHasSignedValue (HidItemType type) {
 #define HID_ITEM_BIT(type) (UINT64_C(1) << ((type) >> 2))
 
 typedef enum {
-  HID_COL_PhysicaL    = 0X00,
+  HID_COL_Physical    = 0X00,
   HID_COL_Application = 0X01,
   HID_COL_Logical     = 0X02,
 } HidCollectionType;
 
 typedef enum {
-  HID_UPG_GenericDesktop = 0X01,
-  HID_UPG_Button         = 0X09,
-  HID_UPG_Braille        = 0X41,
+  HID_UPG_GenericDesktop          = 0X01,
+  HID_UPG_Simulation              = 0X02,
+  HID_UPG_VirtualReality          = 0X03,
+  HID_UPG_Sport                   = 0X04,
+  HID_UPG_Game                    = 0X05,
+  HID_UPG_GenericDevice           = 0X06,
+  HID_UPG_KeyboardKeypad          = 0X07,
+  HID_UPG_LEDs                    = 0X08,
+  HID_UPG_Button                  = 0X09,
+  HID_UPG_Ordinal                 = 0X0A,
+  HID_UPG_Telephony               = 0X0B,
+  HID_UPG_Consumer                = 0X0C,
+  HID_UPG_Digitizer               = 0X0D,
+  HID_UPG_PhysicalInterfaceDevice = 0X0F,
+  HID_UPG_Unicode                 = 0X10,
+  HID_UPG_AlphanumericDisplay     = 0X14,
+  HID_UPG_MedicalInstruments      = 0X40,
+  HID_UPG_Braille                 = 0X41,
+  HID_UPG_BarCodeScanner          = 0X8C,
+  HID_UPG_Scale                   = 0X8D,
+  HID_UPG_MagneticStripeReader    = 0X8E,
+  HID_UPG_Camera                  = 0X90,
+  HID_UPG_Arcade                  = 0X91,
 } HidUsagePage;
 
 typedef enum {

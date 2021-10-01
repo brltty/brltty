@@ -42,9 +42,12 @@ extern int hidGetNextItem (
   size_t *count
 );
 
-extern const unsigned char hidItemLengths[];
 extern const char *hidGetItemTypeName (unsigned char type);
+extern const char *hidGetCollectionTypeName (unsigned char type);
+extern const char *hidGetUsagePageName (unsigned char type);
+
 extern void hidLogItems (int level, const unsigned char *bytes, size_t count);
+extern const unsigned char hidItemLengths[];
 
 typedef struct {
   uint64_t definedItemTypes;
