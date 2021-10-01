@@ -25,10 +25,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef union {
+  uint32_t u;
+  int32_t s;
+} HidItemValue;
+
 typedef struct {
-  int32_t value;
-  unsigned char type;
-  unsigned char length;
+  HidItemValue value;
+  uint8_t type;
+  uint8_t length;
 } HidItemDescription;
 
 extern int hidGetNextItem (
@@ -43,8 +48,8 @@ extern void hidLogItems (int level, const unsigned char *bytes, size_t count);
 
 typedef struct {
   uint64_t definedItemTypes;
-  int32_t reportSize;
-  uint8_t reportIdentifier;
+  unsigned int reportSize;
+  unsigned char reportIdentifier;
 } HidReportDescription;
 
 extern int hidFillReportDescription (

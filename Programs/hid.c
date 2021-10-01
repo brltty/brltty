@@ -83,20 +83,20 @@ hidGetNextItem (
 
   item->type = type;
   item->length = length;
-  item->value = 0;
+  item->value.u = 0;
 
   {
     unsigned char shift = 0;
 
     while (byte < endValue) {
-      item->value |= *byte++ << shift;
+      item->value.u |= *byte++ << shift;
       shift += 8;
     }
 
     if (hidHasSignedValue(item->type)) {
       shift = 0X20 - shift;
-      item->value <<= shift;
-      item->value >>= shift;
+      item->value.u <<= shift;
+      item->value.s >>= shift;
     }
   }
 
@@ -112,8 +112,9 @@ hidFillReportDescription (
   HidReportDescription *report
 ) {
   int found = 0;
-  int32_t reportCount = 0;
-  int32_t reportSize = 0;
+
+  uint32_t reportSize = 0;
+  uint32_t reportCount = 0;
 
   while (count) {
     HidItemDescription item;
@@ -122,7 +123,7 @@ hidFillReportDescription (
     if (item.type ==  HID_ITM_ReportID) {
       if (found) return 1;
 
-      if (item.value == identifier) {
+      if (item.value.u == identifier) {
         found = 1;
         memset(report, 0, sizeof(*report));
 
@@ -145,12 +146,12 @@ hidFillReportDescription (
       }
 
       case HID_ITM_ReportCount: {
-        reportCount = item.value;
+        reportCount = item.value.u;
         goto itemTypeEncountered;
       }
 
       case HID_ITM_ReportSize: {
-        reportSize = item.value;
+        reportSize = item.value.u;
         goto itemTypeEncountered;
       }
 
@@ -219,12 +220,12 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
     }
 
     if (item.length > 0) {
-      uint32_t hexValue = item.value & ((UINT64_C(1) << (item.length * 8)) - 1);
+      uint32_t hexValue = item.value.u & ((UINT64_C(1) << (item.length * 8)) - 1);
       int hexPrecision = item.length * 2;
 
       STR_PRINTF(
         " = %" PRId32 " (0X%.*" PRIX32 ")",
-        item.value, hexPrecision, hexValue
+        item.value.s, hexPrecision, hexValue
       );
     }
 
