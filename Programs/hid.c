@@ -160,13 +160,13 @@ hidGetNextItem (
 }
 
 int
-hidFillReportDescription (
+hidGetReportSize (
   const unsigned char *bytes, size_t count,
-  unsigned char identifier,
-  HidReportDescription *report
+  unsigned char identifier, size_t *size
 ) {
   int found = 0;
 
+  uint64_t definedItemTypes = 0;
   uint32_t reportSize = 0;
   uint32_t reportCount = 0;
 
@@ -175,14 +175,12 @@ hidFillReportDescription (
     if (!hidGetNextItem(&item, &bytes, &count)) break;
 
     if (item.type ==  HID_ITM_ReportID) {
-      if (found) return 1;
+      if (found) break;
 
       if (item.value.u == identifier) {
         found = 1;
-        memset(report, 0, sizeof(*report));
-
-        report->reportIdentifier = identifier;
-        report->reportSize = 0;
+        *size = 0;
+        if (identifier) *size += 1;
       }
 
       continue;
@@ -194,56 +192,37 @@ hidFillReportDescription (
       case HID_ITM_Input:
       case HID_ITM_Output:
       case HID_ITM_Feature:
-      {
-        report->reportSize += reportSize * reportCount;
-        continue;
-      }
+        *size += reportSize * reportCount;
+        break;
 
-      case HID_ITM_ReportCount: {
+      case HID_ITM_ReportCount:
         reportCount = item.value.u;
-        goto itemTypeEncountered;
-      }
+        break;
 
-      case HID_ITM_ReportSize: {
+      case HID_ITM_ReportSize:
         reportSize = item.value.u;
-        goto itemTypeEncountered;
-      }
-
-      itemTypeEncountered: {
-        report->definedItemTypes |= HID_ITEM_BIT(item.type);
-        continue;
-      }
+        break;
 
       default:
         continue;
     }
+
+    definedItemTypes |= HID_ITEM_BIT(item.type);
   }
 
-  return found;
-}
-
-int
-hidGetReportSize (
-  const unsigned char *bytes, size_t count,
-  unsigned char identifier, size_t *size
-) {
-  HidReportDescription report;
-  *size = 0;
-
-  if (hidFillReportDescription(bytes, count, identifier, &report)) {
-    *size = (report.reportSize + 7) / 8;
-    *size += 1;
+  if (found) {
+    *size += 7;
+    *size /= 8;
 
     logMessage(LOG_CATEGORY(USB_IO),
-      "HID report size: %02X = %"PRIsize, identifier, *size
+      "HID report size: %02X = %"PRIsize,
+      identifier, *size
     );
-
-    return 1;
   } else {
     logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
   }
 
-  return 0;
+  return found;
 }
 
 void

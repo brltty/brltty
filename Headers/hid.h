@@ -49,18 +49,6 @@ extern const char *hidGetUsagePageName (uint16_t page);
 extern void hidLogItems (int level, const unsigned char *bytes, size_t count);
 extern unsigned char hidGetValueSize (unsigned char item);
 
-typedef struct {
-  uint64_t definedItemTypes;
-  unsigned int reportSize;
-  unsigned char reportIdentifier;
-} HidReportDescription;
-
-extern int hidFillReportDescription (
-  const unsigned char *bytes, size_t count,
-  unsigned char identifier,
-  HidReportDescription *report
-);
-
 extern int hidGetReportSize (
   const unsigned char *bytes, size_t count,
   unsigned char identifier, size_t *size
