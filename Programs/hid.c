@@ -164,7 +164,11 @@ hidGetReportSize (
   const unsigned char *bytes, size_t count,
   unsigned char identifier, size_t *size
 ) {
-  int found = 0;
+  int noIdentifier = !identifier;
+  int found = noIdentifier;
+
+  size_t totalBits = 0;
+  if (!noIdentifier) totalBits += 8;
 
   uint64_t definedItemTypes = 0;
   uint32_t reportSize = 0;
@@ -172,47 +176,49 @@ hidGetReportSize (
 
   while (count) {
     HidItemDescription item;
-    if (!hidGetNextItem(&item, &bytes, &count)) break;
 
-    if (item.type ==  HID_ITM_ReportID) {
-      if (found) break;
+    if (!hidGetNextItem(&item, &bytes, &count)) {
+      if (count) return 0;
+      break;
+    }
 
-      if (item.value.u == identifier) {
-        found = 1;
-        *size = 0;
-        if (identifier) *size += 1;
+    if (item.type == HID_ITM_ReportID) {
+      if (noIdentifier) {
+        found = 0;
+        break;
       }
 
+      if (found) break;
+      if (item.value.u == identifier) found = 1;
       continue;
     }
 
-    if (!found) continue;
+    if (found) {
+      switch (item.type) {
+        case HID_ITM_Input:
+        case HID_ITM_Output:
+        case HID_ITM_Feature:
+          totalBits += reportSize * reportCount;
+          break;
 
-    switch (item.type) {
-      case HID_ITM_Input:
-      case HID_ITM_Output:
-      case HID_ITM_Feature:
-        *size += reportSize * reportCount;
-        break;
+        case HID_ITM_ReportCount:
+          reportCount = item.value.u;
+          break;
 
-      case HID_ITM_ReportCount:
-        reportCount = item.value.u;
-        break;
+        case HID_ITM_ReportSize:
+          reportSize = item.value.u;
+          break;
 
-      case HID_ITM_ReportSize:
-        reportSize = item.value.u;
-        break;
+        default:
+          continue;
+      }
 
-      default:
-        continue;
+      definedItemTypes |= HID_ITEM_BIT(item.type);
     }
-
-    definedItemTypes |= HID_ITEM_BIT(item.type);
   }
 
   if (found) {
-    *size += 7;
-    *size /= 8;
+    *size = (totalBits + 7) / 8;
 
     logMessage(LOG_CATEGORY(USB_IO),
       "HID report size: %02X = %"PRIsize,
