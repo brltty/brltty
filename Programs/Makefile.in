@@ -33,11 +33,12 @@ all-tools: all-brltty-cldr all-brltty-lsinc
 all-brltty-cldr: brltty-cldr$X
 all-brltty-lsinc: brltty-lsinc$X
 
-everything: all all-brltest all-spktest all-scrtest all-crctest all-msgtest $(ALL_API)
+everything: all all-brltest all-spktest all-scrtest all-crctest all-hidtest all-msgtest $(ALL_API)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
 all-crctest: crctest$X
+all-hidtest: hidtest$X
 all-msgtest: msgtest$X
 
 all-api: all-xbrlapi all-brltty-clip all-apitest
@@ -426,6 +427,14 @@ hid.$O:
 
 hid_braille.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_braille.c
+
+HIDTEST_OBJECTS = hidtest.$O $(PROGRAM_OBJECTS) crc_algorithms.$O $(HID_OBJECTS)
+
+hidtest$X: $(HIDTEST_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(HIDTEST_OBJECTS) $(LDLIBS)
+
+hidtest.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hidtest.c
 
 ###############################################################################
 
