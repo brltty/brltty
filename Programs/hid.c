@@ -35,84 +35,88 @@ hidGetName (const char *const *names, size_t count, uint16_t index) {
   return names[index];
 }
 
-static const char *hidItemTypeNames[] = {
-  HID_ITEM_TYPE_NAME(UsagePage),
-  HID_ITEM_TYPE_NAME(Usage),
-  HID_ITEM_TYPE_NAME(LogicalMinimum),
-  HID_ITEM_TYPE_NAME(UsageMinimum),
-  HID_ITEM_TYPE_NAME(LogicalMaximum),
-  HID_ITEM_TYPE_NAME(UsageMaximum),
-  HID_ITEM_TYPE_NAME(PhysicalMinimum),
-  HID_ITEM_TYPE_NAME(DesignatorIndex),
-  HID_ITEM_TYPE_NAME(PhysicalMaximum),
-  HID_ITEM_TYPE_NAME(DesignatorMinimum),
-  HID_ITEM_TYPE_NAME(UnitExponent),
-  HID_ITEM_TYPE_NAME(DesignatorMaximum),
-  HID_ITEM_TYPE_NAME(Unit),
-  HID_ITEM_TYPE_NAME(ReportSize),
-  HID_ITEM_TYPE_NAME(StringIndex),
-  HID_ITEM_TYPE_NAME(Input),
-  HID_ITEM_TYPE_NAME(ReportID),
-  HID_ITEM_TYPE_NAME(StringMinimum),
-  HID_ITEM_TYPE_NAME(Output),
-  HID_ITEM_TYPE_NAME(ReportCount),
-  HID_ITEM_TYPE_NAME(StringMaximum),
-  HID_ITEM_TYPE_NAME(Collection),
-  HID_ITEM_TYPE_NAME(Push),
-  HID_ITEM_TYPE_NAME(Delimiter),
-  HID_ITEM_TYPE_NAME(Feature),
-  HID_ITEM_TYPE_NAME(Pop),
-  HID_ITEM_TYPE_NAME(EndCollection),
-};
-
 const char *
 hidGetItemTypeName (unsigned char type) {
-  return hidGetName(hidItemTypeNames, ARRAY_COUNT(hidItemTypeNames), type);
-}
+  static const char *names[] = {
+    HID_ITEM_TYPE_NAME(UsagePage),
+    HID_ITEM_TYPE_NAME(Usage),
+    HID_ITEM_TYPE_NAME(LogicalMinimum),
+    HID_ITEM_TYPE_NAME(UsageMinimum),
+    HID_ITEM_TYPE_NAME(LogicalMaximum),
+    HID_ITEM_TYPE_NAME(UsageMaximum),
+    HID_ITEM_TYPE_NAME(PhysicalMinimum),
+    HID_ITEM_TYPE_NAME(DesignatorIndex),
+    HID_ITEM_TYPE_NAME(PhysicalMaximum),
+    HID_ITEM_TYPE_NAME(DesignatorMinimum),
+    HID_ITEM_TYPE_NAME(UnitExponent),
+    HID_ITEM_TYPE_NAME(DesignatorMaximum),
+    HID_ITEM_TYPE_NAME(Unit),
+    HID_ITEM_TYPE_NAME(ReportSize),
+    HID_ITEM_TYPE_NAME(StringIndex),
+    HID_ITEM_TYPE_NAME(Input),
+    HID_ITEM_TYPE_NAME(ReportID),
+    HID_ITEM_TYPE_NAME(StringMinimum),
+    HID_ITEM_TYPE_NAME(Output),
+    HID_ITEM_TYPE_NAME(ReportCount),
+    HID_ITEM_TYPE_NAME(StringMaximum),
+    HID_ITEM_TYPE_NAME(Collection),
+    HID_ITEM_TYPE_NAME(Push),
+    HID_ITEM_TYPE_NAME(Delimiter),
+    HID_ITEM_TYPE_NAME(Feature),
+    HID_ITEM_TYPE_NAME(Pop),
+    HID_ITEM_TYPE_NAME(EndCollection),
+  };
 
-static const char *hidCollectionTypeNames[] = {
-  HID_COLLECTION_TYPE_NAME(Physical),
-  HID_COLLECTION_TYPE_NAME(Application),
-  HID_COLLECTION_TYPE_NAME(Logical),
-};
+  return hidGetName(names, ARRAY_COUNT(names), type);
+}
 
 const char *
 hidGetCollectionTypeName (unsigned char type) {
-  return hidGetName(hidCollectionTypeNames, ARRAY_COUNT(hidCollectionTypeNames), type);
-}
+  static const char *names[] = {
+    HID_COLLECTION_TYPE_NAME(Physical),
+    HID_COLLECTION_TYPE_NAME(Application),
+    HID_COLLECTION_TYPE_NAME(Logical),
+  };
 
-static const char *hidUsagePageNames[] = {
-  HID_USAGE_PAGE_NAME(GenericDesktop),
-  HID_USAGE_PAGE_NAME(Simulation),
-  HID_USAGE_PAGE_NAME(VirtualReality),
-  HID_USAGE_PAGE_NAME(Sport),
-  HID_USAGE_PAGE_NAME(Game),
-  HID_USAGE_PAGE_NAME(GenericDevice),
-  HID_USAGE_PAGE_NAME(KeyboardKeypad),
-  HID_USAGE_PAGE_NAME(LEDs),
-  HID_USAGE_PAGE_NAME(Button),
-  HID_USAGE_PAGE_NAME(Ordinal),
-  HID_USAGE_PAGE_NAME(Telephony),
-  HID_USAGE_PAGE_NAME(Consumer),
-  HID_USAGE_PAGE_NAME(Digitizer),
-  HID_USAGE_PAGE_NAME(PhysicalInterfaceDevice),
-  HID_USAGE_PAGE_NAME(Unicode),
-  HID_USAGE_PAGE_NAME(AlphanumericDisplay),
-  HID_USAGE_PAGE_NAME(MedicalInstruments),
-  HID_USAGE_PAGE_NAME(BarCodeScanner),
-  HID_USAGE_PAGE_NAME(Braille),
-  HID_USAGE_PAGE_NAME(Scale),
-  HID_USAGE_PAGE_NAME(MagneticStripeReader),
-  HID_USAGE_PAGE_NAME(Camera),
-  HID_USAGE_PAGE_NAME(Arcade),
-};
+  return hidGetName(names, ARRAY_COUNT(names), type);
+}
 
 const char *
-hidGetUsagePageName (unsigned char type) {
-  return hidGetName(hidUsagePageNames, ARRAY_COUNT(hidUsagePageNames), type);
+hidGetUsagePageName (unsigned char page) {
+  static const char *names[] = {
+    HID_USAGE_PAGE_NAME(GenericDesktop),
+    HID_USAGE_PAGE_NAME(Simulation),
+    HID_USAGE_PAGE_NAME(VirtualReality),
+    HID_USAGE_PAGE_NAME(Sport),
+    HID_USAGE_PAGE_NAME(Game),
+    HID_USAGE_PAGE_NAME(GenericDevice),
+    HID_USAGE_PAGE_NAME(KeyboardKeypad),
+    HID_USAGE_PAGE_NAME(LEDs),
+    HID_USAGE_PAGE_NAME(Button),
+    HID_USAGE_PAGE_NAME(Ordinal),
+    HID_USAGE_PAGE_NAME(Telephony),
+    HID_USAGE_PAGE_NAME(Consumer),
+    HID_USAGE_PAGE_NAME(Digitizer),
+    HID_USAGE_PAGE_NAME(PhysicalInterfaceDevice),
+    HID_USAGE_PAGE_NAME(Unicode),
+    HID_USAGE_PAGE_NAME(AlphanumericDisplay),
+    HID_USAGE_PAGE_NAME(MedicalInstruments),
+    HID_USAGE_PAGE_NAME(BarCodeScanner),
+    HID_USAGE_PAGE_NAME(Braille),
+    HID_USAGE_PAGE_NAME(Scale),
+    HID_USAGE_PAGE_NAME(MagneticStripeReader),
+    HID_USAGE_PAGE_NAME(Camera),
+    HID_USAGE_PAGE_NAME(Arcade),
+  };
+
+  return hidGetName(names, ARRAY_COUNT(names), page);
 }
 
-const unsigned char hidItemLengths[] = {0, 1, 2, 4};
+unsigned char
+hidGetValueSize (unsigned char item) {
+  static const unsigned char sizes[4] = {0, 1, 2, 4};
+  return sizes[HID_ITEM_LENGTH(item)];
+}
 
 int
 hidGetNextItem (
@@ -126,13 +130,13 @@ hidGetNextItem (
   const unsigned char *endBytes = byte + *count;
 
   unsigned char type = HID_ITEM_TYPE(*byte);
-  unsigned char length = hidItemLengths[HID_ITEM_LENGTH(*byte)];
+  unsigned char valueSize = hidGetValueSize(*byte);
 
-  const unsigned char *endValue = ++byte + length;
+  const unsigned char *endValue = ++byte + valueSize;
   if (endValue > endBytes) return 0;
 
   item->type = type;
-  item->length = length;
+  item->valueSize = valueSize;
   item->value.u = 0;
 
   {
@@ -269,9 +273,9 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
       STR_PRINTF(" %s", name);
     }
 
-    if (item.length > 0) {
-      uint32_t hexValue = item.value.u & ((UINT64_C(1) << (item.length * 8)) - 1);
-      int hexPrecision = item.length * 2;
+    if (item.valueSize > 0) {
+      uint32_t hexValue = item.value.u & ((UINT64_C(1) << (item.valueSize * 8)) - 1);
+      int hexPrecision = item.valueSize * 2;
 
       STR_PRINTF(
         " = %" PRId32 " (0X%.*" PRIX32 ")",
