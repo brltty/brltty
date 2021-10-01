@@ -42,9 +42,9 @@ extern int hidGetNextItem (
   size_t *count
 );
 
-extern const char *hidGetItemTypeName (unsigned char type);
-extern const char *hidGetCollectionTypeName (unsigned char type);
-extern const char *hidGetUsagePageName (unsigned char page);
+extern const char *hidGetItemTypeName (uint8_t type);
+extern const char *hidGetCollectionTypeName (uint32_t type);
+extern const char *hidGetUsagePageName (uint16_t page);
 
 extern void hidLogItems (int level, const unsigned char *bytes, size_t count);
 extern unsigned char hidGetValueSize (unsigned char item);

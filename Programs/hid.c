@@ -30,13 +30,13 @@
 #define HID_USAGE_PAGE_NAME(name) HID_NAME(HID_UPG, name)
 
 static inline const char *
-hidGetName (const char *const *names, size_t count, uint16_t index) {
+hidGetName (const char *const *names, size_t count, uint32_t index) {
   if (index >= count) return NULL;
   return names[index];
 }
 
 const char *
-hidGetItemTypeName (unsigned char type) {
+hidGetItemTypeName (uint8_t type) {
   static const char *names[] = {
     HID_ITEM_TYPE_NAME(UsagePage),
     HID_ITEM_TYPE_NAME(Usage),
@@ -71,7 +71,7 @@ hidGetItemTypeName (unsigned char type) {
 }
 
 const char *
-hidGetCollectionTypeName (unsigned char type) {
+hidGetCollectionTypeName (uint32_t type) {
   static const char *names[] = {
     HID_COLLECTION_TYPE_NAME(Physical),
     HID_COLLECTION_TYPE_NAME(Application),
@@ -82,7 +82,7 @@ hidGetCollectionTypeName (unsigned char type) {
 }
 
 const char *
-hidGetUsagePageName (unsigned char page) {
+hidGetUsagePageName (uint16_t page) {
   static const char *names[] = {
     HID_USAGE_PAGE_NAME(GenericDesktop),
     HID_USAGE_PAGE_NAME(Simulation),
