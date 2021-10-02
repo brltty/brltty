@@ -236,6 +236,17 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
   const char *label = "HID items log";
   logMessage(level, "begin %s", label);
 
+  int decOffsetWidth;
+  int hexOffsetWidth;
+
+  {
+    unsigned int maximum = count;
+    char buffer[0X20];
+
+    decOffsetWidth = snprintf(buffer, sizeof(buffer), "%u", maximum);
+    hexOffsetWidth = snprintf(buffer, sizeof(buffer), "%x", maximum);
+  }
+
   const unsigned char *byte = bytes;
 
   while (1) {
@@ -248,8 +259,8 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
     STR_BEGIN(log, sizeof(log));
 
     STR_PRINTF(
-      "HID item at %" PRIu32 " (0X%" PRIX32 "):",
-      offset, offset
+      "HID item at %*" PRIu32 " (0X%.*" PRIX32 "):",
+      decOffsetWidth, offset, hexOffsetWidth, offset
     );
 
     {
