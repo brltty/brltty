@@ -251,53 +251,62 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
 
   while (1) {
     unsigned int offset = byte - bytes;
-
     HidItemDescription item;
-    if (!hidGetNextItem(&item, &byte, &count)) break;
+    int ok = hidGetNextItem(&item, &byte, &count);
 
     char log[0X100];
     STR_BEGIN(log, sizeof(log));
 
     STR_PRINTF(
-      "HID item at %*" PRIu32 " (0X%.*" PRIX32 "):",
+      "HID item: %*" PRIu32 " (0X%.*" PRIX32 "):",
       decOffsetWidth, offset, hexOffsetWidth, offset
     );
 
-    {
-      const char *name = hidGetItemTypeName(item.type);
-      if (!name) name = "<unknown>";
-      STR_PRINTF(" %s", name);
-    }
-
-    if (item.valueSize > 0) {
-      uint32_t hexValue = item.value.u & ((UINT64_C(1) << (item.valueSize * 8)) - 1);
-      int hexPrecision = item.valueSize * 2;
-
-      STR_PRINTF(
-        " = %" PRId32 " (0X%.*" PRIX32 ")",
-        item.value.s, hexPrecision, hexValue
-      );
-    }
-
-    {
-      const char *name = NULL;
-      uint32_t value = item.value.u;
-
-      switch (item.type) {
-        case HID_ITM_Collection:
-          name = hidGetCollectionTypeName(value);
-          break;
-
-        case HID_ITM_UsagePage:
-          name = hidGetUsagePageName(value);
-          break;
+    if (ok) {
+      {
+        const char *name = hidGetItemTypeName(item.type);
+        if (!name) name = "<unknown>";
+        STR_PRINTF(" %s", name);
       }
 
-      if (name) STR_PRINTF(": %s", name);
+      if (item.valueSize > 0) {
+        uint32_t hexValue = item.value.u & ((UINT64_C(1) << (item.valueSize * 8)) - 1);
+        int hexPrecision = item.valueSize * 2;
+
+        STR_PRINTF(
+          " = %" PRId32 " (0X%.*" PRIX32 ")",
+          item.value.s, hexPrecision, hexValue
+        );
+      }
+
+      {
+        const char *name = NULL;
+        uint32_t value = item.value.u;
+
+        switch (item.type) {
+          case HID_ITM_Collection:
+            name = hidGetCollectionTypeName(value);
+            break;
+
+          case HID_ITM_UsagePage:
+            name = hidGetUsagePageName(value);
+            break;
+        }
+
+        if (name) STR_PRINTF(": %s", name);
+      }
+    } else if (count) {
+      STR_PRINTF(" incomplete:");
+      const unsigned char *end = byte + count;
+
+      while (byte < end) {
+        STR_PRINTF(" %02X", *byte++);
+      }
     }
 
     STR_END;
     logMessage(level, "%s", log);
+    if (!ok) break;
   }
 
   logMessage(level, "end %s", label);
