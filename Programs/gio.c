@@ -152,8 +152,8 @@ gioConnectResource (
       endpoint->input.from = 0;
       endpoint->input.to = 0;
 
-      endpoint->hidReportItems.address = NULL;
-      endpoint->hidReportItems.size = 0;
+      endpoint->hidItems.address = NULL;
+      endpoint->hidItems.size = 0;
 
       if (properties->private->getOptions) {
         endpoint->options = *properties->private->getOptions(descriptor);
@@ -208,7 +208,7 @@ gioDisconnectResource (GioEndpoint *endpoint) {
     ok = 1;
   }
 
-  if (endpoint->hidReportItems.address) free(endpoint->hidReportItems.address);
+  if (endpoint->hidItems.address) free(endpoint->hidItems.address);
   free(endpoint);
   return ok;
 }
@@ -445,18 +445,22 @@ gioAskResource (
                 endpoint->options.requestTimeout);
 }
 
-size_t
-gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
-  if (!endpoint->hidReportItems.address) {
-    GioGetHidReportItemsMethod *method = endpoint->methods->getHidReportItems;
+int
+gioGetHidReportSize (
+  GioEndpoint *endpoint,
+  unsigned char identifier,
+  HidReportSize *size
+) {
+  if (!endpoint->hidItems.address) {
+    GioGetHidItemsMethod *method = endpoint->methods->getHidItems;
 
     if (!method) {
-      logUnsupportedOperation("getHidReportItems");
+      logUnsupportedOperation("getHidItems");
       errno = ENOSYS;
       return 0;
     }
 
-    if (!method(endpoint->handle, &endpoint->hidReportItems,
+    if (!method(endpoint->handle, &endpoint->hidItems,
                 endpoint->options.requestTimeout)) {
       return 0;
     }
@@ -471,13 +475,13 @@ gioGetHidReportSize (GioEndpoint *endpoint, unsigned char report) {
       return 0;
     }
 
-    return method(&endpoint->hidReportItems, report);
+    return method(&endpoint->hidItems, identifier, size);
   }
 }
 
 ssize_t
 gioSetHidReport (
-  GioEndpoint *endpoint, unsigned char report,
+  GioEndpoint *endpoint, unsigned char identifier,
   const void *data, uint16_t size
 ) {
   GioSetHidReportMethod *method = endpoint->methods->setHidReport;
@@ -488,7 +492,7 @@ gioSetHidReport (
     return -1;
   }
 
-  return method(endpoint->handle, report,
+  return method(endpoint->handle, identifier,
                 data, size, endpoint->options.requestTimeout);
 }
 
@@ -502,7 +506,7 @@ gioWriteHidReport (
 
 ssize_t
 gioGetHidReport (
-  GioEndpoint *endpoint, unsigned char report,
+  GioEndpoint *endpoint, unsigned char identifier,
   void *buffer, uint16_t size
 ) {
   GioGetHidReportMethod *method = endpoint->methods->getHidReport;
@@ -513,13 +517,13 @@ gioGetHidReport (
     return -1;
   }
 
-  return method(endpoint->handle, report,
+  return method(endpoint->handle, identifier,
                 buffer, size, endpoint->options.requestTimeout);
 }
 
 ssize_t
 gioSetHidFeature (
-  GioEndpoint *endpoint, unsigned char report,
+  GioEndpoint *endpoint, unsigned char identifier,
   const void *data, uint16_t size
 ) {
   GioSetHidFeatureMethod *method = endpoint->methods->setHidFeature;
@@ -530,7 +534,7 @@ gioSetHidFeature (
     return -1;
   }
 
-  return method(endpoint->handle, report,
+  return method(endpoint->handle, identifier,
                 data, size, endpoint->options.requestTimeout);
 }
 
@@ -544,7 +548,7 @@ gioWriteHidFeature (
 
 ssize_t
 gioGetHidFeature (
-  GioEndpoint *endpoint, unsigned char report,
+  GioEndpoint *endpoint, unsigned char identifier,
   void *buffer, uint16_t size
 ) {
   GioGetHidFeatureMethod *method = endpoint->methods->getHidFeature;
@@ -555,7 +559,7 @@ gioGetHidFeature (
     return -1;
   }
 
-  return method(endpoint->handle, report,
+  return method(endpoint->handle, identifier,
                 buffer, size, endpoint->options.requestTimeout);
 }
 

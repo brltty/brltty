@@ -21,6 +21,7 @@
 
 #include "serial_types.h"
 #include "usb_types.h"
+#include "hid_types.h"
 
 #ifdef __cplusplus
 extern "C" {

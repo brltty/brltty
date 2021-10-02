@@ -634,12 +634,23 @@ typedef enum {
   HT_HID_CMD_FlushBuffers = 0X01, /* flush input and output buffers */
 } HtHidCommand;
 
-static size_t hidReportSize_OutData;
-static size_t hidReportSize_InData;
-static size_t hidReportSize_InCommand;
-static size_t hidReportSize_OutVersion;
-static size_t hidReportSize_OutBaud;
-static size_t hidReportSize_InBaud;
+static HidReportSize hidReportSize_OutData;
+#define hidOutDataSize hidReportSize_OutData.input
+
+static HidReportSize hidReportSize_InData;
+#define hidInDataSize hidReportSize_InData.output
+
+static HidReportSize hidReportSize_InCommand;
+#define hidInCommandSize hidReportSize_InCommand.output
+
+static HidReportSize hidReportSize_OutVersion;
+#define hidOutVersionSize hidReportSize_OutVersion.input
+
+static HidReportSize hidReportSize_OutBaud;
+#define hidOutBaudSize hidReportSize_OutBaud.input
+
+static HidReportSize hidReportSize_InBaud;
+#define hidInBaudSize hidReportSize_InBaud.output
 
 static uint16_t hidFirmwareVersion;
 static unsigned char *hidInputReport = NULL;
@@ -666,8 +677,8 @@ getHidReport (
 
 static int
 allocateHidInputBuffer (void) {
-  if (hidReportSize_OutData) {
-    if ((hidInputReport = malloc(hidReportSize_OutData))) {
+  if (hidOutDataSize) {
+    if ((hidInputReport = malloc(hidOutDataSize))) {
       hidInputLength = 0;
       hidInputOffset = 0;
       return 1;
@@ -691,8 +702,8 @@ static int
 getHidFirmwareVersion (BrailleDisplay *brl) {
   hidFirmwareVersion = 0;
 
-  if (hidReportSize_OutVersion) {
-    unsigned char report[hidReportSize_OutVersion];
+  if (hidOutVersionSize) {
+    unsigned char report[hidOutVersionSize];
     ssize_t result = gioGetHidReport(brl->gioEndpoint,
                                      HT_HID_RPT_OutVersion, report, sizeof(report));
 
@@ -708,8 +719,8 @@ getHidFirmwareVersion (BrailleDisplay *brl) {
 
 static int
 executeHidFirmwareCommand (BrailleDisplay *brl, HtHidCommand command) {
-  if (hidReportSize_InCommand) {
-    unsigned char report[hidReportSize_InCommand];
+  if (hidInCommandSize) {
+    unsigned char report[hidInCommandSize];
 
     report[0] = HT_HID_RPT_InCommand;
     report[1] = command;
@@ -737,13 +748,13 @@ typedef struct {
 static int
 initializeUsbSession2 (BrailleDisplay *brl) {
   static const BrailleReportSizeEntry reportTable[] = {
-    {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
-    {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
-    {.number=HT_HID_RPT_InCommand, .size=&hidReportSize_InCommand},
-    {.number=HT_HID_RPT_OutVersion, .size=&hidReportSize_OutVersion},
-    {.number=HT_HID_RPT_OutBaud, .size=&hidReportSize_OutBaud},
-    {.number=HT_HID_RPT_InBaud, .size=&hidReportSize_InBaud},
-    {.number=0}
+    {.identifier=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
+    {.identifier=HT_HID_RPT_InData, .size=&hidReportSize_InData},
+    {.identifier=HT_HID_RPT_InCommand, .size=&hidReportSize_InCommand},
+    {.identifier=HT_HID_RPT_OutVersion, .size=&hidReportSize_OutVersion},
+    {.identifier=HT_HID_RPT_OutBaud, .size=&hidReportSize_OutBaud},
+    {.identifier=HT_HID_RPT_InBaud, .size=&hidReportSize_InBaud},
+    {.identifier=0}
   };
 
   if (getBrailleReportSizes(brl, reportTable)) {
@@ -765,7 +776,7 @@ static int
 awaitUsbInput2 (
   UsbDevice *device, const UsbChannelDefinition *definition, int milliseconds
 ) {
-  if (hidReportSize_OutData) {
+  if (hidOutDataSize) {
     if (hidInputOffset < hidInputLength) return 1;
 
     TimePeriod period;
@@ -773,7 +784,7 @@ awaitUsbInput2 (
 
     while (1) {
       ssize_t result = getHidReport(device, definition, HT_HID_RPT_OutData,
-                                    hidInputReport, hidReportSize_OutData);
+                                    hidInputReport, hidOutDataSize);
 
       if (result == -1) return 0;
       hidInputOffset = 0;
@@ -824,9 +835,9 @@ writeUsbData2 (
   const unsigned char *buffer = data;
   int index = 0;
 
-  if (hidReportSize_InData) {
+  if (hidInDataSize) {
     while (size) {
-      unsigned char report[hidReportSize_InData];
+      unsigned char report[hidInDataSize];
       unsigned char count = MIN(size, (sizeof(report) - 2));
       int result;
 
@@ -862,9 +873,9 @@ static const UsbOperations usbOperations2 = {
 static int
 initializeUsbSession3 (BrailleDisplay *brl) {
   static const BrailleReportSizeEntry reportTable[] = {
-    {.number=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
-    {.number=HT_HID_RPT_InData, .size=&hidReportSize_InData},
-    {.number=0}
+    {.identifier=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
+    {.identifier=HT_HID_RPT_InData, .size=&hidReportSize_InData},
+    {.identifier=0}
   };
 
   return getBrailleReportSizes(brl, reportTable);
@@ -878,9 +889,9 @@ writeUsbData3 (
   const unsigned char *buffer = data;
   int index = 0;
 
-  if (hidReportSize_InData) {
+  if (hidInDataSize) {
     while (size) {
-      unsigned char report[hidReportSize_InData];
+      unsigned char report[hidInDataSize];
       const unsigned char count = MIN(size, (sizeof(report) - 2));
       int result;
 
@@ -905,7 +916,7 @@ filterUsbInput3 (UsbInputFilterData *data) {
   unsigned char *buffer = data->buffer;
 
   if ((data->length >= 2) &&
-      (data->length == hidReportSize_OutData) && 
+      (data->length == hidOutDataSize) && 
       (buffer[0] == HT_HID_RPT_OutData) &&
       (buffer[1] <= (data->length - 2))) {
     data->length = buffer[1];

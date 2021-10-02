@@ -28,7 +28,7 @@ typedef struct GioHandleStruct GioHandle;
 typedef struct {
   void *address;
   size_t size;
-} GioHidReportItemsData;
+} GioHidItemsData;
 
 typedef int GioDisconnectResourceMethod (GioHandle *handle);
 
@@ -59,27 +59,27 @@ typedef ssize_t GioAskResourceMethod (
   void *buffer, uint16_t size, int timeout
 );
 
-typedef int GioGetHidReportItemsMethod (GioHandle *handle, GioHidReportItemsData *items, int timeout);
+typedef int GioGetHidItemsMethod (GioHandle *handle, GioHidItemsData *items, int timeout);
 
-typedef size_t GioGetHidReportSizeMethod (const GioHidReportItemsData *items, unsigned char report);
+typedef int GioGetHidReportSizeMethod (const GioHidItemsData *items, unsigned char identifier, HidReportSize *size);
 
 typedef ssize_t GioSetHidReportMethod (
-  GioHandle *handle, unsigned char report,
+  GioHandle *handle, unsigned char identifier,
   const void *data, uint16_t size, int timeout
 );
 
 typedef ssize_t GioGetHidReportMethod (
-  GioHandle *handle, unsigned char report,
+  GioHandle *handle, unsigned char identifier,
   void *buffer, uint16_t size, int timeout
 );
 
 typedef ssize_t GioSetHidFeatureMethod (
-  GioHandle *handle, unsigned char report,
+  GioHandle *handle, unsigned char identifier,
   const void *data, uint16_t size, int timeout
 );
 
 typedef ssize_t GioGetHidFeatureMethod (
-  GioHandle *handle, unsigned char report,
+  GioHandle *handle, unsigned char identifier,
   void *buffer, uint16_t size, int timeout
 );
 
@@ -102,7 +102,7 @@ typedef struct {
   GioTellResourceMethod *tellResource;
   GioAskResourceMethod *askResource;
 
-  GioGetHidReportItemsMethod *getHidReportItems;
+  GioGetHidItemsMethod *getHidItems;
   GioGetHidReportSizeMethod *getHidReportSize;
 
   GioSetHidReportMethod *setHidReport;
@@ -122,7 +122,7 @@ struct GioEndpointStruct {
   GioOptions options;
   GioTypeIdentifier resourceType;
   unsigned int bytesPerSecond;
-  GioHidReportItemsData hidReportItems;
+  GioHidItemsData hidItems;
 
   struct {
     int error;

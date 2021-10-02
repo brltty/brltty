@@ -410,17 +410,16 @@ writeBrailleMessage (
 }
 
 int
-getBrailleReportSize (BrailleDisplay *brl, unsigned char number, size_t *size) {
-  if (!(*size = gioGetHidReportSize(brl->gioEndpoint, number))) return 0;
-  return 1;
+getBrailleReportSize (BrailleDisplay *brl, unsigned char identifier, HidReportSize *size) {
+  return gioGetHidReportSize(brl->gioEndpoint, identifier, size);
 }
 
 int
 getBrailleReportSizes (BrailleDisplay *brl, const BrailleReportSizeEntry *table) {
   const BrailleReportSizeEntry *report = table;
 
-  while (report->number) {
-    if (!getBrailleReportSize(brl, report->number, report->size)) return 0;
+  while (report->identifier) {
+    if (!getBrailleReportSize(brl, report->identifier, report->size)) return 0;
     report += 1;
   }
 

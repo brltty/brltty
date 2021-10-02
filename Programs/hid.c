@@ -120,13 +120,14 @@ hidGetNextItem (
 int
 hidGetReportSize (
   const unsigned char *bytes, size_t count,
-  unsigned char identifier, size_t *size
+  uint8_t identifier, HidReportSize *size
 ) {
   int noIdentifier = !identifier;
   int found = noIdentifier;
 
-  size_t totalBits = 0;
-  if (!noIdentifier) totalBits += 8;
+  size_t inputSize = 0;
+  size_t outputSize = 0;
+  size_t featureSize = 0;
 
   uint64_t definedItemTypes = 0;
   uint32_t reportSize = 0;
@@ -153,11 +154,25 @@ hidGetReportSize (
 
     if (found) {
       switch (item.type) {
+      {
+        size_t *size;
+
         case HID_ITM_Input:
+          size = &inputSize;
+          goto doSize;
+
         case HID_ITM_Output:
+          size = &outputSize;
+          goto doSize;
+
         case HID_ITM_Feature:
-          totalBits += reportSize * reportCount;
+          size = &featureSize;
+          goto doSize;
+
+        doSize:
+          *size += reportSize * reportCount;
           break;
+      }
 
         case HID_ITM_ReportCount:
           reportCount = item.value.u;
@@ -176,12 +191,49 @@ hidGetReportSize (
   }
 
   if (found) {
-    *size = (totalBits + 7) / 8;
+    char log[0X100];
+    STR_BEGIN(log, sizeof(log));
+    STR_PRINTF("HID report size: %02X", identifier);
 
-    logMessage(LOG_CATEGORY(USB_IO),
-      "HID report size: %02X = %"PRIsize,
-      identifier, *size
-    );
+    {
+      typedef struct {
+        const char *label;
+        size_t *bytes;
+        size_t bits;
+      } SizeEntry;
+
+      SizeEntry sizeTable[] = {
+        { .label = "In",
+          .bits = inputSize,
+          .bytes = &size->input
+        },
+
+        { .label = "Out",
+          .bits = outputSize,
+          .bytes = &size->output
+        },
+
+        { .label = "Ftr",
+          .bits = featureSize,
+          .bytes = &size->feature
+        },
+      };
+
+      SizeEntry *entry = sizeTable;
+      const SizeEntry *end = entry + ARRAY_COUNT(sizeTable);
+
+      while (entry < end) {
+        size_t bytes = (entry->bits + 7) / 8;
+        if (bytes && !noIdentifier) bytes += 1;
+        *entry->bytes = bytes;
+
+        STR_PRINTF(" %s:%" PRIsize, entry->label, bytes);
+        entry += 1;
+      }
+    }
+
+    STR_END;
+    logMessage(LOG_CATEGORY(USB_IO), "%s", log);
   } else {
     logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
   }

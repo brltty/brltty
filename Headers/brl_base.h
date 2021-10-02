@@ -128,12 +128,12 @@ extern int writeBrailleMessage (
 extern int acknowledgeBrailleMessage (BrailleDisplay *brl);
 
 typedef struct {
-  unsigned char number;
-  size_t *size;
+  unsigned char identifier;
+  HidReportSize *size;
 } BrailleReportSizeEntry;
 
 extern int getBrailleReportSizes (BrailleDisplay *brl, const BrailleReportSizeEntry *table);
-extern int getBrailleReportSize (BrailleDisplay *brl, unsigned char number, size_t *size);
+extern int getBrailleReportSize (BrailleDisplay *brl, unsigned char identifier, HidReportSize *size);
 
 typedef int BrailleRequestWriter (BrailleDisplay *brl);
 

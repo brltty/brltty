@@ -133,6 +133,12 @@ typedef enum {
   HID_USG_FLG_ABSOLUTE = 0X00,
 } HidUsageFlags;
 
+typedef struct {
+  size_t input;
+  size_t output;
+  size_t feature;
+} HidReportSize;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
