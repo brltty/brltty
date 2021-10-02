@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_HID
 
 #include "hid_types.h"
+#include "strfmth.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +48,7 @@ extern const char *hidGetCollectionTypeName (uint32_t type);
 extern const char *hidGetUsagePageName (uint16_t page);
 
 extern void hidLogItems (int level, const unsigned char *bytes, size_t count);
+extern STR_DECLARE_FORMATTER(hidFormatUsageFlags, uint32_t flags);
 extern unsigned char hidGetValueSize (unsigned char item);
 
 extern int hidGetReportSize (

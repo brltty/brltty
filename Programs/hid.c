@@ -231,6 +231,40 @@ hidGetReportSize (
   return found;
 }
 
+STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)
+  typedef struct {
+    const char *on;
+    const char *off;
+    uint8_t bit;
+  } FlagEntry;
+
+  static const FlagEntry flagTable[] = {
+    { .bit = HID_USG_FLG_CONSTANT,
+      .on = "const",
+      .off = "data"
+    },
+
+    { .bit = HID_USG_FLG_VARIABLE,
+      .on = "var",
+      .off = "array"
+    },
+
+    { .bit = HID_USG_FLG_RELATIVE,
+      .on = "rel",
+      .off = "abs"
+    },
+  };
+
+  const FlagEntry *flag = flagTable;
+  const FlagEntry *end = flag + ARRAY_COUNT(flagTable);
+
+  while (flag < end) {
+    if (STR_LENGTH > 0) STR_PRINTF(" ");
+    STR_PRINTF("%s", ((flags & flag->bit)? flag->on: flag->off));
+    flag += 1;
+  }
+STR_END_FORMATTER
+
 void
 hidLogItems (int level, const unsigned char *bytes, size_t count) {
   const char *label = "HID items log";
@@ -280,20 +314,30 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
       }
 
       {
-        const char *name = NULL;
         uint32_t value = item.value.u;
+        const char *text = NULL;
+        char buffer[0X40];
 
         switch (item.type) {
           case HID_ITM_Collection:
-            name = hidGetCollectionTypeName(value);
+            text = hidGetCollectionTypeName(value);
             break;
 
           case HID_ITM_UsagePage:
-            name = hidGetUsagePageName(value);
+            text = hidGetUsagePageName(value);
+            break;
+
+          case HID_ITM_Input:
+          case HID_ITM_Output:
+          case HID_ITM_Feature:
+            STR_BEGIN(buffer, sizeof(buffer));
+            STR_FORMAT(hidFormatUsageFlags, value);
+            STR_END;
+            text = buffer;
             break;
         }
 
-        if (name) STR_PRINTF(": %s", name);
+        if (text) STR_PRINTF(": %s", text);
       }
     } else if (count) {
       STR_PRINTF(" incomplete:");
@@ -302,6 +346,8 @@ hidLogItems (int level, const unsigned char *bytes, size_t count) {
       while (byte < end) {
         STR_PRINTF(" %02X", *byte++);
       }
+    } else {
+      STR_PRINTF(" end");
     }
 
     STR_END;
