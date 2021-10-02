@@ -70,48 +70,6 @@ hidGetItemTypeName (uint8_t type) {
   return hidGetName(names, ARRAY_COUNT(names), type);
 }
 
-const char *
-hidGetCollectionTypeName (uint32_t type) {
-  static const char *names[] = {
-    HID_COLLECTION_TYPE_NAME(Physical),
-    HID_COLLECTION_TYPE_NAME(Application),
-    HID_COLLECTION_TYPE_NAME(Logical),
-  };
-
-  return hidGetName(names, ARRAY_COUNT(names), type);
-}
-
-const char *
-hidGetUsagePageName (uint16_t page) {
-  static const char *names[] = {
-    HID_USAGE_PAGE_NAME(GenericDesktop),
-    HID_USAGE_PAGE_NAME(Simulation),
-    HID_USAGE_PAGE_NAME(VirtualReality),
-    HID_USAGE_PAGE_NAME(Sport),
-    HID_USAGE_PAGE_NAME(Game),
-    HID_USAGE_PAGE_NAME(GenericDevice),
-    HID_USAGE_PAGE_NAME(KeyboardKeypad),
-    HID_USAGE_PAGE_NAME(LEDs),
-    HID_USAGE_PAGE_NAME(Button),
-    HID_USAGE_PAGE_NAME(Ordinal),
-    HID_USAGE_PAGE_NAME(Telephony),
-    HID_USAGE_PAGE_NAME(Consumer),
-    HID_USAGE_PAGE_NAME(Digitizer),
-    HID_USAGE_PAGE_NAME(PhysicalInterfaceDevice),
-    HID_USAGE_PAGE_NAME(Unicode),
-    HID_USAGE_PAGE_NAME(AlphanumericDisplay),
-    HID_USAGE_PAGE_NAME(MedicalInstruments),
-    HID_USAGE_PAGE_NAME(BarCodeScanner),
-    HID_USAGE_PAGE_NAME(Braille),
-    HID_USAGE_PAGE_NAME(Scale),
-    HID_USAGE_PAGE_NAME(MagneticStripeReader),
-    HID_USAGE_PAGE_NAME(Camera),
-    HID_USAGE_PAGE_NAME(Arcade),
-  };
-
-  return hidGetName(names, ARRAY_COUNT(names), page);
-}
-
 unsigned char
 hidGetValueSize (unsigned char item) {
   static const unsigned char sizes[4] = {0, 1, 2, 4};
@@ -229,6 +187,48 @@ hidGetReportSize (
   }
 
   return found;
+}
+
+const char *
+hidGetCollectionTypeName (uint32_t type) {
+  static const char *names[] = {
+    HID_COLLECTION_TYPE_NAME(Physical),
+    HID_COLLECTION_TYPE_NAME(Application),
+    HID_COLLECTION_TYPE_NAME(Logical),
+  };
+
+  return hidGetName(names, ARRAY_COUNT(names), type);
+}
+
+const char *
+hidGetUsagePageName (uint16_t page) {
+  static const char *names[] = {
+    HID_USAGE_PAGE_NAME(GenericDesktop),
+    HID_USAGE_PAGE_NAME(Simulation),
+    HID_USAGE_PAGE_NAME(VirtualReality),
+    HID_USAGE_PAGE_NAME(Sport),
+    HID_USAGE_PAGE_NAME(Game),
+    HID_USAGE_PAGE_NAME(GenericDevice),
+    HID_USAGE_PAGE_NAME(KeyboardKeypad),
+    HID_USAGE_PAGE_NAME(LEDs),
+    HID_USAGE_PAGE_NAME(Button),
+    HID_USAGE_PAGE_NAME(Ordinal),
+    HID_USAGE_PAGE_NAME(Telephony),
+    HID_USAGE_PAGE_NAME(Consumer),
+    HID_USAGE_PAGE_NAME(Digitizer),
+    HID_USAGE_PAGE_NAME(PhysicalInterfaceDevice),
+    HID_USAGE_PAGE_NAME(Unicode),
+    HID_USAGE_PAGE_NAME(AlphanumericDisplay),
+    HID_USAGE_PAGE_NAME(MedicalInstruments),
+    HID_USAGE_PAGE_NAME(BarCodeScanner),
+    HID_USAGE_PAGE_NAME(Braille),
+    HID_USAGE_PAGE_NAME(Scale),
+    HID_USAGE_PAGE_NAME(MagneticStripeReader),
+    HID_USAGE_PAGE_NAME(Camera),
+    HID_USAGE_PAGE_NAME(Arcade),
+  };
+
+  return hidGetName(names, ARRAY_COUNT(names), page);
 }
 
 STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)
