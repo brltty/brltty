@@ -119,9 +119,13 @@ hidGetNextItem (
 
 int
 hidGetReportSize (
-  const unsigned char *bytes, size_t count,
-  uint8_t identifier, HidReportSize *size
+  HidItemsDescriptor *items,
+  uint8_t identifier,
+  HidReportSize *size
 ) {
+  const unsigned char *bytes = items->bytes;
+  size_t count = items->count;
+
   int noIdentifier = !identifier;
   int found = noIdentifier;
 

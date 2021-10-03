@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <string.h>
 #include <errno.h>
 
 #include "log.h"
@@ -40,12 +41,11 @@ usbHidDescriptor (UsbDevice *device) {
   return NULL;
 }
 
-ssize_t
+HidItemsDescriptor *
 usbHidGetItems (
   UsbDevice *device,
   unsigned char interface,
   unsigned char number,
-  unsigned char **items,
   int timeout
 ) {
   const UsbHidDescriptor *hid = usbHidDescriptor(device);
@@ -54,9 +54,14 @@ usbHidGetItems (
     if (number < hid->bNumDescriptors) {
       const UsbClassDescriptor *descriptor = &hid->descriptors[number];
       uint16_t length = getLittleEndian16(descriptor->wDescriptorLength);
-      void *buffer = malloc(length);
 
-      if (buffer) {
+      HidItemsDescriptor *items;
+      size_t size = sizeof(*items);
+      size += length;
+
+      if ((items = malloc(size))) {
+        void *buffer = items + 1;
+
         ssize_t result = usbControlRead(
           device, UsbControlRecipient_Interface, UsbControlType_Standard,
           UsbStandardRequest_GetDescriptor,
@@ -65,26 +70,31 @@ usbHidGetItems (
         );
 
         if (result != -1) {
+          memset(items, 0, sizeof(*items));
+          items->bytes = buffer;
+          items->count = result;
+
           hidLogItems(
             LOG_CATEGORY(USB_IO) | LOG_DEBUG,
             buffer, result
           );
 
-          *items = buffer;
-          return result;
+          return items;
         }
 
-        free(buffer);
+        free(items);
       } else {
         logMallocError();
       }
     } else {
-      logMessage(LOG_WARNING, "USB report descriptor not found: %u[%u]",
-                 interface, number);
+      logMessage(LOG_WARNING,
+        "USB report descriptor not found: %u[%u]",
+        interface, number
+      );
     }
   }
 
-  return -1;
+  return NULL;
 }
 
 ssize_t

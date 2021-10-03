@@ -25,11 +25,6 @@ extern "C" {
 
 typedef struct GioHandleStruct GioHandle;
 
-typedef struct {
-  void *address;
-  size_t size;
-} GioHidItemsData;
-
 typedef int GioDisconnectResourceMethod (GioHandle *handle);
 
 typedef const char *MakeResourceIdentifierMethod (GioHandle *handle, char *buffer, size_t size);
@@ -59,9 +54,7 @@ typedef ssize_t GioAskResourceMethod (
   void *buffer, uint16_t size, int timeout
 );
 
-typedef int GioGetHidItemsMethod (GioHandle *handle, GioHidItemsData *items, int timeout);
-
-typedef int GioGetHidReportSizeMethod (const GioHidItemsData *items, unsigned char identifier, HidReportSize *size);
+typedef HidItemsDescriptor *GioGetHidItemsMethod (GioHandle *handle, int timeout);
 
 typedef ssize_t GioSetHidReportMethod (
   GioHandle *handle, unsigned char identifier,
@@ -103,11 +96,8 @@ typedef struct {
   GioAskResourceMethod *askResource;
 
   GioGetHidItemsMethod *getHidItems;
-  GioGetHidReportSizeMethod *getHidReportSize;
-
   GioSetHidReportMethod *setHidReport;
   GioGetHidReportMethod *getHidReport;
-
   GioSetHidFeatureMethod *setHidFeature;
   GioGetHidFeatureMethod *getHidFeature;
 
@@ -122,7 +112,7 @@ struct GioEndpointStruct {
   GioOptions options;
   GioTypeIdentifier resourceType;
   unsigned int bytesPerSecond;
-  GioHidItemsData hidItems;
+  HidItemsDescriptor *hidItems;
 
   struct {
     int error;

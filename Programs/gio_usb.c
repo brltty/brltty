@@ -176,25 +176,10 @@ askUsbResource (
                         request, value, index, buffer, size, timeout);
 }
 
-static int
-getUsbHidItems (GioHandle *handle, GioHidItemsData *items, int timeout) {
+static HidItemsDescriptor *
+getUsbHidItems (GioHandle *handle, int timeout) {
   UsbChannel *channel = handle->channel;
-  unsigned char *address;
-  ssize_t result = usbHidGetItems(channel->device,
-                                  channel->definition->interface, 0,
-                                  &address, timeout);
-
-  if (!address) return 0;
-  items->address = address;
-  items->size = result;
-  return 1;
-}
-
-static int
-getUsbHidReportSize (const GioHidItemsData *items, unsigned char identifier, HidReportSize *size) {
-  if (hidGetReportSize(items->address, items->size, identifier, size)) return 1;
-  errno = ENOSYS;
-  return 0;
+  return usbHidGetItems(channel->device, channel->definition->interface, 0, timeout);
 }
 
 static ssize_t
@@ -275,11 +260,8 @@ static const GioMethods gioUsbMethods = {
   .askResource = askUsbResource,
 
   .getHidItems = getUsbHidItems,
-  .getHidReportSize = getUsbHidReportSize,
-
   .setHidReport = setUsbHidReport,
   .getHidReport = getUsbHidReport,
-
   .setHidFeature = setUsbHidFeature,
   .getHidFeature = getUsbHidFeature,
 

@@ -52,8 +52,9 @@ extern const char *hidGetUsagePageName (uint16_t page);
 extern STR_DECLARE_FORMATTER(hidFormatUsageFlags, uint32_t flags);
 
 extern int hidGetReportSize (
-  const unsigned char *bytes, size_t count,
-  uint8_t identifier, HidReportSize *size
+  HidItemsDescriptor *items,
+  uint8_t identifier,
+  HidReportSize *size
 );
 
 #ifdef __cplusplus

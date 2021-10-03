@@ -26,6 +26,7 @@
 #include "async_alarm.h"
 #include "io_generic.h"
 #include "gio_internal.h"
+#include "hid.h"
 #include "io_serial.h"
 
 const GioProperties *const gioProperties[] = {
@@ -152,8 +153,7 @@ gioConnectResource (
       endpoint->input.from = 0;
       endpoint->input.to = 0;
 
-      endpoint->hidItems.address = NULL;
-      endpoint->hidItems.size = 0;
+      endpoint->hidItems = NULL;
 
       if (properties->private->getOptions) {
         endpoint->options = *properties->private->getOptions(descriptor);
@@ -208,7 +208,7 @@ gioDisconnectResource (GioEndpoint *endpoint) {
     ok = 1;
   }
 
-  if (endpoint->hidItems.address) free(endpoint->hidItems.address);
+  if (endpoint->hidItems) free(endpoint->hidItems);
   free(endpoint);
   return ok;
 }
@@ -445,13 +445,9 @@ gioAskResource (
                 endpoint->options.requestTimeout);
 }
 
-int
-gioGetHidReportSize (
-  GioEndpoint *endpoint,
-  unsigned char identifier,
-  HidReportSize *size
-) {
-  if (!endpoint->hidItems.address) {
+static HidItemsDescriptor *
+gioGetHidItems (GioEndpoint *endpoint, unsigned char identifier) {
+  if (!endpoint->hidItems) {
     GioGetHidItemsMethod *method = endpoint->methods->getHidItems;
 
     if (!method) {
@@ -460,23 +456,26 @@ gioGetHidReportSize (
       return 0;
     }
 
-    if (!method(endpoint->handle, &endpoint->hidItems,
-                endpoint->options.requestTimeout)) {
-      return 0;
-    }
+    HidItemsDescriptor *items = method(
+      endpoint->handle, endpoint->options.requestTimeout
+    );
+
+    if (!items) return NULL;
+    endpoint->hidItems = items;
   }
 
-  {
-    GioGetHidReportSizeMethod *method = endpoint->methods->getHidReportSize;
+  return endpoint->hidItems;
+}
 
-    if (!method) {
-      logUnsupportedOperation("getHidReportSize");
-      errno = ENOSYS;
-      return 0;
-    }
-
-    return method(&endpoint->hidItems, identifier, size);
-  }
+int
+gioGetHidReportSize (
+  GioEndpoint *endpoint,
+  unsigned char identifier,
+  HidReportSize *size
+) {
+  HidItemsDescriptor *items = gioGetHidItems(endpoint, identifier);
+  if (!items) return 0;
+  return hidGetReportSize(items, identifier, size);
 }
 
 ssize_t

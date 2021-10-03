@@ -20,8 +20,8 @@
 #define BRLTTY_INCLUDED_IO_USB
 
 #include "prologue.h"
-
 #include "usb_types.h"
+#include "hid_types.h"
 #include "async_io.h"
 
 #ifdef __cplusplus
@@ -242,11 +242,10 @@ typedef enum {
 
 extern const UsbHidDescriptor *usbHidDescriptor (UsbDevice *device);
 
-extern ssize_t usbHidGetItems (
+extern HidItemsDescriptor *usbHidGetItems (
   UsbDevice *device,
   unsigned char interface,
   unsigned char number,
-  unsigned char **items,
   int timeout
 );
 
