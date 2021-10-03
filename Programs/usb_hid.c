@@ -60,25 +60,18 @@ usbHidGetItems (
       size += length;
 
       if ((items = malloc(size))) {
-        void *buffer = items + 1;
-
         ssize_t result = usbControlRead(
           device, UsbControlRecipient_Interface, UsbControlType_Standard,
           UsbStandardRequest_GetDescriptor,
           (descriptor->bDescriptorType << 8) | interface,
-          number, buffer, length, timeout
+          number, items->bytes, length, timeout
         );
 
         if (result != -1) {
           memset(items, 0, sizeof(*items));
-          items->bytes = buffer;
           items->count = result;
 
-          hidLogItems(
-            LOG_CATEGORY(USB_IO) | LOG_DEBUG,
-            buffer, result
-          );
-
+          hidLogItems(LOG_CATEGORY(USB_IO) | LOG_DEBUG, items);
           return items;
         }
 

@@ -46,13 +46,13 @@ extern int hidGetNextItem (
 extern const char *hidGetItemTypeName (uint8_t type);
 extern unsigned char hidGetValueSize (unsigned char item);
 
-extern void hidLogItems (int level, const unsigned char *bytes, size_t count);
+extern void hidLogItems (int level, const HidItemsDescriptor *items);
 extern const char *hidGetCollectionTypeName (uint32_t type);
 extern const char *hidGetUsagePageName (uint16_t page);
 extern STR_DECLARE_FORMATTER(hidFormatUsageFlags, uint32_t flags);
 
 extern int hidGetReportSize (
-  HidItemsDescriptor *items,
+  const HidItemsDescriptor *items,
   uint8_t identifier,
   HidReportSize *size
 );

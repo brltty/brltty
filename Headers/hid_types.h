@@ -134,8 +134,8 @@ typedef enum {
 } HidUsageFlags;
 
 typedef struct {
-  unsigned char *bytes;
   size_t count;
+  unsigned char bytes[];
 } HidItemsDescriptor;
 
 typedef struct {

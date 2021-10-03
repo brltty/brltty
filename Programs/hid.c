@@ -119,7 +119,7 @@ hidGetNextItem (
 
 int
 hidGetReportSize (
-  HidItemsDescriptor *items,
+  const HidItemsDescriptor *items,
   uint8_t identifier,
   HidReportSize *size
 ) {
@@ -322,9 +322,12 @@ STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)
 STR_END_FORMATTER
 
 void
-hidLogItems (int level, const unsigned char *bytes, size_t count) {
+hidLogItems (int level, const HidItemsDescriptor *items) {
   const char *label = "HID items log";
   logMessage(level, "begin %s", label);
+
+  const unsigned char *bytes = items->bytes;
+  size_t count = items->count;
 
   int decOffsetWidth;
   int hexOffsetWidth;
