@@ -18,23 +18,38 @@
 ###############################################################################
 
 . "`dirname "${0}"`/../prologue.sh"
+. "${programDirectory}/mingw.sh"
+
+processExtraProgramParameters() {
+   [ "${#}" -gt 0 ] || set -- libusb libusb-1.0
+   usbPackages=( "${@}" )
+}
+
+optionalProgramParameters
 parseProgramArguments "${@}"
 
 setSourceRoot
-dosDirectory="${sourceRoot}/DOS"
+windowsDirectory="${sourceRoot}/Windows"
 
-logMessage task "Building for DOS"
-logFile="${programName}.log"
-
-"${dosDirectory}/mkdosarc" -t "${dosDirectory}/ToolChain" -o "${sourceRoot}" &>"${logFile}"
-returnCode="${?}"
-
-[ "${returnCode}" -eq 0 ] || {
-   logMessage error "build failed: rc=${returnCode}"
-   exit 10
+[ "${#}" -gt 0 ] || {
+   set -- libusb libusb-1.0
 }
 
-logMessage task "build completed successfully"
-diff "${sourceRoot}/Logs/Builds/DOS.log" "${logFile}"
+for usbPackage in "${usbPackages[@]}"
+do
+   logMessage task "Building for Windows: ${usbPackage}"
+   logFile="${programName}-${usbPackage}.log"
+
+   "${windowsDirectory}/mkwin" -u "${usbPackage}" "${sourceRoot}" &>"${logFile}"
+   returnCode="${?}"
+
+   [ "${returnCode}" -eq 0 ] || {
+      logMessage error "build failed: rc=${returnCode}"
+      exit 10
+   }
+
+   logMessage task "build completed successfully"
+   diff "${sourceRoot}/Logs/Builds/Windows-${usbPackage}.log" "${logFile}"
+done
 
 exit 0

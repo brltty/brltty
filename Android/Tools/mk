@@ -20,9 +20,9 @@
 . "`dirname "${0}"`/../../prologue.sh"
 parseProgramArguments "${@}"
 
-logMessage task "Building for Android"
 setSourceRoot
 
+logMessage task "Building for Android"
 logFile="${programName}.log"
 
 "${sourceRoot}/Android/Tools/rebuild" &>"${logFile}"
