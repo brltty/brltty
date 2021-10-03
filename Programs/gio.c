@@ -445,7 +445,7 @@ gioAskResource (
                 endpoint->options.requestTimeout);
 }
 
-static HidItemsDescriptor *
+const HidItemsDescriptor *
 gioGetHidItems (GioEndpoint *endpoint, unsigned char identifier) {
   if (!endpoint->hidItems) {
     GioGetHidItemsMethod *method = endpoint->methods->getHidItems;
@@ -473,7 +473,7 @@ gioGetHidReportSize (
   unsigned char identifier,
   HidReportSize *size
 ) {
-  HidItemsDescriptor *items = gioGetHidItems(endpoint, identifier);
+  const HidItemsDescriptor *items = gioGetHidItems(endpoint, identifier);
   if (!items) return 0;
   return hidGetReportSize(items, identifier, size);
 }
