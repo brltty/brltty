@@ -1,0 +1,24 @@
+mkdosarc: configuring build
+configure: WARNING: using cross tools not prefixed with host triplet
+configure: WARNING: program privileges support not available on this platform
+configure: WARNING: function not available: systemd:sd_session_get_vt()
+mkdosarc: building programs
+/home/dave/brltty/git/main/Programs/lock.c:213:2: warning: #warning thread lock support not available on this platform
+In file included from /home/dave/brltty/git/main/Drivers/Braille/TTY/braille.c:40:
+/home/dave/brltty/git/main/Headers/get_curses.h:54:2: warning: #warning curses package either unspecified or unsupported
+/home/dave/brltty/git/main/Programs/io_misc.c:452:2: warning: #warning sockets not supported on this platform
+In file included from /home/dave/brltty/git/main/Programs/brltty-ttb.c:1247:
+/home/dave/brltty/git/main/Headers/get_curses.h:54:2: warning: #warning curses package either unspecified or unsupported
+mkdosarc: building documentation
+Processing file /home/dave/brltty/git/main/Documents/Manual-BRLTTY/English/BRLTTY.sgml
+Processing file /home/dave/brltty/git/main/Documents/Manual-BRLTTY/English/BRLTTY.sgml
+Processing file /home/dave/brltty/git/main/Documents/Manual-BRLTTY/French/BRLTTY.sgml
+Processing file /home/dave/brltty/git/main/Documents/Manual-BRLTTY/French/BRLTTY.sgml
+Processing file /home/dave/brltty/git/main/Documents/Manual-BrlAPI/English/BrlAPI.sgml
+Processing file /home/dave/brltty/git/main/Documents/Manual-BrlAPI/English/BrlAPI.sgml
+mkdosarc: installing files
+mkdosarc: updating files
+mkdosarc: converting text files
+mkdosarc: checking for name collisions
+mkdosarc: creating archive
+mkdosarc: done

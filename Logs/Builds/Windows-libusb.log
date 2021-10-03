@@ -1,0 +1,63 @@
+mkwin: revision identifier: BRLTTY-6.3-464-g7bd0ae54M
+mkwin: MinGW command not found: linuxdoc
+mkwin: copying source tree
+mkwin: applying patches
+patching file Programs/usb_libusb-1.0.c
+patching file Programs/usb_libusb.c
+Hunk #1 succeeded at 377 (offset 73 lines).
+mkwin: configuring build
+mkwin: building programs
+In file included from c:\Program Files (x86)\Python38-32\include/Python.h:85,
+                 from brlapi.auto.c:4:
+c:\Program Files (x86)\Python38-32\include/pytime.h:123:59: warning: 'struct timeval' declared inside parameter list will not be visible outside of this definition or declaration
+  123 | PyAPI_FUNC(int) _PyTime_FromTimeval(_PyTime_t *tp, struct timeval *tv);
+      |                                                           ^~~~~~~
+c:\Program Files (x86)\Python38-32\include/pytime.h:130:12: warning: 'struct timeval' declared inside parameter list will not be visible outside of this definition or declaration
+  130 |     struct timeval *tv,
+      |            ^~~~~~~
+c:\Program Files (x86)\Python38-32\include/pytime.h:135:12: warning: 'struct timeval' declared inside parameter list will not be visible outside of this definition or declaration
+  135 |     struct timeval *tv,
+      |            ^~~~~~~
+brlapi.auto.c: In function '__Pyx_ImportType':
+brlapi.auto.c:24061:13: warning: unknown conversion type character 'z' in format [-Wformat=]
+24061 |             "%s.%s size changed, may indicate binary incompatibility. "
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+brlapi.auto.c:24062:24: note: format string is defined here
+24062 |             "Expected %zd from C header, got %zd from PyObject",
+      |                        ^
+brlapi.auto.c:24061:13: warning: unknown conversion type character 'z' in format [-Wformat=]
+24061 |             "%s.%s size changed, may indicate binary incompatibility. "
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+brlapi.auto.c:24062:47: note: format string is defined here
+24062 |             "Expected %zd from C header, got %zd from PyObject",
+      |                                               ^
+brlapi.auto.c:24061:13: warning: too many arguments for format [-Wformat-extra-args]
+24061 |             "%s.%s size changed, may indicate binary incompatibility. "
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from c:\Program Files (x86)\Python38-32\include/Python.h:85,
+                 from ../../../source/Bindings/Python/bindings.c:25:
+c:\Program Files (x86)\Python38-32\include/pytime.h:123:59: warning: 'struct timeval' declared inside parameter list will not be visible outside of this definition or declaration
+  123 | PyAPI_FUNC(int) _PyTime_FromTimeval(_PyTime_t *tp, struct timeval *tv);
+      |                                                           ^~~~~~~
+c:\Program Files (x86)\Python38-32\include/pytime.h:130:12: warning: 'struct timeval' declared inside parameter list will not be visible outside of this definition or declaration
+  130 |     struct timeval *tv,
+      |            ^~~~~~~
+c:\Program Files (x86)\Python38-32\include/pytime.h:135:12: warning: 'struct timeval' declared inside parameter list will not be visible outside of this definition or declaration
+  135 |     struct timeval *tv,
+      |            ^~~~~~~
+mkwin: building documents
+linuxdoc is not installed - document will not be made
+linuxdoc is not installed - document will not be made
+linuxdoc is not installed - document will not be made
+mkwin: installing files
+mkwin: updating files
+mkwin: USB package: libusb
+mkwin: installing package files: LibUSB (aka LibUSB-Win32)
+   Creating library brlapi.lib and object brlapi.exp
+mkwin: creating configurator
+Successfully compiled: C:\Users\dave\AppData\Local\Temp\brltty-mkwin\install\brltty-win-6.3-464-libusb\brlttycnf.exe
+mkwin: converting text files
+mkwin: creating archive
+mkwin: creating installer
+mkwin: cleaning up
+mkwin: done
