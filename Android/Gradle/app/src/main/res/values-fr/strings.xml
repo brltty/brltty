@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Alerte</string>
   <string name="LOG_LEVEL_LABEL_emergency">Urgence</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Entrée générique</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Paquets en entrée</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Paquets en sortie</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Événements clavier du périphérique braille</string>

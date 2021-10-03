@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Varsel</string>
   <string name="LOG_LEVEL_LABEL_emergency">Nødstilfelle</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Vanlige inndata</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Inndatapakker</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Utdatapakker</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Hendelser knyttet til taster på en punktskriftenhet</string>

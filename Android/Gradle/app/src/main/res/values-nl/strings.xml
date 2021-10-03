@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Alert</string>
   <string name="LOG_LEVEL_LABEL_emergency">Alarm</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Generic Input</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Input Packets</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Output Packets</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Braille Device Key Events</string>

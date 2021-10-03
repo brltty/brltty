@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Оповещение</string>
   <string name="LOG_LEVEL_LABEL_emergency">Авария</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Обобщённый ввод</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Входной пакет</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Выходной пакет</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Ключевые события брайлевского устройства</string>

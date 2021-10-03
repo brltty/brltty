@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Hälytys</string>
   <string name="LOG_LEVEL_LABEL_emergency">Hätätilanne</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Yleinen syöte</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Syötepaketit</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Tulostuspaketit</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Pistenäytön näppäintapahtumat</string>

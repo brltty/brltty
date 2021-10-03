@@ -119,7 +119,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Allarme</string>
   <string name="LOG_LEVEL_LABEL_emergency">Emergenza</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Ingresso Generico</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Pacchetti in Ingresso</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Pacchetti in uscita</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Eventi Chiave Dispositivo Braille</string>

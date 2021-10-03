@@ -120,7 +120,7 @@ LOG_LEVEL_LABEL_critical Critical
 LOG_LEVEL_LABEL_alert Alert
 LOG_LEVEL_LABEL_emergency Emergency
 
-LOG_CATEGORY_LABEL_ingio Generic Input
+LOG_CATEGORY_LABEL_gio Generic I/O
 LOG_CATEGORY_LABEL_inpkts Input Packets
 LOG_CATEGORY_LABEL_outpkts Output Packets
 LOG_CATEGORY_LABEL_brlkeys Braille Device Key Events

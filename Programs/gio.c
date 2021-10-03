@@ -269,6 +269,8 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
     return -1;
   }
 
+  logBytes(LOG_CATEGORY(GENERIC_IO), "output", data, size);
+
   ssize_t result = method(endpoint->handle, data, size,
                           endpoint->options.outputTimeout);
 
@@ -345,7 +347,7 @@ gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait) {
                                 (wait? endpoint->options.inputTimeout: 0), 0);
 
         if (result > 0) {
-          logBytes(LOG_CATEGORY(GENERIC_INPUT), NULL, &endpoint->input.buffer[endpoint->input.to], result);
+          logBytes(LOG_CATEGORY(GENERIC_IO), "input", &endpoint->input.buffer[endpoint->input.to], result);
           endpoint->input.to += result;
           wait = 1;
         } else {
@@ -461,7 +463,7 @@ gioGetHidItems (GioEndpoint *endpoint, unsigned char identifier) {
     );
 
     if (!items) return NULL;
-    hidLogItems(LOG_CATEGORY(GENERIC_INPUT) | LOG_DEBUG, items);
+    hidLogItems(LOG_CATEGORY(GENERIC_IO) | LOG_DEBUG, items);
     endpoint->hidItems = items;
   }
 

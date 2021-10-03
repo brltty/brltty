@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Výstrahy</string>
   <string name="LOG_LEVEL_LABEL_emergency">Nouzové</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Obecný vstup</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Vstupní pakety</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Výstupní pakety</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Události klávesnice braillského zařízení</string>

@@ -531,7 +531,7 @@
 # with a minus sign [-] disables it (particularly useful if "all" is used).
 # The categories are:
 #	all	enable all of the categories
-#	ingio	generic input
+#	gio	generic I/O
 #	inpkts	input packets
 #	outpkts	output packets
 #	brlkeys	braille device key events

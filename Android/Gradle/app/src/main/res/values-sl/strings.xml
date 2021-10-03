@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Alarm</string>
   <string name="LOG_LEVEL_LABEL_emergency">V sili</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Generičen Vnos</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Vnosna Polja</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Izhodna Polja</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Dogodki v Zvezi s Tipkami Na Brajevi Napravi</string>

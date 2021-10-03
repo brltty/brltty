@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Alarmsignale</string>
   <string name="LOG_LEVEL_LABEL_emergency">unerwartete Ereignisse</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Allgemeine Eingabe</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Eingabepakete</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Ausgabepakete</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Braillezeilentasten Ereignisse</string>

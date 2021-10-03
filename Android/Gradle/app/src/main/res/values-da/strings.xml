@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">Alarm</string>
   <string name="LOG_LEVEL_LABEL_emergency">Uheld</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">Generisk input</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Input pakker</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Output pakker</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Braille enhed nøglehændelser</string>

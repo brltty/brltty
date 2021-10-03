@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="LOG_CATEGORY_LABEL_ingio">Generic Input</string>
+  <string name="LOG_CATEGORY_LABEL_gio">Generic I/O</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Input Packets</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Output Packets</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Braille Device Key Events</string>
@@ -20,7 +20,7 @@
   <string name="LOG_CATEGORY_LABEL_scrdrv">Screen Driver Events</string>
 
   <string-array name="LOG_CATEGORY_LABELS">
-    <item>@string/LOG_CATEGORY_LABEL_ingio</item>
+    <item>@string/LOG_CATEGORY_LABEL_gio</item>
     <item>@string/LOG_CATEGORY_LABEL_inpkts</item>
     <item>@string/LOG_CATEGORY_LABEL_outpkts</item>
     <item>@string/LOG_CATEGORY_LABEL_brlkeys</item>
@@ -40,7 +40,7 @@
   </string-array>
 
   <string-array name="LOG_CATEGORY_VALUES">
-    <item>ingio</item>
+    <item>gio</item>
     <item>inpkts</item>
     <item>outpkts</item>
     <item>brlkeys</item>

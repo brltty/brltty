@@ -123,7 +123,6 @@
   <string name="LOG_LEVEL_LABEL_alert">警告</string>
   <string name="LOG_LEVEL_LABEL_emergency">緊急</string>
 
-  <string name="LOG_CATEGORY_LABEL_ingio">一般輸入</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">輸入封包</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">輸出封包</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">點字鍵盤事件</string>
