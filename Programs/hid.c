@@ -238,7 +238,7 @@ hidGetReportSize (
     }
 
     STR_END;
-    logMessage(LOG_CATEGORY(USB_IO), "%s", log);
+    logMessage(LOG_CATEGORY(GENERIC_INPUT), "%s", log);
   } else {
     logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
   }

@@ -23,7 +23,7 @@
 
 #include "log.h"
 #include "io_usb.h"
-#include "hid.h"
+#include "hid_types.h"
 #include "bitfield.h"
 
 const UsbHidDescriptor *
@@ -70,8 +70,6 @@ usbHidGetItems (
         if (result != -1) {
           memset(items, 0, sizeof(*items));
           items->count = result;
-
-          hidLogItems(LOG_CATEGORY(USB_IO) | LOG_DEBUG, items);
           return items;
         }
 
