@@ -17,15 +17,16 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/../../prologue.sh"
+. "`dirname "${0}"`/../prologue.sh"
 parseProgramArguments "${@}"
 
-logMessage task "Building for Android"
+logMessage task "Building for DOS"
 setSourceRoot
 
 logFile="${programName}.log"
+dosDirectory="${sourceRoot}/DOS"
 
-"${sourceRoot}/Android/Tools/rebuild" &>"${logFile}"
+"${dosDirectory}/mkdosarc" -t "${dosDirectory}/ToolChain" -o "${sourceRoot}" &>"${logFile}"
 returnCode="${?}"
 
 [ "${returnCode}" -eq 0 ] || {
@@ -34,6 +35,6 @@ returnCode="${?}"
 }
 
 logMessage task "build completed successfully"
-diff "${sourceRoot}/Logs/Builds/Android.log" "${logFile}"
+diff "${sourceRoot}/Logs/Builds/DOS.log" "${logFile}"
 
 exit 0
