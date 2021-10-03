@@ -155,71 +155,70 @@ hidGetReportSize (
 
       reportIdentifier = item.value.u;
       if (reportIdentifier == identifier) reportFound = 1;
-      continue;
-    }
+    } else {
+      switch (item.type) {
+      {
+        size_t *size;
 
-    switch (item.type) {
-    {
-      size_t *size;
+        case HID_ITM_Input:
+          size = &inputSize;
+          goto doSize;
 
-      case HID_ITM_Input:
-        size = &inputSize;
-        goto doSize;
+        case HID_ITM_Output:
+          size = &outputSize;
+          goto doSize;
 
-      case HID_ITM_Output:
-        size = &outputSize;
-        goto doSize;
+        case HID_ITM_Feature:
+          size = &featureSize;
+          goto doSize;
 
-      case HID_ITM_Feature:
-        size = &featureSize;
-        goto doSize;
+        doSize:
+          if (reportIdentifier == identifier) *size += reportSize * reportCount;
+          break;
+      }
 
-      doSize:
-        if (reportIdentifier == identifier) *size += reportSize * reportCount;
-        break;
-    }
+        case HID_ITM_ReportCount:
+          reportCount = item.value.u;
+          break;
 
-      case HID_ITM_ReportCount:
-        reportCount = item.value.u;
-        break;
+        case HID_ITM_ReportSize:
+          reportSize = item.value.u;
+          break;
 
-      case HID_ITM_ReportSize:
-        reportSize = item.value.u;
-        break;
+        case HID_ITM_Collection:
+        case HID_ITM_EndCollection:
+        case HID_ITM_UsagePage:
+        case HID_ITM_UsageMinimum:
+        case HID_ITM_UsageMaximum:
+        case HID_ITM_Usage:
+        case HID_ITM_LogicalMinimum:
+        case HID_ITM_LogicalMaximum:
+        case HID_ITM_PhysicalMinimum:
+        case HID_ITM_PhysicalMaximum:
+          break;
 
-      case HID_ITM_Collection:
-      case HID_ITM_EndCollection:
-      case HID_ITM_UsagePage:
-      case HID_ITM_UsageMinimum:
-      case HID_ITM_UsageMaximum:
-      case HID_ITM_Usage:
-      case HID_ITM_LogicalMinimum:
-      case HID_ITM_LogicalMaximum:
-      case HID_ITM_PhysicalMinimum:
-      case HID_ITM_PhysicalMaximum:
-        break;
+        default: {
+          if (!(itemTypesEncountered & HID_ITEM_BIT(item.type))) {
+            char log[0X100];
+            STR_BEGIN(log, sizeof(log));
+            STR_PRINTF("unhandled item type: ");
 
-      default: {
-        if (!(itemTypesEncountered & HID_ITEM_BIT(item.type))) {
-          char log[0X100];
-          STR_BEGIN(log, sizeof(log));
-          STR_PRINTF("unhandled item type: ");
+            {
+              const char *name = hidGetItemTypeName(item.type);
 
-          {
-            const char *name = hidGetItemTypeName(item.type);
-
-            if (name) {
-              STR_PRINTF("%s", name);
-            } else {
-              STR_PRINTF("0X%02X", item.type);
+              if (name) {
+                STR_PRINTF("%s", name);
+              } else {
+                STR_PRINTF("0X%02X", item.type);
+              }
             }
+
+            STR_END;
+            logMessage(LOG_WARNING, "%s", log);
           }
 
-          STR_END;
-          logMessage(LOG_WARNING, "%s", log);
+          break;
         }
-
-        break;
       }
     }
 
@@ -385,7 +384,8 @@ STR_END_FORMATTER
 void
 hidLogItems (int level, const HidItemsDescriptor *items) {
   const char *label = "HID items log";
-  logMessage(level, "begin %s", label);
+  logMessage(level, "begin %s: Bytes:%"PRIsize, label, items->count);
+  unsigned int itemCount = 0;
 
   const unsigned char *nextByte = items->bytes;
   size_t bytesLeft = items->count;
@@ -414,6 +414,8 @@ hidLogItems (int level, const HidItemsDescriptor *items) {
     );
 
     if (ok) {
+      itemCount += 1;
+
       {
         const char *name = hidGetItemTypeName(item.type);
         if (!name) name = "<unknown>";
@@ -472,5 +474,5 @@ hidLogItems (int level, const HidItemsDescriptor *items) {
     if (!ok) break;
   }
 
-  logMessage(level, "end %s", label);
+  logMessage(level, "end %s: Items:%u", label, itemCount);
 }
