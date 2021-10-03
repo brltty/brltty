@@ -124,8 +124,8 @@ hidGetReportSize (
   uint8_t identifier,
   HidReportSize *size
 ) {
-  const unsigned char *bytes = items->bytes;
-  size_t count = items->count;
+  const unsigned char *nextByte = items->bytes;
+  size_t bytesLeft = items->count;
 
   int noIdentifier = !identifier;
   int found = noIdentifier;
@@ -138,11 +138,11 @@ hidGetReportSize (
   uint32_t reportSize = 0;
   uint32_t reportCount = 0;
 
-  while (count) {
+  while (bytesLeft) {
     HidItemDescription item;
 
-    if (!hidGetNextItem(&item, &bytes, &count)) {
-      if (count) return 0;
+    if (!hidGetNextItem(&item, &nextByte, &bytesLeft)) {
+      if (bytesLeft) return 0;
       break;
     }
 
@@ -356,26 +356,24 @@ hidLogItems (int level, const HidItemsDescriptor *items) {
   const char *label = "HID items log";
   logMessage(level, "begin %s", label);
 
-  const unsigned char *bytes = items->bytes;
-  size_t count = items->count;
+  const unsigned char *nextByte = items->bytes;
+  size_t bytesLeft = items->count;
 
   int decOffsetWidth;
   int hexOffsetWidth;
 
   {
-    unsigned int maximum = count;
+    unsigned int maximumOffset = bytesLeft;
     char buffer[0X20];
 
-    decOffsetWidth = snprintf(buffer, sizeof(buffer), "%u", maximum);
-    hexOffsetWidth = snprintf(buffer, sizeof(buffer), "%x", maximum);
+    decOffsetWidth = snprintf(buffer, sizeof(buffer), "%u", maximumOffset);
+    hexOffsetWidth = snprintf(buffer, sizeof(buffer), "%x", maximumOffset);
   }
 
-  const unsigned char *byte = bytes;
-
   while (1) {
-    unsigned int offset = byte - bytes;
+    unsigned int offset = nextByte - items->bytes;
     HidItemDescription item;
-    int ok = hidGetNextItem(&item, &byte, &count);
+    int ok = hidGetNextItem(&item, &nextByte, &bytesLeft);
 
     char log[0X100];
     STR_BEGIN(log, sizeof(log));
@@ -428,12 +426,12 @@ hidLogItems (int level, const HidItemsDescriptor *items) {
 
         if (text) STR_PRINTF(": %s", text);
       }
-    } else if (count) {
+    } else if (bytesLeft) {
       STR_PRINTF(" incomplete:");
-      const unsigned char *end = byte + count;
+      const unsigned char *end = nextByte + bytesLeft;
 
-      while (byte < end) {
-        STR_PRINTF(" %02X", *byte++);
+      while (nextByte < end) {
+        STR_PRINTF(" %02X", *nextByte++);
       }
     } else {
       STR_PRINTF(" end");
