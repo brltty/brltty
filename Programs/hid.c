@@ -128,13 +128,14 @@ hidGetReportSize (
   size_t bytesLeft = items->count;
 
   int noIdentifier = !identifier;
-  int found = noIdentifier;
+  int reportFound = noIdentifier;
 
   size_t inputSize = 0;
   size_t outputSize = 0;
   size_t featureSize = 0;
 
-  uint64_t definedItemTypes = 0;
+  uint64_t itemTypesEncountered = 0;
+  uint32_t reportIdentifier = 0;
   uint32_t reportSize = 0;
   uint32_t reportCount = 0;
 
@@ -148,54 +149,84 @@ hidGetReportSize (
 
     if (item.type == HID_ITM_ReportID) {
       if (noIdentifier) {
-        found = 0;
+        reportFound = 0;
         break;
       }
 
-      if (found) break;
-      if (item.value.u == identifier) found = 1;
+      reportIdentifier = item.value.u;
+      if (reportIdentifier == identifier) reportFound = 1;
       continue;
     }
 
-    if (found) {
-      switch (item.type) {
-      {
-        size_t *size;
+    switch (item.type) {
+    {
+      size_t *size;
 
-        case HID_ITM_Input:
-          size = &inputSize;
-          goto doSize;
+      case HID_ITM_Input:
+        size = &inputSize;
+        goto doSize;
 
-        case HID_ITM_Output:
-          size = &outputSize;
-          goto doSize;
+      case HID_ITM_Output:
+        size = &outputSize;
+        goto doSize;
 
-        case HID_ITM_Feature:
-          size = &featureSize;
-          goto doSize;
+      case HID_ITM_Feature:
+        size = &featureSize;
+        goto doSize;
 
-        doSize:
-          *size += reportSize * reportCount;
-          break;
-      }
-
-        case HID_ITM_ReportCount:
-          reportCount = item.value.u;
-          break;
-
-        case HID_ITM_ReportSize:
-          reportSize = item.value.u;
-          break;
-
-        default:
-          continue;
-      }
-
-      definedItemTypes |= HID_ITEM_BIT(item.type);
+      doSize:
+        if (reportIdentifier == identifier) *size += reportSize * reportCount;
+        break;
     }
+
+      case HID_ITM_ReportCount:
+        reportCount = item.value.u;
+        break;
+
+      case HID_ITM_ReportSize:
+        reportSize = item.value.u;
+        break;
+
+      case HID_ITM_Collection:
+      case HID_ITM_EndCollection:
+      case HID_ITM_UsagePage:
+      case HID_ITM_UsageMinimum:
+      case HID_ITM_UsageMaximum:
+      case HID_ITM_Usage:
+      case HID_ITM_LogicalMinimum:
+      case HID_ITM_LogicalMaximum:
+      case HID_ITM_PhysicalMinimum:
+      case HID_ITM_PhysicalMaximum:
+        break;
+
+      default: {
+        if (!(itemTypesEncountered & HID_ITEM_BIT(item.type))) {
+          char log[0X100];
+          STR_BEGIN(log, sizeof(log));
+          STR_PRINTF("unhandled item type: ");
+
+          {
+            const char *name = hidGetItemTypeName(item.type);
+
+            if (name) {
+              STR_PRINTF("%s", name);
+            } else {
+              STR_PRINTF("0X%02X", item.type);
+            }
+          }
+
+          STR_END;
+          logMessage(LOG_WARNING, "%s", log);
+        }
+
+        break;
+      }
+    }
+
+    itemTypesEncountered |= HID_ITEM_BIT(item.type);
   }
 
-  if (found) {
+  if (reportFound) {
     char log[0X100];
     STR_BEGIN(log, sizeof(log));
     STR_PRINTF("HID report size: %02X", identifier);
@@ -243,7 +274,7 @@ hidGetReportSize (
     logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
   }
 
-  return found;
+  return reportFound;
 }
 
 const char *
@@ -361,7 +392,6 @@ hidLogItems (int level, const HidItemsDescriptor *items) {
 
   int decOffsetWidth;
   int hexOffsetWidth;
-
   {
     unsigned int maximumOffset = bytesLeft;
     char buffer[0X20];
