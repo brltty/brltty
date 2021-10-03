@@ -22,6 +22,7 @@
 
 #include "log.h"
 #include "hid.h"
+#include "hid_defs.h"
 #include "strfmt.h"
 
 #define HID_NAME(prefix, name) [prefix ## _ ## name] = #name
@@ -291,7 +292,7 @@ STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)
   typedef struct {
     const char *on;
     const char *off;
-    uint8_t bit;
+    uint16_t bit;
   } FlagEntry;
 
   static const FlagEntry flagTable[] = {
@@ -309,14 +310,43 @@ STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)
       .on = "rel",
       .off = "abs"
     },
+
+    { .bit = HID_USG_FLG_WRAP,
+      .on = "wrap",
+    },
+
+    { .bit = HID_USG_FLG_NON_LINEAR,
+      .on = "nonlin",
+    },
+
+    { .bit = HID_USG_FLG_NO_PREFERRED,
+      .on = "nopref",
+    },
+
+    { .bit = HID_USG_FLG_NULL_STATE,
+      .on = "null",
+    },
+
+    { .bit = HID_USG_FLG_VOLATILE,
+      .on = "volatile",
+    },
+
+    { .bit = HID_USG_FLG_BUFFERED_BYTE,
+      .on = "buffbyte",
+    },
   };
 
   const FlagEntry *flag = flagTable;
   const FlagEntry *end = flag + ARRAY_COUNT(flagTable);
 
   while (flag < end) {
-    if (STR_LENGTH > 0) STR_PRINTF(" ");
-    STR_PRINTF("%s", ((flags & flag->bit)? flag->on: flag->off));
+    const char *name = (flags & flag->bit)? flag->on: flag->off;
+
+    if (name) {
+      if (STR_LENGTH > 0) STR_PRINTF(" ");
+      STR_PRINTF("%s", name);
+    }
+
     flag += 1;
   }
 STR_END_FORMATTER
