@@ -228,7 +228,7 @@ hidGetReportSize (
   if (reportFound) {
     char log[0X100];
     STR_BEGIN(log, sizeof(log));
-    STR_PRINTF("HID report size: %02X", identifier);
+    STR_PRINTF("report size: %02X", identifier);
 
     {
       typedef struct {
@@ -268,7 +268,7 @@ hidGetReportSize (
     }
 
     STR_END;
-    logMessage(LOG_CATEGORY(GENERIC_IO), "%s", log);
+    logMessage(LOG_CATEGORY(HUMAN_INTERFACE), "%s", log);
   } else {
     logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
   }
@@ -382,8 +382,9 @@ STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)
 STR_END_FORMATTER
 
 void
-hidLogItems (int level, const HidItemsDescriptor *items) {
-  const char *label = "HID items log";
+hidLogItems (const HidItemsDescriptor *items) {
+  int level = LOG_CATEGORY(HUMAN_INTERFACE) | LOG_DEBUG;
+  const char *label = "items log";
   logMessage(level, "begin %s: Bytes:%"PRIsize, label, items->count);
   unsigned int itemCount = 0;
 
@@ -409,7 +410,7 @@ hidLogItems (int level, const HidItemsDescriptor *items) {
     STR_BEGIN(log, sizeof(log));
 
     STR_PRINTF(
-      "HID item: %*" PRIu32 " (0X%.*" PRIX32 "):",
+      "item: %*" PRIu32 " (0X%.*" PRIX32 "):",
       decOffsetWidth, offset, hexOffsetWidth, offset
     );
 

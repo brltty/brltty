@@ -463,7 +463,7 @@ gioGetHidItems (GioEndpoint *endpoint, unsigned char identifier) {
     );
 
     if (!items) return NULL;
-    hidLogItems(LOG_CATEGORY(GENERIC_IO) | LOG_DEBUG, items);
+    hidLogItems(items);
     endpoint->hidItems = items;
   }
 

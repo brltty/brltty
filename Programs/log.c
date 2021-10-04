@@ -143,6 +143,12 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
     .prefix = "Bluetooth"
   },
 
+  [LOG_CATEGORY_INDEX(HUMAN_INTERFACE)] = {
+    .name = "hid",
+    .title = strtext("Human Interface Events"),
+    .prefix = "HID"
+  },
+
   [LOG_CATEGORY_INDEX(BRAILLE_DRIVER)] = {
     .name = "brldrv",
     .title = strtext("Braille Driver Events"),
