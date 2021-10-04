@@ -69,8 +69,10 @@ changeStringSetting (char **setting, const char *value) {
 
 int
 extendStringSetting (char **setting, const char *value, int prepend) {
-  if (value && *value) {
-    if (*setting) {
+  if (!value) value = "";
+
+  if (*setting && **setting) {
+    if (*value) {
       size_t newSize = strlen(*setting) + 1 + strlen(value) + 1;
       char newSetting[newSize];
 
@@ -81,9 +83,9 @@ extendStringSetting (char **setting, const char *value, int prepend) {
       }
 
       if (!changeStringSetting(setting, newSetting)) return 0;
-    } else if (!changeStringSetting(setting, value)) {
-      return 0;
     }
+  } else if (!changeStringSetting(setting, value)) {
+    return 0;
   }
 
   return 1;
