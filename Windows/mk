@@ -20,9 +20,18 @@
 . "`dirname "${0}"`/../prologue.sh"
 . "${programDirectory}/mingw.sh"
 
+readonly defaultUsbPackageNames=( libusb libusb-1.0 )
+
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+The positional parameters are the names of USB packages. If none are
+specified, the default is: ${defaultUsbPackageNames[*]}
+END_OF_PROGRAM_USAGE_NOTES
+}
+
 processExtraProgramParameters() {
-   [ "${#}" -gt 0 ] || set -- libusb libusb-1.0
-   usbPackages=( "${@}" )
+   [ "${#}" -gt 0 ] || set -- "${defaultUsbPackageNames[@]}"
+   usbPackageNames=( "${@}" )
 }
 
 optionalProgramParameters
@@ -35,12 +44,12 @@ read <"${windowsDirectory}/python-location" pythonLocation || exit "${?}"
 [ -e "${pythonLocation}" ] || logMessage error "Python not found: ${pythonLocation}"
 [ -d "${pythonLocation}" ] || logMessage error "not a directory: ${pythonLocation}"
 
-for usbPackage in "${usbPackages[@]}"
+for usbPackage in "${usbPackageNames[@]}"
 do
    logMessage task "Building for Windows: ${usbPackage}"
    logFile="${programName}-${usbPackage}.log"
 
-   "${windowsDirectory}/mkwin" -P "${pythonLocation}" -u "${usbPackage}" "${sourceRoot}" &>"${logFile}"
+   "${windowsDirectory}/mkwin" -P "${pythonLocation}" -u "${usbPackage}" -- "${sourceRoot}" &>"${logFile}"
    returnCode="${?}"
 
    [ "${returnCode}" -eq 0 ] || {

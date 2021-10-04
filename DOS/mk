@@ -26,7 +26,7 @@ dosDirectory="${sourceRoot}/DOS"
 logMessage task "Building for DOS"
 logFile="${programName}.log"
 
-"${dosDirectory}/mkdosarc" -t "${dosDirectory}/ToolChain" -o "${sourceRoot}" &>"${logFile}"
+"${dosDirectory}/mkdosarc" -t "${dosDirectory}/ToolChain" -o -- "${sourceRoot}" &>"${logFile}"
 returnCode="${?}"
 
 [ "${returnCode}" -eq 0 ] || {
