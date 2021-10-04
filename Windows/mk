@@ -31,16 +31,16 @@ parseProgramArguments "${@}"
 setSourceRoot
 windowsDirectory="${sourceRoot}/Windows"
 
-[ "${#}" -gt 0 ] || {
-   set -- libusb libusb-1.0
-}
+read <"${windowsDirectory}/python-location" pythonLocation || exit "${?}"
+[ -e "${pythonLocation}" ] || logMessage error "Python not found: ${pythonLocation}"
+[ -d "${pythonLocation}" ] || logMessage error "not a directory: ${pythonLocation}"
 
 for usbPackage in "${usbPackages[@]}"
 do
    logMessage task "Building for Windows: ${usbPackage}"
    logFile="${programName}-${usbPackage}.log"
 
-   "${windowsDirectory}/mkwin" -u "${usbPackage}" "${sourceRoot}" &>"${logFile}"
+   "${windowsDirectory}/mkwin" -P "${pythonLocation}" -u "${usbPackage}" "${sourceRoot}" &>"${logFile}"
    returnCode="${?}"
 
    [ "${returnCode}" -eq 0 ] || {
