@@ -120,7 +120,6 @@ LOG_LEVEL_LABEL_critical Critical
 LOG_LEVEL_LABEL_alert Alert
 LOG_LEVEL_LABEL_emergency Emergency
 
-LOG_CATEGORY_LABEL_gio Generic I/O
 LOG_CATEGORY_LABEL_inpkts Input Packets
 LOG_CATEGORY_LABEL_outpkts Output Packets
 LOG_CATEGORY_LABEL_brlkeys Braille Device Key Events
@@ -131,6 +130,7 @@ LOG_CATEGORY_LABEL_update Update Events
 LOG_CATEGORY_LABEL_speech Speech Events
 LOG_CATEGORY_LABEL_async Async Events
 LOG_CATEGORY_LABEL_server Server Events
+LOG_CATEGORY_LABEL_gio Generic I/O
 LOG_CATEGORY_LABEL_serial Serial I/O
 LOG_CATEGORY_LABEL_usb USB I/O
 LOG_CATEGORY_LABEL_bluetooth Bluetooth I/O

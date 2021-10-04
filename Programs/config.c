@@ -110,7 +110,7 @@ logProgramBanner (void) {
 
 static void
 logProperty (const char *value, const char *variable, const char *label) {
-  if (*value) {
+  if (value && *value) {
     if (variable) setGlobalVariable(variable, value);
   } else {
     value = gettext("none");
@@ -746,7 +746,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "log-level",
     .letter = 'l',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar | OPT_Format,
+    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar | OPT_Format,
     .argument = strtext("lvl|cat,..."),
     .setting.string = &opt_logLevel,
     .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)."),

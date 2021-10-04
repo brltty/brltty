@@ -518,36 +518,36 @@
 # Only one severity threshold may be specified. Less severe uncategorized
 # events will not be logged. If not specified, "notice" will be assumed.
 # The severity thresholds are:
-#	emergency
-#	alert
-#	critical
-#	error
-#	warning
-#	notice
-#	information
-#	debug
+#log-level	emergency
+#log-level	alert
+#log-level	critical
+#log-level	error
+#log-level	warning
+#log-level	notice
+#log-level	information
+#log-level	debug
 
 # Any number of event categories may be enabled. Prefixing a category name
 # with a minus sign [-] disables it (particularly useful if "all" is used).
 # The categories are:
-#	all	enable all of the categories
-#	gio	generic I/O
-#	inpkts	input packets
-#	outpkts	output packets
-#	brlkeys	braille device key events
-#	kbdkeys	keyboard key events
-#	csrtrk	cursor tracking
-#	csrrtg	cursor routing
-#	update	update events
-#	speech	speech events
-#	async	asynchronous event scheduling
-#	server	BrlAPI server events
-#	serial	serial I/O
-#	usb	USB I/O
-#	bluetooth	Bluetooth I/O
-#	brldrv	braille driver events
-#	spkdrv	speech driver events
-#	scrdrv	screen driver events
+#log-level	all	# enable all of the categories
+#log-level	inpkts	# input packets
+#log-level	outpkts	# output packets
+#log-level	brlkeys	# braille device key events
+#log-level	kbdkeys	# keyboard key events
+#log-level	csrtrk	# cursor tracking
+#log-level	csrrtg	# cursor routing
+#log-level	update	# update events
+#log-level	speech	# speech events
+#log-level	async	# asynchronous event scheduling
+#log-level	server	# BrlAPI server events
+#log-level	gio	# generic I/O
+#log-level	serial	# serial I/O
+#log-level	usb	# USB I/O
+#log-level	bluetooth	# Bluetooth I/O
+#log-level	brldrv	# braille driver events
+#log-level	spkdrv	# speech driver events
+#log-level	scrdrv	# screen driver events
 
 
 #######################

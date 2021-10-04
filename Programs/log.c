@@ -59,12 +59,6 @@ typedef struct {
 } LogCategoryEntry;
 
 static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
-  [LOG_CATEGORY_INDEX(GENERIC_IO)] = {
-    .name = "gio",
-    .title = strtext("generic I/O"),
-    .prefix = "GIO"
-  },
-
   [LOG_CATEGORY_INDEX(INPUT_PACKETS)] = {
     .name = "inpkts",
     .title = strtext("Input Packets"),
@@ -123,6 +117,12 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
     .name = "server",
     .title = strtext("Server Events"),
     .prefix = "server"
+  },
+
+  [LOG_CATEGORY_INDEX(GENERIC_IO)] = {
+    .name = "gio",
+    .title = strtext("generic I/O"),
+    .prefix = "GIO"
   },
 
   [LOG_CATEGORY_INDEX(SERIAL_IO)] = {

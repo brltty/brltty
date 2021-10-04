@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <string name="LOG_CATEGORY_LABEL_gio">Generic I/O</string>
   <string name="LOG_CATEGORY_LABEL_inpkts">Input Packets</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Output Packets</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Braille Device Key Events</string>
@@ -12,6 +11,7 @@
   <string name="LOG_CATEGORY_LABEL_speech">Speech Events</string>
   <string name="LOG_CATEGORY_LABEL_async">Async Events</string>
   <string name="LOG_CATEGORY_LABEL_server">Server Events</string>
+  <string name="LOG_CATEGORY_LABEL_gio">Generic I/O</string>
   <string name="LOG_CATEGORY_LABEL_serial">Serial I/O</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
   <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth I/O</string>
@@ -20,7 +20,6 @@
   <string name="LOG_CATEGORY_LABEL_scrdrv">Screen Driver Events</string>
 
   <string-array name="LOG_CATEGORY_LABELS">
-    <item>@string/LOG_CATEGORY_LABEL_gio</item>
     <item>@string/LOG_CATEGORY_LABEL_inpkts</item>
     <item>@string/LOG_CATEGORY_LABEL_outpkts</item>
     <item>@string/LOG_CATEGORY_LABEL_brlkeys</item>
@@ -31,6 +30,7 @@
     <item>@string/LOG_CATEGORY_LABEL_speech</item>
     <item>@string/LOG_CATEGORY_LABEL_async</item>
     <item>@string/LOG_CATEGORY_LABEL_server</item>
+    <item>@string/LOG_CATEGORY_LABEL_gio</item>
     <item>@string/LOG_CATEGORY_LABEL_serial</item>
     <item>@string/LOG_CATEGORY_LABEL_usb</item>
     <item>@string/LOG_CATEGORY_LABEL_bluetooth</item>
@@ -40,7 +40,6 @@
   </string-array>
 
   <string-array name="LOG_CATEGORY_VALUES">
-    <item>gio</item>
     <item>inpkts</item>
     <item>outpkts</item>
     <item>brlkeys</item>
@@ -51,6 +50,7 @@
     <item>speech</item>
     <item>async</item>
     <item>server</item>
+    <item>gio</item>
     <item>serial</item>
     <item>usb</item>
     <item>bluetooth</item>
