@@ -21,9 +21,9 @@
 setSourceRoot
 setBuildRoot
 
-export BRLTTY_TABLES_DIRECTORY="${BRLTTY_SOURCE_ROOT}/Tables"
-export BRLTTY_DRIVERS_DIRECTORY="${BRLTTY_BUILD_ROOT}/lib"
-export BRLTTY_LOCALE_DIRECTORY="${BRLTTY_BUILD_ROOT}/Messages/locale"
+export BRLTTY_TABLES_DIRECTORY="${sourceRoot}/Tables"
+export BRLTTY_DRIVERS_DIRECTORY="${buildRoot}/lib"
+export BRLTTY_LOCALE_DIRECTORY="${buildRoot}/Messages/locale"
 
-exec "${programDirectory}/run-command" "${BRLTTY_BUILD_ROOT}/Programs/brltty" -E "${@}"
+exec "${programDirectory}/run-command" "${buildRoot}/Programs/brltty" -E "${@}"
 exit "${?}"

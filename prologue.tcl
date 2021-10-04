@@ -36,17 +36,22 @@ set speechDriversSubdirectory [file join $driversSubdirectory Speech]
 set screenDriversSubdirectory [file join $driversSubdirectory Screen]
 
 proc setSourceRoot {} {
-   if {![findContainingDirectory ::env(BRLTTY_SOURCE_ROOT) [pwd] [list brltty.pc.in]]} {
+   set variable ::env(BRLTTY_SOURCE_ROOT)
+
+   if {![findContainingDirectory $variable [pwd] [list brltty.pc.in]]} {
       semanticError "source tree not found"
    }
+
+   return [set ::sourceRoot [set $variable]]
 }
 
 proc setBuildRoot {} {
    global initialDirectory scriptDirectory
+   set variable ::env(BRLTTY_BUILD_ROOT)
 
    foreach directory [list $initialDirectory $scriptDirectory] {
-      if {[findContainingDirectory ::env(BRLTTY_BUILD_ROOT) $directory [list brltty.pc]]} {
-         return
+      if {[findContainingDirectory $variable $directory [list brltty.pc]]} {
+         return [set ::buildRoot [set $variable]]
       }
    }
 

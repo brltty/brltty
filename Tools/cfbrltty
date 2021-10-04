@@ -21,7 +21,7 @@
 set -e
 
 setSourceRoot
-cd "${BRLTTY_SOURCE_ROOT}"
+cd "${sourceRoot}"
 
 revisionIdentifier="$(./getrevid .)" || {
    revisionHeader="${programsSubdirectory}/revision_identifier.h"

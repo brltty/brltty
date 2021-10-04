@@ -20,7 +20,7 @@
 . "$(dirname "${0}")/../prologue.sh"
 setBuildRoot
 
-defaultBuildRoot="${BRLTTY_BUILD_ROOT}"
+defaultBuildRoot="${buildRoot}"
 defaultPackageName="brltty"
 variableNames=()
 

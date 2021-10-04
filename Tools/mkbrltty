@@ -22,7 +22,7 @@ parseProgramArguments "${@}"
 
 set -e
 setBuildRoot
-cd "${BRLTTY_BUILD_ROOT}"
+cd "${buildRoot}"
 
 makeTargets=(
    brltty braille-drivers speech-drivers screen-drivers

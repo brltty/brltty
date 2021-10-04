@@ -47,7 +47,7 @@ readonly variablePrefix="${commandName^^?}"
 getVariable "${variablePrefix}_VALGRIND_DIRECTORY" vgDirectory
 
 [ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
-export LD_LIBRARY_PATH="${BRLTTY_BUILD_ROOT}/Programs${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${buildRoot}/Programs${LD_LIBRARY_PATH}"
 
 [ -n "${vgDirectory}" ] && {
    [ -e "${vgDirectory}" ] || semanticError "directory not found: ${vgDirectory}"

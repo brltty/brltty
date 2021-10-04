@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-source [file join [file dirname [info script]] .. brltty-prologue.tcl]
+source [file join [file dirname [info script]] .. prologue.tcl]
 
 set optionDefinitions {
 }

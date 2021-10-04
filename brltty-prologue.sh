@@ -32,6 +32,9 @@ resolveDirectory() {
    fi
 }
 
+programDirectory="$(dirname "${0}")"
+readonly programDirectory="$(resolveDirectory "${programDirectory}")"
+
 toRelativePath() {
    local toPath="${1}"
    local variable="${2}"
@@ -78,9 +81,6 @@ toRelativePath() {
       echo "${toPath}"
    fi
 }
-
-programDirectory="$(dirname "${0}")"
-readonly programDirectory="$(resolveDirectory "${programDirectory}")"
 
 setVariable() {
    eval "${1}"'="${2}"'

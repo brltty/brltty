@@ -20,5 +20,5 @@
 . "`dirname "${0}"`/prologue.sh"
 setBuildRoot
 
-exec "${programDirectory}/run-command" "${BRLTTY_BUILD_ROOT}/Programs/xbrlapi" "$@"
+exec "${programDirectory}/run-command" "${buildRoot}/Programs/xbrlapi" "$@"
 exit "${?}"
