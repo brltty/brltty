@@ -14,7 +14,7 @@
   <string name="LOG_CATEGORY_LABEL_gio">Generic I/O</string>
   <string name="LOG_CATEGORY_LABEL_serial">Serial I/O</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth I/O</string>
+  <string name="LOG_CATEGORY_LABEL_bt">Bluetooth I/O</string>
   <string name="LOG_CATEGORY_LABEL_hid">Human Interface Events</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Braille Driver Events</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Speech Driver Events</string>
@@ -34,7 +34,7 @@
     <item>@string/LOG_CATEGORY_LABEL_gio</item>
     <item>@string/LOG_CATEGORY_LABEL_serial</item>
     <item>@string/LOG_CATEGORY_LABEL_usb</item>
-    <item>@string/LOG_CATEGORY_LABEL_bluetooth</item>
+    <item>@string/LOG_CATEGORY_LABEL_bt</item>
     <item>@string/LOG_CATEGORY_LABEL_hid</item>
     <item>@string/LOG_CATEGORY_LABEL_brldrv</item>
     <item>@string/LOG_CATEGORY_LABEL_spkdrv</item>
@@ -55,7 +55,7 @@
     <item>gio</item>
     <item>serial</item>
     <item>usb</item>
-    <item>bluetooth</item>
+    <item>bt</item>
     <item>hid</item>
     <item>brldrv</item>
     <item>spkdrv</item>

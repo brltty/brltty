@@ -544,7 +544,7 @@
 #log-level	gio	# generic I/O
 #log-level	serial	# serial I/O
 #log-level	usb	# USB I/O
-#log-level	bluetooth	# Bluetooth I/O
+#log-level	bt	# Bluetooth I/O
 #log-level	hid	# Human Interface Events
 #log-level	brldrv	# braille driver events
 #log-level	spkdrv	# speech driver events

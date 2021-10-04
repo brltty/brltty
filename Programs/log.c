@@ -138,7 +138,7 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
   },
 
   [LOG_CATEGORY_INDEX(BLUETOOTH_IO)] = {
-    .name = "bluetooth",
+    .name = "bt",
     .title = strtext("Bluetooth I/O"),
     .prefix = "Bluetooth"
   },
