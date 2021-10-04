@@ -17,23 +17,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/../../prologue.sh"
+. "`dirname "${0}"`/../mk-prologue.sh"
 parseProgramArguments "${@}"
 
-setSourceRoot
+mkPlatformName="Android"
+mkOldLogName="Android"
+mkNewLogName="${programName}"
 
-logMessage task "Building for Android"
-logFile="${programName}.log"
-
-"${sourceRoot}/Android/Tools/rebuild" &>"${logFile}"
-returnCode="${?}"
-
-[ "${returnCode}" -eq 0 ] || {
-   logMessage error "build failed: rc=${returnCode}"
-   exit 10
-}
-
-logMessage task "build completed successfully"
-diff "${sourceRoot}/Logs/Builds/Android.log" "${logFile}"
-
-exit 0
+mkBuild "${sourceRoot}/Android/Tools/rebuild"
+exit "${?}"

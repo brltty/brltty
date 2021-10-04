@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/../prologue.sh"
+. "`dirname "${0}"`/../mk-prologue.sh"
 . "${programDirectory}/mingw.sh"
 
 readonly defaultUsbPackageNames=( libusb libusb-1.0 )
@@ -37,7 +37,6 @@ processExtraProgramParameters() {
 optionalProgramParameters
 parseProgramArguments "${@}"
 
-setSourceRoot
 windowsDirectory="${sourceRoot}/Windows"
 
 read <"${windowsDirectory}/python-location" pythonLocation || exit "${?}"
@@ -46,19 +45,10 @@ read <"${windowsDirectory}/python-location" pythonLocation || exit "${?}"
 
 for usbPackage in "${usbPackageNames[@]}"
 do
-   logMessage task "Building for Windows: ${usbPackage}"
-   logFile="${programName}-${usbPackage}.log"
-
-   "${windowsDirectory}/mkwin" -P "${pythonLocation}" -u "${usbPackage}" -- "${sourceRoot}" &>"${logFile}"
-   returnCode="${?}"
-
-   [ "${returnCode}" -eq 0 ] || {
-      logMessage error "build failed: rc=${returnCode}"
-      exit 10
-   }
-
-   logMessage task "build completed successfully"
-   diff "${sourceRoot}/Logs/Builds/Windows-${usbPackage}.log" "${logFile}"
+   mkPlatformName="Windows[${usbPackage}]"
+   mkOldLogName="Windows-${usbPackage}"
+   mkNewLogName="${programName}-${usbPackage}"
+   mkBuild "${windowsDirectory}/mkwin" -P "${pythonLocation}" -u "${usbPackage}" -- "${sourceRoot}"
 done
 
-exit 0
+exit "${?}"

@@ -17,13 +17,25 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/../mk-prologue.sh"
-parseProgramArguments "${@}"
+. "$(dirname "${BASH_SOURCE[0]}")/prologue.sh"
+setSourceRoot
+readonly mkLogFileExtension="log"
 
-mkPlatformName="DOS"
-mkOldLogName="DOS"
-mkNewLogName="${programName}"
+mkBuild() {
+   [ -n "${mkPlatformName}" ] || internalError "platform name not set"
+   [ -n "${mkOldLogName}" ] || internalError "old log name not set"
+   [ -n "${mkNewLogName}" ] || internalError "new log name not set"
 
-dosDirectory="${sourceRoot}/DOS"
-mkBuild "${dosDirectory}/mkdosarc" -t "${dosDirectory}/ToolChain" -o -- "${sourceRoot}"
-exit "${?}"
+   logMessage task "Building for ${mkPlatformName}"
+   local newLogFile="${mkNewLogName}.${mkLogFileExtension}"
+   local oldLogFile="${sourceRoot}/Logs/Builds/${mkOldLogName}.${mkLogFileExtension}"
+
+   "${@}" &>"${newLogFile}" || {
+      local returnCode="${?}"
+      logMessage error "build failed: rc=${returnCode}"
+      exit 10
+   }
+
+   logMessage task "build completed successfully"
+   diff "${oldLogFile}" "${newLogFile}"
+}
