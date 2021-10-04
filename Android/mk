@@ -25,4 +25,4 @@ mkOldLogName="Android"
 mkNewLogName="${programName}"
 
 mkBuild "${sourceRoot}/Android/Tools/rebuild"
-exit "${?}"
+exit 0

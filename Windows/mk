@@ -51,4 +51,4 @@ do
    mkBuild "${windowsDirectory}/mkwin" -P "${pythonLocation}" -u "${usbPackage}" -- "${sourceRoot}"
 done
 
-exit "${?}"
+exit 0

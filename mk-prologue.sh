@@ -19,20 +19,22 @@
 
 . "$(dirname "${BASH_SOURCE[0]}")/prologue.sh"
 setSourceRoot
+
 readonly mkLogFileExtension="log"
+readonly mkLogsDirectory="${sourceRoot}/Logs/Builds"
 
 mkBuild() {
-   [ -n "${mkPlatformName}" ] || internalError "platform name not set"
-   [ -n "${mkOldLogName}" ] || internalError "old log name not set"
-   [ -n "${mkNewLogName}" ] || internalError "new log name not set"
+   [ -n "${mkPlatformName}" ] || internalError "platform name not defined"
+   [ -n "${mkOldLogName}" ] || internalError "old log name not defined"
+   [ -n "${mkNewLogName}" ] || internalError "new log name not defined"
 
    logMessage task "Building for ${mkPlatformName}"
    local newLogFile="${mkNewLogName}.${mkLogFileExtension}"
-   local oldLogFile="${sourceRoot}/Logs/Builds/${mkOldLogName}.${mkLogFileExtension}"
+   local oldLogFile="${mkLogsDirectory}/${mkOldLogName}.${mkLogFileExtension}"
 
    "${@}" &>"${newLogFile}" || {
-      local returnCode="${?}"
-      logMessage error "build failed: rc=${returnCode}"
+      local exitStatus="${?}"
+      logMessage error "build failed with exit status ${exitStatus} - see ${newLogFile}"
       exit 10
    }
 
