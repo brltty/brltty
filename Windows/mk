@@ -38,6 +38,8 @@ optionalProgramParameters
 parseProgramArguments "${@}"
 
 windowsDirectory="${sourceRoot}/Windows"
+mkIgnoreMismatch "^mkwin: revision identifier: "
+mkIgnoreMismatch "^Successfully compiled: "
 
 read <"${windowsDirectory}/python-location" pythonLocation || exit "${?}"
 [ -e "${pythonLocation}" ] || logMessage error "Python not found: ${pythonLocation}"

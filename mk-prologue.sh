@@ -22,6 +22,12 @@ setSourceRoot
 
 readonly mkLogFileExtension="log"
 readonly mkLogsDirectory="${sourceRoot}/Logs/Builds"
+mkDiffOptions=()
+
+mkIgnoreMismatch() {
+   local pattern="${1}"
+   mkDiffOptions+=( -I "${pattern}" )
+}
 
 mkBuild() {
    [ -n "${mkPlatformName}" ] || internalError "platform name not defined"
@@ -39,5 +45,5 @@ mkBuild() {
    }
 
    logMessage task "build completed successfully"
-   diff "${oldLogFile}" "${newLogFile}"
+   diff "${mkDiffOptions[@]}" -- "${oldLogFile}" "${newLogFile}"
 }
