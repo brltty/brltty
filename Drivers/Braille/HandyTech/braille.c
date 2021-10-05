@@ -634,23 +634,12 @@ typedef enum {
   HT_HID_CMD_FlushBuffers = 0X01, /* flush input and output buffers */
 } HtHidCommand;
 
-static HidReportSize hidReportSize_OutData;
-#define hidOutDataSize hidReportSize_OutData.input
-
-static HidReportSize hidReportSize_InData;
-#define hidInDataSize hidReportSize_InData.output
-
-static HidReportSize hidReportSize_InCommand;
-#define hidInCommandSize hidReportSize_InCommand.output
-
-static HidReportSize hidReportSize_OutVersion;
-#define hidOutVersionSize hidReportSize_OutVersion.input
-
-static HidReportSize hidReportSize_OutBaud;
-#define hidOutBaudSize hidReportSize_OutBaud.input
-
-static HidReportSize hidReportSize_InBaud;
-#define hidInBaudSize hidReportSize_InBaud.output
+static size_t hidOutDataSize = 0;
+static size_t hidInDataSize = 0;
+static size_t hidInCommandSize = 0;
+static size_t hidOutVersionSize = 0;
+static size_t hidOutBaudSize = 0;
+static size_t hidInBaudSize = 0;
 
 static uint16_t hidFirmwareVersion;
 static unsigned char *hidInputReport = NULL;
@@ -748,12 +737,12 @@ typedef struct {
 static int
 initializeUsbSession2 (BrailleDisplay *brl) {
   static const BrailleReportSizeEntry reportTable[] = {
-    {.identifier=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
-    {.identifier=HT_HID_RPT_InData, .size=&hidReportSize_InData},
-    {.identifier=HT_HID_RPT_InCommand, .size=&hidReportSize_InCommand},
-    {.identifier=HT_HID_RPT_OutVersion, .size=&hidReportSize_OutVersion},
-    {.identifier=HT_HID_RPT_OutBaud, .size=&hidReportSize_OutBaud},
-    {.identifier=HT_HID_RPT_InBaud, .size=&hidReportSize_InBaud},
+    {.identifier=HT_HID_RPT_OutData, .input=&hidOutDataSize},
+    {.identifier=HT_HID_RPT_InData, .output=&hidInDataSize},
+    {.identifier=HT_HID_RPT_InCommand, .output=&hidInCommandSize},
+    {.identifier=HT_HID_RPT_OutVersion, .input=&hidOutVersionSize},
+    {.identifier=HT_HID_RPT_OutBaud, .input=&hidOutBaudSize},
+    {.identifier=HT_HID_RPT_InBaud, .output=&hidInBaudSize},
     {.identifier=0}
   };
 
@@ -873,8 +862,8 @@ static const UsbOperations usbOperations2 = {
 static int
 initializeUsbSession3 (BrailleDisplay *brl) {
   static const BrailleReportSizeEntry reportTable[] = {
-    {.identifier=HT_HID_RPT_OutData, .size=&hidReportSize_OutData},
-    {.identifier=HT_HID_RPT_InData, .size=&hidReportSize_InData},
+    {.identifier=HT_HID_RPT_OutData, .input=&hidOutDataSize},
+    {.identifier=HT_HID_RPT_InData, .output=&hidInDataSize},
     {.identifier=0}
   };
 

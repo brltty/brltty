@@ -416,11 +416,17 @@ getBrailleReportSize (BrailleDisplay *brl, unsigned char identifier, HidReportSi
 
 int
 getBrailleReportSizes (BrailleDisplay *brl, const BrailleReportSizeEntry *table) {
-  const BrailleReportSizeEntry *report = table;
+  const BrailleReportSizeEntry *entry = table;
 
-  while (report->identifier) {
-    if (!getBrailleReportSize(brl, report->identifier, report->size)) return 0;
-    report += 1;
+  while (entry->identifier) {
+    HidReportSize size;
+    if (!getBrailleReportSize(brl, entry->identifier, &size)) return 0;
+
+    if (entry->input) *entry->input = size.input;
+    if (entry->output) *entry->output = size.output;
+    if (entry->feature) *entry->feature = size.feature;
+
+    entry += 1;
   }
 
   return 1;
