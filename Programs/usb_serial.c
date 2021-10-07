@@ -26,6 +26,7 @@
 #include "usb_internal.h"
 #include "usb_serial.h"
 #include "usb_adapters.h"
+#include "bitfield.h"
 
 static void
 usbLogSerialProblem (UsbDevice *device, const char *problem) {

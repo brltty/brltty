@@ -117,6 +117,7 @@
 #include "hidkeys.h"
 #include "io_generic.h"
 #include "io_usb.h"
+#include "usb_hid.h"
 
 typedef enum {
   PARM_ROTATED_CELLS,

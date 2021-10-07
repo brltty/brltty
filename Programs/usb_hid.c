@@ -23,7 +23,7 @@
 
 #include "log.h"
 #include "io_usb.h"
-#include "hid_types.h"
+#include "usb_hid.h"
 #include "bitfield.h"
 
 const UsbHidDescriptor *

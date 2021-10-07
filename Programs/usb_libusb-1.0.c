@@ -25,6 +25,7 @@
 #include "log.h"
 #include "io_usb.h"
 #include "usb_internal.h"
+#include "bitfield.h"
 
 struct UsbDeviceExtensionStruct {
   libusb_device *device;

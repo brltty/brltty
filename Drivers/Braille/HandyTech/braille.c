@@ -618,6 +618,7 @@ struct BrailleDataStruct {
 
 /* USB IO */
 #include "io_usb.h"
+#include "usb_hid.h"
 
 #define HT_HID_REPORT_TIMEOUT 100
 

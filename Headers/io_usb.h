@@ -21,7 +21,6 @@
 
 #include "prologue.h"
 #include "usb_types.h"
-#include "hid_types.h"
 #include "async_io.h"
 
 #ifdef __cplusplus
@@ -222,66 +221,6 @@ extern ssize_t usbWriteData (
   unsigned char endpointNumber,
   const void *data,
   size_t length,
-  int timeout
-);
-
-typedef enum {
-  UsbHidRequest_GetReport   = 0X01,
-  UsbHidRequest_GetIdle     = 0X02,
-  UsbHidRequest_GetProtocol = 0X03,
-  UsbHidRequest_SetReport   = 0X09,
-  UsbHidRequest_SetIdle     = 0X0A,
-  UsbHidRequest_SetProtocol = 0X0B
-} UsbHidRequest;
-
-typedef enum {
-  UsbHidReportType_Input   = 0X01,
-  UsbHidReportType_Output  = 0X02,
-  UsbHidReportType_Feature = 0X03
-} UsbHidReportType;
-
-extern const UsbHidDescriptor *usbHidDescriptor (UsbDevice *device);
-
-extern HidItemsDescriptor *usbHidGetItems (
-  UsbDevice *device,
-  unsigned char interface,
-  unsigned char number,
-  int timeout
-);
-
-extern ssize_t usbHidGetReport (
-  UsbDevice *device,
-  unsigned char interface,
-  unsigned char report,
-  void *buffer,
-  uint16_t length,
-  int timeout
-);
-
-extern ssize_t usbHidSetReport (
-  UsbDevice *device,
-  unsigned char interface,
-  unsigned char report,
-  const void *buffer,
-  uint16_t length,
-  int timeout
-);
-
-extern ssize_t usbHidGetFeature (
-  UsbDevice *device,
-  unsigned char interface,
-  unsigned char report,
-  void *buffer,
-  uint16_t length,
-  int timeout
-);
-
-extern ssize_t usbHidSetFeature (
-  UsbDevice *device,
-  unsigned char interface,
-  unsigned char report,
-  const void *buffer,
-  uint16_t length,
   int timeout
 );
 

@@ -31,6 +31,7 @@
 #include "log.h"
 #include "strfmt.h"
 #include "parameters.h"
+#include "bitfield.h"
 #include "bitmask.h"
 #include "parse.h"
 #include "file.h"
