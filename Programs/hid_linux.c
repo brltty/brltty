@@ -58,23 +58,18 @@ hidTestString (
 }
 
 static int
-hidTestUint16 (
+hidTestIdentifier (
   struct udev_device *device,
   const char *attributeName,
   const void *testValue
 ) {
-  const uint16_t *testInteger = testValue;
-  if (!*testInteger) return 1;
+  const uint16_t *testIdentifier = testValue;
+  if (!*testIdentifier) return 1;
 
-  const char *actualString = udev_device_get_sysattr_value(device, attributeName);
-  if (!actualString) return 0;
-  if (!*actualString) return 0;
+  uint16_t actualIdentifier;
+  if (!hidParseIdentifier(&actualIdentifier, udev_device_get_sysattr_value(device, attributeName))) return 0;
 
-  char *end;
-  long int actualInteger = strtol(actualString, &end, 0X10);
-  if (*end) return 0;
-
-  return actualInteger == *testInteger;
+  return actualIdentifier == *testIdentifier;
 }
 
 typedef struct {
@@ -191,12 +186,12 @@ hidOpenDevice_USB (const HidDeviceDescription_USB *description) {
 
     { .name = "idVendor",
       .value = &description->vendorIdentifier,
-      .function = hidTestUint16
+      .function = hidTestIdentifier
     },
 
     { .name = "idProduct",
       .value = &description->productIdentifier,
-      .function = hidTestUint16
+      .function = hidTestIdentifier
     },
   };
 

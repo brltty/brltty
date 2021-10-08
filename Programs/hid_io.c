@@ -41,3 +41,19 @@ hidInitializeDeviceDescription_Bluetooth (HidDeviceDescription_Bluetooth *descri
 
   description->deviceAddress = NULL;
 }
+
+int
+hidParseIdentifier (uint16_t *identifier, const char *string) {
+  if (!string) return 0;
+  if (!*string) return 0;
+
+  char *end;
+  long int value = strtol(string, &end, 0X10);
+  if (*end) return 0;
+
+  if (value < 0) return 0;
+  if (value > UINT16_MAX) return 0;
+
+  *identifier = value;
+  return 1;
+}

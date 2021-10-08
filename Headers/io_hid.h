@@ -45,6 +45,8 @@ extern HidDevice *hidOpenDevice_Bluetooth (const HidDeviceDescription_Bluetooth 
 
 extern void hidCloseDevice (HidDevice *hid);
 
+extern int hidParseIdentifier (uint16_t *identifier, const char *string);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
