@@ -168,30 +168,30 @@ hidOpenDevice (
 }
 
 HidDevice *
-hidOpenDevice_USB (const HidDeviceDescription_USB *description) {
+hidOpenDevice_USB (const HidDeviceFilter_USB *filter) {
   const HidAttributeTest tests[] = {
     { .name = "manufacturer",
-      .value = description->manufacturerName,
+      .value = filter->manufacturerName,
       .function = hidTestString
     },
 
     { .name = "product",
-      .value = description->productDescription,
+      .value = filter->productDescription,
       .function = hidTestString
     },
 
     { .name = "serial",
-      .value = description->serialNumber,
+      .value = filter->serialNumber,
       .function = hidTestString
     },
 
     { .name = "idVendor",
-      .value = &description->vendorIdentifier,
+      .value = &filter->vendorIdentifier,
       .function = hidTestIdentifier
     },
 
     { .name = "idProduct",
-      .value = &description->productIdentifier,
+      .value = &filter->productIdentifier,
       .function = hidTestIdentifier
     },
   };
@@ -200,10 +200,10 @@ hidOpenDevice_USB (const HidDeviceDescription_USB *description) {
 }
 
 HidDevice *
-hidOpenDevice_Bluetooth (const HidDeviceDescription_Bluetooth *description) {
+hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter) {
   const HidAttributeTest tests[] = {
     { .name = "address",
-      .value = description->deviceAddress,
+      .value = filter->deviceAddress,
       .function = hidTestString
     },
   };

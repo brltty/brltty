@@ -23,13 +23,13 @@
 #include "io_hid.h"
 
 HidDevice *
-hidOpenDevice_USB (const HidDeviceDescription_USB *description) {
+hidOpenDevice_USB (const HidDeviceFilter_USB *filter) {
   errno = ENOSYS;
   return NULL;
 }
 
 HidDevice *
-hidOpenDevice_Bluetooth (const HidDeviceDescription_Bluetooth *description) {
+hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter) {
   errno = ENOSYS;
   return NULL;
 }

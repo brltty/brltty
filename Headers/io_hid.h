@@ -33,17 +33,17 @@ typedef struct {
   const char *serialNumber;
   uint16_t vendorIdentifier;
   uint16_t productIdentifier;
-} HidDeviceDescription_USB;
+} HidDeviceFilter_USB;
 
-extern void hidInitializeDeviceDescription_USB (HidDeviceDescription_USB *description);
-extern HidDevice *hidOpenDevice_USB (const HidDeviceDescription_USB *description);
+extern void hidInitializeDeviceFilter_USB (HidDeviceFilter_USB *filter);
+extern HidDevice *hidOpenDevice_USB (const HidDeviceFilter_USB *filter);
 
 typedef struct {
   const char *deviceAddress;
-} HidDeviceDescription_Bluetooth;
+} HidDeviceFilter_Bluetooth;
 
-extern void hidInitializeDeviceDescription_Bluetooth (HidDeviceDescription_Bluetooth *description);
-extern HidDevice *hidOpenDevice_Bluetooth (const HidDeviceDescription_Bluetooth *description);
+extern void hidInitializeDeviceFilter_Bluetooth (HidDeviceFilter_Bluetooth *filter);
+extern HidDevice *hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter);
 
 extern void hidCloseDevice (HidDevice *hid);
 extern HidItemsDescriptor *hidGetItems (HidDevice *hid);

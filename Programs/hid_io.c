@@ -24,22 +24,22 @@
 #include "io_hid.h"
 
 void
-hidInitializeDeviceDescription_USB (HidDeviceDescription_USB *description) {
-  memset(description, 0, sizeof(*description));
+hidInitializeDeviceFilter_USB (HidDeviceFilter_USB *filter) {
+  memset(filter, 0, sizeof(*filter));
 
-  description->manufacturerName = NULL;
-  description->productDescription = NULL;
-  description->serialNumber = NULL;
+  filter->manufacturerName = NULL;
+  filter->productDescription = NULL;
+  filter->serialNumber = NULL;
 
-  description->vendorIdentifier = 0;
-  description->productIdentifier = 0;
+  filter->vendorIdentifier = 0;
+  filter->productIdentifier = 0;
 }
 
 void
-hidInitializeDeviceDescription_Bluetooth (HidDeviceDescription_Bluetooth *description) {
-  memset(description, 0, sizeof(*description));
+hidInitializeDeviceFilter_Bluetooth (HidDeviceFilter_Bluetooth *filter) {
+  memset(filter, 0, sizeof(*filter));
 
-  description->deviceAddress = NULL;
+  filter->deviceAddress = NULL;
 }
 
 int

@@ -102,25 +102,25 @@ main (int argc, char *argv[]) {
     return PROG_EXIT_SYNTAX;
   }
 
-  HidDeviceDescription_USB description;
-  hidInitializeDeviceDescription_USB(&description);
+  HidDeviceFilter_USB filter;
+  hidInitializeDeviceFilter_USB(&filter);
 
-  description.manufacturerName = opt_manufacturerName;
-  description.productDescription = opt_productDescription;
-  description.serialNumber = opt_serialNumber;
+  filter.manufacturerName = opt_manufacturerName;
+  filter.productDescription = opt_productDescription;
+  filter.serialNumber = opt_serialNumber;
 
   {
     int ok = 1;
 
     if (*opt_vendorIdentifier) {
-      if (!hidParseIdentifier(&description.vendorIdentifier, opt_vendorIdentifier)) {
+      if (!hidParseIdentifier(&filter.vendorIdentifier, opt_vendorIdentifier)) {
         logMessage(LOG_ERR, "invalid vendor identifier: %s", opt_vendorIdentifier);
         ok = 0;
       }
     }
 
     if (*opt_productIdentifier) {
-      if (!hidParseIdentifier(&description.productIdentifier, opt_productIdentifier)) {
+      if (!hidParseIdentifier(&filter.productIdentifier, opt_productIdentifier)) {
         logMessage(LOG_ERR, "invalid product identifier: %s", opt_productIdentifier);
         ok = 0;
       }
@@ -129,7 +129,7 @@ main (int argc, char *argv[]) {
     if (!ok) return PROG_EXIT_SYNTAX;
   }
 
-  HidDevice *device = hidOpenDevice_USB(&description);
+  HidDevice *device = hidOpenDevice_USB(&filter);
   if (!device) {
     logMessage(LOG_ERR, "device not found");
     return PROG_EXIT_SEMANTIC;
