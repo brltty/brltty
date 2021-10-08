@@ -34,8 +34,12 @@ hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter) {
   return NULL;
 }
 
+void
+hidCloseDevice (HidDevice *device) {
+}
+
 HidItemsDescriptor *
-hidGetItems (HidDevice *hid) {
+hidGetItems (HidDevice *device) {
   errno = ENOSYS;
   return NULL;
 }

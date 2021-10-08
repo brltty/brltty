@@ -45,10 +45,11 @@ typedef struct {
 extern void hidInitializeDeviceFilter_Bluetooth (HidDeviceFilter_Bluetooth *filter);
 extern HidDevice *hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter);
 
-extern void hidCloseDevice (HidDevice *hid);
-extern HidItemsDescriptor *hidGetItems (HidDevice *hid);
+extern void hidCloseDevice (HidDevice *device);
+extern HidItemsDescriptor *hidGetItems (HidDevice *device);
 
 extern int hidParseIdentifier (uint16_t *identifier, const char *string);
+extern int hidMatchString (const char *actualString, const char *testString);
 
 #ifdef __cplusplus
 }

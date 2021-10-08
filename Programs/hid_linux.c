@@ -55,7 +55,7 @@ hidTestString (
   if (!actualString) return 0;
   if (!*actualString) return 0;
 
-  return strcasecmp(actualString, testString) == 0;
+  return hidMatchString(actualString, testString);
 }
 
 static int
@@ -212,23 +212,23 @@ hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter) {
 }
 
 void
-hidCloseDevice (HidDevice *hid) {
-  close(hid->fileDescriptor);
-  free(hid->devPath);
-  free(hid->sysPath);
-  free(hid);
+hidCloseDevice (HidDevice *device) {
+  close(device->fileDescriptor);
+  free(device->devPath);
+  free(device->sysPath);
+  free(device);
 }
 
 HidItemsDescriptor *
-hidGetItems (HidDevice *hid) {
+hidGetItems (HidDevice *device) {
   int size;
 
-  if (ioctl(hid->fileDescriptor, HIDIOCGRDESCSIZE, &size) != -1) {
+  if (ioctl(device->fileDescriptor, HIDIOCGRDESCSIZE, &size) != -1) {
     struct hidraw_report_descriptor descriptor = {
       .size = size
     };
 
-    if (ioctl(hid->fileDescriptor, HIDIOCGRDESC, &descriptor) != -1) {
+    if (ioctl(device->fileDescriptor, HIDIOCGRDESC, &descriptor) != -1) {
       HidItemsDescriptor *items;
 
       if ((items = malloc(sizeof(*items) + size))) {

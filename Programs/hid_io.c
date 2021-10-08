@@ -57,3 +57,10 @@ hidParseIdentifier (uint16_t *identifier, const char *string) {
   *identifier = value;
   return 1;
 }
+
+int
+hidMatchString (const char *actualString, const char *testString) {
+  size_t testLength = strlen(testString);
+  if (testLength > strlen(actualString)) return 0;
+  return strncasecmp(actualString, testString, testLength) == 0;
+}
