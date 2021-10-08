@@ -286,6 +286,12 @@ BLUETOOTH_OBJECTS = gio_bluetooth.$O bluetooth.$O bluetooth_names.$O $(BLUETOOTH
 BLUETOOTH_INCLUDES = @bluetooth_includes@
 BLUETOOTH_LIBS = @bluetooth_libs@
 
+HID_PACKAGE = @hid_package@
+HID_OBJECT = hid_$(HID_PACKAGE)
+HID_OBJECTS = hid_io.$O $(HID_OBJECT).$O
+HID_INCLUDES = @hid_includes@
+HID_LIBS = @hid_libs@
+
 PORTS_PACKAGE = @ports_package@
 PORTS_OBJECT = ports_$(PORTS_PACKAGE)
 PORTS_OBJECTS = $(PORTS_OBJECT).$O

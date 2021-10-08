@@ -172,6 +172,10 @@ extern "C" {
 #undef USE_PKG_BLUETOOTH_LINUX
 #undef USE_PKG_BLUETOOTH_WINDOWS
 
+/* Define only one of the following HID I/O packages. */
+#undef USE_PKG_HID_NONE
+#undef USE_PKG_HID_LINUX
+
 /* Define only one of the following I/O ports packages. */
 #undef USE_PKG_PORTS_NONE
 #undef USE_PKG_PORTS_GLIBC

@@ -1535,6 +1535,19 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth I/O], [], [dnl
       ;;
 ])
 
+BRLTTY_ARG_PACKAGE([hid], [Human Interface Device I/O], [], [dnl
+   linux*)
+      AC_CHECK_HEADER([linux/hidraw.h], [dnl
+         BRLTTY_HAVE_PACKAGE([libudev], [libudev], [dnl
+            hid_package="linux"
+            hid_includes="${libudev_includes}"
+            hid_libs="${libudev_libs}"
+         ])
+         AC_HAVE_LIBRARY([bluetooth])
+      ])
+      ;;
+])
+
 BRLTTY_ARG_PACKAGE([ports], [I/O ports], [], [dnl
    cygwin*)
       ports_package="windows"

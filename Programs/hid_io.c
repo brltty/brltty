@@ -18,29 +18,26 @@
 
 #include "prologue.h"
 
-#include "program.h"
-#include "options.h"
+#include <string.h>
+
 #include "log.h"
 #include "io_hid.h"
 
-BEGIN_OPTION_TABLE(programOptions)
-END_OPTION_TABLE
+void
+hidInitializeDeviceDescription_USB (HidDeviceDescription_USB *description) {
+  memset(description, 0, sizeof(*description));
 
-int
-main (int argc, char *argv[]) {
-  {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
-      .applicationName = "hidtest",
-    };
+  description->manufacturerName = NULL;
+  description->productName = NULL;
+  description->serialNumber = NULL;
 
-    PROCESS_OPTIONS(descriptor, argc, argv);
-  }
+  description->vendorIdentifier = 0;
+  description->productIdentifier = 0;
+}
 
-  if (argc) {
-    logMessage(LOG_ERR, "too many parameters");
-    return PROG_EXIT_SYNTAX;
-  }
+void
+hidInitializeDeviceDescription_Bluetooth (HidDeviceDescription_Bluetooth *description) {
+  memset(description, 0, sizeof(*description));
 
-  return PROG_EXIT_SUCCESS;
+  description->deviceAddress = NULL;
 }

@@ -18,29 +18,18 @@
 
 #include "prologue.h"
 
-#include "program.h"
-#include "options.h"
-#include "log.h"
+#include <errno.h>
+
 #include "io_hid.h"
 
-BEGIN_OPTION_TABLE(programOptions)
-END_OPTION_TABLE
+HidDevice *
+hidOpenDevice_USB (const HidDeviceDescription_USB *description) {
+  errno = ENOSYS;
+  return NULL;
+}
 
-int
-main (int argc, char *argv[]) {
-  {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
-      .applicationName = "hidtest",
-    };
-
-    PROCESS_OPTIONS(descriptor, argc, argv);
-  }
-
-  if (argc) {
-    logMessage(LOG_ERR, "too many parameters");
-    return PROG_EXIT_SYNTAX;
-  }
-
-  return PROG_EXIT_SUCCESS;
+HidDevice *
+hidOpenDevice_Bluetooth (const HidDeviceDescription_Bluetooth *description) {
+  errno = ENOSYS;
+  return NULL;
 }

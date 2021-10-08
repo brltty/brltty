@@ -395,7 +395,7 @@ msgtest.$O:
 
 ###############################################################################
 
-HID_OBJECTS = hid.$O hid_braille.$O
+HID_OBJECTS = hid.$O hid_braille.$O hid_io.$O $(HID_OBJECT).$O
 
 hid.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid.c
@@ -403,10 +403,16 @@ hid.$O:
 hid_braille.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_braille.c
 
-HIDTEST_OBJECTS = hidtest.$O $(PROGRAM_OBJECTS)
+hid_io.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_io.c
+
+$(HID_OBJECT).$O:
+	$(CC) $(LIBCFLAGS) $(HID_INCLUDES) -c $(SRC_DIR)/$(HID_OBJECT).c
+
+HIDTEST_OBJECTS = hidtest.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS)
 
 hidtest$X: $(HIDTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(HIDTEST_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(HIDTEST_OBJECTS) $(HID_LIBS) $(LDLIBS)
 
 hidtest.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hidtest.c
@@ -649,7 +655,7 @@ ktb_keyboard.$O:
 BRLTTY_KTB_OBJECTS = brltty-ktb.$O $(PROGRAM_OBJECTS) $(KTB_OBJECTS) ktb_audit.$O ktb_keyboard.$O $(TTB_OBJECTS) $(PREFS_OBJECTS) $(CHARSET_OBJECTS) dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O $(HID_OBJECTS) brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O cmd_brlapi.$O crc_generate.$O $(FIRMWARE_OBJECTS)
 
 brltty-ktb$X: $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVERS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(HID_LIBS) $(LDLIBS)
 
 brltty-ktb.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-ktb.c
@@ -867,7 +873,7 @@ learn.$O:
 ###############################################################################
 
 BRLTTY_OBJECTS = brltty.$O $(CORE_OBJECTS)
-BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(SERVICE_LIBS) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LOUIS_LIBS) $(EXPAT_LIBS) $(RGX_LIBS) $(POLKIT_LIBS) $(LDLIBS)
+BRLTTY_LIBRARIES = $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(SERVICE_LIBS) $(PCM_LIBS) $(MIDI_LIBS) $(USB_LIBS) $(BLUETOOTH_LIBS) $(HID_LIBS) $(LOUIS_LIBS) $(EXPAT_LIBS) $(RGX_LIBS) $(POLKIT_LIBS) $(LDLIBS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRLTTY_LIBRARIES)
@@ -938,7 +944,7 @@ brltty-lsinc.$O:
 BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) report.$O $(TTB_OBJECTS) $(KTB_OBJECTS) $(PREFS_OBJECTS) $(CHARSET_OBJECTS) dataarea.$O cmd.$O cmd_queue.$O drivers.$O driver.$O $(BRAILLE_OBJECTS) hidkeys.$O learn.$O
 
 brltest$X: $(BRLTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(HID_LIBS) $(LDLIBS)
 
 brltest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltest.c
