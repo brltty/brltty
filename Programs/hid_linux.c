@@ -28,11 +28,13 @@
 
 #include "log.h"
 #include "io_hid.h"
+#include "hid_linux.h"
 
 struct HidDeviceStruct {
   char *sysPath;
   char *devPath;
   int fileDescriptor;
+  char strings[];
 };
 
 typedef int HidAttributeTester (
@@ -96,11 +98,43 @@ hidTestAttributes (
 }
 
 static HidDevice *
+hidNewDevice (struct udev_device *udevDevice) {
+  const char *sysPath = udev_device_get_syspath(udevDevice);
+  const char *devPath = udev_device_get_devnode(udevDevice);
+
+  size_t sysSize = strlen(sysPath) + 1;
+  size_t devSize = strlen(devPath) + 1;
+  HidDevice *hidDevice = malloc(sizeof(*hidDevice) + sysSize + devSize);
+
+  if (hidDevice) {
+    memset(hidDevice, 0, sizeof(*hidDevice));
+
+    {
+      char *string = hidDevice->strings;
+      string = mempcpy((hidDevice->sysPath = string), sysPath, sysSize);
+      string = mempcpy((hidDevice->devPath = string), devPath, devSize);
+    }
+
+    if ((hidDevice->fileDescriptor = open(devPath, (O_RDWR | O_NONBLOCK))) != -1) {
+      return hidDevice;
+    } else {
+      logMessage(LOG_ERR, "device open error: %s: %s", devPath, strerror(errno));
+    }
+
+    free(hidDevice);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static HidDevice *
 hidOpenDevice (
   const char *subsystem, const char *devtype,
   const HidAttributeTest *tests, size_t testCount
 ) {
-  HidDevice *hid = NULL;
+  HidDevice *hidDevice = NULL;
   struct udev *udev = udev_new();
 
   if (udev) {
@@ -110,50 +144,26 @@ hidOpenDevice (
       udev_enumerate_add_match_subsystem(enumeration, "hidraw");
       udev_enumerate_scan_devices(enumeration);
 
-      struct udev_list_entry *devices = udev_enumerate_get_list_entry(enumeration);
-      struct udev_list_entry *device;
+      struct udev_list_entry *deviceList = udev_enumerate_get_list_entry(enumeration);
+      struct udev_list_entry *deviceEntry;
 
-      udev_list_entry_foreach(device, devices) {
-        const char *sysPath = udev_list_entry_get_name(device);
-        struct udev_device *dev = udev_device_new_from_syspath(udev, sysPath);
+      udev_list_entry_foreach(deviceEntry, deviceList) {
+        const char *sysPath = udev_list_entry_get_name(deviceEntry);
+        struct udev_device *sysDevice = udev_device_new_from_syspath(udev, sysPath);
 
-        if (dev) {
-          struct udev_device *parent = udev_device_get_parent_with_subsystem_devtype(dev, subsystem, devtype);
+        if (sysDevice) {
+          struct udev_device *parent = udev_device_get_parent_with_subsystem_devtype(sysDevice, subsystem, devtype);
 
           if (parent) {
             if (hidTestAttributes(parent, tests, testCount)) {
-              if ((hid = malloc(sizeof(*hid)))) {
-                memset(hid, 0, sizeof(*hid));
-
-                if ((hid->sysPath = strdup(sysPath))) {
-                  if ((hid->devPath = strdup(udev_device_get_devnode(dev)))) {
-                    if ((hid->fileDescriptor = open(hid->devPath, (O_RDWR | O_NONBLOCK))) != -1) {
-                      udev_device_unref(parent);
-                      break;
-                    } else {
-                      logMessage(LOG_ERR, "device open error: %s: %s", hid->devPath, strerror(errno));
-                    }
-
-                    free(hid->devPath);
-                  } else {
-                    logMallocError();
-                  }
-
-                  free(hid->sysPath);
-                } else {
-                  logMallocError();
-                }
-
-                free(hid);
-                hid = NULL;
-              } else {
-                logMallocError();
-              }
+              hidDevice = hidNewDevice(sysDevice);
             }
 
-            udev_device_unref(parent);
+            udev_device_unref(sysDevice);
           }
         }
+
+        if (hidDevice) break;
       }
 
       udev_enumerate_unref(enumeration);
@@ -164,7 +174,7 @@ hidOpenDevice (
     udev = NULL;
   }
 
-  return hid;
+  return hidDevice;
 }
 
 HidDevice *
@@ -214,8 +224,6 @@ hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter) {
 void
 hidCloseDevice (HidDevice *device) {
   close(device->fileDescriptor);
-  free(device->devPath);
-  free(device->sysPath);
   free(device);
 }
 
@@ -290,4 +298,25 @@ hidSetFeature (HidDevice *device, const char *feature, size_t size) {
   if (ioctl(device->fileDescriptor, HIDIOCSFEATURE(size), feature) != -1) return 1;
   logSystemError("ioctl[HIDIOCSFEATURE]");
   return 0;
+}
+
+ssize_t
+hidGetName (HidDevice *device, char *buffer, size_t size) {
+  ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
+  if (length == -1) logSystemError("ioctl[HIDIOCGRAWNAME]");
+  return length;
+}
+
+ssize_t
+hidGetPhysical (HidDevice *device, char *buffer, size_t size) {
+  ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
+  if (length == -1) logSystemError("ioctl[HIDIOCGRAWPHYS]");
+  return length;
+}
+
+ssize_t
+hidGetUnique (HidDevice *device, char *buffer, size_t size) {
+  ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
+  if (length == -1) logSystemError("ioctl[HIDIOCGRAWUNIQ]");
+  return length;
 }
