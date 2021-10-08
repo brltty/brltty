@@ -28,7 +28,7 @@ hidInitializeDeviceDescription_USB (HidDeviceDescription_USB *description) {
   memset(description, 0, sizeof(*description));
 
   description->manufacturerName = NULL;
-  description->productName = NULL;
+  description->productDescription = NULL;
   description->serialNumber = NULL;
 
   description->vendorIdentifier = 0;

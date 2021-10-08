@@ -27,7 +27,7 @@ typedef struct HidDeviceStruct HidDevice;
 
 typedef struct {
   const char *manufacturerName;
-  const char *productName;
+  const char *productDescription;
   const char *serialNumber;
   uint16_t vendorIdentifier;
   uint16_t productIdentifier;

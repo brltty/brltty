@@ -52,9 +52,9 @@ public final class UsbDeviceCollection extends DeviceCollection {
     }
   }
 
-  private final String getProductName (UsbDevice device) {
+  private final String getProductDescription (UsbDevice device) {
     if (APITests.haveLollipop) {
-      return device.getProductName();
+      return device.getProductDescription();
     } else {
       return null;
     }
@@ -99,7 +99,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
 
           String[] components = new String[] {
             getManufacturerName(device),
-            getProductName(device),
+            getProductDescription(device),
             getSerialNumber(device)
           };
 

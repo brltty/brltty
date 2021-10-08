@@ -727,17 +727,17 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 
 typedef struct {
-  const char *productName;
+  const char *productDescription;
   const KeyTableDefinition *keyTableDefinition;
 } DeviceType;
 
 static const DeviceType deviceType_Voyager = {
-  .productName = "Voyager",
+  .productDescription = "Voyager",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(all)
 };
 
 static const DeviceType deviceType_BraillePen = {
-  .productName = "Braille Pen",
+  .productDescription = "Braille Pen",
   .keyTableDefinition = &KEY_TABLE_DEFINITION(bp)
 };
 
@@ -933,7 +933,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           const DeviceType *deviceType = deviceModel->deviceType;
 
           cellCount = deviceModel->actualCellCount;
-          logMessage(LOG_INFO, "Device Type: %s", deviceType->productName);
+          logMessage(LOG_INFO, "Device Type: %s", deviceType->productDescription);
           logMessage(LOG_INFO, "Cell Count: %u", cellCount);
 
           protocol->logSerialNumber(brl);

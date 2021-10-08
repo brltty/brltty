@@ -180,7 +180,7 @@ hidOpenDevice_USB (const HidDeviceDescription_USB *description) {
     },
 
     { .name = "product",
-      .value = description->productName,
+      .value = description->productDescription,
       .function = hidTestString
     },
 
