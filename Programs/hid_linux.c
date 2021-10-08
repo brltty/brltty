@@ -263,3 +263,31 @@ hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
 
   return 0;
 }
+
+int
+hidGetReport (HidDevice *device, char *buffer, size_t size) {
+  if (ioctl(device->fileDescriptor, HIDIOCGINPUT(size), buffer) != -1) return 1;
+  logSystemError("ioctl[HIDIOCGINPUT]");
+  return 0;
+}
+
+int
+hidSetReport (HidDevice *device, const char *report, size_t size) {
+  if (ioctl(device->fileDescriptor, HIDIOCSOUTPUT(size), report) != -1) return 1;
+  logSystemError("ioctl[HIDIOCSOUTPUT]");
+  return 0;
+}
+
+int
+hidGetFeature (HidDevice *device, char *buffer, size_t size) {
+  if (ioctl(device->fileDescriptor, HIDIOCGFEATURE(size), buffer) != -1) return 1;
+  logSystemError("ioctl[HIDIOCGFEATURE]");
+  return 0;
+}
+
+int
+hidSetFeature (HidDevice *device, const char *feature, size_t size) {
+  if (ioctl(device->fileDescriptor, HIDIOCSFEATURE(size), feature) != -1) return 1;
+  logSystemError("ioctl[HIDIOCSFEATURE]");
+  return 0;
+}

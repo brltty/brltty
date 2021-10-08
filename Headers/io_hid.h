@@ -46,8 +46,15 @@ extern void hidInitializeDeviceFilter_Bluetooth (HidDeviceFilter_Bluetooth *filt
 extern HidDevice *hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter);
 
 extern void hidCloseDevice (HidDevice *device);
+
 extern HidItemsDescriptor *hidGetItems (HidDevice *device);
 extern int hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product);
+
+extern int hidGetReport (HidDevice *device, char *buffer, size_t size);
+extern int hidSetReport (HidDevice *device, const char *report, size_t size);
+
+extern int hidGetFeature (HidDevice *device, char *buffer, size_t size);
+extern int hidSetFeature (HidDevice *device, const char *feature, size_t size);
 
 extern int hidParseIdentifier (uint16_t *identifier, const char *string);
 extern int hidMatchString (const char *actualString, const char *testString);

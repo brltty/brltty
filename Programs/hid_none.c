@@ -49,3 +49,27 @@ hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
   errno = ENOSYS;
   return 0;
 }
+
+int
+hidGetReport (HidDevice *device, char *buffer, size_t size) {
+  errno = ENOSYS;
+  return 0;
+}
+
+int
+hidSetReport (HidDevice *device, const char *report, size_t size) {
+  errno = ENOSYS;
+  return 0;
+}
+
+int
+hidGetFeature (HidDevice *device, char *buffer, size_t size) {
+  errno = ENOSYS;
+  return 0;
+}
+
+int
+hidSetFeature (HidDevice *device, const char *feature, size_t size) {
+  errno = ENOSYS;
+  return 0;
+}
