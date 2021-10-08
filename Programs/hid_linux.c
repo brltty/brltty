@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <libudev.h>
 #include <linux/hidraw.h>
 
@@ -216,4 +217,34 @@ hidCloseDevice (HidDevice *hid) {
   free(hid->devPath);
   free(hid->sysPath);
   free(hid);
+}
+
+HidItemsDescriptor *
+hidGetItems (HidDevice *hid) {
+  int size;
+
+  if (ioctl(hid->fileDescriptor, HIDIOCGRDESCSIZE, &size) != -1) {
+    struct hidraw_report_descriptor descriptor = {
+      .size = size
+    };
+
+    if (ioctl(hid->fileDescriptor, HIDIOCGRDESC, &descriptor) != -1) {
+      HidItemsDescriptor *items;
+
+      if ((items = malloc(sizeof(*items) + size))) {
+        memset(items, 0, sizeof(*items));
+        items->count = size;
+        memcpy(items->bytes, descriptor.value, size);
+        return items;
+      } else {
+        logMallocError();
+      }
+    } else {
+      logSystemError("ioctl[HIDIOCGRDESC]");
+    }
+  } else {
+    logSystemError("ioctl[HIDIOCGRDESCSIZE]");
+  }
+
+  return NULL;
 }

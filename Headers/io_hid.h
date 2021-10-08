@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_IO_HID
 #define BRLTTY_INCLUDED_IO_HID
 
+#include "hid_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -44,6 +46,7 @@ extern void hidInitializeDeviceDescription_Bluetooth (HidDeviceDescription_Bluet
 extern HidDevice *hidOpenDevice_Bluetooth (const HidDeviceDescription_Bluetooth *description);
 
 extern void hidCloseDevice (HidDevice *hid);
+extern HidItemsDescriptor *hidGetItems (HidDevice *hid);
 
 extern int hidParseIdentifier (uint16_t *identifier, const char *string);
 

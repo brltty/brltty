@@ -18,16 +18,20 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
+
 #include "program.h"
 #include "options.h"
 #include "log.h"
 #include "io_hid.h"
+#include "hid_items.h"
 
 static char *opt_manufacturerName;
 static char *opt_productDescription;
 static char *opt_serialNumber;
 static char *opt_vendorIdentifier;
 static char *opt_productIdentifier;
+static int opt_listItems;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "manufacturer-name",
@@ -64,7 +68,23 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_productIdentifier,
     .description = strtext("The device's product identifier.")
   },
+
+  { .word = "list-items",
+    .letter = 'l',
+    .setting.flag = &opt_listItems,
+    .description = strtext("List the report descriptor.")
+  },
 END_OPTION_TABLE
+
+static int
+listItem (const char *line, void *data) {
+  FILE *stream = stdout;
+  fprintf(stream, "%s\n", line);
+  if (!ferror(stream)) return 1;
+
+  logSystemError("output");
+  return 0;
+}
 
 int
 main (int argc, char *argv[]) {
@@ -113,6 +133,19 @@ main (int argc, char *argv[]) {
   if (!device) {
     logMessage(LOG_ERR, "device not found");
     return PROG_EXIT_SEMANTIC;
+  }
+
+  if (opt_listItems) {
+    HidItemsDescriptor *items = hidGetItems(device);
+
+    if (!items) {
+      logMessage(LOG_ERR, "descriptor not found");
+      return PROG_EXIT_FATAL;
+    } 
+
+    int wasListed = hidListItems(items, listItem, NULL);
+    free(items);
+    if (!wasListed) return PROG_EXIT_FATAL;
   }
 
   hidCloseDevice(device);

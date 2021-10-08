@@ -381,13 +381,25 @@ STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)
   }
 STR_END_FORMATTER
 
-void
-hidLogItems (const HidItemsDescriptor *items) {
-  int level = LOG_CATEGORY(HUMAN_INTERFACE) | LOG_DEBUG;
-  const char *label = "items log";
-  logMessage(level, "begin %s: Bytes:%"PRIsize, label, items->count);
-  unsigned int itemCount = 0;
+static int
+hidListItem (const char *line, void *data) {
+  return logMessage((LOG_CATEGORY(HUMAN_INTERFACE) | LOG_DEBUG), "%s", line);
+}
 
+int
+hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *data) {
+  if (!listItem) listItem = hidListItem;
+  const char *label = "items list";
+
+  {
+    char line[0X40];
+    STR_BEGIN(line, sizeof(line));
+    STR_PRINTF("begin %s: Bytes:%"PRIsize, label, items->count);
+    STR_END;
+    if (!listItem(line, data)) return 0;
+  }
+
+  unsigned int itemCount = 0;
   const unsigned char *nextByte = items->bytes;
   size_t bytesLeft = items->count;
 
@@ -406,8 +418,8 @@ hidLogItems (const HidItemsDescriptor *items) {
     HidItemDescription item;
     int ok = hidGetNextItem(&item, &nextByte, &bytesLeft);
 
-    char log[0X100];
-    STR_BEGIN(log, sizeof(log));
+    char line[0X100];
+    STR_BEGIN(line, sizeof(line));
 
     STR_PRINTF(
       "item: %*" PRIu32 " (0X%.*" PRIX32 "):",
@@ -471,9 +483,15 @@ hidLogItems (const HidItemsDescriptor *items) {
     }
 
     STR_END;
-    logMessage(level, "%s", log);
+    if (!listItem(line, data)) return 0;
     if (!ok) break;
   }
 
-  logMessage(level, "end %s: Items:%u", label, itemCount);
+  {
+    char line[0X40];
+    STR_BEGIN(line, sizeof(line));
+    STR_PRINTF("end %s: Items:%u", label, itemCount);
+    STR_END;
+    return listItem(line, data);
+  }
 }

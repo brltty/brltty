@@ -33,3 +33,9 @@ hidOpenDevice_Bluetooth (const HidDeviceDescription_Bluetooth *description) {
   errno = ENOSYS;
   return NULL;
 }
+
+HidItemsDescriptor *
+hidGetItems (HidDevice *hid) {
+  errno = ENOSYS;
+  return NULL;
+}
