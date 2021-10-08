@@ -19,6 +19,8 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 #include "program.h"
 #include "options.h"
@@ -31,7 +33,9 @@ static char *opt_productDescription;
 static char *opt_serialNumber;
 static char *opt_vendorIdentifier;
 static char *opt_productIdentifier;
+
 static int opt_listItems;
+static int opt_showIdentifiers;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "manufacturer-name",
@@ -74,16 +78,31 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_listItems,
     .description = strtext("List the report descriptor.")
   },
+
+  { .word = "show-identifiers",
+    .letter = 'i',
+    .setting.flag = &opt_showIdentifiers,
+    .description = strtext("Show the vendor and product identifiers.")
+  },
 END_OPTION_TABLE
+
+static FILE *outputStream;
+int outputError;
+
+static int
+canWriteOutput (void) {
+  if (outputError) return 0;
+  if (!ferror(outputStream)) return 1;
+
+  outputError = errno;
+  return 0;
+}
 
 static int
 listItem (const char *line, void *data) {
-  FILE *stream = stdout;
+  FILE *stream = outputStream;
   fprintf(stream, "%s\n", line);
-  if (!ferror(stream)) return 1;
-
-  logSystemError("output");
-  return 0;
+  return canWriteOutput();
 }
 
 int
@@ -129,25 +148,49 @@ main (int argc, char *argv[]) {
     if (!ok) return PROG_EXIT_SYNTAX;
   }
 
+  outputStream = stdout;
+  outputError = 0;
+
+  ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
   HidDevice *device = hidOpenDevice_USB(&filter);
-  if (!device) {
+
+  if (device) {
+    if (canWriteOutput()) {
+      if (opt_showIdentifiers) {
+        uint16_t vendor;
+        uint16_t product;
+
+        if (hidGetIdentifiers(device, &vendor, &product)) {
+          fprintf(outputStream, "%04X:%04X\n", vendor, product);
+        } else {
+          logMessage(LOG_WARNING, "identifiers not available");
+        }
+      }
+    }
+
+    if (canWriteOutput()) {
+      if (opt_listItems) {
+        HidItemsDescriptor *items = hidGetItems(device);
+
+        if (items) {
+          hidListItems(items, listItem, NULL);
+          free(items);
+        } else {
+          logMessage(LOG_ERR, "descriptor not available");
+        } 
+      }
+    }
+
+    hidCloseDevice(device);
+  } else {
     logMessage(LOG_ERR, "device not found");
-    return PROG_EXIT_SEMANTIC;
+    exitStatus = PROG_EXIT_SEMANTIC;
   }
 
-  if (opt_listItems) {
-    HidItemsDescriptor *items = hidGetItems(device);
-
-    if (!items) {
-      logMessage(LOG_ERR, "descriptor not found");
-      return PROG_EXIT_FATAL;
-    } 
-
-    int wasListed = hidListItems(items, listItem, NULL);
-    free(items);
-    if (!wasListed) return PROG_EXIT_FATAL;
+  if (outputError) {
+    logMessage(LOG_ERR, "output error: %s", strerror(outputError));
+    exitStatus = PROG_EXIT_FATAL;
   }
 
-  hidCloseDevice(device);
-  return PROG_EXIT_SUCCESS;
+  return exitStatus;
 }

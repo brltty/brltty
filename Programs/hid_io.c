@@ -46,6 +46,7 @@ int
 hidParseIdentifier (uint16_t *identifier, const char *string) {
   if (!string) return 0;
   if (!*string) return 0;
+  if (strlen(string) > 4) return 0;
 
   char *end;
   long int value = strtol(string, &end, 0X10);

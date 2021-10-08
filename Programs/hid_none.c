@@ -43,3 +43,9 @@ hidGetItems (HidDevice *device) {
   errno = ENOSYS;
   return NULL;
 }
+
+int
+hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
+  errno = ENOSYS;
+  return 0;
+}

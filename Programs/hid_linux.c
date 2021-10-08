@@ -248,3 +248,18 @@ hidGetItems (HidDevice *device) {
 
   return NULL;
 }
+
+int
+hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
+  struct hidraw_devinfo info;
+
+  if (ioctl(device->fileDescriptor, HIDIOCGRAWINFO, &info) != -1) {
+    if (vendor) *vendor = info.vendor;
+    if (product) *product = info.product;
+    return 1;
+  } else {
+    logSystemError("ioctl[HIDIOCGRAWINFO]");
+  }
+
+  return 0;
+}
