@@ -26,7 +26,7 @@
 #include "async_alarm.h"
 #include "io_generic.h"
 #include "gio_internal.h"
-#include "hid.h"
+#include "hid_items.h"
 #include "io_serial.h"
 
 const GioProperties *const gioProperties[] = {

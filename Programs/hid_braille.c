@@ -19,5 +19,5 @@
 #include "prologue.h"
 
 #include "log.h"
-#include "hid.h"
+#include "hid_items.h"
 #include "hid_braille.h"

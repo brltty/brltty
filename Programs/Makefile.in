@@ -395,10 +395,10 @@ msgtest.$O:
 
 ###############################################################################
 
-HID_OBJECTS = hid.$O hid_braille.$O hid_io.$O $(HID_OBJECT).$O
+HID_OBJECTS = hid_items.$O hid_braille.$O hid_io.$O $(HID_OBJECT).$O
 
-hid.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid.c
+hid_items.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_items.c
 
 hid_braille.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_braille.c

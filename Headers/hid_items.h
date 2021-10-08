@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_HID
-#define BRLTTY_INCLUDED_HID
+#ifndef BRLTTY_INCLUDED_HID_ITEMS
+#define BRLTTY_INCLUDED_HID_ITEMS
 
 #include "hid_types.h"
 #include "strfmth.h"
@@ -61,4 +61,4 @@ extern int hidGetReportSize (
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_HID */
+#endif /* BRLTTY_INCLUDED_HID_ITEMS */
