@@ -221,6 +221,16 @@ hidTestDevice_USB (HidDevice *hidDevice, struct udev_device *udevDevice, const v
   if (!usbDevice) return 0;
 
   const HidAttributeTest tests[] = {
+    { .name = "idVendor",
+      .value = &usbFilter->vendorIdentifier,
+      .function = hidTestIdentifier
+    },
+
+    { .name = "idProduct",
+      .value = &usbFilter->productIdentifier,
+      .function = hidTestIdentifier
+    },
+
     { .name = "manufacturer",
       .value = usbFilter->manufacturerName,
       .function = hidTestString
@@ -234,16 +244,6 @@ hidTestDevice_USB (HidDevice *hidDevice, struct udev_device *udevDevice, const v
     { .name = "serial",
       .value = usbFilter->serialNumber,
       .function = hidTestString
-    },
-
-    { .name = "idVendor",
-      .value = &usbFilter->vendorIdentifier,
-      .function = hidTestIdentifier
-    },
-
-    { .name = "idProduct",
-      .value = &usbFilter->productIdentifier,
-      .function = hidTestIdentifier
     },
   };
 
@@ -260,8 +260,20 @@ hidTestDevice_Bluetooth (HidDevice *hidDevice, struct udev_device *udevDevice, c
   if (hidDevice->rawInfo.bustype != BUS_BLUETOOTH) return 0;
   const HidDeviceFilter_Bluetooth *bf = filter;
 
+  if (bf->vendorIdentifier) {
+    if (hidDevice->rawInfo.vendor != bf->vendorIdentifier) {
+      return 0;
+    }
+  }
+
+  if (bf->productIdentifier) {
+    if (hidDevice->rawInfo.product != bf->productIdentifier) {
+      return 0;
+    }
+  }
+
   {
-    const char *address = bf->deviceAddress;
+    const char *address = bf->macAddress;
 
     if (address && *address) {
       char buffer[0X100];

@@ -26,21 +26,11 @@
 void
 hidInitializeDeviceFilter_USB (HidDeviceFilter_USB *filter) {
   memset(filter, 0, sizeof(*filter));
-
-  filter->manufacturerName = NULL;
-  filter->productDescription = NULL;
-  filter->serialNumber = NULL;
-
-  filter->vendorIdentifier = 0;
-  filter->productIdentifier = 0;
 }
 
 void
 hidInitializeDeviceFilter_Bluetooth (HidDeviceFilter_Bluetooth *filter) {
   memset(filter, 0, sizeof(*filter));
-
-  filter->deviceAddress = NULL;
-  filter->deviceName = NULL;
 }
 
 int

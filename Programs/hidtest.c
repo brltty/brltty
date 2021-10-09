@@ -28,61 +28,79 @@
 #include "io_hid.h"
 #include "hid_items.h"
 
-static char *opt_manufacturerName;
-static char *opt_productDescription;
-static char *opt_serialNumber;
-static char *opt_vendorIdentifier;
-static char *opt_productIdentifier;
-
 static int opt_listItems;
 static int opt_showIdentifiers;
 
+static char *opt_vendorIdentifier;
+static char *opt_productIdentifier;
+
+static char *opt_usbManufacturerName;
+static char *opt_usbProductDescription;
+static char *opt_usbSerialNumber;
+
+static char *opt_bluetoothAddress;
+static char *opt_bluetoothName;
+
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "manufacturer-name",
-    .letter = 'm',
-    .argument = strtext("string"),
-    .setting.string = &opt_manufacturerName,
-    .description = strtext("The name of the device's manufacturer.")
+  { .word = "list",
+    .letter = 'l',
+    .setting.flag = &opt_listItems,
+    .description = strtext("List the HID report descriptor.")
   },
 
-  { .word = "product-description",
+  { .word = "identifiers",
+    .letter = 'i',
+    .setting.flag = &opt_showIdentifiers,
+    .description = strtext("Show the vendor and product identifiers.")
+  },
+
+  { .word = "vendor",
+    .letter = 'v',
+    .argument = strtext("identifier"),
+    .setting.string = &opt_vendorIdentifier,
+    .description = strtext("Match the vendor identifier.")
+  },
+
+  { .word = "product",
+    .letter = 'p',
+    .argument = strtext("identifier"),
+    .setting.string = &opt_productIdentifier,
+    .description = strtext("Match the product identifier.")
+  },
+
+  { .word = "manufacturer",
+    .letter = 'm',
+    .argument = strtext("string"),
+    .setting.string = &opt_usbManufacturerName,
+    .description = strtext("USB - Match the start of the manufacturer name.")
+  },
+
+  { .word = "description",
     .letter = 'd',
     .argument = strtext("string"),
-    .setting.string = &opt_productDescription,
-    .description = strtext("The device's product description.")
+    .setting.string = &opt_usbProductDescription,
+    .description = strtext("USB - Match the start of the product description.")
   },
 
   { .word = "serial-number",
     .letter = 's',
     .argument = strtext("string"),
-    .setting.string = &opt_serialNumber,
-    .description = strtext("The device's serial number.")
+    .setting.string = &opt_usbSerialNumber,
+    .description = strtext("USB - Match the start of the serial number.")
   },
 
-  { .word = "vendor-identifier",
-    .letter = 'v',
-    .argument = strtext("hex"),
-    .setting.string = &opt_vendorIdentifier,
-    .description = strtext("The device's vendor identifier.")
+  { .word = "address",
+    .letter = 'a',
+    .argument = strtext("string"),
+    .setting.string = &opt_bluetoothAddress,
+    .description = strtext("Bluetooth - Match the full MAC address.")
   },
 
-  { .word = "product-identifier",
-    .letter = 'p',
-    .argument = strtext("hex"),
-    .setting.string = &opt_productIdentifier,
-    .description = strtext("The device's product identifier.")
-  },
-
-  { .word = "list-items",
-    .letter = 'l',
-    .setting.flag = &opt_listItems,
-    .description = strtext("List the report descriptor.")
-  },
-
-  { .word = "show-identifiers",
-    .letter = 'i',
-    .setting.flag = &opt_showIdentifiers,
-    .description = strtext("Show the vendor and product identifiers.")
+  { .word = "name",
+    .letter = 'n',
+    .argument = strtext("string"),
+    .setting.string = &opt_bluetoothName,
+    .description = strtext("Bluetooth - Match the start of the device name.")
   },
 END_OPTION_TABLE
 
@@ -124,9 +142,9 @@ main (int argc, char *argv[]) {
   HidDeviceFilter_USB filter;
   hidInitializeDeviceFilter_USB(&filter);
 
-  filter.manufacturerName = opt_manufacturerName;
-  filter.productDescription = opt_productDescription;
-  filter.serialNumber = opt_serialNumber;
+  filter.manufacturerName = opt_usbManufacturerName;
+  filter.productDescription = opt_usbProductDescription;
+  filter.serialNumber = opt_usbSerialNumber;
 
   {
     int ok = 1;
