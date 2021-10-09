@@ -23,9 +23,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern ssize_t hidGetName (HidDevice *device, char *buffer, size_t size);
-extern ssize_t hidGetPhysical (HidDevice *device, char *buffer, size_t size);
-extern ssize_t hidGetUnique (HidDevice *device, char *buffer, size_t size);
+extern ssize_t hidGetDeviceName (HidDevice *device, char *buffer, size_t size);
+extern ssize_t hidGetPhysicalAddress (HidDevice *device, char *buffer, size_t size);
+extern ssize_t hidGetUniqueIdentifier (HidDevice *device, char *buffer, size_t size);
 
 #ifdef __cplusplus
 }

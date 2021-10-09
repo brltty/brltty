@@ -48,21 +48,21 @@ hidCloseDevice (HidDevice *device) {
 }
 
 ssize_t
-hidGetName (HidDevice *device, char *buffer, size_t size) {
+hidGetDeviceName (HidDevice *device, char *buffer, size_t size) {
   ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
   if (length == -1) logSystemError("ioctl[HIDIOCGRAWNAME]");
   return length;
 }
 
 ssize_t
-hidGetPhysical (HidDevice *device, char *buffer, size_t size) {
+hidGetPhysicalAddress (HidDevice *device, char *buffer, size_t size) {
   ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
   if (length == -1) logSystemError("ioctl[HIDIOCGRAWPHYS]");
   return length;
 }
 
 ssize_t
-hidGetUnique (HidDevice *device, char *buffer, size_t size) {
+hidGetUniqueIdentifier (HidDevice *device, char *buffer, size_t size) {
   ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
   if (length == -1) logSystemError("ioctl[HIDIOCGRAWUNIQ]");
   return length;
@@ -258,6 +258,27 @@ hidOpenDevice_USB (const HidDeviceFilter_USB *filter) {
 static int
 hidTestDevice_Bluetooth (HidDevice *hidDevice, struct udev_device *udevDevice, const void *filter) {
   if (hidDevice->rawInfo.bustype != BUS_BLUETOOTH) return 0;
+  const HidDeviceFilter_Bluetooth *bf = filter;
+
+  {
+    const char *address = bf->deviceAddress;
+
+    if (address && *address) {
+      char buffer[0X100];
+      hidGetUniqueIdentifier(hidDevice, buffer, sizeof(buffer));
+      if (strcasecmp(address, buffer) != 0) return 0;
+    }
+  }
+
+  {
+    const char *name = bf->deviceName;
+
+    if (name && *name) {
+      char buffer[0X100];
+      hidGetDeviceName(hidDevice, buffer, sizeof(buffer));
+      if (!hidMatchString(buffer, name)) return 0;
+    }
+  }
 
   return 1;
 }
