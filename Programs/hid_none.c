@@ -73,3 +73,24 @@ hidSetFeature (HidDevice *device, const char *feature, size_t size) {
   errno = ENOSYS;
   return 0;
 }
+
+int
+hidMonitorInput (HidDevice *device, AsyncMonitorCallback *callback, void *data) {
+  errno = ENOSYS;
+  return 0;
+}
+
+int
+hidAwaitInput (HidDevice *device, int timeout) {
+  errno = ENOSYS;
+  return 0;
+}
+
+ssize_t
+hidReadData (
+  HidDevice *device, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  errno = ENOSYS;
+  return -1;
+}

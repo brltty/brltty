@@ -395,8 +395,6 @@ msgtest.$O:
 
 ###############################################################################
 
-HID_OBJECTS = hid_items.$O hid_braille.$O hid_io.$O $(HID_OBJECT).$O
-
 hid_items.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_items.c
 
@@ -409,7 +407,7 @@ hid_io.$O:
 $(HID_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(HID_INCLUDES) -c $(SRC_DIR)/$(HID_OBJECT).c
 
-HIDTEST_OBJECTS = hidtest.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS)
+HIDTEST_OBJECTS = hidtest.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS) io_misc.$O
 
 hidtest$X: $(HIDTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(HIDTEST_OBJECTS) $(HID_LIBS) $(LDLIBS)
@@ -429,7 +427,7 @@ ezusb.$O:
 
 ###############################################################################
 
-BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O $(HID_OBJECTS) brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) crc_generate.$O $(FIRMWARE_OBJECTS)
+BRAILLE_OBJECTS = brl.$O brl_utils.$O brl_input.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) crc_generate.$O $(FIRMWARE_OBJECTS)
 
 brl.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brl.c
@@ -652,7 +650,7 @@ ktb_cmds.$O:
 ktb_keyboard.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/ktb_keyboard.c
 
-BRLTTY_KTB_OBJECTS = brltty-ktb.$O $(PROGRAM_OBJECTS) $(KTB_OBJECTS) ktb_audit.$O ktb_keyboard.$O $(TTB_OBJECTS) $(PREFS_OBJECTS) $(CHARSET_OBJECTS) dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O $(HID_OBJECTS) brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O cmd_brlapi.$O crc_generate.$O $(FIRMWARE_OBJECTS)
+BRLTTY_KTB_OBJECTS = brltty-ktb.$O $(PROGRAM_OBJECTS) $(KTB_OBJECTS) ktb_audit.$O ktb_keyboard.$O $(TTB_OBJECTS) $(PREFS_OBJECTS) $(CHARSET_OBJECTS) dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O cmd_brlapi.$O crc_generate.$O $(FIRMWARE_OBJECTS)
 
 brltty-ktb$X: $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVERS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(HID_LIBS) $(LDLIBS)

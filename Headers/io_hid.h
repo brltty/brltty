@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_IO_HID
 
 #include "hid_types.h"
+#include "async_io.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,6 +59,14 @@ extern int hidSetReport (HidDevice *device, const char *report, size_t size);
 
 extern int hidGetFeature (HidDevice *device, char *buffer, size_t size);
 extern int hidSetFeature (HidDevice *device, const char *feature, size_t size);
+
+extern int hidMonitorInput (HidDevice *device, AsyncMonitorCallback *callback, void *data);
+extern int hidAwaitInput (HidDevice *device, int timeout);
+
+extern ssize_t hidReadData (
+  HidDevice *device, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+);
 
 extern int hidParseIdentifier (uint16_t *identifier, const char *string);
 extern int hidMatchString (const char *actualString, const char *testString);

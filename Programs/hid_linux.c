@@ -30,19 +30,30 @@
 #include "log.h"
 #include "io_hid.h"
 #include "hid_linux.h"
+#include "io_misc.h"
 
 struct HidDeviceStruct {
   char *sysPath;
   char *devPath;
 
   int fileDescriptor;
+  AsyncHandle inputMonitor;
   struct hidraw_devinfo rawInfo;
 
   char strings[];
 };
 
+static void
+hidCancelInputMonitor (HidDevice *device) {
+  if (device->inputMonitor) {
+    asyncCancelRequest(device->inputMonitor);
+    device->inputMonitor = NULL;
+  }
+}
+
 void
 hidCloseDevice (HidDevice *device) {
+  hidCancelInputMonitor(device);
   close(device->fileDescriptor);
   free(device);
 }
@@ -363,4 +374,24 @@ hidSetFeature (HidDevice *device, const char *feature, size_t size) {
   if (ioctl(device->fileDescriptor, HIDIOCSFEATURE(size), feature) != -1) return 1;
   logSystemError("ioctl[HIDIOCSFEATURE]");
   return 0;
+}
+
+int
+hidMonitorInput (HidDevice *device, AsyncMonitorCallback *callback, void *data) {
+  hidCancelInputMonitor(device);
+  if (!callback) return 1;
+  return asyncMonitorFileInput(&device->inputMonitor, device->fileDescriptor, callback, data);
+}
+
+int
+hidAwaitInput (HidDevice *device, int timeout) {
+  return awaitFileInput(device->fileDescriptor, timeout);
+}
+
+ssize_t
+hidReadData (
+  HidDevice *device, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  return readFile(device->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
 }
