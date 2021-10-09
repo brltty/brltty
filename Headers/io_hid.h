@@ -40,6 +40,7 @@ extern HidDevice *hidOpenDevice_USB (const HidDeviceFilter_USB *filter);
 
 typedef struct {
   const char *deviceAddress;
+  const char *deviceName;
 } HidDeviceFilter_Bluetooth;
 
 extern void hidInitializeDeviceFilter_Bluetooth (HidDeviceFilter_Bluetooth *filter);

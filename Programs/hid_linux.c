@@ -25,6 +25,7 @@
 #include <sys/ioctl.h>
 #include <libudev.h>
 #include <linux/hidraw.h>
+#include <linux/input.h>
 
 #include "log.h"
 #include "io_hid.h"
@@ -33,9 +34,39 @@
 struct HidDeviceStruct {
   char *sysPath;
   char *devPath;
+
   int fileDescriptor;
+  struct hidraw_devinfo rawInfo;
+
   char strings[];
 };
+
+void
+hidCloseDevice (HidDevice *device) {
+  close(device->fileDescriptor);
+  free(device);
+}
+
+ssize_t
+hidGetName (HidDevice *device, char *buffer, size_t size) {
+  ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
+  if (length == -1) logSystemError("ioctl[HIDIOCGRAWNAME]");
+  return length;
+}
+
+ssize_t
+hidGetPhysical (HidDevice *device, char *buffer, size_t size) {
+  ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
+  if (length == -1) logSystemError("ioctl[HIDIOCGRAWPHYS]");
+  return length;
+}
+
+ssize_t
+hidGetUnique (HidDevice *device, char *buffer, size_t size) {
+  ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
+  if (length == -1) logSystemError("ioctl[HIDIOCGRAWUNIQ]");
+  return length;
+}
 
 typedef int HidAttributeTester (
   struct udev_device *device,
@@ -116,7 +147,13 @@ hidNewDevice (struct udev_device *udevDevice) {
     }
 
     if ((hidDevice->fileDescriptor = open(devPath, (O_RDWR | O_NONBLOCK))) != -1) {
-      return hidDevice;
+      if (ioctl(hidDevice->fileDescriptor, HIDIOCGRAWINFO, &hidDevice->rawInfo) != -1) {
+        return hidDevice;
+      } else {
+        logSystemError("ioctl[HIDIOCGRAWINFO]");
+      }
+
+      close(hidDevice->fileDescriptor);
     } else {
       logMessage(LOG_ERR, "device open error: %s: %s", devPath, strerror(errno));
     }
@@ -129,11 +166,10 @@ hidNewDevice (struct udev_device *udevDevice) {
   return NULL;
 }
 
+typedef int HidDeviceTester (HidDevice *hidDevice, struct udev_device *udevDevice, const void *filter);
+
 static HidDevice *
-hidOpenDevice (
-  const char *subsystem, const char *devtype,
-  const HidAttributeTest *tests, size_t testCount
-) {
+hidOpenDevice (HidDeviceTester *testDevice, const void *filter) {
   HidDevice *hidDevice = NULL;
   struct udev *udev = udev_new();
 
@@ -149,18 +185,17 @@ hidOpenDevice (
 
       udev_list_entry_foreach(deviceEntry, deviceList) {
         const char *sysPath = udev_list_entry_get_name(deviceEntry);
-        struct udev_device *sysDevice = udev_device_new_from_syspath(udev, sysPath);
+        struct udev_device *udevDevice = udev_device_new_from_syspath(udev, sysPath);
 
-        if (sysDevice) {
-          struct udev_device *parent = udev_device_get_parent_with_subsystem_devtype(sysDevice, subsystem, devtype);
-
-          if (parent) {
-            if (hidTestAttributes(parent, tests, testCount)) {
-              hidDevice = hidNewDevice(sysDevice);
+        if (udevDevice) {
+          if ((hidDevice = hidNewDevice(udevDevice))) {
+            if (!testDevice(hidDevice, udevDevice, filter)) {
+              hidCloseDevice(hidDevice);
+              hidDevice = NULL;
             }
-
-            udev_device_unref(sysDevice);
           }
+
+          udev_device_unref(udevDevice);
         }
 
         if (hidDevice) break;
@@ -177,54 +212,59 @@ hidOpenDevice (
   return hidDevice;
 }
 
-HidDevice *
-hidOpenDevice_USB (const HidDeviceFilter_USB *filter) {
+static int
+hidTestDevice_USB (HidDevice *hidDevice, struct udev_device *udevDevice, const void *filter) {
+  if (hidDevice->rawInfo.bustype != BUS_USB) return 0;
+  const HidDeviceFilter_USB *usbFilter = filter;
+
+  struct udev_device *usbDevice = udev_device_get_parent_with_subsystem_devtype(udevDevice, "usb", "usb_device");
+  if (!usbDevice) return 0;
+
   const HidAttributeTest tests[] = {
     { .name = "manufacturer",
-      .value = filter->manufacturerName,
+      .value = usbFilter->manufacturerName,
       .function = hidTestString
     },
 
     { .name = "product",
-      .value = filter->productDescription,
+      .value = usbFilter->productDescription,
       .function = hidTestString
     },
 
     { .name = "serial",
-      .value = filter->serialNumber,
+      .value = usbFilter->serialNumber,
       .function = hidTestString
     },
 
     { .name = "idVendor",
-      .value = &filter->vendorIdentifier,
+      .value = &usbFilter->vendorIdentifier,
       .function = hidTestIdentifier
     },
 
     { .name = "idProduct",
-      .value = &filter->productIdentifier,
+      .value = &usbFilter->productIdentifier,
       .function = hidTestIdentifier
     },
   };
 
-  return hidOpenDevice("usb", "usb_device", tests, ARRAY_COUNT(tests));
+  return hidTestAttributes(usbDevice, tests, ARRAY_COUNT(tests));
+}
+
+HidDevice *
+hidOpenDevice_USB (const HidDeviceFilter_USB *filter) {
+  return hidOpenDevice(hidTestDevice_USB, filter);
+}
+
+static int
+hidTestDevice_Bluetooth (HidDevice *hidDevice, struct udev_device *udevDevice, const void *filter) {
+  if (hidDevice->rawInfo.bustype != BUS_BLUETOOTH) return 0;
+
+  return 1;
 }
 
 HidDevice *
 hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter) {
-  const HidAttributeTest tests[] = {
-    { .name = "address",
-      .value = filter->deviceAddress,
-      .function = hidTestString
-    },
-  };
-
-  return hidOpenDevice("usb", "usb_device", tests, ARRAY_COUNT(tests));
-}
-
-void
-hidCloseDevice (HidDevice *device) {
-  close(device->fileDescriptor);
-  free(device);
+  return hidOpenDevice(hidTestDevice_Bluetooth, filter);
 }
 
 HidItemsDescriptor *
@@ -259,17 +299,9 @@ hidGetItems (HidDevice *device) {
 
 int
 hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
-  struct hidraw_devinfo info;
-
-  if (ioctl(device->fileDescriptor, HIDIOCGRAWINFO, &info) != -1) {
-    if (vendor) *vendor = info.vendor;
-    if (product) *product = info.product;
-    return 1;
-  } else {
-    logSystemError("ioctl[HIDIOCGRAWINFO]");
-  }
-
-  return 0;
+  if (vendor) *vendor = device->rawInfo.vendor;
+  if (product) *product = device->rawInfo.product;
+  return 1;
 }
 
 int
@@ -298,25 +330,4 @@ hidSetFeature (HidDevice *device, const char *feature, size_t size) {
   if (ioctl(device->fileDescriptor, HIDIOCSFEATURE(size), feature) != -1) return 1;
   logSystemError("ioctl[HIDIOCSFEATURE]");
   return 0;
-}
-
-ssize_t
-hidGetName (HidDevice *device, char *buffer, size_t size) {
-  ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
-  if (length == -1) logSystemError("ioctl[HIDIOCGRAWNAME]");
-  return length;
-}
-
-ssize_t
-hidGetPhysical (HidDevice *device, char *buffer, size_t size) {
-  ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
-  if (length == -1) logSystemError("ioctl[HIDIOCGRAWPHYS]");
-  return length;
-}
-
-ssize_t
-hidGetUnique (HidDevice *device, char *buffer, size_t size) {
-  ssize_t length = ioctl(device->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
-  if (length == -1) logSystemError("ioctl[HIDIOCGRAWUNIQ]");
-  return length;
 }

@@ -40,6 +40,7 @@ hidInitializeDeviceFilter_Bluetooth (HidDeviceFilter_Bluetooth *filter) {
   memset(filter, 0, sizeof(*filter));
 
   filter->deviceAddress = NULL;
+  filter->deviceName = NULL;
 }
 
 int
