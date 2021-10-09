@@ -140,6 +140,7 @@ hidGetReportSize (
   uint32_t reportCount = 0;
 
   while (bytesLeft) {
+    size_t offset = nextByte - items->bytes;
     HidItemDescription item;
 
     if (!hidGetNextItem(&item, &nextByte, &bytesLeft)) {
@@ -201,7 +202,7 @@ hidGetReportSize (
           if (!(itemTypesEncountered & HID_ITEM_BIT(item.type))) {
             char log[0X100];
             STR_BEGIN(log, sizeof(log));
-            STR_PRINTF("unhandled item type: ");
+            STR_PRINTF("unhandled item type at offset %"PRIsize ": ", offset);
 
             {
               const char *name = hidGetItemTypeName(item.type);
@@ -269,8 +270,6 @@ hidGetReportSize (
 
     STR_END;
     logMessage(LOG_CATEGORY(HUMAN_INTERFACE), "%s", log);
-  } else {
-    logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
   }
 
   return reportFound;
@@ -431,8 +430,12 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
 
       {
         const char *name = hidGetItemTypeName(item.type);
-        if (!name) name = "<unknown>";
-        STR_PRINTF(" %s", name);
+
+        if (name) {
+          STR_PRINTF(" %s", name);
+        } else {
+          STR_PRINTF(" unknown item type: 0X%02X", item.type);
+        }
       }
 
       if (item.valueSize > 0) {

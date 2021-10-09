@@ -137,6 +137,25 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
+static FILE *outputStream;
+static int outputError;
+
+static int
+canWriteOutput (void) {
+  if (outputError) return 0;
+  if (!ferror(outputStream)) return 1;
+
+  outputError = errno;
+  return 0;
+}
+
+static int
+listItem (const char *line, void *data) {
+  FILE *stream = outputStream;
+  fprintf(stream, "%s\n", line);
+  return canWriteOutput();
+}
+
 static int
 parseString (const char *value, void *field) {
   const char **string = field;
@@ -278,54 +297,106 @@ openDevice (HidDevice **device) {
   return 1;
 }
 
-static FILE *outputStream;
-static int outputError;
-
-static int
-canWriteOutput (void) {
-  if (outputError) return 0;
-  if (!ferror(outputStream)) return 1;
-
-  outputError = errno;
-  return 0;
+static HidItemsDescriptor *
+getItems (HidDevice *device) {
+  static HidItemsDescriptor *items = NULL;
+  if (!items) items = hidGetItems(device);
+  return items;
 }
 
 static int
-listItem (const char *line, void *data) {
-  FILE *stream = outputStream;
-  fprintf(stream, "%s\n", line);
+getInputReportSize (HidDevice *device, uint8_t identifier, size_t *size) {
+  HidItemsDescriptor *items = getItems(device);
+  if (!items) return 0;
+
+  static uint8_t isInitialized;
+  static uint8_t reportIdentifier;
+  static HidReportSize reportSize;
+
+  if (!isInitialized || (identifier != reportIdentifier)) {
+    if (!hidGetReportSize(items, identifier, &reportSize)) return 0;
+    reportIdentifier = identifier;
+    isInitialized = 1;
+  }
+
+  *size = reportSize.input;
+  return 1;
+}
+
+static int
+writeInput (const unsigned char *from, size_t count) {
+  const unsigned char *to = from + count;
+
+  char line[(count * 3) + 1];
+  STR_BEGIN(line, sizeof(line));
+
+  while (from < to) {
+    STR_PRINTF(" %02X", *from++);
+  }
+
+  STR_END;
+  fprintf(outputStream, "input:%s\n", line);
+  if (!canWriteOutput()) return 0;
+
+  fflush(outputStream);
   return canWriteOutput();
 }
 
 static int
 echoInput (HidDevice *device, int timeout) {
+  size_t reportSize;
+  unsigned char reportIdentifier = 0;
+  int hasReportIdentifiers = !getInputReportSize(device, reportIdentifier, &reportSize);
+
+  unsigned char buffer[0X1000];
+  size_t bufferSize = sizeof(buffer);
+
+  unsigned char *from = buffer;
+  unsigned char *to = from;
+  const unsigned char *end = from + bufferSize;
+
   while (hidAwaitInput(device, timeout)) {
-    unsigned char buffer[0X1000];
-    ssize_t result = hidReadData(device, buffer, sizeof(buffer), 1000, 100);
+    ssize_t result = hidReadData(device, to, (end - to), 1000, 100);
 
     if (result == -1) {
       logMessage(LOG_ERR, "input error: %s", strerror(errno));
       return 0;
     }
 
-    char line[(result * 3) + 1];
-    STR_BEGIN(line, sizeof(line));
+    to += result;
 
-    {
-      const unsigned char *byte = buffer;
-      const unsigned char *end = byte + result;
+    while (from < to) {
+      if (hasReportIdentifiers) {
+        reportIdentifier = *from;
 
-      while (byte < end) {
-        STR_PRINTF(" %02X", *byte++);
+        if (!getInputReportSize(device, reportIdentifier, &reportSize)) {
+          logMessage(LOG_ERR, "unexpected input report: %02X", reportIdentifier);
+          return 0;
+        }
       }
+
+      size_t count = to - from;
+
+      if (reportSize > count) {
+        if (from == buffer) {
+          logMessage(LOG_ERR,
+            "input report too large: %02X: %"PRIsize " > %"PRIsize,
+            reportIdentifier, reportSize, count
+          );
+
+          return 0;
+        }
+
+        memmove(buffer, from, count);
+        from = buffer;
+        to = from + count;
+
+        break;
+      }
+
+      if (!writeInput(from, reportSize)) return 0;
+      from += reportSize;
     }
-
-    STR_END;
-    fprintf(outputStream, "input:%s\n", line);
-    if (!canWriteOutput()) break;
-
-    fflush(outputStream);
-    if (!canWriteOutput()) break;
   }
 
   return 1;
@@ -383,11 +454,10 @@ main (int argc, char *argv[]) {
 
     if (canWriteOutput()) {
       if (opt_listItems) {
-        HidItemsDescriptor *items = hidGetItems(device);
+        HidItemsDescriptor *items = getItems(device);
 
         if (items) {
           hidListItems(items, listItem, NULL);
-          free(items);
         } else {
           logMessage(LOG_ERR, "descriptor not available");
           exitStatus = PROG_EXIT_SEMANTIC;
@@ -396,7 +466,11 @@ main (int argc, char *argv[]) {
     }
 
     if (canWriteOutput()) {
-      echoInput(device, inputTimeout);
+      if (opt_echoInput) {
+        if (!echoInput(device, inputTimeout)) {
+          exitStatus = PROG_EXIT_FATAL;
+        }
+      }
     }
 
     hidCloseDevice(device);

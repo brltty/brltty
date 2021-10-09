@@ -478,7 +478,10 @@ gioGetHidReportSize (
 ) {
   const HidItemsDescriptor *items = gioGetHidItems(endpoint, identifier);
   if (!items) return 0;
-  return hidGetReportSize(items, identifier, size);
+
+  if (hidGetReportSize(items, identifier, size)) return 1;
+  logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
+  return 0;
 }
 
 ssize_t
