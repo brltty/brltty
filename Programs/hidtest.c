@@ -25,11 +25,16 @@
 #include "program.h"
 #include "options.h"
 #include "log.h"
+#include "strfmt.h"
+#include "parse.h"
 #include "io_hid.h"
 #include "hid_items.h"
 
 static int opt_listItems;
 static int opt_showIdentifiers;
+
+static int opt_echoInput;
+static char *opt_inputTimeout;
 
 static int opt_forceUSB;
 static int opt_forceBluetooth;
@@ -57,16 +62,29 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Show the vendor and product identifiers.")
   },
 
+  { .word = "echo",
+    .letter = 'e',
+    .setting.flag = &opt_echoInput,
+    .description = strtext("Echo (in hexadecimal) input received from the device.")
+  },
+
+  { .word = "timeout",
+    .letter = 't',
+    .argument = strtext("integer"),
+    .setting.string = &opt_inputTimeout,
+    .description = strtext("The input timeout (in seconds).")
+  },
+
   { .word = "usb",
     .letter = 'u',
     .setting.flag = &opt_forceUSB,
-    .description = strtext("Look for a USB device.")
+    .description = strtext("Filter for a USB device.")
   },
 
   { .word = "bluetooth",
     .letter = 'b',
     .setting.flag = &opt_forceBluetooth,
-    .description = strtext("Look for a Bluetooth device.")
+    .description = strtext("Filter for a Bluetooth device.")
   },
 
   { .word = "vendor",
@@ -279,6 +297,40 @@ listItem (const char *line, void *data) {
   return canWriteOutput();
 }
 
+static int
+echoInput (HidDevice *device, int timeout) {
+  while (hidAwaitInput(device, timeout)) {
+    unsigned char buffer[0X1000];
+    ssize_t result = hidReadData(device, buffer, sizeof(buffer), 1000, 100);
+
+    if (result == -1) {
+      logMessage(LOG_ERR, "input error: %s", strerror(errno));
+      return 0;
+    }
+
+    char line[(result * 3) + 1];
+    STR_BEGIN(line, sizeof(line));
+
+    {
+      const unsigned char *byte = buffer;
+      const unsigned char *end = byte + result;
+
+      while (byte < end) {
+        STR_PRINTF(" %02X", *byte++);
+      }
+    }
+
+    STR_END;
+    fprintf(outputStream, "input:%s\n", line);
+    if (!canWriteOutput()) break;
+
+    fflush(outputStream);
+    if (!canWriteOutput()) break;
+  }
+
+  return 1;
+}
+
 int
 main (int argc, char *argv[]) {
   {
@@ -294,6 +346,18 @@ main (int argc, char *argv[]) {
     logMessage(LOG_ERR, "too many parameters");
     return PROG_EXIT_SYNTAX;
   }
+
+  int inputTimeout = 10;
+  {
+    static const int minimum = 1;
+    static const int maximum = 99;
+
+    if (!validateInteger(&inputTimeout, opt_inputTimeout, &minimum, &maximum)) {
+      logMessage(LOG_ERR, "invalid input timeout: %s", opt_inputTimeout);
+      return PROG_EXIT_SYNTAX;
+    }
+  }
+  inputTimeout *= 1000;
 
   outputStream = stdout;
   outputError = 0;
@@ -329,6 +393,10 @@ main (int argc, char *argv[]) {
           exitStatus = PROG_EXIT_SEMANTIC;
         } 
       }
+    }
+
+    if (canWriteOutput()) {
+      echoInput(device, inputTimeout);
     }
 
     hidCloseDevice(device);

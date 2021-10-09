@@ -152,7 +152,6 @@ readData (
 
       if (timeout) {
         if (awaitInput(ioh, timeout)) continue;
-        logMessage(LOG_WARNING, "input byte missing at offset %u", offset);
       } else
 
 #ifdef __MSDOS__
