@@ -80,6 +80,108 @@ hidLinuxGetUniqueIdentifier (HidHandle *handle, char *buffer, size_t size) {
   return length;
 }
 
+static HidItemsDescriptor *
+hidLinuxGetItems (HidHandle *handle) {
+  int size;
+
+  if (ioctl(handle->fileDescriptor, HIDIOCGRDESCSIZE, &size) != -1) {
+    struct hidraw_report_descriptor descriptor = {
+      .size = size
+    };
+
+    if (ioctl(handle->fileDescriptor, HIDIOCGRDESC, &descriptor) != -1) {
+      HidItemsDescriptor *items;
+
+      if ((items = malloc(sizeof(*items) + size))) {
+        memset(items, 0, sizeof(*items));
+        items->count = size;
+        memcpy(items->bytes, descriptor.value, size);
+        return items;
+      } else {
+        logMallocError();
+      }
+    } else {
+      logSystemError("ioctl[HIDIOCGRDESC]");
+    }
+  } else {
+    logSystemError("ioctl[HIDIOCGRDESCSIZE]");
+  }
+
+  return NULL;
+}
+
+static int
+hidLinuxGetIdentifiers (HidHandle *handle, uint16_t *vendor, uint16_t *product) {
+  if (vendor) *vendor = handle->deviceInformation.vendor;
+  if (product) *product = handle->deviceInformation.product;
+  return 1;
+}
+
+static int
+hidLinuxGetReport (HidHandle *handle, char *buffer, size_t size) {
+  if (ioctl(handle->fileDescriptor, HIDIOCGINPUT(size), buffer) != -1) return 1;
+  logSystemError("ioctl[HIDIOCGINPUT]");
+  return 0;
+}
+
+static int
+hidLinuxSetReport (HidHandle *handle, const char *report, size_t size) {
+  if (ioctl(handle->fileDescriptor, HIDIOCSOUTPUT(size), report) != -1) return 1;
+  logSystemError("ioctl[HIDIOCSOUTPUT]");
+  return 0;
+}
+
+static int
+hidLinuxGetFeature (HidHandle *handle, char *buffer, size_t size) {
+  if (ioctl(handle->fileDescriptor, HIDIOCGFEATURE(size), buffer) != -1) return 1;
+  logSystemError("ioctl[HIDIOCGFEATURE]");
+  return 0;
+}
+
+static int
+hidLinuxSetFeature (HidHandle *handle, const char *feature, size_t size) {
+  if (ioctl(handle->fileDescriptor, HIDIOCSFEATURE(size), feature) != -1) return 1;
+  logSystemError("ioctl[HIDIOCSFEATURE]");
+  return 0;
+}
+
+static int
+hidLinuxMonitorInput (HidHandle *handle, AsyncMonitorCallback *callback, void *data) {
+  hidLinuxCancelInputMonitor(handle);
+  if (!callback) return 1;
+  return asyncMonitorFileInput(&handle->inputMonitor, handle->fileDescriptor, callback, data);
+}
+
+static int
+hidLinuxAwaitInput (HidHandle *handle, int timeout) {
+  return awaitFileInput(handle->fileDescriptor, timeout);
+}
+
+static ssize_t
+hidLinuxReadData (
+  HidHandle *handle, void *buffer, size_t size,
+  int initialTimeout, int subsequentTimeout
+) {
+  return readFile(handle->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+}
+
+static const HidHandleMethods hidLinuxHandleMethods = {
+  .destroyHandle = hidLinuxDestroyHandle,
+
+  .getItems = hidLinuxGetItems,
+  .getIdentifiers = hidLinuxGetIdentifiers,
+
+  .getReport = hidLinuxGetReport,
+  .setReport = hidLinuxSetReport,
+
+  .getFeature = hidLinuxGetFeature,
+  .setFeature = hidLinuxSetFeature,
+
+  .monitorInput = hidLinuxMonitorInput,
+  .awaitInput = hidLinuxAwaitInput,
+  .readData = hidLinuxReadData,
+};
+
 typedef int HidLinuxAttributeTester (
   struct udev_device *device,
   const char *name,
@@ -317,106 +419,10 @@ hidLinuxNewBluetoothHandle (const HidBluetoothFilter *filter) {
   return hidLinuxFindDevice(hidLinuxTestBluetoothDevice, filter);
 }
 
-static HidItemsDescriptor *
-hidLinuxGetItems (HidHandle *handle) {
-  int size;
+const HidPackageDescriptor hidPackageDescriptor = {
+  .packageName = "Linux",
+  .handleMethods = &hidLinuxHandleMethods,
 
-  if (ioctl(handle->fileDescriptor, HIDIOCGRDESCSIZE, &size) != -1) {
-    struct hidraw_report_descriptor descriptor = {
-      .size = size
-    };
-
-    if (ioctl(handle->fileDescriptor, HIDIOCGRDESC, &descriptor) != -1) {
-      HidItemsDescriptor *items;
-
-      if ((items = malloc(sizeof(*items) + size))) {
-        memset(items, 0, sizeof(*items));
-        items->count = size;
-        memcpy(items->bytes, descriptor.value, size);
-        return items;
-      } else {
-        logMallocError();
-      }
-    } else {
-      logSystemError("ioctl[HIDIOCGRDESC]");
-    }
-  } else {
-    logSystemError("ioctl[HIDIOCGRDESCSIZE]");
-  }
-
-  return NULL;
-}
-
-static int
-hidLinuxGetIdentifiers (HidHandle *handle, uint16_t *vendor, uint16_t *product) {
-  if (vendor) *vendor = handle->deviceInformation.vendor;
-  if (product) *product = handle->deviceInformation.product;
-  return 1;
-}
-
-static int
-hidLinuxGetReport (HidHandle *handle, char *buffer, size_t size) {
-  if (ioctl(handle->fileDescriptor, HIDIOCGINPUT(size), buffer) != -1) return 1;
-  logSystemError("ioctl[HIDIOCGINPUT]");
-  return 0;
-}
-
-static int
-hidLinuxSetReport (HidHandle *handle, const char *report, size_t size) {
-  if (ioctl(handle->fileDescriptor, HIDIOCSOUTPUT(size), report) != -1) return 1;
-  logSystemError("ioctl[HIDIOCSOUTPUT]");
-  return 0;
-}
-
-static int
-hidLinuxGetFeature (HidHandle *handle, char *buffer, size_t size) {
-  if (ioctl(handle->fileDescriptor, HIDIOCGFEATURE(size), buffer) != -1) return 1;
-  logSystemError("ioctl[HIDIOCGFEATURE]");
-  return 0;
-}
-
-static int
-hidLinuxSetFeature (HidHandle *handle, const char *feature, size_t size) {
-  if (ioctl(handle->fileDescriptor, HIDIOCSFEATURE(size), feature) != -1) return 1;
-  logSystemError("ioctl[HIDIOCSFEATURE]");
-  return 0;
-}
-
-static int
-hidLinuxMonitorInput (HidHandle *handle, AsyncMonitorCallback *callback, void *data) {
-  hidLinuxCancelInputMonitor(handle);
-  if (!callback) return 1;
-  return asyncMonitorFileInput(&handle->inputMonitor, handle->fileDescriptor, callback, data);
-}
-
-static int
-hidLinuxAwaitInput (HidHandle *handle, int timeout) {
-  return awaitFileInput(handle->fileDescriptor, timeout);
-}
-
-static ssize_t
-hidLinuxReadData (
-  HidHandle *handle, void *buffer, size_t size,
-  int initialTimeout, int subsequentTimeout
-) {
-  return readFile(handle->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
-}
-
-const HidHandleMethods hidHandleMethods = {
   .newUSBHandle = hidLinuxNewUSBHandle,
   .newBluetoothHandle = hidLinuxNewBluetoothHandle,
-  .destroyHandle = hidLinuxDestroyHandle,
-
-  .getItems = hidLinuxGetItems,
-  .getIdentifiers = hidLinuxGetIdentifiers,
-
-  .getReport = hidLinuxGetReport,
-  .setReport = hidLinuxSetReport,
-
-  .getFeature = hidLinuxGetFeature,
-  .setFeature = hidLinuxSetFeature,
-
-  .monitorInput = hidLinuxMonitorInput,
-  .awaitInput = hidLinuxAwaitInput,
-  .readData = hidLinuxReadData,
 };

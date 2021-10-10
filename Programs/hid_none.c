@@ -18,24 +18,9 @@
 
 #include "prologue.h"
 
-#include <errno.h>
-
 #include "io_hid.h"
 #include "hid_internal.h"
 
-static HidHandle *
-hidNoneNewUSBHandle (const HidUSBFilter *filter) {
-  errno = ENOSYS;
-  return NULL;
-}
-
-static HidHandle *
-hidNoneNewBluetoothHandle (const HidBluetoothFilter *filter) {
-  errno = ENOSYS;
-  return NULL;
-}
-
-const HidHandleMethods hidHandleMethods = {
-  .newUSBHandle = hidNoneNewUSBHandle,
-  .newBluetoothHandle = hidNoneNewBluetoothHandle,
+const HidPackageDescriptor hidPackageDescriptor = {
+  .packageName = "None"
 };

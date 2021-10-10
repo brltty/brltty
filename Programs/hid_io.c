@@ -62,23 +62,25 @@ hidMatchString (const char *actualString, const char *testString) {
 struct HidDeviceStruct {
   HidHandle *handle;
   const HidHandleMethods *handleMethods;
+  const char *communicationMethod;
 };
 
 static HidDevice *
-hidNewDevice (HidHandle *handle, const HidHandleMethods *handleMethods) {
+hidNewDevice (HidHandle *handle, const char *communicationMethod) {
   if (handle) {
     HidDevice *device;
 
     if ((device = malloc(sizeof(*device)))) {
       memset(device, 0, sizeof(*device));
       device->handle = handle;
-      device->handleMethods = handleMethods;
+      device->handleMethods = hidPackageDescriptor.handleMethods;
+      device->communicationMethod = communicationMethod;
       return device;
     } else {
       logMallocError();
     }
 
-    handleMethods->destroyHandle(handle);
+    hidPackageDescriptor.handleMethods->destroyHandle(handle);
   }
 
   return NULL;
@@ -86,8 +88,7 @@ hidNewDevice (HidHandle *handle, const HidHandleMethods *handleMethods) {
 
 HidDevice *
 hidOpenUSBDevice (const HidUSBFilter *filter) {
-  const HidHandleMethods *handleMethods = &hidHandleMethods;
-  HidNewUSBHandleMethod *method = handleMethods->newUSBHandle;
+  HidNewUSBHandleMethod *method = hidPackageDescriptor.newUSBHandle;
 
   if (!method) {
     logUnsupportedOperation("hidOpenUSBDevice");
@@ -95,13 +96,12 @@ hidOpenUSBDevice (const HidUSBFilter *filter) {
     return NULL;
   }
 
-  return hidNewDevice(method(filter), handleMethods);
+  return hidNewDevice(method(filter), "USB");
 }
 
 HidDevice *
 hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
-  const HidHandleMethods *handleMethods = &hidHandleMethods;
-  HidNewBluetoothHandleMethod *method = handleMethods->newBluetoothHandle;
+  HidNewBluetoothHandleMethod *method = hidPackageDescriptor.newBluetoothHandle;
 
   if (!method) {
     logUnsupportedOperation("hidOpenBluetoothDevice");
@@ -109,7 +109,7 @@ hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
     return NULL;
   }
 
-  return hidNewDevice(method(filter), handleMethods);
+  return hidNewDevice(method(filter), "Bluetooth");
 }
 
 void

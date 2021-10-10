@@ -24,9 +24,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct HidHandleStruct HidHandle;
-
-typedef HidHandle *HidNewUSBHandleMethod (const HidUSBFilter *filter);
-typedef HidHandle *HidNewBluetoothHandleMethod (const HidBluetoothFilter *filter);
 typedef void HidDestroyHandleMethod (HidHandle *handle);
 
 typedef HidItemsDescriptor *HidGetItemsMethod (HidHandle *handle);
@@ -47,8 +44,6 @@ typedef ssize_t HidReadDataMethod (
 );
 
 typedef struct {
-  HidNewUSBHandleMethod *newUSBHandle;
-  HidNewBluetoothHandleMethod *newBluetoothHandle;
   HidDestroyHandleMethod *destroyHandle;
 
   HidGetItemsMethod *getItems;
@@ -65,7 +60,18 @@ typedef struct {
   HidReadDataMethod *readData;
 } HidHandleMethods;
 
-extern const HidHandleMethods hidHandleMethods;
+typedef HidHandle *HidNewUSBHandleMethod (const HidUSBFilter *filter);
+typedef HidHandle *HidNewBluetoothHandleMethod (const HidBluetoothFilter *filter);
+
+typedef struct {
+  const char *packageName;
+  const HidHandleMethods *handleMethods;
+
+  HidNewUSBHandleMethod *newUSBHandle;
+  HidNewBluetoothHandleMethod *newBluetoothHandle;
+} HidPackageDescriptor;
+
+extern const HidPackageDescriptor hidPackageDescriptor;
 
 #ifdef __cplusplus
 }
