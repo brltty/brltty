@@ -24,18 +24,18 @@
 #include "hid_internal.h"
 
 static HidHandle *
-hidNoneNewUSB (const HidDeviceFilter_USB *filter) {
+hidNoneNewUSBHandle (const HidUSBFilter *filter) {
   errno = ENOSYS;
   return NULL;
 }
 
 static HidHandle *
-hidNoneNewBluetooth (const HidDeviceFilter_Bluetooth *filter) {
+hidNoneNewBluetoothHandle (const HidBluetoothFilter *filter) {
   errno = ENOSYS;
   return NULL;
 }
 
 HidPlatformMethods hidPlatformMethods = {
-  .newUSB = hidNoneNewUSB,
-  .newBluetooth = hidNoneNewBluetooth,
+  .newUSBHandle = hidNoneNewUSBHandle,
+  .newBluetoothHandle = hidNoneNewBluetoothHandle,
 };

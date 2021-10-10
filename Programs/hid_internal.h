@@ -25,9 +25,9 @@ extern "C" {
 
 typedef struct HidHandleStruct HidHandle;
 
-typedef HidHandle *HidNewUSBMethod (const HidDeviceFilter_USB *filter);
-typedef HidHandle *HidNewBluetoothMethod (const HidDeviceFilter_Bluetooth *filter);
-typedef void HidDestroyMethod (HidHandle *handle);
+typedef HidHandle *HidNewUSBHandleMethod (const HidUSBFilter *filter);
+typedef HidHandle *HidNewBluetoothHandleMethod (const HidBluetoothFilter *filter);
+typedef void HidDestroyHandleMethod (HidHandle *handle);
 
 typedef HidItemsDescriptor *HidGetItemsMethod (HidHandle *handle);
 typedef int HidGetIdentifiersMethod (HidHandle *handle, uint16_t *vendor, uint16_t *product);
@@ -47,9 +47,9 @@ typedef ssize_t HidReadDataMethod (
 );
 
 typedef struct {
-  HidNewUSBMethod *newUSB;
-  HidNewBluetoothMethod *newBluetooth;
-  HidDestroyMethod *destroy;
+  HidNewUSBHandleMethod *newUSBHandle;
+  HidNewBluetoothHandleMethod *newBluetoothHandle;
+  HidDestroyHandleMethod *destroyHandle;
 
   HidGetItemsMethod *getItems;
   HidGetIdentifiersMethod *getIdentifiers;

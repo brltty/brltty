@@ -53,7 +53,7 @@ hidLinuxCancelInputMonitor (HidHandle *handle) {
 }
 
 static void
-hidLinuxDestroy (HidHandle *handle) {
+hidLinuxDestroyHandle (HidHandle *handle) {
   hidLinuxCancelInputMonitor(handle);
   close(handle->fileDescriptor);
   free(handle);
@@ -207,7 +207,7 @@ hidLinuxFindDevice (HidLinuxDeviceTester *testDevice, const void *filter) {
         if (hidDevice) {
           if ((handle = hidLinuxNewHandle(hidDevice))) {
             if (!testDevice(hidDevice, handle, filter)) {
-              hidLinuxDestroy(handle);
+              hidLinuxDestroyHandle(handle);
               handle = NULL;
             }
           }
@@ -230,36 +230,36 @@ hidLinuxFindDevice (HidLinuxDeviceTester *testDevice, const void *filter) {
 }
 
 static int
-hidLinuxTestDevice_USB (struct udev_device *hidDevice, HidHandle *handle, const void *filter) {
+hidLinuxTestUSBDevice (struct udev_device *hidDevice, HidHandle *handle, const void *filter) {
   if (handle->deviceInformation.bustype != BUS_USB) return 0;
-  const HidDeviceFilter_USB *uf = filter;
+  const HidUSBFilter *huf = filter;
 
   struct udev_device *usbDevice = udev_device_get_parent_with_subsystem_devtype(hidDevice, "usb", "usb_device");
   if (!usbDevice) return 0;
 
   const HidLinuxAttributeTest tests[] = {
     { .name = "idVendor",
-      .value = &uf->vendorIdentifier,
+      .value = &huf->vendorIdentifier,
       .function = hidLinuxTestIdentifier
     },
 
     { .name = "idProduct",
-      .value = &uf->productIdentifier,
+      .value = &huf->productIdentifier,
       .function = hidLinuxTestIdentifier
     },
 
     { .name = "manufacturer",
-      .value = uf->manufacturerName,
+      .value = huf->manufacturerName,
       .function = hidLinuxTestString
     },
 
     { .name = "product",
-      .value = uf->productDescription,
+      .value = huf->productDescription,
       .function = hidLinuxTestString
     },
 
     { .name = "serial",
-      .value = uf->serialNumber,
+      .value = huf->serialNumber,
       .function = hidLinuxTestString
     },
   };
@@ -268,29 +268,29 @@ hidLinuxTestDevice_USB (struct udev_device *hidDevice, HidHandle *handle, const 
 }
 
 static HidHandle *
-hidLinuxNewUSB (const HidDeviceFilter_USB *filter) {
-  return hidLinuxFindDevice(hidLinuxTestDevice_USB, filter);
+hidLinuxNewUSBHandle (const HidUSBFilter *filter) {
+  return hidLinuxFindDevice(hidLinuxTestUSBDevice, filter);
 }
 
 static int
-hidLinuxTestDevice_Bluetooth (struct udev_device *hidDevice, HidHandle *handle, const void *filter) {
+hidLinuxTestBluetoothDevice (struct udev_device *hidDevice, HidHandle *handle, const void *filter) {
   if (handle->deviceInformation.bustype != BUS_BLUETOOTH) return 0;
-  const HidDeviceFilter_Bluetooth *bf = filter;
+  const HidBluetoothFilter *hbf = filter;
 
-  if (bf->vendorIdentifier) {
-    if (handle->deviceInformation.vendor != bf->vendorIdentifier) {
+  if (hbf->vendorIdentifier) {
+    if (handle->deviceInformation.vendor != hbf->vendorIdentifier) {
       return 0;
     }
   }
 
-  if (bf->productIdentifier) {
-    if (handle->deviceInformation.product != bf->productIdentifier) {
+  if (hbf->productIdentifier) {
+    if (handle->deviceInformation.product != hbf->productIdentifier) {
       return 0;
     }
   }
 
   {
-    const char *address = bf->macAddress;
+    const char *address = hbf->macAddress;
 
     if (address && *address) {
       char buffer[0X100];
@@ -300,7 +300,7 @@ hidLinuxTestDevice_Bluetooth (struct udev_device *hidDevice, HidHandle *handle, 
   }
 
   {
-    const char *name = bf->deviceName;
+    const char *name = hbf->deviceName;
 
     if (name && *name) {
       char buffer[0X100];
@@ -313,8 +313,8 @@ hidLinuxTestDevice_Bluetooth (struct udev_device *hidDevice, HidHandle *handle, 
 }
 
 static HidHandle *
-hidLinuxNewBluetooth (const HidDeviceFilter_Bluetooth *filter) {
-  return hidLinuxFindDevice(hidLinuxTestDevice_Bluetooth, filter);
+hidLinuxNewBluetoothHandle (const HidBluetoothFilter *filter) {
+  return hidLinuxFindDevice(hidLinuxTestBluetoothDevice, filter);
 }
 
 static HidItemsDescriptor *
@@ -403,9 +403,9 @@ hidLinuxReadData (
 }
 
 HidPlatformMethods hidPlatformMethods = {
-  .newUSB = hidLinuxNewUSB,
-  .newBluetooth = hidLinuxNewBluetooth,
-  .destroy = hidLinuxDestroy,
+  .newUSBHandle = hidLinuxNewUSBHandle,
+  .newBluetoothHandle = hidLinuxNewBluetoothHandle,
+  .destroyHandle = hidLinuxDestroyHandle,
 
   .getItems = hidLinuxGetItems,
   .getIdentifiers = hidLinuxGetIdentifiers,

@@ -26,12 +26,12 @@
 #include "hid_internal.h"
 
 void
-hidInitializeDeviceFilter_USB (HidDeviceFilter_USB *filter) {
+hidInitializeUSBFilter (HidUSBFilter *filter) {
   memset(filter, 0, sizeof(*filter));
 }
 
 void
-hidInitializeDeviceFilter_Bluetooth (HidDeviceFilter_Bluetooth *filter) {
+hidInitializeBluetoothFilter (HidBluetoothFilter *filter) {
   memset(filter, 0, sizeof(*filter));
 }
 
@@ -76,18 +76,18 @@ hidNewDevice (HidHandle *handle) {
       logMallocError();
     }
 
-    hidPlatformMethods.destroy(handle);
+    hidPlatformMethods.destroyHandle(handle);
   }
 
   return NULL;
 }
 
 HidDevice *
-hidOpenDevice_USB (const HidDeviceFilter_USB *filter) {
-  HidNewUSBMethod *method = hidPlatformMethods.newUSB;
+hidOpenUSBDevice (const HidUSBFilter *filter) {
+  HidNewUSBHandleMethod *method = hidPlatformMethods.newUSBHandle;
 
   if (!method) {
-    logUnsupportedOperation("hidOpenDevice_USB");
+    logUnsupportedOperation("hidOpenUSBDevice");
     errno = ENOSYS;
     return NULL;
   }
@@ -96,11 +96,11 @@ hidOpenDevice_USB (const HidDeviceFilter_USB *filter) {
 }
 
 HidDevice *
-hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter) {
-  HidNewBluetoothMethod *method = hidPlatformMethods.newBluetooth;
+hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
+  HidNewBluetoothHandleMethod *method = hidPlatformMethods.newBluetoothHandle;
 
   if (!method) {
-    logUnsupportedOperation("hidOpenDevice_Bluetooth");
+    logUnsupportedOperation("hidOpenBluetoothDevice");
     errno = ENOSYS;
     return NULL;
   }
@@ -110,7 +110,7 @@ hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter) {
 
 void
 hidCloseDevice (HidDevice *device) {
-  HidDestroyMethod *method = hidPlatformMethods.destroy;
+  HidDestroyHandleMethod *method = hidPlatformMethods.destroyHandle;
 
   if (method) {
     method(device->handle);

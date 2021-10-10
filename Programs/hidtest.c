@@ -199,11 +199,11 @@ parseAddress (const char *value, void *field) {
 
 static int
 openDevice (HidDevice **device) {
-  HidDeviceFilter_USB uf;
-  hidInitializeDeviceFilter_USB(&uf);
+  HidUSBFilter huf;
+  hidInitializeUSBFilter(&huf);
 
-  HidDeviceFilter_Bluetooth bf;
-  hidInitializeDeviceFilter_Bluetooth(&bf);
+  HidBluetoothFilter hbf;
+  hidInitializeBluetoothFilter(&hbf);
 
   typedef struct {
     const char *name;
@@ -216,47 +216,47 @@ openDevice (HidDevice **device) {
   const FilterEntry filterTable[] = {
     { .name = "vendor identifier",
       .value = opt_vendorIdentifier,
-      .field = &uf.vendorIdentifier,
+      .field = &huf.vendorIdentifier,
       .parser = parseIdentifier,
     },
 
     { .name = "product identifier",
       .value = opt_productIdentifier,
-      .field = &uf.productIdentifier,
+      .field = &huf.productIdentifier,
       .parser = parseIdentifier,
     },
 
     { .name = "manufacturer name",
       .value = opt_manufacturerName,
-      .field = &uf.manufacturerName,
+      .field = &huf.manufacturerName,
       .parser = parseString,
       .flag = &opt_forceUSB,
     },
 
     { .name = "product description",
       .value = opt_productDescription,
-      .field = &uf.productDescription,
+      .field = &huf.productDescription,
       .parser = parseString,
       .flag = &opt_forceUSB,
     },
 
     { .name = "serial number",
       .value = opt_serialNumber,
-      .field = &uf.serialNumber,
+      .field = &huf.serialNumber,
       .parser = parseString,
       .flag = &opt_forceUSB,
     },
 
     { .name = "MAC address",
       .value = opt_macAddress,
-      .field = &bf.macAddress,
+      .field = &hbf.macAddress,
       .parser = parseAddress,
       .flag = &opt_forceBluetooth,
     },
 
     { .name = "device name",
       .value = opt_deviceName,
-      .field = &bf.deviceName,
+      .field = &hbf.deviceName,
       .parser = parseString,
       .flag = &opt_forceBluetooth,
     },
@@ -285,13 +285,13 @@ openDevice (HidDevice **device) {
     filter += 1;
   }
 
-  bf.vendorIdentifier = uf.vendorIdentifier;
-  bf.productIdentifier = uf.productIdentifier;
+  hbf.vendorIdentifier = huf.vendorIdentifier;
+  hbf.productIdentifier = huf.productIdentifier;
 
   if (opt_forceBluetooth) {
-    *device = hidOpenDevice_Bluetooth(&bf);
+    *device = hidOpenBluetoothDevice(&hbf);
   } else {
-    *device = hidOpenDevice_USB(&uf);
+    *device = hidOpenUSBDevice(&huf);
   }
 
   return 1;

@@ -34,20 +34,20 @@ typedef struct {
   const char *serialNumber;
   uint16_t vendorIdentifier;
   uint16_t productIdentifier;
-} HidDeviceFilter_USB;
+} HidUSBFilter;
 
-extern void hidInitializeDeviceFilter_USB (HidDeviceFilter_USB *filter);
-extern HidDevice *hidOpenDevice_USB (const HidDeviceFilter_USB *filter);
+extern void hidInitializeUSBFilter (HidUSBFilter *filter);
+extern HidDevice *hidOpenUSBDevice (const HidUSBFilter *filter);
 
 typedef struct {
   const char *macAddress;
   const char *deviceName;
   uint16_t vendorIdentifier;
   uint16_t productIdentifier;
-} HidDeviceFilter_Bluetooth;
+} HidBluetoothFilter;
 
-extern void hidInitializeDeviceFilter_Bluetooth (HidDeviceFilter_Bluetooth *filter);
-extern HidDevice *hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter);
+extern void hidInitializeBluetoothFilter (HidBluetoothFilter *filter);
+extern HidDevice *hidOpenBluetoothDevice (const HidBluetoothFilter *filter);
 
 extern void hidCloseDevice (HidDevice *device);
 
