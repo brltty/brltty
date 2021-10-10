@@ -35,7 +35,7 @@ hidNoneNewBluetoothHandle (const HidBluetoothFilter *filter) {
   return NULL;
 }
 
-HidPlatformMethods hidPlatformMethods = {
+const HidHandleMethods hidHandleMethods = {
   .newUSBHandle = hidNoneNewUSBHandle,
   .newBluetoothHandle = hidNoneNewBluetoothHandle,
 };

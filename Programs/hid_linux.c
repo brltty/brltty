@@ -402,7 +402,7 @@ hidLinuxReadData (
   return readFile(handle->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
 }
 
-HidPlatformMethods hidPlatformMethods = {
+const HidHandleMethods hidHandleMethods = {
   .newUSBHandle = hidLinuxNewUSBHandle,
   .newBluetoothHandle = hidLinuxNewBluetoothHandle,
   .destroyHandle = hidLinuxDestroyHandle,

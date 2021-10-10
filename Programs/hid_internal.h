@@ -63,9 +63,9 @@ typedef struct {
   HidMonitorInputMethod *monitorInput;
   HidAwaitInputMethod *awaitInput;
   HidReadDataMethod *readData;
-} HidPlatformMethods;
+} HidHandleMethods;
 
-extern HidPlatformMethods hidPlatformMethods;
+extern const HidHandleMethods hidHandleMethods;
 
 #ifdef __cplusplus
 }

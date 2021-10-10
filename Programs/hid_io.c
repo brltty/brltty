@@ -61,22 +61,24 @@ hidMatchString (const char *actualString, const char *testString) {
 
 struct HidDeviceStruct {
   HidHandle *handle;
+  const HidHandleMethods *handleMethods;
 };
 
 static HidDevice *
-hidNewDevice (HidHandle *handle) {
+hidNewDevice (HidHandle *handle, const HidHandleMethods *handleMethods) {
   if (handle) {
     HidDevice *device;
 
     if ((device = malloc(sizeof(*device)))) {
       memset(device, 0, sizeof(*device));
       device->handle = handle;
+      device->handleMethods = handleMethods;
       return device;
     } else {
       logMallocError();
     }
 
-    hidPlatformMethods.destroyHandle(handle);
+    handleMethods->destroyHandle(handle);
   }
 
   return NULL;
@@ -84,7 +86,8 @@ hidNewDevice (HidHandle *handle) {
 
 HidDevice *
 hidOpenUSBDevice (const HidUSBFilter *filter) {
-  HidNewUSBHandleMethod *method = hidPlatformMethods.newUSBHandle;
+  const HidHandleMethods *handleMethods = &hidHandleMethods;
+  HidNewUSBHandleMethod *method = handleMethods->newUSBHandle;
 
   if (!method) {
     logUnsupportedOperation("hidOpenUSBDevice");
@@ -92,12 +95,13 @@ hidOpenUSBDevice (const HidUSBFilter *filter) {
     return NULL;
   }
 
-  return hidNewDevice(method(filter));
+  return hidNewDevice(method(filter), handleMethods);
 }
 
 HidDevice *
 hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
-  HidNewBluetoothHandleMethod *method = hidPlatformMethods.newBluetoothHandle;
+  const HidHandleMethods *handleMethods = &hidHandleMethods;
+  HidNewBluetoothHandleMethod *method = handleMethods->newBluetoothHandle;
 
   if (!method) {
     logUnsupportedOperation("hidOpenBluetoothDevice");
@@ -105,12 +109,12 @@ hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
     return NULL;
   }
 
-  return hidNewDevice(method(filter));
+  return hidNewDevice(method(filter), handleMethods);
 }
 
 void
 hidCloseDevice (HidDevice *device) {
-  HidDestroyHandleMethod *method = hidPlatformMethods.destroyHandle;
+  HidDestroyHandleMethod *method = device->handleMethods->destroyHandle;
 
   if (method) {
     method(device->handle);
@@ -122,7 +126,7 @@ hidCloseDevice (HidDevice *device) {
 
 HidItemsDescriptor *
 hidGetItems (HidDevice *device) {
-  HidGetItemsMethod *method = hidPlatformMethods.getItems;
+  HidGetItemsMethod *method = device->handleMethods->getItems;
 
   if (!method) {
     logUnsupportedOperation("hidGetItems");
@@ -135,7 +139,7 @@ hidGetItems (HidDevice *device) {
 
 int
 hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
-  HidGetIdentifiersMethod *method = hidPlatformMethods.getIdentifiers;
+  HidGetIdentifiersMethod *method = device->handleMethods->getIdentifiers;
 
   if (!method) {
     logUnsupportedOperation("hidGetIdentifiers");
@@ -155,7 +159,7 @@ hidLogReport (const char *action, const char *data, size_t size, uint8_t identif
 
 int
 hidGetReport (HidDevice *device, char *buffer, size_t size) {
-  HidGetReportMethod *method = hidPlatformMethods.getReport;
+  HidGetReportMethod *method = device->handleMethods->getReport;
 
   if (!method) {
     logUnsupportedOperation("hidGetReport");
@@ -172,7 +176,7 @@ hidGetReport (HidDevice *device, char *buffer, size_t size) {
 
 int
 hidSetReport (HidDevice *device, const char *report, size_t size) {
-  HidSetReportMethod *method = hidPlatformMethods.setReport;
+  HidSetReportMethod *method = device->handleMethods->setReport;
 
   if (!method) {
     logUnsupportedOperation("hidSetReport");
@@ -187,7 +191,7 @@ hidSetReport (HidDevice *device, const char *report, size_t size) {
 
 int
 hidGetFeature (HidDevice *device, char *buffer, size_t size) {
-  HidGetFeatureMethod *method = hidPlatformMethods.getFeature;
+  HidGetFeatureMethod *method = device->handleMethods->getFeature;
 
   if (!method) {
     logUnsupportedOperation("hidGetFeature");
@@ -204,7 +208,7 @@ hidGetFeature (HidDevice *device, char *buffer, size_t size) {
 
 int
 hidSetFeature (HidDevice *device, const char *feature, size_t size) {
-  HidSetFeatureMethod *method = hidPlatformMethods.setFeature;
+  HidSetFeatureMethod *method = device->handleMethods->setFeature;
 
   if (!method) {
     logUnsupportedOperation("hidSetFeature");
@@ -219,7 +223,7 @@ hidSetFeature (HidDevice *device, const char *feature, size_t size) {
 
 int
 hidMonitorInput (HidDevice *device, AsyncMonitorCallback *callback, void *data) {
-  HidMonitorInputMethod *method = hidPlatformMethods.monitorInput;
+  HidMonitorInputMethod *method = device->handleMethods->monitorInput;
 
   if (!method) {
     logUnsupportedOperation("hidMonitorInput");
@@ -232,7 +236,7 @@ hidMonitorInput (HidDevice *device, AsyncMonitorCallback *callback, void *data) 
 
 int
 hidAwaitInput (HidDevice *device, int timeout) {
-  HidAwaitInputMethod *method = hidPlatformMethods.awaitInput;
+  HidAwaitInputMethod *method = device->handleMethods->awaitInput;
 
   if (!method) {
     logUnsupportedOperation("hidAwaitInput");
@@ -248,7 +252,7 @@ hidReadData (
   HidDevice *device, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-  HidReadDataMethod *method = hidPlatformMethods.readData;
+  HidReadDataMethod *method = device->handleMethods->readData;
 
   if (!method) {
     logUnsupportedOperation("hidReadData");
@@ -260,7 +264,7 @@ hidReadData (
 
   if (result != -1) {
     logBytes(LOG_CATEGORY(HUMAN_INTERFACE),
-      "interrupt input", buffer, result
+      "endpoint input", buffer, result
     );
   }
 
