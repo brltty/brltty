@@ -407,13 +407,16 @@ hid_io.$O:
 $(HID_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(HID_INCLUDES) -c $(SRC_DIR)/$(HID_OBJECT).c
 
-HIDTEST_OBJECTS = hidtest.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS) io_misc.$O
+HIDTEST_OBJECTS = hidtest.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS) hid_inspect.$O io_misc.$O
 
 hidtest$X: $(HIDTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(HIDTEST_OBJECTS) $(HID_LIBS) $(LDLIBS)
 
 hidtest.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hidtest.c
+
+hid_inspect.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_inspect.c
 
 ###############################################################################
 

@@ -29,6 +29,7 @@
 #include "parse.h"
 #include "io_hid.h"
 #include "hid_items.h"
+#include "hid_inspect.h"
 
 static int opt_listItems;
 static int opt_showIdentifiers;

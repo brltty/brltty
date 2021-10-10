@@ -463,7 +463,6 @@ gioGetHidItems (GioEndpoint *endpoint, unsigned char identifier) {
     );
 
     if (!items) return NULL;
-    hidListItems(items, NULL, NULL);
     endpoint->hidItems = items;
   }
 

@@ -16,43 +16,25 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_HID_ITEMS
-#define BRLTTY_INCLUDED_HID_ITEMS
+#ifndef BRLTTY_INCLUDED_HID_INSPECT
+#define BRLTTY_INCLUDED_HID_INSPECT
 
 #include "hid_types.h"
+#include "strfmth.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef union {
-  uint32_t u;
-  int32_t s;
-} HidItemValue;
+typedef int HidItemLister (const char *line, void *data);
+extern int hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *data);
 
-typedef struct {
-  HidItemValue value;
-  uint8_t type;
-  uint8_t valueSize;
-} HidItemDescription;
-
-extern int hidGetNextItem (
-  HidItemDescription *item,
-  const unsigned char **bytes,
-  size_t *count
-);
-
-extern const char *hidGetItemTypeName (uint8_t type);
-extern unsigned char hidGetValueSize (unsigned char item);
-
-extern int hidGetReportSize (
-  const HidItemsDescriptor *items,
-  uint8_t identifier,
-  HidReportSize *size
-);
+extern const char *hidGetCollectionTypeName (uint32_t type);
+extern const char *hidGetUsagePageName (uint16_t page);
+extern STR_DECLARE_FORMATTER(hidFormatUsageFlags, uint32_t flags);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_HID_ITEMS */
+#endif /* BRLTTY_INCLUDED_HID_INSPECT */

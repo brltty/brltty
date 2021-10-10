@@ -65,6 +65,18 @@ struct HidDeviceStruct {
   const char *communicationMethod;
 };
 
+static void
+hidDestroyHandle (HidHandle *handle) {
+  HidDestroyHandleMethod *method = hidPackageDescriptor.handleMethods->destroyHandle;
+
+  if (method) {
+    method(handle);
+  } else {
+    logUnsupportedOperation("hidCloseDevice");
+    errno = ENOSYS;
+  }
+}
+
 static HidDevice *
 hidNewDevice (HidHandle *handle, const char *communicationMethod) {
   if (handle) {
@@ -80,7 +92,7 @@ hidNewDevice (HidHandle *handle, const char *communicationMethod) {
       logMallocError();
     }
 
-    hidPackageDescriptor.handleMethods->destroyHandle(handle);
+    hidDestroyHandle(handle);
   }
 
   return NULL;
@@ -114,14 +126,8 @@ hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
 
 void
 hidCloseDevice (HidDevice *device) {
-  HidDestroyHandleMethod *method = device->handleMethods->destroyHandle;
-
-  if (method) {
-    method(device->handle);
-  } else {
-    logUnsupportedOperation("hidCloseDevice");
-    errno = ENOSYS;
-  }
+  hidDestroyHandle(device->handle);
+  free(device);
 }
 
 HidItemsDescriptor *
@@ -151,7 +157,7 @@ hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
 }
 
 static void
-hidLogReport (const char *action, const char *data, size_t size, uint8_t identifier) {
+hidLogDataTransfer (const char *action, const char *data, size_t size, uint8_t identifier) {
   logBytes(LOG_CATEGORY(HUMAN_INTERFACE),
     "%s: %02X", data, size, action, identifier
   );
@@ -170,7 +176,7 @@ hidGetReport (HidDevice *device, char *buffer, size_t size) {
   uint8_t identifier = *buffer;
   if (!method(device->handle, buffer, size)) return 0;
 
-  hidLogReport("get report", buffer, size-1, identifier);
+  hidLogDataTransfer("get report", buffer, size-1, identifier);
   return 1;
 }
 
@@ -184,9 +190,8 @@ hidSetReport (HidDevice *device, const char *report, size_t size) {
     return 0;
   }
 
-  if (!method(device->handle, report, size)) return 0;
-  hidLogReport("set report", report+1, size-1, *report);
-  return 1;
+  hidLogDataTransfer("set report", report+1, size-1, *report);
+  return method(device->handle, report, size);
 }
 
 int
@@ -202,7 +207,7 @@ hidGetFeature (HidDevice *device, char *buffer, size_t size) {
   uint8_t identifier = *buffer;
   if (!method(device->handle, buffer, size)) return 0;
 
-  hidLogReport("get feature", buffer, size-1, identifier);
+  hidLogDataTransfer("get feature", buffer, size-1, identifier);
   return 1;
 }
 
@@ -216,9 +221,8 @@ hidSetFeature (HidDevice *device, const char *feature, size_t size) {
     return 0;
   }
 
-  if (!method(device->handle, feature, size)) return 0;
-  hidLogReport("set feature", feature+1, size-1, *feature);
-  return 1;
+  hidLogDataTransfer("set feature", feature+1, size-1, *feature);
+  return method(device->handle, feature, size);
 }
 
 int
