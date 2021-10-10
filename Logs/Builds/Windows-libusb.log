@@ -1,10 +1,9 @@
-mkwin: revision identifier: BRLTTY-6.3-464-g7bd0ae54M
+mkwin: revision identifier: BRLTTY-6.4-93-g481ab5e1M
 mkwin: MinGW command not found: linuxdoc
 mkwin: copying source tree
 mkwin: applying patches
 patching file Programs/usb_libusb-1.0.c
 patching file Programs/usb_libusb.c
-Hunk #1 succeeded at 377 (offset 73 lines).
 mkwin: configuring build
 mkwin: building programs
 In file included from c:\Program Files (x86)\Python38-32\include/Python.h:85,
@@ -55,7 +54,7 @@ mkwin: USB package: libusb
 mkwin: installing package files: LibUSB (aka LibUSB-Win32)
    Creating library brlapi.lib and object brlapi.exp
 mkwin: creating configurator
-Successfully compiled: C:\Users\dave\AppData\Local\Temp\brltty-mkwin\install\brltty-win-6.3-464-libusb\brlttycnf.exe
+Successfully compiled: C:\Users\dave\AppData\Local\Temp\brltty-mkwin\install\brltty-win-6.4-93-libusb\brlttycnf.exe
 mkwin: converting text files
 mkwin: creating archive
 mkwin: creating installer

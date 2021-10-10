@@ -2,7 +2,7 @@ Index: Programs/usb_libusb-1.0.c
 ===================================================================
 --- Programs/usb_libusb-1.0.c.orig
 +++ Programs/usb_libusb-1.0.c
-@@ -93,6 +93,19 @@ static int
+@@ -94,6 +94,19 @@ static int
  usbGetHandle (UsbDeviceExtension *devx) {
    if (!devx->handle) {
      int result;
@@ -26,7 +26,7 @@ Index: Programs/usb_libusb.c
 ===================================================================
 --- Programs/usb_libusb.c.orig
 +++ Programs/usb_libusb.c
-@@ -304,6 +304,20 @@ usbFindDevice (UsbDeviceChooser chooser,
+@@ -378,6 +378,20 @@ usbFindDevice (UsbDeviceChooser chooser,
    UsbDevice *device = NULL;
    int result;
  
