@@ -42,6 +42,7 @@ toRelativePath "${programDirectory}" configureDirectory
    --without-kbd-package \
    --without-bell-package \
    --without-leds-package \
+   --without-hid-package \
    \
    --disable-java-bindings \
    --disable-ocaml-bindings \

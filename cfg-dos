@@ -86,6 +86,7 @@ export LDFLAGS=""
    \
    --without-usb-package \
    --without-bluetooth-package \
+   --without-hid-package \
    \
    --host="${toolsSystem}" \
    --quiet \
