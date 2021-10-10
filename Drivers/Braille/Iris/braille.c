@@ -29,6 +29,7 @@
 #include "ascii.h"
 #include "cmd.h"
 #include "parse.h"
+#include "async.h"
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "ports.h"

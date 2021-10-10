@@ -19,14 +19,11 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_WAIT
 #define BRLTTY_INCLUDED_ASYNC_WAIT
 
-#include "async.h"
+#include "async_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#define ASYNC_CONDITION_TESTER(name) int name (void *data)
-typedef ASYNC_CONDITION_TESTER(AsyncConditionTester);
 
 extern int asyncAwaitCondition (int timeout, AsyncConditionTester *testCondition, void *data);
 extern void asyncWait (int duration);

@@ -19,21 +19,11 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_EVENT
 #define BRLTTY_INCLUDED_ASYNC_EVENT
 
-#include "async.h"
+#include "async_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct AsyncEventStruct AsyncEvent;
-
-typedef struct {
-  void *eventData;
-  void *signalData;
-} AsyncEventCallbackParameters;
-
-#define ASYNC_EVENT_CALLBACK(name) void name (const AsyncEventCallbackParameters *parameters)
-typedef ASYNC_EVENT_CALLBACK(AsyncEventCallback);
 
 extern AsyncEvent *asyncNewEvent (AsyncEventCallback *callback, void *data);
 extern void asyncDiscardEvent (AsyncEvent *event);

@@ -23,7 +23,7 @@
 #include "ktb_types.h"
 #include "gio_types.h"
 #include "queue.h"
-#include "async.h"
+#include "async_types.h"
 
 #ifdef __cplusplus
 extern "C" {

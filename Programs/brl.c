@@ -31,6 +31,7 @@
 #include "ttb.h"
 #include "ktb.h"
 #include "queue.h"
+#include "async.h"
 
 void
 constructBrailleDisplay (BrailleDisplay *brl) {

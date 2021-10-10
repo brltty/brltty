@@ -38,6 +38,7 @@
 #include "utf8.h"
 #include "device.h"
 #include "timing.h"
+#include "async.h"
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "io_misc.h"

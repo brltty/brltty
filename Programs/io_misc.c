@@ -26,6 +26,7 @@
 #include "io_misc.h"
 #include "log.h"
 #include "file.h"
+#include "async.h"
 #include "async_wait.h"
 #include "async_io.h"
 

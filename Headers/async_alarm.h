@@ -19,20 +19,12 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_ALARM
 #define BRLTTY_INCLUDED_ASYNC_ALARM
 
-#include "async.h"
+#include "async_types.h"
 #include "timing.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct {
-  const TimeValue *now;
-  void *data;
-} AsyncAlarmCallbackParameters;
-
-#define ASYNC_ALARM_CALLBACK(name) void name (const AsyncAlarmCallbackParameters *parameters)
-typedef ASYNC_ALARM_CALLBACK(AsyncAlarmCallback);
 
 extern int asyncNewAbsoluteAlarm (
   AsyncHandle *handle,

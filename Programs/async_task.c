@@ -23,6 +23,7 @@
 #include "log.h"
 #include "async_task.h"
 #include "async_internal.h"
+#include "async_event.h"
 
 typedef struct {
   AsyncTaskCallback *callback;

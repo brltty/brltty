@@ -33,6 +33,7 @@
 #include "parse.h"
 #include "file.h"
 #include "device.h"
+#include "async.h"
 #include "async_wait.h"
 #include "async_io.h"
 #include "hostcmd.h"

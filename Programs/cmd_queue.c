@@ -28,6 +28,7 @@
 #include "brl_cmds.h"
 #include "cmd.h"
 #include "queue.h"
+#include "async.h"
 #include "async_alarm.h"
 #include "prefs.h"
 #include "ktb_types.h"

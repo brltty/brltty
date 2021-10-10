@@ -19,8 +19,8 @@
 #ifndef BRLTTY_INCLUDED_IO_BLUETOOTH
 #define BRLTTY_INCLUDED_IO_BLUETOOTH
 
+#include "async_types.h"
 #include "strfmth.h"
-#include "async_io.h"
 
 #ifdef __cplusplus
 extern "C" {

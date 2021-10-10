@@ -19,15 +19,11 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_TASK
 #define BRLTTY_INCLUDED_ASYNC_TASK
 
-#include "async.h"
-#include "async_event.h"
+#include "async_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#define ASYNC_TASK_CALLBACK(name) void name (void *data)
-typedef ASYNC_TASK_CALLBACK(AsyncTaskCallback);
 
 extern int asyncAddTask (
   AsyncEvent *event,

@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "parameters.h"
+#include "async.h"
 #include "async_alarm.h"
 #include "alert.h"
 #include "scr.h"

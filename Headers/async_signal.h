@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_ASYNC_SIGNAL
 
 #include "prologue.h"
+#include "async_types.h"
 
 #undef ASYNC_CAN_HANDLE_SIGNALS
 #undef ASYNC_CAN_BLOCK_SIGNALS
@@ -39,8 +40,6 @@
 #endif /* SIGRTMIN */
 #endif /* SIG_SETMASK */
 #endif /* HAVE_SIGNAL_H */
-
-#include "async.h"
 
 #ifdef __cplusplus
 extern "C" {

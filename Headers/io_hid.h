@@ -20,7 +20,7 @@
 #define BRLTTY_INCLUDED_IO_HID
 
 #include "hid_types.h"
-#include "async_io.h"
+#include "async_types.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -21,9 +21,11 @@
 #include <string.h>
 #include <errno.h>
 
+#include "log.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
-#include "log.h"
+#include "async.h"
+#include "async_io.h"
 #include "io_misc.h"
 #include "thread.h"
 #include "system_java.h"

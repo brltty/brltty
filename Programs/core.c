@@ -52,6 +52,7 @@
 #include "cmd_toggle.h"
 #include "cmd_touch.h"
 
+#include "async.h"
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "async_event.h"

@@ -32,6 +32,8 @@
 #include "hid_internal.h"
 #include "hid_linux.h"
 #include "io_misc.h"
+#include "async.h"
+#include "async_io.h"
 
 struct HidHandleStruct {
   char *sysfsPath;

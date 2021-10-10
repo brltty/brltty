@@ -25,6 +25,7 @@
 #include "report.h"
 #include "api_control.h"
 #include "queue.h"
+#include "async.h"
 #include "async_alarm.h"
 #include "brl_base.h"
 #include "brl_utils.h"

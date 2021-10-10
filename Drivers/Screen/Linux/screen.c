@@ -37,6 +37,7 @@
 
 #include "log.h"
 #include "report.h"
+#include "async.h"
 #include "async_io.h"
 #include "device.h"
 #include "io_misc.h"

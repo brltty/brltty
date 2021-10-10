@@ -19,11 +19,11 @@
 #ifndef BRLTTY_INCLUDED_ASYNC
 #define BRLTTY_INCLUDED_ASYNC
 
+#include "async_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct AsyncHandleStruct *AsyncHandle;
 
 extern int asyncTestHandle (AsyncHandle handle);
 extern void asyncDiscardHandle (AsyncHandle handle);

@@ -25,6 +25,7 @@
 
 #include "log.h"
 #include "io_misc.h"
+#include "async_io.h"
 
 #include "serial_termios.h"
 #include "serial_internal.h"
