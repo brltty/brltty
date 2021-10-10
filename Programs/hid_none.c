@@ -21,76 +21,21 @@
 #include <errno.h>
 
 #include "io_hid.h"
+#include "hid_internal.h"
 
-HidDevice *
-hidOpenDevice_USB (const HidDeviceFilter_USB *filter) {
+static HidHandle *
+hidNoneNewUSB (const HidDeviceFilter_USB *filter) {
   errno = ENOSYS;
   return NULL;
 }
 
-HidDevice *
-hidOpenDevice_Bluetooth (const HidDeviceFilter_Bluetooth *filter) {
+static HidHandle *
+hidNoneNewBluetooth (const HidDeviceFilter_Bluetooth *filter) {
   errno = ENOSYS;
   return NULL;
 }
 
-void
-hidCloseDevice (HidDevice *device) {
-}
-
-HidItemsDescriptor *
-hidGetItems (HidDevice *device) {
-  errno = ENOSYS;
-  return NULL;
-}
-
-int
-hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
-  errno = ENOSYS;
-  return 0;
-}
-
-int
-hidGetReport (HidDevice *device, char *buffer, size_t size) {
-  errno = ENOSYS;
-  return 0;
-}
-
-int
-hidSetReport (HidDevice *device, const char *report, size_t size) {
-  errno = ENOSYS;
-  return 0;
-}
-
-int
-hidGetFeature (HidDevice *device, char *buffer, size_t size) {
-  errno = ENOSYS;
-  return 0;
-}
-
-int
-hidSetFeature (HidDevice *device, const char *feature, size_t size) {
-  errno = ENOSYS;
-  return 0;
-}
-
-int
-hidMonitorInput (HidDevice *device, AsyncMonitorCallback *callback, void *data) {
-  errno = ENOSYS;
-  return 0;
-}
-
-int
-hidAwaitInput (HidDevice *device, int timeout) {
-  errno = ENOSYS;
-  return 0;
-}
-
-ssize_t
-hidReadData (
-  HidDevice *device, void *buffer, size_t size,
-  int initialTimeout, int subsequentTimeout
-) {
-  errno = ENOSYS;
-  return -1;
-}
+HidPlatformMethods hidPlatformMethods = {
+  .newUSB = hidNoneNewUSB,
+  .newBluetooth = hidNoneNewBluetooth,
+};
