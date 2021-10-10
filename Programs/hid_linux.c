@@ -61,27 +61,6 @@ hidLinuxDestroyHandle (HidHandle *handle) {
   free(handle);
 }
 
-ssize_t
-hidLinuxGetDeviceName (HidHandle *handle, char *buffer, size_t size) {
-  ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
-  if (length == -1) logSystemError("ioctl[HIDIOCGRAWNAME]");
-  return length;
-}
-
-ssize_t
-hidLinuxGetPhysicalAddress (HidHandle *handle, char *buffer, size_t size) {
-  ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
-  if (length == -1) logSystemError("ioctl[HIDIOCGRAWPHYS]");
-  return length;
-}
-
-ssize_t
-hidLinuxGetUniqueIdentifier (HidHandle *handle, char *buffer, size_t size) {
-  ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
-  if (length == -1) logSystemError("ioctl[HIDIOCGRAWUNIQ]");
-  return length;
-}
-
 static HidItemsDescriptor *
 hidLinuxGetItems (HidHandle *handle) {
   int size;
@@ -167,6 +146,93 @@ hidLinuxReadData (
   return readFile(handle->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
 }
 
+static size_t
+hidLinuxGetDeviceName (HidHandle *handle, char *buffer, size_t size) {
+  ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
+
+  if (length == -1) {
+    logSystemError("ioctl[HIDIOCGRAWNAME]");
+    length = 0;
+  } else if (length == size) {
+    if (length > 0) length -= 1;
+  }
+
+  buffer[length] = 0;
+  return length;
+}
+
+static size_t
+hidLinuxGetPhysicalAddress (HidHandle *handle, char *buffer, size_t size) {
+  ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
+
+  if (length == -1) {
+    logSystemError("ioctl[HIDIOCGRAWPHYS]");
+    length = 0;
+  } else if (length == size) {
+    if (length > 0) length -= 1;
+  }
+
+  buffer[length] = 0;
+  return length;
+}
+
+static size_t
+hidLinuxGetUniqueIdentifier (HidHandle *handle, char *buffer, size_t size) {
+  ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
+
+  if (length == -1) {
+    logSystemError("ioctl[HIDIOCGRAWUNIQ]");
+    length = 0;
+  } else if (length == size) {
+    if (length > 0) length -= 1;
+  }
+
+  buffer[length] = 0;
+  return length;
+}
+
+static char *
+hidLinuxGetDeviceDescription (HidHandle *handle) {
+  char buffer[0X1000];
+  size_t length = hidLinuxGetDeviceName(handle, buffer, sizeof(buffer));
+
+  if (length) {
+    char *description = strdup(buffer);
+    if (description) return description;
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static char *
+hidLinuxGetDeviceEndpoint (HidHandle *handle) {
+  char buffer[0X1000];
+  size_t length = hidLinuxGetUniqueIdentifier(handle, buffer, sizeof(buffer));
+
+  if (length) {
+    char *endpoint = strdup(buffer);
+    if (endpoint) return endpoint;
+    logMallocError();
+  }
+
+  return NULL;
+}
+
+static char *
+hidLinuxGetHostEndpoint (HidHandle *handle) {
+  char buffer[0X1000];
+  size_t length = hidLinuxGetPhysicalAddress(handle, buffer, sizeof(buffer));
+
+  if (length) {
+    char *endpoint = strdup(buffer);
+    if (endpoint) return endpoint;
+    logMallocError();
+  }
+
+  return NULL;
+}
+
 static const HidHandleMethods hidLinuxHandleMethods = {
   .destroyHandle = hidLinuxDestroyHandle,
 
@@ -182,6 +248,10 @@ static const HidHandleMethods hidLinuxHandleMethods = {
   .monitorInput = hidLinuxMonitorInput,
   .awaitInput = hidLinuxAwaitInput,
   .readData = hidLinuxReadData,
+
+  .getDeviceDescription = hidLinuxGetDeviceDescription,
+  .getDeviceEndpoint = hidLinuxGetDeviceEndpoint,
+  .getHostEndpoint = hidLinuxGetHostEndpoint,
 };
 
 typedef int HidLinuxAttributeTester (

@@ -43,6 +43,10 @@ typedef ssize_t HidReadDataMethod (
   int initialTimeout, int subsequentTimeout
 );
 
+typedef char *HidGetDeviceDescriptionMethod (HidHandle *handle);
+typedef char *HidGetDeviceEndpointMethod (HidHandle *handle);
+typedef char *HidGetHostEndpointMethod (HidHandle *handle);
+
 typedef struct {
   HidDestroyHandleMethod *destroyHandle;
 
@@ -58,6 +62,10 @@ typedef struct {
   HidMonitorInputMethod *monitorInput;
   HidAwaitInputMethod *awaitInput;
   HidReadDataMethod *readData;
+
+  HidGetDeviceDescriptionMethod *getDeviceDescription;
+  HidGetDeviceEndpointMethod *getDeviceEndpoint;
+  HidGetHostEndpointMethod *getHostEndpoint;
 } HidHandleMethods;
 
 typedef HidHandle *HidNewUSBHandleMethod (const HidUSBFilter *filter);

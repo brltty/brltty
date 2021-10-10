@@ -63,6 +63,10 @@ struct HidDeviceStruct {
   HidHandle *handle;
   const HidHandleMethods *handleMethods;
   const char *communicationMethod;
+
+  char *deviceDescription;
+  char *deviceEndpoint;
+  char *hostEndpoint;
 };
 
 static void
@@ -127,6 +131,11 @@ hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
 void
 hidCloseDevice (HidDevice *device) {
   hidDestroyHandle(device->handle);
+
+  if (device->deviceDescription) free(device->deviceDescription);
+  if (device->deviceEndpoint) free(device->deviceEndpoint);
+  if (device->hostEndpoint) free(device->hostEndpoint);
+
   free(device);
 }
 
@@ -273,4 +282,55 @@ hidReadData (
   }
 
   return result;
+}
+
+const char *
+hidGetDeviceDescription (HidDevice *device) {
+  HidGetDeviceDescriptionMethod *method = device->handleMethods->getDeviceDescription;
+
+  if (!method) {
+    logUnsupportedOperation("hidGetDeviceDescription");
+    errno = ENOSYS;
+    return NULL;
+  }
+
+  if (!device->deviceDescription) {
+    device->deviceDescription = method(device->handle);
+  }
+
+  return device->deviceDescription;
+}
+
+const char *
+hidGetDeviceEndpoint (HidDevice *device) {
+  HidGetDeviceEndpointMethod *method = device->handleMethods->getDeviceEndpoint;
+
+  if (!method) {
+    logUnsupportedOperation("hidGetDeviceEndpoint");
+    errno = ENOSYS;
+    return NULL;
+  }
+
+  if (!device->deviceEndpoint) {
+    device->deviceEndpoint = method(device->handle);
+  }
+
+  return device->deviceEndpoint;
+}
+
+const char *
+hidGetHostEndpoint (HidDevice *device) {
+  HidGetHostEndpointMethod *method = device->handleMethods->getHostEndpoint;
+
+  if (!method) {
+    logUnsupportedOperation("hidGetHostEndpoint");
+    errno = ENOSYS;
+    return NULL;
+  }
+
+  if (!device->hostEndpoint) {
+    device->hostEndpoint = method(device->handle);
+  }
+
+  return device->hostEndpoint;
 }

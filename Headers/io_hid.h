@@ -68,6 +68,10 @@ extern ssize_t hidReadData (
   int initialTimeout, int subsequentTimeout
 );
 
+extern const char *hidGetDeviceDescription (HidDevice *device);
+extern const char *hidGetDeviceEndpoint (HidDevice *device);
+extern const char *hidGetHostEndpoint (HidDevice *device);
+
 extern int hidParseIdentifier (uint16_t *identifier, const char *string);
 extern int hidMatchString (const char *actualString, const char *testString);
 
