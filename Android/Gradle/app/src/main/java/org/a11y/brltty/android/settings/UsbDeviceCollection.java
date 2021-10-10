@@ -54,7 +54,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
 
   private final String getProductDescription (UsbDevice device) {
     if (APITests.haveLollipop) {
-      return device.getProductDescription();
+      return device.getProductName();
     } else {
       return null;
     }

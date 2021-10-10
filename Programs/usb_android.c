@@ -23,6 +23,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "bitfield.h"
 #include "queue.h"
 
 #include "io_usb.h"
