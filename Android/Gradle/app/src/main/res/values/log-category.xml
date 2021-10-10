@@ -15,7 +15,7 @@
   <string name="LOG_CATEGORY_LABEL_serial">Serial I/O</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
   <string name="LOG_CATEGORY_LABEL_bt">Bluetooth I/O</string>
-  <string name="LOG_CATEGORY_LABEL_hid">Human Interface Events</string>
+  <string name="LOG_CATEGORY_LABEL_hid">Human Interface I/O</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Braille Driver Events</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Speech Driver Events</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Screen Driver Events</string>

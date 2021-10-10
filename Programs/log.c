@@ -145,7 +145,7 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
 
   [LOG_CATEGORY_INDEX(HUMAN_INTERFACE)] = {
     .name = "hid",
-    .title = strtext("Human Interface Events"),
+    .title = strtext("Human Interface I/O"),
     .prefix = "HID"
   },
 

@@ -134,7 +134,7 @@ LOG_CATEGORY_LABEL_gio Generic I/O
 LOG_CATEGORY_LABEL_serial Serial I/O
 LOG_CATEGORY_LABEL_usb USB I/O
 LOG_CATEGORY_LABEL_bt Bluetooth I/O
-LOG_CATEGORY_LABEL_hid Human Interface Events
+LOG_CATEGORY_LABEL_hid Human Interface I/O
 LOG_CATEGORY_LABEL_brldrv Braille Driver Events
 LOG_CATEGORY_LABEL_spkdrv Speech Driver Events
 LOG_CATEGORY_LABEL_scrdrv Screen Driver Events
