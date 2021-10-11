@@ -63,10 +63,6 @@ struct HidDeviceStruct {
   HidHandle *handle;
   const HidHandleMethods *handleMethods;
   const char *communicationMethod;
-
-  char *deviceDescription;
-  char *deviceEndpoint;
-  char *hostEndpoint;
 };
 
 static void
@@ -131,11 +127,6 @@ hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
 void
 hidCloseDevice (HidDevice *device) {
   hidDestroyHandle(device->handle);
-
-  if (device->deviceDescription) free(device->deviceDescription);
-  if (device->deviceEndpoint) free(device->deviceEndpoint);
-  if (device->hostEndpoint) free(device->hostEndpoint);
-
   free(device);
 }
 
@@ -294,11 +285,7 @@ hidGetDeviceDescription (HidDevice *device) {
     return NULL;
   }
 
-  if (!device->deviceDescription) {
-    device->deviceDescription = method(device->handle);
-  }
-
-  return device->deviceDescription;
+  return method(device->handle);
 }
 
 const char *
@@ -311,26 +298,52 @@ hidGetDeviceEndpoint (HidDevice *device) {
     return NULL;
   }
 
-  if (!device->deviceEndpoint) {
-    device->deviceEndpoint = method(device->handle);
-  }
-
-  return device->deviceEndpoint;
+  return method(device->handle);
 }
 
 const char *
-hidGetHostEndpoint (HidDevice *device) {
-  HidGetHostEndpointMethod *method = device->handleMethods->getHostEndpoint;
+hidGetHostPath (HidDevice *device) {
+  HidGetHostPathMethod *method = device->handleMethods->getHostPath;
 
   if (!method) {
-    logUnsupportedOperation("hidGetHostEndpoint");
+    logUnsupportedOperation("hidGetHostPath");
     errno = ENOSYS;
     return NULL;
   }
 
-  if (!device->hostEndpoint) {
-    device->hostEndpoint = method(device->handle);
+  return method(device->handle);
+}
+
+const char *
+hidGetHostDevice (HidDevice *device) {
+  HidGetHostDeviceMethod *method = device->handleMethods->getHostDevice;
+
+  if (!method) {
+    logUnsupportedOperation("hidGetHostDevice");
+    errno = ENOSYS;
+    return NULL;
   }
 
-  return device->hostEndpoint;
+  return method(device->handle);
+}
+
+const char *
+hidCacheString (
+  HidHandle *handle, char **cachedValue,
+  char *buffer, size_t size,
+  HidGetStringMethod *getString, void *data
+) {
+  if (!*cachedValue) {
+    if (!getString(handle, buffer, size, data)) return NULL;
+    char *value = strdup(buffer);
+
+    if (!value) {
+      logMallocError();
+      return NULL;
+    }
+
+    *cachedValue = value;
+  }
+
+  return *cachedValue;
 }

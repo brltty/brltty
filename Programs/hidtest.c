@@ -33,6 +33,8 @@
 
 static int opt_listItems;
 static int opt_showIdentifiers;
+static int opt_showHostPath;
+static int opt_showHostDevice;
 
 static int opt_echoInput;
 static char *opt_inputTimeout;
@@ -61,6 +63,18 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'i',
     .setting.flag = &opt_showIdentifiers,
     .description = strtext("Show the vendor and product identifiers.")
+  },
+
+  { .word = "host-path",
+    .letter = 'P',
+    .setting.flag = &opt_showHostPath,
+    .description = strtext("Show the host path.")
+  },
+
+  { .word = "host-device",
+    .letter = 'D',
+    .setting.flag = &opt_showHostDevice,
+    .description = strtext("Show the host Device.")
   },
 
   { .word = "echo",
@@ -447,7 +461,33 @@ main (int argc, char *argv[]) {
         if (hidGetIdentifiers(device, &vendor, &product)) {
           fprintf(outputStream, "%04X:%04X\n", vendor, product);
         } else {
-          logMessage(LOG_WARNING, "identifiers not available");
+          logMessage(LOG_WARNING, "vendor/product identifiers not available");
+          exitStatus = PROG_EXIT_SEMANTIC;
+        }
+      }
+    }
+
+    if (canWriteOutput()) {
+      if (opt_showHostPath) {
+        const char *hostPath = hidGetHostPath(device);
+
+        if (hostPath) {
+          fprintf(outputStream, "%s\n", hostPath);
+        } else {
+          logMessage(LOG_WARNING, "host path not available");
+          exitStatus = PROG_EXIT_SEMANTIC;
+        }
+      }
+    }
+
+    if (canWriteOutput()) {
+      if (opt_showHostDevice) {
+        const char *hostDevice = hidGetHostDevice(device);
+
+        if (hostDevice) {
+          fprintf(outputStream, "%s\n", hostDevice);
+        } else {
+          logMessage(LOG_WARNING, "host device not available");
           exitStatus = PROG_EXIT_SEMANTIC;
         }
       }

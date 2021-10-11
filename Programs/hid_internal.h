@@ -43,9 +43,11 @@ typedef ssize_t HidReadDataMethod (
   int initialTimeout, int subsequentTimeout
 );
 
-typedef char *HidGetDeviceDescriptionMethod (HidHandle *handle);
-typedef char *HidGetDeviceEndpointMethod (HidHandle *handle);
-typedef char *HidGetHostEndpointMethod (HidHandle *handle);
+typedef const char *HidGetDeviceDescriptionMethod (HidHandle *handle);
+typedef const char *HidGetDeviceEndpointMethod (HidHandle *handle);
+
+typedef const char *HidGetHostPathMethod (HidHandle *handle);
+typedef const char *HidGetHostDeviceMethod (HidHandle *handle);
 
 typedef struct {
   HidDestroyHandleMethod *destroyHandle;
@@ -65,7 +67,9 @@ typedef struct {
 
   HidGetDeviceDescriptionMethod *getDeviceDescription;
   HidGetDeviceEndpointMethod *getDeviceEndpoint;
-  HidGetHostEndpointMethod *getHostEndpoint;
+
+  HidGetHostPathMethod *getHostPath;
+  HidGetHostDeviceMethod *getHostDevice;
 } HidHandleMethods;
 
 typedef HidHandle *HidNewUSBHandleMethod (const HidUSBFilter *filter);
@@ -80,6 +84,16 @@ typedef struct {
 } HidPackageDescriptor;
 
 extern const HidPackageDescriptor hidPackageDescriptor;
+
+typedef int HidGetStringMethod (
+  HidHandle *handle, char *buffer, size_t size, void *data
+);
+
+extern const char *hidCacheString (
+  HidHandle *handle, char **cachedValue,
+  char *buffer, size_t size,
+  HidGetStringMethod *getString, void *data
+);
 
 #ifdef __cplusplus
 }
