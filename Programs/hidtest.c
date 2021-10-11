@@ -608,8 +608,9 @@ writeData (HidDevice *device) {
       return 0;
     }
 
-    size_t expected = size.output;
     size_t actual = writeDataLength;
+    size_t expected = size.output;
+    if (!identifier) expected += 1;
 
     if (actual != expected) {
       logMessage(LOG_ERR,
