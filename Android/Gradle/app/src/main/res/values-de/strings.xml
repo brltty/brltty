@@ -135,7 +135,7 @@
   <string name="LOG_CATEGORY_LABEL_server">Server Ereignisse</string>
   <string name="LOG_CATEGORY_LABEL_serial">Serielle E/A</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB E/A</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth E/A</string>
+  <string name="LOG_CATEGORY_LABEL_bt">Bluetooth E/A</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Brailletreiberereignisse</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Sprachausgabentreiber</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Bildschirmtreiberereignisse</string>

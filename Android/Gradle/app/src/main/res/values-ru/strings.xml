@@ -135,7 +135,7 @@
   <string name="LOG_CATEGORY_LABEL_server">Серверные события</string>
   <string name="LOG_CATEGORY_LABEL_serial">Последовательный I/O</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth I/O</string>
+  <string name="LOG_CATEGORY_LABEL_bt">Bluetooth I/O</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">События брайлевского драйвера</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">События речевого драйвера</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">События драйвера программы экранного доступа</string>

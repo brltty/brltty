@@ -135,7 +135,7 @@
   <string name="LOG_CATEGORY_LABEL_server">لحظات سرویس دهنده</string>
   <string name="LOG_CATEGORY_LABEL_serial">فعالیت سریال</string>
   <string name="LOG_CATEGORY_LABEL_usb">فعالیت یو اس بی</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">فعالیت بلوتوث</string>
+  <string name="LOG_CATEGORY_LABEL_bt">فعالیت بلوتوث</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">لحظات راه انداز بریل</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">لحظات راه انداز گفتار</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">لحظات راه انداز صفحه</string>

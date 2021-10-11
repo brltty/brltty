@@ -135,7 +135,7 @@
   <string name="LOG_CATEGORY_LABEL_server">Palvelintapahtumat</string>
   <string name="LOG_CATEGORY_LABEL_serial">Sarjaportin syöttö/tulostus</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB:n syöttö/tulostus</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetoothin syöttö/tulostus</string>
+  <string name="LOG_CATEGORY_LABEL_bt">Bluetoothin syöttö/tulostus</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Pistenäyttöajurin tapahtumat</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Puheajurin tapahtumat</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Näyttöajurin tapahtumat</string>

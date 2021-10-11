@@ -135,7 +135,7 @@
   <string name="LOG_CATEGORY_LABEL_server">Události serveru</string>
   <string name="LOG_CATEGORY_LABEL_serial">Sériový Vstup/Výstup</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB Vstup/Výstup</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth Vstup/Výstup</string>
+  <string name="LOG_CATEGORY_LABEL_bt">Bluetooth Vstup/Výstup</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Události braillského ovladače</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Události ovladače hlasu</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Události ovladače obrazovky</string>

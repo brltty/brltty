@@ -131,7 +131,7 @@
   <string name="LOG_CATEGORY_LABEL_server">Eventi Server</string>
   <string name="LOG_CATEGORY_LABEL_serial">I/O Seriale</string>
   <string name="LOG_CATEGORY_LABEL_usb">I/O USB</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">I/O Bluetooth</string>
+  <string name="LOG_CATEGORY_LABEL_bt">I/O Bluetooth</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Eventi Driver Braille</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Eventi Driver Voce</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Eventi Driver Schermo</string>

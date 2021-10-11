@@ -135,7 +135,7 @@
   <string name="LOG_CATEGORY_LABEL_server">Server hændelser</string>
   <string name="LOG_CATEGORY_LABEL_serial">Serielt I/O</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth I/O</string>
+  <string name="LOG_CATEGORY_LABEL_bt">Bluetooth I/O</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Braille-driver hændelser</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Tale-driver hændelser</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Skærm-river hændelser</string>

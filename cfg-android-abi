@@ -57,6 +57,7 @@ readonly configureOptions=(
    --without-beep-package
    --without-midi-package
    --without-fm-package
+   --without-hid-package
    --without-ports-package
 )
 

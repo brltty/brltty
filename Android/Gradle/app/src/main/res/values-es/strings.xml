@@ -135,7 +135,7 @@
   <string name="LOG_CATEGORY_LABEL_server">Eventos de Servidor</string>
   <string name="LOG_CATEGORY_LABEL_serial">E/S en Serie</string>
   <string name="LOG_CATEGORY_LABEL_usb">E/S USB</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">E/S Bluetooth</string>
+  <string name="LOG_CATEGORY_LABEL_bt">E/S Bluetooth</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Eventos de Controlador de Braille</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Eventos de Controlador de Habla</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Eventos de Controlador de Pantalla</string>

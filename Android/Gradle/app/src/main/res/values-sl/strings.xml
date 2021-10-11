@@ -135,7 +135,7 @@
   <string name="LOG_CATEGORY_LABEL_server">Dogodki Strežnika</string>
   <string name="LOG_CATEGORY_LABEL_serial">Serijski V/I</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB V/I</string>
-  <string name="LOG_CATEGORY_LABEL_bluetooth">Bluetooth V/I</string>
+  <string name="LOG_CATEGORY_LABEL_bt">Bluetooth V/I</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Dogodki Gonilnika za Brajico</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Dogodki Gonilnika Govora</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Dogodki Zaslonskega Gonilnika</string>
