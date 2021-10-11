@@ -148,13 +148,15 @@ hidLinuxReadData (
 
 static size_t
 hidLinuxGetDeviceName (HidHandle *handle, char *buffer, size_t size) {
+  // For USB, this will be the manufacturer string, a space, and the product string.
+  // For Bluetooth, this will be the name of the device.
   ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
 
   if (length == -1) {
     logSystemError("ioctl[HIDIOCGRAWNAME]");
     length = 0;
   } else if (length == size) {
-    if (length > 0) length -= 1;
+    length -= 1;
   }
 
   buffer[length] = 0;
@@ -163,13 +165,15 @@ hidLinuxGetDeviceName (HidHandle *handle, char *buffer, size_t size) {
 
 static size_t
 hidLinuxGetPhysicalAddress (HidHandle *handle, char *buffer, size_t size) {
+  // For USB, this will be the physical path (controller, hubs, ports, etc) to the device.
+  // For Bluetooth, this will be the address of the host controller.
   ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
 
   if (length == -1) {
     logSystemError("ioctl[HIDIOCGRAWPHYS]");
     length = 0;
   } else if (length == size) {
-    if (length > 0) length -= 1;
+    length -= 1;
   }
 
   buffer[length] = 0;
@@ -178,13 +182,15 @@ hidLinuxGetPhysicalAddress (HidHandle *handle, char *buffer, size_t size) {
 
 static size_t
 hidLinuxGetUniqueIdentifier (HidHandle *handle, char *buffer, size_t size) {
+  // For USB, this will be the serial number of the device.
+  // For Bluetooth, this will be the MAC (hardware) address of the device.
   ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
 
   if (length == -1) {
     logSystemError("ioctl[HIDIOCGRAWUNIQ]");
     length = 0;
   } else if (length == size) {
-    if (length > 0) length -= 1;
+    length -= 1;
   }
 
   buffer[length] = 0;
