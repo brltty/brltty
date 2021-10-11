@@ -51,6 +51,7 @@ static int opt_showHostPath;
 static int opt_showHostDevice;
 static int opt_listItems;
 
+static char *opt_writeData;
 static int opt_echoInput;
 static char *opt_inputTimeout;
 
@@ -152,6 +153,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("List the HID report descriptor.")
   },
 
+  { .word = "write",
+    .letter = 'w',
+    .argument = strtext("data"),
+    .setting.string = &opt_writeData,
+    .description = strtext("Specify what to write to the device.")
+  },
+
   { .word = "echo",
     .letter = 'e',
     .setting.flag = &opt_echoInput,
@@ -176,13 +184,6 @@ canWriteOutput (void) {
 
   outputError = errno;
   return 0;
-}
-
-static int
-listItem (const char *line, void *data) {
-  FILE *stream = outputStream;
-  fprintf(stream, "%s\n", line);
-  return canWriteOutput();
 }
 
 static int
@@ -329,7 +330,12 @@ openDevice (HidDevice **device) {
 static HidItemsDescriptor *
 getItems (HidDevice *device) {
   static HidItemsDescriptor *items = NULL;
-  if (!items) items = hidGetItems(device);
+
+  if (!items) {
+    items = hidGetItems(device);
+    if (!items) logMessage(LOG_ERR, "HID items descriptor not available");
+  }
+
   return items;
 }
 
@@ -353,6 +359,242 @@ getInputReportSize (HidDevice *device, uint8_t identifier, size_t *size) {
 }
 
 static int
+listItem (const char *line, void *data) {
+  FILE *stream = outputStream;
+  fprintf(stream, "%s\n", line);
+  return canWriteOutput();
+}
+
+static int
+listItems (HidDevice *device) {
+  HidItemsDescriptor *items = getItems(device);
+  if (!items) return 0;
+
+  hidListItems(items, listItem, NULL);
+  return 1;
+}
+
+static int
+showIdentifiers (HidDevice *device) {
+  uint16_t vendor;
+  uint16_t product;
+
+  if (!hidGetIdentifiers(device, &vendor, &product)) {
+    logMessage(LOG_WARNING, "vendor/product identifiers not available");
+    return 0;
+  }
+
+  fprintf(outputStream, "Vendor Identifier: %04X\nProduct Identifier: %04X\n", vendor, product);
+  return 1;
+}
+
+static int
+showDeviceIdentifier (HidDevice *device) {
+  const char *identifier = hidGetDeviceIdentifier(device);
+
+  if (!identifier) {
+    logMessage(LOG_WARNING, "device identifier not available");
+    return 0;
+  }
+
+  fprintf(outputStream, "Device Identifier: %s\n", identifier);
+  return 1;
+}
+
+static int
+showDeviceName (HidDevice *device) {
+  const char *name = hidGetDeviceName(device);
+
+  if (!name) {
+    logMessage(LOG_WARNING, "device name not available");
+    return 0;
+  }
+
+  fprintf(outputStream, "Device Name: %s\n", name);
+  return 1;
+}
+
+static int
+showHostPath (HidDevice *device) {
+  const char *path = hidGetHostPath(device);
+
+  if (!path) {
+    logMessage(LOG_WARNING, "host path not available");
+    return 0;
+  }
+
+  fprintf(outputStream, "Host Path: %s\n", path);
+  return 1;
+}
+
+static int
+showHostDevice (HidDevice *device) {
+  const char *hostDevice = hidGetHostDevice(device);
+
+  if (!hostDevice) {
+    logMessage(LOG_WARNING, "host device not available");
+    return 0;
+  }
+
+  fprintf(outputStream, "Host Device: %s\n", hostDevice);
+  return 1;
+}
+
+static unsigned char writeDataBuffer[0X1000];
+static size_t writeDataLength = 0;
+
+static int
+isHexadecimal (unsigned char *digit, char character) {
+  const char string[] = {character, 0};
+  char *end;
+  long int value = strtol(string, &end, 0X10);
+
+  if (*end) {
+    logMessage(LOG_ERR, "invalid hexadecimal digit: %c", character);
+    return 0;
+  }
+
+  *digit = value;
+  return 1;
+}
+
+static int
+parseWriteData (const char *data) {
+  unsigned char *out = writeDataBuffer;
+  const unsigned char *end = out + sizeof(writeDataBuffer);
+
+  const char *in = data;
+  unsigned char byte = 0;
+  unsigned int count = 1;
+
+  enum {NEXT, HEX, DOTS, COUNT};
+  unsigned int state = NEXT;
+
+  while (*in) {
+    char character = *in++;
+
+    switch (state) {
+      case NEXT: {
+        if (iswspace(character)) continue;
+
+        if (character == '[') {
+          state = DOTS;
+          continue;
+        }
+
+        unsigned char digit;
+        if (!isHexadecimal(&digit, character)) return 0;
+
+        byte = digit << 4;
+        state = HEX;
+        continue;
+      }
+
+      case HEX: {
+        unsigned char digit;
+        if (!isHexadecimal(&digit, character)) return 0;
+
+        byte |= digit;
+        state = NEXT;
+        break;
+      }
+
+      case DOTS: {
+        if (character == ']') {
+          state = NEXT;
+          break;
+        }
+
+        if ((character < '1') || (character > '8')) {
+          logMessage(LOG_ERR, "invalid dot number: %c", character);
+          return 0;
+        }
+        unsigned char bit = 1 << (character - '1');
+
+        if (byte & bit) {
+          logMessage(LOG_ERR, "duplicate dot number: %c", character);
+          return 0;
+        }
+
+        byte |= bit;
+        continue;
+      }
+
+      case COUNT: {
+        if (iswspace(character)) break;
+        int digit = character - '0';
+
+        if ((digit < 0) || (digit > 9)) {
+          logMessage(LOG_ERR, "invalid count digit: %c", character);
+          return 0;
+        }
+
+        if (!digit) {
+          if (!count) {
+            logMessage(LOG_ERR, "first digit of count can't be 0");
+            return 0;
+          }
+        }
+
+        count *= 10;
+        count += digit;
+
+        if (!*in) break;
+        continue;
+      }
+
+      default:
+        logMessage(LOG_ERR, "unexpected write data parser state: %u", state);
+        return 0;
+    }
+
+    if (state == COUNT) {
+      if (!count) {
+        logMessage(LOG_ERR, "missing count");
+        return 0;
+      }
+
+      state = NEXT;
+    } else if (*in == '*') {
+      in += 1;
+      state = COUNT;
+      count = 0;
+      continue;
+    }
+
+    while (count--) {
+      if (out == end) {
+        logMessage(LOG_ERR, "write data too long");
+        return 0;
+      }
+
+      *out++ = byte;
+    }
+
+    byte = 0;
+    count = 1;
+  }
+
+  if (state != NEXT) {
+    logMessage(LOG_ERR, "incomplete write data");
+    return 0;
+  }
+
+  writeDataLength = out - writeDataBuffer;
+  return 1;
+}
+
+static int
+writeData (HidDevice *device) {
+  if (!writeDataLength) return 1;
+
+  logBytes(LOG_NOTICE, "writing", writeDataBuffer, writeDataLength);
+  return 1;
+}
+
+static int inputTimeout = 10;
+
+static int
 writeInput (const unsigned char *from, size_t count) {
   const unsigned char *to = from + count;
 
@@ -372,7 +614,7 @@ writeInput (const unsigned char *from, size_t count) {
 }
 
 static int
-echoInput (HidDevice *device, int timeout) {
+echoInput (HidDevice *device) {
   size_t reportSize;
   unsigned char reportIdentifier = 0;
   int hasReportIdentifiers = !getInputReportSize(device, reportIdentifier, &reportSize);
@@ -384,7 +626,7 @@ echoInput (HidDevice *device, int timeout) {
   unsigned char *to = from;
   const unsigned char *end = from + bufferSize;
 
-  while (hidAwaitInput(device, timeout)) {
+  while (hidAwaitInput(device, inputTimeout)) {
     ssize_t result = hidReadData(device, to, (end - to), 1000, 100);
 
     if (result == -1) {
@@ -431,6 +673,44 @@ echoInput (HidDevice *device, int timeout) {
   return 1;
 }
 
+typedef struct {
+  int (*handler) (HidDevice *device);
+  int *flag;
+} ActionEntry;
+
+static const ActionEntry actionTable[] = {
+  { .handler = showIdentifiers,
+    .flag = &opt_showIdentifiers,
+  },
+
+  { .handler = showDeviceIdentifier,
+    .flag = &opt_showDeviceIdentifier,
+  },
+
+  { .handler = showDeviceName,
+    .flag = &opt_showDeviceName,
+  },
+
+  { .handler = showHostPath,
+    .flag = &opt_showHostPath,
+  },
+
+  { .handler = showHostDevice,
+    .flag = &opt_showHostDevice,
+  },
+
+  { .handler = listItems,
+    .flag = &opt_listItems,
+  },
+
+  { .handler = writeData,
+  },
+
+  { .handler = echoInput,
+    .flag = &opt_echoInput,
+  },
+};
+
 int
 main (int argc, char *argv[]) {
   {
@@ -447,7 +727,12 @@ main (int argc, char *argv[]) {
     return PROG_EXIT_SYNTAX;
   }
 
-  int inputTimeout = 10;
+  if (*opt_writeData) {
+    if (!parseWriteData(opt_writeData)) {
+      return PROG_EXIT_SYNTAX;
+    }
+  }
+
   {
     static const int minimum = 1;
     static const int maximum = 99;
@@ -456,102 +741,37 @@ main (int argc, char *argv[]) {
       logMessage(LOG_ERR, "invalid input timeout: %s", opt_inputTimeout);
       return PROG_EXIT_SYNTAX;
     }
+
+    inputTimeout *= 1000;
   }
-  inputTimeout *= 1000;
 
   outputStream = stdout;
   outputError = 0;
 
-  HidDevice *device = NULL;
-  if (!openDevice(&device)) return PROG_EXIT_SYNTAX;
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
+  HidDevice *device = NULL;
 
-  if (device) {
-    if (canWriteOutput()) {
-      if (opt_showIdentifiers) {
-        uint16_t vendor;
-        uint16_t product;
+  if (openDevice(&device)) {
+    const ActionEntry *action = actionTable;
+    const ActionEntry *end = action + ARRAY_COUNT(actionTable);
 
-        if (hidGetIdentifiers(device, &vendor, &product)) {
-          fprintf(outputStream, "Vendor Identifier: %04X\nProduct Identifier: %04X\n", vendor, product);
-        } else {
-          logMessage(LOG_WARNING, "vendor/product identifiers not available");
-          exitStatus = PROG_EXIT_SEMANTIC;
+    while (action < end) {
+      if (!action->flag || *action->flag) {
+        int ok = 0;
+
+        if (action->handler(device)) {
+          if (canWriteOutput()) {
+            ok = 1;
+          }
         }
-      }
-    }
 
-    if (canWriteOutput()) {
-      if (opt_showDeviceIdentifier) {
-        const char *identifier = hidGetDeviceIdentifier(device);
-
-        if (identifier) {
-          fprintf(outputStream, "Device Identifier: %s\n", identifier);
-        } else {
-          logMessage(LOG_WARNING, "device reference not available");
-          exitStatus = PROG_EXIT_SEMANTIC;
-        }
-      }
-    }
-
-    if (canWriteOutput()) {
-      if (opt_showDeviceName) {
-        const char *name = hidGetDeviceName(device);
-
-        if (name) {
-          fprintf(outputStream, "Device Name: %s\n", name);
-        } else {
-          logMessage(LOG_WARNING, "device name not available");
-          exitStatus = PROG_EXIT_SEMANTIC;
-        }
-      }
-    }
-
-    if (canWriteOutput()) {
-      if (opt_showHostPath) {
-        const char *path = hidGetHostPath(device);
-
-        if (path) {
-          fprintf(outputStream, "Host Path: %s\n", path);
-        } else {
-          logMessage(LOG_WARNING, "host path not available");
-          exitStatus = PROG_EXIT_SEMANTIC;
-        }
-      }
-    }
-
-    if (canWriteOutput()) {
-      if (opt_showHostDevice) {
-        const char *hostDevice = hidGetHostDevice(device);
-
-        if (hostDevice) {
-          fprintf(outputStream, "Host Device: %s\n", hostDevice);
-        } else {
-          logMessage(LOG_WARNING, "host device not available");
-          exitStatus = PROG_EXIT_SEMANTIC;
-        }
-      }
-    }
-
-    if (canWriteOutput()) {
-      if (opt_listItems) {
-        HidItemsDescriptor *items = getItems(device);
-
-        if (items) {
-          hidListItems(items, listItem, NULL);
-        } else {
-          logMessage(LOG_ERR, "descriptor not available");
-          exitStatus = PROG_EXIT_SEMANTIC;
-        } 
-      }
-    }
-
-    if (canWriteOutput()) {
-      if (opt_echoInput) {
-        if (!echoInput(device, inputTimeout)) {
+        if (!ok) {
           exitStatus = PROG_EXIT_FATAL;
+          break;
         }
       }
+
+      action += 1;
     }
 
     hidCloseDevice(device);
