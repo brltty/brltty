@@ -157,14 +157,14 @@ hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
 }
 
 static void
-hidLogDataTransfer (const char *action, const char *data, size_t size, uint8_t identifier) {
+hidLogDataTransfer (const char *action, const unsigned char *data, size_t size, uint8_t identifier) {
   logBytes(LOG_CATEGORY(HUMAN_INTERFACE),
     "%s: %02X", data, size, action, identifier
   );
 }
 
 int
-hidGetReport (HidDevice *device, char *buffer, size_t size) {
+hidGetReport (HidDevice *device, unsigned char *buffer, size_t size) {
   HidGetReportMethod *method = device->handleMethods->getReport;
 
   if (!method) {
@@ -181,7 +181,7 @@ hidGetReport (HidDevice *device, char *buffer, size_t size) {
 }
 
 int
-hidSetReport (HidDevice *device, const char *report, size_t size) {
+hidSetReport (HidDevice *device, const unsigned char *report, size_t size) {
   HidSetReportMethod *method = device->handleMethods->setReport;
 
   if (!method) {
@@ -195,7 +195,7 @@ hidSetReport (HidDevice *device, const char *report, size_t size) {
 }
 
 int
-hidGetFeature (HidDevice *device, char *buffer, size_t size) {
+hidGetFeature (HidDevice *device, unsigned char *buffer, size_t size) {
   HidGetFeatureMethod *method = device->handleMethods->getFeature;
 
   if (!method) {
@@ -212,7 +212,7 @@ hidGetFeature (HidDevice *device, char *buffer, size_t size) {
 }
 
 int
-hidSetFeature (HidDevice *device, const char *feature, size_t size) {
+hidSetFeature (HidDevice *device, const unsigned char *feature, size_t size) {
   HidSetFeatureMethod *method = device->handleMethods->setFeature;
 
   if (!method) {
@@ -226,7 +226,7 @@ hidSetFeature (HidDevice *device, const char *feature, size_t size) {
 }
 
 int
-hidWriteData (HidDevice *device, const char *data, size_t size) {
+hidWriteData (HidDevice *device, const unsigned char *data, size_t size) {
   HidWriteDataMethod *method = device->handleMethods->writeData;
 
   if (!method) {
@@ -270,7 +270,7 @@ hidAwaitInput (HidDevice *device, int timeout) {
 
 ssize_t
 hidReadData (
-  HidDevice *device, void *buffer, size_t size,
+  HidDevice *device, unsigned char *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
   HidReadDataMethod *method = device->handleMethods->readData;

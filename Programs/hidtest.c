@@ -587,9 +587,41 @@ parseWriteData (const char *data) {
 static int
 writeData (HidDevice *device) {
   if (!writeDataLength) return 1;
-
   logBytes(LOG_NOTICE, "writing", writeDataBuffer, writeDataLength);
-  return 1;
+
+  const HidItemsDescriptor *items = getItems(device);
+  if (!items) return 0;
+
+  {
+    unsigned char identifier = writeDataBuffer[0];
+    HidReportSize size;
+    int ok = 0;
+
+    if (hidGetReportSize(items, identifier, &size)) {
+      if (size.output) {
+        ok = 1;
+      }
+    }
+
+    if (!ok) {
+      logMessage(LOG_ERR, "output report not defined: %02X", identifier);
+      return 0;
+    }
+
+    size_t expected = size.output;
+    size_t actual = writeDataLength;
+
+    if (actual != expected) {
+      logMessage(LOG_ERR,
+        "incorrect output report size: %02X: %"PRIsize " != %"PRIsize,
+        identifier, actual, expected
+      );
+
+      return 0;
+    }
+  }
+
+  return hidSetReport(device, writeDataBuffer, writeDataLength);
 }
 
 static int inputTimeout = 10;

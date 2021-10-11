@@ -29,18 +29,18 @@ typedef void HidDestroyHandleMethod (HidHandle *handle);
 typedef HidItemsDescriptor *HidGetItemsMethod (HidHandle *handle);
 typedef int HidGetIdentifiersMethod (HidHandle *handle, uint16_t *vendor, uint16_t *product);
 
-typedef int HidGetReportMethod (HidHandle *handle, char *buffer, size_t size);
-typedef int HidSetReportMethod (HidHandle *handle, const char *report, size_t size);
+typedef int HidGetReportMethod (HidHandle *handle, unsigned char *buffer, size_t size);
+typedef int HidSetReportMethod (HidHandle *handle, const unsigned char *report, size_t size);
 
-typedef int HidGetFeatureMethod (HidHandle *handle, char *buffer, size_t size);
-typedef int HidSetFeatureMethod (HidHandle *handle, const char *feature, size_t size);
+typedef int HidGetFeatureMethod (HidHandle *handle, unsigned char *buffer, size_t size);
+typedef int HidSetFeatureMethod (HidHandle *handle, const unsigned char *feature, size_t size);
 
-typedef int HidWriteDataMethod (HidHandle *handle, const char *data, size_t size);
+typedef int HidWriteDataMethod (HidHandle *handle, const unsigned char *data, size_t size);
 typedef int HidMonitorInputMethod (HidHandle *handle, AsyncMonitorCallback *callback, void *data);
 typedef int HidAwaitInputMethod (HidHandle *handle, int timeout);
 
 typedef ssize_t HidReadDataMethod (
-  HidHandle *handle, void *buffer, size_t size,
+  HidHandle *handle, unsigned char *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
 

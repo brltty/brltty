@@ -107,35 +107,35 @@ hidLinuxGetIdentifiers (HidHandle *handle, uint16_t *vendor, uint16_t *product) 
 }
 
 static int
-hidLinuxGetReport (HidHandle *handle, char *buffer, size_t size) {
+hidLinuxGetReport (HidHandle *handle, unsigned char *buffer, size_t size) {
   if (ioctl(handle->fileDescriptor, HIDIOCGINPUT(size), buffer) != -1) return 1;
   logSystemError("ioctl[HIDIOCGINPUT]");
   return 0;
 }
 
 static int
-hidLinuxSetReport (HidHandle *handle, const char *report, size_t size) {
+hidLinuxSetReport (HidHandle *handle, const unsigned char *report, size_t size) {
   if (ioctl(handle->fileDescriptor, HIDIOCSOUTPUT(size), report) != -1) return 1;
   logSystemError("ioctl[HIDIOCSOUTPUT]");
   return 0;
 }
 
 static int
-hidLinuxGetFeature (HidHandle *handle, char *buffer, size_t size) {
+hidLinuxGetFeature (HidHandle *handle, unsigned char *buffer, size_t size) {
   if (ioctl(handle->fileDescriptor, HIDIOCGFEATURE(size), buffer) != -1) return 1;
   logSystemError("ioctl[HIDIOCGFEATURE]");
   return 0;
 }
 
 static int
-hidLinuxSetFeature (HidHandle *handle, const char *feature, size_t size) {
+hidLinuxSetFeature (HidHandle *handle, const unsigned char *feature, size_t size) {
   if (ioctl(handle->fileDescriptor, HIDIOCSFEATURE(size), feature) != -1) return 1;
   logSystemError("ioctl[HIDIOCSFEATURE]");
   return 0;
 }
 
 static int
-hidLinuxWriteData (HidHandle *handle, const char *data, size_t size) {
+hidLinuxWriteData (HidHandle *handle, const unsigned char *data, size_t size) {
   return writeFile(handle->fileDescriptor, data, size);
 }
 
@@ -153,7 +153,7 @@ hidLinuxAwaitInput (HidHandle *handle, int timeout) {
 
 static ssize_t
 hidLinuxReadData (
-  HidHandle *handle, void *buffer, size_t size,
+  HidHandle *handle, unsigned char *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
   return readFile(handle->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
