@@ -33,6 +33,9 @@
 
 static int opt_listItems;
 static int opt_showIdentifiers;
+
+static int opt_showDeviceReference;
+
 static int opt_showHostPath;
 static int opt_showHostDevice;
 
@@ -63,6 +66,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'i',
     .setting.flag = &opt_showIdentifiers,
     .description = strtext("Show the vendor and product identifiers.")
+  },
+
+  { .word = "device-reference",
+    .letter = 'R',
+    .setting.flag = &opt_showDeviceReference,
+    .description = strtext("Show the device reference.")
   },
 
   { .word = "host-path",
@@ -462,6 +471,19 @@ main (int argc, char *argv[]) {
           fprintf(outputStream, "%04X:%04X\n", vendor, product);
         } else {
           logMessage(LOG_WARNING, "vendor/product identifiers not available");
+          exitStatus = PROG_EXIT_SEMANTIC;
+        }
+      }
+    }
+
+    if (canWriteOutput()) {
+      if (opt_showDeviceReference) {
+        const char *deviceReference = hidGetDeviceReference(device);
+
+        if (deviceReference) {
+          fprintf(outputStream, "%s\n", deviceReference);
+        } else {
+          logMessage(LOG_WARNING, "device reference not available");
           exitStatus = PROG_EXIT_SEMANTIC;
         }
       }

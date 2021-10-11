@@ -44,7 +44,7 @@ struct HidHandleStruct {
   struct hidraw_devinfo deviceInformation;
 
   char *deviceDescription;
-  char *deviceEndpoint;
+  char *deviceReference;
   char *hostPath;
 
   char strings[];
@@ -64,7 +64,7 @@ hidLinuxDestroyHandle (HidHandle *handle) {
   close(handle->fileDescriptor);
 
   if (handle->deviceDescription) free(handle->deviceDescription);
-  if (handle->deviceEndpoint) free(handle->deviceEndpoint);
+  if (handle->deviceReference) free(handle->deviceReference);
   if (handle->hostPath) free(handle->hostPath);
 
   free(handle);
@@ -218,11 +218,11 @@ hidLinuxGetDeviceDescription (HidHandle *handle) {
 }
 
 static const char *
-hidLinuxGetDeviceEndpoint (HidHandle *handle) {
+hidLinuxGetDeviceReference (HidHandle *handle) {
   char buffer[0X1000];
 
   return hidCacheString(
-    handle, &handle->deviceEndpoint,
+    handle, &handle->deviceReference,
     buffer, sizeof(buffer),
     hidLinuxGetUniqueIdentifier, NULL
   );
@@ -261,7 +261,7 @@ static const HidHandleMethods hidLinuxHandleMethods = {
   .readData = hidLinuxReadData,
 
   .getDeviceDescription = hidLinuxGetDeviceDescription,
-  .getDeviceEndpoint = hidLinuxGetDeviceEndpoint,
+  .getDeviceReference = hidLinuxGetDeviceReference,
 
   .getHostPath = hidLinuxGetHostPath,
   .getHostDevice = hidLinuxGetHostDevice,
@@ -480,7 +480,7 @@ hidLinuxTestBluetoothDevice (struct udev_device *hidDevice, HidHandle *handle, c
     const char *testAddress = hbf->macAddress;
 
     if (testAddress && *testAddress) {
-      const char *actualAddress = hidLinuxGetDeviceEndpoint(handle);
+      const char *actualAddress = hidLinuxGetDeviceReference(handle);
       if (!actualAddress) return 0;
       if (strcasecmp(actualAddress, testAddress) != 0) return 0;
     }

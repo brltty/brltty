@@ -289,11 +289,11 @@ hidGetDeviceDescription (HidDevice *device) {
 }
 
 const char *
-hidGetDeviceEndpoint (HidDevice *device) {
-  HidGetDeviceEndpointMethod *method = device->handleMethods->getDeviceEndpoint;
+hidGetDeviceReference (HidDevice *device) {
+  HidGetDeviceReferenceMethod *method = device->handleMethods->getDeviceReference;
 
   if (!method) {
-    logUnsupportedOperation("hidGetDeviceEndpoint");
+    logUnsupportedOperation("hidGetDeviceReference");
     errno = ENOSYS;
     return NULL;
   }
