@@ -276,11 +276,11 @@ hidReadData (
 }
 
 const char *
-hidGetDeviceDescription (HidDevice *device) {
-  HidGetDeviceDescriptionMethod *method = device->handleMethods->getDeviceDescription;
+hidGetDeviceIdentifier (HidDevice *device) {
+  HidGetDeviceIdentifierMethod *method = device->handleMethods->getDeviceIdentifier;
 
   if (!method) {
-    logUnsupportedOperation("hidGetDeviceDescription");
+    logUnsupportedOperation("hidGetDeviceIdentifier");
     errno = ENOSYS;
     return NULL;
   }
@@ -289,11 +289,11 @@ hidGetDeviceDescription (HidDevice *device) {
 }
 
 const char *
-hidGetDeviceReference (HidDevice *device) {
-  HidGetDeviceReferenceMethod *method = device->handleMethods->getDeviceReference;
+hidGetDeviceName (HidDevice *device) {
+  HidGetDeviceNameMethod *method = device->handleMethods->getDeviceName;
 
   if (!method) {
-    logUnsupportedOperation("hidGetDeviceReference");
+    logUnsupportedOperation("hidGetDeviceName");
     errno = ENOSYS;
     return NULL;
   }

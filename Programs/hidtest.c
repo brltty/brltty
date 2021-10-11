@@ -34,7 +34,8 @@
 static int opt_listItems;
 static int opt_showIdentifiers;
 
-static int opt_showDeviceReference;
+static int opt_showDeviceIdentifier;
+static int opt_showDeviceName;
 
 static int opt_showHostPath;
 static int opt_showHostDevice;
@@ -68,10 +69,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Show the vendor and product identifiers.")
   },
 
-  { .word = "device-reference",
-    .letter = 'R',
-    .setting.flag = &opt_showDeviceReference,
-    .description = strtext("Show the device reference.")
+  { .word = "device-identifier",
+    .letter = 'I',
+    .setting.flag = &opt_showDeviceIdentifier,
+    .description = strtext("Show the device identifier.")
+  },
+
+  { .word = "device-name",
+    .letter = 'N',
+    .setting.flag = &opt_showDeviceName,
+    .description = strtext("Show the device name.")
   },
 
   { .word = "host-path",
@@ -468,7 +475,7 @@ main (int argc, char *argv[]) {
         uint16_t product;
 
         if (hidGetIdentifiers(device, &vendor, &product)) {
-          fprintf(outputStream, "%04X:%04X\n", vendor, product);
+          fprintf(outputStream, "Vendor/Product Identifiers: %04X:%04X\n", vendor, product);
         } else {
           logMessage(LOG_WARNING, "vendor/product identifiers not available");
           exitStatus = PROG_EXIT_SEMANTIC;
@@ -477,11 +484,11 @@ main (int argc, char *argv[]) {
     }
 
     if (canWriteOutput()) {
-      if (opt_showDeviceReference) {
-        const char *deviceReference = hidGetDeviceReference(device);
+      if (opt_showDeviceIdentifier) {
+        const char *identifier = hidGetDeviceIdentifier(device);
 
-        if (deviceReference) {
-          fprintf(outputStream, "%s\n", deviceReference);
+        if (identifier) {
+          fprintf(outputStream, "Device Identifier: %s\n", identifier);
         } else {
           logMessage(LOG_WARNING, "device reference not available");
           exitStatus = PROG_EXIT_SEMANTIC;
@@ -490,11 +497,24 @@ main (int argc, char *argv[]) {
     }
 
     if (canWriteOutput()) {
-      if (opt_showHostPath) {
-        const char *hostPath = hidGetHostPath(device);
+      if (opt_showDeviceName) {
+        const char *name = hidGetDeviceName(device);
 
-        if (hostPath) {
-          fprintf(outputStream, "%s\n", hostPath);
+        if (name) {
+          fprintf(outputStream, "Device Name: %s\n", name);
+        } else {
+          logMessage(LOG_WARNING, "device name not available");
+          exitStatus = PROG_EXIT_SEMANTIC;
+        }
+      }
+    }
+
+    if (canWriteOutput()) {
+      if (opt_showHostPath) {
+        const char *path = hidGetHostPath(device);
+
+        if (path) {
+          fprintf(outputStream, "Host Path: %s\n", path);
         } else {
           logMessage(LOG_WARNING, "host path not available");
           exitStatus = PROG_EXIT_SEMANTIC;
@@ -507,7 +527,7 @@ main (int argc, char *argv[]) {
         const char *hostDevice = hidGetHostDevice(device);
 
         if (hostDevice) {
-          fprintf(outputStream, "%s\n", hostDevice);
+          fprintf(outputStream, "Host Device: %s\n", hostDevice);
         } else {
           logMessage(LOG_WARNING, "host device not available");
           exitStatus = PROG_EXIT_SEMANTIC;

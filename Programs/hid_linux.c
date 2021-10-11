@@ -30,7 +30,6 @@
 #include "log.h"
 #include "io_hid.h"
 #include "hid_internal.h"
-#include "hid_linux.h"
 #include "io_misc.h"
 #include "async.h"
 #include "async_io.h"
@@ -43,8 +42,8 @@ struct HidHandleStruct {
   AsyncHandle inputMonitor;
   struct hidraw_devinfo deviceInformation;
 
-  char *deviceDescription;
-  char *deviceReference;
+  char *deviceName;
+  char *deviceIdentifier;
   char *hostPath;
 
   char strings[];
@@ -63,8 +62,8 @@ hidLinuxDestroyHandle (HidHandle *handle) {
   hidLinuxCancelInputMonitor(handle);
   close(handle->fileDescriptor);
 
-  if (handle->deviceDescription) free(handle->deviceDescription);
-  if (handle->deviceReference) free(handle->deviceReference);
+  if (handle->deviceName) free(handle->deviceName);
+  if (handle->deviceIdentifier) free(handle->deviceIdentifier);
   if (handle->hostPath) free(handle->hostPath);
 
   free(handle);
@@ -156,7 +155,7 @@ hidLinuxReadData (
 }
 
 static int
-hidLinuxGetDeviceName (HidHandle *handle, char *buffer, size_t size, void *data) {
+hidLinuxGetRawName (HidHandle *handle, char *buffer, size_t size, void *data) {
   // For USB, this will be the manufacturer string, a space, and the product string.
   // For Bluetooth, this will be the name of the device.
   ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
@@ -207,24 +206,24 @@ hidLinuxGetUniqueIdentifier (HidHandle *handle, char *buffer, size_t size, void 
 }
 
 static const char *
-hidLinuxGetDeviceDescription (HidHandle *handle) {
+hidLinuxGetDeviceIdentifier (HidHandle *handle) {
   char buffer[0X1000];
 
   return hidCacheString(
-    handle, &handle->deviceDescription,
+    handle, &handle->deviceIdentifier,
     buffer, sizeof(buffer),
-    hidLinuxGetDeviceName, NULL
+    hidLinuxGetUniqueIdentifier, NULL
   );
 }
 
 static const char *
-hidLinuxGetDeviceReference (HidHandle *handle) {
+hidLinuxGetDeviceName (HidHandle *handle) {
   char buffer[0X1000];
 
   return hidCacheString(
-    handle, &handle->deviceReference,
+    handle, &handle->deviceName,
     buffer, sizeof(buffer),
-    hidLinuxGetUniqueIdentifier, NULL
+    hidLinuxGetRawName, NULL
   );
 }
 
@@ -260,8 +259,8 @@ static const HidHandleMethods hidLinuxHandleMethods = {
   .awaitInput = hidLinuxAwaitInput,
   .readData = hidLinuxReadData,
 
-  .getDeviceDescription = hidLinuxGetDeviceDescription,
-  .getDeviceReference = hidLinuxGetDeviceReference,
+  .getDeviceIdentifier = hidLinuxGetDeviceIdentifier,
+  .getDeviceName = hidLinuxGetDeviceName,
 
   .getHostPath = hidLinuxGetHostPath,
   .getHostDevice = hidLinuxGetHostDevice,
@@ -480,7 +479,7 @@ hidLinuxTestBluetoothDevice (struct udev_device *hidDevice, HidHandle *handle, c
     const char *testAddress = hbf->macAddress;
 
     if (testAddress && *testAddress) {
-      const char *actualAddress = hidLinuxGetDeviceReference(handle);
+      const char *actualAddress = hidLinuxGetDeviceIdentifier(handle);
       if (!actualAddress) return 0;
       if (strcasecmp(actualAddress, testAddress) != 0) return 0;
     }
@@ -490,7 +489,7 @@ hidLinuxTestBluetoothDevice (struct udev_device *hidDevice, HidHandle *handle, c
     const char *testName = hbf->deviceName;
 
     if (testName && *testName) {
-      const char *actualName = hidLinuxGetDeviceDescription(handle);
+      const char *actualName = hidLinuxGetDeviceName(handle);
       if (!actualName) return 0;
       if (!hidMatchString(actualName, testName)) return 0;
     }
