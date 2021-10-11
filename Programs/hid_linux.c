@@ -135,6 +135,11 @@ hidLinuxSetFeature (HidHandle *handle, const char *feature, size_t size) {
 }
 
 static int
+hidLinuxWriteData (HidHandle *handle, const char *data, size_t size) {
+  return writeFile(handle->fileDescriptor, data, size);
+}
+
+static int
 hidLinuxMonitorInput (HidHandle *handle, AsyncMonitorCallback *callback, void *data) {
   hidLinuxCancelInputMonitor(handle);
   if (!callback) return 1;
@@ -172,7 +177,7 @@ hidLinuxGetRawName (HidHandle *handle, char *buffer, size_t size, void *data) {
 }
 
 static int
-hidLinuxGetPhysicalAddress (HidHandle *handle, char *buffer, size_t size, void *data) {
+hidLinuxGetRawPhysical (HidHandle *handle, char *buffer, size_t size, void *data) {
   // For USB, this will be the physical path (controller, hubs, ports, etc) to the device.
   // For Bluetooth, this will be the address of the host controller.
   ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
@@ -189,7 +194,7 @@ hidLinuxGetPhysicalAddress (HidHandle *handle, char *buffer, size_t size, void *
 }
 
 static int
-hidLinuxGetUniqueIdentifier (HidHandle *handle, char *buffer, size_t size, void *data) {
+hidLinuxGetRawUnique (HidHandle *handle, char *buffer, size_t size, void *data) {
   // For USB, this will be the serial number of the device.
   // For Bluetooth, this will be the MAC (hardware) address of the device.
   ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
@@ -212,7 +217,7 @@ hidLinuxGetDeviceIdentifier (HidHandle *handle) {
   return hidCacheString(
     handle, &handle->deviceIdentifier,
     buffer, sizeof(buffer),
-    hidLinuxGetUniqueIdentifier, NULL
+    hidLinuxGetRawUnique, NULL
   );
 }
 
@@ -234,7 +239,7 @@ hidLinuxGetHostPath (HidHandle *handle) {
   return hidCacheString(
     handle, &handle->hostPath,
     buffer, sizeof(buffer),
-    hidLinuxGetPhysicalAddress, NULL
+    hidLinuxGetRawPhysical, NULL
   );
 }
 
@@ -255,6 +260,7 @@ static const HidHandleMethods hidLinuxHandleMethods = {
   .getFeature = hidLinuxGetFeature,
   .setFeature = hidLinuxSetFeature,
 
+  .writeData = hidLinuxWriteData,
   .monitorInput = hidLinuxMonitorInput,
   .awaitInput = hidLinuxAwaitInput,
   .readData = hidLinuxReadData,

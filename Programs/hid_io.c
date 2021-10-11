@@ -226,6 +226,23 @@ hidSetFeature (HidDevice *device, const char *feature, size_t size) {
 }
 
 int
+hidWriteData (HidDevice *device, const char *data, size_t size) {
+  HidWriteDataMethod *method = device->handleMethods->writeData;
+
+  if (!method) {
+    logUnsupportedOperation("hidWriteData");
+    errno = ENOSYS;
+    return 0;
+  }
+
+  logBytes(LOG_CATEGORY(HUMAN_INTERFACE),
+    "output", data, size
+  );
+
+  return method(device->handle, data, size);
+}
+
+int
 hidMonitorInput (HidDevice *device, AsyncMonitorCallback *callback, void *data) {
   HidMonitorInputMethod *method = device->handleMethods->monitorInput;
 
@@ -268,7 +285,7 @@ hidReadData (
 
   if (result != -1) {
     logBytes(LOG_CATEGORY(HUMAN_INTERFACE),
-      "endpoint input", buffer, result
+      "input", buffer, result
     );
   }
 

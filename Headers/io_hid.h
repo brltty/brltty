@@ -60,6 +60,7 @@ extern int hidSetReport (HidDevice *device, const char *report, size_t size);
 extern int hidGetFeature (HidDevice *device, char *buffer, size_t size);
 extern int hidSetFeature (HidDevice *device, const char *feature, size_t size);
 
+extern int hidWriteData (HidDevice *device, const char *data, size_t size);
 extern int hidMonitorInput (HidDevice *device, AsyncMonitorCallback *callback, void *data);
 extern int hidAwaitInput (HidDevice *device, int timeout);
 

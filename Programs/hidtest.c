@@ -31,18 +31,6 @@
 #include "hid_items.h"
 #include "hid_inspect.h"
 
-static int opt_listItems;
-static int opt_showIdentifiers;
-
-static int opt_showDeviceIdentifier;
-static int opt_showDeviceName;
-
-static int opt_showHostPath;
-static int opt_showHostDevice;
-
-static int opt_echoInput;
-static char *opt_inputTimeout;
-
 static int opt_forceUSB;
 static int opt_forceBluetooth;
 
@@ -56,56 +44,17 @@ static char *opt_serialNumber;
 static char *opt_macAddress;
 static char *opt_deviceName;
 
+static int opt_showIdentifiers;
+static int opt_showDeviceIdentifier;
+static int opt_showDeviceName;
+static int opt_showHostPath;
+static int opt_showHostDevice;
+static int opt_listItems;
+
+static int opt_echoInput;
+static char *opt_inputTimeout;
+
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "list",
-    .letter = 'l',
-    .setting.flag = &opt_listItems,
-    .description = strtext("List the HID report descriptor.")
-  },
-
-  { .word = "identifiers",
-    .letter = 'i',
-    .setting.flag = &opt_showIdentifiers,
-    .description = strtext("Show the vendor and product identifiers.")
-  },
-
-  { .word = "device-identifier",
-    .letter = 'I',
-    .setting.flag = &opt_showDeviceIdentifier,
-    .description = strtext("Show the device identifier.")
-  },
-
-  { .word = "device-name",
-    .letter = 'N',
-    .setting.flag = &opt_showDeviceName,
-    .description = strtext("Show the device name.")
-  },
-
-  { .word = "host-path",
-    .letter = 'P',
-    .setting.flag = &opt_showHostPath,
-    .description = strtext("Show the host path.")
-  },
-
-  { .word = "host-device",
-    .letter = 'D',
-    .setting.flag = &opt_showHostDevice,
-    .description = strtext("Show the host Device.")
-  },
-
-  { .word = "echo",
-    .letter = 'e',
-    .setting.flag = &opt_echoInput,
-    .description = strtext("Echo (in hexadecimal) input received from the device.")
-  },
-
-  { .word = "timeout",
-    .letter = 't',
-    .argument = strtext("integer"),
-    .setting.string = &opt_inputTimeout,
-    .description = strtext("The input timeout (in seconds).")
-  },
-
   { .word = "usb",
     .letter = 'u',
     .setting.flag = &opt_forceUSB,
@@ -165,6 +114,55 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("string"),
     .setting.string = &opt_deviceName,
     .description = strtext("Match the start of the device name (Bluetooth only).")
+  },
+
+  { .word = "identifiers",
+    .letter = 'i',
+    .setting.flag = &opt_showIdentifiers,
+    .description = strtext("Show the vendor and product identifiers.")
+  },
+
+  { .word = "device-identifier",
+    .letter = 'I',
+    .setting.flag = &opt_showDeviceIdentifier,
+    .description = strtext("Show the device identifier.")
+  },
+
+  { .word = "device-name",
+    .letter = 'N',
+    .setting.flag = &opt_showDeviceName,
+    .description = strtext("Show the device name.")
+  },
+
+  { .word = "host-path",
+    .letter = 'P',
+    .setting.flag = &opt_showHostPath,
+    .description = strtext("Show the host path.")
+  },
+
+  { .word = "host-device",
+    .letter = 'D',
+    .setting.flag = &opt_showHostDevice,
+    .description = strtext("Show the host Device.")
+  },
+
+  { .word = "list",
+    .letter = 'l',
+    .setting.flag = &opt_listItems,
+    .description = strtext("List the HID report descriptor.")
+  },
+
+  { .word = "echo",
+    .letter = 'e',
+    .setting.flag = &opt_echoInput,
+    .description = strtext("Echo (in hexadecimal) input received from the device.")
+  },
+
+  { .word = "timeout",
+    .letter = 't',
+    .argument = strtext("integer"),
+    .setting.string = &opt_inputTimeout,
+    .description = strtext("The input timeout (in seconds).")
   },
 END_OPTION_TABLE
 
@@ -475,7 +473,7 @@ main (int argc, char *argv[]) {
         uint16_t product;
 
         if (hidGetIdentifiers(device, &vendor, &product)) {
-          fprintf(outputStream, "Vendor/Product Identifiers: %04X:%04X\n", vendor, product);
+          fprintf(outputStream, "Vendor Identifier: %04X\nProduct Identifier: %04X\n", vendor, product);
         } else {
           logMessage(LOG_WARNING, "vendor/product identifiers not available");
           exitStatus = PROG_EXIT_SEMANTIC;

@@ -35,6 +35,7 @@ typedef int HidSetReportMethod (HidHandle *handle, const char *report, size_t si
 typedef int HidGetFeatureMethod (HidHandle *handle, char *buffer, size_t size);
 typedef int HidSetFeatureMethod (HidHandle *handle, const char *feature, size_t size);
 
+typedef int HidWriteDataMethod (HidHandle *handle, const char *data, size_t size);
 typedef int HidMonitorInputMethod (HidHandle *handle, AsyncMonitorCallback *callback, void *data);
 typedef int HidAwaitInputMethod (HidHandle *handle, int timeout);
 
@@ -61,6 +62,7 @@ typedef struct {
   HidGetFeatureMethod *getFeature;
   HidSetFeatureMethod *setFeature;
 
+  HidWriteDataMethod *writeData;
   HidMonitorInputMethod *monitorInput;
   HidAwaitInputMethod *awaitInput;
   HidReadDataMethod *readData;
