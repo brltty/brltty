@@ -51,7 +51,7 @@ static int opt_showHostPath;
 static int opt_showHostDevice;
 static int opt_listItems;
 
-static char *opt_writeData;
+static char *opt_outputReport;
 static int opt_echoInput;
 static char *opt_inputTimeout;
 
@@ -153,11 +153,11 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("List the HID report descriptor.")
   },
 
-  { .word = "write",
-    .letter = 'w',
+  { .word = "output-report",
+    .letter = 'o',
     .argument = strtext("data"),
-    .setting.string = &opt_writeData,
-    .description = strtext("Specify what to write to the device.")
+    .setting.string = &opt_outputReport,
+    .description = strtext("Set an output report.")
   },
 
   { .word = "echo",
@@ -440,8 +440,8 @@ showHostDevice (HidDevice *device) {
   return 1;
 }
 
-static unsigned char writeDataBuffer[0X1000];
-static size_t writeDataLength = 0;
+static unsigned char outputReportBuffer[0X1000];
+static size_t outputReportLength = 0;
 
 static int
 isHexadecimal (unsigned char *digit, char character) {
@@ -459,9 +459,9 @@ isHexadecimal (unsigned char *digit, char character) {
 }
 
 static int
-parseWriteData (const char *data) {
-  unsigned char *out = writeDataBuffer;
-  const unsigned char *end = out + sizeof(writeDataBuffer);
+parseOutputReport (const char *data) {
+  unsigned char *out = outputReportBuffer;
+  const unsigned char *end = out + sizeof(outputReportBuffer);
 
   const char *in = data;
   unsigned char byte = 0;
@@ -544,7 +544,7 @@ parseWriteData (const char *data) {
       }
 
       default:
-        logMessage(LOG_ERR, "unexpected write data parser state: %u", state);
+        logMessage(LOG_ERR, "unexpected output report parser state: %u", state);
         return 0;
     }
 
@@ -564,7 +564,7 @@ parseWriteData (const char *data) {
 
     while (count--) {
       if (out == end) {
-        logMessage(LOG_ERR, "write data too long");
+        logMessage(LOG_ERR, "output report buffer too small");
         return 0;
       }
 
@@ -576,24 +576,24 @@ parseWriteData (const char *data) {
   }
 
   if (state != NEXT) {
-    logMessage(LOG_ERR, "incomplete write data");
+    logMessage(LOG_ERR, "incomplete output report specification");
     return 0;
   }
 
-  writeDataLength = out - writeDataBuffer;
+  outputReportLength = out - outputReportBuffer;
   return 1;
 }
 
 static int
-writeData (HidDevice *device) {
-  if (!writeDataLength) return 1;
-  logBytes(LOG_NOTICE, "writing", writeDataBuffer, writeDataLength);
+setOutputReport (HidDevice *device) {
+  if (!outputReportLength) return 1;
+  logBytes(LOG_NOTICE, "output report", outputReportBuffer, outputReportLength);
 
   const HidItemsDescriptor *items = getItems(device);
   if (!items) return 0;
 
   {
-    unsigned char identifier = writeDataBuffer[0];
+    unsigned char identifier = outputReportBuffer[0];
     HidReportSize size;
     int ok = 0;
 
@@ -608,21 +608,22 @@ writeData (HidDevice *device) {
       return 0;
     }
 
-    size_t actual = writeDataLength;
+    size_t actual = outputReportLength;
     size_t expected = size.output;
     if (!identifier) expected += 1;
 
     if (actual != expected) {
       logMessage(LOG_ERR,
-        "incorrect output report size: %02X: %"PRIsize " != %"PRIsize,
-        identifier, actual, expected
+        "incorrect output report size: %02X:"
+        " Expected:%"PRIsize " Actual:%"PRIsize,
+        identifier, expected, actual
       );
 
       return 0;
     }
   }
 
-  return hidSetReport(device, writeDataBuffer, writeDataLength);
+  return hidSetReport(device, outputReportBuffer, outputReportLength);
 }
 
 static int inputTimeout = 10;
@@ -736,7 +737,7 @@ static const ActionEntry actionTable[] = {
     .flag = &opt_listItems,
   },
 
-  { .handler = writeData,
+  { .handler = setOutputReport,
   },
 
   { .handler = echoInput,
@@ -760,8 +761,8 @@ main (int argc, char *argv[]) {
     return PROG_EXIT_SYNTAX;
   }
 
-  if (*opt_writeData) {
-    if (!parseWriteData(opt_writeData)) {
+  if (*opt_outputReport) {
+    if (!parseOutputReport(opt_outputReport)) {
       return PROG_EXIT_SYNTAX;
     }
   }
