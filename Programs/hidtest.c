@@ -59,6 +59,35 @@ static char *opt_writeFeature;
 static int opt_echoInput;
 static char *opt_inputTimeout;
 
+static
+STR_BEGIN_FORMATTER(formatParseBytesHelp, unsigned int index)
+  static const char *lines[] = {
+    strtext("One or more bytes (must match the report size)."),
+    strtext("Bytes may be separated by whitespace."),
+    strtext("Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]."),
+    strtext("A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified)."),
+    strtext("The first byte is the report number (00 for no report number)."),
+  };
+
+  switch (index) {
+    case 0: {
+      const char *const *line = lines;
+      const char *const *end = line + ARRAY_COUNT(lines);
+
+      while (line < end) {
+        if (STR_LENGTH) STR_PRINTF(" ");
+        STR_PRINTF("%s", gettext(*line));
+        line += 1;
+      }
+
+      break;
+    }
+
+    default:
+      break;
+  }
+STR_END_FORMATTER
+
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "usb",
     .letter = 'u',
@@ -175,14 +204,18 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'w',
     .argument = strtext("bytes"),
     .setting.string = &opt_writeReport,
-    .description = strtext("Write (set) an output report. One or more bytes (must match the report size). Bytes may be separated by whitespace. Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]. A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified). The first byte is the report number (00 for no report number).")
+    .flags = OPT_Format,
+    .description = strtext("Write (set) an output report. %s"),
+    .strings.format = formatParseBytesHelp
   },
 
   { .word = "write-feature",
     .letter = 'W',
     .argument = strtext("bytes"),
     .setting.string = &opt_writeFeature,
-    .description = strtext("Write (set) a feature report. One or more bytes (must match the report size). Bytes may be separated by whitespace. Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]. A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified). The first byte is the report number (00 for no report number).")
+    .flags = OPT_Format,
+    .description = strtext("Write (set) a feature report. %s"),
+    .strings.format = formatParseBytesHelp
   },
 
   { .word = "echo",
