@@ -59,25 +59,24 @@ static char *opt_writeFeature;
 static int opt_echoInput;
 static char *opt_inputTimeout;
 
+static const char *parseBytesHelp[] = {
+  strtext("Bytes may be separated by whitespace."),
+  strtext("Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]."),
+  strtext("A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified)."),
+  strtext("The first byte is the report number (00 for no report number)."),
+};
+
 static
 STR_BEGIN_FORMATTER(formatParseBytesHelp, unsigned int index)
-  static const char *lines[] = {
-    strtext("One or more bytes (must match the report size)."),
-    strtext("Bytes may be separated by whitespace."),
-    strtext("Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]."),
-    strtext("A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified)."),
-    strtext("The first byte is the report number (00 for no report number)."),
-  };
-
   switch (index) {
     case 0: {
-      const char *const *line = lines;
-      const char *const *end = line + ARRAY_COUNT(lines);
+      const char *const *sentence = parseBytesHelp;
+      const char *const *end = sentence + ARRAY_COUNT(parseBytesHelp);
 
-      while (line < end) {
+      while (sentence < end) {
         if (STR_LENGTH) STR_PRINTF(" ");
-        STR_PRINTF("%s", gettext(*line));
-        line += 1;
+        STR_PRINTF("%s", gettext(*sentence));
+        sentence += 1;
       }
 
       break;
@@ -190,14 +189,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'r',
     .argument = strtext("number"),
     .setting.string = &opt_readReport,
-    .description = strtext("Read (get) an input report (decimal from 0 through 255).")
+    .description = strtext("Read (get) an input report (a decimal integer from 0 through 255).")
   },
 
   { .word = "read-feature",
     .letter = 'R',
     .argument = strtext("number"),
     .setting.string = &opt_readFeature,
-    .description = strtext("Read (get) a feature report (decimal from 1 through 255).")
+    .description = strtext("Read (get) a feature report (a decimal integer from 1 through 255).")
   },
 
   { .word = "write-report",
@@ -242,6 +241,25 @@ canWriteOutput (void) {
 
   outputError = errno;
   return 0;
+}
+
+static int
+writeBytesLine (const char *label, const unsigned char *from, size_t count) {
+  const unsigned char *to = from + count;
+
+  char line[(count * 3) + 1];
+  STR_BEGIN(line, sizeof(line));
+
+  while (from < to) {
+    STR_PRINTF(" %02X", *from++);
+  }
+
+  STR_END;
+  fprintf(outputStream, "%s:%s\n", label, line);
+  if (!canWriteOutput()) return 0;
+
+  fflush(outputStream);
+  return canWriteOutput();
 }
 
 static int
@@ -829,25 +847,6 @@ parseInputTimeout (void) {
 }
 
 static int
-writeInput (const unsigned char *from, size_t count) {
-  const unsigned char *to = from + count;
-
-  char line[(count * 3) + 1];
-  STR_BEGIN(line, sizeof(line));
-
-  while (from < to) {
-    STR_PRINTF(" %02X", *from++);
-  }
-
-  STR_END;
-  fprintf(outputStream, "input:%s\n", line);
-  if (!canWriteOutput()) return 0;
-
-  fflush(outputStream);
-  return canWriteOutput();
-}
-
-static int
 performEchoInput (HidDevice *device) {
   HidReportSize reportSize;
   const size_t *inputSize = &reportSize.input;
@@ -906,7 +905,7 @@ performEchoInput (HidDevice *device) {
         break;
       }
 
-      if (!writeInput(from, *inputSize)) return 0;
+      if (!writeBytesLine("Input Report", from, *inputSize)) return 0;
       from += *inputSize;
     }
   }
@@ -914,95 +913,95 @@ performEchoInput (HidDevice *device) {
   return 1;
 }
 
-typedef struct {
-  int (*handler) (void);
-} ParseEntry;
-
-static const ParseEntry parseTable[] = {
-  { .handler = parseReadReport,
-  },
-
-  { .handler = parseReadFeature,
-  },
-
-  { .handler = parseWriteReport,
-  },
-
-  { .handler = parseWriteFeature,
-  },
-
-  { .handler = parseInputTimeout,
-  },
-};
-
 static int
-parseOptions (void) {
-  const ParseEntry *parse = parseTable;
-  const ParseEntry *end = parse + ARRAY_COUNT(parseTable);
+parseOperands (void) {
+  typedef struct {
+    int (*parse) (void);
+  } OperandEntry;
 
-  while (parse < end) {
-    if (!parse->handler()) return 0;
-    parse += 1;
+  static const OperandEntry operandTable[] = {
+    { .parse = parseReadReport,
+    },
+
+    { .parse = parseReadFeature,
+    },
+
+    { .parse = parseWriteReport,
+    },
+
+    { .parse = parseWriteFeature,
+    },
+
+    { .parse = parseInputTimeout,
+    },
+  };
+
+  const OperandEntry *operand = operandTable;
+  const OperandEntry *end = operand + ARRAY_COUNT(operandTable);
+
+  while (operand < end) {
+    if (!operand->parse()) return 0;
+    operand += 1;
   }
 
   return 1;
 }
 
-typedef struct {
-  int (*handler) (HidDevice *device);
-  int *flag;
-} ActionEntry;
-
-static const ActionEntry actionTable[] = {
-  { .handler = performShowIdentifiers,
-    .flag = &opt_showIdentifiers,
-  },
-
-  { .handler = performShowDeviceIdentifier,
-    .flag = &opt_showDeviceIdentifier,
-  },
-
-  { .handler = performShowDeviceName,
-    .flag = &opt_showDeviceName,
-  },
-
-  { .handler = performShowHostPath,
-    .flag = &opt_showHostPath,
-  },
-
-  { .handler = performShowHostDevice,
-    .flag = &opt_showHostDevice,
-  },
-
-  { .handler = performListItems,
-    .flag = &opt_listItems,
-  },
-
-  { .handler = performReadReport,
-  },
-
-  { .handler = performReadFeature,
-  },
-
-  { .handler = performWriteReport,
-  },
-
-  { .handler = performWriteFeature,
-  },
-
-  { .handler = performEchoInput,
-    .flag = &opt_echoInput,
-  },
-};
-
 static int
 performActions (HidDevice *device) {
+  typedef struct {
+    int (*perform) (HidDevice *device);
+    int *requested;
+  } ActionEntry;
+
+  static const ActionEntry actionTable[] = {
+    { .perform = performShowIdentifiers,
+      .requested = &opt_showIdentifiers,
+    },
+
+    { .perform = performShowDeviceIdentifier,
+      .requested = &opt_showDeviceIdentifier,
+    },
+
+    { .perform = performShowDeviceName,
+      .requested = &opt_showDeviceName,
+    },
+
+    { .perform = performShowHostPath,
+      .requested = &opt_showHostPath,
+    },
+
+    { .perform = performShowHostDevice,
+      .requested = &opt_showHostDevice,
+    },
+
+    { .perform = performListItems,
+      .requested = &opt_listItems,
+    },
+
+    { .perform = performReadReport,
+    },
+
+    { .perform = performReadFeature,
+    },
+
+    { .perform = performWriteReport,
+    },
+
+    { .perform = performWriteFeature,
+    },
+
+    { .perform = performEchoInput,
+      .requested = &opt_echoInput,
+    },
+  };
+
   const ActionEntry *action = actionTable;
   const ActionEntry *end = action + ARRAY_COUNT(actionTable);
 
   while (action < end) {
-    if (!action->flag || *action->flag) {
-      if (!action->handler(device)) return 0;
+    if (!action->requested || *action->requested) {
+      if (!action->perform(device)) return 0;
       if (!canWriteOutput()) return 0;
     }
 
@@ -1031,7 +1030,7 @@ main (int argc, char *argv[]) {
     return PROG_EXIT_SYNTAX;
   }
 
-  if (!parseOptions()) return PROG_EXIT_SYNTAX;
+  if (!parseOperands()) return PROG_EXIT_SYNTAX;
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
   HidDevice *device = NULL;
 
