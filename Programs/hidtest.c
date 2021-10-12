@@ -51,7 +51,11 @@ static int opt_showHostPath;
 static int opt_showHostDevice;
 static int opt_listItems;
 
-static char *opt_outputReport;
+static char *opt_readReport;
+static char *opt_readFeature;
+static char *opt_writeReport;
+static char *opt_writeFeature;
+
 static int opt_echoInput;
 static char *opt_inputTimeout;
 
@@ -105,7 +109,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "address",
     .letter = 'a',
-    .argument = strtext("string"),
+    .argument = strtext("octets"),
     .setting.string = &opt_macAddress,
     .description = strtext("Match the full MAC address (Bluetooth only - all six two-digit, hexadecimal octets separated by a colon [:]).")
   },
@@ -153,11 +157,32 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("List the HID report descriptor's items.")
   },
 
-  { .word = "output-report",
-    .letter = 'o',
+  { .word = "read-report",
+    .letter = 'r',
+    .argument = strtext("number"),
+    .setting.string = &opt_readReport,
+    .description = strtext("Read (get) an input report (decimal from 0 through 255).")
+  },
+
+  { .word = "read-feature",
+    .letter = 'R',
+    .argument = strtext("number"),
+    .setting.string = &opt_readFeature,
+    .description = strtext("Read (get) a feature report (decimal from 1 through 255).")
+  },
+
+  { .word = "write-report",
+    .letter = 'w',
     .argument = strtext("bytes"),
-    .setting.string = &opt_outputReport,
-    .description = strtext("Set an output report. One or more bytes (must match the report size). Bytes may be separated by whitespace. Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]. A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified). The first byte is the report number (00 for no report number).")
+    .setting.string = &opt_writeReport,
+    .description = strtext("Write (set) an output report. One or more bytes (must match the report size). Bytes may be separated by whitespace. Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]. A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified). The first byte is the report number (00 for no report number).")
+  },
+
+  { .word = "write-feature",
+    .letter = 'W',
+    .argument = strtext("bytes"),
+    .setting.string = &opt_writeFeature,
+    .description = strtext("Write (set) a feature report. One or more bytes (must match the report size). Bytes may be separated by whitespace. Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]. A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified). The first byte is the report number (00 for no report number).")
   },
 
   { .word = "echo",
@@ -200,7 +225,7 @@ parseIdentifier (const char *value, void *field) {
 }
 
 static int
-parseAddress (const char *value, void *field) {
+parseMacAddress (const char *value, void *field) {
   {
     const char *byte = value;
     unsigned int state = 0;
@@ -280,7 +305,7 @@ openDevice (HidDevice **device) {
     { .name = "MAC address",
       .value = opt_macAddress,
       .field = &hbf.macAddress,
-      .parser = parseAddress,
+      .parser = parseMacAddress,
       .flag = &opt_forceBluetooth,
     },
 
@@ -327,7 +352,7 @@ openDevice (HidDevice **device) {
   return 1;
 }
 
-static HidItemsDescriptor *
+static const HidItemsDescriptor *
 getItems (HidDevice *device) {
   static HidItemsDescriptor *items = NULL;
 
@@ -340,42 +365,14 @@ getItems (HidDevice *device) {
 }
 
 static int
-getInputReportSize (HidDevice *device, uint8_t identifier, size_t *size) {
-  HidItemsDescriptor *items = getItems(device);
+getReportSize (HidDevice *device, unsigned char identifier, HidReportSize *size) {
+  const HidItemsDescriptor *items = hidGetItems(device);
   if (!items) return 0;
-
-  static uint8_t isInitialized;
-  static uint8_t reportIdentifier;
-  static HidReportSize reportSize;
-
-  if (!isInitialized || (identifier != reportIdentifier)) {
-    if (!hidGetReportSize(items, identifier, &reportSize)) return 0;
-    reportIdentifier = identifier;
-    isInitialized = 1;
-  }
-
-  *size = reportSize.input;
-  return 1;
+  return hidGetReportSize(items, identifier, size);
 }
 
 static int
-listItem (const char *line, void *data) {
-  FILE *stream = outputStream;
-  fprintf(stream, "%s\n", line);
-  return canWriteOutput();
-}
-
-static int
-listItems (HidDevice *device) {
-  HidItemsDescriptor *items = getItems(device);
-  if (!items) return 0;
-
-  hidListItems(items, listItem, NULL);
-  return 1;
-}
-
-static int
-showIdentifiers (HidDevice *device) {
+performShowIdentifiers (HidDevice *device) {
   uint16_t vendor;
   uint16_t product;
 
@@ -384,12 +381,17 @@ showIdentifiers (HidDevice *device) {
     return 0;
   }
 
-  fprintf(outputStream, "Vendor Identifier: %04X\nProduct Identifier: %04X\n", vendor, product);
+  fprintf(outputStream,
+    "Vendor Identifier: %04X\n"
+    "Product Identifier: %04X\n",
+    vendor, product
+  );
+
   return 1;
 }
 
 static int
-showDeviceIdentifier (HidDevice *device) {
+performShowDeviceIdentifier (HidDevice *device) {
   const char *identifier = hidGetDeviceIdentifier(device);
 
   if (!identifier) {
@@ -402,7 +404,7 @@ showDeviceIdentifier (HidDevice *device) {
 }
 
 static int
-showDeviceName (HidDevice *device) {
+performShowDeviceName (HidDevice *device) {
   const char *name = hidGetDeviceName(device);
 
   if (!name) {
@@ -415,7 +417,7 @@ showDeviceName (HidDevice *device) {
 }
 
 static int
-showHostPath (HidDevice *device) {
+performShowHostPath (HidDevice *device) {
   const char *path = hidGetHostPath(device);
 
   if (!path) {
@@ -428,7 +430,7 @@ showHostPath (HidDevice *device) {
 }
 
 static int
-showHostDevice (HidDevice *device) {
+performShowHostDevice (HidDevice *device) {
   const char *hostDevice = hidGetHostDevice(device);
 
   if (!hostDevice) {
@@ -440,8 +442,102 @@ showHostDevice (HidDevice *device) {
   return 1;
 }
 
-static unsigned char outputReportBuffer[0X1000];
-static size_t outputReportLength = 0;
+static int
+listItem (const char *line, void *data) {
+  fprintf(outputStream, "%s\n", line);
+  return canWriteOutput();
+}
+
+static int
+performListItems (HidDevice *device) {
+  const HidItemsDescriptor *items = getItems(device);
+  if (!items) return 0;
+
+  hidListItems(items, listItem, NULL);
+  return 1;
+}
+
+static int
+isReportNumber (unsigned char *number, const char *string, unsigned char minimum) {
+  unsigned int value;
+
+  if (isUnsignedInteger(&value, string)) {
+    if ((value >= minimum) && (value < 0X100)) {
+      *number = value;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static unsigned char readReportNumber;
+
+static int
+parseReadReport (void) {
+  const char *number = opt_readReport;
+  if (!*number) return 1;
+  if (isReportNumber(&readReportNumber, number, 0)) return 1;
+
+  logMessage(LOG_ERR, "invalid input report number: %s", number);
+  return 0;
+}
+
+static int
+performReadReport (HidDevice *device) {
+  if (!*opt_readReport) return 1;
+  HidReportSize reportSize;
+
+  if (getReportSize(device, readReportNumber, &reportSize)) {
+    const size_t *size = &reportSize.input;
+
+    if (*size) {
+      unsigned char report[*size];
+      report[0] = readReportNumber;
+
+      if (!hidGetReport(device, report, *size)) return 0;
+      logBytes(LOG_NOTICE, "input report: %u", report, *size, readReportNumber);
+      return 1;
+    }
+  }
+
+  logMessage(LOG_ERR, "input report not defined: %u", readReportNumber);
+  return 0;
+}
+
+static unsigned char readFeatureNumber;
+
+static int
+parseReadFeature (void) {
+  const char *number = opt_readFeature;
+  if (!*number) return 1;
+  if (isReportNumber(&readFeatureNumber, number, 1)) return 1;
+
+  logMessage(LOG_ERR, "invalid feature report number: %s", number);
+  return 0;
+}
+
+static int
+performReadFeature (HidDevice *device) {
+  if (!*opt_readFeature) return 1;
+  HidReportSize reportSize;
+
+  if (getReportSize(device, readFeatureNumber, &reportSize)) {
+    const size_t *size = &reportSize.feature;
+
+    if (*size) {
+      unsigned char feature[*size];
+      feature[0] = readFeatureNumber;
+
+      if (!hidGetFeature(device, feature, *size)) return 0;
+      logBytes(LOG_NOTICE, "feature report: %u", feature, *size, readFeatureNumber);
+      return 1;
+    }
+  }
+
+  logMessage(LOG_ERR, "feature report not defined: %u", readFeatureNumber);
+  return 0;
+}
 
 static int
 isHexadecimal (unsigned char *digit, char character) {
@@ -459,146 +555,164 @@ isHexadecimal (unsigned char *digit, char character) {
 }
 
 static int
-parseOutputReport (const char *data) {
-  unsigned char *out = outputReportBuffer;
-  const unsigned char *end = out + sizeof(outputReportBuffer);
+parseBytes (
+  const char *bytes, const char *what, unsigned char *buffer,
+  size_t bufferSize, size_t *bufferUsed
+) {
+  unsigned char *out = buffer;
+  const unsigned char *end = out + bufferSize;
 
-  const char *in = data;
-  unsigned char byte = 0;
-  unsigned int count = 1;
+  if (*bytes) {
+    const char *in = bytes;
+    unsigned char byte = 0;
+    unsigned int count = 1;
 
-  enum {NEXT, HEX, DOTS, COUNT};
-  unsigned int state = NEXT;
+    enum {NEXT, HEX, DOTS, COUNT};
+    unsigned int state = NEXT;
 
-  while (*in) {
-    char character = *in++;
+    while (*in) {
+      char character = *in++;
 
-    switch (state) {
-      case NEXT: {
-        if (iswspace(character)) continue;
+      switch (state) {
+        case NEXT: {
+          if (iswspace(character)) continue;
 
-        if (character == '[') {
-          state = DOTS;
+          if (character == '[') {
+            state = DOTS;
+            continue;
+          }
+
+          unsigned char digit;
+          if (!isHexadecimal(&digit, character)) return 0;
+
+          byte = digit << 4;
+          state = HEX;
           continue;
         }
 
-        unsigned char digit;
-        if (!isHexadecimal(&digit, character)) return 0;
+        case HEX: {
+          unsigned char digit;
+          if (!isHexadecimal(&digit, character)) return 0;
 
-        byte = digit << 4;
-        state = HEX;
-        continue;
-      }
-
-      case HEX: {
-        unsigned char digit;
-        if (!isHexadecimal(&digit, character)) return 0;
-
-        byte |= digit;
-        state = NEXT;
-        break;
-      }
-
-      case DOTS: {
-        if (character == ']') {
+          byte |= digit;
           state = NEXT;
           break;
         }
 
-        if ((character < '1') || (character > '8')) {
-          logMessage(LOG_ERR, "invalid dot number: %c", character);
-          return 0;
-        }
-        unsigned char bit = 1 << (character - '1');
+        case DOTS: {
+          if (character == ']') {
+            state = NEXT;
+            break;
+          }
 
-        if (byte & bit) {
-          logMessage(LOG_ERR, "duplicate dot number: %c", character);
-          return 0;
-        }
-
-        byte |= bit;
-        continue;
-      }
-
-      case COUNT: {
-        if (iswspace(character)) break;
-        int digit = character - '0';
-
-        if ((digit < 0) || (digit > 9)) {
-          logMessage(LOG_ERR, "invalid count digit: %c", character);
-          return 0;
-        }
-
-        if (!digit) {
-          if (!count) {
-            logMessage(LOG_ERR, "first digit of count can't be 0");
+          if ((character < '1') || (character > '8')) {
+            logMessage(LOG_ERR, "invalid dot number: %c", character);
             return 0;
           }
+          unsigned char bit = 1 << (character - '1');
+
+          if (byte & bit) {
+            logMessage(LOG_ERR, "duplicate dot number: %c", character);
+            return 0;
+          }
+
+          byte |= bit;
+          continue;
         }
 
-        count *= 10;
-        count += digit;
+        case COUNT: {
+          if (iswspace(character)) break;
+          int digit = character - '0';
 
-        if (!*in) break;
+          if ((digit < 0) || (digit > 9)) {
+            logMessage(LOG_ERR, "invalid count digit: %c", character);
+            return 0;
+          }
+
+          if (!digit) {
+            if (!count) {
+              logMessage(LOG_ERR, "first digit of count can't be 0");
+              return 0;
+            }
+          }
+
+          count *= 10;
+          count += digit;
+
+          if (!*in) break;
+          continue;
+        }
+
+        default:
+          logMessage(LOG_ERR, "unexpected bytes parser state: %u", state);
+          return 0;
+      }
+
+      if (state == COUNT) {
+        if (!count) {
+          logMessage(LOG_ERR, "missing count");
+          return 0;
+        }
+
+        state = NEXT;
+      } else if (*in == '*') {
+        in += 1;
+        state = COUNT;
+        count = 0;
         continue;
       }
 
-      default:
-        logMessage(LOG_ERR, "unexpected output report parser state: %u", state);
-        return 0;
-    }
+      while (count--) {
+        if (out == end) {
+          logMessage(LOG_ERR, "%s buffer too small", what);
+          return 0;
+        }
 
-    if (state == COUNT) {
-      if (!count) {
-        logMessage(LOG_ERR, "missing count");
-        return 0;
+        *out++ = byte;
       }
 
-      state = NEXT;
-    } else if (*in == '*') {
-      in += 1;
-      state = COUNT;
-      count = 0;
-      continue;
+      byte = 0;
+      count = 1;
     }
 
-    while (count--) {
-      if (out == end) {
-        logMessage(LOG_ERR, "output report buffer too small");
-        return 0;
-      }
-
-      *out++ = byte;
+    if (state != NEXT) {
+      logMessage(LOG_ERR, "incomplete %s specification", what);
+      return 0;
     }
-
-    byte = 0;
-    count = 1;
   }
 
-  if (state != NEXT) {
-    logMessage(LOG_ERR, "incomplete output report specification");
-    return 0;
-  }
-
-  outputReportLength = out - outputReportBuffer;
+  *bufferUsed = out - buffer;
   return 1;
 }
 
-static int
-setOutputReport (HidDevice *device) {
-  if (!outputReportLength) return 1;
-  logBytes(LOG_NOTICE, "output report", outputReportBuffer, outputReportLength);
+static unsigned char writeReportBuffer[0X1000];
+static size_t writeReportLength;
 
-  const HidItemsDescriptor *items = getItems(device);
-  if (!items) return 0;
+static int
+parseWriteReport (void) {
+  return parseBytes(
+    opt_writeReport, "output report", writeReportBuffer,
+    ARRAY_COUNT(writeReportBuffer), &writeReportLength
+  );
+}
+
+static int
+performWriteReport (HidDevice *device) {
+  if (!writeReportLength) return 1;
+
+  logBytes(LOG_NOTICE,
+    "writing output report",
+    writeReportBuffer, writeReportLength
+  );
 
   {
-    unsigned char identifier = outputReportBuffer[0];
-    HidReportSize size;
+    unsigned char identifier = writeReportBuffer[0];
+    HidReportSize reportSize;
+    size_t *expectedSize = &reportSize.output;
     int ok = 0;
 
-    if (hidGetReportSize(items, identifier, &size)) {
-      if (size.output) {
+    if (getReportSize(device, identifier, &reportSize)) {
+      if (*expectedSize) {
         ok = 1;
       }
     }
@@ -608,25 +722,56 @@ setOutputReport (HidDevice *device) {
       return 0;
     }
 
-    size_t actual = outputReportLength;
-    size_t expected = size.output;
-    if (!identifier) expected += 1;
+    if (!identifier) *expectedSize += 1;
+    size_t actualSize = writeReportLength;
 
-    if (actual != expected) {
+    if (actualSize != *expectedSize) {
       logMessage(LOG_ERR,
         "incorrect output report size: %02X:"
         " Expected:%"PRIsize " Actual:%"PRIsize,
-        identifier, expected, actual
+        identifier, *expectedSize, actualSize
       );
 
       return 0;
     }
   }
 
-  return hidSetReport(device, outputReportBuffer, outputReportLength);
+  return hidSetReport(device, writeReportBuffer, writeReportLength);
 }
 
-static int inputTimeout = 10;
+static unsigned char writeFeatureBuffer[0X1000];
+static size_t writeFeatureLength;
+
+static int
+parseWriteFeature (void) {
+  return parseBytes(
+    opt_writeFeature, "feature report", writeFeatureBuffer,
+    ARRAY_COUNT(writeFeatureBuffer), &writeFeatureLength
+  );
+}
+
+static int
+performWriteFeature (HidDevice *device) {
+  return 1;
+}
+
+static int inputTimeout;
+
+static int
+parseInputTimeout (void) {
+  inputTimeout = 10;
+
+  static const int minimum = 1;
+  static const int maximum = 99;
+
+  if (!validateInteger(&inputTimeout, opt_inputTimeout, &minimum, &maximum)) {
+    logMessage(LOG_ERR, "invalid input timeout: %s", opt_inputTimeout);
+    return 0;
+  }
+
+  inputTimeout *= 1000;
+  return 1;
+}
 
 static int
 writeInput (const unsigned char *from, size_t count) {
@@ -648,10 +793,12 @@ writeInput (const unsigned char *from, size_t count) {
 }
 
 static int
-echoInput (HidDevice *device) {
-  size_t reportSize;
+performEchoInput (HidDevice *device) {
+  HidReportSize reportSize;
+  const size_t *inputSize = &reportSize.input;
+
   unsigned char reportIdentifier = 0;
-  int hasReportIdentifiers = !getInputReportSize(device, reportIdentifier, &reportSize);
+  int hasReportIdentifiers = !getReportSize(device, reportIdentifier, &reportSize);
 
   unsigned char buffer[0X1000];
   size_t bufferSize = sizeof(buffer);
@@ -674,19 +821,24 @@ echoInput (HidDevice *device) {
       if (hasReportIdentifiers) {
         reportIdentifier = *from;
 
-        if (!getInputReportSize(device, reportIdentifier, &reportSize)) {
-          logMessage(LOG_ERR, "unexpected input report: %02X", reportIdentifier);
+        if (!getReportSize(device, reportIdentifier, &reportSize)) {
+          logMessage(LOG_ERR, "undefined input report: %02X", reportIdentifier);
           return 0;
         }
       }
 
+      if (!*inputSize) {
+        logMessage(LOG_ERR, "input report size is zero: %02X", reportIdentifier);
+        return 0;
+      }
+
       size_t count = to - from;
 
-      if (reportSize > count) {
+      if (*inputSize > count) {
         if (from == buffer) {
           logMessage(LOG_ERR,
             "input report too large: %02X: %"PRIsize " > %"PRIsize,
-            reportIdentifier, reportSize, count
+            reportIdentifier, *inputSize, count
           );
 
           return 0;
@@ -699,9 +851,43 @@ echoInput (HidDevice *device) {
         break;
       }
 
-      if (!writeInput(from, reportSize)) return 0;
-      from += reportSize;
+      if (!writeInput(from, *inputSize)) return 0;
+      from += *inputSize;
     }
+  }
+
+  return 1;
+}
+
+typedef struct {
+  int (*handler) (void);
+} ParseEntry;
+
+static const ParseEntry parseTable[] = {
+  { .handler = parseReadReport,
+  },
+
+  { .handler = parseReadFeature,
+  },
+
+  { .handler = parseWriteReport,
+  },
+
+  { .handler = parseWriteFeature,
+  },
+
+  { .handler = parseInputTimeout,
+  },
+};
+
+static int
+parseOptions (void) {
+  const ParseEntry *parse = parseTable;
+  const ParseEntry *end = parse + ARRAY_COUNT(parseTable);
+
+  while (parse < end) {
+    if (!parse->handler()) return 0;
+    parse += 1;
   }
 
   return 1;
@@ -713,37 +899,63 @@ typedef struct {
 } ActionEntry;
 
 static const ActionEntry actionTable[] = {
-  { .handler = showIdentifiers,
+  { .handler = performShowIdentifiers,
     .flag = &opt_showIdentifiers,
   },
 
-  { .handler = showDeviceIdentifier,
+  { .handler = performShowDeviceIdentifier,
     .flag = &opt_showDeviceIdentifier,
   },
 
-  { .handler = showDeviceName,
+  { .handler = performShowDeviceName,
     .flag = &opt_showDeviceName,
   },
 
-  { .handler = showHostPath,
+  { .handler = performShowHostPath,
     .flag = &opt_showHostPath,
   },
 
-  { .handler = showHostDevice,
+  { .handler = performShowHostDevice,
     .flag = &opt_showHostDevice,
   },
 
-  { .handler = listItems,
+  { .handler = performListItems,
     .flag = &opt_listItems,
   },
 
-  { .handler = setOutputReport,
+  { .handler = performReadReport,
   },
 
-  { .handler = echoInput,
+  { .handler = performReadFeature,
+  },
+
+  { .handler = performWriteReport,
+  },
+
+  { .handler = performWriteFeature,
+  },
+
+  { .handler = performEchoInput,
     .flag = &opt_echoInput,
   },
 };
+
+static int
+performActions (HidDevice *device) {
+  const ActionEntry *action = actionTable;
+  const ActionEntry *end = action + ARRAY_COUNT(actionTable);
+
+  while (action < end) {
+    if (!action->flag || *action->flag) {
+      if (!action->handler(device)) return 0;
+      if (!canWriteOutput()) return 0;
+    }
+
+    action += 1;
+  }
+
+  return 1;
+}
 
 int
 main (int argc, char *argv[]) {
@@ -756,58 +968,20 @@ main (int argc, char *argv[]) {
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
+  outputStream = stdout;
+  outputError = 0;
+
   if (argc) {
     logMessage(LOG_ERR, "too many parameters");
     return PROG_EXIT_SYNTAX;
   }
 
-  if (*opt_outputReport) {
-    if (!parseOutputReport(opt_outputReport)) {
-      return PROG_EXIT_SYNTAX;
-    }
-  }
-
-  {
-    static const int minimum = 1;
-    static const int maximum = 99;
-
-    if (!validateInteger(&inputTimeout, opt_inputTimeout, &minimum, &maximum)) {
-      logMessage(LOG_ERR, "invalid input timeout: %s", opt_inputTimeout);
-      return PROG_EXIT_SYNTAX;
-    }
-
-    inputTimeout *= 1000;
-  }
-
-  outputStream = stdout;
-  outputError = 0;
-
+  if (!parseOptions()) return PROG_EXIT_SYNTAX;
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
   HidDevice *device = NULL;
 
   if (openDevice(&device)) {
-    const ActionEntry *action = actionTable;
-    const ActionEntry *end = action + ARRAY_COUNT(actionTable);
-
-    while (action < end) {
-      if (!action->flag || *action->flag) {
-        int ok = 0;
-
-        if (action->handler(device)) {
-          if (canWriteOutput()) {
-            ok = 1;
-          }
-        }
-
-        if (!ok) {
-          exitStatus = PROG_EXIT_FATAL;
-          break;
-        }
-      }
-
-      action += 1;
-    }
-
+    if (!performActions(device)) exitStatus = PROG_EXIT_FATAL;
     hidCloseDevice(device);
   } else {
     logMessage(LOG_ERR, "device not found");
