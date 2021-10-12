@@ -59,7 +59,7 @@ BEGIN_OPTION_TABLE(programOptions)
   { .word = "usb",
     .letter = 'u',
     .setting.flag = &opt_forceUSB,
-    .description = strtext("Filter for a USB device.")
+    .description = strtext("Filter for a USB device (the default if not ambiguous).")
   },
 
   { .word = "bluetooth",
@@ -72,14 +72,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'v',
     .argument = strtext("identifier"),
     .setting.string = &opt_vendorIdentifier,
-    .description = strtext("Match the vendor identifier.")
+    .description = strtext("Match the vendor identifier (four hexadecimal digits).")
   },
 
   { .word = "product",
     .letter = 'p',
     .argument = strtext("identifier"),
     .setting.string = &opt_productIdentifier,
-    .description = strtext("Match the product identifier.")
+    .description = strtext("Match the product identifier (four hexadecimal digits).")
   },
 
   { .word = "manufacturer",
@@ -107,7 +107,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'a',
     .argument = strtext("string"),
     .setting.string = &opt_macAddress,
-    .description = strtext("Match the full MAC address (Bluetooth only).")
+    .description = strtext("Match the full MAC address (Bluetooth only - all six two-digit, hexadecimal octets separated by a colon [:]).")
   },
 
   { .word = "name",
@@ -126,38 +126,38 @@ BEGIN_OPTION_TABLE(programOptions)
   { .word = "device-identifier",
     .letter = 'I',
     .setting.flag = &opt_showDeviceIdentifier,
-    .description = strtext("Show the device identifier.")
+    .description = strtext("Show the device identifier (USB serial number, Bluetooth device address, etc).")
   },
 
   { .word = "device-name",
     .letter = 'N',
     .setting.flag = &opt_showDeviceName,
-    .description = strtext("Show the device name.")
+    .description = strtext("Show the device name (USB manufacturer and/or product strings, Bluetooth device name, etc).")
   },
 
   { .word = "host-path",
     .letter = 'P',
     .setting.flag = &opt_showHostPath,
-    .description = strtext("Show the host path.")
+    .description = strtext("Show the host path (USB topology, Bluetooth host controller address, etc).")
   },
 
   { .word = "host-device",
     .letter = 'D',
     .setting.flag = &opt_showHostDevice,
-    .description = strtext("Show the host Device.")
+    .description = strtext("Show the host device (usually its absolute path).")
   },
 
   { .word = "list",
     .letter = 'l',
     .setting.flag = &opt_listItems,
-    .description = strtext("List the HID report descriptor.")
+    .description = strtext("List the HID report descriptor's items.")
   },
 
   { .word = "output-report",
     .letter = 'o',
-    .argument = strtext("data"),
+    .argument = strtext("bytes"),
     .setting.string = &opt_outputReport,
-    .description = strtext("Set an output report.")
+    .description = strtext("Set an output report. One or more bytes (must match the report size). Bytes may be separated by whitespace. Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]. A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified). The first byte is the report number (00 for no report number).")
   },
 
   { .word = "echo",
