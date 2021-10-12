@@ -63,6 +63,7 @@ struct HidDeviceStruct {
   HidHandle *handle;
   const HidHandleMethods *handleMethods;
   const char *communicationMethod;
+  HidItemsDescriptor *items;
 };
 
 static void
@@ -127,20 +128,26 @@ hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
 void
 hidCloseDevice (HidDevice *device) {
   hidDestroyHandle(device->handle);
+  if (device->items) free(device->items);
   free(device);
 }
 
-HidItemsDescriptor *
+const HidItemsDescriptor *
 hidGetItems (HidDevice *device) {
-  HidGetItemsMethod *method = device->handleMethods->getItems;
+  if (!device->items) {
+    HidGetItemsMethod *method = device->handleMethods->getItems;
 
-  if (!method) {
-    logUnsupportedOperation("hidGetItems");
-    errno = ENOSYS;
-    return NULL;
+    if (!method) {
+      logUnsupportedOperation("hidGetItems");
+      errno = ENOSYS;
+      return NULL;
+    }
+
+    device->items = method(device->handle);
+    if (!device->items) logMessage(LOG_ERR, "HID items descriptor not available");
   }
 
-  return method(device->handle);
+  return device->items;
 }
 
 int

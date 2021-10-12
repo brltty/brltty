@@ -403,18 +403,6 @@ openDevice (HidDevice **device) {
   return 1;
 }
 
-static const HidItemsDescriptor *
-getItems (HidDevice *device) {
-  static HidItemsDescriptor *items = NULL;
-
-  if (!items) {
-    items = hidGetItems(device);
-    if (!items) logMessage(LOG_ERR, "HID items descriptor not available");
-  }
-
-  return items;
-}
-
 static int
 getReportSize (HidDevice *device, unsigned char identifier, HidReportSize *size) {
   const HidItemsDescriptor *items = hidGetItems(device);
@@ -501,7 +489,7 @@ listItem (const char *line, void *data) {
 
 static int
 performListItems (HidDevice *device) {
-  const HidItemsDescriptor *items = getItems(device);
+  const HidItemsDescriptor *items = hidGetItems(device);
   if (!items) return 0;
 
   hidListItems(items, listItem, NULL);
