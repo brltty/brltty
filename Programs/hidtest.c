@@ -718,6 +718,46 @@ parseBytes (
   return 1;
 }
 
+static int
+verifyWrite (
+  HidDevice *device, const char *what,
+  HidReportSize *reportSize, size_t *expectedSize,
+  const unsigned char *buffer, size_t bufferSize
+) {
+  logBytes(LOG_NOTICE, "writing %s report", buffer, bufferSize, what);
+
+  {
+    unsigned char identifier = buffer[0];
+    int isDefined = 0;
+
+    if (getReportSize(device, identifier, reportSize)) {
+      if (*expectedSize) {
+        isDefined = 1;
+      }
+    }
+
+    if (!isDefined) {
+      logMessage(LOG_ERR, "%s report not defined: %02X", what, identifier);
+      return 0;
+    }
+
+    if (!identifier) *expectedSize += 1;
+    size_t actualSize = bufferSize;
+
+    if (actualSize != *expectedSize) {
+      logMessage(LOG_ERR,
+        "incorrect %s report size: %02X:"
+        " Expected:%"PRIsize " Actual:%"PRIsize,
+        what, identifier, *expectedSize, actualSize
+      );
+
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 static unsigned char writeReportBuffer[0X1000];
 static size_t writeReportLength;
 
@@ -732,43 +772,15 @@ parseWriteReport (void) {
 static int
 performWriteReport (HidDevice *device) {
   if (!writeReportLength) return 1;
+  HidReportSize reportSize;
 
-  logBytes(LOG_NOTICE,
-    "writing output report",
+  int verified = verifyWrite(
+    device, "output",
+    &reportSize, &reportSize.output,
     writeReportBuffer, writeReportLength
   );
 
-  {
-    unsigned char identifier = writeReportBuffer[0];
-    HidReportSize reportSize;
-    size_t *expectedSize = &reportSize.output;
-    int ok = 0;
-
-    if (getReportSize(device, identifier, &reportSize)) {
-      if (*expectedSize) {
-        ok = 1;
-      }
-    }
-
-    if (!ok) {
-      logMessage(LOG_ERR, "output report not defined: %02X", identifier);
-      return 0;
-    }
-
-    if (!identifier) *expectedSize += 1;
-    size_t actualSize = writeReportLength;
-
-    if (actualSize != *expectedSize) {
-      logMessage(LOG_ERR,
-        "incorrect output report size: %02X:"
-        " Expected:%"PRIsize " Actual:%"PRIsize,
-        identifier, *expectedSize, actualSize
-      );
-
-      return 0;
-    }
-  }
-
+  if (!verified) return 0;
   return hidSetReport(device, writeReportBuffer, writeReportLength);
 }
 
@@ -785,7 +797,17 @@ parseWriteFeature (void) {
 
 static int
 performWriteFeature (HidDevice *device) {
-  return 1;
+  if (!writeFeatureLength) return 1;
+  HidReportSize reportSize;
+
+  int verified = verifyWrite(
+    device, "feature",
+    &reportSize, &reportSize.feature,
+    writeFeatureBuffer, writeFeatureLength
+  );
+
+  if (!verified) return 0;
+  return hidSetFeature(device, writeFeatureBuffer, writeFeatureLength);
 }
 
 static int inputTimeout;
@@ -855,7 +877,7 @@ performEchoInput (HidDevice *device) {
         reportIdentifier = *from;
 
         if (!getReportSize(device, reportIdentifier, &reportSize)) {
-          logMessage(LOG_ERR, "undefined input report: %02X", reportIdentifier);
+          logMessage(LOG_ERR, "input report not defined: %02X", reportIdentifier);
           return 0;
         }
       }
