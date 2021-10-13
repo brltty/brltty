@@ -528,14 +528,14 @@ performReadReport (HidDevice *device) {
   HidReportSize reportSize;
 
   if (getReportSize(device, readReportNumber, &reportSize)) {
-    const size_t *size = &reportSize.input;
+    size_t size = reportSize.input - 1;
 
-    if (*size) {
-      unsigned char report[*size];
+    if (size) {
+      unsigned char report[size];
       report[0] = readReportNumber;
 
-      if (!hidGetReport(device, report, *size)) return 0;
-      logBytes(LOG_NOTICE, "input report: %u", report, *size, readReportNumber);
+      if (!hidGetReport(device, report, size)) return 0;
+      logBytes(LOG_NOTICE, "input report: %u", report, size, readReportNumber);
       return 1;
     }
   }
@@ -562,14 +562,14 @@ performReadFeature (HidDevice *device) {
   HidReportSize reportSize;
 
   if (getReportSize(device, readFeatureNumber, &reportSize)) {
-    const size_t *size = &reportSize.feature;
+    size_t size = reportSize.feature - 1;
 
-    if (*size) {
-      unsigned char feature[*size];
+    if (size) {
+      unsigned char feature[size];
       feature[0] = readFeatureNumber;
 
-      if (!hidGetFeature(device, feature, *size)) return 0;
-      logBytes(LOG_NOTICE, "feature report: %u", feature, *size, readFeatureNumber);
+      if (!hidGetFeature(device, feature, size)) return 0;
+      logBytes(LOG_NOTICE, "feature report: %u", feature, size, readFeatureNumber);
       return 1;
     }
   }
