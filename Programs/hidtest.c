@@ -1022,12 +1022,14 @@ main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
   HidDevice *device = NULL;
 
-  if (openDevice(&device)) {
-    if (!performActions(device)) exitStatus = PROG_EXIT_FATAL;
-    hidCloseDevice(device);
-  } else {
+  if (!openDevice(&device)) {
+    exitStatus = PROG_EXIT_SYNTAX;
+  } else if (!device) {
     logMessage(LOG_ERR, "device not found");
     exitStatus = PROG_EXIT_SEMANTIC;
+  } else {
+    if (!performActions(device)) exitStatus = PROG_EXIT_FATAL;
+    hidCloseDevice(device);
   }
 
   if (outputError) {
