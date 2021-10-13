@@ -512,6 +512,29 @@ performListItems (HidDevice *device) {
 }
 
 static int
+verifyRead (
+  HidDevice *device, const char *what, unsigned char identifier,
+  HidReportSize *reportSize, size_t *size
+) {
+  {
+    int isDefined = 0;
+
+    if (getReportSize(device, identifier, reportSize)) {
+      if (*size) {
+        isDefined = 1;
+      }
+    }
+
+    if (!isDefined) {
+      logMessage(LOG_ERR, "%s report not defined: %02X", what, identifier);
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
 isReportNumber (unsigned char *number, const char *string, unsigned char minimum) {
   unsigned int value;
 
@@ -525,13 +548,13 @@ isReportNumber (unsigned char *number, const char *string, unsigned char minimum
   return 0;
 }
 
-static unsigned char readReportNumber;
+static unsigned char readReportIdentifier;
 
 static int
 parseReadReport (void) {
   const char *number = opt_readReport;
   if (!*number) return 1;
-  if (isReportNumber(&readReportNumber, number, 0)) return 1;
+  if (isReportNumber(&readReportIdentifier, number, 0)) return 1;
 
   logMessage(LOG_ERR, "invalid input report number: %s", number);
   return 0;
@@ -540,32 +563,31 @@ parseReadReport (void) {
 static int
 performReadReport (HidDevice *device) {
   if (!*opt_readReport) return 1;
+
   HidReportSize reportSize;
+  size_t *size = &reportSize.input;
 
-  if (getReportSize(device, readReportNumber, &reportSize)) {
-    size_t size = reportSize.input - 1;
+  int verified = verifyRead(
+    device, "input", readReportIdentifier,
+    &reportSize, size
+  );
 
-    if (size) {
-      unsigned char report[size];
-      report[0] = readReportNumber;
+  if (!verified) return 0;
+  unsigned char report[*size];
+  report[0] = readReportIdentifier;
 
-      if (!hidGetReport(device, report, size)) return 0;
-      writeBytesLine("Input Report: %02X", report, size, readReportNumber);
-      return 1;
-    }
-  }
-
-  logMessage(LOG_ERR, "input report not defined: %u", readReportNumber);
-  return 0;
+  if (!hidGetReport(device, report, *size)) return 0;
+  writeBytesLine("Input Report: %02X", report, *size, readReportIdentifier);
+  return 1;
 }
 
-static unsigned char readFeatureNumber;
+static unsigned char readFeatureIdentifier;
 
 static int
 parseReadFeature (void) {
   const char *number = opt_readFeature;
   if (!*number) return 1;
-  if (isReportNumber(&readFeatureNumber, number, 1)) return 1;
+  if (isReportNumber(&readFeatureIdentifier, number, 1)) return 1;
 
   logMessage(LOG_ERR, "invalid feature report number: %s", number);
   return 0;
@@ -574,23 +596,22 @@ parseReadFeature (void) {
 static int
 performReadFeature (HidDevice *device) {
   if (!*opt_readFeature) return 1;
+
   HidReportSize reportSize;
+  size_t *size = &reportSize.feature;
 
-  if (getReportSize(device, readFeatureNumber, &reportSize)) {
-    size_t size = reportSize.feature - 1;
+  int verified = verifyRead(
+    device, "feature", readFeatureIdentifier,
+    &reportSize, size
+  );
 
-    if (size) {
-      unsigned char feature[size];
-      feature[0] = readFeatureNumber;
+  if (!verified) return 0;
+  unsigned char feature[*size];
+  feature[0] = readFeatureIdentifier;
 
-      if (!hidGetFeature(device, feature, size)) return 0;
-      writeBytesLine("Feature Report: %02X", feature, size, readFeatureNumber);
-      return 1;
-    }
-  }
-
-  logMessage(LOG_ERR, "feature report not defined: %u", readFeatureNumber);
-  return 0;
+  if (!hidGetFeature(device, feature, *size)) return 0;
+  writeBytesLine("Feature Report: %02X", feature, *size, readFeatureIdentifier);
+  return 1;
 }
 
 static int
@@ -743,12 +764,12 @@ static int
 verifyWrite (
   HidDevice *device, const char *what,
   HidReportSize *reportSize, size_t *expectedSize,
-  const unsigned char *buffer, size_t bufferSize
+  const unsigned char *buffer, size_t actualSize
 ) {
-  logBytes(LOG_NOTICE, "writing %s report", buffer, bufferSize, what);
+  logBytes(LOG_NOTICE, "writing %s report", buffer, actualSize, what);
+  unsigned char identifier = buffer[0];
 
   {
-    unsigned char identifier = buffer[0];
     int isDefined = 0;
 
     if (getReportSize(device, identifier, reportSize)) {
@@ -761,19 +782,18 @@ verifyWrite (
       logMessage(LOG_ERR, "%s report not defined: %02X", what, identifier);
       return 0;
     }
+  }
 
-    if (!identifier) *expectedSize += 1;
-    size_t actualSize = bufferSize;
+  if (!identifier) *expectedSize += 1;
 
-    if (actualSize != *expectedSize) {
-      logMessage(LOG_ERR,
-        "incorrect %s report size: %02X:"
-        " Expected:%"PRIsize " Actual:%"PRIsize,
-        what, identifier, *expectedSize, actualSize
-      );
+  if (actualSize != *expectedSize) {
+    logMessage(LOG_ERR,
+      "incorrect %s report size: %02X:"
+      " Expected:%"PRIsize " Actual:%"PRIsize,
+      what, identifier, *expectedSize, actualSize
+    );
 
-      return 0;
-    }
+    return 0;
   }
 
   return 1;
