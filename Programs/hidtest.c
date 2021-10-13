@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 
@@ -243,19 +244,33 @@ canWriteOutput (void) {
   return 0;
 }
 
+static int writeBytesLine (
+  const char *format,
+  const unsigned char *from, size_t count,
+  ...
+) PRINTF(1, 4);
+
 static int
-writeBytesLine (const char *label, const unsigned char *from, size_t count) {
+writeBytesLine (const char *format, const unsigned char *from, size_t count, ...) {
   const unsigned char *to = from + count;
 
-  char line[(count * 3) + 1];
-  STR_BEGIN(line, sizeof(line));
+  char bytes[(count * 3) + 1];
+  STR_BEGIN(bytes, sizeof(bytes));
 
   while (from < to) {
     STR_PRINTF(" %02X", *from++);
   }
-
   STR_END;
-  fprintf(outputStream, "%s:%s\n", label, line);
+
+  char label[0X100];
+  {
+    va_list arguments;
+    va_start(arguments, count);
+    vsnprintf(label, sizeof(label), format, arguments);
+    va_end(arguments);
+  }
+
+  fprintf(outputStream, "%s:%s\n", label, bytes);
   if (!canWriteOutput()) return 0;
 
   fflush(outputStream);
@@ -535,7 +550,7 @@ performReadReport (HidDevice *device) {
       report[0] = readReportNumber;
 
       if (!hidGetReport(device, report, size)) return 0;
-      logBytes(LOG_NOTICE, "input report: %u", report, size, readReportNumber);
+      writeBytesLine("Input Report: %02X", report, size, readReportNumber);
       return 1;
     }
   }
@@ -569,7 +584,7 @@ performReadFeature (HidDevice *device) {
       feature[0] = readFeatureNumber;
 
       if (!hidGetFeature(device, feature, size)) return 0;
-      logBytes(LOG_NOTICE, "feature report: %u", feature, size, readFeatureNumber);
+      writeBytesLine("Feature Report: %02X", feature, size, readFeatureNumber);
       return 1;
     }
   }
