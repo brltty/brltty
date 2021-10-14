@@ -566,7 +566,6 @@ parseReadReport (void) {
 
 static int
 performReadReport (HidDevice *device) {
-  if (!*opt_readReport) return 1;
   unsigned char identifier = readReportIdentifier;
 
   HidReportSize reportSize;
@@ -600,7 +599,6 @@ parseReadFeature (void) {
 
 static int
 performReadFeature (HidDevice *device) {
-  if (!*opt_readFeature) return 1;
   unsigned char identifier = readFeatureIdentifier;
 
   HidReportSize reportSize;
@@ -810,7 +808,6 @@ static int
 performWriteReport (HidDevice *device) {
   const unsigned char *report = writeReportBuffer;
   size_t length = writeReportLength;
-  if (!length) return 1;
 
   unsigned char identifier;
   HidReportSize reportSize;
@@ -841,7 +838,6 @@ static int
 performWriteFeature (HidDevice *device) {
   const unsigned char *feature = writeFeatureBuffer;
   size_t length = writeFeatureLength;
-  if (!length) return 1;
 
   unsigned char identifier;
   HidReportSize reportSize;
@@ -980,48 +976,64 @@ static int
 performActions (HidDevice *device) {
   typedef struct {
     int (*perform) (HidDevice *device);
-    int *requested;
+    unsigned char isFlag:1;
+
+    union {
+      char **string;
+      int *flag;
+    } option;
   } ActionEntry;
 
   static const ActionEntry actionTable[] = {
     { .perform = performShowIdentifiers,
-      .requested = &opt_showIdentifiers,
+      .isFlag = 1,
+      .option.flag = &opt_showIdentifiers,
     },
 
     { .perform = performShowDeviceIdentifier,
-      .requested = &opt_showDeviceIdentifier,
+      .isFlag = 1,
+      .option.flag = &opt_showDeviceIdentifier,
     },
 
     { .perform = performShowDeviceName,
-      .requested = &opt_showDeviceName,
+      .isFlag = 1,
+      .option.flag = &opt_showDeviceName,
     },
 
     { .perform = performShowHostPath,
-      .requested = &opt_showHostPath,
+      .isFlag = 1,
+      .option.flag = &opt_showHostPath,
     },
 
     { .perform = performShowHostDevice,
-      .requested = &opt_showHostDevice,
+      .isFlag = 1,
+      .option.flag = &opt_showHostDevice,
     },
 
     { .perform = performListItems,
-      .requested = &opt_listItems,
+      .isFlag = 1,
+      .option.flag = &opt_listItems,
     },
 
     { .perform = performReadReport,
+      .option.string = &opt_readReport,
     },
 
     { .perform = performReadFeature,
+      .option.string = &opt_readFeature,
     },
 
     { .perform = performWriteReport,
+      .option.string = &opt_writeReport,
     },
 
     { .perform = performWriteFeature,
+      .option.string = &opt_writeFeature,
     },
 
     { .perform = performEchoInput,
-      .requested = &opt_echoInput,
+      .isFlag = 1,
+      .option.flag = &opt_echoInput,
     },
   };
 
@@ -1029,7 +1041,15 @@ performActions (HidDevice *device) {
   const ActionEntry *end = action + ARRAY_COUNT(actionTable);
 
   while (action < end) {
-    if (!action->requested || *action->requested) {
+    int perform = 0;
+
+    if (action->isFlag) {
+      if (*action->option.flag) perform = 1;
+    } else {
+      if (**action->option.string) perform = 1;
+    }
+
+    if (perform) {
       if (!action->perform(device)) return 0;
       if (!canWriteOutput()) return 0;
     }
