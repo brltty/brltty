@@ -69,4 +69,10 @@ public abstract class APITests {
 
   public final static boolean haveQ
   = haveAPILevel(Build.VERSION_CODES.Q);
+
+  public final static boolean haveR
+  = haveAPILevel(Build.VERSION_CODES.R);
+
+  public final static boolean haveS
+  = haveAPILevel(Build.VERSION_CODES.S);
 }
