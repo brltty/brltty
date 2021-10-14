@@ -1065,7 +1065,7 @@ main (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
-      .applicationName = "hidtest",
+      .applicationName = "brltty-hid",
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

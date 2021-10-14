@@ -18,27 +18,27 @@
 
 all: all-commands all-tools $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 
-all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse
+all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse all-brltty-hid
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltty-lscmds: brltty-lscmds$X
 all-brltty-trtxt: brltty-trtxt$X
 all-brltty-ttb: brltty-ttb$X
-all-brltty-atb: brltty-atb$X
 all-brltty-ctb: brltty-ctb$X
+all-brltty-atb: brltty-atb$X
 all-brltty-ktb: brltty-ktb$X $(BRAILLE_DRIVERS)
 all-brltty-tune: brltty-tune$X
 all-brltty-morse: brltty-morse$X
+all-brltty-hid: brltty-hid$X
 
 all-tools: all-brltty-cldr all-brltty-lsinc
 all-brltty-cldr: brltty-cldr$X
 all-brltty-lsinc: brltty-lsinc$X
 
-everything: all all-brltest all-spktest all-scrtest all-crctest all-hidtest all-msgtest $(ALL_API)
+everything: all all-brltest all-spktest all-scrtest all-crctest all-msgtest $(ALL_API)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
 all-crctest: crctest$X
-all-hidtest: hidtest$X
 all-msgtest: msgtest$X
 
 all-api: all-xbrlapi all-brltty-clip all-apitest
@@ -407,13 +407,13 @@ hid_io.$O:
 $(HID_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(HID_INCLUDES) -c $(SRC_DIR)/$(HID_OBJECT).c
 
-HIDTEST_OBJECTS = hidtest.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS) hid_inspect.$O io_misc.$O
+BRLTTY_HID_OBJECTS = brltty-hid.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS) hid_inspect.$O io_misc.$O
 
-hidtest$X: $(HIDTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(HIDTEST_OBJECTS) $(HID_LIBS) $(LDLIBS)
+brltty-hid$X: $(BRLTTY_HID_OBJECTS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_HID_OBJECTS) $(HID_LIBS) $(LDLIBS)
 
-hidtest.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hidtest.c
+brltty-hid.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brltty-hid.c
 
 hid_inspect.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_inspect.c
@@ -1122,14 +1122,15 @@ install-program-directories: install-program-directory
 
 install-commands: all-commands install-program-directories
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-atb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-atb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ktb$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-hid$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-tune$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-morse$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
 
 install-tools: all-tools install-program-directories
 	$(INSTALL_PROGRAM) brltty-cldr$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -1321,11 +1322,11 @@ distclean clean::
 	for language do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) $@); done
 
 clean::
-	-rm -f brltty$X brltty-cldr$X
-	-rm -f brltty-lscmds$X brltty-lsinc$X
+	-rm -f brltty$X
 	-rm -f brltty-trtxt$X brltty-ttb$X brltty-ctb$X brltty-atb$X brltty-ktb$X
 	-rm -f brltty-tune$X brltty-morse$X
-	-rm -f xbrlapi$X brltty-clip$X
+	-rm -f brltty-cldr$X brltty-hid$X brltty-lscmds$X brltty-lsinc$X
+	-rm -f brltty-clip$X xbrlapi$X
 	-rm -f tbl2hex$(X_FOR_BUILD) *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(LIB_EXT).* *.$(ARC_EXT) *.def *.class *.jar
 	-rm -f $(BLD_TOP)$(DRV_DIR)/*

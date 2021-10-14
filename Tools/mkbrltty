@@ -26,13 +26,11 @@ cd "${buildRoot}"
 
 makeTargets=(
    brltty braille-drivers speech-drivers screen-drivers
-   brltty-lscmds brltty-lsinc brltty-cldr
-   brltty-trtxt brltty-ttb brltty-ctb brltty-atb brltty-ktb
+   brltty-trtxt brltty-ttb brltty-ctb brltty-atb brltty-ktb brltty-hid
    brltty-tune brltty-morse
-   brltest spktest scrtest
-   crctest hidtest msgtest
-   xbrlapi brltty-clip apitest
-   all-api-bindings
+   brltty-lscmds brltty-lsinc brltty-cldr
+   brltest spktest scrtest crctest msgtest
+   all-api-bindings brltty-clip xbrlapi apitest
 )
 
 make -s -C "${programsSubdirectory}" "${makeTargets[@]}"

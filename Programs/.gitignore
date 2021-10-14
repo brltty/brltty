@@ -5,6 +5,7 @@
 /brltty-cldr
 /brltty-clip
 /brltty-ctb
+/brltty-hid
 /brltty-ktb
 /brltty-lscmds
 /brltty-lsinc
@@ -15,7 +16,6 @@
 
 /brltest
 /crctest
-/hidtest
 /msgtest
 /scrtest
 /spktest
