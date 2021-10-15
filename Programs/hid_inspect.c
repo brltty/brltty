@@ -39,7 +39,7 @@ hidGetReports (const HidItemsDescriptor *items) {
   size_t bytesLeft = items->count;
 
   while (1) {
-    HidItemDescription item;
+    HidItem item;
     if (!hidGetNextItem(&item, &nextByte, &bytesLeft)) break;
 
     switch (item.type) {
@@ -223,7 +223,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
 
   while (1) {
     unsigned int offset = nextByte - items->bytes;
-    HidItemDescription item;
+    HidItem item;
     int ok = hidGetNextItem(&item, &nextByte, &bytesLeft);
 
     char line[0X100];

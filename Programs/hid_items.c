@@ -70,7 +70,7 @@ hidGetValueSize (unsigned char item) {
 
 int
 hidGetNextItem (
-  HidItemDescription *item,
+  HidItem *item,
   const unsigned char **bytes,
   size_t *count
 ) {
@@ -132,7 +132,7 @@ hidGetReportSize (
 
   while (bytesLeft) {
     size_t offset = nextByte - items->bytes;
-    HidItemDescription item;
+    HidItem item;
 
     if (!hidGetNextItem(&item, &nextByte, &bytesLeft)) {
       if (bytesLeft) return 0;

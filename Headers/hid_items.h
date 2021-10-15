@@ -34,10 +34,10 @@ typedef struct {
   HidItemValue value;
   uint8_t type;
   uint8_t valueSize;
-} HidItemDescription;
+} HidItem;
 
 extern int hidGetNextItem (
-  HidItemDescription *item,
+  HidItem *item,
   const unsigned char **bytes,
   size_t *count
 );
