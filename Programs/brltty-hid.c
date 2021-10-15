@@ -32,29 +32,31 @@
 #include "hid_items.h"
 #include "hid_inspect.h"
 
-static int opt_forceUSB;
-static int opt_forceBluetooth;
+static int opt_matchUSBDevices;
+static int opt_matchBluetoothDevices;
 
-static char *opt_vendorIdentifier;
-static char *opt_productIdentifier;
+static char *opt_matchVendorIdentifier;
+static char *opt_matchProductIdentifier;
 
-static char *opt_manufacturerName;
-static char *opt_productDescription;
-static char *opt_serialNumber;
+static char *opt_matchManufacturerName;
+static char *opt_matchProductDescription;
+static char *opt_matchSerialNumber;
 
-static char *opt_macAddress;
-static char *opt_deviceName;
+static char *opt_matchDeviceAddress;
+static char *opt_matchDeviceName;
 
 static int opt_showIdentifiers;
 static int opt_showDeviceIdentifier;
 static int opt_showDeviceName;
 static int opt_showHostPath;
 static int opt_showHostDevice;
-static int opt_listReports;
+
 static int opt_listItems;
+static int opt_listReports;
 
 static char *opt_readReport;
 static char *opt_readFeature;
+
 static char *opt_writeReport;
 static char *opt_writeFeature;
 
@@ -90,107 +92,107 @@ STR_BEGIN_FORMATTER(formatParseBytesHelp, unsigned int index)
 STR_END_FORMATTER
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "usb",
+  { .word = "match-usb-devices",
     .letter = 'u',
-    .setting.flag = &opt_forceUSB,
+    .setting.flag = &opt_matchUSBDevices,
     .description = strtext("Filter for a USB device (the default if not ambiguous).")
   },
 
-  { .word = "bluetooth",
+  { .word = "match-bluetooth-devices",
     .letter = 'b',
-    .setting.flag = &opt_forceBluetooth,
+    .setting.flag = &opt_matchBluetoothDevices,
     .description = strtext("Filter for a Bluetooth device.")
   },
 
-  { .word = "vendor-identifier",
+  { .word = "match-vendor-identifier",
     .letter = 'v',
     .argument = strtext("identifier"),
-    .setting.string = &opt_vendorIdentifier,
+    .setting.string = &opt_matchVendorIdentifier,
     .description = strtext("Match the vendor identifier (four hexadecimal digits).")
   },
 
-  { .word = "product-identifier",
+  { .word = "match-product-identifier",
     .letter = 'p',
     .argument = strtext("identifier"),
-    .setting.string = &opt_productIdentifier,
+    .setting.string = &opt_matchProductIdentifier,
     .description = strtext("Match the product identifier (four hexadecimal digits).")
   },
 
-  { .word = "manufacturer-name",
+  { .word = "match-manufacturer-name",
     .letter = 'm',
     .argument = strtext("string"),
-    .setting.string = &opt_manufacturerName,
+    .setting.string = &opt_matchManufacturerName,
     .description = strtext("Match the start of the manufacturer name (USB only).")
   },
 
-  { .word = "product-description",
+  { .word = "match-product-description",
     .letter = 'd',
     .argument = strtext("string"),
-    .setting.string = &opt_productDescription,
+    .setting.string = &opt_matchProductDescription,
     .description = strtext("Match the start of the product description (USB only).")
   },
 
-  { .word = "serial-number",
+  { .word = "match-serial-number",
     .letter = 's',
     .argument = strtext("string"),
-    .setting.string = &opt_serialNumber,
+    .setting.string = &opt_matchSerialNumber,
     .description = strtext("Match the start of the serial number (USB only).")
   },
 
-  { .word = "bluetooth-address",
+  { .word = "match-device-address",
     .letter = 'a',
     .argument = strtext("octets"),
-    .setting.string = &opt_macAddress,
+    .setting.string = &opt_matchDeviceAddress,
     .description = strtext("Match the full MAC address (Bluetooth only - all six two-digit, hexadecimal octets separated by a colon [:]).")
   },
 
-  { .word = "bluetooth-name",
+  { .word = "match-device-name",
     .letter = 'n',
     .argument = strtext("string"),
-    .setting.string = &opt_deviceName,
+    .setting.string = &opt_matchDeviceName,
     .description = strtext("Match the start of the device name (Bluetooth only).")
   },
 
-  { .word = "identifiers",
+  { .word = "show-identifiers",
     .letter = 'i',
     .setting.flag = &opt_showIdentifiers,
     .description = strtext("Show the vendor and product identifiers.")
   },
 
-  { .word = "device-identifier",
+  { .word = "show-device-identifier",
     .letter = 'I',
     .setting.flag = &opt_showDeviceIdentifier,
     .description = strtext("Show the device identifier (USB serial number, Bluetooth device address, etc).")
   },
 
-  { .word = "device-name",
+  { .word = "show-device-name",
     .letter = 'N',
     .setting.flag = &opt_showDeviceName,
     .description = strtext("Show the device name (USB manufacturer and/or product strings, Bluetooth device name, etc).")
   },
 
-  { .word = "host-path",
+  { .word = "show-host-path",
     .letter = 'P',
     .setting.flag = &opt_showHostPath,
     .description = strtext("Show the host path (USB topology, Bluetooth host controller address, etc).")
   },
 
-  { .word = "host-device",
+  { .word = "show-host-device",
     .letter = 'D',
     .setting.flag = &opt_showHostDevice,
     .description = strtext("Show the host device (usually its absolute path).")
-  },
-
-  { .word = "list-reports",
-    .letter = 'L',
-    .setting.flag = &opt_listReports,
-    .description = strtext("List each report's identifier and sizes.")
   },
 
   { .word = "list-items",
     .letter = 'l',
     .setting.flag = &opt_listItems,
     .description = strtext("List the HID report descriptor's items.")
+  },
+
+  { .word = "list-reports",
+    .letter = 'L',
+    .setting.flag = &opt_listReports,
+    .description = strtext("List each report's identifier and sizes.")
   },
 
   { .word = "read-report",
@@ -231,7 +233,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Echo (in hexadecimal) input received from the device.")
   },
 
-  { .word = "timeout",
+  { .word = "input-timeout",
     .letter = 't',
     .argument = strtext("integer"),
     .setting.string = &opt_inputTimeout,
@@ -343,50 +345,50 @@ openDevice (HidDevice **device) {
 
   const FilterEntry filterTable[] = {
     { .name = "vendor identifier",
-      .value = opt_vendorIdentifier,
+      .value = opt_matchVendorIdentifier,
       .field = &huf.vendorIdentifier,
       .parser = parseIdentifier,
     },
 
     { .name = "product identifier",
-      .value = opt_productIdentifier,
+      .value = opt_matchProductIdentifier,
       .field = &huf.productIdentifier,
       .parser = parseIdentifier,
     },
 
     { .name = "manufacturer name",
-      .value = opt_manufacturerName,
+      .value = opt_matchManufacturerName,
       .field = &huf.manufacturerName,
       .parser = parseString,
-      .flag = &opt_forceUSB,
+      .flag = &opt_matchUSBDevices,
     },
 
     { .name = "product description",
-      .value = opt_productDescription,
+      .value = opt_matchProductDescription,
       .field = &huf.productDescription,
       .parser = parseString,
-      .flag = &opt_forceUSB,
+      .flag = &opt_matchUSBDevices,
     },
 
     { .name = "serial number",
-      .value = opt_serialNumber,
+      .value = opt_matchSerialNumber,
       .field = &huf.serialNumber,
       .parser = parseString,
-      .flag = &opt_forceUSB,
+      .flag = &opt_matchUSBDevices,
     },
 
     { .name = "MAC address",
-      .value = opt_macAddress,
+      .value = opt_matchDeviceAddress,
       .field = &hbf.macAddress,
       .parser = parseMacAddress,
-      .flag = &opt_forceBluetooth,
+      .flag = &opt_matchBluetoothDevices,
     },
 
     { .name = "device name",
-      .value = opt_deviceName,
+      .value = opt_matchDeviceName,
       .field = &hbf.deviceName,
       .parser = parseString,
-      .flag = &opt_forceBluetooth,
+      .flag = &opt_matchBluetoothDevices,
     },
   };
 
@@ -403,7 +405,7 @@ openDevice (HidDevice **device) {
       if (filter->flag) {
         *filter->flag = 1;
 
-        if (opt_forceUSB && opt_forceBluetooth) {
+        if (opt_matchUSBDevices && opt_matchBluetoothDevices) {
           logMessage(LOG_ERR, "conflicting filter options");
           return 0;
         }
@@ -416,7 +418,7 @@ openDevice (HidDevice **device) {
   hbf.vendorIdentifier = huf.vendorIdentifier;
   hbf.productIdentifier = huf.productIdentifier;
 
-  if (opt_forceBluetooth) {
+  if (opt_matchBluetoothDevices) {
     *device = hidOpenBluetoothDevice(&hbf);
   } else {
     *device = hidOpenUSBDevice(&huf);
@@ -510,6 +512,15 @@ listItem (const char *line, void *data) {
 }
 
 static int
+performListItems (HidDevice *device) {
+  const HidItemsDescriptor *items = hidGetItems(device);
+  if (!items) return 0;
+
+  hidListItems(items, listItem, NULL);
+  return 1;
+}
+
+static int
 performListReports (HidDevice *device) {
   const HidItemsDescriptor *items = hidGetItems(device);
   if (!items) return 0;
@@ -567,15 +578,6 @@ performListReports (HidDevice *device) {
 }
 
 static int
-performListItems (HidDevice *device) {
-  const HidItemsDescriptor *items = hidGetItems(device);
-  if (!items) return 0;
-
-  hidListItems(items, listItem, NULL);
-  return 1;
-}
-
-static int
 isReportIdentifier (unsigned char *identifier, const char *string, unsigned char minimum) {
   if (strlen(string) != 2) return 0;
 
@@ -620,11 +622,11 @@ static unsigned char readReportIdentifier;
 
 static int
 parseReadReport (void) {
-  const char *number = opt_readReport;
-  if (!*number) return 1;
-  if (isReportIdentifier(&readReportIdentifier, number, 0)) return 1;
+  const char *operand = opt_readReport;
+  if (!*operand) return 1;
+  if (isReportIdentifier(&readReportIdentifier, operand, 0)) return 1;
 
-  logMessage(LOG_ERR, "invalid input report number: %s", number);
+  logMessage(LOG_ERR, "invalid input report identifier: %s", operand);
   return 0;
 }
 
@@ -653,11 +655,11 @@ static unsigned char readFeatureIdentifier;
 
 static int
 parseReadFeature (void) {
-  const char *number = opt_readFeature;
-  if (!*number) return 1;
-  if (isReportIdentifier(&readFeatureIdentifier, number, 1)) return 1;
+  const char *operand = opt_readFeature;
+  if (!*operand) return 1;
+  if (isReportIdentifier(&readFeatureIdentifier, operand, 1)) return 1;
 
-  logMessage(LOG_ERR, "invalid feature report number: %s", number);
+  logMessage(LOG_ERR, "invalid feature report identifier: %s", operand);
   return 0;
 }
 
@@ -1074,14 +1076,14 @@ performActions (HidDevice *device) {
       .option.flag = &opt_showHostDevice,
     },
 
-    { .perform = performListReports,
-      .isFlag = 1,
-      .option.flag = &opt_listReports,
-    },
-
     { .perform = performListItems,
       .isFlag = 1,
       .option.flag = &opt_listItems,
+    },
+
+    { .perform = performListReports,
+      .isFlag = 1,
+      .option.flag = &opt_listReports,
     },
 
     { .perform = performReadReport,

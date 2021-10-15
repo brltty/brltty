@@ -32,7 +32,7 @@ hidGetReports (const HidItemsDescriptor *items) {
   unsigned char identifiers[UINT8_MAX];
   unsigned char count = 0;
 
-  BITMASK(haveIdentifier, UINT8_MAX, char);
+  BITMASK(haveIdentifier, UINT8_MAX+1, char);
   BITMASK_ZERO(haveIdentifier);
 
   const unsigned char *nextByte = items->bytes;
@@ -197,12 +197,12 @@ hidListItem (const char *line, void *data) {
 int
 hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *data) {
   if (!listItem) listItem = hidListItem;
-  const char *label = "items list";
+  const char *label = "Items List";
 
   {
     char line[0X40];
     STR_BEGIN(line, sizeof(line));
-    STR_PRINTF("begin %s: Bytes:%"PRIsize, label, items->count);
+    STR_PRINTF("Begin %s: Bytes:%"PRIsize, label, items->count);
     STR_END;
     if (!listItem(line, data)) return 0;
   }
@@ -230,7 +230,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
     STR_BEGIN(line, sizeof(line));
 
     STR_PRINTF(
-      "item: %*" PRIu32 " (0X%.*" PRIX32 "):",
+      "Item: %*" PRIu32 " (0X%.*" PRIX32 "):",
       decOffsetWidth, offset, hexOffsetWidth, offset
     );
 
@@ -302,7 +302,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
   {
     char line[0X40];
     STR_BEGIN(line, sizeof(line));
-    STR_PRINTF("end %s: Items:%u", label, itemCount);
+    STR_PRINTF("End %s: Items:%u", label, itemCount);
     STR_END;
     return listItem(line, data);
   }
