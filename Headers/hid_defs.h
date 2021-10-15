@@ -23,14 +23,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define HID_NAME(prefix, name) [prefix ## _ ## name] = #name
-
-static inline const char *
-hidGetName (const char *const *names, size_t count, uint32_t index) {
-  if (index >= count) return NULL;
-  return names[index];
-}
-
 typedef enum {
   HID_ITM_UsagePage         = 0X04,
   HID_ITM_Usage             = 0X08,

@@ -23,8 +23,8 @@
 #include "log.h"
 #include "strfmt.h"
 #include "bitmask.h"
-#include "hid_items.h"
 #include "hid_defs.h"
+#include "hid_items.h"
 #include "hid_inspect.h"
 
 HidReports *
@@ -81,49 +81,57 @@ hidGetReports (const HidItemsDescriptor *items) {
   return NULL;
 }
 
-#define HID_COLLECTION_TYPE_NAME(name) HID_NAME(HID_COL, name)
-#define HID_USAGE_PAGE_NAME(name) HID_NAME(HID_UPG, name)
+#define HID_USAGE_PAGE_ENTRY(name) HID_TABLE_ENTRY(HID_UPG, name)
+#define HID_COLLECTION_TYPE_ENTRY(name) HID_TABLE_ENTRY(HID_COL, name)
 
-const char *
-hidGetCollectionTypeName (uint32_t type) {
-  static const char *names[] = {
-    HID_COLLECTION_TYPE_NAME(Physical),
-    HID_COLLECTION_TYPE_NAME(Application),
-    HID_COLLECTION_TYPE_NAME(Logical),
+const HidUsagePageEntry *
+hidGetUsagePageEntry (uint32_t page) {
+  static const HidUsagePageEntry table[] = {
+    HID_USAGE_PAGE_ENTRY(GenericDesktop),
+    HID_USAGE_PAGE_ENTRY(Simulation),
+    HID_USAGE_PAGE_ENTRY(VirtualReality),
+    HID_USAGE_PAGE_ENTRY(Sport),
+    HID_USAGE_PAGE_ENTRY(Game),
+    HID_USAGE_PAGE_ENTRY(GenericDevice),
+    HID_USAGE_PAGE_ENTRY(KeyboardKeypad),
+    HID_USAGE_PAGE_ENTRY(LEDs),
+    HID_USAGE_PAGE_ENTRY(Button),
+    HID_USAGE_PAGE_ENTRY(Ordinal),
+    HID_USAGE_PAGE_ENTRY(Telephony),
+    HID_USAGE_PAGE_ENTRY(Consumer),
+    HID_USAGE_PAGE_ENTRY(Digitizer),
+    HID_USAGE_PAGE_ENTRY(PhysicalInterfaceDevice),
+    HID_USAGE_PAGE_ENTRY(Unicode),
+    HID_USAGE_PAGE_ENTRY(AlphanumericDisplay),
+    HID_USAGE_PAGE_ENTRY(MedicalInstruments),
+    HID_USAGE_PAGE_ENTRY(BarCodeScanner),
+    HID_USAGE_PAGE_ENTRY(Braille),
+    HID_USAGE_PAGE_ENTRY(Scale),
+    HID_USAGE_PAGE_ENTRY(MagneticStripeReader),
+    HID_USAGE_PAGE_ENTRY(Camera),
+    HID_USAGE_PAGE_ENTRY(Arcade),
   };
 
-  return hidGetName(names, ARRAY_COUNT(names), type);
+  static void *sorted = NULL;
+  return hidGetTableEntry(
+    table, ARRAY_COUNT(table), sizeof(table[0]),
+    &sorted, page
+  );
 }
 
-const char *
-hidGetUsagePageName (uint16_t page) {
-  static const char *names[] = {
-    HID_USAGE_PAGE_NAME(GenericDesktop),
-    HID_USAGE_PAGE_NAME(Simulation),
-    HID_USAGE_PAGE_NAME(VirtualReality),
-    HID_USAGE_PAGE_NAME(Sport),
-    HID_USAGE_PAGE_NAME(Game),
-    HID_USAGE_PAGE_NAME(GenericDevice),
-    HID_USAGE_PAGE_NAME(KeyboardKeypad),
-    HID_USAGE_PAGE_NAME(LEDs),
-    HID_USAGE_PAGE_NAME(Button),
-    HID_USAGE_PAGE_NAME(Ordinal),
-    HID_USAGE_PAGE_NAME(Telephony),
-    HID_USAGE_PAGE_NAME(Consumer),
-    HID_USAGE_PAGE_NAME(Digitizer),
-    HID_USAGE_PAGE_NAME(PhysicalInterfaceDevice),
-    HID_USAGE_PAGE_NAME(Unicode),
-    HID_USAGE_PAGE_NAME(AlphanumericDisplay),
-    HID_USAGE_PAGE_NAME(MedicalInstruments),
-    HID_USAGE_PAGE_NAME(BarCodeScanner),
-    HID_USAGE_PAGE_NAME(Braille),
-    HID_USAGE_PAGE_NAME(Scale),
-    HID_USAGE_PAGE_NAME(MagneticStripeReader),
-    HID_USAGE_PAGE_NAME(Camera),
-    HID_USAGE_PAGE_NAME(Arcade),
+const HidCollectionTypeEntry *
+hidGetCollectionTypeEntry (uint32_t type) {
+  static const HidCollectionTypeEntry table[] = {
+    HID_COLLECTION_TYPE_ENTRY(Physical),
+    HID_COLLECTION_TYPE_ENTRY(Application),
+    HID_COLLECTION_TYPE_ENTRY(Logical),
   };
 
-  return hidGetName(names, ARRAY_COUNT(names), page);
+  static void *sorted = NULL;
+  return hidGetTableEntry(
+    table, ARRAY_COUNT(table), sizeof(table[0]),
+    &sorted, type
+  );
 }
 
 STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)
@@ -263,13 +271,17 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
         char buffer[0X40];
 
         switch (item.type) {
-          case HID_ITM_Collection:
-            text = hidGetCollectionTypeName(value);
+          case HID_ITM_UsagePage: {
+            const HidUsagePageEntry *upg = hidGetUsagePageEntry(value);
+            if (upg) text = upg->header.name;
             break;
+          }
 
-          case HID_ITM_UsagePage:
-            text = hidGetUsagePageName(value);
+          case HID_ITM_Collection: {
+            const HidCollectionTypeEntry *col = hidGetCollectionTypeEntry(value);
+            if (col) text = col->header.name;
             break;
+          }
 
           case HID_ITM_Input:
           case HID_ITM_Output:

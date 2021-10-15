@@ -31,13 +31,21 @@ typedef struct {
   unsigned char identifiers[];
 } HidReports;
 
+typedef struct {
+  HID_TABLE_ENTRY_HEADER;
+} HidUsagePageEntry;
+
+typedef struct {
+  HID_TABLE_ENTRY_HEADER;
+} HidCollectionTypeEntry;
+
 extern HidReports *hidGetReports (const HidItemsDescriptor *items);
+extern const HidUsagePageEntry *hidGetUsagePageEntry (uint32_t page);
+extern const HidCollectionTypeEntry *hidGetCollectionTypeEntry (uint32_t type);
 
 typedef int HidItemLister (const char *line, void *data);
 extern int hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *data);
 
-extern const char *hidGetCollectionTypeName (uint32_t type);
-extern const char *hidGetUsagePageName (uint16_t page);
 extern STR_DECLARE_FORMATTER(hidFormatUsageFlags, uint32_t flags);
 
 #ifdef __cplusplus

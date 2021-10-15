@@ -25,41 +25,112 @@
 #include "hid_items.h"
 #include "hid_defs.h"
 
-#define HID_ITEM_TYPE_NAME(name) HID_NAME(HID_ITM, name)
+static int
+hidCompareTableEntriesByValue (const void *element1, const void *element2) {
+  const HidTableEntryHeader *const *header1 = element1;
+  const HidTableEntryHeader *const *header2 = element2;
+
+  uint32_t value1 = (*header1)->value;
+  uint32_t value2 = (*header2)->value;
+
+  if (value1 < value2) return -1;
+  if (value1 > value2) return 1;
+  return 0;
+}
+
+const void *
+hidGetTableEntry (
+  const void *table, size_t count, size_t size,
+  void *sorted, uint32_t value
+) {
+  const HidTableEntryHeader ***sortedEntries = sorted;
+
+  if (!*sortedEntries) {
+    if (!(*sortedEntries = malloc(ARRAY_SIZE(*sortedEntries, count)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    {
+      const void *entry = table;
+      const HidTableEntryHeader **header = *sortedEntries;
+
+      for (unsigned int index=0; index<count; index+=1) {
+        *header++ = entry;
+        entry += size;
+      }
+    }
+
+    qsort(
+      *sortedEntries, count, sizeof(**sortedEntries),
+      hidCompareTableEntriesByValue
+    );
+  }
+
+  unsigned int from = 0;
+  unsigned int to = count;
+
+  while (from < to) {
+    unsigned int current = (from + to) / 2;
+    const HidTableEntryHeader *header = (*sortedEntries)[current];
+    if (value == header->value) return header;
+
+    if (value < header->value) {
+      to = current;
+    } else {
+      from = current + 1;
+    }
+  }
+
+  return NULL;
+}
+
+#define HID_ITEM_TYPE_ENTRY(name) HID_TABLE_ENTRY(HID_ITM, name)
+
+const HidItemTypeEntry *
+hidGetItemTypeEntry (uint8_t type) {
+  static const HidItemTypeEntry table[] = {
+    HID_ITEM_TYPE_ENTRY(UsagePage),
+    HID_ITEM_TYPE_ENTRY(Usage),
+    HID_ITEM_TYPE_ENTRY(LogicalMinimum),
+    HID_ITEM_TYPE_ENTRY(UsageMinimum),
+    HID_ITEM_TYPE_ENTRY(LogicalMaximum),
+    HID_ITEM_TYPE_ENTRY(UsageMaximum),
+    HID_ITEM_TYPE_ENTRY(PhysicalMinimum),
+    HID_ITEM_TYPE_ENTRY(DesignatorIndex),
+    HID_ITEM_TYPE_ENTRY(PhysicalMaximum),
+    HID_ITEM_TYPE_ENTRY(DesignatorMinimum),
+    HID_ITEM_TYPE_ENTRY(UnitExponent),
+    HID_ITEM_TYPE_ENTRY(DesignatorMaximum),
+    HID_ITEM_TYPE_ENTRY(Unit),
+    HID_ITEM_TYPE_ENTRY(ReportSize),
+    HID_ITEM_TYPE_ENTRY(StringIndex),
+    HID_ITEM_TYPE_ENTRY(Input),
+    HID_ITEM_TYPE_ENTRY(ReportID),
+    HID_ITEM_TYPE_ENTRY(StringMinimum),
+    HID_ITEM_TYPE_ENTRY(Output),
+    HID_ITEM_TYPE_ENTRY(ReportCount),
+    HID_ITEM_TYPE_ENTRY(StringMaximum),
+    HID_ITEM_TYPE_ENTRY(Collection),
+    HID_ITEM_TYPE_ENTRY(Push),
+    HID_ITEM_TYPE_ENTRY(Delimiter),
+    HID_ITEM_TYPE_ENTRY(Feature),
+    HID_ITEM_TYPE_ENTRY(Pop),
+    HID_ITEM_TYPE_ENTRY(EndCollection),
+  };
+
+  static void *sorted = NULL;
+  return hidGetTableEntry(
+    table, ARRAY_COUNT(table), sizeof(table[0]),
+    &sorted, type
+  );
+}
 
 const char *
 hidGetItemTypeName (uint8_t type) {
-  static const char *names[] = {
-    HID_ITEM_TYPE_NAME(UsagePage),
-    HID_ITEM_TYPE_NAME(Usage),
-    HID_ITEM_TYPE_NAME(LogicalMinimum),
-    HID_ITEM_TYPE_NAME(UsageMinimum),
-    HID_ITEM_TYPE_NAME(LogicalMaximum),
-    HID_ITEM_TYPE_NAME(UsageMaximum),
-    HID_ITEM_TYPE_NAME(PhysicalMinimum),
-    HID_ITEM_TYPE_NAME(DesignatorIndex),
-    HID_ITEM_TYPE_NAME(PhysicalMaximum),
-    HID_ITEM_TYPE_NAME(DesignatorMinimum),
-    HID_ITEM_TYPE_NAME(UnitExponent),
-    HID_ITEM_TYPE_NAME(DesignatorMaximum),
-    HID_ITEM_TYPE_NAME(Unit),
-    HID_ITEM_TYPE_NAME(ReportSize),
-    HID_ITEM_TYPE_NAME(StringIndex),
-    HID_ITEM_TYPE_NAME(Input),
-    HID_ITEM_TYPE_NAME(ReportID),
-    HID_ITEM_TYPE_NAME(StringMinimum),
-    HID_ITEM_TYPE_NAME(Output),
-    HID_ITEM_TYPE_NAME(ReportCount),
-    HID_ITEM_TYPE_NAME(StringMaximum),
-    HID_ITEM_TYPE_NAME(Collection),
-    HID_ITEM_TYPE_NAME(Push),
-    HID_ITEM_TYPE_NAME(Delimiter),
-    HID_ITEM_TYPE_NAME(Feature),
-    HID_ITEM_TYPE_NAME(Pop),
-    HID_ITEM_TYPE_NAME(EndCollection),
-  };
-
-  return hidGetName(names, ARRAY_COUNT(names), type);
+  const HidItemTypeEntry *entry = hidGetItemTypeEntry(type);
+  if (!entry) return NULL;
+  return entry->header.name;
 }
 
 unsigned char
