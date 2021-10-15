@@ -40,7 +40,7 @@ extern void hidInitializeUSBFilter (HidUSBFilter *filter);
 extern HidDevice *hidOpenUSBDevice (const HidUSBFilter *filter);
 
 typedef struct {
-  const char *macAddress;
+  const char *deviceAddress;
   const char *deviceName;
   uint16_t vendorIdentifier;
   uint16_t productIdentifier;
@@ -69,7 +69,7 @@ extern ssize_t hidReadData (
   int initialTimeout, int subsequentTimeout
 );
 
-extern const char *hidGetDeviceIdentifier (HidDevice *device);
+extern const char *hidGetDeviceAddress (HidDevice *device);
 extern const char *hidGetDeviceName (HidDevice *device);
 
 extern const char *hidGetHostPath (HidDevice *device);

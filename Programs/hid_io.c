@@ -300,11 +300,11 @@ hidReadData (
 }
 
 const char *
-hidGetDeviceIdentifier (HidDevice *device) {
-  HidGetDeviceIdentifierMethod *method = device->handleMethods->getDeviceIdentifier;
+hidGetDeviceAddress (HidDevice *device) {
+  HidGetDeviceAddressMethod *method = device->handleMethods->getDeviceAddress;
 
   if (!method) {
-    logUnsupportedOperation("hidGetDeviceIdentifier");
+    logUnsupportedOperation("hidGetDeviceAddress");
     errno = ENOSYS;
     return NULL;
   }

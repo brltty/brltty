@@ -44,7 +44,7 @@ typedef ssize_t HidReadDataMethod (
   int initialTimeout, int subsequentTimeout
 );
 
-typedef const char *HidGetDeviceIdentifierMethod (HidHandle *handle);
+typedef const char *HidGetDeviceAddressMethod (HidHandle *handle);
 typedef const char *HidGetDeviceNameMethod (HidHandle *handle);
 
 typedef const char *HidGetHostPathMethod (HidHandle *handle);
@@ -67,7 +67,7 @@ typedef struct {
   HidAwaitInputMethod *awaitInput;
   HidReadDataMethod *readData;
 
-  HidGetDeviceIdentifierMethod *getDeviceIdentifier;
+  HidGetDeviceAddressMethod *getDeviceAddress;
   HidGetDeviceNameMethod *getDeviceName;
 
   HidGetHostPathMethod *getHostPath;

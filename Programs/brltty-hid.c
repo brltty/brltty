@@ -45,8 +45,8 @@ static char *opt_matchSerialNumber;
 static char *opt_matchDeviceAddress;
 static char *opt_matchDeviceName;
 
-static int opt_showIdentifiers;
-static int opt_showDeviceIdentifier;
+static int opt_showDeviceIdentifiers;
+static int opt_showDeviceAddress;
 static int opt_showDeviceName;
 static int opt_showHostPath;
 static int opt_showHostDevice;
@@ -143,7 +143,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'a',
     .argument = strtext("octets"),
     .setting.string = &opt_matchDeviceAddress,
-    .description = strtext("Match the full MAC address (Bluetooth only - all six two-digit, hexadecimal octets separated by a colon [:]).")
+    .description = strtext("Match the full device address (Bluetooth only - all six two-digit, hexadecimal octets separated by a colon [:]).")
   },
 
   { .word = "match-device-name",
@@ -153,16 +153,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Match the start of the device name (Bluetooth only).")
   },
 
-  { .word = "show-identifiers",
-    .letter = 'i',
-    .setting.flag = &opt_showIdentifiers,
+  { .word = "show-device-identifiers",
+    .letter = 'I',
+    .setting.flag = &opt_showDeviceIdentifiers,
     .description = strtext("Show the vendor and product identifiers.")
   },
 
-  { .word = "show-device-identifier",
-    .letter = 'I',
-    .setting.flag = &opt_showDeviceIdentifier,
-    .description = strtext("Show the device identifier (USB serial number, Bluetooth device address, etc).")
+  { .word = "show-device-address",
+    .letter = 'A',
+    .setting.flag = &opt_showDeviceAddress,
+    .description = strtext("Show the device address (USB serial number, Bluetooth device address, etc).")
   },
 
   { .word = "show-device-name",
@@ -300,7 +300,7 @@ parseIdentifier (const char *value, void *field) {
 }
 
 static int
-parseMacAddress (const char *value, void *field) {
+parseMACAddress (const char *value, void *field) {
   {
     const char *byte = value;
     unsigned int state = 0;
@@ -379,8 +379,8 @@ openDevice (HidDevice **device) {
 
     { .name = "MAC address",
       .value = opt_matchDeviceAddress,
-      .field = &hbf.macAddress,
-      .parser = parseMacAddress,
+      .field = &hbf.deviceAddress,
+      .parser = parseMACAddress,
       .flag = &opt_matchBluetoothDevices,
     },
 
@@ -435,7 +435,7 @@ getReportSize (HidDevice *device, unsigned char identifier, HidReportSize *size)
 }
 
 static int
-performShowIdentifiers (HidDevice *device) {
+performShowDeviceIdentifiers (HidDevice *device) {
   uint16_t vendor;
   uint16_t product;
 
@@ -445,8 +445,7 @@ performShowIdentifiers (HidDevice *device) {
   }
 
   fprintf(outputStream,
-    "Vendor Identifier: %04X\n"
-    "Product Identifier: %04X\n",
+    "Device Identifiers: %04X:%04X\n",
     vendor, product
   );
 
@@ -454,15 +453,15 @@ performShowIdentifiers (HidDevice *device) {
 }
 
 static int
-performShowDeviceIdentifier (HidDevice *device) {
-  const char *identifier = hidGetDeviceIdentifier(device);
+performShowDeviceAddress (HidDevice *device) {
+  const char *address = hidGetDeviceAddress(device);
 
-  if (!identifier) {
-    logMessage(LOG_WARNING, "device identifier not available");
+  if (!address) {
+    logMessage(LOG_WARNING, "device address not available");
     return 0;
   }
 
-  fprintf(outputStream, "Device Identifier: %s\n", identifier);
+  fprintf(outputStream, "Device Address: %s\n", address);
   return 1;
 }
 
@@ -1051,14 +1050,14 @@ performActions (HidDevice *device) {
   } ActionEntry;
 
   static const ActionEntry actionTable[] = {
-    { .perform = performShowIdentifiers,
+    { .perform = performShowDeviceIdentifiers,
       .isFlag = 1,
-      .option.flag = &opt_showIdentifiers,
+      .option.flag = &opt_showDeviceIdentifiers,
     },
 
-    { .perform = performShowDeviceIdentifier,
+    { .perform = performShowDeviceAddress,
       .isFlag = 1,
-      .option.flag = &opt_showDeviceIdentifier,
+      .option.flag = &opt_showDeviceAddress,
     },
 
     { .perform = performShowDeviceName,
