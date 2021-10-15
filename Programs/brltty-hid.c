@@ -50,6 +50,7 @@ static int opt_showDeviceIdentifier;
 static int opt_showDeviceName;
 static int opt_showHostPath;
 static int opt_showHostDevice;
+static int opt_listReports;
 static int opt_listItems;
 
 static char *opt_readReport;
@@ -101,28 +102,28 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Filter for a Bluetooth device.")
   },
 
-  { .word = "vendor",
+  { .word = "vendor-identifier",
     .letter = 'v',
     .argument = strtext("identifier"),
     .setting.string = &opt_vendorIdentifier,
     .description = strtext("Match the vendor identifier (four hexadecimal digits).")
   },
 
-  { .word = "product",
+  { .word = "product-identifier",
     .letter = 'p',
     .argument = strtext("identifier"),
     .setting.string = &opt_productIdentifier,
     .description = strtext("Match the product identifier (four hexadecimal digits).")
   },
 
-  { .word = "manufacturer",
+  { .word = "manufacturer-name",
     .letter = 'm',
     .argument = strtext("string"),
     .setting.string = &opt_manufacturerName,
     .description = strtext("Match the start of the manufacturer name (USB only).")
   },
 
-  { .word = "description",
+  { .word = "product-description",
     .letter = 'd',
     .argument = strtext("string"),
     .setting.string = &opt_productDescription,
@@ -136,14 +137,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Match the start of the serial number (USB only).")
   },
 
-  { .word = "address",
+  { .word = "bluetooth-address",
     .letter = 'a',
     .argument = strtext("octets"),
     .setting.string = &opt_macAddress,
     .description = strtext("Match the full MAC address (Bluetooth only - all six two-digit, hexadecimal octets separated by a colon [:]).")
   },
 
-  { .word = "name",
+  { .word = "bluetooth-name",
     .letter = 'n',
     .argument = strtext("string"),
     .setting.string = &opt_deviceName,
@@ -180,7 +181,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Show the host device (usually its absolute path).")
   },
 
-  { .word = "list",
+  { .word = "list-reports",
+    .letter = 'L',
+    .setting.flag = &opt_listReports,
+    .description = strtext("List each report's identifier and sizes.")
+  },
+
+  { .word = "list-items",
     .letter = 'l',
     .setting.flag = &opt_listItems,
     .description = strtext("List the HID report descriptor's items.")
@@ -218,7 +225,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.format = formatParseBytesHelp
   },
 
-  { .word = "echo",
+  { .word = "echo-input",
     .letter = 'e',
     .setting.flag = &opt_echoInput,
     .description = strtext("Echo (in hexadecimal) input received from the device.")
@@ -500,6 +507,63 @@ static int
 listItem (const char *line, void *data) {
   fprintf(outputStream, "%s\n", line);
   return canWriteOutput();
+}
+
+static int
+performListReports (HidDevice *device) {
+  const HidItemsDescriptor *items = hidGetItems(device);
+  if (!items) return 0;
+
+  HidReports *reports = hidGetReports(items);
+  if (!reports) return 0;
+
+  for (unsigned int index=0; index<reports->count; index+=1) {
+    unsigned char identifier = reports->identifiers[index];
+    HidReportSize size;
+
+    char line[0X40];
+    STR_BEGIN(line, sizeof(line));
+    STR_PRINTF("Report %02X:", identifier);
+
+    if (hidGetReportSize(items, identifier, &size)) {
+      typedef struct {
+        const char *label;
+        const size_t value;
+      } SizeEntry;
+
+      const SizeEntry sizeTable[] = {
+        { .value = size.input,
+          .label = "In",
+        },
+
+        { .value = size.output,
+          .label = "Out",
+        },
+
+        { .value = size.feature,
+          .label = "Ftr",
+        },
+      };
+
+      const SizeEntry *size = sizeTable;
+      const SizeEntry *end = size + ARRAY_COUNT(sizeTable);
+
+      while (size < end) {
+        if (size->value) {
+          STR_PRINTF(" %s:%"PRIsize, size->label, size->value);
+        }
+
+        size += 1;
+      }
+    }
+
+    STR_END;
+    fprintf(outputStream, "%s\n", line);
+    if (!canWriteOutput()) return 0;
+  }
+
+  free(reports);
+  return 1;
 }
 
 static int
@@ -1008,6 +1072,11 @@ performActions (HidDevice *device) {
     { .perform = performShowHostDevice,
       .isFlag = 1,
       .option.flag = &opt_showHostDevice,
+    },
+
+    { .perform = performListReports,
+      .isFlag = 1,
+      .option.flag = &opt_listReports,
     },
 
     { .perform = performListItems,

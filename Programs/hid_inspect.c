@@ -22,9 +22,64 @@
 
 #include "log.h"
 #include "strfmt.h"
+#include "bitmask.h"
 #include "hid_items.h"
 #include "hid_defs.h"
 #include "hid_inspect.h"
+
+HidReports *
+hidGetReports (const HidItemsDescriptor *items) {
+  unsigned char identifiers[UINT8_MAX];
+  unsigned char count = 0;
+
+  BITMASK(haveIdentifier, UINT8_MAX, char);
+  BITMASK_ZERO(haveIdentifier);
+
+  const unsigned char *nextByte = items->bytes;
+  size_t bytesLeft = items->count;
+
+  while (1) {
+    HidItemDescription item;
+    if (!hidGetNextItem(&item, &nextByte, &bytesLeft)) break;
+
+    switch (item.type) {
+      case HID_ITM_ReportID: {
+        uint32_t identifier = item.value.u;
+
+        if (!identifier) continue;
+        if (identifier > UINT8_MAX) continue;
+        if (BITMASK_TEST(haveIdentifier, identifier)) continue;
+
+        BITMASK_SET(haveIdentifier, identifier);
+        identifiers[count++] = identifier;
+        break;
+      }
+
+      case HID_ITM_Input:
+      case HID_ITM_Output:
+      case HID_ITM_Feature:
+        if (!count) identifiers[count++] = 0;
+        break;
+    }
+  }
+
+  HidReports *reports;
+  size_t size = sizeof(*reports);
+  size += count;
+
+  if ((reports = malloc(size))) {
+    memset(reports, 0, sizeof(*reports));
+
+    reports->count = count;
+    memcpy(reports->identifiers, identifiers, count);
+
+    return reports;
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
 
 #define HID_COLLECTION_TYPE_NAME(name) HID_NAME(HID_COL, name)
 #define HID_USAGE_PAGE_NAME(name) HID_NAME(HID_UPG, name)

@@ -26,6 +26,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct {
+  unsigned char count;
+  unsigned char identifiers[];
+} HidReports;
+
+extern HidReports *hidGetReports (const HidItemsDescriptor *items);
+
 typedef int HidItemLister (const char *line, void *data);
 extern int hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *data);
 
