@@ -49,6 +49,33 @@ typedef struct {
 extern void hidInitializeBluetoothFilter (HidBluetoothFilter *filter);
 extern HidDevice *hidOpenBluetoothDevice (const HidBluetoothFilter *filter);
 
+typedef struct {
+  struct {
+    HidDeviceIdentifier vendor;
+    HidDeviceIdentifier product;
+  } identifiers;
+
+  struct {
+    const char *manufacturerName;
+    const char *productDescription;
+    const char *serialNumber;
+  } usb;
+
+  struct {
+    const char *deviceAddress;
+    const char *deviceName;
+  } bluetooth;
+
+  struct {
+    unsigned char wantUSB:1;
+    unsigned char wantBluetooth:1;
+  } flags;
+} HidFilter;
+
+extern void hidInitializeFilter (HidFilter *filter);
+extern int hidSetFilterIdentifiers (HidFilter *filter, const char *vendor, const char *product);
+extern int hidOpenDevice (HidDevice **device, const HidFilter *filter);
+
 extern void hidCloseDevice (HidDevice *device);
 
 extern const HidItemsDescriptor *hidGetItems (HidDevice *device);

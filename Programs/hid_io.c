@@ -124,6 +124,200 @@ hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
 }
 
 void
+hidInitializeFilter (HidFilter *filter) {
+  memset(filter, 0, sizeof(*filter));
+}
+
+int
+hidSetFilterIdentifiers (HidFilter *filter, const char *vendor, const char *product) {
+  typedef struct {
+    const char *name;
+    const char *operand;
+    HidDeviceIdentifier *identifier;
+  } IdentifierEntry;
+
+  const IdentifierEntry identifierTable[] = {
+    { .name = "vendor",
+      .operand = vendor,
+      .identifier = &filter->identifiers.vendor,
+    },
+
+    { .name = "product",
+      .operand = product,
+      .identifier = &filter->identifiers.product,
+    },
+  };
+
+  const IdentifierEntry *cur = identifierTable;
+  const IdentifierEntry *end = cur + ARRAY_COUNT(identifierTable);
+
+  while (cur < end) {
+    if (cur->operand && *cur->operand) {
+      if (!hidParseDeviceIdentifier(cur->identifier, cur->operand)) {
+        logMessage(LOG_ERR, "invalid %s identifier: %s", cur->name, cur->operand);
+        return 0;
+      }
+    }
+
+    cur += 1;
+  }
+
+  return 1;
+}
+
+static int
+hidCopyStringFilter (const void *from, void *to) {
+  const char *fromString = from;
+  if (!fromString) return 0;
+  if (!*fromString) return 0;
+
+  const char **toString = to;
+  *toString = fromString;
+  return 1;
+}
+
+static int
+hidCopyIdentifierFilter (const void *from, void *to) {
+  const HidDeviceIdentifier *fromIdentifier = from;
+  if (!*fromIdentifier) return 0;
+
+  HidDeviceIdentifier *toIdentifier = to;
+  *toIdentifier = *fromIdentifier;
+  return 1;
+}
+
+static int
+hidTestMacAddress (const void *from) {
+  const char *address = from;
+  const char *byte = address;
+
+  unsigned int state = 0;
+  unsigned int octets = 0;
+  const char *digits = "0123456789ABCDEFabcdef";
+
+  while (*byte) {
+    if (!state) octets += 1;
+
+    if (++state < 3) {
+      if (!strchr(digits, *byte)) return 0;
+    } else {
+      if (*byte != ':') return 0;
+      state = 0;
+    }
+
+    byte += 1;
+  }
+
+  return (octets == 6) && (state == 2);
+}
+
+int
+hidOpenDevice (HidDevice **device, const HidFilter *filter) {
+  unsigned char wantUSB = filter->flags.wantUSB;
+  unsigned char wantBluetooth = filter->flags.wantBluetooth;
+
+  HidUSBFilter huf;
+  hidInitializeUSBFilter(&huf);
+
+  HidBluetoothFilter hbf;
+  hidInitializeBluetoothFilter(&hbf);
+
+  typedef struct {
+    const char *name;
+    unsigned char *flag;
+    int (*copy) (const void *from, void *to);
+    int (*test) (const void *from);
+    const void *from;
+    void *to;
+  } FilterEntry;
+
+  const FilterEntry filterTable[] = {
+    { .name = "vendor identifier",
+      .copy = hidCopyIdentifierFilter,
+      .from = &filter->identifiers.vendor,
+      .to = &huf.vendorIdentifier,
+    },
+
+    { .name = "product identifier",
+      .copy = hidCopyIdentifierFilter,
+      .from = &filter->identifiers.product,
+      .to = &huf.productIdentifier,
+    },
+
+    { .name = "manufacturer name",
+      .copy = hidCopyStringFilter,
+      .from = filter->usb.manufacturerName,
+      .to = &huf.manufacturerName,
+      .flag = &wantUSB,
+    },
+
+    { .name = "product description",
+      .copy = hidCopyStringFilter,
+      .from = filter->usb.productDescription,
+      .to = &huf.productDescription,
+      .flag = &wantUSB,
+    },
+
+    { .name = "serial number",
+      .copy = hidCopyStringFilter,
+      .from = filter->usb.serialNumber,
+      .to = &huf.serialNumber,
+      .flag = &wantUSB,
+    },
+
+    { .name = "MAC address",
+      .copy = hidCopyStringFilter,
+      .test = hidTestMacAddress,
+      .from = filter->bluetooth.deviceAddress,
+      .to = &hbf.deviceAddress,
+      .flag = &wantBluetooth,
+    },
+
+    { .name = "device name",
+      .copy = hidCopyStringFilter,
+      .from = filter->bluetooth.deviceName,
+      .to = &hbf.deviceName,
+      .flag = &wantBluetooth,
+    },
+  };
+
+  const FilterEntry *cur = filterTable;
+  const FilterEntry *end = cur + ARRAY_COUNT(filterTable);
+
+  while (cur < end) {
+    if (cur->copy(cur->from, cur->to)) {
+      if (cur->flag) *cur->flag = 1;
+
+      if (cur->test) {
+        if (!cur->test(cur->from)) {
+          const char *operand = cur->from;
+          logMessage(LOG_ERR, "invalid %s: %s", cur->name, operand);
+          return 0;
+        }
+      }
+    }
+
+    cur += 1;
+  }
+
+  if (wantUSB && wantBluetooth) {
+    logMessage(LOG_ERR, "conflicting filter options");
+    return 0;
+  }
+
+  hbf.vendorIdentifier = huf.vendorIdentifier;
+  hbf.productIdentifier = huf.productIdentifier;
+
+  if (wantBluetooth) {
+    *device = hidOpenBluetoothDevice(&hbf);
+  } else {
+    *device = hidOpenUSBDevice(&huf);
+  }
+
+  return 1;
+}
+
+void
 hidCloseDevice (HidDevice *device) {
   hidDestroyHandle(device->handle);
   if (device->items) free(device->items);

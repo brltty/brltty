@@ -287,144 +287,27 @@ writeBytesLine (const char *format, const unsigned char *from, size_t count, ...
 }
 
 static int
-parseString (const char *value, void *field) {
-  const char **string = field;
-  *string = value;
-  return 1;
-}
-
-static int
-parseDeviceIdentifier (const char *value, void *field) {
-  HidDeviceIdentifier *identifier = field;
-  return hidParseDeviceIdentifier(identifier, value);
-}
-
-static int
-parseMACAddress (const char *value, void *field) {
-  {
-    const char *byte = value;
-    unsigned int state = 0;
-    unsigned int octets = 0;
-    const char *digits = "0123456789ABCDEFabcdef";
-
-    while (*byte) {
-      if (!state) octets += 1;
-
-      if (++state < 3) {
-        if (!strchr(digits, *byte)) return 0;
-      } else {
-        if (*byte != ':') return 0;
-        state = 0;
-      }
-
-      byte += 1;
-    }
-
-    if (octets != 6) return 0;
-    if (state != 2) return 0;
-  }
-
-  return parseString(value, field);
-}
-
-static int
 openDevice (HidDevice **device) {
-  HidUSBFilter huf;
-  hidInitializeUSBFilter(&huf);
-
-  HidBluetoothFilter hbf;
-  hidInitializeBluetoothFilter(&hbf);
-
-  typedef struct {
-    const char *name;
-    const char *value;
-    void *field;
-    int (*parser) (const char *value, void *field);
-    int *flag;
-  } FilterEntry;
-
-  const FilterEntry filterTable[] = {
-    { .name = "vendor identifier",
-      .value = opt_matchVendorIdentifier,
-      .field = &huf.vendorIdentifier,
-      .parser = parseDeviceIdentifier,
+  HidFilter filter = {
+    .usb = {
+      .manufacturerName = opt_matchManufacturerName,
+      .productDescription = opt_matchProductDescription,
+      .serialNumber = opt_matchSerialNumber,
     },
 
-    { .name = "product identifier",
-      .value = opt_matchProductIdentifier,
-      .field = &huf.productIdentifier,
-      .parser = parseDeviceIdentifier,
+    .bluetooth = {
+      .deviceAddress = opt_matchDeviceAddress,
+      .deviceName = opt_matchDeviceName,
     },
 
-    { .name = "manufacturer name",
-      .value = opt_matchManufacturerName,
-      .field = &huf.manufacturerName,
-      .parser = parseString,
-      .flag = &opt_matchUSBDevices,
-    },
-
-    { .name = "product description",
-      .value = opt_matchProductDescription,
-      .field = &huf.productDescription,
-      .parser = parseString,
-      .flag = &opt_matchUSBDevices,
-    },
-
-    { .name = "serial number",
-      .value = opt_matchSerialNumber,
-      .field = &huf.serialNumber,
-      .parser = parseString,
-      .flag = &opt_matchUSBDevices,
-    },
-
-    { .name = "MAC address",
-      .value = opt_matchDeviceAddress,
-      .field = &hbf.deviceAddress,
-      .parser = parseMACAddress,
-      .flag = &opt_matchBluetoothDevices,
-    },
-
-    { .name = "device name",
-      .value = opt_matchDeviceName,
-      .field = &hbf.deviceName,
-      .parser = parseString,
-      .flag = &opt_matchBluetoothDevices,
+    .flags = {
+      .wantUSB = opt_matchUSBDevices,
+      .wantBluetooth = opt_matchBluetoothDevices,
     },
   };
 
-  const FilterEntry *filter = filterTable;
-  const FilterEntry *end = filter + ARRAY_COUNT(filterTable);
-
-  while (filter < end) {
-    if (filter->value && *filter->value) {
-      if (!filter->parser(filter->value, filter->field)) {
-        logMessage(LOG_ERR, "invalid %s: %s", filter->name, filter->value);
-        return 0;
-      }
-
-      if (filter->flag) {
-        *filter->flag = 1;
-
-        if (opt_matchUSBDevices && opt_matchBluetoothDevices) {
-          logMessage(LOG_ERR, "conflicting filter options");
-          return 0;
-        }
-      }
-    }
-
-    filter += 1;
-  }
-
-  hbf.vendorIdentifier = huf.vendorIdentifier;
-  hbf.productIdentifier = huf.productIdentifier;
-
-  if (opt_matchBluetoothDevices) {
-    *device = hidOpenBluetoothDevice(&hbf);
-  } else {
-    *device = hidOpenUSBDevice(&huf);
-  }
-
-  return 1;
+  if (!hidSetFilterIdentifiers(&filter, opt_matchVendorIdentifier, opt_matchProductIdentifier)) return 0;
+  return hidOpenDevice(device, &filter);
 }
 
 static int
