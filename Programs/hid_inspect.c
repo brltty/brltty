@@ -223,12 +223,14 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
 
       {
         HidUnsignedValue value = item.value.u;
-        const char *text = NULL;
+
+        char name[0X100];
+        STR_BEGIN(name, sizeof(name));
 
         switch (item.type) {
           case HID_ITM_UsagePage: {
             const HidUsagePageEntry *upg = hidGetUsagePageEntry(value);
-            if (upg) text = upg->header.name;
+            if (upg) STR_PRINTF("%s", upg->header.name);
             break;
           }
 
@@ -254,7 +256,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
                 const HidTableEntryHeader *uhd = hidGetTableEntry(utb, usage);
 
                 if (uhd) {
-                  STR_PRINTF(": %s", uhd->name);
+                  STR_PRINTF("%s", uhd->name);
                   if (page != usagePage) STR_PRINTF(" [%s]", upg->header.name);
                 }
               }
@@ -265,20 +267,20 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
 
           case HID_ITM_Collection: {
             const HidCollectionTypeEntry *col = hidGetCollectionTypeEntry(value);
-            if (col) text = col->header.name;
+            if (col) STR_PRINTF("%s", col->header.name);
             break;
           }
 
           case HID_ITM_Input:
           case HID_ITM_Output:
           case HID_ITM_Feature: {
-            STR_PRINTF(": ");
             STR_FORMAT(hidFormatUsageFlags, value);
             break;
           }
         }
 
-        if (text) STR_PRINTF(": %s", text);
+        STR_END;
+        if (*name) STR_PRINTF(": %s", name);
       }
     } else if (bytesLeft) {
       STR_PRINTF(" incomplete:");

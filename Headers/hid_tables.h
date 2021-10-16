@@ -80,6 +80,16 @@ HID_TABLE_METHODS(GenericDesktopUsage)
 
 typedef struct {
   HID_TABLE_ENTRY_HEADER;
+} HidKeyboardUsageEntry;
+HID_TABLE_METHODS(KeyboardUsage)
+
+typedef struct {
+  HID_TABLE_ENTRY_HEADER;
+} HidLEDsUsageEntry;
+HID_TABLE_METHODS(LEDsUsage)
+
+typedef struct {
+  HID_TABLE_ENTRY_HEADER;
   HidTable *usageTable;
 } HidUsagePageEntry;
 HID_TABLE_METHODS(UsagePage)
