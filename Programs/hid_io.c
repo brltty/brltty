@@ -24,6 +24,8 @@
 #include "log.h"
 #include "io_hid.h"
 #include "hid_internal.h"
+#include "parse.h"
+#include "device.h"
 
 void
 hidInitializeUSBFilter (HidUSBFilter *filter) {
@@ -129,7 +131,9 @@ hidInitializeFilter (HidFilter *filter) {
 }
 
 int
-hidSetFilterIdentifiers (HidFilter *filter, const char *vendor, const char *product) {
+hidSetFilterIdentifiers (
+  HidFilter *filter, const char *vendor, const char *product
+) {
   typedef struct {
     const char *name;
     const char *operand;
@@ -163,6 +167,64 @@ hidSetFilterIdentifiers (HidFilter *filter, const char *vendor, const char *prod
   }
 
   return 1;
+}
+
+typedef enum {
+  HID_FLT_ADDRESS,
+  HID_FLT_NAME,
+
+  HID_FLT_MANUFACTURER,
+  HID_FLT_DESCRIPTION,
+  HID_FLT_SERIAL_NUMBER,
+
+  HID_FLT_VENDOR,
+  HID_FLT_PRODUCT,
+} HidFilterParameter;
+
+static const char *const hidFilterParameters[] = {
+  "address",
+  "name",
+
+  "manufacturer",
+  "description",
+  "serialNumber",
+
+  "vendor",
+  "product",
+
+  NULL
+};
+
+static char **
+hidGetFilterParameters (const char *string) {
+  if (!string) string = "";
+  return getDeviceParameters(hidFilterParameters, string);
+}
+
+int
+hidSetFilter (HidFilter *filter, const char *string) {
+  hidInitializeFilter(filter);
+  char **parameters = hidGetFilterParameters(string);
+
+  if (parameters) {
+    filter->usb.manufacturerName = parameters[HID_FLT_MANUFACTURER];
+    filter->usb.productDescription = parameters[HID_FLT_DESCRIPTION];
+    filter->usb.serialNumber = parameters[HID_FLT_SERIAL_NUMBER];
+
+    filter->bluetooth.deviceAddress = parameters[HID_FLT_ADDRESS];
+    filter->bluetooth.deviceName = parameters[HID_FLT_NAME];
+
+    int ok = hidSetFilterIdentifiers(
+      filter,
+      parameters[HID_FLT_VENDOR],
+      parameters[HID_FLT_PRODUCT]
+    );
+
+    deallocateStrings(parameters);
+    if (ok) return 1;
+  }
+
+  return 0;
 }
 
 static int

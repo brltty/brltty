@@ -73,9 +73,13 @@ typedef struct {
 } HidFilter;
 
 extern void hidInitializeFilter (HidFilter *filter);
-extern int hidSetFilterIdentifiers (HidFilter *filter, const char *vendor, const char *product);
-extern int hidOpenDevice (HidDevice **device, const HidFilter *filter);
+extern int hidSetFilter (HidFilter *filter, const char *string);
 
+extern int hidSetFilterIdentifiers (
+  HidFilter *filter, const char *vendor, const char *product
+);
+
+extern int hidOpenDevice (HidDevice **device, const HidFilter *filter);
 extern void hidCloseDevice (HidDevice *device);
 
 extern const HidItemsDescriptor *hidGetItems (HidDevice *device);

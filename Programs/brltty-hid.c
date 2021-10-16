@@ -306,7 +306,11 @@ openDevice (HidDevice **device) {
     },
   };
 
-  if (!hidSetFilterIdentifiers(&filter, opt_matchVendorIdentifier, opt_matchProductIdentifier)) return 0;
+  int ok = hidSetFilterIdentifiers(
+    &filter, opt_matchVendorIdentifier, opt_matchProductIdentifier
+  );
+
+  if (!ok) return 0;
   return hidOpenDevice(device, &filter);
 }
 
