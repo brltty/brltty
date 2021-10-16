@@ -177,6 +177,8 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
     hexOffsetWidth = snprintf(buffer, sizeof(buffer), "%x", maximumOffset);
   }
 
+  HidUnsignedValue usagePage = 0;
+
   while (1) {
     unsigned int offset = nextByte - items->bytes;
     HidItem item;
@@ -186,12 +188,18 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
     STR_BEGIN(line, sizeof(line));
 
     STR_PRINTF(
-      "Item: %*" PRIu32 " (0X%.*" PRIX32 "):",
+      "Item: %*u (0X%.*X):",
       decOffsetWidth, offset, hexOffsetWidth, offset
     );
 
     if (ok) {
       itemCount += 1;
+
+      switch (item.type) {
+        case HID_ITM_UsagePage:
+          usagePage = item.value.u;
+          break;
+      }
 
       {
         const char *name = hidGetItemTypeName(item.type);
@@ -216,12 +224,42 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
       {
         HidUnsignedValue value = item.value.u;
         const char *text = NULL;
-        char buffer[0X40];
 
         switch (item.type) {
           case HID_ITM_UsagePage: {
             const HidUsagePageEntry *upg = hidGetUsagePageEntry(value);
             if (upg) text = upg->header.name;
+            break;
+          }
+
+          case HID_ITM_UsageMinimum:
+          case HID_ITM_UsageMaximum:
+          case HID_ITM_Usage: {
+            HidUnsignedValue usage = item.value.u;
+
+            HidUnsignedValue page;
+            const HidUsagePageEntry *upg;
+
+            if (item.valueSize == 4) {
+              page = usage >> 0X10;
+              usage &= UINT16_MAX;
+            } else {
+              page = usagePage;
+            }
+
+            if ((upg = hidGetUsagePageEntry(page))) {
+              HidTable *utb = upg->usageTable;
+
+              if (utb) {
+                const HidTableEntryHeader *uhd = hidGetTableEntry(utb, usage);
+
+                if (uhd) {
+                  STR_PRINTF(": %s", uhd->name);
+                  if (page != usagePage) STR_PRINTF(" [%s]", upg->header.name);
+                }
+              }
+            }
+
             break;
           }
 
@@ -233,12 +271,11 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
 
           case HID_ITM_Input:
           case HID_ITM_Output:
-          case HID_ITM_Feature:
-            STR_BEGIN(buffer, sizeof(buffer));
+          case HID_ITM_Feature: {
+            STR_PRINTF(": ");
             STR_FORMAT(hidFormatUsageFlags, value);
-            STR_END;
-            text = buffer;
             break;
+          }
         }
 
         if (text) STR_PRINTF(": %s", text);

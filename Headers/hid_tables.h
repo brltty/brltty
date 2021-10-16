@@ -75,6 +75,12 @@ HID_TABLE_METHODS(CollectionType)
 
 typedef struct {
   HID_TABLE_ENTRY_HEADER;
+} HidGenericDesktopUsageEntry;
+HID_TABLE_METHODS(GenericDesktopUsage)
+
+typedef struct {
+  HID_TABLE_ENTRY_HEADER;
+  HidTable *usageTable;
 } HidUsagePageEntry;
 HID_TABLE_METHODS(UsagePage)
 
