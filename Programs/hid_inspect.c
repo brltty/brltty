@@ -257,8 +257,12 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
 
                 if (uhd) {
                   STR_PRINTF("%s", uhd->name);
-                  if (page != usagePage) STR_PRINTF(" [%s]", upg->header.name);
                 }
+              }
+
+              if (page != usagePage) {
+                if (*name) STR_PRINTF(" ");
+                STR_PRINTF("[%s]", upg->header.name);
               }
             }
 
