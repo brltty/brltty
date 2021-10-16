@@ -25,6 +25,7 @@
 #include "bitmask.h"
 #include "hid_defs.h"
 #include "hid_items.h"
+#include "hid_tables.h"
 #include "hid_inspect.h"
 
 HidReports *
@@ -79,59 +80,6 @@ hidGetReports (const HidItemsDescriptor *items) {
   }
 
   return NULL;
-}
-
-#define HID_USAGE_PAGE_ENTRY(name) HID_TABLE_ENTRY(HID_UPG, name)
-#define HID_COLLECTION_TYPE_ENTRY(name) HID_TABLE_ENTRY(HID_COL, name)
-
-const HidUsagePageEntry *
-hidGetUsagePageEntry (uint32_t page) {
-  static const HidUsagePageEntry table[] = {
-    HID_USAGE_PAGE_ENTRY(GenericDesktop),
-    HID_USAGE_PAGE_ENTRY(Simulation),
-    HID_USAGE_PAGE_ENTRY(VirtualReality),
-    HID_USAGE_PAGE_ENTRY(Sport),
-    HID_USAGE_PAGE_ENTRY(Game),
-    HID_USAGE_PAGE_ENTRY(GenericDevice),
-    HID_USAGE_PAGE_ENTRY(KeyboardKeypad),
-    HID_USAGE_PAGE_ENTRY(LEDs),
-    HID_USAGE_PAGE_ENTRY(Button),
-    HID_USAGE_PAGE_ENTRY(Ordinal),
-    HID_USAGE_PAGE_ENTRY(Telephony),
-    HID_USAGE_PAGE_ENTRY(Consumer),
-    HID_USAGE_PAGE_ENTRY(Digitizer),
-    HID_USAGE_PAGE_ENTRY(PhysicalInterfaceDevice),
-    HID_USAGE_PAGE_ENTRY(Unicode),
-    HID_USAGE_PAGE_ENTRY(AlphanumericDisplay),
-    HID_USAGE_PAGE_ENTRY(MedicalInstruments),
-    HID_USAGE_PAGE_ENTRY(BarCodeScanner),
-    HID_USAGE_PAGE_ENTRY(Braille),
-    HID_USAGE_PAGE_ENTRY(Scale),
-    HID_USAGE_PAGE_ENTRY(MagneticStripeReader),
-    HID_USAGE_PAGE_ENTRY(Camera),
-    HID_USAGE_PAGE_ENTRY(Arcade),
-  };
-
-  static void *sorted = NULL;
-  return hidGetTableEntry(
-    table, ARRAY_COUNT(table), sizeof(table[0]),
-    &sorted, page
-  );
-}
-
-const HidCollectionTypeEntry *
-hidGetCollectionTypeEntry (uint32_t type) {
-  static const HidCollectionTypeEntry table[] = {
-    HID_COLLECTION_TYPE_ENTRY(Physical),
-    HID_COLLECTION_TYPE_ENTRY(Application),
-    HID_COLLECTION_TYPE_ENTRY(Logical),
-  };
-
-  static void *sorted = NULL;
-  return hidGetTableEntry(
-    table, ARRAY_COUNT(table), sizeof(table[0]),
-    &sorted, type
-  );
 }
 
 STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)

@@ -24,6 +24,7 @@
 #include "strfmt.h"
 #include "hid_items.h"
 #include "hid_defs.h"
+#include "hid_tables.h"
 
 static int
 hidCompareTableEntriesByValue (const void *element1, const void *element2) {
@@ -39,40 +40,35 @@ hidCompareTableEntriesByValue (const void *element1, const void *element2) {
 }
 
 const void *
-hidGetTableEntry (
-  const void *table, size_t count, size_t size,
-  void *sorted, uint32_t value
-) {
-  const HidTableEntryHeader ***sortedEntries = sorted;
-
-  if (!*sortedEntries) {
-    if (!(*sortedEntries = malloc(ARRAY_SIZE(*sortedEntries, count)))) {
+hidGetTableEntry (HidTableDescriptor *table, uint32_t value) {
+  if (!table->sorted) {
+    if (!(table->sorted = malloc(ARRAY_SIZE(table->sorted, table->count)))) {
       logMallocError();
       return NULL;
     }
 
     {
-      const void *entry = table;
-      const HidTableEntryHeader **header = *sortedEntries;
+      const void *entry = table->entries;
+      const HidTableEntryHeader **header = table->sorted;
 
-      for (unsigned int index=0; index<count; index+=1) {
+      for (unsigned int index=0; index<table->count; index+=1) {
         *header++ = entry;
-        entry += size;
+        entry += table->size;
       }
     }
 
     qsort(
-      *sortedEntries, count, sizeof(**sortedEntries),
+      table->sorted, table->count, sizeof(*table->sorted),
       hidCompareTableEntriesByValue
     );
   }
 
   unsigned int from = 0;
-  unsigned int to = count;
+  unsigned int to = table->count;
 
   while (from < to) {
     unsigned int current = (from + to) / 2;
-    const HidTableEntryHeader *header = (*sortedEntries)[current];
+    const HidTableEntryHeader *header = table->sorted[current];
     if (value == header->value) return header;
 
     if (value < header->value) {
@@ -86,45 +82,35 @@ hidGetTableEntry (
 }
 
 #define HID_ITEM_TYPE_ENTRY(name) HID_TABLE_ENTRY(HID_ITM, name)
-
-const HidItemTypeEntry *
-hidGetItemTypeEntry (uint8_t type) {
-  static const HidItemTypeEntry table[] = {
-    HID_ITEM_TYPE_ENTRY(UsagePage),
-    HID_ITEM_TYPE_ENTRY(Usage),
-    HID_ITEM_TYPE_ENTRY(LogicalMinimum),
-    HID_ITEM_TYPE_ENTRY(UsageMinimum),
-    HID_ITEM_TYPE_ENTRY(LogicalMaximum),
-    HID_ITEM_TYPE_ENTRY(UsageMaximum),
-    HID_ITEM_TYPE_ENTRY(PhysicalMinimum),
-    HID_ITEM_TYPE_ENTRY(DesignatorIndex),
-    HID_ITEM_TYPE_ENTRY(PhysicalMaximum),
-    HID_ITEM_TYPE_ENTRY(DesignatorMinimum),
-    HID_ITEM_TYPE_ENTRY(UnitExponent),
-    HID_ITEM_TYPE_ENTRY(DesignatorMaximum),
-    HID_ITEM_TYPE_ENTRY(Unit),
-    HID_ITEM_TYPE_ENTRY(ReportSize),
-    HID_ITEM_TYPE_ENTRY(StringIndex),
-    HID_ITEM_TYPE_ENTRY(Input),
-    HID_ITEM_TYPE_ENTRY(ReportID),
-    HID_ITEM_TYPE_ENTRY(StringMinimum),
-    HID_ITEM_TYPE_ENTRY(Output),
-    HID_ITEM_TYPE_ENTRY(ReportCount),
-    HID_ITEM_TYPE_ENTRY(StringMaximum),
-    HID_ITEM_TYPE_ENTRY(Collection),
-    HID_ITEM_TYPE_ENTRY(Push),
-    HID_ITEM_TYPE_ENTRY(Delimiter),
-    HID_ITEM_TYPE_ENTRY(Feature),
-    HID_ITEM_TYPE_ENTRY(Pop),
-    HID_ITEM_TYPE_ENTRY(EndCollection),
-  };
-
-  static void *sorted = NULL;
-  return hidGetTableEntry(
-    table, ARRAY_COUNT(table), sizeof(table[0]),
-    &sorted, type
-  );
-}
+HID_BEGIN_TABLE(ItemType)
+  HID_ITEM_TYPE_ENTRY(UsagePage),
+  HID_ITEM_TYPE_ENTRY(Usage),
+  HID_ITEM_TYPE_ENTRY(LogicalMinimum),
+  HID_ITEM_TYPE_ENTRY(UsageMinimum),
+  HID_ITEM_TYPE_ENTRY(LogicalMaximum),
+  HID_ITEM_TYPE_ENTRY(UsageMaximum),
+  HID_ITEM_TYPE_ENTRY(PhysicalMinimum),
+  HID_ITEM_TYPE_ENTRY(DesignatorIndex),
+  HID_ITEM_TYPE_ENTRY(PhysicalMaximum),
+  HID_ITEM_TYPE_ENTRY(DesignatorMinimum),
+  HID_ITEM_TYPE_ENTRY(UnitExponent),
+  HID_ITEM_TYPE_ENTRY(DesignatorMaximum),
+  HID_ITEM_TYPE_ENTRY(Unit),
+  HID_ITEM_TYPE_ENTRY(ReportSize),
+  HID_ITEM_TYPE_ENTRY(StringIndex),
+  HID_ITEM_TYPE_ENTRY(Input),
+  HID_ITEM_TYPE_ENTRY(ReportID),
+  HID_ITEM_TYPE_ENTRY(StringMinimum),
+  HID_ITEM_TYPE_ENTRY(Output),
+  HID_ITEM_TYPE_ENTRY(ReportCount),
+  HID_ITEM_TYPE_ENTRY(StringMaximum),
+  HID_ITEM_TYPE_ENTRY(Collection),
+  HID_ITEM_TYPE_ENTRY(Push),
+  HID_ITEM_TYPE_ENTRY(Delimiter),
+  HID_ITEM_TYPE_ENTRY(Feature),
+  HID_ITEM_TYPE_ENTRY(Pop),
+  HID_ITEM_TYPE_ENTRY(EndCollection),
+HID_END_TABLE(ItemType)
 
 const char *
 hidGetItemTypeName (uint8_t type) {

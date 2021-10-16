@@ -31,17 +31,7 @@ typedef struct {
   unsigned char identifiers[];
 } HidReports;
 
-typedef struct {
-  HID_TABLE_ENTRY_HEADER;
-} HidUsagePageEntry;
-
-typedef struct {
-  HID_TABLE_ENTRY_HEADER;
-} HidCollectionTypeEntry;
-
 extern HidReports *hidGetReports (const HidItemsDescriptor *items);
-extern const HidUsagePageEntry *hidGetUsagePageEntry (uint32_t page);
-extern const HidCollectionTypeEntry *hidGetCollectionTypeEntry (uint32_t type);
 
 typedef int HidItemLister (const char *line, void *data);
 extern int hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *data);

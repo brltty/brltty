@@ -42,31 +42,6 @@ extern int hidGetNextItem (
   size_t *count
 );
 
-typedef struct {
-  const char *name;
-  uint32_t value;
-} HidTableEntryHeader;
-
-#define HID_TABLE_ENTRY_HEADER HidTableEntryHeader header
-
-#define HID_TABLE_ENTRY(prefix, suffix, ...) { \
-  .header = { \
-    .name = #suffix, \
-    .value = prefix ## _ ## suffix, \
-  }, \
-  __VA_ARGS__ \
-}
-
-extern const void *hidGetTableEntry (
-  const void *table, size_t count, size_t size,
-  void *sorted, uint32_t value
-);
-
-typedef struct {
-  HID_TABLE_ENTRY_HEADER;
-} HidItemTypeEntry;
-
-extern const HidItemTypeEntry *hidGetItemTypeEntry (uint8_t type);
 extern const char *hidGetItemTypeName (uint8_t type);
 extern unsigned char hidGetValueSize (unsigned char item);
 

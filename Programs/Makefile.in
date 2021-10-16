@@ -407,7 +407,7 @@ hid_io.$O:
 $(HID_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(HID_INCLUDES) -c $(SRC_DIR)/$(HID_OBJECT).c
 
-BRLTTY_HID_OBJECTS = brltty-hid.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS) hid_inspect.$O io_misc.$O
+BRLTTY_HID_OBJECTS = brltty-hid.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS) hid_inspect.$O hid_tables.$O io_misc.$O
 
 brltty-hid$X: $(BRLTTY_HID_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_HID_OBJECTS) $(HID_LIBS) $(LDLIBS)
@@ -417,6 +417,9 @@ brltty-hid.$O:
 
 hid_inspect.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_inspect.c
+
+hid_tables.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_tables.c
 
 ###############################################################################
 
