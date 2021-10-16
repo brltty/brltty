@@ -100,7 +100,7 @@ hidLinuxGetItems (HidHandle *handle) {
 }
 
 static int
-hidLinuxGetIdentifiers (HidHandle *handle, uint16_t *vendor, uint16_t *product) {
+hidLinuxGetDeviceIdentifiers (HidHandle *handle, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product) {
   if (vendor) *vendor = handle->deviceInformation.vendor;
   if (product) *product = handle->deviceInformation.product;
   return 1;
@@ -252,7 +252,7 @@ static const HidHandleMethods hidLinuxHandleMethods = {
   .destroyHandle = hidLinuxDestroyHandle,
 
   .getItems = hidLinuxGetItems,
-  .getIdentifiers = hidLinuxGetIdentifiers,
+  .getDeviceIdentifiers = hidLinuxGetDeviceIdentifiers,
 
   .getReport = hidLinuxGetReport,
   .setReport = hidLinuxSetReport,
@@ -296,16 +296,16 @@ hidLinuxTestString (
 }
 
 static int
-hidLinuxTestIdentifier (
+hidLinuxTestDeviceIdentifier (
   struct udev_device *device,
   const char *name,
   const void *value
 ) {
-  const uint16_t *testIdentifier = value;
+  const HidDeviceIdentifier *testIdentifier = value;
   if (!*testIdentifier) return 1;
 
-  uint16_t actualIdentifier;
-  if (!hidParseIdentifier(&actualIdentifier, udev_device_get_sysattr_value(device, name))) return 0;
+  HidDeviceIdentifier actualIdentifier;
+  if (!hidParseDeviceIdentifier(&actualIdentifier, udev_device_get_sysattr_value(device, name))) return 0;
 
   return actualIdentifier == *testIdentifier;
 }
@@ -432,12 +432,12 @@ hidLinuxTestUSBDevice (struct udev_device *hidDevice, HidHandle *handle, const v
   const HidLinuxAttributeTest tests[] = {
     { .name = "idVendor",
       .value = &huf->vendorIdentifier,
-      .function = hidLinuxTestIdentifier
+      .function = hidLinuxTestDeviceIdentifier
     },
 
     { .name = "idProduct",
       .value = &huf->productIdentifier,
-      .function = hidLinuxTestIdentifier
+      .function = hidLinuxTestDeviceIdentifier
     },
 
     { .name = "manufacturer",

@@ -27,7 +27,7 @@ typedef struct HidHandleStruct HidHandle;
 typedef void HidDestroyHandleMethod (HidHandle *handle);
 
 typedef HidItemsDescriptor *HidGetItemsMethod (HidHandle *handle);
-typedef int HidGetIdentifiersMethod (HidHandle *handle, uint16_t *vendor, uint16_t *product);
+typedef int HidGetDeviceIdentifiersMethod (HidHandle *handle, uint16_t *vendor, uint16_t *product);
 
 typedef int HidGetReportMethod (HidHandle *handle, unsigned char *buffer, size_t size);
 typedef int HidSetReportMethod (HidHandle *handle, const unsigned char *report, size_t size);
@@ -54,7 +54,7 @@ typedef struct {
   HidDestroyHandleMethod *destroyHandle;
 
   HidGetItemsMethod *getItems;
-  HidGetIdentifiersMethod *getIdentifiers;
+  HidGetDeviceIdentifiersMethod *getDeviceIdentifiers;
 
   HidGetReportMethod *getReport;
   HidSetReportMethod *setReport;

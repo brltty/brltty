@@ -169,7 +169,7 @@ hidGetNextItem (
 int
 hidGetReportSize (
   const HidItemsDescriptor *items,
-  uint8_t identifier,
+  HidReportIdentifier identifier,
   HidReportSize *size
 ) {
   const unsigned char *nextByte = items->bytes;

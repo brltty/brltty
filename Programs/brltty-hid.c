@@ -294,9 +294,9 @@ parseString (const char *value, void *field) {
 }
 
 static int
-parseIdentifier (const char *value, void *field) {
-  uint16_t *identifier = field;
-  return hidParseIdentifier(identifier, value);
+parseDeviceIdentifier (const char *value, void *field) {
+  HidDeviceIdentifier *identifier = field;
+  return hidParseDeviceIdentifier(identifier, value);
 }
 
 static int
@@ -347,13 +347,13 @@ openDevice (HidDevice **device) {
     { .name = "vendor identifier",
       .value = opt_matchVendorIdentifier,
       .field = &huf.vendorIdentifier,
-      .parser = parseIdentifier,
+      .parser = parseDeviceIdentifier,
     },
 
     { .name = "product identifier",
       .value = opt_matchProductIdentifier,
       .field = &huf.productIdentifier,
-      .parser = parseIdentifier,
+      .parser = parseDeviceIdentifier,
     },
 
     { .name = "manufacturer name",
@@ -428,7 +428,7 @@ openDevice (HidDevice **device) {
 }
 
 static int
-getReportSize (HidDevice *device, unsigned char identifier, HidReportSize *size) {
+getReportSize (HidDevice *device, HidReportIdentifier identifier, HidReportSize *size) {
   const HidItemsDescriptor *items = hidGetItems(device);
   if (!items) return 0;
   return hidGetReportSize(items, identifier, size);
@@ -436,10 +436,10 @@ getReportSize (HidDevice *device, unsigned char identifier, HidReportSize *size)
 
 static int
 performShowDeviceIdentifiers (HidDevice *device) {
-  uint16_t vendor;
-  uint16_t product;
+  HidDeviceIdentifier vendor;
+  HidDeviceIdentifier product;
 
-  if (!hidGetIdentifiers(device, &vendor, &product)) {
+  if (!hidGetDeviceIdentifiers(device, &vendor, &product)) {
     logMessage(LOG_WARNING, "vendor/product identifiers not available");
     return 0;
   }
@@ -577,7 +577,7 @@ performListReports (HidDevice *device) {
 }
 
 static int
-isReportIdentifier (unsigned char *identifier, const char *string, unsigned char minimum) {
+isReportIdentifier (HidReportIdentifier *identifier, const char *string, unsigned char minimum) {
   if (strlen(string) != 2) return 0;
 
   char *end;
@@ -591,7 +591,7 @@ isReportIdentifier (unsigned char *identifier, const char *string, unsigned char
 
 static int
 isReportDefined (
-  HidDevice *device, const char *what, unsigned char identifier,
+  HidDevice *device, const char *what, HidReportIdentifier identifier,
   HidReportSize *reportSize, size_t *size
 ) {
   if (getReportSize(device, identifier, reportSize)) {
@@ -606,7 +606,7 @@ isReportDefined (
 
 static int
 verifyRead (
-  HidDevice *device, const char *what, unsigned char identifier,
+  HidDevice *device, const char *what, HidReportIdentifier identifier,
   HidReportSize *reportSize, size_t *size
 ) {
   int isDefined = isReportDefined(
@@ -617,7 +617,7 @@ verifyRead (
   return isDefined;
 }
 
-static unsigned char readReportIdentifier;
+static HidReportIdentifier readReportIdentifier;
 
 static int
 parseReadReport (void) {
@@ -631,7 +631,7 @@ parseReadReport (void) {
 
 static int
 performReadReport (HidDevice *device) {
-  unsigned char identifier = readReportIdentifier;
+  HidReportIdentifier identifier = readReportIdentifier;
 
   HidReportSize reportSize;
   size_t *size = &reportSize.input;
@@ -650,7 +650,7 @@ performReadReport (HidDevice *device) {
   return 1;
 }
 
-static unsigned char readFeatureIdentifier;
+static HidReportIdentifier readFeatureIdentifier;
 
 static int
 parseReadFeature (void) {
@@ -664,7 +664,7 @@ parseReadFeature (void) {
 
 static int
 performReadFeature (HidDevice *device) {
-  unsigned char identifier = readFeatureIdentifier;
+  HidReportIdentifier identifier = readFeatureIdentifier;
 
   HidReportSize reportSize;
   size_t *size = &reportSize.feature;

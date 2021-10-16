@@ -47,7 +47,7 @@ extern unsigned char hidGetValueSize (unsigned char item);
 
 extern int hidGetReportSize (
   const HidItemsDescriptor *items,
-  uint8_t identifier,
+  HidReportIdentifier identifier,
   HidReportSize *size
 );
 

@@ -26,6 +26,9 @@ extern "C" {
 typedef uint32_t HidUnsignedValue;
 typedef int32_t HidSignedValue;
 
+typedef uint8_t HidReportIdentifier;
+typedef uint16_t HidDeviceIdentifier;
+
 typedef struct {
   size_t count;
   unsigned char bytes[];

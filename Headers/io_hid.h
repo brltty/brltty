@@ -32,8 +32,8 @@ typedef struct {
   const char *manufacturerName;
   const char *productDescription;
   const char *serialNumber;
-  uint16_t vendorIdentifier;
-  uint16_t productIdentifier;
+  HidDeviceIdentifier vendorIdentifier;
+  HidDeviceIdentifier productIdentifier;
 } HidUSBFilter;
 
 extern void hidInitializeUSBFilter (HidUSBFilter *filter);
@@ -42,8 +42,8 @@ extern HidDevice *hidOpenUSBDevice (const HidUSBFilter *filter);
 typedef struct {
   const char *deviceAddress;
   const char *deviceName;
-  uint16_t vendorIdentifier;
-  uint16_t productIdentifier;
+  HidDeviceIdentifier vendorIdentifier;
+  HidDeviceIdentifier productIdentifier;
 } HidBluetoothFilter;
 
 extern void hidInitializeBluetoothFilter (HidBluetoothFilter *filter);
@@ -52,7 +52,7 @@ extern HidDevice *hidOpenBluetoothDevice (const HidBluetoothFilter *filter);
 extern void hidCloseDevice (HidDevice *device);
 
 extern const HidItemsDescriptor *hidGetItems (HidDevice *device);
-extern int hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product);
+extern int hidGetDeviceIdentifiers (HidDevice *device, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product);
 
 extern int hidGetReport (HidDevice *device, unsigned char *buffer, size_t size);
 extern int hidSetReport (HidDevice *device, const unsigned char *report, size_t size);
@@ -75,7 +75,7 @@ extern const char *hidGetDeviceName (HidDevice *device);
 extern const char *hidGetHostPath (HidDevice *device);
 extern const char *hidGetHostDevice (HidDevice *device);
 
-extern int hidParseIdentifier (uint16_t *identifier, const char *string);
+extern int hidParseDeviceIdentifier (HidDeviceIdentifier *identifier, const char *string);
 extern int hidMatchString (const char *actualString, const char *testString);
 
 #ifdef __cplusplus

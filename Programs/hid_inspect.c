@@ -86,7 +86,7 @@ STR_BEGIN_FORMATTER(hidFormatUsageFlags, HidUnsignedValue flags)
   typedef struct {
     const char *on;
     const char *off;
-    uint16_t bit;
+    HidUnsignedValue bit;
   } FlagEntry;
 
   static const FlagEntry flagTable[] = {

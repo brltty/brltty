@@ -36,16 +36,14 @@ hidInitializeBluetoothFilter (HidBluetoothFilter *filter) {
 }
 
 int
-hidParseIdentifier (uint16_t *identifier, const char *string) {
+hidParseDeviceIdentifier (HidDeviceIdentifier *identifier, const char *string) {
   if (!string) return 0;
   if (!*string) return 0;
   if (strlen(string) > 4) return 0;
 
   char *end;
-  long int value = strtol(string, &end, 0X10);
+  long unsigned int value = strtoul(string, &end, 0X10);
   if (*end) return 0;
-
-  if (value < 0) return 0;
   if (value > UINT16_MAX) return 0;
 
   *identifier = value;
@@ -151,11 +149,11 @@ hidGetItems (HidDevice *device) {
 }
 
 int
-hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
-  HidGetIdentifiersMethod *method = device->handleMethods->getIdentifiers;
+hidGetDeviceIdentifiers (HidDevice *device, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product) {
+  HidGetDeviceIdentifiersMethod *method = device->handleMethods->getDeviceIdentifiers;
 
   if (!method) {
-    logUnsupportedOperation("hidGetIdentifiers");
+    logUnsupportedOperation("hidGetDeviceIdentifiers");
     errno = ENOSYS;
     return 0;
   }
@@ -164,7 +162,7 @@ hidGetIdentifiers (HidDevice *device, uint16_t *vendor, uint16_t *product) {
 }
 
 static void
-hidLogDataTransfer (const char *action, const unsigned char *data, size_t size, uint8_t identifier) {
+hidLogDataTransfer (const char *action, const unsigned char *data, size_t size, HidReportIdentifier identifier) {
   logBytes(LOG_CATEGORY(HUMAN_INTERFACE),
     "%s: %02X", data, size, action, identifier
   );
@@ -180,7 +178,7 @@ hidGetReport (HidDevice *device, unsigned char *buffer, size_t size) {
     return 0;
   }
 
-  uint8_t identifier = *buffer;
+  HidReportIdentifier identifier = *buffer;
   if (!method(device->handle, buffer, size)) return 0;
 
   hidLogDataTransfer("get report", buffer, size-1, identifier);
