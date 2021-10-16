@@ -90,6 +90,11 @@ HID_TABLE_METHODS(LEDsUsage)
 
 typedef struct {
   HID_TABLE_ENTRY_HEADER;
+} HidBrailleUsageEntry;
+HID_TABLE_METHODS(BrailleUsage)
+
+typedef struct {
+  HID_TABLE_ENTRY_HEADER;
   HidTable *usageTable;
 } HidUsagePageEntry;
 HID_TABLE_METHODS(UsagePage)
