@@ -31,8 +31,8 @@ hidCompareTableEntriesByValue (const void *element1, const void *element2) {
   const HidTableEntryHeader *const *header1 = element1;
   const HidTableEntryHeader *const *header2 = element2;
 
-  uint32_t value1 = (*header1)->value;
-  uint32_t value2 = (*header2)->value;
+  HidUnsignedValue value1 = (*header1)->value;
+  HidUnsignedValue value2 = (*header2)->value;
 
   if (value1 < value2) return -1;
   if (value1 > value2) return 1;
@@ -40,7 +40,7 @@ hidCompareTableEntriesByValue (const void *element1, const void *element2) {
 }
 
 const void *
-hidGetTableEntry (HidTableDescriptor *table, uint32_t value) {
+hidGetTableEntry (HidTable *table, HidUnsignedValue value) {
   if (!table->sorted) {
     if (!(table->sorted = malloc(ARRAY_SIZE(table->sorted, table->count)))) {
       logMallocError();
@@ -183,9 +183,9 @@ hidGetReportSize (
   size_t featureSize = 0;
 
   uint64_t itemTypesEncountered = 0;
-  uint32_t reportIdentifier = 0;
-  uint32_t reportSize = 0;
-  uint32_t reportCount = 0;
+  HidUnsignedValue reportIdentifier = 0;
+  HidUnsignedValue reportSize = 0;
+  HidUnsignedValue reportCount = 0;
 
   while (bytesLeft) {
     size_t offset = nextByte - items->bytes;

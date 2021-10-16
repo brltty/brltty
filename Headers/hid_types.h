@@ -23,6 +23,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef uint32_t HidUnsignedValue;
+typedef int32_t HidSignedValue;
+
 typedef struct {
   size_t count;
   unsigned char bytes[];

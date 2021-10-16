@@ -26,8 +26,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef union {
-  uint32_t u;
-  int32_t s;
+  HidUnsignedValue u;
+  HidSignedValue s;
 } HidItemValue;
 
 typedef struct {

@@ -19,13 +19,15 @@
 #ifndef BRLTTY_INCLUDED_HID_TABLES
 #define BRLTTY_INCLUDED_HID_TABLES
 
+#include "hid_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
   const char *name;
-  uint32_t value;
+  HidUnsignedValue value;
 } HidTableEntryHeader;
 
 #define HID_TABLE_ENTRY_HEADER HidTableEntryHeader header
@@ -43,23 +45,23 @@ typedef struct {
   size_t const size;
   size_t const count;
   const HidTableEntryHeader **sorted;
-} HidTableDescriptor;
+} HidTable;
 
 #define HID_BEGIN_TABLE(type) static const Hid##type##Entry hid##type##Entries[] = {
 
 #define HID_END_TABLE(type) }; \
-static HidTableDescriptor hid##type##Descriptor = { \
+static HidTable hid##type##Table = { \
   .entries = hid##type##Entries, \
   .size = sizeof(hid##type##Entries[0]), \
   .count = ARRAY_COUNT(hid##type##Entries), \
   .sorted = NULL \
 }; \
-const Hid##type##Entry *hidGet##type##Entry (uint32_t value) { \
-  return hidGetTableEntry(&hid##type##Descriptor, value); \
+const Hid##type##Entry *hidGet##type##Entry (HidUnsignedValue value) { \
+  return hidGetTableEntry(&hid##type##Table, value); \
 }
 
 #define HID_TABLE_METHODS(type) \
-extern const Hid##type##Entry *hidGet##type##Entry (uint32_t value);
+extern const Hid##type##Entry *hidGet##type##Entry (HidUnsignedValue value);
 
 typedef struct {
   HID_TABLE_ENTRY_HEADER;
@@ -76,7 +78,7 @@ typedef struct {
 } HidUsagePageEntry;
 HID_TABLE_METHODS(UsagePage)
 
-extern const void *hidGetTableEntry (HidTableDescriptor *table, uint32_t value);
+extern const void *hidGetTableEntry (HidTable *table, HidUnsignedValue value);
 
 #ifdef __cplusplus
 }

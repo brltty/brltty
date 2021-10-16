@@ -45,7 +45,7 @@ hidGetReports (const HidItemsDescriptor *items) {
 
     switch (item.type) {
       case HID_ITM_ReportID: {
-        uint32_t identifier = item.value.u;
+        HidUnsignedValue identifier = item.value.u;
 
         if (!identifier) continue;
         if (identifier > UINT8_MAX) continue;
@@ -82,7 +82,7 @@ hidGetReports (const HidItemsDescriptor *items) {
   return NULL;
 }
 
-STR_BEGIN_FORMATTER(hidFormatUsageFlags, uint32_t flags)
+STR_BEGIN_FORMATTER(hidFormatUsageFlags, HidUnsignedValue flags)
   typedef struct {
     const char *on;
     const char *off;
@@ -204,17 +204,17 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
       }
 
       if (item.valueSize > 0) {
-        uint32_t hexValue = item.value.u & ((UINT64_C(1) << (item.valueSize * 8)) - 1);
+        HidUnsignedValue hexValue = item.value.u & ((UINT64_C(1) << (item.valueSize * 8)) - 1);
         int hexPrecision = item.valueSize * 2;
 
         STR_PRINTF(
-          " = %" PRId32 " (0X%.*" PRIX32 ")",
+          " = %d (0X%.*X)",
           item.value.s, hexPrecision, hexValue
         );
       }
 
       {
-        uint32_t value = item.value.u;
+        HidUnsignedValue value = item.value.u;
         const char *text = NULL;
         char buffer[0X40];
 
