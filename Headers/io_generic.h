@@ -36,18 +36,23 @@ extern GioEndpoint *gioConnectResource (
   const GioDescriptor *descriptor
 );
 
+extern const void *gioGetApplicationData (GioEndpoint *endpoint);
 extern int gioDisconnectResource (GioEndpoint *endpoint);
 
-extern const void *gioGetApplicationData (GioEndpoint *endpoint);
 extern const char *gioMakeResourceIdentifier (GioEndpoint *endpoint, char *buffer, size_t size);
 extern char *gioGetResourceIdentifier (GioEndpoint *endpoint);
+
 extern char *gioGetResourceName (GioEndpoint *endpoint);
+extern GioTypeIdentifier gioGetResourceType (GioEndpoint *endpoint);
+extern void *gioGetResourceObject (GioEndpoint *endpoint);
 
 extern ssize_t gioWriteData (GioEndpoint *endpoint, const void *data, size_t size);
 extern int gioAwaitInput (GioEndpoint *endpoint, int timeout);
 extern ssize_t gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait);
 extern int gioReadByte (GioEndpoint *endpoint, unsigned char *byte, int wait);
 extern int gioDiscardInput (GioEndpoint *endpoint);
+
+extern int gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data);
 
 extern int gioReconfigureResource (
   GioEndpoint *endpoint,
@@ -112,8 +117,6 @@ extern ssize_t gioGetHidFeature (
   void *buffer, uint16_t size
 );
 
-extern int gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data);
-
 typedef struct {
   void *const data;
   int error;
@@ -129,9 +132,6 @@ extern GioHandleInputObject *gioNewHandleInputObject (
 );
 
 extern void gioDestroyHandleInputObject (GioHandleInputObject *hio);
-
-extern GioTypeIdentifier gioGetResourceType (GioEndpoint *endpoint);
-extern void *gioGetResourceObject (GioEndpoint *endpoint);
 
 #ifdef __cplusplus
 }

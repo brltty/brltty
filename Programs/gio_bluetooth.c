@@ -47,6 +47,11 @@ getBluetoothResourceName (GioHandle *handle, int timeout) {
   return bthGetNameOfDevice(handle->connection, timeout);
 }
 
+static void *
+getBluetoothResourceObject (GioHandle *handle) {
+  return handle->connection;
+}
+
 static ssize_t
 writeBluetoothData (GioHandle *handle, const void *data, size_t size, int timeout) {
   return bthWriteData(handle->connection, data, size);
@@ -71,24 +76,17 @@ monitorBluetoothInput (GioHandle *handle, AsyncMonitorCallback *callback, void *
   return bthMonitorInput(handle->connection, callback, data);
 }
 
-static void *
-getBluetoothResourceObject (GioHandle *handle) {
-  return handle->connection;
-}
-
 static const GioMethods gioBluetoothMethods = {
   .disconnectResource = disconnectBluetoothResource,
 
   .makeResourceIdentifier = makeBluetoothResourceIdentifier,
   .getResourceName = getBluetoothResourceName,
+  .getResourceObject = getBluetoothResourceObject,
 
   .writeData = writeBluetoothData,
   .awaitInput = awaitBluetoothInput,
   .readData = readBluetoothData,
-
   .monitorInput = monitorBluetoothInput,
-
-  .getResourceObject = getBluetoothResourceObject
 };
 
 static int

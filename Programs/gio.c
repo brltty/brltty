@@ -198,6 +198,11 @@ gioConnectResource (
   return NULL;
 }
 
+const void *
+gioGetApplicationData (GioEndpoint *endpoint) {
+  return endpoint->options.applicationData;
+}
+
 int
 gioDisconnectResource (GioEndpoint *endpoint) {
   int ok = 0;
@@ -213,11 +218,6 @@ gioDisconnectResource (GioEndpoint *endpoint) {
   if (endpoint->hidItems) free(endpoint->hidItems);
   free(endpoint);
   return ok;
-}
-
-const void *
-gioGetApplicationData (GioEndpoint *endpoint) {
-  return endpoint->options.applicationData;
 }
 
 const char *
@@ -259,6 +259,20 @@ gioGetResourceName (GioEndpoint *endpoint) {
   }
 
   return name;
+}
+
+GioTypeIdentifier
+gioGetResourceType (GioEndpoint *endpoint) {
+  return endpoint->resourceType;
+}
+
+void *
+gioGetResourceObject (GioEndpoint *endpoint) {
+  GioGetResourceObjectMethod *method = endpoint->methods->getResourceObject;
+
+  if (method) return method(endpoint->handle);
+  logUnsupportedOperation("getResourceObject");
+  return NULL;
 }
 
 ssize_t
@@ -378,6 +392,19 @@ gioDiscardInput (GioEndpoint *endpoint) {
   unsigned char byte;
   while (gioReadByte(endpoint, &byte, 0));
   return errno == EAGAIN;
+}
+
+int
+gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
+  GioMonitorInputMethod *method = endpoint->methods->monitorInput;
+
+  if (method) {
+    if (method(endpoint->handle, callback, data)) {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 int
@@ -569,19 +596,6 @@ gioGetHidFeature (
                 buffer, size, endpoint->options.requestTimeout);
 }
 
-int
-gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
-  GioMonitorInputMethod *method = endpoint->methods->monitorInput;
-
-  if (method) {
-    if (method(endpoint->handle, callback, data)) {
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
 struct GioHandleInputObjectStruct {
   GioEndpoint *endpoint;
   AsyncHandle pollAlarm;
@@ -661,18 +675,4 @@ gioDestroyHandleInputObject (GioHandleInputObject *hio) {
   }
 
   free(hio);
-}
-
-GioTypeIdentifier
-gioGetResourceType (GioEndpoint *endpoint) {
-  return endpoint->resourceType;
-}
-
-void *
-gioGetResourceObject (GioEndpoint *endpoint) {
-  GioGetResourceObjectMethod *method = endpoint->methods->getResourceObject;
-
-  if (method) return method(endpoint->handle);
-  logUnsupportedOperation("getResourceObject");
-  return NULL;
 }

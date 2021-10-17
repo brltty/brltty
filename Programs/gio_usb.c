@@ -61,6 +61,11 @@ getUsbResourceName (GioHandle *handle, int timeout) {
   return usbGetProduct(channel->device, timeout);
 }
 
+static void *
+getUsbResourceObject (GioHandle *handle) {
+  return handle->channel;
+}
+
 static ssize_t
 writeUsbData (GioHandle *handle, const void *data, size_t size, int timeout) {
   UsbChannel *channel = handle->channel;
@@ -146,6 +151,19 @@ readUsbData (
 }
 
 static int
+monitorUsbInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
+  if (!GIO_USB_INPUT_MONITOR_DISABLE) {
+    UsbChannel *channel = handle->channel;
+    unsigned char endpoint = channel->definition->inputEndpoint;
+
+    if (!endpoint) return 0;
+    return usbMonitorInputEndpoint(channel->device, endpoint, callback, data);
+  }
+
+  return 0;
+}
+
+static int
 reconfigureUsbResource (GioHandle *handle, const SerialParameters *parameters) {
   UsbChannel *channel = handle->channel;
 
@@ -226,34 +244,17 @@ getUsbHidFeature (
                           identifier, buffer, size, timeout);
 }
 
-static int
-monitorUsbInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
-  if (!GIO_USB_INPUT_MONITOR_DISABLE) {
-    UsbChannel *channel = handle->channel;
-    unsigned char endpoint = channel->definition->inputEndpoint;
-
-    if (!endpoint) return 0;
-    return usbMonitorInputEndpoint(channel->device, endpoint, callback, data);
-  }
-
-  return 0;
-}
-
-static void *
-getUsbResourceObject (GioHandle *handle) {
-  return handle->channel;
-}
-
 static const GioMethods gioUsbMethods = {
   .disconnectResource = disconnectUsbResource,
 
   .makeResourceIdentifier = makeUsbResourceIdentifier,
   .getResourceName = getUsbResourceName,
+  .getResourceObject = getUsbResourceObject,
 
   .writeData = writeUsbData,
   .awaitInput = awaitUsbInput,
   .readData = readUsbData,
-
+  .monitorInput = monitorUsbInput,
   .reconfigureResource = reconfigureUsbResource,
 
   .tellResource = tellUsbResource,
@@ -264,10 +265,6 @@ static const GioMethods gioUsbMethods = {
   .getHidReport = getUsbHidReport,
   .setHidFeature = setUsbHidFeature,
   .getHidFeature = getUsbHidFeature,
-
-  .monitorInput = monitorUsbInput,
-
-  .getResourceObject = getUsbResourceObject
 };
 
 static int

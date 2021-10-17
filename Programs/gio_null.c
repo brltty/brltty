@@ -69,7 +69,6 @@ static const GioMethods gioNullMethods = {
 
   .awaitInput = awaitNullInput,
   .readData = readNullData,
-
   .monitorInput = monitorNullInput
 };
 

@@ -54,6 +54,11 @@ getHidResourceName (GioHandle *handle, int timeout) {
   return NULL;
 }
 
+static void *
+getHidResourceObject (GioHandle *handle) {
+  return handle->device;
+}
+
 static ssize_t
 writeHidData (GioHandle *handle, const void *data, size_t size, int timeout) {
   return hidWriteData(handle->device, data, size);
@@ -71,6 +76,11 @@ readHidData (
 ) {
   return hidReadData(handle->device, buffer, size,
                      initialTimeout, subsequentTimeout);
+}
+
+static int
+monitorHidInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
+  return hidMonitorInput(handle->device, callback, data);
 }
 
 static HidItemsDescriptor *
@@ -110,35 +120,23 @@ getHidFeature (
   return -1;
 }
 
-static int
-monitorHidInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data) {
-  return hidMonitorInput(handle->device, callback, data);
-}
-
-static void *
-getHidResourceObject (GioHandle *handle) {
-  return handle->device;
-}
-
 static const GioMethods gioHidMethods = {
   .disconnectResource = disconnectHidResource,
 
   .makeResourceIdentifier = makeHidResourceIdentifier,
   .getResourceName = getHidResourceName,
+  .getResourceObject = getHidResourceObject,
 
   .writeData = writeHidData,
   .awaitInput = awaitHidInput,
   .readData = readHidData,
+  .monitorInput = monitorHidInput,
 
   .getHidItems = getHidItems,
   .setHidReport = setHidReport,
   .getHidReport = getHidReport,
   .setHidFeature = setHidFeature,
   .getHidFeature = getHidFeature,
-
-  .monitorInput = monitorHidInput,
-
-  .getResourceObject = getHidResourceObject
 };
 
 static int

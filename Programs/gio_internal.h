@@ -31,6 +31,8 @@ typedef const char *MakeResourceIdentifierMethod (GioHandle *handle, char *buffe
 
 typedef char *GioGetResourceNameMethod (GioHandle *handle, int timeout);
 
+typedef void *GioGetResourceObjectMethod (GioHandle *handle);
+
 typedef ssize_t GioWriteDataMethod (GioHandle *handle, const void *data, size_t size, int timeout);
 
 typedef int GioAwaitInputMethod (GioHandle *handle, int timeout);
@@ -39,6 +41,8 @@ typedef ssize_t GioReadDataMethod (
   GioHandle *handle, void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 );
+
+typedef int GioMonitorInputMethod (GioHandle *handle, AsyncMonitorCallback *callback, void *data);
 
 typedef int GioReconfigureResourceMethod (GioHandle *handle, const SerialParameters *parameters);
 
@@ -76,20 +80,17 @@ typedef ssize_t GioGetHidFeatureMethod (
   void *buffer, uint16_t size, int timeout
 );
 
-typedef int GioMonitorInputMethod (GioHandle *handle, AsyncMonitorCallback *callback, void *data);
-
-typedef void *GioGetResourceObjectMethod (GioHandle *handle);
-
 typedef struct {
   GioDisconnectResourceMethod *disconnectResource;
 
   MakeResourceIdentifierMethod *makeResourceIdentifier;
   GioGetResourceNameMethod *getResourceName;
+  GioGetResourceObjectMethod *getResourceObject;
 
   GioWriteDataMethod *writeData;
   GioAwaitInputMethod *awaitInput;
   GioReadDataMethod *readData;
-
+  GioMonitorInputMethod *monitorInput;
   GioReconfigureResourceMethod *reconfigureResource;
 
   GioTellResourceMethod *tellResource;
@@ -100,10 +101,6 @@ typedef struct {
   GioGetHidReportMethod *getHidReport;
   GioSetHidFeatureMethod *setHidFeature;
   GioGetHidFeatureMethod *getHidFeature;
-
-  GioMonitorInputMethod *monitorInput;
-
-  GioGetResourceObjectMethod *getResourceObject;
 } GioMethods;
 
 struct GioEndpointStruct {
