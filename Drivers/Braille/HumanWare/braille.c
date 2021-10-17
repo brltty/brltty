@@ -748,6 +748,37 @@ readHidPacket (BrailleDisplay *brl, void *buffer, size_t size) {
   return readBraillePacket(brl, NULL, buffer, size, verifyHidPacket, NULL);
 }
 
+static size_t
+getPressedKeysReportSize (BrailleDisplay *brl) {
+  {
+    GioEndpoint *endpoint = brl->gioEndpoint;
+    const HidItemsDescriptor *items = gioGetHidItems(endpoint, 0);
+
+    if (items) {
+      HidReportSize reportSize;
+
+      if (gioGetHidReportSize(endpoint, HW_REP_IN_PressedKeys, &reportSize)) {
+        size_t size = reportSize.input;
+        if (size) return size;
+      }
+    }
+  }
+
+  {
+    size_t size = brl->data->model->pressedKeysReportSize;
+    if (size) return size;
+  }
+
+  size_t size = 1;
+  size += brl->textColumns;
+  size += THUMB_KEY_COUNT;
+  if (brl->data->model->hasBrailleKeys) size += BRAILLE_KEY_COUNT;
+  if (brl->data->model->hasCommandKeys) size += COMMAND_KEY_COUNT;
+  if (brl->data->model->hasJoystick) size += JOYSTICK_KEY_COUNT;
+  if (brl->data->model->hasSecondThumbKeys) size += THUMB_KEY_COUNT;
+  return size;
+}
+
 static int
 probeHidDisplay (BrailleDisplay *brl) {
   HW_CapabilitiesReport capabilities;
@@ -769,21 +800,11 @@ probeHidDisplay (BrailleDisplay *brl) {
 
   {
     unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
-    unsigned char reportSize = brl->data->model->pressedKeysReportSize;
+    *size = getPressedKeysReportSize(brl);
 
-    if (reportSize) {
-      *size = reportSize;
-    } else {
-      *size = 1;
-      *size += brl->textColumns;
-      *size += THUMB_KEY_COUNT;
-      if (brl->data->model->hasBrailleKeys) *size += BRAILLE_KEY_COUNT;
-      if (brl->data->model->hasCommandKeys) *size += COMMAND_KEY_COUNT;
-      if (brl->data->model->hasJoystick) *size += JOYSTICK_KEY_COUNT;
-      if (brl->data->model->hasSecondThumbKeys) *size += THUMB_KEY_COUNT;
-    }
-
-    logMessage(LOG_DEBUG, "pressed keys report size: %u", *size);
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
+      "pressed keys report size: %u", *size
+    );
   }
 
   return 1;
