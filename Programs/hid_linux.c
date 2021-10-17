@@ -106,32 +106,48 @@ hidLinuxGetDeviceIdentifiers (HidHandle *handle, HidDeviceIdentifier *vendor, Hi
   return 1;
 }
 
-static int
+static ssize_t
 hidLinuxGetReport (HidHandle *handle, unsigned char *buffer, size_t size) {
-  if (ioctl(handle->fileDescriptor, HIDIOCGINPUT(size), buffer) != -1) return 1;
-  logSystemError("ioctl[HIDIOCGINPUT]");
-  return 0;
+  int result = ioctl(handle->fileDescriptor, HIDIOCGINPUT(size), buffer);
+
+  if (result == -1) {
+    logSystemError("ioctl[HIDIOCGINPUT]");
+  }
+
+  return result;
 }
 
-static int
+static ssize_t
 hidLinuxSetReport (HidHandle *handle, const unsigned char *report, size_t size) {
-  if (ioctl(handle->fileDescriptor, HIDIOCSOUTPUT(size), report) != -1) return 1;
-  logSystemError("ioctl[HIDIOCSOUTPUT]");
-  return 0;
+  int result = ioctl(handle->fileDescriptor, HIDIOCSOUTPUT(size), report);
+
+  if (result == -1) {
+    logSystemError("ioctl[HIDIOCSOUTPUT]");
+  }
+
+  return result;
 }
 
-static int
+static ssize_t
 hidLinuxGetFeature (HidHandle *handle, unsigned char *buffer, size_t size) {
-  if (ioctl(handle->fileDescriptor, HIDIOCGFEATURE(size), buffer) != -1) return 1;
-  logSystemError("ioctl[HIDIOCGFEATURE]");
-  return 0;
+  int result = ioctl(handle->fileDescriptor, HIDIOCGFEATURE(size), buffer);
+
+  if (result == -1) {
+    logSystemError("ioctl[HIDIOCGFEATURE]");
+  }
+
+  return result;
 }
 
-static int
+static ssize_t
 hidLinuxSetFeature (HidHandle *handle, const unsigned char *feature, size_t size) {
-  if (ioctl(handle->fileDescriptor, HIDIOCSFEATURE(size), feature) != -1) return 1;
-  logSystemError("ioctl[HIDIOCSFEATURE]");
-  return 0;
+  int result = ioctl(handle->fileDescriptor, HIDIOCSFEATURE(size), feature);
+
+  if (result == -1) {
+    logSystemError("ioctl[HIDIOCSFEATURE]");
+  }
+
+  return result;
 }
 
 static int

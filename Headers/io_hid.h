@@ -91,11 +91,11 @@ extern void hidCloseDevice (HidDevice *device);
 extern HidItemsDescriptor *hidGetItems (HidDevice *device);
 extern int hidGetDeviceIdentifiers (HidDevice *device, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product);
 
-extern int hidGetReport (HidDevice *device, unsigned char *buffer, size_t size);
-extern int hidSetReport (HidDevice *device, const unsigned char *report, size_t size);
+extern ssize_t hidGetReport (HidDevice *device, unsigned char *buffer, size_t size);
+extern ssize_t hidSetReport (HidDevice *device, const unsigned char *report, size_t size);
 
-extern int hidGetFeature (HidDevice *device, unsigned char *buffer, size_t size);
-extern int hidSetFeature (HidDevice *device, const unsigned char *feature, size_t size);
+extern ssize_t hidGetFeature (HidDevice *device, unsigned char *buffer, size_t size);
+extern ssize_t hidSetFeature (HidDevice *device, const unsigned char *feature, size_t size);
 
 extern int hidWriteData (HidDevice *device, const unsigned char *data, size_t size);
 extern int hidMonitorInput (HidDevice *device, AsyncMonitorCallback *callback, void *data);

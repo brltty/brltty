@@ -544,7 +544,7 @@ performReadReport (HidDevice *device) {
   unsigned char report[*size];
   report[0] = identifier;
 
-  if (!hidGetReport(device, report, *size)) return 0;
+  if (hidGetReport(device, report, *size) == -1) return 0;
   writeBytesLine("Input Report: %02X", report, *size, identifier);
   return 1;
 }
@@ -577,7 +577,7 @@ performReadFeature (HidDevice *device) {
   unsigned char feature[*size];
   feature[0] = identifier;
 
-  if (!hidGetFeature(device, feature, *size)) return 0;
+  if (hidGetFeature(device, feature, *size) == -1) return 0;
   writeBytesLine("Feature Report: %02X", feature, *size, identifier);
   return 1;
 }
@@ -784,7 +784,7 @@ performWriteReport (HidDevice *device) {
 
   if (!verified) return 0;
   writeBytesLine("Output Report: %02X", report, length, identifier);
-  return hidSetReport(device, report, length);
+  return hidSetReport(device, report, length) != -1;
 }
 
 static unsigned char writeFeatureBuffer[0X1000];
@@ -814,7 +814,7 @@ performWriteFeature (HidDevice *device) {
 
   if (!verified) return 0;
   writeBytesLine("Feature Report: %02X", feature, length, identifier);
-  return hidSetFeature(device, feature, length);
+  return hidSetFeature(device, feature, length) != -1;
 }
 
 static int inputTimeout;

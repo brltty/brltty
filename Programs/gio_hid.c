@@ -93,7 +93,7 @@ setHidReport (
   GioHandle *handle, unsigned char identifier,
   const void *data, uint16_t size, int timeout
 ) {
-  return -1;
+  return hidSetReport(handle->device, data, size);
 }
 
 static ssize_t
@@ -101,7 +101,7 @@ getHidReport (
   GioHandle *handle, unsigned char identifier,
   void *buffer, uint16_t size, int timeout
 ) {
-  return -1;
+  return hidGetReport(handle->device, buffer, size);
 }
 
 static ssize_t
@@ -109,7 +109,7 @@ setHidFeature (
   GioHandle *handle, unsigned char identifier,
   const void *data, uint16_t size, int timeout
 ) {
-  return -1;
+  return hidSetFeature(handle->device, data, size);
 }
 
 static ssize_t
@@ -117,7 +117,7 @@ getHidFeature (
   GioHandle *handle, unsigned char identifier,
   void *buffer, uint16_t size, int timeout
 ) {
-  return -1;
+  return hidGetFeature(handle->device, buffer, size);
 }
 
 static const GioMethods gioHidMethods = {

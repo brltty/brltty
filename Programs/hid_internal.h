@@ -29,11 +29,11 @@ typedef void HidDestroyHandleMethod (HidHandle *handle);
 typedef HidItemsDescriptor *HidGetItemsMethod (HidHandle *handle);
 typedef int HidGetDeviceIdentifiersMethod (HidHandle *handle, uint16_t *vendor, uint16_t *product);
 
-typedef int HidGetReportMethod (HidHandle *handle, unsigned char *buffer, size_t size);
-typedef int HidSetReportMethod (HidHandle *handle, const unsigned char *report, size_t size);
+typedef ssize_t HidGetReportMethod (HidHandle *handle, unsigned char *buffer, size_t size);
+typedef ssize_t HidSetReportMethod (HidHandle *handle, const unsigned char *report, size_t size);
 
-typedef int HidGetFeatureMethod (HidHandle *handle, unsigned char *buffer, size_t size);
-typedef int HidSetFeatureMethod (HidHandle *handle, const unsigned char *feature, size_t size);
+typedef ssize_t HidGetFeatureMethod (HidHandle *handle, unsigned char *buffer, size_t size);
+typedef ssize_t HidSetFeatureMethod (HidHandle *handle, const unsigned char *feature, size_t size);
 
 typedef int HidWriteDataMethod (HidHandle *handle, const unsigned char *data, size_t size);
 typedef int HidMonitorInputMethod (HidHandle *handle, AsyncMonitorCallback *callback, void *data);

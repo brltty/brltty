@@ -465,7 +465,7 @@ hidLogDataTransfer (const char *action, const unsigned char *data, size_t size, 
   );
 }
 
-int
+ssize_t
 hidGetReport (HidDevice *device, unsigned char *buffer, size_t size) {
   HidGetReportMethod *method = device->handleMethods->getReport;
 
@@ -476,13 +476,16 @@ hidGetReport (HidDevice *device, unsigned char *buffer, size_t size) {
   }
 
   HidReportIdentifier identifier = *buffer;
-  if (!method(device->handle, buffer, size)) return 0;
+  ssize_t result = method(device->handle, buffer, size);
 
-  hidLogDataTransfer("get report", buffer, size-1, identifier);
-  return 1;
+  if (result != -1) {
+    hidLogDataTransfer("get report", buffer, result, identifier);
+  }
+
+  return result;
 }
 
-int
+ssize_t
 hidSetReport (HidDevice *device, const unsigned char *report, size_t size) {
   HidSetReportMethod *method = device->handleMethods->setReport;
 
@@ -496,7 +499,7 @@ hidSetReport (HidDevice *device, const unsigned char *report, size_t size) {
   return method(device->handle, report, size);
 }
 
-int
+ssize_t
 hidGetFeature (HidDevice *device, unsigned char *buffer, size_t size) {
   HidGetFeatureMethod *method = device->handleMethods->getFeature;
 
@@ -506,14 +509,17 @@ hidGetFeature (HidDevice *device, unsigned char *buffer, size_t size) {
     return 0;
   }
 
-  uint8_t identifier = *buffer;
-  if (!method(device->handle, buffer, size)) return 0;
+  HidReportIdentifier identifier = *buffer;
+  ssize_t result = method(device->handle, buffer, size);
 
-  hidLogDataTransfer("get feature", buffer, size-1, identifier);
-  return 1;
+  if (result != -1) {
+    hidLogDataTransfer("get feature", buffer, result, identifier);
+  }
+
+  return result;
 }
 
-int
+ssize_t
 hidSetFeature (HidDevice *device, const unsigned char *feature, size_t size) {
   HidSetFeatureMethod *method = device->handleMethods->setFeature;
 
