@@ -88,7 +88,7 @@ extern int hidOpenDeviceWithParameters (
 
 extern void hidCloseDevice (HidDevice *device);
 
-extern const HidItemsDescriptor *hidGetItems (HidDevice *device);
+extern HidItemsDescriptor *hidGetItems (HidDevice *device);
 extern int hidGetDeviceIdentifiers (HidDevice *device, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product);
 
 extern int hidGetReport (HidDevice *device, unsigned char *buffer, size_t size);

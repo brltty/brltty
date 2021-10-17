@@ -314,9 +314,21 @@ openDevice (HidDevice **device) {
   return hidOpenDeviceWithFilter(device, &filter);
 }
 
+static const HidItemsDescriptor *
+getItems (HidDevice *device) {
+  static const HidItemsDescriptor *items = NULL;
+
+  if (!items) {
+    items = hidGetItems(device);
+    if (!items) logMessage(LOG_ERR, "HID items not available");
+  }
+
+  return items;
+}
+
 static int
 getReportSize (HidDevice *device, HidReportIdentifier identifier, HidReportSize *size) {
-  const HidItemsDescriptor *items = hidGetItems(device);
+  const HidItemsDescriptor *items = getItems(device);
   if (!items) return 0;
   return hidGetReportSize(items, identifier, size);
 }
@@ -399,7 +411,7 @@ listItem (const char *line, void *data) {
 
 static int
 performListItems (HidDevice *device) {
-  const HidItemsDescriptor *items = hidGetItems(device);
+  const HidItemsDescriptor *items = getItems(device);
   if (!items) return 0;
 
   hidListItems(items, listItem, NULL);
@@ -408,7 +420,7 @@ performListItems (HidDevice *device) {
 
 static int
 performListReports (HidDevice *device) {
-  const HidItemsDescriptor *items = hidGetItems(device);
+  const HidItemsDescriptor *items = getItems(device);
   if (!items) return 0;
 
   HidReports *reports = hidGetReports(items);

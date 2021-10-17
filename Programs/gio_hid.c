@@ -75,7 +75,7 @@ readHidData (
 
 static HidItemsDescriptor *
 getHidItems (GioHandle *handle, int timeout) {
-  return NULL;
+  return hidGetItems(handle->device);
 }
 
 static ssize_t

@@ -141,8 +141,6 @@ struct HidDeviceStruct {
 
   const HidBusMethods *busMethods;
   const HidHandleMethods *handleMethods;
-
-  HidItemsDescriptor *items;
 };
 
 static void
@@ -431,26 +429,20 @@ hidOpenDeviceWithParameters (HidDevice **device, const char *string) {
 void
 hidCloseDevice (HidDevice *device) {
   hidDestroyHandle(device->handle);
-  if (device->items) free(device->items);
   free(device);
 }
 
-const HidItemsDescriptor *
+HidItemsDescriptor *
 hidGetItems (HidDevice *device) {
-  if (!device->items) {
-    HidGetItemsMethod *method = device->handleMethods->getItems;
+  HidGetItemsMethod *method = device->handleMethods->getItems;
 
-    if (!method) {
-      logUnsupportedOperation("hidGetItems");
-      errno = ENOSYS;
-      return NULL;
-    }
-
-    device->items = method(device->handle);
-    if (!device->items) logMessage(LOG_ERR, "HID items descriptor not available");
+  if (!method) {
+    logUnsupportedOperation("hidGetItems");
+    errno = ENOSYS;
+    return NULL;
   }
 
-  return device->items;
+  return method(device->handle);
 }
 
 int
