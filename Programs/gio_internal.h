@@ -155,6 +155,7 @@ extern const GioProperties gioProperties_null;
 extern const GioProperties gioProperties_serial;
 extern const GioProperties gioProperties_usb;
 extern const GioProperties gioProperties_bluetooth;
+extern const GioProperties gioProperties_hid;
 
 extern void gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters);
 

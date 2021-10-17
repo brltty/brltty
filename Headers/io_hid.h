@@ -73,13 +73,19 @@ typedef struct {
 } HidFilter;
 
 extern void hidInitializeFilter (HidFilter *filter);
-extern int hidSetFilter (HidFilter *filter, const char *string);
 
 extern int hidSetFilterIdentifiers (
   HidFilter *filter, const char *vendor, const char *product
 );
 
-extern int hidOpenDevice (HidDevice **device, const HidFilter *filter);
+extern int hidOpenDeviceWithFilter (
+  HidDevice **device, const HidFilter *filter
+);
+
+extern int hidOpenDeviceWithParameters (
+  HidDevice **device, const char *string
+);
+
 extern void hidCloseDevice (HidDevice *device);
 
 extern const HidItemsDescriptor *hidGetItems (HidDevice *device);
@@ -108,6 +114,13 @@ extern const char *hidGetHostDevice (HidDevice *device);
 
 extern int hidParseDeviceIdentifier (HidDeviceIdentifier *identifier, const char *string);
 extern int hidMatchString (const char *actualString, const char *testString);
+
+extern const char *hidMakeDeviceIdentifier (
+  HidDevice *device, char *buffer, size_t size
+);
+
+#define HID_DEVICE_QUALIFIER "hid"
+extern int isHidDeviceIdentifier (const char **identifier);
 
 #ifdef __cplusplus
 }

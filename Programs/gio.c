@@ -35,6 +35,7 @@ const GioProperties *const gioProperties[] = {
   &gioProperties_serial,
   &gioProperties_usb,
   &gioProperties_bluetooth,
+  &gioProperties_hid,
   NULL
 };
 

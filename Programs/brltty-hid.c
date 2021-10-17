@@ -311,7 +311,7 @@ openDevice (HidDevice **device) {
   );
 
   if (!ok) return 0;
-  return hidOpenDevice(device, &filter);
+  return hidOpenDeviceWithFilter(device, &filter);
 }
 
 static int

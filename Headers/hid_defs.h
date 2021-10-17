@@ -81,6 +81,26 @@ typedef enum {
 } HidCollectionType;
 
 typedef enum {
+  HID_USG_TYPE_Undefined = 0,
+  HID_USG_TYPE_LinearControl,
+  HID_USG_TYPE_OnOffControl,
+  HID_USG_TYPE_MomentaryControl,
+  HID_USG_TYPE_OneShotControl,
+  HID_USG_TYPE_RetriggerControl,
+  HID_USG_TYPE_Selector,
+  HID_USG_TYPE_StaticValue,
+  HID_USG_TYPE_StaticFlag,
+  HID_USG_TYPE_DynamicValue,
+  HID_USG_TYPE_DynamicFlag,
+  HID_USG_TYPE_NamedArray,
+  HID_USG_TYPE_ApplicationCollection,
+  HID_USG_TYPE_LogicalCollection,
+  HID_USG_TYPE_PhysicalCollection,
+  HID_USG_TYPE_UsageSwitch,
+  HID_USG_TYPE_UsageModifier,
+} HidUsageType;
+
+typedef enum {
   HID_USG_GDT_Pointer                   = 0X01,
   HID_USG_GDT_Mouse                     = 0X02,
   HID_USG_GDT_Joystick                  = 0X04,

@@ -22,10 +22,87 @@
 #include <errno.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "io_hid.h"
 #include "hid_internal.h"
 #include "parse.h"
 #include "device.h"
+
+typedef enum {
+  HID_FLT_ADDRESS,
+  HID_FLT_NAME,
+
+  HID_FLT_MANUFACTURER,
+  HID_FLT_DESCRIPTION,
+  HID_FLT_SERIAL_NUMBER,
+
+  HID_FLT_VENDOR,
+  HID_FLT_PRODUCT,
+} HidFilterParameter;
+
+static const char *const hidFilterParameters[] = {
+  "address",
+  "name",
+
+  "manufacturer",
+  "description",
+  "serialNumber",
+
+  "vendor",
+  "product",
+
+  NULL
+};
+
+static char **
+hidGetFilterParameters (const char *string) {
+  if (!string) string = "";
+  return getDeviceParameters(hidFilterParameters, string);
+}
+
+typedef struct {
+  STR_DECLARE_FORMATTER((*extendDeviceIdentifier), HidDevice *device);
+} HidBusMethods;
+
+static
+STR_BEGIN_FORMATTER(hidExtendUSBDeviceIdentifier, HidDevice *device)
+  {
+    const char *serialNumber = hidGetDeviceAddress(device);
+
+    if (serialNumber && *serialNumber) {
+      STR_PRINTF(
+        "%s%c%s%c",
+        hidFilterParameters[HID_FLT_SERIAL_NUMBER],
+        PARAMETER_ASSIGNMENT_CHARACTER,
+        serialNumber, DEVICE_PARAMETER_SEPARATOR
+      );
+    }
+  }
+STR_END_FORMATTER
+
+static const HidBusMethods hidUSBBusMethods = {
+  .extendDeviceIdentifier = hidExtendUSBDeviceIdentifier,
+};
+
+static
+STR_BEGIN_FORMATTER(hidExtendBluetoothDeviceIdentifier, HidDevice *device)
+  {
+    const char *macAddress = hidGetDeviceAddress(device);
+
+    if (macAddress && *macAddress) {
+      STR_PRINTF(
+        "%s%c%s%c",
+        hidFilterParameters[HID_FLT_ADDRESS],
+        PARAMETER_ASSIGNMENT_CHARACTER,
+        macAddress, DEVICE_PARAMETER_SEPARATOR
+      );
+    }
+  }
+STR_END_FORMATTER
+
+static const HidBusMethods hidBluetoothBusMethods= {
+  .extendDeviceIdentifier = hidExtendBluetoothDeviceIdentifier,
+};
 
 void
 hidInitializeUSBFilter (HidUSBFilter *filter) {
@@ -61,8 +138,10 @@ hidMatchString (const char *actualString, const char *testString) {
 
 struct HidDeviceStruct {
   HidHandle *handle;
+
+  const HidBusMethods *busMethods;
   const HidHandleMethods *handleMethods;
-  const char *communicationMethod;
+
   HidItemsDescriptor *items;
 };
 
@@ -79,7 +158,7 @@ hidDestroyHandle (HidHandle *handle) {
 }
 
 static HidDevice *
-hidNewDevice (HidHandle *handle, const char *communicationMethod) {
+hidNewDevice (HidHandle *handle, const HidBusMethods *busMethods) {
   if (handle) {
     HidDevice *device;
 
@@ -87,7 +166,7 @@ hidNewDevice (HidHandle *handle, const char *communicationMethod) {
       memset(device, 0, sizeof(*device));
       device->handle = handle;
       device->handleMethods = hidPackageDescriptor.handleMethods;
-      device->communicationMethod = communicationMethod;
+      device->busMethods = busMethods;
       return device;
     } else {
       logMallocError();
@@ -109,7 +188,7 @@ hidOpenUSBDevice (const HidUSBFilter *filter) {
     return NULL;
   }
 
-  return hidNewDevice(method(filter), "USB");
+  return hidNewDevice(method(filter), &hidUSBBusMethods);
 }
 
 HidDevice *
@@ -122,7 +201,7 @@ hidOpenBluetoothDevice (const HidBluetoothFilter *filter) {
     return NULL;
   }
 
-  return hidNewDevice(method(filter), "Bluetooth");
+  return hidNewDevice(method(filter), &hidBluetoothBusMethods);
 }
 
 void
@@ -167,64 +246,6 @@ hidSetFilterIdentifiers (
   }
 
   return 1;
-}
-
-typedef enum {
-  HID_FLT_ADDRESS,
-  HID_FLT_NAME,
-
-  HID_FLT_MANUFACTURER,
-  HID_FLT_DESCRIPTION,
-  HID_FLT_SERIAL_NUMBER,
-
-  HID_FLT_VENDOR,
-  HID_FLT_PRODUCT,
-} HidFilterParameter;
-
-static const char *const hidFilterParameters[] = {
-  "address",
-  "name",
-
-  "manufacturer",
-  "description",
-  "serialNumber",
-
-  "vendor",
-  "product",
-
-  NULL
-};
-
-static char **
-hidGetFilterParameters (const char *string) {
-  if (!string) string = "";
-  return getDeviceParameters(hidFilterParameters, string);
-}
-
-int
-hidSetFilter (HidFilter *filter, const char *string) {
-  hidInitializeFilter(filter);
-  char **parameters = hidGetFilterParameters(string);
-
-  if (parameters) {
-    filter->usb.manufacturerName = parameters[HID_FLT_MANUFACTURER];
-    filter->usb.productDescription = parameters[HID_FLT_DESCRIPTION];
-    filter->usb.serialNumber = parameters[HID_FLT_SERIAL_NUMBER];
-
-    filter->bluetooth.deviceAddress = parameters[HID_FLT_ADDRESS];
-    filter->bluetooth.deviceName = parameters[HID_FLT_NAME];
-
-    int ok = hidSetFilterIdentifiers(
-      filter,
-      parameters[HID_FLT_VENDOR],
-      parameters[HID_FLT_PRODUCT]
-    );
-
-    deallocateStrings(parameters);
-    if (ok) return 1;
-  }
-
-  return 0;
 }
 
 static int
@@ -274,7 +295,7 @@ hidTestMacAddress (const void *from) {
 }
 
 int
-hidOpenDevice (HidDevice **device, const HidFilter *filter) {
+hidOpenDeviceWithFilter (HidDevice **device, const HidFilter *filter) {
   unsigned char wantUSB = filter->flags.wantUSB;
   unsigned char wantBluetooth = filter->flags.wantBluetooth;
 
@@ -377,6 +398,34 @@ hidOpenDevice (HidDevice **device, const HidFilter *filter) {
   }
 
   return 1;
+}
+
+int
+hidOpenDeviceWithParameters (HidDevice **device, const char *string) {
+  HidFilter filter;
+  hidInitializeFilter(&filter);
+  char **parameters = hidGetFilterParameters(string);
+
+  if (parameters) {
+    filter.usb.manufacturerName = parameters[HID_FLT_MANUFACTURER];
+    filter.usb.productDescription = parameters[HID_FLT_DESCRIPTION];
+    filter.usb.serialNumber = parameters[HID_FLT_SERIAL_NUMBER];
+
+    filter.bluetooth.deviceAddress = parameters[HID_FLT_ADDRESS];
+    filter.bluetooth.deviceName = parameters[HID_FLT_NAME];
+
+    int ok = hidSetFilterIdentifiers(
+      &filter,
+      parameters[HID_FLT_VENDOR],
+      parameters[HID_FLT_PRODUCT]
+    );
+
+    if (ok) ok = hidOpenDeviceWithFilter(device, &filter);
+    deallocateStrings(parameters);
+    if (ok) return 1;
+  }
+
+  return 0;
 }
 
 void
@@ -624,4 +673,52 @@ hidCacheString (
   }
 
   return *cachedValue;
+}
+
+const char *
+hidMakeDeviceIdentifier (HidDevice *device, char *buffer, size_t size) {
+  size_t length;
+  STR_BEGIN(buffer, size);
+  STR_PRINTF("%s%c", HID_DEVICE_QUALIFIER, PARAMETER_QUALIFIER_CHARACTER);
+
+  {
+    HidDeviceIdentifier vendor;
+    HidDeviceIdentifier product;
+
+    if (hidGetDeviceIdentifiers(device, &vendor, &product)) {
+      if (vendor) {
+        STR_PRINTF(
+          "%s%c%04X%c",
+          hidFilterParameters[HID_FLT_VENDOR],
+          PARAMETER_ASSIGNMENT_CHARACTER,
+          vendor, DEVICE_PARAMETER_SEPARATOR
+        );
+      }
+
+      if (product) {
+        STR_PRINTF(
+          "%s%c%04X%c",
+          hidFilterParameters[HID_FLT_PRODUCT],
+          PARAMETER_ASSIGNMENT_CHARACTER,
+          product, DEVICE_PARAMETER_SEPARATOR
+        );
+      }
+    }
+  }
+
+  STR_FORMAT(device->busMethods->extendDeviceIdentifier, device);
+  length = STR_LENGTH;
+  STR_END;
+
+  {
+    char *last = &buffer[length] - 1;
+    if (*last == DEVICE_PARAMETER_SEPARATOR) *last = 0;
+  }
+
+  return buffer;
+}
+
+int
+isHidDeviceIdentifier (const char **identifier) {
+  return hasQualifier(identifier, HID_DEVICE_QUALIFIER);
 }

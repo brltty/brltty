@@ -262,6 +262,9 @@ gio_usb.$O:
 gio_bluetooth.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio_bluetooth.c
 
+gio_hid.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/gio_hid.c
+
 ###############################################################################
 
 async_handle.$O:

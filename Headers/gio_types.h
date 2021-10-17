@@ -86,6 +86,10 @@ typedef struct {
     unsigned discoverChannel:1;
     GioOptions options;
   } bluetooth;
+
+  struct {
+    GioOptions options;
+  } hid;
 } GioDescriptor;
 
 typedef struct GioEndpointStruct GioEndpoint;
@@ -97,7 +101,8 @@ typedef enum {
   GIO_TYPE_NULL,
   GIO_TYPE_SERIAL,
   GIO_TYPE_USB,
-  GIO_TYPE_BLUETOOTH
+  GIO_TYPE_BLUETOOTH,
+  GIO_TYPE_HID,
 } GioTypeIdentifier;
 
 typedef struct {
