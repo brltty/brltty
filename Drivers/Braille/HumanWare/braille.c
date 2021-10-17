@@ -752,15 +752,11 @@ static size_t
 getPressedKeysReportSize (BrailleDisplay *brl) {
   {
     GioEndpoint *endpoint = brl->gioEndpoint;
-    const HidItemsDescriptor *items = gioGetHidItems(endpoint, 0);
+    HidReportSize reportSize;
 
-    if (items) {
-      HidReportSize reportSize;
-
-      if (gioGetHidReportSize(endpoint, HW_REP_IN_PressedKeys, &reportSize)) {
-        size_t size = reportSize.input;
-        if (size) return size;
-      }
+    if (gioGetHidReportSize(endpoint, HW_REP_IN_PressedKeys, &reportSize)) {
+      size_t size = reportSize.input;
+      if (size) return size;
     }
   }
 
