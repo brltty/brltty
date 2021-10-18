@@ -202,8 +202,8 @@ getUsbHidItems (GioHandle *handle, int timeout) {
 
 static ssize_t
 setUsbHidReport (
-  GioHandle *handle, unsigned char identifier,
-  const void *data, uint16_t size, int timeout
+  GioHandle *handle, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size, int timeout
 ) {
   UsbChannel *channel = handle->channel;
 
@@ -224,8 +224,8 @@ getUsbHidReport (
 
 static ssize_t
 setUsbHidFeature (
-  GioHandle *handle, unsigned char identifier,
-  const void *data, uint16_t size, int timeout
+  GioHandle *handle, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size, int timeout
 ) {
   UsbChannel *channel = handle->channel;
 

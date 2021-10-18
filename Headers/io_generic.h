@@ -76,10 +76,7 @@ extern ssize_t gioAskResource (
   void *buffer, uint16_t size
 );
 
-extern const HidItemsDescriptor *gioGetHidItems (
-  GioEndpoint *endpoint,
-  unsigned char identifier
-);
+extern const HidItemsDescriptor *gioGetHidItems (GioEndpoint *endpoint);
 
 extern int gioGetHidReportSize (
   GioEndpoint *endpoint,
@@ -88,13 +85,13 @@ extern int gioGetHidReportSize (
 );
 
 extern ssize_t gioSetHidReport (
-  GioEndpoint *endpoint, unsigned char identifier,
-  const void *data, uint16_t size
+  GioEndpoint *endpoint, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size
 );
 
 extern ssize_t gioWriteHidReport (
   GioEndpoint *endpoint,
-  const unsigned char *data, uint16_t size
+  const unsigned char *data, size_t size
 );
 
 extern ssize_t gioGetHidReport (
@@ -103,13 +100,13 @@ extern ssize_t gioGetHidReport (
 );
 
 extern ssize_t gioSetHidFeature (
-  GioEndpoint *endpoint, unsigned char identifier,
-  const void *data, uint16_t size
+  GioEndpoint *endpoint, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size
 );
 
 extern ssize_t gioWriteHidFeature (
   GioEndpoint *endpoint,
-  const unsigned char *data, uint16_t size
+  const unsigned char *data, size_t size
 );
 
 extern ssize_t gioGetHidFeature (

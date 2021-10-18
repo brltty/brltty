@@ -479,7 +479,7 @@ gioAskResource (
 }
 
 const HidItemsDescriptor *
-gioGetHidItems (GioEndpoint *endpoint, unsigned char identifier) {
+gioGetHidItems (GioEndpoint *endpoint) {
   if (!endpoint->hidItems) {
     GioGetHidItemsMethod *method = endpoint->methods->getHidItems;
 
@@ -506,7 +506,7 @@ gioGetHidReportSize (
   unsigned char identifier,
   HidReportSize *size
 ) {
-  const HidItemsDescriptor *items = gioGetHidItems(endpoint, identifier);
+  const HidItemsDescriptor *items = gioGetHidItems(endpoint);
   if (!items) return 0;
 
   if (hidGetReportSize(items, identifier, size)) return 1;
@@ -516,8 +516,8 @@ gioGetHidReportSize (
 
 ssize_t
 gioSetHidReport (
-  GioEndpoint *endpoint, unsigned char identifier,
-  const void *data, uint16_t size
+  GioEndpoint *endpoint, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size
 ) {
   GioSetHidReportMethod *method = endpoint->methods->setHidReport;
 
@@ -534,7 +534,7 @@ gioSetHidReport (
 ssize_t
 gioWriteHidReport (
   GioEndpoint *endpoint,
-  const unsigned char *data, uint16_t size
+  const unsigned char *data, size_t size
 ) {
   return gioSetHidReport(endpoint, data[0], data, size);
 }
@@ -558,8 +558,8 @@ gioGetHidReport (
 
 ssize_t
 gioSetHidFeature (
-  GioEndpoint *endpoint, unsigned char identifier,
-  const void *data, uint16_t size
+  GioEndpoint *endpoint, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size
 ) {
   GioSetHidFeatureMethod *method = endpoint->methods->setHidFeature;
 
@@ -576,7 +576,7 @@ gioSetHidFeature (
 ssize_t
 gioWriteHidFeature (
   GioEndpoint *endpoint,
-  const unsigned char *data, uint16_t size
+  const unsigned char *data, size_t size
 ) {
   return gioSetHidFeature(endpoint, data[0], data, size);
 }

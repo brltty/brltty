@@ -90,8 +90,8 @@ getHidItems (GioHandle *handle, int timeout) {
 
 static ssize_t
 setHidReport (
-  GioHandle *handle, unsigned char identifier,
-  const void *data, uint16_t size, int timeout
+  GioHandle *handle, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size, int timeout
 ) {
   return hidSetReport(handle->device, data, size);
 }
@@ -106,8 +106,8 @@ getHidReport (
 
 static ssize_t
 setHidFeature (
-  GioHandle *handle, unsigned char identifier,
-  const void *data, uint16_t size, int timeout
+  GioHandle *handle, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size, int timeout
 ) {
   return hidSetFeature(handle->device, data, size);
 }

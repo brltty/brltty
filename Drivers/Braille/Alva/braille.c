@@ -1679,7 +1679,7 @@ verifyPacket2u (
 static int
 setFeature2u (BrailleDisplay *brl, const unsigned char *request, size_t size) {
   logOutputPacket(request, size);
-  return gioSetHidFeature(brl->gioEndpoint, request[0], request, size) != -1;
+  return gioWriteHidFeature(brl->gioEndpoint, request, size) != -1;
 }
 
 static size_t
