@@ -44,6 +44,11 @@ makeNullResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
   return buffer;
 }
 
+static ssize_t
+writeNullData (GioHandle *handle, const void *data, size_t size, int timeout) {
+  return size;
+}
+
 static int
 awaitNullInput (GioHandle *handle, int timeout) {
   return 1;
@@ -67,6 +72,7 @@ static const GioMethods gioNullMethods = {
 
   .makeResourceIdentifier = makeNullResourceIdentifier,
 
+  .writeData = writeNullData,
   .awaitInput = awaitNullInput,
   .readData = readNullData,
   .monitorInput = monitorNullInput

@@ -31,11 +31,11 @@
 #include "io_serial.h"
 
 const GioProperties *const gioProperties[] = {
-  &gioProperties_null,
   &gioProperties_serial,
   &gioProperties_usb,
   &gioProperties_bluetooth,
   &gioProperties_hid,
+  &gioProperties_null,
   NULL
 };
 
@@ -50,8 +50,6 @@ gioInitializeOptions (GioOptions *options) {
 
 void
 gioInitializeDescriptor (GioDescriptor *descriptor) {
-  gioInitializeOptions(&descriptor->null.options);
-
   descriptor->serial.parameters = NULL;
   gioInitializeOptions(&descriptor->serial.options);
   descriptor->serial.options.inputTimeout = 100;
@@ -68,6 +66,10 @@ gioInitializeDescriptor (GioDescriptor *descriptor) {
   gioInitializeOptions(&descriptor->bluetooth.options);
   descriptor->bluetooth.options.inputTimeout = 1000;
   descriptor->bluetooth.options.requestTimeout = 5000;
+
+  gioInitializeOptions(&descriptor->hid.options);
+
+  gioInitializeOptions(&descriptor->null.options);
 }
 
 void

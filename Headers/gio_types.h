@@ -67,10 +67,6 @@ typedef struct {
 
 typedef struct {
   struct {
-    GioOptions options;
-  } null;
-
-  struct {
     const SerialParameters *parameters;
     GioOptions options;
   } serial;
@@ -90,6 +86,10 @@ typedef struct {
   struct {
     GioOptions options;
   } hid;
+
+  struct {
+    GioOptions options;
+  } null;
 } GioDescriptor;
 
 typedef struct GioEndpointStruct GioEndpoint;
@@ -98,11 +98,11 @@ typedef int GioTestIdentifierMethod (const char **identifier);
 
 typedef enum {
   GIO_TYPE_UNSPECIFIED = 0,
-  GIO_TYPE_NULL,
   GIO_TYPE_SERIAL,
   GIO_TYPE_USB,
   GIO_TYPE_BLUETOOTH,
   GIO_TYPE_HID,
+  GIO_TYPE_NULL,
 } GioTypeIdentifier;
 
 typedef struct {

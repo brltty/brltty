@@ -22,11 +22,11 @@ It may be one of:
    ==========  =======================
    Qualifier   Assumed First Parameter
    ----------  -----------------------
-   null:
    serial:     name=
    usb:        serialNumber=
    bluetooth:  address=
    hid:        address=
+   null:
    ==========  =======================
 
 The qualifier is case insensitive, and any abbreviation may be used.
@@ -66,8 +66,8 @@ and the name of the first supplied parameter:
     ttyS0
     name=ttyS0
 
-Serial Device Parameters
-------------------------
+Serial Device Identifiers
+-------------------------
 
 Serial device identifiers support the following parameters:
 
@@ -121,8 +121,8 @@ especially since, in most cases, the braille driver overrides them.
    Specify the kind of flow control to use. It must be one of: ``none``,
    ``hardware``. If this parameter isn't supplied then ``none`` is assumed.
 
-USB Device Parameters
----------------------
+USB Device Identifiers
+----------------------
 
 USB device identifiers support the following parameters:
 
@@ -160,8 +160,8 @@ supply any of them.
    case insensitive, and any abbreviation may be used. If this parameter isn't
    supplied then ``yes`` is assumed.
 
-Bluetooth Device Parameters
----------------------------
+Bluetooth Device Identifiers
+----------------------------
 
 Bluetooth device identifiers support the following parameters:
 
@@ -221,8 +221,8 @@ BRLTTY can detect a Bluetooth device by name on the following platforms:
    acquired. It must be an integer within the range ``1``-``59``. If this
    parameter isn't supplied then a reasonable default is assumed.
 
-HID Device Parameters
----------------------
+HID Device Identifiers
+----------------------
 
 HID device identifiers support the following parameters:
 
@@ -279,4 +279,12 @@ USB-specific and Bluetooth-specific parameters may not be combined.
    The product identifier of the device.
    It must be four hexadecimal digits.
    The letter digits may be in either case.
+
+Null Device Identifiers
+-----------------------
+A ``null`` endpoint has the following properties:
+
+* It always indicates that input is available.
+* Reading from it always yields end-of-file.
+* Writing to it is always successful but does nothing.
 
