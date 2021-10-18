@@ -95,8 +95,13 @@ extern ssize_t gioWriteHidReport (
 );
 
 extern ssize_t gioGetHidReport (
-  GioEndpoint *endpoint, unsigned char identifier,
-  void *buffer, uint16_t size
+  GioEndpoint *endpoint, HidReportIdentifier identifier,
+  unsigned char *buffer, size_t size
+);
+
+extern ssize_t gioReadHidReport (
+  GioEndpoint *endpoint,
+  unsigned char *buffer, size_t size
 );
 
 extern ssize_t gioSetHidFeature (
@@ -110,8 +115,13 @@ extern ssize_t gioWriteHidFeature (
 );
 
 extern ssize_t gioGetHidFeature (
-  GioEndpoint *endpoint, unsigned char identifier,
-  void *buffer, uint16_t size
+  GioEndpoint *endpoint, HidReportIdentifier identifier,
+  unsigned char *buffer, size_t size
+);
+
+extern ssize_t gioReadHidFeature (
+  GioEndpoint *endpoint,
+  unsigned char *buffer, size_t size
 );
 
 typedef struct {

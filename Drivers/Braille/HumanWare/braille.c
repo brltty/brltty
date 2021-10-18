@@ -664,14 +664,14 @@ static const ProtocolEntry serialProtocol = {
 
 static ssize_t
 readHidFeature (
-  BrailleDisplay *brl, unsigned char report,
+  BrailleDisplay *brl, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size
 ) {
   if (size > 0) *buffer = 0;
-  ssize_t length = gioGetHidFeature(brl->gioEndpoint, report, buffer, size);
+  ssize_t length = gioGetHidFeature(brl->gioEndpoint, identifier, buffer, size);
 
   if (length != -1) {
-    if ((length > 0) && (*buffer == report)) {
+    if ((length > 0) && (*buffer == identifier)) {
       logInputPacket(buffer, length);
       return length;
     }

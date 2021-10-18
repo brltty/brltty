@@ -1683,8 +1683,8 @@ setFeature2u (BrailleDisplay *brl, const unsigned char *request, size_t size) {
 }
 
 static size_t
-getFeature2u (BrailleDisplay *brl, unsigned char feature, unsigned char *response, size_t size) {
-  ssize_t length = gioGetHidFeature(brl->gioEndpoint, feature, response, size);
+getFeature2u (BrailleDisplay *brl, HidReportIdentifier identifier, unsigned char *response, size_t size) {
+  ssize_t length = gioGetHidFeature(brl->gioEndpoint, identifier, response, size);
 
   if (length > 0) {
     logInputPacket(response, length);

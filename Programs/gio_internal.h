@@ -66,8 +66,8 @@ typedef ssize_t GioSetHidReportMethod (
 );
 
 typedef ssize_t GioGetHidReportMethod (
-  GioHandle *handle, unsigned char identifier,
-  void *buffer, uint16_t size, int timeout
+  GioHandle *handle, HidReportIdentifier identifier,
+  unsigned char *buffer, size_t size, int timeout
 );
 
 typedef ssize_t GioSetHidFeatureMethod (
@@ -76,8 +76,8 @@ typedef ssize_t GioSetHidFeatureMethod (
 );
 
 typedef ssize_t GioGetHidFeatureMethod (
-  GioHandle *handle, unsigned char identifier,
-  void *buffer, uint16_t size, int timeout
+  GioHandle *handle, HidReportIdentifier identifier,
+  unsigned char *buffer, size_t size, int timeout
 );
 
 typedef struct {

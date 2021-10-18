@@ -541,8 +541,8 @@ gioWriteHidReport (
 
 ssize_t
 gioGetHidReport (
-  GioEndpoint *endpoint, unsigned char identifier,
-  void *buffer, uint16_t size
+  GioEndpoint *endpoint, HidReportIdentifier identifier,
+  unsigned char *buffer, size_t size
 ) {
   GioGetHidReportMethod *method = endpoint->methods->getHidReport;
 
@@ -554,6 +554,14 @@ gioGetHidReport (
 
   return method(endpoint->handle, identifier,
                 buffer, size, endpoint->options.requestTimeout);
+}
+
+ssize_t
+gioReadHidReport (
+  GioEndpoint *endpoint,
+  unsigned char *buffer, size_t size
+) {
+  return gioGetHidReport(endpoint, buffer[0], buffer, size);
 }
 
 ssize_t
@@ -583,8 +591,8 @@ gioWriteHidFeature (
 
 ssize_t
 gioGetHidFeature (
-  GioEndpoint *endpoint, unsigned char identifier,
-  void *buffer, uint16_t size
+  GioEndpoint *endpoint, HidReportIdentifier identifier,
+  unsigned char *buffer, size_t size
 ) {
   GioGetHidFeatureMethod *method = endpoint->methods->getHidFeature;
 
@@ -596,6 +604,14 @@ gioGetHidFeature (
 
   return method(endpoint->handle, identifier,
                 buffer, size, endpoint->options.requestTimeout);
+}
+
+ssize_t
+gioReadHidFeature (
+  GioEndpoint *endpoint,
+  unsigned char *buffer, size_t size
+) {
+  return gioGetHidFeature(endpoint, buffer[0], buffer, size);
 }
 
 struct GioHandleInputObjectStruct {
