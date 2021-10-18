@@ -84,6 +84,21 @@ extern int gioGetHidReportSize (
   HidReportSize *size
 );
 
+extern size_t gioGetHidInputSize (
+  GioEndpoint *endpoint,
+  HidReportIdentifier identifier
+);
+
+extern size_t gioGetHidOutputSize (
+  GioEndpoint *endpoint,
+  HidReportIdentifier identifier
+);
+
+extern size_t gioGetHidFeatureSize (
+  GioEndpoint *endpoint,
+  HidReportIdentifier identifier
+);
+
 extern ssize_t gioGetHidReport (
   GioEndpoint *endpoint, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size

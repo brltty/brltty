@@ -751,12 +751,8 @@ readHidPacket (BrailleDisplay *brl, void *buffer, size_t size) {
 static size_t
 getPressedKeysReportSize (BrailleDisplay *brl) {
   {
-    HidReportSize reportSize;
-
-    if (gioGetHidReportSize(brl->gioEndpoint, HW_REP_IN_PressedKeys, &reportSize)) {
-      size_t size = reportSize.input;
-      if (size) return size;
-    }
+    size_t size = gioGetHidInputSize(brl->gioEndpoint, HW_REP_IN_PressedKeys);
+    if (size) return size;
   }
 
   {
