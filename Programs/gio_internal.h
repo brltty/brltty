@@ -60,17 +60,12 @@ typedef ssize_t GioAskResourceMethod (
 
 typedef HidItemsDescriptor *GioGetHidItemsMethod (GioHandle *handle, int timeout);
 
-typedef ssize_t GioSetHidReportMethod (
-  GioHandle *handle, HidReportIdentifier identifier,
-  const unsigned char *data, size_t size, int timeout
-);
-
 typedef ssize_t GioGetHidReportMethod (
   GioHandle *handle, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size, int timeout
 );
 
-typedef ssize_t GioSetHidFeatureMethod (
+typedef ssize_t GioSetHidReportMethod (
   GioHandle *handle, HidReportIdentifier identifier,
   const unsigned char *data, size_t size, int timeout
 );
@@ -78,6 +73,11 @@ typedef ssize_t GioSetHidFeatureMethod (
 typedef ssize_t GioGetHidFeatureMethod (
   GioHandle *handle, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size, int timeout
+);
+
+typedef ssize_t GioSetHidFeatureMethod (
+  GioHandle *handle, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size, int timeout
 );
 
 typedef struct {
@@ -97,10 +97,10 @@ typedef struct {
   GioAskResourceMethod *askResource;
 
   GioGetHidItemsMethod *getHidItems;
-  GioSetHidReportMethod *setHidReport;
   GioGetHidReportMethod *getHidReport;
-  GioSetHidFeatureMethod *setHidFeature;
+  GioSetHidReportMethod *setHidReport;
   GioGetHidFeatureMethod *getHidFeature;
+  GioSetHidFeatureMethod *setHidFeature;
 } GioMethods;
 
 struct GioEndpointStruct {

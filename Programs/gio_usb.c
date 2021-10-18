@@ -201,17 +201,6 @@ getUsbHidItems (GioHandle *handle, int timeout) {
 }
 
 static ssize_t
-setUsbHidReport (
-  GioHandle *handle, HidReportIdentifier identifier,
-  const unsigned char *data, size_t size, int timeout
-) {
-  UsbChannel *channel = handle->channel;
-
-  return usbHidSetReport(channel->device, channel->definition->interface,
-                         identifier, data, size, timeout);
-}
-
-static ssize_t
 getUsbHidReport (
   GioHandle *handle, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size, int timeout
@@ -223,14 +212,14 @@ getUsbHidReport (
 }
 
 static ssize_t
-setUsbHidFeature (
+setUsbHidReport (
   GioHandle *handle, HidReportIdentifier identifier,
   const unsigned char *data, size_t size, int timeout
 ) {
   UsbChannel *channel = handle->channel;
 
-  return usbHidSetFeature(channel->device, channel->definition->interface,
-                          identifier, data, size, timeout);
+  return usbHidSetReport(channel->device, channel->definition->interface,
+                         identifier, data, size, timeout);
 }
 
 static ssize_t
@@ -242,6 +231,17 @@ getUsbHidFeature (
 
   return usbHidGetFeature(channel->device, channel->definition->interface,
                           identifier, buffer, size, timeout);
+}
+
+static ssize_t
+setUsbHidFeature (
+  GioHandle *handle, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size, int timeout
+) {
+  UsbChannel *channel = handle->channel;
+
+  return usbHidSetFeature(channel->device, channel->definition->interface,
+                          identifier, data, size, timeout);
 }
 
 static const GioMethods gioUsbMethods = {
@@ -261,10 +261,10 @@ static const GioMethods gioUsbMethods = {
   .askResource = askUsbResource,
 
   .getHidItems = getUsbHidItems,
-  .setHidReport = setUsbHidReport,
   .getHidReport = getUsbHidReport,
-  .setHidFeature = setUsbHidFeature,
+  .setHidReport = setUsbHidReport,
   .getHidFeature = getUsbHidFeature,
+  .setHidFeature = setUsbHidFeature,
 };
 
 static int

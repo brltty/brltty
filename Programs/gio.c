@@ -515,31 +515,6 @@ gioGetHidReportSize (
 }
 
 ssize_t
-gioSetHidReport (
-  GioEndpoint *endpoint, HidReportIdentifier identifier,
-  const unsigned char *data, size_t size
-) {
-  GioSetHidReportMethod *method = endpoint->methods->setHidReport;
-
-  if (!method) {
-    logUnsupportedOperation("setHidReport");
-    errno = ENOSYS;
-    return -1;
-  }
-
-  return method(endpoint->handle, identifier,
-                data, size, endpoint->options.requestTimeout);
-}
-
-ssize_t
-gioWriteHidReport (
-  GioEndpoint *endpoint,
-  const unsigned char *data, size_t size
-) {
-  return gioSetHidReport(endpoint, data[0], data, size);
-}
-
-ssize_t
 gioGetHidReport (
   GioEndpoint *endpoint, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size
@@ -565,14 +540,14 @@ gioReadHidReport (
 }
 
 ssize_t
-gioSetHidFeature (
+gioSetHidReport (
   GioEndpoint *endpoint, HidReportIdentifier identifier,
   const unsigned char *data, size_t size
 ) {
-  GioSetHidFeatureMethod *method = endpoint->methods->setHidFeature;
+  GioSetHidReportMethod *method = endpoint->methods->setHidReport;
 
   if (!method) {
-    logUnsupportedOperation("setHidFeature");
+    logUnsupportedOperation("setHidReport");
     errno = ENOSYS;
     return -1;
   }
@@ -582,11 +557,11 @@ gioSetHidFeature (
 }
 
 ssize_t
-gioWriteHidFeature (
+gioWriteHidReport (
   GioEndpoint *endpoint,
   const unsigned char *data, size_t size
 ) {
-  return gioSetHidFeature(endpoint, data[0], data, size);
+  return gioSetHidReport(endpoint, data[0], data, size);
 }
 
 ssize_t
@@ -612,6 +587,31 @@ gioReadHidFeature (
   unsigned char *buffer, size_t size
 ) {
   return gioGetHidFeature(endpoint, buffer[0], buffer, size);
+}
+
+ssize_t
+gioSetHidFeature (
+  GioEndpoint *endpoint, HidReportIdentifier identifier,
+  const unsigned char *data, size_t size
+) {
+  GioSetHidFeatureMethod *method = endpoint->methods->setHidFeature;
+
+  if (!method) {
+    logUnsupportedOperation("setHidFeature");
+    errno = ENOSYS;
+    return -1;
+  }
+
+  return method(endpoint->handle, identifier,
+                data, size, endpoint->options.requestTimeout);
+}
+
+ssize_t
+gioWriteHidFeature (
+  GioEndpoint *endpoint,
+  const unsigned char *data, size_t size
+) {
+  return gioSetHidFeature(endpoint, data[0], data, size);
 }
 
 struct GioHandleInputObjectStruct {
