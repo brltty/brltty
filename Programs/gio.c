@@ -514,25 +514,14 @@ gioGetHidReportSize (
   return 0;
 }
 
-static size_t
-gioGetHidSize (
-  GioEndpoint *endpoint, HidReportIdentifier identifier,
-  HidReportSize *reportSize, size_t *size
-) {
-  if (!gioGetHidReportSize(endpoint, identifier, reportSize)) return 0;
-  return *size;
-}
-
 size_t
 gioGetHidInputSize (
   GioEndpoint *endpoint,
   HidReportIdentifier identifier
 ) {
-  HidReportSize reportSize;
-
-  return gioGetHidSize(
-    endpoint, identifier, &reportSize, &reportSize.input
-  );
+  HidReportSize size;
+  if (!gioGetHidReportSize(endpoint, identifier, &size)) return 0;
+  return size.input;
 }
 
 size_t
@@ -540,11 +529,9 @@ gioGetHidOutputSize (
   GioEndpoint *endpoint,
   HidReportIdentifier identifier
 ) {
-  HidReportSize reportSize;
-
-  return gioGetHidSize(
-    endpoint, identifier, &reportSize, &reportSize.output
-  );
+  HidReportSize size;
+  if (!gioGetHidReportSize(endpoint, identifier, &size)) return 0;
+  return size.output;
 }
 
 size_t
@@ -552,11 +539,9 @@ gioGetHidFeatureSize (
   GioEndpoint *endpoint,
   HidReportIdentifier identifier
 ) {
-  HidReportSize reportSize;
-
-  return gioGetHidSize(
-    endpoint, identifier, &reportSize, &reportSize.feature
-  );
+  HidReportSize size;
+  if (!gioGetHidReportSize(endpoint, identifier, &size)) return 0;
+  return size.feature;
 }
 
 ssize_t
@@ -606,7 +591,9 @@ gioWriteHidReport (
   GioEndpoint *endpoint,
   const unsigned char *data, size_t size
 ) {
-  return gioSetHidReport(endpoint, data[0], data, size);
+  HidReportIdentifier identifier = data[0];
+  if (!identifier) data += 1, size -= 1;
+  return gioSetHidReport(endpoint, identifier, data, size);
 }
 
 ssize_t
@@ -656,7 +643,9 @@ gioWriteHidFeature (
   GioEndpoint *endpoint,
   const unsigned char *data, size_t size
 ) {
-  return gioSetHidFeature(endpoint, data[0], data, size);
+  HidReportIdentifier identifier = data[0];
+  if (!identifier) data += 1, size -= 1;
+  return gioSetHidFeature(endpoint, identifier, data, size);
 }
 
 struct GioHandleInputObjectStruct {

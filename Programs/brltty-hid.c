@@ -544,8 +544,9 @@ performReadReport (HidDevice *device) {
   unsigned char report[*size];
   report[0] = identifier;
 
-  if (hidGetReport(device, report, *size) == -1) return 0;
-  writeBytesLine("Input Report: %02X", report, *size, identifier);
+  ssize_t result = hidGetReport(device, report, *size);
+  if (result == -1) return 0;
+  writeBytesLine("Input Report: %02X", report, result, identifier);
   return 1;
 }
 
@@ -577,8 +578,9 @@ performReadFeature (HidDevice *device) {
   unsigned char feature[*size];
   feature[0] = identifier;
 
-  if (hidGetFeature(device, feature, *size) == -1) return 0;
-  writeBytesLine("Feature Report: %02X", feature, *size, identifier);
+  ssize_t result = hidGetFeature(device, feature, *size);
+  if (result == -1) return 0;
+  writeBytesLine("Feature Report: %02X", feature, result, identifier);
   return 1;
 }
 

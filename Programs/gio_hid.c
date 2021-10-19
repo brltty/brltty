@@ -93,6 +93,7 @@ getHidReport (
   GioHandle *handle, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size, int timeout
 ) {
+  buffer[0] = identifier;
   return hidGetReport(handle->device, buffer, size);
 }
 
@@ -101,6 +102,16 @@ setHidReport (
   GioHandle *handle, HidReportIdentifier identifier,
   const unsigned char *data, size_t size, int timeout
 ) {
+  unsigned char buffer[1 + size];
+
+  if (!identifier) {
+    buffer[0] = identifier;
+    memcpy(&buffer[1], data, size);
+
+    data = buffer;
+    size += 1;
+  }
+
   return hidSetReport(handle->device, data, size);
 }
 
@@ -109,6 +120,7 @@ getHidFeature (
   GioHandle *handle, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size, int timeout
 ) {
+  buffer[0] = identifier;
   return hidGetFeature(handle->device, buffer, size);
 }
 
@@ -117,6 +129,16 @@ setHidFeature (
   GioHandle *handle, HidReportIdentifier identifier,
   const unsigned char *data, size_t size, int timeout
 ) {
+  unsigned char buffer[1 + size];
+
+  if (!identifier) {
+    buffer[0] = identifier;
+    memcpy(&buffer[1], data, size);
+
+    data = buffer;
+    size += 1;
+  }
+
   return hidSetFeature(handle->device, data, size);
 }
 
