@@ -333,6 +333,18 @@ getReportSize (HidDevice *device, HidReportIdentifier identifier, HidReportSize 
   return hidGetReportSize(items, identifier, size);
 }
 
+static void
+logUnexpectedLength (
+  const char *what, HidReportIdentifier identifier,
+  size_t expected, size_t actual
+) {
+  logMessage(LOG_WARNING,
+    "unexpected %s length: %02X:"
+    " Expected:%"PRIsize " Actual:%"PRIsize,
+    what, identifier, expected, actual
+  );
+}
+
 static int
 performShowDeviceIdentifiers (HidDevice *device) {
   HidDeviceIdentifier vendor;
@@ -540,14 +552,23 @@ performReadReport (HidDevice *device) {
     &reportSize, size
   );
 
-  if (!verified) return 0;
-  unsigned char report[*size];
-  report[0] = identifier;
+  if (verified) {
+    size_t length = *size;
+    unsigned char report[length];
 
-  ssize_t result = hidGetReport(device, report, *size);
-  if (result == -1) return 0;
-  writeBytesLine("Input Report: %02X", report, result, identifier);
-  return 1;
+    report[0] = identifier;
+    ssize_t result = hidGetReport(device, report, length);
+
+    if (result == -1) {
+      logSystemError("hidGetReport");
+    } else {
+      writeBytesLine("Input Report: %02X", report, result, identifier);
+      if (result == length) return 1;
+      logUnexpectedLength("report read", identifier, length, result);
+    }
+  }
+
+  return 0;
 }
 
 static HidReportIdentifier readFeatureIdentifier;
@@ -574,14 +595,23 @@ performReadFeature (HidDevice *device) {
     &reportSize, size
   );
 
-  if (!verified) return 0;
-  unsigned char feature[*size];
-  feature[0] = identifier;
+  if (verified) {
+    size_t length = *size;
+    unsigned char feature[length];
 
-  ssize_t result = hidGetFeature(device, feature, *size);
-  if (result == -1) return 0;
-  writeBytesLine("Feature Report: %02X", feature, result, identifier);
-  return 1;
+    feature[0] = identifier;
+    ssize_t result = hidGetFeature(device, feature, length);
+
+    if (result == -1) {
+      logSystemError("hidGetFeature");
+    } else {
+      writeBytesLine("Feature Report: %02X", feature, result, identifier);
+      if (result == length) return 1;
+      logUnexpectedLength("feature read", identifier, length, result);
+    }
+  }
+
+  return 0;
 }
 
 static int
@@ -784,9 +814,20 @@ performWriteReport (HidDevice *device) {
     report, length
   );
 
-  if (!verified) return 0;
-  writeBytesLine("Output Report: %02X", report, length, identifier);
-  return hidSetReport(device, report, length) != -1;
+  if (verified) {
+    writeBytesLine("Writing Report: %02X", report, length, identifier);
+    ssize_t result = hidSetReport(device, report, length);
+
+    if (result == -1) {
+      logSystemError("hidSetReport");
+    } else if (result == length) {
+      return 1;
+    } else {
+      logUnexpectedLength("report write", identifier, length, result);
+    }
+  }
+
+  return 0;
 }
 
 static unsigned char writeFeatureBuffer[0X1000];
@@ -814,9 +855,20 @@ performWriteFeature (HidDevice *device) {
     feature, length
   );
 
-  if (!verified) return 0;
-  writeBytesLine("Feature Report: %02X", feature, length, identifier);
-  return hidSetFeature(device, feature, length) != -1;
+  if (verified) {
+    writeBytesLine("Writing Feature: %02X", feature, length, identifier);
+    ssize_t result = hidSetFeature(device, feature, length);
+
+    if (result == -1) {
+      logSystemError("hidSetFeature");
+    } else if (result == length) {
+      return 1;
+    } else {
+      logUnexpectedLength("feature write", identifier, length, result);
+    }
+  }
+
+  return 0;
 }
 
 static int inputTimeout;
