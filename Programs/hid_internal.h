@@ -19,6 +19,9 @@
 #ifndef BRLTTY_INCLUDED_HID_INTERNAL
 #define BRLTTY_INCLUDED_HID_INTERNAL
 
+#include "hid_types.h"
+#include "async_types.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -26,12 +29,16 @@ extern "C" {
 typedef struct HidHandleStruct HidHandle;
 typedef void HidDestroyHandleMethod (HidHandle *handle);
 
-typedef HidItemsDescriptor *HidGetItemsMethod (HidHandle *handle);
-typedef int HidGetDeviceIdentifiersMethod (HidHandle *handle, uint16_t *vendor, uint16_t *product);
+typedef const HidItemsDescriptor *HidGetItemsMethod (HidHandle *handle);
+
+typedef int HidGetReportSizeMethod (
+  HidHandle *handle,
+  HidReportIdentifier identifier,
+  HidReportSize *size
+);
 
 typedef ssize_t HidGetReportMethod (HidHandle *handle, unsigned char *buffer, size_t size);
 typedef ssize_t HidSetReportMethod (HidHandle *handle, const unsigned char *report, size_t size);
-
 typedef ssize_t HidGetFeatureMethod (HidHandle *handle, unsigned char *buffer, size_t size);
 typedef ssize_t HidSetFeatureMethod (HidHandle *handle, const unsigned char *feature, size_t size);
 
@@ -44,9 +51,9 @@ typedef ssize_t HidReadDataMethod (
   int initialTimeout, int subsequentTimeout
 );
 
+typedef int HidGetDeviceIdentifiersMethod (HidHandle *handle, uint16_t *vendor, uint16_t *product);
 typedef const char *HidGetDeviceAddressMethod (HidHandle *handle);
 typedef const char *HidGetDeviceNameMethod (HidHandle *handle);
-
 typedef const char *HidGetHostPathMethod (HidHandle *handle);
 typedef const char *HidGetHostDeviceMethod (HidHandle *handle);
 
@@ -54,11 +61,10 @@ typedef struct {
   HidDestroyHandleMethod *destroyHandle;
 
   HidGetItemsMethod *getItems;
-  HidGetDeviceIdentifiersMethod *getDeviceIdentifiers;
 
+  HidGetReportSizeMethod *getReportSize;
   HidGetReportMethod *getReport;
   HidSetReportMethod *setReport;
-
   HidGetFeatureMethod *getFeature;
   HidSetFeatureMethod *setFeature;
 
@@ -67,9 +73,9 @@ typedef struct {
   HidAwaitInputMethod *awaitInput;
   HidReadDataMethod *readData;
 
+  HidGetDeviceIdentifiersMethod *getDeviceIdentifiers;
   HidGetDeviceAddressMethod *getDeviceAddress;
   HidGetDeviceNameMethod *getDeviceName;
-
   HidGetHostPathMethod *getHostPath;
   HidGetHostDeviceMethod *getHostDevice;
 } HidHandleMethods;
@@ -86,6 +92,9 @@ typedef struct {
 } HidPackageDescriptor;
 
 extern const HidPackageDescriptor hidPackageDescriptor;
+
+extern int hidParseDeviceIdentifier (HidDeviceIdentifier *identifier, const char *string);
+extern int hidMatchString (const char *actualString, const char *testString);
 
 typedef int HidGetStringMethod (
   HidHandle *handle, char *buffer, size_t size, void *data

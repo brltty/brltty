@@ -28,7 +28,7 @@ extern "C" {
 
 typedef struct {
   unsigned char count;
-  unsigned char identifiers[];
+  HidReportIdentifier identifiers[];
 } HidReports;
 
 extern HidReports *hidGetReports (const HidItemsDescriptor *items);

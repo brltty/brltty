@@ -27,7 +27,6 @@
 #include "async_alarm.h"
 #include "io_generic.h"
 #include "gio_internal.h"
-#include "hid_items.h"
 #include "io_serial.h"
 
 const GioProperties *const gioProperties[] = {
@@ -157,8 +156,6 @@ gioConnectResource (
       endpoint->input.from = 0;
       endpoint->input.to = 0;
 
-      endpoint->hidItems = NULL;
-
       if (properties->private->getOptions) {
         endpoint->options = *properties->private->getOptions(descriptor);
       } else {
@@ -217,7 +214,6 @@ gioDisconnectResource (GioEndpoint *endpoint) {
     ok = 1;
   }
 
-  if (endpoint->hidItems) free(endpoint->hidItems);
   free(endpoint);
   return ok;
 }
@@ -478,38 +474,26 @@ gioAskResource (
                 endpoint->options.requestTimeout);
 }
 
-const HidItemsDescriptor *
-gioGetHidItems (GioEndpoint *endpoint) {
-  if (!endpoint->hidItems) {
-    GioGetHidItemsMethod *method = endpoint->methods->getHidItems;
-
-    if (!method) {
-      logUnsupportedOperation("getHidItems");
-      errno = ENOSYS;
-      return 0;
-    }
-
-    HidItemsDescriptor *items = method(
-      endpoint->handle, endpoint->options.requestTimeout
-    );
-
-    if (!items) return NULL;
-    endpoint->hidItems = items;
-  }
-
-  return endpoint->hidItems;
-}
-
 int
 gioGetHidReportSize (
   GioEndpoint *endpoint,
-  unsigned char identifier,
+  HidReportIdentifier identifier,
   HidReportSize *size
 ) {
-  const HidItemsDescriptor *items = gioGetHidItems(endpoint);
-  if (!items) return 0;
+  GioGetHidReportSizeMethod *method = endpoint->methods->getHidReportSize;
 
-  if (hidGetReportSize(items, identifier, size)) return 1;
+  if (!method) {
+    logUnsupportedOperation("getHidReportSize");
+    errno = ENOSYS;
+    return 0;
+  }
+
+  int ok = method(
+    endpoint->handle, identifier, size,
+    endpoint->options.requestTimeout
+  );
+
+  if (ok) return 1;
   logMessage(LOG_WARNING, "HID report not found: %02X", identifier);
   return 0;
 }

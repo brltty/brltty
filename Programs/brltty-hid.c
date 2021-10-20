@@ -316,13 +316,8 @@ openDevice (HidDevice **device) {
 
 static const HidItemsDescriptor *
 getItems (HidDevice *device) {
-  static const HidItemsDescriptor *items = NULL;
-
-  if (!items) {
-    items = hidGetItems(device);
-    if (!items) logMessage(LOG_ERR, "HID items not available");
-  }
-
+  const HidItemsDescriptor *items = hidGetItems(device);
+  if (!items) logMessage(LOG_ERR, "HID items not available");
   return items;
 }
 
@@ -330,7 +325,7 @@ static int
 getReportSize (HidDevice *device, HidReportIdentifier identifier, HidReportSize *size) {
   const HidItemsDescriptor *items = getItems(device);
   if (!items) return 0;
-  return hidGetReportSize(items, identifier, size);
+  return hidReportSize(items, identifier, size);
 }
 
 static void
@@ -446,7 +441,7 @@ performListReports (HidDevice *device) {
     STR_BEGIN(line, sizeof(line));
     STR_PRINTF("Report %02X:", identifier);
 
-    if (hidGetReportSize(items, identifier, &size)) {
+    if (hidReportSize(items, identifier, &size)) {
       typedef struct {
         const char *label;
         const size_t value;

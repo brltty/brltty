@@ -76,11 +76,9 @@ extern ssize_t gioAskResource (
   void *buffer, uint16_t size
 );
 
-extern const HidItemsDescriptor *gioGetHidItems (GioEndpoint *endpoint);
-
 extern int gioGetHidReportSize (
   GioEndpoint *endpoint,
-  unsigned char identifier,
+  HidReportIdentifier identifier,
   HidReportSize *size
 );
 

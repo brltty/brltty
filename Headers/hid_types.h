@@ -40,6 +40,44 @@ typedef struct {
   size_t feature;
 } HidReportSize;
 
+typedef struct {
+  const char *manufacturerName;
+  const char *productDescription;
+  const char *serialNumber;
+  HidDeviceIdentifier vendorIdentifier;
+  HidDeviceIdentifier productIdentifier;
+} HidUSBFilter;
+
+typedef struct {
+  const char *deviceAddress;
+  const char *deviceName;
+  HidDeviceIdentifier vendorIdentifier;
+  HidDeviceIdentifier productIdentifier;
+} HidBluetoothFilter;
+
+typedef struct {
+  struct {
+    HidDeviceIdentifier vendor;
+    HidDeviceIdentifier product;
+  } identifiers;
+
+  struct {
+    const char *manufacturerName;
+    const char *productDescription;
+    const char *serialNumber;
+  } usb;
+
+  struct {
+    const char *deviceAddress;
+    const char *deviceName;
+  } bluetooth;
+
+  struct {
+    unsigned char wantUSB:1;
+    unsigned char wantBluetooth:1;
+  } flags;
+} HidFilter;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

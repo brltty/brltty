@@ -36,15 +36,18 @@
 #include "gio_internal.h"
 #include "io_usb.h"
 #include "usb_hid.h"
+#include "hid_items.h"
 
 struct GioHandleStruct {
   UsbChannel *channel;
   GioUsbConnectionProperties properties;
+  HidItemsDescriptor *hidItems;
 };
 
 static int
 disconnectUsbResource (GioHandle *handle) {
   usbCloseChannel(handle->channel);
+  if (handle->hidItems) free(handle->hidItems);
   free(handle);
   return 1;
 }
@@ -194,10 +197,28 @@ askUsbResource (
                         request, value, index, buffer, size, timeout);
 }
 
-static HidItemsDescriptor *
+static const HidItemsDescriptor *
 getUsbHidItems (GioHandle *handle, int timeout) {
-  UsbChannel *channel = handle->channel;
-  return usbHidGetItems(channel->device, channel->definition->interface, 0, timeout);
+  if (!handle->hidItems) {
+    UsbChannel *channel = handle->channel;
+
+    handle->hidItems = usbHidGetItems(
+      channel->device, channel->definition->interface,
+      0, timeout
+    );
+  }
+
+  return handle->hidItems;
+}
+
+static int
+getUsbHidReportSize (
+  GioHandle *handle, HidReportIdentifier identifier,
+  HidReportSize *size, int timeout
+) {
+  const HidItemsDescriptor *items = getUsbHidItems(handle, timeout);
+  if (!items) return 0;
+  return hidReportSize(items, identifier, size);
 }
 
 static ssize_t
@@ -260,7 +281,7 @@ static const GioMethods gioUsbMethods = {
   .tellResource = tellUsbResource,
   .askResource = askUsbResource,
 
-  .getHidItems = getUsbHidItems,
+  .getHidReportSize = getUsbHidReportSize,
   .getHidReport = getUsbHidReport,
   .setHidReport = setUsbHidReport,
   .getHidFeature = getUsbHidFeature,

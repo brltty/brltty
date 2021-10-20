@@ -36,16 +36,16 @@ typedef struct {
   uint8_t valueSize;
 } HidItem;
 
-extern int hidGetNextItem (
+extern int hidNextItem (
   HidItem *item,
   const unsigned char **bytes,
   size_t *count
 );
 
-extern const char *hidGetItemTypeName (uint8_t type);
-extern unsigned char hidGetValueSize (unsigned char item);
+extern const char *hidItemTypeName (uint8_t type);
+extern unsigned char hidItemValueSize (unsigned char item);
 
-extern int hidGetReportSize (
+extern int hidReportSize (
   const HidItemsDescriptor *items,
   HidReportIdentifier identifier,
   HidReportSize *size

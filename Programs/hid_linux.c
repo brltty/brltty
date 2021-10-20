@@ -28,8 +28,9 @@
 #include <linux/input.h>
 
 #include "log.h"
-#include "io_hid.h"
+#include "hid_types.h"
 #include "hid_internal.h"
+#include "hid_items.h"
 #include "io_misc.h"
 #include "async.h"
 #include "async_io.h"
@@ -42,6 +43,7 @@ struct HidHandleStruct {
   AsyncHandle inputMonitor;
   struct hidraw_devinfo deviceInformation;
 
+  HidItemsDescriptor *hidItems;
   char *deviceAddress;
   char *deviceName;
   char *hostPath;
@@ -62,6 +64,7 @@ hidLinuxDestroyHandle (HidHandle *handle) {
   hidLinuxCancelInputMonitor(handle);
   close(handle->fileDescriptor);
 
+  if (handle->hidItems) free(handle->hidItems);
   if (handle->deviceAddress) free(handle->deviceAddress);
   if (handle->deviceName) free(handle->deviceName);
   if (handle->hostPath) free(handle->hostPath);
@@ -69,8 +72,9 @@ hidLinuxDestroyHandle (HidHandle *handle) {
   free(handle);
 }
 
-static HidItemsDescriptor *
+static const HidItemsDescriptor *
 hidLinuxGetItems (HidHandle *handle) {
+  if (handle->hidItems) return handle->hidItems;
   int size;
 
   if (ioctl(handle->fileDescriptor, HIDIOCGRDESCSIZE, &size) != -1) {
@@ -85,7 +89,7 @@ hidLinuxGetItems (HidHandle *handle) {
         memset(items, 0, sizeof(*items));
         items->count = size;
         memcpy(items->bytes, descriptor.value, size);
-        return items;
+        return (handle->hidItems = items);
       } else {
         logMallocError();
       }
@@ -100,10 +104,14 @@ hidLinuxGetItems (HidHandle *handle) {
 }
 
 static int
-hidLinuxGetDeviceIdentifiers (HidHandle *handle, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product) {
-  if (vendor) *vendor = handle->deviceInformation.vendor;
-  if (product) *product = handle->deviceInformation.product;
-  return 1;
+hidLinuxGetReportSize (
+  HidHandle *handle,
+  HidReportIdentifier identifier,
+  HidReportSize *size
+) {
+  const HidItemsDescriptor *items = hidLinuxGetItems(handle);
+  if (!items) return 0;
+  return hidReportSize(items, identifier, size);
 }
 
 static ssize_t
@@ -173,6 +181,13 @@ hidLinuxReadData (
   int initialTimeout, int subsequentTimeout
 ) {
   return readFile(handle->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
+}
+
+static int
+hidLinuxGetDeviceIdentifiers (HidHandle *handle, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product) {
+  if (vendor) *vendor = handle->deviceInformation.vendor;
+  if (product) *product = handle->deviceInformation.product;
+  return 1;
 }
 
 static int
@@ -268,11 +283,10 @@ static const HidHandleMethods hidLinuxHandleMethods = {
   .destroyHandle = hidLinuxDestroyHandle,
 
   .getItems = hidLinuxGetItems,
-  .getDeviceIdentifiers = hidLinuxGetDeviceIdentifiers,
 
+  .getReportSize = hidLinuxGetReportSize,
   .getReport = hidLinuxGetReport,
   .setReport = hidLinuxSetReport,
-
   .getFeature = hidLinuxGetFeature,
   .setFeature = hidLinuxSetFeature,
 
@@ -281,9 +295,9 @@ static const HidHandleMethods hidLinuxHandleMethods = {
   .awaitInput = hidLinuxAwaitInput,
   .readData = hidLinuxReadData,
 
+  .getDeviceIdentifiers = hidLinuxGetDeviceIdentifiers,
   .getDeviceAddress = hidLinuxGetDeviceAddress,
   .getDeviceName = hidLinuxGetDeviceName,
-
   .getHostPath = hidLinuxGetHostPath,
   .getHostDevice = hidLinuxGetHostDevice,
 };

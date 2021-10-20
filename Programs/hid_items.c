@@ -113,20 +113,20 @@ HID_BEGIN_TABLE(ItemType)
 HID_END_TABLE(ItemType)
 
 const char *
-hidGetItemTypeName (uint8_t type) {
+hidItemTypeName (uint8_t type) {
   const HidItemTypeEntry *entry = hidGetItemTypeEntry(type);
   if (!entry) return NULL;
   return entry->header.name;
 }
 
 unsigned char
-hidGetValueSize (unsigned char item) {
+hidItemValueSize (unsigned char item) {
   static const unsigned char sizes[4] = {0, 1, 2, 4};
   return sizes[HID_ITEM_LENGTH(item)];
 }
 
 int
-hidGetNextItem (
+hidNextItem (
   HidItem *item,
   const unsigned char **bytes,
   size_t *count
@@ -137,7 +137,7 @@ hidGetNextItem (
   const unsigned char *endBytes = byte + *count;
 
   unsigned char type = HID_ITEM_TYPE(*byte);
-  unsigned char valueSize = hidGetValueSize(*byte);
+  unsigned char valueSize = hidItemValueSize(*byte);
 
   const unsigned char *endValue = ++byte + valueSize;
   if (endValue > endBytes) return 0;
@@ -167,7 +167,7 @@ hidGetNextItem (
 }
 
 int
-hidGetReportSize (
+hidReportSize (
   const HidItemsDescriptor *items,
   HidReportIdentifier identifier,
   HidReportSize *size
@@ -191,7 +191,7 @@ hidGetReportSize (
     size_t offset = nextByte - items->bytes;
     HidItem item;
 
-    if (!hidGetNextItem(&item, &nextByte, &bytesLeft)) {
+    if (!hidNextItem(&item, &nextByte, &bytesLeft)) {
       if (bytesLeft) return 0;
       break;
     }
@@ -253,7 +253,7 @@ hidGetReportSize (
             STR_PRINTF("unhandled item type at offset %"PRIsize ": ", offset);
 
             {
-              const char *name = hidGetItemTypeName(item.type);
+              const char *name = hidItemTypeName(item.type);
 
               if (name) {
                 STR_PRINTF("%s", name);

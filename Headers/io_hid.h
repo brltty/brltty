@@ -28,49 +28,11 @@ extern "C" {
 
 typedef struct HidDeviceStruct HidDevice;
 
-typedef struct {
-  const char *manufacturerName;
-  const char *productDescription;
-  const char *serialNumber;
-  HidDeviceIdentifier vendorIdentifier;
-  HidDeviceIdentifier productIdentifier;
-} HidUSBFilter;
-
 extern void hidInitializeUSBFilter (HidUSBFilter *filter);
 extern HidDevice *hidOpenUSBDevice (const HidUSBFilter *filter);
 
-typedef struct {
-  const char *deviceAddress;
-  const char *deviceName;
-  HidDeviceIdentifier vendorIdentifier;
-  HidDeviceIdentifier productIdentifier;
-} HidBluetoothFilter;
-
 extern void hidInitializeBluetoothFilter (HidBluetoothFilter *filter);
 extern HidDevice *hidOpenBluetoothDevice (const HidBluetoothFilter *filter);
-
-typedef struct {
-  struct {
-    HidDeviceIdentifier vendor;
-    HidDeviceIdentifier product;
-  } identifiers;
-
-  struct {
-    const char *manufacturerName;
-    const char *productDescription;
-    const char *serialNumber;
-  } usb;
-
-  struct {
-    const char *deviceAddress;
-    const char *deviceName;
-  } bluetooth;
-
-  struct {
-    unsigned char wantUSB:1;
-    unsigned char wantBluetooth:1;
-  } flags;
-} HidFilter;
 
 extern void hidInitializeFilter (HidFilter *filter);
 
@@ -88,8 +50,13 @@ extern int hidOpenDeviceWithParameters (
 
 extern void hidCloseDevice (HidDevice *device);
 
-extern HidItemsDescriptor *hidGetItems (HidDevice *device);
-extern int hidGetDeviceIdentifiers (HidDevice *device, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product);
+extern const HidItemsDescriptor *hidGetItems (HidDevice *device);
+
+extern int hidGetReportSize (
+  HidDevice *device,
+  HidReportIdentifier identifier,
+  HidReportSize *size
+);
 
 extern ssize_t hidGetReport (HidDevice *device, unsigned char *buffer, size_t size);
 extern ssize_t hidSetReport (HidDevice *device, const unsigned char *report, size_t size);
@@ -106,14 +73,11 @@ extern ssize_t hidReadData (
   int initialTimeout, int subsequentTimeout
 );
 
+extern int hidGetDeviceIdentifiers (HidDevice *device, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product);
 extern const char *hidGetDeviceAddress (HidDevice *device);
 extern const char *hidGetDeviceName (HidDevice *device);
-
 extern const char *hidGetHostPath (HidDevice *device);
 extern const char *hidGetHostDevice (HidDevice *device);
-
-extern int hidParseDeviceIdentifier (HidDeviceIdentifier *identifier, const char *string);
-extern int hidMatchString (const char *actualString, const char *testString);
 
 extern const char *hidMakeDeviceIdentifier (
   HidDevice *device, char *buffer, size_t size

@@ -432,30 +432,34 @@ hidCloseDevice (HidDevice *device) {
   free(device);
 }
 
-HidItemsDescriptor *
+const HidItemsDescriptor *
 hidGetItems (HidDevice *device) {
   HidGetItemsMethod *method = device->handleMethods->getItems;
 
   if (!method) {
     logUnsupportedOperation("hidGetItems");
     errno = ENOSYS;
-    return NULL;
+    return 0;
   }
 
   return method(device->handle);
 }
 
 int
-hidGetDeviceIdentifiers (HidDevice *device, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product) {
-  HidGetDeviceIdentifiersMethod *method = device->handleMethods->getDeviceIdentifiers;
+hidGetReportSize (
+  HidDevice *device,
+  HidReportIdentifier identifier,
+  HidReportSize *size
+) {
+  HidGetReportSizeMethod *method = device->handleMethods->getReportSize;
 
   if (!method) {
-    logUnsupportedOperation("hidGetDeviceIdentifiers");
+    logUnsupportedOperation("hidGetReportSize");
     errno = ENOSYS;
     return 0;
   }
 
-  return method(device->handle, vendor, product);
+  return method(device->handle, identifier, size);
 }
 
 static void
@@ -598,6 +602,19 @@ hidReadData (
   }
 
   return result;
+}
+
+int
+hidGetDeviceIdentifiers (HidDevice *device, HidDeviceIdentifier *vendor, HidDeviceIdentifier *product) {
+  HidGetDeviceIdentifiersMethod *method = device->handleMethods->getDeviceIdentifiers;
+
+  if (!method) {
+    logUnsupportedOperation("hidGetDeviceIdentifiers");
+    errno = ENOSYS;
+    return 0;
+  }
+
+  return method(device->handle, vendor, product);
 }
 
 const char *

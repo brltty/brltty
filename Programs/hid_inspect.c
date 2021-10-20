@@ -30,7 +30,7 @@
 
 HidReports *
 hidGetReports (const HidItemsDescriptor *items) {
-  unsigned char identifiers[UINT8_MAX];
+  HidReportIdentifier identifiers[UINT8_MAX];
   unsigned char count = 0;
 
   BITMASK(haveIdentifier, UINT8_MAX+1, char);
@@ -41,7 +41,7 @@ hidGetReports (const HidItemsDescriptor *items) {
 
   while (1) {
     HidItem item;
-    if (!hidGetNextItem(&item, &nextByte, &bytesLeft)) break;
+    if (!hidNextItem(&item, &nextByte, &bytesLeft)) break;
 
     switch (item.type) {
       case HID_ITM_ReportID: {
@@ -182,7 +182,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
   while (1) {
     unsigned int offset = nextByte - items->bytes;
     HidItem item;
-    int ok = hidGetNextItem(&item, &nextByte, &bytesLeft);
+    int ok = hidNextItem(&item, &nextByte, &bytesLeft);
 
     char line[0X100];
     STR_BEGIN(line, sizeof(line));
@@ -202,7 +202,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
       }
 
       {
-        const char *name = hidGetItemTypeName(item.type);
+        const char *name = hidItemTypeName(item.type);
 
         if (name) {
           STR_PRINTF(" %s", name);
