@@ -42,7 +42,6 @@ extern int hidNextItem (
   size_t *count
 );
 
-extern const char *hidItemTypeName (uint8_t type);
 extern unsigned char hidItemValueSize (unsigned char item);
 
 extern int hidReportSize (

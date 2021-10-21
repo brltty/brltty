@@ -28,6 +28,61 @@
 #include "hid_tables.h"
 #include "hid_inspect.h"
 
+static int
+hidCompareTableEntriesByValue (const void *element1, const void *element2) {
+  const HidTableEntryHeader *const *header1 = element1;
+  const HidTableEntryHeader *const *header2 = element2;
+
+  HidUnsignedValue value1 = (*header1)->value;
+  HidUnsignedValue value2 = (*header2)->value;
+
+  if (value1 < value2) return -1;
+  if (value1 > value2) return 1;
+  return 0;
+}
+
+const void *
+hidGetTableEntry (HidTable *table, HidUnsignedValue value) {
+  if (!table->sorted) {
+    if (!(table->sorted = malloc(ARRAY_SIZE(table->sorted, table->count)))) {
+      logMallocError();
+      return NULL;
+    }
+
+    {
+      const void *entry = table->entries;
+      const HidTableEntryHeader **header = table->sorted;
+
+      for (unsigned int index=0; index<table->count; index+=1) {
+        *header++ = entry;
+        entry += table->size;
+      }
+    }
+
+    qsort(
+      table->sorted, table->count, sizeof(*table->sorted),
+      hidCompareTableEntriesByValue
+    );
+  }
+
+  unsigned int from = 0;
+  unsigned int to = table->count;
+
+  while (from < to) {
+    unsigned int current = (from + to) / 2;
+    const HidTableEntryHeader *header = table->sorted[current];
+    if (value == header->value) return header;
+
+    if (value < header->value) {
+      to = current;
+    } else {
+      from = current + 1;
+    }
+  }
+
+  return NULL;
+}
+
 HidReports *
 hidGetReports (const HidItemsDescriptor *items) {
   HidReportIdentifier identifiers[UINT8_MAX];
@@ -202,10 +257,10 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
       }
 
       {
-        const char *name = hidItemTypeName(item.type);
+        const HidItemTypeEntry *itt = hidGetItemTypeEntry(item.type);
 
-        if (name) {
-          STR_PRINTF(" %s", name);
+        if (itt) {
+          STR_PRINTF(" %s", itt->header.name);
         } else {
           STR_PRINTF(" unknown item type: 0X%02X", item.type);
         }

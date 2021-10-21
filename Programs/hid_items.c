@@ -26,99 +26,6 @@
 #include "hid_defs.h"
 #include "hid_tables.h"
 
-static int
-hidCompareTableEntriesByValue (const void *element1, const void *element2) {
-  const HidTableEntryHeader *const *header1 = element1;
-  const HidTableEntryHeader *const *header2 = element2;
-
-  HidUnsignedValue value1 = (*header1)->value;
-  HidUnsignedValue value2 = (*header2)->value;
-
-  if (value1 < value2) return -1;
-  if (value1 > value2) return 1;
-  return 0;
-}
-
-const void *
-hidGetTableEntry (HidTable *table, HidUnsignedValue value) {
-  if (!table->sorted) {
-    if (!(table->sorted = malloc(ARRAY_SIZE(table->sorted, table->count)))) {
-      logMallocError();
-      return NULL;
-    }
-
-    {
-      const void *entry = table->entries;
-      const HidTableEntryHeader **header = table->sorted;
-
-      for (unsigned int index=0; index<table->count; index+=1) {
-        *header++ = entry;
-        entry += table->size;
-      }
-    }
-
-    qsort(
-      table->sorted, table->count, sizeof(*table->sorted),
-      hidCompareTableEntriesByValue
-    );
-  }
-
-  unsigned int from = 0;
-  unsigned int to = table->count;
-
-  while (from < to) {
-    unsigned int current = (from + to) / 2;
-    const HidTableEntryHeader *header = table->sorted[current];
-    if (value == header->value) return header;
-
-    if (value < header->value) {
-      to = current;
-    } else {
-      from = current + 1;
-    }
-  }
-
-  return NULL;
-}
-
-#define HID_ITEM_TYPE_ENTRY(name) HID_TABLE_ENTRY(HID_ITM, name)
-HID_BEGIN_TABLE(ItemType)
-  HID_ITEM_TYPE_ENTRY(UsagePage),
-  HID_ITEM_TYPE_ENTRY(Usage),
-  HID_ITEM_TYPE_ENTRY(LogicalMinimum),
-  HID_ITEM_TYPE_ENTRY(UsageMinimum),
-  HID_ITEM_TYPE_ENTRY(LogicalMaximum),
-  HID_ITEM_TYPE_ENTRY(UsageMaximum),
-  HID_ITEM_TYPE_ENTRY(PhysicalMinimum),
-  HID_ITEM_TYPE_ENTRY(DesignatorIndex),
-  HID_ITEM_TYPE_ENTRY(PhysicalMaximum),
-  HID_ITEM_TYPE_ENTRY(DesignatorMinimum),
-  HID_ITEM_TYPE_ENTRY(UnitExponent),
-  HID_ITEM_TYPE_ENTRY(DesignatorMaximum),
-  HID_ITEM_TYPE_ENTRY(Unit),
-  HID_ITEM_TYPE_ENTRY(ReportSize),
-  HID_ITEM_TYPE_ENTRY(StringIndex),
-  HID_ITEM_TYPE_ENTRY(Input),
-  HID_ITEM_TYPE_ENTRY(ReportID),
-  HID_ITEM_TYPE_ENTRY(StringMinimum),
-  HID_ITEM_TYPE_ENTRY(Output),
-  HID_ITEM_TYPE_ENTRY(ReportCount),
-  HID_ITEM_TYPE_ENTRY(StringMaximum),
-  HID_ITEM_TYPE_ENTRY(Collection),
-  HID_ITEM_TYPE_ENTRY(Push),
-  HID_ITEM_TYPE_ENTRY(Delimiter),
-  HID_ITEM_TYPE_ENTRY(Feature),
-  HID_ITEM_TYPE_ENTRY(Pop),
-  HID_ITEM_TYPE_ENTRY(EndCollection),
-HID_END_TABLE(ItemType)
-
-const char *
-hidItemTypeName (uint8_t type) {
-  const HidItemTypeEntry *entry = hidGetItemTypeEntry(type);
-  if (!entry) return NULL;
-  return entry->header.name;
-}
-
 unsigned char
 hidItemValueSize (unsigned char item) {
   static const unsigned char sizes[4] = {0, 1, 2, 4};
@@ -248,22 +155,10 @@ hidReportSize (
 
         default: {
           if (!(itemTypesEncountered & HID_ITEM_BIT(item.type))) {
-            char log[0X100];
-            STR_BEGIN(log, sizeof(log));
-            STR_PRINTF("unhandled item type at offset %"PRIsize ": ", offset);
-
-            {
-              const char *name = hidItemTypeName(item.type);
-
-              if (name) {
-                STR_PRINTF("%s", name);
-              } else {
-                STR_PRINTF("0X%02X", item.type);
-              }
-            }
-
-            STR_END;
-            logMessage(LOG_WARNING, "%s", log);
+            logMessage(LOG_WARNING,
+              "unhandled item type at offset %"PRIsize ": 0X%02X",
+              offset, item.type
+            );
           }
 
           break;
