@@ -42,7 +42,7 @@ hidCompareTableEntriesByValue (const void *element1, const void *element2) {
 }
 
 const void *
-hidGetTableEntry (HidTable *table, HidUnsignedValue value) {
+hidTableEntry (HidTable *table, HidUnsignedValue value) {
   if (!table->sorted) {
     if (!(table->sorted = malloc(ARRAY_SIZE(table->sorted, table->count)))) {
       logMallocError();
@@ -84,7 +84,7 @@ hidGetTableEntry (HidTable *table, HidUnsignedValue value) {
 }
 
 static int
-compareIdentifiers (const void *element1, const void *element2) {
+hidCompareReportIdentifiers (const void *element1, const void *element2) {
   const HidReportIdentifier *identifier1 = element1;
   const HidReportIdentifier *identifier2 = element2;
 
@@ -130,7 +130,10 @@ hidGetReports (const HidItemsDescriptor *items) {
   }
 
   if (count > 1) {
-    qsort(identifiers, count, sizeof(identifiers[0]), compareIdentifiers);
+    qsort(
+      identifiers, count, sizeof(identifiers[0]),
+      hidCompareReportIdentifiers
+    );
   }
 
   HidReports *reports;
@@ -271,7 +274,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
       }
 
       {
-        const HidItemTypeEntry *itt = hidGetItemTypeEntry(item.type);
+        const HidItemTypeEntry *itt = hidItemTypeEntry(item.type);
 
         if (itt) {
           STR_PRINTF(" %s", itt->header.name);
@@ -298,7 +301,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
 
         switch (item.type) {
           case HID_ITM_UsagePage: {
-            const HidUsagePageEntry *upg = hidGetUsagePageEntry(value);
+            const HidUsagePageEntry *upg = hidUsagePageEntry(value);
             if (upg) STR_PRINTF("%s", upg->header.name);
             break;
           }
@@ -318,11 +321,11 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
               page = usagePage;
             }
 
-            if ((upg = hidGetUsagePageEntry(page))) {
+            if ((upg = hidUsagePageEntry(page))) {
               HidTable *utb = upg->usageTable;
 
               if (utb) {
-                const HidTableEntryHeader *uhd = hidGetTableEntry(utb, usage);
+                const HidTableEntryHeader *uhd = hidTableEntry(utb, usage);
 
                 if (uhd) {
                   STR_PRINTF("%s", uhd->name);
@@ -339,7 +342,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
           }
 
           case HID_ITM_Collection: {
-            const HidCollectionTypeEntry *col = hidGetCollectionTypeEntry(value);
+            const HidCollectionTypeEntry *col = hidCollectionTypeEntry(value);
             if (col) STR_PRINTF("%s", col->header.name);
             break;
           }

@@ -56,12 +56,12 @@ static HidTable hid##type##Table = { \
   .count = ARRAY_COUNT(hid##type##Entries), \
   .sorted = NULL \
 }; \
-const Hid##type##Entry *hidGet##type##Entry (HidUnsignedValue value) { \
-  return hidGetTableEntry(&hid##type##Table, value); \
+const Hid##type##Entry *hid##type##Entry (HidUnsignedValue value) { \
+  return hidTableEntry(&hid##type##Table, value); \
 }
 
 #define HID_TABLE_METHODS(type) \
-extern const Hid##type##Entry *hidGet##type##Entry (HidUnsignedValue value);
+extern const Hid##type##Entry *hid##type##Entry (HidUnsignedValue value);
 
 typedef struct {
   HID_TABLE_ENTRY_HEADER;
@@ -73,23 +73,27 @@ typedef struct {
 } HidCollectionTypeEntry;
 HID_TABLE_METHODS(CollectionType)
 
+#define HID_USAGE_ENTRY_HEADER \
+  HID_TABLE_ENTRY_HEADER; \
+  unsigned char usageType
+
 typedef struct {
-  HID_TABLE_ENTRY_HEADER;
+  HID_USAGE_ENTRY_HEADER;
 } HidGenericDesktopUsageEntry;
 HID_TABLE_METHODS(GenericDesktopUsage)
 
 typedef struct {
-  HID_TABLE_ENTRY_HEADER;
+  HID_USAGE_ENTRY_HEADER;
 } HidKeyboardUsageEntry;
 HID_TABLE_METHODS(KeyboardUsage)
 
 typedef struct {
-  HID_TABLE_ENTRY_HEADER;
+  HID_USAGE_ENTRY_HEADER;
 } HidLEDsUsageEntry;
 HID_TABLE_METHODS(LEDsUsage)
 
 typedef struct {
-  HID_TABLE_ENTRY_HEADER;
+  HID_USAGE_ENTRY_HEADER;
 } HidBrailleUsageEntry;
 HID_TABLE_METHODS(BrailleUsage)
 
@@ -99,7 +103,7 @@ typedef struct {
 } HidUsagePageEntry;
 HID_TABLE_METHODS(UsagePage)
 
-extern const void *hidGetTableEntry (HidTable *table, HidUnsignedValue value);
+extern const void *hidTableEntry (HidTable *table, HidUnsignedValue value);
 
 #ifdef __cplusplus
 }
