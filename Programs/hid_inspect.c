@@ -83,6 +83,16 @@ hidGetTableEntry (HidTable *table, HidUnsignedValue value) {
   return NULL;
 }
 
+static int
+compareIdentifiers (const void *element1, const void *element2) {
+  const HidReportIdentifier *identifier1 = element1;
+  const HidReportIdentifier *identifier2 = element2;
+
+  if (*identifier1 < *identifier2) return -1;
+  if (*identifier1 > *identifier2) return 1;
+  return 0;
+}
+
 HidReports *
 hidGetReports (const HidItemsDescriptor *items) {
   HidReportIdentifier identifiers[UINT8_MAX];
@@ -117,6 +127,10 @@ hidGetReports (const HidItemsDescriptor *items) {
         if (!count) identifiers[count++] = 0;
         break;
     }
+  }
+
+  if (count > 1) {
+    qsort(identifiers, count, sizeof(identifiers[0]), compareIdentifiers);
   }
 
   HidReports *reports;
