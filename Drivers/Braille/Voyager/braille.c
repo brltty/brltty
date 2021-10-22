@@ -727,30 +727,30 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
 
 typedef struct {
-  const char *productDescription;
-  const KeyTableDefinition *keyTableDefinition;
-} DeviceType;
+  const char *name;
+  const KeyTableDefinition *keyTable;
+} ProductEntry;
 
-static const DeviceType deviceType_Voyager = {
-  .productDescription = "Voyager",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(all)
+static const ProductEntry productEntry_Voyager = {
+  .name = "Voyager",
+  .keyTable = &KEY_TABLE_DEFINITION(all)
 };
 
-static const DeviceType deviceType_BraillePen = {
-  .productDescription = "Braille Pen",
-  .keyTableDefinition = &KEY_TABLE_DEFINITION(bp)
+static const ProductEntry productEntry_BraillePen = {
+  .name = "Braille Pen",
+  .keyTable = &KEY_TABLE_DEFINITION(bp)
 };
 
 
 typedef struct {
-  const DeviceType *deviceType;
+  const ProductEntry *product;
   int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start);
   unsigned char reportedCellCount;
   unsigned char actualCellCount;
   unsigned partialUpdates:1;
-} DeviceModel;
+} ModelEntry;
 
-static const DeviceModel *deviceModel;
+static const ModelEntry *model;
 
 typedef struct {
   struct {
@@ -797,7 +797,7 @@ writeBraille0 (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 
 static int
 writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
-  if (!deviceModel->partialUpdates) {
+  if (!model->partialUpdates) {
     unsigned char buffer[count + 2];
     WriteBrailleData wbd = {
       .from = {
@@ -822,7 +822,7 @@ writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
 
 static int
 writeBraille4 (BrailleDisplay *brl, const unsigned char *cells, unsigned char count, unsigned char start) {
-  if (!deviceModel->partialUpdates) {
+  if (!model->partialUpdates) {
     unsigned char buffer[count + 4];
     WriteBrailleData wbd = {
       .from = {
@@ -874,28 +874,28 @@ writeBraille4 (BrailleDisplay *brl, const unsigned char *cells, unsigned char co
   }
 }
 
-static const DeviceModel deviceModels[] = {
-  { .reportedCellCount = 48,
+static const ModelEntry modelTable[] = {
+  { .product = &productEntry_Voyager,
+    .reportedCellCount = 48,
     .actualCellCount = 44,
     .writeBraille = writeBraille4,
     .partialUpdates = 1,
-    .deviceType = &deviceType_Voyager
-  }
-  ,
-  { .reportedCellCount = 72,
+  },
+
+  { .product = &productEntry_Voyager,
+    .reportedCellCount = 72,
     .actualCellCount = 70,
     .writeBraille = writeBraille2,
     .partialUpdates = 1,
-    .deviceType = &deviceType_Voyager
-  }
-  ,
-  { .reportedCellCount = 12,
+  },
+
+  { .product = &productEntry_BraillePen,
+    .reportedCellCount = 12,
     .actualCellCount = 12,
     .writeBraille = writeBraille0,
-    .deviceType = &deviceType_BraillePen
-  }
-  ,
-  { .deviceType = NULL }
+  },
+
+  { .product = NULL }
 };
 
 
@@ -926,14 +926,14 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (connectResource(brl, device)) {
     if (protocol->getCellCount(brl, &cellCount)) {
-      deviceModel = deviceModels;
+      model = modelTable;
 
-      while (deviceModel->deviceType) {
-        if (deviceModel->reportedCellCount == cellCount) {
-          const DeviceType *deviceType = deviceModel->deviceType;
+      while (model->product) {
+        if (model->reportedCellCount == cellCount) {
+          const ProductEntry *product = model->product;
+          logMessage(LOG_INFO, "Product: %s", product->name);
 
-          cellCount = deviceModel->actualCellCount;
-          logMessage(LOG_INFO, "Device Type: %s", deviceType->productDescription);
+          cellCount = model->actualCellCount;
           logMessage(LOG_INFO, "Cell Count: %u", cellCount);
 
           protocol->logSerialNumber(brl);
@@ -946,7 +946,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->textColumns = cellCount;		/* initialize size of display */
           brl->textRows = 1;		/* always 1 */
 
-          setBrailleKeyTable(brl, deviceType->keyTableDefinition);
+          setBrailleKeyTable(brl, product->keyTable);
           brl->setBrailleFirmness = setBrailleFirmness;
 
           if ((previousCells = malloc(cellCount))) {
@@ -975,12 +975,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           break;
         }
 
-        deviceModel += 1;
+        model += 1;
       }
 
-      if (!deviceModel->reportedCellCount) {
+      if (!model->reportedCellCount) {
         logMessage(LOG_ERR, "unsupported cell count: %u", cellCount);
-        deviceModel = NULL;
+        model = NULL;
       }
     }
 
@@ -1011,7 +1011,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned int to = cellCount;
   int changed;
 
-  if (deviceModel->partialUpdates) {
+  if (model->partialUpdates) {
     changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, &from, &to, &forceWrite);
   } else {
     changed = cellsHaveChanged(previousCells, brl->buffer, cellCount, NULL, NULL, &forceWrite);
@@ -1019,7 +1019,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
   if (changed) {
     translateOutputCells(&translatedCells[from], &brl->buffer[from], to-from);
-    if (!deviceModel->writeBraille(brl, translatedCells, to-from, from)) return 0;
+    if (!model->writeBraille(brl, translatedCells, to-from, from)) return 0;
   }
 
   return 1;
