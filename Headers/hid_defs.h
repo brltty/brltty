@@ -82,16 +82,22 @@ typedef enum {
 
 typedef enum {
   HID_USG_TYPE_Undefined = 0,
+
+  // Controls
   HID_USG_TYPE_LinearControl,
   HID_USG_TYPE_OnOffControl,
   HID_USG_TYPE_MomentaryControl,
   HID_USG_TYPE_OneShotControl,
   HID_USG_TYPE_RetriggerControl,
+
+  // Data
   HID_USG_TYPE_Selector,
   HID_USG_TYPE_StaticValue,
   HID_USG_TYPE_StaticFlag,
   HID_USG_TYPE_DynamicValue,
   HID_USG_TYPE_DynamicFlag,
+
+  // Collections
   HID_USG_TYPE_NamedArray,
   HID_USG_TYPE_ApplicationCollection,
   HID_USG_TYPE_LogicalCollection,
@@ -544,7 +550,7 @@ typedef enum {
   HID_UPG_Sport                   = 0X04,
   HID_UPG_Game                    = 0X05,
   HID_UPG_GenericDevice           = 0X06,
-  HID_UPG_KeyboardKeypad          = 0X07,
+  HID_UPG_Keyboard_Keypad         = 0X07,
   HID_UPG_LEDs                    = 0X08,
   HID_UPG_Button                  = 0X09,
   HID_UPG_Ordinal                 = 0X0A,

@@ -325,17 +325,30 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
               HidTable *utb = upg->usageTable;
 
               if (utb) {
-                const HidTableEntryHeader *uhd = hidTableEntry(utb, usage);
+                const HidUsageEntryHeader *usg = hidTableEntry(utb, usage);
 
-                if (uhd) {
-                  STR_PRINTF("%s", uhd->name);
+                if (usg) {
+                  STR_PRINTF("%s", usg->header.name);
+
+                  {
+                    const HidUsageTypeEntry *type = hidUsageTypeEntry(usg->usageType);
+                    if (type) STR_PRINTF(" (%s)", type->header.name);
+                  }
                 }
               }
+            }
 
-              if (page != usagePage) {
-                if (*name) STR_PRINTF(" ");
-                STR_PRINTF("[%s]", upg->header.name);
+            if (page != usagePage) {
+              if (*name) STR_PRINTF(" ");
+              STR_PRINTF("[");
+
+              if (upg) {
+                STR_PRINTF("%s", upg->header.name);
+              } else {
+                STR_PRINTF("0X%02X", page);
               }
+
+              STR_PRINTF("]");
             }
 
             break;

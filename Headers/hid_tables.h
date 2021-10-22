@@ -73,9 +73,18 @@ typedef struct {
 } HidCollectionTypeEntry;
 HID_TABLE_METHODS(CollectionType)
 
+typedef struct {
+  HID_TABLE_ENTRY_HEADER;
+} HidUsageTypeEntry;
+HID_TABLE_METHODS(UsageType)
+
 #define HID_USAGE_ENTRY_HEADER \
   HID_TABLE_ENTRY_HEADER; \
   unsigned char usageType
+
+typedef struct {
+  HID_USAGE_ENTRY_HEADER;
+} HidUsageEntryHeader;
 
 typedef struct {
   HID_USAGE_ENTRY_HEADER;
