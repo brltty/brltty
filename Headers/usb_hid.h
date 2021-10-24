@@ -52,17 +52,17 @@ extern HidItemsDescriptor *usbHidGetItems (
 extern ssize_t usbHidGetReport (
   UsbDevice *device,
   unsigned char interface,
-  unsigned char report,
-  void *buffer,
-  uint16_t length,
+  HidReportIdentifier identifier,
+  unsigned char *buffer,
+  uint16_t size,
   int timeout
 );
 
 extern ssize_t usbHidSetReport (
   UsbDevice *device,
   unsigned char interface,
-  unsigned char report,
-  const void *buffer,
+  HidReportIdentifier identifier,
+  const unsigned char *data,
   uint16_t length,
   int timeout
 );
@@ -70,17 +70,17 @@ extern ssize_t usbHidSetReport (
 extern ssize_t usbHidGetFeature (
   UsbDevice *device,
   unsigned char interface,
-  unsigned char report,
-  void *buffer,
-  uint16_t length,
+  HidReportIdentifier identifier,
+  unsigned char *buffer,
+  uint16_t size,
   int timeout
 );
 
 extern ssize_t usbHidSetFeature (
   UsbDevice *device,
   unsigned char interface,
-  unsigned char report,
-  const void *buffer,
+  HidReportIdentifier identifier,
+  const unsigned char *data,
   uint16_t length,
   int timeout
 );

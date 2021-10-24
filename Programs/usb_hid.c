@@ -92,16 +92,16 @@ ssize_t
 usbHidGetReport (
   UsbDevice *device,
   unsigned char interface,
-  unsigned char report,
-  void *buffer,
-  uint16_t length,
+  HidReportIdentifier identifier,
+  unsigned char *buffer,
+  uint16_t size,
   int timeout
 ) {
   return usbControlRead(device,
     UsbControlRecipient_Interface, UsbControlType_Class,
     UsbHidRequest_GetReport,
-    (UsbHidReportType_Input << 8) | report, interface,
-    buffer, length, timeout
+    (UsbHidReportType_Input << 8) | identifier, interface,
+    buffer, size, timeout
   );
 }
 
@@ -109,16 +109,16 @@ ssize_t
 usbHidSetReport (
   UsbDevice *device,
   unsigned char interface,
-  unsigned char report,
-  const void *buffer,
+  HidReportIdentifier identifier,
+  const unsigned char *data,
   uint16_t length,
   int timeout
 ) {
   return usbControlWrite(device,
     UsbControlRecipient_Interface, UsbControlType_Class,
     UsbHidRequest_SetReport,
-    (UsbHidReportType_Output << 8) | report, interface,
-    buffer, length, timeout
+    (UsbHidReportType_Output << 8) | identifier, interface,
+    data, length, timeout
   );
 }
 
@@ -126,16 +126,16 @@ ssize_t
 usbHidGetFeature (
   UsbDevice *device,
   unsigned char interface,
-  unsigned char report,
-  void *buffer,
-  uint16_t length,
+  HidReportIdentifier identifier,
+  unsigned char *buffer,
+  uint16_t size,
   int timeout
 ) {
   return usbControlRead(device,
     UsbControlRecipient_Interface, UsbControlType_Class,
     UsbHidRequest_GetReport,
-    (UsbHidReportType_Feature << 8) | report, interface,
-    buffer, length, timeout
+    (UsbHidReportType_Feature << 8) | identifier, interface,
+    buffer, size, timeout
   );
 }
 
@@ -143,15 +143,15 @@ ssize_t
 usbHidSetFeature (
   UsbDevice *device,
   unsigned char interface,
-  unsigned char report,
-  const void *buffer,
+  HidReportIdentifier identifier,
+  const unsigned char *data,
   uint16_t length,
   int timeout
 ) {
   return usbControlWrite(device,
     UsbControlRecipient_Interface, UsbControlType_Class,
     UsbHidRequest_SetReport,
-    (UsbHidReportType_Feature << 8) | report, interface,
-    buffer, length, timeout
+    (UsbHidReportType_Feature << 8) | identifier, interface,
+    data, length, timeout
   );
 }
