@@ -1780,12 +1780,14 @@ initializeBrailleDriver (const char *code, int verify) {
       }
 
       if (constructed) {
-        logMessage(LOG_INFO, "%s: %s [%s]",
-                   gettext("Braille Driver"), braille->definition.code, braille->definition.name);
         identifyBrailleDriver(braille, 0);
-        logParameters(braille->parameters, brailleDriverParameters,
-                      gettext("Braille Parameter"));
         logMessage(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
+
+        logParameters(
+          braille->parameters,
+          brailleDriverParameters,
+          gettext("Braille Parameter")
+        );
 
         {
           const char *strings[] = {
@@ -2225,11 +2227,13 @@ initializeSpeechDriver (const char *code, int verify) {
       }
 
       if (constructed) {
-        logMessage(LOG_INFO, "%s: %s [%s]",
-                   gettext("Speech Driver"), speech->definition.code, speech->definition.name);
         identifySpeechDriver(speech, 0);
-        logParameters(speech->parameters, speechDriverParameters,
-                      gettext("Speech Parameter"));
+
+        logParameters(
+          speech->parameters,
+          speechDriverParameters,
+          gettext("Speech Parameter")
+        );
 
         return 1;
       }
@@ -2432,16 +2436,20 @@ changeSpeechParameters (const char *parameters) {
 static int
 initializeScreenDriver (const char *code, int verify) {
   if ((screen = loadScreenDriver(code, &screenObject, opt_driversDirectory))) {
-    screenDriverParameters = getParameters(getScreenParameters(screen),
-                                           getScreenDriverDefinition(screen)->code,
-                                           screenParameters);
+    screenDriverParameters = getParameters(
+      getScreenParameters(screen),
+      screen->definition.code,
+      screenParameters
+    );
 
     if (screenDriverParameters) {
       int constructed = verify;
 
       if (!constructed) {
-        logMessage(LOG_DEBUG, "initializing screen driver: %s",
-                   getScreenDriverDefinition(screen)->code);
+        logMessage(LOG_DEBUG,
+          "initializing screen driver: %s",
+          screen->definition.code
+        );
 
         if (constructScreenDriver(screenDriverParameters)) {
           constructed = 1;
@@ -2450,14 +2458,13 @@ initializeScreenDriver (const char *code, int verify) {
       }
 
       if (constructed) {
-        logMessage(LOG_INFO, "%s: %s [%s]",
-                   gettext("Screen Driver"),
-                   getScreenDriverDefinition(screen)->code,
-                   getScreenDriverDefinition(screen)->name);
         identifyScreenDriver(screen, 0);
-        logParameters(getScreenParameters(screen),
-                      screenDriverParameters,
-                      gettext("Screen Parameter"));
+
+        logParameters(
+          getScreenParameters(screen),
+          screenDriverParameters,
+          gettext("Screen Parameter")
+        );
 
         return 1;
       }

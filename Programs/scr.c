@@ -46,11 +46,6 @@ getScreenParameters (const ScreenDriver *driver) {
   return driver->parameters;
 }
 
-const DriverDefinition *
-getScreenDriverDefinition (const ScreenDriver *driver) {
-  return &driver->definition;
-}
-
 static void
 initializeScreen (void) {
   screen->initialize(&mainScreen);

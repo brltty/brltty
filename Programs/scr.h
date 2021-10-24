@@ -74,7 +74,6 @@ extern const ScreenDriver noScreen;
 extern void setNoScreen (void);
 
 extern const char *const *getScreenParameters (const ScreenDriver *driver);
-extern const DriverDefinition *getScreenDriverDefinition (const ScreenDriver *driver);
 
 extern int haveScreenDriver (const char *code);
 extern const char *getDefaultScreenDriver (void);

@@ -129,21 +129,33 @@ loadDriver (
               static const char *expectedVersion = DRIVER_VERSION_STRING;
 
               if (strcmp(actualVersion, expectedVersion) != 0) {
-                logMessage(LOG_WARNING, "%s %s driver version %s does not match expected version %s",
-                           driverCode, typeName, actualVersion, expectedVersion);
+                logMessage(LOG_WARNING,
+                  "%s driver version mismatch: %s: Expected:%s Actual%s",
+                  typeName, driverCode,
+                  expectedVersion, actualVersion
+                );
               }
             } else {
-              logMessage(LOG_WARNING, "cannot find %s %s driver version symbol: %s",
-                         driverCode, typeName, versionSymbol);
+              logMessage(LOG_WARNING,
+                "cannot find %s driver version symbol: %s: %s",
+                typeName, driverCode, versionSymbol
+              );
             }
           }
         } else {
-          logMessage(LOG_ERR, "cannot find %s driver symbol: %s", typeName, driverSymbol);
+          logMessage(LOG_ERR,
+            "cannot find %s driver symbol: %s",
+            typeName, driverSymbol
+          );
+
           unloadSharedObject(libraryHandle);
           driverAddress = NULL;
         }
       } else {
-        logMessage(LOG_ERR, "cannot load %s driver: %s", typeName, libraryPath);
+        logMessage(LOG_ERR,
+          "cannot load %s driver: %s",
+          typeName, libraryPath
+        );
       }
 
       free(libraryPath);
@@ -162,16 +174,19 @@ identifyDriver (
 ) {
   {
     char buffer[0X100];
-
     STR_BEGIN(buffer, sizeof(buffer));
-    STR_PRINTF("%s %s Driver:", definition->name, type);
+
+    STR_PRINTF(
+      "%s Driver: %s [%s]",
+      type, definition->code, definition->name
+    );
 
     if (definition->version && *definition->version) {
-      STR_PRINTF(" version %s", definition->version);
+      STR_PRINTF(" Version:%s", definition->version);
     }
 
     if (full) {
-      STR_PRINTF(" [compiled on %s at %s]", definition->date, definition->time);
+      STR_PRINTF(" (compiled on %s at %s)", definition->date, definition->time);
     }
 
     STR_END;
@@ -179,7 +194,8 @@ identifyDriver (
   }
 
   if (full) {
-    if (definition->developers && *definition->developers)
+    if (definition->developers && *definition->developers) {
       logMessage(LOG_INFO, "   Developed by %s", definition->developers);
+    }
   }
 }
