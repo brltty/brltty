@@ -325,21 +325,6 @@ hidLinuxTestString (
   return hidMatchString(actualString, testString);
 }
 
-static int
-hidLinuxTestDeviceIdentifier (
-  struct udev_device *device,
-  const char *name,
-  const void *value
-) {
-  const HidDeviceIdentifier *testIdentifier = value;
-  if (!*testIdentifier) return 1;
-
-  HidDeviceIdentifier actualIdentifier;
-  if (!hidParseDeviceIdentifier(&actualIdentifier, udev_device_get_sysattr_value(device, name))) return 0;
-
-  return actualIdentifier == *testIdentifier;
-}
-
 typedef struct {
   const char *name;
   const void *value;
@@ -401,14 +386,14 @@ hidLinuxNewHandle (struct udev_device *device) {
   return NULL;
 }
 
-typedef int HidLinuxDeviceTester (
-  struct udev_device *device,
+typedef int HidLinuxPropertiesTester (
   HidHandle *handle,
+  struct udev_device *device,
   const void *filter
 );
 
 static HidHandle *
-hidLinuxFindDevice (HidLinuxDeviceTester *testDevice, const void *filter) {
+hidLinuxFindDevice (HidLinuxPropertiesTester *testProperties, const void *filter) {
   HidHandle *handle = NULL;
   struct udev *udev = udev_new();
 
@@ -428,7 +413,7 @@ hidLinuxFindDevice (HidLinuxDeviceTester *testDevice, const void *filter) {
 
         if (hidDevice) {
           if ((handle = hidLinuxNewHandle(hidDevice))) {
-            if (!testDevice(hidDevice, handle, filter)) {
+            if (!testProperties(handle, hidDevice, filter)) {
               hidLinuxDestroyHandle(handle);
               handle = NULL;
             }
@@ -452,36 +437,46 @@ hidLinuxFindDevice (HidLinuxDeviceTester *testDevice, const void *filter) {
 }
 
 static int
-hidLinuxTestUSBDevice (struct udev_device *hidDevice, HidHandle *handle, const void *filter) {
+hidLinuxTestCommonProperties (HidHandle *handle, const HidCommonProperties *common) {
+  if (common->vendorIdentifier) {
+    if (handle->deviceInformation.vendor != common->vendorIdentifier) {
+      return 0;
+    }
+  }
+
+  if (common->productIdentifier) {
+    if (handle->deviceInformation.product != common->productIdentifier) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
+hidLinuxTestUSBProperties (HidHandle *handle, struct udev_device *hidDevice, const void *filter) {
   if (handle->deviceInformation.bustype != BUS_USB) return 0;
+
   const HidUSBFilter *huf = filter;
+  if (!hidLinuxTestCommonProperties(handle, &huf->common)) return 0;
 
   struct udev_device *usbDevice = udev_device_get_parent_with_subsystem_devtype(hidDevice, "usb", "usb_device");
   if (!usbDevice) return 0;
+  const HidUSBProperties *test = &huf->usb;
 
   const HidLinuxAttributeTest tests[] = {
-    { .name = "idVendor",
-      .value = &huf->vendorIdentifier,
-      .function = hidLinuxTestDeviceIdentifier
-    },
-
-    { .name = "idProduct",
-      .value = &huf->productIdentifier,
-      .function = hidLinuxTestDeviceIdentifier
-    },
-
     { .name = "manufacturer",
-      .value = huf->manufacturerName,
+      .value = test->manufacturerName,
       .function = hidLinuxTestString
     },
 
     { .name = "product",
-      .value = huf->productDescription,
+      .value = test->productDescription,
       .function = hidLinuxTestString
     },
 
     { .name = "serial",
-      .value = huf->serialNumber,
+      .value = test->serialNumber,
       .function = hidLinuxTestString
     },
   };
@@ -491,28 +486,19 @@ hidLinuxTestUSBDevice (struct udev_device *hidDevice, HidHandle *handle, const v
 
 static HidHandle *
 hidLinuxNewUSBHandle (const HidUSBFilter *filter) {
-  return hidLinuxFindDevice(hidLinuxTestUSBDevice, filter);
+  return hidLinuxFindDevice(hidLinuxTestUSBProperties, filter);
 }
 
 static int
-hidLinuxTestBluetoothDevice (struct udev_device *hidDevice, HidHandle *handle, const void *filter) {
+hidLinuxTestBluetoothProperties (HidHandle *handle, struct udev_device *hidDevice, const void *filter) {
   if (handle->deviceInformation.bustype != BUS_BLUETOOTH) return 0;
+
   const HidBluetoothFilter *hbf = filter;
-
-  if (hbf->vendorIdentifier) {
-    if (handle->deviceInformation.vendor != hbf->vendorIdentifier) {
-      return 0;
-    }
-  }
-
-  if (hbf->productIdentifier) {
-    if (handle->deviceInformation.product != hbf->productIdentifier) {
-      return 0;
-    }
-  }
+  if (!hidLinuxTestCommonProperties(handle, &hbf->common)) return 0;
+  const HidBluetoothProperties *test = &hbf->bluetooth;
 
   {
-    const char *testAddress = hbf->deviceAddress;
+    const char *testAddress = test->macAddress;
 
     if (testAddress && *testAddress) {
       const char *actualAddress = hidLinuxGetDeviceAddress(handle);
@@ -522,7 +508,7 @@ hidLinuxTestBluetoothDevice (struct udev_device *hidDevice, HidHandle *handle, c
   }
 
   {
-    const char *testName = hbf->deviceName;
+    const char *testName = test->deviceName;
 
     if (testName && *testName) {
       const char *actualName = hidLinuxGetDeviceName(handle);
@@ -536,7 +522,7 @@ hidLinuxTestBluetoothDevice (struct udev_device *hidDevice, HidHandle *handle, c
 
 static HidHandle *
 hidLinuxNewBluetoothHandle (const HidBluetoothFilter *filter) {
-  return hidLinuxFindDevice(hidLinuxTestBluetoothDevice, filter);
+  return hidLinuxFindDevice(hidLinuxTestBluetoothProperties, filter);
 }
 
 const HidPackageDescriptor hidPackageDescriptor = {

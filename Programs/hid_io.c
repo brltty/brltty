@@ -220,12 +220,12 @@ hidSetFilterIdentifiers (
   const IdentifierEntry identifierTable[] = {
     { .name = "vendor",
       .operand = vendor,
-      .identifier = &filter->identifiers.vendor,
+      .identifier = &filter->common.vendorIdentifier,
     },
 
     { .name = "product",
       .operand = product,
-      .identifier = &filter->identifiers.product,
+      .identifier = &filter->common.productIdentifier,
     },
   };
 
@@ -297,11 +297,14 @@ hidOpenDeviceWithFilter (HidDevice **device, const HidFilter *filter) {
   unsigned char wantUSB = filter->flags.wantUSB;
   unsigned char wantBluetooth = filter->flags.wantBluetooth;
 
-  HidUSBFilter huf;
-  hidInitializeUSBFilter(&huf);
+  HidCommonProperties common;
+  memset(&common, 0, sizeof(common));
 
-  HidBluetoothFilter hbf;
-  hidInitializeBluetoothFilter(&hbf);
+  HidUSBProperties usb;
+  memset(&usb, 0, sizeof(usb));
+
+  HidBluetoothProperties bluetooth;
+  memset(&bluetooth, 0, sizeof(bluetooth));
 
   typedef struct {
     const char *name;
@@ -315,49 +318,49 @@ hidOpenDeviceWithFilter (HidDevice **device, const HidFilter *filter) {
   const FilterEntry filterTable[] = {
     { .name = "vendor identifier",
       .copy = hidCopyIdentifierFilter,
-      .from = &filter->identifiers.vendor,
-      .to = &huf.vendorIdentifier,
+      .from = &filter->common.vendorIdentifier,
+      .to = &common.vendorIdentifier,
     },
 
     { .name = "product identifier",
       .copy = hidCopyIdentifierFilter,
-      .from = &filter->identifiers.product,
-      .to = &huf.productIdentifier,
+      .from = &filter->common.productIdentifier,
+      .to = &common.productIdentifier,
     },
 
     { .name = "manufacturer name",
       .copy = hidCopyStringFilter,
       .from = filter->usb.manufacturerName,
-      .to = &huf.manufacturerName,
+      .to = &usb.manufacturerName,
       .flag = &wantUSB,
     },
 
     { .name = "product description",
       .copy = hidCopyStringFilter,
       .from = filter->usb.productDescription,
-      .to = &huf.productDescription,
+      .to = &usb.productDescription,
       .flag = &wantUSB,
     },
 
     { .name = "serial number",
       .copy = hidCopyStringFilter,
       .from = filter->usb.serialNumber,
-      .to = &huf.serialNumber,
+      .to = &usb.serialNumber,
       .flag = &wantUSB,
     },
 
     { .name = "MAC address",
       .copy = hidCopyStringFilter,
       .test = hidTestMacAddress,
-      .from = filter->bluetooth.deviceAddress,
-      .to = &hbf.deviceAddress,
+      .from = filter->bluetooth.macAddress,
+      .to = &bluetooth.macAddress,
       .flag = &wantBluetooth,
     },
 
     { .name = "device name",
       .copy = hidCopyStringFilter,
       .from = filter->bluetooth.deviceName,
-      .to = &hbf.deviceName,
+      .to = &bluetooth.deviceName,
       .flag = &wantBluetooth,
     },
   };
@@ -386,12 +389,18 @@ hidOpenDeviceWithFilter (HidDevice **device, const HidFilter *filter) {
     return 0;
   }
 
-  hbf.vendorIdentifier = huf.vendorIdentifier;
-  hbf.productIdentifier = huf.productIdentifier;
-
   if (wantBluetooth) {
+    HidBluetoothFilter hbf = {
+      .common = common,
+      .bluetooth = bluetooth,
+    };
     *device = hidOpenBluetoothDevice(&hbf);
   } else {
+    HidUSBFilter huf = {
+      .common = common,
+      .usb = usb,
+    };
+
     *device = hidOpenUSBDevice(&huf);
   }
 
@@ -400,17 +409,21 @@ hidOpenDeviceWithFilter (HidDevice **device, const HidFilter *filter) {
 
 int
 hidOpenDeviceWithParameters (HidDevice **device, const char *string) {
-  HidFilter filter;
-  hidInitializeFilter(&filter);
   char **parameters = hidGetFilterParameters(string);
 
   if (parameters) {
-    filter.usb.manufacturerName = parameters[HID_FLT_MANUFACTURER];
-    filter.usb.productDescription = parameters[HID_FLT_DESCRIPTION];
-    filter.usb.serialNumber = parameters[HID_FLT_SERIAL_NUMBER];
+    HidFilter filter = {
+      .usb = {
+        .manufacturerName = parameters[HID_FLT_MANUFACTURER],
+        .productDescription = parameters[HID_FLT_DESCRIPTION],
+        .serialNumber = parameters[HID_FLT_SERIAL_NUMBER],
+      },
 
-    filter.bluetooth.deviceAddress = parameters[HID_FLT_ADDRESS];
-    filter.bluetooth.deviceName = parameters[HID_FLT_NAME];
+      .bluetooth = {
+        .macAddress = parameters[HID_FLT_ADDRESS],
+        .deviceName = parameters[HID_FLT_NAME],
+      },
+    };
 
     int ok = hidSetFilterIdentifiers(
       &filter,

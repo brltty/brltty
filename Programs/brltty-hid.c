@@ -296,7 +296,7 @@ openDevice (HidDevice **device) {
     },
 
     .bluetooth = {
-      .deviceAddress = opt_matchDeviceAddress,
+      .macAddress = opt_matchDeviceAddress,
       .deviceName = opt_matchDeviceName,
     },
 

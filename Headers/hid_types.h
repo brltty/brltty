@@ -41,36 +41,35 @@ typedef struct {
 } HidReportSize;
 
 typedef struct {
+  HidDeviceIdentifier vendorIdentifier;
+  HidDeviceIdentifier productIdentifier;
+} HidCommonProperties;
+
+typedef struct {
   const char *manufacturerName;
   const char *productDescription;
   const char *serialNumber;
-  HidDeviceIdentifier vendorIdentifier;
-  HidDeviceIdentifier productIdentifier;
+} HidUSBProperties;
+
+typedef struct {
+  const char *macAddress;
+  const char *deviceName;
+} HidBluetoothProperties;
+
+typedef struct {
+  HidCommonProperties common;
+  HidUSBProperties usb;
 } HidUSBFilter;
 
 typedef struct {
-  const char *deviceAddress;
-  const char *deviceName;
-  HidDeviceIdentifier vendorIdentifier;
-  HidDeviceIdentifier productIdentifier;
+  HidCommonProperties common;
+  HidBluetoothProperties bluetooth;
 } HidBluetoothFilter;
 
 typedef struct {
-  struct {
-    HidDeviceIdentifier vendor;
-    HidDeviceIdentifier product;
-  } identifiers;
-
-  struct {
-    const char *manufacturerName;
-    const char *productDescription;
-    const char *serialNumber;
-  } usb;
-
-  struct {
-    const char *deviceAddress;
-    const char *deviceName;
-  } bluetooth;
+  HidCommonProperties common;
+  HidUSBProperties usb;
+  HidBluetoothProperties bluetooth;
 
   struct {
     unsigned char wantUSB:1;
