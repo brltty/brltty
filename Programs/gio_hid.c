@@ -145,7 +145,7 @@ setHidFeature (
   return hidSetFeature(handle->device, data, size);
 }
 
-static const GioMethods gioHidMethods = {
+static const GioHandleMethods gioHidMethods = {
   .disconnectResource = disconnectHidResource,
 
   .makeResourceIdentifier = makeHidResourceIdentifier,
@@ -188,7 +188,7 @@ getHidOptions (const GioDescriptor *descriptor) {
   return &descriptor->hid.options;
 }
 
-static const GioMethods *
+static const GioHandleMethods *
 getHidMethods (void) {
   return &gioHidMethods;
 }
@@ -221,7 +221,7 @@ static const GioPrivateProperties gioPrivateProperties_hid = {
   .isSupported = isHidSupported,
 
   .getOptions = getHidOptions,
-  .getMethods = getHidMethods,
+  .getHandleMethods = getHidMethods,
 
   .connectResource = connectHidResource
 };

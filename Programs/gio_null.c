@@ -67,7 +67,7 @@ monitorNullInput (GioHandle *handle, AsyncMonitorCallback *callback, void *data)
   return 1;
 }
 
-static const GioMethods gioNullMethods = {
+static const GioHandleMethods gioNullMethods = {
   .disconnectResource = disconnectNullResource,
 
   .makeResourceIdentifier = makeNullResourceIdentifier,
@@ -102,7 +102,7 @@ getNullOptions (const GioDescriptor *descriptor) {
   return &descriptor->null.options;
 }
 
-static const GioMethods *
+static const GioHandleMethods *
 getNullMethods (void) {
   return &gioNullMethods;
 }
@@ -129,7 +129,7 @@ static const GioPrivateProperties gioPrivateProperties_null = {
   .isSupported = isNullSupported,
 
   .getOptions = getNullOptions,
-  .getMethods = getNullMethods,
+  .getHandleMethods = getNullMethods,
 
   .connectResource = connectNullResource
 };

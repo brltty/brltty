@@ -104,11 +104,11 @@ typedef struct {
   GioSetHidReportMethod *setHidReport;
   GioGetHidFeatureMethod *getHidFeature;
   GioSetHidFeatureMethod *setHidFeature;
-} GioMethods;
+} GioHandleMethods;
 
 struct GioEndpointStruct {
   GioHandle *handle;
-  const GioMethods *methods;
+  const GioHandleMethods *handleMethods;
   GioOptions options;
   GioTypeIdentifier resourceType;
   unsigned int bytesPerSecond;
@@ -125,7 +125,7 @@ typedef int GioIsSupportedMethod (const GioDescriptor *descriptor);
 
 typedef const GioOptions *GioGetOptionsMethod (const GioDescriptor *descriptor);
 
-typedef const GioMethods *GioGetMethodsMethod (void);
+typedef const GioHandleMethods *GioGetHandleMethodsMethod (void);
 
 typedef GioHandle *GioConnectResourceMethod (
   const char *identifier,
@@ -138,7 +138,7 @@ typedef struct {
   GioIsSupportedMethod *isSupported;
 
   GioGetOptionsMethod *getOptions;
-  GioGetMethodsMethod *getMethods;
+  GioGetHandleMethodsMethod *getHandleMethods;
 
   GioConnectResourceMethod *connectResource;
   GioPrepareEndpointMethod *prepareEndpoint;

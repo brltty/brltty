@@ -76,7 +76,7 @@ monitorBluetoothInput (GioHandle *handle, AsyncMonitorCallback *callback, void *
   return bthMonitorInput(handle->connection, callback, data);
 }
 
-static const GioMethods gioBluetoothMethods = {
+static const GioHandleMethods gioBluetoothMethods = {
   .disconnectResource = disconnectBluetoothResource,
 
   .makeResourceIdentifier = makeBluetoothResourceIdentifier,
@@ -113,7 +113,7 @@ getBluetoothOptions (const GioDescriptor *descriptor) {
   return &descriptor->bluetooth.options;
 }
 
-static const GioMethods *
+static const GioHandleMethods *
 getBluetoothMethods (void) {
   return &gioBluetoothMethods;
 }
@@ -152,7 +152,7 @@ static const GioPrivateProperties gioPrivateProperties_bluetooth = {
   .isSupported = isBluetoothSupported,
 
   .getOptions = getBluetoothOptions,
-  .getMethods = getBluetoothMethods,
+  .getHandleMethods = getBluetoothMethods,
 
   .connectResource = connectBluetoothResource
 };

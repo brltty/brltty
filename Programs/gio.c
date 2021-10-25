@@ -162,10 +162,10 @@ gioConnectResource (
         gioInitializeOptions(&endpoint->options);
       }
 
-      if (properties->private->getMethods) {
-        endpoint->methods = properties->private->getMethods();
+      if (properties->private->getHandleMethods) {
+        endpoint->handleMethods = properties->private->getHandleMethods();
       } else {
-        endpoint->methods = NULL;
+        endpoint->handleMethods = NULL;
       }
 
       if (properties->private->connectResource) {
@@ -205,7 +205,7 @@ gioGetApplicationData (GioEndpoint *endpoint) {
 int
 gioDisconnectResource (GioEndpoint *endpoint) {
   int ok = 0;
-  GioDisconnectResourceMethod *method = endpoint->methods->disconnectResource;
+  GioDisconnectResourceMethod *method = endpoint->handleMethods->disconnectResource;
 
   if (!method) {
     logUnsupportedOperation("disconnectResource");
@@ -221,7 +221,7 @@ gioDisconnectResource (GioEndpoint *endpoint) {
 const char *
 gioMakeResourceIdentifier (GioEndpoint *endpoint, char *buffer, size_t size) {
   const char *identifier = NULL;
-  MakeResourceIdentifierMethod *method = endpoint->methods->makeResourceIdentifier;
+  MakeResourceIdentifierMethod *method = endpoint->handleMethods->makeResourceIdentifier;
 
   if (!method) {
     logUnsupportedOperation("makeResourceIdentifier");
@@ -247,7 +247,7 @@ gioGetResourceIdentifier (GioEndpoint *endpoint) {
 char *
 gioGetResourceName (GioEndpoint *endpoint) {
   char *name = NULL;
-  GioGetResourceNameMethod *method = endpoint->methods->getResourceName;
+  GioGetResourceNameMethod *method = endpoint->handleMethods->getResourceName;
 
   if (!method) {
     logUnsupportedOperation("getResourceName");
@@ -266,7 +266,7 @@ gioGetResourceType (GioEndpoint *endpoint) {
 
 void *
 gioGetResourceObject (GioEndpoint *endpoint) {
-  GioGetResourceObjectMethod *method = endpoint->methods->getResourceObject;
+  GioGetResourceObjectMethod *method = endpoint->handleMethods->getResourceObject;
 
   if (method) return method(endpoint->handle);
   logUnsupportedOperation("getResourceObject");
@@ -275,7 +275,7 @@ gioGetResourceObject (GioEndpoint *endpoint) {
 
 ssize_t
 gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
-  GioWriteDataMethod *method = endpoint->methods->writeData;
+  GioWriteDataMethod *method = endpoint->handleMethods->writeData;
 
   if (!method) {
     logUnsupportedOperation("writeData");
@@ -303,7 +303,7 @@ gioWriteData (GioEndpoint *endpoint, const void *data, size_t size) {
 
 int
 gioAwaitInput (GioEndpoint *endpoint, int timeout) {
-  GioAwaitInputMethod *method = endpoint->methods->awaitInput;
+  GioAwaitInputMethod *method = endpoint->handleMethods->awaitInput;
 
   if (!method) {
     logUnsupportedOperation("awaitInput");
@@ -318,7 +318,7 @@ gioAwaitInput (GioEndpoint *endpoint, int timeout) {
 
 ssize_t
 gioReadData (GioEndpoint *endpoint, void *buffer, size_t size, int wait) {
-  GioReadDataMethod *method = endpoint->methods->readData;
+  GioReadDataMethod *method = endpoint->handleMethods->readData;
 
   if (!method) {
     logUnsupportedOperation("readData");
@@ -394,7 +394,7 @@ gioDiscardInput (GioEndpoint *endpoint) {
 
 int
 gioMonitorInput (GioEndpoint *endpoint, AsyncMonitorCallback *callback, void *data) {
-  GioMonitorInputMethod *method = endpoint->methods->monitorInput;
+  GioMonitorInputMethod *method = endpoint->handleMethods->monitorInput;
 
   if (method) {
     if (method(endpoint->handle, callback, data)) {
@@ -411,7 +411,7 @@ gioReconfigureResource (
   const SerialParameters *parameters
 ) {
   int ok = 1;
-  GioReconfigureResourceMethod *method = endpoint->methods->reconfigureResource;
+  GioReconfigureResourceMethod *method = endpoint->handleMethods->reconfigureResource;
 
   if (!method) {
     logUnsupportedOperation("reconfigureResource");
@@ -441,7 +441,7 @@ gioTellResource (
   uint8_t request, uint16_t value, uint16_t index,
   const void *data, uint16_t size
 ) {
-  GioTellResourceMethod *method = endpoint->methods->tellResource;
+  GioTellResourceMethod *method = endpoint->handleMethods->tellResource;
 
   if (!method) {
     logUnsupportedOperation("tellResource");
@@ -461,7 +461,7 @@ gioAskResource (
   uint8_t request, uint16_t value, uint16_t index,
   void *buffer, uint16_t size
 ) {
-  GioAskResourceMethod *method = endpoint->methods->askResource;
+  GioAskResourceMethod *method = endpoint->handleMethods->askResource;
 
   if (!method) {
     logUnsupportedOperation("askResource");
@@ -480,7 +480,7 @@ gioGetHidReportSize (
   HidReportIdentifier identifier,
   HidReportSize *size
 ) {
-  GioGetHidReportSizeMethod *method = endpoint->methods->getHidReportSize;
+  GioGetHidReportSizeMethod *method = endpoint->handleMethods->getHidReportSize;
 
   if (!method) {
     logUnsupportedOperation("getHidReportSize");
@@ -533,7 +533,7 @@ gioGetHidReport (
   GioEndpoint *endpoint, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size
 ) {
-  GioGetHidReportMethod *method = endpoint->methods->getHidReport;
+  GioGetHidReportMethod *method = endpoint->handleMethods->getHidReport;
 
   if (!method) {
     logUnsupportedOperation("getHidReport");
@@ -558,7 +558,7 @@ gioSetHidReport (
   GioEndpoint *endpoint, HidReportIdentifier identifier,
   const unsigned char *data, size_t size
 ) {
-  GioSetHidReportMethod *method = endpoint->methods->setHidReport;
+  GioSetHidReportMethod *method = endpoint->handleMethods->setHidReport;
 
   if (!method) {
     logUnsupportedOperation("setHidReport");
@@ -585,7 +585,7 @@ gioGetHidFeature (
   GioEndpoint *endpoint, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size
 ) {
-  GioGetHidFeatureMethod *method = endpoint->methods->getHidFeature;
+  GioGetHidFeatureMethod *method = endpoint->handleMethods->getHidFeature;
 
   if (!method) {
     logUnsupportedOperation("getHidFeature");
@@ -610,7 +610,7 @@ gioSetHidFeature (
   GioEndpoint *endpoint, HidReportIdentifier identifier,
   const unsigned char *data, size_t size
 ) {
-  GioSetHidFeatureMethod *method = endpoint->methods->setHidFeature;
+  GioSetHidFeatureMethod *method = endpoint->handleMethods->setHidFeature;
 
   if (!method) {
     logUnsupportedOperation("setHidFeature");

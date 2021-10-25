@@ -265,7 +265,7 @@ setUsbHidFeature (
                           identifier, data, size, timeout);
 }
 
-static const GioMethods gioUsbMethods = {
+static const GioHandleMethods gioUsbMethods = {
   .disconnectResource = disconnectUsbResource,
 
   .makeResourceIdentifier = makeUsbResourceIdentifier,
@@ -312,7 +312,7 @@ getUsbOptions (const GioDescriptor *descriptor) {
   return &descriptor->usb.options;
 }
 
-static const GioMethods *
+static const GioHandleMethods *
 getUsbMethods (void) {
   return &gioUsbMethods;
 }
@@ -385,7 +385,7 @@ static const GioPrivateProperties gioPrivateProperties_usb = {
   .isSupported = isUsbSupported,
 
   .getOptions = getUsbOptions,
-  .getMethods = getUsbMethods,
+  .getHandleMethods = getUsbMethods,
 
   .connectResource = connectUsbResource,
   .prepareEndpoint = prepareUsbEndpoint
