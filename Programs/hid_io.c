@@ -609,9 +609,11 @@ hidReadData (
   ssize_t result = method(device->handle, buffer, size, initialTimeout, subsequentTimeout);
 
   if (result != -1) {
-    logBytes(LOG_CATEGORY(HID_IO),
-      "input", buffer, result
-    );
+    if (result > 0) {
+      logBytes(LOG_CATEGORY(HID_IO),
+        "input", buffer, result
+      );
+    }
   }
 
   return result;
