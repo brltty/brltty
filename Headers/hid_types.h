@@ -77,6 +77,16 @@ typedef struct {
   } flags;
 } HidFilter;
 
+typedef struct {
+  const void *data;
+  const char *name;
+  HidDeviceIdentifier vendor;
+  HidDeviceIdentifier product;
+} HidModelEntry;
+
+#define BEGIN_HID_MODEL_TABLE static const HidModelEntry hidModelTable[] = {
+#define END_HID_MODEL_TABLE { .name=NULL, .vendor=0 } };
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

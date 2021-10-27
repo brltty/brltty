@@ -79,11 +79,12 @@ typedef struct {
 
   struct {
     uint8_t channelNumber;
-    unsigned discoverChannel:1;
+    unsigned char discoverChannel:1;
     GioOptions options;
   } bluetooth;
 
   struct {
+    const HidModelEntry *modelTable;
     GioOptions options;
   } hid;
 

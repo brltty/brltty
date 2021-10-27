@@ -679,7 +679,6 @@ readHidFeature (
   BrailleDisplay *brl, HidReportIdentifier identifier,
   unsigned char *buffer, size_t size
 ) {
-  if (size > 0) *buffer = 0;
   ssize_t length = gioGetHidFeature(brl->gioEndpoint, identifier, buffer, size);
 
   if (length != -1) {
@@ -691,7 +690,7 @@ readHidFeature (
     errno = EAGAIN;
   }
 
-  logSystemError("USB HID feature read");
+  logSystemError("HID feature read");
   return -1;
 }
 
@@ -879,7 +878,7 @@ typedef struct {
   const ModelEntry *model;
 } ResourceData;
 
-static const ResourceData resourceData_serial = {
+static const ResourceData resourceData_serial_generic = {
   .protocol = &serialProtocol
 };
 
@@ -908,7 +907,7 @@ static const ResourceData resourceData_serial_one = {
   .protocol = &serialProtocol
 };
 
-static const ResourceData resourceData_HID = {
+static const ResourceData resourceData_HID_generic = {
   .protocol = &hidProtocol
 };
 
@@ -961,7 +960,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=3,
       .serial = &serialParameters,
-      .data = &resourceData_serial,
+      .data = &resourceData_serial_generic,
       .resetDevice = 1
     },
 
@@ -1014,7 +1013,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X1C71, .product=0XC006,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1,
-      .data = &resourceData_HID
+      .data = &resourceData_HID_generic
     },
 
     { /* BrailleNote Touch (HID protocol) */
@@ -1133,11 +1132,37 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
     },
   END_USB_CHANNEL_DEFINITIONS
 
+  BEGIN_HID_MODEL_TABLE
+    { .name = "APH Chameleon 20",
+      .data = &resourceData_HID_C20,
+    },
+
+    { .name = "APH Mantis Q40",
+      .data = &resourceData_HID_M40,
+    },
+
+    { .name = "NLS eReader Humanware",
+      .data = &resourceData_HID_NLS,
+    },
+
+    { .name = "Humanware BrailleOne",
+      .data = &resourceData_HID_one,
+    },
+
+    { .name = "Brailliant BI 40X",
+      .data = &resourceData_HID_BI40X,
+    },
+
+    { .name = "Brailliant BI 20X",
+      .data = &resourceData_HID_BI20X,
+    },
+  END_HID_MODEL_TABLE
+
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
-  descriptor.serial.options.applicationData = &resourceData_serial;
+  descriptor.serial.options.applicationData = &resourceData_serial_generic;
   descriptor.serial.options.readyDelay = OPEN_READY_DELAY;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
@@ -1145,8 +1170,10 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
   descriptor.bluetooth.channelNumber = 1;
   descriptor.bluetooth.discoverChannel = 1;
-  descriptor.bluetooth.options.applicationData = &resourceData_serial;
+  descriptor.bluetooth.options.applicationData = &resourceData_serial_generic;
   descriptor.bluetooth.options.readyDelay = OPEN_READY_DELAY;
+
+  descriptor.hid.modelTable = hidModelTable;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     const ResourceData *resourceData = gioGetApplicationData(brl->gioEndpoint);
