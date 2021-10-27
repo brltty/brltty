@@ -280,6 +280,7 @@ getModelByIdentifier (HW_ModelIdentifier identifier) {
     }
   }
 
+  logMessage(LOG_WARNING, "unknown model identifier: %u", identifier);
   return NULL;
 }
 
@@ -341,19 +342,30 @@ struct BrailleDataStruct {
 
 static const ModelEntry *
 getModelByCellCount (BrailleDisplay *brl) {
-  switch (brl->textColumns) {
+  unsigned int cellCount = brl->textColumns;
+
+  switch (cellCount) {
     case 14: return &modelEntry_BI14;
     case 32: return &modelEntry_BI32;
     case 40: return &modelEntry_BI40;
     case 80: return &modelEntry_B80;
-    default: return NULL;
+
+    default:
+      logMessage(LOG_WARNING, "unknown cell count: %u", cellCount);
+      return NULL;
   }
 }
 
-static void
+static int
 setModel (BrailleDisplay *brl) {
-  if (!brl->data->model) brl->data->model = getModelByCellCount(brl);
+  if (!brl->data->model) {
+    if (!(brl->data->model = getModelByCellCount(brl))) {
+      return 0;
+    }
+  }
+
   logMessage(LOG_DEBUG, "Model Name: %s", brl->data->model->modelName);
+  return 1;
 }
 
 static int
@@ -787,7 +799,7 @@ probeHidDisplay (BrailleDisplay *brl) {
   );
 
   brl->textColumns = capabilities.cellCount;
-  setModel(brl);
+  if (!setModel(brl)) return 0;
 
   {
     unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
