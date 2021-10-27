@@ -143,7 +143,7 @@ static const LogCategoryEntry logCategoryTable[LOG_CATEGORY_COUNT] = {
     .prefix = "Bluetooth"
   },
 
-  [LOG_CATEGORY_INDEX(HUMAN_INTERFACE)] = {
+  [LOG_CATEGORY_INDEX(HID_IO)] = {
     .name = "hid",
     .title = strtext("Human Interface I/O"),
     .prefix = "HID"

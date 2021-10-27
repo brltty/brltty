@@ -212,7 +212,7 @@ hidReportSize (
     }
 
     STR_END;
-    logMessage(LOG_CATEGORY(HUMAN_INTERFACE), "%s", log);
+    logMessage(LOG_CATEGORY(HID_IO), "%s", log);
   }
 
   return reportFound;

@@ -477,7 +477,7 @@ hidGetReportSize (
 
 static void
 hidLogDataTransfer (const char *action, const unsigned char *data, size_t size, HidReportIdentifier identifier) {
-  logBytes(LOG_CATEGORY(HUMAN_INTERFACE),
+  logBytes(LOG_CATEGORY(HID_IO),
     "%s: %02X", data, size, action, identifier
   );
 }
@@ -560,7 +560,7 @@ hidWriteData (HidDevice *device, const unsigned char *data, size_t size) {
     return 0;
   }
 
-  logBytes(LOG_CATEGORY(HUMAN_INTERFACE),
+  logBytes(LOG_CATEGORY(HID_IO),
     "output", data, size
   );
 
@@ -609,7 +609,7 @@ hidReadData (
   ssize_t result = method(device->handle, buffer, size, initialTimeout, subsequentTimeout);
 
   if (result != -1) {
-    logBytes(LOG_CATEGORY(HUMAN_INTERFACE),
+    logBytes(LOG_CATEGORY(HID_IO),
       "input", buffer, result
     );
   }

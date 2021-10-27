@@ -223,7 +223,7 @@ getHidModelEntry (HidDevice *device, const HidModelEntry *model) {
           if (strncasecmp(name, model->name, length) != 0) continue;
         }
 
-        logMessage(LOG_CATEGORY(HUMAN_INTERFACE), "model found: %s", model->name);
+        logMessage(LOG_CATEGORY(HID_IO), "model found: %s", model->name);
         return model;
       }
     }

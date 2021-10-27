@@ -219,7 +219,7 @@ STR_END_FORMATTER
 
 static int
 hidListItem (const char *line, void *data) {
-  return logMessage((LOG_CATEGORY(HUMAN_INTERFACE) | LOG_DEBUG), "%s", line);
+  return logMessage((LOG_CATEGORY(HID_IO) | LOG_DEBUG), "%s", line);
 }
 
 int
