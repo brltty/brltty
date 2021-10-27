@@ -89,7 +89,6 @@ static int
 gioStartEndpoint (GioEndpoint *endpoint) {
   {
     int delay = endpoint->options.readyDelay;
-
     if (delay) asyncWait(delay);
   }
 
@@ -149,6 +148,8 @@ gioConnectResource (
     GioEndpoint *endpoint;
 
     if ((endpoint = malloc(sizeof(*endpoint)))) {
+      memset(endpoint, 0, sizeof(*endpoint));
+
       endpoint->resourceType = properties->public->type.identifier;
       endpoint->bytesPerSecond = 0;
 
@@ -156,7 +157,7 @@ gioConnectResource (
       endpoint->input.from = 0;
       endpoint->input.to = 0;
 
-      if (properties->private->getOptions) {
+      if (descriptor && properties->private->getOptions) {
         endpoint->options = *properties->private->getOptions(descriptor);
       } else {
         gioInitializeOptions(&endpoint->options);
@@ -541,6 +542,7 @@ gioGetHidReport (
     return -1;
   }
 
+  buffer[0] = identifier;
   return method(endpoint->handle, identifier,
                 buffer, size, endpoint->options.requestTimeout);
 }
@@ -593,6 +595,7 @@ gioGetHidFeature (
     return -1;
   }
 
+  buffer[0] = identifier;
   return method(endpoint->handle, identifier,
                 buffer, size, endpoint->options.requestTimeout);
 }
