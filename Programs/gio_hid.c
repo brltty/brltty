@@ -27,6 +27,7 @@
 
 struct GioHandleStruct {
   HidDevice *device;
+  const HidModelEntry *model;
 };
 
 static int
@@ -180,7 +181,7 @@ static const GioPublicProperties gioPublicProperties_hid = {
 
 static int
 isHidSupported (const GioDescriptor *descriptor) {
-  return 1;
+  return !!descriptor->hid.modelTable;
 }
 
 static const GioOptions *
@@ -191,6 +192,44 @@ getHidOptions (const GioDescriptor *descriptor) {
 static const GioHandleMethods *
 getHidMethods (void) {
   return &gioHidMethods;
+}
+
+static const HidModelEntry *
+getHidModelEntry (HidDevice *device, const HidModelEntry *model) {
+  if (model) {
+    HidDeviceIdentifier vendor;
+    HidDeviceIdentifier product;
+
+    if (hidGetDeviceIdentifiers(device, &vendor, &product)) {
+      for (; (model->vendor || model->product || model->name); model+=1) {
+        if (model->vendor) {
+          if (model->vendor != vendor) {
+            continue;
+          }
+        }
+
+        if (model->product) {
+          if (model->product != product) {
+            continue;
+          }
+        }
+
+        if (model->name) {
+          const char *name = hidGetDeviceName(device);
+          if (!name) continue;
+
+          size_t length = strlen(model->name);
+          if (length > strlen(name)) continue;
+          if (strncasecmp(name, model->name, length) != 0) continue;
+        }
+
+        logMessage(LOG_CATEGORY(HUMAN_INTERFACE), "model found: %s", model->name);
+        return model;
+      }
+    }
+  }
+
+  return NULL;
 }
 
 static GioHandle *
@@ -205,7 +244,12 @@ connectHidResource (
 
     if (hidOpenDeviceWithParameters(&handle->device, identifier)) {
       if (handle->device) {
-        return handle;
+        handle->model = getHidModelEntry(
+          handle->device,
+          descriptor->hid.modelTable
+        );
+
+        if (handle->model) return handle;
       }
     }
 
@@ -217,13 +261,20 @@ connectHidResource (
   return NULL;
 }
 
+static int
+prepareHidEndpoint (GioEndpoint *endpoint) {
+  gioSetApplicationData(endpoint, endpoint->handle->model->data);
+  return 1;
+}
+
 static const GioPrivateProperties gioPrivateProperties_hid = {
   .isSupported = isHidSupported,
 
   .getOptions = getHidOptions,
   .getHandleMethods = getHidMethods,
 
-  .connectResource = connectHidResource
+  .connectResource = connectHidResource,
+  .prepareEndpoint = prepareHidEndpoint,
 };
 
 const GioProperties gioProperties_hid = {

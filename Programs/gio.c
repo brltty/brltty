@@ -85,6 +85,11 @@ gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters)
   endpoint->bytesPerSecond = parameters->baud / serialGetCharacterSize(parameters);
 }
 
+void
+gioSetApplicationData (GioEndpoint *endpoint, const void *data) {
+  endpoint->options.applicationData = data;
+}
+
 static int
 gioStartEndpoint (GioEndpoint *endpoint) {
   {

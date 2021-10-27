@@ -157,6 +157,7 @@ extern const GioProperties gioProperties_hid;
 extern const GioProperties gioProperties_null;
 
 extern void gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters);
+extern void gioSetApplicationData (GioEndpoint *endpoint, const void *data);
 
 #ifdef __cplusplus
 }
