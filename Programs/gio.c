@@ -154,6 +154,7 @@ gioConnectResource (
 
     if ((endpoint = malloc(sizeof(*endpoint)))) {
       memset(endpoint, 0, sizeof(*endpoint));
+      endpoint->referenceCount = 1;
 
       endpoint->resourceType = properties->public->type.identifier;
       endpoint->bytesPerSecond = 0;
@@ -176,6 +177,20 @@ gioConnectResource (
 
       if (properties->private->connectResource) {
         if ((endpoint->handle = properties->private->connectResource(identifier, descriptor))) {
+          {
+            GioGetChainedEndpointMethod *getChainedEndpoint = endpoint->handleMethods->getChainedEndpoint;
+
+            if (getChainedEndpoint) {
+              GioEndpoint *chainedEndpoint = getChainedEndpoint(endpoint->handle);
+
+              if (chainedEndpoint) {
+                chainedEndpoint->referenceCount += 1;
+                gioDisconnectResource(endpoint);
+                return chainedEndpoint;
+              }
+            }
+          }
+
           if (!properties->private->prepareEndpoint || properties->private->prepareEndpoint(endpoint)) {
             if (gioStartEndpoint(endpoint)) {
               return endpoint;
@@ -210,6 +225,8 @@ gioGetApplicationData (GioEndpoint *endpoint) {
 
 int
 gioDisconnectResource (GioEndpoint *endpoint) {
+  if (--endpoint->referenceCount > 0) return 1;
+
   int ok = 0;
   GioDisconnectResourceMethod *method = endpoint->handleMethods->disconnectResource;
 

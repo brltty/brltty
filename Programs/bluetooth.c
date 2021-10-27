@@ -199,63 +199,11 @@ bthRecallConnectError (uint64_t address, int *value) {
   return 1;
 }
 
-static BluetoothConnection *
-bthNewConnection (uint64_t address, uint8_t channel, int discover, int timeout) {
-  BluetoothConnection *connection;
-
-  if ((connection = malloc(sizeof(*connection)))) {
-    memset(connection, 0, sizeof(*connection));
-    connection->address = address;
-    connection->channel = channel;
-
-    if ((connection->extension = bthNewConnectionExtension(connection->address))) {
-      int alreadyTried = 0;
-
-      if (discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension, timeout);
-      bthLogChannel(connection->channel);
-
-      {
-        int value;
-
-        if (bthRecallConnectError(connection->address, &value)) {
-          errno = value;
-          alreadyTried = 1;
-        }
-      }
-
-      if (!alreadyTried) {
-        TimePeriod period;
-        startTimePeriod(&period, BLUETOOTH_CHANNEL_BUSY_RETRY_TIMEOUT);
-
-        while (1) {
-          if (bthOpenChannel(connection->extension, connection->channel, timeout)) {
-            return connection;
-          }
-
-          if (afterTimePeriod(&period, NULL)) break;
-          if (errno != EBUSY) break;
-          asyncWait(BLUETOOTH_CHANNEL_BUSY_RETRY_INTERVAL);
-        }
-
-        bthRememberConnectError(connection->address, errno);
-      }
-
-      bthReleaseConnectionExtension(connection->extension);
-    }
-
-    free(connection);
-  } else {
-    logMallocError();
-  }
-
-  return NULL;
-}
-
 void
 bthInitializeConnectionRequest (BluetoothConnectionRequest *request) {
   memset(request, 0, sizeof(*request));
   request->driver = NULL;
-  request->identifier = NULL;
+  request->address = 0;
   request->timeout = BLUETOOTH_CHANNEL_CONNECT_TIMEOUT;
   request->channel = 0;
   request->discover = 0;
@@ -534,31 +482,79 @@ bthProcessDiscoverParameter (BluetoothConnectionRequest *request, const char *pa
   return 0;
 }
 
+int
+bthApplyParameters (BluetoothConnectionRequest *request, const char *identifier) {
+  char **parameters = bthGetConnectionParameters(identifier);
+  if (!parameters) return 0;
+
+  int ok = 1;
+  if (!bthProcessChannelParameter(request, parameters[BTH_CONN_CHANNEL])) ok = 0;
+  if (!bthProcessDiscoverParameter(request, parameters[BTH_CONN_DISCOVER])) ok = 0;
+  if (!bthProcessTimeoutParameter(request, parameters[BTH_CONN_TIMEOUT])) ok = 0;
+  if (!bthGetDeviceAddress(&request->address, parameters, request->driver)) ok = 0;
+
+  deallocateStrings(parameters);
+  return ok;
+}
+
 BluetoothConnection *
 bthOpenConnection (const BluetoothConnectionRequest *request) {
-  BluetoothConnection *connection = NULL;
-  BluetoothConnectionRequest req = *request;
-  char **parameters = bthGetConnectionParameters(req.identifier);
+  BluetoothConnection *connection;
 
-  if (parameters) {
-    {
-      int ok = 1;
+  if ((connection = malloc(sizeof(*connection)))) {
+    memset(connection, 0, sizeof(*connection));
+    connection->address = request->address;
+    connection->channel = request->channel;
 
-      if (!req.channel) req.discover = 1;
-      if (!bthProcessChannelParameter(&req, parameters[BTH_CONN_CHANNEL])) ok = 0;
-      if (!bthProcessDiscoverParameter(&req, parameters[BTH_CONN_DISCOVER])) ok = 0;
-      if (!bthProcessTimeoutParameter(&req, parameters[BTH_CONN_TIMEOUT])) ok = 0;
+    if ((connection->extension = bthNewConnectionExtension(connection->address))) {
+      int alreadyTried = 0;
 
-      uint64_t address;
-      if (!bthGetDeviceAddress(&address, parameters, req.driver)) ok = 0;
+      {
+        int value;
 
-      if (ok) connection = bthNewConnection(address, req.channel, req.discover, req.timeout);
+        if (bthRecallConnectError(connection->address, &value)) {
+          errno = value;
+          alreadyTried = 1;
+        }
+      }
+
+      if (!alreadyTried) {
+        if (request->discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension, request->timeout);
+        bthLogChannel(connection->channel);
+
+        if (connection->channel) {
+          TimePeriod period;
+          startTimePeriod(&period, BLUETOOTH_CHANNEL_BUSY_RETRY_TIMEOUT);
+
+          while (1) {
+            if (bthOpenChannel(connection->extension, connection->channel, request->timeout)) {
+              return connection;
+            }
+
+            if (afterTimePeriod(&period, NULL)) break;
+            if (errno != EBUSY) break;
+            asyncWait(BLUETOOTH_CHANNEL_BUSY_RETRY_INTERVAL);
+          }
+        } else {
+          logMessage(LOG_CATEGORY(BLUETOOTH_IO),
+            "serial port channel neither specified nor discovered"
+          );
+
+          errno = EINVAL;
+        }
+
+        bthRememberConnectError(connection->address, errno);
+      }
+
+      bthReleaseConnectionExtension(connection->extension);
     }
 
-    deallocateStrings(parameters);
+    free(connection);
+  } else {
+    logMallocError();
   }
 
-  return connection;
+  return NULL;
 }
 
 void

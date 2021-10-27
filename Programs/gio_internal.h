@@ -27,6 +27,8 @@ typedef struct GioHandleStruct GioHandle;
 
 typedef int GioDisconnectResourceMethod (GioHandle *handle);
 
+typedef GioEndpoint *GioGetChainedEndpointMethod (GioHandle *handle);
+
 typedef const char *MakeResourceIdentifierMethod (GioHandle *handle, char *buffer, size_t size);
 
 typedef char *GioGetResourceNameMethod (GioHandle *handle, int timeout);
@@ -85,6 +87,7 @@ typedef ssize_t GioSetHidFeatureMethod (
 
 typedef struct {
   GioDisconnectResourceMethod *disconnectResource;
+  GioGetChainedEndpointMethod *getChainedEndpoint;
 
   MakeResourceIdentifierMethod *makeResourceIdentifier;
   GioGetResourceNameMethod *getResourceName;
@@ -112,6 +115,7 @@ struct GioEndpointStruct {
   GioOptions options;
   GioTypeIdentifier resourceType;
   unsigned int bytesPerSecond;
+  unsigned char referenceCount;
 
   struct {
     int error;

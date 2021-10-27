@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_bluetooth.h"
@@ -28,13 +29,20 @@
 
 struct GioHandleStruct {
   BluetoothConnection *connection;
+  GioEndpoint *hidEndpoint;
 };
 
 static int
 disconnectBluetoothResource (GioHandle *handle) {
-  bthCloseConnection(handle->connection);
+  if (handle->connection) bthCloseConnection(handle->connection);
+  if (handle->hidEndpoint) gioDisconnectResource(handle->hidEndpoint);
   free(handle);
   return 1;
+}
+
+static GioEndpoint *
+getBluetoothChainedEndpoint (GioHandle *handle) {
+  return handle->hidEndpoint;
 }
 
 static const char *
@@ -78,6 +86,7 @@ monitorBluetoothInput (GioHandle *handle, AsyncMonitorCallback *callback, void *
 
 static const GioHandleMethods gioBluetoothMethods = {
   .disconnectResource = disconnectBluetoothResource,
+  .getChainedEndpoint = getBluetoothChainedEndpoint,
 
   .makeResourceIdentifier = makeBluetoothResourceIdentifier,
   .getResourceName = getBluetoothResourceName,
@@ -118,6 +127,17 @@ getBluetoothMethods (void) {
   return &gioBluetoothMethods;
 }
 
+static GioEndpoint *
+getHidEndpoint (uint64_t address, const GioDescriptor *descriptor) {
+  char identifier[0X40];
+  STR_BEGIN(identifier, sizeof(identifier));
+  STR_PRINTF("hid:address=");
+  STR_FORMAT(bthFormatAddress, address);
+  STR_END;
+
+  return gioConnectResource(identifier, descriptor);
+}
+
 static GioHandle *
 connectBluetoothResource (
   const char *identifier,
@@ -126,18 +146,28 @@ connectBluetoothResource (
   GioHandle *handle = malloc(sizeof(*handle));
 
   if (handle) {
-    BluetoothConnectionRequest request;
+    memset(handle, 0, sizeof(*handle));
 
+    BluetoothConnectionRequest request;
     bthInitializeConnectionRequest(&request);
+
     request.driver = braille->definition.code;
-    request.identifier = identifier;
     request.channel = descriptor->bluetooth.channelNumber;
     request.discover = descriptor->bluetooth.discoverChannel;
 
-    memset(handle, 0, sizeof(*handle));
+    if (bthApplyParameters(&request, identifier)) {
+      {
+        GioEndpoint *hidEndpoint = getHidEndpoint(request.address, descriptor);
 
-    if ((handle->connection = bthOpenConnection(&request))) {
-      return handle;
+        if (hidEndpoint) {
+          handle->hidEndpoint = hidEndpoint;
+          return handle;
+        }
+      }
+
+      if ((handle->connection = bthOpenConnection(&request))) {
+        return handle;
+      }
     }
 
     free(handle);

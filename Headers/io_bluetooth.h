@@ -36,16 +36,17 @@ extern const char *const *bthGetDriverCodes (const char *address, int timeout);
 
 typedef struct {
   const char *driver;
-  const char *identifier;
+  uint64_t address;
   int timeout;
   uint8_t channel;
-  unsigned discover:1;
+  unsigned char discover:1;
 } BluetoothConnectionRequest;
 
 extern void bthInitializeConnectionRequest (BluetoothConnectionRequest *request);
+extern int bthApplyParameters (BluetoothConnectionRequest *request, const char *identifier);
+
 extern int bthParseAddress (uint64_t *address, const char *string);
 extern int bthParseChannelNumber (uint8_t *channel, const char *string);
-
 extern STR_DECLARE_FORMATTER (bthFormatAddress, uint64_t address);
 
 extern BluetoothConnection *bthOpenConnection (const BluetoothConnectionRequest *request);
