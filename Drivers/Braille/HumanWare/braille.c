@@ -783,22 +783,30 @@ getPressedKeysReportSize (BrailleDisplay *brl) {
 
 static int
 probeHidDisplay (BrailleDisplay *brl) {
-  HW_CapabilitiesReport capabilities;
-  unsigned char *const buffer = (unsigned char *)&capabilities;
-  const size_t size = sizeof(capabilities);
+  brl->textColumns = 0;
 
-  ssize_t length = readHidFeature(brl, HW_REP_FTR_Capabilities, buffer, size);
-  if (length == -1) return 0;
-  memset(&buffer[length], 0, (size - length));
+  if (!brl->textColumns) {
+    size_t size = gioGetHidOutputSize(brl->gioEndpoint, HW_REP_OUT_WriteCells);
+    if (size > 4) brl->textColumns = size - 4;
+  }
 
-  setFirmwareVersion(brl,
-    getDecimalValue(&capabilities.version.major, 1),
-    getDecimalValue(&capabilities.version.minor, 1),
-    getDecimalValue(&capabilities.version.build[0], 2)
-  );
+  if (!brl->textColumns) {
+    HW_CapabilitiesReport capabilities;
+    unsigned char *const buffer = (unsigned char *)&capabilities;
+    const size_t size = sizeof(capabilities);
 
-  brl->textColumns = capabilities.cellCount;
-  if (!setModel(brl)) return 0;
+    ssize_t length = readHidFeature(brl, HW_REP_FTR_Capabilities, buffer, size);
+    if (length == -1) return 0;
+    memset(&buffer[length], 0, (size - length));
+
+    setFirmwareVersion(brl,
+      getDecimalValue(&capabilities.version.major, 1),
+      getDecimalValue(&capabilities.version.minor, 1),
+      getDecimalValue(&capabilities.version.build[0], 2)
+    );
+
+    brl->textColumns = capabilities.cellCount;
+  }
 
   {
     unsigned char *size = &brl->data->hid.pressedKeys.reportSize;
@@ -809,6 +817,7 @@ probeHidDisplay (BrailleDisplay *brl) {
     );
   }
 
+  if (!setModel(brl)) return 0;
   return 1;
 }
 
