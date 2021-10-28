@@ -155,7 +155,7 @@ hidReportSize (
 
         default: {
           if (!(itemTypesEncountered & HID_ITEM_BIT(item.type))) {
-            logMessage(LOG_WARNING,
+            logMessage(LOG_CATEGORY(HID_IO),
               "unhandled item type at offset %"PRIsize ": 0X%02X",
               offset, item.type
             );
