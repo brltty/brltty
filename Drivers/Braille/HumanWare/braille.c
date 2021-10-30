@@ -280,7 +280,10 @@ getModelByIdentifier (HW_ModelIdentifier identifier) {
     }
   }
 
-  logMessage(LOG_WARNING, "unknown model identifier: %u", identifier);
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
+    "unknown model identifier: %u", identifier
+  );
+
   return NULL;
 }
 
