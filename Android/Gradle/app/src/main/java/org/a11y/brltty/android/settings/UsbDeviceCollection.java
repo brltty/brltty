@@ -96,11 +96,18 @@ public final class UsbDeviceCollection extends DeviceCollection {
 
         {
           boolean first = true;
+          String serialNumber;
+
+          try {
+            serialNumber = getSerialNumber(device);
+          } catch (SecurityException exception) {
+            serialNumber = "Access Not Granted";
+          }
 
           String[] components = new String[] {
             getManufacturerName(device),
             getProductDescription(device),
-            getSerialNumber(device)
+            serialNumber
           };
 
           for (String component : components) {
