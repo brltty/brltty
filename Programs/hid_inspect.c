@@ -288,7 +288,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
         int hexPrecision = item.valueSize * 2;
 
         STR_PRINTF(
-          " = %d (0X%.*X)",
+          " = %" PRId32 " (0X%.*" PRIX32 ")",
           item.value.s, hexPrecision, hexValue
         );
       }
@@ -345,7 +345,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
               if (upg) {
                 STR_PRINTF("%s", upg->header.name);
               } else {
-                STR_PRINTF("0X%02X", page);
+                STR_PRINTF("0X%02"PRIX32, page);
               }
 
               STR_PRINTF("]");
