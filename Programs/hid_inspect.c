@@ -108,7 +108,7 @@ hidGetReports (const HidItemsDescriptor *items) {
     HidItem item;
     if (!hidNextItem(&item, &nextByte, &bytesLeft)) break;
 
-    switch (item.type) {
+    switch (item.tag) {
       case HID_ITM_ReportID: {
         HidUnsignedValue identifier = item.value.u;
 
@@ -267,19 +267,19 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
     if (ok) {
       itemCount += 1;
 
-      switch (item.type) {
+      switch (item.tag) {
         case HID_ITM_UsagePage:
           usagePage = item.value.u;
           break;
       }
 
       {
-        const HidItemTypeEntry *itt = hidItemTypeEntry(item.type);
+        const HidItemTagEntry *tag = hidItemTagEntry(item.tag);
 
-        if (itt) {
-          STR_PRINTF(" %s", itt->header.name);
+        if (tag) {
+          STR_PRINTF(" %s", tag->header.name);
         } else {
-          STR_PRINTF(" unknown item type: 0X%02X", item.type);
+          STR_PRINTF(" unknown item tag: 0X%02X", item.tag);
         }
       }
 
@@ -299,7 +299,7 @@ hidListItems (const HidItemsDescriptor *items, HidItemLister *listItem, void *da
         char name[0X100];
         STR_BEGIN(name, sizeof(name));
 
-        switch (item.type) {
+        switch (item.tag) {
           case HID_ITM_UsagePage: {
             const HidUsagePageEntry *upg = hidUsagePageEntry(value);
             if (upg) STR_PRINTF("%s", upg->header.name);

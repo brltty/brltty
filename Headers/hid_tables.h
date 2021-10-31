@@ -65,8 +65,8 @@ extern const Hid##type##Entry *hid##type##Entry (HidUnsignedValue value);
 
 typedef struct {
   HID_TABLE_ENTRY_HEADER;
-} HidItemTypeEntry;
-HID_TABLE_METHODS(ItemType)
+} HidItemTagEntry;
+HID_TABLE_METHODS(ItemTag)
 
 typedef struct {
   HID_TABLE_ENTRY_HEADER;

@@ -23,11 +23,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef uint16_t HidDeviceIdentifier;
+typedef uint8_t HidReportIdentifier;
+
 typedef uint32_t HidUnsignedValue;
 typedef int32_t HidSignedValue;
-
-typedef uint8_t HidReportIdentifier;
-typedef uint16_t HidDeviceIdentifier;
 
 typedef struct {
   size_t count;

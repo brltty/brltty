@@ -29,7 +29,7 @@
 unsigned char
 hidItemValueSize (unsigned char item) {
   static const unsigned char sizes[4] = {0, 1, 2, 4};
-  return sizes[HID_ITEM_LENGTH(item)];
+  return sizes[HID_ITEM_SIZE(item)];
 }
 
 int
@@ -43,13 +43,13 @@ hidNextItem (
   const unsigned char *byte = *bytes;
   const unsigned char *endBytes = byte + *count;
 
-  unsigned char type = HID_ITEM_TYPE(*byte);
+  unsigned char itemTag = HID_ITEM_TAG(*byte);
   unsigned char valueSize = hidItemValueSize(*byte);
 
   const unsigned char *endValue = ++byte + valueSize;
   if (endValue > endBytes) return 0;
 
-  item->type = type;
+  item->tag = itemTag;
   item->valueSize = valueSize;
   item->value.u = 0;
 
@@ -61,7 +61,7 @@ hidNextItem (
       shift += 8;
     }
 
-    if (hidHasSignedValue(item->type)) {
+    if (hidHasSignedValue(item->tag)) {
       shift = 0X20 - shift;
       item->value.u <<= shift;
       item->value.s >>= shift;
@@ -89,7 +89,7 @@ hidReportSize (
   size_t outputSize = 0;
   size_t featureSize = 0;
 
-  uint64_t itemTypesEncountered = 0;
+  uint64_t itemTagsEncountered = 0;
   HidUnsignedValue reportIdentifier = 0;
   HidUnsignedValue reportSize = 0;
   HidUnsignedValue reportCount = 0;
@@ -103,7 +103,7 @@ hidReportSize (
       break;
     }
 
-    if (item.type == HID_ITM_ReportID) {
+    if (item.tag == HID_ITM_ReportID) {
       if (noIdentifier) {
         reportFound = 0;
         break;
@@ -112,7 +112,7 @@ hidReportSize (
       reportIdentifier = item.value.u;
       if (reportIdentifier == identifier) reportFound = 1;
     } else {
-      switch (item.type) {
+      switch (item.tag) {
       {
         size_t *size;
 
@@ -154,10 +154,10 @@ hidReportSize (
           break;
 
         default: {
-          if (!(itemTypesEncountered & HID_ITEM_BIT(item.type))) {
+          if (!(itemTagsEncountered & HID_ITEM_TAG_BIT(item.tag))) {
             logMessage(LOG_CATEGORY(HID_IO),
-              "unhandled item type at offset %"PRIsize ": 0X%02X",
-              offset, item.type
+              "unhandled item tag at offset %"PRIsize ": 0X%02X",
+              offset, item.tag
             );
           }
 
@@ -166,7 +166,7 @@ hidReportSize (
       }
     }
 
-    itemTypesEncountered |= HID_ITEM_BIT(item.type);
+    itemTagsEncountered |= HID_ITEM_TAG_BIT(item.tag);
   }
 
   if (reportFound) {

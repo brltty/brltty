@@ -32,7 +32,7 @@ typedef union {
 
 typedef struct {
   HidItemValue value;
-  uint8_t type;
+  uint8_t tag;
   uint8_t valueSize;
 } HidItem;
 

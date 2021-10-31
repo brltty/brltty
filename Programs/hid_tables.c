@@ -21,36 +21,36 @@
 #include "hid_defs.h"
 #include "hid_tables.h"
 
-#define HID_ITEM_TYPE_ENTRY(name) HID_TABLE_ENTRY(HID_ITM, name)
-HID_BEGIN_TABLE(ItemType)
-  HID_ITEM_TYPE_ENTRY(UsagePage),
-  HID_ITEM_TYPE_ENTRY(Usage),
-  HID_ITEM_TYPE_ENTRY(LogicalMinimum),
-  HID_ITEM_TYPE_ENTRY(UsageMinimum),
-  HID_ITEM_TYPE_ENTRY(LogicalMaximum),
-  HID_ITEM_TYPE_ENTRY(UsageMaximum),
-  HID_ITEM_TYPE_ENTRY(PhysicalMinimum),
-  HID_ITEM_TYPE_ENTRY(DesignatorIndex),
-  HID_ITEM_TYPE_ENTRY(PhysicalMaximum),
-  HID_ITEM_TYPE_ENTRY(DesignatorMinimum),
-  HID_ITEM_TYPE_ENTRY(UnitExponent),
-  HID_ITEM_TYPE_ENTRY(DesignatorMaximum),
-  HID_ITEM_TYPE_ENTRY(Unit),
-  HID_ITEM_TYPE_ENTRY(ReportSize),
-  HID_ITEM_TYPE_ENTRY(StringIndex),
-  HID_ITEM_TYPE_ENTRY(Input),
-  HID_ITEM_TYPE_ENTRY(ReportID),
-  HID_ITEM_TYPE_ENTRY(StringMinimum),
-  HID_ITEM_TYPE_ENTRY(Output),
-  HID_ITEM_TYPE_ENTRY(ReportCount),
-  HID_ITEM_TYPE_ENTRY(StringMaximum),
-  HID_ITEM_TYPE_ENTRY(Collection),
-  HID_ITEM_TYPE_ENTRY(Push),
-  HID_ITEM_TYPE_ENTRY(Delimiter),
-  HID_ITEM_TYPE_ENTRY(Feature),
-  HID_ITEM_TYPE_ENTRY(Pop),
-  HID_ITEM_TYPE_ENTRY(EndCollection),
-HID_END_TABLE(ItemType)
+#define HID_ITEM_TAG_ENTRY(name) HID_TABLE_ENTRY(HID_ITM, name)
+HID_BEGIN_TABLE(ItemTag)
+  HID_ITEM_TAG_ENTRY(UsagePage),
+  HID_ITEM_TAG_ENTRY(Usage),
+  HID_ITEM_TAG_ENTRY(LogicalMinimum),
+  HID_ITEM_TAG_ENTRY(UsageMinimum),
+  HID_ITEM_TAG_ENTRY(LogicalMaximum),
+  HID_ITEM_TAG_ENTRY(UsageMaximum),
+  HID_ITEM_TAG_ENTRY(PhysicalMinimum),
+  HID_ITEM_TAG_ENTRY(DesignatorIndex),
+  HID_ITEM_TAG_ENTRY(PhysicalMaximum),
+  HID_ITEM_TAG_ENTRY(DesignatorMinimum),
+  HID_ITEM_TAG_ENTRY(UnitExponent),
+  HID_ITEM_TAG_ENTRY(DesignatorMaximum),
+  HID_ITEM_TAG_ENTRY(Unit),
+  HID_ITEM_TAG_ENTRY(ReportSize),
+  HID_ITEM_TAG_ENTRY(StringIndex),
+  HID_ITEM_TAG_ENTRY(Input),
+  HID_ITEM_TAG_ENTRY(ReportID),
+  HID_ITEM_TAG_ENTRY(StringMinimum),
+  HID_ITEM_TAG_ENTRY(Output),
+  HID_ITEM_TAG_ENTRY(ReportCount),
+  HID_ITEM_TAG_ENTRY(StringMaximum),
+  HID_ITEM_TAG_ENTRY(Collection),
+  HID_ITEM_TAG_ENTRY(Push),
+  HID_ITEM_TAG_ENTRY(Delimiter),
+  HID_ITEM_TAG_ENTRY(Feature),
+  HID_ITEM_TAG_ENTRY(Pop),
+  HID_ITEM_TAG_ENTRY(EndCollection),
+HID_END_TABLE(ItemTag)
 
 #define HID_COLLECTION_TYPE_ENTRY(name) HID_TABLE_ENTRY(HID_COL, name)
 HID_BEGIN_TABLE(CollectionType)
