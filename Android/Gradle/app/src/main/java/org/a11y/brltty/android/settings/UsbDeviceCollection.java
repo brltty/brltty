@@ -101,7 +101,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
           try {
             serialNumber = getSerialNumber(device);
           } catch (SecurityException exception) {
-            serialNumber = "Access Not Granted";
+            serialNumber = null;
           }
 
           String[] components = new String[] {
@@ -148,6 +148,9 @@ public final class UsbDeviceCollection extends DeviceCollection {
     UsbDevice device = map.get(value);
     parameters.put("vendorIdentifier", Integer.toString(device.getVendorId()));
     parameters.put("productIdentifier", Integer.toString(device.getProductId()));
-    parameters.put("serialNumber", getSerialNumber(device));
+
+    if (UsbHelper.obtainPermission(device)) {
+      parameters.put("serialNumber", getSerialNumber(device));
+    }
   }
 }

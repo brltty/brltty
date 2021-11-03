@@ -120,7 +120,7 @@ public class UsbHelper {
     return null;
   }
 
-  private static boolean obtainPermission (UsbDevice device) {
+  public static boolean obtainPermission (UsbDevice device) {
     if (usbManager.hasPermission(device)) return true;
     Log.d(LOG_TAG, "requesting permission for USB device: " + device);
 

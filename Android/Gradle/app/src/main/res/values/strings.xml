@@ -3,6 +3,8 @@
 <resources>
   <string name="app_description">BRLTTY supports braille devices.</string>
 
+  <string name="usbMonitor_label">USB Device Attached Monitor</string>
+
   <string name="about_label_activity">About Application</string>
   <string name="about_label_copyright">Copyright</string>
   <string name="about_label_buildTime">Build Time</string>

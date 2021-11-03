@@ -21,15 +21,15 @@ import org.a11y.brltty.android.*;
 import org.a11y.brltty.core.CoreWrapper;
 
 import java.util.Collections;
-
 import java.util.Map;
 import java.util.LinkedHashMap;
-
 import java.util.Set;
 import java.util.TreeSet;
 
 import android.util.Log;
 import android.os.Bundle;
+import android.os.AsyncTask;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceScreen;
@@ -368,44 +368,56 @@ public final class DeviceManager extends SettingsFragment {
     addDeviceButton.setOnPreferenceClickListener(
       new Preference.OnPreferenceClickListener() {
         @Override
-        public boolean onPreferenceClick (Preference preference) {
-          String name = deviceNameEditor.getSummary().toString();
-          String deviceIdentifier;
+        public boolean onPreferenceClick (final Preference preference) {
+          new AsyncTask<Object, Object, String>() {
+            String name;
 
-          try {
-            deviceIdentifier = deviceCollection.makeIdentifier(deviceIdentifierList.getValue());
-          } catch (SecurityException exception) {
-            deviceIdentifier = null;
-          }
-
-          if (deviceIdentifier == null) {
-            showProblem(R.string.ADD_DEVICE_NO_PERMISSION, name);
-          } else {
-            deviceNames.add(name);
-            updateSelectedDeviceList();
-            updateDeviceName();
-
-            {
-              SharedPreferences.Editor editor = preference.getEditor();
-
-              {
-                Map<String, String> properties = new LinkedHashMap();
-                properties.put(PREF_KEY_DEVICE_IDENTIFIER, deviceIdentifier);
-
-                properties.put(
-                  PREF_KEY_DEVICE_DRIVER,
-                  deviceDriverList.getValue()
-                );
-
-                putProperties(editor, name, properties);
-              }
-
-              editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
-              editor.apply();
+            @Override
+            protected void onPreExecute () {
+              name = deviceNameEditor.getSummary().toString();
             }
 
-            addDeviceScreen.getDialog().dismiss();
-          }
+            @Override
+            protected String doInBackground (Object... arguments) {
+              try {
+                return deviceCollection.makeIdentifier(deviceIdentifierList.getValue());
+              } catch (SecurityException exception) {
+                return null;
+              }
+            }
+
+            @Override
+            protected void onPostExecute (String identifier) {
+              if (identifier == null) {
+                showProblem(R.string.ADD_DEVICE_NO_PERMISSION, name);
+              } else {
+                deviceNames.add(name);
+                updateSelectedDeviceList();
+                updateDeviceName();
+
+                {
+                  final SharedPreferences.Editor editor = preference.getEditor();
+
+                  {
+                    Map<String, String> properties = new LinkedHashMap();
+                    properties.put(PREF_KEY_DEVICE_IDENTIFIER, identifier);
+
+                    properties.put(
+                      PREF_KEY_DEVICE_DRIVER,
+                      deviceDriverList.getValue()
+                    );
+
+                    putProperties(editor, name, properties);
+                  }
+
+                  editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
+                  editor.apply();
+                }
+
+                addDeviceScreen.getDialog().dismiss();
+              }
+            }
+          }.execute();
 
           return true;
         }

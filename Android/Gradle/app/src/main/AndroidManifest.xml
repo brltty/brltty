@@ -8,6 +8,8 @@
   android:versionName="@string/app_version"
   >
 
+  <uses-feature android:name="android.hardware.usb.host" />
+
   <!-- for creating a foreground notification -->
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
@@ -73,15 +75,6 @@
         android:name="android.accessibilityservice"
         android:resource="@xml/accessibility_service"
        />
-
-      <intent-filter>
-        <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-      </intent-filter>
-
-      <meta-data
-        android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-         android:resource="@xml/usb_devices"
-       />
     </service>
 
     <service
@@ -118,6 +111,25 @@
       android:name=".activities.AboutActivity"
       android:label="@string/about_label_activity"
       >
+    </activity>
+
+    <activity
+      android:name=".activities.UsbDeviceAttachedMonitor"
+      android:label="@string/usbMonitor_label"
+      android:exported="false"
+      android:noHistory="true"
+      android:excludeFromRecents="true"
+      android:directBootAware="true"
+      >
+
+      <intent-filter>
+        <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+      </intent-filter>
+
+      <meta-data
+        android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+        android:resource="@xml/usb_devices"
+       />
     </activity>
 
     <receiver
