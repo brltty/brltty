@@ -369,6 +369,7 @@ public final class DeviceManager extends SettingsFragment {
       new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick (Preference preference) {
+          String name = deviceNameEditor.getSummary().toString();
           String deviceIdentifier;
 
           try {
@@ -378,8 +379,8 @@ public final class DeviceManager extends SettingsFragment {
           }
 
           if (deviceIdentifier == null) {
+            showProblem(R.string.ADD_DEVICE_NO_PERMISSION, name);
           } else {
-            String name = deviceNameEditor.getSummary().toString();
             deviceNames.add(name);
             updateSelectedDeviceList();
             updateDeviceName();

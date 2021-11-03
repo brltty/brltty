@@ -28,6 +28,7 @@ import java.text.Collator;
 import java.text.CollationKey;
 
 import android.util.Log;
+import android.widget.Toast;
 import android.os.Bundle;
 
 import android.content.SharedPreferences;
@@ -49,6 +50,17 @@ public abstract class SettingsFragment extends PreferenceFragment {
     if (APITests.haveNougat) {
       getPreferenceManager().setStorageDeviceProtected();
     }
+  }
+
+  protected final void showProblem (int problem, String detail) {
+    StringBuilder message = new StringBuilder();
+    message.append(getString(problem));
+    if (detail != null) message.append(": ").append(detail);
+    Toast.makeText(getActivity(), message.toString(), Toast.LENGTH_LONG).show();
+  }
+
+  protected final void showProblem (int problem) {
+    showProblem(problem, null);
   }
 
   private static String makePropertyKey (String name, String key) {
