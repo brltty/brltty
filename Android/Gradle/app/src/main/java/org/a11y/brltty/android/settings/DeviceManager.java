@@ -369,35 +369,43 @@ public final class DeviceManager extends SettingsFragment {
       new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick (Preference preference) {
-          String name = deviceNameEditor.getSummary().toString();
-          deviceNames.add(name);
-          updateSelectedDeviceList();
-          updateDeviceName();
+          String deviceIdentifier;
 
-          {
-            SharedPreferences.Editor editor = preference.getEditor();
-
-            {
-              Map<String, String> properties = new LinkedHashMap();
-
-              properties.put(
-                PREF_KEY_DEVICE_IDENTIFIER,
-                deviceCollection.makeIdentifier(deviceIdentifierList.getValue())
-              );
-
-              properties.put(
-                PREF_KEY_DEVICE_DRIVER,
-                deviceDriverList.getValue()
-              );
-
-              putProperties(editor, name, properties);
-            }
-
-            editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
-            editor.apply();
+          try {
+            deviceIdentifier = deviceCollection.makeIdentifier(deviceIdentifierList.getValue());
+          } catch (SecurityException exception) {
+            deviceIdentifier = null;
           }
 
-          addDeviceScreen.getDialog().dismiss();
+          if (deviceIdentifier == null) {
+          } else {
+            String name = deviceNameEditor.getSummary().toString();
+            deviceNames.add(name);
+            updateSelectedDeviceList();
+            updateDeviceName();
+
+            {
+              SharedPreferences.Editor editor = preference.getEditor();
+
+              {
+                Map<String, String> properties = new LinkedHashMap();
+                properties.put(PREF_KEY_DEVICE_IDENTIFIER, deviceIdentifier);
+
+                properties.put(
+                  PREF_KEY_DEVICE_DRIVER,
+                  deviceDriverList.getValue()
+                );
+
+                putProperties(editor, name, properties);
+              }
+
+              editor.putStringSet(PREF_KEY_DEVICE_NAMES, deviceNames);
+              editor.apply();
+            }
+
+            addDeviceScreen.getDialog().dismiss();
+          }
+
           return true;
         }
       }
