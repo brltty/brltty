@@ -109,23 +109,13 @@ gioGetProperties (
        *properties; properties+=1) {
     if (descriptor) {
       GioIsSupportedMethod *isSupported = (*properties)->private->isSupported;
-
-      if (!isSupported) {
-        logUnsupportedOperation("isSupported");
-        continue;
-      }
-
+      if (!isSupported) continue;
       if (!isSupported(descriptor)) continue;
     }
 
     {
       GioTestIdentifierMethod *testIdentifier = (*properties)->public->testIdentifier;
-
-      if (!testIdentifier) {
-        logUnsupportedOperation("testIdentifier");
-        continue;
-      }
-
+      if (!testIdentifier) continue;
       if (testIdentifier(identifier)) return *properties;
     }
   }

@@ -156,7 +156,7 @@ connectBluetoothResource (
     request.discover = descriptor->bluetooth.discoverChannel;
 
     if (bthApplyParameters(&request, identifier)) {
-      {
+      if (gioIsHidSupported(descriptor)) {
         GioEndpoint *hidEndpoint = getHidEndpoint(request.address, descriptor);
 
         if (hidEndpoint) {

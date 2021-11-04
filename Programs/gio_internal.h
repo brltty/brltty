@@ -163,6 +163,11 @@ extern const GioProperties gioProperties_null;
 extern void gioSetBytesPerSecond (GioEndpoint *endpoint, const SerialParameters *parameters);
 extern void gioSetApplicationData (GioEndpoint *endpoint, const void *data);
 
+static inline int
+gioIsHidSupported (const GioDescriptor *descriptor) {
+  return gioProperties_hid.private->isSupported(descriptor);
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
