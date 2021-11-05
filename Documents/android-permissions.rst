@@ -14,10 +14,6 @@
 ``BLUETOOTH``
   * For communicating with a braille device via Bluetooth.
 
-``BLUETOOTH_ADMIN``
-  * For communicating with a braille device via Bluetooth
-    on Android 4.0 (Ice Cream Sandwich).
-
 ``INTERNET``
   * For listening on a TCP/IP port for BrlAPI client connection requests.
 

@@ -8,8 +8,6 @@
   android:versionName="@string/app_version"
   >
 
-  <uses-feature android:name="android.hardware.usb.host" />
-
   <!-- for creating a foreground notification -->
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
@@ -18,8 +16,10 @@
 
   <!-- for communicating with a braille device via Bluetooth -->
   <uses-permission android:name="android.permission.BLUETOOTH" />
-  <!-- also required by Android 4.0 (Ice Cream Sandwich) -->
-  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+  <uses-feature android:name="android.hardware.bluetooth" />
+
+  <!-- for communicating with a braille device via USB -->
+  <uses-feature android:name="android.hardware.usb.host" />
 
   <!-- for listening on a TCP/IP port for BrlAPI client connection requests -->
   <uses-permission android:name="android.permission.INTERNET" />
@@ -38,10 +38,12 @@
 
   <!-- for getting Wi-Fi status values (for the INDICATORS command) -->
   <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+  <uses-feature android:name="android.hardware.wifi" />
 
   <!-- for getting the Wi-Fi SSID (for the INDICATORS command) -->
   <!-- for getting cell information (for the INDICATORS command) -->
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-feature android:name="android.hardware.location" />
 
   <!-- for getting the cell signal strength (for the INDICATORS command) -->
   <uses-permission android:name="android.permission.ACCESS_COARSE_UPDATES" />
