@@ -176,20 +176,24 @@ You can get to this screen using any of the following methods:
 * From your braille device via global action #5.
   See `Global Actions`_ for details.
 
+* From your braille device via Space + Dots12345678.
+
+* Via ``Settings`` -> ``Accessibility`` -> ``BRLTTY`` -> ``Settings``.
+
 * From the notifications shade.
   Open it by dragging the status bar downward:
 
-  * With two fingers if Explore By Touch is active.
-  * With one finger if Explore By Touch isn't active.
+  + With two fingers (if Explore by Touch is active).
+  + With one finger (if Explore by Touch isn't active).
 
   Then find BRLTTY's service notification and tap it.
 
-* Via the Accessibility button within the system navigation area.
+* Via the Accessibility button on the system navigation bar.
   This capability was introduced in Android 8.0 (Oreo).
   The button may not be visible for a number of reasons, for example:
 
-  * The device's system navigation area isn't rendered via software.
-  * An application has chosen to hide the system navigation area.
+  + The device's system navigation bar isn't rendered via software.
+  + An application has chosen to hide the system navigation bar.
 
 Customized Data Files
 ~~~~~~~~~~~~~~~~~~~~~
