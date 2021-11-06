@@ -18,7 +18,8 @@
 ###############################################################################
 
 . "`dirname "${0}"`/mk-prologue.sh"
-. "${programDirectory}/mingw.sh"
+windowsDirectory="${sourceRoot}/Windows"
+. "${windowsDirectory}/mingw.sh"
 
 readonly defaultUsbPackageNames=( libusb libusb-1.0 )
 
@@ -37,8 +38,8 @@ processExtraProgramParameters() {
 optionalProgramParameters
 parseProgramArguments "${@}"
 
-windowsDirectory="${sourceRoot}/Windows"
 mkIgnoreMismatch "^mkwin: revision identifier: "
+mkIgnoreMismatch "^ *Creating library "
 mkIgnoreMismatch "^Successfully compiled: "
 
 read <"${windowsDirectory}/python-location" pythonLocation || exit "${?}"

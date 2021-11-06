@@ -45,5 +45,6 @@ mkBuild() {
    }
 
    logMessage task "build completed successfully"
+   sed -e "s%${sourceRoot}%.../brltty%g" -i "${newLogFile}"
    diff "${mkDiffOptions[@]}" -- "${oldLogFile}" "${newLogFile}"
 }
