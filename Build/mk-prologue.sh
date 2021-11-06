@@ -17,11 +17,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "$(dirname "${BASH_SOURCE[0]}")/prologue.sh"
+. "$(dirname "${BASH_SOURCE[0]}")/../prologue.sh"
 setSourceRoot
 
 readonly mkLogFileExtension="log"
-readonly mkLogsDirectory="${sourceRoot}/Logs/Builds"
+readonly mkLogsDirectory="${sourceRoot}/Build/Logs"
 mkDiffOptions=()
 
 mkIgnoreMismatch() {

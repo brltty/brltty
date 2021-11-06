@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/../mk-prologue.sh"
+. "`dirname "${0}"`/mk-prologue.sh"
 parseProgramArguments "${@}"
 
 mkPlatformName="DOS"
