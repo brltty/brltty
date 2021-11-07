@@ -1454,7 +1454,10 @@ addWatches (void) {
   };
 
   for (const WatchEntry *watch=watchTable; watch->message; watch+=1) {
-    if (!addWatch(watch->message, watch->event)) return 0;
+    if (!addWatch(watch->message, watch->event)) {
+      logMessage(LOG_ERR, "can't add watch %s %s", watch->message, watch->event);
+      return 0;
+    }
   }
 
   return 1;
@@ -1483,7 +1486,10 @@ construct_AtSpi2Screen (void) {
     goto noBus;
   }
 
-  if (!dbus_connection_add_filter(bus, AtSpi2Filter, NULL, NULL)) goto noConnection;
+  if (!dbus_connection_add_filter(bus, AtSpi2Filter, NULL, NULL)) {
+    logMessage(LOG_ERR, "can't add atspi2 filter");
+    goto noConnection;
+  }
   if (!addWatches()) goto noWatches;
 
   if (!curPath) {
