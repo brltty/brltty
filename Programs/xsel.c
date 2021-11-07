@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "xsel.h"
+#include <X11/Xatom.h>
 
 #ifdef HAVE_X11_EXTENSIONS_XFIXES_H
 #include <X11/extensions/Xfixes.h>
@@ -98,8 +99,8 @@ int XSelProcess(Display *dpy, XSelData *data, XEvent *ev, const char *content, X
 	XChangeProperty(dpy, srev->requestor, srev->property, data->utf8, 8, PropModeReplace, (unsigned char*) content, strlen(content));
 	sev.property = srev->property;
       } else if (srev->target == data->targetsAtom) {
-	const void *targets = "TARGETS\nUTF8_STRING\n";
-	XChangeProperty(dpy, srev->requestor, srev->property, data->targetsAtom, 8, PropModeReplace, targets, strlen(targets));
+	Atom targets[] = { data->targetsAtom, data->utf8 };
+	XChangeProperty(dpy, srev->requestor, srev->property, XA_ATOM, 32, PropModeReplace, (unsigned char*) targets, sizeof(targets)/sizeof(*targets));
 	sev.property = srev->property;
       } else {
 	sev.property = None;
