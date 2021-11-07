@@ -28,6 +28,8 @@
 #warning clipboard tracking not supported by this build - check that libxfixes has been installed
 #endif /* HAVE_X11_EXTENSIONS_XFIXES_H */
 
+/* TODO: get initial clipboard value on startup */
+
 void XSelInit(Display *dpy, XSelData *data) {
   data->sel = XInternAtom(dpy, "CLIPBOARD", False);
   data->selProp = XInternAtom(dpy, "BRLTTY_CLIPBOARD", False);
