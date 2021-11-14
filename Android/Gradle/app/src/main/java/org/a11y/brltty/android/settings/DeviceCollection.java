@@ -76,8 +76,12 @@ public abstract class DeviceCollection {
     return reference.toString();
   }
 
+  public static Map<String, String> newParameters () {
+    return new LinkedHashMap<String, String>();
+  }
+
   public final String makeReference (String value) {
-    Map<String, String> parameters = new LinkedHashMap<String, String>();
+    Map<String, String> parameters = newParameters();
     putParameters(parameters, value);
     return makeReference(parameters);
   }

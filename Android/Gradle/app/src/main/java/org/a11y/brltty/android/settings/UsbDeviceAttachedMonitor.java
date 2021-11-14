@@ -16,13 +16,16 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brltty.android.activities;
+package org.a11y.brltty.android.settings;
 import org.a11y.brltty.android.*;
 
 import android.util.Log;
-
 import android.app.Activity;
 import android.os.Bundle;
+
+import android.content.Intent;
+import android.hardware.usb.*;
+import java.util.Map;
 
 public class UsbDeviceAttachedMonitor extends Activity {
   private final static String LOG_TAG = UsbDeviceAttachedMonitor.class.getName();
@@ -30,6 +33,18 @@ public class UsbDeviceAttachedMonitor extends Activity {
   @Override
   protected void onCreate (Bundle savedState) {
     super.onCreate(savedState);
+
+    Intent intent = getIntent();
+    UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+
+    Map<String, String> parameters = DeviceCollection.newParameters();
+    UsbDeviceCollection.putParameters(parameters, device);
+
+    Log.i(LOG_TAG,
+      String.format(
+        "device attached: %s", UsbDeviceCollection.makeReference(parameters)
+      )
+    );
   }
 
   @Override

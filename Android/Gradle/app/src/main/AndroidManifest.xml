@@ -116,7 +116,7 @@
     </activity>
 
     <activity
-      android:name=".activities.UsbDeviceAttachedMonitor"
+      android:name=".settings.UsbDeviceAttachedMonitor"
       android:label="@string/usbMonitor_label"
       android:exported="false"
       android:noHistory="true"
