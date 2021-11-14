@@ -30,21 +30,29 @@ import java.util.Map;
 public class UsbDeviceAttachedMonitor extends Activity {
   private final static String LOG_TAG = UsbDeviceAttachedMonitor.class.getName();
 
+  private static void addParameter (Map<String, String> parameters, String name, String value) {
+    if ((value != null) && !value.isEmpty()) {
+      parameters.put(name, value);
+    }
+  }
+
+  private static String makeDescription (UsbDevice device) {
+    Map<String, String> parameters = DeviceCollection.newParameters();
+    UsbDeviceCollection.putParameters(parameters, device);
+
+    addParameter(parameters, "manufacturerName", device.getManufacturerName());
+    addParameter(parameters, "productName", device.getProductName());
+
+    return UsbDeviceCollection.makeReference(parameters);
+  }
+
   @Override
   protected void onCreate (Bundle savedState) {
     super.onCreate(savedState);
 
     Intent intent = getIntent();
     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-
-    Map<String, String> parameters = DeviceCollection.newParameters();
-    UsbDeviceCollection.putParameters(parameters, device);
-
-    Log.i(LOG_TAG,
-      String.format(
-        "device attached: %s", UsbDeviceCollection.makeReference(parameters)
-      )
-    );
+    Log.i(LOG_TAG, ("device attached: " + makeDescription(device)));
   }
 
   @Override
