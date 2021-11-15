@@ -33,16 +33,16 @@ public final class UsbDeviceCollection extends DeviceCollection {
     return DEVICE_QUALIFIER;
   }
 
-  private final static UsbManager manager = (UsbManager)
+  private final static UsbManager usbManager = (UsbManager)
     BrailleApplication.get().getSystemService(Context.USB_SERVICE);
 
-  private final Map<String, UsbDevice> map;
-  private final Collection<UsbDevice> devices;
+  private final Map<String, UsbDevice> usbDeviceMap;
+  private final Collection<UsbDevice> usbDevices;
 
   public UsbDeviceCollection (Context context) {
     super();
-    map = manager.getDeviceList();
-    devices = map.values();
+    usbDeviceMap = usbManager.getDeviceList();
+    usbDevices = usbDeviceMap.values();
   }
 
   private final String getManufacturerName (UsbDevice device) {
@@ -65,7 +65,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
     if (APITests.haveLollipop) {
       return device.getSerialNumber();
     } else {
-      UsbDeviceConnection connection = manager.openDevice(device);
+      UsbDeviceConnection connection = usbManager.openDevice(device);
       if (connection == null) return null;
 
       try {
@@ -85,7 +85,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
       }
     };
 
-    return makeStringArray(devices, stringMaker);
+    return makeStringArray(usbDevices, stringMaker);
   }
 
   @Override
@@ -141,7 +141,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
       }
     };
 
-    return makeStringArray(devices, stringMaker);
+    return makeStringArray(usbDevices, stringMaker);
   }
 
   public static void putParameters (Map<String, String> parameters, UsbDevice device) {
@@ -155,7 +155,7 @@ public final class UsbDeviceCollection extends DeviceCollection {
 
   @Override
   protected final void putParameters (Map<String, String> parameters, String value) {
-    UsbDevice device = map.get(value);
+    UsbDevice device = usbDeviceMap.get(value);
     putParameters(parameters, device);
   }
 }
