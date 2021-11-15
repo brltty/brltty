@@ -584,9 +584,15 @@ usbEndpointDescriptor (
   unsigned char endpointAddress
 ) {
   const UsbDescriptor *descriptor = NULL;
+  device->scratch.endpointInterfaceDescriptor = NULL;
 
   while (usbNextDescriptor(device, &descriptor)) {
-    if (descriptor->endpoint.bDescriptorType == UsbDescriptorType_Endpoint) {
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) {
+      device->scratch.endpointInterfaceDescriptor = &descriptor->interface;
+      continue;
+    }
+
+    if (descriptor->header.bDescriptorType == UsbDescriptorType_Endpoint) {
       if (descriptor->endpoint.bEndpointAddress == endpointAddress) {
         return &descriptor->endpoint;
       }
@@ -749,12 +755,11 @@ usbTestEndpoint (const void *item, void *data) {
 
 UsbEndpoint *
 usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
-  UsbEndpoint *endpoint;
-  const UsbEndpointDescriptor *descriptor;
+  UsbEndpoint *endpoint = findItem(device->endpoints, usbTestEndpoint, &endpointAddress);
+  if (endpoint) return endpoint;
+  const UsbEndpointDescriptor *descriptor = usbEndpointDescriptor(device, endpointAddress);
 
-  if ((endpoint = findItem(device->endpoints, usbTestEndpoint, &endpointAddress))) return endpoint;
-
-  if ((descriptor = usbEndpointDescriptor(device, endpointAddress))) {
+  if (descriptor) {
     {
       const char *direction;
       const char *transfer;
@@ -773,15 +778,20 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
         case UsbEndpointTransfer_Interrupt:   transfer = "int"; break;
       }
 
-      logMessage(LOG_CATEGORY(USB_IO), "ept=%02X dir=%s xfr=%s pkt=%d ivl=%dms",
-                 descriptor->bEndpointAddress, direction, transfer,
-                 getLittleEndian16(descriptor->wMaxPacketSize),
-                 descriptor->bInterval);
+      logMessage(LOG_CATEGORY(USB_IO),
+        "ept=%02X dir=%s xfr=%s pkt=%d ivl=%dms",
+        descriptor->bEndpointAddress,
+        direction, transfer,
+        getLittleEndian16(descriptor->wMaxPacketSize),
+        descriptor->bInterval
+      );
     }
 
     if ((endpoint = malloc(sizeof(*endpoint)))) {
       memset(endpoint, 0, sizeof(*endpoint));
+
       endpoint->device = device;
+      endpoint->interface = device->scratch.endpointInterfaceDescriptor;
       endpoint->descriptor = descriptor;
       endpoint->extension = NULL;
       endpoint->prepare = NULL;
@@ -946,13 +956,17 @@ usbOpenInterface (
   if (!descriptor) return 0;
   if (descriptor == device->interface) return 1;
 
-  if (device->interface)
-    if (device->interface->bInterfaceNumber != interface)
+  if (device->interface) {
+    if (device->interface->bInterfaceNumber != interface) {
       usbCloseInterface(device);
+    }
+  }
 
-  if (!device->interface)
-    if (!usbClaimInterface(device, interface))
+  if (!device->interface) {
+    if (!usbClaimInterface(device, interface)) {
       return 0;
+    }
+  }
 
   if (usbAlternativeCount(device, interface) == 1) goto done;
 

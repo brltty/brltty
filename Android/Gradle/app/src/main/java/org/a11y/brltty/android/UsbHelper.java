@@ -101,7 +101,6 @@ public class UsbHelper {
 
     for (int index=0; index<count; index+=1) {
       UsbInterface intf = device.getInterface(index);
-
       if (identifier == intf.getId()) return intf;
     }
 
@@ -113,7 +112,6 @@ public class UsbHelper {
 
     for (int index=0; index<count; index+=1) {
       UsbEndpoint endpoint = intf.getEndpoint(index);
-
       if (address == endpoint.getAddress()) return endpoint;
     }
 

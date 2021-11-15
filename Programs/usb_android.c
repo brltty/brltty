@@ -766,11 +766,13 @@ usbReadDeviceDescriptor (UsbDevice *device) {
 int
 usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbDevice *device = endpoint->device;
+  const UsbInterfaceDescriptor *interface = endpoint->interface;
+
   UsbDeviceExtension *devx = device->extension;
   const UsbHostDevice *host = devx->host;
   JNIEnv *env = host->env;
 
-  if (devx->interface) {
+  if (usbSetInterface(devx, interface->bInterfaceNumber)) {
     jobject localReference = usbGetInterfaceEndpoint(env, devx->interface, endpoint->descriptor->bEndpointAddress);
 
     if (localReference) {
@@ -799,6 +801,9 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
         logMallocError();
         clearJavaException(env, 0);
       }
+    } else {
+      logMessage(LOG_ERR, "couldn't get endpoint object");
+      errno = EIO;
     }
   } else {
     errno = ENOSYS;
