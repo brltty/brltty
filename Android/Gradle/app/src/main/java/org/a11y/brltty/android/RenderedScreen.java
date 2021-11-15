@@ -345,22 +345,26 @@ public class RenderedScreen {
       {
         int childCount = root.getChildCount();
 
-        for (int childIndex=0; childIndex<childCount; childIndex+=1) {
-          AccessibilityNodeInfo child = root.getChild(childIndex);
+        if (childCount == 0) {
+          propagatedActions = SIGNIFICANT_NODE_ACTIONS;
+        } else {
+          for (int childIndex=0; childIndex<childCount; childIndex+=1) {
+            AccessibilityNodeInfo child = root.getChild(childIndex);
 
-          if (child != null) {
-            try {
-              propagatedActions |= addScreenElements(child);
-            } finally {
-              child.recycle();
-              child = null;
+            if (child != null) {
+              try {
+                propagatedActions |= addScreenElements(child);
+              } finally {
+                child.recycle();
+                child = null;
+              }
             }
           }
         }
       }
 
       int actions = getSignificantActions(root);
-      boolean hasActions = (actions & ~propagatedActions) != 0;
+      boolean hasActions = (actions & propagatedActions) != 0;
       propagatedActions &= ~actions;
 
       if (ScreenUtilities.isVisible(root)) {
@@ -426,7 +430,6 @@ public class RenderedScreen {
         }
 
         if (text != null) {
-          propagatedActions |= SIGNIFICANT_NODE_ACTIONS & ~actions;
           if (!root.isEnabled()) text += " (disabled)";
           screenElements.add(text, root);
         }
