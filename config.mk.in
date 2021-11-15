@@ -288,7 +288,7 @@ BLUETOOTH_LIBS = @bluetooth_libs@
 
 HID_PACKAGE = @hid_package@
 HID_OBJECT = hid_$(HID_PACKAGE)
-HID_OBJECTS = hid_io.$O hid_items.$O hid_braille.$O $(HID_OBJECT).$O
+HID_OBJECTS = hid.$O hid_items.$O hid_braille.$O $(HID_OBJECT).$O
 HID_INCLUDES = @hid_includes@
 HID_LIBS = @hid_libs@
 

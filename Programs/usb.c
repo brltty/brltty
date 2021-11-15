@@ -1573,13 +1573,13 @@ usbNewChannel (UsbChooseChannelData *data) {
 }
 
 typedef enum {
-  USB_CHAN_SERIAL_NUMBER,
-  USB_CHAN_VENDOR_IDENTIFIER,
-  USB_CHAN_PRODUCT_IDENTIFIER,
-  USB_CHAN_GENERIC_DEVICES
-} UsbChannelParameter;
+  USB_PARM_SERIAL_NUMBER,
+  USB_PARM_VENDOR_IDENTIFIER,
+  USB_PARM_PRODUCT_IDENTIFIER,
+  USB_PARM_GENERIC_DEVICES
+} UsbDeviceParameter;
 
-static const char *const usbChannelParameters[] = {
+static const char *const usbDeviceParameterNames[] = {
   "serialNumber",
   "vendorIdentifier",
   "productIdentifier",
@@ -1588,29 +1588,29 @@ static const char *const usbChannelParameters[] = {
 };
 
 static char **
-usbGetChannelParameters (const char *identifier) {
+usbGetDeviceParameters (const char *identifier) {
   if (!identifier) identifier = "";
-  return getDeviceParameters(usbChannelParameters, identifier);
+  return getDeviceParameters(usbDeviceParameterNames, identifier);
 }
 
 UsbChannel *
 usbOpenChannel (const UsbChannelDefinition *definitions, const char *identifier) {
   UsbChannel *channel = NULL;
-  char **parameters = usbGetChannelParameters(identifier);
+  char **parameters = usbGetDeviceParameters(identifier);
 
   if (parameters) {
     int ok = 1;
 
     UsbChooseChannelData choose = {
       .definition = definitions,
-      .serialNumber = parameters[USB_CHAN_SERIAL_NUMBER]
+      .serialNumber = parameters[USB_PARM_SERIAL_NUMBER]
     };
 
-    if (!usbParseVendorIdentifier(&choose.vendorIdentifier, parameters[USB_CHAN_VENDOR_IDENTIFIER])) ok = 0;
-    if (!usbParseProductIdentifier(&choose.productIdentifier, parameters[USB_CHAN_PRODUCT_IDENTIFIER])) ok = 0;
+    if (!usbParseVendorIdentifier(&choose.vendorIdentifier, parameters[USB_PARM_VENDOR_IDENTIFIER])) ok = 0;
+    if (!usbParseProductIdentifier(&choose.productIdentifier, parameters[USB_PARM_PRODUCT_IDENTIFIER])) ok = 0;
 
     {
-      const char *parameter = parameters[USB_CHAN_GENERIC_DEVICES];
+      const char *parameter = parameters[USB_PARM_GENERIC_DEVICES];
 
       if (!(parameter && *parameter)) {
         choose.genericDevices = 1;
@@ -1670,7 +1670,7 @@ usbMakeChannelIdentifier (UsbChannel *channel, char *buffer, size_t size) {
     if (vendorIdentifier) {
       STR_PRINTF(
         "%s%c0X%04X%c",
-        usbChannelParameters[USB_CHAN_VENDOR_IDENTIFIER],
+        usbDeviceParameterNames[USB_PARM_VENDOR_IDENTIFIER],
         PARAMETER_ASSIGNMENT_CHARACTER,
         vendorIdentifier,
         DEVICE_PARAMETER_SEPARATOR
@@ -1684,7 +1684,7 @@ usbMakeChannelIdentifier (UsbChannel *channel, char *buffer, size_t size) {
     if (productIdentifier) {
       STR_PRINTF(
         "%s%c0X%04X%c",
-        usbChannelParameters[USB_CHAN_PRODUCT_IDENTIFIER],
+        usbDeviceParameterNames[USB_PARM_PRODUCT_IDENTIFIER],
         PARAMETER_ASSIGNMENT_CHARACTER,
         productIdentifier,
         DEVICE_PARAMETER_SEPARATOR
@@ -1699,7 +1699,7 @@ usbMakeChannelIdentifier (UsbChannel *channel, char *buffer, size_t size) {
       if (!strchr(serialNumber, DEVICE_PARAMETER_SEPARATOR)) {
         STR_PRINTF(
           "%s%c%s%c",
-          usbChannelParameters[USB_CHAN_SERIAL_NUMBER],
+          usbDeviceParameterNames[USB_PARM_SERIAL_NUMBER],
           PARAMETER_ASSIGNMENT_CHARACTER,
           serialNumber,
           DEVICE_PARAMETER_SEPARATOR

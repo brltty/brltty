@@ -676,15 +676,15 @@ serialConfigureFlowControl (SerialDevice *serial, const char *string) {
 }
 
 typedef enum {
-  SERIAL_DEV_NAME,
-  SERIAL_DEV_BAUD,
-  SERIAL_DEV_DATA_BITS,
-  SERIAL_DEV_STOP_BITS,
-  SERIAL_DEV_PARITY,
-  SERIAL_DEV_FLOW_CONTROL
+  SERIAL_PARM_NAME,
+  SERIAL_PARM_BAUD,
+  SERIAL_PARM_DATA_BITS,
+  SERIAL_PARM_STOP_BITS,
+  SERIAL_PARM_DATA_PARITY,
+  SERIAL_PARM_FLOW_CONTROL
 } SerialDeviceParameter;
 
-static const char *const serialDeviceParameters[] = {
+static const char *const serialDeviceParameterNames[] = {
   "name",
   "baud",
   "dataBits",
@@ -697,7 +697,7 @@ static const char *const serialDeviceParameters[] = {
 static char **
 serialGetDeviceParameters (const char *identifier) {
   if (!identifier) identifier = "";
-  return getDeviceParameters(serialDeviceParameters, identifier);
+  return getDeviceParameters(serialDeviceParameterNames, identifier);
 }
 
 SerialDevice *
@@ -711,7 +711,7 @@ serialOpenDevice (const char *identifier) {
       memset(serial, 0, sizeof(*serial));
 
       {
-        const char *name = parameters[SERIAL_DEV_NAME];
+        const char *name = parameters[SERIAL_PARM_NAME];
         if (!*name) name = SERIAL_FIRST_DEVICE;
         serial->devicePath = getDevicePath(name);
       }
@@ -723,11 +723,11 @@ serialOpenDevice (const char *identifier) {
         if (serialConnectDevice(serial, serial->devicePath)) {
           int ok = 1;
 
-          if (!serialConfigureBaud(serial, parameters[SERIAL_DEV_BAUD])) ok = 0;
-          if (!serialConfigureDataBits(serial, parameters[SERIAL_DEV_DATA_BITS])) ok = 0;
-          if (!serialConfigureStopBits(serial, parameters[SERIAL_DEV_STOP_BITS])) ok = 0;
-          if (!serialConfigureParity(serial, parameters[SERIAL_DEV_PARITY])) ok = 0;
-          if (!serialConfigureFlowControl(serial, parameters[SERIAL_DEV_FLOW_CONTROL])) ok = 0;
+          if (!serialConfigureBaud(serial, parameters[SERIAL_PARM_BAUD])) ok = 0;
+          if (!serialConfigureDataBits(serial, parameters[SERIAL_PARM_DATA_BITS])) ok = 0;
+          if (!serialConfigureStopBits(serial, parameters[SERIAL_PARM_STOP_BITS])) ok = 0;
+          if (!serialConfigureParity(serial, parameters[SERIAL_PARM_DATA_PARITY])) ok = 0;
+          if (!serialConfigureFlowControl(serial, parameters[SERIAL_PARM_FLOW_CONTROL])) ok = 0;
 
           deallocateStrings(parameters);
           if (ok) return serial;
@@ -778,7 +778,7 @@ serialMakeDeviceIdentifier (SerialDevice *serial, char *buffer, size_t size) {
     "%s%c%s%c%s",
     SERIAL_DEVICE_QUALIFIER,
     PARAMETER_QUALIFIER_CHARACTER,
-    serialDeviceParameters[SERIAL_DEV_NAME],
+    serialDeviceParameterNames[SERIAL_PARM_NAME],
     PARAMETER_ASSIGNMENT_CHARACTER,
     serialGetDevicePath(serial)
   );

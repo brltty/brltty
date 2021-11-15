@@ -29,18 +29,18 @@
 #include "device.h"
 
 typedef enum {
-  HID_FLT_ADDRESS,
-  HID_FLT_NAME,
+  HID_PARM_ADDRESS,
+  HID_PARM_NAME,
 
-  HID_FLT_MANUFACTURER,
-  HID_FLT_DESCRIPTION,
-  HID_FLT_SERIAL_NUMBER,
+  HID_PARM_MANUFACTURER,
+  HID_PARM_DESCRIPTION,
+  HID_PARM_SERIAL_NUMBER,
 
-  HID_FLT_VENDOR,
-  HID_FLT_PRODUCT,
-} HidFilterParameter;
+  HID_PARM_VENDOR,
+  HID_PARM_PRODUCT,
+} HidDeviceParameter;
 
-static const char *const hidFilterParameters[] = {
+static const char *const hidDeviceParameterNames[] = {
   "address",
   "name",
 
@@ -55,9 +55,9 @@ static const char *const hidFilterParameters[] = {
 };
 
 static char **
-hidGetFilterParameters (const char *string) {
+hidGetDeviceParameters (const char *string) {
   if (!string) string = "";
-  return getDeviceParameters(hidFilterParameters, string);
+  return getDeviceParameters(hidDeviceParameterNames, string);
 }
 
 typedef struct {
@@ -72,7 +72,7 @@ STR_BEGIN_FORMATTER(hidExtendUSBDeviceIdentifier, HidDevice *device)
     if (serialNumber && *serialNumber) {
       STR_PRINTF(
         "%s%c%s%c",
-        hidFilterParameters[HID_FLT_SERIAL_NUMBER],
+        hidDeviceParameterNames[HID_PARM_SERIAL_NUMBER],
         PARAMETER_ASSIGNMENT_CHARACTER,
         serialNumber, DEVICE_PARAMETER_SEPARATOR
       );
@@ -92,7 +92,7 @@ STR_BEGIN_FORMATTER(hidExtendBluetoothDeviceIdentifier, HidDevice *device)
     if (macAddress && *macAddress) {
       STR_PRINTF(
         "%s%c%s%c",
-        hidFilterParameters[HID_FLT_ADDRESS],
+        hidDeviceParameterNames[HID_PARM_ADDRESS],
         PARAMETER_ASSIGNMENT_CHARACTER,
         macAddress, DEVICE_PARAMETER_SEPARATOR
       );
@@ -409,26 +409,26 @@ hidOpenDeviceWithFilter (HidDevice **device, const HidFilter *filter) {
 
 int
 hidOpenDeviceWithParameters (HidDevice **device, const char *string) {
-  char **parameters = hidGetFilterParameters(string);
+  char **parameters = hidGetDeviceParameters(string);
 
   if (parameters) {
     HidFilter filter = {
       .usb = {
-        .manufacturerName = parameters[HID_FLT_MANUFACTURER],
-        .productDescription = parameters[HID_FLT_DESCRIPTION],
-        .serialNumber = parameters[HID_FLT_SERIAL_NUMBER],
+        .manufacturerName = parameters[HID_PARM_MANUFACTURER],
+        .productDescription = parameters[HID_PARM_DESCRIPTION],
+        .serialNumber = parameters[HID_PARM_SERIAL_NUMBER],
       },
 
       .bluetooth = {
-        .macAddress = parameters[HID_FLT_ADDRESS],
-        .deviceName = parameters[HID_FLT_NAME],
+        .macAddress = parameters[HID_PARM_ADDRESS],
+        .deviceName = parameters[HID_PARM_NAME],
       },
     };
 
     int ok = hidSetFilterIdentifiers(
       &filter,
-      parameters[HID_FLT_VENDOR],
-      parameters[HID_FLT_PRODUCT]
+      parameters[HID_PARM_VENDOR],
+      parameters[HID_PARM_PRODUCT]
     );
 
     if (ok) ok = hidOpenDeviceWithFilter(device, &filter);
@@ -719,7 +719,7 @@ hidMakeDeviceIdentifier (HidDevice *device, char *buffer, size_t size) {
       if (vendor) {
         STR_PRINTF(
           "%s%c%04X%c",
-          hidFilterParameters[HID_FLT_VENDOR],
+          hidDeviceParameterNames[HID_PARM_VENDOR],
           PARAMETER_ASSIGNMENT_CHARACTER,
           vendor, DEVICE_PARAMETER_SEPARATOR
         );
@@ -728,7 +728,7 @@ hidMakeDeviceIdentifier (HidDevice *device, char *buffer, size_t size) {
       if (product) {
         STR_PRINTF(
           "%s%c%04X%c",
-          hidFilterParameters[HID_FLT_PRODUCT],
+          hidDeviceParameterNames[HID_PARM_PRODUCT],
           PARAMETER_ASSIGNMENT_CHARACTER,
           product, DEVICE_PARAMETER_SEPARATOR
         );

@@ -404,8 +404,8 @@ hid_items.$O:
 hid_braille.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_braille.c
 
-hid_io.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid_io.c
+hid.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/hid.c
 
 $(HID_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(HID_INCLUDES) -c $(SRC_DIR)/$(HID_OBJECT).c
