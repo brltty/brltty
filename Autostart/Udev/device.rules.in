@@ -528,6 +528,7 @@ ENV{PRODUCT}=="c251/1132/*", ENV{BRLTTY_BRAILLE_DRIVER}="eu", GOTO="brltty_usb_r
 GOTO="brltty_device_end"
 
 LABEL="brltty_usb_run"
+SYMLINK+="brltty/USB-Mfr:$attr{manufacturer}-Prd:$attr{product}-Ser:$attr{serial}"
 ENV{BRLTTY_BRAILLE_DEVICE}="usb:vendor=0X$sysfs{idVendor}+product=0X$sysfs{idProduct}+serial=$sysfs{serial}"
 GOTO="brltty_device_run"
 
