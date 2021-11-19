@@ -26,7 +26,8 @@ UDEV_RULES_DIRECTORY = $(UDEV_LIBRARY_DIRECTORY)/rules.d
 
 UDEV_PATH_PREFIX = $(UDEV_RULES_DIRECTORY)/$(UDEV_RULES_SEQUENCE)-$(PACKAGE_TARNAME)-
 UDEV_RULES_EXTENSION = rules
-UDEV_NAME_DEVICE = device.$(UDEV_RULES_EXTENSION)
+UDEV_NAME_USB = usb.$(UDEV_RULES_EXTENSION)
+UDEV_NAME_HID = hid.$(UDEV_RULES_EXTENSION)
 UDEV_NAME_UINPUT = uinput.$(UDEV_RULES_EXTENSION)
 
 install-scripts-directory:
@@ -38,10 +39,13 @@ install-wrapper: install-scripts-directory
 install-rules-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_RULES_DIRECTORY)
 
-install-rules: install-rules-device install-rules-uinput
+install-rules: install-rules-usb install-rules-hid install-rules-uinput
 
-install-rules-device: install-rules-directory
-	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_DEVICE) $(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE)
+install-rules-usb: install-rules-directory
+	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_USB) $(UDEV_PATH_PREFIX)$(UDEV_NAME_USB)
+
+install-rules-hid: install-rules-directory
+	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_HID) $(UDEV_PATH_PREFIX)$(UDEV_NAME_HID)
 
 install-rules-uinput: install-rules-directory
 	$(INSTALL_DATA) $(SRC_DIR)/$(UDEV_NAME_UINPUT) $(UDEV_PATH_PREFIX)$(UDEV_NAME_UINPUT)
@@ -49,7 +53,7 @@ install-rules-uinput: install-rules-directory
 install-rules-all: install-wrapper install-rules
 
 install-rules-no-generic: install-rules-all
-	$(SRC_TOP)Tools/updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE)
+	$(SRC_TOP)Tools/updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_PATH_PREFIX)$(UDEV_NAME_USB)
 
 install: install-rules-$(UDEV_RULES_TYPE)
 
@@ -59,7 +63,7 @@ uninstall:
 	-rm -f $(UDEV_SCRIPTS_DIRECTORY)/udev-*
 
 distclean::
-	-rm device.rules
+	-rm $(UDEV_NAME_USB)
 
 reload:
 	udevadm control --reload
