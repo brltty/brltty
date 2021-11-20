@@ -17,7 +17,6 @@
 ###############################################################################
 
 [Unit]
-
 Description=BRLTTY Instance: %I
 Documentation=man:brltty(1)
 Documentation=@PACKAGE_URL@
@@ -29,6 +28,9 @@ RequiresMountsFor=@BRLAPI_SOCKETPATH@
 
 StopWhenUnneeded=true
 RefuseManualStart=true
+
+After=local-fs.target
+After=sound.target
 
 
 [Service]
