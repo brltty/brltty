@@ -648,7 +648,7 @@ if {[llength $positionalArguments] == 0} {
    lappend positionalArguments "c:[file join $sourceRoot Programs usb_devices.c]"
    lappend positionalArguments "hotplug:[file join $sourceRoot Autostart Hotplug brltty.usermap]"
    lappend positionalArguments "metainfo:[file join $sourceRoot Autostart AppStream org.a11y.brltty.metainfo.xml]"
-   lappend positionalArguments "udev:[file join $sourceRoot Autostart Udev usb.rules.in]"
+   lappend positionalArguments "udev:[file join $sourceRoot Autostart Udev device.rules.in]"
 
    foreach file [glob -directory [file join $sourceRoot Windows] -nocomplain "*.inf"] {
       lappend positionalArguments "inf:$file"

@@ -1970,7 +1970,7 @@ AC_OUTPUT([
    Bindings/Python/setup.py
    Autostart/Systemd/brltty@.service
    Autostart/Systemd/tmpfiles
-   Autostart/Udev/usb.rules
+   Autostart/Udev/device.rules
    Autostart/X11/90xbrlapi
    Android/Gradle/config.properties
    ${brltty_make_files}
