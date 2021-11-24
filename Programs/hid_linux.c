@@ -116,7 +116,14 @@ hidLinuxGetReportSize (
 
 static ssize_t
 hidLinuxGetReport (HidHandle *handle, unsigned char *buffer, size_t size) {
-  int result = ioctl(handle->fileDescriptor, HIDIOCGINPUT(size), buffer);
+  int result;
+
+#ifdef HIDIOCGINPUT
+  result = ioctl(handle->fileDescriptor, HIDIOCGINPUT(size), buffer);
+#else /* HIDIOCGINPUT */
+  result = -1;
+  errno = ENOSYS;
+#endif /* HIDIOCGINPUT */
 
   if (result == -1) {
     logSystemError("ioctl[HIDIOCGINPUT]");
@@ -127,7 +134,14 @@ hidLinuxGetReport (HidHandle *handle, unsigned char *buffer, size_t size) {
 
 static ssize_t
 hidLinuxSetReport (HidHandle *handle, const unsigned char *report, size_t size) {
-  int result = ioctl(handle->fileDescriptor, HIDIOCSOUTPUT(size), report);
+  int result;
+
+#ifdef HIDIOCSOUTPUT
+  result = ioctl(handle->fileDescriptor, HIDIOCSOUTPUT(size), report);
+#else /* HIDIOCSOUTPUT */
+  result = -1;
+  errno = ENOSYS;
+#endif /* HIDIOCSOUTPUT */
 
   if (result == -1) {
     logSystemError("ioctl[HIDIOCSOUTPUT]");
@@ -228,7 +242,14 @@ static int
 hidLinuxGetRawUnique (HidHandle *handle, char *buffer, size_t size, void *data) {
   // For USB, this will be the serial number of the device.
   // For Bluetooth, this will be the MAC (hardware) address of the device.
-  ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
+  ssize_t length;
+
+#ifdef HIDIOCGRAWUNIQ
+  length = ioctl(handle->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
+#else /* HIDIOCGRAWUNIQ */
+  length = -1;
+  errno = ENOSYS;
+#endif /* HIDIOCGRAWUNIQ */
 
   if (length == -1) {
     logSystemError("ioctl[HIDIOCGRAWUNIQ]");
