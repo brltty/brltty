@@ -116,38 +116,31 @@ hidLinuxGetReportSize (
 
 static ssize_t
 hidLinuxGetReport (HidHandle *handle, unsigned char *buffer, size_t size) {
-  int result;
+  int length;
 
 #ifdef HIDIOCGINPUT
-  result = ioctl(handle->fileDescriptor, HIDIOCGINPUT(size), buffer);
+  length = ioctl(handle->fileDescriptor, HIDIOCGINPUT(size), buffer);
 #else /* HIDIOCGINPUT */
-  result = -1;
+  length = -1;
   errno = ENOSYS;
 #endif /* HIDIOCGINPUT */
 
-  if (result == -1) {
-    logSystemError("ioctl[HIDIOCGINPUT]");
-  }
-
-  return result;
+  if (length == -1) logSystemError("ioctl[HIDIOCGINPUT]");
+  return length;
 }
 
 static ssize_t
 hidLinuxSetReport (HidHandle *handle, const unsigned char *report, size_t size) {
-  int result;
+  int count;
 
 #ifdef HIDIOCSOUTPUT
-  result = ioctl(handle->fileDescriptor, HIDIOCSOUTPUT(size), report);
+  count = ioctl(handle->fileDescriptor, HIDIOCSOUTPUT(size), report);
 #else /* HIDIOCSOUTPUT */
-  result = -1;
-  errno = ENOSYS;
+  count = write(handle->fileDescriptor, report, size);
 #endif /* HIDIOCSOUTPUT */
 
-  if (result == -1) {
-    logSystemError("ioctl[HIDIOCSOUTPUT]");
-  }
-
-  return result;
+  if (count == -1) logSystemError("ioctl[HIDIOCSOUTPUT]");
+  return count;
 }
 
 static ssize_t
@@ -163,13 +156,9 @@ hidLinuxGetFeature (HidHandle *handle, unsigned char *buffer, size_t size) {
 
 static ssize_t
 hidLinuxSetFeature (HidHandle *handle, const unsigned char *feature, size_t size) {
-  int result = ioctl(handle->fileDescriptor, HIDIOCSFEATURE(size), feature);
-
-  if (result == -1) {
-    logSystemError("ioctl[HIDIOCSFEATURE]");
-  }
-
-  return result;
+  int count = ioctl(handle->fileDescriptor, HIDIOCSFEATURE(size), feature);
+  if (count == -1) logSystemError("ioctl[HIDIOCSFEATURE]");
+  return count;
 }
 
 static int
@@ -208,7 +197,7 @@ static int
 hidLinuxGetRawName (HidHandle *handle, char *buffer, size_t size, void *data) {
   // For USB, this will be the manufacturer string, a space, and the product string.
   // For Bluetooth, this will be the name of the device.
-  ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
+  int length = ioctl(handle->fileDescriptor, HIDIOCGRAWNAME(size), buffer);
 
   if (length == -1) {
     logSystemError("ioctl[HIDIOCGRAWNAME]");
@@ -225,7 +214,7 @@ static int
 hidLinuxGetRawPhysical (HidHandle *handle, char *buffer, size_t size, void *data) {
   // For USB, this will be the physical path (controller, hubs, ports, etc) to the device.
   // For Bluetooth, this will be the address of the host controller.
-  ssize_t length = ioctl(handle->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
+  int length = ioctl(handle->fileDescriptor, HIDIOCGRAWPHYS(size), buffer);
 
   if (length == -1) {
     logSystemError("ioctl[HIDIOCGRAWPHYS]");
@@ -242,7 +231,7 @@ static int
 hidLinuxGetRawUnique (HidHandle *handle, char *buffer, size_t size, void *data) {
   // For USB, this will be the serial number of the device.
   // For Bluetooth, this will be the MAC (hardware) address of the device.
-  ssize_t length;
+  int length;
 
 #ifdef HIDIOCGRAWUNIQ
   length = ioctl(handle->fileDescriptor, HIDIOCGRAWUNIQ(size), buffer);
