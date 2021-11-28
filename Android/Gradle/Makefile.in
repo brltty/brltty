@@ -12,6 +12,6 @@ bundle: bundle-release
 lint: lint-debug
 install: install-debug
 
-include common.mk
-include targets.mk
-include publish.mk
+include $(SRC_DIR)/common.mk
+include $(SRC_DIR)/targets.mk
+include $(SRC_DIR)/publish.mk
