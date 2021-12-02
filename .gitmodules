@@ -1,0 +1,4 @@
+[submodule "LibLouis/Source"]
+	path = LibLouis/Source
+	url = https://github.com/liblouis/liblouis
+	branch = master
