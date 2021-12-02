@@ -50,7 +50,7 @@ AC_DEFINE_UNQUOTED([BRLAPI_REVISION], [${api_revision}],
                    [Define this to be the API library revision number.])
 
 BRLTTY_SUMMARY_BEGIN
-brltty_build_directories=". Programs Documents Messages"
+brltty_build_directories=". Programs Documents Messages LibLouis"
 brltty_source_directory="`dirname "${0}"`"
 brltty_manual_directories=""
 

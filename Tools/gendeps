@@ -25,9 +25,12 @@ proc getBuildDirectories {{root ""}} {
 
    if {[string length $root] == 0} {
       set root .
+
       set setPath {
          set path $name
       }
+   } elseif {[file exists [file join $root .git]]} {
+      return
    } else {
       set setPath {
          set path [file join $root $name]

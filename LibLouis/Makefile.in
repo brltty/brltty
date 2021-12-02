@@ -44,6 +44,6 @@ $(AUTOGEN_TARGET): $(CHECKOUT_TARGET)
 $(CHECKOUT_TARGET):
 	git submodule update --init -- $(SOURCE_DIRECTORY)
 
-clean distclean:
+clean distclean::
 	$(MAKE) -C $(BUILD_DIRECTORY) -- $@
 
