@@ -1,0 +1,6 @@
+autoconf
+automake
+libtool
+libyaml
+libyaml-devel
+texinfo
