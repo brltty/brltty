@@ -27,6 +27,7 @@ libpcre3-dev
 libpolkit-gobject-1-dev
 libspeechd-dev
 libsystemd-dev
+libudev-dev
 libx11-dev
 libxaw7-dev
 libxt-dev
