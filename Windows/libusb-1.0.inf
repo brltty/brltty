@@ -40,7 +40,7 @@ HKR,,Icon,,-20
 %ProviderName% = libusbDevice_WinUSB,NTx86,NTamd64
 
 [libusbDevice_WinUSB.NTx86]
-; BEGIN_USB_DEVICES LibUSB-1.0 LIBUSB_DEV
+; BEGIN_USB_BRAILLE_DEVICES LibUSB-1.0 LIBUSB_DEV
 
 ; Device: 0403:6001
 ; Generic Identifier
@@ -405,10 +405,10 @@ HKR,,Icon,,-20
 ; Device: C251:1132
 "LibUSB-1.0: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_1132
 
-; END_USB_DEVICES
+; END_USB_BRAILLE_DEVICES
 
 [libusbDevice_WinUSB.NTamd64]
-; BEGIN_USB_DEVICES LibUSB-1.0 LIBUSB_DEV
+; BEGIN_USB_BRAILLE_DEVICES LibUSB-1.0 LIBUSB_DEV
 
 ; Device: 0403:6001
 ; Generic Identifier
@@ -773,7 +773,7 @@ HKR,,Icon,,-20
 ; Device: C251:1132
 "LibUSB-1.0: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_1132
 
-; END_USB_DEVICES
+; END_USB_BRAILLE_DEVICES
 
 ; ==================== Installation ===================
 

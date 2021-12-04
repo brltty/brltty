@@ -493,7 +493,7 @@ proc updateFile {file newLines} {
    upvar #0 optionValues(test) testMode
 
    set lines [readLines $file]
-   set markerSuffix "_USB_DEVICES"
+   set markerSuffix "_USB_BRAILLE_DEVICES"
    set beginMarker "BEGIN$markerSuffix"
    set endMarker "END$markerSuffix"
 

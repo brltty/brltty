@@ -25,7 +25,7 @@
 }
 
 const UsbDeviceEntry usbDeviceTable[] = {
-// BEGIN_USB_DEVICES
+// BEGIN_USB_BRAILLE_DEVICES
 
 // Device: 0403:6001
 // Generic Identifier
@@ -524,7 +524,7 @@ USB_DEVICE_ENTRY(0XC251, 0X1131, "eu"),
 // EuroBraille [reserved]
 USB_DEVICE_ENTRY(0XC251, 0X1132, "eu"),
 
-// END_USB_DEVICES
+// END_USB_BRAILLE_DEVICES
 };
 
 const uint16_t usbDeviceCount = ARRAY_COUNT(usbDeviceTable);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <!-- BEGIN_USB_DEVICES -->
+  <!-- BEGIN_USB_BRAILLE_DEVICES -->
 
   <!-- Device: 0403:6001 -->
   <!-- Generic Identifier -->
@@ -500,5 +500,5 @@
   <!-- EuroBraille [reserved] -->
   <usb-device vendor-id="49745" product-id="4402" />
 
-  <!-- END_USB_DEVICES -->
+  <!-- END_USB_BRAILLE_DEVICES -->
 </resources>
