@@ -643,9 +643,9 @@ void
 bthProcessDiscoveredDevices (
   DiscoveredBluetoothDeviceTester *testDevice, void *data
 ) {
+#ifdef HAVE_PKG_DBUS
   int found = 0;
 
-#ifdef HAVE_PKG_DBUS
   DBusError error;
   DBusConnection *bus;
  
