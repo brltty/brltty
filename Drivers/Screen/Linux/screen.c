@@ -547,7 +547,21 @@ static size_t
 readUnicodeDevice (off_t offset, void *buffer, size_t size) {
   if (openCurrentUnicode()) {
     const ssize_t count = pread(unicodeDescriptor, buffer, size, offset);
-    if (count != -1) return count;
+
+    if (count != -1) {
+      if (1) {
+        uint32_t *character = buffer;
+        const uint32_t *end = character + (count / sizeof(*character));
+
+        while (character < end) {
+          if (*character == 0X20202020) *character = ' ';
+          character += 1;
+        }
+      }
+
+      return count;
+    }
+
     if (errno != ENODATA) logSystemError("unicode read");
   }
 
@@ -560,10 +574,10 @@ static size_t unicodeCacheUsed;
 
 static size_t
 readUnicodeCache (off_t offset, void *buffer, size_t size) {
-  if (offset <= unicodeCacheSize) {
-    size_t left = unicodeCacheSize - offset;
-
+  if (offset <= unicodeCacheUsed) {
+    size_t left = unicodeCacheUsed - offset;
     if (size > left) size = left;
+
     memcpy(buffer, &unicodeCacheBuffer[offset], size);
     return size;
   } else {
