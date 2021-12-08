@@ -1,13 +1,18 @@
+[Strings]
+manufacturer = "BRLTTY"
+DeviceClassGUID = "{1720fa8e-ed15-4346-b73d-909eb41e89ef}"
+DriverVersion = "01/01/1995,0.1.12.1"
+
 [Version]
 Signature = "$Chicago$"
 provider  = %manufacturer%
-DriverVer = 01/01/1995,0.1.12.1
+DriverVer = %DriverVersion%
 CatalogFile = brltty.cat
 CatalogFile.NT = brltty.cat
 CatalogFile.NTAMD64 = brltty_x64.cat
 
 Class = LibUsbDevices
-ClassGUID = {EB781AAF-9C70-4523-A5DF-642A87ECA567}
+ClassGUID = %DeviceClassGUID%
 
 [ClassInstall]
 AddReg=libusb_class_install_add_reg
@@ -1230,9 +1235,3 @@ ServiceBinary  = %12%\libusb0_x64.sys
 
 ; END_USB_BRAILLE_DEVICES
 
-;--------------------------------------------------------------------------
-; Strings
-;--------------------------------------------------------------------------
-
-[Strings]
-manufacturer = "BRLTTY"

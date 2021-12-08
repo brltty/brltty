@@ -5,8 +5,8 @@
 [Strings]
 
 DeviceGUID = "{ffe1ce84-18a1-4cf9-ac16-df74b7958daa}"
-DeviceClassGUID = "{78a1c341-4539-11d3-b88d-00c04fad5171}"
-Date = "04/26/2010"
+DeviceClassGUID = "{1720fa8e-ed15-4346-b73d-909eb41e89ef}"
+DriverVersion = "04/26/2010"
 
 ProviderName = "libusb 1.0"
 WinUSB_SvcDesc = "WinUSB Driver Service"
@@ -16,7 +16,7 @@ ClassName = "libusb (WinUSB) devices"
 ; ====================== Version ======================
 
 [Version]
-DriverVer = %Date%
+DriverVer = %DriverVersion%
 Signature = "$Windows NT$"
 Class = %ClassName%
 ClassGuid = %DeviceClassGUID%

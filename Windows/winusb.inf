@@ -1,3 +1,8 @@
+[Strings]
+ManufacturerName="brltty"
+ClassName="USB braille devices"
+REG_MULTI_SZ = 0x00010000
+
 [Version]
 Signature = "$Windows NT$"
 Class     = USBDevice
@@ -774,11 +779,4 @@ HKR,,DeviceInterfaceGUIDs,0x10000,"{9f543223-cede-4fa3-b376-a25ce9a30e74}"
 ; [DestinationDirs]
 ; If your INF needs to copy files, you must not use the DefaultDestDir directive here.
 ; You must explicitly reference all file-list-section names in this section.
-
-; =================== Strings ===================
-
-[Strings]
-ManufacturerName="brltty"
-ClassName="USB braille devices"
-REG_MULTI_SZ = 0x00010000
 
