@@ -554,7 +554,17 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
         const uint32_t *end = character + (count / sizeof(*character));
 
         while (character < end) {
-          if (*character == 0X20202020) *character = ' ';
+          if (*character == 0X20202020) {
+            static unsigned char bugEncountered = 0;
+
+            if (!bugEncountered) {
+              bugEncountered = 1;
+              logMessage(LOG_WARNING, "Linux screen driver: Unicode space bug detected");
+            }
+
+            *character = ' ';
+          }
+
           character += 1;
         }
       }
