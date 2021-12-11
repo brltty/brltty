@@ -720,6 +720,7 @@
 # Linux Screen Driver Parameters
 #screen-parameters lx:Charset=name+... # []
 #screen-parameters lx:FallbackText=text # ""
+#screen-parameters lx:FixUnicodeSpaces=no # [no,yes]
 #screen-parameters lx:HFB=auto # [auto,vga,fb,0-7]
 #screen-parameters lx:LogSFM=no # [no,yes]
 #screen-parameters lx:Unicode=yes # [yes,no]
