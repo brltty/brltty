@@ -65,7 +65,7 @@ proc generatedFile {file} {
       return 1
    }
 
-   if {[lcontain {revision_identifier.h brlapi_constants.h} $name]} {
+   if {[lcontain {brlapi_constants.h} $name]} {
       return 1
    }
 

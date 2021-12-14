@@ -24,7 +24,7 @@ setSourceRoot
 cd "${sourceRoot}"
 
 revisionIdentifier="$(./getrevid .)" || {
-   revisionHeader="${programsSubdirectory}/revision_identifier.h"
+   revisionHeader="${programsSubdirectory}/revision_identifier.auto.h"
 
    revisionIdentifier="$(sed -e 's/"//g' "${revisionHeader}")" || {
       revisionIdentifier="$(date +'%Y%m%d-%H%M%S')"

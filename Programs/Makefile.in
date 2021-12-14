@@ -48,8 +48,8 @@ all-apitest: apitest$X
 
 ###############################################################################
 
-REVISION_HEADER = revision_identifier.h
-$(REVISION_HEADER): $(SRC_TOP)getrevid
+REVISION_HEADER = revision_identifier.auto.h
+$(REVISION_HEADER):
 	-$(SRC_TOP)getrevid -s -f $@ -d unknown $(SRC_TOP)
 
 revision.$O:

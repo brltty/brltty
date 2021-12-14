@@ -21,7 +21,7 @@
 #include "revision.h"
 
 static const char revisionIdentifier[] =
-#include "revision_identifier.h"
+#include "revision_identifier.auto.h"
 ;
 
 const char *
