@@ -19,13 +19,13 @@
 all: all-commands all-tools $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 
 all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse all-brltty-hid
-all-brltty: brltty$X $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
+all-brltty: brltty$X | $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltty-lscmds: brltty-lscmds$X
 all-brltty-trtxt: brltty-trtxt$X
 all-brltty-ttb: brltty-ttb$X
 all-brltty-ctb: brltty-ctb$X
 all-brltty-atb: brltty-atb$X
-all-brltty-ktb: brltty-ktb$X $(BRAILLE_DRIVERS)
+all-brltty-ktb: brltty-ktb$X | $(BRAILLE_DRIVERS)
 all-brltty-tune: brltty-tune$X
 all-brltty-morse: brltty-morse$X
 all-brltty-hid: brltty-hid$X
@@ -35,9 +35,9 @@ all-brltty-cldr: brltty-cldr$X
 all-brltty-lsinc: brltty-lsinc$X
 
 everything: all all-brltest all-spktest all-scrtest all-crctest all-msgtest $(ALL_API)
-all-brltest: brltest$X $(BRAILLE_DRIVERS)
-all-spktest: spktest$X $(SPEECH_DRIVERS)
-all-scrtest: scrtest$X $(SCREEN_DRIVERS)
+all-brltest: brltest$X | $(BRAILLE_DRIVERS)
+all-spktest: spktest$X | $(SPEECH_DRIVERS)
+all-scrtest: scrtest$X | $(SCREEN_DRIVERS)
 all-crctest: crctest$X
 all-msgtest: msgtest$X
 
@@ -562,7 +562,7 @@ ttb_louis.$O:
 
 BRLTTY_TTB_OBJECTS = brltty-ttb.$O $(PROGRAM_OBJECTS) dataarea.$O $(TTB_OBJECTS) ttb_gnome.$O ttb_louis.$O $(PREFS_OBJECTS) $(CHARSET_OBJECTS)
 
-brltty-ttb$X: $(BRLTTY_TTB_OBJECTS) $(BUILD_API)
+brltty-ttb$X: $(BRLTTY_TTB_OBJECTS) | $(BUILD_API)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TTB_OBJECTS) $(API_REF) $(CURSES_LIBS) $(LDLIBS)
 
 brltty-ttb.$O:
@@ -658,7 +658,7 @@ ktb_keyboard.$O:
 
 BRLTTY_KTB_OBJECTS = brltty-ktb.$O $(PROGRAM_OBJECTS) $(KTB_OBJECTS) ktb_audit.$O ktb_keyboard.$O $(TTB_OBJECTS) $(PREFS_OBJECTS) $(CHARSET_OBJECTS) dataarea.$O drivers.$O driver.$O brl_utils.$O brl_driver.$O brl_base.$O $(BRAILLE_DRIVER_OBJECTS) $(IO_OBJECTS) cmd.$O cmd_queue.$O hidkeys.$O report.$O cmd_brlapi.$O crc_generate.$O $(FIRMWARE_OBJECTS)
 
-brltty-ktb$X: $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVERS)
+brltty-ktb$X: $(BRLTTY_KTB_OBJECTS) | $(BRAILLE_DRIVERS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_KTB_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(USB_LIBS) $(BLUETOOTH_LIBS) $(HID_LIBS) $(LDLIBS)
 
 brltty-ktb.$O:
@@ -731,7 +731,7 @@ brlapi_keytab.auto.h: $(SRC_DIR)/brlapi_keytab.awk $(COMMANDS_DEPENDENCIES)
 brlapi_brldefs.auto.h: $(SRC_DIR)/brlapi_brldefs.awk $(COMMANDS_DEPENDENCIES)
 	$(AWK) -f $(SRC_DIR)/brlapi_brldefs.awk $(COMMANDS_ARGUMENTS) >$@
 
-all-api-bindings: api
+all-api-bindings: | api
 	set -- $(API_BINDINGS); \
 	for language \
 	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) all) || exit 1; \
@@ -1006,7 +1006,7 @@ morse.$O:
 
 APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) cmd.$O cmd_brlapi.$O $(TTB_OBJECTS) $(PREFS_OBJECTS) $(CHARSET_OBJECTS) dataarea.$O
 
-apitest$X: $(APITEST_OBJECTS) api
+apitest$X: $(APITEST_OBJECTS) | api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) $(API_LIBS) $(LDLIBS)
 
 apitest.$O:
@@ -1063,7 +1063,7 @@ scr.auto.h: $(SRC_DIR)/mkdrvtab
 
 XBRLAPI_OBJECTS = xbrlapi.$O $(XSEL_OBJECT) $(PROGRAM_OBJECTS)
 
-xbrlapi$X: $(XBRLAPI_OBJECTS) api
+xbrlapi$X: $(XBRLAPI_OBJECTS) | api
 	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) $(API_LIBS) $(XKB_LIBS) $(XFIXES_LIBS) $(X11_LIBS) $(LDLIBS)
 
 xbrlapi.$O:
@@ -1076,7 +1076,7 @@ xsel.$O:
 
 BRLTTY_CLIP_OBJECTS = brltty-clip.$O $(PROGRAM_OBJECTS)
 
-brltty-clip$X: $(BRLTTY_CLIP_OBJECTS) api
+brltty-clip$X: $(BRLTTY_CLIP_OBJECTS) | api
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_CLIP_OBJECTS) $(API_LIBS) $(LDLIBS)
 
 brltty-clip.$O:
@@ -1092,7 +1092,7 @@ tbl2hex$(X_FOR_BUILD): $(TBL2HEX_OBJECTS)
 
 ###############################################################################
 
-check-braille-drivers: brltty$X braille-drivers $(API_LIB_VERSIONED)
+check-braille-drivers: brltty$X $(API_LIB_VERSIONED) | braille-drivers
 	@echo checking braille drivers
 	set -- $(BRAILLE_DRIVER_CODES) && \
 	for code; do \
@@ -1100,7 +1100,7 @@ check-braille-drivers: brltty$X braille-drivers $(API_LIB_VERSIONED)
 	./brltty -v -lwarning -N -e -f /dev/null -b $$code -s no -D "$(BLD_TOP)$(DRV_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" 2>&1 || exit 11; \
 	done
 
-check-speech-drivers: brltty speech-drivers
+check-speech-drivers: brltty$X | speech-drivers
 	@echo checking speech drivers
 	set -- $(SPEECH_DRIVER_CODES) && \
 	for code; do \

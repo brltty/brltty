@@ -42,7 +42,7 @@ JAVA_SOURCES = Constants.java $(SRC_DIR)/*.java $(SRC_DIR)/*/*.java
 JAVA_JNI_FILE = $(LIB_PFX)$(API_NAME)_java.$(LIB_EXT)
 jni: $(JAVA_JNI_FILE)
 
-$(JAVA_JNI_FILE): bindings.$O $(API_NAME)
+$(JAVA_JNI_FILE): bindings.$O | $(API_NAME)
 	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O $(API_LDFLAGS)
 
 bindings.$O:

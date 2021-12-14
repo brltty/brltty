@@ -28,9 +28,9 @@ TCL_DESTDIR = $(INSTALL_ROOT)
 TCL_PKG = $(TCL_DIR)/$(API_NAME)-$(API_RELEASE)
 TCL_API = $(LIB_PFX)$(API_NAME)_tcl.$(LIB_EXT)
 
-all: $(TCL_API)
+all: $(TCL_API) mkindex
 
-$(TCL_API): bindings.$O $(API_NAME)
+$(TCL_API): bindings.$O | $(API_NAME)
 	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O $(TCL_LIBS) $(API_LDFLAGS)
 
 PARAMETERS_HEADER = parameters.auto.h
@@ -49,7 +49,7 @@ clean::
 	-rm -f $(TCL_API) mkindex
 	-rm -f $(CONSTANTS_HEADERS)
 
-install: all mkindex
+install: all
 	$(INSTALL_DIRECTORY) $(TCL_DESTDIR)$(TCL_PKG)
 	$(INSTALL_PROGRAM) $(TCL_API) $(TCL_DESTDIR)$(TCL_PKG)
 	$(TCLSH) ./mkindex

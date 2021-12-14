@@ -24,6 +24,6 @@ DRIVER_DEVELOPERS = Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, Samue
 BRL_OBJS = @braille_libraries_ba@
 include $(SRC_TOP)braille.mk
 
-braille.$O: brlapi
+braille.$O: | brlapi
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
 
