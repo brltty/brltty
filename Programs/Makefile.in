@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: all-commands all-tools $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
+all: all-commands all-tools $(ALL_API) $(ALL_API_BINDINGS)
 
 all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse all-brltty-hid
 all-brltty: brltty$X | $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
@@ -34,14 +34,14 @@ all-tools: all-brltty-cldr all-brltty-lsinc
 all-brltty-cldr: brltty-cldr$X
 all-brltty-lsinc: brltty-lsinc$X
 
-everything: all all-brltest all-spktest all-scrtest all-crctest all-msgtest $(ALL_API)
+everything: all all-brltest all-spktest all-scrtest all-crctest all-msgtest
 all-brltest: brltest$X | $(BRAILLE_DRIVERS)
 all-spktest: spktest$X | $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X | $(SCREEN_DRIVERS)
 all-crctest: crctest$X
 all-msgtest: msgtest$X
 
-all-api: all-xbrlapi all-brltty-clip all-apitest
+all-api: $(ALL_XBRLAPI) all-brltty-clip all-apitest brlapi_brldefs.auto.h
 all-xbrlapi: xbrlapi$X
 all-brltty-clip: brltty-clip$X
 all-apitest: apitest$X
