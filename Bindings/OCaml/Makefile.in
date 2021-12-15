@@ -52,15 +52,15 @@ OCAML_FILES = $(OCAML_MISC) $(OCAML_CLIBS) $(OCAML_BCLIB) $(OCAML_NCLIB)
 .PHONY: install install-with-findlib install-without-findlib
 .PHONY: uninstall uninstall-with-findlib uninstall-without-findlib
 
-all : $(OCAML_FILES)
+all: $(OCAML_FILES)
 
-$(OCAML_CLIBS) : brlapi_stubs.$O brlapi
+$(OCAML_CLIBS): brlapi_stubs.$O | brlapi
 	$(OCAMLMKLIB) -ldopt "$(LDFLAGS)" $(API_LDFLAGS) -oc $(OCAML_LIB)_stubs brlapi_stubs.$O
 
-$(OCAML_BCLIB) : $(OCAML_CLIBS) brlapi.cmo
+$(OCAML_BCLIB): $(OCAML_CLIBS) brlapi.cmo
 	$(OCAMLC) -a $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB).cma brlapi.cmo
 
-$(OCAML_NCLIB) : $(OCAML_CLIBS) brlapi.cmx
+$(OCAML_NCLIB): $(OCAML_CLIBS) brlapi.cmx
 	$(OCAMLMKLIB) -ldopt "$(LDFLAGS)" $(OCAMLMKLIBOPT_FLAGS) -o $(OCAML_LIB) brlapi.cmx
 
 brlapi.cmi: brlapi.mli
@@ -75,20 +75,20 @@ brlapi.cmx: brlapi.ml brlapi.cmi
 brlapi_stubs.$O: $(SRC_DIR)/brlapi_stubs.c
 	$(OCAMLC) -cc $(CC) -ccopt "$(LIBCFLAGS)" -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
 
-brlapi.mli : $(SRC_DIR)/main.mli constants.mli
+brlapi.mli: $(SRC_DIR)/main.mli constants.mli
 	cat $(SRC_DIR)/main.mli constants.mli > $@
 
-brlapi.ml : $(SRC_DIR)/main.ml constants.ml
+brlapi.ml: $(SRC_DIR)/main.ml constants.ml
 	cat $(SRC_DIR)/main.ml constants.ml > $@
 
-constants.mli : constants.ml
+constants.mli: constants.ml
 	$(OCAMLC) -o /dev/null -c -i constants.ml > $@
 
 constants.ml: $(CONSTANTS_DEPENDENCIES)
 	$(AWK) $(CONSTANTS_ARGUMENTS) >$@
 
 clean::
-	rm -f *.cm* *.a *.so constants.ml* brlapi.ml*
+	-rm -f -- *.cm* *.a *.so constants.ml* brlapi.ml*
 
 install: all $(OCAML_INSTALL_TARGET)
 
@@ -117,3 +117,4 @@ uninstall-without-findlib:
 
 uninstall-with-findlib:
 	-$(OCAMLFIND) remove -destdir "$(OCAML_DESTDIR)" $(OCAML_LIB)
+
