@@ -137,5 +137,8 @@ distclean::
 	-rm -f *~ *orig \#*\# *.rej ? a.out
 	-rm -f Makefile
 
+src:
+	$(SYMLINK) $(SRC_DIR) src
+
 .DELETE_ON_ERROR:
 
