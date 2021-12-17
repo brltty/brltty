@@ -1,17 +1,12 @@
-; ======== libusb 1.0 (WinUSB) device driver ==========
-
-; ===================== Strings =======================
-
 [Strings]
+ProviderName  = "BRLTTY"
+DriverVersion = "12/16/2021,6.4.0.0"
+ClassName     = "USB Braille Devices"
+ClassGUID     = "{1720fa8e-ed15-4346-b73d-909eb41e89ef}"
+DeviceGUID    = "{ffe1ce84-18a1-4cf9-ac16-df74b7958daa}"
 
-DeviceGUID = "{ffe1ce84-18a1-4cf9-ac16-df74b7958daa}"
-DeviceClassGUID = "{1720fa8e-ed15-4346-b73d-909eb41e89ef}"
-DriverVersion = "04/26/2010"
-
-ProviderName = "libusb 1.0"
 WinUSB_SvcDesc = "WinUSB Driver Service"
 DiskName = "libusb (WinUSB) Device Install Disk"
-ClassName = "libusb (WinUSB) devices"
 
 ; ====================== Version ======================
 
@@ -19,7 +14,7 @@ ClassName = "libusb (WinUSB) devices"
 DriverVer = %DriverVersion%
 Signature = "$Windows NT$"
 Class = %ClassName%
-ClassGuid = %DeviceClassGUID%
+ClassGuid = %ClassGUID%
 Provider = %ProviderName%
 CatalogFile = libusb_device.cat
 

@@ -1,18 +1,19 @@
 [Strings]
-manufacturer = "BRLTTY"
-DeviceClassGUID = "{1720fa8e-ed15-4346-b73d-909eb41e89ef}"
-DriverVersion = "01/01/1995,0.1.12.1"
+ProviderName  = "BRLTTY"
+DriverVersion = "12/16/2021,6.4.0.0"
+ClassName     = "USB Braille Devices"
+ClassGUID     = "{1720fa8e-ed15-4346-b73d-909eb41e89ef}"
 
 [Version]
 Signature = "$Chicago$"
-provider  = %manufacturer%
+provider  = %ProviderName%
 DriverVer = %DriverVersion%
 CatalogFile = brltty.cat
 CatalogFile.NT = brltty.cat
-CatalogFile.NTAMD64 = brltty_x64.cat
+CatalogFile.NTamd64 = brltty_x64.cat
 
-Class = LibUsbDevices
-ClassGUID = %DeviceClassGUID%
+Class     = %ClassName%
+ClassGUID = %ClassGUID%
 
 [ClassInstall32]
 AddReg=libusb_class_install_add_reg
@@ -22,7 +23,7 @@ HKR,,,,"LibUSB-Win32 Devices"
 HKR,,Icon,,"-20"
 
 [Manufacturer]
-%manufacturer%=Devices,NTX86,NTAMD64
+%ProviderName%=Devices,NTx86,NTamd64
 
 ;--------------------------------------------------------------------------
 ; Files
@@ -66,19 +67,19 @@ libusb0_x64.dll
 [LIBUSB_DEV.NT]
 CopyFiles = libusb_files_sys, libusb_files_dll
 
-[LIBUSB_DEV.NTAMD64]
+[LIBUSB_DEV.NTamd64]
 CopyFiles = libusb_files_sys_x64, libusb_files_dll_wow64, libusb_files_dll_x64
 
 [LIBUSB_DEV.NT.HW]
 AddReg = libusb_add_reg_hw
 
-[LIBUSB_DEV.NTAMD64.HW]
+[LIBUSB_DEV.NTamd64.HW]
 AddReg = libusb_add_reg_hw
 
 [LIBUSB_DEV.NT.Services]
 AddService = libusb0, 0x00000002, libusb_add_service
 
-[LIBUSB_DEV.NTAMD64.Services]
+[LIBUSB_DEV.NTamd64.Services]
 AddService = libusb0, 0x00000002, libusb_add_service_amd64
 
 ; Device properties
@@ -108,7 +109,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Devices
 ;--------------------------------------------------------------------------
 
-[Devices.NTX86]
+[Devices.NTx86]
 ; BEGIN_USB_BRAILLE_DEVICES LibUSB-Win32 LIBUSB_DEV
 
 ; Device: 0403:6001
@@ -476,7 +477,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 
 ; END_USB_BRAILLE_DEVICES
 
-[Devices.NTAMD64]
+[Devices.NTamd64]
 ; BEGIN_USB_BRAILLE_DEVICES LibUSB-Win32 LIBUSB_DEV
 
 ; Device: 0403:6001

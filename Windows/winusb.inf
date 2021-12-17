@@ -1,20 +1,23 @@
 [Strings]
-ManufacturerName="brltty"
-ClassName="USB braille devices"
+ProviderName  = "BRLTTY"
+DriverVersion = "12/16/2021,6.4.0.0"
+ClassName     = "USB Braille Devices"
+ClassGUID     = "{1720fa8e-ed15-4346-b73d-909eb41e89ef}"
+
 REG_MULTI_SZ = 0x00010000
 
 [Version]
 Signature = "$Windows NT$"
-Class     = USBDevice
-ClassGUID = {88BAE032-5A81-49f0-BC3D-A4FF138216D6}
-Provider  = %ManufacturerName%
+Class     = %ClassName%
+ClassGUID = %ClassGUID%
+Provider  = %ProviderName%
 CatalogFile = WinUSBInstallation.cat
-DriverVer=09/04/2012,13.54.20.543
+DriverVer=%DriverVersion%
 
 ; ========== Manufacturer/Models sections ===========
 
 [Manufacturer]
-%ManufacturerName% = Standard,NTx86,NTamd64
+%ProviderName% = Standard,NTx86,NTamd64
 
 [Standard.NTx86]
 ; BEGIN_USB_BRAILLE_DEVICES winusb USB_Install
