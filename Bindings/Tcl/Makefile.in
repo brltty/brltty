@@ -27,10 +27,7 @@ TCL_API_DIR = $(INSTALL_ROOT)$(TCL_DIR)/$(API_NAME)-$(API_RELEASE)
 TCL_API_LIB = $(LIB_PFX)$(API_NAME)_tcl.$(LIB_EXT)
 TCL_INDEX_SCRIPT = mkindex
 
-all: $(TCL_API_LIB) make-index-script
-
-make-index-script:
-	echo >$(TCL_INDEX_SCRIPT) 'pkg_mkIndex $(TCL_API_DIR) $(TCL_API_LIB)'
+all: $(TCL_API_LIB) | make-index-script
 
 $(TCL_API_LIB): bindings.$O | $(API_NAME)
 	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O $(TCL_LIBS) $(API_LDFLAGS)
@@ -44,9 +41,12 @@ $(CONSTANTS_HEADERS): $(CONSTANTS_DEPENDENCIES)
 bindings.$O:
 	$(CC) $(TCL_CPPFLAGS) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
 
+make-index-script:
+	echo >$(TCL_INDEX_SCRIPT) 'pkg_mkIndex $(TCL_API_DIR) $(TCL_API_LIB)'
+
 clean::
-	-rm -f $(TCL_API_LIB) $(TCL_INDEX_SCRIPT)
-	-rm -f $(CONSTANTS_HEADERS)
+	-rm -f -- $(TCL_API_LIB) $(TCL_INDEX_SCRIPT)
+	-rm -f -- $(CONSTANTS_HEADERS)
 
 install: all
 	$(INSTALL_DIRECTORY) $(TCL_API_DIR)
