@@ -522,7 +522,7 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
         if (request->discover) bthDiscoverSerialPortChannel(&connection->channel, connection->extension, request->timeout);
         bthLogChannel(connection->channel);
 
-        if (connection->channel) {
+        {
           TimePeriod period;
           startTimePeriod(&period, BLUETOOTH_CHANNEL_BUSY_RETRY_TIMEOUT);
 
@@ -535,12 +535,6 @@ bthOpenConnection (const BluetoothConnectionRequest *request) {
             if (errno != EBUSY) break;
             asyncWait(BLUETOOTH_CHANNEL_BUSY_RETRY_INTERVAL);
           }
-        } else {
-          logMessage(LOG_CATEGORY(BLUETOOTH_IO),
-            "serial port channel neither specified nor discovered"
-          );
-
-          errno = EINVAL;
         }
 
         bthRememberConnectError(connection->address, errno);
