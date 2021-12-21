@@ -1,6 +1,7 @@
 [Strings]
 ProviderName  = "BRLTTY"
-DriverVersion = "12/16/2021,6.4.0.0"
+DriverDate    = "12/21/2021"
+DriverVersion = "6.4.0.228"
 ClassName     = "USB Braille Devices"
 ClassGUID     = "{1720fa8e-ed15-4346-b73d-909eb41e89ef}"
 DeviceGUID    = "{ffe1ce84-18a1-4cf9-ac16-df74b7958daa}"
@@ -11,7 +12,7 @@ DiskName = "libusb (WinUSB) Device Install Disk"
 ; ====================== Version ======================
 
 [Version]
-DriverVer = %DriverVersion%
+DriverVer = %DriverDate%,%DriverVersion%
 Signature = "$Windows NT$"
 Class = %ClassName%
 ClassGuid = %ClassGUID%

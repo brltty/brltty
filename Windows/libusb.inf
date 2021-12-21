@@ -1,13 +1,14 @@
 [Strings]
 ProviderName  = "BRLTTY"
-DriverVersion = "12/16/2021,6.4.0.0"
+DriverDate    = "12/21/2021"
+DriverVersion = "6.4.0.228"
 ClassName     = "USB Braille Devices"
 ClassGUID     = "{1720fa8e-ed15-4346-b73d-909eb41e89ef}"
 
 [Version]
 Signature = "$Chicago$"
 provider  = %ProviderName%
-DriverVer = %DriverVersion%
+DriverVer = %DriverDate%,%DriverVersion%
 CatalogFile = brltty.cat
 CatalogFile.NT = brltty.cat
 CatalogFile.NTamd64 = brltty_x64.cat
