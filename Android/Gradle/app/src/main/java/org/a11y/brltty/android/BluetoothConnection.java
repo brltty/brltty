@@ -26,7 +26,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+
 import java.util.UUID;
+import android.os.ParcelUuid;
 
 import android.util.Log;
 
@@ -202,6 +204,18 @@ public class BluetoothConnection {
     closeInputStream();
     closeOutputStream();
     closeBluetoothSocket();
+  }
+
+  public boolean canDiscover () {
+    BluetoothDevice device = getDevice();
+
+    for (ParcelUuid uuid : device.getUuids()) {
+      if (uuid.getUuid().equals(SERIAL_PROFILE_UUID)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public static BluetoothSocket createRfcommSocket (BluetoothDevice device, int channel) {
