@@ -600,7 +600,7 @@ static DATA_OPERANDS_PROCESSOR(processContractionTableDirective) {
       }
 
       default:
-        reportDataError(file, "unimplemented opcode: %" PRIws, opcodeNames[opcode]);
+        reportDataError(file, "unimplemented opcode: %" PRIws, getContractionTableOpcodeName(opcode));
         break;
     }
 
