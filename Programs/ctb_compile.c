@@ -384,7 +384,16 @@ allocateCharacterClasses (ContractionTableData *ctd) {
 
 const wchar_t *
 getContractionTableOpcodeName (ContractionTableOpcode opcode) {
-  return opcodeNames[opcode];
+  const wchar_t *name = NULL;
+
+  if (opcode >= 0) {
+    if (opcode < ARRAY_COUNT(opcodeNames)) {
+      name = opcodeNames[opcode];
+    }
+  }
+
+  if (!name) name = WS_C("<unknown>");
+  return name;
 }
 
 static ContractionTableOpcode
