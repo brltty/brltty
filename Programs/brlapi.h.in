@@ -1403,22 +1403,21 @@ typedef uint32_t brlapi_packetType_t;
  */
 const char * BRLAPI_STDCALL brlapi_getPacketTypeName(brlapi_packetType_t type);
 
-/* brlapi__exceptionHandler_t */
+/* brlapi_exceptionHandler_t */
 /** Types for exception handlers
  *
  * Types of exception handlers which are to be given to
  * brlapi_setExceptionHandler() and brlapi__setExceptionHandler().
  *
- * \param handle is the handle corresponding to the guilty connection;
  * \param error is a BRLAPI_ERROR_ error code;
  * \param type is the type of the guilty packet;
  * \param packet points to the content of the guilty packet (might be a little bit truncated);
  * \param size gives the guilty packet's size.
  */
-typedef void (BRLAPI_STDCALL *brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size);
 #ifndef BRLAPI_NO_SINGLE_SESSION
 typedef void (BRLAPI_STDCALL *brlapi_exceptionHandler_t)(int error, brlapi_packetType_t type, const void *packet, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
+typedef void (BRLAPI_STDCALL *brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size);
 
 /* brlapi_strexception */
 /** Describes an exception
