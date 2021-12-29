@@ -19,7 +19,6 @@
 [Unit]
 Description=Braille Device: %I
 Documentation=man:brltty(1)
-Documentation=http://brltty.app/
 
 BindsTo=%i.device
 Requires=brltty@-%i.service

@@ -31,6 +31,7 @@ RefuseManualStart=true
 
 After=local-fs.target
 After=sound.target
+Before=getty.target display-manager.service
 
 
 [Service]

@@ -18,9 +18,9 @@
 
 [Unit]
 Description=BRLTTY (using configuration file /etc/brltty_%I.conf)
+Documentation=man:brltty(1)
 
 Requires=brltty@-etc-brltty_%i.conf.service
-Before=getty.target display-manager.service
 
 [Path]
 PathExists=/etc/brltty_%I.conf

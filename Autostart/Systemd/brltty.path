@@ -18,9 +18,9 @@
 
 [Unit]
 Description=Default BRLTTY Instance
+Documentation=man:brltty(1)
 
 Requires=brltty@-etc-brltty.conf.service
-Before=getty.target display-manager.service
 
 [Path]
 PathExists=/etc/brltty.conf
