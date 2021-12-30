@@ -97,6 +97,7 @@ USB_DEVICE_ENTRY(0X0452, 0X0100, "mt"),
 // Device: 045E:930A
 // HIMS [Braille Sense (USB 1.1)]
 // HIMS [Braille Sense (USB 2.0)]
+// HIMS [Braille Sense 6 (USB 2.1)]
 // HIMS [Braille Sense U2 (USB 2.0)]
 USB_DEVICE_ENTRY(0X045E, 0X930A, "hm"),
 

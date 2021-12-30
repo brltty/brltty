@@ -87,7 +87,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Metec [all models]"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense 6 (USB 2.1)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge and QBrailleXL]"=LIBUSB_DEV, USB\VID_045E&PID_930B
@@ -467,7 +467,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Metec [all models]"=LIBUSB_DEV, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
+"LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense 6 (USB 2.1)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge and QBrailleXL]"=LIBUSB_DEV, USB\VID_045E&PID_930B

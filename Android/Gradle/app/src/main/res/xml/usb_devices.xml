@@ -73,6 +73,7 @@
   <!-- Device: 045E:930A -->
   <!-- HIMS [Braille Sense (USB 1.1)] -->
   <!-- HIMS [Braille Sense (USB 2.0)] -->
+  <!-- HIMS [Braille Sense 6 (USB 2.1)] -->
   <!-- HIMS [Braille Sense U2 (USB 2.0)] -->
   <usb-device vendor-id="1118" product-id="37642" />
 

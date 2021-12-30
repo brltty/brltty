@@ -72,7 +72,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 "winusb: Metec [all models]"=USB_Install, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"winusb: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=USB_Install, USB\VID_045E&PID_930A
+"winusb: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense 6 (USB 2.1)], HIMS [Braille Sense U2 (USB 2.0)]"=USB_Install, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "winusb: HIMS [Braille Edge and QBrailleXL]"=USB_Install, USB\VID_045E&PID_930B
@@ -452,7 +452,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 "winusb: Metec [all models]"=USB_Install, USB\VID_0452&PID_0100
 
 ; Device: 045E:930A
-"winusb: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=USB_Install, USB\VID_045E&PID_930A
+"winusb: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense 6 (USB 2.1)], HIMS [Braille Sense U2 (USB 2.0)]"=USB_Install, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
 "winusb: HIMS [Braille Edge and QBrailleXL]"=USB_Install, USB\VID_045E&PID_930B

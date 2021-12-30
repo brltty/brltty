@@ -51,6 +51,7 @@ typedef enum {
   UsbSpecificationVersion_1_0 = 0X0100,
   UsbSpecificationVersion_1_1 = 0X0110,
   UsbSpecificationVersion_2_0 = 0X0200,
+  UsbSpecificationVersion_2_1 = 0X0210,
   UsbSpecificationVersion_3_0 = 0X0300
 } UsbSpecificationVersion;
 

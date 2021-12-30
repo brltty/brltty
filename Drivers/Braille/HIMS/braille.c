@@ -590,6 +590,16 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&brailleSenseProtocol
     },
 
+    { /* Braille Sense 6 (USB 2.1) */
+      .version = UsbSpecificationVersion_2_1,
+      .vendor=0X045E, .product=0X930A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .verifyInterface=1,
+      .disableAutosuspend=1,
+      .data=&brailleSenseProtocol
+    },
+
     { /* Sync Braille */
       .vendor=0X0403, .product=0X6001,
       .manufacturers = usbManufacturers_0403_6001,
