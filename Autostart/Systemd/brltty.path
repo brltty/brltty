@@ -20,12 +20,15 @@
 Description=Default BRLTTY Instance
 Documentation=man:brltty(1)
 
+DefaultDependencies=no
+After=local-fs.target
 Requires=brltty@-etc-brltty.conf.service
+
 
 [Path]
 PathExists=/etc/brltty.conf
 Unit=brltty@-etc-brltty.conf.service
 
+
 [Install]
 WantedBy=default.target multi-user.target rescue.target emergency.target
-

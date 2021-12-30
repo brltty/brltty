@@ -21,17 +21,18 @@ Description=BRLTTY Instance: %I
 Documentation=man:brltty(1)
 Documentation=@PACKAGE_URL@
 
-ConditionPathExists=%I
 RequiresMountsFor=@WRITABLE_DIRECTORY@
 RequiresMountsFor=@UPDATABLE_DIRECTORY@
 RequiresMountsFor=@BRLAPI_SOCKETPATH@
 
-StopWhenUnneeded=true
-RefuseManualStart=true
+Wants=sound.target
+After=sound.target
 
 After=local-fs.target
-After=sound.target
-Before=getty.target display-manager.service
+ConditionPathExists=%I
+
+RefuseManualStart=true
+StopWhenUnneeded=true
 
 
 [Service]
