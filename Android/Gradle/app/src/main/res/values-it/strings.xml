@@ -8,7 +8,7 @@
   <string name="about_label_activity">Info sull\'Applicazione</string>
   <string name="about_label_copyright">Copyright</string>
   <string name="about_label_sourceRevision">Revisione Sorgente</string>
-  <string name="about_label_buildTime">Data Rilascio</string>
+  <string name="about_label_buildTime">Data e Ora del Rilascio</string>
   <string name="about_label_privacyPolicy">Informativa sulla Privacy</string>
 
   <string name="inputService_name">BRLTTY Servizio in Ingresso</string>
