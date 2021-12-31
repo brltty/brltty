@@ -3,8 +3,13 @@
 <resources>
   <string name="app_description">BRLTTY permette l\'utilizzo di dispositivi braille.</string>
 
+  <string name="usbMonitor_label">Dispositivo USB Collegato Monitor</string>
+
   <string name="about_label_activity">Info sull\'Applicazione</string>
   <string name="about_label_copyright">Copyright</string>
+  <string name="about_label_sourceRevision">Revisione Sorgente</string>
+  <string name="about_label_buildTime">Data Rilascio</string>
+  <string name="about_label_privacyPolicy">Informativa sulla Privacy</string>
 
   <string name="inputService_name">BRLTTY Servizio in Ingresso</string>
   <string name="inputService_type">Tastiere su Dispositivi Braille</string>
@@ -24,6 +29,7 @@
   <string name="fileDownloader_state_connecting">connessione in corso</string>
   <string name="fileDownloader_state_downloading">scaricamento in corso</string>
 
+  <string name="setting_state_off">Off</string>
   <string name="checkbox_state_unchecked">No</string>
   <string name="checkbox_state_checked">Sì</string>
 
@@ -96,6 +102,7 @@
   <string name="ADD_DEVICE_UNSELECTED_DRIVER">driver braille non selezionato</string>
   <string name="ADD_DEVICE_NO_DEVICES">nessun dispositivo</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">nome dispositivo già in uso</string>
+  <string name="ADD_DEVICE_NO_PERMISSION">accesso al dispositivo negato</string>
 
   <string name="REMOVE_DEVICE_PROMPT">Sei sicuro di voler rimuovere questo dispositivo?</string>
 
@@ -129,9 +136,11 @@
   <string name="LOG_CATEGORY_LABEL_speech">Eventi Audio</string>
   <string name="LOG_CATEGORY_LABEL_async">Eventi Asincroni</string>
   <string name="LOG_CATEGORY_LABEL_server">Eventi Server</string>
+  <string name="LOG_CATEGORY_LABEL_gio">I/O generico</string>
   <string name="LOG_CATEGORY_LABEL_serial">I/O Seriale</string>
   <string name="LOG_CATEGORY_LABEL_usb">I/O USB</string>
   <string name="LOG_CATEGORY_LABEL_bt">I/O Bluetooth</string>
+  <string name="LOG_CATEGORY_LABEL_hid">I/O Interfaccia Uomo-Macchina</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Eventi Driver Braille</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Eventi Driver Voce</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Eventi Driver Schermo</string>
@@ -263,6 +272,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">Olandese (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Portoghese (grado 2)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Russo (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalese (non contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (contratto)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Thai (contratto)</string>
