@@ -1,5 +1,7 @@
 app_description BRLTTY supports braille devices.
 
+usbMonitor_label USB Device Attached Monitor
+
 about_label_activity About Application
 about_label_copyright Copyright
 about_label_buildTime Build Time
