@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 2019-2021 by Samuel Thibault <Samuel.Thibault@ens-lyon.org>
+ * Copyright (C) 2019-2022 by Samuel Thibault <Samuel.Thibault@ens-lyon.org>
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *

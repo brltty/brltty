@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006-2021 S&S
+ *  Copyright (C) 2006-2022 S&S
  *  Samuel Thibault <samuel.thibault@ens-lyon.org>
  *  Sébastien Hinderer <sebastien.hinderer@ens-lyon.org>
  *
