@@ -479,10 +479,20 @@ static const ProtocolEntry brailleEdgeProtocol = {
 };
 
 
+static const ProtocolEntry brailleSense6Protocol = {
+  .modelName = "BrailleSense 6",
+  .resourceNamePrefix = "H632B",
+  .keyTable = &KEY_TABLE_DEFINITION(scroll),
+  .testIdentities = testBrailleSenseIdentities,
+  .getDefaultCellCount = getBrailleSenseDefaultCellCount
+};
+
+
 static const ProtocolEntry *protocolTable[] = {
   &brailleSenseProtocol,
   &syncBrailleProtocol,
   &brailleEdgeProtocol,
+  &brailleSense6Protocol,
   NULL
 };
 
