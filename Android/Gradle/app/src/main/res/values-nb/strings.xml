@@ -3,6 +3,8 @@
 <resources>
   <string name="app_description">BRLTTY støtter punktskriftenheter.</string>
 
+  <string name="usbMonitor_label">Observere tilkoplet USB-enhet</string>
+
   <string name="about_label_activity">Om programmet</string>
   <string name="about_label_copyright">Opphavsrett</string>
   <string name="about_label_buildTime">Byggetid</string>
