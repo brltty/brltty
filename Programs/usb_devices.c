@@ -29,7 +29,7 @@ const UsbDeviceEntry usbDeviceTable[] = {
 
 // Device: 0403:6001
 // Generic Identifier
-// Vendor: Future Technology Devices International, Ltd
+// Vendor: Future Technology Devices International, Ltd.
 // Product: FT232 USB-Serial (UART) IC
 // Albatross [all models]
 // Cebra [all models]
@@ -318,6 +318,9 @@ USB_DEVICE_ENTRY(0X1209, 0XABC0, "ic"),
 USB_DEVICE_ENTRY(0X16C0, 0X05E1, "cn"),
 
 // Device: 1A86:7523
+// Generic Identifier
+// Vendor: Jiangsu QinHeng, Ltd.
+// Product: CH341 USB Bridge Controller
 // Baum [NLS eReader Zoomax (20 cells)]
 USB_DEVICE_ENTRY(0X1A86, 0X7523, "bm"),
 

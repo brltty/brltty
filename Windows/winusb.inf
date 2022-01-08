@@ -25,7 +25,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 0403:6001
 ; Generic Identifier
-; Vendor: Future Technology Devices International, Ltd
+; Vendor: Future Technology Devices International, Ltd.
 ; Product: FT232 USB-Serial (UART) IC
 "winusb: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=USB_Install, USB\VID_0403&PID_6001
 
@@ -237,6 +237,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 "winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
 
 ; Device: 1A86:7523
+; Generic Identifier
+; Vendor: Jiangsu QinHeng, Ltd.
+; Product: CH341 USB Bridge Controller
 "winusb: Baum [NLS eReader Zoomax (20 cells)]"=USB_Install, USB\VID_1A86&PID_7523
 
 ; Device: 1C71:C004
@@ -393,7 +396,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 0403:6001
 ; Generic Identifier
-; Vendor: Future Technology Devices International, Ltd
+; Vendor: Future Technology Devices International, Ltd.
 ; Product: FT232 USB-Serial (UART) IC
 "winusb: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=USB_Install, USB\VID_0403&PID_6001
 
@@ -605,6 +608,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 "winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
 
 ; Device: 1A86:7523
+; Generic Identifier
+; Vendor: Jiangsu QinHeng, Ltd.
+; Product: CH341 USB Bridge Controller
 "winusb: Baum [NLS eReader Zoomax (20 cells)]"=USB_Install, USB\VID_1A86&PID_7523
 
 ; Device: 1C71:C004

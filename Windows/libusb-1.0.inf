@@ -40,7 +40,7 @@ HKR,,Icon,,-20
 
 ; Device: 0403:6001
 ; Generic Identifier
-; Vendor: Future Technology Devices International, Ltd
+; Vendor: Future Technology Devices International, Ltd.
 ; Product: FT232 USB-Serial (UART) IC
 "LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
@@ -252,6 +252,9 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Canute [all models]"=LIBUSB_DEV, USB\VID_16C0&PID_05E1
 
 ; Device: 1A86:7523
+; Generic Identifier
+; Vendor: Jiangsu QinHeng, Ltd.
+; Product: CH341 USB Bridge Controller
 "LibUSB-1.0: Baum [NLS eReader Zoomax (20 cells)]"=LIBUSB_DEV, USB\VID_1A86&PID_7523
 
 ; Device: 1C71:C004
@@ -408,7 +411,7 @@ HKR,,Icon,,-20
 
 ; Device: 0403:6001
 ; Generic Identifier
-; Vendor: Future Technology Devices International, Ltd
+; Vendor: Future Technology Devices International, Ltd.
 ; Product: FT232 USB-Serial (UART) IC
 "LibUSB-1.0: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
@@ -620,6 +623,9 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Canute [all models]"=LIBUSB_DEV, USB\VID_16C0&PID_05E1
 
 ; Device: 1A86:7523
+; Generic Identifier
+; Vendor: Jiangsu QinHeng, Ltd.
+; Product: CH341 USB Bridge Controller
 "LibUSB-1.0: Baum [NLS eReader Zoomax (20 cells)]"=LIBUSB_DEV, USB\VID_1A86&PID_7523
 
 ; Device: 1C71:C004

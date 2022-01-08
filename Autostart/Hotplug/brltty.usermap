@@ -20,7 +20,7 @@
 
 # Device: 0403:6001
 # Generic Identifier
-# Vendor: Future Technology Devices International, Ltd
+# Vendor: Future Technology Devices International, Ltd.
 # Product: FT232 USB-Serial (UART) IC
 # Albatross [all models]
 # Cebra [all models]
@@ -309,6 +309,9 @@ brltty 0x0003 0x1209 0xabc0
 brltty 0x0003 0x16c0 0x05e1
 
 # Device: 1A86:7523
+# Generic Identifier
+# Vendor: Jiangsu QinHeng, Ltd.
+# Product: CH341 USB Bridge Controller
 # Baum [NLS eReader Zoomax (20 cells)]
 brltty 0x0003 0x1a86 0x7523
 
