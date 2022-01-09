@@ -1024,6 +1024,7 @@ usbCloseDevice (UsbDevice *device) {
 static UsbDevice *
 usbOpenDevice (UsbDeviceExtension *extension) {
   UsbDevice *device;
+
   if ((device = malloc(sizeof(*device)))) {
     memset(device, 0, sizeof(*device));
     device->extension = extension;
@@ -1059,9 +1060,11 @@ usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser *chooser, UsbChoo
   UsbDevice *device;
 
   if ((device = usbOpenDevice(extension))) {
-    logMessage(LOG_CATEGORY(USB_IO), "testing device: vendor=%04X product=%04X",
-               getLittleEndian16(device->descriptor.idVendor),
-               getLittleEndian16(device->descriptor.idProduct));
+    logMessage(LOG_CATEGORY(USB_IO),
+      "testing device: vendor=%04X product=%04X",
+      getLittleEndian16(device->descriptor.idVendor),
+      getLittleEndian16(device->descriptor.idProduct)
+    );
 
     if (chooser(device, data)) {
       usbLogString(device, device->descriptor.iManufacturer, "Manufacturer Name");
@@ -1518,14 +1521,19 @@ struct UsbChooseChannelDataStruct {
 static int
 usbChooseChannel (UsbDevice *device, UsbChooseChannelData *data) {
   const UsbDeviceDescriptor *descriptor = &device->descriptor;
+  logBytes(LOG_CATEGORY(USB_IO), "device descriptor", descriptor, sizeof(*descriptor));
 
   if (!(descriptor->iManufacturer || descriptor->iProduct || descriptor->iSerialNumber)) {
     UsbDeviceDescriptor actualDescriptor;
     ssize_t result = usbGetDeviceDescriptor(device, &actualDescriptor);
 
     if (result == UsbDescriptorSize_Device) {
-      logMessage(LOG_CATEGORY(USB_IO), "using actual device descriptor");
       device->descriptor = actualDescriptor;
+
+      logBytes(LOG_CATEGORY(USB_IO),
+        "using actual device descriptor",
+        descriptor, sizeof(*descriptor)
+      );
     }
   }
 
