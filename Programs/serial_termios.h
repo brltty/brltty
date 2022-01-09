@@ -26,7 +26,7 @@
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */
 
-#include "async.h"
+#include "async_handle.h"
 
 #ifdef __cplusplus
 extern "C" {

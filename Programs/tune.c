@@ -23,7 +23,7 @@
 #include "log.h"
 #include "parameters.h"
 #include "thread.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_alarm.h"
 #include "async_event.h"
 #include "async_wait.h"

@@ -36,7 +36,7 @@
 
 #include "log.h"
 #include "timing.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_io.h"
 
 typedef enum {

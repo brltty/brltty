@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 
 #include "log.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_io.h"
 
 #include "brl_driver.h"

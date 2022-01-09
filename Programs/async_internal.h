@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_INTERNAL
 #define BRLTTY_INCLUDED_ASYNC_INTERNAL
 
-#include "async.h"
+#include "async_handle.h"
 #include "queue.h"
 
 #ifdef __cplusplus

@@ -21,7 +21,7 @@
 #include "parameters.h"
 #include "blink.h"
 #include "prefs.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_alarm.h"
 #include "update.h"
 #include "core.h"

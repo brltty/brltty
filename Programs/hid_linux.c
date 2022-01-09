@@ -32,7 +32,7 @@
 #include "hid_internal.h"
 #include "hid_items.h"
 #include "io_misc.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_io.h"
 
 struct HidHandleStruct {

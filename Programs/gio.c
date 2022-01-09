@@ -22,7 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "io_generic.h"

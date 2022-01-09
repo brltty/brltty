@@ -44,7 +44,7 @@
 #include "file.h"
 #include "parse.h"
 #include "timing.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_wait.h"
 #include "async_alarm.h"
 #include "async_io.h"

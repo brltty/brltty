@@ -21,7 +21,7 @@
 
 #include "strfmth.h"
 #include "cmd_types.h"
-#include "async.h"
+#include "async_handle.h"
 
 #ifdef __cplusplus
 extern "C" {

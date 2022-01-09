@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ASYNC
-#define BRLTTY_INCLUDED_ASYNC
+#ifndef BRLTTY_INCLUDED_ASYNC_HANDLE
+#define BRLTTY_INCLUDED_ASYNC_HANDLE
 
 #include "async_types.h"
 
@@ -33,4 +33,4 @@ extern void asyncCancelRequest (AsyncHandle handle);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ASYNC */
+#endif /* BRLTTY_INCLUDED_ASYNC_HANDLE */

@@ -23,7 +23,7 @@
 
 #include "log.h"
 #include "parameters.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_alarm.h"
 
 #define BRL_HAVE_STATUS_CELLS

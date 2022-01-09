@@ -66,7 +66,7 @@
 #include "parse.h"
 #include "thread.h"
 #include "brl_cmds.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_io.h"
 #include "async_alarm.h"
 #include "async_event.h"

@@ -26,7 +26,7 @@
 #include "log.h"
 #include "pipe.h"
 #include "file.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_io.h"
 
 struct NamedPipeObjectStruct {

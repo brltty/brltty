@@ -31,7 +31,7 @@
 #include "unicode.h"
 #include "ttb.h"
 #include "scr.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_alarm.h"
 #include "prefs.h"
 #include "core.h"

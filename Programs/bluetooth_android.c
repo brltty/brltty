@@ -24,7 +24,7 @@
 #include "log.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_io.h"
 #include "io_misc.h"
 #include "thread.h"

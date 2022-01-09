@@ -27,7 +27,7 @@
 #include "report.h"
 #include "strfmt.h"
 #include "update.h"
-#include "async.h"
+#include "async_handle.h"
 #include "async_alarm.h"
 #include "timing.h"
 #include "unicode.h"
