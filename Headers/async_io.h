@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_ASYNC_IO
 
 #include "async_types.h"
+#include "async_types_io.h"
 
 #ifdef __cplusplus
 extern "C" {

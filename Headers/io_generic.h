@@ -20,7 +20,7 @@
 #define BRLTTY_INCLUDED_IO_GENERIC
 
 #include "gio_types.h"
-#include "async_types.h"
+#include "async_types_io.h"
 
 #ifdef __cplusplus
 extern "C" {

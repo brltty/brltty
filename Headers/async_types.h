@@ -38,36 +38,6 @@ typedef ASYNC_ALARM_CALLBACK(AsyncAlarmCallback);
 #define ASYNC_CONDITION_TESTER(name) int name (void *data)
 typedef ASYNC_CONDITION_TESTER(AsyncConditionTester);
 
-typedef struct {
-  void *data;
-  int error;
-} AsyncMonitorCallbackParameters;
-
-#define ASYNC_MONITOR_CALLBACK(name) int name (const AsyncMonitorCallbackParameters *parameters)
-typedef ASYNC_MONITOR_CALLBACK(AsyncMonitorCallback);
-
-typedef struct {
-  void *data;
-  const void *buffer;
-  size_t size;
-  size_t length;
-  int error;
-  unsigned end:1;
-} AsyncInputCallbackParameters;
-
-#define ASYNC_INPUT_CALLBACK(name) size_t name (const AsyncInputCallbackParameters *parameters)
-typedef ASYNC_INPUT_CALLBACK(AsyncInputCallback);
-
-typedef struct {
-  void *data;
-  const void *buffer;
-  size_t size;
-  int error;
-} AsyncOutputCallbackParameters;
-
-#define ASYNC_OUTPUT_CALLBACK(name) void name (const AsyncOutputCallbackParameters *parameters)
-typedef ASYNC_OUTPUT_CALLBACK(AsyncOutputCallback);
-
 typedef struct AsyncEventStruct AsyncEvent;
 
 typedef struct {
