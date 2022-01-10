@@ -16,43 +16,18 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ASYNC_TYPES
-#define BRLTTY_INCLUDED_ASYNC_TYPES
-
-#include "timing_types.h"
+#ifndef BRLTTY_INCLUDED_ASYNC_TYPES_WAIT
+#define BRLTTY_INCLUDED_ASYNC_TYPES_WAIT
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct AsyncHandleStruct *AsyncHandle;
-
-typedef struct {
-  const TimeValue *now;
-  void *data;
-} AsyncAlarmCallbackParameters;
-
-#define ASYNC_ALARM_CALLBACK(name) void name (const AsyncAlarmCallbackParameters *parameters)
-typedef ASYNC_ALARM_CALLBACK(AsyncAlarmCallback);
-
 #define ASYNC_CONDITION_TESTER(name) int name (void *data)
 typedef ASYNC_CONDITION_TESTER(AsyncConditionTester);
-
-typedef struct AsyncEventStruct AsyncEvent;
-
-typedef struct {
-  void *eventData;
-  void *signalData;
-} AsyncEventCallbackParameters;
-
-#define ASYNC_EVENT_CALLBACK(name) void name (const AsyncEventCallbackParameters *parameters)
-typedef ASYNC_EVENT_CALLBACK(AsyncEventCallback);
-
-#define ASYNC_TASK_CALLBACK(name) void name (void *data)
-typedef ASYNC_TASK_CALLBACK(AsyncTaskCallback);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ASYNC_TYPES */
+#endif /* BRLTTY_INCLUDED_ASYNC_TYPES_WAIT */

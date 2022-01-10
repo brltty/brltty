@@ -20,7 +20,7 @@
 #define BRLTTY_INCLUDED_ASYNC_SIGNAL
 
 #include "prologue.h"
-#include "async_types.h"
+#include "async_types_handle.h"
 
 #undef ASYNC_CAN_HANDLE_SIGNALS
 #undef ASYNC_CAN_BLOCK_SIGNALS

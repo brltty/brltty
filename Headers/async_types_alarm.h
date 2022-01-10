@@ -16,25 +16,25 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ASYNC_TASK
-#define BRLTTY_INCLUDED_ASYNC_TASK
+#ifndef BRLTTY_INCLUDED_ASYNC_TYPES_ALARM
+#define BRLTTY_INCLUDED_ASYNC_TYPES_ALARM
 
-#include "async_types_task.h"
-#include "async_types_event.h"
+#include "timing_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern int asyncAddTask (
-  AsyncEvent *event,
-  AsyncTaskCallback *callback, void *data
-);
+typedef struct {
+  const TimeValue *now;
+  void *data;
+} AsyncAlarmCallbackParameters;
 
-extern AsyncEvent *asyncNewAddTaskEvent (void);
+#define ASYNC_ALARM_CALLBACK(name) void name (const AsyncAlarmCallbackParameters *parameters)
+typedef ASYNC_ALARM_CALLBACK(AsyncAlarmCallback);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ASYNC_TASK */
+#endif /* BRLTTY_INCLUDED_ASYNC_TYPES_ALARM */

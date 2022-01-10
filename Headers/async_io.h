@@ -19,8 +19,8 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_IO
 #define BRLTTY_INCLUDED_ASYNC_IO
 
-#include "async_types.h"
 #include "async_types_io.h"
+#include "async_types_handle.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -16,25 +16,18 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ASYNC_TASK
-#define BRLTTY_INCLUDED_ASYNC_TASK
-
-#include "async_types_task.h"
-#include "async_types_event.h"
+#ifndef BRLTTY_INCLUDED_ASYNC_TYPES_TASK
+#define BRLTTY_INCLUDED_ASYNC_TYPES_TASK
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern int asyncAddTask (
-  AsyncEvent *event,
-  AsyncTaskCallback *callback, void *data
-);
-
-extern AsyncEvent *asyncNewAddTaskEvent (void);
+#define ASYNC_TASK_CALLBACK(name) void name (void *data)
+typedef ASYNC_TASK_CALLBACK(AsyncTaskCallback);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ASYNC_TASK */
+#endif /* BRLTTY_INCLUDED_ASYNC_TYPES_TASK */

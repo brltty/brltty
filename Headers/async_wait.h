@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_WAIT
 #define BRLTTY_INCLUDED_ASYNC_WAIT
 
-#include "async_types.h"
+#include "async_types_wait.h"
 
 #ifdef __cplusplus
 extern "C" {

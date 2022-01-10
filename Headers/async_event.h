@@ -19,7 +19,7 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_EVENT
 #define BRLTTY_INCLUDED_ASYNC_EVENT
 
-#include "async_types.h"
+#include "async_types_event.h"
 
 #ifdef __cplusplus
 extern "C" {

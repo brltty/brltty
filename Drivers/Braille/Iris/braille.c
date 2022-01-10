@@ -32,6 +32,7 @@
 #include "async_handle.h"
 #include "async_wait.h"
 #include "async_alarm.h"
+#include "timing.h"
 #include "ports.h"
 #include "message.h"
 

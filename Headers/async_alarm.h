@@ -19,8 +19,8 @@
 #ifndef BRLTTY_INCLUDED_ASYNC_ALARM
 #define BRLTTY_INCLUDED_ASYNC_ALARM
 
-#include "async_types.h"
-#include "timing.h"
+#include "async_types_alarm.h"
+#include "async_types_handle.h"
 
 #ifdef __cplusplus
 extern "C" {
