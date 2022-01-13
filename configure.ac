@@ -404,9 +404,9 @@ else
 fi
 AC_SUBST([LIBCXXFLAGS])
 
-AC_PATH_TOOL([LD], [ld])
-AC_PATH_TOOL([STRIP], [strip])
-AC_PATH_TOOL([RANLIB], [ranlib])
+AC_CHECK_TOOL([LD], [ld])
+AC_CHECK_TOOL([STRIP], [strip])
+AC_CHECK_TOOL([RANLIB], [ranlib])
 
 AC_PROG_AWK
 AC_PROG_LN_S
