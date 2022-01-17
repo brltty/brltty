@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HIMS Braille Edge
+title HIMS Braille Edge and QBrailleXL
 
 include common.kti
 include scroll.kti

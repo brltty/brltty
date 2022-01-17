@@ -598,7 +598,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&syncBrailleProtocol
     },
 
-    { /* Braille Edge */
+    { /* Braille Edge and QBrailleXL */
       .vendor=0X045E, .product=0X930B,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
