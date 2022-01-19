@@ -406,6 +406,9 @@ HKR,,Icon,,-20
 
 ; END_USB_BRAILLE_DEVICES
 
+; Microsoft Narrator Device
+"LibUSB-1.0: Microsoft Narrator"=LIBUSB_DEV, USB\NarratorOverride
+
 [libusbDevice_WinUSB.NTamd64]
 ; BEGIN_USB_BRAILLE_DEVICES LibUSB-1.0 LIBUSB_DEV
 
@@ -776,6 +779,9 @@ HKR,,Icon,,-20
 "LibUSB-1.0: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_1132
 
 ; END_USB_BRAILLE_DEVICES
+
+; Microsoft Narrator Device
+"LibUSB-1.0: Microsoft Narrator"=LIBUSB_DEV, USB\NarratorOverride
 
 ; ==================== Installation ===================
 

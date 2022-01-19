@@ -481,6 +481,9 @@ ServiceBinary  = %12%\libusb0_x64.sys
 
 ; END_USB_BRAILLE_DEVICES
 
+; Microsoft Narrator Device
+"LibUSB-Win32: Microsoft Narrator"=LIBUSB_DEV, USB\NarratorOverride
+
 [Devices.NTamd64]
 ; BEGIN_USB_BRAILLE_DEVICES LibUSB-Win32 LIBUSB_DEV
 
@@ -851,4 +854,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: EuroBraille [reserved]"=LIBUSB_DEV, USB\VID_C251&PID_1132
 
 ; END_USB_BRAILLE_DEVICES
+
+; Microsoft Narrator Device
+"LibUSB-Win32: Microsoft Narrator"=LIBUSB_DEV, USB\NarratorOverride
 

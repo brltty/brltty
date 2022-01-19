@@ -391,6 +391,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; END_USB_BRAILLE_DEVICES
 
+; Microsoft Narrator Device
+"WinUSB: Microsoft Narrator"=USB_Install, USB\NarratorOverride
+
 [Standard.NTamd64]
 ; BEGIN_USB_BRAILLE_DEVICES winusb USB_Install
 
@@ -761,6 +764,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 "winusb: EuroBraille [reserved]"=USB_Install, USB\VID_C251&PID_1132
 
 ; END_USB_BRAILLE_DEVICES
+
+; Microsoft Narrator Device
+"WinUSB: Microsoft Narrator"=USB_Install, USB\NarratorOverride
 
 ; ========== Class definition (for Windows 8 and ealier versions)===========
 

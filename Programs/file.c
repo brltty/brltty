@@ -1201,12 +1201,14 @@ writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
 
     if (iconvHandle == (iconv_t)-1) {
       if ((iconvHandle = iconv_open(consoleEncoding, internalEncoding)) == (iconv_t)-1) {
+        const char *externalEncoding = consoleEncoding;
+        consoleEncoding = "";
+
         logMessage(LOG_WARNING,
           "iconv open error: %s -> %s: %s",
-          internalEncoding, consoleEncoding, strerror(errno)
+          internalEncoding, externalEncoding, strerror(errno)
         );
 
-        consoleEncoding = "";
         goto ENCODING_NOT_SUPPORTED;
       }
     }
