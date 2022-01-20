@@ -85,7 +85,7 @@ brltty 0x0003 0x0452 0x0100
 brltty 0x0003 0x045e 0x930a
 
 # Device: 045E:930B
-# HIMS [Braille Edge]
+# HIMS [Braille Edge and QBrailleXL]
 brltty 0x0003 0x045e 0x930b
 
 # Device: 0483:A1D3

@@ -94,7 +94,7 @@ USB_DEVICE_ENTRY(0X0452, 0X0100, "mt"),
 USB_DEVICE_ENTRY(0X045E, 0X930A, "hm"),
 
 // Device: 045E:930B
-// HIMS [Braille Edge]
+// HIMS [Braille Edge and QBrailleXL]
 USB_DEVICE_ENTRY(0X045E, 0X930B, "hm"),
 
 // Device: 0483:A1D3

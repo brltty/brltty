@@ -84,7 +84,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
-"LibUSB-1.0: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
+"LibUSB-1.0: HIMS [Braille Edge and QBrailleXL]"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
 ; Device: 0483:A1D3
 "LibUSB-1.0: Baum [Orbit Reader 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
@@ -458,7 +458,7 @@ HKR,,Icon,,-20
 "LibUSB-1.0: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
-"LibUSB-1.0: HIMS [Braille Edge]"=LIBUSB_DEV, USB\VID_045E&PID_930B
+"LibUSB-1.0: HIMS [Braille Edge and QBrailleXL]"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
 ; Device: 0483:A1D3
 "LibUSB-1.0: Baum [Orbit Reader 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3

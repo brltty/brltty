@@ -70,7 +70,7 @@
   <usb-device vendor-id="1118" product-id="37642" />
 
   <!-- Device: 045E:930B -->
-  <!-- HIMS [Braille Edge] -->
+  <!-- HIMS [Braille Edge and QBrailleXL] -->
   <usb-device vendor-id="1118" product-id="37643" />
 
   <!-- Device: 0483:A1D3 -->

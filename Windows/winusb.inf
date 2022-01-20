@@ -69,7 +69,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 "winusb: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=USB_Install, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
-"winusb: HIMS [Braille Edge]"=USB_Install, USB\VID_045E&PID_930B
+"winusb: HIMS [Braille Edge and QBrailleXL]"=USB_Install, USB\VID_045E&PID_930B
 
 ; Device: 0483:A1D3
 "winusb: Baum [Orbit Reader 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
@@ -443,7 +443,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 "winusb: HIMS [Braille Sense (USB 1.1)], HIMS [Braille Sense (USB 2.0)], HIMS [Braille Sense U2 (USB 2.0)]"=USB_Install, USB\VID_045E&PID_930A
 
 ; Device: 045E:930B
-"winusb: HIMS [Braille Edge]"=USB_Install, USB\VID_045E&PID_930B
+"winusb: HIMS [Braille Edge and QBrailleXL]"=USB_Install, USB\VID_045E&PID_930B
 
 ; Device: 0483:A1D3
 "winusb: Baum [Orbit Reader 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
