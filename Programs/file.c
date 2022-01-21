@@ -1188,22 +1188,23 @@ createAnonymousPipe (FileDescriptor *pipeInput, FileDescriptor *pipeOutput) {
 
 void
 writeWithConsoleEncoding (FILE *stream, const char *bytes, size_t count) {
-  static const char *actualConsoleEncoding = NULL;
-  if (!actualConsoleEncoding) actualConsoleEncoding = getConsoleEncoding();
+  static const char *consoleEncoding = NULL;
+  if (!consoleEncoding) consoleEncoding = getConsoleEncoding();
 
-  if (!actualConsoleEncoding || isCharsetUTF8(actualConsoleEncoding)) {
-    actualConsoleEncoding = "";
+  if (!consoleEncoding || isCharsetUTF8(consoleEncoding)) {
+    consoleEncoding = "";
   }
 
 #ifdef HAVE_ICONV_H
-  if (*actualConsoleEncoding) {
-    static const char internalEncoding[] = "UTF-8";
+  if (*consoleEncoding) {
     static iconv_t iconvHandle = (iconv_t)-1;
 
     if (iconvHandle == (iconv_t)-1) {
-      if ((iconvHandle = iconv_open(actualConsoleEncoding, internalEncoding)) == (iconv_t)-1) {
-        const char *externalEncoding = actualConsoleEncoding;
-        actualConsoleEncoding = "";
+      static const char internalEncoding[] = "UTF-8";
+      const char *externalEncoding = consoleEncoding;
+
+      if ((iconvHandle = iconv_open(externalEncoding, internalEncoding)) == (iconv_t)-1) {
+        consoleEncoding = "";
 
         logMessage(LOG_WARNING,
           "iconv open error: %s -> %s: %s",
