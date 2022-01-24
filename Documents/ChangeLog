@@ -1,6 +1,11 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+January 24, 2022:
+ - BRLTTY 6.4.1 released:
+   The Russian text table has been significantly improved.
+   A log recursion problem when running as a Windows service has been resolved.
+
 September 24, 2021:
  - BRLTTY 6.4 released:
    General changes:

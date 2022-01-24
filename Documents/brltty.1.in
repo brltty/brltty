@@ -16,7 +16,7 @@
 .\"
 .\" This software is maintained by Dave Mielke <dave@mielke.cc>.
 .\"
-.TH "BRLTTY" "1" "September 2021" "@PACKAGE_TARNAME@ @PACKAGE_VERSION@" "@PACKAGE_NAME@ User's Manual"
+.TH "BRLTTY" "1" "January 2022" "@PACKAGE_TARNAME@ @PACKAGE_VERSION@" "@PACKAGE_NAME@ User's Manual"
 .SH NAME
 brltty \- refreshable braille display driver for Linux/Unix
 .SH SYNOPSIS
