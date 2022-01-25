@@ -73,6 +73,7 @@ static char *xDisplay;
 static int no_daemon;
 static int quiet;
 static int verbose;
+static int xkb_major_opcode;
 
 static int brlapi_fd;
 
@@ -410,6 +411,13 @@ static int ErrorHandler(Display *dpy, XErrorEvent *ev) {
     grabFailed=1;
     return 0;
   }
+#ifdef CAN_SIMULATE_KEY_PRESSES
+  if (ev->request_code == xkb_major_opcode && ev->minor_code == X_kbSetMap) {
+    /* Server refused our Xkb remapping request, probably the buggy version 21, ignore error */
+    fprintf(stderr,gettext("xbrlapi: server refused our mapping request, could not synthesize key\n"));
+    return 0;
+  }
+#endif
   if (XGetErrorText(dpy, ev->error_code, buffer, sizeof(buffer)))
     fatal("XGetErrorText");
   fprintf(stderr,gettext("xbrlapi: X Error %d, %s on display %s\n"), ev->type, buffer, XDisplayName(Xdisplay));
@@ -665,6 +673,8 @@ static void toX_f(const char *display) {
       fatal(gettext("Incompatible XKB library\n"));
     if (!XkbQueryExtension(dpy, &foo, &foo, &foo, &major, &minor))
       fatal(gettext("Incompatible XKB server support\n"));
+    if (!XQueryExtension(dpy, "XKEYBOARD", &xkb_major_opcode, &foo, &foo))
+      fatal(gettext("Could not get XKB major opcode\n"));
   }
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 
