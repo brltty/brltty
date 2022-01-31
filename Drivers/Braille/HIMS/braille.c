@@ -451,6 +451,14 @@ static const ProtocolEntry brailleSenseProtocol = {
   .getDefaultCellCount = getBrailleSenseDefaultCellCount
 };
 
+static const ProtocolEntry brailleSense6Protocol = {
+  .modelName = "BrailleSense 6",
+  .resourceNamePrefix = "H632B",
+  .keyTable = &KEY_TABLE_DEFINITION(scroll),
+  .testIdentities = testBrailleSenseIdentities,
+  .getDefaultCellCount = getBrailleSenseDefaultCellCount
+};
+
 
 static int
 getSyncBrailleDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
@@ -476,15 +484,6 @@ static const ProtocolEntry brailleEdgeProtocol = {
   .keyTable = &KEY_TABLE_DEFINITION(edge),
   .testIdentities = testBrailleEdgeIdentities,
   .getDefaultCellCount = getBrailleEdgeDefaultCellCount
-};
-
-
-static const ProtocolEntry brailleSense6Protocol = {
-  .modelName = "BrailleSense 6",
-  .resourceNamePrefix = "H632B",
-  .keyTable = &KEY_TABLE_DEFINITION(scroll),
-  .testIdentities = testBrailleSenseIdentities,
-  .getDefaultCellCount = getBrailleSenseDefaultCellCount
 };
 
 
@@ -600,14 +599,14 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&brailleSenseProtocol
     },
 
-    { /* Braille Sense 6 (USB 2.1) */
+    { /* BrailleSense 6 (USB 2.1) */
       .version = UsbSpecificationVersion_2_1,
       .vendor=0X045E, .product=0X930A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .verifyInterface=1,
       .disableAutosuspend=1,
-      .data=&brailleSenseProtocol
+      .data=&brailleSense6Protocol
     },
 
     { /* Sync Braille */
