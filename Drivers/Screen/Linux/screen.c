@@ -59,8 +59,9 @@ typedef enum {
   PARM_RPI_SPACES_BUG,
   PARM_UNICODE,
   PARM_VIRTUAL_TERMINAL_NUMBER,
+  PARM_WIDECHAR_PADDING,
 } ScreenParameters;
-#define SCRPARMS "charset", "fallbacktext", "hfb", "logsfm", "rpispacesbug", "unicode", "vt"
+#define SCRPARMS "charset", "fallbacktext", "hfb", "logsfm", "rpispacesbug", "unicode", "vt", "widecharpadding"
 
 #include "scr_driver.h"
 #include "screen.h"
@@ -68,10 +69,11 @@ typedef enum {
 static const char *problemText;
 static const char *fallbackText;
 
-static unsigned int rpiSpacesBug;
 static unsigned int logScreenFontMap;
+static unsigned int rpiSpacesBug;
 static unsigned int unicodeEnabled;
 static int virtualTerminalNumber;
+static unsigned int widecharPadding;
 
 #define UNICODE_ROW_DIRECT 0XF000
 
@@ -1137,6 +1139,8 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
         if ((blanks > 0) && (wc == WC_C(' '))) {
           blanks -= 1;
           wc = WEOF;
+        } else if (widecharPadding) {
+          blanks = 0;
         } else {
           blanks = getCharacterWidth(wc) - 1;
         }
@@ -1264,17 +1268,6 @@ static int
 processParameters_LinuxScreen (char **parameters) {
   fallbackText = parameters[PARM_FALLBACK_TEXT];
 
-  rpiSpacesBug = 0;
-  {
-    const char *parameter = parameters[PARM_RPI_SPACES_BUG];
-
-    if (parameter && *parameter) {
-      if (!validateYesNo(&rpiSpacesBug, parameter)) {
-        logMessage(LOG_WARNING, "%s: %s", "invalid fix Unicode spaces setting", parameter);
-      }
-    }
-  }
-
   {
     const char *names = parameters[PARM_CHARSET];
 
@@ -1317,6 +1310,17 @@ processParameters_LinuxScreen (char **parameters) {
     }
   }
 
+  rpiSpacesBug = 0;
+  {
+    const char *parameter = parameters[PARM_RPI_SPACES_BUG];
+
+    if (parameter && *parameter) {
+      if (!validateYesNo(&rpiSpacesBug, parameter)) {
+        logMessage(LOG_WARNING, "%s: %s", "invalid RPI spaces bug setting", parameter);
+      }
+    }
+  }
+
   unicodeEnabled = 1;
   {
     const char *parameter = parameters[PARM_UNICODE];
@@ -1338,6 +1342,17 @@ processParameters_LinuxScreen (char **parameters) {
 
       if (!validateInteger(&virtualTerminalNumber, parameter, &minimum, &maximum)) {
         logMessage(LOG_WARNING, "%s: %s", "invalid virtual terminal number", parameter);
+      }
+    }
+  }
+
+  widecharPadding = 0;
+  {
+    const char *parameter = parameters[PARM_WIDECHAR_PADDING];
+
+    if (parameter && *parameter) {
+      if (!validateYesNo(&widecharPadding, parameter)) {
+        logMessage(LOG_WARNING, "%s: %s", "invalid widechar padding setting", parameter);
       }
     }
   }
