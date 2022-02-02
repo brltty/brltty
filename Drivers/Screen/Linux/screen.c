@@ -54,13 +54,13 @@
 typedef enum {
   PARM_CHARSET,
   PARM_FALLBACK_TEXT,
-  PARM_FIX_UNICODE_SPACES,
   PARM_HIGH_FONT_BIT,
   PARM_LOG_SCREEN_FONT_MAP,
+  PARM_RPI_SPACES_BUG,
   PARM_UNICODE,
   PARM_VIRTUAL_TERMINAL_NUMBER,
 } ScreenParameters;
-#define SCRPARMS "charset", "fallbacktext", "fixunicodespaces", "hfb", "logsfm", "unicode", "vt"
+#define SCRPARMS "charset", "fallbacktext", "hfb", "logsfm", "rpispacesbug", "unicode", "vt"
 
 #include "scr_driver.h"
 #include "screen.h"
@@ -68,7 +68,7 @@ typedef enum {
 static const char *problemText;
 static const char *fallbackText;
 
-static unsigned int fixUnicodeSpaces;
+static unsigned int rpiSpacesBug;
 static unsigned int logScreenFontMap;
 static unsigned int unicodeEnabled;
 static int virtualTerminalNumber;
@@ -551,7 +551,7 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
     const ssize_t count = pread(unicodeDescriptor, buffer, size, offset);
 
     if (count != -1) {
-      if (fixUnicodeSpaces) {
+      if (rpiSpacesBug) {
         uint32_t *character = buffer;
         const uint32_t *end = character + (count / sizeof(*character));
 
@@ -1264,12 +1264,12 @@ static int
 processParameters_LinuxScreen (char **parameters) {
   fallbackText = parameters[PARM_FALLBACK_TEXT];
 
-  fixUnicodeSpaces = 0;
+  rpiSpacesBug = 0;
   {
-    const char *parameter = parameters[PARM_FIX_UNICODE_SPACES];
+    const char *parameter = parameters[PARM_RPI_SPACES_BUG];
 
     if (parameter && *parameter) {
-      if (!validateYesNo(&fixUnicodeSpaces, parameter)) {
+      if (!validateYesNo(&rpiSpacesBug, parameter)) {
         logMessage(LOG_WARNING, "%s: %s", "invalid fix Unicode spaces setting", parameter);
       }
     }
