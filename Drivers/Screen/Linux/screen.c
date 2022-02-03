@@ -559,11 +559,11 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
 
         while (character < end) {
           if (*character == 0X20202020) {
-            static unsigned char bugEncountered = 0;
+            static unsigned char bugLogged = 0;
 
-            if (!bugEncountered) {
-              bugEncountered = 1;
-              logMessage(LOG_WARNING, "Linux screen driver: Unicode space bug detected");
+            if (!bugLogged) {
+              logMessage(LOG_WARNING, "Linux screen driver: RPI spaces bug detected");
+              bugLogged = 1;
             }
 
             *character = ' ';
