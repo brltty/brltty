@@ -29,6 +29,7 @@
 #include "cmd_utils.h"
 #include "brl_cmds.h"
 #include "unicode.h"
+#include "ascii.h"
 #include "ttb.h"
 #include "scr.h"
 #include "async_handle.h"
@@ -117,6 +118,13 @@ insertKey (ScreenKey key, int flags) {
   if (flags & BRL_FLG_INPUT_META) key |= SCR_KEY_ALT_LEFT;
   if (flags & BRL_FLG_INPUT_ALTGR) key |= SCR_KEY_ALT_RIGHT;
   if (flags & BRL_FLG_INPUT_GUI) key |= SCR_KEY_GUI;
+
+  if (flags & BRL_FLG_INPUT_ESCAPED) {
+    if (!insertScreenKey(ESC)) {
+      return 0;
+    }
+  }
+
   return insertScreenKey(key);
 }
 

@@ -46,12 +46,12 @@ const CommandModifierEntry commandModifierTable_motion[] = {
 
 const CommandModifierEntry commandModifierTable_row[] = {
   {.name="scaled", .bit=BRL_FLG_MOTION_SCALED},
-  {.name=NULL    , .bit=0                  }
+  {.name=NULL    , .bit=0                    }
 };
 
 const CommandModifierEntry commandModifierTable_vertical[] = {
   {.name="toleft", .bit=BRL_FLG_MOTION_TOLEFT},
-  {.name=NULL    , .bit=0                  }
+  {.name=NULL    , .bit=0                    }
 };
 
 const CommandModifierEntry commandModifierTable_input[] = {
@@ -60,12 +60,13 @@ const CommandModifierEntry commandModifierTable_input[] = {
   {.name="meta"   , .bit=BRL_FLG_INPUT_META   },
   {.name="altgr"  , .bit=BRL_FLG_INPUT_ALTGR  },
   {.name="gui"    , .bit=BRL_FLG_INPUT_GUI    },
-  {.name=NULL     , .bit=0                   }
+  {.name=NULL     , .bit=0                    }
 };
 
 const CommandModifierEntry commandModifierTable_character[] = {
-  {.name="upper", .bit=BRL_FLG_INPUT_UPPER},
-  {.name=NULL   , .bit=0                 }
+  {.name="upper"  , .bit=BRL_FLG_INPUT_UPPER  },
+  {.name="escaped", .bit=BRL_FLG_INPUT_ESCAPED},
+  {.name=NULL     , .bit=0                    }
 };
 
 const CommandModifierEntry commandModifierTable_braille[] = {
