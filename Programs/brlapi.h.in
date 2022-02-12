@@ -438,6 +438,8 @@ int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int 
  * Once brlapi_enterTtyMode() is called, brlapi_leaveTtyMode() has to be called
  * before calling brlapi_enterTtyMode() again.
  *
+ * TODO: document which functions work in TTY mode only.
+ *
  * \sa brlapi_leaveTtyMode() brlapi_readKey()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
@@ -986,6 +988,9 @@ int BRLAPI_STDCALL brlapi__acceptKeyRanges(brlapi_handle_t *handle, const brlapi
 
 /* brlapi_enterRawMode */
 /** Switch to Raw mode
+ *
+ * TODO: document which functions work in raw mode.
+ *
  * \param driver Specifies the name of the driver for which the raw
  * communication will be established.
  * \return 0 on success, -1 on error */
