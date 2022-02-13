@@ -324,7 +324,7 @@ ASYNC_CONDITION_TESTER(testSpeechResponseReceived) {
 
 static int
 awaitSpeechResponse (SpeechDriverThread *sdt, int timeout) {
-  return asyncAwaitCondition(timeout, testSpeechResponseReceived, (void *)sdt);
+  return asyncAwaitCondition(timeout, testSpeechResponseReceived, sdt);
 }
 
 static void sendSpeechRequest (SpeechDriverThread *sdt);
@@ -830,10 +830,10 @@ THREAD_FUNCTION(runSpeechDriverThread) {
 
   setThreadState(sdt, THD_STARTING);
 
-  if ((sdt->requestEvent = asyncNewEvent(handleSpeechRequestEvent, (void *)sdt))) {
+  if ((sdt->requestEvent = asyncNewEvent(handleSpeechRequestEvent, sdt))) {
     if (startSpeechDriver(sdt)) {
       setThreadReady(sdt);
-      asyncWaitFor(testSpeechDriverThreadStopping, (void *)sdt);
+      asyncWaitFor(testSpeechDriverThreadStopping, sdt);
       stopSpeechDriver(sdt);
     } else {
       logMessage(LOG_CATEGORY(SPEECH_EVENTS), "driver construction failure");
@@ -872,7 +872,7 @@ constructSpeechDriverThread (
   SpeechDriverThread *sdt;
 
   if ((sdt = malloc(sizeof(*sdt)))) {
-    memset((void *)sdt, 0, sizeof(*sdt));
+    memset(sdt, 0, sizeof(*sdt));
     setThreadState(sdt, THD_CONSTRUCTING);
     setResponsePending(sdt);
 
@@ -883,11 +883,11 @@ constructSpeechDriverThread (
       spk->driver.thread = sdt;
 
 #ifdef GOT_PTHREADS
-      if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessageEvent, (void *)sdt))) {
+      if ((sdt->messageEvent = asyncNewEvent(handleSpeechMessageEvent, sdt))) {
         pthread_t threadIdentifier;
         int createError = createThread("speech-driver",
                                        &threadIdentifier, NULL,
-                                       runSpeechDriverThread, (void *)sdt);
+                                       runSpeechDriverThread, sdt);
 
         if (!createError) {
           sdt->threadIdentifier = threadIdentifier;
@@ -924,7 +924,7 @@ constructSpeechDriverThread (
       deallocateQueue(sdt->requestQueue);
     }
 
-    free((void *)sdt);
+    free(sdt);
   } else {
     logMallocError();
   }
@@ -958,6 +958,6 @@ destroySpeechDriverThread (SpeechSynthesizer *spk) {
 
   sdt->speechSynthesizer->driver.thread = NULL;
   deallocateQueue(sdt->requestQueue);
-  free((void *)sdt);
+  free(sdt);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
