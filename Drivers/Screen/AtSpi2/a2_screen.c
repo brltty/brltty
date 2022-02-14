@@ -17,6 +17,7 @@
  */
 
 #include "prologue.h"
+#include "embed.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -1164,13 +1165,7 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
                !strcmp(member, "Disconnected")) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "DBus disconnected signal, shutting down");
-#if defined(SIGTERM)
-      raise(SIGTERM);
-#elif defined(SIGINT)
-      raise(SIGINT);
-#else /* termination signal */
-#warning no defined termination signal
-#endif /* termination signal */
+      brlttyInterrupt(WAIT_STOP);
     } else {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "unknown signal: Intf:%s Msg:%s", interface, member);
@@ -1186,6 +1181,7 @@ static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *m
 #ifdef HAVE_PKG_X11
 /* Integration of X11 events with brltty monitors */
 static AsyncHandle a2XWatch;
+static int closeX = 1;
 static ReportListenerInstance *coreSelUpdatedListener;
 static int settingClipboard;
 
@@ -1215,6 +1211,12 @@ void a2DropX(void) {
 ASYNC_MONITOR_CALLBACK(a2ProcessX) {
   XEvent ev;
 
+  if (closeX) {
+    asyncCancelRequest(a2XWatch);
+    a2XWatch = NULL;
+    return 1;
+  }
+
   while (XPending(dpy)) {
     XNextEvent(dpy, &ev);
     XSelProcess(dpy, &xselData, &ev, clipboardContent, a2XSelUpdated);
@@ -1241,6 +1243,32 @@ REPORT_LISTENER(a2CoreSelUpdated) {
     }
   }
 }
+
+static int ErrorHandler(Display *dpy, XErrorEvent *ev) {
+  char buffer[128];
+  XGetErrorText(dpy, ev->error_code, buffer, sizeof(buffer));
+  logMessage(LOG_ERR, "X Error %d, %s", ev->type, buffer);
+  logMessage(LOG_ERR, "resource %#010lx, req %u:%u",ev->resourceid,ev->request_code,ev->minor_code);
+  logMessage(LOG_ERR, "Shutting down");
+  closeX = 1;
+  brlttyInterrupt(WAIT_STOP);
+  return 0;
+}
+
+static int IOErrorHandler(Display *dpy) {
+  logMessage(LOG_ERR, "X I/O error, shutting down");
+  closeX = 1;
+  brlttyInterrupt(WAIT_STOP);
+  return 0;
+}
+
+static void IOErrorExitHandler(Display *dpy, void *data) {
+  logMessage(LOG_ERR, "X I/O Error Exit, shutting down");
+  closeX = 1;
+  brlttyInterrupt(WAIT_STOP);
+  return;
+}
+
 #endif /* HAVE_PKG_X11 */
 
 /* Integration of DBus watches with brltty monitors */
@@ -1504,8 +1532,12 @@ construct_AtSpi2Screen (void) {
   dbus_connection_set_timeout_functions(bus, a2AddTimeout, a2RemoveTimeout, a2TimeoutToggled, NULL, NULL);
 
 #ifdef HAVE_PKG_X11
+  closeX = 0;
   dpy = XOpenDisplay(NULL);
   if (dpy) {
+    XSetErrorHandler(ErrorHandler);
+    XSetIOErrorHandler(IOErrorHandler);
+    XSetIOErrorExitHandler(dpy, IOErrorExitHandler, NULL);
     XSelInit(dpy, &xselData);
     XFlush(dpy);
 #ifdef HAVE_PTHREAD_ATFORK
@@ -1517,6 +1549,7 @@ construct_AtSpi2Screen (void) {
 #endif /* HAVE_PKG_X11 */
 
   logMessage(LOG_CATEGORY(SCREEN_DRIVER), "SPI2 initialized");
+  brlttyEnableInterrupt();
   return 1;
 
 noWatches:
@@ -1530,11 +1563,15 @@ noBus:
 
 static void
 destruct_AtSpi2Screen (void) {
+  brlttyDisableInterrupt();
 #ifdef HAVE_PKG_X11
   if (dpy) {
     unregisterReportListener(coreSelUpdatedListener);
     coreSelUpdatedListener = NULL;
-    asyncCancelRequest(a2XWatch);
+    if (a2XWatch) {
+      asyncCancelRequest(a2XWatch);
+      a2XWatch = NULL;
+    }
     XCloseDisplay(dpy);
     dpy = NULL;
     free(clipboardContent);
