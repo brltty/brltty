@@ -245,9 +245,9 @@ testInteger() {
    local value="${1}"
 
    [ "${value}" = "0" ] || {
-      [ "$(expr "${value#-}" : '^[1-9][0-9]*$')" = "0" ] && {
-         return 1
-      }
+      value="${value#-}"
+      [ -n "${value}" ] || return 1
+      [ "$(expr "${value}" : '^[1-9][0-9]*$')" -eq "${#value}" ] || return 1
    }
 
    return 0
@@ -525,7 +525,7 @@ showProgramUsageSummary() {
 
          local usage="$(getVariable "programParameterUsage_${index}")"
          local default="$(getVariable "programParameterDefault_${index}")"
-         [ -z "${default}" ] || usage="${usage} (default is ${default})"
+         [ -z "${default}" ] || usage="${usage} - the default is ${default}"
          addProgramUsageText "${usage}" "${width}" "  ${line}"
 
          index=$((index + 1))
@@ -549,7 +549,7 @@ showProgramUsageSummary() {
 
          usage="$(getVariable "programOptionUsage_${letter}")"
          local default="$(getVariable "programOptionDefault_${letter}")"
-         [ -z "${default}" ] || usage="${usage} (default is ${default})"
+         [ -z "${default}" ] || usage="${usage} - the default is ${default}"
          addProgramUsageText "${usage}" "${width}" "  ${line}"
       done
    }
