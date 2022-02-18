@@ -243,7 +243,13 @@ internalError() {
 
 testInteger() {
    local value="${1}"
-   [[ "${value}" =~ ^(0|-?[1-9][0-9]*)$ ]] || return 1
+
+   [ "${value}" = "0" ] || {
+      [ "$(expr "${value#-}" : '^[1-9][0-9]*$')" = "0" ] && {
+         return 1
+      }
+   }
+
    return 0
 }
 
