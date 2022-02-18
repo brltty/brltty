@@ -1262,12 +1262,14 @@ static int IOErrorHandler(Display *dpy) {
   return 0;
 }
 
+#ifdef HAVE_XSETIOERROREXITHANDLER
 static void IOErrorExitHandler(Display *dpy, void *data) {
   logMessage(LOG_ERR, "X I/O Error Exit, shutting down");
   closeX = 1;
   brlttyInterrupt(WAIT_STOP);
   return;
 }
+#endif
 
 #endif /* HAVE_PKG_X11 */
 
@@ -1537,7 +1539,9 @@ construct_AtSpi2Screen (void) {
   if (dpy) {
     XSetErrorHandler(ErrorHandler);
     XSetIOErrorHandler(IOErrorHandler);
+#ifdef HAVE_XSETIOERROREXITHANDLER
     XSetIOErrorExitHandler(dpy, IOErrorExitHandler, NULL);
+#endif
     XSelInit(dpy, &xselData);
     XFlush(dpy);
 #ifdef HAVE_PTHREAD_ATFORK

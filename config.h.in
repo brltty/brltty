@@ -400,6 +400,9 @@ extern "C" {
 /* Define this if the header file X11/keysym.h exists. */
 #undef HAVE_X11_KEYSYM_H
 
+/* Define this if the function XSetIOErrorExitHandler exists.  */
+#undef HAVE_XSETIOERROREXITHANDLER
+
 /* Define this if the function atspi_get_a11y_bus exists in atspi2. */
 #undef HAVE_ATSPI_GET_A11Y_BUS
 

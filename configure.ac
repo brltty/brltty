@@ -844,6 +844,16 @@ BRLTTY_ARG_DISABLE(
          ])
       ])
 
+      brltty_cppflags_save="${CPPFLAGS}"
+      CPPFLAGS="${CPPFLAGS} ${x11_includes}"
+      brltty_libs_save="${LIBS}"
+      LIBS="${x11_libs} ${LIBS}"
+
+      AC_CHECK_FUNCS([XSetIOErrorExitHandler])
+
+      CPPFLAGS="${brltty_cppflags_save}"
+      LIBS="${brltty_libs_save}"
+
       BRLTTY_HAVE_PACKAGE([xt], [xt], [dnl
          xtk_libs="${xt_libs} ${xtk_libs}"
 
