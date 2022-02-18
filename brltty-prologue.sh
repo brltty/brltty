@@ -19,6 +19,34 @@
 readonly initialDirectory="$(pwd)"
 readonly programName="$(basename "${0}")"
 
+setVariable() {
+   eval "${1}"'="${2}"'
+}
+
+getVariable() {
+   if [ -n "${2}" ]
+   then
+      eval "${2}"'="${'"${1}"'}"'
+   else
+      eval 'echo "${'"${1}"'}"'
+   fi
+}
+
+defineEnumeration() {
+   local prefix="${1}"
+   shift 1
+
+   local name
+   local value=1
+
+   for name
+   do
+      local variable="${prefix}${name}"
+      readonly "${variable}"="${value}"
+      value=$((value + 1))
+   done
+}
+
 resolveDirectory() {
    local path="${1}"
    local variable="${2}"
@@ -80,34 +108,6 @@ toRelativePath() {
    else
       echo "${toPath}"
    fi
-}
-
-setVariable() {
-   eval "${1}"'="${2}"'
-}
-
-getVariable() {
-   if [ -n "${2}" ]
-   then
-      eval "${2}"'="${'"${1}"'}"'
-   else
-      eval 'echo "${'"${1}"'}"'
-   fi
-}
-
-defineEnumeration() {
-   local prefix="${1}"
-   shift 1
-
-   local name
-   local value=1
-
-   for name
-   do
-      local variable="${prefix}${name}"
-      readonly "${variable}"="${value}"
-      value=$((value + 1))
-   done
 }
 
 parseParameterString() {
@@ -239,6 +239,35 @@ internalError() {
 
    logMessage error "${message}"
    exit 4
+}
+
+testInteger() {
+   local value="${1}"
+   [[ "${value}" =~ ^(0|-?[1-9][0-9]*)$ ]] || return 1
+   return 0
+}
+
+verifyInteger() {
+   local label="${1}"
+   local value="${2}"
+   local minimum="${3}"
+   local maximum="${4}"
+
+   testInteger "${value}" || {
+      semanticError "${label} not an integer: ${value}"
+   }
+
+   [ -n "${minimum}" ] && {
+      [ "${value}" -lt "${minimum}" ] && {
+         semanticError "${label} out of range: ${value} < ${minimum}"
+      }
+   }
+
+   [ -n "${maximum}" ] && {
+      [ "${value}" -gt "${maximum}" ] && {
+         semanticError "${label} out of range: ${value} > ${maximum}"
+      }
+   }
 }
 
 testContainingDirectory() {
