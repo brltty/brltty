@@ -1920,19 +1920,9 @@ test "${prefix}" = "NONE" && prefix=""
 original_exec_prefix="${exec_prefix}"
 test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
 BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_directory}])
+
 BRLTTY_DEFINE_DIRECTORY([LOCALE_DIRECTORY], [${execute_root}${localedir}],
                         [Define this to be a string containing the path to the locale directory.])
-if test -n "${updatable_directory}"
-then
-   BRLTTY_DEFINE_DIRECTORY([UPDATABLE_DIRECTORY], [${updatable_directory}],
-                           [Define this to be a string containing the path to a directory which contains files that can be updated.])
-fi
-
-if test -n "${writable_directory}"
-then
-   BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${writable_directory}],
-                           [Define this to be a string containing the path to a writable directory.])
-fi
 
 BRLTTY_DEFINE_DIRECTORY([TABLES_DIRECTORY], [${execute_root}${tables_directory}],
                         [Define this to be a string containing the path to the data files directory.])
@@ -1943,13 +1933,25 @@ BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory
 BRLTTY_DEFINE_DIRECTORY([SCRIPTS_DIRECTORY], [${execute_root}${scripts_directory}],
                         [Define this to be a string containing the path to the scripts directory.])
 
-BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
+BRLTTY_PUBLIC_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])
 
-BRLTTY_DEFINE_DIRECTORY([BRLAPI_ETCDIR], [${CONFIGURATION_DIRECTORY}],
+if test -n "${updatable_directory}"
+then
+   BRLTTY_PUBLIC_DIRECTORY([UPDATABLE_DIRECTORY], [${updatable_directory}],
+                           [Define this to be a string containing the path to a directory which contains files that can be updated.])
+fi
+
+if test -n "${writable_directory}"
+then
+   BRLTTY_PUBLIC_DIRECTORY([WRITABLE_DIRECTORY], [${writable_directory}],
+                           [Define this to be a string containing the path to a writable directory.])
+fi
+
+BRLTTY_PUBLIC_DIRECTORY([BRLAPI_ETCDIR], [${CONFIGURATION_DIRECTORY}],
                         [Define this to be a string containing the path to BrlAPI's data files directory.])
 
-BRLTTY_DEFINE_DIRECTORY([BRLAPI_SOCKETPATH], [${api_socket_path}],
+BRLTTY_PUBLIC_DIRECTORY([BRLAPI_SOCKETPATH], [${api_socket_path}],
                         [Define this to be a string containing the path to BrlAPI's local sockets directory.])
 
 prefix="${original_prefix}"

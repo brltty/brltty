@@ -72,16 +72,22 @@ AC_DEFUN([BRLTTY_DEFINE_DIRECTORY], [dnl
 BRLTTY_VAR_EXPAND([$1], [$2])
 brltty_path="${$1}"
 
-test "${brltty_enabled_relocatable_install}" = "yes" && {
-   test "${$1}" = "${$1#\\}" && {
-      BRLTTY_RELATIVE_PATH([brltty_path], [${$1}], [${brltty_reference_directory}])
-   }
-}
+ifelse([$4], [public], [], [dnl
+  test "${brltty_enabled_relocatable_install}" = "yes" && {
+     test "${$1}" = "${$1#\\}" && {
+        BRLTTY_RELATIVE_PATH([brltty_path], [${$1}], [${brltty_reference_directory}])
+     }
+  }
+])
 
 BRLTTY_DEFINE_EXPANDED([$1], [${brltty_path}], [$3])
 # resolve escaped characters
 eval '$1="'"${$1}"'"'
 AC_SUBST([$1])
+])
+
+AC_DEFUN([BRLTTY_PUBLIC_DIRECTORY], [dnl
+BRLTTY_DEFINE_DIRECTORY([$1], [$2], [$3], [public])
 ])
 
 AC_DEFUN([BRLTTY_ARG_WITH], [dnl
