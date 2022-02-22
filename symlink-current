@@ -17,5 +17,5 @@ set -e
 installTree="$("${sourceTree}/Tools/pkgvars" -b "${buildTree}" -- execute_root)"
 installLocation="$(dirname "${installTree}")"
 installDirectory="$(basename "${installTree}")"
-sudo ln -f -s -- "${installDirectory}" "${installLocation}/current"
+sudo ln --force --symbolic -- "${installDirectory}" "${installLocation}/current"
 exit 0
