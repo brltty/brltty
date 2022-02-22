@@ -1,0 +1,21 @@
+#!/bin/bash
+
+. "$(dirname "${0}")/Source/brltty-prologue.sh"
+addProgramOption s string.path sourceTree "the path to the source tree"
+addProgramOption b string.path buildTree "the path to the build tree"
+parseProgramArguments "${@}"
+
+[ -n "${sourceTree}" ] || syntaxError "source tree not specified"
+[ -e "${sourceTree}" ] || semanticError "source tree not found: ${sourceTree}"
+[ -d "${sourceTree}" ] || semanticError "source tree not a directory: ${sourceTree}"
+
+[ -n "${buildTree}" ] || syntaxError "build tree not specified"
+[ -e "${buildTree}" ] || semanticError "build tree not found: ${buildTree}"
+[ -d "${buildTree}" ] || semanticError "build tree not a directory: ${buildTree}"
+
+set -e
+installTree="$("${sourceTree}/Tools/pkgvars" -b "${buildTree}" -- execute_root)"
+installLocation="$(dirname "${installTree}")"
+installDirectory="$(basename "${installTree}")"
+sudo ln -f -s -- "${installDirectory}" "${installLocation}/current"
+exit 0

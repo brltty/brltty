@@ -23,18 +23,22 @@ $(CONFIGURE_TARGET): $(AUTOGEN_TARGET)
 build: $(CONFIGURE_TARGET)
 	$(MAKE) --silent -C $(BUILD_TREE)/Programs -- everything
 
-install: build
-	sudo $(MAKE) --silent -C $(BUILD_TREE)/Programs -- install
-
-uninstall:
-	sudo $(MAKE) --silent -C $(BUILD_TREE) -- $@
-
 clean distclean:
 	$(MAKE) --silent -C $(BUILD_TREE) -- $@
 
 unconfigure:
 	-rm -f -r -- $(BUILD_TREE)
 	-rm -f -- $(AUTOGEN_TARGET)
+
+install: build
+	sudo $(MAKE) --silent -C $(BUILD_TREE)/Programs -- install
+	sudo $(MAKE) --silent -C $(BUILD_TREE) -- install-systemd
+
+uninstall:
+	sudo $(MAKE) --silent -C $(BUILD_TREE) -- $@
+
+current:
+	./symlink-current -s $(SOURCE_TREE) -b $(BUILD_TREE)
 
 install-required-packages: $(CLONE_TARGET)
 	$(SOURCE_TREE)/Tools/reqpkgs -q -i
