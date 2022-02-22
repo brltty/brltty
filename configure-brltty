@@ -1,4 +1,5 @@
 #!/bin/bash
+. "$(dirname "${0}")/prologue.sh"
 
 configureOptions=(
    --enable-relocatable-install
@@ -9,7 +10,6 @@ configureOptions=(
    --without-theta
 )
 
-. "$(dirname "${0}")/Source/brltty-prologue.sh"
 addProgramOption s string.path sourceTree "the path to the source tree"
 addProgramOption b string.path buildTree "the path to the build tree"
 addProgramOption i string.path installLocation "the path to the install location"

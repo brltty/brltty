@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. "$(dirname "${0}")/Source/brltty-prologue.sh"
+. "$(dirname "${0}")/prologue.sh"
 addProgramOption s string.path sourceTree "the path to the source tree"
 addProgramOption b string.path buildTree "the path to the build tree"
 parseProgramArguments "${@}"

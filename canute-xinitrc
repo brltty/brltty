@@ -1,0 +1,12 @@
+#!/bin/bash
+
+eval $(dbus-launch --sh-syntax --exit-with-session)
+export GTK_MODULES=gail:atk-bridge
+
+/usr/libexec/at-spi-bus-launcher &
+/usr/libexec/at-spi2-registryd &
+
+xbrlapi &
+brltty -N -b ba -s no -x a2
+
+gnome-terminal --geometry 40x9
