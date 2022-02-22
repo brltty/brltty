@@ -1,0 +1,43 @@
+#!/bin/bash
+
+configureOptions=(
+   --enable-relocatable-install
+   --without-pgmprivs-package
+   --without-libbraille
+   --without-mikropuhe
+   --without-swift
+   --without-theta
+)
+
+. "$(dirname "${0}")/Source/brltty-prologue.sh"
+addProgramOption s string.path sourceTree "the path to the source tree"
+addProgramOption b string.path buildTree "the path to the build tree"
+addProgramOption i string.path installLocation "the path to the install location"
+parseProgramArguments "${@}"
+
+[ -n "${sourceTree}" ] || syntaxError "source tree not specified"
+[ -e "${sourceTree}" ] || semanticError "source tree not found: ${sourceTree}"
+[ -d "${sourceTree}" ] || semanticError "source tree not a directory: ${sourceTree}"
+[ "${sourceTree#/}" = "${sourceTree}" ] && sourceTree="${initialDirectory}/${sourceTree}"
+
+[ -n "${buildTree}" ] || syntaxError "build tree not specified"
+[ -e "${buildTree}" ] || semanticError "build tree not found: ${buildTree}"
+[ -d "${buildTree}" ] || semanticError "build tree not a directory: ${buildTree}"
+[ "${buildTree#/}" = "${buildTree}" ] && buildTree="${initialDirectory}/${buildTree}"
+
+[ -n "${installLocation}" ] || syntaxError "install location not specified"
+[ -e "${installLocation}" ] || semanticError "install location not found: ${installLocation}"
+[ -d "${installLocation}" ] || semanticError "install location not a directory: ${installLocation}"
+[ -w "${installLocation}" ] || semanticError "install location not writable: ${installLocation}"
+[ "${installLocation#/}" = "${installLocation}" ] && installLocation="${initialDirectory}/${installLocation}"
+
+set -e
+cd "${sourceTree}"
+revisionIdentifier="$(./getrevid .)"
+installTree="${installLocation}/REV-${revisionIdentifier}"
+configureOptions+=("--with-execute-root=${installTree}")
+
+cd "${buildTree}"
+toRelativePath "${sourceTree}" sourcePath
+"${sourcePath}/configure" --quiet "${configureOptions[@]}"
+exit 0
