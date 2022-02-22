@@ -18,9 +18,7 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../prologue.sh"
-setBuildRoot
 
-defaultBuildRoot="${buildRoot}"
 defaultPackageName="brltty"
 variableNames=()
 
@@ -28,12 +26,18 @@ processExtraProgramParameters() {
    variableNames+=( "${@}" )
 }
 
-addProgramOption b string.directory buildRoot "the root directory of the build" "${defaultBuildRoot}"
+addProgramOption b string.directory buildRoot "the root directory of the build"
 addProgramOption p string.name packageName "the name of the package" "${defaultPackageName}"
 optionalProgramParameters
 parseProgramArguments "${@}"
 
-[ -n "${buildRoot}" ] || buildRoot="${defaultBuildRoot}"
+if [ -n "${buildRoot}" ]
+then
+   verifyInputDirectory "${buildRoot}"
+else
+   setBuildRoot
+fi
+
 [ -n "${packageName}" ] || packageName="${defaultPackageName}"
 
 pkgConfig() {
