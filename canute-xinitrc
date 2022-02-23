@@ -8,6 +8,6 @@ export GTK_MODULES=gail:atk-bridge
 /usr/libexec/at-spi2-registryd &
 
 /brltty/current/bin/xbrlapi
-/brltty/current/bin/brltty -N -b ba -s no -x a2
+/brltty/current/bin/brltty -N -f /etc/brltty-atspi.conf
 
 gnome-terminal --geometry 40x9
