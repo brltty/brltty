@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "$(dirname "${0}")/../brltty-prologue.sh"
+. "$(dirname "${0}")/brltty-prologue.sh"
 ttyDefaultPath="/dev/tty"
 
 addProgramOption p string.path ttyPath "the path to the device" "${ttyDefaultPath}"

@@ -564,7 +564,7 @@ showProgramUsageSummary() {
    showProgramUsageNotes
 }
 
-addProgramOption h flag programOption_showUsageSummary "show usage summary (this output), and then exit"
+addProgramOption h flag programOption_showUsageSummary "show (this) usage summary, and then exit"
 addProgramOption q counter programOption_quietCount "decrease output verbosity"
 addProgramOption v counter programOption_verboseCount "increase output verbosity"
 
