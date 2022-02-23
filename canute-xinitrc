@@ -1,13 +1,17 @@
 #!/bin/bash
-export BRLAPI_HOST=":canute"
+set -e
 
+atspiDirectory="/usr/lib/at-spi2-core"
 eval $(dbus-launch --sh-syntax --exit-with-session)
 export GTK_MODULES=gail:atk-bridge
 
-/usr/libexec/at-spi-bus-launcher &
-/usr/libexec/at-spi2-registryd &
+"${atspiDirectory}/at-spi-bus-launcher" &
+"${atspiDirectory}/at-spi2-registryd" &
 
-/brltty/current/bin/xbrlapi
-/brltty/current/bin/brltty -N -f /etc/brltty-atspi.conf
+export BRLAPI_HOST=":canute"
+brlttyPath="/brltty/current/bin"
+"${brlttyPath}/xbrlapi"
+"${brlttyPath}/brltty" -N -f /etc/brltty-atspi.conf
 
-gnome-terminal --geometry 40x9
+exec gnome-terminal --geometry 40x9
+exit "${?}"

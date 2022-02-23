@@ -1,4 +1,5 @@
 ldconfig
+brltty-genkey
 systemctl daemon-reload
 systemctl enable brltty@canute.path
 systemctl start brltty@canute.path

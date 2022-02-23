@@ -1,0 +1,3 @@
+#!/bin/bash
+startx /brltty/current/libexec/canute-xinitrc "${@}"
+exit "${?}"

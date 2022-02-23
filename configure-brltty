@@ -28,7 +28,6 @@ parseProgramArguments "${@}"
 [ -n "${installLocation}" ] || syntaxError "install location not specified"
 [ -e "${installLocation}" ] || semanticError "install location not found: ${installLocation}"
 [ -d "${installLocation}" ] || semanticError "install location not a directory: ${installLocation}"
-[ -w "${installLocation}" ] || semanticError "install location not writable: ${installLocation}"
 [ "${installLocation#/}" = "${installLocation}" ] && installLocation="${initialDirectory}/${installLocation}"
 
 set -e

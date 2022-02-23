@@ -15,8 +15,7 @@ parseProgramArguments "${@}"
 
 set -e
 installTree="$("${sourceTree}/Tools/pkgvars" -b "${buildTree}" -- execute_root)"
-installLocation="$(dirname "${installTree}")"
-installDirectory="$(basename "${installTree}")"
-sudo rm -- "${installLocation}/current"
-sudo ln --symbolic -- "${installDirectory}" "${installLocation}/current"
+sudo cp "${programDirectory}/canute-setup" "${installTree}/bin/"
+sudo cp "${programDirectory}/canute-startx" "${installTree}/bin/"
+sudo cp "${programDirectory}/canute-xinitrc" "${installTree}/libexec/"
 exit 0

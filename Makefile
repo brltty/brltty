@@ -34,6 +34,7 @@ unconfigure:
 install: build
 	sudo $(MAKE) --silent -C $(BUILD_TREE)/Programs -- install
 	sudo $(MAKE) --silent -C $(BUILD_TREE) -- install-systemd install-udev
+	./install-files -s $(SOURCE_TREE) -b $(BUILD_TREE)
 
 uninstall:
 	sudo $(MAKE) --silent -C $(BUILD_TREE) -- $@
