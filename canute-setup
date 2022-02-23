@@ -1,0 +1,5 @@
+ldconfig
+systemctl daemon-reload
+systemctl enable brltty@canute.path
+systemctl start brltty@canute.path
+udevadm control --reload

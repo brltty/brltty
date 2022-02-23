@@ -3,6 +3,7 @@ all: build
 SOURCE_TREE = Source
 BUILD_TREE = Build
 INSTALL_LOCATION = /brltty
+SYSTEMD_UNIT = brltty@canute.path
 
 CLONE_TARGET = $(SOURCE_TREE)/configure.ac
 clone: $(CLONE_TARGET)
@@ -32,13 +33,23 @@ unconfigure:
 
 install: build
 	sudo $(MAKE) --silent -C $(BUILD_TREE)/Programs -- install
-	sudo $(MAKE) --silent -C $(BUILD_TREE) -- install-systemd
+	sudo $(MAKE) --silent -C $(BUILD_TREE) -- install-systemd install-udev
 
 uninstall:
 	sudo $(MAKE) --silent -C $(BUILD_TREE) -- $@
 
 current:
 	./symlink-current -s $(SOURCE_TREE) -b $(BUILD_TREE)
+
+status:
+	systemctl $@ $(SYSTEMD_UNIT)
+
+enable disable start stop:
+	sudo systemctl $@ $(SYSTEMD_UNIT)
+
+restart:
+	sudo systemctl stop $(SYSTEMD_UNIT)
+	sudo systemctl start $(SYSTEMD_UNIT)
 
 install-required-packages: $(CLONE_TARGET)
 	$(SOURCE_TREE)/Tools/reqpkgs -q -i

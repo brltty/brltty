@@ -1,0 +1,42 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2022 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+######################################################
+# Udev rules for giving BRLTTY access to /dev/uinput #
+######################################################
+
+#############################################################################
+# BRLTTY is now able to switch to running as an unprivileged user, using    #
+# only a few capabilities), and we don't want to be using CAP_DAC_OVERRIDE. #
+# It uses uinput in order to support some important features, including:    #
+# *  Keyboard Key Tables                                                    #
+# *  Injecting arbitrary key combinations typed on braille devices.         #
+#############################################################################
+
+KERNEL=="uinput", ACTION=="add", GOTO="brltty_uinput_add"
+GOTO="brltty_uinput_end"
+
+LABEL="brltty_uinput_add"
+TEST=="/usr/bin/setfacl", GOTO="brltty_uinput_setfacl"
+GOTO="brltty_uinput_end"
+
+LABEL="brltty_uinput_setfacl"
+RUN+="/usr/bin/setfacl -m u:brltty:rw /dev/$name"
+GOTO="brltty_uinput_end"
+
+LABEL="brltty_uinput_end"
