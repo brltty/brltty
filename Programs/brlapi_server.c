@@ -2757,7 +2757,14 @@ static int loopBind(SocketDescriptor fd, const struct sockaddr *address, socklen
   int delay = 1;
   int res;
 
-  while ((res = bind(fd, address, length)) == -1) {
+  while (1) {
+    {
+      mode_t originalMask = umask(0);
+      res = bind(fd, address, length);
+      umask(originalMask);
+    }
+
+    if (res != -1) break;
     if (!running) break;
 
     if (
