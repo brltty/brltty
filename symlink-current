@@ -10,8 +10,13 @@ verifyBuildTree
 
 set -e
 getInstallTree installTree
+installSubdirectory="$(basename "${installTree}")"
 installLocation="$(dirname "${installTree}")"
-installDirectory="$(basename "${installTree}")"
-sudo rm -- "${installLocation}/current"
-sudo ln --symbolic -- "${installDirectory}" "${installLocation}/current"
+installSymlink="${installLocation}/current"
+
+[ "$(readlink "${installSymlink}")" = "${installSubdirectory}" ] || {
+   sudo rm -- "${installSymlink}"
+   sudo ln --symbolic -- "${installSubdirectory}" "${installSymlink}"
+}
+
 exit 0

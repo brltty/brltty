@@ -9,6 +9,8 @@ verifySourceTree() {
    [ -n "${sourceTree}" ] || syntaxError "source tree not specified"
    [ -e "${sourceTree}" ] || semanticError "source tree not found: ${sourceTree}"
    [ -d "${sourceTree}" ] || semanticError "source tree not a directory: ${sourceTree}"
+   testContainingDirectory "${sourceTree}" brltty.pc.in || semanticError "not a BRLTTY source tree: ${sourceTree}"
+
    [ "${sourceTree#/}" = "${sourceTree}" ] && sourceTree="${initialDirectory}/${sourceTree}"
 }
 
@@ -20,6 +22,8 @@ verifyBuildTree() {
    [ -n "${buildTree}" ] || syntaxError "build tree not specified"
    [ -e "${buildTree}" ] || semanticError "build tree not found: ${buildTree}"
    [ -d "${buildTree}" ] || semanticError "build tree not a directory: ${buildTree}"
+   testContainingDirectory "${buildTree}" brltty.pc || semanticError "not a BRLTTY build tree: ${buildTree}"
+
    [ "${buildTree#/}" = "${buildTree}" ] && buildTree="${initialDirectory}/${buildTree}"
 }
 
