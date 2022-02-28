@@ -91,6 +91,41 @@ logDetail() {
    logMessage detail "${@}"
 }
 
+programTerminationCommandCount=0
+
+runProgramTerminationCommands() {
+   set +e
+
+   while [ "${programTerminationCommandCount}" -gt 0 ]
+   do
+      set -- $(getVariable "programTerminationCommand${programTerminationCommandCount}")
+      let "programTerminationCommandCount -= 1"
+
+      local process="${1}"
+      local directory="${2}"
+      shift 2
+
+      [ "${process}" = "${$}" ] && {
+         cd "${directory}"
+         "${@}"
+      }
+   done
+}
+
+pushProgramTerminationCommand() {
+   [ "${programTerminationCommandCount}" -gt 0 ] || trap runProgramTerminationCommands exit
+   setVariable "programTerminationCommand$((programTerminationCommandCount += 1))" "${$} $(pwd) ${*}"
+}
+
+needTemporaryDirectory() {
+   [ -n "${temporaryDirectory}" ] || {
+      umask 022
+      [ -n "${TMPDIR}" -a -d "${TMPDIR}" -a -r "${TMPDIR}" -a -w "${TMPDIR}" -a -x "${TMPDIR}" ] || export TMPDIR="/tmp"
+      temporaryDirectory="$(mktemp -d "${TMPDIR}/${programName}.$(date +"%Y%m%d-%H%M%S").XXXXXX")" && cd "${temporaryDirectory}" || exit "${?}"
+      pushProgramTerminationCommand rm -f -r -- "${temporaryDirectory}"
+   }
+}
+
 resolveDirectory() {
    local path="${1}"
    local variable="${2}"
@@ -365,19 +400,6 @@ verifyOutputDirectory() {
    else
       mkdir -p "${path}"
    fi
-}
-
-needTemporaryDirectory() {
-   cleanup() {
-      set +e
-      cd /
-      [ -z "${temporaryDirectory}" ] || rm -f -r -- "${temporaryDirectory}"
-   }
-   trap "cleanup" 0
-
-   umask 022
-   [ -n "${TMPDIR}" -a -d "${TMPDIR}" -a -r "${TMPDIR}" -a -w "${TMPDIR}" -a -x "${TMPDIR}" ] || export TMPDIR="/tmp"
-   temporaryDirectory="$(mktemp -d "${TMPDIR}/${programName}.XXXXXX")" && cd "${temporaryDirectory}" || exit "${?}"
 }
 
 programParameterCount=0
