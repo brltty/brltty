@@ -3,9 +3,20 @@
 installTree="/brltty/current"
 . "${installTree}/bin/brltty-prologue.sh"
 
+defaultSessionScript="${installTree}/libexec/canute-xsession"
+defaultLogFile="/tmp/${programName}.log"
+
+addProgramOption s string.file sessionScript "the X session script" "${defaultSessionScript}"
+addProgramOption l string.file logFile "the log file" "${defaultLogFile}"
 addProgramOption n flag noMonitor "no monitor - use a virtual X display"
 parseProgramArguments "${@}"
-sessionScript="${installTree}/libexec/canute-xsession"
+
+[ -n "${sessionScript}" ] || sessionScript="${defaultSessionScript}"
+verifyExecutableFile "${sessionScript}"
+
+[ -n "${logFile}" ] || logFile="${defaultLogFile}"
+verifyOutputFile "${logFile}"
+exec &> "${logFile}"
 
 [ -n "${DISPLAY}" ] || {
    "${noMonitor}" || {
@@ -13,7 +24,10 @@ sessionScript="${installTree}/libexec/canute-xsession"
       exit "${?}"
    }
 
-   export DISPLAY=:7
+   displayNumber=30
+   export DISPLAY=":${displayNumber}"
+   export WINDOWPATH="${displayNumber}"
+
    Xvfb "${DISPLAY}" &
    xvfbProcess="${!}"
    pushProgramTerminationCommand kill -TERM "${xvfbProcess}"
