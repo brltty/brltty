@@ -368,20 +368,52 @@ findContainingDirectory() {
    export "${variable}"="${directory}"
 }
 
-verifyExecutable() {
-   local path="${1}"
-
-   [ -e "${path}" ] || semanticError "file not found: ${path}"
-   [ -f "${path}" ] || semanticError "not a file: ${path}"
-   [ -x "${path}" ] || semanticError "file not executable: ${path}"
-}
-
 testDirectory() {
    local path="${1}"
 
    [ -e "${path}" ] || return 1
    [ -d "${path}" ] || semanticError "not a directory: ${path}"
    return 0
+}
+
+verifyWritableDirectory() {
+   local path="${1}"
+
+   testDirectory "${path}" || semanticError "directory not found: ${path}"
+   [ -w "${path}" ] || semanticError "directory not writable: ${path}"
+}
+
+testFile() {
+   local path="${1}"
+
+   [ -e "${path}" ] || return 1
+   [ -f "${path}" ] || semanticError "not a file: ${path}"
+   return 0
+}
+
+verifyInputFile() {
+   local path="${1}"
+
+   testFile "${path}" || semanticError "file not found: ${path}"
+   [ -r "${path}" ] || semanticError "file not readable: ${path}"
+}
+
+verifyOutputFile() {
+   local path="${1}"
+
+   if testFile "${path}"
+   then
+      [ -w "${path}" ] || semanticError "file not writable: ${path}"
+   else
+      verifyWritableDirectory "$(dirname "${path}")"
+   fi
+}
+
+verifyExecutableFile() {
+   local path="${1}"
+
+   testFile "${path}" || semanticError "file not found: ${path}"
+   [ -x "${path}" ] || semanticError "file not executable: ${path}"
 }
 
 verifyInputDirectory() {

@@ -81,7 +81,7 @@ addProgramOption U flag rootUser "set user root execution"
 addProgramParameter executable executablePath "the path to the executable"
 parseProgramArguments "${@}"
 
-verifyExecutable "${executablePath}"
+verifyExecutableFile "${executablePath}"
 
 "${testMode}" || {
    if "${useSudo}"
