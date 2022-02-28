@@ -16,4 +16,9 @@ do
    sudo cp -- "${programDirectory}/${subdirectory}/"* "${installTree}/${subdirectory}/"
 done
 
+for subdirectory in etc
+do
+   sudo tar --create --file "${installTree}/${subdirectory}.tar" "${subdirectory}"
+done
+
 exit 0
