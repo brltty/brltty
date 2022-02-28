@@ -1,3 +1,23 @@
 #!/bin/bash
-startx /brltty/current/libexec/canute-xinitrc "${@}"
+
+installTree="/brltty/current"
+. "${installTree}/bin/brltty-prologue.sh"
+
+addProgramOption n flag noMonitor "no monitor - use a virtual X display"
+parseProgramArguments "${@}"
+sessionScript="${installTree}/libexec/canute-xsession"
+
+[ -n "${DISPLAY}" ] || {
+   "${noMonitor}" || {
+      startx "${sessionScript}"
+      exit "${?}"
+   }
+
+   export DISPLAY=:7
+   Xvfb "${DISPLAY}" &
+   xvfbProcess="${!}"
+   pushProgramTerminationCommand kill -TERM "${xvfbProcess}"
+}
+
+"${sessionScript}"
 exit "${?}"

@@ -22,7 +22,7 @@ verifyBuildTree() {
    [ -n "${buildTree}" ] || syntaxError "build tree not specified"
    [ -e "${buildTree}" ] || semanticError "build tree not found: ${buildTree}"
    [ -d "${buildTree}" ] || semanticError "build tree not a directory: ${buildTree}"
-   testContainingDirectory "${buildTree}" brltty.pc || semanticError "not a BRLTTY build tree: ${buildTree}"
+#  testContainingDirectory "${buildTree}" brltty.pc || semanticError "not a BRLTTY build tree: ${buildTree}"
 
    [ "${buildTree#/}" = "${buildTree}" ] && buildTree="${initialDirectory}/${buildTree}"
 }
