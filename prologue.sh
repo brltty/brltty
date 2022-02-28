@@ -1,30 +1,41 @@
 #!/bin/bash
 . "$(dirname "${BASH_SOURCE[0]}")/Source/brltty-prologue.sh"
 
-setSourceRoot() {
-   findContainingDirectory BRLTTY_SOURCE_ROOT "${programDirectory}" brltty.pc.in || {
-      semanticError "source tree not found"
-   }
-
-   readonly sourceRoot="${BRLTTY_SOURCE_ROOT}"
+addSourceTreeOption() {
+   addProgramOption s string.directory sourceTree "the path to the source tree"
 }
 
-setBuildRoot() {
-   local variable=BRLTTY_BUILD_ROOT
-   set -- brltty.pc
-
-   findContainingDirectory "${variable}" "${initialDirectory}" "${@}" || {
-      findContainingDirectory "${variable}" "${programDirectory}" "${@}" || {
-         semanticError "build tree not found"
-      }
-   }
-
-   readonly buildRoot="${BRLTTY_BUILD_ROOT}"
+verifySourceTree() {
+   [ -n "${sourceTree}" ] || syntaxError "source tree not specified"
+   [ -e "${sourceTree}" ] || semanticError "source tree not found: ${sourceTree}"
+   [ -d "${sourceTree}" ] || semanticError "source tree not a directory: ${sourceTree}"
+   [ "${sourceTree#/}" = "${sourceTree}" ] && sourceTree="${initialDirectory}/${sourceTree}"
 }
 
-readonly documentsSubdirectory="Documents"
-readonly driversSubdirectory="Drivers"
-readonly programsSubdirectory="Programs"
-readonly tablesSubdirectory="Tables"
-readonly toolsSubdirectory="Tools"
+addBuildTreeOption() {
+   addProgramOption b string.directory buildTree "the path to the build tree"
+}
+
+verifyBuildTree() {
+   [ -n "${buildTree}" ] || syntaxError "build tree not specified"
+   [ -e "${buildTree}" ] || semanticError "build tree not found: ${buildTree}"
+   [ -d "${buildTree}" ] || semanticError "build tree not a directory: ${buildTree}"
+   [ "${buildTree#/}" = "${buildTree}" ] && buildTree="${initialDirectory}/${buildTree}"
+}
+
+addInstallLocationOption() {
+   addProgramOption i string.directory installLocation "the path to the install location"
+}
+
+verifyInstallLocation() {
+   [ -n "${installLocation}" ] || syntaxError "install location not specified"
+   [ -e "${installLocation}" ] || semanticError "install location not found: ${installLocation}"
+   [ -d "${installLocation}" ] || semanticError "install location not a directory: ${installLocation}"
+   [ "${installLocation#/}" = "${installLocation}" ] && installLocation="${initialDirectory}/${installLocation}"
+}
+
+getInstallTree() {
+   local resultVariable="${1}"
+   setVariable "${resultVariable}" "$("${sourceTree}/Tools/pkgvars" -b "${buildTree}" -- execute_root)"
+}
 

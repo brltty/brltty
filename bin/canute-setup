@@ -1,6 +1,11 @@
+#!/bin/bash
+set -e
+
 ldconfig
-brltty-genkey
+/brltty/current/bin/brltty-genkey -q
 systemctl daemon-reload
 systemctl enable brltty@canute.path
 systemctl start brltty@canute.path
 udevadm control --reload
+
+exit 0
