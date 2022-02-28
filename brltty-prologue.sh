@@ -19,6 +19,12 @@
 readonly initialDirectory="$(pwd)"
 readonly programName="$(basename "${0}")"
 
+programMessage() {
+   local message="${1}"
+
+   [ -z "${message}" ] || echo >&2 "${programName}: ${message}"
+}
+
 setVariable() {
    eval "${1}"'="${2}"'
 }
@@ -45,6 +51,44 @@ defineEnumeration() {
       readonly "${variable}"="${value}"
       value=$((value + 1))
    done
+}
+
+defineEnumeration programLogLevel_ error warning notice task step detail
+programLogLevel=$((${programLogLevel_task}))
+
+logMessage() {
+   local level="${1}"
+   local message="${2}"
+
+   local variable="programLogLevel_${level}"
+   local value=$((${variable}))
+
+   [ "${value}" -gt 0 ] || programMessage "unknown log level: ${level}"
+   [ "${value}" -gt "${programLogLevel}" ] || programMessage "${message}"
+}
+
+logError() {
+   logMessage error "${@}"
+}
+
+logWarning() {
+   logMessage warning "${@}"
+}
+
+logNotice() {
+   logMessage notice "${@}"
+}
+
+logTask() {
+   logMessage task "${@}"
+}
+
+logStep() {
+   logMessage step "${@}"
+}
+
+logDetail() {
+   logMessage detail "${@}"
 }
 
 resolveDirectory() {
@@ -200,44 +244,24 @@ stringWrapped() {
    echo "${result}"
 }
 
-programMessage() {
-   local message="${1}"
-
-   [ -z "${message}" ] || echo >&2 "${programName}: ${message}"
-}
-
-defineEnumeration programLogLevel_ error warning notice task step detail
-programLogLevel=$((${programLogLevel_task}))
-
-logMessage() {
-   local level="${1}"
-   local message="${2}"
-
-   local variable="programLogLevel_${level}"
-   local value=$((${variable}))
-
-   [ "${value}" -gt 0 ] || programMessage "unknown log level: ${level}"
-   [ "${value}" -gt "${programLogLevel}" ] || programMessage "${message}"
-}
-
 syntaxError() {
    local message="${1}"
 
-   logMessage error "${message}"
+   logError "${message}"
    exit 2
 }
 
 semanticError() {
    local message="${1}"
 
-   logMessage error "${message}"
+   logError "${message}"
    exit 3
 }
 
 internalError() {
    local message="${1}"
 
-   logMessage error "${message}"
+   logError "${message}"
    exit 4
 }
 
@@ -383,7 +407,7 @@ optionalProgramParameters() {
    then
       programParameterCountMinimum="${programParameterCount}"
    else
-      logMessage warning "program parameters are already optional"
+      logWarning "program parameters are already optional"
    fi
 }
 
