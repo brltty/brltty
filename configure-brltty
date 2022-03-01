@@ -8,6 +8,8 @@ configureOptions=(
    --without-mikropuhe
    --without-swift
    --without-theta
+   --disable-lisp-bindings
+   --disable-ocaml-bindings
 )
 
 addSourceTreeOption
