@@ -1152,36 +1152,18 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
   updated = 1;
 }
 
-static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *message, void *user_data)
-{
-  int type = dbus_message_get_type(message);
-  const char *interface = dbus_message_get_interface(message);
-  const char *member = dbus_message_get_member(message);
+static int closeX = 1;
 
-  if (type == DBUS_MESSAGE_TYPE_SIGNAL) {
-    if (!strncmp(interface, SPI2_DBUS_INTERFACE_EVENT".", strlen(SPI2_DBUS_INTERFACE_EVENT"."))) {
-      AtSpi2HandleEvent(interface + strlen(SPI2_DBUS_INTERFACE_EVENT"."), message);
-    } else if (!strcmp(interface, DBUS_INTERFACE_LOCAL) &&
-               !strcmp(member, "Disconnected")) {
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                 "DBus disconnected signal, shutting down");
-      brlttyInterrupt(WAIT_STOP);
-    } else {
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                 "unknown signal: Intf:%s Msg:%s", interface, member);
-    }
-  } else {
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-               "unknown message: Type:%d Intf:%s Msg:%s", type, interface, member);
-  }
-
-  return DBUS_HANDLER_RESULT_HANDLED;
+static void
+onScreenDriverFailure (const char *cause) {
+  logMessage(LOG_ERR, "screen driver failure: %s", cause);
+  closeX = 1;
+  brlttyInterrupt(WAIT_STOP);
 }
 
 #ifdef HAVE_PKG_X11
 /* Integration of X11 events with brltty monitors */
 static AsyncHandle a2XWatch;
-static int closeX = 1;
 static ReportListenerInstance *coreSelUpdatedListener;
 static int settingClipboard;
 
@@ -1249,24 +1231,18 @@ static int ErrorHandler(Display *dpy, XErrorEvent *ev) {
   XGetErrorText(dpy, ev->error_code, buffer, sizeof(buffer));
   logMessage(LOG_ERR, "X Error %d, %s", ev->type, buffer);
   logMessage(LOG_ERR, "resource %#010lx, req %u:%u",ev->resourceid,ev->request_code,ev->minor_code);
-  logMessage(LOG_ERR, "Shutting down");
-  closeX = 1;
-  brlttyInterrupt(WAIT_STOP);
+  onScreenDriverFailure("X error");
   return 0;
 }
 
 static int IOErrorHandler(Display *dpy) {
-  logMessage(LOG_ERR, "X I/O error, shutting down");
-  closeX = 1;
-  brlttyInterrupt(WAIT_STOP);
+  onScreenDriverFailure("X I/O error");
   return 0;
 }
 
 #ifdef HAVE_XSETIOERROREXITHANDLER
 static void IOErrorExitHandler(Display *dpy, void *data) {
-  logMessage(LOG_ERR, "X I/O Error Exit, shutting down");
-  closeX = 1;
-  brlttyInterrupt(WAIT_STOP);
+  onScreenDriverFailure("X I/O Error Exit");
   return;
 }
 #endif
@@ -1493,6 +1469,30 @@ addWatches (void) {
   return 1;
 }
 
+static DBusHandlerResult AtSpi2Filter(DBusConnection *connection, DBusMessage *message, void *user_data)
+{
+  int type = dbus_message_get_type(message);
+  const char *interface = dbus_message_get_interface(message);
+  const char *member = dbus_message_get_member(message);
+
+  if (type == DBUS_MESSAGE_TYPE_SIGNAL) {
+    if (!strncmp(interface, SPI2_DBUS_INTERFACE_EVENT".", strlen(SPI2_DBUS_INTERFACE_EVENT"."))) {
+      AtSpi2HandleEvent(interface + strlen(SPI2_DBUS_INTERFACE_EVENT"."), message);
+    } else if (!strcmp(interface, DBUS_INTERFACE_LOCAL) &&
+               !strcmp(member, "Disconnected")) {
+      onScreenDriverFailure("DBus disconnected");
+    } else {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+                 "unknown signal: Intf:%s Msg:%s", interface, member);
+    }
+  } else {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+               "unknown message: Type:%d Intf:%s Msg:%s", type, interface, member);
+  }
+
+  return DBUS_HANDLER_RESULT_HANDLED;
+}
+
 static int
 construct_AtSpi2Screen (void) {
   DBusError error;
@@ -1562,6 +1562,7 @@ noConnection:
   dbus_connection_unref(bus);
 
 noBus:
+  onScreenDriverFailure("driver couldn't start");
   return 0;
 }
 
