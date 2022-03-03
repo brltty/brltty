@@ -391,6 +391,22 @@ static struct window *window_of_Window(Window win) {
   return cur;
 }
 
+static int isRootWindow (Window win) {
+  if (win == PointerRoot) return 1;
+
+  {
+    int count = ScreenCount(dpy);
+     
+    for (int index=0; index<count; index+=1) {
+      if (RootWindow(dpy, index) == win) {
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}
+
 static int del_window(Window win) {
   struct window **pred;
   struct window *cur;
@@ -580,16 +596,18 @@ static void setName(const struct window *window) {
 }
 
 static void setFocus(Window win) {
-  struct window *window;
-
   curWindow=win;
   api_setFocus((uint32_t)win);
 
   if (!quiet) {
-    if (!(window=window_of_Window(win))) {
-      fprintf(stderr,gettext("xbrlapi: didn't grab window %#010lx but got focus\n"),win);
-      api_setName("unknown");
-    } else setName(window);
+    struct window *window = window_of_Window(win);
+
+    if (window) {
+      setName(window);
+    } else {
+      fprintf(stderr, gettext("xbrlapi: didn't grab window %#010lx but got focus\n"), win);
+      api_setName(isRootWindow(win)? "root window": "unnamed window");
+    }
   }
 }
 
