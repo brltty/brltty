@@ -12,12 +12,13 @@ export GTK_MODULES=gail:atk-bridge
 atspiDirectory="/usr/lib/at-spi2-core"
 "${atspiDirectory}/at-spi-bus-launcher" &
 "${atspiDirectory}/at-spi2-registryd" &
+sleep 3
 
-brlttyPath="/brltty/current/bin"
+brlttyPath="${installTree}/bin"
 export BRLAPI_HOST=":canute"
 "${brlttyPath}/xbrlapi"
 "${brlttyPath}/brltty" -N -f /etc/brltty-atspi.conf
 
 marco &
-exec gnome-terminal --wait --title "Canute Interactive Session"
+exec gnome-terminal --wait --title "Canute Interactive Session" -- /bin/bash --rcfile "${installTree}/libexec/canute-xsession.bashrc"
 exit "${?}"

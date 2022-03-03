@@ -21,7 +21,7 @@ exec &> "${logFile}"
 set -- startx "${sessionScript}"
 
 "${noMonitor}" && {
-   set -- "${@}" -- /usr/bin/Xvfb
+   set -- "${@}" -- /usr/bin/Xorg -config "/etc/xorg-dummy-1920x1080.conf"
    [ -n "${XDG_VTNR}" ] && export WINDOWPATH="${XDG_VTNR}"
 }
 
