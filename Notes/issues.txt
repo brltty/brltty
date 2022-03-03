@@ -1,6 +1,3 @@
 Xvfb path
-install etc
-Xvfb vt#
 build directory verification
-exec startx
 brlapi.key permissions

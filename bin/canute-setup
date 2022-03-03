@@ -6,11 +6,13 @@ installTree="/brltty/current"
 parseProgramArguments "${@}"
 set -e
 
+tar --extract --file "/brltty/current/etc.tar" --directory "/"
 ldconfig
 /brltty/current/bin/brltty-genkey -q
+udevadm control --reload
+
 systemctl daemon-reload
 systemctl enable brltty@canute.path
 systemctl start brltty@canute.path
-udevadm control --reload
 
 exit 0
