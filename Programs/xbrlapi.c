@@ -540,7 +540,7 @@ static char *getWindowTitle(Window win) {
   wm_name[nitems++] = 0;
   ret = strdup((char *) wm_name);
   XFree(wm_name);
-  debugf("type %lx name %s len %ld\n",actual_type,ret,nitems);
+  debugf("type %ld name %s len %ld\n",actual_type,ret,nitems);
 #ifdef HAVE_ICONV_H
   {
     if (actual_type == utf8StringAtom && utf8Conv != (iconv_t)(-1)) {
