@@ -69,6 +69,7 @@ install: all
 	[ -z "$(PYTHON_DESTDIR)" ] || set -- "$${@}" --root "$(PYTHON_DESTDIR)"; \
 	[ -z "$(PYTHON_PREFIX)" ] || set -- "$${@}" --prefix "$(PYTHON_PREFIX)"; \
 	"$(PYTHON)" ./setup.py "$${@}"
+	-rm -f -r -- Brlapi.egg-info
 
 uninstall:
 	[ ! -f "$(INSTALLED_FILES)" ] || rm -f -- `$(AWK) '{printf "%s%s ", "$(PYTHON_DESTDIR)", $$0}' "$(INSTALLED_FILES)"`
