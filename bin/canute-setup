@@ -1,4 +1,9 @@
 #!/bin/bash
+
+installTree="/brltty/current"
+. "${installTree}/bin/brltty-prologue.sh"
+
+parseProgramArguments "${@}"
 set -e
 
 ldconfig

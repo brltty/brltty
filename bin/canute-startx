@@ -17,9 +17,13 @@ verifyOutputFile "${logFile}"
 [ -n "${sessionScript}" ] || sessionScript="${defaultSessionScript}"
 verifyExecutableFile "${sessionScript}"
 
-set -- startx "${sessionScript}"
-"${noMonitor}" && set -- "${@}" -- /usr/bin/Xvfb
-
 exec &> "${logFile}"
-"${@}"
+set -- startx "${sessionScript}"
+
+"${noMonitor}" && {
+   set -- "${@}" -- /usr/bin/Xvfb
+   [ -n "${XDG_VTNR}" ] && export WINDOWPATH="${XDG_VTNR}"
+}
+
+exec "${@}"
 exit "${?}"
