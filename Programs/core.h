@@ -158,6 +158,7 @@ extern int savePreferences (void);
 
 extern unsigned char getCursorDots (const unsigned char *setting);
 extern int setCursorDots (unsigned char *setting, unsigned char dots);
+extern unsigned char mapCursorDots (unsigned char dots);
 
 extern unsigned char getScreenCursorDots (void);
 extern int setScreenCursorDots (unsigned char dots);

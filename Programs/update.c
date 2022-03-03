@@ -182,7 +182,7 @@ setSpeechCursorDots (unsigned char dots) {
   return setCursorDots(&prefs.speechCursorStyle, dots);
 }
 
-static unsigned char
+unsigned char
 mapCursorDots (unsigned char dots) {
   if (!hasEightDotCells(&brl)) {
     brlRemapDot(&dots, BRL_DOT_7, BRL_DOT_3);

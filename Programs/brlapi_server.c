@@ -604,7 +604,7 @@ getCursorOverlay (BrailleDisplay *brl) {
     requireBlinkDescriptor(blink);
 
     if (isBlinkVisible(blink)) {
-      return getScreenCursorDots();
+      return mapCursorDots(getScreenCursorDots());
     }
   }
 
