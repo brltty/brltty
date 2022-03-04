@@ -39,10 +39,13 @@ uninstall:
 current:
 	./symlink-current -s $(SOURCE_TREE) -b $(BUILD_TREE)
 
+INSTALL_CURRENT = $(INSTALL_LOCATION)/current
+INSTALL_TREE = $(shell readlink -n -e -- $(INSTALL_CURRENT))
+
 TAR_ARCHIVE = canute-brltty.tar
 tar-archive: $(TAR_ARCHIVE)
 $(TAR_ARCHIVE):
-	tar --file $(TAR_ARCHIVE) --create --absolute-names -- $(INSTALL_LOCATION)
+	tar --file $(TAR_ARCHIVE) --create --absolute-names -- $(INSTALL_TREE) $(INSTALL_CURRENT)
 
 GZIP_ARCHIVE = $(TAR_ARCHIVE).gz
 gzip-archive: $(GZIP_ARCHIVE)
@@ -59,7 +62,7 @@ xz-archive: $(XZ_ARCHIVE)
 $(XZ_ARCHIVE): $(TAR_ARCHIVE)
 	xz -9 -c $(TAR_ARCHIVE) >$@
 
-clean:
+clean-archives:
 	-rm -f -- *.tar *.tar.*
 
 status:
