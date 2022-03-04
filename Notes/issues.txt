@@ -1,3 +1,2 @@
-Xvfb path
+Xorg path
 build directory verification
-brlapi.key permissions

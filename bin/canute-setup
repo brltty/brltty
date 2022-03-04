@@ -15,8 +15,11 @@ set -e
 apt --yes --quiet --quiet --quiet install -- "${requiredPackages[@]}"
 tar --extract --file "${installTree}/etc.tar" --directory "/"
 
+apiKeyFile="/etc/brlapi.key"
+"${installTree}/bin/brltty-genkey" -q -f "${apiKeyFile}"
+chmod u=rw,go=r "${apiKeyFile}"
+
 ldconfig
-"${installTree}/bin/brltty-genkey" -q
 udevadm control --reload
 
 systemdUnit="brltty@canute.path"
