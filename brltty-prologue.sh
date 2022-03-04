@@ -300,6 +300,33 @@ internalError() {
    exit 4
 }
 
+verifyActionFlags() {
+   local allFlag="${1}"
+   shift 1
+
+   local allRequested
+   getVariable "${allFlag}" allRequested
+   local actionFlag
+
+   for actionFlag in "${@}"
+   do
+      local actionRequested
+      getVariable "${actionFlag}" actionRequested
+
+      "${actionRequested}" && {
+         "${allRequested}" && syntaxError "conflicting actions"
+         return
+      }
+   done
+
+   "${allRequested}" || syntaxError "no actions"
+
+   for actionFlag in "${@}"
+   do
+      setVariable "${actionFlag}" true
+   done
+}
+
 testInteger() {
    local value="${1}"
 
