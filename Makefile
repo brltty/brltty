@@ -24,9 +24,6 @@ $(CONFIGURE_TARGET): $(AUTOGEN_TARGET)
 build: $(CONFIGURE_TARGET)
 	$(MAKE) --silent -C $(BUILD_TREE)/Programs -- everything
 
-clean distclean::
-	$(MAKE) --silent -C $(BUILD_TREE) -- $@
-
 unconfigure:
 	-rm -f -r -- $(BUILD_TREE)
 	-rm -f -- $(AUTOGEN_TARGET)
@@ -34,7 +31,7 @@ unconfigure:
 install: build
 	sudo $(MAKE) --silent -C $(BUILD_TREE)/Programs -- install-commands install-tools install-manpages install-drivers install-tables install-core-headers install-api-libraries install-api-commands install-xbrlapi install-api-headers install-api-bindings
 	sudo $(MAKE) --silent -C $(BUILD_TREE) -- install-systemd install-udev
-	./install-files -s $(SOURCE_TREE) -b $(BUILD_TREE)
+	./add-files -s $(SOURCE_TREE) -b $(BUILD_TREE)
 
 uninstall:
 	sudo $(MAKE) --silent -C $(BUILD_TREE) -- $@
@@ -62,7 +59,7 @@ xz-archive: $(XZ_ARCHIVE)
 $(XZ_ARCHIVE): $(TAR_ARCHIVE)
 	xz -9 -c $(TAR_ARCHIVE) >$@
 
-clean::
+clean:
 	-rm -f -- *.tar *.tar.*
 
 status:

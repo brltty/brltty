@@ -10,6 +10,8 @@ verifyBuildTree
 
 set -e
 getInstallTree installTree
+testDirectory "${installTree}" || semanticError "install tree not found: ${installTree}"
+
 installSubdirectory="$(basename "${installTree}")"
 installLocation="$(dirname "${installTree}")"
 installSymlink="${installLocation}/current"

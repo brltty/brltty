@@ -1,0 +1,64 @@
+#!/bin/bash
+. "$(dirname "${0}")/prologue.sh"
+
+makeTarget() {
+   local target="${1}"
+
+   logTask "making target: ${target}"
+   make --silent -- "${target}"
+}
+
+verifyRequestedActions() {
+   local allFlag="${1}"
+   shift 1
+
+   local allRequested
+   getVariable "${allFlag}" allRequested
+   local actionFlag
+
+   for actionFlag in "${@}"
+   do
+      local actionRequested
+      getVariable "${actionFlag}" actionRequested
+
+      "${actionRequested}" && {
+         "${allRequested}" && syntaxError "conflicting actions"
+         return
+      }
+   done
+
+   "${allRequested}" || syntaxError "no actions"
+
+   for actionFlag in "${@}"
+   do
+      setVariable "${actionFlag}" true
+   done
+}
+
+addProgramOption A flag allActions "perform all of the actions"
+addProgramOption u flag makeUnconfigure "unconfigure BRLTTY"
+addProgramOption c flag makeConfigure "configure BRLTTY"
+addProgramOption b flag makeBuild "build BRLTTY"
+addProgramOption i flag makeInstall "install BRLTTY"
+addProgramOption l flag makeCurrent "set the \"current\" link"
+addProgramOption a flag makeArchives "make the archives"
+parseProgramArguments "${@}"
+verifyRequestedActions allActions makeUnconfigure makeConfigure makeBuild makeInstall makeCurrent makeArchives
+
+set -e
+cd "${programDirectory}"
+
+! "${makeUnconfigure}" || makeTarget unconfigure
+! "${makeConfigure}" || makeTarget configure
+! "${makeBuild}" || makeTarget build
+! "${makeInstall}" || makeTarget install
+! "${makeCurrent}" || makeTarget current
+
+! "${makeArchives}" || {
+   rm -f -- *.tar
+   makeTarget gzip-archive
+   makeTarget bzip2-archive
+   makeTarget xz-archive
+}
+
+exit 0
