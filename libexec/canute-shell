@@ -1,0 +1,9 @@
+#!/bin/bash
+
+installTree="/brltty/current"
+. "${installTree}/bin/brltty-prologue.sh"
+
+parseProgramArguments "${@}"
+
+exec /bin/bash --rcfile "${installTree}/libexec/canute-bashrc"
+exit "${?}"

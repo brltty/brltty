@@ -20,5 +20,5 @@ export BRLAPI_HOST=":canute"
 "${brlttyPath}/brltty" -N -f /etc/brltty-atspi.conf
 
 marco &
-exec gnome-terminal --wait --title "Canute Interactive Session" -- /bin/bash --rcfile "${installTree}/libexec/canute-xsession.bashrc"
+exec gnome-terminal --wait --title "Canute Interactive Session" -- "${installTree}/libexec/canute-shell"
 exit "${?}"

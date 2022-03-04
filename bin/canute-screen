@@ -1,0 +1,9 @@
+#!/bin/bash
+
+installTree="/brltty/current"
+. "${installTree}/bin/brltty-prologue.sh"
+
+parseProgramArguments "${@}"
+
+exec screen -m -s "${installTree}/libexec/canute-shell"
+exit 0
