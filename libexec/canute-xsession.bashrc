@@ -1,2 +1,2 @@
-export PS1="Canute> "
-brltty-ttysize -c 40 -l 9
+export PS1='\u-\W\$ '
+canute-ttysize

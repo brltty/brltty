@@ -1,0 +1,10 @@
+#!/bin/bash
+
+installTree="/brltty/current"
+. "${installTree}/bin/brltty-prologue.sh"
+
+parseProgramArguments "${@}"
+set -e
+
+brltty-ttysize -c 40 -l 9
+exit 0
