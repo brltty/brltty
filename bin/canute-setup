@@ -3,10 +3,18 @@
 installTree="/brltty/current"
 . "${installTree}/bin/brltty-prologue.sh"
 
+requiredPackages=(
+   gnome-terminal
+   marco
+)
+
 parseProgramArguments "${@}"
+[ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 set -e
 
+apt --yes --quiet --quiet --quiet install -- "${requiredPackages[@]}"
 tar --extract --file "${installTree}/etc.tar" --directory "/"
+
 ldconfig
 "${installTree}/bin/brltty-genkey" -q
 udevadm control --reload
