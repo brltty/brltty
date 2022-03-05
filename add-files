@@ -11,9 +11,10 @@ verifyBuildTree
 set -e
 getInstallTree installTree
 
-for subdirectory in bin libexec
+for sourceDirectory in Files/*
 do
-   sudo cp -- "${programDirectory}/${subdirectory}/"* "${installTree}/${subdirectory}/"
+   targetDirectory="${installTree}/${sourceDirectory#*/}"
+   sudo cp -- "${programDirectory}/${sourceDirectory}/"* "${targetDirectory}/"
 done
 
 for subdirectory in etc

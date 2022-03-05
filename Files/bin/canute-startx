@@ -18,12 +18,13 @@ verifyOutputFile "${logFile}"
 verifyExecutableFile "${sessionScript}"
 
 exec &> "${logFile}"
-set -- startx "${sessionScript}"
+startxCommand=(startx "${sessionScript}")
 
 "${noMonitor}" && {
-   set -- "${@}" -- /usr/bin/Xorg -config "/etc/xorg-dummy-1920x1080.conf"
+   startxCommand+=(-- /usr/bin/Xorg)
+   startxCommand+=(-config "${installTree}/etc/xorg-dummy-1920x1080.conf")
    [ -n "${XDG_VTNR}" ] && export WINDOWPATH="${XDG_VTNR}"
 }
 
-exec "${@}"
+exec "${startxCommand[@]}"
 exit "${?}"
