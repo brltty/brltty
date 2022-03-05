@@ -5,5 +5,5 @@ installTree="/brltty/current"
 
 parseProgramArguments "${@}"
 
-exec screen -m -s "${installTree}/libexec/canute-shell"
+exec screen -m -t "Canute" -s "${installTree}/libexec/canute-shell"
 exit 0
