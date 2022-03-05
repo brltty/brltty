@@ -78,6 +78,6 @@ set -e
 
 executeCommand tar --extract --absolute-names --file "${tarFile}" --directory "/"
 executeCommand cd "${installTree}"
-executeCommand bin/canute-setup -A
+executeCommand libexec/canute-setup -A
 
 exit 0
