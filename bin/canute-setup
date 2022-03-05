@@ -6,25 +6,40 @@ installTree="/brltty/current"
 requiredPackages=(
    gnome-terminal
    marco
+   screen
 )
 
+addProgramOption A flag allActions "perform all of the actions"
+addProgramOption p flag hostPackages "install the host packages"
+addProgramOption e flag etcFiles "install the /etc/ files"
+addProgramOption k flag apiKey "generate the BrlAPI access key"
+addProgramOption l flag sharedLibraries "configure the shared libraries"
+addProgramOption u flag udevReload "reload the Udev rules"
+addProgramOption s flag systemdUnits "configure the Systemd units"
 parseProgramArguments "${@}"
+verifyActionFlags allActions hostPackages etcFiles apiKey sharedLibraries udevReload systemdUnits
+
 [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 set -e
 
-apt --yes --quiet --quiet --quiet install -- "${requiredPackages[@]}"
-tar --extract --file "${installTree}/etc.tar" --directory "/"
+! "${hostPackages}" || apt --yes --quiet --quiet --quiet install -- "${requiredPackages[@]}"
+! "${etcFiles}" || tar --extract --file "${installTree}/etc.tar" --directory "/"
 
-apiKeyFile="/etc/brlapi.key"
-"${installTree}/bin/brltty-genkey" -q -f "${apiKeyFile}"
-chmod u=rw,go=r "${apiKeyFile}"
+! "${apiKey}" || {
+   apiKeyFile="/etc/brlapi.key"
+   "${installTree}/bin/brltty-genkey" -q -f "${apiKeyFile}"
+   chmod u=rw,go=r "${apiKeyFile}"
+}
 
-ldconfig
-udevadm control --reload
+! "${sharedLibraries}" || ldconfig
+! "${udevReload}" || udevadm control --reload
 
-systemdUnit="brltty@canute.path"
-systemctl daemon-reload
-systemctl enable "${systemdUnit}"
-systemctl start "${systemdUnit}"
+! "${systemdUnits}" || {
+   systemdUnit="brltty@canute.path"
+
+   systemctl daemon-reload
+   systemctl enable "${systemdUnit}"
+   systemctl start "${systemdUnit}"
+}
 
 exit 0
