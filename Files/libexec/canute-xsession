@@ -17,7 +17,7 @@ sleep 3
 brlttyPath="${installTree}/bin"
 export BRLAPI_HOST=":canute"
 "${brlttyPath}/xbrlapi"
-"${brlttyPath}/brltty" -N -f /etc/brltty-atspi.conf
+"${brlttyPath}/brltty" -N -f "${installTree}/etc/brltty-atspi.conf"
 
 marco &
 exec gnome-terminal --wait --title "Canute Interactive Session" -- "${installTree}/libexec/canute-shell"
