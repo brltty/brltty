@@ -239,7 +239,9 @@ setNamedPipeMethods (NamedPipeObject *obj) {
 #elif defined(S_ISFIFO)
 static int
 createFifo (NamedPipeObject *obj) {
+  lockUmask();
   int result = mkfifo(obj->host.path, 0);
+  unlockUmask();
 
   if ((result == -1) && (errno == EEXIST)) {
     struct stat fifo;
@@ -253,7 +255,11 @@ createFifo (NamedPipeObject *obj) {
   }
 
   if (result != -1) {
-    if (chmod(obj->host.path, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH) != -1) {
+    lockUmask();
+    int changed = chmod(obj->host.path, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH) != -1;
+    unlockUmask();
+
+    if (changed) {
       // open read-write even though we only read to prevent an end-of-file condition
       if ((obj->input.descriptor = open(obj->host.path, O_RDWR|O_NONBLOCK)) != -1) {
         logMessage(LOG_DEBUG, "FIFO created: %s: fd=%d",

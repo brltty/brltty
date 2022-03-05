@@ -162,7 +162,10 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   if (!(serialDevice = serialOpenDevice(device))) goto failure;
   
 #ifdef DEBUG
+  lockUmask();
   brl_log = open("/tmp/brllog", O_CREAT | O_WRONLY);
+  unlockUmask();
+
   if(brl_log < 0){
     goto failure;
   }

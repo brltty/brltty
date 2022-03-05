@@ -192,16 +192,18 @@ createPidFile (const char *path, ProcessIdentifier pid) {
 
     typedef enum {PFS_ready, PFS_stale, PFS_clash, PFS_error} PidFileState;
     PidFileState state = PFS_error;
-    int file = open(path,
-                    O_RDWR | O_CREAT,
-                    S_IRUSR | S_IWUSR
+
+    lockUmask();
+    int file = open(
+      path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR
 #ifdef S_IRGRP
-                    | S_IRGRP
+                            | S_IRGRP
 #endif /* S_IRGRP */
 #ifdef S_IROTH
-                    | S_IROTH
+                            | S_IROTH
 #endif /* S_IROTH */
-                    );
+    );
+    unlockUmask();
 
     if (file != -1) {
       int locked = acquireFileLock(file, 1);

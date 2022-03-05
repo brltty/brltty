@@ -44,6 +44,7 @@
 #include "log.h"
 #include "strfmt.h"
 #include "file.h"
+#include "lock.h"
 #include "parse.h"
 #include "async_wait.h"
 #include "utf8.h"
@@ -335,6 +336,22 @@ testDirectoryPath (const char *path) {
   return 0;
 }
 
+static LockDescriptor *
+getUmaskLock (void) {
+  static LockDescriptor *lock = NULL;
+  return getLockDescriptor(&lock, "umask");
+}
+
+void
+lockUmask (void) {
+  obtainExclusiveLock(getUmaskLock());
+}
+
+void
+unlockUmask (void) {
+  releaseLock(getUmaskLock());
+}
+
 int
 createDirectory (const char *path, int worldWritable) {
 #if defined(GRUB_RUNTIME)
@@ -344,7 +361,11 @@ createDirectory (const char *path, int worldWritable) {
 #ifdef __MINGW32__
   if (mkdir(path) != -1) return 1;
 #else /* __MINGW32__ */
-  if (mkdir(path, (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) != -1) {
+  lockUmask();
+  int created = mkdir(path, (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) != -1;
+  unlockUmask();
+
+  if (created) {
     if (!worldWritable) return 1;
     mode_t mode = 0;
 
@@ -364,7 +385,13 @@ createDirectory (const char *path, int worldWritable) {
     mode |= S_ISVTX;
     #endif /* S_ISVTX */
 
-    if (chmod(path, mode) != -1) return 1;
+    {
+      lockUmask();
+      int changed = chmod(path, mode) != -1;
+      unlockUmask();
+      if (changed) return 1;
+    }
+
     logMessage(LOG_WARNING,
       "%s: %s: %s",
       gettext("cannot make world writable"),

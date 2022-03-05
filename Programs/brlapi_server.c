@@ -2759,9 +2759,11 @@ static int loopBind(SocketDescriptor fd, const struct sockaddr *address, socklen
 
   while (1) {
     {
+      lockUmask();
       mode_t originalMask = umask(0);
       res = bind(fd, address, length);
       umask(originalMask);
+      unlockUmask();
     }
 
     if (res != -1) break;
@@ -3098,9 +3100,13 @@ getPathStatus (const void *object, struct stat *status) {
 static int
 setPathPermissions (const void *object, mode_t permissions) {
   const char *path = object;
-  if (chmod(path, permissions) != -1) return 1;
-  logSystemError("chmod");
-  return 0;
+
+  lockUmask();
+  int changed = chmod(path, permissions) != -1;
+  unlockUmask();
+
+  if (!changed) logSystemError("chmod");
+  return changed;
 }
 
 static int
@@ -3127,9 +3133,13 @@ getFileStatus (const void *object, struct stat *status) {
 static int
 setFilePermissions (const void *object, mode_t permissions) {
   const int *fd = object;
-  if (fchmod(*fd, permissions) != -1) return 1;
-  logSystemError("fchmod");
-  return 0;
+
+  lockUmask();
+  int changed = fchmod(*fd, permissions) != -1;
+  unlockUmask();
+
+  if (!changed) logSystemError("fchmod");
+  return changed;
 }
 
 static int
@@ -3209,12 +3219,16 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     goto outfd;
   }
 
-  while (mkdir(BRLAPI_SOCKETPATH, (permissions | S_ISVTX)) == -1) {
-    if (!running) goto outfd;
-
-    if (errno == EEXIST) {
-      break;
+  while (1) {
+    {
+      lockUmask();
+      int mkdirResult = mkdir(BRLAPI_SOCKETPATH, (permissions | S_ISVTX));
+      unlockUmask();
+      if (mkdirResult != -1) break;
     }
+
+    if (!running) goto outfd;
+    if (errno == EEXIST) break;
 
     if ((errno != EROFS) && (errno != ENOENT)) {
       logSystemError("making socket directory");
@@ -3239,8 +3253,15 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   tmppath[lpath+2+lport+1]=0;
   lockpath[lpath+2+lport]=0;
 
-  while ((lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL,
-                      (permissions & (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)))) == -1) {
+  while (1) {
+    {
+      lockUmask();
+      lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL,
+                  (permissions & (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)));
+      unlockUmask();
+    }
+
+    if (lock != -1) break;
     if (!running) goto outfd;
 
     if (errno == EROFS) {

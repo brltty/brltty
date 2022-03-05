@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 
 #include "log.h"
+#include "file.h"
 #include "device.h"
 #include "async_wait.h"
 #include "ascii.h"
@@ -71,10 +72,13 @@ makeFifo (const char *path, mode_t mode) {
       if (S_ISFIFO(status.st_mode)) return 1;
       logMessage(LOG_ERR, "Download object not a FIFO: %s", path);
    } else if (errno == ENOENT) {
+      lockUmask();
       mode_t mask = umask(0);
       int result = mkfifo(path, mode);
       int error = errno;
       umask(mask);
+      unlockUmask();
+
       if (result != -1) return 1;
       errno = error;
       logSystemError("Download FIFO creation");
