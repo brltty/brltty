@@ -3,12 +3,6 @@
 installTree="/brltty/current"
 . "${installTree}/bin/brltty-prologue.sh"
 
-requiredPackages=(
-   gnome-terminal
-   marco
-   screen
-)
-
 addProgramOption A flag allActions "perform all of the actions"
 addProgramOption p flag hostPackages "install the host packages"
 addProgramOption e flag etcFiles "install the /etc/ files"
@@ -17,29 +11,61 @@ addProgramOption l flag sharedLibraries "configure the shared libraries"
 addProgramOption u flag udevReload "reload the Udev rules"
 addProgramOption s flag systemdUnits "configure the Systemd units"
 parseProgramArguments "${@}"
-verifyActionFlags allActions hostPackages etcFiles apiKey sharedLibraries udevReload systemdUnits
 
-[ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
-set -e
+actionFlags=(hostPackages etcFiles apiKey sharedLibraries udevReload systemdUnits)
+verifyActionFlags allActions "${actionFlags[@]}"
 
-! "${hostPackages}" || apt --yes --quiet --quiet --quiet install -- "${requiredPackages[@]}"
-! "${etcFiles}" || tar --extract --file "${installTree}/etc.tar" --directory "/"
+performAction_hostPackages() {
+   local packages=()
+   local line
 
-! "${apiKey}" || {
-   apiKeyFile="/etc/brlapi.key"
+   while read line
+   do
+      packages+=("${line}")
+   done <"${installTree}/etc/host-packages"
+
+   [ "${#packages[*]}" -eq 0 ] || {
+      apt --yes --quiet --quiet --quiet install -- "${packages[@]}"
+   }
+}
+
+performAction_etcFiles() {
+   tar --extract --file "${installTree}/etc.tar" --directory "/"
+}
+
+performAction_apiKey() {
+   local apiKeyFile="/etc/brlapi.key"
    "${installTree}/bin/brltty-genkey" -q -f "${apiKeyFile}"
    chmod u=rw,go=r "${apiKeyFile}"
 }
 
-! "${sharedLibraries}" || ldconfig
-! "${udevReload}" || udevadm control --reload
-
-! "${systemdUnits}" || {
-   systemdUnit="brltty@canute.path"
-
-   systemctl daemon-reload
-   systemctl enable "${systemdUnit}"
-   systemctl start "${systemdUnit}"
+performAction_sharedLibraries() {
+   ldconfig
 }
+
+performAction_udevReload() {
+   udevadm control --reload
+}
+
+performAction_systemdUnits() {
+   systemctl daemon-reload
+   local unit
+
+   for unit in "brltty@canute.path"
+   do
+      systemctl enable "${unit}"
+      systemctl start "${unit}"
+   done
+}
+
+[ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
+set -e
+
+for action in "${actionFlags[@]}"
+do
+   ! "${!action}" || {
+      "performAction_${action}"
+   }
+done
 
 exit 0
