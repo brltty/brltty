@@ -19,10 +19,19 @@ addBuildTreeOption() {
 }
 
 verifyBuildTree() {
+   local empty="${1:-false}"
+
    [ -n "${buildTree}" ] || syntaxError "build tree not specified"
    [ -e "${buildTree}" ] || semanticError "build tree not found: ${buildTree}"
    [ -d "${buildTree}" ] || semanticError "build tree not a directory: ${buildTree}"
-#  testContainingDirectory "${buildTree}" brltty.pc || semanticError "not a BRLTTY build tree: ${buildTree}"
+
+   if "${empty}"
+   then
+      set -- $(find "${buildTree}" -mindepth 1 -maxdepth 1)
+      [ "${#}" -eq 0 ] || semanticError "build tree not empty: ${buildTree}"
+   else
+      testContainingDirectory "${buildTree}" brltty.pc || semanticError "not a BRLTTY build tree: ${buildTree}"
+   fi
 
    [ "${buildTree#/}" = "${buildTree}" ] && buildTree="${initialDirectory}/${buildTree}"
 }

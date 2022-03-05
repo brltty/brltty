@@ -1,2 +1,1 @@
 Xorg path
-build directory verification

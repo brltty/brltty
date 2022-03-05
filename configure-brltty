@@ -18,7 +18,7 @@ addInstallLocationOption
 parseProgramArguments "${@}"
 
 verifySourceTree
-verifyBuildTree
+verifyBuildTree true
 verifyInstallLocation
 
 set -e
