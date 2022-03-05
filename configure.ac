@@ -1858,7 +1858,7 @@ then
             BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(X11_LIBS) $(CSPI_LIBS)])
          ])
       ])
-   ])
+   ], [:])
 fi
 
 BRLTTY_IF_DBUS([dnl
