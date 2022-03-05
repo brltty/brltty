@@ -9,6 +9,7 @@ Usage: ${programName} [-option ...] tar-file
 
 The following options may be specified:
   -h  show this command line usage summary, and then exit
+  -t  test mode - show (but don't execute) the commands
 END-OF-USAGE-SUMMARY
 }
 
@@ -32,13 +33,24 @@ semanticError() {
    exit 3
 }
 
-showUsage=false
+executeCommand() {
+   if "${testMode}"
+   then
+      programMessage "test mode: ${*}"
+   else
+      "${@}"
+   fi
+}
 
-while getopts ":h" option
+showUsage=false
+testMode=false
+
+while getopts ":ht" option
 do
    case "${option}"
    in
       h) showUsage=true;;
+      t) testMode=true;;
 
       :) syntaxError "missing operand: -${OPTARG}";;
      \?) syntaxError "unrecognized option: -${OPTARG}";;
@@ -61,11 +73,11 @@ shift 1
 [ -f "${tarFile}" ] || semanticError "not a file: ${tarFile}"
 [ -r "${tarFile}" ] || semanticError "file not readable: ${tarFile}"
 
-[ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
+"${testMode}" || [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 set -e
 
-tar --extract --absolute-names --file "${tarFile}" --directory "/"
-cd "${installTree}"
-bin/canute-setup -A
+executeCommand tar --extract --absolute-names --file "${tarFile}" --directory "/"
+executeCommand cd "${installTree}"
+executeCommand bin/canute-setup -A
 
 exit 0
