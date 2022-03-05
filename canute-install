@@ -1,0 +1,71 @@
+#!/bin/bash
+
+programName="${0##*/}"
+installTree="/brltty/current"
+
+showUsageSummary() {
+cat <<END-OF-USAGE-SUMMARY
+Usage: ${programName} [-option ...] tar-file
+
+The following options may be specified:
+  -h  show this command line usage summary, and then exit
+END-OF-USAGE-SUMMARY
+}
+
+programMessage() {
+   local message="${1}"
+
+   echo >&2 "${programName}: ${message}"
+}
+
+syntaxError() {
+   local message="${1}"
+
+   programMessage "${message}"
+   exit 2
+}
+
+semanticError() {
+   local message="${1}"
+
+   programMessage "${message}"
+   exit 3
+}
+
+showUsage=false
+
+while getopts ":h" option
+do
+   case "${option}"
+   in
+      h) showUsage=true;;
+
+      :) syntaxError "missing operand: -${OPTARG}";;
+     \?) syntaxError "unrecognized option: -${OPTARG}";;
+      *) syntaxError "unimplemented option: -${option}";;
+   esac
+done
+shift $((OPTIND - 1))
+
+"${showUsage}" && {
+   showUsageSummary
+   exit 0
+}
+
+[ "${#}" -ge 1 ] || syntaxError "missing tar file path"
+tarFile="${1}"
+shift 1
+
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
+[ -e "${tarFile}" ] || semanticError "file not found: ${tarFile}"
+[ -f "${tarFile}" ] || semanticError "not a file: ${tarFile}"
+[ -r "${tarFile}" ] || semanticError "file not readable: ${tarFile}"
+
+[ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
+set -e
+
+tar --extract --absolute-names --file "${tarFile}" --directory "/"
+cd "${installTree}"
+bin/canute-setup -A
+
+exit 0
