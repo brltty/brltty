@@ -16,6 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+testMode=false
+
 readonly initialDirectory="$(pwd)"
 readonly programName="$(basename "${0}")"
 
@@ -304,7 +306,7 @@ findHostCommand() {
    local pathVariable="${1}"
    local command="${2}"
 
-   local path="$(which "${command}")" || return 1
+   local path="$(which "${command}")"
    [ -n "${path}" ] || return 1
 
    setVariable "${pathVariable}" "${path}"
@@ -317,6 +319,16 @@ verifyHostCommand() {
 
    findHostCommand "${pathVariable}" "${command}" || {
       semanticError "host command not found: ${command}"
+   }
+}
+
+executeHostCommand() {
+   logDetail "executing host command: ${*}"
+
+   "${testMode}" || "${@}" || {
+      local status="${?}"
+      logWarning "host command failed with exit status ${status}: ${*}"
+      return "${status}"
    }
 }
 
@@ -566,6 +578,10 @@ addProgramOption() {
    programOptionLetters="${programOptionLetters} ${letter}"
    programOptionString="${programOptionString}${letter}"
    [ "${length}" -eq 0 ] || programOptionString="${programOptionString}:"
+}
+
+addTestModeOption() {
+   addProgramOption t flag testMode "test mode - log (but don't execute) the host commands"
 }
 
 addProgramUsageLine() {
