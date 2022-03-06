@@ -131,7 +131,7 @@ findTool() {
    local path="${toolsDirectory}/${properties["SYSTEM"]}-${name}"
 
    [ -f "${path}" ] || {
-      logError "tool not found: ${name}"
+      logError "tool not found: ${path}"
       exit 8
    }
 
