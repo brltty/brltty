@@ -21,7 +21,8 @@ exec &> "${logFile}"
 startxCommand=(startx "${sessionScript}")
 
 "${noMonitor}" && {
-   startxCommand+=(-- /usr/bin/Xorg)
+   verifyHostCommand xorgPath Xorg
+   startxCommand+=(-- "${xorgPath}")
    startxCommand+=(-config "${installTree}/etc/xorg-dummy-1920x1080.conf")
    [ -n "${XDG_VTNR}" ] && export WINDOWPATH="${XDG_VTNR}"
 }
