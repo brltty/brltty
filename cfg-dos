@@ -27,12 +27,16 @@ toolsRoot="${!toolsRootVariable}"
 [ -n "${toolsRoot}" ] || semanticError "${toolsRootVariable} not set"
 [  -f "${toolsRoot}/bin/${toolsSystem}-gcc" ] || semanticError "not a DOS tools root: ${toolsRoot}"
 export toolsDirectory="${toolsRoot}/bin"
-export PATH="${PATH}:${toolsDirectory}"
+export PATH="${toolsDirectory}:${PATH}"
 
 checkTool() {
    eval export "${1}=\`set -- \"${toolsDirectory}/\"*\"-$2\" && echo \"\${1}\"\`"
 }
+
 checkTool CC gcc
+checkTool LD ld
+checkTool STRIP strip
+checkTool RANLIB ranlib
 
 export CFLAGS="-fgnu89-inline"
 export LDFLAGS=""
@@ -76,6 +80,7 @@ export LDFLAGS=""
    --without-fm-package \
    \
    --without-pgmpath-package \
+   --without-pgmprivs-package \
    --without-service-package \
    --without-params-package \
    --without-rgx-package \

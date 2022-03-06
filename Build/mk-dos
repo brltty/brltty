@@ -25,5 +25,5 @@ mkOldLogName="DOS"
 mkNewLogName="${programName}"
 
 dosDirectory="${sourceRoot}/DOS"
-mkBuild "${dosDirectory}/mkdosarc" -t "${dosDirectory}/ToolChain" -o -- "${sourceRoot}"
+mkBuild "${dosDirectory}/mkdosarc" -T "${dosDirectory}/ToolChain" -o -- "${sourceRoot}"
 exit 0

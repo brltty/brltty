@@ -1,6 +1,5 @@
 mkdosarc: configuring build
 configure: WARNING: using cross tools not prefixed with host triplet
-configure: WARNING: program privileges support not available on this platform
 configure: WARNING: function not available: systemd:sd_session_get_vt()
 mkdosarc: building programs
 .../brltty/Programs/lock.c:213:2: warning: #warning thread lock support not available on this platform
