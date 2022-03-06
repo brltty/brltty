@@ -9,7 +9,7 @@ verifySourceTree() {
    [ -n "${sourceTree}" ] || syntaxError "source tree not specified"
    [ -e "${sourceTree}" ] || semanticError "source tree not found: ${sourceTree}"
    [ -d "${sourceTree}" ] || semanticError "source tree not a directory: ${sourceTree}"
-   testContainingDirectory "${sourceTree}" brltty.pc.in || semanticError "not a BRLTTY source tree: ${sourceTree}"
+   testContainingDirectory "${sourceTree}" brltty.pc.in || semanticError "not a source tree: ${sourceTree}"
 
    [ "${sourceTree#/}" = "${sourceTree}" ] && sourceTree="${initialDirectory}/${sourceTree}"
 }
@@ -19,18 +19,18 @@ addBuildTreeOption() {
 }
 
 verifyBuildTree() {
-   local empty="${1:-false}"
+   local unconfigured="${1:-false}"
 
    [ -n "${buildTree}" ] || syntaxError "build tree not specified"
    [ -e "${buildTree}" ] || semanticError "build tree not found: ${buildTree}"
    [ -d "${buildTree}" ] || semanticError "build tree not a directory: ${buildTree}"
 
-   if "${empty}"
+   if "${unconfigured}"
    then
       set -- $(find "${buildTree}" -mindepth 1 -maxdepth 1)
-      [ "${#}" -eq 0 ] || semanticError "build tree not empty: ${buildTree}"
+      [ "${#}" -eq 0 ] || semanticError "not an unconfigured build tree: ${buildTree}"
    else
-      testContainingDirectory "${buildTree}" brltty.pc || semanticError "not a BRLTTY build tree: ${buildTree}"
+      testContainingDirectory "${buildTree}" brltty.pc || semanticError "not a configured build tree: ${buildTree}"
    fi
 
    [ "${buildTree#/}" = "${buildTree}" ] && buildTree="${initialDirectory}/${buildTree}"

@@ -77,7 +77,5 @@ shift 1
 set -e
 
 executeCommand tar --extract --absolute-names --file "${tarFile}" --directory "/"
-executeCommand cd "${installTree}"
-executeCommand libexec/canute-setup -A
-
+executeCommand "${installTree}/libexec/canute-setup" -A
 exit 0
