@@ -1,5 +1,9 @@
 #!/bin/bash
-. "$(dirname "${0}")/../prologue.sh"
+
+topDirectory="$(dirname "${0}")/.."
+topDirectory="$(realpath "${topDirectory}")"
+make --silent -C "${topDirectory}" clone
+. "${topDirectory}/prologue.sh"
 
 makeTarget() {
    local target="${1}"
@@ -20,7 +24,7 @@ parseProgramArguments "${@}"
 verifyActionFlags allActions makeUnconfigure makeConfigure makeBuild makeInstall makeCurrent makeArchives
 
 set -e
-executeHostCommand cd "${programDirectory}/.."
+executeHostCommand cd "${topDirectory}"
 
 ! "${makeUnconfigure}" || makeTarget unconfigure
 ! "${makeConfigure}" || makeTarget configure
