@@ -40,7 +40,7 @@ mkBuild() {
 
    "${@}" &>"${newLogFile}" || {
       local exitStatus="${?}"
-      logMessage error "build failed with exit status ${exitStatus} - see ${newLogFile}"
+      logError "build failed with exit status ${exitStatus} - see ${newLogFile}"
       exit 10
    }
 

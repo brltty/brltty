@@ -44,7 +44,7 @@ installFile() {
       mkdir -p "${path%/*}"
       cp "${source}" "${path}"
    else
-      logMessage warning "file not installed: ${target}"
+      logWarning "file not installed: ${target}"
    fi
 }
 
@@ -80,7 +80,7 @@ installPackage_libusb0() {
       installFile "amd64/libusb0.sys" "bin/libusb0_x64.sys"
       installFile "amd64/libusb0.dll" "bin/libusb0_x64.dll"
    else
-      logMessage warning "${libusb0Name} not installable"
+      logWarning "${libusb0Name} not installable"
    fi
 }
 
@@ -90,7 +90,7 @@ installPackage_libusb1() {
       cd "${libusb1Root}"
       installFile "MinGW32/dll/libusb-1.0.dll" "bin/"
    else
-      logMessage warning "${libusb1Name} not installable"
+      logWarning "${libusb1Name} not installable"
    fi
 }
 
@@ -103,7 +103,7 @@ installPackage_winusb() {
       installFile "x86/WdfCoInstaller01009.dll" "bin/x86/"
       installFile "amd64/WdfCoInstaller01009.dll" "bin/amd64/"
    else
-      logMessage warning "${winusbName} not installable"
+      logWarning "${winusbName} not installable"
    fi
 }
 
@@ -161,7 +161,7 @@ logMessage task "revision identifier: ${revisionIdentifier}"
       export PATH="${PATH}:${cygwinRoot}/bin"
       export nodosfilewarning=1
    else
-      logMessage warning "not a Cygwin root directory: ${cygwinRoot}"
+      logWarning "not a Cygwin root directory: ${cygwinRoot}"
    fi
 }
 
@@ -326,7 +326,7 @@ then
       installFile "${file}" "Python/"
    done
 else
-   logMessage warning "Python bindings installer not found"
+   logWarning "Python bindings installer not found"
 fi
 
 cd "${sourceRoot}"
@@ -441,7 +441,7 @@ then
    cd "${installRoot}/lib"
    "${libPath}" //nologo /def:brlapi.def /name:brlapi-${BRLAPI_VERSION}.dll /out:brlapi.lib /machine:x86
 else
-   logMessage warning "import library not creatable"
+   logWarning "import library not creatable"
 fi
 
 cd "${installRoot}/.."
@@ -462,7 +462,7 @@ do
    then
       cp "${path}" .
    else
-      logMessage warning "installer source file not found: ${file}"
+      logWarning "installer source file not found: ${file}"
       nsisRoot=""
    fi
 done
@@ -475,7 +475,7 @@ then
    "${ahkRoot}/Compiler/Ahk2Exe.exe" //in brlttycnf.ahk //out brlttycnf.exe
    rm brlttycnf.ahk
 else
-   logMessage warning "configurator not creatable"
+   logWarning "configurator not creatable"
 fi
 
 if [ -n "${unix2dosPath}" ]
@@ -504,16 +504,16 @@ then
                      ;;
 
                   a | def | dll | doc | egg-info | exe | exp | lib | mo | pdf | pyd | sys | ttf);;
-                  *) logMessage warning "unexpected file extension: ${handle}";;
+                  *) logWarning "unexpected file extension: ${handle}";;
                esac
             fi
          elif [ ! -d "${path}" ]
          then
-            logMessage warning "unsupported special file: ${handle}"
+            logWarning "unsupported special file: ${handle}"
          fi
       done
 else
-   logMessage warning "text files not convertable"
+   logWarning "text files not convertable"
 fi
 
 if "${invokeShell}"
@@ -531,7 +531,7 @@ then
    cd "${installRoot}/.."
    "${zipPath}" -q -A -r "${archiveFile}" "${buildName}"
 else
-   logMessage warning "archive not creatable"
+   logWarning "archive not creatable"
 fi
 
 if [ -n "${nsisRoot}" ]
@@ -550,7 +550,7 @@ then
    rm -f "${initialDirectory}/${installerFile}"
    cp "${installerFile}" "${initialDirectory}/${installerFile}"
 else
-   logMessage warning "installer not creatable"
+   logWarning "installer not creatable"
 fi
 
 "${keepBuild}" || {

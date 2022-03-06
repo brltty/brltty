@@ -66,7 +66,7 @@ executeCommand() {
    exitStatus=0
    "${@}" || exitStatus="${?}"
 
-   [ "${exitStatus}" -eq 0 ] || logMessage warning "command failed: ${1}: exit status ${exitStatus}"
+   [ "${exitStatus}" -eq 0 ] || logWarning "command failed: ${1}: exit status ${exitStatus}"
    return "${exitStatus}"
 }
 
@@ -74,7 +74,7 @@ downloadFile() {
    local source="${1}"
    local target="${2}"
 
-   logMessage step "downloading file: ${source}"
+   logNote "downloading file: ${source}"
    [ -z "${target}" ] && target="${source##*/}"
    executeCommand wget -nv -O "${target}" "${archiveRoot}/${source}"
 }
@@ -112,7 +112,7 @@ applyPatch() {
          }
       }
    else
-      logMessage warning "file not found: ${path}"
+      logWarning "file not found: ${path}"
    fi
 }
 
@@ -266,7 +266,7 @@ installCython() {
       installFile Cython/distutils.cfg "${directory}/lib/distutils"
       applyPatch "Cython/PythonCygwinCCompiler.patch" "${directory}/lib/distutils" "cygwinccompiler.py" "vcruntime140"
    else
-      logMessage warning "Python not found"
+      logWarning "Python not found"
    fi
 }
 

@@ -140,7 +140,7 @@ proc writeProgramMessage {message} {
    }
 }
 
-makeEnumeration logLevels {error warning notice task step detail}
+makeEnumeration logLevels {error warning notice task note detail}
 set logLevel $logLevels(task)
 
 proc logMessage {level message} {
@@ -151,13 +151,29 @@ proc logMessage {level message} {
    }
 }
 
+proc logError {{message ""}} {
+   logMessage error $message
+}
+
+proc logWarning {{message ""}} {
+   logMessage warning $message
+}
+
+proc logNote {{message ""}} {
+   logMessage note $message
+}
+
+proc logDetail {{message ""}} {
+   logMessage detail $message
+}
+
 proc syntaxError {{message ""}} {
-   writeProgramMessage $message
+   logError $message
    exit 2
 }
 
 proc semanticError {{message ""}} {
-   writeProgramMessage $message
+   logError $message
    exit 3
 }
 
@@ -539,12 +555,12 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
       }
 
       if {[set count [dict size [set subset [dict filter $options key $name*]]]] == 0} {
-         writeProgramMessage "unknown option: $prefix$name"
+         logError "unknown option: $prefix$name"
          return 0
       }
 
       if {$count > 1} {
-         writeProgramMessage "ambiguous option: $prefix$name ([join [lsort [dict keys $subset]] ", "])"
+         logError "ambiguous option: $prefix$name ([join [lsort [dict keys $subset]] ", "])"
          return 0
       }
 
@@ -566,7 +582,7 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
 
          default {
             if {[llength $arguments] == 0} {
-               writeProgramMessage "missing operand: $prefix$name"
+               logError "missing operand: $prefix$name"
                return 0
             }
 
@@ -579,7 +595,7 @@ proc processCommandOptions {valuesArray argumentsVariable definitions {optionsVa
                }
 
                if {!$result} {
-                  writeProgramMessage "operand not $type: $prefix$name $value"
+                  logError "operand not $type: $prefix$name $value"
                   return 0
                }
             }

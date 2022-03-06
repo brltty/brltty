@@ -37,18 +37,18 @@ try() {
 
 [ -n "${keyFile}" ] || keyFile="${defaultKeyFile}"
 
-logMessage step "trying mcookie"
+logNote "trying mcookie"
 try mcookie >"${keyFile}"
 
 for device in "/dev/urandom" "/dev/random"
 do
    [ -c "${device}" -a -r "${device}" ] && {
-      logMessage step "trying ${device}"
+      logNote "trying ${device}"
       try dd if="${device}" of="${keyFile}" bs=32 count=1
    }
 done
 
-logMessage step "trying \$RANDOM"
+logNote "trying \$RANDOM"
 key="${RANDOM}"
 [ -n "${key}" ] && try echo >"${keyFile}" "${key}"
 

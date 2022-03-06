@@ -143,7 +143,7 @@ proc configureSerialDevice {{options {-g}}} {
    set command [list]
    lappend command stty -F $devicePath
    eval lappend command $options
-   logMessage step "command: [join $command " "]"
+   logNote "command: [join $command " "]"
 
    lvarpush command exec
    lappend command 2>@ stderr

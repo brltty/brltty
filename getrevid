@@ -52,7 +52,7 @@ export GIT_DIR="${GIT_WORK_TREE}/.git"
      [ -f "${revisionFile}" ] && read <"${revisionFile}" revisionIdentifier
   fi
 
-  [ -n "${revisionIdentifier}" ] || logMessage warning "unrecognized source repository type: ${sourceRoot}"
+  [ -n "${revisionIdentifier}" ] || logWarning "unrecognized source repository type: ${sourceRoot}"
 }
 
 [ -n "${revisionIdentifier}" ] || {

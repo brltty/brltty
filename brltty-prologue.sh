@@ -55,7 +55,7 @@ defineEnumeration() {
    done
 }
 
-defineEnumeration programLogLevel_ error warning notice task step detail
+defineEnumeration programLogLevel_ error warning notice task note detail
 programLogLevel=$((${programLogLevel_task}))
 
 logMessage() {
@@ -85,8 +85,8 @@ logTask() {
    logMessage task "${@}"
 }
 
-logStep() {
-   logMessage step "${@}"
+logNote() {
+   logMessage note "${@}"
 }
 
 logDetail() {

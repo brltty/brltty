@@ -222,34 +222,34 @@ find . -print |
 
       if [ "${name#*.*.}" != "${name}" ]
       then
-         logMessage warning "name contains more than one dot: ${handle}"
+         logWarning "name contains more than one dot: ${handle}"
       elif [ "${name#.}" != "${name}" ]
       then
-         logMessage warning "null name: ${handle}"
+         logWarning "null name: ${handle}"
       elif [ "${name%.}" != "${name}" ]
       then
-         logMessage warning "null extension: ${handle}"
+         logWarning "null extension: ${handle}"
       elif [ -f "${path}" ]
       then
          if [ "${extension}" = "${name}" ]
          then
-            logMessage warning "file without an extension: ${handle}"
+            logWarning "file without an extension: ${handle}"
          else
             case "${extension}"
             in
                txt | html | htm | csv | cfg | [tcak]t[bi] | h) convertTextFile "${path}";;
                exe | pdf | doc);;
-               *) logMessage warning "unexpected file extension: ${handle}";;
+               *) logWarning "unexpected file extension: ${handle}";;
             esac
          fi
       elif [ -d "${path}" ]
       then
          if [ "${extension}" != "${name}" ]
          then
-            logMessage warning "directory with an extension: ${handle}"
+            logWarning "directory with an extension: ${handle}"
          fi
       else
-         logMessage warning "unsupported special file: ${handle}"
+         logWarning "unsupported special file: ${handle}"
       fi
    done
 
@@ -281,7 +281,7 @@ find . -type d -print |
          then
             shortNames["${shortName}"]="${longName}"
          else
-            logMessage warning "name collision: ${directory#.}: ${shortNames["${shortName}"]} & ${longName}"
+            logWarning "name collision: ${directory#.}: ${shortNames["${shortName}"]} & ${longName}"
          fi
       done
    done

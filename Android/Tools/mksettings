@@ -143,7 +143,7 @@ if {[llength $propertyNames] == 0} {
 
 set inputFile  "brltty.conf.in"
 set inputPath [file join $sourceRoot Documents $inputFile]
-logMessage step "loading properties: $inputPath"
+logNote "loading properties: $inputPath"
 set properties [loadProperties $inputPath $propertyNames]
 
 foreach name $propertyNames {
@@ -156,7 +156,7 @@ set updated 0
 foreach propertyName $propertyNames {
    set resourceFile "[string tolower $propertyName].xml"
    set resourcePath [file join $applicationDirectory res values $resourceFile]
-   logMessage step "writing resource file: $resourcePath"
+   logNote "writing resource file: $resourcePath"
 
    if {[updateFile $resourcePath "[join [makeResourceLines $properties $propertyName] \n]\n"]} {
       set updated 1

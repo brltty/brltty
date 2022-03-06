@@ -43,8 +43,8 @@ mkIgnoreMismatch "^ *Creating library "
 mkIgnoreMismatch "^Successfully compiled: "
 
 read <"${windowsDirectory}/python-location" pythonLocation || exit "${?}"
-[ -e "${pythonLocation}" ] || logMessage error "Python not found: ${pythonLocation}"
-[ -d "${pythonLocation}" ] || logMessage error "not a directory: ${pythonLocation}"
+[ -e "${pythonLocation}" ] || logError "Python not found: ${pythonLocation}"
+[ -d "${pythonLocation}" ] || logError "not a directory: ${pythonLocation}"
 
 for usbPackage in "${usbPackageNames[@]}"
 do

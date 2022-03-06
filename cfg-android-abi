@@ -83,7 +83,7 @@ setProperties() {
 
       "${optional}" || {
          [ -n "${value}" ] || {
-            logMessage error "property not set: ${property}"
+            logError "property not set: ${property}"
             ok=false
          }
       }
@@ -118,7 +118,7 @@ linkMissingHeaders() {
       local buildHeader="${buildInclude}/${header}"
       [ -e "${buildHeader}" ] || continue
 
-      logMessage step "adding symbolic link for header: ${abiName}: ${header}"
+      logNote "adding symbolic link for header: ${abiName}: ${header}"
       ln -s "${buildHeader}" "${hostHeader}" || exit "${?}"
    done
 }
@@ -139,7 +139,7 @@ findTool() {
    fi
 
    [ -z "${problem}" ] || {
-      logMessage error "${problem}: ${abiName}: ${name}"
+      logError "${problem}: ${abiName}: ${name}"
       exit 8
    }
 
@@ -167,9 +167,9 @@ if [ -f "${buildMakeFile}" ]
 then
    if "${forceReconfigure}"
    then
-      logMessage warning "reconfiguring build: ${buildDirectory}"
+      logWarning "reconfiguring build: ${buildDirectory}"
    else
-      logMessage step "build already configured: ${buildDirectory}"
+      logNote "build already configured: ${buildDirectory}"
       exit 0
    fi
 else

@@ -89,7 +89,7 @@ function logMessage {
    local value="${logLevels[$level]}"
 
    [ -n "${value}" ] || {
-      logMessage warning "undefined log level: ${level}"
+      logWarning "undefined log level: ${level}"
       value=0
    }
 
@@ -99,21 +99,21 @@ function logMessage {
 function syntaxError {
    local message="${1}"
 
-   logMessage error "${message}"
+   logError "${message}"
    exit 2
 }
 
 function semanticError {
    local message="${1}"
 
-   logMessage error "${message}"
+   logError "${message}"
    exit 3
 }
 
 function externalError {
    local message="${1}"
 
-   logMessage error "${message}"
+   logError "${message}"
    exit 4
 }
 
@@ -319,14 +319,14 @@ function changeScriptVariable {
 }
 
 function logBuildDirectory {
-   logMessage step "build directory: ${PWD}"
+   logNote "build directory: ${PWD}"
 }
 
 function runBuildCommand {
    local logFile="${1}"
    shift 1
 
-   logMessage step "build command: ${*}"
+   logNote "build command: ${*}"
    "${@}" >&"${logFile}" || externalError "build error: for details, see ${PWD}/${logFile}"
 }
 

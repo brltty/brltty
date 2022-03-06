@@ -77,7 +77,7 @@ proc loadStringList {} {
 proc auditStringList {} {
    global baseStrings
 
-   logMessage step "auditing string list"
+   logNote "auditing string list"
    set listedStrings [loadStringList]
    splitNames [dict keys $listedStrings] oldNames sameNames newNames
    writeNames "[getProgramName].txt" $newNames
@@ -140,7 +140,7 @@ proc getIgnorableNames {strings} {
 }
 
 proc auditLanguage {code directory} {
-   logMessage step "auditing language: $code"
+   logNote "auditing language: $code"
    set languageStrings [loadStringResources $directory]
    splitNames [dict keys $languageStrings] oldNames sameNames newNames
    writeNames "[getProgramName]-$code.txt" $newNames

@@ -85,15 +85,15 @@ verifyPackage() {
 
    if [ -z "${root}" ]
    then
-      logMessage warning "package location not defined: ${name}"
+      logWarning "package location not defined: ${name}"
       root=""
    elif [ ! -e "${root}" ]
    then
-      logMessage warning "directory not found: ${root}"
+      logWarning "directory not found: ${root}"
       root=""
    elif [ ! -d "${root}" ]
    then
-      logMessage warning "not a directory: ${root}"
+      logWarning "not a directory: ${root}"
       root=""
    else
       set -- $(getVariable "${package}Files")
@@ -105,7 +105,7 @@ verifyPackage() {
          local path="${prefix}/${file}"
 
          [ -e "${path}" ] || {
-            logMessage warning "${name} file not found: ${path}"
+            logWarning "${name} file not found: ${path}"
             root=""
          }
       done
@@ -137,7 +137,7 @@ verifyWindowsPackage() {
       local download="$(getVariable "${package}Download")"
       [ -z "${download}" ] || message="${message} (download from ${download})"
 
-      logMessage warning "${message}"
+      logWarning "${message}"
       return 1
    }
 
@@ -167,7 +167,7 @@ verifyMingwPackage() {
       local name="$(getVariable "${package}Name")"
       [ -z "${name}" ] || message="${message} ${name}"
 
-      logMessage warning "${message}"
+      logWarning "${message}"
       return 1
    }
 
@@ -211,7 +211,7 @@ verifyWindowsCommand() {
          message="${message} from ${download})"
       }
 
-      logMessage warning "${message}"
+      logWarning "${message}"
       return 1
    }
 
@@ -241,7 +241,7 @@ verifyMingwCommand() {
       local package="$(getVariable "${command}Package")"
       [ -z "${package}" ] || message="${message} (install package ${package})"
 
-      logMessage warning "${message}"
+      logWarning "${message}"
       return 1
    }
 

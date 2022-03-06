@@ -19,12 +19,8 @@
 
 source [file join [file dirname [info script]] .. prologue.tcl]
 
-proc logDriverWarning {message} {
-   logMessage warning $message
-}
-
 proc logSourceWarning {location message} {
-   logDriverWarning "$message: [dict get $location file]\[[dict get $location line]\]"
+   logWarning "$message: [dict get $location file]\[[dict get $location line]\]"
 }
 
 proc makeDecimalNumber {value} {
@@ -200,7 +196,7 @@ proc parseDriver {directory} {
       dict set driver code $code
       parseSourceFiles channels $directory
    } else {
-      logDriverWarning "driver code not defined: $name"
+      logWarning "driver code not defined: $name"
    }
 
    dict set driver channels $channels
@@ -239,7 +235,7 @@ proc makeDeviceTable {drivers} {
 
                if {[dict exists $deviceTable vendors $vendor products $product]} {
                   set devices [dict get $deviceTable vendors $vendor products $product devices]
-                  logMessage step "device specified more than once: $identifier: [formatDeviceDescription [lindex $devices 0]] & [formatDeviceDescription $device]"
+                  logNote "device specified more than once: $identifier: [formatDeviceDescription [lindex $devices 0]] & [formatDeviceDescription $device]"
                } else {
                   set devices [list]
                   dict set deviceTable vendors $vendor products $product generic [dict exists $genericDevices $identifier]
@@ -249,7 +245,7 @@ proc makeDeviceTable {drivers} {
                dict set deviceTable vendors $vendor products $product devices $devices
 
                if {[dict get $deviceTable vendors $vendor products $product generic]} {
-                  logMessage step "generic device identifier: $identifier: [formatDeviceDescription $device]"
+                  logNote "generic device identifier: $identifier: [formatDeviceDescription $device]"
                }
             }
          }

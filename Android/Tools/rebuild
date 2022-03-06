@@ -35,7 +35,7 @@ proc executeCommand {args} {
 }
 
 proc setWorkingDirectory {path} {
-   logMessage step "working directory: $path"
+   logDetail "working directory: $path"
    set problem [executeCommand cd $path]
 
    if {[string length $problem] > 0} {
@@ -45,7 +45,7 @@ proc setWorkingDirectory {path} {
 
 proc executeHostCommand {args} {
    set command [join $args " "]
-   logMessage step "executing host command: $command"
+   logDetail "executing host command: $command"
 
    set args [linsert $args 0 exec <@ stdin]
    lappend args >@ stdout 2>@ stderr

@@ -84,7 +84,7 @@ proc updateTable {lists name} {
          return 1
       }
    } else {
-      logMessage warning "table headers not defined: $name"
+      logWarning "table headers not defined: $name"
    }
 
    return 0
