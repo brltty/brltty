@@ -161,35 +161,43 @@ static void showModelIdentifier(void)
 #define DOTS_TEXT "dots: "
 #define DOTS_TEXTLEN (strlen(DOTS_TEXT))
 #define DOTS_LEN 8
-#define DOTS_TOTALLEN (DOTS_TEXTLEN+DOTS_LEN)
+#define DOTS_TOTALLEN (DOTS_TEXTLEN + DOTS_LEN)
 static void showDots(void)
 {
-  unsigned int x, y;
-  brlapi_keyCode_t k;
-  if (brlapi_getDisplaySize(&x, &y)<0) {
-    brlapi_perror("failed");
-    exit(PROG_EXIT_FATAL);
+  unsigned int size;
+
+  {
+    unsigned int columns, rows;
+
+    if (brlapi_getDisplaySize(&columns, &rows) < 0) {
+      brlapi_perror("failed");
+      exit(PROG_EXIT_FATAL);
+    }
+
+    size = columns * rows;
+    unsigned int minimum = DOTS_TOTALLEN;
+
+    if (size < minimum) {
+      fprintf(stderr, "can't show dots on a braille display with less than %u cells\n", minimum);
+      exit(PROG_EXIT_SEMANTIC);
+    }
   }
-  if (brlapi_enterTtyMode(-1, NULL)<0) {
+
+  if (brlapi_enterTtyMode(-1, NULL) < 0) {
     brlapi_perror("enterTtyMode");
     exit(PROG_EXIT_FATAL);
   }
-  if (x*y<DOTS_TOTALLEN) {
-    fprintf(stderr,"can't show dots with a braille display with less than %d cells\n",(int)DOTS_TOTALLEN);
-    exit(PROG_EXIT_SEMANTIC);
-  }
+
   {
-    char text[x*y+1];
-    unsigned char or[x*y];
-    brlapi_writeArguments_t wa = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-    fprintf(stderr,"Showing dot patterns\n");
-    memcpy(text,DOTS_TEXT,DOTS_TEXTLEN);
-    memset(text+DOTS_TEXTLEN,' ',sizeof(text)-DOTS_TEXTLEN);
-    text[x*y] = 0;
-    wa.regionBegin = 1;
-    wa.regionSize = sizeof(or);
-    wa.text = text;
-    memset(or,0,sizeof(or));
+    fprintf(stderr, "Showing dot patterns\n");
+
+    char text[size + 1];
+    memset(text, ' ', size);
+    text[size] = 0;
+    memcpy(text, DOTS_TEXT, DOTS_TEXTLEN);
+
+    unsigned char or[size];
+    memset(or, 0, size);
     or[DOTS_TEXTLEN+0] = BRL_DOT_1;
     or[DOTS_TEXTLEN+1] = BRL_DOT_2;
     or[DOTS_TEXTLEN+2] = BRL_DOT_3;
@@ -198,13 +206,23 @@ static void showDots(void)
     or[DOTS_TEXTLEN+5] = BRL_DOT_6;
     or[DOTS_TEXTLEN+6] = BRL_DOT_7;
     or[DOTS_TEXTLEN+7] = BRL_DOT_8;
+
+    brlapi_writeArguments_t wa = BRLAPI_WRITEARGUMENTS_INITIALIZER;
+    wa.regionBegin = 1;
+    wa.regionSize = size;
+    wa.text = text;
     wa.orMask = or;
-    if (brlapi_write(&wa)<0) {
+
+    if (brlapi_write(&wa) < 0) {
       brlapi_perror("brlapi_write");
       exit(PROG_EXIT_FATAL);
     }
   }
-  brlapi_readKey(1, &k);
+
+  {
+    brlapi_keyCode_t key;
+    brlapi_readKey(1, &key);
+  }
 }
 
 static void enterLearnMode(void)
