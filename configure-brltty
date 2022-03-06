@@ -12,6 +12,7 @@ configureOptions=(
    --disable-ocaml-bindings
 )
 
+addTestModeOption
 addSourceTreeOption
 addBuildTreeOption
 addInstallLocationOption
@@ -22,12 +23,11 @@ verifyBuildTree true
 verifyInstallLocation
 
 set -e
-cd "${sourceTree}"
-revisionIdentifier="$(./getrevid .)"
+revisionIdentifier="$("${sourceTree}/getrevid" "${sourceTree}")"
 installTree="${installLocation}/REV-${revisionIdentifier}"
 configureOptions+=("--with-execute-root=${installTree}")
 
-cd "${buildTree}"
+executeHostCommand cd "${buildTree}"
 toRelativePath "${sourceTree}" sourcePath
-"${sourcePath}/configure" --quiet "${configureOptions[@]}"
+executeHostCommand "${sourcePath}/configure" --quiet "${configureOptions[@]}"
 exit 0

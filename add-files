@@ -1,6 +1,7 @@
 #!/bin/bash
-
 . "$(dirname "${0}")/prologue.sh"
+
+addTestModeOption
 addSourceTreeOption
 addBuildTreeOption
 parseProgramArguments "${@}"
@@ -14,12 +15,12 @@ getInstallTree installTree
 for sourceDirectory in Files/*
 do
    targetDirectory="${installTree}/${sourceDirectory#*/}"
-   sudo cp -- "${programDirectory}/${sourceDirectory}/"* "${targetDirectory}/"
+   executeHostCommand sudo cp -- "${programDirectory}/${sourceDirectory}/"* "${targetDirectory}/"
 done
 
 for subdirectory in etc
 do
-   sudo tar --create --file "${installTree}/${subdirectory}.tar" "${subdirectory}"
+   executeHostCommand sudo tar --create --file "${installTree}/${subdirectory}.tar" "${subdirectory}"
 done
 
 exit 0

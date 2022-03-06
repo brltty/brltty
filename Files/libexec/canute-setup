@@ -3,6 +3,7 @@
 installTree="/brltty/current"
 . "${installTree}/bin/brltty-prologue.sh"
 
+addTestModeOption
 addProgramOption A flag allActions "perform all of the actions"
 addProgramOption p flag hostPackages "install the host packages"
 addProgramOption e flag etcFiles "install the /etc/ files"
@@ -25,36 +26,36 @@ performAction_hostPackages() {
    done <"${installTree}/etc/host-packages"
 
    [ "${#packages[*]}" -eq 0 ] || {
-      apt --yes --quiet --quiet --quiet install -- "${packages[@]}"
+      executeHostCommand apt --yes --quiet --quiet --quiet install -- "${packages[@]}"
    }
 }
 
 performAction_etcFiles() {
-   tar --extract --file "${installTree}/etc.tar" --directory "/"
+   executeHostCommand tar --extract --file "${installTree}/etc.tar" --directory "/"
 }
 
 performAction_apiKey() {
    local apiKeyFile="/etc/brlapi.key"
-   "${installTree}/bin/brltty-genkey" -q -f "${apiKeyFile}"
-   chmod u=rw,go=r "${apiKeyFile}"
+   executeHostCommand "${installTree}/bin/brltty-genkey" -q -f "${apiKeyFile}"
+   executeHostCommand chmod u=rw,go=r "${apiKeyFile}"
 }
 
 performAction_sharedLibraries() {
-   ldconfig
+   executeHostCommand ldconfig
 }
 
 performAction_udevReload() {
-   udevadm control --reload
+   executeHostCommand udevadm control --reload
 }
 
 performAction_systemdUnits() {
-   systemctl daemon-reload
+   executeHostCommand systemctl daemon-reload
    local unit
 
    for unit in "brltty@canute.path"
    do
-      systemctl enable "${unit}"
-      systemctl start "${unit}"
+      executeHostCommand systemctl enable "${unit}"
+      executeHostCommand systemctl start "${unit}"
    done
 }
 

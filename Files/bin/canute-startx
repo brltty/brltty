@@ -6,6 +6,7 @@ installTree="/brltty/current"
 defaultLogFile="/tmp/${programName}.log"
 defaultSessionScript="${installTree}/libexec/canute-xsession"
 
+addTestModeOption
 addProgramOption l string.file logFile "the log file" "${defaultLogFile}"
 addProgramOption s string.file sessionScript "the X session script" "${defaultSessionScript}"
 addProgramOption n flag noMonitor "no monitor - use a virtual X display"
@@ -17,7 +18,7 @@ verifyOutputFile "${logFile}"
 [ -n "${sessionScript}" ] || sessionScript="${defaultSessionScript}"
 verifyExecutableFile "${sessionScript}"
 
-exec &> "${logFile}"
+"${testMode}" || exec &> "${logFile}"
 startxCommand=(startx "${sessionScript}")
 
 "${noMonitor}" && {
@@ -27,5 +28,5 @@ startxCommand=(startx "${sessionScript}")
    [ -n "${XDG_VTNR}" ] && export WINDOWPATH="${XDG_VTNR}"
 }
 
-exec "${startxCommand[@]}"
+executeHostCommand exec "${startxCommand[@]}"
 exit "${?}"

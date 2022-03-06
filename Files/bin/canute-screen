@@ -3,7 +3,8 @@
 installTree="/brltty/current"
 . "${installTree}/bin/brltty-prologue.sh"
 
+addTestModeOption
 parseProgramArguments "${@}"
 
-exec screen -m -c "${installTree}/etc/canute-screenrc"
+executeHostCommand exec screen -m -c "${installTree}/etc/canute-screenrc"
 exit 0
