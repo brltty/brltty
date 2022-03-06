@@ -49,13 +49,13 @@ performAction_udevReload() {
 }
 
 performAction_systemdUnits() {
-   executeHostCommand systemctl daemon-reload
+   executeHostCommand systemctl --quiet daemon-reload
    local unit
 
    for unit in "brltty@canute.path"
    do
-      executeHostCommand systemctl enable "${unit}"
-      executeHostCommand systemctl start "${unit}"
+      executeHostCommand systemctl --quiet enable "${unit}"
+      executeHostCommand systemctl --quiet start "${unit}"
    done
 }
 
