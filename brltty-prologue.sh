@@ -300,6 +300,26 @@ internalError() {
    exit 4
 }
 
+findHostCommand() {
+   local pathVariable="${1}"
+   local command="${2}"
+
+   local path="$(which "${command}")" || return 1
+   [ -n "${path}" ] || return 1
+
+   setVariable "${pathVariable}" "${path}"
+   return 0
+}
+
+verifyHostCommand() {
+   local pathVariable="${1}"
+   local command="${2}"
+
+   findHostCommand "${pathVariable}" "${command}" || {
+      semanticError "host command not found: ${command}"
+   }
+}
+
 verifyActionFlags() {
    local allFlag="${1}"
    shift 1
