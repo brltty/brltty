@@ -1,5 +1,8 @@
 #!/bin/bash
-. "$(dirname "${BASH_SOURCE[0]}")/Source/brltty-prologue.sh"
+
+topDirectory="$(dirname "${BASH_SOURCE[0]}")"
+readonly topDirectory="$(realpath "${topDirectory}")"
+. "${topDirectory}/Source/brltty-prologue.sh"
 
 addSourceTreeOption() {
    addProgramOption s string.directory sourceTree "the path to the source tree"

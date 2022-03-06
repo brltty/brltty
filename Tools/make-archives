@@ -1,7 +1,6 @@
 #!/bin/bash
 
 topDirectory="$(dirname "${0}")/.."
-topDirectory="$(realpath "${topDirectory}")"
 make --silent -C "${topDirectory}" clone
 . "${topDirectory}/prologue.sh"
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-. "$(dirname "${0}")/prologue.sh"
+. "$(dirname "${0}")/../prologue.sh"
 
 addTestModeOption
 addSourceTreeOption
@@ -15,7 +15,7 @@ getInstallTree installTree
 for sourceDirectory in Files/*
 do
    targetDirectory="${installTree}/${sourceDirectory#*/}"
-   executeHostCommand sudo cp -- "${programDirectory}/${sourceDirectory}/"* "${targetDirectory}/"
+   executeHostCommand sudo cp -- "${topDirectory}/${sourceDirectory}/"* "${targetDirectory}/"
 done
 
 for subdirectory in etc

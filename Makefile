@@ -20,7 +20,7 @@ $(AUTOGEN_TARGET): $(CLONE_TARGET)
 CONFIGURE_TARGET = $(BUILD_TREE)/Makefile
 configure: $(CONFIGURE_TARGET)
 $(CONFIGURE_TARGET): $(AUTOGEN_TARGET)
-	./configure-brltty -s $(SOURCE_TREE) -b $(BUILD_TREE) -i $(INSTALL_LOCATION)
+	Make/configure-brltty -s $(SOURCE_TREE) -b $(BUILD_TREE) -i $(INSTALL_LOCATION)
 
 build: $(CONFIGURE_TARGET)
 	$(MAKE) --silent -C $(BUILD_TREE)/Programs -- everything
@@ -32,13 +32,13 @@ unconfigure:
 install: build
 	sudo $(MAKE) --silent -C $(BUILD_TREE)/Programs -- install-commands install-tools install-manpages install-drivers install-tables install-core-headers install-api-libraries install-api-commands install-xbrlapi install-api-headers install-api-bindings
 	sudo $(MAKE) --silent -C $(BUILD_TREE) -- install-systemd install-udev
-	./add-files -s $(SOURCE_TREE) -b $(BUILD_TREE)
+	Make/add-files -s $(SOURCE_TREE) -b $(BUILD_TREE)
 
 uninstall:
 	sudo $(MAKE) --silent -C $(BUILD_TREE) -- $@
 
 current:
-	./symlink-current -s $(SOURCE_TREE) -b $(BUILD_TREE)
+	Make/symlink-current -s $(SOURCE_TREE) -b $(BUILD_TREE)
 
 INSTALL_CURRENT = $(INSTALL_LOCATION)/current
 INSTALL_TREE = $(shell readlink -n -e -- $(INSTALL_CURRENT))
