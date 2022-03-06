@@ -8,7 +8,7 @@ SYSTEMD_UNIT = brltty@canute.path
 CLONE_TARGET = $(SOURCE_TREE)/configure.ac
 clone: $(CLONE_TARGET)
 $(CLONE_TARGET):
-	git clone --quiet -- https://github.com/brltty/brltty $(SOURCE_TREE)
+	git clone --quiet --branch master -- https://github.com/brltty/brltty $(SOURCE_TREE)
 	$(SOURCE_TREE)/Tools/reqpkgs -q -i
 
 AUTOGEN_TARGET = $(SOURCE_TREE)/configure
