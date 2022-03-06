@@ -20,7 +20,7 @@ linkPath="${installLocation}/current"
 if [ -L "${linkPath}" ]
 then
    [ "$(readlink "${linkPath}")" != "${installSubdirectory}" ] || {
-      logStep "link already correct: ${linkPath} -> ${installSubdirectory}"
+      logNote "link already correct: ${linkPath} -> ${installSubdirectory}"
       exit 0
    }
 
