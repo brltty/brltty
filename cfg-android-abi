@@ -127,23 +127,16 @@ findTool() {
    local variable="${1}"
    local name="${2}"
 
-   set -- "${toolsDirectory}/"*"-${name}"
-   local problem=""
+   logDetail "finding tool: ${name}"
+   local path="${toolsDirectory}/${properties["SYSTEM"]}-${name}"
 
-   if [ "${#}" -eq 0 ]
-   then
-      problem="tool not found"
-   elif [ "${#}" -gt 1 ]
-   then
-      problem="ambiguous tool"
-   fi
-
-   [ -z "${problem}" ] || {
-      logError "${problem}: ${abiName}: ${name}"
+   [ -f "${path}" ] || {
+      logError "tool not found: ${name}"
       exit 8
    }
 
-   setVariable "${variable}" "${1}"
+   logNote "tool found: ${path}"
+   setVariable "${variable}" "${path}"
    export "${variable}"
 }
 
@@ -179,6 +172,9 @@ fi
 toolsDirectory="${properties[TOOLCHAIN]}/bin"
 export PATH="${PATH}:${toolsDirectory}"
 findTool CC gcc
+findTool LD ld
+findTool STRIP strip
+findTool RANLIB ranlib
 
 sysrootDirectory="${properties[TOOLCHAIN]}/sysroot"
 export PKG_CONFIG_SYSROOT_DIR="${sysrootDirectory}"

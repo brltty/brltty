@@ -120,7 +120,7 @@ insertKey (ScreenKey key, int flags) {
   if (flags & BRL_FLG_INPUT_GUI) key |= SCR_KEY_GUI;
 
   if (flags & BRL_FLG_INPUT_ESCAPED) {
-    if (!insertScreenKey(ESC)) {
+    if (!insertScreenKey((ScreenKey)ESC)) {
       return 0;
     }
   }
