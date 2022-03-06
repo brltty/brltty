@@ -19,13 +19,16 @@ To install this software:
    2) As root, run: canute-install /path/to/the/archive
    3) Reboot the host.
 
-canute-startx
-   This script starts an X session with a terminal that has
-   the same dimensions as the Canute's braille display.
+The following canute-* scripts will be in the command search path.
+Each has a -h (help) option.
 
 canute-screen
    This script starts a text mode session with a terminal that
    has the same dimensions as the Canute's braille display.
+
+canute-startx
+   This script starts an X session with a terminal that has
+   the same dimensions as the Canute's braille display.
 
 canute-ttysize
    This script configures the current terminal to have
