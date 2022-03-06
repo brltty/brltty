@@ -5,7 +5,7 @@ installTree="/brltty/current"
 
 addTestModeOption
 addProgramOption A flag allActions "perform all of the actions"
-addProgramOption p flag hostPackages "install the host packages"
+addProgramOption p flag hostPackages "install the required host packages"
 addProgramOption e flag etcFiles "install the /etc/ files"
 addProgramOption k flag apiKey "generate the BrlAPI access key"
 addProgramOption l flag sharedLibraries "configure the shared libraries"
@@ -23,7 +23,7 @@ performAction_hostPackages() {
    while read line
    do
       packages+=("${line}")
-   done <"${installTree}/etc/host-packages"
+   done <"${installTree}/etc/required-packages"
 
    [ "${#packages[*]}" -eq 0 ] || {
       executeHostCommand apt --yes --quiet --quiet --quiet install -- "${packages[@]}"
@@ -59,7 +59,7 @@ performAction_systemdUnits() {
    done
 }
 
-[ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
+"${testMode}" || [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 set -e
 
 for action in "${actionFlags[@]}"
