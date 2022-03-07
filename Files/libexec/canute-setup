@@ -1,8 +1,6 @@
 #!/bin/bash
+. /brltty/current/libexec/prologue.sh
 shopt -s extglob
-
-installTree="/brltty/current"
-. "${installTree}/bin/brltty-prologue.sh"
 
 addTestModeOption
 addProgramOption A flag allActions "perform all of the actions"

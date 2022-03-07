@@ -1,7 +1,5 @@
 #!/bin/bash
-
-installTree="/brltty/current"
-. "${installTree}/bin/brltty-prologue.sh"
+. /brltty/current/libexec/prologue.sh
 
 processExtraProgramParameters() {
    declare -g -r clientParameters=("${clientCommand}" "${@}")
@@ -13,5 +11,5 @@ optionalProgramParameters argument "the command's arguments"
 parseProgramArguments "${@}"
 export BRLAPI_HOST=":canute"
 
-executeHostCommand "${clientParameters[@]}"
+executeHostCommand exec "${clientParameters[@]}"
 exit 0

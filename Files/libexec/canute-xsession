@@ -1,7 +1,5 @@
 #!/bin/bash
-
-installTree="/brltty/current"
-. "${installTree}/bin/brltty-prologue.sh"
+. /brltty/current/libexec/prologue.sh
 
 parseProgramArguments "${@}"
 set -e
