@@ -1,11 +1,12 @@
 #!/bin/bash
+shopt -s extglob
 
 installTree="/brltty/current"
 . "${installTree}/bin/brltty-prologue.sh"
 
 addTestModeOption
 addProgramOption A flag allActions "perform all of the actions"
-addProgramOption p flag hostPackages "install the required host packages"
+addProgramOption p flag requiredPackages "install the required host packages"
 addProgramOption e flag etcFiles "install the /etc/ files"
 addProgramOption k flag apiKey "generate the BrlAPI access key"
 addProgramOption l flag sharedLibraries "configure the shared libraries"
@@ -13,17 +14,26 @@ addProgramOption u flag udevReload "reload the Udev rules"
 addProgramOption s flag systemdUnits "configure the Systemd units"
 parseProgramArguments "${@}"
 
-actionFlags=(hostPackages etcFiles apiKey sharedLibraries udevReload systemdUnits)
+actionFlags=(requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits)
 verifyActionFlags allActions "${actionFlags[@]}"
 
-performAction_hostPackages() {
+performAction_requiredPackages() {
+   local packagesFile="${installTree}/etc/required-packages"
+   verifyInputFile "${packagesFile}"
+
    local packages=()
    local line
 
    while read line
    do
+      line="${line##*( )}"
+      [ -n "${line}" ] || continue
+      [ "${line:0:1}" != "#" ] || continue
+      line="${line%%*( )}"
+
+      logNote "required package: ${line}"
       packages+=("${line}")
-   done <"${installTree}/etc/required-packages"
+   done <"${packagesFile}"
 
    [ "${#packages[*]}" -eq 0 ] || {
       executeHostCommand apt --yes --quiet --quiet --quiet install -- "${packages[@]}"
