@@ -1,0 +1,17 @@
+#!/bin/bash
+
+installTree="/brltty/current"
+. "${installTree}/bin/brltty-prologue.sh"
+
+processExtraProgramParameters() {
+   declare -g -r clientParameters=("${clientCommand}" "${@}")
+}
+
+addTestModeOption
+addProgramParameter command clientCommand "the na,e of, or the relative or absolute path to, the command"
+optionalProgramParameters argument "the command's arguments"
+parseProgramArguments "${@}"
+export BRLAPI_HOST=":canute"
+
+executeHostCommand "${clientParameters[@]}"
+exit 0
