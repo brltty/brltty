@@ -52,7 +52,7 @@ JAVA_JAR_FILE = $(API_NAME).jar
 jar: $(JAVA_JAR_FILE)
 
 $(JAVA_JAR_FILE): classes.made
-	$(JAR) cf $@ -C classes .
+	$(JAR) cfm $@ $(SRC_DIR)/manifest -C classes .
 
 JAVAC_LINT_OPTIONS = cast,deprecation,fallthrough,finally,overrides,rawtypes,unchecked
 
