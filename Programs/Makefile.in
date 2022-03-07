@@ -892,7 +892,7 @@ BRLTTY_CORE_LIB = $(LIB_PFX)$(CORE_NAME)_core.$(LIB_EXT)
 core-library: $(BRLTTY_CORE_LIB)
 
 $(BRLTTY_CORE_LIB): $(CORE_OBJECTS)
-	$(MKLIB:<name>=$@) $@ $(CORE_OBJECTS) $(BRLTTY_LIBRARIES)
+	$(MKLIB:<name>=$@.$(PACKAGE_VERSION)) $@ $(CORE_OBJECTS) $(BRLTTY_LIBRARIES)
 
 ###############################################################################
 
@@ -908,7 +908,7 @@ brltty.class: $(SRC_DIR)/brltty.java
 	javac $(SRC_DIR)/brltty.java
 
 $(BRLTTY_JNI_LIB): brltty_jni.$O $(BRLTTY_CORE_LIB)
-	$(MKLIB:<name>=$@) $@ brltty_jni.$O $(LDLIBS)
+	$(MKLIB:<name>=$@.$(PACKAGE_VERSION)) $@ brltty_jni.$O $(LDLIBS)
 
 brltty_jni.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brltty_jni.c

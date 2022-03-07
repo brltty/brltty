@@ -30,7 +30,7 @@ TCL_INDEX_SCRIPT = mkindex
 all: $(TCL_API_LIB) | make-index-script
 
 $(TCL_API_LIB): bindings.$O | $(API_NAME)
-	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O $(TCL_LIBS) $(API_LDFLAGS)
+	$(MKLIB:<name>=$(TCL_API_LIB).$(API_VERSION)) $@ bindings.$O $(TCL_LIBS) $(API_LDFLAGS)
 
 PARAMETERS_HEADER = parameters.auto.h
 CONSTANTS_HEADERS = $(PARAMETERS_HEADER)
