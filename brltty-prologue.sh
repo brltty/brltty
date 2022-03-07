@@ -519,6 +519,8 @@ optionalProgramParameters() {
    if [ "${programParameterCountMinimum}" -lt 0 ]
    then
       programParameterCountMinimum="${programParameterCount}"
+      optionalProgramParameterLabel="${1}"
+      optionalProgramParameterUsage="${2}"
    else
       logWarning "program parameters are already optional"
    fi
@@ -646,10 +648,19 @@ showProgramUsageSummary() {
       index=$((index + 1))
    done
 
+   [ -z "${optionalProgramParameterLabel}" ] || {
+      line="${line} [${optionalProgramParameterLabel} ...]"
+
+      [ -z "${optionalProgramParameterUsage}" ] || {
+         addProgramParameter "${optionalProgramParameterLabel} ..." optionalProgramParameterVariable "${optionalProgramParameterUsage}"
+      }
+   }
+
    line="${line}${suffix}"
    addProgramUsageLine "${line}"
 
    [ "${programParameterCount}" -eq 0 ] || {
+      addProgramUsageLine ""
       addProgramUsageLine "Parameters:"
 
       local indent=$((programParameterLabelWidth + 2))
@@ -674,6 +685,7 @@ showProgramUsageSummary() {
    }
 
    [ "${#}" -eq 0 ] || {
+      addProgramUsageLine ""
       addProgramUsageLine "Options:"
 
       local indent=$((3 + programOptionOperandWidth + 2))
