@@ -31,4 +31,5 @@ then
 fi
 
 executeHostCommand sudo ln --symbolic -- "${installSubdirectory}" "${linkPath}"
+executeHostCommand sudo "${installTree}/libexec/canute-setup" -l
 exit 0
