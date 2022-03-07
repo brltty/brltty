@@ -99,7 +99,7 @@ listInstalledPackages_dnf() {
 }
 
 installPackages_dnf() {
-   dnf --quiet install "${@}"
+   dnf -y --quiet install "${@}"
 }
 
 listInstalledPackages_dpkg() {
@@ -107,7 +107,7 @@ listInstalledPackages_dpkg() {
 }
 
 installPackages_dpkg() {
-   apt-get --quiet install "${@}"
+   apt --yes --quiet --quiet --quiet install "${@}"
 }
 
 listInstalledPackages_pkg() {
