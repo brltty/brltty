@@ -12,6 +12,6 @@ parseProgramArguments "${@}"
 
 export TCLLIBPATH="${apiLinksDirectory}/tcl"
 
-apiSetServer
+canuteSetServer
 executeHostCommand exec "${clientParameters[@]}"
 exit 0

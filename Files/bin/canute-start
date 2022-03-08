@@ -1,0 +1,15 @@
+#!/bin/bash
+. /brltty/current/libexec/prologue.sh
+
+parseProgramArguments "${@}"
+set -e
+
+if systemctl --quiet is-active "${canuteSystemdUnit}"
+then
+   logTask "Canute already running"
+else
+   executeHostCommand sudo systemctl --quiet start "${canuteSystemdUnit}"
+   logTask "Canute has been started"
+fi
+
+exit 0

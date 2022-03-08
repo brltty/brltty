@@ -12,7 +12,7 @@ atspiDirectory="/usr/lib/at-spi2-core"
 "${atspiDirectory}/at-spi2-registryd" &
 sleep 3
 
-apiSetServer
+canuteSetServer
 brlttyPath="${installTree}/bin"
 "${brlttyPath}/xbrlapi"
 "${brlttyPath}/brltty" -N -f "${installTree}/etc/brltty-atspi.conf"

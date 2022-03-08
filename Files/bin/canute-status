@@ -1,0 +1,8 @@
+#!/bin/bash
+. /brltty/current/libexec/prologue.sh
+
+parseProgramArguments "${@}"
+set -e
+
+systemctl status "${canuteSystemdUnit}"
+exit 0

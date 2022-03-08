@@ -73,7 +73,7 @@ performAction_systemdUnits() {
    executeHostCommand systemctl --quiet daemon-reload
    local unit
 
-   for unit in "brltty@canute.path"
+   for unit in "${canuteSystemdUnit}"
    do
       executeHostCommand systemctl --quiet enable "${unit}"
       executeHostCommand systemctl --quiet start "${unit}"

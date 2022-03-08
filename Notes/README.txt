@@ -34,3 +34,18 @@ canute-ttysize
    This script configures the current terminal to have
    the same dimensions as the Canute's braille display.
 
+canute-start
+   Start the Canute braille display now.
+
+canute-stop
+   Stop the Canute braille display now.
+
+canute-enable
+   The Canute braille display will be started when the system boots.
+
+canute-disable
+   The Canute braille display won't be started when the system boots.
+
+canute-status
+   Show the current status of the Canute braille display process.
+
