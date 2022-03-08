@@ -1,5 +1,5 @@
 #!/bin/bash
-. /brltty/current/libexec/prologue.sh
+. /brltty/current/libexec/canute-prologue.sh
 
 parseProgramArguments "${@}"
 set -e
