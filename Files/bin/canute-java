@@ -1,0 +1,5 @@
+#!/bin/bash
+. /brltty/current/libexec/canute-prologue.sh
+
+exec java "-Djava.library.path=${apiLinksDirectory}/java" "${@}"
+exit 0
