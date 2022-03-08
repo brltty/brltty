@@ -17,7 +17,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-defaultModifiedIndicator="M"
+defaultModifiedIndicator="+"
 
 . "`dirname "${0}"`/brltty-prologue.sh"
 addProgramOption a string.anything appendText "text to append to the revision identifier"
