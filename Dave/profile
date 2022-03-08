@@ -1,0 +1,12 @@
+umask 022
+
+if [ -n "${BASH_VERSION}" ]
+then
+    [ -f "${HOME}/.bashrc" ] && . "${HOME}/.bashrc"
+    export PS1='[\u@\h-\W] \A> '
+fi
+
+PATH="${HOME}/bin:${PATH}"
+PATH="${HOME}/.local/bin:${PATH}"
+
+export MAKEFLAGS=s

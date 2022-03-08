@@ -1,0 +1,6 @@
+set errorbells novisualbell report=0
+set lazyredraw display=lastline,uhex
+set laststatus=2 showmode showcmd ruler
+set number wrap autoindent
+set shiftwidth=2 expandtab
+set ignorecase nowrapscan
