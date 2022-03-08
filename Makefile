@@ -37,8 +37,9 @@ install: build
 uninstall:
 	sudo $(MAKE) --silent -C $(BUILD_TREE) -- $@
 
-current:
+symlinks:
 	Make/symlink-current -s $(SOURCE_TREE) -b $(BUILD_TREE)
+	Make/symlink-bindings
 
 INSTALL_CURRENT = $(INSTALL_LOCATION)/current
 INSTALL_TREE = $(shell readlink -n -e -- $(INSTALL_CURRENT))

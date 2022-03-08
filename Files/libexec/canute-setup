@@ -49,20 +49,18 @@ performAction_apiKey() {
 }
 
 performAction_sharedLibraries() {
-   local configurationFile="/etc/ld.so.conf.d/brlapi.conf"
-   local configurationLines=""
+   local file lines=""
 
-   local file
    while read file
    do
-      [ -z "${configurationLines}" ] || configurationLines+=$'\n'
-      configurationLines+="${file}"
+      [ -z "${lines}" ] || lines+=$'\n'
+      lines+="${file}"
    done < <(find "${installTree}/" -type f \( -name "*.so" -o -name "*.so.*" \))
 
-   sed <<<"${configurationLines}" --regexp-extended --expression '
+   sed <<<"${lines}" --regexp-extended --expression '
       s%/[^/]*$%%
       /\/brltty$/d
-   ' | sort | uniq >"${configurationFile}"
+   ' | sort | uniq >"${ldConfigurationFile}"
 
    executeHostCommand ldconfig
 }

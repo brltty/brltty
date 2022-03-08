@@ -10,6 +10,8 @@ addProgramParameter command clientCommand "the na,e of, or the relative or absol
 optionalProgramParameters argument "the command's arguments"
 parseProgramArguments "${@}"
 
+export TCLLIBPATH="${apiLinksDirectory}/tcl"
+
 apiSetServer
 executeHostCommand exec "${clientParameters[@]}"
 exit 0

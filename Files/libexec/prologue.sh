@@ -9,3 +9,5 @@ apiSetServer() {
    export BRLAPI_HOST=":canute"
 }
 
+readonly ldConfigurationFile="/etc/ld.so.conf.d/brlapi.conf"
+readonly apiLinksDirectory="${installTree}/lib"

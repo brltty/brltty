@@ -17,10 +17,10 @@ addProgramOption u flag makeUnconfigure "unconfigure BRLTTY"
 addProgramOption c flag makeConfigure "configure BRLTTY"
 addProgramOption b flag makeBuild "build BRLTTY"
 addProgramOption i flag makeInstall "install BRLTTY"
-addProgramOption l flag makeCurrent "set the \"current\" link"
+addProgramOption s flag makeSymlinks "make the symbolic links"
 addProgramOption a flag makeArchives "make the archives"
 parseProgramArguments "${@}"
-verifyActionFlags allActions makeUnconfigure makeConfigure makeBuild makeInstall makeCurrent makeArchives
+verifyActionFlags allActions makeUnconfigure makeConfigure makeBuild makeInstall makeSymlinks makeArchives
 
 set -e
 executeHostCommand cd "${topDirectory}"
@@ -29,7 +29,7 @@ executeHostCommand cd "${topDirectory}"
 ! "${makeConfigure}" || makeTarget configure
 ! "${makeBuild}" || makeTarget build
 ! "${makeInstall}" || makeTarget install
-! "${makeCurrent}" || makeTarget current
+! "${makeSymlinks}" || makeTarget symlinks
 
 ! "${makeArchives}" || {
    executeHostCommand rm -f -- *.tar

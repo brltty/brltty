@@ -1,0 +1,25 @@
+#!/bin/bash
+. /brltty/current/libexec/prologue.sh
+
+addTestModeOption
+parseProgramArguments "${@}"
+set -e
+
+while read directory
+do
+   language=""
+
+   case "${directory}"
+   in
+      *java* | *jni*) language="java";;
+      *python*) language="python";;
+      *tcl*) language="tcl";;
+   esac
+
+   [ -n "${language}" ] || continue
+   linkPath="${apiLinksDirectory}/${language}"
+   linkTarget="$(realpath --relative-to "${apiLinksDirectory}" -- "${directory}")"
+   executeHostCommand sudo ln --symbolic --force -- "${linkTarget}" "${linkPath}"
+done <"${ldConfigurationFile}"
+
+exit 0
