@@ -35,17 +35,27 @@ canute-ttysize
    the same dimensions as the Canute's braille display.
 
 canute-start
-   Start the Canute braille display now.
+   Start the Canute braille display process now.
 
 canute-stop
-   Stop the Canute braille display now.
+   Stop the Canute braille display process now.
 
 canute-enable
-   The Canute braille display will be started when the system boots.
+   The Canute braille display process will be started when the system boots.
 
 canute-disable
-   The Canute braille display won't be started when the system boots.
+   The Canute braille display process won't be started when the system boots.
 
 canute-status
    Show the current status of the Canute braille display process.
+
+canute-client
+   Run a BrlAPI client within a prepared environment.
+   It doesn't work for Java clients.
+
+canute-java
+   Run a Java BrlAPI client.
+
+canute-apitest
+   Perform a BrlAPI protocol test.
 

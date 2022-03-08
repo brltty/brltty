@@ -2,12 +2,12 @@
 . /brltty/current/libexec/canute-prologue.sh
 
 processExtraProgramParameters() {
-   declare -g -r clientParameters=("${clientCommand}" "${@}")
+   declare -g -r clientParameters=("${testName}" "${@}")
 }
 
 addTestModeOption
-addProgramParameter command clientCommand "the na,e of, or the relative or absolute path to, the command"
-optionalProgramParameters argument "the command's arguments"
+addProgramParameter test testName "the name of the test to be performed - specify -- -help for the usage summary"
+optionalProgramParameters argument "the test's arguments"
 parseProgramArguments "${@}"
 
 executeHostCommand exec canute-java org.a11y.brlapi.MainProgram "${clientParameters[@]}"
