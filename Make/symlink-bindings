@@ -1,25 +1,33 @@
 #!/bin/bash
-. /brltty/current/libexec/prologue.sh
+. /brltty/current/libexec/canute-prologue.sh
+
+makeLink() {
+   local linkName="${1}"
+
+   local linkPath="${apiLinksDirectory}/${linkName}"
+   local linkTarget="$(realpath --relative-to "${apiLinksDirectory}" -- "${targetDirectory}")"
+   ! [ -e "${linkPath}" ] || executeHostCommand sudo rm -- "${linkPath}"
+   executeHostCommand sudo ln --symbolic -- "${linkTarget}" "${linkPath}"
+}
 
 addTestModeOption
 parseProgramArguments "${@}"
 set -e
 
-while read directory
+while read targetDirectory
 do
-   language=""
-
-   case "${directory}"
+   case "${targetDirectory}"
    in
-      *java* | *jni*) language="java";;
-      *python*) language="python";;
-      *tcl*) language="tcl";;
+      *java* | *jni*) makeLink jni;;
+      *python*) makeLink python;;
+      *tcl*) makeLink tcl;;
    esac
-
-   [ -n "${language}" ] || continue
-   linkPath="${apiLinksDirectory}/${language}"
-   linkTarget="$(realpath --relative-to "${apiLinksDirectory}" -- "${directory}")"
-   executeHostCommand sudo ln --symbolic --force -- "${linkTarget}" "${linkPath}"
 done <"${ldConfigurationFile}"
+
+while read jarFile
+do
+   targetDirectory="$(dirname "${jarFile}")"
+   makeLink java
+done < <(find "${installTree}/" -type f -name "*.jar")
 
 exit 0

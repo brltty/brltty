@@ -1,5 +1,5 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
-exec java "-Djava.library.path=${apiLinksDirectory}/java" "${@}"
+exec java --class-path "${apiLinksDirectory}/java/brlapi.jar"  "-Djava.library.path=${apiLinksDirectory}/jni" "${@}"
 exit 0
