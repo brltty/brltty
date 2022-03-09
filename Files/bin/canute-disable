@@ -7,7 +7,7 @@ set -e
 if systemctl --quiet is-enabled "${canuteSystemdUnit}"
 then
    executeHostCommand sudo systemctl --quiet disable "${canuteSystemdUnit}"
-   logTask "Canute won't start when system boots"
+   logNotice "Canute won't start when system boots"
 else
    logTask "Canute already disabled"
 fi

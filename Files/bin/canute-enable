@@ -9,7 +9,7 @@ then
    logTask "Canute already enabled"
 else
    executeHostCommand sudo systemctl --quiet enable "${canuteSystemdUnit}"
-   logTask "Canute will start when system boots"
+   logNotice "Canute will start when system boots"
 fi
 
 exit 0

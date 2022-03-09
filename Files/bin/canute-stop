@@ -7,7 +7,7 @@ set -e
 if systemctl --quiet is-active "${canuteSystemdUnit}"
 then
    executeHostCommand sudo systemctl --quiet stop "${canuteSystemdUnit}"
-   logTask "Canute has been stopped"
+   logNotice "Canute has been stopped"
 else
    logTask "Canute not running"
 fi
