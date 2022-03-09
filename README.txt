@@ -56,6 +56,6 @@ canute-client
 canute-java
    Run a Java BrlAPI client.
 
-canute-apitest
-   Perform a BrlAPI protocol test.
+canute-apitool
+   Perform various BrlAPI functions.
 
