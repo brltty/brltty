@@ -1,5 +1,6 @@
 #!/bin/bash
 . "$(dirname "${0}")/../prologue.sh"
+. "${programDirectory}/make-prologue.sh"
 
 addTestModeOption
 addSourceTreeOption
@@ -15,21 +16,7 @@ testDirectory "${installTree}" || semanticError "install tree not found: ${insta
 
 installSubdirectory="$(basename "${installTree}")"
 installLocation="$(dirname "${installTree}")"
-linkPath="${installLocation}/current"
 
-if [ -L "${linkPath}" ]
-then
-   [ "$(readlink "${linkPath}")" != "${installSubdirectory}" ] || {
-      logNote "link already correct: ${linkPath} -> ${installSubdirectory}"
-      exit 0
-   }
-
-   executeHostCommand sudo rm -- "${linkPath}"
-elif [ -e "${linkPath}" ]
-then
-   semanticError "not a symbolic link: ${linkPath}"
-fi
-
-executeHostCommand sudo ln --symbolic -- "${installSubdirectory}" "${linkPath}"
+makeSymbolicLink "${installLocation}/current" "${installSubdirectory}"
 executeHostCommand sudo "${installTree}/libexec/canute-setup" -l
 exit 0

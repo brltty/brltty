@@ -1,13 +1,14 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
+. "${programDirectory}/make-prologue.sh"
 
-makeLink() {
+makeBindingsLink() {
    local linkName="${1}"
 
    local linkPath="${apiLinksDirectory}/${linkName}"
    local linkTarget="$(realpath --relative-to "${apiLinksDirectory}" -- "${targetDirectory}")"
-   ! [ -e "${linkPath}" ] || executeHostCommand sudo rm -- "${linkPath}"
-   executeHostCommand sudo ln --symbolic -- "${linkTarget}" "${linkPath}"
+
+   makeSymbolicLink "${linkPath}" "${linkTarget}"
 }
 
 addTestModeOption
@@ -18,16 +19,16 @@ while read targetDirectory
 do
    case "${targetDirectory}"
    in
-      *java* | *jni*) makeLink jni;;
-      *python*) makeLink python;;
-      *tcl*) makeLink tcl;;
+      *java* | *jni*) makeBindingsLink jni;;
+      *python*) makeBindingsLink python;;
+      *tcl*) makeBindingsLink tcl;;
    esac
 done <"${ldConfigurationFile}"
 
 while read jarFile
 do
    targetDirectory="$(dirname "${jarFile}")"
-   makeLink java
+   makeBindingsLink java
 done < <(find "${installTree}/" -type f -name "*.jar")
 
 exit 0

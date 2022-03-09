@@ -1,5 +1,6 @@
 #!/bin/bash
 . "$(dirname "${0}")/../prologue.sh"
+. "${programDirectory}/make-prologue.sh"
 
 configureOptions=(
    --enable-relocatable-install
