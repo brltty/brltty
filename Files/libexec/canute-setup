@@ -4,7 +4,8 @@ shopt -s extglob
 
 addTestModeOption
 addProgramOption A flag allActions "perform all of the actions"
-addProgramOption p flag requiredPackages "install the required host packages"
+addProgramOption P flag unwantedPackages "remove unwanted packages"
+addProgramOption p flag requiredPackages "install required packages"
 addProgramOption e flag etcFiles "install the /etc/ files"
 addProgramOption k flag apiKey "generate the BrlAPI access key"
 addProgramOption l flag sharedLibraries "configure the shared libraries"
@@ -12,30 +13,41 @@ addProgramOption u flag udevReload "reload the Udev rules"
 addProgramOption s flag systemdUnits "configure the Systemd units"
 parseProgramArguments "${@}"
 
-actionFlags=(requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits)
+actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits)
 verifyActionFlags allActions "${actionFlags[@]}"
 
-performAction_requiredPackages() {
-   local packagesFile="${installTree}/etc/required-packages"
+processPackages() {
+   local type="${1}"
+   shift 1
+
+   local packagesFile="${installTree}/etc/${type}-packages"
    verifyInputFile "${packagesFile}"
 
    local packages=()
-   local line
+   local name
 
-   while read line
+   while read name
    do
-      line="${line##*( )}"
-      [ -n "${line}" ] || continue
-      [ "${line:0:1}" != "#" ] || continue
-      line="${line%%*( )}"
+      name="${name##*( )}"
+      [ -n "${name}" ] || continue
+      [ "${name:0:1}" != "#" ] || continue
+      name="${name%%*( )}"
 
-      logNote "required package: ${line}"
-      packages+=("${line}")
+      logNote "${type} package: ${name}"
+      packages+=("${name}")
    done <"${packagesFile}"
 
    [ "${#packages[*]}" -eq 0 ] || {
-      executeHostCommand apt --yes --quiet --quiet --quiet install -- "${packages[@]}"
+      executeHostCommand "${@}" "${packages[@]}"
    }
+}
+
+performAction_unwantedPackages() {
+   processPackages unwanted apt --yes --quiet --quiet --quiet remove --
+}
+
+performAction_requiredPackages() {
+   processPackages required apt --yes --quiet --quiet --quiet install --
 }
 
 performAction_etcFiles() {

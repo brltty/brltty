@@ -1,3 +1,15 @@
+screen
 gnome-terminal
 marco
-screen
+
+at-spi
+at-spi2-core
+
+python-all-dev
+python-docutils
+python3-all-dev
+python3-docutils
+cython
+
+tcl-dev
+default-jdk
