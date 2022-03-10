@@ -75,8 +75,9 @@ performAction_systemdUnits() {
 
    for unit in "${canuteSystemdUnit}"
    do
-      executeHostCommand systemctl --quiet enable "${unit}"
+      ! systemctl --quiet is-active "${unit}" || executeHostCommand systemctl --quiet stop "${unit}"
       executeHostCommand systemctl --quiet start "${unit}"
+      systemctl --quiet is-enabled "${unit}" || executeHostCommand systemctl --quiet enable "${unit}"
    done
 }
 
