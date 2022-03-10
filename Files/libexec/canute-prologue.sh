@@ -6,7 +6,7 @@ readonly installTree="$(dirname "${installTree}")"
 . "${installTree}/bin/brltty-prologue.sh"
 
 readonly ldConfigurationFile="/etc/ld.so.conf.d/brlapi.conf"
-readonly apiLinksDirectory="${installTree}/lib"
+readonly apiLinksDirectory="${installTree}"
 readonly canuteSystemdUnit="brltty@canute.path"
 
 brlttyPackageProperty() {

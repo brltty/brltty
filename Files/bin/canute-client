@@ -10,6 +10,7 @@ addProgramParameter command clientCommand "the na,e of, or the relative or absol
 optionalProgramParameters argument "the command's arguments"
 parseProgramArguments "${@}"
 
+export PYTHONPATH="${apiLinksDirectory}/python"
 export TCLLIBPATH="${apiLinksDirectory}/tcl"
 
 canuteSetServer
