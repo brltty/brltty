@@ -4,5 +4,5 @@
 addTestModeOption
 parseProgramArguments "${@}"
 
-executeHostCommand exec screen -m -c "${installTree}/etc/canute-screenrc"
+executeHostCommand exec screen -m -c "${installTree}/libexec/canute-screenrc"
 exit 0
