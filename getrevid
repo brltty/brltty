@@ -36,13 +36,10 @@ parseProgramArguments "${@}"
 
 [ -n "${modifiedIndicator}" ] || modifiedIndicator="${defaultModifiedIndicator}"
 
-export GIT_WORK_TREE="${sourceRoot}"
-export GIT_DIR="${GIT_WORK_TREE}/.git"
-
 [ -n "${revisionIdentifier}" ] || {
-  if [ -d "${GIT_DIR}" -o -f "${GIT_DIR}" ]
+  if [ -e "${sourceRoot}/.git" ]
   then
-     revisionIdentifier="`git describe --tags --abbrev=8 --dirty="${modifiedIndicator}" --match="BRLTTY-*" 2>/dev/null`"
+     revisionIdentifier="`git -C "${sourceRoot}" describe --tags --abbrev=8 --dirty="${modifiedIndicator}" --match="BRLTTY-*" 2>/dev/null`"
   elif [ -d "${sourceRoot}/.svn" ]
   then
      revisionIdentifier="`svnversion -n "${sourceRoot}" 2>/dev/null`"
