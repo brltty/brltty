@@ -1709,7 +1709,10 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, const i
     return -1;
   }
 
-  if (brlapi__getDisplaySize(handle, &handle->brlx, &handle->brly)<0) return -1;
+  if (brlapi__getDisplaySize(handle, &handle->brlx, &handle->brly)<0){
+    pthread_mutex_unlock(&handle->state_mutex);
+    return -1;
+  }
 
   /* Clear key buffer before taking the tty, just in case... */
   pthread_mutex_lock(&handle->read_mutex);
