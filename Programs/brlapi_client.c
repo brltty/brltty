@@ -1739,12 +1739,12 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, const i
       } else {
 	char **sessions;
 	/* Not even logind knows :/ we are probably logged in from gdm */
-	ret = sd_uid_get_sessions(getuid(), 0, &sessions);
+	int nsessions = sd_uid_get_sessions(getuid(), 0, &sessions);
 
-	if (ret > 0) {
+	if (nsessions > 0) {
 	  int i, chosen = -1;
 
-	  for (i = 0; i < ret; i++) {
+	  for (i = 0; i < nsessions; i++) {
 	    char *type;
 
 	    ret = sd_session_get_type(sessions[i], &type);
@@ -1766,7 +1766,7 @@ int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, const i
 
 	  if (chosen >= 0) sd_session_get_vt(sessions[i], &vtnr);
 
-	  for (i = 0; i < ret; i++) free(sessions[i]);
+	  for (i = 0; i < nsessions; i++) free(sessions[i]);
 	  free(sessions);
 	}
       }
