@@ -1264,7 +1264,6 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 
     else {
       logConversionDecision(c, "ISO_8859-1", isLatin1 ? "internal conversion" : "assumed");
-      lockMutex(&c->brailleWindowMutex);
       size_t len = textLen;
       if (!fill) {
 	CHECKEXC(len <= rsiz, BRLAPI_ERROR_INVALID_PACKET, "text too big");
@@ -1275,6 +1274,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
 	else
 	  CHECKEXC((!andAttr && !orAttr) || len == rsiz, BRLAPI_ERROR_INVALID_PACKET, "text length does not match and/or mask length");
       }
+      lockMutex(&c->brailleWindowMutex);
       convertFromLatin1(c, rbeg, len, text);
       end = rbeg-1 + len;
     }
