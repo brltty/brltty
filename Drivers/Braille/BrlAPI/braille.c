@@ -185,7 +185,10 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 
     if (brlapi_write(&arguments)==0) {
       memcpy(prevData,brl->buffer,displaySize);
-      wmemcpy(prevText,text,displaySize);
+      if (text)
+	wmemcpy(prevText,text,displaySize);
+      else
+	wmemset(prevText,0,displaySize);
       prevCursor = brl->cursor;
       prevShown = 1;
     } else {
