@@ -359,6 +359,20 @@ verifyActionFlags() {
    done
 }
 
+verifyChoice() {
+   local label="${1}"
+   local value="${2}"
+   shift 2
+
+   local choice
+   for choice
+   do
+      [ "${choice}" != "${value}" ] || return 0
+   done
+
+   syntaxError "invalid ${label}: ${value}"
+}
+
 testInteger() {
    local value="${1}"
 
