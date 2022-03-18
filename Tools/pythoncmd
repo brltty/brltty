@@ -46,15 +46,19 @@ except IndexError:
 try:
   import sysconfig
 # putProgramMessage("sysconfig")
+  if hasattr(sysconfig, 'get_default_scheme'):
+    scheme = sysconfig.get_default_scheme()
+  else:
+    scheme = sysconfig._get_default_scheme()
 
   def getIncludeDirectory():
-    return sysconfig.get_path("include")
+    return sysconfig.get_path("include", scheme)
 
   def getLibraryDirectory():
-    return sysconfig.get_path("stdlib")
+    return sysconfig.get_path("stdlib", scheme)
 
   def getPackageDirectory():
-    return sysconfig.get_path("platlib")
+    return sysconfig.get_path("platlib", scheme)
 
   def getConfigurationVariable(name):
     return sysconfig.get_config_var(name)
