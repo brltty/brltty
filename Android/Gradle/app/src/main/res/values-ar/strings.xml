@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="app_description">يدعم BRLTTY أجهزة برايل المختلفة.</string>
+
+  <string name="about_label_activity">حول التطبيق</string>
+  <string name="about_label_copyright">حقوق النشر</string>
+  <string name="about_label_buildTime">وقت الإنشاء</string>
+  <string name="about_label_sourceRevision">مراجعة المصدر</string>
+  <string name="about_label_privacyPolicy">سياسة الخصوصية</string>
+
+  <string name="inputService_name">خدمة الإدخال في BRLTTY</string>
+  <string name="inputService_type">لوحات المفاتيح على أجهزة برايل</string>
+  <string name="inputService_not_enabled">خدمة الإدخال غير مُفعَّلة</string>
+  <string name="inputService_not_selected">خدمة الإدخال غير محددة</string>
+  <string name="inputService_not_started">خدمة الإدخال لم تبدأ</string>
+  <string name="inputService_not_connected">خدمة الإدخال غير متصلة</string>
+
+  <string name="updateApplication_problem_failed">لم يتم تحديث التطبيق</string>
+
+  <string name="packageInstaller_problem_failed">الحزمة غير مثبتة</string>
+  <string name="packageInstaller_problem_same">نفس الإصدار</string>
+  <string name="packageInstaller_problem_downgrade">الرجوع إلى إصدار أقدم غير مسموح به</string>
+
+  <string name="fileDownloader_title">أداة تنزيل الملفات من BRLTTY</string>
+  <string name="fileDownloader_problem_failed">لم يتم تنزيل الملف</string>
+  <string name="fileDownloader_state_connecting">يجري الاتصال</string>
+  <string name="fileDownloader_state_downloading">يجري التحميل</string>
+
+  <string name="setting_state_off">معطل</string>
+  <string name="checkbox_state_unchecked">لا</string>
+  <string name="checkbox_state_checked">نعم</string>
+
+  <string name="braille_channel_name">حالة جهاز برايل</string>
+  <string name="braille_hint_tap">انقر للحصول على الإجراءات</string>
+  <string name="braille_state_released">مفرغ</string>
+  <string name="braille_state_waiting">قيد الانتظار</string>
+  <string name="braille_state_connected">متصل</string>
+
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">الإشعارات</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">إعدادات سريعة</string>
+  <string name="GLOBAL_BUTTON_BACK">رجوع</string>
+  <string name="GLOBAL_BUTTON_HOME">الشاشة الرئيسية</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">التطبيقات الحديثة</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">نظرة عامة</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">تبديل طريقة الإدخال</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">عرض دليل المستخدم</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">تصفح الموقع</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">تصفح رسائل المستخدمين</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">إرسال رسالة للمستخدمين</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">إدارة العضوية في مجتمع المستخدمين</string>
+
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">تحديث التطبيق</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">نسخة للمطورين</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">السماح بالعودة للنسخ الأقدم</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">إجراآت إمكانية الوصول</string>
+
+  <string name="SETTINGS_SCREEN_MAIN">إعدادات BRLTTY</string>
+  <string name="SETTINGS_SCREEN_GENERAL">الاعدادات العامة</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">إعدادات الرسائل</string>
+  <string name="SETTINGS_SCREEN_DEVICES">إدارة الأجهزة</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">إعدادات متقدمة</string>
+
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">فصل جهاز برايل</string>
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">نمط التنقل</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">دعم النطق</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">جدول النص</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">جدول السمات</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">جدول الاختصارات</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">جدول لوحة المفاتيح</string>
+
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">عرض التنبيهات</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">عرض الإعلانات</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">عرض الإشعارات</string>
+
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">مستوى السجل</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">أقسام السجل</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">سجل أحداث إمكانية الوصول</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">تسجيل الشاشة المعروضة</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">سجل أحداث لوحات المفاتيح</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">سجل الأحداث غير المعالجة</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">الجهاز المحدد</string>
+  <string name="DEVICES_BUTTON_ADD">إضافة جهاز</string>
+  <string name="DEVICES_BUTTON_REMOVE">إزالة جهاز</string>
+
+  <string name="SELECTED_DEVICE_NONE">لا توجد أجهزة</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">الجهاز غير محدد</string>
+
+  <string name="ADD_DEVICE_NAME">اسم الجهاز</string>
+  <string name="ADD_DEVICE_METHOD">طريقة الاتصال</string>
+  <string name="ADD_DEVICE_SELECT">اختيار جهاز</string>
+  <string name="ADD_DEVICE_DRIVER">سائقة برايل</string>
+  <string name="ADD_DEVICE_DONE">تم</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">طريقة الاتصال غير محددة</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">الجهاز غير محدد</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">لم يتم تحديد سائقة تشغيل برايل</string>
+  <string name="ADD_DEVICE_NO_DEVICES">لا توجد أجهزة</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">اسم الجهاز قيد الاستخدام بالفعل</string>
+  <string name="ADD_DEVICE_NO_PERMISSION">لم يتم منح صلاحية الوصول إلى الجهاز</string>
+
+  <string name="REMOVE_DEVICE_PROMPT">هل ترغب حقًا في إزالة هذا الجهاز؟</string>
+
+  <string name="SET_SELECTION_NONE">لم يتم تحديد أي شيء</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">قائمة عمودية</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">شبكة ثنائية الأبعاد</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_native">محلي</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">بلوتوث</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">الكابل التسلسلي Serial</string>
+
+  <string name="LOG_LEVEL_LABEL_debug">تصحيح الأخطاء</string>
+  <string name="LOG_LEVEL_LABEL_information">معلومات</string>
+  <string name="LOG_LEVEL_LABEL_notice">ملاحظات</string>
+  <string name="LOG_LEVEL_LABEL_warning">تحذيرات</string>
+  <string name="LOG_LEVEL_LABEL_error">أخطاء</string>
+  <string name="LOG_LEVEL_LABEL_critical">أخطاء حرجة</string>
+  <string name="LOG_LEVEL_LABEL_alert">تنبيهات</string>
+  <string name="LOG_LEVEL_LABEL_emergency">طوارئ</string>
+
+  <string name="LOG_CATEGORY_LABEL_inpkts">حزم الإدخال</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">حزم العرض</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">أحداث مفاتيح جهاز برايل</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">أحداث أزرار لوحة المفاتيح</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">تعقب المؤشر</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">توجيه المؤشر</string>
+  <string name="LOG_CATEGORY_LABEL_update">تحديث الأحداث</string>
+  <string name="LOG_CATEGORY_LABEL_speech">أحداث النطق</string>
+  <string name="LOG_CATEGORY_LABEL_async">أحداث غير متزامنة</string>
+  <string name="LOG_CATEGORY_LABEL_server">أحداث الخادم</string>
+  <string name="LOG_CATEGORY_LABEL_gio">عام I / O</string>
+  <string name="LOG_CATEGORY_LABEL_serial">التسلسل I / O</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
+  <string name="LOG_CATEGORY_LABEL_bt">Bluetooth I/O</string>
+  <string name="LOG_CATEGORY_LABEL_hid">واجهة العرض I/O</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">أحداث سائقة برايل</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">أحداث سائقة النطق</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">أحداث سائقة الشاشة</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">الاكتشاف التلقائي</string>
+
+  <string name="TEXT_TABLE_LABEL_auto">الاختيار التلقائي على أساس اللغة</string>
+  <string name="TEXT_TABLE_LABEL_ar">عربي (عام)</string>
+  <string name="TEXT_TABLE_LABEL_as">الأسامية</string>
+  <string name="TEXT_TABLE_LABEL_awa">الأوادية</string>
+  <string name="TEXT_TABLE_LABEL_bg">البلغارية</string>
+  <string name="TEXT_TABLE_LABEL_bh">البيهارية</string>
+  <string name="TEXT_TABLE_LABEL_bn">البنغالية</string>
+  <string name="TEXT_TABLE_LABEL_bo">التبتية</string>
+  <string name="TEXT_TABLE_LABEL_bra">البراغية</string>
+  <string name="TEXT_TABLE_LABEL_brf">تنسيق برايل الجاهز (لعرض ملفات .brf داخل تطبيقات تحرير المستندات)</string>
+  <string name="TEXT_TABLE_LABEL_cs">التشيكية</string>
+  <string name="TEXT_TABLE_LABEL_cy">الولزية</string>
+  <string name="TEXT_TABLE_LABEL_da">الدنمركية</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">الدنمركية (سفيند ثوغارد ، 2002-11-18)</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">الدنماركية (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_de">الألمانية</string>
+  <string name="TEXT_TABLE_LABEL_dra">درافيدان</string>
+  <string name="TEXT_TABLE_LABEL_el">اليونانية</string>
+  <string name="TEXT_TABLE_LABEL_en">الإنجليزية</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">الإنجليزية (كندا)</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">الإنجليزية (المملكة المتحدة)</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc">الإنجليزية (أكواد برايل الحاسوبية لأمريكا الشمالية)</string>
+  <string name="TEXT_TABLE_LABEL_en_US">الإنجليزية (الولايات المتحدة)</string>
+  <string name="TEXT_TABLE_LABEL_eo">اسبرانتو</string>
+  <string name="TEXT_TABLE_LABEL_es">الأسبانية</string>
+  <string name="TEXT_TABLE_LABEL_et">الإستونية</string>
+  <string name="TEXT_TABLE_LABEL_fi">الفنلندية</string>
+  <string name="TEXT_TABLE_LABEL_fr">الفرنسية</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007">الفرنسية (الموحدة 2007)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">الفرنسية (كندا)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">الفرنسية (رمز برايل للكمبيوتر الفرنسي القياسي)</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">الفرنسية (فرنسا)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">الفرنسية (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_ga">الايرلندية</string>
+  <string name="TEXT_TABLE_LABEL_gd">الغيلية</string>
+  <string name="TEXT_TABLE_LABEL_gon">الغاندية</string>
+  <string name="TEXT_TABLE_LABEL_gu">الغوجاراتية</string>
+  <string name="TEXT_TABLE_LABEL_he">العبرية</string>
+  <string name="TEXT_TABLE_LABEL_hi">الهندية</string>
+  <string name="TEXT_TABLE_LABEL_hr">الكرواتية</string>
+  <string name="TEXT_TABLE_LABEL_hu">المجرية</string>
+  <string name="TEXT_TABLE_LABEL_hy">الأرمينية</string>
+  <string name="TEXT_TABLE_LABEL_is">الأيسلاندية</string>
+  <string name="TEXT_TABLE_LABEL_it">الإيطالية</string>
+  <string name="TEXT_TABLE_LABEL_kha">الكازاخية</string>
+  <string name="TEXT_TABLE_LABEL_kn">الكانادا</string>
+  <string name="TEXT_TABLE_LABEL_kok">الكونكانية</string>
+  <string name="TEXT_TABLE_LABEL_kru">الكوروخ</string>
+  <string name="TEXT_TABLE_LABEL_lt">الليتوانية</string>
+  <string name="TEXT_TABLE_LABEL_lv">اللاتفية</string>
+  <string name="TEXT_TABLE_LABEL_mg">المدغشقرية</string>
+  <string name="TEXT_TABLE_LABEL_mi">الماوري</string>
+  <string name="TEXT_TABLE_LABEL_ml">المالايالامية</string>
+  <string name="TEXT_TABLE_LABEL_mni">المانيبوري</string>
+  <string name="TEXT_TABLE_LABEL_mr">الماراثى</string>
+  <string name="TEXT_TABLE_LABEL_mt">المالطية</string>
+  <string name="TEXT_TABLE_LABEL_mun">الموندا</string>
+  <string name="TEXT_TABLE_LABEL_mwr">المرواري</string>
+  <string name="TEXT_TABLE_LABEL_ne">النيبالية</string>
+  <string name="TEXT_TABLE_LABEL_new">النيوري</string>
+  <string name="TEXT_TABLE_LABEL_nl">الهولندية</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">الهولندية (بلجيكا)</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">الهولندية (هولندا)</string>
+  <string name="TEXT_TABLE_LABEL_no">النرويجية</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">النرويجية (مع دعم للغات أخرى)</string>
+  <string name="TEXT_TABLE_LABEL_no_oup">النرويجية (الجمعية العامة لبرايل)</string>
+  <string name="TEXT_TABLE_LABEL_nwc">النيواري (قديم)</string>
+  <string name="TEXT_TABLE_LABEL_or">الأوريا</string>
+  <string name="TEXT_TABLE_LABEL_pa">البنجابي</string>
+  <string name="TEXT_TABLE_LABEL_pi">البالي</string>
+  <string name="TEXT_TABLE_LABEL_pl">البولندية</string>
+  <string name="TEXT_TABLE_LABEL_pt">البرتغالية</string>
+  <string name="TEXT_TABLE_LABEL_ro">الرومانية</string>
+  <string name="TEXT_TABLE_LABEL_ru">الروسية</string>
+  <string name="TEXT_TABLE_LABEL_sa">السنسكريتية</string>
+  <string name="TEXT_TABLE_LABEL_sat">السنتالية</string>
+  <string name="TEXT_TABLE_LABEL_sd">السندية</string>
+  <string name="TEXT_TABLE_LABEL_se">السامي (الشمالية)</string>
+  <string name="TEXT_TABLE_LABEL_sk">السلوفاكية</string>
+  <string name="TEXT_TABLE_LABEL_sl">السلوفينية</string>
+  <string name="TEXT_TABLE_LABEL_sv">السويدية</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989">السويدية (معيار 1989)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996">السويدية (معيار 1996)</string>
+  <string name="TEXT_TABLE_LABEL_sw">السواحيلية</string>
+  <string name="TEXT_TABLE_LABEL_ta">التاميل</string>
+  <string name="TEXT_TABLE_LABEL_te">التيلجو</string>
+  <string name="TEXT_TABLE_LABEL_tr">التركية</string>
+  <string name="TEXT_TABLE_LABEL_uk">الأوكرانية</string>
+  <string name="TEXT_TABLE_LABEL_vi">الفيتنامية</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">عكس لون المقدمة في العمود الأيسر ولون الخلفية في العمود الأيمن</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">لون المقدمة في العمود الأيسر ولون الخلفية في العمود الأيمن</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">لون المقدمة في المربع العلوي ولون الخلفية في المربع السفلي</string>
+
+  <string name="CONTRACTION_TABLE_LABEL_auto">الاختيار التلقائي على أساس اللغة</string>
+  <string name="CONTRACTION_TABLE_LABEL_af">الأفريكانية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_am">الأمهرية (غير مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">الألمانية</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">الألمانية (غير مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">الألمانية (الاختصارات الأساسية)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">الألمانية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">الألمانية (مختصر  - وفقا لمعايير 1998)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">الألمانية (مختصر  - معيار 2015)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">الإنجليزية</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">الإنجليزية (الولايات المتحدة)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">الإنجليزية (الموحد، مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">الإنجليزية (الولايات المتحدة ، مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">الإسبانية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">الفرنسية</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">الفرنسية (غير مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">الفرنسية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha">الهوسا (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_id">الأندونيسية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa">الأبجدية الصوتية الدولية</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja">اليابانية (غير مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">الكورية</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">الكورية (غير مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1">الكورية (مختصر جزئيا)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2">الكورية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">الليتوانية (غير مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">المدغشقرية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun">الموندا (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">الهولندية مختصرمتعاقد)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">الشيشيوا (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt">البرتغالية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">الروسية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_si">السنهالية (غير مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw">السواحيلية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_th">التايلاندية (مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">الصينية (تايوان ، غير مختصر)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu">الزولو (مختصر)</string>
+
+  <string name="KEYBOARD_TABLE_LABEL_braille">روابط للوحات مفاتيح برايل</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">روابط للوحات المفاتيح الكاملة</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">ارتباطات للتنقل عبر اللوحة الرقمية</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">ارتباطات للوحات المفاتيح التي ليس بها لوحة رقمية</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">روابط للوحات مفاتيح Sun Type 6</string>
+</resources>
