@@ -34,7 +34,7 @@ mkBuild() {
    [ -n "${mkOldLogName}" ] || internalError "old log name not defined"
    [ -n "${mkNewLogName}" ] || internalError "new log name not defined"
 
-   logMessage task "Building for ${mkPlatformName}"
+   logMessage task "building for ${mkPlatformName}"
    local newLogFile="${mkNewLogName}.${mkLogFileExtension}"
    local oldLogFile="${mkLogsDirectory}/${mkOldLogName}.${mkLogFileExtension}"
 

@@ -50,6 +50,7 @@ try:
     scheme = sysconfig.get_default_scheme()
   else:
     scheme = sysconfig._get_default_scheme()
+
   if scheme == 'posix_local':
     # Debian's default scheme installs to /usr/local/ but we want to find headers in /usr/
     scheme = 'posix_prefix'
