@@ -20,7 +20,7 @@
 
 # ensure that space is defined
 ifNotGlyph \s
-  ifCell 0
+  ifDots 0
     glyph \s 0
   else
     char \s 0

@@ -148,14 +148,14 @@ resetTextTableDots (TextTableData *ttd, unsigned char dots, wchar_t character) {
   }
 }
 
-static void
+int
 setTextTableDots (TextTableData *ttd, wchar_t character, unsigned char dots) {
   TextTableHeader *header = getTextTableHeader(ttd);
+  if (BITMASK_TEST(header->dotsCharacterDefined, dots)) return 0;
 
-  if (!BITMASK_TEST(header->dotsCharacterDefined, dots)) {
-    header->dotsToCharacter[dots] = character;
-    BITMASK_SET(header->dotsCharacterDefined, dots);
-  }
+  header->dotsToCharacter[dots] = character;
+  BITMASK_SET(header->dotsCharacterDefined, dots);
+  return 1;
 }
 
 int

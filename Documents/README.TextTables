@@ -131,6 +131,23 @@ be entered from a braille keyboard.
 
 See `The Char Directive`_ for examples.
 
+The Dots Directive
+------------------
+
+.. parsed-literal:: dots *character* *dots* # *comment*
+
+Use this directive to specify how a Unicode character is to be typed on a
+braille keyboard. Characters defined via this directive are input-only - they won't
+be rendered on the braille display.
+
+*character*
+   |character operand|
+
+*dots*
+   |dots operand|
+
+See `The Char Directive`_ for examples.
+
 The Alias Directive
 -------------------
 
@@ -193,10 +210,10 @@ Examples::
 
    ifNotGlyph \s glyph \s 0
 
-The IfCell Directive
----------------------
+The IfDots Directive
+--------------------
 
-.. parsed-literal:: ifCell *cell* *directive*
+.. parsed-literal:: ifDots *cell* *directive*
 
 Use this directive to only process one or more directives if a character can be
 entered from a braille keyboard.
@@ -207,10 +224,10 @@ entered from a braille keyboard.
 *directive*
    |directive operand|
 
-The IfNotCell Directive
-------------------------
+The IfNotDots Directive
+-----------------------
 
-.. parsed-literal:: ifNotCell *cell* *directive*
+.. parsed-literal:: ifNotDots *cell* *directive*
 
 Use this directive to only process one or more directives if a character can't
 be entered from a braille keyboard.
