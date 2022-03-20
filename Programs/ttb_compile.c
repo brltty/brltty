@@ -172,10 +172,12 @@ setTextTableGlyph (TextTableData *ttd, wchar_t character, unsigned char dots) {
 int
 setTextTableInput (TextTableData *ttd, wchar_t character, unsigned char dots) {
   TextTableHeader *header = getTextTableHeader(ttd);
-  if (BITMASK_TEST(header->dotsCharacterDefined, dots)) return 0;
 
-  header->dotsToCharacter[dots] = character;
-  BITMASK_SET(header->dotsCharacterDefined, dots);
+  if (!BITMASK_TEST(header->dotsCharacterDefined, dots)) {
+    header->dotsToCharacter[dots] = character;
+    BITMASK_SET(header->dotsCharacterDefined, dots);
+  }
+
   return 1;
 }
 
