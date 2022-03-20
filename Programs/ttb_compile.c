@@ -149,16 +149,6 @@ resetTextTableDots (TextTableData *ttd, unsigned char dots, wchar_t character) {
 }
 
 int
-setTextTableInput (TextTableData *ttd, wchar_t character, unsigned char dots) {
-  TextTableHeader *header = getTextTableHeader(ttd);
-  if (BITMASK_TEST(header->dotsCharacterDefined, dots)) return 0;
-
-  header->dotsToCharacter[dots] = character;
-  BITMASK_SET(header->dotsCharacterDefined, dots);
-  return 1;
-}
-
-int
 setTextTableGlyph (TextTableData *ttd, wchar_t character, unsigned char dots) {
   UnicodeRowEntry *row = getUnicodeRowEntry(ttd, character, 1);
 
@@ -180,9 +170,19 @@ setTextTableGlyph (TextTableData *ttd, wchar_t character, unsigned char dots) {
 }
 
 int
+setTextTableInput (TextTableData *ttd, wchar_t character, unsigned char dots) {
+  TextTableHeader *header = getTextTableHeader(ttd);
+  if (BITMASK_TEST(header->dotsCharacterDefined, dots)) return 0;
+
+  header->dotsToCharacter[dots] = character;
+  BITMASK_SET(header->dotsCharacterDefined, dots);
+  return 1;
+}
+
+int
 setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
   if (!setTextTableGlyph(ttd, character, dots)) return 0;
-  setTextTableInput(ttd, character, dots);
+  if (!setTextTableInput(ttd, character, dots)) return 0;
   return 1;
 }
 

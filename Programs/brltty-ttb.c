@@ -364,30 +364,26 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const v
 
   {
     const TextTableHeader *header = getTextTableHeader(ttd);
-    unsigned int groupNumber;
 
-    for (groupNumber=0; groupNumber<UNICODE_GROUP_COUNT; groupNumber+=1) {
+    for (unsigned int groupNumber=0; groupNumber<UNICODE_GROUP_COUNT; groupNumber+=1) {
       TextTableOffset groupOffset = header->unicodeGroups[groupNumber];
 
       if (groupOffset) {
         const UnicodeGroupEntry *group = getTextTableItem(ttd, groupOffset);
-        unsigned int planeNumber;
 
-        for (planeNumber=0; planeNumber<UNICODE_PLANES_PER_GROUP; planeNumber+=1) {
+        for (unsigned int planeNumber=0; planeNumber<UNICODE_PLANES_PER_GROUP; planeNumber+=1) {
           TextTableOffset planeOffset = group->planes[planeNumber];
 
           if (planeOffset) {
             const UnicodePlaneEntry *plane = getTextTableItem(ttd, planeOffset);
-            unsigned int rowNumber;
 
-            for (rowNumber=0; rowNumber<UNICODE_ROWS_PER_PLANE; rowNumber+=1) {
+            for (unsigned int rowNumber=0; rowNumber<UNICODE_ROWS_PER_PLANE; rowNumber+=1) {
               TextTableOffset rowOffset = plane->rows[rowNumber];
 
               if (rowOffset) {
                 const UnicodeRowEntry *row = getTextTableItem(ttd, rowOffset);
-                unsigned int cellNumber;
 
-                for (cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
+                for (unsigned int cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
                   if (BITMASK_TEST(row->cellDefined, cellNumber)) {
                     wchar_t character = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, cellNumber);
 
