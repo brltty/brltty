@@ -206,7 +206,7 @@ static DATA_OPERANDS_PROCESSOR(processGlyphOperands) {
   return 1;
 }
 
-static DATA_OPERANDS_PROCESSOR(processDotsOperands) {
+static DATA_OPERANDS_PROCESSOR(processInputOperands) {
   TextTableData *ttd = data;
   wchar_t character;
 
@@ -214,7 +214,7 @@ static DATA_OPERANDS_PROCESSOR(processDotsOperands) {
     unsigned char dots;
 
     if (getDotsOperand(file, &dots)) {
-      if (!setTextTableDots(ttd, character, dots)) return 0;
+      if (!setTextTableInput(ttd, character, dots)) return 0;
     }
   }
 
@@ -247,9 +247,9 @@ static DATA_OPERANDS_PROCESSOR(processIfNotGlyphOperands) {
   return processGlyphTestOperands(file, 1, data);
 }
 
-static const char dotsDescription[] = "dot number(s)";
+static const char inputDescription[] = "dot number(s)";
 
-static DATA_CONDITION_TESTER(testDotsDefined) {
+static DATA_CONDITION_TESTER(testInputDefined) {
   TextTableData *ttd = data;
 
   ByteOperand cells;
@@ -257,7 +257,7 @@ static DATA_CONDITION_TESTER(testDotsDefined) {
 
   if (cells.length != 1) {
     reportDataError(file, "not a single %s: %.*" PRIws,
-                    dotsDescription, identifier->length, identifier->characters);
+                    inputDescription, identifier->length, identifier->characters);
 
     return 0;
   }
@@ -267,16 +267,16 @@ static DATA_CONDITION_TESTER(testDotsDefined) {
 }
 
 static int
-processDotsTestOperands (DataFile *file, int not, void *data) {
-  return processConditionOperands(file, testDotsDefined, not, dotsDescription, data);
+processInputTestOperands (DataFile *file, int not, void *data) {
+  return processConditionOperands(file, testInputDefined, not, inputDescription, data);
 }
 
-static DATA_OPERANDS_PROCESSOR(processIfDotsOperands) {
-  return processDotsTestOperands(file, 0, data);
+static DATA_OPERANDS_PROCESSOR(processIfInputOperands) {
+  return processInputTestOperands(file, 0, data);
 }
 
-static DATA_OPERANDS_PROCESSOR(processIfNotDotsOperands) {
-  return processDotsTestOperands(file, 1, data);
+static DATA_OPERANDS_PROCESSOR(processIfNotInputOperands) {
+  return processInputTestOperands(file, 1, data);
 }
 
 static DATA_OPERANDS_PROCESSOR(processNativeTextTableOperands) {
@@ -288,11 +288,11 @@ static DATA_OPERANDS_PROCESSOR(processNativeTextTableOperands) {
     {.name=WS_C("byte"), .processor=processByteOperands},
     {.name=WS_C("char"), .processor=processCharOperands},
     {.name=WS_C("glyph"), .processor=processGlyphOperands},
-    {.name=WS_C("dots"), .processor=processDotsOperands},
+    {.name=WS_C("input"), .processor=processInputOperands},
     {.name=WS_C("ifglyph"), .processor=processIfGlyphOperands, .unconditional=1},
     {.name=WS_C("ifnotglyph"), .processor=processIfNotGlyphOperands, .unconditional=1},
-    {.name=WS_C("ifdots"), .processor=processIfDotsOperands, .unconditional=1},
-    {.name=WS_C("ifnotdots"), .processor=processIfNotDotsOperands, .unconditional=1},
+    {.name=WS_C("ifinput"), .processor=processIfInputOperands, .unconditional=1},
+    {.name=WS_C("ifnotinput"), .processor=processIfNotInputOperands, .unconditional=1},
   END_DATA_DIRECTIVE_TABLE
 
   return processDirectiveOperand(file, &directives, "text table directive", data);

@@ -149,7 +149,7 @@ resetTextTableDots (TextTableData *ttd, unsigned char dots, wchar_t character) {
 }
 
 int
-setTextTableDots (TextTableData *ttd, wchar_t character, unsigned char dots) {
+setTextTableInput (TextTableData *ttd, wchar_t character, unsigned char dots) {
   TextTableHeader *header = getTextTableHeader(ttd);
   if (BITMASK_TEST(header->dotsCharacterDefined, dots)) return 0;
 
@@ -182,7 +182,7 @@ setTextTableGlyph (TextTableData *ttd, wchar_t character, unsigned char dots) {
 int
 setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
   if (!setTextTableGlyph(ttd, character, dots)) return 0;
-  setTextTableDots(ttd, character, dots);
+  setTextTableInput(ttd, character, dots);
   return 1;
 }
 

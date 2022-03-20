@@ -105,34 +105,39 @@ char \u201D	( 23 56  )  #    ⠶ ” [RIGHT DOUBLE QUOTATION MARK]
 char \u201E	( 23 56  )  #    ⠶ „ [DOUBLE LOW-9 QUOTATION MARK]
 char \u201F	( 23 56  )  #    ⠶ ‟ [DOUBLE HIGH-REVERSED-9 QUOTATION MARK]
 
+# The English letters must be defined after the Arabic ones so that
+# typing on a braille keyboard will yield the Arabic ones.
 include ltr-latin.tti
+
+# The English digits are their corresponding letters with dot 8 added.
 include num-dot8.tti
 
-dots \x61	(1     78)  # ⢁ a [LATIN SMALL LETTER A]
-dots \x62	(12    78)  # ⢃ b [LATIN SMALL LETTER B]
-dots \x63	(1  4  78)  # ⢉ c [LATIN SMALL LETTER C]
-dots \x64	(1  45 78)  # ⢙ d [LATIN SMALL LETTER D]
-dots \x65	(1   5 78)  # ⢑ e [LATIN SMALL LETTER E]
-dots \x66	(12 4  78)  # ⢋ f [LATIN SMALL LETTER F]
-dots \x67	(12 45 78)  # ⢛ g [LATIN SMALL LETTER G]
-dots \x68	(12  5 78)  # ⢓ h [LATIN SMALL LETTER H]
-dots \x69	( 2 4  78)  # ⢊ i [LATIN SMALL LETTER I]
-dots \x6A	( 2 45 78)  # ⢚ j [LATIN SMALL LETTER J]
-dots \x6B	(1 3   78)  # ⢅ k [LATIN SMALL LETTER K]
-dots \x6C	(123   78)  # ⢇ l [LATIN SMALL LETTER L]
-dots \x6D	(1 34  78)  # ⢍ m [LATIN SMALL LETTER M]
-dots \x6E	(1 345 78)  # ⢝ n [LATIN SMALL LETTER N]
-dots \x6F	(1 3 5 78)  # ⢕ o [LATIN SMALL LETTER O]
-dots \x70	(1234  78)  # ⢏ p [LATIN SMALL LETTER P]
-dots \x71	(12345 78)  # ⢟ q [LATIN SMALL LETTER Q]
-dots \x72	(123 5 78)  # ⢗ r [LATIN SMALL LETTER R]
-dots \x73	( 234  78)  # ⢎ s [LATIN SMALL LETTER S]
-dots \x74	( 2345 78)  # ⢞ t [LATIN SMALL LETTER T]
-dots \x75	(1 3  678)  # ⢥ u [LATIN SMALL LETTER U]
-dots \x76	(123  678)  # ⢧ v [LATIN SMALL LETTER V]
-dots \x77	( 2 45678)  # ⢺ w [LATIN SMALL LETTER W]
-dots \x78	(1 34 678)  # ⢭ x [LATIN SMALL LETTER X]
-dots \x79	(1 345678)  # ⢽ y [LATIN SMALL LETTER Y]
-dots \x7A	(1 3 5678)  # ⢵ z [LATIN SMALL LETTER Z]
+# English letters can be typed by adding both dots 7 and 8.
+input	a	(1     78)
+input	b	(12    78)
+input	c	(1  4  78)
+input	d	(1  45 78)
+input	e	(1   5 78)
+input	f	(12 4  78)
+input	g	(12 45 78)
+input	h	(12  5 78)
+input	i	( 2 4  78)
+input	j	( 2 45 78)
+input	k	(1 3   78)
+input	l	(123   78)
+input	m	(1 34  78)
+input	n	(1 345 78)
+input	o	(1 3 5 78)
+input	p	(1234  78)
+input	q	(12345 78)
+input	r	(123 5 78)
+input	s	( 234  78)
+input	t	( 2345 78)
+input	u	(1 3  678)
+input	v	(123  678)
+input	w	( 2 45678)
+input	x	(1 34 678)
+input	y	(1 345678)
+input	z	(1 3 5678)
 
 include common.tti
