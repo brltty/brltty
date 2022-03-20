@@ -19,13 +19,8 @@
 # This BRLTTY text subtable defines several useful character aliases
 
 # ensure that space is defined
-ifNotGlyph \s
-  ifInput 0
-    glyph \s 0
-  else
-    char \s 0
-  endIf
-endIf
+ifNotGlyph \s  glyph \s 0
+ifNotInput 0  input \s 0
 
 # characters that represent a space
 alias	\xA0	\s	# no-break space
