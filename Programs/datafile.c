@@ -345,6 +345,11 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
             ok = 1;
             break;
 
+          case WC_C('R'):
+            character = UNICODE_REPLACEMENT_CHARACTER;
+            ok = 1;
+            break;
+
           case WC_C('s'):
             character = WC_C(' ');
             ok = 1;

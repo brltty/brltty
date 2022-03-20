@@ -16,6 +16,7 @@ A *string* operand may be specified as a non-whitespace sequence of:
    ``\n``           The newline character.
    ``\o###``        The three-digit octal representation of a character.
    ``\r``           The carriage return character.
+   ``\R``           The Unicode replacement character.
    ``\s``           The space character.
    ``\t``           The horizontal tab character.
    ``\u####``       The four-digit hexadecimal representation of a character.
