@@ -17,13 +17,10 @@
 ###############################################################################
 
 # BRLTTY Text Table - Arabic (generic)
-
-# Maintained by John J. Boyer, director@chpi.org, www.chpi.org
 #
-# This table is built and maintained by Leon Ungier <Leon.Ungier@ViewPlus.com>
-# with help and guidance from Mohammed R. Ramadan <mramadan@nattiq.com>
-#
-# Converted from liblouis table by Samuel Thibault <samuel.thibault@ens-lyon.org>
+# This text table was converted from LibLouis's ar-ar-comp8 table.
+# Maintainer: Dave Mielke <Dave@Mielke.cc>
+# Advisor: Ikrami Ahmad <Ikrami@blind.gov.qa>
 
 char	\x21	( 23 5   )	# ⠖ ! [EXCLAMATION MARK]
 char	\x22	( 23 56  )	# ⠶ " [QUOTATION MARK]
