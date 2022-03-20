@@ -43,8 +43,8 @@ extern void *getTextTableItem (TextTableData *ttd, TextTableOffset offset);
 extern TextTableHeader *getTextTableHeader (TextTableData *ttd);
 extern const unsigned char *getUnicodeCell (TextTableData *ttd, wchar_t character);
 
-extern int setTextTableGlyph (TextTableData *ttd, wchar_t character, unsigned char dots);
 extern int setTextTableInput (TextTableData *ttd, wchar_t character, unsigned char dots);
+extern int setTextTableGlyph (TextTableData *ttd, wchar_t character, unsigned char dots);
 extern int setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots);
 extern void unsetTextTableCharacter (TextTableData *ttd, wchar_t character);
 extern int setTextTableByte (TextTableData *ttd, unsigned char byte, unsigned char dots);

@@ -263,7 +263,7 @@ static DATA_CONDITION_TESTER(testInputDefined) {
   }
 
   const TextTableHeader *header = getTextTableHeader(ttd);
-  return !!BITMASK_TEST(header->dotsCharacterDefined, cells.bytes[0]);
+  return !!BITMASK_TEST(header->inputCharacterDefined, cells.bytes[0]);
 }
 
 static int

@@ -243,7 +243,7 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
 wchar_t
 convertDotsToCharacter (TextTable *table, unsigned char dots) {
   const TextTableHeader *header = table->header.fields;
-  if (BITMASK_TEST(header->dotsCharacterDefined, dots)) return header->dotsToCharacter[dots];
+  if (BITMASK_TEST(header->inputCharacterDefined, dots)) return header->inputCharacters[dots];
   return UNICODE_REPLACEMENT_CHARACTER;
 }
 

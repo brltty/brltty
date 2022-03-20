@@ -54,8 +54,8 @@ typedef struct {
 
 typedef struct {
   TextTableOffset unicodeGroups[UNICODE_GROUP_COUNT];
-  wchar_t dotsToCharacter[0X100];
-  BITMASK(dotsCharacterDefined, 0X100, char);
+  wchar_t inputCharacters[0X100];
+  BITMASK(inputCharacterDefined, 0X100, char);
   DataOffset aliasArray;
   uint32_t aliasCount;
 } TextTableHeader;

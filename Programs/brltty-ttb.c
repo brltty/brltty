@@ -317,9 +317,11 @@ static int
 isPrimaryCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
   const TextTableHeader *header = getTextTableHeader(ttd);
 
-  if (BITMASK_TEST(header->dotsCharacterDefined, dots))
-    if (header->dotsToCharacter[dots] == character)
+  if (BITMASK_TEST(header->inputCharacterDefined, dots)) {
+    if (header->inputCharacters[dots] == character) {
       return 1;
+    }
+  }
 
   return 0;
 }
