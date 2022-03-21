@@ -205,8 +205,7 @@ static unsigned char
 mapDots (unsigned char input, const BrlDotTable from, const BrlDotTable to) {
   unsigned char output = 0;
   {
-    int dot;
-    for (dot=0; dot<BRL_DOT_COUNT; ++dot) {
+    for (int dot=0; dot<BRL_DOT_COUNT; dot+=1) {
       if (input & from[dot]) output |= to[dot];
     }
   }
@@ -215,7 +214,7 @@ mapDots (unsigned char input, const BrlDotTable from, const BrlDotTable to) {
 
 typedef TextTableData *TableReader (const char *path, FILE *file, const void *data);
 typedef int TableWriter (const char *path, FILE *file, TextTableData *ttd, const void *data);
-typedef int CharacterWriter (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, int isPrimary, const void *data);
+typedef int CharacterWriter (FILE *file, const char *directive, wchar_t character, unsigned char dots);
 typedef int AliasWriter (FILE *file, const TextTableAliasEntry *alias, const void *data);
 
 static int
@@ -314,19 +313,6 @@ writeHeaderComment (FILE *file, CommentWriter *writeComment) {
 }
 
 static int
-isPrimaryCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
-  const TextTableHeader *header = getTextTableHeader(ttd);
-
-  if (BITMASK_TEST(header->inputCharacterDefined, dots)) {
-    if (header->inputCharacters[dots] == character) {
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-static int
 writeCharacterDescription (FILE *file, wchar_t character) {
   if (!writeString(file, " ")) return 0;
   if (!writeUtf8Character(file, ((iswprint(character) && !iswspace(character))? character: WC_C(' ')))) return 0;
@@ -344,62 +330,143 @@ writeCharacterDescription (FILE *file, wchar_t character) {
   return 1;
 }
 
+typedef struct {
+  wchar_t character;
+  unsigned char dots;
+} InputCharacterEntry;
+
 static int
-writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const void *data) {
-  if (*opt_charset) {
-    unsigned char byte = 0;
+compareInputCharacterEntries (const InputCharacterEntry *entry1, const InputCharacterEntry *entry2) {
+  if (entry1->character < entry2->character) return -1;
+  if (entry1->character > entry2->character) return 1;
+  return 0;
+}
 
-    do {
-      wint_t character = convertCharToWchar(byte);
+static int
+sortInputCharacterEntries (const void *entry1, const void *entry2) {
+  return compareInputCharacterEntries(entry1, entry2);
+}
 
-      if (character != WEOF) {
-        const unsigned char *cell = getUnicodeCell(ttd, character);
+typedef struct {
+  const char *in;
+  const char *out;
+  const char *inOut;
+} WriteCharacterDirectives;
 
-        if (cell) {
-          int isPrimary = isPrimaryCharacter(ttd, character, *cell);
+#define WRITE_CHARACTER_DIRECTIVES(...) &(const WriteCharacterDirectives){__VA_ARGS__}
+#define WRITE_CHARACTERS_IN_ONLY WRITE_CHARACTER_DIRECTIVES(.in="")
+#define WRITE_CHARACTERS_OUT_ONLY WRITE_CHARACTER_DIRECTIVES(.out="")
+#define WRITE_CHARACTERS_NATIVE WRITE_CHARACTER_DIRECTIVES(.in="input", .out="glyph", .inOut="char")
+#define WRITE_CHARACTERS_LIBLOUIS WRITE_CHARACTER_DIRECTIVES(.in="nofor", .out="noback", .inOut="")
 
-          if (!writer(file, character, *cell, &byte, isPrimary, data)) return 0;
-        }
+static int
+writeInputCharacters (
+  FILE *file, const wchar_t *character,
+  const InputCharacterEntry **entry,
+  const InputCharacterEntry *const *end,
+  CharacterWriter *writer, const char *directive
+) {
+  while (*entry < *end) {
+    if (character) {
+      if ((*entry)->character >= *character) {
+        break;
       }
-    } while ((byte += 1));
+    }
+
+    if (directive) {
+      if (!writer(file, directive, (*entry)->character, (*entry)->dots)) {
+        return 0;
+      }
+    }
+
+    *entry += 1;
   }
 
-  {
-    const TextTableHeader *header = getTextTableHeader(ttd);
+  return 1;
+}
 
-    for (unsigned int groupNumber=0; groupNumber<UNICODE_GROUP_COUNT; groupNumber+=1) {
-      TextTableOffset groupOffset = header->unicodeGroups[groupNumber];
+static int
+writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const void *data) {
+  const WriteCharacterDirectives *directives = data;
+  const TextTableHeader *header = getTextTableHeader(ttd);
 
-      if (groupOffset) {
-        const UnicodeGroupEntry *group = getTextTableItem(ttd, groupOffset);
+  InputCharacterEntry inputCharactersBuffer[0X100];
+  unsigned int inputCharacterCount = 0;
 
-        for (unsigned int planeNumber=0; planeNumber<UNICODE_PLANES_PER_GROUP; planeNumber+=1) {
-          TextTableOffset planeOffset = group->planes[planeNumber];
+  for (unsigned int dots=0; dots<0X100; dots+=1) {
+    if (BITMASK_TEST(header->inputCharacterDefined, dots)) {
+      InputCharacterEntry *entry = &inputCharactersBuffer[inputCharacterCount++];
+      entry->character = header->inputCharacters[dots];
+      entry->dots = dots;
+    }
+  }
 
-          if (planeOffset) {
-            const UnicodePlaneEntry *plane = getTextTableItem(ttd, planeOffset);
+  qsort(
+    inputCharactersBuffer, inputCharacterCount,
+    sizeof(inputCharactersBuffer[0]),
+    sortInputCharacterEntries
+  );
 
-            for (unsigned int rowNumber=0; rowNumber<UNICODE_ROWS_PER_PLANE; rowNumber+=1) {
-              TextTableOffset rowOffset = plane->rows[rowNumber];
+  const InputCharacterEntry *inputCharacterEntry = inputCharactersBuffer;
+  const InputCharacterEntry *const inputCharacterEnd = inputCharacterEntry + inputCharacterCount;
 
-              if (rowOffset) {
-                const UnicodeRowEntry *row = getTextTableItem(ttd, rowOffset);
+  for (unsigned int groupNumber=0; groupNumber<UNICODE_GROUP_COUNT; groupNumber+=1) {
+    TextTableOffset groupOffset = header->unicodeGroups[groupNumber];
 
-                for (unsigned int cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
-                  if (BITMASK_TEST(row->cellDefined, cellNumber)) {
-                    wchar_t character = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, cellNumber);
+    if (groupOffset) {
+      const UnicodeGroupEntry *group = getTextTableItem(ttd, groupOffset);
 
-                    if (*opt_charset) {
-                      if (convertWcharToChar(character) != EOF) {
-                        continue;
+      for (unsigned int planeNumber=0; planeNumber<UNICODE_PLANES_PER_GROUP; planeNumber+=1) {
+        TextTableOffset planeOffset = group->planes[planeNumber];
+
+        if (planeOffset) {
+          const UnicodePlaneEntry *plane = getTextTableItem(ttd, planeOffset);
+
+          for (unsigned int rowNumber=0; rowNumber<UNICODE_ROWS_PER_PLANE; rowNumber+=1) {
+            TextTableOffset rowOffset = plane->rows[rowNumber];
+
+            if (rowOffset) {
+              const UnicodeRowEntry *row = getTextTableItem(ttd, rowOffset);
+
+              for (unsigned int cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
+                if (BITMASK_TEST(row->cellDefined, cellNumber)) {
+                  wchar_t character = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, cellNumber);
+                  unsigned char dots = row->cells[cellNumber];
+
+                  {
+                    int ok = writeInputCharacters(
+                      file, &character,
+                      &inputCharacterEntry, &inputCharacterEnd,
+                      writer, directives->in
+                    );
+
+                    if (!ok) return 0;
+                  }
+
+                  if (inputCharacterEntry < inputCharacterEnd) {
+                    if (character == inputCharacterEntry->character) {
+                      if (dots == inputCharacterEntry->dots) {
+                        const char *directive = directives->inOut;
+
+                        if (directive) {
+                          if (!writer(file, directive, character, dots)) {
+                            return 0;
+                          }
+
+                          inputCharacterEntry += 1;
+                          continue;
+                        }
                       }
                     }
+                  }
 
-                    {
-                      const unsigned char *cell = &row->cells[cellNumber];
-                      int isPrimary = isPrimaryCharacter(ttd, character, *cell);
+                  {
+                    const char *directive = directives->out;
 
-                      if (!writer(file, character, *cell, NULL, isPrimary, data)) return 0;
+                    if (directive) {
+                      if (!writer(file, directive, character, dots)) {
+                        return 0;
+                      }
                     }
                   }
                 }
@@ -411,7 +478,11 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, const v
     }
   }
 
-  return 1;
+  return writeInputCharacters(
+    file, NULL,
+    &inputCharacterEntry, &inputCharacterEnd,
+    writer, directives->in
+  );
 }
 
 static int
@@ -435,47 +506,34 @@ readTable_native (const char *path, FILE *file, const void *data) {
 
 static int
 writeDots_native (FILE *file, unsigned char dots) {
-  unsigned char dot;
-
   if (fprintf(file, "(") == EOF) return 0;
-  for (dot=0X01; dot; dot<<=1) {
+
+  for (unsigned char dot=0X01; dot; dot<<=1) {
     char number = (dots & dot)? brlDotToNumber(dot): ' ';
     if (fprintf(file, "%c", number) == EOF) return 0;
   }
-  if (fprintf(file, ")") == EOF) return 0;
 
+  if (fprintf(file, ")") == EOF) return 0;
   return 1;
 }
 
 static int
 writeCharacter_native (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
-  if (fprintf(file, "%s\t", (isPrimary? "char": "glyph")) == EOF) return 0;
+  if (fprintf(file, "%s\t", directive) == EOF) return 0;
   if (!writeHexadecimalCharacter(file, character)) return 0;
   if (fprintf(file, "\t") == EOF) return 0;
   if (!writeDots_native(file, dots)) return 0;
   if (fprintf(file, "\t#") == EOF) return 0;
-
-  if (*opt_charset) {
-    const int width = 2;
-    char buffer[width + 1];
-
-    if (byte) {
-      snprintf(buffer, sizeof(buffer), "%0*X", width, *byte);
-    } else {
-      snprintf(buffer, sizeof(buffer), "%*s", width, "");
-    }
-
-    if (fprintf(file, " %s", buffer) == EOF) return 0;
-  }
 
   if (fprintf(file, " ") == EOF) return 0;
   if (!writeUtf8Cell(file, dots)) return 0;
 
   if (!writeCharacterDescription(file, character)) return 0;
   if (fprintf(file, "\n") == EOF) return 0;
+
   return 1;
 }
 
@@ -525,8 +583,8 @@ readTable_binary (const char *path, FILE *file, const void *data) {
       if (data) dots = mapDots(dots, data, dotsInternal);
       if (!setTextTableByte(ttd, byte, dots)) break;
     }
-    if (byte == count) return ttd;
 
+    if (byte == count) return ttd;
     destroyTextTableData(ttd);
   }
 
@@ -537,17 +595,16 @@ static int
 writeTable_binary (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
-  int byte;
-
-  for (byte=0; byte<0X100; byte+=1) {
+  for (unsigned int byte=0; byte<0X100; byte+=1) {
     unsigned char dots;
 
     {
       wint_t character = convertCharToWchar(byte);
       if (character == WEOF) character = UNICODE_REPLACEMENT_CHARACTER;
 
-      if (!getDots(ttd, character, &dots))
+      if (!getDots(ttd, character, &dots)) {
         dots = 0;
+      }
     }
 
     if (data) dots = mapDots(dots, dotsInternal, data);
@@ -568,8 +625,8 @@ readTable_gnome (const char *path, FILE *file, const void *data) {
 
 static int
 writeCharacter_gnome (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
   wchar_t pattern = UNICODE_BRAILLE_ROW | dots;
 
@@ -594,13 +651,10 @@ writeTable_gnome (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
   /* TODO UNKNOWN-CHAR %wc all */
-  if (fprintf(file, "ENCODING UTF-8\n") == EOF) goto error;
-  if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_gnome, data)) goto error;
+  if (fprintf(file, "ENCODING UTF-8\n") == EOF) return 0;
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_gnome, data)) return 0;
   return 1;
-
-error:
-  return 0;
 }
 #endif /* HAVE_ICONV_H */
 
@@ -611,9 +665,15 @@ readTable_libLouis (const char *path, FILE *file, const void *data) {
 
 static int
 writeCharacter_libLouis (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
+  if (*directive) {
+    if (fprintf(file, "%s ", directive) == EOF) {
+      return 0;
+    }
+  }
+
   {
     const char *type;
 
@@ -686,12 +746,9 @@ static int
 writeTable_libLouis (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
-  if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_libLouis, data)) goto error;
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_libLouis, data)) return 0;
   return 1;
-
-error:
-  return 0;
 }
 
 static int
@@ -738,16 +795,13 @@ writeCharacterOutput_XCompose (FILE *file, wchar_t character) {
 
 static int
 writeCharacter_XCompose (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *_data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
-  if (isPrimary) {
-    if (!writeCharacterDots_XCompose (file, dots)) return 0;
-    if (fprintf(file, " : \"") == EOF) return 0;
-    if (!writeCharacterOutput_XCompose(file, character)) return 0;
-    if (fprintf(file, "\"\n") == EOF) return 0;
-  }
-
+  if (!writeCharacterDots_XCompose (file, dots)) return 0;
+  if (fprintf(file, " : \"") == EOF) return 0;
+  if (!writeCharacterOutput_XCompose(file, character)) return 0;
+  if (fprintf(file, "\"\n") == EOF) return 0;
   return 1;
 }
 
@@ -755,12 +809,9 @@ static int
 writeTable_XCompose (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
-  if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_XCompose, NULL)) goto error;
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_XCompose, data)) return 0;
   return 1;
-
-error:
-  return 0;
 }
 
 static int
@@ -779,22 +830,23 @@ writeCharacter_half_XCompose (
 
 static int
 writeCharacter_leftrighthalf_XCompose (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *_data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
-  if (isPrimary) {
-    unsigned char leftDots = brlGetLeftDots(dots);
-    unsigned char rightDots = brlGetRightDots(dots);
+  unsigned char leftDots = brlGetLeftDots(dots);
+  unsigned char rightDots = brlGetRightDots(dots);
 
-    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
-    if (!leftDots)
-    {
-      /* Also add shortcut without blank pattern for left part.  */
-      if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
-      if (fprintf(file, " : \"") == EOF) return 0;
-      if (!writeCharacterOutput_XCompose(file, character)) return 0;
-      if (fprintf(file, "\"\n") == EOF) return 0;
-    }
+  if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) {
+    return 0;
+  }
+
+  if (!leftDots) {
+    /* Also add shortcut without blank pattern for left part.  */
+
+    if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
+    if (fprintf(file, " : \"") == EOF) return 0;
+    if (!writeCharacterOutput_XCompose(file, character)) return 0;
+    if (fprintf(file, "\"\n") == EOF) return 0;
   }
 
   return 1;
@@ -804,126 +856,95 @@ static int
 writeTable_leftrighthalf_XCompose (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
-  if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_leftrighthalf_XCompose, NULL)) goto error;
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_leftrighthalf_XCompose, data)) return 0;
   return 1;
-
-error:
-  return 0;
 }
 
 static int
 writeCharacter_lefthalf_XCompose (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *_data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
-  if (isPrimary) {
-    unsigned char leftDots = brlGetLeftDots(dots);
-    unsigned char rightDots = brlGetRightDotsToLeftDots(dots);
+  unsigned char leftDots = brlGetLeftDots(dots);
+  unsigned char rightDots = brlGetRightDotsToLeftDots(dots);
 
-    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
-  }
-
-  return 1;
+  return writeCharacter_half_XCompose(file, character, leftDots, rightDots);
 }
 
 static int
 writeTable_lefthalf_XCompose (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
-  if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_lefthalf_XCompose, NULL)) goto error;
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_lefthalf_XCompose, data)) return 0;
   return 1;
-
-error:
-  return 0;
 }
 
 static int
 writeCharacter_lefthalfalt_XCompose (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *_data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
-  if (isPrimary) {
-    unsigned char leftDots = brlGetLeftDots(dots);
-    unsigned char rightDots = brlGetRightDotsToLeftDotsAlt(dots);
+  unsigned char leftDots = brlGetLeftDots(dots);
+  unsigned char rightDots = brlGetRightDotsToLeftDotsAlt(dots);
 
-    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
-  }
-
-  return 1;
+  return writeCharacter_half_XCompose(file, character, leftDots, rightDots);
 }
 
 static int
 writeTable_lefthalfalt_XCompose (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
-  if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_lefthalfalt_XCompose, NULL)) goto error;
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_lefthalfalt_XCompose, data)) return 0;
   return 1;
-
-error:
-  return 0;
 }
 
 static int
 writeCharacter_righthalf_XCompose (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *_data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
-  if (isPrimary) {
-    unsigned char leftDots = brlGetLeftDotsToRightDots(dots);
-    unsigned char rightDots = brlGetRightDots(dots);
+  unsigned char leftDots = brlGetLeftDotsToRightDots(dots);
+  unsigned char rightDots = brlGetRightDots(dots);
 
-    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
-  }
-
-  return 1;
+  return writeCharacter_half_XCompose(file, character, leftDots, rightDots);
 }
 
 static int
 writeTable_righthalf_XCompose (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
-  if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_righthalf_XCompose, NULL)) goto error;
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_righthalf_XCompose, data)) return 0;
   return 1;
-
-error:
-  return 0;
 }
 
 static int
 writeCharacter_righthalfalt_XCompose (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *_data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
-  if (isPrimary) {
-    unsigned char leftDots = brlGetLeftDotsToRightDotsAlt(dots);
-    unsigned char rightDots = brlGetRightDots(dots);
+  unsigned char leftDots = brlGetLeftDotsToRightDotsAlt(dots);
+  unsigned char rightDots = brlGetRightDots(dots);
 
-    if (!writeCharacter_half_XCompose(file, character, leftDots, rightDots)) return 0;
-  }
-
-  return 1;
+  return writeCharacter_half_XCompose(file, character, leftDots, rightDots);
 }
 
 static int
 writeTable_righthalfalt_XCompose (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
-  if (!writeHeaderComment(file, writeHashComment)) goto error;
-  if (!writeCharacters(file, ttd, writeCharacter_righthalfalt_XCompose, NULL)) goto error;
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_righthalfalt_XCompose, data)) return 0;
   return 1;
-
-error:
-  return 0;
 }
 
 static int
 writeCharacter_JAWS (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
   uint32_t value = character;
 
@@ -938,7 +959,7 @@ writeTable_JAWS (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
   if (!writeHeaderComment(file, writeSemicolonComment)) return 0;
-  if (!writeCharacters(file, ttd, writeCharacter_JAWS, NULL)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_JAWS, data)) return 0;
   return 1;
 }
 
@@ -966,8 +987,8 @@ writeCharacterName_CPreprocessor (FILE *file, wchar_t character) {
 
 static int
 writeCharacter_CPreprocessor (
-  FILE *file, wchar_t character, unsigned char dots,
-  const unsigned char *byte, int isPrimary, const void *data
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
 ) {
   if (!beginCMacro(file, "BRLTTY_TEXT_TABLE_CHARACTER")) return 0;
   if (!writeCharacterValue_CPreprocessor(file, character)) return 0;
@@ -976,7 +997,7 @@ writeCharacter_CPreprocessor (
   if (fprintf(file, "0X%02" PRIX8, dots) == EOF) return 0;
 
   if (!nextCArgument(file)) return 0;
-  if (fprintf(file, "%d", isPrimary) == EOF) return 0;
+  if (fprintf(file, "%s", directive) == EOF) return 0;
 
   if (!nextCArgument(file)) return 0;
   if (!writeCharacterName_CPreprocessor(file, character)) return 0;
@@ -1010,7 +1031,7 @@ writeTable_CPreprocessor (
   if (!endLine(file)) return 0;
 
   if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS", "")) return 0;
-  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_CHARACTER", "(unicode, braille, isPrimary, name)")) return 0;
+  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_CHARACTER", "(unicode, braille, canInput, name)")) return 0;
   if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_END_CHARACTERS", "")) return 0;
 
   if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_ALIASES", "")) return 0;
@@ -1020,7 +1041,7 @@ writeTable_CPreprocessor (
   if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_NO_NAME", "(character)")) return 0;
 
   if (fprintf(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS\n") == EOF) return 0;
-  if (!writeCharacters(file, ttd, writeCharacter_CPreprocessor, NULL)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_CPreprocessor, data)) return 0;
   if (fprintf(file, "BRLTTY_TEXT_TABLE_END_CHARACTERS\n") == EOF) return 0;
   if (!endLine(file)) return 0;
 
@@ -1043,6 +1064,7 @@ static const FormatEntry formatEntries[] = {
   { .name = "ttb",
     .read = readTable_native,
     .write = writeTable_native,
+    .data = WRITE_CHARACTERS_NATIVE,
   },
 
   { .name = "a2b",
@@ -1061,49 +1083,60 @@ static const FormatEntry formatEntries[] = {
   { .name = "gnb",
     .read = readTable_gnome,
     .write = writeTable_gnome,
+    .data = WRITE_CHARACTERS_IN_ONLY,
   },
 #endif /* HAVE_ICONV_H */
 
   { .name = "ctb",
     .read = readTable_libLouis,
     .write = writeTable_libLouis,
+    .data = WRITE_CHARACTERS_LIBLOUIS,
   },
 
   { .name = "utb",
     .read = readTable_libLouis,
     .write = writeTable_libLouis,
+    .data = WRITE_CHARACTERS_LIBLOUIS,
   },
 
   { .name = "XCompose",
     .write = writeTable_XCompose,
+    .data = WRITE_CHARACTERS_IN_ONLY,
   },
 
   { .name = "half-XCompose",
     .write = writeTable_leftrighthalf_XCompose,
+    .data = WRITE_CHARACTERS_IN_ONLY,
   },
 
   { .name = "lefthalf-XCompose",
     .write = writeTable_lefthalf_XCompose,
+    .data = WRITE_CHARACTERS_IN_ONLY,
   },
 
   { .name = "lefthalfalt-XCompose",
     .write = writeTable_lefthalfalt_XCompose,
+    .data = WRITE_CHARACTERS_IN_ONLY,
   },
 
   { .name = "righthalf-XCompose",
     .write = writeTable_righthalf_XCompose,
+    .data = WRITE_CHARACTERS_IN_ONLY,
   },
 
   { .name = "righthalfalt-XCompose",
     .write = writeTable_righthalfalt_XCompose,
+    .data = WRITE_CHARACTERS_IN_ONLY,
   },
 
   { .name = "jbt",
     .write = writeTable_JAWS,
+    .data = WRITE_CHARACTERS_OUT_ONLY,
   },
 
   { .name = "cpp",
     .write = writeTable_CPreprocessor,
+    .data = WRITE_CHARACTER_DIRECTIVES(.out="0", .inOut="1"),
   },
 
   { .name = NULL }
@@ -1411,9 +1444,7 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
   {
     wchar_t *description = calloc(descriptionLength+1, sizeof(*description));
     if (description) {
-      unsigned int i;
-
-      for (i=0; i<descriptionLength; i+=1) {
+      for (unsigned int i=0; i<descriptionLength; i+=1) {
         wint_t wc = convertCharToWchar(buffer[i]);
         if (wc == WEOF) wc = WC_C(' ');
         description[i] = wc;
@@ -2378,8 +2409,7 @@ editTable (void) {
       newAttributes.c_cflag |= CS8;
 
       {
-        int i;
-        for (i=0; i<NCCS; i+=1) newAttributes.c_cc[i] = _POSIX_VDISABLE;
+        for (int i=0; i<NCCS; i+=1) newAttributes.c_cc[i] = _POSIX_VDISABLE;
       }
 
       newAttributes.c_cc[VTIME] = 0;
