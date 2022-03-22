@@ -707,12 +707,15 @@ writeCharacter_LibLouis (
     if (fprintf(file, "%" PRIwc, value) == EOF) return 0;
   } else {
     unsigned long int value = character;
+
     int digits = (value < (1 << 16))? 4:
                  (value < (1 << 20))? 5:
                                       8;
+
     int format = (value < (1 << 16))? 'x':
                  (value < (1 << 20))? 'y':
                                       'z';
+
     if (fprintf(file, "\\%c%0*lx", format, digits, value) == EOF) return 0;
   }
 
@@ -723,11 +726,13 @@ writeCharacter_LibLouis (
     if (!writeDots(file, dots)) return 0;
   }
 
+  if (fprintf(file, "\t#") == EOF) return 0;
+
   {
     char name[0X40];
 
     if (getCharacterName(character, name, sizeof(name))) {
-      if (fprintf(file, "\t%s", name) == EOF) return 0;
+      if (fprintf(file, " %s", name) == EOF) return 0;
     }
   }
 
