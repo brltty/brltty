@@ -657,12 +657,22 @@ writeTable_gnome (
 #endif /* HAVE_ICONV_H */
 
 static TextTableData *
-readTable_libLouis (const char *path, FILE *file, const void *data) {
+readTable_LibLouis (const char *path, FILE *file, const void *data) {
   return processLibLouisStream(file, path);
 }
 
+static const char *
+getCharacterType_LibLouis (wchar_t character) {
+  if (iswspace(character)) return "space";
+  if (iswdigit(character)) return "digit";
+  if (iswpunct(character)) return "punctuation";
+  if (iswlower(character)) return "lowercase";
+  if (iswupper(character)) return "uppercase";
+  return "letter";
+}
+
 static int
-writeCharacter_libLouis (
+writeCharacter_LibLouis (
   FILE *file, const char *directive,
   wchar_t character, unsigned char dots
 ) {
@@ -673,22 +683,7 @@ writeCharacter_libLouis (
   }
 
   {
-    const char *type;
-
-    if (iswspace(character)) {
-      type = "space";
-    } else if (iswdigit(character)) {
-      type = "digit";
-    } else if (iswpunct(character)) {
-      type = "punctuation";
-    } else if (iswlower(character)) {
-      type = "lowercase";
-    } else if (iswupper(character)) {
-      type = "uppercase";
-    } else {
-      type = "letter";
-    }
-
+    const char *type = getCharacterType_LibLouis(character);
     if (fprintf(file, "%s", type) == EOF) return 0;
   }
 
@@ -741,11 +736,11 @@ writeCharacter_libLouis (
 }
 
 static int
-writeTable_libLouis (
+writeTable_LibLouis (
   const char *path, FILE *file, TextTableData *ttd, const void *data
 ) {
   if (!writeHeaderComment(file, writeHashComment)) return 0;
-  if (!writeCharacters(file, ttd, writeCharacter_libLouis, data)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_LibLouis, data)) return 0;
   return 1;
 }
 
@@ -1086,14 +1081,14 @@ static const FormatEntry formatEntries[] = {
 #endif /* HAVE_ICONV_H */
 
   { .name = "ctb",
-    .read = readTable_libLouis,
-    .write = writeTable_libLouis,
+    .read = readTable_LibLouis,
+    .write = writeTable_LibLouis,
     .data = WRITE_CHARACTERS_LIBLOUIS,
   },
 
   { .name = "utb",
-    .read = readTable_libLouis,
-    .write = writeTable_libLouis,
+    .read = readTable_LibLouis,
+    .write = writeTable_LibLouis,
     .data = WRITE_CHARACTERS_LIBLOUIS,
   },
 
