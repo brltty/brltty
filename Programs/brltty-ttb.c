@@ -530,9 +530,7 @@ writeCharacter_native (
   if (!writeUtf8Cell(file, dots)) return 0;
 
   if (!writeCharacterDescription(file, character)) return 0;
-  if (fprintf(file, "\n") == EOF) return 0;
-
-  return 1;
+  return endLine(file);
 }
 
 static int
@@ -543,8 +541,7 @@ writeAlias_native (FILE *file, const TextTableAliasEntry *alias, const void *dat
   if (!writeHexadecimalCharacter(file, alias->to)) return 0;
   if (fprintf(file, "\t#") == EOF) return 0;
   if (!writeCharacterDescription(file, alias->from)) return 0;
-  if (fprintf(file, "\n") == EOF) return 0;
-  return 1;
+  return endLine(file);
 }
 
 static int
@@ -615,6 +612,100 @@ writeTable_binary (
   return 1;
 }
 
+static TextTableData *
+readTable_LibLouis (const char *path, FILE *file, const void *data) {
+  return processLibLouisStream(file, path);
+}
+
+static const char *
+getCharacterType_LibLouis (wchar_t character) {
+  if (iswspace(character)) return "space";
+
+  if (iswlower(character)) return "lowercase";
+  if (iswupper(character)) return "uppercase";
+  if (iswalpha(character)) return "letter";
+
+  if (iswdigit(character)) return "digit";
+  if (iswxdigit(character)) return "digit";
+
+  if (iswpunct(character)) return "punctuation";
+  return NULL;
+}
+
+static int
+writeCharacter_LibLouis (
+  FILE *file, const char *directive,
+  wchar_t character, unsigned char dots
+) {
+  const char *type = getCharacterType_LibLouis(character);
+  if (!type) return 1;
+
+  if (*directive) {
+    if (fprintf(file, "%s ", directive) == EOF) {
+      return 0;
+    }
+  }
+
+  if (fprintf(file, "%s\t", type) == EOF) return 0;
+
+  if (character == WC_C('\\')) {
+    if (fprintf(file, "\\\\") == EOF) return 0;
+  } else if (character == WC_C('\f')) {
+    if (fprintf(file, "\\f") == EOF) return 0;
+  } else if (character == WC_C('\n')) {
+    if (fprintf(file, "\\n") == EOF) return 0;
+  } else if (character == WC_C('\r')) {
+    if (fprintf(file, "\\r") == EOF) return 0;
+  } else if (character == WC_C(' ')) {
+    if (fprintf(file, "\\s") == EOF) return 0;
+  } else if (character == WC_C('\t')) {
+    if (fprintf(file, "\\t") == EOF) return 0;
+  } else if (character == WC_C('\v')) {
+    if (fprintf(file, "\\v") == EOF) return 0;
+  } else if ((character > 0X20) && (character < 0X7F) && (character != '#')) {
+    wint_t value = character;
+    if (fprintf(file, "%" PRIwc, value) == EOF) return 0;
+  } else {
+    unsigned long int value = character;
+
+    int digits = (value < (1 << 16))? 4:
+                 (value < (1 << 20))? 5:
+                                      8;
+
+    int format = (value < (1 << 16))? 'x':
+                 (value < (1 << 20))? 'y':
+                                      'z';
+
+    if (fprintf(file, "\\%c%0*lx", format, digits, value) == EOF) return 0;
+  }
+
+  if (fprintf(file, "\t") == EOF) return 0;
+  if (!dots) {
+    if (fprintf(file, "0") == EOF) return 0;
+  } else {
+    if (!writeDots(file, dots)) return 0;
+  }
+
+  {
+    char name[0X40];
+
+    if (getCharacterName(character, name, sizeof(name))) {
+      if (fprintf(file, "\t# %s", name) == EOF) return 0;
+    }
+  }
+
+  return endLine(file);
+}
+
+static int
+writeTable_LibLouis (
+  const char *path, FILE *file, TextTableData *ttd, const void *data
+) {
+  if (!writeHeaderComment(file, writeHashComment)) return 0;
+  if (!writeCharacters(file, ttd, writeCharacter_LibLouis, data)) return 0;
+  return 1;
+}
+
 #ifdef HAVE_ICONV_H
 static TextTableData *
 readTable_gnome (const char *path, FILE *file, const void *data) {
@@ -655,99 +746,6 @@ writeTable_gnome (
   return 1;
 }
 #endif /* HAVE_ICONV_H */
-
-static TextTableData *
-readTable_LibLouis (const char *path, FILE *file, const void *data) {
-  return processLibLouisStream(file, path);
-}
-
-static const char *
-getCharacterType_LibLouis (wchar_t character) {
-  if (iswspace(character)) return "space";
-  if (iswdigit(character)) return "digit";
-  if (iswpunct(character)) return "punctuation";
-  if (iswlower(character)) return "lowercase";
-  if (iswupper(character)) return "uppercase";
-  return "letter";
-}
-
-static int
-writeCharacter_LibLouis (
-  FILE *file, const char *directive,
-  wchar_t character, unsigned char dots
-) {
-  if (*directive) {
-    if (fprintf(file, "%s ", directive) == EOF) {
-      return 0;
-    }
-  }
-
-  {
-    const char *type = getCharacterType_LibLouis(character);
-    if (fprintf(file, "%s", type) == EOF) return 0;
-  }
-
-  if (fprintf(file, "\t") == EOF) return 0;
-  if (character == WC_C('\\')) {
-    if (fprintf(file, "\\\\") == EOF) return 0;
-  } else if (character == WC_C('\f')) {
-    if (fprintf(file, "\\f") == EOF) return 0;
-  } else if (character == WC_C('\n')) {
-    if (fprintf(file, "\\n") == EOF) return 0;
-  } else if (character == WC_C('\r')) {
-    if (fprintf(file, "\\r") == EOF) return 0;
-  } else if (character == WC_C(' ')) {
-    if (fprintf(file, "\\s") == EOF) return 0;
-  } else if (character == WC_C('\t')) {
-    if (fprintf(file, "\\t") == EOF) return 0;
-  } else if (character == WC_C('\v')) {
-    if (fprintf(file, "\\v") == EOF) return 0;
-  } else if ((character > 0X20) && (character < 0X7F) && (character != '#')) {
-    wint_t value = character;
-    if (fprintf(file, "%" PRIwc, value) == EOF) return 0;
-  } else {
-    unsigned long int value = character;
-
-    int digits = (value < (1 << 16))? 4:
-                 (value < (1 << 20))? 5:
-                                      8;
-
-    int format = (value < (1 << 16))? 'x':
-                 (value < (1 << 20))? 'y':
-                                      'z';
-
-    if (fprintf(file, "\\%c%0*lx", format, digits, value) == EOF) return 0;
-  }
-
-  if (fprintf(file, "\t") == EOF) return 0;
-  if (!dots) {
-    if (fprintf(file, "0") == EOF) return 0;
-  } else {
-    if (!writeDots(file, dots)) return 0;
-  }
-
-  if (fprintf(file, "\t#") == EOF) return 0;
-
-  {
-    char name[0X40];
-
-    if (getCharacterName(character, name, sizeof(name))) {
-      if (fprintf(file, " %s", name) == EOF) return 0;
-    }
-  }
-
-  if (fprintf(file, "\n") == EOF) return 0;
-  return 1;
-}
-
-static int
-writeTable_LibLouis (
-  const char *path, FILE *file, TextTableData *ttd, const void *data
-) {
-  if (!writeHeaderComment(file, writeHashComment)) return 0;
-  if (!writeCharacters(file, ttd, writeCharacter_LibLouis, data)) return 0;
-  return 1;
-}
 
 static int
 writeCharacterDots_XCompose (FILE *file, unsigned char dots) {
@@ -799,8 +797,8 @@ writeCharacter_XCompose (
   if (!writeCharacterDots_XCompose (file, dots)) return 0;
   if (fprintf(file, " : \"") == EOF) return 0;
   if (!writeCharacterOutput_XCompose(file, character)) return 0;
-  if (fprintf(file, "\"\n") == EOF) return 0;
-  return 1;
+  if (fprintf(file, "\"") == EOF) return 0;
+  return endLine(file);
 }
 
 static int
@@ -822,8 +820,8 @@ writeCharacter_half_XCompose (
   if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
   if (fprintf(file, " : \"") == EOF) return 0;
   if (!writeCharacterOutput_XCompose(file, character)) return 0;
-  if (fprintf(file, "\"\n") == EOF) return 0;
-  return 1;
+  if (fprintf(file, "\"") == EOF) return 0;
+  return endLine(file);
 }
 
 static int
@@ -844,7 +842,8 @@ writeCharacter_leftrighthalf_XCompose (
     if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
     if (fprintf(file, " : \"") == EOF) return 0;
     if (!writeCharacterOutput_XCompose(file, character)) return 0;
-    if (fprintf(file, "\"\n") == EOF) return 0;
+    if (fprintf(file, "\"") == EOF) return 0;
+    if (!endLine(file)) return 0;
   }
 
   return 1;
@@ -864,10 +863,11 @@ writeCharacter_lefthalf_XCompose (
   FILE *file, const char *directive,
   wchar_t character, unsigned char dots
 ) {
-  unsigned char leftDots = brlGetLeftDots(dots);
-  unsigned char rightDots = brlGetRightDotsToLeftDots(dots);
-
-  return writeCharacter_half_XCompose(file, character, leftDots, rightDots);
+  return writeCharacter_half_XCompose(
+    file, character,
+    brlGetLeftDots(dots),
+    brlGetRightDotsToLeftDots(dots)
+  );
 }
 
 static int
@@ -884,10 +884,11 @@ writeCharacter_lefthalfalt_XCompose (
   FILE *file, const char *directive,
   wchar_t character, unsigned char dots
 ) {
-  unsigned char leftDots = brlGetLeftDots(dots);
-  unsigned char rightDots = brlGetRightDotsToLeftDotsAlt(dots);
-
-  return writeCharacter_half_XCompose(file, character, leftDots, rightDots);
+  return writeCharacter_half_XCompose(
+    file, character,
+    brlGetLeftDots(dots),
+    brlGetRightDotsToLeftDotsAlt(dots)
+  );
 }
 
 static int
@@ -904,10 +905,11 @@ writeCharacter_righthalf_XCompose (
   FILE *file, const char *directive,
   wchar_t character, unsigned char dots
 ) {
-  unsigned char leftDots = brlGetLeftDotsToRightDots(dots);
-  unsigned char rightDots = brlGetRightDots(dots);
-
-  return writeCharacter_half_XCompose(file, character, leftDots, rightDots);
+  return writeCharacter_half_XCompose(
+    file, character,
+    brlGetLeftDotsToRightDots(dots),
+    brlGetRightDots(dots)
+  );
 }
 
 static int
@@ -924,10 +926,11 @@ writeCharacter_righthalfalt_XCompose (
   FILE *file, const char *directive,
   wchar_t character, unsigned char dots
 ) {
-  unsigned char leftDots = brlGetLeftDotsToRightDotsAlt(dots);
-  unsigned char rightDots = brlGetRightDots(dots);
-
-  return writeCharacter_half_XCompose(file, character, leftDots, rightDots);
+  return writeCharacter_half_XCompose(
+    file, character,
+    brlGetLeftDotsToRightDotsAlt(dots),
+    brlGetRightDots(dots)
+  );
 }
 
 static int
@@ -948,8 +951,7 @@ writeCharacter_JAWS (
 
   if (fprintf(file, "U+%04" PRIX32 "=", value) == EOF) return 0;
   if (!writeDots(file, dots)) return 0;
-  if (fprintf(file, "\n") == EOF) return 0;
-  return 1;
+  return endLine(file);
 }
 
 static int
@@ -1001,8 +1003,7 @@ writeCharacter_CPreprocessor (
   if (!writeCharacterName_CPreprocessor(file, character)) return 0;
 
   if (!endCMacro(file)) return 0;
-  if (!endLine(file)) return 0;
-  return 1;
+  return endLine(file);
 }
 
 static int
@@ -1077,14 +1078,6 @@ static const FormatEntry formatEntries[] = {
     .data = &dots14253678,
   },
 
-#ifdef HAVE_ICONV_H
-  { .name = "gnb",
-    .read = readTable_gnome,
-    .write = writeTable_gnome,
-    .data = WRITE_CHARACTERS_IN_ONLY,
-  },
-#endif /* HAVE_ICONV_H */
-
   { .name = "ctb",
     .read = readTable_LibLouis,
     .write = writeTable_LibLouis,
@@ -1096,6 +1089,14 @@ static const FormatEntry formatEntries[] = {
     .write = writeTable_LibLouis,
     .data = WRITE_CHARACTERS_LIBLOUIS,
   },
+
+#ifdef HAVE_ICONV_H
+  { .name = "gnb",
+    .read = readTable_gnome,
+    .write = writeTable_gnome,
+    .data = WRITE_CHARACTERS_IN_ONLY,
+  },
+#endif /* HAVE_ICONV_H */
 
   { .name = "XCompose",
     .write = writeTable_XCompose,
