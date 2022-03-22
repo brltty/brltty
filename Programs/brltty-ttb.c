@@ -721,18 +721,27 @@ writeCharacter_gnome (
 
   if (iswprint(character) && !iswspace(character)) {
     Utf8Buffer utf8Character;
-    Utf8Buffer utf8Pattern;
-
     if (!convertWcharToUtf8(character, utf8Character)) return 0;
+
+    Utf8Buffer utf8Pattern;
     if (!convertWcharToUtf8(pattern, utf8Pattern)) return 0;
-    if (fprintf(file, "UCS-CHAR %s %s\n", utf8Character, utf8Pattern) == EOF) return 0;
+
+    if (fprintf(file, "UCS-CHAR %s %s", utf8Character, utf8Pattern) == EOF) return 0;
   } else {
     uint32_t c = character;
     uint32_t p = pattern;
-    if (fprintf(file, "UNICODE-CHAR U+%02" PRIx32 " U+%04" PRIx32" \n", c, p) == EOF) return 0;
+    if (fprintf(file, "UNICODE-CHAR U+%02" PRIx32 " U+%04" PRIx32, c, p) == EOF) return 0;
   }
 
-  return 1;
+  {
+    char name[0X40];
+
+    if (getCharacterName(character, name, sizeof(name))) {
+      if (fprintf(file, "  # %s", name) == EOF) return 0;
+    }
+  }
+
+  return endLine(file);
 }
 
 static int
@@ -765,6 +774,8 @@ writeCharacterDots_XCompose (FILE *file, unsigned char dots) {
 
 static int
 writeCharacterOutput_XCompose (FILE *file, wchar_t character) {
+  if (fprintf(file, " : \"") == EOF) return 0;
+
   switch (character) {
     case WC_C('\n'):
       if (fprintf(file, "\\n") == EOF) return 0;
@@ -786,7 +797,18 @@ writeCharacterOutput_XCompose (FILE *file, wchar_t character) {
       if (fprintf(file, "%lc", (wint_t)character) == EOF) return 0;
       break;
   }
-  return 1;
+
+  if (fprintf(file, "\"") == EOF) return 0;
+
+  {
+    char name[0X40];
+
+    if (getCharacterName(character, name, sizeof(name))) {
+      if (fprintf(file, "  # %s", name) == EOF) return 0;
+    }
+  }
+
+  return endLine(file);
 }
 
 static int
@@ -795,10 +817,7 @@ writeCharacter_XCompose (
   wchar_t character, unsigned char dots
 ) {
   if (!writeCharacterDots_XCompose (file, dots)) return 0;
-  if (fprintf(file, " : \"") == EOF) return 0;
-  if (!writeCharacterOutput_XCompose(file, character)) return 0;
-  if (fprintf(file, "\"") == EOF) return 0;
-  return endLine(file);
+  return writeCharacterOutput_XCompose(file, character);
 }
 
 static int
@@ -818,10 +837,7 @@ writeCharacter_half_XCompose (
   if (!writeCharacterDots_XCompose (file, leftDots)) return 0;
   if (fprintf(file, " ") == EOF) return 0;
   if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
-  if (fprintf(file, " : \"") == EOF) return 0;
-  if (!writeCharacterOutput_XCompose(file, character)) return 0;
-  if (fprintf(file, "\"") == EOF) return 0;
-  return endLine(file);
+  return writeCharacterOutput_XCompose(file, character);
 }
 
 static int
@@ -838,12 +854,8 @@ writeCharacter_leftrighthalf_XCompose (
 
   if (!leftDots) {
     /* Also add shortcut without blank pattern for left part.  */
-
     if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
-    if (fprintf(file, " : \"") == EOF) return 0;
     if (!writeCharacterOutput_XCompose(file, character)) return 0;
-    if (fprintf(file, "\"") == EOF) return 0;
-    if (!endLine(file)) return 0;
   }
 
   return 1;
