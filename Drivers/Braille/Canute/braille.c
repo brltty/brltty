@@ -661,9 +661,7 @@ startUpdate (BrailleDisplay *brl) {
         if (writePacket(brl, packet, (byte - packet))) {
           row->haveNewCells = 0;
           brl->data->window.lastRowSent = brl->data->window.firstChangedRow++;
-
           memcpy(row->oldCells, row->newCells, length);
-          row->haveOldCells = 1;
         }
 
         return 1;
@@ -710,9 +708,17 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         brl->data->status.flags = result;
         continue;
 
-      case CN_CMD_SEND_ROW:
-        motorsTime = ROW_UPDATE_TIME;
+      case CN_CMD_SEND_ROW: {
+        RowEntry *row = getRowEntry(brl, brl->data->window.lastRowSent);
+
+        if (row->haveOldCells) {
+          motorsTime = ROW_UPDATE_TIME;
+        } else {
+          row->haveOldCells = 1;
+        }
+
         break;
+      }
 
       case CN_CMD_RESET_CELLS:
         motorsTime = CELLS_RESET_TIME;
