@@ -336,15 +336,13 @@ typedef struct {
 } InputCharacterEntry;
 
 static int
-compareInputCharacterEntries (const InputCharacterEntry *entry1, const InputCharacterEntry *entry2) {
+sortInputCharacterEntries (const void *element1, const void *element2) {
+  const InputCharacterEntry *entry1 = element1;
+  const InputCharacterEntry *entry2 = element2;
+
   if (entry1->character < entry2->character) return -1;
   if (entry1->character > entry2->character) return 1;
   return 0;
-}
-
-static int
-sortInputCharacterEntries (const void *entry1, const void *entry2) {
-  return compareInputCharacterEntries(entry1, entry2);
 }
 
 typedef struct {
@@ -1031,7 +1029,7 @@ writeTable_CPreprocessor (
   if (!endLine(file)) return 0;
 
   if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_CHARACTERS", "")) return 0;
-  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_CHARACTER", "(unicode, braille, canInput, name)")) return 0;
+  if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_CHARACTER", "(unicode, braille, properties, name)")) return 0;
   if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_END_CHARACTERS", "")) return 0;
 
   if (!defineCMacro(file, "BRLTTY_TEXT_TABLE_BEGIN_ALIASES", "")) return 0;
@@ -1136,7 +1134,7 @@ static const FormatEntry formatEntries[] = {
 
   { .name = "cpp",
     .write = writeTable_CPreprocessor,
-    .data = WRITE_CHARACTER_DIRECTIVES(.out="0", .inOut="1"),
+    .data = WRITE_CHARACTER_DIRECTIVES(.in="1", .out="2", .inOut="3"),
   },
 
   { .name = NULL }
