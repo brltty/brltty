@@ -649,34 +649,39 @@ writeCharacter_LibLouis (
   if (fprintf(file, "%s\t", type) == EOF) return 0;
 
   if (character == WC_C('\\')) {
-    if (fprintf(file, "\\\\") == EOF) return 0;
+    if (!writeString(file, "\\\\")) return 0;
   } else if (character == WC_C('\f')) {
-    if (fprintf(file, "\\f") == EOF) return 0;
+    if (!writeString(file, "\\f")) return 0;
   } else if (character == WC_C('\n')) {
-    if (fprintf(file, "\\n") == EOF) return 0;
+    if (!writeString(file, "\\n")) return 0;
   } else if (character == WC_C('\r')) {
-    if (fprintf(file, "\\r") == EOF) return 0;
+    if (!writeString(file, "\\r")) return 0;
   } else if (character == WC_C(' ')) {
-    if (fprintf(file, "\\s") == EOF) return 0;
+    if (!writeString(file, "\\s")) return 0;
   } else if (character == WC_C('\t')) {
-    if (fprintf(file, "\\t") == EOF) return 0;
+    if (!writeString(file, "\\t")) return 0;
   } else if (character == WC_C('\v')) {
-    if (fprintf(file, "\\v") == EOF) return 0;
+    if (!writeString(file, "\\v")) return 0;
   } else if ((character > 0X20) && (character < 0X7F) && (character != '#')) {
     wint_t value = character;
     if (fprintf(file, "%" PRIwc, value) == EOF) return 0;
   } else {
     unsigned long int value = character;
+    int digits;
+    char format;
 
-    int digits = (value < (1 << 16))? 4:
-                 (value < (1 << 20))? 5:
-                                      8;
+    if (value < (1 << 16)) {
+      digits = 4;
+      format = 'x';
+    } else if (value < (1 << 20)) {
+      digits = 5;
+      format = 'y';
+    } else {
+      digits = 8;
+      format = 'z';
+    }
 
-    int format = (value < (1 << 16))? 'x':
-                 (value < (1 << 20))? 'y':
-                                      'z';
-
-    if (fprintf(file, "\\%c%0*lx", format, digits, value) == EOF) return 0;
+    if (fprintf(file, "\\%c%0*lX", format, digits, value) == EOF) return 0;
   }
 
   if (fprintf(file, "\t") == EOF) return 0;
