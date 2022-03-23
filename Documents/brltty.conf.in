@@ -503,6 +503,11 @@
 # Logging Options #
 ###################
 
+# The quiet directive reduces the logging level to standard error by one
+# level and also suppresses the braille and speech driver banners.
+# (can be overridden with the --quiet [-q] option)
+#quiet off	# [off,on]
+
 # The log-file directive specifies the file to which diagnostics are written.
 # Relative paths are anchored at the current working directory. If not
 # specified, diagnostics are written to the system log.
