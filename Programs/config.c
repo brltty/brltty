@@ -741,6 +741,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "quiet",
     .letter = 'q',
+    .flags = OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_quiet,
     .description = strtext("Suppress start-up messages.")
   },
