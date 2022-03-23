@@ -852,7 +852,7 @@ writeCharacter_leftrighthalf_XCompose (
     return 0;
   }
 
-  if (!leftDots) {
+  if (!leftDots && rightDots) {
     /* Also add shortcut without blank pattern for left part.  */
     if (!writeCharacterDots_XCompose (file, rightDots)) return 0;
     if (!writeCharacterOutput_XCompose(file, character)) return 0;
