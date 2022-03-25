@@ -20,41 +20,79 @@
 . "$(dirname "${BASH_SOURCE[0]}")/brltty-prologue.sh"
 
 getElement() {
-   eval setVariable "${1}" "\${${2}[\"${3}\"]}"
+   eval setVariable "\${1}" "\${${2}[\"${3}\"]}"
 }
 
 setElement() {
-   eval "${1}[\"${2}\"]=\"${3}\""
+   eval setVariable "\${1}[\"${2}\"]" "${3}"
 }
 
 setElements() {
    local _array="${1}"
    shift 1
-   eval "${_array}=("${@}")"
+   eval "${_array}=(\"\${@}\")"
 }
 
 appendElements() {
    local _array="${1}"
    shift 1
-   eval "${_array}+=("${@}")"
+   eval "${_array}+=(\"\${@}\")"
+}
+
+prependElements() {
+   local _array="${1}"
+   shift 1
+   eval setElements "\${_array}" "\"\${@}\" \"\${${_array}[@]}\""
+}
+
+shiftElements() {
+   local _array="${1}"
+   local _count="${2}"
+
+   eval set -- "\"\${${_array}[@]}\""
+   shift "${_count}"
+   setElements "${_array}" "${@}"
+}
+
+getElementCount() {
+   eval setVariable "\${1}" "\${#${2}[*]}"
+}
+
+getElementNames() {
+   eval "${1}=(\"\${!${2}[@]}\")"
+}
+
+forElements() {
+   local _array="${1}"
+   shift 1
+
+   local _names=()
+   getElementNames _names "${_array}"
+
+   local name
+   for name in "${_names[@]}"
+   do
+      local value
+      getElement value "${_array}" "${name}"
+      "${@}" "${name}" "${value}"
+   done
 }
 
 getElements() {
-   eval "${1}=(\"\${!${2}[@]}\")"
+   local _toArray="${1}"
+   local _fromArray="${2}"
+   forElements "${_fromArray}" setElement "${_toArray}"
+}
+
+listElement() {
+   local array="${1}"
+   local name="${2}"
+   local value="${3}"
+   echo "${array}[${name}]: ${value}"
 }
 
 listElements() {
    local _array="${1}"
-
-   local _elements=()
-   getElements _elements "${_array}"
-
-   local element
-   for element in "${_elements[@]}"
-   do
-      local value
-      getElement value "${_array}" "${element}"
-      echo "${_array}[${element}]: ${value}"
-   done | sort
+   forElements "${_array}" listElement "${_array}" | sort
 }
 
