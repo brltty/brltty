@@ -20,11 +20,11 @@
 . "$(dirname "${BASH_SOURCE[0]}")/brltty-prologue.sh"
 
 getElement() {
-   eval setVariable "\${1}" "\${${2}[\"${3}\"]}"
+   eval setVariable "\${1}" "\"\${${2}[\"${3}\"]}\""
 }
 
 setElement() {
-   eval setVariable "\${1}[\"${2}\"]" "${3}"
+   eval setVariable "\${1}[\"${2}\"]" "\"\${3}\""
 }
 
 setElements() {
