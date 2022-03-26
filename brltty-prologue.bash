@@ -96,6 +96,36 @@ listElements() {
    forElements "${_array}" listElement "${_array}" | sort
 }
 
+findProgramConfigurationFile() {
+   local fileVariable="${1}"
+   local extension="${2}"
+
+   local suffix="${programName}.${extension}"
+   local prefixes=("./.")
+
+   [ -n "${HOME}" ] && {
+      prefixes+=("${HOME}/.config/${programName}/")
+      prefixes+=("${HOME}/.")
+   }
+
+   prefixes+=("/etc/${programName}/")
+   prefixes+=("/etc/xdg/${programName}/")
+   prefixes+=("/etc/")
+
+   local prefix
+   for prefix in "${prefixes[@]}"
+   do
+      local _file="${prefix}${suffix}"
+      [ -f "${_file}" ] || continue
+      [ -r "${_file}" ] || continue
+
+      setVariable "${fileVariable}" "${_file}"
+      return 0
+   done
+
+   return 1
+}
+
 verifyChoice() {
    local label="${1}"
    local valueVariable="${2}"
