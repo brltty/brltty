@@ -1,5 +1,6 @@
 #define BRLAPI_NO_SINGLE_SESSION 1
 #include <brlapi.h>
+#include <errno.h>
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -22,8 +23,8 @@ static int openConnection(lua_State *L) {
         .host = luaL_optstring(L, 1, NULL), .auth = luaL_optstring(L, 2, NULL)
     };
     brlapi_connectionSettings_t actualSettings;
-    brlapi_handle_t *const handle = (brlapi_handle_t *)lua_newuserdatauv(L,
-        brlapi_getHandleSize(), 0
+    brlapi_handle_t *const handle = (brlapi_handle_t *)lua_newuserdatauv(
+        L, brlapi_getHandleSize(), 0
     );
     luaL_setmetatable(L, handle_t);
 
@@ -38,23 +39,23 @@ static int openConnection(lua_State *L) {
     return 3;
 }
 
+static int getFileDescriptor(lua_State *L) {
+    const int fileDescriptor = brlapi__getFileDescriptor(checkhandle(L, 1));
+
+    if (fileDescriptor == BRLAPI_INVALID_FILE_DESCRIPTOR) {
+        lua_pushstring(L, "Connection closed");
+        lua_error(L);
+    }
+
+    lua_pushinteger(L, fileDescriptor);
+
+    return 1;
+}
+
 static int closeConnection(lua_State *L) {
     brlapi__closeConnection(checkhandle(L, 1));
 
     return 0;
-}
-
-static int getDisplaySize(lua_State *L) {
-    unsigned int x, y;
-
-    if (brlapi__getDisplaySize(checkhandle(L, 1), &x, &y) == -1) {
-        lua_pushstring(L, brlapi_strerror(&brlapi_error));
-        lua_error(L);
-    }
-
-    lua_pushinteger(L, x), lua_pushinteger(L, y);
-
-    return 2;
 }
 
 static int getDriverName(lua_State *L) {
@@ -72,20 +73,33 @@ static int getDriverName(lua_State *L) {
 
 static int getModelIdentifier(lua_State *L) {
     brlapi_handle_t *const handle = checkhandle(L, 1);
-    char name[BRLAPI_MAXNAMELENGTH + 1];
+    char ident[BRLAPI_MAXNAMELENGTH + 1];
 
-    if (brlapi__getModelIdentifier(handle, name, sizeof(name)) == -1) {
+    if (brlapi__getModelIdentifier(handle, ident, sizeof(ident)) == -1) {
         lua_pushstring(L, brlapi_strerror(&brlapi_error));
         lua_error(L);
     }
 
-    lua_pushstring(L, name);
+    lua_pushstring(L, ident);
 
     return 1;
 }
 
+static int getDisplaySize(lua_State *L) {
+    unsigned int x, y;
+
+    if (brlapi__getDisplaySize(checkhandle(L, 1), &x, &y) == -1) {
+        lua_pushstring(L, brlapi_strerror(&brlapi_error));
+        lua_error(L);
+    }
+
+    lua_pushinteger(L, x), lua_pushinteger(L, y);
+
+    return 2;
+}
+
 static int enterTtyMode(lua_State *L) {
-    int result = brlapi__enterTtyMode(checkhandle(L, 1),
+    const int result = brlapi__enterTtyMode(checkhandle(L, 1),
         luaL_checkinteger(L, 2), luaL_optstring(L, 3, NULL)
     );
 
@@ -144,9 +158,16 @@ static int writeDots(lua_State *L) {
 
 static int readKey(lua_State *L) {
     brlapi_handle_t *const handle = checkhandle(L, 1);
+    const int wait = lua_toboolean(L, 2);
     brlapi_keyCode_t keyCode;
+    int result;
 
-    switch (brlapi__readKey(handle, lua_toboolean(L, 2), &keyCode)) {
+    do {
+        result = brlapi__readKey(handle, wait, &keyCode);
+    } while (result == -1 &&
+             brlapi_errno == BRLAPI_ERROR_LIBCERR && brlapi_libcerrno == EINTR);
+
+    switch (result) {
     case -1:
         lua_pushstring(L, brlapi_strerror(&brlapi_error));
         lua_error(L);
@@ -164,9 +185,16 @@ static int readKey(lua_State *L) {
 
 static int readKeyWithTimeout(lua_State *L) {
     brlapi_handle_t *const handle = checkhandle(L, 1);
+    const int timeout_ms = luaL_checkinteger(L, 2);
     brlapi_keyCode_t keyCode;
+    int result;
 
-    switch (brlapi__readKeyWithTimeout(handle, luaL_checkinteger(L, 2), &keyCode)) {
+    do {
+        result = brlapi__readKeyWithTimeout(handle, timeout_ms, &keyCode);
+    } while (result == -1 &&
+             brlapi_errno == BRLAPI_ERROR_LIBCERR && brlapi_libcerrno == EINTR);
+
+    switch (result) {
     case -1:
         lua_pushstring(L, brlapi_strerror(&brlapi_error));
         lua_error(L);
@@ -226,9 +254,68 @@ static int enterRawMode(lua_State *L) {
 }
 
 static int leaveRawMode(lua_State *L) {
-    brlapi_handle_t *handle = (brlapi_handle_t *)luaL_checkudata(L, 1, handle_t);
+    brlapi_handle_t *const handle = checkhandle(L, 1);
 
     if (brlapi__leaveRawMode(handle) == -1) {
+        lua_pushstring(L, brlapi_strerror(&brlapi_error));
+        lua_error(L);
+    }
+
+    return 0;
+}
+
+static int acceptAllKeys(lua_State *L) {
+    if (brlapi__acceptAllKeys(checkhandle(L, 1)) == -1) {
+        lua_pushstring(L, brlapi_strerror(&brlapi_error));
+        lua_error(L);
+    }
+
+    return 0;
+}
+
+static int ignoreAllKeys(lua_State *L) {
+    if (brlapi__ignoreAllKeys(checkhandle(L, 1)) == -1) {
+        lua_pushstring(L, brlapi_strerror(&brlapi_error));
+        lua_error(L);
+    }
+
+    return 0;
+}
+
+static int suspendDriver(lua_State *L) {
+    brlapi_handle_t *const handle = checkhandle(L, 1);
+    const char *const driverName = luaL_checkstring(L, 2);
+
+    if (brlapi__suspendDriver(handle, driverName) == -1) {
+        lua_pushstring(L, brlapi_strerror(&brlapi_error));
+        lua_error(L);
+    }
+
+    return 0;
+}
+
+static int resumeDriver(lua_State *L) {
+    brlapi_handle_t *const handle = checkhandle(L, 1);
+
+    if (brlapi__resumeDriver(handle) == -1) {
+        lua_pushstring(L, brlapi_strerror(&brlapi_error));
+        lua_error(L);
+    }
+
+    return 0;
+}
+
+static int pause_(lua_State *L) {
+    brlapi_handle_t *const handle = checkhandle(L, 1);
+    const int timeout_ms = luaL_checkinteger(L, 2);
+    int result;
+
+    do {
+        result = brlapi__pause(handle, timeout_ms);
+    } while (timeout_ms == -1 && result == -1 &&
+             brlapi_errno == BRLAPI_ERROR_LIBCERR && brlapi_libcerrno == EINTR);
+
+    if (result == -1) {
         lua_pushstring(L, brlapi_strerror(&brlapi_error));
         lua_error(L);
     }
@@ -244,6 +331,7 @@ static const luaL_Reg meta[] = {
 static const luaL_Reg funcs[] = {
     { "getLibraryVersion", getLibraryVersion },
     { "openConnection", openConnection },
+    { "getFileDescriptor", getFileDescriptor },
     { "closeConnection", closeConnection },
     { "getDriverName", getDriverName },
     { "getModelIdentifier", getModelIdentifier },
@@ -259,6 +347,11 @@ static const luaL_Reg funcs[] = {
     { "describeKeyCode", describeKeyCode },
     { "enterRawMode", enterRawMode },
     { "leaveRawMode", leaveRawMode },
+    { "acceptAllKeys", acceptAllKeys },
+    { "ignoreAllKeys", ignoreAllKeys },
+    { "suspendDriver", suspendDriver },
+    { "resumeDriver", resumeDriver },
+    { "pause", pause_ },
     { NULL, NULL }
 };
 
