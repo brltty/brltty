@@ -96,3 +96,42 @@ listElements() {
    forElements "${_array}" listElement "${_array}" | sort
 }
 
+verifyChoice() {
+   local label="${1}"
+   local valueVariable="${2}"
+   shift 2
+
+   local value
+   getVariable "${valueVariable}" value
+
+   local candidates=()
+   local length="${#value}"
+   local choice
+
+   for choice
+   do
+      [ "${length}" -le "${#choice}" ] || continue
+      [ "${value}" = "${choice:0:length}" ] || continue
+      candidates+=("${choice}")
+   done
+
+   local count="${#candidates[*]}"
+   [ "${count}" -gt 0 ] || syntaxError "invalid ${label}: ${value}"
+
+   [ "${count}" -eq 1 ] || {
+      local message="ambiguous ${label}: ${value}"
+      local delimiter=" ("
+
+      for choice in "${candidates[@]}"
+      do
+         message+="${delimiter}${choice}"
+         delimiter=", "
+      done
+
+      message+=")"
+      syntaxError "${message}"
+   }
+
+   setVariable "${valueVariable}" "${candidates[0]}"
+}
+
