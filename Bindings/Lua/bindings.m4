@@ -19,7 +19,7 @@ AC_DEFUN([BRLTTY_LUA_BINDINGS], [dnl
 LUA_OK=false
 
 BRLTTY_HAVE_PACKAGE([lua], [lua], [dnl
-   AC_CHECK_TOOL([LUA], [lua])
+   AC_PATH_PROG([LUA], [lua])
 
    if test -n "${LUA}"
    then

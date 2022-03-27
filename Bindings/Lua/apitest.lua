@@ -15,13 +15,40 @@
   This software is maintained by Dave Mielke <dave@mielke.cc>.
 ]]
 
-local brlapi = require"brlapi"
-local getDriverName, getModelIdentifier, getDisplaySize, closeConnection =
-    brlapi.getDriverName,
-    brlapi.getModelIdentifier,
-    brlapi.getDisplaySize,
-    brlapi.closeConnection
+require("../../brltty-prologue")
+brlapi = require("brlapi")
 
-local brl = brlapi.openConnection()
-print(brl:getDriverName(), brl:getModelIdentifier(), brl:getDisplaySize())
-brl:closeConnection()
+getDriverName, getModelIdentifier, getDisplaySize, closeConnection =
+  brlapi.getDriverName,
+  brlapi.getModelIdentifier,
+  brlapi.getDisplaySize,
+  brlapi.closeConnection
+
+function showProperty (name, value)
+  io.stdout:write(string.format("%s: %s\n", name, tostring(value)))
+end
+
+connected, result = pcall(
+  function ()
+    return brlapi.openConnection()
+  end
+)
+
+if connected
+then
+  brl = result
+  showProperty("Driver", brl:getDriverName())
+  showProperty("Model", brl:getModelIdentifier())
+
+  do
+    local columns, rows = brl:getDisplaySize()
+    showProperty("Size", string.format("%dx%d", columns, rows))
+  end
+
+  brl:closeConnection()
+else
+  writeProgramMessage(result)
+  os.exit(9)
+end
+
+os.exit()

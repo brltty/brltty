@@ -15,39 +15,18 @@
   This software is maintained by Dave Mielke <dave@mielke.cc>.
 ]]
 
-programName = string.match(arg[0], "([^/]*)$")
-argumentCount = #arg
-argumentIndex = 1
+require("brltty-prologue")
 
-function writeProgramMessage (message)
-  io.stderr:write(string.format("%s: %s\n", programName, message))
+function showPackageDirectory ()
 end
 
-function syntaxError (message)
-  writeProgramMessage(message)
-  os.exit(2)
-end
-
-function noMoreArguments () 
-  return argumentIndex > argumentCount
-end
-
-function nextArgument (label)
-  if noMoreArguments()
-  then
-    writeProgramMessage(string.format("missing %s", label))
-  end
-
-  local argument = arg[argumentIndex]
-  argumentIndex = argumentIndex + 1
-  return argument
-end
-
-action = nextArgument("action")
+action = nextProgramArgument("action")
 
 if action == "pkgdir"
 then
-  os.exit()
+  showPackageDirectory()
+else
+  syntaxError(string.format("unknown action: %s", action))
 end
 
-syntaxError(string.format("unknown action: %s", action))
+os.exit()
