@@ -30,6 +30,7 @@ libX11-devel
 libXt-devel
 libXtst-devel
 linuxdoc-tools
+lua-devel
 make
 ncurses-devel
 neXtaw-devel
