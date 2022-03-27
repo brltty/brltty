@@ -19,9 +19,17 @@ AC_DEFUN([BRLTTY_LUA_BINDINGS], [dnl
 LUA_OK=false
 
 BRLTTY_HAVE_PACKAGE([lua], [lua], [dnl
-   LUA_OK=true
+   AC_CHECK_TOOL([LUA], [lua])
+
+   if test -n "${LUA}"
+   then
+      AC_MSG_NOTICE([Lua shell: ${LUA}])
+
+      LUA_OK=true
+   fi
 ])
 
 AC_SUBST([LUA_OK])
+AC_SUBST([LUA])
 ])
 

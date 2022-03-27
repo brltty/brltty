@@ -16,6 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "${0%/*}/../../apitest.sh"
-exec lua "${programDirectory}/${programName}.lua" -- "${@}"
+. "${0%/*}/../brltty-prologue.sh"
+exec lua "${programDirectory}/${programName}.lua" "${@}"
 exit "${?}"

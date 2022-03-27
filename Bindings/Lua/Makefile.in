@@ -18,6 +18,8 @@
 include $(SRC_TOP)bindings.mk
 
 LUA_OK = @LUA_OK@
+LUA = @LUA@
+
 LUA_INCLUDES = @lua_includes@
 LUA_LIBS = @lua_libs@
 
