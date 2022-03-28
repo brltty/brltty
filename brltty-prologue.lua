@@ -17,7 +17,7 @@
 
 programName = string.match(arg[0], "([^/]*)$")
 programArgumentCount = #arg
-programArgumentIndex = 1
+programArgumentNumber = 1
 
 function writeProgramMessage (message)
   io.stderr:write(string.format("%s: %s\n", programName, message))
@@ -28,18 +28,42 @@ function syntaxError (message)
   os.exit(2)
 end
 
-function noMoreProgramArguments () 
-  return programArgumentIndex > programArgumentCount
+function haveMoreProgramArguments () 
+  return programArgumentNumber <= programArgumentCount
 end
 
 function nextProgramArgument (label)
-  if noMoreProgramArguments()
-  then
+  if not haveMoreProgramArguments() then
     syntaxError(string.format("missing %s", label))
   end
 
-  local argument = arg[programArgumentIndex]
-  programArgumentIndex = programArgumentIndex + 1
+  local argument = arg[programArgumentNumber]
+  programArgumentNumber = programArgumentNumber + 1
   return argument
+end
+
+function stringContains (string, substring)
+  return not not string:find(substring, 1, true)
+end
+
+function splitString (string, delimiter)
+  local components = {}
+  local count = 0
+  local oldPosition = 1
+
+  while true do
+    local newPosition = string:find(delimiter, oldPosition, true)
+    if not newPosition then break end
+
+    count = count + 1
+    components[count] = string:sub(oldPosition, newPosition-1)
+
+    oldPosition = newPosition + #delimiter
+  end
+
+  count = count + 1
+  components[count] = string:sub(oldPosition)
+
+  return components
 end
 

@@ -17,14 +17,28 @@
 
 require("brltty-prologue")
 
-function showPackageDirectory ()
+function showLibraryDirectory ()
+  for number, component in ipairs(splitString(package.cpath, ";")) do
+    local directory, name = component:match("^(.*)/(.-)$")
+    if name ~= "?.so" then goto next end
+
+    if not directory then goto next end
+    if #directory == 0 then goto next end
+
+    if directory:sub(1,1) ~= "/" then goto next end
+    if stringContains(directory, "?") then goto next end
+
+    print(directory)
+    break
+
+  ::next::
+  end
 end
 
 action = nextProgramArgument("action")
 
-if action == "pkgdir"
-then
-  showPackageDirectory()
+if action == "libdir" then
+  showLibraryDirectory()
 else
   syntaxError(string.format("unknown action: %s", action))
 end
