@@ -36,10 +36,13 @@ function performTests ()
   brl:closeConnection()
 end
 
-local ok, error = pcall(performTests)
-if not ok then
-  writeProgramMessage(error)
-  os.exit(9)
+do
+  local ok, error = pcall(performTests)
+
+  if not ok then
+    writeProgramMessage(error)
+    os.exit(9)
+  end
 end
 
 os.exit()
