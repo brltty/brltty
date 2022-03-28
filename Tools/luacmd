@@ -17,6 +17,6 @@
 ###############################################################################
 
 . "${0%/*}/../brltty-prologue.sh"
-export LUA_PATH="${programDirectory}/../?.lua"
+export LUA_PATH="${programDirectory}/../?.lua;;"
 exec lua "${programDirectory}/${programName}.lua" "${@}"
 exit "${?}"

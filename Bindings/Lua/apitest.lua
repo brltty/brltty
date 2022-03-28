@@ -15,20 +15,14 @@
   This software is maintained by Dave Mielke <dave@mielke.cc>.
 ]]
 
-require("../../brltty-prologue")
 brlapi = require("brlapi")
-
-getDriverName, getModelIdentifier, getDisplaySize, closeConnection =
-  brlapi.getDriverName,
-  brlapi.getModelIdentifier,
-  brlapi.getDisplaySize,
-  brlapi.closeConnection
+require("../../brltty-prologue")
 
 function showProperty (name, value)
   io.stdout:write(string.format("%s: %s\n", name, tostring(value)))
 end
 
-connected, result = pcall(
+connected, brl = pcall(
   function ()
     return brlapi.openConnection()
   end
@@ -36,7 +30,6 @@ connected, result = pcall(
 
 if connected
 then
-  brl = result
   showProperty("Driver", brl:getDriverName())
   showProperty("Model", brl:getModelIdentifier())
 
@@ -46,8 +39,9 @@ then
   end
 
   brl:closeConnection()
+  brl = nil
 else
-  writeProgramMessage(result)
+  writeProgramMessage(brl)
   os.exit(9)
 end
 
