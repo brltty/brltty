@@ -22,14 +22,9 @@ function showProperty (name, value)
   io.stdout:write(string.format("%s: %s\n", name, tostring(value)))
 end
 
-connected, brl = pcall(
-  function ()
-    return brlapi.openConnection()
-  end
-)
+function performTests ()
+  local brl = brlapi.openConnection()
 
-if connected
-then
   showProperty("Driver Name", brl:getDriverName())
   showProperty("Model Identifier", brl:getModelIdentifier())
 
@@ -39,9 +34,11 @@ then
   end
 
   brl:closeConnection()
-  brl = nil
-else
-  writeProgramMessage(brl)
+end
+
+local ok, error = pcall(performTests)
+if not ok then
+  writeProgramMessage(error)
   os.exit(9)
 end
 
