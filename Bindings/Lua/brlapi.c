@@ -25,6 +25,11 @@
 static const char *handle_t = "brlapi";
 #define checkhandle(L, arg) (brlapi_handle_t *)luaL_checkudata(L, (arg), handle_t)
 
+static void error(lua_State *L) {
+  lua_pushstring(L, brlapi_strerror(&brlapi_error));
+  lua_error(L);
+}
+
 static int getLibraryVersion(lua_State *L) {
   int major, minor, revision;
   brlapi_getLibraryVersion(&major, &minor, &revision);
@@ -46,10 +51,8 @@ static int openConnection(lua_State *L) {
   );
   luaL_setmetatable(L, handle_t);
 
-  if (brlapi__openConnection(handle, &desiredSettings, &actualSettings) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__openConnection(handle, &desiredSettings, &actualSettings) == -1)
+    error(L);
 
   lua_pushstring(L, actualSettings.host);
   lua_pushstring(L, actualSettings.auth);    
@@ -60,10 +63,7 @@ static int openConnection(lua_State *L) {
 static int getFileDescriptor(lua_State *L) {
   const int fileDescriptor = brlapi__getFileDescriptor(checkhandle(L, 1));
 
-  if (fileDescriptor == BRLAPI_INVALID_FILE_DESCRIPTOR) {
-    lua_pushstring(L, "Connection closed");
-    lua_error(L);
-  }
+  if (fileDescriptor == BRLAPI_INVALID_FILE_DESCRIPTOR) error(L);
 
   lua_pushinteger(L, fileDescriptor);
 
@@ -79,10 +79,8 @@ static int closeConnection(lua_State *L) {
 static int getDriverName(lua_State *L) {
   char name[BRLAPI_MAXNAMELENGTH + 1];
 
-  if (brlapi__getDriverName(checkhandle(L, 1), name, sizeof(name)) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__getDriverName(checkhandle(L, 1), name, sizeof(name)) == -1)
+    error(L);
 
   lua_pushstring(L, name);
 
@@ -93,10 +91,7 @@ static int getModelIdentifier(lua_State *L) {
   brlapi_handle_t *const handle = checkhandle(L, 1);
   char ident[BRLAPI_MAXNAMELENGTH + 1];
 
-  if (brlapi__getModelIdentifier(handle, ident, sizeof(ident)) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__getModelIdentifier(handle, ident, sizeof(ident)) == -1) error(L);
 
   lua_pushstring(L, ident);
 
@@ -106,10 +101,7 @@ static int getModelIdentifier(lua_State *L) {
 static int getDisplaySize(lua_State *L) {
   unsigned int x, y;
 
-  if (brlapi__getDisplaySize(checkhandle(L, 1), &x, &y) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__getDisplaySize(checkhandle(L, 1), &x, &y) == -1) error(L);
 
   lua_pushinteger(L, x), lua_pushinteger(L, y);
 
@@ -121,10 +113,7 @@ static int enterTtyMode(lua_State *L) {
     luaL_checkinteger(L, 2), luaL_optstring(L, 3, NULL)
   );
 
-  if (result == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (result == -1) error(L);
 
   lua_pushinteger(L, result);
 
@@ -132,19 +121,14 @@ static int enterTtyMode(lua_State *L) {
 }
 
 static int leaveTtyMode(lua_State *L) {
-  if (brlapi__leaveTtyMode(checkhandle(L, 1)) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__leaveTtyMode(checkhandle(L, 1)) == -1) error(L);
 
   return 0;
 }
 
 static int setFocus(lua_State *L) {
-  if (brlapi__setFocus(checkhandle(L, 1), luaL_checkinteger(L, 2)) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__setFocus(checkhandle(L, 1), luaL_checkinteger(L, 2)) == -1)
+    error(L);
 
   return 0;
 }
@@ -154,10 +138,7 @@ static int writeText(lua_State *L) {
   const int cursor = luaL_checkinteger(L, 2);
   const char *const text = luaL_checkstring(L, 3);
 
-  if (brlapi__writeText(handle, cursor, text) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__writeText(handle, cursor, text) == -1) error(L);
 
   return 0;
 }
@@ -166,10 +147,7 @@ static int writeDots(lua_State *L) {
   brlapi_handle_t *const handle = checkhandle(L, 1);
   const unsigned char *const dots = (const unsigned char *)luaL_checkstring(L, 2);
 
-  if (brlapi__writeDots(handle, dots) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__writeDots(handle, dots) == -1) error(L);
 
   return 0;
 }
@@ -187,8 +165,7 @@ static int readKey(lua_State *L) {
 
   switch (result) {
   case -1:
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
+    error(L);
     break; /* never reached */
   case 0:
     break;
@@ -214,8 +191,7 @@ static int readKeyWithTimeout(lua_State *L) {
 
   switch (result) {
   case -1:
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
+    error(L);
     break; /* never reached */
   case 0:
     break;
@@ -263,10 +239,7 @@ static int enterRawMode(lua_State *L) {
   brlapi_handle_t *const handle = checkhandle(L, 1);
   const char *const driverName = luaL_checkstring(L, 2);
 
-  if (brlapi__enterRawMode(handle, driverName) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__enterRawMode(handle, driverName) == -1) error(L);
 
   return 0;
 }
@@ -274,10 +247,7 @@ static int enterRawMode(lua_State *L) {
 static int leaveRawMode(lua_State *L) {
   brlapi_handle_t *const handle = checkhandle(L, 1);
 
-  if (brlapi__leaveRawMode(handle) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__leaveRawMode(handle) == -1) error(L);
 
   return 0;
 }
@@ -302,10 +272,7 @@ static int changeKeys(
   ];
 
   if (range == brlapi_rangeType_all) {
-    if (change(handle, range, NULL, 0) == -1) {
-      lua_pushstring(L, brlapi_strerror(&brlapi_error));
-      lua_error(L);
-    }
+    if (change(handle, range, NULL, 0) == -1) error(L);
 
     return 0;
   }
@@ -324,10 +291,7 @@ static int changeKeys(
       lua_pop(L, 1);
     }
 
-    if (change(handle, range, keys, count) == -1) {
-      lua_pushstring(L, brlapi_strerror(&brlapi_error));
-      lua_error(L);
-    }
+    if (change(handle, range, keys, count) == -1) error(L);
   }
  
   return 0;
@@ -342,19 +306,13 @@ static int ignoreKeys(lua_State *L) {
 }
 
 static int acceptAllKeys(lua_State *L) {
-  if (brlapi__acceptAllKeys(checkhandle(L, 1)) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__acceptAllKeys(checkhandle(L, 1)) == -1) error(L);
 
   return 0;
 }
 
 static int ignoreAllKeys(lua_State *L) {
-  if (brlapi__ignoreAllKeys(checkhandle(L, 1)) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__ignoreAllKeys(checkhandle(L, 1)) == -1) error(L);
 
   return 0;
 }
@@ -363,19 +321,13 @@ static int suspendDriver(lua_State *L) {
   brlapi_handle_t *const handle = checkhandle(L, 1);
   const char *const driverName = luaL_checkstring(L, 2);
 
-  if (brlapi__suspendDriver(handle, driverName) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__suspendDriver(handle, driverName) == -1) error(L);
 
   return 0;
 }
 
 static int resumeDriver(lua_State *L) {
-  if (brlapi__resumeDriver(checkhandle(L, 1)) == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (brlapi__resumeDriver(checkhandle(L, 1)) == -1) error(L);
 
   return 0;
 }
@@ -390,10 +342,7 @@ static int pause_(lua_State *L) {
   } while (timeout_ms == -1 && result == -1 &&
            brlapi_errno == BRLAPI_ERROR_LIBCERR && brlapi_libcerrno == EINTR);
 
-  if (result == -1) {
-    lua_pushstring(L, brlapi_strerror(&brlapi_error));
-    lua_error(L);
-  }
+  if (result == -1) error(L);
 
   return 0;
 }
