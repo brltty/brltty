@@ -30,12 +30,12 @@ connected, brl = pcall(
 
 if connected
 then
-  showProperty("Driver", brl:getDriverName())
-  showProperty("Model", brl:getModelIdentifier())
+  showProperty("Driver Name", brl:getDriverName())
+  showProperty("Model Identifier", brl:getModelIdentifier())
 
   do
     local columns, rows = brl:getDisplaySize()
-    showProperty("Size", string.format("%dx%d", columns, rows))
+    showProperty("Display Size", string.format("%dx%d", columns, rows))
   end
 
   brl:closeConnection()
