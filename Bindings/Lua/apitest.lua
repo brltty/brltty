@@ -15,16 +15,19 @@
   This software is maintained by Dave Mielke <dave@mielke.cc>.
 ]]
 
-brlapi = require("brlapi")
+local brlapi = require("brlapi")
 require("../../brltty-prologue")
 
-function showProperty (name, value)
+local function showProperty (name, value)
   io.stdout:write(string.format("%s: %s\n", name, tostring(value)))
 end
 
-function performTests ()
-  local brl = brlapi.openConnection()
+local function performTests ()
+  showProperty("BrlAPI Version", string.format("%d.%d.%d", brlapi.getLibraryVersion()))
 
+  local brl <close> = brlapi.openConnection(arg[2], arg[3])
+
+  showProperty("File Descriptor", brl:getFileDescriptor())
   showProperty("Driver Name", brl:getDriverName())
   showProperty("Model Identifier", brl:getModelIdentifier())
 
@@ -32,8 +35,6 @@ function performTests ()
     local columns, rows = brl:getDisplaySize()
     showProperty("Display Size", string.format("%dx%d", columns, rows))
   end
-
-  brl:closeConnection()
 end
 
 do
