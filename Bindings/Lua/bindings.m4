@@ -17,6 +17,8 @@
 
 AC_DEFUN([BRLTTY_LUA_BINDINGS], [dnl
 LUA_OK=false
+LUA=""
+LUA_LIBRARY_DIRECTORY=""
 
 BRLTTY_HAVE_PACKAGE([lua], [lua], [dnl
    AC_PATH_PROG([LUA], [lua])
@@ -24,12 +26,26 @@ BRLTTY_HAVE_PACKAGE([lua], [lua], [dnl
    if test -n "${LUA}"
    then
       AC_MSG_NOTICE([Lua shell: ${LUA}])
+      BRLTTY_LUA_QUERY([LUA_LIBRARY_DIRECTORY], [libdir])
 
-      LUA_OK=true
+      if test -n "${LUA_LIBRARY_DIRECTORY}"
+      then
+         AC_MSG_NOTICE([Lua library directory: ${LUA_LIBRARY_DIRECTORY}])
+         LUA_OK=true
+      else
+         AC_MSG_WARN([Lua library directory not found])
+      fi
+   else
+      AC_MSG_WARN([Lua shell not found])
+      LUA="LUA_SHELL_NOT_FOUND_BY_CONFIGURE"
    fi
 ])
 
 AC_SUBST([LUA_OK])
 AC_SUBST([LUA])
+AC_SUBST([LUA_LIBRARY_DIRECTORY])
 ])
 
+AC_DEFUN([BRLTTY_LUA_QUERY], [dnl
+   $1=`"${srcdir}/Tools/luacmd" $2`
+])
