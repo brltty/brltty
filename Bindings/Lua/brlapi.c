@@ -110,7 +110,7 @@ static int getDisplaySize(lua_State *L) {
 
 static int enterTtyMode(lua_State *L) {
   const int result = brlapi__enterTtyMode(checkhandle(L, 1),
-    luaL_checkinteger(L, 2), luaL_optstring(L, 3, NULL)
+    luaL_optinteger(L, 2, BRLAPI_TTY_DEFAULT), luaL_optstring(L, 3, NULL)
   );
 
   if (result == -1) error(L);
