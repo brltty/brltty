@@ -67,7 +67,7 @@ findLineBreakOpportunities (
    * 9  digits
    */
 
-  while (lbo->index < end) {
+  while (lbo->index <= end) {
     unsigned char *opportunity = &opportunities[lbo->index];
 
     lbo->previous = lbo->before;
@@ -456,7 +456,7 @@ findLineBreakOpportunities (
   unsigned char *opportunities,
   const wchar_t *characters, unsigned int end
 ) {
-  while (lbo->index < end) {
+  while (lbo->index <= end) {
     int isSpace = testCharacter(bcd, characters[lbo->index], CTC_Space);
     opportunities[lbo->index] = lbo->wasSpace && !isSpace;
 
@@ -986,7 +986,7 @@ contractText_native (BrailleContractionData *bcd) {
   BYTE *destjoin = NULL;
   BYTE *destlast = NULL;
 
-  unsigned char lineBreakOpportunities[getInputCount(bcd)];
+  unsigned char lineBreakOpportunities[getInputCount(bcd) + 1];
   LineBreakOpportunitiesState lbo;
   prepareLineBreakOpportunitiesState(&lbo);
 
