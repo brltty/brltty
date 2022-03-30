@@ -466,6 +466,19 @@ findLineBreakOpportunities (
 }
 #endif /* HAVE_ICU */
 
+static int
+isLineBreakOpportunity (
+  BrailleContractionData *bcd,
+  LineBreakOpportunitiesState *lbo,
+  unsigned char *opportunities
+) {
+  unsigned int index = getInputConsumed(bcd);
+  if (index == getInputCount(bcd)) return 1;
+
+  findLineBreakOpportunities(bcd, lbo, opportunities, bcd->input.begin, index);
+  return opportunities[index];
+}
+
 static inline ContractionTableHeader *
 getContractionTableHeader (BrailleContractionData *bcd) {
   return bcd->table->data.internal.header.fields;
@@ -1172,25 +1185,13 @@ contractText_native (BrailleContractionData *bcd) {
       bcd->input.current += 1;
     }
 
-    {
-      unsigned int index = getInputConsumed(bcd);
-      int canBreak;
+    if (isLineBreakOpportunity(bcd, &lbo, lineBreakOpportunities)) {
+      srcjoin = bcd->input.current;
+      destjoin = bcd->output.current;
 
-      if (index == getInputCount(bcd)) {
-        canBreak = 1;
-      } else {
-        findLineBreakOpportunities(bcd, &lbo, lineBreakOpportunities, bcd->input.begin, index);
-        canBreak = lineBreakOpportunities[index];
-      }
-
-      if (canBreak) {
-        srcjoin = bcd->input.current;
-        destjoin = bcd->output.current;
-
-        if (bcd->current.opcode != CTO_JoinedWord) {
-          srcword = bcd->input.current;
-          destword = bcd->output.current;
-        }
+      if (bcd->current.opcode != CTO_JoinedWord) {
+        srcword = bcd->input.current;
+        destword = bcd->output.current;
       }
     }
 
