@@ -1172,14 +1172,25 @@ contractText_native (BrailleContractionData *bcd) {
       bcd->input.current += 1;
     }
 
-    findLineBreakOpportunities(bcd, &lbo, lineBreakOpportunities, bcd->input.begin, getInputConsumed(bcd));
-    if (lineBreakOpportunities[getInputConsumed(bcd)]) {
-      srcjoin = bcd->input.current;
-      destjoin = bcd->output.current;
+    {
+      unsigned int index = getInputConsumed(bcd);
+      int canBreak;
 
-      if (bcd->current.opcode != CTO_JoinedWord) {
-        srcword = bcd->input.current;
-        destword = bcd->output.current;
+      if (index == getInputCount(bcd)) {
+        canBreak = 1;
+      } else {
+        findLineBreakOpportunities(bcd, &lbo, lineBreakOpportunities, bcd->input.begin, index);
+        canBreak = lineBreakOpportunities[index];
+      }
+
+      if (canBreak) {
+        srcjoin = bcd->input.current;
+        destjoin = bcd->output.current;
+
+        if (bcd->current.opcode != CTO_JoinedWord) {
+          srcword = bcd->input.current;
+          destword = bcd->output.current;
+        }
       }
     }
 
