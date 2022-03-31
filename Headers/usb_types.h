@@ -257,12 +257,15 @@ typedef struct {
 typedef struct {
   const void *data;
   const SerialParameters *serial;
+
   const char *const *manufacturers;
   const char *const *products;
 
+  uint16_t version;
   uint16_t vendor;
   uint16_t product;
-  uint16_t version;
+  uint16_t parentVendor;
+  uint16_t parentProduct;
 
   unsigned char configuration;
   unsigned char interface;
@@ -270,10 +273,10 @@ typedef struct {
   unsigned char inputEndpoint;
   unsigned char outputEndpoint;
 
-  unsigned disableAutosuspend:1;
-  unsigned disableEndpointReset:1;
-  unsigned verifyInterface:1;
-  unsigned resetDevice:1;
+  unsigned char disableAutosuspend:1;
+  unsigned char disableEndpointReset:1;
+  unsigned char verifyInterface:1;
+  unsigned char resetDevice:1;
 } UsbChannelDefinition;
 
 #define BEGIN_USB_CHANNEL_DEFINITIONS static const UsbChannelDefinition usbChannelDefinitions[] = {

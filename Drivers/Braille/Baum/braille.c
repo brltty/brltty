@@ -3263,6 +3263,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* NLS eReader Zoomax (20 cells) */
       .vendor=0X1A86, .product=0X7523,
+      .parentVendor=0X1A40, .parentProduct=0X0101,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=2, .outputEndpoint=2,
       .data=&baumEscapeOperations
