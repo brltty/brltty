@@ -66,20 +66,24 @@ proc parseChannelDefinition {channelVariable lines location stringsArray} {
          continue
       }
 
-      if {[regexp {\.vendor\s*=\s*(\S*?)\s*,} $line x identifier]} {
-         dict set channel vendor $identifier
+      foreach property {vendor product parentVendor parentProduct} {
+         set prefix {\.}
+         set suffix {\s*=\s*(\S*?)\s*,}
+         set pattern "${prefix}${property}${suffix}"
+
+         if {[regexp $pattern $line x identifier]} {
+            dict set channel $property $identifier
+         }
       }
 
-      if {[regexp {\.product\s*=\s*(\S*?)\s*,} $line x identifier]} {
-         dict set channel product $identifier
-      }
+      foreach property {manufacturers products} {
+         set prefix {\.}
+         set suffix {\s*=\s*(\S*?)\s*,}
+         set pattern "${prefix}${property}${suffix}"
 
-      if {[regexp {\.manufacturers\s*=\s*(\S*?)\s*,} $line x name]} {
-         dict set channel manufacturers $strings($name)
-      }
-
-      if {[regexp {\.products\s*=\s*(\S*?)\s*,} $line x name]} {
-         dict set channel products $strings($name)
+         if {[regexp $pattern $line x name]} {
+            dict set channel $property $strings($name)
+         }
       }
    }
 
@@ -218,7 +222,7 @@ proc parseDrivers {} {
 }
 
 proc formatDeviceDescription {device} {
-   return "[dict get $device name]\[[dict get $device model]\]"
+   return "[dict get $device name] \[[dict get $device channel model]\]"
 }
 
 proc makeDeviceTable {drivers} {
@@ -231,7 +235,7 @@ proc makeDeviceTable {drivers} {
          foreach channel $channels {
             dict with channel {
                set identifier [formatDeviceIdentifier $vendor $product]
-               set device [dict create code $code name $name model $model]
+               set device [dict create code $code name $name channel $channel]
 
                if {[dict exists $deviceTable vendors $vendor products $product]} {
                   set devices [dict get $deviceTable vendors $vendor products $product devices]
@@ -306,6 +310,21 @@ proc parseFileArguments {filesArray schemes arguments} {
    }
 }
 
+proc compareFilters {filter1 filter2} {
+   set length1 [llength $filter1]
+   set length2 [llength $filter2]
+
+   if {$length1 > $length2} {
+      return -1
+   }
+
+   if {$length1 < $length2} {
+      return 1
+   }
+
+   return [string compare $filter1 $filter2]
+}
+
 proc xmlMakeComment {comment} {
    return "<!-- $comment -->"
 }
@@ -314,7 +333,7 @@ proc makeComment_android {comment} {
    return [xmlMakeComment $comment]
 }
 
-proc makeLines_android {vendor product drivers descriptions exclude} {
+proc makeLines_android {vendor product codes descriptions exclude channels} {
    set lines [list]
 
    foreach description $descriptions {
@@ -334,17 +353,16 @@ proc makeComment_c {comment} {
    return "// $comment"
 }
 
-proc makeLines_c {vendor product drivers descriptions exclude} {
+proc makeLines_c {vendor product codes descriptions exclude channels} {
    set lines [list]
 
    foreach description $descriptions {
       lappend lines [makeComment_c $description]
    }
 
-   set codes [list]
-   foreach driver $drivers {
-      lappend codes "\"$driver\""
-   }
+   set codes [lmap code $codes {
+      set code "\"$code\""
+   }]
 
    lappend lines [format "USB_DEVICE_ENTRY(0X%04X, 0X%04X, [join $codes ", "])," $vendor $product]
    return $lines
@@ -354,7 +372,7 @@ proc makeComment_hotplug {comment} {
    return "# $comment"
 }
 
-proc makeLines_hotplug {vendor product drivers descriptions exclude} {
+proc makeLines_hotplug {vendor product codes descriptions exclude channels} {
    set lines [list]
 
    foreach description $descriptions {
@@ -374,7 +392,7 @@ proc makeComment_inf {comment} {
    return "; $comment"
 }
 
-proc makeLines_inf {vendor product drivers descriptions exclude} {
+proc makeLines_inf {vendor product codes descriptions exclude channels} {
    set lines [list]
    set line [format "\"\$1: %s\"=\$2, USB\\VID_%04X&PID_%04X" [join $descriptions ", "] $vendor $product]
 
@@ -390,7 +408,7 @@ proc makeComment_metainfo {comment} {
    return [xmlMakeComment $comment]
 }
 
-proc makeLines_metainfo {vendor product drivers descriptions exclude} {
+proc makeLines_metainfo {vendor product codes descriptions exclude channels} {
    set lines [list]
 
    foreach description $descriptions {
@@ -410,18 +428,50 @@ proc makeComment_udev {comment} {
    return "# $comment"
 }
 
-proc makeLines_udev {vendor product drivers descriptions exclude} {
+proc makeLines_udev {vendor product codes descriptions exclude channels} {
    set lines [list]
 
    foreach description $descriptions {
       lappend lines [makeComment_udev $description]
    }
 
-   set line [format "ENV\{PRODUCT\}==\"%x/%x/*\", ENV\{BRLTTY_BRAILLE_DRIVER\}=\"%s\", GOTO=\"brltty_usb_run\"" $vendor $product [join $drivers ,]]
-   if {$exclude} {
-      set line [makeComment_udev $line]
+   set baseFilter [list]
+   lappend baseFilter [format "ENV{PRODUCT}==\"%x/%x/*\"" $vendor $product]
+   set baseLength [llength $baseFilter]
+
+   foreach channel $channels {
+      set filter $baseFilter
+
+      foreach {property attribute} {
+         parentVendor  idVendor
+         parentProduct idProduct
+      } {
+         if {[dict exists $channel $property]} {
+            set value [format "%04x" [dict get $channel $property]]
+            lappend filter "ATTRS{$attribute}==\"$value\""
+         }
+      }
+
+      lappend filters($filter) [dict get $channel code]
    }
-   lappend lines $line
+
+   foreach filter [lsort -command compareFilters [array names filters]] {
+      set filterLength [llength $filter]
+      set codes [lsort -unique $filters($filter)]
+
+      set rule $filter
+      lappend rule "ENV{BRLTTY_BRAILLE_DRIVER}=\"[join $codes ,]\""
+      lappend rule "GOTO=\"brltty_usb_run\""
+      set line [join $rule ", "]
+
+      if {$filterLength == $baseLength} {
+         if {$exclude} {
+            set line [makeComment_udev $line]
+         }
+      }
+
+      lappend lines $line
+   }
 
    return $lines
 }
@@ -451,12 +501,20 @@ proc makeLines {linesArray schemes deviceTable} {
 
             set codes [list]
             set descriptions [list]
+            set channels [list]
 
             foreach deviceEntry [dict get $productEntry devices] {
-               lappend codes [dict get $deviceEntry code]
-               lappend descriptions "[dict get $deviceEntry name] \[[dict get $deviceEntry model]\]"
+               lappend codes [set code [dict get $deviceEntry code]]
+               lappend descriptions [set description [formatDeviceDescription $deviceEntry]]
+
+               set channel [dict get $deviceEntry channel]
+               dict set channel code $code
+               dict set channel description $description
+               lappend channels $channel
             }
 
+            set codes [lsort -unique $codes]
+            set descriptions [lsort $descriptions]
             set exclude 0
 
             if {[dict get $productEntry generic]} {
@@ -475,10 +533,7 @@ proc makeLines {linesArray schemes deviceTable} {
                set exclude $excludeGenericDevices
             }
 
-            set drivers [lsort -unique $codes]
-            set descriptions [lsort $descriptions]
-
-            eval [list lappend lines] [$makeLines $vendor $product $drivers $descriptions $exclude]
+            eval [list lappend lines] [$makeLines $vendor $product $codes $descriptions $exclude $channels]
             lappend lines ""
          }
       }
