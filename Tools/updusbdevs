@@ -443,12 +443,23 @@ proc makeLines_udev {vendor product codes descriptions exclude channels} {
       set filter $baseFilter
 
       foreach {property attribute} {
+         manufacturers manufacturer
+         products      product
+      } {
+         if {[dict exists $channel $property]} {
+            foreach string [dict get $channel $property] {
+               lappend filter "ATTR{$attribute}==\"$string\""
+            }
+         }
+      }
+
+      foreach {property attribute} {
          parentVendor  idVendor
          parentProduct idProduct
       } {
          if {[dict exists $channel $property]} {
-            set value [format "%04x" [dict get $channel $property]]
-            lappend filter "ATTRS{$attribute}==\"$value\""
+            set identifier [format "%04x" [dict get $channel $property]]
+            lappend filter "ATTRS{$attribute}==\"$identifier\""
          }
       }
 
