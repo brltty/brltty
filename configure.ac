@@ -1096,7 +1096,7 @@ BRLTTY_PKGCONFIG_VARIABLE([POLKIT_RULE_DIR], [polkit-gobject-1], [ruledir], [/us
 BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_SYSUSERS_DIR], [systemd], [sysusersdir], [/usr/lib/sysusers.d])
 BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_TMPFILES_DIR], [systemd], [tmpfilesdir], [/usr/lib/tmpfiles.d])
 BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_UNIT_DIR], [systemd], [systemdsystemunitdir], [/usr/lib/systemd/system])
-BRLTTY_PKGCONFIG_VARIABLE([UDEV_DIR], [udev], [udevdir], [/usr/lib/udev])
+BRLTTY_PKGCONFIG_VARIABLE([SYSTEMD_CONF_DIR], [systemd], [systemdsystemconfdir], [/usr/lib/systemd/system])
 
 BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
    *android*)
