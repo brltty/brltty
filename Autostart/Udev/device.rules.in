@@ -37,7 +37,10 @@ LABEL="brltty_usb_begin"
 # HandyTech [FTDI chip]
 # Hedo [MobilLine]
 # MDV [all models]
-ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="at,ce,hd,hm,ht,md", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ATTR{manufacturer}=="FTDI", ENV{BRLTTY_BRAILLE_DRIVER}="hm,ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ATTR{manufacturer}=="Hedo Reha Technik GmbH", ENV{BRLTTY_BRAILLE_DRIVER}="hd", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ATTR{manufacturer}=="Tivomatic Oy", ENV{BRLTTY_BRAILLE_DRIVER}="at", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="ce,md", GOTO="brltty_usb_run"
 
 # Device: 0403:DE58
 # Hedo [MobilLine]
@@ -296,14 +299,14 @@ ENV{PRODUCT}=="f4e/114/*", ENV{BRLTTY_BRAILLE_DRIVER}="fs", GOTO="brltty_usb_run
 # Product: CP210x UART Bridge / myAVR mySmartUSB light
 # BrailleMemo [Pocket]
 # Seika [Braille Display]
-ENV{PRODUCT}=="10c4/ea60/*", ENV{BRLTTY_BRAILLE_DRIVER}="mm,sk", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="10c4/ea60/*", ATTR{manufacturer}=="Silicon Labs", ENV{BRLTTY_BRAILLE_DRIVER}="mm,sk", GOTO="brltty_usb_run"
 
 # Device: 10C4:EA80
 # Generic Identifier
 # Vendor: Cygnal Integrated Products, Inc.
 # Product: CP210x UART Bridge
 # Seika [Note Taker]
-ENV{PRODUCT}=="10c4/ea80/*", ENV{BRLTTY_BRAILLE_DRIVER}="sk", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="10c4/ea80/*", ATTR{manufacturer}=="Silicon Laboratories", ENV{BRLTTY_BRAILLE_DRIVER}="sk", GOTO="brltty_usb_run"
 
 # Device: 1148:0301
 # BrailleMemo [Smart]
@@ -315,14 +318,14 @@ ENV{PRODUCT}=="1209/abc0/*", ENV{BRLTTY_BRAILLE_DRIVER}="ic", GOTO="brltty_usb_r
 
 # Device: 16C0:05E1
 # Canute [all models]
-ENV{PRODUCT}=="16c0/5e1/*", ENV{BRLTTY_BRAILLE_DRIVER}="cn", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="16c0/5e1/*", ATTR{manufacturer}=="bristolbraille.co.uk", ATTR{product}=="Canute 360", ENV{BRLTTY_BRAILLE_DRIVER}="cn", GOTO="brltty_usb_run"
 
 # Device: 1A86:7523
 # Generic Identifier
 # Vendor: Jiangsu QinHeng, Ltd.
 # Product: CH341 USB Bridge Controller
 # Baum [NLS eReader Zoomax (20 cells)]
-ENV{PRODUCT}=="1a86/7523/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="1a86/7523/*", ATTRS{idVendor}=="1a40", ATTRS{idProduct}=="0101", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
 
 # Device: 1C71:C004
 # BrailleNote [HumanWare APEX]
