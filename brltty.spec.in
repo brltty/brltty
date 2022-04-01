@@ -468,6 +468,27 @@ Install this package if you have a Java application
 which directly accesses a refreshable braille display.
 
 
+%package -n lua-brlapi
+Version: @api_release@
+Release: 1
+Group: System Environment/Libraries
+License: LGPL
+
+BuildRequires: lua
+BuildRequires: lua-devel
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Lua bindings for BrlAPI.
+%description -n lua-brlapi
+This package provides the Lua bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have an Lua application
+which directly accesses a refreshable braille display.
+
+
 %package -n ocaml-brlapi
 Version: @api_release@
 Release: 1
@@ -668,6 +689,9 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n java-brlapi
 @JAVA_JAR_DIR@/*
 @JAVA_JNI_DIR@/*
+
+%files -n lua-brlapi
+@LUA_LIBRARY_DIRECTORY@/
 
 %files -n ocaml-brlapi
 @OCAMLLIB@/brlapi
