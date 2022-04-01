@@ -546,7 +546,7 @@ make install
 make install-messages
 make install-appstream
 make install-systemd
-make install-udev
+make install-udev UDEV_RULES_LOCATION=%{_udevrulesdir}
 make install-polkit
 make install-dracut
 make install-documents
