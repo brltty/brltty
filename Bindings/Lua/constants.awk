@@ -18,7 +18,7 @@
 ###############################################################################
 
 function brlCommand(name, symbol, value, help) {
-  print "  CMD(" name ", " symbol ")" >commandsHeader
+  print "  CMD(" name ", " symbol ")"
 }
 
 function brlBlock(name, symbol, value, help) {
