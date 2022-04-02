@@ -423,10 +423,9 @@ parseParameters (
     while (1) {
       const char *parameterEnd = strchr(parameter, PARAMETER_SEPARATOR_CHARACTER);
       int done = !parameterEnd;
-      int parameterLength;
 
       if (done) parameterEnd = parameter + strlen(parameter);
-      parameterLength = parameterEnd - parameter;
+      int parameterLength = parameterEnd - parameter;
 
       if (parameterLength > 0) {
         const char *value = memchr(parameter, PARAMETER_ASSIGNMENT_CHARACTER, parameterLength);
@@ -435,7 +434,7 @@ parseParameters (
           logMessage(LOG_ERR, "%s: %.*s",
                      gettext("missing parameter value"),
                      parameterLength, parameter);
-          return 0;
+          goto NEXT_PARAMETER;
         }
 
         {
@@ -459,7 +458,7 @@ parseParameters (
                 logMessage(LOG_ERR, "%s: %.*s",
                            gettext("missing parameter qualifier"),
                            parameterLength, parameter);
-                return 0;
+                goto NEXT_PARAMETER;
               }
 
               if ((qualifierLength == strlen(qualifier)) &&
@@ -473,7 +472,7 @@ parseParameters (
             logMessage(LOG_ERR, "%s: %.*s",
                        gettext("missing parameter name"),
                        parameterLength, parameter);
-            return 0;
+            goto NEXT_PARAMETER;
           }
 
           if (isEligible) {
@@ -493,7 +492,7 @@ parseParameters (
 
                 free(values[index]);
                 values[index] = newValue;
-                goto parameterDone;
+                goto NEXT_PARAMETER;
               }
 
               index += 1;
@@ -502,12 +501,12 @@ parseParameters (
             logMessage(LOG_ERR, "%s: %.*s",
                        gettext("unsupported parameter"),
                        parameterLength, parameter);
-            return 0;
+            goto NEXT_PARAMETER;
           }
         }
       }
 
-    parameterDone:
+    NEXT_PARAMETER:
       if (done) break;
       parameter = parameterEnd + 1;
     }
