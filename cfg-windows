@@ -45,6 +45,7 @@ toRelativePath "${programDirectory}" configureDirectory
    --without-hid-package \
    \
    --disable-java-bindings \
+   --disable-lua-bindings \
    --disable-ocaml-bindings \
    --disable-tcl-bindings \
    \
