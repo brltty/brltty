@@ -59,6 +59,8 @@ readonly configureOptions=(
    --without-fm-package
    --without-hid-package
    --without-ports-package
+
+   --disable-lua-bindings
 )
 
 . "`dirname "${0}"`/brltty-prologue.sh"
