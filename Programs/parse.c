@@ -431,7 +431,7 @@ parseParameters (
         const char *value = memchr(parameter, PARAMETER_ASSIGNMENT_CHARACTER, parameterLength);
 
         if (!value) {
-          logMessage(LOG_ERR, "%s: %.*s",
+          logMessage(LOG_WARNING, "%s: %.*s",
                      gettext("missing parameter value"),
                      parameterLength, parameter);
           goto NEXT_PARAMETER;
@@ -455,7 +455,7 @@ parseParameters (
               isEligible = 0;
 
               if (!qualifierLength) {
-                logMessage(LOG_ERR, "%s: %.*s",
+                logMessage(LOG_WARNING, "%s: %.*s",
                            gettext("missing parameter qualifier"),
                            parameterLength, parameter);
                 goto NEXT_PARAMETER;
@@ -469,7 +469,7 @@ parseParameters (
           }
 
           if (!nameLength) {
-            logMessage(LOG_ERR, "%s: %.*s",
+            logMessage(LOG_WARNING, "%s: %.*s",
                        gettext("missing parameter name"),
                        parameterLength, parameter);
             goto NEXT_PARAMETER;
@@ -498,7 +498,7 @@ parseParameters (
               index += 1;
             }
 
-            logMessage(LOG_ERR, "%s: %.*s",
+            logMessage(LOG_WARNING, "%s: %.*s",
                        gettext("unsupported parameter"),
                        parameterLength, parameter);
             goto NEXT_PARAMETER;
