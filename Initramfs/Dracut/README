@@ -78,17 +78,17 @@ BRLTTY_DRACUT_TEXT_TABLES
 
     BRLTTY_DRACUT_TEXT_TABLES="de fr"
 
-BRLTTY_DRACUT_ATTRIBUTES_TABLES
-  A space-separated list of additional attributes tables to include. For
-  example::
-
-    BRLTTY_DRACUT_ATTRIBUTES_TABLES="upper_lower left_right"
-
 BRLTTY_DRACUT_CONTRACTION_TABLES
   A space-separated list of additional contraction tables to include. For
   example::
 
     BRLTTY_DRACUT_CONTRACTION_TABLES="de-g2 fr-g2"
+
+BRLTTY_DRACUT_ATTRIBUTES_TABLES
+  A space-separated list of additional attributes tables to include. For
+  example::
+
+    BRLTTY_DRACUT_ATTRIBUTES_TABLES="upper_lower left_right"
 
 BRLTTY_DRACUT_KEYBOARD_TABLES
   A space-separated list of additional keyboard tables to include. For
