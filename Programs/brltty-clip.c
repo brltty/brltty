@@ -48,20 +48,20 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "BrlAPI authorization/authentication schemes."
   },
 
-  { .word = "get",
+  { .word = "get-content",
     .letter = 'g',
     .setting.flag = &opt_getContent,
     .description = "Write the content of the clipboard to standard output."
   },
 
-  { .word = "set",
+  { .word = "set-content",
     .letter = 's',
     .argument = "content",
     .setting.string = &opt_setContent,
     .description = "Set the content of the clipboard."
   },
 
-  { .word = "remove",
+  { .word = "remove-newline",
     .letter = 'r',
     .setting.flag = &opt_removeNewline,
     .description = "Remove a trailing newline."
