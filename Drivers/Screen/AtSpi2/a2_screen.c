@@ -1692,10 +1692,12 @@ insertKey_AtSpi2Screen (ScreenKey key) {
   int modMeta=0, modControl=0;
 
   switch (key) {
-    case '\n':   key = SCR_KEY_ENTER;     break;
+    case '\n':
+    case '\r':   key = SCR_KEY_ENTER;     break;
     case '\t':   key = SCR_KEY_TAB;       break;
     case '\b':   key = SCR_KEY_BACKSPACE; break;
     case '\033': key = SCR_KEY_ESCAPE;    break;
+    default:                              break;
   }
 
   setScreenKeyModifiers(&key, SCR_KEY_CONTROL);
