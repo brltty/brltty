@@ -348,6 +348,108 @@ static int pause_(lua_State *L) {
   return 0;
 }
 
+static int getBooleanParameter(lua_State *L, brlapi_param_t param) {
+  brlapi_param_bool_t value;
+  const int result = brlapi__getParameter(checkhandle(L, 1),
+    param, 0, BRLAPI_PARAMF_GLOBAL, &value, sizeof(value)
+  );
+
+  if (result == -1) error(L);
+
+  lua_pushboolean(L, value);
+
+  return 1;
+}
+
+static int setBooleanParameter(lua_State *L, brlapi_param_t param) {
+  brlapi_handle_t *const handle = checkhandle(L, 1);
+  const brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
+  const brlapi_param_bool_t value = lua_toboolean(L, 2);
+
+  if (brlapi__setParameter(handle, param, 0, flags, &value, sizeof(value)) == -1)
+    error(L);
+
+  return 0;
+}
+
+static int getStringParameter(lua_State *L, brlapi_param_t param) {
+  size_t count;
+  char *string = brlapi__getParameterAlloc(checkhandle(L, 1),
+    param, 0, BRLAPI_PARAMF_GLOBAL, &count
+  );
+
+  if (string == NULL) error(L);
+
+  lua_pushlstring(L, string, count);
+  free(string);
+
+  return 1;
+}
+
+static int setStringParameter(lua_State *L, brlapi_param_t param) {
+  brlapi_handle_t *const handle = checkhandle(L, 1);
+  size_t length;
+  const brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
+  const char *string = luaL_checklstring(L, 2, &length);
+
+  if (brlapi__setParameter(handle, param, 0, flags, string, length) == -1)
+    error(L);
+
+  return 0;
+}
+
+static int getDriverCode(lua_State *L) {
+  return getStringParameter(L, BRLAPI_PARAM_DRIVER_CODE);
+}
+
+static int getDriverVersion(lua_State *L) {
+  return getStringParameter(L, BRLAPI_PARAM_DRIVER_VERSION);
+}
+
+static int getDeviceOnline(lua_State *L) {
+  return getBooleanParameter(L, BRLAPI_PARAM_DEVICE_ONLINE);
+}
+
+static int getAudibleAlerts(lua_State *L) {
+  return getBooleanParameter(L, BRLAPI_PARAM_AUDIBLE_ALERTS);
+}
+
+static int setAudibleAlerts(lua_State *L) {
+  return setBooleanParameter(L, BRLAPI_PARAM_AUDIBLE_ALERTS);
+}
+
+static int getClipboardContent(lua_State *L) {
+  return getStringParameter(L, BRLAPI_PARAM_CLIPBOARD_CONTENT);
+}
+
+static int setClipboardContent(lua_State *L) {
+  return setStringParameter(L, BRLAPI_PARAM_CLIPBOARD_CONTENT);
+}
+
+static int getComputerBrailleTable(lua_State *L) {
+  return getStringParameter(L, BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE);
+}
+
+static int setComputerBrailleTable(lua_State *L) {
+  return setStringParameter(L, BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE);
+}
+
+static int getLiteraryBrailleTable(lua_State *L) {
+  return getStringParameter(L, BRLAPI_PARAM_LITERARY_BRAILLE_TABLE);
+}
+
+static int setLiteraryBrailleTable(lua_State *L) {
+  return setStringParameter(L, BRLAPI_PARAM_LITERARY_BRAILLE_TABLE);
+}
+
+static int getMessageLocale(lua_State *L) {
+  return getStringParameter(L, BRLAPI_PARAM_MESSAGE_LOCALE);
+}
+
+static int setMessageLocale(lua_State *L) {
+  return setStringParameter(L, BRLAPI_PARAM_MESSAGE_LOCALE);
+}
+
 static const luaL_Reg meta[] = {
   { "__close", closeConnection },
   { NULL, NULL }
@@ -379,6 +481,19 @@ static const luaL_Reg funcs[] = {
   { "suspendDriver", suspendDriver },
   { "resumeDriver", resumeDriver },
   { "pause", pause_ },
+  { "getDriverCode", getDriverCode },
+  { "getDriverVersion", getDriverVersion },
+  { "getDeviceOnline", getDeviceOnline },
+  { "getAudibleAlerts", getAudibleAlerts },
+  { "setAudibleAlerts", setAudibleAlerts },
+  { "getClipboardContent", getClipboardContent },
+  { "setClipboardContent", setClipboardContent },
+  { "getComputerBrailleTable", getComputerBrailleTable },
+  { "setComputerBrailleTable", setComputerBrailleTable },
+  { "getLiteraryBrailleTable", getLiteraryBrailleTable },
+  { "setLiteraryBrailleTable", setLiteraryBrailleTable },
+  { "getMessageLocale", getMessageLocale },
+  { "setMessageLocale", setMessageLocale },
   { NULL, NULL }
 };
 

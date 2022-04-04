@@ -29,12 +29,20 @@ local function performTests ()
 
   showProperty("File Descriptor", brl:getFileDescriptor())
   showProperty("Driver Name", brl:getDriverName())
+  showProperty("Driver Code", brl:getDriverCode())
+  showProperty("Driver Version", brl:getDriverVersion())
   showProperty("Model Identifier", brl:getModelIdentifier())
 
   do
     local columns, rows = brl:getDisplaySize()
     showProperty("Display Size", string.format("%dx%d", columns, rows))
   end
+
+  showProperty("Device Online", brl:getDeviceOnline())
+  showProperty("Audible Alerts", brl:getAudibleAlerts())
+  showProperty("Computer Braille Table", brl:getComputerBrailleTable())
+  showProperty("Literary Braille Table", brl:getLiteraryBrailleTable())
+  showProperty("Message Locale", brl:getMessageLocale())
 end
 
 do
