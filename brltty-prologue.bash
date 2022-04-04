@@ -97,13 +97,12 @@ listElements() {
 }
 
 programConfigurationFilePrefixes=()
-
 findProgramConfigurationFile() {
    local fileVariable="${1}"
    shift 1
 
    [ "${#}" -gt 0 ] || set -- conf cfg
-   local extensions=("${@}")
+   local fileExtensions=("${@}")
 
    [ "${#programConfigurationFilePrefixes[*]}" -gt 0 ] || {
       programConfigurationFilePrefixes+=("${PWD}/.")
@@ -123,9 +122,54 @@ findProgramConfigurationFile() {
    do
       local extension
 
-      for extension in "${extensions[@]}"
+      for extension in "${fileExtensions[@]}"
       do
          local _file="${prefix}${programName}.${extension}"
+         [ -f "${_file}" ] || continue
+         [ -r "${_file}" ] || continue
+
+         setVariable "${fileVariable}" "${_file}"
+         return 0
+      done
+   done
+
+   return 1
+}
+
+programComponentDirectories=()
+findProgramComponent() {
+   local fileVariable="${1}"
+   shift 1
+
+   [ "${#}" -gt 0 ] || set -- bash sh
+   local fileExtensions=("${@}")
+
+   [ "${#programComponentDirectories[*]}" -gt 0 ] || {
+      local subdirectory="libexec"
+
+      programComponentDirectories+=("${PWD}")
+      programComponentDirectories+=("${PWD}/../${subdirectory}")
+
+      [ -n "${HOME}" ] && {
+         programComponentDirectories+=("${HOME}/.config/${programName}")
+         programComponentDirectories+=("${HOME}/${subdirectory}")
+      }
+
+      programComponentDirectories+=("/usr/${subdirectory}")
+      programComponentDirectories+=("/${subdirectory}")
+
+      programComponentDirectories+=("/etc/${programName}")
+      programComponentDirectories+=("/etc/xdg/${programName}")
+   }
+
+   local directory
+   for directory in "${programComponentDirectories[@]}"
+   do
+      local extension
+
+      for extension in "${fileExtensions[@]}"
+      do
+         local _file="${directory}/${programName}.${extension}"
          [ -f "${_file}" ] || continue
          [ -r "${_file}" ] || continue
 
