@@ -140,6 +140,7 @@ verifyChoice() {
 
    for choice
    do
+      [ "${value}" = "${choice}" ] && return 0
       [ "${length}" -le "${#choice}" ] || continue
       [ "${value}" = "${choice:0:length}" ] || continue
       candidates+=("${choice}")
