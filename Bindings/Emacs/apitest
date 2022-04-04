@@ -1,0 +1,3 @@
+#!/bin/sh
+
+emacs --batch --no-site-file -L . -l apitest.el
