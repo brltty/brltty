@@ -96,31 +96,42 @@ listElements() {
    forElements "${_array}" listElement "${_array}" | sort
 }
 
+programConfigurationFilePrefixes=()
+
 findProgramConfigurationFile() {
    local fileVariable="${1}"
-   local extension="${2}"
+   shift 1
 
-   local suffix="${programName}.${extension}"
-   local prefixes=("./.")
+   [ "${#}" -gt 0 ] || set -- conf cfg
+   local extensions=("${@}")
 
-   [ -n "${HOME}" ] && {
-      prefixes+=("${HOME}/.config/${programName}/")
-      prefixes+=("${HOME}/.")
+   [ "${#programConfigurationFilePrefixes[*]}" -gt 0 ] || {
+      programConfigurationFilePrefixes+=("${PWD}/.")
+
+      [ -n "${HOME}" ] && {
+         programConfigurationFilePrefixes+=("${HOME}/.config/${programName}/")
+         programConfigurationFilePrefixes+=("${HOME}/.")
+      }
+
+      programConfigurationFilePrefixes+=("/etc/${programName}/")
+      programConfigurationFilePrefixes+=("/etc/xdg/${programName}/")
+      programConfigurationFilePrefixes+=("/etc/")
    }
 
-   prefixes+=("/etc/${programName}/")
-   prefixes+=("/etc/xdg/${programName}/")
-   prefixes+=("/etc/")
-
    local prefix
-   for prefix in "${prefixes[@]}"
+   for prefix in "${programConfigurationFilePrefixes[@]}"
    do
-      local _file="${prefix}${suffix}"
-      [ -f "${_file}" ] || continue
-      [ -r "${_file}" ] || continue
+      local extension
 
-      setVariable "${fileVariable}" "${_file}"
-      return 0
+      for extension in "${extensions[@]}"
+      do
+         local _file="${prefix}${programName}.${extension}"
+         [ -f "${_file}" ] || continue
+         [ -r "${_file}" ] || continue
+
+         setVariable "${fileVariable}" "${_file}"
+         return 0
+      done
    done
 
    return 1
