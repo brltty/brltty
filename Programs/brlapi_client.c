@@ -1630,6 +1630,8 @@ static int getControllingTty(void)
   /*if ((env = getenv("WINDOW")) && sscanf(env, "%u", &tty) == 1) return tty;*/
   if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) return tty;
   if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
+  if (!getenv("DISPLAY") && !getenv("WAYLAND_DISPLAY"))
+    if ((env = getenv("XDG_VTNR")) && sscanf(env, "%u", &tty) == 1) return tty;
 
 #ifdef WINDOWS
   if (CHECKGETPROC("kernel32.dll", GetConsoleWindow))
