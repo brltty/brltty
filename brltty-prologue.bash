@@ -139,10 +139,16 @@ findProgramConfigurationFile() {
 programComponentDirectories=()
 findProgramComponent() {
    local fileVariable="${1}"
-   shift 1
-
-   [ "${#}" -gt 0 ] || set -- bash sh
+   local name="${2}"
+   shift 2
    local fileExtensions=("${@}")
+
+   if [ "${#fileExtensions[*]}" -eq 0 ]
+   then
+      fileExtensions=(bash sh)
+   else
+      name="${programName}.${name}"
+   fi
 
    [ "${#programComponentDirectories[*]}" -gt 0 ] || {
       local subdirectory="libexec"
@@ -169,7 +175,7 @@ findProgramComponent() {
 
       for extension in "${fileExtensions[@]}"
       do
-         local _file="${directory}/${programName}.${extension}"
+         local _file="${directory}/${name}.${extension}"
          [ -f "${_file}" ] || continue
          [ -r "${_file}" ] || continue
 
@@ -179,6 +185,24 @@ findProgramComponent() {
    done
 
    return 1
+}
+
+includeProgramComponent() {
+   local fileVariable="${1}"
+   local name="${2}"
+
+   findProgramComponent "${fileVariable}" "${name}" || {
+      logWarning "program component not found: ${name}"
+      return 1
+   }
+
+   . "${!fileVariable}" || {
+      logWarning "failure including program component: ${name}"
+      return 2
+   }
+
+   logNote "program component included: ${name}"
+   return 0
 }
 
 verifyChoice() {
