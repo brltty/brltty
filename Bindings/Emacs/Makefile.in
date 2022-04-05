@@ -1,0 +1,41 @@
+###############################################################################
+# libbrlapi - A library providing access to braille terminals for applications.
+#
+# Copyright (C) 2006-2022 by Dave Mielke <dave@mielke.cc>
+#
+# libbrlapi comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+include $(SRC_TOP)bindings.mk
+
+EMACS_OK = @LUA_OK@
+EMACS = @EMACS@
+
+EMACS_API_NAME = $(API_NAME)
+EMACS_API_OBJECT = bindings.$O
+EMACS_API_LIBRARY = $(EMACS_API_NAME).$(LIB_EXT)
+
+all: $(EMACS_API_LIBRARY)
+
+$(EMACS_API_LIBRARY): $(EMACS_API_OBJECT)
+	$(MKLIB:<name>=$(EMACS_API_LIBRARY).$(API_VERSION)) $@ $(EMACS_API_OBJECT) $(API_LDFLAGS)
+
+$(EMACS_API_OBJECT): | $(API_NAME)
+	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
+
+clean::
+	-rm -f -- $(EMACS_API_LIBRARY)
+
+install: all
+
+uninstall:
+

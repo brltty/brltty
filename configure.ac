@@ -21,6 +21,7 @@ AC_INIT([BRLTTY], [6.4], [BRLTTY@brltty.app], [brltty], [https://brltty.app/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
 AC_CONFIG_MACRO_DIR([m4])
+m4_include([Bindings/Emacs/bindings.m4])
 m4_include([Bindings/Java/bindings.m4])
 m4_include([Bindings/Lisp/bindings.m4])
 m4_include([Bindings/Lua/bindings.m4])
@@ -762,6 +763,7 @@ BRLTTY_ARG_DISABLE(
           [api_socket_path], ["${default_api_socket_path}"]
       )
 
+      BRLTTY_BINDINGS([Emacs])
       BRLTTY_BINDINGS([Java])
       BRLTTY_BINDINGS([Lisp])
       BRLTTY_BINDINGS([Lua])
