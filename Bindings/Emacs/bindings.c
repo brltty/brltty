@@ -72,11 +72,11 @@ extract_string(emacs_env *env, ptrdiff_t nargs, ptrdiff_t arg, emacs_value *args
     if (env->is_not_nil(env, args[arg])) {
       ptrdiff_t size;
       if (env->copy_string_contents(env, args[arg], NULL, &size)) {
-	char *string = malloc(size);
+        char *string = malloc(size);
 
-	if (env->copy_string_contents(env, args[arg], string, &size)) {
-	  return string;
-	}
+        if (env->copy_string_contents(env, args[arg], string, &size)) {
+          return string;
+        }
       }
     }
   }
@@ -96,6 +96,7 @@ openConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   int result;
 
   if (env->non_local_exit_check(env) != emacs_funcall_exit_return) {
+    if (handle) free(handle);
     if (host) free(host);
     if (auth) free(auth);
     return NULL;
@@ -108,6 +109,7 @@ openConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   
   if (result == -1) {
     error(env);
+    free(handle);
     return NULL;
   }
 
@@ -115,43 +117,36 @@ openConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
 }
 
 static emacs_value
-getDriverName(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
+getString(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data,
+  int BRLAPI_STDCALL (*get) (brlapi_handle_t *, char *, size_t)
+) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
-  char name[BRLAPI_MAXNAMELENGTH + 1];
-  size_t length;
 
-  if (handle == NULL) return NULL;
+  if (handle) {
+    char name[BRLAPI_MAXNAMELENGTH + 1];
+    size_t length = get(handle, name, sizeof(name));
 
-  length = brlapi__getDriverName(handle, name, sizeof(name));
+    if (length != -1) {
+      if (length > 0) length--;
 
-  if (length == -1) {
+      return env->make_string(env, name, length);
+    }
+
     error(env);
-    return NULL;
   }
 
-  if (length > 0) length--;
+  return NULL;
+}
 
-  return env->make_string(env, name, length);
+static emacs_value
+getDriverName(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
+  return getString(env, nargs, args, data, brlapi__getDriverName);
 }
 
 static emacs_value
 getModelIdentifier(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
-  char name[BRLAPI_MAXNAMELENGTH + 1];
-  size_t length;
-
-  if (handle == NULL) return NULL;
-
-  length = brlapi__getModelIdentifier(handle, name, sizeof(name));
-
-  if (length == -1) {
-    error(env);
-    return NULL;
-  }
-
-  if (length > 0) length--;
-
-  return env->make_string(env, name, length);
+  return getString(env, nargs, args, data, brlapi__getModelIdentifier);
 }
 
 static inline emacs_value
@@ -178,56 +173,60 @@ getDisplaySize(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   return NULL;
 }
 
-static inline int
-extract_tty(emacs_env *env, emacs_value arg) {
-  if (!env->is_not_nil(env, arg)) return BRLAPI_TTY_DEFAULT;
-  return env->extract_integer(env, arg);
-}
-
 static char *
 extract_driver(emacs_env *env, emacs_value arg) {
-  ptrdiff_t length;
-  env->copy_string_contents(env, arg, NULL, &length);
-  char *driver = malloc(length);
-  env->copy_string_contents(env, arg, driver, &length);
-  return driver;
+  ptrdiff_t size;
+
+  if (env->copy_string_contents(env, arg, NULL, &size)) {
+    char *driver = malloc(size);
+
+    if (env->copy_string_contents(env, arg, driver, &size)) {
+      return driver;
+    }
+  }
+
+  return NULL;
 }
 
 static emacs_value
 enterTtyMode(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
-  int tty = nargs > 1? extract_tty(env, args[1]): BRLAPI_TTY_DEFAULT;
-  char *driver = nargs > 2? extract_driver(env, args[2]): NULL;
+  emacs_value result = NULL;
 
-  if (env->non_local_exit_check(env) != emacs_funcall_exit_return) {
+  if (handle) {
+    int tty = nargs > 1 && env->is_not_nil(env, args[1])?
+              env->extract_integer(env, args[1]): BRLAPI_TTY_DEFAULT;
+    char *driver = nargs > 2? extract_driver(env, args[2]): NULL;
+
+    if (env->non_local_exit_check(env) == emacs_funcall_exit_return) {
+      tty = brlapi__enterTtyMode(handle, tty, driver);
+    
+      if (tty != -1) {
+        result = env->make_integer(env, tty);
+      } else {
+        error(env);
+      }
+    }
+
     if (driver) free(driver);
-    return NULL;
   }
 
-  tty = brlapi__enterTtyMode(handle, tty, driver);
-
-  if (driver) free(driver);
-
-  if (tty == -1) {
-    error(env);
-    return NULL;
-  }
-  
-  return env->make_integer(env, tty);
+  return result;
 }
 
 static emacs_value
 leaveTtyMode(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
 
-  if (handle == NULL) return NULL;
+  if (handle) {
+    if (brlapi__leaveTtyMode(handle) != -1) {
+      return env->intern(env, "nil");
+    }
 
-  if (brlapi__leaveTtyMode(handle) == -1) {
     error(env);
-    return NULL;
   }
 
-  return env->intern(env, "nil");
+  return NULL;
 }
 
 static inline int
@@ -248,15 +247,15 @@ writeText(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
       char text[size];
 
       if (env->copy_string_contents(env, args[1], text, &size)) {
-	int cursor = nargs > 2? extract_cursor(env, args[2]): BRLAPI_CURSOR_OFF;
+        int cursor = nargs > 2? extract_cursor(env, args[2]): BRLAPI_CURSOR_OFF;
 
-	if (env->non_local_exit_check(env) == emacs_funcall_exit_return) {
-	  if (brlapi__writeText(handle, cursor, text) != -1) {
-	    return env->intern(env, "nil");
-	  }
+        if (env->non_local_exit_check(env) == emacs_funcall_exit_return) {
+          if (brlapi__writeText(handle, cursor, text) != -1) {
+            return env->intern(env, "nil");
+          }
 
-	  error(env);
-	}
+          error(env);
+        }
       }
     }
   }
@@ -320,7 +319,10 @@ readKeyWithTimeout(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *dat
 }
 
 static emacs_value
-getStringParameter(brlapi_param_t param, emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
+getStringParameter(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data,
+  brlapi_param_t param
+) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
   char *string;
   size_t count;
@@ -343,8 +345,8 @@ getStringParameter(brlapi_param_t param, emacs_env *env, ptrdiff_t nargs, emacs_
 
 static emacs_value
 setStringParameter(
-  brlapi_param_t param,
-  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data,
+  brlapi_param_t param
 ) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
   ptrdiff_t length;
@@ -370,63 +372,91 @@ setStringParameter(
 
 static emacs_value
 getDriverCode(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return getStringParameter(BRLAPI_PARAM_DRIVER_CODE, env, nargs, args, data);
+  return getStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_DRIVER_CODE);
 }
 
 static emacs_value
 getDriverVersion(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return getStringParameter(BRLAPI_PARAM_DRIVER_VERSION, env, nargs, args, data);
+  return getStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_DRIVER_VERSION);
 }
 
 static emacs_value
-getClipboardContent(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return getStringParameter(BRLAPI_PARAM_CLIPBOARD_CONTENT, env, nargs, args, data);
+getClipboardContent(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_CLIPBOARD_CONTENT);
 }
 
 static emacs_value
-setClipboardContent(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return setStringParameter(BRLAPI_PARAM_CLIPBOARD_CONTENT, env, nargs, args, data);
+setClipboardContent(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return setStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_CLIPBOARD_CONTENT);
 }
 
 static emacs_value
-getComputerBrailleTable(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return getStringParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE, env, nargs, args, data);
+getComputerBrailleTable(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE);
 }
 
 static emacs_value
-setComputerBrailleTable(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return setStringParameter(BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE, env, nargs, args, data);
+setComputerBrailleTable(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return setStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE);
 }
 
 static emacs_value
-getLiteraryBrailleTable(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return getStringParameter(BRLAPI_PARAM_LITERARY_BRAILLE_TABLE, env, nargs, args, data);
+getLiteraryBrailleTable(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_LITERARY_BRAILLE_TABLE);
 }
 
 static emacs_value
-setLiteraryBrailleTable(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return setStringParameter(BRLAPI_PARAM_LITERARY_BRAILLE_TABLE, env, nargs, args, data);
+setLiteraryBrailleTable(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return setStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_LITERARY_BRAILLE_TABLE);
 }
 
 static emacs_value
-getMessageLocae(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return getStringParameter(BRLAPI_PARAM_MESSAGE_LOCALE, env, nargs, args, data);
+getMessageLocae(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_MESSAGE_LOCALE);
 }
 
 static emacs_value
-setMessageLocale(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
-  return setStringParameter(BRLAPI_PARAM_MESSAGE_LOCALE, env, nargs, args, data);
+setMessageLocale(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return setStringParameter(env, nargs, args, data,
+                            BRLAPI_PARAM_MESSAGE_LOCALE);
 }
 
 static emacs_value
 closeConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
 
-  if (handle == NULL) return NULL;
+  if (handle) {
+    brlapi__closeConnection(handle);
 
-  brlapi__closeConnection(handle);
+    return env->intern(env, "nil");
+  }
 
-  return env->intern(env, "nil");
+  return NULL;
 }
 
 int
@@ -454,15 +484,15 @@ emacs_module_init(struct emacs_runtime *runtime) {
     env->funcall(env, env->intern(env, "defalias"), ARRAY_COUNT(args), args); \
   }
 
+  register_function(getLibraryVersion, 0, 0, "get-library-version",
+    "Get the version of BrlAPI."
+  )
   register_function(openConnection, 0, 2, "open-connection",
     "Open a new connection to BRLTTY."
     "\n\nHOST is a string of the form \"host:0\" where the number after the colon"
     "\nspecifies the instance of BRLTTY on the given host."
     "\n\nIf AUTH is non-nil, specifies the path to the secret key."
     "\n\n(fn &optional HOST AUTH)"
-  )
-  register_function(getLibraryVersion, 0, 0, "get-library-version",
-    "Get the version of BrlAPI."
   )
   register_function(getDriverName, 1, 1, "get-driver-name",
     "Get the complete name of the driver used by BRLTTY."
