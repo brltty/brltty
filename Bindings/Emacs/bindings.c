@@ -33,10 +33,10 @@ error(emacs_env *env) {
   const char *const str = brlapi_strerror(&brlapi_error);
   emacs_value error_symbol = env->intern(env, error_name);
   emacs_value data[] = {
+    env->make_string(env, str, strlen(str)),
     env->make_integer(env, brlapi_errno),
     env->make_integer(env, brlapi_libcerrno),
-    env->make_integer(env, brlapi_gaierrno),
-    env->make_string(env, str, strlen(str))
+    env->make_integer(env, brlapi_gaierrno)
   };
 
   env->non_local_exit_signal(env,
