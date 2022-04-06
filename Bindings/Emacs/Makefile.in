@@ -36,6 +36,9 @@ $(EMACS_API_OBJECT): | $(API_NAME)
 clean::
 	-rm -f -- $(EMACS_API_LIBRARY)
 
+distclean::
+	-rm -f -- load.el
+
 install: all
 	$(INSTALL_DIRECTORY) $(EMACS_API_DIRECTORY)
 	$(INSTALL_PROGRAM) $(EMACS_API_LIBRARY) $(EMACS_API_DIRECTORY)

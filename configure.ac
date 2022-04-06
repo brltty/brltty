@@ -1981,6 +1981,7 @@ AC_OUTPUT([
    Documents/brltty.1
    Documents/xbrlapi.1
    Documents/BrlAPIref.doxy
+   Bindings/Emacs/load.el
    Bindings/Lisp/brlapi.asd
    Bindings/Lisp/brlapi_config.lisp
    Bindings/Python/setup.py
