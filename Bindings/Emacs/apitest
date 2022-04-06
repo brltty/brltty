@@ -17,6 +17,5 @@
 ###############################################################################
 
 . "${0%/*}/../../apitest.sh"
-export LUA_PATH="${programDirectory}/../../?.lua;;"
 exec emacs --batch --no-site-file -L . -l apitest.el
 exit "${?}"

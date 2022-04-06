@@ -17,7 +17,7 @@
 
 include $(SRC_TOP)bindings.mk
 
-EMACS_OK = @LUA_OK@
+EMACS_OK = @EMACS_OK@
 EMACS = @EMACS@
 
 EMACS_API_NAME = $(API_NAME)
