@@ -96,7 +96,43 @@ listElements() {
    forElements "${_array}" listElement "${_array}" | sort
 }
 
-programConfigurationFilePrefixes=()
+writeElement() {
+   local name="${1}"
+   local value="${2}"
+   echo "${name} ${value}"
+}
+
+writeElements() {
+   local _array="${1}"
+   forElements "${_array}" writeElement | sort
+}
+
+readElements() {
+   local _array="${1}"
+
+   local name value
+   while read name value
+   do
+      setElement "${_array}" "${name}" "${value}"
+   done
+}
+
+programConfigurationFilePrefixArray=()
+makeProgramConfigurationFilePrefixArray() {
+   [ "${#programConfigurationFilePrefixArray[*]}" -gt 0 ] || {
+      programConfigurationFilePrefixArray+=("${PWD}/.")
+
+      [ -n "${HOME}" ] && {
+         programConfigurationFilePrefixArray+=("${HOME}/.config/${programName}/")
+         programConfigurationFilePrefixArray+=("${HOME}/.")
+      }
+
+      programConfigurationFilePrefixArray+=("/etc/${programName}/")
+      programConfigurationFilePrefixArray+=("/etc/xdg/${programName}/")
+      programConfigurationFilePrefixArray+=("/etc/")
+   }
+}
+
 findProgramConfigurationFile() {
    local fileVariable="${1}"
    shift 1
@@ -104,21 +140,10 @@ findProgramConfigurationFile() {
    [ "${#}" -gt 0 ] || set -- conf cfg
    local fileExtensions=("${@}")
 
-   [ "${#programConfigurationFilePrefixes[*]}" -gt 0 ] || {
-      programConfigurationFilePrefixes+=("${PWD}/.")
-
-      [ -n "${HOME}" ] && {
-         programConfigurationFilePrefixes+=("${HOME}/.config/${programName}/")
-         programConfigurationFilePrefixes+=("${HOME}/.")
-      }
-
-      programConfigurationFilePrefixes+=("/etc/${programName}/")
-      programConfigurationFilePrefixes+=("/etc/xdg/${programName}/")
-      programConfigurationFilePrefixes+=("/etc/")
-   }
-
+   makeProgramConfigurationFilePrefixArray
    local prefix
-   for prefix in "${programConfigurationFilePrefixes[@]}"
+
+   for prefix in "${programConfigurationFilePrefixArray[@]}"
    do
       local extension
 
@@ -136,7 +161,27 @@ findProgramConfigurationFile() {
    return 1
 }
 
-programComponentDirectories=()
+programComponentDirectoryArray=()
+makeProgramComponentDirectoryArray() {
+   [ "${#programComponentDirectoryArray[*]}" -gt 0 ] || {
+      local subdirectory="libexec"
+
+      programComponentDirectoryArray+=("${PWD}")
+      programComponentDirectoryArray+=("${PWD}/../${subdirectory}")
+
+      [ -n "${HOME}" ] && {
+         programComponentDirectoryArray+=("${HOME}/.config/${programName}")
+         programComponentDirectoryArray+=("${HOME}/${subdirectory}")
+      }
+
+      programComponentDirectoryArray+=("/usr/${subdirectory}")
+      programComponentDirectoryArray+=("/${subdirectory}")
+
+      programComponentDirectoryArray+=("/etc/${programName}")
+      programComponentDirectoryArray+=("/etc/xdg/${programName}")
+   }
+}
+
 findProgramComponent() {
    local fileVariable="${1}"
    local name="${2}"
@@ -150,26 +195,10 @@ findProgramComponent() {
       name="${programName}.${name}"
    fi
 
-   [ "${#programComponentDirectories[*]}" -gt 0 ] || {
-      local subdirectory="libexec"
-
-      programComponentDirectories+=("${PWD}")
-      programComponentDirectories+=("${PWD}/../${subdirectory}")
-
-      [ -n "${HOME}" ] && {
-         programComponentDirectories+=("${HOME}/.config/${programName}")
-         programComponentDirectories+=("${HOME}/${subdirectory}")
-      }
-
-      programComponentDirectories+=("/usr/${subdirectory}")
-      programComponentDirectories+=("/${subdirectory}")
-
-      programComponentDirectories+=("/etc/${programName}")
-      programComponentDirectories+=("/etc/xdg/${programName}")
-   }
-
+   makeProgramComponentDirectoryArray
    local directory
-   for directory in "${programComponentDirectories[@]}"
+
+   for directory in "${programComponentDirectoryArray[@]}"
    do
       local extension
 
@@ -203,6 +232,77 @@ includeProgramComponent() {
 
    logNote "program component included: ${name}"
    return 0
+}
+
+declare -A persistentProgramSettingsArray=()
+persistentProgramSettingsChanged=false
+readonly persistentProgramSettingsExtension="conf"
+
+restorePersistentProgramSettins() {
+   local settingsFile
+
+   findProgramConfigurationFile settingsFile "${persistentProgramSettingsExtension}" && {
+      persistentProgramSettingsArray=()
+      readElements persistentProgramSettingsArray <"${settingsFile}"
+      persistentProgramSettingsChanged=false
+   }
+}
+
+savePersistentProgramSettins() {
+   local settingsFile
+
+   "${persistentProgramSettingsChanged}" && {
+      findProgramConfigurationFile settingsFile "${persistentProgramSettingsExtension}" && [ -f "${settingsFile}" -a -w "${settingsFile}" ] || {
+         settingsFile=""
+         local prefix
+
+         for prefix in "${programConfigurationFilePrefixArray[@]}"
+         do
+            local directory="${prefix%/}"
+            [ "${directory}" = "${prefix}" ] && continue
+
+            if [ -e "${directory}" ]
+            then
+               [ -d "${directory}" ] || continue
+            else
+               mkdir --parents -- "${directory}" || continue
+               logNote "program configuration directory created: ${directory}"
+            fi
+
+            [ -w "${directory}" ] || continue
+            settingsFile="${directory}/${programName}.${persistentProgramSettingsExtension}"
+            break
+         done
+
+         [ -n "${settingsFile}" ] || {
+            logWarning "no eligible program configuration directory"
+            return 1
+         }
+      }
+
+      writeElements persistentProgramSettingsArray >"${settingsFile}"
+      persistentProgramSettingsChanged=false
+   }
+
+   return 0
+}
+
+getPersistentProgramSetting() {
+   local variable="${1}"
+   local name="${2}"
+
+   setVariable "${variable}" "${persistentProgramSettingsArray["${name}"]}"
+}
+
+changePersistentProgramSetting() {
+   local name="${1}"
+   local value="${2}"
+   local -n setting="persistentProgramSettingsArray[\"${name}\"]"
+
+   [ "${value}" = "${setting}" ] || {
+      setting="${value}"
+      persistentProgramSettingsChanged=true
+   }
 }
 
 verifyChoice() {
