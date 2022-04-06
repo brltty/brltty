@@ -17,5 +17,5 @@
 ###############################################################################
 
 . "${0%/*}/../../apitest.sh"
-exec emacs --batch --no-site-file -L . -l apitest.el
+exec emacs --batch --no-site-file -L . -l apitest.el "${@}"
 exit "${?}"
