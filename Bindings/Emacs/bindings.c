@@ -28,6 +28,11 @@ int plugin_is_GPL_compatible;
 static const char *error_name = "brlapi-error";
 static const char *error_message = "BrlAPI Error";
 
+static inline emacs_value
+list(emacs_env *env, ptrdiff_t nargs, emacs_value *args) {
+  return env->funcall(env, env->intern(env, "list"), nargs, args);
+}
+
 static void
 error(emacs_env *env) {
   const char *const str = brlapi_strerror(&brlapi_error);
@@ -40,22 +45,43 @@ error(emacs_env *env) {
   };
 
   env->non_local_exit_signal(env,
-    error_symbol,
-    env->funcall(env, env->intern(env, "list"), ARRAY_COUNT(data), data)
+    error_symbol, list(env, ARRAY_COUNT(data), data)
   );
+}
+
+static emacs_value
+getLibraryVersion(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
+  int major, minor, revision;
+
+  brlapi_getLibraryVersion(&major, &minor, &revision);
+
+  {
+    emacs_value data[] = {
+      env->intern(env, ":major"), env->make_integer(env, major),
+      env->intern(env, ":minor"), env->make_integer(env, minor),
+      env->intern(env, ":revision"), env->make_integer(env, revision)
+    };
+
+    return list(env, ARRAY_COUNT(data), data);
+  }
 }
 
 static char *
 extract_string(emacs_env *env, ptrdiff_t nargs, ptrdiff_t arg, emacs_value *args) {
-  if (arg >= nargs) return NULL;
+  if (arg < nargs) {
+    if (env->is_not_nil(env, args[arg])) {
+      ptrdiff_t size;
+      if (env->copy_string_contents(env, args[arg], NULL, &size)) {
+	char *string = malloc(size);
 
-  if (!env->is_not_nil(env, args[arg])) return NULL;
-  
-  ptrdiff_t length;
-  env->copy_string_contents(env, args[arg], NULL, &length);
-  char *buf = malloc(length);
-  env->copy_string_contents(env, args[arg], buf, &length);
-  return buf;
+	if (env->copy_string_contents(env, args[arg], string, &size)) {
+	  return string;
+	}
+      }
+    }
+  }
+
+  return NULL;
 }
 
 static emacs_value
@@ -138,16 +164,18 @@ cons(emacs_env *env, emacs_value car, emacs_value cdr) {
 static emacs_value
 getDisplaySize(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
-  unsigned int x, y;
 
-  if (handle == NULL) return NULL;
+  if (handle) {
+    unsigned int x, y;
 
-  if (brlapi__getDisplaySize(handle, &x, &y) == -1) {
+    if (brlapi__getDisplaySize(handle, &x, &y) != -1) {
+      return cons(env, env->make_integer(env, x), env->make_integer(env, y));
+    }
+
     error(env);
-    return NULL;
   }
 
-  return cons(env, env->make_integer(env, x), env->make_integer(env, y));
+  return NULL;
 }
 
 static inline int
@@ -432,6 +460,9 @@ emacs_module_init(struct emacs_runtime *runtime) {
     "\nspecifies the instance of BRLTTY on the given host."
     "\n\nIf AUTH is non-nil, specifies the path to the secret key."
     "\n\n(fn &optional HOST AUTH)"
+  )
+  register_function(getLibraryVersion, 0, 0, "get-library-version",
+    "Get the version of BrlAPI."
   )
   register_function(getDriverName, 1, 1, "get-driver-name",
     "Get the complete name of the driver used by BRLTTY."
