@@ -318,6 +318,38 @@ readKeyWithTimeout(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *dat
   return env->make_integer(env, (intmax_t)keyCode);
 }
 
+static inline brlapi_keyCode_t
+extract_keyCode(emacs_env *env, emacs_value value) {
+  return (brlapi_keyCode_t)env->extract_integer(env, value);
+}
+
+static emacs_value
+describeKeyCode(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
+  const brlapi_keyCode_t keyCode = extract_keyCode(env, args[0]);
+
+  if (env->non_local_exit_check(env) == emacs_funcall_exit_return) {
+    brlapi_describedKeyCode_t description;
+
+    if (brlapi_describeKeyCode(keyCode, &description) != -1) {
+      static const size_t min_len = 3;
+      emacs_value data[min_len + description.flags];
+      
+      data[0] = env->intern(env, description.type);
+      data[1] = env->intern(env, description.command);
+      data[2] = env->make_integer(env, description.argument);
+      for (size_t index = 0; index < description.flags; index += 1) {
+        data[min_len+index] = env->intern(env, description.flag[index]);
+      }
+
+      return list(env, ARRAY_COUNT(data), data);
+    }
+
+    error(env);
+  }
+
+  return NULL;
+}
+
 static emacs_value
 getStringParameter(
   emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data,
@@ -447,6 +479,99 @@ setMessageLocale(
 }
 
 static emacs_value
+getBoundCommandKeyCodes(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
+
+  if (handle) {
+    static const brlapi_param_t param = BRLAPI_PARAM_BOUND_COMMAND_KEYCODES;
+    static const brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
+    size_t count;
+    brlapi_keyCode_t *codes = brlapi__getParameterAlloc(
+      handle, param, 0, flags, &count
+    );
+
+    if (codes != NULL) {
+      count /= sizeof(brlapi_keyCode_t);
+
+      {
+        emacs_value data[count];
+        for (size_t i = 0; i < count; i += 1) {
+          data[i] = env->make_integer(env, (intmax_t)codes[i]);
+        }
+        free(codes);
+
+        return list(env, ARRAY_COUNT(data), data);
+      }
+    }
+
+    error(env);
+  }
+
+  return NULL;
+}
+
+static emacs_value
+getCommandKeycodeName(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
+
+  if (handle) {
+    brlapi_keyCode_t keyCode = extract_keyCode(env, args[1]);
+
+    if (env->non_local_exit_check(env) == emacs_funcall_exit_return) {
+      char *name = brlapi__getParameterAlloc(handle,
+        BRLAPI_PARAM_COMMAND_KEYCODE_NAME, keyCode, BRLAPI_PARAMF_GLOBAL, NULL
+      );
+      
+      if (name) {
+        emacs_value result = env->intern(env, name);
+
+        free(name);
+        
+        return result;
+      }
+
+      error(env);
+    }
+  }
+  
+  return NULL;
+}
+
+static emacs_value
+getCommandKeycodeSummary(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
+
+  if (handle) {
+    brlapi_keyCode_t keyCode = extract_keyCode(env, args[1]);
+
+    if (env->non_local_exit_check(env) == emacs_funcall_exit_return) {
+      size_t count;
+      char *summary = brlapi__getParameterAlloc(handle,
+        BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY, keyCode, BRLAPI_PARAMF_GLOBAL, &count
+      );
+      
+      if (summary) {
+        emacs_value result = env->make_string(env, summary, count);
+
+        free(summary);
+        
+        return result;
+      }
+
+      error(env);
+    }
+  }
+  
+  return NULL;
+}
+
+static emacs_value
 closeConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
 
@@ -529,6 +654,10 @@ emacs_module_init(struct emacs_runtime *runtime) {
     "Read a keypress from CONNECTION waiting MILISECONDS."
     "\n\n(fn CONNECTION MILISECONDS)"
   )
+  register_function(describeKeyCode, 1, 1, "describe-key-code",
+    "Decode KEY-CODE into its individual symbolic components."
+    "\n\n(fn KEY-CODE)"
+  )
   register_function(getDriverCode, 1, 1, "get-driver-code",
     "Get the driver code (a 2 letter string) of CONNECTION."
     "\n\n(fn CONNECTION)"
@@ -568,6 +697,18 @@ emacs_module_init(struct emacs_runtime *runtime) {
   register_function(setMessageLocale, 2, 2, "set-message-locale",
     "Set the message locale of CONNECTION to STRING."
     "\n\n(fn CONNECTION STRING)"
+  )
+  register_function(getBoundCommandKeyCodes, 1, 1, "get-bound-command-key-codes",
+    "Get commands bound by the driver."
+    "\n\n(fn CONNECTION)"
+  )
+  register_function(getCommandKeycodeName, 2, 2, "get-command-keycode-name",
+    "Get the name (a symbol) of the given command KEYCODE."
+    "\n\n(fn KEYCODE)"
+  )
+  register_function(getCommandKeycodeSummary, 2, 2, "get-command-keycode-summary",
+    "Get a description for a command KEYCODE."
+    "\n\n(fn KEYCODE)"
   )
   register_function(closeConnection, 1, 1, "close-connection",
     "Close the connection."

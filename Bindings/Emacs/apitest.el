@@ -12,4 +12,8 @@
 (let ((size (brlapi-get-display-size brl)))
   (message "Display Size: %dx%d" (car size) (cdr size)))
 
+(message "Bound Commands: %S"
+         (mapcar (lambda (code) (brlapi-get-command-keycode-name brl code))
+                 (brlapi-get-bound-command-key-codes brl)))
+
 (brlapi-close-connection brl)
