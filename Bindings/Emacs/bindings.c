@@ -479,13 +479,13 @@ setMessageLocale(
 }
 
 static emacs_value
-getBoundCommandKeyCodes(
-  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+getKeycodes(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data,
+  brlapi_param_t param
 ) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
 
   if (handle) {
-    static const brlapi_param_t param = BRLAPI_PARAM_BOUND_COMMAND_KEYCODES;
     static const brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
     size_t count;
     brlapi_keyCode_t *codes = brlapi__getParameterAlloc(
@@ -513,8 +513,27 @@ getBoundCommandKeyCodes(
 }
 
 static emacs_value
-getCommandKeycodeName(
+getBoundCommandKeycodes(
   emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getKeycodes(env, nargs, args, data,
+    BRLAPI_PARAM_BOUND_COMMAND_KEYCODES
+  );
+}
+
+static emacs_value
+getDefinedDriverKeycodes(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getKeycodes(env, nargs, args, data,
+    BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES
+  );
+}
+
+static emacs_value
+getKeycodeName(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data,
+  brlapi_param_t param
 ) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
 
@@ -523,7 +542,7 @@ getCommandKeycodeName(
 
     if (env->non_local_exit_check(env) == emacs_funcall_exit_return) {
       char *name = brlapi__getParameterAlloc(handle,
-        BRLAPI_PARAM_COMMAND_KEYCODE_NAME, keyCode, BRLAPI_PARAMF_GLOBAL, NULL
+        param, keyCode, BRLAPI_PARAMF_GLOBAL, NULL
       );
       
       if (name) {
@@ -542,8 +561,27 @@ getCommandKeycodeName(
 }
 
 static emacs_value
-getCommandKeycodeSummary(
+getCommandKeycodeName(
   emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getKeycodeName(env, nargs, args, data,
+    BRLAPI_PARAM_COMMAND_KEYCODE_NAME
+  );
+}
+
+static emacs_value
+getDriverKeycodeName(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getKeycodeName(env, nargs, args, data,
+    BRLAPI_PARAM_DRIVER_KEYCODE_NAME
+  );
+}
+
+static emacs_value
+getKeycodeSummary(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data,
+  brlapi_param_t param
 ) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
 
@@ -553,7 +591,7 @@ getCommandKeycodeSummary(
     if (env->non_local_exit_check(env) == emacs_funcall_exit_return) {
       size_t count;
       char *summary = brlapi__getParameterAlloc(handle,
-        BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY, keyCode, BRLAPI_PARAMF_GLOBAL, &count
+        param, keyCode, BRLAPI_PARAMF_GLOBAL, &count
       );
       
       if (summary) {
@@ -569,6 +607,24 @@ getCommandKeycodeSummary(
   }
   
   return NULL;
+}
+
+static emacs_value
+getCommandKeycodeSummary(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getKeycodeSummary(env, nargs, args, data,
+    BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY
+  );
+}
+
+static emacs_value
+getDriverKeycodeSummary(
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data
+) {
+  return getKeycodeSummary(env, nargs, args, data,
+    BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY
+  );
 }
 
 static emacs_value
@@ -682,7 +738,7 @@ emacs_module_init(struct emacs_runtime *runtime) {
     "Set the computer braille table of CONNECTION to STRING."
     "\n\n(fn CONNECTION STRING)"
   )
-  register_function(getLiteraryBrailleTable, 1, 1, "get-literary-table",
+  register_function(getLiteraryBrailleTable, 1, 1, "get-literary-braille-table",
     "Get the literary braille table of CONNECTION."
     "\n\n(fn CONNECTION)"
   )
@@ -698,7 +754,7 @@ emacs_module_init(struct emacs_runtime *runtime) {
     "Set the message locale of CONNECTION to STRING."
     "\n\n(fn CONNECTION STRING)"
   )
-  register_function(getBoundCommandKeyCodes, 1, 1, "get-bound-command-key-codes",
+  register_function(getBoundCommandKeycodes, 1, 1, "get-bound-command-keycodes",
     "Get commands bound by the driver."
     "\n\n(fn CONNECTION)"
   )
@@ -708,6 +764,18 @@ emacs_module_init(struct emacs_runtime *runtime) {
   )
   register_function(getCommandKeycodeSummary, 2, 2, "get-command-keycode-summary",
     "Get a description for a command KEYCODE."
+    "\n\n(fn KEYCODE)"
+  )
+  register_function(getDefinedDriverKeycodes, 1, 1, "get-defined-driver-keycodes",
+    "Get a list of defined driver specific keycodes."
+    "\n\n(fn CONNECTION)"
+  )
+  register_function(getDriverKeycodeName, 2, 2, "get-driver-keycode-name",
+    "Get the name (a symbol) of the driver specific KEYCODE."
+    "\n\n(fn KEYCODE)"
+  )
+  register_function(getDriverKeycodeSummary, 2, 2, "get-driver-keycode-summary",
+    "Get a description for a driver specific KEYCODE."
     "\n\n(fn KEYCODE)"
   )
   register_function(closeConnection, 1, 1, "close-connection",

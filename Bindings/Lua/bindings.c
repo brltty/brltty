@@ -372,10 +372,13 @@ static int setBooleanParameter(lua_State *L, brlapi_param_t param) {
   return 0;
 }
 
-static int getStringParameter(lua_State *L, brlapi_param_t param) {
+static int getStringParameter(
+  lua_State *L,
+  brlapi_param_t param, brlapi_param_subparam_t subparam
+) {
   size_t count;
   char *string = brlapi__getParameterAlloc(checkhandle(L, 1),
-    param, 0, BRLAPI_PARAMF_GLOBAL, &count
+    param, subparam, BRLAPI_PARAMF_GLOBAL, &count
   );
 
   if (string == NULL) error(L);
@@ -386,24 +389,27 @@ static int getStringParameter(lua_State *L, brlapi_param_t param) {
   return 1;
 }
 
-static int setStringParameter(lua_State *L, brlapi_param_t param) {
+static int setStringParameter(
+  lua_State *L,
+  brlapi_param_t param, brlapi_param_subparam_t subparam
+) {
   brlapi_handle_t *const handle = checkhandle(L, 1);
   size_t length;
   const brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
   const char *string = luaL_checklstring(L, 2, &length);
 
-  if (brlapi__setParameter(handle, param, 0, flags, string, length) == -1)
+  if (brlapi__setParameter(handle, param, subparam, flags, string, length) == -1)
     error(L);
 
   return 0;
 }
 
 static int getDriverCode(lua_State *L) {
-  return getStringParameter(L, BRLAPI_PARAM_DRIVER_CODE);
+  return getStringParameter(L, BRLAPI_PARAM_DRIVER_CODE, 0);
 }
 
 static int getDriverVersion(lua_State *L) {
-  return getStringParameter(L, BRLAPI_PARAM_DRIVER_VERSION);
+  return getStringParameter(L, BRLAPI_PARAM_DRIVER_VERSION, 0);
 }
 
 static int getDeviceOnline(lua_State *L) {
@@ -419,35 +425,97 @@ static int setAudibleAlerts(lua_State *L) {
 }
 
 static int getClipboardContent(lua_State *L) {
-  return getStringParameter(L, BRLAPI_PARAM_CLIPBOARD_CONTENT);
+  return getStringParameter(L, BRLAPI_PARAM_CLIPBOARD_CONTENT, 0);
 }
 
 static int setClipboardContent(lua_State *L) {
-  return setStringParameter(L, BRLAPI_PARAM_CLIPBOARD_CONTENT);
+  return setStringParameter(L, BRLAPI_PARAM_CLIPBOARD_CONTENT, 0);
 }
 
 static int getComputerBrailleTable(lua_State *L) {
-  return getStringParameter(L, BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE);
+  return getStringParameter(L, BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE, 0);
 }
 
 static int setComputerBrailleTable(lua_State *L) {
-  return setStringParameter(L, BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE);
+  return setStringParameter(L, BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE, 0);
 }
 
 static int getLiteraryBrailleTable(lua_State *L) {
-  return getStringParameter(L, BRLAPI_PARAM_LITERARY_BRAILLE_TABLE);
+  return getStringParameter(L, BRLAPI_PARAM_LITERARY_BRAILLE_TABLE, 0);
 }
 
 static int setLiteraryBrailleTable(lua_State *L) {
-  return setStringParameter(L, BRLAPI_PARAM_LITERARY_BRAILLE_TABLE);
+  return setStringParameter(L, BRLAPI_PARAM_LITERARY_BRAILLE_TABLE, 0);
 }
 
 static int getMessageLocale(lua_State *L) {
-  return getStringParameter(L, BRLAPI_PARAM_MESSAGE_LOCALE);
+  return getStringParameter(L, BRLAPI_PARAM_MESSAGE_LOCALE, 0);
 }
 
 static int setMessageLocale(lua_State *L) {
-  return setStringParameter(L, BRLAPI_PARAM_MESSAGE_LOCALE);
+  return setStringParameter(L, BRLAPI_PARAM_MESSAGE_LOCALE, 0);
+}
+
+static int getBoundCommandKeycodes(lua_State *L) {
+  size_t count;
+  brlapi_keyCode_t *codes = brlapi__getParameterAlloc(checkhandle(L, 1),
+    BRLAPI_PARAM_BOUND_COMMAND_KEYCODES, 0, BRLAPI_PARAMF_GLOBAL, &count
+  );
+
+  if (codes == NULL) error(L);
+
+  count /= sizeof(brlapi_keyCode_t);
+
+  lua_newtable(L);
+  for (size_t i = 0; i < count; i += 1) {
+    lua_pushinteger(L, (lua_Integer)codes[i]);
+    lua_rawseti(L, -2, i + 1);
+  }
+
+  free(codes);
+
+  return 1;
+}
+
+static int getCommandKeycodeName(lua_State *L) {
+  const brlapi_keyCode_t keyCode = (brlapi_keyCode_t)luaL_checkinteger(L, 2);
+  return getStringParameter(L, BRLAPI_PARAM_COMMAND_KEYCODE_NAME, keyCode);
+}
+
+static int getCommandKeycodeSummary(lua_State *L) {
+  const brlapi_keyCode_t keyCode = (brlapi_keyCode_t)luaL_checkinteger(L, 2);
+  return getStringParameter(L, BRLAPI_PARAM_COMMAND_KEYCODE_SUMMARY, keyCode);
+}
+
+static int getDefinedDriverKeycodes(lua_State *L) {
+  size_t count;
+  brlapi_keyCode_t *codes = brlapi__getParameterAlloc(checkhandle(L, 1),
+    BRLAPI_PARAM_DEFINED_DRIVER_KEYCODES, 0, BRLAPI_PARAMF_GLOBAL, &count
+  );
+
+  if (codes == NULL) error(L);
+
+  count /= sizeof(brlapi_keyCode_t);
+
+  lua_newtable(L);
+  for (size_t i = 0; i < count; i += 1) {
+    lua_pushinteger(L, (lua_Integer)codes[i]);
+    lua_rawseti(L, -2, i + 1);
+  }
+
+  free(codes);
+
+  return 1;
+}
+
+static int getDriverKeycodeName(lua_State *L) {
+  const brlapi_keyCode_t keyCode = (brlapi_keyCode_t)luaL_checkinteger(L, 2);
+  return getStringParameter(L, BRLAPI_PARAM_DRIVER_KEYCODE_NAME, keyCode);
+}
+
+static int getDriverKeycodeSummary(lua_State *L) {
+  const brlapi_keyCode_t keyCode = (brlapi_keyCode_t)luaL_checkinteger(L, 2);
+  return getStringParameter(L, BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY, keyCode);
 }
 
 static const luaL_Reg meta[] = {
@@ -494,6 +562,12 @@ static const luaL_Reg funcs[] = {
   { "setLiteraryBrailleTable", setLiteraryBrailleTable },
   { "getMessageLocale", getMessageLocale },
   { "setMessageLocale", setMessageLocale },
+  { "getBoundCommandKeycodes", getBoundCommandKeycodes },
+  { "getCommandKeycodeName", getCommandKeycodeName },
+  { "getCommandKeycodeSummary", getCommandKeycodeSummary },
+  { "getDefinedDriverKeycodes", getDefinedDriverKeycodes },
+  { "getDriverKeycodeName", getDriverKeycodeName },
+  { "getDriverKeycodeSummary", getDriverKeycodeSummary },
   { NULL, NULL }
 };
 
