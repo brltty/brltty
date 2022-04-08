@@ -314,6 +314,7 @@ evaluateExpression() {
 
    local _result
    _result="$(bc --quiet <<<"${expression}")" || return 1
+   [ -n "${_result}" ] || return 1
 
    setVariable "${resultVariable}" "${_result}"
    return 0
@@ -326,7 +327,7 @@ convertUnit() {
    local precision="${4}"
 
    local toValue
-   setVariable toValue "$(units --terse --output-format "%.${precision:-0}f" "${from}" "${to}")"
+   toValue="$(units --terse --output-format "%.${precision:-0}f" "${from}" "${to}")" || return 1
 
    [ "${toValue}" = "${toValue%.*}" ] || {
       toValue="${toValue%%*(0)}"
@@ -334,6 +335,7 @@ convertUnit() {
    }
 
    setVariable "${resultVariable}" "${toValue}"
+   return 0
 }
 
 convertSimpleUnit() {
@@ -343,7 +345,8 @@ convertSimpleUnit() {
    local toUnit="${4}"
    local precision="${5}"
 
-   convertUnit "${resultVariable}" "${fromValue}${fromUnit}" "${toUnit}" "${precision}"
+   convertUnit "${resultVariable}" "${fromValue}${fromUnit}" "${toUnit}" "${precision}" || return 1
+   return 0
 }
 
 formatSimpleUnit() {
@@ -353,8 +356,10 @@ formatSimpleUnit() {
    local precision="${4}"
 
    local value="${!variable}"
-   convertSimpleUnit value "${value}" "${fromUnit}" "${toUnit}" "${precision}"
+   convertSimpleUnit value "${value}" "${fromUnit}" "${toUnit}" "${precision}" || return 1
+
    setVariable "${variable}" "${value}${toUnit}"
+   return 0
 }
 
 convertComplexUnit() {
@@ -365,7 +370,8 @@ convertComplexUnit() {
    local unitType="${5}"
    local precision="${6}"
 
-   convertUnit "${resultVariable}" "${unitType}${fromUnit}(${fromValue})" "${unitType}${toUnit}" "${precision}"
+   convertUnit "${resultVariable}" "${unitType}${fromUnit}(${fromValue})" "${unitType}${toUnit}" "${precision}" || return 1
+   return 0
 }
 
 formatComplexUnit() {
@@ -376,8 +382,10 @@ formatComplexUnit() {
    local precision="${5}"
 
    local value="${!variable}"
-   convertComplexUnit value "${value}" "${fromUnit}" "${toUnit}" "${unitType}" "${precision}"
+   convertComplexUnit value "${value}" "${fromUnit}" "${toUnit}" "${unitType}" "${precision}" || return 1
+
    setVariable "${variable}" "${value}${toUnit}"
+   return 0
 }
 
 verifyChoice() {
