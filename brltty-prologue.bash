@@ -169,6 +169,9 @@ makeProgramComponentDirectoryArray() {
       programComponentDirectoryArray+=("${PWD}")
       programComponentDirectoryArray+=("${PWD}/../${subdirectory}")
 
+      programComponentDirectoryArray+=("${programDirectory}")
+      programComponentDirectoryArray+=("${programDirectory}/../${subdirectory}")
+
       [ -n "${HOME}" ] && {
          programComponentDirectoryArray+=("${HOME}/.config/${programName}")
          programComponentDirectoryArray+=("${HOME}/${subdirectory}")
@@ -217,20 +220,20 @@ findProgramComponent() {
 }
 
 includeProgramComponent() {
-   local fileVariable="${1}"
-   local name="${2}"
+   local name="${1}"
 
-   findProgramComponent "${fileVariable}" "${name}" || {
+   local component
+   findProgramComponent component "${name}" || {
       logWarning "program component not found: ${name}"
       return 1
    }
 
-   . "${!fileVariable}" || {
-      logWarning "failure including program component: ${name}"
+   . "${component}" || {
+      logWarning "problem including program component: ${component}"
       return 2
    }
 
-   logNote "program component included: ${name}"
+   logNote "program component included: ${component}"
    return 0
 }
 
