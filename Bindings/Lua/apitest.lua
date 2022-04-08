@@ -43,6 +43,28 @@ local function performTests ()
   showProperty("Computer Braille Table", brl:getComputerBrailleTable())
   showProperty("Literary Braille Table", brl:getLiteraryBrailleTable())
   showProperty("Message Locale", brl:getMessageLocale())
+
+  do
+    local commandKeycodes = brl:getBoundCommandKeycodes();
+    local string = ""
+    for i = 1, #commandKeycodes, 1 do
+      string = string .. brl:getCommandKeycodeName(commandKeycodes[i])
+      if i < #commandKeycodes then
+        string = string .. ", "
+      end
+    end
+    showProperty("Bound Command Keycode Names", string)
+  end
+
+  do
+    local driverKeycodes = brl:getDefinedDriverKeycodes();
+    local string = ""
+    for i = 1, #driverKeycodes, 1 do
+      string = string .. brl:getDriverKeycodeName(driverKeycodes[i])
+      if i < #driverKeycodes then string = string .. ", " end
+    end
+    showProperty("Defined Driver Keycode Names", string)
+  end
 end
 
 do
