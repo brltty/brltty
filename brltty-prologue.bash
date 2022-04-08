@@ -308,6 +308,78 @@ changePersistentProgramSetting() {
    }
 }
 
+evaluateExpression() {
+   local resultVariable="${1}"
+   local expression="${2}"
+
+   local _result
+   _result="$(bc --quiet <<<"${expression}")" || return 1
+
+   setVariable "${resultVariable}" "${_result}"
+   return 0
+}
+
+convertUnit() {
+   local resultVariable="${1}"
+   local from="${2}"
+   local to="${3}"
+   local precision="${4}"
+
+   local toValue
+   setVariable toValue "$(units --terse --output-format "%.${precision:-0}f" "${from}" "${to}")"
+
+   [ "${toValue}" = "${toValue%.*}" ] || {
+      toValue="${toValue%%*(0)}"
+      toValue="${toValue%.}"
+   }
+
+   setVariable "${resultVariable}" "${toValue}"
+}
+
+convertSimpleUnit() {
+   local resultVariable="${1}"
+   local fromValue="${2}"
+   local fromUnit="${3}"
+   local toUnit="${4}"
+   local precision="${5}"
+
+   convertUnit "${resultVariable}" "${fromValue}${fromUnit}" "${toUnit}" "${precision}"
+}
+
+formatSimpleUnit() {
+   local variable="${1}"
+   local fromUnit="${2}"
+   local toUnit="${3}"
+   local precision="${4}"
+
+   local value="${!variable}"
+   convertSimpleUnit value "${value}" "${fromUnit}" "${toUnit}" "${precision}"
+   setVariable "${variable}" "${value}${toUnit}"
+}
+
+convertComplexUnit() {
+   local resultVariable="${1}"
+   local fromValue="${2}"
+   local fromUnit="${3}"
+   local toUnit="${4}"
+   local unitType="${5}"
+   local precision="${6}"
+
+   convertUnit "${resultVariable}" "${unitType}${fromUnit}(${fromValue})" "${unitType}${toUnit}" "${precision}"
+}
+
+formatComplexUnit() {
+   local variable="${1}"
+   local fromUnit="${2}"
+   local toUnit="${3}"
+   local unitType="${4}"
+   local precision="${5}"
+
+   local value="${!variable}"
+   convertComplexUnit value "${value}" "${fromUnit}" "${toUnit}" "${unitType}" "${precision}"
+   setVariable "${variable}" "${value}${toUnit}"
+}
+
 verifyChoice() {
    local label="${1}"
    local valueVariable="${2}"
