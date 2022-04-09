@@ -34,4 +34,5 @@ AC_CHECK_HEADER([emacs-module.h], [dnl
 
 AC_SUBST([EMACS_OK])
 AC_SUBST([EMACS])
+AC_SUBST([EMACS_SUBDIRECTORY], [Emacs])
 ])
