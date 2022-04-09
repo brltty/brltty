@@ -29,6 +29,13 @@ static const char *error_name = "brlapi-error";
 static const char *error_message = "BrlAPI Error";
 
 static inline emacs_value
+cons(emacs_env *env, emacs_value car, emacs_value cdr) {
+  emacs_value args[] = { car, cdr };
+
+  return env->funcall(env, env->intern(env, "cons"), ARRAY_COUNT(args), args);
+}
+
+static inline emacs_value
 list(emacs_env *env, ptrdiff_t nargs, emacs_value *args) {
   return env->funcall(env, env->intern(env, "list"), nargs, args);
 }
@@ -147,13 +154,6 @@ getDriverName(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
 static emacs_value
 getModelIdentifier(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   return getString(env, nargs, args, data, brlapi__getModelIdentifier);
-}
-
-static inline emacs_value
-cons(emacs_env *env, emacs_value car, emacs_value cdr) {
-  emacs_value args[] = { car, cdr };
-
-  return env->funcall(env, env->intern(env, "cons"), ARRAY_COUNT(args), args);
 }
 
 static emacs_value
@@ -323,6 +323,91 @@ extract_keyCode(emacs_env *env, emacs_value value) {
   return (brlapi_keyCode_t)env->extract_integer(env, value);
 }
 
+static const ptrdiff_t changeKeysMinArity = 2;
+
+static emacs_value
+changeKeys (
+  emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data,
+  int BRLAPI_STDCALL (*change) (
+    brlapi_handle_t *, brlapi_rangeType_t, const brlapi_keyCode_t[], unsigned int
+  )
+) {
+  brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
+
+  if (handle) {
+    static const char *rangeNames[] = {
+      "all", "code", "command", "key", "type", NULL
+    };
+    static const brlapi_rangeType_t rangeTypes[] = {
+      brlapi_rangeType_all,
+      brlapi_rangeType_code,
+      brlapi_rangeType_command,
+      brlapi_rangeType_key,
+      brlapi_rangeType_type
+    };
+    size_t rangeIndex = 0;
+
+    while (rangeNames[rangeIndex]) {
+      if (env->eq(env, args[1], env->intern(env, rangeNames[rangeIndex]))) {
+        break;
+      }
+      rangeIndex++;
+    }
+
+    if (rangeNames[rangeIndex]) {
+      const brlapi_rangeType_t range = rangeTypes[rangeIndex];
+
+      if (range == brlapi_rangeType_all) {
+        if (change(handle, range, NULL, 0) != -1) {
+          return env->intern(env, "nil");
+        }
+
+        error(env);
+      } else {
+        brlapi_keyCode_t keys[nargs - changeKeysMinArity];
+
+        for (ptrdiff_t index = 0; index < ARRAY_COUNT(keys); index++) {
+          keys[index] = extract_keyCode(env, args[changeKeysMinArity + index]);
+
+          if (env->non_local_exit_check(env) != emacs_funcall_exit_return)
+            return NULL;
+        }
+
+        if (change(handle, range, keys, ARRAY_COUNT(keys)) != -1) {
+          return env->intern(env, "nil");
+        }
+
+        error(env);
+      }
+
+      return NULL;
+    }
+
+    { /* (signal 'wrong-type-argument (list 'symbolp arg)) */
+      emacs_value data[] = {
+        env->intern(env, "symbolp"), args[1]
+      };
+
+      env->non_local_exit_signal(env,
+        env->intern(env, "wrong-type-argument"),
+        list(env, ARRAY_COUNT(data), data)
+      );
+    }
+  }
+
+  return NULL;
+}
+
+static emacs_value
+acceptKeys(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
+  return changeKeys(env, nargs, args, data, brlapi__acceptKeys);
+}
+
+static emacs_value
+ignoreKeys(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
+  return changeKeys(env, nargs, args, data, brlapi__ignoreKeys);
+}
+
 static emacs_value
 describeKeyCode(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
   const brlapi_keyCode_t keyCode = extract_keyCode(env, args[0]);
@@ -356,23 +441,24 @@ getStringParameter(
   brlapi_param_t param
 ) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
-  char *string;
-  size_t count;
-  const brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
 
-  if (handle == NULL) return NULL;
+  if (handle) {
+    static const brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
+    size_t count;
+    char *string = brlapi__getParameterAlloc(handle, param, 0, flags, &count);
 
-  string = brlapi__getParameterAlloc(handle, param, 0, flags, &count);
+    if (string) {
+      emacs_value result = env->make_string(env, string, count);
 
-  if (string == NULL) {
+      free(string);
+
+      return result;
+    }
+
     error(env);
-    return NULL;
   }
 
-  emacs_value result = env->make_string(env, string, count);
-  free(string);
-
-  return result;
+  return NULL;
 }
 
 static emacs_value
@@ -381,22 +467,23 @@ setStringParameter(
   brlapi_param_t param
 ) {
   brlapi_handle_t *const handle = env->get_user_ptr(env, args[0]);
-  ptrdiff_t length;
-  const brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
 
-  if (handle == NULL) return NULL;
+  if (handle) {
+    ptrdiff_t length;
+    
+    if (env->copy_string_contents(env, args[1], NULL, &length)) {
+      char string[length];
+      
+      if (env->copy_string_contents(env, args[1], string, &length)) {
+        static const brlapi_param_flags_t flags = BRLAPI_PARAMF_GLOBAL;
 
-  if (env->copy_string_contents(env, args[1], NULL, &length)) {
-    char string[length];
+        if (brlapi__setParameter(handle, param, 0, flags, string, length) != -1) {
+          return env->intern(env, "nil");
+        }
 
-    if (!env->copy_string_contents(env, args[1], string, &length))
-      return NULL;
-  
-    if (brlapi__setParameter(handle, param, 0, flags, string, length) != -1) {
-      return env->intern(env, "nil");
+        error(env);
+      }
     }
-
-    error(env);
   }
 
   return NULL;
@@ -673,6 +760,7 @@ emacs_module_init(struct emacs_runtime *runtime) {
     "\n\nHOST is a string of the form \"host:0\" where the number after the colon"
     "\nspecifies the instance of BRLTTY on the given host."
     "\n\nIf AUTH is non-nil, specifies the path to the secret key."
+    "\n\nAlso see `brlapi-close-connection'."
     "\n\n(fn &optional HOST AUTH)"
   )
   register_function(getDriverName, 1, 1, "get-driver-name",
@@ -709,6 +797,21 @@ emacs_module_init(struct emacs_runtime *runtime) {
   register_function(readKeyWithTimeout, 2, 2, "read-key-with-timeout",
     "Read a keypress from CONNECTION waiting MILISECONDS."
     "\n\n(fn CONNECTION MILISECONDS)"
+  )
+  register_function(acceptKeys, changeKeysMinArity, emacs_variadic_function, "accept-keys",
+    "Ask the server to give KEY-CODES to the application."
+    "\n\nTYPE should be one of the following symbols:"
+    "\n  'all' for all keys"
+    "\n  'type' for keys of a given type"
+    "\n  'command' for keys of a given command block, i.e. matching the key type and command parts"
+    "\n  'key' for a given key with any flags"
+    "\n  'code' for a given key code"
+    "\n\n(fn CONNECTION TYPE &rest KEY-CODES)"
+  )
+  register_function(ignoreKeys, changeKeysMinArity, emacs_variadic_function, "ignore-keys",
+    "Ask the server to handle KEY-CODES by brltty."
+    "\n\nSee `brlapi-accept-keys' for a description of the TYPE argument."
+    "\n\n(fn CONNECTION TYPE &rest KEY-CODES)"
   )
   register_function(describeKeyCode, 1, 1, "describe-key-code",
     "Decode KEY-CODE into its individual symbolic components."
