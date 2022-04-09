@@ -242,9 +242,10 @@ persistentProgramSettingsChanged=false
 readonly persistentProgramSettingsExtension="conf"
 
 restorePersistentProgramSettins() {
-   local settingsFile
+   local settingsFile="${1}"
 
-   findProgramConfigurationFile settingsFile "${persistentProgramSettingsExtension}" && {
+   [ -n "${settingsFile}" ] || findProgramConfigurationFile settingsFile "${persistentProgramSettingsExtension}" && {
+      logNote "restoring persistent program settings: ${settingsFile}"
       persistentProgramSettingsArray=()
       readElements persistentProgramSettingsArray <"${settingsFile}"
       persistentProgramSettingsChanged=false
@@ -252,37 +253,40 @@ restorePersistentProgramSettins() {
 }
 
 savePersistentProgramSettins() {
-   local settingsFile
+   local settingsFile="${1}"
 
    "${persistentProgramSettingsChanged}" && {
-      findProgramConfigurationFile settingsFile "${persistentProgramSettingsExtension}" && [ -f "${settingsFile}" -a -w "${settingsFile}" ] || {
-         settingsFile=""
-         local prefix
+      [ -n "${settingsFile}" ] || {
+         findProgramConfigurationFile settingsFile "${persistentProgramSettingsExtension}" && [ -f "${settingsFile}" -a -w "${settingsFile}" ] || {
+            settingsFile=""
+            local prefix
 
-         for prefix in "${programConfigurationFilePrefixArray[@]}"
-         do
-            local directory="${prefix%/}"
-            [ "${directory}" = "${prefix}" ] && continue
+            for prefix in "${programConfigurationFilePrefixArray[@]}"
+            do
+               local directory="${prefix%/}"
+               [ "${directory}" = "${prefix}" ] && continue
 
-            if [ -e "${directory}" ]
-            then
-               [ -d "${directory}" ] || continue
-            else
-               mkdir --parents -- "${directory}" || continue
-               logNote "program configuration directory created: ${directory}"
-            fi
+               if [ -e "${directory}" ]
+               then
+                  [ -d "${directory}" ] || continue
+               else
+                  mkdir --parents -- "${directory}" || continue
+                  logNote "program configuration directory created: ${directory}"
+               fi
 
-            [ -w "${directory}" ] || continue
-            settingsFile="${directory}/${programName}.${persistentProgramSettingsExtension}"
-            break
-         done
+               [ -w "${directory}" ] || continue
+               settingsFile="${directory}/${programName}.${persistentProgramSettingsExtension}"
+               break
+            done
 
-         [ -n "${settingsFile}" ] || {
-            logWarning "no eligible program configuration directory"
-            return 1
+            [ -n "${settingsFile}" ] || {
+               logWarning "no eligible program configuration directory"
+               return 1
+            }
          }
       }
 
+      logNote "saving persistent program settings: ${settingsFile}"
       writeElements persistentProgramSettingsArray >"${settingsFile}"
       persistentProgramSettingsChanged=false
    }
