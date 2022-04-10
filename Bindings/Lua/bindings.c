@@ -31,17 +31,6 @@ static void error(lua_State *L) {
   lua_error(L);
 }
 
-static int getLibraryVersion(lua_State *L) {
-  int major, minor, revision;
-  brlapi_getLibraryVersion(&major, &minor, &revision);
-
-  lua_pushinteger(L, major),
-  lua_pushinteger(L, minor),
-  lua_pushinteger(L, revision);
-    
-  return 3;
-}
-
 static int openConnection(lua_State *L) {
   const brlapi_connectionSettings_t desiredSettings = {
     .host = luaL_optstring(L, 1, NULL), .auth = luaL_optstring(L, 2, NULL)
@@ -518,13 +507,76 @@ static int getDriverKeycodeSummary(lua_State *L) {
   return getStringParameter(L, BRLAPI_PARAM_DRIVER_KEYCODE_SUMMARY, keyCode);
 }
 
+static inline int versionGetField(lua_State *L, const char *name) {
+  if (lua_getfield(L, 1, name) == LUA_TNUMBER) {
+    if (lua_getfield(L, 2, name) == LUA_TNUMBER) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int versionCompare(lua_State *L, int op) {
+  int result = 0;
+
+  if (versionGetField(L, "major")) {
+    if (lua_compare(L, -2, -1, LUA_OPLT)) {
+      result = 1;
+    } else if (lua_compare(L, -2, -1, LUA_OPEQ)) {
+      if (versionGetField(L, "minor")) {
+	if (lua_compare(L, -2, -1, LUA_OPLT)) {
+	  result = 1;
+	} else if (lua_compare(L, -2, -1, LUA_OPEQ)) {
+	  if (versionGetField(L, "revision")) {
+	    if (lua_compare(L, -2, -1, op)) {
+	      result = 1;
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  lua_pushboolean(L, result);
+  return 1;
+}
+
+static int versionLT(lua_State *L) {
+  return versionCompare(L, LUA_OPLT);
+}
+
+static int versionLE(lua_State *L) {
+  return versionCompare(L, LUA_OPLE);
+}
+
+static int versionString(lua_State *L) {
+  static const char *separator = ".";
+
+  lua_getfield(L, 1, "major");
+  lua_pushstring(L, separator);
+  lua_getfield(L, 1, "minor");
+  lua_pushstring(L, separator);
+  lua_getfield(L, 1, "revision");
+
+  lua_concat(L, 5);
+
+  return 1;
+}
+
+static const luaL_Reg version_meta[] = {
+  { "__lt", versionLT },
+  { "__le", versionLE },
+  { "__tostring", versionString },
+  { NULL, NULL }
+};
+
 static const luaL_Reg meta[] = {
   { "__close", closeConnection },
   { NULL, NULL }
 };
 
 static const luaL_Reg funcs[] = {
-  { "getLibraryVersion", getLibraryVersion },
   { "openConnection", openConnection },
   { "getFileDescriptor", getFileDescriptor },
   { "closeConnection", closeConnection },
@@ -582,6 +634,21 @@ int luaopen_brlapi(lua_State *L) {
   luaL_newmetatable(L, handle_t);
   luaL_setfuncs(L, meta, 0);
   luaL_newlib(L, funcs);
+
+  {
+    int major, minor, revision;
+
+    brlapi_getLibraryVersion(&major, &minor, &revision);
+
+    lua_createtable(L, 0, 3);
+    lua_pushinteger(L, major), lua_setfield(L, -2, "major");
+    lua_pushinteger(L, minor), lua_setfield(L, -2, "minor");
+    lua_pushinteger(L, revision), lua_setfield(L, -2, "revision");
+    luaL_newmetatable(L, "version");
+    luaL_setfuncs(L, version_meta, 0);
+    lua_setmetatable(L, -2);
+    lua_setfield(L, -2, "version");
+  }
 
   createcmdtable(L);
   lua_setfield(L, -2, "CMD");

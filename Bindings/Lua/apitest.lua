@@ -23,7 +23,10 @@ local function showProperty (name, value)
 end
 
 local function performTests ()
-  showProperty("BrlAPI Version", string.format("%d.%d.%d", brlapi.getLibraryVersion()))
+  showProperty("BrlAPI Version", brlapi.version)
+  if brlapi.version < {major=0, minor=8, revision=3} then
+    error "BrlAPI is too old"
+  end
 
   local brl <close> = brlapi.openConnection(arg[2], arg[3])
 
