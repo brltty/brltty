@@ -120,7 +120,7 @@ openConnection(emacs_env *env, ptrdiff_t nargs, emacs_value *args, void *data) {
     return NULL;
   }
 
-  return env->make_user_ptr(env, NULL, handle);
+  return env->make_user_ptr(env, free, handle);
 }
 
 static emacs_value
