@@ -997,7 +997,7 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
 {
   int res = 0;
   brlapi_keyCode_t x,y;
-  uint32_t (*ints)[4] = (uint32_t (*)[4]) packet;
+  uint32_t (*ints)[4] = (uint32_t (*)[4]) &packet->uint32;
   unsigned int i;
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
