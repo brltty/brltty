@@ -13,3 +13,6 @@ cython
 
 tcl-dev
 default-jdk
+
+libbluetooth-dev
+libpcre3-dev
