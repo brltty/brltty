@@ -60,6 +60,7 @@ readonly configureOptions=(
    --without-hid-package
    --without-ports-package
 
+   --disable-emacs-bindings
    --disable-lua-bindings
 )
 
