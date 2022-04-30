@@ -44,6 +44,7 @@ toRelativePath "${programDirectory}" configureDirectory
    --without-leds-package \
    --without-hid-package \
    \
+   --disable-emacs-bindings \
    --disable-java-bindings \
    --disable-lua-bindings \
    --disable-ocaml-bindings \
