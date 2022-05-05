@@ -9,7 +9,9 @@ configureOptions=(
    --without-mikropuhe
    --without-swift
    --without-theta
+   --disable-emacs-bindings
    --disable-lisp-bindings
+   --disable-lua-bindings
    --disable-ocaml-bindings
 )
 
