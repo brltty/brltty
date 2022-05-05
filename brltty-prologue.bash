@@ -120,7 +120,7 @@ readElements() {
 programConfigurationFilePrefixArray=()
 makeProgramConfigurationFilePrefixArray() {
    [ "${#programConfigurationFilePrefixArray[*]}" -gt 0 ] || {
-      programConfigurationFilePrefixArray+=("${PWD}/.")
+      programConfigurationFilePrefixArray+=("${programDirectory}/.")
 
       [ -n "${HOME}" ] && {
          programConfigurationFilePrefixArray+=("${HOME}/.config/${programName}/")
