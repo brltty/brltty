@@ -16,3 +16,7 @@ default-jdk
 
 libbluetooth-dev
 libpcre3-dev
+
+curl
+jq
+units
