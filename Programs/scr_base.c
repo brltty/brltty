@@ -90,6 +90,17 @@ setScreenKeyModifiers (ScreenKey *key, ScreenKey which) {
   }
 }
 
+void
+mapScreenKey (ScreenKey *key) {
+  switch (*key & SCR_KEY_CHAR_MASK) {
+    case '\n':
+    case '\r':   *key = SCR_KEY_ENTER;     break;
+    case '\t':   *key = SCR_KEY_TAB;       break;
+    case '\b':   *key = SCR_KEY_BACKSPACE; break;
+    case '\033': *key = SCR_KEY_ESCAPE;    break;
+  }
+}
+
 static const char text_BaseScreen[] = " ";
 
 static int

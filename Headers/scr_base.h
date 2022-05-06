@@ -28,6 +28,7 @@ extern "C" {
 
 extern int isSpecialKey (ScreenKey key);
 extern void setScreenKeyModifiers (ScreenKey *key, ScreenKey which);
+extern void mapScreenKey (ScreenKey *key);
 
 typedef struct {
   const char * (*getTitle) (void);
