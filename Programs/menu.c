@@ -729,7 +729,7 @@ newFilesMenuItem (
 
     char *pattern;
     {
-      const char *strings[] = {"?*", extension};
+      const char *strings[] = {"*", extension};
       pattern = joinStrings(strings, ARRAY_COUNT(strings));
     }
 
