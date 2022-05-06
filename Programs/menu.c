@@ -662,9 +662,7 @@ endItem_files (MenuItem *item, int deallocating) {
   }
 #elif defined(__MINGW32__)
   if (files->names) {
-    int i;
-
-    for (i=files->offset; i<files->count; i+=1) free(files->names[i]);
+    for (int i=files->offset; i<files->count; i+=1) free(files->names[i]);
     free(files->names);
     files->names = NULL;
   }
@@ -683,13 +681,6 @@ getValue_files (const MenuItem *item) {
   }
 
   if (!path) path = "";
-  return path;
-}
-
-static const char *
-getText_files (const MenuItem *item) {
-  const FileData *files = item->data.files;
-  const char *path = getMenuItemValue(item);
   const char *name = locatePathName(path);
 
   if (name == path) {
@@ -699,14 +690,21 @@ getText_files (const MenuItem *item) {
       int length = strlen(path) - strlen(extension);
       Menu *menu = item->menu;
 
-      snprintf(menu->valueBuffer, sizeof(menu->valueBuffer),
-               "%.*s", length, name);
+      snprintf(
+        menu->valueBuffer, sizeof(menu->valueBuffer),
+        "%.*s", length, name
+      );
 
-      return menu->valueBuffer;
+      path = menu->valueBuffer;
     }
   }
 
   return path;
+}
+
+static const char *
+getText_files (const MenuItem *item) {
+  return item->methods->getValue(item);
 }
 
 static const MenuItemMethods menuItemMethods_files = {
@@ -725,14 +723,13 @@ newFilesMenuItem (
   FileData *files;
 
   if ((files = malloc(sizeof(*files)))) {
-    char *pattern;
-
     memset(files, 0, sizeof(*files));
     files->extension = extension;
     files->none = !!none;
 
+    char *pattern;
     {
-      const char *strings[] = {"*", extension};
+      const char *strings[] = {"?*", extension};
       pattern = joinStrings(strings, ARRAY_COUNT(strings));
     }
 
