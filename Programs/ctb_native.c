@@ -549,6 +549,8 @@ makeDecomposedBraille (BrailleContractionData *bcd, wchar_t character, BYTE *cel
       if (character != entry->value) break;
 
       const ContractionTableRule *rule = entry->always;
+      if (!rule) break;
+
       unsigned int cellCount = rule->replen;
       if (!cellCount) break;
       if ((end - from) < cellCount) break;
