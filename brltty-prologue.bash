@@ -324,6 +324,21 @@ evaluateExpression() {
    return 0
 }
 
+if [ -n "${SRANDOM}" ]
+then
+   declare -n bashRandomNumberVariable="SRANDOM"
+else
+   declare -n bashRandomNumberVariable="RANDOM"
+fi
+
+getRandomInteger() {
+   local resultVariable="${1}"
+   local maximumValue="${2}"
+   local minimumValue="${3:-1}"
+
+   setVariable "${resultVariable}" $(( (bashRandomNumberVariable % (maximumValue - minimumValue + 1)) + minimumValue ))
+}
+
 convertUnit() {
    local resultVariable="${1}"
    local from="${2}"
