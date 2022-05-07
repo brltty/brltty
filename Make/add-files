@@ -16,7 +16,7 @@ getInstallTree installTree
 for sourceDirectory in Files/*
 do
    targetDirectory="${installTree}/${sourceDirectory#*/}"
-   executeHostCommand sudo cp -- "${topDirectory}/${sourceDirectory}/"* "${targetDirectory}/"
+   executeHostCommand sudo rsync --quiet --recursive --perms --links -- "${topDirectory}/${sourceDirectory}/" "${targetDirectory}/"
 done
 
 for subdirectory in etc

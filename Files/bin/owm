@@ -3,6 +3,93 @@
 includeProgramComponent weather
 shopt -s extglob
 
+curlLocation=""
+curlOptions=()
+
+curlNewRequest() {
+   local location="${1}"
+
+   curlLocation="${location}"
+   curlOptions=(--silent --show-error --get)
+}
+
+curlExtendLocation() {
+   local component
+   for component in "${@}"
+   do
+      curlLocation+="/${component}"
+   done
+}
+
+curlAddQueryParameter() {
+   local name="${1}"
+   local value="${2}"
+
+   curlOptions+=(--data-urlencode "${name}=${value}")
+}
+
+curlAddQueryParameters() {
+   local parametersArray="${1}"
+
+   forElements "${parametersArray}" curlAddQueryParameter
+}
+
+curlGetResponse() {
+   local responseVariable="${1}"
+
+   local -n curlResponse="${responseVariable}"
+   curlResponse="$(curl "${curlOptions[@]}" -- "${curlLocation}")" || exit 9
+}
+
+jsonParse() {
+   local resultArray="${1}"
+   local parser="${2}"
+   local json="${3}"
+
+   local jqPath
+   findProgramComponent jqPath "${parser}" jq || {
+      semanticError "JSON parser not found: ${parser}"
+   }
+
+   local jqOptions=(--from-file "${jqPath}")
+   jqOptions+=(--raw-output)
+
+   local jqResponse
+   jqResponse="$(jq "${jqOptions[@]}" <<<"${json}")" || exit 8
+
+   local name value
+   while read name value
+   do
+      [ "${value}" = "null" ] && value=""
+      setElement "${resultArray}" "${name}" "${value}"
+   done <<<"${jqResponse}"
+}
+
+ipGetMyAddress() {
+   local resultVariable="${1}"
+   curlNewRequest "https:/api64.ipify.org?format=json"
+
+   local response
+   curlGetResponse response
+
+   local -A results=()
+   jsonParse results ip-address "${response}"
+   setVariable "${resultVariable}" "${results["ip,address"]}"
+}
+
+ipGetLocation() {
+   local locationArray="${1}"
+   local address="${2}"
+   [ -n "${adress}" ] || ipGetMyAddress address
+
+   curlNewRequest "https:/ipapi.co"
+   curlExtendLocation "${address}" "json"
+
+   local response
+   curlGetResponse response
+   jsonParse "${locationArray}" ip-location "${response}"
+}
+
 readonly owmDistanceUnit="m"
 readonly owmPressureUnit="hpa"
 readonly owmSpeedUnit="m/s"
@@ -31,33 +118,21 @@ owmSetKey() {
    setElement "${parametersArray}" "appid" "${owmKeyValue}"
 }
 
-owmAddQueryParameter() {
-   local name="${1}"
-   local value="${2}"
-   curlOptions+=(--data-urlencode "${name}=${value}")
-}
-
 owmQuery() {
    local resultArray="${1}"
    local parametersArray="${2}"
    shift 2
 
-   local curlOptions=(--silent --show-error --get)
-   local curlLocation="https://api.OpenWeatherMap.org"
-
    local -A owmParameters=()
    getElements owmParameters "${parametersArray}"
    owmSetKey owmParameters
-   forElements owmParameters owmAddQueryParameter
 
-   local owmComponent
-   for owmComponent in "${@}"
-   do
-      curlLocation+="/${owmComponent}"
-   done
+   curlNewRequest "https://api.OpenWeatherMap.org"
+   curlExtendLocation "${@}"
+   curlAddQueryParameters owmParameters
 
    local owmResponse
-   owmResponse="$(curl "${curlOptions[@]}" -- "${curlLocation}")" || exit "${?}"
+   curlGetResponse owmResponse
 
    local owmMessage
    owmMessage="$(jq -r '.message?' <<<"${owmResponse}")"
@@ -67,25 +142,7 @@ owmQuery() {
 
    local owmName="${1}-${3}"
    "${owmSaveResponses}" && jq . <<<"${owmResponse}" >"${programName}.${owmName}.json"
-
-   local jqPath
-   findProgramComponent jqPath "${owmName}" jq || {
-      semanticError "API response parser not found: ${owmName}"
-   }
-
-   local jqOptions=(--from-file "${jqPath}")
-   jqOptions+=(--raw-output)
-
-   local jqResponse
-   jqResponse="$(jq "${jqOptions[@]}" <<<"${owmResponse}")" || exit "${?}"
-
-   local name value
-   while read name value
-   do
-      [ "${value}" = "null" ] && value=""
-      setElement "${resultArray}" "${name}" "${value}"
-   done <<<"${jqResponse}"
-
+   jsonParse "${resultArray}" "${owmName}" "${owmResponse}"
   #listElements "${resultArray}"
 }
 
@@ -272,7 +329,11 @@ Queries (may be abbreviated):
   forecast [latitude longitude]
   weather [latitude longitude]
 
-The -l option may be used to specify a location in lieu of its coordinates.
+The location to use is selected as follows:
+1: The coordinate parameters.
+2: The location descriptor (specified via -l).
+3: The saved location setting.
+4: The user's current location.
 
 Location Descriptors:
   A location descriptor is specified as name[[,state],country].
@@ -335,6 +396,17 @@ makeLocationPhrase() {
    done
 
    setVariable "${phraseVariable}" "${result}"
+}
+
+getMyCoordinates() {
+   local latitudeVariable="${1}"
+   local longitudeVariable="${2}"
+
+   local -A result=()
+   ipGetLocation result
+
+   setVariable "${latitudeVariable}" "${result["location,latitude"]}"
+   setVariable "${longitudeVariable}" "${result["location,longitude"]}"
 }
 
 getLocationCoordinates() {
@@ -426,7 +498,13 @@ getLocation() {
    else
       getPersistentProgramSetting "${latitudeVariable}" "${latitudeSetting}"
       getPersistentProgramSetting "${longitudeVariable}" "${longitudeSetting}"
-      saveLocation=false
+
+      if [ -n "${!latitudeVariable}" -a -n "${!longitudeVariable}" ]
+      then
+         saveLocation=false
+      else
+         getMyCoordinates "${latitudeVariable}" "${longitudeVariable}"
+      fi
    fi
 
    "${saveLocation}" && {

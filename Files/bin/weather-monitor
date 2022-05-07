@@ -1,0 +1,6 @@
+#!/bin/bash
+. brltty-prologue.bash
+parseProgramArguments "${@}"
+
+run-command -c -i 3600 -d 1800 -- owm -L -- weather
+exit 0

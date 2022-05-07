@@ -1,0 +1,48 @@
+#!/bin/bash
+. brltty-prologue.bash
+
+commandArguments=()
+processExtraProgramParameters() {
+   commandArguments=("${@}")
+}
+
+addProgramParameter command commandName "the command to execute (name, relative path, or absolute path)"
+optionalProgramParameters "arg" "arguments (options and parameters) for the command"
+
+addProgramOption c flag clearScreen "clear the screen before running the command"
+addProgramOption i string.seconds executionInterval "the inetval at which to reexecute the command"
+addProgramOption d string.seconds intervalDeviation "the maximum randomized deviation from the interval"
+parseProgramArguments "${@}"
+
+runCommand() {
+   "${clearScreen}" && clear
+   "${commandName}" "${commandArguments[@]}"
+}
+
+if [ -n "${executionInterval}" ]
+then
+   verifyInteger "execution interval" "${executionInterval}" 1
+
+   if [ -n "${intervalDeviation}" ]
+   then
+      verifyInteger "interval deviation" "${intervalDeviation}" 0 $((executionInterval - 1))
+   else
+      intervalDeviation=0
+   fi
+
+   minimumInterval=$((executionInterval - intervalDeviation))
+   maximumInterval=$((executionInterval + intervalDeviation))
+
+   while true
+   do
+      runCommand
+      getRandomInteger delay "${maximumInterval}" "${minimumInterval}"
+      logNote "delaying for ${delay} seconds"
+      sleep "${delay}"
+   done
+else
+   [ -n "${intervalDeviation}" ] && syntaxError "deviation without interval"
+   runCommand
+fi
+
+exit 0
