@@ -394,6 +394,8 @@ insertKey_WindowsScreen (ScreenKey key) {
   DWORD controlKeyState = 0;
   WCHAR wchar = 0;
 
+  mapScreenKey(&key);
+
   logMessage(LOG_DEBUG, "Insert key: %4.4X",key);
   if (isSpecialKey(key)) {
     switch (key & SCR_KEY_CHAR_MASK) {
