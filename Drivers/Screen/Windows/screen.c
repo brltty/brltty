@@ -402,7 +402,7 @@ insertKey_WindowsScreen (ScreenKey key) {
       case SCR_KEY_ENTER:         vk = VK_RETURN; wchar='\r'; break;
       case SCR_KEY_TAB:           vk = VK_TAB;    wchar='\t'; break;
       case SCR_KEY_BACKSPACE:     vk = VK_BACK;   wchar='\b'; break;
-      case SCR_KEY_ESCAPE:        vk = VK_ESCAPE; wchar='\e'; break;
+      case SCR_KEY_ESCAPE:        vk = VK_ESCAPE; wchar='\033'; break;
       case SCR_KEY_CURSOR_LEFT:   vk = VK_LEFT;   break;
       case SCR_KEY_CURSOR_RIGHT:  vk = VK_RIGHT;  break;
       case SCR_KEY_CURSOR_UP:     vk = VK_UP;     break;
