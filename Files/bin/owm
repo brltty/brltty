@@ -41,14 +41,17 @@ curlGetResponse() {
    curlResponse="$(curl "${curlOptions[@]}" -- "${curlLocation}")" || exit 9
 }
 
+addProgramOption J flag saveJSON "save API JSON responses"
+
 jsonParse() {
    local resultArray="${1}"
-   local parser="${2}"
-   local json="${3}"
+   local json="${2}"
+   local jqFilter="${3}"
+   "${saveJSON}" && jq . <<<"${owmResponse}" >"${programName}.${jqFilter}.json"
 
    local jqPath
-   findProgramComponent jqPath "${parser}" jq || {
-      semanticError "JSON parser not found: ${parser}"
+   findProgramComponent jqPath "${jqFilter}" jq || {
+      semanticError "JSON filter not found: ${jqFilter}"
    }
 
    local jqOptions=(--from-file "${jqPath}")
@@ -63,6 +66,18 @@ jsonParse() {
       [ "${value}" = "null" ] && value=""
       setElement "${resultArray}" "${name}" "${value}"
    done <<<"${jqResponse}"
+
+   false && listElements "${resultArray}"
+}
+
+jsonGet() {
+   local resultVariable="${1}"
+   local json="${2}"
+   local jqField="${3}"
+
+   local -n jqResult="${resultVariable}"
+   jqResult="$(jq -r "${jqField}?" <<<"${json}")" || exit 8
+   [ "${jqResult}" = "null" ] && jqResult=""
 }
 
 ipGetMyAddress() {
@@ -73,7 +88,7 @@ ipGetMyAddress() {
    curlGetResponse response
 
    local -A results=()
-   jsonParse results ip-address "${response}"
+   jsonParse results "${response}" ip-address
    setVariable "${resultVariable}" "${results["ip,address"]}"
 }
 
@@ -87,7 +102,7 @@ ipGetLocation() {
 
    local response
    curlGetResponse response
-   jsonParse "${locationArray}" ip-location "${response}"
+   jsonParse "${locationArray}" "${response}" ip-location
 }
 
 readonly owmDistanceUnit="m"
@@ -95,9 +110,8 @@ readonly owmPressureUnit="hpa"
 readonly owmSpeedUnit="m/s"
 readonly owmTemperatureUnit="C"
 
-addProgramOption k string.key owmKeyValue "the application key for Open Weather Map" "the first line in the key file"
-addProgramOption K string.file owmKeyFile "the file containing the application key"
-addProgramOption R flag owmSaveResponses "save the Open Weather Map API responses"
+addProgramOption o string.key owmKeyValue "the application key for Open Weather Map" "the first line in the key file"
+addProgramOption O string.file owmKeyFile "the file containing the application key"
 
 owmSetKey() {
    local parametersArray="${1}"
@@ -135,15 +149,11 @@ owmQuery() {
    curlGetResponse owmResponse
 
    local owmMessage
-   owmMessage="$(jq -r '.message?' <<<"${owmResponse}")"
-   [ "${owmMessage}" = "null" ] && owmMessage=""
+   jsonGet owmMessage "${owmResponse}" ".message"
    [ "${owmMessage}" = "0" ] && owmMessage=""
    [ -n "${owmMessage}" ] && semanticError "${owmMessage}"
 
-   local owmName="${1}-${3}"
-   "${owmSaveResponses}" && jq . <<<"${owmResponse}" >"${programName}.${owmName}.json"
-   jsonParse "${resultArray}" "${owmName}" "${owmResponse}"
-  #listElements "${resultArray}"
+   jsonParse "${resultArray}" "${owmResponse}" "${1}-${3}"
 }
 
 owmQueryLocation() {
@@ -330,10 +340,10 @@ Queries (may be abbreviated):
   weather [latitude longitude]
 
 The location to use is selected as follows:
-1: The coordinate parameters.
-2: The location descriptor (specified via -l).
-3: The saved location setting.
-4: The user's current location.
+1: The coordinate parameters (if specified).
+2: The location descriptor (if specified via the -l option).
+3: The location setting (if saved).
+4: The current location (determined via the IP address).
 
 Location Descriptors:
   A location descriptor is specified as name[[,state],country].
