@@ -58,7 +58,7 @@ readonly -A imperialUnits=(
    ["${timeFormatSetting}"]="12-hours"
 )
 
-readonly unitGroupNames=(metric imperial)
+readonly unitsTypeNames=(metric imperial)
 readonly windDirections=(N NNE NE ENE E ESE SE SSE S SSW SW WSW W WNW NW NNW)
 
 toWindDirection() {

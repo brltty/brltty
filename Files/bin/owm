@@ -7,9 +7,9 @@ curlLocation=""
 curlOptions=()
 
 curlNewRequest() {
-   local location="${1}"
+   local server="${1}"
 
-   curlLocation="${location}"
+   curlLocation="https://${server}"
    curlOptions=(--silent --show-error --get)
 }
 
@@ -43,11 +43,11 @@ curlGetResponse() {
 
 addProgramOption J flag saveJSON "save API JSON responses"
 
-jsonParse() {
+jsonFilterFields() {
    local resultArray="${1}"
    local json="${2}"
    local jqFilter="${3}"
-   "${saveJSON}" && jq . <<<"${owmResponse}" >"${programName}.${jqFilter}.json"
+   "${saveJSON}" && jq . <<<"${json}" >"${programName}.${jqFilter}.json"
 
    local jqPath
    findProgramComponent jqPath "${jqFilter}" jq || {
@@ -67,10 +67,10 @@ jsonParse() {
       setElement "${resultArray}" "${name}" "${value}"
    done <<<"${jqResponse}"
 
-   false && listElements "${resultArray}"
+   false && writeElements "${resultArray}"
 }
 
-jsonGet() {
+jsonGetField() {
    local resultVariable="${1}"
    local json="${2}"
    local jqField="${3}"
@@ -82,27 +82,29 @@ jsonGet() {
 
 ipGetMyAddress() {
    local resultVariable="${1}"
-   curlNewRequest "https:/api64.ipify.org?format=json"
+
+   curlNewRequest "api64.ipify.org"
+   curlAddQueryParameter "format" "json"
 
    local response
    curlGetResponse response
 
    local -A results=()
-   jsonParse results "${response}" ip-address
+   jsonFilterFields results "${response}" my-address
    setVariable "${resultVariable}" "${results["ip,address"]}"
 }
 
-ipGetLocation() {
-   local locationArray="${1}"
+ipGetProperties() {
+   local propertiesArray="${1}"
    local address="${2}"
    [ -n "${adress}" ] || ipGetMyAddress address
 
-   curlNewRequest "https:/ipapi.co"
+   curlNewRequest "ipapi.co"
    curlExtendLocation "${address}" "json"
 
    local response
    curlGetResponse response
-   jsonParse "${locationArray}" "${response}" ip-location
+   jsonFilterFields "${propertiesArray}" "${response}" address-properties
 }
 
 readonly owmDistanceUnit="m"
@@ -141,7 +143,7 @@ owmQuery() {
    getElements owmParameters "${parametersArray}"
    owmSetKey owmParameters
 
-   curlNewRequest "https://api.OpenWeatherMap.org"
+   curlNewRequest "api.OpenWeatherMap.org"
    curlExtendLocation "${@}"
    curlAddQueryParameters owmParameters
 
@@ -149,11 +151,11 @@ owmQuery() {
    curlGetResponse owmResponse
 
    local owmMessage
-   jsonGet owmMessage "${owmResponse}" ".message"
+   jsonGetField owmMessage "${owmResponse}" ".message"
    [ "${owmMessage}" = "0" ] && owmMessage=""
    [ -n "${owmMessage}" ] && semanticError "${owmMessage}"
 
-   jsonParse "${resultArray}" "${owmResponse}" "${1}-${3}"
+   jsonFilterFields "${resultArray}" "${owmResponse}" "${1}-${3}"
 }
 
 owmQueryLocation() {
@@ -210,7 +212,7 @@ owmQueryWeather() {
    owmQuery "${WeatherArray}" parameters data 2.5 weather
 }
 
-addProgramOption u string.group unitGroup "the group of units to default to (${unitGroupNames[*]})"
+addProgramOption u string.type unitsType "the type of units to default to (${unitsTypeNames[*]})"
 addProgramOption D string.unit distanceUnit "the unit to display visibility distance in (${!distanceUnits[*]})" "${owmDistanceUnit}"
 addProgramOption P string.unit pressureUnit "the unit to display atmospheric pressure in (${!pressureUnits[*]})" "${owmPressureUnit}"
 addProgramOption S string.unit speedUnit "the unit to display wind speed in (${!speedUnits[*]})" "${owmSpeedUnit}"
@@ -219,11 +221,32 @@ addProgramOption T string.unit temperatureUnit "the unit to display temperaturse
 readonly defaultTimeFormat="24-hours"
 addProgramOption H string.mode timeFormat "the mode to display time in (${!timeFormats[*]})" "${defaultTimeFormat}"
 
-useUnitGroup() {
-   local group="${1}"
-   verifyChoice "unit group" group "${unitGroupNames[@]}"
+declare -A unitVariables=(
+   ["${distanceUnitSetting}"]="distanceUnit"
+   ["${pressureUnitSetting}"]="pressureUnit"
+   ["${speedUnitSetting}"]="speedUnit"
+   ["${temperatureUnitSetting}"]="temperatureUnit"
+   ["${timeFormatSetting}"]="timeFormat"
+)
 
-   local settingsArray="${group}Units"
+saveUnits() {
+   local -a settingNames=()
+   getElementNames settingNames unitVariables
+
+   local setting
+   for setting in "${settingNames[@]}"
+   do
+      local variable="${unitVariables["${setting}"]}"
+      changePersistentProgramSetting "${setting}" "${!variable}"
+   done
+}
+
+useUnits() {
+   local type="${1}"
+
+   verifyChoice "units type" type "${unitsTypeNames[@]}"
+   local settingsArray="${type}Units"
+
    local -a settingNames=()
    getElementNames settingNames "${settingsArray}"
 
@@ -232,7 +255,9 @@ useUnitGroup() {
    do
       local unit
       getElement unit "${settingsArray}" "${setting}"
-      changePersistentProgramSetting "${setting}" "${unit}"
+
+      local variable="${unitVariables["${setting}"]}"
+      setVariable "${variable}" "${unit}"
    done
 }
 
@@ -343,13 +368,14 @@ The location to use is selected as follows:
 1: The coordinate parameters (if specified).
 2: The location descriptor (if specified via the -l option).
 3: The location setting (if saved).
-4: The current location (determined via the IP address).
+4: The current location (estimated via the IP address).
 
 Location Descriptors:
   A location descriptor is specified as name[[,state],country].
   The name is required, must be first, and may be abbreviated.
   The optional two-letter ISO 3166 country code must be last.
   The optional two-letter state code only applies to the US.
+  The special value = means the (estimated) current location.
 
 Latitudes and Longitudes
   A latitude or longitude is specified as a number either between -90 and +90
@@ -408,15 +434,18 @@ makeLocationPhrase() {
    setVariable "${phraseVariable}" "${result}"
 }
 
+declare -A myProperties=()
+getMyProperties() {
+   [ "${#myProperties[*]}" -eq 0 ] && ipGetProperties myProperties
+}
+
 getMyCoordinates() {
    local latitudeVariable="${1}"
    local longitudeVariable="${2}"
 
-   local -A result=()
-   ipGetLocation result
-
-   setVariable "${latitudeVariable}" "${result["location,latitude"]}"
-   setVariable "${longitudeVariable}" "${result["location,longitude"]}"
+   getMyProperties
+   setVariable "${latitudeVariable}" "${myProperties["location,latitude"]}"
+   setVariable "${longitudeVariable}" "${myProperties["location,longitude"]}"
 }
 
 getLocationCoordinates() {
@@ -498,13 +527,16 @@ getLocation() {
    local latitudeVariable="${1}"
    local longitudeVariable="${2}"
 
-   if [ -n "${locationDescriptor}" ]
-   then
-      getLocationCoordinates "${latitudeVariable}" "${longitudeVariable}" "${locationDescriptor}"
-   elif haveMoreQueryArguments
+   if haveMoreQueryArguments
    then
       getLatitudeArgument "${latitudeVariable}"
       getLongitudeArgument "${longitudeVariable}"
+   elif [ "${locationDescriptor}" = "=" ]
+   then
+      getMyCoordinates "${latitudeVariable}" "${longitudeVariable}"
+   elif [ -n "${locationDescriptor}" ]
+   then
+      getLocationCoordinates "${latitudeVariable}" "${longitudeVariable}" "${locationDescriptor}"
    else
       getPersistentProgramSetting "${latitudeVariable}" "${latitudeSetting}"
       getPersistentProgramSetting "${longitudeVariable}" "${longitudeSetting}"
@@ -684,29 +716,21 @@ addProgramOption U flag saveUnits "save the specified units"
 addProgramOption f string.file configurationFile "the configuration file to use"
 parseProgramArguments "${@}"
 
+[ -n "${locationNumber}" ] && {
+   verifyInteger "location number" "${locationNumber}" 1 99
+}
+
 restorePersistentProgramSettins "${configurationFile}"
-[ -n "${unitGroup}" ] && useUnitGroup "${unitGroup}"
+[ -n "${unitsType}" ] && useUnits "${unitsType}"
 
 verifyDistanceUnit
 verifyPressureUnit
 verifySpeedUnit
 verifyTemperatureUnit
 verifyTimeFormat
-
-[ -n "${locationNumber}" ] && {
-   verifyInteger "location number" "${locationNumber}" 1 99
-}
-
-"${saveUnits}" && {
-   changePersistentProgramSetting "${timeFormatSetting}" "${timeFormat}"
-   changePersistentProgramSetting "${distanceUnitSetting}" "${distanceUnit}"
-   changePersistentProgramSetting "${pressureUnitSetting}" "${pressureUnit}"
-   changePersistentProgramSetting "${speedUnitSetting}" "${speedUnit}"
-   changePersistentProgramSetting "${temperatureUnitSetting}" "${temperatureUnit}"
-}
-
 verifyChoice "query type" queryType location coordinates forecast weather
-"performQuery_${queryType}"
 
+"${saveUnits}" && saveUnits
+"performQuery_${queryType}"
 savePersistentProgramSettins "${configurationFile}"
 exit 0
