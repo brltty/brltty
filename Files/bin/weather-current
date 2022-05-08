@@ -1,0 +1,10 @@
+#!/bin/bash
+. brltty-prologue.bash
+
+addProgramOption m flag monitor "monitor the weather"
+parseProgramArguments "${@}"
+
+set -- owm -L -U -- weather
+"${monitor}" && set run-command -c -i 3600 -d 1800 -- "${@}"
+"${@}"
+exit "${?}"

@@ -81,7 +81,7 @@ jsonGetField() {
 }
 
 ipGetMyAddress() {
-   local resultVariable="${1}"
+   local addressVariable="${1}"
 
    curlNewRequest "api64.ipify.org"
    curlAddQueryParameter "format" "json"
@@ -91,7 +91,9 @@ ipGetMyAddress() {
 
    local -A results=()
    jsonFilterFields results "${response}" my-address
-   setVariable "${resultVariable}" "${results["ip,address"]}"
+
+   setVariable "${addressVariable}" "${results["ip,address"]}"
+   logNote "IP address: ${!addressVariable}"
 }
 
 ipGetProperties() {
@@ -158,18 +160,6 @@ owmQuery() {
    jsonFilterFields "${resultArray}" "${owmResponse}" "${1}-${3}"
 }
 
-owmQueryLocation() {
-   local locationsArray="${1}"
-   local descriptor="${2}"
-
-   local -A parameters=(
-      ["q"]="${descriptor}"
-      ["limit"]="5"
-   )
-
-   owmQuery "${locationsArray}" parameters geo 1.0 direct
-}
-
 owmQueryCoordinates() {
    local locationsArray="${1}"
    local latitude="${2}"
@@ -182,6 +172,18 @@ owmQueryCoordinates() {
    )
 
    owmQuery "${locationsArray}" parameters geo 1.0 reverse
+}
+
+owmQueryLocation() {
+   local locationsArray="${1}"
+   local descriptor="${2}"
+
+   local -A parameters=(
+      ["q"]="${descriptor}"
+      ["limit"]="5"
+   )
+
+   owmQuery "${locationsArray}" parameters geo 1.0 direct
 }
 
 owmQueryForecast() {
@@ -229,36 +231,34 @@ declare -A unitVariables=(
    ["${timeFormatSetting}"]="timeFormat"
 )
 
-saveUnits() {
-   local -a settingNames=()
-   getElementNames settingNames unitVariables
+forUnitVariables() {
+   forElements unitVariables "${@}"
+}
 
-   local setting
-   for setting in "${settingNames[@]}"
-   do
-      local variable="${unitVariables["${setting}"]}"
-      changePersistentProgramSetting "${setting}" "${!variable}"
-   done
+saveUnit() {
+   local setting="${1}"
+   local variable="${2}"
+
+   changePersistentProgramSetting "${setting}" "${!variable}"
+}
+
+saveUnits() {
+   forUnitVariables saveUnit
+}
+
+setUnit() {
+   local setting="${1}"
+   local unit="${2}"
+
+   local variable="${unitVariables["${setting}"]}"
+   setVariable "${variable}" "${unit}"
 }
 
 useUnits() {
    local type="${1}"
 
    verifyChoice "units type" type "${unitsTypeNames[@]}"
-   local settingsArray="${type}Units"
-
-   local -a settingNames=()
-   getElementNames settingNames "${settingsArray}"
-
-   local setting
-   for setting in "${settingNames[@]}"
-   do
-      local unit
-      getElement unit "${settingsArray}" "${setting}"
-
-      local variable="${unitVariables["${setting}"]}"
-      setVariable "${variable}" "${unit}"
-   done
+   forElements "${type}Units" setUnit
 }
 
 getSetting() {
@@ -270,14 +270,22 @@ getSetting() {
       getPersistentProgramSetting value "${setting}"
 
       [ -n "${value}" ] || {
-         value="${default}"
+         getMyProperties
+         local country="${myProperties["location,country,code"]}"
+         local unitsType
+
+         if [ "${country}" = "US" ]
+         then
+            unitsType=imperial
+         else
+            unitsType=metric
+         fi
+
+         local unitsArray="${unitsType}Units"
+         getElement value "${unitsArray}" "${setting}"
+         [ -n "${value}" ] || value="${default}"
       }
    }
-}
-
-verifyTimeFormat() {
-   getSetting timeFormat "${defaultTimeFormat}" "${timeFormatSetting}"
-   verifyChoice "clock mode" timeFormat "${!timeFormats[@]}"
 }
 
 verifyDistanceUnit() {
@@ -300,14 +308,9 @@ verifyTemperatureUnit() {
    verifyChoice "temperature unit" temperatureUnit "${!temperatureUnits[@]}"
 }
 
-formatTime() {
-   local variable="${1}"
-
-   local text
-   printf -v text "%(${timeFormats["${timeFormat}"]}, %A, %B %e)T" "${!variable}"
-   text="${text//+( )/ }"
-
-   setVariable "${variable}" "${text# }"
+verifyTimeFormat() {
+   getSetting timeFormat "${defaultTimeFormat}" "${timeFormatSetting}"
+   verifyChoice "time format" timeFormat "${!timeFormats[@]}"
 }
 
 formatDistance() {
@@ -353,6 +356,16 @@ formatTemperature() {
    local precision="${2}"
 
    formatComplexUnit "${variable}" "${owmTemperatureUnit}" "${temperatureUnit}" temp "${precision}"
+}
+
+formatTime() {
+   local variable="${1}"
+
+   local text
+   printf -v text "%(${timeFormats["${timeFormat}"]}, %A, %B %e)T" "${!variable}"
+   text="${text//+( )/ }"
+
+   setVariable "${variable}" "${text# }"
 }
 
 showProgramUsageNotes() {
@@ -608,15 +621,6 @@ showLocations() {
    done
 }
 
-performQuery_location() {
-   [ -n "${locationDescriptor}" ] || getQueryArgument locationDescriptor "location"
-   noMoreQueryArguments
-
-   local -A locations=()
-   owmQueryLocation locations "${locationDescriptor}"
-   showLocations locations "${locationDescriptor}"
-}
-
 performQuery_coordinates() {
    local latitude longitude
    getLocation latitude longitude
@@ -625,6 +629,15 @@ performQuery_coordinates() {
    local -A locations=()
    owmQueryCoordinates locations "${latitude}" "${longitude}"
    showLocations locations "[${latitude}, ${longitude}]"
+}
+
+performQuery_location() {
+   [ -n "${locationDescriptor}" ] || getQueryArgument locationDescriptor "location"
+   noMoreQueryArguments
+
+   local -A locations=()
+   owmQueryLocation locations "${locationDescriptor}"
+   showLocations locations "${locationDescriptor}"
 }
 
 performQuery_forecast() {
