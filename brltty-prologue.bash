@@ -243,8 +243,17 @@ readonly persistentProgramSettingsExtension="conf"
 
 restorePersistentProgramSettins() {
    local settingsFile="${1}"
+   local found=false
 
-   [ -n "${settingsFile}" ] || findProgramConfigurationFile settingsFile "${persistentProgramSettingsExtension}" && {
+   if [ -n "${settingsFile}" ]
+   then
+      [ -e "${settingsFile}" ] && found=true
+   elif findProgramConfigurationFile settingsFile "${persistentProgramSettingsExtension}"
+   then
+      found=true
+   fi
+
+   "${found}" && {
       logNote "restoring persistent program settings: ${settingsFile}"
       persistentProgramSettingsArray=()
       readElements persistentProgramSettingsArray <"${settingsFile}"
