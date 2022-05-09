@@ -41,7 +41,8 @@ curlGetResponse() {
    curlResponse="$(curl "${curlOptions[@]}" -- "${curlLocation}")" || exit 9
 }
 
-addProgramOption J flag saveJSON "save API JSON responses"
+addProgramOption J flag saveJSON "save the JSON responses"
+addProgramOption F flag saveFields "save the filtered fields"
 
 jsonFilterFields() {
    local resultArray="${1}"
@@ -67,7 +68,8 @@ jsonFilterFields() {
       setElement "${resultArray}" "${name}" "${value}"
    done <<<"${jqResponse}"
 
-   false && writeElements "${resultArray}"
+   "${saveFields}" && writeElements "${resultArray}" >"${programName}.${jqFilter}.txt"
+   return 0
 }
 
 jsonGetField() {
