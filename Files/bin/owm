@@ -41,14 +41,17 @@ curlGetResponse() {
    curlResponse="$(curl "${curlOptions[@]}" -- "${curlLocation}")" || exit 9
 }
 
-addProgramOption J flag saveJSON "save the JSON responses"
-addProgramOption F flag saveFields "save the filtered fields"
+jsonExtension="json"
+addProgramOption J flag saveJSON "save the JSON responses (extension is .${jsonExtension})"
+
+fieldsExtension="txt"
+addProgramOption F flag saveFields "save the filtered fields (extension is .${fieldsExtension})"
 
 jsonFilterFields() {
    local resultArray="${1}"
    local json="${2}"
    local jqFilter="${3}"
-   "${saveJSON}" && jq . <<<"${json}" >"${programName}.${jqFilter}.json"
+   "${saveJSON}" && jq . <<<"${json}" >"${programName}.${jqFilter}.${jsonExtension}"
 
    local jqPath
    findProgramComponent jqPath "${jqFilter}" jq || {
@@ -68,7 +71,7 @@ jsonFilterFields() {
       setElement "${resultArray}" "${name}" "${value}"
    done <<<"${jqResponse}"
 
-   "${saveFields}" && writeElements "${resultArray}" >"${programName}.${jqFilter}.txt"
+   "${saveFields}" && writeElements "${resultArray}" >"${programName}.${jqFilter}.${fieldsExtension}"
    return 0
 }
 

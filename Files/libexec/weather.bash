@@ -26,6 +26,7 @@ readonly -A pressureUnits=(
 
 readonly -A speedUnits=(
    ["km/hr"]="kilometers per hour"
+   ["knots"]="knots"
    ["m/s"]="meters per second"
    ["mph"]="miles per hour"
 )
