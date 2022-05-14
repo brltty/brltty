@@ -1,0 +1,28 @@
+#!/bin/bash
+. brltty-prologue.bash
+
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+
+If the parameter's name isn't specified then all the parameters are listed.
+If just a name is specified then only that parameter's value is shown.
+If a value is also specified then it's assigned to the named parameter.
+END_OF_PROGRAM_USAGE_NOTES
+}
+
+optionalProgramParameters
+addProgramParameter "name" apiParameter "the name of a BrlAPI parameter"
+addProgramParameter "value" newValue "the new value to assign to the parameter"
+parseProgramArguments "${@}"
+
+if [ -n "${newValue}" ]
+then
+   canute-apitool set-parameter "${apiParameter}" "${newValue}"
+elif [ -n "${apiParameter}" ]
+then
+   canute-apitool list-parameter "${apiParameter}"
+else
+   canute-apitool list-parameters"${apiParameter}"
+fi
+
+exit 0

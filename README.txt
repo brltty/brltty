@@ -59,3 +59,9 @@ canute-java
 canute-apitool
    Perform various BrlAPI functions.
 
+canute-apitool
+   Show/set the values of BrlAPI parameters.
+
+weather-current
+   Show the current weather conditions.
+
