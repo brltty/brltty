@@ -4,7 +4,7 @@
 addProgramOption m flag monitor "monitor the weather"
 parseProgramArguments "${@}"
 
-set -- owm -L -U -- weather
-"${monitor}" && set run-command -c -i 3600 -d 1800 -- "${@}"
+set -- /brltty/current/libexec/owm -L -U -- weather
+"${monitor}" && set /brltty/current/libexec/run-command -c -i 3600 -d 1800 -- "${@}"
 "${@}"
 exit "${?}"
