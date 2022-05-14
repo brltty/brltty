@@ -1,5 +1,5 @@
 #!/bin/bash
-. brltty-prologue.bash
+. /brltty/current/libexec/canute-prologue.sh
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
@@ -15,14 +15,32 @@ addProgramParameter "name" apiParameter "the name of a BrlAPI parameter"
 addProgramParameter "value" newValue "the new value to assign to the parameter"
 parseProgramArguments "${@}"
 
-if [ -n "${newValue}" ]
+apiCommand() {
+   local command="${1}"
+   shift 1
+
+   canute-apitool "${command}" -server "localhost:${session}" "${@}"
+   return "${?}"
+}
+
+if [ -n "${DISPLAY}" ]
 then
-   canute-apitool set-parameter "${apiParameter}" "${newValue}"
-elif [ -n "${apiParameter}" ]
-then
-   canute-apitool list-parameter "${apiParameter}"
+   session=1
 else
-   canute-apitool list-parameters"${apiParameter}"
+   session=0
 fi
 
-exit 0
+if [ -n "${newValue}" ]
+then
+   apiCommand set-parameter "${apiParameter}" "${newValue}"
+   returnCode="${?}"
+elif [ -n "${apiParameter}" ]
+then
+   apiCommand list-parameter "${apiParameter}"
+   returnCode="${?}"
+else
+   apiCommand list-parameters
+   returnCode="${?}"
+fi
+
+exit "${returnCode}"

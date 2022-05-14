@@ -1,5 +1,13 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
+if [ -n "${DISPLAY}" ]
+then
+   session=1
+else
+   session=0
+fi
+
+export BRLAPI_HOST="localhost:${session}"
 exec java --class-path "${apiLinksDirectory}/java/brlapi.jar"  "-Djava.library.path=${apiLinksDirectory}/jni" "${@}"
-exit 0
+exit "${?}"
