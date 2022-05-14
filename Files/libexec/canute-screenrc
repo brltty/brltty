@@ -1,1 +1,2 @@
-screen -t Canute 0 /brltty/current/libexec/canute-shell
+screen -t Weather 1 /brltty/current/bin/weather-current -m
+screen -t Canute  0 /brltty/current/libexec/canute-shell

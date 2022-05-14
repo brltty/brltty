@@ -1,2 +1,8 @@
 export PS1='\u-\W\$ '
 canute-ttysize
+
+onExitFromCanuteShell() {
+   screen -X quit
+}
+trap onExitFromCanuteShell EXIT
+
