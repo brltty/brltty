@@ -1,6 +1,7 @@
 screen
 gnome-terminal
 marco
+espeak-ng
 
 at-spi
 at-spi2-core
