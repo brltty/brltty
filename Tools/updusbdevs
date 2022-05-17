@@ -475,10 +475,8 @@ proc makeLines_udev {vendor product codes descriptions exclude channels} {
       lappend rule "GOTO=\"brltty_usb_run\""
       set line [join $rule ", "]
 
-      if {$filterLength == $baseLength} {
-         if {$exclude} {
-            set line [makeComment_udev $line]
-         }
+      if {$exclude} {
+         set line [makeComment_udev $line]
       }
 
       lappend lines $line
@@ -489,7 +487,8 @@ proc makeLines_udev {vendor product codes descriptions exclude channels} {
 
 proc makeLines {linesArray schemes deviceTable} {
    global genericDevices
-   upvar #0 optionValues(nogeneric) excludeGenericDevices
+   upvar #0 optionValues(nogeneric) noGeneric
+   upvar #0 optionValues(onlygeneric) onlyGeneric
 
    foreach scheme $schemes {
       set makeLines makeLines_$scheme
@@ -526,9 +525,9 @@ proc makeLines {linesArray schemes deviceTable} {
 
             set codes [lsort -unique $codes]
             set descriptions [lsort $descriptions]
-            set exclude 0
+            set isGeneric [dict get $productEntry generic]
 
-            if {[dict get $productEntry generic]} {
+            if {$isGeneric} {
                lappend lines [$makeComment "Generic Identifier"]
                set generic [dict get $genericDevices $identifier]
 
@@ -540,11 +539,10 @@ proc makeLines {linesArray schemes deviceTable} {
                      lappend lines [$makeComment "$header: [dict get $generic $property]"]
                   }
                }
-
-               set exclude $excludeGenericDevices
             }
 
-            eval [list lappend lines] [$makeLines $vendor $product $codes $descriptions $exclude $channels]
+            set excludeDevice [expr {$isGeneric? $noGeneric: $onlyGeneric}]
+            eval [list lappend lines] [$makeLines $vendor $product $codes $descriptions $excludeDevice $channels]
             lappend lines ""
          }
       }
@@ -706,6 +704,7 @@ set genericDevices [makeGenericDeviceTable {
 set optionDefinitions {
    {test      flag "don't update the files"}
    {nogeneric flag "don't include generic USB to serial adapters"}
+   {onlygeneric flag "only include generic USB to serial adapters"}
 }
 
 processProgramArguments optionValues $optionDefinitions positionalArguments "\[scheme:file ...\]"
