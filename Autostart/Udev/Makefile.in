@@ -17,9 +17,6 @@
 ###############################################################################
 
 UDEV_RULES_SEQUENCE = 90
-#UDEV_RULES_TYPE = all
-UDEV_RULES_TYPE = no-generic
-
 UDEV_PARENT_LOCATION = $(libdir)
 #UDEV_PARENT_LOCATION = $(sysconfdir)
 
@@ -29,9 +26,22 @@ UDEV_RULES_DIRECTORY = $(INSTALL_ROOT)$(UDEV_RULES_LOCATION)
 
 UDEV_PATH_PREFIX = $(UDEV_RULES_DIRECTORY)/$(UDEV_RULES_SEQUENCE)-$(PACKAGE_TARNAME)-
 UDEV_RULES_EXTENSION = rules
-UDEV_NAME_DEVICE = device.$(UDEV_RULES_EXTENSION)
+
 UDEV_NAME_HID = hid.$(UDEV_RULES_EXTENSION)
 UDEV_NAME_UINPUT = uinput.$(UDEV_RULES_EXTENSION)
+UDEV_NAME_USB_ALL = usb-all.$(UDEV_RULES_EXTENSION)
+UDEV_NAME_USB_GENERIC = usb-generic.$(UDEV_RULES_EXTENSION)
+UDEV_NAME_USB_NONGENERIC = usb-nongeneric.$(UDEV_RULES_EXTENSION)
+
+all: usb-generic usb-nongeneric
+
+usb-generic: $(UDEV_NAME_USB_ALL)
+	cp $(UDEV_NAME_USB_ALL) $(UDEV_NAME_USB_GENERIC)
+	$(SRC_TOP)Tools/updusbdevs -quiet -quiet -onlygeneric udev:$(UDEV_NAME_USB_GENERIC)
+
+usb-nongeneric: $(UDEV_NAME_USB_ALL)
+	cp $(UDEV_NAME_USB_ALL) $(UDEV_NAME_USB_NONGENERIC)
+	$(SRC_TOP)Tools/updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_NAME_USB_NONGENERIC)
 
 install-scripts-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_SCRIPTS_DIRECTORY)
@@ -42,10 +52,7 @@ install-wrapper: install-scripts-directory
 install-rules-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_RULES_DIRECTORY)
 
-install-rules: install-rules-device install-rules-hid install-rules-uinput
-
-install-rules-device: install-rules-directory
-	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_DEVICE) $(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE)
+install-rules: install-rules-hid install-rules-uinput install-rules-usb
 
 install-rules-hid: install-rules-directory
 	$(INSTALL_DATA) $(SRC_DIR)/$(UDEV_NAME_HID) $(UDEV_PATH_PREFIX)$(UDEV_NAME_HID)
@@ -53,20 +60,27 @@ install-rules-hid: install-rules-directory
 install-rules-uinput: install-rules-directory
 	$(INSTALL_DATA) $(SRC_DIR)/$(UDEV_NAME_UINPUT) $(UDEV_PATH_PREFIX)$(UDEV_NAME_UINPUT)
 
-install-rules-all: install-wrapper install-rules
+install-rules-usb-generic: install-rules-directory
+	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_USB_GENERIC) $(UDEV_PATH_PREFIX)$(UDEV_NAME_USB_GENERIC)
 
-install-rules-no-generic: install-rules-all
-	$(SRC_TOP)Tools/updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_PATH_PREFIX)$(UDEV_NAME_DEVICE)
+install-rules-usb-nongeneric: install-rules-directory
+	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_USB_NONGENERIC) $(UDEV_PATH_PREFIX)$(UDEV_NAME_USB_NONGENERIC)
 
-install: install-rules-$(UDEV_RULES_TYPE)
+install-rules-usb: install-rules-usb-generic install-rules-usb-nongeneric
+
+install: install-wrapper install-rules
 
 uninstall:
 	-rm -f $(UDEV_RULES_DIRECTORY)/?*-$(PACKAGE_TARNAME).$(UDEV_RULES_EXTENSION)
 	-rm -f $(UDEV_RULES_DIRECTORY)/?*-$(PACKAGE_TARNAME)-*.$(UDEV_RULES_EXTENSION)
 	-rm -f $(UDEV_SCRIPTS_DIRECTORY)/udev-*
 
-distclean::
-	-rm $(UDEV_NAME_DEVICE)
+clean::
+	-rm $(UDEV_NAME_USB_GENERIC)
+	-rm $(UDEV_NAME_USB_NONGENERIC)
+
+distclean:: clean
+	-rm $(UDEV_NAME_USB_ALL)
 
 reload:
 	udevadm control --reload
