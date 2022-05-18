@@ -13,6 +13,6 @@ parseProgramArguments "${@}"
 export PYTHONPATH="${apiLinksDirectory}/python"
 export TCLLIBPATH="${apiLinksDirectory}/tcl"
 
-canuteSetServer
+canuteSetSession
 executeHostCommand exec "${clientParameters[@]}"
 exit 0

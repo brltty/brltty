@@ -12,10 +12,10 @@ atspiDirectory="/usr/lib/at-spi2-core"
 "${atspiDirectory}/at-spi2-registryd" &
 sleep 3
 
-canuteSetServer
+canuteSetSession canute
 brlttyPath="${installTree}/bin"
 "${brlttyPath}/xbrlapi"
-"${brlttyPath}/brltty" -N -f "${installTree}/etc/brltty-atspi.conf"
+"${brlttyPath}/brltty" -N -f "${installTree}/etc/brltty-startx.conf"
 
 marco &
 exec gnome-terminal --wait --title "Canute Interactive Session" -- "${installTree}/libexec/canute-shell"

@@ -1,10 +1,10 @@
 #!/bin/bash
-. brltty-prologue.bash
+. /brltty/current/libexec/canute-prologue.sh
 
 addProgramOption m flag monitor "monitor the weather"
 parseProgramArguments "${@}"
 
-set -- /brltty/current/libexec/owm -L -U -- weather
-"${monitor}" && set /brltty/current/libexec/run-command -c -i 3600 -d 1800 -- "${@}"
+set -- "${installTree}/libexec/owm" -L -U -- weather
+"${monitor}" && set "${installTree}/libexec/run-command" -c -i 3600 -d 1800 -- "${@}"
 "${@}"
 exit "${?}"

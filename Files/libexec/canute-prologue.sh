@@ -20,13 +20,17 @@ brlttyPackageProperty() {
    return 0
 }
 
-canuteSetServer() {
-   if [ -n "${DISPLAY}" ]
-   then
-      session=atspi
-   else
-      session=canute
-   fi
+canuteSetSession() {
+   local session="${1}"
+
+   [ -n "${session}" ] || {
+      if [ -n "${DISPLAY}" ]
+      then
+         session=startx
+      else
+         session=canute
+      fi
+   }
 
    export BRLAPI_HOST=":${session}"
 }
