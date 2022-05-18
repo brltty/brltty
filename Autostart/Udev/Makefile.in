@@ -60,10 +60,10 @@ install-rules-hid: install-rules-directory
 install-rules-uinput: install-rules-directory
 	$(INSTALL_DATA) $(SRC_DIR)/$(UDEV_NAME_UINPUT) $(UDEV_PATH_PREFIX)$(UDEV_NAME_UINPUT)
 
-install-rules-usb-generic: install-rules-directory
+install-rules-usb-generic: usb-generic install-rules-directory
 	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_USB_GENERIC) $(UDEV_PATH_PREFIX)$(UDEV_NAME_USB_GENERIC)
 
-install-rules-usb-nongeneric: install-rules-directory
+install-rules-usb-nongeneric: usb-nongeneric install-rules-directory
 	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_USB_NONGENERIC) $(UDEV_PATH_PREFIX)$(UDEV_NAME_USB_NONGENERIC)
 
 install-rules-usb: install-rules-usb-generic install-rules-usb-nongeneric
@@ -76,11 +76,11 @@ uninstall:
 	-rm -f $(UDEV_SCRIPTS_DIRECTORY)/udev-*
 
 clean::
-	-rm $(UDEV_NAME_USB_GENERIC)
-	-rm $(UDEV_NAME_USB_NONGENERIC)
+	-rm -f $(UDEV_NAME_USB_GENERIC)
+	-rm -f $(UDEV_NAME_USB_NONGENERIC)
 
 distclean:: clean
-	-rm $(UDEV_NAME_USB_ALL)
+	-rm -f $(UDEV_NAME_USB_ALL)
 
 reload:
 	udevadm control --reload

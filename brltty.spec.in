@@ -360,11 +360,30 @@ AutoProv: no
 AutoReq: yes
 Requires: systemd-udev
 
-Summary: Udev rules for BRLTTY.
+Summary: BRLTTY Udev rules.
 %description -n brltty-udev
-This package provides the rules and wrapper for managing BRLTTY via Udev.
+This package provides the rules and the wrapper for managing BRLTTY via Udev.
 
 Install this package if you'd like to manage BRLTTY processes via Udev.
+It doesn't include the rules for braille devices that use generic USB to serial adapters.
+
+
+%package -n brltty-udev-generic
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+BuildArch: noarch
+
+AutoProv: no
+AutoReq: yes
+Requires: systemd-udev
+
+Summary: BRLTTY Udev rules for braille devices that use a generic USB to serial adapter.
+%description -n brltty-udev-generic
+This package provides additional rules for managing BRLTTY via Udev.
+
+Install this package in order to support braille devices that use a generic USB to serial adapter.
 
 
 %package -n brltty-dracut
@@ -654,7 +673,11 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brltty-udev
 %{_udevrulesdir}/*
+%exclude %{_udevrulesdir}/*-generic*
 %{_pkglibexecdir}/udev-*
+
+%files -n brltty-udev-generic
+%{_udevrulesdir}/*-generic*
 
 %files -n brltty-dracut
 /usr/lib/dracut/modules.d/99brltty
