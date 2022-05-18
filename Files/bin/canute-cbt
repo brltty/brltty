@@ -1,0 +1,16 @@
+#!/bin/bash
+. /brltty/current/libexec/canute-prologue.sh
+
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+
+Show or set the current computer (text) braille table.
+END_OF_PROGRAM_USAGE_NOTES
+}
+
+optionalProgramParameters
+addProgramParameter "new-table" newTable "the new computer (text) braille table to use"
+parseProgramArguments "${@}"
+
+exec canute-parameter computer-braille-table "${newTable}"
+exit "${?}"

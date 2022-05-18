@@ -62,6 +62,12 @@ canute-apitool
 canute-apitool
    Show/set the values of BrlAPI parameters.
 
+canute-cbt
+   Show/set the current computer (text) braille table.
+
+canute-lbt
+   Show/set the current literary (contraction) braille table.
+
 weather-current
    Show the current weather conditions.
 
