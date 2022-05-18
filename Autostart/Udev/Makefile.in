@@ -29,19 +29,21 @@ UDEV_RULES_EXTENSION = rules
 
 UDEV_NAME_HID = hid.$(UDEV_RULES_EXTENSION)
 UDEV_NAME_UINPUT = uinput.$(UDEV_RULES_EXTENSION)
-UDEV_NAME_USB_ALL = usb-all.$(UDEV_RULES_EXTENSION)
+
+UPDUSBDEVS = $(SRC_TOP)Tools/updusbdevs -quiet -quiet
+UDEV_NAME_USB_TEMPLATE = usb-template.$(UDEV_RULES_EXTENSION)
 UDEV_NAME_USB_GENERIC = usb-generic.$(UDEV_RULES_EXTENSION)
 UDEV_NAME_USB_NONGENERIC = usb-nongeneric.$(UDEV_RULES_EXTENSION)
 
 all: usb-generic usb-nongeneric
 
-usb-generic: $(UDEV_NAME_USB_ALL)
-	cp $(UDEV_NAME_USB_ALL) $(UDEV_NAME_USB_GENERIC)
-	$(SRC_TOP)Tools/updusbdevs -quiet -quiet -onlygeneric udev:$(UDEV_NAME_USB_GENERIC)
+usb-generic:
+	cp $(UDEV_NAME_USB_TEMPLATE) $(UDEV_NAME_USB_GENERIC)
+	$(UPDUSBDEVS) -onlygeneric udev:$(UDEV_NAME_USB_GENERIC)
 
-usb-nongeneric: $(UDEV_NAME_USB_ALL)
-	cp $(UDEV_NAME_USB_ALL) $(UDEV_NAME_USB_NONGENERIC)
-	$(SRC_TOP)Tools/updusbdevs -quiet -quiet -nogeneric udev:$(UDEV_NAME_USB_NONGENERIC)
+usb-nongeneric:
+	cp $(UDEV_NAME_USB_TEMPLATE) $(UDEV_NAME_USB_NONGENERIC)
+	$(UPDUSBDEVS) -nogeneric udev:$(UDEV_NAME_USB_NONGENERIC)
 
 install-scripts-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_SCRIPTS_DIRECTORY)
@@ -80,7 +82,7 @@ clean::
 	-rm -f $(UDEV_NAME_USB_NONGENERIC)
 
 distclean:: clean
-	-rm -f $(UDEV_NAME_USB_ALL)
+	-rm -f $(UDEV_NAME_USB_TEMPLATE)
 
 reload:
 	udevadm control --reload
