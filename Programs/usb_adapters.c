@@ -21,7 +21,7 @@
 #include "usb_adapters.h"
 
 const UsbSerialAdapter usbSerialAdapterTable[] = {
-  { /* Albatross, Cebra, HIMS, HandyTech FTDI */
+  { /* Albatross, Cebra, HIMS SyncBraille, HandyTech FTDI, Hedo MobilLine, MDV */
     .vendor=0X0403, .product=0X6001,
     .generic = 1,
     .operations = &usbSerialOperations_FTDI_FT8U232AM
@@ -147,13 +147,13 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
     .operations = &usbSerialOperations_Belkin
   },
 
-  { /* Braille Memo, Seika Braille Display */
+  { /* BrailleMemo Pocket, Seika BrailleDisplay */
     .vendor=0X10C4, .product=0XEA60,
     .generic = 1,
     .operations = &usbSerialOperations_CP2101
   },
 
-  { /* Seika Note Taker */
+  { /* Seika NoteTaker */
     .vendor=0X10C4, .product=0XEA80,
     .generic = 1,
     .operations = &usbSerialOperations_CP2110

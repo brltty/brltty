@@ -32,18 +32,18 @@ UDEV_NAME_UINPUT = uinput.$(UDEV_RULES_EXTENSION)
 
 UPDUSBDEVS = $(SRC_TOP)Tools/updusbdevs -quiet -quiet
 UDEV_NAME_USB_TEMPLATE = usb-template.$(UDEV_RULES_EXTENSION)
+UDEV_NAME_USB_CUSTOMIZED = usb-customized.$(UDEV_RULES_EXTENSION)
 UDEV_NAME_USB_GENERIC = usb-generic.$(UDEV_RULES_EXTENSION)
-UDEV_NAME_USB_NONGENERIC = usb-nongeneric.$(UDEV_RULES_EXTENSION)
 
-all: usb-generic usb-nongeneric
+all: usb-customized usb-generic
+
+usb-customized:
+	cp $(UDEV_NAME_USB_TEMPLATE) $(UDEV_NAME_USB_CUSTOMIZED)
+	$(UPDUSBDEVS) -customized udev:$(UDEV_NAME_USB_CUSTOMIZED)
 
 usb-generic:
 	cp $(UDEV_NAME_USB_TEMPLATE) $(UDEV_NAME_USB_GENERIC)
-	$(UPDUSBDEVS) -onlygeneric udev:$(UDEV_NAME_USB_GENERIC)
-
-usb-nongeneric:
-	cp $(UDEV_NAME_USB_TEMPLATE) $(UDEV_NAME_USB_NONGENERIC)
-	$(UPDUSBDEVS) -nogeneric udev:$(UDEV_NAME_USB_NONGENERIC)
+	$(UPDUSBDEVS) -generic udev:$(UDEV_NAME_USB_GENERIC)
 
 install-scripts-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_SCRIPTS_DIRECTORY)
@@ -62,13 +62,13 @@ install-rules-hid: install-rules-directory
 install-rules-uinput: install-rules-directory
 	$(INSTALL_DATA) $(SRC_DIR)/$(UDEV_NAME_UINPUT) $(UDEV_PATH_PREFIX)$(UDEV_NAME_UINPUT)
 
+install-rules-usb-customized: usb-customized install-rules-directory
+	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_USB_CUSTOMIZED) $(UDEV_PATH_PREFIX)$(UDEV_NAME_USB_CUSTOMIZED)
+
 install-rules-usb-generic: usb-generic install-rules-directory
 	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_USB_GENERIC) $(UDEV_PATH_PREFIX)$(UDEV_NAME_USB_GENERIC)
 
-install-rules-usb-nongeneric: usb-nongeneric install-rules-directory
-	$(INSTALL_DATA) $(BLD_DIR)/$(UDEV_NAME_USB_NONGENERIC) $(UDEV_PATH_PREFIX)$(UDEV_NAME_USB_NONGENERIC)
-
-install-rules-usb: install-rules-usb-generic install-rules-usb-nongeneric
+install-rules-usb: install-rules-usb-customized install-rules-usb-generic
 
 install: install-wrapper install-rules
 
@@ -78,8 +78,8 @@ uninstall:
 	-rm -f $(UDEV_SCRIPTS_DIRECTORY)/udev-*
 
 clean::
+	-rm -f $(UDEV_NAME_USB_CUSTOMIZED)
 	-rm -f $(UDEV_NAME_USB_GENERIC)
-	-rm -f $(UDEV_NAME_USB_NONGENERIC)
 
 distclean:: clean
 	-rm -f $(UDEV_NAME_USB_TEMPLATE)
