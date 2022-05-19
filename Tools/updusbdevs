@@ -487,8 +487,8 @@ proc makeLines_udev {vendor product codes descriptions exclude channels} {
 
 proc makeLines {linesArray schemes deviceTable} {
    global genericDevices
-   upvar #0 optionValues(customized) includeCustomized
-   upvar #0 optionValues(generic) includeGeneric
+   upvar #0 optionValues(nogeneric) noGenericDevices
+   upvar #0 optionValues(onlygeneric) onlyGenericDevices
    upvar #0 optionValues(keep) keepExcludedDevices
 
    foreach scheme $schemes {
@@ -508,7 +508,7 @@ proc makeLines {linesArray schemes deviceTable} {
             set productEntry [dict get $products $product]
 
             set isGeneric [dict get $productEntry generic]
-            set excludeDevice [expr {!($isGeneric? $includeGeneric: $includeCustomized)}]
+            set excludeDevice [expr {$isGeneric? $noGenericDevices: $onlyGenericDevices}]
 
             if {$excludeDevice && !$keepExcludedDevices} {
                continue
@@ -708,10 +708,10 @@ set genericDevices [makeGenericDeviceTable {
 }]
 
 set optionDefinitions {
-   {customized  flag "only include customized devices"}
-   {generic     flag "only include generic devices"}
-   {keep        flag "keep commented out rules for excluded devices"}
-   {test        flag "don't update the files"}
+   {keep          flag "keep commented out rules for excluded devices"}
+   {nogeneric     flag "don't include generic devices"}
+   {onlygeneric   flag "only include generic devices"}
+   {test          flag "don't update the files"}
 }
 
 processProgramArguments optionValues $optionDefinitions positionalArguments "\[scheme:file ...\]"

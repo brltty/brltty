@@ -39,11 +39,11 @@ all: usb-customized usb-generic
 
 usb-customized:
 	cp $(UDEV_NAME_USB_TEMPLATE) $(UDEV_NAME_USB_CUSTOMIZED)
-	$(UPDUSBDEVS) -customized udev:$(UDEV_NAME_USB_CUSTOMIZED)
+	$(UPDUSBDEVS) -nogeneric udev:$(UDEV_NAME_USB_CUSTOMIZED)
 
 usb-generic:
 	cp $(UDEV_NAME_USB_TEMPLATE) $(UDEV_NAME_USB_GENERIC)
-	$(UPDUSBDEVS) -generic udev:$(UDEV_NAME_USB_GENERIC)
+	$(UPDUSBDEVS) -onlygeneric udev:$(UDEV_NAME_USB_GENERIC)
 
 install-scripts-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_SCRIPTS_DIRECTORY)
