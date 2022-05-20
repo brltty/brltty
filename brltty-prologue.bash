@@ -416,6 +416,22 @@ formatComplexUnit() {
    return 0
 }
 
+isAbbreviation() {
+   local abbreviation="${1}"
+   shift 1
+
+   local length="${#abbreviation}"
+   local word
+
+   for word
+   do
+      [ "${length}" -le "${#word}" ] || continue
+      [ "${abbreviation}" = "${word:0:length}" ] && return 0
+   done
+
+   return 1
+}
+
 verifyChoice() {
    local label="${1}"
    local valueVariable="${2}"
@@ -425,14 +441,12 @@ verifyChoice() {
    getVariable "${valueVariable}" value
 
    local candidates=()
-   local length="${#value}"
    local choice
 
    for choice
    do
       [ "${value}" = "${choice}" ] && return 0
-      [ "${length}" -le "${#choice}" ] || continue
-      [ "${value}" = "${choice:0:length}" ] || continue
+      isAbbreviation "${value}" "${choice}" || continue
       candidates+=("${choice}")
    done
 
