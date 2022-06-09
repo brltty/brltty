@@ -17,7 +17,7 @@
 ###############################################################################
 
 AC_PREREQ([2.64])
-AC_INIT([BRLTTY], [6.4], [BRLTTY@brltty.app], [brltty], [https://brltty.app/])
+AC_INIT([BRLTTY], [6.5], [BRLTTY@brltty.app], [brltty], [https://brltty.app/])
 AC_CONFIG_SRCDIR([Programs/brltty.c])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -36,7 +36,7 @@ AC_DEFINE_UNQUOTED([PACKAGE_COPYRIGHT], ["${copyright}"],
 
 AC_SUBST([api_major], [0])
 AC_SUBST([api_minor], [8])
-AC_SUBST([api_revision], [3])
+AC_SUBST([api_revision], [4])
 
 AC_SUBST([api_name], [BrlAPI])
 AC_SUBST([api_version], [${api_major}.${api_minor}])

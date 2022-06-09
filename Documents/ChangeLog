@@ -1,6 +1,74 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+June 9, 2022:
+ - BRLTTY 6.5 released:
+   General changes:
+      Help (-h) output lines are now wrapped at the screen width (not at 79).
+      Parameter errors no longer prevent a driver from starting.
+      Word Wrap when using contracted braille has been fixed.
+      The Quiet setting can now be specified within brltty.conf.
+      In data files, \R now represents the Unicode replacement character.
+      Chord-6/8 now toggle between 6- and 8-dot computer braille.
+      Bindings for the Emacs editor have been added.
+      Bindings for the Lua language have been added.
+      An Arabic message catalog has been added.
+   Logging changes:
+      The ingio log category has been renamed to gio.
+      The bluetooth log category has been renamed to bt.
+      The hid log category has been added.
+   Baum braille driver changes:
+      The Orbit Reader 40 is now supported.
+   Canute braille driver changes:
+      Driver startup is now much faster.
+      Lines that haven't effectively changed are no longer rewritten.
+   HumanWare braille driver changes:
+      An easy way to revert to the legacy thumb key bindings has been added.
+      The newer models can now be used via Bluetooth on Linux.
+   Linux screen driver changes:
+      The WidecharPadding= parameter has been added.
+      The FixUnicodeSpaces= parameter has been renamed to RpiSpacesBug=.
+   AtSpi2 screen driver changes:
+      Control characters are now mapped to their corresponding special keys.
+      Brltty is now shut down if the driver fails to start.
+      The driver no longer crashes when the X server is shut down.
+   BrlAPI changes:
+      The version is now 0.8.4 (it was 0.8.3).
+      The permissions on local server sockets are now set correctly.
+      The cursor is now represented correctly when using six-dot cells.
+      Some locking issues have been resolved.
+      A text console can now create its own client session.
+   Text table changes:
+      The Russian (ru) table has been significantly updated.
+      The Arabic (ar) table has been significantly updated.
+      Typing when using the Arabic (ar) table now yields Arabic (not English) letters.
+      The input directive has been added.
+   Key table changes:
+      The +escaped character modifier has been added.
+   Udev changes:
+      The rules for customized and generic devices can now be installed separately.
+      The device and uinput rules can now be installed separately.
+      Filtering is now also done on the manufacturer and product strings.
+      Filtering on a parent hub's vendor/product identifiers is now supported.
+      A HID rules file has been added.
+      Symlinks for USB-connected devices are now in /dev/brltty/.
+   Linux changes:
+      Bluetooth HID is now supported.
+   Windows changes:
+      Brltty no longer crashes when started as a service.
+   Android changes:
+      Now targeting API level 30 and setting isAccessibilityTool.
+      The Actions screen now scrolls vertically.
+      Settings -> Accessibility -> BRLTTY -> Settings now goes to the Actions screen.
+      Arabic string translations have been added.
+   Tool changes:
+      brltty-clip now has better long options.
+      brltty-hid has been added.
+      brltty-ttysize has been added.
+      xbrlapi now ignores keyboard remapping errors from the X server.
+   Build changes:
+      The LD, STRIP, and RANLIB commands are no longer hard-coded.
+
 September 24, 2021:
  - BRLTTY 6.4 released:
    General changes:
