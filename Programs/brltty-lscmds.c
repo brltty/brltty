@@ -53,7 +53,7 @@ writeString (const char *string) {
   while (*string) writeCharacter(*string++);
 }
 
-static const char headerCharacters[] = {'=', '-', '~'};
+static const char headerCharacters[] = {'~', '=', '-'};
 static unsigned char headerLevel = 0;
 
 static void
@@ -68,10 +68,18 @@ decrementHeaderLevel (void) {
 
 static void
 writeHeader (const char *header) {
+  char headerCharacter = headerCharacters[headerLevel];
+  size_t headerLength = strlen(header);
+
+  if (headerLevel == 0) {
+    writeCharacters(headerCharacter, headerLength);
+    endLine();
+  }
+
   writeString(header);
   endLine();
 
-  writeCharacters(headerCharacters[headerLevel], strlen(header));
+  writeCharacters(headerCharacter, headerLength);
   endLine();
   endLine();
 }
