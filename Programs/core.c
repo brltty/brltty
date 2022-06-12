@@ -1635,8 +1635,11 @@ brlttyConstruct (int argc, char *argv[]) {
 
 int
 brlttyDestruct (void) {
+  if (prefs.saveOnExit) savePreferences();
+
   suspendUpdates();
   stopCoreTasks();
+
   endProgram();
   endCommandQueue();
   return 1;

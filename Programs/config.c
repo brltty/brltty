@@ -1536,7 +1536,6 @@ savePreferences (void) {
     free(path);
   }
 
-  if (!ok) message(NULL, gettext("not saved"), 0);
   return ok;
 }
 

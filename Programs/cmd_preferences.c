@@ -37,6 +37,19 @@ typedef struct {
 } PreferencesCommandData;
 
 static int
+save (void) {
+  int saved = savePreferences();
+
+  if (saved) {
+    alert(ALERT_COMMAND_DONE);
+  } else {
+    message(NULL, gettext("not saved"), 0);
+  }
+
+  return saved;
+}
+
+static int
 handlePreferencesCommands (int command, void *data) {
   static const char modeString_preferences[] = "prf";
   PreferencesCommandData *pcd = data;
@@ -46,12 +59,7 @@ handlePreferencesCommands (int command, void *data) {
       int ok = 0;
 
       if (isSpecialScreen(SCR_MENU)) {
-        if (prefs.saveOnExit) {
-          if (savePreferences()) {
-            alert(ALERT_COMMAND_DONE);
-          }
-        }
-
+        if (prefs.saveOnExit) save();
         deactivateSpecialScreen(SCR_MENU);
         ok = 1;
       } else if (activateSpecialScreen(SCR_MENU)) {
@@ -72,11 +80,9 @@ handlePreferencesCommands (int command, void *data) {
 
     case BRL_CMD_PREFSAVE:
       if (isSpecialScreen(SCR_MENU)) {
-        if (savePreferences()) alert(ALERT_COMMAND_DONE);
+        save();
         deactivateSpecialScreen(SCR_MENU);
-      } else if (savePreferences()) {
-        alert(ALERT_COMMAND_DONE);
-      } else {
+      } else if (!save()) {
         alert(ALERT_COMMAND_REJECTED);
       }
       break;
