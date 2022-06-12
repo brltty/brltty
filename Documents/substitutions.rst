@@ -2,6 +2,7 @@
 .. |README.AttributesTables| replace:: `Attributes Tables`_
 .. |README.Bluetooth| replace:: `Bluetooth Connections`_
 .. |README.BrailleDots| replace:: `Braille Dots`_
+.. |README.CommandReference| replace:: `The Command Reference`_
 .. |README.ContractionTables| replace:: `Contraction Tables`_
 .. |README.Customize| replace:: `Local Customization`_
 .. |README.Devices| replace:: `Device Identifiers`_
@@ -11,6 +12,7 @@
 .. |README.Linux| replace:: `BRLTTY on Linux`_
 .. |README.OpenBSD| replace:: `BRLTTY on OpenBSD`_
 .. |README.Polling| replace:: `Polling`_
+.. |README.PrivacyPolicy| replace:: `Privacy Policy`_
 .. |README.Profiles| replace:: `Profiles`_
 .. |README.Stow| replace:: `Using the Stow Build Manager`_
 .. |README.Systemd| replace:: `Using Systemd Service Management`_

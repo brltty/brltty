@@ -1,0 +1,1626 @@
+The BRLTTY Command Reference
+============================
+
+.. contents::
+
+Special Modes
+-------------
+
+HELP
+~~~~
+
+Enter/leave help display.
+
+LEARN
+~~~~~
+
+Enter/leave command learn mode.
+
+PREFMENU
+~~~~~~~~
+
+Enter/leave preferences menu.
+
+INFO
+~~~~
+
+Enter/leave status display.
+
+DISPMD
+~~~~~~
+
+Set display mode attributes/text.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+FREEZE
+~~~~~~
+
+Set screen image frozen/unfrozen.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+DESCCHAR
+~~~~~~~~
+
+Describe character.
+
+The following modifiers may be specified:
+
+* a column number
+
+TIME
+~~~~
+
+Show current date and time.
+
+INDICATORS
+~~~~~~~~~~
+
+Show various device status indicators.
+
+CONTEXT
+~~~~~~~
+
+Switch to command context.
+
+The following modifiers may be specified:
+
+* an offset
+
+Cursor Functions
+----------------
+
+HOME
+~~~~
+
+Go to screen cursor.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+BACK
+~~~~
+
+Go back after cursor tracking.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+RETURN
+~~~~~~
+
+Go to screen cursor or go back after cursor tracking.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+ROUTE
+~~~~~
+
+Bring screen cursor to character.
+
+The following modifiers may be specified:
+
+* a column number
+
+ROUTE_LINE
+~~~~~~~~~~
+
+Bring screen cursor to line.
+
+The following modifiers may be specified:
+
+* Row: scaled
+* Vertical: toleft
+
+CSRJMP_VERT
+~~~~~~~~~~~
+
+Bring screen cursor to current line.
+
+ROUTE_CURR_LOCN
+~~~~~~~~~~~~~~~
+
+Bring screen cursor to speech cursor.
+
+Vertical Navigation
+-------------------
+
+LNUP
+~~~~
+
+Go up one line.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+LNDN
+~~~~
+
+Go down one line.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+TOP
+~~~
+
+Go to top line.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+BOT
+~~~
+
+Go to bottom line.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+TOP_LEFT
+~~~~~~~~
+
+Go to beginning of top line.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+BOT_LEFT
+~~~~~~~~
+
+Go to beginning of bottom line.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+PRDIFLN
+~~~~~~~
+
+Go up to nearest line with different content.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+NXDIFLN
+~~~~~~~
+
+Go down to nearest line with different content.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+ATTRUP
+~~~~~~
+
+Go up to nearest line with different highlighting.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+ATTRDN
+~~~~~~
+
+Go down to nearest line with different highlighting.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+PRPGRPH
+~~~~~~~
+
+Go up to first line of paragraph.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+NXPGRPH
+~~~~~~~
+
+Go down to first line of next paragraph.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+PRPROMPT
+~~~~~~~~
+
+Go up to previous command prompt.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+NXPROMPT
+~~~~~~~~
+
+Go down to next command prompt.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+WINUP
+~~~~~
+
+Go up several lines.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+WINDN
+~~~~~
+
+Go down several lines.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+PRINDENT
+~~~~~~~~
+
+Go up to nearest line with less indent than character.
+
+The following modifiers may be specified:
+
+* a column number
+* Motion: route
+* Vertical: toleft
+
+NXINDENT
+~~~~~~~~
+
+Go down to nearest line with less indent than character.
+
+The following modifiers may be specified:
+
+* a column number
+* Motion: route
+* Vertical: toleft
+
+PRDIFCHAR
+~~~~~~~~~
+
+Go up to nearest line with different character.
+
+The following modifiers may be specified:
+
+* a column number
+* Motion: route
+* Vertical: toleft
+
+NXDIFCHAR
+~~~~~~~~~
+
+Go down to nearest line with different character.
+
+The following modifiers may be specified:
+
+* a column number
+* Motion: route
+* Vertical: toleft
+
+GOTOLINE
+~~~~~~~~
+
+Go to selected line.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Row: scaled
+* Vertical: toleft
+
+Horizontal Navigation
+---------------------
+
+FWINLT
+~~~~~~
+
+Go backward one braille window.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+FWINRT
+~~~~~~
+
+Go forward one braille window.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+FWINLTSKIP
+~~~~~~~~~~
+
+Go backward skipping blank braille windows.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+FWINRTSKIP
+~~~~~~~~~~
+
+Go forward skipping blank braille windows.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+PRNBWIN
+~~~~~~~
+
+Go backward to nearest non-blank braille window.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+NXNBWIN
+~~~~~~~
+
+Go forward to nearest non-blank braille window.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+LNBEG
+~~~~~
+
+Go to beginning of line.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+LNEND
+~~~~~
+
+Go to end of line.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+CHRLT
+~~~~~
+
+Go left one character.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+CHRRT
+~~~~~
+
+Go right one character.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+HWINLT
+~~~~~~
+
+Go left half a braille window.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+HWINRT
+~~~~~~
+
+Go right half a braille window.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SETLEFT
+~~~~~~~
+
+Place left end of braille window at character.
+
+The following modifiers may be specified:
+
+* a column number
+
+Window Navigation
+-----------------
+
+GUI_TITLE
+~~~~~~~~~
+
+Show the window title.
+
+GUI_BRL_ACTIONS
+~~~~~~~~~~~~~~~
+
+Open the braille actions window.
+
+GUI_HOME
+~~~~~~~~
+
+Go to the home screen.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+GUI_BACK
+~~~~~~~~
+
+Go back to the previous screen.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+GUI_DEV_SETTINGS
+~~~~~~~~~~~~~~~~
+
+Open the device settings window.
+
+GUI_DEV_OPTIONS
+~~~~~~~~~~~~~~~
+
+Open the device options window.
+
+GUI_APP_LIST
+~~~~~~~~~~~~
+
+Open the application list window.
+
+GUI_APP_MENU
+~~~~~~~~~~~~
+
+Open the application-specific menu.
+
+GUI_APP_ALERTS
+~~~~~~~~~~~~~~
+
+Open the application alerts window.
+
+GUI_AREA_ACTV
+~~~~~~~~~~~~~
+
+Return to the active screen area.
+
+GUI_AREA_PREV
+~~~~~~~~~~~~~
+
+Switch to the previous screen area.
+
+GUI_AREA_NEXT
+~~~~~~~~~~~~~
+
+Switch to the next screen area.
+
+GUI_ITEM_FRST
+~~~~~~~~~~~~~
+
+Move to the first item in the screen area.
+
+GUI_ITEM_PREV
+~~~~~~~~~~~~~
+
+Move to the previous item in the screen area.
+
+GUI_ITEM_NEXT
+~~~~~~~~~~~~~
+
+Move to the next item in the screen area.
+
+GUI_ITEM_LAST
+~~~~~~~~~~~~~
+
+Move to the last item in the screen area.
+
+Clipboard Functions
+-------------------
+
+CLIP_NEW
+~~~~~~~~
+
+Start new clipboard at character.
+
+The following modifiers may be specified:
+
+* a column number
+
+CLIP_ADD
+~~~~~~~~
+
+Append to clipboard from character.
+
+The following modifiers may be specified:
+
+* a column number
+
+COPY_LINE
+~~~~~~~~~
+
+Linear copy to character.
+
+The following modifiers may be specified:
+
+* a column number
+
+COPY_RECT
+~~~~~~~~~
+
+Rectangular copy to character.
+
+The following modifiers may be specified:
+
+* a column number
+
+CLIP_COPY
+~~~~~~~~~
+
+Copy characters to clipboard.
+
+CLIP_APPEND
+~~~~~~~~~~~
+
+Append characters to clipboard.
+
+PASTE
+~~~~~
+
+Insert clipboard text after screen cursor.
+
+PASTE_HISTORY
+~~~~~~~~~~~~~
+
+Insert clipboard history entry after screen cursor.
+
+The following modifiers may be specified:
+
+* an offset
+
+PRSEARCH
+~~~~~~~~
+
+Search backward for clipboard text.
+
+NXSEARCH
+~~~~~~~~
+
+Search forward for clipboard text.
+
+CLIP_SAVE
+~~~~~~~~~
+
+Save clipboard to disk.
+
+CLIP_RESTORE
+~~~~~~~~~~~~
+
+Restore clipboard from disk.
+
+Text Selection and the Host Clipboard
+-------------------------------------
+
+TXTSEL_CLEAR
+~~~~~~~~~~~~
+
+Clear the text selection.
+
+TXTSEL_SET
+~~~~~~~~~~
+
+Set text selection.
+
+The following modifiers may be specified:
+
+* an offset
+
+TXTSEL_START
+~~~~~~~~~~~~
+
+Start text selection.
+
+The following modifiers may be specified:
+
+* an offset
+
+TXTSEL_ALL
+~~~~~~~~~~
+
+Select all of the text.
+
+HOST_COPY
+~~~~~~~~~
+
+Copy selected text to host clipboard.
+
+HOST_CUT
+~~~~~~~~
+
+Cut selected text to host clipboard.
+
+HOST_PASTE
+~~~~~~~~~~
+
+Insert host clipboard text after screen cursor.
+
+Configuration Functions
+-----------------------
+
+TOUCH_NAV
+~~~~~~~~~
+
+Set touch navigation on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+AUTOREPEAT
+~~~~~~~~~~
+
+Set autorepeat on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+SIXDOTS
+~~~~~~~
+
+Set text style 6-dot/8-dot.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+CONTRACTED
+~~~~~~~~~~
+
+Set contracted/computer braille.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+COMPBRL6
+~~~~~~~~
+
+Set six/eight dot computer braille.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+SKPIDLNS
+~~~~~~~~
+
+Set skipping of lines with identical content on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+SKPBLNKWINS
+~~~~~~~~~~~
+
+Set skipping of blank braille windows on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+SLIDEWIN
+~~~~~~~~
+
+Set sliding braille window on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+CSRTRK
+~~~~~~
+
+Set track screen cursor on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+CSRSIZE
+~~~~~~~
+
+Set screen cursor style block/underline.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+CSRVIS
+~~~~~~
+
+Set screen cursor visibility on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+CSRHIDE
+~~~~~~~
+
+Set hidden screen cursor on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+CSRBLINK
+~~~~~~~~
+
+Set screen cursor blinking on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+ATTRVIS
+~~~~~~~
+
+Set attribute underlining on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+ATTRBLINK
+~~~~~~~~~
+
+Set attribute blinking on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+CAPBLINK
+~~~~~~~~
+
+Set capital letter blinking on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+TUNES
+~~~~~
+
+Set alert tunes on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+SET_TEXT_TABLE
+~~~~~~~~~~~~~~
+
+Set text table.
+
+The following modifiers may be specified:
+
+* an offset
+
+SET_ATTRIBUTES_TABLE
+~~~~~~~~~~~~~~~~~~~~
+
+Set attributes table.
+
+The following modifiers may be specified:
+
+* an offset
+
+SET_CONTRACTION_TABLE
+~~~~~~~~~~~~~~~~~~~~~
+
+Set contraction table.
+
+The following modifiers may be specified:
+
+* an offset
+
+SET_KEYBOARD_TABLE
+~~~~~~~~~~~~~~~~~~
+
+Set keyboard table.
+
+The following modifiers may be specified:
+
+* an offset
+
+SET_LANGUAGE_PROFILE
+~~~~~~~~~~~~~~~~~~~~
+
+Set language profile.
+
+The following modifiers may be specified:
+
+* an offset
+
+Menu Operations
+---------------
+
+MENU_PREV_ITEM
+~~~~~~~~~~~~~~
+
+Go up to previous item.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+MENU_NEXT_ITEM
+~~~~~~~~~~~~~~
+
+Go down to next item.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+MENU_FIRST_ITEM
+~~~~~~~~~~~~~~~
+
+Go up to first item.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+MENU_LAST_ITEM
+~~~~~~~~~~~~~~
+
+Go down to last item.
+
+The following modifiers may be specified:
+
+* Motion: route
+* Vertical: toleft
+
+MENU_PREV_SETTING
+~~~~~~~~~~~~~~~~~
+
+Select previous choice.
+
+MENU_NEXT_SETTING
+~~~~~~~~~~~~~~~~~
+
+Select next choice.
+
+MENU_PREV_LEVEL
+~~~~~~~~~~~~~~~
+
+Go to previous menu level.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+PREFLOAD
+~~~~~~~~
+
+Restore preferences from disk.
+
+PREFSAVE
+~~~~~~~~
+
+Save preferences to disk.
+
+Speech Functions
+----------------
+
+MUTE
+~~~~
+
+Stop speaking.
+
+SAY_LINE
+~~~~~~~~
+
+Speak current line.
+
+SAY_ALL
+~~~~~~~
+
+Speak from top of screen through bottom of screen.
+
+SAY_ABOVE
+~~~~~~~~~
+
+Speak from top of screen through current line.
+
+SAY_BELOW
+~~~~~~~~~
+
+Speak from current line through bottom of screen.
+
+SPKHOME
+~~~~~~~
+
+Go to current speaking position.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SAY_SOFTER
+~~~~~~~~~~
+
+Decrease speaking volume.
+
+SAY_LOUDER
+~~~~~~~~~~
+
+Increase speaking volume.
+
+SAY_SLOWER
+~~~~~~~~~~
+
+Decrease speaking rate.
+
+SAY_FASTER
+~~~~~~~~~~
+
+Increase speaking rate.
+
+SAY_LOWER
+~~~~~~~~~
+
+Decrease speaking pitch.
+
+SAY_HIGHER
+~~~~~~~~~~
+
+Increase speaking pitch.
+
+AUTOSPEAK
+~~~~~~~~~
+
+Set autospeak on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+ASPK_SEL_LINE
+~~~~~~~~~~~~~
+
+Set autospeak selected line on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+ASPK_SEL_CHAR
+~~~~~~~~~~~~~
+
+Set autospeak selected character on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+ASPK_INS_CHARS
+~~~~~~~~~~~~~~
+
+Set autospeak inserted characters on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+ASPK_DEL_CHARS
+~~~~~~~~~~~~~~
+
+Set autospeak deleted characters on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+ASPK_REP_CHARS
+~~~~~~~~~~~~~~
+
+Set autospeak replaced characters on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+ASPK_CMP_WORDS
+~~~~~~~~~~~~~~
+
+Set autospeak completed words on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+ASPK_INDENT
+~~~~~~~~~~~
+
+Set autospeak indent of current line on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+Speech Navigation
+-----------------
+
+SPEAK_CURR_CHAR
+~~~~~~~~~~~~~~~
+
+Speak current character.
+
+DESC_CURR_CHAR
+~~~~~~~~~~~~~~
+
+Describe current character.
+
+SPEAK_PREV_CHAR
+~~~~~~~~~~~~~~~
+
+Go to and speak previous character.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_NEXT_CHAR
+~~~~~~~~~~~~~~~
+
+Go to and speak next character.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_FRST_CHAR
+~~~~~~~~~~~~~~~
+
+Go to and speak first non-blank character on line.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_LAST_CHAR
+~~~~~~~~~~~~~~~
+
+Go to and speak last non-blank character on line.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_CURR_WORD
+~~~~~~~~~~~~~~~
+
+Speak current word.
+
+SPELL_CURR_WORD
+~~~~~~~~~~~~~~~
+
+Spell current word.
+
+SPEAK_PREV_WORD
+~~~~~~~~~~~~~~~
+
+Go to and speak previous word.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_NEXT_WORD
+~~~~~~~~~~~~~~~
+
+Go to and speak next word.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_CURR_LINE
+~~~~~~~~~~~~~~~
+
+Speak current line.
+
+SPEAK_PREV_LINE
+~~~~~~~~~~~~~~~
+
+Go to and speak previous line.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_NEXT_LINE
+~~~~~~~~~~~~~~~
+
+Go to and speak next line.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_FRST_LINE
+~~~~~~~~~~~~~~~
+
+Go to and speak first non-blank line on screen.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_LAST_LINE
+~~~~~~~~~~~~~~~
+
+Go to and speak last non-blank line on screen.
+
+The following modifiers may be specified:
+
+* Motion: route
+
+SPEAK_INDENT
+~~~~~~~~~~~~
+
+Speak indent of current line.
+
+SPEAK_CURR_LOCN
+~~~~~~~~~~~~~~~
+
+Speak speech cursor location.
+
+SHOW_CURR_LOCN
+~~~~~~~~~~~~~~
+
+Set speech cursor visibility on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+Keyboard Input
+--------------
+
+PASSDOTS
+~~~~~~~~
+
+Type braille dots.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+* Character: upper, escaped
+* Braille: dot1, dot2, dot3, dot4, dot5, dot6, dot7, dot8, space
+
+PASSCHAR
+~~~~~~~~
+
+Type unicode character.
+
+The following modifiers may be specified:
+
+* a single character
+* Input: shift, control, meta, altgr, gui
+* Character: upper, escaped
+
+KEY_BACKSPACE
+~~~~~~~~~~~~~
+
+Backspace key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_ENTER
+~~~~~~~~~
+
+Enter key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_TAB
+~~~~~~~
+
+Tab key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_CURSOR_LEFT
+~~~~~~~~~~~~~~~
+
+Cursor-left key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_CURSOR_RIGHT
+~~~~~~~~~~~~~~~~
+
+Cursor-right key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_CURSOR_UP
+~~~~~~~~~~~~~
+
+Cursor-up key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_CURSOR_DOWN
+~~~~~~~~~~~~~~~
+
+Cursor-down key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_PAGE_UP
+~~~~~~~~~~~
+
+Page-up key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_PAGE_DOWN
+~~~~~~~~~~~~~
+
+Page-down key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_HOME
+~~~~~~~~
+
+Home key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_END
+~~~~~~~
+
+End key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_INSERT
+~~~~~~~~~~
+
+Insert key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_DELETE
+~~~~~~~~~~
+
+Delete key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+UNSTICK
+~~~~~~~
+
+Clear all sticky input modifiers.
+
+UPPER
+~~~~~
+
+Cycle the Upper sticky input modifier (next, on, off).
+
+SHIFT
+~~~~~
+
+Cycle the Shift sticky input modifier (next, on, off).
+
+CONTROL
+~~~~~~~
+
+Cycle the Control sticky input modifier (next, on, off).
+
+META
+~~~~
+
+Cycle the Meta (Left Alt) sticky input modifier (next, on, off).
+
+ALTGR
+~~~~~
+
+Cycle the AltGr (Right Alt) sticky input modifier (next, on, off).
+
+GUI
+~~~
+
+Cycle the GUI (Windows) sticky input modifier (next, on, off).
+
+KEY_ESCAPE
+~~~~~~~~~~
+
+Escape key.
+
+The following modifiers may be specified:
+
+* Input: shift, control, meta, altgr, gui
+
+KEY_FUNCTION
+~~~~~~~~~~~~
+
+Function key.
+
+The following modifiers may be specified:
+
+* an offset
+* Input: shift, control, meta, altgr, gui
+
+SWITCHVT
+~~~~~~~~
+
+Switch to specific virtual terminal.
+
+The following modifiers may be specified:
+
+* an offset
+
+SWITCHVT_PREV
+~~~~~~~~~~~~~
+
+Switch to the previous virtual terminal.
+
+SWITCHVT_NEXT
+~~~~~~~~~~~~~
+
+Switch to the next virtual terminal.
+
+SELECTVT
+~~~~~~~~
+
+Bind to specific virtual terminal.
+
+The following modifiers may be specified:
+
+* an offset
+
+SELECTVT_PREV
+~~~~~~~~~~~~~
+
+Bind to the previous virtual terminal.
+
+SELECTVT_NEXT
+~~~~~~~~~~~~~
+
+Bind to the next virtual terminal.
+
+BRLKBD
+~~~~~~
+
+Set braille keyboard enabled/disabled.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+BRLUCDOTS
+~~~~~~~~~
+
+Set braille typing mode dots/text.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+Special Functions
+-----------------
+
+SETMARK
+~~~~~~~
+
+Remember current braille window position.
+
+The following modifiers may be specified:
+
+* an offset
+
+GOTOMARK
+~~~~~~~~
+
+Go to remembered braille window position.
+
+The following modifiers may be specified:
+
+* an offset
+* Motion: route
+
+REFRESH
+~~~~~~~
+
+Refresh braille display.
+
+REFRESH_LINE
+~~~~~~~~~~~~
+
+Refresh braille line.
+
+The following modifiers may be specified:
+
+* Row: scaled
+* Vertical: toleft
+
+RESTARTBRL
+~~~~~~~~~~
+
+Restart braille driver.
+
+BRL_STOP
+~~~~~~~~
+
+Stop the braille driver.
+
+BRL_START
+~~~~~~~~~
+
+Start the braille driver.
+
+RESTARTSPEECH
+~~~~~~~~~~~~~
+
+Restart speech driver.
+
+SPK_STOP
+~~~~~~~~
+
+Stop the speech driver.
+
+SPK_START
+~~~~~~~~~
+
+Start the speech driver.
+
+SCR_STOP
+~~~~~~~~
+
+Stop the screen driver.
+
+SCR_START
+~~~~~~~~~
+
+Start the screen driver.
+
+Internal Functions
+------------------
+
+NOOP
+~~~~
+
+Do nothing.
+
+OFFLINE
+~~~~~~~
+
+Braille display temporarily unavailable.
+
+ALERT
+~~~~~
+
+Render an alert.
+
+The following modifiers may be specified:
+
+* an offset
+
+PASSXT
+~~~~~~
+
+XT (set 1) keyboard scan code.
+
+The following modifiers may be specified:
+
+* Keyboard: release, emul0, emul1
+
+PASSAT
+~~~~~~
+
+AT (set 2) keyboard scan code.
+
+The following modifiers may be specified:
+
+* Keyboard: release, emul0, emul1
+
+PASSPS2
+~~~~~~~
+
+PS/2 (set 3) keyboard scan code.
+
+The following modifiers may be specified:
+
+* Keyboard: release, emul0, emul1
+
+TOUCH_AT
+~~~~~~~~
+
+Current reading location.
+
+The following modifiers may be specified:
+
+* an offset

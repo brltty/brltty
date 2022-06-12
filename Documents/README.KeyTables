@@ -102,6 +102,8 @@ context.
    secondary command is autorepeated if it has been defined, else the primary
    command is autorepeated.
 
+   For a list of commands, see |README.CommandReference|.
+
 .. _Bind Command Modifiers:
 
 One or more modifiers may be optionally appended to a command name by using a 

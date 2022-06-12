@@ -17,34 +17,37 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "$(dirname "${0}")/../prologue.sh"
-setSourceRoot
-cd $sourceRoot
-
-addProgramOption c flag updateCommandReference "update the command reference"
-addProgramOption s flag updateAndroidSettings "update the Android settings resources"
-addProgramOption t flag updateCSVTables "update the CSV tables"
-addProgramOption u flag updateUSBDevices "update the USB device lists"
+. "`dirname "${0}"`/../prologue.sh"
 parseProgramArguments "${@}"
 
-updateAll=true
-set -- updateAndroidSettings updateCommandReference updateCSVTables updateUSBDevices
+setSourceRoot
+set -e
 
-for variable
-do
-   "${!variable}" && updateAll=false
-done
+cd "${sourceRoot}/${programsSubdirectory}"
+make --silent brltty-lscmds
+newText="$(./brltty-lscmds)"
 
-"${updateAll}" && {
-   for variable
-   do
-      setVariable "${variable}" true
-   done
-}
+cd "${sourceRoot}/${documentsSubdirectory}"
+outputFile="README.CommandReference"
 
-"${updateAndroidSettings}" && Android/Tools/mksettings
-"${updateCommandReference}" && Tools/updcmdref
-"${updateCSVTables}" && Tools/updcsvs
-"${updateUSBDevices}" && Tools/updusbdevs
+if [ -e "${outputFile}" ]
+then
+   [ -f "${outputFile}" ] || semanticError "not a file: ${outputFile}"
+   [ -r "${outputFile}" ] || semanticError "file not readable: ${outputFile}"
+   oldText="$(cat "${outputFile}")"
 
+   if [ "${oldText}" = "${newText}" ]
+   then
+      logTask "not updated"
+      exit 0
+   fi
+
+   [ -w "${outputFile}" ] || semanticError "file not writable: ${outputFile}"
+   fileVerb="updating"
+else
+   fileVerb="adding"
+fi
+
+logNotice "${fileVerb} file: ${outputFile}"
+echo "${newText}" >"${outputFile}"
 exit 0

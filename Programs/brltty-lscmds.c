@@ -211,7 +211,7 @@ main (int argc, char *argv[]) {
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
-  writeHeader("BRLTTY Command Reference");
+  writeHeader("The BRLTTY Command Reference");
   writeString(".. contents::\n\n");
 
   listGroups();

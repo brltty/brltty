@@ -2,6 +2,7 @@
 .. _Attributes Tables: AttributesTables.html
 .. _Bluetooth Connections: Bluetooth.html
 .. _Braille Dots: BrailleDots.html
+.. _The Command Reference: CommandReference.html
 .. _Contraction Tables: ContractionTables.html
 .. _Local Customization: Customize.html
 .. _Device Identifiers: Devices.html
@@ -11,6 +12,7 @@
 .. _BRLTTY on Linux: Linux.html
 .. _BRLTTY on OpenBSD: OpenBSD.html
 .. _Polling: Polling.html
+.. _Privacy Policy: PrivacyPolicy.html
 .. _Profiles: Profiles.html
 .. _Using the Stow Build Manager: Stow.html
 .. _Using Systemd Service Management: Systemd.html
