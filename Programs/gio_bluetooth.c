@@ -52,7 +52,15 @@ makeBluetoothResourceIdentifier (GioHandle *handle, char *buffer, size_t size) {
 
 static char *
 getBluetoothResourceName (GioHandle *handle, int timeout) {
-  return bthGetNameOfDevice(handle->connection, timeout);
+  const char *name = bthGetNameOfDevice(handle->connection, timeout);
+
+  if (name) {
+    char *copy = strdup(name);
+    if (copy) return copy;
+    logMallocError();
+  }
+
+  return NULL;
 }
 
 static void *

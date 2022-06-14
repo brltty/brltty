@@ -30,8 +30,8 @@ typedef struct BluetoothConnectionStruct BluetoothConnection;
 
 extern void bthForgetDevices (void);
 
-extern char *bthGetNameOfDevice (BluetoothConnection *connection, int timeout);
-extern char *bthGetNameAtAddress (const char *address, int timeout);
+extern const char *bthGetNameOfDevice (BluetoothConnection *connection, int timeout);
+extern const char *bthGetNameAtAddress (const char *address, int timeout);
 extern const char *const *bthGetDriverCodes (const char *address, int timeout);
 
 typedef struct {

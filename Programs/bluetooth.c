@@ -68,10 +68,10 @@ typedef struct {
 
 static void
 bthDeallocateDeviceEntry (void *item, void *data) {
-  BluetoothDeviceEntry *device = item;
+  BluetoothDeviceEntry *entry = item;
 
-  if (device->name) free(device->name);
-  free(device);
+  if (entry->name) free(entry->name);
+  free(entry);
 }
 
 static Queue *
@@ -100,18 +100,18 @@ bthGetDeviceEntry (uint64_t address, int add) {
   Queue *devices = bthGetDeviceQueue(add);
 
   if (devices) {
-    BluetoothDeviceEntry *device = findItem(devices, bthTestDeviceAddress, &address);
-    if (device) return device;
+    BluetoothDeviceEntry *entry = findItem(devices, bthTestDeviceAddress, &address);
+    if (entry) return entry;
 
     if (add) {
-      if ((device = malloc(sizeof(*device)))) {
-        device->address = address;
-        device->name = NULL;
-        device->error = 0;
-        device->paired = 0;
+      if ((entry = malloc(sizeof(*entry)))) {
+        entry->address = address;
+        entry->name = NULL;
+        entry->error = 0;
+        entry->paired = 0;
 
-        if (enqueueItem(devices, device)) return device;
-        free(device);
+        if (enqueueItem(devices, entry)) return entry;
+        free(entry);
       } else {
         logMallocError();
       }
@@ -122,13 +122,13 @@ bthGetDeviceEntry (uint64_t address, int add) {
 }
 
 static int
-bthSetDeviceName (BluetoothDeviceEntry *device, const char *name) {
+bthRememberDeviceName (BluetoothDeviceEntry *entry, const char *name) {
   if (name && *name) {
     char *copy = strdup(name);
 
     if (copy) {
-      if (device->name) free(device->name);
-      device->name = copy;
+      if (entry->name) free(entry->name);
+      entry->name = copy;
       return 1;
     } else {
       logMallocError();
@@ -153,7 +153,7 @@ bthRememberDiscoveredDevice (const DiscoveredBluetoothDevice *device, void *data
   BluetoothDeviceEntry *entry = bthGetDeviceEntry(device->address, 1);
 
   if (entry) {
-    bthSetDeviceName(entry, device->name);
+    bthRememberDeviceName(entry, device->name);
     entry->paired = device->paired;
   }
 
@@ -182,20 +182,20 @@ bthForgetDevices (void) {
 
 static int
 bthRememberConnectError (uint64_t address, int value) {
-  BluetoothDeviceEntry *device = bthGetDeviceEntry(address, 1);
-  if (!device) return 0;
+  BluetoothDeviceEntry *entry = bthGetDeviceEntry(address, 1);
+  if (!entry) return 0;
 
-  device->error = value;
+  entry->error = value;
   return 1;
 }
 
 static int
 bthRecallConnectError (uint64_t address, int *value) {
-  BluetoothDeviceEntry *device = bthGetDeviceEntry(address, 0);
-  if (!device) return 0;
-  if (!device->error) return 0;
+  BluetoothDeviceEntry *entry = bthGetDeviceEntry(address, 0);
+  if (!entry) return 0;
+  if (!entry->error) return 0;
 
-  *value = device->error;
+  *value = entry->error;
   return 1;
 }
 
@@ -627,34 +627,34 @@ bthWriteData (BluetoothConnection *connection, const void *buffer, size_t size) 
   return bthPutData(connection->extension, buffer, size);
 }
 
-static char *
+static const char *
 bthGetDeviceName (uint64_t address, int timeout) {
   bthDiscoverDevices();
-  BluetoothDeviceEntry *device = bthGetDeviceEntry(address, 1);
+  BluetoothDeviceEntry *entry = bthGetDeviceEntry(address, 1);
 
-  if (device) {
-    if (!device->name) {
+  if (entry) {
+    if (!entry->name) {
       logMessage(LOG_CATEGORY(BLUETOOTH_IO), "obtaining device name");
 
-      if ((device->name = bthObtainDeviceName(address, timeout))) {
-        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "device name: %s", device->name);
+      if ((entry->name = bthObtainDeviceName(address, timeout))) {
+        logMessage(LOG_CATEGORY(BLUETOOTH_IO), "device name: %s", entry->name);
       } else {
         logMessage(LOG_CATEGORY(BLUETOOTH_IO), "device name not obtained");
       }
     }
 
-    return device->name;
+    return entry->name;
   }
 
   return NULL;
 }
 
-char *
+const char *
 bthGetNameOfDevice (BluetoothConnection *connection, int timeout) {
   return bthGetDeviceName(connection->address, timeout);
 }
 
-char *
+const char *
 bthGetNameAtAddress (const char *address, int timeout) {
   uint64_t bda;
 
