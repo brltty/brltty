@@ -632,7 +632,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (connectResource(brl, device)) {
       if (!(brl->data->protocol = gioGetApplicationData(brl->gioEndpoint))) {
-        char *name = gioGetResourceName(brl->gioEndpoint);
+        char *name = strdup(gioGetResourceName(brl->gioEndpoint));
         brl->data->protocol = &brailleSenseProtocol;
 
         if (name) {
