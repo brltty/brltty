@@ -1500,22 +1500,44 @@ finishPreferencesLoad (void) {
 int
 loadPreferences (void) {
   int ok = 0;
+  int found = 0;
 
   {
     char *path = makePreferencesFilePath(opt_preferencesFile);
 
     if (path) {
       if (testFilePath(path)) {
-        oldPreferencesEnabled = 0;
+        found = 1;
         if (loadPreferencesFile(path)) ok = 1;
+        oldPreferencesEnabled = 0;
+      } else {
+        logMessage(LOG_DEBUG, "preferences file not found: %s", path);
       }
 
       free(path);
     }
   }
 
-  if (oldPreferencesEnabled && oldPreferencesFile) {
-    if (loadPreferencesFile(oldPreferencesFile)) ok = 1;
+  if (oldPreferencesEnabled) {
+    const char *path = oldPreferencesFile;
+
+    if (path) {
+      if (testFilePath(path)) {
+        found = 1;
+        if (loadPreferencesFile(path)) ok = 1;
+      } else {
+        logMessage(LOG_DEBUG, "old preferences file not found: %s", path);
+      }
+    }
+  }
+
+  if (!found) {
+    char *path = makePath(opt_tablesDirectory, "default.prefs");
+
+    if (path) {
+      if (loadPreferencesFile(path)) ok = 1;
+      free(path);
+    }
   }
 
   finishPreferencesLoad();
