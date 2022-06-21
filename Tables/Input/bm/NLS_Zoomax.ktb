@@ -103,5 +103,5 @@ bind S2+S3 CSRJMP_VERT
 include display6.kti
 include routing6.kti
 
-assign speech BL
+assign speech BL+
 include ../speech.kti
