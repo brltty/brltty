@@ -1748,6 +1748,12 @@ hasModGui (ScreenKey key) {
 
 static int
 injectKeyEvent (int key, int press) {
+  logMessage(
+    LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG,
+    "injecting key %s: %02X",
+    (press? "press": "release"), key
+  );
+
   if (!openKeyboard()) return 0;
   return writeKeyEvent(uinputKeyboard, key, press);
 }
@@ -1794,6 +1800,11 @@ insertUinput (
 
 static int
 insertByte (char byte) {
+  logMessage(
+    LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG,
+    "inserting byte: %02X", byte
+  );
+
   if (controlCurrentConsole(TIOCSTI, &byte) != -1) return 1;
   logSystemError("ioctl[TIOCSTI]");
   return 0;
