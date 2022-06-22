@@ -16,10 +16,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind \{speech}Dot1 SPEAK_CURR_LOCN
-bind \{speech}Dot2 ROUTE_CURR_LOCN
-bind \{speech}Dot3 SPKHOME
-bind \{speech}Dot7 AUTOSPEAK
+bind \{speech}Dot1 AUTOSPEAK+on
+bind \{speech}Dot2 MUTE
+bind \{speech}Dot3 AUTOSPEAK+off
+bind \{speech}Dot7 SPEAK_CURR_LOCN
 
 bind \{speech}Dot4 SAY_ABOVE
 bind \{speech}Dot5 SAY_LINE
@@ -46,11 +46,12 @@ bind \{speech}Dot7+Dot5 SPEAK_FRST_CHAR
 bind \{speech}Dot7+Dot6 SPEAK_LAST_CHAR
 bind \{speech}Dot7+Dot8 SPEAK_LAST_LINE
 
-bind \{speech}Space MUTE
 bind \{speech}Space+Dot1 SAY_SOFTER
 bind \{speech}Space+Dot4 SAY_LOUDER
 bind \{speech}Space+Dot2 SAY_SLOWER
 bind \{speech}Space+Dot5 SAY_FASTER
 bind \{speech}Space+Dot3 SAY_LOWER
 bind \{speech}Space+Dot6 SAY_HIGHER
+bind \{speech}Space+Dot7 ROUTE_CURR_LOCN
+bind \{speech}Space+Dot8 RETURN
 
