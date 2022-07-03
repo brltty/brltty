@@ -41,6 +41,7 @@ python-all-dev
 python-docutils
 python3-all-dev
 python3-docutils
+python3-setuptools
 systemd
 tcl-dev
 udev
