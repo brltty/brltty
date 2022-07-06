@@ -22,6 +22,7 @@
 
 #include "log.h"
 #include "unicode.h"
+#include "ascii.h"
 
 #ifdef HAVE_ICU
 #include <unicode/uversion.h>
@@ -153,8 +154,8 @@ getCharacterWidth (wchar_t character) {
   if (category == U_UNASSIGNED) return -1;
   return 1;
 #else /* character width */
-  if (character == NUL) return 0;
-  if (character == DEL) return -1;
+  if (character == ASCII_NUL) return 0;
+  if (character == ASCII_DEL) return -1;
   if (!(character & 0X60)) return -1;
   return 1;
 #endif /* character width */
