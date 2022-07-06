@@ -22,7 +22,6 @@
 
 #include "log.h"
 #include "unicode.h"
-#include "ascii.h"
 
 #ifdef HAVE_ICU
 #include <unicode/uversion.h>

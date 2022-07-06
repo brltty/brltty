@@ -284,7 +284,7 @@ writeContractedBraille (const wchar_t *characters, size_t length, void *data) {
   const wchar_t *character = characters;
 
   while (1) {
-    const wchar_t *end = wmemchr(character, FF, length);
+    const wchar_t *end = wmemchr(character, ASCII_FF, length);
     size_t count;
 
     if (!end) break;

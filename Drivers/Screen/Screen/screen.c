@@ -272,7 +272,7 @@ insertKey_ScreenScreen (ScreenKey key) {
     }
 
     STR_BEGIN(buffer, sizeof(buffer));
-    if (key & SCR_KEY_ALT_LEFT) STR_PRINTF("%c", ESC);
+    if (key & SCR_KEY_ALT_LEFT) STR_PRINTF("%c", ASCII_ESC);
     STR_PRINTF("\\%03o", byte);
     STR_END;
 

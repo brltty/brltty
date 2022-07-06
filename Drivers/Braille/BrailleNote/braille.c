@@ -290,7 +290,7 @@ writeVisualDisplay (unsigned char c) {
 static int
 doVisualDisplay (BrailleDisplay *brl) {
   int vt = getVirtualTerminal();
-  const unsigned char end[] = {ESC, 0};
+  const unsigned char end[] = {ASCII_ESC, 0};
   unsigned int state = 0;
   openVisualDisplay();
   writeVisualDisplay(BN_RSP_DISPLAY);

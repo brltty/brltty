@@ -90,10 +90,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       CB_charactersPerSecond = BAUDRATE / 10;
 
       if (serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) {
-        static const unsigned char init_seq[] = {ESC, '?'};
+        static const unsigned char init_seq[] = {ASCII_ESC, '?'};
 
         if (serialWriteData(CB_serialDevice, init_seq, sizeof(init_seq)) == sizeof(init_seq)) {
-          static const unsigned char init_ack[] = {ESC, '?'};
+          static const unsigned char init_ack[] = {ASCII_ESC, '?'};
           unsigned int n = 0;
           unsigned char c;
           signed char id = -1;
@@ -197,7 +197,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
   /* Only refresh display if the data has changed: */
   if (textChanged || statusChanged) {
-    static const unsigned char header[] = {ESC, 'B'};
+    static const unsigned char header[] = {ASCII_ESC, 'B'};
     unsigned char buffer[sizeof(header) + ((brl->statusColumns + brl->textColumns) * 2)];
     unsigned char *byte = buffer;
     int i;			/* loop counter */
@@ -206,13 +206,13 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
     for (i=0; i<brl->statusColumns; i+=1) {
       const unsigned char c = translateOutputCell(status[i]);
-      if (c == ESC) *byte++ = c;
+      if (c == ASCII_ESC) *byte++ = c;
       *byte++ = c;
     }
 
     for (i=0; i<brl->textColumns; i+=1) {
       const unsigned char c = translateOutputCell(brl->buffer[i]);
-      if (c == ESC) *byte++ = c;
+      if (c == ASCII_ESC) *byte++ = c;
       *byte++ = c;
     }
 

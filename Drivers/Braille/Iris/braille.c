@@ -781,13 +781,13 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
 
     if (port->state) {
       switch (byte) {
-        case DLE:
+        case ASCII_DLE:
           if (!port->escape) {
             port->escape = 1;
             continue;
           }
 
-        case EOT:
+        case ASCII_EOT:
           if (!port->escape) {
             port->state = 0;
 
@@ -813,11 +813,11 @@ readNativePacket (BrailleDisplay *brl, Port *port, void *packet, size_t size) {
           port->escape = 0;
           break;
       }
-    } else if (byte == SOH) {
+    } else if (byte == ASCII_SOH) {
       port->state = 1;
       port->escape = 0;
       port->position = port->packet;
-    } else if (byte == ACK) {
+    } else if (byte == ASCII_ACK) {
       port->handleNativeAcknowledgement(brl);
     } else {
       logIgnoredByte(byte);
@@ -838,7 +838,7 @@ readEurobraillePacket (BrailleDisplay *brl, Port *port, void *packet, size_t siz
 
     switch (port->state) {
       case 0:
-        if (byte == STX) {
+        if (byte == ASCII_STX) {
           port->state = 1;
           port->position = port->packet;
           port->length = 0;
@@ -877,7 +877,7 @@ readEurobraillePacket (BrailleDisplay *brl, Port *port, void *packet, size_t siz
         break;
 
       case 4:
-        if (byte == ETX) {
+        if (byte == ASCII_ETX) {
           size_t length = port->position - port->packet;
 
           port->state = 0;
@@ -897,7 +897,7 @@ readEurobraillePacket (BrailleDisplay *brl, Port *port, void *packet, size_t siz
         break;
 
       case 5:
-        if (byte == ETX) {
+        if (byte == ASCII_ETX) {
           port->state = 0;
         } else {
           logDiscardedByte(byte);
@@ -917,7 +917,8 @@ readEurobraillePacket (BrailleDisplay *brl, Port *port, void *packet, size_t siz
 static inline int
 needsEscape (unsigned char byte) {
   static const unsigned char escapedChars[0X20] = {
-    [SOH] = 1, [EOT] = 1, [DLE] = 1, [ACK] = 1, [NAK] = 1
+    [ASCII_SOH] = 1, [ASCII_EOT] = 1, [ASCII_DLE] = 1,
+    [ASCII_ACK] = 1, [ASCII_NAK] = 1,
   };
 
   if (byte < sizeof(escapedChars)) return escapedChars[byte];
@@ -945,7 +946,7 @@ handleNativeAcknowledgement_internal (BrailleDisplay *brl) {
   acknowledgeBrailleMessage(brl);
 
   if (brl->data->isForwarding && brl->data->external.protocol->forwardAcknowledgements) {
-    static const unsigned char acknowledgement[] = {ACK};
+    static const unsigned char acknowledgement[] = {ASCII_ACK};
 
     writeBraillePacket(brl, brl->data->external.port.gioEndpoint,
                        acknowledgement, sizeof(acknowledgement));
@@ -968,14 +969,14 @@ writeNativePacket (
     const unsigned char *source = packet;
     unsigned char *target = buffer;
 
-    *target++ = SOH;
+    *target++ = ASCII_SOH;
 
     while (size--) {
-      if (needsEscape(*source)) *target++ = DLE;
+      if (needsEscape(*source)) *target++ = ASCII_DLE;
       *target++ = *source++;
     }
 
-    *target++ = EOT;
+    *target++ = ASCII_EOT;
     count = target - buffer;
   }
 
@@ -1001,11 +1002,11 @@ writeEurobraillePacket (BrailleDisplay *brl, Port *port, const void *data, size_
   unsigned char	packet[packetSize + 2];
   unsigned char *p = packet;
 
-  *p++ = STX;
+  *p++ = ASCII_STX;
   *p++ = (packetSize >> 8) & 0X00FF;
   *p++ = packetSize & 0X00FF;  
   p = mempcpy(p, data, size);
-  *p++ = ETX;
+  *p++ = ASCII_ETX;
 
   count = p - packet;
   if (!writeBraillePacket(brl, port->gioEndpoint, packet, count)) return 0;

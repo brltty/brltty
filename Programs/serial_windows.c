@@ -95,8 +95,8 @@ serialPutInitialAttributes (SerialAttributes *attributes) {
   attributes->DCBlength = sizeof(*attributes);
   attributes->fBinary = TRUE;
   attributes->fTXContinueOnXoff = TRUE;
-  attributes->XonChar = DC1;
-  attributes->XoffChar = DC3;
+  attributes->XonChar = ASCII_DC1;
+  attributes->XoffChar = ASCII_DC3;
 }
 
 int

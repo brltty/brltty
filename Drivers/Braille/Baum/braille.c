@@ -1207,7 +1207,7 @@ verifyBaumPacket (
 ) {
   BaumPacketVerificationData *pvd = data;
   unsigned char byte = bytes[size-1];
-  int escape = byte == ESC;
+  int escape = byte == ASCII_ESC;
 
   switch (pvd->state) {
     case BAUM_PVS_WAITING:
@@ -1326,7 +1326,7 @@ verifyBaumPacket (
 
       case BAUM_RSP_NLS_ZMX_BD:
       case BAUM_RSP_NLS_ZMX_BE:
-        if (byte != CR) return BRL_PVR_EXCLUDE;
+        if (byte != ASCII_CR) return BRL_PVR_EXCLUDE;
         break;
 
       default:
@@ -1357,13 +1357,13 @@ static int
 writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
   unsigned char buffer[1 + (length * 2)];
   unsigned char *byte = buffer;
-  *byte++ = ESC;
+  *byte++ = ASCII_ESC;
 
   {
     int index = 0;
     while (index < length)
-      if ((*byte++ = packet[index++]) == ESC)
-        *byte++ = ESC;
+      if ((*byte++ = packet[index++]) == ASCII_ESC)
+        *byte++ = ASCII_ESC;
   }
 
   return writeBraillePacket(brl, NULL, buffer, (byte - buffer));

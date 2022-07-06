@@ -183,9 +183,9 @@ writePacket (BrailleDisplay *brl, unsigned char code, const void *data, unsigned
   MD_Packet packet;
   unsigned char *byte = packet.fields.data.bytes;
 
-  packet.fields.soh = SOH;
-  packet.fields.stx = STX;
-  packet.fields.etx = ETX;
+  packet.fields.soh = ASCII_SOH;
+  packet.fields.stx = ASCII_STX;
+  packet.fields.etx = ASCII_ETX;
 
   packet.fields.code = code;
   packet.fields.length = length;
@@ -208,12 +208,12 @@ verifyPacket (
 
   switch (size) {
     case 1:
-      if (byte != SOH) return BRL_PVR_INVALID;
+      if (byte != ASCII_SOH) return BRL_PVR_INVALID;
       *length = 5;
       break;
 
     case 2:
-      if (byte != STX) return BRL_PVR_INVALID;
+      if (byte != ASCII_STX) return BRL_PVR_INVALID;
       break;
 
     case 4:
@@ -221,7 +221,7 @@ verifyPacket (
       break;
 
     case 5:
-      if (byte != ETX) return BRL_PVR_INVALID;
+      if (byte != ASCII_ETX) return BRL_PVR_INVALID;
       break;
 
     default:

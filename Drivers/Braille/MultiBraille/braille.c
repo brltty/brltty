@@ -322,7 +322,7 @@ static struct KeyStroke getbrlkey (void) {
 	KeyStroke keystroke;
 		
 	while (serialReadData (MB_serialDevice, &c, 1, 0, 0) == 1) {
-		if (c != ESC) continue;	/* advance to next ESC-sequence */
+		if (c != ASCII_ESC) continue;	/* advance to next ESC-sequence */
 
 		serialReadData (MB_serialDevice, &c, 1, 0, 0);		/* read block number */
 		switch (c) {

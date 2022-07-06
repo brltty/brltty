@@ -304,11 +304,11 @@ forceRewrite (void) {
 static int
 needsEscape (unsigned char byte) {
   switch (byte) {
-    case SOH:
-    case EOT:
-    case DLE:
-    case ACK:
-    case NAK:
+    case ASCII_SOH:
+    case ASCII_EOT:
+    case ASCII_DLE:
+    case ASCII_ACK:
+    case ASCII_NAK:
       return 1;
   }
 
@@ -338,7 +338,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
           escape = 0;
           escaped = 1;
         }
-      else if (byte == DLE)
+      else if (byte == ASCII_DLE)
         {
           escape = 1;
           continue;
@@ -348,7 +348,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
         {
           switch (byte)
             {
-            case SOH:
+            case ASCII_SOH:
               if (started)
                 {
                   logShortPacket(buffer, offset);
@@ -357,7 +357,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
                 }
               goto addByte;
 
-            case EOT:
+            case ASCII_EOT:
               break;
 
             default:
@@ -389,7 +389,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
         }
       offset += 1;
 
-      if (!escaped && (byte == EOT))
+      if (!escaped && (byte == ASCII_EOT))
         {
           if (offset > sizeof(buffer))
             {
@@ -413,7 +413,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
             }
 
             if (parity) {
-              static const unsigned char message[] = {NAK, EU_NAK_PAR};
+              static const unsigned char message[] = {ASCII_NAK, EU_NAK_PAR};
 
               io->writeData(brl, message, sizeof(message));
               offset = 0;
@@ -424,7 +424,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
           offset -= 1; /* remove parity */
 
           {
-            static const unsigned char message[] = {ACK};
+            static const unsigned char message[] = {ASCII_ACK};
             io->writeData(brl, message, sizeof(message));
           }
 
@@ -444,7 +444,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 static ssize_t
 writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
 #define PUT(byte) \
-  if (needsEscape((byte))) *target++ = DLE; \
+  if (needsEscape((byte))) *target++ = ASCII_DLE; \
   *target++ = (byte); \
   parity ^= (byte);
 
@@ -454,7 +454,7 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   const unsigned char *source = packet;
   unsigned char	parity = 0;
 
-  *target++ = SOH;
+  *target++ = ASCII_SOH;
   PUT(size);
 
   while (size--) {
@@ -466,7 +466,7 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   if (++outputPacketNumber >= 256) outputPacketNumber = 128;
 
   PUT(parity);
-  *target++ = EOT;
+  *target++ = ASCII_EOT;
 
   {
     size_t count = target - buffer;
@@ -572,7 +572,7 @@ writeVisual (BrailleDisplay *brl, const wchar_t *text) {
 
       while (source < end) {
         if (source == cursor) {
-          *target++ = ESC;
+          *target++ = ASCII_ESC;
           *target++ = EU_LCD_CURSOR;
         }
 

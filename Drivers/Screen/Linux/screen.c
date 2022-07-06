@@ -2206,7 +2206,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
 
       switch (meta) {
         case K_ESCPREFIX:
-          *--character = ESC;
+          *--character = ASCII_ESC;
           break;
 
         case K_METABIT:

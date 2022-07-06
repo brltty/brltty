@@ -436,8 +436,6 @@ findLineBreakOpportunities (
 }
 
 #else /* HAVE_ICU */
-#include "ascii.h"
-
 typedef struct {
   unsigned int index;
   int wasSpace;

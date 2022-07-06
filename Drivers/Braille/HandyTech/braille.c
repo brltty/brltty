@@ -968,7 +968,7 @@ verifyPacket (
       break;
   }
 
-  if ((size == *length) && (bytes[0] == HT_PKT_Extended) && (byte != SYN)) {
+  if ((size == *length) && (bytes[0] == HT_PKT_Extended) && (byte != ASCII_SYN)) {
     return BRL_PVR_INVALID;
   }
 
@@ -1090,7 +1090,7 @@ writeExtendedPacket (
   packet.fields.data.extended.length = size + 1; /* type byte is included */
   packet.fields.data.extended.type = type;
   if (data) memcpy(packet.fields.data.extended.data.bytes, data, size);
-  packet.fields.data.extended.data.bytes[size] = SYN;
+  packet.fields.data.extended.data.bytes[size] = ASCII_SYN;
   size += 5; /* EXT, ID, LEN, TYPE, ..., SYN */
   return writeBrailleMessage(brl, NULL, type, &packet, size);
 }
@@ -1479,7 +1479,7 @@ writeCells_Bookworm (BrailleDisplay *brl) {
 
   buffer[0] = 0X01;
   memcpy(buffer+1, brl->data->rawData, brl->data->model->textCells);
-  buffer[sizeof(buffer)-1] = SYN;
+  buffer[sizeof(buffer)-1] = ASCII_SYN;
   return writeBrailleMessage(brl, NULL, 0X01, buffer, sizeof(buffer));
 }
 

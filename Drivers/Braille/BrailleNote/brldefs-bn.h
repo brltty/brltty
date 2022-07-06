@@ -22,7 +22,7 @@
 #include "ascii.h"
 
 typedef enum {
-  BN_REQ_BEGIN    = ESC,
+  BN_REQ_BEGIN    = ASCII_ESC,
   BN_REQ_DESCRIBE = '?',
   BN_REQ_WRITE    = 'B'
 } BN_RequestType;
@@ -40,7 +40,7 @@ typedef enum {
   BN_RSP_INPUT_RESET = 0X8A,
   BN_RSP_QWERTY_KEY  = 0X8C,
   BN_RSP_QWERTY_MODS = 0X8D,
-  BN_RSP_DISPLAY     = ESC
+  BN_RSP_DISPLAY     = ASCII_ESC
 } BN_ResponseType;
 
 typedef enum {

@@ -26,6 +26,7 @@
 #include "scr_utils.h"
 #include "scr_base.h"
 #include "scr_internal.h"
+#include "ascii.h"
 
 int
 isSpecialKey (ScreenKey key) {
@@ -97,7 +98,7 @@ mapScreenKey (ScreenKey *key) {
     case '\r':   *key = SCR_KEY_ENTER;     break;
     case '\t':   *key = SCR_KEY_TAB;       break;
     case '\b':   *key = SCR_KEY_BACKSPACE; break;
-    case '\033': *key = SCR_KEY_ESCAPE;    break;
+    case ASCII_ESC: *key = SCR_KEY_ESCAPE;    break;
   }
 }
 

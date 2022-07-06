@@ -854,19 +854,19 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
 #define MAXIMUM_PACKET_SIZE PACKET_SIZE(0XFF)
 #define PACKET_BYTE(packet, index) ((packet)[PACKET_SIZE((index)) - 1])
 
-static const unsigned char BRL_ID[] = {ESC, 'I', 'D', '='};
+static const unsigned char BRL_ID[] = {ASCII_ESC, 'I', 'D', '='};
 #define BRL_ID_LENGTH (sizeof(BRL_ID))
 #define BRL_ID_SIZE (BRL_ID_LENGTH + 1)
 
 static int
 writeFunction1 (BrailleDisplay *brl, unsigned char code) {
-  unsigned char bytes[] = {ESC, 'F', 'U', 'N', code, CR};
+  unsigned char bytes[] = {ASCII_ESC, 'F', 'U', 'N', code, ASCII_CR};
   return writeBraillePacket(brl, NULL, bytes, sizeof(bytes));
 }
 
 static int
 writeParameter1 (BrailleDisplay *brl, unsigned char parameter, unsigned char setting) {
-  unsigned char bytes[] = {ESC, 'P', 'A', 3, 0, parameter, setting, CR};
+  unsigned char bytes[] = {ASCII_ESC, 'P', 'A', 3, 0, parameter, setting, ASCII_CR};
   return writeBraillePacket(brl, NULL, bytes, sizeof(bytes));
 }
 
@@ -1138,8 +1138,8 @@ readCommand1 (BrailleDisplay *brl) {
 
 static int
 writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int count) {
-  static const unsigned char header[] = {CR, ESC, 'B'};	/* escape code to display braille */
-  static const unsigned char trailer[] = {CR};		/* to send after the braille sequence */
+  static const unsigned char header[] = {ASCII_CR, ASCII_ESC, 'B'};	/* escape code to display braille */
+  static const unsigned char trailer[] = {ASCII_CR};		/* to send after the braille sequence */
 
   unsigned char packet[sizeof(header) + 2 + count + sizeof(trailer)];
   unsigned char *byte = packet;
@@ -1411,7 +1411,7 @@ verifyPacket2s (
   switch (size) {
     case 1:
       switch (byte) {
-        case ESC:
+        case ASCII_ESC:
           *length = 2;
           break;
 
@@ -1452,14 +1452,14 @@ setFeature2s (BrailleDisplay *brl, const unsigned char *request, size_t size) {
 
 static size_t
 getFeature2s (BrailleDisplay *brl, unsigned char feature, unsigned char *response, size_t size) {
-  const unsigned char request[] = {ESC, feature, 0X3F};
+  const unsigned char request[] = {ASCII_ESC, feature, 0X3F};
 
   if (protocol->setFeature(brl, request, sizeof(request))) {
     while (awaitBrailleInput(brl, 1000)) {
       int length = protocol->readPacket(brl, response, size);
 
       if (length <= 0) break;
-      if ((response[0] == ESC) && (response[1] == feature)) return length;
+      if ((response[0] == ASCII_ESC) && (response[1] == feature)) return length;
       logUnexpectedPacket(response, length);
     }
   }
@@ -1568,7 +1568,7 @@ readCommand2s (BrailleDisplay *brl) {
     if (length < 0) return BRL_CMD_RESTARTBRL;
 
     switch (packet[0]) {
-      case ESC:
+      case ASCII_ESC:
         switch (packet[1]) {
           case 0X4B: /* K */ {
             int command = interpretKeyEvent2(brl, packet[2], packet[3]);
@@ -1600,7 +1600,7 @@ writeBraille2s (BrailleDisplay *brl, const unsigned char *cells, int start, int 
   unsigned char packet[4 + count];
   unsigned char *byte = packet;
 
-  *byte++ = ESC;
+  *byte++ = ASCII_ESC;
   *byte++ = 0X42;
   *byte++ = start;
   *byte++ = count;

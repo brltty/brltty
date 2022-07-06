@@ -272,7 +272,7 @@ writeSerialPacket (BrailleDisplay *brl, unsigned char code, unsigned char *data,
   unsigned char size = 0;
   unsigned char index;
 
-  buffer[size++] = ESC;
+  buffer[size++] = ASCII_ESC;
   buffer[size++] = code;
 
   for (index=0; index<count; ++index)
@@ -297,7 +297,7 @@ readSerialPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
       return 0;
     }
 
-    if (byte == ESC) {
+    if (byte == ASCII_ESC) {
       if ((escape = !escape)) continue;
     } else if (escape) {
       escape = 0;

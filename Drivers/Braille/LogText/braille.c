@@ -110,7 +110,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
          const unsigned char byte = 0XFF;
 
          if (memchr(outputTable, byte, sizeof(outputTable))) {
-            outputTable[translateInputCell(byte)] = SUB;
+            outputTable[translateInputCell(byte)] = ASCII_SUB;
          }
       }
    }
@@ -471,7 +471,7 @@ downloadFile (void) {
                   address = buffer;
                }
                if ((newline = memchr(address, '\n', count))) {
-                  static const unsigned char lineTrailer[] = {CR, LF};
+                  static const unsigned char lineTrailer[] = {ASCII_CR, ASCII_LF};
                   size_t length = newline - address;
                   if (!sendBytes(address, length++)) break;
                   if (!sendBytes(lineTrailer, sizeof(lineTrailer))) break;

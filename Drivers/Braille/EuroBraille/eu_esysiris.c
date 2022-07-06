@@ -385,7 +385,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
             }
 
             if (byte == pad) continue;
-            if (byte == STX) break;
+            if (byte == ASCII_STX) break;
 
             if (sequence && !sequenceKnown) {
               sequenceNumber = byte;
@@ -426,7 +426,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 
       if (++offset == length)
         {
-          if (byte != ETX)
+          if (byte != ASCII_ETX)
             {
               logCorruptPacket(buffer, offset);
               offset = 0;
@@ -447,11 +447,11 @@ writePacket (BrailleDisplay *brl, const void *packet, size_t size) {
   unsigned char buf[packetSize + 2];
   if (!io || !packet || !size)
     return (-1);
-  buf[0] = STX;
+  buf[0] = ASCII_STX;
   buf[1] = (packetSize >> 8) & 0x00FF;
   buf[2] = packetSize & 0x00FF;
   memcpy(buf + 3, packet, size);
-  buf[sizeof(buf)-1] = ETX;
+  buf[sizeof(buf)-1] = ASCII_ETX;
   logOutputPacket(buf, sizeof(buf));
   return io->writeData(brl, buf, sizeof(buf));
 }
@@ -614,19 +614,19 @@ makeKeyboardCommand (BrailleDisplay *brl, const unsigned char *packet) {
           command = BRL_CMD_BLK(PASSCHAR) | d;
           break;
 
-        case BS:
+        case ASCII_BS:
           command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_BACKSPACE;
           break;
 
-        case HT:
+        case ASCII_HT:
           command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_TAB;
           break;
 
-        case CR:
+        case ASCII_CR:
           command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_ENTER;
           break;
 
-        case ESC:
+        case ASCII_ESC:
           command = BRL_CMD_BLK(PASSKEY) | BRL_KEY_ESCAPE;
           break;
 

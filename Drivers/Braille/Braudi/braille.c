@@ -44,12 +44,12 @@ readBytes (unsigned char *buffer, int size, size_t *length) {
     }
     byte = buffer[*length - 1];
 
-    if ((*length == 1) && (byte == ACK)) {
+    if ((*length == 1) && (byte == ASCII_ACK)) {
       *length = 0;
       continue;
     }
 
-    if (byte == CR) {
+    if (byte == ASCII_CR) {
       logBytes(LOG_DEBUG, "Read", buffer, *length);
       return 1;
     }
@@ -68,14 +68,14 @@ writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
 
 static int
 writeAcknowledgement (BrailleDisplay *brl) {
-  static const unsigned char acknowledgement[] = {ACK};
+  static const unsigned char acknowledgement[] = {ASCII_ACK};
   return writeBytes(brl, acknowledgement, sizeof(acknowledgement));
 }
 
 static int
 writeCells (BrailleDisplay *brl) {
   static const unsigned char header[] = {'D'};
-  static const unsigned char trailer[] = {CR};
+  static const unsigned char trailer[] = {ASCII_CR};
   unsigned char buffer[sizeof(header) + brl->textColumns + sizeof(trailer)];
   unsigned char *byte = buffer;
 
@@ -124,7 +124,7 @@ interpretNumber (int *number, const unsigned char **bytes, int *count) {
 
 static int
 identifyDisplay (BrailleDisplay *brl) {
-  static const unsigned char identify[] = {'I', CR};
+  static const unsigned char identify[] = {'I', ASCII_CR};
 
   if (writeBytes(brl, identify, sizeof(identify))) {
     if (serialAwaitInput(serialDevice, 1000)) {

@@ -506,7 +506,7 @@ verifySerialPacket (
 
   switch (size) {
     case 1:
-      if (byte != ESC) return BRL_PVR_INVALID;
+      if (byte != ASCII_ESC) return BRL_PVR_INVALID;
       *length = 3;
       break;
 
@@ -530,7 +530,7 @@ static int
 writeSerialPacket (BrailleDisplay *brl, unsigned char type, unsigned char length, const void *data) {
   HW_Packet packet;
 
-  packet.fields.header = ESC;
+  packet.fields.header = ASCII_ESC;
   packet.fields.type = type;
   packet.fields.length = length;
 
