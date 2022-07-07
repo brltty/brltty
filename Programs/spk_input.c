@@ -24,6 +24,7 @@
 #include "spk_input.h"
 #include "spk.h"
 #include "pipe.h"
+#include "ascii.h"
 #include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -33,17 +34,33 @@ struct SpeechInputObjectStruct {
 
 static
 NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
-//SpeechInputObject *obj = parameters->data;
-
   const unsigned char *buffer = parameters->buffer;
-  size_t length = parameters->length;
-  char string[length + 1];
+  size_t count = parameters->length;
+  const unsigned char *end = buffer + count;
+  SayOptions options = 0;
 
-  memcpy(string, buffer, length);
-  string[length] = 0;
-  sayString(&spk, string, 0);
+  while (buffer < end) {
+     if (*buffer != ASCII_ESC) break;
+     if (++buffer == end) break;
 
-  return length;
+     switch (*buffer++) {
+       case '!':
+         options |= SAY_OPT_MUTE_FIRST;
+         break;
+     }
+  }
+
+  if (buffer < end) {
+    size_t length = end - buffer;
+    char string[length + 1];
+
+    memcpy(string, buffer, length);
+    string[length] = 0;
+
+    sayString(&spk, string, options);
+  }
+
+  return count;
 }
 
 SpeechInputObject *
