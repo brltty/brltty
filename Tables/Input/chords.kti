@@ -89,6 +89,7 @@ bind \{chord}\{l} LEARN
 bind \{chord}\{p} PREFMENU
 bind \{chord}\{p}+\{toggleOff} PREFLOAD
 bind \{chord}\{p}+\{toggleOn} PREFSAVE
+bind \{chord}\{p}+\{toggleOff}+\{toggleOn} PREFRESET
 
 beginVariables
 assign toggleKeys \{chord}\{r}

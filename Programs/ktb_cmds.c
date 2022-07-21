@@ -161,8 +161,9 @@ static const CommandListEntry commandList_menu[] = {
   { .code = BRL_CMD_MENU_PREV_SETTING },
   { .code = BRL_CMD_MENU_NEXT_SETTING },
   { .code = BRL_CMD_MENU_PREV_LEVEL },
-  { .code = BRL_CMD_PREFLOAD },
   { .code = BRL_CMD_PREFSAVE },
+  { .code = BRL_CMD_PREFLOAD },
+  { .code = BRL_CMD_PREFRESET },
 };
 
 static const CommandListEntry commandList_say[] = {

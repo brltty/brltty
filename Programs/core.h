@@ -153,7 +153,7 @@ extern ProgramExitStatus brlttyPrepare (int argc, char *argv[]);
 extern ProgramExitStatus brlttyStart (void);
 
 extern void setPreferences (const PreferenceSettings *newPreferences);
-extern int loadPreferences (void);
+extern int loadPreferences (int reset);
 extern int savePreferences (void);
 
 extern unsigned char getCursorDots (const unsigned char *setting);

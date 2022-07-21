@@ -1498,35 +1498,40 @@ finishPreferencesLoad (void) {
 }
 
 int
-loadPreferences (void) {
+loadPreferences (int reset) {
   int ok = 0;
   int found = 0;
 
-  {
-    char *path = makePreferencesFilePath(opt_preferencesFile);
+  if (reset) {
+    resetPreferences();
+    ok = 1;
+  } else {
+    {
+      char *path = makePreferencesFilePath(opt_preferencesFile);
 
-    if (path) {
-      if (testFilePath(path)) {
-        found = 1;
-        if (loadPreferencesFile(path)) ok = 1;
-        oldPreferencesEnabled = 0;
-      } else {
-        logMessage(LOG_DEBUG, "preferences file not found: %s", path);
+      if (path) {
+        if (testFilePath(path)) {
+          found = 1;
+          if (loadPreferencesFile(path)) ok = 1;
+          oldPreferencesEnabled = 0;
+        } else {
+          logMessage(LOG_DEBUG, "preferences file not found: %s", path);
+        }
+
+        free(path);
       }
-
-      free(path);
     }
-  }
 
-  if (oldPreferencesEnabled) {
-    const char *path = oldPreferencesFile;
+    if (oldPreferencesEnabled) {
+      const char *path = oldPreferencesFile;
 
-    if (path) {
-      if (testFilePath(path)) {
-        found = 1;
-        if (loadPreferencesFile(path)) ok = 1;
-      } else {
-        logMessage(LOG_DEBUG, "old preferences file not found: %s", path);
+      if (path) {
+        if (testFilePath(path)) {
+          found = 1;
+          if (loadPreferencesFile(path)) ok = 1;
+        } else {
+          logMessage(LOG_DEBUG, "old preferences file not found: %s", path);
+        }
       }
     }
   }
@@ -2986,7 +2991,7 @@ brlttyStart (void) {
   logProperty(opt_preferencesFile, "preferencesFile", gettext("Preferences File"));
 
   resetPreferences();
-  loadPreferences();
+  loadPreferences(0);
 
   if (opt_promptPatterns && *opt_promptPatterns) {
     int count;

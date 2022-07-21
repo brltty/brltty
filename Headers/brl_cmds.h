@@ -268,6 +268,8 @@ typedef enum {
   BRL_CMD_CONTRACTED /* set contracted/computer braille */,
   BRL_CMD_COMPBRL6 /* set six/eight dot computer braille */,
 
+  BRL_CMD_PREFRESET /* reset preferences to defaults */,
+
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
 

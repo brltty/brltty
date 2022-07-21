@@ -28,6 +28,7 @@
 #include "menu.h"
 #include "menu_prefs.h"
 #include "scr_special.h"
+#include "scr_menu.h"
 #include "message.h"
 #include "alert.h"
 #include "core.h"
@@ -90,8 +91,19 @@ handlePreferencesCommands (int command, void *data) {
     case BRL_CMD_PREFLOAD:
       if (isSpecialScreen(SCR_MENU)) {
         setPreferences(&pcd->savedPreferences);
+        menuScreenUpdated();
         message(modeString_preferences, gettext("changes discarded"), 0);
-      } else if (loadPreferences()) {
+      } else if (loadPreferences(0)) {
+        menuScreenUpdated();
+        alert(ALERT_COMMAND_DONE);
+      } else {
+        alert(ALERT_COMMAND_REJECTED);
+      }
+      break;
+
+    case BRL_CMD_PREFRESET:
+      if (loadPreferences(1)) {
+        menuScreenUpdated();
         alert(ALERT_COMMAND_DONE);
       } else {
         alert(ALERT_COMMAND_REJECTED);
