@@ -1968,7 +1968,9 @@ setProcessOwnership (uid_t uid, gid_t gid) {
           logSystemError("setresuid");
         }
 
-        setresgid(oldRgid, oldEgid, oldSgid);
+        if (setresgid(oldRgid, oldEgid, oldSgid) == -1) {
+          logSystemError("setresgid");
+        }
       } else {
         logSystemError("setresgid");
       }
