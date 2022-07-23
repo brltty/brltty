@@ -2211,7 +2211,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
 
         case K_METABIT:
           if (*character >= 0X80) {
-            logMessage(LOG_WARNING, "can't add meta bit to character: U+%04X", *character);
+            logMessage(LOG_WARNING, "can't add meta bit to character: U+%04X", (uint32_t)*character);
             return 0;
           }
 
