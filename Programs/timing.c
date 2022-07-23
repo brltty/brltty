@@ -26,7 +26,7 @@
 #endif /* HAVE_(GET|SET)TIMEOFDAY */
 
 #ifdef HAVE_SYS_POLL_H
-#include <sys/poll.h>
+#include <poll.h>
 #endif /* HAVE_SYS_POLL_H */
 
 #ifdef HAVE_SELECT

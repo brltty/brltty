@@ -1504,7 +1504,6 @@ loadPreferences (int reset) {
 
   if (reset) {
     resetPreferences();
-    ok = 1;
   } else {
     {
       char *path = makePreferencesFilePath(opt_preferencesFile);

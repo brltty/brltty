@@ -42,7 +42,7 @@ typedef HANDLE MonitorEntry;
 #elif defined(HAVE_SYS_POLL_H)
 #define ASYNC_CAN_MONITOR_IO
 
-#include <sys/poll.h>
+#include <poll.h>
 typedef struct pollfd MonitorEntry;
 
 #elif defined(GOT_SELECT)
