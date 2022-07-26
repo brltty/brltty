@@ -490,6 +490,31 @@ isRepeatableCommand (int command) {
   return 0;
 }
 
+static int
+getCommand (
+  KeyTable *table, unsigned char context,
+  const KeyValue *key, unsigned int position,
+  const KeyBinding **binding, int *wasInserted,
+  int *isIncomplete, int *isImmediate
+) {
+  *binding = findKeyBinding(table, context, key, isIncomplete);
+  *wasInserted = insertPressedKey(table, key, position);
+
+  if (*binding) {
+    *isImmediate = 1;
+    return (*binding)->primaryCommand.value;
+  }
+
+  if ((*binding = findKeyBinding(table, context, NULL, isIncomplete))) {
+    *isImmediate = 0;
+    return (*binding)->primaryCommand.value;
+  }
+
+  int command = makeKeyboardCommand(table, context, 0);
+  if (command != EOF) *isImmediate = 0;
+  return command;
+}
+
 KeyTableState
 processKeyEvent (
   KeyTable *table, unsigned char context,
@@ -531,33 +556,36 @@ processKeyEvent (
     if (wasPressed) removePressedKey(table, keyPosition);
 
     if (press) {
+      const KeyBinding *binding;
       int isIncomplete = 0;
-      const KeyBinding *binding = findKeyBinding(table, context, &keyValue, &isIncomplete);
-      int inserted = insertPressedKey(table, &keyValue, keyPosition);
+      int wasInserted;
 
-      if (binding) {
-        command = binding->primaryCommand.value;
-      } else if ((binding = findKeyBinding(table, context, NULL, &isIncomplete))) {
-        command = binding->primaryCommand.value;
-        isImmediate = 0;
-      } else if ((command = makeKeyboardCommand(table, context, 0)) != EOF) {
-        isImmediate = 0;
-      } else if (context == KTB_CTX_DEFAULT) {
-        command = EOF;
-      } else if (!inserted) {
-        command = EOF;
-      } else {
-        removePressedKey(table, keyPosition);
-        binding = findKeyBinding(table, KTB_CTX_DEFAULT, &keyValue, &isIncomplete);
-        inserted = insertPressedKey(table, &keyValue, keyPosition);
+      int command = getCommand(
+        table, context,
+        &keyValue, keyPosition,
+        &binding, &wasInserted,
+        &isIncomplete, &isImmediate
+      );
 
-        if (binding) {
-          command = binding->primaryCommand.value;
-        } else if ((binding = findKeyBinding(table, KTB_CTX_DEFAULT, NULL, &isIncomplete))) {
-          command = binding->primaryCommand.value;
-          isImmediate = 0;
-        } else {
-          command = EOF;
+      if (command == EOF) {
+        if ((context != KTB_CTX_DEFAULT) && wasInserted) {
+          removePressedKey(table, keyPosition);
+
+          command = getCommand(
+            table, KTB_CTX_DEFAULT,
+            &keyValue, keyPosition,
+            &binding, &wasInserted,
+            &isIncomplete, &isImmediate
+          );
+
+          if (command != EOF) {
+            switch (command & BRL_MSK_BLK) {
+              case BRL_CMD_BLK(PASSDOTS): {
+                command = BRL_CMD_ALERT(COMMAND_REJECTED);
+                break;
+              }
+            }
+          }
         }
       }
 
