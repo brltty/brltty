@@ -265,7 +265,7 @@ ifelse(len([$5]), 0, [], [dnl
 fi])
 
 AC_DEFUN([BRLTTY_HELP_STRING], [dnl
-AC_HELP_STRING([$1], patsubst([$2], [
+AS_HELP_STRING([$1], patsubst([$2], [
 .*$]), m4_defn([brltty_help_prefix]))dnl
 patsubst(patsubst([$2], [\`[^
 ]*]), [
@@ -752,14 +752,21 @@ AC_DEFUN([BRLTTY_HAVE_WINDOWS_LIBRARY], [dnl
 AC_CACHE_CHECK(
    [if DLL $1 can be loaded],
    [brltty_cv_dll_$1],
-   [AC_TRY_RUN([
-#include <windows.h>
-int main () {
-   return !LoadLibrary("$1.DLL");
-}
-],
-[brltty_cv_dll_$1=yes],
-[brltty_cv_dll_$1=no])])
+   [
+      AC_RUN_IFELSE(
+         [
+            AC_LANG_SOURCE([[
+               #include <windows.h>
+               int main () {
+                  return !LoadLibrary("$1.DLL");
+               }
+            ]])
+         ],
+         [brltty_cv_dll_$1=yes],
+         [brltty_cv_dll_$1=no]
+      )
+   ]
+)
 if test "${brltty_cv_dll_$1}" = "yes"
 then
    AC_HAVE_LIBRARY([$1])
@@ -773,23 +780,28 @@ AC_DEFUN([BRLTTY_HAVE_WINDOWS_FUNCTION], [dnl
 AC_CACHE_CHECK(
    [if function $1 in DLL $2 exists],
    [brltty_cv_function_$1],
-   [AC_TRY_RUN([
-#include <windows.h>
-#include <stdio.h>
-#include <errno.h>
+   [
+      AC_RUN_IFELSE([
+         AC_LANG_SOURCE([[
+            #include <windows.h>
+            #include <stdio.h>
+            #include <errno.h>
 
-int
-main (void) {
-  HMODULE module;
-  HINSTANCE instance;
-  if (!(instance = LoadLibrary("$2.dll"))) return 1;
-  if (!(module = GetModuleHandle("$2.dll"))) return 2;
-  if (!(GetProcAddress(module, "$1"))) return 3;
-  return 0;
-}
-],
-   [brltty_cv_function_$1=yes],
-   [brltty_cv_function_$1=no])])
+            int
+            main (void) {
+              HMODULE module;
+              HINSTANCE instance;
+              if (!(instance = LoadLibrary("$2.dll"))) return 1;
+              if (!(module = GetModuleHandle("$2.dll"))) return 2;
+              if (!(GetProcAddress(module, "$1"))) return 3;
+              return 0;
+            }
+         ]]),
+         [brltty_cv_function_$1=yes],
+         [brltty_cv_function_$1=no]
+      ])
+   ]
+)
 if test "${brltty_cv_function_$1}" = "yes"
 then
    AC_DEFINE(BRLTTY_UPPERCASE_TRANSLATE([HAVE_$1]), [1],

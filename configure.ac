@@ -77,11 +77,11 @@ done
 AC_SUBST([brltty_manual_directories])
 brltty_build_directories="${brltty_build_directories} ${brltty_manual_directories}"
 
-AC_CONFIG_HEADER([config.h])
-AC_CONFIG_HEADER([Programs/brlapi.h])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([Programs/brlapi.h])
 AC_PREFIX_DEFAULT([])
 AC_CONFIG_AUX_DIR([acdir])
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_TARGET
 
 brltty_default_execute_root="/${PACKAGE_TARNAME}-${PACKAGE_VERSION}"
 BRLTTY_ARG_WITH(
@@ -980,13 +980,24 @@ AC_EXEEXT
 AC_CACHE_CHECK(
    [if the compiler understands the __alignof__ operator],
    [brltty_cv_c_operator_alignof],
-   [AC_TRY_COMPILE([
-int a;
-int b = __alignof__(a);
-],
-[],
-[brltty_cv_c_operator_alignof=yes],
-[brltty_cv_c_operator_alignof=no])])
+   [
+      AC_COMPILE_IFELSE(
+         [
+            AC_LANG_PROGRAM(
+               [[
+                  int a;
+                  int b = __alignof__(a);
+               ]], [[
+               ]]
+            )
+         ], [
+            brltty_cv_c_operator_alignof=yes
+         ], [
+            brltty_cv_c_operator_alignof=no
+         ]
+      )
+   ]
+)
 if test "${brltty_cv_c_operator_alignof}" = "yes"
 then
    AC_DEFINE([HAVE_OPERATOR_ALIGNOF],  [1],
@@ -1000,11 +1011,19 @@ AC_CACHE_CHECK(
       brltty_cv_c_thread_local=""
       for thread_local_qualifier in "_Thread_local" "__thread" "__declspec(thread)"
       do
-         AC_TRY_COMPILE([
-static ${thread_local_qualifier} int i;
-],
-            [],
-            [brltty_cv_c_thread_local="${thread_local_qualifier}"; break])
+         AC_COMPILE_IFELSE(
+            [
+               AC_LANG_PROGRAM(
+                  [[
+                     static ${thread_local_qualifier} int i;
+                  ]], [[
+                  ]]
+               )
+            ], [
+               brltty_cv_c_thread_local="${thread_local_qualifier}"
+               break
+            ]
+         )
       done
    ]
 )
@@ -1964,15 +1983,11 @@ exec_prefix="${original_exec_prefix}"
 AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END
 
-AC_CONFIG_COMMANDS([build-configure], [dnl
-   "${srcdir}/mk4build"
-])
-
 [brltty_make_files="`echo "${brltty_build_directories}" | sed -e '
 s%\([^ ][^ ]*\)%\1/Makefile:prologue.mk:\1/Makefile.in%g
 '`"]
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
    config.mk
    brltty.spec
    brltty-config.sh
@@ -1992,3 +2007,9 @@ AC_OUTPUT([
    Android/Gradle/config.properties
    ${brltty_make_files}
 ])
+
+AC_CONFIG_COMMANDS([build-configure], [dnl
+   "${srcdir}/mk4build"
+])
+
+AC_OUTPUT
