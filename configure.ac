@@ -661,7 +661,7 @@ BRLTTY_ARG_DISABLE(
       install_messages=install-messages
 
       AC_CHECK_HEADER([libintl.h], [dnl
-         AC_HAVE_LIBRARY([intl])
+         BRLTTY_HAVE_LIBRARY([intl])
          AC_DEFINE([ENABLE_I18N_SUPPORT], [1],
                    [Define this if internationalization support is to be included.])
       ])
@@ -708,7 +708,7 @@ BRLTTY_ARG_DISABLE(
    [],
 [dnl
    AC_CHECK_HEADERS([iconv.h], [
-      AC_HAVE_LIBRARY([iconv])
+      BRLTTY_HAVE_LIBRARY([iconv])
    ])
 ])
 
@@ -924,7 +924,7 @@ AC_CHECK_HEADERS([pwd.h grp.h])
 AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h dev/speaker/speaker.h linux/vt.h])
 AC_CHECK_HEADERS([sdkddkver.h])
 
-AC_CHECK_HEADERS([execinfo.h], [AC_HAVE_LIBRARY([execinfo])])
+AC_CHECK_HEADERS([execinfo.h], [BRLTTY_HAVE_LIBRARY([execinfo])])
 
 AC_CHECK_HEADERS([linux/input.h], [
    AC_CHECK_HEADERS([linux/uinput.h], [], [], [
@@ -1235,7 +1235,7 @@ BRLTTY_ARG_PACKAGE([pgmpath], [program path], [], [dnl
 BRLTTY_ARG_PACKAGE([pgmprivs], [program privileges], [], [dnl
    linux*)
       pgmprivs_package="linux"
-      AC_HAVE_LIBRARY([cap])
+      BRLTTY_HAVE_LIBRARY([cap])
       ;;
 ])
 
@@ -1522,8 +1522,8 @@ BRLTTY_ARG_PACKAGE([usb], [USB I/O], [winusb libusb-1.0 libusb], [dnl
       ;;
    solaris*)
       usb_package="solaris"
-      AC_HAVE_LIBRARY([aio])
-      AC_HAVE_LIBRARY([rt])
+      BRLTTY_HAVE_LIBRARY([aio])
+      BRLTTY_HAVE_LIBRARY([rt])
       ;;
 ], [dnl
    winusb)
@@ -1558,7 +1558,7 @@ BRLTTY_ARG_PACKAGE([bluetooth], [Bluetooth I/O], [], [dnl
    linux*)
       AC_CHECK_HEADER([bluetooth/bluetooth.h], [dnl
          bluetooth_package="linux"
-         AC_HAVE_LIBRARY([bluetooth])
+         BRLTTY_HAVE_LIBRARY([bluetooth])
 
          BRLTTY_IF_DBUS([dnl
             bluetooth_includes="${dbus_includes}"
@@ -1576,7 +1576,7 @@ BRLTTY_ARG_PACKAGE([hid], [Human Interface Device I/O], [], [dnl
             hid_includes="${libudev_includes}"
             hid_libs="${libudev_libs}"
          ])
-         AC_HAVE_LIBRARY([bluetooth])
+         BRLTTY_HAVE_LIBRARY([bluetooth])
       ])
       ;;
 ])

@@ -145,6 +145,8 @@ AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_parameters]), ["${$1_parameter
                    [Define this to be a string containing the default parameters for the $2.])
 BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
 
+AC_DEFUN([BRLTTY_HAVE_LIBRARY], [AC_CHECK_LIB([$1], [main], [$2], [$3])])
+
 AC_DEFUN([BRLTTY_ARG_PACKAGE], [dnl
 $1_package=""
 $1_includes=""
@@ -719,7 +721,7 @@ AC_CACHE_CHECK([which translit([$1], [_], [ ]) package to use], [brltty_cv_packa
 ])
    $1_package="${brltty_cv_package_$1}"
 else
-   AC_HAVE_LIBRARY([${$1_package}], [], [$1_package=""])
+   BRLTTY_HAVE_LIBRARY([${$1_package}], [], [$1_package=""])
 fi
 AC_SUBST([$1_package])
 test -n "${$1_package}" && {
@@ -769,7 +771,7 @@ AC_CACHE_CHECK(
 )
 if test "${brltty_cv_dll_$1}" = "yes"
 then
-   AC_HAVE_LIBRARY([$1])
+   BRLTTY_HAVE_LIBRARY([$1])
    $2
 else
    :
