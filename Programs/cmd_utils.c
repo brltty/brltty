@@ -27,6 +27,7 @@
 #include "alert.h"
 #include "brl_cmds.h"
 #include "unicode.h"
+#include "ascii.h"
 #include "scr.h"
 #include "core.h"
 
@@ -115,9 +116,15 @@ getCharacterCoordinates (int arg, int *row, int *first, int *last, int relaxed) 
   return 1;
 }
 
-STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
+static ScreenCharacter
+getScreenCharacter (int column, int row) {
   ScreenCharacter character;
   readScreen(column, row, 1, 1, &character);
+  return character;
+}
+
+STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
+  ScreenCharacter character = getScreenCharacter(column, row);
 
   {
     char name[0X40];
@@ -171,5 +178,183 @@ STR_BEGIN_FORMATTER(formatCharacterDescription, int column, int row)
 
   if (character.attributes & SCR_ATTR_BLINK) {
     STR_PRINTF(" %s", gettext("blinking"));
+  }
+STR_END_FORMATTER
+
+static const char *const phoneticWords[] = {
+  [' '] = "space",
+
+  ['a'] = "alpha",
+  ['b'] = "bravo",
+  ['c'] = "charlie",
+  ['d'] = "delta",
+  ['e'] = "echo",
+  ['f'] = "foxtrot",
+  ['g'] = "golf",
+  ['h'] = "hotel",
+  ['i'] = "india",
+  ['j'] = "juliet",
+  ['k'] = "kilo",
+  ['l'] = "lima",
+  ['m'] = "mike",
+  ['n'] = "november",
+  ['o'] = "oscar",
+  ['p'] = "papa",
+  ['q'] = "quebec",
+  ['r'] = "romeo",
+  ['s'] = "sierra",
+  ['t'] = "tango",
+  ['u'] = "uniform",
+  ['v'] = "victor",
+  ['w'] = "whiskey",
+  ['x'] = "x-ray",
+  ['y'] = "yankee",
+  ['z'] = "zulu",
+
+  ['0'] = "zero",
+  ['1'] = "one",
+  ['2'] = "two",
+  ['3'] = "three",
+  ['4'] = "four",
+  ['5'] = "five",
+  ['6'] = "six",
+  ['7'] = "seven",
+  ['8'] = "eight",
+  ['9'] = "nine",
+
+  ['+'] = "plus",
+  ['='] = "equals",
+  ['<'] = "less than",
+  ['>'] = "greater than",
+
+  ['('] = "left parenthesis",
+  [')'] = "right parenthesis",
+  ['['] = "left square bracket",
+  [']'] = "right square bracket",
+  ['{'] = "left curly bracket",
+  ['}'] = "right curly bracket",
+
+  ['"'] = "quote",
+  ['\''] = "apostrophe",
+  [','] = "comma",
+  [';'] = "semicolon",
+  [':'] = "colon",
+  ['.'] = "period",
+  ['!'] = "exclamation point",
+  ['?'] = "question mark",
+
+  ['`'] = "grave",
+  ['~'] = "tilde",
+  ['@'] = "at sign",
+  ['#'] = "number sign",
+  ['$'] = "dollar sign",
+  ['%'] = "percent sign",
+  ['^'] = "circumflex",
+  ['&'] = "ampersand",
+  ['*'] = "asterisk",
+  ['-'] = "dash",
+  ['_'] = "underscore",
+
+  ['/'] = "slash",
+  ['\\'] = "backslash",
+  ['|'] = "vertical bar",
+
+  [ASCII_NUL] = "null",
+  [ASCII_SOH] = "start of header",
+  [ASCII_STX] = "start of text",
+  [ASCII_ETX] = "end of text",
+  [ASCII_EOT] = "end of transmission",
+  [ASCII_ENQ] = "enquiry",
+  [ASCII_ACK] = "acknowledgement",
+  [ASCII_BEL] = "bell",
+  [ASCII_BS] = "backspace",
+  [ASCII_HT] = "horizontal tab",
+  [ASCII_LF] = "line feed",
+  [ASCII_VT] = "vertical tab",
+  [ASCII_FF] = "form feed",
+  [ASCII_CR] = "carriage return",
+  [ASCII_SO] = "shift out",
+  [ASCII_SI] = "shift in",
+  [ASCII_DLE] = "data link escape",
+  [ASCII_DC1] = "device control one",
+  [ASCII_DC2] = "device control two",
+  [ASCII_DC3] = "device control three",
+  [ASCII_DC4] = "device control four",
+  [ASCII_NAK] = "negative acknowledgement",
+  [ASCII_SYN] = "synchronous idle",
+  [ASCII_ETB] = "end of transmission block",
+  [ASCII_CAN] = "cancel",
+  [ASCII_EM] = "end of medium",
+  [ASCII_SUB] = "substitute",
+  [ASCII_ESC] = "escape",
+  [ASCII_FS] = "file separator",
+  [ASCII_GS] = "group separator",
+  [ASCII_RS] = "record separator",
+  [ASCII_US] = "unit separator",
+  [ASCII_DEL] = "delete",
+};
+
+static const char *
+getPhoneticWord (wchar_t character) {
+  if (character >= ARRAY_COUNT(phoneticWords)) return NULL;
+  return phoneticWords[character];
+}
+
+STR_BEGIN_FORMATTER(formatPhoneticPhrase, int column, int row)
+  wchar_t character = getScreenCharacter(column, row).text;
+
+  wchar_t characters[0X10];
+  size_t characterCount = decomposeCharacter(character, characters, ARRAY_COUNT(characters));
+
+  if (!characterCount) {
+    characters[0] = character;
+    characterCount = 1;
+  }
+
+  for (unsigned int characterIndex=0; characterIndex<characterCount; characterIndex+=1) {
+    if (characterIndex > 0) {
+      STR_PRINTF("%s ", ((characterIndex == 1)? "with": ","));
+    }
+
+    character = characters[characterIndex];
+    const char *word = getPhoneticWord(character);
+    char nameBuffer[0X40];
+
+    if (!word) {
+      if (iswupper(character)) {
+        character = towlower(character);
+        word = getPhoneticWord(character);
+        if (word) STR_PRINTF("cap ");
+      }
+    }
+
+    if (!word) {
+      if (getCharacterName(character, nameBuffer, sizeof(nameBuffer))) {
+        word = nameBuffer;
+
+        {
+          char *byte = nameBuffer;
+
+          while (*byte) {
+            *byte = tolower((unsigned char)*byte);
+            byte += 1;
+          }
+        }
+
+        {
+          const char *space = strchr(word, ' ');
+
+          if (space) {
+            size_t length = space - word + 1;
+            if (memcmp(word,  "combining ", length) == 0) word += length;
+          }
+        }
+      }
+    }
+
+    if (word) {
+      if (STR_LENGTH > 0) STR_PRINTF(" ");
+      STR_PRINTF("%s", word);
+    }
   }
 STR_END_FORMATTER

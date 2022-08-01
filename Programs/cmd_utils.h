@@ -32,6 +32,7 @@ extern int isTextOffset (int arg, int *first, int *last, int relaxed);
 extern int getCharacterCoordinates (int arg, int *row, int *first, int *last, int relaxed);
 
 extern STR_DECLARE_FORMATTER(formatCharacterDescription, int column, int row);
+extern STR_DECLARE_FORMATTER(formatPhoneticPhrase, int column, int row);
 
 #ifdef __cplusplus
 }

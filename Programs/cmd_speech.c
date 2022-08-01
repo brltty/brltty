@@ -480,7 +480,7 @@ handleSpeechCommands (int command, void *data) {
     case BRL_CMD_DESC_CURR_CHAR: {
       char description[0X50];
       STR_BEGIN(description, sizeof(description));
-      STR_FORMAT(formatCharacterDescription, ses->spkx, ses->spky);
+      STR_FORMAT(formatPhoneticPhrase, ses->spkx, ses->spky);
       STR_END;
       sayString(&spk, description, SAY_OPT_MUTE_FIRST);
       break;
