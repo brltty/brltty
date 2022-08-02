@@ -229,10 +229,10 @@ static const char *const phoneticWords[] = {
 
   ['('] = "left parenthesis",
   [')'] = "right parenthesis",
-  ['['] = "left square bracket",
-  [']'] = "right square bracket",
-  ['{'] = "left curly bracket",
-  ['}'] = "right curly bracket",
+  ['['] = "left bracket",
+  [']'] = "right bracket",
+  ['{'] = "left brace",
+  ['}'] = "right brace",
 
   ['"'] = "quote",
   ['\''] = "apostrophe",
@@ -240,15 +240,15 @@ static const char *const phoneticWords[] = {
   [';'] = "semicolon",
   [':'] = "colon",
   ['.'] = "period",
-  ['!'] = "exclamation point",
-  ['?'] = "question mark",
+  ['!'] = "exclamation",
+  ['?'] = "question",
 
   ['`'] = "grave",
   ['~'] = "tilde",
-  ['@'] = "at sign",
-  ['#'] = "number sign",
-  ['$'] = "dollar sign",
-  ['%'] = "percent sign",
+  ['@'] = "at",
+  ['#'] = "number",
+  ['$'] = "dollar",
+  ['%'] = "percent",
   ['^'] = "circumflex",
   ['&'] = "ampersand",
   ['*'] = "asterisk",
@@ -313,7 +313,7 @@ STR_BEGIN_FORMATTER(formatPhoneticPhrase, int column, int row)
 
   for (unsigned int characterIndex=0; characterIndex<characterCount; characterIndex+=1) {
     if (characterIndex > 0) {
-      STR_PRINTF("%s ", ((characterIndex == 1)? "with": ","));
+      STR_PRINTF("%s ", ((characterIndex == 1)? " with": ","));
     }
 
     character = characters[characterIndex];
