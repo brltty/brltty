@@ -322,9 +322,13 @@ STR_BEGIN_FORMATTER(formatPhoneticPhrase, int column, int row)
 
     if (!word) {
       if (iswupper(character)) {
-        character = towlower(character);
-        word = getPhoneticWord(character);
-        if (word) STR_PRINTF("cap ");
+        wchar_t lowercase = towlower(character);
+        word = getPhoneticWord(lowercase);
+
+        if (word) {
+          STR_PRINTF("cap ");
+          character = lowercase;
+        }
       }
     }
 
