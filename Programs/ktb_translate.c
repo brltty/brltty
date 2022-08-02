@@ -491,7 +491,7 @@ isRepeatableCommand (int command) {
 }
 
 static int
-getCommand (
+getPressedKeysCommand (
   KeyTable *table, unsigned char context,
   const KeyValue *key, unsigned int position,
   const KeyBinding **binding, int *wasInserted,
@@ -560,7 +560,7 @@ processKeyEvent (
       int isIncomplete = 0;
       int wasInserted;
 
-      int command = getCommand(
+      int command = getPressedKeysCommand(
         table, context,
         &keyValue, keyPosition,
         &binding, &wasInserted,
@@ -571,7 +571,7 @@ processKeyEvent (
         if ((context != KTB_CTX_DEFAULT) && wasInserted) {
           removePressedKey(table, keyPosition);
 
-          command = getCommand(
+          command = getPressedKeysCommand(
             table, KTB_CTX_DEFAULT,
             &keyValue, keyPosition,
             &binding, &wasInserted,
