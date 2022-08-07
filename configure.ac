@@ -1527,16 +1527,16 @@ BRLTTY_ARG_PACKAGE([usb], [USB I/O], [winusb libusb-1.0 libusb], [dnl
       ;;
 ], [dnl
    winusb)
-      AC_CHECK_HEADER([winusb.h], [dnl
+      BRLTTY_HAVE_HEADER([winusb.h], [dnl
          usb_package="winusb"
          usb_libs="-lwinusb"
-      ], [], [-])
+      ])
       ;;
    libusb)
-      AC_CHECK_HEADER([usb.h], [dnl
+      BRLTTY_HAVE_HEADER([usb.h], [dnl
          usb_package="libusb"
          usb_libs="-lusb"
-      ], [], [-])
+      ])
       ;;
 ])
 

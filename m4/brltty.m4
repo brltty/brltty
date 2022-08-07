@@ -145,6 +145,10 @@ AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_parameters]), ["${$1_parameter
                    [Define this to be a string containing the default parameters for the $2.])
 BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
 
+AC_DEFUN([BRLTTY_HAVE_HEADER], [dnl
+AC_CHECK_HEADER([$1], [$2], [$3], [-])
+])
+
 AC_DEFUN([BRLTTY_HAVE_LIBRARY], [AC_CHECK_LIB([$1], [main], [$2], [$3])])
 
 AC_DEFUN([BRLTTY_ARG_PACKAGE], [dnl
@@ -708,7 +712,7 @@ AC_CACHE_CHECK([which translit([$1], [_], [ ]) package to use], [brltty_cv_packa
          brltty_found=true
          for brltty_header in ${brltty_headers}
          do
-            AC_CHECK_HEADER([${brltty_header}], [], [brltty_found=false], [-])
+            BRLTTY_HAVE_HEADER([${brltty_header}], [], [brltty_found=false])
             "${brltty_found}" || break
          done
          "${brltty_found}" || continue
