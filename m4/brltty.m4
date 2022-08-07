@@ -145,8 +145,8 @@ AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE_TRANSLATE([$1_parameters]), ["${$1_parameter
                    [Define this to be a string containing the default parameters for the $2.])
 BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
 
-AC_DEFUN([BRLTTY_HAVE_HEADER], [dnl
-AC_CHECK_HEADER([$1], [$2], [$3], [-])
+AC_DEFUN([BRLTTY_HAVE_HEADER], [
+AC_PREPROC_IFELSE([AC_LANG_SOURCE([[@%:@include <$1>]])], [$2], [$3])
 ])
 
 AC_DEFUN([BRLTTY_HAVE_LIBRARY], [AC_CHECK_LIB([$1], [main], [$2], [$3])])
