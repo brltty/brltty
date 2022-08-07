@@ -1,0 +1,6 @@
+expat-static
+glib2-static
+glibc-static
+gpm-static
+libcap-static
+ncurses-static
