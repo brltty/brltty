@@ -1,5 +1,5 @@
-alsa-lib-devel
 #at-spi-devel
+alsa-lib-devel
 at-spi2-core-devel
 autoconf
 automake
@@ -18,12 +18,12 @@ flite-devel
 gawk
 gcc
 gettext
-glibc-devel
 glib2-devel
+glibc-devel
 gpm-devel
 groff
-java
-java-devel
+java-11-openjdk
+java-11-openjdk-devel
 libcap-devel
 libicu-devel
 liblouis-devel
