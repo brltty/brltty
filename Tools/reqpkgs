@@ -29,6 +29,9 @@ then
 elif [ -x /usr/sbin/pkg ]
 then
    packageManager="pkg"
+elif [ -x /usr/bin/zypper ]
+then
+   packageManager="zypper"
 else
    semanticError "unknown package manager"
 fi
@@ -50,6 +53,10 @@ in
 
    pkg)
       platformName="freebsd"
+      ;;
+
+   zypper)
+      platformName="opensuse"
       ;;
 
    *) semanticError "unknown host platform: ${packageManager}";;
@@ -116,6 +123,20 @@ listInstalledPackages_pkg() {
 
 installPackages_pkg() {
    pkg --quiet install "${@}"
+}
+
+listInstalledPackages_zypper() {
+   zypper --quiet packages --installed-only | awk --field-separator "|" '
+      NR > 2 {
+         sub(/^\s*/, "", $3)
+         sub(/\s*$/, "", $3)
+         print $3
+      }
+   ' | sort -u
+}
+
+installPackages_zypper() {
+   zypper --quiet install --no-confirm -- "${@}"
 }
 
 normalizePackageList() {
