@@ -1,3 +1,5 @@
+#espeak-ng
+#espeak-ng-dev
 #festival
 #liblouis-dev
 #linuxdoc-tools
@@ -28,6 +30,8 @@ libc-dev
 libcap-dev
 libx11-dev
 libxaw-dev
+libxext-dev
+libxfixes-dev
 libxt-dev
 libxtst-dev
 lua5.1
