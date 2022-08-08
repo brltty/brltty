@@ -20,24 +20,22 @@
 set -e
 . "$(dirname "${0}")/../brltty-prologue.sh"
 
-if [ -x /usr/bin/dnf ]
-then
-   packageManager="dnf"
-elif [ -x /usr/bin/dpkg ]
-then
-   packageManager="dpkg"
-elif [ -x /usr/sbin/pkg ]
-then
-   packageManager="pkg"
-elif [ -x /usr/bin/zypper ]
-then
-   packageManager="zypper"
-else
-   semanticError "unknown package manager"
-fi
+packageManager=""
+for packageCommand in /sbin/apk /usr/bin/dnf /usr/bin/dpkg /usr/sbin/pkg /usr/bin/zypper
+do
+   [ -x "${packageCommand}" ] && {
+      packageManager="${packageCommand##*/}"
+      break
+   }
+done
+[ -n "${packageManager}" ] || semanticError "unknown package manager"
 
 case "${packageManager}"
 in
+   apk)
+      platformName="alpine"
+      ;;
+
    dnf)
       platformName="fedora"
       ;;
@@ -101,6 +99,19 @@ addProgramOption l flag listNeededPackages "list the needed packages"
 optionalProgramParameters
 parseProgramArguments "${@}"
 
+listInstalledPackages_apk() {
+   apk list --installed | awk '
+      {
+         gsub(/-[0-9].*/, "", $1)
+         print $1
+      }
+   ' | sort -u
+}
+
+installPackages_apk() {
+   apk add --quiet -- "${@}"
+}
+
 listInstalledPackages_dnf() {
    rpm --query --all --queryformat '%{NAME}\n'
 }
@@ -160,7 +171,12 @@ neededPackages=(
    $(
       diff <(listInstalledPackages | normalizePackageList) \
            <(listRequiredPackages | normalizePackageList) |
-      sed -n -e 's/^> //p'
+      sed -n -e '
+         /^--- /b
+         /^+++ /b
+         s/^+/> /
+	 s/^> //p
+      '
    )
 )
 
