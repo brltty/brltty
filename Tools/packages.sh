@@ -21,12 +21,37 @@ setPackageManager() {
    semanticError "unknown package manager"
 }
 
-unsupportedPackageOperation() {
-   semanticError "unsupported package operation"
-}
-
 normalizePackageList() {
    sort | uniq
+}
+
+unsupportedPackageAction() {
+   local action="${1}"
+   semanticError "unsupported package action: ${action}"
+}
+
+listInstalledPackages_() {
+   unsupportedPackageAction list
+}
+
+installPackages_() {
+   unsupportedPackageAction install
+}
+
+removePackages_() {
+   unsupportedPackageAction remove
+}
+
+describePackage_() {
+   unsupportedPackageAction describe
+}
+
+whichPackage_() {
+   unsupportedPackageAction which
+}
+
+searchPackage_() {
+   unsupportedPackageAction search
 }
 
 listInstalledPackages_apk() {
@@ -51,7 +76,7 @@ describePackage_apk() {
 }
 
 whichPackage_apk() {
-   unsupportedPackageOperation
+   unsupportedPackageAction which
 }
 
 searchPackage_apk() {
@@ -112,6 +137,22 @@ listInstalledPackages_pkg() {
 
 installPackages_pkg() {
    pkg --quiet install "${@}"
+}
+
+removePackages_pkg() {
+   unsupportedPackageAction remove
+}
+
+describePackage_pkg() {
+   unsupportedPackageAction describe
+}
+
+whichPackage_pkg() {
+   unsupportedPackageAction which
+}
+
+searchPackage_pkg() {
+   unsupportedPackageAction search
 }
 
 listInstalledPackages_zypper() {
