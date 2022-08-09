@@ -18,6 +18,10 @@ unsupportedPackageOperation() {
    semanticError "unsupported package operation"
 }
 
+normalizePackageList() {
+   sort | uniq
+}
+
 listInstalledPackages_apk() {
    apk list --installed | awk '
       {
@@ -36,7 +40,7 @@ removePackages_apk() {
 }
 
 describePackage_apk() {
-   apk info -- "${@}"
+   apk info -- "${1}"
 }
 
 whichPackage_apk() {
@@ -44,7 +48,7 @@ whichPackage_apk() {
 }
 
 searchPackage_apk() {
-   apk search --description -- "${@}"
+   apk search --description -- "${1}"
 }
 
 listInstalledPackages_dnf() {
@@ -101,8 +105,20 @@ installPackages_zypper() {
    zypper --quiet install --no-confirm -- "${@}"
 }
 
-normalizePackageList() {
-   sort | uniq
+removePackages_zypper() {
+   zypper --quiet remove --no-confirm -- "${@}"
+}
+
+describePackage_zypper() {
+   zypper --quiet info -- "${1}"
+}
+
+whichPackage_zypper() {
+   zypper --quiet what-provides -- "${1}"
+}
+
+searchPackage_zypper() {
+   zypper --quiet search --sort-by-name --search-descriptions -- "${1}"
 }
 
 listInstalledPackages() {
