@@ -20,7 +20,7 @@ LUA_OK=false
 LUA=""
 LUA_LIBRARY_DIRECTORY=""
 
-BRLTTY_HAVE_PACKAGE([lua], [lua], [dnl
+BRLTTY_HAVE_PACKAGE([lua], [lua5.1 lua], [dnl
    AC_PATH_PROG([LUA], [lua])
 
    if test -n "${LUA}"

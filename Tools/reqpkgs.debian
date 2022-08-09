@@ -23,6 +23,7 @@ libexpat1-dev
 libgpm-dev
 libicu-dev
 liblouis-dev
+liblua5.1-dev
 libncursesw5-dev
 libpcre3-dev
 libpolkit-gobject-1-dev
