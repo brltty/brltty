@@ -1,9 +1,16 @@
 #!/bin/bash
 
 setPackageManager() {
-   local command
+   local -r commands=(
+      /sbin/apk
+      /usr/bin/dnf
+      /usr/bin/dpkg
+      /usr/sbin/pkg
+      /usr/bin/zypper
+   )
 
-   for command in /sbin/apk /usr/bin/dnf /usr/bin/dpkg /usr/sbin/pkg /usr/bin/zypper
+   local command
+   for command in "${commands[@]}"
    do
       [ -x "${command}" ] && {
          declare -g -r packageManager="${command##*/}"
