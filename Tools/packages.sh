@@ -103,7 +103,7 @@ whichPackage_dpkg() {
 }
 
 searchPackage_dpkg() {
-	apt-cache search -- "(^|[^[:alpha:]])${1}($|[^[:alpha:]])"
+   apt-cache search -- '(^|[^[:alpha:]])'"${1}"'($|[^[:alpha:]])'
 }
 
 listInstalledPackages_pkg() {
