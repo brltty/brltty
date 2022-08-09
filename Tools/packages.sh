@@ -1,16 +1,21 @@
 #!/bin/bash
-packageManager=""
 
-for packageCommand in /sbin/apk /usr/bin/dnf /usr/bin/dpkg /usr/sbin/pkg /usr/bin/zypper
-do
-   [ -x "${packageCommand}" ] && {
-      packageManager="${packageCommand##*/}"
-      break
-   }
-done
+setPackageManager() {
+   local command
 
-[ -n "${packageManager}" ] || {
+   for command in /sbin/apk /usr/bin/dnf /usr/bin/dpkg /usr/sbin/pkg /usr/bin/zypper
+   do
+      [ -x "${command}" ] && {
+         declare -g -r packageManager="${command##*/}"
+         return 0
+      }
+   done
+
    semanticError "unknown package manager"
+}
+
+unsupportedPackageOperation() {
+   semanticError "unsupported package operation"
 }
 
 listInstalledPackages_apk() {
@@ -23,7 +28,23 @@ listInstalledPackages_apk() {
 }
 
 installPackages_apk() {
-   apk add --quiet -- "${@}"
+   apk add --quiet --no-progress -- "${@}"
+}
+
+removePackages_apk() {
+   apk del --quiet --no-progress -- "${@}"
+}
+
+describePackage_apk() {
+   apk info -- "${@}"
+}
+
+whichPackage_apk() {
+   unsupportedPackageOperation
+}
+
+searchPackage_apk() {
+   apk search --description -- "${@}"
 }
 
 listInstalledPackages_dnf() {
@@ -108,3 +129,4 @@ searchPackage() {
    "searchPackage_${packageManager}" "${1}"
 }
 
+setPackageManager
