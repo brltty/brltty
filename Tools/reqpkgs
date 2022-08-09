@@ -17,18 +17,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-set -e
 . "$(dirname "${0}")/../brltty-prologue.sh"
-
-packageManager=""
-for packageCommand in /sbin/apk /usr/bin/dnf /usr/bin/dpkg /usr/sbin/pkg /usr/bin/zypper
-do
-   [ -x "${packageCommand}" ] && {
-      packageManager="${packageCommand##*/}"
-      break
-   }
-done
-[ -n "${packageManager}" ] || semanticError "unknown package manager"
+. "${programDirectory}/packages.sh"
+set -e
 
 case "${packageManager}"
 in
@@ -99,65 +90,6 @@ addProgramOption l flag listNeededPackages "list the needed packages"
 optionalProgramParameters
 parseProgramArguments "${@}"
 
-listInstalledPackages_apk() {
-   apk list --installed | awk '
-      {
-         gsub(/-[0-9].*/, "", $1)
-         print $1
-      }
-   ' | sort -u
-}
-
-installPackages_apk() {
-   apk add --quiet -- "${@}"
-}
-
-listInstalledPackages_dnf() {
-   rpm --query --all --queryformat '%{NAME}\n'
-}
-
-installPackages_dnf() {
-   dnf -y --quiet install "${@}"
-}
-
-listInstalledPackages_dpkg() {
-   dpkg-query --show --showformat '${Package}\n'
-}
-
-installPackages_dpkg() {
-   apt --yes --quiet --quiet --quiet install "${@}"
-}
-
-listInstalledPackages_pkg() {
-   pkg query --all "%n"
-}
-
-installPackages_pkg() {
-   pkg --quiet install "${@}"
-}
-
-listInstalledPackages_zypper() {
-   zypper --quiet packages --installed-only | awk --field-separator "|" '
-      NR > 2 {
-         sub(/^\s*/, "", $3)
-         sub(/\s*$/, "", $3)
-         print $3
-      }
-   ' | sort -u
-}
-
-installPackages_zypper() {
-   zypper --quiet install --no-confirm -- "${@}"
-}
-
-normalizePackageList() {
-   sort | uniq
-}
-
-listInstalledPackages() {
-   "listInstalledPackages_${packageManager}"
-}
-
 listRequiredPackages() {
    local name
 
@@ -192,7 +124,7 @@ then
    }
 
    "${installNeededPackages}" && {
-      "installPackages_${packageManager}" "${neededPackages[@]}"
+      installPackages "${neededPackages[@]}"
    }
 else
    logMessage task "no needed packages"
