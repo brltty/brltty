@@ -71,7 +71,7 @@ processExtraProgramParameters() {
          addRequiredPackage ${package}
       done
    else
-      local file="${programDirectory}/${programName}.${platformName}"
+      local file="${programDirectory}/${programName}.d/${platformName}"
       [ -e "${file}" ] || semanticError "platform package list not found: ${file}"
       [ -f "${file}" ] || semanticError "not a file: ${file}"
       [ -r "${file}" ] || semanticError "platform package list not readable: ${file}"
