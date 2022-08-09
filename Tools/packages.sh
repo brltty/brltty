@@ -80,7 +80,23 @@ listInstalledPackages_dpkg() {
 }
 
 installPackages_dpkg() {
-   apt --yes --quiet --quiet --quiet install "${@}"
+   apt --yes --quiet --quiet --quiet install -- "${@}"
+}
+
+removePackages_dpkg() {
+   apt --yes --quiet --quiet --quiet remove -- "${@}"
+}
+
+describePackage_dpkg() {
+   apt-cache show -- "${1}"
+}
+
+whichPackage_dpkg() {
+   dpkg --search -- "${1}"
+}
+
+searchPackage_dpkg() {
+   apt-cache search -- " ${1} "
 }
 
 listInstalledPackages_pkg() {
