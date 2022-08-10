@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -17,37 +17,32 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-setPackageManager() {
-   local -r commands=(
-      /sbin/apk
-      /usr/bin/dnf
-      /usr/bin/dpkg
-      /usr/sbin/pkg
-      /sbin/xbps-install
-      /usr/bin/zypper
-   )
-
-   local command
-   for command in "${commands[@]}"
-   do
-      [ -x "${command}" ] && {
-         declare -g packageManager="${command##*/}"
-         packageManager="${packageManager%%-*}"
-         return 0
+listInstalledPackages() {
+   xbps-query --list-pkgs | awk '
+      {
+         sub(/-[0-9].*/, "", $2)
+         print $2
       }
-   done
-
-   semanticError "unknown package manager"
+   '
 }
 
-normalizePackageList() {
-   sort | uniq
+installPackages() {
+   xbps-install --yes -- "${@}"
 }
 
-unsupportedPackageAction() {
-   local action="${1}"
-   semanticError "unsupported package action: ${action}"
+removePackages() {
+   xbps-remove --yes -- "${@}"
 }
 
-setPackageManager
-. "${programDirectory}/packages.d/${packageManager}.sh"
+describePackage() {
+   xbps-query --show "${1}"
+}
+
+whichPackage() {
+   xbps-query --ownedby "${1}"
+}
+
+searchPackage() {
+   xbps-query --search "${1}"
+}
+
