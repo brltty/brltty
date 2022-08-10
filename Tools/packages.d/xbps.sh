@@ -35,7 +35,7 @@ removePackages() {
 }
 
 describePackage() {
-   xbps-query --show "${1}"
+   xbps-query --property pkgver,architecture,homepage,state,short_desc --show "${1}"
 }
 
 whichPackage() {
