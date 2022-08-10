@@ -34,8 +34,8 @@ libxext-dev
 libxfixes-dev
 libxt-dev
 libxtst-dev
-lua5.1
-lua5.1-dev
+lua5.4
+lua5.4-dev
 make
 ncurses-dev
 ocaml
