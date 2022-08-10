@@ -18,11 +18,11 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../brltty-prologue.sh"
-. "${programDirectory}/packages.sh"
 
 parseProgramArguments "${@}"
 
 set -e
+. "${programDirectory}/packages.sh"
 installedPackages=( $(listInstalledPackages) )
 
 for package in "${installedPackages[@]}"

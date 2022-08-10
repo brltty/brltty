@@ -18,10 +18,12 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../brltty-prologue.sh"
-. "${programDirectory}/packages.sh"
 
 addProgramParameter "file" filePath "the path of the file to be located"
 parseProgramArguments "${@}"
 
+set -e
+. "${programDirectory}/packages.sh"
+
 whichPackage "${filePath}"
-exit "${?}"
+exit 0

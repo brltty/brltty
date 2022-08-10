@@ -21,7 +21,8 @@ setPackageManager() {
    local -r commands=(
       /sbin/apk
       /usr/bin/dnf
-      /usr/bin/dpkg
+      /usr/bin/apt
+      /usr/sbin/pacman
       /usr/sbin/pkg
       /sbin/xbps-install
       /usr/bin/zypper
@@ -50,4 +51,5 @@ unsupportedPackageAction() {
 }
 
 setPackageManager
+logNote "package manager: ${packageManager}"
 . "${programDirectory}/packages.d/${packageManager}.sh"

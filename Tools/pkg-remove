@@ -18,7 +18,6 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../brltty-prologue.sh"
-. "${programDirectory}/packages.sh"
 
 processExtraProgramParameters() {
    declare -g additionalPackages=( "${@}" )
@@ -28,5 +27,8 @@ addProgramParameter "package" packageName "the package to remove"
 optionalProgramParameters "packages" "additional packages to remove"
 parseProgramArguments "${@}"
 
+set -e
+. "${programDirectory}/packages.sh"
+
 removePackages "${packageName}" "${additionalPackages[@]}"
-exit "${?}"
+exit 0

@@ -18,85 +18,78 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../brltty-prologue.sh"
-. "${programDirectory}/packages.sh"
-set -e
-
-case "${packageManager}"
-in
-   apk)
-      platformName="alpine"
-      ;;
-
-   dnf)
-      platformName="fedora"
-      ;;
-
-   dpkg)
-      if [ "$(uname -s)" = "GNU" ]
-      then
-         platformName="hurd"
-      else
-         platformName="debian"
-      fi
-      ;;
-
-   pacman)
-      platformName="arch"
-      ;;
-
-   pkg)
-      platformName="freebsd"
-      ;;
-
-   xbps)
-      platformName="void"
-      ;;
-
-   zypper)
-      platformName="opensuse"
-      ;;
-
-   *) semanticError "unknown host platform: ${packageManager}";;
-esac
-
-requiredPackageNames=()
-addRequiredPackage() {
-   local name="${1}"
-
-   [ -n "${name}" ] || return 0
-   [ "${name:0:1}" = "#" ] && return 0
-
-   requiredPackageNames[${#requiredPackageNames[*]}]="${name}"
-}
 
 processExtraProgramParameters() {
-   local package
-
-   if [ "${#}" -gt 0 ]
-   then
-      for package
-      do
-         addRequiredPackage ${package}
-      done
-   else
-      local file="${programDirectory}/${programName}.d/${platformName}"
-      [ -e "${file}" ] || semanticError "platform package list not found: ${file}"
-      [ -f "${file}" ] || semanticError "not a file: ${file}"
-      [ -r "${file}" ] || semanticError "platform package list not readable: ${file}"
-
-      while read package
-      do
-         addRequiredPackage ${package}
-      done < <(cat "${file}")
-   fi
-
-   [ "${#requiredPackageNames[@]}" -gt 0 ] || semanticError "empty package list"
+   declare -g requiredPackageNames=( "${@}" )
 }
 
 addProgramOption i flag installNeededPackages "install the needed packages"
 addProgramOption l flag listNeededPackages "list the needed packages"
 optionalProgramParameters
 parseProgramArguments "${@}"
+
+set -e
+. "${programDirectory}/packages.sh"
+
+[ "${#requiredPackageNames[@]}" -gt 0 ] || {
+   loadRequiredPackageNames() {
+      local file="${programDirectory}/${programName}.d/${platformName}"
+      [ -e "${file}" ] || semanticError "platform package list not found: ${file}"
+      [ -f "${file}" ] || semanticError "not a file: ${file}"
+      [ -r "${file}" ] || semanticError "platform package list not readable: ${file}"
+
+      local name
+      while read name
+      do
+         [ -n "${name}" ] || continue
+         [ "${name:0:1}" = "#" ] && continue
+         requiredPackageNames[${#requiredPackageNames[*]}]="${name}"
+      done < <(cat "${file}")
+
+      [ "${#requiredPackageNames[@]}" -gt 0 ] || semanticError "empty package list"
+   }
+
+   case "${packageManager}"
+   in
+      apk)
+         platformName="alpine"
+         ;;
+
+      dnf)
+         platformName="fedora"
+         ;;
+
+      apt)
+         if [ "$(uname -s)" = "GNU" ]
+         then
+            platformName="hurd"
+         else
+            platformName="debian"
+         fi
+         ;;
+
+      pacman)
+         platformName="arch"
+         ;;
+
+      pkg)
+         platformName="freebsd"
+         ;;
+
+      xbps)
+         platformName="void"
+         ;;
+
+      zypper)
+         platformName="opensuse"
+         ;;
+
+      *) semanticError "unknown host platform: ${packageManager}";;
+   esac
+
+   logNote "platform name: ${platformName}"
+   loadRequiredPackageNames
+}
 
 listRequiredPackages() {
    local name

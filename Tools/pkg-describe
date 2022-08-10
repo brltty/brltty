@@ -18,10 +18,12 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../brltty-prologue.sh"
-. "${programDirectory}/packages.sh"
 
 addProgramParameter "package" packageName "the package to describe"
 parseProgramArguments "${@}"
 
+set -e
+. "${programDirectory}/packages.sh"
+
 describePackage "${packageName}"
-exit "${?}"
+exit 0

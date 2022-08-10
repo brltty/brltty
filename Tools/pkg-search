@@ -18,10 +18,12 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../brltty-prologue.sh"
-. "${programDirectory}/packages.sh"
 
 addProgramParameter "string" searchString "the string to search for"
 parseProgramArguments "${@}"
 
+set -e
+. "${programDirectory}/packages.sh"
+
 searchPackage "${searchString}"
-exit "${?}"
+exit 0
