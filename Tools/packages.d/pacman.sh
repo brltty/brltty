@@ -18,26 +18,26 @@
 ###############################################################################
 
 listInstalledPackages() {
-   unsupportedPackageAction list
+   pacman --query --native | awk '{print $1}'
 }
 
 installPackages() {
-   unsupportedPackageAction install
+   pacman --sync --quiet --noprogressbar --noconfirm -- "${@}"
 }
 
 removePackages() {
-   unsupportedPackageAction remove
+   pacman --remove --noprogressbar --noconfirm -- "${@}"
 }
 
 describePackage() {
-   unsupportedPackageAction describe
+   pacman --sync --info -- "${1}"
 }
 
 whichPackage() {
-   unsupportedPackageAction which
+   pacman --files -- "${1}"
 }
 
 searchPackage() {
-   unsupportedPackageAction search
+   pacman --sync --search -- "${1}"
 }
 

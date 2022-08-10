@@ -20,8 +20,8 @@
 setPackageManager() {
    local -r commands=(
       /sbin/apk
-      /usr/bin/dnf
       /usr/bin/apt
+      /usr/bin/dnf
       /usr/sbin/pacman
       /usr/sbin/pkg
       /sbin/xbps-install

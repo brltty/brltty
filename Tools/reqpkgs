@@ -55,10 +55,6 @@ set -e
          platformName="alpine"
          ;;
 
-      dnf)
-         platformName="fedora"
-         ;;
-
       apt)
          if [ "$(uname -s)" = "GNU" ]
          then
@@ -66,6 +62,10 @@ set -e
          else
             platformName="debian"
          fi
+         ;;
+
+      dnf)
+         platformName="fedora"
          ;;
 
       pacman)
