@@ -18,26 +18,26 @@
 ###############################################################################
 
 listInstalledPackages() {
-   pkg query --all -- "%n"
+   unsupportedPackageAction list
 }
 
 installPackages() {
-   pkg install --quiet --yes -- "${@}"
+   unsupportedPackageAction install
 }
 
 removePackages() {
-   pkg delete --quiet --yes -- "${@}"
+   unsupportedPackageAction remove
 }
 
 describePackage() {
-   pkg rquery -- '%n %v %q\n%c\n%e' "${1}"
+   unsupportedPackageAction describe
 }
 
 whichPackage() {
-   pkg which -- "${1}"
+   unsupportedPackageAction which
 }
 
 searchPackage() {
-   pkg search --search description --label pkg-name --query-modifier comment -- "${1}"
+   unsupportedPackageAction search
 }
 

@@ -40,8 +40,16 @@ in
       fi
       ;;
 
+   pacman)
+      platformName="arch"
+      ;;
+
    pkg)
       platformName="freebsd"
+      ;;
+
+   xbps)
+      platformName="void"
       ;;
 
    zypper)
