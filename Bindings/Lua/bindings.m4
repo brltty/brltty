@@ -21,7 +21,7 @@ LUA=""
 LUA_LIBRARY_DIRECTORY=""
 
 BRLTTY_HAVE_PACKAGE([lua], [lua5.4 lua], [dnl
-   AC_PATH_PROG([LUA], [lua5.4 lua])
+   AC_PATH_PROGS([LUA], [lua5.4 lua])
 
    if test -n "${LUA}"
    then
