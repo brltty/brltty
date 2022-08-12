@@ -18,9 +18,8 @@
 
 all: all-commands all-tools $(ALL_API) $(ALL_API_BINDINGS)
 
-all-commands: all-brltty all-brltty-lscmds all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-pty all-brltty-tune all-brltty-morse all-brltty-hid
+all-commands: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-pty all-brltty-tune all-brltty-morse all-brltty-lscmds all-brltty-hid
 all-brltty: brltty$X | $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
-all-brltty-lscmds: brltty-lscmds$X
 all-brltty-trtxt: brltty-trtxt$X
 all-brltty-ttb: brltty-ttb$X
 all-brltty-ctb: brltty-ctb$X
@@ -29,6 +28,7 @@ all-brltty-ktb: brltty-ktb$X | $(BRAILLE_DRIVERS)
 all-brltty-pty: brltty-pty$X
 all-brltty-tune: brltty-tune$X
 all-brltty-morse: brltty-morse$X
+all-brltty-lscmds: brltty-lscmds$X
 all-brltty-hid: brltty-hid$X
 
 all-tools: all-brltty-cldr all-brltty-lsinc
@@ -1139,7 +1139,6 @@ install-program-directories: install-program-directory
 
 install-commands: all-commands install-program-directories
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -1148,6 +1147,7 @@ install-commands: all-commands install-program-directories
 	$(INSTALL_PROGRAM) brltty-pty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-tune$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-morse$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-hid$X $(INSTALL_PROGRAM_DIRECTORY) 
 
 install-tools: all-tools install-program-directories
