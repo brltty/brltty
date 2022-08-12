@@ -56,5 +56,5 @@ install: all
 uninstall:
 	-rm -f $(TCL_API_DIR)/$(TCL_API_LIB)
 	-rm -f $(TCL_API_DIR)/pkgIndex.tcl
-	[ -d $(TCL_API_DIR) ] && rmdir $(TCL_API_DIR)
+	-[ -d $(TCL_API_DIR) ] && rmdir $(TCL_API_DIR)
 
