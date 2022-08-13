@@ -976,16 +976,19 @@ scrtest.$O:
 
 ###############################################################################
 
-BRLTTY_PTY_OBJECTS = brltty-pty.$O $(PROGRAM_OBJECTS) pty_object.$O
+BRLTTY_PTY_OBJECTS = brltty-pty.$O $(PROGRAM_OBJECTS) pty_object.$O pty_screen.$O
 
 brltty-pty$X: $(BRLTTY_PTY_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_PTY_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_PTY_OBJECTS) $(CURSES_LIBS) $(LDLIBS)
 
 brltty-pty.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty-pty.c
 
 pty_object.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/pty_object.c
+
+pty_screen.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/pty_screen.c
 
 ###############################################################################
 

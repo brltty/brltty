@@ -26,12 +26,16 @@
 #include "log.h"
 #include "options.h"
 #include "pty_object.h"
+#include "pty_screen.h"
+#include "file.h"
 #include "async_handle.h"
 #include "async_wait.h"
 #include "async_io.h"
 #include "async_signal.h"
 
 static int opt_showPath;
+static int opt_logOutputActions;
+static int opt_logUnexpectedOutput;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "show-path",
@@ -39,19 +43,58 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_showPath,
     .description = strtext("show the path of the slave pty device")
   },
+
+  { .word = "log-output-actions",
+    .letter = 'A',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_logOutputActions,
+    .description = strtext("log output actions")
+  },
+
+  { .word = "log-unexpected-output",
+    .letter = 'U',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_logUnexpectedOutput,
+    .description = strtext("log unexpected output")
+  },
 END_OPTION_TABLE
+
+static int
+setEnvironmentString (const char *variable, const char *string) {
+  int result = setenv(variable, string, 1);
+  if (result != -1) return 1;
+
+  logSystemError("setenv");
+  return 0;
+}
+
+static int
+setEnvironmentInteger (const char *variable, int integer) {
+  char string[0X10];
+  snprintf(string, sizeof(string), "%d", integer);
+  return setEnvironmentString(variable, string);
+}
+
+static int
+setEnvironmentVariables (void) {
+  {
+    size_t width, height;
+
+    if (getConsoleSize(&width, &height)) {
+      if (!setEnvironmentInteger("COLUMNS", width)) return 0;
+      if (!setEnvironmentInteger("LINES", height)) return 0;
+    }
+  }
+
+  return setEnvironmentString("TERM", ptyGetScreenType());
+}
 
 static int
 prepareChild (PtyObject *pty) {
   setsid();
   ptyCloseMaster(pty);
 
-  if (setenv("TERM", "dumb", 1) == -1) {
-    logSystemError("setenv");
-    return 0;
-  }
-
-  {
+  if (setEnvironmentVariables()) {
     int tty;
     if (!ptyOpenSlave(pty, &tty)) return 0;
     int keep = 0;
@@ -109,6 +152,13 @@ runChild (PtyObject *pty, char **command) {
   return PROG_EXIT_FATAL;
 }
 
+static
+ASYNC_MONITOR_CALLBACK(standardInputMonitor) {
+  PtyObject *pty = parameters->data;
+  ptyProcessInputCharacter(ptyGetMaster(pty));
+  return 1;
+}
+
 static unsigned char childHasTerminated;
 static unsigned char slaveIsClosed;
 
@@ -121,7 +171,11 @@ static
 ASYNC_INPUT_CALLBACK(ptyInputHandler) {
   if (!(parameters->error || parameters->end)) {
     size_t length = parameters->length;
-    write(1, parameters->buffer, length);
+
+    if (ptyParseOutputBytes(parameters->buffer, length)) {
+      ptyRefreshScreen();
+    }
+
     return length;
   }
 
@@ -168,18 +222,34 @@ getExitStatus (pid_t pid) {
 static int
 runParent (PtyObject *pty, pid_t child) {
   int exitStatus = PROG_EXIT_FATAL;
-  AsyncHandle inputHandle;
+  AsyncHandle ptyInputHandle;
 
   childHasTerminated = 0;
   slaveIsClosed = 0;
 
-  if (asyncReadFile(&inputHandle, ptyGetMaster(pty), 1, ptyInputHandler, NULL)) {
-    if (asyncHandleSignal(SIGCHLD, childTerminationHandler, NULL)) {
-      asyncAwaitCondition(INT_MAX, childTerminationTester, NULL);
-      exitStatus = getExitStatus(child);
+  if (asyncReadFile(&ptyInputHandle, ptyGetMaster(pty), 1, ptyInputHandler, NULL)) {
+    AsyncHandle standardInputHandle;
+
+    if (asyncMonitorFileInput(&standardInputHandle, 0, standardInputMonitor, pty)) {
+      if (asyncHandleSignal(SIGCHLD, childTerminationHandler, NULL)) {
+        {
+          unsigned char oldLogLevel = stderrLogLevel;
+          if (isatty(2)) stderrLogLevel = LOG_ERR;
+
+          ptyBeginScreen();
+          asyncAwaitCondition(INT_MAX, childTerminationTester, NULL);
+          ptyEndScreen();
+
+          stderrLogLevel = oldLogLevel;
+        }
+
+        exitStatus = getExitStatus(child);
+      }
+
+      asyncCancelRequest(standardInputHandle);
     }
 
-    asyncCancelRequest(inputHandle);
+    asyncCancelRequest(ptyInputHandle);
   }
 
   return exitStatus;
@@ -199,6 +269,9 @@ main (int argc, char *argv[]) {
 
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
+
+  if (opt_logOutputActions) ptyLogOutputActions(1);
+  if (opt_logUnexpectedOutput) ptyLogUnexpectedOutput(1);
 
   if ((pty = ptyNewObject())) {
     if (opt_showPath) {
