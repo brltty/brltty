@@ -70,6 +70,7 @@ ptyGetScreenType (void) {
 }
 
 static unsigned char keypadTransmitMode;
+static unsigned char bracketedPasteMode;
 
 void
 ptyBeginScreen (void) {
@@ -82,6 +83,7 @@ ptyBeginScreen (void) {
   scrollok(stdscr, TRUE);
 
   keypadTransmitMode = 0;
+  bracketedPasteMode = 0;
 }
 
 void
@@ -147,8 +149,8 @@ ptyProcessInputCharacter (int fd) {
     }
     #undef KEY
 
-    if (sequence) {
-      if (keypadTransmitMode) {
+    if (keypadTransmitMode) {
+      if (sequence) {
         switch (character) {
           case KEY_UP: case KEY_DOWN: case KEY_LEFT: case KEY_RIGHT:
             strcpy(buffer, sequence);
@@ -356,7 +358,7 @@ performBracketAction_h (unsigned char byte) {
     switch (outputParserNumberArray[0]) {
       case 34:
         logOutputAction("cnorm");
-        attroff(A_INVIS);
+        curs_set(1);
         return 1;
     }
   }
@@ -370,7 +372,7 @@ performBracketAction_l (unsigned char byte) {
     switch (outputParserNumberArray[0]) {
       case 34:
         logOutputAction("cvvis");
-        // FIXME: set cursor very visible
+        curs_set(2);
         return 1;
     }
   }
@@ -553,13 +555,13 @@ performQuestionMarkAction_h (unsigned char byte) {
         return 1;
 
       case 25:
-        logOutputAction("unknown");
-        // FIXME: unknown
+        logOutputAction("cnorm");
+        curs_set(1);
         return 1;
 
       case 2004:
-        logOutputAction("unknown");
-        // FIXME: unknown
+        logOutputAction("smbp");
+        bracketedPasteMode = 1;
         return 1;
     }
   }
@@ -578,12 +580,12 @@ performQuestionMarkAction_l (unsigned char byte) {
 
       case 25:
         logOutputAction("civis");
-        attron(A_INVIS);
+        curs_set(0);
         return 1;
 
       case 2004:
-        logOutputAction("unknown");
-        // FIXME: unknown
+        logOutputAction("rmbp");
+        bracketedPasteMode = 0;
         return 1;
     }
   }
