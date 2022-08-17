@@ -19,25 +19,47 @@
 #ifndef BRLTTY_INCLUDED_PTY_SCREEN
 #define BRLTTY_INCLUDED_PTY_SCREEN
 
+#include "get_curses.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-extern const char *ptyGetScreenType (void);
 
 extern void ptyBeginScreen (void);
 extern void ptyEndScreen (void);
 extern void ptyRefreshScreen (void);
 
-extern void ptyProcessInputCharacter (int fd);
+extern void ptyInsertLines (int count);
+extern void ptyDeleteLines (int count);
 
-extern void ptyResetOutputParser (void);
-extern int ptyParseOutputByte (unsigned char byte);
-extern int ptyParseOutputBytes (const unsigned char *bytes, size_t count);
+extern void ptyInsertCharacters (int count);
+extern void ptyDeleteCharacters (int count);
+extern void ptyAddCharacter (unsigned char character);
 
-extern void ptyLogOutputActions (int yes);
-extern void ptyLogUnexpectedOutput (int yes);
-extern void ptyLogInsertedBytes (int yes);
+extern void ptySetCursorVisibility (int visibility);
+extern void ptySetAttributes (attr_t attributes);
+extern void ptyAddAttributes (attr_t attributes);
+extern void ptyRemoveAttributes (attr_t attributes);
+extern void ptySetForegroundColor (unsigned char color);
+extern void ptySetBackgroundColor (unsigned char color);
+
+extern void ptyClearToEndOfScreen (void);
+extern void ptyClearToEndOfLine (void);
+
+extern void ptySetScrollRegion (int top, int bottom);
+extern void ptyScrollRegion (int amount);
+
+extern int ptyGetCursorRow ();
+extern int ptyGetCursorColumn ();
+
+extern void ptySetCursorPosition (int row, int column);
+extern void ptySetCursorRow (int row);
+extern void ptySetCursorColumn (int column);
+
+extern void ptyMoveCursorUp (int amount);
+extern void ptyMoveCursorDown (int amount);
+extern void ptyMoveCursorLeft (int amount);
+extern void ptyMoveCursorRight (int amount);
 
 #ifdef __cplusplus
 }

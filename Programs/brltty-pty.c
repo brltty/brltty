@@ -26,7 +26,7 @@
 #include "log.h"
 #include "options.h"
 #include "pty_object.h"
-#include "pty_screen.h"
+#include "pty_terminal.h"
 #include "file.h"
 #include "async_handle.h"
 #include "async_wait.h"
@@ -94,7 +94,7 @@ setEnvironmentVariables (void) {
     }
   }
 
-  return setEnvironmentString("TERM", ptyGetScreenType());
+  return setEnvironmentString("TERM", ptyGetTerminalType());
 }
 
 static int
@@ -163,7 +163,7 @@ runChild (PtyObject *pty, char **command) {
 static
 ASYNC_MONITOR_CALLBACK(standardInputMonitor) {
   PtyObject *pty = parameters->data;
-  ptyProcessInputCharacter(ptyGetMaster(pty));
+  ptyProcessTerminalInput(ptyGetMaster(pty));
   return 1;
 }
 
@@ -181,7 +181,7 @@ ASYNC_INPUT_CALLBACK(ptyInputHandler) {
     size_t length = parameters->length;
 
     if (ptyParseOutputBytes(parameters->buffer, length)) {
-      ptyRefreshScreen();
+      ptySynchronizeTerminal();
     }
 
     return length;
@@ -244,9 +244,9 @@ runParent (PtyObject *pty, pid_t child) {
           unsigned char oldLogLevel = stderrLogLevel;
           if (isatty(2)) stderrLogLevel = LOG_ERR;
 
-          ptyBeginScreen();
+          ptyBeginTerminal();
           asyncAwaitCondition(INT_MAX, childTerminationTester, NULL);
-          ptyEndScreen();
+          ptyEndTerminal();
 
           stderrLogLevel = oldLogLevel;
         }
@@ -278,9 +278,9 @@ main (int argc, char *argv[]) {
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
-  if (opt_logOutputActions) ptyLogOutputActions(1);
-  if (opt_logUnexpectedOutput) ptyLogUnexpectedOutput(1);
-  if (opt_logInsertedBytes) ptyLogInsertedBytes(1);
+  if (opt_logOutputActions) ptySetLogOutputActions(1);
+  if (opt_logUnexpectedOutput) ptySetLogUnexpectedOutput(1);
+  if (opt_logInsertedBytes) ptySetLogInsertedBytes(1);
 
   if ((pty = ptyNewObject())) {
     if (opt_showPath) {
