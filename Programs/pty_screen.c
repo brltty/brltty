@@ -24,10 +24,8 @@
  * nel=\EE
  * op=\E[39;49m
  * rc=\E8
- * rmir=\E[4l
  * rs2=\Ec
  * sc=\E7
- * smir=\E[4h
  * tbc=\E[3g
  */
 
@@ -68,6 +66,7 @@ ptyGetScreenType (void) {
   return ptyScreenType;
 }
 
+static unsigned char insertMode = 0;
 static unsigned char keypadTransmitMode = 0;
 static unsigned char bracketedPasteMode = 0;
 
@@ -88,6 +87,7 @@ ptyBeginScreen (void) {
   noecho();
   scrollok(stdscr, TRUE);
 
+  insertMode = 0;
   keypadTransmitMode = 0;
   bracketedPasteMode = 0;
 
@@ -338,6 +338,7 @@ parseOutputByte_BASIC (unsigned char byte) {
         logMessage(screenLogLevel, "addch 0X%02X", byte);
       }
 
+      if (insertMode) insch(' ');
       addch(byte);
       return 0;
     }
@@ -428,6 +429,11 @@ static int
 performBracketAction_h (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
+      case 4:
+        logOutputAction("smir");
+        insertMode = 1;
+        return 1;
+
       case 34:
         logOutputAction("cnorm");
         curs_set(1);
@@ -442,6 +448,11 @@ static int
 performBracketAction_l (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
+      case 4:
+        logOutputAction("rmir");
+        insertMode = 0;
+        return 1;
+
       case 34:
         logOutputAction("cvvis");
         curs_set(2);
