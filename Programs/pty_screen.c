@@ -23,8 +23,6 @@
  * ht=^I
  * hts=\EH
  * ich=\E[%p1%d@
- * il=\E[%p1%dL
- * il1=\E[L
  * ind=\n
  * is2=\E)0
  * nel=\EE
@@ -51,6 +49,7 @@
 static const unsigned char screenLogLevel = LOG_NOTICE;
 static unsigned char logOutputActions = 0;
 static unsigned char logUnexpectedOutput = 0;
+static unsigned char logInsertedBytes = 0;
 
 void
 ptyLogOutputActions (int yes) {
@@ -62,6 +61,11 @@ ptyLogUnexpectedOutput (int yes) {
   logUnexpectedOutput = yes;
 }
 
+void
+ptyLogInsertedBytes (int yes) {
+  logInsertedBytes = yes;
+}
+
 static const char ptyScreenType[] = "vt100";
 
 const char *
@@ -69,8 +73,15 @@ ptyGetScreenType (void) {
   return ptyScreenType;
 }
 
-static unsigned char keypadTransmitMode;
-static unsigned char bracketedPasteMode;
+static unsigned char keypadTransmitMode = 0;
+static unsigned char bracketedPasteMode = 0;
+
+static int scrollRegionTop;
+static int scrollRegionBottom;
+
+static unsigned char hasColor = 0;
+static unsigned char foregroundColor;
+static unsigned char backgroundColor;
 
 void
 ptyBeginScreen (void) {
@@ -84,6 +95,13 @@ ptyBeginScreen (void) {
 
   keypadTransmitMode = 0;
   bracketedPasteMode = 0;
+
+  scrollRegionTop = getbegy(stdscr);
+  scrollRegionBottom = getmaxy(stdscr) - 1;
+
+  if ((hasColor = has_colors())) {
+    start_color();
+  }
 }
 
 void
@@ -170,23 +188,64 @@ ptyProcessInputCharacter (int fd) {
 }
 
 static int
-getCurrentLine () {
+getCursorRow () {
   return getcury(stdscr);
 }
 
 static int
-getCurrentColumn () {
+getCursorColumn () {
   return getcurx(stdscr);
 }
 
-static void
-changeCursorLineBy (int amount) {
-  move(getCurrentLine()+amount, getCurrentColumn());
+static int
+isWithinScrollRegion (int row) {
+  if (row < scrollRegionTop) return 0;
+  if (row > scrollRegionBottom) return 0;
+  return 1;
 }
 
 static void
-changeCursorColumnBy (int amount) {
-  move(getCurrentLine(), getCurrentColumn()+amount);
+moveCursorUp (int amount) {
+  int oldRow = getCursorRow();
+  int newRow = oldRow - amount;
+
+  if (isWithinScrollRegion(oldRow)) {
+    int delta = newRow - scrollRegionTop;
+
+    if (delta < 0) {
+      scrl(delta);
+      newRow = scrollRegionTop;
+    }
+  }
+
+  if (newRow != oldRow) move(newRow, getCursorColumn());
+}
+
+static void
+moveCursorDown (int amount) {
+  int oldRow = getCursorRow();
+  int newRow = oldRow + amount;
+
+  if (isWithinScrollRegion(oldRow)) {
+    int delta = newRow - scrollRegionBottom;
+
+    if (delta > 0) {
+      scrl(delta);
+      newRow = scrollRegionBottom;
+    }
+  }
+
+  if (newRow != oldRow) move(newRow, getCursorColumn());
+}
+
+static void
+moveCursorLeft (int amount) {
+  move(getCursorRow(), getCursorColumn()-amount);
+}
+
+static void
+moveCursorRight (int amount) {
+  move(getCursorRow(), getCursorColumn()+amount);
 }
 
 typedef enum {
@@ -227,15 +286,8 @@ logOutputAction (const char *name) {
     STR_BEGIN(prefix, sizeof(prefix));
     STR_PRINTF("%s", name);
 
-    if (outputParserNumberCount > 0) {
-      STR_PRINTF(" (");
-
-      for (int i=0; i<outputParserNumberCount; i+=1) {
-        if (i > 0) STR_PRINTF(", ");
-        STR_PRINTF("%d", outputParserNumberArray[i]);
-      }
-
-      STR_PRINTF(")");
+    for (int i=0; i<outputParserNumberCount; i+=1) {
+      STR_PRINTF(" %d", outputParserNumberArray[i]);
     }
 
     STR_END;
@@ -264,21 +316,26 @@ parseOutputByte_BASIC (unsigned char byte) {
 
     case ASCII_BS:
       logOutputAction("cub1");
-      changeCursorColumnBy(-1);
+      moveCursorLeft(1);
       return 0;
 
     case ASCII_LF:
       logOutputAction("cud1");
-      changeCursorLineBy(1);
+      moveCursorDown(1);
       return 0;
 
     case ASCII_ESC:
       outputParserState = OPS_ESCAPE;
       return 0;
 
-    default:
+    default: {
+      if (logInsertedBytes) {
+        logMessage(screenLogLevel, "addch 0X%02X", byte);
+      }
+
       addch(byte);
       return 0;
+    }
   }
 }
 
@@ -428,17 +485,19 @@ performBracketAction_m (unsigned char byte) {
         return 1;
 
       default: {
-        int color = number % 10;
+        int color = (number % 10) - '0';
 
         if (color <= 0X7) {
           switch (number / 10) {
             case 3:
               logOutputAction("setaf");
+              foregroundColor = color;
               // FIXME: set foreground color
               return 1;
 
             case 4:
               logOutputAction("setab");
+              backgroundColor = color;
               // FIXME: set background color
               return 1;
           }
@@ -457,22 +516,22 @@ performBracketAction (unsigned char byte) {
   switch (byte) {
     case 'A':
       logOutputAction("cuu");
-      changeCursorLineBy(-getOutputActionCount());
+      moveCursorUp(getOutputActionCount());
       return 1;
 
     case 'B':
       logOutputAction("cud");
-      changeCursorLineBy(getOutputActionCount());
+      moveCursorDown(getOutputActionCount());
       return 1;
 
     case 'C':
       logOutputAction("cuf");
-      changeCursorColumnBy(getOutputActionCount());
+      moveCursorRight(getOutputActionCount());
       return 1;
 
     case 'D':
       logOutputAction("cub");
-      changeCursorColumnBy(-getOutputActionCount());
+      moveCursorLeft(getOutputActionCount());
       return 1;
 
     case 'H': {
@@ -483,14 +542,14 @@ performBracketAction (unsigned char byte) {
         break;
       }
 
-      int *line = &outputParserNumberArray[0];
+      int *row = &outputParserNumberArray[0];
       int *column = &outputParserNumberArray[1];
 
-      if ((*line -= 1) < 0) break;
+      if ((*row -= 1) < 0) break;
       if ((*column -= 1) < 0) break;
 
       logOutputAction("cup");
-      move(*line, *column);
+      move(*row, *column);
       return 1;
     }
 
@@ -503,6 +562,13 @@ performBracketAction (unsigned char byte) {
       logOutputAction("el");
       clrtoeol();
       return 1;
+
+    case 'L': {
+      logOutputAction("il");
+      int count = getOutputActionCount();
+      while (count--) insertln();
+      return 1;
+    }
 
     case 'M': {
       logOutputAction("dl");
@@ -530,14 +596,17 @@ performBracketAction (unsigned char byte) {
     case 'r': {
       if (outputParserNumberCount != 2) break;
 
-      int *first = &outputParserNumberArray[0];
-      int *last = &outputParserNumberArray[1];
+      int *top = &outputParserNumberArray[0];
+      int *bottom = &outputParserNumberArray[1];
 
-      if ((*first -= 1) < 0) break;
-      if ((*last -= 1) < 0) break;
+      if ((*top -= 1) < 0) break;
+      if ((*bottom -= 1) < 0) break;
+
+      scrollRegionTop = *top;
+      scrollRegionBottom = *bottom;
 
       logOutputAction("csr");
-      setscrreg(*first, *last);
+      setscrreg(*top, *bottom);
       return 1;
     }
   }

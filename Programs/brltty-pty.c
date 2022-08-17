@@ -36,6 +36,7 @@
 static int opt_showPath;
 static int opt_logOutputActions;
 static int opt_logUnexpectedOutput;
+static int opt_logInsertedBytes;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "show-path",
@@ -56,6 +57,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden,
     .setting.flag = &opt_logUnexpectedOutput,
     .description = strtext("log unexpected output")
+  },
+
+  { .word = "log-inserted-bytes",
+    .letter = 'I',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_logInsertedBytes,
+    .description = strtext("log inserted bytes")
   },
 END_OPTION_TABLE
 
@@ -272,6 +280,7 @@ main (int argc, char *argv[]) {
 
   if (opt_logOutputActions) ptyLogOutputActions(1);
   if (opt_logUnexpectedOutput) ptyLogUnexpectedOutput(1);
+  if (opt_logInsertedBytes) ptyLogInsertedBytes(1);
 
   if ((pty = ptyNewObject())) {
     if (opt_showPath) {
