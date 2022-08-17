@@ -22,7 +22,6 @@
  * cuu1=\EM
  * ht=^I
  * hts=\EH
- * ich=\E[%p1%d@
  * ind=\n
  * is2=\E)0
  * nel=\EE
@@ -304,11 +303,6 @@ parseOutputByte_BASIC (unsigned char byte) {
   outputParserNumberCount = 0;
 
   switch (byte) {
-    case 'g':
-      logOutputAction("flash");
-      flash();
-      return 0;
-
     case ASCII_BEL:
       logOutputAction("bel");
       beep();
@@ -354,6 +348,11 @@ parseOutputByte_ESCAPE (unsigned char byte) {
     case '>':
       logOutputAction("rmkx");
       keypadTransmitMode = 0;
+      goto basic;
+
+    case 'g':
+      logOutputAction("flash");
+      flash();
       goto basic;
   }
 
@@ -581,6 +580,13 @@ performBracketAction (unsigned char byte) {
       logOutputAction("dch");
       int count = getOutputActionCount();
       while (count--) delch();
+      return 1;
+    }
+
+    case '@': {
+      logOutputAction("ic");
+      int count = getOutputActionCount();
+      while (count--) insch(' ');
       return 1;
     }
 
