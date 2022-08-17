@@ -18,16 +18,12 @@
 
 /* unimplemented output actions
  * cbt=\E[Z
- * cr=\r
- * cuu1=\EM
  * ht=^I
  * hts=\EH
- * ind=\n
  * is2=\E)0
  * nel=\EE
  * op=\E[39;49m
  * rc=\E8
- * ri=\EM
  * rmir=\E[4l
  * rs2=\Ec
  * sc=\E7
@@ -196,6 +192,16 @@ getCursorColumn () {
   return getcurx(stdscr);
 }
 
+static void
+setCursorRow (int row) {
+  move(row, getCursorColumn());
+}
+
+static void
+setCursorColumn (int column) {
+  move(getCursorRow(), column);
+}
+
 static int
 isWithinScrollRegion (int row) {
   if (row < scrollRegionTop) return 0;
@@ -217,7 +223,7 @@ moveCursorUp (int amount) {
     }
   }
 
-  if (newRow != oldRow) move(newRow, getCursorColumn());
+  if (newRow != oldRow) setCursorRow(newRow);
 }
 
 static void
@@ -234,17 +240,17 @@ moveCursorDown (int amount) {
     }
   }
 
-  if (newRow != oldRow) move(newRow, getCursorColumn());
+  if (newRow != oldRow) setCursorRow(newRow);
 }
 
 static void
 moveCursorLeft (int amount) {
-  move(getCursorRow(), getCursorColumn()-amount);
+  setCursorColumn(getCursorColumn()-amount);
 }
 
 static void
 moveCursorRight (int amount) {
-  move(getCursorRow(), getCursorColumn()+amount);
+  setCursorColumn(getCursorColumn()+amount);
 }
 
 typedef enum {
@@ -318,6 +324,11 @@ parseOutputByte_BASIC (unsigned char byte) {
       moveCursorDown(1);
       return 0;
 
+    case ASCII_CR:
+      logOutputAction("cr");
+      setCursorColumn(0);
+      return 0;
+
     case ASCII_ESC:
       outputParserState = OPS_ESCAPE;
       return 0;
@@ -349,6 +360,11 @@ parseOutputByte_ESCAPE (unsigned char byte) {
       logOutputAction("rmkx");
       keypadTransmitMode = 0;
       goto basic;
+
+    case 'M':
+      logOutputAction("cuu1");
+      moveCursorUp(1);
+      return 0;
 
     case 'g':
       logOutputAction("flash");
