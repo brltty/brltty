@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <sys/wait.h>
+#include <sys/ipc.h>
 
 #include "log.h"
 #include "options.h"
@@ -33,16 +34,24 @@
 #include "async_io.h"
 #include "async_signal.h"
 
-static int opt_showPath;
+static int opt_shmIdentifier;
+static int opt_ttyPath;
+
 static int opt_logOutputActions;
-static int opt_logUnexpectedOutput;
 static int opt_logInsertedBytes;
+static int opt_logUnexpectedOutput;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "show-path",
-    .letter = 'p',
-    .setting.flag = &opt_showPath,
-    .description = strtext("show the path of the slave pty device")
+  { .word = "shm-identifier",
+    .letter = 's',
+    .setting.flag = &opt_shmIdentifier,
+    .description = strtext("show the identifier of the shared memory segment")
+  },
+
+  { .word = "tty-path",
+    .letter = 't',
+    .setting.flag = &opt_ttyPath,
+    .description = strtext("show the path of the tty device")
   },
 
   { .word = "log-output-actions",
@@ -52,18 +61,18 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("log output actions")
   },
 
-  { .word = "log-unexpected-output",
-    .letter = 'U',
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_logUnexpectedOutput,
-    .description = strtext("log unexpected output")
-  },
-
   { .word = "log-inserted-bytes",
     .letter = 'I',
     .flags = OPT_Hidden,
     .setting.flag = &opt_logInsertedBytes,
     .description = strtext("log inserted bytes")
+  },
+
+  { .word = "log-unexpected-output",
+    .letter = 'U',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_logUnexpectedOutput,
+    .description = strtext("log unexpected output")
   },
 END_OPTION_TABLE
 
@@ -283,9 +292,13 @@ main (int argc, char *argv[]) {
   if (opt_logInsertedBytes) ptySetLogInsertedBytes(1);
 
   if ((pty = ptyNewObject())) {
-    if (opt_showPath) {
-      FILE *stream = stdout;
-      fprintf(stream, "%s\n", ptyGetPath(pty));
+    const char *ttyPath = ptyGetPath(pty);
+    int shmIdentifier = ftok(ttyPath, 'p');
+
+    {
+      FILE *stream = stderr;
+      if (opt_ttyPath) fprintf(stream, "%s\n", ttyPath);
+      if (opt_shmIdentifier) fprintf(stream, "%d\n", shmIdentifier);
       fflush(stream);
     }
 

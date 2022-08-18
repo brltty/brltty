@@ -34,7 +34,7 @@ ptyBeginScreen (void) {
   intrflush(stdscr, FALSE);
   keypad(stdscr, TRUE);
 
-  cbreak();
+  raw();
   noecho();
   scrollok(stdscr, TRUE);
 
