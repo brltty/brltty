@@ -67,13 +67,13 @@ static unsigned char insertMode = 0;
 static unsigned char keypadTransmitMode = 0;
 static unsigned char bracketedPasteMode = 0;
 
-void
-ptyBeginTerminal (void) {
+int
+ptyBeginTerminal (const char *tty) {
   insertMode = 0;
   keypadTransmitMode = 0;
   bracketedPasteMode = 0;
 
-  ptyBeginScreen();
+  return ptyBeginScreen(tty);
 }
 
 void

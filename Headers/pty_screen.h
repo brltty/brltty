@@ -25,9 +25,22 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void ptyBeginScreen (void);
+extern int ptyBeginScreen (const char *tty);
 extern void ptyEndScreen (void);
 extern void ptyRefreshScreen (void);
+
+extern int ptyGetCursorRow ();
+extern int ptyGetCursorColumn ();
+
+extern void ptySetCursorPosition (int row, int column);
+extern void ptySetCursorRow (int row);
+extern void ptySetCursorColumn (int column);
+
+extern void ptySetScrollRegion (int top, int bottom);
+extern void ptyMoveCursorUp (int amount);
+extern void ptyMoveCursorDown (int amount);
+extern void ptyMoveCursorLeft (int amount);
+extern void ptyMoveCursorRight (int amount);
 
 extern void ptyInsertLines (int count);
 extern void ptyDeleteLines (int count);
@@ -45,19 +58,6 @@ extern void ptySetBackgroundColor (unsigned char color);
 
 extern void ptyClearToEndOfScreen (void);
 extern void ptyClearToEndOfLine (void);
-
-extern int ptyGetCursorRow ();
-extern int ptyGetCursorColumn ();
-
-extern void ptySetCursorPosition (int row, int column);
-extern void ptySetCursorRow (int row);
-extern void ptySetCursorColumn (int column);
-
-extern void ptySetScrollRegion (int top, int bottom);
-extern void ptyMoveCursorUp (int amount);
-extern void ptyMoveCursorDown (int amount);
-extern void ptyMoveCursorLeft (int amount);
-extern void ptyMoveCursorRight (int amount);
 
 #ifdef __cplusplus
 }

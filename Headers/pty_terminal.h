@@ -25,7 +25,7 @@ extern "C" {
 
 extern const char *ptyGetTerminalType (void);
 
-extern void ptyBeginTerminal (void);
+extern int ptyBeginTerminal (const char *tty);
 extern void ptyEndTerminal (void);
 extern void ptySynchronizeTerminal (void);
 

@@ -18,8 +18,11 @@
 
 #include "prologue.h"
 
+#include <sys/stat.h>
+
 #include "log.h"
 #include "pty_screen.h"
+#include "pty_shared.h"
 
 static int scrollRegionTop;
 static int scrollRegionBottom;
@@ -28,103 +31,115 @@ static unsigned char hasColors = 0;
 static unsigned char foregroundColor;
 static unsigned char backgroundColor;
 
-void
-ptyBeginScreen (void) {
-  initscr();
-  intrflush(stdscr, FALSE);
-  keypad(stdscr, TRUE);
+static unsigned int sharedSegmentSize = 0;
+static int sharedSegmentIdentifier = 0;
+static void *sharedSegmentAddress = NULL;
 
-  raw();
-  noecho();
-  scrollok(stdscr, TRUE);
+static int
+releaseSharedSegment (void) {
+  if (shmctl(sharedSegmentIdentifier, IPC_RMID, NULL) != -1) return 1;
+  logSystemError("shmctl[IPC_RMID]");
+  return 0;;
+}
 
-  scrollRegionTop = getbegy(stdscr);
-  scrollRegionBottom = getmaxy(stdscr) - 1;
+static int
+allocateSharedSegment (const char *tty) {
+  sharedSegmentSize = (sizeof(PtySharedSegmentCharacter) * COLS * LINES) + sizeof(PtySharedSegmentHeader);
+  key_t key = ptyMakeSharedSegmentKey(tty);
 
-  hasColors = has_colors();
-  foregroundColor = COLOR_WHITE;
-  backgroundColor = COLOR_BLACK;
+  int found = ptyGetSharedSegmentIdentifier(key, &sharedSegmentIdentifier);
+  if (found) releaseSharedSegment();
 
-  if (hasColors) {
-    start_color();
+  {
+    int flags = IPC_CREAT | S_IRUSR | S_IWUSR;
+    found = (sharedSegmentIdentifier = shmget(key, sharedSegmentSize, flags)) != -1;
   }
+
+  if (found) {
+    sharedSegmentAddress = ptyAttachSharedSegment(sharedSegmentIdentifier);
+    if (sharedSegmentAddress) return 1;
+    releaseSharedSegment();
+  } else {
+    logSystemError("shmget");
+  }
+
+  return 0;
+}
+
+static void
+setSharedSegmentCharacters (const PtySharedSegmentCharacter *character, PtySharedSegmentCharacter *from, const PtySharedSegmentCharacter *to) {
+  while (from < to) *from++ = *character;
+}
+
+static void
+initializeSharedSegmentHeader (void) {
+  PtySharedSegmentHeader *header = sharedSegmentAddress;
+
+  header->headerSize = sizeof(*header);
+  header->segmentSize = sharedSegmentSize;
+
+  header->characterSize = sizeof(PtySharedSegmentCharacter);
+  header->charactersOffset = header->headerSize;
+
+  header->screenHeight = LINES;
+  header->screenWidth = COLS;
+
+  header->cursorRow = ptyGetCursorRow();
+  header->cursorColumn = ptyGetCursorColumn();
+
+  {
+    static const PtySharedSegmentCharacter initializer = {
+      .text = ' ',
+    };
+
+    PtySharedSegmentCharacter *from = ptyGetSharedSegmentScreenStart(header);
+    const PtySharedSegmentCharacter *to = ptyGetSharedSegmentScreenEnd(header);
+    setSharedSegmentCharacters(&initializer, from, to);
+  }
+}
+
+int
+ptyBeginScreen (const char *tty) {
+  if (initscr()) {
+    intrflush(stdscr, FALSE);
+    keypad(stdscr, TRUE);
+
+    raw();
+    noecho();
+    scrollok(stdscr, TRUE);
+
+    scrollRegionTop = getbegy(stdscr);
+    scrollRegionBottom = getmaxy(stdscr) - 1;
+
+    hasColors = has_colors();
+    foregroundColor = COLOR_WHITE;
+    backgroundColor = COLOR_BLACK;
+
+    if (hasColors) {
+      start_color();
+    }
+
+    if (allocateSharedSegment(tty)) {
+      initializeSharedSegmentHeader();
+      return 1;
+    }
+
+    endwin();
+  }
+
+  return 0;
 }
 
 void
 ptyEndScreen (void) {
   endwin();
+  ptyDetachSharedSegment(sharedSegmentAddress);
+  releaseSharedSegment();
 }
 
 void
 ptyRefreshScreen (void) {
   refresh();
-}
-
-void
-ptyInsertLines (int count) {
-  while (count-- > 0) insertln();
-}
-
-void
-ptyDeleteLines (int count) {
-  while (count-- > 0) deleteln();
-}
-
-void
-ptyInsertCharacters (int count) {
-  while (count-- > 0) insch(' ');
-}
-
-void
-ptyDeleteCharacters (int count) {
-  while (count-- > 0) delch();
-}
-
-void
-ptyAddCharacter (unsigned char character) {
-  addch(character);
-}
-
-void
-ptySetCursorVisibility (int visibility) {
-  curs_set(visibility);
-}
-
-void
-ptySetAttributes (attr_t attributes) {
-  attrset(attributes);
-}
-
-void
-ptyAddAttributes (attr_t attributes) {
-  attron(attributes);
-}
-
-void
-ptyRemoveAttributes (attr_t attributes) {
-  attroff(attributes);
-}
-
-void
-ptySetForegroundColor (unsigned char color) {
-  foregroundColor = color;
-  // FIXME
-}
-
-void
-ptySetBackgroundColor (unsigned char color) {
-  backgroundColor = color;
-  // FIXME
-}
-
-void
-ptyClearToEndOfScreen (void) {
-  clrtobot();
-}
-
-void
-ptyClearToEndOfLine (void) {
-  clrtoeol();
 }
 
 int
@@ -213,4 +228,114 @@ ptyMoveCursorLeft (int amount) {
 void
 ptyMoveCursorRight (int amount) {
   ptySetCursorColumn(ptyGetCursorColumn()+amount);
+}
+
+static PtySharedSegmentCharacter *
+setSharedSegmentCharacter (int row, int column, PtySharedSegmentCharacter **end) {
+  cchar_t wch;
+
+  {
+    int oldRow = ptyGetCursorRow();
+    int oldColumn = ptyGetCursorColumn();
+    int move = (row != oldRow) || (column != oldColumn);
+
+    if (move) ptySetCursorPosition(row, column);
+    in_wch(&wch);
+    if (move) ptySetCursorPosition(oldRow, oldColumn);
+  }
+
+  PtySharedSegmentCharacter *character = ptyGetSharedSegmentCharacter(sharedSegmentAddress, row, column, end);
+  character->text = wch.chars[0];
+  character->blink = wch.attr & A_BLINK;
+  character->bold = wch.attr & A_BOLD;
+  character->underline = wch.attr & A_UNDERLINE;
+  character->reverse = wch.attr & A_REVERSE;
+  character->standout = wch.attr & A_STANDOUT;
+  character->dim = wch.attr & A_DIM;
+
+  return character;
+}
+
+static PtySharedSegmentCharacter *
+setCurrentSharedSegmentCharacter (PtySharedSegmentCharacter **end) {
+  return setSharedSegmentCharacter(ptyGetCursorRow(), ptyGetCursorColumn(), end);
+}
+
+void
+ptyInsertLines (int count) {
+  while (count-- > 0) insertln();
+}
+
+void
+ptyDeleteLines (int count) {
+  while (count-- > 0) deleteln();
+}
+
+void
+ptyInsertCharacters (int count) {
+  while (count-- > 0) insch(' ');
+}
+
+void
+ptyDeleteCharacters (int count) {
+  while (count-- > 0) delch();
+}
+
+void
+ptyAddCharacter (unsigned char character) {
+  int row = ptyGetCursorRow();
+  int column = ptyGetCursorColumn();
+
+  addch(character);
+  setSharedSegmentCharacter(row, column, NULL);
+}
+
+void
+ptySetCursorVisibility (int visibility) {
+  curs_set(visibility);
+}
+
+void
+ptySetAttributes (attr_t attributes) {
+  attrset(attributes);
+}
+
+void
+ptyAddAttributes (attr_t attributes) {
+  attron(attributes);
+}
+
+void
+ptyRemoveAttributes (attr_t attributes) {
+  attroff(attributes);
+}
+
+void
+ptySetForegroundColor (unsigned char color) {
+  foregroundColor = color;
+  // FIXME
+}
+
+void
+ptySetBackgroundColor (unsigned char color) {
+  backgroundColor = color;
+  // FIXME
+}
+
+void
+ptyClearToEndOfScreen (void) {
+  clrtobot();
+
+  PtySharedSegmentCharacter *from = setCurrentSharedSegmentCharacter(NULL);
+  const PtySharedSegmentCharacter *to = ptyGetSharedSegmentScreenEnd(sharedSegmentAddress);
+  setSharedSegmentCharacters(from, from+1, to);
+}
+
+void
+ptyClearToEndOfLine (void) {
+  clrtoeol();
+
+  PtySharedSegmentCharacter *to;
+  PtySharedSegmentCharacter *from = setCurrentSharedSegmentCharacter(&to);
+  setSharedSegmentCharacters(from, from+1, to);
 }

@@ -22,7 +22,6 @@
 #include <errno.h>
 #include <limits.h>
 #include <sys/wait.h>
-#include <sys/ipc.h>
 
 #include "log.h"
 #include "options.h"
@@ -34,20 +33,12 @@
 #include "async_io.h"
 #include "async_signal.h"
 
-static int opt_shmIdentifier;
 static int opt_ttyPath;
-
 static int opt_logOutputActions;
 static int opt_logInsertedBytes;
 static int opt_logUnexpectedOutput;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "shm-identifier",
-    .letter = 's',
-    .setting.flag = &opt_shmIdentifier,
-    .description = strtext("show the identifier of the shared memory segment")
-  },
-
   { .word = "tty-path",
     .letter = 't',
     .setting.flag = &opt_ttyPath,
@@ -253,9 +244,12 @@ runParent (PtyObject *pty, pid_t child) {
           unsigned char oldLogLevel = stderrLogLevel;
           if (isatty(2)) stderrLogLevel = LOG_ERR;
 
-          ptyBeginTerminal();
-          asyncAwaitCondition(INT_MAX, childTerminationTester, NULL);
-          ptyEndTerminal();
+          if (ptyBeginTerminal(ptyGetPath(pty))) {
+            asyncAwaitCondition(INT_MAX, childTerminationTester, NULL);
+            ptyEndTerminal();
+          } else {
+            kill(child, SIGTERM);
+          }
 
           stderrLogLevel = oldLogLevel;
         }
@@ -293,12 +287,10 @@ main (int argc, char *argv[]) {
 
   if ((pty = ptyNewObject())) {
     const char *ttyPath = ptyGetPath(pty);
-    int shmIdentifier = ftok(ttyPath, 'p');
 
-    {
+    if (opt_ttyPath) {
       FILE *stream = stderr;
-      if (opt_ttyPath) fprintf(stream, "%s\n", ttyPath);
-      if (opt_shmIdentifier) fprintf(stream, "%d\n", shmIdentifier);
+      fprintf(stream, "%s\n", ttyPath);
       fflush(stream);
     }
 
