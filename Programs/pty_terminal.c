@@ -170,6 +170,13 @@ ptyProcessTerminalInput (int fd) {
 }
 
 typedef enum {
+  OBP_DONE,
+  OBP_CONTINUE,
+  OBP_REPROCESS,
+  OBP_UNEXPECTED,
+} OutputByteParserResult;
+
+typedef enum {
   OPS_BASIC,
   OPS_ESCAPE,
   OPS_BRACKET,
@@ -216,10 +223,10 @@ logOutputAction (const char *name) {
   }
 }
 
-typedef int OutputByteParser (unsigned char byte);
-static int handleUnexpectedOutputByte (unsigned char byte);
+typedef OutputByteParserResult OutputByteParser (unsigned char byte);
+static void handleUnexpectedOutputByte (unsigned char byte);
 
-static int
+static OutputByteParserResult
 parseOutputByte_BASIC (unsigned char byte) {
   outputParserQuestionMark = 0;
   outputParserNumberCount = 0;
@@ -228,26 +235,26 @@ parseOutputByte_BASIC (unsigned char byte) {
     case ASCII_BEL:
       logOutputAction("bel");
       soundAudibleAlert();
-      return 0;
+      return OBP_DONE;
 
     case ASCII_BS:
       logOutputAction("cub1");
       ptyMoveCursorLeft(1);
-      return 0;
+      return OBP_DONE;
 
     case ASCII_LF:
       logOutputAction("cud1");
       ptyMoveCursorDown(1);
-      return 0;
+      return OBP_DONE;
 
     case ASCII_CR:
       logOutputAction("cr");
       ptySetCursorColumn(0);
-      return 0;
+      return OBP_DONE;
 
     case ASCII_ESC:
       outputParserState = OPS_ESCAPE;
-      return 0;
+      return OBP_CONTINUE;
 
     default: {
       if (logInsertedBytes) {
@@ -256,58 +263,54 @@ parseOutputByte_BASIC (unsigned char byte) {
 
       if (insertMode) ptyInsertCharacters(1);
       ptyAddCharacter(byte);
-      return 0;
+      return OBP_DONE;
     }
   }
 }
 
-static int
+static OutputByteParserResult
 parseOutputByte_ESCAPE (unsigned char byte) {
   switch (byte) {
     case '[':
       outputParserState = OPS_BRACKET;
-      return 0;
+      return OBP_CONTINUE;
 
     case '=':
       logOutputAction("smkx");
       keypadTransmitMode = 1;
-      goto basic;
+      return OBP_DONE;
 
     case '>':
       logOutputAction("rmkx");
       keypadTransmitMode = 0;
-      goto basic;
+      return OBP_DONE;
 
     case 'M':
       logOutputAction("cuu1");
       ptyMoveCursorUp(1);
-      return 0;
+      return OBP_DONE;
 
     case 'g':
       logOutputAction("flash");
       showVisualAlert();
-      goto basic;
+      return OBP_DONE;
   }
 
-  return handleUnexpectedOutputByte(byte);
-
-basic:
-  outputParserState = OPS_BASIC;
-  return 0;
+  return OBP_UNEXPECTED;
 }
 
-static int
+static OutputByteParserResult
 parseOutputByte_BRACKET (unsigned char byte) {
   outputParserState = OPS_NUMBER;
-  if (outputParserQuestionMark) return 1;
-  if (byte != '?') return 1;
+  if (outputParserQuestionMark) return OBP_REPROCESS;
+  if (byte != '?') return OBP_REPROCESS;
 
   outputParserQuestionMark = 1;
   outputParserState = OPS_BRACKET;
-  return 0;
+  return OBP_CONTINUE;
 }
 
-static int
+static OutputByteParserResult
 parseOutputByte_NUMBER (unsigned char byte) {
   if (iswdigit(byte)) {
     outputParserNumber = 0;
@@ -316,23 +319,23 @@ parseOutputByte_NUMBER (unsigned char byte) {
     outputParserState = OPS_ACTION;
   }
 
-  return 1;
+  return OBP_REPROCESS;
 }
 
-static int
+static OutputByteParserResult
 parseOutputByte_DIGIT (unsigned char byte) {
   if (iswdigit(byte)) {
     outputParserNumber *= 10;
     outputParserNumber += byte - '0';
-    return 0;
+    return OBP_CONTINUE;
   }
 
   addOutputParserNumber(outputParserNumber);
   outputParserNumber = 0;
-  if (byte == ';') return 0;
+  if (byte == ';') return OBP_CONTINUE;
 
   outputParserState = OPS_ACTION;
-  return 1;
+  return OBP_REPROCESS;
 }
 
 static int
@@ -341,50 +344,50 @@ getOutputActionCount (void) {
   return outputParserNumberArray[0];
 }
 
-static int
+static OutputByteParserResult
 performBracketAction_h (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
       case 4:
         logOutputAction("smir");
         insertMode = 1;
-        return 1;
+        return OBP_DONE;
 
       case 34:
         logOutputAction("cnorm");
         ptySetCursorVisibility(1);
-        return 1;
+        return OBP_DONE;
     }
   }
 
-  return 0;
+  return OBP_UNEXPECTED;
 }
 
-static int
+static OutputByteParserResult
 performBracketAction_l (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
       case 4:
         logOutputAction("rmir");
         insertMode = 0;
-        return 1;
+        return OBP_DONE;
 
       case 34:
         logOutputAction("cvvis");
         ptySetCursorVisibility(2);
-        return 1;
+        return OBP_DONE;
     }
   }
 
-  return 0;
+  return OBP_UNEXPECTED;
 }
 
-static int
+static OutputByteParserResult
 performBracketAction_m (unsigned char byte) {
   if (outputParserNumberCount == 0) {
     logOutputAction("sgr0");
     ptySetAttributes(0);
-    return 1;
+    return OBP_DONE;
   }
 
   if (outputParserNumberCount == 1) {
@@ -394,37 +397,37 @@ performBracketAction_m (unsigned char byte) {
       case 1:
         logOutputAction("bold");
         ptyAddAttributes(A_BOLD);
-        return 1;
+        return OBP_DONE;
 
       case 5:
         logOutputAction("blink");
         ptyAddAttributes(A_BLINK);
-        return 1;
+        return OBP_DONE;
 
       case 7:
         logOutputAction("rev");
         ptyAddAttributes(A_REVERSE);
-        return 1;
+        return OBP_DONE;
 
       case 3:
         logOutputAction("smso");
         ptyAddAttributes(A_STANDOUT);
-        return 1;
+        return OBP_DONE;
 
       case 23:
         logOutputAction("rmso");
         ptyRemoveAttributes(A_STANDOUT);
-        return 1;
+        return OBP_DONE;
 
       case 4:
         logOutputAction("smul");
         ptyAddAttributes(A_UNDERLINE);
-        return 1;
+        return OBP_DONE;
 
       case 24:
         logOutputAction("rmul");
         ptyRemoveAttributes(A_UNDERLINE);
-        return 1;
+        return OBP_DONE;
 
       default: {
         int color = (number % 10) - '0';
@@ -434,14 +437,12 @@ performBracketAction_m (unsigned char byte) {
             case 3:
               logOutputAction("setaf");
               ptySetForegroundColor(color);
-              // FIXME: set foreground color
-              return 1;
+              return OBP_DONE;
 
             case 4:
               logOutputAction("setab");
               ptySetBackgroundColor(color);
-              // FIXME: set background color
-              return 1;
+              return OBP_DONE;
           }
         }
 
@@ -450,31 +451,31 @@ performBracketAction_m (unsigned char byte) {
     }
   }
 
-  return 0;
+  return OBP_UNEXPECTED;
 }
 
-static int
+static OutputByteParserResult
 performBracketAction (unsigned char byte) {
   switch (byte) {
     case 'A':
       logOutputAction("cuu");
       ptyMoveCursorUp(getOutputActionCount());
-      return 1;
+      return OBP_DONE;
 
     case 'B':
       logOutputAction("cud");
       ptyMoveCursorDown(getOutputActionCount());
-      return 1;
+      return OBP_DONE;
 
     case 'C':
       logOutputAction("cuf");
       ptyMoveCursorRight(getOutputActionCount());
-      return 1;
+      return OBP_DONE;
 
     case 'D':
       logOutputAction("cub");
       ptyMoveCursorLeft(getOutputActionCount());
-      return 1;
+      return OBP_DONE;
 
     case 'H': {
       if (outputParserNumberCount == 0) {
@@ -492,38 +493,38 @@ performBracketAction (unsigned char byte) {
 
       logOutputAction("cup");
       ptySetCursorPosition(*row, *column);
-      return 1;
+      return OBP_DONE;
     }
 
     case 'J':
       logOutputAction("ed");
       ptyClearToEndOfScreen();
-      return 1;
+      return OBP_DONE;
 
     case 'K':
       logOutputAction("el");
       ptyClearToEndOfLine();
-      return 1;
+      return OBP_DONE;
 
     case 'L':
       logOutputAction("il");
       ptyInsertLines(getOutputActionCount());
-      return 1;
+      return OBP_DONE;
 
     case 'M':
       logOutputAction("dl");
       ptyDeleteLines(getOutputActionCount());
-      return 1;
+      return OBP_DONE;
 
     case 'P':
       logOutputAction("dch");
       ptyDeleteCharacters(getOutputActionCount());
-      return 1;
+      return OBP_DONE;
 
     case '@':
       logOutputAction("ic");
       ptyInsertCharacters(getOutputActionCount());
-      return 1;
+      return OBP_DONE;
 
     case 'h':
       return performBracketAction_h(byte);
@@ -545,62 +546,62 @@ performBracketAction (unsigned char byte) {
 
       logOutputAction("csr");
       ptySetScrollRegion(*top, *bottom);
-      return 1;
+      return OBP_DONE;
     }
   }
 
-  return 0;
+  return OBP_UNEXPECTED;
 }
 
-static int
+static OutputByteParserResult
 performQuestionMarkAction_h (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
       case 1:
         logOutputAction("smkx");
         keypadTransmitMode = 1;
-        return 1;
+        return OBP_DONE;
 
       case 25:
         logOutputAction("cnorm");
         ptySetCursorVisibility(1);
-        return 1;
+        return OBP_DONE;
 
       case 2004:
         logOutputAction("smbp");
         bracketedPasteMode = 1;
-        return 1;
+        return OBP_DONE;
     }
   }
 
-  return 0;
+  return OBP_UNEXPECTED;
 }
 
-static int
+static OutputByteParserResult
 performQuestionMarkAction_l (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
       case 1:
         logOutputAction("rmkx");
         keypadTransmitMode = 0;
-        return 1;
+        return OBP_DONE;
 
       case 25:
         logOutputAction("civis");
         ptySetCursorVisibility(0);
-        return 1;
+        return OBP_DONE;
 
       case 2004:
         logOutputAction("rmbp");
         bracketedPasteMode = 0;
-        return 1;
+        return OBP_DONE;
     }
   }
 
-  return 0;
+  return OBP_UNEXPECTED;
 }
 
-static int
+static OutputByteParserResult
 performQuestionMarkAction (unsigned char byte) {
   switch (byte) {
     case 'h':
@@ -610,22 +611,16 @@ performQuestionMarkAction (unsigned char byte) {
       return performQuestionMarkAction_l(byte);
   }
 
-  return 0;
+  return OBP_UNEXPECTED;
 }
 
-static int
+static OutputByteParserResult
 parseOutputByte_ACTION (unsigned char byte) {
-  int performed;
-
   if (outputParserQuestionMark) {
-    performed = performQuestionMarkAction(byte);
+    return performQuestionMarkAction(byte);
   } else {
-    performed = performBracketAction(byte);
+    return performBracketAction(byte);
   }
-
-  if (!performed) return handleUnexpectedOutputByte(byte);
-  outputParserState = OPS_BASIC;
-  return 0;
 }
 
 typedef struct {
@@ -649,8 +644,10 @@ static const OutputParserStateEntry outputParserStateTable[] = {
 };
 #undef OPS
 
-static int
+static void
 handleUnexpectedOutputByte (unsigned char byte) {
+  soundAudibleAlert();
+
   if (logUnexpectedOutput) {
     logBytes(screenLogLevel,
       "unexpected pty output byte: %s[0X%02X]",
@@ -658,23 +655,37 @@ handleUnexpectedOutputByte (unsigned char byte) {
       outputParserStateTable[outputParserState].name, byte
     );
   }
-
-  soundAudibleAlert();
-  outputParserState = OPS_BASIC;
-
-  return 0;
 }
 
 int
 ptyParseOutputByte (unsigned char byte) {
-  if (outputParserState == OPS_BASIC) outputByteCount = 0;
+  if (outputParserState == OPS_BASIC) {
+    outputByteCount = 0;
+  }
 
   if (outputByteCount < ARRAY_COUNT(outputByteBuffer)) {
     outputByteBuffer[outputByteCount++] = byte;
   }
 
-  while (outputParserStateTable[outputParserState].parseOutputByte(byte));
-  return outputParserState == OPS_BASIC;
+  while (1) {
+    OutputByteParserResult result = outputParserStateTable[outputParserState].parseOutputByte(byte);
+
+    switch (result) {
+      case OBP_REPROCESS:
+        continue;
+
+      case OBP_UNEXPECTED:
+        handleUnexpectedOutputByte(byte);
+        /* fall through */
+
+      case OBP_DONE:
+        outputParserState = OPS_BASIC;
+        return 1;
+
+      case OBP_CONTINUE:
+        return 0;
+    }
+  }
 }
 
 int

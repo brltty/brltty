@@ -16,16 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* unimplemented output actions
- * cbt=\E[Z - back-tab
- * ht=^I - tab
- * hts=\EH - set tab
- * nel=\EE - newline (cr lf)
- * rc=\E8 - restore cursor
- * sc=\E7 - save cursor
- * tbc=\E[3g - clear all tabs
- */
-
 #include "prologue.h"
 
 #include "log.h"
@@ -118,11 +108,13 @@ ptyRemoveAttributes (attr_t attributes) {
 void
 ptySetForegroundColor (unsigned char color) {
   foregroundColor = color;
+  // FIXME
 }
 
 void
 ptySetBackgroundColor (unsigned char color) {
   backgroundColor = color;
+  // FIXME
 }
 
 void
@@ -133,18 +125,6 @@ ptyClearToEndOfScreen (void) {
 void
 ptyClearToEndOfLine (void) {
   clrtoeol();
-}
-
-void
-ptySetScrollRegion (int top, int bottom) {
-  scrollRegionTop = top;
-  scrollRegionBottom = bottom;
-  setscrreg(top, bottom);
-}
-
-void
-ptyScrollRegion (int amount) {
-  scrl(amount);
 }
 
 int
@@ -172,6 +152,18 @@ ptySetCursorColumn (int column) {
   ptySetCursorPosition(ptyGetCursorRow(), column);
 }
 
+void
+ptySetScrollRegion (int top, int bottom) {
+  scrollRegionTop = top;
+  scrollRegionBottom = bottom;
+  setscrreg(top, bottom);
+}
+
+static void
+scrollLines (int amount) {
+  scrl(amount);
+}
+
 static int
 isWithinScrollRegion (int row) {
   if (row < scrollRegionTop) return 0;
@@ -188,7 +180,7 @@ ptyMoveCursorUp (int amount) {
     int delta = newRow - scrollRegionTop;
 
     if (delta < 0) {
-      ptyScrollRegion(delta);
+      scrollLines(delta);
       newRow = scrollRegionTop;
     }
   }
@@ -205,7 +197,7 @@ ptyMoveCursorDown (int amount) {
     int delta = newRow - scrollRegionBottom;
 
     if (delta > 0) {
-      ptyScrollRegion(delta);
+      scrollLines(delta);
       newRow = scrollRegionBottom;
     }
   }

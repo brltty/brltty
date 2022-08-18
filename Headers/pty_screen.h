@@ -46,9 +46,6 @@ extern void ptySetBackgroundColor (unsigned char color);
 extern void ptyClearToEndOfScreen (void);
 extern void ptyClearToEndOfLine (void);
 
-extern void ptySetScrollRegion (int top, int bottom);
-extern void ptyScrollRegion (int amount);
-
 extern int ptyGetCursorRow ();
 extern int ptyGetCursorColumn ();
 
@@ -56,6 +53,7 @@ extern void ptySetCursorPosition (int row, int column);
 extern void ptySetCursorRow (int row);
 extern void ptySetCursorColumn (int column);
 
+extern void ptySetScrollRegion (int top, int bottom);
 extern void ptyMoveCursorUp (int amount);
 extern void ptyMoveCursorDown (int amount);
 extern void ptyMoveCursorLeft (int amount);
