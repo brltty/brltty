@@ -29,9 +29,6 @@ extern int ptyBeginScreen (const char *tty);
 extern void ptyEndScreen (void);
 extern void ptyRefreshScreen (void);
 
-extern unsigned int ptyGetCursorRow ();
-extern unsigned int ptyGetCursorColumn ();
-
 extern void ptySetCursorPosition (unsigned int row, unsigned int column);
 extern void ptySetCursorRow (unsigned int row);
 extern void ptySetCursorColumn (unsigned int column);
@@ -58,6 +55,9 @@ extern void ptySetBackgroundColor (unsigned char color);
 
 extern void ptyClearToEndOfScreen (void);
 extern void ptyClearToEndOfLine (void);
+
+extern void ptySetScreenLogLevel (unsigned char level);
+extern void ptyLogSharedSegment (const char *label);
 
 #ifdef __cplusplus
 }

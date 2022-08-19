@@ -37,7 +37,7 @@ typedef struct {
   unsigned char reverse:1;
   unsigned char standout:1;
   unsigned char dim:1;
-} PtySharedSegmentCharacter;
+} PtyCharacter;
 
 typedef struct {
   unsigned int headerSize;
@@ -51,18 +51,18 @@ typedef struct {
 
   unsigned int cursorRow;
   unsigned int cursorColumn;
-} PtySharedSegmentHeader;
+} PtyHeader;
 
-extern key_t ptyMakeSharedSegmentKey (const char *tty);
-extern int ptyGetSharedSegmentIdentifier (key_t key, int *identifier);
-extern void *ptyAttachSharedSegment (int identifier);
-extern void *ptyGetSharedSegment (const char *tty);
-extern int ptyDetachSharedSegment (void *address);
+extern key_t ptyMakeSegmentKey (const char *tty);
+extern int ptyGetSegmentIdentifier (key_t key, int *identifier);
+extern void *ptyAttachSegment (int identifier);
+extern void *ptyGetSegment (const char *tty);
+extern int ptyDetachSegment (void *address);
 
-extern PtySharedSegmentCharacter *ptyGetSharedSegmentScreenStart (PtySharedSegmentHeader *header);
-extern PtySharedSegmentCharacter *ptyGetSharedSegmentRow (PtySharedSegmentHeader *header, unsigned int row, PtySharedSegmentCharacter **end);
-extern PtySharedSegmentCharacter *ptyGetSharedSegmentCharacter (PtySharedSegmentHeader *header, unsigned int row, unsigned int column, PtySharedSegmentCharacter **end);
-extern const PtySharedSegmentCharacter *ptyGetSharedSegmentScreenEnd (PtySharedSegmentHeader *header);
+extern PtyCharacter *ptyGetScreenStart (PtyHeader *header);
+extern PtyCharacter *ptyGetRow (PtyHeader *header, unsigned int row, PtyCharacter **end);
+extern PtyCharacter *ptyGetCharacter (PtyHeader *header, unsigned int row, unsigned int column, PtyCharacter **end);
+extern const PtyCharacter *ptyGetScreenEnd (PtyHeader *header);
 
 #ifdef __cplusplus
 }

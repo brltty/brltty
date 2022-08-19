@@ -32,34 +32,46 @@ static unsigned char hasColors = 0;
 static unsigned char foregroundColor;
 static unsigned char backgroundColor;
 
-static unsigned int sharedSegmentSize = 0;
-static int sharedSegmentIdentifier = 0;
-static void *sharedSegmentAddress = NULL;
+static unsigned int segmentSize = 0;
+static int segmentIdentifier = 0;
+static PtyHeader *segmentHeader = NULL;
+
+static unsigned char screenLogLevel = LOG_DEBUG;
+
+void
+ptySetScreenLogLevel (unsigned char level) {
+  screenLogLevel = level;
+}
+
+void
+ptyLogSegment (const char *label) {
+  logBytes(screenLogLevel, "pty segment: %s", segmentHeader, segmentSize, label);
+}
 
 static int
-releaseSharedSegment (void) {
-  if (shmctl(sharedSegmentIdentifier, IPC_RMID, NULL) != -1) return 1;
+releaseSegment (void) {
+  if (shmctl(segmentIdentifier, IPC_RMID, NULL) != -1) return 1;
   logSystemError("shmctl[IPC_RMID]");
   return 0;;
 }
 
 static int
-allocateSharedSegment (const char *tty) {
-  sharedSegmentSize = (sizeof(PtySharedSegmentCharacter) * COLS * LINES) + sizeof(PtySharedSegmentHeader);
-  key_t key = ptyMakeSharedSegmentKey(tty);
+allocateSegment (const char *tty) {
+  segmentSize = (sizeof(PtyCharacter) * COLS * LINES) + sizeof(PtyHeader);
+  key_t key = ptyMakeSegmentKey(tty);
 
-  int found = ptyGetSharedSegmentIdentifier(key, &sharedSegmentIdentifier);
-  if (found) releaseSharedSegment();
+  int found = ptyGetSegmentIdentifier(key, &segmentIdentifier);
+  if (found) releaseSegment();
 
   {
     int flags = IPC_CREAT | S_IRUSR | S_IWUSR;
-    found = (sharedSegmentIdentifier = shmget(key, sharedSegmentSize, flags)) != -1;
+    found = (segmentIdentifier = shmget(key, segmentSize, flags)) != -1;
   }
 
   if (found) {
-    sharedSegmentAddress = ptyAttachSharedSegment(sharedSegmentIdentifier);
-    if (sharedSegmentAddress) return 1;
-    releaseSharedSegment();
+    segmentHeader = ptyAttachSegment(segmentIdentifier);
+    if (segmentHeader) return 1;
+    releaseSegment();
   } else {
     logSystemError("shmget");
   }
@@ -68,34 +80,57 @@ allocateSharedSegment (const char *tty) {
 }
 
 static void
-setSharedSegmentCharacters (const PtySharedSegmentCharacter *character, PtySharedSegmentCharacter *from, const PtySharedSegmentCharacter *to) {
+saveCursorPosition (void) {
+  segmentHeader->cursorRow = getcury(stdscr);
+  segmentHeader->cursorColumn = getcurx(stdscr);
+}
+
+static PtyCharacter *
+getCurrentCharacter (PtyCharacter **end) {
+  return ptyGetCharacter(segmentHeader, segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
+}
+
+static PtyCharacter *
+moveCharacters (PtyCharacter *to, const PtyCharacter *from, unsigned int count) {
+  if (count) memmove(to, from, (count * sizeof(*from)));
+  return to;
+}
+
+static void
+setCharacters (PtyCharacter *from, const PtyCharacter *to, const PtyCharacter *character) {
   while (from < to) *from++ = *character;
 }
 
 static void
-initializeSharedSegmentHeader (void) {
-  PtySharedSegmentHeader *header = sharedSegmentAddress;
+propagateCharacter (PtyCharacter *from, const PtyCharacter *to) {
+  setCharacters(from+1, to, from);
+}
 
-  header->headerSize = sizeof(*header);
-  header->segmentSize = sharedSegmentSize;
+static void
+initializeCharacters (PtyCharacter *from, const PtyCharacter *to) {
+  static const PtyCharacter initializer = {
+    .text = ' ',
+  };
 
-  header->characterSize = sizeof(PtySharedSegmentCharacter);
-  header->charactersOffset = header->headerSize;
+  setCharacters(from, to, &initializer);
+}
 
-  header->screenHeight = LINES;
-  header->screenWidth = COLS;
+static void
+initializeHeader (void) {
+  segmentHeader->headerSize = sizeof(*segmentHeader);
+  segmentHeader->segmentSize = segmentSize;
 
-  header->cursorRow = ptyGetCursorRow();
-  header->cursorColumn = ptyGetCursorColumn();
+  segmentHeader->characterSize = sizeof(PtyCharacter);
+  segmentHeader->charactersOffset = segmentHeader->headerSize;
+
+  segmentHeader->screenHeight = LINES;
+  segmentHeader->screenWidth = COLS;
+  saveCursorPosition();;
 
   {
-    static const PtySharedSegmentCharacter initializer = {
-      .text = ' ',
-    };
-
-    PtySharedSegmentCharacter *from = ptyGetSharedSegmentScreenStart(header);
-    const PtySharedSegmentCharacter *to = ptyGetSharedSegmentScreenEnd(header);
-    setSharedSegmentCharacters(&initializer, from, to);
+    PtyCharacter *from = ptyGetScreenStart(segmentHeader);
+    const PtyCharacter *to = ptyGetScreenEnd(segmentHeader);
+    initializeCharacters(from, to);
   }
 }
 
@@ -120,8 +155,8 @@ ptyBeginScreen (const char *tty) {
       start_color();
     }
 
-    if (allocateSharedSegment(tty)) {
-      initializeSharedSegmentHeader();
+    if (allocateSegment(tty)) {
+      initializeHeader();
       return 1;
     }
 
@@ -134,8 +169,8 @@ ptyBeginScreen (const char *tty) {
 void
 ptyEndScreen (void) {
   endwin();
-  ptyDetachSharedSegment(sharedSegmentAddress);
-  releaseSharedSegment();
+  ptyDetachSegment(segmentHeader);
+  releaseSegment();
 }
 
 void
@@ -143,29 +178,21 @@ ptyRefreshScreen (void) {
   refresh();
 }
 
-unsigned int
-ptyGetCursorRow () {
-  return getcury(stdscr);
-}
-
-unsigned int
-ptyGetCursorColumn () {
-  return getcurx(stdscr);
-}
-
 void
 ptySetCursorPosition (unsigned int row, unsigned int column) {
   move(row, column);
+  segmentHeader->cursorRow = row;
+  segmentHeader->cursorColumn = column;
 }
 
 void
 ptySetCursorRow (unsigned int row) {
-  ptySetCursorPosition(row, ptyGetCursorColumn());
+  ptySetCursorPosition(row, segmentHeader->cursorColumn);
 }
 
 void
 ptySetCursorColumn (unsigned int column) {
-  ptySetCursorPosition(ptyGetCursorRow(), column);
+  ptySetCursorPosition(segmentHeader->cursorRow, column);
 }
 
 void
@@ -189,7 +216,7 @@ isWithinScrollRegion (unsigned int row) {
 
 void
 ptyMoveCursorUp (unsigned int amount) {
-  unsigned int oldRow = ptyGetCursorRow();
+  unsigned int oldRow = segmentHeader->cursorRow;
   unsigned int newRow = oldRow - amount;
 
   if (isWithinScrollRegion(oldRow)) {
@@ -206,7 +233,7 @@ ptyMoveCursorUp (unsigned int amount) {
 
 void
 ptyMoveCursorDown (unsigned int amount) {
-  unsigned int oldRow = ptyGetCursorRow();
+  unsigned int oldRow = segmentHeader->cursorRow;
   unsigned int newRow = oldRow + amount;
 
   if (isWithinScrollRegion(oldRow)) {
@@ -223,21 +250,21 @@ ptyMoveCursorDown (unsigned int amount) {
 
 void
 ptyMoveCursorLeft (unsigned int amount) {
-  ptySetCursorColumn(ptyGetCursorColumn()-amount);
+  ptySetCursorColumn(segmentHeader->cursorColumn-amount);
 }
 
 void
 ptyMoveCursorRight (unsigned int amount) {
-  ptySetCursorColumn(ptyGetCursorColumn()+amount);
+  ptySetCursorColumn(segmentHeader->cursorColumn+amount);
 }
 
-static PtySharedSegmentCharacter *
-setSharedSegmentCharacter (unsigned int row, unsigned int column, PtySharedSegmentCharacter **end) {
+static PtyCharacter *
+setCharacter (unsigned int row, unsigned int column, PtyCharacter **end) {
   cchar_t wch;
 
   {
-    unsigned int oldRow = ptyGetCursorRow();
-    unsigned int oldColumn = ptyGetCursorColumn();
+    unsigned int oldRow = segmentHeader->cursorRow;
+    unsigned int oldColumn = segmentHeader->cursorColumn;
     int move = (row != oldRow) || (column != oldColumn);
 
     if (move) ptySetCursorPosition(row, column);
@@ -245,7 +272,7 @@ setSharedSegmentCharacter (unsigned int row, unsigned int column, PtySharedSegme
     if (move) ptySetCursorPosition(oldRow, oldColumn);
   }
 
-  PtySharedSegmentCharacter *character = ptyGetSharedSegmentCharacter(sharedSegmentAddress, row, column, end);
+  PtyCharacter *character = ptyGetCharacter(segmentHeader, row, column, end);
   character->text = wch.chars[0];
   character->blink = wch.attr & A_BLINK;
   character->bold = wch.attr & A_BOLD;
@@ -257,45 +284,62 @@ setSharedSegmentCharacter (unsigned int row, unsigned int column, PtySharedSegme
   return character;
 }
 
-static PtySharedSegmentCharacter *
-setCurrentSharedSegmentCharacter (PtySharedSegmentCharacter **end) {
-  return setSharedSegmentCharacter(ptyGetCursorRow(), ptyGetCursorColumn(), end);
+static PtyCharacter *
+setCurrentCharacter (PtyCharacter **end) {
+  return setCharacter(segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
 }
 
 void
 ptyInsertLines (unsigned int count) {
-  while (count-- > 0) insertln();
-}
-
-void
-ptyDeleteLines (unsigned int count) {
-  while (count-- > 0) deleteln();
-}
-
-void
-ptyInsertCharacters (unsigned int count) {
-  while (count-- > 0) insch(' ');
-
-  PtySharedSegmentCharacter *to;
-  PtySharedSegmentCharacter *from = setCurrentSharedSegmentCharacter(&to);
-
-  if (from < to) {
-    memmove(from+1, from, ((to - from - 1) * sizeof(*from)));
+  {
+    unsigned int counter = count;
+    while (counter-- > 0) insertln();
   }
 }
 
 void
+ptyDeleteLines (unsigned int count) {
+  {
+    unsigned int counter = count;
+    while (counter-- > 0) deleteln();
+  }
+}
+
+void
+ptyInsertCharacters (unsigned int count) {
+  PtyCharacter *end;
+  PtyCharacter *from = getCurrentCharacter(&end);
+
+  PtyCharacter *to = from + count;
+  if (to > end) to = end;
+  moveCharacters(to, from, (end - to));
+
+  {
+    unsigned int counter = count;
+    while (counter-- > 0) insch(' ');
+  }
+
+  setCurrentCharacter(NULL);
+  propagateCharacter(from, to);
+}
+
+void
 ptyDeleteCharacters (unsigned int count) {
-  while (count-- > 0) delch();
+  {
+    unsigned int counter = count;
+    while (counter-- > 0) delch();
+  }
 }
 
 void
 ptyAddCharacter (unsigned char character) {
-  unsigned int row = ptyGetCursorRow();
-  unsigned int column = ptyGetCursorColumn();
+  unsigned int row = segmentHeader->cursorRow;
+  unsigned int column = segmentHeader->cursorColumn;
 
   addch(character);
-  setSharedSegmentCharacter(row, column, NULL);
+  saveCursorPosition();
+
+  setCharacter(row, column, NULL);
 }
 
 void
@@ -334,16 +378,16 @@ void
 ptyClearToEndOfScreen (void) {
   clrtobot();
 
-  PtySharedSegmentCharacter *from = setCurrentSharedSegmentCharacter(NULL);
-  const PtySharedSegmentCharacter *to = ptyGetSharedSegmentScreenEnd(sharedSegmentAddress);
-  setSharedSegmentCharacters(from, from+1, to);
+  PtyCharacter *from = setCurrentCharacter(NULL);
+  const PtyCharacter *to = ptyGetScreenEnd(segmentHeader);
+  propagateCharacter(from, to);
 }
 
 void
 ptyClearToEndOfLine (void) {
   clrtoeol();
 
-  PtySharedSegmentCharacter *to;
-  PtySharedSegmentCharacter *from = setCurrentSharedSegmentCharacter(&to);
-  setSharedSegmentCharacters(from, from+1, to);
+  PtyCharacter *to;
+  PtyCharacter *from = setCurrentCharacter(&to);
+  propagateCharacter(from, to);
 }

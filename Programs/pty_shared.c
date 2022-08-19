@@ -22,12 +22,12 @@
 #include "pty_shared.h"
 
 key_t
-ptyMakeSharedSegmentKey (const char *tty) {
+ptyMakeSegmentKey (const char *tty) {
   return ftok(tty, 'p');
 }
 
 int
-ptyGetSharedSegmentIdentifier (key_t key, int *identifier) {
+ptyGetSegmentIdentifier (key_t key, int *identifier) {
   int result = shmget(key, 0, 0);
   int ok = result != -1;
 
@@ -41,7 +41,7 @@ ptyGetSharedSegmentIdentifier (key_t key, int *identifier) {
 }
 
 void *
-ptyAttachSharedSegment (int identifier) {
+ptyAttachSegment (int identifier) {
   void *address = shmat(identifier, NULL, 0);
   if (address != (void *)-1) return address;
 
@@ -50,12 +50,12 @@ ptyAttachSharedSegment (int identifier) {
 }
 
 void *
-ptyGetSharedSegment (const char *tty) {
-  key_t key = ptyMakeSharedSegmentKey(tty);
+ptyGetSegment (const char *tty) {
+  key_t key = ptyMakeSegmentKey(tty);
   int identifier;
 
-  if (ptyGetSharedSegmentIdentifier(key, &identifier)) {
-    void *address = ptyAttachSharedSegment(identifier);
+  if (ptyGetSegmentIdentifier(key, &identifier)) {
+    void *address = ptyAttachSegment(identifier);
     if (address) return address;
   }
 
@@ -63,22 +63,22 @@ ptyGetSharedSegment (const char *tty) {
 }
 
 int
-ptyDetachSharedSegment (void *address) {
+ptyDetachSegment (void *address) {
   if (shmdt(address) != -1) return 1;
   logSystemError("shmdt");
   return 0;
 }
 
-PtySharedSegmentCharacter *
-ptyGetSharedSegmentScreenStart (PtySharedSegmentHeader *header) {
+PtyCharacter *
+ptyGetScreenStart (PtyHeader *header) {
   void *address = header;
   address += header->charactersOffset;
   return address;
 }
 
-PtySharedSegmentCharacter *
-ptyGetSharedSegmentRow (PtySharedSegmentHeader *header, unsigned int row, PtySharedSegmentCharacter **end) {
-  void *character = ptyGetSharedSegmentScreenStart(header);
+PtyCharacter *
+ptyGetRow (PtyHeader *header, unsigned int row, PtyCharacter **end) {
+  void *character = ptyGetScreenStart(header);
   unsigned int width = header->screenWidth * header->characterSize;
   character += row * width;
 
@@ -89,14 +89,14 @@ ptyGetSharedSegmentRow (PtySharedSegmentHeader *header, unsigned int row, PtySha
   return character;
 }
 
-PtySharedSegmentCharacter *
-ptyGetSharedSegmentCharacter (PtySharedSegmentHeader *header, unsigned int row, unsigned int column, PtySharedSegmentCharacter **end) {
-  void *address = ptyGetSharedSegmentRow(header, row, end);
+PtyCharacter *
+ptyGetCharacter (PtyHeader *header, unsigned int row, unsigned int column, PtyCharacter **end) {
+  void *address = ptyGetRow(header, row, end);
   address += column * header->characterSize;
   return address;
 }
 
-const PtySharedSegmentCharacter *
-ptyGetSharedSegmentScreenEnd (PtySharedSegmentHeader *header) {
-  return ptyGetSharedSegmentRow(header, header->screenHeight, NULL);
+const PtyCharacter *
+ptyGetScreenEnd (PtyHeader *header) {
+  return ptyGetRow(header, header->screenHeight, NULL);
 }

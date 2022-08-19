@@ -36,10 +36,16 @@
 #include "pty_screen.h"
 #include "ascii.h"
 
-static const unsigned char screenLogLevel = LOG_NOTICE;
+static unsigned char terminalLogLevel = LOG_DEBUG;
 static unsigned char logOutputActions = 0;
 static unsigned char logUnexpectedOutput = 0;
 static unsigned char logInsertedBytes = 0;
+
+void
+ptySetTerminalLogLevel (unsigned char level) {
+  terminalLogLevel = level;
+  ptySetScreenLogLevel(level);
+}
 
 void
 ptySetLogOutputActions (int yes) {
@@ -219,7 +225,7 @@ logOutputAction (const char *name) {
     }
 
     STR_END;
-    logBytes(screenLogLevel, "%s", outputByteBuffer, outputByteCount, prefix);
+    logBytes(terminalLogLevel, "%s", outputByteBuffer, outputByteCount, prefix);
   }
 }
 
@@ -258,7 +264,7 @@ parseOutputByte_BASIC (unsigned char byte) {
 
     default: {
       if (logInsertedBytes) {
-        logMessage(screenLogLevel, "addch 0X%02X", byte);
+        logMessage(terminalLogLevel, "addch 0X%02X", byte);
       }
 
       if (insertMode) ptyInsertCharacters(1);
@@ -397,6 +403,11 @@ performBracketAction_m (unsigned char byte) {
       case 1:
         logOutputAction("bold");
         ptyAddAttributes(A_BOLD);
+        return OBP_DONE;
+
+      case 2:
+        logOutputAction("dim");
+        ptyAddAttributes(A_DIM);
         return OBP_DONE;
 
       case 5:
@@ -649,7 +660,7 @@ handleUnexpectedOutputByte (unsigned char byte) {
   soundAudibleAlert();
 
   if (logUnexpectedOutput) {
-    logBytes(screenLogLevel,
+    logBytes(terminalLogLevel,
       "unexpected pty output byte: %s[0X%02X]",
       outputByteBuffer, outputByteCount,
       outputParserStateTable[outputParserState].name, byte

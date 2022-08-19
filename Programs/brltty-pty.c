@@ -240,18 +240,13 @@ runParent (PtyObject *pty, pid_t child) {
 
     if (asyncMonitorFileInput(&standardInputHandle, 0, standardInputMonitor, pty)) {
       if (asyncHandleSignal(SIGCHLD, childTerminationHandler, NULL)) {
-        {
-          unsigned char oldLogLevel = stderrLogLevel;
-          if (isatty(2)) stderrLogLevel = LOG_ERR;
+        if (!isatty(2)) ptySetTerminalLogLevel(LOG_NOTICE);
 
-          if (ptyBeginTerminal(ptyGetPath(pty))) {
-            asyncAwaitCondition(INT_MAX, childTerminationTester, NULL);
-            ptyEndTerminal();
-          } else {
-            kill(child, SIGTERM);
-          }
-
-          stderrLogLevel = oldLogLevel;
+        if (ptyBeginTerminal(ptyGetPath(pty))) {
+          asyncAwaitCondition(INT_MAX, childTerminationTester, NULL);
+          ptyEndTerminal();
+        } else {
+          kill(child, SIGTERM);
         }
 
         exitStatus = getExitStatus(child);
