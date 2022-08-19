@@ -193,12 +193,12 @@ ptyResetOutputParser (void) {
   outputParserState = OPS_BASIC;
 }
 
-static int outputParserNumber;
-static int outputParserNumberArray[9];
+static unsigned int outputParserNumber;
+static unsigned int outputParserNumberArray[9];
 static unsigned char outputParserNumberCount;
 
 static void
-addOutputParserNumber (int number) {
+addOutputParserNumber (unsigned int number) {
   if (outputParserNumberCount < ARRAY_COUNT(outputParserNumberArray)) {
     outputParserNumberArray[outputParserNumberCount++] = number;
   }
@@ -214,8 +214,8 @@ logOutputAction (const char *name) {
     STR_BEGIN(prefix, sizeof(prefix));
     STR_PRINTF("%s", name);
 
-    for (int i=0; i<outputParserNumberCount; i+=1) {
-      STR_PRINTF(" %d", outputParserNumberArray[i]);
+    for (unsigned int i=0; i<outputParserNumberCount; i+=1) {
+      STR_PRINTF(" %u", outputParserNumberArray[i]);
     }
 
     STR_END;
@@ -338,7 +338,7 @@ parseOutputByte_DIGIT (unsigned char byte) {
   return OBP_REPROCESS;
 }
 
-static int
+static unsigned int
 getOutputActionCount (void) {
   if (outputParserNumberCount == 0) return 1;
   return outputParserNumberArray[0];
@@ -391,7 +391,7 @@ performBracketAction_m (unsigned char byte) {
   }
 
   if (outputParserNumberCount == 1) {
-    int number = outputParserNumberArray[0];
+    unsigned int number = outputParserNumberArray[0];
 
     switch (number) {
       case 1:
@@ -430,7 +430,7 @@ performBracketAction_m (unsigned char byte) {
         return OBP_DONE;
 
       default: {
-        int color = (number % 10) - '0';
+        unsigned char color = number % 10;
 
         if (color <= 0X7) {
           switch (number / 10) {
@@ -485,11 +485,11 @@ performBracketAction (unsigned char byte) {
         break;
       }
 
-      int *row = &outputParserNumberArray[0];
-      int *column = &outputParserNumberArray[1];
+      unsigned int *row = &outputParserNumberArray[0];
+      unsigned int *column = &outputParserNumberArray[1];
 
-      if ((*row -= 1) < 0) break;
-      if ((*column -= 1) < 0) break;
+      if (!(*row)--) break;
+      if (!(*column)--) break;
 
       logOutputAction("cup");
       ptySetCursorPosition(*row, *column);
@@ -538,11 +538,11 @@ performBracketAction (unsigned char byte) {
     case 'r': {
       if (outputParserNumberCount != 2) break;
 
-      int *top = &outputParserNumberArray[0];
-      int *bottom = &outputParserNumberArray[1];
+      unsigned int *top = &outputParserNumberArray[0];
+      unsigned int *bottom = &outputParserNumberArray[1];
 
-      if ((*top -= 1) < 0) break;
-      if ((*bottom -= 1) < 0) break;
+      if (!(*top)--) break;
+      if (!(*bottom)--) break;
 
       logOutputAction("csr");
       ptySetScrollRegion(*top, *bottom);

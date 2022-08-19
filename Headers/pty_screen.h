@@ -29,27 +29,27 @@ extern int ptyBeginScreen (const char *tty);
 extern void ptyEndScreen (void);
 extern void ptyRefreshScreen (void);
 
-extern int ptyGetCursorRow ();
-extern int ptyGetCursorColumn ();
+extern unsigned int ptyGetCursorRow ();
+extern unsigned int ptyGetCursorColumn ();
 
-extern void ptySetCursorPosition (int row, int column);
-extern void ptySetCursorRow (int row);
-extern void ptySetCursorColumn (int column);
+extern void ptySetCursorPosition (unsigned int row, unsigned int column);
+extern void ptySetCursorRow (unsigned int row);
+extern void ptySetCursorColumn (unsigned int column);
 
-extern void ptySetScrollRegion (int top, int bottom);
-extern void ptyMoveCursorUp (int amount);
-extern void ptyMoveCursorDown (int amount);
-extern void ptyMoveCursorLeft (int amount);
-extern void ptyMoveCursorRight (int amount);
+extern void ptySetScrollRegion (unsigned int top, unsigned int bottom);
+extern void ptyMoveCursorUp (unsigned int amount);
+extern void ptyMoveCursorDown (unsigned int amount);
+extern void ptyMoveCursorLeft (unsigned int amount);
+extern void ptyMoveCursorRight (unsigned int amount);
 
-extern void ptyInsertLines (int count);
-extern void ptyDeleteLines (int count);
+extern void ptyInsertLines (unsigned int count);
+extern void ptyDeleteLines (unsigned int count);
 
-extern void ptyInsertCharacters (int count);
-extern void ptyDeleteCharacters (int count);
+extern void ptyInsertCharacters (unsigned int count);
+extern void ptyDeleteCharacters (unsigned int count);
 extern void ptyAddCharacter (unsigned char character);
 
-extern void ptySetCursorVisibility (int visibility);
+extern void ptySetCursorVisibility (unsigned int visibility);
 extern void ptySetAttributes (attr_t attributes);
 extern void ptyAddAttributes (attr_t attributes);
 extern void ptyRemoveAttributes (attr_t attributes);

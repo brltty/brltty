@@ -60,8 +60,8 @@ extern void *ptyGetSharedSegment (const char *tty);
 extern int ptyDetachSharedSegment (void *address);
 
 extern PtySharedSegmentCharacter *ptyGetSharedSegmentScreenStart (PtySharedSegmentHeader *header);
-extern PtySharedSegmentCharacter *ptyGetSharedSegmentRow (PtySharedSegmentHeader *header, int row, PtySharedSegmentCharacter **end);
-extern PtySharedSegmentCharacter *ptyGetSharedSegmentCharacter (PtySharedSegmentHeader *header, int row, int column, PtySharedSegmentCharacter **end);
+extern PtySharedSegmentCharacter *ptyGetSharedSegmentRow (PtySharedSegmentHeader *header, unsigned int row, PtySharedSegmentCharacter **end);
+extern PtySharedSegmentCharacter *ptyGetSharedSegmentCharacter (PtySharedSegmentHeader *header, unsigned int row, unsigned int column, PtySharedSegmentCharacter **end);
 extern const PtySharedSegmentCharacter *ptyGetSharedSegmentScreenEnd (PtySharedSegmentHeader *header);
 
 #ifdef __cplusplus

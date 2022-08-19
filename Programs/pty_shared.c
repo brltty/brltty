@@ -77,7 +77,7 @@ ptyGetSharedSegmentScreenStart (PtySharedSegmentHeader *header) {
 }
 
 PtySharedSegmentCharacter *
-ptyGetSharedSegmentRow (PtySharedSegmentHeader *header, int row, PtySharedSegmentCharacter **end) {
+ptyGetSharedSegmentRow (PtySharedSegmentHeader *header, unsigned int row, PtySharedSegmentCharacter **end) {
   void *character = ptyGetSharedSegmentScreenStart(header);
   unsigned int width = header->screenWidth * header->characterSize;
   character += row * width;
@@ -90,7 +90,7 @@ ptyGetSharedSegmentRow (PtySharedSegmentHeader *header, int row, PtySharedSegmen
 }
 
 PtySharedSegmentCharacter *
-ptyGetSharedSegmentCharacter (PtySharedSegmentHeader *header, int row, int column, PtySharedSegmentCharacter **end) {
+ptyGetSharedSegmentCharacter (PtySharedSegmentHeader *header, unsigned int row, unsigned int column, PtySharedSegmentCharacter **end) {
   void *address = ptyGetSharedSegmentRow(header, row, end);
   address += column * header->characterSize;
   return address;

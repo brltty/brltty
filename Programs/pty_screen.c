@@ -18,14 +18,15 @@
 
 #include "prologue.h"
 
+#include <string.h>
 #include <sys/stat.h>
 
 #include "log.h"
 #include "pty_screen.h"
 #include "pty_shared.h"
 
-static int scrollRegionTop;
-static int scrollRegionBottom;
+static unsigned int scrollRegionTop;
+static unsigned int scrollRegionBottom;
 
 static unsigned char hasColors = 0;
 static unsigned char foregroundColor;
@@ -142,33 +143,33 @@ ptyRefreshScreen (void) {
   refresh();
 }
 
-int
+unsigned int
 ptyGetCursorRow () {
   return getcury(stdscr);
 }
 
-int
+unsigned int
 ptyGetCursorColumn () {
   return getcurx(stdscr);
 }
 
 void
-ptySetCursorPosition (int row, int column) {
+ptySetCursorPosition (unsigned int row, unsigned int column) {
   move(row, column);
 }
 
 void
-ptySetCursorRow (int row) {
+ptySetCursorRow (unsigned int row) {
   ptySetCursorPosition(row, ptyGetCursorColumn());
 }
 
 void
-ptySetCursorColumn (int column) {
+ptySetCursorColumn (unsigned int column) {
   ptySetCursorPosition(ptyGetCursorRow(), column);
 }
 
 void
-ptySetScrollRegion (int top, int bottom) {
+ptySetScrollRegion (unsigned int top, unsigned int bottom) {
   scrollRegionTop = top;
   scrollRegionBottom = bottom;
   setscrreg(top, bottom);
@@ -180,16 +181,16 @@ scrollLines (int amount) {
 }
 
 static int
-isWithinScrollRegion (int row) {
+isWithinScrollRegion (unsigned int row) {
   if (row < scrollRegionTop) return 0;
   if (row > scrollRegionBottom) return 0;
   return 1;
 }
 
 void
-ptyMoveCursorUp (int amount) {
-  int oldRow = ptyGetCursorRow();
-  int newRow = oldRow - amount;
+ptyMoveCursorUp (unsigned int amount) {
+  unsigned int oldRow = ptyGetCursorRow();
+  unsigned int newRow = oldRow - amount;
 
   if (isWithinScrollRegion(oldRow)) {
     int delta = newRow - scrollRegionTop;
@@ -204,9 +205,9 @@ ptyMoveCursorUp (int amount) {
 }
 
 void
-ptyMoveCursorDown (int amount) {
-  int oldRow = ptyGetCursorRow();
-  int newRow = oldRow + amount;
+ptyMoveCursorDown (unsigned int amount) {
+  unsigned int oldRow = ptyGetCursorRow();
+  unsigned int newRow = oldRow + amount;
 
   if (isWithinScrollRegion(oldRow)) {
     int delta = newRow - scrollRegionBottom;
@@ -221,22 +222,22 @@ ptyMoveCursorDown (int amount) {
 }
 
 void
-ptyMoveCursorLeft (int amount) {
+ptyMoveCursorLeft (unsigned int amount) {
   ptySetCursorColumn(ptyGetCursorColumn()-amount);
 }
 
 void
-ptyMoveCursorRight (int amount) {
+ptyMoveCursorRight (unsigned int amount) {
   ptySetCursorColumn(ptyGetCursorColumn()+amount);
 }
 
 static PtySharedSegmentCharacter *
-setSharedSegmentCharacter (int row, int column, PtySharedSegmentCharacter **end) {
+setSharedSegmentCharacter (unsigned int row, unsigned int column, PtySharedSegmentCharacter **end) {
   cchar_t wch;
 
   {
-    int oldRow = ptyGetCursorRow();
-    int oldColumn = ptyGetCursorColumn();
+    unsigned int oldRow = ptyGetCursorRow();
+    unsigned int oldColumn = ptyGetCursorColumn();
     int move = (row != oldRow) || (column != oldColumn);
 
     if (move) ptySetCursorPosition(row, column);
@@ -262,36 +263,43 @@ setCurrentSharedSegmentCharacter (PtySharedSegmentCharacter **end) {
 }
 
 void
-ptyInsertLines (int count) {
+ptyInsertLines (unsigned int count) {
   while (count-- > 0) insertln();
 }
 
 void
-ptyDeleteLines (int count) {
+ptyDeleteLines (unsigned int count) {
   while (count-- > 0) deleteln();
 }
 
 void
-ptyInsertCharacters (int count) {
+ptyInsertCharacters (unsigned int count) {
   while (count-- > 0) insch(' ');
+
+  PtySharedSegmentCharacter *to;
+  PtySharedSegmentCharacter *from = setCurrentSharedSegmentCharacter(&to);
+
+  if (from < to) {
+    memmove(from+1, from, ((to - from - 1) * sizeof(*from)));
+  }
 }
 
 void
-ptyDeleteCharacters (int count) {
+ptyDeleteCharacters (unsigned int count) {
   while (count-- > 0) delch();
 }
 
 void
 ptyAddCharacter (unsigned char character) {
-  int row = ptyGetCursorRow();
-  int column = ptyGetCursorColumn();
+  unsigned int row = ptyGetCursorRow();
+  unsigned int column = ptyGetCursorColumn();
 
   addch(character);
   setSharedSegmentCharacter(row, column, NULL);
 }
 
 void
-ptySetCursorVisibility (int visibility) {
+ptySetCursorVisibility (unsigned int visibility) {
   curs_set(visibility);
 }
 
