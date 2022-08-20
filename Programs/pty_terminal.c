@@ -21,8 +21,6 @@
  * ht=^I - tab
  * hts=\EH - set tab
  * nel=\EE - newline (cr lf)
- * rc=\E8 - restore cursor
- * sc=\E7 - save cursor
  * tbc=\E[3g - clear all tabs
  */
 
@@ -238,6 +236,10 @@ parseOutputByte_BASIC (unsigned char byte) {
   outputParserNumberCount = 0;
 
   switch (byte) {
+    case ASCII_ESC:
+      outputParserState = OPS_ESCAPE;
+      return OBP_CONTINUE;
+
     case ASCII_BEL:
       logOutputAction("bel");
       soundAudibleAlert();
@@ -258,9 +260,15 @@ parseOutputByte_BASIC (unsigned char byte) {
       ptySetCursorColumn(0);
       return OBP_DONE;
 
-    case ASCII_ESC:
-      outputParserState = OPS_ESCAPE;
-      return OBP_CONTINUE;
+    case '7':
+      logOutputAction("sc");
+      ptySaveCursorPosition();
+      return OBP_DONE;
+
+    case '8':
+      logOutputAction("rc");
+      ptyRestoreCursorPosition();
+      return OBP_DONE;
 
     default: {
       if (logInsertedBytes) {

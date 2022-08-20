@@ -39,6 +39,9 @@ extern void ptyMoveCursorDown (unsigned int amount);
 extern void ptyMoveCursorLeft (unsigned int amount);
 extern void ptyMoveCursorRight (unsigned int amount);
 
+extern void ptySaveCursorPosition (void);
+extern void ptyRestoreCursorPosition (void);
+
 extern void ptyInsertLines (unsigned int count);
 extern void ptyDeleteLines (unsigned int count);
 

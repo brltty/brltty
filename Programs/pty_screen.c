@@ -28,6 +28,9 @@
 static unsigned int scrollRegionTop;
 static unsigned int scrollRegionBottom;
 
+static unsigned int savedCursorRow = 0;
+static unsigned int savedCursorColumn = 0;
+
 static unsigned char hasColors = 0;
 static unsigned char foregroundColor;
 static unsigned char backgroundColor;
@@ -80,7 +83,7 @@ allocateSegment (const char *tty) {
 }
 
 static void
-saveCursorPosition (void) {
+storeCursorPosition (void) {
   segmentHeader->cursorRow = getcury(stdscr);
   segmentHeader->cursorColumn = getcurx(stdscr);
 }
@@ -125,7 +128,7 @@ initializeHeader (void) {
 
   segmentHeader->screenHeight = LINES;
   segmentHeader->screenWidth = COLS;
-  saveCursorPosition();;
+  storeCursorPosition();;
 
   {
     PtyCharacter *from = ptyGetScreenStart(segmentHeader);
@@ -146,6 +149,9 @@ ptyBeginScreen (const char *tty) {
 
     scrollRegionTop = getbegy(stdscr);
     scrollRegionBottom = getmaxy(stdscr) - 1;
+
+    savedCursorRow = 0;
+    savedCursorColumn = 0;
 
     hasColors = has_colors();
     foregroundColor = COLOR_WHITE;
@@ -181,8 +187,7 @@ ptyRefreshScreen (void) {
 void
 ptySetCursorPosition (unsigned int row, unsigned int column) {
   move(row, column);
-  segmentHeader->cursorRow = row;
-  segmentHeader->cursorColumn = column;
+  storeCursorPosition();
 }
 
 void
@@ -256,6 +261,17 @@ ptyMoveCursorLeft (unsigned int amount) {
 void
 ptyMoveCursorRight (unsigned int amount) {
   ptySetCursorColumn(segmentHeader->cursorColumn+amount);
+}
+
+void
+ptySaveCursorPosition (void) {
+  savedCursorRow = segmentHeader->cursorRow;
+  savedCursorColumn = segmentHeader->cursorColumn;
+}
+
+void
+ptyRestoreCursorPosition (void) {
+  ptySetCursorPosition(savedCursorRow, savedCursorColumn);
 }
 
 static PtyCharacter *
@@ -337,7 +353,7 @@ ptyAddCharacter (unsigned char character) {
   unsigned int column = segmentHeader->cursorColumn;
 
   addch(character);
-  saveCursorPosition();
+  storeCursorPosition();
 
   setCharacter(row, column, NULL);
 }
