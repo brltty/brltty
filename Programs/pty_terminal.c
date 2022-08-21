@@ -36,8 +36,8 @@
 
 static unsigned char terminalLogLevel = LOG_DEBUG;
 static unsigned char logOutputActions = 0;
+static unsigned char logOutputCharacters = 0;
 static unsigned char logUnexpectedOutput = 0;
-static unsigned char logInsertedBytes = 0;
 
 void
 ptySetTerminalLogLevel (unsigned char level) {
@@ -51,13 +51,13 @@ ptySetLogOutputActions (int yes) {
 }
 
 void
-ptySetLogUnexpectedOutput (int yes) {
-  logUnexpectedOutput = yes;
+ptySetLogOutputCharacters (int yes) {
+  logOutputCharacters = yes;
 }
 
 void
-ptySetLogInsertedBytes (int yes) {
-  logInsertedBytes = yes;
+ptySetLogUnexpectedOutput (int yes) {
+  logUnexpectedOutput = yes;
 }
 
 static const char ptyTerminalType[] = "vt100";
@@ -260,18 +260,8 @@ parseOutputByte_BASIC (unsigned char byte) {
       ptySetCursorColumn(0);
       return OBP_DONE;
 
-    case '7':
-      logOutputAction("sc");
-      ptySaveCursorPosition();
-      return OBP_DONE;
-
-    case '8':
-      logOutputAction("rc");
-      ptyRestoreCursorPosition();
-      return OBP_DONE;
-
     default: {
-      if (logInsertedBytes) {
+      if (logOutputCharacters) {
         logMessage(terminalLogLevel, "addch 0X%02X", byte);
       }
 
@@ -299,14 +289,19 @@ parseOutputByte_ESCAPE (unsigned char byte) {
       keypadTransmitMode = 0;
       return OBP_DONE;
 
-    case 'M':
-      logOutputAction("cuu1");
-      ptyMoveCursorUp(1);
-      return OBP_DONE;
-
     case 'g':
       logOutputAction("flash");
       showVisualAlert();
+      return OBP_DONE;
+
+    case '7':
+      logOutputAction("sc");
+      ptySaveCursorPosition();
+      return OBP_DONE;
+
+    case '8':
+      logOutputAction("rc");
+      ptyRestoreCursorPosition();
       return OBP_DONE;
   }
 
@@ -398,76 +393,82 @@ performBracketAction_l (unsigned char byte) {
 
 static OutputByteParserResult
 performBracketAction_m (unsigned char byte) {
-  if (outputParserNumberCount == 0) {
-    logOutputAction("sgr0");
-    ptySetAttributes(0);
-    return OBP_DONE;
+  if (outputParserNumberCount == 0) addOutputParserNumber(0);
+  if (outputParserNumberCount != 1) return OBP_UNEXPECTED;
+  unsigned int number = outputParserNumberArray[0];
+
+  switch (number / 10) {
+    {
+      const char *actionName;
+      void (*setColor) (int color);
+      int color;
+
+    case 3:
+      actionName = "setaf";
+      setColor = ptySetForegroundColor;
+      goto doColor;
+
+    case 4:
+      actionName = "setab";
+      setColor = ptySetBackgroundColor;
+      goto doColor;
+
+    doColor:
+      color = number % 10;
+      if (color == 8) return OBP_UNEXPECTED;
+      if (color == 9) color = -1;
+
+      logOutputAction(actionName);
+      setColor(color);
+      return OBP_DONE;
+    }
   }
 
-  if (outputParserNumberCount == 1) {
-    unsigned int number = outputParserNumberArray[0];
+  switch (number) {
+    case 0:
+      logOutputAction("sgr0");
+      ptySetAttributes(0);
+      return OBP_DONE;
 
-    switch (number) {
-      case 1:
-        logOutputAction("bold");
-        ptyAddAttributes(A_BOLD);
-        return OBP_DONE;
+    case 1:
+      logOutputAction("bold");
+      ptyAddAttributes(A_BOLD);
+      return OBP_DONE;
 
-      case 2:
-        logOutputAction("dim");
-        ptyAddAttributes(A_DIM);
-        return OBP_DONE;
+    case 2:
+      logOutputAction("dim");
+      ptyAddAttributes(A_DIM);
+      return OBP_DONE;
 
-      case 5:
-        logOutputAction("blink");
-        ptyAddAttributes(A_BLINK);
-        return OBP_DONE;
+    case 5:
+      logOutputAction("blink");
+      ptyAddAttributes(A_BLINK);
+      return OBP_DONE;
 
-      case 7:
-        logOutputAction("rev");
-        ptyAddAttributes(A_REVERSE);
-        return OBP_DONE;
+    case 7:
+      logOutputAction("rev");
+      ptyAddAttributes(A_REVERSE);
+      return OBP_DONE;
 
-      case 3:
-        logOutputAction("smso");
-        ptyAddAttributes(A_STANDOUT);
-        return OBP_DONE;
+    case 3:
+      logOutputAction("smso");
+      ptyAddAttributes(A_STANDOUT);
+      return OBP_DONE;
 
-      case 23:
-        logOutputAction("rmso");
-        ptyRemoveAttributes(A_STANDOUT);
-        return OBP_DONE;
+    case 23:
+      logOutputAction("rmso");
+      ptyRemoveAttributes(A_STANDOUT);
+      return OBP_DONE;
 
-      case 4:
-        logOutputAction("smul");
-        ptyAddAttributes(A_UNDERLINE);
-        return OBP_DONE;
+    case 4:
+      logOutputAction("smul");
+      ptyAddAttributes(A_UNDERLINE);
+      return OBP_DONE;
 
-      case 24:
-        logOutputAction("rmul");
-        ptyRemoveAttributes(A_UNDERLINE);
-        return OBP_DONE;
-
-      default: {
-        unsigned char color = number % 10;
-
-        if (color <= 0X7) {
-          switch (number / 10) {
-            case 3:
-              logOutputAction("setaf");
-              ptySetForegroundColor(color);
-              return OBP_DONE;
-
-            case 4:
-              logOutputAction("setab");
-              ptySetBackgroundColor(color);
-              return OBP_DONE;
-          }
-        }
-
-        break;
-      }
-    }
+    case 24:
+      logOutputAction("rmul");
+      ptyRemoveAttributes(A_UNDERLINE);
+      return OBP_DONE;
   }
 
   return OBP_UNEXPECTED;
@@ -501,14 +502,14 @@ performBracketAction (unsigned char byte) {
         addOutputParserNumber(1);
         addOutputParserNumber(1);
       } else if (outputParserNumberCount != 2) {
-        break;
+        return OBP_UNEXPECTED;
       }
 
       unsigned int *row = &outputParserNumberArray[0];
       unsigned int *column = &outputParserNumberArray[1];
 
-      if (!(*row)--) break;
-      if (!(*column)--) break;
+      if (!(*row)--) return OBP_UNEXPECTED;
+      if (!(*column)--) return OBP_UNEXPECTED;
 
       logOutputAction("cup");
       ptySetCursorPosition(*row, *column);
@@ -555,13 +556,13 @@ performBracketAction (unsigned char byte) {
       return performBracketAction_m(byte);
 
     case 'r': {
-      if (outputParserNumberCount != 2) break;
+      if (outputParserNumberCount != 2) return OBP_UNEXPECTED;
 
       unsigned int *top = &outputParserNumberArray[0];
       unsigned int *bottom = &outputParserNumberArray[1];
 
-      if (!(*top)--) break;
-      if (!(*bottom)--) break;
+      if (!(*top)--) return OBP_UNEXPECTED;
+      if (!(*bottom)--) return OBP_UNEXPECTED;
 
       logOutputAction("csr");
       ptySetScrollRegion(*top, *bottom);

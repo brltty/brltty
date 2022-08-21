@@ -16,6 +16,16 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+/* not done yet:
+ * parent: SIGTERM SIGINT SIGQUIT
+ * screen: resize
+ * screen: driver
+ * segment: insertLines()
+ * segment: deleteLines()
+ * segment: deleteCharacters()
+ * segment: scrollRegion()
+ */
+
 #include "prologue.h"
 
 #include <stdio.h>
@@ -35,7 +45,7 @@
 
 static int opt_ttyPath;
 static int opt_logOutputActions;
-static int opt_logInsertedBytes;
+static int opt_logOutputCharacters;
 static int opt_logUnexpectedOutput;
 
 BEGIN_OPTION_TABLE(programOptions)
@@ -52,11 +62,11 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("log output actions")
   },
 
-  { .word = "log-inserted-bytes",
-    .letter = 'I',
+  { .word = "log-output-characters",
+    .letter = 'C',
     .flags = OPT_Hidden,
-    .setting.flag = &opt_logInsertedBytes,
-    .description = strtext("log inserted bytes")
+    .setting.flag = &opt_logOutputCharacters,
+    .description = strtext("log output characters")
   },
 
   { .word = "log-unexpected-output",
@@ -277,8 +287,8 @@ main (int argc, char *argv[]) {
   }
 
   if (opt_logOutputActions) ptySetLogOutputActions(1);
+  if (opt_logOutputCharacters) ptySetLogOutputCharacters(1);
   if (opt_logUnexpectedOutput) ptySetLogUnexpectedOutput(1);
-  if (opt_logInsertedBytes) ptySetLogInsertedBytes(1);
 
   if ((pty = ptyNewObject())) {
     const char *ttyPath = ptyGetPath(pty);

@@ -53,8 +53,8 @@ extern void ptySetCursorVisibility (unsigned int visibility);
 extern void ptySetAttributes (attr_t attributes);
 extern void ptyAddAttributes (attr_t attributes);
 extern void ptyRemoveAttributes (attr_t attributes);
-extern void ptySetForegroundColor (unsigned char color);
-extern void ptySetBackgroundColor (unsigned char color);
+extern void ptySetForegroundColor (int color);
+extern void ptySetBackgroundColor (int color);
 
 extern void ptyClearToEndOfScreen (void);
 extern void ptyClearToEndOfLine (void);

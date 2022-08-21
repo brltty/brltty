@@ -25,26 +25,59 @@
 #include "pty_screen.h"
 #include "pty_shared.h"
 
-static unsigned int scrollRegionTop;
-static unsigned int scrollRegionBottom;
-
-static unsigned int savedCursorRow = 0;
-static unsigned int savedCursorColumn = 0;
-
-static unsigned char hasColors = 0;
-static unsigned char foregroundColor;
-static unsigned char backgroundColor;
-
-static unsigned int segmentSize = 0;
-static int segmentIdentifier = 0;
-static PtyHeader *segmentHeader = NULL;
-
 static unsigned char screenLogLevel = LOG_DEBUG;
 
 void
 ptySetScreenLogLevel (unsigned char level) {
   screenLogLevel = level;
 }
+
+static unsigned char hasColors = 0;
+static unsigned char currentForegroundColor;
+static unsigned char currentBackgroundColor;
+static unsigned char defaultForegroundColor;
+static unsigned char defaultBackgroundColor;
+static unsigned char colorPairMap[0100];
+
+static unsigned char
+toColorPair (unsigned char foreground, unsigned char background) {
+  return colorPairMap[(background << 3) | foreground];
+}
+
+static void
+initializeColors (unsigned char foreground, unsigned char background) {
+  currentForegroundColor = defaultForegroundColor = foreground;
+  currentBackgroundColor = defaultBackgroundColor = background;
+}
+
+static void
+initializeColorPairs (void) {
+  for (unsigned int pair=0; pair<ARRAY_COUNT(colorPairMap); pair+=1) {
+    colorPairMap[pair] = pair;
+  }
+
+  {
+    short foreground, background;
+    pair_content(0, &foreground, &background);
+    initializeColors(foreground, background);
+
+    unsigned char pair = toColorPair(foreground, background);
+    colorPairMap[pair] = 0;
+    colorPairMap[0] = pair;
+  }
+
+  for (unsigned char foreground=COLOR_BLACK; foreground<=COLOR_WHITE; foreground+=1) {
+    for (unsigned char background=COLOR_BLACK; background<=COLOR_WHITE; background+=1) {
+      unsigned char pair = toColorPair(foreground, background);
+      if (!pair) continue;
+      init_pair(pair, foreground, background);
+    }
+  }
+}
+
+static unsigned int segmentSize = 0;
+static int segmentIdentifier = 0;
+static PtyHeader *segmentHeader = NULL;
 
 void
 ptyLogSegment (const char *label) {
@@ -111,8 +144,10 @@ propagateCharacter (PtyCharacter *from, const PtyCharacter *to) {
 
 static void
 initializeCharacters (PtyCharacter *from, const PtyCharacter *to) {
-  static const PtyCharacter initializer = {
+  const PtyCharacter initializer = {
     .text = ' ',
+    .foreground = defaultForegroundColor,
+    .background = defaultBackgroundColor,
   };
 
   setCharacters(from, to, &initializer);
@@ -137,6 +172,12 @@ initializeHeader (void) {
   }
 }
 
+static unsigned int scrollRegionTop;
+static unsigned int scrollRegionBottom;
+
+static unsigned int savedCursorRow = 0;
+static unsigned int savedCursorColumn = 0;
+
 int
 ptyBeginScreen (const char *tty) {
   if (initscr()) {
@@ -154,11 +195,11 @@ ptyBeginScreen (const char *tty) {
     savedCursorColumn = 0;
 
     hasColors = has_colors();
-    foregroundColor = COLOR_WHITE;
-    backgroundColor = COLOR_BLACK;
+    initializeColors(COLOR_WHITE, COLOR_BLACK);
 
     if (hasColors) {
       start_color();
+      initializeColorPairs();
     }
 
     if (allocateSegment(tty)) {
@@ -290,12 +331,18 @@ setCharacter (unsigned int row, unsigned int column, PtyCharacter **end) {
 
   PtyCharacter *character = ptyGetCharacter(segmentHeader, row, column, end);
   character->text = wch.chars[0];
+
   character->blink = wch.attr & A_BLINK;
   character->bold = wch.attr & A_BOLD;
   character->underline = wch.attr & A_UNDERLINE;
   character->reverse = wch.attr & A_REVERSE;
   character->standout = wch.attr & A_STANDOUT;
   character->dim = wch.attr & A_DIM;
+
+  short foreground, background;
+  pair_content(wch.ext_color, &foreground, &background);
+  character->foreground = foreground;
+  character->background = background;
 
   return character;
 }
@@ -378,16 +425,24 @@ ptyRemoveAttributes (attr_t attributes) {
   attroff(attributes);
 }
 
-void
-ptySetForegroundColor (unsigned char color) {
-  foregroundColor = color;
-  // FIXME
+static void
+setColor (void) {
+  attroff(A_COLOR);
+  attron(COLOR_PAIR(toColorPair(currentForegroundColor, currentBackgroundColor)));
 }
 
 void
-ptySetBackgroundColor (unsigned char color) {
-  backgroundColor = color;
-  // FIXME
+ptySetForegroundColor (int color) {
+  if (color == -1) color = defaultForegroundColor;
+  currentForegroundColor = color;
+  setColor();
+}
+
+void
+ptySetBackgroundColor (int color) {
+  if (color == -1) color = defaultBackgroundColor;
+  currentBackgroundColor = color;
+  setColor();
 }
 
 void

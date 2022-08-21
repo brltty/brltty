@@ -37,8 +37,8 @@ extern int ptyParseOutputBytes (const unsigned char *bytes, size_t count);
 
 extern void ptySetTerminalLogLevel (unsigned char level);
 extern void ptySetLogOutputActions (int yes);
+extern void ptySetLogOutputCharacters (int yes);
 extern void ptySetLogUnexpectedOutput (int yes);
-extern void ptySetLogInsertedBytes (int yes);
 
 #ifdef __cplusplus
 }
