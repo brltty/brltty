@@ -45,8 +45,8 @@
 
 static int opt_ttyPath;
 static int opt_logOutputActions;
-static int opt_logOutputCharacters;
-static int opt_logUnexpectedOutput;
+static int opt_logOutputBytes;
+static int opt_logUnexpectedSequences;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "tty-path",
@@ -62,18 +62,18 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("log output actions")
   },
 
-  { .word = "log-output-characters",
-    .letter = 'C',
+  { .word = "log-output-bytes",
+    .letter = 'B',
     .flags = OPT_Hidden,
-    .setting.flag = &opt_logOutputCharacters,
-    .description = strtext("log output characters")
+    .setting.flag = &opt_logOutputBytes,
+    .description = strtext("log output bytes that aren't part of escape sequences")
   },
 
-  { .word = "log-unexpected-output",
+  { .word = "log-unexpected-sequences",
     .letter = 'U',
     .flags = OPT_Hidden,
-    .setting.flag = &opt_logUnexpectedOutput,
-    .description = strtext("log unexpected output")
+    .setting.flag = &opt_logUnexpectedSequences,
+    .description = strtext("log unexpected escape sequences")
   },
 END_OPTION_TABLE
 
@@ -287,8 +287,8 @@ main (int argc, char *argv[]) {
   }
 
   if (opt_logOutputActions) ptySetLogOutputActions(1);
-  if (opt_logOutputCharacters) ptySetLogOutputCharacters(1);
-  if (opt_logUnexpectedOutput) ptySetLogUnexpectedOutput(1);
+  if (opt_logOutputBytes) ptySetLogOutputBytes(1);
+  if (opt_logUnexpectedSequences) ptySetLogUnexpectedSequences(1);
 
   if ((pty = ptyNewObject())) {
     const char *ttyPath = ptyGetPath(pty);

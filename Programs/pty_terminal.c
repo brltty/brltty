@@ -36,8 +36,8 @@
 
 static unsigned char terminalLogLevel = LOG_DEBUG;
 static unsigned char logOutputActions = 0;
-static unsigned char logOutputCharacters = 0;
-static unsigned char logUnexpectedOutput = 0;
+static unsigned char logOutputBytes = 0;
+static unsigned char logUnexpectedSequences = 0;
 
 void
 ptySetTerminalLogLevel (unsigned char level) {
@@ -51,13 +51,13 @@ ptySetLogOutputActions (int yes) {
 }
 
 void
-ptySetLogOutputCharacters (int yes) {
-  logOutputCharacters = yes;
+ptySetLogOutputBytes (int yes) {
+  logOutputBytes = yes;
 }
 
 void
-ptySetLogUnexpectedOutput (int yes) {
-  logUnexpectedOutput = yes;
+ptySetLogUnexpectedSequences (int yes) {
+  logUnexpectedSequences = yes;
 }
 
 static const char ptyTerminalType[] = "vt100";
@@ -261,7 +261,7 @@ parseOutputByte_BASIC (unsigned char byte) {
       return OBP_DONE;
 
     default: {
-      if (logOutputCharacters) {
+      if (logOutputBytes) {
         logMessage(terminalLogLevel, "addch 0X%02X", byte);
       }
 
@@ -394,84 +394,88 @@ performBracketAction_l (unsigned char byte) {
 static OutputByteParserResult
 performBracketAction_m (unsigned char byte) {
   if (outputParserNumberCount == 0) addOutputParserNumber(0);
-  if (outputParserNumberCount != 1) return OBP_UNEXPECTED;
-  unsigned int number = outputParserNumberArray[0];
 
-  switch (number / 10) {
-    {
-      const char *actionName;
-      void (*setColor) (int color);
-      int color;
+  for (unsigned int index=0; index<outputParserNumberCount; index+=1) {
+    unsigned int number = outputParserNumberArray[index];
 
-    case 3:
-      actionName = "setaf";
-      setColor = ptySetForegroundColor;
-      goto doColor;
+    switch (number / 10) {
+      {
+        const char *actionName;
+        void (*setColor) (int color);
+        int color;
 
-    case 4:
-      actionName = "setab";
-      setColor = ptySetBackgroundColor;
-      goto doColor;
+      case 3:
+        actionName = "setaf";
+        setColor = ptySetForegroundColor;
+        goto doColor;
 
-    doColor:
-      color = number % 10;
-      if (color == 8) return OBP_UNEXPECTED;
-      if (color == 9) color = -1;
+      case 4:
+        actionName = "setab";
+        setColor = ptySetBackgroundColor;
+        goto doColor;
 
-      logOutputAction(actionName);
-      setColor(color);
-      return OBP_DONE;
+      doColor:
+        color = number % 10;
+        if (color == 8) return OBP_UNEXPECTED;
+        if (color == 9) color = -1;
+
+        logOutputAction(actionName);
+        setColor(color);
+        continue;
+      }
     }
+
+    switch (number) {
+      case 0:
+        logOutputAction("sgr0");
+        ptySetAttributes(0);
+        continue;
+
+      case 1:
+        logOutputAction("bold");
+        ptyAddAttributes(A_BOLD);
+        continue;
+
+      case 2:
+        logOutputAction("dim");
+        ptyAddAttributes(A_DIM);
+        continue;
+
+      case 3:
+        logOutputAction("smso");
+        ptyAddAttributes(A_STANDOUT);
+        continue;
+
+      case 4:
+        logOutputAction("smul");
+        ptyAddAttributes(A_UNDERLINE);
+        continue;
+
+      case 5:
+        logOutputAction("blink");
+        ptyAddAttributes(A_BLINK);
+        continue;
+
+      case 7:
+        logOutputAction("rev");
+        ptyAddAttributes(A_REVERSE);
+        continue;
+
+      case 23:
+        logOutputAction("rmso");
+        ptyRemoveAttributes(A_STANDOUT);
+        continue;
+
+      case 24:
+        logOutputAction("rmul");
+        ptyRemoveAttributes(A_UNDERLINE);
+        continue;
+    }
+
+    return OBP_UNEXPECTED;
   }
 
-  switch (number) {
-    case 0:
-      logOutputAction("sgr0");
-      ptySetAttributes(0);
-      return OBP_DONE;
-
-    case 1:
-      logOutputAction("bold");
-      ptyAddAttributes(A_BOLD);
-      return OBP_DONE;
-
-    case 2:
-      logOutputAction("dim");
-      ptyAddAttributes(A_DIM);
-      return OBP_DONE;
-
-    case 5:
-      logOutputAction("blink");
-      ptyAddAttributes(A_BLINK);
-      return OBP_DONE;
-
-    case 7:
-      logOutputAction("rev");
-      ptyAddAttributes(A_REVERSE);
-      return OBP_DONE;
-
-    case 3:
-      logOutputAction("smso");
-      ptyAddAttributes(A_STANDOUT);
-      return OBP_DONE;
-
-    case 23:
-      logOutputAction("rmso");
-      ptyRemoveAttributes(A_STANDOUT);
-      return OBP_DONE;
-
-    case 4:
-      logOutputAction("smul");
-      ptyAddAttributes(A_UNDERLINE);
-      return OBP_DONE;
-
-    case 24:
-      logOutputAction("rmul");
-      ptyRemoveAttributes(A_UNDERLINE);
-      return OBP_DONE;
-  }
-
-  return OBP_UNEXPECTED;
+  return OBP_DONE;
 }
 
 static OutputByteParserResult
@@ -668,7 +672,7 @@ static void
 handleUnexpectedOutputByte (unsigned char byte) {
   soundAudibleAlert();
 
-  if (logUnexpectedOutput) {
+  if (logUnexpectedSequences) {
     logBytes(terminalLogLevel,
       "unexpected pty output byte: %s[0X%02X]",
       outputByteBuffer, outputByteCount,
