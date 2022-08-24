@@ -17,11 +17,20 @@
  */
 
 /* unimplemented output actions
- * cbt=\E[Z - back-tab
- * ht=^I - tab
+ * cbt=\E[Z - tab backward
+ * cuu1=\EM - cursor up 1
+ * el1=\E[1K - clear to beginning of line
+ * enacs=\E(B\E)0 - enable alternate charset mode
+ * hpa=\E[%i%p1%dG - horizontal address
+ * ht=^I - tab forward
  * hts=\EH - set tab
- * nel=\EE - newline (cr lf)
+ * ind=\n - scroll up
+ * indn=\E[%p1%dS - scroll forward lines
+ * kmous=\E[M - mouse event
+ * nel=\EE - newline (CR LF)
+ * ri=\EM - scroll down
  * tbc=\E[3g - clear all tabs
+ * vpa=\E[%i%p1%dd - vertical address
  */
 
 #include "prologue.h"
@@ -36,7 +45,8 @@
 
 static unsigned char terminalLogLevel = LOG_DEBUG;
 static unsigned char logOutputActions = 0;
-static unsigned char logOutputBytes = 0;
+static unsigned char logTerminalInput = 0;
+static unsigned char logTerminalOutput = 0;
 static unsigned char logUnexpectedSequences = 0;
 
 void
@@ -51,8 +61,13 @@ ptySetLogOutputActions (int yes) {
 }
 
 void
-ptySetLogOutputBytes (int yes) {
-  logOutputBytes = yes;
+ptySetLogTerminalInput (int yes) {
+  logTerminalInput = yes;
+}
+
+void
+ptySetLogTerminalOutput (int yes) {
+  logTerminalOutput = yes;
 }
 
 void
@@ -60,7 +75,7 @@ ptySetLogUnexpectedSequences (int yes) {
   logUnexpectedSequences = yes;
 }
 
-static const char ptyTerminalType[] = "vt100";
+static const char ptyTerminalType[] = "screen";
 
 const char *
 ptyGetTerminalType (void) {
@@ -68,14 +83,18 @@ ptyGetTerminalType (void) {
 }
 
 static unsigned char insertMode = 0;
+static unsigned char alternateCharsetMode = 0;
 static unsigned char keypadTransmitMode = 0;
 static unsigned char bracketedPasteMode = 0;
+static unsigned char alternateScreenBuffer = 0;
 
 int
 ptyBeginTerminal (const char *tty) {
   insertMode = 0;
+  alternateCharsetMode = 0;
   keypadTransmitMode = 0;
   bracketedPasteMode = 0;
+  alternateScreenBuffer = 0;
 
   return ptyBeginScreen(tty);
 }
@@ -91,12 +110,12 @@ ptySynchronizeTerminal (void) {
 }
 
 static void
-soundAudibleAlert (void) {
+soundAlert (void) {
   beep();
 }
 
 static void
-showVisualAlert (void) {
+showAlert (void) {
   flash();
 }
 
@@ -115,12 +134,11 @@ ptyProcessTerminalInput (int fd) {
     switch (character) {
       KEY(BACKSPACE, "\x7F")
       KEY(BTAB     , "\x1B[Z")
-      KEY(B2       , "\x1B[G")
 
-      KEY(UP       , "\x1B[A")
-      KEY(DOWN     , "\x1B[B")
-      KEY(RIGHT    , "\x1B[C")
-      KEY(LEFT     , "\x1B[D")
+      KEY(UP       , "\x1BOA")
+      KEY(DOWN     , "\x1BOB")
+      KEY(RIGHT    , "\x1BOC")
+      KEY(LEFT     , "\x1BOD")
 
       KEY(HOME     , "\x1B[1~")
       KEY(IC       , "\x1B[2~")
@@ -129,7 +147,6 @@ ptyProcessTerminalInput (int fd) {
       KEY(PPAGE    , "\x1B[5~")
       KEY(NPAGE    , "\x1B[6~")
 
-      KEY(F( 0)    , "\x1B[10~")
       KEY(F( 1)    , "\x1BOP")
       KEY(F( 2)    , "\x1BOQ")
       KEY(F( 3)    , "\x1BOR")
@@ -142,14 +159,6 @@ ptyProcessTerminalInput (int fd) {
       KEY(F(10)    , "\x1B[21~")
       KEY(F(11)    , "\x1B[23~")
       KEY(F(12)    , "\x1B[24~")
-      KEY(F(13)    , "\x1B[25~")
-      KEY(F(14)    , "\x1B[26~")
-      KEY(F(15)    , "\x1B[28~")
-      KEY(F(16)    , "\x1B[29~")
-      KEY(F(17)    , "\x1B[31~")
-      KEY(F(18)    , "\x1B[32~")
-      KEY(F(19)    , "\x1B[33~")
-      KEY(F(20)    , "\x1B[34~")
     }
     #undef KEY
 
@@ -166,19 +175,35 @@ ptyProcessTerminalInput (int fd) {
     }
   }
 
-  if (sequence) {
-    write(fd, sequence, strlen(sequence));
-  } else {
-    beep();
+  if (!sequence) {
+    buffer[0] = 0;
+    sequence = buffer;
+    soundAlert();
   }
+
+  size_t count = strlen(sequence);
+
+  if (logTerminalInput) {
+    const char *name = keyname(character);
+    if (!name) name = "unknown";
+    logBytes(terminalLogLevel, "input: 0X%02X (%s)", sequence, count, character, name);
+  }
+
+  write(fd, sequence, count);
 }
 
-typedef enum {
-  OBP_DONE,
-  OBP_CONTINUE,
-  OBP_REPROCESS,
-  OBP_UNEXPECTED,
-} OutputByteParserResult;
+static unsigned char outputByteBuffer[0X40];
+static unsigned char outputByteCount;
+
+static void
+logUnexpectedSequence (void) {
+  if (logUnexpectedSequences) {
+    logBytes(
+      terminalLogLevel, "unexpected",
+      outputByteBuffer, outputByteCount
+    );
+  }
+}
 
 typedef enum {
   OPS_BASIC,
@@ -208,27 +233,37 @@ addOutputParserNumber (unsigned int number) {
   }
 }
 
-static unsigned char outputByteBuffer[0X40];
-static unsigned char outputByteCount;
+static unsigned int
+getOutputActionCount (void) {
+  if (outputParserNumberCount == 0) return 1;
+  return outputParserNumberArray[0];
+}
 
 static void
-logOutputAction (const char *name) {
+logOutputAction (const char *name, const char *description) {
   if (logOutputActions) {
     char prefix[0X100];
     STR_BEGIN(prefix, sizeof(prefix));
-    STR_PRINTF("%s", name);
+    STR_PRINTF("sequence: %s", name);
 
     for (unsigned int i=0; i<outputParserNumberCount; i+=1) {
       STR_PRINTF(" %u", outputParserNumberArray[i]);
     }
 
+    if (description && *description) STR_PRINTF(" (%s)", description);
     STR_END;
     logBytes(terminalLogLevel, "%s", outputByteBuffer, outputByteCount, prefix);
   }
 }
 
+typedef enum {
+  OBP_DONE,
+  OBP_CONTINUE,
+  OBP_REPROCESS,
+  OBP_UNEXPECTED,
+} OutputByteParserResult;
+
 typedef OutputByteParserResult OutputByteParser (unsigned char byte);
-static void handleUnexpectedOutputByte (unsigned char byte);
 
 static OutputByteParserResult
 parseOutputByte_BASIC (unsigned char byte) {
@@ -241,28 +276,38 @@ parseOutputByte_BASIC (unsigned char byte) {
       return OBP_CONTINUE;
 
     case ASCII_BEL:
-      logOutputAction("bel");
-      soundAudibleAlert();
+      logOutputAction("bel", "audible alert");
+      soundAlert();
       return OBP_DONE;
 
     case ASCII_BS:
-      logOutputAction("cub1");
+      logOutputAction("cub1", "cursor left 1");
       ptyMoveCursorLeft(1);
       return OBP_DONE;
 
     case ASCII_LF:
-      logOutputAction("cud1");
+      logOutputAction("cud1", "cursor down 1");
       ptyMoveCursorDown(1);
       return OBP_DONE;
 
     case ASCII_CR:
-      logOutputAction("cr");
+      logOutputAction("cr", "carriage return");
       ptySetCursorColumn(0);
       return OBP_DONE;
 
+    case ASCII_SO:
+      logOutputAction("smacs", "alternate charset on");
+      alternateCharsetMode = 1;
+      return OBP_DONE;
+
+    case ASCII_SI:
+      logOutputAction("rmacs", "alternate charset off");
+      alternateCharsetMode = 0;
+      return OBP_DONE;
+
     default: {
-      if (logOutputBytes) {
-        logMessage(terminalLogLevel, "addch 0X%02X", byte);
+      if (logTerminalOutput) {
+        logMessage(terminalLogLevel, "output: 0X%02X", byte);
       }
 
       if (insertMode) ptyInsertCharacters(1);
@@ -280,27 +325,27 @@ parseOutputByte_ESCAPE (unsigned char byte) {
       return OBP_CONTINUE;
 
     case '=':
-      logOutputAction("smkx");
+      logOutputAction("smkx", "keypad transmit on");
       keypadTransmitMode = 1;
       return OBP_DONE;
 
     case '>':
-      logOutputAction("rmkx");
+      logOutputAction("rmkx", "keypad transmit off");
       keypadTransmitMode = 0;
       return OBP_DONE;
 
     case 'g':
-      logOutputAction("flash");
-      showVisualAlert();
+      logOutputAction("flash", "visual alert");
+      showAlert();
       return OBP_DONE;
 
     case '7':
-      logOutputAction("sc");
+      logOutputAction("sc", "save cursor position");
       ptySaveCursorPosition();
       return OBP_DONE;
 
     case '8':
-      logOutputAction("rc");
+      logOutputAction("rc", "restore cursor position");
       ptyRestoreCursorPosition();
       return OBP_DONE;
   }
@@ -347,23 +392,17 @@ parseOutputByte_DIGIT (unsigned char byte) {
   return OBP_REPROCESS;
 }
 
-static unsigned int
-getOutputActionCount (void) {
-  if (outputParserNumberCount == 0) return 1;
-  return outputParserNumberArray[0];
-}
-
 static OutputByteParserResult
 performBracketAction_h (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
       case 4:
-        logOutputAction("smir");
+        logOutputAction("smir", "insert on");
         insertMode = 1;
         return OBP_DONE;
 
       case 34:
-        logOutputAction("cnorm");
+        logOutputAction("cnorm", "cursor normal visibility");
         ptySetCursorVisibility(1);
         return OBP_DONE;
     }
@@ -377,12 +416,12 @@ performBracketAction_l (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
       case 4:
-        logOutputAction("rmir");
+        logOutputAction("rmir", "insert off");
         insertMode = 0;
         return OBP_DONE;
 
       case 34:
-        logOutputAction("cvvis");
+        logOutputAction("cvvis", "cursor very visile");
         ptySetCursorVisibility(2);
         return OBP_DONE;
     }
@@ -400,17 +439,20 @@ performBracketAction_m (unsigned char byte) {
 
     switch (number / 10) {
       {
-        const char *actionName;
+        const char *name;
+        const char *description;
         void (*setColor) (int color);
         int color;
 
       case 3:
-        actionName = "setaf";
+        name = "setaf";
+        description = "foreground color";
         setColor = ptySetForegroundColor;
         goto doColor;
 
       case 4:
-        actionName = "setab";
+        name = "setab";
+        description = "background color";
         setColor = ptySetBackgroundColor;
         goto doColor;
 
@@ -419,7 +461,7 @@ performBracketAction_m (unsigned char byte) {
         if (color == 8) return OBP_UNEXPECTED;
         if (color == 9) color = -1;
 
-        logOutputAction(actionName);
+        logOutputAction(name, description);
         setColor(color);
         continue;
       }
@@ -427,47 +469,47 @@ performBracketAction_m (unsigned char byte) {
 
     switch (number) {
       case 0:
-        logOutputAction("sgr0");
+        logOutputAction("sgr0", "all attributes off");
         ptySetAttributes(0);
         continue;
 
       case 1:
-        logOutputAction("bold");
+        logOutputAction("bold", "bold on");
         ptyAddAttributes(A_BOLD);
         continue;
 
       case 2:
-        logOutputAction("dim");
+        logOutputAction("dim", "dim on");
         ptyAddAttributes(A_DIM);
         continue;
 
       case 3:
-        logOutputAction("smso");
+        logOutputAction("smso", "standout on");
         ptyAddAttributes(A_STANDOUT);
         continue;
 
       case 4:
-        logOutputAction("smul");
+        logOutputAction("smul", "underline on");
         ptyAddAttributes(A_UNDERLINE);
         continue;
 
       case 5:
-        logOutputAction("blink");
+        logOutputAction("blink", "blink on");
         ptyAddAttributes(A_BLINK);
         continue;
 
       case 7:
-        logOutputAction("rev");
+        logOutputAction("rev", "reverse video on");
         ptyAddAttributes(A_REVERSE);
         continue;
 
       case 23:
-        logOutputAction("rmso");
+        logOutputAction("rmso", "standout off");
         ptyRemoveAttributes(A_STANDOUT);
         continue;
 
       case 24:
-        logOutputAction("rmul");
+        logOutputAction("rmul", "underline off");
         ptyRemoveAttributes(A_UNDERLINE);
         continue;
     }
@@ -482,22 +524,22 @@ static OutputByteParserResult
 performBracketAction (unsigned char byte) {
   switch (byte) {
     case 'A':
-      logOutputAction("cuu");
+      logOutputAction("cuu", "cursor up");
       ptyMoveCursorUp(getOutputActionCount());
       return OBP_DONE;
 
     case 'B':
-      logOutputAction("cud");
+      logOutputAction("cud", "cursor down");
       ptyMoveCursorDown(getOutputActionCount());
       return OBP_DONE;
 
     case 'C':
-      logOutputAction("cuf");
+      logOutputAction("cuf", "cursor right");
       ptyMoveCursorRight(getOutputActionCount());
       return OBP_DONE;
 
     case 'D':
-      logOutputAction("cub");
+      logOutputAction("cub", "cursor left");
       ptyMoveCursorLeft(getOutputActionCount());
       return OBP_DONE;
 
@@ -515,38 +557,38 @@ performBracketAction (unsigned char byte) {
       if (!(*row)--) return OBP_UNEXPECTED;
       if (!(*column)--) return OBP_UNEXPECTED;
 
-      logOutputAction("cup");
+      logOutputAction("cup", "set cursor position");
       ptySetCursorPosition(*row, *column);
       return OBP_DONE;
     }
 
     case 'J':
-      logOutputAction("ed");
+      logOutputAction("ed", "clear to end of screen");
       ptyClearToEndOfScreen();
       return OBP_DONE;
 
     case 'K':
-      logOutputAction("el");
+      logOutputAction("el", "clear to end of line");
       ptyClearToEndOfLine();
       return OBP_DONE;
 
     case 'L':
-      logOutputAction("il");
+      logOutputAction("il", "insert lines");
       ptyInsertLines(getOutputActionCount());
       return OBP_DONE;
 
     case 'M':
-      logOutputAction("dl");
+      logOutputAction("dl", "delete lines");
       ptyDeleteLines(getOutputActionCount());
       return OBP_DONE;
 
     case 'P':
-      logOutputAction("dch");
+      logOutputAction("dch", "delete characters");
       ptyDeleteCharacters(getOutputActionCount());
       return OBP_DONE;
 
     case '@':
-      logOutputAction("ic");
+      logOutputAction("ic", "insert characters");
       ptyInsertCharacters(getOutputActionCount());
       return OBP_DONE;
 
@@ -568,7 +610,7 @@ performBracketAction (unsigned char byte) {
       if (!(*top)--) return OBP_UNEXPECTED;
       if (!(*bottom)--) return OBP_UNEXPECTED;
 
-      logOutputAction("csr");
+      logOutputAction("csr", "set scroll region");
       ptySetScrollRegion(*top, *bottom);
       return OBP_DONE;
     }
@@ -582,17 +624,22 @@ performQuestionMarkAction_h (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
       case 1:
-        logOutputAction("smkx");
+        logOutputAction("smkx", "keypad transmit on");
         keypadTransmitMode = 1;
         return OBP_DONE;
 
       case 25:
-        logOutputAction("cnorm");
+        logOutputAction("cnorm", "cursor normal visibility");
         ptySetCursorVisibility(1);
         return OBP_DONE;
 
+      case 1049:
+        logOutputAction("smcup", "alternate screen buffer on");
+        alternateScreenBuffer = 1;
+        return OBP_DONE;
+
       case 2004:
-        logOutputAction("smbp");
+        logOutputAction("smbp", "bracketed paste on");
         bracketedPasteMode = 1;
         return OBP_DONE;
     }
@@ -606,17 +653,22 @@ performQuestionMarkAction_l (unsigned char byte) {
   if (outputParserNumberCount == 1) {
     switch (outputParserNumberArray[0]) {
       case 1:
-        logOutputAction("rmkx");
+        logOutputAction("rmkx", "keypad transmit off");
         keypadTransmitMode = 0;
         return OBP_DONE;
 
       case 25:
-        logOutputAction("civis");
+        logOutputAction("civis", "cursor invisible");
         ptySetCursorVisibility(0);
         return OBP_DONE;
 
+      case 1049:
+        logOutputAction("rmcup", "alternate screen buffer off");
+        alternateScreenBuffer = 0;
+        return OBP_DONE;
+
       case 2004:
-        logOutputAction("rmbp");
+        logOutputAction("rmbp", "bracketed paste off");
         bracketedPasteMode = 0;
         return OBP_DONE;
     }
@@ -668,19 +720,6 @@ static const OutputParserStateEntry outputParserStateTable[] = {
 };
 #undef OPS
 
-static void
-handleUnexpectedOutputByte (unsigned char byte) {
-  soundAudibleAlert();
-
-  if (logUnexpectedSequences) {
-    logBytes(terminalLogLevel,
-      "unexpected pty output byte: %s[0X%02X]",
-      outputByteBuffer, outputByteCount,
-      outputParserStateTable[outputParserState].name, byte
-    );
-  }
-}
-
 int
 ptyParseOutputByte (unsigned char byte) {
   if (outputParserState == OPS_BASIC) {
@@ -699,7 +738,8 @@ ptyParseOutputByte (unsigned char byte) {
         continue;
 
       case OBP_UNEXPECTED:
-        handleUnexpectedOutputByte(byte);
+        soundAlert();
+        logUnexpectedSequence();
         /* fall through */
 
       case OBP_DONE:

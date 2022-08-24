@@ -45,35 +45,43 @@
 
 static int opt_ttyPath;
 static int opt_logOutputActions;
-static int opt_logOutputBytes;
+static int opt_logTerminalInput;
+static int opt_logTerminalOutput;
 static int opt_logUnexpectedSequences;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "tty-path",
-    .letter = 't',
+    .letter = 'p',
     .setting.flag = &opt_ttyPath,
-    .description = strtext("show the path of the tty device")
+    .description = strtext("show the path to the pty slave")
   },
 
-  { .word = "log-output-actions",
+  { .word = "log-actions",
     .letter = 'A',
     .flags = OPT_Hidden,
     .setting.flag = &opt_logOutputActions,
-    .description = strtext("log output actions")
+    .description = strtext("log actions requested via output (escape sequences or special characters) from the pty slave")
   },
 
-  { .word = "log-output-bytes",
-    .letter = 'B',
+  { .word = "log-input",
+    .letter = 'I',
     .flags = OPT_Hidden,
-    .setting.flag = &opt_logOutputBytes,
-    .description = strtext("log output bytes that aren't part of escape sequences")
+    .setting.flag = &opt_logTerminalInput,
+    .description = strtext("log input to the pty slave")
   },
 
-  { .word = "log-unexpected-sequences",
+  { .word = "log-output",
+    .letter = 'O',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_logTerminalOutput,
+    .description = strtext("log output from the pty slave that isn't part of an escape sequence")
+  },
+
+  { .word = "log-unexpected",
     .letter = 'U',
     .flags = OPT_Hidden,
     .setting.flag = &opt_logUnexpectedSequences,
-    .description = strtext("log unexpected escape sequences")
+    .description = strtext("log unexpected output escape sequences")
   },
 END_OPTION_TABLE
 
@@ -286,9 +294,10 @@ main (int argc, char *argv[]) {
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
-  if (opt_logOutputActions) ptySetLogOutputActions(1);
-  if (opt_logOutputBytes) ptySetLogOutputBytes(1);
-  if (opt_logUnexpectedSequences) ptySetLogUnexpectedSequences(1);
+  ptySetLogOutputActions(opt_logOutputActions);
+  ptySetLogTerminalInput(opt_logTerminalInput);
+  ptySetLogTerminalOutput(opt_logTerminalOutput);
+  ptySetLogUnexpectedSequences(opt_logUnexpectedSequences);
 
   if ((pty = ptyNewObject())) {
     const char *ttyPath = ptyGetPath(pty);
