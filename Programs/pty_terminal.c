@@ -17,20 +17,14 @@
  */
 
 /* unimplemented output actions
- * cbt=\E[Z - tab backward
- * cuu1=\EM - cursor up 1
- * el1=\E[1K - clear to beginning of line
  * enacs=\E(B\E)0 - enable alternate charset mode
- * hpa=\E[%i%p1%dG - horizontal address
- * ht=^I - tab forward
  * hts=\EH - set tab
- * ind=\n - scroll up
- * indn=\E[%p1%dS - scroll forward lines
  * kmous=\E[M - mouse event
- * nel=\EE - newline (CR LF)
- * ri=\EM - scroll down
  * tbc=\E[3g - clear all tabs
- * vpa=\E[%i%p1%dd - vertical address
+ * u6=\E[%i%d;%dR - user string 6
+ * u7=\E[6n - user string 7
+ * u8=\E[?1;2c - user string 8
+ * u9=\E[c - user string 9
  */
 
 #include "prologue.h"
@@ -217,11 +211,6 @@ typedef enum {
 static OutputParserState outputParserState;
 static unsigned char outputParserQuestionMark;
 
-void
-ptyResetOutputParser (void) {
-  outputParserState = OPS_BASIC;
-}
-
 static unsigned int outputParserNumber;
 static unsigned int outputParserNumberArray[9];
 static unsigned char outputParserNumberCount;
@@ -244,7 +233,7 @@ logOutputAction (const char *name, const char *description) {
   if (logOutputActions) {
     char prefix[0X100];
     STR_BEGIN(prefix, sizeof(prefix));
-    STR_PRINTF("sequence: %s", name);
+    STR_PRINTF("action: %s", name);
 
     for (unsigned int i=0; i<outputParserNumberCount; i+=1) {
       STR_PRINTF(" %u", outputParserNumberArray[i]);
@@ -283,6 +272,11 @@ parseOutputByte_BASIC (unsigned char byte) {
     case ASCII_BS:
       logOutputAction("cub1", "cursor left 1");
       ptyMoveCursorLeft(1);
+      return OBP_DONE;
+
+    case ASCII_HT:
+      logOutputAction("ht", "forward tab");
+      ptyTabForward();
       return OBP_DONE;
 
     case ASCII_LF:
@@ -332,6 +326,17 @@ parseOutputByte_ESCAPE (unsigned char byte) {
     case '>':
       logOutputAction("rmkx", "keypad transmit off");
       keypadTransmitMode = 0;
+      return OBP_DONE;
+
+    case 'E':
+      logOutputAction("nel", "new line");
+      ptySetCursorColumn(0);
+      ptyMoveCursorDown(1);
+      return OBP_DONE;
+
+    case 'M':
+      logOutputAction("cuu1", "cursor up 1");
+      ptyMoveCursorUp(1);
       return OBP_DONE;
 
     case 'g':
@@ -543,6 +548,16 @@ performBracketAction (unsigned char byte) {
       ptyMoveCursorLeft(getOutputActionCount());
       return OBP_DONE;
 
+    case 'G': {
+      if (outputParserNumberCount != 1) return OBP_UNEXPECTED   ;
+      unsigned int *column = &outputParserNumberArray[0];
+      if (!(*column)--) return OBP_UNEXPECTED;
+
+      logOutputAction("hpa", "set cursor column");
+      ptySetCursorColumn(*column);
+      return OBP_DONE;
+    }
+
     case 'H': {
       if (outputParserNumberCount == 0) {
         addOutputParserNumber(1);
@@ -563,14 +578,29 @@ performBracketAction (unsigned char byte) {
     }
 
     case 'J':
-      logOutputAction("ed", "clear to end of screen");
-      ptyClearToEndOfScreen();
+      if (outputParserNumberCount != 0) return OBP_UNEXPECTED;
+      logOutputAction("ed", "clear to end of display");
+      ptyClearToEndOfDisplay();
       return OBP_DONE;
 
-    case 'K':
-      logOutputAction("el", "clear to end of line");
-      ptyClearToEndOfLine();
-      return OBP_DONE;
+    case 'K': {
+      if (outputParserNumberCount == 0) addOutputParserNumber(0);
+      if (outputParserNumberCount != 1) return OBP_UNEXPECTED;
+
+      switch (outputParserNumberArray[0]) {
+        case 0:
+          logOutputAction("el", "clear to end of line");
+          ptyClearToEndOfLine();
+          return OBP_DONE;
+
+        case 1:
+          logOutputAction("el1", "clear to beginning of line");
+          ptyClearToBeginningOfLine();
+          return OBP_DONE;
+      }
+
+      break;
+    }
 
     case 'L':
       logOutputAction("il", "insert lines");
@@ -587,10 +617,25 @@ performBracketAction (unsigned char byte) {
       ptyDeleteCharacters(getOutputActionCount());
       return OBP_DONE;
 
-    case '@':
-      logOutputAction("ic", "insert characters");
-      ptyInsertCharacters(getOutputActionCount());
+    case 'S':
+      logOutputAction("indn", "scroll forward");
+      ptyScrollLines(getOutputActionCount());
       return OBP_DONE;
+
+    case 'Z':
+      logOutputAction("cbt", "back tab");
+      ptyTabBackward();
+      return OBP_DONE;
+
+    case 'd': {
+      if (outputParserNumberCount != 1) return OBP_UNEXPECTED   ;
+      unsigned int *row = &outputParserNumberArray[0];
+      if (!(*row)--) return OBP_UNEXPECTED;
+
+      logOutputAction("vpa", "set cursor row");
+      ptySetCursorRow(*row);
+      return OBP_DONE;
+    }
 
     case 'h':
       return performBracketAction_h(byte);
@@ -614,6 +659,11 @@ performBracketAction (unsigned char byte) {
       ptySetScrollRegion(*top, *bottom);
       return OBP_DONE;
     }
+
+    case '@':
+      logOutputAction("ic", "insert characters");
+      ptyInsertCharacters(getOutputActionCount());
+      return OBP_DONE;
   }
 
   return OBP_UNEXPECTED;

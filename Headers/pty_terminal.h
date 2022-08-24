@@ -31,7 +31,6 @@ extern void ptySynchronizeTerminal (void);
 
 extern void ptyProcessTerminalInput (int fd);
 
-extern void ptyResetOutputParser (void);
 extern int ptyParseOutputByte (unsigned char byte);
 extern int ptyParseOutputBytes (const unsigned char *bytes, size_t count);
 

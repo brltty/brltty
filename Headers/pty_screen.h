@@ -33,14 +33,19 @@ extern void ptySetCursorPosition (unsigned int row, unsigned int column);
 extern void ptySetCursorRow (unsigned int row);
 extern void ptySetCursorColumn (unsigned int column);
 
+extern void ptySaveCursorPosition (void);
+extern void ptyRestoreCursorPosition (void);
+
 extern void ptySetScrollRegion (unsigned int top, unsigned int bottom);
+extern void ptyScrollLines (int amount);
+
 extern void ptyMoveCursorUp (unsigned int amount);
 extern void ptyMoveCursorDown (unsigned int amount);
 extern void ptyMoveCursorLeft (unsigned int amount);
 extern void ptyMoveCursorRight (unsigned int amount);
 
-extern void ptySaveCursorPosition (void);
-extern void ptyRestoreCursorPosition (void);
+extern void ptyTabForward (void);
+extern void ptyTabBackward (void);
 
 extern void ptyInsertLines (unsigned int count);
 extern void ptyDeleteLines (unsigned int count);
@@ -56,8 +61,9 @@ extern void ptyRemoveAttributes (attr_t attributes);
 extern void ptySetForegroundColor (int color);
 extern void ptySetBackgroundColor (int color);
 
-extern void ptyClearToEndOfScreen (void);
+extern void ptyClearToEndOfDisplay (void);
 extern void ptyClearToEndOfLine (void);
+extern void ptyClearToBeginningOfLine (void);
 
 extern void ptySetScreenLogLevel (unsigned char level);
 extern void ptyLogSharedSegment (const char *label);

@@ -138,7 +138,7 @@ setCharacters (PtyCharacter *from, const PtyCharacter *to, const PtyCharacter *c
 }
 
 static void
-propagateCharacter (PtyCharacter *from, const PtyCharacter *to) {
+propagateFirstCharacter (PtyCharacter *from, const PtyCharacter *to) {
   setCharacters(from+1, to, from);
 }
 
@@ -242,14 +242,25 @@ ptySetCursorColumn (unsigned int column) {
 }
 
 void
+ptySaveCursorPosition (void) {
+  savedCursorRow = segmentHeader->cursorRow;
+  savedCursorColumn = segmentHeader->cursorColumn;
+}
+
+void
+ptyRestoreCursorPosition (void) {
+  ptySetCursorPosition(savedCursorRow, savedCursorColumn);
+}
+
+void
 ptySetScrollRegion (unsigned int top, unsigned int bottom) {
   scrollRegionTop = top;
   scrollRegionBottom = bottom;
   setscrreg(top, bottom);
 }
 
-static void
-scrollLines (int amount) {
+void
+ptyScrollLines (int amount) {
   scrl(amount);
 }
 
@@ -269,7 +280,7 @@ ptyMoveCursorUp (unsigned int amount) {
     int delta = newRow - scrollRegionTop;
 
     if (delta < 0) {
-      scrollLines(delta);
+      ptyScrollLines(delta);
       newRow = scrollRegionTop;
     }
   }
@@ -286,7 +297,7 @@ ptyMoveCursorDown (unsigned int amount) {
     int delta = newRow - scrollRegionBottom;
 
     if (delta > 0) {
-      scrollLines(delta);
+      ptyScrollLines(delta);
       newRow = scrollRegionBottom;
     }
   }
@@ -305,14 +316,13 @@ ptyMoveCursorRight (unsigned int amount) {
 }
 
 void
-ptySaveCursorPosition (void) {
-  savedCursorRow = segmentHeader->cursorRow;
-  savedCursorColumn = segmentHeader->cursorColumn;
+ptyTabForward (void) {
+  ptySetCursorColumn(((segmentHeader->cursorColumn / TABSIZE) + 1) * TABSIZE);
 }
 
 void
-ptyRestoreCursorPosition (void) {
-  ptySetCursorPosition(savedCursorRow, savedCursorColumn);
+ptyTabBackward (void) {
+  ptySetCursorColumn(((segmentHeader->cursorColumn - 1) / TABSIZE) * TABSIZE);
 }
 
 static PtyCharacter *
@@ -383,7 +393,7 @@ ptyInsertCharacters (unsigned int count) {
   }
 
   setCurrentCharacter(NULL);
-  propagateCharacter(from, to);
+  propagateFirstCharacter(from, to);
 }
 
 void
@@ -446,12 +456,12 @@ ptySetBackgroundColor (int color) {
 }
 
 void
-ptyClearToEndOfScreen (void) {
+ptyClearToEndOfDisplay (void) {
   clrtobot();
 
   PtyCharacter *from = setCurrentCharacter(NULL);
   const PtyCharacter *to = ptyGetScreenEnd(segmentHeader);
-  propagateCharacter(from, to);
+  propagateFirstCharacter(from, to);
 }
 
 void
@@ -460,5 +470,18 @@ ptyClearToEndOfLine (void) {
 
   PtyCharacter *to;
   PtyCharacter *from = setCurrentCharacter(&to);
-  propagateCharacter(from, to);
+  propagateFirstCharacter(from, to);
+}
+
+void
+ptyClearToBeginningOfLine (void) {
+  unsigned int column = segmentHeader->cursorColumn;
+  if (column > 0) ptySetCursorColumn(0);
+
+  while (1) {
+    ptyAddCharacter(' ');
+    if (segmentHeader->cursorColumn > column) break;
+  }
+
+  ptySetCursorColumn(column);
 }
