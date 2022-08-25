@@ -132,7 +132,7 @@ prepareChild (PtyObject *pty) {
         int result = dup2(tty, fd);
 
         if (result == -1) {
-          if (fd != 2) logSystemError("dup2");
+          logSystemError("dup2");
           return 0;
         }
       }

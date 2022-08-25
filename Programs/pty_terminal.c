@@ -156,16 +156,12 @@ ptyProcessTerminalInput (int fd) {
     }
     #undef KEY
 
-    if (keypadTransmitMode) {
-      if (sequence) {
-        switch (character) {
-          case KEY_UP: case KEY_DOWN: case KEY_LEFT: case KEY_RIGHT:
-            strcpy(buffer, sequence);
-            buffer[1] = 'O';
-            sequence = buffer;
-            break;
-        }
-      }
+    switch (character) {
+      case KEY_UP: case KEY_DOWN: case KEY_LEFT: case KEY_RIGHT:
+        strcpy(buffer, sequence);
+        buffer[1] = keypadTransmitMode? 'O': '[';
+        sequence = buffer;
+        break;
     }
   }
 
@@ -275,13 +271,18 @@ parseOutputByte_BASIC (unsigned char byte) {
       return OBP_DONE;
 
     case ASCII_HT:
-      logOutputAction("ht", "forward tab");
+      logOutputAction("ht", "tab forward");
       ptyTabForward();
       return OBP_DONE;
 
     case ASCII_LF:
-      logOutputAction("cud1", "cursor down 1");
-      ptyMoveCursorDown(1);
+      if (ptyAmWithinScrollRegion()) {
+        logOutputAction("ind", "move down 1");
+        ptyMoveDown1();
+      } else {
+        logOutputAction("cud1", "cursor down 1");
+        ptyMoveCursorDown(1);
+      }
       return OBP_DONE;
 
     case ASCII_CR:
@@ -331,12 +332,17 @@ parseOutputByte_ESCAPE (unsigned char byte) {
     case 'E':
       logOutputAction("nel", "new line");
       ptySetCursorColumn(0);
-      ptyMoveCursorDown(1);
+      ptyMoveDown1();
       return OBP_DONE;
 
     case 'M':
-      logOutputAction("cuu1", "cursor up 1");
-      ptyMoveCursorUp(1);
+      if (ptyAmWithinScrollRegion()) {
+        logOutputAction("ri", "move up 1");
+        ptyMoveUp1();
+      } else {
+        logOutputAction("cuu1", "cursor up 1");
+        ptyMoveCursorUp(1);
+      }
       return OBP_DONE;
 
     case 'g':
@@ -622,8 +628,13 @@ performBracketAction (unsigned char byte) {
       ptyScrollLines(getOutputActionCount());
       return OBP_DONE;
 
+    case 'T':
+      logOutputAction("rin", "scroll backward");
+      ptyScrollLines(-getOutputActionCount());
+      return OBP_DONE;
+
     case 'Z':
-      logOutputAction("cbt", "back tab");
+      logOutputAction("cbt", "tab backward");
       ptyTabBackward();
       return OBP_DONE;
 

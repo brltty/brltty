@@ -259,11 +259,6 @@ ptySetScrollRegion (unsigned int top, unsigned int bottom) {
   setscrreg(top, bottom);
 }
 
-void
-ptyScrollLines (int amount) {
-  scrl(amount);
-}
-
 static int
 isWithinScrollRegion (unsigned int row) {
   if (row < scrollRegionTop) return 0;
@@ -271,48 +266,60 @@ isWithinScrollRegion (unsigned int row) {
   return 1;
 }
 
+int
+ptyAmWithinScrollRegion (void) {
+  return isWithinScrollRegion(segmentHeader->cursorRow);
+}
+
+void
+ptyScrollLines (int amount) {
+  scrl(amount);
+}
+
 void
 ptyMoveCursorUp (unsigned int amount) {
-  unsigned int oldRow = segmentHeader->cursorRow;
-  unsigned int newRow = oldRow - amount;
-
-  if (isWithinScrollRegion(oldRow)) {
-    int delta = newRow - scrollRegionTop;
-
-    if (delta < 0) {
-      ptyScrollLines(delta);
-      newRow = scrollRegionTop;
-    }
-  }
-
-  if (newRow != oldRow) ptySetCursorRow(newRow);
+  unsigned int row = segmentHeader->cursorRow;
+  if (amount > row) amount = row;
+  if (amount > 0) ptySetCursorRow(row-amount);
 }
 
 void
 ptyMoveCursorDown (unsigned int amount) {
   unsigned int oldRow = segmentHeader->cursorRow;
-  unsigned int newRow = oldRow + amount;
-
-  if (isWithinScrollRegion(oldRow)) {
-    int delta = newRow - scrollRegionBottom;
-
-    if (delta > 0) {
-      ptyScrollLines(delta);
-      newRow = scrollRegionBottom;
-    }
-  }
-
+  unsigned int newRow = MIN(oldRow+amount, LINES-1);
   if (newRow != oldRow) ptySetCursorRow(newRow);
 }
 
 void
 ptyMoveCursorLeft (unsigned int amount) {
-  ptySetCursorColumn(segmentHeader->cursorColumn-amount);
+  unsigned int column = segmentHeader->cursorColumn;
+  if (amount > column) amount = column;
+  if (amount > 0) ptySetCursorColumn(column-amount);
 }
 
 void
 ptyMoveCursorRight (unsigned int amount) {
-  ptySetCursorColumn(segmentHeader->cursorColumn+amount);
+  unsigned int oldColumn = segmentHeader->cursorColumn;
+  unsigned int newColumn = MIN(oldColumn+amount, COLS-1);
+  if (newColumn != oldColumn) ptySetCursorColumn(newColumn);
+}
+
+void
+ptyMoveUp1 (void) {
+  if (segmentHeader->cursorRow == scrollRegionTop) {
+    ptyScrollLines(-1);
+  } else {
+    ptyMoveCursorUp(1);
+  }
+}
+
+void
+ptyMoveDown1 (void) {
+  if (segmentHeader->cursorRow == scrollRegionBottom) {
+    ptyScrollLines(1);
+  } else {
+    ptyMoveCursorDown(1);
+  }
 }
 
 void
@@ -364,17 +371,21 @@ setCurrentCharacter (PtyCharacter **end) {
 
 void
 ptyInsertLines (unsigned int count) {
-  {
-    unsigned int counter = count;
-    while (counter-- > 0) insertln();
+  if (ptyAmWithinScrollRegion()) {
+    {
+      unsigned int counter = count;
+      while (counter-- > 0) insertln();
+    }
   }
 }
 
 void
 ptyDeleteLines (unsigned int count) {
-  {
-    unsigned int counter = count;
-    while (counter-- > 0) deleteln();
+  if (ptyAmWithinScrollRegion()) {
+    {
+      unsigned int counter = count;
+      while (counter-- > 0) deleteln();
+    }
   }
 }
 
