@@ -17,13 +17,13 @@
  */
 
 /* not done yet:
+ * parent: no curses
+ * parent: no segment
  * parent: SIGTERM SIGINT SIGQUIT
  * screen: resize
  * screen: driver
  * segment: insertLines()
  * segment: deleteLines()
- * segment: deleteCharacters()
- * segment: scrollRegion()
  */
 
 #include "prologue.h"

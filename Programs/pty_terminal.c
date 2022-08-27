@@ -80,7 +80,7 @@ static unsigned char insertMode = 0;
 static unsigned char alternateCharsetMode = 0;
 static unsigned char keypadTransmitMode = 0;
 static unsigned char bracketedPasteMode = 0;
-static unsigned char alternateScreenBuffer = 0;
+static unsigned char absoluteCursorAddressingMode = 0;
 
 int
 ptyBeginTerminal (const char *tty) {
@@ -88,7 +88,7 @@ ptyBeginTerminal (const char *tty) {
   alternateCharsetMode = 0;
   keypadTransmitMode = 0;
   bracketedPasteMode = 0;
-  alternateScreenBuffer = 0;
+  absoluteCursorAddressingMode = 0;
 
   return ptyBeginScreen(tty);
 }
@@ -343,6 +343,12 @@ parseOutputByte_ESCAPE (unsigned char byte) {
         logOutputAction("cuu1", "cursor up 1");
         ptyMoveCursorUp(1);
       }
+      return OBP_DONE;
+
+    case 'c':
+      logOutputAction("clear", "clear screen");
+      ptySetCursorPosition(0, 0);
+      ptyClearToEndOfDisplay();
       return OBP_DONE;
 
     case 'g':
@@ -625,12 +631,12 @@ performBracketAction (unsigned char byte) {
 
     case 'S':
       logOutputAction("indn", "scroll forward");
-      ptyScrollLines(getOutputActionCount());
+      ptyScrollForward(getOutputActionCount());
       return OBP_DONE;
 
     case 'T':
       logOutputAction("rin", "scroll backward");
-      ptyScrollLines(-getOutputActionCount());
+      ptyScrollBackward(getOutputActionCount());
       return OBP_DONE;
 
     case 'Z':
@@ -695,8 +701,8 @@ performQuestionMarkAction_h (unsigned char byte) {
         return OBP_DONE;
 
       case 1049:
-        logOutputAction("smcup", "alternate screen buffer on");
-        alternateScreenBuffer = 1;
+        logOutputAction("smcup", "absolute cursor addressing on");
+        absoluteCursorAddressingMode = 1;
         return OBP_DONE;
 
       case 2004:
@@ -724,8 +730,8 @@ performQuestionMarkAction_l (unsigned char byte) {
         return OBP_DONE;
 
       case 1049:
-        logOutputAction("rmcup", "alternate screen buffer off");
-        alternateScreenBuffer = 0;
+        logOutputAction("rmcup", "absolute cursor addressing off");
+        absoluteCursorAddressingMode = 0;
         return OBP_DONE;
 
       case 2004:

@@ -38,7 +38,8 @@ extern void ptyRestoreCursorPosition (void);
 
 extern void ptySetScrollRegion (unsigned int top, unsigned int bottom);
 extern int ptyAmWithinScrollRegion (void);
-extern void ptyScrollLines (int amount);
+extern void ptyScrollBackward (unsigned int count);
+extern void ptyScrollForward (unsigned int count);
 
 extern void ptyMoveCursorUp (unsigned int amount);
 extern void ptyMoveCursorDown (unsigned int amount);
@@ -48,8 +49,8 @@ extern void ptyMoveCursorRight (unsigned int amount);
 extern void ptyMoveUp1 (void);
 extern void ptyMoveDown1 (void);
 
-extern void ptyTabForward (void);
 extern void ptyTabBackward (void);
+extern void ptyTabForward (void);
 
 extern void ptyInsertLines (unsigned int count);
 extern void ptyDeleteLines (unsigned int count);

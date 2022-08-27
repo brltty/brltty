@@ -122,14 +122,45 @@ storeCursorPosition (void) {
 }
 
 static PtyCharacter *
-getCurrentCharacter (PtyCharacter **end) {
-  return ptyGetCharacter(segmentHeader, segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
+setCharacter (unsigned int row, unsigned int column, PtyCharacter **end) {
+  cchar_t wch;
+
+  {
+    unsigned int oldRow = segmentHeader->cursorRow;
+    unsigned int oldColumn = segmentHeader->cursorColumn;
+    int move = (row != oldRow) || (column != oldColumn);
+
+    if (move) ptySetCursorPosition(row, column);
+    in_wch(&wch);
+    if (move) ptySetCursorPosition(oldRow, oldColumn);
+  }
+
+  PtyCharacter *character = ptyGetCharacter(segmentHeader, row, column, end);
+  character->text = wch.chars[0];
+
+  character->blink = wch.attr & A_BLINK;
+  character->bold = wch.attr & A_BOLD;
+  character->underline = wch.attr & A_UNDERLINE;
+  character->reverse = wch.attr & A_REVERSE;
+  character->standout = wch.attr & A_STANDOUT;
+  character->dim = wch.attr & A_DIM;
+
+  short foreground, background;
+  pair_content(wch.ext_color, &foreground, &background);
+  character->foreground = foreground;
+  character->background = background;
+
+  return character;
 }
 
 static PtyCharacter *
-moveCharacters (PtyCharacter *to, const PtyCharacter *from, unsigned int count) {
-  if (count) memmove(to, from, (count * sizeof(*from)));
-  return to;
+setCurrentCharacter (PtyCharacter **end) {
+  return setCharacter(segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
+}
+
+static PtyCharacter *
+getCurrentCharacter (PtyCharacter **end) {
+  return ptyGetCharacter(segmentHeader, segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
 }
 
 static void
@@ -140,6 +171,35 @@ setCharacters (PtyCharacter *from, const PtyCharacter *to, const PtyCharacter *c
 static void
 propagateFirstCharacter (PtyCharacter *from, const PtyCharacter *to) {
   setCharacters(from+1, to, from);
+}
+
+static void
+moveCharacters (const PtyCharacter *from, PtyCharacter *to, unsigned int count) {
+  if (count && (from != to)) {
+    memmove(to, from, (count * sizeof(*from)));
+  }
+}
+
+static void
+fillCharacters (unsigned int row, unsigned int column, unsigned int count) {
+  PtyCharacter *from = setCharacter(row, column, NULL);
+  propagateFirstCharacter(from, (from + count));
+}
+
+static void
+moveRows (unsigned int from, unsigned int to, unsigned int count) {
+  if (count && (from != to)) {
+    moveCharacters(
+      ptyGetRow(segmentHeader, from, NULL),
+      ptyGetRow(segmentHeader, to, NULL),
+      (count * COLS)
+    );
+  }
+}
+
+static void
+fillRows (unsigned int row, unsigned int count) {
+  fillCharacters(row, 0, (count * COLS));
 }
 
 static void
@@ -186,7 +246,10 @@ ptyBeginScreen (const char *tty) {
 
     raw();
     noecho();
+
     scrollok(stdscr, TRUE);
+    idlok(stdscr, TRUE);
+    idcok(stdscr, TRUE);
 
     scrollRegionTop = getbegy(stdscr);
     scrollRegionBottom = getmaxy(stdscr) - 1;
@@ -271,9 +334,42 @@ ptyAmWithinScrollRegion (void) {
   return isWithinScrollRegion(segmentHeader->cursorRow);
 }
 
+static void
+logRows (const char *label) {
+  unsigned char bytes[0X20];
+  unsigned char *byte = bytes;
+
+  for (unsigned int row=0; row<27; row+=1) {
+    *byte++ = ptyGetRow(segmentHeader, row, NULL)->text;
+  }
+
+  logBytes(screenLogLevel, "rows %s", bytes, (byte - bytes), label);
+}
+
 void
-ptyScrollLines (int amount) {
-  scrl(amount);
+ptyScrollBackward (unsigned int count) {
+  unsigned int row = scrollRegionTop;
+  unsigned int end = scrollRegionBottom + 1;
+  unsigned int size = end - row;
+
+  if (count > size) count = size;
+  scrl(-count);
+
+  moveRows(row, (row + count), (size - count));
+  fillRows(row, count);
+}
+
+void
+ptyScrollForward (unsigned int count) {
+  unsigned int row = scrollRegionTop;
+  unsigned int end = scrollRegionBottom + 1;
+  unsigned int size = end - row;
+
+  if (count > size) count = size;
+  scrl(count);
+
+  moveRows((row + count), row, (size - count));
+  fillRows((end - count), count);
 }
 
 void
@@ -307,7 +403,7 @@ ptyMoveCursorRight (unsigned int amount) {
 void
 ptyMoveUp1 (void) {
   if (segmentHeader->cursorRow == scrollRegionTop) {
-    ptyScrollLines(-1);
+    ptyScrollBackward(1);
   } else {
     ptyMoveCursorUp(1);
   }
@@ -316,10 +412,15 @@ ptyMoveUp1 (void) {
 void
 ptyMoveDown1 (void) {
   if (segmentHeader->cursorRow == scrollRegionBottom) {
-    ptyScrollLines(1);
+    ptyScrollForward(1);
   } else {
     ptyMoveCursorDown(1);
   }
+}
+
+void
+ptyTabBackward (void) {
+  ptySetCursorColumn(((segmentHeader->cursorColumn - 1) / TABSIZE) * TABSIZE);
 }
 
 void
@@ -328,64 +429,30 @@ ptyTabForward (void) {
 }
 
 void
-ptyTabBackward (void) {
-  ptySetCursorColumn(((segmentHeader->cursorColumn - 1) / TABSIZE) * TABSIZE);
-}
-
-static PtyCharacter *
-setCharacter (unsigned int row, unsigned int column, PtyCharacter **end) {
-  cchar_t wch;
-
-  {
-    unsigned int oldRow = segmentHeader->cursorRow;
-    unsigned int oldColumn = segmentHeader->cursorColumn;
-    int move = (row != oldRow) || (column != oldColumn);
-
-    if (move) ptySetCursorPosition(row, column);
-    in_wch(&wch);
-    if (move) ptySetCursorPosition(oldRow, oldColumn);
-  }
-
-  PtyCharacter *character = ptyGetCharacter(segmentHeader, row, column, end);
-  character->text = wch.chars[0];
-
-  character->blink = wch.attr & A_BLINK;
-  character->bold = wch.attr & A_BOLD;
-  character->underline = wch.attr & A_UNDERLINE;
-  character->reverse = wch.attr & A_REVERSE;
-  character->standout = wch.attr & A_STANDOUT;
-  character->dim = wch.attr & A_DIM;
-
-  short foreground, background;
-  pair_content(wch.ext_color, &foreground, &background);
-  character->foreground = foreground;
-  character->background = background;
-
-  return character;
-}
-
-static PtyCharacter *
-setCurrentCharacter (PtyCharacter **end) {
-  return setCharacter(segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
-}
-
-void
 ptyInsertLines (unsigned int count) {
   if (ptyAmWithinScrollRegion()) {
-    {
-      unsigned int counter = count;
-      while (counter-- > 0) insertln();
-    }
+    unsigned int row = segmentHeader->cursorRow;
+    unsigned int oldTop = scrollRegionTop;
+    unsigned int oldBottom = scrollRegionBottom;
+
+    ptySetScrollRegion(row, scrollRegionBottom);
+    ptyScrollBackward(count);
+    ptySetScrollRegion(oldTop, oldBottom);
+logRows("il");
   }
 }
 
 void
 ptyDeleteLines (unsigned int count) {
   if (ptyAmWithinScrollRegion()) {
-    {
-      unsigned int counter = count;
-      while (counter-- > 0) deleteln();
-    }
+    unsigned int row = segmentHeader->cursorRow;
+    unsigned int oldTop = scrollRegionTop;
+    unsigned int oldBottom = scrollRegionBottom;
+
+    ptySetScrollRegion(row, scrollRegionBottom);
+    ptyScrollForward(count);
+    ptySetScrollRegion(oldTop, oldBottom);
+logRows("dl");
   }
 }
 
@@ -394,25 +461,33 @@ ptyInsertCharacters (unsigned int count) {
   PtyCharacter *end;
   PtyCharacter *from = getCurrentCharacter(&end);
 
+  if ((from + count) > end) count = end - from;
   PtyCharacter *to = from + count;
-  if (to > end) to = end;
-  moveCharacters(to, from, (end - to));
+  moveCharacters(from, to, (end - to));
 
   {
     unsigned int counter = count;
     while (counter-- > 0) insch(' ');
   }
 
-  setCurrentCharacter(NULL);
-  propagateFirstCharacter(from, to);
+  fillCharacters(segmentHeader->cursorRow, segmentHeader->cursorColumn, count);
 }
 
 void
 ptyDeleteCharacters (unsigned int count) {
+  PtyCharacter *end;
+  PtyCharacter *to = getCurrentCharacter(&end);
+
+  if ((to + count) > end) count = end - to;
+  PtyCharacter *from = to + count;
+  if (from < end) moveCharacters(from, to, (end - from));
+
   {
     unsigned int counter = count;
     while (counter-- > 0) delch();
   }
+
+  fillCharacters(segmentHeader->cursorRow, (COLS - count), count);
 }
 
 void
