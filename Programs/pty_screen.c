@@ -18,12 +18,10 @@
 
 #include "prologue.h"
 
-#include <string.h>
-#include <sys/stat.h>
-
 #include "log.h"
 #include "pty_screen.h"
-#include "pty_shared.h"
+#include "scr_emulator.h"
+#include "msg_queue.h"
 
 static unsigned char screenLogLevel = LOG_DEBUG;
 
@@ -75,41 +73,60 @@ initializeColorPairs (void) {
   }
 }
 
-static unsigned int segmentSize = 0;
+static int haveTerminalMessageQueue = 0;
+static int terminalMessageQueue;
+static int haveTerminalInputHandler = 0;
+
+static int
+sendTerminalMessage (MessageType type, const void *content, size_t length) {
+  if (!haveTerminalMessageQueue) return 0;
+  return sendMessage(terminalMessageQueue, type, content, length, 0);
+}
+
+static int
+startTerminalMessageReceiver (const char *name, MessageType type, size_t size, MessageHandler *handler, void *data) {
+  if (!haveTerminalMessageQueue) return 0;
+  return startMessageReceiver(name, terminalMessageQueue, type, size, handler, data);
+}
+
+static void
+messageHandler_terminalInput (const MessageHandlerParameters *parameters) {
+  PtyObject *pty = parameters->data;
+  const unsigned char *content = parameters->content;
+  size_t length = parameters->length;
+
+  ptyWriteInput(pty, content, length);
+}
+
+static void
+enableMessages (key_t key) {
+  haveTerminalMessageQueue = createMessageQueue(&terminalMessageQueue, key);
+}
+
 static int segmentIdentifier = 0;
-static PtyHeader *segmentHeader = NULL;
-
-void
-ptyLogSegment (const char *label) {
-  logBytes(screenLogLevel, "pty segment: %s", segmentHeader, segmentSize, label);
-}
+static ScreenSegmentHeader *segmentHeader = NULL;
 
 static int
-releaseSegment (void) {
-  if (shmctl(segmentIdentifier, IPC_RMID, NULL) != -1) return 1;
-  logSystemError("shmctl[IPC_RMID]");
-  return 0;;
-}
-
-static int
-allocateSegment (const char *tty) {
-  segmentSize = (sizeof(PtyCharacter) * COLS * LINES) + sizeof(PtyHeader);
-  key_t key = ptyMakeSegmentKey(tty);
-
-  int found = ptyGetSegmentIdentifier(key, &segmentIdentifier);
-  if (found) releaseSegment();
-
-  {
-    int flags = IPC_CREAT | S_IRUSR | S_IWUSR;
-    found = (segmentIdentifier = shmget(key, segmentSize, flags)) != -1;
+destroySegment (void) {
+  if (haveTerminalMessageQueue) {
+    destroyMessageQueue(terminalMessageQueue);
+    haveTerminalMessageQueue = 0;
   }
 
-  if (found) {
-    segmentHeader = ptyAttachSegment(segmentIdentifier);
-    if (segmentHeader) return 1;
-    releaseSegment();
-  } else {
-    logSystemError("shmget");
+  return destroyScreenSegment(segmentIdentifier);
+}
+
+static int
+createSegment (const char *path) {
+  key_t key;
+
+  if (makeTerminalKey(&key, path)) {
+    segmentHeader = createScreenSegment(&segmentIdentifier, key, COLS, LINES);
+
+    if (segmentHeader) {
+      enableMessages(key);
+      return 1;
+    }
   }
 
   return 0;
@@ -121,8 +138,15 @@ storeCursorPosition (void) {
   segmentHeader->cursorColumn = getcurx(stdscr);
 }
 
-static PtyCharacter *
-setCharacter (unsigned int row, unsigned int column, PtyCharacter **end) {
+static void
+setColor (ScreenSegmentColor *ssc, unsigned char color, unsigned char level) {
+  if (color & COLOR_RED) ssc->red = level;
+  if (color & COLOR_GREEN) ssc->green = level;
+  if (color & COLOR_BLUE) ssc->blue = level;
+}
+
+static ScreenSegmentCharacter *
+setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **end) {
   cchar_t wch;
 
   {
@@ -135,63 +159,68 @@ setCharacter (unsigned int row, unsigned int column, PtyCharacter **end) {
     if (move) ptySetCursorPosition(oldRow, oldColumn);
   }
 
-  PtyCharacter *character = ptyGetCharacter(segmentHeader, row, column, end);
-  character->text = wch.chars[0];
+  ScreenSegmentCharacter character = {
+    .text = wch.chars[0],
+  };
 
-  character->blink = wch.attr & A_BLINK;
-  character->bold = wch.attr & A_BOLD;
-  character->underline = wch.attr & A_UNDERLINE;
-  character->reverse = wch.attr & A_REVERSE;
-  character->standout = wch.attr & A_STANDOUT;
-  character->dim = wch.attr & A_DIM;
+  {
+    short fgColor, bgColor;
+    pair_content(wch.ext_color, &fgColor, &bgColor);
 
-  short foreground, background;
-  pair_content(wch.ext_color, &foreground, &background);
-  character->foreground = foreground;
-  character->background = background;
+    unsigned char bgLevel = SCREEN_SEGMENT_COLOR_LEVEL;
+    unsigned char fgLevel = bgLevel;
 
-  return character;
+    if (wch.attr & (A_BOLD | A_STANDOUT)) fgLevel = 0XFF;
+    if (wch.attr & A_DIM) fgLevel >>= 1, bgLevel >>= 1;
+
+    {
+      ScreenSegmentColor *cfg, *cbg;
+
+      if (wch.attr & A_REVERSE) {
+        cfg = &character.background;
+        cbg = &character.foreground;
+      } else {
+        cfg = &character.foreground;
+        cbg = &character.background;
+      }
+
+      setColor(cfg, fgColor, fgLevel);
+      setColor(cbg, bgColor, bgLevel);
+    }
+  }
+
+  if (wch.attr & A_BLINK) character.blink = 1;
+  if (wch.attr & A_UNDERLINE) character.underline = 1;
+
+  {
+    ScreenSegmentCharacter *location = getScreenCharacter(segmentHeader, row, column, end);
+    *location = character;
+    return location;
+  }
 }
 
-static PtyCharacter *
-setCurrentCharacter (PtyCharacter **end) {
+static ScreenSegmentCharacter *
+setCurrentCharacter (ScreenSegmentCharacter **end) {
   return setCharacter(segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
 }
 
-static PtyCharacter *
-getCurrentCharacter (PtyCharacter **end) {
-  return ptyGetCharacter(segmentHeader, segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
-}
-
-static void
-setCharacters (PtyCharacter *from, const PtyCharacter *to, const PtyCharacter *character) {
-  while (from < to) *from++ = *character;
-}
-
-static void
-propagateFirstCharacter (PtyCharacter *from, const PtyCharacter *to) {
-  setCharacters(from+1, to, from);
-}
-
-static void
-moveCharacters (const PtyCharacter *from, PtyCharacter *to, unsigned int count) {
-  if (count && (from != to)) {
-    memmove(to, from, (count * sizeof(*from)));
-  }
+static ScreenSegmentCharacter *
+getCurrentCharacter (ScreenSegmentCharacter **end) {
+  return getScreenCharacter(segmentHeader, segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
 }
 
 static void
 fillCharacters (unsigned int row, unsigned int column, unsigned int count) {
-  PtyCharacter *from = setCharacter(row, column, NULL);
-  propagateFirstCharacter(from, (from + count));
+  ScreenSegmentCharacter *from = setCharacter(row, column, NULL);
+  propagateScreenCharacter(from, (from + count));
 }
 
 static void
 moveRows (unsigned int from, unsigned int to, unsigned int count) {
   if (count && (from != to)) {
-    moveCharacters(
-      ptyGetRow(segmentHeader, from, NULL),
-      ptyGetRow(segmentHeader, to, NULL),
+    moveScreenCharacters(
+      getScreenRow(segmentHeader, to, NULL),
+      getScreenRow(segmentHeader, from, NULL),
       (count * COLS)
     );
   }
@@ -202,36 +231,6 @@ fillRows (unsigned int row, unsigned int count) {
   fillCharacters(row, 0, (count * COLS));
 }
 
-static void
-initializeCharacters (PtyCharacter *from, const PtyCharacter *to) {
-  const PtyCharacter initializer = {
-    .text = ' ',
-    .foreground = defaultForegroundColor,
-    .background = defaultBackgroundColor,
-  };
-
-  setCharacters(from, to, &initializer);
-}
-
-static void
-initializeHeader (void) {
-  segmentHeader->headerSize = sizeof(*segmentHeader);
-  segmentHeader->segmentSize = segmentSize;
-
-  segmentHeader->characterSize = sizeof(PtyCharacter);
-  segmentHeader->charactersOffset = segmentHeader->headerSize;
-
-  segmentHeader->screenHeight = LINES;
-  segmentHeader->screenWidth = COLS;
-  storeCursorPosition();;
-
-  {
-    PtyCharacter *from = ptyGetScreenStart(segmentHeader);
-    const PtyCharacter *to = ptyGetScreenEnd(segmentHeader);
-    initializeCharacters(from, to);
-  }
-}
-
 static unsigned int scrollRegionTop;
 static unsigned int scrollRegionBottom;
 
@@ -239,7 +238,10 @@ static unsigned int savedCursorRow = 0;
 static unsigned int savedCursorColumn = 0;
 
 int
-ptyBeginScreen (const char *tty) {
+ptyBeginScreen (PtyObject *pty) {
+  haveTerminalMessageQueue = 0;
+  haveTerminalInputHandler = 0;
+
   if (initscr()) {
     intrflush(stdscr, FALSE);
     keypad(stdscr, TRUE);
@@ -265,8 +267,14 @@ ptyBeginScreen (const char *tty) {
       initializeColorPairs();
     }
 
-    if (allocateSegment(tty)) {
-      initializeHeader();
+    if (createSegment(ptyGetPath(pty))) {
+      storeCursorPosition();
+
+      haveTerminalInputHandler = startTerminalMessageReceiver(
+        "terminal-input-receiver", TERMINAL_MESSAGE_INPUT,
+        0X200, messageHandler_terminalInput, pty
+      );
+
       return 1;
     }
 
@@ -279,12 +287,13 @@ ptyBeginScreen (const char *tty) {
 void
 ptyEndScreen (void) {
   endwin();
-  ptyDetachSegment(segmentHeader);
-  releaseSegment();
+  detachScreenSegment(segmentHeader);
+  destroySegment();
 }
 
 void
 ptyRefreshScreen (void) {
+  sendTerminalMessage(TERMINAL_MESSAGE_UPDATED, NULL, 0);
   refresh();
 }
 
@@ -332,18 +341,6 @@ isWithinScrollRegion (unsigned int row) {
 int
 ptyAmWithinScrollRegion (void) {
   return isWithinScrollRegion(segmentHeader->cursorRow);
-}
-
-static void
-logRows (const char *label) {
-  unsigned char bytes[0X20];
-  unsigned char *byte = bytes;
-
-  for (unsigned int row=0; row<27; row+=1) {
-    *byte++ = ptyGetRow(segmentHeader, row, NULL)->text;
-  }
-
-  logBytes(screenLogLevel, "rows %s", bytes, (byte - bytes), label);
 }
 
 void
@@ -438,7 +435,6 @@ ptyInsertLines (unsigned int count) {
     ptySetScrollRegion(row, scrollRegionBottom);
     ptyScrollBackward(count);
     ptySetScrollRegion(oldTop, oldBottom);
-logRows("il");
   }
 }
 
@@ -452,18 +448,17 @@ ptyDeleteLines (unsigned int count) {
     ptySetScrollRegion(row, scrollRegionBottom);
     ptyScrollForward(count);
     ptySetScrollRegion(oldTop, oldBottom);
-logRows("dl");
   }
 }
 
 void
 ptyInsertCharacters (unsigned int count) {
-  PtyCharacter *end;
-  PtyCharacter *from = getCurrentCharacter(&end);
+  ScreenSegmentCharacter *end;
+  ScreenSegmentCharacter *from = getCurrentCharacter(&end);
 
   if ((from + count) > end) count = end - from;
-  PtyCharacter *to = from + count;
-  moveCharacters(from, to, (end - to));
+  ScreenSegmentCharacter *to = from + count;
+  moveScreenCharacters(to, from, (end - to));
 
   {
     unsigned int counter = count;
@@ -475,12 +470,12 @@ ptyInsertCharacters (unsigned int count) {
 
 void
 ptyDeleteCharacters (unsigned int count) {
-  PtyCharacter *end;
-  PtyCharacter *to = getCurrentCharacter(&end);
+  ScreenSegmentCharacter *end;
+  ScreenSegmentCharacter *to = getCurrentCharacter(&end);
 
   if ((to + count) > end) count = end - to;
-  PtyCharacter *from = to + count;
-  if (from < end) moveCharacters(from, to, (end - from));
+  ScreenSegmentCharacter *from = to + count;
+  if (from < end) moveScreenCharacters(to, from, (end - from));
 
   {
     unsigned int counter = count;
@@ -522,7 +517,7 @@ ptyRemoveAttributes (attr_t attributes) {
 }
 
 static void
-setColor (void) {
+setCharacterColors (void) {
   attroff(A_COLOR);
   attron(COLOR_PAIR(toColorPair(currentForegroundColor, currentBackgroundColor)));
 }
@@ -531,32 +526,32 @@ void
 ptySetForegroundColor (int color) {
   if (color == -1) color = defaultForegroundColor;
   currentForegroundColor = color;
-  setColor();
+  setCharacterColors();
 }
 
 void
 ptySetBackgroundColor (int color) {
   if (color == -1) color = defaultBackgroundColor;
   currentBackgroundColor = color;
-  setColor();
+  setCharacterColors();
 }
 
 void
 ptyClearToEndOfDisplay (void) {
   clrtobot();
 
-  PtyCharacter *from = setCurrentCharacter(NULL);
-  const PtyCharacter *to = ptyGetScreenEnd(segmentHeader);
-  propagateFirstCharacter(from, to);
+  ScreenSegmentCharacter *from = setCurrentCharacter(NULL);
+  const ScreenSegmentCharacter *to = getScreenEnd(segmentHeader);
+  propagateScreenCharacter(from, to);
 }
 
 void
 ptyClearToEndOfLine (void) {
   clrtoeol();
 
-  PtyCharacter *to;
-  PtyCharacter *from = setCurrentCharacter(&to);
-  propagateFirstCharacter(from, to);
+  ScreenSegmentCharacter *to;
+  ScreenSegmentCharacter *from = setCurrentCharacter(&to);
+  propagateScreenCharacter(from, to);
 }
 
 void

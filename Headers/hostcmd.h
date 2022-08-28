@@ -26,11 +26,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-  unsigned asynchronous:1;
-
   FILE **standardInput;
   FILE **standardOutput;
   FILE **standardError;
+
+  unsigned char asynchronous:1;
 } HostCommandOptions;
 
 extern void initializeHostCommandOptions (HostCommandOptions *options);

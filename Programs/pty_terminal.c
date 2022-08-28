@@ -83,14 +83,14 @@ static unsigned char bracketedPasteMode = 0;
 static unsigned char absoluteCursorAddressingMode = 0;
 
 int
-ptyBeginTerminal (const char *tty) {
+ptyBeginTerminal (PtyObject *pty) {
   insertMode = 0;
   alternateCharsetMode = 0;
   keypadTransmitMode = 0;
   bracketedPasteMode = 0;
   absoluteCursorAddressingMode = 0;
 
-  return ptyBeginScreen(tty);
+  return ptyBeginScreen(pty);
 }
 
 void
@@ -114,7 +114,7 @@ showAlert (void) {
 }
 
 void
-ptyProcessTerminalInput (int fd) {
+ptyProcessTerminalInput (PtyObject *pty) {
   int character = getch();
   const char *sequence = NULL;
   char buffer[0X20];
@@ -179,7 +179,7 @@ ptyProcessTerminalInput (int fd) {
     logBytes(terminalLogLevel, "input: 0X%02X (%s)", sequence, count, character, name);
   }
 
-  write(fd, sequence, count);
+  ptyWriteInput(pty, sequence, count);
 }
 
 static unsigned char outputByteBuffer[0X40];
@@ -520,6 +520,11 @@ performBracketAction_m (unsigned char byte) {
         ptyAddAttributes(A_REVERSE);
         continue;
 
+      case 22:
+        logOutputAction("normal", "bold/dim off");
+        ptyRemoveAttributes(A_BOLD | A_DIM);
+        continue;
+
       case 23:
         logOutputAction("rmso", "standout off");
         ptyRemoveAttributes(A_STANDOUT);
@@ -528,6 +533,16 @@ performBracketAction_m (unsigned char byte) {
       case 24:
         logOutputAction("rmul", "underline off");
         ptyRemoveAttributes(A_UNDERLINE);
+        continue;
+
+      case 25:
+        logOutputAction("unblink", "blink off");
+        ptyRemoveAttributes(A_BLINK);
+        continue;
+
+      case 27:
+        logOutputAction("unrev", "reverse video off");
+        ptyRemoveAttributes(A_REVERSE);
         continue;
     }
 

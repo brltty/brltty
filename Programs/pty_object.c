@@ -108,3 +108,10 @@ int
 ptyGetMaster (const PtyObject *pty) {
   return pty->master;
 }
+
+int
+ptyWriteInput (PtyObject *pty, const void *data, size_t length) {
+  if (write(pty->master, data, length) != -1) return 1;
+  logSystemError("pty write input");
+  return 0;
+}

@@ -34,6 +34,8 @@ extern int ptyGetMaster (const PtyObject *pty);
 extern int ptyOpenSlave (const PtyObject *pty, int *fileDescriptor);
 extern void ptyCloseMaster (PtyObject *pty);
 
+extern int ptyWriteInput (PtyObject *pty, const void *data, size_t length);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -19,16 +19,16 @@
 /* not done yet:
  * parent: no curses
  * parent: no segment
+ * parent: terminal tye list
  * parent: SIGTERM SIGINT SIGQUIT
  * screen: resize
- * screen: driver
- * segment: insertLines()
- * segment: deleteLines()
+ * screen: driver: insertKey()
  */
 
 #include "prologue.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <errno.h>
 #include <limits.h>
 #include <sys/wait.h>
@@ -43,15 +43,23 @@
 #include "async_io.h"
 #include "async_signal.h"
 
+static int opt_driverDirectives;
 static int opt_ttyPath;
+
 static int opt_logOutputActions;
 static int opt_logTerminalInput;
 static int opt_logTerminalOutput;
 static int opt_logUnexpectedSequences;
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .word = "driver-directives",
+    .letter = 'd',
+    .setting.flag = &opt_driverDirectives,
+    .description = strtext("write driver directives to standard error")
+  },
+
   { .word = "tty-path",
-    .letter = 'p',
+    .letter = 't',
     .setting.flag = &opt_ttyPath,
     .description = strtext("show the path to the pty slave")
   },
@@ -84,6 +92,25 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("log unexpected output escape sequences")
   },
 END_OPTION_TABLE
+
+static void writeDriverDirective (const char *format, ...) PRINTF(1, 2);
+
+static void
+writeDriverDirective (const char *format, ...) {
+  if (opt_driverDirectives) {
+    va_list args;
+    va_start(args, format);
+
+    {
+      FILE *stream = stderr;
+      vfprintf(stream, format, args);
+      fputc('\n', stream);
+      fflush(stream);
+    }
+
+    va_end(args);
+  }
+}
 
 static int
 setEnvironmentString (const char *variable, const char *string) {
@@ -181,16 +208,16 @@ runChild (PtyObject *pty, char **command) {
 static
 ASYNC_MONITOR_CALLBACK(standardInputMonitor) {
   PtyObject *pty = parameters->data;
-  ptyProcessTerminalInput(ptyGetMaster(pty));
+  ptyProcessTerminalInput(pty);
   return 1;
 }
 
 static unsigned char childHasTerminated;
-static unsigned char slaveIsClosed;
+static unsigned char slaveHasBeenClosed;
 
 static
 ASYNC_CONDITION_TESTER(childTerminationTester) {
-  return childHasTerminated && slaveIsClosed;
+  return childHasTerminated && slaveHasBeenClosed;
 }
 
 static
@@ -205,7 +232,7 @@ ASYNC_INPUT_CALLBACK(ptyInputHandler) {
     return length;
   }
 
-  slaveIsClosed = 1;
+  slaveHasBeenClosed = 1;
   return 0;
 }
 
@@ -215,7 +242,7 @@ childTerminationHandler (int signalNumber) {
 }
 
 static int
-getExitStatus (pid_t pid) {
+reapExitStatus (pid_t pid) {
   while (1) {
     int status;
     pid_t result = waitpid(pid, &status, 0);
@@ -251,23 +278,24 @@ runParent (PtyObject *pty, pid_t child) {
   AsyncHandle ptyInputHandle;
 
   childHasTerminated = 0;
-  slaveIsClosed = 0;
+  slaveHasBeenClosed = 0;
 
   if (asyncReadFile(&ptyInputHandle, ptyGetMaster(pty), 1, ptyInputHandler, NULL)) {
     AsyncHandle standardInputHandle;
 
-    if (asyncMonitorFileInput(&standardInputHandle, 0, standardInputMonitor, pty)) {
+    if (asyncMonitorFileInput(&standardInputHandle, STDIN_FILENO, standardInputMonitor, pty)) {
       if (asyncHandleSignal(SIGCHLD, childTerminationHandler, NULL)) {
         if (!isatty(2)) ptySetTerminalLogLevel(LOG_NOTICE);
 
-        if (ptyBeginTerminal(ptyGetPath(pty))) {
+        if (ptyBeginTerminal(pty)) {
+          writeDriverDirective("path %s", ptyGetPath(pty));
           asyncAwaitCondition(INT_MAX, childTerminationTester, NULL);
           ptyEndTerminal();
         } else {
           kill(child, SIGTERM);
         }
 
-        exitStatus = getExitStatus(child);
+        exitStatus = reapExitStatus(child);
       }
 
       asyncCancelRequest(standardInputHandle);

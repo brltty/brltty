@@ -16,34 +16,31 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_PTY_TERMINAL
-#define BRLTTY_INCLUDED_PTY_TERMINAL
-
-#include "pty_object.h"
+#ifndef BRLTTY_INCLUDED_MSG_QUEUE
+#define BRLTTY_INCLUDED_MSG_QUEUE
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern const char *ptyGetTerminalType (void);
+typedef long int MessageType;
 
-extern int ptyBeginTerminal (PtyObject *pty);
-extern void ptyEndTerminal (void);
-extern void ptySynchronizeTerminal (void);
+extern int sendMessage (int queue, MessageType type, const void *content, size_t length, int flags);
+extern ssize_t receiveMessage (int queue, MessageType *type, void *buffer, size_t size, int flags);
 
-extern void ptyProcessTerminalInput (PtyObject *pty);
+typedef struct {
+  void *data;
+  MessageType type;
 
-extern int ptyParseOutputByte (unsigned char byte);
-extern int ptyParseOutputBytes (const unsigned char *bytes, size_t count);
+  size_t length;
+  unsigned char content[];
+} MessageHandlerParameters;
 
-extern void ptySetTerminalLogLevel (unsigned char level);
-extern void ptySetLogOutputActions (int yes);
-extern void ptySetLogTerminalInput (int yes);
-extern void ptySetLogTerminalOutput (int yes);
-extern void ptySetLogUnexpectedSequences (int yes);
+typedef void MessageHandler (const MessageHandlerParameters *parameters);
+extern int startMessageReceiver (const char *name, int queue, MessageType type, size_t size, MessageHandler *handler, void *data);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_PTY_TERMINAL */
+#endif /* BRLTTY_INCLUDED_MSG_QUEUE */

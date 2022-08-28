@@ -1870,6 +1870,7 @@ in
 esac
 
 AC_CHECK_HEADER([sys/shm.h], [dnl
+   BRLTTY_SCREEN_DRIVER([em], [TerminalEmulator])
    BRLTTY_SCREEN_DRIVER([sc], [Screen])
 ])
 

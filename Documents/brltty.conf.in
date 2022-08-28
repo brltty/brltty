@@ -698,6 +698,7 @@
 #screen-driver	an	# Android
 #screen-driver	as	# AtSpi
 #screen-driver	a2	# AtSpi2
+#screen-driver	em	# Terminal Emulator
 #screen-driver	hd	# Hurd
 #screen-driver	lx	# Linux
 #screen-driver	pb	# PcBios
@@ -731,6 +732,9 @@
 #screen-parameters lx:Unicode=yes # [yes,no]
 #screen-parameters lx:VT=0 # [0-63]
 #screen-parameters lx:WidecharPadding=no # [no,yes]
+
+# Terminal Emulator Screen Driver Parameters
+#screen-parameters em:Emulator= # [brltty-pty]
 
 # Windows Screen Driver Parameters
 #screen-parameters wn:Root=no # [no,yes]

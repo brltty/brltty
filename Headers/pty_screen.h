@@ -19,13 +19,14 @@
 #ifndef BRLTTY_INCLUDED_PTY_SCREEN
 #define BRLTTY_INCLUDED_PTY_SCREEN
 
+#include "pty_object.h"
 #include "get_curses.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern int ptyBeginScreen (const char *tty);
+extern int ptyBeginScreen (PtyObject *pty);
 extern void ptyEndScreen (void);
 extern void ptyRefreshScreen (void);
 
@@ -71,7 +72,6 @@ extern void ptyClearToEndOfLine (void);
 extern void ptyClearToBeginningOfLine (void);
 
 extern void ptySetScreenLogLevel (unsigned char level);
-extern void ptyLogSharedSegment (const char *label);
 
 #ifdef __cplusplus
 }

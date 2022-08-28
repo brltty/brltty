@@ -976,7 +976,18 @@ scrtest.$O:
 
 ###############################################################################
 
-BRLTTY_PTY_OBJECTS = brltty-pty.$O $(PROGRAM_OBJECTS) pty_object.$O pty_terminal.$O pty_screen.$O pty_shared.$O
+TERMINAL_EMULATOR_OBJECTS = scr_terminal.$O scr_emulator.$O msg_queue.$O
+
+scr_terminal.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_terminal.c
+
+scr_emulator.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_emulator.c
+
+msg_queue.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/msg_queue.c
+
+BRLTTY_PTY_OBJECTS = brltty-pty.$O $(PROGRAM_OBJECTS) pty_object.$O pty_terminal.$O pty_screen.$O $(TERMINAL_EMULATOR_OBJECTS)
 
 brltty-pty$X: $(BRLTTY_PTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_PTY_OBJECTS) $(CURSES_LIBS) $(LDLIBS)
@@ -992,9 +1003,6 @@ pty_terminal.$O:
 
 pty_screen.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/pty_screen.c
-
-pty_shared.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/pty_shared.c
 
 ###############################################################################
 
