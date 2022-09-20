@@ -142,7 +142,6 @@ prfword hypnosen 125-6-13456-1234-1345-135-234-14
 always infanterie 35-124-235-2345-12456-346
 prfword infanterien 35-124-235-2345-12456-24-14
 prfword imitat =
-always impfungleich 24-134-1234-124-256-1245-1456 shouldn't use the ung-contraction
 always johannis 245-135-125-235-1345-24-234
 always johannisbeer 245-135-125-235-1345-24-234-12-15-15-1235
 before lnr always kamera 13-1-134-12456-1
@@ -280,6 +279,7 @@ always tuberkulose 2345-136-12-12456-13-136-123-135-234-15
 prfword tuberkulosen 2345-136-12-12456-13-136-123-135-234-14
 before lnr always tundra 2345-256-145-1235-1
 sufword ultra =
+always ungleich 256-1245-1456 shouldn't use the ung-contraction
 always vegetarier 1236-15-12346-2345-356-24-12456
 before l always vokal 1236-135-13-25
 always völkerkunde 5-1236-13-12456-13-256-145-15
