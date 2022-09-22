@@ -1517,7 +1517,7 @@ addIncompleteBindings (KeyContext *ctx) {
   if (!count) return 1;
 
   size_t size = count * sizeof(*ctx->keyBindings.table);
-  KeyBinding bindings[size];
+  KeyBinding* bindings = (KeyBinding *) malloc(size * sizeof(KeyBinding)) ;
   memcpy(bindings, ctx->keyBindings.table, size);
 
   const KeyBinding *binding = bindings;
@@ -1525,11 +1525,14 @@ addIncompleteBindings (KeyContext *ctx) {
 
   while (binding < end) {
     const KeyCombination *combination = &binding->keyCombination;
-    if (!addIncompleteBinding(ctx, combination->modifierKeys, combination->modifierCount)) return 0;
-    if (!addIncompleteSubbindings(ctx, combination->modifierKeys, combination->modifierCount)) return 0;
+    if (!addIncompleteBinding(ctx, combination->modifierKeys, combination->modifierCount)
+      || !addIncompleteSubbindings(ctx, combination->modifierKeys, combination->modifierCount)) {
+      free(bindings);
+      return 0;
+    }
     binding += 1;
   }
-
+  free(bindings);
   return 1;
 }
 
