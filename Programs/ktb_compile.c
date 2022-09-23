@@ -1517,7 +1517,7 @@ addIncompleteBindings (KeyContext *ctx) {
   if (!count) return 1;
 
   size_t size = count * sizeof(*ctx->keyBindings.table);
-  KeyBinding bindings[size];
+  KeyBinding bindings[count];
   memcpy(bindings, ctx->keyBindings.table, size);
 
   const KeyBinding *binding = bindings;
