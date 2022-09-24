@@ -30,9 +30,9 @@ openjdk11
 pcre2
 pkgconf
 polkit
-python37
-py37-cython
-py37-docutils
+python39
+py39-cython
+py39-docutils
 speech-dispatcher
 tcl87
 xorgproto
