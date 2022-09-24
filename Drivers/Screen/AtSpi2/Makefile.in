@@ -24,16 +24,14 @@ DRIVER_DEVELOPERS =
 SCR_OBJS = @screen_libraries_a2@
 include $(SRC_TOP)screen.mk
 
-SRC_FILES = a2_screen.c
+OBJECT_FILES = a2_screen.$O xsel.$O
 
-OBJ_FILES = $(SRC_FILES:.c=.$O) $(XSEL_OBJECT)
-
-screen.$O: $(OBJ_FILES)
-	$(MKREL) $@ $(OBJ_FILES)
-
-xsel.$O: $(SRC_TOP)$(PGM_DIR)/xsel.c
-	$(CC) $(SCR_CFLAGS) -c $<
+screen.$O: $(OBJECT_FILES)
+	$(MKREL) $@ $(OBJECT_FILES)
 
 a2_screen.$O:
 	$(CC) $(SCR_CFLAGS) $(ATSPI2_INCLUDES) $(DBUS_INCLUDES) $(GLIB2_INCLUDES) -c $(SRC_DIR)/a2_screen.c
+
+%.$O: $(SRC_TOP)$(PGM_DIR)/%.c $(SRC_TOP)$(HDR_DIR)/%.h
+	$(CC) $(SCR_CFLAGS) -c $<
 

@@ -31,9 +31,6 @@ screen.$O: $(OBJECT_FILES)
 em_screen.$O:
 	$(CC) $(SCR_CFLAGS) -c $(SRC_DIR)/em_screen.c
 
-scr_terminal.$O: $(SRC_TOP)$(PGM_DIR)/scr_terminal.c $(SRC_TOP)$(HDR_DIR)/scr_terminal.h
-	$(CC) $(SCR_CFLAGS) -c $<
-
-msg_queue.$O: $(SRC_TOP)$(PGM_DIR)/msg_queue.c $(SRC_TOP)$(HDR_DIR)/msg_queue.h
+%.$O: $(SRC_TOP)$(PGM_DIR)/%.c $(SRC_TOP)$(HDR_DIR)/%.h
 	$(CC) $(SCR_CFLAGS) -c $<
 
