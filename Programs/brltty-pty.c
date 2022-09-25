@@ -17,12 +17,9 @@
  */
 
 /* not done yet:
- * parent: no curses
- * parent: no segment
- * parent: terminal tye list
+ * parent: terminal type list
  * parent: SIGTERM SIGINT SIGQUIT
  * screen: resize
- * screen: driver: insertKey()
  */
 
 #include "prologue.h"
@@ -190,7 +187,7 @@ runChild (PtyObject *pty, char **command) {
     if (result == -1) {
       switch (errno) {
         case ENOENT:
-          logMessage(LOG_ERR, "command not found: %s", *command);
+          logMessage(LOG_ERR, "%s: %s", gettext("command not found"), *command);
           return PROG_EXIT_SEMANTIC;
 
         default:
@@ -326,6 +323,16 @@ main (int argc, char *argv[]) {
   ptySetLogTerminalInput(opt_logTerminalInput);
   ptySetLogTerminalOutput(opt_logTerminalOutput);
   ptySetLogUnexpectedSequences(opt_logUnexpectedSequences);
+
+  if (!isatty(STDIN_FILENO)) {
+    logMessage(LOG_ERR, "%s", gettext("standard input isn't a terminal"));
+    return PROG_EXIT_SEMANTIC;
+  }
+
+  if (!isatty(STDOUT_FILENO)) {
+    logMessage(LOG_ERR, "%s", gettext("standard output isn't a terminal"));
+    return PROG_EXIT_SEMANTIC;
+  }
 
   if ((pty = ptyNewObject())) {
     const char *ttyPath = ptyGetPath(pty);

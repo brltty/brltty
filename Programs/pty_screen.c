@@ -157,18 +157,21 @@ setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **en
     int move = (row != oldRow) || (column != oldColumn);
     if (move) ptySetCursorPosition(row, column);
 
-#ifdef GOT_CURSES_WCH
-    cchar_t wch;
-    in_wch(&wch);
-    text = wch.chars[0];
-    attributes = wch.attr;
-    colorPair = wch.ext_color;
-#else /* GOT_CURSES_WCH */
-    int ch = inch();
-    text = ch & A_CHARTEXT;
-    attributes = ch & A_ATTRIBUTES;
-    colorPair = PAIR_NUMBER(ch);
-#endif /* GOT_CURSES_WCH */
+    {
+    #ifdef GOT_CURSES_WCH
+      cchar_t character;
+      in_wch(&character);
+
+      text = character.chars[0];
+      attributes = character.attr;
+      colorPair = character.ext_color;
+    #else /* GOT_CURSES_WCH */
+      int character = inch();
+      text = character & A_CHARTEXT;
+      attributes = character & A_ATTRIBUTES;
+      colorPair = PAIR_NUMBER(character);
+    #endif /* GOT_CURSES_WCH */
+    }
 
     if (move) ptySetCursorPosition(oldRow, oldColumn);
   }
