@@ -1977,17 +1977,17 @@ static int
 doKeyboardCommand (EditTableData *etd) {
 #undef IS_UNICODE_CHARACTER
 #if defined(GOT_CURSES)
-#ifdef GOT_CURSES_GET_WCH
+#ifdef GOT_CURSES_WCH
 #define IS_UNICODE_CHARACTER
   wint_t ch;
   int ret = get_wch(&ch);
 
   if (ret == KEY_CODE_YES)
-#else /* GOT_CURSES_GET_WCH */
+#else /* GOT_CURSES_WCH */
   int ch = getch();
 
   if (ch >= 0X100)
-#endif /* GOT_CURSES_GET_WCH */
+#endif /* GOT_CURSES_WCH */
   {
     switch (ch) {
       case KEY_LEFT:
@@ -2067,9 +2067,9 @@ doKeyboardCommand (EditTableData *etd) {
     }
   } else
 
-#ifdef GOT_CURSES_GET_WCH
+#ifdef GOT_CURSES_WCH
   if (ret == OK)
-#endif /* GOT_CURSES_GET_WCH */
+#endif /* GOT_CURSES_WCH */
 #else /* standard input/output */
   int handled = 1;
 

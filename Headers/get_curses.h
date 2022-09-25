@@ -21,7 +21,7 @@
 
 #include "prologue.h"
 #undef GOT_CURSES
-#undef GOT_CURSES_GET_WCH
+#undef GOT_CURSES_WCH
 
 #if defined(HAVE_PKG_CURSES)
 #define GOT_CURSES
@@ -33,7 +33,7 @@
 
 #elif defined(HAVE_PKG_NCURSESW)
 #define GOT_CURSES
-#define GOT_CURSES_GET_WCH
+#define GOT_CURSES_WCH
 #include <ncursesw/ncurses.h>
 
 #elif defined(HAVE_PKG_PDCURSES)
@@ -46,7 +46,7 @@
 
 #elif defined(HAVE_PKG_PDCURSESW)
 #define GOT_CURSES
-#define GOT_CURSES_GET_WCH
+#define GOT_CURSES_WCH
 #define PDC_WIDE
 #include <curses.h>
 

@@ -147,36 +147,50 @@ setColor (ScreenSegmentColor *ssc, unsigned char color, unsigned char level) {
 
 static ScreenSegmentCharacter *
 setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **end) {
-  cchar_t wch;
+  wchar_t text;
+  int attributes;
+  int colorPair;
 
   {
     unsigned int oldRow = segmentHeader->cursorRow;
     unsigned int oldColumn = segmentHeader->cursorColumn;
     int move = (row != oldRow) || (column != oldColumn);
-
     if (move) ptySetCursorPosition(row, column);
+
+#ifdef GOT_CURSES_WCH
+    cchar_t wch;
     in_wch(&wch);
+    text = wch.chars[0];
+    attributes = wch.attr;
+    colorPair = wch.ext_color;
+#else /* GOT_CURSES_WCH */
+    int ch = inch();
+    text = ch & A_CHARTEXT;
+    attributes = ch & A_ATTRIBUTES;
+    colorPair = PAIR_NUMBER(ch);
+#endif /* GOT_CURSES_WCH */
+
     if (move) ptySetCursorPosition(oldRow, oldColumn);
   }
 
   ScreenSegmentCharacter character = {
-    .text = wch.chars[0],
+    .text = text,
   };
 
   {
     short fgColor, bgColor;
-    pair_content(wch.ext_color, &fgColor, &bgColor);
+    pair_content(colorPair, &fgColor, &bgColor);
 
     unsigned char bgLevel = SCREEN_SEGMENT_COLOR_LEVEL;
     unsigned char fgLevel = bgLevel;
 
-    if (wch.attr & (A_BOLD | A_STANDOUT)) fgLevel = 0XFF;
-    if (wch.attr & A_DIM) fgLevel >>= 1, bgLevel >>= 1;
+    if (attributes & (A_BOLD | A_STANDOUT)) fgLevel = 0XFF;
+    if (attributes & A_DIM) fgLevel >>= 1, bgLevel >>= 1;
 
     {
       ScreenSegmentColor *cfg, *cbg;
 
-      if (wch.attr & A_REVERSE) {
+      if (attributes & A_REVERSE) {
         cfg = &character.background;
         cbg = &character.foreground;
       } else {
@@ -189,8 +203,8 @@ setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **en
     }
   }
 
-  if (wch.attr & A_BLINK) character.blink = 1;
-  if (wch.attr & A_UNDERLINE) character.underline = 1;
+  if (attributes & A_BLINK) character.blink = 1;
+  if (attributes & A_UNDERLINE) character.underline = 1;
 
   {
     ScreenSegmentCharacter *location = getScreenCharacter(segmentHeader, row, column, end);
