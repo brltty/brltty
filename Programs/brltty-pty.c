@@ -18,7 +18,6 @@
 
 /* not done yet:
  * parent: terminal type list
- * parent: SIGTERM SIGINT SIGQUIT
  * screen: resize
  */
 
@@ -202,19 +201,39 @@ runChild (PtyObject *pty, char **command) {
   return PROG_EXIT_FATAL;
 }
 
+static unsigned char parentHasDied;
+static unsigned char childHasTerminated;
+static unsigned char slaveHasBeenClosed;
+
+static
+ASYNC_CONDITION_TESTER(parentTerminationTester) {
+  if (parentHasDied) return 1;
+  return childHasTerminated && slaveHasBeenClosed;
+}
+
+static void
+parentDeathHandler (int signalNumber) {
+  parentHasDied = 1;
+}
+
+static void
+childTerminationHandler (int signalNumber) {
+  childHasTerminated = 1;
+}
+
+static int
+installSignalHandlers (void) {
+  if (!asyncHandleSignal(SIGTERM, parentDeathHandler, NULL)) return 0;
+  if (!asyncHandleSignal(SIGINT, parentDeathHandler, NULL)) return 0;
+  if (!asyncHandleSignal(SIGQUIT, parentDeathHandler, NULL)) return 0;
+  return asyncHandleSignal(SIGCHLD, childTerminationHandler, NULL);
+}
+
 static
 ASYNC_MONITOR_CALLBACK(standardInputMonitor) {
   PtyObject *pty = parameters->data;
   ptyProcessTerminalInput(pty);
   return 1;
-}
-
-static unsigned char childHasTerminated;
-static unsigned char slaveHasBeenClosed;
-
-static
-ASYNC_CONDITION_TESTER(childTerminationTester) {
-  return childHasTerminated && slaveHasBeenClosed;
 }
 
 static
@@ -231,11 +250,6 @@ ASYNC_INPUT_CALLBACK(ptyInputHandler) {
 
   slaveHasBeenClosed = 1;
   return 0;
-}
-
-static void
-childTerminationHandler (int signalNumber) {
-  childHasTerminated = 1;
 }
 
 static int
@@ -274,6 +288,7 @@ runParent (PtyObject *pty, pid_t child) {
   int exitStatus = PROG_EXIT_FATAL;
   AsyncHandle ptyInputHandle;
 
+  parentHasDied = 0;
   childHasTerminated = 0;
   slaveHasBeenClosed = 0;
 
@@ -281,18 +296,17 @@ runParent (PtyObject *pty, pid_t child) {
     AsyncHandle standardInputHandle;
 
     if (asyncMonitorFileInput(&standardInputHandle, STDIN_FILENO, standardInputMonitor, pty)) {
-      if (asyncHandleSignal(SIGCHLD, childTerminationHandler, NULL)) {
+      if (installSignalHandlers()) {
         if (!isatty(2)) ptySetTerminalLogLevel(LOG_NOTICE);
 
         if (ptyBeginTerminal(pty)) {
           writeDriverDirective("path %s", ptyGetPath(pty));
-          asyncAwaitCondition(INT_MAX, childTerminationTester, NULL);
-          ptyEndTerminal();
-        } else {
-          kill(child, SIGTERM);
-        }
 
-        exitStatus = reapExitStatus(child);
+          asyncAwaitCondition(INT_MAX, parentTerminationTester, NULL);
+          if (!parentHasDied) exitStatus = reapExitStatus(child);
+
+          ptyEndTerminal();
+        }
       }
 
       asyncCancelRequest(standardInputHandle);
