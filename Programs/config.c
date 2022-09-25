@@ -248,8 +248,8 @@ static const char *const optionStrings_CancelExecution[] = {
 
 static char *opt_promptPatterns;
 
-static char *opt_privilegeParameters;
 static int opt_stayPrivileged;
+static char *opt_privilegeParameters;
 
 static char *opt_pidFile;
 static char *opt_configurationFile;
@@ -428,20 +428,20 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings.array = optionStrings_RemoveService
   },
 
-  { .word = "privilege-parameters",
+  { .word = "stay-privileged",
     .letter = 'z',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .setting.flag = &opt_stayPrivileged,
+    .description = strtext("Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc).")
+  },
+
+  { .word = "privilege-parameters",
+    .letter = 'Z',
     .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_privilegeParameters,
     .internal.setting = PRIVILEGE_PARAMETERS,
     .description = strtext("Parameters for the privilege establishment stage.")
-  },
-
-  { .word = "stay-privileged",
-    .letter = 'Z',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .setting.flag = &opt_stayPrivileged,
-    .description = strtext("Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc).")
   },
 
   { .word = "cancel-execution",

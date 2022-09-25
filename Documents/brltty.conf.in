@@ -647,7 +647,7 @@
 # The stay-privileged directive disables switching to an unprivilegdd user
 # as well as the relinquishing of any privileges (group memberships,
 # capabilities, etc).
-# (can be overridden with the --stay-privileged= [-Z] option)
+# (can be overridden with the --stay-privileged= [-z] option)
 #stay-privileged	off	# [off,on]
 
 # The privilege-parameters directive specifies the default privilege
@@ -655,7 +655,7 @@
 # user (e.g. by root on a Linux/Unix system). The configured defaults are:
 # "@privilege_parameters@".
 # (can be specified more than once)
-# (can be overridden with the --privilege-parameters= [-z] option)
+# (can be overridden with the --privilege-parameters= [-Z] option)
 #privilege-parameters platform:name=value,...
 
 # Linux Privilege Parameters
