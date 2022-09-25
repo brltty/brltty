@@ -818,9 +818,9 @@ AC_SUBST([curses_libs])
 
 xkb_libs=""
 xtk_libs=""
-xsel_object=""
 all_xbrlapi=""
 install_xbrlapi=""
+xsel_object=""
 BRLTTY_ARG_DISABLE(
    [x],
    [support for X11],
@@ -883,9 +883,9 @@ BRLTTY_ARG_DISABLE(
 ])
 AC_SUBST([xkb_libs])
 AC_SUBST([xtk_libs])
-AC_SUBST([xsel_object])
 AC_SUBST([all_xbrlapi])
 AC_SUBST([install_xbrlapi])
+AC_SUBST([xsel_object])
 
 test -z "$gui_toolkit_package" && {
    case "${host_os}"
@@ -1869,10 +1869,23 @@ in
       ;;
 esac
 
+all_brltty_pty=""
+install_brltty_pty=""
 AC_CHECK_HEADER([sys/shm.h], [dnl
-   BRLTTY_SCREEN_DRIVER([em], [TerminalEmulator])
    BRLTTY_SCREEN_DRIVER([sc], [Screen])
+
+   AC_CHECK_HEADER([sys/msg.h], [dnl
+      BRLTTY_SCREEN_DRIVER([em], [TerminalEmulator])
+
+      if test -n "${curses_package}"
+      then
+         all_brltty_pty="all-brltty-pty"
+         install_brltty_pty="install-brltty-pty"
+      fi
+   ])
 ])
+AC_SUBST([all_brltty_pty])
+AC_SUBST([install_brltty_pty])
 
 if test "${brltty_enabled_x}" = "yes"
 then

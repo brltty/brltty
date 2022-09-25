@@ -444,6 +444,9 @@ INSTALL_API_BINDINGS = @install_api_bindings@
 ALL_XBRLAPI = @all_xbrlapi@
 INSTALL_XBRLAPI = @install_xbrlapi@
 
+ALL_BRLTTY_PTY = @all_brltty_pty@
+INSTALL_BRLTTY_PTY = @install_brltty_pty@
+
 MOUNT_OBJECTS = $(MNTPT_OBJECTS) $(MNTFS_OBJECTS)
 GIO_OBJECTS = gio.$O gio_serial.$O gio_usb.$O gio_bluetooth.$O gio_hid.$O gio_null.$O
 IO_OBJECTS = io_misc.$O io_log.$O $(SERIAL_OBJECTS) $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) $(HID_OBJECTS) $(GIO_OBJECTS) $(MOUNT_OBJECTS)

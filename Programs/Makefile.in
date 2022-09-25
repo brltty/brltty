@@ -18,7 +18,7 @@
 
 all: all-commands all-tools $(ALL_API) $(ALL_API_BINDINGS)
 
-all-commands: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-pty all-brltty-tune all-brltty-morse all-brltty-lscmds all-brltty-hid
+all-commands: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb $(ALL_BRLTTY_PTY) all-brltty-tune all-brltty-morse all-brltty-lscmds all-brltty-hid
 all-brltty: brltty$X | $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltty-trtxt: brltty-trtxt$X
 all-brltty-ttb: brltty-ttb$X
