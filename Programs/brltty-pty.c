@@ -42,10 +42,10 @@
 static int opt_driverDirectives;
 static int opt_ttyPath;
 
-static int opt_logOutputActions;
-static int opt_logTerminalInput;
-static int opt_logTerminalOutput;
-static int opt_logUnexpectedSequences;
+static int opt_logInput;
+static int opt_logOutput;
+static int opt_logSequences;
+static int opt_logUnexpected;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "driver-directives",
@@ -57,35 +57,35 @@ BEGIN_OPTION_TABLE(programOptions)
   { .word = "tty-path",
     .letter = 't',
     .setting.flag = &opt_ttyPath,
-    .description = strtext("show the path to the pty slave")
-  },
-
-  { .word = "log-actions",
-    .letter = 'A',
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_logOutputActions,
-    .description = strtext("log actions requested via output (escape sequences or special characters) from the pty slave")
+    .description = strtext("show the absolute path to the pty slave")
   },
 
   { .word = "log-input",
     .letter = 'I',
     .flags = OPT_Hidden,
-    .setting.flag = &opt_logTerminalInput,
-    .description = strtext("log input to the pty slave")
+    .setting.flag = &opt_logInput,
+    .description = strtext("log input written to the pty slave")
   },
 
   { .word = "log-output",
     .letter = 'O',
     .flags = OPT_Hidden,
-    .setting.flag = &opt_logTerminalOutput,
-    .description = strtext("log output from the pty slave that isn't part of an escape sequence")
+    .setting.flag = &opt_logOutput,
+    .description = strtext("log output received from the pty slave that isn't an escape sequence or a special character")
+  },
+
+  { .word = "log-sequences",
+    .letter = 'S',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_logSequences,
+    .description = strtext("log escape sequences and special characters received from the pty slave")
   },
 
   { .word = "log-unexpected",
     .letter = 'U',
     .flags = OPT_Hidden,
-    .setting.flag = &opt_logUnexpectedSequences,
-    .description = strtext("log unexpected output escape sequences")
+    .setting.flag = &opt_logUnexpected,
+    .description = strtext("log unexpected input/output")
   },
 END_OPTION_TABLE
 
@@ -327,16 +327,16 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-pty",
-      .argumentsSummary = "[command [arg ...a]]"
+      .argumentsSummary = "[command [arg ...]]"
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
-  ptySetLogOutputActions(opt_logOutputActions);
-  ptySetLogTerminalInput(opt_logTerminalInput);
-  ptySetLogTerminalOutput(opt_logTerminalOutput);
-  ptySetLogUnexpectedSequences(opt_logUnexpectedSequences);
+  ptySetLogInput(opt_logInput);
+  ptySetLogOutput(opt_logOutput);
+  ptySetLogSequences(opt_logSequences);
+  ptySetLogUnexpected(opt_logUnexpected);
 
   if (!isatty(STDIN_FILENO)) {
     logMessage(LOG_ERR, "%s", gettext("standard input isn't a terminal"));

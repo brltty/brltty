@@ -148,7 +148,7 @@ setColor (ScreenSegmentColor *ssc, unsigned char color, unsigned char level) {
 static ScreenSegmentCharacter *
 setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **end) {
   wchar_t text;
-  int attributes;
+  attr_t attributes;
   int colorPair;
 
   {
@@ -166,7 +166,7 @@ setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **en
       attributes = character.attr;
       colorPair = character.ext_color;
     #else /* GOT_CURSES_WCH */
-      int character = inch();
+      chtype character = inch();
       text = character & A_CHARTEXT;
       attributes = character & A_ATTRIBUTES;
       colorPair = PAIR_NUMBER(character);

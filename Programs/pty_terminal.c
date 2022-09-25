@@ -38,10 +38,10 @@
 #include "ascii.h"
 
 static unsigned char terminalLogLevel = LOG_DEBUG;
-static unsigned char logOutputActions = 0;
-static unsigned char logTerminalInput = 0;
-static unsigned char logTerminalOutput = 0;
-static unsigned char logUnexpectedSequences = 0;
+static unsigned char logInput = 0;
+static unsigned char logOutput = 0;
+static unsigned char logSequences = 0;
+static unsigned char logUnexpected = 0;
 
 void
 ptySetTerminalLogLevel (unsigned char level) {
@@ -50,23 +50,23 @@ ptySetTerminalLogLevel (unsigned char level) {
 }
 
 void
-ptySetLogOutputActions (int yes) {
-  logOutputActions = yes;
+ptySetLogInput (int yes) {
+  logInput = yes;
 }
 
 void
-ptySetLogTerminalInput (int yes) {
-  logTerminalInput = yes;
+ptySetLogOutput (int yes) {
+  logOutput = yes;
 }
 
 void
-ptySetLogTerminalOutput (int yes) {
-  logTerminalOutput = yes;
+ptySetLogSequences (int yes) {
+  logSequences = yes;
 }
 
 void
-ptySetLogUnexpectedSequences (int yes) {
-  logUnexpectedSequences = yes;
+ptySetLogUnexpected (int yes) {
+  logUnexpected = yes;
 }
 
 static const char ptyTerminalType[] = "screen";
@@ -165,21 +165,21 @@ ptyProcessTerminalInput (PtyObject *pty) {
     }
   }
 
-  if (!sequence) {
-    buffer[0] = 0;
-    sequence = buffer;
-    soundAlert();
-  }
+  if (sequence) {
+    size_t count = strlen(sequence);
 
-  size_t count = strlen(sequence);
+    if (logInput) {
+      const char *name = keyname(character);
+      if (!name) name = "unknown";
+      logBytes(terminalLogLevel, "input: 0X%02X (%s)", sequence, count, character, name);
+    }
 
-  if (logTerminalInput) {
+    ptyWriteInput(pty, sequence, count);
+  } else if (logUnexpected) {
     const char *name = keyname(character);
     if (!name) name = "unknown";
-    logBytes(terminalLogLevel, "input: 0X%02X (%s)", sequence, count, character, name);
+    logMessage(terminalLogLevel, "unexpected input: 0X%02X (%s)", character, name);
   }
-
-  ptyWriteInput(pty, sequence, count);
 }
 
 static unsigned char outputByteBuffer[0X40];
@@ -187,9 +187,9 @@ static unsigned char outputByteCount;
 
 static void
 logUnexpectedSequence (void) {
-  if (logUnexpectedSequences) {
+  if (logUnexpected) {
     logBytes(
-      terminalLogLevel, "unexpected",
+      terminalLogLevel, "unexpected sequence",
       outputByteBuffer, outputByteCount
     );
   }
@@ -226,7 +226,7 @@ getOutputActionCount (void) {
 
 static void
 logOutputAction (const char *name, const char *description) {
-  if (logOutputActions) {
+  if (logSequences) {
     char prefix[0X100];
     STR_BEGIN(prefix, sizeof(prefix));
     STR_PRINTF("action: %s", name);
@@ -301,7 +301,7 @@ parseOutputByte_BASIC (unsigned char byte) {
       return OBP_DONE;
 
     default: {
-      if (logTerminalOutput) {
+      if (logOutput) {
         logMessage(terminalLogLevel, "output: 0X%02X", byte);
       }
 
@@ -820,7 +820,6 @@ ptyParseOutputByte (unsigned char byte) {
         continue;
 
       case OBP_UNEXPECTED:
-        soundAlert();
         logUnexpectedSequence();
         /* fall through */
 
