@@ -19,6 +19,8 @@
 all install uninstall install-documents:
 	cd $(PGM_DIR) && $(MAKE) $@
 
+install-extras: install-messages install-appstream install-systemd install-udev install-polkit
+
 install-messages uninstall-messages:
 	cd $(MSG_DIR) && $(MAKE) $(@:-messages=)
 
