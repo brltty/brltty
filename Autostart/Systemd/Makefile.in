@@ -17,15 +17,13 @@
 ###############################################################################
 
 SYSTEMD_UNITS_DIRECTORY = $(INSTALL_ROOT)$(SYSTEMD_UNIT_DIR)
-SYSTEMD_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)$(SCRIPTS_DIRECTORY)
-
 SYSTEMD_USERS_DIRECTORY = $(INSTALL_ROOT)$(SYSTEMD_SYSUSERS_DIR)
 SYSTEMD_USERS_FILE = $(SYSTEMD_USERS_DIRECTORY)/$(PACKAGE_TARNAME).conf
 
 SYSTEMD_FILES_DIRECTORY = $(INSTALL_ROOT)$(SYSTEMD_TMPFILES_DIR)
 SYSTEMD_FILES_FILE = $(SYSTEMD_FILES_DIRECTORY)/$(PACKAGE_TARNAME).conf
 
-install: install-units install-scripts install-users install-files
+install: install-units install-wrapper install-users install-files
 
 install-units-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_UNITS_DIRECTORY)
@@ -36,11 +34,8 @@ install-units: install-units-directory
 	$(INSTALL_DATA) $(SRC_DIR)/brltty@.path $(SYSTEMD_UNITS_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brltty.path $(SYSTEMD_UNITS_DIRECTORY)
 
-install-scripts-directory:
-	$(INSTALL_DIRECTORY) $(SYSTEMD_SCRIPTS_DIRECTORY)
-
-install-scripts: install-scripts-directory
-	$(INSTALL_SCRIPT) $(SRC_DIR)/systemd-wrapper $(SYSTEMD_SCRIPTS_DIRECTORY)
+install-wrapper: install-commands-directory
+	$(INSTALL_SCRIPT) $(SRC_DIR)/systemd-wrapper $(INSTALL_COMMANDS_DIRECTORY)
 
 install-users-directory:
 	$(INSTALL_DIRECTORY) $(SYSTEMD_USERS_DIRECTORY)
@@ -58,7 +53,7 @@ uninstall:
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME).*
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME)@.*
 	-rm -f $(SYSTEMD_UNITS_DIRECTORY)/$(PACKAGE_TARNAME)-*
-	-rm -f $(SYSTEMD_SCRIPTS_DIRECTORY)/systemd-*
+	-rm -f $(INSTALL_COMMANDS_DIRECTORY)/systemd-*
 	-rm -f $(SYSTEMD_USERS_FILE)
 	-rm -f $(SYSTEMD_FILES_FILE)
 

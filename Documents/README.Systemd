@@ -6,9 +6,9 @@ Using Systemd Service Management
 
 .. |configuration directory| replace:: /usr/lib
 .. |unit directory| replace:: |configuration directory|/systemd/system
-.. |scripts directory| replace:: |configuration directory|/brltty
 .. |users directory| replace:: |configuration directory|/sysusers.d
 .. |files directory| replace:: |configuration directory|/tmpfiles.d
+.. |commands directory| replace:: /usr/libexec/brltty
 .. |build subdirectory| replace:: Autostart/Systemd
 .. |default configuration file| replace:: ``/etc/brltty.conf``
 
@@ -26,7 +26,7 @@ The following steps need to be performed:
   + brltty@.path
 
 * A wrapper script needs to be installed
-  into the |scripts directory| directory:
+  into the |commands directory| directory:
 
   + systemd-wrapper
 

@@ -142,15 +142,15 @@ BRLTTY_ARG_REQUIRED(
 )
 
 BRLTTY_ARG_REQUIRED(
-   [drivers-directory], [DIRECTORY],
-   [path to directory containing drivers],
-   [drivers_directory], ["${libdir}/${PACKAGE_TARNAME}"]
+   [commands-directory], [DIRECTORY],
+   [path to directory containing helper commands],
+   [commands_directory], ["${libexecdir}/${PACKAGE_TARNAME}"]
 )
 
 BRLTTY_ARG_REQUIRED(
-   [scripts-directory], [DIRECTORY],
-   [path to directory containing helper scripts],
-   [scripts_directory], ["${libexecdir}/${PACKAGE_TARNAME}"]
+   [drivers-directory], [DIRECTORY],
+   [path to directory containing drivers],
+   [drivers_directory], ["${libdir}/${PACKAGE_TARNAME}"]
 )
 
 BRLTTY_ARG_WITH(
@@ -1967,8 +1967,8 @@ BRLTTY_DEFINE_DIRECTORY([TABLES_DIRECTORY], [${execute_root}${tables_directory}]
 BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory}],
                         [Define this to be a string containing the path to the drivers directory.])
 
-BRLTTY_DEFINE_DIRECTORY([SCRIPTS_DIRECTORY], [${execute_root}${scripts_directory}],
-                        [Define this to be a string containing the path to the scripts directory.])
+BRLTTY_DEFINE_DIRECTORY([COMMANDS_DIRECTORY], [${execute_root}${commands_directory}],
+                        [Define this to be a string containing the path to the helper commands directory.])
 
 BRLTTY_PUBLIC_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
                         [Define this to be a string containing the path to the configuration directory.])

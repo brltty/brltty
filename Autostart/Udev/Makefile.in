@@ -20,7 +20,6 @@ UDEV_RULES_SEQUENCE = 90
 UDEV_PARENT_LOCATION = $(libdir)
 #UDEV_PARENT_LOCATION = $(sysconfdir)
 
-UDEV_SCRIPTS_DIRECTORY = $(INSTALL_ROOT)$(SCRIPTS_DIRECTORY)
 UDEV_RULES_LOCATION = $(UDEV_PARENT_LOCATION)/udev/rules.d
 UDEV_RULES_DIRECTORY = $(INSTALL_ROOT)$(UDEV_RULES_LOCATION)
 
@@ -45,11 +44,8 @@ usb-generic:
 	cp $(UDEV_NAME_USB_TEMPLATE) $(UDEV_NAME_USB_GENERIC)
 	$(UPDUSBDEVS) -onlygeneric udev:$(UDEV_NAME_USB_GENERIC)
 
-install-scripts-directory:
-	$(INSTALL_DIRECTORY) $(UDEV_SCRIPTS_DIRECTORY)
-
-install-wrapper: install-scripts-directory
-	$(INSTALL_SCRIPT) $(SRC_DIR)/udev-wrapper $(UDEV_SCRIPTS_DIRECTORY)
+install-wrapper: install-commands-directory
+	$(INSTALL_SCRIPT) $(SRC_DIR)/udev-wrapper $(INSTALL_COMMANDS_DIRECTORY)
 
 install-rules-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_RULES_DIRECTORY)
@@ -75,7 +71,7 @@ install: install-wrapper install-rules
 uninstall:
 	-rm -f $(UDEV_RULES_DIRECTORY)/?*-$(PACKAGE_TARNAME).$(UDEV_RULES_EXTENSION)
 	-rm -f $(UDEV_RULES_DIRECTORY)/?*-$(PACKAGE_TARNAME)-*.$(UDEV_RULES_EXTENSION)
-	-rm -f $(UDEV_SCRIPTS_DIRECTORY)/udev-*
+	-rm -f $(INSTALL_COMMANDS_DIRECTORY)/udev-*
 
 clean::
 	-rm -f $(UDEV_NAME_USB_CUSTOMIZED)

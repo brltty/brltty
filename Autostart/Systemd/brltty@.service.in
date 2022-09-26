@@ -49,7 +49,7 @@ Environment="BRLTTY_PID_FILE=%t/brltty/brltty-%i.pid"
 
 Type=@SYSTEMD_SERVICE_TYPE@
 Environment="BRLTTY_EXECUTABLE_ARGUMENTS=@SYSTEMD_SERVICE_ARGUMENTS@"
-ExecStart=@SCRIPTS_DIRECTORY@/systemd-wrapper
+ExecStart=@COMMANDS_DIRECTORY@/systemd-wrapper
 
 TimeoutStartSec=5
 TimeoutStopSec=10

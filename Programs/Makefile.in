@@ -18,18 +18,18 @@
 
 all: all-commands all-tools $(ALL_API) $(ALL_API_BINDINGS)
 
-all-commands: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb $(ALL_BRLTTY_PTY) all-brltty-tune all-brltty-morse all-brltty-lscmds all-brltty-hid
+all-commands: all-brltty all-brltty-trtxt all-brltty-ttb all-brltty-ctb all-brltty-atb all-brltty-ktb all-brltty-tune all-brltty-morse all-brltty-lscmds all-brltty-hid $(ALL_BRLTTY_PTY)
 all-brltty: brltty$X | $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltty-trtxt: brltty-trtxt$X
 all-brltty-ttb: brltty-ttb$X
 all-brltty-ctb: brltty-ctb$X
 all-brltty-atb: brltty-atb$X
 all-brltty-ktb: brltty-ktb$X | $(BRAILLE_DRIVERS)
-all-brltty-pty: brltty-pty$X
 all-brltty-tune: brltty-tune$X
 all-brltty-morse: brltty-morse$X
 all-brltty-lscmds: brltty-lscmds$X
 all-brltty-hid: brltty-hid$X
+all-brltty-pty: brltty-pty$X
 
 all-tools: all-brltty-cldr all-brltty-lsinc
 all-brltty-cldr: brltty-cldr$X
@@ -1154,18 +1154,20 @@ install-programs: install-commands install-tools
 
 install-program-directories: install-program-directory
 
-install-commands: all-commands install-program-directories
+install-commands: all-commands install-program-directories $(INSTALL_BRLTTY_PTY)
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-trtxt$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ttb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ctb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-atb$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-ktb$X $(INSTALL_PROGRAM_DIRECTORY) 
-	$(INSTALL_PROGRAM) brltty-pty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-tune$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-morse$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-hid$X $(INSTALL_PROGRAM_DIRECTORY) 
+
+install-brltty-pty: install-commands-directory
+	$(INSTALL_PROGRAM) brltty-pty$X $(INSTALL_COMMANDS_DIRECTORY) 
 
 install-tools: all-tools install-program-directories
 	$(INSTALL_PROGRAM) brltty-cldr$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -1287,6 +1289,7 @@ uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-mess
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-*
+	-rm -f $(INSTALL_COMMANDS_DIRECTORY)/brltty-*
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
 	-rm -f $(INSTALL_X11_AUTOSTART_DIRECTORY)/$(XBRLAPI_X11_AUTOSTART_FILE)
 	-rm -f $(INSTALL_GDM_AUTOSTART_DIRECTORY)/$(XBRLAPI_GDM_AUTOSTART_FILE)
@@ -1360,7 +1363,7 @@ distclean clean::
 clean::
 	-rm -f brltty$X
 	-rm -f brltty-trtxt$X brltty-ttb$X brltty-ctb$X brltty-atb$X brltty-ktb$X
-	-rm -f brltty-pty$X brltty-tune$X brltty-morse$X
+	-rm -f brltty-tune$X brltty-morse$X brltty-pty$X
 	-rm -f brltty-cldr$X brltty-hid$X brltty-lscmds$X brltty-lsinc$X
 	-rm -f brltty-clip$X xbrlapi$X
 	-rm -f tbl2hex$(X_FOR_BUILD) *test$X *-static$X
