@@ -26,7 +26,9 @@
 #include "msg_queue.h"
 #include "utf8.h"
 #include "hostcmd.h"
+#include "parse.h"
 #include "file.h"
+#include "program.h"
 #include "async_handle.h"
 #include "async_io.h"
 #include "embed.h"
@@ -38,14 +40,13 @@ typedef enum {
 #define SCRPARMS "emulator"
 #include "scr_driver.h"
 
-static const char *emulatorCommand = NULL;
+static char *emulatorCommand = NULL;
 
 static int
 processParameters_TerminalEmulatorScreen (char **parameters) {
   {
-    const char *command = parameters[PARM_EMULATOR];
-    if (!(command && *command)) command = "brltty-pty";
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER), "emulator: %s", command);
+    char *command = parameters[PARM_EMULATOR];
+    if (command && !*command) command = NULL;
     emulatorCommand = command;
   }
 
@@ -233,10 +234,41 @@ ASYNC_MONITOR_CALLBACK(emEmulatorMonitor) {
   return 1;
 }
 
+static char *
+makeDefaultEmulatorPath (void) {
+  char *path = NULL;
+  char *directory = NULL;
+
+  if (changeStringSetting(&directory, COMMANDS_DIRECTORY)) {
+    if (fixInstallPath(&directory)) {
+      if ((path = makePath(directory, "brltty-pty"))) {
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+          "default terminal emulator: %s", path
+        );
+      }
+    }
+  }
+
+  if (directory) free(directory);
+  return path;
+}
+
 static int
 startEmulator (void) {
+  char *command = emulatorCommand;
+
+  if (!command) {
+    if (!(command = makeDefaultEmulatorPath())) {
+      return 0;
+    };
+  }
+
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+    "terminal emulator command: %s", command
+  );
+
   const char *const arguments[] = {
-    emulatorCommand, "--driver-directives"
+    command, "--driver-directives"
   };
 
   const HostCommandOptions options = {
@@ -244,7 +276,10 @@ startEmulator (void) {
     .asynchronous = 1,
   };
 
-  if (!runHostCommand(arguments, &options)) {
+  int exitStatus = runHostCommand(arguments, &options);
+  if (command != emulatorCommand) free(command);
+
+  if (!exitStatus) {
     if (asyncMonitorFileInput(&emulatorMonitorHandle, fileno(emulatorStream), emEmulatorMonitor, NULL)) {
       return 1;
     }
