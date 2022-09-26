@@ -70,35 +70,6 @@ ptyNewObject (void) {
   return NULL;
 }
 
-int
-ptyOpenSlave (const PtyObject *pty, int *fileDescriptor) {
-  int result = open(pty->path, O_RDWR);
-  int opened = result != INVALID_FILE_DESCRIPTOR;
-
-  if (opened) {
-    *fileDescriptor = result;
-  } else {
-    logSystemError("pty slave open");
-  }
-
-  return opened;
-}
-
-void
-ptyCloseMaster (PtyObject *pty) {
-  if (pty->master != INVALID_FILE_DESCRIPTOR) {
-    close(pty->master);
-    pty->master = INVALID_FILE_DESCRIPTOR;
-  }
-}
-
-void
-ptyDestroyObject (PtyObject *pty) {
-  ptyCloseMaster(pty);
-  free(pty->path);
-  free(pty);
-}
-
 const char *
 ptyGetPath (const PtyObject *pty) {
   return pty->path;
@@ -114,4 +85,33 @@ ptyWriteInput (PtyObject *pty, const void *data, size_t length) {
   if (write(pty->master, data, length) != -1) return 1;
   logSystemError("pty write input");
   return 0;
+}
+
+void
+ptyCloseMaster (PtyObject *pty) {
+  if (pty->master != INVALID_FILE_DESCRIPTOR) {
+    close(pty->master);
+    pty->master = INVALID_FILE_DESCRIPTOR;
+  }
+}
+
+int
+ptyOpenSlave (const PtyObject *pty, int *fileDescriptor) {
+  int result = open(pty->path, O_RDWR);
+  int opened = result != INVALID_FILE_DESCRIPTOR;
+
+  if (opened) {
+    *fileDescriptor = result;
+  } else {
+    logSystemError("pty slave open");
+  }
+
+  return opened;
+}
+
+void
+ptyDestroyObject (PtyObject *pty) {
+  ptyCloseMaster(pty);
+  free(pty->path);
+  free(pty);
 }

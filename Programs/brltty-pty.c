@@ -201,39 +201,41 @@ runChild (PtyObject *pty, char **command) {
   return PROG_EXIT_FATAL;
 }
 
-static unsigned char parentHasDied;
+static unsigned char parentIsQuitting;
 static unsigned char childHasTerminated;
 static unsigned char slaveHasBeenClosed;
 
 static
 ASYNC_CONDITION_TESTER(parentTerminationTester) {
-  if (parentHasDied) return 1;
+  if (parentIsQuitting) return 1;
   return childHasTerminated && slaveHasBeenClosed;
 }
 
 static void
-parentDeathHandler (int signalNumber) {
-  parentHasDied = 1;
+parentQuitMonitor (int signalNumber) {
+  parentIsQuitting = 1;
 }
 
 static void
-childTerminationHandler (int signalNumber) {
+childTerminationMonitor (int signalNumber) {
   childHasTerminated = 1;
 }
 
 static int
 installSignalHandlers (void) {
-  if (!asyncHandleSignal(SIGTERM, parentDeathHandler, NULL)) return 0;
-  if (!asyncHandleSignal(SIGINT, parentDeathHandler, NULL)) return 0;
-  if (!asyncHandleSignal(SIGQUIT, parentDeathHandler, NULL)) return 0;
-  return asyncHandleSignal(SIGCHLD, childTerminationHandler, NULL);
+  if (!asyncHandleSignal(SIGTERM, parentQuitMonitor, NULL)) return 0;
+  if (!asyncHandleSignal(SIGINT, parentQuitMonitor, NULL)) return 0;
+  if (!asyncHandleSignal(SIGQUIT, parentQuitMonitor, NULL)) return 0;
+  return asyncHandleSignal(SIGCHLD, childTerminationMonitor, NULL);
 }
 
 static
 ASYNC_MONITOR_CALLBACK(standardInputMonitor) {
   PtyObject *pty = parameters->data;
-  ptyProcessTerminalInput(pty);
-  return 1;
+  if (ptyProcessTerminalInput(pty)) return 1;
+
+  parentIsQuitting = 1;
+  return 0;
 }
 
 static
@@ -288,7 +290,7 @@ runParent (PtyObject *pty, pid_t child) {
   int exitStatus = PROG_EXIT_FATAL;
   AsyncHandle ptyInputHandle;
 
-  parentHasDied = 0;
+  parentIsQuitting = 0;
   childHasTerminated = 0;
   slaveHasBeenClosed = 0;
 
@@ -303,7 +305,7 @@ runParent (PtyObject *pty, pid_t child) {
           writeDriverDirective("path %s", ptyGetPath(pty));
 
           asyncAwaitCondition(INT_MAX, parentTerminationTester, NULL);
-          if (!parentHasDied) exitStatus = reapExitStatus(child);
+          if (!parentIsQuitting) exitStatus = reapExitStatus(child);
 
           ptyEndTerminal();
         }

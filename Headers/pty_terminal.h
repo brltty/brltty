@@ -31,7 +31,7 @@ extern int ptyBeginTerminal (PtyObject *pty);
 extern void ptyEndTerminal (void);
 extern void ptySynchronizeTerminal (void);
 
-extern void ptyProcessTerminalInput (PtyObject *pty);
+extern int ptyProcessTerminalInput (PtyObject *pty);
 
 extern int ptyParseOutputByte (unsigned char byte);
 extern int ptyParseOutputBytes (const unsigned char *bytes, size_t count);

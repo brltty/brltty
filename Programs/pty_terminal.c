@@ -113,7 +113,7 @@ showAlert (void) {
   flash();
 }
 
-void
+int
 ptyProcessTerminalInput (PtyObject *pty) {
   int character = getch();
   const char *sequence = NULL;
@@ -174,12 +174,14 @@ ptyProcessTerminalInput (PtyObject *pty) {
       logBytes(terminalLogLevel, "input: 0X%02X (%s)", sequence, count, character, name);
     }
 
-    ptyWriteInput(pty, sequence, count);
+    if (!ptyWriteInput(pty, sequence, count)) return 0;
   } else if (logUnexpected) {
     const char *name = keyname(character);
     if (!name) name = "unknown";
     logMessage(terminalLogLevel, "unexpected input: 0X%02X (%s)", character, name);
   }
+
+  return 1;
 }
 
 static unsigned char outputByteBuffer[0X40];
