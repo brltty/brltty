@@ -139,44 +139,47 @@ beginProgram (int argumentCount, char **argumentVector) {
   pushLogPrefix(programName);
 }
 
-int
-fixInstallPath (char **path) {
+const char *
+getProgramDirectory (void) {
   static const char *programDirectory = NULL;
 
   if (!programDirectory) {
     if ((programDirectory = getPathDirectory(programPath))) {
+      logMessage(LOG_DEBUG, "program directory: %s", programDirectory);
       registerProgramMemory("program-directory", &programDirectory);
     } else {
       logMessage(LOG_WARNING, gettext("cannot determine program directory"));
-      programDirectory = CURRENT_DIRECTORY_NAME;
+      programDirectory = "";
     }
-
-    logMessage(LOG_DEBUG, "program directory: %s", programDirectory);
   }
 
-  {
-    const char *problem = strtext("cannot fix install path");
-    char *newPath = makePath(programDirectory, *path);
+  if (!*programDirectory) return NULL;
+  return programDirectory;
+}
 
-    if (newPath) {
-      if (changeStringSetting(path, newPath)) {
-        if (isAbsolutePath(*path)) {
-          problem = NULL;
-        } else {
-          problem = strtext("install path not absolute");
-        }
+int
+fixInstallPath (char **path) {
+  const char *programDirectory = getProgramDirectory();
+  if (!programDirectory) programDirectory = CURRENT_DIRECTORY_NAME;
+
+  const char *problem = strtext("cannot fix install path");
+  char *newPath = makePath(programDirectory, *path);
+
+  if (newPath) {
+    if (changeStringSetting(path, newPath)) {
+      if (isAbsolutePath(*path)) {
+        problem = NULL;
+      } else {
+        problem = strtext("install path not absolute");
       }
-
-      free(newPath);
     }
 
-    if (problem) {
-      logMessage(LOG_WARNING, "%s: %s", gettext(problem), *path);
-      return 0;
-    }
+    free(newPath);
   }
 
-  return 1;
+  if (!problem) return 1;
+  logMessage(LOG_WARNING, "%s: %s", gettext(problem), *path);
+  return 0;
 }
 
 int
