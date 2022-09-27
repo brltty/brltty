@@ -82,8 +82,16 @@ ASYNC_EVENT_CALLBACK(handleReceivedMessage) {
   MessageReceiverArgument *mra = parameters->eventData;
   MessageHandlerParameters *mhp = parameters->signalData;
 
-  mra->handler(mhp);
-  free(mhp);
+  if (mhp) {
+    mra->handler(mhp);
+    free(mhp);
+  } else {
+    void *result;
+    pthread_join(mra->thread, &result);
+
+    asyncDiscardEvent(mra->event);
+    free(mra);
+  }
 }
 
 THREAD_FUNCTION(messageReceiverThread) {
@@ -116,7 +124,7 @@ THREAD_FUNCTION(messageReceiverThread) {
     break;
   }
 
-  free(mra);
+  asyncSignalEvent(mra->event, NULL);
   return NULL;
 }
 
