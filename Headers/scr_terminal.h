@@ -28,8 +28,8 @@ extern "C" {
 extern int makeTerminalKey (key_t *key, const char *path);
 
 typedef enum {
-  TERMINAL_MESSAGE_INPUT   = 'i', // driver->emulator - UTF-8
-  TERMINAL_MESSAGE_UPDATED = 'u', // emulator->driver - no content
+  TERMINAL_MESSAGE_INPUT_TEXT      = 't', // driver->emulator - UTF-8
+  TERMINAL_MESSAGE_SEGMENT_UPDATED = 'u', // emulator->driver - no content
 } TerminalMessageType;
 
 extern int getMessageQueue (int *queue, key_t key);
@@ -41,7 +41,7 @@ typedef struct {
 } ScreenSegmentColor;
 
 typedef struct {
-  wchar_t text;
+  uint32_t text;
 
   ScreenSegmentColor foreground;
   ScreenSegmentColor background;

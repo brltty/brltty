@@ -84,7 +84,7 @@ enableMessages (key_t key) {
   if (haveTerminalMessageQueue) {
     haveSegmentUpdatedHandler = startMessageReceiver(
       "screen-segment-updated-receiver",
-      terminalMessageQueue, TERMINAL_MESSAGE_UPDATED,
+      terminalMessageQueue, TERMINAL_MESSAGE_SEGMENT_UPDATED,
       0, messageHandler_segmentUpdated, NULL
     );
   }
@@ -485,7 +485,7 @@ insertKey_TerminalEmulatorScreen (ScreenKey key) {
     sequence = utf8;
   }
 
-  return sendTerminalMessage(TERMINAL_MESSAGE_INPUT, sequence, strlen(sequence));
+  return sendTerminalMessage(TERMINAL_MESSAGE_INPUT_TEXT, sequence, strlen(sequence));
 }
 
 static void

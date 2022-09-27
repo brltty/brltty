@@ -288,7 +288,7 @@ ptyBeginScreen (PtyObject *pty) {
       storeCursorPosition();
 
       haveTerminalInputHandler = startTerminalMessageReceiver(
-        "terminal-input-receiver", TERMINAL_MESSAGE_INPUT,
+        "terminal-input-receiver", TERMINAL_MESSAGE_INPUT_TEXT,
         0X200, messageHandler_terminalInput, pty
       );
 
@@ -310,7 +310,7 @@ ptyEndScreen (void) {
 
 void
 ptyRefreshScreen (void) {
-  sendTerminalMessage(TERMINAL_MESSAGE_UPDATED, NULL, 0);
+  sendTerminalMessage(TERMINAL_MESSAGE_SEGMENT_UPDATED, NULL, 0);
   refresh();
 }
 
