@@ -236,20 +236,14 @@ ASYNC_MONITOR_CALLBACK(emEmulatorMonitor) {
 
 static char *
 makeDefaultEmulatorPath (void) {
-  char *path = NULL;
-  char *directory = NULL;
+  char *path = makeCommandPath("brltty-pty");
 
-  if (changeStringSetting(&directory, COMMANDS_DIRECTORY)) {
-    if (fixInstallPath(&directory)) {
-      if ((path = makePath(directory, "brltty-pty"))) {
-        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-          "default terminal emulator: %s", path
-        );
-      }
-    }
+  if (path) {
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+      "default terminal emulator: %s", path
+    );
   }
 
-  if (directory) free(directory);
   return path;
 }
 

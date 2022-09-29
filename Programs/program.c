@@ -182,6 +182,21 @@ fixInstallPath (char **path) {
   return 0;
 }
 
+char *
+makeCommandPath (const char *command) {
+  char *path = NULL;
+  char *directory = NULL;
+
+  if (changeStringSetting(&directory, COMMANDS_DIRECTORY)) {
+    if (fixInstallPath(&directory)) {
+      path = makePath(directory, command);
+    }
+  }
+
+  if (directory) free(directory);
+  return path;
+}
+
 int
 createPidFile (const char *path, ProcessIdentifier pid) {
 #if defined(GRUB_RUNTIME)

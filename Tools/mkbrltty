@@ -27,7 +27,7 @@ cd "${buildRoot}"
 makeTargets=(
    brltty braille-drivers speech-drivers screen-drivers
    brltty-trtxt brltty-ttb brltty-ctb brltty-atb brltty-ktb
-   brltty-pty brltty-tune brltty-morse
+   brltty-tune brltty-morse brltty-pty
    brltty-lscmds brltty-hid
    brltty-cldr brltty-lsinc
    brltest spktest scrtest crctest msgtest
