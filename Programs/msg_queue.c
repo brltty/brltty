@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <errno.h>
 #include <sys/msg.h>
 
 #include "log.h"
@@ -59,7 +60,7 @@ receiveMessage (int queue, MessageType *type, void *buffer, size_t size, int fla
   if (length != -1) {
     *type = message.type;
     if (length) memcpy(buffer, message.buffer, length);
-  } else {
+  } else if (errno != EIDRM) {
     logSystemError("msgrcv");
   }
 
