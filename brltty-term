@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -17,9 +17,28 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/prologue.sh"
-setSourceRoot
-setBuildRoot
+. "brltty-prologue.sh"
 
-exec "${sourceRoot}/run-brltty" -n -xem -X"em:emulator=${buildRoot}/Programs/brltty-pty" "${@}"
+[ -t 0 ] || semanticError "standard input isn't a terminal"
+[ -t 1 ] || semanticError "standard output isn't a terminal"
+
+findCommand() {
+   local commands=(brltty run-brltty)
+   local command
+
+   for command in "${commands[@]}"
+   do
+      local path="${programDirectory}/${command}"
+      [ -f "${path}" ] || continue
+      [ -x "${path}" ] || continue
+
+      commandPath="${path}"
+      return 0
+   done
+
+   semanticError "command not found: ${commands[0]}"
+}
+findCommand
+
+exec "${commandPath}" --no-daemon --screen-driver=em "${@}"
 exit "${?}"
