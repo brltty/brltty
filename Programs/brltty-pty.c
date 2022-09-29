@@ -126,6 +126,27 @@ setEnvironmentInteger (const char *variable, int integer) {
 
 static int
 setEnvironmentVariables (void) {
+  if (!setEnvironmentString("TERM_PROGRAM", programName)) return 0;
+  if (!setEnvironmentString("TERM_PROGRAM_VERSION", PACKAGE_VERSION)) return 0;
+
+  {
+    static const char *const variables[] = {
+      /* screen */ "STY", "WINDOW",
+      /* tmux   */ "TMUX",
+    };
+
+    const char *const *variable = variables;
+    const char *const *end = variable + ARRAY_COUNT(variables);
+
+    while (variable < end) {
+      if (unsetenv(*variable) == -1) {
+        logSystemError("unsetenv");
+      }
+
+      variable += 1;
+    }
+  }
+
   {
     size_t width, height;
 
