@@ -183,13 +183,20 @@ fixInstallPath (char **path) {
 }
 
 char *
-makeCommandPath (const char *command) {
+makeProgramPath (const char *name) {
+   const char *directory = getProgramDirectory();
+   if (!directory) return NULL;
+   return makePath(directory, name);
+}
+
+char *
+makeCommandPath (const char *name) {
   char *path = NULL;
   char *directory = NULL;
 
   if (changeStringSetting(&directory, COMMANDS_DIRECTORY)) {
     if (fixInstallPath(&directory)) {
-      path = makePath(directory, command);
+      path = makePath(directory, name);
     }
   }
 

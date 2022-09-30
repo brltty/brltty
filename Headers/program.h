@@ -50,7 +50,8 @@ extern void registerProgramMemory (const char *name, void *pointer);
 
 extern const char *getProgramDirectory (void);
 extern int fixInstallPath (char **path);
-extern char *makeCommandPath (const char *command);
+extern char *makeProgramPath (const char *name);
+extern char *makeCommandPath (const char *name);
 
 extern int createPidFile (const char *path, ProcessIdentifier pid);
 extern int cancelProgram (const char *pidFile);

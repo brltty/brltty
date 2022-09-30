@@ -236,15 +236,35 @@ ASYNC_MONITOR_CALLBACK(emEmulatorMonitor) {
 
 static char *
 makeDefaultEmulatorPath (void) {
-  char *path = makeCommandPath("brltty-pty");
+  typedef char *PathMaker (const char *name);
 
-  if (path) {
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-      "default terminal emulator: %s", path
-    );
+  static PathMaker *pathMakers[] = {
+    makeProgramPath,
+    makeCommandPath,
+  };
+
+  PathMaker **pathMaker = pathMakers;
+  PathMaker **end = pathMaker + ARRAY_COUNT(pathMakers);
+
+  while (pathMaker < end) {
+    char *path = (*pathMaker)("brltty-pty");
+
+    if (path) {
+      if (testProgramPath(path)) {
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+          "default terminal emulator: %s", path
+        );
+
+        return path;
+      }
+
+      free(path);
+    }
+
+    pathMaker += 1;
   }
 
-  return path;
+  return NULL;
 }
 
 static int
