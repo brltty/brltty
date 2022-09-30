@@ -264,6 +264,7 @@ makeDefaultEmulatorPath (void) {
     pathMaker += 1;
   }
 
+  logMessage(LOG_WARNING, "default terminal emulator not found");
   return NULL;
 }
 
@@ -274,7 +275,7 @@ startEmulator (void) {
   if (!command) {
     if (!(command = makeDefaultEmulatorPath())) {
       return 0;
-    };
+    }
   }
 
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -285,10 +286,10 @@ startEmulator (void) {
     command, "--driver-directives"
   };
 
-  const HostCommandOptions options = {
-    .standardError = &emulatorStream,
-    .asynchronous = 1,
-  };
+  HostCommandOptions options;
+  initializeHostCommandOptions(&options);
+  options.asynchronous = 1;
+  options.standardError = &emulatorStream;
 
   int exitStatus = runHostCommand(arguments, &options);
   if (command != emulatorCommand) free(command);
@@ -327,8 +328,8 @@ construct_TerminalEmulatorScreen (void) {
     problemText = gettext("no screen emulator");
   }
 
-  destruct_TerminalEmulatorScreen();
   endSession("driver construction failure");
+//destruct_TerminalEmulatorScreen();
   return 0;
 }
 

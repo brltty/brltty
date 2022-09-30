@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "log.h"
 #include "strfmt.h"
 #include "hostcmd.h"
@@ -69,6 +71,7 @@ processHostCommandStreams (
 
 void
 initializeHostCommandOptions (HostCommandOptions *options) {
+  memset(options, 0, sizeof(*options));
   options->asynchronous = 0;
 
   options->standardInput = NULL;

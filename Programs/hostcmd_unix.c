@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -148,7 +149,16 @@ runCommand (
 
       if (processHostCommandStreams(streams, finishChildHostCommandStream, NULL)) {
         execvp(command[0], (char *const*)command);
-        logSystemError("execvp");
+
+        switch (errno) {
+          case ENOENT:
+            logMessage(LOG_ERR, "command not found: %s", command[0]);
+            break;
+
+          default:
+            logSystemError("execvp");
+            break;
+        }
       }
 
       _exit(1);
