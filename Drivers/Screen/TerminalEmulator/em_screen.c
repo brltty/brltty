@@ -294,6 +294,8 @@ startEmulator (void) {
   if (command != emulatorCommand) free(command);
 
   if (!exitStatus) {
+    detachStandardStreams();
+
     if (asyncMonitorFileInput(&emulatorMonitorHandle, fileno(emulatorStream), emEmulatorMonitor, NULL)) {
       return 1;
     }

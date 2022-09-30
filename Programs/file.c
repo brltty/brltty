@@ -1056,6 +1056,45 @@ STR_BEGIN_FORMATTER(formatInputError, const char *file, const int *line, const c
   STR_VPRINTF(format, arguments);
 STR_END_FORMATTER
 
+static void
+detachStandardStream (FILE *stream, const char *name, int output) {
+  const char *nullDevice = "/dev/null";
+
+  if (output) {
+    fflush(stream);
+  }
+
+  if (!freopen(nullDevice, (output? "a": "r"), stream)) {
+    if (errno != ENOENT) {
+      char action[0X40];
+      snprintf(action, sizeof(action), "freopen[%s]", name);
+      logSystemError(action);
+    }
+  }
+}
+
+void
+detachStandardInput (void) {
+  detachStandardStream(stdin, "stdin", 0);
+}
+
+void
+detachStandardOutput (void) {
+  detachStandardStream(stdout, "stdout", 1);
+}
+
+void
+detachStandardError (void) {
+  detachStandardStream(stderr, "stderr", 1);
+}
+
+void
+detachStandardStreams (void) {
+  detachStandardInput();
+  detachStandardOutput();
+  detachStandardError();
+}
+
 #ifdef __MINGW32__
 int
 getConsoleSize (size_t *width, size_t *height) {
