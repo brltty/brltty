@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -34,6 +34,7 @@ then
    showSize=false
 else
    ttyColumns="$(tput cols)"
+   [ -n "${ttyColumns}" ] || semanticError "column count not available: ${TERM}"
 fi
 
 if [ -n "${ttyLines}" ]
@@ -42,6 +43,7 @@ then
    showSize=false
 else
    ttyLines="$(tput lines)"
+   [ -n "${ttyLines}" ] || semanticError "line count not available: ${TERM}"
 fi
 
 if "${showSize}"
