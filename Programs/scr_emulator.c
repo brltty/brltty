@@ -83,6 +83,7 @@ initializeScreenCharacters (ScreenSegmentCharacter *from, const ScreenSegmentCha
     .text = ' ',
     .foreground = SCREEN_SEGMENT_COLOR_WHITE,
     .background = SCREEN_SEGMENT_COLOR_BLACK,
+    .alpha = UINT8_MAX,
   };
 
   setScreenCharacters(from, to, &initializer);
@@ -112,6 +113,10 @@ createScreenSegment (int *id, key_t key, int columns, int rows) {
 
       segment->cursorRow = 0;
       segment->cursorColumn = 0;
+
+      segment->screenNumber = 0;
+      segment->commonFlags = 0;
+      segment->privateFlags = 0;
 
       {
         ScreenSegmentCharacter *from = getScreenStart(segment);

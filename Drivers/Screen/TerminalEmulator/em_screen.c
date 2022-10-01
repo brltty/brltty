@@ -84,7 +84,7 @@ enableMessages (key_t key) {
   if (haveTerminalMessageQueue) {
     haveSegmentUpdatedHandler = startMessageReceiver(
       "screen-segment-updated-receiver",
-      terminalMessageQueue, TERMINAL_MESSAGE_SEGMENT_UPDATED,
+      terminalMessageQueue, TERM_MSG_SEGMENT_UPDATED,
       0, messageHandler_segmentUpdated, NULL
     );
   }
@@ -364,16 +364,17 @@ refresh_TerminalEmulatorScreen (void) {
   return 1;
 }
 
-static int
-currentVirtualTerminal_TerminalEmulatorScreen (void) {
-  return 1;
-}
-
 static ScreenSegmentHeader *
 getSegment (void) {
   ScreenSegmentHeader *segment = cachedSegment;
   if (!segment) segment = screenSegment;
   return segment;
+}
+
+static int
+currentVirtualTerminal_TerminalEmulatorScreen (void) {
+  ScreenSegmentHeader *segment = getSegment();
+  return segment? segment->screenNumber: 0;
 }
 
 static void
@@ -502,7 +503,7 @@ insertKey_TerminalEmulatorScreen (ScreenKey key) {
     sequence = utf8;
   }
 
-  return sendTerminalMessage(TERMINAL_MESSAGE_INPUT_TEXT, sequence, strlen(sequence));
+  return sendTerminalMessage(TERM_MSG_INPUT_TEXT, sequence, strlen(sequence));
 }
 
 static void

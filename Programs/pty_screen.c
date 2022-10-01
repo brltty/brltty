@@ -178,6 +178,7 @@ setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **en
 
   ScreenSegmentCharacter character = {
     .text = text,
+    .alpha = UINT8_MAX,
   };
 
   {
@@ -187,7 +188,7 @@ setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **en
     unsigned char bgLevel = SCREEN_SEGMENT_COLOR_LEVEL;
     unsigned char fgLevel = bgLevel;
 
-    if (attributes & (A_BOLD | A_STANDOUT)) fgLevel = 0XFF;
+    if (attributes & (A_BOLD | A_STANDOUT)) fgLevel = UINT8_MAX;
     if (attributes & A_DIM) fgLevel >>= 1, bgLevel >>= 1;
 
     {
@@ -285,10 +286,11 @@ ptyBeginScreen (PtyObject *pty) {
     }
 
     if (createSegment(ptyGetPath(pty))) {
+      segmentHeader->screenNumber = 1;
       storeCursorPosition();
 
       haveTerminalInputHandler = startTerminalMessageReceiver(
-        "terminal-input-receiver", TERMINAL_MESSAGE_INPUT_TEXT,
+        "terminal-input-receiver", TERM_MSG_INPUT_TEXT,
         0X200, messageHandler_terminalInput, pty
       );
 
@@ -310,7 +312,7 @@ ptyEndScreen (void) {
 
 void
 ptyRefreshScreen (void) {
-  sendTerminalMessage(TERMINAL_MESSAGE_SEGMENT_UPDATED, NULL, 0);
+  sendTerminalMessage(TERM_MSG_SEGMENT_UPDATED, NULL, 0);
   refresh();
 }
 

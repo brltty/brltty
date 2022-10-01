@@ -28,16 +28,16 @@ extern "C" {
 extern int makeTerminalKey (key_t *key, const char *path);
 
 typedef enum {
-  TERMINAL_MESSAGE_INPUT_TEXT      = 't', // driver->emulator - UTF-8
-  TERMINAL_MESSAGE_SEGMENT_UPDATED = 'u', // emulator->driver - no content
+  TERM_MSG_INPUT_TEXT      = 't', // driver->emulator - UTF-8
+  TERM_MSG_SEGMENT_UPDATED = 'u', // emulator->driver - no content
 } TerminalMessageType;
 
 extern int getMessageQueue (int *queue, key_t key);
 
 typedef struct {
-  unsigned char red;
-  unsigned char green;
-  unsigned char blue;
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
 } ScreenSegmentColor;
 
 typedef struct {
@@ -45,23 +45,28 @@ typedef struct {
 
   ScreenSegmentColor foreground;
   ScreenSegmentColor background;
+  uint8_t alpha;
 
   unsigned char blink:1;
   unsigned char underline:1;
 } ScreenSegmentCharacter;
 
 typedef struct {
-  unsigned int headerSize;
-  unsigned int segmentSize;
+  uint32_t headerSize;
+  uint32_t segmentSize;
 
-  unsigned int characterSize;
-  unsigned int charactersOffset;
+  uint32_t characterSize;
+  uint32_t charactersOffset;
 
-  unsigned int screenHeight;
-  unsigned int screenWidth;
+  uint32_t screenHeight;
+  uint32_t screenWidth;
 
-  unsigned int cursorRow;
-  unsigned int cursorColumn;
+  uint32_t cursorRow;
+  uint32_t cursorColumn;
+
+  uint32_t screenNumber;
+  uint32_t commonFlags;
+  uint32_t privateFlags;
 } ScreenSegmentHeader;
 
 extern int getScreenSegment (int *identifier, key_t key);
