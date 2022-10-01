@@ -34,20 +34,28 @@
 #include "embed.h"
 
 typedef enum {
+  PARM_COMMAND,
   PARM_EMULATOR,
 } ScreenParameters;
 
-#define SCRPARMS "emulator"
+#define SCRPARMS "command", "emulator"
 #include "scr_driver.h"
 
-static char *emulatorCommand = NULL;
+static char *terminalCommand = NULL;
+static char *terminalEmulator = NULL;
 
 static int
 processParameters_TerminalEmulatorScreen (char **parameters) {
   {
+    char *command = parameters[PARM_COMMAND];
+    if (command && !*command) command = NULL;
+    terminalCommand = command;
+  }
+
+  {
     char *command = parameters[PARM_EMULATOR];
     if (command && !*command) command = NULL;
-    emulatorCommand = command;
+    terminalEmulator = command;
   }
 
   return 1;
@@ -270,21 +278,26 @@ makeDefaultEmulatorPath (void) {
 
 static int
 startEmulator (void) {
-  char *command = emulatorCommand;
+  char *emulator = terminalEmulator;
 
-  if (!command) {
-    if (!(command = makeDefaultEmulatorPath())) {
+  if (!emulator) {
+    if (!(emulator = makeDefaultEmulatorPath())) {
       return 0;
     }
   }
 
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-    "terminal emulator command: %s", command
+    "terminal emulator command: %s", emulator
   );
 
-  const char *const arguments[] = {
-    command, "--driver-directives"
-  };
+  const char *arguments[5];
+  unsigned int argumentCount = 0;
+
+  arguments[argumentCount++] = emulator;
+  arguments[argumentCount++] = "--driver-directives";
+  arguments[argumentCount++] = "--";
+  if (terminalCommand) arguments[argumentCount++] = terminalCommand;
+  arguments[argumentCount++] = NULL;
 
   HostCommandOptions options;
   initializeHostCommandOptions(&options);
@@ -292,7 +305,8 @@ startEmulator (void) {
   options.standardError = &emulatorStream;
 
   int exitStatus = runHostCommand(arguments, &options);
-  if (command != emulatorCommand) free(command);
+  if (emulator != terminalEmulator) free(emulator);
+  emulator = NULL;
 
   if (!exitStatus) {
     detachStandardStreams();

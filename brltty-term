@@ -17,14 +17,19 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "brltty-prologue.sh"
+. "$(dirname "${0}")/brltty-prologue.sh"
 
 [ -t 0 ] || semanticError "standard input isn't a terminal"
 [ -t 1 ] || semanticError "standard output isn't a terminal"
 
-findSiblingCommand commandPath brltty run-brltty || {
+findSiblingCommand brlttyPath brltty run-brltty || {
    semanticError "brltty not found"
 }
 
-exec "${commandPath}" --no-daemon --screen-driver=em "${@}"
+command="${BRLTTY_TERM_COMMAND:-${SHELL:-/bin/sh}}"
+findHostCommand commandPath "${command}" || {
+   semanticError "command not found: ${command}"
+}
+
+exec "${brlttyPath}" -n -xem -X"em:command=${commandPath}" "${@}"
 exit "${?}"
