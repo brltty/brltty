@@ -22,23 +22,9 @@
 [ -t 0 ] || semanticError "standard input isn't a terminal"
 [ -t 1 ] || semanticError "standard output isn't a terminal"
 
-findCommand() {
-   local commands=(brltty run-brltty)
-   local command
-
-   for command in "${commands[@]}"
-   do
-      local path="${programDirectory}/${command}"
-      [ -f "${path}" ] || continue
-      [ -x "${path}" ] || continue
-
-      commandPath="${path}"
-      return 0
-   done
-
-   semanticError "command not found: ${commands[0]}"
+findSiblingCommand commandPath brltty run-brltty || {
+   semanticError "brltty not found"
 }
-findCommand
 
 exec "${commandPath}" --no-daemon --screen-driver=em "${@}"
 exit "${?}"

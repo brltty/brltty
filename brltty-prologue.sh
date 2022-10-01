@@ -303,6 +303,24 @@ internalError() {
    exit 4
 }
 
+findSiblingCommand() {
+   local resultVariable="${1}"
+   shift 1
+
+   local command
+   for command in "${@}"
+   do
+      local path="${programDirectory}/${command}"
+      [ -f "${path}" ] || continue
+      [ -x "${path}" ] || continue
+
+      setVariable "${resultVariable}" "${path}"
+      return 0
+   done
+
+   return 1
+}
+
 findHostCommand() {
    local pathVariable="${1}"
    local command="${2}"
