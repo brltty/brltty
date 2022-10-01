@@ -2918,13 +2918,9 @@ brlttyStart (void) {
   if (!opt_noDaemon) {
     stderrLogLevel = 0;
 
-#if defined(GRUB_RUNTIME)
-
-#else /* redirect stdio streams to /dev/null */
     detachStandardInput();
     detachStandardOutput();
     if (!opt_standardError) detachStandardError();
-#endif /* redirect stdio streams to /dev/null */
 
 #ifdef __MINGW32__
     {
