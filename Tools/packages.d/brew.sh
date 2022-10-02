@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -17,40 +17,27 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-setPackageManager() {
-   local -r commands=(
-      /usr/local/bin/brew
-      /sbin/apk
-      /usr/bin/apt
-      /usr/bin/dnf
-      /usr/sbin/pacman
-      /usr/sbin/pkg
-      /sbin/xbps-install
-      /usr/bin/zypper
-   )
-
-   local command
-   for command in "${commands[@]}"
-   do
-      [ -x "${command}" ] && {
-         packageManager="${command##*/}"
-         packageManager="${packageManager%%-*}"
-         return 0
-      }
-   done
-
-   semanticError "unknown package manager"
+listInstalledPackages() {
+   brew list -1 --full-name
 }
 
-normalizePackageList() {
-   sort | uniq
+installPackages() {
+   brew install "${@}"
 }
 
-unsupportedPackageAction() {
-   local action="${1}"
-   semanticError "unsupported package action: ${action}"
+removePackages() {
+   brew uninstall "${@}"
 }
 
-setPackageManager
-logNote "package manager: ${packageManager}"
-. "${programDirectory}/packages.d/${packageManager}.sh"
+describePackage() {
+   brew desc --eval-all "${1}"
+}
+
+whichPackage() {
+   brew which-formula --explain "${1}"
+}
+
+searchPackage() {
+   brew search "${1}"
+}
+

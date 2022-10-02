@@ -20,7 +20,7 @@
 . "$(dirname "${0}")/../brltty-prologue.sh"
 
 processExtraProgramParameters() {
-   declare -g requiredPackageNames=( "${@}" )
+   requiredPackageNames=( "${@}" )
 }
 
 addProgramOption i flag installNeededPackages "install the needed packages"
@@ -62,6 +62,10 @@ set -e
          else
             platformName="debian"
          fi
+         ;;
+
+      brew)
+         platformName="darwin"
          ;;
 
       dnf)
