@@ -735,7 +735,10 @@
 
 # Terminal Emulator Screen Driver Parameters
 #screen-parameters em:command= # [$SHELL]
+#screen-parameters em:Directory=path # []
 #screen-parameters em:Emulator= # [brltty-pty]
+#screen-parameters em:Group=name/number # []
+#screen-parameters em:User=name/number # []
 
 # Windows Screen Driver Parameters
 #screen-parameters wn:Root=no # [no,yes]

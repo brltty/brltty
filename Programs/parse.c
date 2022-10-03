@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <pwd.h>
+#include <grp.h>
 
 #include "parse.h"
 #include "log.h"
@@ -387,6 +389,63 @@ validateFloat (float *value, const char *string, const float *minimum, const flo
   return 1;
 }
 #endif /* NO_FLOAT */
+
+int
+validateUser (uid_t *value, const char *string, gid_t *group) {
+  {
+    int integer = geteuid();
+    static const int minimum = 1;
+    static const int maximum = UINT16_MAX;
+
+    if (validateInteger(&integer, string, &minimum, &maximum)) {
+      *value = integer;
+
+      if (group) {
+        struct passwd *user = getpwuid(*value);
+        *group = user? user->pw_gid: 0;
+      }
+
+      return 1;
+    }
+  }
+
+  {
+    struct passwd *user = getpwnam(string);
+
+    if (user) {
+      *value = user->pw_uid;
+      if (group) *group = user->pw_gid;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+int
+validateGroup (gid_t *value, const char *string) {
+  {
+    int integer = geteuid();
+    static const int minimum = 1;
+    static const int maximum = UINT16_MAX;
+
+    if (validateInteger(&integer, string, &minimum, &maximum)) {
+      *value = integer;
+      return 1;
+    }
+  }
+
+  {
+    struct group *group = getgrnam(string);
+
+    if (group) {
+      *value = group->gr_gid;
+      return 1;
+    }
+  }
+
+  return 0;
+}
 
 int
 hasQualifier (const char **identifier, const char *qualifier) {

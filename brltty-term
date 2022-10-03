@@ -31,5 +31,21 @@ findHostCommand commandPath "${command}" || {
    semanticError "command not found: ${command}"
 }
 
-exec "${brlttyPath}" -n -xem -X"em:command=${commandPath}" "${@}"
+addDriverParameter() {
+   local name="${1}"
+   local value="${2}"
+
+  driverParameters+=("-Xem:${name}=${value}")
+}
+
+driverParameters=()
+addDriverParameter command "${commandPath}"
+addDriverParameter user "$(id -u)"
+addDriverParameter group "$(id -g)"
+addDriverParameter directory "${PWD}"
+
+SUDO=""
+[ -u "${brlttyPath}" ] || SUDO="sudo"
+
+exec ${SUDO} "${brlttyPath}" -n -z -xem "${driverParameters[@]}" "${@}"
 exit "${?}"

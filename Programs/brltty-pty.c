@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 #include <errno.h>
 #include <limits.h>
 #include <sys/wait.h>
@@ -33,6 +34,7 @@
 #include "options.h"
 #include "pty_object.h"
 #include "pty_terminal.h"
+#include "parse.h"
 #include "file.h"
 #include "async_handle.h"
 #include "async_wait.h"
@@ -40,7 +42,10 @@
 #include "async_signal.h"
 
 static int opt_driverDirectives;
-static int opt_ttyPath;
+static int opt_showPath;
+static char *opt_asUser;
+static char *opt_asGroup;
+static char *opt_inDirectory;
 
 static int opt_logInput;
 static int opt_logOutput;
@@ -49,15 +54,36 @@ static int opt_logUnexpected;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "driver-directives",
-    .letter = 'd',
+    .letter = 'x',
     .setting.flag = &opt_driverDirectives,
     .description = strtext("write driver directives to standard error")
   },
 
-  { .word = "tty-path",
-    .letter = 't',
-    .setting.flag = &opt_ttyPath,
+  { .word = "show-path",
+    .letter = 'p',
+    .setting.flag = &opt_showPath,
     .description = strtext("show the absolute path to the pty slave")
+  },
+
+  { .word = "user",
+    .letter = 'u',
+    .argument = "user",
+    .setting.string = &opt_asUser,
+    .description = strtext("the name or number of the user to run as")
+  },
+
+  { .word = "group",
+    .letter = 'g',
+    .argument = "group",
+    .setting.string = &opt_asGroup,
+    .description = strtext("the name or number of the group to run as")
+  },
+
+  { .word = "directory",
+    .letter = 'd',
+    .argument = "path",
+    .setting.string = &opt_inDirectory,
+    .description = strtext("the directory to change to")
   },
 
   { .word = "log-input",
@@ -371,10 +397,50 @@ main (int argc, char *argv[]) {
     return PROG_EXIT_SEMANTIC;
   }
 
+  {
+    uid_t user = 0;
+    gid_t group = 0;
+
+    if (*opt_asUser) {
+      if (!validateUser(&user, opt_asUser, &group)) {
+        logMessage(LOG_ERR, "unknown user: %s", opt_asUser);
+        return PROG_EXIT_SEMANTIC;
+      }
+    }
+
+    if (*opt_asGroup) {
+      if (!validateGroup(&group, opt_asGroup)) {
+        logMessage(LOG_ERR, "unknown group: %s", opt_asGroup);
+        return PROG_EXIT_SEMANTIC;
+      }
+    }
+
+    if (group) {
+      if (setresgid(group, group, group) == -1) {
+        logSystemError("setresgid");
+        return PROG_EXIT_FATAL;
+      }
+    }
+
+    if (user) {
+      if (setresuid(user, user, user) == -1) {
+        logSystemError("setresuid");
+        return PROG_EXIT_FATAL;
+      }
+    }
+  }
+
+  if (*opt_inDirectory) {
+    if (chdir(opt_inDirectory) == -1) {
+      logMessage(LOG_ERR, "can't change to directory: %s: %s", opt_inDirectory, strerror(errno));
+      return PROG_EXIT_FATAL;
+    }
+  }
+
   if ((pty = ptyNewObject())) {
     const char *ttyPath = ptyGetPath(pty);
 
-    if (opt_ttyPath) {
+    if (opt_showPath) {
       FILE *stream = stderr;
       fprintf(stream, "%s\n", ttyPath);
       fflush(stream);

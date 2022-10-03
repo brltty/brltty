@@ -35,29 +35,35 @@
 
 typedef enum {
   PARM_COMMAND,
+  PARM_DIRECTORY,
   PARM_EMULATOR,
+  PARM_GROUP,
+  PARM_USER,
 } ScreenParameters;
 
-#define SCRPARMS "command", "emulator"
+#define SCRPARMS "command", "directory", "emulator", "group", "user"
 #include "scr_driver.h"
 
 static char *terminalCommand = NULL;
+static char *terminalDirectory = NULL;
 static char *terminalEmulator = NULL;
+static char *terminalGroup = NULL;
+static char *terminalUser = NULL;
+
+static void
+setParameter (char **variable, char **parameters, ScreenParameters parameter) {
+  char *value = parameters[parameter];
+  if (value && !*value) value = NULL;
+  *variable = value;
+}
 
 static int
 processParameters_TerminalEmulatorScreen (char **parameters) {
-  {
-    char *command = parameters[PARM_COMMAND];
-    if (command && !*command) command = NULL;
-    terminalCommand = command;
-  }
-
-  {
-    char *command = parameters[PARM_EMULATOR];
-    if (command && !*command) command = NULL;
-    terminalEmulator = command;
-  }
-
+  setParameter(&terminalCommand, parameters, PARM_COMMAND);
+  setParameter(&terminalDirectory, parameters, PARM_DIRECTORY);
+  setParameter(&terminalEmulator, parameters, PARM_EMULATOR);
+  setParameter(&terminalGroup, parameters, PARM_GROUP);
+  setParameter(&terminalUser, parameters, PARM_USER);
   return 1;
 }
 
@@ -290,11 +296,27 @@ startEmulator (void) {
     "terminal emulator command: %s", emulator
   );
 
-  const char *arguments[5];
+  const char *arguments[11];
   unsigned int argumentCount = 0;
 
   arguments[argumentCount++] = emulator;
   arguments[argumentCount++] = "--driver-directives";
+
+  if (terminalUser) {
+    arguments[argumentCount++] = "--user";
+    arguments[argumentCount++] = terminalUser;
+  }
+
+  if (terminalGroup) {
+    arguments[argumentCount++] = "--group";
+    arguments[argumentCount++] = terminalGroup;
+  }
+
+  if (terminalDirectory) {
+    arguments[argumentCount++] = "--directory";
+    arguments[argumentCount++] = terminalDirectory;
+  }
+
   arguments[argumentCount++] = "--";
   if (terminalCommand) arguments[argumentCount++] = terminalCommand;
   arguments[argumentCount++] = NULL;
