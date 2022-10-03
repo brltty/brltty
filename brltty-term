@@ -19,6 +19,64 @@
 
 . "$(dirname "${0}")/brltty-prologue.sh"
 
+usageSummary="Usage: ${programName} [shell] [-option ...]
+
+This script runs:
+* A shell via the brltty-pty terminal emulator.
+* brltty using its TerminalEmulator screen driver.
+
+It's especially useful on platforms that don't support a native screen driver.
+This newer method may (should) be used in preference to the older method of
+running brltty in conjunction with its provided patch to the screen program.
+
+All of the arguments to this script are interpreted as brltty options,
+with the following exceptions:
+* If the first argument is -h then this usage summary is displayed.
+* If the first argument doesn't begin with - (i.e. it isn't an option)
+  then it's interpreted as the shell to run, and the rest of the arguments
+  are interpreted as brltty options.
+
+The shell may be specified via either its name or its path. It's also okay
+to specify a terminal manager rather than a shell. For example:
+* ${programName} screen
+* ${programName} tmux
+
+If the shell isn't specified on the command line then, in descending order of
+precedence, the following is used:
+* If set, the \$BRLTTY_TERM_SHELL environment variable.
+* If set, the \$SHELL environment variable.
+* The default shell (sh).
+
+Brltty is run as root so that it can access the braille device. If its
+set-user-id bit is set then it's run directly. If not, it's run via sudo.
+In this case, consider configuring sudo so that it won't prompt for the
+user's password.
+
+If the copy of this script in its installed location is used then the
+installed brltty is run. If, however, the copy in the top-level directory
+of the source tree is used then brltty in the build tree (which needn't
+be installed) is run.
+
+"
+
+shellCommand=""
+
+[ "${#}" -eq 0 ] || {
+   argument="${1}"
+
+   [ "${argument}" = "-h" ] && {
+      echo -n "${usageSummary}"
+      exit 0
+   }
+
+   [ "${#argument}" -eq 0 ] || {
+      [ "${argument:0:1}" = "-" ] || {
+         shellCommand="${argument}"
+         shift 1
+      }
+   }
+}
+
 [ -t 0 ] || semanticError "standard input isn't a terminal"
 [ -t 1 ] || semanticError "standard output isn't a terminal"
 
@@ -26,9 +84,12 @@ findSiblingCommand brlttyPath brltty run-brltty || {
    semanticError "brltty not found"
 }
 
-command="${BRLTTY_TERM_COMMAND:-${SHELL:-/bin/sh}}"
-findHostCommand commandPath "${command}" || {
-   semanticError "command not found: ${command}"
+[ -n "${shellCommand}" ] || shellCommand="${BRLTTY_TERM_SHELL}"
+[ -n "${shellCommand}" ] || shellCommand="${SHELL}"
+[ -n "${shellCommand}" ] || shellCommand="sh"
+
+findHostCommand shellPath "${shellCommand}" || {
+   semanticError "shell not found: ${shellCommand}"
 }
 
 addDriverParameter() {
@@ -39,7 +100,7 @@ addDriverParameter() {
 }
 
 driverParameters=()
-addDriverParameter command "${commandPath}"
+addDriverParameter command "${shellPath}"
 addDriverParameter user "$(id -u)"
 addDriverParameter group "$(id -g)"
 addDriverParameter directory "${PWD}"
