@@ -23,7 +23,7 @@ usageSummary="Usage: ${programName} [shell] [-option ...]
 
 This script runs:
 * A shell via the brltty-pty terminal emulator.
-* brltty using its TerminalEmulator screen driver.
+* Brltty using its TerminalEmulator screen driver.
 
 It's especially useful on platforms that don't support a native screen driver.
 This newer method may (should) be used in preference to the older method of
@@ -48,9 +48,10 @@ precedence, the following is used:
 * The default shell (sh).
 
 Brltty is run as root so that it can access the braille device. If its
-set-user-id bit is set then it's run directly. If not, it's run via sudo.
-In this case, consider configuring sudo so that it won't prompt for the
-user's password.
+set-user-id bit is set and/or if this script is already running as root
+then it's run directly. If neither, it's run via sudo. In this case, you
+may wish to consider configuring sudo so that it won't prompt for the
+user's password because the braille device won't be operational yet.
 
 If the copy of this script in its installed location is used then the
 installed brltty is run. If, however, the copy in the top-level directory
@@ -100,14 +101,17 @@ addDriverParameter() {
 }
 
 driverParameters=()
+user="$(id -u)"
+
 addDriverParameter shell "${shellPath}"
-addDriverParameter user "$(id -u)"
+addDriverParameter user "${user}"
 addDriverParameter group "$(id -g)"
 addDriverParameter directory "${PWD}"
 addDriverParameter home "${HOME}"
 
-SUDO=""
-[ -u "${brlttyPath}" ] || SUDO="sudo"
+SUDO="sudo"
+[ -u "${brlttyPath}" ] && SUDO=""
+[ "${user}" -eq 0 ] && SUDO=""
 
 exec ${SUDO} "${brlttyPath}" -n -z -xem "${driverParameters[@]}" "${@}"
 exit "${?}"
