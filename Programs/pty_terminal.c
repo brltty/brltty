@@ -35,6 +35,7 @@
 #include "strfmt.h"
 #include "pty_terminal.h"
 #include "pty_screen.h"
+#include "scr_types.h"
 #include "ascii.h"
 
 static unsigned char terminalLogLevel = LOG_DEBUG;
@@ -116,72 +117,63 @@ showAlert (void) {
 int
 ptyProcessTerminalInput (PtyObject *pty) {
   int character = getch();
-  const char *sequence = NULL;
-  char buffer[0X20];
 
-  if (character < 0X100) {
-    buffer[0] = character;
-    buffer[1] = 0;
-    sequence = buffer;
-  } else {
-    #define KEY(name, seq) case KEY_##name: sequence = seq; break;
+  if (logInput) {
+    const char *name = keyname(character);
+    if (!name) name = "unknown";
+    logMessage(terminalLogLevel, "input: 0X%02X (%s)", character, name);
+  }
+
+  if (character > UINT8_MAX) {
+    ScreenKey key = 0;
+
+    #define KEY(from, to) case KEY_##from: key = SCR_KEY_##to; break;
     switch (character) {
-      KEY(BACKSPACE, "\x7F")
-      KEY(BTAB     , "\x1B[Z")
+      KEY(ENTER    , ENTER)
+      KEY(BACKSPACE, BACKSPACE)
 
-      KEY(UP       , "\x1BOA")
-      KEY(DOWN     , "\x1BOB")
-      KEY(RIGHT    , "\x1BOC")
-      KEY(LEFT     , "\x1BOD")
+      KEY(LEFT     , CURSOR_LEFT)
+      KEY(RIGHT    , CURSOR_RIGHT)
+      KEY(UP       , CURSOR_UP)
+      KEY(DOWN     , CURSOR_DOWN)
 
-      KEY(HOME     , "\x1B[1~")
-      KEY(IC       , "\x1B[2~")
-      KEY(DC       , "\x1B[3~")
-      KEY(END      , "\x1B[4~")
-      KEY(PPAGE    , "\x1B[5~")
-      KEY(NPAGE    , "\x1B[6~")
+      KEY(PPAGE    , PAGE_UP)
+      KEY(NPAGE    , PAGE_DOWN)
+      KEY(HOME     , HOME)
+      KEY(END      , END)
+      KEY(IC       , INSERT)
+      KEY(DC       , DELETE)
 
-      KEY(F( 1)    , "\x1BOP")
-      KEY(F( 2)    , "\x1BOQ")
-      KEY(F( 3)    , "\x1BOR")
-      KEY(F( 4)    , "\x1BOS")
-      KEY(F( 5)    , "\x1B[15~")
-      KEY(F( 6)    , "\x1B[17~")
-      KEY(F( 7)    , "\x1B[18~")
-      KEY(F( 8)    , "\x1B[19~")
-      KEY(F( 9)    , "\x1B[20~")
-      KEY(F(10)    , "\x1B[21~")
-      KEY(F(11)    , "\x1B[23~")
-      KEY(F(12)    , "\x1B[24~")
+      KEY(F( 1)    , F1)
+      KEY(F( 2)    , F2)
+      KEY(F( 3)    , F3)
+      KEY(F( 4)    , F4)
+      KEY(F( 5)    , F5)
+      KEY(F( 6)    , F6)
+      KEY(F( 7)    , F7)
+      KEY(F( 8)    , F8)
+      KEY(F( 9)    , F9)
+      KEY(F(10)    , F10)
+      KEY(F(11)    , F11)
+      KEY(F(12)    , F12)
     }
     #undef KEY
 
-    switch (character) {
-      case KEY_UP: case KEY_DOWN: case KEY_LEFT: case KEY_RIGHT:
-        strcpy(buffer, sequence);
-        buffer[1] = keypadTransmitMode? 'O': '[';
-        sequence = buffer;
-        break;
-    }
-  }
-
-  if (sequence) {
-    size_t count = strlen(sequence);
-
-    if (logInput) {
+    if (key) {
+      if (!ptyWriteInputCharacter(pty, key, keypadTransmitMode)) {
+        return 0;
+      }
+    } else if (logUnexpected) {
       const char *name = keyname(character);
       if (!name) name = "unknown";
-      logBytes(terminalLogLevel, "input: 0X%02X (%s)", sequence, count, character, name);
+      logMessage(terminalLogLevel, "unexpected input: 0X%02X (%s)", character, name);
     }
 
-    if (!ptyWriteInput(pty, sequence, count)) return 0;
-  } else if (logUnexpected) {
-    const char *name = keyname(character);
-    if (!name) name = "unknown";
-    logMessage(terminalLogLevel, "unexpected input: 0X%02X (%s)", character, name);
+    return 1;
   }
 
-  return 1;
+  char byte = character;
+  return ptyWriteInputData(pty, &byte,1);
 }
 
 static unsigned char outputByteBuffer[0X40];

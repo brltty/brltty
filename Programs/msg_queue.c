@@ -31,7 +31,7 @@ int
 sendMessage (int queue, MessageType type, const void *content, size_t length, int flags) {
   struct {
     MessageType type;
-    unsigned char content[length];
+    char content[length];
   } message;
 
   if (!content) {
@@ -51,7 +51,7 @@ ssize_t
 receiveMessage (int queue, MessageType *type, void *buffer, size_t size, int flags) {
   struct {
     MessageType type;
-    unsigned char buffer[size];
+    char buffer[size];
   } message;
 
   if (!buffer) size = 0;
@@ -97,7 +97,7 @@ ASYNC_EVENT_CALLBACK(handleReceivedMessage) {
 
 THREAD_FUNCTION(messageReceiverThread) {
   MessageReceiverArgument *mra = argument;
-  unsigned char buffer[mra->size];
+  char buffer[mra->size];
 
   while (1) {
     MessageType type = mra->type;

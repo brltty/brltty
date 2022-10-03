@@ -31,7 +31,8 @@ extern void ptyDestroyObject (PtyObject *pty);
 extern const char *ptyGetPath (const PtyObject *pty);
 extern int ptyGetMaster (const PtyObject *pty);
 
-extern int ptyWriteInput (PtyObject *pty, const void *data, size_t length);
+extern int ptyWriteInputData (PtyObject *pty, const void *data, size_t length);
+extern int ptyWriteInputCharacter (PtyObject *pty, wchar_t character, int kxMode);
 
 extern void ptyCloseMaster (PtyObject *pty);
 extern int ptyOpenSlave (const PtyObject *pty, int *fileDescriptor);

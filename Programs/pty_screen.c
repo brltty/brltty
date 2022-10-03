@@ -22,6 +22,7 @@
 #include "pty_screen.h"
 #include "scr_emulator.h"
 #include "msg_queue.h"
+#include "utf8.h"
 
 static unsigned char screenLogLevel = LOG_DEBUG;
 
@@ -92,10 +93,14 @@ startTerminalMessageReceiver (const char *name, MessageType type, size_t size, M
 static void
 messageHandler_InputText (const MessageHandlerParameters *parameters) {
   PtyObject *pty = parameters->data;
-  const unsigned char *content = parameters->content;
+  const char *content = parameters->content;
   size_t length = parameters->length;
 
-  ptyWriteInput(pty, content, length);
+  while (length) {
+    wint_t character = convertUtf8ToWchar(&content, &length);
+    if (character == WEOF) break;
+    if (!ptyWriteInputCharacter(pty, character, 0)) break;
+  }
 }
 
 static void

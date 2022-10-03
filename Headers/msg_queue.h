@@ -33,7 +33,7 @@ typedef struct {
   MessageType type;
 
   size_t length;
-  unsigned char content[];
+  char content[];
 } MessageHandlerParameters;
 
 typedef void MessageHandler (const MessageHandlerParameters *parameters);

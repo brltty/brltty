@@ -149,6 +149,11 @@ typedef enum {
   SCR_KEY_F24,
 } ScreenKey;
 
+static inline int
+isSpecialKey (ScreenKey key) {
+  return (key & (SCR_KEY_CHAR_MASK & ~0XFF)) == SCR_KEY_UNICODE_ROW;
+}
+
 /* must be less than 0 */
 #define SCR_NO_VT -1
 

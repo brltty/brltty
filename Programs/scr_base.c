@@ -28,11 +28,6 @@
 #include "scr_internal.h"
 #include "ascii.h"
 
-int
-isSpecialKey (ScreenKey key) {
-  return (key & (SCR_KEY_CHAR_MASK & ~0XFF)) == SCR_KEY_UNICODE_ROW;
-}
-
 void
 setScreenKeyModifiers (ScreenKey *key, ScreenKey which) {
   if (!isSpecialKey(*key)) {

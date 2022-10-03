@@ -525,55 +525,10 @@ insertKey_TerminalEmulatorScreen (ScreenKey key) {
   setScreenKeyModifiers(&key, 0);
 
   wchar_t character = key & SCR_KEY_CHAR_MASK;
-  const char *sequence = NULL;
   Utf8Buffer utf8;
+  size_t length = convertWcharToUtf8(character, utf8);
 
-  if (isSpecialKey(key)) {
-    #define KEY(key, seq) case SCR_KEY_##key: sequence = seq; break;
-    switch (character) {
-      KEY(ENTER, "\r")
-      KEY(TAB, "\t")
-      KEY(BACKSPACE, "\x7f")
-      KEY(ESCAPE, "\x1b")
-
-      KEY(CURSOR_LEFT, "\x1b[D")
-      KEY(CURSOR_RIGHT, "\x1b[C")
-      KEY(CURSOR_UP, "\x1b[A")
-      KEY(CURSOR_DOWN, "\x1b[B")
-
-      KEY(PAGE_UP, "\x1b[5~")
-      KEY(PAGE_DOWN, "\x1b[6~")
-
-      KEY(HOME, "\x1b[1~")
-      KEY(END, "\x1b[4~")
-
-      KEY(INSERT, "\x1b[2~")
-      KEY(DELETE, "\x1b[3~")
-
-      KEY(F1, "\x1BOP")
-      KEY(F2, "\x1BOQ")
-      KEY(F3, "\x1BOR")
-      KEY(F4, "\x1BOS")
-      KEY(F5, "\x1B[15~")
-      KEY(F6, "\x1B[17~")
-      KEY(F7, "\x1B[18~")
-      KEY(F8, "\x1B[19~")
-      KEY(F9, "\x1B[20~")
-      KEY(F10, "\x1B[21~")
-      KEY(F11, "\x1B[23~")
-      KEY(F12, "\x1B[24~")
-
-      default:
-        logMessage(LOG_WARNING, "unsupported key: %04X", key);
-        return 0;
-    }
-    #undef KEY
-  } else {
-    convertWcharToUtf8(character, utf8);
-    sequence = utf8;
-  }
-
-  return sendTerminalMessage(TERM_MSG_INPUT_TEXT, sequence, strlen(sequence));
+  return sendTerminalMessage(TERM_MSG_INPUT_TEXT, utf8, length);
 }
 
 static void
