@@ -23,7 +23,7 @@ usageSummary="Usage: ${programName} [shell] [-option ...]
 
 This script runs:
 * A shell via the brltty-pty terminal emulator.
-* Brltty using its TerminalEmulator screen driver.
+* Brltty using its Terminal Emulator screen driver.
 
 It's especially useful on platforms that don't support a native screen driver.
 This newer method may (should) be used in preference to the older method of
@@ -41,17 +41,17 @@ to specify a terminal manager rather than a shell. For example:
 * ${programName} screen
 * ${programName} tmux
 
-If the shell isn't specified on the command line then, in descending order of
-precedence, the following is used:
-* If set, the \$BRLTTY_TERM_SHELL environment variable.
-* If set, the \$SHELL environment variable.
-* The default shell (sh).
+If the shell isn't specified on the command line then, in decreasing
+precedence, one of the following is used:
+1: If set, the \$BRLTTY_TERM_SHELL environment variable.
+2: If set, the \$SHELL environment variable.
+3: The default shell (sh).
 
 Brltty is run as root so that it can access the braille device. If its
 set-user-id bit is set and/or if this script is already running as root
 then it's run directly. If neither, it's run via sudo. In this case, you
 may wish to consider configuring sudo so that it won't prompt for the
-user's password because the braille device won't be operational yet.
+user's password since the braille device wouldn't be operational yet.
 
 If the copy of this script in its installed location is used then the
 installed brltty is run. If, however, the copy in the top-level directory
@@ -93,25 +93,28 @@ findHostCommand shellPath "${shellCommand}" || {
    semanticError "shell not found: ${shellCommand}"
 }
 
+driverParameters=()
+driverCode="em"
+
 addDriverParameter() {
    local name="${1}"
    local value="${2}"
 
-  driverParameters+=("-Xem:${name}=${value}")
+  driverParameters+=("-X${driverCode}:${name}=${value}")
 }
 
-driverParameters=()
-user="$(id -u)"
+currentUser="$(id -u)"
+currentGroup="$(id -g)"
 
 addDriverParameter shell "${shellPath}"
-addDriverParameter user "${user}"
-addDriverParameter group "$(id -g)"
+addDriverParameter user "${currentUser}"
+addDriverParameter group "${currentGroup}"
 addDriverParameter directory "${PWD}"
 addDriverParameter home "${HOME}"
 
 SUDO="sudo"
 [ -u "${brlttyPath}" ] && SUDO=""
-[ "${user}" -eq 0 ] && SUDO=""
+[ "${currentUser}" -eq 0 ] && SUDO=""
 
-exec ${SUDO} "${brlttyPath}" -n -z -xem "${driverParameters[@]}" "${@}"
+exec ${SUDO} "${brlttyPath}" -n -z -x"${driverCode}" "${driverParameters[@]}" "${@}"
 exit "${?}"
