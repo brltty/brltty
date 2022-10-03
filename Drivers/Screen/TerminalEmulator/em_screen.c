@@ -34,23 +34,23 @@
 #include "embed.h"
 
 typedef enum {
-  PARM_COMMAND,
   PARM_DIRECTORY,
   PARM_EMULATOR,
   PARM_GROUP,
   PARM_HOME,
+  PARM_SHELL,
   PARM_USER,
 } ScreenParameters;
 
-#define SCRPARMS "command", "directory", "emulator", "group", "home", "user"
+#define SCRPARMS "directory", "emulator", "group", "home", "shell", "user"
 #include "scr_driver.h"
 
-static char *terminalCommand = NULL;
-static char *terminalDirectory = NULL;
-static char *terminalEmulator = NULL;
-static char *terminalGroup = NULL;
-static char *terminalHome = NULL;
-static char *terminalUser = NULL;
+static char *directoryParameter = NULL;
+static char *emulatorParameter = NULL;
+static char *groupParameter = NULL;
+static char *homeParameter = NULL;
+static char *shellParameter = NULL;
+static char *userParameter = NULL;
 
 static void
 setParameter (char **variable, char **parameters, ScreenParameters parameter) {
@@ -61,12 +61,12 @@ setParameter (char **variable, char **parameters, ScreenParameters parameter) {
 
 static int
 processParameters_TerminalEmulatorScreen (char **parameters) {
-  setParameter(&terminalCommand, parameters, PARM_COMMAND);
-  setParameter(&terminalDirectory, parameters, PARM_DIRECTORY);
-  setParameter(&terminalEmulator, parameters, PARM_EMULATOR);
-  setParameter(&terminalGroup, parameters, PARM_GROUP);
-  setParameter(&terminalHome, parameters, PARM_HOME);
-  setParameter(&terminalUser, parameters, PARM_USER);
+  setParameter(&directoryParameter, parameters, PARM_DIRECTORY);
+  setParameter(&emulatorParameter, parameters, PARM_EMULATOR);
+  setParameter(&groupParameter, parameters, PARM_GROUP);
+  setParameter(&homeParameter, parameters, PARM_HOME);
+  setParameter(&shellParameter, parameters, PARM_SHELL);
+  setParameter(&userParameter, parameters, PARM_USER);
   return 1;
 }
 
@@ -287,7 +287,7 @@ makeDefaultEmulatorPath (void) {
 
 static int
 startEmulator (void) {
-  char *emulator = terminalEmulator;
+  char *emulator = emulatorParameter;
 
   if (!emulator) {
     if (!(emulator = makeDefaultEmulatorPath())) {
@@ -305,28 +305,28 @@ startEmulator (void) {
   arguments[argumentCount++] = emulator;
   arguments[argumentCount++] = "--driver-directives";
 
-  if (terminalUser) {
+  if (userParameter) {
     arguments[argumentCount++] = "--user";
-    arguments[argumentCount++] = terminalUser;
+    arguments[argumentCount++] = userParameter;
   }
 
-  if (terminalGroup) {
+  if (groupParameter) {
     arguments[argumentCount++] = "--group";
-    arguments[argumentCount++] = terminalGroup;
+    arguments[argumentCount++] = groupParameter;
   }
 
-  if (terminalDirectory) {
+  if (directoryParameter) {
     arguments[argumentCount++] = "--working-directory";
-    arguments[argumentCount++] = terminalDirectory;
+    arguments[argumentCount++] = directoryParameter;
   }
 
-  if (terminalHome) {
+  if (homeParameter) {
     arguments[argumentCount++] = "--home-directory";
-    arguments[argumentCount++] = terminalHome;
+    arguments[argumentCount++] = homeParameter;
   }
 
   arguments[argumentCount++] = "--";
-  if (terminalCommand) arguments[argumentCount++] = terminalCommand;
+  if (shellParameter) arguments[argumentCount++] = shellParameter;
   arguments[argumentCount++] = NULL;
 
   HostCommandOptions options;
@@ -335,7 +335,7 @@ startEmulator (void) {
   options.standardError = &emulatorStream;
 
   int exitStatus = runHostCommand(arguments, &options);
-  if (emulator != terminalEmulator) free(emulator);
+  if (emulator != emulatorParameter) free(emulator);
   emulator = NULL;
 
   if (!exitStatus) {

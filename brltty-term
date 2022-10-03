@@ -100,7 +100,7 @@ addDriverParameter() {
 }
 
 driverParameters=()
-addDriverParameter command "${shellPath}"
+addDriverParameter shell "${shellPath}"
 addDriverParameter user "$(id -u)"
 addDriverParameter group "$(id -g)"
 addDriverParameter directory "${PWD}"

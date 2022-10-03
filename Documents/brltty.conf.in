@@ -734,10 +734,11 @@
 #screen-parameters lx:WidecharPadding=no # [no,yes]
 
 # Terminal Emulator Screen Driver Parameters
-#screen-parameters em:command= # [$SHELL]
 #screen-parameters em:Directory=path # []
 #screen-parameters em:Emulator= # [brltty-pty]
 #screen-parameters em:Group=name/number # []
+#screen-parameters em:Home=path # []
+#screen-parameters em:Shell= # [$SHELL]
 #screen-parameters em:User=name/number # []
 
 # Windows Screen Driver Parameters
