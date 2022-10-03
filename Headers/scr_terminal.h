@@ -28,8 +28,9 @@ extern "C" {
 extern int makeTerminalKey (key_t *key, const char *path);
 
 typedef enum {
-  TERM_MSG_INPUT_TEXT      = 't', // driver->emulator - UTF-8
-  TERM_MSG_SEGMENT_UPDATED = 'u', // emulator->driver - no content
+  TERM_MSG_INPUT_TEXT       = 't', // driver->emulator - UTF-8
+  TERM_MSG_SEGMENT_UPDATED  = 'u', // emulator->driver - no content
+  TERM_MSG_EMULATOR_EXITING = 'x', // emulator->driver - no content
 } TerminalMessageType;
 
 extern int getMessageQueue (int *queue, key_t key);

@@ -738,6 +738,7 @@
 #screen-parameters em:Emulator=command # [brltty-pty]
 #screen-parameters em:Group=name/number # []
 #screen-parameters em:Home=path # []
+#screen-parameters em:Path=path # []
 #screen-parameters em:Shell=command # [$SHELL]
 #screen-parameters em:User=name/number # []
 

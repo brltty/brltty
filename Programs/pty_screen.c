@@ -75,7 +75,7 @@ initializeColorPairs (void) {
 
 static int haveTerminalMessageQueue = 0;
 static int terminalMessageQueue;
-static int haveTerminalInputHandler = 0;
+static int haveInputTextHandler = 0;
 
 static int
 sendTerminalMessage (MessageType type, const void *content, size_t length) {
@@ -90,7 +90,7 @@ startTerminalMessageReceiver (const char *name, MessageType type, size_t size, M
 }
 
 static void
-messageHandler_terminalInput (const MessageHandlerParameters *parameters) {
+messageHandler_InputText (const MessageHandlerParameters *parameters) {
   PtyObject *pty = parameters->data;
   const unsigned char *content = parameters->content;
   size_t length = parameters->length;
@@ -258,7 +258,7 @@ static unsigned int savedCursorColumn = 0;
 int
 ptyBeginScreen (PtyObject *pty) {
   haveTerminalMessageQueue = 0;
-  haveTerminalInputHandler = 0;
+  haveInputTextHandler = 0;
 
   if (initscr()) {
     intrflush(stdscr, FALSE);
@@ -289,9 +289,9 @@ ptyBeginScreen (PtyObject *pty) {
       segmentHeader->screenNumber = 1;
       storeCursorPosition();
 
-      haveTerminalInputHandler = startTerminalMessageReceiver(
-        "terminal-input-receiver", TERM_MSG_INPUT_TEXT,
-        0X200, messageHandler_terminalInput, pty
+      haveInputTextHandler = startTerminalMessageReceiver(
+        "terminal-input-text-receiver", TERM_MSG_INPUT_TEXT,
+        0X200, messageHandler_InputText, pty
       );
 
       return 1;
@@ -306,6 +306,7 @@ ptyBeginScreen (PtyObject *pty) {
 void
 ptyEndScreen (void) {
   endwin();
+  sendTerminalMessage(TERM_MSG_EMULATOR_EXITING, NULL, 0);
   detachScreenSegment(segmentHeader);
   destroySegment();
 }

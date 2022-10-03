@@ -38,17 +38,19 @@ typedef enum {
   PARM_EMULATOR,
   PARM_GROUP,
   PARM_HOME,
+  PARM_PATH,
   PARM_SHELL,
   PARM_USER,
 } ScreenParameters;
 
-#define SCRPARMS "directory", "emulator", "group", "home", "shell", "user"
+#define SCRPARMS "directory", "emulator", "group", "home", "path", "shell", "user"
 #include "scr_driver.h"
 
 static char *directoryParameter = NULL;
 static char *emulatorParameter = NULL;
 static char *groupParameter = NULL;
 static char *homeParameter = NULL;
+static char *pathParameter = NULL;
 static char *shellParameter = NULL;
 static char *userParameter = NULL;
 
@@ -65,9 +67,16 @@ processParameters_TerminalEmulatorScreen (char **parameters) {
   setParameter(&emulatorParameter, parameters, PARM_EMULATOR);
   setParameter(&groupParameter, parameters, PARM_GROUP);
   setParameter(&homeParameter, parameters, PARM_HOME);
+  setParameter(&pathParameter, parameters, PARM_PATH);
   setParameter(&shellParameter, parameters, PARM_SHELL);
   setParameter(&userParameter, parameters, PARM_USER);
   return 1;
+}
+
+static void
+handleException (const char *cause) {
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "stopping: %s", cause);
+  brlttyInterrupt(WAIT_STOP);
 }
 
 static AsyncHandle emulatorMonitorHandle = NULL;
@@ -82,6 +91,7 @@ static ScreenSegmentHeader *cachedSegment = NULL;
 static int haveTerminalMessageQueue = 0;
 static int terminalMessageQueue;
 static int haveSegmentUpdatedHandler = 0;
+static int haveEmulatorExitingHandler = 0;
 
 static int
 sendTerminalMessage (MessageType type, const void *content, size_t length) {
@@ -95,6 +105,11 @@ messageHandler_segmentUpdated (const MessageHandlerParameters *parameters) {
 }
 
 static void
+messageHandler_emulatorExiting (const MessageHandlerParameters *parameters) {
+  handleException("emulator exiting");
+}
+
+static void
 enableMessages (key_t key) {
   haveTerminalMessageQueue = getMessageQueue(&terminalMessageQueue, key);
 
@@ -104,7 +119,30 @@ enableMessages (key_t key) {
       terminalMessageQueue, TERM_MSG_SEGMENT_UPDATED,
       0, messageHandler_segmentUpdated, NULL
     );
+
+    haveEmulatorExitingHandler = startMessageReceiver(
+      "terminal-emulator-exiting-receiver",
+      terminalMessageQueue, TERM_MSG_EMULATOR_EXITING,
+      0, messageHandler_emulatorExiting, NULL
+    );
   }
+}
+
+static int
+accessSegmentForPath (const char *path) {
+  key_t key;
+
+  if (makeTerminalKey(&key, path)) {
+    if ((screenSegment = getScreenSegmentForKey(key))) {
+      problemText = gettext("no screen cache");
+      enableMessages(key);
+      return 1;
+    } else {
+      problemText = gettext("screen not accessible");
+    }
+  }
+
+  return 0;
 }
 
 static void
@@ -138,27 +176,12 @@ destruct_TerminalEmulatorScreen (void) {
 }
 
 static void
-endSession (const char *reason) {
-  logMessage(LOG_CATEGORY(SCREEN_DRIVER), "session ending: %s", reason);
-  brlttyInterrupt(WAIT_STOP);
-}
-
-static void
 driverDirectiveHandler_path (const char *const *operands) {
   const char *path = operands[0];
 
   if (path) {
     if (!screenSegment) {
-      key_t key;
-
-      if (makeTerminalKey(&key, path)) {
-        if ((screenSegment = getScreenSegmentForKey(key))) {
-          problemText = gettext("no screen cache");
-          enableMessages(key);
-        } else {
-          problemText = gettext("screen not accessible");
-        }
-      }
+      accessSegmentForPath(path);
     }
   }
 }
@@ -232,12 +255,12 @@ ASYNC_MONITOR_CALLBACK(emEmulatorMonitor) {
     );
 
     if (!ok) {
-      const char *reason =
+      const char *cause =
         ferror(emulatorStream)? "emulator stream error":
         feof(emulatorStream)? "end of emulator stream":
         "emulator monitor failure";
 
-      endSession(reason);
+      handleException(cause);
       return 0;
     }
 
@@ -364,15 +387,18 @@ construct_TerminalEmulatorScreen (void) {
 
   haveTerminalMessageQueue = 0;
   haveSegmentUpdatedHandler = 0;
+  haveEmulatorExitingHandler = 0;
 
-  if (startEmulator()) {
+  if (pathParameter) {
+    if (accessSegmentForPath(pathParameter)) return 1;
+  } else if (startEmulator()) {
     problemText = gettext("screen not attached");
     return 1;
   } else {
     problemText = gettext("no screen emulator");
   }
 
-  endSession("driver construction failure");
+  handleException("driver construction failure");
 //destruct_TerminalEmulatorScreen();
   return 0;
 }
