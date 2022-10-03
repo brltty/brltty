@@ -45,7 +45,8 @@ static int opt_driverDirectives;
 static int opt_showPath;
 static char *opt_asUser;
 static char *opt_asGroup;
-static char *opt_inDirectory;
+static char *opt_workingDirectory;
+static char *opt_homeDirectory;
 
 static int opt_logInput;
 static int opt_logOutput;
@@ -79,11 +80,18 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("the name or number of the group to run as")
   },
 
-  { .word = "directory",
+  { .word = "working-directory",
     .letter = 'd',
     .argument = "path",
-    .setting.string = &opt_inDirectory,
+    .setting.string = &opt_workingDirectory,
     .description = strtext("the directory to change to")
+  },
+
+  { .word = "home-directory",
+    .letter = 'D',
+    .argument = "path",
+    .setting.string = &opt_homeDirectory,
+    .description = strtext("the home directory to use")
   },
 
   { .word = "log-input",
@@ -430,9 +438,15 @@ main (int argc, char *argv[]) {
     }
   }
 
-  if (*opt_inDirectory) {
-    if (chdir(opt_inDirectory) == -1) {
-      logMessage(LOG_ERR, "can't change to directory: %s: %s", opt_inDirectory, strerror(errno));
+  if (*opt_workingDirectory) {
+    if (chdir(opt_workingDirectory) == -1) {
+      logMessage(LOG_ERR, "can't change to directory: %s: %s", opt_workingDirectory, strerror(errno));
+      return PROG_EXIT_FATAL;
+    }
+  }
+
+  if (*opt_homeDirectory) {
+    if (!setEnvironmentString("HOME", opt_homeDirectory)) {
       return PROG_EXIT_FATAL;
     }
   }

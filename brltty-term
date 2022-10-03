@@ -43,6 +43,7 @@ addDriverParameter command "${commandPath}"
 addDriverParameter user "$(id -u)"
 addDriverParameter group "$(id -g)"
 addDriverParameter directory "${PWD}"
+addDriverParameter home "${HOME}"
 
 SUDO=""
 [ -u "${brlttyPath}" ] || SUDO="sudo"

@@ -38,16 +38,18 @@ typedef enum {
   PARM_DIRECTORY,
   PARM_EMULATOR,
   PARM_GROUP,
+  PARM_HOME,
   PARM_USER,
 } ScreenParameters;
 
-#define SCRPARMS "command", "directory", "emulator", "group", "user"
+#define SCRPARMS "command", "directory", "emulator", "group", "home", "user"
 #include "scr_driver.h"
 
 static char *terminalCommand = NULL;
 static char *terminalDirectory = NULL;
 static char *terminalEmulator = NULL;
 static char *terminalGroup = NULL;
+static char *terminalHome = NULL;
 static char *terminalUser = NULL;
 
 static void
@@ -63,6 +65,7 @@ processParameters_TerminalEmulatorScreen (char **parameters) {
   setParameter(&terminalDirectory, parameters, PARM_DIRECTORY);
   setParameter(&terminalEmulator, parameters, PARM_EMULATOR);
   setParameter(&terminalGroup, parameters, PARM_GROUP);
+  setParameter(&terminalHome, parameters, PARM_HOME);
   setParameter(&terminalUser, parameters, PARM_USER);
   return 1;
 }
@@ -296,7 +299,7 @@ startEmulator (void) {
     "terminal emulator command: %s", emulator
   );
 
-  const char *arguments[11];
+  const char *arguments[13];
   unsigned int argumentCount = 0;
 
   arguments[argumentCount++] = emulator;
@@ -313,8 +316,13 @@ startEmulator (void) {
   }
 
   if (terminalDirectory) {
-    arguments[argumentCount++] = "--directory";
+    arguments[argumentCount++] = "--working-directory";
     arguments[argumentCount++] = terminalDirectory;
+  }
+
+  if (terminalHome) {
+    arguments[argumentCount++] = "--home-directory";
+    arguments[argumentCount++] = terminalHome;
   }
 
   arguments[argumentCount++] = "--";
