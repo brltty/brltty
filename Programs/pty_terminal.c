@@ -99,11 +99,6 @@ ptyEndTerminal (void) {
   ptyEndScreen();
 }
 
-void
-ptySynchronizeTerminal (void) {
-  ptyRefreshScreen();
-}
-
 static void
 soundAlert (void) {
   beep();
@@ -838,5 +833,9 @@ ptyProcessTerminalOutput (const unsigned char *bytes, size_t count) {
     wantRefresh = parseOutputByte(*byte++);
   }
 
-  return wantRefresh;
+  if (wantRefresh) {
+    ptyRefreshScreen();
+  }
+
+  return 1;
 }

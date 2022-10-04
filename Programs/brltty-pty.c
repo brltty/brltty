@@ -298,8 +298,8 @@ ASYNC_INPUT_CALLBACK(ptyInputHandler) {
   if (!(parameters->error || parameters->end)) {
     size_t length = parameters->length;
 
-    if (ptyProcessTerminalOutput(parameters->buffer, length)) {
-      ptySynchronizeTerminal();
+    if (!ptyProcessTerminalOutput(parameters->buffer, length)) {
+      parentIsQuitting = 1;
     }
 
     return length;

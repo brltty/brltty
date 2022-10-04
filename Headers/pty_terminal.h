@@ -29,7 +29,6 @@ extern const char *ptyGetTerminalType (void);
 
 extern int ptyBeginTerminal (PtyObject *pty);
 extern void ptyEndTerminal (void);
-extern void ptySynchronizeTerminal (void);
 
 extern int ptyProcessTerminalInput (PtyObject *pty);
 extern int ptyProcessTerminalOutput (const unsigned char *bytes, size_t count);
