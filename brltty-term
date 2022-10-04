@@ -112,7 +112,7 @@ addDriverParameter group "${currentGroup}"
 addDriverParameter directory "${PWD}"
 addDriverParameter home "${HOME}"
 
-SUDO="sudo"
+SUDO="sudo --bell --preserve-env --preserve-env=USER,LOGNAME --"
 [ -u "${brlttyPath}" ] && SUDO=""
 [ "${currentUser}" -eq 0 ] && SUDO=""
 
