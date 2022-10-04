@@ -51,22 +51,22 @@ ptySetTerminalLogLevel (unsigned char level) {
 }
 
 void
-ptySetLogInput (int yes) {
+ptySetLogTerminalInput (int yes) {
   logInput = yes;
 }
 
 void
-ptySetLogOutput (int yes) {
+ptySetLogTerminalOutput (int yes) {
   logOutput = yes;
 }
 
 void
-ptySetLogSequences (int yes) {
+ptySetLogTerminalSequences (int yes) {
   logSequences = yes;
 }
 
 void
-ptySetLogUnexpected (int yes) {
+ptySetLogUnexpectedTerminalIO (int yes) {
   logUnexpected = yes;
 }
 
@@ -796,8 +796,8 @@ static const OutputParserStateEntry outputParserStateTable[] = {
 };
 #undef OPS
 
-int
-ptyParseOutputByte (unsigned char byte) {
+static int
+parseOutputByte (unsigned char byte) {
   if (outputParserState == OPS_BASIC) {
     outputByteCount = 0;
   }
@@ -828,14 +828,14 @@ ptyParseOutputByte (unsigned char byte) {
 }
 
 int
-ptyParseOutputBytes (const unsigned char *bytes, size_t count) {
+ptyProcessTerminalOutput (const unsigned char *bytes, size_t count) {
   int wantRefresh = 0;
 
   const unsigned char *byte = bytes;
   const unsigned char *end = byte + count;
 
   while (byte < end) {
-    wantRefresh = ptyParseOutputByte(*byte++);
+    wantRefresh = parseOutputByte(*byte++);
   }
 
   return wantRefresh;

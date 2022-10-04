@@ -31,6 +31,9 @@ extern void ptyDestroyObject (PtyObject *pty);
 extern const char *ptyGetPath (const PtyObject *pty);
 extern int ptyGetMaster (const PtyObject *pty);
 
+extern void ptySetLogLevel (PtyObject *pty, unsigned char level);
+extern void ptySetLogInput (PtyObject *pty, int yes);
+
 extern int ptyWriteInputData (PtyObject *pty, const void *data, size_t length);
 extern int ptyWriteInputCharacter (PtyObject *pty, wchar_t character, int kxMode);
 

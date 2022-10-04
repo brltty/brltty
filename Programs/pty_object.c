@@ -28,6 +28,9 @@
 struct PtyObjectStruct {
   char *path;
   int master;
+
+  unsigned char logLevel;
+  unsigned char logInput:1;
 };
 
 PtyObject *
@@ -36,6 +39,12 @@ ptyNewObject (void) {
 
   if ((pty = malloc(sizeof(*pty)))) {
     memset(pty, 0, sizeof(*pty));
+
+    pty->path = NULL;
+    pty->master = INVALID_FILE_DESCRIPTOR;
+
+    pty->logLevel = LOG_DEBUG;
+    pty->logInput = 0;
 
     if ((pty->master = posix_openpt(O_RDWR)) != -1) {
       if ((pty->path = ptsname(pty->master))) {
@@ -81,8 +90,22 @@ ptyGetMaster (const PtyObject *pty) {
   return pty->master;
 }
 
+void
+ptySetLogLevel (PtyObject *pty, unsigned char level) {
+  pty->logLevel = level;
+}
+
+void
+ptySetLogInput (PtyObject *pty, int yes) {
+  pty->logInput = yes;
+}
+
 int
 ptyWriteInputData (PtyObject *pty, const void *data, size_t length) {
+  if (pty->logInput) {
+    logBytes(pty->logLevel, "pty input", data, length);
+  }
+
   if (write(pty->master, data, length) != -1) return 1;
   logSystemError("pty write input");
   return 0;
@@ -131,6 +154,10 @@ ptyWriteInputCharacter (PtyObject *pty, wchar_t character, int kxMode) {
     KEY(F10         , "\x1B[21~")
     KEY(F11         , "\x1B[23~")
     KEY(F12         , "\x1B[24~")
+
+    default:
+      logMessage(LOG_WARNING, "unsupported pty screen key: %04X", character);
+      break;
   }
   #undef KEY
 

@@ -298,7 +298,7 @@ ASYNC_INPUT_CALLBACK(ptyInputHandler) {
   if (!(parameters->error || parameters->end)) {
     size_t length = parameters->length;
 
-    if (ptyParseOutputBytes(parameters->buffer, length)) {
+    if (ptyProcessTerminalOutput(parameters->buffer, length)) {
       ptySynchronizeTerminal();
     }
 
@@ -354,7 +354,11 @@ runParent (PtyObject *pty, pid_t child) {
 
     if (asyncMonitorFileInput(&standardInputHandle, STDIN_FILENO, standardInputMonitor, pty)) {
       if (installSignalHandlers()) {
-        if (!isatty(2)) ptySetTerminalLogLevel(LOG_NOTICE);
+        if (!isatty(2)) {
+          unsigned char level = LOG_NOTICE;
+          ptySetTerminalLogLevel(level);
+          ptySetLogLevel(pty, level);
+        }
 
         if (ptyBeginTerminal(pty)) {
           writeDriverDirective("path %s", ptyGetPath(pty));
@@ -390,10 +394,10 @@ main (int argc, char *argv[]) {
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 
-  ptySetLogInput(opt_logInput);
-  ptySetLogOutput(opt_logOutput);
-  ptySetLogSequences(opt_logSequences);
-  ptySetLogUnexpected(opt_logUnexpected);
+  ptySetLogTerminalInput(opt_logInput);
+  ptySetLogTerminalOutput(opt_logOutput);
+  ptySetLogTerminalSequences(opt_logSequences);
+  ptySetLogUnexpectedTerminalIO(opt_logUnexpected);
 
   if (!isatty(STDIN_FILENO)) {
     logMessage(LOG_ERR, "%s", gettext("standard input isn't a terminal"));
@@ -452,6 +456,7 @@ main (int argc, char *argv[]) {
   }
 
   if ((pty = ptyNewObject())) {
+    ptySetLogInput(pty, opt_logInput);
     const char *ttyPath = ptyGetPath(pty);
 
     if (opt_showPath) {

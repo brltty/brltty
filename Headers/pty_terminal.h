@@ -32,15 +32,13 @@ extern void ptyEndTerminal (void);
 extern void ptySynchronizeTerminal (void);
 
 extern int ptyProcessTerminalInput (PtyObject *pty);
-
-extern int ptyParseOutputByte (unsigned char byte);
-extern int ptyParseOutputBytes (const unsigned char *bytes, size_t count);
+extern int ptyProcessTerminalOutput (const unsigned char *bytes, size_t count);
 
 extern void ptySetTerminalLogLevel (unsigned char level);
-extern void ptySetLogInput (int yes);
-extern void ptySetLogOutput (int yes);
-extern void ptySetLogSequences (int yes);
-extern void ptySetLogUnexpected (int yes);
+extern void ptySetLogTerminalInput (int yes);
+extern void ptySetLogTerminalOutput (int yes);
+extern void ptySetLogTerminalSequences (int yes);
+extern void ptySetLogUnexpectedTerminalIO (int yes);
 
 #ifdef __cplusplus
 }
