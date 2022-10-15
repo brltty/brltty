@@ -102,7 +102,7 @@ runProgramTerminationCommands() {
    while [ "${programTerminationCommandCount}" -gt 0 ]
    do
       set -- $(getVariable "programTerminationCommand${programTerminationCommandCount}")
-      let "programTerminationCommandCount -= 1"
+      programTerminationCommandCount=$((programTerminationCommandCount - 1))
 
       local process="${1}"
       local directory="${2}"
