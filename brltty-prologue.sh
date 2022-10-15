@@ -145,53 +145,6 @@ resolveDirectory() {
 programDirectory="$(dirname "${0}")"
 readonly programDirectory="$(resolveDirectory "${programDirectory}")"
 
-toRelativePath() {
-   local toPath="${1}"
-   local variable="${2}"
-
-   [ -n "${toPath}" ] || toPath="."
-   resolveDirectory "${toPath}" toPath
-   local fromPath="$(pwd)"
-
-   [ "${fromPath%/}" = "${fromPath}" ] && fromPath+="/"
-   [ "${toPath%/}" = "${toPath}" ] && toPath+="/"
-
-   local fromLength="${#fromPath}"
-   local toLength="${#toPath}"
-
-   local limit=$(( (fromLength < toLength)? fromLength: toLength ))
-   local index=0
-   local start=0
-
-   while (( index < limit ))
-   do
-      local fromChar="${fromPath:index:1}"
-      local toChar="${toPath:index:1}"
-
-      [ "${fromChar}" = "${toChar}" ] || break
-      [ "${fromChar}" = "/" ] && start="$((index + 1))"
-      let "index += 1"
-   done
-
-   fromPath="${fromPath:start}"
-   toPath="${toPath:start}"
-
-   while [ "${#fromPath}" -gt 0 ]
-   do
-      toPath="../${toPath}"
-      fromPath="${fromPath#*/}"
-   done
-
-   [ -n "${toPath}" ] || toPath="."
-
-   if [ -n "${variable}" ]
-   then
-      setVariable "${variable}" "${toPath}"
-   else
-      echo "${toPath}"
-   fi
-}
-
 parseParameterString() {
    local valuesArray="${1}"
    local parameters="${2}"
