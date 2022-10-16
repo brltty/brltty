@@ -22,6 +22,7 @@
 "${programDirectory}/configure" \
    --disable-gpm \
    --disable-iconv \
+   --disable-icu \
    --disable-polkit \
    \
    --without-libbraille \
@@ -35,6 +36,7 @@
    --without-theta \
    \
    --without-pgmpath-package \
+   --without-pgmprivs-package \
    --without-service-package \
    --without-params-package \
    --without-charset-package \
@@ -46,12 +48,11 @@
    --without-beep-package \
    --without-pcm-package \
    --without-fm-package \
+   --without-hid-package \
    --without-ports-package \
    \
    --disable-java-bindings \
-   --disable-ocaml-bindings \
    --disable-python-bindings \
-   --disable-tcl-bindings \
    \
    --quiet \
    "${@}"
