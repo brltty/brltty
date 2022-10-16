@@ -121,11 +121,17 @@ pushProgramTerminationCommand() {
 }
 
 needTemporaryDirectory() {
-   [ -n "${temporaryDirectory}" ] || {
-      umask 022
+   local variable="${1:-temporaryDirectory}"
+
+   local _directory
+   getVariable "${variable}" _directory
+
+   [ -n "${_directory}" ] || {
       [ -n "${TMPDIR}" -a -d "${TMPDIR}" -a -r "${TMPDIR}" -a -w "${TMPDIR}" -a -x "${TMPDIR}" ] || export TMPDIR="/tmp"
-      temporaryDirectory="$(mktemp -d "${TMPDIR}/${programName}.$(date +"%Y%m%d-%H%M%S").XXXXXX")" && cd "${temporaryDirectory}" || exit "${?}"
-      pushProgramTerminationCommand rm -f -r -- "${temporaryDirectory}"
+      _directory="$(mktemp -d "${TMPDIR}/${programName}.$(date +"%Y%m%d-%H%M%S").XXXXXX")"
+      pushProgramTerminationCommand rm -f -r -- "${_directory}"
+      cd "${_directory}"
+      setVariable "${variable}" "${_directory}"
    }
 }
 
