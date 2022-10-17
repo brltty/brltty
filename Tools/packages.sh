@@ -20,6 +20,7 @@
 setPackageManager() {
    local -r commands=(
       /usr/local/bin/brew
+
       /sbin/apk
       /usr/bin/apt
       /usr/bin/dnf

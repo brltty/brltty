@@ -41,3 +41,5 @@ searchPackage() {
    brew search "${1}"
 }
 
+export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_NO_INSTALL_CLEANUP=1
