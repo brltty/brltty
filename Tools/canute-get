@@ -1,0 +1,91 @@
+#!/bin/bash
+
+programName="${0##*/}"
+
+showUsageSummary() {
+cat <<END-OF-USAGE-SUMMARY
+Usage: ${programName} [-option ...]
+
+The following options may be specified:
+  -a name  the name of the archive
+  -h       show this command line usage summary, and then exit
+  -l url   the location containing the archive
+  -s name  the name of the install script
+END-OF-USAGE-SUMMARY
+}
+
+programMessage() {
+   local message="${1}"
+
+   echo >&2 "${programName}: ${message}"
+}
+
+syntaxError() {
+   local message="${1}"
+
+   programMessage "${message}"
+   exit 2
+}
+
+semanticError() {
+   local message="${1}"
+
+   programMessage "${message}"
+   exit 3
+}
+
+getFile() {
+   local file="${1}"
+
+   wget --quiet --output-document "${file}" -- "${archiveLocation}/${file}"
+}
+
+removeTemporaryDirectory() {
+   set +e
+   cd /
+   rm -f -r -- "${temporaryDirectory}"
+}
+
+showUsage=false
+archiveLocation="https://brltty.app/archive/Canute"
+archiveName="canute-brltty.tar.gz"
+scriptName="canute-install"
+
+while getopts ":a:hl:s:" option
+do
+   case "${option}"
+   in
+      a) archiveName="${OPTARG}";;
+      h) showUsage=true;;
+      l) archiveLocation="${OPTARG}";;
+      s) scriptName="${OPTARG}";;
+
+      :) syntaxError "missing operand: -${OPTARG}";;
+     \?) syntaxError "unrecognized option: -${OPTARG}";;
+      *) syntaxError "unimplemented option: -${option}";;
+   esac
+done
+
+shift $((OPTIND - 1))
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
+
+"${showUsage}" && {
+   showUsageSummary
+   exit 0
+}
+
+[ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
+set -e
+
+[ -n "${TMPDIR}" -a -d "${TMPDIR}" -a -r "${TMPDIR}" -a -w "${TMPDIR}" -a -x "${TMPDIR}" ] || export TMPDIR="/tmp"
+temporaryDirectory="$(mktemp -d "${TMPDIR}/${programName}.$(date +"%Y%m%d-%H%M%S").XXXXXX")"
+trap removeTemporaryDirectory exit
+
+cd "${temporaryDirectory}"
+getFile "${archiveName}"
+getFile "${scriptName}"
+
+chmod u+x -- "${scriptName}"
+"./${scriptName}" "${archiveName}"
+
+exit 0
