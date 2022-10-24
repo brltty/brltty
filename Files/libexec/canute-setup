@@ -11,9 +11,10 @@ addProgramOption k flag apiKey "generate the BrlAPI access key"
 addProgramOption l flag sharedLibraries "configure the shared libraries"
 addProgramOption u flag udevReload "reload the Udev rules"
 addProgramOption s flag systemdUnits "configure the Systemd units"
+addProgramOption d flag setDefault "set the default target to boot"
 parseProgramArguments "${@}"
 
-actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits)
+actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits setDefault)
 verifyActionFlags allActions "${actionFlags[@]}"
 
 processPackages() {
@@ -91,6 +92,10 @@ performAction_systemdUnits() {
       executeHostCommand systemctl --quiet start "${unit}"
       systemctl --quiet is-enabled "${unit}" || executeHostCommand systemctl --quiet enable "${unit}"
    done
+}
+
+performAction_setDefault() {
+   executeHostCommand systemctl --quiet set-default multi-user.target
 }
 
 "${testMode}" || [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
