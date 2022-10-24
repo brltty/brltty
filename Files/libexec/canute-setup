@@ -48,6 +48,7 @@ performAction_unwantedPackages() {
 }
 
 performAction_requiredPackages() {
+   executeHostCommand apt --quiet --quiet update
    processPackages required apt --yes --quiet --quiet --quiet install --
 }
 
