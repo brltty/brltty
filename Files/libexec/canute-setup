@@ -3,19 +3,19 @@
 shopt -s extglob
 
 addTestModeOption
-addProgramOption A flag allActions "perform all of the actions"
-addProgramOption P flag unwantedPackages "remove unwanted packages"
-addProgramOption p flag requiredPackages "install required packages"
-addProgramOption e flag etcFiles "install the /etc/ files"
-addProgramOption k flag apiKey "generate the BrlAPI access key"
-addProgramOption l flag sharedLibraries "configure the shared libraries"
-addProgramOption u flag udevReload "reload the Udev rules"
-addProgramOption s flag systemdUnits "configure the Systemd units"
-addProgramOption d flag setDefault "set the default target to boot"
-addProgramOption r flag rebootSystem "reboot the system"
+addProgramOption A flag allActions "perform all of the actions - implies -P -p -e -k -l -u -s -b -r"
+addProgramOption P flag unwantedPackages "remove the unwanted packages - implied by -A"
+addProgramOption p flag requiredPackages "install the required packages - implied by -A"
+addProgramOption e flag etcFiles "install the /etc/ files - implied by -A"
+addProgramOption k flag apiKey "generate the BrlAPI access key - implied by -A"
+addProgramOption l flag sharedLibraries "configure the shared libraries - implied by -A"
+addProgramOption u flag udevReload "reload the Udev rules - implied by -A"
+addProgramOption s flag systemdUnits "configure the Systemd units - implied by -A"
+addProgramOption b flag bootTaret "set the boot target"
+addProgramOption r flag rebootSystem "reboot the system - implied by -A"
 parseProgramArguments "${@}"
 
-actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits setDefault installComplete rebootSystem)
+actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits bootTaret installComplete rebootSystem)
 installComplete=false
 verifyActionFlags allActions "${actionFlags[@]}"
 
@@ -46,25 +46,33 @@ processPackages() {
 }
 
 performAction_unwantedPackages() {
+   logTask "removing the unwanted packages"
    processPackages unwanted apt --yes --quiet --quiet --quiet remove --
 }
 
 performAction_requiredPackages() {
+   logTask "updating the package metadata"
    executeHostCommand apt --quiet --quiet --quiet -- update
+
+   logTask "installing the required packages"
    processPackages required apt --yes --quiet --quiet --quiet install --
 }
 
 performAction_etcFiles() {
+   logTask "installing the /etc/ files"
    executeHostCommand tar --extract --file "${installTree}/etc.tar" --directory "/"
 }
 
 performAction_apiKey() {
+   logTask "generating the BrlAPI access key"
+
    local apiKeyFile="/etc/brlapi.key"
    executeHostCommand "${installTree}/bin/brltty-genkey" -q -f "${apiKeyFile}"
    executeHostCommand chmod u=rw,go=r "${apiKeyFile}"
 }
 
 performAction_sharedLibraries() {
+   logTask "configuring the shared libraries"
    local file lines=""
 
    while read file
@@ -82,11 +90,15 @@ performAction_sharedLibraries() {
 }
 
 performAction_udevReload() {
+   logTask "reloading the Udev rules"
    executeHostCommand udevadm control --reload
 }
 
 performAction_systemdUnits() {
+   logTask "reloading the Systemd units"
    executeHostCommand systemctl --quiet daemon-reload
+
+   logTask "configuring the Systemd units"
    local unit
 
    for unit in "${canuteSystemdUnit}"
@@ -97,7 +109,8 @@ performAction_systemdUnits() {
    done
 }
 
-performAction_setDefault() {
+performAction_bootTaret() {
+   logTask "setting the boot target"
    executeHostCommand systemctl --quiet set-default multi-user.target
 }
 

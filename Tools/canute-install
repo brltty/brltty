@@ -11,11 +11,12 @@ Install or upgrade the Raspbian Canute software.
 Copyright © 2022 - Bristol Braille Technology CIC
 
 Usage: ${programName} [-option ...]
-This script must be executed as root.
 The following options may be specified:
   -h       show this command line usage summary, and then exit
   -a name  the name of the archive (${defaultArchiveName})
   -l url   the location containing the archive (${defaultArchiveLocation})
+
+This script must be executed as root on a Raspbian system.
 END-OF-USAGE-SUMMARY
 }
 
@@ -39,9 +40,10 @@ semanticError() {
    exit 3
 }
 
-getFile() {
+downloadFile() {
    local file="${1}"
 
+   programMessage "downloading the archive"
    wget --quiet --output-document "${file}" -- "${archiveLocation}/${file}"
 }
 
@@ -90,9 +92,10 @@ needTemporaryDirectory
 trap removeTemporaryDirectory exit
 
 cd "${temporaryDirectory}"
-getFile "${archiveName}"
+downloadFile "${archiveName}"
 
+programMessage "unpacking the archive"
 tar --extract --absolute-names --file "${archiveName}" --directory "/"
-"/brltty/current/libexec/canute-setup" -A
 
+"/brltty/current/libexec/canute-setup" -A
 exit 0

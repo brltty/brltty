@@ -18,5 +18,5 @@ installSubdirectory="$(basename "${installTree}")"
 installLocation="$(dirname "${installTree}")"
 
 makeSymbolicLink "${installLocation}/current" "${installSubdirectory}"
-executeHostCommand sudo "${installTree}/libexec/canute-setup" -l
+executeHostCommand sudo "${installTree}/libexec/canute-setup" -q -l
 exit 0
