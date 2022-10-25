@@ -12,9 +12,11 @@ addProgramOption l flag sharedLibraries "configure the shared libraries"
 addProgramOption u flag udevReload "reload the Udev rules"
 addProgramOption s flag systemdUnits "configure the Systemd units"
 addProgramOption d flag setDefault "set the default target to boot"
+addProgramOption r flag rebootSystem "reboot the system"
 parseProgramArguments "${@}"
 
-actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits setDefault)
+actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits setDefault installComplete rebootSystem)
+installComplete=false
 verifyActionFlags allActions "${actionFlags[@]}"
 
 processPackages() {
@@ -97,6 +99,37 @@ performAction_systemdUnits() {
 
 performAction_setDefault() {
    executeHostCommand systemctl --quiet set-default multi-user.target
+}
+
+performAction_installComplete() {
+   sync
+   programMessage "install complete"
+}
+
+confirmAction() {
+   local prompt="${1}"
+
+   local response
+   while read -p "${programName}: ${prompt}? " -r response
+   do
+      response="${response,,*}"
+
+      isAbbreviation "${response}" yes && return 0 ||
+      isAbbreviation "${response}" no && return 1 ||
+      continue
+   done
+
+   echo >&2 ""
+   return 2
+}
+
+performAction_rebootSystem() {
+   if confirmAction "reboot the system"
+   then
+      reboot
+   else
+      programMessage "system not rebooted"
+   fi
 }
 
 "${testMode}" || [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"

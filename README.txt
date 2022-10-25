@@ -6,10 +6,7 @@ Relevant files can be found at:
 
    https://brltty.app/archive/Canute/
 
-To install this software:
-
-1) Download and run (as root) the canute-install script.
-2) Reboot the host.
+To install or upgrade this software, download and run (as root) the canute-install script.
 
 The following canute-* scripts will be in the command search path.
 Each has a -h (help) option.
