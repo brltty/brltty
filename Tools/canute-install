@@ -1,15 +1,15 @@
 #!/bin/bash
 
 programName="${0##*/}"
-installTree="/brltty/current"
 
 showUsageSummary() {
 cat <<END-OF-USAGE-SUMMARY
-Usage: ${programName} [-option ...] tar-file
+Usage: ${programName} [-option ...]
 
 The following options may be specified:
-  -h  show this command line usage summary, and then exit
-  -t  test mode - show (but don't execute) the commands
+  -a name  the name of the archive
+  -h       show this command line usage summary, and then exit
+  -l url   the location containing the archive
 END-OF-USAGE-SUMMARY
 }
 
@@ -26,56 +26,59 @@ syntaxError() {
    exit 2
 }
 
-semanticError() {
-   local message="${1}"
+getFile() {
+   local file="${1}"
 
-   programMessage "${message}"
-   exit 3
+   wget --quiet --output-document "${file}" -- "${archiveLocation}/${file}"
 }
 
-executeCommand() {
-   if "${testMode}"
-   then
-      programMessage "test mode: ${*}"
-   else
-      "${@}"
-   fi
+needTemporaryDirectory() {
+   [ -n "${TMPDIR}" -a -d "${TMPDIR}" -a -r "${TMPDIR}" -a -w "${TMPDIR}" -a -x "${TMPDIR}" ] || export TMPDIR="/tmp"
+   temporaryDirectory="$(mktemp -d "${TMPDIR}/${programName}.$(date +"%Y%m%d-%H%M%S").XXXXXX")"
+}
+
+removeTemporaryDirectory() {
+   set +e
+   cd /
+   rm -f -r -- "${temporaryDirectory}"
 }
 
 showUsage=false
-testMode=false
+archiveLocation="https://brltty.app/archive/Canute"
+archiveName="canute-brltty.tar.gz"
 
-while getopts ":ht" option
+while getopts ":a:hl:" option
 do
    case "${option}"
    in
+      a) archiveName="${OPTARG}";;
       h) showUsage=true;;
-      t) testMode=true;;
+      l) archiveLocation="${OPTARG}";;
 
       :) syntaxError "missing operand: -${OPTARG}";;
      \?) syntaxError "unrecognized option: -${OPTARG}";;
       *) syntaxError "unimplemented option: -${option}";;
    esac
 done
+
 shift $((OPTIND - 1))
+[ "${#}" -eq 0 ] || syntaxError "too many parameters"
 
 "${showUsage}" && {
    showUsageSummary
    exit 0
 }
 
-[ "${#}" -ge 1 ] || syntaxError "missing tar file path"
-tarFile="${1}"
-shift 1
-
-[ "${#}" -eq 0 ] || syntaxError "too many parameters"
-[ -e "${tarFile}" ] || semanticError "file not found: ${tarFile}"
-[ -f "${tarFile}" ] || semanticError "not a file: ${tarFile}"
-[ -r "${tarFile}" ] || semanticError "file not readable: ${tarFile}"
-
-"${testMode}" || [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
+[ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 set -e
 
-executeCommand tar --extract --absolute-names --file "${tarFile}" --directory "/"
-executeCommand "${installTree}/libexec/canute-setup" -A
+needTemporaryDirectory
+trap removeTemporaryDirectory exit
+
+cd "${temporaryDirectory}"
+getFile "${archiveName}"
+
+tar --extract --absolute-names --file "${archiveName}" --directory "/"
+"/brltty/current/libexec/canute-setup" -A
+
 exit 0
