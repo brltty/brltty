@@ -2,14 +2,20 @@
 
 programName="${0##*/}"
 
+defaultArchiveLocation="https://brltty.app/archive/Canute"
+defaultArchiveName="canute-brltty.tar.gz"
+
 showUsageSummary() {
 cat <<END-OF-USAGE-SUMMARY
-Usage: ${programName} [-option ...]
+Install or upgrade the Raspbian Canute software.
+Copyright © 2022 - Bristol Braille Technology CIC
 
+Usage: ${programName} [-option ...]
+This script must be executed as root.
 The following options may be specified:
-  -a name  the name of the archive
   -h       show this command line usage summary, and then exit
-  -l url   the location containing the archive
+  -a name  the name of the archive (${defaultArchiveName})
+  -l url   the location containing the archive (${defaultArchiveLocation})
 END-OF-USAGE-SUMMARY
 }
 
@@ -24,6 +30,13 @@ syntaxError() {
 
    programMessage "${message}"
    exit 2
+}
+
+semanticError() {
+   local message="${1}"
+
+   programMessage "${message}"
+   exit 3
 }
 
 getFile() {
@@ -44,15 +57,15 @@ removeTemporaryDirectory() {
 }
 
 showUsage=false
-archiveLocation="https://brltty.app/archive/Canute"
-archiveName="canute-brltty.tar.gz"
+archiveLocation="${defaultArchiveLocation}"
+archiveName="${defaultArchiveName}"
 
-while getopts ":a:hl:" option
+while getopts ":ha:l:" option
 do
    case "${option}"
    in
-      a) archiveName="${OPTARG}";;
       h) showUsage=true;;
+      a) archiveName="${OPTARG}";;
       l) archiveLocation="${OPTARG}";;
 
       :) syntaxError "missing operand: -${OPTARG}";;
