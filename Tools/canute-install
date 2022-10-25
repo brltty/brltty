@@ -82,6 +82,7 @@ shift $((OPTIND - 1))
    exit 0
 }
 
+[ -f "/usr/bin/raspi-config" ] || semanticError "not Raspbian"
 [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 set -e
 
