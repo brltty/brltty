@@ -8,7 +8,7 @@ defaultArchiveName="canute-brltty.tar.gz"
 showUsageSummary() {
 cat <<END-OF-USAGE-SUMMARY
 Install or upgrade the Raspbian Canute software.
-Copyright © 2022 - Bristol Braille Technology CIC
+Copyright © 2022 by Bristol Braille Technology CIC
 
 Usage: ${programName} [-option ...]
 The following options may be specified:
