@@ -43,7 +43,6 @@ semanticError() {
 downloadFile() {
    local file="${1}"
 
-   programMessage "downloading the archive"
    wget --quiet --output-document "${file}" -- "${archiveLocation}/${file}"
 }
 
@@ -90,11 +89,12 @@ set -e
 
 needTemporaryDirectory
 trap removeTemporaryDirectory exit
-
 cd "${temporaryDirectory}"
+
+programMessage "downloading archive"
 downloadFile "${archiveName}"
 
-programMessage "unpacking the archive"
+programMessage "unpacking archive"
 tar --extract --absolute-names --file "${archiveName}" --directory "/"
 
 "/brltty/current/libexec/canute-setup" -A

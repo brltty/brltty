@@ -150,7 +150,7 @@ performAction_setupFinished() {
 performAction_rebootSystem() {
    sync
 
-   if confirmAction "reboot the system"
+   if confirmAction "reboot system"
    then
       reboot
    else
