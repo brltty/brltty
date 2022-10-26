@@ -15,8 +15,8 @@ addProgramOption b flag bootTaret "set the boot target"
 addProgramOption r flag rebootSystem "reboot the system - implied by -A"
 parseProgramArguments "${@}"
 
-actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits bootTaret installComplete rebootSystem)
-installComplete=false
+actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits bootTaret setupFinished rebootSystem)
+setupFinished=false
 verifyActionFlags allActions "${actionFlags[@]}"
 
 processPackages() {
@@ -114,12 +114,13 @@ performAction_bootTaret() {
    executeHostCommand systemctl --quiet set-default multi-user.target
 }
 
-performAction_installComplete() {
-   sync
-   programMessage "install complete"
+performAction_setupFinished() {
+   programMessage "setup finished"
 }
 
 performAction_rebootSystem() {
+   sync
+
    if confirmAction "reboot the system"
    then
       reboot
