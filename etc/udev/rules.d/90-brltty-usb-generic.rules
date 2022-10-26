@@ -1,0 +1,122 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2022 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+#########################################################################
+# Udev rules for starting BRLTTY when a USB braille device is connected #
+#########################################################################
+
+SUBSYSTEM=="usb_device", GOTO="brltty_usb_begin"
+SUBSYSTEM=="usb", KERNEL!="*:*", GOTO="brltty_usb_begin"
+GOTO="brltty_device_end"
+
+LABEL="brltty_usb_begin"
+# BEGIN_USB_BRAILLE_DEVICES
+
+# Device: 0403:6001
+# Generic Identifier
+# Vendor: Future Technology Devices International, Ltd.
+# Product: FT232 USB-Serial (UART) IC
+# Albatross [all models]
+# Cebra [all models]
+# HIMS [Sync Braille]
+# HandyTech [FTDI chip]
+# Hedo [MobilLine]
+# MDV [all models]
+ENV{PRODUCT}=="403/6001/*", ATTR{manufacturer}=="FTDI", ENV{BRLTTY_BRAILLE_DRIVER}="hm,ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ATTR{manufacturer}=="Hedo Reha Technik GmbH", ENV{BRLTTY_BRAILLE_DRIVER}="hd", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ATTR{manufacturer}=="Tivomatic Oy", ENV{BRLTTY_BRAILLE_DRIVER}="at", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_BRAILLE_DRIVER}="ce,md", GOTO="brltty_usb_run"
+
+# Device: 10C4:EA60
+# Generic Identifier
+# Vendor: Cygnal Integrated Products, Inc.
+# Product: CP210x UART Bridge / myAVR mySmartUSB light
+# BrailleMemo [Pocket]
+# Seika [Braille Display]
+ENV{PRODUCT}=="10c4/ea60/*", ATTR{manufacturer}=="Silicon Labs", ENV{BRLTTY_BRAILLE_DRIVER}="mm,sk", GOTO="brltty_usb_run"
+
+# Device: 10C4:EA80
+# Generic Identifier
+# Vendor: Cygnal Integrated Products, Inc.
+# Product: CP210x UART Bridge
+# Seika [Note Taker]
+ENV{PRODUCT}=="10c4/ea80/*", ATTR{manufacturer}=="Silicon Laboratories", ENV{BRLTTY_BRAILLE_DRIVER}="sk", GOTO="brltty_usb_run"
+
+# Device: 1A86:7523
+# Generic Identifier
+# Vendor: Jiangsu QinHeng, Ltd.
+# Product: CH341 USB Bridge Controller
+# Baum [NLS eReader Zoomax (20 cells)]
+ENV{PRODUCT}=="1a86/7523/*", ATTRS{idVendor}=="1a40", ATTRS{idProduct}=="0101", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
+
+# END_USB_BRAILLE_DEVICES
+GOTO="brltty_device_end"
+
+LABEL="brltty_usb_run"
+SYMLINK+="brltty/USB-Mfr:$attr{manufacturer}-Prd:$attr{product}-Ser:$attr{serial}"
+ENV{BRLTTY_BRAILLE_DEVICE}="usb:vendor=0X$sysfs{idVendor}+product=0X$sysfs{idProduct}+serial=$sysfs{serial}"
+GOTO="brltty_device_run"
+
+LABEL="brltty_device_run"
+TEST=="/sys/fs/cgroup/systemd", GOTO="brltty_systemd"
+TEST=="/run/systemd/system", GOTO="brltty_systemd"
+ENV{BRLTTY_PID_FILE}="/run/brltty/brltty.$kernel.pid"
+
+TEST=="/etc/init", GOTO="brltty_upstart"
+TEST=="/etc/event.d", GOTO="brltty_upstart"
+
+ACTION=="add", GOTO="brltty_udev_add"
+ACTION=="remove", GOTO="brltty_udev_remove"
+GOTO="brltty_device_end"
+
+LABEL="brltty_udev_add"
+RUN+="/brltty/REV-BRLTTY-6.5-127-gc0b7b74f/libexec/brltty/udev-wrapper"
+GOTO="brltty_device_end"
+
+LABEL="brltty_udev_remove"
+RUN+="/brltty/REV-BRLTTY-6.5-127-gc0b7b74f/libexec/brltty/udev-wrapper -C"
+GOTO="brltty_device_end"
+
+LABEL="brltty_upstart"
+ACTION=="add", GOTO="brltty_upstart_start"
+ACTION=="remove", GOTO="brltty_upstart_stop"
+GOTO="brltty_device_end"
+
+LABEL="brltty_upstart_start"
+PROGRAM="/sbin/initctl status brltty", RESULT=="*running*", GOTO="brltty_upstart_restart"
+RUN+="/sbin/initctl start --quiet --no-wait brltty 'BRLTTY_BRAILLE_DEVICE=$env{BRLTTY_BRAILLE_DEVICE}' 'BRLTTY_BRAILLE_DRIVER=$env{BRLTTY_BRAILLE_DRIVER}'"
+GOTO="brltty_device_end"
+
+LABEL="brltty_upstart_restart"
+RUN+="/sbin/initctl restart --quiet --no-wait brltty 'BRLTTY_BRAILLE_DEVICE=$env{BRLTTY_BRAILLE_DEVICE}' 'BRLTTY_BRAILLE_DRIVER=$env{BRLTTY_BRAILLE_DRIVER}'"
+GOTO="brltty_device_end"
+
+LABEL="brltty_upstart_stop"
+RUN+="/sbin/initctl stop --quiet --no-wait brltty"
+GOTO="brltty_device_end"
+
+LABEL="brltty_systemd"
+TAG+="systemd"
+ACTION=="add", GOTO="brltty_systemd_add"
+GOTO="brltty_device_end"
+
+LABEL="brltty_systemd_add"
+ENV{SYSTEMD_WANTS}+="brltty-device@.service"
+GOTO="brltty_device_end"
+
+LABEL="brltty_device_end"

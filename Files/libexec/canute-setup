@@ -3,68 +3,97 @@
 shopt -s extglob
 
 addTestModeOption
-addProgramOption A flag allActions "perform all of the actions - implies -P -p -e -k -l -u -s -b -r"
-addProgramOption P flag unwantedPackages "remove the unwanted packages - implied by -A"
-addProgramOption p flag requiredPackages "install the required packages - implied by -A"
-addProgramOption e flag etcFiles "install the /etc/ files - implied by -A"
-addProgramOption k flag apiKey "generate the BrlAPI access key - implied by -A"
-addProgramOption l flag sharedLibraries "configure the shared libraries - implied by -A"
-addProgramOption u flag udevReload "reload the Udev rules - implied by -A"
-addProgramOption s flag systemdUnits "configure the Systemd units - implied by -A"
-addProgramOption b flag bootTaret "set the boot target"
-addProgramOption r flag rebootSystem "reboot the system - implied by -A"
+addProgramOption A flag allActions "perform all of the actions - implies -p -P -f -F -k -l -u -s -b -r"
+addProgramOption p flag requiredPackages "install required packages - implied by -A"
+addProgramOption P flag unwantedPackages "remove unwanted packages - implied by -A"
+addProgramOption f flag hostFiles "install host files - implied by -A"
+addProgramOption F flag unwantedFiles "remove unwanted files - implied by -A"
+addProgramOption k flag apiKey "generate BrlAPI access key - implied by -A"
+addProgramOption l flag sharedLibraries "configure shared libraries - implied by -A"
+addProgramOption u flag udevRules "reload Udev rules - implied by -A"
+addProgramOption s flag systemdUnits "configure Systemd units - implied by -A"
+addProgramOption b flag bootTaret "set boot target"
+addProgramOption r flag rebootSystem "reboot system - implied by -A"
 parseProgramArguments "${@}"
 
-actionFlags=(unwantedPackages requiredPackages etcFiles apiKey sharedLibraries udevReload systemdUnits bootTaret setupFinished rebootSystem)
+actionFlags=(requiredPackages unwantedPackages hostFiles unwantedFiles apiKey sharedLibraries udevRules systemdUnits bootTaret setupFinished rebootSystem)
 setupFinished=false
 verifyActionFlags allActions "${actionFlags[@]}"
 
-processPackages() {
-   local type="${1}"
-   shift 1
+readList() {
+   local listArray="${1}"
+   local name="${2}"
 
-   local packagesFile="${installTree}/etc/${type}-packages"
-   verifyInputFile "${packagesFile}"
+   local file="${installTree}/etc/${name}"
+   verifyInputFile "${file}"
 
-   local packages=()
-   local name
+   local list=()
+   local item
 
-   while read name
+   while read item
    do
-      name="${name##*( )}"
-      [ -n "${name}" ] || continue
-      [ "${name:0:1}" != "#" ] || continue
-      name="${name%%*( )}"
+      item="${item##*( )}"
+      [ -n "${item}" ] || continue
+      [ "${item:0:1}" != "#" ] || continue
+      item="${item%%*( )}"
 
-      logNote "${type} package: ${name}"
-      packages+=("${name}")
-   done <"${packagesFile}"
+      list+=("${item}")
+   done <"${file}"
 
-   [ "${#packages[*]}" -eq 0 ] || {
-      executeHostCommand "${@}" "${packages[@]}"
+   [ "${#list[*]}" -gt 0 ] || return 1
+   setElements "${listArray}" "${list[@]}"
+   return 0
+}
+
+performAction_requiredPackages() {
+   local -a packages
+
+   ! readList packages required-packages || {
+      logTask "updating package metadata"
+      executeHostCommand apt --quiet --quiet --quiet -- update
+
+      logTask "installing required packages"
+      executeHostCommand apt --yes --quiet --quiet --quiet install -- "${packages[@]}"
    }
 }
 
 performAction_unwantedPackages() {
-   logTask "removing the unwanted packages"
-   processPackages unwanted apt --yes --quiet --quiet --quiet remove --
+   local -a packages
+
+   ! readList packages unwanted-packages || {
+      logTask "removing unwanted packages"
+      executeHostCommand apt --yes --quiet --quiet --quiet remove -- "${packages[@]}"
+   }
 }
 
-performAction_requiredPackages() {
-   logTask "updating the package metadata"
-   executeHostCommand apt --quiet --quiet --quiet -- update
-
-   logTask "installing the required packages"
-   processPackages required apt --yes --quiet --quiet --quiet install --
-}
-
-performAction_etcFiles() {
-   logTask "installing the /etc/ files"
+performAction_hostFiles() {
+   logTask "installing host files"
    executeHostCommand tar --extract --file "${installTree}/etc.tar" --directory "/"
 }
 
+performAction_unwantedFiles() {
+   local -a files
+
+   ! readList files unwanted-files || {
+      logTask "removing unwanted files"
+      local file
+
+      for file in "${files[@]}"
+      do
+         [ -e "${file}" ] || continue
+
+         if [ -d "${file}" ]
+         then
+            executeHostCommand rm -f -r -- "${file}"
+         else
+            executeHostCommand rm -f -- "${file}"
+         fi
+      done
+   }
+}
+
 performAction_apiKey() {
-   logTask "generating the BrlAPI access key"
+   logTask "generating BrlAPI access key"
 
    local apiKeyFile="/etc/brlapi.key"
    executeHostCommand "${installTree}/bin/brltty-genkey" -q -f "${apiKeyFile}"
@@ -72,7 +101,7 @@ performAction_apiKey() {
 }
 
 performAction_sharedLibraries() {
-   logTask "configuring the shared libraries"
+   logTask "configuring shared libraries"
    local file lines=""
 
    while read file
@@ -89,16 +118,16 @@ performAction_sharedLibraries() {
    executeHostCommand ldconfig
 }
 
-performAction_udevReload() {
-   logTask "reloading the Udev rules"
+performAction_udevRules() {
+   logTask "reloading Udev rules"
    executeHostCommand udevadm control --reload
 }
 
 performAction_systemdUnits() {
-   logTask "reloading the Systemd units"
+   logTask "reloading Systemd units"
    executeHostCommand systemctl --quiet daemon-reload
 
-   logTask "configuring the Systemd units"
+   logTask "configuring Systemd units"
    local unit
 
    for unit in "${canuteSystemdUnit}"
@@ -110,7 +139,7 @@ performAction_systemdUnits() {
 }
 
 performAction_bootTaret() {
-   logTask "setting the boot target"
+   logTask "setting boot target"
    executeHostCommand systemctl --quiet set-default multi-user.target
 }
 
