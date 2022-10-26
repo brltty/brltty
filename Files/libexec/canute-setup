@@ -144,17 +144,17 @@ performAction_bootTaret() {
 }
 
 performAction_setupFinished() {
-   programMessage "setup finished"
+   logTask "setup finished"
 }
 
 performAction_rebootSystem() {
-   sync
+   executeHostCommand sync
 
    if confirmAction "reboot system"
    then
-      reboot
+      executeHostCommand reboot
    else
-      programMessage "system not rebooted"
+      logNotice "system not rebooted"
    fi
 }
 
