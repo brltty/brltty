@@ -517,3 +517,24 @@ verifyChoice() {
    setVariable "${valueVariable}" "${candidates[0]}"
 }
 
+confirmAction() {
+   local prompt="${1}"
+
+   local yesWord="yes"
+   local noWord="no"
+   local response
+
+   while read -p "${programName}: ${prompt} (${yesWord} | [${noWord}])? " -r response
+   do
+      [ -n "${response}" ] || continue
+      response="${response,,*}"
+
+      isAbbreviation "${response}" "${yesWord}" && return 0 ||
+      isAbbreviation "${response}" "${noWord}" && return 1 ||
+      programMessage "unrecognized response"
+   done
+
+   echo >&2 ""
+   return 2
+}
+
