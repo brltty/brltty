@@ -60,7 +60,7 @@ executeHostCommand() {
 downloadFile() {
    local file="${1}"
 
-   executeHostCommand curl >"${file}" --silent --show-error --get --location -- "${archiveLocation}/${file}"
+   executeHostCommand curl --output "${file}" --silent --show-error --get --location -- "${archiveLocation}/${file}"
 }
 
 needTemporaryDirectory() {
@@ -105,7 +105,7 @@ shift $((OPTIND - 1))
 }
 
 [ -f "/usr/bin/raspi-config" ] || semanticError "not Raspbian"
-[ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
+"${testMode}" || [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 
 "${testMode}" && quietMode=false
 set -e
@@ -123,7 +123,7 @@ archiveScheme="${archiveLocation%%:*}"
 
       needTemporaryDirectory
       trap removeTemporaryDirectory exit
-      cd "${temporaryDirectory}"
+      executeHostCommand cd "${temporaryDirectory}"
 
       logTask "downloading archive"
       downloadFile "${archiveName}"
@@ -132,9 +132,11 @@ archiveScheme="${archiveLocation%%:*}"
 }
 
 archivePath="${archiveLocation}/${archiveName}"
-[ -e "${archivePath}" ] || semanticError "archive oot found: ${archivePath}"
-[ -f "${archivePath}" ] || semanticError "not a file: ${archivePath}"
-[ -r "${archivePath}" ] || semanticError "archive oot readable: ${archivePath}"
+"${testMode}" || {
+   [ -e "${archivePath}" ] || semanticError "archive oot found: ${archivePath}"
+   [ -f "${archivePath}" ] || semanticError "not a file: ${archivePath}"
+   [ -r "${archivePath}" ] || semanticError "archive oot readable: ${archivePath}"
+}
 
 logTask "unpacking archive"
 executeHostCommand tar --extract --absolute-names --file "${archivePath}" --directory "/"

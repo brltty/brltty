@@ -102,18 +102,21 @@ performAction_apiKey() {
 
 performAction_sharedLibraries() {
    logTask "configuring shared libraries"
-   local file lines=""
 
-   while read file
-   do
-      [ -z "${lines}" ] || lines+=$'\n'
-      lines+="${file}"
-   done < <(find "${installTree}/" -type f \( -name "*.so" -o -name "*.so.*" \))
+   "${testMode}" || {
+      local file lines=""
 
-   sed <<<"${lines}" --regexp-extended --expression '
-      s%/[^/]*$%%
-      /\/brltty$/d
-   ' | sort | uniq >"${ldConfigurationFile}"
+      while read file
+      do
+         [ -z "${lines}" ] || lines+=$'\n'
+         lines+="${file}"
+      done < <(find "${installTree}/" -type f \( -name "*.so" -o -name "*.so.*" \))
+
+      sed <<<"${lines}" --regexp-extended --expression '
+         s%/[^/]*$%%
+         /\/brltty$/d
+      ' | sort | uniq >"${ldConfigurationFile}"
+   }
 
    executeHostCommand ldconfig
 }
