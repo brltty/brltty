@@ -1,1 +1,2 @@
 /etc/udev/rules.d/90-brltty-device.rules
+/etc/profile.d/zzz-must-be-last.sh

@@ -8,6 +8,7 @@ addTestModeOption
 addProgramOption l string.file logFile "the log file" "${defaultLogFile}"
 addProgramOption s string.file sessionScript "the X session script" "${defaultSessionScript}"
 addProgramOption n flag noMonitor "no monitor - use a virtual X display"
+addProgramOption c flag clearScreen "clear screen on exit"
 parseProgramArguments "${@}"
 
 [ -n "${logFile}" ] || logFile="${defaultLogFile}"
@@ -15,8 +16,6 @@ verifyOutputFile "${logFile}"
 
 [ -n "${sessionScript}" ] || sessionScript="${defaultSessionScript}"
 verifyExecutableFile "${sessionScript}"
-
-"${testMode}" || exec &> "${logFile}"
 startxCommand=(startx "${sessionScript}")
 
 "${noMonitor}" && {
@@ -26,5 +25,15 @@ startxCommand=(startx "${sessionScript}")
    [ -n "${XDG_VTNR}" ] && export WINDOWPATH="${XDG_VTNR}"
 }
 
-executeHostCommand exec "${startxCommand[@]}"
-exit "${?}"
+exec {standardOutput}>&1
+"${testMode}" || exec &> "${logFile}"
+
+executeHostCommand "${startxCommand[@]}"
+exitStatus="${?}"
+
+"${clearScreen}" && {
+   exec >&${standardOutput}
+   executeHostCommand clear
+}
+
+exit "${exitStatus}"
