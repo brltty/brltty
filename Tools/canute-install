@@ -7,16 +7,16 @@ defaultArchiveName="canute-brltty.tar.gz"
 
 showUsageSummary() {
 cat <<END-OF-USAGE-SUMMARY
-Install or upgrade the Raspbian Canute software.
+Install or upgrade the Raspbian Canute Controller software.
 Copyright © 2022 by Bristol Braille Technology CIC
 
 Usage: ${programName} [-option ...]
 The following options may be specified:
 -h       show this command line usage summary, and then exit
--q       quiet mode - don't log the actions
--t       test mode - log the host commands that would be executed - -q ignored
--a name  the name of the archive (${defaultArchiveName})
--l url   the location containing the archive (${defaultArchiveLocation})
+-q       quiet mode - don't show the name of each action before it's performed
+-t       test mode - show the host commands that would be executed (root not required) - -q ignored
+-a file  the name of the archive - default is ${defaultArchiveName}
+-l path  the archive's container (URL or local directory) - default is ${defaultArchiveLocation}
 
 This script must be executed as root on a Raspbian system.
 END-OF-USAGE-SUMMARY
@@ -133,9 +133,13 @@ archiveScheme="${archiveLocation%%:*}"
 
 archivePath="${archiveLocation}/${archiveName}"
 "${testMode}" || {
-   [ -e "${archivePath}" ] || semanticError "archive oot found: ${archivePath}"
+   [ -e "${archiveLocation}" ] || semanticError "directory not found: ${archiveLocation}"
+   [ -d "${archiveLocation}" ] || semanticError "not a directory: ${archiveLocation}"
+   [ -x "${archiveLocation}" ] || semanticError "directory not searchable: ${archiveLocation}"
+
+   [ -e "${archivePath}" ] || semanticError "archive not found: ${archivePath}"
    [ -f "${archivePath}" ] || semanticError "not a file: ${archivePath}"
-   [ -r "${archivePath}" ] || semanticError "archive oot readable: ${archivePath}"
+   [ -r "${archivePath}" ] || semanticError "archive not readable: ${archivePath}"
 }
 
 logTask "unpacking archive"
