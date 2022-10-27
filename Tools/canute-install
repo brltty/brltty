@@ -12,9 +12,11 @@ Copyright © 2022 by Bristol Braille Technology CIC
 
 Usage: ${programName} [-option ...]
 The following options may be specified:
-  -h       show this command line usage summary, and then exit
-  -a name  the name of the archive (${defaultArchiveName})
-  -l url   the location containing the archive (${defaultArchiveLocation})
+-h       show this command line usage summary, and then exit
+-q       quiet mode - don't log the actions
+-t       test mode - log the host commands that would be executed - -q ignored
+-a name  the name of the archive (${defaultArchiveName})
+-l url   the location containing the archive (${defaultArchiveLocation})
 
 This script must be executed as root on a Raspbian system.
 END-OF-USAGE-SUMMARY
@@ -24,6 +26,12 @@ programMessage() {
    local message="${1}"
 
    echo >&2 "${programName}: ${message}"
+}
+
+logTask() {
+   local message="${1}"
+
+   "${quietMode}" || programMessage "${message}"
 }
 
 syntaxError() {
@@ -40,10 +48,19 @@ semanticError() {
    exit 3
 }
 
+executeHostCommand() {
+   if "${testMode}"
+   then
+      programMessage "executing host command: ${*}"
+   else
+      "${@}"
+   fi
+}
+
 downloadFile() {
    local file="${1}"
 
-   curl >"${file}" --silent --show-error --get --location -- "${archiveLocation}/${file}"
+   executeHostCommand curl >"${file}" --silent --show-error --get --location -- "${archiveLocation}/${file}"
 }
 
 needTemporaryDirectory() {
@@ -58,14 +75,18 @@ removeTemporaryDirectory() {
 }
 
 showUsage=false
+quietMode=false
+testMode=false
 archiveLocation="${defaultArchiveLocation}"
 archiveName="${defaultArchiveName}"
 
-while getopts ":ha:l:" option
+while getopts ":hqta:l:" option
 do
    case "${option}"
    in
       h) showUsage=true;;
+      q) quietMode=true;;
+      t) testMode=true;;
       a) archiveName="${OPTARG}";;
       l) archiveLocation="${OPTARG}";;
 
@@ -85,6 +106,8 @@ shift $((OPTIND - 1))
 
 [ -f "/usr/bin/raspi-config" ] || semanticError "not Raspbian"
 [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
+
+"${testMode}" && quietMode=false
 set -e
 
 [ -n "${archiveLocation}" ] || archiveLocation="."
@@ -102,7 +125,7 @@ archiveScheme="${archiveLocation%%:*}"
       trap removeTemporaryDirectory exit
       cd "${temporaryDirectory}"
 
-      programMessage "downloading archive"
+      logTask "downloading archive"
       downloadFile "${archiveName}"
       archiveLocation="."
    }
@@ -113,8 +136,20 @@ archivePath="${archiveLocation}/${archiveName}"
 [ -f "${archivePath}" ] || semanticError "not a file: ${archivePath}"
 [ -r "${archivePath}" ] || semanticError "archive oot readable: ${archivePath}"
 
-programMessage "unpacking archive"
-tar --extract --absolute-names --file "${archivePath}" --directory "/"
+logTask "unpacking archive"
+executeHostCommand tar --extract --absolute-names --file "${archivePath}" --directory "/"
 
-"/brltty/current/libexec/canute-setup" -A
+logTask "setting up system"
+setupCommand=("/brltty/current/libexec/canute-setup" -A)
+
+if "${testMode}"
+then
+   setupCommand+=(-t -v -v)
+   testMode=false
+elif "${quietMode}"
+then
+   setupCommand+=(-q)
+fi
+
+executeHostCommand "${setupCommand[@]}"
 exit 0

@@ -12,7 +12,7 @@ addProgramOption k flag apiKey "generate BrlAPI access key - implied by -A"
 addProgramOption l flag sharedLibraries "configure shared libraries - implied by -A"
 addProgramOption u flag udevRules "reload Udev rules - implied by -A"
 addProgramOption s flag systemdUnits "configure Systemd units - implied by -A"
-addProgramOption b flag bootTaret "set boot target"
+addProgramOption b flag bootTaret "set boot target - implied by -A"
 addProgramOption r flag rebootSystem "reboot system - implied by -A"
 parseProgramArguments "${@}"
 
@@ -144,13 +144,13 @@ performAction_bootTaret() {
 }
 
 performAction_setupFinished() {
-   logTask "setup finished"
+   logTask "system setup finished"
 }
 
 performAction_rebootSystem() {
    executeHostCommand sync
 
-   if confirmAction "reboot system"
+   if ! "${testMode}" && confirmAction "reboot system"
    then
       executeHostCommand reboot
    else
