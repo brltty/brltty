@@ -526,7 +526,7 @@ confirmAction() {
 
    while read -p "${programName}: ${prompt} ([${noWord}] | ${yesWord})? " -r response
    do
-      [ -n "${response}" ] || continue
+      [ -n "${response}" ] || return 1
       response="${response,,*}"
 
       isAbbreviation "${response}" "${noWord}" && return 1 ||
