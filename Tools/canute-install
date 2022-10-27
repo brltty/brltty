@@ -87,15 +87,36 @@ shift $((OPTIND - 1))
 [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 set -e
 
-needTemporaryDirectory
-trap removeTemporaryDirectory exit
-cd "${temporaryDirectory}"
+if [ -n "${archiveLocation}" ]
+then
+   archiveScheme="${archiveLocation%%:*}"
 
-programMessage "downloading archive"
-downloadFile "${archiveName}"
+   if [ "${archiveScheme}" != "${archiveLocation}" ]
+   then
+      if [ "${archiveScheme}" = "${archiveScheme#*/}" ]
+      then
+         [ -n "${archiveScheme}" ] || syntaxError "no archive location sheme: ${archiveLocation}"
+
+         needTemporaryDirectory
+         trap removeTemporaryDirectory exit
+         cd "${temporaryDirectory}"
+
+         programMessage "downloading archive"
+         downloadFile "${archiveName}"
+         archiveLocation="."
+      fi
+   fi
+else
+   archiveLocation="."
+fi
+
+archivePath="${archiveLocation}/${archiveName}"
+[ -e "${archivePath}" ] || semanticError "archive oot found: ${archivePath}"
+[ -f "${archivePath}" ] || semanticError "not a file: ${archivePath}"
+[ -r "${archivePath}" ] || semanticError "archive oot readable: ${archivePath}"
 
 programMessage "unpacking archive"
-tar --extract --absolute-names --file "${archiveName}" --directory "/"
+tar --extract --absolute-names --file "${archivePath}" --directory "/"
 
 "/brltty/current/libexec/canute-setup" -A
 exit 0
