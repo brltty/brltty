@@ -520,17 +520,17 @@ verifyChoice() {
 confirmAction() {
    local prompt="${1}"
 
-   local yesWord="yes"
    local noWord="no"
+   local yesWord="yes"
    local response
 
-   while read -p "${programName}: ${prompt} (${yesWord} | [${noWord}])? " -r response
+   while read -p "${programName}: ${prompt} ([${noWord}] | ${yesWord})? " -r response
    do
       [ -n "${response}" ] || continue
       response="${response,,*}"
 
-      isAbbreviation "${response}" "${yesWord}" && return 0 ||
       isAbbreviation "${response}" "${noWord}" && return 1 ||
+      isAbbreviation "${response}" "${yesWord}" && return 0 ||
       programMessage "unrecognized response"
    done
 
