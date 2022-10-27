@@ -87,28 +87,26 @@ shift $((OPTIND - 1))
 [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 set -e
 
-if [ -n "${archiveLocation}" ]
-then
-   archiveScheme="${archiveLocation%%:*}"
+[ -n "${archiveLocation}" ] || archiveLocation="."
+archiveScheme="${archiveLocation%%:*}"
 
-   if [ "${archiveScheme}" != "${archiveLocation}" ]
-   then
-      if [ "${archiveScheme}" = "${archiveScheme#*/}" ]
-      then
-         [ -n "${archiveScheme}" ] || syntaxError "no archive location sheme: ${archiveLocation}"
+[ "${archiveScheme}" = "${archiveLocation}" ] || {
+   # the location contains a colon so it might have a scheme
 
-         needTemporaryDirectory
-         trap removeTemporaryDirectory exit
-         cd "${temporaryDirectory}"
+   [ "${archiveScheme}" != "${archiveScheme#*/}" ] || {
+      # the scheme doesn't contain a slash
+      [ -n "${archiveScheme}" ] || syntaxError "empty archive location sheme: ${archiveLocation}"
+      # yes it actually is a scheme
 
-         programMessage "downloading archive"
-         downloadFile "${archiveName}"
-         archiveLocation="."
-      fi
-   fi
-else
-   archiveLocation="."
-fi
+      needTemporaryDirectory
+      trap removeTemporaryDirectory exit
+      cd "${temporaryDirectory}"
+
+      programMessage "downloading archive"
+      downloadFile "${archiveName}"
+      archiveLocation="."
+   }
+}
 
 archivePath="${archiveLocation}/${archiveName}"
 [ -e "${archivePath}" ] || semanticError "archive oot found: ${archivePath}"
