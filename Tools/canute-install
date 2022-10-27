@@ -43,7 +43,7 @@ semanticError() {
 downloadFile() {
    local file="${1}"
 
-   wget --quiet --output-document "${file}" -- "${archiveLocation}/${file}"
+   curl >"${file}" --silent --show-error --get --location -- "${archiveLocation}/${file}"
 }
 
 needTemporaryDirectory() {
