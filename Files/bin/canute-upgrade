@@ -1,0 +1,12 @@
+#!/bin/bash
+. /brltty/current/libexec/canute-prologue.sh
+
+parseProgramArguments "${@}"
+
+set -e
+needTemporaryDirectory
+executeHostCommand cd "${temporaryDirectory}"
+
+executeHostCommand cp "${installTree}/libexec/canute-install" .
+executeHostCommand ./canute-install
+exit 0

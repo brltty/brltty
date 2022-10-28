@@ -11,6 +11,9 @@ To install or upgrade this software, download and run (as root) the canute-insta
 The following canute-* scripts will be in the command search path.
 Each has a -h (help) option.
 
+canute-upgrade
+   This script upgrades the Raspbian Canute Controller software.
+
 canute-screen
    This script starts a text mode session with a terminal that
    has the same dimensions as the Canute's braille display.
@@ -48,7 +51,7 @@ canute-java
 canute-apitool
    Perform various BrlAPI functions.
 
-canute-apitool
+canute-parameter
    Show/set the values of BrlAPI parameters.
 
 canute-cbt
