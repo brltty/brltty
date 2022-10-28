@@ -2,7 +2,7 @@ CLONE_TARGET = $(SOURCE_TREE)/configure.ac
 clone: $(CLONE_TARGET)
 $(CLONE_TARGET):
 	git clone --quiet --branch master -- https://github.com/brltty/brltty $(SOURCE_TREE)
-	sudo $(SOURCE_TREE)/Tools/reqpkgs -q -i
+	-sudo $(SOURCE_TREE)/Tools/reqpkgs -q -i
 
 AUTOGEN_TARGET = $(SOURCE_TREE)/configure
 autogen: $(AUTOGEN_TARGET)
