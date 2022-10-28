@@ -6,11 +6,11 @@ espeak-ng
 at-spi
 at-spi2-core
 
-python-all-dev
-python-docutils
-python3-all-dev
+python3-setuptools
 python3-docutils
-cython
+python3-all-dev
+python-all-dev
+cython3
 
 tcl-dev
 default-jdk
