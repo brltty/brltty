@@ -1,9 +1,16 @@
+archives: gzip-archive bzip2-archive xz-archive
+
 INSTALL_CURRENT = $(INSTALL_LOCATION)/current
 INSTALL_TREE = $(shell readlink -n -e -- $(INSTALL_CURRENT))
 
-TAR_ARCHIVE = canute-brltty.tar
+ARCHIVES_DIRECTORY = Archives
+archives-directory: $(ARCHIVES_DIRECTORY)
+$(ARCHIVES_DIRECTORY):
+	install --directory $(ARCHIVES_DIRECTORY)
+
+TAR_ARCHIVE = $(ARCHIVES_DIRECTORY)/canute-brltty.tar
 tar-archive: $(TAR_ARCHIVE)
-$(TAR_ARCHIVE):
+$(TAR_ARCHIVE): | archives-directory
 	tar --file $(TAR_ARCHIVE) --create --absolute-names -- $(INSTALL_TREE) $(INSTALL_CURRENT)
 
 GZIP_ARCHIVE = $(TAR_ARCHIVE).gz
@@ -22,6 +29,5 @@ $(XZ_ARCHIVE): $(TAR_ARCHIVE)
 	xz -9 -c $(TAR_ARCHIVE) >$@
 
 clean-archives:
-	-rm -f -- *.tar *.tar
-	-rm -f -- *.tar *.tar.*
+	rm -f -r -- $(ARCHIVES_DIRECTORY)
 
