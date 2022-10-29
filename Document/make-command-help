@@ -8,7 +8,6 @@ makeCommandHelp() {
    for path in "${directory}/"*
    do
       local name="${path##*/}"
-      [ "${name}" != "canute-java" ] || continue
 
       {
          echo -n -e "${name}\n${name//?/\~}\n\n"

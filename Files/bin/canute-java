@@ -1,6 +1,21 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
+showUsageSummary() {
+cat <<END-OF-USAGE-SUMMARY
+Usage: ${programName} {-h | [java-argument ...]}
+The following options may be specified:
+-h       show this command line usage summary, and then exit
+END-OF-USAGE-SUMMARY
+}
+
+[ "${#}" -gt 0 ] && {
+   [ "${1}" = "-h" ] && {
+      showUsageSummary
+      exit 0
+   }
+}
+
 if [ -n "${DISPLAY}" ]
 then
    session=1
