@@ -21,6 +21,12 @@ set -e
 . "`dirname "${0}"`/brltty-prologue.sh"
 . "${programDirectory}/brltty-config.sh"
 
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Simplify the job of Creating and making changes to BRLTTY's unprivileged user.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
 declare -A privilegeParameters
 parseParameterString privilegeParameters "${BRLTTY_PRIVILEGE_PARAMETERS}" lx
 

@@ -22,8 +22,13 @@ umask 077
 
 . "`dirname "${0}"`/brltty-prologue.sh"
 . "${programDirectory}/brltty-config.sh"
-
 defaultKeyFile="${BRLTTY_EXECUTE_ROOT}${BRLAPI_KEY_FILE}"
+
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Generate the BrlAPI access key.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
 
 addProgramOption f string.path keyFile "the BrlAPI key file" "${defaultKeyFile}"
 parseProgramArguments "${@}"

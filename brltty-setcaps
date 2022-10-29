@@ -20,6 +20,12 @@
 set -e
 . "`dirname "${0}"`/brltty-prologue.sh"
 
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Simplify the job of assigning capabilities to the BRLTTY executable.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
 executeCommand() {
    "${useSudo}" && set -- sudo -- "${@}"
 

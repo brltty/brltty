@@ -223,21 +223,28 @@ stringWrapped() {
 
    local result=""
 
-   while [ "${#string}" -gt "${width}" ]
+   local line
+   while read line
    do
-      local head="$(stringHead "${string}" $((width + 1)))"
-      head="${head% *}"
+      while [ "${#line}" -gt "${width}" ]
+      do
+         [ "${line}" = "${line# }" ] || break
 
-      [ "${#head}" -le "${width}" ] || {
-         head="${string%% *}"
-         [ "${head}" != "${string}" ] || break
-      }
+         local head="$(stringHead "${line}" $((width + 1)))"
+         head="${head% *}"
 
-      result="${result} $(stringQuoted "${head}")"
-      string="$(stringTail "${string}" $((${#head} + 1)))"
-   done
+         [ "${#head}" -le "${width}" ] || {
+            head="${line%% *}"
+            [ "${head}" != "${line}" ] || break
+         }
 
-   result="${result} $(stringQuoted "${string}")"
+         result="${result} $(stringQuoted "${head}")"
+         line="$(stringTail "${line}" $((${#head} + 1)))"
+      done
+
+      result="${result} $(stringQuoted "${line}")"
+   done <<<"${string}"
+
    echo "${result}"
 }
 
@@ -573,10 +580,9 @@ addProgramUsageLine() {
 
 addProgramUsageText() {
    local text="${1}"
-   local width="${2}"
-   local prefix="${3}"
+   local prefix="${2}"
 
-   width=$((width - ${#prefix}))
+   local width=$((programUsageWidth - ${#prefix}))
 
    while [ "${width}" -lt 1 ]
    do
@@ -604,8 +610,14 @@ addProgramUsageText() {
 
 showProgramUsageSummary() {
    programUsageLineCount=0
-   set ${programOptionLetters}
-   local width="${COLUMNS:-72}"
+   local programUsageWidth="${COLUMNS:-72}"
+   set -- ${programOptionLetters}
+
+   local purpose="$(showProgramUsagePurpose)"
+   [ -z "${purpose}" ] || {
+      addProgramUsageText "${purpose}"
+      addProgramUsageLine ""
+   }
 
    local line="Usage: ${programName}"
    [ "${#}" -eq 0 ] || line="${line} [-option ...]"
@@ -656,7 +668,7 @@ showProgramUsageSummary() {
          local usage="$(getVariable "programParameterUsage_${index}")"
          local default="$(getVariable "programParameterDefault_${index}")"
          [ -z "${default}" ] || usage="${usage} - the default is ${default}"
-         addProgramUsageText "${usage}" "${width}" "  ${line}"
+         addProgramUsageText "${usage}" "  ${line}"
 
          index=$((index + 1))
       done
@@ -681,8 +693,14 @@ showProgramUsageSummary() {
          usage="$(getVariable "programOptionUsage_${letter}")"
          local default="$(getVariable "programOptionDefault_${letter}")"
          [ -z "${default}" ] || usage="${usage} - the default is ${default}"
-         addProgramUsageText "${usage}" "${width}" "  ${line}"
+         addProgramUsageText "${usage}" "  ${line}"
       done
+   }
+
+   local notes="$(showProgramUsageNotes)"
+   [ -z "${notes}" ] || {
+      addProgramUsageLine ""
+      addProgramUsageText "${notes}"
    }
 
    local index=0
@@ -691,8 +709,6 @@ showProgramUsageSummary() {
       getVariable "programUsageLine_${index}"
       index=$((index + 1))
    done
-
-   showProgramUsageNotes
 }
 
 addProgramOption h flag programOption_showUsageSummary "show (this) usage summary, and then exit"
@@ -760,6 +776,11 @@ parseProgramArguments() {
 # main script and augmented. They need to be defined after this    #
 # prologue is embeded and before the program arguments are parsed. #
 ####################################################################
+
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+END_OF_PROGRAM_USAGE_PURPOSE
+}
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES

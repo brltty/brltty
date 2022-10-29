@@ -20,6 +20,12 @@
 . "$(dirname "${0}")/brltty-prologue.sh"
 ttyDefaultPath="/dev/tty"
 
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Inspect or change the size of the current virtual terminal's screen.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
 addProgramOption p string.path ttyPath "the path to the device" "${ttyDefaultPath}"
 addProgramOption c string.count ttyColumns "set the number of columns"
 addProgramOption l string.count ttyLines "set the number of lines"
