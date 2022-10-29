@@ -18,3 +18,6 @@ install-required-packages: | clone
 set-screen-size: $(CLONE_TARGET)
 	$(SOURCE_TREE)/Tools/ttysize -c 40 -l 9
 
+document:
+	$(MAKE) --directory Document
+

@@ -1,0 +1,27 @@
+#!/bin/bash
+. "$(dirname "${0}")/../prologue.sh"
+
+makeCommandHelp() {
+   local directory="${1}"
+
+   local path
+   for path in "${directory}/"*
+   do
+      local name="${path##*/}"
+      [ "${name}" != "canute-java" ] || continue
+
+      {
+         echo -n -e "${name}\n${name//?/\~}\n\n"
+         echo -n -e "::\n\n"
+         "${path}" -h | sed 's/^/  /'
+         echo ""
+      } >"${name}.hlp"
+   done
+}
+
+parseProgramArguments "${@}"
+
+set -e
+makeCommandHelp ../Files/bin
+
+exit 0

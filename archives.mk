@@ -8,7 +8,7 @@ archives-directory: $(ARCHIVES_DIRECTORY)
 $(ARCHIVES_DIRECTORY):
 	install --directory $(ARCHIVES_DIRECTORY)
 
-TAR_ARCHIVE = $(ARCHIVES_DIRECTORY)/canute-brltty.tar
+TAR_ARCHIVE = $(ARCHIVES_DIRECTORY)/canute-controller.tar
 tar-archive: $(TAR_ARCHIVE)
 $(TAR_ARCHIVE): | archives-directory
 	tar --file $(TAR_ARCHIVE) --create --absolute-names -- $(INSTALL_TREE) $(INSTALL_CURRENT)
@@ -29,5 +29,5 @@ $(XZ_ARCHIVE): $(TAR_ARCHIVE)
 	xz -9 -c $(TAR_ARCHIVE) >$@
 
 clean-archives:
-	rm -f -r -- $(ARCHIVES_DIRECTORY)
+	-rm -f -r -- $(ARCHIVES_DIRECTORY)
 
