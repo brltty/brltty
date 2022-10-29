@@ -1,6 +1,6 @@
-==========================
-Raspbian Canute Controller
-==========================
+==============================
+The Raspbian Canute Controller
+==============================
 
 .. contents::
 
