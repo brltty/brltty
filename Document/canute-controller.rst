@@ -4,6 +4,15 @@ The Raspbian Canute Controller
 
 .. contents::
 
+Installation and Upgrading
+==========================
+
+To install the **Canute Controller** software on your **Raspbian** system,
+download the `<canute-install>`_ script and run it as **root**.
+
+After it's been installed, you can upgrade it by
+running the `canute-upgrade`_ script as **root**.
+
 Commands
 ========
 
