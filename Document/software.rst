@@ -1,16 +1,31 @@
-==============================
-The Raspbian Canute Controller
-==============================
+.. |product name| replace:: Raspbian Canute Controller
+.. |document subject| replace:: The |product name| Software
+
+==================
+|document subject|
+==================
+
+|document subject| is Copyright ©
+2022
+by Bristol Braille Technology CIC.
 
 .. contents::
 
 Installation and Upgrading
 ==========================
 
-To install the **Canute Controller** software on your **Raspbian** system,
+An archive of |document subject| can be downloaded in the following formats:
+
+  =====  ==============================
+  bzip2  `<canute-controller.tar.bz2>`_
+  gzip   `<canute-controller.tar.gz>`_
+  xz     `<canute-controller.tar.xz>`_
+  =====  ==============================
+
+To install it on your **Raspbian** system,
 download the `<canute-install>`_ script and run it as **root**.
 
-After it's been installed, you can upgrade it by
+After it has been installed, you can upgrade it by
 running the `canute-upgrade`_ script as **root**.
 
 Commands

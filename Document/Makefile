@@ -1,4 +1,4 @@
-DOCUMENT_NAME = canute-controller
+DOCUMENT_NAME = software
 
 all: $(DOCUMENT_NAME).html
 
