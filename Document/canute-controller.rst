@@ -10,31 +10,31 @@ Commands
 Session Management
 ------------------
 
-.. include:: canute-startx.hlp
-.. include:: canute-screen.hlp
-.. include:: canute-ttysize.hlp
+.. include:: canute-startx.help.rst
+.. include:: canute-screen.help.rst
+.. include:: canute-ttysize.help.rst
 
 System Administration
 ---------------------
 
-.. include:: canute-upgrade.hlp
-.. include:: canute-status.hlp
-.. include:: canute-start.hlp
-.. include:: canute-stop.hlp
-.. include:: canute-enable.hlp
-.. include:: canute-disable.hlp
+.. include:: canute-upgrade.help.rst
+.. include:: canute-status.help.rst
+.. include:: canute-start.help.rst
+.. include:: canute-stop.help.rst
+.. include:: canute-enable.help.rst
+.. include:: canute-disable.help.rst
 
 Set/Inspect BrlAPI Parameters
 -----------------------------
 
-.. include:: canute-apitool.hlp
-.. include:: canute-parameter.hlp
-.. include:: canute-cbt.hlp
-.. include:: canute-lbt.hlp
-.. include:: canute-client.hlp
+.. include:: canute-apitool.help.rst
+.. include:: canute-parameter.help.rst
+.. include:: canute-cbt.help.rst
+.. include:: canute-lbt.help.rst
+.. include:: canute-client.help.rst
 
 Miscellaneous Commands
 ----------------------
 
-.. include:: weather-current.hlp
+.. include:: weather-current.help.rst
 

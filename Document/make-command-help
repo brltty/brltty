@@ -15,7 +15,7 @@ makeCommandHelp() {
          echo -n -e "::\n\n"
          "${path}" -h | sed 's/^/  /'
          echo ""
-      } >"${name}.hlp"
+      } >"${name}.help.rst"
    done
 }
 
