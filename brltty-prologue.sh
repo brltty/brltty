@@ -227,7 +227,7 @@ stringWrapped() {
 
    while true
    do
-      local length="$(expr "${string}" : $'[^\n]*.')"
+      local length="$(expr "${string}" : $'[^\n]*\n')"
       local line
 
       if [ "${length}" -eq 0 ]
