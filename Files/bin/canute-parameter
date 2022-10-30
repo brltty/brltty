@@ -1,6 +1,12 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Show or set the values of BrlAPI parameters.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
 

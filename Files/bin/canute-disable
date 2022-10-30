@@ -1,6 +1,12 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+The Canute braille display process won't be started when the system boots.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
 parseProgramArguments "${@}"
 set -e
 

@@ -1,6 +1,12 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Configure the current terminal to have the same dimensions as the Canute's braille display.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
 parseProgramArguments "${@}"
 set -e
 

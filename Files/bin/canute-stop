@@ -1,6 +1,12 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Stop the Canute braille display process now.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
 parseProgramArguments "${@}"
 set -e
 

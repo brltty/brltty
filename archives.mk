@@ -1,5 +1,3 @@
-archives: gzip-archive bzip2-archive xz-archive
-
 INSTALL_CURRENT = $(INSTALL_LOCATION)/current
 INSTALL_TREE = $(shell readlink -n -e -- $(INSTALL_CURRENT))
 

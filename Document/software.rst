@@ -1,11 +1,11 @@
 .. |product name| replace:: Raspbian Canute Controller
-.. |document subject| replace:: The |product name| Software
+.. |document subject| replace:: |product name| Software
 
-==================
-|document subject|
-==================
+======================
+The |document subject|
+======================
 
-|document subject| is Copyright ©
+The |document subject| is Copyright ©
 2022
 by Bristol Braille Technology CIC.
 
@@ -14,7 +14,7 @@ by Bristol Braille Technology CIC.
 Installation and Upgrading
 ==========================
 
-An archive of |document subject| can be downloaded in the following formats:
+An archive of the |document subject| can be downloaded in the following formats:
 
   =====  ==============================
   bzip2  `<canute-controller.tar.bz2>`_

@@ -1,6 +1,12 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Start a text-mode session with a terminal that has the same dimensions as the Canute's braille display.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
 addTestModeOption
 parseProgramArguments "${@}"
 

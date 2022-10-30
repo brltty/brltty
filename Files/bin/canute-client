@@ -1,6 +1,13 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Run a BrlAPI client within a prepared environment.
+Java clients aren't supported (use canute-java instead).
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
 processExtraProgramParameters() {
    declare -g -r clientParameters=("${clientCommand}" "${@}")
 }
