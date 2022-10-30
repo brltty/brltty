@@ -104,15 +104,27 @@ shift $((OPTIND - 1))
    exit 0
 }
 
+[ -n "${archiveName}" ] || syntaxError "archive name not specified"
+[ -n "${archiveLocation}" ] || archiveLocation="."
+tarDecompressionOption=""
+
+case "${archiveName}"
+in
+   *.tgz) tarDecompressionOption="--gzip";;
+   *.tar) tarDecompressionOption="";;
+   *.tar.bz2) tarDecompressionOption="--bzip2";;
+   *.tar.gz) tarDecompressionOption="--gzip";;
+   *.tar.xz) tarDecompressionOption="--xz";;
+   *) semanticError "unrecognized archive file extension: ${archiveName}";;
+esac
+
 [ -f "/usr/bin/raspi-config" ] || semanticError "not Raspbian"
 "${testMode}" || [ "$(id -u)" -eq 0 ] || semanticError "not executing as root"
 
 "${testMode}" && quietMode=false
 set -e
 
-[ -n "${archiveLocation}" ] || archiveLocation="."
 archiveScheme="${archiveLocation%%:*}"
-
 [ "${archiveScheme}" = "${archiveLocation}" ] || {
    # the location contains a colon so it might have a scheme
 
@@ -143,7 +155,7 @@ archivePath="${archiveLocation}/${archiveName}"
 }
 
 logTask "unpacking archive"
-executeHostCommand tar --extract --absolute-names --file "${archivePath}" --directory "/"
+executeHostCommand tar --extract ${tarDecompressionOption} --absolute-names --file "${archivePath}" --directory "/"
 
 logTask "setting up system"
 setupCommand=("/brltty/current/libexec/canute-setup" -A)
