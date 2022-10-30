@@ -72,6 +72,10 @@ public class ApiTool extends Program {
     if (knownPrograms.isEmpty()) {
       usage.append("\nNo programs or clients have been defined.");
     } else {
+      usage.append("\nThis program gives command line access to")
+           .append(", and can be used to exercise,")
+           .append(" the functionality provided by the BrlAPI interface.");
+
       usage.append("\nThese programs and clients have been defined")
            .append(" (each has its own -help option):");
 
