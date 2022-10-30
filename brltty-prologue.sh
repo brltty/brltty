@@ -181,14 +181,15 @@ stringHead() {
    local string="${1}"
    local length="${2}"
 
-   expr substr "${string}" 1 "${length}"
+   [ "${length}" -eq 0 ] || expr substr "${string}" 1 "${length}"
 }
 
 stringTail() {
    local string="${1}"
    local start="${2}"
 
-   expr substr "${string}" $((start + 1)) $((${#string} - start))
+   local length=$((${#string} - start))
+   [ "${length}" -eq 0 ] || expr substr "${string}" $((start + 1)) "${length}"
 }
 
 stringReplace() {
@@ -218,32 +219,54 @@ stringQuoted() {
 }
 
 stringWrapped() {
-   local string="${1}"
+   local string="${1}"$'\n'
    local width="${2}"
 
    local result=""
+   local paragraph=""
 
-   local line
-   while read line
+   while true
    do
-      while [ "${#line}" -gt "${width}" ]
-      do
-         [ "${line}" = "${line# }" ] || break
+      local length="$(expr "${string}" : $'[^\n]*.')"
+      local line
 
-         local head="$(stringHead "${line}" $((width + 1)))"
+      if [ "${length}" -eq 0 ]
+      then
+         line="${string}"
+         string=""
+      else
+         line="$(stringHead "${string}" $((length - 1)))"
+         string="$(stringTail "${string}" "${length}")"
+      fi
+
+      [ -z "${line}" ] || [ "${line}" != "${line# }" ] || {
+         [ -z "${paragraph}" ] || paragraph="${paragraph} "
+         paragraph="${paragraph}${line}"
+         continue
+      }
+
+      while [ "${#paragraph}" -gt "${width}" ]
+      do
+         local head="$(stringHead "${paragraph}" $((width + 1)))"
          head="${head% *}"
 
          [ "${#head}" -le "${width}" ] || {
-            head="${line%% *}"
-            [ "${head}" != "${line}" ] || break
+            head="${paragraph%% *}"
+            [ "${head}" != "${paragraph}" ] || break
          }
 
          result="${result} $(stringQuoted "${head}")"
-         line="$(stringTail "${line}" $((${#head} + 1)))"
+         paragraph="$(stringTail "${paragraph}" $((${#head} + 1)))"
       done
 
+      [ -z "${paragraph}" ] || {
+         result="${result} $(stringQuoted "${paragraph}")"
+         paragraph=""
+      }
+
+      [ -n "${string}" ] || break
       result="${result} $(stringQuoted "${line}")"
-   done <<<"${string}"
+   done
 
    echo "${result}"
 }
@@ -600,7 +623,7 @@ addProgramUsageText() {
       width=1
    }
 
-   eval set -- $(stringWrapped "${text}" "${width}")
+   eval set -- "$(stringWrapped "${text}" "${width}")"
    for line
    do
       addProgramUsageLine "${prefix}${line}"
@@ -616,7 +639,7 @@ showProgramUsageSummary() {
    local purpose="$(showProgramUsagePurpose)"
    [ -z "${purpose}" ] || {
       addProgramUsageText "${purpose}"
-      addProgramUsageLine ""
+      addProgramUsageLine
    }
 
    local line="Usage: ${programName}"
@@ -650,7 +673,7 @@ showProgramUsageSummary() {
    addProgramUsageLine "${line}"
 
    [ "${programParameterCount}" -eq 0 ] || {
-      addProgramUsageLine ""
+      addProgramUsageLine
       addProgramUsageLine "Parameters:"
 
       local indent=$((programParameterLabelWidth + 2))
@@ -675,7 +698,7 @@ showProgramUsageSummary() {
    }
 
    [ "${#}" -eq 0 ] || {
-      addProgramUsageLine ""
+      addProgramUsageLine
       addProgramUsageLine "Options:"
 
       local indent=$((3 + programOptionOperandWidth + 2))
@@ -699,7 +722,7 @@ showProgramUsageSummary() {
 
    local notes="$(showProgramUsageNotes)"
    [ -z "${notes}" ] || {
-      addProgramUsageLine ""
+      addProgramUsageLine
       addProgramUsageText "${notes}"
    }
 
@@ -711,7 +734,7 @@ showProgramUsageSummary() {
    done
 }
 
-addProgramOption h flag programOption_showUsageSummary "show (this) usage summary, and then exit"
+addProgramOption h flag programOption_showUsageSummary "show this usage summary, and then exit"
 addProgramOption q counter programOption_quietCount "decrease output verbosity"
 addProgramOption v counter programOption_verboseCount "increase output verbosity"
 
