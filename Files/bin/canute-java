@@ -3,7 +3,10 @@
 
 showUsageSummary() {
 cat <<END-OF-USAGE-SUMMARY
+Run a BrlAPI Java client within a prepared environment.
+
 Usage: ${programName} {-h | [java-argument ...]}
+
 The following options may be specified:
 -h       show this command line usage summary, and then exit
 END-OF-USAGE-SUMMARY
