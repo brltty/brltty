@@ -24,7 +24,7 @@ import org.a11y.brlapi.clients.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-public class MainProgram extends Program {
+public class ApiTool extends Program {
   private final static KeywordMap<Class<? extends Program>> knownPrograms =
                    new KeywordMap<>();
 
@@ -59,7 +59,7 @@ public class MainProgram extends Program {
     addProgram(WriteTextClient.class);
   }
 
-  public MainProgram (String... arguments) {
+  public ApiTool (String... arguments) {
     super(arguments);
     addRequiredParameters("program/client");
     addRepeatingParameter("argument");
@@ -72,7 +72,8 @@ public class MainProgram extends Program {
     if (knownPrograms.isEmpty()) {
       usage.append("\nNo programs or clients have been defined.");
     } else {
-      usage.append("\nThese programs and clients have been defined:");
+      usage.append("\nThese programs and clients have been defined")
+           .append(" (each has its own -help option):");
 
       for (String name : knownPrograms.getKeywords()) {
         usage.append("\n  ").append(name);
@@ -151,7 +152,7 @@ public class MainProgram extends Program {
 
   public static void main (String... arguments) {
     try {
-      new MainProgram(arguments).run();
+      new ApiTool(arguments).run();
     } catch (ExitException exception) {
       System.exit(exception.getExitCode());
     }
