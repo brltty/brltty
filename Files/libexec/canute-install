@@ -3,7 +3,7 @@
 programName="${0##*/}"
 
 defaultArchiveLocation="https://brltty.app/archive/Canute"
-defaultArchiveName="canute-brltty.tar.gz"
+defaultArchiveName="canute-controller.tar.gz"
 
 showUsageSummary() {
 cat <<END-OF-USAGE-SUMMARY
