@@ -114,12 +114,16 @@ public abstract class Program extends ProgramComponent implements Runnable {
     haveRepeatingParameter = true;
   }
 
-  public final static char USAGE_OPTIONAL_BEGIN = '[';
-  public final static char USAGE_OPTIONAL_END = ']';
-  public final static String USAGE_REPEATING_INDICATOR = "...";
+  public String getPurpose () {
+    return null;
+  }
 
   protected void extendUsageSummary (StringBuilder usage) {
   }
+
+  public final static char USAGE_OPTIONAL_BEGIN = '[';
+  public final static char USAGE_OPTIONAL_END = ']';
+  public final static String USAGE_REPEATING_INDICATOR = "...";
 
   public final String getUsageSummary () {
     StringBuilder usage = new StringBuilder();
@@ -159,6 +163,14 @@ public abstract class Program extends ProgramComponent implements Runnable {
       }
 
       if (usage.length() == start) usage.append(" (no arguments)");
+    }
+
+    {
+      String purpose = getPurpose();
+
+      if ((purpose != null) && !purpose.isEmpty()) {
+        usage.append("\n\n").append(purpose);
+      }
     }
 
     if (haveOptions) {

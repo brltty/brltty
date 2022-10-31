@@ -24,7 +24,7 @@ import org.a11y.brlapi.clients.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-public class ApiTool extends Program {
+public class ApiToolProgram extends Program {
   private final static KeywordMap<Class<? extends Program>> knownPrograms =
                    new KeywordMap<>();
 
@@ -59,10 +59,15 @@ public class ApiTool extends Program {
     addProgram(WriteTextClient.class);
   }
 
-  public ApiTool (String... arguments) {
+  public ApiToolProgram (String... arguments) {
     super(arguments);
     addRequiredParameters("program/client");
     addRepeatingParameter("argument");
+  }
+
+  @Override
+  public String getPurpose () {
+    return "Command line access to the functionality provided by the BrlAPI interface.";
   }
 
   @Override
@@ -72,10 +77,6 @@ public class ApiTool extends Program {
     if (knownPrograms.isEmpty()) {
       usage.append("\nNo programs or clients have been defined.");
     } else {
-      usage.append("\nThis program gives command line access to")
-           .append(", and can be used to exercise,")
-           .append(" the functionality provided by the BrlAPI interface.");
-
       usage.append("\nThese programs and clients have been defined")
            .append(" (each has its own -help option):");
 
@@ -156,7 +157,7 @@ public class ApiTool extends Program {
 
   public static void main (String... arguments) {
     try {
-      new ApiTool(arguments).run();
+      new ApiToolProgram(arguments).run();
     } catch (ExitException exception) {
       System.exit(exception.getExitCode());
     }
