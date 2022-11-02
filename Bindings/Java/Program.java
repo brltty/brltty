@@ -21,6 +21,7 @@ package org.a11y.brlapi;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 
 public abstract class Program extends ProgramComponent implements Runnable {
   protected abstract void runProgram () throws ProgramException;
@@ -129,10 +130,22 @@ public abstract class Program extends ProgramComponent implements Runnable {
     StringBuilder usage = new StringBuilder();
     boolean haveOptions = !programOptions.isEmpty();
 
-    usage.append("Usage Summary for ").append(getName());
+    String programName = getName();
+    Matcher matcher = Strings.getMatcher("^(.*)(\\p{Upper}.*)$", programName);
+    String programPhrase;
+
+    if (matcher.matches()) {
+      programName = matcher.group(1);
+      programPhrase = "the " + programName + ' ' + matcher.group(2);
+    } else {
+      programPhrase = programName;
+    }
+
+    usage.append("Usage Summary for ")
+         .append(programPhrase);
 
     {
-      usage.append("\nSyntax:");
+      usage.append("\nSyntax: ").append(programName);
       int start = usage.length();
 
       if (haveOptions) {
