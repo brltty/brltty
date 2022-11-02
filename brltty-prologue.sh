@@ -219,7 +219,7 @@ stringQuoted() {
 }
 
 stringWrapped() {
-   local string="${1}"$'\n'
+   local string="${1}"
    local width="${2}"
 
    local result=""
