@@ -17,14 +17,15 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-package org.a11y.brlapi;
+package org.a11y.brlapi.commands;
+import org.a11y.brlapi.*;
 import org.a11y.brlapi.programs.*;
 import org.a11y.brlapi.clients.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-public class ApiToolProgram extends Program {
+public class ApiToolCommand extends Program {
   private final static KeywordMap<Class<? extends Program>> knownPrograms =
                    new KeywordMap<>();
 
@@ -37,7 +38,8 @@ public class ApiToolProgram extends Program {
       name = Strings.replaceAll(name, "Program$", "");
     }
 
-    knownPrograms.put(toOperandName(Strings.wordify(name)), type);
+    name = toOperandName(Strings.wordify(name));
+    knownPrograms.put(name, type);
   }
 
   static {
@@ -59,7 +61,7 @@ public class ApiToolProgram extends Program {
     addProgram(WriteTextClient.class);
   }
 
-  public ApiToolProgram (String... arguments) {
+  public ApiToolCommand (String... arguments) {
     super(arguments);
     addRequiredParameters("program/client");
     addRepeatingParameter("argument");
@@ -157,7 +159,7 @@ public class ApiToolProgram extends Program {
 
   public static void main (String... arguments) {
     try {
-      new ApiToolProgram(arguments).run();
+      new ApiToolCommand(arguments).run();
     } catch (ExitException exception) {
       System.exit(exception.getExitCode());
     }

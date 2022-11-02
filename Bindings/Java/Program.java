@@ -127,8 +127,9 @@ public abstract class Program extends ProgramComponent implements Runnable {
 
   public final String getUsageSummary () {
     StringBuilder usage = new StringBuilder();
-    usage.append("Usage Summary for ").append(getName());
     boolean haveOptions = !programOptions.isEmpty();
+
+    usage.append("Usage Summary for ").append(getName());
 
     {
       usage.append("\nSyntax:");
