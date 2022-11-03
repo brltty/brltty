@@ -1,7 +1,6 @@
 INSTALL_CURRENT = $(INSTALL_LOCATION)/current
 INSTALL_TREE = $(shell readlink -n -e -- $(INSTALL_CURRENT))
 
-ARCHIVES_DIRECTORY = Archives
 archives-directory: $(ARCHIVES_DIRECTORY)
 $(ARCHIVES_DIRECTORY):
 	install --directory $(ARCHIVES_DIRECTORY)
@@ -27,5 +26,8 @@ $(XZ_ARCHIVE): $(TAR_ARCHIVE)
 	xz -9 -c $(TAR_ARCHIVE) >$@
 
 clean-archives:
-	-rm -f -r -- $(ARCHIVES_DIRECTORY)
+	$(MAKE) --directory $(ARCHIVES_DIRECTORY) clean
+
+archives: clean-archives
+	$(MAKE) --directory $(ARCHIVES_DIRECTORY) all
 

@@ -9,5 +9,5 @@ command-help:
 	./make-command-help
 
 clean:
-	-rm -f -- $(DOCUMENT_NAME).html *.hlp
+	-rm -f -- *.html *.help.rst
 
