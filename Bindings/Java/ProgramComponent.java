@@ -24,10 +24,6 @@ public abstract class ProgramComponent extends Component {
     super();
   }
 
-  public static String getProgramName (Class<? extends Program> type) {
-    return type.getSimpleName();
-  }
-
   public static boolean isClient (Class <? extends Program> type) {
     return Client.class.isAssignableFrom(type);
   }

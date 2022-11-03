@@ -46,4 +46,12 @@ public abstract class Component {
   public static String toOperandName (String string) {
     return string.replace(' ', '-').toLowerCase();
   }
+
+  public static String getObjectName (Class<? extends Object> type) {
+    return type.getSimpleName();
+  }
+
+  public final String getObjectName () {
+    return getObjectName(getClass());
+  }
 }

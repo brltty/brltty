@@ -108,7 +108,6 @@ public class ApiToolCommand extends Program {
     if (programType == null) {
       throw new SyntaxException("unknown program/client: %s", programName);
     }
-    programName = getProgramName(programType);
 
     count -= 1;
     programArguments = new String[count];
@@ -154,12 +153,15 @@ public class ApiToolCommand extends Program {
       throw new ProgramException(message);
     }
 
-    program.run();
+    program.setProgramName(programName)
+           .run();
   }
 
   public static void main (String... arguments) {
     try {
-      new ApiToolCommand(arguments).run();
+      new ApiToolCommand(arguments)
+         .setProgramName("apitool")
+         .run();
     } catch (ExitException exception) {
       System.exit(exception.getExitCode());
     }

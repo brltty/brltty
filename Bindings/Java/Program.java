@@ -25,17 +25,24 @@ import java.util.regex.Matcher;
 
 public abstract class Program extends ProgramComponent implements Runnable {
   protected abstract void runProgram () throws ProgramException;
+  private String programName = null;
 
   public final boolean isClient () {
     return isClient(this);
   }
 
-  public final String getName () {
-    return getProgramName(getClass());
+  public final String getProgramName () {
+    if (programName == null) return getObjectName();
+    return programName;
+  }
+
+  public final Program setProgramName (String name) {
+    programName = name;
+    return this;
   }
 
   protected final void writeProgramMessage (String format, Object... arguments) {
-    System.err.println((getName() + ": " + String.format(format, arguments)));
+    System.err.println((getObjectName() + ": " + String.format(format, arguments)));
   }
 
   protected static class Option {
@@ -130,22 +137,24 @@ public abstract class Program extends ProgramComponent implements Runnable {
     StringBuilder usage = new StringBuilder();
     boolean haveOptions = !programOptions.isEmpty();
 
-    String programName = getName();
-    Matcher matcher = Strings.getMatcher("^(.*)(\\p{Upper}.*)$", programName);
-    String programPhrase;
+    {
+      String pattern = "^(.*)(\\p{Upper}.*)$";
+      String name = getObjectName();
+      Matcher matcher = Strings.getMatcher(pattern, name);
+      String phrase;
 
-    if (matcher.matches()) {
-      programName = matcher.group(1);
-      programPhrase = "the " + programName + ' ' + matcher.group(2);
-    } else {
-      programPhrase = programName;
+      if (matcher.matches()) {
+        name = matcher.group(1);
+        phrase = "the " + name + ' ' + matcher.group(2);
+      } else {
+        phrase = name;
+      }
+
+      usage.append("Usage Summary for ").append(phrase);
     }
 
-    usage.append("Usage Summary for ")
-         .append(programPhrase);
-
     {
-      usage.append("\nSyntax: ").append(programName);
+      usage.append("\nSyntax: ").append(getProgramName());
       int start = usage.length();
 
       if (haveOptions) {
