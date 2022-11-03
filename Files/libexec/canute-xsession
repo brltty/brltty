@@ -14,19 +14,22 @@ then
    registryDaemon="spi-2-registryd"
 else
    atspiDirectory="${atspiDirectory%/*}"
+   [ -d "${atspiDirectory}" ] || atspiDirectory="/usr/libexec"
+
    busLauncher="at-spi-bus-launcher"
    registryDaemon="at-spi2-registryd"
 fi
 
 busLauncher="${atspiDirectory}/${busLauncher}"
 [ -x "${busLauncher}" ] || semanticError "bus launcher not found: ${busLauncher}"
-"${busLauncher}" &
 
 registryDaemon="${atspiDirectory}/${registryDaemon}"
 [ -x "${registryDaemon}" ] || semanticError "registry daemon not found: ${registryDaemon}"
-"${registryDaemon}" &
 
+"${busLauncher}" &
+"${registryDaemon}" &
 sleep 3
+
 canuteSetSession canute
 brlttyPath="${installTree}/bin"
 "${brlttyPath}/xbrlapi"
