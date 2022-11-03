@@ -7,11 +7,26 @@ set -e
 eval $(dbus-launch --sh-syntax --exit-with-session)
 export GTK_MODULES=gail:atk-bridge
 
-atspiDirectory="/usr/lib/at-spi2-core"
-"${atspiDirectory}/at-spi-bus-launcher" &
-"${atspiDirectory}/at-spi2-registryd" &
-sleep 3
+atspiDirectory="/usr/lib/at-spi2-core/at"
+if [ -d "${atspiDirectory}" ]
+then
+   busLauncher="spi-bus-launcher"
+   registryDaemon="spi-2-registryd"
+else
+   atspiDirectory="${atspiDirectory%/*}"
+   busLauncher="at-spi-bus-launcher"
+   registryDaemon="at-spi2-registryd"
+fi
 
+busLauncher="${atspiDirectory}/${busLauncher}"
+[ -x "${busLauncher}" ] || semanticError "bus launcher not found: ${busLauncher}"
+"${busLauncher}" &
+
+registryDaemon="${atspiDirectory}/${registryDaemon}"
+[ -x "${registryDaemon}" ] || semanticError "registry daemon not found: ${registryDaemon}"
+"${registryDaemon}" &
+
+sleep 3
 canuteSetSession canute
 brlttyPath="${installTree}/bin"
 "${brlttyPath}/xbrlapi"
