@@ -632,7 +632,7 @@ proc formatCommandOptionsUsage {options} {
 
 proc showCommandUsage {name optionsDescriptor argumentsUsage getArgumentsUsageSummary} {
    set optionsUsage [formatCommandOptionsUsage $optionsDescriptor]
-   set usage "Usage: $name"
+   set usage "Syntax: $name"
 
    if {[string length $optionsUsage] > 0} {
       append usage " \[-option ...\]"

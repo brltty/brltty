@@ -642,7 +642,7 @@ showProgramUsageSummary() {
       addProgramUsageLine
    }
 
-   local line="Usage: ${programName}"
+   local line="Syntax: ${programName}"
    [ "${#}" -eq 0 ] || line="${line} [-option ...]"
 
    local index=0
