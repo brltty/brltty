@@ -116,7 +116,7 @@ public class ApiToolCommand extends Program {
 
   @Override
   protected final void runProgram () throws ProgramException {
-    String term = isClient(programType)? "client": "program";
+    String objectName = getObjectName();
     Program program = null;
 
     try {
@@ -127,22 +127,25 @@ public class ApiToolCommand extends Program {
       program = (Program)constructor.newInstance((Object)programArguments);
     } catch (NoSuchMethodException exception) {
       throw new ProgramException(
-        "%s constructor not found: %s", term, programName
+        "constructor not found: %s",
+        objectName
       );
     } catch (InstantiationException exception) {
       throw new ProgramException(
-        "%s instantiation failed: %s: %s", term, programName, exception.getMessage()
+        "instantiation failed: %s: %s",
+        objectName, exception.getMessage()
       );
     } catch (IllegalAccessException exception) {
       throw new ProgramException(
-        "%s object access denied: %s: %s", term, programName, exception.getMessage()
+        "access denied: %s: %s",
+        objectName, exception.getMessage()
       );
     } catch (InvocationTargetException exception) {
       Throwable cause = exception.getCause();
 
       String message = String.format(
-        "%s construction failed: %s: %s",
-        term, programName, cause.getClass().getSimpleName()
+        "construction failed: %s: %s",
+        objectName, cause.getClass().getSimpleName()
       );
 
       {
