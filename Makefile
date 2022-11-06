@@ -25,6 +25,7 @@ set-screen-size: $(CLONE_TARGET)
 
 release: archives documents
 	rm -f -- $(RELEASE_DIRECTORY)/*
+	git describe --always --abbrev=40 --dirty=+ >$(RELEASE_DIRECTORY)/git-commit.txt
 	cp --archive -- $(DOCUMENTS_DIRECTORY)/software.html $(RELEASE_DIRECTORY)/index.html
 	cp --archive -- $(ARCHIVES_DIRECTORY)/*.tar.* $(RELEASE_DIRECTORY)/
 	cp --archive -- Files/libexec/canute-install $(RELEASE_DIRECTORY)/
