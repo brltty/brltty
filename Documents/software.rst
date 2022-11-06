@@ -14,7 +14,13 @@ by Bristol Braille Technology CIC.
 Installation and Upgrading
 ==========================
 
-An archive of the |document subject| can be downloaded in the following formats:
+The source for the |document subject| is on
+the `bbt-canute <https://github.com/brltty/brltty/tree/bbt-canute>`_ branch
+of `BRLTTY <https://brltty.app>`_'s
+`source repository <https://github.com/brltty/brltty>`_.  
+
+Files pertaining to the most recent stable release can be found at `<https://brltty.app/archive/Canute>`_.
+An archive of its build can be downloaded in the following formats:
 
   =====  ==============================
   bzip2  `<canute-controller.tar.bz2>`_
@@ -22,7 +28,7 @@ An archive of the |document subject| can be downloaded in the following formats:
   xz     `<canute-controller.tar.xz>`_
   =====  ==============================
 
-To install it on your **Raspbian** system,
+To install it for the first time,
 download the `<canute-install>`_ script and run it as **root**.
 
 After it has been installed, you can upgrade it by
@@ -31,15 +37,20 @@ running the `canute-upgrade`_ script as **root**.
 Commands
 ========
 
-Session Management
-------------------
+The |document subject| provides several commands.
+Each of them has a **-h** (help) option which shows its usage summary.
+
+What follows is a lsit of these commands along with their associated usage summaries.
+
+Session Management Commands
+---------------------------
 
 .. include:: canute-startx.help.rst
 .. include:: canute-screen.help.rst
 .. include:: canute-ttysize.help.rst
 
-System Administration
----------------------
+System Administration Commands
+------------------------------
 
 .. include:: canute-upgrade.help.rst
 .. include:: canute-status.help.rst
@@ -48,8 +59,8 @@ System Administration
 .. include:: canute-enable.help.rst
 .. include:: canute-disable.help.rst
 
-Set/Inspect BrlAPI Parameters
------------------------------
+BrlAPI Commands
+---------------
 
 .. include:: canute-apitool.help.rst
 .. include:: canute-parameter.help.rst
