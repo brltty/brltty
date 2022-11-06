@@ -1,6 +1,10 @@
 .. |product name| replace:: Raspbian Canute Controller
 .. |document subject| replace:: |product name| Software
 
+.. _BRLTTY: https://brltty.app/
+.. _source repository: https://github.com/brltty/brltty
+.. _bbt-canute branch: https://github.com/brltty/brltty/tree/bbt-canute
+
 ======================
 The |document subject|
 ======================
@@ -15,11 +19,10 @@ Installation and Upgrading
 ==========================
 
 The source for the |document subject| is on
-the `bbt-canute <https://github.com/brltty/brltty/tree/bbt-canute>`_ branch
-of `BRLTTY <https://brltty.app>`_'s
-`source repository <https://github.com/brltty/brltty>`_.  
+the `bbt-canute branch`_ of `BRLTTY`_'s `source repository`_.  
 
 Files pertaining to the most recent stable release can be found at `<https://brltty.app/archive/Canute>`_.
+Its commit identifier is in `<git-commit.txt>`_.
 An archive of its build can be downloaded in the following formats:
 
   =====  ==============================
