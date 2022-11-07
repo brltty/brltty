@@ -117,7 +117,6 @@ main (int argc, char *argv[]) {
       OPTION_TABLE(programOptions),
       .applicationName = "crctest",
       .applicationPurpose = strtext("Test supported CRC (Cyclic Redundancy Check) checksum algorithms."),
-      .argumentsSummary = "",
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

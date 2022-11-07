@@ -191,6 +191,7 @@ showOptions (
   OptionProcessingInformation *info,
   int showHiddenOptions
 ) {
+  int foundOption = 0;
   unsigned int letterWidth = 0;
   unsigned int wordWidth = 0;
   unsigned int argumentWidth = 0;
@@ -198,6 +199,7 @@ showOptions (
   for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
     const OptionEntry *option = &info->optionTable[optionIndex];
     if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
+    foundOption = 1;
 
     if (option->word) {
       unsigned int length = strlen(option->word);
@@ -205,99 +207,111 @@ showOptions (
       wordWidth = MAX(wordWidth, length);
     }
 
-    if (option->letter) letterWidth = 3;
+    if (option->letter) letterWidth = 2;
     if (option->argument) argumentWidth = MAX(argumentWidth, strlen(gettext(option->argument)));
   }
 
-  for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
-    const OptionEntry *option = &info->optionTable[optionIndex];
-    if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
+  if (foundOption) {
+    fprintf(stream, "\n%s:\n", gettext("Options"));
 
-    unsigned int lineLength = 0;
+    for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
+      const OptionEntry *option = &info->optionTable[optionIndex];
+      if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
 
-    if (option->letter) {
-      line[lineLength++] = '-';
-      line[lineLength++] = option->letter;
-    }
+      unsigned int lineLength = 0;
+      while (lineLength < 2) line[lineLength++] = ' ';
 
-    while (lineLength < letterWidth) {
-      line[lineLength++] = ' ';
-    }
+      {
+        unsigned int end = lineLength + letterWidth;
 
-    {
-      unsigned int end = lineLength + 2 + wordWidth;
-
-      if (option->word) {
-        size_t wordLength = strlen(option->word);
-
-        line[lineLength++] = '-';
-        line[lineLength++] = '-';
-        memcpy(line+lineLength, option->word, wordLength);
-        lineLength += wordLength;
-        if (option->argument) line[lineLength++] = '=';
-      }
-
-      while (lineLength < end) line[lineLength++] = ' ';
-    }
-    line[lineLength++] = ' ';
-
-    {
-      unsigned int end = lineLength + argumentWidth;
-
-      if (option->argument) {
-        const char *argument = gettext(option->argument);
-        size_t argumentLength = strlen(argument);
-
-        memcpy(line+lineLength, argument, argumentLength);
-        lineLength += argumentLength;
-      }
-
-      while (lineLength < end) line[lineLength++] = ' ';
-    }
-    line[lineLength++] = ' ';
-
-    line[lineLength++] = ' ';
-    {
-      const int formatStrings = !!(option->flags & OPT_Format);
-      const char *description = option->description? gettext(option->description): "";
-
-      char buffer[0X400];
-      char *from = buffer;
-      const char *const to = from + sizeof(buffer);
-
-      if (formatStrings? !!option->strings.format: !!option->strings.array) {
-        unsigned int index = 0;
-        const unsigned int limit = 4;
-        const char *strings[limit];
-
-        while (index < limit) {
-          const char *string;
-
-          if (formatStrings) {
-            size_t length = option->strings.format(from, (to - from), index);
-
-            if (length) {
-              string = from;
-              from += length + 1;
-            } else {
-              string = NULL;
-            }
-          } else {
-            string = option->strings.array[index];
-          }
-
-          if (!string) break;
-          strings[index++] = string;
+        if (option->letter) {
+          line[lineLength++] = '-';
+          line[lineLength++] = option->letter;
         }
 
-        while (index < limit) strings[index++] = "";
-        snprintf(from, (to - from),
-          description, strings[0], strings[1], strings[2], strings[3]
-        );
-        description = from;
-      }
+        while (lineLength < letterWidth) {
+          line[lineLength++] = ' ';
+        }
 
-      showWrappedText(stream, description, line, lineLength, lineWidth);
+        while (lineLength < end) line[lineLength++] = ' ';
+      }
+      line[lineLength++] = ' ';
+
+      {
+        unsigned int end = lineLength + 2 + wordWidth;
+
+        if (option->word) {
+          size_t wordLength = strlen(option->word);
+
+          line[lineLength++] = '-';
+          line[lineLength++] = '-';
+          memcpy(line+lineLength, option->word, wordLength);
+          lineLength += wordLength;
+          if (option->argument) line[lineLength++] = '=';
+        }
+
+        while (lineLength < end) line[lineLength++] = ' ';
+      }
+      line[lineLength++] = ' ';
+
+      {
+        unsigned int end = lineLength + argumentWidth;
+
+        if (option->argument) {
+          const char *argument = gettext(option->argument);
+          size_t argumentLength = strlen(argument);
+
+          memcpy(line+lineLength, argument, argumentLength);
+          lineLength += argumentLength;
+        }
+
+        while (lineLength < end) line[lineLength++] = ' ';
+      }
+      line[lineLength++] = ' ';
+
+      line[lineLength++] = ' ';
+      {
+        const int formatStrings = !!(option->flags & OPT_Format);
+        const char *description = option->description? gettext(option->description): "";
+
+        char buffer[0X400];
+        char *from = buffer;
+        const char *const to = from + sizeof(buffer);
+
+        if (formatStrings? !!option->strings.format: !!option->strings.array) {
+          unsigned int index = 0;
+          const unsigned int limit = 4;
+          const char *strings[limit];
+
+          while (index < limit) {
+            const char *string;
+
+            if (formatStrings) {
+              size_t length = option->strings.format(from, (to - from), index);
+
+              if (length) {
+                string = from;
+                from += length + 1;
+              } else {
+                string = NULL;
+              }
+            } else {
+              string = option->strings.array[index];
+            }
+
+            if (!string) break;
+            strings[index++] = string;
+          }
+
+          while (index < limit) strings[index++] = "";
+          snprintf(from, (to - from),
+            description, strings[0], strings[1], strings[2], strings[3]
+          );
+          description = from;
+        }
+
+        showWrappedText(stream, description, line, lineLength, lineWidth);
+      }
     }
   }
 }

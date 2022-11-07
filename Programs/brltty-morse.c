@@ -134,7 +134,7 @@ main (int argc, char *argv[]) {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-morse",
       .applicationPurpose = strtext("Translate text into Morse Code tones."),
-      .argumentsSummary = "text... | -f [{file | -}...]",
+      .argumentsSummary = "text ... | -f [{file | -} ...]",
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);
