@@ -1040,7 +1040,7 @@ main (int argc, char *argv[]) {
       .applicationName = "xbrlapi",
 
       .usage = {
-        .purpose = strtext("Augment an X session by supporting input from the braille device, and by announcing the new title (when switching windows) on the braille display."),
+        .purpose = strtext("Augment an X session by supporting input typed on the braille device, showing the title of the focused window on the braille display, and switching braille focus to it."),
       }
     };
 
