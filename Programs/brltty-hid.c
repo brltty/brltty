@@ -63,34 +63,6 @@ static char *opt_writeFeature;
 static int opt_echoInput;
 static char *opt_inputTimeout;
 
-static const char *parseBytesHelp[] = {
-  strtext("Bytes may be separated by whitespace."),
-  strtext("Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]."),
-  strtext("A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified)."),
-  strtext("The first byte is the report number (00 for no report number)."),
-};
-
-static
-STR_BEGIN_FORMATTER(formatParseBytesHelp, unsigned int index)
-  switch (index) {
-    case 0: {
-      const char *const *sentence = parseBytesHelp;
-      const char *const *end = sentence + ARRAY_COUNT(parseBytesHelp);
-
-      while (sentence < end) {
-        if (STR_LENGTH) STR_PRINTF(" ");
-        STR_PRINTF("%s", gettext(*sentence));
-        sentence += 1;
-      }
-
-      break;
-    }
-
-    default:
-      break;
-  }
-STR_END_FORMATTER
-
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "match-usb-devices",
     .letter = 'u',
@@ -214,8 +186,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("bytes"),
     .setting.string = &opt_writeReport,
     .flags = OPT_Format,
-    .description = strtext("Write (set) an output report. %s"),
-    .strings.format = formatParseBytesHelp
+    .description = strtext("Write (set) an output report (see below)."),
   },
 
   { .word = "write-feature",
@@ -223,8 +194,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("bytes"),
     .setting.string = &opt_writeFeature,
     .flags = OPT_Format,
-    .description = strtext("Write (set) a feature report. %s"),
-    .strings.format = formatParseBytesHelp
+    .description = strtext("Write (set) a feature report (see below)."),
   },
 
   { .word = "echo-input",
@@ -1085,6 +1055,13 @@ main (int argc, char *argv[]) {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-hid",
       .applicationPurpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
+      .usageNotes = {
+        strtext("Bytes may be separated by whitespace."),
+        strtext("Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]."),
+        strtext("A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified)."),
+        strtext("The first byte is the report number (00 for no report number)."),
+        NULL
+      },
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

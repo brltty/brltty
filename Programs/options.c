@@ -168,9 +168,67 @@ showWrappedText (
 }
 
 static void
+showFormattedLines (
+  FILE *stream, const char *const chunks[],
+  char *line, int width
+) {
+  const char *const *chunk = chunks;
+
+  char *paragraphText = NULL;
+  size_t paragraphSize = 0;
+  size_t paragraphLength = 0;
+
+  while (1) {
+    const char *text = *chunk;
+    if (!text) break;
+    char byte = *text;
+
+    if (byte && !iswspace(byte)) {
+      size_t textLength = strlen(text);
+
+      size_t newSize = paragraphLength + textLength + 1;
+      int extending = !!paragraphLength;
+      if (extending) newSize += 1;
+
+      if (newSize > paragraphSize) {
+        char *newText = realloc(paragraphText, newSize);
+
+        if (!newText) {
+          logMallocError();
+          break;
+        }
+
+        paragraphText = newText;
+        paragraphSize = newSize;
+      }
+
+      if (extending) paragraphText[paragraphLength++] = ' ';
+      memcpy(&paragraphText[paragraphLength], text, textLength);
+      paragraphText[paragraphLength += textLength] = 0;
+    } else {
+      if (paragraphLength) {
+        showWrappedText(stream, paragraphText, line, 0, width);
+        paragraphLength = 0;
+      }
+
+      fprintf(stream, "%s\n", text);
+    }
+
+    chunk += 1;
+  }
+
+  if (paragraphLength) {
+    showWrappedText(stream, paragraphText, line, 0, width);
+  }
+
+  if (paragraphText) free(paragraphText);
+}
+
+static void
 showSyntax (
-  FILE *stream, char *line, unsigned int lineWidth,
-  int haveOptions, const char *argumentsSummary
+  FILE *stream,
+  int haveOptions,
+  const char *argumentsSummary
 ) {
   fprintf(stream, "%s: %s", gettext("Syntax"), programName);
 
@@ -322,7 +380,8 @@ processCommandLine (
   int *argumentCount,
   char ***argumentVector,
   const char *applicationPurpose,
-  const char *argumentsSummary
+  const char *argumentsSummary,
+  const char *const usageNotes[]
 ) {
   const char *reset = NULL;
   const char resetPrefix = '+';
@@ -635,8 +694,13 @@ processCommandLine (
       fputc('\n', usageStream);
     }
 
-    showSyntax(usageStream, line, width, !!info->optionCount, argumentsSummary);
+    showSyntax(usageStream, !!info->optionCount, argumentsSummary);
     showOptions(usageStream, line, width, info, optHelpAll);
+
+    if (usageNotes && *usageNotes) {
+      fputc('\n', usageStream);
+      showFormattedLines(usageStream, usageNotes, line, width);
+    }
 
     info->exitImmediately = 1;
   }
@@ -1083,7 +1147,9 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
 
   processCommandLine(
     &info, argumentCount, argumentVector,
-    descriptor->applicationPurpose, descriptor->argumentsSummary
+    descriptor->applicationPurpose,
+    descriptor->argumentsSummary,
+    descriptor->usageNotes
   );
 
   if (descriptor->doBootParameters && *descriptor->doBootParameters) {

@@ -39,7 +39,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("string"),
     .setting.string = &opt_outputFormat,
     .internal.setting = DEFAULT_OUTPUT_FORMAT,
-    .description = strtext("Format of each output line.")
+    .description = strtext("The format of each output line.")
   },
 END_OPTION_TABLE
 
@@ -208,6 +208,26 @@ main (int argc, char *argv[]) {
       .applicationName = "brltty-cldr",
       .applicationPurpose = strtext("List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."),
       .argumentsSummary = "input-file",
+      .usageNotes = {
+        "The output format string is printf-like.",
+        "These format specifiers are recognized:",
+        "  %n  the name of the character sequence",
+        "  %s  the actual charaacter sequence",
+        "  %x  the charaacter sequence in hexadecimal",
+        "  %%  a literal percent sign",
+        "These backslash [\\] escapes are recognized:",
+        "  \\a  alert (bell)",
+        "  \\b  backspace",
+        "  \\e  escape",
+        "  \\f  form feed",
+        "  \\n  new line",
+        "  \\r  carriage return",
+        "  \\t  horizontal tab",
+        "  \\v  vertical tab",
+        "  \\\\  literal backslasha  ",
+        "The default output format (excluding the quotes) is \"" DEFAULT_OUTPUT_FORMAT "\".",
+        NULL
+      },
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

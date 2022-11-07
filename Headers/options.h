@@ -87,6 +87,7 @@ typedef struct {
   const char *applicationName;
   const char *applicationPurpose;
   const char *argumentsSummary;
+  const char *usageNotes[];
 } OptionsDescriptor;
 
 #define OPTION_TABLE(name) .optionTable = name, .optionCount = ARRAY_COUNT(name)
