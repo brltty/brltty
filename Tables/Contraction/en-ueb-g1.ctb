@@ -1,0 +1,170 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2022 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Contraction Table - English (UEB, grade 1)
+# Created by Michael Curran <mick@kulgan.net>
+
+#This is by no means complete, but at least all the important ascii symbols and general grade 2 contractions are here.
+#I am trying to compress space as much as possible so a lot of syllable boundary rules havn't been included.
+
+#Special signs
+capsign 6
+begcaps 6-6
+endcaps 6-3
+letsign 56
+
+#Numbers
+numsign 3456
+always 1 1
+always 2 12
+always 3 14
+always 4 145
+always 5 15
+always 6 124
+always 7 1245
+always 8 125
+always 9 24
+always 0 245
+midnum . 256
+midnum , 2
+midnum \s 5
+
+include letters-latin.cti
+always \s 0  
+repeatable \s\s 0-0
+always \t 456-2345
+
+always " 6-2356
+always ' 3
+
+always , 2
+always ; 23
+always : 25
+always . 256
+always ! 235
+always ? 236
+
+always ( 5-126
+always ) 5-345
+always [ 46-126
+always ] 46-345
+always { 456-126
+always } 456-345
+always < 4-126
+always > 4-345
+
+always | 456-1256
+always / 456-34
+always \\ 456-16
+
+always ` 46-16
+always ~ 4-35
+always @ 4-1
+always # 456-1456
+always $ 4-234
+always % 46-356
+always ^ 4-26
+always & 4-12346
+always * 5-35
+always - 36
+always _ 46-36
+always = 5-2356
+always + 5-235
+
+# http://www.brailleauthority.org/ueb/symbols_list.pdf
+always	\xA1	45-56-235	# ¡ ⠘⠰⠖	inverted exclamation mark - 13.5
+always	\xA2	4-14	# ¢ ⠈⠉	cent - 3.10
+always	\xA3	4-123	# £ ⠈⠇	pound (sterling) - 3.10
+always	\xA5	4-13456	# ¥ ⠈⠽	yen (Japan) - 3.10
+always	\xA7	45-234	# § ⠘⠎	section - 3.19
+always	\xA9	45-14	# © ⠘⠉	copyright - 3.8
+always	\xAE	45-1235	# ® ⠘⠗	registered - 3.8
+always	\xB0	45-245	# ° ⠘⠚	degree - 3.11
+always	\xB6	45-1234	# ¶ ⠘⠏	paragraph - 3.19
+always	\xBF	45-56-236	# ¿ ⠘⠰⠦	inverted question mark - 13.5
+always	\u0300	45-16	# ` ⠘⠡	grave accent (combining) - 4.2
+always	\u0301	45-34	# ´ ⠘⠌	acute accent (combining) - 4.2
+always	\u0302	45-146	# ^ ⠘⠩	circumflex accent (combining) - 4.2
+always	\u0303	45-12456	# ~ ⠘⠽	tilde (combining) - 4.2
+always	\u0308	45-25	# ¨ ⠘⠒	diaeresis (combining) - 4.2
+always	\u030A	45-1246	# ˚ ⠘⠫	ring above (combining) - 4.2
+always	\u0327	45-12346	# ¸ ⠘⠯	cedilla (combining) - 4.2
+always	\u2014	6-36	# — ⠠⠤	dash - 7.2
+always	\u2020	4-6-1456	# † ⠈⠠⠹	dagger - 3.3
+always	\u2021	4-6-12456	# ‡ ⠈⠠⠻	double dagger - 3.3
+always	\u2022	456-256	# • ⠸⠲	bullet - 3.5
+always	\u20A3	4-124	# ₣ ⠈⠋	franc (France) - 3.10
+always	\u20A6	4-1345	# ₦ ⠈⠝	naira (Nigeria) - 3.10
+always	\u20AC	4-15	# € ⠈⠑	euro - 3.10
+always	\u2122	45-2345	# ™ ⠘⠞	trade mark - 3.8
+always	\u2640	45-1346	# ♀ ⠘⠭	female (Venus) - 3.16
+always	\u2642	45-13456	# ♂ ⠘⠽	male (Mars) - 3.16
+always	\u3003	5-2	# 〃 ⠐⠂	ditto mark - 3.12
+
+# http://www.brailleauthority.org/ueb/Guidelines_for_Technical_Material_2008-10.pdf
+always	\x2B	5-235	# + ⠐⠖	plus
+always	\xB1	456-235	# ± ⠸⠖	plus or minus (plus over minus)
+always	\xB7	5-256	# · ⠐⠲	multiplication (middle dot)
+always	\xD7	5-236	# × ⠐⠦	multiplication (cross)
+always	\xF7	5-34	# ÷ ⠐⠌	division (horizontal line between dots)
+always	\u2032	2356	# ′ ⠶	prime (feet, minutes)
+always	\u2033	2356-2356	# ″ ⠶⠶	double prime (inches, seconds)
+always	\u2212	5-36	# − ⠐⠤	minus
+always	\u2213	456-36	# ∓ ⠸⠤	minus or plus (minus over plus)
+always	\u221D	456-5-2356	# ∝ ⠸⠐⠶	proportional to
+always	\u2243	456-35	# ≃ ⠸⠔	asymptomatically equal to (tilde over horizontal line)
+always	\u2245	5-456-35	# ≅ ⠐⠸⠔	approximately equal to (tilde over equals sign)
+always	\u2248	45-35	# ≈ ⠘⠔	almost equal to (tilde over tilde)
+always	\u224F	45-5-2356	# ≏ ⠘⠐⠶	difference between (equals sign with bump in top bar)
+always	\u2251	46-5-2356	# ≑ ⠨⠐⠶	geometrically equal to (equals sign dotted above and below)
+always	\u2260	5-2356-4-156	# ≠ ⠐⠶⠈⠱	not equal to (line through equals sign)
+always	\u2261	456-123456	# ≡ ⠸⠿	identical to (three horizontal lines)
+always	\u2264	456-4-126	# ≤ ⠸⠈⠣	less than or equal to
+always	\u2265	456-4-345	# ≥ ⠸⠈⠜	greater than or equal to
+always	\u226A	46-4-126	# ≪ ⠨⠈⠣	much less than
+always	\u226B	46-4-345	# ≫ ⠨⠈⠜	much greater than
+
+# The Greek letters
+always	\u03B1	46-1	# α ⠨⠁	alpha
+always	\u03B2	46-12	# β ⠨⠃	beta
+always	\u03B3	46-1245	# γ ⠨⠛	gamma
+always	\u03B4	46-145	# δ ⠨⠙	delta
+always	\u03B5	46-15	# ε ⠨⠑	epsilon
+always	\u03B6	46-1356	# ζ ⠨⠵	zeta
+always	\u03B7	46-156	# η ⠨⠱	eta
+always	\u03B8	46-1456	# θ ⠨⠹	theta
+always	\u03B9	46-24	# ι ⠨⠊	iota
+always	\u03BA	46-13	# κ ⠨⠅	kappa
+always	\u03BB	46-123	# λ ⠨⠇	lamda
+always	\u03BC	46-134	# μ ⠨⠍	mu
+always	\u03BD	46-1345	# ν ⠨⠝	nu
+always	\u03BE	46-1346	# ξ ⠨⠭	xi
+always	\u03BF	46-135	# ο ⠨⠕	omicron
+always	\u03C0	46-1234	# π ⠨⠏	pi
+always	\u03C1	46-1235	# ρ ⠨⠗	rho
+always	\u03C2	46-234	# ς ⠨⠎	final sigma
+always	\u03C3	46-234	# σ ⠨⠎	sigma
+always	\u03C4	46-2345	# τ ⠨⠞	tau
+always	\u03C5	46-136	# υ ⠨⠥	upsilon
+always	\u03C6	46-124	# φ ⠨⠋	phi
+always	\u03C7	46-12346	# χ ⠨⠯	chi
+always	\u03C8	46-13456	# ψ ⠨⠽	psi
+always	\u03C9	46-2456	# ω ⠨⠺	omega
+
+# inline contraction of emoji descriptions
+emoji en

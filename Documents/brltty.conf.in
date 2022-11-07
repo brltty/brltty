@@ -233,6 +233,7 @@
 #contraction-table	de-2015	# German (contracted - 2015 standard)
 #contraction-table	en	# English
 #contraction-table	en_US	# English (United States)
+#contraction-table	en-ueb-g1	# English (Unified, uncontracted)
 #contraction-table	en-ueb-g2	# English (Unified, contracted)
 #contraction-table	en-us-g2	# English (United States, contracted)
 #contraction-table	es	# Spanish (contracted)

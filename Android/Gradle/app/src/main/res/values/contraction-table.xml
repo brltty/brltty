@@ -14,6 +14,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de_g1" translatable="true">German (basic contractions)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_g2" translatable="true">German (contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_en" translatable="true">English</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1" translatable="true">English (Unified, uncontracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2" translatable="true">English (Unified, contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2" translatable="true">English (United States, contracted)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US" translatable="true">English (United States)</string>
@@ -53,6 +54,7 @@
     <item>@string/CONTRACTION_TABLE_LABEL_de_g1</item>
     <item>@string/CONTRACTION_TABLE_LABEL_de_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_en</item>
+    <item>@string/CONTRACTION_TABLE_LABEL_en_ueb_g1</item>
     <item>@string/CONTRACTION_TABLE_LABEL_en_ueb_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_en_us_g2</item>
     <item>@string/CONTRACTION_TABLE_LABEL_en_US</item>
@@ -93,6 +95,7 @@
     <item>de-g1</item>
     <item>de-g2</item>
     <item>en</item>
+    <item>en-ueb-g1</item>
     <item>en-ueb-g2</item>
     <item>en-us-g2</item>
     <item>en_US</item>
