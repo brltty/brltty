@@ -98,7 +98,8 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltest",
-      .argumentsSummary = "[driver [parameter=value ...]]"
+      .applicationPurpose = strtext("Test a braille driver."),
+      .argumentsSummary = "[driver [parameter=value ...]]",
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

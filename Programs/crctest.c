@@ -116,7 +116,8 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "crctest",
-      .argumentsSummary = ""
+      .applicationPurpose = strtext("Test supported CRC (Cyclic Redundancy Check) checksum algorithms."),
+      .argumentsSummary = "",
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

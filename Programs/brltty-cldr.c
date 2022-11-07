@@ -206,8 +206,10 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-cldr",
-      .argumentsSummary = "input-file"
+      .applicationPurpose = strtext("List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."),
+      .argumentsSummary = "input-file",
     };
+
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 

@@ -148,8 +148,10 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-tune",
-      .argumentsSummary = "note... | -f [{file | -}...]"
+      .applicationPurpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
+      .argumentsSummary = "note... | -f [{file | -}...]",
     };
+
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 

@@ -2509,7 +2509,8 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-ttb",
-      .argumentsSummary = "input-table [output-table]"
+      .applicationPurpose = strtext("Check/edit a text (computer braille) table, or convert it from one format to another."),
+      .argumentsSummary = "input-table [output-table]",
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

@@ -444,8 +444,10 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-ctb",
-      .argumentsSummary = "[{input-file | -} ...]"
+      .applicationPurpose = strtext("Check/validate a contraction (literary braille) table, or translate text into contracted braille."),
+      .argumentsSummary = "[{input-file | -} ...]",
     };
+
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 

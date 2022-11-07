@@ -90,7 +90,8 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-lsinc",
-      .argumentsSummary = "file ..."
+      .applicationPurpose = strtext("List the paths to a data file and those which it recursively includes."),
+      .argumentsSummary = "file ...",
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

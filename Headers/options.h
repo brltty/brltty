@@ -79,10 +79,13 @@ typedef struct {
 typedef struct {
   const OptionEntry *optionTable;
   unsigned int optionCount;
+
   int *doBootParameters;
   int *doEnvironmentVariables;
   char **configurationFile;
+
   const char *applicationName;
+  const char *applicationPurpose;
   const char *argumentsSummary;
 } OptionsDescriptor;
 

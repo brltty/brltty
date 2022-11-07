@@ -149,7 +149,8 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-clip",
-      .argumentsSummary = "[{input-file | -} ...]"
+      .applicationPurpose = strtext("Manage brltty's clipboard from the command line."),
+      .argumentsSummary = "[{input-file | -} ...]",
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

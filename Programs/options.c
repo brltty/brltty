@@ -122,12 +122,12 @@ ensureSetting (
 }
 
 static void
-showUsageLine (
-  FILE *stream, const char *description, char *line,
+showWrappedText (
+  FILE *stream, const char *text, char *line,
   unsigned int offset, unsigned int width
 ) {
   unsigned int limit = width - offset;
-  unsigned int charsLeft = strlen(description);
+  unsigned int charsLeft = strlen(text);
 
   while (1) {
     unsigned int charCount = charsLeft;
@@ -136,12 +136,12 @@ showUsageLine (
       charCount = limit;
 
       while (charCount > 0) {
-        if (isspace(description[charCount])) break;
+        if (isspace(text[charCount])) break;
         charCount -= 1;
       }
 
       while (charCount > 0) {
-        if (!isspace(description[--charCount])) {
+        if (!isspace(text[--charCount])) {
           charCount += 1;
           break;
         }
@@ -149,7 +149,7 @@ showUsageLine (
     }
 
     if (charCount > 0) {
-      memcpy(line+offset, description, charCount);
+      memcpy(line+offset, text, charCount);
       unsigned int length = offset + charCount;
 
       writeWithConsoleEncoding(stream, line, length);
@@ -157,32 +157,47 @@ showUsageLine (
     }
 
     while (charCount < charsLeft) {
-      if (!isspace(description[charCount])) break;
+      if (!isspace(text[charCount])) break;
       charCount += 1;
     }
 
     if (!(charsLeft -= charCount)) break;
-    description += charCount;
+    text += charCount;
     memset(line, ' ', offset);
   }
 }
 
 static void
-showUsageSummary (
-  OptionProcessingInformation *info,
-  FILE *outputStream,
-  unsigned int lineWidth,
-  const char *argumentsSummary,
-  int all
+showSyntax (
+  FILE *stream, char *line, unsigned int lineWidth,
+  int haveOptions, const char *argumentsSummary
 ) {
-  char line[lineWidth+1];
+  fprintf(stream, "%s: %s", gettext("Syntax"), programName);
+
+  if (haveOptions) {
+    fprintf(stream, " [-%s ...]", gettext("option"));
+  }
+
+  if (argumentsSummary && *argumentsSummary) {
+    fprintf(stream, " %s", argumentsSummary);
+  }
+
+  fprintf(stream, "\n");
+}
+
+static void
+showOptions (
+  FILE *stream, char *line, unsigned int lineWidth,
+  OptionProcessingInformation *info,
+  int showHiddenOptions
+) {
   unsigned int letterWidth = 0;
   unsigned int wordWidth = 0;
   unsigned int argumentWidth = 0;
 
   for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
     const OptionEntry *option = &info->optionTable[optionIndex];
-    if (!all && (option->flags & OPT_Hidden)) continue;
+    if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
 
     if (option->word) {
       unsigned int length = strlen(option->word);
@@ -194,24 +209,9 @@ showUsageSummary (
     if (option->argument) argumentWidth = MAX(argumentWidth, strlen(gettext(option->argument)));
   }
 
-  fputs(gettext("Usage"), outputStream);
-  fprintf(outputStream, ": %s", programName);
-
-  if (info->optionCount) {
-    fputs(" [", outputStream);
-    fputs(gettext("option"), outputStream);
-    fputs(" ...]", outputStream);
-  }
-
-  if (argumentsSummary && *argumentsSummary) {
-    fprintf(outputStream, " %s", argumentsSummary);
-  }
-
-  fprintf(outputStream, "\n");
-
   for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
     const OptionEntry *option = &info->optionTable[optionIndex];
-    if (!all && (option->flags & OPT_Hidden)) continue;
+    if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
 
     unsigned int lineLength = 0;
 
@@ -297,7 +297,7 @@ showUsageSummary (
         description = from;
       }
 
-      showUsageLine(outputStream, description, line, lineLength, lineWidth);
+      showWrappedText(stream, description, line, lineLength, lineWidth);
     }
   }
 }
@@ -307,6 +307,7 @@ processCommandLine (
   OptionProcessingInformation *info,
   int *argumentCount,
   char ***argumentVector,
+  const char *applicationPurpose,
   const char *argumentsSummary
 ) {
   const char *reset = NULL;
@@ -609,9 +610,20 @@ processCommandLine (
   *argumentCount -= optind;
 
   if (optHelp) {
+    FILE *usageStream = stdout;
+
     size_t width = UINT16_MAX;
     getConsoleSize(&width, NULL);
-    showUsageSummary(info, stdout, width, argumentsSummary, optHelpAll);
+    char line[width+1];
+
+    if (applicationPurpose && *applicationPurpose) {
+      showWrappedText(usageStream, gettext(applicationPurpose), line, 0, width);
+      fputc('\n', usageStream);
+    }
+
+    showSyntax(usageStream, line, width, !!info->optionCount, argumentsSummary);
+    showOptions(usageStream, line, width, info, optHelpAll);
+
     info->exitImmediately = 1;
   }
 
@@ -1054,7 +1066,11 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
 
   onProgramExit("options", exitOptions, (void *)descriptor);
   beginProgram(*argumentCount, *argumentVector);
-  processCommandLine(&info, argumentCount, argumentVector, descriptor->argumentsSummary);
+
+  processCommandLine(
+    &info, argumentCount, argumentVector,
+    descriptor->applicationPurpose, descriptor->argumentsSummary
+  );
 
   if (descriptor->doBootParameters && *descriptor->doBootParameters) {
     processBootParameters(&info, descriptor->applicationName);

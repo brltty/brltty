@@ -133,8 +133,10 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-morse",
-      .argumentsSummary = "text... | -f [{file | -}...]"
+      .applicationPurpose = strtext("Translate text into Morse Code tones."),
+      .argumentsSummary = "text... | -f [{file | -}...]",
     };
+
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 

@@ -1084,6 +1084,7 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-hid",
+      .applicationPurpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

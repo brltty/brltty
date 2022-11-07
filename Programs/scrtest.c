@@ -133,8 +133,10 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "scrtest",
-      .argumentsSummary = "[parameter=value ...]"
+      .applicationPurpose = strtext("Test a screen driver."),
+      .argumentsSummary = "[parameter=value ...]",
     };
+
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
 

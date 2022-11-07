@@ -246,7 +246,8 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "msgtest",
-      .argumentsSummary = "action [argument ...]"
+      .applicationPurpose = strtext("Test message localization using the message catalog reader."),
+      .argumentsSummary = "action [argument ...]",
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);
