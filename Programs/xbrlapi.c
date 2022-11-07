@@ -1038,7 +1038,10 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "xbrlapi",
-      .applicationPurpose = strtext("Augment an X session by supporting input from the braille device, and by announcing the new title (when switching windows) on the braille display."),
+
+      .usage = {
+        .purpose = strtext("Augment an X session by supporting input from the braille device, and by announcing the new title (when switching windows) on the braille display."),
+      }
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

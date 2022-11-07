@@ -388,8 +388,11 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-pty",
-      .applicationPurpose = strtext("Run a shell or terminal manager within a pty (virtual terminal) and export its screen via a shared memory segment so that brltty can read it via its Terminal Emulator screen driver."),
-      .argumentsSummary = "[command [arg ...]]",
+
+      .usage = {
+        .purpose = strtext("Run a shell or terminal manager within a pty (virtual terminal) and export its screen via a shared memory segment so that brltty can read it via its Terminal Emulator screen driver."),
+        .parameters = "[command [arg ...]]",
+      }
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

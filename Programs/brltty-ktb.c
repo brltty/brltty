@@ -287,8 +287,11 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-ktb",
-      .applicationPurpose = strtext("check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."),
-      .argumentsSummary = "table-name",
+
+      .usage = {
+        .purpose = strtext("check a key table, list the key naems it can use, or write the key bindings it defines in useful formats."),
+        .parameters = "table-name",
+      }
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

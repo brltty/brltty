@@ -45,8 +45,11 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-atb",
-      .applicationPurpose = strtext("Check an attributes table."),
-      .argumentsSummary = "attributes-table",
+
+      .usage = {
+        .purpose = strtext("Check an attributes table."),
+        .parameters = "attributes-table",
+      }
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
   }

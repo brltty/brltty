@@ -249,7 +249,10 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-lscmds",
-      .applicationPurpose = strtext("Write a brltty command reference in reStructuredText."),
+
+      .usage = {
+        .purpose = strtext("Write a brltty command reference in reStructuredText."),
+      }
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

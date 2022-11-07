@@ -210,7 +210,11 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "tbl2hex",
-      .argumentsSummary = "table-file"
+
+      .usage = {
+        .purpose = strtext("Write the hexadecimal array representation of a compiled table."),
+        .parameters = "table-file",
+      }
     };
     PROCESS_OPTIONS(descriptor, argc, argv);
   }

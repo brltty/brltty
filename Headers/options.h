@@ -77,6 +77,12 @@ typedef struct {
 };
 
 typedef struct {
+  const char *purpose;
+  const char *parameters;
+  const char *const *notes;
+} UsageDescriptor;
+
+typedef struct {
   const OptionEntry *optionTable;
   unsigned int optionCount;
 
@@ -85,9 +91,7 @@ typedef struct {
   char **configurationFile;
 
   const char *applicationName;
-  const char *applicationPurpose;
-  const char *argumentsSummary;
-  const char *usageNotes[];
+  const UsageDescriptor usage;
 } OptionsDescriptor;
 
 #define OPTION_TABLE(name) .optionTable = name, .optionCount = ARRAY_COUNT(name)

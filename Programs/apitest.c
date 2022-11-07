@@ -475,8 +475,11 @@ main (int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
-      .applicationPurpose = strtext("Test BrlAPI functions."),
       .applicationName = "apitest",
+
+      .usage = {
+        .purpose = strtext("Test BrlAPI functions."),
+      }
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

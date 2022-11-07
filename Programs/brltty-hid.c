@@ -1051,17 +1051,22 @@ performActions (HidDevice *device) {
 int
 main (int argc, char *argv[]) {
   {
+    static const char *const usageNotes[] = {
+      strtext("Bytes may be separated by whitespace."),
+      strtext("Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]."),
+      strtext("A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified)."),
+      strtext("The first byte is the report number (00 for no report number)."),
+      NULL
+    };
+
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-hid",
-      .applicationPurpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
-      .usageNotes = {
-        strtext("Bytes may be separated by whitespace."),
-        strtext("Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]."),
-        strtext("A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified)."),
-        strtext("The first byte is the report number (00 for no report number)."),
-        NULL
-      },
+
+      .usage = {
+        .purpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
+        .notes = usageNotes,
+      }
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

@@ -111,8 +111,11 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "spktest",
-      .applicationPurpose = strtext("Test a speech driver."),
-      .argumentsSummary = "[driver [parameter=value ...]]",
+
+      .usage = {
+        .purpose = strtext("Test a speech driver."),
+        .parameters = "[driver [parameter=value ...]]",
+      }
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);

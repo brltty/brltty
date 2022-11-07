@@ -858,7 +858,10 @@ brlttyPrepare (int argc, char *argv[]) {
       .doEnvironmentVariables = &opt_environmentVariables,
       .configurationFile = &opt_configurationFile,
       .applicationName = "brltty",
-      .applicationPurpose = strtext("Screen reader for those who use a braille device."),
+
+      .usage = {
+        .purpose = strtext("Screen reader for those who use a braille device."),
+      }
     };
 
     ProgramExitStatus exitStatus = processOptions(&descriptor, &argc, &argv);

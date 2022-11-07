@@ -234,7 +234,11 @@ main (int argc, char *argv[]) {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-trtxt",
-      .argumentsSummary = "[{input-file | -} ...]"
+
+      .usage = {
+        .purpose = strtext("Translate one binary braille representation to another."),
+        .parameters = "[{input-file | -} ...]",
+      }
     };
 
     PROCESS_OPTIONS(descriptor, argc, argv);
