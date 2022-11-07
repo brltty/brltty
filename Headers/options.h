@@ -63,18 +63,17 @@ typedef struct {
   } strings;
 } OptionEntry;
 
-#define BEGIN_OPTION_TABLE(name) static const OptionEntry name[] = {
-#define END_OPTION_TABLE \
+#define BEGIN_OPTION_TABLE(name) \
+static const OptionEntry name[] = { \
   { .word = "help", \
     .letter = 'h', \
-    .description = strtext("Print a usage summary (commonly used options only), and then exit.") \
-  } \
-  , \
+    .description = strtext("Show a usage summary that only contains commonly used options, and then exit.") \
+  }, \
   { .word = "full-help", \
     .letter = 'H', \
-    .description = strtext("Print a usage summary (all options), and then exit.") \
-  } \
-};
+    .description = strtext("Show a usage summary that contains all of the options, and then exit.") \
+  },
+#define END_OPTION_TABLE };
 
 typedef struct {
   const char *purpose;
