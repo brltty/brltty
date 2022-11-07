@@ -65,10 +65,10 @@ System Administration Commands
 BrlAPI Commands
 ---------------
 
-.. include:: canute-apitool.help.rst
+.. include:: canute-table.help.rst
 .. include:: canute-parameter.help.rst
-.. include:: canute-cbt.help.rst
-.. include:: canute-lbt.help.rst
+.. include:: canute-apitool.help.rst
+.. include:: canute-java.help.rst
 .. include:: canute-client.help.rst
 
 Miscellaneous Commands

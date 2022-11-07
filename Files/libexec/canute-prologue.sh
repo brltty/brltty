@@ -5,6 +5,13 @@ installTree="$(realpath --no-symlinks -- "${installTree}")"
 readonly installTree="$(dirname "${installTree}")"
 . "${installTree}/bin/brltty-prologue.bash"
 
+readonly dataFilesDirectory="${installTree}/etc/brltty"
+readonly contractionTablesDirectory="${dataFilesDirectory}/Contraction"
+readonly textTablesDirectory="${dataFilesDirectory}/Text"
+
+readonly contractionTableExtension="ctb"
+readonly textTableExtension="ttb"
+
 readonly ldConfigurationFile="/etc/ld.so.conf.d/brlapi.conf"
 readonly apiLinksDirectory="${installTree}"
 readonly canuteSystemdUnit="brltty@canute.path"

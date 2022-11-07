@@ -1,0 +1,82 @@
+#!/bin/bash
+. /brltty/current/libexec/canute-prologue.sh
+
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Manage which braille table is used to render text on the Canute braille display.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+The (optional) table-name parameter can refer to either a literary or a computer braille table.
+This can be constrained via the -c and -l options.
+If this parameter isn't specified then the name and type of the current table are shown.
+
+BRLTTY refers to a literary braille table as a contraction table, and to a computer braille table as a text table.
+END_OF_PROGRAM_USAGE_NOTES
+}
+
+addProgramOption c flag isTextTable "only interpret the name as that of a computer braille table"
+addProgramOption l flag isContractionTable "only interpret the name as that of a literary braille table"
+optionalProgramParameters
+addProgramParameter "table-name" tableName "the braille table to switch to"
+parseProgramArguments "${@}"
+set -e
+
+if [ -n "${tableName}" ]
+then
+   isEitherTable=false
+   "${isContractionTable}" || "${isTextTable}" || isEitherTable=true
+
+   foundContractionTable=false
+   foundTextTable=false
+
+   if "${isContractionTable}" || "${isEitherTable}"
+   then
+      tablePath="${contractionTablesDirectory}/${tableName}.${contractionTableExtension}"
+      ! [ -f "${tablePath}" ] || foundContractionTable=true
+   fi
+
+   if "${isTextTable}" || "${isEitherTable}"
+   then
+      tablePath="${textTablesDirectory}/${tableName}.${textTableExtension}"
+      ! [ -f "${tablePath}" ] || foundTextTable=true
+   fi
+
+   if "${foundContractionTable}" && "${foundTextTable}"
+   then
+      semanticError "ambiguous braille table name: ${tableName}"
+   fi
+
+   if "${foundContractionTable}"
+   then
+      brailleVariant="literary"
+      literaryBraille="yes"
+   elif "${foundTextTable}"
+   then
+      brailleVariant="computer"
+      literaryBraille="no"
+   else
+      semanticError "braille table not found: ${tableName}"
+   fi
+
+   canute-parameter "${brailleVariant}-braille-table" "${tableName}"
+   canute-parameter "literary-braille" "${literaryBraille}"
+else
+   parameter="literary-braille"
+   response="$(canute-parameter "${parameter}")"
+
+   case "${response}"
+   in
+       true) brailleVariant="literary";;
+      false) brailleVariant="computer";;
+      *) semanticError "unexpected response: ${parameter}=${response}";;
+   esac
+
+   parameter="${brailleVariant}-braille-table"
+   tableName="$(canute-parameter "${parameter}")"
+   echo "${tableName} - ${brailleVariant} braille"
+fi
+
+exit 0
