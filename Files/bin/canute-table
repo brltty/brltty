@@ -3,7 +3,7 @@
 
 showProgramUsagePurpose() {
 cat <<END_OF_PROGRAM_USAGE_PURPOSE
-Manage which braille table is used to render text on the Canute braille display.
+Manage which table is used to render text on the Canute's braille display.
 END_OF_PROGRAM_USAGE_PURPOSE
 }
 

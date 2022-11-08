@@ -45,15 +45,15 @@ Each of them has a **-h** (help) option which shows its usage summary.
 
 What follows is a lsit of these commands along with their associated usage summaries.
 
-Session Management Commands
----------------------------
+User Sessions
+-------------
 
 .. include:: canute-startx.help.rst
 .. include:: canute-screen.help.rst
 .. include:: canute-ttysize.help.rst
 
-System Administration Commands
-------------------------------
+System Administration
+---------------------
 
 .. include:: canute-upgrade.help.rst
 .. include:: canute-status.help.rst
@@ -62,14 +62,18 @@ System Administration Commands
 .. include:: canute-enable.help.rst
 .. include:: canute-disable.help.rst
 
-BrlAPI Commands
----------------
+BrlAPI Parameter Management
+---------------------------
 
 .. include:: canute-table.help.rst
 .. include:: canute-parameter.help.rst
-.. include:: canute-apitool.help.rst
-.. include:: canute-java.help.rst
+
+BrlAPI Session Establishment
+----------------------------
+
 .. include:: canute-client.help.rst
+.. include:: canute-java.help.rst
+.. include:: canute-apitool.help.rst
 
 Miscellaneous Commands
 ----------------------

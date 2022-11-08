@@ -42,20 +42,20 @@ canute-disable
    The Canute braille display process won't be started when the system boots.
 
 canute-table
-   Manage which braille table is used to render text on the Canute braille display.
+   Manage which table is used to render text on the Canute's braille display.
 
 canute-parameter
    Show/set the values of BrlAPI parameters.
 
-canute-apitool
-   Perform various BrlAPI functions.
+canute-client
+   Run a BrlAPI client within a prepared environment.
+   It doesn't work for Java clients.
 
 canute-java
    Run a Java BrlAPI client.
 
-canute-client
-   Run a BrlAPI client within a prepared environment.
-   It doesn't work for Java clients.
+canute-apitool
+   Perform various BrlAPI functions.
 
 weather-current
    Show the current weather conditions.
