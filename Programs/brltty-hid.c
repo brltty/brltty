@@ -1052,10 +1052,10 @@ int
 main (int argc, char *argv[]) {
   {
     static const char *const usageNotes[] = {
-      strtext("Bytes may be separated by whitespace."),
-      strtext("Each byte is either two hexadecimal digits or [zero or more braille dot numbers within brackets]."),
-      strtext("A byte may optionally be followed by an asterisk [*] and a decimal count (1 if not specified)."),
-      strtext("The first byte is the report number (00 for no report number)."),
+      "When writing a report or feature, the bytes don't need to be, but can be, separated from one another by whitespace.",
+      "Each byte is either two hexadecimal digits or zero or more braille dot numbers within [square brackets].",
+      "A byte may optionally be followed by an asterisk [*] and a decimal count - if not specified, 1 is assumed.",
+      "The first byte is the report number - specify 00 for no report number.",
       NULL
     };
 
