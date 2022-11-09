@@ -516,7 +516,7 @@ scr_menu.$O:
 
 ###############################################################################
 
-ALERT_OBJECTS = alert.$O tune_build.$O message.$O $(TUNE_OBJECTS)
+ALERT_OBJECTS = alert.$O tune_builder.$O message.$O $(TUNE_OBJECTS)
 
 alert.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/alert.c
@@ -1006,7 +1006,7 @@ pty_screen.$O:
 
 ###############################################################################
 
-BRLTTY_TUNE_OBJECTS = brltty-tune.$O tune_utils.$O tune_build.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS) io_misc.$O
+BRLTTY_TUNE_OBJECTS = brltty-tune.$O tune_utils.$O tune_builder.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS) io_misc.$O
 
 brltty-tune$X: $(BRLTTY_TUNE_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TUNE_OBJECTS) $(PCM_LIBS) $(MIDI_LIBS) $(LDLIBS)
@@ -1017,8 +1017,8 @@ brltty-tune.$O:
 tune_utils.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tune_utils.c
 
-tune_build.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tune_build.c
+tune_builder.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/tune_builder.c
 
 ###############################################################################
 

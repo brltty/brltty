@@ -25,7 +25,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "tune_build.h"
+#include "tune_builder.h"
 #include "notes.h"
 #include "utf8.h"
 
@@ -133,7 +133,7 @@ parseNumber (
   unsigned long value = 0;
   const char *problem = "invalid";
 
-  while (1) {
+  while (**operand) {
     if (!value && (*operand > start)) goto PROBLEM_ENCOUNTERED;
 
     long int digit = **operand - WC_C('0');
@@ -305,7 +305,7 @@ parseMode (TuneBuilder *tb, int *accidentals, const wchar_t **operand) {
   if (!isalpha(*from)) return 1;
 
   const wchar_t *to = from;
-  while (iswalpha(*++to));
+  while (isalpha(*++to));
   unsigned int length = to - from;
 
   const ModeEntry *mode = NULL;
@@ -337,51 +337,54 @@ parseMode (TuneBuilder *tb, int *accidentals, const wchar_t **operand) {
 
 static int
 parseKeySignature (TuneBuilder *tb, const wchar_t **operand) {
+  int noteSpecified = 0;
   int accidentals;
-  int increment;
 
   {
     unsigned char index;
 
     if (parseNoteLetter(&index, operand)) {
+      noteSpecified = 1;
       accidentals = scaleAccidentals[index];
-      increment = NOTES_PER_SCALE;
       if (!parseMode(tb, &accidentals, operand)) return 0;
-    } else {
-      accidentals = 0;
-      increment = 1;
     }
   }
 
-  TuneNumber count = 0;
-  if (!parseNumber(tb, &count, operand, 0, 1, NOTES_PER_OCTAVE-1, "accidental count")) {
-    return 0;
-  }
+  if (!noteSpecified) {
+    TuneNumber count = 0;
+    int increment = 1;
 
-  int haveCount = count != 0;
-  wchar_t accidental = **operand;
-
-  switch (accidental) {
-    case '-':
-      increment = -increment;
-      /* fall through */
-    case '+':
-      if (haveCount) {
-        *operand += 1;
-      } else {
-        do {
-          count += 1;
-        } while (*++*operand == accidental);
-      }
-      break;
-
-    default:
-      if (!haveCount) break;
-      logSyntaxError(tb, "accidental not specified");
+    if (!parseNumber(tb, &count, operand, 0, 1, NOTES_PER_OCTAVE-1, "accidental count")) {
       return 0;
+    }
+
+    int haveCount = count != 0;
+    wchar_t accidental = **operand;
+
+    switch (accidental) {
+      case '-':
+        increment = -increment;
+        /* fall through */
+      case '+':
+        if (haveCount) {
+          *operand += 1;
+        } else {
+          do {
+            count += 1;
+          } while (*++*operand == accidental);
+        }
+        break;
+
+      default:
+        if (!haveCount) break;
+        logSyntaxError(tb, "accidental not specified");
+        return 0;
+    }
+
+    accidentals = increment * count;
   }
 
-  accidentals += increment * count;
+logMessage(LOG_NOTICE, "ccc=%d", accidentals);
   setAccidentals(tb, accidentals);
   return 1;
 }
@@ -396,7 +399,7 @@ parseNote (TuneBuilder *tb, const wchar_t **operand, unsigned char *note) {
   } else {
     int defaultAccidentals = 0;
 
-    if (**operand == 'n') {
+    if (**operand == 'm') {
       *operand += 1;
       TuneParameter parameter = tb->note;
       if (!parseRequiredParameter(tb, &parameter, operand)) return 0;
@@ -409,10 +412,13 @@ parseNote (TuneBuilder *tb, const wchar_t **operand, unsigned char *note) {
       TuneParameter octave = tb->octave;
       if (!parseOptionalParameter(tb, &octave, operand)) return 0;
 
+      int octaveSpecified = *operand != octaveOperand;
+      if (octaveSpecified) octave.current += 1;
+
       noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
       defaultAccidentals = tb->accidentals[noteIndex];
 
-      if (*operand == octaveOperand) {
+      if (!octaveSpecified) {
         int adjustOctave = 0;
         TuneNumber previousNote = tb->note.current;
         TuneNumber currentNote = noteNumber;
@@ -512,7 +518,7 @@ parseTone (TuneBuilder *tb, const wchar_t **operand) {
 }
 
 static int
-parseTuneOperand (TuneBuilder *tb, const wchar_t *operand) {
+parseCommand (TuneBuilder *tb, const wchar_t *operand) {
   tb->source.text = operand;
 
   switch (*operand) {
@@ -566,7 +572,7 @@ parseTuneText (TuneBuilder *tb, const wchar_t *text) {
 #endif /* __MINGW32__ */
                           ))) {
     if (*operand == '#') break;
-    if (!parseTuneOperand(tb, operand)) return 0;
+    if (!parseCommand(tb, operand)) return 0;
     string = NULL;
   }
 
@@ -646,7 +652,7 @@ resetTuneBuilder (TuneBuilder *tb) {
 
   setParameter(&tb->duration, "note duration", 1, UINT16_MAX, 0);
   setParameter(&tb->note, "MIDI note number", getLowestNote(), getHighestNote(), NOTE_MIDDLE_C+noteOffsets[2]);
-  setParameter(&tb->octave, "octave number", 0, 10, 0);
+  setParameter(&tb->octave, "octave number", 0, 9, 0);
   setParameter(&tb->percentage, "percentage", 1, 100, 80);
   setParameter(&tb->tempo, "tempo", 40, UINT8_MAX, (60 * 2));
 
@@ -683,3 +689,112 @@ destroyTuneBuilder (TuneBuilder *tb) {
   if (tb->tones.array) free(tb->tones.array);
   free(tb);
 }
+
+const char *const tuneBuilderUsageNotes[] = {
+  "If the tune is specified on the command line then each argument contains a command group.",
+  "If it's read from a file then each line contains a command group.",
+  "A command group is zero or more commands separated from one another by whitespace.",
+  "A number sign [#] at the beginning or after whitespace begins a comment.",
+  "",
+  "Each command is a letter immediately followed by its parameter(s).",
+  "In the following descriptions,",
+  "<angle brackets> are used to show that a parameter is required",
+  "and [square brackets] are used to show that it's optional.",
+  "While a command doesn't contain any spaces, some of the descriptions include them for clarity.",
+  "When there is a choice, {curly brackets} combined with vertical bar [|] separators are used.",
+  "These commands are recognized:",
+  "  a-g  the seven standard note letters",
+  "  k    change the key signature",
+  "  m    a MIDI note number",
+  "  p    change the note period",
+  "  r    a rest",
+  "  t    change the tempo",
+  "",
+  "A note command begins with any of the seven standard note letters (a, b, c, d, e, f, g).",
+  "Its general syntax is:",
+  "",
+  "  <letter> [octave] [accidental] [duration]",
+  "",
+  "The m<number>[duration] command specifies a note by its MIDI number.",
+  "The number must be within the range 1 through 127.",
+  "MIDI stands for Musical Instrument Digital Interface.",
+  "It specifies that Middle-C is note 60, ",
+  "that a higher number represents a higher pitch,",
+  "and that adjacent numbers represent notes that differ in pitch by 1 semitone.",
+  "",
+  "The r[duration] command specifies a rest - the musical way of saying \"no note\".",
+  "",
+  "Octaves are numbered according to International Pitch Notation,",
+  "so the scale starting with Middle-C is octave 4.",
+  "Octaves 0 through 9 may be specified, although notes above g9 can't be played (this is a MIDI limitation).",
+  "If the octave of the first note isn't specified then octave 4 is assumed.",
+  "If it isn't specified for any subsequent note then the technique used in braille music is used.",
+  "Normally, the octave of the previous note is assumed.",
+  "If, however, the note in an adjacent octave is three semitones or less away from the previous one then the new octave is assumed.",
+  "",
+  "If the accidental (sharp, flat, or natural) isn't specified then the one defined by the current key signature is assumed.",
+  "It may be specified as",
+  "a plus sign [+] for sharp,",
+  "a minus sign [-] for flat,",
+  "or an equal sign [=] for natural.",
+  "More than one sharp or flat (+ or -) may be specified.",
+  "",
+  "If the duration of the first note isn't specified then the length of one beat at the current tempo is assumed.",
+  "If it isn't specified for any subsequent note then the duration of the previous note is assumed.",
+  "Its general syntax is:",
+  "",
+  "  {[@<milliseconds>] | [*<multiplier>] [/<divisor>]} [dots]",
+  "",
+  "The duration may be specified as an explicit number of milliseconds by prefixing the number of milliseconds with an at sign [@].",
+  "Alternatively, it may be calculated by applying a multiplier and/or a divisor, in that order, to the duration of the previous note.",
+  "The multiplier is a number prefixed with an asterisk [*] and must be within the range 1 through 16.",
+  "The divisor is a number prefixed with a slash [/] and must be within the range 1 through 128.",
+  "Both default to 1.",
+  "This calculation doesn't take into account the effect of any dots added to the previous note's duration.",
+  "",
+  "Both ways of specifying the duration allow any number of dots [.] to be appended.",
+  "These dots modify the duration of the note in the same way that adding dots to a note does in print (and braille) music.",
+  "For example:",
+  "At a tempo of 120 (beats per minute), a whole note (4 beats) has a duration of 2 seconds. So:",
+  "  #dots  seconds  beats",
+  "    0     2       4",
+  "    1     3       6",
+  "    2     3.5     7",
+  "    3     3.75    7-1/2",
+  "   etc",
+  "",
+  "The k command changes the key signature.",
+  "The default key signature is C Major, i.e. it has no accidentals.",
+  "This command has two forms:",
+  "",
+  "k<key>[mode]:",
+  "The key must be one of the seven standard note letters (a, b, c, d, e, f, g).",
+  "The mode may also be specified.",
+  "Any Unambiguous abbreviation of its name may be used.",
+  "The recognized mode names are:",
+  "major,",
+  "minor,",
+  "ionian,",
+  "dorian,",
+  "phrygian,",
+  "lydian,",
+  "mixolydian,",
+  "aeolian,",
+  "locrian.",
+  "",
+  "k[count]<accidental>:",
+  "The key signature may also be implied by specifying how many accidentals (sharps or flats) it has.",
+  "The count must be a number within the range 1 through 12 (the number of semitones within a scale).",
+  "The accidental must be either a plus sign [+] for sharp or a minus sign [-] for flat.",
+  "If the count is specified then there must be one accidental indicator.",
+  "If it isn't specified then more than one accidental indicator may be specified.",
+  "",
+  "The p<number> command changes the note period - the amount of time within its duration that a note is on.",
+  "It's a percentage, and must be within the range 1 through 100.",
+  "The initial note period is 80 percent.",
+  "",
+  "The t<number> command changes the tempo (speed).",
+  "It's the number of beats per minute, and must be within the range 40 through 255.",
+  "The default tempo is 120 beats per minute.",
+  NULL
+};

@@ -25,7 +25,7 @@
 #include "options.h"
 #include "prefs.h"
 #include "tune_utils.h"
-#include "tune_build.h"
+#include "tune_builder.h"
 #include "notes.h"
 #include "datafile.h"
 
@@ -151,7 +151,8 @@ main (int argc, char *argv[]) {
 
       .usage = {
         .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
-        .parameters = "note... | -f [{file | -}...]",
+        .parameters = "commands ... | -f [{file | -} ...]",
+        .notes = tuneBuilderUsageNotes,
       }
     };
 

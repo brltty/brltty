@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_TUNE_BUILD
-#define BRLTTY_INCLUDED_TUNE_BUILD
+#ifndef BRLTTY_INCLUDED_TUNE_BUILDER
+#define BRLTTY_INCLUDED_TUNE_BUILDER
 
 #include "tune.h"
 
@@ -34,6 +34,7 @@ typedef enum {
 } TuneStatus;
 
 typedef struct TuneBuilderStruct TuneBuilder;
+extern const char *const tuneBuilderUsageNotes[];
 
 extern TuneBuilder *newTuneBuilder (void);
 extern void resetTuneBuilder (TuneBuilder *tune);
@@ -55,4 +56,4 @@ extern int addNote (TuneBuilder *tune, unsigned char note, int duration);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_TUNE_BUILD */
+#endif /* BRLTTY_INCLUDED_TUNE_BUILDER */
