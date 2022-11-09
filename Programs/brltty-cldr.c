@@ -204,13 +204,19 @@ int
 main (int argc, char *argv[]) {
   {
     static const char *const usageNotes[] = {
-      "The output format string is printf-like.",
-      "These format specifiers are recognized:",
+      "The output format is printf-like -",
+      "arbitrary text which may contain",
+      "field specifiers (introduced via a percent sign [%])",
+      "and/or special characters (introduced via a backslash [\\]).",
+      "The default format, excluding the quotes, is \"" DEFAULT_OUTPUT_FORMAT "\".",
+      "",
+      "These field specifiers are recognized:",
       "  %n  the name of the character sequence",
-      "  %s  the actual charaacter sequence",
-      "  %x  the charaacter sequence in hexadecimal",
+      "  %s  the character sequence itself",
+      "  %x  the character sequence in hexadecimal",
       "  %%  a literal percent sign",
-      "These backslash [\\] escapes are recognized:",
+      "",
+      "These special characters are recognized:",
       "  \\a  alert (bell)",
       "  \\b  backspace",
       "  \\e  escape",
@@ -220,7 +226,6 @@ main (int argc, char *argv[]) {
       "  \\t  horizontal tab",
       "  \\v  vertical tab",
       "  \\\\  literal backslasha  ",
-      "The default output format (excluding the quotes) is \"" DEFAULT_OUTPUT_FORMAT "\".",
       NULL
     };
 
