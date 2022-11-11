@@ -211,10 +211,7 @@ static int
 parseDuration (TuneBuilder *tb, const wchar_t **operand, int *duration) {
   if (**operand == '@') {
     *operand += 1;
-
-    TuneParameter parameter = tb->duration;
-    if (!parseRequiredParameter(tb, &parameter, operand)) return 0;
-    *duration = parameter.current;
+    if (!parseRequiredParameter(tb, &tb->duration, operand)) return 0;
   } else {
     const wchar_t *durationOperand = *operand;
 
@@ -242,10 +239,8 @@ parseDuration (TuneBuilder *tb, const wchar_t **operand, int *duration) {
     }
 
     if (*operand != durationOperand) setCurrentDuration(tb, multiplier, divisor);
-    *duration = tb->duration.current;
   }
-
-  tb->duration.current = *duration;
+  *duration = tb->duration.current;
 
   {
     int increment = *duration;
@@ -760,15 +755,15 @@ const char *const tuneBuilderUsageNotes[] = {
   "    0     2       4",
   "    1     3       6",
   "    2     3.5     7",
-  "    3     3.75    7-1/2",
+  "    3     3.75    7+1/2",
   "   etc",
   "",
   "The k command changes the key signature.",
   "The default key signature is C Major, i.e. it has no accidentals.",
   "This command has two forms:",
   "",
-  "k<key>[mode]:",
-  "The key must be one of the seven standard note letters (a, b, c, d, e, f, g).",
+  "k<root>[mode]:",
+  "The root note must be one of the seven standard note letters (a, b, c, d, e, f, g).",
   "The mode may also be specified.",
   "Any Unambiguous abbreviation of its name may be used.",
   "The recognized mode names are:",
