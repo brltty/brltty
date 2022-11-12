@@ -203,7 +203,7 @@ setCurrentDuration (TuneBuilder *tb, TuneNumber multiplier, TuneNumber divisor) 
 }
 
 static void
-setBaseDuration (TuneBuilder *tb) {
+setInitialDuration (TuneBuilder *tb) {
   setCurrentDuration(tb, 1, 1);
 }
 
@@ -331,7 +331,7 @@ parseMode (TuneBuilder *tb, int *accidentals, const wchar_t **operand) {
 }
 
 static int
-parseKeySignature (TuneBuilder *tb, const wchar_t **operand) {
+parseKey (TuneBuilder *tb, const wchar_t **operand) {
   int noteSpecified = 0;
   int accidentals;
 
@@ -519,7 +519,7 @@ parseCommand (TuneBuilder *tb, const wchar_t *operand) {
   switch (*operand) {
     case 'k':
       operand += 1;
-      if (!parseKeySignature(tb, &operand)) return 0;
+      if (!parseKey(tb, &operand)) return 0;
       break;
 
     case 'p':
@@ -530,7 +530,7 @@ parseCommand (TuneBuilder *tb, const wchar_t *operand) {
     case 't':
       operand += 1;
       if (!parseTempo(tb, &operand)) return 0;
-      setBaseDuration(tb);
+      setInitialDuration(tb);
       break;
 
     default:
@@ -652,7 +652,7 @@ resetTuneBuilder (TuneBuilder *tb) {
   setParameter(&tb->tempo, "tempo", 40, UINT8_MAX, (60 * 2));
 
   setAccidentals(tb, 0);
-  setBaseDuration(tb);
+  setInitialDuration(tb);
   setOctave(tb);
 
   tb->source.text = WS_C("");
@@ -699,7 +699,7 @@ const char *const tuneBuilderUsageNotes[] = {
   "When there is a choice, {curly brackets} combined with vertical bar [|] separators are used.",
   "These commands are recognized:",
   "  a-g  the seven standard note letters",
-  "  k    change the key signature",
+  "  k    change the key",
   "  m    a MIDI note number",
   "  p    change the note period",
   "  r    a rest",
@@ -727,7 +727,7 @@ const char *const tuneBuilderUsageNotes[] = {
   "Normally, the octave of the previous note is assumed.",
   "If, however, the note in an adjacent octave is three semitones or less away from the previous one then the new octave is assumed.",
   "",
-  "If the accidental (sharp, flat, or natural) isn't specified then the one defined by the current key signature is assumed.",
+  "If the accidental (sharp, flat, or natural) isn't specified then the one defined by the current key is assumed.",
   "It may be specified as",
   "a plus sign [+] for sharp,",
   "a minus sign [-] for flat,",
@@ -758,8 +758,8 @@ const char *const tuneBuilderUsageNotes[] = {
   "    3     3.75    7+1/2",
   "   etc",
   "",
-  "The k command changes the key signature.",
-  "The default key signature is C Major, i.e. it has no accidentals.",
+  "The k command changes the key.",
+  "The initial key is C Major, i.e. it has no accidentals.",
   "This command has two forms:",
   "",
   "k<root>[mode]:",
@@ -778,7 +778,7 @@ const char *const tuneBuilderUsageNotes[] = {
   "locrian.",
   "",
   "k[count]<accidental>:",
-  "The key signature may also be implied by specifying how many accidentals (sharps or flats) it has.",
+  "The key may also be implied by specifying how many accidentals (sharps or flats) it has.",
   "The count must be a number within the range 1 through 12 (the number of semitones within a scale).",
   "The accidental must be either a plus sign [+] for sharp or a minus sign [-] for flat.",
   "If the count is specified then there must be one accidental indicator.",
