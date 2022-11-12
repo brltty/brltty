@@ -198,13 +198,13 @@ parseTempo (TuneBuilder *tb, const wchar_t **operand) {
 }
 
 static void
-setCurrentDuration (TuneBuilder *tb, TuneNumber multiplier, TuneNumber divisor) {
+setDefaultDuration (TuneBuilder *tb, TuneNumber multiplier, TuneNumber divisor) {
   tb->duration.current = (60000 * multiplier) / (tb->tempo.current * divisor);
 }
 
 static void
-setInitialDuration (TuneBuilder *tb) {
-  setCurrentDuration(tb, 1, 1);
+resetDefaultDuration (TuneBuilder *tb) {
+  setDefaultDuration(tb, 1, 1);
 }
 
 static int
@@ -238,7 +238,7 @@ parseDuration (TuneBuilder *tb, const wchar_t **operand, int *duration) {
       divisor = 1;
     }
 
-    if (*operand != durationOperand) setCurrentDuration(tb, multiplier, divisor);
+    if (*operand != durationOperand) setDefaultDuration(tb, multiplier, divisor);
   }
   *duration = tb->duration.current;
 
@@ -260,7 +260,7 @@ toOctave (TuneNumber note) {
 }
 
 static void
-setOctave (TuneBuilder *tb) {
+setDefaultOctave (TuneBuilder *tb) {
   tb->octave.current = toOctave(tb->note.current);
 }
 
@@ -431,7 +431,7 @@ parseNote (TuneBuilder *tb, const wchar_t **operand, unsigned char *note) {
     }
 
     tb->note.current = noteNumber;
-    setOctave(tb);
+    setDefaultOctave(tb);
 
     {
       wchar_t accidental = **operand;
@@ -530,7 +530,7 @@ parseCommand (TuneBuilder *tb, const wchar_t *operand) {
     case 't':
       operand += 1;
       if (!parseTempo(tb, &operand)) return 0;
-      setInitialDuration(tb);
+      resetDefaultDuration(tb);
       break;
 
     default:
@@ -652,8 +652,8 @@ resetTuneBuilder (TuneBuilder *tb) {
   setParameter(&tb->tempo, "tempo", 40, UINT8_MAX, (60 * 2));
 
   setAccidentals(tb, 0);
-  setInitialDuration(tb);
-  setOctave(tb);
+  resetDefaultDuration(tb);
+  setDefaultOctave(tb);
 
   tb->source.text = WS_C("");
   tb->source.name = "";
@@ -722,8 +722,8 @@ const char *const tuneBuilderUsageNotes[] = {
   "Octaves are numbered according to International Pitch Notation,",
   "so the scale starting with Middle-C is octave 4.",
   "Octaves 0 through 9 may be specified, although notes above g9 can't be played (this is a MIDI limitation).",
-  "If the octave of the first note isn't specified then octave 4 is assumed.",
-  "If it isn't specified for any subsequent note then the technique used in braille music is used.",
+  "If the octave of the first note of the tune isn't specified then octave 4 is assumed.",
+  "If it isn't specified for any other note then the technique used in braille music is used.",
   "Normally, the octave of the previous note is assumed.",
   "If, however, the note in an adjacent octave is three semitones or less away from the previous one then the new octave is assumed.",
   "",
@@ -734,8 +734,8 @@ const char *const tuneBuilderUsageNotes[] = {
   "or an equal sign [=] for natural.",
   "More than one sharp or flat (+ or -) may be specified.",
   "",
-  "If the duration of the first note isn't specified then the length of one beat at the current tempo is assumed.",
-  "If it isn't specified for any subsequent note then the duration of the previous note is assumed.",
+  "If the duration of the first note of the tune, or after a tempo change, isn't specified then the length of one beat at the current tempo is assumed.",
+  "If it isn't specified for any other note then the duration of the previous note is assumed.",
   "Its general syntax is:",
   "",
   "  {[@<milliseconds>] | [*<multiplier>] [/<divisor>]} [dots]",
