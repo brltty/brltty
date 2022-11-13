@@ -202,11 +202,6 @@ setDefaultDuration (TuneBuilder *tb, TuneNumber multiplier, TuneNumber divisor) 
   tb->duration.current = (60000 * multiplier) / (tb->tempo.current * divisor);
 }
 
-static void
-resetDefaultDuration (TuneBuilder *tb) {
-  setDefaultDuration(tb, 1, 1);
-}
-
 static int
 parseDuration (TuneBuilder *tb, const wchar_t **operand, int *duration) {
   if (**operand == '@') {
@@ -391,43 +386,39 @@ parseNote (TuneBuilder *tb, const wchar_t **operand, unsigned char *note) {
   if (**operand == 'r') {
     *operand += 1;
     noteNumber = 0;
+  } else if (**operand == 'm') {
+    *operand += 1;
+    TuneParameter parameter = tb->note;
+    if (!parseRequiredParameter(tb, &parameter, operand)) return 0;
+    noteNumber = parameter.current;
   } else {
-    int defaultAccidentals = 0;
+    unsigned char noteIndex;
+    if (!parseNoteLetter(&noteIndex, operand)) return 0;
 
-    if (**operand == 'm') {
-      *operand += 1;
-      TuneParameter parameter = tb->note;
-      if (!parseRequiredParameter(tb, &parameter, operand)) return 0;
-      noteNumber = parameter.current;
-    } else {
-      unsigned char noteIndex;
-      if (!parseNoteLetter(&noteIndex, operand)) return 0;
+    const wchar_t *octaveOperand = *operand;
+    TuneParameter octave = tb->octave;
+    if (!parseOptionalParameter(tb, &octave, operand)) return 0;
 
-      const wchar_t *octaveOperand = *operand;
-      TuneParameter octave = tb->octave;
-      if (!parseOptionalParameter(tb, &octave, operand)) return 0;
+    int octaveSpecified = *operand != octaveOperand;
+    if (octaveSpecified) octave.current += 1;
 
-      int octaveSpecified = *operand != octaveOperand;
-      if (octaveSpecified) octave.current += 1;
+    noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
+    int defaultAccidentals = tb->accidentals[noteIndex];
 
-      noteNumber = (octave.current * NOTES_PER_OCTAVE) + noteOffsets[noteIndex];
-      defaultAccidentals = tb->accidentals[noteIndex];
+    if (!octaveSpecified) {
+      int adjustOctave = 0;
+      TuneNumber previousNote = tb->note.current;
+      TuneNumber currentNote = noteNumber;
 
-      if (!octaveSpecified) {
-        int adjustOctave = 0;
-        TuneNumber previousNote = tb->note.current;
-        TuneNumber currentNote = noteNumber;
-
-        if (currentNote < previousNote) {
-          currentNote += NOTES_PER_OCTAVE;
-          if ((currentNote - previousNote) <= 3) adjustOctave = 1;
-        } else if (currentNote > previousNote) {
-          currentNote -= NOTES_PER_OCTAVE;
-          if ((previousNote - currentNote) <= 3) adjustOctave = 1;
-        }
-
-        if (adjustOctave) noteNumber = currentNote;
+      if (currentNote < previousNote) {
+        currentNote += NOTES_PER_OCTAVE;
+        if ((currentNote - previousNote) <= 3) adjustOctave = 1;
+      } else if (currentNote > previousNote) {
+        currentNote -= NOTES_PER_OCTAVE;
+        if ((previousNote - currentNote) <= 3) adjustOctave = 1;
       }
+
+      if (adjustOctave) noteNumber = currentNote;
     }
 
     tb->note.current = noteNumber;
@@ -466,19 +457,14 @@ parseNote (TuneBuilder *tb, const wchar_t **operand, unsigned char *note) {
       }
     }
 
-    {
-      const unsigned char lowestNote = getLowestNote();
-      const unsigned char highestNote = getHighestNote();
+    if (noteNumber < getLowestNote()) {
+      logSyntaxError(tb, "note too low");
+      return 0;
+    }
 
-      if (noteNumber < lowestNote) {
-        logSyntaxError(tb, "note too low");
-        return 0;
-      }
-
-      if (noteNumber > highestNote) {
-        logSyntaxError(tb, "note too high");
-        return 0;
-      }
+    if (noteNumber > getHighestNote()) {
+      logSyntaxError(tb, "note too high");
+      return 0;
     }
   }
 
@@ -530,7 +516,6 @@ parseCommand (TuneBuilder *tb, const wchar_t *operand) {
     case 't':
       operand += 1;
       if (!parseTempo(tb, &operand)) return 0;
-      resetDefaultDuration(tb);
       break;
 
     default:
@@ -652,7 +637,7 @@ resetTuneBuilder (TuneBuilder *tb) {
   setParameter(&tb->tempo, "tempo", 40, UINT8_MAX, (60 * 2));
 
   setAccidentals(tb, 0);
-  resetDefaultDuration(tb);
+  setDefaultDuration(tb, 1, 1);
   setDefaultOctave(tb);
 
   tb->source.text = WS_C("");
@@ -734,7 +719,8 @@ const char *const tuneBuilderUsageNotes[] = {
   "or an equal sign [=] for natural.",
   "More than one sharp or flat (+ or -) may be specified.",
   "",
-  "The duration initially defaults to the length of one beat at the default tempo.",
+  "If the duration of a ntoe isn't specified then the duration of the previous note is assumed.",
+  "If the duration of the first note isn't specified then the length of one beat at the default tempo is assumed.",
   "A duration may be specified in two ways:",
   "",
   "@<number>:",
@@ -745,7 +731,6 @@ const char *const tuneBuilderUsageNotes[] = {
   "The multiplier is a number prefixed with an asterisk [*] and must be within the range 1 through 16.",
   "The divisor is a number prefixed with a slash [/] and must be within the range 1 through 128.",
   "Both default to 1.",
-  "If this form is used then the default duration is also changed to the calculated value.",
   "",
   "Both ways of specifying the duration allow any number of dots [.] to be appended.",
   "These dots modify the duration of the note in the same way that adding dots to a note does in print (and braille) music.",
@@ -791,6 +776,5 @@ const char *const tuneBuilderUsageNotes[] = {
   "The t<number> command changes the tempo (speed).",
   "It's the number of beats per minute, and must be within the range 40 through 255.",
   "The initial tempo is 120 beats per minute.",
-  "This command also changes the default duration to the length of one beat at the new tempo.",
   NULL
 };
