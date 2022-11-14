@@ -247,6 +247,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Allemand (abrégé - standard 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Anglais</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Anglais (États-Unis)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Anglais (Braille anglais unifié, 1er degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Anglais (Braille anglais unifié, 2ème degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Anglais (EU, 2ème degré)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Espagnol (2ème degré)</string>
