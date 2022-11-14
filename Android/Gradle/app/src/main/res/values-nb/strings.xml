@@ -252,6 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de_2015">tysk (kortskrift - 2015-standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">engelsk</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">engelsk (USA)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">engelsk (enhetlig, fullskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">engelsk (enhetlig, kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">engelsk (Forente stater, kortskrift)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">spansk (kortskrift)</string>
