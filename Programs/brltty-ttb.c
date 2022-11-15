@@ -186,7 +186,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Report the characters within the current screen font that aren't defined within the text table.")
   },
 #endif /* HAVE_UNDEFINED_CHARACTERS_SUPPORT */
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static const BrlDotTable dotsInternal = {
   BRL_DOT_1, BRL_DOT_2, BRL_DOT_3, BRL_DOT_4,
@@ -2506,8 +2506,8 @@ main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-ttb",
 
       .usage = {

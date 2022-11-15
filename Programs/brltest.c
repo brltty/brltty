@@ -85,7 +85,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.setting = BRAILLE_DEVICE,
     .description = "Path to device for accessing braille display."
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 int
 main (int argc, char *argv[]) {
@@ -95,8 +95,8 @@ main (int argc, char *argv[]) {
   void *object;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltest",
 
       .usage = {

@@ -84,7 +84,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Name of MIDI instrument."
   },
 #endif /* HAVE_MIDI_SUPPORT */
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static void
 beginTuneStream (const char *name, void *data) {
@@ -150,8 +150,8 @@ main (int argc, char *argv[]) {
       "If it's read from a file then each line contains a command group.",
     END_USAGE_NOTES
 
-    const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-tune",
 
       .usage = {

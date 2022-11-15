@@ -35,15 +35,15 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory containing tables.")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 int
 main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-atb",
 
       .usage = {

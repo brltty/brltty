@@ -36,7 +36,7 @@
 #include "ctb_internal.h"
 
 BEGIN_OPTION_TABLE(programOptions)
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 typedef struct {
   void *object;
@@ -207,8 +207,8 @@ main (int argc, char *argv[]) {
   char *path;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "tbl2hex",
 
       .usage = {

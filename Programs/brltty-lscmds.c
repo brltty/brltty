@@ -28,7 +28,7 @@
 #include "cmd.h"
 
 BEGIN_OPTION_TABLE(programOptions)
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static void
 writeCharacter (char character) {
@@ -246,8 +246,8 @@ putCommandIndex (void) {
 int
 main (int argc, char *argv[]) {
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-lscmds",
 
       .usage = {

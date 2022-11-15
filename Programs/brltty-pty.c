@@ -121,7 +121,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_logUnexpected,
     .description = strtext("log unexpected input/output")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static void writeDriverDirective (const char *format, ...) PRINTF(1, 2);
 
@@ -385,8 +385,8 @@ main (int argc, char *argv[]) {
   PtyObject *pty;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-pty",
 
       .usage = {

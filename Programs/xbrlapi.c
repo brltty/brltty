@@ -118,7 +118,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &verbose,
     .description = strtext("Write debugging output to stdout")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 /******************************************************************************
  * error handling
@@ -1035,8 +1035,8 @@ static void term_handler(int foo) {
 int
 main (int argc, char *argv[]) {
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "xbrlapi",
 
       .usage = {

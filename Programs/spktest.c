@@ -78,7 +78,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_pcmDevice,
     .description = "Digital audio soundcard device specifier."
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static int
 say (SpeechSynthesizer *spk, const char *string) {
@@ -108,8 +108,8 @@ main (int argc, char *argv[]) {
   int speechRate = SPK_RATE_DEFAULT;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "spktest",
 
       .usage = {

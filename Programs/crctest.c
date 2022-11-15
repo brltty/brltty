@@ -103,7 +103,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_residue,
     .description = "the residue"
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static int
 validateOptions (void) {
@@ -113,8 +113,8 @@ validateOptions (void) {
 int
 main (int argc, char *argv[]) {
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "crctest",
 
       .usage = {

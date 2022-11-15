@@ -43,8 +43,7 @@
 #endif /* HAVE_GETOPT_H */
 
 typedef struct {
-  const OptionEntry *const optionTable;
-  unsigned int const optionCount;
+  const OptionsDescriptor *const options;
   uint8_t *const ensuredSettings;
 
   uint8_t exitImmediately:1;
@@ -62,7 +61,7 @@ getEnsuredSetting (
   const OptionProcessingInformation *info,
   const OptionEntry *option
 ) {
-  return &info->ensuredSettings[option - info->optionTable];
+  return &info->ensuredSettings[option - info->options->table];
 }
 
 static void
@@ -264,8 +263,8 @@ showOptions (
   unsigned int wordWidth = 0;
   unsigned int argumentWidth = 0;
 
-  for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
-    const OptionEntry *option = &info->optionTable[optionIndex];
+  for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
+    const OptionEntry *option = &info->options->table[optionIndex];
     if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
     foundOption = 1;
 
@@ -282,8 +281,8 @@ showOptions (
   if (foundOption) {
     fprintf(stream, "\n%s:\n", gettext("Options"));
 
-    for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
-      const OptionEntry *option = &info->optionTable[optionIndex];
+    for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
+      const OptionEntry *option = &info->options->table[optionIndex];
       if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
 
       unsigned int lineLength = 0;
@@ -396,14 +395,14 @@ processCommandLine (
   int resetLetter;
 
   const int firstNonLetter = 0X80;
-  const OptionEntry *optionEntries[firstNonLetter + info->optionCount];
+  const OptionEntry *optionEntries[firstNonLetter + info->options->count];
 
   for (unsigned int index=0; index<ARRAY_COUNT(optionEntries); index+=1) {
     optionEntries[index] = NULL;
   }
 
-  int optionLetters[info->optionCount];
-  char shortOptions[2 + (info->optionCount * 2) + 1];
+  int optionLetters[info->options->count];
+  char shortOptions[2 + (info->options->count * 2) + 1];
 
   {
     int nextNonLetter = firstNonLetter;
@@ -412,8 +411,8 @@ processCommandLine (
     *opt++ = '+';
     *opt++ = ':';
 
-    for (unsigned int index=0; index<info->optionCount; index+=1) {
-      const OptionEntry *entry = &info->optionTable[index];
+    for (unsigned int index=0; index<info->options->count; index+=1) {
+      const OptionEntry *entry = &info->options->table[index];
       int letter = entry->letter;
 
       if (letter) {
@@ -441,13 +440,13 @@ processCommandLine (
   }
 
 #ifdef HAVE_GETOPT_LONG
-  struct option longOptions[(info->optionCount * 2) + 1];
+  struct option longOptions[(info->options->count * 2) + 1];
 
   {
     struct option *opt = longOptions;
 
-    for (unsigned int index=0; index<info->optionCount; index+=1) {
-      const OptionEntry *entry = &info->optionTable[index];
+    for (unsigned int index=0; index<info->options->count; index+=1) {
+      const OptionEntry *entry = &info->options->table[index];
       const char *word = entry->word;
       if (!word) continue;
       int letter = optionLetters[index];
@@ -536,8 +535,8 @@ processCommandLine (
           } else {
             option = -1;
 
-            for (unsigned int index=0; index<info->optionCount; index+=1) {
-              entry = &info->optionTable[index];
+            for (unsigned int index=0; index<info->options->count; index+=1) {
+              entry = &info->options->table[index];
               const char *word = entry->word;
 
               if (word) {
@@ -706,7 +705,7 @@ processCommandLine (
       }
     }
 
-    showSyntax(usageStream, !!info->optionCount, usage->parameters);
+    showSyntax(usageStream, !!info->options->count, usage->parameters);
     showOptions(usageStream, line, width, info, optHelpAll);
 
     {
@@ -751,8 +750,8 @@ processBootParameters (
     int parameterCount = 0;
     char **parameters = splitString(value, ',', &parameterCount);
 
-    for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
-      const OptionEntry *option = &info->optionTable[optionIndex];
+    for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
+      const OptionEntry *option = &info->options->table[optionIndex];
 
       if ((option->bootParameter) && (option->bootParameter <= parameterCount)) {
         char *parameter = parameters[option->bootParameter-1];
@@ -824,8 +823,8 @@ processEnvironmentVariables (
   OptionProcessingInformation *info,
   const char *prefix
 ) {
-  for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
-    const OptionEntry *option = &info->optionTable[optionIndex];
+  for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
+    const OptionEntry *option = &info->options->table[optionIndex];
 
     if (!processEnvironmentVariable(info, option, prefix)) return 0;
   }
@@ -838,8 +837,8 @@ processInternalSettings (
   OptionProcessingInformation *info,
   int config
 ) {
-  for (unsigned int optionIndex=0; optionIndex<info->optionCount; optionIndex+=1) {
-    const OptionEntry *option = &info->optionTable[optionIndex];
+  for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
+    const OptionEntry *option = &info->options->table[optionIndex];
 
     if (!(option->flags & OPT_Config) == !config) {
       const char *setting = option->internal.setting;
@@ -913,7 +912,7 @@ processConfigurationDirective (
   const ConfigurationDirective *directive = findConfigurationDirective(keyword, conf);
 
   if (directive) {
-    const OptionEntry *option = &conf->info->optionTable[directive->option];
+    const OptionEntry *option = &conf->info->options->table[directive->option];
     char **setting = &conf->settings[directive->option];
 
     if (*setting && !hasExtendableArgument(option)) {
@@ -1021,8 +1020,8 @@ freeConfigurationDirectives (ConfigurationFileProcessingData *conf) {
 
 static int
 addConfigurationDirectives (ConfigurationFileProcessingData *conf) {
-  for (unsigned int optionIndex=0; optionIndex<conf->info->optionCount; optionIndex+=1) {
-    const OptionEntry *option = &conf->info->optionTable[optionIndex];
+  for (unsigned int optionIndex=0; optionIndex<conf->info->options->count; optionIndex+=1) {
+    const OptionEntry *option = &conf->info->options->table[optionIndex];
 
     if ((option->flags & OPT_Config) && option->word) {
       ConfigurationDirective *directive;
@@ -1064,8 +1063,8 @@ processConfigurationFile (
     FILE *file = openDataFile(path, "r", optional);
 
     if (file) {
-      char *settings[info->optionCount];
-      ConfigurationDirective *directives[info->optionCount];
+      char *settings[info->options->count];
+      ConfigurationDirective *directives[info->options->count];
 
       ConfigurationFileProcessingData conf = {
         .info = info,
@@ -1080,7 +1079,7 @@ processConfigurationFile (
       if (addConfigurationDirectives(&conf)) {
         int processed;
 
-        for (unsigned int index=0; index<info->optionCount; index+=1) {
+        for (unsigned int index=0; index<info->options->count; index+=1) {
           conf.settings[index] = NULL;
         }
 
@@ -1093,11 +1092,11 @@ processConfigurationFile (
           processed = processDataStream(NULL, file, path, &dataFileParameters);
         }
 
-        for (unsigned int index=0; index<info->optionCount; index+=1) {
+        for (unsigned int index=0; index<info->options->count; index+=1) {
           char *setting = conf.settings[index];
 
           if (setting) {
-            ensureSetting(info, &info->optionTable[index], setting);
+            ensureSetting(info, &info->options->table[index], setting);
             free(setting);
           }
         }
@@ -1118,19 +1117,15 @@ processConfigurationFile (
 }
 
 void
-resetOptions (const OptionsDescriptor *descriptor) {
-  unsigned int optionIndex = 0;
-
-  for (optionIndex=0; optionIndex<descriptor->optionCount; optionIndex+=1) {
-    const OptionEntry *option = &descriptor->optionTable[optionIndex];
+resetOptions (const OptionsDescriptor *options) {
+  for (unsigned int index=0; index<options->count; index+=1) {
+    const OptionEntry *option = &options->table[index];
 
     if (option->argument) {
       char **string = option->setting.string;
-
       if (string) changeStringSetting(string, NULL);
     } else {
       int *flag = option->setting.flag;
-
       if (flag) *flag = 0;
     }
   }
@@ -1138,19 +1133,17 @@ resetOptions (const OptionsDescriptor *descriptor) {
 
 static void
 exitOptions (void *data) {
-  const OptionsDescriptor *descriptor = data;
-
-  resetOptions(descriptor);
+  const OptionsDescriptor *options = data;
+  resetOptions(options);
 }
 
 ProgramExitStatus
-processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
-  uint8_t ensuredSettings[descriptor->optionCount];
+processOptions (const CommandLineDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
+  uint8_t ensuredSettings[descriptor->options->count];
   memset(ensuredSettings, 0, sizeof(ensuredSettings));
 
   OptionProcessingInformation info = {
-    .optionTable = descriptor->optionTable,
-    .optionCount = descriptor->optionCount,
+    .options = descriptor->options,
     .ensuredSettings = ensuredSettings,
 
     .exitImmediately = 0,
@@ -1158,7 +1151,7 @@ processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char **
     .syntaxError = 0
   };
 
-  onProgramExit("options", exitOptions, (void *)descriptor);
+  onProgramExit("options", exitOptions, (void *)descriptor->options);
   beginProgram(*argumentCount, *argumentVector);
   processCommandLine(&info, argumentCount, argumentVector, &descriptor->usage);
 

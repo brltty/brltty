@@ -66,7 +66,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_removeNewline,
     .description = "Remove a trailing newline."
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static const brlapi_param_t apiParameter = BRLAPI_PARAM_CLIPBOARD_CONTENT;
 static const brlapi_param_subparam_t apiSubparam = 0;
@@ -146,8 +146,8 @@ main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-clip",
 
       .usage = {

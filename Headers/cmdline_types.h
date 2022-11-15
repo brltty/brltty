@@ -25,6 +25,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define FLAG_TRUE_WORD "on"
+#define FLAG_FALSE_WORD "off"
+
 typedef enum {
   OPT_Hidden	= 0X01,
   OPT_Extend	= 0X02,
@@ -32,9 +35,6 @@ typedef enum {
   OPT_EnvVar	= 0X08,
   OPT_Format  	= 0X10
 } OptionFlag;
-
-#define FLAG_TRUE_WORD "on"
-#define FLAG_FALSE_WORD "off"
 
 typedef struct {
   const char *word;
@@ -61,6 +61,11 @@ typedef struct {
   } strings;
 } OptionEntry;
 
+typedef struct {
+  const OptionEntry *table;
+  size_t count;
+} OptionsDescriptor;
+
 #define BEGIN_OPTION_TABLE(name) \
 static const OptionEntry name[] = { \
   { .word = "help", \
@@ -71,13 +76,34 @@ static const OptionEntry name[] = { \
     .letter = 'H', \
     .description = strtext("Show a usage summary that contains all of the options, and then exit.") \
   },
-#define END_OPTION_TABLE };
-#define OPTION_TABLE(name) .optionTable = name, .optionCount = ARRAY_COUNT(name)
+
+#define END_OPTION_TABLE(name) }; \
+  static const OptionsDescriptor name##Descriptor = { \
+    .table = name, \
+    .count = ARRAY_COUNT(name), \
+  };
 
 #define DECLARE_USAGE_NOTES(name) const char *const name[]
 #define BEGIN_USAGE_NOTES(name) DECLARE_USAGE_NOTES(name) = {
 #define END_USAGE_NOTES NULL};
 #define USAGE_NOTES(...) (const char *const *const []){__VA_ARGS__, NULL}
+
+typedef struct {
+  const char *purpose;
+  const char *parameters;
+  const char *const *const *notes;
+} UsageDescriptor;
+
+typedef struct {
+  const OptionsDescriptor *options;
+
+  int *doBootParameters;
+  int *doEnvironmentVariables;
+  char **configurationFile;
+
+  const char *applicationName;
+  const UsageDescriptor usage;
+} CommandLineDescriptor;
 
 #ifdef __cplusplus
 }

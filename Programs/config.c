@@ -774,7 +774,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_version,
     .description = strtext("Log the versions of the core, API, and built-in drivers, and then exit.")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 int
 changeLogLevel (const char *operand) {
@@ -852,8 +852,8 @@ establishPrivileges (void) {
 ProgramExitStatus
 brlttyPrepare (int argc, char *argv[]) {
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .doBootParameters = &opt_bootParameters,
       .doEnvironmentVariables = &opt_environmentVariables,
       .configurationFile = &opt_configurationFile,

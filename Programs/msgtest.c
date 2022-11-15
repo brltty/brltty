@@ -64,7 +64,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_utf8Output,
     .description = strtext("write the translations using UTF-8")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static int
 noOutputErrorYet (void) {
@@ -243,8 +243,8 @@ main (int argc, char *argv[]) {
   outputStream = stdout;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "msgtest",
 
       .usage = {

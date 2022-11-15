@@ -41,7 +41,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.setting = DEFAULT_OUTPUT_FORMAT,
     .description = strtext("The format of each output line.")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static void
 onFormatError (void) {
@@ -228,8 +228,8 @@ main (int argc, char *argv[]) {
       "  \\\\  literal backslasha  ",
     END_USAGE_NOTES
 
-    const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-cldr",
 
       .usage = {

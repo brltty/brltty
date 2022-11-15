@@ -82,7 +82,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_boxHeight,
     .description = "Height of region."
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static int
 setRegion (
@@ -130,8 +130,8 @@ main (int argc, char *argv[]) {
   void *driverObject;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "scrtest",
 
       .usage = {

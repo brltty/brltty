@@ -90,7 +90,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory for loading drivers.")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static void *driverObject;
 
@@ -284,8 +284,8 @@ main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_SUCCESS;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-ktb",
 
       .usage = {

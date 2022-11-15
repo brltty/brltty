@@ -95,7 +95,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_forceOutput,
     .description = strtext("Force immediate output.")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static wchar_t *inputBuffer;
 static size_t inputSize;
@@ -441,8 +441,8 @@ main (int argc, char *argv[]) {
   prefs.expandCurrentWord = 0;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-ctb",
 
       .usage = {

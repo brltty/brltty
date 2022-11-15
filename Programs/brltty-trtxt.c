@@ -78,7 +78,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_noBaseCharacters,
     .description = strtext("Don't fall back to the Unicode base character.")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static TextTable *inputTable;
 static TextTable *outputTable;
@@ -231,8 +231,8 @@ main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus = PROG_EXIT_FATAL;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-trtxt",
 
       .usage = {

@@ -28,7 +28,7 @@
 #include "file.h"
 
 BEGIN_OPTION_TABLE(programOptions)
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static void
 noMemory (void) {
@@ -87,8 +87,8 @@ main (int argc, char *argv[]) {
   ProgramExitStatus exitStatus;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-lsinc",
 
       .usage = {

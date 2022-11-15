@@ -209,7 +209,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_inputTimeout,
     .description = strtext("The input timeout (in seconds).")
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static FILE *outputStream;
 static int outputError;
@@ -1058,8 +1058,8 @@ main (int argc, char *argv[]) {
       "The first byte is the report number - specify 00 for no report number.",
     END_USAGE_NOTES
 
-    const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-hid",
 
       .usage = {

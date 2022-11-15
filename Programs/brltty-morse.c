@@ -107,7 +107,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Name of MIDI instrument."
   },
 #endif /* HAVE_MIDI_SUPPORT */
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static
 DATA_OPERANDS_PROCESSOR(processMorseLine) {
@@ -130,8 +130,8 @@ exitMorseObject (void *data) {
 int
 main (int argc, char *argv[]) {
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "brltty-morse",
 
       .usage = {

@@ -27,26 +27,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-  const char *purpose;
-  const char *parameters;
-  const char *const *const *notes;
-} UsageDescriptor;
-
-typedef struct {
-  const OptionEntry *optionTable;
-  unsigned int optionCount;
-
-  int *doBootParameters;
-  int *doEnvironmentVariables;
-  char **configurationFile;
-
-  const char *applicationName;
-  const UsageDescriptor usage;
-} OptionsDescriptor;
-
 extern ProgramExitStatus processOptions (
-  const OptionsDescriptor *descriptor,
+  const CommandLineDescriptor *descriptor,
   int *argumentCount, char ***argumentVector
 );
 
@@ -56,7 +38,7 @@ extern ProgramExitStatus processOptions (
   if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus; \
 }
 
-extern void resetOptions (const OptionsDescriptor *descriptor);
+extern void resetOptions (const OptionsDescriptor *options);
 
 typedef struct {
   void (*beginStream) (const char *name, void *data);

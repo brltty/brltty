@@ -123,7 +123,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_auth,
     .description = "BrlAPI authorization/authentication schemes."
   },
-END_OPTION_TABLE
+END_OPTION_TABLE(programOptions)
 
 static void showDisplaySize(void)
 {
@@ -473,8 +473,8 @@ main (int argc, char *argv[]) {
   brlapi_fileDescriptor fd;
 
   {
-    static const OptionsDescriptor descriptor = {
-      OPTION_TABLE(programOptions),
+    const CommandLineDescriptor descriptor = {
+      .options = &programOptionsDescriptor,
       .applicationName = "apitest",
 
       .usage = {
