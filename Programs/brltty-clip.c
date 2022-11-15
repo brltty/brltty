@@ -22,7 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
-#include "options.h"
+#include "cmdline.h"
 #include "datafile.h"
 #include "utf8.h"
 #include "brlapi.h"

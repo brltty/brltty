@@ -24,7 +24,7 @@
 
 #include "log.h"
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "file.h"
 
 BEGIN_OPTION_TABLE(programOptions)

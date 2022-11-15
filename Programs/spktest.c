@@ -27,7 +27,7 @@
 #include <errno.h>
 
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "log.h"
 #include "spk.h"
 #include "file.h"

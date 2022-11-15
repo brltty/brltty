@@ -22,7 +22,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "options.h"
+#include "cmdline.h"
 #include "log.h"
 #include "file.h"
 

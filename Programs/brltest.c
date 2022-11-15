@@ -24,7 +24,7 @@
 #include <errno.h>
 
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "parameters.h"
 #include "log.h"
 #include "parse.h"

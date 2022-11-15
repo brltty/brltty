@@ -59,7 +59,7 @@
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
 
-#include "options.h"
+#include "cmdline.h"
 
 #define debugf(fmt, ...) do { if (verbose) fprintf(stderr, fmt, ## __VA_ARGS__); } while (0)
 

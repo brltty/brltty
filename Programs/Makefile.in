@@ -74,8 +74,8 @@ $(SERVICE_OBJECT).$O:
 
 ###############################################################################
 
-options.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/options.c
+cmdline.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/cmdline.c
 
 $(PARAMS_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(PARAMS_INCLUDES) -c $(SRC_DIR)/$(PARAMS_OBJECT).c

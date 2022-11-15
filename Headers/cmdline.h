@@ -16,64 +16,16 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_OPTIONS
-#define BRLTTY_INCLUDED_OPTIONS
+#ifndef BRLTTY_INCLUDED_CMDLINE
+#define BRLTTY_INCLUDED_CMDLINE
 
-#include "strfmth.h"
+#include "cmdline_types.h"
 #include "program.h"
 #include "datafile.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef enum {
-  OPT_Hidden	= 0X01,
-  OPT_Extend	= 0X02,
-  OPT_Config	= 0X04,
-  OPT_EnvVar	= 0X08,
-  OPT_Format  	= 0X10
-} OptionFlag;
-
-#define FLAG_TRUE_WORD "on"
-#define FLAG_FALSE_WORD "off"
-
-typedef struct {
-  const char *word;
-  const char *argument;
-  const char *description;
-
-  struct {
-    const char *setting;
-    int (*adjust) (char **setting);
-  } internal;
-
-  unsigned char letter;
-  unsigned char bootParameter;
-  unsigned char flags;
-
-  union {
-    int *flag;
-    char **string;
-  } setting;
-
-  union {
-    const char *const *array;
-    STR_DECLARE_FORMATTER((*format), unsigned int index);
-  } strings;
-} OptionEntry;
-
-#define BEGIN_OPTION_TABLE(name) \
-static const OptionEntry name[] = { \
-  { .word = "help", \
-    .letter = 'h', \
-    .description = strtext("Show a usage summary that only contains commonly used options, and then exit.") \
-  }, \
-  { .word = "full-help", \
-    .letter = 'H', \
-    .description = strtext("Show a usage summary that contains all of the options, and then exit.") \
-  },
-#define END_OPTION_TABLE };
 
 typedef struct {
   const char *purpose;
@@ -92,8 +44,6 @@ typedef struct {
   const char *applicationName;
   const UsageDescriptor usage;
 } OptionsDescriptor;
-
-#define OPTION_TABLE(name) .optionTable = name, .optionCount = ARRAY_COUNT(name)
 
 extern ProgramExitStatus processOptions (
   const OptionsDescriptor *descriptor,
@@ -123,4 +73,4 @@ extern ProgramExitStatus processInputFiles (
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_OPTIONS */
+#endif /* BRLTTY_INCLUDED_CMDLINE */

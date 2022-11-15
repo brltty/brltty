@@ -31,7 +31,7 @@
 #include <sys/wait.h>
 
 #include "log.h"
-#include "options.h"
+#include "cmdline.h"
 #include "pty_object.h"
 #include "pty_terminal.h"
 #include "parse.h"

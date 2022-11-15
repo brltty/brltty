@@ -26,7 +26,7 @@
 #include "log.h"
 #include "strfmt.h"
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "file.h"
 #include "get_select.h"
 #include "brl_dots.h"

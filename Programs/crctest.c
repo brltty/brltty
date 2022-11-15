@@ -19,7 +19,7 @@
 #include "prologue.h"
 
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "crc.h"
 
 static char *opt_algorithmName;

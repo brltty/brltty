@@ -24,7 +24,7 @@
 #include <ctype.h>
 
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "log.h"
 #include "parse.h"
 #include "scr.h"

@@ -24,7 +24,7 @@
 #include <errno.h>
 
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "log.h"
 #include "strfmt.h"
 #include "parse.h"
@@ -1051,13 +1051,12 @@ performActions (HidDevice *device) {
 int
 main (int argc, char *argv[]) {
   {
-    static const char *const usageNotes[] = {
+    static BEGIN_USAGE_NOTES(usageNotes)
       "When writing a report or feature, the bytes don't need to be, but can be, separated from one another by whitespace.",
       "Each byte is either two hexadecimal digits or zero or more braille dot numbers within [square brackets].",
       "A byte may optionally be followed by an asterisk [*] and a decimal count - if not specified, 1 is assumed.",
       "The first byte is the report number - specify 00 for no report number.",
-      NULL
-    };
+    END_USAGE_NOTES
 
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
@@ -1065,7 +1064,7 @@ main (int argc, char *argv[]) {
 
       .usage = {
         .purpose = strtext("Find HID devices, list report descriptors, read/write reports/features, or monitor input from a HID device."),
-        .notes = usageNotes,
+        .notes = USAGE_NOTES(usageNotes),
       }
     };
 

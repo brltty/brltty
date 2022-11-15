@@ -29,7 +29,7 @@
 #include <pthread.h>
 #endif
 
-#include "options.h"
+#include "cmdline.h"
 #include "pid.h"
 #include "brl_cmds.h"
 #include "brl_dots.h"

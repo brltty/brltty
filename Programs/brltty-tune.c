@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "options.h"
+#include "cmdline.h"
 #include "prefs.h"
 #include "tune_utils.h"
 #include "tune_builder.h"
@@ -152,7 +152,7 @@ main (int argc, char *argv[]) {
       .usage = {
         .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
         .parameters = "commands ... | -f [{file | -} ...]",
-        .notes = tuneBuilderUsageNotes,
+        .notes = USAGE_NOTES(tuneBuilderUsageNotes),
       }
     };
 

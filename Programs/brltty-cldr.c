@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "log.h"
 #include "cldr.h"
 #include "datafile.h"
@@ -203,7 +203,7 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
 int
 main (int argc, char *argv[]) {
   {
-    static const char *const usageNotes[] = {
+    static BEGIN_USAGE_NOTES(usageNotes)
       "The output format is printf-like -",
       "arbitrary text which may contain",
       "field specifiers (introduced via a percent sign [%])",
@@ -226,8 +226,7 @@ main (int argc, char *argv[]) {
       "  \\t  horizontal tab",
       "  \\v  vertical tab",
       "  \\\\  literal backslasha  ",
-      NULL
-    };
+    END_USAGE_NOTES
 
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
@@ -236,7 +235,7 @@ main (int argc, char *argv[]) {
       .usage = {
         .purpose = strtext("List the characters defined within a CLDR (Common Locale Data Repository Project) annotations file."),
         .parameters = "input-file",
-        .notes = usageNotes,
+        .notes = USAGE_NOTES(usageNotes),
       }
     };
 

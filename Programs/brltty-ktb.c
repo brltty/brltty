@@ -22,7 +22,7 @@
 #include <string.h>
 
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "log.h"
 #include "file.h"
 #include "parse.h"

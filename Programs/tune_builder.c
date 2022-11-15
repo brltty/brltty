@@ -670,7 +670,7 @@ destroyTuneBuilder (TuneBuilder *tb) {
   free(tb);
 }
 
-const char *const tuneBuilderUsageNotes[] = {
+BEGIN_USAGE_NOTES(tuneBuilderUsageNotes)
   "If the tune is specified on the command line then each argument contains a command group.",
   "If it's read from a file then each line contains a command group.",
   "A command group is zero or more commands separated from one another by whitespace.",
@@ -776,5 +776,4 @@ const char *const tuneBuilderUsageNotes[] = {
   "The t<number> command changes the tempo (speed).",
   "It's the number of beats per minute, and must be within the range 40 through 255.",
   "The initial tempo is 120 beats per minute.",
-  NULL
-};
+END_USAGE_NOTES

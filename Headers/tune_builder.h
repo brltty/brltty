@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_TUNE_BUILDER
 
 #include "tune.h"
+#include "cmdline_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,7 +35,7 @@ typedef enum {
 } TuneStatus;
 
 typedef struct TuneBuilderStruct TuneBuilder;
-extern const char *const tuneBuilderUsageNotes[];
+extern DECLARE_USAGE_NOTES(tuneBuilderUsageNotes);
 
 extern TuneBuilder *newTuneBuilder (void);
 extern void resetTuneBuilder (TuneBuilder *tune);

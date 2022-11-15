@@ -24,7 +24,7 @@
 
 #include "log.h"
 #include "program.h"
-#include "options.h"
+#include "cmdline.h"
 #include "messages.h"
 #include "parse.h"
 #include "file.h"

@@ -68,7 +68,7 @@
 #include "messages.h"
 #include "revision.h"
 #include "service.h"
-#include "options.h"
+#include "cmdline.h"
 #include "profile_types.h"
 #include "brl_input.h"
 #include "cmd_queue.h"
