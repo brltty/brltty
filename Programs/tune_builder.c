@@ -54,6 +54,9 @@ struct TuneBuilderStruct {
   TuneParameter percentage;
   TuneParameter tempo;
 
+  TuneNumber durationMultiplier;
+  TuneNumber durationDivisor;
+
   struct {
     const wchar_t *text;
     const char *name;
@@ -198,8 +201,8 @@ parseTempo (TuneBuilder *tb, const wchar_t **operand) {
 }
 
 static void
-setDefaultDuration (TuneBuilder *tb, TuneNumber multiplier, TuneNumber divisor) {
-  tb->duration.current = (60000 * multiplier) / (tb->tempo.current * divisor);
+setCurrentDuration (TuneBuilder *tb) {
+  tb->duration.current = (60000 * tb->durationMultiplier) / (tb->tempo.current * tb->durationDivisor);
 }
 
 static int
@@ -233,7 +236,13 @@ parseDuration (TuneBuilder *tb, const wchar_t **operand, int *duration) {
       divisor = 1;
     }
 
-    if (*operand != durationOperand) setDefaultDuration(tb, multiplier, divisor);
+    if (*operand != durationOperand) {
+      tb->durationMultiplier = multiplier;
+      tb->durationDivisor = divisor;
+      tb->duration.current = 0;
+    }
+
+    if (!tb->duration.current) setCurrentDuration(tb);
   }
   *duration = tb->duration.current;
 
@@ -255,7 +264,7 @@ toOctave (TuneNumber note) {
 }
 
 static void
-setDefaultOctave (TuneBuilder *tb) {
+setCurrentOctave (TuneBuilder *tb) {
   tb->octave.current = toOctave(tb->note.current);
 }
 
@@ -422,7 +431,7 @@ parseNote (TuneBuilder *tb, const wchar_t **operand, unsigned char *note) {
     }
 
     tb->note.current = noteNumber;
-    setDefaultOctave(tb);
+    setCurrentOctave(tb);
 
     {
       wchar_t accidental = **operand;
@@ -636,9 +645,11 @@ resetTuneBuilder (TuneBuilder *tb) {
   setParameter(&tb->percentage, "percentage", 1, 100, 80);
   setParameter(&tb->tempo, "tempo", 40, UINT8_MAX, (60 * 2));
 
+  tb->durationMultiplier = 1;
+  tb->durationDivisor = 1;
+
   setAccidentals(tb, 0);
-  setDefaultDuration(tb, 1, 1);
-  setDefaultOctave(tb);
+  setCurrentOctave(tb);
 
   tb->source.text = WS_C("");
   tb->source.name = "";

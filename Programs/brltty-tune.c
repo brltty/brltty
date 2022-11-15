@@ -148,6 +148,7 @@ main (int argc, char *argv[]) {
     static BEGIN_USAGE_NOTES(usageNotes)
       "If the tune is specified on the command line then each argument contains a command group.",
       "If it's read from a file then each line contains a command group.",
+      "Each specified file contains a different tune.",
     END_USAGE_NOTES
 
     const CommandLineDescriptor descriptor = {
