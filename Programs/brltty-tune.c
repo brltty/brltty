@@ -145,14 +145,19 @@ DATA_OPERANDS_PROCESSOR(processTuneLine) {
 int
 main (int argc, char *argv[]) {
   {
-    static const OptionsDescriptor descriptor = {
+    static BEGIN_USAGE_NOTES(usageNotes)
+      "If the tune is specified on the command line then each argument contains a command group.",
+      "If it's read from a file then each line contains a command group.",
+    END_USAGE_NOTES
+
+    const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-tune",
 
       .usage = {
         .purpose = strtext("Compose a tune with the tune builder and play it with the tone generator."),
         .parameters = "commands ... | -f [{file | -} ...]",
-        .notes = USAGE_NOTES(tuneBuilderUsageNotes),
+        .notes = USAGE_NOTES(usageNotes, tuneBuilderUsageNotes),
       }
     };
 

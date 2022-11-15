@@ -671,8 +671,6 @@ destroyTuneBuilder (TuneBuilder *tb) {
 }
 
 BEGIN_USAGE_NOTES(tuneBuilderUsageNotes)
-  "If the tune is specified on the command line then each argument contains a command group.",
-  "If it's read from a file then each line contains a command group.",
   "A command group is zero or more commands separated from one another by whitespace.",
   "A number sign [#] at the beginning or after whitespace begins a comment.",
   "",

@@ -1058,7 +1058,7 @@ main (int argc, char *argv[]) {
       "The first byte is the report number - specify 00 for no report number.",
     END_USAGE_NOTES
 
-    static const OptionsDescriptor descriptor = {
+    const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-hid",
 

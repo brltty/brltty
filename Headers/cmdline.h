@@ -30,7 +30,7 @@ extern "C" {
 typedef struct {
   const char *purpose;
   const char *parameters;
-  const char *const *notes;
+  const char *const *const *notes;
 } UsageDescriptor;
 
 typedef struct {

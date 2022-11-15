@@ -77,7 +77,7 @@ static const OptionEntry name[] = { \
 #define DECLARE_USAGE_NOTES(name) const char *const name[]
 #define BEGIN_USAGE_NOTES(name) DECLARE_USAGE_NOTES(name) = {
 #define END_USAGE_NOTES NULL};
-#define USAGE_NOTES(name) name
+#define USAGE_NOTES(...) (const char *const *const []){__VA_ARGS__, NULL}
 
 #ifdef __cplusplus
 }

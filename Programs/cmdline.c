@@ -169,59 +169,68 @@ showWrappedText (
 
 static void
 showFormattedLines (
-  FILE *stream, const char *const chunks[],
+  FILE *stream, const char *const *const *blocks,
   char *line, int width
 ) {
-  const char *const *chunk = chunks;
+  const char *const *const *block = blocks;
 
   char *paragraphText = NULL;
   size_t paragraphSize = 0;
   size_t paragraphLength = 0;
 
-  while (1) {
-    const char *text = *chunk;
-    if (!text) break;
-    text = gettext(text);
+  while (*block) {
+    const char *const *chunk = *block++;
+    if (!*chunk) continue;
 
-    if (*text && !iswspace(*text)) {
-      size_t textLength = strlen(text);
+    while (1) {
+      const char *text = *chunk;
+      if (!text) break;
+      text = gettext(text);
 
-      size_t newLength = paragraphLength + textLength + 1;
-      int extending = !!paragraphLength;
-      if (extending) newLength += 1;
+      if (*text && !iswspace(*text)) {
+        size_t textLength = strlen(text);
 
-      if (newLength > paragraphSize) {
-        size_t newSize = newLength;
-        char *newText = realloc(paragraphText, newSize);
+        size_t newLength = paragraphLength + textLength + 1;
+        int extending = !!paragraphLength;
+        if (extending) newLength += 1;
 
-        if (!newText) {
-          logMallocError();
-          break;
+        if (newLength > paragraphSize) {
+          size_t newSize = (newLength | 0XFF) + 1;
+          char *newText = realloc(paragraphText, newSize);
+
+          if (!newText) {
+            logMallocError();
+            goto done;
+          }
+
+          paragraphText = newText;
+          paragraphSize = newSize;
         }
 
-        paragraphText = newText;
-        paragraphSize = newSize;
+        if (extending) paragraphText[paragraphLength++] = ' ';
+        memcpy(&paragraphText[paragraphLength], text, textLength);
+        paragraphText[paragraphLength += textLength] = 0;
+      } else {
+        if (paragraphLength) {
+          showWrappedText(stream, paragraphText, line, 0, width);
+          paragraphLength = 0;
+        }
+
+        fprintf(stream, "%s\n", text);
       }
 
-      if (extending) paragraphText[paragraphLength++] = ' ';
-      memcpy(&paragraphText[paragraphLength], text, textLength);
-      paragraphText[paragraphLength += textLength] = 0;
-    } else {
-      if (paragraphLength) {
-        showWrappedText(stream, paragraphText, line, 0, width);
-        paragraphLength = 0;
-      }
-
-      fprintf(stream, "%s\n", text);
+      chunk += 1;
     }
 
-    chunk += 1;
+    if (paragraphLength) {
+      showWrappedText(stream, paragraphText, line, 0, width);
+      paragraphLength = 0;
+    }
+
+    if (*block) fputc('\n', stream);
   }
 
-  if (paragraphLength) {
-    showWrappedText(stream, paragraphText, line, 0, width);
-  }
-
+done:
   if (paragraphText) free(paragraphText);
 }
 
@@ -701,7 +710,7 @@ processCommandLine (
     showOptions(usageStream, line, width, info, optHelpAll);
 
     {
-      const char *const *notes = usage->notes;
+      const char *const *const *notes = usage->notes;
 
       if (notes && *notes) {
         fputc('\n', usageStream);

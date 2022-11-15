@@ -228,7 +228,7 @@ main (int argc, char *argv[]) {
       "  \\\\  literal backslasha  ",
     END_USAGE_NOTES
 
-    static const OptionsDescriptor descriptor = {
+    const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "brltty-cldr",
 
