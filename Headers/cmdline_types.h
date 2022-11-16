@@ -25,8 +25,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define FLAG_TRUE_WORD "on"
-#define FLAG_FALSE_WORD "off"
+#define OPT_WORD_TRUE "on"
+#define OPT_WORD_FALSE "off"
 
 typedef enum {
   OPT_Hidden	= 0X01,
@@ -34,7 +34,7 @@ typedef enum {
   OPT_Config	= 0X04,
   OPT_EnvVar	= 0X08,
   OPT_Format  	= 0X10
-} OptionFlag;
+} CommandLineOptionFlag;
 
 typedef struct {
   const char *word;
@@ -59,15 +59,15 @@ typedef struct {
     const char *const *array;
     STR_DECLARE_FORMATTER((*format), unsigned int index);
   } strings;
-} OptionEntry;
+} CommandLineOption;
 
 typedef struct {
-  const OptionEntry *table;
+  const CommandLineOption *table;
   size_t count;
-} OptionsDescriptor;
+} CommandLineOptions;
 
 #define BEGIN_OPTION_TABLE(name) \
-static const OptionEntry name[] = { \
+static const CommandLineOption name##Table[] = { \
   { .word = "help", \
     .letter = 'h', \
     .description = strtext("Show a usage summary that only contains commonly used options, and then exit.") \
@@ -78,10 +78,10 @@ static const OptionEntry name[] = { \
   },
 
 #define END_OPTION_TABLE(name) }; \
-  static const OptionsDescriptor name##Descriptor = { \
-    .table = name, \
-    .count = ARRAY_COUNT(name), \
-  };
+static const CommandLineOptions name = { \
+  .table = name##Table, \
+  .count = ARRAY_COUNT(name##Table), \
+};
 
 #define DECLARE_USAGE_NOTES(name) const char *const name[]
 #define BEGIN_USAGE_NOTES(name) DECLARE_USAGE_NOTES(name) = {
@@ -92,17 +92,17 @@ typedef struct {
   const char *purpose;
   const char *parameters;
   const char *const *const *notes;
-} UsageDescriptor;
+} CommandLineUsage;
 
 typedef struct {
-  const OptionsDescriptor *options;
-
-  int *doBootParameters;
-  int *doEnvironmentVariables;
-  char **configurationFile;
+  const CommandLineOptions *options;
 
   const char *applicationName;
-  const UsageDescriptor usage;
+  char **configurationFile;
+  int *doEnvironmentVariables;
+  int *doBootParameters;
+
+  const CommandLineUsage usage;
 } CommandLineDescriptor;
 
 #ifdef __cplusplus

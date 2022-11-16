@@ -86,6 +86,13 @@ BEGIN_OPTION_TABLE(programOptions)
 #endif /* HAVE_MIDI_SUPPORT */
 END_OPTION_TABLE(programOptions)
 
+static
+BEGIN_USAGE_NOTES(usageNotes)
+  "If the tune is specified on the command line then each argument contains a command group.",
+  "If it's read from a file then each line contains a command group.",
+  "Each specified file contains a different tune.",
+END_USAGE_NOTES
+
 static void
 beginTuneStream (const char *name, void *data) {
   TuneBuilder *tb = data;
@@ -145,14 +152,8 @@ DATA_OPERANDS_PROCESSOR(processTuneLine) {
 int
 main (int argc, char *argv[]) {
   {
-    static BEGIN_USAGE_NOTES(usageNotes)
-      "If the tune is specified on the command line then each argument contains a command group.",
-      "If it's read from a file then each line contains a command group.",
-      "Each specified file contains a different tune.",
-    END_USAGE_NOTES
-
     const CommandLineDescriptor descriptor = {
-      .options = &programOptionsDescriptor,
+      .options = &programOptions,
       .applicationName = "brltty-tune",
 
       .usage = {

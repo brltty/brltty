@@ -43,6 +43,32 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE(programOptions)
 
+static
+BEGIN_USAGE_NOTES(usageNotes)
+  "The output format is printf-like -",
+  "arbitrary text which may contain",
+  "field specifiers (introduced via a percent sign [%])",
+  "and/or special characters (introduced via a backslash [\\]).",
+  "The default format, excluding the quotes, is \"" DEFAULT_OUTPUT_FORMAT "\".",
+  "",
+  "These field specifiers are recognized:",
+  "  %n  the name of the character sequence",
+  "  %s  the character sequence itself",
+  "  %x  the character sequence in hexadecimal",
+  "  %%  a literal percent sign",
+  "",
+  "These special characters are recognized:",
+  "  \\a  alert (bell)",
+  "  \\b  backspace",
+  "  \\e  escape",
+  "  \\f  form feed",
+  "  \\n  new line",
+  "  \\r  carriage return",
+  "  \\t  horizontal tab",
+  "  \\v  vertical tab",
+  "  \\\\  literal backslasha  ",
+END_USAGE_NOTES
+
 static void
 onFormatError (void) {
   exit(PROG_EXIT_SYNTAX);
@@ -203,33 +229,8 @@ CLDR_ANNOTATION_HANDLER(handleAnnotation) {
 int
 main (int argc, char *argv[]) {
   {
-    static BEGIN_USAGE_NOTES(usageNotes)
-      "The output format is printf-like -",
-      "arbitrary text which may contain",
-      "field specifiers (introduced via a percent sign [%])",
-      "and/or special characters (introduced via a backslash [\\]).",
-      "The default format, excluding the quotes, is \"" DEFAULT_OUTPUT_FORMAT "\".",
-      "",
-      "These field specifiers are recognized:",
-      "  %n  the name of the character sequence",
-      "  %s  the character sequence itself",
-      "  %x  the character sequence in hexadecimal",
-      "  %%  a literal percent sign",
-      "",
-      "These special characters are recognized:",
-      "  \\a  alert (bell)",
-      "  \\b  backspace",
-      "  \\e  escape",
-      "  \\f  form feed",
-      "  \\n  new line",
-      "  \\r  carriage return",
-      "  \\t  horizontal tab",
-      "  \\v  vertical tab",
-      "  \\\\  literal backslasha  ",
-    END_USAGE_NOTES
-
     const CommandLineDescriptor descriptor = {
-      .options = &programOptionsDescriptor,
+      .options = &programOptions,
       .applicationName = "brltty-cldr",
 
       .usage = {

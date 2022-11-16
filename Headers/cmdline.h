@@ -38,7 +38,7 @@ extern ProgramExitStatus processOptions (
   if (exitStatus != PROG_EXIT_SUCCESS) return exitStatus; \
 }
 
-extern void resetOptions (const OptionsDescriptor *options);
+extern void resetOptions (const CommandLineOptions *options);
 
 typedef struct {
   void (*beginStream) (const char *name, void *data);

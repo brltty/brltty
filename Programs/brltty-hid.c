@@ -211,6 +211,14 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE(programOptions)
 
+static
+BEGIN_USAGE_NOTES(usageNotes)
+  "When writing a report or feature, the bytes don't need to be, but can be, separated from one another by whitespace.",
+  "Each byte is either two hexadecimal digits or zero or more braille dot numbers within [square brackets].",
+  "A byte may optionally be followed by an asterisk [*] and a decimal count - if not specified, 1 is assumed.",
+  "The first byte is the report number - specify 00 for no report number.",
+END_USAGE_NOTES
+
 static FILE *outputStream;
 static int outputError;
 
@@ -1051,15 +1059,8 @@ performActions (HidDevice *device) {
 int
 main (int argc, char *argv[]) {
   {
-    static BEGIN_USAGE_NOTES(usageNotes)
-      "When writing a report or feature, the bytes don't need to be, but can be, separated from one another by whitespace.",
-      "Each byte is either two hexadecimal digits or zero or more braille dot numbers within [square brackets].",
-      "A byte may optionally be followed by an asterisk [*] and a decimal count - if not specified, 1 is assumed.",
-      "The first byte is the report number - specify 00 for no report number.",
-    END_USAGE_NOTES
-
     const CommandLineDescriptor descriptor = {
-      .options = &programOptionsDescriptor,
+      .options = &programOptions,
       .applicationName = "brltty-hid",
 
       .usage = {

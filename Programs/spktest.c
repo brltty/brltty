@@ -109,7 +109,7 @@ main (int argc, char *argv[]) {
 
   {
     const CommandLineDescriptor descriptor = {
-      .options = &programOptionsDescriptor,
+      .options = &programOptions,
       .applicationName = "spktest",
 
       .usage = {

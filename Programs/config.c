@@ -579,9 +579,9 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_releaseDevice,
 #ifdef WINDOWS
-    .internal.setting = FLAG_TRUE_WORD,
+    .internal.setting = OPT_WORD_TRUE,
 #else /* WINDOWS */
-    .internal.setting = FLAG_FALSE_WORD,
+    .internal.setting = OPT_WORD_FALSE,
 #endif /* WINDOWS */
     .description = strtext("Release braille device when screen or window is unreadable.")
   },
@@ -853,11 +853,12 @@ ProgramExitStatus
 brlttyPrepare (int argc, char *argv[]) {
   {
     const CommandLineDescriptor descriptor = {
-      .options = &programOptionsDescriptor,
-      .doBootParameters = &opt_bootParameters,
-      .doEnvironmentVariables = &opt_environmentVariables,
-      .configurationFile = &opt_configurationFile,
+      .options = &programOptions,
+
       .applicationName = "brltty",
+      .configurationFile = &opt_configurationFile,
+      .doEnvironmentVariables = &opt_environmentVariables,
+      .doBootParameters = &opt_bootParameters,
 
       .usage = {
         .purpose = strtext("Screen reader for those who use a braille device."),

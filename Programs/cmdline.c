@@ -43,7 +43,7 @@
 #endif /* HAVE_GETOPT_H */
 
 typedef struct {
-  const OptionsDescriptor *const options;
+  const CommandLineOptions *const options;
   uint8_t *const ensuredSettings;
 
   uint8_t exitImmediately:1;
@@ -52,14 +52,14 @@ typedef struct {
 } OptionProcessingInformation;
 
 static int
-hasExtendableArgument (const OptionEntry *option) {
+hasExtendableArgument (const CommandLineOption *option) {
   return option->argument && (option->flags & OPT_Extend);
 }
 
 static uint8_t *
 getEnsuredSetting (
   const OptionProcessingInformation *info,
-  const OptionEntry *option
+  const CommandLineOption *option
 ) {
   return &info->ensuredSettings[option - info->options->table];
 }
@@ -67,7 +67,7 @@ getEnsuredSetting (
 static void
 setEnsuredSetting (
   const OptionProcessingInformation *info,
-  const OptionEntry *option,
+  const CommandLineOption *option,
   uint8_t yes
 ) {
   *getEnsuredSetting(info, option) = yes;
@@ -76,7 +76,7 @@ setEnsuredSetting (
 static int
 ensureSetting (
   OptionProcessingInformation *info,
-  const OptionEntry *option,
+  const CommandLineOption *option,
   const char *value
 ) {
   uint8_t *ensured = getEnsuredSetting(info, option);
@@ -264,7 +264,7 @@ showOptions (
   unsigned int argumentWidth = 0;
 
   for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
-    const OptionEntry *option = &info->options->table[optionIndex];
+    const CommandLineOption *option = &info->options->table[optionIndex];
     if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
     foundOption = 1;
 
@@ -282,7 +282,7 @@ showOptions (
     fprintf(stream, "\n%s:\n", gettext("Options"));
 
     for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
-      const OptionEntry *option = &info->options->table[optionIndex];
+      const CommandLineOption *option = &info->options->table[optionIndex];
       if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
 
       unsigned int lineLength = 0;
@@ -388,14 +388,14 @@ processCommandLine (
   OptionProcessingInformation *info,
   int *argumentCount,
   char ***argumentVector,
-  const UsageDescriptor *usage
+  const CommandLineUsage *usage
 ) {
   const char *reset = NULL;
   const char resetPrefix = '+';
   int resetLetter;
 
   const int firstNonLetter = 0X80;
-  const OptionEntry *optionEntries[firstNonLetter + info->options->count];
+  const CommandLineOption *optionEntries[firstNonLetter + info->options->count];
 
   for (unsigned int index=0; index<ARRAY_COUNT(optionEntries); index+=1) {
     optionEntries[index] = NULL;
@@ -412,7 +412,7 @@ processCommandLine (
     *opt++ = ':';
 
     for (unsigned int index=0; index<info->options->count; index+=1) {
-      const OptionEntry *entry = &info->options->table[index];
+      const CommandLineOption *entry = &info->options->table[index];
       int letter = entry->letter;
 
       if (letter) {
@@ -446,7 +446,7 @@ processCommandLine (
     struct option *opt = longOptions;
 
     for (unsigned int index=0; index<info->options->count; index+=1) {
-      const OptionEntry *entry = &info->options->table[index];
+      const CommandLineOption *entry = &info->options->table[index];
       const char *word = entry->word;
       if (!word) continue;
       int letter = optionLetters[index];
@@ -528,7 +528,7 @@ processCommandLine (
           char *name = argument + 1;
           size_t nameLength = strcspn(name, ":");
           char *value = name[nameLength]? (name + nameLength + 1): NULL;
-          const OptionEntry *entry;
+          const CommandLineOption *entry;
 
           if (nameLength == 1) {
             entry = optionEntries[option = *name];
@@ -585,7 +585,7 @@ processCommandLine (
         }
 
         {
-          const OptionEntry *entry = optionEntries[option];
+          const CommandLineOption *entry = optionEntries[option];
 
           if (entry && !entry->argument && entry->setting.flag) {
             resetLetter = option;
@@ -616,7 +616,7 @@ processCommandLine (
 
     switch (option) {
       default: {
-        const OptionEntry *entry = optionEntries[option];
+        const CommandLineOption *entry = optionEntries[option];
 
         if (entry->argument) {
           if (!*optarg) {
@@ -646,7 +646,7 @@ processCommandLine (
       }
 
       case 0: { // reset a flag
-        const OptionEntry *entry = optionEntries[resetLetter];
+        const CommandLineOption *entry = optionEntries[resetLetter];
         *entry->setting.flag = 0;
         setEnsuredSetting(info, entry, 1);
         break;
@@ -751,7 +751,7 @@ processBootParameters (
     char **parameters = splitString(value, ',', &parameterCount);
 
     for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
-      const OptionEntry *option = &info->options->table[optionIndex];
+      const CommandLineOption *option = &info->options->table[optionIndex];
 
       if ((option->bootParameter) && (option->bootParameter <= parameterCount)) {
         char *parameter = parameters[option->bootParameter-1];
@@ -779,7 +779,7 @@ processBootParameters (
 static int
 processEnvironmentVariable (
   OptionProcessingInformation *info,
-  const OptionEntry *option,
+  const CommandLineOption *option,
   const char *prefix
 ) {
   size_t prefixLength = strlen(prefix);
@@ -824,7 +824,7 @@ processEnvironmentVariables (
   const char *prefix
 ) {
   for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
-    const OptionEntry *option = &info->options->table[optionIndex];
+    const CommandLineOption *option = &info->options->table[optionIndex];
 
     if (!processEnvironmentVariable(info, option, prefix)) return 0;
   }
@@ -838,13 +838,13 @@ processInternalSettings (
   int config
 ) {
   for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
-    const OptionEntry *option = &info->options->table[optionIndex];
+    const CommandLineOption *option = &info->options->table[optionIndex];
 
     if (!(option->flags & OPT_Config) == !config) {
       const char *setting = option->internal.setting;
       char *newSetting = NULL;
 
-      if (!setting) setting = option->argument? "": FLAG_FALSE_WORD;
+      if (!setting) setting = option->argument? "": OPT_WORD_FALSE;
 
       if (option->internal.adjust) {
         if (*setting) {
@@ -912,7 +912,7 @@ processConfigurationDirective (
   const ConfigurationDirective *directive = findConfigurationDirective(keyword, conf);
 
   if (directive) {
-    const OptionEntry *option = &conf->info->options->table[directive->option];
+    const CommandLineOption *option = &conf->info->options->table[directive->option];
     char **setting = &conf->settings[directive->option];
 
     if (*setting && !hasExtendableArgument(option)) {
@@ -1021,7 +1021,7 @@ freeConfigurationDirectives (ConfigurationFileProcessingData *conf) {
 static int
 addConfigurationDirectives (ConfigurationFileProcessingData *conf) {
   for (unsigned int optionIndex=0; optionIndex<conf->info->options->count; optionIndex+=1) {
-    const OptionEntry *option = &conf->info->options->table[optionIndex];
+    const CommandLineOption *option = &conf->info->options->table[optionIndex];
 
     if ((option->flags & OPT_Config) && option->word) {
       ConfigurationDirective *directive;
@@ -1117,9 +1117,9 @@ processConfigurationFile (
 }
 
 void
-resetOptions (const OptionsDescriptor *options) {
+resetOptions (const CommandLineOptions *options) {
   for (unsigned int index=0; index<options->count; index+=1) {
-    const OptionEntry *option = &options->table[index];
+    const CommandLineOption *option = &options->table[index];
 
     if (option->argument) {
       char **string = option->setting.string;
@@ -1133,7 +1133,7 @@ resetOptions (const OptionsDescriptor *options) {
 
 static void
 exitOptions (void *data) {
-  const OptionsDescriptor *options = data;
+  const CommandLineOptions *options = data;
   resetOptions(options);
 }
 
