@@ -385,7 +385,8 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
   int ret = 0;
 
   struct timeval now;
-  int delay = 0;
+  long delay = 0;
+  int polled = 0; /* Whether we have polled at least once */
 
   do {
     if (deadline) {
@@ -393,10 +394,15 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
       delay = (deadline->tv_sec  - now.tv_sec ) * 1000 +
 	      (deadline->tv_usec - now.tv_usec) / 1000;
       if (delay < 0) {
-	/* The deadline has expired, don't wait more */
-	return -4;
+	if (polled) {
+	  /* The deadline has expired, don't wait more */
+	  return -4;
+	}
+	/* Poll at least once */
+	delay = 0;
       }
     }
+    polled = 1;
 #ifdef __MINGW32__
     DWORD dw;
     dw = WaitForSingleObject(handle->packet.overl.hEvent, deadline ? delay : INFINITE);
