@@ -21,8 +21,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <pwd.h>
-#include <grp.h>
 
 #include "parse.h"
 #include "log.h"
@@ -390,6 +388,10 @@ validateFloat (float *value, const char *string, const float *minimum, const flo
 }
 #endif /* NO_FLOAT */
 
+#if defined(HAVE_PWD_H) && defined(HAVE_GRP_H)
+#include <pwd.h>
+#include <grp.h>
+
 int
 validateUser (uid_t *value, const char *string, gid_t *group) {
   {
@@ -446,6 +448,7 @@ validateGroup (gid_t *value, const char *string) {
 
   return 0;
 }
+#endif /* defined(HAVE_PWD_H) && defined(HAVE_GRP_H) */
 
 int
 hasQualifier (const char **identifier, const char *qualifier) {

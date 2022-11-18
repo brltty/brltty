@@ -88,8 +88,10 @@ extern int isFloat (float *value, const char *string);
 extern int validateFloat (float *value, const char *string, const float *minimum, const float *maximum);
 #endif /* NO_FLOAT */
 
+#if defined(HAVE_PWD_H) && defined(HAVE_GRP_H)
 extern int validateUser (uid_t *value, const char *string, gid_t *group);
 extern int validateGroup (gid_t *value, const char *string);
+#endif /* defined(HAVE_PWD_H) && defined(HAVE_GRP_H) */
 
 #define PATH_SEPARATOR_CHARACTER       '/'
 #define PARAMETER_SEPARATOR_CHARACTER  ','
