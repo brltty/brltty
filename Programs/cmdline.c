@@ -28,6 +28,7 @@
 #include "cmdline.h"
 #include "params.h"
 #include "log.h"
+#include "strfmt.h"
 #include "file.h"
 #include "datafile.h"
 #include "utf8.h"
@@ -394,6 +395,7 @@ processCommandLine (
   const char resetPrefix = '+';
   int resetLetter;
 
+  int dosSyntax = 0;
   const int firstNonLetter = 0X80;
   const CommandLineOption *letterToOption[firstNonLetter + info->options->count];
 
@@ -408,8 +410,8 @@ processCommandLine (
     int nextNonLetter = firstNonLetter;
 
     char *opt = shortOptions;
-    *opt++ = '+';
-    *opt++ = ':';
+    *opt++ = '+'; // stop parsing options as soon as a non-option argument is encountered
+    *opt++ = ':'; // Don't write any error messages
 
     for (unsigned int index=0; index<info->options->count; index+=1) {
       const CommandLineOption *option = &info->options->table[index];
@@ -491,7 +493,6 @@ processCommandLine (
 
 #ifdef ALLOW_DOS_OPTION_SYNTAX
   const char dosPrefix = '/';
-  int dosSyntax = 0;
 
   if (*argumentCount > 1) {
     if (*(*argumentVector)[1] == dosPrefix) {
@@ -652,30 +653,57 @@ processCommandLine (
         break;
       }
 
-      case '?': { // an unknown option has been specified
-        const char *message = gettext("unknown option");
+    {
+      const char *problem;
+
+      case '?': // an unknown option has been specified
+        info->syntaxError = 1;
+        problem = gettext("unknown option");
+        goto logOptionProblem;
+
+      case ':': // the operand for a string option hasn't been specified
+        info->syntaxError = 1;
+        problem = gettext("missing operand");
+        goto logOptionProblem;
+
+      case '-': // the operand for an option is invalid
+        info->warning = 1;
+        problem = gettext("invalid operand");
+        goto logOptionProblem;
+
+      logOptionProblem:
+        char message[0X100];
+        STR_BEGIN(message, sizeof(message));
+
+        STR_PRINTF("%s: ", problem);
+        size_t length = STR_LENGTH;
 
         if (optopt) {
-          logMessage(LOG_ERR, "%s: %c%c", message, prefix, optopt);
-        } else {
-          logMessage(LOG_ERR, "%s: %s", message, (*argumentVector)[optind-1]);
+          const CommandLineOption *option = letterToOption[optopt];
+          const char *beforeLetter = "";
+          const char *afterLetter = "";
+
+          if (option->word) {
+            if (!dosSyntax) STR_PRINTF("%c", prefix);
+            STR_PRINTF("%c%s", prefix, option->word);
+
+            beforeLetter = " (";
+            afterLetter = ")";
+          }
+
+          if (option->letter) {
+            STR_PRINTF("%s%c%c%s", beforeLetter, prefix, option->letter, afterLetter);
+          }
         }
 
-        info->syntaxError = 1;
-        break;
-      }
+        if (STR_LENGTH == length) {
+          STR_PRINTF("%s", (*argumentVector)[optind-1]);
+        }
 
-      case ':': { // the operand for a string option hasn't been specified
-        logMessage(LOG_ERR, "%s: %c%c", gettext("missing operand"), prefix, optopt);
-        info->syntaxError = 1;
+        STR_END;
+        logMessage(LOG_WARNING, "%s", message);
         break;
-      }
-
-      case '-': { // the operand for an option is invalid
-        logMessage(LOG_ERR, "%s: %c%c: %s", gettext("invalid operand"), prefix, optopt, optarg);
-        info->warning = 1;
-        break;
-      }
+    }
 
       case 'H': // full help
         optHelpAll = 1;
