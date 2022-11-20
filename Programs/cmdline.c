@@ -395,13 +395,13 @@ processCommandLine (
   int resetLetter;
 
   const int firstNonLetter = 0X80;
-  const CommandLineOption *optionEntries[firstNonLetter + info->options->count];
+  const CommandLineOption *letterToOption[firstNonLetter + info->options->count];
 
-  for (unsigned int index=0; index<ARRAY_COUNT(optionEntries); index+=1) {
-    optionEntries[index] = NULL;
+  for (unsigned int index=0; index<ARRAY_COUNT(letterToOption); index+=1) {
+    letterToOption[index] = NULL;
   }
 
-  int optionLetters[info->options->count];
+  int indexToLetter[info->options->count];
   char shortOptions[2 + (info->options->count * 2) + 1];
 
   {
@@ -412,27 +412,27 @@ processCommandLine (
     *opt++ = ':';
 
     for (unsigned int index=0; index<info->options->count; index+=1) {
-      const CommandLineOption *entry = &info->options->table[index];
-      int letter = entry->letter;
+      const CommandLineOption *option = &info->options->table[index];
+      int letter = option->letter;
 
       if (letter) {
-        if (optionEntries[letter]) {
+        if (letterToOption[letter]) {
           logMessage(LOG_WARNING, "duplicate short option: -%c", letter);
           letter = 0;
         } else {
           *opt++ = letter;
-          if (entry->argument) *opt++ = ':';
+          if (option->argument) *opt++ = ':';
         }
       }
 
       if (!letter) letter = nextNonLetter++;
-      optionLetters[index] = letter;
-      optionEntries[letter] = entry;
+      indexToLetter[index] = letter;
+      letterToOption[letter] = option;
 
-      if (entry->argument) {
-        if (entry->setting.string) *entry->setting.string = NULL;
+      if (option->argument) {
+        if (option->setting.string) *option->setting.string = NULL;
       } else {
-        if (entry->setting.flag) *entry->setting.flag = 0;
+        if (option->setting.flag) *option->setting.flag = 0;
       }
     }
 
@@ -446,18 +446,18 @@ processCommandLine (
     struct option *opt = longOptions;
 
     for (unsigned int index=0; index<info->options->count; index+=1) {
-      const CommandLineOption *entry = &info->options->table[index];
-      const char *word = entry->word;
+      const CommandLineOption *option = &info->options->table[index];
+      const char *word = option->word;
       if (!word) continue;
-      int letter = optionLetters[index];
+      int letter = indexToLetter[index];
 
       opt->name = word;
-      opt->has_arg = entry->argument? required_argument: no_argument;
+      opt->has_arg = option->argument? required_argument: no_argument;
       opt->flag = NULL;
       opt->val = letter;
       opt += 1;
 
-      if (!entry->argument && entry->setting.flag) {
+      if (!option->argument && option->setting.flag) {
         char *name;
 
         const char *noPrefix = "no-";
@@ -508,12 +508,12 @@ processCommandLine (
   int optHelpAll = 0;
 
   while (1) {
-    int option;
+    int letter;
     char prefix = '-';
     resetLetter = 0;
 
     if (optind == *argumentCount) {
-      option = -1;
+      letter = -1;
     } else {
       char *argument = (*argumentVector)[optind];
 
@@ -523,52 +523,52 @@ processCommandLine (
         optind += 1;
 
         if (*argument != dosPrefix) {
-          option = -1;
+          letter = -1;
         } else {
           char *name = argument + 1;
           size_t nameLength = strcspn(name, ":");
           char *value = name[nameLength]? (name + nameLength + 1): NULL;
-          const CommandLineOption *entry;
+          const CommandLineOption *option;
 
           if (nameLength == 1) {
-            entry = optionEntries[option = *name];
+            option = letterToOption[letter = *name];
           } else {
-            option = -1;
+            letter = -1;
 
             for (unsigned int index=0; index<info->options->count; index+=1) {
-              entry = &info->options->table[index];
-              const char *word = entry->word;
+              option = &info->options->table[index];
+              const char *word = option->word;
 
               if (word) {
                 if ((nameLength == strlen(word)) &&
                     (strncasecmp(word, name, nameLength) == 0)) {
-                  option = optionLetters[index];
+                  letter = indexToLetter[index];
                   break;
                 }
               }
             }
 
-            if (option < 0) {
-              entry = NULL;
-              option = 0;
+            if (letter < 0) {
+              option = NULL;
+              letter = 0;
             }
           }
 
-          optopt = option;
+          optopt = letter;
           optarg = value;
 
-          if (!entry) {
-            option = '?';
-          } else if (entry->argument) {
-            if (!optarg) option = ':';
+          if (!option) {
+            letter = '?';
+          } else if (option->argument) {
+            if (!optarg) letter = ':';
           } else if (value) {
             unsigned int on;
 
             if (!validateFlagKeyword(&on, value)) {
-              option = '-';
+              letter = '-';
             } else if (!on) {
-              resetLetter = option;
-              option = 0;
+              resetLetter = letter;
+              letter = 0;
             }
           }
         }
@@ -578,21 +578,21 @@ processCommandLine (
       if (reset) {
         prefix = resetPrefix;
 
-        if (!(option = *reset++)) {
+        if (!(letter = *reset++)) {
           reset = NULL;
           optind += 1;
           continue;
         }
 
         {
-          const CommandLineOption *entry = optionEntries[option];
+          const CommandLineOption *option = letterToOption[letter];
 
-          if (entry && !entry->argument && entry->setting.flag) {
-            resetLetter = option;
-            option = 0;
+          if (option && !option->argument && option->setting.flag) {
+            resetLetter = letter;
+            letter = 0;
           } else {
-            optopt = option;
-            option = '?';
+            optopt = letter;
+            letter = '?';
           }
         }
       } else {
@@ -602,53 +602,53 @@ processCommandLine (
         }
 
 #ifdef HAVE_GETOPT_LONG
-        option = getopt_long(*argumentCount, *argumentVector, shortOptions, longOptions, NULL);
+        letter = getopt_long(*argumentCount, *argumentVector, shortOptions, longOptions, NULL);
 #else /* HAVE_GETOPT_LONG */
-        option = getopt(*argumentCount, *argumentVector, shortOptions);
+        letter = getopt(*argumentCount, *argumentVector, shortOptions);
 #endif /* HAVE_GETOPT_LONG */
       }
     }
 
-    if (option == -1) break;
+    if (letter == -1) break;
     /* continue on error as much as possible, as often we are typing blind
      * and won't even see the error message unless the display comes up.
      */
 
-    switch (option) {
+    switch (letter) {
       default: {
-        const CommandLineOption *entry = optionEntries[option];
+        const CommandLineOption *option = letterToOption[letter];
 
-        if (entry->argument) {
+        if (option->argument) {
           if (!*optarg) {
-            setEnsuredSetting(info, entry, 0);
+            setEnsuredSetting(info, option, 0);
             break;
           }
 
-          if (entry->setting.string) {
-            if (entry->flags & OPT_Extend) {
-              extendStringSetting(entry->setting.string, optarg, 0);
+          if (option->setting.string) {
+            if (option->flags & OPT_Extend) {
+              extendStringSetting(option->setting.string, optarg, 0);
             } else {
-              changeStringSetting(entry->setting.string, optarg);
+              changeStringSetting(option->setting.string, optarg);
             }
           }
         } else {
-          if (entry->setting.flag) {
-            if (entry->flags & OPT_Extend) {
-              *entry->setting.flag += 1;
+          if (option->setting.flag) {
+            if (option->flags & OPT_Extend) {
+              *option->setting.flag += 1;
             } else {
-              *entry->setting.flag = 1;
+              *option->setting.flag = 1;
             }
           }
         }
 
-        setEnsuredSetting(info, entry, 1);
+        setEnsuredSetting(info, option, 1);
         break;
       }
 
       case 0: { // reset a flag
-        const CommandLineOption *entry = optionEntries[resetLetter];
-        *entry->setting.flag = 0;
-        setEnsuredSetting(info, entry, 1);
+        const CommandLineOption *option = letterToOption[resetLetter];
+        *option->setting.flag = 0;
+        setEnsuredSetting(info, option, 1);
         break;
       }
 
