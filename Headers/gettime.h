@@ -19,12 +19,7 @@
 #ifndef BRLTTY_INCLUDED_GETTIME
 #define BRLTTY_INCLUDED_GETTIME
 
-#include "prologue.h"
 #include <sys/time.h>
-
-#ifdef HAVE_CLOCK_GETTIME
-#include <time.h>
-#endif /* HAVE_CLOCK_GETTIME */
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,18 +27,7 @@ extern "C" {
 
 static inline int
 getRealTime (struct timeval *now) {
-  int result;
-
-#if defined(HAVE_CLOCK_GETTIME)
-  struct timespec time;
-  result = clock_gettime(CLOCK_REALTIME, &time);
-  now->tv_sec = time.tv_sec;
-  now->tv_usec = time.tv_nsec / 1000;
-#else /* getRealTime */
-  result = gettimeofday(now, NULL);
-#endif /* getRealTime */
-
-  return result;
+  return gettimeofday(now, NULL);
 }
 
 #ifdef __cplusplus
