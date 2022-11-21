@@ -18,7 +18,19 @@
 ###############################################################################
 
 . "`dirname "${0}"`/prologue.sh"
+command=xbrlapi
+
+handleInitialHelpOption "${@}" <<END-OF-HELP
+Run ${command} from its build tree.
+
+Syntax: ${programName} {-h | [-option ...]}
+
+All of the options are passed through to ${command} itself.
+
+See run-command -h for more details.
+END-OF-HELP
+
 setBuildRoot
 
-exec "${programDirectory}/run-command" "${buildRoot}/Programs/xbrlapi" "$@"
+exec "${programDirectory}/run-command" "${buildRoot}/Programs/${command}" "$@"
 exit "${?}"

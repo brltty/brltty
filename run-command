@@ -18,23 +18,25 @@
 ###############################################################################
 
 . "$(dirname "${0}")/prologue.sh"
-setBuildRoot
 
-[ "${#}" -eq 0 ] && {
-cat <<END_OF_USAGE
-Usage: ${programName} command [argument ...]
-Execute the specified command with the specified arguments. If not root
-then execute the command as root via sudo.
+handleInitialHelpOption "${@}" <<END-OF-HELP
+Execute the specified command, with the specified arguments,
+such that it picks up shared objects from the BRLTTY build tree.
+
+Syntax: ${programName} {-h | command [argument ...]}
+
+The working directory must be somewhere within the build tree that's to be used.
+If it isn't then the source tree will be used.
 
 Environment Variables:
   <COMMAND>_VALGRIND_DIRECTORY=path
     If set then write a valgrind memory usage log to a file named
     <command>-yyyymmdd-HHMMSS.vg in the specified directory.
+END-OF-HELP
 
-END_OF_USAGE
-exit 0
-}
+setBuildRoot
 
+[ "${#}" -gt 0 ] || syntaxError "missing command"
 commandName="${1}"
 shift 1
 
@@ -43,11 +45,12 @@ readonly commandPath="$(type -P "${commandName}")"
 readonly commandName="${commandPath##*/}"
 set -- "${commandPath}" "${@}"
 
-readonly variablePrefix="${commandName^^?}"
-getVariable "${variablePrefix}_VALGRIND_DIRECTORY" vgDirectory
-
 [ -n "${LD_LIBRARY_PATH}" ] && LD_LIBRARY_PATH=":${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="${buildRoot}/Programs${LD_LIBRARY_PATH}"
+
+readonly variablePrefix="${commandName^^?}"
+getVariable "${variablePrefix}_VALGRIND_DIRECTORY" vgDirectory
+readonly vgDirectory
 
 [ -n "${vgDirectory}" ] && {
    [ -e "${vgDirectory}" ] || semanticError "directory not found: ${vgDirectory}"

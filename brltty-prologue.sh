@@ -594,6 +594,9 @@ addTestModeOption() {
    addProgramOption t flag testMode "test mode - log (but don't execute) the host commands"
 }
 
+programUsageLineCount=0
+programUsageLineWidth="${COLUMNS:-72}"
+
 addProgramUsageLine() {
    local line="${1}"
 
@@ -605,7 +608,7 @@ addProgramUsageText() {
    local text="${1}"
    local prefix="${2}"
 
-   local width=$((programUsageWidth - ${#prefix}))
+   local width=$((programUsageLineWidth - ${#prefix}))
 
    while [ "${width}" -lt 1 ]
    do
@@ -631,9 +634,17 @@ addProgramUsageText() {
    done
 }
 
+writeProgramUsageLines() {
+   local index=0
+
+   while [ "${index}" -lt "${programUsageLineCount}" ]
+   do
+      getVariable "programUsageLine_${index}"
+      index=$((index + 1))
+   done
+}
+
 showProgramUsageSummary() {
-   programUsageLineCount=0
-   local programUsageWidth="${COLUMNS:-72}"
    set -- ${programOptionLetters}
 
    local purpose="$(showProgramUsagePurpose)"
@@ -726,12 +737,7 @@ showProgramUsageSummary() {
       addProgramUsageText "${notes}"
    }
 
-   local index=0
-   while [ "${index}" -lt "${programUsageLineCount}" ]
-   do
-      getVariable "programUsageLine_${index}"
-      index=$((index + 1))
-   done
+   writeProgramUsageLines
 }
 
 addProgramOption h flag programOption_showUsageSummary "show this usage summary, and then exit"
@@ -792,6 +798,18 @@ parseProgramArguments() {
 
    readonly programLogLevel=$((programLogLevel + programOption_verboseCount - programOption_quietCount))
    processExtraProgramParameters "${@}"
+}
+
+handleInitialHelpOption() {
+   if [ "${#}" -gt 0 ]
+   then
+      if [ "${1}" = "-h" ]
+      then
+         addProgramUsageText "$(cat)"
+         writeProgramUsageLines
+         exit 0
+      fi
+   fi
 }
 
 ####################################################################

@@ -676,7 +676,7 @@ processCommandLine (
         STR_BEGIN(message, sizeof(message));
 
         STR_PRINTF("%s: ", problem);
-        size_t length = STR_LENGTH;
+        size_t optionStart = STR_LENGTH;
 
         if (optopt) {
           const CommandLineOption *option = letterToOption[optopt];
@@ -696,7 +696,7 @@ processCommandLine (
           }
         }
 
-        if (STR_LENGTH == length) {
+        if (STR_LENGTH == optionStart) {
           STR_PRINTF("%s", (*argumentVector)[optind-1]);
         }
 

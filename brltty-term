@@ -19,13 +19,13 @@
 
 . "$(dirname "${0}")/brltty-prologue.sh"
 
-usageSummary="Usage: ${programName} [shell] [-option ...]
+usageSummary="\
+Run a shell or terminal manager via the brltty-pty terminal emulator
+and brltty using its Terminal Emulator screen driver.
 
-This script runs:
-* A shell via the brltty-pty terminal emulator.
-* Brltty using its Terminal Emulator screen driver.
+Syntax: ${programName} [shell] [-option ...]
 
-It's especially useful on platforms that don't support a native screen driver.
+This script is especially useful on platforms that don't support a native screen driver.
 This newer method may (should) be used in preference to the older method of
 running brltty in conjunction with its provided patch to the screen program.
 
