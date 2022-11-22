@@ -680,19 +680,24 @@ processCommandLine (
 
         if (optopt) {
           const CommandLineOption *option = letterToOption[optopt];
-          const char *beforeLetter = "";
-          const char *afterLetter = "";
 
-          if (option->word) {
-            if (!dosSyntax) STR_PRINTF("%c", prefix);
-            STR_PRINTF("%c%s", prefix, option->word);
+          if (option) {
+            const char *beforeLetter = "";
+            const char *afterLetter = "";
 
-            beforeLetter = " (";
-            afterLetter = ")";
-          }
+            if (option->word) {
+              if (!dosSyntax) STR_PRINTF("%c", prefix);
+              STR_PRINTF("%c%s", prefix, option->word);
 
-          if (option->letter) {
-            STR_PRINTF("%s%c%c%s", beforeLetter, prefix, option->letter, afterLetter);
+              beforeLetter = " (";
+              afterLetter = ")";
+            }
+
+            if (option->letter) {
+              STR_PRINTF("%s%c%c%s", beforeLetter, prefix, option->letter, afterLetter);
+            }
+          } else if (optopt < firstNonLetter) {
+            STR_PRINTF("%c%c", prefix, optopt);
           }
         }
 
