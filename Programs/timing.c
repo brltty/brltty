@@ -73,7 +73,7 @@ getCurrentTime (TimeValue *now) {
     now->nanoseconds = (milliseconds % MSECS_PER_SEC) * NSECS_PER_MSEC;
   }
 
-#elif defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_REALTIME)
+#elif defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_REALTIME) && !defined(__MINGW32__)
   struct timespec ts;
 
   if (clock_gettime(CLOCK_REALTIME, &ts) != -1) {
@@ -86,7 +86,12 @@ getCurrentTime (TimeValue *now) {
 #elif defined(HAVE_GETTIMEOFDAY)
   struct timeval tv;
 
-  if (gettimeofday(&tv, NULL) != -1) {
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  int result = gettimeofday(&tv, NULL);
+  #pragma GCC diagnostic pop
+
+  if (result != -1) {
     now->seconds = tv.tv_sec;
     now->nanoseconds = tv.tv_usec * NSECS_PER_USEC;
   } else {
