@@ -57,13 +57,40 @@ processParameters_WindowsScreen (char **parameters) {
 
 static int
 openStdHandles (void) {
-  if ((consoleOutput == INVALID_HANDLE_VALUE &&
-    (consoleOutput = CreateFile("CONOUT$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE)
-    ||(consoleInput == INVALID_HANDLE_VALUE &&
-    (consoleInput = CreateFile("CONIN$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE)) {
-    logWindowsSystemError("GetStdHandle");
-    return 0;
+  if (consoleOutput == INVALID_HANDLE_VALUE) {
+    consoleOutput = CreateFile(
+      "CONOUT$", // file name
+      (GENERIC_READ | GENERIC_WRITE), // desired access
+      (FILE_SHARE_READ | FILE_SHARE_WRITE), // share mode
+      NULL, // security attributes
+      OPEN_EXISTING, // creation disposition
+      0, // flags and attributes
+      NULL // template file
+    );
+
+    if (consoleOutput == INVALID_HANDLE_VALUE) {
+      logWindowsSystemError("CreateFile[CONOUT$]");
+      return 0;
+    }
   }
+
+  if (consoleInput == INVALID_HANDLE_VALUE) {
+    consoleInput = CreateFile(
+      "CONIN$", // file name
+      (GENERIC_READ | GENERIC_WRITE), // desired access
+      (FILE_SHARE_READ | FILE_SHARE_WRITE), // share mode
+      NULL, // security attributes
+      OPEN_EXISTING, // creation disposition
+      0, // flags and attributes
+      NULL // template file
+    );
+
+    if (consoleInput == INVALID_HANDLE_VALUE) {
+      logWindowsSystemError("CreateFile[CONIN$]");
+      return 0;
+    }
+  }
+
   return 1;
 }
 
@@ -80,14 +107,34 @@ tryToAttach (HWND win) {
 #define CONSOLEWINDOW "ConsoleWindowClass"
   static char class[] = CONSOLEWINDOW;
   DWORD process;
-  if (GetClassName(win, class, sizeof(class)) != strlen(CONSOLEWINDOW)
-      || memcmp(class,CONSOLEWINDOW,strlen(CONSOLEWINDOW)))
+
+  {
+    int ok = 0;
+
+    if (GetClassName(win, class, sizeof(class)) == strlen(CONSOLEWINDOW)) {
+      if (memcmp(class,CONSOLEWINDOW,strlen(CONSOLEWINDOW)) == 0) {
+        ok = 1;
+      }
+    }
+
+    if (!ok) {
+      logMessage(LOG_ERR, "incorrect class: %s != %s", class, CONSOLEWINDOW);
+      return 0;
+    }
+  }
+
+  if (!GetWindowThreadProcessId(win, &process)) {
+    logWindowsSystemError("GetWindowThreadProcessId");
     return 0;
-  if (!GetWindowThreadProcessId(win, &process))
-    return 0;
+  }
+
   FreeConsole();
-  if (!AttachConsoleProc(process))
+
+  if (!AttachConsoleProc(process)) {
+    logWindowsSystemError("AttachConsole");
     return 0;
+  }
+
   closeStdHandles();
   return openStdHandles();
 }
