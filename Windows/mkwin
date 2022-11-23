@@ -325,8 +325,10 @@ Technical notes on this build:
 
 cd "${buildRoot}"
 installFile "Documents/brltty.conf" "etc/"
-installFiles "Debug/" config.h config.mk Programs/*.exe Programs/*.dll
 installFile "Drivers/BrlAPI/WindowEyes/webrloem109.dll" "WindowEyes/"
+
+installFiles "Debug/" config.h config.mk config.log
+installFiles "Debug/" Programs/*.exe Programs/*.dll
 
 set -- Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.*.exe
 if [ "${#}" -gt 0 ]
@@ -509,7 +511,7 @@ then
             then
                case "${extension}"
                in
-                  bash | bat | cat | conf | csv | h | htm | html | inf | lua | mk | nsi | pc | policy | sh | tcl | txt | xml | [tcak]t[bi])
+                  bash | bat | cat | conf | csv | h | htm | html | inf | log | lua | mk | nsi | pc | policy | sh | tcl | txt | xml | [tcak]t[bi])
                      "${unix2dosPath}" -q -o "${path}"
                      ;;
 
