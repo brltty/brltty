@@ -66,6 +66,7 @@ BrlAPI Parameter Management
 ---------------------------
 
 .. include:: canute-table.help.rst
+.. include:: canute-cursor.help.rst
 .. include:: canute-parameter.help.rst
 
 BrlAPI Session Establishment

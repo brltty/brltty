@@ -44,6 +44,9 @@ canute-disable
 canute-table
    Manage which table is used to render text on the Canute's braille display.
 
+canute-cursor
+   Manage how the cursor is rendered on the Canute's braille display.
+
 canute-parameter
    Show/set the values of BrlAPI parameters.
 
