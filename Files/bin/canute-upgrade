@@ -14,5 +14,5 @@ needTemporaryDirectory
 executeHostCommand cd "${temporaryDirectory}"
 
 executeHostCommand cp "${installTree}/libexec/canute-install" .
-./canute-install
+sudo ./canute-install
 exit 0
