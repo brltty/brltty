@@ -24,10 +24,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  csUnderline,
-  csBlock,
+  csBottomDots,
+  csAllDots,
   csLowerLeftDot,
-  csLowerRightDot
+  csLowerRightDot,
+  csNoDots
 } CursorStyles;
 
 typedef enum {

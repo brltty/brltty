@@ -80,10 +80,11 @@ PREFERENCE_STRING_TABLE(autoreleaseTime,
 )
 
 PREFERENCE_STRING_TABLE(cursorStyle,
-  [csUnderline] = "underline",
-  [csBlock] = "block",
+  [csBottomDots] = "underline",
+  [csAllDots] = "block",
   [csLowerLeftDot] = "dot7",
   [csLowerRightDot] = "dot8",
+  [csNoDots] = "hide",
 )
 
 PREFERENCE_STRING_TABLE(brailleFirmness,

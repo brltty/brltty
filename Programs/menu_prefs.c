@@ -661,10 +661,11 @@ updateLogMessagesSubmenu (void) {
 static Menu *
 makePreferencesMenu (void) {
   static const MenuString cursorStyles[] = {
-    [csUnderline] = {.label=strtext("Underline"), .comment=strtext("dots 7 and 8")},
-    [csBlock] = {.label=strtext("Block"), .comment=strtext("all dots")},
+    [csBottomDots] = {.label=strtext("Underline"), .comment=strtext("dots 7 and 8")},
+    [csAllDots] = {.label=strtext("Block"), .comment=strtext("all dots")},
     [csLowerLeftDot] = {.label=strtext("Lower Left Dot"), .comment=strtext("dot 7")},
     [csLowerRightDot] = {.label=strtext("Lower Right Dot"), .comment=strtext("dot 8")},
+    [csNoDots] = {.label=strtext("Hide"), .comment=strtext("no dots")},
   };
 
   Menu *rootMenu = newMenu();
