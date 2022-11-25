@@ -2,10 +2,11 @@
 . /brltty/current/libexec/canute-prologue.sh
 
 declare -A cursorStyles=(
-   [block]=12345678
    [underline]=78
+   [block]=12345678
    [left]=7
    [right]=8
+   [hide]=0
 )
 
 showProgramUsagePurpose() {
@@ -16,11 +17,12 @@ END_OF_PROGRAM_USAGE_PURPOSE
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
+If this parameter isn't specified then the name of the current cursor style is shown.
 END_OF_PROGRAM_USAGE_NOTES
 }
 
 optionalProgramParameters
-addProgramParameter "cursor-style" styleName "the cursor style to switch to (${!cursorStyles[*]})"
+addProgramParameter "cursor-style" styleName "the name of the cursor style to switch to (${!cursorStyles[*]})"
 parseProgramArguments "${@}"
 set -e
 
