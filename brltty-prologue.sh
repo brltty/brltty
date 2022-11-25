@@ -264,7 +264,11 @@ stringWrapped() {
          paragraph=""
       }
 
-      [ -n "${string}" ] || break
+      [ -n "${string}" ] || {
+         [ -z "${line}" ] || result="${result} $(stringQuoted "${line}")"
+         break
+      }
+
       result="${result} $(stringQuoted "${line}")"
    done
 
