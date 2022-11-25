@@ -1,23 +1,16 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
-showUsageSummary() {
-cat <<END-OF-USAGE-SUMMARY
+handleInitialHelpOption "${@}" <<END-OF-HELP
 Run a BrlAPI Java client within a prepared environment.
 
-Usage: ${programName} {-h | [java-argument ...]}
+Syntax: ${programName} {-h | [java-argument ...]}
 
-The following options may be specified:
--h       show this command line usage summary, and then exit
-END-OF-USAGE-SUMMARY
-}
+Options:
+  -h       show this command line usage summary, and then exit
 
-[ "${#}" -gt 0 ] && {
-   [ "${1}" = "-h" ] && {
-      showUsageSummary
-      exit 0
-   }
-}
+All of the arguments are passed through to the java command.
+END-OF-HELP
 
 if [ -n "${DISPLAY}" ]
 then
