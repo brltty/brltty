@@ -655,6 +655,7 @@ processCommandLine (
 
     {
       const char *problem;
+      char message[0X100];
 
       case '?': // an unknown option has been specified
         info->syntaxError = 1;
@@ -672,7 +673,6 @@ processCommandLine (
         goto logOptionProblem;
 
       logOptionProblem:
-        char message[0X100];
         STR_BEGIN(message, sizeof(message));
 
         STR_PRINTF("%s: ", problem);
