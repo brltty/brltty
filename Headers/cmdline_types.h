@@ -69,7 +69,7 @@ typedef struct {
 static const CommandLineOption name##Table[] = { \
   { .word = "help", \
     .letter = 'h', \
-    .description = strtext("Show a usage summary that only contains commonly used options, and then exit.") \
+    .description = strtext("Show this usage summary, and then exit.") \
   },
 
 #define END_OPTION_TABLE(name) }; \
