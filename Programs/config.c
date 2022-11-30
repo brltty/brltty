@@ -375,18 +375,10 @@ static const char *const optionStrings_SpeechDriver[] = {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "start-message",
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("text"),
-    .setting.string = &opt_startMessage,
-    .description = strtext("The text to be shown when the braille driver starts and to be spoken when the speech driver starts.")
-  },
-
-  { .word = "stop-message",
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("text"),
-    .setting.string = &opt_stopMessage,
-    .description = strtext("The text to be shown when the braille driver stops.")
+  { .word = "version",
+    .letter = 'V',
+    .setting.flag = &opt_version,
+    .description = strtext("Log the versions of the core, API, and built-in drivers, and then exit.")
   },
 
   { .word = "environment-variables",
@@ -394,71 +386,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Hidden,
     .setting.flag = &opt_environmentVariables,
     .description = strtext("Recognize environment variables.")
-  },
-
-  { .word = "locale-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("directory"),
-    .setting.string = &opt_localeDirectory,
-    .internal.setting = LOCALE_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory which contains message localizations.")
-  },
-
-  { .word = "no-daemon",
-    .letter = 'n',
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_noDaemon,
-    .description = strtext("Remain a foreground process.")
-  },
-
-  { .word = "install-service",
-    .letter = 'I',
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_installService,
-    .description = strtext("Install the %s service, and then exit."),
-    .strings.array = optionStrings_InstallService
-  },
-
-  { .word = "remove-service",
-    .letter = 'R',
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_removeService,
-    .description = strtext("Remove the %s service, and then exit."),
-    .strings.array = optionStrings_RemoveService
-  },
-
-  { .word = "stay-privileged",
-    .letter = 'z',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .setting.flag = &opt_stayPrivileged,
-    .description = strtext("Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc).")
-  },
-
-  { .word = "privilege-parameters",
-    .letter = 'Z',
-    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar,
-    .argument = strtext("name=value,..."),
-    .setting.string = &opt_privilegeParameters,
-    .internal.setting = PRIVILEGE_PARAMETERS,
-    .description = strtext("Parameters for the privilege establishment stage.")
-  },
-
-  { .word = "cancel-execution",
-    .letter = 'C',
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_cancelExecution,
-    .description = strtext("Stop an existing instance of %s, and then exit."),
-    .strings.array = optionStrings_CancelExecution
-  },
-
-  { .word = "pid-file",
-    .letter = 'P',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("file"),
-    .setting.string = &opt_pidFile,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to process identifier file.")
   },
 
   { .word = "configuration-file",
@@ -470,78 +397,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.adjust = fixInstallPath,
     .description = strtext("Path to default settings file.")
   },
-
-  { .word = "preferences-file",
-    .letter = 'F',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("file"),
-    .setting.string = &opt_preferencesFile,
-    .internal.setting = PREFERENCES_FILE,
-    .description = strtext("Name of or path to default preferences file.")
-  },
-
-  { .word = "override-preferences",
-    .letter = 'o',
-    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
-    .argument = strtext("name=value,..."),
-    .setting.string = &opt_overridePreferences,
-    .description = strtext("Explicit preference settings.")
-  },
-
-  { .word = "prompt-patterns",
-    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
-    .argument = strtext("regexp,..."),
-    .setting.string = &opt_promptPatterns,
-    .description = strtext("Patterns that match command prompts.")
-  },
-
-  { .word = "updatable-directory",
-    .letter = 'U',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("directory"),
-    .setting.string = &opt_updatableDirectory,
-    .internal.setting = UPDATABLE_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory which contains files that can be updated.")
-  },
-
-  { .word = "writable-directory",
-    .letter = 'W',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("directory"),
-    .setting.string = &opt_writableDirectory,
-    .internal.setting = WRITABLE_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory which can be written to.")
-  },
-
-  { .word = "drivers-directory",
-    .letter = 'D',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("directory"),
-    .setting.string = &opt_driversDirectory,
-    .internal.setting = DRIVERS_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory containing drivers.")
-  },
-
-#ifdef ENABLE_API
-  { .word = "no-api",
-    .letter = 'N',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .setting.flag = &opt_noApi,
-    .description = strtext("Disable the application programming interface.")
-  },
-
-  { .word = "api-parameters",
-    .letter = 'A',
-    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
-    .argument = strtext("name=value,..."),
-    .setting.string = &opt_apiParameters,
-    .internal.setting = API_PARAMETERS,
-    .description = strtext("Parameters for the application programming interface.")
-  },
-#endif /* ENABLE_API */
 
   { .word = "braille-driver",
     .letter = 'b',
@@ -586,16 +441,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Release braille device when screen or window is unreadable.")
   },
 
-  { .word = "tables-directory",
-    .letter = 'T',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("directory"),
-    .setting.string = &opt_tablesDirectory,
-    .internal.setting = TABLES_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory containing tables.")
-  },
-
   { .word = "text-table",
     .letter = 't',
     .bootParameter = 3,
@@ -622,23 +467,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("file"),
     .setting.string = &opt_attributesTable,
     .description = strtext("Name of or path to attributes table.")
-  },
-
-  { .word = "keyboard-table",
-    .letter = 'k',
-    .flags = OPT_Config | OPT_EnvVar,
-    .argument = strtext("file"),
-    .setting.string = &opt_keyboardTable,
-    .internal.setting = optionOperand_off,
-    .description = strtext("Name of or path to keyboard table.")
-  },
-
-  { .word = "keyboard-properties",
-    .letter = 'K',
-    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar,
-    .argument = strtext("name=value,..."),
-    .setting.string = &opt_keyboardProperties,
-    .description = strtext("Properties of eligible keyboards.")
   },
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -675,14 +503,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_quietIfNoBraille,
     .description = strtext("Do not autospeak when braille is not being used.")
   },
-
-  { .word = "autospeak-threshold",
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar | OPT_Format,
-    .argument = strtext("quality"),
-    .setting.string = &opt_autospeakThreshold,
-    .description = strtext("Minimum screen content quality to autospeak (one of {%s})."),
-    .strings.format = formatScreenContentQualityChoices
-  },
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   { .word = "screen-driver",
@@ -704,40 +524,65 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Parameters for the screen driver.")
   },
 
-#ifdef HAVE_PCM_SUPPORT
-  { .word = "pcm-device",
-    .letter = 'p',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("device"),
-    .setting.string = &opt_pcmDevice,
-    .description = strtext("PCM (soundcard digital audio) device specifier.")
-  },
-#endif /* HAVE_PCM_SUPPORT */
-
-#ifdef HAVE_MIDI_SUPPORT
-  { .word = "midi-device",
-    .letter = 'm',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("device"),
-    .setting.string = &opt_midiDevice,
-    .description = strtext("MIDI (Musical Instrument Digital Interface) device specifier.")
-  },
-#endif /* HAVE_MIDI_SUPPORT */
-
-  { .word = "message-time",
-    .letter = 'M',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
-    .argument = strtext("csecs"),
-    .setting.string = &opt_messageTime,
-    .description = strtext("Message hold timeout (in 10ms units).")
+  { .word = "autospeak-threshold",
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar | OPT_Format,
+    .argument = strtext("quality"),
+    .setting.string = &opt_autospeakThreshold,
+    .description = strtext("Minimum screen content quality to autospeak (one of {%s})."),
+    .strings.format = formatScreenContentQualityChoices
   },
 
-  { .word = "standard-error",
-    .letter = 'e',
-    .flags = OPT_Hidden,
-    .setting.flag = &opt_standardError,
-    .description = strtext("Log to standard error rather than to the system log.")
+  { .word = "keyboard-table",
+    .letter = 'k',
+    .flags = OPT_Config | OPT_EnvVar,
+    .argument = strtext("file"),
+    .setting.string = &opt_keyboardTable,
+    .internal.setting = optionOperand_off,
+    .description = strtext("Name of or path to keyboard table.")
   },
+
+  { .word = "keyboard-properties",
+    .letter = 'K',
+    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar,
+    .argument = strtext("name=value,..."),
+    .setting.string = &opt_keyboardProperties,
+    .description = strtext("Properties of eligible keyboards.")
+  },
+
+  { .word = "preferences-file",
+    .letter = 'F',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("file"),
+    .setting.string = &opt_preferencesFile,
+    .internal.setting = PREFERENCES_FILE,
+    .description = strtext("Name of or path to default preferences file.")
+  },
+
+  { .word = "override-preferences",
+    .letter = 'o',
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
+    .argument = strtext("name=value,..."),
+    .setting.string = &opt_overridePreferences,
+    .description = strtext("Explicit preference settings.")
+  },
+
+#ifdef ENABLE_API
+  { .word = "no-api",
+    .letter = 'N',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .setting.flag = &opt_noApi,
+    .description = strtext("Disable the application programming interface.")
+  },
+
+  { .word = "api-parameters",
+    .letter = 'A',
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
+    .argument = strtext("name=value,..."),
+    .setting.string = &opt_apiParameters,
+    .internal.setting = API_PARAMETERS,
+    .description = strtext("Parameters for the application programming interface.")
+  },
+#endif /* ENABLE_API */
 
   { .word = "quiet",
     .letter = 'q',
@@ -763,16 +608,171 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to log file.")
   },
 
+  { .word = "standard-error",
+    .letter = 'e',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_standardError,
+    .description = strtext("Log to standard error rather than to the system log.")
+  },
+
+  { .word = "no-daemon",
+    .letter = 'n',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_noDaemon,
+    .description = strtext("Remain a foreground process.")
+  },
+
+  { .word = "stay-privileged",
+    .letter = 'z',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .setting.flag = &opt_stayPrivileged,
+    .description = strtext("Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc).")
+  },
+
+  { .word = "privilege-parameters",
+    .letter = 'Z',
+    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar,
+    .argument = strtext("name=value,..."),
+    .setting.string = &opt_privilegeParameters,
+    .internal.setting = PRIVILEGE_PARAMETERS,
+    .description = strtext("Parameters for the privilege establishment stage.")
+  },
+
+  { .word = "message-time",
+    .letter = 'M',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("csecs"),
+    .setting.string = &opt_messageTime,
+    .description = strtext("Message hold timeout (in 10ms units).")
+  },
+
+  { .word = "start-message",
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("text"),
+    .setting.string = &opt_startMessage,
+    .description = strtext("The text to be shown when the braille driver starts and to be spoken when the speech driver starts.")
+  },
+
+  { .word = "stop-message",
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("text"),
+    .setting.string = &opt_stopMessage,
+    .description = strtext("The text to be shown when the braille driver stops.")
+  },
+
+  { .word = "prompt-patterns",
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
+    .argument = strtext("regexp,..."),
+    .setting.string = &opt_promptPatterns,
+    .description = strtext("Patterns that match command prompts.")
+  },
+
+#ifdef HAVE_PCM_SUPPORT
+  { .word = "pcm-device",
+    .letter = 'p',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("device"),
+    .setting.string = &opt_pcmDevice,
+    .description = strtext("PCM (soundcard digital audio) device specifier.")
+  },
+#endif /* HAVE_PCM_SUPPORT */
+
+#ifdef HAVE_MIDI_SUPPORT
+  { .word = "midi-device",
+    .letter = 'm',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("device"),
+    .setting.string = &opt_midiDevice,
+    .description = strtext("MIDI (Musical Instrument Digital Interface) device specifier.")
+  },
+#endif /* HAVE_MIDI_SUPPORT */
+
+  { .word = "tables-directory",
+    .letter = 'T',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("directory"),
+    .setting.string = &opt_tablesDirectory,
+    .internal.setting = TABLES_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory containing tables.")
+  },
+
+  { .word = "drivers-directory",
+    .letter = 'D',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("directory"),
+    .setting.string = &opt_driversDirectory,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory containing drivers.")
+  },
+
+  { .word = "updatable-directory",
+    .letter = 'U',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("directory"),
+    .setting.string = &opt_updatableDirectory,
+    .internal.setting = UPDATABLE_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory which contains files that can be updated.")
+  },
+
+  { .word = "writable-directory",
+    .letter = 'W',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("directory"),
+    .setting.string = &opt_writableDirectory,
+    .internal.setting = WRITABLE_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory which can be written to.")
+  },
+
+  { .word = "locale-directory",
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("directory"),
+    .setting.string = &opt_localeDirectory,
+    .internal.setting = LOCALE_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory which contains message localizations.")
+  },
+
+  { .word = "pid-file",
+    .letter = 'P',
+    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .argument = strtext("file"),
+    .setting.string = &opt_pidFile,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to process identifier file.")
+  },
+
+  { .word = "cancel-execution",
+    .letter = 'C',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_cancelExecution,
+    .description = strtext("Stop an existing instance of %s, and then exit."),
+    .strings.array = optionStrings_CancelExecution
+  },
+
+  { .word = "install-service",
+    .letter = 'I',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_installService,
+    .description = strtext("Install the %s service, and then exit."),
+    .strings.array = optionStrings_InstallService
+  },
+
+  { .word = "remove-service",
+    .letter = 'R',
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_removeService,
+    .description = strtext("Remove the %s service, and then exit."),
+    .strings.array = optionStrings_RemoveService
+  },
+
   { .word = "verify",
     .letter = 'v',
     .setting.flag = &opt_verify,
     .description = strtext("Write the start-up logs, and then exit.")
-  },
-
-  { .word = "version",
-    .letter = 'V',
-    .setting.flag = &opt_version,
-    .description = strtext("Log the versions of the core, API, and built-in drivers, and then exit.")
   },
 END_OPTION_TABLE(programOptions)
 
