@@ -84,7 +84,6 @@ BEGIN_OPTION_TABLE(programOptions)
 #ifdef HAVE_PCM_SUPPORT
   { .word = "pcm-device",
     .letter = 'p',
-    .flags = OPT_Hidden,
     .argument = "device",
     .setting.string = &opt_pcmDevice,
     .description = "Device specifier for soundcard digital audio."
@@ -94,7 +93,6 @@ BEGIN_OPTION_TABLE(programOptions)
 #ifdef HAVE_MIDI_SUPPORT
   { .word = "midi-device",
     .letter = 'm',
-    .flags = OPT_Hidden,
     .argument = "device",
     .setting.string = &opt_midiDevice,
     .description = "Device specifier for the Musical Instrument Digital Interface."

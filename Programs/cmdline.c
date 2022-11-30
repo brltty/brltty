@@ -256,35 +256,32 @@ showSyntax (
 static void
 showOptions (
   FILE *stream, char *line, unsigned int lineWidth,
-  OptionProcessingInformation *info,
-  int showHiddenOptions
+  OptionProcessingInformation *info
 ) {
-  int foundOption = 0;
-  unsigned int letterWidth = 0;
-  unsigned int wordWidth = 0;
-  unsigned int argumentWidth = 0;
+  size_t optionCount = info->options->count;
 
-  for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
-    const CommandLineOption *option = &info->options->table[optionIndex];
-    if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
-    foundOption = 1;
+  if (info->options->count > 0) {
+    unsigned int letterWidth = 0;
+    unsigned int wordWidth = 0;
+    unsigned int argumentWidth = 0;
 
-    if (option->word) {
-      unsigned int length = strlen(option->word);
-      if (option->argument) length += 1;
-      wordWidth = MAX(wordWidth, length);
+    for (unsigned int optionIndex=0; optionIndex<optionCount; optionIndex+=1) {
+      const CommandLineOption *option = &info->options->table[optionIndex];
+
+      if (option->word) {
+        unsigned int length = strlen(option->word);
+        if (option->argument) length += 1;
+        wordWidth = MAX(wordWidth, length);
+      }
+
+      if (option->letter) letterWidth = 2;
+      if (option->argument) argumentWidth = MAX(argumentWidth, strlen(gettext(option->argument)));
     }
 
-    if (option->letter) letterWidth = 2;
-    if (option->argument) argumentWidth = MAX(argumentWidth, strlen(gettext(option->argument)));
-  }
-
-  if (foundOption) {
     fprintf(stream, "\n%s:\n", gettext("Options"));
 
-    for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
+    for (unsigned int optionIndex=0; optionIndex<optionCount; optionIndex+=1) {
       const CommandLineOption *option = &info->options->table[optionIndex];
-      if (!showHiddenOptions && (option->flags & OPT_Hidden)) continue;
 
       unsigned int lineLength = 0;
       while (lineLength < 2) line[lineLength++] = ' ';
@@ -504,9 +501,7 @@ processCommandLine (
   opterr = 0;
   optind = 1;
   int lastOptInd = -1;
-
   int optHelp = 0;
-  int optHelpAll = 0;
 
   while (1) {
     int letter;
@@ -710,9 +705,6 @@ processCommandLine (
         break;
     }
 
-      case 'H': // full help
-        optHelpAll = 1;
-        /* fall through */
       case 'h': // help - show usage summary and then exit
         optHelp = 1;
         break;
@@ -739,7 +731,7 @@ processCommandLine (
     }
 
     showSyntax(usageStream, !!info->options->count, usage->parameters);
-    showOptions(usageStream, line, width, info, optHelpAll);
+    showOptions(usageStream, line, width, info);
 
     {
       const char *const *const *notes = usage->notes;

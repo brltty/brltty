@@ -96,28 +96,24 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "log-input",
     .letter = 'I',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_logInput,
     .description = strtext("log input written to the pty slave")
   },
 
   { .word = "log-output",
     .letter = 'O',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_logOutput,
     .description = strtext("log output received from the pty slave that isn't an escape sequence or a special character")
   },
 
   { .word = "log-sequences",
     .letter = 'S',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_logSequences,
     .description = strtext("log escape sequences and special characters received from the pty slave")
   },
 
   { .word = "log-unexpected",
     .letter = 'U',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_logUnexpected,
     .description = strtext("log unexpected input/output")
   },

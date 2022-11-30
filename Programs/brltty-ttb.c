@@ -179,7 +179,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "tables-directory",
     .letter = 'T',
-    .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,

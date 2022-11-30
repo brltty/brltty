@@ -383,7 +383,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "environment-variables",
     .letter = 'E',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_environmentVariables,
     .description = strtext("Recognize environment variables.")
   },
@@ -431,7 +430,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "release-device",
     .letter = 'r',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_releaseDevice,
 #ifdef WINDOWS
     .internal.setting = OPT_WORD_TRUE,
@@ -491,7 +490,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "speech-input",
     .letter = 'i',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_speechInput,
     .description = strtext("Name of or path to speech input object.")
@@ -499,7 +498,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "quiet-if-no-braille",
     .letter = 'Q',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_quietIfNoBraille,
     .description = strtext("Do not autospeak when braille is not being used.")
   },
@@ -525,7 +524,7 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
   { .word = "autospeak-threshold",
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar | OPT_Format,
+    .flags = OPT_Config | OPT_EnvVar | OPT_Format,
     .argument = strtext("quality"),
     .setting.string = &opt_autospeakThreshold,
     .description = strtext("Minimum screen content quality to autospeak (one of {%s})."),
@@ -543,7 +542,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "keyboard-properties",
     .letter = 'K',
-    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_keyboardProperties,
     .description = strtext("Properties of eligible keyboards.")
@@ -551,7 +550,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "preferences-file",
     .letter = 'F',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_preferencesFile,
     .internal.setting = PREFERENCES_FILE,
@@ -569,7 +568,7 @@ BEGIN_OPTION_TABLE(programOptions)
 #ifdef ENABLE_API
   { .word = "no-api",
     .letter = 'N',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_noApi,
     .description = strtext("Disable the application programming interface.")
   },
@@ -593,7 +592,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "log-level",
     .letter = 'l',
-    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar | OPT_Format,
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar | OPT_Format,
     .argument = strtext("lvl|cat,..."),
     .setting.string = &opt_logLevel,
     .description = strtext("Logging level (%s or one of {%s}) and/or log categories to enable (any combination of {%s}, each optionally prefixed by %s to disable)."),
@@ -602,7 +601,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "log-file",
     .letter = 'L',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_logFile,
     .description = strtext("Path to log file.")
@@ -610,28 +609,26 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "standard-error",
     .letter = 'e',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_standardError,
     .description = strtext("Log to standard error rather than to the system log.")
   },
 
   { .word = "no-daemon",
     .letter = 'n',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_noDaemon,
     .description = strtext("Remain a foreground process.")
   },
 
   { .word = "stay-privileged",
     .letter = 'z',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .setting.flag = &opt_stayPrivileged,
     .description = strtext("Don't switch to an unprivileged user or relinquish any privileges (group memberships, capabilities, etc).")
   },
 
   { .word = "privilege-parameters",
     .letter = 'Z',
-    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Extend | OPT_Config | OPT_EnvVar,
     .argument = strtext("name=value,..."),
     .setting.string = &opt_privilegeParameters,
     .internal.setting = PRIVILEGE_PARAMETERS,
@@ -640,21 +637,21 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "message-time",
     .letter = 'M',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("csecs"),
     .setting.string = &opt_messageTime,
     .description = strtext("Message hold timeout (in 10ms units).")
   },
 
   { .word = "start-message",
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("text"),
     .setting.string = &opt_startMessage,
     .description = strtext("The text to be shown when the braille driver starts and to be spoken when the speech driver starts.")
   },
 
   { .word = "stop-message",
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("text"),
     .setting.string = &opt_stopMessage,
     .description = strtext("The text to be shown when the braille driver stops.")
@@ -670,7 +667,7 @@ BEGIN_OPTION_TABLE(programOptions)
 #ifdef HAVE_PCM_SUPPORT
   { .word = "pcm-device",
     .letter = 'p',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("device"),
     .setting.string = &opt_pcmDevice,
     .description = strtext("PCM (soundcard digital audio) device specifier.")
@@ -680,7 +677,7 @@ BEGIN_OPTION_TABLE(programOptions)
 #ifdef HAVE_MIDI_SUPPORT
   { .word = "midi-device",
     .letter = 'm',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("device"),
     .setting.string = &opt_midiDevice,
     .description = strtext("MIDI (Musical Instrument Digital Interface) device specifier.")
@@ -689,7 +686,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "tables-directory",
     .letter = 'T',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,
@@ -699,7 +696,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "drivers-directory",
     .letter = 'D',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
     .internal.setting = DRIVERS_DIRECTORY,
@@ -709,7 +706,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "updatable-directory",
     .letter = 'U',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("directory"),
     .setting.string = &opt_updatableDirectory,
     .internal.setting = UPDATABLE_DIRECTORY,
@@ -719,7 +716,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "writable-directory",
     .letter = 'W',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("directory"),
     .setting.string = &opt_writableDirectory,
     .internal.setting = WRITABLE_DIRECTORY,
@@ -728,7 +725,7 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
   { .word = "locale-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("directory"),
     .setting.string = &opt_localeDirectory,
     .internal.setting = LOCALE_DIRECTORY,
@@ -738,7 +735,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "pid-file",
     .letter = 'P',
-    .flags = OPT_Hidden | OPT_Config | OPT_EnvVar,
+    .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_pidFile,
     .internal.adjust = fixInstallPath,
@@ -747,7 +744,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "cancel-execution",
     .letter = 'C',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_cancelExecution,
     .description = strtext("Stop an existing instance of %s, and then exit."),
     .strings.array = optionStrings_CancelExecution
@@ -755,7 +751,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "install-service",
     .letter = 'I',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_installService,
     .description = strtext("Install the %s service, and then exit."),
     .strings.array = optionStrings_InstallService
@@ -763,7 +758,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "remove-service",
     .letter = 'R',
-    .flags = OPT_Hidden,
     .setting.flag = &opt_removeService,
     .description = strtext("Remove the %s service, and then exit."),
     .strings.array = optionStrings_RemoveService

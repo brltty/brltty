@@ -72,7 +72,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "tables-directory",
     .letter = 'T',
-    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,

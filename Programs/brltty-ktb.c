@@ -73,7 +73,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "tables-directory",
     .letter = 'T',
-    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,
@@ -83,7 +82,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "drivers-directory",
     .letter = 'D',
-    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
     .internal.setting = DRIVERS_DIRECTORY,

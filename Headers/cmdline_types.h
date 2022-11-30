@@ -29,11 +29,10 @@ extern "C" {
 #define OPT_WORD_FALSE "off"
 
 typedef enum {
-  OPT_Hidden	= 0X01,
-  OPT_Extend	= 0X02,
-  OPT_Config	= 0X04,
-  OPT_EnvVar	= 0X08,
-  OPT_Format  	= 0X10
+  OPT_Extend	= 0X01,
+  OPT_Config	= 0X02,
+  OPT_EnvVar	= 0X04,
+  OPT_Format  	= 0X08,
 } CommandLineOptionFlag;
 
 typedef struct {
@@ -71,10 +70,6 @@ static const CommandLineOption name##Table[] = { \
   { .word = "help", \
     .letter = 'h', \
     .description = strtext("Show a usage summary that only contains commonly used options, and then exit.") \
-  }, \
-  { .word = "full-help", \
-    .letter = 'H', \
-    .description = strtext("Show a usage summary that contains all of the options, and then exit.") \
   },
 
 #define END_OPTION_TABLE(name) }; \

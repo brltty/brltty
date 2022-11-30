@@ -71,7 +71,6 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "drivers-directory",
     .letter = 'D',
-    .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
     .internal.setting = DRIVERS_DIRECTORY,
