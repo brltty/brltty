@@ -41,16 +41,6 @@ static char *opt_pcmDevice;
 static char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "drivers-directory",
-    .letter = 'D',
-    .flags = OPT_Hidden,
-    .argument = "directory",
-    .setting.string = &opt_driversDirectory,
-    .internal.setting = DRIVERS_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = "Path to directory for loading drivers."
-  },
-
   { .word = "text-string",
     .letter = 't',
     .argument = "string",
@@ -77,6 +67,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "device",
     .setting.string = &opt_pcmDevice,
     .description = "Digital audio soundcard device specifier."
+  },
+
+  { .word = "drivers-directory",
+    .letter = 'D',
+    .flags = OPT_Hidden,
+    .argument = "directory",
+    .setting.string = &opt_driversDirectory,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = "Path to directory for loading drivers."
   },
 END_OPTION_TABLE(programOptions)
 

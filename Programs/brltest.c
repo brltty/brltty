@@ -48,14 +48,12 @@ static char *opt_tablesDirectory;
 static char *opt_writableDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "drivers-directory",
-    .letter = 'D',
-    .flags = OPT_Hidden,
-    .argument = "directory",
-    .setting.string = &opt_driversDirectory,
-    .internal.setting = DRIVERS_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = "Path to directory for loading drivers."
+  { .word = "device",
+    .letter = 'd',
+    .argument = "device",
+    .setting.string = &opt_brailleDevice,
+    .internal.setting = BRAILLE_DEVICE,
+    .description = "Path to device for accessing braille display."
   },
 
   { .word = "tables-directory",
@@ -68,6 +66,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory containing tables.")
   },
 
+  { .word = "drivers-directory",
+    .letter = 'D',
+    .flags = OPT_Hidden,
+    .argument = "directory",
+    .setting.string = &opt_driversDirectory,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = "Path to directory for loading drivers."
+  },
+
   { .word = "writable-directory",
     .letter = 'W',
     .flags = OPT_Hidden,
@@ -76,14 +84,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .internal.setting = WRITABLE_DIRECTORY,
     .internal.adjust = fixInstallPath,
     .description = strtext("Path to directory which can be written to.")
-  },
-
-  { .word = "device",
-    .letter = 'd',
-    .argument = "device",
-    .setting.string = &opt_brailleDevice,
-    .internal.setting = BRAILLE_DEVICE,
-    .description = "Path to device for accessing braille display."
   },
 END_OPTION_TABLE(programOptions)
 

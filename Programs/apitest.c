@@ -44,17 +44,33 @@ static brlapi_connectionSettings_t settings;
 static char *opt_host;
 static char *opt_auth;
 
-static int opt_learnMode;
-static int opt_showDots;
 static int opt_showName;
 static int opt_showModelIdentifier;
 static int opt_showSize;
+
+static int opt_showDots;
 static int opt_showKeyCodes;
-static int opt_suspendMode;
+static int opt_learnMode;
 static int opt_parameters;
+
+static int opt_suspendMode;
 static int opt_threadMode;
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .word = "brlapi",
+    .letter = 'b',
+    .argument = "[host][:port]",
+    .setting.string = &opt_host,
+    .description = "BrlAPIa host and/or port to connect to."
+  },
+
+  { .word = "auth",
+    .letter = 'a',
+    .argument = "scheme+...",
+    .setting.string = &opt_auth,
+    .description = "BrlAPI authorization/authentication schemes."
+  },
+
   { .word = "name",
     .letter = 'n',
     .setting.flag = &opt_showName,
@@ -66,7 +82,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_showModelIdentifier,
     .description = "Show the model identifier of the braille device."
   },
-
 
   { .word = "window",
     .letter = 'w',
@@ -80,22 +95,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Show dot pattern."
   },
 
-  { .word = "learn",
-    .letter = 'l',
-    .setting.flag = &opt_learnMode,
-    .description = "Enter interactive command learn mode."
-  },
-
   { .word = "keycodes",
     .letter = 'k',
     .setting.flag = &opt_showKeyCodes,
     .description = "Enter interactive keycode learn mode."
   },
 
-  { .word = "suspend",
-    .letter = 's',
-    .setting.flag = &opt_suspendMode,
-    .description = "Suspend the braille driver (press ^C or send SIGUSR1 to resume)."
+  { .word = "learn",
+    .letter = 'l',
+    .setting.flag = &opt_learnMode,
+    .description = "Enter interactive command learn mode."
   },
 
   { .word = "parameters",
@@ -104,24 +113,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Test parameters"
   },
 
+  { .word = "suspend",
+    .letter = 's',
+    .setting.flag = &opt_suspendMode,
+    .description = "Suspend the braille driver (press ^C or send SIGUSR1 to resume)."
+  },
+
   { .word = "thread",
     .letter = 't',
     .setting.flag = &opt_threadMode,
     .description = "Exercise threaded use"
-  },
-
-  { .word = "brlapi",
-    .letter = 'b',
-    .argument = "[host][:port]",
-    .setting.string = &opt_host,
-    .description = "BrlAPIa host and/or port to connect to."
-  },
-
-  { .word = "auth",
-    .letter = 'a',
-    .argument = "scheme+...",
-    .setting.string = &opt_auth,
-    .description = "BrlAPI authorization/authentication schemes."
   },
 END_OPTION_TABLE(programOptions)
 
@@ -225,39 +226,6 @@ static void showDots(void)
   }
 }
 
-static void enterLearnMode(void)
-{
-  int res;
-  brlapi_keyCode_t code;
-  int cmd;
-  char buf[0X100], *val;
-
-  fprintf(stderr,"Entering command learn mode\n");
-  if (brlapi_enterTtyMode(-1, NULL)<0) {
-    brlapi_perror("enterTtyMode");
-    return;
-  }
-
-  if (brlapi_writeText(BRLAPI_CURSOR_OFF, "command learn mode")<0) {
-    brlapi_perror("brlapi_writeText");
-    exit(PROG_EXIT_FATAL);
-  }
-
-  while ((res = brlapi_readKey(1, &code)) != -1) {
-    fprintf(stderr, "got key %016"BRLAPI_PRIxKEYCODE"\n",code);
-    cmd = cmdBrlapiToBrltty(code);
-    describeCommand(buf, sizeof(buf), cmd,
-                    (CDO_IncludeName | CDO_IncludeOperand));
-    brlapi_writeText(BRLAPI_CURSOR_OFF, buf);
-    fprintf(stderr, "%s\n", buf);
-    val = brlapi_getParameterAlloc(BRLAPI_PARAM_COMMAND_LONG_NAME, cmd, BRLAPI_PARAMF_GLOBAL, NULL);
-    fprintf(stderr, "%s\n", val);
-    free(val);
-    if (cmd==BRL_CMD_LEARN) return;
-  }
-  brlapi_perror("brlapi_readKey");
-}
-
 static char *getKeyName (brlapi_keyCode_t key)
 {
   return brlapi_getParameterAlloc(BRLAPI_PARAM_KEY_SHORT_NAME, (key & ~BRLAPI_DRV_KEY_PRESS), BRLAPI_PARAMF_GLOBAL, NULL);
@@ -340,45 +308,37 @@ static void showKeyCodes(void)
   if (res < 0) brlapi_perror("brlapi_readKey");
 }
 
-#ifdef SIGUSR1
-static void emptySignalHandler(int sig) { }
-#endif /* SIGUSR1 */
-
-static void suspendDriver(void)
+static void enterLearnMode(void)
 {
-  char driver[30];
-  fprintf(stderr, "Getting driver name: ");
+  int res;
+  brlapi_keyCode_t code;
+  int cmd;
+  char buf[0X100], *val;
 
-  if (brlapi_getDriverName(driver, sizeof(driver))<0) {
-    brlapi_perror("failed");
+  fprintf(stderr,"Entering command learn mode\n");
+  if (brlapi_enterTtyMode(-1, NULL)<0) {
+    brlapi_perror("enterTtyMode");
+    return;
+  }
+
+  if (brlapi_writeText(BRLAPI_CURSOR_OFF, "command learn mode")<0) {
+    brlapi_perror("brlapi_writeText");
     exit(PROG_EXIT_FATAL);
   }
-  fprintf(stderr, "%s\n", driver);
 
-  fprintf(stderr, "Suspending driver\n");
-  if (brlapi_suspendDriver(driver)) {
-    brlapi_perror("suspend");
-  } else {
-#ifdef SIGUSR1
-    signal(SIGUSR1,emptySignalHandler);
-#endif /* SIGUSR1 */
-
-    {
-      ProcessIdentifier pid = getProcessIdentifier();
-      fprintf(stderr, "Waiting (to resume, send SIGUSR1 to process %"PRIpid")\n", pid);
-    }
-
-    brlapi_pause(-1);
-
-#ifdef SIGUSR1
-    signal(SIGUSR1,SIG_DFL);
-#endif /* SIGUSR1 */
-
-    fprintf(stderr, "Resuming driver\n");
-    if (brlapi_resumeDriver()) {
-      brlapi_perror("resumeDriver");
-    }
+  while ((res = brlapi_readKey(1, &code)) != -1) {
+    fprintf(stderr, "got key %016"BRLAPI_PRIxKEYCODE"\n",code);
+    cmd = cmdBrlapiToBrltty(code);
+    describeCommand(buf, sizeof(buf), cmd,
+                    (CDO_IncludeName | CDO_IncludeOperand));
+    brlapi_writeText(BRLAPI_CURSOR_OFF, buf);
+    fprintf(stderr, "%s\n", buf);
+    val = brlapi_getParameterAlloc(BRLAPI_PARAM_COMMAND_LONG_NAME, cmd, BRLAPI_PARAMF_GLOBAL, NULL);
+    fprintf(stderr, "%s\n", val);
+    free(val);
+    if (cmd==BRL_CMD_LEARN) return;
   }
+  brlapi_perror("brlapi_readKey");
 }
 
 static void brailleRetainDotsChanged(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, void *priv, const void *data, size_t len)
@@ -423,6 +383,47 @@ static void testParameters(void)
   printf("retain dots now %d\n", val);
 
   listKeys();
+}
+
+#ifdef SIGUSR1
+static void emptySignalHandler(int sig) { }
+#endif /* SIGUSR1 */
+
+static void suspendDriver(void)
+{
+  char driver[30];
+  fprintf(stderr, "Getting driver name: ");
+
+  if (brlapi_getDriverName(driver, sizeof(driver))<0) {
+    brlapi_perror("failed");
+    exit(PROG_EXIT_FATAL);
+  }
+  fprintf(stderr, "%s\n", driver);
+
+  fprintf(stderr, "Suspending driver\n");
+  if (brlapi_suspendDriver(driver)) {
+    brlapi_perror("suspend");
+  } else {
+#ifdef SIGUSR1
+    signal(SIGUSR1,emptySignalHandler);
+#endif /* SIGUSR1 */
+
+    {
+      ProcessIdentifier pid = getProcessIdentifier();
+      fprintf(stderr, "Waiting (to resume, send SIGUSR1 to process %"PRIpid")\n", pid);
+    }
+
+    brlapi_pause(-1);
+
+#ifdef SIGUSR1
+    signal(SIGUSR1,SIG_DFL);
+#endif /* SIGUSR1 */
+
+    fprintf(stderr, "Resuming driver\n");
+    if (brlapi_resumeDriver()) {
+      brlapi_perror("resumeDriver");
+    }
+  }
 }
 
 volatile int thread_done;
@@ -508,20 +509,20 @@ main (int argc, char *argv[]) {
       showDots();
     }
 
-    if (opt_learnMode) {
-      enterLearnMode();
-    }
-
     if (opt_showKeyCodes) {
       showKeyCodes();
     }
 
-    if (opt_suspendMode) {
-      suspendDriver();
+    if (opt_learnMode) {
+      enterLearnMode();
     }
 
     if (opt_parameters) {
       testParameters();
+    }
+
+    if (opt_suspendMode) {
+      suspendDriver();
     }
 
     if (opt_threadMode) {

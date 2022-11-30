@@ -37,16 +37,6 @@ static char *opt_screenDriver;
 static char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "drivers-directory",
-    .letter = 'D',
-    .flags = OPT_Hidden,
-    .argument = "directory",
-    .setting.string = &opt_driversDirectory,
-    .internal.setting = DRIVERS_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = "Path to directory for loading drivers."
-  },
-
   { .word = "screen-driver",
     .letter = 'x',
     .argument = "driver",
@@ -81,6 +71,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "count",
     .setting.string = &opt_boxHeight,
     .description = "Height of region."
+  },
+
+  { .word = "drivers-directory",
+    .letter = 'D',
+    .flags = OPT_Hidden,
+    .argument = "directory",
+    .setting.string = &opt_driversDirectory,
+    .internal.setting = DRIVERS_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = "Path to directory for loading drivers."
   },
 END_OPTION_TABLE(programOptions)
 

@@ -142,16 +142,6 @@ static int opt_undefined;
 #endif /* HAVE_UNDEFINED_CHARACTERS_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "tables-directory",
-    .letter = 'T',
-    .flags = OPT_Hidden,
-    .argument = "directory",
-    .setting.string = &opt_tablesDirectory,
-    .internal.setting = TABLES_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory containing text tables.")
-  },
-
   { .word = "edit",
     .letter = 'e',
     .setting.flag = &opt_edit,
@@ -186,6 +176,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Report the characters within the current screen font that aren't defined within the text table.")
   },
 #endif /* HAVE_UNDEFINED_CHARACTERS_SUPPORT */
+
+  { .word = "tables-directory",
+    .letter = 'T',
+    .flags = OPT_Hidden,
+    .argument = "directory",
+    .setting.string = &opt_tablesDirectory,
+    .internal.setting = TABLES_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory containing text tables.")
+  },
 END_OPTION_TABLE(programOptions)
 
 static const BrlDotTable dotsInternal = {

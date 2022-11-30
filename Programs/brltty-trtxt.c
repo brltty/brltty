@@ -34,6 +34,7 @@
 static char *opt_tablesDirectory;
 static char *opt_inputTable;
 static char *opt_outputTable;
+
 static int opt_sixDots;
 static int opt_noBaseCharacters;
 
@@ -41,16 +42,6 @@ static const char tableName_autoselect[] = "auto";
 static const char tableName_unicode[] = "unicode";
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "tables-directory",
-    .letter = 'T',
-    .flags = OPT_Hidden,
-    .argument = strtext("directory"),
-    .setting.string = &opt_tablesDirectory,
-    .internal.setting = TABLES_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory for text tables.")
-  },
-
   { .word = "input-table",
     .letter = 'i',
     .argument = strtext("file"),
@@ -77,6 +68,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'b',
     .setting.flag = &opt_noBaseCharacters,
     .description = strtext("Don't fall back to the Unicode base character.")
+  },
+
+  { .word = "tables-directory",
+    .letter = 'T',
+    .flags = OPT_Hidden,
+    .argument = strtext("directory"),
+    .setting.string = &opt_tablesDirectory,
+    .internal.setting = TABLES_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory for text tables.")
   },
 END_OPTION_TABLE(programOptions)
 

@@ -39,19 +39,30 @@ static char *opt_tablesDirectory;
 static char *opt_contractionTable;
 static char *opt_textTable;
 static char *opt_verificationTable;
-static int opt_reformatText;
+
 static char *opt_outputWidth;
+static int opt_reformatText;
 static int opt_forceOutput;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .word = "tables-directory",
-    .letter = 'T',
-    .flags = OPT_Hidden,
-    .argument = strtext("directory"),
-    .setting.string = &opt_tablesDirectory,
-    .internal.setting = TABLES_DIRECTORY,
-    .internal.adjust = fixInstallPath,
-    .description = strtext("Path to directory containing tables.")
+  { .word = "output-width",
+    .letter = 'w',
+    .argument = "columns",
+    .setting.string = &opt_outputWidth,
+    .internal.setting = "",
+    .description = strtext("Maximum length of an output line.")
+  },
+
+  { .word = "reformat-text",
+    .letter = 'r',
+    .setting.flag = &opt_reformatText,
+    .description = strtext("Reformat input.")
+  },
+
+  { .word = "force-output",
+    .letter = 'f',
+    .setting.flag = &opt_forceOutput,
+    .description = strtext("Force immediate output.")
   },
 
   { .word = "contraction-table",
@@ -76,24 +87,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Contraction verification table.")
   },
 
-  { .word = "reformat-text",
-    .letter = 'r',
-    .setting.flag = &opt_reformatText,
-    .description = strtext("Reformat input.")
-  },
-
-  { .word = "output-width",
-    .letter = 'w',
-    .argument = "columns",
-    .setting.string = &opt_outputWidth,
-    .internal.setting = "",
-    .description = strtext("Maximum length of an output line.")
-  },
-
-  { .word = "force-output",
-    .letter = 'f',
-    .setting.flag = &opt_forceOutput,
-    .description = strtext("Force immediate output.")
+  { .word = "tables-directory",
+    .letter = 'T',
+    .flags = OPT_Hidden,
+    .argument = strtext("directory"),
+    .setting.string = &opt_tablesDirectory,
+    .internal.setting = TABLES_DIRECTORY,
+    .internal.adjust = fixInstallPath,
+    .description = strtext("Path to directory containing tables.")
   },
 END_OPTION_TABLE(programOptions)
 
