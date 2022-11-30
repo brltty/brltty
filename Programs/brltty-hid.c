@@ -185,7 +185,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'w',
     .argument = strtext("bytes"),
     .setting.string = &opt_writeReport,
-    .flags = OPT_Format,
     .description = strtext("Write (set) an output report (see below)."),
   },
 
@@ -193,7 +192,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'W',
     .argument = strtext("bytes"),
     .setting.string = &opt_writeFeature,
-    .flags = OPT_Format,
     .description = strtext("Write (set) a feature report (see below)."),
   },
 
