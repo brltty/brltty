@@ -701,7 +701,7 @@ makePreferencesMenu (void) {
     {
       static const MenuString strings[] = {
         {.label=strtext("Computer Braille")},
-        {.label=strtext("Contracted Braille")}
+        {.label=strtext("Contracted Braille")},
       };
 
       NAME(strtext("Braille Variant"));
@@ -731,7 +731,7 @@ makePreferencesMenu (void) {
     {
       static const MenuString strings[] = {
         {.label=strtext("8-dot")},
-        {.label=strtext("6-dot")}
+        {.label=strtext("6-dot")},
       };
 
       NAME(strtext("Computer Braille Cell Type"));
@@ -849,6 +849,7 @@ makePreferencesMenu (void) {
       NAME(strtext("Word Wrap"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.wordWrap, &itemName));
     }
+
     {
       NAME(strtext("Skip Identical Lines"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.skipIdenticalLines, &itemName));
@@ -911,12 +912,12 @@ makePreferencesMenu (void) {
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.trackScreenScroll, &itemName));
     }
 
-#ifdef HAVE_LIBGPM
+  #ifdef HAVE_LIBGPM
     {
       NAME(strtext("Track Screen Pointer"));
       ITEM(newBooleanMenuItem(navigationSubmenu, &prefs.trackScreenPointer, &itemName));
     }
-#endif /* HAVE_LIBGPM */
+  #endif /* HAVE_LIBGPM */
 
     {
       NAME(strtext("Highlight Braille Window Location"));
@@ -1066,15 +1067,15 @@ makePreferencesMenu (void) {
       CHANGED(TuneDevice);
     }
 
-#ifdef HAVE_PCM_SUPPORT
+  #ifdef HAVE_PCM_SUPPORT
     {
       NAME(strtext("PCM Volume"));
       ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.pcmVolume, &itemName));
       TEST(TunesPcm);
     }
-#endif /* HAVE_PCM_SUPPORT */
+  #endif /* HAVE_PCM_SUPPORT */
 
-#ifdef HAVE_MIDI_SUPPORT
+  #ifdef HAVE_MIDI_SUPPORT
     {
       NAME(strtext("MIDI Volume"));
       ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.midiVolume, &itemName));
@@ -1091,15 +1092,15 @@ makePreferencesMenu (void) {
         TEST(TunesMidi);
       }
     }
-#endif /* HAVE_MIDI_SUPPORT */
+  #endif /* HAVE_MIDI_SUPPORT */
 
-#ifdef HAVE_FM_SUPPORT
+  #ifdef HAVE_FM_SUPPORT
     {
       NAME(strtext("FM Volume"));
       ITEM(newVolumeMenuItem(alertsSubmenu, &prefs.fmVolume, &itemName));
       TEST(TunesFm);
     }
-#endif /* HAVE_FM_SUPPORT */
+  #endif /* HAVE_FM_SUPPORT */
 
     {
       NAME(strtext("Alert Dots"));
@@ -1372,7 +1373,7 @@ makePreferencesMenu (void) {
     }
 
     {
-#define STATUS_FIELD_ITEM(number) { ITEM(newStatusFieldMenuItem(statusSubmenu, number, testStatusField##number, changedStatusField##number)); }
+      #define STATUS_FIELD_ITEM(number) { ITEM(newStatusFieldMenuItem(statusSubmenu, number, testStatusField##number, changedStatusField##number)); }
       STATUS_FIELD_ITEM(1);
       STATUS_FIELD_ITEM(2);
       STATUS_FIELD_ITEM(3);
@@ -1382,7 +1383,7 @@ makePreferencesMenu (void) {
       STATUS_FIELD_ITEM(7);
       STATUS_FIELD_ITEM(8);
       STATUS_FIELD_ITEM(9);
-#undef STATUS_FIELD_ITEM
+      #undef STATUS_FIELD_ITEM
     }
   }
 
@@ -1564,12 +1565,12 @@ makePreferencesMenu (void) {
       ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartBrailleDriver));
     }
 
-#ifdef ENABLE_SPEECH_SUPPORT
+  #ifdef ENABLE_SPEECH_SUPPORT
     {
       NAME(strtext("Restart Speech Driver"));
       ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartSpeechDriver));
     }
-#endif /* ENABLE_SPEECH_SUPPORT */
+  #endif /* ENABLE_SPEECH_SUPPORT */
 
     {
       NAME(strtext("Restart Screen Driver"));
