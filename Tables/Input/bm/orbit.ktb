@@ -29,6 +29,7 @@ include navpad.kti
 
 assign press Select
 include emulate6.kti
+include routing.kti
 
 note The rocker to the left of the braille cells emulates the Display2 key,
 note * and the one to their right emulates the Display5 key.
