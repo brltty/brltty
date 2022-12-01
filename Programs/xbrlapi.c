@@ -101,12 +101,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("X display to connect to")
   },
 
-  { .word = "no-daemon",
-    .letter = 'n',
-    .setting.flag = &no_daemon,
-    .description = strtext("Remain a foreground process")
-  },
-
   { .word = "quiet",
     .letter = 'q',
     .setting.flag = &quiet,
@@ -117,6 +111,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'v',
     .setting.flag = &verbose,
     .description = strtext("Write debugging output to stdout")
+  },
+
+  { .word = "no-daemon",
+    .letter = 'n',
+    .setting.flag = &no_daemon,
+    .description = strtext("Remain a foreground process")
   },
 END_OPTION_TABLE(programOptions)
 
