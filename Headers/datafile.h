@@ -111,7 +111,7 @@ extern int writeUtf8Cells (FILE *stream, const unsigned char *cells, size_t coun
 typedef struct {
   const wchar_t *name;
   DataOperandsProcessor *processor;
-  unsigned unconditional:1;
+  unsigned char unconditional:1;
 } DataDirective;
 
 typedef struct {

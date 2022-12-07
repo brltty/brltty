@@ -63,14 +63,14 @@ typedef void SetSpeechFinishedMethod (SpeechSynthesizer *spk);
 typedef void SetSpeechLocationMethod (SpeechSynthesizer *spk, int location);
 
 struct SpeechSynthesizerStruct {
-  unsigned sayBanner:1;
-  unsigned canAutospeak:1;
+  unsigned char sayBanner:1;
+  unsigned char canAutospeak:1;
 
   struct {
-    unsigned isActive:1;
     int screenNumber;
     int firstLine;
     int speechLocation;
+    unsigned char isActive:1;
   } track;
 
   SetSpeechVolumeMethod *setVolume;

@@ -28,23 +28,23 @@ typedef struct {
   const char *description;
   int code;
 
-  unsigned isToggle:1;
-  unsigned isMotion:1;
-  unsigned isRow:1;
-  unsigned isVertical:1;
-  unsigned isHorizontal:1;
-  unsigned isPanning:1;
+  unsigned char isToggle:1;
+  unsigned char isMotion:1;
+  unsigned char isRow:1;
+  unsigned char isVertical:1;
+  unsigned char isHorizontal:1;
+  unsigned char isPanning:1;
 
-  unsigned isInput:1;
-  unsigned isCharacter:1;
-  unsigned isBraille:1;
+  unsigned char isInput:1;
+  unsigned char isCharacter:1;
+  unsigned char isBraille:1;
 
-  unsigned isKeyboard:1;
+  unsigned char isKeyboard:1;
 
-  unsigned isRouting:1;
-  unsigned isColumn:1;
-  unsigned isOffset:1;
-  unsigned isRange:1;
+  unsigned char isRouting:1;
+  unsigned char isColumn:1;
+  unsigned char isOffset:1;
+  unsigned char isRange:1;
 } CommandEntry;
 
 #ifdef __cplusplus

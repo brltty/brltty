@@ -62,7 +62,7 @@ typedef struct {
   int inputTimeout;
   int outputTimeout;
   int requestTimeout;
-  unsigned ignoreWriteTimeouts:1;
+  unsigned char ignoreWriteTimeouts:1;
 } GioOptions;
 
 typedef struct {

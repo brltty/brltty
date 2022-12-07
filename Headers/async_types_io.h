@@ -37,7 +37,7 @@ typedef struct {
   size_t size;
   size_t length;
   int error;
-  unsigned end:1;
+  unsigned char end:1;
 } AsyncInputCallbackParameters;
 
 #define ASYNC_INPUT_CALLBACK(name) size_t name (const AsyncInputCallbackParameters *parameters)
