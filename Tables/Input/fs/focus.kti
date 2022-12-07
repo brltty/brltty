@@ -46,7 +46,7 @@ include speech.kti
 bind NavrowKey DESCCHAR
 bind PanLeft+NavrowKey PRINDENT
 bind PanRight+NavrowKey NXINDENT
-bind LeftSelector+NavrowKey SETLEFT
-bind RightSelector+NavrowKey SWITCHVT
+bind LeftSelector+NavrowKey PRDIFCHAR
+bind RightSelector+NavrowKey NXDIFCHAR
 bind NavrowKey+!NavrowKey CLIP_APPEND
 

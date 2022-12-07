@@ -43,4 +43,6 @@ assign chord Space+
 include ../chords.kti
 
 bind Space+RoutingKey KEY_FUNCTION
+bind LeftShift+RoutingKey SETLEFT
+bind RightShift+RoutingKey SWITCHVT
 
