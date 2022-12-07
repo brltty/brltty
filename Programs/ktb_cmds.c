@@ -190,6 +190,7 @@ static const CommandListEntry commandList_say[] = {
 };
 
 static const CommandListEntry commandList_speak[] = {
+  { .code = BRL_CMD_BLK(ROUTE_SPEECH) },
   { .code = BRL_CMD_SPEAK_CURR_CHAR },
   { .code = BRL_CMD_DESC_CURR_CHAR },
   { .code = BRL_CMD_SPEAK_PREV_CHAR },

@@ -507,8 +507,27 @@ handleSpeechCommands (int command, void *data) {
       speakIndent(NULL, 0, 1);
       break;
 
-    default:
-      return 0;
+    default: {
+      int arg = command & BRL_MSK_ARG;
+
+      switch (command & BRL_MSK_BLK) {
+        case BRL_CMD_BLK(ROUTE_SPEECH): {
+          int column, row;
+
+          if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
+            ses->spkx = column;
+            ses->spky = row;
+          } else {
+            alert(ALERT_COMMAND_REJECTED);
+          }
+
+          break;
+        }
+
+        default:
+          return 0;
+      }
+    }
   }
 
   return 1;

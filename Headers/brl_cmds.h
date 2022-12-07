@@ -306,7 +306,7 @@ typedef enum {
   BRL_BLK_REFRESH_LINE /* refresh braille line */,
   BRL_BLK_TXTSEL_START /* start text selection */,
   BRL_BLK_TXTSEL_SET /* set text selection */,
-  BRL_BLK_1C /* (reserved) */,
+  BRL_BLK_ROUTE_SPEECH /* bring speech cursor to character */,
   BRL_BLK_1D /* (reserved) */,
   BRL_BLK_SELECTVT /* bind to specific virtual terminal */,
   BRL_BLK_ALERT /* render an alert */,
