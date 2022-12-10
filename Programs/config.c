@@ -145,7 +145,7 @@ static const char *const *const autodetectableBrailleDrivers_Bluetooth =
   );
 
 #define SERVICE_NAME "BrlAPI"
-#define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
+#define SERVICE_DESCRIPTION "Braille Devices API"
 
 static
 STR_BEGIN_FORMATTER(formatLogLevelString, unsigned int index)

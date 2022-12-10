@@ -274,6 +274,11 @@ Manually run BRLTTY, via the ``run-brltty.bat`` script, with options that
 set the log level to ``debug`` and enable several useful log categories.
 All arguments are passed through to the ``run-brltty.bat`` script.
 
+``kill-brltty.bat``
+~~~~~~~~~~~~~~~~~~~
+
+Forceably terminate the manually-run BRLTTY process.
+
 ``enable-brlapi.bat``
 ~~~~~~~~~~~~~~~~~~~~~~
 

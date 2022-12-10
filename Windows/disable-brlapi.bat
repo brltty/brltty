@@ -2,6 +2,7 @@
 
 setlocal
 set programFolder=%~dp0
+set programName=disable
 
 net stop BrlAPI
-"%programFolder%bin\brltty" -R
+call "%programFolder%run-brltty" -R %*
