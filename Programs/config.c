@@ -502,6 +502,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.flag = &opt_quietIfNoBraille,
     .description = strtext("Do not autospeak when braille is not being used.")
   },
+
+  { .word = "autospeak-threshold",
+    .flags = OPT_Config | OPT_EnvVar | OPT_Format,
+    .argument = strtext("quality"),
+    .setting.string = &opt_autospeakThreshold,
+    .description = strtext("Minimum screen content quality to autospeak (one of {%s})."),
+    .strings.format = formatScreenContentQualityChoices
+  },
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   { .word = "screen-driver",
@@ -521,14 +529,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_screenParameters,
     .internal.setting = SCREEN_PARAMETERS,
     .description = strtext("Parameters for the screen driver.")
-  },
-
-  { .word = "autospeak-threshold",
-    .flags = OPT_Config | OPT_EnvVar | OPT_Format,
-    .argument = strtext("quality"),
-    .setting.string = &opt_autospeakThreshold,
-    .description = strtext("Minimum screen content quality to autospeak (one of {%s})."),
-    .strings.format = formatScreenContentQualityChoices
   },
 
   { .word = "keyboard-table",
@@ -2880,7 +2880,7 @@ brlttyStart (void) {
     }
 
     if (opt_installService) {
-      installService(SERVICE_NAME, SERVICE_DESCRIPTION);
+      installService(SERVICE_NAME, SERVICE_DESCRIPTION, opt_configurationFile);
       stop = 1;
     }
 

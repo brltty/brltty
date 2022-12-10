@@ -23,7 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int installService (const char *name, const char *description);
+extern int installService (const char *name, const char *description, const char *configurationFile);
 extern int removeService (const char *name);
 
 extern int notifyServiceReady (void);

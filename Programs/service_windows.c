@@ -24,22 +24,40 @@
 #include "system_windows.h"
 
 int
-installService (const char *name, const char *description) {
-  int installed = 0;
+installService (const char *name, const char *description, const char *configurationFile) {
   const char *const arguments[] = {
     getProgramPath(),
+    "-n", "+N",
+    "-f", configurationFile,
     NULL
   };
+
+  int installed = 0;
   char *command = makeWindowsCommandLine(arguments);
 
   if (command) {
-    SC_HANDLE scm = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+    SC_HANDLE scm = OpenSCManager(
+      NULL, // machine name
+      NULL, // database name
+      SC_MANAGER_CREATE_SERVICE // desired access
+    );
 
     if (scm) {
-      SC_HANDLE service = CreateService(scm, name, description, SERVICE_ALL_ACCESS,
-                                        SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
-                                        SERVICE_AUTO_START, SERVICE_ERROR_NORMAL,
-                                        command, NULL, NULL, NULL, NULL, NULL);
+      SC_HANDLE service = CreateService(
+        scm, // service control manager database
+        name, // service name
+        description, // display name
+        SERVICE_ALL_ACCESS, // desired access
+        (SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS), // service type
+        SERVICE_AUTO_START, // start type
+        SERVICE_ERROR_NORMAL, // error control
+        command, // binary path name
+        NULL, // load order group
+        NULL, // tag id
+        NULL, // dependencies
+        NULL, // service start name
+        NULL // password
+      );
 
       if (service) {
         logMessage(LOG_NOTICE, "service installed: %s", name);

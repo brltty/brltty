@@ -24,7 +24,7 @@
 #include "service.h"
 
 int
-installService (const char *name, const char *description) {
+installService (const char *name, const char *description, const char *configurationFile) {
   logUnsupportedFeature("service installation");
   return 0;
 }
