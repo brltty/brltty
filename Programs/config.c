@@ -882,14 +882,22 @@ brlttyPrepare (int argc, char *argv[]) {
   setLogLevels();
   onProgramExit("log", exitLog, NULL);
 
-  if (*opt_logFile) {
-    openLogFile(opt_logFile);
-  } else {
-    openSystemLog();
+  {
+    const char *logFile;
+
+    if (*opt_logFile) {
+      logFile = opt_logFile;
+      openLogFile(logFile);
+    } else {
+      logFile = "<system>";
+      openSystemLog();
+    }
+
+    logProgramBanner();
+    logProperty(logFile, "logFile", gettext("Log File"));
+    logProperty(opt_logLevel, "logLevel", gettext("Log Level"));
   }
 
-  logProgramBanner();
-  logProperty(opt_logLevel, "logLevel", gettext("Log Level"));
   logProperty(getMessagesLocale(), "messagesLocale", gettext("Messages Locale"));
   logProperty(getMessagesDomain(), "messagesDomain", gettext("Messages Domain"));
   logProperty(getMessagesDirectory(), "messagesDirectory", gettext("Messages Directory"));
@@ -2967,6 +2975,10 @@ brlttyStart (void) {
   }
 
   logProperty(opt_configurationFile, "configurationFile", gettext("Configuration File"));
+  logProperty(opt_tablesDirectory, "tablesDirectory", gettext("Tables Directory"));
+  logProperty(opt_driversDirectory, "driversDirectory", gettext("Drivers Directory"));
+  logProperty(opt_writableDirectory, "writableDirectory", gettext("Writable Directory"));
+  logProperty(opt_updatableDirectory, "updatableDirectory", gettext("Updatable Directory"));
   logProperty(opt_preferencesFile, "preferencesFile", gettext("Preferences File"));
 
   resetPreferences();
@@ -2984,11 +2996,6 @@ brlttyStart (void) {
       deallocateStrings(patterns);
     }
   }
-
-  logProperty(opt_updatableDirectory, "updatableDirectory", gettext("Updatable Directory"));
-  logProperty(opt_writableDirectory, "writableDirectory", gettext("Writable Directory"));
-  logProperty(opt_driversDirectory, "driversDirectory", gettext("Drivers Directory"));
-  logProperty(opt_tablesDirectory, "tablesDirectory", gettext("Tables Directory"));
 
   setTextAndContractionTables();
   setAttributesTable();
