@@ -50,39 +50,57 @@
 #include "program.h"
 
 
+static inline int
+allowBackslashAsPathSeparator (void) {
+#if defined(__MINGW32__) || defined(__MSDOS__)
+  return 1;
+#else /* defined(__MINGW32__) || defined(__MSDOS__) */
+  return 0;
+#endif /* defined(__MINGW32__) || defined(__MSDOS__) */
+}
+
 int
 isPathSeparator (const char character) {
-  return character == PATH_SEPARATOR_CHARACTER;
+  if (character == PATH_SEPARATOR_CHARACTER) return 1;
+
+  if (allowBackslashAsPathSeparator()) {
+    if (character == '\\') {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 int
 isAbsolutePath (const char *path) {
   if (isPathSeparator(path[0])) return 1;
 
-#if defined(__MINGW32__) || defined(__MSDOS__)
-  if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", toupper(path[0]))) {
-    if (path[1] == ':') {
-      return 1;
+  if (allowBackslashAsPathSeparator()) {
+    if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", toupper(path[0]))) {
+      if (path[1] == ':') {
+        return 1;
+      }
     }
   }
-#endif /* defined(__MINGW32__) || defined(__MSDOS__) */
 
   return 0;
 }
 
 static size_t
-stripPathDelimiter (const char *path, size_t length) {
+stripPathSeparator (const char *path, size_t length) {
   while (length) {
     if (!isPathSeparator(path[length-1])) break;
     length -= 1;
   }
+
   return length;
 }
 
 char *
 getPathDirectory (const char *path) {
   size_t length = strlen(path);
-  size_t end = stripPathDelimiter(path, length);
+  size_t end = stripPathSeparator(path, length);
 
   if (end) {
     while (--end) {
@@ -92,7 +110,7 @@ getPathDirectory (const char *path) {
     }
 
     if ((length = end)) {
-      if ((end = stripPathDelimiter(path, length))) {
+      if ((end = stripPathSeparator(path, length))) {
         length = end;
       }
     }
@@ -395,14 +413,16 @@ ensureDirectory (const char *path, int worldWritable) {
     logMessage(LOG_ERR, "cannot access directory: %s: %s", path, strerror(errno));
   } else {
     {
-      char *directory = getPathDirectory(path);
-      if (!directory) return 0;
+      char *parent = getPathDirectory(path);
+      if (!parent) return 0;
+      int exists = 0;
 
-      {
-         int exists = ensureDirectory(directory, 0);
-         free(directory);
-         if (!exists) return 0;
+      if (strcmp(parent, path) != 0) {
+        exists = ensureDirectory(parent, 0);
       }
+
+      free(parent);
+      if (!exists) return 0;
     }
 
     if (createDirectory(path, worldWritable)) {
