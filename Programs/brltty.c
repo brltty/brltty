@@ -36,6 +36,8 @@ brlttyRun (void) {
 }
 
 #ifdef __MINGW32__
+#include "utf8.h"
+
 static SERVICE_STATUS_HANDLE serviceStatusHandle;
 static DWORD serviceState;
 static ProgramExitStatus serviceExitStatus;
@@ -114,28 +116,68 @@ exitService (void) {
   SET_SERVICE_STATE(SERVICE_STOPPED, PROG_EXIT_SUCCESS);
 }
 
+static char **
+getCommandLineArguments (DWORD *argc) {
+  int count;
+  LPWSTR *arguments = CommandLineToArgvW(GetCommandLineW(), &count);
+  char **argv;
+
+  if ((argv = malloc(ARRAY_SIZE(argv, count+1)))) {
+    unsigned int index = 0;
+
+    while (index < count) {
+      const wchar_t *argument = arguments[index];
+
+      if (!(argv[index] = getUtf8FromWchars(argument, wcslen(argument), NULL))) {
+        logMallocError();
+        break;
+      }
+
+      index += 1;
+    }
+
+    LocalFree(arguments);
+    arguments = NULL;
+
+    if (index == count) {
+      argv[count] = NULL;
+      *argc = count;
+      return argv;
+    }
+
+    while (index > 0) free(argv[index-=1]);
+    free(argv);
+  } else {
+    logMallocError();
+  }
+
+  return NULL;
+}
+
 static void WINAPI
 serviceMain (DWORD argc, LPSTR *argv) {
   atexit(exitService);
 
-  if ((serviceStatusHandle = RegisterServiceCtrlHandler("", serviceControlHandler))) {
-    if ((SET_SERVICE_STATE(SERVICE_START_PENDING, PROG_EXIT_SUCCESS))) {
-      if ((serviceExitStatus = brlttyConstruct(argc, argv)) == PROG_EXIT_SUCCESS) {
-        if ((SET_SERVICE_STATE(SERVICE_RUNNING, PROG_EXIT_SUCCESS))) {
-          serviceExitStatus = brlttyRun();
-        } else {
-          serviceExitStatus = PROG_EXIT_FATAL;
+  if ((argv = getCommandLineArguments(&argc))) {
+    if ((serviceStatusHandle = RegisterServiceCtrlHandler("", serviceControlHandler))) {
+      if ((SET_SERVICE_STATE(SERVICE_START_PENDING, PROG_EXIT_SUCCESS))) {
+        if ((serviceExitStatus = brlttyConstruct(argc, argv)) == PROG_EXIT_SUCCESS) {
+          if ((SET_SERVICE_STATE(SERVICE_RUNNING, PROG_EXIT_SUCCESS))) {
+            serviceExitStatus = brlttyRun();
+          } else {
+            serviceExitStatus = PROG_EXIT_FATAL;
+          }
+
+          brlttyDestruct();
+        } else if (serviceExitStatus == PROG_EXIT_FORCE) {
+          serviceExitStatus = PROG_EXIT_SUCCESS;
         }
 
-        brlttyDestruct();
-      } else if (serviceExitStatus == PROG_EXIT_FORCE) {
-        serviceExitStatus = PROG_EXIT_SUCCESS;
+        SET_SERVICE_STATE(SERVICE_STOPPED, serviceExitStatus);
       }
-
-      SET_SERVICE_STATE(SERVICE_STOPPED, serviceExitStatus);
+    } else {
+      logWindowsSystemError("RegisterServiceCtrlHandler");
     }
-  } else {
-    logWindowsSystemError("RegisterServiceCtrlHandler");
   }
 }
 #endif /* __MINGW32__ */

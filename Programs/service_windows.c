@@ -26,8 +26,7 @@
 int
 installService (const char *name, const char *description, const char *configurationFile) {
   const char *const arguments[] = {
-    getProgramPath(),
-    "-n", "+N",
+    getProgramPath(), "-n",
     "-f", configurationFile,
     NULL
   };
