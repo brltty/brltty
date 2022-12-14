@@ -246,7 +246,12 @@ bthPerformServiceLookup (
           bthSocketError("WSALookupServiceEnd", NULL);
         }
       } else {
-        bthSocketError("WSALookupServiceBegin", NULL);
+        static const DWORD exceptions[] = {
+          WSASERVICE_NOT_FOUND,
+          NO_ERROR
+        };
+
+        bthSocketError("WSALookupServiceBegin", exceptions);
       }
     } else {
       bthSocketError("WSAAddressToString", NULL);
@@ -463,7 +468,12 @@ bthProcessDiscoveredDevices (
         bthSocketError("WSALookupServiceEnd", NULL);
       }
     } else {
-      bthSocketError("WSALookupServiceBegin", NULL);
+      static const DWORD exceptions[] = {
+        WSASERVICE_NOT_FOUND,
+        NO_ERROR
+      };
+
+      bthSocketError("WSALookupServiceBegin", exceptions);
     }
   }
 }
