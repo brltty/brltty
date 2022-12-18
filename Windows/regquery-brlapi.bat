@@ -1,9 +1,7 @@
 @echo off
 
 setlocal EnableDelayedExpansion
+call %programDirectory%setvars-brlapi
 
-set serviceName=BrlAPI
-set serviceKey=HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\%serviceName%
-
-reg query %serviceKey%
+reg query "%serviceKey%"
 exit /B %ERRORLEVEL%

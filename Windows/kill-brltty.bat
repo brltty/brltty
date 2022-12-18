@@ -1,14 +1,14 @@
 @echo off
 
 setlocal EnableDelayedExpansion
-set programFolder=%~dp0
-call %programFolder%set-variables
+set programDirectory=%~dp0
+call %programDirectory%setvars-brltty
 
 if exist "%pidFile%" (
-   set /P pid= < %pidFile%
+   set /P pid= < "%pidFile%"
 
    if "!pid!" NEQ "" (
-      taskkill /PID !pid! /F /T
+      taskkill /PID "!pid!" /F /T
       exit /B %ERRORLEVEL%
    )
 )
