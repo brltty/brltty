@@ -54,9 +54,14 @@ static inline int
 allowBackslashAsPathSeparator (void) {
 #if defined(__MINGW32__) || defined(__MSDOS__)
   return 1;
-#else /* defined(__MINGW32__) || defined(__MSDOS__) */
+#else /* allow backslash */
   return 0;
-#endif /* defined(__MINGW32__) || defined(__MSDOS__) */
+#endif /* allow backslash */
+}
+
+static int
+isDriveLetter (char character) {
+  return !!strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", toupper(character));
 }
 
 int
@@ -77,9 +82,11 @@ isAbsolutePath (const char *path) {
   if (isPathSeparator(path[0])) return 1;
 
   if (allowBackslashAsPathSeparator()) {
-    if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", toupper(path[0]))) {
+    if (isDriveLetter(path[0])) {
       if (path[1] == ':') {
-        return 1;
+        if (isPathSeparator(path[2])) {
+          return 1;
+        }
       }
     }
   }
