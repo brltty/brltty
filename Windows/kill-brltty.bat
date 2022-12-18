@@ -2,7 +2,7 @@
 
 setlocal EnableDelayedExpansion
 set programFolder=%~dp0
-set pidFile="%programFolder%brltty.pid"
+call %programFolder%set-variables
 
 if exist "%pidFile%" (
    set /P pid= < %pidFile%
