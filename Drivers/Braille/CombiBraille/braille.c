@@ -227,46 +227,50 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static int
-getKey (void) {
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   static short ptr = 0;		/* input queue pointer */
   static unsigned char q[4];	/* input queue */
-  unsigned char c;		/* character buffer */
 
-  while (serialReadData (CB_serialDevice, &c, 1, 0, 0) == 1)
-    {
-      if (ptr == 0 && c != 27)
-	continue;
-      if (ptr == 1 && c != 'K' && c != 'C')
-	{
-	  ptr = 0;
-	  continue;
-	}
-      q[ptr++] = c;
-      if (ptr < 3 || (ptr == 3 && q[1] == 'K' && !q[2]))
-	continue;
-      ptr = 0;
-      if (q[1] == 'K')
-	return (q[2] ? q[2] : q[3] | 0x0060);
-      return ((int) q[2] | 0x80);
+  while (1) {
+    unsigned char c;		/* character buffer */
+    if (serialReadData(CB_serialDevice, &c, 1, 0, 0) != 1) return EOF;
+    q[ptr++] = c;
+
+    switch (ptr) {
+      case 1:
+        if (c == ASCII_ESC) continue;
+        break;
+
+      case 2:
+        if (c == 'C') continue;
+        if (c == 'K') continue;
+        break;
+
+      case 3:
+        if (q[1] != 'C') continue;
+        {
+          char key = q[2];
+
+          if (key < 6) {
+            enqueueKey(brl, CB_GRP_NavigationKeys, (CB_KEY_Status1 + key));
+          } else {
+            enqueueKey(brl, CB_GRP_RoutingKeys, (key - 6));
+          }
+        }
+        break;
+
+      case 4:
+        if (q[2]) {
+          enqueueKeys(brl, q[2], CB_GRP_NavigationKeys, CB_KEY_Dot6);
+        } else {
+          enqueueKeys(brl, q[3], CB_GRP_NavigationKeys, CB_KEY_Thumb1);
+        }
+        break;
+
+      default:
+        break;
     }
-  return EOF;
-}
 
-static int
-brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  int key;
-
-  while ((key = getKey()) != EOF) {
-    if (key >= 0X86) {
-      enqueueKey(brl, CB_GRP_RoutingKeys, (key - 0X86));
-    } else if (key >= 0X80) {
-      enqueueKey(brl, CB_GRP_NavigationKeys, (CB_KEY_Status1 + (key - 0X80)));
-    } else if (key >= 0X60) {
-      enqueueKeys(brl, key & 0X1F, CB_GRP_NavigationKeys, CB_KEY_Thumb1);
-    } else if (key < 0X40) {
-      enqueueKeys(brl, key & 0X3F, CB_GRP_NavigationKeys, CB_KEY_Dot6);
-    }
+    ptr = 0;
   }
-
-  return EOF;
 }
