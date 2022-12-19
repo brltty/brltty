@@ -2,7 +2,7 @@
 
 setlocal EnableDelayedExpansion
 set programDirectory=%~dp0
-call %programDirectory%setvars-brlapi
+call "%programDirectory%setvars-brlapi"
 
 sc query %serviceName% >NUL 2>NUL
 if %ERRORLEVEL% NEQ 0 (
@@ -11,7 +11,7 @@ if %ERRORLEVEL% NEQ 0 (
    if !ERRORLEVEL! NEQ 0  exit /B !ERRORLEVEL!
 
    set programName=service
-   call %programDirectory%setvars-brltty
+   call "%programDirectory%setvars-brltty"
    set logLevel=info
 
    for /F "usebackq tokens=1,2,*" %%A in (

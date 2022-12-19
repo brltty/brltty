@@ -3,7 +3,7 @@
 setlocal
 set programDirectory=%~dp0
 
-call %programDirectory%setvars-brlapi
+call "%programDirectory%setvars-brlapi"
 net stop %serviceName%
 
 set programName=disable

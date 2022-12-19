@@ -2,7 +2,7 @@
 
 setlocal
 set programDirectory=%~dp0
-call %programDirectory%setvars-brltty
+call "%programDirectory%setvars-brltty"
 set logLevel=info
 
 if "%programName%" == "%packageName%" (
@@ -10,5 +10,5 @@ if "%programName%" == "%packageName%" (
    echo Alt-Space menu^). The log file is "%logFile%".
 )
 
-"%programDirectory%bin\brltty" -n -U "%updatableDirectory%" -W "%writableDirectory%" -P "%pidFile%" -L "%logFile%" -l "%logLevel%" -f "%configurationFile%" %*
+"%programDirectory%bin\brltty" -n -N -U "%updatableDirectory%" -W "%writableDirectory%" -P "%pidFile%" -L "%logFile%" -l "%logLevel%" -f "%configurationFile%" %*
 exit /B %ERRORLEVEL%
