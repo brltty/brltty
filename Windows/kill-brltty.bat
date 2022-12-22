@@ -13,4 +13,5 @@ if exist "%pidFile%" (
    )
 )
 
-exit /B 0
+@echo %packageName% isn't running
+exit /B 1
