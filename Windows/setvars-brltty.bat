@@ -10,3 +10,4 @@ set configurationFile=%programDirectory%etc\%packageName%.conf
 set logFile=%programDirectory%%programName%.log
 set pidFile=%writableDirectory%\%programName%.pid
 
+exit /B 0
