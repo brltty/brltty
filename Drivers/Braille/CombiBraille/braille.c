@@ -33,32 +33,41 @@
 #include "braille.h"
 #include "io_serial.h"
 
-BEGIN_KEY_NAME_TABLE(all)
+BEGIN_KEY_NAME_TABLE(dot)
   KEY_NAME_ENTRY(CB_KEY_Dot1, "Dot1"),
   KEY_NAME_ENTRY(CB_KEY_Dot2, "Dot2"),
   KEY_NAME_ENTRY(CB_KEY_Dot3, "Dot3"),
   KEY_NAME_ENTRY(CB_KEY_Dot4, "Dot4"),
   KEY_NAME_ENTRY(CB_KEY_Dot5, "Dot5"),
   KEY_NAME_ENTRY(CB_KEY_Dot6, "Dot6"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(thumb)
   KEY_NAME_ENTRY(CB_KEY_Thumb1, "Thumb1"),
   KEY_NAME_ENTRY(CB_KEY_Thumb2, "Thumb2"),
   KEY_NAME_ENTRY(CB_KEY_Thumb3, "Thumb3"),
   KEY_NAME_ENTRY(CB_KEY_Thumb4, "Thumb4"),
   KEY_NAME_ENTRY(CB_KEY_Thumb5, "Thumb5"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(status)
   KEY_NAME_ENTRY(CB_KEY_Status1, "Status1"),
   KEY_NAME_ENTRY(CB_KEY_Status2, "Status2"),
   KEY_NAME_ENTRY(CB_KEY_Status3, "Status3"),
   KEY_NAME_ENTRY(CB_KEY_Status4, "Status4"),
   KEY_NAME_ENTRY(CB_KEY_Status5, "Status5"),
   KEY_NAME_ENTRY(CB_KEY_Status6, "Status6"),
+END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(routing)
   KEY_GROUP_ENTRY(CB_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(all),
+  KEY_NAME_TABLE(dot),
+  KEY_NAME_TABLE(thumb),
+  KEY_NAME_TABLE(status),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(all)
