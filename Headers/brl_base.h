@@ -69,12 +69,13 @@ extern void makeInputTable (void);
 extern void *translateInputCells (unsigned char *target, const unsigned char *source, size_t count);
 extern unsigned char translateInputCell (unsigned char cell);
 
-#define MAKE_OUTPUT_TABLE(dot1, dot2, dot3, dot4, dot5, dot6, dot7, dot8) { \
+#define MAKE_OUTPUT_TABLE(dot1, dot2, dot3, dot4, dot5, dot6, dot7, dot8) \
+do { \
   static const DotsTable dots = { \
     (dot1), (dot2), (dot3), (dot4), (dot5), (dot6), (dot7), (dot8) \
   }; \
   makeOutputTable(dots); \
-}
+} while (0)
 
 extern int awaitBrailleInput (BrailleDisplay *brl, int timeout);
 

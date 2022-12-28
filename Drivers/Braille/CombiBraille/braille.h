@@ -17,17 +17,6 @@
  */
 
 /* used by speech.c */
-#include "io_serial.h"
-extern SerialDevice *CB_serialDevice;
-extern int CB_charactersPerSecond;			/* file descriptor for Braille display */
+#include "brl_types.h"
+extern BrailleDisplay *cbBrailleDisplay;
 
-#define BAUDRATE 38400		/* baud rate for Braille display */
-
-/* The following sequences are sent at termination and before and after Braille
- * data.  The first byte is the length of the sequence.
- *
- * Initialisation is treated specially, as there may not be a Braille
- * display connected.  This relies on a reply from the display.
- */
-#define ACK_TIMEOUT 5000	/* acknowledgement timeout in milliseconds */
-#define MAX_ATTEMPTS 0		/* total tiimeout = timeout * attempts */
