@@ -91,7 +91,9 @@ initializeScreenCharacters (ScreenSegmentCharacter *from, const ScreenSegmentCha
 
 ScreenSegmentHeader *
 createScreenSegment (int *id, key_t key, int columns, int rows) {
-  size_t size = sizeof(ScreenSegmentHeader) + (sizeof(ScreenSegmentCharacter) * columns * rows);
+  size_t size = sizeof(ScreenSegmentHeader) +
+                sizeof(((ScreenSegmentHeader*)0)->rowOffsets[0]) * rows +
+                sizeof(ScreenSegmentCharacter) * columns * rows;
   int identifier;
 
   if (getScreenSegment(&identifier, key)) {
@@ -106,7 +108,6 @@ createScreenSegment (int *id, key_t key, int columns, int rows) {
       segment->segmentSize = size;
 
       segment->characterSize = sizeof(ScreenSegmentCharacter);
-      segment->charactersOffset = segment->headerSize;
 
       segment->screenHeight = rows;
       segment->screenWidth = columns;
@@ -118,9 +119,17 @@ createScreenSegment (int *id, key_t key, int columns, int rows) {
       segment->commonFlags = 0;
       segment->privateFlags = 0;
 
+      /* Initialize row offsets. Rows are initially sequential. */
+      for (unsigned int r = 0; r < rows; r++) {
+        segment->rowOffsets[r] =
+		sizeof(*segment) +
+		sizeof(segment->rowOffsets[0]) * rows +
+		sizeof(ScreenSegmentCharacter) * columns * r;
+      }
+
       {
-        ScreenSegmentCharacter *from = getScreenStart(segment);
-        const ScreenSegmentCharacter *to = getScreenEnd(segment);
+        ScreenSegmentCharacter *from = (void *)segment + segment->rowOffsets[0];
+        ScreenSegmentCharacter *to = (void *)segment + size;
         initializeScreenCharacters(from, to);
       }
 
