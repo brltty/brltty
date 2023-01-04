@@ -84,14 +84,14 @@ static unsigned char bracketedPasteMode = 0;
 static unsigned char absoluteCursorAddressingMode = 0;
 
 int
-ptyBeginTerminal (PtyObject *pty) {
+ptyBeginTerminal (PtyObject *pty, int driverDirectives) {
   insertMode = 0;
   alternateCharsetMode = 0;
   keypadTransmitMode = 0;
   bracketedPasteMode = 0;
   absoluteCursorAddressingMode = 0;
 
-  return ptyBeginScreen(pty);
+  return ptyBeginScreen(pty, driverDirectives);
 }
 
 void

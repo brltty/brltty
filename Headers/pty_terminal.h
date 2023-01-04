@@ -27,7 +27,7 @@ extern "C" {
 
 extern const char *ptyGetTerminalType (void);
 
-extern int ptyBeginTerminal (PtyObject *pty);
+extern int ptyBeginTerminal (PtyObject *pty, int driverDirectives);
 extern void ptyEndTerminal (void);
 
 extern int ptyProcessTerminalInput (PtyObject *pty);

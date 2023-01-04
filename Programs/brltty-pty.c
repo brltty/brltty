@@ -356,7 +356,7 @@ runParent (PtyObject *pty, pid_t child) {
           ptySetLogLevel(pty, level);
         }
 
-        if (ptyBeginTerminal(pty)) {
+        if (ptyBeginTerminal(pty, opt_driverDirectives)) {
           writeDriverDirective("path %s", ptyGetPath(pty));
 
           asyncAwaitCondition(INT_MAX, parentTerminationTester, NULL);

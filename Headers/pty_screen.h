@@ -26,7 +26,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int ptyBeginScreen (PtyObject *pty);
+extern int ptyBeginScreen (PtyObject *pty, int driverDirectives);
 extern void ptyEndScreen (void);
 extern void ptyRefreshScreen (void);
 

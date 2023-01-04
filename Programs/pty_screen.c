@@ -122,14 +122,14 @@ destroySegment (void) {
 }
 
 static int
-createSegment (const char *path) {
+createSegment (const char *path, int driverDirectives) {
   key_t key;
 
   if (makeTerminalKey(&key, path)) {
     segmentHeader = createScreenSegment(&segmentIdentifier, key, COLS, LINES);
 
     if (segmentHeader) {
-      enableMessages(key);
+      if (driverDirectives) enableMessages(key);
       return 1;
     }
   }
@@ -261,7 +261,7 @@ static unsigned int savedCursorRow = 0;
 static unsigned int savedCursorColumn = 0;
 
 int
-ptyBeginScreen (PtyObject *pty) {
+ptyBeginScreen (PtyObject *pty, int driverDirectives) {
   haveTerminalMessageQueue = 0;
   haveInputTextHandler = 0;
 
@@ -290,7 +290,7 @@ ptyBeginScreen (PtyObject *pty) {
       initializeColorPairs();
     }
 
-    if (createSegment(ptyGetPath(pty))) {
+    if (createSegment(ptyGetPath(pty), driverDirectives)) {
       segmentHeader->screenNumber = 1;
       storeCursorPosition();
 
