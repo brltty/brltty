@@ -396,7 +396,7 @@ int
 validateUser (uid_t *value, const char *string, gid_t *group) {
   {
     int integer = geteuid();
-    static const int minimum = 1;
+    static const int minimum = 0;
     static const int maximum = UINT16_MAX;
 
     if (validateInteger(&integer, string, &minimum, &maximum)) {
@@ -428,7 +428,7 @@ int
 validateGroup (gid_t *value, const char *string) {
   {
     int integer = geteuid();
-    static const int minimum = 1;
+    static const int minimum = 0;
     static const int maximum = UINT16_MAX;
 
     if (validateInteger(&integer, string, &minimum, &maximum)) {
