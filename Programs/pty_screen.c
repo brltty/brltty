@@ -566,7 +566,10 @@ ptyClearToEndOfDisplay (void) {
   clrtobot();
 
   ScreenSegmentCharacter *from = setCurrentCharacter(NULL);
-  const ScreenSegmentCharacter *to = getScreenEnd(segmentHeader);
+
+  const ScreenSegmentCharacter *to;
+  getScreenRow(segmentHeader, segmentHeader->screenHeight-1, &to);
+
   propagateScreenCharacter(from, to);
 }
 

@@ -104,23 +104,15 @@ getScreenSegmentForPath (const char *path) {
 }
 
 ScreenSegmentCharacter *
-getScreenStart (ScreenSegmentHeader *segment) {
-  void *address = segment;
-  address += segment->charactersOffset;
-  return address;
-}
-
-ScreenSegmentCharacter *
 getScreenRow (ScreenSegmentHeader *segment, unsigned int row, ScreenSegmentCharacter **end) {
-  void *character = getScreenStart(segment);
-  unsigned int width = segment->screenWidth * segment->characterSize;
-  character += row * width;
+  void *address = segment;
+  address += segment->rowOffsets[row];
 
   if (end) {
-    *end = character + width;
+    *end = address + segment->screenWidth * segment->characterSize;
   }
 
-  return character;
+  return address;
 }
 
 ScreenSegmentCharacter *
@@ -128,9 +120,4 @@ getScreenCharacter (ScreenSegmentHeader *segment, unsigned int row, unsigned int
   void *address = getScreenRow(segment, row, end);
   address += column * segment->characterSize;
   return address;
-}
-
-const ScreenSegmentCharacter *
-getScreenEnd (ScreenSegmentHeader *segment) {
-  return getScreenRow(segment, segment->screenHeight, NULL);
 }

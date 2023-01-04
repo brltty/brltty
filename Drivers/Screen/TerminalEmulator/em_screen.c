@@ -485,11 +485,10 @@ readCharacters_TerminalEmulatorScreen (const ScreenBox *box, ScreenCharacter *bu
 
   if (validateScreenBox(box, segment->screenWidth, segment->screenHeight)) {
     ScreenCharacter *target = buffer;
-    const ScreenSegmentCharacter *source = getScreenStart(segment);
-    source += (box->top * segment->screenWidth) + box->left;
-    unsigned int sourceRowIncrement = segment->screenWidth - box->width;
 
     for (unsigned int row=0; row<box->height; row+=1) {
+      const ScreenSegmentCharacter *source =
+          getScreenCharacter(segment, box->top + row, box->left, NULL);
       for (unsigned int column=0; column<box->width; column+=1) {
         target->text = source->text;
 
@@ -510,8 +509,6 @@ readCharacters_TerminalEmulatorScreen (const ScreenBox *box, ScreenCharacter *bu
         source += 1;
         target += 1;
       }
-
-      source += sourceRowIncrement;
     }
 
     return 1;
