@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -17,42 +17,27 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-setPackageManager() {
-   local -r commands=(
-      /usr/local/bin/brew
-
-      /sbin/apk
-      /usr/bin/apt
-      /usr/bin/dnf
-      /usr/sbin/pacman
-      /usr/sbin/pkg
-      /usr/sbin/pkg_info
-      /sbin/xbps-install
-      /usr/bin/zypper
-   )
-
-   local command
-   for command in "${commands[@]}"
-   do
-      [ -x "${command}" ] && {
-         packageManager="${command##*/}"
-         packageManager="${packageManager%%-*}"
-         return 0
-      }
-   done
-
-   semanticError "unknown package manager"
+listInstalledPackages() {
+   pkg_info -q -a | sed -e 's/^\(.*\)-.*$/\1/'
 }
 
-normalizePackageList() {
-   sort | uniq
+installPackages() {
+   pkg_add -I -x "${@}"
 }
 
-unsupportedPackageAction() {
-   local action="${1}"
-   semanticError "unsupported package action: ${action}"
+removePackages() {
+   pkg_delete -I -x "${@}"
 }
 
-setPackageManager
-logNote "package manager: ${packageManager}"
-. "${programDirectory}/packages.d/${packageManager}.sh"
+describePackage() {
+   pkg_info "${1}"
+}
+
+whichPackage() {
+   pkg_info -E "${1}"
+}
+
+searchPackage() {
+   pkg_info -Q -q "${1}"
+}
+
