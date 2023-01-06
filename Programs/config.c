@@ -114,7 +114,7 @@ logProperty (const char *value, const char *variable, const char *label) {
   if (value && *value) {
     if (variable) setGlobalVariable(variable, value);
   } else {
-    value = gettext("none");
+    value = "none";
   }
 
   logMessage(LOG_INFO, "%s: %s", label, value);
@@ -332,8 +332,7 @@ setAutospeakThreshold (void) {
 
   logProperty(
     screenContentQualityChoices[autospeakMinimumScreenContentQuality],
-    "autospeakThreshold",
-    gettext("Autospeak Threshold")
+    "autospeakThreshold", "Autospeak Threshold"
   );
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -837,7 +836,7 @@ establishPrivileges (void) {
   char **parameters = getParameters(names, platform, opt_privilegeParameters);
 
   if (parameters) {
-    logParameters(names, parameters, gettext("Privilege Parameter"));
+    logParameters(names, parameters, "Privilege Parameter");
     establishProgramPrivileges(parameters, opt_stayPrivileged);
     deallocateStrings(parameters);
   }
@@ -894,13 +893,13 @@ brlttyPrepare (int argc, char *argv[]) {
     }
 
     logProgramBanner();
-    logProperty(logFile, "logFile", gettext("Log File"));
-    logProperty(opt_logLevel, "logLevel", gettext("Log Level"));
+    logProperty(logFile, "logFile", "Log File");
+    logProperty(opt_logLevel, "logLevel", "Log Level");
   }
 
-  logProperty(getMessagesLocale(), "messagesLocale", gettext("Messages Locale"));
-  logProperty(getMessagesDomain(), "messagesDomain", gettext("Messages Domain"));
-  logProperty(getMessagesDirectory(), "messagesDirectory", gettext("Messages Directory"));
+  logProperty(getMessagesLocale(), "messagesLocale", "Messages Locale");
+  logProperty(getMessagesDomain(), "messagesDomain", "Messages Domain");
+  logProperty(getMessagesDirectory(), "messagesDirectory", "Messages Directory");
 
 #ifdef ENABLE_SPEECH_SUPPORT
   setAutospeakThreshold();
@@ -1010,7 +1009,7 @@ setTextAndContractionTables (void) {
     usingInternalTextTable = 1;
   }
 
-  logProperty(opt_textTable, "textTable", gettext("Text Table"));
+  logProperty(opt_textTable, "textTable", "Text Table");
   onProgramExit("text-table", exitTextTable, NULL);
 
   if (*opt_contractionTable) {
@@ -1034,7 +1033,7 @@ setTextAndContractionTables (void) {
     }
   }
 
-  logProperty(opt_contractionTable, "contractionTable", gettext("Contraction Table"));
+  logProperty(opt_contractionTable, "contractionTable", "Contraction Table");
   onProgramExit("contraction-table", exitContractionTable, NULL);
 }
 
@@ -1066,7 +1065,7 @@ setAttributesTable (void) {
     changeStringSetting(&opt_attributesTable, ATTRIBUTES_TABLE);
   }
 
-  logProperty(opt_attributesTable, "attributesTable", gettext("Attributes Table"));
+  logProperty(opt_attributesTable, "attributesTable", "Attributes Table");
   onProgramExit("attributes-table", exitAttributesTable, NULL);
 }
 
@@ -1329,7 +1328,7 @@ setKeyboardTable (void) {
   parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties);
   onProgramExit("keyboard-table", exitKeyboardTable, NULL);
   changeKeyboardTable(opt_keyboardTable);
-  logProperty(opt_keyboardTable, "keyboardTable", gettext("Keyboard Table"));
+  logProperty(opt_keyboardTable, "keyboardTable", "Keyboard Table");
 }
 
 int
@@ -1598,7 +1597,7 @@ startApiServer (void) {
 
     if (apiParameters) {
       api.logServerIdentity(0);
-      logParameters(parameters, apiParameters, gettext("API Parameter"));
+      logParameters(parameters, apiParameters, "API Parameter");
 
       if (!opt_verify) {
         if (api.startServer(apiParameters)) {
@@ -1769,7 +1768,7 @@ constructBrailleDriver (void) {
     braille->destruct(&brl);
   } else {
     logMessage(LOG_DEBUG, "%s: %s -> %s",
-               gettext("braille driver initialization failed"),
+               "braille driver initialization failed",
                braille->definition.code, brailleDevice);
   }
 
@@ -1820,7 +1819,7 @@ initializeBrailleDriver (const char *code, int verify) {
         logParameters(
           braille->parameters,
           brailleDriverParameters,
-          gettext("Braille Parameter")
+          "Braille Parameter"
         );
 
         {
@@ -2266,7 +2265,7 @@ initializeSpeechDriver (const char *code, int verify) {
         logParameters(
           speech->parameters,
           speechDriverParameters,
-          gettext("Speech Parameter")
+          "Speech Parameter"
         );
 
         return 1;
@@ -2497,7 +2496,7 @@ initializeScreenDriver (const char *code, int verify) {
         logParameters(
           getScreenParameters(screen),
           screenDriverParameters,
-          gettext("Screen Parameter")
+          "Screen Parameter"
         );
 
         return 1;
@@ -2967,19 +2966,19 @@ brlttyStart (void) {
     char *directory;
 
     if ((directory = getWorkingDirectory())) {
-      logProperty(directory, "workingDirectory", gettext("Working Directory"));
+      logProperty(directory, "workingDirectory", "Working Directory");
       free(directory);
     } else {
       logMessage(LOG_WARNING, "%s: %s", gettext("cannot determine working directory"), strerror(errno));
     }
   }
 
-  logProperty(opt_configurationFile, "configurationFile", gettext("Configuration File"));
-  logProperty(opt_tablesDirectory, "tablesDirectory", gettext("Tables Directory"));
-  logProperty(opt_driversDirectory, "driversDirectory", gettext("Drivers Directory"));
-  logProperty(opt_writableDirectory, "writableDirectory", gettext("Writable Directory"));
-  logProperty(opt_updatableDirectory, "updatableDirectory", gettext("Updatable Directory"));
-  logProperty(opt_preferencesFile, "preferencesFile", gettext("Preferences File"));
+  logProperty(opt_configurationFile, "configurationFile", "Configuration File");
+  logProperty(opt_tablesDirectory, "tablesDirectory", "Tables Directory");
+  logProperty(opt_driversDirectory, "driversDirectory", "Drivers Directory");
+  logProperty(opt_writableDirectory, "writableDirectory", "Writable Directory");
+  logProperty(opt_updatableDirectory, "updatableDirectory", "Updatable Directory");
+  logProperty(opt_preferencesFile, "preferencesFile", "Preferences File");
 
   resetPreferences();
   loadPreferences(0);
@@ -3041,7 +3040,7 @@ brlttyStart (void) {
   }
 
   /* Create the file system object for speech input. */
-  logProperty(opt_speechInput, "speechInput", gettext("Speech Input"));
+  logProperty(opt_speechInput, "speechInput", "Speech Input");
   if (!opt_verify) {
     if (*opt_speechInput) {
       speechInputObject = newSpeechInputObject(opt_speechInput);
