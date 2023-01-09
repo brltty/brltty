@@ -90,24 +90,35 @@ initializeScreenCharacters (ScreenSegmentCharacter *from, const ScreenSegmentCha
 }
 
 ScreenSegmentHeader *
-createScreenSegment (int *id, key_t key, int columns, int rows) {
-  size_t size = sizeof(ScreenSegmentHeader) +
-                sizeof(((ScreenSegmentHeader*)0)->rowOffsets[0]) * rows +
-                sizeof(ScreenSegmentCharacter) * columns * rows;
-  int identifier;
+createScreenSegment (int *identifier, key_t key, int columns, int rows) {
+  size_t rowsSize = sizeof(ScreenSegmentRow) * rows;
+  size_t characterCount = rows * columns;
+  size_t charactersSize = sizeof(ScreenSegmentCharacter) * characterCount;
 
-  if (getScreenSegment(&identifier, key)) {
-    destroyScreenSegment(identifier);
+  size_t segmentSize = sizeof(ScreenSegmentHeader) + rowsSize + charactersSize;
+  int segmentIdentifier;
+
+  if (getScreenSegment(&segmentIdentifier, key)) {
+    destroyScreenSegment(segmentIdentifier);
   }
 
-  if ((identifier = shmget(key, size, ipcCreationFlags)) != -1) {
-    ScreenSegmentHeader *segment = attachScreenSegment(identifier);
+  if ((segmentIdentifier = shmget(key, segmentSize, ipcCreationFlags)) != -1) {
+    ScreenSegmentHeader *segment = attachScreenSegment(segmentIdentifier);
 
     if (segment) {
+      uint32_t nextOffset = 0;
+
+      segment->segmentSize = segmentSize;
       segment->headerSize = sizeof(*segment);
-      segment->segmentSize = size;
+      nextOffset += segment->headerSize;
+
+      segment->rowSize = sizeof(ScreenSegmentRow);
+      segment->rowsOffset = nextOffset;
+      nextOffset += rowsSize;
 
       segment->characterSize = sizeof(ScreenSegmentCharacter);
+      segment->charactersOffset = nextOffset;
+      nextOffset += charactersSize;
 
       segment->screenHeight = rows;
       segment->screenWidth = columns;
@@ -119,25 +130,33 @@ createScreenSegment (int *id, key_t key, int columns, int rows) {
       segment->commonFlags = 0;
       segment->privateFlags = 0;
 
-      /* Initialize row offsets. Rows are initially sequential. */
-      for (unsigned int r = 0; r < rows; r++) {
-        segment->rowOffsets[r] =
-		sizeof(*segment) +
-		sizeof(segment->rowOffsets[0]) * rows +
-		sizeof(ScreenSegmentCharacter) * columns * r;
+      if (segment->rowsOffset) {
+        /* Rows are initially sequential. */
+
+        ScreenSegmentRow *row = getScreenRowArray(segment);
+        ScreenSegmentRow *end = row + rows;
+
+        uint32_t offset = segment->charactersOffset;
+        uint32_t increment = getScreenRowWidth(segment);
+
+        while (row < end) {
+          row->charactersOffset = offset;
+          offset += increment;
+          row += 1;
+        }
       }
 
       {
-        ScreenSegmentCharacter *from = (void *)segment + segment->rowOffsets[0];
-        ScreenSegmentCharacter *to = (void *)segment + size;
+        ScreenSegmentCharacter *from = getScreenCharacterArray(segment);
+        const ScreenSegmentCharacter *to = from + characterCount;
         initializeScreenCharacters(from, to);
       }
 
-      if (id) *id = identifier;
+      if (identifier) *identifier = segmentIdentifier;
       return segment;
     }
 
-    destroyScreenSegment(identifier);
+    destroyScreenSegment(segmentIdentifier);
   } else {
     logSystemError("shmget");
   }

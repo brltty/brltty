@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
 #include "log.h"
 #include "pty_screen.h"
 #include "scr_emulator.h"
@@ -239,6 +241,17 @@ fillCharacters (unsigned int row, unsigned int column, unsigned int count) {
 }
 
 static void
+moveRows (unsigned int from, unsigned int to, unsigned int count) {
+  if (count && (from != to)) {
+    moveScreenCharacters(
+      getScreenRow(segmentHeader, to, NULL),
+      getScreenRow(segmentHeader, from, NULL),
+      (count * COLS)
+    );
+  }
+}
+
+static void
 fillRows (unsigned int row, unsigned int count) {
   while (count--) fillCharacters(row++, 0, COLS);
 }
@@ -360,18 +373,18 @@ ptyAmWithinScrollRegion (void) {
 #define swap(a, b) do { a ^= b; b ^= a; a ^= b; } while (0)
 
 /* return the greatest common divisor */
-static unsigned long gcd(unsigned long a, unsigned long b) {
+static unsigned long
+gcd (unsigned long a, unsigned long b) {
   unsigned long r = a | b;
-
   if (!a || !b) return r;
 
-  b >>= __builtin_ffs(b);
+  b >>= ffs(b);
   if (b == 1) return r & -r;
 
-  for (;;) {
-    a >>= __builtin_ffs(a);
+  while (1) {
+    a >>= ffs(a);
     if (a == 1) return r & -r;
-    if (a == b) return a << __builtin_ffs(r);
+    if (a == b) return a << ffs(r);
 
     if (a < b) swap(a, b);
     a -= b;
@@ -379,13 +392,13 @@ static unsigned long gcd(unsigned long a, unsigned long b) {
 }
 
 static void
-ptyScroll (unsigned int count, bool down) {
+scrollRows (unsigned int count, int down) {
   unsigned int top = scrollRegionTop;
-  unsigned int bot = scrollRegionBottom + 1;
-  unsigned int size = bot - top;
-  unsigned int i, j, k, delta, clear;
+  unsigned int bottom = scrollRegionBottom + 1;
+  unsigned int size = bottom - top;
 
   if (count > size) count = size;
+  unsigned int delta, clear;
 
   if (down) {
     scrl(-count);
@@ -393,21 +406,24 @@ ptyScroll (unsigned int count, bool down) {
     delta = size - count;
   } else {
     scrl(count);
-    clear = bot - count;
+    clear = bottom - count;
     delta = count;
   }
 
-  for (i = 0; i < gcd(delta, size); i++) {
-    uint32_t tmp = segmentHeader->rowOffsets[top + i];
-    j = i;
+  for (unsigned int i=0; i<gcd(delta, size); i+=1) {
+    ScreenSegmentRow row = getScreenRowArray(segmentHeader)[top + i];
+    unsigned int j = i;
+
     while (1) {
-      k = j + delta;
+      unsigned int k = j + delta;
       if (k >= size) k -= size;
       if (k == i) break;
-      segmentHeader->rowOffsets[top + j] = segmentHeader->rowOffsets[top + k];
+
+      getScreenRowArray(segmentHeader)[top + j] = getScreenRowArray(segmentHeader)[top + k];
       j = k;
     }
-    segmentHeader->rowOffsets[top + j] = tmp;
+
+    getScreenRowArray(segmentHeader)[top + j] = row;
   }
 
   fillRows(clear, count);
@@ -415,12 +431,36 @@ ptyScroll (unsigned int count, bool down) {
 
 void
 ptyScrollBackward (unsigned int count) {
-  ptyScroll (count, true);
+  if (segmentHeader->rowsOffset) {
+    scrollRows(count, true);
+  } else {
+    unsigned int row = scrollRegionTop;
+    unsigned int end = scrollRegionBottom + 1;
+    unsigned int size = end - row;
+
+    if (count > size) count = size;
+    scrl(-count);
+
+    moveRows(row, (row + count), (size - count));
+    fillRows(row, count);
+  }
 }
 
 void
 ptyScrollForward (unsigned int count) {
-  ptyScroll (count, false);
+  if (segmentHeader->rowsOffset) {
+    scrollRows(count, false);
+  } else {
+    unsigned int row = scrollRegionTop;
+    unsigned int end = scrollRegionBottom + 1;
+    unsigned int size = end - row;
+
+    if (count > size) count = size;
+    scrl(count);
+
+    moveRows((row + count), row, (size - count));
+    fillRows((end - count), count);
+  }
 }
 
 void
@@ -591,16 +631,6 @@ ptySetBackgroundColor (int color) {
 }
 
 void
-ptyClearToEndOfDisplay (void) {
-  clrtobot();
-
-  ptyClearToEndOfLine();
-
-  unsigned int bottomRows = segmentHeader->screenHeight - segmentHeader->cursorRow - 1;
-  if (bottomRows > 0) fillRows(segmentHeader->cursorRow + 1, bottomRows);
-}
-
-void
 ptyClearToEndOfLine (void) {
   clrtoeol();
 
@@ -620,4 +650,20 @@ ptyClearToBeginningOfLine (void) {
   }
 
   ptySetCursorColumn(column);
+}
+
+void
+ptyClearToEndOfDisplay (void) {
+  clrtobot();
+
+  if (segmentHeader->rowsOffset) {
+    ptyClearToEndOfLine();
+
+    unsigned int bottomRows = segmentHeader->screenHeight - segmentHeader->cursorRow - 1;
+    if (bottomRows > 0) fillRows(segmentHeader->cursorRow + 1, bottomRows);
+  } else {
+    ScreenSegmentCharacter *from = setCurrentCharacter(NULL);
+    const ScreenSegmentCharacter *to = from + getScreenCharacterCount(segmentHeader);
+    propagateScreenCharacter(from, to);
+  }
 }

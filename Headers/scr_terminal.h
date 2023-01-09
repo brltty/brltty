@@ -53,10 +53,19 @@ typedef struct {
 } ScreenSegmentCharacter;
 
 typedef struct {
+  uint32_t charactersOffset;
+} ScreenSegmentRow;
+
+typedef struct {
   uint32_t headerSize;
   uint32_t segmentSize;
 
+  uint32_t rowsOffset;
+  uint32_t rowSize;
+
+  uint32_t charactersOffset;
   uint32_t characterSize;
+
   uint32_t screenHeight;
   uint32_t screenWidth;
 
@@ -66,8 +75,6 @@ typedef struct {
   uint32_t screenNumber;
   uint32_t commonFlags;
   uint32_t privateFlags;
-
-  uint32_t rowOffsets[0];
 } ScreenSegmentHeader;
 
 extern int getScreenSegment (int *identifier, key_t key);
@@ -76,6 +83,20 @@ extern int detachScreenSegment (ScreenSegmentHeader *segment);
 
 extern ScreenSegmentHeader *getScreenSegmentForKey (key_t key);
 extern ScreenSegmentHeader *getScreenSegmentForPath (const char *path);
+
+static inline unsigned int
+getScreenRowWidth (ScreenSegmentHeader *segment) {
+  return segment->screenWidth * segment->characterSize;
+}
+
+static inline unsigned int
+getScreenCharacterCount (ScreenSegmentHeader *segment) {
+  return segment->screenWidth * segment->screenHeight;
+}
+
+extern void *getScreenItem (ScreenSegmentHeader *segment, uint32_t offset);
+extern ScreenSegmentRow *getScreenRowArray (ScreenSegmentHeader *segment);
+extern ScreenSegmentCharacter *getScreenCharacterArray (ScreenSegmentHeader *segment);
 
 extern ScreenSegmentCharacter *getScreenRow (ScreenSegmentHeader *segment, unsigned int row, ScreenSegmentCharacter **end);
 extern ScreenSegmentCharacter *getScreenCharacter (ScreenSegmentHeader *segment, unsigned int row, unsigned int column, ScreenSegmentCharacter **end);

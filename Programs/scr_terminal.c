@@ -103,13 +103,36 @@ getScreenSegmentForPath (const char *path) {
   return getScreenSegmentForKey(key);
 }
 
+void *
+getScreenItem (ScreenSegmentHeader *segment, uint32_t offset) {
+  void *address = segment;
+  address += offset;
+  return address;
+}
+
+ScreenSegmentRow *
+getScreenRowArray (ScreenSegmentHeader *segment) {
+  return getScreenItem(segment, segment->rowsOffset);
+}
+
+ScreenSegmentCharacter *
+getScreenCharacterArray (ScreenSegmentHeader *segment) {
+  return getScreenItem(segment, segment->charactersOffset);
+}
+
 ScreenSegmentCharacter *
 getScreenRow (ScreenSegmentHeader *segment, unsigned int row, ScreenSegmentCharacter **end) {
   void *address = segment;
-  address += segment->rowOffsets[row];
+
+  if (segment->rowsOffset) {
+    address += getScreenRowArray(segment)[row].charactersOffset;
+  } else {
+    address += segment->charactersOffset;
+    address += row * getScreenRowWidth(segment);
+  }
 
   if (end) {
-    *end = address + segment->screenWidth * segment->characterSize;
+    *end = address + getScreenRowWidth(segment);
   }
 
   return address;

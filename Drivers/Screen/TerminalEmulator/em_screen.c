@@ -488,7 +488,8 @@ readCharacters_TerminalEmulatorScreen (const ScreenBox *box, ScreenCharacter *bu
 
     for (unsigned int row=0; row<box->height; row+=1) {
       const ScreenSegmentCharacter *source =
-          getScreenCharacter(segment, box->top + row, box->left, NULL);
+        getScreenCharacter(segment, box->top + row, box->left, NULL);
+
       for (unsigned int column=0; column<box->width; column+=1) {
         target->text = source->text;
 
