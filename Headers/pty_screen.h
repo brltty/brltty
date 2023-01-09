@@ -39,8 +39,8 @@ extern void ptyRestoreCursorPosition (void);
 
 extern void ptySetScrollRegion (unsigned int top, unsigned int bottom);
 extern int ptyAmWithinScrollRegion (void);
-extern void ptyScrollBackward (unsigned int count);
-extern void ptyScrollForward (unsigned int count);
+extern void ptyScrollDown (unsigned int count);
+extern void ptyScrollUp (unsigned int count);
 
 extern void ptyMoveCursorUp (unsigned int amount);
 extern void ptyMoveCursorDown (unsigned int amount);
@@ -67,9 +67,9 @@ extern void ptyRemoveAttributes (attr_t attributes);
 extern void ptySetForegroundColor (int color);
 extern void ptySetBackgroundColor (int color);
 
-extern void ptyClearToEndOfDisplay (void);
 extern void ptyClearToEndOfLine (void);
 extern void ptyClearToBeginningOfLine (void);
+extern void ptyClearToEndOfDisplay (void);
 
 extern void ptySetScreenLogLevel (unsigned char level);
 

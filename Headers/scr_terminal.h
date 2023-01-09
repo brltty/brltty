@@ -60,17 +60,17 @@ typedef struct {
   uint32_t headerSize;
   uint32_t segmentSize;
 
-  uint32_t rowsOffset;
-  uint32_t rowSize;
-
-  uint32_t charactersOffset;
-  uint32_t characterSize;
-
   uint32_t screenHeight;
   uint32_t screenWidth;
 
   uint32_t cursorRow;
   uint32_t cursorColumn;
+
+  uint32_t rowsOffset;
+  uint32_t rowSize;
+
+  uint32_t charactersOffset;
+  uint32_t characterSize;
 
   uint32_t screenNumber;
   uint32_t commonFlags;
@@ -84,22 +84,27 @@ extern int detachScreenSegment (ScreenSegmentHeader *segment);
 extern ScreenSegmentHeader *getScreenSegmentForKey (key_t key);
 extern ScreenSegmentHeader *getScreenSegmentForPath (const char *path);
 
+static inline int
+haveScreenRowArray (const ScreenSegmentHeader *segment) {
+  return !!segment->rowsOffset;
+}
+
 static inline unsigned int
-getScreenRowWidth (ScreenSegmentHeader *segment) {
+getScreenRowWidth (const ScreenSegmentHeader *segment) {
   return segment->screenWidth * segment->characterSize;
 }
 
 static inline unsigned int
-getScreenCharacterCount (ScreenSegmentHeader *segment) {
+getScreenCharacterCount (const ScreenSegmentHeader *segment) {
   return segment->screenWidth * segment->screenHeight;
 }
 
 extern void *getScreenItem (ScreenSegmentHeader *segment, uint32_t offset);
 extern ScreenSegmentRow *getScreenRowArray (ScreenSegmentHeader *segment);
-extern ScreenSegmentCharacter *getScreenCharacterArray (ScreenSegmentHeader *segment);
+extern ScreenSegmentCharacter *getScreenCharacterArray (ScreenSegmentHeader *segment, const ScreenSegmentCharacter **end);
 
-extern ScreenSegmentCharacter *getScreenRow (ScreenSegmentHeader *segment, unsigned int row, ScreenSegmentCharacter **end);
-extern ScreenSegmentCharacter *getScreenCharacter (ScreenSegmentHeader *segment, unsigned int row, unsigned int column, ScreenSegmentCharacter **end);
+extern ScreenSegmentCharacter *getScreenRow (ScreenSegmentHeader *segment, unsigned int row, const ScreenSegmentCharacter **end);
+extern ScreenSegmentCharacter *getScreenCharacter (ScreenSegmentHeader *segment, unsigned int row, unsigned int column, const ScreenSegmentCharacter **end);
 
 #ifdef __cplusplus
 }

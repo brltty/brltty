@@ -92,8 +92,7 @@ initializeScreenCharacters (ScreenSegmentCharacter *from, const ScreenSegmentCha
 ScreenSegmentHeader *
 createScreenSegment (int *identifier, key_t key, int columns, int rows) {
   size_t rowsSize = sizeof(ScreenSegmentRow) * rows;
-  size_t characterCount = rows * columns;
-  size_t charactersSize = sizeof(ScreenSegmentCharacter) * characterCount;
+  size_t charactersSize = sizeof(ScreenSegmentCharacter) * rows * columns;
 
   size_t segmentSize = sizeof(ScreenSegmentHeader) + rowsSize + charactersSize;
   int segmentIdentifier;
@@ -112,6 +111,12 @@ createScreenSegment (int *identifier, key_t key, int columns, int rows) {
       segment->headerSize = sizeof(*segment);
       nextOffset += segment->headerSize;
 
+      segment->screenHeight = rows;
+      segment->screenWidth = columns;
+
+      segment->cursorRow = 0;
+      segment->cursorColumn = 0;
+
       segment->rowSize = sizeof(ScreenSegmentRow);
       segment->rowsOffset = nextOffset;
       nextOffset += rowsSize;
@@ -120,17 +125,11 @@ createScreenSegment (int *identifier, key_t key, int columns, int rows) {
       segment->charactersOffset = nextOffset;
       nextOffset += charactersSize;
 
-      segment->screenHeight = rows;
-      segment->screenWidth = columns;
-
-      segment->cursorRow = 0;
-      segment->cursorColumn = 0;
-
       segment->screenNumber = 0;
       segment->commonFlags = 0;
       segment->privateFlags = 0;
 
-      if (segment->rowsOffset) {
+      if (haveScreenRowArray(segment)) {
         /* Rows are initially sequential. */
 
         ScreenSegmentRow *row = getScreenRowArray(segment);
@@ -147,8 +146,8 @@ createScreenSegment (int *identifier, key_t key, int columns, int rows) {
       }
 
       {
-        ScreenSegmentCharacter *from = getScreenCharacterArray(segment);
-        const ScreenSegmentCharacter *to = from + characterCount;
+        const ScreenSegmentCharacter *to;
+        ScreenSegmentCharacter *from = getScreenCharacterArray(segment, &to);
         initializeScreenCharacters(from, to);
       }
 

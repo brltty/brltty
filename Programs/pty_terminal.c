@@ -635,12 +635,12 @@ performBracketAction (unsigned char byte) {
 
     case 'S':
       logOutputAction("indn", "scroll forward");
-      ptyScrollForward(getOutputActionCount());
+      ptyScrollUp(getOutputActionCount());
       return OBP_DONE;
 
     case 'T':
       logOutputAction("rin", "scroll backward");
-      ptyScrollBackward(getOutputActionCount());
+      ptyScrollDown(getOutputActionCount());
       return OBP_DONE;
 
     case 'Z':

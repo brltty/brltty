@@ -153,7 +153,7 @@ setColor (ScreenSegmentColor *ssc, unsigned char color, unsigned char level) {
 }
 
 static ScreenSegmentCharacter *
-setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **end) {
+setCharacter (unsigned int row, unsigned int column, const ScreenSegmentCharacter **end) {
   wchar_t text;
   attr_t attributes;
   int colorPair;
@@ -225,12 +225,12 @@ setCharacter (unsigned int row, unsigned int column, ScreenSegmentCharacter **en
 }
 
 static ScreenSegmentCharacter *
-setCurrentCharacter (ScreenSegmentCharacter **end) {
+setCurrentCharacter (const ScreenSegmentCharacter **end) {
   return setCharacter(segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
 }
 
 static ScreenSegmentCharacter *
-getCurrentCharacter (ScreenSegmentCharacter **end) {
+getCurrentCharacter (const ScreenSegmentCharacter **end) {
   return getScreenCharacter(segmentHeader, segmentHeader->cursorRow, segmentHeader->cursorColumn, end);
 }
 
@@ -430,8 +430,8 @@ scrollRows (unsigned int count, int down) {
 }
 
 void
-ptyScrollBackward (unsigned int count) {
-  if (segmentHeader->rowsOffset) {
+ptyScrollDown (unsigned int count) {
+  if (haveScreenRowArray(segmentHeader)) {
     scrollRows(count, true);
   } else {
     unsigned int row = scrollRegionTop;
@@ -447,8 +447,8 @@ ptyScrollBackward (unsigned int count) {
 }
 
 void
-ptyScrollForward (unsigned int count) {
-  if (segmentHeader->rowsOffset) {
+ptyScrollUp (unsigned int count) {
+  if (haveScreenRowArray(segmentHeader)) {
     scrollRows(count, false);
   } else {
     unsigned int row = scrollRegionTop;
@@ -494,7 +494,7 @@ ptyMoveCursorRight (unsigned int amount) {
 void
 ptyMoveUp1 (void) {
   if (segmentHeader->cursorRow == scrollRegionTop) {
-    ptyScrollBackward(1);
+    ptyScrollDown(1);
   } else {
     ptyMoveCursorUp(1);
   }
@@ -503,7 +503,7 @@ ptyMoveUp1 (void) {
 void
 ptyMoveDown1 (void) {
   if (segmentHeader->cursorRow == scrollRegionBottom) {
-    ptyScrollForward(1);
+    ptyScrollUp(1);
   } else {
     ptyMoveCursorDown(1);
   }
@@ -527,7 +527,7 @@ ptyInsertLines (unsigned int count) {
     unsigned int oldBottom = scrollRegionBottom;
 
     ptySetScrollRegion(row, scrollRegionBottom);
-    ptyScrollBackward(count);
+    ptyScrollDown(count);
     ptySetScrollRegion(oldTop, oldBottom);
   }
 }
@@ -540,14 +540,14 @@ ptyDeleteLines (unsigned int count) {
     unsigned int oldBottom = scrollRegionBottom;
 
     ptySetScrollRegion(row, scrollRegionBottom);
-    ptyScrollForward(count);
+    ptyScrollUp(count);
     ptySetScrollRegion(oldTop, oldBottom);
   }
 }
 
 void
 ptyInsertCharacters (unsigned int count) {
-  ScreenSegmentCharacter *end;
+  const ScreenSegmentCharacter *end;
   ScreenSegmentCharacter *from = getCurrentCharacter(&end);
 
   if ((from + count) > end) count = end - from;
@@ -564,7 +564,7 @@ ptyInsertCharacters (unsigned int count) {
 
 void
 ptyDeleteCharacters (unsigned int count) {
-  ScreenSegmentCharacter *end;
+  const ScreenSegmentCharacter *end;
   ScreenSegmentCharacter *to = getCurrentCharacter(&end);
 
   if ((to + count) > end) count = end - to;
@@ -634,7 +634,7 @@ void
 ptyClearToEndOfLine (void) {
   clrtoeol();
 
-  ScreenSegmentCharacter *to;
+  const ScreenSegmentCharacter *to;
   ScreenSegmentCharacter *from = setCurrentCharacter(&to);
   propagateScreenCharacter(from, to);
 }
@@ -656,14 +656,15 @@ void
 ptyClearToEndOfDisplay (void) {
   clrtobot();
 
-  if (segmentHeader->rowsOffset) {
+  if (haveScreenRowArray(segmentHeader)) {
     ptyClearToEndOfLine();
 
     unsigned int bottomRows = segmentHeader->screenHeight - segmentHeader->cursorRow - 1;
     if (bottomRows > 0) fillRows(segmentHeader->cursorRow + 1, bottomRows);
   } else {
     ScreenSegmentCharacter *from = setCurrentCharacter(NULL);
-    const ScreenSegmentCharacter *to = from + getScreenCharacterCount(segmentHeader);
+    const ScreenSegmentCharacter *to;
+    getScreenCharacterArray(segmentHeader, &to);
     propagateScreenCharacter(from, to);
   }
 }

@@ -116,15 +116,17 @@ getScreenRowArray (ScreenSegmentHeader *segment) {
 }
 
 ScreenSegmentCharacter *
-getScreenCharacterArray (ScreenSegmentHeader *segment) {
-  return getScreenItem(segment, segment->charactersOffset);
+getScreenCharacterArray (ScreenSegmentHeader *segment, const ScreenSegmentCharacter **end) {
+  ScreenSegmentCharacter *array = getScreenItem(segment, segment->charactersOffset);
+  if (end) *end = array + getScreenCharacterCount(segment);
+  return array;
 }
 
 ScreenSegmentCharacter *
-getScreenRow (ScreenSegmentHeader *segment, unsigned int row, ScreenSegmentCharacter **end) {
+getScreenRow (ScreenSegmentHeader *segment, unsigned int row, const ScreenSegmentCharacter **end) {
   void *address = segment;
 
-  if (segment->rowsOffset) {
+  if (haveScreenRowArray(segment)) {
     address += getScreenRowArray(segment)[row].charactersOffset;
   } else {
     address += segment->charactersOffset;
@@ -139,7 +141,7 @@ getScreenRow (ScreenSegmentHeader *segment, unsigned int row, ScreenSegmentChara
 }
 
 ScreenSegmentCharacter *
-getScreenCharacter (ScreenSegmentHeader *segment, unsigned int row, unsigned int column, ScreenSegmentCharacter **end) {
+getScreenCharacter (ScreenSegmentHeader *segment, unsigned int row, unsigned int column, const ScreenSegmentCharacter **end) {
   void *address = getScreenRow(segment, row, end);
   address += column * segment->characterSize;
   return address;
