@@ -117,9 +117,14 @@ createScreenSegment (int *identifier, key_t key, int columns, int rows) {
       segment->cursorRow = 0;
       segment->cursorColumn = 0;
 
-      segment->rowSize = sizeof(ScreenSegmentRow);
-      segment->rowsOffset = nextOffset;
-      nextOffset += rowsSize;
+      if (0) {
+        segment->rowSize = sizeof(ScreenSegmentRow);
+        segment->rowsOffset = nextOffset;
+        nextOffset += rowsSize;
+      } else {
+        segment->rowSize = 0;
+        segment->rowsOffset = 0;
+      }
 
       segment->characterSize = sizeof(ScreenSegmentCharacter);
       segment->charactersOffset = nextOffset;
