@@ -66,15 +66,15 @@ typedef struct {
   uint32_t cursorRow;
   uint32_t cursorColumn;
 
+  uint32_t screenNumber;
+  uint32_t commonFlags;
+  uint32_t privateFlags;
+
   uint32_t rowsOffset;
   uint32_t rowSize;
 
   uint32_t charactersOffset;
   uint32_t characterSize;
-
-  uint32_t screenNumber;
-  uint32_t commonFlags;
-  uint32_t privateFlags;
 } ScreenSegmentHeader;
 
 extern int getScreenSegment (int *identifier, key_t key);

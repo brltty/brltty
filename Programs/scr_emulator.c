@@ -117,6 +117,10 @@ createScreenSegment (int *identifier, key_t key, int columns, int rows) {
       segment->cursorRow = 0;
       segment->cursorColumn = 0;
 
+      segment->screenNumber = 0;
+      segment->commonFlags = 0;
+      segment->privateFlags = 0;
+
       if (0) {
         segment->rowSize = sizeof(ScreenSegmentRow);
         segment->rowsOffset = nextOffset;
@@ -129,10 +133,6 @@ createScreenSegment (int *identifier, key_t key, int columns, int rows) {
       segment->characterSize = sizeof(ScreenSegmentCharacter);
       segment->charactersOffset = nextOffset;
       nextOffset += charactersSize;
-
-      segment->screenNumber = 0;
-      segment->commonFlags = 0;
-      segment->privateFlags = 0;
 
       if (haveScreenRowArray(segment)) {
         /* Rows are initially sequential. */
