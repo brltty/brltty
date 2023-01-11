@@ -5,6 +5,7 @@
 configureOptions=(
    --enable-relocatable-install
    --without-pgmprivs-package
+   --without-ports-package
    --without-libbraille
    --without-mikropuhe
    --without-swift

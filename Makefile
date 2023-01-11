@@ -23,7 +23,10 @@ install-required-packages: | clone
 set-screen-size: $(CLONE_TARGET)
 	$(SOURCE_TREE)/Tools/ttysize -c 40 -l 9
 
-release: archives documents
+release-directory:
+	mkdir --parents -- $(RELEASE_DIRECTORY)
+
+release: release-directory archives documents
 	rm -f -- $(RELEASE_DIRECTORY)/*
 	git rev-parse HEAD >$(RELEASE_DIRECTORY)/git-commit.txt
 	cp --archive -- $(DOCUMENTS_DIRECTORY)/software.html $(RELEASE_DIRECTORY)/index.html

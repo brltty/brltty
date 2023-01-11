@@ -1,0 +1,17 @@
+[user]
+	name = Dave Mielke
+	email = Dave@Mielke.cc
+[core]
+	editor = vim
+[advice]
+	statusHints = false
+[push]
+	default = upstream
+[color]
+	diff = false
+	grep = false
+	branch = false
+[http]
+	cookiefile = /home/dave/.gitcookies
+[credential]
+	username = DaveMielke

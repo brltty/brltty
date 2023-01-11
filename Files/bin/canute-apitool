@@ -1,5 +1,5 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
-exec canute-java org.a11y.brlapi.commands.ApiToolCommand "${@}"
+exec "${programDirectory}/canute-java" org.a11y.brlapi.commands.ApiToolCommand "${@}"
 exit 0
