@@ -373,18 +373,18 @@ ptyAmWithinScrollRegion (void) {
 #define swap(a, b) do { a ^= b; b ^= a; a ^= b; } while (0)
 
 /* return the greatest common divisor */
-static unsigned long
-gcd (unsigned long a, unsigned long b) {
-  unsigned long r = a | b;
+static unsigned int
+gcd (unsigned int a, unsigned int b) {
+  unsigned int r = a | b;
   if (!a || !b) return r;
 
-  b >>= ffs(b);
+  b >>= (ffs(b)-1);
   if (b == 1) return r & -r;
 
   while (1) {
-    a >>= ffs(a);
+    a >>= (ffs(a)-1);
     if (a == 1) return r & -r;
-    if (a == b) return a << ffs(r);
+    if (a == b) return a << (ffs(r)-1);
 
     if (a < b) swap(a, b);
     a -= b;
