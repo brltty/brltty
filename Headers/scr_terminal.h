@@ -83,6 +83,7 @@ extern int detachScreenSegment (ScreenSegmentHeader *segment);
 
 extern ScreenSegmentHeader *getScreenSegmentForKey (key_t key);
 extern ScreenSegmentHeader *getScreenSegmentForPath (const char *path);
+extern void logScreenSegment (const ScreenSegmentHeader *segment);
 
 static inline int
 haveScreenRowArray (const ScreenSegmentHeader *segment) {

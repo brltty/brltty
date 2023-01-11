@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/msg.h>
@@ -101,6 +102,27 @@ getScreenSegmentForPath (const char *path) {
   key_t key;
   if (!makeTerminalKey(&key, path)) return NULL;
   return getScreenSegmentForKey(key);
+}
+
+void
+logScreenSegment (const ScreenSegmentHeader *segment) {
+  const void *const address = segment;
+  const unsigned char *const bytes = address;
+
+  uint32_t offset = 0;
+  const uint32_t end = segment->segmentSize;
+  unsigned int increment = 0X10;
+  const int width = snprintf(NULL, 0, "%X", end);
+
+  while (offset < end) {
+    {
+      const uint32_t count = end - offset;
+      if (increment > count) increment = count;
+    }
+
+    logBytes(LOG_NOTICE, "screen segment: %0*X", &bytes[offset], increment, width, offset);
+    offset += increment;
+  }
 }
 
 void *
