@@ -91,7 +91,7 @@ initializeScreenCharacters (ScreenSegmentCharacter *from, const ScreenSegmentCha
 
 ScreenSegmentHeader *
 createScreenSegment (int *identifier, key_t key, int columns, int rows) {
-  size_t rowsSize = sizeof(ScreenSegmentRow) * rows;
+  size_t rowsSize = 1? (sizeof(ScreenSegmentRow) * rows): 0;
   size_t charactersSize = sizeof(ScreenSegmentCharacter) * rows * columns;
 
   size_t segmentSize = sizeof(ScreenSegmentHeader) + rowsSize + charactersSize;
@@ -121,7 +121,7 @@ createScreenSegment (int *identifier, key_t key, int columns, int rows) {
       segment->commonFlags = 0;
       segment->privateFlags = 0;
 
-      if (0) {
+      if (rowsSize) {
         segment->rowSize = sizeof(ScreenSegmentRow);
         segment->rowsOffset = nextOffset;
         nextOffset += rowsSize;
