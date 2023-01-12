@@ -18,8 +18,6 @@
 
 #include "prologue.h"
 
-#include <string.h>
-
 #include "log.h"
 #include "pty_screen.h"
 #include "scr_emulator.h"
@@ -370,29 +368,78 @@ ptyAmWithinScrollRegion (void) {
   return isWithinScrollRegion(segmentHeader->cursorRow);
 }
 
-#define swap(a, b) do { a ^= b; b ^= a; a ^= b; } while (0)
+#define SWAP(a, b) do { (a) ^= (b); (b) ^= (a); (a) ^= (b); } while (0)
 
-/* return the greatest common divisor */
+#undef HAVE_BUILTIN_CTZ
+#ifdef __has_builtin
+#if __has_builtin(__builtin_ctz)
+#define HAVE_BUILTIN_CTZ
+#endif /* __has_builtin(__builtin_ctz) */
+#endif /* __has_builtin */
+
+#ifdef HAVE_BUILTIN_CTZ
+static inline int
+ctz (unsigned int x) {
+  return __builtin_ctz(x);
+}
+
+#else /* HAVE_BUILTIN_CTZ */
+#include <string.h>
+
+static inline int
+ctz (unsigned int x) {
+  return ffs(x) - 1;
+}
+#endif /* HAVE_BUILTIN_CTZ */
+
+/* Greatest Common Divisor
+ *
+ * gcd(a,b) computes the greatest common divisor of a and b. I included 
+ * a highly optimized implementation for speed. But the simplest 
+ * implementation would look like:
+ *
+ * unsigned long gcd(unsigned long a, unsigned long b) {
+ *   if (b == 0) return a;
+ *   return gcd(b, a % b);
+ * }
+ */
 static unsigned int
 gcd (unsigned int a, unsigned int b) {
   unsigned int r = a | b;
   if (!a || !b) return r;
 
-  b >>= (ffs(b)-1);
+  b >>= ctz(b);
   if (b == 1) return r & -r;
 
   while (1) {
-    a >>= (ffs(a)-1);
+    a >>= ctz(a);
     if (a == 1) return r & -r;
-    if (a == b) return a << (ffs(r)-1);
+    if (a == b) return a << ctz(r);
 
-    if (a < b) swap(a, b);
+    if (a < b) SWAP(a, b);
     a -= b;
   }
 }
 
+/* Scrolling the Row Array
+ *
+ * The idea is to have lines indexed into an array. Then, a screen scroll 
+ * can be achieved by performing an array rotation. To scroll one line 
+ * up, the array is rotated left by one position and what used to be the 
+ * top row becomes the bottom row and gets cleared. To scroll one line 
+ * down, the array is rotated left by n-1 positions instead, and the bottom 
+ * row becomes the top row. And this works the same regardless of the 
+ * number of lines to scroll.
+ *
+ * The array rotation algorithm used here is complexity O(n) in execution 
+ * and O(1) in memory usage, n being the array size. The scroll amount 
+ * doesn't affect complexity.
+ *
+ * See https://www.geeksforgeeks.org/array-rotation/ for algorithmic 
+ * details.
+ */
 static void
-scrollRows (unsigned int count, int down) {
+scrollRowArray (unsigned int count, int down) {
   unsigned int top = scrollRegionTop;
   unsigned int bottom = scrollRegionBottom + 1;
   unsigned int size = bottom - top;
@@ -432,7 +479,7 @@ scrollRows (unsigned int count, int down) {
 void
 ptyScrollDown (unsigned int count) {
   if (haveScreenRowArray(segmentHeader)) {
-    scrollRows(count, true);
+    scrollRowArray(count, true);
   } else {
     unsigned int row = scrollRegionTop;
     unsigned int end = scrollRegionBottom + 1;
@@ -449,7 +496,7 @@ ptyScrollDown (unsigned int count) {
 void
 ptyScrollUp (unsigned int count) {
   if (haveScreenRowArray(segmentHeader)) {
-    scrollRows(count, false);
+    scrollRowArray(count, false);
   } else {
     unsigned int row = scrollRegionTop;
     unsigned int end = scrollRegionBottom + 1;
