@@ -758,7 +758,7 @@ cdef class Connection:
 		cdef int retval
 		cdef c_brlapi.brlapi_rangeType_t c_type
 		cdef c_brlapi.brlapi_keyCode_t *c_set
-		cdef unsigned int c_n
+		cdef long c_n
 		c_type = key_type
 		c_n = len(set)
 		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_keyCode_t))
@@ -782,7 +782,7 @@ cdef class Connection:
 		cdef int retval
 		cdef c_brlapi.brlapi_rangeType_t c_type
 		cdef c_brlapi.brlapi_keyCode_t *c_set
-		cdef unsigned int c_n
+		cdef long c_n
 		c_type = key_type
 		c_n = len(set)
 		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_keyCode_t))
@@ -833,7 +833,7 @@ cdef class Connection:
 		The given codes should be raw keycodes (i.e. some driver name was given to brlapi_enterTtyMode()) """
 		cdef int retval
 		cdef c_brlapi.brlapi_range_t *c_keys
-		cdef unsigned int c_n
+		cdef long c_n
 		c_n = len(keys)
 		c_keys = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_range_t))
 		for i from 0 <= i < c_n:
@@ -856,7 +856,7 @@ cdef class Connection:
 		The given codes should be raw keycodes (i.e. some driver name was given to brlapi_enterTtyMode()) """
 		cdef int retval
 		cdef c_brlapi.brlapi_range_t *c_keys
-		cdef unsigned int c_n
+		cdef long c_n
 		c_n = len(keys)
 		c_keys = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_brlapi.brlapi_range_t))
 		for i from 0 <= i < c_n:
