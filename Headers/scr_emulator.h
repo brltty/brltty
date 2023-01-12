@@ -28,7 +28,7 @@ extern "C" {
 extern int createMessageQueue (int *queue, key_t key);
 extern int destroyMessageQueue (int queue);
 
-extern ScreenSegmentHeader *createScreenSegment (int *identifier, key_t key, int columns, int rows);
+extern ScreenSegmentHeader *createScreenSegment (int *identifier, key_t key, int columns, int rows, int enableRowArray);
 extern int destroyScreenSegment (int identifier);
 
 extern void moveScreenCharacters (ScreenSegmentCharacter *to, const ScreenSegmentCharacter *from, size_t count);

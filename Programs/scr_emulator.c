@@ -90,8 +90,8 @@ initializeScreenCharacters (ScreenSegmentCharacter *from, const ScreenSegmentCha
 }
 
 ScreenSegmentHeader *
-createScreenSegment (int *identifier, key_t key, int columns, int rows) {
-  size_t rowsSize = 1? (sizeof(ScreenSegmentRow) * rows): 0;
+createScreenSegment (int *identifier, key_t key, int columns, int rows, int enableRowArray) {
+  size_t rowsSize = enableRowArray? (sizeof(ScreenSegmentRow) * rows): 0;
   size_t charactersSize = sizeof(ScreenSegmentCharacter) * rows * columns;
 
   size_t segmentSize = sizeof(ScreenSegmentHeader) + rowsSize + charactersSize;

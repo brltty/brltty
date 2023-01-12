@@ -24,6 +24,8 @@
 #include "msg_queue.h"
 #include "utf8.h"
 
+#define ENABLE_ROW_ARRAY 1
+
 static unsigned char screenLogLevel = LOG_DEBUG;
 
 void
@@ -126,7 +128,7 @@ createSegment (const char *path, int driverDirectives) {
   key_t key;
 
   if (makeTerminalKey(&key, path)) {
-    segmentHeader = createScreenSegment(&segmentIdentifier, key, COLS, LINES);
+    segmentHeader = createScreenSegment(&segmentIdentifier, key, COLS, LINES, ENABLE_ROW_ARRAY);
 
     if (segmentHeader) {
       if (driverDirectives) enableMessages(key);
