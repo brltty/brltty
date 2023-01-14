@@ -25,7 +25,7 @@ apiCommand() {
    local command="${1}"
    shift 1
 
-   canute-apitool "${command}" -server "localhost:${session}" "${@}"
+   "${programDirectory}/canute-apitool" "${command}" -server "localhost:${session}" "${@}"
    return "${?}"
 }
 

@@ -30,9 +30,9 @@ if [ -n "${styleName}" ]
 then
    verifyChoice "cursor style" styleName "${!cursorStyles[@]}"
    styleDots="${cursorStyles["${styleName}"]}"
-   canute-parameter cursor-dots "${styleDots}"
+   "${programDirectory}/canute-parameter" cursor-dots "${styleDots}"
 else
-   styleDots="$(canute-parameter cursor-dots)"
+   styleDots="$("${programDirectory}/canute-parameter" cursor-dots)"
    styleName=""
 
    for name in "${!cursorStyles[@]}"

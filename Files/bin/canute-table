@@ -61,11 +61,11 @@ then
       semanticError "braille table not found: ${tableName}"
    fi
 
-   canute-parameter "${brailleVariant}-braille-table" "${tableName}"
-   canute-parameter "literary-braille" "${literaryBraille}"
+   "${programDirectory}/canute-parameter" "${brailleVariant}-braille-table" "${tableName}"
+   "${programDirectory}/canute-parameter" "literary-braille" "${literaryBraille}"
 else
    parameter="literary-braille"
-   response="$(canute-parameter "${parameter}")"
+   response="$("${programDirectory}/canute-parameter" "${parameter}")"
 
    case "${response}"
    in
@@ -75,7 +75,7 @@ else
    esac
 
    parameter="${brailleVariant}-braille-table"
-   tableName="$(canute-parameter "${parameter}")"
+   tableName="$("${programDirectory}/canute-parameter" "${parameter}")"
    echo "${tableName} - ${brailleVariant} braille"
 fi
 
