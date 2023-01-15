@@ -1,0 +1,32 @@
+all: setup
+
+setup: setup-keyboard setup-profile setup-git setup-lynx setup-vim
+
+DEFAULTS_DIRECTORY = /etc/default
+HOME_DIRECTORY = $${HOME}
+
+KEYBOARD_CONFIGURATION_FILE = keyboard
+LOGIN_PROFILE = profile
+GIT_CONFIGURATION_FILE = gitconfig
+LYNX_CONFIGURATION_FILE = lynxrc
+VIM_SUBDIRECTORY = .vim
+VIM_CONFIGURATION_FILE = vimrc
+
+setup-keyboard:
+	sudo cp $(KEYBOARD_CONFIGURATION_FILE) $(DEFAULTS_DIRECTORY)/$(KEYBOARD_CONFIGURATION_FILE)
+
+setup-profile:
+	cp $(LOGIN_PROFILE) $(HOME_DIRECTORY)/.$(LOGIN_PROFILE)
+
+setup-git:
+	cp $(GIT_CONFIGURATION_FILE) $(HOME_DIRECTORY)/.$(GIT_CONFIGURATION_FILE)
+
+setup-lynx:
+	cp $(LYNX_CONFIGURATION_FILE) $(HOME_DIRECTORY)/.$(LYNX_CONFIGURATION_FILE)
+
+setup-vim: setup-vim-subdirectory
+	cp $(VIM_CONFIGURATION_FILE) $(HOME_DIRECTORY)/$(VIM_SUBDIRECTORY)/$(VIM_CONFIGURATION_FILE)
+
+setup-vim-subdirectory:
+	mkdir --parents $(VIM_SUBDIRECTORY)
+
