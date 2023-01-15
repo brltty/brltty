@@ -1,6 +1,7 @@
 screen
 gnome-terminal
 marco
+mate-settings-daemon-common
 espeak-ng
 
 at-spi
