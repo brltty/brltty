@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+cd "${0%/*}"
+cd "$(git rev-parse --show-toplevel 2>/dev/null | head -1)"
+
+make -s install
+make -s symlinks
+sudo Files/libexec/canute-setup -A
+
+exit 0
