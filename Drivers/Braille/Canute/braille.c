@@ -335,14 +335,17 @@ allocateRowEntries (BrailleDisplay *brl) {
 static void
 setRowHasChanged (BrailleDisplay *brl, unsigned int index) {
   getRowEntry(brl, index)->haveNewCells = 1;
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "row has changed: %u", index);
 
   if (index < brl->data->window.firstChangedRow) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "first changed row: %u", index);
     brl->data->window.firstChangedRow = index;
   }
 }
 
 static void
 resendRow (BrailleDisplay *brl) {
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "resending row: %u", brl->data->window.lastRowSent);
   setRowHasChanged(brl, brl->data->window.lastRowSent);
 }
 
@@ -658,7 +661,10 @@ startUpdate (BrailleDisplay *brl) {
         *byte++ = brl->data->window.firstChangedRow;
         byte = translateOutputCells(byte, row->newCells, length);
 
-        if (writePacket(brl, packet, (byte - packet))) {
+        size_t size = byte - packet;
+        logBytes(LOG_CATEGORY(BRAILLE_DRIVER), "sending row: %u", packet, size, brl->data->window.firstChangedRow);
+
+        if (writePacket(brl, packet, size)) {
           row->haveNewCells = 0;
           brl->data->window.lastRowSent = brl->data->window.firstChangedRow++;
           memcpy(row->oldCells, row->newCells, length);
