@@ -1,0 +1,4 @@
+#!/bin/sh
+. "$(dirname "${0}")/gh.sh"
+wget -q -O gh.deb https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_armv6.deb
+exit "${?}"
