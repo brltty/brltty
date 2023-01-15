@@ -17,6 +17,7 @@ tcl-dev
 default-jdk
 
 libbluetooth-dev
+libpcre2-dev
 libpcre3-dev
 libicu-dev
 
