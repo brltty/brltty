@@ -27,21 +27,27 @@
 #include "async_event.h"
 #include "thread.h"
 
+typedef struct {
+  MessageType type;
+  char content[];
+} Message;
+
+#define MESSAGE(name, length) \
+  unsigned char name##_bytes[sizeof(MessageType) + (length)]; \
+  Message *name = (void *)name##_bytes;
+
 int
 sendMessage (int queue, MessageType type, const void *content, size_t length, int flags) {
-  struct {
-    MessageType type;
-    char content[length];
-  } message;
+  MESSAGE(message, length);
 
   if (!content) {
     length = 0;
   } else if (length) {
-    memcpy(message.content, content, length);
+    memcpy(message->content, content, length);
   }
 
-  message.type = type;
-  if (msgsnd(queue, &message, length, flags) != -1) return 1;
+  message->type = type;
+  if (msgsnd(queue, message, length, flags) != -1) return 1;
 
   logSystemError("msgsnd");
   return 0;
@@ -49,17 +55,14 @@ sendMessage (int queue, MessageType type, const void *content, size_t length, in
 
 ssize_t
 receiveMessage (int queue, MessageType *type, void *buffer, size_t size, int flags) {
-  struct {
-    MessageType type;
-    char buffer[size];
-  } message;
+  MESSAGE(message, size);
 
   if (!buffer) size = 0;
-  ssize_t length = msgrcv(queue, &message, size, *type, flags);
+  ssize_t length = msgrcv(queue, message, size, *type, flags);
 
   if (length != -1) {
-    *type = message.type;
-    if (length) memcpy(buffer, message.buffer, length);
+    *type = message->type;
+    if (length) memcpy(buffer, message->content, length);
   } else if (errno != EIDRM) {
     logSystemError("msgrcv");
   }
