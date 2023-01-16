@@ -1101,7 +1101,7 @@ xbrlapi.$O:
 	$(CC) $(CFLAGS) $(X11_INCLUDES) -c $(SRC_DIR)/xbrlapi.c
 
 xsel.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/xsel.c
+	$(CC) $(LIBCFLAGS) $(X11_INCLUDES) -c $(SRC_DIR)/xsel.c
 
 ###############################################################################
 
