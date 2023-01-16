@@ -428,15 +428,15 @@ main (int argc, char *argv[]) {
     }
 
     if (group) {
-      if (setresgid(group, group, group) == -1) {
-        logSystemError("setresgid");
+      if (setregid(group, group) == -1) {
+        logSystemError("setregid");
         return PROG_EXIT_FATAL;
       }
     }
 
     if (user) {
-      if (setresuid(user, user, user) == -1) {
-        logSystemError("setresuid");
+      if (setreuid(user, user) == -1) {
+        logSystemError("setreuid");
         return PROG_EXIT_FATAL;
       }
     }
