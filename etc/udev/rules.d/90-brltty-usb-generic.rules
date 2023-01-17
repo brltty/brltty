@@ -85,11 +85,11 @@ ACTION=="remove", GOTO="brltty_udev_remove"
 GOTO="brltty_device_end"
 
 LABEL="brltty_udev_add"
-RUN+="/brltty/REV-BRLTTY-6.5-127-gc0b7b74f/libexec/brltty/udev-wrapper"
+RUN+="/brltty/current/libexec/brltty/udev-wrapper"
 GOTO="brltty_device_end"
 
 LABEL="brltty_udev_remove"
-RUN+="/brltty/REV-BRLTTY-6.5-127-gc0b7b74f/libexec/brltty/udev-wrapper -C"
+RUN+="/brltty/current/libexec/brltty/udev-wrapper -C"
 GOTO="brltty_device_end"
 
 LABEL="brltty_upstart"
