@@ -1,16 +1,20 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
 
-handleInitialHelpOption "${@}" <<END-OF-HELP
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
 Run a BrlAPI Java client within a prepared environment.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
 
-Syntax: ${programName} {-h | [java-argument ...]}
+processExtraProgramParameters() {
+   declare -g classArguments=("${@}")
+}
 
-Options:
-  -h       show this command line usage summary, and then exit
-
-All of the arguments are passed through to the java command.
-END-OF-HELP
+addProgramParameter "class" className "the class (or jar) to run"
+optionalProgramParameters "arg" "the arguments to pass to the class"
+parseProgramArguments "${@}"
+set -e
 
 if [ -n "${DISPLAY}" ]
 then
@@ -20,5 +24,5 @@ else
 fi
 
 export BRLAPI_HOST="localhost:${session}"
-exec java --class-path "${apiLinksDirectory}/java/brlapi.jar"  "-Djava.library.path=${apiLinksDirectory}/jni" "${@}"
+exec java --class-path "${apiLinksDirectory}/java/brlapi.jar"  "-Djava.library.path=${apiLinksDirectory}/jni" "${className}" "${classArguments[@]}"
 exit "${?}"

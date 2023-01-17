@@ -10,7 +10,7 @@ END_OF_PROGRAM_USAGE_PURPOSE
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
-The table-name parameter specifies the new table to be used for rendering braille.
+The parameter specifies the new table to be used for rendering braille.
 If it isn't specified then the name and type of the current table are shown.
 It may be specified with or without its file extension,
 and may refer to a text (computer braillei), contraction (literary braille), or LibLouis table.

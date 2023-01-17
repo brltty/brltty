@@ -17,7 +17,7 @@ END_OF_PROGRAM_USAGE_PURPOSE
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
-If this parameter isn't specified then the name of the current cursor style is shown.
+If the parameter isn't specified then the name of the current cursor style is shown.
 END_OF_PROGRAM_USAGE_NOTES
 }
 
