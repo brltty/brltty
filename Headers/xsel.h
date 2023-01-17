@@ -19,10 +19,10 @@
 #ifndef BRLAPI_INCLUDED_XSEL
 #define BRLAPI_INCLUDED_XSEL
 
+#include "prologue.h"
+
 #include <X11/X.h>
 #include <X11/Xlib.h>
-
-#include "prologue.h"
 
 #ifdef __cplusplus
 extern "C" {
