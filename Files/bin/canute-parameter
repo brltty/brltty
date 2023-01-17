@@ -15,6 +15,7 @@ If a value is also specified then it's assigned to the named parameter.
 END_OF_PROGRAM_USAGE_NOTES
 }
 
+addProgramOption g flag isGlobalParameter "the parameter is global"
 optionalProgramParameters
 addProgramParameter "name" apiParameter "the name of a BrlAPI parameter"
 addProgramParameter "value" newValue "the new value to assign to the parameter"
@@ -28,12 +29,8 @@ apiCommand() {
    return "${?}"
 }
 
-if [ -n "${DISPLAY}" ]
-then
-   session=1
-else
-   session=0
-fi
+session=0
+"${isGlobalParameter}" || [ -z "${DISPLAY}" ] || session=1
 
 if [ -n "${newValue}" ]
 then
