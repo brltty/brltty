@@ -6,11 +6,12 @@ readonly installTree="$(dirname "${installTree}")"
 . "${installTree}/bin/brltty-prologue.bash"
 
 readonly dataFilesDirectory="${installTree}/etc/brltty"
-readonly contractionTablesDirectory="${dataFilesDirectory}/Contraction"
 readonly textTablesDirectory="${dataFilesDirectory}/Text"
+readonly contractionTablesDirectory="${dataFilesDirectory}/Contraction"
+readonly liblouisTablesDirectory="/usr/share/liblouis/tables"
 
-readonly contractionTableExtension="ctb"
 readonly textTableExtension="ttb"
+readonly contractionTableExtension="ctb"
 
 readonly ldConfigurationFile="/etc/ld.so.conf.d/brlapi.conf"
 readonly apiLinksDirectory="${installTree}"

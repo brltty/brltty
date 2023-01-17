@@ -1,5 +1,6 @@
 #!/bin/bash
 . /brltty/current/libexec/canute-prologue.sh
+shopt -s nullglob
 
 showProgramUsagePurpose() {
 cat <<END_OF_PROGRAM_USAGE_PURPOSE
@@ -9,16 +10,18 @@ END_OF_PROGRAM_USAGE_PURPOSE
 
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
-The (optional) table-name parameter can refer to either a literary or a computer braille table.
-This can be constrained via the -c and -l options.
-If this parameter isn't specified then the name and type of the current table are shown.
-
-BRLTTY refers to a literary braille table as a contraction table, and to a computer braille table as a text table.
+The table-name parameter specifies the new table to be used for rendering braille.
+If it isn't specified then the name and type of the current table are shown.
+It may refer to a text (computer braillei), contraction (literary braille), or LibLouis table.
+This can be constrained via the -c, -l, and -L options.
+If none of these options are specified then -c and -l are assumed;
+-L isn't because many BRLTTY and LibLouis tables have the same names.
 END_OF_PROGRAM_USAGE_NOTES
 }
 
-addProgramOption c flag isTextTable "only interpret the name as that of a computer braille table"
-addProgramOption l flag isContractionTable "only interpret the name as that of a literary braille table"
+addProgramOption c flag allowTextTable "interpret the name as that of a computer braille table"
+addProgramOption l flag allowContractionTable "interpret the name as that of a literary braille table"
+addProgramOption L flag allowLiblouisTable "interpret the name as that of a LibLouis table"
 optionalProgramParameters
 addProgramParameter "table-name" tableName "the braille table to switch to"
 parseProgramArguments "${@}"
@@ -26,39 +29,66 @@ set -e
 
 if [ -n "${tableName}" ]
 then
-   isEitherTable=false
-   "${isContractionTable}" || "${isTextTable}" || isEitherTable=true
-
-   foundContractionTable=false
-   foundTextTable=false
-
-   if "${isContractionTable}" || "${isEitherTable}"
+   if "${allowTextTable}" || "${allowContractionTable}" || "${allowLiblouisTable}"
    then
-      tablePath="${contractionTablesDirectory}/${tableName}.${contractionTableExtension}"
-      ! [ -f "${tablePath}" ] || foundContractionTable=true
+      defaultTableTypes=false
+   else
+      defaultTableTypes=true
    fi
 
-   if "${isTextTable}" || "${isEitherTable}"
+   foundTextTable=0
+   foundContractionTable=0
+   foundLiblouisTable=0
+
+   if "${allowTextTable}" || "${defaultTableTypes}"
    then
       tablePath="${textTablesDirectory}/${tableName}.${textTableExtension}"
-      ! [ -f "${tablePath}" ] || foundTextTable=true
+      ! [ -f "${tablePath}" ] || foundTextTable=1
    fi
 
-   if "${foundContractionTable}" && "${foundTextTable}"
+   if "${allowContractionTable}" || "${defaultTableTypes}"
    then
-      semanticError "ambiguous braille table name: ${tableName}"
+      tablePath="${contractionTablesDirectory}/${tableName}.${contractionTableExtension}"
+      ! [ -f "${tablePath}" ] || foundContractionTable=1
    fi
 
-   if "${foundContractionTable}"
+   if "${allowLiblouisTable}"
    then
-      brailleVariant="literary"
-      literaryBraille="yes"
-   elif "${foundTextTable}"
+      set -- $(
+         set -e
+         cd "${liblouisTablesDirectory}"
+         echo "${tableName}".*
+      )
+
+      if [ "${#}" -eq 1 ]
+      then
+         liblouisTableName="${1##*/}"
+      elif [ "${#}" -gt 1 ]
+      then
+         logWarning "ambiguous LibLouis table: ${*}"
+      fi
+
+      foundLiblouisTable="${#}"
+   fi
+
+   foundCount=$((foundTextTable + foundContractionTable + foundLiblouisTable))
+   ((foundCount < 2)) || semanticError "ambiguous table name: ${tableName}"
+
+   if ((foundTextTable))
    then
       brailleVariant="computer"
       literaryBraille="no"
+   elif ((foundContractionTable))
+   then
+      brailleVariant="literary"
+      literaryBraille="yes"
+   elif ((foundLiblouisTable))
+   then
+      brailleVariant="literary"
+      literaryBraille="yes"
+      tableName="louis:${liblouisTableName}"
    else
-      semanticError "braille table not found: ${tableName}"
+      semanticError "table not found: ${tableName}"
    fi
 
    "${programDirectory}/canute-parameter" "${brailleVariant}-braille-table" "${tableName}"

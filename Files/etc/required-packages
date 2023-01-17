@@ -17,9 +17,10 @@ tcl-dev
 default-jdk
 
 libbluetooth-dev
+libicu-dev
+liblouis-dev
 libpcre2-dev
 libpcre3-dev
-libicu-dev
 
 curl
 jq
