@@ -12,11 +12,24 @@ showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
 The table-name parameter specifies the new table to be used for rendering braille.
 If it isn't specified then the name and type of the current table are shown.
-It may refer to a text (computer braillei), contraction (literary braille), or LibLouis table.
+It may be specified with or without its file extension,
+and may refer to a text (computer braillei), contraction (literary braille), or LibLouis table.
 This can be constrained via the -c, -l, and -L options.
 If none of these options are specified then -c and -l are assumed;
--L isn't because many BRLTTY and LibLouis tables have the same names.
+-L isn't because several BRLTTY and LibLouis tables have the same names.
 END_OF_PROGRAM_USAGE_NOTES
+}
+
+testTable() {
+   local name="${1}"
+   local directory="${2}"
+   local extension="${3}"
+
+   local file="${name}"
+   [ "${file}" != "${file%.*}" ] || file+=".${extension}"
+
+   [ -f "${directory}/${file}" ] || return 1
+   return 0
 }
 
 addProgramOption c flag allowTextTable "interpret the name as that of a computer braille table"
@@ -42,33 +55,38 @@ then
 
    if "${allowTextTable}" || "${defaultTableTypes}"
    then
-      tablePath="${textTablesDirectory}/${tableName}.${textTableExtension}"
-      ! [ -f "${tablePath}" ] || foundTextTable=1
+      ! testTable "${tableName}" "${textTablesDirectory}" "${textTableExtension}" || foundTextTable=1
    fi
 
    if "${allowContractionTable}" || "${defaultTableTypes}"
    then
-      tablePath="${contractionTablesDirectory}/${tableName}.${contractionTableExtension}"
-      ! [ -f "${tablePath}" ] || foundContractionTable=1
+      ! testTable "${tableName}" "${contractionTablesDirectory}" "${contractionTableExtension}" || foundContractionTable=1
    fi
 
    if "${allowLiblouisTable}"
    then
-      set -- $(
+      tables=($(
          set -e
          cd "${liblouisTablesDirectory}"
-         echo "${tableName}".*
-      )
 
-      if [ "${#}" -eq 1 ]
+         if [ "${tableName}" = "${tableName%.*}" ]
+         then
+            echo "${tableName}".*
+         elif [ -f "${tableName}" ]
+         then
+            echo "${tableName}"
+         fi
+      ))
+
+      foundLiblouisTable="${#tables[*]}"
+
+      if [ "${foundLiblouisTable}" -eq 1 ]
       then
-         liblouisTableName="${1##*/}"
-      elif [ "${#}" -gt 1 ]
+         liblouisTableName="louis:${tables[0]}"
+      elif [ "${foundLiblouisTable}" -gt 1 ]
       then
-         logWarning "ambiguous LibLouis table: ${*}"
+         logWarning "ambiguous LibLouis table: ${tables[*]}"
       fi
-
-      foundLiblouisTable="${#}"
    fi
 
    foundCount=$((foundTextTable + foundContractionTable + foundLiblouisTable))
@@ -86,7 +104,7 @@ then
    then
       brailleVariant="literary"
       literaryBraille="yes"
-      tableName="louis:${liblouisTableName}"
+      tableName="${liblouisTableName}"
    else
       semanticError "table not found: ${tableName}"
    fi
