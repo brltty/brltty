@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+hostName="canute"
+timeZone="America/Toronto"
+
+sudo hostnamectl set-hostname "${hostName}"
+sudo dosfslabel /dev/mmcblk0p1 "${hostName}-boot"
+sudo e2label /dev/mmcblk0p2 "${hostName}-root"
+
+sudo timedatectl set-timezone "${timeZone}"
+sudo timedatectl set-ntp true
+
+exit 0
