@@ -33,7 +33,7 @@ sleep 3
 canuteSetSession canute
 brlttyPath="${installTree}/bin"
 "${brlttyPath}/xbrlapi"
-"${brlttyPath}/brltty" -N -f "${installTree}/etc/brltty-startx.conf"
+"${brlttyPath}/brltty" -f "${installTree}/etc/brltty-startx.conf"
 
 marco &
 exec gnome-terminal --wait --title "Canute Interactive Session" -- "${installTree}/libexec/canute-shell"
