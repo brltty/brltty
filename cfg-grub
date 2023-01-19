@@ -19,31 +19,41 @@
 
 . "`dirname "${0}"`/brltty-prologue.sh"
 
+handleInitialHelpOption "${@}" <<END-OF-HELP
+Configure a BRLTTY build for running within the Grub boot loader.
+
+Syntax: ${programName} {-h | [-option ...]}
+
+All of the options are passed through, unmodified, as additional options to the configure script.
+END-OF-HELP
+
 # Braille drivers already disabled:
 # ba (by --disable-api)
 # il (not on Linux)
 # lb (by --without-libbraille)
 # xw (by --disable-x)
 
-"${programDirectory}/configure" \
-   --disable-api \
-   --disable-icu \
-   --disable-gpm \
-   --disable-polkit \
-   --disable-x \
-   \
-   --without-libbraille \
-   --with-braille-driver=-lt,-tt,-vd,-vr \
-   \
-   --disable-speech-support \
-   \
-   --without-bell-package \
-   --without-leds-package \
-   \
-   --without-pcm-package \
-   --without-midi-package \
-   --without-fm-package \
-   \
-   --host=i386-elf \
-   "${@}"
+configureOptions=(
+   --disable-api
+   --disable-icu
+   --disable-gpm
+   --disable-polkit
+   --disable-x
+
+   --without-libbraille
+   --with-braille-driver=-lt,-tt,-vd,-vr
+
+   --disable-speech-support
+
+   --without-bell-package
+   --without-leds-package
+
+   --without-pcm-package
+   --without-midi-package
+   --without-fm-package
+
+   --host=i386-elf
+)
+
+"${programDirectory}/configure" --quiet "${configureOptions[@]}" "${@}"
 exit "${?}"

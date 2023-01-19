@@ -18,34 +18,41 @@
 ###############################################################################
 
 . "`dirname "${0}"`/brltty-prologue.sh"
-set -e
+
+handleInitialHelpOption "${@}" <<END-OF-HELP
+Configure a BRLTTY build for running on an Iris braille display.
+
+Syntax: ${programName} {-h | [-option ...]}
+
+All of the options are passed through, unmodified, as additional options to the configure script.
+END-OF-HELP
+
+configureOptions=(
+   --enable-standalone-programs
+   --without-dynld-package
+
+   --disable-api
+   --disable-gpm
+   --disable-icu
+   --disable-polkit
+   --disable-x
+   --without-curses
+
+   --without-libbraille
+   --with-braille-driver=ir,-all
+   --disable-speech-support
+   --with-screen-driver=lx,-all
+
+   --without-usb-package
+   --without-bluetooth-package
+
+   --without-pcm-package
+   --without-midi-package
+
+   --without-service-package
+   --without-mntpt-package
+)
+
 export CC="gcc -m32"
-
-"${programDirectory}/configure" \
-   --enable-standalone-programs \
-   --without-dynld-package \
-   \
-   --disable-api \
-   --disable-gpm \
-   --disable-icu \
-   --disable-polkit \
-   --disable-x \
-   --without-curses \
-   \
-   --without-libbraille \
-   --with-braille-driver=ir,-all \
-   --disable-speech-support \
-   --with-screen-driver=lx,-all \
-   \
-   --without-usb-package \
-   --without-bluetooth-package \
-   \
-   --without-pcm-package \
-   --without-midi-package \
-   \
-   --without-service-package \
-   --without-mntpt-package \
-   \
-   --quiet "${@}"
-
-exit 0
+echo "${programDirectory}/configure" --quiet "${configureOptions[@]}" "${@}"
+exit "${?}"

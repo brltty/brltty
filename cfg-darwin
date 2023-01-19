@@ -19,6 +19,14 @@
 
 . "`dirname "${0}"`/brltty-prologue.sh"
 
+handleInitialHelpOption "${@}" <<END-OF-HELP
+Configure a BRLTTY build for the Darwin (Mac OS X) platform.
+
+Syntax: ${programName} {-h | [-option ...]}
+
+All of the options are passed through, unmodified, as additional options to the configure script.
+END-OF-HELP
+
 configureOptions=(
    --prefix=/usr/local 
 

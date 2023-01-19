@@ -17,6 +17,20 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+. "`dirname "${0}"`/brltty-prologue.sh"
+
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Configure a BRLTTY build for a specific ABI (application binary interface) of the Android platform.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+This script is used by cfg-android, and is for internal use only.
+END_OF_PROGRAM_USAGE_NOTES
+}
+
 # Braille drivers already disabled:
 # lb (by --without-libbraille)
 # xw (by --disable-x)
@@ -63,9 +77,6 @@ readonly configureOptions=(
    --disable-emacs-bindings
    --disable-lua-bindings
 )
-
-. "`dirname "${0}"`/brltty-prologue.sh"
-set -e
 
 setProperties() {
    declare -g -A properties
@@ -146,6 +157,7 @@ findTool() {
 addProgramOption f flag forceReconfigure "force a reconfigure"
 addProgramParameter ABI abiName "name of ABI to configure" "the source tree"
 parseProgramArguments "${@}"
+set -e
 
 abiRoot="${programDirectory}/Android/ABI/${abiName}"
 abiPropertiesFile="${abiRoot}/build.properties"

@@ -18,11 +18,19 @@
 ###############################################################################
 
 . "`dirname "${0}"`/brltty-prologue.sh"
-set -e
 
 toolsSystem="i586-pc-msdosdjgpp"
-
 toolsRootVariable=DOS_TOOLS_ROOT
+
+handleInitialHelpOption "${@}" <<END-OF-HELP
+Configure a BRLTTY build for the DOS platform.
+
+Syntax: ${programName} {-h | [-option ...]}
+
+All of the options are passed through, unmodified, as additional options to the configure script.
+The ${toolsRootVariable} environment variable must point to the root directory for the DJGPP tols.
+END-OF-HELP
+
 toolsRoot="${!toolsRootVariable}"
 [ -n "${toolsRoot}" ] || semanticError "${toolsRootVariable} not set"
 [  -f "${toolsRoot}/bin/${toolsSystem}-gcc" ] || semanticError "not a DOS tools root: ${toolsRoot}"
@@ -45,56 +53,56 @@ export LDFLAGS=""
 # lb (by --without-libbraille)
 # xw (by --disable-x)
 
-"${programDirectory}/configure" \
-   --with-configuration-file=brltty.cfg \
-   --with-writable-directory='${prefix}/' \
-   --enable-relocatable-install \
-   \
-   --disable-api \
-   --disable-expat \
-   --disable-gpm \
-   --disable-icu \
-   --disable-liblouis \
-   --disable-polkit \
-   --disable-x \
-   \
-   --without-libbraille \
-   --with-braille-driver=-vr,-cn,all \
-   \
-   --without-espeak \
-   --without-espeak-ng \
-   --without-flite \
-   --without-mikropuhe \
-   --without-speechd \
-   --without-swift \
-   --without-theta \
-   --with-speech-driver=-xs,all \
-   \
-   --with-screen-driver=pb,-all \
-   \
-   --without-bell-package \
-   --without-leds-package \
-   \
-   --without-pcm-package \
-   --without-midi-package \
-   --without-fm-package \
-   \
-   --without-pgmpath-package \
-   --without-pgmprivs-package \
-   --without-service-package \
-   --without-params-package \
-   --without-rgx-package \
-   --without-hostcmd-package \
-   --without-mntpt-package \
-   --without-mntfs-package \
-   --without-kbd-package \
-   \
-   --without-usb-package \
-   --without-bluetooth-package \
-   --without-hid-package \
-   \
-   --host="${toolsSystem}" \
-   --quiet \
-   "${@}"
+configureOptions=(
+   --with-configuration-file=brltty.cfg
+   --with-writable-directory='${prefix}/'
+   --enable-relocatable-install
 
+   --disable-api
+   --disable-expat
+   --disable-gpm
+   --disable-icu
+   --disable-liblouis
+   --disable-polkit
+   --disable-x
+
+   --without-libbraille
+   --with-braille-driver=-vr,-cn,all
+
+   --without-espeak
+   --without-espeak-ng
+   --without-flite
+   --without-mikropuhe
+   --without-speechd
+   --without-swift
+   --without-theta
+   --with-speech-driver=-xs,all
+
+   --with-screen-driver=pb,-all
+
+   --without-bell-package
+   --without-leds-package
+
+   --without-pcm-package
+   --without-midi-package
+   --without-fm-package
+
+   --without-pgmpath-package
+   --without-pgmprivs-package
+   --without-service-package
+   --without-params-package
+   --without-rgx-package
+   --without-hostcmd-package
+   --without-mntpt-package
+   --without-mntfs-package
+   --without-kbd-package
+
+   --without-usb-package
+   --without-bluetooth-package
+   --without-hid-package
+
+   --host="${toolsSystem}"
+)
+
+"${programDirectory}/configure" --quiet "${configureOptions[@]}" "${@}"
 exit 0

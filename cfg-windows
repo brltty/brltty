@@ -19,38 +19,45 @@
 
 . "`dirname "${0}"`/brltty-prologue.bash"
 
-toRelativePath "${programDirectory}" configureDirectory
-"${configureDirectory}/configure" \
-   --enable-relocatable-install \
-   \
-   --disable-expat \
-   --disable-gpm \
-   --disable-i18n \
-   --disable-icu \
-   --disable-liblouis \
-   --disable-polkit \
-   --disable-x \
-   \
-   --without-libbraille \
-   --disable-speech-support \
-   \
-   --without-pgmprivs-package \
-   --without-params-package \
-   --without-rgx-package \
-   --without-mntpt-package \
-   --without-mntfs-package \
-   --without-kbd-package \
-   --without-bell-package \
-   --without-leds-package \
-   --without-hid-package \
-   \
-   --disable-emacs-bindings \
-   --disable-java-bindings \
-   --disable-lua-bindings \
-   --disable-ocaml-bindings \
-   --disable-tcl-bindings \
-   \
-   --quiet \
-   "${@}"
+handleInitialHelpOption "${@}" <<END-OF-HELP
+Configure a BRLTTY build for the Windows platform.
 
+Syntax: ${programName} {-h | [-option ...]}
+
+All of the options are passed through, unmodified, as additional options to the configure script.
+END-OF-HELP
+
+configureOptions=(
+   --enable-relocatable-install
+
+   --disable-expat
+   --disable-gpm
+   --disable-i18n
+   --disable-icu
+   --disable-liblouis
+   --disable-polkit
+   --disable-x
+
+   --without-libbraille
+   --disable-speech-support
+
+   --without-pgmprivs-package
+   --without-params-package
+   --without-rgx-package
+   --without-mntpt-package
+   --without-mntfs-package
+   --without-kbd-package
+   --without-bell-package
+   --without-leds-package
+   --without-hid-package
+
+   --disable-emacs-bindings
+   --disable-java-bindings
+   --disable-lua-bindings
+   --disable-ocaml-bindings
+   --disable-tcl-bindings
+)
+
+toRelativePath "${programDirectory}" configureDirectory
+"${configureDirectory}/configure" --quiet "${configureOptions[@]}" "${@}"
 exit "${?}"

@@ -18,7 +18,19 @@
 ###############################################################################
 
 . "`dirname "${0}"`/brltty-prologue.sh"
-set -e
+
+showProgramUsagePurpose() {
+cat <<END_OF_PROGRAM_USAGE_PURPOSE
+Configure a BRLTTY build for the Android platform.
+END_OF_PROGRAM_USAGE_PURPOSE
+}
+
+showProgramUsageNotes() {
+cat <<END_OF_PROGRAM_USAGE_NOTES
+All of the options are passed through, unmodified, as additional options to the configure script.
+The ANDROID_NDK environment variable must point to the root directory for the Android NDK (native development kit).
+END_OF_PROGRAM_USAGE_NOTES
+}
 
 defaultToplevelABI="armeabi-v7a"
 
@@ -26,6 +38,7 @@ addProgramOption a string.ABI toplevelABI "the top-level's ABI" "${defaultToplev
 addProgramOption n flag noToplevelConfigure "don't configure the top-level"
 addProgramOption o flag overwriteBuildProperties "overwrite existing ABI build properties"
 parseProgramArguments "${@}"
+set -e
 
 sourceRoot="${programDirectory}"
 buildRoot="${initialDirectory}"
