@@ -19,6 +19,8 @@
 
 . "`dirname "${0}"`/brltty-prologue.sh"
 
+ndkRootVariable=ANDROID_NDK
+
 showProgramUsagePurpose() {
 cat <<END_OF_PROGRAM_USAGE_PURPOSE
 Configure a BRLTTY build for the Android platform.
@@ -28,7 +30,7 @@ END_OF_PROGRAM_USAGE_PURPOSE
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
 All of the options are passed through, unmodified, as additional options to the configure script.
-The ANDROID_NDK environment variable must point to the root directory for the Android NDK (native development kit).
+The ${ndkRootVariable} environment variable must point to the root directory for the Android NDK (native development kit).
 END_OF_PROGRAM_USAGE_NOTES
 }
 
@@ -47,16 +49,16 @@ androidRoot="${buildRoot}/Android"
 ndkRoot="${androidRoot}/NDK"
 
 [ -d "${ndkRoot}" ] || {
-   [ -n "${ANDROID_NDK}" ] || {
+   [ -n "${!ndkRootVariable}" ] || {
       semanticError "Android NDK directory not defined: ${ndkRoot}"
    }
 
-   [  -f "${ANDROID_NDK}/ndk-build" ] || {
-      semanticError "not an Android NDK: ${ANDROID_NDK}"
+   [  -f "${!ndkRootVariable}/ndk-build" ] || {
+      semanticError "not an Android NDK: ${!ndkRootVariable}"
    }
 
-   logNote "creating symbolic link: ${ndkRoot} -> ${ANDROID_NDK}"
-   ln -s "${ANDROID_NDK}" "${ndkRoot}" || exit "${?}"
+   logNote "creating symbolic link: ${ndkRoot} -> ${!ndkRootVariable}"
+   ln -s "${!ndkRootVariable}" "${ndkRoot}" || exit "${?}"
 }
 
 architecturesRoot="${androidRoot}/ABI"
