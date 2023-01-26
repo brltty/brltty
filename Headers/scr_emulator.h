@@ -25,12 +25,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int createMessageQueue (int *queue, key_t key);
-extern int destroyMessageQueue (int queue);
-
-extern ScreenSegmentHeader *createScreenSegment (int *identifier, key_t key, int columns, int rows, int enableRowArray);
-extern int destroyScreenSegment (int identifier);
-
 extern void moveScreenCharacters (ScreenSegmentCharacter *to, const ScreenSegmentCharacter *from, size_t count);
 extern void setScreenCharacters (ScreenSegmentCharacter *from, const ScreenSegmentCharacter *to, const ScreenSegmentCharacter *character);
 extern void propagateScreenCharacter (ScreenSegmentCharacter *from, const ScreenSegmentCharacter *to);
@@ -39,6 +33,16 @@ extern void propagateScreenCharacter (ScreenSegmentCharacter *from, const Screen
 #define SCREEN_SEGMENT_COLOR_LEVEL 0XAA
 #define SCREEN_SEGMENT_COLOR_BLACK SCREEN_SEGMENT_COLOR(0, 0, 0)
 #define SCREEN_SEGMENT_COLOR_WHITE SCREEN_SEGMENT_COLOR(SCREEN_SEGMENT_COLOR_LEVEL, SCREEN_SEGMENT_COLOR_LEVEL, SCREEN_SEGMENT_COLOR_LEVEL)
+
+extern void fillScreenRows (ScreenSegmentHeader *segment, unsigned int row, unsigned int count, const ScreenSegmentCharacter *character);
+extern void moveScreenRows (ScreenSegmentHeader *segment, unsigned int from, unsigned int to, unsigned int count);
+extern void scrollScreenRows (ScreenSegmentHeader *segment, unsigned int top, unsigned int size, unsigned int count, int down);
+
+extern ScreenSegmentHeader *createScreenSegment (int *identifier, key_t key, int columns, int rows, int enableRowArray);
+extern int destroyScreenSegment (int identifier);
+
+extern int createMessageQueue (int *queue, key_t key);
+extern int destroyMessageQueue (int queue);
 
 #ifdef __cplusplus
 }
