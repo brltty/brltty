@@ -3,6 +3,8 @@
 <resources>
   <string name="app_description">BRLTTY supporte des afficheurs braille.</string>
 
+  <string name="usbMonitor_label">Visionneur de périphériques USB connectés</string>
+
   <string name="about_label_activity">À propos de l\'application</string>
   <string name="about_label_copyright">Droits d\'auteur</string>
   <string name="about_label_buildTime">Date de construction</string>
@@ -100,6 +102,7 @@
   <string name="ADD_DEVICE_UNSELECTED_DRIVER">pilote braille non sélectionné</string>
   <string name="ADD_DEVICE_NO_DEVICES">pas de périphériques</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">nom de périphérique déjà utilisé</string>
+  <string name="ADD_DEVICE_NO_PERMISSION">Accès au périphérique interdit</string>
 
   <string name="REMOVE_DEVICE_PROMPT">Voulez-vous vraiment supprimer ce périphérique ?</string>
 
@@ -133,9 +136,11 @@
   <string name="LOG_CATEGORY_LABEL_speech">Événements liés à la parole</string>
   <string name="LOG_CATEGORY_LABEL_async">Événements asynchrones</string>
   <string name="LOG_CATEGORY_LABEL_server">Événements liés au serveur</string>
+  <string name="LOG_CATEGORY_LABEL_gio">E/S générique</string>
   <string name="LOG_CATEGORY_LABEL_serial">E/S série</string>
   <string name="LOG_CATEGORY_LABEL_usb">E/S USB</string>
   <string name="LOG_CATEGORY_LABEL_bt">E/S Bluetooth</string>
+  <string name="LOG_CATEGORY_LABEL_hid">E/S interface homme-machine</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Pilote braille</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Pilote de synthèse vocale</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Pilote de l\'écran</string>
