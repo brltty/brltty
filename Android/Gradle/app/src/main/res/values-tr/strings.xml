@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <string name="app_description">BRLTTY braille cihazları destekler.</string>
+
+  <string name="usbMonitor_label">Eklenen USB cihaz izlemesi</string>
+
+  <string name="about_label_activity">Uygulama hakkında</string>
+  <string name="about_label_copyright">Telif hakkı</string>
+  <string name="about_label_buildTime">Yapım zamanı</string>
+  <string name="about_label_sourceRevision">Kaynak Revizyonu</string>
+  <string name="about_label_privacyPolicy">Gizlilik Politikası</string>
+
+  <string name="inputService_name">BRLTTY Girdi Hizmeti</string>
+  <string name="inputService_type">Braille cihaz Klavyeleri</string>
+  <string name="inputService_not_enabled">Girdi hizmeti etkinleştirilmedi</string>
+  <string name="inputService_not_selected">Girdi hizmeti seçilmedi</string>
+  <string name="inputService_not_started">Girdi hizmeti başlatılmadı</string>
+  <string name="inputService_not_connected">Girdi hizmeti bağlı değil</string>
+
+  <string name="updateApplication_problem_failed">Uygulama güncellenemedi</string>
+
+  <string name="packageInstaller_problem_failed">Paket kurulamadı</string>
+  <string name="packageInstaller_problem_same">Aynı sürüm</string>
+  <string name="packageInstaller_problem_downgrade">Sürüm düşürmeye izin verilmemektedir</string>
+
+  <string name="fileDownloader_title">BRLTTY dosya indirici</string>
+  <string name="fileDownloader_problem_failed">Dosya indirilemedi</string>
+  <string name="fileDownloader_state_connecting">bağlanıyor</string>
+  <string name="fileDownloader_state_downloading">indiriliyor</string>
+
+  <string name="setting_state_off">Kapalı</string>
+  <string name="checkbox_state_unchecked">Hayır</string>
+  <string name="checkbox_state_checked">Evet</string>
+
+  <string name="braille_channel_name">Braille Cihaz Durumu</string>
+  <string name="braille_hint_tap">Eylemler için dokunun</string>
+  <string name="braille_state_released">Bağlı değil</string>
+  <string name="braille_state_waiting">Bekleniyor</string>
+  <string name="braille_state_connected">Bağlı</string>
+
+  <string name="GLOBAL_BUTTON_NOTIFICATIONS">Bildirimler</string>
+  <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Hızlı ayarlar</string>
+  <string name="GLOBAL_BUTTON_BACK">Geri</string>
+  <string name="GLOBAL_BUTTON_HOME">Ana sayfa</string>
+  <string name="GLOBAL_BUTTON_RECENT_APPS">Son uygulamalar</string>
+  <string name="GLOBAL_BUTTON_OVERVIEW">Genel bakış</string>
+
+  <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Girdi yöntemini değiştir</string>
+  <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Kullanıcı kılavuzunu görüntüle</string>
+  <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Web sayfasına git</string>
+  <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Topluluk mesajlarına gözat</string>
+  <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Topluluk mesajı yayınla</string>
+  <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Topluluk üyeliğini yönet</string>
+
+  <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Uygulamayı güncelle</string>
+  <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">Geliştirici sürümü</string>
+  <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">Sürüm düşürmeye izin ver</string>
+
+  <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Erişilebilirlik eylemleri</string>
+
+  <string name="SETTINGS_SCREEN_MAIN">BRLTTY Ayarları</string>
+  <string name="SETTINGS_SCREEN_GENERAL">Genel Ayarlar</string>
+  <string name="SETTINGS_SCREEN_MESSAGE">Mesaj Ayarları</string>
+  <string name="SETTINGS_SCREEN_DEVICES">Cihazları Yönet</string>
+  <string name="SETTINGS_SCREEN_ADVANCED">Gelişmiş Ayarlar</string>
+
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Braille Cihaz Bağlantısını Kes</string>
+  <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Dolaşım Modu</string>
+  <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Konuşma Desteği</string>
+
+  <string name="SETTINGS_BUTTON_TEXT_TABLE">Metin Tablosu</string>
+  <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Öznitelik Tablosu</string>
+  <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Kısaltma Tablosu</string>
+  <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Klavye Tablosu</string>
+
+  <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Uyarıları Göster</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Duyuruları Göster</string>
+  <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Bildirimleri Göster</string>
+
+  <string name="SETTINGS_BUTTON_LOG_LEVEL">Günlük Oluşturma Düzeyi</string>
+  <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Günlük Oluşturma Kategorileri</string>
+  <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Erişilebilirlik Etkinliklerini Günlük Dosyasına Kaydet</string>
+  <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Dönüştürülen Ekranı Günlük Dosyasına Kaydet</string>
+  <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Klavye Etkinliklerini Günlük Dosyasına Kaydet</string>
+  <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">İşlenemeyen Etkinlikleri Günlük Dosyasına Kaydet</string>
+
+  <string name="DEVICES_BUTTON_SELECTED">Seçili Cihaz</string>
+  <string name="DEVICES_BUTTON_ADD">Cihaz Ekle</string>
+  <string name="DEVICES_BUTTON_REMOVE">Cihazı Kaldır</string>
+
+  <string name="SELECTED_DEVICE_NONE">Seçili Cihaz Yok</string>
+  <string name="SELECTED_DEVICE_UNSELECTED">Cihaz Seçili Değil</string>
+
+  <string name="ADD_DEVICE_NAME">Cihaz Adı</string>
+  <string name="ADD_DEVICE_METHOD">Bağlantı Yöntemi</string>
+  <string name="ADD_DEVICE_SELECT">Cihaz Seç</string>
+  <string name="ADD_DEVICE_DRIVER">Braille Sürücüsü</string>
+  <string name="ADD_DEVICE_DONE">Tamamlandı</string>
+  <string name="ADD_DEVICE_UNSELECTED_METHOD">Bağlantı yöntemi seçilmedi</string>
+  <string name="ADD_DEVICE_UNSELECTED_DEVICE">Cihaz seçilmedi</string>
+  <string name="ADD_DEVICE_UNSELECTED_DRIVER">braille sürücüsü seçilmedi</string>
+  <string name="ADD_DEVICE_NO_DEVICES">Cihaz bulunamadı</string>
+  <string name="ADD_DEVICE_DUPLICATE_NAME">Cihaz adı zaten kullanılıyor</string>
+  <string name="ADD_DEVICE_NO_PERMISSION">Cihaza erişim izni verilmemiş</string>
+
+  <string name="REMOVE_DEVICE_PROMPT">Bu cihazı gerçekten kaldırmak istiyor musunuz?</string>
+
+  <string name="SET_SELECTION_NONE">hiçbiri seçilmedi</string>
+
+  <string name="NAVIGATION_MODE_LABEL_List">Dikey Liste</string>
+  <string name="NAVIGATION_MODE_LABEL_Grid">İki Boyutlu Kılavuz</string>
+
+  <string name="SPEECH_SUPPORT_LABEL_native">Yerel</string>
+
+  <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
+  <string name="COMMUNICATION_METHOD_LABEL_Serial">Serial</string>
+
+  <string name="LOG_LEVEL_LABEL_debug">Hata Ayıklama</string>
+  <string name="LOG_LEVEL_LABEL_information">Bilgi</string>
+  <string name="LOG_LEVEL_LABEL_notice">Duyuru</string>
+  <string name="LOG_LEVEL_LABEL_warning">Uyarı</string>
+  <string name="LOG_LEVEL_LABEL_error">Hata</string>
+  <string name="LOG_LEVEL_LABEL_critical">Kritik</string>
+  <string name="LOG_LEVEL_LABEL_alert">Acil Uyarı</string>
+  <string name="LOG_LEVEL_LABEL_emergency">Acil Durum</string>
+
+  <string name="LOG_CATEGORY_LABEL_inpkts">Girdi Paketleri</string>
+  <string name="LOG_CATEGORY_LABEL_outpkts">Çıktı Paketleri</string>
+  <string name="LOG_CATEGORY_LABEL_brlkeys">Braille Cihaz Tuş Etkinlikleri</string>
+  <string name="LOG_CATEGORY_LABEL_kbdkeys">Klavye Tuş Etkinlikleri</string>
+  <string name="LOG_CATEGORY_LABEL_csrtrk">İmleç İzleme</string>
+  <string name="LOG_CATEGORY_LABEL_csrrtg">İmleç Yönlendirme</string>
+  <string name="LOG_CATEGORY_LABEL_update">Etkinlikleri Güncelle</string>
+  <string name="LOG_CATEGORY_LABEL_speech">Konuşma Etkinlikleri</string>
+  <string name="LOG_CATEGORY_LABEL_async">Async Etkinlikler</string>
+  <string name="LOG_CATEGORY_LABEL_server">Sunucu Etkinlikleri</string>
+  <string name="LOG_CATEGORY_LABEL_gio">Generic I/O</string>
+  <string name="LOG_CATEGORY_LABEL_serial">Serial I/O</string>
+  <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
+  <string name="LOG_CATEGORY_LABEL_bt">Bluetooth I/O</string>
+  <string name="LOG_CATEGORY_LABEL_hid">İnsan Arabirim Cihazı I/O</string>
+  <string name="LOG_CATEGORY_LABEL_brldrv">Braille Sürücüsü Etkinlikleri</string>
+  <string name="LOG_CATEGORY_LABEL_spkdrv">Konuşma Sürücüsü Etkinlikleri</string>
+  <string name="LOG_CATEGORY_LABEL_scrdrv">Ekran Sürücüsü Etkinlikleri</string>
+
+  <string name="BRAILLE_DRIVER_LABEL_auto">Oto-algıla</string>
+
+  <string name="TEXT_TABLE_LABEL_auto">Yerel Tabanlı Oto-seçim</string>
+  <string name="TEXT_TABLE_LABEL_ar">Arapça (genel)</string>
+  <string name="TEXT_TABLE_LABEL_as">Assam dili</string>
+  <string name="TEXT_TABLE_LABEL_awa">Awadhi</string>
+  <string name="TEXT_TABLE_LABEL_bg">Bulgarca</string>
+  <string name="TEXT_TABLE_LABEL_bh">Bihari</string>
+  <string name="TEXT_TABLE_LABEL_bn">Bengalce</string>
+  <string name="TEXT_TABLE_LABEL_bo">Tibetçe</string>
+  <string name="TEXT_TABLE_LABEL_bra">Braj</string>
+  <string name="TEXT_TABLE_LABEL_brf">Hazır Braille Formatı BRF (.editördeki brf dosyalarını görüntülemek için)</string>
+  <string name="TEXT_TABLE_LABEL_cs">Çekçe</string>
+  <string name="TEXT_TABLE_LABEL_cy">Galce</string>
+  <string name="TEXT_TABLE_LABEL_da">Danca</string>
+  <string name="TEXT_TABLE_LABEL_da_1252">Danca (Svend Thougaard, 2002–11–18)</string>
+  <string name="TEXT_TABLE_LABEL_da_lt">Danca (LogText)</string>
+  <string name="TEXT_TABLE_LABEL_de">Almanca</string>
+  <string name="TEXT_TABLE_LABEL_dra">Dravid Dili</string>
+  <string name="TEXT_TABLE_LABEL_el">Yunanca</string>
+  <string name="TEXT_TABLE_LABEL_en">İngilizce</string>
+  <string name="TEXT_TABLE_LABEL_en_CA">İngilizce (Kanada)</string>
+  <string name="TEXT_TABLE_LABEL_en_GB">İngilizce (İngiltere)</string>
+  <string name="TEXT_TABLE_LABEL_en_nabcc">İngilizce (Kuzey Amerika Braille Bilgisayar Kodu)</string>
+  <string name="TEXT_TABLE_LABEL_en_US">İngilizce (Amerika Birleşik Devletleri)</string>
+  <string name="TEXT_TABLE_LABEL_eo">Esperanto</string>
+  <string name="TEXT_TABLE_LABEL_es">İspanyolca</string>
+  <string name="TEXT_TABLE_LABEL_et">Estonca</string>
+  <string name="TEXT_TABLE_LABEL_fi">Fince</string>
+  <string name="TEXT_TABLE_LABEL_fr">Fransızca</string>
+  <string name="TEXT_TABLE_LABEL_fr_2007">Fransızca (birleşik 2007)</string>
+  <string name="TEXT_TABLE_LABEL_fr_CA">Fransızca (kanada)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">Fransızca (Code Braille Informatique Français Standard)</string>
+  <string name="TEXT_TABLE_LABEL_fr_FR">Fransızca (Fransa)</string>
+  <string name="TEXT_TABLE_LABEL_fr_vs">Fransızca (VisioBraille)</string>
+  <string name="TEXT_TABLE_LABEL_ga">İrlandaca</string>
+  <string name="TEXT_TABLE_LABEL_gd">İskoç Galcesi</string>
+  <string name="TEXT_TABLE_LABEL_gon">Gondi</string>
+  <string name="TEXT_TABLE_LABEL_gu">Guceratça</string>
+  <string name="TEXT_TABLE_LABEL_he">İbranice</string>
+  <string name="TEXT_TABLE_LABEL_hi">Hintçe</string>
+  <string name="TEXT_TABLE_LABEL_hr">Hırvatça</string>
+  <string name="TEXT_TABLE_LABEL_hu">Macarca</string>
+  <string name="TEXT_TABLE_LABEL_hy">Ermenice</string>
+  <string name="TEXT_TABLE_LABEL_is">İzlandaca</string>
+  <string name="TEXT_TABLE_LABEL_it">Italyanca</string>
+  <string name="TEXT_TABLE_LABEL_kha">Khasi</string>
+  <string name="TEXT_TABLE_LABEL_kn">Kannada</string>
+  <string name="TEXT_TABLE_LABEL_kok">Konkani</string>
+  <string name="TEXT_TABLE_LABEL_kru">Kurukh</string>
+  <string name="TEXT_TABLE_LABEL_lt">Litvanca</string>
+  <string name="TEXT_TABLE_LABEL_lv">Letonca</string>
+  <string name="TEXT_TABLE_LABEL_mg">Malagasy</string>
+  <string name="TEXT_TABLE_LABEL_mi">Maori</string>
+  <string name="TEXT_TABLE_LABEL_ml">Malayalam</string>
+  <string name="TEXT_TABLE_LABEL_mni">Manipuri</string>
+  <string name="TEXT_TABLE_LABEL_mr">Marathi</string>
+  <string name="TEXT_TABLE_LABEL_mt">Maltaca</string>
+  <string name="TEXT_TABLE_LABEL_mun">Munda</string>
+  <string name="TEXT_TABLE_LABEL_mwr">Marwari</string>
+  <string name="TEXT_TABLE_LABEL_ne">Nepalce</string>
+  <string name="TEXT_TABLE_LABEL_new">Newari</string>
+  <string name="TEXT_TABLE_LABEL_nl">Felemenkçe</string>
+  <string name="TEXT_TABLE_LABEL_nl_BE">Felemenkçe (Belçika)</string>
+  <string name="TEXT_TABLE_LABEL_nl_NL">Felemenkçe (Hollanda)</string>
+  <string name="TEXT_TABLE_LABEL_no">Norveççe</string>
+  <string name="TEXT_TABLE_LABEL_no_generic">Norveççe (diğer dilleri destekleyen)</string>
+  <string name="TEXT_TABLE_LABEL_no_oup">Norveççe (Offentlig utvalg for punktskrift)</string>
+  <string name="TEXT_TABLE_LABEL_nwc">Newari (eski)</string>
+  <string name="TEXT_TABLE_LABEL_or">Oriya</string>
+  <string name="TEXT_TABLE_LABEL_pa">Pancapça</string>
+  <string name="TEXT_TABLE_LABEL_pi">Pali</string>
+  <string name="TEXT_TABLE_LABEL_pl">Lehçe</string>
+  <string name="TEXT_TABLE_LABEL_pt">Portekizce</string>
+  <string name="TEXT_TABLE_LABEL_ro">Romence</string>
+  <string name="TEXT_TABLE_LABEL_ru">Rusça</string>
+  <string name="TEXT_TABLE_LABEL_sa">Sanskritçe</string>
+  <string name="TEXT_TABLE_LABEL_sat">Santali</string>
+  <string name="TEXT_TABLE_LABEL_sd">Sindhi</string>
+  <string name="TEXT_TABLE_LABEL_se">Samice (Kuzey)</string>
+  <string name="TEXT_TABLE_LABEL_sk">Slovakça</string>
+  <string name="TEXT_TABLE_LABEL_sl">Slovence</string>
+  <string name="TEXT_TABLE_LABEL_sv">İsveççe</string>
+  <string name="TEXT_TABLE_LABEL_sv_1989">İsveççe (1989 standart)</string>
+  <string name="TEXT_TABLE_LABEL_sv_1996">İsveççe (1996 standart)</string>
+  <string name="TEXT_TABLE_LABEL_sw">Swahili</string>
+  <string name="TEXT_TABLE_LABEL_ta">Tamilce</string>
+  <string name="TEXT_TABLE_LABEL_te">Telugu</string>
+  <string name="TEXT_TABLE_LABEL_tr">Türkçe</string>
+  <string name="TEXT_TABLE_LABEL_uk">Ukraynaca</string>
+  <string name="TEXT_TABLE_LABEL_vi">Viyetnamca</string>
+
+  <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">Ön plan renkleri sol sütunda ve arka plan renkleri sağ sütunda ters</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_left_right">Ön plan renkleri sol sütunda ve arka plan renkleri sağ sütunda</string>
+  <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">Ön plan renkleri üst kısımda ve arka plan renkleri alt kısımda</string>
+
+  <string name="CONTRACTION_TABLE_LABEL_auto">Yerel oto-seçim</string>
+  <string name="CONTRACTION_TABLE_LABEL_af">Afrikanca (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_am">Amharca (kısaltmasız)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de">Almanca</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g0">Almanca (kısaltmasız)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g1">Almanca (temel kısaltmalar)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_g2">Almanca (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_1998">Almanca (kısaltmalı - 1998 standart)</string>
+  <string name="CONTRACTION_TABLE_LABEL_de_2015">Almanca (kısaltmalı - 2015 standart)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en">İngilizce</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_US">İngilizce (Amerika Birleşik Devletleri)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">İngilizce (Birleşmiş, kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_us_g2">İngilizce (Amerika Birleşik Devletleri, kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_es">İspanyolca (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr">Fransızca</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g1">Fransızca (kısaltmasız)</string>
+  <string name="CONTRACTION_TABLE_LABEL_fr_g2">Fransızca (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ha">Hausa (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_id">Endonezyaca (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ipa">Uluslararası Fonetik Alfabesi</string>
+  <string name="CONTRACTION_TABLE_LABEL_ja">Japonca (kısaltmasız)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko">Korece</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g0">Korece (kısaltmasız)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g1">Korece (kısmi kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ko_g2">Korece (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_lt">Litvanca (kısaltmasız)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mg">Malagasy (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_mun">Munda (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_nl">Felemenkçe (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_pt">Portekizce (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Rusça (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_si">Sri Lankaca (kısaltmasız)</string>
+  <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_th">Tayca (kısaltmalı)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zh_TW">Çince (Tayvan, kısaltmasız)</string>
+  <string name="CONTRACTION_TABLE_LABEL_zu">Zulu (kısaltmalı)</string>
+
+  <string name="KEYBOARD_TABLE_LABEL_braille">Braille klavyeler için bağlam tuşları</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">Tam klavyeler için bağlam tuşları</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">Tuş takımı tabanlı dolaşım için tuş takımı bağlam tuşları</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">Tuş takımı olmayan klavyeler için bağlam tuşları</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">Sun Tip 6 Klavyeler için bağlam tuşları</string>
+</resources>
