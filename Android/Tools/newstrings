@@ -90,7 +90,7 @@ proc auditStringList {} {
       set newText [dict get $baseStrings $name text]
 
       if {![string equal $newText $oldText]} {
-         putProgramMessage "string changed: $name: $oldText -> $newText"
+         writeProgramMessage "base string changed: $name: $oldText -> $newText"
       }
    }
 }
@@ -155,7 +155,7 @@ proc auditLanguage {code directory} {
 
       foreach name [dict keys $listedStrings] {
          if {[dict get $listedStrings $name order] != [dict get $languageStrings $name order]} {
-            putProgramMessage "string out of order: $code: $name"
+            writeProgramMessage "language string out of order: $code: $name"
          }
       }
    }
