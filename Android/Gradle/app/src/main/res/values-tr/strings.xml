@@ -252,6 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Almanca (kısaltmalı - 2015 standart)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">İngilizce</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">İngilizce (Amerika Birleşik Devletleri)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">İngilizce (Birleşmiş, kısaltmasız)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">İngilizce (Birleşmiş, kısaltmalı)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">İngilizce (Amerika Birleşik Devletleri, kısaltmalı)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">İspanyolca (kısaltmalı)</string>
