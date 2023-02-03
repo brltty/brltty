@@ -136,11 +136,11 @@
   <string name="LOG_CATEGORY_LABEL_speech">Govorni Dogodki</string>
   <string name="LOG_CATEGORY_LABEL_async">Asinhroni Dogodki</string>
   <string name="LOG_CATEGORY_LABEL_server">Dogodki Strežnika</string>
-  <string name="LOG_CATEGORY_LABEL_gio">splošni I/O</string>
+  <string name="LOG_CATEGORY_LABEL_gio">splošni V/I</string>
   <string name="LOG_CATEGORY_LABEL_serial">Serijski V/I</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB V/I</string>
   <string name="LOG_CATEGORY_LABEL_bt">Bluetooth V/I</string>
-  <string name="LOG_CATEGORY_LABEL_hid">Human Vmesnik I/O</string>
+  <string name="LOG_CATEGORY_LABEL_hid">Human Vmesnik V/I</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Dogodki Gonilnika za Brajico</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Dogodki Gonilnika Govora</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Dogodki Zaslonskega Gonilnika</string>
@@ -251,9 +251,9 @@
   <string name="CONTRACTION_TABLE_LABEL_de_1998">Nemška (s krajšavami - 1998 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Nemška (s krajšavami - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Angleška</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Angleška (Združena, brez kr</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Angleška (Združena Angleška razvrstitev 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Angleška (Združene Države)</string>
-  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Angleška (Združena, brez krajšav)</string>
-  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">English (Združena Angleška Brajica, razvrstitev 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (ZDA, razvrstitev 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Španska(razvrstitev 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_fr">Francoska</string>
