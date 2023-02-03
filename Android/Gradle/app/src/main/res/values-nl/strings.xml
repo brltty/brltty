@@ -3,6 +3,8 @@
 <resources>
   <string name="app_description">BRLTTY ondersteunt brailleapparaten.</string>
 
+  <string name="usbMonitor_label">USB Apparaat Aangesloten Monitor</string>
+
   <string name="about_label_activity">Over applicatie</string>
   <string name="about_label_copyright">Copyright</string>
   <string name="about_label_buildTime">Moment Van Build</string>
@@ -100,6 +102,7 @@
   <string name="ADD_DEVICE_UNSELECTED_DRIVER">braille driver niet geselecteerd</string>
   <string name="ADD_DEVICE_NO_DEVICES">geen apparaten</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">apparaatnaam al in gebruik</string>
+  <string name="ADD_DEVICE_NO_PERMISSION">TOESTEMMING toegang tot apparaat niet verleend</string>
 
   <string name="REMOVE_DEVICE_PROMPT">Weet u zeker dat u dit apparaat wilt verwijderen?</string>
 
@@ -133,9 +136,11 @@
   <string name="LOG_CATEGORY_LABEL_speech">Speech Events</string>
   <string name="LOG_CATEGORY_LABEL_async">Async Events</string>
   <string name="LOG_CATEGORY_LABEL_server">Server Events</string>
+  <string name="LOG_CATEGORY_LABEL_gio">Algemeen I/O</string>
   <string name="LOG_CATEGORY_LABEL_serial">Serial I/O</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB I/O</string>
   <string name="LOG_CATEGORY_LABEL_bt">Bluetooth I/O</string>
+  <string name="LOG_CATEGORY_LABEL_hid">Menselijk Interface I/O</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Braille Driver Events</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Speech Driver Events</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Screen Driver Events</string>
@@ -247,6 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Duits (verkort - 2015 standaard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Engels</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Engels (Verenigde Staten)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Engels (verenigd, onverkort)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Engels (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Engels (VS, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Spaans (grade 2)</string>
