@@ -3,11 +3,13 @@
 <resources>
   <string name="app_description">BRLTTY podpira brajeve naprave.</string>
 
+  <string name="usbMonitor_label">Spremljanje Priključene USB Naprave</string>
+
   <string name="about_label_activity">O Programu</string>
   <string name="about_label_copyright">Avtorske Pravice</string>
-  <string name="about_label_buildTime">Čas Graditve</string>
-  <string name="about_label_sourceRevision">Različica IzvorneKode</string>
-  <string name="about_label_privacyPolicy">Politika Zasebnosti</string>
+  <string name="about_label_buildTime">Čas Graditve</string>
+  <string name="about_label_sourceRevision">Različica IzvorneKode</string>
+  <string name="about_label_privacyPolicy">Politika Zasebnosti</string>
 
   <string name="inputService_name">BRLTTY Storitev Vnosa</string>
   <string name="inputService_type">Tipkovnice na Brajevih Vrsticah</string>
@@ -27,7 +29,7 @@
   <string name="fileDownloader_state_connecting">povezovanje</string>
   <string name="fileDownloader_state_downloading">prenašanje</string>
 
-  <string name="setting_state_off">Izključeno</string>
+  <string name="setting_state_off">Izključeno</string>
   <string name="checkbox_state_unchecked">Ne</string>
   <string name="checkbox_state_checked">Da</string>
 
@@ -100,6 +102,7 @@
   <string name="ADD_DEVICE_UNSELECTED_DRIVER">gonilnik brajeve vrstice ni izbran</string>
   <string name="ADD_DEVICE_NO_DEVICES">ni naprav</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">ime naprave že v uporabi</string>
+  <string name="ADD_DEVICE_NO_PERMISSION">dostop do naprave ni dodeljen</string>
 
   <string name="REMOVE_DEVICE_PROMPT">Ali res želite odstraniti to napravo?</string>
 
@@ -133,9 +136,11 @@
   <string name="LOG_CATEGORY_LABEL_speech">Govorni Dogodki</string>
   <string name="LOG_CATEGORY_LABEL_async">Asinhroni Dogodki</string>
   <string name="LOG_CATEGORY_LABEL_server">Dogodki Strežnika</string>
+  <string name="LOG_CATEGORY_LABEL_gio">splošni I/O</string>
   <string name="LOG_CATEGORY_LABEL_serial">Serijski V/I</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB V/I</string>
   <string name="LOG_CATEGORY_LABEL_bt">Bluetooth V/I</string>
+  <string name="LOG_CATEGORY_LABEL_hid">Human Vmesnik I/O</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Dogodki Gonilnika za Brajico</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Dogodki Gonilnika Govora</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Dogodki Zaslonskega Gonilnika</string>
@@ -247,6 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Nemška (s krajšavami - 2015 standard)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Angleška</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Angleška (Združene Države)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Angleška (Združena, brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">English (Združena Angleška Brajica, razvrstitev 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">English (ZDA, razvrstitev 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Španska(razvrstitev 2)</string>
@@ -267,7 +273,7 @@
   <string name="CONTRACTION_TABLE_LABEL_nl">Nizozemska(s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_ny">Chichewa (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_pt">Portugalska (razvrstitev 2)</string>
-  <string name="CONTRACTION_TABLE_LABEL_ru">Ruska (skrajšana)</string>
+  <string name="CONTRACTION_TABLE_LABEL_ru">Ruska (skrajšana)</string>
   <string name="CONTRACTION_TABLE_LABEL_si">Sinhalska(brez krajšav)</string>
   <string name="CONTRACTION_TABLE_LABEL_sw">Swahili (s krajšavami)</string>
   <string name="CONTRACTION_TABLE_LABEL_th">Tajska(s krajšavami)</string>
