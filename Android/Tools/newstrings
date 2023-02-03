@@ -75,10 +75,9 @@ proc loadStringList {} {
 }
 
 proc auditStringList {} {
-   global baseStrings
+   global baseStrings listedStrings
 
    logNote "auditing string list"
-   set listedStrings [loadStringList]
    splitNames [dict keys $listedStrings] oldNames sameNames newNames
    writeNames "[getProgramName].txt" $newNames
 
@@ -110,10 +109,12 @@ proc loadStringResources {directory} {
       logMessage detail "loading string resources: $path"
 
       if {[catch [list open $path {RDONLY}] channel] == 0} {
+         set order 0
+
          while {[gets $channel line] >= 0} {
             if {[regexp $pattern $line x name ignorable text]} {
                set ignorable [expr {[string length $ignorable] > 0}]
-               set string [dict create text $text ignorable $ignorable]
+               set string [dict create text $text ignorable $ignorable order [incr order]]
                dict set strings $name $string
             }
          }
@@ -148,6 +149,16 @@ proc auditLanguage {code directory} {
    foreach name $oldNames {
       writeProgramMessage "old language string: $code: $name"
    }
+
+   if {([string length $oldNames] + [string length $newNames]) == 0} {
+      global listedStrings
+
+      foreach name [dict keys $listedStrings] {
+         if {[dict get $listedStrings $name order] != [dict get $languageStrings $name order]} {
+            putProgramMessage "string out of order: $code: $name"
+         }
+      }
+   }
 }
 
 proc auditAllLanguages {} {
@@ -169,6 +180,8 @@ set baseDirectory [file join $applicationDirectory res values]
 set baseStrings [loadStringResources $baseDirectory]
 set ignorableNames [getIgnorableNames $baseStrings]
 
+set listedStrings [loadStringList]
 auditStringList
+
 auditAllLanguages
 exit 0
