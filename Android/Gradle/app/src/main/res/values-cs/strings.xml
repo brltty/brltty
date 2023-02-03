@@ -3,6 +3,8 @@
 <resources>
   <string name="app_description">BRLTTY podporuje braillské řádky.</string>
 
+  <string name="usbMonitor_label">Připojený monitor zařízení USB</string>
+
   <string name="about_label_activity">O aplikaci</string>
   <string name="about_label_copyright">Copyright</string>
   <string name="about_label_buildTime">Čas sestavení</string>
@@ -100,6 +102,7 @@
   <string name="ADD_DEVICE_UNSELECTED_DRIVER">Braillský ovladač nevybrán</string>
   <string name="ADD_DEVICE_NO_DEVICES">Žádná zařízení</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">Jméno zařízení se již používá</string>
+  <string name="ADD_DEVICE_NO_PERMISSION">přístup k zařízení nebyl udělen</string>
 
   <string name="REMOVE_DEVICE_PROMPT">Opravdu si přejete odebrat toto zařízení?</string>
 
@@ -133,9 +136,11 @@
   <string name="LOG_CATEGORY_LABEL_speech">Události hlasu</string>
   <string name="LOG_CATEGORY_LABEL_async">Asynchronní události</string>
   <string name="LOG_CATEGORY_LABEL_server">Události serveru</string>
+  <string name="LOG_CATEGORY_LABEL_gio">Obecný Vstup/Výstup</string>
   <string name="LOG_CATEGORY_LABEL_serial">Sériový Vstup/Výstup</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB Vstup/Výstup</string>
   <string name="LOG_CATEGORY_LABEL_bt">Bluetooth Vstup/Výstup</string>
+  <string name="LOG_CATEGORY_LABEL_hid">Vstup/Výstup Human Interface</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Události braillského ovladače</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Události ovladače hlasu</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Události ovladače obrazovky</string>
@@ -247,6 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Němčina (zkratkopis - standart 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Angličtina</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Angličtina (Spojené státy)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Angličtina (Unified, plnopis)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Angličtina (Unified English Braille, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Angličtina (US, grade 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Španělština (grade 2)</string>
