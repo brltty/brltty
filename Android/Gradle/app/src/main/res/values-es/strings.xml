@@ -3,6 +3,8 @@
 <resources>
   <string name="app_description">BRLTTY apoya dispositivos de braille.</string>
 
+  <string name="usbMonitor_label">detector de dispositivo USB conectado</string>
+
   <string name="about_label_activity">Acerca de aplicación</string>
   <string name="about_label_copyright">Derechos de autor</string>
   <string name="about_label_buildTime">Hora de Compilación</string>
@@ -100,6 +102,7 @@
   <string name="ADD_DEVICE_UNSELECTED_DRIVER">controlador de braille no está seleccionado</string>
   <string name="ADD_DEVICE_NO_DEVICES">ningunos dispositivos</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">nombre de dispositivo ya está en uso</string>
+  <string name="ADD_DEVICE_NO_PERMISSION">acceso al dispositivo no concedido</string>
 
   <string name="REMOVE_DEVICE_PROMPT">¿Realmente desea retirar este dispositivo?</string>
 
@@ -133,9 +136,11 @@
   <string name="LOG_CATEGORY_LABEL_speech">Eventos del Habla</string>
   <string name="LOG_CATEGORY_LABEL_async">Eventos de Async</string>
   <string name="LOG_CATEGORY_LABEL_server">Eventos de Servidor</string>
+  <string name="LOG_CATEGORY_LABEL_gio">E/S genérica</string>
   <string name="LOG_CATEGORY_LABEL_serial">E/S en Serie</string>
   <string name="LOG_CATEGORY_LABEL_usb">E/S USB</string>
   <string name="LOG_CATEGORY_LABEL_bt">E/S Bluetooth</string>
+  <string name="LOG_CATEGORY_LABEL_hid">E/S de interfaz humana</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Eventos de Controlador de Braille</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Eventos de Controlador de Habla</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Eventos de Controlador de Pantalla</string>
@@ -247,6 +252,7 @@
   <string name="CONTRACTION_TABLE_LABEL_de_2015">Alemán (contraccionado - estándar de 2015)</string>
   <string name="CONTRACTION_TABLE_LABEL_en">Inglés</string>
   <string name="CONTRACTION_TABLE_LABEL_en_US">Inglés (Estados Unidos)</string>
+  <string name="CONTRACTION_TABLE_LABEL_en_ueb_g1">Inglés (Unificado, no contraccionado)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_ueb_g2">Inglés (Braille Inglés unificado, grado 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_en_us_g2">Inglés (Estados Unidos, grado 2)</string>
   <string name="CONTRACTION_TABLE_LABEL_es">Español (grado 2)</string>
