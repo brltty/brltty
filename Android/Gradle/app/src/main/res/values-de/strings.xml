@@ -3,6 +3,8 @@
 <resources>
   <string name="app_description">BRLTTY unterstützt Braillegeräte.</string>
 
+  <string name="usbMonitor_label">Überwachung angeschlossener USB-Geräte</string>
+
   <string name="about_label_activity">Über die Applikation</string>
   <string name="about_label_copyright">Copyright</string>
   <string name="about_label_buildTime">Erstellungsdatum</string>
@@ -100,6 +102,7 @@
   <string name="ADD_DEVICE_UNSELECTED_DRIVER">Brailletreiber nicht ausgewählt</string>
   <string name="ADD_DEVICE_NO_DEVICES">keine Geräte</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">Gerätename ist bereits in Verwendung</string>
+  <string name="ADD_DEVICE_NO_PERMISSION">Zugriff zum Gerät verweigert</string>
 
   <string name="REMOVE_DEVICE_PROMPT">Möchten Sie dieses Gerät wirklich entfernen?</string>
 
@@ -133,9 +136,11 @@
   <string name="LOG_CATEGORY_LABEL_speech">Sprachereignisse</string>
   <string name="LOG_CATEGORY_LABEL_async">Asynchrone Ereignisse</string>
   <string name="LOG_CATEGORY_LABEL_server">Server Ereignisse</string>
+  <string name="LOG_CATEGORY_LABEL_gio">Allgemeine Ein-/Ausgabe</string>
   <string name="LOG_CATEGORY_LABEL_serial">Serielle E/A</string>
   <string name="LOG_CATEGORY_LABEL_usb">USB E/A</string>
   <string name="LOG_CATEGORY_LABEL_bt">Bluetooth E/A</string>
+  <string name="LOG_CATEGORY_LABEL_hid">Human Interface Ein-/Ausgabe</string>
   <string name="LOG_CATEGORY_LABEL_brldrv">Brailletreiberereignisse</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Sprachausgabentreiber</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Bildschirmtreiberereignisse</string>
