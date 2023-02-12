@@ -1274,7 +1274,7 @@ or raw mode. The client can send either of these types of packet:
   <itemize>
   <item><tt/BRLAPI_PACKET_GETDRIVERNAME/
   or <tt/BRLAPI_PACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
-  <item><tt/BRLAPI_PACKET_ENTERTTY/MODE to enter tty handling mode,
+  <item><tt/BRLAPI_PACKET_ENTERTTYMODE/ to enter tty handling mode,
   <item><tt/BRLAPI_PACKET_ENTERRAWMODE/ to enter raw mode,
   </itemize>
 
