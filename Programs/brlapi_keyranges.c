@@ -192,7 +192,7 @@ int removeKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l)
 
     /* Now values are the same, tinker with flags */
     for (i=0; i<32; i++) {
-      uint32_t mask = 1<<i;
+      uint32_t mask = 1U<<i;
 
       if ((!(c->maxFlags & mask) &&  (minFlags & mask)) ||
           ( (c->minFlags & mask) && !(maxFlags & mask)))
