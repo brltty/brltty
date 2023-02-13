@@ -46,6 +46,35 @@
 #include "api_control.h"
 #include "core.h"
 
+static void
+overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
+  unsigned char dots;
+
+  switch (attributes) {
+    case SCR_COLOUR_FG_DARK_GREY | SCR_COLOUR_BG_BLACK:
+    case SCR_COLOUR_FG_LIGHT_GREY | SCR_COLOUR_BG_BLACK:
+    case SCR_COLOUR_FG_LIGHT_GREY | SCR_COLOUR_BG_BLUE:
+    case SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_CYAN:
+      return;
+
+    case SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY:
+      dots = BRL_DOT_7 | BRL_DOT_8;
+      break;
+
+    case SCR_COLOUR_FG_WHITE | SCR_COLOUR_BG_BLACK:
+    default:
+      dots = BRL_DOT_8;
+      break;
+  }
+
+  {
+    BlinkDescriptor *blink = &attributesUnderlineBlinkDescriptor;
+
+    requireBlinkDescriptor(blink);
+    if (isBlinkVisible(blink)) *cell |= dots;
+  }
+}
+
 int isContracted = 0;
 int contractedLength;
 int contractedStart;
@@ -75,6 +104,119 @@ ensureContractedOffsetsSize (size_t size) {
   }
 
   return 1;
+}
+
+static void
+generateContractedBraille (wchar_t *textBuffer, unsigned int textLength) {
+  while (1) {
+    int inputLength = scr.cols - ses->winx;
+    ensureContractedOffsetsSize(inputLength);
+    wchar_t inputText[inputLength];
+
+    ScreenCharacter inputCharacters[inputLength];
+    readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
+
+    for (int i=0; i<inputLength; i+=1) {
+      inputText[i] = inputCharacters[i].text;
+    }
+
+    int outputLength = textLength;
+    unsigned char outputCells[outputLength];
+
+    contractText(
+      contractionTable,
+      inputText, &inputLength,
+      outputCells, &outputLength,
+      contractedOffsets, getContractedCursor()
+    );
+
+    {
+      int inputEnd = inputLength;
+
+      if (contractedTrack) {
+        if (outputLength == textLength) {
+          int inputIndex = inputEnd;
+
+          while (inputIndex) {
+            int offset = contractedOffsets[--inputIndex];
+
+            if (offset != CTB_NO_OFFSET) {
+              if (offset != outputLength) break;
+              inputEnd = inputIndex;
+            }
+          }
+        }
+
+        if (scr.posx >= (ses->winx + inputEnd)) {
+          int offset = 0;
+          int length = scr.cols - ses->winx;
+          int onspace = 0;
+
+          while (offset < length) {
+            if ((iswspace(inputCharacters[offset].text) != 0) != onspace) {
+              if (onspace) break;
+              onspace = 1;
+            }
+
+            offset += 1;
+          }
+
+          if ((offset += ses->winx) > scr.posx) {
+            ses->winx = scr.posx;
+          } else {
+            ses->winx = offset;
+          }
+
+          continue;
+        }
+      }
+    }
+
+    contractedStart = ses->winx;
+    contractedLength = inputLength;
+    contractedTrack = 0;
+
+    if (ses->displayMode || prefs.showAttributes) {
+      int inputOffset;
+      int outputOffset = 0;
+      unsigned char attributes = 0;
+      unsigned char attributesBuffer[outputLength];
+
+      for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
+        int offset = contractedOffsets[inputOffset];
+
+        if (offset != CTB_NO_OFFSET) {
+          while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
+          attributes = 0;
+        }
+
+        attributes |= inputCharacters[inputOffset].attributes;
+      }
+
+      while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
+
+      if (ses->displayMode) {
+        for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
+          outputCells[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
+        }
+      } else {
+        unsigned int i;
+
+        for (i=0; i<outputLength; i+=1) {
+          overlayAttributesUnderline(&outputCells[i], attributesBuffer[i]);
+        }
+      }
+    }
+
+    fillDotsRegion(
+      textBuffer, brl.buffer,
+      textStart, textCount,
+      brl.textColumns, brl.textRows,
+      outputCells, outputLength
+    );
+
+    break;
+  }
 }
 
 static int oldwinx;
@@ -229,35 +371,6 @@ getScreenCursorPosition (int x, int y) {
   }
 
   return position;
-}
-
-static void
-overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
-  unsigned char dots;
-
-  switch (attributes) {
-    case SCR_COLOUR_FG_DARK_GREY | SCR_COLOUR_BG_BLACK:
-    case SCR_COLOUR_FG_LIGHT_GREY | SCR_COLOUR_BG_BLACK:
-    case SCR_COLOUR_FG_LIGHT_GREY | SCR_COLOUR_BG_BLUE:
-    case SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_CYAN:
-      return;
-
-    case SCR_COLOUR_FG_BLACK | SCR_COLOUR_BG_LIGHT_GREY:
-      dots = BRL_DOT_7 | BRL_DOT_8;
-      break;
-
-    case SCR_COLOUR_FG_WHITE | SCR_COLOUR_BG_BLACK:
-    default:
-      dots = BRL_DOT_8;
-      break;
-  }
-
-  {
-    BlinkDescriptor *blink = &attributesUnderlineBlinkDescriptor;
-
-    requireBlinkDescriptor(blink);
-    if (isBlinkVisible(blink)) *cell |= dots;
-  }
 }
 
 static int
@@ -1012,125 +1125,19 @@ doUpdate (void) {
     if (infoMode) {
       if (!renderInfoLine()) brl.hasFailed = 1;
     } else {
-      const unsigned int textLength = textCount * brl.textRows;
-      isContracted = 0;
-
       const unsigned int windowLength = brl.textColumns * brl.textRows;
       memset(brl.buffer, 0, windowLength);
 
       wchar_t textBuffer[windowLength];
       wmemset(textBuffer, WC_C(' '), windowLength);
 
+      unsigned int textLength = textCount * brl.textRows;
+      isContracted = 0;
+
       if (isContracting()) {
-        while (1) {
-          int inputLength = scr.cols - ses->winx;
-          ensureContractedOffsetsSize(inputLength);
-          wchar_t inputText[inputLength];
-
-          ScreenCharacter inputCharacters[inputLength];
-          readScreen(ses->winx, ses->winy, inputLength, 1, inputCharacters);
-
-          for (int i=0; i<inputLength; i+=1) {
-            inputText[i] = inputCharacters[i].text;
-          }
-
-          int outputLength = textLength;
-          unsigned char outputCells[outputLength];
-
-          contractText(
-            contractionTable,
-            inputText, &inputLength,
-            outputCells, &outputLength,
-            contractedOffsets, getContractedCursor()
-          );
-
-          {
-            int inputEnd = inputLength;
-
-            if (contractedTrack) {
-              if (outputLength == textLength) {
-                int inputIndex = inputEnd;
-
-                while (inputIndex) {
-                  int offset = contractedOffsets[--inputIndex];
-
-                  if (offset != CTB_NO_OFFSET) {
-                    if (offset != outputLength) break;
-                    inputEnd = inputIndex;
-                  }
-                }
-              }
-
-              if (scr.posx >= (ses->winx + inputEnd)) {
-                int offset = 0;
-                int length = scr.cols - ses->winx;
-                int onspace = 0;
-
-                while (offset < length) {
-                  if ((iswspace(inputCharacters[offset].text) != 0) != onspace) {
-                    if (onspace) break;
-                    onspace = 1;
-                  }
-
-                  offset += 1;
-                }
-
-                if ((offset += ses->winx) > scr.posx) {
-                  ses->winx = scr.posx;
-                } else {
-                  ses->winx = offset;
-                }
-
-                continue;
-              }
-            }
-          }
-
-          contractedStart = ses->winx;
-          contractedLength = inputLength;
-          contractedTrack = 0;
-          isContracted = 1;
-
-          if (ses->displayMode || prefs.showAttributes) {
-            int inputOffset;
-            int outputOffset = 0;
-            unsigned char attributes = 0;
-            unsigned char attributesBuffer[outputLength];
-
-            for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
-              int offset = contractedOffsets[inputOffset];
-
-              if (offset != CTB_NO_OFFSET) {
-                while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
-                attributes = 0;
-              }
-
-              attributes |= inputCharacters[inputOffset].attributes;
-            }
-
-            while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
-
-            if (ses->displayMode) {
-              for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
-                outputCells[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
-              }
-            } else {
-              unsigned int i;
-
-              for (i=0; i<outputLength; i+=1) {
-                overlayAttributesUnderline(&outputCells[i], attributesBuffer[i]);
-              }
-            }
-          }
-
-          fillDotsRegion(textBuffer, brl.buffer,
-                         textStart, textCount, brl.textColumns, brl.textRows,
-                         outputCells, outputLength);
-          break;
-        }
-      }
-
-      if (!isContracted) {
+        generateContractedBraille(textBuffer, textLength);
+        isContracted = 1;
+      } else {
         ScreenCharacter characters[textLength];
         readBrailleWindow(characters, ARRAY_COUNT(characters));
         translateBrailleWindow(characters, textBuffer);
