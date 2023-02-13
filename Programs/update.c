@@ -219,9 +219,6 @@ generateContractedBraille (wchar_t *textBuffer, unsigned int textLength) {
   }
 }
 
-static int oldwinx;
-static int oldwiny;
-
 static int
 checkScreenPointer (void) {
   int moved = 0;
@@ -605,6 +602,9 @@ checkScreenScroll (int track) {
     oldWidth = newWidth;
   }
 }
+
+static int oldwinx;
+static int oldwiny;
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static int wasAutospeaking;
@@ -1132,11 +1132,10 @@ doUpdate (void) {
       wmemset(textBuffer, WC_C(' '), windowLength);
 
       unsigned int textLength = textCount * brl.textRows;
-      isContracted = 0;
+      isContracted = isContracting();
 
-      if (isContracting()) {
+      if (isContracted) {
         generateContractedBraille(textBuffer, textLength);
-        isContracted = 1;
       } else {
         ScreenCharacter characters[textLength];
         readBrailleWindow(characters, ARRAY_COUNT(characters));
