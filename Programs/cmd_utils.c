@@ -48,23 +48,32 @@ alertLineSkipped (unsigned int *count) {
 
 int
 isTextOffset (int arg, int *first, int *last, int relaxed) {
-  int value = arg;
+  int y = arg / brl.textColumns;
+  if (y >= brl.textRows) return 0;
+  if ((ses->winy + y) >= scr.rows) return 0;
 
-  if (value < textStart) return 0;
-  if ((value -= textStart) >= textCount) return 0;
+  int x = arg % brl.textColumns;
+  if (x < textStart) return 0;
+  if ((x -= textStart) >= textCount) return 0;
 
   if (isContracted) {
+    BrailleRowDescriptor *brd = getBrailleRowDescriptor(y);
+    if (!brd) return 0;
+
+    int *offsets = brd->contracted.offsets.array;
+    if (!offsets) return 0;
+
     int start = 0;
     int end = 0;
 
     {
       int textIndex = 0;
 
-      while (textIndex < contractedLength) {
-        int cellIndex = contractedOffsets[textIndex];
+      while (textIndex < brd->contracted.length) {
+        int cellIndex = offsets[textIndex];
 
         if (cellIndex != CTB_NO_OFFSET) {
-          if (cellIndex > value) {
+          if (cellIndex > x) {
             end = textIndex - 1;
             break;
           }
@@ -75,27 +84,27 @@ isTextOffset (int arg, int *first, int *last, int relaxed) {
         textIndex += 1;
       }
 
-      if (textIndex == contractedLength) end = textIndex - 1;
+      if (textIndex == brd->contracted.length) end = textIndex - 1;
     }
 
     if (first) *first = start;
     if (last) *last = end;
-    return 1;
+  } else {
+    if ((ses->winx + x) >= scr.cols) {
+      if (!relaxed) return 0;
+      x = scr.cols - ses->winx - 1;
+    }
+
+    if (prefs.wordWrap) {
+      int length = getWordWrapLength(ses->winy, ses->winx, textCount);
+      if (length > textCount) length = textCount;
+      if (x >= length) x = length - 1;
+    }
+
+    if (first) *first = x;
+    if (last) *last = x;
   }
 
-  if ((ses->winx + value) >= scr.cols) {
-    if (!relaxed) return 0;
-    value = scr.cols - 1 - ses->winx;
-  }
-
-  if (prefs.wordWrap) {
-    int length = getWordWrapLength(ses->winy, ses->winx, textCount);
-    if (length > textCount) length = textCount;
-    if (value >= length) value = length - 1;
-  }
-
-  if (first) *first = value;
-  if (last) *last = value;
   return 1;
 }
 

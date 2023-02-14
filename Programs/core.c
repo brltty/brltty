@@ -1150,12 +1150,11 @@ getUncontractedCursorOffset (int x, int y) {
 }
 
 int
-getContractedCursor (void) {
+getContractedCursorOffset (void) {
   int offset = getUncontractedCursorOffset(scr.posx, scr.posy);
-
-  return ((offset != BRL_NO_CURSOR) && !ses->hideScreenCursor)?
-         offset:
-         CTB_NO_CURSOR;
+  if (offset == BRL_NO_CURSOR) return CTB_NO_CURSOR;
+  if (ses->hideScreenCursor) return CTB_NO_CURSOR;
+  return offset;
 }
 
 int
@@ -1174,7 +1173,7 @@ getContractedLength (unsigned int outputLimit) {
     contractionTable,
     inputBuffer, &inputLength,
     outputBuffer, &outputLength,
-    outputOffsets, getContractedCursor()
+    outputOffsets, getContractedCursorOffset()
   );
 
   for (int length=0; length<inputLength; length+=1) {

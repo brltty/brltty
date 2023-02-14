@@ -58,18 +58,20 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->writeDelay = 0;
 
   brl->buffer = NULL;
-  brl->quality = 0;
-  brl->isCoreBuffer = 0;
-
   brl->bufferResized = NULL;
-  brl->resizeRequired = 0;
+
+  brl->rowDescriptors.array = NULL;
+  brl->rowDescriptors.size = 0;
 
   brl->cursor = BRL_NO_CURSOR;
+  brl->quality = 0;
 
   brl->noDisplay = 0;
   brl->hasFailed = 0;
   brl->isOffline = 0;
   brl->isSuspended = 0;
+  brl->isCoreBuffer = 0;
+  brl->resizeRequired = 0;
   brl->hideCursor = 0;
 
   brl->acknowledgements.messages = NULL;
@@ -94,6 +96,16 @@ destructBrailleDisplay (BrailleDisplay *brl) {
   if (brl->keyTable) {
     destroyKeyTable(brl->keyTable);
     brl->keyTable = NULL;
+  }
+
+  if (brl->rowDescriptors.array) {
+    while (brl->rowDescriptors.size > 0) {
+      BrailleRowDescriptor *brd = &brl->rowDescriptors.array[--brl->rowDescriptors.size];
+      if (brd->contracted.offsets.array) free(brd->contracted.offsets.array);
+    }
+
+    free(brl->rowDescriptors.array);
+    brl->rowDescriptors.array = NULL;
   }
 
   if (brl->buffer) {

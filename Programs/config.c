@@ -1373,14 +1373,20 @@ brailleWindowReconfigured (unsigned int rows, unsigned int columns) {
     }
   }
 
-  logMessage(LOG_DEBUG, "regions: text=%u.%u status=%u.%u",
-             textStart, textCount, statusStart, statusCount);
+  logMessage(LOG_DEBUG,
+    "regions: text=%u.%u status=%u.%u",
+    textStart, textCount,
+    statusStart, statusCount
+  );
 
   fullWindowShift = MAX(textCount-prefs.brailleWindowOverlap, 1);
   halfWindowShift = textCount / 2;
   verticalWindowShift = (rows > 1)? rows: 5;
-  logMessage(LOG_DEBUG, "shifts: full=%u half=%u vertical=%u",
-             fullWindowShift, halfWindowShift, verticalWindowShift);
+
+  logMessage(LOG_DEBUG,
+    "shifts: full=%u half=%u vertical=%u",
+    fullWindowShift, halfWindowShift, verticalWindowShift
+  );
 }
 
 void
