@@ -901,11 +901,10 @@ trackScreenCursor (int place) {
   ses->dcty = 0;
 
   if (isContracted) {
+    slideBrailleWindowVertically(scr.posy);
     contractedTrack = 1;
 
-    if (scr.posy != ses->winy) {
-      ses->winy = scr.posy;
-    } else if (scr.posx > ses->winx) {
+    if (scr.posx > ses->winx) {
       if (scr.posx < (ses->winx + getContractedLength(textCount))) {
         return 1;
       }
