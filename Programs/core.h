@@ -136,7 +136,6 @@ extern STR_DECLARE_FORMATTER(formatBrailleTime, const TimeFormattingData *fmt);
 
 extern int isContracted;
 extern int contractedTrack;
-extern int contractedStart;
 extern BrailleRowDescriptor *getBrailleRowDescriptor (unsigned int row);
 
 extern int isContracting (void);

@@ -197,7 +197,6 @@ translateBrailleWindow (
 
 int isContracted = 0;
 int contractedTrack = 0;
-int contractedStart;
 
 BrailleRowDescriptor *
 getBrailleRowDescriptor (unsigned int row) {
@@ -1190,8 +1189,6 @@ doUpdate (void) {
           contractedTrack = 0;
           if (generated) break;
         }
-
-        contractedStart = ses->winx;
       } else {
         ScreenCharacter characters[textLength];
         readBrailleWindow(characters, ARRAY_COUNT(characters));
