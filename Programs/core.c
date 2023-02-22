@@ -1142,21 +1142,6 @@ isContracting (void) {
 }
 
 int
-getUncontractedCursorOffset (int x, int y) {
-  return ((y == ses->winy) && (x >= ses->winx) && (x < scr.cols))?
-         (x - ses->winx):
-         BRL_NO_CURSOR;
-}
-
-int
-getContractedCursorOffset (void) {
-  int offset = getUncontractedCursorOffset(scr.posx, scr.posy);
-  if (offset == BRL_NO_CURSOR) return CTB_NO_CURSOR;
-  if (ses->hideScreenCursor) return CTB_NO_CURSOR;
-  return offset;
-}
-
-int
 getContractedLength (unsigned int outputLimit) {
   int inputLength = scr.cols - ses->winx;
   wchar_t inputBuffer[inputLength];
@@ -1172,7 +1157,7 @@ getContractedLength (unsigned int outputLimit) {
     contractionTable,
     inputBuffer, &inputLength,
     outputBuffer, &outputLength,
-    outputOffsets, getContractedCursorOffset()
+    outputOffsets, getCursorOffsetForContracting()
   );
 
   for (int length=0; length<inputLength; length+=1) {

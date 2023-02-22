@@ -248,6 +248,13 @@ ensureContractedOffsetsSize (BrailleRowDescriptor *brd, size_t size) {
   return 1;
 }
 
+int
+getCursorOffsetForContracting (void) {
+  if (scr.posy != ses->winy) return CTB_NO_CURSOR;
+  if (scr.posx < ses->winx) return CTB_NO_CURSOR;
+  return scr.posx - ses->winx;
+}
+
 static int
 contractScreenRow (BrailleRowDescriptor *brd, unsigned int screenRow, unsigned char *cells, unsigned int cellCount) {
   int isCursorRow = scr.posy == ses->winy;
@@ -270,8 +277,7 @@ contractScreenRow (BrailleRowDescriptor *brd, unsigned int screenRow, unsigned c
     contractionTable,
     inputText, &inputLength,
     cells, &outputLength,
-    offsetsArray,
-    (isCursorRow && (scr.posx >= ses->winx))? (scr.posx - ses->winx): CTB_NO_CURSOR
+    offsetsArray, getCursorOffsetForContracting()
   );
 
   {

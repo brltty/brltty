@@ -137,10 +137,9 @@ extern STR_DECLARE_FORMATTER(formatBrailleTime, const TimeFormattingData *fmt);
 extern int isContracted;
 extern int contractedTrack;
 extern BrailleRowDescriptor *getBrailleRowDescriptor (unsigned int row);
+extern int getCursorOffsetForContracting (void);
 
 extern int isContracting (void);
-extern int getUncontractedCursorOffset (int x, int y);
-extern int getContractedCursorOffset (void);
 extern int getContractedLength (unsigned int outputLimit);
 
 extern ContractionTable *contractionTable;
