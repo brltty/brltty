@@ -81,6 +81,24 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->acknowledgements.missing.limit = BRAILLE_MESSAGE_UNACKNOWLEDGEED_LIMIT;
 }
 
+static void
+destroyContractionCache (ContractionCache *cache) {
+  if (cache->input.characters) {
+    free(cache->input.characters);
+    cache->input.characters = NULL;
+  }
+
+  if (cache->output.cells) {
+    free(cache->output.cells);
+    cache->output.cells = NULL;
+  }
+
+  if (cache->offsets.array) {
+    free(cache->offsets.array);
+    cache->offsets.array = NULL;
+  }
+}
+
 void
 destructBrailleDisplay (BrailleDisplay *brl) {
   if (brl->acknowledgements.alarm) {
@@ -101,6 +119,7 @@ destructBrailleDisplay (BrailleDisplay *brl) {
   if (brl->rowDescriptors.array) {
     while (brl->rowDescriptors.size > 0) {
       BrailleRowDescriptor *brd = &brl->rowDescriptors.array[--brl->rowDescriptors.size];
+      destroyContractionCache(&brd->contracted.cache);
       if (brd->contracted.offsets.array) free(brd->contracted.offsets.array);
     }
 

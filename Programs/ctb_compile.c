@@ -706,18 +706,6 @@ initializeCommonFields (ContractionTable *table) {
   table->rules.array = NULL;
   table->rules.size = 0;
   table->rules.count = 0;
-
-  table->cache.input.characters = NULL;
-  table->cache.input.size = 0;
-  table->cache.input.count = 0;
-
-  table->cache.output.cells = NULL;
-  table->cache.output.size = 0;
-  table->cache.output.count = 0;
-
-  table->cache.offsets.array = NULL;
-  table->cache.offsets.size = 0;
-  table->cache.offsets.count = 0;
 }
 
 static void
@@ -736,21 +724,6 @@ destroyCommonFields (ContractionTable *table) {
 
     free(table->rules.array);
     table->rules.array = NULL;
-  }
-
-  if (table->cache.input.characters) {
-    free(table->cache.input.characters);
-    table->cache.input.characters = NULL;
-  }
-
-  if (table->cache.output.cells) {
-    free(table->cache.output.cells);
-    table->cache.output.cells = NULL;
-  }
-
-  if (table->cache.offsets.array) {
-    free(table->cache.offsets.array);
-    table->cache.offsets.array = NULL;
   }
 }
 

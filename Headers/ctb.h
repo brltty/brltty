@@ -42,6 +42,7 @@ extern int replaceContractionTable (const char *directory, const char *name);
 
 extern void contractText (
   ContractionTable *contractionTable, /* Pointer to translation table */
+  ContractionCache *contractionCache,
   const wchar_t *inputBuffer, /* What is to be translated */
   int *inputLength, /* Its length */
   unsigned char *outputBuffer, /* Where the translation is to go */

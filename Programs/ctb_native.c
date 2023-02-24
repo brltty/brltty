@@ -1050,8 +1050,10 @@ contractText_native (BrailleContractionData *bcd) {
         int outputLength = bcd->output.end - bcd->output.current;
 
         contractText(
-          bcd->table, inputBuffer, &inputLength,
-          bcd->output.current, &outputLength, NULL, CTB_NO_CURSOR
+          bcd->table, NULL,
+          inputBuffer, &inputLength,
+          bcd->output.current, &outputLength,
+          NULL, CTB_NO_CURSOR
         );
 
         bcd->output.current += outputLength;

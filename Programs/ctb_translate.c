@@ -143,107 +143,129 @@ makeCachedCursorOffset (BrailleContractionData *bcd) {
 }
 
 static int
-checkCache (BrailleContractionData *bcd) {
-  if (!bcd->table->cache.input.characters) return 0;
-  if (!bcd->table->cache.output.cells) return 0;
-  if (bcd->input.offsets && !bcd->table->cache.offsets.count) return 0;
-  if (bcd->table->cache.output.maximum != getOutputCount(bcd)) return 0;
-  if (bcd->table->cache.cursorOffset != makeCachedCursorOffset(bcd)) return 0;
-  if (bcd->table->cache.expandCurrentWord != prefs.expandCurrentWord) return 0;
-  if (bcd->table->cache.capitalizationMode != prefs.capitalizationMode) return 0;
+checkContractionCache (BrailleContractionData *bcd, ContractionCache *cache) {
+  if (!cache) return 0;
+  if (!cache->input.characters) return 0;
+  if (!cache->output.cells) return 0;
+  if (bcd->input.offsets && !cache->offsets.count) return 0;
+  if (cache->output.maximum != getOutputCount(bcd)) return 0;
+  if (cache->cursorOffset != makeCachedCursorOffset(bcd)) return 0;
+  if (cache->expandCurrentWord != prefs.expandCurrentWord) return 0;
+  if (cache->capitalizationMode != prefs.capitalizationMode) return 0;
 
   {
     unsigned int count = getInputCount(bcd);
-    if (bcd->table->cache.input.count != count) return 0;
-    if (wmemcmp(bcd->input.begin, bcd->table->cache.input.characters, count) != 0) return 0;
+    if (cache->input.count != count) return 0;
+    if (wmemcmp(bcd->input.begin, cache->input.characters, count) != 0) return 0;
   }
 
   return 1;
 }
 
 static void
-updateCache (BrailleContractionData *bcd) {
-  {
-    unsigned int count = getInputCount(bcd);
+useContractionCache (BrailleContractionData *bcd, ContractionCache *cache) {
+  bcd->input.current = bcd->input.begin + cache->input.consumed;
+  bcd->output.current = bcd->output.begin + cache->output.count;
 
-    if (count > bcd->table->cache.input.size) {
-      unsigned int newSize = count | 0X7F;
-      wchar_t *newCharacters = malloc(ARRAY_SIZE(newCharacters, newSize));
-
-      if (!newCharacters) {
-        logMallocError();
-        bcd->table->cache.input.count = 0;
-        goto inputDone;
-      }
-
-      if (bcd->table->cache.input.characters) free(bcd->table->cache.input.characters);
-      bcd->table->cache.input.characters = newCharacters;
-      bcd->table->cache.input.size = newSize;
-    }
-
-    wmemcpy(bcd->table->cache.input.characters, bcd->input.begin, count);
-    bcd->table->cache.input.count = count;
-    bcd->table->cache.input.consumed = getInputConsumed(bcd);
-  }
-inputDone:
-
-  {
-    unsigned int count = getOutputConsumed(bcd);
-
-    if (count > bcd->table->cache.output.size) {
-      unsigned int newSize = count | 0X7F;
-      unsigned char *newCells = malloc(ARRAY_SIZE(newCells, newSize));
-
-      if (!newCells) {
-        logMallocError();
-        bcd->table->cache.output.count = 0;
-        goto outputDone;
-      }
-
-      if (bcd->table->cache.output.cells) free(bcd->table->cache.output.cells);
-      bcd->table->cache.output.cells = newCells;
-      bcd->table->cache.output.size = newSize;
-    }
-
-    memcpy(bcd->table->cache.output.cells, bcd->output.begin, count);
-    bcd->table->cache.output.count = count;
-    bcd->table->cache.output.maximum = getOutputCount(bcd);
-  }
-outputDone:
+  memcpy(
+    bcd->output.begin, cache->output.cells,
+    ARRAY_SIZE(bcd->output.begin, cache->output.count)
+  );
 
   if (bcd->input.offsets) {
-    unsigned int count = getInputCount(bcd);
+    memcpy(
+      bcd->input.offsets, cache->offsets.array,
+      ARRAY_SIZE(bcd->input.offsets, cache->offsets.count)
+    );
+  }
+}
 
-    if (count > bcd->table->cache.offsets.size) {
-      unsigned int newSize = count | 0X7F;
-      int *newArray = malloc(ARRAY_SIZE(newArray, newSize));
+static void
+updateContractionCache (BrailleContractionData *bcd, ContractionCache *cache) {
+  if (cache) {
+    {
+      unsigned int count = getInputCount(bcd);
 
-      if (!newArray) {
-        logMallocError();
-        bcd->table->cache.offsets.count = 0;
-        goto offsetsDone;
+      if (count > cache->input.size) {
+        unsigned int newSize = count | 0X7F;
+        wchar_t *newCharacters = malloc(ARRAY_SIZE(newCharacters, newSize));
+
+        if (!newCharacters) {
+          logMallocError();
+          cache->input.count = 0;
+          goto inputDone;
+        }
+
+        if (cache->input.characters) free(cache->input.characters);
+        cache->input.characters = newCharacters;
+        cache->input.size = newSize;
       }
 
-      if (bcd->table->cache.offsets.array) free(bcd->table->cache.offsets.array);
-      bcd->table->cache.offsets.array = newArray;
-      bcd->table->cache.offsets.size = newSize;
+      wmemcpy(cache->input.characters, bcd->input.begin, count);
+      cache->input.count = count;
+      cache->input.consumed = getInputConsumed(bcd);
     }
+  inputDone:
 
-    memcpy(bcd->table->cache.offsets.array, bcd->input.offsets, ARRAY_SIZE(bcd->input.offsets, count));
-    bcd->table->cache.offsets.count = count;
-  } else {
-    bcd->table->cache.offsets.count = 0;
+    {
+      unsigned int count = getOutputConsumed(bcd);
+
+      if (count > cache->output.size) {
+        unsigned int newSize = count | 0X7F;
+        unsigned char *newCells = malloc(ARRAY_SIZE(newCells, newSize));
+
+        if (!newCells) {
+          logMallocError();
+          cache->output.count = 0;
+          goto outputDone;
+        }
+
+        if (cache->output.cells) free(cache->output.cells);
+        cache->output.cells = newCells;
+        cache->output.size = newSize;
+      }
+
+      memcpy(cache->output.cells, bcd->output.begin, count);
+      cache->output.count = count;
+      cache->output.maximum = getOutputCount(bcd);
+    }
+  outputDone:
+
+    if (bcd->input.offsets) {
+      unsigned int count = getInputCount(bcd);
+
+      if (count > cache->offsets.size) {
+        unsigned int newSize = count | 0X7F;
+        int *newArray = malloc(ARRAY_SIZE(newArray, newSize));
+
+        if (!newArray) {
+          logMallocError();
+          cache->offsets.count = 0;
+          goto offsetsDone;
+        }
+
+        if (cache->offsets.array) free(cache->offsets.array);
+        cache->offsets.array = newArray;
+        cache->offsets.size = newSize;
+      }
+
+      memcpy(cache->offsets.array, bcd->input.offsets, ARRAY_SIZE(bcd->input.offsets, count));
+      cache->offsets.count = count;
+    } else {
+      cache->offsets.count = 0;
+    }
+  offsetsDone:
+
+    cache->cursorOffset = makeCachedCursorOffset(bcd);
+    cache->expandCurrentWord = prefs.expandCurrentWord;
+    cache->capitalizationMode = prefs.capitalizationMode;
   }
-offsetsDone:
-
-  bcd->table->cache.cursorOffset = makeCachedCursorOffset(bcd);
-  bcd->table->cache.expandCurrentWord = prefs.expandCurrentWord;
-  bcd->table->cache.capitalizationMode = prefs.capitalizationMode;
 }
 
 void
 contractText (
   ContractionTable *contractionTable,
+  ContractionCache *contractionCache,
   const wchar_t *inputBuffer, int *inputLength,
   BYTE *outputBuffer, int *outputLength,
   int *offsetsMap, const int cursorOffset
@@ -266,17 +288,8 @@ contractText (
     }
   };
 
-  if (checkCache(&bcd)) {
-    bcd.input.current = bcd.input.begin + bcd.table->cache.input.consumed;
-
-    if (bcd.input.offsets) {
-      memcpy(bcd.input.offsets, bcd.table->cache.offsets.array,
-             ARRAY_SIZE(bcd.input.offsets, bcd.table->cache.offsets.count));
-    }
-
-    bcd.output.current = bcd.output.begin + bcd.table->cache.output.count;
-    memcpy(bcd.output.begin, bcd.table->cache.output.cells,
-           ARRAY_SIZE(bcd.output.begin, bcd.table->cache.output.count));
+  if (checkContractionCache(&bcd, contractionCache)) {
+    useContractionCache(&bcd, contractionCache);
   } else {
     int contracted;
 
@@ -366,7 +379,7 @@ contractText (
       if (!done) bcd.input.current = srcorig;
     }
 
-    updateCache(&bcd);
+    updateContractionCache(&bcd, contractionCache);
   }
 
   *inputLength = getInputConsumed(&bcd);

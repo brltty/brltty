@@ -186,7 +186,7 @@ writeCharacters (const wchar_t *inputLine, size_t inputLength, void *data) {
       }
     }
 
-    contractText(contractionTable,
+    contractText(contractionTable, NULL,
                  inputBuffer, &inputCount,
                  outputBuffer, &outputCount,
                  NULL, CTB_NO_CURSOR);
@@ -339,7 +339,7 @@ writeVerificationTableLine (const wchar_t *characters, size_t length, void *data
   int outputCount = length << 2;
   unsigned char outputBuffer[outputCount];
 
-  contractText(contractionTable,
+  contractText(contractionTable, NULL,
                characters, &inputCount,
                outputBuffer, &outputCount,
                NULL, CTB_NO_CURSOR);
@@ -369,7 +369,7 @@ static DATA_OPERANDS_PROCESSOR(processContractsOperands) {
       int outputCount = inputCount << 3;
       unsigned char outputBuffer[outputCount];
 
-      contractText(contractionTable,
+      contractText(contractionTable, NULL,
 		   text.characters, &inputCount,
 		   outputBuffer, &outputCount,
 		   NULL, CTB_NO_CURSOR);

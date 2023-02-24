@@ -198,10 +198,26 @@ translateBrailleWindow (
 int isContracted = 0;
 int contractedTrack = 0;
 
+static void
+initializeContractionCache (ContractionCache *cache) {
+  cache->input.characters = NULL;
+  cache->input.size = 0;
+  cache->input.count = 0;
+
+  cache->output.cells = NULL;
+  cache->output.size = 0;
+  cache->output.count = 0;
+
+  cache->offsets.array = NULL;
+  cache->offsets.size = 0;
+  cache->offsets.count = 0;
+}
+
 BrailleRowDescriptor *
 getBrailleRowDescriptor (unsigned int row) {
   if (row >= brl.rowDescriptors.size) {
     size_t newSize = row + 1;
+
     BrailleRowDescriptor *newArray = realloc(
       brl.rowDescriptors.array,
       ARRAY_SIZE(brl.rowDescriptors.array, newSize)
@@ -214,6 +230,7 @@ getBrailleRowDescriptor (unsigned int row) {
 
     while (brl.rowDescriptors.size < newSize) {
       BrailleRowDescriptor *brd = &newArray[brl.rowDescriptors.size++];
+      initializeContractionCache(&brd->contracted.cache);
       brd->contracted.length = 0;
       brd->contracted.offsets.array = NULL;
       brd->contracted.offsets.size = 0;
@@ -274,7 +291,7 @@ contractScreenRow (BrailleRowDescriptor *brd, unsigned int screenRow, unsigned c
   int *offsetsArray = brd->contracted.offsets.array;
 
   contractText(
-    contractionTable,
+    contractionTable, &brd->contracted.cache,
     inputText, &inputLength,
     cells, &outputLength,
     offsetsArray, getCursorOffsetForContracting()

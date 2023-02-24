@@ -32,6 +32,32 @@ typedef enum {
   CTB_CAP_DOT7
 } CTB_CapitalizationMode;
 
+typedef struct {
+  struct {
+    wchar_t *characters;
+    unsigned int size;
+    unsigned int count;
+    unsigned int consumed;
+  } input;
+
+  struct {
+    unsigned char *cells;
+    unsigned int size;
+    unsigned int count;
+    unsigned int maximum;
+  } output;
+
+  struct {
+    int *array;
+    unsigned int size;
+    unsigned int count;
+  } offsets;
+
+  int cursorOffset;
+  unsigned char expandCurrentWord;
+  unsigned char capitalizationMode;
+} ContractionCache;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

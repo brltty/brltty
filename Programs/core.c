@@ -1154,7 +1154,7 @@ getContractedLength (unsigned int outputLimit) {
   int outputOffsets[offsetCount + 1];
 
   contractText(
-    contractionTable,
+    contractionTable, NULL,
     inputBuffer, &inputLength,
     outputBuffer, &outputLength,
     outputOffsets, getCursorOffsetForContracting()

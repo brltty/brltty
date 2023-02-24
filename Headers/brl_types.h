@@ -20,6 +20,7 @@
 #define BRLTTY_INCLUDED_BRL_TYPES
 
 #include "driver.h"
+#include "ctb_types.h"
 #include "ktb_types.h"
 #include "gio_types.h"
 #include "queue.h"
@@ -64,6 +65,7 @@ typedef int SetAutorepeatPropertiesMethod (BrailleDisplay *brl, int on, int dela
 
 typedef struct {
   struct {
+    ContractionCache cache;
     int length;
 
     struct {
