@@ -82,7 +82,7 @@ constructBrailleDisplay (BrailleDisplay *brl) {
 }
 
 static void
-destroyContractionCache (ContractionCache *cache) {
+destructContractionCache (ContractionCache *cache) {
   if (cache->input.characters) {
     free(cache->input.characters);
     cache->input.characters = NULL;
@@ -97,6 +97,12 @@ destroyContractionCache (ContractionCache *cache) {
     free(cache->offsets.array);
     cache->offsets.array = NULL;
   }
+}
+
+static void
+destructBrailleRowDescriptor (BrailleRowDescriptor *brd) {
+  destructContractionCache(&brd->contracted.cache);
+  if (brd->contracted.offsets.array) free(brd->contracted.offsets.array);
 }
 
 void
@@ -119,8 +125,7 @@ destructBrailleDisplay (BrailleDisplay *brl) {
   if (brl->rowDescriptors.array) {
     while (brl->rowDescriptors.size > 0) {
       BrailleRowDescriptor *brd = &brl->rowDescriptors.array[--brl->rowDescriptors.size];
-      destroyContractionCache(&brd->contracted.cache);
-      if (brd->contracted.offsets.array) free(brd->contracted.offsets.array);
+      destructBrailleRowDescriptor(brd);
     }
 
     free(brl->rowDescriptors.array);

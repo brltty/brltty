@@ -199,7 +199,7 @@ int isContracted = 0;
 int contractedTrack = 0;
 
 static void
-initializeContractionCache (ContractionCache *cache) {
+constructContractionCache (ContractionCache *cache) {
   cache->input.characters = NULL;
   cache->input.size = 0;
   cache->input.count = 0;
@@ -211,6 +211,14 @@ initializeContractionCache (ContractionCache *cache) {
   cache->offsets.array = NULL;
   cache->offsets.size = 0;
   cache->offsets.count = 0;
+}
+
+static void
+constructBrailleRowDescriptor (BrailleRowDescriptor *brd) {
+  constructContractionCache(&brd->contracted.cache);
+  brd->contracted.length = 0;
+  brd->contracted.offsets.array = NULL;
+  brd->contracted.offsets.size = 0;
 }
 
 BrailleRowDescriptor *
@@ -230,10 +238,7 @@ getBrailleRowDescriptor (unsigned int row) {
 
     while (brl.rowDescriptors.size < newSize) {
       BrailleRowDescriptor *brd = &newArray[brl.rowDescriptors.size++];
-      initializeContractionCache(&brd->contracted.cache);
-      brd->contracted.length = 0;
-      brd->contracted.offsets.array = NULL;
-      brd->contracted.offsets.size = 0;
+      constructBrailleRowDescriptor(brd);
     }
 
     brl.rowDescriptors.array = newArray;
