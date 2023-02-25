@@ -537,6 +537,9 @@ int BRLAPI_STDCALL brlapi__setFocus(brlapi_handle_t *handle, int tty);
  * nowadays all font rasterization is performed on the client side, and mere
  * pixmaps are sent to the X server.
  *
+ * \note For braille displays with multiple lines, text will be wrapped over the
+ * lines.
+ *
  * @{ */
 
 /* brlapi_writeText */
@@ -594,7 +597,7 @@ int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned cha
 /** Structure containing arguments to be given to brlapi_write() */
 typedef struct {
   int displayNumber /** Display number ::BRLAPI_DISPLAY_DEFAULT == unspecified */;
-  unsigned int regionBegin /** Region of display to update, 1st character of display is 1 */;
+  unsigned int regionBegin /** Region of display to update, 1st character of display is 1, 1st character of the second line of display is the width of a line plus 1, etc. Regions are always a linear wrap over the different lines. */;
   int regionSize /** Number of characters held in andMask and orMask. If negative, its absolute value is taken into account, and the output is padded or truncated to fill the rest of the display. */;
   const char *text /** Text to display, must hold as many characters as the region fields expresses. */;
   int textSize /** Size of text in bytes. If -1, strlen() is used for computing it. */;
