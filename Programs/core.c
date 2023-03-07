@@ -79,6 +79,12 @@
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 BrailleDisplay brl;                        /* For the Braille routines */
+
+int
+haveBrailleDisplay (void) {
+  return braille->definition.code != noBraille.definition.code;
+}
+
 ScreenDescription scr;
 SessionEntry *ses = NULL;
 
@@ -992,13 +998,13 @@ isAllSpaceCharacters (const ScreenCharacter *characters, int count) {
   return findFirstNonSpaceCharacter(characters, count) < 0;
 }
 
-int
-haveBrailleDisplay (void) {
-  return braille->definition.code != noBraille.definition.code;
-}
-
 #ifdef ENABLE_SPEECH_SUPPORT
 SpeechSynthesizer spk;
+
+int
+haveSpeechSynthesizer (void) {
+  return speech->definition.code != noSpeech.definition.code;
+}
 
 void
 trackSpeech (void) {
@@ -1009,11 +1015,6 @@ trackSpeech (void) {
     slideBrailleWindowVertically(spk.track.firstLine + (location / scr.cols));
     scheduleUpdate("speech tracked");
   }
-}
-
-int
-haveSpeechSynthesizer (void) {
-  return speech->definition.code != noSpeech.definition.code;
 }
 
 int
