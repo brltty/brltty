@@ -1761,7 +1761,7 @@ constructBrailleDriver (void) {
             }
           }
 
-          makeBrailleHelpPage(keyTablePath);
+          if (haveBrailleDisplay()) makeBrailleHelpPage(keyTablePath);
           free(keyTablePath);
         }
       }

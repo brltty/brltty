@@ -164,6 +164,7 @@ extern unsigned char getSpeechCursorDots (void);
 extern int setSpeechCursorDots (unsigned char dots);
 
 extern BrailleDisplay brl;			/* braille driver reference */
+extern int haveBrailleDisplay (void);
 
 extern unsigned int textStart;
 extern unsigned int textCount;
@@ -204,6 +205,7 @@ extern int isAllSpaceCharacters (const ScreenCharacter *characters, int count);
 
 #ifdef ENABLE_SPEECH_SUPPORT
 extern SpeechSynthesizer spk;
+extern int haveSpeechSynthesizer (void);
 extern int opt_quietIfNoBraille;
 
 extern int isAutospeakActive (void);

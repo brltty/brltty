@@ -992,6 +992,11 @@ isAllSpaceCharacters (const ScreenCharacter *characters, int count) {
   return findFirstNonSpaceCharacter(characters, count) < 0;
 }
 
+int
+haveBrailleDisplay (void) {
+  return braille->definition.code != noBraille.definition.code;
+}
+
 #ifdef ENABLE_SPEECH_SUPPORT
 SpeechSynthesizer spk;
 
@@ -1007,10 +1012,15 @@ trackSpeech (void) {
 }
 
 int
+haveSpeechSynthesizer (void) {
+  return speech->definition.code != noSpeech.definition.code;
+}
+
+int
 isAutospeakActive (void) {
-  if (speech->definition.code == noSpeech.definition.code) return 0;
+  if (!haveSpeechSynthesizer()) return 0;
   if (prefs.autospeak) return 1;
-  if (braille->definition.code != noBraille.definition.code) return 0;
+  if (haveBrailleDisplay()) return 0;
   return !opt_quietIfNoBraille;
 }
 
