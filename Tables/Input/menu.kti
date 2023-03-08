@@ -30,3 +30,4 @@ bind Dot6 MENU_NEXT_SETTING
 bind Dot7 MENU_PREV_LEVEL
 bind Dot8 PREFMENU
 
+bind \{chord}Dot1+Dot3+Dot5+Dot6 MENU_PREV_LEVEL
