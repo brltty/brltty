@@ -337,7 +337,35 @@ processCommand (KeyTable *table, int command) {
                 BRL_CMD_ALERT(CONTEXT_PERSISTENT);
             }
 
-            if (!enqueueCommand(command)) return 0;
+            if (prefs.speakKeyContext) {
+              if (ctx->title) {
+                speakAlertText(ctx->title);
+              } else {
+                const wchar_t *name = ctx->name;
+                const wchar_t *from = name;
+
+                wchar_t text[(wcslen(name) * 2) + 1];
+                wchar_t *to = text;
+
+                while (*from) {
+                  wchar_t character = *from++;
+
+                  if (iswupper(character)) {
+                    if (to != text) {
+                      *to++ = WC_C(' ');
+                    }
+                  }
+
+                  *to++ = character;
+                }
+
+                *to = 0;
+                speakAlertText(text);
+              }
+            } else if (!enqueueCommand(command)) {
+              return 0;
+            }
+
             command = BRL_CMD_NOOP;
           }
 

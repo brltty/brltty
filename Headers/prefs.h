@@ -210,6 +210,9 @@ typedef struct {
   unsigned char consoleBellAlert;
   unsigned char keyboardLedAlerts;
 
+  unsigned char speakKeyContext;
+  unsigned char speakModifierKey;
+
   unsigned char autoreleaseTime;
   unsigned char onFirstRelease;
   unsigned char touchNavigation;

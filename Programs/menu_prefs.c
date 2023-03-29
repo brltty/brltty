@@ -1111,6 +1111,18 @@ makePreferencesMenu (void) {
       NAME(strtext("Alert Messages"));
       ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.alertMessages, &itemName));
     }
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    {
+      NAME(strtext("Speak Key Context"));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.speakKeyContext, &itemName));
+    }
+
+    {
+      NAME(strtext("Speak Modifier Key"));
+      ITEM(newBooleanMenuItem(alertsSubmenu, &prefs.speakModifierKey, &itemName));
+    }
+#endif /* ENABLE_SPEECH_SUPPORT */
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT

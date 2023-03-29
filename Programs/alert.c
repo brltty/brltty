@@ -25,6 +25,9 @@
 #include "tune_builder.h"
 #include "message.h"
 #include "brl_dots.h"
+#include "utf8.h"
+#include "spk.h"
+#include "core.h"
 
 typedef struct {
   unsigned char duration;
@@ -260,5 +263,20 @@ alert (AlertIdentifier identifier) {
     } else if (prefs.alertMessages && alert->message) {
       message(NULL, gettext(alert->message), 0);
     }
+  }
+}
+
+void
+speakAlertMessage (const char *message) {
+  sayString(&spk, message, SAY_OPT_MUTE_FIRST);
+}
+
+void
+speakAlertText (const wchar_t *text) {
+  char *message = getUtf8FromWchars(text, wcslen(text), NULL);
+
+  if (message) {
+    speakAlertMessage(message);
+    free(message);
   }
 }

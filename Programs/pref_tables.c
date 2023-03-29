@@ -480,6 +480,18 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.keyboardLedAlerts
   },
 
+  { .name = "speak-key-context",
+    .defaultValue = DEFAULT_SPEAK_KEY_CONTEXT,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.speakKeyContext
+  },
+
+  { .name = "speak-modifier-key",
+    .defaultValue = DEFAULT_SPEAK_MODIFIER_KEY,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.speakModifierKey
+  },
+
   { .name = "alert-tunes",
     .defaultValue = DEFAULT_ALERT_TUNES,
     .settingNames = &preferenceStringTable_boolean,

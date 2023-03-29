@@ -387,6 +387,10 @@ void
 alert (AlertIdentifier identifier) {
 }
 
+void
+speakAlertText (const wchar_t *text) {
+}
+
 #include "api_control.h"
 
 const ApiMethods api;

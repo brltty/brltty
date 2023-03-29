@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "log.h"
@@ -167,46 +168,72 @@ handleInputCommands (int command, void *data) {
     }
 
     {
-      int flag;
+      int modifierFlag;
+      const char *modifierName;
 
     case BRL_CMD_SHIFT:
-      flag = BRL_FLG_INPUT_SHIFT;
+      modifierFlag = BRL_FLG_INPUT_SHIFT;
+      modifierName = "shift";
       goto doModifier;
 
     case BRL_CMD_UPPER:
-      flag = BRL_FLG_INPUT_UPPER;
+      modifierFlag = BRL_FLG_INPUT_UPPER;
+      modifierName = "uppercase";
       goto doModifier;
 
     case BRL_CMD_CONTROL:
-      flag = BRL_FLG_INPUT_CONTROL;
+      modifierFlag = BRL_FLG_INPUT_CONTROL;
+      modifierName = "control";
       goto doModifier;
 
     case BRL_CMD_META:
-      flag = BRL_FLG_INPUT_META;
+      modifierFlag = BRL_FLG_INPUT_META;
+      modifierName = "left alt";
       goto doModifier;
 
     case BRL_CMD_ALTGR:
-      flag = BRL_FLG_INPUT_ALTGR;
+      modifierFlag = BRL_FLG_INPUT_ALTGR;
+      modifierName = "right alt";
       goto doModifier;
 
     case BRL_CMD_GUI:
-      flag = BRL_FLG_INPUT_GUI;
+      modifierFlag = BRL_FLG_INPUT_GUI;
+      modifierName = "graphic";
       goto doModifier;
 
     doModifier:
       cancelModifierTimeout(icd);
 
-      if (icd->modifiers.on & flag) {
-        icd->modifiers.on &= ~flag;
-        icd->modifiers.next &= ~flag;
-        alert(ALERT_MODIFIER_OFF);
-      } else if (icd->modifiers.next & flag) {
-        icd->modifiers.on |= flag;
-        icd->modifiers.next &= ~flag;
-        alert(ALERT_MODIFIER_ON);
+      AlertIdentifier modifierAlert;
+      const char *modifierState;
+
+      if (icd->modifiers.on & modifierFlag) {
+        icd->modifiers.on &= ~modifierFlag;
+        icd->modifiers.next &= ~modifierFlag;
+        modifierAlert = ALERT_MODIFIER_OFF;
+        modifierState = "off";
+      } else if (icd->modifiers.next & modifierFlag) {
+        icd->modifiers.on |= modifierFlag;
+        icd->modifiers.next &= ~modifierFlag;
+        modifierAlert = ALERT_MODIFIER_ON;
+        modifierState = "on";
       } else {
-        icd->modifiers.next |= flag;
-        alert(ALERT_MODIFIER_NEXT);
+        icd->modifiers.next |= modifierFlag;
+        modifierAlert = ALERT_MODIFIER_NEXT;
+        modifierState = "next";
+      }
+
+      if (prefs.speakModifierKey) {
+        char message[strlen(modifierName) + 1 + strlen(modifierState) + 1];
+
+        snprintf(
+          message, sizeof(message),
+          "%s %s", modifierName, modifierState
+        );
+
+        speakAlertMessage(message);
+      } else {
+        alert(modifierAlert);
       }
 
       setModifierTimeout(icd);
