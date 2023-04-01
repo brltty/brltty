@@ -54,6 +54,8 @@ if __name__ == "__main__":
     )
     
     setup(
+        zip_safe = False,
+
         name = "Brlapi",
         version = "@api_release@",
         description = "BrlAPI Client Bindings for Python",
