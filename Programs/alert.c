@@ -150,7 +150,7 @@ static const AlertEntry alertTable[] = {
     .tune = "m80@80 m79@90 m78@100 m77@100 r@20 m77@100 r@20 m77@150"
   },
 
-  [ALERT_MODIFIER_NEXT] = {
+  [ALERT_MODIFIER_ONCE] = {
     .tune = "m70@60 m74@60 m77@90"
   },
 

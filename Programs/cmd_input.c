@@ -42,8 +42,8 @@ typedef struct {
 
   struct {
     AsyncHandle timeout;
-    int on;
-    int next;
+    int once;
+    int lock;
   } modifiers;
 } InputCommandData;
 
@@ -62,8 +62,8 @@ cancelModifierTimeout (InputCommandData *icd) {
 
 static void
 initializeModifierFlags (InputCommandData *icd) {
-  icd->modifiers.on = 0;
-  icd->modifiers.next = 0;
+  icd->modifiers.once = 0;
+  icd->modifiers.lock = 0;
 }
 
 static void
@@ -88,7 +88,7 @@ ASYNC_ALARM_CALLBACK(handleStickyModifiersTimeout) {
 
 static int
 haveModifierFlags (InputCommandData *icd) {
-  return icd->modifiers.on || icd->modifiers.next;
+  return icd->modifiers.once || icd->modifiers.lock;
 }
 
 static int
@@ -108,9 +108,9 @@ setModifierTimeout (InputCommandData *icd) {
 
 static void
 applyModifierFlags (InputCommandData *icd, int *flags) {
-  *flags |= icd->modifiers.on;
-  *flags |= icd->modifiers.next;
-  icd->modifiers.next = 0;
+  *flags |= icd->modifiers.lock;
+  *flags |= icd->modifiers.once;
+  icd->modifiers.once = 0;
 
   setModifierTimeout(icd);
 }
@@ -212,20 +212,20 @@ handleInputCommands (int command, void *data) {
       AlertIdentifier modifierAlert;
       const char *modifierState;
 
-      if (icd->modifiers.on & modifierFlag) {
-        icd->modifiers.on &= ~modifierFlag;
-        icd->modifiers.next &= ~modifierFlag;
+      if (icd->modifiers.lock & modifierFlag) {
+        icd->modifiers.once &= ~modifierFlag;
+        icd->modifiers.lock &= ~modifierFlag;
         modifierAlert = ALERT_MODIFIER_OFF;
         modifierState = "off";
-      } else if (icd->modifiers.next & modifierFlag) {
-        icd->modifiers.on |= modifierFlag;
-        icd->modifiers.next &= ~modifierFlag;
+      } else if (icd->modifiers.once & modifierFlag) {
+        icd->modifiers.once &= ~modifierFlag;
+        icd->modifiers.lock |= modifierFlag;
         modifierAlert = ALERT_MODIFIER_LOCK;
         modifierState = "lock";
       } else {
-        icd->modifiers.next |= modifierFlag;
-        modifierAlert = ALERT_MODIFIER_NEXT;
-        modifierState = "next";
+        icd->modifiers.once |= modifierFlag;
+        modifierAlert = ALERT_MODIFIER_ONCE;
+        modifierState = "once";
       }
 
       if (prefs.speakModifierKey) {
@@ -233,7 +233,7 @@ handleInputCommands (int command, void *data) {
 
         snprintf(
           message, sizeof(message),
-          "%s %s", modifierName, modifierState
+          "%s: %s", modifierName, modifierState
         );
 
         speakAlertMessage(message);
