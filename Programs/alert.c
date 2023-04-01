@@ -154,7 +154,7 @@ static const AlertEntry alertTable[] = {
     .tune = "m70@60 m74@60 m77@90"
   },
 
-  [ALERT_MODIFIER_ON] = {
+  [ALERT_MODIFIER_LOCK] = {
     .tune = "m70@60 m74@60 m77@60 m82@90"
   },
 

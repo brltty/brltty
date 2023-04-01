@@ -69,7 +69,12 @@ initializeModifierFlags (InputCommandData *icd) {
 static void
 clearModifierFlags (InputCommandData *icd) {
   initializeModifierFlags(icd);
-  alert(ALERT_MODIFIER_OFF);
+
+  if (prefs.speakModifierKey) {
+    speakAlertMessage("modifiers reset");
+  } else {
+    alert(ALERT_MODIFIER_OFF);
+  }
 }
 
 ASYNC_ALARM_CALLBACK(handleStickyModifiersTimeout) {
@@ -215,8 +220,8 @@ handleInputCommands (int command, void *data) {
       } else if (icd->modifiers.next & modifierFlag) {
         icd->modifiers.on |= modifierFlag;
         icd->modifiers.next &= ~modifierFlag;
-        modifierAlert = ALERT_MODIFIER_ON;
-        modifierState = "on";
+        modifierAlert = ALERT_MODIFIER_LOCK;
+        modifierState = "lock";
       } else {
         icd->modifiers.next |= modifierFlag;
         modifierAlert = ALERT_MODIFIER_NEXT;
