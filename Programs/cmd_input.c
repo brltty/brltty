@@ -229,7 +229,7 @@ handleInputCommands (int command, void *data) {
       }
 
       if (prefs.speakModifierKey) {
-        char message[strlen(modifierName) + 1 + strlen(modifierState) + 1];
+        char message[strlen(modifierName) + 2 + strlen(modifierState) + 1];
 
         snprintf(
           message, sizeof(message),
