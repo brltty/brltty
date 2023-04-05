@@ -1571,8 +1571,10 @@ destruct_AtSpi2Screen (void) {
   brlttyDisableInterrupt();
 #ifdef HAVE_PKG_X11
   if (dpy) {
-    unregisterReportListener(coreSelUpdatedListener);
-    coreSelUpdatedListener = NULL;
+    if (coreSelUpdatedListener) {
+      unregisterReportListener(coreSelUpdatedListener);
+      coreSelUpdatedListener = NULL;
+    }
     if (a2XWatch) {
       asyncCancelRequest(a2XWatch);
       a2XWatch = NULL;
