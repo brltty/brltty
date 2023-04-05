@@ -2476,7 +2476,7 @@ static int handleParamRequest(Connection *c, brlapi_packetType_t type, brlapi_pa
 	  && (s->flags & BRLAPI_PARAMF_GLOBAL) == (flags & BRLAPI_PARAMF_GLOBAL))
 	break;
     }
-    if (s) {
+    if (s != &c->subscriptions) {
       if (flags & BRLAPI_PARAMF_GLOBAL)
         paramState[param].global_subscriptions--;
       else
