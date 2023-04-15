@@ -832,7 +832,7 @@ static int handleGetDriverName(Connection *c, brlapi_packetType_t type, brlapi_p
 
 static int handleGetModelIdentifier(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  return handleGetDriver(c, type, size, disp ? disp->keyBindings : "");
+  return handleGetDriver(c, type, size, disp && disp->keyBindings ? disp->keyBindings : "");
 }
 
 static int handleGetDisplaySize(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
