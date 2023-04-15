@@ -1737,7 +1737,7 @@ PARAM_WRITER(cursorBlinkPercentage)
 PARAM_READER(renderedCells)
 {
   lockMutex(&apiDriverMutex);
-    if (disp) {
+    if (disp && c->brailleWindow.text) {
       unsigned char buffer[displaySize];
       getDots(&c->brailleWindow, buffer);
 
