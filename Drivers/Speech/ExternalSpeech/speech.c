@@ -137,20 +137,44 @@ static void spk_mute (SpeechSynthesizer *spk)
   mywrite(spk, helper_fd, &c,1);
 }
 
-static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
+static void spk_setVolume (SpeechSynthesizer *spk, unsigned char setting)
 {
-  float expand = 1.0 / getFloatSpeechRate(setting); 
-  unsigned char *p = (unsigned char *)&expand;
-  unsigned char l[5];
   if(helper_fd < 0) return;
-  logMessage(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
-  l[0] = 3; /* time scale code */
+  logMessage(LOG_DEBUG,"set volume to %u", setting);
+  unsigned char l[2];
+  l[0] = 2;
+  l[1] = getIntegerSpeechVolume(setting, 100);
+  mywrite(spk, helper_fd, &l, 2);
+}
+
+static void putFloatSetting (SpeechSynthesizer *spk, unsigned char code, float value)
+{
+  unsigned char l[5] = {code};
+  unsigned char *p = (unsigned char *)&value;
+
 #ifdef WORDS_BIGENDIAN
   l[1] = p[0]; l[2] = p[1]; l[3] = p[2]; l[4] = p[3];
 #else /* WORDS_BIGENDIAN */
   l[1] = p[3]; l[2] = p[2]; l[3] = p[1]; l[4] = p[0];
 #endif /* WORDS_BIGENDIAN */
+
   mywrite(spk, helper_fd, &l, 5);
+}
+
+static void spk_setRate (SpeechSynthesizer *spk, unsigned char setting)
+{
+  float expand = 1.0 / getFloatSpeechRate(setting); 
+  if(helper_fd < 0) return;
+  logMessage(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
+  putFloatSetting(spk, 3, expand);
+}
+
+static void spk_setPitch (SpeechSynthesizer *spk, unsigned char setting)
+{
+  float multiplier = getFloatSpeechPitch(setting); 
+  if(helper_fd < 0) return;
+  logMessage(LOG_DEBUG,"set pitch to %u (multiplier %f)", setting, multiplier);
+  putFloatSetting(spk, 5, multiplier);
 }
 
 ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
@@ -180,7 +204,9 @@ static int spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
   const char *extSockPath = parameters[PARM_SOCK_PATH];
 
+  spk->setVolume = spk_setVolume;
   spk->setRate = spk_setRate;
+  spk->setPitch = spk_setPitch;
 
   if(!*extSockPath) extSockPath = HELPER_SOCKET_PATH;
 
