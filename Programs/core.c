@@ -1067,6 +1067,7 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
     }
   } else if (count == 1) {
     wchar_t character = characters[0].text;
+    unsigned char attributes = characters[0].attributes;
     const char *prefix = NULL;
 
     if (iswupper(character)) {
@@ -1085,18 +1086,23 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
           sayOptions |= SAY_OPT_HIGHER_PITCH;
           break;
       }
+    } else if (iswpunct(character)) {
+      sayOptions |= SAY_OPT_ALL_PUNCTUATION;
     }
 
     if (prefix) {
-      wchar_t buffer[0X100];
-      size_t length = makeWcharsFromUtf8(prefix, buffer, ARRAY_COUNT(buffer));
+      wchar_t textBuffer[0X100];
+      size_t length = makeWcharsFromUtf8(prefix, textBuffer, ARRAY_COUNT(textBuffer));
 
-      buffer[length++] = WC_C(' ');
-      buffer[length++] = character;
-      sayWideCharacters(&spk, buffer, NULL, length, sayOptions);
+      textBuffer[length++] = WC_C(' ');
+      textBuffer[length++] = character;
+
+      unsigned char attributesBuffer[length];
+      memset(attributesBuffer, attributes, length);
+
+      sayWideCharacters(&spk, textBuffer, attributesBuffer, length, sayOptions);
     } else {
-      if (iswpunct(character)) sayOptions |= SAY_OPT_ALL_PUNCTUATION;
-      sayWideCharacters(&spk, &character, NULL, 1, sayOptions);
+      sayWideCharacters(&spk, &character, &attributes, 1, sayOptions);
     }
   } else if (spell) {
     wchar_t string[count * 2];
