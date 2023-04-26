@@ -23,26 +23,22 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-
 #include <sys/socket.h>
 #include <sys/un.h>
 
-
 #include "log.h"
 #include "timing.h"
+#include "io_misc.h"
 #include "async_handle.h"
 #include "async_io.h"
 
 typedef enum {
   PARM_SOCKET_PATH,
 } DriverParameter;
-#define SPKPARMS "socket_path"
 
+#define SPKPARMS "socket_path"
 #include "spk_driver.h"
 #include "speech.h"
 
@@ -51,7 +47,6 @@ static struct sockaddr_un socketAddress;
 static int socketDescriptor = -1;
 
 static uint16_t totalCharacterCount;
-
 #define TRACK_DATA_SIZE 2
 static AsyncHandle trackHandle = NULL;
 
@@ -59,7 +54,10 @@ ASYNC_INPUT_CALLBACK(xsHandleSpeechTrackingInput) {
   SpeechSynthesizer *spk = parameters->data;
 
   if (parameters->error) {
-    logMessage(LOG_WARNING, "speech tracking input error: %s", strerror(parameters->error));
+    logMessage(LOG_WARNING,
+      "speech tracking input error %d: %s",
+      parameters->error, strerror(parameters->error)
+    );
   } else if (parameters->end) {
     logMessage(LOG_WARNING, "speech tracking end-of-file");
   } else if (parameters->length >= TRACK_DATA_SIZE) {
@@ -86,33 +84,36 @@ amConnected (void) {
 static int
 connectToServer (SpeechSynthesizer *spk) {
   if (amConnected()) return 1;
-  int fd = socket(AF_UNIX, SOCK_STREAM, 0);
 
-  if (fd != -1) {
-    if (connect(fd, (struct sockaddr *)&socketAddress, sizeof(socketAddress)) != -1) {
-      if (fcntl(fd, F_SETFL, O_NONBLOCK) != -1) {
-        if (asyncReadFile(&trackHandle, socketDescriptor, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, spk)) {
-          socketDescriptor = fd;
+  logMessage(LOG_CATEGORY(SPEECH_DRIVER), "connecting to server: %s", socketPath);
+  int sd = socket(AF_UNIX, SOCK_STREAM, 0);
+
+  if (sd != -1) {
+    if (connect(sd, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) != -1) {
+      if (setBlockingIo(sd, 0)) {
+        if (asyncReadFile(&trackHandle, sd, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, spk)) {
+          logMessage(LOG_CATEGORY(SPEECH_DRIVER), "connected to server: fd=%d", sd);
+          socketDescriptor = sd;
           return 1;
         }
-      } else {
-        logSystemError("fcntl[F_SETFL,O_NONBLOCK]");
       }
     } else {
       logSystemError("connect");
     }
 
-    close(fd);
+    close(sd);
   } else {
     logSystemError("socket");
   }
 
-  return amConnected();
+  return 0;
 }
 
 static void
 disconnectFromServer (void) {
   if (amConnected()) {
+    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "disconnecting from server");
+
     if (trackHandle) {
       asyncCancelRequest(trackHandle);
       trackHandle = NULL;
@@ -144,8 +145,7 @@ sendData (SpeechSynthesizer *spk, const void *buffer, size_t length) {
     if (result == -1) {
       if ((errno == EINTR) || (errno == EAGAIN)) continue;
 
-      logMessage(
-        LOG_CATEGORY(SPEECH_DRIVER),
+      logMessage(LOG_ERR,
         "ExternalSpeech write error %d: %s",
         errno, strerror(errno)
       );
@@ -161,20 +161,20 @@ sendData (SpeechSynthesizer *spk, const void *buffer, size_t length) {
   }
 
   int done = position == end;
-  if (!done) logMessage(LOG_CATEGORY(SPEECH_DRIVER), "write timed out");
+  if (!done) logMessage(LOG_ERR, "ExternalSpeech write timed out");
   return done;
 }
 
 static void
 spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes) {
   unsigned char l[5];
-  l[0] = 4; /* say code */
+  l[0] = 4;
   l[1] = length >> 8;
-  l[2] = length & 0xFF;
+  l[2] = length & 0XFF;
 
   if (attributes) {
     l[3] = count >> 8;
-    l[4] = count & 0xFF;
+    l[4] = count & 0XFF;
   } else {
     l[3] = 0;
     l[4] = 0;
@@ -195,6 +195,7 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_
 static void
 spk_mute (SpeechSynthesizer *spk) {
   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "mute");
+
   unsigned char l[1];
   l[0] = 1;
   sendData(spk, l, sizeof(l));
@@ -202,18 +203,24 @@ spk_mute (SpeechSynthesizer *spk) {
 
 static void
 spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
-  logMessage(LOG_DEBUG,"set volume to %u", setting);
+  unsigned char percentage = getIntegerSpeechVolume(setting, 100);
+
+  logMessage(
+    LOG_CATEGORY(SPEECH_DRIVER),
+    "set volume to %u (%u%%)",
+    setting, percentage
+  );
 
   unsigned char l[2];
   l[0] = 2;
-  l[1] = getIntegerSpeechVolume(setting, 100);
+  l[1] = percentage;
   sendData(spk, l, sizeof(l));
 }
 
 static int
 sendFloatSetting (SpeechSynthesizer *spk, unsigned char code, float value) {
   unsigned char l[5] = {code};
-  unsigned char *p = (unsigned char *)&value;
+  const unsigned char *p = (const unsigned char *)&value;
 
 #ifdef WORDS_BIGENDIAN
   l[1] = p[0]; l[2] = p[1]; l[3] = p[2]; l[4] = p[3];
@@ -226,15 +233,27 @@ sendFloatSetting (SpeechSynthesizer *spk, unsigned char code, float value) {
 
 static void
 spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  float expand = 1.0 / getFloatSpeechRate(setting); 
-  logMessage(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
-  sendFloatSetting(spk, 3, expand);
+  float stretch = 1.0 / getFloatSpeechRate(setting); 
+
+  logMessage(
+    LOG_CATEGORY(SPEECH_DRIVER),
+    "set rate to %u (time scale %f)",
+    setting, stretch
+  );
+
+  sendFloatSetting(spk, 3, stretch);
 }
 
 static void
 spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
   float multiplier = getFloatSpeechPitch(setting); 
-  logMessage(LOG_DEBUG,"set pitch to %u (multiplier %f)", setting, multiplier);
+
+  logMessage(
+    LOG_CATEGORY(SPEECH_DRIVER),
+    "set pitch to %u (multiplier %f)",
+    setting, multiplier
+  );
+
   sendFloatSetting(spk, 5, multiplier);
 }
 
