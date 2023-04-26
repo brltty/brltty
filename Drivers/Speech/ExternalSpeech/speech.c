@@ -24,7 +24,6 @@
 #include "prologue.h"
 
 #include <stdio.h>
-#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -124,32 +123,50 @@ disconnectFromServer (void) {
   }
 }
 
-static void
-sendData (SpeechSynthesizer *spk, const void *buf, int len) {
-  char *pos = (char *)buf;
-  int w;
-  TimePeriod period;
-  if (!amConnected()) return;
-  startTimePeriod(&period, 2000);
-  do {
-    if((w = write(socketDescriptor, pos, len)) < 0) {
-      if(errno == EINTR || errno == EAGAIN) continue;
-      else if(errno == EPIPE)
-	logMessage(LOG_CATEGORY(SPEECH_DRIVER), "broken pipe");
-         /* try to reinit may be ??? */
-      else logMessage(LOG_CATEGORY(SPEECH_DRIVER), "ExternalSpeech: pipe to helper program: write");
-      return;
+static int
+sendData (SpeechSynthesizer *spk, const void *buffer, size_t length) {
+  if (!amConnected()) {
+    if (!connectToServer(spk)) {
+      return 0;
     }
-    pos += w; len -= w;
-  } while(len && !afterTimePeriod(&period, NULL));
-  if(len)
-    logMessage(LOG_CATEGORY(SPEECH_DRIVER), "write timed out");
+  }
+
+  const unsigned char *position = buffer;
+  const unsigned char *end = position + length;
+
+  TimePeriod period;
+  startTimePeriod(&period, 2000);
+
+  while (position < end) {
+    if (afterTimePeriod(&period, NULL)) break;
+    ssize_t result = write(socketDescriptor, position, (end - position));
+
+    if (result == -1) {
+      if ((errno == EINTR) || (errno == EAGAIN)) continue;
+
+      logMessage(
+        LOG_CATEGORY(SPEECH_DRIVER),
+        "ExternalSpeech write error %d: %s",
+        errno, strerror(errno)
+      );
+
+      disconnectFromServer();
+      if (!connectToServer(spk)) return 0;
+
+      position = buffer;
+      continue;
+    }
+
+    position += result;
+  }
+
+  int done = position == end;
+  if (!done) logMessage(LOG_CATEGORY(SPEECH_DRIVER), "write timed out");
+  return done;
 }
 
 static void
 spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes) {
-  if (!amConnected()) return;
-
   unsigned char l[5];
   l[0] = 4; /* say code */
   l[1] = length >> 8;
@@ -163,17 +180,21 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_
     l[4] = 0;
   }
 
-  sendData(spk, l, sizeof(l));
-  sendData(spk, text, length);
-  if (attributes) sendData(spk, attributes, count);
+  if (!sendData(spk, l, sizeof(l))) return;
+  if (!sendData(spk, text, length)) return;
+
+  if (attributes) {
+    if (!sendData(spk, attributes, count)) {
+      return;
+    }
+  }
+
   totalCharacterCount = count;
 }
 
 static void
 spk_mute (SpeechSynthesizer *spk) {
-  if (!amConnected()) return;
   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "mute");
-
   unsigned char l[1];
   l[0] = 1;
   sendData(spk, l, sizeof(l));
@@ -181,7 +202,6 @@ spk_mute (SpeechSynthesizer *spk) {
 
 static void
 spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
-  if (!amConnected()) return;
   logMessage(LOG_DEBUG,"set volume to %u", setting);
 
   unsigned char l[2];
@@ -190,8 +210,8 @@ spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
   sendData(spk, l, sizeof(l));
 }
 
-static void
-putFloatSetting (SpeechSynthesizer *spk, unsigned char code, float value) {
+static int
+sendFloatSetting (SpeechSynthesizer *spk, unsigned char code, float value) {
   unsigned char l[5] = {code};
   unsigned char *p = (unsigned char *)&value;
 
@@ -201,25 +221,21 @@ putFloatSetting (SpeechSynthesizer *spk, unsigned char code, float value) {
   l[1] = p[3]; l[2] = p[2]; l[3] = p[1]; l[4] = p[0];
 #endif /* WORDS_BIGENDIAN */
 
-  sendData(spk, l, sizeof(l));
+  return sendData(spk, l, sizeof(l));
 }
 
 static void
 spk_setRate (SpeechSynthesizer *spk, unsigned char setting) {
-  if (!amConnected()) return;
-
   float expand = 1.0 / getFloatSpeechRate(setting); 
   logMessage(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
-  putFloatSetting(spk, 3, expand);
+  sendFloatSetting(spk, 3, expand);
 }
 
 static void
 spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
-  if (!amConnected()) return;
-
   float multiplier = getFloatSpeechPitch(setting); 
   logMessage(LOG_DEBUG,"set pitch to %u (multiplier %f)", setting, multiplier);
-  putFloatSetting(spk, 5, multiplier);
+  sendFloatSetting(spk, 5, multiplier);
 }
 
 static int
