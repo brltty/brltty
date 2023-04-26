@@ -125,14 +125,14 @@ disconnectFromServer (void) {
 }
 
 static int
-sendData (SpeechSynthesizer *spk, const void *buffer, size_t length) {
+sendPacket (SpeechSynthesizer *spk, const unsigned char *packet, size_t length) {
   if (!amConnected()) {
     if (!connectToServer(spk)) {
       return 0;
     }
   }
 
-  const unsigned char *position = buffer;
+  const unsigned char *position = packet;
   const unsigned char *end = position + length;
 
   TimePeriod period;
@@ -153,7 +153,7 @@ sendData (SpeechSynthesizer *spk, const void *buffer, size_t length) {
       disconnectFromServer();
       if (!connectToServer(spk)) return 0;
 
-      position = buffer;
+      position = packet;
       continue;
     }
 
@@ -167,28 +167,20 @@ sendData (SpeechSynthesizer *spk, const void *buffer, size_t length) {
 
 static void
 spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes) {
-  unsigned char l[5];
-  l[0] = 4;
-  l[1] = length >> 8;
-  l[2] = length & 0XFF;
+  if (!attributes) count = 0;
 
-  if (attributes) {
-    l[3] = count >> 8;
-    l[4] = count & 0XFF;
-  } else {
-    l[3] = 0;
-    l[4] = 0;
-  }
+  unsigned char packet[5 + length + count];
+  unsigned char *p = packet;
 
-  if (!sendData(spk, l, sizeof(l))) return;
-  if (!sendData(spk, text, length)) return;
+  *p++ = 4;
+  *p++ = length >> 8;
+  *p++ = length & 0XFF;
+  *p++ = count >> 8;
+  *p++ = count & 0XFF;
+  p = mempcpy(p, text, length);
+  p = mempcpy(p, attributes, count);
 
-  if (attributes) {
-    if (!sendData(spk, attributes, count)) {
-      return;
-    }
-  }
-
+  sendPacket(spk, packet, (p - packet));
   totalCharacterCount = count;
 }
 
@@ -196,9 +188,8 @@ static void
 spk_mute (SpeechSynthesizer *spk) {
   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "mute");
 
-  unsigned char l[1];
-  l[0] = 1;
-  sendData(spk, l, sizeof(l));
+  unsigned char packet[] = {1};
+  sendPacket(spk, packet, sizeof(packet));
 }
 
 static void
@@ -211,24 +202,28 @@ spk_setVolume (SpeechSynthesizer *spk, unsigned char setting) {
     setting, percentage
   );
 
-  unsigned char l[2];
-  l[0] = 2;
-  l[1] = percentage;
-  sendData(spk, l, sizeof(l));
+  unsigned char packet[] = {2, percentage};
+  sendPacket(spk, packet, sizeof(packet));
 }
 
 static int
 sendFloatSetting (SpeechSynthesizer *spk, unsigned char code, float value) {
-  unsigned char l[5] = {code};
-  const unsigned char *p = (const unsigned char *)&value;
+  unsigned char packet[5] = {code};
+  const unsigned char *v = (const unsigned char *)&value;
 
 #ifdef WORDS_BIGENDIAN
-  l[1] = p[0]; l[2] = p[1]; l[3] = p[2]; l[4] = p[3];
+  packet[1] = v[0];
+  packet[2] = v[1];
+  packet[3] = v[2];
+  packet[4] = v[3];
 #else /* WORDS_BIGENDIAN */
-  l[1] = p[3]; l[2] = p[2]; l[3] = p[1]; l[4] = p[0];
+  packet[1] = v[3];
+  packet[2] = v[2];
+  packet[3] = v[1];
+  packet[4] = v[0];
 #endif /* WORDS_BIGENDIAN */
 
-  return sendData(spk, l, sizeof(l));
+  return sendPacket(spk, packet, sizeof(packet));
 }
 
 static void
