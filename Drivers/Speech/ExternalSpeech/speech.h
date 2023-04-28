@@ -22,5 +22,8 @@
    is specified on the command-line (-p) or in the brltty.conf file
    (speech-driverparm option). */
 
-/* Specify the path of UNIX-domain socket to the external helper program. */
-#define HELPER_SOCKET_PATH "/tmp/exs-data"
+/* The default path of the UNIX-domain socket for the external helper program. */
+#define XS_DEFAULT_SOCKET_PATH "/tmp/exs-data"
+
+/* The maxdimum amount of time that a write to the socket may take. */
+#define XS_WRITE_TIMEOUT 2000

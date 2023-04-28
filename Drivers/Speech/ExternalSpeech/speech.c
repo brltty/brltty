@@ -136,10 +136,15 @@ sendPacket (SpeechSynthesizer *spk, const unsigned char *packet, size_t length) 
   const unsigned char *end = position + length;
 
   TimePeriod period;
-  startTimePeriod(&period, 2000);
+  startTimePeriod(&period, XS_WRITE_TIMEOUT);
 
   while (position < end) {
-    if (afterTimePeriod(&period, NULL)) break;
+    if (afterTimePeriod(&period, NULL)) {
+      logMessage(LOG_ERR, "ExternalSpeech write timed out");
+      disconnectFromServer();
+      return 0;
+    }
+
     ssize_t result = write(socketDescriptor, position, (end - position));
 
     if (result == -1) {
@@ -160,9 +165,7 @@ sendPacket (SpeechSynthesizer *spk, const unsigned char *packet, size_t length) 
     position += result;
   }
 
-  int done = position == end;
-  if (!done) logMessage(LOG_ERR, "ExternalSpeech write timed out");
-  return done;
+  return 1;
 }
 
 static void
@@ -259,12 +262,14 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
   spk->setPitch = spk_setPitch;
 
   socketPath = parameters[PARM_SOCKET_PATH];
-  if (!socketPath || !*socketPath) socketPath = HELPER_SOCKET_PATH;
+  if (!socketPath || !*socketPath) socketPath = XS_DEFAULT_SOCKET_PATH;
 
   memset(&socketAddress, 0, sizeof(socketAddress));
   socketAddress.sun_family = AF_UNIX;
   strncpy(socketAddress.sun_path, socketPath, sizeof(socketAddress.sun_path)-1);
 
+  socketDescriptor = -1;
+  trackHandle = NULL;
   return connectToServer(spk);
 }
 
