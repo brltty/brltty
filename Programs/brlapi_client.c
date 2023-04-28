@@ -1662,9 +1662,28 @@ static int getControllingTty(void)
     FILE *stream;
 
     if ((stream = fopen("/proc/self/stat", "r"))) {
-      int vt;
-      int ok = fscanf(stream, "%*d %*s %*c %*d %*d %*d %d", &tty) == 1;
+      char buf[256];
+      size_t read = fscanf(buf, sizeof(*buf), sizeof(buf) / sizeof(buf[0]), stream);
       fclose(stream);
+
+      /* The line format is "$pid ($comm) $state ...
+       * where comm may contain space as part of its name, ex:
+       * 12345 (someproc) S 123 456) R ...
+       * So to process valid identified after comm, we should skip comm by
+       * getting the 1st ) from end.
+       */
+      char *ptr = buf + read - 1;
+      while (*ptr && *ptr != ')' && buf < ptr) {
+        ptr -= 1;
+      }
+      if (*ptr != ')') {
+        break;
+      }
+      /* Point to space after ($comm). */
+      ptr += 1;
+
+      int vt;
+      int ok = sscanf(ptr, " %*c %*d %*d %*d %d", &tty) == 1;
 
       if (ok && (major(tty) == TTY_MAJOR)) {
         vt = minor(tty);
