@@ -183,8 +183,9 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_
   p = mempcpy(p, text, length);
   p = mempcpy(p, attributes, count);
 
-  sendPacket(spk, packet, (p - packet));
-  totalCharacterCount = count;
+  if (sendPacket(spk, packet, (p - packet))) {
+    totalCharacterCount = count;
+  }
 }
 
 static void
