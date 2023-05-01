@@ -1659,41 +1659,46 @@ static int getControllingTty(void)
 #endif /* WINDOWS */
 
 #ifdef linux
-  {
-    int fd;
-    if ((fd = open("/proc/self/stat", O_RDONLY, 0)) >= 0) {
-      char buf[256];
-      size_t read_bytes = read(fd, buf, sizeof(buf) - 1);
-      close(fd);
-      /* Append null at the end of buffer to ensure that read doesn't
-       * overflows.*/
-      buf[255] = '\0';
-
-      /* The line format is "$pid ($comm) $state ...
-       * where comm may contain space and `)` as part of its name, ex:
-       * 12345 (someproc) S 123 456) R ...
-       * So to process valid identified after comm, we should skip comm by
-       * getting the 1st ) from end.
-       */
-      char *ptr = buf + read_bytes - 1;
-      while (buf < ptr && *ptr != ')') {
-        ptr -= 1;
-      }
-      if (*ptr != ')') {
-        return -1;
-      }
-      /* Point to space after ($comm). */
-      ptr += 1;
-
-      int vt;
-      int ok = sscanf(ptr, " %*c %*d %*d %*d %d", &tty) == 1;
-
-      if (ok && (major(tty) == TTY_MAJOR)) {
-        vt = minor(tty);
-        if ((vt >= 1) && (vt <= MAXIMUM_VIRTUAL_CONSOLE)) return vt;
-      }
+  do {
+    int fd = open("/proc/self/stat", O_RDONLY, 0);
+    if (fd < 0) {
+      break;
     }
-  }
+
+    char buf[256];
+    ssize_t read_bytes = read(fd, buf, sizeof(buf) - 1);
+    close(fd);
+    if (read_bytes < 0) {
+      break;
+    }
+    /* Append null at the end of buffer to ensure that read doesn't
+     * overflows.*/
+    buf[read_bytes] = '\0';
+
+    /* The line format is "$pid ($comm) $state ...
+     * where comm may contain space and `)` as part of its name, ex:
+     * 12345 (some proc (foo) S 123 456) R ...
+     * So to process valid identified after comm, we should skip comm by
+     * getting the 1st `)` from end.
+     */
+    char *ptr = buf + read_bytes - 1;
+    while (ptr > buf && *ptr != ')') {
+      ptr -= 1;
+    }
+    if (*ptr != ')') {
+      break;
+    }
+    /* Point to space after ($comm). */
+    ptr += 1;
+
+    int vt;
+    int ok = sscanf(ptr, " %*c %*d %*d %*d %d", &tty) == 1;
+
+    if (ok && (major(tty) == TTY_MAJOR)) {
+      vt = minor(tty);
+      if ((vt >= 1) && (vt <= MAXIMUM_VIRTUAL_CONSOLE)) return vt;
+    }
+  } while (0);
 #endif /* linux */
 
   return -1;
