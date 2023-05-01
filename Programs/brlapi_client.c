@@ -1671,13 +1671,13 @@ static int getControllingTty(void)
     if (read_bytes < 0) {
       break;
     }
-    /* Append null at the end of buffer to ensure that read doesn't
+    /* Append null at the end of buffer to ensure that sscanf doesn't
      * overflows.*/
     buf[read_bytes] = '\0';
 
     /* The line format is "$pid ($comm) $state ...
      * where comm may contain space and `)` as part of its name, ex:
-     * 12345 (some proc (foo) S 123 456) R ...
+     * 12345 (some proc (foo)) R ...
      * So to process valid identified after comm, we should skip comm by
      * getting the 1st `)` from end.
      */
