@@ -192,13 +192,6 @@ extern void forgetDevices (void);
 extern void reconfigureBrailleWindow (void);
 extern int haveStatusCells (void);
 
-typedef enum {
-  SCT_WORD,
-  SCT_NONWORD,
-  SCT_SPACE
-} ScreenCharacterType;
-
-extern ScreenCharacterType getScreenCharacterType (const ScreenCharacter *character);
 extern int findFirstNonSpaceCharacter (const ScreenCharacter *characters, int count);
 extern int findLastNonSpaceCharacter (const ScreenCharacter *characters, int count);
 extern int isAllSpaceCharacters (const ScreenCharacter *characters, int count);

@@ -962,20 +962,12 @@ trackScreenCursor (int place) {
   return 1;
 }
 
-ScreenCharacterType
-getScreenCharacterType (const ScreenCharacter *character) {
-  if (iswspace(character->text)) return SCT_SPACE;
-  if (iswalnum(character->text)) return SCT_WORD;
-  if (wcschr(WS_C("_"), character->text)) return SCT_WORD;
-  return SCT_NONWORD;
-}
-
 int
 findFirstNonSpaceCharacter (const ScreenCharacter *characters, int count) {
   int index = 0;
 
   while (index < count) {
-    if (getScreenCharacterType(&characters[index]) != SCT_SPACE) return index;
+    if (!iswspace(characters[index].text)) return index;
     index += 1;
   }
 
@@ -987,7 +979,7 @@ findLastNonSpaceCharacter (const ScreenCharacter *characters, int count) {
   int index = count;
 
   while (index > 0)
-    if (getScreenCharacterType(&characters[--index]) != SCT_SPACE)
+    if (!iswspace(characters[--index].text))
       return index;
 
   return -1;

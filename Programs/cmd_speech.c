@@ -291,21 +291,21 @@ handleSpeechCommands (int command, void *data) {
         int column = ses->spkx;
 
         ScreenCharacter characters[scr.cols];
-        ScreenCharacterType type;
         int onCurrentWord;
+        int onSpace;
 
         int from = column;
         int to = from + 1;
 
       findWord:
         readScreenRow(row, scr.cols, characters);
-        type = (row == ses->spky)? getScreenCharacterType(&characters[column]): SCT_SPACE;
-        onCurrentWord = type != SCT_SPACE;
+        onCurrentWord = (row == ses->spky) && !iswspace(characters[column].text);
+        onSpace = !onCurrentWord;
 
         if (direction < 0) {
           while (1) {
             if (column == 0) {
-              if ((type != SCT_SPACE) && !onCurrentWord) {
+              if (!onSpace && !onCurrentWord) {
                 ses->spkx = from = column;
                 ses->spky = row;
                 break;
@@ -318,26 +318,26 @@ handleSpeechCommands (int command, void *data) {
             }
 
             {
-              ScreenCharacterType newType = getScreenCharacterType(&characters[--column]);
+              int isSpace = iswspace(characters[--column].text);
 
-              if (newType != type) {
+              if (isSpace != onSpace) {
                 if (onCurrentWord) {
                   onCurrentWord = 0;
-                } else if (type != SCT_SPACE) {
+                } else if (!onSpace) {
                   ses->spkx = from = column + 1;
                   ses->spky = row;
                   break;
                 }
 
-                if (newType != SCT_SPACE) to = column + 1;
-                type = newType;
+                if (!isSpace) to = column + 1;
+                onSpace = isSpace;
               }
             }
           }
         } else if (direction > 0) {
           while (1) {
             if (++column == scr.cols) {
-              if ((type != SCT_SPACE) && !onCurrentWord) {
+              if (!onSpace && !onCurrentWord) {
                 to = column;
                 ses->spkx = from;
                 ses->spky = row;
@@ -351,33 +351,33 @@ handleSpeechCommands (int command, void *data) {
             }
 
             {
-              ScreenCharacterType newType = getScreenCharacterType(&characters[column]);
+              int isSpace = iswspace(characters[column].text);
 
-              if (newType != type) {
+              if (isSpace != onSpace) {
                 if (onCurrentWord) {
                   onCurrentWord = 0;
-                } else if (type != SCT_SPACE) {
+                } else if (!onSpace) {
                   to = column;
                   ses->spkx = from;
                   ses->spky = row;
                   break;
                 }
 
-                if (newType != SCT_SPACE) from = column;
-                type = newType;
+                if (!isSpace) from = column;
+                onSpace = isSpace;
               }
             }
           }
-        } else if (type != SCT_SPACE) {
+        } else if (!onSpace) {
           while (from > 0) {
-            if (getScreenCharacterType(&characters[--from]) != type) {
+            if (iswspace(characters[--from].text)) {
               from += 1;
               break;
             }
           }
 
           while (to < scr.cols) {
-            if (getScreenCharacterType(&characters[to]) != type) break;
+            if (iswspace(characters[to].text)) break;
             to += 1;
           }
         }
