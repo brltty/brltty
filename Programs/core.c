@@ -1098,24 +1098,35 @@ speakCharacters (const ScreenCharacter *characters, size_t count, int spell, int
       textBuffer[length++] = character;
 
       unsigned char attributesBuffer[length];
-      memset(attributesBuffer, attributes, length);
+      memset(attributesBuffer, SCR_COLOUR_DEFAULT, length);
+      attributesBuffer[length-1] = attributes;
 
       sayWideCharacters(&spk, textBuffer, attributesBuffer, length, sayOptions);
     } else {
       sayWideCharacters(&spk, &character, &attributes, 1, sayOptions);
     }
   } else if (spell) {
-    wchar_t string[count * 2];
-    size_t length = 0;
-    unsigned int index = 0;
+    size_t length = count * 2;
+    wchar_t textBuffer[length];
+    unsigned char attributesBuffer[length];
 
-    while (index < count) {
-      string[length++] = characters[index++].text;
-      string[length++] = WC_C(' ');
+    wchar_t *text = textBuffer;
+    unsigned char *attributes = attributesBuffer;
+
+    const ScreenCharacter *character = characters;
+    const ScreenCharacter *end = character + count;
+
+    while (character < end) {
+      *text++ = character->text;
+      *attributes++ = character->attributes;
+
+      *text++ = WC_C(' ');
+      *attributes++ = SCR_COLOUR_DEFAULT;
+
+      character += 1;
     }
 
-    string[length] = WC_C('\0');
-    sayWideCharacters(&spk, string, NULL, length, sayOptions);
+    sayWideCharacters(&spk, textBuffer, attributesBuffer, length-1, sayOptions);
   } else {
     sayScreenCharacters(characters, count, sayOptions);
   }
