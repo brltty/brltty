@@ -94,9 +94,10 @@ typedef struct {
   wchar_t *name;
   wchar_t *title;
 
-  unsigned isSpecial:1;
-  unsigned isDefined:1;
-  unsigned isReferenced:1;
+  unsigned char isSpecial:1;
+  unsigned char isDefined:1;
+  unsigned char isReferenced:1;
+  unsigned char isIsolated:1;
 
   struct {
     KeyBinding *table;

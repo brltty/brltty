@@ -182,6 +182,7 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       ctx->isSpecial = 0;
       ctx->isDefined = 0;
       ctx->isReferenced = 0;
+      ctx->isIsolated = 0;
 
       ctx->keyBindings.table = NULL;
       ctx->keyBindings.size = 0;
@@ -1176,29 +1177,6 @@ static DATA_OPERANDS_PROCESSOR(processHotkeyOperands) {
   return 1;
 }
 
-static DATA_OPERANDS_PROCESSOR(processIgnoreOperands) {
-  KeyTableData *ktd = data;
-  HotkeyEntry hotkey;
-
-  memset(&hotkey, 0, sizeof(hotkey));
-  if (hideBindings(ktd)) hotkey.flags |= HKF_HIDDEN;
-  hotkey.pressCommand = hotkey.releaseCommand = ktd->nullBoundCommand;
-
-  if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
-    KeyContext *ctx = getCurrentKeyContext(ktd);
-
-    if (ctx) {
-      if (addHotkey(ctx, &hotkey)) {
-        return 1;
-      }
-    }
-
-    return 0;
-  }
-
-  return 1;
-}
-
 static DATA_CONDITION_TESTER(testKeyDefined) {
   return !!findKeyName(identifier->characters, identifier->length, data);
 }
@@ -1293,6 +1271,29 @@ static DATA_OPERANDS_PROCESSOR(processIfNotPlatformOperands) {
   return processPlatformTestOperands(file, 1, data);
 }
 
+static DATA_OPERANDS_PROCESSOR(processIgnoreOperands) {
+  KeyTableData *ktd = data;
+  HotkeyEntry hotkey;
+
+  memset(&hotkey, 0, sizeof(hotkey));
+  if (hideBindings(ktd)) hotkey.flags |= HKF_HIDDEN;
+  hotkey.pressCommand = hotkey.releaseCommand = ktd->nullBoundCommand;
+
+  if (getKeyOperand(file, &hotkey.keyValue, ktd)) {
+    KeyContext *ctx = getCurrentKeyContext(ktd);
+
+    if (ctx) {
+      if (addHotkey(ctx, &hotkey)) {
+        return 1;
+      }
+    }
+
+    return 0;
+  }
+
+  return 1;
+}
+
 static DATA_OPERANDS_PROCESSOR(processIncludeWrapper) {
   KeyTableData *ktd = data;
   int result;
@@ -1308,6 +1309,21 @@ static DATA_OPERANDS_PROCESSOR(processIncludeWrapper) {
   ktd->hideRequested = hideRequested;
   ktd->hideInherited = hideInherited;
   return result;
+}
+
+static DATA_OPERANDS_PROCESSOR(processIsolatedOperands) {
+  KeyTableData *ktd = data;
+  KeyContext *ctx = getCurrentKeyContext(ktd);
+
+  if (ctx) {
+    if (!ctx->isIsolated) {
+      ctx->isIsolated = 1;
+    } else {
+      reportDataError(file, "context already solated: %"PRIws, ctx->name);
+    }
+  }
+
+  return 1;
 }
 
 static DATA_OPERANDS_PROCESSOR(processMapOperands) {
@@ -1436,6 +1452,7 @@ static DATA_OPERANDS_PROCESSOR(processKeyTableOperands) {
     {.name=WS_C("ifnotplatform"), .processor=processIfNotPlatformOperands, .unconditional=1},
     {.name=WS_C("ignore"), .processor=processIgnoreOperands},
     {.name=WS_C("include"), .processor=processIncludeWrapper},
+    {.name=WS_C("isolated"), .processor=processIsolatedOperands},
     {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("note"), .processor=processNoteOperands},
     {.name=WS_C("superimpose"), .processor=processSuperimposeOperands},

@@ -385,6 +385,19 @@ Examples::
 
    ignore Key1
 
+The Isolated Directive
+----------------------
+
+.. parsed-literal:: isolated
+
+Use this directive to isolate the current context.
+If a key binding can't be found within an isolated context
+then it won't be looked up within the default context.
+
+Examples::
+
+   isolated
+
 The Map Directive
 -----------------
 

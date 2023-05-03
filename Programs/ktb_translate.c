@@ -596,7 +596,14 @@ processKeyEvent (
       );
 
       if (command == EOF) {
-        if ((context != KTB_CTX_DEFAULT) && wasInserted) {
+        int tryDefaultContext = wasInserted && (context != KTB_CTX_DEFAULT);
+
+        if (tryDefaultContext) {
+          const KeyContext *ctx = getKeyContext(table, context);
+          if (ctx && ctx->isIsolated) tryDefaultContext = 0;
+        }
+
+        if (tryDefaultContext) {
           removePressedKey(table, keyPosition);
 
           command = getPressedKeysCommand(
