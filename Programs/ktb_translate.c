@@ -600,7 +600,11 @@ processKeyEvent (
 
         if (tryDefaultContext) {
           const KeyContext *ctx = getKeyContext(table, context);
-          if (ctx && ctx->isIsolated) tryDefaultContext = 0;
+
+          if (ctx && ctx->isIsolated) {
+            tryDefaultContext = 0;
+            command = BRL_CMD_ALERT(COMMAND_REJECTED);
+          }
         }
 
         if (tryDefaultContext) {
