@@ -92,6 +92,12 @@ typedef struct {
 
 typedef struct {
   wchar_t *name;
+  BoundCommand *commands;
+  unsigned int count;
+} CommandMacro;
+
+typedef struct {
+  wchar_t *name;
   wchar_t *title;
 
   unsigned char isSpecial:1;
@@ -117,6 +123,12 @@ typedef struct {
     unsigned int count;
     int superimpose;
   } mappedKeys;
+
+  struct {
+    CommandMacro *table;
+    unsigned int size;
+    unsigned int count;
+  } commandMacros;
 } KeyContext;
 
 struct KeyTableStruct {

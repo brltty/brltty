@@ -196,6 +196,10 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       ctx->mappedKeys.size = 0;
       ctx->mappedKeys.count = 0;
       ctx->mappedKeys.superimpose = 0;
+
+      ctx->commandMacros.table = NULL;
+      ctx->commandMacros.size = 0;
+      ctx->commandMacros.count = 0;
     }
   }
 
@@ -254,6 +258,22 @@ findKeyContext (unsigned char *context, const wchar_t *name, int length, KeyTabl
       }
 
       ktd->table->keyContexts.count -= 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+findCommandMacro (KeyContext *ctx, const wchar_t *name, int length, unsigned int *position) {
+  for (unsigned int i=0; i<ctx->commandMacros.count; i+=1) {
+    const CommandMacro *macro = &ctx->commandMacros.table[i];
+
+    if (length == wcslen(macro->name)) {
+      if (wmemcmp(name, macro->name, length) == 0) {
+        if (position) *position = i;
+        return 1;
+      }
     }
   }
 
@@ -785,6 +805,16 @@ parseCommandOperand (DataFile *file, BoundCommand *cmd, const wchar_t *character
             cmd->value += context - KTB_CTX_DEFAULT;
           }
 
+          offsetDone = 1;
+          continue;
+        }
+      } else if ((*command)->code == BRL_CMD_BLK(MACRO)) {
+        KeyContext *ctx = getCurrentKeyContext(ktd);
+        if (!ctx) return 0;
+        unsigned int position;
+
+        if (findCommandMacro(ctx, modifier.characters, modifier.length, &position)) {
+          cmd->value += position;
           offsetDone = 1;
           continue;
         }
@@ -1326,6 +1356,72 @@ static DATA_OPERANDS_PROCESSOR(processIsolatedOperands) {
   return 1;
 }
 
+static DATA_OPERANDS_PROCESSOR(processMacroOperands) {
+  KeyTableData *ktd = data;
+  DataString name;
+
+  if (getDataString(file, &name, 1, "macro name")) {
+    KeyContext *ctx = getCurrentKeyContext(ktd);
+
+    if (ctx) {
+      if (findCommandMacro(ctx, name.characters, name.length, NULL)) {
+        reportDataError(file, "macro already defined: %.*"PRIws, name.length, name.characters);
+      } else {
+        size_t limit = 100;
+        BoundCommand commands[limit];
+        size_t count = 0;
+
+        while (findDataOperand(file, NULL)) {
+          if (count == limit) {
+            reportDataError(file, "macro too large: %.*"PRIws, name.length, name.characters);
+            return 1;
+          }
+
+          BoundCommand *command = &commands[count];
+          if (!getCommandOperand(file, command, ktd)) return 1;
+          count += 1;
+        }
+
+        if (count > 0) {
+          if (ctx->commandMacros.count == ctx->commandMacros.size) {
+            size_t newSize = ctx->commandMacros.size? ctx->commandMacros.size<<1: 1;
+            CommandMacro *newTable = realloc(ctx->commandMacros.table, ARRAY_SIZE(ctx->commandMacros.table, newSize));
+
+            if (!newTable) {
+              logMallocError();
+              return 0;
+            }
+
+            ctx->commandMacros.table = newTable;
+            ctx->commandMacros.size = newSize;
+          }
+
+          CommandMacro *macro = &ctx->commandMacros.table[ctx->commandMacros.count];
+          memset(macro, 0, sizeof(*macro));
+
+          if (setString(&macro->name, name.characters, name.length)) {
+            size_t size = ARRAY_SIZE(macro->commands, (macro->count = count));
+
+            if ((macro->commands = malloc(size))) {
+              memcpy(macro->commands, commands, size);
+              ctx->commandMacros.count += 1;
+              return 1;
+            }
+
+            free(macro->name);
+          }
+
+          return 0;
+        } else {
+          reportDataError(file, "empty macro: %.*"PRIws, name.length, name.characters);
+        }
+      }
+    }
+  }
+
+  return 1;
+}
+
 static DATA_OPERANDS_PROCESSOR(processMapOperands) {
   KeyTableData *ktd = data;
   MappedKeyEntry map;
@@ -1453,6 +1549,7 @@ static DATA_OPERANDS_PROCESSOR(processKeyTableOperands) {
     {.name=WS_C("ignore"), .processor=processIgnoreOperands},
     {.name=WS_C("include"), .processor=processIncludeWrapper},
     {.name=WS_C("isolated"), .processor=processIsolatedOperands},
+    {.name=WS_C("macro"), .processor=processMacroOperands},
     {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("note"), .processor=processNoteOperands},
     {.name=WS_C("superimpose"), .processor=processSuperimposeOperands},
@@ -1729,6 +1826,16 @@ destroyKeyTable (KeyTable *table) {
     if (ctx->keyBindings.table) free(ctx->keyBindings.table);
     if (ctx->hotkeys.table) free(ctx->hotkeys.table);
     if (ctx->mappedKeys.table) free(ctx->mappedKeys.table);
+
+    if (ctx->commandMacros.table) {
+      while (ctx->commandMacros.count > 0) {
+        CommandMacro *macro = &ctx->commandMacros.table[--ctx->commandMacros.count];
+        free(macro->name);
+        free(macro->commands);
+      }
+
+      free(ctx->commandMacros.table);
+    }
   }
 
   if (table->keyContexts.table) free(table->keyContexts.table);

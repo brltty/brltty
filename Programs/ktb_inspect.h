@@ -29,6 +29,11 @@ getKeyContext (KeyTable *table, unsigned char context) {
   return NULL;
 }
 
+static inline const KeyContext *
+getCurrentKeyContext (KeyTable *table) {
+  return getKeyContext(table, table->context.current);
+}
+
 static inline int
 isTemporaryKeyContext (const KeyTable *table, const KeyContext *ctx) {
   return ((ctx - table->keyContexts.table) > KTB_CTX_DEFAULT) && !ctx->title;

@@ -181,11 +181,15 @@ The Context Directive
 .. parsed-literal:: context *name* *title*
 
 Use this directive to define alternate ways to interpret certain key events
-and/or combinations. A context contains definitions created by any of:
+and/or combinations.
+Switching to another context is done via the BRLTTY command CONTEXT+name.
+
+A context contains definitions created by any of:
 
 *  `The Bind Directive`_
 *  `The Hotkey Directive`_
 *  `The Ignore Directive`_
+*  `The Macro Directive`_
 *  `The Map Directive`_
 *  `The Superimpose Directive`_
 
@@ -193,8 +197,8 @@ and/or combinations. A context contains definitions created by any of:
    Which context subsequent definitions are to be created within.
 
 *title*
-   A person-readable description of the context. It may contain spaces, and
-   standard capitalization conventions should be used. This operand is
+   A person-readable description of the context. It may contain spaces.
+   Standard capitalization conventions should be used. This operand is
    optional. If supplied when selecting a context which already has a title
    then the two must match. Special contexts already have internally-assigned
    titles.
@@ -397,6 +401,24 @@ then it won't be looked up within the default context.
 Examples::
 
    isolated
+
+The Macro Directive
+-------------------
+
+.. parsed-literal:: macro *name* *command* ...
+
+Use this directive to associate a sequence of BRLTY commands with a named macro.
+A macro is ivoked via the BRLTTY command MACRO+name.
+
+*name*
+   The name of the macro being defined.
+
+*command*
+   The BRLTTY commands that are to be executed.
+
+Examples::
+
+   macro topRight TOP LNEND
 
 The Map Directive
 -----------------

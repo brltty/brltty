@@ -318,6 +318,7 @@ typedef enum {
   BRL_BLK_PASSPS2 /* PS/2 (set 3) keyboard scan code */,
   BRL_BLK_CONTEXT /* switch to command context */,
   BRL_BLK_TOUCH_AT /* current reading location */,
+  BRL_BLK_MACRO /* execute command macro */,
 
   BRL_blockCommandCount /* must be last */
 } BRL_BlockCommand;

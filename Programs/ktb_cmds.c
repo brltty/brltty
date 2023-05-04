@@ -269,6 +269,7 @@ static const CommandListEntry commandList_internal[] = {
   { .code = BRL_CMD_BLK(PASSAT) },
   { .code = BRL_CMD_BLK(PASSPS2) },
   { .code = BRL_CMD_BLK(TOUCH_AT) },
+  { .code = BRL_CMD_BLK(MACRO) },
 };
 
 #define COMMAND_LIST(name) .commands = { \

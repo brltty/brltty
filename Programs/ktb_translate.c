@@ -372,6 +372,25 @@ processCommand (KeyTable *table, int command) {
           break;
         }
 
+        case BRL_CMD_BLK(MACRO): {
+          const KeyContext *ctx = getCurrentKeyContext(table);
+
+          if (ctx) {
+            if (arg < ctx->commandMacros.count) {
+              const CommandMacro *macro = &ctx->commandMacros.table[arg];
+              const BoundCommand *cmd = macro->commands;
+              const BoundCommand *end = cmd + macro->count;
+
+              while (cmd < end) {
+                if (!processCommand(table, (cmd++)->value)) return 0;
+              }
+            }
+          }
+
+          command = BRL_CMD_NOOP;
+          break;
+        }
+
         case BRL_CMD_BLK(PASSDOTS):
           switch (prefs.brailleTypingMode) {
             case BRL_TYPING_DOTS: {
