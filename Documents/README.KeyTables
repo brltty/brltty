@@ -405,20 +405,19 @@ Examples::
 The Macro Directive
 -------------------
 
-.. parsed-literal:: macro *name* *command* ...
+.. parsed-literal:: macro *keys* *command* ...
 
-Use this directive to associate a sequence of BRLTY commands with a named macro.
-A macro is ivoked via the BRLTTY command MACRO+name.
+Use this directive to bind a sequence of BRLTY commands to a key combination.
 
-*name*
-   The name of the macro being defined.
+*keys*
+   The key combination being defined.
 
-*command*
+*command* ...
    The BRLTTY commands that are to be executed.
 
 Examples::
 
-   macro topRight TOP LNEND
+   macro Key1+Key2 TOP LNEND
 
 The Map Directive
 -----------------

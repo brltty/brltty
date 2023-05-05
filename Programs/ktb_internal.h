@@ -92,12 +92,6 @@ typedef struct {
 
 typedef struct {
   wchar_t *name;
-  BoundCommand *commands;
-  unsigned int count;
-} CommandMacro;
-
-typedef struct {
-  wchar_t *name;
   wchar_t *title;
 
   unsigned char isSpecial:1;
@@ -123,13 +117,12 @@ typedef struct {
     unsigned int count;
     int superimpose;
   } mappedKeys;
-
-  struct {
-    CommandMacro *table;
-    unsigned int size;
-    unsigned int count;
-  } commandMacros;
 } KeyContext;
+
+typedef struct {
+  BoundCommand *commands;
+  unsigned int count;
+} CommandMacro;
 
 struct KeyTableStruct {
   wchar_t *title;
@@ -180,6 +173,12 @@ struct KeyTableStruct {
     AsyncHandle alarm;
     int time;
   } autorelease;
+
+  struct {
+    CommandMacro *table;
+    unsigned int size;
+    unsigned int count;
+  } commandMacros;
 
   struct {
     const char *logLabel;

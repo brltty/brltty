@@ -373,17 +373,13 @@ processCommand (KeyTable *table, int command) {
         }
 
         case BRL_CMD_BLK(MACRO): {
-          const KeyContext *ctx = getCurrentKeyContext(table);
+          if (arg < table->commandMacros.count) {
+            const CommandMacro *macro = &table->commandMacros.table[arg];
+            const BoundCommand *cmd = macro->commands;
+            const BoundCommand *end = cmd + macro->count;
 
-          if (ctx) {
-            if (arg < ctx->commandMacros.count) {
-              const CommandMacro *macro = &ctx->commandMacros.table[arg];
-              const BoundCommand *cmd = macro->commands;
-              const BoundCommand *end = cmd + macro->count;
-
-              while (cmd < end) {
-                if (!processCommand(table, (cmd++)->value)) return 0;
-              }
+            while (cmd < end) {
+              if (!processCommand(table, (cmd++)->value)) return 0;
             }
           }
 
