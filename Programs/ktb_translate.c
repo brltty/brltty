@@ -622,7 +622,7 @@ processKeyEvent (
 
           if (ctx && ctx->isIsolated) {
             tryDefaultContext = 0;
-            command = BRL_CMD_ALERT(COMMAND_REJECTED);
+            command = BRL_CMD_NOOP;
           }
         }
 
