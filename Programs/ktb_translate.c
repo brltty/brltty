@@ -553,9 +553,7 @@ getPressedKeysCommand (
     return (*binding)->primaryCommand.value;
   }
 
-  int command = makeKeyboardCommand(table, context, 0);
-  if (command != EOF) *isImmediate = 0;
-  return command;
+  return EOF;
 }
 
 KeyTableState
@@ -609,6 +607,12 @@ processKeyEvent (
         &binding, &wasInserted,
         &isIncomplete, &isImmediate
       );
+
+      if (command == EOF) {
+        if ((command = makeKeyboardCommand(table, context, 0)) != EOF) {
+          isImmediate = 0;
+        }       ;
+      }
 
       if (command == EOF) {
         int tryDefaultContext = wasInserted && (context != KTB_CTX_DEFAULT);
