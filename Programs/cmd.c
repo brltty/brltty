@@ -162,11 +162,10 @@ findCommandEntry (int code) {
 
         if (blk) {
           int next = last + 1;
+          if (next == count) return cmd;
 
-          if (next < count) {
-            if (blk != (commandEntries[next]->code & BRL_MSK_BLK)) {
-              return cmd;
-            }
+          if (blk != (commandEntries[next]->code & BRL_MSK_BLK)) {
+            return cmd;
           }
         }
       }
@@ -290,7 +289,8 @@ STR_BEGIN_FORMATTER(describeCommand, int command, CommandDescriptionOption optio
          )) {
         STR_PRINTF(" %s", gettext("at cursor"));
       } else if (cmd->isColumn || cmd->isRow || cmd->isOffset) {
-        STR_PRINTF(" #%u", arg - (cmd->code & BRL_MSK_ARG) + 1);
+        int offset = arg - (cmd->code & BRL_MSK_ARG);
+        STR_PRINTF(" #%u", offset+1);
       } else if (cmd->isRange) {
         STR_PRINTF(" #%u-%u", arg1, arg2);
       }
