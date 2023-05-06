@@ -332,14 +332,12 @@ handleNavigationCommands (int command, void *data) {
   switch (command & BRL_MSK_CMD) {
     {
       int row;
-      int ok;
 
     case BRL_CMD_TOP_LEFT:
       command |= BRL_FLG_MOTION_TOLEFT;
       /* fall through */
     case BRL_CMD_TOP:
       row = 0;
-      ok = ses->winy > row;
       goto doTopBottom;
 
     case BRL_CMD_BOT_LEFT:
@@ -347,18 +345,11 @@ handleNavigationCommands (int command, void *data) {
       /* fall through */
     case BRL_CMD_BOT:
       row = MAX(scr.rows, brl.textRows) - brl.textRows;
-      ok = ses->winy < row;
       goto doTopBottom;
 
     doTopBottom:
-      if (ok) {
-        ses->winy = row;
-      } else if ((command & BRL_FLG_MOTION_TOLEFT) && (ses->winx > 0)) {
-        oldwiny = -1;
-      } else {
-        alert(ALERT_BOUNCE);
-      }
-
+      ses->winy = row;
+      if (command & BRL_FLG_MOTION_TOLEFT) ses->winx = 0;
       break;
     }
 
