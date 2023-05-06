@@ -330,28 +330,19 @@ handleNavigationCommands (int command, void *data) {
   int oldwiny = ses->winy;
 
   switch (command & BRL_MSK_CMD) {
-    {
-      int row;
-
     case BRL_CMD_TOP_LEFT:
-      command |= BRL_FLG_MOTION_TOLEFT;
+      ses->winx = 0;
       /* fall through */
     case BRL_CMD_TOP:
-      row = 0;
-      goto doTopBottom;
+      ses->winy = 0;
+      break;
 
     case BRL_CMD_BOT_LEFT:
-      command |= BRL_FLG_MOTION_TOLEFT;
+      ses->winx = 0;
       /* fall through */
     case BRL_CMD_BOT:
-      row = MAX(scr.rows, brl.textRows) - brl.textRows;
-      goto doTopBottom;
-
-    doTopBottom:
-      ses->winy = row;
-      if (command & BRL_FLG_MOTION_TOLEFT) ses->winx = 0;
+      ses->winy = MAX(scr.rows, brl.textRows) - brl.textRows;
       break;
-    }
 
     case BRL_CMD_WINUP:
       if (canMoveUp()) {
