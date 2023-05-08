@@ -319,6 +319,7 @@ typedef enum {
   BRL_BLK_CONTEXT /* switch to command context */,
   BRL_BLK_TOUCH_AT /* current reading location */,
   BRL_BLK_MACRO /* execute command macro */,
+  BRL_BLK_HOSTCMD /* run host command */,
 
   BRL_blockCommandCount /* must be last */
 } BRL_BlockCommand;

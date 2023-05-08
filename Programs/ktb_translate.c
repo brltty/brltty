@@ -34,6 +34,7 @@
 #include "cmd.h"
 #include "cmd_enqueue.h"
 #include "async_alarm.h"
+#include "hostcmd.h"
 
 #define BRL_CMD_ALERT(alert) BRL_CMD_ARG(ALERT, ALERT_##alert)
 
@@ -381,6 +382,21 @@ processCommand (KeyTable *table, int command) {
             while (cmd < end) {
               if (!processCommand(table, (cmd++)->value)) return 0;
             }
+          }
+
+          command = BRL_CMD_NOOP;
+          break;
+        }
+
+        case BRL_CMD_BLK(HOSTCMD): {
+          if (arg < table->hostCommands.count) {
+            const HostCommand *hc = &table->hostCommands.table[arg];
+
+            HostCommandOptions options;
+            initializeHostCommandOptions(&options);
+            options.asynchronous = 1;
+
+            runHostCommand((const char *const *)hc->arguments, &options);
           }
 
           command = BRL_CMD_NOOP;

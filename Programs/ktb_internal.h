@@ -124,6 +124,11 @@ typedef struct {
   unsigned int count;
 } CommandMacro;
 
+typedef struct {
+  char **arguments;
+  unsigned int count;
+} HostCommand;
+
 struct KeyTableStruct {
   wchar_t *title;
 
@@ -179,6 +184,12 @@ struct KeyTableStruct {
     unsigned int size;
     unsigned int count;
   } commandMacros;
+
+  struct {
+    HostCommand *table;
+    unsigned int size;
+    unsigned int count;
+  } hostCommands;
 
   struct {
     const char *logLabel;

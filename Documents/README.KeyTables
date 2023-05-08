@@ -191,6 +191,7 @@ A context contains definitions created by any of:
 *  `The Ignore Directive`_
 *  `The Macro Directive`_
 *  `The Map Directive`_
+*  `The Run Directive`_
 *  `The Superimpose Directive`_
 
 *name*
@@ -209,7 +210,11 @@ number of times thereafter. These special contexts are predefined:
 ``default``
    The default context. If a definition can't be found within the current
    context then it's looked up within the default context. This only applies
-   to definitions created by `The Bind Directive`_.
+   to definitions created by:
+
+   *  `The Bind Directive`_.
+   *  `The Macro Directive`_.
+   *  `The Run Directive`_.
 
 ``menu``
    This context is used when within BRLTTY's Preferences Menu.
@@ -532,6 +537,26 @@ The above example would be rendered as:
    +  The second element of an inner list.
 
    The third line of the second outer list element.
+
+The Run Directive
+-----------------
+
+.. parsed-literal:: run *keys* *name* [*argument* ...]
+
+Use this directive to bind a host command to a key combination.
+
+*keys*
+   The key combination being defined.
+
+<name*
+   The name of the host command. It may also be the path.
+
+*argument* ...
+   The arguments to be passed to the host command.
+
+Examples::
+
+   run Key1+Key2 pkill --exact brltty
 
 The Superimpose Directive
 -------------------------
