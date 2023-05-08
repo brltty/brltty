@@ -93,28 +93,28 @@ findHostCommand shellPath "${shellCommand}" || {
    semanticError "shell not found: ${shellCommand}"
 }
 
-driverParameters=()
-driverCode="em"
+screenDriver="em"
+screenParameters=()
 
-addDriverParameter() {
+addScreenParameter() {
    local name="${1}"
    local value="${2}"
 
-  driverParameters+=("-X${driverCode}:${name}=${value}")
+  screenParameters+=("-X${screenDriver}:${name}=${value}")
 }
 
 currentUser="$(id -u)"
 currentGroup="$(id -g)"
 
-addDriverParameter shell "${shellPath}"
-addDriverParameter user "${currentUser}"
-addDriverParameter group "${currentGroup}"
-addDriverParameter directory "${PWD}"
-addDriverParameter home "${HOME}"
+addScreenParameter shell "${shellPath}"
+addScreenParameter user "${currentUser}"
+addScreenParameter group "${currentGroup}"
+addScreenParameter directory "${PWD}"
+addScreenParameter home "${HOME}"
 
 SUDO="sudo --bell --preserve-env --preserve-env=USER,LOGNAME --"
 [ -u "${brlttyPath}" ] && SUDO=""
 [ "${currentUser}" -eq 0 ] && SUDO=""
 
-exec ${SUDO} "${brlttyPath}" -n -z -x"${driverCode}" "${driverParameters[@]}" "${@}"
+exec ${SUDO} "${brlttyPath}" -n -z -x"${screenDriver}" "${screenParameters[@]}" "${@}"
 exit "${?}"
