@@ -1261,9 +1261,9 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       logConversionDecision(c, charset, "iconv conversion");
 
       size_t len = fill ? textLen : rsiz;
-      wchar_t textBuf[len];
+      wchar_t textBuf[len ? len : 1];
       char *in = (char *) text, *out = (char *) textBuf;
-      size_t sin = textLen, sout = sizeof(textBuf);
+      size_t sin = textLen, sout = len * sizeof(wchar_t);
 
       iconv_t conv = iconv_open(getWcharCharset(), charset);
       CHECKEXC((conv != (iconv_t)(-1)), BRLAPI_ERROR_INVALID_PACKET, "invalid charset");
