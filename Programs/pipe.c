@@ -26,6 +26,7 @@
 #include "log.h"
 #include "pipe.h"
 #include "file.h"
+#include "io_misc.h"
 #include "async_handle.h"
 #include "async_io.h"
 
@@ -265,6 +266,7 @@ createFifo (NamedPipeObject *obj) {
         logMessage(LOG_DEBUG, "FIFO created: %s: fd=%d",
                    obj->host.path, obj->input.descriptor);
 
+        setCloseOnExec(obj->input.descriptor, 1);
         return 1;
       } else {
         logMessage(LOG_ERR, "cannot open FIFO: %s: %s",

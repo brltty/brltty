@@ -89,16 +89,18 @@ connectToServer (SpeechSynthesizer *spk) {
   int sd = socket(AF_UNIX, SOCK_STREAM, 0);
 
   if (sd != -1) {
-    if (connect(sd, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) != -1) {
-      if (setBlockingIo(sd, 0)) {
-        if (asyncReadFile(&trackHandle, sd, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, spk)) {
-          logMessage(LOG_CATEGORY(SPEECH_DRIVER), "connected to server: fd=%d", sd);
-          socketDescriptor = sd;
-          return 1;
+    if (setCloseOnExec(sd, 1)) {
+      if (connect(sd, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) != -1) {
+        if (setBlockingIo(sd, 0)) {
+          if (asyncReadFile(&trackHandle, sd, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, spk)) {
+            logMessage(LOG_CATEGORY(SPEECH_DRIVER), "connected to server: fd=%d", sd);
+            socketDescriptor = sd;
+            return 1;
+          }
         }
+      } else {
+        logSystemError("connect");
       }
-    } else {
-      logSystemError("connect");
     }
 
     close(sd);

@@ -132,6 +132,8 @@ bthOpenChannel (BluetoothConnectionExtension *bcx, uint8_t channel, int timeout)
   bcx->remoteAddress.rc_channel = channel;
 
   if ((bcx->socketDescriptor = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
+    setCloseOnExec(bcx->socketDescriptor, 1);
+
     if (bind(bcx->socketDescriptor, (struct sockaddr *)&bcx->localAddress, sizeof(bcx->localAddress)) != -1) {
       if (setBlockingIo(bcx->socketDescriptor, 0)) {
         int connectResult = LINUX_BLUETOOTH_CHANNEL_CONNECT_ASYNCHRONOUS?
@@ -215,6 +217,8 @@ bthNewL2capConnection (const bdaddr_t *address, int timeout) {
   SocketDescriptor socketDescriptor = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
 
   if (socketDescriptor != -1) {
+    setCloseOnExec(socketDescriptor, 1);
+
     if (setBlockingIo(socketDescriptor, 0)) {
       struct sockaddr_l2 socketAddress = {
         .l2_family = AF_BLUETOOTH,

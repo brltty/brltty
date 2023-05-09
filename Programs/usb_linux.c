@@ -81,7 +81,13 @@ struct UsbEndpointExtensionStruct {
 static int
 usbOpenUsbfsFile (UsbDeviceExtension *devx) {
   if (devx->usbfsFile == -1) {
-    if ((devx->usbfsFile = open(devx->host->usbfsPath, O_RDWR)) == -1) {
+    mode_t openFlags = O_RDWR;
+
+    #ifdef O_CLOEXEC
+    openFlags |= O_CLOEXEC;
+    #endif /* O_CLOEXEC */
+
+    if ((devx->usbfsFile = open(devx->host->usbfsPath, openFlags)) == -1) {
       logMessage(LOG_ERR, "USBFS open error: %s: %s",
                  devx->host->usbfsPath, strerror(errno));
       return 0;
@@ -111,7 +117,13 @@ usbDisableAutosuspend (UsbDevice *device) {
     char *path = makePath(devx->host->sysfsPath, "power/autosuspend");
 
     if (path) {
-      int file = open(path, O_WRONLY);
+      mode_t openFlags = O_WRONLY;
+
+      #ifdef O_CLOEXEC
+      openFlags |= O_CLOEXEC;
+      #endif /* O_CLOEXEC */
+
+      int file = open(path, openFlags);
 
       if (file != -1) {
         static const char *const values[] = {"-1", "0", NULL};
@@ -1306,7 +1318,13 @@ usbReadHostDeviceDescriptor (UsbHostDevice *host) {
       char *path;
 
       if ((path = makePath(host->sysfsPath, "descriptors"))) {
-        if ((file = open(path, O_RDONLY)) != -1) {
+        mode_t openFlags = O_RDONLY;
+
+        #ifdef O_CLOEXEC
+        openFlags |= O_CLOEXEC;
+        #endif /* O_CLOEXEC */
+
+        if ((file = open(path, openFlags)) != -1) {
           sysfs = 1;
         }
 
@@ -1316,7 +1334,13 @@ usbReadHostDeviceDescriptor (UsbHostDevice *host) {
   }
 
   if (file == -1) {
-    file = open(host->usbfsPath, O_RDONLY);
+    mode_t openFlags = O_RDONLY;
+
+    #ifdef O_CLOEXEC
+    openFlags |= O_CLOEXEC;
+    #endif /* O_CLOEXEC */
+
+    file = open(host->usbfsPath, openFlags);
   }
 
   if (file != -1) {

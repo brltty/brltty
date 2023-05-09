@@ -514,6 +514,8 @@ serialConnectDevice (SerialDevice *serial, const char *device) {
   serial->package.inputMonitor = NULL;
 
   if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
+    setCloseOnExec(serial->fileDescriptor, 1);
+
     if (isatty(serial->fileDescriptor)) {
       if (serialPrepareDevice(serial)) {
         logMessage(LOG_CATEGORY(SERIAL_IO), "device opened: %s: fd=%d",

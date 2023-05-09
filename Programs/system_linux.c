@@ -956,6 +956,10 @@ static int
 openDevice (const char *path, mode_t flags, int allowModeSubset) {
   int descriptor;
 
+  #ifdef O_CLOEXEC
+  flags |= O_CLOEXEC;
+  #endif /* O_CLOEXEC */
+
   if ((descriptor = open(path, flags)) != -1) goto opened;
   if (!allowModeSubset) goto failed;
   if ((flags & O_ACCMODE) != O_RDWR) goto failed;

@@ -2826,6 +2826,8 @@ static SocketDescriptor newTcpSocket(int family, int type, int protocol, const s
   SocketDescriptor fd = socket(family, type, protocol);
 
   if (fd != INVALID_SOCKET_DESCRIPTOR) {
+    setCloseOnExec(fd, 1);
+
 #ifdef SO_REUSEADDR
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
                    (const void *)&yes, sizeof(yes)) == -1) {
@@ -3059,7 +3061,17 @@ static int readPid(char *path)
   pid_t pid;
   int n;
   FileDescriptor fd;
-  fd = open(path, O_RDONLY);
+
+  {
+    mode_t openFlags = O_RDONLY;
+
+    #ifdef O_CLOEXEC
+    openFlags |= O_CLOEXEC;
+    #endif /* O_CLOEXEC */
+
+    fd = open(path, openFlags);
+  }
+
   if (fd == -1) return 0;
   n = read(fd, pids, sizeof(pids)-1);
   closeFileDescriptor(fd);
@@ -3238,6 +3250,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
     goto out;
   }
 
+  setCloseOnExec(fd, 1);
   sa.sun_family = AF_LOCAL;
 
   if (lpath+lport+1>sizeof(sa.sun_path)) {
@@ -3282,8 +3295,20 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
   while (1) {
     {
       lockUmask();
-      lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL,
-                  (permissions & (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)));
+
+      {
+        mode_t openFlags = O_WRONLY | O_CREAT | O_EXCL;
+
+        #ifdef O_CLOEXEC
+        openFlags |= O_CLOEXEC;
+        #endif /* O_CLOEXEC */
+
+        lock = open(
+          tmppath, openFlags,
+          (permissions & (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH))
+        );
+      }
+
       unlockUmask();
     }
 
