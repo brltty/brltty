@@ -121,10 +121,32 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 typedef enum {
   PARM_AUTH,
   PARM_HOST,
-  PARM_STACKSIZE
+  PARM_STACKSIZE,
+#ifdef ENABLE_API_FUZZING
+  PARM_FUZZ,
+  PARM_FUZZSEED,
+  PARM_FUZZHEAD,
+  PARM_FUZZWRITE,
+  PARM_FUZZWRITEUTF8,
+  PARM_CRASH,
+#endif
 } Parameters;
 
-const char *const api_serverParameters[] = { "auth", "host", "stacksize", NULL };
+const char *const api_serverParameters[] = {
+  "auth", "host", "stacksize",
+#ifdef ENABLE_API_FUZZING
+  "fuzz", "fuzzseed", "fuzzhead", "fuzzwrite", "fuzzwriteutf8", "crash",
+#endif /* ENABLE_API_FUZZING */
+  NULL
+};
+
+#ifdef ENABLE_API_FUZZING
+static int fuzz_runs;
+static int fuzz_seed;
+static unsigned int fuzz_head;
+static unsigned int fuzz_write;
+static unsigned int fuzz_writeutf8;
+#endif /* ENABLE_API_FUZZING */
 
 static size_t stackSize;
 
@@ -228,6 +250,10 @@ static ParamState paramState[BRLAPI_PARAM_COUNT];
 
 /* Pointer to the connection accepter thread */
 static pthread_t serverThread; /* server */
+#ifdef ENABLE_API_FUZZING
+static pthread_t fuzzerThread;                       /* fuzzer */
+static pthread_t crasherThread;                      /* crash reproducer */
+#endif /* ENABLE_API_FUZZING */
 static pthread_t socketThreads[SERVER_SOCKET_LIMIT]; /* socket binding threads */
 static int running; /* should threads be running? */
 static char **socketHosts = NULL; /* socket local hosts */
@@ -4508,6 +4534,229 @@ void api_logServerIdentity(int full)
   }
 }
 
+#ifdef ENABLE_API_FUZZING
+/* Function : api_connect */
+/* Connect to our own API server */
+static int api_connect(void){
+  int s;
+#if defined(PF_LOCAL)
+  struct sockaddr_un sa;
+  s = socket(PF_LOCAL, SOCK_STREAM, 0);
+  memset(&sa, 0, sizeof(sa));
+  sa.sun_family = AF_LOCAL;
+  sprintf(sa.sun_path, BRLAPI_SOCKETPATH "/0");
+#else
+  struct sockaddr_in sa;
+  s = socket(AF_INET, SOCK_STREAM, 0);
+  memset(&sa, 0, sizeof(sa));
+  sa.sin_family = AF_INET;
+  sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  sa.sin_port = htons(BRLAPI_SOCKETPORTNUM);
+#endif
+  while (true) {
+    int c = connect(s, (struct sockaddr *) &sa, sizeof(sa));
+    if (!c) break;
+    if (errno != ECONNREFUSED)
+      logMessage(LOG_WARNING, "Could not connect to API: %s", strerror(errno));
+    sleep(1);
+  }
+  return s;
+}
+
+/* Function : api_writeData */
+/* Write to API socket some data */
+static int api_writeData(int s, const void* data, size_t size) {
+  size_t remaining = size;
+  while (remaining) {
+    ssize_t done = write(s, data, remaining);
+    if (done < 0) {
+      if (errno != EINTR && errno != EAGAIN)
+	return 0;
+      done = 0;
+    }
+    remaining -= done;
+    data += done;
+  }
+  return 1;
+}
+
+/* Function : api_writeFile */
+/* Write to API socket the content of a file */
+static int api_writeFile(int s, const char* filename) {
+  struct stat st;
+  int fd;
+  size_t size;
+  fd = open(filename, O_RDONLY);
+  if (fd < 0) return 0;
+  if (fstat(fd, &st) < 0) {
+    close(fd);
+    return 0;
+  }
+  size = st.st_size;
+  if (size == 0) return 0;
+  {
+    uint8_t buff[size];
+    ssize_t ret;
+    ret = read(fd, buff, size);
+    close(fd);
+    if (ret < size) return 0;
+    return api_writeData(s, buff, size);
+  }
+}
+
+/* Function : api_writeHead */
+/* Write to API socket the version + auth head, so the fuzzer does not have to guess these */
+static int api_writeHead(int s) {
+  const uint32_t versionPacket[] = {
+    htonl(4), htonl(BRLAPI_PACKET_VERSION),
+    htonl(BRLAPI_PROTOCOL_VERSION)
+  };
+  if (!api_writeData(s, versionPacket, sizeof(versionPacket))) return 0;
+  return 1;
+}
+
+/* Function : api_writeWrite */
+/* Write to API socket the write header, so the fuzzer does not have to guess it */
+static int api_writeWrite(int s, int utf8) {
+  {
+    const uint32_t enterTtyModePacket[] = { htonl(2*4), htonl(BRLAPI_PACKET_ENTERTTYMODE), htonl(1), htonl(1) };
+    if (!api_writeData(s, enterTtyModePacket, sizeof(enterTtyModePacket))) return 0;
+  }
+  {
+    const uint32_t writePacket[] = {
+      htonl(3 * 4 + displaySize + (utf8 ? 6 : 11)), htonl(BRLAPI_PACKET_WRITE),
+      htonl(BRLAPI_WF_REGION | BRLAPI_WF_TEXT | BRLAPI_WF_CHARSET),
+      htonl(1), htonl(displaySize),
+    };
+    if (!api_writeData(s, writePacket, sizeof(writePacket))) return 0;
+  }
+  return 1;
+}
+
+/* Function : api_writeLatin1Charset */
+/* Write to API socket the write footer for latin1, so the fuzzer does not have to guess it */
+static int api_writeLatin1Charset(int s) {
+  return api_writeData(s, "\x0aiso-8859-1", 11);
+}
+
+/* Function : api_writeUtf8Charset */
+/* Write to API socket the write footer for UTF-8, so the fuzzer does not have to guess it */
+static int api_writeUtf8Charset(int s) {
+  return api_writeData(s, "\x05UTF-8", 6);
+}
+
+/* Function : api_writeHeading */
+/* Write to API socket the heading for a test */
+static int api_writeHeading(int s) {
+  if (!fuzz_head && !api_writeHead(s)) return 0;
+  if (fuzz_write && !api_writeWrite(s, fuzz_writeutf8)) return 0;
+  return 1;
+}
+
+/* Function : api_writeTrailing */
+/* Write to API socket the trailing for a test */
+static int api_writeTrailing(int s) {
+  if (fuzz_write) {
+    if (fuzz_writeutf8) {
+      if (!api_writeUtf8Charset(s)) return 0;
+    } else {
+      if (!api_writeLatin1Charset(s)) return 0;
+    }
+  }
+  return 1;
+}
+
+/* Function : api_writeInput */
+/* Write to API socket some data set */
+static int api_writeInput(int s, const uint8_t *data, size_t size) {
+  if (fuzz_write) {
+    /* Reject sizes that don't match display size */
+    if (fuzz_writeutf8) {
+      char buf[size+1];
+      memcpy(buf, data, size);
+      buf[size] = 0;
+      if (countUtf8Characters((const char*) data) != displaySize) return -1;
+    } else {
+      if (size != displaySize) return -1;
+    }
+  }
+  if (!api_writeHeading(s)) return 0;
+  if (!api_writeData(s, data, size)) return 0;
+  if (!api_writeTrailing(s)) return 0;
+  return 1;
+}
+
+/* Function: api_readData */
+/* Read all data coming from API socket */
+static int api_readData(int s){
+  while (1) {
+    char buff[4096];
+    ssize_t r = read(s, buff, sizeof(buff));
+    if (r <= 0) {
+      close(s);
+      return r == 0;
+    }
+  }
+}
+
+/* Function: api_testOneInput */
+/* Test feeding API with feeding one input set */
+static int api_testOneInput(const uint8_t *data, size_t size)
+{
+  int s = api_connect();
+  int r = api_writeInput(s, data, size);
+  if (r == -1) return -1; /* Reject this data */
+  if (r == 0) goto out;
+  shutdown(s, SHUT_WR); /* We are finished speaking */
+  api_readData(s);
+out:
+  close(s);
+  return 0;
+}
+
+/* Prototype for LLVM fuzzer runner */
+extern int LLVMFuzzerRunDriver(int *argc, char ***argv,
+                               int (*UserCb)(const uint8_t *data, size_t size));
+
+/* Function: fuzzerFunction */
+/* Runs the LLVM fuzzer */
+THREAD_FUNCTION(fuzzerFunction)
+{
+  char runs[18];
+  char seed[18];
+  char *argv[] = { "brltty", "-max_len=1000", "-dict=Tools/fuzz-dict", "-detect_leaks=0", "-rss_limit_mb=1000", runs, seed, NULL };
+  int a = sizeof(argv) / sizeof(argv[0]) - 1;
+  char **a_2 = argv;
+  snprintf(runs, sizeof(runs), "-runs=%d", fuzz_runs);
+  snprintf(seed, sizeof(seed), "-seed=%d", fuzz_seed);
+  sleep(1);
+  LLVMFuzzerRunDriver(&a, &a_2, &api_testOneInput);
+  _exit(EXIT_SUCCESS);
+  return 0;
+}
+
+/* Function: crasherFunction */
+/* Runs one crasher reproducer */
+THREAD_FUNCTION(crasherFunction)
+{
+  int s, r = 0;
+  sleep(1);
+  s = api_connect();
+  if (!api_writeHeading(s)) goto out;
+  if (!api_writeFile(s, argument)) goto out;
+  if (!api_writeTrailing(s)) goto out;
+  shutdown(s, SHUT_WR);
+  api_readData(s);
+  r = 1;
+out:
+  close(s);
+  if (r)
+    logMessage(LOG_ALERT, "crash test passed");
+  _exit(EXIT_SUCCESS);
+  return NULL;
+}
+#endif /* ENABLE_API_FUZZING */
+
 /* Function : api_startServer */
 /* Initializes BrlApi */
 /* One first initialize the driver */
@@ -4606,6 +4855,26 @@ int api_startServer(BrailleDisplay *brl, char **parameters)
 
     goto noServerThread;
   }
+
+#ifdef ENABLE_API_FUZZING
+  validateOnOff(&fuzz_head, parameters[PARM_FUZZHEAD]);
+  validateOnOff(&fuzz_write, parameters[PARM_FUZZWRITE]);
+  validateOnOff(&fuzz_writeutf8, parameters[PARM_FUZZWRITEUTF8]);
+
+  const char *fuzz = parameters[PARM_FUZZ];
+  if (fuzz) {
+    validateInteger(&fuzz_runs, fuzz, NULL, NULL);
+    if (fuzz_runs) {
+      if (parameters[PARM_FUZZSEED])
+        validateInteger(&fuzz_seed, parameters[PARM_FUZZSEED], NULL, NULL);
+      createThread("fuzzer", &fuzzerThread, &attr, fuzzerFunction, NULL);
+    }
+  }
+
+  const char *crash = parameters[PARM_CRASH];
+  if (crash)
+    createThread("crasher", &crasherThread, &attr, crasherFunction, (void*) crash);
+#endif /* ENABLE_API_FUZZING */
 
   return 1;
 

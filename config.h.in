@@ -610,6 +610,9 @@ extern "C" {
 /* Define this if the application programming interface is to be included. */
 #undef ENABLE_API
 
+/* Define this if the application programming interface is to be fuzzed. */
+#undef ENABLE_API_FUZZING
+
 /* Define this to be a string containing the default parameters for the application programming interface. */
 #undef API_PARAMETERS
 
