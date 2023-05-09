@@ -800,6 +800,28 @@ BRLTTY_SUMMARY_ITEM([api-socket-path], [api_socket_path])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHKEYFILE], ["${api_authkeyfile}"],
                        [Define this to be a string containing the name of BrlAPI's authorization key file.])
 
+BRLTTY_ARG_ENABLE(
+   [api-fuzzing],
+   [fuzzing the application programming interface],
+   [],
+[dnl
+  AC_CACHE_CHECK([for LLVM fuzzer], [brltty_cv_llvm_fuzzer], [dnl
+    HOST_CPU="`$CC -print-multiarch | sed -e 's/-.*//'`"
+    fuzzer_libs="`$CC -print-runtime-dir`/libclang_rt.fuzzer_no_main-$HOST_CPU.a -lstdc++ -lm"
+    CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link -fsanitize=address,undefined -fstack-protector-strong"
+    LIBS="$LIBS -fsanitize=address,undefined -lubsan"
+    OLD_LIBS="$LIBS"
+    LIBS="$LIBS $fuzzer_libs"
+    AC_COMPILE_IFELSE(
+      [AC_LANG_PROGRAM([[]], [[]])],
+      [], [AC_MSG_ERROR([Compiler does not support fuzzing, did you set CC=clang?])])
+    LIBS="$OLD_LIBS"
+  ])
+  AC_DEFINE([ENABLE_API_FUZZING], [1],
+    [Define this if the application programming interface is to be fuzzed.])],
+])
+AC_SUBST(fuzzer_libs)
+
 brltty_curses_libs_save="${LIBS}"
 BRLTTY_PACKAGE_CHOOSE([curses],
    [ncursesw ncursesw/ncurses.h],
