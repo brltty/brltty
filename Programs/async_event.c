@@ -25,6 +25,7 @@
 #include "async_event.h"
 #include "async_internal.h"
 #include "file.h"
+#include "io_misc.h"
 
 struct AsyncEventStruct {
   AsyncEventCallback *callback;
@@ -112,6 +113,8 @@ asyncNewEvent (AsyncEventCallback *callback, void *data) {
         event->monitorDescriptor = INVALID_FILE_DESCRIPTOR;
       }
 #else /* __MINGW32__ */
+      setCloseOnExec(event->pipeInput, 1);
+      setCloseOnExec(event->pipeOutput, 1);
       event->monitorDescriptor = event->pipeOutput;
 #endif /* __MINGW32__ */
 

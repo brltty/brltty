@@ -38,6 +38,7 @@
 #include "timing.h"
 #include "addresses.h"
 #include "stdiox.h"
+#include "io_misc.h"
 #include "thread.h"
 
 const char logCategoryName_all[] = "all";
@@ -287,8 +288,13 @@ closeLogFile (void) {
 void
 openLogFile (const char *path) {
   closeLogFile();
-  logFile = fopen(path, "w");
-  if (logFile) writeUtf8ByteOrderMark(logFile);
+  FILE *stream = fopen(path, "w");
+
+  if (stream) {
+    setCloseOnExec(fileno(stream), 1);
+    writeUtf8ByteOrderMark(stream);
+    logFile = stream;
+  }
 }
 
 static void

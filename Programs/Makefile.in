@@ -408,7 +408,7 @@ hid.$O:
 $(HID_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(HID_INCLUDES) -c $(SRC_DIR)/$(HID_OBJECT).c
 
-BRLTTY_HID_OBJECTS = brltty-hid.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS) hid_inspect.$O hid_tables.$O io_misc.$O
+BRLTTY_HID_OBJECTS = brltty-hid.$O $(PROGRAM_OBJECTS) $(HID_OBJECTS) hid_inspect.$O hid_tables.$O
 
 brltty-hid$X: $(BRLTTY_HID_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_HID_OBJECTS) $(HID_LIBS) $(LDLIBS)
@@ -956,7 +956,7 @@ brltest.$O:
 
 ###############################################################################
 
-SPKTEST_OBJECTS = spktest.$O $(PROGRAM_OBJECTS) io_misc.$O drivers.$O driver.$O $(SPEECH_OBJECTS) $(PREFS_OBJECTS)
+SPKTEST_OBJECTS = spktest.$O $(PROGRAM_OBJECTS) drivers.$O driver.$O $(SPEECH_OBJECTS) $(PREFS_OBJECTS)
 
 spktest$X: $(SPKTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -1006,7 +1006,7 @@ pty_screen.$O:
 
 ###############################################################################
 
-BRLTTY_TUNE_OBJECTS = brltty-tune.$O tune_utils.$O tune_builder.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS) io_misc.$O
+BRLTTY_TUNE_OBJECTS = brltty-tune.$O tune_utils.$O tune_builder.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS)
 
 brltty-tune$X: $(BRLTTY_TUNE_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_TUNE_OBJECTS) $(PCM_LIBS) $(MIDI_LIBS) $(LDLIBS)
@@ -1022,7 +1022,7 @@ tune_builder.$O:
 
 ###############################################################################
 
-BRLTTY_MORSE_OBJECTS = brltty-morse.$O morse.$O tune_utils.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS) io_misc.$O
+BRLTTY_MORSE_OBJECTS = brltty-morse.$O morse.$O tune_utils.$O $(PROGRAM_OBJECTS) $(PREFS_OBJECTS) $(TUNE_OBJECTS)
 
 brltty-morse$X: $(BRLTTY_MORSE_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_MORSE_OBJECTS) $(PCM_LIBS) $(MIDI_LIBS) $(LDLIBS)
