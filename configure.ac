@@ -818,7 +818,7 @@ BRLTTY_ARG_ENABLE(
     LIBS="$OLD_LIBS"
   ])
   AC_DEFINE([ENABLE_API_FUZZING], [1],
-    [Define this if the application programming interface is to be fuzzed.])],
+    [Define this if the application programming interface is to be fuzzed.])
 ])
 AC_SUBST(fuzzer_libs)
 
