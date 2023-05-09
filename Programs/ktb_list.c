@@ -786,12 +786,91 @@ listKeyTableNotes (ListGenerationData *lgd) {
 }
 
 static int
+listCommandMacros (ListGenerationData *lgd) {
+  unsigned int count = lgd->keyTable->commandMacros.count;
+
+  if (count > 0) {
+    lgd->topicHeader = WS_C("Command Macros");
+
+    const CommandMacro *macro = lgd->keyTable->commandMacros.table;
+    const CommandMacro *endMacros = macro + count;
+    unsigned int number = 0;
+
+    while (macro < endMacros) {
+      {
+        char buffer[0X100];
+        snprintf(buffer, sizeof(buffer), "Command Macro #%u:", ++number);
+        if (!putUtf8String(lgd, buffer)) return 0;
+      }
+
+      {
+        const BoundCommand *command = macro->commands;
+        const BoundCommand *endCommands = command + macro->count;
+
+        while (command < endCommands) {
+          if (!putCharacter(lgd, WC_C(' '))) return 0;
+          if (!putUtf8String(lgd, command->entry->name)) return 0;
+          command += 1;
+        }
+      }
+
+      if (!endLine(lgd)) return 0;
+      macro += 1;
+    }
+
+    if (!endLine(lgd)) return 0;
+  }
+
+  return 1;
+}
+
+static int
+listHostCommands (ListGenerationData *lgd) {
+  unsigned int count = lgd->keyTable->hostCommands.count;
+
+  if (count > 0) {
+    lgd->topicHeader = WS_C("Host Commands");
+
+    const HostCommand *hc = lgd->keyTable->hostCommands.table;
+    const HostCommand *end = hc + count;
+    unsigned int number = 0;
+
+    while (hc < end) {
+      {
+        char buffer[0X100];
+        snprintf(buffer, sizeof(buffer), "Host Command #%u:", ++number);
+        if (!putUtf8String(lgd, buffer)) return 0;
+      }
+
+      {
+        char **argument = hc->arguments;
+
+        while (*argument) {
+          if (!putCharacter(lgd, WC_C(' '))) return 0;
+          if (!putUtf8String(lgd, *argument)) return 0;
+          argument += 1;
+        }
+      }
+
+      if (!endLine(lgd)) return 0;
+      hc += 1;
+    }
+
+    if (!endLine(lgd)) return 0;
+  }
+
+  return 1;
+}
+
+static int
 listKeyTableSections (ListGenerationData *lgd) {
   typedef int Lister (ListGenerationData *lgd);
 
   static Lister *const listerTable[] = {
     listKeyTableTitle,
     listKeyTableNotes,
+    listCommandMacros,
+    listHostCommands,
     listSpecialKeyContexts,
     listPersistentKeyContexts
   };
