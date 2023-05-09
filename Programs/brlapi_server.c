@@ -4897,7 +4897,7 @@ int api_startServer(BrailleDisplay *brl, char **parameters)
   }
 
   const char *crash = parameters[PARM_CRASH];
-  if (crash)
+  if (crash && crash[0])
     createThread("crasher", &crasherThread, &attr, crasherFunction, (void*) crash);
 #endif /* ENABLE_API_FUZZING */
 
