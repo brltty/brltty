@@ -670,6 +670,9 @@ usbMakeInputPipe (UsbEndpoint *endpoint) {
 
   if (createAnonymousPipe(&endpoint->direction.input.pipe.input,
                           &endpoint->direction.input.pipe.output)) {
+    setCloseOnExec(endpoint->direction.input.pipe.input, 1);
+    setCloseOnExec(endpoint->direction.input.pipe.output, 1);
+
     if (setBlockingIo(endpoint->direction.input.pipe.output, 0)) {
       return 1;
     }
