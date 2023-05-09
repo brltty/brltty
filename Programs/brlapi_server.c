@@ -4749,7 +4749,7 @@ THREAD_FUNCTION(fuzzerFunction)
 {
   char runs[18];
   char seed[18];
-  char *argv[] = { "brltty", "-max_len=1000", "-dict=Tools/fuzz-dict", "-detect_leaks=0", "-rss_limit_mb=1000", runs, seed, NULL };
+  char *argv[] = { "brltty", "-max_len=1000", "-dict=Tools/brlapi-fuzz-dict", "-detect_leaks=0", "-rss_limit_mb=1000", runs, seed, NULL };
   int a = sizeof(argv) / sizeof(argv[0]) - 1;
   char **a_2 = argv;
   snprintf(runs, sizeof(runs), "-runs=%d", fuzz_runs);
