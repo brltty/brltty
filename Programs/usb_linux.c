@@ -81,7 +81,7 @@ struct UsbEndpointExtensionStruct {
 static int
 usbOpenUsbfsFile (UsbDeviceExtension *devx) {
   if (devx->usbfsFile == -1) {
-    mode_t openFlags = O_RDWR;
+    int openFlags = O_RDWR;
 
     #ifdef O_CLOEXEC
     openFlags |= O_CLOEXEC;
@@ -117,7 +117,7 @@ usbDisableAutosuspend (UsbDevice *device) {
     char *path = makePath(devx->host->sysfsPath, "power/autosuspend");
 
     if (path) {
-      mode_t openFlags = O_WRONLY;
+      int openFlags = O_WRONLY;
 
       #ifdef O_CLOEXEC
       openFlags |= O_CLOEXEC;
@@ -1318,7 +1318,7 @@ usbReadHostDeviceDescriptor (UsbHostDevice *host) {
       char *path;
 
       if ((path = makePath(host->sysfsPath, "descriptors"))) {
-        mode_t openFlags = O_RDONLY;
+        int openFlags = O_RDONLY;
 
         #ifdef O_CLOEXEC
         openFlags |= O_CLOEXEC;
@@ -1334,7 +1334,7 @@ usbReadHostDeviceDescriptor (UsbHostDevice *host) {
   }
 
   if (file == -1) {
-    mode_t openFlags = O_RDONLY;
+    int openFlags = O_RDONLY;
 
     #ifdef O_CLOEXEC
     openFlags |= O_CLOEXEC;

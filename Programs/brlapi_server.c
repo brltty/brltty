@@ -3063,7 +3063,7 @@ static int readPid(char *path)
   FileDescriptor fd;
 
   {
-    mode_t openFlags = O_RDONLY;
+    int openFlags = O_RDONLY;
 
     #ifdef O_CLOEXEC
     openFlags |= O_CLOEXEC;
@@ -3297,7 +3297,7 @@ static FileDescriptor createLocalSocket(struct socketInfo *info)
       lockUmask();
 
       {
-        mode_t openFlags = O_WRONLY | O_CREAT | O_EXCL;
+        int openFlags = O_WRONLY | O_CREAT | O_EXCL;
 
         #ifdef O_CLOEXEC
         openFlags |= O_CLOEXEC;

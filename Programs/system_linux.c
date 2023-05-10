@@ -953,7 +953,7 @@ installUinputModule (void) {
 }
 
 static int
-openDevice (const char *path, mode_t flags, int allowModeSubset) {
+openDevice (const char *path, int flags, int allowModeSubset) {
   int descriptor;
 
   #ifdef O_CLOEXEC
