@@ -4564,22 +4564,31 @@ void api_logServerIdentity(int full)
 /* Connect to our own API server */
 static int api_connect(void){
   int s;
-#if defined(PF_LOCAL)
-  struct sockaddr_un sa;
-  s = socket(PF_LOCAL, SOCK_STREAM, 0);
-  memset(&sa, 0, sizeof(sa));
-  sa.sun_family = AF_LOCAL;
-  sprintf(sa.sun_path, BRLAPI_SOCKETPATH "/0");
-#else
-  struct sockaddr_in sa;
-  s = socket(AF_INET, SOCK_STREAM, 0);
-  memset(&sa, 0, sizeof(sa));
-  sa.sin_family = AF_INET;
-  sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-  sa.sin_port = htons(BRLAPI_SOCKETPORTNUM);
-#endif
+  struct sockaddr_storage ss;
+  size_t ss_size;
+
+#ifdef PF_LOCAL
+  if (socketInfo[0].addrfamily == PF_LOCAL) {
+    struct sockaddr_un *sun = (struct sockaddr_un *) &ss;
+    s = socket(PF_LOCAL, SOCK_STREAM, 0);
+    ss_size = sizeof(*sun);
+    memset(sun, 0, ss_size);
+    sun->sun_family = AF_LOCAL;
+    sprintf(sun->sun_path, BRLAPI_SOCKETPATH "/%s", socketInfo[0].port);
+  } else
+#endif /* PF_LOCAL */
+  {
+    struct sockaddr_in *sin = (struct sockaddr_in *) &ss;
+    s = socket(AF_INET, SOCK_STREAM, 0);
+    ss_size = sizeof(*sin);
+    memset(sin, 0, ss_size);
+    sin->sin_family = AF_INET;
+    sin->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    sin->sin_port = htons(BRLAPI_SOCKETPORTNUM+atoi(socketInfo[0].port));
+  }
+
   while (true) {
-    int c = connect(s, (struct sockaddr *) &sa, sizeof(sa));
+    int c = connect(s, (struct sockaddr *) &ss, ss_size);
     if (!c) break;
     if (errno != ECONNREFUSED)
       logMessage(LOG_WARNING, "Could not connect to API: %s", strerror(errno));
