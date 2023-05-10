@@ -22,11 +22,6 @@
 #define SERVER_SELECT_TIMEOUT 1
 #define UNAUTH_LIMIT 5
 #define UNAUTH_TIMEOUT 30
-#define OUR_STACK_MIN 0X10000
-
-#ifndef PTHREAD_STACK_MIN
-#define PTHREAD_STACK_MIN OUR_STACK_MIN
-#endif /* PTHREAD_STACK_MIN */
 
 #define RELEASE "BrlAPI Server: release " BRLAPI_RELEASE
 #define COPYRIGHT "   Copyright (C) 2002-2023 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
@@ -121,7 +116,6 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 typedef enum {
   PARM_AUTH,
   PARM_HOST,
-  PARM_STACKSIZE,
 #ifdef ENABLE_API_FUZZING
   PARM_FUZZ,
   PARM_FUZZSEED,
@@ -133,7 +127,7 @@ typedef enum {
 } Parameters;
 
 const char *const api_serverParameters[] = {
-  "auth", "host", "stacksize",
+  "auth", "host",
 #ifdef ENABLE_API_FUZZING
   "fuzz", "fuzzseed", "fuzzhead", "fuzzwrite", "fuzzwriteutf8", "crash",
 #endif /* ENABLE_API_FUZZING */
@@ -147,8 +141,6 @@ static unsigned int fuzz_head;
 static unsigned int fuzz_write;
 static unsigned int fuzz_writeutf8;
 #endif /* ENABLE_API_FUZZING */
-
-static size_t stackSize;
 
 #define WERR(x, y, ...) do { \
   logMessage(LOG_ERR, "writing error %d to %"PRIfd, y, x); \
@@ -3646,7 +3638,6 @@ THREAD_FUNCTION(createServerSocket) {
 /* Returns NULL in any case */
 THREAD_FUNCTION(runServer) {
   char *hosts = (char *)argument;
-  pthread_attr_t attr;
   int i;
   int res;
   struct sockaddr_storage addr;
@@ -3688,10 +3679,6 @@ THREAD_FUNCTION(runServer) {
   nbAlloc = serverSocketCount;
 #endif /* __MINGW32__ */
 
-  pthread_attr_init(&attr);
-  /* don't care if it fails */
-  pthread_attr_setstacksize(&attr,stackSize);
-
   for (i=0;i<serverSocketCount;i++)
     socketInfo[i].fd = INVALID_FILE_DESCRIPTOR;
 
@@ -3724,7 +3711,7 @@ THREAD_FUNCTION(runServer) {
         char name[0X100];
         snprintf(name, sizeof(name), "server-socket-create-%d", i);
 
-        res = createThread(name, &socketThreads[i], &attr,
+        res = createThread(name, &socketThreads[i], NULL,
                            createServerSocket, (void *)(intptr_t)i);
       }
 
@@ -4813,22 +4800,6 @@ int api_startServer(BrailleDisplay *brl, char **parameters)
     if (*operand) hosts = operand;
   }
 
-  stackSize = MAX(PTHREAD_STACK_MIN, OUR_STACK_MIN);
-  {
-    const char *operand = parameters[PARM_STACKSIZE];
-
-    if (*operand) {
-      int size;
-      static const int minSize = PTHREAD_STACK_MIN;
-
-      if (validateInteger(&size, operand, &minSize, NULL)) {
-        stackSize = size;
-      } else {
-        logMessage(LOG_WARNING, "%s: %s", gettext("invalid thread stack size"), operand);
-      }
-    }
-  }
-
   auth = BRLAPI_DEFAUTH;
   {
     const char *operand = parameters[PARM_AUTH];
@@ -4836,7 +4807,6 @@ int api_startServer(BrailleDisplay *brl, char **parameters)
     if (*operand) auth = operand;
   }
 
-  pthread_attr_t attr;
   pthread_mutexattr_t mattr;
 
   coreActive=1;
@@ -4862,9 +4832,6 @@ int api_startServer(BrailleDisplay *brl, char **parameters)
   pthread_mutex_init(&apiSuspendMutex,&mattr);
   pthread_mutex_init(&apiParamMutex,&mattr);
 
-  pthread_attr_init(&attr);
-  pthread_attr_setstacksize(&attr,stackSize);
-
 #ifndef __MINGW32__
   initializeBlockedSignalsMask();
   asyncHandleSignal(SIGUSR2, asyncEmptySignalHandler, NULL);
@@ -4873,7 +4840,7 @@ int api_startServer(BrailleDisplay *brl, char **parameters)
   running = 1;
   trueBraille=&noBraille;
 
-  if ((res = createThread("server-main", &serverThread, &attr,
+  if ((res = createThread("server-main", &serverThread, NULL,
                           runServer, hosts)) != 0) {
     logMessage(LOG_WARNING,"pthread_create: %s",strerror(res));
     running = 0;
@@ -4901,13 +4868,13 @@ int api_startServer(BrailleDisplay *brl, char **parameters)
     if (fuzz_runs) {
       if (parameters[PARM_FUZZSEED])
         validateInteger(&fuzz_seed, parameters[PARM_FUZZSEED], NULL, NULL);
-      createThread("fuzzer", &fuzzerThread, &attr, fuzzerFunction, NULL);
+      createThread("fuzzer", &fuzzerThread, NULL, fuzzerFunction, NULL);
     }
   }
 
   const char *crash = parameters[PARM_CRASH];
   if (crash && crash[0])
-    createThread("crasher", &crasherThread, &attr, crasherFunction, (void*) crash);
+    createThread("crasher", &crasherThread, NULL, crasherFunction, (void*) crash);
 #endif /* ENABLE_API_FUZZING */
 
   return 1;
