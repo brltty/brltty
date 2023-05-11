@@ -917,7 +917,6 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
        * doesn't exist yet. This is forbidden. */
       unlockMutex(&apiConnectionsMutex);
       WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "already having another tty");
-      freeBrailleWindow(&c->brailleWindow);
       return 0;
     }
     /* ok, allocate path */
