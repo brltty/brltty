@@ -21,4 +21,34 @@ title HandyTech Activator
 bind B1+B4+SpaceLeft TOUCH_NAV
 
 include joystick.kti
-include bs.kti
+bind RoutingKey ROUTE
+bind RoutingKey+!RoutingKey CLIP_COPY
+
+bind SpaceLeft+RoutingKey PRINDENT
+bind SpaceRight+RoutingKey NXINDENT
+
+bind SpaceLeft FWINLT
+bind SpaceRight FWINRT
+bind SpaceLeft+SpaceRight PASTE
+
+bind B1+SpaceLeft LNBEG
+bind B1+SpaceRight LNEND
+bind B2+SpaceLeft TOP
+bind B2+SpaceRight BOT
+bind B3+SpaceLeft HWINLT
+bind B3+SpaceRight HWINRT
+bind B6+SpaceLeft CHRLT
+bind B6+SpaceRight CHRRT
+bind B2+B3+SpaceLeft MUTE
+bind B2+B3+SpaceRight SAY_LINE
+
+include dots.kti
+
+assign brailleOn B1+B8+SpaceRight
+assign brailleOff B1+B8+SpaceLeft
+assign space SpaceLeft
+assign enter SpaceRight
+include input.kti
+
+include ../bm/display6.kti
+include ../bm/routing6.kti
