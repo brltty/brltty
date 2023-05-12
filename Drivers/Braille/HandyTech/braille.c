@@ -88,6 +88,16 @@ BEGIN_KEY_NAME_TABLE(rockers)
   KEY_NAME_ENTRY(HT_KEY_Down, "RightRockerBottom"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(navigation)
+  KEY_NAME_ENTRY(HT_KEY_Escape, "Display1"),
+  KEY_NAME_ENTRY(HT_KEY_LeftCenter, "Display2"),
+  KEY_NAME_ENTRY(HT_KEY_Return, "Display3"),
+
+  KEY_NAME_ENTRY(HT_KEY_Up, "Display4"),
+  KEY_NAME_ENTRY(HT_KEY_RightCenter, "Display5"),
+  KEY_NAME_ENTRY(HT_KEY_Down, "Display6"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLE(joystick)
   KEY_NAME_ENTRY(HT_KEY_JoystickLeft, "Left"),
   KEY_NAME_ENTRY(HT_KEY_JoystickRight, "Right"),
@@ -255,7 +265,7 @@ END_KEY_NAME_TABLES
 BEGIN_KEY_NAME_TABLES(ac4)
   KEY_NAME_TABLE(routing),
   KEY_NAME_TABLE(dots),
-  KEY_NAME_TABLE(rockers),
+  KEY_NAME_TABLE(navigation),
   KEY_NAME_TABLE(brailleStar),
   KEY_NAME_TABLE(joystick),
 END_KEY_NAME_TABLES
