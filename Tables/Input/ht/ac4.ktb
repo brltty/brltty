@@ -21,8 +21,6 @@ title HandyTech Activator
 bind B1+B4+SpaceLeft TOUCH_NAV
 
 include joystick.kti
-bind RoutingKey ROUTE
-bind RoutingKey+!RoutingKey CLIP_COPY
 
 bind SpaceLeft+RoutingKey PRINDENT
 bind SpaceRight+RoutingKey NXINDENT
