@@ -1108,6 +1108,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     regionSize = (int32_t) ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region size */
     if (regionSize < 0) {
+      CHECKEXC(regionSize != INT32_MIN, BRLAPI_ERROR_INVALID_PARAMETER, "invalid region size");
       rsiz = -regionSize;
       fill = true;
     } else {
