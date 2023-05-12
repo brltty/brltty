@@ -211,6 +211,10 @@ typedef enum {
   HT_KEY_JoystickDown       = 0X77,
   HT_KEY_JoystickAction     = 0X78,
 
+  /* Activator keys */
+  HT_KEY_LeftCenter         = 0X7A,
+  HT_KEY_RightCenter        = 0X7B,
+
   /* ranges and flags */
   HT_KEY_ROUTING = 0X20,
   HT_KEY_STATUS = 0X70,
