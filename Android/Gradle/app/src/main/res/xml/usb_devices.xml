@@ -15,6 +15,10 @@
   <!-- MDV [all models] -->
   <usb-device vendor-id="1027" product-id="24577" />
 
+  <!-- Device: 0403:6010 -->
+  <!-- DotPad [all models] -->
+  <usb-device vendor-id="1027" product-id="24592" />
+
   <!-- Device: 0403:DE58 -->
   <!-- Hedo [MobilLine] -->
   <usb-device vendor-id="1027" product-id="56920" />

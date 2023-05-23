@@ -39,6 +39,10 @@ const UsbDeviceEntry usbDeviceTable[] = {
 // MDV [all models]
 USB_DEVICE_ENTRY(0X0403, 0X6001, "at", "ce", "hd", "hm", "ht", "md"),
 
+// Device: 0403:6010
+// DotPad [all models]
+USB_DEVICE_ENTRY(0X0403, 0X6010, "dp"),
+
 // Device: 0403:DE58
 // Hedo [MobilLine]
 USB_DEVICE_ENTRY(0X0403, 0XDE58, "hd"),

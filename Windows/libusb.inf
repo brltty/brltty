@@ -119,6 +119,9 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Product: FT232 USB-Serial (UART) IC
 "LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
 
+; Device: 0403:6010
+"LibUSB-Win32: DotPad [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6010
+
 ; Device: 0403:DE58
 "LibUSB-Win32: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58
 
@@ -492,6 +495,9 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Vendor: Future Technology Devices International, Ltd.
 ; Product: FT232 USB-Serial (UART) IC
 "LibUSB-Win32: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6001
+
+; Device: 0403:6010
+"LibUSB-Win32: DotPad [all models]"=LIBUSB_DEV, USB\VID_0403&PID_6010
 
 ; Device: 0403:DE58
 "LibUSB-Win32: Hedo [MobilLine]"=LIBUSB_DEV, USB\VID_0403&PID_DE58

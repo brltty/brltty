@@ -30,6 +30,10 @@
 # MDV [all models]
 brltty 0x0003 0x0403 0x6001
 
+# Device: 0403:6010
+# DotPad [all models]
+brltty 0x0003 0x0403 0x6010
+
 # Device: 0403:DE58
 # Hedo [MobilLine]
 brltty 0x0003 0x0403 0xde58

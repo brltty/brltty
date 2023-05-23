@@ -691,6 +691,11 @@ set genericDevices [makeGenericDeviceTable {
       "FT232 USB-Serial (UART) IC"
    }
 
+   {  0X0403 0X6010
+      "Future Technology Devices International, Ltd"
+      "FT2232C/D/H Dual UART/FIFO IC"
+   }
+
    {  0X10C4 0XEA60
       "Cygnal Integrated Products, Inc."
       "CP210x UART Bridge / myAVR mySmartUSB light"

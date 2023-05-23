@@ -50,6 +50,10 @@
     <!-- MDV [all models] -->
     <modalias>usb:v0403p6001*</modalias>
 
+    <!-- Device: 0403:6010 -->
+    <!-- DotPad [all models] -->
+    <modalias>usb:v0403p6010*</modalias>
+
     <!-- Device: 0403:DE58 -->
     <!-- Hedo [MobilLine] -->
     <modalias>usb:v0403pDE58*</modalias>

@@ -732,6 +732,9 @@ Cebra
 .B cn
 Canute
 .TP 4
+.B dp
+DotPad
+.TP 4
 .B ec
 EcoBraille
 .TP 4

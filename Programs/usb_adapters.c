@@ -27,6 +27,12 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
     .operations = &usbSerialOperations_FTDI_FT8U232AM
   },
 
+  { /* DotPad */
+    .vendor=0X0403, .product=0X6010,
+    .generic = 1,
+    .operations = &usbSerialOperations_FTDI_FT232BM
+  },
+
   { /* Hedo MobilLine */
     .vendor=0X0403, .product=0XDE58,
     .operations = &usbSerialOperations_FTDI_FT232BM

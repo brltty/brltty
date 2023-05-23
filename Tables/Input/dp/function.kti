@@ -1,0 +1,39 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2023 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+bind FunctionKey.1 LNUP:TOP
+bind FunctionKey.4 LNDN:BOT
+
+bind FunctionKey.2 PRDIFLN:ATTRUP
+bind FunctionKey.3 NXDIFLN:ATTRDN
+
+bind FunctionKey.2+FunctionKey.1 PRPROMPT:HELP
+bind FunctionKey.2+FunctionKey.4 NXPROMPT
+
+bind FunctionKey.3+FunctionKey.1 PRPGRPH
+bind FunctionKey.3+FunctionKey.4 NXPGRPH:LEARN
+
+bind FunctionKey.1+FunctionKey.4 INFO
+bind FunctionKey.2+FunctionKey.3 TIME:PREFMENU
+
+context menu
+bind FunctionKey.1 MENU_PREV_ITEM:MENU_FIRST_ITEM
+bind FunctionKey.2 MENU_PREV_SETTING:PREFLOAD
+bind FunctionKey.3 MENU_NEXT_SETTING:PREFSAVE
+bind FunctionKey.4 MENU_NEXT_ITEM:MENU_LAST_ITEM
+

@@ -29,6 +29,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Product: FT232 USB-Serial (UART) IC
 "winusb: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=USB_Install, USB\VID_0403&PID_6001
 
+; Device: 0403:6010
+"winusb: DotPad [all models]"=USB_Install, USB\VID_0403&PID_6010
+
 ; Device: 0403:DE58
 "winusb: Hedo [MobilLine]"=USB_Install, USB\VID_0403&PID_DE58
 
@@ -402,6 +405,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Vendor: Future Technology Devices International, Ltd.
 ; Product: FT232 USB-Serial (UART) IC
 "winusb: Albatross [all models], Cebra [all models], HIMS [Sync Braille], HandyTech [FTDI chip], Hedo [MobilLine], MDV [all models]"=USB_Install, USB\VID_0403&PID_6001
+
+; Device: 0403:6010
+"winusb: DotPad [all models]"=USB_Install, USB\VID_0403&PID_6010
 
 ; Device: 0403:DE58
 "winusb: Hedo [MobilLine]"=USB_Install, USB\VID_0403&PID_DE58
