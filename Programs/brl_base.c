@@ -279,6 +279,14 @@ deallocateBrailleMessage (BrailleMessage *msg) {
   free(msg);
 }
 
+static void
+cancelBrailleMessageAlarm (BrailleDisplay *brl) {
+  if (brl->acknowledgements.alarm) {
+    asyncCancelRequest(brl->acknowledgements.alarm);
+    brl->acknowledgements.alarm = NULL;
+  }
+}
+
 static void setBrailleMessageAlarm (BrailleDisplay *brl);
 
 static int
@@ -306,11 +314,7 @@ writeNextBrailleMessage (BrailleDisplay *brl) {
     }
   }
 
-  if (brl->acknowledgements.alarm) {
-    asyncCancelRequest(brl->acknowledgements.alarm);
-    brl->acknowledgements.alarm = NULL;
-  }
-
+  cancelBrailleMessageAlarm(brl);
   return ok;
 }
 
@@ -408,6 +412,16 @@ writeBrailleMessage (
   }
 
   return 0;
+}
+
+void
+endBrailleMessages (BrailleDisplay *brl) {
+  cancelBrailleMessageAlarm(brl);
+
+  if (brl->acknowledgements.messages) {
+    deallocateQueue(brl->acknowledgements.messages);
+    brl->acknowledgements.messages = NULL;
+  }
 }
 
 int

@@ -127,6 +127,7 @@ extern int writeBrailleMessage (
 );
 
 extern int acknowledgeBrailleMessage (BrailleDisplay *brl);
+extern void endBrailleMessages (BrailleDisplay *brl);
 
 typedef struct {
   size_t *input;
