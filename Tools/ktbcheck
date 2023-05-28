@@ -18,11 +18,10 @@
 ###############################################################################
 
 . "$(dirname "${0}")/../prologue.sh"
+setBuildRoot
+
 set -e
-
-setSourceRoot
-cd "${sourceRoot}/Programs"
-
+cd "${buildRoot}/Programs"
 make --silent brltty-ktb
 ./brltty-ktb -T../Tables -D../lib -a "${@}"
 exit 0
