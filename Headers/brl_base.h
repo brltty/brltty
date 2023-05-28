@@ -122,7 +122,7 @@ extern int writeBraillePacket (
 
 extern int writeBrailleMessage (
   BrailleDisplay *brl, GioEndpoint *endpoint,
-  int type,
+  unsigned int type,
   const void *packet, size_t size
 );
 

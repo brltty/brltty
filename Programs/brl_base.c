@@ -264,9 +264,9 @@ writeBraillePacket (
 
 typedef struct {
   GioEndpoint *endpoint;
-  int type;
+  unsigned int type;
   size_t size;
-  unsigned char packet[0];
+  unsigned char packet[];
 } BrailleMessage;
 
 static void
@@ -368,7 +368,7 @@ deallocateBrailleMessageItem (void *item, void *data) {
 int
 writeBrailleMessage (
   BrailleDisplay *brl, GioEndpoint *endpoint,
-  int type,
+  unsigned int type,
   const void *packet, size_t size
 ) {
   if (brl->acknowledgements.alarm) {
