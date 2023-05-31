@@ -1386,6 +1386,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.usb.options.requestTimeout = 100;
 
   descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.discoverChannel = 1;
 
   if (connectBrailleResource(brl, identifier, &descriptor, initializeSession)) {
     return 1;
