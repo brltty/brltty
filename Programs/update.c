@@ -928,9 +928,9 @@ autospeak (AutospeakMode mode) {
                     last -= 1;
                   }
 
-                  if (last > first) {
+                  if (++last > first) {
                     column = first;
-                    count = last - first + 1;
+                    count = (last + 1) - first;
                     reason = "word inserted";
                     goto autospeak;
                   }
@@ -986,9 +986,9 @@ autospeak (AutospeakMode mode) {
                 }
               }
 
-              if ((length -= first) > 1) {
+              if ((length -= first) > 0) {
                 column = first;
-                count = length;
+                count = length + 1;
                 reason = "word appended";
                 goto autospeak;
               }
@@ -1016,8 +1016,9 @@ autospeak (AutospeakMode mode) {
       if (!reason) reason = "unknown reason";
 
       logMessage(LOG_CATEGORY(SPEECH_EVENTS),
-                 "autospeak: %s: [%d,%d] %d.%d",
-                 reason, ses->winx, ses->winy, column, count);
+        "autospeak: %s: [%d,%d] %d.%d",
+        reason, ses->winx, ses->winy, column, count
+      );
 
       speakCharacters(characters, count, 0, interrupt);
     }

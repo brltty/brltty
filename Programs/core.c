@@ -1025,14 +1025,10 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions
   unsigned char attributes[count];
   unsigned char *a = attributes;
 
-  {
-    unsigned int i;
-
-    for (i=0; i<count; i+=1) {
-      const ScreenCharacter *character = &characters[i];
-      *t++ = character->text;
-      *a++ = character->attributes;
-    }
+  for (unsigned int i=0; i<count; i+=1) {
+    const ScreenCharacter *character = &characters[i];
+    *t++ = character->text;
+    *a++ = character->attributes;
   }
 
   sayWideCharacters(&spk, text, attributes, count, options);
