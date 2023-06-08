@@ -144,7 +144,7 @@ typedef enum {
   DP_SEQ_TEXT = 0X80,
 } DP_PacketSeqFlag;
 
-#define DP_MAXIMUM_TEXT_COLUMNS 40
+#define DP_MAXIMUM_TEXT_COLUMNS 80
 
 typedef struct {
   unsigned char sync[2];
