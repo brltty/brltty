@@ -16,24 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-bind FunctionKey.1 LNUP:TOP
-bind FunctionKey.4 LNDN:BOT
+title DotPad with Panning Keys and 4 Function Keys
 
-bind FunctionKey.2 PRDIFLN:ATTRUP
-bind FunctionKey.3 NXDIFLN:ATTRDN
-
-bind FunctionKey.1+FunctionKey.2 PRPROMPT:HELP
-bind FunctionKey.2+FunctionKey.4 NXPROMPT
-
-bind FunctionKey.3+FunctionKey.1 PRPGRPH
-bind FunctionKey.3+FunctionKey.4 NXPGRPH:LEARN
-
-bind FunctionKey.1+FunctionKey.4 INFO
-bind FunctionKey.2+FunctionKey.3 TIME:PREFMENU
-
-context menu
-bind FunctionKey.1 MENU_PREV_ITEM:MENU_FIRST_ITEM
-bind FunctionKey.2 MENU_PREV_SETTING:PREFLOAD
-bind FunctionKey.3 MENU_NEXT_SETTING:PREFSAVE
-bind FunctionKey.4 MENU_NEXT_ITEM:MENU_LAST_ITEM
-
+include panning.kti
+include function.kti

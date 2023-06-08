@@ -90,10 +90,17 @@ BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(function),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(panfn4)
+  KEY_NAME_TABLE(panning),
+  KEY_NAME_TABLE(function),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(all)
+DEFINE_KEY_TABLE(panfn4)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(all),
+  &KEY_TABLE_DEFINITION(panfn4),
 END_KEY_TABLE_LIST
 
 struct BrailleDataStruct {
@@ -378,6 +385,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.serial.parameters = &serialParameters;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
+//descriptor.usb.options.readyDelay = 3000;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     return 1;
