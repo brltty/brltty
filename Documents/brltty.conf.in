@@ -701,6 +701,7 @@
 #screen-driver	as	# AtSpi
 #screen-driver	a2	# AtSpi2
 #screen-driver	em	# Terminal Emulator
+#screen-driver	fv	# File Viewer
 #screen-driver	hd	# Hurd
 #screen-driver	lx	# Linux
 #screen-driver	pb	# PcBios
@@ -724,6 +725,9 @@
 # AtSpi2 Screen Driver Parameters
 #screen-parameters a2:Release=yes # [yes,no]
 #screen-parameters a2:Type=default # [default,all,{terminal,text}+...]
+
+# File Viewer Screen Driver Parameters
+#screen-parameters fv:File=path #
 
 # Linux Screen Driver Parameters
 #screen-parameters lx:Charset=name+... # []

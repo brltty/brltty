@@ -1892,6 +1892,8 @@ in
       ;;
 esac
 
+BRLTTY_SCREEN_DRIVER([fv], [FileViewer])
+
 all_brltty_pty=""
 install_brltty_pty=""
 AC_CHECK_HEADER([sys/shm.h], [dnl
