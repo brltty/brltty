@@ -38,32 +38,32 @@ typedef enum {
 #include "scr_driver.h"
 
 static const char *filePath;
-
-static wchar_t *screenCharacters;
-static int screenOffset;
+static wchar_t *fileCharacters;
 
 typedef struct {
   unsigned int offset;
   unsigned int length;
-} ScreenLine;
+} LineDescriptor;
 
-static ScreenLine *screenLines;
-static unsigned int screenLineSize;
-static unsigned int screenLineCount;
-static int screenLineWidth;
+static LineDescriptor *lineDescriptors;
+static unsigned int lineSize;
+static unsigned int lineCount;
+
+static int screenWidth;
+static int cursorOffset;
 
 static void
 destruct_FileViewerScreen (void) {
   brlttyDisableInterrupt();
 
-  if (screenLines) {
-    free(screenLines);
-    screenLines = NULL;
+  if (lineDescriptors) {
+    free(lineDescriptors);
+    lineDescriptors = NULL;
   }
 
-  if (screenCharacters) {
-    free(screenCharacters);
-    screenCharacters = NULL;
+  if (fileCharacters) {
+    free(fileCharacters);
+    fileCharacters = NULL;
   }
 }
 
@@ -76,25 +76,25 @@ processParameters_FileViewerScreen (char **parameters) {
 }
 
 static int
-addScreenLine (const wchar_t *from, const wchar_t *to) {
+addLine (const wchar_t *from, const wchar_t *to) {
   size_t lineLength = to - from;
-  if (lineLength > screenLineWidth) screenLineWidth = lineLength;
+  if (lineLength > screenWidth) screenWidth = lineLength;
 
-  if (screenLineCount == screenLineSize) {
-    size_t newSize = screenLineSize? screenLineSize<<1: 1;
-    ScreenLine *newLines = realloc(screenLines, ARRAY_SIZE(screenLines, newSize));
+  if (lineCount == lineSize) {
+    size_t newSize = lineSize? lineSize<<1: 0X80;
+    LineDescriptor *newArray = realloc(lineDescriptors, ARRAY_SIZE(lineDescriptors, newSize));
 
-    if (!newLines) {
+    if (!newArray) {
       logMallocError();
       return 0;
     }
 
-    screenLines = newLines;
-    screenLineSize = newSize;
+    lineDescriptors = newArray;
+    lineSize = newSize;
   }
 
-  ScreenLine *line = &screenLines[screenLineCount++];
-  line->offset = from - screenCharacters;
+  LineDescriptor *line = &lineDescriptors[lineCount++];
+  line->offset = from - fileCharacters;
   line->length = to - from;
 
   return 1;
@@ -103,23 +103,23 @@ addScreenLine (const wchar_t *from, const wchar_t *to) {
 static int
 setScreenContent (const char *text) {
   unsigned int characterCount = countUtf8Characters(text);
-  screenCharacters = malloc(characterCount * sizeof(*screenCharacters));
+  fileCharacters = malloc(characterCount * sizeof(*fileCharacters));
 
-  if (screenCharacters) {
-    makeWcharsFromUtf8(text, screenCharacters, characterCount);
+  if (fileCharacters) {
+    makeWcharsFromUtf8(text, fileCharacters, characterCount);
 
-    const wchar_t *current = screenCharacters;
+    const wchar_t *current = fileCharacters;
     const wchar_t *end = current + characterCount;
 
     while (current < end) {
       wchar_t *next = wcschr(current, WC_C('\n'));
 
       if (!next) {
-        if (!addScreenLine(current, end)) return 0;
+        if (!addLine(current, end)) return 0;
         break;
       }
 
-      if (!addScreenLine(current, next)) return 0;
+      if (!addLine(current, next)) return 0;
       current = next + 1;
     }
 
@@ -132,33 +132,25 @@ setScreenContent (const char *text) {
 }
 
 static int
-construct_FileViewerScreen (void) {
-  screenCharacters = NULL;
-  screenOffset = 0;
-
-  screenLines = NULL;
-  screenLineSize = 0;
-  screenLineCount = 0;
-  screenLineWidth = 0;
-
+loadFile (void) {
   const char *problem = NULL;
 
   if (filePath) {
     struct stat status;
 
     if (stat(filePath, &status) != -1) {
-      size_t size = status.st_size;
-      char *text = malloc(size + 1);
+      size_t fileSize = status.st_size;
+      char *text = malloc(fileSize + 1);
 
       if (text) {
         int fileDescriptor = open(filePath, O_RDONLY);
 
         if (fileDescriptor != -1) {
-          ssize_t result = read(fileDescriptor, text, size);
+          ssize_t result = read(fileDescriptor, text, fileSize);
 
           if (result != -1) {
-            if (result < size) size = result;
-            text[size] = 0;
+            if (result < fileSize) fileSize = result;
+            text[fileSize] = 0;
             setScreenContent(text);
           } else {
             problem = strerror(errno);
@@ -181,18 +173,32 @@ construct_FileViewerScreen (void) {
     filePath = NULL;
   }
 
-  if (problem) {
-    char log[0X100];
-    STR_BEGIN(log, sizeof(log));
+  if (!problem) return 1;
+  char log[0X100];
+  STR_BEGIN(log, sizeof(log));
 
-    if (filePath) STR_PRINTF("%s: ", filePath);
-    STR_PRINTF("%s", problem);
+  if (filePath) STR_PRINTF("%s: ", filePath);
+  STR_PRINTF("%s", problem);
 
-    STR_END;
-    logMessage(LOG_WARNING, "%s", log);
-    setScreenContent(log);
-  }
+  STR_END;
+  logMessage(LOG_WARNING, "%s", log);
 
+  setScreenContent(log);
+  return 0;
+}
+
+static int
+construct_FileViewerScreen (void) {
+  fileCharacters = NULL;
+
+  lineDescriptors = NULL;
+  lineSize = 0;
+  lineCount = 0;
+
+  screenWidth = 0;
+  cursorOffset = 0;
+
+  loadFile();
   brlttyEnableInterrupt();
   return 1;
 }
@@ -209,35 +215,35 @@ refresh_FileViewerScreen (void) {
 
 static int
 toScreenRow (int offset) {
-  return offset / screenLineWidth;
+  return offset / screenWidth;
 }
 
 static int
 toScreenColumn (int offset) {
-  return offset % screenLineWidth;
+  return offset % screenWidth;
 }
 
 static void
 describe_FileViewerScreen (ScreenDescription *description) {
-  description->rows = screenLineCount;
-  description->cols = screenLineWidth;
-  description->posy = toScreenRow(screenOffset);
-  description->posx = toScreenColumn(screenOffset);
+  description->rows = lineCount;
+  description->cols = screenWidth;
+  description->posy = toScreenRow(cursorOffset);
+  description->posx = toScreenColumn(cursorOffset);
 }
 
 static int
 readCharacters_FileViewerScreen (const ScreenBox *box, ScreenCharacter *buffer) {
-  if (validateScreenBox(box, screenLineWidth, screenLineCount)) {
+  if (validateScreenBox(box, screenWidth, lineCount)) {
     ScreenCharacter *target = buffer;
 
     for (unsigned int row=0; row<box->height; row+=1) {
-      const ScreenLine *line = &screenLines[box->top + row];
+      const LineDescriptor *line = &lineDescriptors[box->top + row];
 
       unsigned int from = box->left;
       unsigned int to = from + box->width;
 
       for (unsigned int column=from; column<to; column+=1) {
-        target->text = (column < line->length)? screenCharacters[line->offset + column]: WC_C(' ');
+        target->text = (column < line->length)? fileCharacters[line->offset + column]: WC_C(' ');
         target->attributes = SCR_COLOUR_DEFAULT;
         target += 1;
       }
@@ -251,21 +257,21 @@ readCharacters_FileViewerScreen (const ScreenBox *box, ScreenCharacter *buffer) 
 
 static int
 toScreenOffset (int row, int column) {
-  return (row * screenLineWidth) + column;
+  return (row * screenWidth) + column;
 }
 
 static int
 routeCursor_FileViewerScreen (int column, int row, int screen) {
-  screenOffset = toScreenOffset(row, column);
+  cursorOffset = toScreenOffset(row, column);
   return 1;
 }
 
 static void
 moveCursor (int amount) {
-  int newOffset = screenOffset + amount;
+  int newOffset = cursorOffset + amount;
 
-  if ((newOffset >= 0) && (newOffset < (screenLineCount * screenLineWidth))) {
-    screenOffset = newOffset;
+  if ((newOffset >= 0) && (newOffset < (lineCount * screenWidth))) {
+    cursorOffset = newOffset;
   } else {
     alert(ALERT_COMMAND_REJECTED);
   }
@@ -273,8 +279,8 @@ moveCursor (int amount) {
 
 static int
 isBlankRow (int row) {
-  const ScreenLine *line = &screenLines[row];
-  const wchar_t *character = &screenCharacters[line->offset];
+  const LineDescriptor *line = &lineDescriptors[row];
+  const wchar_t *character = &fileCharacters[line->offset];
   const wchar_t *end = character + line->length;
 
   while (character < end) {
@@ -288,14 +294,14 @@ isBlankRow (int row) {
 static void
 findPreviousParagraph (void) {
   int wasBlank = 1;
-  int row = toScreenRow(screenOffset);
+  int row = toScreenRow(cursorOffset);
 
   while (row > 0) {
     int isBlank = isBlankRow(--row);
 
     if (isBlank != wasBlank) {
       if ((wasBlank = isBlank)) {
-        screenOffset = toScreenOffset(row+1, 0);
+        cursorOffset = toScreenOffset(row+1, 0);
         return;
       }
     }
@@ -304,21 +310,21 @@ findPreviousParagraph (void) {
   if (wasBlank) {
     alert(ALERT_COMMAND_REJECTED);
   } else {
-    screenOffset = toScreenOffset(row, 0);
+    cursorOffset = toScreenOffset(row, 0);
   }
 }
 
 static void
 findNextParagraph (void) {
   int wasBlank = 0;
-  int row = toScreenRow(screenOffset);
+  int row = toScreenRow(cursorOffset);
 
-  while (row < screenLineCount) {
+  while (row < lineCount) {
     int isBlank = isBlankRow(row);
 
     if (isBlank != wasBlank) {
       if (!(wasBlank = isBlank)) {
-        screenOffset = toScreenOffset(row, 0);
+        cursorOffset = toScreenOffset(row, 0);
         return;
       }
     }
@@ -345,11 +351,11 @@ handleCommand_FileViewerScreen (int command) {
       return 1;
 
     case BRL_CMD_KEY(CURSOR_UP):
-      moveCursor(-screenLineWidth);
+      moveCursor(-screenWidth);
       return 1;
 
     case BRL_CMD_KEY(CURSOR_DOWN):
-      moveCursor(screenLineWidth);
+      moveCursor(screenWidth);
       return 1;
 
     case BRL_CMD_KEY(PAGE_UP):
@@ -361,26 +367,15 @@ handleCommand_FileViewerScreen (int command) {
       return 1;
 
     case BRL_CMD_KEY(HOME):
-      screenOffset = 0;
+      cursorOffset = 0;
       return 1;
 
     case BRL_CMD_KEY(END):
-      screenOffset = (screenLineCount - 1) * screenLineWidth;
+      cursorOffset = toScreenOffset(lineCount-1, 0);
       return 1;
   }
 
   return 0;
-}
-
-static int
-insertKey_FileViewerScreen (ScreenKey key) {
-  if (key == SCR_KEY_ESCAPE) {
-    brlttyInterrupt(WAIT_STOP);
-  } else {
-    return 0;
-  }
-
-  return 1;
 }
 
 static void
@@ -395,7 +390,6 @@ scr_initialize (MainScreen *main) {
 
   main->base.routeCursor = routeCursor_FileViewerScreen;
   main->base.handleCommand = handleCommand_FileViewerScreen;
-  main->base.insertKey = insertKey_FileViewerScreen;
 
   main->processParameters = processParameters_FileViewerScreen;
   main->construct = construct_FileViewerScreen;

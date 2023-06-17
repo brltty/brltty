@@ -3,6 +3,7 @@
 "as","AtSpi","X11 desktop via AT-SPI 1"
 "a2","AtSpi2","X11 desktop via AT-SPI 2"
 "em","Terminal Emulator",""
+"fv","File Viewer",""
 "hd","Hurd","The Hurd"
 "lx","Linux","Linux"
 "pb","PcBios","MS-DOS"
