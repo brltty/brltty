@@ -2,6 +2,7 @@
 
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
+drivers_directory="@drivers_directory@"
 program_directory="@program_directory@"
 xbrlapi="$program_directory/xbrlapi"
 brltty="$program_directory/brltty"
@@ -9,7 +10,9 @@ brltty="$program_directory/brltty"
 if [ -x "${xbrlapi}" ]; then
   if "${xbrlapi}" 2>/dev/null ; then
     # xbrlapi could connect to BrlAPI, try to start brltty with AtSpi2 driver.
-    if [ -x "${brltty}" ]; then
+    if [ -x "${brltty}" -a \
+         -e "$drivers_directory/libbrlttybba.so" -a \
+         -e "$drivers_directory/libbrlttyxa2.so" ]; then
       "${brltty}" -b ba -s no -x a2 -N 2>/dev/null
     fi
   fi
