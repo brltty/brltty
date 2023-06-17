@@ -16,6 +16,7 @@
   <string name="BRAILLE_DRIVER_LABEL_cb" translatable="false">CombiBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_ce" translatable="false">Cebra</string>
   <string name="BRAILLE_DRIVER_LABEL_cn" translatable="false">Canute</string>
+  <string name="BRAILLE_DRIVER_LABEL_dp" translatable="false">DotPad</string>
   <string name="BRAILLE_DRIVER_LABEL_ec" translatable="false">EcoBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_eu" translatable="false">EuroBraille</string>
   <string name="BRAILLE_DRIVER_LABEL_fa" translatable="false">FrankAudiodata</string>
@@ -56,6 +57,7 @@
     <item>@string/BRAILLE_DRIVER_LABEL_cb</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ce</item>
     <item>@string/BRAILLE_DRIVER_LABEL_cn</item>
+    <item>@string/BRAILLE_DRIVER_LABEL_dp</item>
     <item>@string/BRAILLE_DRIVER_LABEL_ec</item>
     <item>@string/BRAILLE_DRIVER_LABEL_eu</item>
     <item>@string/BRAILLE_DRIVER_LABEL_fa</item>
@@ -97,6 +99,7 @@
     <item>cb</item>
     <item>ce</item>
     <item>cn</item>
+    <item>dp</item>
     <item>ec</item>
     <item>eu</item>
     <item>fa</item>

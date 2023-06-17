@@ -31,6 +31,9 @@
 brltty 0x0003 0x0403 0x6001
 
 # Device: 0403:6010
+# Generic Identifier
+# Vendor: Future Technology Devices International, Ltd
+# Product: FT2232C/D/H Dual UART/FIFO IC
 # DotPad [all models]
 brltty 0x0003 0x0403 0x6010
 

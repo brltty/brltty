@@ -40,6 +40,9 @@ const UsbDeviceEntry usbDeviceTable[] = {
 USB_DEVICE_ENTRY(0X0403, 0X6001, "at", "ce", "hd", "hm", "ht", "md"),
 
 // Device: 0403:6010
+// Generic Identifier
+// Vendor: Future Technology Devices International, Ltd
+// Product: FT2232C/D/H Dual UART/FIFO IC
 // DotPad [all models]
 USB_DEVICE_ENTRY(0X0403, 0X6010, "dp"),
 

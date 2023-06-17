@@ -51,6 +51,9 @@
     <modalias>usb:v0403p6001*</modalias>
 
     <!-- Device: 0403:6010 -->
+    <!-- Generic Identifier -->
+    <!-- Vendor: Future Technology Devices International, Ltd -->
+    <!-- Product: FT2232C/D/H Dual UART/FIFO IC -->
     <!-- DotPad [all models] -->
     <modalias>usb:v0403p6010*</modalias>
 
