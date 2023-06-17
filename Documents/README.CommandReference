@@ -79,6 +79,7 @@ Alphabetical Command Index
 * `GUI_TITLE`_
 * `HELP`_
 * `HOME`_
+* `HOSTCMD`_
 * `HOST_COPY`_
 * `HOST_CUT`_
 * `HOST_PASTE`_
@@ -106,6 +107,7 @@ Alphabetical Command Index
 * `LNDN`_
 * `LNEND`_
 * `LNUP`_
+* `MACRO`_
 * `MENU_FIRST_ITEM`_
 * `MENU_LAST_ITEM`_
 * `MENU_NEXT_ITEM`_
@@ -135,6 +137,7 @@ Alphabetical Command Index
 * `PRDIFLN`_
 * `PREFLOAD`_
 * `PREFMENU`_
+* `PREFRESET`_
 * `PREFSAVE`_
 * `PRINDENT`_
 * `PRNBWIN`_
@@ -149,6 +152,7 @@ Alphabetical Command Index
 * `ROUTE`_
 * `ROUTE_CURR_LOCN`_
 * `ROUTE_LINE`_
+* `ROUTE_SPEECH`_
 * `SAY_ABOVE`_
 * `SAY_ALL`_
 * `SAY_BELOW`_
@@ -1119,8 +1123,9 @@ Menu Operations
 * `MENU_PREV_SETTING`_
 * `MENU_NEXT_SETTING`_
 * `MENU_PREV_LEVEL`_
-* `PREFLOAD`_
 * `PREFSAVE`_
+* `PREFLOAD`_
+* `PREFRESET`_
 
 .. _MENU_PREV_ITEM:
 
@@ -1174,13 +1179,17 @@ The following modifiers may be specified:
 
 * Motion: route
 
+.. _PREFSAVE:
+
+**PREFSAVE** - Save preferences to disk.
+
 .. _PREFLOAD:
 
 **PREFLOAD** - Restore preferences from disk.
 
-.. _PREFSAVE:
+.. _PREFRESET:
 
-**PREFSAVE** - Save preferences to disk.
+**PREFRESET** - Reset preferences to defaults.
 
 Speech Functions
 ================
@@ -1325,6 +1334,7 @@ The following modifiers may be specified:
 Speech Navigation
 =================
 
+* `ROUTE_SPEECH`_
 * `SPEAK_CURR_CHAR`_
 * `DESC_CURR_CHAR`_
 * `SPEAK_PREV_CHAR`_
@@ -1343,6 +1353,14 @@ Speech Navigation
 * `SPEAK_INDENT`_
 * `SPEAK_CURR_LOCN`_
 * `SHOW_CURR_LOCN`_
+
+.. _ROUTE_SPEECH:
+
+**ROUTE_SPEECH** - Bring speech cursor to character.
+
+The following modifiers may be specified:
+
+* a column number
 
 .. _SPEAK_CURR_CHAR:
 
@@ -1801,6 +1819,8 @@ Internal Functions
 * `PASSAT`_
 * `PASSPS2`_
 * `TOUCH_AT`_
+* `MACRO`_
+* `HOSTCMD`_
 
 .. _NOOP:
 
@@ -1845,6 +1865,22 @@ The following modifiers may be specified:
 .. _TOUCH_AT:
 
 **TOUCH_AT** - Current reading location.
+
+The following modifiers may be specified:
+
+* an offset
+
+.. _MACRO:
+
+**MACRO** - Execute command macro.
+
+The following modifiers may be specified:
+
+* an offset
+
+.. _HOSTCMD:
+
+**HOSTCMD** - Run host command.
 
 The following modifiers may be specified:
 
