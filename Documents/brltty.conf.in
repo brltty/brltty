@@ -288,6 +288,7 @@
 # BrlAPI Braille Driver Parameters
 #braille-parameters ba:Auth=@CONFIGURATION_DIRECTORY@/@api_authkeyfile@
 #braille-parameters ba:Host=:0
+#braille-parameters ba:SpeechChanges=yes # [yes,no]
 
 # BrailleLite Braille Driver Parameters
 #braille-parameters bl:BaudRate=9600 # [300,600,1200,2400,4800,9600,19200,38400]
