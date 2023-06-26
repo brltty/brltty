@@ -18,6 +18,8 @@
 
 #include "prologue.h"
 
+#include <time.h>
+#include <sys/ioctl.h>
 #include <dev/wscons/wsconsio.h>
 
 #include "log.h"

@@ -1,4 +1,4 @@
-#!/bin/bash -p
+#!/usr/bin/env bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -28,9 +28,30 @@ All of the options are passed through, unmodified, as additional options to the 
 END-OF-HELP
 
 configureOptions=(
-   --disable-speech-support --disable-api
-   --without-pcm-package
    --disable-icu
+   --disable-liblouis
+   --disable-polkit
+
+   --disable-api
+   --without-libbraille
+   --disable-speech-support
+
+   --without-pgmpath-package
+   --without-pgmprivs-package
+   --without-service-package
+   --without-params-package
+   --without-charset-package
+   --without-rgx-package
+   --without-mntpt-package
+   --without-mntfs-package
+   --without-kbd-package
+   --without-bell-package
+   --without-leds-package
+   --without-pcm-package
+   --without-midi-package
+   --without-bluetooth-package
+   --without-hid-package
+   --without-ports-package
 )
 
 "${programDirectory}/configure" --quiet "${configureOptions[@]}" "${@}"

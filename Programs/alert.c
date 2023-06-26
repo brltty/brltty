@@ -26,8 +26,11 @@
 #include "message.h"
 #include "brl_dots.h"
 #include "utf8.h"
-#include "spk.h"
 #include "core.h"
+
+#ifdef ENABLE_SPEECH_SUPPORT
+#include "spk.h"
+#endif /* ENABLE_SPEECH_SUPPORT */
 
 typedef struct {
   unsigned char duration;
@@ -268,7 +271,9 @@ alert (AlertIdentifier identifier) {
 
 void
 speakAlertMessage (const char *message) {
+#ifdef ENABLE_SPEECH_SUPPORT
   sayString(&spk, message, SAY_OPT_MUTE_FIRST);
+#endif /* ENABLE_SPEECH_SUPPORT */
 }
 
 void
