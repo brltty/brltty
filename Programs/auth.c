@@ -177,33 +177,6 @@ checkPeerGroup (PeerCredentials *credentials, const MethodDescriptor_group *grou
   return 0;
 }
 
-#elif defined(SO_PEERCRED)
-#define CAN_CHECK_CREDENTIALS
-
-typedef struct ucred PeerCredentials;
-
-static int
-retrievePeerCredentials (PeerCredentials *credentials, int fd) {
-  socklen_t length = sizeof(*credentials);
-  if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, credentials, &length) != -1) return 1;
-  logSystemError("getsockopt[SO_PEERCRED]");
-  return 0;
-}
-
-static void
-releasePeerCredentials (PeerCredentials *credentials) {
-}
-
-static int
-checkPeerUser (PeerCredentials *credentials, const MethodDescriptor_user *user) {
-  return user->id == credentials->uid;
-}
-
-static int
-checkPeerGroup (PeerCredentials *credentials, const MethodDescriptor_group *group) {
-  return group->id == credentials->gid;
-}
-
 #elif defined(HAVE_GETPEEREID)
 #define CAN_CHECK_CREDENTIALS
 
@@ -231,6 +204,33 @@ checkPeerUser (PeerCredentials *credentials, const MethodDescriptor_user *user) 
 static int
 checkPeerGroup (PeerCredentials *credentials, const MethodDescriptor_group *group) {
   return group->id == credentials->egid;
+}
+
+#elif defined(SO_PEERCRED)
+#define CAN_CHECK_CREDENTIALS
+
+typedef struct ucred PeerCredentials;
+
+static int
+retrievePeerCredentials (PeerCredentials *credentials, int fd) {
+  socklen_t length = sizeof(*credentials);
+  if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, credentials, &length) != -1) return 1;
+  logSystemError("getsockopt[SO_PEERCRED]");
+  return 0;
+}
+
+static void
+releasePeerCredentials (PeerCredentials *credentials) {
+}
+
+static int
+checkPeerUser (PeerCredentials *credentials, const MethodDescriptor_user *user) {
+  return user->id == credentials->uid;
+}
+
+static int
+checkPeerGroup (PeerCredentials *credentials, const MethodDescriptor_group *group) {
+  return group->id == credentials->gid;
 }
 
 #else /* peer credentials method */

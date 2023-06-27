@@ -28,7 +28,6 @@ All of the options are passed through, unmodified, as additional options to the 
 END-OF-HELP
 
 configureOptions=(
-   --disable-api
    --disable-icu
    --disable-liblouis
    --disable-polkit
