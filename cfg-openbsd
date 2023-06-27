@@ -28,13 +28,25 @@ All of the options are passed through, unmodified, as additional options to the 
 END-OF-HELP
 
 configureOptions=(
+   --disable-api
    --disable-icu
    --disable-liblouis
    --disable-polkit
 
-   --disable-api
    --without-libbraille
-   --disable-speech-support
+   --without-espeak
+   --without-espeak-ng
+   --without-flite
+   --without-mikropuhe
+   --without-speechd
+   --without-swift
+   --without-theta
+
+   --disable-emacs-bindings
+   --disable-java-bindings
+   --disable-lua-bindings
+   --disable-ocaml-bindings
+   --disable-python-bindings
 
    --without-pgmpath-package
    --without-pgmprivs-package

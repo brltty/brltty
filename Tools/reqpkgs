@@ -80,6 +80,10 @@ set -e
          platformName="freebsd"
          ;;
 
+      pkg_info)
+         platformName="openbsd"
+         ;;
+
       xbps)
          platformName="void"
          ;;
