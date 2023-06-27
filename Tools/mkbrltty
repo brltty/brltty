@@ -34,5 +34,5 @@ makeTargets=(
    all-api-bindings brltty-clip xbrlapi apitest
 )
 
-make -s -C "${programsSubdirectory}" "${makeTargets[@]}"
+gmake -s -C "${programsSubdirectory}" "${makeTargets[@]}"
 exit 0
