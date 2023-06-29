@@ -28,7 +28,7 @@ bind FunctionKey.2+FunctionKey.4 NXPROMPT
 bind FunctionKey.3+FunctionKey.1 PRPGRPH
 bind FunctionKey.3+FunctionKey.4 NXPGRPH:LEARN
 
-bind FunctionKey.1+FunctionKey.4 INFO
+bind FunctionKey.1+FunctionKey.4 HOME:BACK
 bind FunctionKey.2+FunctionKey.3 TIME:PREFMENU
 
 context menu

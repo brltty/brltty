@@ -18,7 +18,11 @@
 
 bind PanLeft FWINLT:LNBEG
 bind PanRight FWINRT:LNEND
-bind PanLeft+PanRight HOME:BACK
+
+# A short press of both panning keys is expected to refresh the whole display.
+# A long press of both panning keys is imlemented internally;
+# it gives haptic feedback regarding how charged the battery is.
+bind PanLeft+PanRight REFRESH:NOOP
 
 context menu
 bind PanLeft FWINLT:MENU_PREV_LEVEL
