@@ -61,24 +61,20 @@ typedef enum {
 } DP_DotsPerCell;
 
 typedef struct {
+  unsigned char rowCount; // 1, 2
+  unsigned char columnCount; // 12, 14, 15, 16, 20, 24, 26, 28, 30, 32, 36, 40
+  unsigned char dividedLine;
+  unsigned char refreshTime; // 100ms
+} DP_DisplayDescriptor;
+
+typedef struct {
   unsigned char features;
   unsigned char dotsPerCell; // 0:6, 1:8
   unsigned char distanceBetweenPins; // 0.1mm
-  unsigned char reserved;
+  unsigned char functionKeyCount;
 
-  struct {
-    unsigned char rowCount; // 1, 2
-    unsigned char columnCount; // 12, 14, 15, 16, 20, 24, 26, 28, 30, 32, 36, 40
-    unsigned char dividedLine;
-    unsigned char refreshTime; // 100ms
-  } text;
-
-  struct {
-    unsigned char rowCount; // 10, 8, 5
-    unsigned char columnCount; // 20, 30, 32, 36, 40, 48
-    unsigned char dividedLine;
-    unsigned char refreshTime; // 100ms
-  } graphic;
+  DP_DisplayDescriptor text;
+  DP_DisplayDescriptor graphic;
 } DP_BoardInformation;
 
 typedef enum {

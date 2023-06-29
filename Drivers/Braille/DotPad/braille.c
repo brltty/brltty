@@ -412,6 +412,16 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
     sizeof(brl->data->boardInformation)
   );
 
+  {
+    DP_BoardInformation *info = &brl->data->boardInformation;
+
+    if (info->features & DP_HAS_FUNCTION_KEYS) {
+      if (!info->functionKeyCount) {
+        info->functionKeyCount = 4;
+      }
+    }
+  }
+
   logBytes(LOG_CATEGORY(BRAILLE_DRIVER),
     "Board Information",
     &brl->data->boardInformation,
