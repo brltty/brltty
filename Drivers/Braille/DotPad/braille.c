@@ -23,7 +23,16 @@
 
 #include "log.h"
 #include "bitfield.h"
+#include "parse.h"
 
+#define BRL_STATUS_FIELDS sfTime, sfSpace, sfCursorAndWindowColumn3, sfSpace, sfCursorAndWindowRow2, sfSpace, sfScreenNumber, sfSpace, sfStateLetter
+#define BRL_HAVE_STATUS_CELLS
+
+typedef enum {
+  PARM_DISPLAY,
+} DP_DriverParameter;
+
+#define BRLPARMS "display"
 #include "brl_driver.h"
 #include "brldefs-dp.h"
 
@@ -103,6 +112,26 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(panfn4),
 END_KEY_TABLE_LIST
 
+typedef struct {
+  unsigned char *cells;
+  unsigned char destination;
+} ExternalRowEntry;
+
+typedef struct {
+  unsigned char *cells;
+
+  const ExternalRowEntry *upperRow;
+  const ExternalRowEntry *lowerRow;
+
+  unsigned char upperShift;
+  unsigned char lowerShift;
+
+  unsigned char upperMask;
+  unsigned char lowerMask;
+
+  unsigned char hasChanged;
+} InternalRowEntry;
+
 struct BrailleDataStruct {
   DP_BoardInformation boardInformation;
   unsigned char firmwareVersion[8];
@@ -117,10 +146,291 @@ struct BrailleDataStruct {
   } keys;
 
   struct {
-    unsigned char rewrite;
-    unsigned char cells[DP_MAXIMUM_TEXT_COLUMNS];
-  } text;
+    unsigned char destination;
+    unsigned char refreshTime;
+
+    unsigned char horizontalSpacing;
+    unsigned char verticalSpacing;
+
+    unsigned char cellWidth;
+    unsigned char cellHeight;
+
+    unsigned char externalColumns;
+    unsigned char externalRows;
+
+    unsigned char internalColumns;
+    unsigned char internalRows;
+  } display;
+
+  struct {
+    unsigned char *externalCells;
+    ExternalRowEntry *externalRows;
+
+    unsigned char *internalCells;
+    InternalRowEntry *internalRows;
+
+    unsigned char *statusCells;
+  } arrays;;
 };
+
+static void
+setExternalDisplayProperties (BrailleDisplay *brl, const DP_DisplayDescriptor *display) {
+  {
+    unsigned char dotsPerCell = brl->data->boardInformation.dotsPerCell;
+
+    unsigned char *width = &brl->data->display.cellWidth;
+    unsigned char *height = &brl->data->display.cellHeight;
+
+    switch (dotsPerCell) {
+      default:
+        logMessage(LOG_WARNING, "unexpected dots per cell: %u", dotsPerCell);
+        /* fall through */
+      case DP_DPC_8:
+        *width = 2;
+        *height = 4;
+        break;
+
+      case DP_DPC_6:
+        *width = 2;
+        *height = 3;
+        break;
+    }
+  }
+
+  brl->data->display.refreshTime = display->refreshTime;
+  brl->data->display.externalColumns = display->columnCount;
+  brl->data->display.externalRows = display->rowCount;
+}
+
+static unsigned char
+toInternalDimension (unsigned char count, unsigned char internalDots, unsigned char externalDots, unsigned char spacing) {
+  return (((count * externalDots) - internalDots) / (internalDots + spacing)) + 1;
+}
+
+static void
+setInternalDisplayProperties (BrailleDisplay *brl) {
+  brl->data->display.internalColumns = toInternalDimension(
+    brl->data->display.externalColumns,
+    2, brl->data->display.cellWidth,
+    brl->data->display.horizontalSpacing
+  );
+
+  brl->data->display.internalRows = toInternalDimension(
+    brl->data->display.externalRows,
+    4, brl->data->display.cellHeight,
+    brl->data->display.verticalSpacing
+  );
+
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
+    "display properties: hs:%u vs:%u cell:%ux%u ext:%ux%u int:%ux%u",
+    brl->data->display.horizontalSpacing, brl->data->display.verticalSpacing,
+    brl->data->display.cellWidth, brl->data->display.cellHeight,
+    brl->data->display.externalColumns, brl->data->display.externalRows,
+    brl->data->display.internalColumns, brl->data->display.internalRows
+  );
+
+  brl->textColumns = brl->data->display.internalColumns;
+  brl->textRows = brl->data->display.internalRows;
+}
+
+static void
+useTextDisplay (BrailleDisplay *brl) {
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "using text display");
+
+  brl->data->display.destination = 0;
+  brl->data->display.horizontalSpacing = 0;
+  brl->data->display.verticalSpacing = 0;
+
+  setExternalDisplayProperties(brl, &brl->data->boardInformation.text);
+  setInternalDisplayProperties(brl);
+}
+
+static void
+useGraphicDisplay (BrailleDisplay *brl) {
+  logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "using graphic display");
+
+  if (brl->data->boardInformation.features & DP_HAS_TEXT_DISPLAY) {
+    brl->data->display.destination = brl->data->boardInformation.text.rowCount;
+  } else {
+    brl->data->display.destination = 1;
+  }
+
+  brl->data->display.horizontalSpacing = 1;
+  brl->data->display.verticalSpacing = 2;
+
+  setExternalDisplayProperties(brl, &brl->data->boardInformation.graphic);
+  setInternalDisplayProperties(brl);
+
+  if (brl->data->boardInformation.features & DP_HAS_TEXT_DISPLAY) {
+    brl->statusColumns = brl->data->boardInformation.text.columnCount;
+    brl->statusRows = 1;
+  }
+}
+
+static int
+selectDisplay (BrailleDisplay *brl, const char *parameter) {
+  typedef struct {
+    const char *name; // must be first
+    void (*useDisplay) (BrailleDisplay *brl);
+    unsigned char featureBit;
+  } ChoiceEntry;
+
+  static const ChoiceEntry choiceTable[] = {
+    { .name = "default" },
+
+    { .name = "text",
+      .useDisplay = useTextDisplay,
+      .featureBit = DP_HAS_TEXT_DISPLAY,
+    },
+
+    { .name = "graphic",
+      .useDisplay = useGraphicDisplay,
+      .featureBit = DP_HAS_GRAPHIC_DISPLAY,
+    },
+
+    { .name = NULL }
+  };
+
+  unsigned char features = brl->data->boardInformation.features;
+  unsigned int choiceIndex;
+
+  if (validateChoiceEx(&choiceIndex, parameter, choiceTable, sizeof(choiceTable[0]))) {
+    const ChoiceEntry *choice = &choiceTable[choiceIndex];
+
+    if (features & choice->featureBit) {
+      choice->useDisplay(brl);
+      return 1;
+    }
+
+    if (choice->featureBit) {
+      logMessage(LOG_WARNING, "no %s display", choice->name);
+    }
+  } else {
+    logMessage(LOG_WARNING, "invalid display setting: %s", parameter);
+  }
+
+  if (features & DP_HAS_GRAPHIC_DISPLAY) {
+    useGraphicDisplay(brl);
+  } else if (features & DP_HAS_TEXT_DISPLAY) {
+    useTextDisplay(brl);
+  } else {
+    logMessage(LOG_WARNING, "no supported display");
+    return 0;
+  }
+
+  return 1;
+}
+
+static int
+processParameters (BrailleDisplay *brl, char **parameters) {
+  if (!selectDisplay(brl, parameters[PARM_DISPLAY])) return 0;
+  return 1;
+}
+
+static ExternalRowEntry *
+getExternalRow (BrailleDisplay *brl, unsigned int index) {
+  return &brl->data->arrays.externalRows[index];
+}
+
+static void
+initializeExternalRows (BrailleDisplay *brl) {
+  unsigned char *cells = brl->data->arrays.externalCells;
+  unsigned char destination = brl->data->display.destination;
+
+  for (unsigned int index=0; index<brl->data->display.externalRows; index+=1) {
+    ExternalRowEntry *row = getExternalRow(brl, index);
+
+    row->cells = cells;
+    cells += brl->data->display.externalColumns;
+
+    row->destination = destination;
+    destination += 1;
+  }
+}
+
+static InternalRowEntry *
+getInternalRow (BrailleDisplay *brl, unsigned int index) {
+  return &brl->data->arrays.internalRows[index];
+}
+
+static void
+initializeInternalRows (BrailleDisplay *brl) {
+  unsigned char *cells = brl->data->arrays.internalCells + brl->data->display.verticalSpacing;
+
+  const unsigned char cellHeight = brl->data->display.cellHeight;
+  const unsigned char rowHeight = cellHeight + brl->data->display.verticalSpacing;
+  const unsigned char cellMask = (1 << cellHeight) - 1;
+
+  for (unsigned int index=0; index<brl->data->display.internalRows; index+=1) {
+    InternalRowEntry *row = getInternalRow(brl, index);
+
+    row->cells = cells;
+    cells += brl->data->display.internalColumns;
+
+    {
+      unsigned char offset = rowHeight * index;
+      row->upperRow = getExternalRow(brl, (offset / cellHeight));
+      row->upperShift = offset % cellHeight;
+      row->upperMask = (cellMask << row->upperShift) & cellMask;
+      row->upperMask |= row->upperMask << 4;
+
+      offset += 3;
+      row->lowerRow = getExternalRow(brl, (offset / cellHeight));
+      row->lowerShift = cellHeight - (offset % cellHeight) - 1;
+      row->lowerMask = cellMask >> row->lowerShift;
+      row->lowerMask |= row->lowerMask << 4;
+    }
+
+    row->hasChanged = 1;
+  }
+}
+
+static int
+makeArrays (BrailleDisplay *brl) {
+  if ((brl->data->arrays.externalCells = calloc(brl->data->display.externalRows, brl->data->display.externalColumns))) {
+    if ((brl->data->arrays.internalCells = calloc(brl->data->display.internalRows, brl->data->display.internalColumns))) {
+      if ((brl->data->arrays.externalRows = malloc(ARRAY_SIZE(brl->data->arrays.externalRows, brl->data->display.externalRows)))) {
+        if ((brl->data->arrays.internalRows = malloc(ARRAY_SIZE(brl->data->arrays.internalRows, brl->data->display.internalRows)))) {
+          int statusCellsAllocated = !brl->statusColumns;
+
+          if (!statusCellsAllocated) {
+            if ((brl->data->arrays.statusCells = calloc(brl->statusColumns, 1))) {
+              statusCellsAllocated = 1;
+            }
+          }
+
+          if (statusCellsAllocated) {
+            initializeExternalRows(brl);
+            initializeInternalRows(brl);
+            return 1;
+          }
+
+          free(brl->data->arrays.internalRows);
+        }
+
+        free(brl->data->arrays.externalRows);
+      }
+
+      free(brl->data->arrays.internalCells);
+    }
+
+    free(brl->data->arrays.externalCells);
+  }
+
+  logMallocError();
+  return 0;
+}
+
+static void
+deallocateArrays (BrailleDisplay *brl) {
+  free(brl->data->arrays.statusCells);
+
+  free(brl->data->arrays.internalRows);
+  free(brl->data->arrays.internalCells);
+
+  free(brl->data->arrays.externalRows);
+  free(brl->data->arrays.externalCells);
+}
 
 static uint16_t
 getUint16 (const unsigned char bytes[2]) {
@@ -299,199 +609,162 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
   return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
 }
 
-static const KeyNameEntry **
-makeKeyNameTable (BrailleDisplay *brl) {
-  typedef struct {
-    const char *type;
-    const KeyNameEntry *keyNames;
-    unsigned char featureBit;
-  } OptionalKeysDescriptor;
+static int
+writeCells (BrailleDisplay *brl, unsigned char destination, const unsigned char *cells, unsigned int count) {
+  unsigned char packet[1 + count];
+  unsigned char *byte = packet;
 
-  static const OptionalKeysDescriptor optionalKeysTable[] = {
-    { .type = "basic",
-      .keyNames = KEY_NAME_TABLE(basic),
-      // not actually used
-    },
+  *byte++ = 0;
+  byte = mempcpy(byte, cells, count);
 
-    { .type = "keyboard",
-      .keyNames = KEY_NAME_TABLE(keyboard),
-      .featureBit = DP_HAS_PERKINS_KEYS,
-    },
+  return writeRequest(brl, DP_REQ_DISPLAY_LINE, destination, packet, (byte - packet));
+}
 
-    { .type = "panning",
-      .keyNames = KEY_NAME_TABLE(panning),
-      .featureBit = DP_HAS_PANNING_KEYS,
-    },
+static int
+writeStatusCells (BrailleDisplay *brl) {
+  return writeCells(brl, 0, brl->data->arrays.statusCells, brl->statusColumns);
+}
 
-    { .type = "navigation",
-      .keyNames = KEY_NAME_TABLE(navigation),
-      .featureBit = DP_HAS_NAVIGATION_KEYS,
-    },
+static int
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
+  translateOutputCells(brl->data->arrays.statusCells, cells, brl->statusColumns);
+  return writeStatusCells(brl);
+}
 
-    { .type = "routing",
-      .keyNames = KEY_NAME_TABLE(routing),
-      .featureBit = DP_HAS_ROUTING_KEYS,
-    },
+static int
+writeExternalRow (BrailleDisplay *brl, const ExternalRowEntry *row) {
+  unsigned char length = brl->data->display.externalColumns;
+  unsigned char packet[1 + length];
+  unsigned char *byte = packet;
 
-    { .type = "function",
-      .keyNames = KEY_NAME_TABLE(function),
-      .featureBit = DP_HAS_FUNCTION_KEYS,
-    },
-  };
+  *byte++ = 0;
+  byte = mempcpy(byte, row->cells, length);
 
-  const KeyNameEntry **names = brl->data->keyNameTable;
-  const OptionalKeysDescriptor *okd = optionalKeysTable;
-  const OptionalKeysDescriptor *end = okd + ARRAY_COUNT(optionalKeysTable);
+  return writeRequest(brl, DP_REQ_DISPLAY_LINE, row->destination, packet, (byte - packet));
+}
 
-  while (okd < end) {
-    if (brl->data->boardInformation.features & okd->featureBit) {
-      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "has %s keys", okd->type);
-      *names++ = okd->keyNames;
-    }
+static int
+refreshCells (BrailleDisplay *brl) {
+  const ExternalRowEntry *row = brl->data->arrays.externalRows;
+  const ExternalRowEntry *end = row + brl->data->display.externalRows;
 
-    okd += 1;
+  while (row < end) {
+    if (!writeExternalRow(brl, row)) return 0;
+    row += 1;
   }
 
-  *names = LAST_KEY_NAME_TABLE;
-  return brl->data->keyNameTable;
+  if (!brl->statusColumns) return 1;
+  return writeStatusCells(brl);
+}
+
+static unsigned int
+getExternalCellOffset (BrailleDisplay *brl, unsigned int index) {
+  return index * (brl->data->display.cellWidth + brl->data->display.horizontalSpacing);
+}
+
+static unsigned char
+getExternalCell (BrailleDisplay *brl, const ExternalRowEntry *row, unsigned int index) {
+  unsigned int offset = getExternalCellOffset(brl, index);
+  index = offset / 2;
+  unsigned char cell = row->cells[index];
+
+  if (offset % 2) {
+    cell >>= 4;
+    cell |= row->cells[index + 1] << 4;
+  }
+
+  return cell;
 }
 
 static void
-setKeyTable (BrailleDisplay *brl) {
-  const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
-  brl->keyBindings = ktd->bindings;
-  brl->keyNames = makeKeyNameTable(brl);
-}
+putExternalCell (BrailleDisplay *brl, const ExternalRowEntry *row, unsigned int index, unsigned char cell) {
+  unsigned int offset = getExternalCellOffset(brl, index);
+  index = offset / 2;
 
-static int
-connectResource (BrailleDisplay *brl, const char *identifier) {
-  static const SerialParameters serialParameters = {
-    SERIAL_DEFAULT_PARAMETERS,
-    .baud = 115200,
-  };
+  if (offset % 2) {
+    unsigned char *dots = &row->cells[index];
+    *dots &= 0X0F;
+    *dots |= cell << 4;
 
-  BEGIN_USB_CHANNEL_DEFINITIONS
-    { /* all models */
-      .vendor=0X0403, .product=0X6010,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2,
-      .serial=&serialParameters
-    },
-  END_USB_CHANNEL_DEFINITIONS
-
-  GioDescriptor descriptor;
-  gioInitializeDescriptor(&descriptor);
-
-  descriptor.serial.parameters = &serialParameters;
-
-  descriptor.usb.channelDefinitions = usbChannelDefinitions;
-//descriptor.usb.options.readyDelay = 3000;
-
-  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
-    return 1;
-  }
-
-  return 0;
-}
-
-static int
-writeIdentifyRequest (BrailleDisplay *brl) {
-  return writeRequest(brl, DP_REQ_BOARD_INFORMATION, 0, NULL, 0);
-}
-
-static BrailleResponseResult
-isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  const DP_Packet *response = packet;
-
-  if (getUint16(response->fields.command) != DP_RSP_BOARD_INFORMATION) {
-    return BRL_RSP_UNEXPECTED;
-  }
-
-  memcpy(
-    &brl->data->boardInformation, response->fields.data,
-    sizeof(brl->data->boardInformation)
-  );
-
-  {
-    DP_BoardInformation *info = &brl->data->boardInformation;
-
-    if (info->features & DP_HAS_FUNCTION_KEYS) {
-      if (!info->functionKeyCount) {
-        info->functionKeyCount = 4;
-      }
-    }
-  }
-
-  logBytes(LOG_CATEGORY(BRAILLE_DRIVER),
-    "Board Information",
-    &brl->data->boardInformation,
-    sizeof(brl->data->boardInformation)
-  );
-
-  acknowledgeBrailleMessage(brl);
-  return BRL_RSP_DONE;
-}
-
-static int
-brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if ((brl->data = malloc(sizeof(*brl->data)))) {
-    memset(brl->data, 0, sizeof(*brl->data));
-
-    if (connectResource(brl, device)) {
-      DP_Packet response;
-
-      if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-                              writeIdentifyRequest,
-                              readPacket, &response, sizeof(response),
-                              isIdentityResponse)) {
-        brl->acknowledgements.missing.timeout = (brl->data->boardInformation.text.refreshTime * 100) + 1000;
-
-        if (writeRequest(brl, DP_REQ_FIRMWARE_VERSION, 0, NULL, 0)) {
-          if (writeRequest(brl, DP_REQ_DEVICE_NAME, 0, NULL, 0)) {
-            setKeyTable(brl);
-            MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80);
-
-            brl->textColumns = brl->data->boardInformation.text.columnCount;
-            brl->textRows = brl->data->boardInformation.text.rowCount;
-
-            brl->data->text.rewrite = 1;
-            return 1;
-          }
-        }
-      }
-
-      disconnectBrailleResource(brl, NULL);
-    }
-
-    free(brl->data);
+    dots += 1;
+    *dots &= 0XF0;
+    *dots |= cell >> 4;
   } else {
-    logMallocError();
+    row->cells[index] = cell;
   }
-
-  return 0;
 }
 
-static void
-brl_destruct (BrailleDisplay *brl) {
-  endBrailleMessages(brl);
-  disconnectBrailleResource(brl, NULL);
+static int
+writeInternalCells (BrailleDisplay *brl, const InternalRowEntry *internalRow, unsigned int from, unsigned int to) {
+  int upperUpdated = 0;
+  int lowerUpdated = 0;
 
-  if (brl->data) {
-    free(brl->data);
-    brl->data = NULL;
+  while (from < to) {
+    unsigned char newCell = translateOutputCell(internalRow->cells[from]);
+
+    {
+      const ExternalRowEntry *upperRow = internalRow->upperRow;
+      unsigned char upperCell = getExternalCell(brl, upperRow, from);
+      unsigned char changedDots = (upperCell ^ (newCell << internalRow->upperShift)) & internalRow->upperMask;
+
+      if (changedDots) {
+        putExternalCell(brl, upperRow, from, (upperCell ^ changedDots));
+        upperUpdated = 1;
+      }
+    }
+
+    if (internalRow->lowerRow != internalRow->upperRow) {
+      const ExternalRowEntry *lowerRow = internalRow->lowerRow;
+      unsigned char lowerCell = getExternalCell(brl, lowerRow, from);
+      unsigned char changedDots = (lowerCell ^ (newCell >> internalRow->lowerShift)) & internalRow->lowerMask;
+
+      if (changedDots) {
+        putExternalCell(brl, lowerRow, from, (lowerCell ^ changedDots));
+        lowerUpdated = 1;
+      }
+    }
+
+    from += 1;
   }
+
+  if (upperUpdated) {
+    if (!writeExternalRow(brl, internalRow->upperRow)) {
+      return 0;
+    }
+  }
+
+  if (lowerUpdated) {
+    if (!writeExternalRow(brl, internalRow->lowerRow)) {
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns,
-                       NULL, NULL, &brl->data->text.rewrite)) {
-    size_t size = brl->textColumns * brl->textRows;
-    unsigned char data[1 + size];
+  unsigned char *cells = brl->buffer;
+  unsigned char rowLength = brl->data->display.internalColumns;
 
-    data[0] = 0;
-    translateOutputCells(&data[1], brl->data->text.cells, size);
-    if (!writeRequest(brl, DP_REQ_DISPLAY_LINE, 0, data, sizeof(data))) return 0;
+  for (unsigned int rowIndex=0; rowIndex<brl->data->display.internalRows; rowIndex+=1) {
+    InternalRowEntry *row = getInternalRow(brl, rowIndex);
+
+    unsigned int from;
+    unsigned int to;
+
+    int rowHasChanged = cellsHaveChanged(
+      row->cells, cells, rowLength,
+      &from, &to, &row->hasChanged
+    );
+
+    if (rowHasChanged) {
+      if (!writeInternalCells(brl, row, from, to)) {
+        return 0;
+      }
+    }
+
+    cells += rowLength;
   }
 
   return 1;
@@ -701,4 +974,200 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
   }
 
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
+}
+
+static const KeyNameEntry **
+makeKeyNameTable (BrailleDisplay *brl) {
+  typedef struct {
+    const char *type;
+    const KeyNameEntry *keyNames;
+    unsigned char featureBit;
+  } OptionalKeysDescriptor;
+
+  static const OptionalKeysDescriptor optionalKeysTable[] = {
+    { .type = "basic",
+      .keyNames = KEY_NAME_TABLE(basic),
+      // not actually used
+    },
+
+    { .type = "keyboard",
+      .keyNames = KEY_NAME_TABLE(keyboard),
+      .featureBit = DP_HAS_PERKINS_KEYS,
+    },
+
+    { .type = "panning",
+      .keyNames = KEY_NAME_TABLE(panning),
+      .featureBit = DP_HAS_PANNING_KEYS,
+    },
+
+    { .type = "navigation",
+      .keyNames = KEY_NAME_TABLE(navigation),
+      .featureBit = DP_HAS_NAVIGATION_KEYS,
+    },
+
+    { .type = "routing",
+      .keyNames = KEY_NAME_TABLE(routing),
+      .featureBit = DP_HAS_ROUTING_KEYS,
+    },
+
+    { .type = "function",
+      .keyNames = KEY_NAME_TABLE(function),
+      .featureBit = DP_HAS_FUNCTION_KEYS,
+    },
+  };
+
+  const KeyNameEntry **names = brl->data->keyNameTable;
+  const OptionalKeysDescriptor *okd = optionalKeysTable;
+  const OptionalKeysDescriptor *end = okd + ARRAY_COUNT(optionalKeysTable);
+
+  while (okd < end) {
+    if (brl->data->boardInformation.features & okd->featureBit) {
+      if (okd->featureBit == DP_HAS_FUNCTION_KEYS) {
+        logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
+          "has %u %s keys",
+          brl->data->boardInformation.functionKeyCount,
+          okd->type
+        );
+      } else {
+        logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "has %s keys", okd->type);
+      }
+
+      *names++ = okd->keyNames;
+    }
+
+    okd += 1;
+  }
+
+  *names = LAST_KEY_NAME_TABLE;
+  return brl->data->keyNameTable;
+}
+
+static void
+setKeyTable (BrailleDisplay *brl) {
+  const KeyTableDefinition *ktd = &KEY_TABLE_DEFINITION(all);
+  brl->keyBindings = ktd->bindings;
+  brl->keyNames = makeKeyNameTable(brl);
+}
+
+static int
+connectResource (BrailleDisplay *brl, const char *identifier) {
+  static const SerialParameters serialParameters = {
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = 115200,
+  };
+
+  BEGIN_USB_CHANNEL_DEFINITIONS
+    { /* all models */
+      .vendor=0X0403, .product=0X6010,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .serial=&serialParameters
+    },
+  END_USB_CHANNEL_DEFINITIONS
+
+  GioDescriptor descriptor;
+  gioInitializeDescriptor(&descriptor);
+
+  descriptor.serial.parameters = &serialParameters;
+
+  descriptor.usb.channelDefinitions = usbChannelDefinitions;
+//descriptor.usb.options.readyDelay = 3000;
+
+  if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+writeIdentifyRequest (BrailleDisplay *brl) {
+  return writeRequest(brl, DP_REQ_BOARD_INFORMATION, 0, NULL, 0);
+}
+
+static BrailleResponseResult
+isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
+  const DP_Packet *response = packet;
+
+  if (getUint16(response->fields.command) != DP_RSP_BOARD_INFORMATION) {
+    return BRL_RSP_UNEXPECTED;
+  }
+
+  memcpy(
+    &brl->data->boardInformation, response->fields.data,
+    sizeof(brl->data->boardInformation)
+  );
+
+  {
+    DP_BoardInformation *info = &brl->data->boardInformation;
+
+    if (info->features & DP_HAS_FUNCTION_KEYS) {
+      if (!info->functionKeyCount) {
+        info->functionKeyCount = 4;
+      }
+    }
+  }
+
+  logBytes(LOG_CATEGORY(BRAILLE_DRIVER),
+    "Board Information",
+    &brl->data->boardInformation,
+    sizeof(brl->data->boardInformation)
+  );
+
+  acknowledgeBrailleMessage(brl);
+  return BRL_RSP_DONE;
+}
+
+static int
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  if ((brl->data = malloc(sizeof(*brl->data)))) {
+    memset(brl->data, 0, sizeof(*brl->data));
+
+    if (connectResource(brl, device)) {
+      DP_Packet response;
+
+      int probed = probeBrailleDisplay(
+        brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
+        writeIdentifyRequest, readPacket,
+        &response, sizeof(response),
+        isIdentityResponse
+      );
+
+      if (probed) {
+        if (processParameters(brl, parameters)) {
+          if (makeArrays(brl)) {
+            brl->acknowledgements.missing.timeout = (brl->data->display.refreshTime * 100) + 1000;
+
+            if (writeRequest(brl, DP_REQ_FIRMWARE_VERSION, 0, NULL, 0)) {
+              if (writeRequest(brl, DP_REQ_DEVICE_NAME, 0, NULL, 0)) {
+                setKeyTable(brl);
+                MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80);
+                brl->refreshBrailleDisplay = refreshCells;
+                return 1;
+              }
+            }
+
+            deallocateArrays(brl);
+          }
+        }
+      }
+
+      disconnectBrailleResource(brl, NULL);
+    }
+
+    free(brl->data);
+  } else {
+    logMallocError();
+  }
+
+  return 0;
+}
+
+static void
+brl_destruct (BrailleDisplay *brl) {
+  endBrailleMessages(brl);
+  disconnectBrailleResource(brl, NULL);
+
+  deallocateArrays(brl);
+  free(brl->data);
 }

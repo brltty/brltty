@@ -298,6 +298,9 @@
 #braille-parameters bm:Protocol=default # [default,escape,hid1,hid2,ht,pb]
 #braille-parameters bm:VarioKeys=no # [no,yes]
 
+# DotPad Braille Driver Parameters
+#brailledd-parameters dp:Display=default # [default,text,graphic]
+
 # EuroBraille Braille Driver Parameters
 #braille-parameters eu:Protocol= # [auto,azerbraille,clio,eurobraille,notebraille,pupibraille,scriba,esys,esytime,iris,esysiris]
 
