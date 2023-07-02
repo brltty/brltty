@@ -243,6 +243,8 @@ useTextDisplay (BrailleDisplay *brl) {
 
   setExternalDisplayProperties(brl, &brl->data->boardInformation.text);
   setInternalDisplayProperties(brl);
+
+  brl->cellSize = brl->data->display.cellWidth * brl->data->display.cellHeight;
 }
 
 static void
