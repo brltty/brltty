@@ -19,7 +19,7 @@
 title DotPad
 
 ifKey RightNext
-include basic.kti
+include scroll.kti
 endIf
 
 ifKey Space

@@ -19,6 +19,8 @@
 #ifndef BRLTTY_INCLUDED_DP_BRLDEFS
 #define BRLTTY_INCLUDED_DP_BRLDEFS
 
+#define DP_MAXIMUM_TEXT_COLUMNS 80
+
 typedef enum {
   DP_REQ_FIRMWARE_VERSION  = 0X0000,
   DP_RSP_FIRMWARE_VERSION  = 0X0001,
@@ -37,7 +39,7 @@ typedef enum {
   DP_RSP_DISPLAY_CURSOR    = 0X0211,
   DP_NTF_DISPLAY_CURSOR    = 0X0212,
 
-  DP_NTF_KEYS_BASIC        = 0X0302,
+  DP_NTF_KEYS_SCROLL        = 0X0302,
   DP_NTF_KEYS_PERKINS      = 0X0312,
   DP_NTF_KEYS_ROUTING      = 0X0322,
   DP_NTF_KEYS_FUNCTION     = 0X0332,
@@ -78,6 +80,17 @@ typedef struct {
 } DP_BoardInformation;
 
 typedef enum {
+  DP_DSP_DOT1 = 0X01,
+  DP_DSP_DOT2 = 0X02,
+  DP_DSP_DOT3 = 0X04,
+  DP_DSP_DOT4 = 0X10,
+  DP_DSP_DOT5 = 0X20,
+  DP_DSP_DOT6 = 0X40,
+  DP_DSP_DOT7 = 0X08,
+  DP_DSP_DOT8 = 0X80,
+} DP_DisplayDots;
+
+typedef enum {
   DP_DRC_ACK      = 0,
   DP_DRC_NACK     = 1,
   DP_DRC_WAIT     = 2,
@@ -85,11 +98,11 @@ typedef enum {
 } DP_DisplayResponseCode;
 
 typedef enum {
-  DP_BSC_LEFT_NEXT     = 28,
-  DP_BSC_LEFT_PREV     = 29,
-  DP_BSC_RIGHT_NEXT    = 30,
-  DP_BSC_RIGHT_PREV    = 31,
-} DP_BasicKey;
+  DP_SCL_LEFT_NEXT     = 28,
+  DP_SCL_LEFT_PREV     = 29,
+  DP_SCL_RIGHT_NEXT    = 30,
+  DP_SCL_RIGHT_PREV    = 31,
+} DP_ScrollKey;
 
 typedef enum {
   DP_KBD_DOT7          =  0,
@@ -117,7 +130,7 @@ typedef enum {
 } DP_PerkinsKey;
 
 typedef enum {
-  DP_GRP_BasicKeys,
+  DP_GRP_ScrollKeys,
   DP_GRP_PerkinsKeys,
   DP_GRP_FunctionKeys,
   DP_GRP_RoutingKeys,
@@ -139,8 +152,6 @@ typedef enum {
 typedef enum {
   DP_SEQ_TEXT = 0X80,
 } DP_PacketSeqFlag;
-
-#define DP_MAXIMUM_TEXT_COLUMNS 80
 
 typedef struct {
   unsigned char sync[2];

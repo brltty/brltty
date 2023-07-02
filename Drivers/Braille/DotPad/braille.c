@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "strfmt.h"
 #include "bitfield.h"
 #include "parse.h"
 
@@ -39,17 +40,20 @@ typedef enum {
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
 
+#define GRAPHIC_HORIZONTAL_SPACING 1
+#define GRAPHIC_VERTICAL_SPACING 2
+
 #define KEY_ENTRY(s,t,k,n) {.value = {.group=DP_GRP_##s, .number=DP_##t##_##k}, .name=n}
-#define BASIC_KEY_ENTRY(k,n) KEY_ENTRY(BasicKeys, BSC, k, n)
+#define SCROLL_KEY_ENTRY(k,n) KEY_ENTRY(ScrollKeys, SCL, k, n)
 #define KEYBOARD_KEY_ENTRY(k,n) KEY_ENTRY(PerkinsKeys, KBD, k, n)
 #define PANNING_KEY_ENTRY(k,n) KEY_ENTRY(PerkinsKeys, PAN, k, n)
 #define NAVIGATION_KEY_ENTRY(k,n) KEY_ENTRY(PerkinsKeys, NAV, k, n)
 
-BEGIN_KEY_NAME_TABLE(basic)
-  BASIC_KEY_ENTRY(LEFT_PREV, "LeftPrev"),
-  BASIC_KEY_ENTRY(LEFT_NEXT, "LeftNext"),
-  BASIC_KEY_ENTRY(RIGHT_PREV, "RightPrev"),
-  BASIC_KEY_ENTRY(RIGHT_NEXT, "RightNext"),
+BEGIN_KEY_NAME_TABLE(scroll)
+  SCROLL_KEY_ENTRY(LEFT_PREV, "LeftPrev"),
+  SCROLL_KEY_ENTRY(LEFT_NEXT, "LeftNext"),
+  SCROLL_KEY_ENTRY(RIGHT_PREV, "RightPrev"),
+  SCROLL_KEY_ENTRY(RIGHT_NEXT, "RightNext"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(keyboard)
@@ -91,7 +95,7 @@ BEGIN_KEY_NAME_TABLE(routing)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(basic),
+  KEY_NAME_TABLE(scroll),
   KEY_NAME_TABLE(keyboard),
   KEY_NAME_TABLE(panning),
   KEY_NAME_TABLE(navigation),
@@ -139,7 +143,7 @@ struct BrailleDataStruct {
   const KeyNameEntry *keyNameTable[7];
 
   struct {
-    unsigned char basic[4];
+    unsigned char scroll[4];
     unsigned char perkins[4];
     unsigned char routing[8];
     unsigned char function[4];
@@ -203,26 +207,26 @@ setExternalDisplayProperties (BrailleDisplay *brl, const DP_DisplayDescriptor *d
 }
 
 static unsigned char
-toInternalDimension (unsigned char count, unsigned char internalDots, unsigned char externalDots, unsigned char spacing) {
-  return (((count * externalDots) - internalDots) / (internalDots + spacing)) + 1;
+toInternalDimension (unsigned char externalCount, unsigned char externalDots, unsigned char internalDots, unsigned char internalSpacing) {
+  return (((externalCount * externalDots) - internalDots) / (internalDots + internalSpacing)) + 1;
 }
 
 static void
 setInternalDisplayProperties (BrailleDisplay *brl) {
   brl->data->display.internalColumns = toInternalDimension(
     brl->data->display.externalColumns,
-    2, brl->data->display.cellWidth,
-    brl->data->display.horizontalSpacing
+    brl->data->display.cellWidth,
+    2, brl->data->display.horizontalSpacing
   );
 
   brl->data->display.internalRows = toInternalDimension(
     brl->data->display.externalRows,
-    4, brl->data->display.cellHeight,
-    brl->data->display.verticalSpacing
+    brl->data->display.cellHeight,
+    4, brl->data->display.verticalSpacing
   );
 
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
-    "display properties: hs:%u vs:%u cell:%ux%u ext:%ux%u int:%ux%u",
+    "display properties: ghsp:%u gvsp:%u cell:%ux%u disp:%ux%u core:%ux%u",
     brl->data->display.horizontalSpacing, brl->data->display.verticalSpacing,
     brl->data->display.cellWidth, brl->data->display.cellHeight,
     brl->data->display.externalColumns, brl->data->display.externalRows,
@@ -257,8 +261,8 @@ useGraphicDisplay (BrailleDisplay *brl) {
     brl->data->display.destination = 1;
   }
 
-  brl->data->display.horizontalSpacing = 1;
-  brl->data->display.verticalSpacing = 2;
+  brl->data->display.horizontalSpacing = GRAPHIC_HORIZONTAL_SPACING;
+  brl->data->display.verticalSpacing = GRAPHIC_VERTICAL_SPACING;
 
   setExternalDisplayProperties(brl, &brl->data->boardInformation.graphic);
   setInternalDisplayProperties(brl);
@@ -540,8 +544,8 @@ verifyPacketLength (const DP_Packet *packet, const BrailleDisplay *brl) {
       expected += 1;
       break;
 
-    case DP_NTF_KEYS_BASIC:
-      expected += sizeof(brl->data->keys.basic);
+    case DP_NTF_KEYS_SCROLL:
+      expected += sizeof(brl->data->keys.scroll);
       break;
 
     case DP_NTF_KEYS_PERKINS:
@@ -613,13 +617,13 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 
 static int
 writeCells (BrailleDisplay *brl, unsigned char destination, const unsigned char *cells, unsigned int count) {
-  unsigned char packet[1 + count];
-  unsigned char *byte = packet;
+  unsigned char data[1 + count];
+  unsigned char *byte = data;
 
   *byte++ = 0;
   byte = mempcpy(byte, cells, count);
 
-  return writeRequest(brl, DP_REQ_DISPLAY_LINE, destination, packet, (byte - packet));
+  return writeRequest(brl, DP_REQ_DISPLAY_LINE, destination, data, (byte - data));
 }
 
 static int
@@ -635,14 +639,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 
 static int
 writeExternalRow (BrailleDisplay *brl, const ExternalRowEntry *row) {
-  unsigned char length = brl->data->display.externalColumns;
-  unsigned char packet[1 + length];
-  unsigned char *byte = packet;
-
-  *byte++ = 0;
-  byte = mempcpy(byte, row->cells, length);
-
-  return writeRequest(brl, DP_REQ_DISPLAY_LINE, row->destination, packet, (byte - packet));
+  return writeCells(brl, row->destination, row->cells, brl->data->display.externalColumns);
 }
 
 static int
@@ -922,11 +919,11 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         acknowledgeBrailleMessage(brl);
         continue;
 
-      case DP_NTF_KEYS_BASIC: {
+      case DP_NTF_KEYS_SCROLL: {
         updateKeyGroup(
-          brl, &packet, DP_GRP_BasicKeys,
-          brl->data->keys.basic,
-          sizeof(brl->data->keys.basic)
+          brl, &packet, DP_GRP_ScrollKeys,
+          brl->data->keys.scroll,
+          sizeof(brl->data->keys.scroll)
         );
 
         continue;
@@ -987,8 +984,8 @@ makeKeyNameTable (BrailleDisplay *brl) {
   } OptionalKeysDescriptor;
 
   static const OptionalKeysDescriptor optionalKeysTable[] = {
-    { .type = "basic",
-      .keyNames = KEY_NAME_TABLE(basic),
+    { .type = "scroll",
+      .keyNames = KEY_NAME_TABLE(scroll),
       // not actually used
     },
 
@@ -1024,15 +1021,17 @@ makeKeyNameTable (BrailleDisplay *brl) {
 
   while (okd < end) {
     if (brl->data->boardInformation.features & okd->featureBit) {
+      char log[0X40];
+      STR_BEGIN(log, sizeof(log));
+      STR_PRINTF("has");
+
       if (okd->featureBit == DP_HAS_FUNCTION_KEYS) {
-        logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
-          "has %u %s keys",
-          brl->data->boardInformation.functionKeyCount,
-          okd->type
-        );
-      } else {
-        logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "has %s keys", okd->type);
+        STR_PRINTF(" %u", brl->data->boardInformation.functionKeyCount);
       }
+
+      STR_PRINTF(" %s keys", okd->type);
+      STR_END;
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "%s", log);
 
       *names++ = okd->keyNames;
     }
@@ -1143,7 +1142,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             if (writeRequest(brl, DP_REQ_FIRMWARE_VERSION, 0, NULL, 0)) {
               if (writeRequest(brl, DP_REQ_DEVICE_NAME, 0, NULL, 0)) {
                 setKeyTable(brl);
-                MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80);
+
+                MAKE_OUTPUT_TABLE(
+                  DP_DSP_DOT1, DP_DSP_DOT2, DP_DSP_DOT3, DP_DSP_DOT4,
+                  DP_DSP_DOT5, DP_DSP_DOT6, DP_DSP_DOT7, DP_DSP_DOT8
+                );
+
                 brl->refreshBrailleDisplay = refreshCells;
                 return 1;
               }
