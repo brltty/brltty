@@ -754,7 +754,7 @@ static int generateToplevel(void)
   Widget tmp_vbox;
   char *disp;
 #ifdef USE_XAW
-  unsigned char *dispb;
+  char *dispb;
 #endif /* USE_XAW */
   XtCallbackRec cb[2] = { { NULL, NULL }, { NULL, NULL } };
 #endif /* USE_XT */
