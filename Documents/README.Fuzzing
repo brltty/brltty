@@ -1,0 +1,60 @@
+~~~~~~~
+Fuzzing
+~~~~~~~
+
+.. include:: prologue.rst
+
+Principle
+=========
+
+BRLTTY has some support for testing it through fuzzing, i.e. feeding it with
+more or less random content, to check that it does not fall into pieces.
+
+Building
+--------
+
+Building with fuzzing support is
+
+   CC=clang ./configure --enable-api-fuzzing
+
+(Fuzzing is only supported with the clang compiler)
+
+This will also enable the address and undefined-behavior sanitizers.
+
+Running
+-------
+
+To start a fuzzing session, one has to set the fuzz BrlAPI parameter, for
+instance to start 1000 fuzzing loops:
+
+   ./run-brltty -b xw -x no -A fuzz=1000 -n -e
+
+It can be useful to try different fuzzing seeds with:
+
+   ./run-brltty -b xw -x no -A fuzz=1000,fuzzseed=1234 -n -e
+
+The initial steps of BrlAPI connections are not fuzzed by default, so the fuzzer
+does not have to get it right before fuzzing the rest of the protocol. To fuzz
+these initial steps, one can use:
+
+   ./run-brltty -b xw -x no -A fuzz=1000,fuzzhead=on -n -e
+
+Conversely, one can concentrate the fuzzing on the writeText operation only (in
+latin1) with:
+
+   ./run-brltty -b xw -x no -A fuzz=1000,fuzzwrite=on -n -e
+
+And in utf8:
+
+   ./run-brltty -b xw -x no -A fuzz=1000,fuzzwriteutf8=on -n -e
+
+Reproducing
+-----------
+
+Once a bug is detected by the fuzzer, it emits a crash file. One can reproduce
+the behavior with:
+
+   ./run-brltty -b xw -x no -A crash=crash-da39a3ee5e6b4b0d3255bfef95601890afd80709 -n -e
+
+and use gdb etc. at will to understand the bug, and eventually check when it is
+fixed.
