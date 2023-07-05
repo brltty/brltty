@@ -291,7 +291,7 @@ openLogFile (const char *path) {
   FILE *stream = fopen(path, "w");
 
   if (stream) {
-    setCloseOnExec(fileno(stream), 1);
+  //setCloseOnExec(fileno(stream), 1);
     writeUtf8ByteOrderMark(stream);
     logFile = stream;
   }

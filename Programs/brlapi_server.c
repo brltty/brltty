@@ -2818,7 +2818,7 @@ static SocketDescriptor newTcpSocket(int family, int type, int protocol, const s
   SocketDescriptor fd = socket(family, type, protocol);
 
   if (fd != INVALID_SOCKET_DESCRIPTOR) {
-    setCloseOnExec(fd, 1);
+  //setCloseOnExec(fd, 1);
 
 #ifdef SO_REUSEADDR
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
