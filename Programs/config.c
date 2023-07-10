@@ -136,7 +136,7 @@ static const char *const *const autodetectableBrailleDrivers_serial =
 
 static const char *const *const autodetectableBrailleDrivers_USB =
   NULL_TERMINATED_STRING_ARRAY(
-    "al", "bm", "bn", "cn", "eu", "fs", "hd", "hm", "ht", "hw", "ic", "mt", "pg", "pm", "sk", "vo"
+    "al", "bm", "bn", "cn", "dp", "eu", "fs", "hd", "hm", "ht", "hw", "ic", "mt", "pg", "pm", "sk", "vo"
   );
 
 static const char *const *const autodetectableBrailleDrivers_Bluetooth =
