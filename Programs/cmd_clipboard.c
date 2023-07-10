@@ -89,9 +89,25 @@ cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fr
 }
 
 static int
-cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length) {
+cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length,
+                 int insertCR) {
   lockMainClipboard();
+    if (insertCR && ccd->begin.offset >= 1) {
+      size_t length;
+      const wchar_t *characters = getClipboardContent(ccd->clipboard, &length);
+      if (length > ccd->begin.offset) length = ccd->begin.offset;
+      while (length > 0) {
+        size_t last = length - 1;
+        if (characters[last] == WC_C('\r')) insertCR = 0;
+        if (characters[last] != WC_C(' ')) break;
+        length = last;
+      }
+      ccd->begin.offset = length;
+    }
+    if (ccd->begin.offset <= 0) insertCR = 0;
+
     int truncated = truncateClipboardContent(ccd->clipboard, ccd->begin.offset);
+    if (insertCR) appendClipboardContent(ccd->clipboard, &(wchar_t){WC_C('\r')}, 1);
     int appended = appendClipboardContent(ccd->clipboard, characters, length);
   unlockMainClipboard();
 
@@ -153,7 +169,7 @@ cpbRectangularCopy (ClipboardCommandData *ccd, int column, int row) {
       length = to - buffer;
     }
 
-    if (cpbEndOperation(ccd, buffer, length)) copied = 1;
+    if (cpbEndOperation(ccd, buffer, length, 1)) copied = 1;
     free(buffer);
   }
 
@@ -235,7 +251,7 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
         length = to - buffer;
       }
 
-      if (cpbEndOperation(ccd, buffer, length)) copied = 1;
+      if (cpbEndOperation(ccd, buffer, length, 0)) copied = 1;
       free(buffer);
     }
   }
