@@ -202,7 +202,7 @@ getReplacementCharacter (void) {
 #ifdef HAVE_WCHAR_H
  return UNICODE_REPLACEMENT_CHARACTER;
 #else /* HAVE_WCHAR_H */
- return SUB;
+ return ASCII_SUB;
 #endif /* HAVE_WCHAR_H */
 }
 
