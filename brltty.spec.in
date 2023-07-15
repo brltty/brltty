@@ -601,6 +601,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %defattr(-,root,root)
 %{_bindir}/brltty
 %{_pkglibdir}
+%{_pkglibexecdir}/brltty-pty
 %exclude %{_pkglibdir}/libbrlttybba.so
 %exclude %{_pkglibdir}/libbrlttybxw.so
 %exclude %{_pkglibdir}/libbrlttysen.so
