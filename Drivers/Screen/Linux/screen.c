@@ -37,6 +37,7 @@
 
 #include "log.h"
 #include "report.h"
+#include "message.h"
 #include "async_handle.h"
 #include "async_io.h"
 #include "device.h"
@@ -1807,6 +1808,12 @@ insertByte (char byte) {
 
   if (controlCurrentConsole(TIOCSTI, &byte) != -1) return 1;
   logSystemError("ioctl[TIOCSTI]");
+
+  message(
+    NULL, "Linux character injection (TIOCSTI) is disabled on this system",
+    (MSG_SILENT)
+  );
+
   return 0;
 }
 
