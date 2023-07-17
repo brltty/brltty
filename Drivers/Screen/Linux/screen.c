@@ -1808,6 +1808,8 @@ insertByte (char byte) {
 
   if (controlCurrentConsole(TIOCSTI, &byte) != -1) return 1;
   logSystemError("ioctl[TIOCSTI]");
+  logPossibleCause("BRLTTY is running without the CAP_SYS_ADMIN kernel capability (see man 7 capabilities)");
+  logPossibleCause("the sysctl parameter dev.tty.legacy_tiocsti is off (see https://lore.kernel.org/linux-hardening/Y0m9l52AKmw6Yxi1@hostpad/)");
 
   message(
     NULL, "Linux character injection (TIOCSTI) is disabled on this system",
