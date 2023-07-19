@@ -80,8 +80,6 @@ AmbientCapabilities=cap_mknod
 User=brltty
 
 # for reading screen content (/dev/vcs*)
-SupplementaryGroups=tty
-
 # for virtual console monitoring and control (/dev/tty<n>)
 SupplementaryGroups=tty
 

@@ -23,8 +23,6 @@
 u brltty - "Braille Device Daemon" /var/lib/brltty
 
 # for reading screen content (/dev/vcs*)
-m brltty tty
-
 # for virtual console monitoring and control (/dev/tty<n>)
 m brltty tty
 
