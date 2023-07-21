@@ -92,7 +92,7 @@ connectToServer (SpeechSynthesizer *spk) {
     if (setCloseOnExec(sd, 1)) {
       if (connect(sd, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) != -1) {
         if (setBlockingIo(sd, 0)) {
-          if (asyncReadFile(&trackHandle, sd, TRACK_DATA_SIZE*10, xsHandleSpeechTrackingInput, spk)) {
+          if (asyncReadSocket(&trackHandle, sd, TRACK_DATA_SIZE, xsHandleSpeechTrackingInput, spk)) {
             logMessage(LOG_CATEGORY(SPEECH_DRIVER), "connected to server: fd=%d", sd);
             socketDescriptor = sd;
             return 1;
