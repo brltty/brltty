@@ -1,6 +1,92 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+July 22, 2023:
+ - BRLTTY 6.6 released:
+   General changes:
+      The -H (uppercase) option and the concept of hidden options have been removed.
+      For consistency (with -A, -B, -S, -X), the -z and -Z short options have been swapped:
+	 -z is now --stay-privileged
+	 -Z is now --privilege-parameters
+      Multi-line contracted braille is now supported.
+      The cursor style can now be set to no dots.
+      A rectangular append to the clipboard now ensures a leading newline.
+      README.CommandReference has been added.
+   Speech changes:
+      Speech can now be interrupted when writing new text to the input FIFO.
+      Autospeak now provides correct character highlighting to the speech driver.
+      A word is now a whitespace-delimited (rather than an alphanumeric) sequence of characters.
+      Word completion for single-character words now works correctly.
+      The ROUTE_SPEECH command (go to the speech cursor) has been added.
+      The DESC_CURR_CHAR command now speaks phonetically.
+   Preferences Menu changes:
+      The PREFRESET command has been added.
+      Space + p + Dots 7-8 is bound to the new PREFRESET command.
+      If the preferences file can't be found then try loading /etc/brltty/default.prefs.
+      Save on Exit now also saves the preferences on program termination.
+      The Speak Key Context preference has been added.
+      The Speak Modifier Key preference has been added.
+   Baum braille driver changes:
+      More recent Orbit Reader models have routing keys.
+   BrlAPI braille driver changes:
+      The speechChanges (no, yes) parameter has been added.
+   CombiBraille braille driver changes:
+      Upgraded to use generic (rather than direct serial) I/O.
+      The routing keys are now supported.
+   DotPad braille driver:
+      New - its two-letter driver code is dp.
+      A multi-line text display is supported within its graphic area.
+   Freedom Scientific braille driver changes:
+      Minor Focus key binding changes:
+	 LeftShift + RoutingKey -> SETLEFT
+	 RightShift + RoutingKey -> SWITCHVT
+	 LeftSelector + NavrowKey -> PRDIFCHAR
+	 RightSelector + NavrowKey -> NXDIFCHAR
+   HandyTech braille driver changes:
+      Bluetooth service discovery now needs to be performed (for newer models).
+   External Speech speech driver changes:
+      The volume and pitch can now be set.
+      Now disconnects from the server when a write error or timeout occurs.
+      Now tries to reconnect to the server if disconnected.
+      Now correctly handles the receipt of tracking data.
+   AtSpi2 screen driver changes:
+      A potential crash on receipt of a cursor routing request has been resolved.
+   File Viewer screen driver:
+      New. Its two-letter driver code is fv.
+      A virtual screen presents the specified file (via its file parameter).
+      The height of the screen is the number of lines within the file.
+      The width of the screen is the length of the file's longest line.
+   Linux screen driver changes:
+      A message is shown on the braille display if character injection (TIOCSTI) is disabled.
+   Terminal Emulator screen driver:
+      New. Its two-letter driver code is em.
+      It monitors a shared memory segment maintained by a terminal emulator
+      for screen content and size, cursor position, etc.
+      It uses a message queue to know when the segment has been updated
+      and to send input typed on the braille device to the terminal emulator.
+      BRLTTY's provided terminal emulator is the new brltty-pty command (in libexec/brltty/).
+      The new brltty-term command runs a shell or terminal manager via brltty-pty,
+      and also runs BRLTTY with its Terminal Emulator screen driver to interact with it.
+   BrlAPI changes:
+      The version is now 0.8.5 (it was 0.8.4).
+      Fuzzing support has been added to the server (see README.APIFuzzing).
+      Various fuzzer-detected issues have been resolved.
+   Contraction tables:
+      The en-ueb-g1 (English, Unified, Grade 1) contraction table has been added.
+   Key tables:
+      A possible stack overflow during table compilation has been resolved.
+      The run directive has been added.
+      The macro directive has been added.
+      The isolated directive has been added.
+      The ktbcheck tool has been added.
+   Windows changes:
+      The batch scripts have been improved.
+      The tasks-brltty.bat script has been added.
+      The regquery-brlapi.bat script has been added.
+      The build now includes the Debug\ directory, which contains:
+         The build's config.h, config.mk, and config.log files.
+         Unstripped executables (.exe) and libraries (.dll).
+
 June 9, 2022:
  - BRLTTY 6.5 released:
    General changes:
