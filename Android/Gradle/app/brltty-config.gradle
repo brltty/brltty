@@ -1,6 +1,6 @@
 brltty.config.revisionIdentifier = [
   brltty.native.rootDirectory + File.separator + "getrevid",
-  "-m", "+",
+  "-m", " ",
   brltty.native.rootDirectory
 ].execute().text.trim()
 
