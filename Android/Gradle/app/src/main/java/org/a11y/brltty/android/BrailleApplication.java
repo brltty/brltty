@@ -22,6 +22,7 @@ import java.util.Locale;
 
 import android.app.Application;
 import android.os.Handler;
+import android.content.pm.PackageManager;
 
 public class BrailleApplication extends Application {
   private static BrailleApplication applicationObject = null;
@@ -65,5 +66,9 @@ public class BrailleApplication extends Application {
 
     if (locale == null) return null;
     return locale.toString();
+  }
+
+  public static boolean havePermission (String permission) {
+    return get().checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
   }
 }

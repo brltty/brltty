@@ -295,12 +295,14 @@ public class BluetoothConnection {
   private static BluetoothDevice[] pairedDevices = null;
 
   public static int getPairedDeviceCount () {
-    if (isUp()) {
-      Set<BluetoothDevice> devices = bluetoothAdapter.getBondedDevices();
+    if (BrailleApplication.havePermission(android.Manifest.permission.BLUETOOTH_CONNECT)) {
+      if (isUp()) {
+        Set<BluetoothDevice> devices = bluetoothAdapter.getBondedDevices();
 
-      if (devices != null) {
-        pairedDevices = devices.toArray(new BluetoothDevice[devices.size()]);
-        return pairedDevices.length;
+        if (devices != null) {
+          pairedDevices = devices.toArray(new BluetoothDevice[devices.size()]);
+          return pairedDevices.length;
+        }
       }
     }
 
