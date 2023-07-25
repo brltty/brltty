@@ -74,7 +74,10 @@ public class UsbHelper {
       usbContext.registerReceiver(permissionReceiver, filter);
     }
 
-    permissionIntent = PendingIntent.getBroadcast(usbContext, 0, new Intent(ACTION_USB_PERMISSION), 0);
+    permissionIntent = PendingIntent.getBroadcast(
+      usbContext, 0, new Intent(ACTION_USB_PERMISSION),
+      PendingIntent.FLAG_IMMUTABLE
+    );
   }
 
   public static void begin () {

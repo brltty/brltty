@@ -61,7 +61,10 @@ public abstract class BrailleNotification {
       Intent.FLAG_ACTIVITY_NEW_TASK
     );
 
-    return PendingIntent.getActivity(context, 0, intent, 0);
+    return PendingIntent.getActivity(
+      context, 0, intent,
+      PendingIntent.FLAG_IMMUTABLE
+    );
   }
 
   private static NotificationManager getManager () {
