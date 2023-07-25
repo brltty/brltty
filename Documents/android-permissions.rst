@@ -12,7 +12,10 @@
     each time you interact with a control on your braille device.
 
 ``BLUETOOTH``
-  * For communicating with a braille device via Bluetooth.
+  * For communicating with a braille device via Bluetooth (API level <= 30).
+
+``BLUETOOTH_CONNECT``
+  * For connecting to a braille device via Bluetooth (API level > 30).
 
 ``INTERNET``
   * For listening on a TCP/IP port for BrlAPI client connection requests.
