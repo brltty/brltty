@@ -18,6 +18,12 @@
      />
 
     <Button
+      android:id="@+id/GLOBAL_BUTTON_ALLOW_BLUETOOTH_CONNECTIONS"
+      android:text="@string/GLOBAL_BUTTON_ALLOW_BLUETOOTH_CONNECTIONS"
+      android:onClick="allowBluetoothConnections"
+     />
+
+    <Button
       android:text="@string/SETTINGS_SCREEN_MAIN"
       android:onClick="launchSettingsActivity"
      />

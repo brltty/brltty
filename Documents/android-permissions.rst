@@ -15,7 +15,10 @@
   * For communicating with a braille device via Bluetooth (API level <= 30).
 
 ``BLUETOOTH_CONNECT``
-  * For connecting to a braille device via Bluetooth (API level > 30).
+  * For connecting to an already-paried Bluetooth device (API level > 30).
+
+``BLUETOOTH_SCAN``
+  * For checking if Bluetotoh device discovery is currently active (API level > 30).
 
 ``INTERNET``
   * For listening on a TCP/IP port for BrlAPI client connection requests.

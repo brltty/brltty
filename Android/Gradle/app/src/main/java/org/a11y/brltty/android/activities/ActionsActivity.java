@@ -35,6 +35,10 @@ public class ActionsActivity extends InternalActivity {
     InputService.switchInputMethod();
   }
 
+  public void allowBluetoothConnections (View view) {
+    requestPermissions(BluetoothConnection.requiredPermissions, 0);
+  }
+
   public void launchSettingsActivity (View view) {
     SettingsActivity.launch();
   }
@@ -136,6 +140,17 @@ public class ActionsActivity extends InternalActivity {
           }
         }
       );
+    }
+  }
+
+  @Override
+  protected void onResume () {
+    super.onResume();
+
+    {
+      Button allowBluetoothConnections = findViewById(R.id.GLOBAL_BUTTON_ALLOW_BLUETOOTH_CONNECTIONS);
+      int visibility = BrailleApplication.havePermissions(BluetoothConnection.requiredPermissions)? View.GONE: View.VISIBLE;
+      allowBluetoothConnections.setVisibility(visibility);
     }
   }
 

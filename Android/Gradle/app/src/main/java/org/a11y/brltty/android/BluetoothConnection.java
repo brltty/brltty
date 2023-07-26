@@ -43,6 +43,11 @@ public class BluetoothConnection {
     "00001101-0000-1000-8000-00805F9B34FB"
   );
 
+  public final static String[] requiredPermissions = {
+    android.Manifest.permission.BLUETOOTH_CONNECT,
+    android.Manifest.permission.BLUETOOTH_SCAN
+  };
+
   protected final static BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
   protected final long remoteAddressValue;
   protected final byte[] remoteAddressBytes = new byte[6];
@@ -241,7 +246,12 @@ public class BluetoothConnection {
   public boolean open (int inputPipe, int channel, boolean secure) {
     BluetoothDevice device = getDevice();
     if (device == null) return false;
-    if (bluetoothAdapter.isDiscovering()) return false;
+
+    if (BrailleApplication.havePermissions(android.Manifest.permission.BLUETOOTH_SCAN)) {
+      if (bluetoothAdapter.isDiscovering()) {
+        return false;
+      }
+    }
 
     if (channel == 0) {
       try {
@@ -295,7 +305,7 @@ public class BluetoothConnection {
   private static BluetoothDevice[] pairedDevices = null;
 
   public static int getPairedDeviceCount () {
-    if (BrailleApplication.havePermission(android.Manifest.permission.BLUETOOTH_CONNECT)) {
+    if (BrailleApplication.havePermissions(android.Manifest.permission.BLUETOOTH_CONNECT)) {
       if (isUp()) {
         Set<BluetoothDevice> devices = bluetoothAdapter.getBondedDevices();
 

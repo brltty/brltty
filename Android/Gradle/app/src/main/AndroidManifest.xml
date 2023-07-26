@@ -14,10 +14,17 @@
   <!-- for resetting the device's lock timer -->
   <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-  <!-- for communicating with a braille device via Bluetooth -->
+  <!-- this application uses Bluetooth -->
   <uses-feature android:name="android.hardware.bluetooth" />
+
+  <!-- for communicating with a braille device via Bluetooth (API level <= 30) -->
   <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+
+  <!-- for connecting to an already-paired Bluetooth device (API level > 30) -->
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+  <!-- for checking if Bluetoth device discovery is currently active (API level > 30) -->
+  <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
   <!-- for communicating with a braille device via USB -->
   <uses-feature android:name="android.hardware.usb.host" />
