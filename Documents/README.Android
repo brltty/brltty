@@ -68,6 +68,11 @@ tap ``Search for Devices`` again. Tap on your braille device to begin the
 Bluetooth Pairing Request, enter its PIN (see its manual for details), and tap
 ``OK``.
 
+There's an additional step that became mandatory in Android 12 (API level 31).
+You need to explicitly tell Android that BRLTTY is allowed to connect to Bluetooth devices.
+To do this, go to BRLTTY's `Actions Screen`_ and tap **Allow Bluetooth Connections**.
+If you don't see this button then this step has already been performed.
+
 Connecting Via USB
 ``````````````````
 
