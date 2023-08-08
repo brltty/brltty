@@ -192,8 +192,12 @@ typedef struct {
   unsigned char id2;
 } IdentityEntry;
 
-static const IdentityEntry panIdentity = {
+static const IdentityEntry assumePanIdentity = {
   .keyTable = &KEY_TABLE_DEFINITION(pan)
+};
+
+static const IdentityEntry assumeScrollIdentity = {
+  .keyTable = &KEY_TABLE_DEFINITION(scroll)
 };
 
 static const IdentityEntry scrollIdentity = {
@@ -353,7 +357,17 @@ testBrailleSenseIdentities (BrailleDisplay *brl) {
     &qwerty2Identity,
     &qwerty1Identity,
     &scrollIdentity,
-    &panIdentity,
+    &assumePanIdentity,
+    NULL
+  };
+
+  return testIdentities(brl, identities);
+}
+
+static const KeyTableDefinition *
+testBrailleSense6Identities (BrailleDisplay *brl) {
+  static const IdentityEntry *const identities[] = {
+    &assumeScrollIdentity,
     NULL
   };
 
@@ -455,7 +469,7 @@ static const ProtocolEntry brailleSense6Protocol = {
   .modelName = "BrailleSense 6",
   .resourceNamePrefix = "H632B",
   .keyTable = &KEY_TABLE_DEFINITION(scroll),
-  .testIdentities = testBrailleSenseIdentities,
+  .testIdentities = testBrailleSense6Identities,
   .getDefaultCellCount = getBrailleSenseDefaultCellCount
 };
 
