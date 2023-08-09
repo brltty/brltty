@@ -187,6 +187,7 @@ typedef union {
 } PACKED InputPacket;
 
 typedef struct {
+  const char *description;
   const KeyTableDefinition *keyTable;
   unsigned char id1;
   unsigned char id2;
@@ -200,22 +201,32 @@ static const IdentityEntry assumeScrollIdentity = {
   .keyTable = &KEY_TABLE_DEFINITION(scroll)
 };
 
+static const IdentityEntry panIdentity = {
+  .description = "Braille Sense PLUS (pan)",
+  .id1 = 0X42, .id2 = 0X53,
+  .keyTable = &KEY_TABLE_DEFINITION(pan)
+};
+
 static const IdentityEntry scrollIdentity = {
+  .description = "Braille Sense PLUS & OnHand (scroll)",
   .id1 = 0X4C, .id2 = 0X58,
   .keyTable = &KEY_TABLE_DEFINITION(scroll)
 };
 
 static const IdentityEntry qwerty2Identity = {
+  .description = "Braille Sense PLUS (qwerty)",
   .id1 = 0X53, .id2 = 0X58,
   .keyTable = &KEY_TABLE_DEFINITION(qwerty)
 };
 
 static const IdentityEntry qwerty1Identity = {
+  .description = "Braille Sense PLUS (qwerty)",
   .id1 = 0X51, .id2 = 0X58,
   .keyTable = &KEY_TABLE_DEFINITION(qwerty)
 };
 
 static const IdentityEntry edgeIdentity = {
+  .description = "Braille EDGE",
   .id1 = 0X42, .id2 = 0X45,
   .keyTable = &KEY_TABLE_DEFINITION(edge)
 };
@@ -357,6 +368,7 @@ testBrailleSenseIdentities (BrailleDisplay *brl) {
     &qwerty2Identity,
     &qwerty1Identity,
     &scrollIdentity,
+    &panIdentity,
     &assumePanIdentity,
     NULL
   };
