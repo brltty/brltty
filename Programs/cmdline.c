@@ -648,9 +648,9 @@ processCommandLine (
         break;
       }
 
-    {
-      const char *problem;
-      char message[0X100];
+      {
+        const char *problem;
+        char message[0X100];
 
       case '?': // an unknown option has been specified
         info->syntaxError = 1;
@@ -703,7 +703,7 @@ processCommandLine (
         STR_END;
         logMessage(LOG_WARNING, "%s", message);
         break;
-    }
+      }
 
       case 'h': // help - show usage summary and then exit
         optHelp = 1;
