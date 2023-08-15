@@ -453,6 +453,7 @@ cdef class Connection:
 		c_brlapi.brlapi_protocolExceptionInit(self.h)
 		if self.fd == -1:
 			c_brlapi.free(self.h)
+			self.h = NULL
 			raise ConnectionError(self.settings.host, self.settings.auth)
 
 	def closeConnection(self):
@@ -465,7 +466,8 @@ cdef class Connection:
 		"""Release resources used by the connection"""
 		if self.fd != -1:
 			c_brlapi.brlapi__closeConnection(self.h)
-		c_brlapi.free(self.h)
+		if self.h != NULL:
+			c_brlapi.free(self.h)
 
 	property host:
 		"""To get authorized to connect, libbrlapi has to tell the BrlAPI server a secret key, for security reasons. This is the path to the file which holds it; it will hence have to be readable by the application."""
