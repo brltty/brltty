@@ -43,7 +43,6 @@ pkg-config
 python3-all-dev
 python3-docutils
 python3-setuptools
-python-all-dev
 systemd
 tcl-dev
 udev
