@@ -4213,10 +4213,12 @@ static void broadcastKey(Tty *tty, brlapi_keyCode_t code, unsigned int how) {
   Connection *c;
   Tty *t;
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
+    int pass;
     lockMutex(&c->acceptedKeysMutex);
-    if ((c->how==how) && (inKeyrangeList(c->acceptedKeys,code) != NULL))
-      writeKey(c->fd,code);
+    pass = ((c->how==how) && (inKeyrangeList(c->acceptedKeys,code) != NULL));
     unlockMutex(&c->acceptedKeysMutex);
+    if (pass)
+      writeKey(c->fd,code);
   }
   for (t = tty->subttys; t; t = t->next)
     broadcastKey(t, code, how);
