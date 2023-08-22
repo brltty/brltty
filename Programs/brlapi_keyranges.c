@@ -145,6 +145,7 @@ int removeKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l)
   uint32_t minVal   = MIN(KeyrangeVal(x0), KeyrangeVal(y0));
   uint32_t maxVal   = MAX(KeyrangeVal(x0), KeyrangeVal(y0));
   KeyrangeList *c, **p, *tmp;
+  int i;
 
   if ((l==NULL) || (*l==NULL)) return 0;
 
@@ -189,21 +190,45 @@ int removeKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l)
       c->maxVal = maxVal;
     }
 
-    /* Now values are contained in suppression, intersect against flags */
+    /* Now values are the same, tinker with flags */
+    for (i=0; i<32; i++) {
+      uint32_t mask = 1U<<i;
 
-    if (~minFlags & maxFlags) {
-      /* At least some flag must now be neither cleared nor set, drop range */
+      if ((!(c->maxFlags & mask) &&  (minFlags & mask)) ||
+          ( (c->minFlags & mask) && !(maxFlags & mask)))
+	/* don't intersect on this flag */
+	continue;
+
+      if (!(c->minFlags & mask) &&  (minFlags & mask)) {
+        /* && (c->maxFlags & mask) */
+	/* part without flag i should be kept intact, save it */
+        p = createKeyrange(p, c->minFlags, c->minVal, c->maxFlags & ~mask, c->maxVal, c);
+        if (p == NULL) return -1;
+	/* now handling part with flag i */
+        c->minFlags |= mask;
+      }
+
+      if ( (c->maxFlags & mask) && !(maxFlags & mask)) {
+        /* && !(c->minFlags & mask) */
+	/* part with flag i should be kept intact, save it */
+        p = createKeyrange(p, c->minFlags | mask, c->minVal, c->maxFlags, c->maxVal, c);
+        if (p == NULL) return -1;
+	/* now handling part without flag i */
+        c->maxFlags &= ~mask;
+      }
+
+      if (!(c->maxFlags | ~minFlags) || !(~c->minFlags | maxFlags))
+        /* don't intersect any more*/
+	break;
+    }
+    if (i<32) {
+      /* don't intersect any more, keep it */
+      break;
+    } else {
+      /* remaining intersection, drop it */
       tmp = c; c = c->next;
       freeKeyrange(p,tmp);
-      continue;
     }
-
-    /* Clamp flags on the value interval */
-    c->minFlags |= ~maxFlags;
-    c->maxFlags &= ~minFlags;
-
-    p = &c->next;
-    c = *p;
   }
 
   return 0;
