@@ -149,6 +149,7 @@ refresh_BaseScreen (void) {
 
 static void
 describe_BaseScreen (ScreenDescription *description) {
+  description->quality = SCQ_NONE;
   description->rows = 1;
   description->cols = strlen(text_BaseScreen);
   description->posx = 0;
