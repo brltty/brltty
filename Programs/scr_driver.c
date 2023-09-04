@@ -81,6 +81,11 @@ describe_NoScreen (ScreenDescription *description) {
     screenMessage = message;
   }
 
+  if (screenMessage)
+    description->quality = SCQ_LOW;
+  else
+    description->quality = SCQ_NONE;
+
   description->rows = 1;
   description->cols = strlen(screenMessage);
   description->posx = 0;
