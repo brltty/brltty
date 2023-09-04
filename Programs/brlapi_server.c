@@ -1485,6 +1485,7 @@ PARAM_WRITER(clientPriority)
   PARAM_ASSERT_SIZE(clientPriority);
 
   lockMutex(&apiConnectionsMutex);
+    logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" setting priority %d",c->fd,*clientPriority);
     c->client_priority = *clientPriority;
 
     if (c->tty) {
@@ -2299,6 +2300,8 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   subparam = ((brlapi_param_subparam_t)ntohl(paramValue->subparam_hi) << 32) || ntohl(paramValue->subparam_lo);
   size -= sizeof(flags) + sizeof(param) + sizeof(subparam);
   _brlapi_ntohParameter(param, paramValue, size);
+
+  logMessage(LOG_CATEGORY(SERVER_EVENTS), "got parameter %"PRIx32" update from fd %"PRIfd,param,c->fd);
 
   {
     const char *error;
