@@ -75,4 +75,10 @@ public abstract class APITests {
 
   public final static boolean haveS
   = haveAPILevel(Build.VERSION_CODES.S);
+
+  public final static boolean haveSV2
+  = haveAPILevel(Build.VERSION_CODES.S_V2);
+
+  public final static boolean haveTiramisu
+  = haveAPILevel(Build.VERSION_CODES.TIRAMISU);
 }

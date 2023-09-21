@@ -14,11 +14,11 @@ dependencies {
 }
 
 android {
-  compileSdkVersion "android-31"
+  compileSdkVersion "android-33"
   buildToolsVersion "29.0.3"
 
   defaultConfig {
-    targetSdkVersion 32
+    targetSdkVersion 33
     minSdkVersion 24
   }
 }
