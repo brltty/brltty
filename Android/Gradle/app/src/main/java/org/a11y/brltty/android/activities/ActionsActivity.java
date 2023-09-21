@@ -75,7 +75,6 @@ public class ActionsActivity extends InternalActivity {
     launch(R.string.community_membership_url);
   }
 
-  private View[] updateApplicationOptions = null;
   private CheckBox developerBuild = null;
   private CheckBox allowDowngrade = null;
 
@@ -116,23 +115,24 @@ public class ActionsActivity extends InternalActivity {
     developerBuild = findViewById(R.id.GLOBAL_CHECKBOX_DEVELOPER_BUILD);
     allowDowngrade = findViewById(R.id.GLOBAL_CHECKBOX_ALLOW_DOWNGRADE);
 
-    updateApplicationOptions = new View[] {
-      developerBuild,
-      allowDowngrade
-    };
-
-    for (View option : updateApplicationOptions) {
-      option.setVisibility(View.GONE);
-    }
-
-    {
+    { // update application options
       View button = findViewById(R.id.GLOBAL_BUTTON_UPDATE_APPLICATION);
+      button.setVisibility(BuildConfig.DEBUG? View.VISIBLE: View.GONE);
+
+      final View[] options = new View[] {
+        developerBuild,
+        allowDowngrade
+      };
+
+      for (View option : options) {
+        option.setVisibility(View.GONE);
+      }
 
       button.setOnLongClickListener(
         new View.OnLongClickListener() {
           @Override
           public boolean onLongClick (View view) {
-            for (View option : updateApplicationOptions) {
+            for (View option : options) {
               option.setVisibility(View.VISIBLE);
             }
 

@@ -41,9 +41,6 @@
   <!-- for knowing when locked storage can be accessed after a reboot -->
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-  <!-- for upgrading to a newer release -->
-  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-
   <!-- for getting Wi-Fi status values (for the INDICATORS command) -->
   <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
   <uses-feature android:name="android.hardware.wifi" />

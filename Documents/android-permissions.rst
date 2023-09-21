@@ -34,7 +34,7 @@
   * For knowing when locked storage can be accessed after a reboot.
 
 ``REQUEST_INSTALL_PACKAGES``
-  * For upgrading to a newer release.
+  * For sideloading an upgrade (debug version only).
 
 ``ACCESS_WIFI_STATE``
   * For getting Wi-Fi status values (for the INDICATORS command).
