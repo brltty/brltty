@@ -1,0 +1,87 @@
+name: build BRLTTY for Windows
+
+on:
+  push:
+    branches: [master]
+
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  build_brltty:
+    runs-on: windows-2025
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+          architecture: x64
+      - name: Install setuptools and cython
+        shell: cmd
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools cython
+
+      - name: Set up MSYS environment
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            autoconf
+            automake
+            make
+            awk
+            bison
+            git
+            groff
+            m4
+            patch
+          pacboy: >-
+            tcl:p
+            pdcurses:p
+            icu:p
+            libiconv:p
+            toolchain:p
+            libusb:p
+
+      - name: Apply patches
+        run: patch -p0 <"Windows/affinity.patch"
+
+      - name: Configure build
+        run: |
+          export PATH="$(cygpath -u "$pythonLocation")/scripts:$(cygpath -u "$pythonLocation"):$PATH"
+          ./autogen
+          ./cfg-windows --prefix=/ --enable-relocatable-install --with-usb-package=winusb
+
+      - name: Build BRLTTY
+        run: |
+          make
+          make -C Documents
+      - name: Install BRLTTY
+        run: |
+          mkdir -p install/{bin,etc,lib,python}
+          make install install-messages JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib PYTHON_PREFIX="Python" INSTALL_ROOT="./install"
+          cp Documents/brltty.conf install/etc/
+          cp Programs/*.exe Programs/*.dll install/bin
+          cp Bindings/Python/dist/* install/python/
+          cp LICENSE-LGPL install/LICENSE-LGPL.txt
+          cp Documents/*.csv install/etc/
+          cp Windows/*.bat install/
+          cp $MINGW_PREFIX/bin/{libgcc_s_seh-1.dll,libiconv-2.dll,libpdcurses*.dll,libintl-8.dll} install/bin/
+          cd install/
+          rm -f "bin/brltty-config"
+          rm -f "etc/brlapi.key"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: brltty
+          path: install

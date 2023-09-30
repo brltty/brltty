@@ -30,7 +30,7 @@ PYTHON_OK=true
 #
 export PYTHONCOERCECLOCALE=0
 
-AC_PATH_PROGS([PYTHON], [python3 python python2], [python])
+AC_PATH_PROGS([PYTHON], [python python3], [python])
 if test -n "${PYTHON}"
 then
    test -n "${PYTHON_VERSION}" || {
