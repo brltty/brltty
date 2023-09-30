@@ -1,0 +1,55 @@
+name: build BRLTTY for Windows
+
+on:
+  push:
+    branches: [master]
+
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  build_brltty:
+    
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+      - name: Set up MSYS environment
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW32
+          update: true
+          install: >-
+            autoconf
+            automake
+            make
+            tcl
+            awk
+            bison
+            groff
+            m4
+            mingw-w64-i686-pdcurses
+            mingw-w64-i686-icu
+            mingw-w64-i686-tcl
+            mingw-w64-i686-winpthreads-git
+            mingw-w64-i686-toolchain
+            mingw-w64-i686-python
+            mingw-w64-i686-python-setuptools
+            mingw-w64-i686-cython
+      - uses: actions/checkout@v3
+      
+      - name: Build BRLTTY
+        run: |
+          ./autogen
+          ./cfg-windows
+          make
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: brltty
+          path: .
