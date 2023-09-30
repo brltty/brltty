@@ -23,7 +23,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW32
-          update: true
+          # update: true
           install: >-
             autoconf
             automake
@@ -38,6 +38,7 @@ jobs:
             mingw-w64-i686-icu
             mingw-w64-i686-tcl
             mingw-w64-i686-winpthreads-git
+            mingw-w64-i686-libiconv
             mingw-w64-i686-toolchain
             mingw-w64-i686-python
             mingw-w64-i686-python-setuptools
@@ -48,11 +49,11 @@ jobs:
         run: |
           patch -p0 <"Windows/affinity.patch"  
           ./autogen
-          ./cfg-windows --quiet --prefix=/ --enable-relocatable-install --with-usb-package=libusb-1.0
-          make -s
-          make -s -C Documents
+          ./cfg-windows --prefix=/ --enable-relocatable-install --with-usb-package=libusb-1.0
+          make
+          make -C Documents
           mkdir install
-          make -s install install-messages JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib     PYTHON_PREFIX="Python" INSTALL_ROOT="./install"
+          make install install-messages JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib     PYTHON_PREFIX="Python" INSTALL_ROOT="./install"
           cp Documents/brltty.conf install/etc/
           cp Programs/*.exe Programs/*.dll install/bin
           cp Bindings/Python/dist/* install/Python/
