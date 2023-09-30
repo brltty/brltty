@@ -31,6 +31,7 @@ jobs:
             tcl
             awk
             bison
+            git
             groff
             m4
             patch
@@ -45,13 +46,20 @@ jobs:
             mingw-w64-i686-cython
       - uses: actions/checkout@v3
       
+      - name: Apply patches
+        run: patch -p0 <"Windows/affinity.patch"  
+          
+      - name: Configure build
+        run: |
+          ./autogen
+          ./cfg-windows --prefix=/ --enable-relocatable-install
+      
       - name: Build BRLTTY
         run: |
-          patch -p0 <"Windows/affinity.patch"  
-          ./autogen
-          ./cfg-windows --prefix=/ --enable-relocatable-install --with-usb-package=libusb-1.0
           make
           make -C Documents
+      - name: Install BRLTTY
+        run: |
           mkdir install
           make install install-messages JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib     PYTHON_PREFIX="Python" INSTALL_ROOT="./install"
           cp Documents/brltty.conf install/etc/
@@ -68,4 +76,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: brltty
-          path: .
+          path: install
