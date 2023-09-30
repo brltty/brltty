@@ -45,9 +45,23 @@ jobs:
       
       - name: Build BRLTTY
         run: |
+          patch -p0 <"Windows/affinity.patch"  
           ./autogen
-          ./cfg-windows
-          make
+          ./cfg-windows --quiet --prefix=/ --enable-relocatable-install --with-usb-package=libusb-1.0
+          make -s
+          make -s -C Documents
+          mkdir install
+          make -s install install-messages JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib     PYTHON_PREFIX="Python" INSTALL_ROOT="./install"
+          cp Documents/brltty.conf install/etc/
+          cp Programs/*.exe Programs/*.dll install/bin
+          cp Bindings/Python/dist/* install/Python/
+          cp LICENSE-LGPL install/LICENSE-LGPL.txt
+          cp Documents/*.csv install/etc/
+          cp Programs/*.bat install/
+          cp /mingw32/bin/{libgcc_s_dw2-1.dll,libiconv-2.dll,libpdcurses*.dll,libintl-8.dll} install/bin/
+          cd install/
+          rm -f "bin/brltty-config"
+          rm -f "etc/brlapi.key"
 
       - uses: actions/upload-artifact@v3
         with:
