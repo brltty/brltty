@@ -33,6 +33,7 @@ jobs:
             bison
             groff
             m4
+            patch
             mingw-w64-i686-pdcurses
             mingw-w64-i686-icu
             mingw-w64-i686-tcl
