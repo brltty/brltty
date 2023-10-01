@@ -1171,6 +1171,7 @@ BRLTTY_ARG_PACKAGE([system], [base system], [], [dnl
       ;;
    mingw*)
       system_package="windows"
+      system_libs="-lsystre"
       ;;
    msdos*)
       system_package="msdos"

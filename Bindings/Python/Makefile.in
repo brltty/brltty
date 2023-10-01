@@ -50,6 +50,7 @@ $(PYTHON_API): brlapi.auto.c $(API_HDRS) | $(INSTALLED_FILES) brlapi
 	set -- $(V_setup) build --build-temp .; \
 	[ "@host_os@" != "mingw32" ] || set -- "$${@}" --compiler mingw32; \
 	"$(PYTHON)" ./setup.py "$${@}"
+	[ "@host_os@" != "mingw32" ] || "$(PYTHON)" ./setup.py $(V_setup) bdist_egg --skip-build
 
 $(INSTALLED_FILES):
 	touch $(INSTALLED_FILES)

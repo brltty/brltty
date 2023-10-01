@@ -52,7 +52,7 @@ jobs:
       - name: Configure build
         run: |
           ./autogen
-          ./cfg-windows --prefix=/ --enable-relocatable-install
+          ./cfg-windows --prefix=/ --enable-relocatable-install --with-usb-package=winusb
       
       - name: Build BRLTTY
         run: |
