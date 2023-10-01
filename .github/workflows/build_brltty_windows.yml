@@ -60,11 +60,11 @@ jobs:
           make -C Documents
       - name: Install BRLTTY
         run: |
-          mkdir install
+          mkdir -p install/{bin,etc,lib,python}
           make install install-messages JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib     PYTHON_PREFIX="Python" INSTALL_ROOT="./install"
           cp Documents/brltty.conf install/etc/
           cp Programs/*.exe Programs/*.dll install/bin
-          cp Bindings/Python/dist/* install/Python/
+          cp Bindings/Python/dist/* install/python/
           cp LICENSE-LGPL install/LICENSE-LGPL.txt
           cp Documents/*.csv install/etc/
           cp Programs/*.bat install/
