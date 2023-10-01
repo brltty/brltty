@@ -67,7 +67,7 @@ jobs:
           cp Bindings/Python/dist/* install/python/
           cp LICENSE-LGPL install/LICENSE-LGPL.txt
           cp Documents/*.csv install/etc/
-          cp Programs/*.bat install/
+          cp Windows/*.bat install/
           cp /mingw32/bin/{libgcc_s_dw2-1.dll,libiconv-2.dll,libpdcurses*.dll,libintl-8.dll} install/bin/
           cd install/
           rm -f "bin/brltty-config"
