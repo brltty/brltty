@@ -828,6 +828,14 @@ static const brlapi_param_properties_t brlapi_param_properties[BRLAPI_PARAM_COUN
     .canWatch = 1,
     .canWrite = 1,
   },
+
+//Driver-speciic Parameters
+  [BRLAPI_PARAM_DRIVER_PROPERTY_VALUE] = {
+    .type = BRLAPI_PARAM_TYPE_UINT32,
+    .canRead = 1,
+    .canWatch = 1,
+    .hasSubparam = 1,
+  },
 };
 
 const brlapi_param_properties_t *brlapi_getParameterProperties(brlapi_param_t parameter) {

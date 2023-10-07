@@ -96,11 +96,15 @@ typedef enum {
   BRLAPI_PARAM_COMPUTER_BRAILLE_TABLE = 28,	/**< Name of the computer braille table: string */
   BRLAPI_PARAM_LITERARY_BRAILLE_TABLE = 29,	/**< Name of the literary braille table: string */
   BRLAPI_PARAM_MESSAGE_LOCALE = 30,		/**< Locale to use for messages: string */
+
 /* TODO: dot-to-unicode as well */
+
+//Driver-speciic Parameters
+  BRLAPI_PARAM_DRIVER_PROPERTY_VALUE = 32,      /**< Value of a driver-specific property: uint32_t */
 
  /* TODO: help strings */
 
-  BRLAPI_PARAM_COUNT = 32 /** Number of parameters */
+  BRLAPI_PARAM_COUNT = 33 /** Number of parameters */
 } brlapi_param_t;
 
 /* brlapi_param_subparam_t */
@@ -253,6 +257,10 @@ typedef char *brlapi_param_literaryBrailleTable_t;
 /* brlapi_param_messageLocale_t */
 /** Type to be used for BRLAPI_PARAM_MESSAGE_LOCALE      */
 typedef char *brlapi_param_messageLocale_t;
+
+/* brlapi_param_driverPropertyValue_t */
+/** Type to be used for BRLAPI_PARAM_DRIVER_PROPERTY_VALUE */
+typedef uint32_t brlapi_param_driverPropertyValue_t;
 
 /** Deprecated in BRLTTY-6.2 - use BRLAPI_PARAM_BOUND_COMMAND_KEYCODES */
 #define BRLAPI_PARAM_BOUND_COMMAND_CODES BRLAPI_PARAM_BOUND_COMMAND_KEYCODES

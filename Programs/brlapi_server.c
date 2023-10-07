@@ -2052,6 +2052,17 @@ PARAM_WRITER(messageLocale)
   return param_writeString(changeMessageLocale, data, size);
 }
 
+/* BRLAPI_PARAM_DRIVER_PROPERTY_VALUE */
+PARAM_READER(driverPropertyValue)
+{
+  return NULL;
+}
+
+PARAM_WRITER(driverPropertyValue)
+{
+  return NULL;
+}
+
 typedef struct {
   unsigned local:1;
   unsigned global:1;
@@ -2246,6 +2257,13 @@ static const ParamDispatch paramDispatch[BRLAPI_PARAM_COUNT] = {
     .global = 1,
     .read = param_messageLocale_read,
     .write = param_messageLocale_write,
+  },
+
+//Driver-speciic Parameters
+  [BRLAPI_PARAM_DRIVER_PROPERTY_VALUE] = {
+    .global = 1,
+    .read = param_driverPropertyValue_read,
+    .write = param_driverPropertyValue_write,
   },
 };
 
