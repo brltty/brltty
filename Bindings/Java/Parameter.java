@@ -63,15 +63,11 @@ public abstract class Parameter extends ParameterComponent {
   }
 
   protected final Object getValue () {
-    return getValue(0);
+    return getValue(DEFAULT_SUBPARAM);
   }
 
   protected final void setValue (long subparam, Object value) {
     clientConnection.setParameter(getParameter(), subparam, isGlobal(), value);
-  }
-
-  protected final void setValue (Object value) {
-    setValue(0, value);
   }
 
   public Object get (long subparam) {
@@ -218,7 +214,7 @@ public abstract class Parameter extends ParameterComponent {
   }
 
   public void set (String value) throws OperandException {
-    set(0, value);
+    set(DEFAULT_SUBPARAM, value);
   }
 
   public final static class WatcherHandle implements AutoCloseable {
@@ -248,6 +244,6 @@ public abstract class Parameter extends ParameterComponent {
   }
 
   public final WatcherHandle watch (ParameterWatcher watcher) {
-    return watch(0, watcher);
+    return watch(DEFAULT_SUBPARAM, watcher);
   }
 }

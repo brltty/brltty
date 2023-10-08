@@ -22,6 +22,8 @@ package org.a11y.brlapi;
 import java.util.Arrays;
 
 public abstract class ParameterComponent extends Component {
+  public final static long DEFAULT_SUBPARAM = 0;
+
   protected ParameterComponent () {
     super();
   }
