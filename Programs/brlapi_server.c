@@ -1485,7 +1485,11 @@ PARAM_WRITER(clientPriority)
   PARAM_ASSERT_SIZE(clientPriority);
 
   lockMutex(&apiConnectionsMutex);
-    logMessage(LOG_CATEGORY(SERVER_EVENTS), "fd %"PRIfd" setting priority %d",c->fd,*clientPriority);
+    logMessage(LOG_CATEGORY(SERVER_EVENTS),
+      "fd %"PRIfd": setting client priority %"PRIu32,
+      c->fd, *clientPriority
+    );
+
     c->client_priority = *clientPriority;
 
     if (c->tty) {
@@ -2072,10 +2076,9 @@ PARAM_WRITER(driverPropertyValue)
   const brlapi_param_driverPropertyValue_t *propertyValue = data;
   PARAM_ASSERT_SIZE(propertyValue);
 
-  logMessage(
-    LOG_CATEGORY(SERVER_EVENTS),
+  logMessage(LOG_CATEGORY(SERVER_EVENTS),
     "fd %"PRIfd": setting driver property %"PRIu64"=%"PRIu64,
-    c->fd ,subparam, *propertyValue
+    c->fd, subparam, *propertyValue
   );
 
   if (!brl.setDriverProperty(&brl, subparam, *propertyValue)) return "cannot set driver property";
