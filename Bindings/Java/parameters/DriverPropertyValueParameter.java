@@ -20,7 +20,7 @@
 package org.a11y.brlapi.parameters;
 import org.a11y.brlapi.*;
 
-public class DriverPropertyValueParameter extends GlobalParameter implements Parameter.IntSettable {
+public class DriverPropertyValueParameter extends GlobalParameter implements Parameter.LongSettable {
   public DriverPropertyValueParameter (ConnectionBase connection) {
     super(connection);
   }
@@ -31,12 +31,12 @@ public class DriverPropertyValueParameter extends GlobalParameter implements Par
   }
 
   @Override
-  public final Integer get () {
-    return asInt(getValue());
+  public final Long get () {
+    return asLong(getValue());
   }
 
   @Override
-  public final void set (int value) {
-    setValue(new int[] {value});
+  public final void set (long value) {
+    setValue(new long[] {value});
   }
 }

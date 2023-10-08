@@ -44,6 +44,9 @@ constructBrailleDisplay (BrailleDisplay *brl) {
   brl->setTouchSensitivity = NULL;
   brl->setAutorepeatProperties = NULL;
 
+  brl->getDriverProperty = NULL;
+  brl->setDriverProperty = NULL;
+
   brl->textColumns = 0;
   brl->textRows = 1;
   brl->statusColumns = 0;

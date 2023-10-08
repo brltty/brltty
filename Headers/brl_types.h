@@ -63,6 +63,9 @@ typedef int SetBrailleFirmnessMethod (BrailleDisplay *brl, BrailleFirmness setti
 typedef int SetTouchSensitivityMethod (BrailleDisplay *brl, TouchSensitivity setting);
 typedef int SetAutorepeatPropertiesMethod (BrailleDisplay *brl, int on, int delay, int interval);
 
+typedef int GetDriverPropertyMethod (BrailleDisplay *brl, uint64_t property, uint64_t *value);
+typedef int SetDriverPropertyMethod (BrailleDisplay *brl, uint64_t property, uint64_t value);
+
 typedef struct {
   struct {
     ContractionCache cache;
@@ -84,6 +87,9 @@ struct BrailleDisplayStruct {
   SetBrailleFirmnessMethod *setBrailleFirmness;
   SetTouchSensitivityMethod *setTouchSensitivity;
   SetAutorepeatPropertiesMethod *setAutorepeatProperties;
+
+  GetDriverPropertyMethod *getDriverProperty;
+  SetDriverPropertyMethod *setDriverProperty;
 
   unsigned int textColumns;
   unsigned int textRows;

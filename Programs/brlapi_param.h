@@ -260,7 +260,7 @@ typedef char *brlapi_param_messageLocale_t;
 
 /* brlapi_param_driverPropertyValue_t */
 /** Type to be used for BRLAPI_PARAM_DRIVER_PROPERTY_VALUE */
-typedef uint32_t brlapi_param_driverPropertyValue_t;
+typedef uint64_t brlapi_param_driverPropertyValue_t;
 
 /** Deprecated in BRLTTY-6.2 - use BRLAPI_PARAM_BOUND_COMMAND_KEYCODES */
 #define BRLAPI_PARAM_BOUND_COMMAND_CODES BRLAPI_PARAM_BOUND_COMMAND_KEYCODES

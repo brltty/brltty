@@ -2055,11 +2055,30 @@ PARAM_WRITER(messageLocale)
 /* BRLAPI_PARAM_DRIVER_PROPERTY_VALUE */
 PARAM_READER(driverPropertyValue)
 {
+  if (!brl.getDriverProperty) return "no gettable driver properties";
+  uint64_t value;
+  if (!brl.getDriverProperty(&brl, subparam, &value)) return "cannot get driver property";
+
+  brlapi_param_driverPropertyValue_t *propertyValue = data;
+  *size = sizeof(*propertyValue);
+  *propertyValue = value;
   return NULL;
 }
 
 PARAM_WRITER(driverPropertyValue)
 {
+  if (!brl.setDriverProperty) return "no settable driver properties";
+
+  const brlapi_param_driverPropertyValue_t *propertyValue = data;
+  PARAM_ASSERT_SIZE(propertyValue);
+
+  logMessage(
+    LOG_CATEGORY(SERVER_EVENTS),
+    "fd %"PRIfd": setting driver property %"PRIu64"=%"PRIu64,
+    c->fd ,subparam, *propertyValue
+  );
+
+  if (!brl.setDriverProperty(&brl, subparam, *propertyValue)) return "cannot set driver property";
   return NULL;
 }
 
