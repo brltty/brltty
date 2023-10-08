@@ -36,7 +36,7 @@ public class SkipIdenticalLinesParameter extends GlobalParameter implements Para
   }
 
   @Override
-  public final void set (boolean yes) {
-    setValue(new boolean[] {yes});
+  public final void set (long subparam, boolean yes) {
+    setValue(subparam, new boolean[] {yes});
   }
 }

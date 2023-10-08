@@ -36,8 +36,8 @@ public class CursorBlinkPeriodParameter extends GlobalParameter implements Param
   }
 
   @Override
-  public final void set (int period) {
-    setValue(new int[] {period});
+  public final void set (long subparam, int period) {
+    setValue(subparam, new int[] {period});
   }
 
   @Override

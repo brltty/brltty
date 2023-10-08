@@ -36,7 +36,7 @@ public class ComputerBrailleCellSizeParameter extends GlobalParameter implements
   }
 
   @Override
-  public final void set (byte size) {
-    setValue(new byte[] {size});
+  public final void set (long subparam, byte size) {
+    setValue(subparam, new byte[] {size});
   }
 }

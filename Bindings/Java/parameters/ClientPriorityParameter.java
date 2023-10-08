@@ -36,7 +36,7 @@ public class ClientPriorityParameter extends LocalParameter implements Parameter
   }
 
   @Override
-  public final void set (int priority) {
-    setValue(new int[] {priority});
+  public final void set (long subparam, int priority) {
+    setValue(subparam, new int[] {priority});
   }
 }

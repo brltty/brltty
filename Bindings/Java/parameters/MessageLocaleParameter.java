@@ -36,7 +36,7 @@ public class MessageLocaleParameter extends GlobalParameter implements Parameter
   }
 
   @Override
-  public final void set (String locale) {
-    setValue(locale);
+  public final void set (long subparam, String locale) {
+    setValue(subparam, locale);
   }
 }

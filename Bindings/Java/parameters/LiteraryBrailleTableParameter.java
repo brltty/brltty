@@ -36,7 +36,7 @@ public class LiteraryBrailleTableParameter extends GlobalParameter implements Pa
   }
 
   @Override
-  public final void set (String name) {
-    setValue(name);
+  public final void set (long subparam, String name) {
+    setValue(subparam, name);
   }
 }

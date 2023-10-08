@@ -35,13 +35,13 @@ public class CursorDotsParameter extends GlobalParameter implements Parameter.St
     return asByte(getValue());
   }
 
-  public final void set (byte dots) {
-    setValue(new byte[] {dots});
+  public final void set (long subparam, byte dots) {
+    setValue(subparam, new byte[] {dots});
   }
 
   @Override
-  public final void set (String numbers) throws SyntaxException {
-    set(Parse.asDots(getParseDescription(), numbers));
+  public final void set (long subparam, String numbers) throws SyntaxException {
+    set(subparam, Parse.asDots(getParseDescription(), numbers));
   }
 
   @Override

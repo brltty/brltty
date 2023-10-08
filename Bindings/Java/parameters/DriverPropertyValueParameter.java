@@ -36,7 +36,7 @@ public class DriverPropertyValueParameter extends GlobalParameter implements Par
   }
 
   @Override
-  public final void set (long value) {
-    setValue(new long[] {value});
+  public final void set (long subparam, long value) {
+    setValue(subparam, new long[] {value});
   }
 }

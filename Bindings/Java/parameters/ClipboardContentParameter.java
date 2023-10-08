@@ -36,7 +36,7 @@ public class ClipboardContentParameter extends GlobalParameter implements Parame
   }
 
   @Override
-  public final void set (String text) {
-    setValue(text);
+  public final void set (long subparam, String text) {
+    setValue(subparam, text);
   }
 }
