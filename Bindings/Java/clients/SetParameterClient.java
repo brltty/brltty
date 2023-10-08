@@ -24,10 +24,12 @@ public class SetParameterClient extends Client {
   public SetParameterClient (String... arguments) {
     super(arguments);
     addRequiredParameters("parameter", "value");
+    addOptionalParameters("subparam");
   }
 
   private String parameterName = null;
   private String parameterValue = null;
+  private Long subparamValue = null;
 
   @Override
   protected void processParameters (String[] parameters)
@@ -42,6 +44,9 @@ public class SetParameterClient extends Client {
     if (index == count) throw new SyntaxException("missing larameter value");
     parameterValue = parameters[index++];
 
+    if (index == count) return;
+    subparamValue = Parse.asLong("subparam", parameters[index++]);
+
     if (index < count) throw new TooManyParametersException(parameters, index);
   }
 
@@ -50,6 +55,11 @@ public class SetParameterClient extends Client {
             throws OperandException
   {
     Parameter parameter = getParameter(connection, parameterName);
-    parameter.set(parameterValue);
+
+    if (subparamValue != null) {
+      parameter.set(subparamValue, parameterValue);
+    } else {
+      parameter.set(parameterValue);
+    }
   }
 }
