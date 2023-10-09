@@ -300,6 +300,9 @@
 
 # DotPad Braille Driver Parameters
 #brailledd-parameters dp:Display=default # [default,text,graphic]
+#brailledd-parameters dp:StatusCells=yes # [yes,no]
+#brailledd-parameters dp:HorizontalSpacing=1 # [0-10] (dots)
+#brailledd-parameters dp:VerticalSpacing=2 # [0-10] (dots)
 
 # EuroBraille Braille Driver Parameters
 #braille-parameters eu:Protocol= # [auto,azerbraille,clio,eurobraille,notebraille,pupibraille,scriba,esys,esytime,iris,esysiris]
