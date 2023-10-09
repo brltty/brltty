@@ -2337,7 +2337,7 @@ static int handleParamValue(Connection *c, brlapi_packetType_t type, brlapi_pack
   if (!checkParamLocalGlobal(c, param, flags))
     return 0;
 
-  subparam = ((brlapi_param_subparam_t)ntohl(paramValue->subparam_hi) << 32) || ntohl(paramValue->subparam_lo);
+  subparam = ((brlapi_param_subparam_t)ntohl(paramValue->subparam_hi) << 32) | ntohl(paramValue->subparam_lo);
   size -= sizeof(flags) + sizeof(param) + sizeof(subparam);
   _brlapi_ntohParameter(param, paramValue, size);
 
