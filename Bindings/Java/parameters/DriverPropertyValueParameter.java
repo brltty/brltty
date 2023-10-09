@@ -31,8 +31,8 @@ public class DriverPropertyValueParameter extends GlobalParameter implements Par
   }
 
   @Override
-  public final Long get () {
-    return asLong(getValue());
+  public final Long get (long subparam) {
+    return asLong(getValue(subparam));
   }
 
   @Override

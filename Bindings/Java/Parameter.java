@@ -79,7 +79,7 @@ public abstract class Parameter extends ParameterComponent {
   }
 
   public Object get () {
-    return null;
+    return get(DEFAULT_SUBPARAM);
   }
 
   @Override
