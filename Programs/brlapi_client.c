@@ -1419,10 +1419,11 @@ static ssize_t _brlapi__getParameter(brlapi_handle_t *handle, brlapi_param_t par
     pthread_mutex_unlock(&handle->req_mutex);
     return -1;
   }
-  if (flags & BRLAPI_PARAMF_GET)
+  if (flags & BRLAPI_PARAMF_GET) {
     rlen = brlapi__waitForPacket(handle, BRLAPI_PACKET_PARAM_VALUE, reply, sizeof(*reply), 1, -1);
-  else
+  } else {
     rlen = brlapi__waitForAck(handle);
+  }
   pthread_mutex_unlock(&handle->req_mutex);
 
   if (rlen < 0) {
