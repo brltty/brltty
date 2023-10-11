@@ -1,0 +1,139 @@
+The DotPad Braille Driver
+=========================
+
+.. contents::
+
+Driver Properties
+-----------------
+
+There are a number of properties which control how the driver renders text.
+Each of these:
+
+* has a built-in default.
+* can have its built-in default overridden via a driver parameter.
+* can be changed and queried at run-time via BrlAPI.
+
+.. topic:: Specifying a Driver Parameter
+
+  The general format of a driver parameter specification is::
+
+    [driver:]name=value
+
+  The name, as well as the value (if it's a word), can be abbreviated.
+  The optional *driver* component is the two-letter code
+  of the driver whose parameter is being specified.
+  It's a good idea to include it in order to avoid
+  any ambiguity with the names of the parameters of other drivers.
+  The DotPad's driver code is ``dp``.
+
+  In decreasing order of precedence, the parameter can be specified via:
+
+  * The ``--braille-parameters=`` (``-B``) command line option.
+  * The ``BRLTTY_BRAILLE_PARAMETERS`` environment variable (if enabled).
+  * The ``braille-parameters`` configuration directive.
+
+.. topic:: Changing a Driver Property
+
+  A driver property is changed by setting the ``DRIVER_PROPERTY_VALUE`` BrlAPI parameter.
+  This is done by calling the ``brlapi_setParameter()`` function
+  with its ``subparam`` argument set to the driver property.
+  The DotPad's driver properties are defined within the ``brldefs-dp.h`` header.
+
+  To set the display to the graphic area, for example, you'd do::
+
+    brlapi_param_t parameter = BRLAPI_PARAM_DRIVER_PROPERTY_VALUE;
+    brlapi_param_subparam_t subparam = DP_SELECT_DISPLAY;
+    brlapi_param_flags_t flags = 0;
+    brlapi_param_driverPropertyValue_t newSetting = DP_DISPLAY_GRAPHIC;
+    int result = brlapi_setParameter(
+      parameter, subparam, flags,
+      &newSetting, sizeof(newSetting)
+    );
+
+.. topic:: Querying a Driver Property
+
+  Querying a driver property is similar to changing it (see above), except that:
+
+  * You call the ``brlapi_getParameter()`` function.
+  * The property's current value is returned within the data area.
+
+  To query the display property, for example, you'd do::
+
+    brlapi_param_t parameter = BRLAPI_PARAM_DRIVER_PROPERTY_VALUE;
+    brlapi_param_subparam_t subparam = DP_SELECT_DISPLAY;
+    brlapi_param_flags_t flags = 0;
+    brlapi_param_driverPropertyValue_t currentSetting;
+    ssize_t length = brlapi_getParameter(
+      parameter, subparam, flags,
+      &currentSetting, sizeof(currentSetting)
+    );
+
+Display Selection
+~~~~~~~~~~~~~~~~~
+
+Select whether text is written to the text area or to the graphic area.
+If text is written to the graphic area then a multi-line display is emulated.
+
+The driver parameter is ``display=``.
+It can be set to one of the following:
+
+``default``
+  Use the graphic area if the device has one,
+  else use the text area.
+
+``text``
+  Explicitly use the text area.
+  It's an error if the device doesn't have one.
+
+``graphic``
+  Explicitly use the graphic area.
+  It's an error if the device doesn't have one.
+
+The driver property is ``DP_SELECT_DISPLAY``.
+It can be set to one of the following:
+
+``DP_DISPLAY_TEXT``
+  Switch to the text area.
+  It's an error if the device doesn't have one.
+
+``DP_DISPLAY_GRAPHIC``
+  Switch to the graphic area.
+  It's an error if the device doesn't have one.
+
+Status Cells
+~~~~~~~~~~~~
+
+When emulating a multi-line display within the graphic area,
+specify whether or not status information is to be written to the actual text area.
+The default is to write it.
+
+The driver parameter is ``statusCells=``.
+It may be specified as either ``yes`` (the default) or as ``no``.
+
+The driver property is ``DP_STATUS_CELLS``.
+It may be set to either 0 for ``no`` or to 1 for ``yes``.
+
+Horizontal Spacing
+~~~~~~~~~~~~~~~~~~
+
+When emulating a multi-line display within the graphic area,
+specify how many columns of dots separate the characters from one another.
+It must be an integer within the range 0-10 (inclusive).
+The default is 1.
+
+The driver parameter is ``horizontalSpacing=``.
+
+The driver property is ``DP_HORIZONTAL_SPACING``.
+
+Vertical Spacing
+~~~~~~~~~~~~~~~~
+
+When emulating a multi-line display within the graphic area,
+specify how many rows of dots separate the lines from one another.
+It must be an integer within the range 0-10 (inclusive).
+The default is 2.
+
+The driver parameter is ``verticalSpacing=``.
+
+The driver property is ``DP_VERTICAL_SPACING``.
+
