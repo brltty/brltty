@@ -9,6 +9,7 @@ cldr-emoji-annotation
 coreutils
 dbus-devel
 doxygen
+emacs
 emacs-devel
 espeak-devel
 espeak-ng-devel
