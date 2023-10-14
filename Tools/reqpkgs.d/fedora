@@ -34,7 +34,7 @@ linuxdoc-tools
 lua-devel
 make
 ncurses-devel
-neXtaw-devel
+Xaw3d
 ocaml
 ocaml-findlib
 pcre2-devel
