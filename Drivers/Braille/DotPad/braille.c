@@ -184,6 +184,132 @@ struct BrailleDataStruct {
   } arrays;
 };
 
+static ExternalRowEntry *
+getExternalRow (BrailleDisplay *brl, unsigned int index) {
+  return &brl->data->arrays.externalRows[index];
+}
+
+static void
+initializeExternalRows (BrailleDisplay *brl) {
+  unsigned char *cells = brl->data->arrays.externalCells;
+  unsigned char destination = brl->data->display.destination;
+
+  for (unsigned int index=0; index<brl->data->display.externalRows; index+=1) {
+    ExternalRowEntry *row = getExternalRow(brl, index);
+
+    row->cells = cells;
+    cells += brl->data->display.externalColumns;
+
+    row->destination = destination;
+    destination += 1;
+  }
+}
+
+static InternalRowEntry *
+getInternalRow (BrailleDisplay *brl, unsigned int index) {
+  return &brl->data->arrays.internalRows[index];
+}
+
+static void
+initializeInternalRows (BrailleDisplay *brl) {
+  unsigned char *cells = brl->data->arrays.internalCells + brl->data->display.verticalSpacing;
+
+  const unsigned char cellHeight = brl->data->display.cellHeight;
+  const unsigned char rowHeight = cellHeight + brl->data->display.verticalSpacing;
+  const unsigned char cellMask = (1 << cellHeight) - 1;
+
+  for (unsigned int index=0; index<brl->data->display.internalRows; index+=1) {
+    InternalRowEntry *row = getInternalRow(brl, index);
+
+    row->cells = cells;
+    cells += brl->data->display.internalColumns;
+
+    {
+      unsigned char offset = rowHeight * index;
+      row->upperRow = getExternalRow(brl, (offset / cellHeight));
+      row->upperShift = offset % cellHeight;
+      row->upperMask = (cellMask << row->upperShift) & cellMask;
+      row->upperMask |= row->upperMask << 4;
+
+      offset += 3;
+      row->lowerRow = getExternalRow(brl, (offset / cellHeight));
+      row->lowerShift = cellHeight - (offset % cellHeight) - 1;
+      row->lowerMask = cellMask >> row->lowerShift;
+      row->lowerMask |= row->lowerMask << 4;
+    }
+
+    row->hasChanged = 1;
+  }
+}
+
+static int
+makeArrays (BrailleDisplay *brl) {
+  if ((brl->data->arrays.externalCells = calloc(brl->data->display.externalRows, brl->data->display.externalColumns))) {
+    if ((brl->data->arrays.internalCells = calloc(brl->data->display.internalRows, brl->data->display.internalColumns))) {
+      if ((brl->data->arrays.externalRows = malloc(ARRAY_SIZE(brl->data->arrays.externalRows, brl->data->display.externalRows)))) {
+        if ((brl->data->arrays.internalRows = malloc(ARRAY_SIZE(brl->data->arrays.internalRows, brl->data->display.internalRows)))) {
+          int statusCellsAllocated = !brl->statusColumns;
+
+          if (!statusCellsAllocated) {
+            if ((brl->data->arrays.statusCells = calloc(brl->statusColumns, 1))) {
+              statusCellsAllocated = 1;
+            }
+          }
+
+          if (statusCellsAllocated) {
+            initializeExternalRows(brl);
+            initializeInternalRows(brl);
+            return 1;
+          }
+
+          free(brl->data->arrays.internalRows);
+          brl->data->arrays.internalRows = NULL;
+        }
+
+        free(brl->data->arrays.externalRows);
+        brl->data->arrays.externalRows = NULL;
+      }
+
+      free(brl->data->arrays.internalCells);
+      brl->data->arrays.internalCells = NULL;
+    }
+
+    free(brl->data->arrays.externalCells);
+    brl->data->arrays.externalCells = NULL;
+  }
+
+  logMallocError();
+  return 0;
+}
+
+static void
+deallocateArrays (BrailleDisplay *brl) {
+  if (brl->data->arrays.statusCells) {
+    free(brl->data->arrays.statusCells);
+    brl->data->arrays.statusCells = NULL;
+  }
+
+  if (brl->data->arrays.internalRows) {
+    free(brl->data->arrays.internalRows);
+    brl->data->arrays.internalRows = NULL;
+  }
+
+  if (brl->data->arrays.internalCells) {
+    free(brl->data->arrays.internalCells);
+    brl->data->arrays.internalCells = NULL;
+  }
+
+  if (brl->data->arrays.externalRows) {
+    free(brl->data->arrays.externalRows);
+    brl->data->arrays.externalRows = NULL;
+  }
+
+  if (brl->data->arrays.externalCells) {
+    free(brl->data->arrays.externalCells);
+    brl->data->arrays.externalCells = NULL;
+  }
+}
+
 static void
 setExternalDisplayProperties (BrailleDisplay *brl, const DP_DisplayDescriptor *display) {
   {
@@ -245,7 +371,7 @@ setInternalDisplayProperties (BrailleDisplay *brl) {
 }
 
 static void
-selectTextDisplay (BrailleDisplay *brl) {
+useTextDisplay (BrailleDisplay *brl) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "using text display");
 
   brl->data->display.destination = 0;
@@ -259,7 +385,7 @@ selectTextDisplay (BrailleDisplay *brl) {
 }
 
 static void
-selectGraphicDisplay (BrailleDisplay *brl) {
+useGraphicDisplay (BrailleDisplay *brl) {
   logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "using graphic display");
 
   if (brl->data->boardInformation.features & DP_HAS_TEXT_DISPLAY) {
@@ -280,16 +406,17 @@ selectGraphicDisplay (BrailleDisplay *brl) {
   }
 }
 
-static void
-selectDisplay (BrailleDisplay *brl) {
-  typedef void (*SelectDisplayMethod) (BrailleDisplay *brl);
+static int
+configureDisplay (BrailleDisplay *brl) {
+  typedef void (*UseDisplayMethod) (BrailleDisplay *brl);
 
-  static const SelectDisplayMethod selectDisplayArray[] = {
-    [DP_DISPLAY_TEXT]    = selectTextDisplay,
-    [DP_DISPLAY_GRAPHIC] = selectGraphicDisplay,
+  static const UseDisplayMethod useDisplayMethods[] = {
+    [DP_DISPLAY_TEXT]    = useTextDisplay,
+    [DP_DISPLAY_GRAPHIC] = useGraphicDisplay,
   };
 
-  selectDisplayArray[brl->data->properties.selectedDisplay](brl);
+  useDisplayMethods[brl->data->properties.selectedDisplay](brl);
+  return makeArrays(brl);
 }
 
 static int
@@ -399,6 +526,25 @@ parseDriverParameters (BrailleDisplay *brl, char **parameters) {
 }
 
 static int
+reconfigureDisplay (BrailleDisplay *brl) {
+  deallocateArrays(brl);
+  int reconfigured = configureDisplay(brl);
+
+  if (reconfigured) {
+    brl->resizeRequired = 1;
+  } else {
+    brl->hasFailed = 1;
+  }
+
+  return reconfigured;
+}
+
+static int
+usingGraphicDisplay (BrailleDisplay *brl) {
+  return brl->data->properties.selectedDisplay != DP_DISPLAY_TEXT;
+}
+
+static int
 verifyDisplayProperty (BrailleDisplay *brl, uint64_t value) {
   unsigned char features = brl->data->boardInformation.features;
 
@@ -424,25 +570,48 @@ verifyDisplayProperty (BrailleDisplay *brl, uint64_t value) {
 static int
 setDriverProperty (BrailleDisplay *brl, uint64_t property, uint64_t value) {
   switch (property) {
-    case DP_PROP_SELECTED_DISPLAY:
+    case DP_PROP_SELECTED_DISPLAY: {
       if (!verifyDisplayProperty(brl, value)) break;
-      brl->data->properties.selectedDisplay = value;
-      return 1;
 
-    case DP_PROP_STATUS_CELLS:
+      if (value != brl->data->properties.selectedDisplay) {
+        brl->data->properties.selectedDisplay = value;
+        reconfigureDisplay(brl);
+      }
+
+      return 1;
+    }
+
+    case DP_PROP_STATUS_CELLS: {
       if (value > 1) break;
-      brl->data->properties.statusCells = value;
-      return 1;
 
-    case DP_PROP_HORIZONTAL_SPACING:
+      if (value != brl->data->properties.statusCells) {
+        brl->data->properties.statusCells = value;
+      }
+
+      return 1;
+    }
+
+    case DP_PROP_HORIZONTAL_SPACING: {
       if (value > DP_MAXIMUM_HORIZONTAL_SPACING) break;
-      brl->data->properties.horizontalSpacing = value;
-      return 1;
 
-    case DP_PROP_VERTICAL_SPACING:
-      if (value > DP_MAXIMUM_VERTICAL_SPACING) break;
-      brl->data->properties.verticalSpacing = value;
+      if (value != brl->data->properties.horizontalSpacing) {
+        brl->data->properties.horizontalSpacing = value;
+        if (usingGraphicDisplay(brl)) reconfigureDisplay(brl);
+      }
+
       return 1;
+    }
+
+    case DP_PROP_VERTICAL_SPACING: {
+      if (value > DP_MAXIMUM_VERTICAL_SPACING) break;
+
+      if (value != brl->data->properties.verticalSpacing) {
+        brl->data->properties.verticalSpacing = value;
+        if (usingGraphicDisplay(brl)) reconfigureDisplay(brl);
+      }
+
+      return 1;
+    }
 
     default:
       logMessage(LOG_WARNING, "cannot set unrecognized driver property: %"PRIu64, property);
@@ -475,111 +644,6 @@ getDriverProperty (BrailleDisplay *brl, uint64_t property, uint64_t *value) {
 
   logMessage(LOG_WARNING, "cannot get unrecognized driver property: %"PRIu64, property);
   return 0;
-}
-
-static ExternalRowEntry *
-getExternalRow (BrailleDisplay *brl, unsigned int index) {
-  return &brl->data->arrays.externalRows[index];
-}
-
-static void
-initializeExternalRows (BrailleDisplay *brl) {
-  unsigned char *cells = brl->data->arrays.externalCells;
-  unsigned char destination = brl->data->display.destination;
-
-  for (unsigned int index=0; index<brl->data->display.externalRows; index+=1) {
-    ExternalRowEntry *row = getExternalRow(brl, index);
-
-    row->cells = cells;
-    cells += brl->data->display.externalColumns;
-
-    row->destination = destination;
-    destination += 1;
-  }
-}
-
-static InternalRowEntry *
-getInternalRow (BrailleDisplay *brl, unsigned int index) {
-  return &brl->data->arrays.internalRows[index];
-}
-
-static void
-initializeInternalRows (BrailleDisplay *brl) {
-  unsigned char *cells = brl->data->arrays.internalCells + brl->data->display.verticalSpacing;
-
-  const unsigned char cellHeight = brl->data->display.cellHeight;
-  const unsigned char rowHeight = cellHeight + brl->data->display.verticalSpacing;
-  const unsigned char cellMask = (1 << cellHeight) - 1;
-
-  for (unsigned int index=0; index<brl->data->display.internalRows; index+=1) {
-    InternalRowEntry *row = getInternalRow(brl, index);
-
-    row->cells = cells;
-    cells += brl->data->display.internalColumns;
-
-    {
-      unsigned char offset = rowHeight * index;
-      row->upperRow = getExternalRow(brl, (offset / cellHeight));
-      row->upperShift = offset % cellHeight;
-      row->upperMask = (cellMask << row->upperShift) & cellMask;
-      row->upperMask |= row->upperMask << 4;
-
-      offset += 3;
-      row->lowerRow = getExternalRow(brl, (offset / cellHeight));
-      row->lowerShift = cellHeight - (offset % cellHeight) - 1;
-      row->lowerMask = cellMask >> row->lowerShift;
-      row->lowerMask |= row->lowerMask << 4;
-    }
-
-    row->hasChanged = 1;
-  }
-}
-
-static int
-makeArrays (BrailleDisplay *brl) {
-  if ((brl->data->arrays.externalCells = calloc(brl->data->display.externalRows, brl->data->display.externalColumns))) {
-    if ((brl->data->arrays.internalCells = calloc(brl->data->display.internalRows, brl->data->display.internalColumns))) {
-      if ((brl->data->arrays.externalRows = malloc(ARRAY_SIZE(brl->data->arrays.externalRows, brl->data->display.externalRows)))) {
-        if ((brl->data->arrays.internalRows = malloc(ARRAY_SIZE(brl->data->arrays.internalRows, brl->data->display.internalRows)))) {
-          int statusCellsAllocated = !brl->statusColumns;
-
-          if (!statusCellsAllocated) {
-            if ((brl->data->arrays.statusCells = calloc(brl->statusColumns, 1))) {
-              statusCellsAllocated = 1;
-            }
-          }
-
-          if (statusCellsAllocated) {
-            initializeExternalRows(brl);
-            initializeInternalRows(brl);
-            return 1;
-          }
-
-          free(brl->data->arrays.internalRows);
-        }
-
-        free(brl->data->arrays.externalRows);
-      }
-
-      free(brl->data->arrays.internalCells);
-    }
-
-    free(brl->data->arrays.externalCells);
-  }
-
-  logMallocError();
-  return 0;
-}
-
-static void
-deallocateArrays (BrailleDisplay *brl) {
-  free(brl->data->arrays.statusCells);
-
-  free(brl->data->arrays.internalRows);
-  free(brl->data->arrays.internalCells);
-
-  free(brl->data->arrays.externalRows);
-  free(brl->data->arrays.externalCells);
 }
 
 static uint16_t
@@ -1290,9 +1354,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       if (connected) {
         if (parseDriverParameters(brl, parameters)) {
-          selectDisplay(brl);
-
-          if (makeArrays(brl)) {
+          if (configureDisplay(brl)) {
             brl->acknowledgements.missing.timeout = (brl->data->display.refreshTime * 100) + 1000;
 
             if (writeRequest(brl, DP_REQ_FIRMWARE_VERSION, 0, NULL, 0)) {
