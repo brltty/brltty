@@ -25,6 +25,8 @@
 #include "spk.h"
 #include "pipe.h"
 #include "ascii.h"
+#include "utf8.h"
+#include "scr_types.h"
 #include "core.h"
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -35,9 +37,11 @@ struct SpeechInputObjectStruct {
 static
 NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
   const unsigned char *buffer = parameters->buffer;
-  size_t count = parameters->length;
-  const unsigned char *end = buffer + count;
+  size_t bufferSize = parameters->length;
+  const unsigned char *end = buffer + bufferSize;
+
   SayOptions options = 0;
+  unsigned char colour = SCR_COLOUR_DEFAULT;
 
   while (buffer < end) {
      if (*buffer != ASCII_ESC) break;
@@ -47,20 +51,27 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
        case '!':
          options |= SAY_OPT_MUTE_FIRST;
          break;
+
+       case 'c':
+         if (buffer < end) colour = *buffer++;
+         break;
      }
   }
 
   if (buffer < end) {
-    size_t length = end - buffer;
-    char string[length + 1];
+    size_t textLength = end - buffer;
+    char text[textLength + 1];
+    memcpy(text, buffer, textLength);
+    text[textLength] = 0;
 
-    memcpy(string, buffer, length);
-    string[length] = 0;
+    size_t attributesCount = countUtf8Characters(text);
+    unsigned char attributes[attributesCount + 1];
+    memset(attributes, colour, attributesCount);
 
-    sayString(&spk, string, options);
+    sayUtf8Characters(&spk, text, attributes, textLength, attributesCount, options);
   }
 
-  return count;
+  return bufferSize;
 }
 
 SpeechInputObject *
