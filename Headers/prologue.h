@@ -147,6 +147,7 @@ static inline void __sync_synchronize (void) {}
 #endif /* __MINGW32__ */
 
 #include <windows.h>
+#include <winerror.h>
 #endif /* WINDOWS */
 
 #ifdef __MINGW32__
