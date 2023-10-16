@@ -50,7 +50,9 @@ if __name__ == "__main__":
         define_macros = [
         ],
 
-        extra_compile_args = "@CYTHON_CFLAGS@".split()
+        extra_compile_args = "@CYTHON_CFLAGS@".split(),
+
+        py_limited_api = True,
     )
     
     setup(
