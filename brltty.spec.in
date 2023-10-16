@@ -126,7 +126,7 @@ Requires: libX11
 BuildRequires: xorg-x11-proto-devel
 BuildRequires: libX11-devel
 BuildRequires: libXt-devel
-BuildRequires: neXtaw-devel
+BuildRequires: Xaw3d-devel
 
 AutoProv: no
 AutoReq: yes
