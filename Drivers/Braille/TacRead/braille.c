@@ -37,18 +37,32 @@ struct BrailleDataStruct {
 };
 
 static int
-writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
-  return writeBraillePacket(brl, NULL, bytes, count);
+writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
+  return writeBraillePacket(brl, NULL, packet, size);
 }
 
 static int
-writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
-  unsigned char bytes[size];
-  unsigned char *byte = bytes;
+writeCommand (BrailleDisplay *brl, unsigned char command, const unsigned char *data, unsigned char size) {
+  unsigned char packet[TR_MAX_PACKET_SIZE];
+  unsigned char *byte = packet;
 
-  byte = mempcpy(byte, packet, size);
+  *byte++ = TR_PKT_SOM;
+  unsigned char *length = byte++;
+  unsigned char *start = byte;
 
-  return writeBytes(brl, bytes, byte-bytes);
+  *byte++ = command;
+  byte = mempcpy(byte, data, size);
+  *length = byte - start;
+
+  {
+    unsigned char checksum = 0;
+    const unsigned char *b = start;
+    while (b < byte) checksum ^= *b++;
+    *byte++ = checksum;
+  }
+
+  *byte++ = TR_PKT_EOM;
+  return writePacket(brl, packet, (byte - packet));
 }
 
 static BraillePacketVerifierResult
@@ -77,30 +91,6 @@ verifyPacket (
 static size_t
 readPacket (BrailleDisplay *brl, void *packet, size_t size) {
   return readBraillePacket(brl, NULL, packet, size, verifyPacket, NULL);
-}
-
-static int
-writeCommand (BrailleDisplay *brl, unsigned char command, const unsigned char *data, unsigned char size) {
-  unsigned char packet[TR_MAX_PACKET_SIZE];
-  unsigned char *byte = packet;
-
-  *byte++ = TR_PKT_SOM;
-  unsigned char *length = byte++;
-  unsigned char *start = byte;
-
-  *byte++ = command;
-  byte = mempcpy(byte, data, size);
-  *length = byte - start;
-
-  {
-    unsigned char checksum = 0;
-    const unsigned char *b = start;
-    while (b < byte) checksum ^= *b++;
-    *byte++ = checksum;
-  }
-
-  *byte++ = TR_PKT_EOM;
-  return writeBytes(brl, packet, (byte - packet));
 }
 
 static int
