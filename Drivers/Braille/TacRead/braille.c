@@ -28,21 +28,9 @@
 
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
-#define MAXIMUM_PACKET_SIZE (2 + 0XFF + 2)
+
 #define MAXIMUM_TEXT_CELLS 0XFF
-
-BEGIN_KEY_NAME_TABLE(navigation)
-END_KEY_NAME_TABLE
-
-BEGIN_KEY_NAME_TABLES(all)
-  KEY_NAME_TABLE(navigation),
-END_KEY_NAME_TABLES
-
-DEFINE_KEY_TABLE(all)
-
-BEGIN_KEY_TABLE_LIST
-  &KEY_TABLE_DEFINITION(all),
-END_KEY_TABLE_LIST
+#define MAXIMUM_PACKET_SIZE (3 + MAXIMUM_TEXT_CELLS + 2)
 
 struct BrailleDataStruct {
   struct {
@@ -182,10 +170,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               writeIdentifyRequest,
                               readPacket, &response, sizeof(response),
                               isIdentityResponse)) {
-        setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
-
         makeOutputTable(dotsTable_ISO11548_1);
-      //MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80);
 
         brl->data->text.rewrite = 1;
         return 1;
