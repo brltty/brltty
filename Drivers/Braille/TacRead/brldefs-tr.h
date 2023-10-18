@@ -19,4 +19,9 @@
 #ifndef BRLTTY_INCLUDED_TR_BRLDEFS
 #define BRLTTY_INCLUDED_TR_BRLDEFS
 
+#define TR_PKT_SOM 0X80 // start of message
+#define TR_PKT_EOM 0X81 // end of message
+
+#define TR_CMD_ACTUATE 0X02
+
 #endif /* BRLTTY_INCLUDED_TR_BRLDEFS */ 

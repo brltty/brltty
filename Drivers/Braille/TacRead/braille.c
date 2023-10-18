@@ -28,7 +28,7 @@
 
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
-#define MAXIMUM_RESPONSE_SIZE (0XFF + 4)
+#define MAXIMUM_PACKET_SIZE (2 + 0XFF + 2)
 #define MAXIMUM_TEXT_CELLS 0XFF
 
 BEGIN_KEY_NAME_TABLE(navigation)
@@ -95,6 +95,48 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 }
 
 static int
+writeCommand (BrailleDisplay *brl, unsigned char command, const unsigned char *data, unsigned char size) {
+  unsigned char packet[MAXIMUM_PACKET_SIZE];
+  unsigned char *byte = packet;
+
+  *byte++ = TR_PKT_SOM;
+  unsigned char *length = byte++;
+  unsigned char *start = byte;
+
+  *byte++ = command;
+  byte = mempcpy(byte, data, size);
+  *length = byte - start;
+
+  {
+    unsigned char checksum = 0;
+    const unsigned char *b = start;
+    while (b < byte) checksum ^= *b++;
+    *byte++ = checksum;
+  }
+
+  *byte++ = TR_PKT_EOM;
+  return writeBytes(brl, packet, (byte - packet));
+}
+
+static int
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
+  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns,
+                       NULL, NULL, &brl->data->text.rewrite)) {
+    unsigned char cells[brl->textColumns];
+
+    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
+    if (!writeCommand(brl, TR_CMD_ACTUATE, cells, brl->textColumns)) return 0;
+  }
+
+  return 1;
+}
+
+static int
+brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
+  return EOF;
+}
+
+static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
     SERIAL_DEFAULT_PARAMETERS
@@ -134,7 +176,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
-      unsigned char response[MAXIMUM_RESPONSE_SIZE];
+      unsigned char response[MAXIMUM_PACKET_SIZE];
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
                               writeIdentifyRequest,
@@ -170,26 +212,3 @@ brl_destruct (BrailleDisplay *brl) {
   }
 }
 
-static int
-brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns,
-                       NULL, NULL, &brl->data->text.rewrite)) {
-    unsigned char cells[brl->textColumns];
-
-    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
-  }
-
-  return 1;
-}
-
-static int
-brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  unsigned char packet[MAXIMUM_RESPONSE_SIZE];
-  size_t size;
-
-  while ((size = readPacket(brl, packet, sizeof(packet)))) {
-    logUnexpectedPacket(packet, size);
-  }
-
-  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
-}
