@@ -29,13 +29,10 @@
 #define PROBE_RETRY_LIMIT 2
 #define PROBE_INPUT_TIMEOUT 1000
 
-#define MAXIMUM_TEXT_CELLS 0XFF
-#define MAXIMUM_PACKET_SIZE (3 + MAXIMUM_TEXT_CELLS + 2)
-
 struct BrailleDataStruct {
   struct {
     unsigned char rewrite;
-    unsigned char cells[MAXIMUM_TEXT_CELLS];
+    unsigned char cells[TR_MAX_TEXT_CELLS];
   } text;
 };
 
@@ -84,7 +81,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 
 static int
 writeCommand (BrailleDisplay *brl, unsigned char command, const unsigned char *data, unsigned char size) {
-  unsigned char packet[MAXIMUM_PACKET_SIZE];
+  unsigned char packet[TR_MAX_PACKET_SIZE];
   unsigned char *byte = packet;
 
   *byte++ = TR_PKT_SOM;
@@ -164,7 +161,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
-      unsigned char response[MAXIMUM_PACKET_SIZE];
+      unsigned char response[TR_MAX_PACKET_SIZE];
 
       if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
                               writeIdentifyRequest,
