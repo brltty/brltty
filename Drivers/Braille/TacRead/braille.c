@@ -114,7 +114,8 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
 static int
 connectResource (BrailleDisplay *brl, const char *identifier) {
   static const SerialParameters serialParameters = {
-    SERIAL_DEFAULT_PARAMETERS
+    SERIAL_DEFAULT_PARAMETERS,
+    .baud = 115200
   };
 
   BEGIN_USB_CHANNEL_DEFINITIONS
