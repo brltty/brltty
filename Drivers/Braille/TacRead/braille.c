@@ -31,8 +31,8 @@
 
 struct BrailleDataStruct {
   struct {
-    unsigned char rewrite;
-    unsigned char cells[TR_MAX_TEXT_CELLS];
+    unsigned char refresh;
+    unsigned char cells[TR_MAX_DATA_LENGTH];
   } text;
 };
 
@@ -41,12 +41,19 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
   return writeBraillePacket(brl, NULL, packet, size);
 }
 
+static unsigned char
+makeChecksum (const unsigned char *from, const unsigned char *to) {
+  unsigned char checksum = 0;
+  while (from < to) checksum ^= *from++;
+  return checksum;
+}
+
 static int
 writeCommand (BrailleDisplay *brl, unsigned char command, const unsigned char *data, unsigned char size) {
   unsigned char packet[TR_MAX_PACKET_SIZE];
   unsigned char *byte = packet;
 
-  *byte++ = TR_PKT_SOM;
+  *byte++ = TR_PKT_START_OF_MESSAGE;
   unsigned char *length = byte++;
   unsigned char *start = byte;
 
@@ -54,14 +61,10 @@ writeCommand (BrailleDisplay *brl, unsigned char command, const unsigned char *d
   byte = mempcpy(byte, data, size);
   *length = byte - start;
 
-  {
-    unsigned char checksum = 0;
-    const unsigned char *b = start;
-    while (b < byte) checksum ^= *b++;
-    *byte++ = checksum;
-  }
+  *byte = makeChecksum(start, byte);
+  byte += 1;
+  *byte++ = TR_PKT_END_OF_MESSAGE;
 
-  *byte++ = TR_PKT_EOM;
   return writePacket(brl, packet, (byte - packet));
 }
 
@@ -76,12 +79,24 @@ verifyPacket (
   switch (size) {
     case 1:
       switch (byte) {
+        case TR_PKT_START_OF_MESSAGE:
+          *length = 2;
+          break;
+
         default:
           return BRL_PVR_INVALID;
       }
       break;
 
+    case 2:
+      *length += byte + 2;
+      break;
+
     default:
+      if (size == *length) {
+        if (byte != TR_PKT_END_OF_MESSAGE) return BRL_PVR_INVALID;
+      } else if (size == (*length - 1)) {
+      }
       break;
   }
 
@@ -96,7 +111,7 @@ readPacket (BrailleDisplay *brl, void *packet, size_t size) {
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns,
-                       NULL, NULL, &brl->data->text.rewrite)) {
+                       NULL, NULL, &brl->data->text.refresh)) {
     unsigned char cells[brl->textColumns];
 
     translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
@@ -167,7 +182,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                               isIdentityResponse)) {
         makeOutputTable(dotsTable_ISO11548_1);
 
-        brl->data->text.rewrite = 1;
+        brl->data->text.refresh = 1;
         return 1;
       }
 
