@@ -249,7 +249,7 @@ installLibUSB1() {
    installWindowsArchive winusb.zip "${windowsDirectory}/WinUSB"
 }
 
-installCython() {
+installPythonDeps() {
    local python
 
    if findCommand python python py
@@ -262,9 +262,13 @@ installCython() {
          "${dryRun}" || executeCommand pip -q install cython
       }
 
-      installFile Cython/vcruntime140.dll "${directory}/libs"
-      installFile Cython/distutils.cfg "${directory}/lib/distutils"
-      applyPatch "Cython/PythonCygwinCCompiler.patch" "${directory}/lib/distutils" "cygwinccompiler.py" "vcruntime140"
+      findCommand wheel wheel || {
+         logMessage task "installing Wheel"
+         "${dryRun}" || executeCommand pip -q install wheel
+      }
+      logMessage task "ensuring Setuptools is up to date"
+      "${dryRun}" || executeCommand pip -q install --upgrade setuptools
+
    else
       logWarning "Python not found"
    fi
@@ -338,7 +342,7 @@ installWindowsArchive icu4c-53_1-Win32-msvc10.zip "${icuLocation}"
 
 installLibUSB0
 installLibUSB1
-installCython
+installPythonDeps
 
 "${keepFiles}" || {
    logMessage task "cleaning up"
