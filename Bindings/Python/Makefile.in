@@ -50,7 +50,6 @@ $(PYTHON_API): brlapi.auto.c $(API_HDRS) | $(INSTALLED_FILES) brlapi
 	set -- $(V_setup) build --build-temp .; \
 	[ "@host_os@" != "mingw32" ] || set -- "$${@}" --compiler mingw32; \
 	"$(PYTHON)" ./setup.py "$${@}"
-	[ "@host_os@" != "mingw32" ] || "$(PYTHON)" ./setup.py $(V_setup) bdist_wininst --skip-build
 
 $(INSTALLED_FILES):
 	touch $(INSTALLED_FILES)
@@ -69,6 +68,7 @@ install: all
 	[ -z "$(PYTHON_DESTDIR)" ] || set -- "$${@}" --root "$(PYTHON_DESTDIR)"; \
 	[ -z "$(PYTHON_PREFIX)" ] || set -- "$${@}" --prefix "$(PYTHON_PREFIX)"; \
 	"$(PYTHON)" ./setup.py "$${@}"
+	[ "@host_os@" != "mingw32" ] || "$(PYTHON)" ./setup.py $(V_setup) bdist_wheel --skip-build                    
 	-rm -f -r -- Brlapi.egg-info
 
 uninstall:
