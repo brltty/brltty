@@ -35,6 +35,7 @@
 		!define DISTDIR "brltty-win-${VERSION}-${VARIANT}"
 	!endif
 
+	Unicode false
 	SetCompressor /SOLID LZMA
 	SetOverwrite IfNewer
 
