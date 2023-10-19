@@ -453,6 +453,13 @@ brltty 0x0003 0x1fe4 0x008b
 # HandyTech [Activator]
 brltty 0x0003 0x1fe4 0x00a4
 
+# Device: 2E8A:0005
+# Generic Identifier
+# Vendor: MicroPython
+# Product: Board in FS mode
+# TacRead [all models]
+brltty 0x0003 0x2e8a 0x0005
+
 # Device: 4242:0001
 # Pegasus [all models]
 brltty 0x0003 0x4242 0x0001

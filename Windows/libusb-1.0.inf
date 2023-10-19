@@ -356,6 +356,12 @@ HKR,,Icon,,-20
 ; Device: 1FE4:00A4
 "LibUSB-1.0: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
 
+; Device: 2E8A:0005
+; Generic Identifier
+; Vendor: MicroPython
+; Product: Board in FS mode
+"LibUSB-1.0: TacRead [all models]"=LIBUSB_DEV, USB\VID_2E8A&PID_0005
+
 ; Device: 4242:0001
 "LibUSB-1.0: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
 
@@ -735,6 +741,12 @@ HKR,,Icon,,-20
 
 ; Device: 1FE4:00A4
 "LibUSB-1.0: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
+
+; Device: 2E8A:0005
+; Generic Identifier
+; Vendor: MicroPython
+; Product: Board in FS mode
+"LibUSB-1.0: TacRead [all models]"=LIBUSB_DEV, USB\VID_2E8A&PID_0005
 
 ; Device: 4242:0001
 "LibUSB-1.0: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001

@@ -431,6 +431,12 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Device: 1FE4:00A4
 "LibUSB-Win32: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
 
+; Device: 2E8A:0005
+; Generic Identifier
+; Vendor: MicroPython
+; Product: Board in FS mode
+"LibUSB-Win32: TacRead [all models]"=LIBUSB_DEV, USB\VID_2E8A&PID_0005
+
 ; Device: 4242:0001
 "LibUSB-Win32: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
 
@@ -810,6 +816,12 @@ ServiceBinary  = %12%\libusb0_x64.sys
 
 ; Device: 1FE4:00A4
 "LibUSB-Win32: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
+
+; Device: 2E8A:0005
+; Generic Identifier
+; Vendor: MicroPython
+; Product: Board in FS mode
+"LibUSB-Win32: TacRead [all models]"=LIBUSB_DEV, USB\VID_2E8A&PID_0005
 
 ; Device: 4242:0001
 "LibUSB-Win32: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001

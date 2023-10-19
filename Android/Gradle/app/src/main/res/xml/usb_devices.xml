@@ -438,6 +438,13 @@
   <!-- HandyTech [Activator] -->
   <usb-device vendor-id="8164" product-id="164" />
 
+  <!-- Device: 2E8A:0005 -->
+  <!-- Generic Identifier -->
+  <!-- Vendor: MicroPython -->
+  <!-- Product: Board in FS mode -->
+  <!-- TacRead [all models] -->
+  <usb-device vendor-id="11914" product-id="5" />
+
   <!-- Device: 4242:0001 -->
   <!-- Pegasus [all models] -->
   <usb-device vendor-id="16962" product-id="1" />

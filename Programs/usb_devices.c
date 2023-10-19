@@ -462,6 +462,13 @@ USB_DEVICE_ENTRY(0X1FE4, 0X008B, "ht"),
 // HandyTech [Activator]
 USB_DEVICE_ENTRY(0X1FE4, 0X00A4, "ht"),
 
+// Device: 2E8A:0005
+// Generic Identifier
+// Vendor: MicroPython
+// Product: Board in FS mode
+// TacRead [all models]
+USB_DEVICE_ENTRY(0X2E8A, 0X0005, "tr"),
+
 // Device: 4242:0001
 // Pegasus [all models]
 USB_DEVICE_ENTRY(0X4242, 0X0001, "pg"),

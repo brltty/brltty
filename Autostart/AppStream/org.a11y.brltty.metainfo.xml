@@ -473,6 +473,13 @@
     <!-- HandyTech [Activator] -->
     <modalias>usb:v1FE4p00A4*</modalias>
 
+    <!-- Device: 2E8A:0005 -->
+    <!-- Generic Identifier -->
+    <!-- Vendor: MicroPython -->
+    <!-- Product: Board in FS mode -->
+    <!-- TacRead [all models] -->
+    <modalias>usb:v2E8Ap0005*</modalias>
+
     <!-- Device: 4242:0001 -->
     <!-- Pegasus [all models] -->
     <modalias>usb:v4242p0001*</modalias>

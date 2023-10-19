@@ -341,6 +341,12 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Device: 1FE4:00A4
 "winusb: HandyTech [Activator]"=USB_Install, USB\VID_1FE4&PID_00A4
 
+; Device: 2E8A:0005
+; Generic Identifier
+; Vendor: MicroPython
+; Product: Board in FS mode
+"winusb: TacRead [all models]"=USB_Install, USB\VID_2E8A&PID_0005
+
 ; Device: 4242:0001
 "winusb: Pegasus [all models]"=USB_Install, USB\VID_4242&PID_0001
 
@@ -720,6 +726,12 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 1FE4:00A4
 "winusb: HandyTech [Activator]"=USB_Install, USB\VID_1FE4&PID_00A4
+
+; Device: 2E8A:0005
+; Generic Identifier
+; Vendor: MicroPython
+; Product: Board in FS mode
+"winusb: TacRead [all models]"=USB_Install, USB\VID_2E8A&PID_0005
 
 ; Device: 4242:0001
 "winusb: Pegasus [all models]"=USB_Install, USB\VID_4242&PID_0001
