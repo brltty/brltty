@@ -108,8 +108,8 @@
     <!-- Device: 045E:930A -->
     <!-- HIMS [Braille Sense (USB 1.1)] -->
     <!-- HIMS [Braille Sense (USB 2.0)] -->
-    <!-- HIMS [Braille Sense 6 (USB 2.1)] -->
     <!-- HIMS [Braille Sense U2 (USB 2.0)] -->
+    <!-- HIMS [BrailleSense 6 (USB 2.1)] -->
     <modalias>usb:v045Ep930A*</modalias>
 
     <!-- Device: 045E:930B -->
