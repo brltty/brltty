@@ -175,6 +175,12 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
     .generic = 1,
     .operations = &usbSerialOperations_CH341
   },
+
+  { /* TacRead */
+    .vendor=0X2E8A, .product=0X0005,
+    .generic = 1,
+    .operations = &usbSerialOperations_CDC_ACM
+  },
 };
 
 const size_t usbSerialAdapterCount = ARRAY_COUNT(usbSerialAdapterTable);

@@ -710,6 +710,11 @@ set genericDevices [makeGenericDeviceTable {
       "Jiangsu QinHeng, Ltd."
       "CH341 USB Bridge Controller"
    }
+
+   {  0X2E8A 0X0005
+      "MicroPython"
+      "Board in FS mode"
+   }
 }]
 
 set optionDefinitions {
