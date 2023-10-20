@@ -283,6 +283,15 @@ parseProgramArguments "${@}"
 
 [ -n "${archiveRoot}" ] || archiveRoot="${defaultArchiveRoot}"
 
+[ -n "${pythonDirectory}" ] || {
+   pythonLocationFile="${programDirectory}/python-location"
+
+   if [ -f "${pythonLocationFile}" ]
+   then
+      read pythonDirectory <"${pythonLocationFile}"
+   fi
+}
+
 [ -n "${pythonDirectory}" ] && {
    [ -d "${pythonDirectory}" ] || semanticError "Python directory not found: ${pythonDirectory}"
    PATH="${pythonDirectory}:${pythonDirectory}/scripts:${PATH}"
