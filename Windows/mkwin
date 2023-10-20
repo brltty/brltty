@@ -294,8 +294,7 @@ Here are some notes on how to get started:
   environment, you need to also install and run NVDA.
 - Either use the BRLTTY configurator (brlttycnf.exe) or manually uncomment the
   appropriate lines in etc/brltty.conf.
-- For Python support (e.g. for NVDA), run Brlapi-${BRLAPI_RELEASE}.win32.exe
-  (which will install the .pyd and .egg-info files).
+- For Python support (e.g. for NVDA), install Brlapi-${BRLAPI_RELEASE}-<PythonVersion>-win32.whl using pip.
 - For sighted users, use the xw braille driver to get a virtual braille box.
 "
 
@@ -318,7 +317,7 @@ Technical notes on this build:
   * only use local sockets (:0+127.0.0.1:0 changed to :0)
 - *${usbPattern}* files come from ${usbName} ${usbVersion}, which can be found at:
   ${usbDownload}
-- Python bindings are provided by: Brlapi-${BRLAPI_RELEASE}.win32.exe
+- Python bindings are provided by: Brlapi-${BRLAPI_RELEASE}-<PythonVersion>-win32.whl
 - C bindings are provided in: include/, and lib/
   A .lib file is provided for linking in (for example) Visual C. Then you can
   just ship bin/brlapi${BRLAPI_RELEASE%.*}.dll alongside your .exe application.
@@ -331,7 +330,7 @@ installFile "Drivers/BrlAPI/WindowEyes/webrloem109.dll" "WindowEyes/"
 installFiles "Debug/" config.h config.mk config.log
 installFiles "Debug/" Programs/*.exe Programs/*.dll
 
-set -- Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}.*.exe
+set -- Bindings/Python/dist/Brlapi-${BRLAPI_RELEASE}-*.whl
 if [ "${#}" -gt 0 ]
 then
    for file
