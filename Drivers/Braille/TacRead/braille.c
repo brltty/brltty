@@ -96,6 +96,21 @@ verifyPacket (
       if (size == *length) {
         if (byte != TR_PKT_END_OF_MESSAGE) return BRL_PVR_INVALID;
       } else if (size == (*length - 1)) {
+        const unsigned char *command = &bytes[2];
+        const unsigned char *checksum = &bytes[size - 1];
+        unsigned char actual = *checksum;
+        unsigned char expected = makeChecksum(command, checksum);
+
+        if (actual != expected) {
+          logBytes(LOG_WARNING,
+            "input packet checksum mismatch:"
+            " Actual:%02X Expected:%02X",
+            bytes, size,
+            actual, expected
+          );
+
+          return BRL_PVR_INVALID;
+        }
       }
       break;
   }
