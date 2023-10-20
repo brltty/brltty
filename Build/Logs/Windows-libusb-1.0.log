@@ -1,10 +1,14 @@
-mkwin: revision identifier: BRLTTY-6.4-290-gb713062eM
+mkwin: revision identifier: BRLTTY-6.6-52-gd1f5b94a+
 mkwin: MinGW command not found: linuxdoc
 mkwin: copying source tree
 mkwin: applying patches
 patching file Programs/usb_libusb-1.0.c
 patching file Programs/usb_libusb.c
 mkwin: configuring build
+../source/brltty-prologue.bash: line 287: declare: -A: invalid option
+declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
+../source/brltty-prologue.bash: line 387: declare: -n: invalid option
+declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
 mkwin: building programs
 In file included from c:\Program Files (x86)\Python38-32\include/Python.h:85,
                  from brlapi.auto.c:4:
@@ -44,24 +48,27 @@ c:\Program Files (x86)\Python38-32\include/pytime.h:130:12: warning: 'struct tim
 c:\Program Files (x86)\Python38-32\include/pytime.h:135:12: warning: 'struct timeval' declared inside parameter list will not be visible outside of this definition or declaration
   135 |     struct timeval *tv,
       |            ^~~~~~~
-c:\Program Files (x86)\Python38-32\lib\site-packages\setuptools\command\bdist_wininst.py:20: SetuptoolsDeprecationWarning: bdist_wininst is deprecated and will be removed in a future version. Use bdist_wheel (wheel packages) instead.
-  warnings.warn(
 mkwin: building documents
 linuxdoc is not installed - document will not be made
 linuxdoc is not installed - document will not be made
 linuxdoc is not installed - document will not be made
 mkwin: installing files
-c:\Program Files (x86)\Python38-32\lib\site-packages\setuptools\command\bdist_wininst.py:20: SetuptoolsDeprecationWarning: bdist_wininst is deprecated and will be removed in a future version. Use bdist_wheel (wheel packages) instead.
-  warnings.warn(
-c:\Program Files (x86)\Python38-32\lib\site-packages\setuptools\command\bdist_wininst.py:20: SetuptoolsDeprecationWarning: bdist_wininst is deprecated and will be removed in a future version. Use bdist_wheel (wheel packages) instead.
-  warnings.warn(
+installing to build\bdist.win32\wheel
+creating build\bdist.win32\wheel\Brlapi-0.8.5.dist-info\WHEEL
+creating 'dist\Brlapi-0.8.5-cp38-cp38-win32.whl' and adding 'build\bdist.win32\wheel' to it
+adding 'brlapi.cp38-win32.pyd'
+adding 'Brlapi-0.8.5.dist-info/METADATA'
+adding 'Brlapi-0.8.5.dist-info/WHEEL'
+adding 'Brlapi-0.8.5.dist-info/top_level.txt'
+adding 'Brlapi-0.8.5.dist-info/RECORD'
+removing build\bdist.win32\wheel
 mkwin: updating files
 mkwin: USB package: libusb-1.0
 mkwin: installing package files: LibUSB-1.0 (aka LibUSBx)
 mkwin: installing package files: LibUSB-1.0 WinUSB Coinstallers
    Creating library brlapi.lib and object brlapi.exp
 mkwin: creating configurator
-Successfully compiled: C:\Users\dave\AppData\Local\Temp\brltty-mkwin\install\brltty-win-6.4-290-libusb-1.0\brlttycnf.exe
+Successfully compiled: C:\Users\dave\AppData\Local\Temp\brltty-mkwin\install\brltty-win-6.6-52-libusb-1.0\brlttycnf.exe
 mkwin: converting text files
 mkwin: creating archive
 mkwin: creating installer
