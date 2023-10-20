@@ -136,10 +136,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       unsigned char response[MAXIMUM_RESPONSE_SIZE];
 
-      if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-                              writeIdentifyRequest,
-                              readPacket, &response, sizeof(response),
-                              isIdentityResponse)) {
+      int probed = probeBrailleDisplay(
+        brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
+        writeIdentifyRequest,
+        readPacket, &response, sizeof(response),
+        isIdentityResponse
+      );
+
+      if (probed) {
         setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
 
         makeOutputTable(dotsTable_ISO11548_1);
@@ -163,11 +167,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   disconnectBrailleResource(brl, NULL);
-
-  if (brl->data) {
-    free(brl->data);
-    brl->data = NULL;
-  }
+  free(brl->data);
 }
 
 static int
