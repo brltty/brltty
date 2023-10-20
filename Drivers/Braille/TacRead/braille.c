@@ -193,12 +193,16 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       unsigned char response[TR_MAX_PACKET_SIZE];
 
-      if (probeBrailleDisplay(brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-                              writeIdentifyRequest,
-                              readPacket, &response, sizeof(response),
-                              isIdentityResponse)) {
-        makeOutputTable(dotsTable_ISO11548_1);
+      int probed = 1 || probeBrailleDisplay(
+        brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
+        writeIdentifyRequest,
+        readPacket, &response, sizeof(response),
+        isIdentityResponse
+      );
 
+      if (probed) {
+        makeOutputTable(dotsTable_ISO11548_1);
+        brl->textColumns = 20;
         brl->data->text.refresh = 1;
         return 1;
       }
@@ -217,10 +221,5 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 static void
 brl_destruct (BrailleDisplay *brl) {
   disconnectBrailleResource(brl, NULL);
-
-  if (brl->data) {
-    free(brl->data);
-    brl->data = NULL;
-  }
+  free(brl->data);
 }
-
