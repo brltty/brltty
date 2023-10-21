@@ -1130,9 +1130,10 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
         continue;
       }
 
-      case DP_NTF_DISPLAY_LINE:
+      case DP_NTF_DISPLAY_LINE: {
         acknowledgeBrailleMessage(brl);
         continue;
+      }
 
       case DP_NTF_KEYS_SCROLL: {
         updateKeyGroup(
@@ -1336,23 +1337,20 @@ isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  brl->getDriverProperty = getDriverProperty;
-  brl->setDriverProperty = setDriverProperty;
-
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
       DP_Packet response;
 
-      int connected = probeBrailleDisplay(
+      int probed = probeBrailleDisplay(
         brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
         writeIdentifyRequest, readPacket,
         &response, sizeof(response),
         isIdentityResponse
       );
 
-      if (connected) {
+      if (probed) {
         if (parseDriverParameters(brl, parameters)) {
           if (configureDisplay(brl)) {
             brl->acknowledgements.missing.timeout = (brl->data->display.refreshTime * 100) + 1000;
@@ -1367,6 +1365,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 );
 
                 brl->refreshBrailleDisplay = refreshCells;
+                brl->getDriverProperty = getDriverProperty;
+                brl->setDriverProperty = setDriverProperty;
+
                 return 1;
               }
             }
