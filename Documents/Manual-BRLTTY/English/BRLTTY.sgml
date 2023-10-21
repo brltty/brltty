@@ -103,12 +103,12 @@ Questions, comments, suggestions, criticisms, and contributions are all welcome.
 Even though our e-mail addresses are listed above,
 the best way to contact us is via BRLTTY's mailing list.
 You can post to the list by sending e-mail to
-<htmlurl url="mailto:BRLTTY@mielke.cc" name="&lt;BRLTTY@mielke.cc&gt;">.
+<htmlurl url="mailto:BRLTTY@brltty.app" name="&lt;BRLTTY@brltty.app&gt;">.
 If you aren't subscribed to the list
 then your posts will be held for moderator approval.
 To subscribe, unsubscribe, change settings, view archives, etc,
 go to the list's information page at
-<htmlurl url="http://mielke.cc/mailman/listinfo/brltty" name="http://mielke.cc/mailman/listinfo/brltty">.
+<htmlurl url="http://brltty.app/mailman/listinfo/brltty" name="http://brltty.app/mailman/listinfo/brltty">.
 
 <sect>Introduction<p>
 BRLTTY gives a braille user access to the text consoles of a Linux/Unix system.
