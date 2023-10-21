@@ -283,24 +283,16 @@ installPythonDependencies() {
 addProgramOption a string.URL archiveRoot "the URL for BRLTTY's Windows archive" "${defaultArchiveRoot}"
 addProgramOption d flag dryRun "dry run - don't actually install anything"
 addProgramOption k flag keepFiles "keep (do not remove) the temporary directory"
-addProgramOption p string.directory pythonDirectory "the directory where Python has been installed"
+addProgramOption p string.directory pythonRoot "the directory where Python has been installed"
 addProgramOption t string.directory temporaryDirectory "the temporary directory to use" "${defaultTemporaryDirectory}"
 parseProgramArguments "${@}"
 
 [ -n "${archiveRoot}" ] || archiveRoot="${defaultArchiveRoot}"
 
-[ -n "${pythonDirectory}" ] || {
-   pythonLocationFile="${programDirectory}/python-location"
-
-   if [ -f "${pythonLocationFile}" ]
-   then
-      read pythonDirectory <"${pythonLocationFile}"
-   fi
-}
-
-[ -n "${pythonDirectory}" ] && {
-   [ -d "${pythonDirectory}" ] || semanticError "Python directory not found: ${pythonDirectory}"
-   PATH="${pythonDirectory}:${pythonDirectory}/scripts:${PATH}"
+getPythonLocation pythonRoot
+[ -n "${pythonRoot}" ] && {
+   [ -d "${pythonRoot}" ] || semanticError "Python directory not found: ${pythonRoot}"
+   PATH="${pythonRoot}:${pythonRoot}/scripts:${PATH}"
 }
 
 readonly windowsDirectory="/c"

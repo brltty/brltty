@@ -262,4 +262,19 @@ verifyMingwCommands() {
    return "${result}"
 }
 
+getPythonLocation() {
+   local pythonRootVariable="${1}"
+   local directory="$(getVariable "${pythonRootVariable}")"
+
+   [ -n "${directory}" ] || {
+      local file="${programDirectory}/python-location"
+
+      if [ -f "${file}" ]
+      then
+         read directory <"${file}"
+         setVariable "${pythonRootVariable}" "${directory}"
+      fi
+   }
+}
+
 [ "${MSYSTEM}" = "MINGW32" ] || semanticError "this script is for MinGW only"

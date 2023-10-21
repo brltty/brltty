@@ -198,15 +198,7 @@ copyProperties "${1}" usb Name Location Download Version Pattern Filter
    fi
 }
 
-[ -n "${pythonRoot}" ] || {
-   pythonLocationFile="${programDirectory}/python-location"
-
-   if [ -f "${pythonLocationFile}" ]
-   then
-      read pythonRoot <"${pythonLocationFile}"
-   fi
-}
-
+getPythonLocation pythonRoot
 [ -z "${pythonRoot}" ] || {
    if verifyWindowsPackage python
    then
