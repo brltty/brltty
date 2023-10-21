@@ -198,8 +198,7 @@ copyProperties "${1}" usb Name Location Download Version Pattern Filter
    fi
 }
 
-getPythonLocation pythonRoot
-[ -z "${pythonRoot}" ] || {
+getPythonLocation pythonRoot && {
    if verifyWindowsPackage python
    then
       export PATH="${pythonRoot}:${pythonRoot}/Scripts:${PATH}"

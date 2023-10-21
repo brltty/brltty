@@ -272,9 +272,12 @@ getPythonLocation() {
       if [ -f "${file}" ]
       then
          read directory <"${file}"
+         [ -n "${directory}" ] || return 1
          setVariable "${pythonRootVariable}" "${directory}"
       fi
    }
+
+   return 0
 }
 
 [ "${MSYSTEM}" = "MINGW32" ] || semanticError "this script is for MinGW only"

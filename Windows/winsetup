@@ -289,10 +289,9 @@ parseProgramArguments "${@}"
 
 [ -n "${archiveRoot}" ] || archiveRoot="${defaultArchiveRoot}"
 
-getPythonLocation pythonRoot
-[ -n "${pythonRoot}" ] && {
+getPythonLocation pythonRoot && {
    [ -d "${pythonRoot}" ] || semanticError "Python directory not found: ${pythonRoot}"
-   PATH="${pythonRoot}:${pythonRoot}/scripts:${PATH}"
+   export PATH="${pythonRoot}:${pythonRoot}/scripts:${PATH}"
 }
 
 readonly windowsDirectory="/c"
