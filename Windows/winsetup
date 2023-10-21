@@ -48,6 +48,7 @@ findCommand() {
    local variable="${1}"
    shift 1
 
+   local name
    for name
    do
       local path="$(command -v "${name}")"
