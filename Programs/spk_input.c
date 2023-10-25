@@ -66,6 +66,12 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
      }
   }
 
+  if (options & SAY_OPT_MUTE_FIRST) {
+    if (asTones || (buffer == end)) {
+      muteSpeech(&spk, "speech input");
+    }
+  }
+
   if (buffer < end) {
     size_t textLength = end - buffer;
     char text[textLength + 1];
