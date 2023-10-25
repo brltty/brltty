@@ -44,7 +44,8 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
 
   SayOptions options = 0;
   unsigned char colour = SCR_COLOUR_DEFAULT;
-  int asTones = 0;
+  int dontSpeak = 0;
+  int asTune = 0;
 
   while (buffer < end) {
      if (*buffer != ASCII_ESC) break;
@@ -59,15 +60,38 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
          if (buffer < end) colour = *buffer++;
          break;
 
-       case 't':
-         asTones = 1;
+       case 'd':
+         if (!prefs.autospeakDeletedCharacters) dontSpeak = 1;
          break;
 
+       case 'i':
+         if (!prefs.autospeakInsertedCharacters) dontSpeak = 1;
+         break;
+
+       case 'l':
+         if (!prefs.autospeakSelectedLine) dontSpeak = 1;
+         break;
+
+       case 'r':
+         if (!prefs.autospeakReplacedCharacters) dontSpeak = 1;
+         break;
+
+       case 's':
+         if (!prefs.autospeakSelectedCharacter) dontSpeak = 1;
+         break;
+
+       case 't':
+         asTune = 1;
+         break;
+
+       case 'w':
+         if (!prefs.autospeakCompletedWords) dontSpeak = 1;
+         break;
      }
   }
 
   if (options & SAY_OPT_MUTE_FIRST) {
-    if (asTones || (buffer == end)) {
+    if (asTune || (buffer == end)) {
       muteSpeech(&spk, "speech input");
     }
   }
@@ -78,7 +102,7 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
     memcpy(text, buffer, textLength);
     text[textLength] = 0;
 
-    if (asTones) {
+    if (asTune) {
       static TuneBuilder *tb = NULL;
 
       if (tb) {
@@ -91,15 +115,15 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
       if (tb) {
         if (parseTuneString(tb, "p100")) {
           if (parseTuneString(tb, text)) {
-            ToneElement *tones = getTune(tb);
+            ToneElement *tune = getTune(tb);
 
-            if (tones) {
-              tunePlayTones(tones);
+            if (tune) {
+              tunePlayTones(tune);
             }
           }
         }
       }
-    } else {
+    } else if (!dontSpeak) {
       size_t attributesCount = countUtf8Characters(text);
       unsigned char attributes[attributesCount + 1];
       memset(attributes, colour, attributesCount);
