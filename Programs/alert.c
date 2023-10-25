@@ -245,7 +245,7 @@ alert (AlertIdentifier identifier) {
         TuneBuilder *tb = getTuneBuilder();
 
         if (tb) {
-          setTuneSourceName(tuneBuilder, "alert");
+          setTuneSourceName(tb, "alert");
           setTuneSourceIndex(tb, identifier);
 
           if (parseTuneString(tb, "p100")) {

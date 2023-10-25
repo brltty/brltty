@@ -24,6 +24,8 @@
 #include "spk_input.h"
 #include "spk.h"
 #include "pipe.h"
+#include "tune.h"
+#include "tune_builder.h"
 #include "ascii.h"
 #include "utf8.h"
 #include "scr_types.h"
@@ -42,6 +44,7 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
 
   SayOptions options = 0;
   unsigned char colour = SCR_COLOUR_DEFAULT;
+  int asTones = 0;
 
   while (buffer < end) {
      if (*buffer != ASCII_ESC) break;
@@ -55,6 +58,11 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
        case 'c':
          if (buffer < end) colour = *buffer++;
          break;
+
+       case 't':
+         asTones = 1;
+         break;
+
      }
   }
 
@@ -64,11 +72,37 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
     memcpy(text, buffer, textLength);
     text[textLength] = 0;
 
-    size_t attributesCount = countUtf8Characters(text);
-    unsigned char attributes[attributesCount + 1];
-    memset(attributes, colour, attributesCount);
+    if (asTones) {
+      static TuneBuilder *tb = NULL;
 
-    sayUtf8Characters(&spk, text, attributes, textLength, attributesCount, options);
+      if (tb) {
+        resetTuneBuilder(tb);
+      } else if ((tb = newTuneBuilder())) {
+        setTuneSourceName(tb, "speech-input");
+        setTuneSourceIndex(tb, 0);
+      }
+
+      if (tb) {
+        if (parseTuneString(tb, "p100")) {
+          if (parseTuneString(tb, text)) {
+            ToneElement *tones = getTune(tb);
+
+            if (tones) {
+              tunePlayTones(tones);
+            }
+          }
+        }
+      }
+    } else {
+      size_t attributesCount = countUtf8Characters(text);
+      unsigned char attributes[attributesCount + 1];
+      memset(attributes, colour, attributesCount);
+
+      sayUtf8Characters(
+        &spk, text, attributes,
+        textLength, attributesCount, options
+      );
+    }
   }
 
   return bufferSize;
