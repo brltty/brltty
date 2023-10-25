@@ -47,9 +47,13 @@ typedef struct {
 
 extern void suppressTuneDeviceOpenErrors (void);
 
+typedef enum {
+  TPO_FREE = 0X01,
+} TunePlayOptions;
+
 extern int tuneSetDevice (TuneDevice device);
-extern void tunePlayNotes (const NoteElement *tune);
-extern void tunePlayTones (const ToneElement *tune);
+extern void tunePlayNotes (const NoteElement *tune, TunePlayOptions options);
+extern void tunePlayTones (const ToneElement *tune, TunePlayOptions options);
 extern void tuneWait (int time);
 extern void tuneSynchronize (void);
 

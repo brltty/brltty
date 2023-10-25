@@ -103,7 +103,7 @@ playTune (TuneBuilder *tb) {
   ToneElement *tune = getTune(tb);
 
   if (tune) {
-    tunePlayTones(tune);
+    tunePlayTones(tune, 0);
     tuneSynchronize();
     free(tune);
   }

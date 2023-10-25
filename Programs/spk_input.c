@@ -103,25 +103,20 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
     text[textLength] = 0;
 
     if (asTune) {
-      static TuneBuilder *tb = NULL;
+      TuneBuilder *tb = newTuneBuilder();
 
       if (tb) {
-        resetTuneBuilder(tb);
-      } else if ((tb = newTuneBuilder())) {
         setTuneSourceName(tb, "speech-input");
         setTuneSourceIndex(tb, 0);
-      }
 
-      if (tb) {
         if (parseTuneString(tb, "p100")) {
           if (parseTuneString(tb, text)) {
             ToneElement *tune = getTune(tb);
-
-            if (tune) {
-              tunePlayTones(tune);
-            }
+            if (tune) tunePlayTones(tune, TPO_FREE);
           }
         }
+
+        destroyTuneBuilder(tb);
       }
     } else if (!dontSpeak) {
       size_t attributesCount = countUtf8Characters(text);

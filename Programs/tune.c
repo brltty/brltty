@@ -108,10 +108,12 @@ typedef struct {
 
     struct {
       const NoteElement *tune;
+      TunePlayOptions options;
     } playNotes;
 
     struct {
       const ToneElement *tune;
+      TunePlayOptions options;
     } playTones;
 
     struct {
@@ -174,21 +176,25 @@ handleTuneRequest (TuneRequest *req) {
 
       case TUNE_REQ_PLAY_NOTES: {
         const NoteElement *tune = req->parameters.playNotes.tune;
+        TunePlayOptions options = req->parameters.playNotes.options;
 
         currentlyPlayingNotes = tune;
         handleTuneRequest_playNotes(tune);
         currentlyPlayingNotes = NULL;
 
+        if (options & TPO_FREE) free((void *)tune);
         break;
       }
 
       case TUNE_REQ_PLAY_TONES: {
         const ToneElement *tune = req->parameters.playTones.tune;
+        TunePlayOptions options = req->parameters.playTones.options;
 
         currentlyPlayingTones = tune;
         handleTuneRequest_playTones(tune);
         currentlyPlayingTones = NULL;
 
+        if (options & TPO_FREE) free((void *)tune);
         break;
       }
 
@@ -467,24 +473,26 @@ tuneSetDevice (TuneDevice device) {
 }
 
 void
-tunePlayNotes (const NoteElement *tune) {
+tunePlayNotes (const NoteElement *tune, TunePlayOptions options) {
   if (tune != currentlyPlayingNotes) {
     TuneRequest *req;
 
     if ((req = newTuneRequest(TUNE_REQ_PLAY_NOTES))) {
       req->parameters.playNotes.tune = tune;
+      req->parameters.playNotes.options = options;
       if (!sendTuneRequest(req)) free(req);
     }
   }
 }
 
 void
-tunePlayTones (const ToneElement *tune) {
+tunePlayTones (const ToneElement *tune, TunePlayOptions options) {
   if (tune != currentlyPlayingTones) {
     TuneRequest *req;
 
     if ((req = newTuneRequest(TUNE_REQ_PLAY_TONES))) {
       req->parameters.playTones.tune = tune;
+      req->parameters.playTones.options = options;
       if (!sendTuneRequest(req)) free(req);
     }
   }

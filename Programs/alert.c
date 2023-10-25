@@ -260,7 +260,7 @@ alert (AlertIdentifier identifier) {
         if (!*tune) *tune = emptyTune;
       }
 
-      tunePlayTones(*tune);
+      tunePlayTones(*tune, 0);
     } else if (prefs.alertDots && alert->tactile.duration) {
       showDotPattern(alert->tactile.pattern, alert->tactile.duration);
     } else if (prefs.alertMessages && alert->message) {

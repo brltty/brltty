@@ -224,7 +224,7 @@ playMorseSequence (MorseObject *morse) {
     if (!addMorseElement(morse, &element)) return 0;
   }
 
-  tunePlayTones(morse->elements.array);
+  tunePlayTones(morse->elements.array, 0);
   tuneSynchronize();
   return 1;
 }
