@@ -160,7 +160,7 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   BLUETOOTH_NAME_ENTRY("SuperVario", "bm"),
 
   // Phoenix Medical Systems: TacRead
-  BLUETOOTH_NAME_ENTRY("Tacread", "tr"),
+  BLUETOOTH_NAME_ENTRY("TacRead", "tr"),
 
   // Seika: Note Taker
   BLUETOOTH_NAME_ENTRY("TSM", "sk"),
