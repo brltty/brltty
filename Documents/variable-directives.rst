@@ -121,6 +121,6 @@ The ListVariables Directive
 
 .. parsed-literal:: listVariables
 
-Use this directive to list all of the currently defiined variables.
+Use this directive to list all of the currently defined variables.
 It can be helpful when debugging.
 

@@ -127,7 +127,7 @@ default`` statement just before them. For example::
 
 If you'd like your additional binding definitions to survive a BRLTTY reinstall
 then you should use a customized key table or subtable (see |README.Customize|)
-that includes the provided one, and then defines your additiional bindings.
+that includes the provided one, and then defines your additional bindings.
 Let's say that you'd like to add your bindings to the ``laptop`` keyboard table
 (``laptop.ktb``). Create a file with the same name - ``laptop.ktb`` - in the
 ``/etc/xdg/brltty/`` directory, and, with an editor, make it look like this::

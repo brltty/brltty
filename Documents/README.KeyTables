@@ -513,7 +513,7 @@ table's help text.
 *  A note that is prefixed with an asterisk (``*``) continues the current outer
    bulleted list element.
 
-*  A note that is prefixed with a plus (``+``) sign is an inner bulletged list
+*  A note that is prefixed with a plus (``+``) sign is an inner bulleted list
    element.
 
 Examples::
