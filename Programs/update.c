@@ -838,6 +838,7 @@ autospeak (AutospeakMode mode) {
       if (!prefs.autospeakSelectedLine) count = 0;
       reason = "line selected";
       if (prefs.autospeakLineIndent) indent = 1;
+      if (isAllSpaceCharacters(newCharacters, newWidth)) count = 0;
     } else {
       int onScreen = (newX >= 0) && (newX < newWidth);
 
@@ -1001,26 +1002,28 @@ autospeak (AutospeakMode mode) {
     }
 
   autospeak:
-    if (mode == AUTOSPEAK_SILENT) count = 0;
+    if (scr.quality >= autospeakMinimumScreenContentQuality) {
+      if (mode == AUTOSPEAK_SILENT) count = 0;
 
-    characters += column;
-    int interrupt = 1;
+      characters += column;
+      int interrupt = 1;
 
-    if (indent) {
-      if (speakIndent(characters, count, 0)) {
-        interrupt = 0;
+      if (indent) {
+        if (speakIndent(characters, count, 0)) {
+          interrupt = 0;
+        }
       }
-    }
 
-    if (count && (scr.quality >= autospeakMinimumScreenContentQuality)) {
-      if (!reason) reason = "unknown reason";
+      if (count) {
+        if (!reason) reason = "unknown reason";
 
-      logMessage(LOG_CATEGORY(SPEECH_EVENTS),
-        "autospeak: %s: [%d,%d] %d.%d",
-        reason, ses->winx, ses->winy, column, count
-      );
+        logMessage(LOG_CATEGORY(SPEECH_EVENTS),
+          "autospeak: %s: [%d,%d] %d.%d",
+          reason, ses->winx, ses->winy, column, count
+        );
 
-      speakCharacters(characters, count, 0, interrupt);
+        speakCharacters(characters, count, 0, interrupt);
+      }
     }
   }
 
