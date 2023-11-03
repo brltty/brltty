@@ -831,6 +831,7 @@ autospeak (AutospeakMode mode) {
 
     if (mode == AUTOSPEAK_FORCE) {
       reason = "current line";
+      if (isAllSpaceCharacters(newCharacters, newWidth)) count = 0;
     } else if (!oldCharacters) {
       reason = "initial line";
       count = 0;
