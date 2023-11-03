@@ -334,7 +334,7 @@ BRLTTY's source tree (where the script resides), then invoke it like this::
 
    ./mkdosarc ..
 
-If you're in the top-level directory of BRLTTY's soruce tree then invoke it
+If you're in the top-level directory of BRLTTY's source tree then invoke it
 like this::
 
    DOS/mkdosarc .

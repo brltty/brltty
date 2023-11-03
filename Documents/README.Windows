@@ -62,7 +62,7 @@ but it can be set up to run automatically.
 The first (or root) BRLTTY should be run as part of Windows startup. It must be
 run with the options that are necessary for it to access your braille device,
 e.g. ``-b`` (to specify the driver), ``-d`` (to specify the device), and
-(maybe) ``-B`` (to specify driver-sspecific parameters). It must also be given
+(maybe) ``-B`` (to specify driver-specific parameters). It must also be given
 the ``-Xroot=yes`` option (which attaches it to the root window).
 
 An additional BRLTTY must then be run for each new console. It should be
@@ -247,7 +247,7 @@ You may get a Java failure that looks something like this::
    {urls=[], parent=gnu.gcj.runtime.ExtensionClassLoader{urls=[], parent=null}}
 
 This problem occurs when the ``java-ecj`` package isn't installed. It can be
-obtained from `Cygwin Ports`_. You can also resolve the probem by downloading
+obtained from the `Cygwin Ports`_. You can also resolve the problem by downloading
 the `Cygwin java-ecj jar`_, and installing it into ``/usr/share/java/ecj.jar``.
 
 Using BRLTTY
@@ -460,7 +460,7 @@ Software Components Required by ``mkwin``
 Links to the pages where we found these
 installers, components, and files are listed.
 In case any of these links becomes out-of-date, however,
-copies of some of them have been preserived at
+copies of some of them have been preserved at
 `<http://BRLTTY.app/archive/Windows/>`_.
 
 The following software components should already be installed:

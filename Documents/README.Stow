@@ -16,7 +16,7 @@ What will be explained here is how to keep ``/usr/local/bin/brltty`` up to date
 without removing old versions.  We decide to put BRLTTY in ``/usr/local`` as
 we don't want to break filesystem root distribution (i.e. ``/bin/brltty``
 should only come from a packaged version of BRLTTY for your distribution. If
-you install software in respect with this rule, you'd install it in
+you install software that adheres to this rule, you'd install it in
 ``/usr/local``). Also, we want not to have to keep source files to be able to
 remove things cleanly. After installing a software, you shouldn't have to rely
 on a by-software uninstallation suite.
@@ -33,8 +33,8 @@ On Fedora:
 Why Stow can help
 =================
 
-Stow allows to manage files like if they were packaged, by creating symlinks
-from by-directory grouped sets of files instead of copying them directly.
+Stow manages files as if they were packaged by creating symlinks
+to sets of files, each of which in its own directory, instead of directly copying them.
 
 We recommend to attentively read Stow Info files, to realize what it can do,
 how, and specially why it is so useful when you have to manage personally
@@ -44,9 +44,9 @@ The procedure
 =============
 
 So we want to run a BRLTTY version, taken from a set of personally compiled
-ones, and safely keep all of them around. Current working release will be run
-from ``/usr/local`` root, while all releases files will be kept in the "safe
-place", the **Stow directory** ``/usr/local/stow/``. For example, releases
+ones, and safely keep all of them around. The current working release will be run
+from the ``/usr/local`` root, while the files for all releases will be kept in a "safe
+place" - the **Stow directory** (``/usr/local/stow/``). For example, releases
 (bins/configs/libs/mans, not source trees) will be stored there like this:
 
 *  ``/usr/local/stow/brltty-3.2/``

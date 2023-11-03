@@ -209,7 +209,7 @@ e.g. a text, contraction, or key table or subtable.
 To do this, add a file with the same name directly into a folder named ``brltty``
 at the top-level of your Android device's primary shared/external storage area.
 This area might be internal (on the device itself)
-or external (on a removal storage device, e.g. an SD card).
+or external (on a removable storage device, e.g. an SD card).
 Normally, it's the area that ``/sdcard`` is symbolically linked to.
 
 BRLTTY won't be aware of your customized data files
@@ -520,7 +520,7 @@ TXTSEL_SET
 
 TXTSEL_START
   Enter `text selection mode`_ with that character being both endpoints.
-  With this method, the first endpoint of the text selection can be anywehre,
+  With this method, the first endpoint of the text selection can be anywhere,
   i.e. it isn't constrained to be a character that the cursor can get to.
   The key combination needs a cursor routing (or equivalent) key.
   We recommend a long press of a cursor routing key
@@ -929,7 +929,7 @@ this with the following command::
    make -s reinstall
 
 If you've obtained your Android package file (``apk``) for BRLTTY from some
-other source (than building it for yourself), then it may have a different name
+other source (rather than building it for yourself), then it may have a different name
 than the make file is expecting. It's useful, therefore, to know what the
 actual host commands are for installing and removing Android applications.
 

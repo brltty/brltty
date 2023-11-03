@@ -61,7 +61,7 @@ required due to host platform limitations.
 
 .. topic:: Monitoring for Bluetooth Input
 
-   Tghis task is event-based on:
+   This task is event-based on:
 
    *  Android
 
