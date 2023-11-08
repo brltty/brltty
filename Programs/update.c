@@ -831,7 +831,6 @@ autospeak (AutospeakMode mode) {
 
     if (mode == AUTOSPEAK_FORCE) {
       reason = "current line";
-      if (isAllSpaceCharacters(newCharacters, newWidth)) count = 0;
     } else if (!oldCharacters) {
       reason = "initial line";
       count = 0;
@@ -839,7 +838,6 @@ autospeak (AutospeakMode mode) {
       if (!prefs.autospeakSelectedLine) count = 0;
       reason = "line selected";
       if (prefs.autospeakLineIndent) indent = 1;
-      if (isAllSpaceCharacters(newCharacters, newWidth)) count = 0;
     } else {
       int onScreen = (newX >= 0) && (newX < newWidth);
 
@@ -1012,6 +1010,12 @@ autospeak (AutospeakMode mode) {
       if (indent) {
         if (speakIndent(characters, count, 0)) {
           interrupt = 0;
+        }
+      }
+
+      if ((characters == newCharacters) && (count > 1)) {
+        if (isAllSpaceCharacters(newCharacters, newWidth)) {
+          count = 0;
         }
       }
 
