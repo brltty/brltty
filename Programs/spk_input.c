@@ -90,18 +90,19 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
      }
   }
 
+  size_t textLength = end - buffer;
+  char text[textLength + 1];
+  memcpy(text, buffer, textLength);
+  text[textLength] = 0;
+  logMessage(LOG_CATEGORY(SPEECH_EVENTS), "speech input: %s", text);
+
   if (options & SAY_OPT_MUTE_FIRST) {
-    if (asTune || (buffer == end)) {
+    if (asTune || !textLength) {
       muteSpeech(&spk, "speech input");
     }
   }
 
-  if (buffer < end) {
-    size_t textLength = end - buffer;
-    char text[textLength + 1];
-    memcpy(text, buffer, textLength);
-    text[textLength] = 0;
-
+  if (textLength) {
     if (asTune) {
       TuneBuilder *tb = newTuneBuilder();
 
