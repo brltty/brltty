@@ -485,6 +485,11 @@
 #keyboard-properties	Vendor=0X0000	# [0X0000-0XFFFF]
 #keyboard-properties	Product=0X0000	# [0X0000-0XFFFF]
 
+# The gui-keyboard directive enables the handling of keyboard events when
+# using a Linux tty in graphics mode.
+# (can be overridden with the --gui-keyboard= [-g] option)
+#gui-keyboard	off	# [off,on]
+
 
 ##################
 # Sound Settings #

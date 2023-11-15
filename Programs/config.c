@@ -291,6 +291,8 @@ static KeyboardMonitorObject *keyboardMonitor = NULL;
 static char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
 
+static int opt_guiKeyboard;
+
 #ifdef ENABLE_API
 static int opt_noApi;
 static char *opt_apiParameters = NULL;
@@ -545,6 +547,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("name=value,..."),
     .setting.string = &opt_keyboardProperties,
     .description = strtext("Properties of eligible keyboards.")
+  },
+
+  { .word = "gui-keyboard",
+    .letter = 'g',
+    .flags = OPT_Config | OPT_EnvVar,
+    .setting.flag = &opt_guiKeyboard,
+    .description = strtext("Handle keyboard key events when using a Linux tty in graphics mode.")
   },
 
   { .word = "preferences-file",
@@ -1072,7 +1081,7 @@ setAttributesTable (void) {
 static KeyTableState
 handleKeyboardEvent (KeyGroup group, KeyNumber number, int press) {
   if (keyboardTable) {
-    if (!scr.unreadable) {
+    if (!scr.unreadable || opt_guiKeyboard) {
       return processKeyEvent(keyboardTable, getCurrentCommandContext(), group, number, press);
     }
 
