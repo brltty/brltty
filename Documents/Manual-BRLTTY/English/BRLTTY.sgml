@@ -1416,8 +1416,8 @@ Access to the needed devices can, of course, be granted to a non-root user
 by changing the file permissions associated with the devices.
 Merely having access to the console, however, isn't enough because
 activating the internal beeper and simulating key strokes still require root privilege.
-So, if you're willing to give up cursor routing, cut&amp;paste, beeps,
-and all that, you can run BRLTTY without root priviledge.
+So, if you're willing to give up Cursor Routing, Copy and Paste, beeps,
+and all that, you can run BRLTTY without root privilege.
 
 <sect1>Build and Run-Time Restrictions<p>
 <descrip>
@@ -2420,7 +2420,7 @@ It doesn't need to exist.
 A template for it can be found within the <tt/Documents/ subdirectory.
 
 Blank lines are ignored.
-A comment begin with a number sign (<tt/&num;/),
+A comment begins with a number sign (<tt/&num;/),
 and continues to the end of the line.
 The following directives are recognized:
 <descrip>
@@ -2641,7 +2641,7 @@ The <tt/brltty/ command accepts the following options:
     (see the <ref id="command-SIXDOTS" name="SIXDOTS"> command
     and the <ref id="preference-text-style" name="Text Style"> preference).
     See the <ref id="configure-contraction-table" name="contraction-table">
-    configureation file directive for the default run-time setting.
+    configuration file directive for the default run-time setting.
     This setting can be changed with the
     <ref id="preference-contraction-table" name="Contraction Table"> preference.
     This option isn't available if the
@@ -2679,7 +2679,7 @@ The <tt/brltty/ command accepts the following options:
     build options for more details).
     The <tt/.ktb/ extension is optional.
     See the <ref id="configure-keyboard-table" name="keyboard-table">
-    configureation file directive for the default run-time setting.
+    configuration file directive for the default run-time setting.
     This setting can be changed with the
     <ref id="preference-keyboard-table" name="Keyboard Table"> preference.
   <tag><tt/-l/<em/level/ <tt/--log-level=/<em/level/<label id="options-log-level"></tag>
@@ -2747,7 +2747,7 @@ The <tt/brltty/ command accepts the following options:
     build options for more details).
     The <tt/.ttb/ extension is optional.
     See the <ref id="configure-text-table" name="text-table">
-    configureation file directive for the default run-time setting.
+    configuration file directive for the default run-time setting.
     This setting can be changed with the
     <ref id="preference-text-table" name="Text Table"> preference.
   <tag><tt/-v/ <tt/--verify/<label id="options-verify"></tag>
@@ -5528,7 +5528,7 @@ Perhaps a picture will make this numbering convention easier to understand.
 |  38  26  [ 3214 6 ]  ampersand                                  |
 |  39  27  [ 3      ]  acute accent                               |
 |  40  28  [ 321 56 ]  left parenthesis                           |
-|   4  291  [ 32 456 ) right parenthesis                          |
+|  41  29  [ 32 456 ) right parenthesis                          |
 |  42  2A  [   1  6 ]  asterisk                                   |
 |  43  2B  [ 3  4 6 ]  plus sign                                  |
 |  44  2C  [      6 ]  comma                                      |
