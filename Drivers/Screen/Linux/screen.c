@@ -1717,38 +1717,8 @@ getCapsLockState (void) {
   return 0;
 }
 
-static inline int
-hasModUpper (ScreenKey key) {
-  return (key & SCR_KEY_UPPER) && !getCapsLockState();
-}
-
-static inline int
-hasModShift (ScreenKey key) {
-  return !!(key & SCR_KEY_SHIFT);
-}
-
-static inline int
-hasModControl (ScreenKey key) {
-  return !!(key & SCR_KEY_CONTROL);
-}
-
-static inline int
-hasModAltLeft (ScreenKey key) {
-  return !!(key & SCR_KEY_ALT_LEFT);
-}
-
-static inline int
-hasModAltRight (ScreenKey key) {
-  return !!(key & SCR_KEY_ALT_RIGHT);
-}
-
-static inline int
-hasModGui (ScreenKey key) {
-  return !!(key & SCR_KEY_GUI);
-}
-
 static int
-injectKeyEvent (int key, int press) {
+injectKeyboardEvent (int key, int press) {
   logMessage(
     LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG,
     "injecting key %s: %02X",
@@ -1759,44 +1729,79 @@ injectKeyEvent (int key, int press) {
   return writeKeyEvent(uinputKeyboard, key, press);
 }
 
+static inline int
+hasModUpper (ScreenKey modifiers) {
+  return (modifiers & SCR_KEY_UPPER) && !getCapsLockState();
+}
+
+static inline int
+hasModShift (ScreenKey modifiers) {
+  return !!(modifiers & SCR_KEY_SHIFT);
+}
+
+static inline int
+hasModControl (ScreenKey modifiers) {
+  return !!(modifiers & SCR_KEY_CONTROL);
+}
+
+static inline int
+hasModAltLeft (ScreenKey modifiers) {
+  return !!(modifiers & SCR_KEY_ALT_LEFT);
+}
+
+static inline int
+hasModAltRight (ScreenKey modifiers) {
+  return !!(modifiers & SCR_KEY_ALT_RIGHT);
+}
+
+static inline int
+hasModGui (ScreenKey modifiers) {
+  return !!(modifiers & SCR_KEY_GUI);
+}
+
 static int
-insertUinput (
-  LinuxKeyCode code,
-  int modUpper, int modShift, int modControl,
-  int modAltLeft, int modAltRight
-) {
+insertLinuxKey (LinuxKeyCode code, ScreenKey modifiers) {
 #ifdef HAVE_LINUX_INPUT_H
+  const int modUpper = hasModUpper(modifiers);
+  const int modShift = hasModShift(modifiers);
+  const int modControl = hasModControl(modifiers);
+  const int modAltLeft = hasModAltLeft(modifiers);
+  const int modAltRight = hasModAltRight(modifiers);
+  const int modGui = hasModGui(modifiers);
+
+#define KEY_EVENT(KEY, PRESS) { if (!injectKeyboardEvent((KEY), (PRESS))) return 0; }
+  if (modUpper) {
+    KEY_EVENT(KEY_CAPSLOCK, 1);
+    KEY_EVENT(KEY_CAPSLOCK, 0);
+  }
+
+  if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 1);
+  if (modControl) KEY_EVENT(KEY_LEFTCTRL, 1);
+  if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 1);
+  if (modAltRight) KEY_EVENT(KEY_RIGHTALT, 1);
+  if (modGui) KEY_EVENT(KEY_LEFTMETA, 1);
+
   if (code) {
-#define KEY_EVENT(KEY, PRESS) { if (!injectKeyEvent((KEY), (PRESS))) return 0; }
-    if (modUpper) {
-      KEY_EVENT(KEY_CAPSLOCK, 1);
-      KEY_EVENT(KEY_CAPSLOCK, 0);
-    }
-
-    if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 1);
-    if (modControl) KEY_EVENT(KEY_LEFTCTRL, 1);
-    if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 1);
-    if (modAltRight) KEY_EVENT(KEY_RIGHTALT, 1);
-
     KEY_EVENT(code, 1);
     KEY_EVENT(code, 0);
+  }
 
-    if (modAltRight) KEY_EVENT(KEY_RIGHTALT, 0);
-    if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 0);
-    if (modControl) KEY_EVENT(KEY_LEFTCTRL, 0);
-    if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 0);
+  if (modGui) KEY_EVENT(KEY_LEFTMETA, 0);
+  if (modAltRight) KEY_EVENT(KEY_RIGHTALT, 0);
+  if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 0);
+  if (modControl) KEY_EVENT(KEY_LEFTCTRL, 0);
+  if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 0);
 
-    if (modUpper) {
-      KEY_EVENT(KEY_CAPSLOCK, 1);
-      KEY_EVENT(KEY_CAPSLOCK, 0);
-    }
+  if (modUpper) {
+    KEY_EVENT(KEY_CAPSLOCK, 1);
+    KEY_EVENT(KEY_CAPSLOCK, 0);
+  }
 #undef KEY_EVENT
 
-    return 1;
-  }
-#endif /* HAVE_LINUX_INPUT_H */
-
+  return 1;
+#else /* HAVE_LINUX_INPUT_H */
   return 0;
+#endif /* HAVE_LINUX_INPUT_H */
 }
 
 static int
@@ -1826,6 +1831,204 @@ insertBytes (const char *byte, size_t count) {
     count -= 1;
   }
   return 1;
+}
+
+typedef struct {
+  const LinuxKeyCode *xtMap;
+  unsigned char xtCode;
+  unsigned char xtEscape;
+} ScreenKeyEntry;
+
+static const ScreenKeyEntry *
+getScreenKeyEntry (ScreenKey key) {
+#define SCREEN_KEY_ENTRY(KEY, ESCAPE, CODE) \
+  case (KEY): { \
+    static const ScreenKeyEntry screenKeyEntry = { \
+      .xtMap = linuxKeyMap_xt ## ESCAPE, \
+      .xtCode = XT_KEY_ ## ESCAPE ## _ ## CODE, \
+      .xtEscape = XT_MOD_ ## ESCAPE, \
+    }; \
+    return &screenKeyEntry; \
+  }
+
+  switch (key & SCR_KEY_CHAR_MASK) {
+    SCREEN_KEY_ENTRY(SCR_KEY_ESCAPE, 00, Escape)
+
+    SCREEN_KEY_ENTRY(SCR_KEY_F1, 00, F1)
+    SCREEN_KEY_ENTRY(SCR_KEY_F2, 00, F2)
+    SCREEN_KEY_ENTRY(SCR_KEY_F3, 00, F3)
+    SCREEN_KEY_ENTRY(SCR_KEY_F4, 00, F4)
+    SCREEN_KEY_ENTRY(SCR_KEY_F5, 00, F5)
+    SCREEN_KEY_ENTRY(SCR_KEY_F6, 00, F6)
+    SCREEN_KEY_ENTRY(SCR_KEY_F7, 00, F7)
+    SCREEN_KEY_ENTRY(SCR_KEY_F8, 00, F8)
+    SCREEN_KEY_ENTRY(SCR_KEY_F9, 00, F9)
+    SCREEN_KEY_ENTRY(SCR_KEY_F10, 00, F10)
+    SCREEN_KEY_ENTRY(SCR_KEY_F11, 00, F11)
+    SCREEN_KEY_ENTRY(SCR_KEY_F12, 00, F12)
+
+    SCREEN_KEY_ENTRY(SCR_KEY_F13, 00, F13)
+    SCREEN_KEY_ENTRY(SCR_KEY_F14, 00, F14)
+    SCREEN_KEY_ENTRY(SCR_KEY_F15, 00, F15)
+    SCREEN_KEY_ENTRY(SCR_KEY_F16, 00, F16)
+    SCREEN_KEY_ENTRY(SCR_KEY_F17, 00, F17)
+    SCREEN_KEY_ENTRY(SCR_KEY_F18, 00, F18)
+    SCREEN_KEY_ENTRY(SCR_KEY_F19, 00, F19)
+    SCREEN_KEY_ENTRY(SCR_KEY_F20, 00, F20)
+    SCREEN_KEY_ENTRY(SCR_KEY_F21, 00, F21)
+    SCREEN_KEY_ENTRY(SCR_KEY_F22, 00, F22)
+    SCREEN_KEY_ENTRY(SCR_KEY_F23, 00, F23)
+    SCREEN_KEY_ENTRY(SCR_KEY_F24, 00, F24)
+
+    SCREEN_KEY_ENTRY('`', 00, Grave)
+    SCREEN_KEY_ENTRY('1', 00, 1)
+    SCREEN_KEY_ENTRY('2', 00, 2)
+    SCREEN_KEY_ENTRY('3', 00, 3)
+    SCREEN_KEY_ENTRY('4', 00, 4)
+    SCREEN_KEY_ENTRY('5', 00, 5)
+    SCREEN_KEY_ENTRY('6', 00, 6)
+    SCREEN_KEY_ENTRY('7', 00, 7)
+    SCREEN_KEY_ENTRY('8', 00, 8)
+    SCREEN_KEY_ENTRY('9', 00, 9)
+    SCREEN_KEY_ENTRY('0', 00, 0)
+    SCREEN_KEY_ENTRY('-', 00, Minus)
+    SCREEN_KEY_ENTRY('=', 00, Equal)
+    SCREEN_KEY_ENTRY(SCR_KEY_BACKSPACE, 00, Backspace)
+
+    SCREEN_KEY_ENTRY(SCR_KEY_TAB, 00, Tab)
+    SCREEN_KEY_ENTRY('q', 00, Q)
+    SCREEN_KEY_ENTRY('w', 00, W)
+    SCREEN_KEY_ENTRY('e', 00, E)
+    SCREEN_KEY_ENTRY('r', 00, R)
+    SCREEN_KEY_ENTRY('t', 00, T)
+    SCREEN_KEY_ENTRY('y', 00, Y)
+    SCREEN_KEY_ENTRY('u', 00, U)
+    SCREEN_KEY_ENTRY('i', 00, I)
+    SCREEN_KEY_ENTRY('o', 00, O)
+    SCREEN_KEY_ENTRY('p', 00, P)
+    SCREEN_KEY_ENTRY('[', 00, LeftBracket)
+    SCREEN_KEY_ENTRY(']', 00, RightBracket)
+    SCREEN_KEY_ENTRY('\\', 00, Backslash)
+
+    SCREEN_KEY_ENTRY('a', 00, A)
+    SCREEN_KEY_ENTRY('s', 00, S)
+    SCREEN_KEY_ENTRY('d', 00, D)
+    SCREEN_KEY_ENTRY('f', 00, F)
+    SCREEN_KEY_ENTRY('g', 00, G)
+    SCREEN_KEY_ENTRY('h', 00, H)
+    SCREEN_KEY_ENTRY('j', 00, J)
+    SCREEN_KEY_ENTRY('k', 00, K)
+    SCREEN_KEY_ENTRY('l', 00, L)
+    SCREEN_KEY_ENTRY(';', 00, Semicolon)
+    SCREEN_KEY_ENTRY('\'', 00, Apostrophe)
+    SCREEN_KEY_ENTRY(SCR_KEY_ENTER, 00, Enter)
+
+    SCREEN_KEY_ENTRY('z', 00, Z)
+    SCREEN_KEY_ENTRY('x', 00, X)
+    SCREEN_KEY_ENTRY('c', 00, C)
+    SCREEN_KEY_ENTRY('v', 00, V)
+    SCREEN_KEY_ENTRY('b', 00, B)
+    SCREEN_KEY_ENTRY('n', 00, N)
+    SCREEN_KEY_ENTRY('m', 00, M)
+    SCREEN_KEY_ENTRY(',', 00, Comma)
+    SCREEN_KEY_ENTRY('.', 00, Period)
+    SCREEN_KEY_ENTRY('/', 00, Slash)
+
+    SCREEN_KEY_ENTRY(' ', 00, Space)
+
+    SCREEN_KEY_ENTRY(SCR_KEY_INSERT, E0, Insert)
+    SCREEN_KEY_ENTRY(SCR_KEY_DELETE, E0, Delete)
+    SCREEN_KEY_ENTRY(SCR_KEY_HOME, E0, Home)
+    SCREEN_KEY_ENTRY(SCR_KEY_END, E0, End)
+    SCREEN_KEY_ENTRY(SCR_KEY_PAGE_UP, E0, PageUp)
+    SCREEN_KEY_ENTRY(SCR_KEY_PAGE_DOWN, E0, PageDown)
+
+    SCREEN_KEY_ENTRY(SCR_KEY_CURSOR_UP, E0, ArrowUp)
+    SCREEN_KEY_ENTRY(SCR_KEY_CURSOR_LEFT, E0, ArrowLeft)
+    SCREEN_KEY_ENTRY(SCR_KEY_CURSOR_DOWN, E0, ArrowDown)
+    SCREEN_KEY_ENTRY(SCR_KEY_CURSOR_RIGHT, E0, ArrowRight)
+  }
+#undef SCREEN_KEY_ENTRY
+
+  return NULL;
+}
+
+static int
+insertKeyCode (ScreenKey screenKey, int raw) {
+  setScreenKeyModifiers(&screenKey, SCR_KEY_SHIFT | SCR_KEY_CONTROL);
+  const ScreenKeyEntry *ske = getScreenKeyEntry(screenKey);
+
+  if (!ske) {
+    logMessage(LOG_WARNING, "key not supported in raw keyboard mode: %04X", screenKey);
+    return 0;
+  }
+
+  if (raw) {
+    const int modUpper = hasModUpper(screenKey);
+    const int modShift = hasModShift(screenKey);
+    const int modControl = hasModControl(screenKey);
+    const int modAltLeft = hasModAltLeft(screenKey);
+    const int modAltRight = hasModAltRight(screenKey);
+    const int modGui = hasModGui(screenKey);
+
+    char codes[22];
+    unsigned int count = 0;
+
+    if (modUpper) {
+      codes[count++] = XT_KEY_00_CapsLock;
+      codes[count++] = XT_KEY_00_CapsLock | XT_BIT_RELEASE;
+    }
+
+    if (modShift) codes[count++] = XT_KEY_00_LeftShift;
+    if (modControl) codes[count++] = XT_KEY_00_LeftControl;
+    if (modAltLeft) codes[count++] = XT_KEY_00_LeftAlt;
+
+    if (modAltRight) {
+      codes[count++] = XT_MOD_E0;
+      codes[count++] = XT_KEY_E0_RightAlt;
+    }
+
+    if (modGui) {
+      codes[count++] = XT_MOD_E0;
+      codes[count++] = XT_KEY_E0_LeftGUI;
+    }
+
+    if (ske->xtEscape) codes[count++] = ske->xtEscape;
+    codes[count++] = ske->xtCode;
+
+    if (ske->xtEscape) codes[count++] = ske->xtEscape;
+    codes[count++] = ske->xtCode | XT_BIT_RELEASE;
+
+    if (modGui) {
+      codes[count++] = XT_MOD_E0;
+      codes[count++] = XT_KEY_E0_LeftGUI | XT_BIT_RELEASE;
+    }
+
+    if (modAltRight) {
+      codes[count++] = XT_MOD_E0;
+      codes[count++] = XT_KEY_E0_RightAlt | XT_BIT_RELEASE;
+    }
+
+    if (modAltLeft) codes[count++] = XT_KEY_00_LeftAlt | XT_BIT_RELEASE;
+    if (modControl) codes[count++] = XT_KEY_00_LeftControl | XT_BIT_RELEASE;
+    if (modShift) codes[count++] = XT_KEY_00_LeftShift | XT_BIT_RELEASE;
+
+    if (modUpper) {
+      codes[count++] = XT_KEY_00_CapsLock;
+      codes[count++] = XT_KEY_00_CapsLock | XT_BIT_RELEASE;
+    }
+
+    return insertBytes(codes, count);
+  } else {
+    LinuxKeyCode linuxKey = ske->xtMap[ske->xtCode];
+
+    if (!linuxKey) {
+      logMessage(LOG_WARNING, "key not supported in medium raw keyboard mode: %04X", screenKey);
+      return 0;
+    }
+
+    return insertLinuxKey(linuxKey, screenKey);
+  }
 }
 
 static int
@@ -1863,194 +2066,11 @@ insertUnicode (wchar_t character) {
 }
 
 static int
-insertCode (ScreenKey key, int raw) {
-  const LinuxKeyCode *map;
-  unsigned char code;
-  unsigned char escape;
-
-  setScreenKeyModifiers(&key, SCR_KEY_SHIFT | SCR_KEY_CONTROL);
-
-#define KEY_TO_XT(KEY, ESCAPE, CODE) \
-  case (KEY): \
-  map = linuxKeyMap_xt ## ESCAPE; \
-  code = XT_KEY_ ## ESCAPE ## _ ## CODE; \
-  escape = XT_MOD_ ## ESCAPE; \
-  break;
-
-  switch (key & SCR_KEY_CHAR_MASK) {
-    KEY_TO_XT(SCR_KEY_ESCAPE, 00, Escape)
-    KEY_TO_XT(SCR_KEY_F1, 00, F1)
-    KEY_TO_XT(SCR_KEY_F2, 00, F2)
-    KEY_TO_XT(SCR_KEY_F3, 00, F3)
-    KEY_TO_XT(SCR_KEY_F4, 00, F4)
-    KEY_TO_XT(SCR_KEY_F5, 00, F5)
-    KEY_TO_XT(SCR_KEY_F6, 00, F6)
-    KEY_TO_XT(SCR_KEY_F7, 00, F7)
-    KEY_TO_XT(SCR_KEY_F8, 00, F8)
-    KEY_TO_XT(SCR_KEY_F9, 00, F9)
-    KEY_TO_XT(SCR_KEY_F10, 00, F10)
-    KEY_TO_XT(SCR_KEY_F11, 00, F11)
-    KEY_TO_XT(SCR_KEY_F12, 00, F12)
-
-    KEY_TO_XT(SCR_KEY_F13, 00, F13)
-    KEY_TO_XT(SCR_KEY_F14, 00, F14)
-    KEY_TO_XT(SCR_KEY_F15, 00, F15)
-    KEY_TO_XT(SCR_KEY_F16, 00, F16)
-    KEY_TO_XT(SCR_KEY_F17, 00, F17)
-    KEY_TO_XT(SCR_KEY_F18, 00, F18)
-    KEY_TO_XT(SCR_KEY_F19, 00, F19)
-    KEY_TO_XT(SCR_KEY_F20, 00, F20)
-    KEY_TO_XT(SCR_KEY_F21, 00, F21)
-    KEY_TO_XT(SCR_KEY_F22, 00, F22)
-    KEY_TO_XT(SCR_KEY_F23, 00, F23)
-    KEY_TO_XT(SCR_KEY_F24, 00, F24)
-
-    KEY_TO_XT('`', 00, Grave)
-    KEY_TO_XT('1', 00, 1)
-    KEY_TO_XT('2', 00, 2)
-    KEY_TO_XT('3', 00, 3)
-    KEY_TO_XT('4', 00, 4)
-    KEY_TO_XT('5', 00, 5)
-    KEY_TO_XT('6', 00, 6)
-    KEY_TO_XT('7', 00, 7)
-    KEY_TO_XT('8', 00, 8)
-    KEY_TO_XT('9', 00, 9)
-    KEY_TO_XT('0', 00, 0)
-    KEY_TO_XT('-', 00, Minus)
-    KEY_TO_XT('=', 00, Equal)
-    KEY_TO_XT(SCR_KEY_BACKSPACE, 00, Backspace)
-
-    KEY_TO_XT(SCR_KEY_TAB, 00, Tab)
-    KEY_TO_XT('q', 00, Q)
-    KEY_TO_XT('w', 00, W)
-    KEY_TO_XT('e', 00, E)
-    KEY_TO_XT('r', 00, R)
-    KEY_TO_XT('t', 00, T)
-    KEY_TO_XT('y', 00, Y)
-    KEY_TO_XT('u', 00, U)
-    KEY_TO_XT('i', 00, I)
-    KEY_TO_XT('o', 00, O)
-    KEY_TO_XT('p', 00, P)
-    KEY_TO_XT('[', 00, LeftBracket)
-    KEY_TO_XT(']', 00, RightBracket)
-    KEY_TO_XT('\\', 00, Backslash)
-
-    KEY_TO_XT('a', 00, A)
-    KEY_TO_XT('s', 00, S)
-    KEY_TO_XT('d', 00, D)
-    KEY_TO_XT('f', 00, F)
-    KEY_TO_XT('g', 00, G)
-    KEY_TO_XT('h', 00, H)
-    KEY_TO_XT('j', 00, J)
-    KEY_TO_XT('k', 00, K)
-    KEY_TO_XT('l', 00, L)
-    KEY_TO_XT(';', 00, Semicolon)
-    KEY_TO_XT('\'', 00, Apostrophe)
-    KEY_TO_XT(SCR_KEY_ENTER, 00, Enter)
-
-    KEY_TO_XT('z', 00, Z)
-    KEY_TO_XT('x', 00, X)
-    KEY_TO_XT('c', 00, C)
-    KEY_TO_XT('v', 00, V)
-    KEY_TO_XT('b', 00, B)
-    KEY_TO_XT('n', 00, N)
-    KEY_TO_XT('m', 00, M)
-    KEY_TO_XT(',', 00, Comma)
-    KEY_TO_XT('.', 00, Period)
-    KEY_TO_XT('/', 00, Slash)
-
-    KEY_TO_XT(' ', 00, Space)
-
-    KEY_TO_XT(SCR_KEY_INSERT, E0, Insert)
-    KEY_TO_XT(SCR_KEY_DELETE, E0, Delete)
-    KEY_TO_XT(SCR_KEY_HOME, E0, Home)
-    KEY_TO_XT(SCR_KEY_END, E0, End)
-    KEY_TO_XT(SCR_KEY_PAGE_UP, E0, PageUp)
-    KEY_TO_XT(SCR_KEY_PAGE_DOWN, E0, PageDown)
-
-    KEY_TO_XT(SCR_KEY_CURSOR_UP, E0, ArrowUp)
-    KEY_TO_XT(SCR_KEY_CURSOR_LEFT, E0, ArrowLeft)
-    KEY_TO_XT(SCR_KEY_CURSOR_DOWN, E0, ArrowDown)
-    KEY_TO_XT(SCR_KEY_CURSOR_RIGHT, E0, ArrowRight)
-
-    default:
-      logMessage(LOG_WARNING, "key not supported in raw keyboard mode: %04X", key);
-      return 0;
-  }
-#undef KEY_TO_XT
-
-  {
-    const int modUpper = hasModUpper(key);
-    const int modShift = hasModShift(key);
-    const int modControl = hasModControl(key);
-    const int modAltLeft = hasModAltLeft(key);
-    const int modAltRight = hasModAltRight(key);
-    const int modGui = hasModGui(key);
-
-    if (raw) {
-      char codes[22];
-      unsigned int count = 0;
-
-      if (modUpper) {
-        codes[count++] = XT_KEY_00_CapsLock;
-        codes[count++] = XT_KEY_00_CapsLock | XT_BIT_RELEASE;
-      }
-
-      if (modShift) codes[count++] = XT_KEY_00_LeftShift;
-      if (modControl) codes[count++] = XT_KEY_00_LeftControl;
-      if (modAltLeft) codes[count++] = XT_KEY_00_LeftAlt;
-
-      if (modAltRight) {
-        codes[count++] = XT_MOD_E0;
-        codes[count++] = XT_KEY_E0_RightAlt;
-      }
-
-      if (modGui) {
-        codes[count++] = XT_MOD_E0;
-        codes[count++] = XT_KEY_E0_LeftGUI;
-      }
-
-      if (escape) codes[count++] = escape;
-      codes[count++] = code;
-
-      if (escape) codes[count++] = escape;
-      codes[count++] = code | XT_BIT_RELEASE;
-
-      if (modGui) {
-        codes[count++] = XT_MOD_E0;
-        codes[count++] = XT_KEY_E0_LeftGUI | XT_BIT_RELEASE;
-      }
-
-      if (modAltRight) {
-        codes[count++] = XT_MOD_E0;
-        codes[count++] = XT_KEY_E0_RightAlt | XT_BIT_RELEASE;
-      }
-
-      if (modAltLeft) codes[count++] = XT_KEY_00_LeftAlt | XT_BIT_RELEASE;
-      if (modControl) codes[count++] = XT_KEY_00_LeftControl | XT_BIT_RELEASE;
-      if (modShift) codes[count++] = XT_KEY_00_LeftShift | XT_BIT_RELEASE;
-
-      if (modUpper) {
-        codes[count++] = XT_KEY_00_CapsLock;
-        codes[count++] = XT_KEY_00_CapsLock | XT_BIT_RELEASE;
-      }
-
-      return insertBytes(codes, count);
-    } else {
-      LinuxKeyCode mapped = map[code];
-
-      if (!mapped) {
-        logMessage(LOG_WARNING, "key not supported in medium raw keyboard mode: %04X", key);
-        return 0;
-      }
-
-      return insertUinput(mapped, modUpper, modShift, modControl, modAltLeft, modAltRight);
-    }
-  }
-}
-
-static int
 insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
+  if (hasModAltLeft(key) || hasModAltRight(key) || hasModGui(key)) {
+    return insertKeyCode(key, 0);
+  }
+
   wchar_t buffer[2];
   const wchar_t *sequence;
   const wchar_t *end;
@@ -2196,7 +2216,7 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
         break;
 
       default:
-        if (insertCode(key, 0)) return 1;
+        if (insertKeyCode(key, 0)) return 1;
         logMessage(LOG_WARNING, "key not supported in xlate keyboard mode: %04X", key);
         return 0;
     }
@@ -2252,11 +2272,11 @@ insertKey_LinuxScreen (ScreenKey key) {
   if (controlCurrentConsole(KDGKBMODE, &mode) != -1) {
     switch (mode) {
       case K_RAW:
-        if (insertCode(key, 1)) ok = 1;
+        if (insertKeyCode(key, 1)) ok = 1;
         break;
 
       case K_MEDIUMRAW:
-        if (insertCode(key, 0)) ok = 1;
+        if (insertKeyCode(key, 0)) ok = 1;
         break;
 
       case K_XLATE:
@@ -2407,7 +2427,7 @@ handleCommand_LinuxScreen (int command) {
 
             xtKeys = linuxKeyMap_xt00;
 
-            if (key) return injectKeyEvent(key, press);
+            if (key) return injectKeyboardEvent(key, press);
 	  }
           break;
 
@@ -2444,7 +2464,7 @@ handleCommand_LinuxScreen (int command) {
             atKeys = linuxKeyMap_at00;
             atKeyPressed = 1;
 
-            if (key) return injectKeyEvent(key, press);
+            if (key) return injectKeyboardEvent(key, press);
           }
           break;
 
@@ -2468,7 +2488,7 @@ handleCommand_LinuxScreen (int command) {
 
             ps2KeyPressed = 1;
 
-            if (key) return injectKeyEvent(key, press);
+            if (key) return injectKeyboardEvent(key, press);
           }
           break;
 
