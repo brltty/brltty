@@ -4104,6 +4104,11 @@ static int initializeAcceptedKeys(Connection *c, int how)
           .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSDOTS
         },
 
+        { .action = removeKeyrange,
+          .type = brlapi_rangeType_command,
+          .code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_GUI_APP_LIST
+        },
+
         { .action = NULL }
       };
 

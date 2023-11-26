@@ -2397,6 +2397,9 @@ handleCommand_LinuxScreen (int command) {
   int cmd = blk | arg;
 
   switch (cmd) {
+    case BRL_CMD_GUI_APP_LIST:
+      return insertLinuxKey(0, SCR_KEY_GUI);
+
     default:
 #ifdef HAVE_LINUX_INPUT_H
       switch (blk) {
