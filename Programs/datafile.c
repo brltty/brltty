@@ -1037,7 +1037,8 @@ DATA_OPERANDS_PROCESSOR(processListVariablesOperands) {
 }
 
 static int
-processVariableAssignmentOperands (DataFile *file, int ifNotSet, void *data) {
+processVariableAssignmentOperands (DataFile *file, int global, int ifNotSet, void *data) {
+  VariableNestingLevel *vnl = global? getGlobalVariables(0): currentDataVariables;
   DataOperand name;
 
   if (getDataOperand(file, &name, "variable name")) {
@@ -1048,13 +1049,12 @@ processVariableAssignmentOperands (DataFile *file, int ifNotSet, void *data) {
     }
 
     if (ifNotSet) {
-      const Variable *variable = findReadableVariable(currentDataVariables, name.characters, name.length);
-
+      const Variable *variable = findReadableVariable(vnl, name.characters, name.length);
       if (variable) return 1;
     }
 
     {
-      Variable *variable = findWritableVariable(currentDataVariables, name.characters, name.length);
+      Variable *variable = findWritableVariable(vnl, name.characters, name.length);
 
       if (variable) {
         if (setVariable(variable, value.characters, value.length)) return 1;
@@ -1065,12 +1065,16 @@ processVariableAssignmentOperands (DataFile *file, int ifNotSet, void *data) {
   return 1;
 }
 
-DATA_OPERANDS_PROCESSOR(processAssignDefaultOperands) {
-  return processVariableAssignmentOperands(file, 1, data);
+DATA_OPERANDS_PROCESSOR(processAssignOperands) {
+  return processVariableAssignmentOperands(file, 0, 0, data);
 }
 
-DATA_OPERANDS_PROCESSOR(processAssignOperands) {
-  return processVariableAssignmentOperands(file, 0, data);
+DATA_OPERANDS_PROCESSOR(processAssignDefaultOperands) {
+  return processVariableAssignmentOperands(file, 0, 1, data);
+}
+
+DATA_OPERANDS_PROCESSOR(processAssignGlobalOperands) {
+  return processVariableAssignmentOperands(file, 1, 0, data);
 }
 
 DATA_OPERANDS_PROCESSOR(processElseOperands) {

@@ -51,6 +51,27 @@ Examples::
 
    assignDefault format plain\stext
 
+The AssignGlobal Directive
+--------------------------
+
+.. parsed-literal:: assignGlobal *variable* *value*
+
+Use this directive to create or update a variable associated with
+the global level. The variable is visible to all include levels.
+See `The Assign Directive`_ for more details.
+
+*variable*
+   The name of the variable. If the variable doesn't already exist at the
+   global level then it is created.
+
+*value*
+   The value that is to be assigned to the variable. If it's not supplied then
+   a zero-length (null) value is assigned.
+
+Examples::
+
+   assignGlobal packageName BRLTTY
+
 The IfVar Directive
 -------------------
 

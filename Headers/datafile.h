@@ -175,8 +175,9 @@ extern DATA_OPERANDS_PROCESSOR(processIfNotVarOperands);
 extern DATA_OPERANDS_PROCESSOR(processBeginVariablesOperands);
 extern DATA_OPERANDS_PROCESSOR(processEndVariablesOperands);
 extern DATA_OPERANDS_PROCESSOR(processListVariablesOperands);
-extern DATA_OPERANDS_PROCESSOR(processAssignDefaultOperands);
 extern DATA_OPERANDS_PROCESSOR(processAssignOperands);
+extern DATA_OPERANDS_PROCESSOR(processAssignDefaultOperands);
+extern DATA_OPERANDS_PROCESSOR(processAssignGlobalOperands);
 
 #define DATA_VARIABLE_DIRECTIVES \
   {.name=WS_C("ifvar"), .processor=processIfVarOperands, .unconditional=1}, \
@@ -184,8 +185,9 @@ extern DATA_OPERANDS_PROCESSOR(processAssignOperands);
   {.name=WS_C("beginvariables"), .processor=processBeginVariablesOperands}, \
   {.name=WS_C("endvariables"), .processor=processEndVariablesOperands}, \
   {.name=WS_C("listvariables"), .processor=processListVariablesOperands}, \
+  {.name=WS_C("assign"), .processor=processAssignOperands}, \
   {.name=WS_C("assigndefault"), .processor=processAssignDefaultOperands}, \
-  {.name=WS_C("assign"), .processor=processAssignOperands}
+  {.name=WS_C("assignglobal"), .processor=processAssignGlobalOperands}
 
 #define BRL_DOT_COUNT 8
 extern const wchar_t brlDotNumbers[BRL_DOT_COUNT];
