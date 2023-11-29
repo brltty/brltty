@@ -291,7 +291,9 @@ static KeyboardMonitorObject *keyboardMonitor = NULL;
 static char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
 
-static int opt_guiKeyboard;
+static int opt_guiKeyboardEnabled;
+static char *opt_guiKeyboardTable;
+static KeyTable *guiKeyboardTable = NULL;
 
 #ifdef ENABLE_API
 static int opt_noApi;
@@ -549,11 +551,20 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Properties of eligible keyboards.")
   },
 
-  { .word = "gui-keyboard",
+  { .word = "gui-keyboard-enabled",
     .letter = 'g',
     .flags = OPT_Config | OPT_EnvVar,
-    .setting.flag = &opt_guiKeyboard,
+    .setting.flag = &opt_guiKeyboardEnabled,
     .description = strtext("Handle keyboard key events when using a Linux tty in graphics mode.")
+  },
+
+  { .word = "gui-keyboard-table",
+    .letter = 'G',
+    .flags = OPT_Config | OPT_EnvVar,
+    .argument = strtext("file"),
+    .setting.string = &opt_guiKeyboardTable,
+    .internal.setting = optionOperand_off,
+    .description = strtext("Name of or path to GUI keyboard table.")
   },
 
   { .word = "preferences-file",
@@ -1080,8 +1091,14 @@ setAttributesTable (void) {
 
 static KeyTableState
 handleKeyboardEvent (KeyGroup group, KeyNumber number, int press) {
+  int gui = !!scr.unreadable;
+
+  if (gui && guiKeyboardTable) {
+    return processKeyEvent(guiKeyboardTable, getCurrentCommandContext(), group, number, press);
+  }
+
   if (keyboardTable) {
-    if (!scr.unreadable || opt_guiKeyboard) {
+    if (!gui || opt_guiKeyboardEnabled) {
       return processKeyEvent(keyboardTable, getCurrentCommandContext(), group, number, press);
     }
 
@@ -1299,7 +1316,7 @@ changeKeyboardTable (const char *name) {
       logMessage(LOG_DEBUG, "compiling keyboard table: %s", path);
 
       if (!(table = compileKeyTable(path, KEY_NAME_TABLES(keyboard)))) {
-        logMessage(LOG_ERR, "%s: %s", gettext("cannot compile keyboard table"), path);
+        logMessage(LOG_ERR, "cannot compile keyboard table: %s", path);
       }
 
       free(path);
@@ -1338,6 +1355,61 @@ setKeyboardTable (void) {
   onProgramExit("keyboard-table", exitKeyboardTable, NULL);
   changeKeyboardTable(opt_keyboardTable);
   logProperty(opt_keyboardTable, "keyboardTable", "Keyboard Table");
+}
+
+static void
+exitGuiKeyboardTable (void *data) {
+  if (guiKeyboardTable) {
+    destroyKeyTable(guiKeyboardTable);
+    guiKeyboardTable = NULL;
+  }
+}
+
+int
+changeGuiKeyboardTable (const char *name) {
+  KeyTable *table = NULL;
+
+  if (!*name) name = "";
+  if (strcmp(name, optionOperand_off) == 0) name = "";
+
+  if (*name) {
+    char *path = makeKeyboardTablePath(opt_tablesDirectory, name);
+
+    if (path) {
+      logMessage(LOG_DEBUG, "compiling GUI keyboard table: %s", path);
+
+      if (!(table = compileKeyTable(path, KEY_NAME_TABLES(keyboard)))) {
+        logMessage(LOG_ERR, "cannot compile GUI keyboard table: %s", path);
+      }
+
+      free(path);
+    }
+
+    if (!table) return 0;
+  }
+
+  if (guiKeyboardTable) {
+    destroyKeyTable(guiKeyboardTable);
+    guiKeyboardTable = NULL;
+  }
+
+  if (table) {
+    setKeyTableLogLabel(table, "gkb");
+    setLogKeyEventsFlag(table, &LOG_CATEGORY_FLAG(KEYBOARD_KEYS));
+    guiKeyboardTable = table;
+  }
+
+  if (!*name) name = optionOperand_off;
+  logMessage(LOG_DEBUG, "GUI keyboard table changed: %s -> %s", opt_guiKeyboardTable, name);
+  changeStringSetting(&opt_guiKeyboardTable, name);
+  return 1;
+}
+
+static void
+setGuiKeyboardTable (void) {
+  onProgramExit("gui-keyboard-table", exitGuiKeyboardTable, NULL);
+  changeGuiKeyboardTable(opt_guiKeyboardTable);
+  logProperty(opt_guiKeyboardTable, "guiKeyboardTable", "GUI Keyboard Table");
 }
 
 int
@@ -3014,6 +3086,7 @@ brlttyStart (void) {
   setTextAndContractionTables();
   setAttributesTable();
   setKeyboardTable();
+  setGuiKeyboardTable();
 
   /* initialize screen driver */
   if (opt_verify) {
