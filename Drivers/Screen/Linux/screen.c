@@ -2289,7 +2289,7 @@ insertKey_LinuxScreen (ScreenKey key) {
 
 #ifdef K_OFF
       case K_OFF:
-        ok = 1;
+        if (insertKeyCode(key, 0)) ok = 1;
         break;
 #endif /* K_OFF */
 
