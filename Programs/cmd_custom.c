@@ -44,3 +44,8 @@ addCustomCommands (void) {
   return pushCommandHandler("custom", KTB_CTX_DEFAULT,
                             handleCustomCommands, NULL, NULL);
 }
+
+int
+apiEligibleCommand (int command) {
+  return 1;
+}

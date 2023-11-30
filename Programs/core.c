@@ -257,6 +257,7 @@ handleUnhandledCommands (int command, void *data) {
 
 static int
 handleApiCommands (int command, void *data) {
+  if (!apiEligibleCommand(command)) return 0;
   return api.handleCommand(command);
 }
 

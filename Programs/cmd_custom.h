@@ -25,6 +25,8 @@ extern "C" {
 
 extern int addCustomCommands (void);
 
+extern int apiEligibleCommand (int command);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
