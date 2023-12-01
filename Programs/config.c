@@ -1094,10 +1094,13 @@ handleKeyboardEvent (KeyGroup group, KeyNumber number, int press) {
   int gui = !!scr.unreadable;
 
   if (gui && guiKeyboardTable) {
+    if (keyboardTable) resetKeyTable(keyboardTable);
     return processKeyEvent(guiKeyboardTable, getCurrentCommandContext(), group, number, press);
   }
 
   if (keyboardTable) {
+    if (guiKeyboardTable) resetKeyTable(guiKeyboardTable);
+
     if (!gui || opt_guiKeyboardEnabled) {
       return processKeyEvent(keyboardTable, getCurrentCommandContext(), group, number, press);
     }
