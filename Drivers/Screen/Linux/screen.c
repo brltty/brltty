@@ -1759,6 +1759,11 @@ hasModGui (ScreenKey modifiers) {
   return !!(modifiers & SCR_KEY_GUI);
 }
 
+static inline int
+hasModCapslock (ScreenKey modifiers) {
+  return !!(modifiers & SCR_KEY_CAPSLOCK);
+}
+
 static int
 insertLinuxKey (LinuxKeyCode code, ScreenKey modifiers) {
 #ifdef HAVE_LINUX_INPUT_H
@@ -1768,6 +1773,7 @@ insertLinuxKey (LinuxKeyCode code, ScreenKey modifiers) {
   const int modAltLeft = hasModAltLeft(modifiers);
   const int modAltRight = hasModAltRight(modifiers);
   const int modGui = hasModGui(modifiers);
+  const int modCapslock = hasModCapslock(modifiers);
 
 #define KEY_EVENT(KEY, PRESS) { if (!injectKeyboardEvent((KEY), (PRESS))) return 0; }
   if (modUpper) {
@@ -1775,6 +1781,7 @@ insertLinuxKey (LinuxKeyCode code, ScreenKey modifiers) {
     KEY_EVENT(KEY_CAPSLOCK, 0);
   }
 
+  if (modCapslock) KEY_EVENT(KEY_CAPSLOCK, 1);
   if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 1);
   if (modControl) KEY_EVENT(KEY_LEFTCTRL, 1);
   if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 1);
@@ -1791,6 +1798,7 @@ insertLinuxKey (LinuxKeyCode code, ScreenKey modifiers) {
   if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 0);
   if (modControl) KEY_EVENT(KEY_LEFTCTRL, 0);
   if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 0);
+  if (modCapslock) KEY_EVENT(KEY_CAPSLOCK, 0);
 
   if (modUpper) {
     KEY_EVENT(KEY_CAPSLOCK, 1);
@@ -1970,8 +1978,9 @@ insertKeyCode (ScreenKey screenKey, int raw) {
     const int modAltLeft = hasModAltLeft(screenKey);
     const int modAltRight = hasModAltRight(screenKey);
     const int modGui = hasModGui(screenKey);
+    const int modCapslock = hasModCapslock(screenKey);
 
-    char codes[22];
+    char codes[24];
     unsigned int count = 0;
 
     if (modUpper) {
@@ -1979,6 +1988,7 @@ insertKeyCode (ScreenKey screenKey, int raw) {
       codes[count++] = XT_KEY_00_CapsLock | XT_BIT_RELEASE;
     }
 
+    if (modCapslock) codes[count++] = XT_KEY_00_CapsLock;
     if (modShift) codes[count++] = XT_KEY_00_LeftShift;
     if (modControl) codes[count++] = XT_KEY_00_LeftControl;
     if (modAltLeft) codes[count++] = XT_KEY_00_LeftAlt;
@@ -2012,6 +2022,7 @@ insertKeyCode (ScreenKey screenKey, int raw) {
     if (modAltLeft) codes[count++] = XT_KEY_00_LeftAlt | XT_BIT_RELEASE;
     if (modControl) codes[count++] = XT_KEY_00_LeftControl | XT_BIT_RELEASE;
     if (modShift) codes[count++] = XT_KEY_00_LeftShift | XT_BIT_RELEASE;
+    if (modCapslock) codes[count++] = XT_KEY_00_CapsLock | XT_BIT_RELEASE;
 
     if (modUpper) {
       codes[count++] = XT_KEY_00_CapsLock;
@@ -2067,7 +2078,7 @@ insertUnicode (wchar_t character) {
 
 static int
 insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
-  if (hasModAltLeft(key) || hasModAltRight(key) || hasModGui(key)) {
+  if (hasModAltLeft(key) || hasModAltRight(key) || hasModGui(key) | hasModCapslock(key)) {
     return insertKeyCode(key, 0);
   }
 

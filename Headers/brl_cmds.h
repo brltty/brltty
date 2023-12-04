@@ -356,13 +356,14 @@ typedef enum {
 #define BRL_FLG_MOTION_SCALED 0X080000 /* scale arg=0X00-0XFF to screen height */
 #define BRL_FLG_MOTION_TOLEFT 0X100000 /* go to beginning of line */
 
-#define BRL_FLG_INPUT_SHIFT   0X010000 /* shift key pressed */
-#define BRL_FLG_INPUT_UPPER   0X020000 /* convert to uppercase */
-#define BRL_FLG_INPUT_CONTROL 0X040000 /* control key pressed */
-#define BRL_FLG_INPUT_META    0X080000 /* meta (left alt) key pressed */
-#define BRL_FLG_INPUT_ALTGR   0X100000 /* altgr (right alt) key pressed */
-#define BRL_FLG_INPUT_GUI     0X200000 /* gui (windows) key pressed */
-#define BRL_FLG_INPUT_ESCAPED 0X400000 /* prefix with escape */
+#define BRL_FLG_INPUT_SHIFT    0X010000 /* shift key pressed */
+#define BRL_FLG_INPUT_UPPER    0X020000 /* convert to uppercase */
+#define BRL_FLG_INPUT_CONTROL  0X040000 /* control key pressed */
+#define BRL_FLG_INPUT_META     0X080000 /* meta (left alt) key pressed */
+#define BRL_FLG_INPUT_ALTGR    0X100000 /* altgr (right alt) key pressed */
+#define BRL_FLG_INPUT_GUI      0X200000 /* gui (windows) key pressed */
+#define BRL_FLG_INPUT_ESCAPED  0X400000 /* prefix with escape */
+#define BRL_FLG_INPUT_CAPSLOCK 0X800000 /* capslock key pressed */
 
 #define BRL_FLG_KBD_RELEASE 0X010000 /* it is a release scan code */
 #define BRL_FLG_KBD_EMUL0   0X020000 /* it is an emulation 0 scan code */
