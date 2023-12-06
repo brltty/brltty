@@ -1699,7 +1699,7 @@ insertKey_AtSpi2Screen (ScreenKey key) {
   if (isSpecialKey(key)) {
     switch (key & SCR_KEY_CHAR_MASK) {
 #ifdef HAVE_X11_KEYSYM_H
-      case SCR_KEY_ENTER:         keysym = XK_KP_Enter;  break;
+      case SCR_KEY_ENTER:         keysym = XK_Return;    break;
       case SCR_KEY_TAB:           keysym = XK_Tab;       break;
       case SCR_KEY_BACKSPACE:     keysym = XK_BackSpace; break;
       case SCR_KEY_ESCAPE:        keysym = XK_Escape;    break;

@@ -629,7 +629,7 @@ insertKey_AtSpiScreen (ScreenKey key) {
 
   if (isSpecialKey(key)) {
     switch (key & SCR_KEY_CHAR_MASK) {
-      case SCR_KEY_ENTER:         keysym = XK_KP_Enter;  break;
+      case SCR_KEY_ENTER:         keysym = XK_Return;    break;
       case SCR_KEY_TAB:           keysym = XK_Tab;       break;
       case SCR_KEY_BACKSPACE:     keysym = XK_BackSpace; break;
       case SCR_KEY_ESCAPE:        keysym = XK_Escape;    break;
