@@ -46,6 +46,6 @@ addCustomCommands (void) {
 }
 
 int
-apiEligibleCommand (int command) {
-  return 1;
+isIneligibleApiCommand (int command) {
+  return 0;
 }
