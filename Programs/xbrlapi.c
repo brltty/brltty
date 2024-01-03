@@ -695,11 +695,13 @@ static int grabWindows(Window win,int level) {
 }
 
 static void writeStateToFile(const char *file, const char *state) {
-  FILE *stream = fopen(file, "w");
+  if (*file) {
+    FILE *stream = fopen(file, "w");
 
-  if (stream) {
-    fputs(state, stream);
-    fclose(stream);
+    if (stream) {
+      fputs(state, stream);
+      fclose(stream);
+    }
   }
 }
 
