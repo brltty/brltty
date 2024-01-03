@@ -2276,6 +2276,14 @@ insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
 }
 
 static int
+logKeyboardMode (const char *mode) {
+  return logMessage(
+    LOG_CATEGORY(SCREEN_DRIVER) | LOG_DEBUG,
+    "keyboard mode is %s", mode
+  );
+}
+
+static int
 insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
   int mode;
@@ -2283,23 +2291,28 @@ insertKey_LinuxScreen (ScreenKey key) {
   if (controlCurrentConsole(KDGKBMODE, &mode) != -1) {
     switch (mode) {
       case K_RAW:
+        logKeyboardMode("raw");
         if (insertKeyCode(key, 1)) ok = 1;
         break;
 
       case K_MEDIUMRAW:
+        logKeyboardMode("medium raw");
         if (insertKeyCode(key, 0)) ok = 1;
         break;
 
       case K_XLATE:
+        logKeyboardMode("translated");
         if (insertTranslated(key, insertXlate)) ok = 1;
         break;
 
       case K_UNICODE:
+        logKeyboardMode("unicode");
         if (insertTranslated(key, insertUnicode)) ok = 1;
         break;
 
 #ifdef K_OFF
       case K_OFF:
+        logKeyboardMode("off");
         if (insertKeyCode(key, 0)) ok = 1;
         break;
 #endif /* K_OFF */
