@@ -2078,10 +2078,6 @@ insertUnicode (wchar_t character) {
 
 static int
 insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
-  if (hasModAltLeft(key) || hasModAltRight(key) || hasModGui(key) | hasModCapslock(key)) {
-    return insertKeyCode(key, 0);
-  }
-
   wchar_t buffer[2];
   const wchar_t *sequence;
   const wchar_t *end;
