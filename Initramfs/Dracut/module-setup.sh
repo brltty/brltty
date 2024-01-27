@@ -21,6 +21,13 @@ installkernel() {
 
 # called by dracut
 install() {
+   local brlttyDataDirectory
+
+   for brlttyDataDirectory in /usr/share/brltty /etc/brltty
+   do
+      [ -d "${brlttyDataDirectory}" ] && break
+   done
+
    brlttyImportInstallOptions
    local -A includedDrivers
 
@@ -90,7 +97,7 @@ brlttyIncludeBrailleDrivers() {
    do
       brlttyIncludeDriver b "${code}" || continue
 
-      local directory="/etc/brltty/Input/${code}"
+      local directory="${brlttyDataDirectory}/Input/${code}"
       brlttyIncludeDataFiles "${directory}/"*.ktb
       inst_multiple -o "${directory}/"*.txt
    done
@@ -174,7 +181,7 @@ brlttyIncludeTables() {
 
    for name
    do
-      brlttyIncludeDataFiles "/etc/brltty/${subdirectory}/${name}.${extension}"
+      brlttyIncludeDataFiles "${brlttyDataDirectory}/${subdirectory}/${name}.${extension}"
    done
 }
 
