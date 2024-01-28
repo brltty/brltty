@@ -302,6 +302,7 @@ USB_DEVICE_ENTRY(0X0F4E, 0X0114, "fs"),
 // Generic Identifier
 // Vendor: Cygnal Integrated Products, Inc.
 // Product: CP210x UART Bridge / myAVR mySmartUSB light
+// BrailleMemo [Next Touch 40]
 // BrailleMemo [Pocket]
 // Seika [Braille Display]
 USB_DEVICE_ENTRY(0X10C4, 0XEA60, "mm", "sk"),

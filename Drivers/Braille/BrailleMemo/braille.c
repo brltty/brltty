@@ -296,6 +296,16 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .manufacturers = usbManufacturers_10C4_EA60,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
+      .verifyInterface=1,
+      .serial=&serialParameters
+    },
+
+    { /* Next Touch 40 */
+      .vendor=0X10C4, .product=0XEA60,
+      .manufacturers = usbManufacturers_10C4_EA60,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=2,
+      .verifyInterface=1,
       .serial=&serialParameters
     },
 
