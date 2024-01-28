@@ -159,7 +159,7 @@ The following braille displays are supported:
          VarioConnect 12/24/32/40/64/80, VarioPro 40/64/80, VarioUltra 20/32/40]
 -  BrailComm [III]
 -  BrailleLite [18/40/M20/M40]
--  BrailleMemo [Pocket (16), Smart (16), 32, 40]
+-  BrailleMemo [Pocket, Smart, Next Touch]
 -  BrailleNote [18/32, Apex]
 -  Braudi
 -  BrlAPI

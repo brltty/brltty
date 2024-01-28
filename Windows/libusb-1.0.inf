@@ -240,7 +240,7 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-1.0: BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-1.0: BrailleMemo [Next Touch 40], BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
@@ -641,7 +641,7 @@ HKR,,Icon,,-20
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-1.0: BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-1.0: BrailleMemo [Next Touch 40], BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier

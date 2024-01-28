@@ -116,12 +116,21 @@ BEGIN_KEY_NAME_TABLES(smart)
   KEY_NAME_TABLE(display),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(nt)
+  KEY_NAME_TABLE(shift),
+  KEY_NAME_TABLE(arrow),
+  KEY_NAME_TABLE(route),
+  KEY_NAME_TABLE(display),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(pocket)
 DEFINE_KEY_TABLE(smart)
+DEFINE_KEY_TABLE(nt)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(pocket),
   &KEY_TABLE_DEFINITION(smart),
+  &KEY_TABLE_DEFINITION(nt),
 END_KEY_TABLE_LIST
 
 typedef struct {
@@ -142,9 +151,16 @@ static const ModelEntry modelEntry_smart = {
   .keyTableDefinition = &KEY_TABLE_DEFINITION(smart)
 };
 
+static const ModelEntry modelEntry_nextTouch = {
+  .identityPrefix = "BM_disp",
+  .modelName = "Next Touch",
+  .keyTableDefinition = &KEY_TABLE_DEFINITION(nt)
+};
+
 static const ModelEntry *const modelEntries[] = {
   &modelEntry_pocket,
   &modelEntry_smart,
+  &modelEntry_nextTouch,
   NULL
 };
 
@@ -296,6 +312,16 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .manufacturers = usbManufacturers_10C4_EA60,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
+      .verifyInterface=1,
+      .serial=&serialParameters
+    },
+
+    { /* Next Touch 40 */
+      .vendor=0X10C4, .product=0XEA60,
+      .manufacturers = usbManufacturers_10C4_EA60,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=2,
+      .verifyInterface=1,
       .serial=&serialParameters
     },
 
@@ -315,6 +341,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
   descriptor.bluetooth.channelNumber = 1;
+  descriptor.bluetooth.discoverChannel = 1;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     return 1;
@@ -361,7 +388,8 @@ verifyIdentityResponse (
   switch (size) {
     case 1:
       switch (byte) {
-        case 0X01:
+        case 0X01: // sent by the Pocket and Smart models
+        case 0X02: // sent by the Next Touch models
           *length = sizeof(MM_IdentityPacket);
           break;
 

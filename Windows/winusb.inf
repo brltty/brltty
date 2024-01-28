@@ -225,7 +225,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"winusb: BrailleMemo [Pocket], Seika [Braille Display]"=USB_Install, USB\VID_10C4&PID_EA60
+"winusb: BrailleMemo [Next Touch 40], BrailleMemo [Pocket], Seika [Braille Display]"=USB_Install, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
@@ -626,7 +626,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"winusb: BrailleMemo [Pocket], Seika [Braille Display]"=USB_Install, USB\VID_10C4&PID_EA60
+"winusb: BrailleMemo [Next Touch 40], BrailleMemo [Pocket], Seika [Braille Display]"=USB_Install, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier

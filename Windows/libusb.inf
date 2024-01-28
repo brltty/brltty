@@ -315,7 +315,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-Win32: BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-Win32: BrailleMemo [Next Touch 40], BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier
@@ -716,7 +716,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Generic Identifier
 ; Vendor: Cygnal Integrated Products, Inc.
 ; Product: CP210x UART Bridge / myAVR mySmartUSB light
-"LibUSB-Win32: BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+"LibUSB-Win32: BrailleMemo [Next Touch 40], BrailleMemo [Pocket], Seika [Braille Display]"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 ; Device: 10C4:EA80
 ; Generic Identifier

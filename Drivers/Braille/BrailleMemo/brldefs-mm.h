@@ -20,9 +20,12 @@
 #define BRLTTY_INCLUDED_MM_BRLDEFS
 
 typedef enum {
-  MM_DEV_Pocket  = 0X02,
-  MM_DEV_Smart16 = 0X11,
-  MM_DEV_Smart40 = 0X12,
+  MM_DEV_Pocket      = 0X02,
+  MM_DEV_Smart16     = 0X11,
+  MM_DEV_Smart40     = 0X12,
+  MM_DEV_Air16       = 0X13,
+  MM_DEV_Air32       = 0X14,
+  MM_DEV_NextTouch40 = 0X21,
 } MM_DeviceIdentifier;
 
 typedef struct {

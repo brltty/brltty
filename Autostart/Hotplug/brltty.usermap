@@ -293,6 +293,7 @@ brltty 0x0003 0x0f4e 0x0114
 # Generic Identifier
 # Vendor: Cygnal Integrated Products, Inc.
 # Product: CP210x UART Bridge / myAVR mySmartUSB light
+# BrailleMemo [Next Touch 40]
 # BrailleMemo [Pocket]
 # Seika [Braille Display]
 brltty 0x0003 0x10c4 0xea60

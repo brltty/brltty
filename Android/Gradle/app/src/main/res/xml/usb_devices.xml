@@ -278,6 +278,7 @@
   <!-- Generic Identifier -->
   <!-- Vendor: Cygnal Integrated Products, Inc. -->
   <!-- Product: CP210x UART Bridge / myAVR mySmartUSB light -->
+  <!-- BrailleMemo [Next Touch 40] -->
   <!-- BrailleMemo [Pocket] -->
   <!-- Seika [Braille Display] -->
   <usb-device vendor-id="4292" product-id="60000" />

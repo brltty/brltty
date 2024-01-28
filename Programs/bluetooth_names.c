@@ -83,6 +83,9 @@ const BluetoothNameEntry bluetoothNameTable[] = {
   // KGS: Braille Memo 32
   BLUETOOTH_NAME_ENTRY("BM32", "mm"),
 
+  // KGS: Next Touch
+  BLUETOOTH_NAME_ENTRY("BM-NextTouch", "mm"),
+
   // HumanWare: Braille Note Touch
   BLUETOOTH_NAME_ENTRY("BrailleNote Touch", "hw"),
 
