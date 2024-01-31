@@ -337,7 +337,9 @@ findNextParagraph (void) {
 
 static int
 handleCommand_FileViewerScreen (int command) {
-  switch (command) {
+  int hasControl = command & BRL_FLG_INPUT_CONTROL;
+
+  switch (command & BRL_MSK_CMD) {
     case BRL_CMD_KEY(ESCAPE):
       brlttyInterrupt(WAIT_STOP);
       return 1;
@@ -366,13 +368,36 @@ handleCommand_FileViewerScreen (int command) {
       findNextParagraph();
       return 1;
 
-    case BRL_CMD_KEY(HOME):
-      cursorOffset = 0;
-      return 1;
+    case BRL_CMD_KEY(HOME): {
+      if (hasControl) {
+        cursorOffset = 0;
+      } else {
+        moveCursor(-toScreenColumn(cursorOffset));
+      }
 
-    case BRL_CMD_KEY(END):
-      cursorOffset = toScreenOffset(lineCount-1, 0);
       return 1;
+    }
+
+    case BRL_CMD_KEY(END): {
+      if (hasControl) {
+        cursorOffset = toScreenOffset(lineCount-1, 0);
+      } else {
+        int row = toScreenRow(cursorOffset);
+        const LineDescriptor *line = &lineDescriptors[row];
+        cursorOffset = toScreenOffset(row, (line->length - 1));
+      }
+
+      return 1;
+    }
+
+    default: {
+      switch (command & BRL_MSK_BLK) {
+        case BRL_CMD_BLK(PASSDOTS):
+        case BRL_CMD_BLK(PASSCHAR):
+          alert(ALERT_COMMAND_REJECTED);
+          return 1;
+      }
+    }
   }
 
   return 0;
