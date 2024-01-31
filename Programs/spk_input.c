@@ -92,7 +92,7 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
       }
     }
 
-    const unsigned char *to = memchr(from, ASCII_ESC, (bufferEnd - from));
+    const unsigned char *to = memchr(from, ASCII_ESC, (bufferSize - (from - buffer)));
     if (!to) to = bufferEnd;
 
     size_t textLength = to - from;
