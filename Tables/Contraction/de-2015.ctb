@@ -22,6 +22,7 @@
 include de-g1.ctb
 
 class e e
+class f f
 class g g
 class h h
 class i i
@@ -371,6 +372,7 @@ word vertikal 1236-12456-2345-24-13-1-123 shouldn't use the ver-contraction
 
 # Nachsilbenkürzungen
 endword falls 124
+endword unfalls 256-124-12345-234
 midendword heit 125
 before s midword heits 125-234
 midendword keit 13
@@ -395,7 +397,7 @@ always industrienation 35-145-136-23456-1235-346-1345-5-1345
 before s midword ations 5-1345-234
 midendword ativ 5-1236
 #always religion 1235-13456-45-245
-endword ismus 5-24
+midendword ismus 5-24
 midendword istisch 5-156
 endword nismus 1345-5-24 shouldn't use the nis-contraction
 midendword nistisch 1345-5-156
@@ -875,7 +877,8 @@ always faell 5-124-12345
 always fertig 124-45
 always fest 124-15-23456 should use the st-contraction
 always film =
-always folgen 124-135-123-1245-14 shouldn't use the ge-contraction
+always folg 124-1245
+contraction fg
 always fragil =
 always fragment 124-1235-1-1245-134-14-2345
 always freund 124-145
@@ -1128,6 +1131,7 @@ always republik 1235-13
 contraction rk
 sufword rest 1235-15-23456 should use the st-contraction
 always richt 2-3456
+always spricht 234-1234-1235-3456-2345 shoudln't use the richt-contraction
 always rück 1235-46
 always rueck 1235-46
 
@@ -1291,7 +1295,7 @@ contraction zw
 
 # exceptions
 always aachen 1-1-1456-14 shouldn't use the ach-contraction
-always abbauf 1-12-12-16-124 Abbaufortschritt, Abbaufront
+before f always abbau 1-12-12-16 Abbaufortschritt, Abbaufront
 sufword abend 1-12-14-145
 always abenteuer 1-12-14-2345-126-12456
 always abenteurer 1-12-14-2345-126-1235-12456

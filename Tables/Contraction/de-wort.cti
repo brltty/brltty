@@ -18,6 +18,7 @@
 
 # BRLTTY Contraction Subtable - German (contracted)
 
+begword aal = shouldn't use the al-contraction
 always aldehyd 25-145-15-125-6-13456-145
 sufword alpha 25-1234-125-1
 always arhythm =
@@ -25,8 +26,13 @@ always arhythm =
 before hilmnrsu always aufnahme 2-16-1345-134-15
 prfword aufnahmen 2-16-1345-134-14
 
+always abballer 1-12-12-1-12345-12456 shouldn't use the aller-contraction
+always abbeiz 1-12-12-146-1356 shouldn't use the bei-contraction
+always abbettel 1-12-23-2345-2345-13456 shouldn't use the te-contraction
+always ableismus 1-12-123-15-5-24 shouldn't use the ei-contraction
 before e always ablöse =
 always absolvent 1-12-234-135-123-1236-14-2345
+always akkordeon 1-13-13-26-145-15-135-1345 Akkordeonist shouldn't use the nis-contraction
 begmidword anachron 235-1-1456-1235-135-1345
 always analyse 235-25-6-13456-234-15
 prfword analysen 235-25-6-13456-234-14
@@ -36,11 +42,14 @@ before konsonant always analysen 235-25-6-13456-234-14
 always arthrose 356-2345-125-1235-135-234-15
 prfword arthrosen 356-2345-125-1235-135-234-14
 always ägypten 345-1245-6-13456-1234-2345-14 shouldn't use the te-contraction
+always ämpter 345-134-2345-12456 shouldn't use the te-contraction
 always aegypten 345-1245-6-13456-1234-2345-14
+always audienz 16-145-24-14-1356 shouldn't use the ie-contraction
 always aufgaben 2-16-1245-1-12-14
 prfword bachelor 12-1-1456-13456-135-1235
 begmidword bachelor 12-1-1456-13456-26
 
+always bakteri 12-1-13-2345-12456-24 shouldn't use the te-contraction
 word beat =
 always beatbox =
 always beatmusik 12-15-1-2345-134-13
@@ -124,6 +133,7 @@ prfword getreides 12346-2345-1235-146-145-123456
 always gorgonzola 1245-26-1245-135-1345-1356-135-123-1
 sufword gottes 1245-135-2345-2345-123456
 always gottesdienst 1245-135-2345-2345-123456-145-346-1345-23456
+always glastrepp = shouldn't use the st-contraction
 always glucose =
 always glukose =
 before t always habich 125-1-12-3456
@@ -155,6 +165,7 @@ prfword karrieren 13-356-1235-24-12456-14
 always klasse 13-123-1-2346-15
 always klassen 13-123-1-2346-14
 always koriander 13-135-1235-24-235-145-12456
+always kriteri 13-1235-24-2345-12456-24 shouldn't use the te-contraction
 always kurzbein 13-1356-12-146-1345
 prfword kurzeit 13-136-1235-1356-146-2345
 prfword kurzeiten 13-136-1235-1356-146-2345-14
@@ -193,6 +204,7 @@ before s always mess 134-15-2346
 
 prfword mitte 134-24-2345-236
 prfword mitten 134-24-2345-2345-14
+always mittlung 134-24-2345-2345-123-136 shouldn't use the mit-contraction
 prfword moore =
 prfword mooren 134-135-135-1235-14
 prfword moores 134-135-135-1235-123456
@@ -225,6 +237,7 @@ prfword pressens 1234-1235-15-2346-14-234
 always pressentisch 1234-1235-15-2346-14-2345-24-156
 always rastalock 1235-1-23456-1-123-135-46
 before e always reise 1235-146-234-15
+always relief 1235-13456-24-15-124 shouldn't use the ie-contraction
 always requiem 1235-15-6-12345-24-12356
 
 before hilmnrsu always reserve 1235-123456-12456-1236-15
@@ -256,11 +269,13 @@ always schultragödie 156-136-123-2345-1235-1-1245-246-145-24-15
 always schultragödien 156-136-123-2345-1235-1-1245-246-145-24-14
 always schultrans 156-136-123-2345-1235-235-234 schultransport
 before hilmnrsu always see =
+before e always sohl = shouldn't use the so-contraction
 sufword solar 234-135-123-356
 prfword soße =
 prfword soßen 234-135-6-2346-14
 always sound =
 always soundso 2-1234-2-136-2-1234
+always speer = shouldn't use the er-contraction
 before e always speise 234-1234-146-234-15
 always tabasco =
 always teacher 2345-15-1-1456-12456
@@ -280,6 +295,7 @@ prfword tuberkulosen 2345-136-12-12456-13-136-123-135-234-14
 before lnr always tundra 2345-256-145-1235-1
 sufword ultra =
 always ungleich 256-1245-1456 shouldn't use the ung-contraction
+midendword ungsobjek 136-234-135-12-245-15-13 shouldn't use the so-contraction
 always vegetarier 1236-15-12346-2345-356-24-12456
 before l always vokal 1236-135-13-25
 always völkerkunde 5-1236-13-12456-13-256-145-15
@@ -359,3 +375,5 @@ always shampoo =
 always tattoo =
 always daewoo =
 always zoo =
+always zücht 1356-1256-1456-2345
+
