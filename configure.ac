@@ -1892,7 +1892,7 @@ in
       ;;
 esac
 
-BRLTTY_SCREEN_DRIVER([fv], [FileViewer])
+BRLTTY_SCREEN_DRIVER([fv], [FileViewer], [-ltinfo])
 
 all_brltty_pty=""
 install_brltty_pty=""

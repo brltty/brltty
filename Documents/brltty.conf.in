@@ -736,6 +736,7 @@
 
 # File Viewer Screen Driver Parameters
 #screen-parameters fv:File=path #
+#screen-parameters fv:show=no # [no,yes]
 
 # Linux Screen Driver Parameters
 #screen-parameters lx:Charset=name+... # []
