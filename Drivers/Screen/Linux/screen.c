@@ -1848,7 +1848,9 @@ typedef struct {
 } ScreenKeyEntry;
 
 static const ScreenKeyEntry *
-getScreenKeyEntry (ScreenKey key) {
+getScreenKeyEntry (ScreenKey key, unsigned char *shift) {
+  *shift = 0;
+
 #define SCREEN_KEY_ENTRY(KEY, ESCAPE, CODE) \
   case (KEY): { \
     static const ScreenKeyEntry screenKeyEntry = { \
@@ -1858,6 +1860,10 @@ getScreenKeyEntry (ScreenKey key) {
     }; \
     return &screenKeyEntry; \
   }
+
+#define SCREEN_KEY_SYMBOL(UNSHIFTED, SHIFTED, ESCAPE, CODE) \
+  case (SHIFTED): *shift = 1; \
+  SCREEN_KEY_ENTRY(UNSHIFTED, ESCAPE, CODE)
 
   switch (key & SCR_KEY_CHAR_MASK) {
     SCREEN_KEY_ENTRY(SCR_KEY_ESCAPE, 00, Escape)
@@ -1888,59 +1894,59 @@ getScreenKeyEntry (ScreenKey key) {
     SCREEN_KEY_ENTRY(SCR_KEY_F23, 00, F23)
     SCREEN_KEY_ENTRY(SCR_KEY_F24, 00, F24)
 
-    SCREEN_KEY_ENTRY('`', 00, Grave)
-    SCREEN_KEY_ENTRY('1', 00, 1)
-    SCREEN_KEY_ENTRY('2', 00, 2)
-    SCREEN_KEY_ENTRY('3', 00, 3)
-    SCREEN_KEY_ENTRY('4', 00, 4)
-    SCREEN_KEY_ENTRY('5', 00, 5)
-    SCREEN_KEY_ENTRY('6', 00, 6)
-    SCREEN_KEY_ENTRY('7', 00, 7)
-    SCREEN_KEY_ENTRY('8', 00, 8)
-    SCREEN_KEY_ENTRY('9', 00, 9)
-    SCREEN_KEY_ENTRY('0', 00, 0)
-    SCREEN_KEY_ENTRY('-', 00, Minus)
-    SCREEN_KEY_ENTRY('=', 00, Equal)
+    SCREEN_KEY_SYMBOL('`', '~', 00, Grave)
+    SCREEN_KEY_SYMBOL('1', '!', 00, 1)
+    SCREEN_KEY_SYMBOL('2', '@', 00, 2)
+    SCREEN_KEY_SYMBOL('3', '#', 00, 3)
+    SCREEN_KEY_SYMBOL('4', '$', 00, 4)
+    SCREEN_KEY_SYMBOL('5', '%', 00, 5)
+    SCREEN_KEY_SYMBOL('6', '^', 00, 6)
+    SCREEN_KEY_SYMBOL('7', '&', 00, 7)
+    SCREEN_KEY_SYMBOL('8', '*', 00, 8)
+    SCREEN_KEY_SYMBOL('9', '(', 00, 9)
+    SCREEN_KEY_SYMBOL('0', ')', 00, 0)
+    SCREEN_KEY_SYMBOL('-', '_', 00, Minus)
+    SCREEN_KEY_SYMBOL('=', '+', 00, Equal)
     SCREEN_KEY_ENTRY(SCR_KEY_BACKSPACE, 00, Backspace)
 
     SCREEN_KEY_ENTRY(SCR_KEY_TAB, 00, Tab)
-    SCREEN_KEY_ENTRY('q', 00, Q)
-    SCREEN_KEY_ENTRY('w', 00, W)
-    SCREEN_KEY_ENTRY('e', 00, E)
-    SCREEN_KEY_ENTRY('r', 00, R)
-    SCREEN_KEY_ENTRY('t', 00, T)
-    SCREEN_KEY_ENTRY('y', 00, Y)
-    SCREEN_KEY_ENTRY('u', 00, U)
-    SCREEN_KEY_ENTRY('i', 00, I)
-    SCREEN_KEY_ENTRY('o', 00, O)
-    SCREEN_KEY_ENTRY('p', 00, P)
-    SCREEN_KEY_ENTRY('[', 00, LeftBracket)
-    SCREEN_KEY_ENTRY(']', 00, RightBracket)
-    SCREEN_KEY_ENTRY('\\', 00, Backslash)
+    SCREEN_KEY_SYMBOL('q', 'Q', 00, Q)
+    SCREEN_KEY_SYMBOL('w', 'W', 00, W)
+    SCREEN_KEY_SYMBOL('e', 'E', 00, E)
+    SCREEN_KEY_SYMBOL('r', 'R', 00, R)
+    SCREEN_KEY_SYMBOL('t', 'T', 00, T)
+    SCREEN_KEY_SYMBOL('y', 'Y', 00, Y)
+    SCREEN_KEY_SYMBOL('u', 'U', 00, U)
+    SCREEN_KEY_SYMBOL('i', 'I', 00, I)
+    SCREEN_KEY_SYMBOL('o', 'O', 00, O)
+    SCREEN_KEY_SYMBOL('p', 'P', 00, P)
+    SCREEN_KEY_SYMBOL('[', '{', 00, LeftBracket)
+    SCREEN_KEY_SYMBOL(']', '}', 00, RightBracket)
+    SCREEN_KEY_SYMBOL('\\', '|', 00, Backslash)
 
-    SCREEN_KEY_ENTRY('a', 00, A)
-    SCREEN_KEY_ENTRY('s', 00, S)
-    SCREEN_KEY_ENTRY('d', 00, D)
-    SCREEN_KEY_ENTRY('f', 00, F)
-    SCREEN_KEY_ENTRY('g', 00, G)
-    SCREEN_KEY_ENTRY('h', 00, H)
-    SCREEN_KEY_ENTRY('j', 00, J)
-    SCREEN_KEY_ENTRY('k', 00, K)
-    SCREEN_KEY_ENTRY('l', 00, L)
-    SCREEN_KEY_ENTRY(';', 00, Semicolon)
-    SCREEN_KEY_ENTRY('\'', 00, Apostrophe)
+    SCREEN_KEY_SYMBOL('a', 'A', 00, A)
+    SCREEN_KEY_SYMBOL('s', 'S', 00, S)
+    SCREEN_KEY_SYMBOL('d', 'D', 00, D)
+    SCREEN_KEY_SYMBOL('f', 'F', 00, F)
+    SCREEN_KEY_SYMBOL('g', 'G', 00, G)
+    SCREEN_KEY_SYMBOL('h', 'H', 00, H)
+    SCREEN_KEY_SYMBOL('j', 'J', 00, J)
+    SCREEN_KEY_SYMBOL('k', 'K', 00, K)
+    SCREEN_KEY_SYMBOL('l', 'L', 00, L)
+    SCREEN_KEY_SYMBOL(';', ':', 00, Semicolon)
+    SCREEN_KEY_SYMBOL('\'', '"', 00, Apostrophe)
     SCREEN_KEY_ENTRY(SCR_KEY_ENTER, 00, Enter)
 
-    SCREEN_KEY_ENTRY('z', 00, Z)
-    SCREEN_KEY_ENTRY('x', 00, X)
-    SCREEN_KEY_ENTRY('c', 00, C)
-    SCREEN_KEY_ENTRY('v', 00, V)
-    SCREEN_KEY_ENTRY('b', 00, B)
-    SCREEN_KEY_ENTRY('n', 00, N)
-    SCREEN_KEY_ENTRY('m', 00, M)
-    SCREEN_KEY_ENTRY(',', 00, Comma)
-    SCREEN_KEY_ENTRY('.', 00, Period)
-    SCREEN_KEY_ENTRY('/', 00, Slash)
+    SCREEN_KEY_SYMBOL('z', 'Z', 00, Z)
+    SCREEN_KEY_SYMBOL('x', 'X', 00, X)
+    SCREEN_KEY_SYMBOL('c', 'C', 00, C)
+    SCREEN_KEY_SYMBOL('v', 'V', 00, V)
+    SCREEN_KEY_SYMBOL('b', 'B', 00, B)
+    SCREEN_KEY_SYMBOL('n', 'N', 00, N)
+    SCREEN_KEY_SYMBOL('m', 'M', 00, M)
+    SCREEN_KEY_SYMBOL(',', '<', 00, Comma)
+    SCREEN_KEY_SYMBOL('.', '>', 00, Period)
+    SCREEN_KEY_SYMBOL('/', '?', 00, Slash)
 
     SCREEN_KEY_ENTRY(' ', 00, Space)
 
@@ -1956,6 +1962,8 @@ getScreenKeyEntry (ScreenKey key) {
     SCREEN_KEY_ENTRY(SCR_KEY_CURSOR_DOWN, E0, ArrowDown)
     SCREEN_KEY_ENTRY(SCR_KEY_CURSOR_RIGHT, E0, ArrowRight)
   }
+
+#undef SCREEN_KEY_SYMBOL
 #undef SCREEN_KEY_ENTRY
 
   return NULL;
@@ -1964,7 +1972,10 @@ getScreenKeyEntry (ScreenKey key) {
 static int
 insertKeyCode (ScreenKey screenKey, int raw) {
   setScreenKeyModifiers(&screenKey, SCR_KEY_SHIFT | SCR_KEY_CONTROL);
-  const ScreenKeyEntry *ske = getScreenKeyEntry(screenKey);
+
+  unsigned char shift = 0;
+  const ScreenKeyEntry *ske = getScreenKeyEntry(screenKey, &shift);
+  if (shift) screenKey |= SCR_KEY_SHIFT;
 
   if (!ske) {
     logMessage(LOG_WARNING, "key not supported in raw keyboard mode: %04X", screenKey);
