@@ -102,18 +102,48 @@ sayWideCharacters (
   const wchar_t *characters, const unsigned char *attributes,
   size_t count, SayOptions options
 ) {
-  int ok = 0;
-  size_t length;
-  void *text = getUtf8FromWchars(characters, count, &length);
+  while (count > 0) {
+    size_t size = 0X1000;
 
-  if (text) {
-    if (sayUtf8Characters(spk, text, attributes, length, count, options)) ok = 1;
-    free(text);
-  } else {
-    logMallocError();
+    if (count < size) {
+      size = count;
+    } else {
+      size_t originalSize = size;
+
+      while (size > 0) {
+        if (iswspace(characters[--size])) break;
+      }
+
+      if (!size) {
+        size = originalSize;
+
+        while (size < count) {
+          if (iswspace(characters[size])) break;
+          size += 1;
+        }
+      }
+    }
+
+    size_t length;
+    void *text = getUtf8FromWchars(characters, size, &length);
+
+    if (!text) {
+      logMallocError();
+      return 0;
+    }
+
+    {
+      int ok = sayUtf8Characters(spk, text, attributes, length, size, options);
+      free(text);
+      if (!ok) return 0;
+    }
+
+    characters += size;
+    attributes += size;
+    count -= size;
   }
 
-  return ok;
+  return 1;
 }
 
 int

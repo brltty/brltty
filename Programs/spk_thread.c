@@ -458,15 +458,14 @@ handleSpeechRequest (SpeechDriverThread *sdt, SpeechRequest *req) {
     switch (req->type) {
       case REQ_SAY_TEXT: {
         SayOptions options = req->arguments.sayText.options;
+        if (options & SAY_OPT_MUTE_FIRST) speech->mute(spk);
+
         int restorePitch = 0;
         int restorePunctuation = 0;
-
-        if (options & SAY_OPT_MUTE_FIRST) speech->mute(spk);
 
         if (options & SAY_OPT_HIGHER_PITCH) {
           if (spk->setPitch) {
             unsigned char pitch = prefs.speechPitch + 7;
-
             if (pitch > SPK_PITCH_MAXIMUM) pitch = SPK_PITCH_MAXIMUM;
 
             if (pitch != prefs.speechPitch) {
