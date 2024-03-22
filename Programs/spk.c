@@ -139,7 +139,7 @@ sayWideCharacters (
     }
 
     characters += size;
-    attributes += size;
+    if (attributes) attributes += size;
     count -= size;
   }
 
