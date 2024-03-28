@@ -1020,19 +1020,34 @@ isAutospeakActive (void) {
 
 void
 sayScreenCharacters (const ScreenCharacter *characters, size_t count, SayOptions options) {
-  wchar_t text[count];
-  wchar_t *t = text;
+  wchar_t *textBuffer;
 
-  unsigned char attributes[count];
-  unsigned char *a = attributes;
+  if ((textBuffer = malloc(ARRAY_SIZE(textBuffer, count)))) {
+    unsigned char *attributesBuffer;
 
-  for (unsigned int i=0; i<count; i+=1) {
-    const ScreenCharacter *character = &characters[i];
-    *t++ = character->text;
-    *a++ = character->attributes;
+    if ((attributesBuffer = malloc(ARRAY_SIZE(attributesBuffer, count)))) {
+      wchar_t *text = textBuffer;
+      unsigned char *attributes = attributesBuffer;
+
+      const ScreenCharacter *character = characters;
+      const ScreenCharacter *end = character + count;
+
+      while (character < end) {
+        *text++ = character->text;
+        *attributes++ = character->attributes;
+        character += 1;
+      }
+
+      sayWideCharacters(&spk, textBuffer, attributesBuffer, count, options);
+      free(attributesBuffer);
+    } else {
+      logMallocError();
+    }
+
+    free(textBuffer);
+  } else {
+    logMallocError();
   }
-
-  sayWideCharacters(&spk, text, attributes, count, options);
 }
 
 void
