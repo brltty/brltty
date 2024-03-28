@@ -136,6 +136,7 @@ sayWideCharacters (
       int ok = sayUtf8Characters(spk, text, attributes, length, size, options);
       free(text);
       if (!ok) return 0;
+      options &= ~SAY_OPT_MUTE_FIRST;
     }
 
     characters += size;
