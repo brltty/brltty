@@ -118,8 +118,6 @@ static int probeHidDisplay(BrailleDisplay *brl, HidItemsDescriptor *items) {
     if (item.tag == HID_ITM_Usage) {
       usageMin = usageMax = -1;
       uint32_t usage = item.value.u;
-      // TODO(b/331881337): Bug in Humanware's firmware, see
-      // https://docs.google.com/document/d/1ZuiV5h0nGHQwUnfXJRFL2-K61rO2aC_JB7UHdd5Nb_U/edit?usp=sharing&resourcekey=0-7sLXaH2DHe7l6hl5SUI0pQ.
       // Overwrite these random "button" usages as DPad Left/Right until
       // Humanware fixes their firmware.
       if (usagePage == HID_UPG_Button) {
