@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2024 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 #include <jni.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -209,8 +224,7 @@ static int probeHidDisplay(BrailleDisplay *brl, HidItemsDescriptor *items) {
           break;
         }
         if (brl->textColumns != -1) {
-         logMessage(LOG_ERR,
-                       "Unexpected received multiple BD output reports");
+          logMessage(LOG_ERR, "Unexpected received multiple BD output reports");
           parsingError = 1;
           break;
         }
@@ -223,7 +237,6 @@ static int probeHidDisplay(BrailleDisplay *brl, HidItemsDescriptor *items) {
     logMessage(LOG_ERR, "There were parsing errors.");
     return 0;
   }
-
   if (brl->data->reportInfo.reportId == -1) {
     logMessage(LOG_ERR, "Could not find a Braille Display report ID");
     return 0;
@@ -233,9 +246,8 @@ static int probeHidDisplay(BrailleDisplay *brl, HidItemsDescriptor *items) {
     return 0;
   }
   for (int i = 0; i < MAX_INPUT_SIZE; i++) {
-    // Uncomment this to print out the bit->usage map:
-    // logMessage(LOG_WARNING, "bit=%d report=%i", i,
-    // brl->data->reportInfo.inputReportUsages[i]);
+    logMessage(LOG_DEBUG, "bit=%d report=%i", i,
+               brl->data->reportInfo.inputReportUsages[i]);
 
     // While parsing the descript we built up map inputReportUsages from
     // bit->usage. However, brltty doesn't use usages to describe key events:
@@ -325,8 +337,6 @@ static int handleKeyRelease(BrailleDisplay *brl, unsigned char key) {
 // Parses a HID input report into brltty key actions.
 // Called by brltty when it wants to parse an input byte array.
 static void handlePressedKeysArray(BrailleDisplay *brl, unsigned char *keys) {
-  unsigned int currentPressedKeyCount = 0;
-
   // Per HIDRAW spec if input descriptor report number is not zero then the
   // first byte in the input should be the report number.
   int hasNumberedReport = brl->data->reportInfo.reportId != 0;
@@ -342,36 +352,25 @@ static void handlePressedKeysArray(BrailleDisplay *brl, unsigned char *keys) {
   for (int byteNum = 0; byteNum < numInputBytes; byteNum++) {
     for (int bit = 0; bit <= 7; bit++) {
       int bitNum = byteNum * 8 + bit;
-      if ((*byte) & (1 << bit)) {
-        // Uncomment this to see which bits are raised in the INPUT report.
-        // logMessage(LOG_WARNING, "Pressed bit %d usage %u",
-        //            bitNum, brl->data->reportInfo.inputReportUsages[bitNum]);
-        char key;
-        if (brl->data->reportInfo.inputReportUsages[bitNum] ==
-            HID_USG_BRL_RouterKey) {
-          int routingKeyNum =
-              bitNum - brl->data->reportInfo.inputRoutingFirstBit;
-          key = HID_KEY_ROUTING + routingKeyNum;
-        } else {
-          key = brl->data->reportInfo.inputReportKeys[bitNum];
-        }
-        if (key != 0) {
-          currentPressedKeyCount += 1;
+      char key;
+      if (brl->data->reportInfo.inputReportUsages[bitNum] ==
+          HID_USG_BRL_RouterKey) {
+        int routingKeyNum = bitNum - brl->data->reportInfo.inputRoutingFirstBit;
+        key = HID_KEY_ROUTING + routingKeyNum;
+      } else {
+        key = brl->data->reportInfo.inputReportKeys[bitNum];
+      }
+      if (key != 0) {
+        if ((*byte) & (1 << bit)) {
+          logMessage(LOG_DEBUG, "Pressed bit %d usage %u", bitNum,
+                     brl->data->reportInfo.inputReportUsages[bitNum]);
           handleKeyPress(brl, key);
+        } else {
+          handleKeyRelease(brl, key);
         }
       }
     }
     byte++;
-  }
-
-  if (brl->data->pressedKeys.count > currentPressedKeyCount) {
-    for (unsigned int key = 0; key <= MAXIMUM_KEY_VALUE; key++) {
-      if (handleKeyRelease(brl, key)) {
-        if (brl->data->pressedKeys.count == currentPressedKeyCount) {
-          break;
-        }
-      }
-    }
   }
 }
 

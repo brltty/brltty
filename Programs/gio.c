@@ -67,6 +67,7 @@ gioInitializeDescriptor (GioDescriptor *descriptor) {
   descriptor->bluetooth.options.inputTimeout = 1000;
   descriptor->bluetooth.options.requestTimeout = 5000;
 
+  descriptor->hid.modelTable = NULL;
   gioInitializeOptions(&descriptor->hid.options);
 
   gioInitializeOptions(&descriptor->null.options);
@@ -496,15 +497,12 @@ gioGetHidDescriptorMethod (
   if (!method) {
     logUnsupportedOperation("getHidDescriptor");
     errno = ENOSYS;
-    return 0;
+    return NULL;
   }
 
   return method(
     endpoint->handle
   );
-
-  logMessage(LOG_WARNING, "HID DESCRIPTOR not found");
-  return NULL;
 }
   
   
