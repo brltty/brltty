@@ -20,8 +20,6 @@
 #include "third_party/brltty/Headers/log.h"
 #include "third_party/brltty/Programs/gio_internal.h"
 
-static jclass helperClass = NULL;
-
 struct BrailleDataStruct {
   struct {
     unsigned char count;

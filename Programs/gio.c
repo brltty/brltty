@@ -488,7 +488,7 @@ gioAskResource (
                 endpoint->options.requestTimeout);
 }
 
-HidReportIdentifier *
+HidItemsDescriptor *
 gioGetHidDescriptorMethod (
   GioEndpoint *endpoint) {
   GioGetHidDescriptorMethod *method = endpoint->handleMethods->getHidDescriptor;

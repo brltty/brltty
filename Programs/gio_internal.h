@@ -60,7 +60,7 @@ typedef ssize_t GioAskResourceMethod (
   void *buffer, uint16_t size, int timeout
 );
 
-typedef HidReportIdentifier *GioGetHidDescriptorMethod(
+typedef HidItemsDescriptor *GioGetHidDescriptorMethod(
   GioHandle *handle
 );
 

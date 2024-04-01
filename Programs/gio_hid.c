@@ -92,7 +92,7 @@ getHidReportSize (
   return hidGetReportSize(handle->device, identifier, size);
 }
 
-static HidReportIdentifier *
+static HidItemsDescriptor *
 getHidDescriptor (GioHandle *handle
 ) {
   return hidGetItems(handle->device);
