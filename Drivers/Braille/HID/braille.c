@@ -116,17 +116,6 @@ static int probeHidDisplay(BrailleDisplay *brl, HidItemsDescriptor *items) {
     if (item.tag == HID_ITM_Usage) {
       usageMin = usageMax = -1;
       uint32_t usage = item.value.u;
-      // Overwrite these random "button" usages as DPad Left/Right until
-      // Humanware fixes their firmware.
-      if (usagePage == HID_UPG_Button) {
-        if (usage == 0x14) {
-          logMessage(LOG_WARNING, "Fixing Humanware nav buttons");
-          usage = HID_USG_BRL_DPadLeft;
-        }
-        if (usage == 0x15) {
-          usage = HID_USG_BRL_DPadRight;
-        }
-      }
       usages[usageIndex++] = usage;
     }
     if (item.tag == HID_ITM_UsageMinimum) {
@@ -214,21 +203,18 @@ static int probeHidDisplay(BrailleDisplay *brl, HidItemsDescriptor *items) {
           parsingError = 1;
           break;
         }
-        if (usages[0] == HID_USG_BRL_6DotCell ||
-            usages[0] == HID_USG_BRL_8DotCell) {
-          if (reportSize != 8) {
-            logMessage(LOG_ERR, "Invalid output bit size %u", reportSize);
-            parsingError = 1;
-            break;
-          }
-          if (brl->textColumns != -1) {
-            logMessage(LOG_ERR,
-                       "Unexpected received multiple BD output reports");
-            parsingError = 1;
-            break;
-          }
-          brl->textColumns = reportCount;
+        if (reportSize != 8) {
+          logMessage(LOG_ERR, "Invalid output bit size %u", reportSize);
+          parsingError = 1;
+          break;
         }
+        if (brl->textColumns != -1) {
+         logMessage(LOG_ERR,
+                       "Unexpected received multiple BD output reports");
+          parsingError = 1;
+          break;
+        }
+        brl->textColumns = reportCount;
       }
     }
   }
@@ -240,6 +226,10 @@ static int probeHidDisplay(BrailleDisplay *brl, HidItemsDescriptor *items) {
 
   if (brl->data->reportInfo.reportId == -1) {
     logMessage(LOG_ERR, "Could not find a Braille Display report ID");
+    return 0;
+  }
+  if (brl->textColumns == -1) {
+    logMessage(LOG_ERR, "Could not find the Braille Display output cell count");
     return 0;
   }
   for (int i = 0; i < MAX_INPUT_SIZE; i++) {
