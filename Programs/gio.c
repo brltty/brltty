@@ -28,6 +28,7 @@
 #include "io_generic.h"
 #include "gio_internal.h"
 #include "io_serial.h"
+#include "hid_types.h"
 
 const GioProperties *const gioProperties[] = {
   &gioProperties_serial,
@@ -487,6 +488,27 @@ gioAskResource (
                 endpoint->options.requestTimeout);
 }
 
+HidReportIdentifier *
+gioGetHidDescriptorMethod (
+  GioEndpoint *endpoint) {
+  GioGetHidDescriptorMethod *method = endpoint->handleMethods->getHidDescriptor;
+
+  if (!method) {
+    logUnsupportedOperation("getHidDescriptor");
+    errno = ENOSYS;
+    return 0;
+  }
+
+  return method(
+    endpoint->handle
+  );
+
+  logMessage(LOG_WARNING, "HID DESCRIPTOR not found");
+  return NULL;
+}
+  
+  
+  
 int
 gioGetHidReportSize (
   GioEndpoint *endpoint,
