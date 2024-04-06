@@ -72,6 +72,15 @@ try:
   b.readKey()
 
   b.ignoreAllKeys()
+  b.acceptKeyRanges([(brlapi.KEY_TYPE_CMD, brlapi.KEY_TYPE_CMD|brlapi.KEY_CODE_MASK)])
+  b.ignoreKeyRanges([(brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_PASSDOTS, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_PASSDOTS|brlapi.KEY_CMD_ARG_MASK)])
+  b.writeText("Press any command key (and not dots)")
+  k = b.readKey()
+  k = brlapi.expandKeyCode(key)
+  b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
+  b.readKey()
+
+  b.ignoreAllKeys()
   b.acceptKeyRanges([(brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_PASSDOTS, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_PASSDOTS|brlapi.KEY_CMD_ARG_MASK)])
   b.writeText("Press a dot key")
   key = b.readKey()
