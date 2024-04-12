@@ -55,6 +55,8 @@ before g always aussagenklän 16-234-234-1245-14-13-123-345-1345
 
 before s always aus 16-234
 
+before t sufword aus 16-234
+
 # Ausnahmen für Vokalgruppen aus de-g1.ctb
 before e always arteri 356-2345-12456-24
 always barrier 12-356-1235-24-12456 shouldn't use the ie-contraction
@@ -187,6 +189,8 @@ after konsonant midword ss =
 after konsonant midendword ssatz 234-234-1356
 after konsonant midendword ssätz 234-5-234-1356
 after konsonant midendword ssaetz 234-5-234-1356
+after konsonant endword sserie 234-234-12456-24-15
+after konsonant endword sserien 234-234-12456-24-14
 after konsonant midword ssch 234-156
 always sschicht 234-156-3456-2345
 always sschlag 234-156-1245
@@ -213,7 +217,7 @@ always ssondern 234-234-1345
 always ssozial 234-234-123
 always espiel 15-2-346
 always sspiel 234-2-346
-always esprach 15-234-1234
+always esprach 15-234-1234-1235-56
 always ssprach 234-234-1234
 always sspräch 234-5-234-1234
 always sspraech 234-5-234-1234
@@ -244,11 +248,12 @@ always est 15-23456
 
 endword tel 2345-13456
 always scheitel 156-146-2345-13456 shouldn't use the te-contraction
-begword bettel 12-15-2345-2345-13456 shouldn't use the te-contraction
+always bettel 23-2345-2345-13456 shouldn't use the te-contraction
 endword teln 2345-13456-1345
 endword tels 2345-13456-234
 endword tem 2345-12356
 endword tene 2345-14-15
+always ttel 2345-2345-13456 shouldn't use the te-contraction
 always tten 2345-2345-14 shouldn't use the te-contraction
 always tter 2345-2345-12456 shouldn't use the te-contraction
 always daten 145-1-2345-14 
@@ -264,7 +269,18 @@ endword ter 2345-12456
 endword tere 2345-12456-15
 endword terem 2345-12456-12356
 endword teren 2345-12456-14
+endword terer 2345-12456-12456
+endword terern 2345-12456-12456-1345
+endword terers 2345-12456-12456-234
 endword teres 2345-12456-123456
+endword terin 2345-12456-35
+endword terinnen 2345-12456-35-1345-14
+endword terisch 2345-12456-24-156
+endword terische 2345-12456-24-156-15
+endword terischem 2345-12456-24-156-12356
+endword terischen 2345-12456-24-156-14
+endword terischer 2345-12456-24-156-12456
+endword terisches 2345-12456-24-156-123456
 endword ters 2345-12456-234
 always liter 123-24-2345-12456
 endword tern 2345-12456-1345
@@ -348,6 +364,8 @@ endword anomal 235-135-134-1-123 shouldn't use the mal-contraction
 midendword iene 346-1345-15 should use the ie-contraction
 midendword ienen 346-1345-14 should use the ie-contraction
 endword tel 2345-13456 should use the el-contraction
+endword telkeit 2345-13456-13 should use the el-contraction
+endword telkeiten 2345-13456-13-14 should use the el-contraction
 endword ten 2345-14 should use the en-contraction
 endword ter 2345-12456 should use the er-contraction
 endword tes 2345-123456 should use the es-contraction
@@ -376,10 +394,18 @@ endword unfalls 256-124-12345-234
 midendword heit 125
 before s midword heits 125-234
 midendword keit 13
-before s midword keits 13-234
+before st midword keits 13-234
 endword mal 134
+endword malig 134-45
+endword malige 134-45-15
+endword maligem 134-45-12356
+endword maligen 134-45-14
+endword maliger 134-45-12456
+endword maliges 134-45-123456
+endword maligkeit 134-45-13
 sufword gemal 12346-134-25 gemalt shouldn't use the mal-contraction
 midendword nis 1346
+always männisch 134-345-1345-1345-24-156
 always nisier 1345-24-234-346-1235 technisierung shouldn't use -nis
 midendword sam 2346
 sufword bisam =
@@ -610,11 +636,12 @@ always nichtzuck 2-1345-1356-136-46
 
 word so 1234
 always so 2-1234
+always soper 234-135-1234-12456
 endword son =
 always cursor = shouldn't use the so-contraction
 begword		absol		=
-begword		absorb		=
-begword		absorp		=
+begword		absorb		1-12-234-26-12
+begword		absorp		1-12-234-26-1234
 always		adsorbier	1-145-234-26-12-346-1235
 always		aerosol		1-12456-135-234-135-123
 always		amtsober	1-134-2345-234-135-12-12456
@@ -671,6 +698,7 @@ always wund 2456-256-145 shouldn't use the und-contraction
 
 word unter 256
 always unter 2-256
+always eunter 15-2-256
 sufword kunter 13-256-2345-12456 shouldn't use the unter-contraction
 sufword kunterbunter 13-256-2345-12456-12-256-2345-12456
 sufword munter 134-256-2345-12456 shouldn't use the unter-contraction
@@ -715,7 +743,7 @@ before i sufword ihr 24
 before e sufword sein 246
 before i sufword sein 246
 word war 356
-word waren 356-14
+sufword waren 356-14
 word warst 356-23456
 word wart 356-2345
 word war's 356-6-234
@@ -746,7 +774,7 @@ always aller 1-12456
 always allerg 1-12345-12456-1245 Allergiker
 word alles 1-123456
 always allesamt 1-12345-15-234-1-134-2345 shouldn't use the es-contraction
-always alphabet 25-1234-125-1-12-15-2345 shouldn't use the hab-contraction
+before t always alphabe 25-1234-125-1-23 shouldn't use the hab-contraction
 word also 1-135
 always ander 2-12456
 always wander 2456-235-145-12456 wandern shouldn't use the ander-contraction
@@ -756,7 +784,7 @@ always abänder 1-12-5-12456
 always bänder 12-345-1345-145-12456 shouldn't use the änder-contraction
 always aender 5-12456
 always arbeit 356-12
-before s always arbeits 356-12-234
+always arbeits 356-12-234
 always arben 356-12-14
 always kauf 13-16-124
 always ausst 16-234-23456 shouldn't use the ss-contraction
@@ -833,6 +861,8 @@ always deal = dealer
 word dei = Agnus Dei
 always demokrat 145-2345
 contraction dt
+always darüber 145-1256
+contraction dü
 word denen 15-14
 word dnister 145-1345-24-234-2345-12456 shouldn't use the nis-contraction
 word denn 145-1345
@@ -996,7 +1026,8 @@ always kraft 13-124
 contraction kf
 always kräft 5-13-124
 always kraeft 5-13-124
-
+before hilmnrsu always kräfte 5-13-124-15
+prfword kräften 5-13-124-14
 always kulturell 13-136-123-2345-136-1235-15-12345 should use the ll-contraction
 
 always kurz 13-1356
@@ -1040,9 +1071,6 @@ always letzt 123-2345
 contraction lt
 always lieb 123-346-12
 
-always männ 5-134-1345
-always maenn 5-134-1345
-#word manna = shouldn't use the mann-contraction
 #always mannequin 134-235-1345-15-6-12345-35 shouldn't use the mann-contraction
 always maschin 134-156
 always material 134-123
@@ -1065,9 +1093,12 @@ always müss 2-134
 word nachdem 1345-145
 always nahm 1345-134 Annahme
 contraction nm
+always nähm 5-1345-134
 always natur 1345-2345
 contraction nt
 always natürlich 1345-456
+always neben 1345-12
+contraction nb
 always nächst 1345-23456
 always naechst 1345-23456
 always nehm 1345-125
@@ -1079,6 +1110,10 @@ endword nischer 1345-24-156-12456 shouldn't use the nis-contraction
 endword nisches 1345-24-156-123456 shouldn't use the nis-contraction
 always nichts 1345-234
 contraction ns
+always nichtselbst 2-1345-234-23456
+always nichtsozial 2-1345-234-123
+always nichtspiel 2-1345-2-346
+always nichtständ 2-1345-5-23456
 always nichtsehend 2-1345-234-2356-14-145 shouldn't use the nichts-contraction
 always nichtschwimm 2-1345-156-2456-24-1346 shouldn't use the nichts-contraction
 always noch 1345-1456
@@ -1097,6 +1132,8 @@ contraction nr
 always nutz 1345-1356
 contraction nz
 always nütz 5-1345-1356
+always ienutz 346-1345-1356
+always enutz 15-1345-1356
 
 sufword ohne 135-15
 contraction oe
@@ -1108,6 +1145,7 @@ always paragraf 1234-1245
 contraction pg
 always person 1234-1345
 contraction pn
+always persön 5-1234-1345
 always platz 1234-1356
 always plätz 5-1234-1356
 always plaetz 5-1234-1356
@@ -1179,12 +1217,9 @@ contraction sn
 always sozial 234-123
 contraction sl
 always spiel 2-346
-always spräch 5-234-1234
-always spraech 5-234-1234
 always sprech 2-2346
 always staat 23456-2345
 always stand 2-23456
-always standard 23456-235-145-356-145 shouldn't use the stand-contraction
 always ständ 5-23456
 always staend 5-23456
 always stell 2-13456
@@ -1204,7 +1239,9 @@ sufword töricht 2345-246-1235-3456-2345 shouldn't use the richt-contraction
 sufword toericht 2345-246-1235-3456-2345 shouldn't use the richt-contraction
 always trag 2345-1245
 contraction tg
+always austrag 16-234-2345-1245 shouldn't use the st-contraction
 always träg 5-2345-1245
+always sträg 234-5-2345-1245
 always train = training shouldn't use the first possible in-contraction
 always treff 2345-124
 contraction tf
@@ -1269,7 +1306,6 @@ contraction wl
 always woll 2-135
 word Wolle 2456-135-12345-15 shouldn't use the woll-contraction
 always wollfad 2456-135-12345-124-1-145 shouldn't use the woll-contraction
-always baumwoll 12-16-134-2456-135-12345 shouldn't use the woll-contraction
 word worden 135-14
 sufword wurd 136
 sufword würd 1256
@@ -1393,7 +1429,7 @@ midendword ericht 15-2-3456
 always erepublik 15-1235-13
 midendword emädchen 15-134-345-145-1456-14
 midendword emaedchen 15-134-345-145-1456-14
-midendword emänn 15-5-134-1345
+midendword emänn 15-134-345-1345-1345
 midendword emaenn 15-5-134-1345
 midendword estand 15-2-23456
 midword estell 15-2-13456
@@ -1408,9 +1444,11 @@ always geil 1245-146-123 shouldn't use the ge-contraction
 midendword geingang 1245-1246-1245-235-1245
 midendword geingän 1245-1246-1245-345-1345
 always gelungen 12346-123-256-1245-14
-always generat 1245-14-12456-1-2345
+always generation 1245-14-12456-5-1345
+begmidword generator 1245-14-12456-1-2345-26
+endword generator 1245-14-12456-1-2345-135-1235
 always generier 1245-14-12456-346-1235
-always gerät 12346-1235-345-2345 should use the ge-contraction
+before t always gerä 12346-1235-345 should use the ge-contraction
 always geraet 12346-1235-345-2345 should use the ge-contraction
 always geräusch 12346-1235-34-156 should use the ge-contraction
 always geraeusch 12346-1235-34-156 should use the ge-contraction
@@ -1442,13 +1480,15 @@ always roboter 1235-135-12-135-2345-12456 shouldn't use the te-contraction
 always round 1235-135-256-145 shouldn't use the und-contraction
 sufword rund 1235-256-145 shouldn't use the und-contraction
 word räson = shouldn't use the so-contraction
+always bläschen 12-123-345-234-1456-14 shouldn't use the sch-contraction
 always döschen 145-246-234-1456-14 shouldn't use the sch-contraction
 always füsschen 124-1256-2346-1456-14
 always häschen 125-345-234-1456-14 shouldn't use the sch-contraction
+always häuschen 125-34-234-1456-14 shouldn't use the sch-contraction
 always höschen 125-246-234-1456-14 should use the ch-contraction
-always wollhöschen 2456-135-12345-125-246-234-1456-14 shouldn't use the woll-contraction
 always küsschen 13-1256-2346-1456-14 shouldn't use the sch-contraction
 always möschen 134-246-234-1456-14 should use the ch-contraction
+always näschen 1345-345-234-1456-14
 word röschen 1235-246-234-1456-14 should use the ch-contraction
 begword rosaro = shouldn't use the ar-contraction
 midendword sammel 234-1-1346-13456 shouldn't use the sam-contraction
@@ -1473,10 +1513,9 @@ always sprung 234-1234-1235-256-1245 shouldn't use the ung-contraction
 always ssitz 234-2-24 shouldn't use the ss-contraction
 always ssonntag =
 always sspiel 234-2-346
-always ssprach 234-234-1234
+always ssprach 234-234-1234-1235-56
 always sstand 234-2-23456
 midendword stitel 234-2345-24-2345-13456
-always studien 23456-136-145-24-14 shouldn't use the ie-contraction
 always stunde 23456-256-145-15 shouldn't use the und-contraction
 always stunden 23456-256-145-14
 always esystem 15-234-6-13456-23456-12356 shouldn't use the es-contraction
@@ -1510,6 +1549,7 @@ begmidword zentral 1356-14-2345-1235-25 zentrallager
 always schall 156-1-12345 schallen shouldn't use the allen-contraction
 always herzultra 125-12456-1356-136-123-2345-1235-1 shouldn't use the zu-contraction
 always mittagessen 134-24-2345-2345-1-1245-15-2346-14
+always mittags 134-24-2345-2345-1-1245-234
 always snakeskin 234-1345-1-13-15-234-13-35
 
 # countries
@@ -1517,6 +1557,7 @@ always dänemark 145-345-1345-15-134-356-13 shouldn't use the em-contraction
 always daenemark 145-345-1345-15-134-356-13 shouldn't use the em-contraction
 
 # names
+sufword aaron =
 word angela 235-1245-13456-1 shouldn't use the ge-contraction
 word angeles 235-1245-13456-123456 shouldn't use the ge-contraction
 word angelika 235-1245-13456-24-13-1 shouldn't use the ge-contraction

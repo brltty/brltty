@@ -19,28 +19,47 @@
 # BRLTTY Contraction Subtable - German (contracted)
 
 begword aal = shouldn't use the al-contraction
+always account =
+prfword aktie =
+always aktien 1-13-2345-24-14
 always aldehyd 25-145-15-125-6-13456-145
+always alemann 25-15-134-235-1345 shouldn't use the el-contraction
+always alkohol 25-13-135-125-135-123
 sufword alpha 25-1234-125-1
 always arhythm =
+always atelier 1-2345-13456-24-12456
 
 before hilmnrsu always aufnahme 2-16-1345-134-15
 prfword aufnahmen 2-16-1345-134-14
+before t always ausbeu 16-234-12-126 shouldn't use the be-contraction
+always austritt 16-234-2345-1235-24-2345-2345 shouldn't use the st-contraction
 
 always abballer 1-12-12-1-12345-12456 shouldn't use the aller-contraction
+sufword baller 12-1-12345-12456 shouldn't use the aller-contraction
 always abbeiz 1-12-12-146-1356 shouldn't use the bei-contraction
 always abbettel 1-12-23-2345-2345-13456 shouldn't use the te-contraction
 always ableismus 1-12-123-15-5-24 shouldn't use the ei-contraction
 before e always ablöse =
+before hilmnrsu always abnahme 1-12-1345-134-15
+prfword abnahmen 1-12-1345-134-14
 always absolvent 1-12-234-135-123-1236-14-2345
+always achilles 1-1456-24-12345-123456
 always akkordeon 1-13-13-26-145-15-135-1345 Akkordeonist shouldn't use the nis-contraction
+before cst always amts = shouldn't use the sch-contraction
 begmidword anachron 235-1-1456-1235-135-1345
 always analyse 235-25-6-13456-234-15
 prfword analysen 235-25-6-13456-234-14
 always analysenauf 235-25-6-13456-234-14-2-16
 always analysenergeb 235-25-6-13456-234-14-12456-12346-12
 before konsonant always analysen 235-25-6-13456-234-14
+always apostroph 1-1234-135-23456-1235-135-1234-125 apostrophier shouldn't use the hier-contraction
 always arthrose 356-2345-125-1235-135-234-15
 prfword arthrosen 356-2345-125-1235-135-234-14
+sufword apostel 1-1234-135-23456-13456 Apostellöffel shouldn't use the stell-contraction
+always aqua =
+always ligaquali 123-45-1-6-12345-25-24
+always autoreifen 16-2345-135-1235-136-124-14
+always autorück 16-2345-135-1235-46
 always ägypten 345-1245-6-13456-1234-2345-14 shouldn't use the te-contraction
 always ämpter 345-134-2345-12456 shouldn't use the te-contraction
 always aegypten 345-1245-6-13456-1234-2345-14
@@ -48,8 +67,21 @@ always audienz 16-145-24-14-1356 shouldn't use the ie-contraction
 always aufgaben 2-16-1245-1-12-14
 prfword bachelor 12-1-1456-13456-135-1235
 begmidword bachelor 12-1-1456-13456-26
+before hilmnrsu always bade =
+prfword baden 12-1-145-14
+prfword badend 12-1-145-14-145
+prfword badende 12-1-145-14-145-15
+prfword badendem 12-1-145-14-145-12356
+prfword badenden 12-1-145-14-145-14
+prfword badender 12-1-145-14-145-12456
+prfword badendes 12-1-145-14-145-123456
+prfword bades 12-1-145-123456
 
 always bakteri 12-1-13-2345-12456-24 shouldn't use the te-contraction
+always basis =
+always baufabrik 12-16-124-1-12-1235-24-13 shouldn't use the auf-contraction
+always baufirma 12-16-124-24-1235-134-1
+always beamten 23-1-134-2345-14 shouldn't use the te-contraction
 word beat =
 always beatbox =
 always beatmusik 12-15-1-2345-134-13
@@ -71,25 +103,66 @@ prfword gebeichteter 12346-12-146-1456-236-2345-12456
 prfword gebeichtetes 12346-12-146-1456-236-2345-123456
 prfword beichtetest 12-146-1456-236-236-23456
 prfword beichtetet 12-146-1456-236-236-2345
+sufword beidreh 2-12-145-1235-2356 shouldn't use the beid-contraction
+sufword bein 12-1246 shouldn't use the bei-contraction
+always einbein 1246-12-1246 shouldn't use the bei-contraction
+always zweibein 1356-2456-146-12-1246 shouldn't use the bei-contraction
+always dreibein 145-1235-146-12-1246 shouldn't use the bei-contraction
+always vierbein 1236-346-1235-12-1246 shouldn't use the bei-contraction
+sufword beinahe 2-12-1345-1-125-15
+sufword beinerv 2-12-1345-12456-1236
+always benediktin 12-14-15-145-24-13-2345-35 shouldn't use the be-contraction
+always beschwerd 23-156-2456-12456-145 shouldn't use the werd-contraction
+before hilmnrsu always beschwerde 23-156-2456-12456-145-15 shouldn't use the werd-contraction
+endword beschwerden 23-156-2456-12456-145-14 shouldn't use the werd-contraction
 endword betrieben 23-2345-1235-346-12-14
+always bindemittel 12-35-145-15-134-2345 shouldn't use the dem-contraction
+always schaummittel 156-16-134-134-2345 shouldn't use the mm-contraction
+always systemmittel 234-6-13456-23456-12356-134-2345 shouldn't use the mm-contraction
+sufword bistro 12-24-23456-1235-135 shouldn't use the bist-contraction
 always blaubeer 12-123-16-12-15-15-1235
 always brombeer =
+before e always brück 12-1235-1256-46 shouldn't use the rück-contraction
+always abrück 1-12-1235-46 should use the rück-contraction
+always bundestags 12-256-145-123456-2345-1-1245-234
+always bibliograph = bibliographieren shouldn't use the hier-contraction
+sufword bistum = shouldn't use the st-contraction
+sufword bistüm = shouldn't use the st-contraction
+always buchstaben 12-136-1456-23456-1-12-14 shouldn't use the be-contraction
 prfword bund 12-256-145
+prfword bunds 12-256-145-234
+sufword bunter 12-256-2345-12456 shouldn't use the unter-contraction
 always burgunder 12-136-1235-1245-256-145-12456
+always container 6-14-135-1345-2345-1-24-1345-12456 shouldn't use the in-contraction
 #always cranberry 6-14-1235-235-23-1235-1235-6-13456
+sufword daneben 145-1-1345-12 shouldn't use the an-contraction
+always dialog =
 always dealer 145-15-1-123-12456
+always dekorateur 145-15-13-26-1-2345-126-1235 shouldn't use the te-contraction
 always dehydr =
+always demontage 145-15-134-135-1345-2345-1-12346 shoudln't use the dem-contraction
+always delegation 145-15-123-15-1245-5-1345 shouldn't use the el-contraction
 always diagnose =
 prfword diagnosen 145-24-1-1245-1345-135-234-14
 before konsonant always diagnosen 145-24-1-1245-1345-135-234-14
 always diamant 145-24-1-134-235-2345
+sufword dichter 145-3456-2345-12456 shouldn't use the te-contraction
+always domain = shouldn't use the ai-contraction
+always dossier 145-135-2346-24-12456 shouldn't use the ie-contraction
+always ehelich 2356-15-456 shouldn't use the el-contraction
 before e always einreise 1246-1235-146-234-15
 always eisstau 146-234-23456-16 eisstau eisstaub gleisstaub
+always elfenbein 13456-124-14-12-1246 shouldn't use the bei-contraction
 always erpresser 12456-1234-1235-15-2346-12456
 always estragon 123456-2345-1235-1-1245-135-1345 # trag?
 always europa 126-1235-135-1234-1
 midendword expresses 15-6-1346-1234-1235-15-2346-123456
 word expresses 1346-1234-1235-15-2346-123456
+always fangein 124-235-1245-1246 shouldn't use the ge-contraction
+begword farbein 124-356-12-1246 shouldn't use the bei-contraction
+always filter 124-24-123-2345-12456 shouldn't use the te-contraction
+sufword fund 124-256-145 shouldn't use the und-contraction
+sufword gallen 1245-1-12345-14 shouldn't use the allen-contraction
 sufword gamma 1245-1-1346-1
 before hilmnrsu always gebäude 12346-12-34-145-15
 prfword gebäuden 12346-12-34-145-14
@@ -97,10 +170,14 @@ prfword gebäudes 12346-12-34-145-123456
 before hilmnrsu always gebinde 12346-12-35-145-15
 prfword gebinden 12346-12-35-145-14
 prfword gebindes 12346-12-35-145-123456
+always geburtstag 12346-12-136-1235-2345-234-2345-1-1245 shouldn't use the st-contraction
 sufword gehäuse 12346-125-34-234-15
 prfword gehäusen 12346-125-34-234-14
 prfword gehäuses 12346-125-34-234-123456
+always geruch 12346-1235-136-1456 shouldn't use the er-contraction
+always gerüst 12346-1235-1256-23456 shouldn't use the er-contraction
 always gesund 12346-234-256-145
+always gewänder 12346-2456-345-1345-145-12456 shouldn't use the änder-contraction
 before hilmnrsu always gewinde 12346-2456-35-145-15
 always gewindelt 12346-2456-35-145-13456-2345
 always gewindelte 12346-2456-35-145-13456-236
@@ -127,6 +204,10 @@ always gemeindeutsch 12346-134-1246-145-156
 always gemüse 12346-134-1256-234-15
 prfword gemüsen 12346-134-1256-234-14
 prfword gemüses 12346-134-1256-234-123456
+always genehmig 12346-1345-125-45 should use the nehm-contraction
+begmidword general 1245-14-12456-25 shouldn't use the ge-contraction
+endword general 1245-14-12456-1-123 shouldn't use the ge-contraction
+always generäl 1245-14-12456-345-123 shouldn't use the ge-contraction
 always getreide 12346-2345-1235-146-145-15
 prfword getreiden 12346-2345-1235-146-145-14
 prfword getreides 12346-2345-1235-146-145-123456
@@ -136,24 +217,37 @@ always gottesdienst 1245-135-2345-2345-123456-145-346-1345-23456
 always glastrepp = shouldn't use the st-contraction
 always glucose =
 always glukose =
+always gürtel 1245-1256-1235-2345-13456 shouldn't use the te-contraction
+always guertel 1245-1256-1235-2345-13456 shouldn't use the te-contraction
 before t always habich 125-1-12-3456
 prfword haie =
 always haustier 125-16-234-2345-346-1235
+always häresie 125-345-1235-15-234-346 shouldn't use the es-contraction
+always haeresie 125-345-1235-15-234-346 shouldn't use the es-contraction
+sufword hallen 125-1-12345-14 shouldn't use the allen-contraction
 always health =
 always heidelbeer 125-146-145-13456-12-15-15-1235
+always hetero 125-15-2345-12456-135 shoudln't use the te-contraction
+always hierarch 125-346-1235-356-1456 shouldn't use the hier- nor er-contraction
 before t always hilfs =
 prfword hilfst 125-24-123-124-23456
 always himbeer =
 sufword hirse =
 sufword holunder 125-135-123-256-145-12456
 sufword holunderbeer 125-135-123-256-145-12456-12-15-15-1235
+always hungrig 125-256-1245-1235-45 shouldn't use the ung-contraction
 always hypnose =
 prfword hypnosen 125-6-13456-1234-1345-135-234-14
 always infanterie 35-124-235-2345-12456-346
 prfword infanterien 35-124-235-2345-12456-24-14
 prfword imitat =
+always indoor 35-145-135-135-1235 shouldn't use the or-contraction
+before t always infraro 35-124-1235-1-1235-135
+always insolvenz 35-234-135-123-1236-14-1356 shouldn't use the so-contraction
 always johannis 245-135-125-235-1345-24-234
 always johannisbeer 245-135-125-235-1345-24-234-12-15-15-1235
+always jubiläum = shouldn't use the äu-contraction
+always jubilaeum = shouldn't use the äu-contraction
 before lnr always kamera 13-1-134-12456-1
 before konsonant always kameral 13-1-134-12456-25
 always kameralia 13-1-134-12456-25-24-1
@@ -162,8 +256,23 @@ always kameralist 13-1-134-12456-25-24-23456
 always kameralistisch 13-1-134-12456-25-5-156
 before hilmnrsu always karriere 13-356-1235-24-12456-15
 prfword karrieren 13-356-1235-24-12456-14
+always kavallerie 13-1-1236-1-12345-12456-346 shouldn't use the aller-contraction
+prfword kavallerien 13-1-1236-1-12345-12456-24-14 shouldn't use the aller-contraction
+always kavallerist 13-1-1236-1-12345-12456-24-23456 shouldn't use the aller-contraction
+sufword klang 13-123-235-1245 shouldn't use the lang-contraction
 always klasse 13-123-1-2346-15
 always klassen 13-123-1-2346-14
+always klassifi 13-123-1-2346-24-124-24 shouldn't use the lass-contraction
+always klassisch 13-123-1-2346-24-156 shouldn't use the lass-contraction
+sufword klebe 13-123-15-23 shouldn't use the leb-contraction
+endword klebe 13-123-15-23 shouldn't use the leb-contraction
+endword kleber 13-123-15-12-12456 shouldn't use the leb-contraction
+endword klebern 13-123-15-12-12456-1345 shouldn't use the leb-contraction
+endword klebers 13-123-15-12-12456-234 shouldn't use the leb-contraction
+prfword kleben 13-123-15-12-14
+prfword klebens 13-123-15-12-14-234
+always klebend 13-123-15-12-14-145
+before e always komödi = shouldn't use the ie-contraction
 always koriander 13-135-1235-24-235-145-12456
 always kriteri 13-1235-24-2345-12456-24 shouldn't use the te-contraction
 always kurzbein 13-1356-12-146-1345
@@ -174,8 +283,19 @@ always kurzentrum 13-136-1235-1356-14-2345-1235-136-134
 prfword kurzelle 13-136-1235-1356-15-12345-15
 prfword kurzellen 13-136-1235-1356-15-12345-14
 always kurzhaar 13-1356-125-1-1-1235
+sufword lauf 123-16-124 shouldn't use the auf-contraction
+always laufbahn 123-16-124-12-1-125-1345
+always laufband 123-16-124-12-235-145
+always laufrad 123-16-124-1235-1-145
+always laufstall 123-16-124-23456-1-12345
 always laufwerk 123-16-124-2456-12456-13
+always kreislauf 13-1235-146-234-123-16-124
 always leiterin 123-146-2345-12456-35
+begmidword liberal 123-24-12-12456-25 shouldn't use the be-contraction
+endword liberal 123-24-12-12456-1-123 shouldn't use the be-contraction
+begmidword illiberal 24-123-123-24-12-12456-25 shouldn't use the be-contraction
+endword illiberal 24-123-123-24-12-12456-1-123 shouldn't use the be-contraction
+before cst always lieblings 123-346-12-123-35-1245-234
 always limit =
 always lipizzaner 123-24-1234-24-1356-1356-235-12456
 
@@ -199,16 +319,22 @@ prfword marinesisches 134-356-35-123456-24-156-123456
 
 always matura =
 always maturant 134-1-2345-136-1235-235-2345
+sufword meer =
+always merkmal 134-12456-13-134
 
 before s always mess 134-15-2346
 
+always milieu 134-24-123-24-126 shouldn't use the ie-contraction
 prfword mitte 134-24-2345-236
 prfword mitten 134-24-2345-2345-14
+always mitternacht 134-24-2345-2345-12456-1345-56-2345 shoudln't use the mit-contraction
 always mittlung 134-24-2345-2345-123-136 shouldn't use the mit-contraction
 prfword moore =
 prfword mooren 134-135-135-1235-14
 prfword moores 134-135-135-1235-123456
+always nachwuchs 1345-56-2456-136-1456-234 shouldn't trigger ss- or st-contraction
 always nappaleder 1345-1-1234-1234-1-123-15-145-12456
+begword national 1345-5-1345-25
 begword neuro 1345-126-1235-135
 always olympia =
 
@@ -221,8 +347,14 @@ always ortstein 26-2345-23456-1246
 
 always papagei 1234-1-1234-1-1245-146
 always paprika =
+always patienten 1234-1-2345-24-14-2345-14 shouldn't use the te-contraction
 always pestorahm 1234-15-23456-135-1235-1-125-134
+begword pferde 1234-124-12456-145-15
+always pferderass 1234-124-12456-145-15-1235-1-2346
+endword pferden 1234-124-12456-145-14
+always philosoph = shouldn't use the so-contraction
 before lnr always pizza =
+always prall 1234-1235-1-12345 shouldn't use the aller- or allen-contraction
 always preiselbeer 1234-1235-146-234-13456-12-15-15-1235
 before hilmnrsu always presse 1234-1235-15-2346-15
 prfword pressen 1234-1235-15-2346-14
@@ -235,6 +367,7 @@ prfword pressendes 1234-1235-15-2346-14-145-123456
 always pressendruck 1234-1235-15-2346-14-145-46
 prfword pressens 1234-1235-15-2346-14-234
 always pressentisch 1234-1235-15-2346-14-2345-24-156
+sufword protein 12345-236-35 shouldn't use the ei-contraction
 always rastalock 1235-1-23456-1-123-135-46
 before e always reise 1235-146-234-15
 always relief 1235-13456-24-15-124 shouldn't use the ie-contraction
@@ -242,8 +375,10 @@ always requiem 1235-15-6-12345-24-12356
 
 before hilmnrsu always reserve 1235-123456-12456-1236-15
 prfword reserven 1235-123456-12456-1236-14
+before t always resulta =
 
 always rhabarber 1235-125-1-12-1-1235-12-12456
+always röntgen 1235-246-1345-2345-1245-14 shouldn't use the ge-contraction
 prfword runde 1235-256-145-15
 prfword runden 1235-256-145-14
 sufword sahne =
@@ -263,23 +398,40 @@ midendword samt =
 before l always sauna 234-16-1345-1
 prfword solos =
 prfword soli =
+always speise 234-1234-146-234-15
+prfword speisen 234-1234-146-234-14
+prfword speisend 234-1234-146-234-14-145
+prfword speisende 234-1234-146-234-14-145-15
+always schaufel 156-16-124-13456 shouldn't use the auf-contraction
+always schaufenster 156-16-124-14-23456-12456 shouldn't use the auf-contraction
 before l always schul 156-136-123
+before l always sschul 234-156-136-123
+always scheiben 156-146-12-14
 always schulter 156-136-123-2345-12456 shouldn't use the te-contraction
 always schultragödie 156-136-123-2345-1235-1-1245-246-145-24-15
 always schultragödien 156-136-123-2345-1235-1-1245-246-145-24-14
 always schultrans 156-136-123-2345-1235-235-234 schultransport
+always schüttel 156-1256-2345-2345-13456 shouldn't use the te-contraction
+always schuettel 156-1256-2345-2345-13456 shouldn't use the te-contraction
 before hilmnrsu always see =
+always seelen 234-15-15-123-14
+always serie 234-12456-24-15 shouldn't use the ie-contraction
+always serien 234-12456-24-14 shouldn't use the ie-contraction
 before e always sohl = shouldn't use the so-contraction
 sufword solar 234-135-123-356
+begmidword solidar 234-135-123-24-145-356 shouldn't use the so-contraction
 prfword soße =
 prfword soßen 234-135-6-2346-14
 always sound =
 always soundso 2-1234-2-136-2-1234
 always speer = shouldn't use the er-contraction
-before e always speise 234-1234-146-234-15
+after e always speise 234-1234-146-234-15
+before e always studi 23456-136-145-24 shouldn't use the ie-contraction
+always sturbin 234-2345-136-1235-12-35 gasturbine shouldn't use the st-contraction
 always tabasco =
 always teacher 2345-15-1-1456-12456
 always teaching 2345-15-1-1456-35-1245
+sufword tages 2345-1-1245-123456 shouldn't use the ge-contraction
 before l always teil 2345-146-123
 before hilmnrsu always teilnahme 2345-146-123-1345-134-15
 prfword teilnahmen 2345-146-123-1345-134-14
@@ -290,18 +442,27 @@ begmidword temporal 2345-12356-1234-26-25
 always temporär 2345-12356-1234-26-345-1235
 word tempore 2345-12356-1234-26-15
 always theater 2345-125-15-1-2345-12456 shouldn't use the te-contraction
+always titel 2345-24-2345-13456 shouldn't use the te-contraction
 always tuberkulose 2345-136-12-12456-13-136-123-135-234-15
 prfword tuberkulosen 2345-136-12-12456-13-136-123-135-234-14
 before lnr always tundra 2345-256-145-1235-1
 sufword ultra =
 always ungleich 256-1245-1456 shouldn't use the ung-contraction
 midendword ungsobjek 136-234-135-12-245-15-13 shouldn't use the so-contraction
+sufword vasallen 1236-1-234-1-12345-14 shouldn't use the allen-contraction
 always vegetarier 1236-15-12346-2345-356-24-12456
+begword verwalter 36-2456-25-2345-12456 shouldn't use the te-contraction
+midendword verwalter 1236-12456-2456-25-2345-12456 shouldn't use the te-contraction
+
 before l always vokal 1236-135-13-25
 always völkerkunde 5-1236-13-12456-13-256-145-15
 always wachstum 2456-56-234-2345-136-134
 always wachstums 2456-56-234-2345-136-134-234
-
+before l always wahl =
+always wiese 2456-346-234-15 shouldn't use the wie-contraction
+always wiesen 2456-346-234-14 shouldn't use the wie-contraction
+before cst always wirtschafts 2456-156-234
+before cst always wissenschafts 2456-2346-14-156-234
 before lnr always yoga =
 always ziegel 1356-346-1245-13456 shouldn't use the ge-contraction
 always zugbegleiter 1356-136-1245-23-1245-123-146-2345-12456
@@ -309,16 +470,21 @@ always zugkraft 1356-136-1245-13-124
 always zugkräft 1356-136-1245-5-13-124
 word zugmitte 1356-136-1245-134-24-2345-236
 always zugtempo 1356-136-1245-2345-12356-1234-135
+always zweitausend 1356-2456-146-2345-16-234-14-145 shouldn't use the weit-contraction
 always zwilling 1356-2456-24-12345-35-1245
 prfword zwillinge 1356-2456-24-12345-35-12346
 before konsonant always zwillings 1356-2456-24-12345-35-1245-234
 always zypressen 1356-6-13456-1234-1235-15-2346-14
 
 # Doppelvokale
+always cherokee 1456-12456-135-13-15-15
 always erdbeer 12456-145-12-15-15-1235
 always waldbeer 2456-25-145-12-15-15-1235
 always zwergerdbeer 1356-2456-12456-1245-12456-145-12-15-15-1235
 always frisbee 124-1235-24-234-12-15-15
+always haar =
+always heer =
+always leer =
 always kaffee =
 always coffee 6-14-135-124-124-15-15
 always toffee 2345-135-124-124-15-15
