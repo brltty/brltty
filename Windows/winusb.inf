@@ -338,6 +338,27 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Device: 1FE4:008B
 "winusb: HandyTech [Basic Braille 160]"=USB_Install, USB\VID_1FE4&PID_008B
 
+; Device: 1FE4:0092
+"winusb: HandyTech [Basic Braille 20 Plus]"=USB_Install, USB\VID_1FE4&PID_0092
+
+; Device: 1FE4:0093
+"winusb: HandyTech [Basic Braille 32 Plus]"=USB_Install, USB\VID_1FE4&PID_0093
+
+; Device: 1FE4:0094
+"winusb: HandyTech [Basic Braille 40 Plus]"=USB_Install, USB\VID_1FE4&PID_0094
+
+; Device: 1FE4:0096
+"winusb: HandyTech [Basic Braille 64 Plus]"=USB_Install, USB\VID_1FE4&PID_0096
+
+; Device: 1FE4:0097
+"winusb: HandyTech [Basic Braille 80 Plus]"=USB_Install, USB\VID_1FE4&PID_0097
+
+; Device: 1FE4:009A
+"winusb: HandyTech [Basic Braille 48 Plus]"=USB_Install, USB\VID_1FE4&PID_009A
+
+; Device: 1FE4:009C
+"winusb: HandyTech [Basic Braille 84 Plus]"=USB_Install, USB\VID_1FE4&PID_009C
+
 ; Device: 1FE4:00A4
 "winusb: HandyTech [Activator]"=USB_Install, USB\VID_1FE4&PID_00A4
 
@@ -717,6 +738,27 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 1FE4:008B
 "winusb: HandyTech [Basic Braille 160]"=USB_Install, USB\VID_1FE4&PID_008B
+
+; Device: 1FE4:0092
+"winusb: HandyTech [Basic Braille 20 Plus]"=USB_Install, USB\VID_1FE4&PID_0092
+
+; Device: 1FE4:0093
+"winusb: HandyTech [Basic Braille 32 Plus]"=USB_Install, USB\VID_1FE4&PID_0093
+
+; Device: 1FE4:0094
+"winusb: HandyTech [Basic Braille 40 Plus]"=USB_Install, USB\VID_1FE4&PID_0094
+
+; Device: 1FE4:0096
+"winusb: HandyTech [Basic Braille 64 Plus]"=USB_Install, USB\VID_1FE4&PID_0096
+
+; Device: 1FE4:0097
+"winusb: HandyTech [Basic Braille 80 Plus]"=USB_Install, USB\VID_1FE4&PID_0097
+
+; Device: 1FE4:009A
+"winusb: HandyTech [Basic Braille 48 Plus]"=USB_Install, USB\VID_1FE4&PID_009A
+
+; Device: 1FE4:009C
+"winusb: HandyTech [Basic Braille 84 Plus]"=USB_Install, USB\VID_1FE4&PID_009C
 
 ; Device: 1FE4:00A4
 "winusb: HandyTech [Activator]"=USB_Install, USB\VID_1FE4&PID_00A4

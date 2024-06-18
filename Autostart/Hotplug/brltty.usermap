@@ -449,6 +449,34 @@ brltty 0x0003 0x1fe4 0x008a
 # HandyTech [Basic Braille 160]
 brltty 0x0003 0x1fe4 0x008b
 
+# Device: 1FE4:0092
+# HandyTech [Basic Braille 20 Plus]
+brltty 0x0003 0x1fe4 0x0092
+
+# Device: 1FE4:0093
+# HandyTech [Basic Braille 32 Plus]
+brltty 0x0003 0x1fe4 0x0093
+
+# Device: 1FE4:0094
+# HandyTech [Basic Braille 40 Plus]
+brltty 0x0003 0x1fe4 0x0094
+
+# Device: 1FE4:0096
+# HandyTech [Basic Braille 64 Plus]
+brltty 0x0003 0x1fe4 0x0096
+
+# Device: 1FE4:0097
+# HandyTech [Basic Braille 80 Plus]
+brltty 0x0003 0x1fe4 0x0097
+
+# Device: 1FE4:009A
+# HandyTech [Basic Braille 48 Plus]
+brltty 0x0003 0x1fe4 0x009a
+
+# Device: 1FE4:009C
+# HandyTech [Basic Braille 84 Plus]
+brltty 0x0003 0x1fe4 0x009c
+
 # Device: 1FE4:00A4
 # HandyTech [Activator]
 brltty 0x0003 0x1fe4 0x00a4

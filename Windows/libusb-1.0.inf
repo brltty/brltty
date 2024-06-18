@@ -353,6 +353,27 @@ HKR,,Icon,,-20
 ; Device: 1FE4:008B
 "LibUSB-1.0: HandyTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
 
+; Device: 1FE4:0092
+"LibUSB-1.0: HandyTech [Basic Braille 20 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0092
+
+; Device: 1FE4:0093
+"LibUSB-1.0: HandyTech [Basic Braille 32 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0093
+
+; Device: 1FE4:0094
+"LibUSB-1.0: HandyTech [Basic Braille 40 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0094
+
+; Device: 1FE4:0096
+"LibUSB-1.0: HandyTech [Basic Braille 64 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0096
+
+; Device: 1FE4:0097
+"LibUSB-1.0: HandyTech [Basic Braille 80 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0097
+
+; Device: 1FE4:009A
+"LibUSB-1.0: HandyTech [Basic Braille 48 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_009A
+
+; Device: 1FE4:009C
+"LibUSB-1.0: HandyTech [Basic Braille 84 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_009C
+
 ; Device: 1FE4:00A4
 "LibUSB-1.0: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
 
@@ -732,6 +753,27 @@ HKR,,Icon,,-20
 
 ; Device: 1FE4:008B
 "LibUSB-1.0: HandyTech [Basic Braille 160]"=LIBUSB_DEV, USB\VID_1FE4&PID_008B
+
+; Device: 1FE4:0092
+"LibUSB-1.0: HandyTech [Basic Braille 20 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0092
+
+; Device: 1FE4:0093
+"LibUSB-1.0: HandyTech [Basic Braille 32 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0093
+
+; Device: 1FE4:0094
+"LibUSB-1.0: HandyTech [Basic Braille 40 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0094
+
+; Device: 1FE4:0096
+"LibUSB-1.0: HandyTech [Basic Braille 64 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0096
+
+; Device: 1FE4:0097
+"LibUSB-1.0: HandyTech [Basic Braille 80 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_0097
+
+; Device: 1FE4:009A
+"LibUSB-1.0: HandyTech [Basic Braille 48 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_009A
+
+; Device: 1FE4:009C
+"LibUSB-1.0: HandyTech [Basic Braille 84 Plus]"=LIBUSB_DEV, USB\VID_1FE4&PID_009C
 
 ; Device: 1FE4:00A4
 "LibUSB-1.0: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4

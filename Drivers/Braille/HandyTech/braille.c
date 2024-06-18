@@ -1346,6 +1346,55 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .data=&usbOperations3
     },
 
+    { /* Basic Braille 20 Plus */
+      .vendor=0X1FE4, .product=0X0092,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Basic Braille 32 Plus */
+      .vendor=0X1FE4, .product=0X0093,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Basic Braille 40 Plus */
+      .vendor=0X1FE4, .product=0X0094,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Basic Braille 64 Plus */
+      .vendor=0X1FE4, .product=0X0096,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Basic Braille 80 Plus */
+      .vendor=0X1FE4, .product=0X0097,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Basic Braille 48 Plus */
+      .vendor=0X1FE4, .product=0X009A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Basic Braille 84 Plus */
+      .vendor=0X1FE4, .product=0X009C,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
     { /* Actilino */
       .vendor=0X1FE4, .product=0X0061,
       .configuration=1, .interface=0, .alternative=0,

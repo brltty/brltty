@@ -434,6 +434,34 @@
   <!-- HandyTech [Basic Braille 160] -->
   <usb-device vendor-id="8164" product-id="139" />
 
+  <!-- Device: 1FE4:0092 -->
+  <!-- HandyTech [Basic Braille 20 Plus] -->
+  <usb-device vendor-id="8164" product-id="146" />
+
+  <!-- Device: 1FE4:0093 -->
+  <!-- HandyTech [Basic Braille 32 Plus] -->
+  <usb-device vendor-id="8164" product-id="147" />
+
+  <!-- Device: 1FE4:0094 -->
+  <!-- HandyTech [Basic Braille 40 Plus] -->
+  <usb-device vendor-id="8164" product-id="148" />
+
+  <!-- Device: 1FE4:0096 -->
+  <!-- HandyTech [Basic Braille 64 Plus] -->
+  <usb-device vendor-id="8164" product-id="150" />
+
+  <!-- Device: 1FE4:0097 -->
+  <!-- HandyTech [Basic Braille 80 Plus] -->
+  <usb-device vendor-id="8164" product-id="151" />
+
+  <!-- Device: 1FE4:009A -->
+  <!-- HandyTech [Basic Braille 48 Plus] -->
+  <usb-device vendor-id="8164" product-id="154" />
+
+  <!-- Device: 1FE4:009C -->
+  <!-- HandyTech [Basic Braille 84 Plus] -->
+  <usb-device vendor-id="8164" product-id="156" />
+
   <!-- Device: 1FE4:00A4 -->
   <!-- HandyTech [Activator] -->
   <usb-device vendor-id="8164" product-id="164" />

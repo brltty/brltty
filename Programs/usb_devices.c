@@ -458,6 +458,34 @@ USB_DEVICE_ENTRY(0X1FE4, 0X008A, "ht"),
 // HandyTech [Basic Braille 160]
 USB_DEVICE_ENTRY(0X1FE4, 0X008B, "ht"),
 
+// Device: 1FE4:0092
+// HandyTech [Basic Braille 20 Plus]
+USB_DEVICE_ENTRY(0X1FE4, 0X0092, "ht"),
+
+// Device: 1FE4:0093
+// HandyTech [Basic Braille 32 Plus]
+USB_DEVICE_ENTRY(0X1FE4, 0X0093, "ht"),
+
+// Device: 1FE4:0094
+// HandyTech [Basic Braille 40 Plus]
+USB_DEVICE_ENTRY(0X1FE4, 0X0094, "ht"),
+
+// Device: 1FE4:0096
+// HandyTech [Basic Braille 64 Plus]
+USB_DEVICE_ENTRY(0X1FE4, 0X0096, "ht"),
+
+// Device: 1FE4:0097
+// HandyTech [Basic Braille 80 Plus]
+USB_DEVICE_ENTRY(0X1FE4, 0X0097, "ht"),
+
+// Device: 1FE4:009A
+// HandyTech [Basic Braille 48 Plus]
+USB_DEVICE_ENTRY(0X1FE4, 0X009A, "ht"),
+
+// Device: 1FE4:009C
+// HandyTech [Basic Braille 84 Plus]
+USB_DEVICE_ENTRY(0X1FE4, 0X009C, "ht"),
+
 // Device: 1FE4:00A4
 // HandyTech [Activator]
 USB_DEVICE_ENTRY(0X1FE4, 0X00A4, "ht"),

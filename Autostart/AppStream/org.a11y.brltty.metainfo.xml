@@ -469,6 +469,34 @@
     <!-- HandyTech [Basic Braille 160] -->
     <modalias>usb:v1FE4p008B*</modalias>
 
+    <!-- Device: 1FE4:0092 -->
+    <!-- HandyTech [Basic Braille 20 Plus] -->
+    <modalias>usb:v1FE4p0092*</modalias>
+
+    <!-- Device: 1FE4:0093 -->
+    <!-- HandyTech [Basic Braille 32 Plus] -->
+    <modalias>usb:v1FE4p0093*</modalias>
+
+    <!-- Device: 1FE4:0094 -->
+    <!-- HandyTech [Basic Braille 40 Plus] -->
+    <modalias>usb:v1FE4p0094*</modalias>
+
+    <!-- Device: 1FE4:0096 -->
+    <!-- HandyTech [Basic Braille 64 Plus] -->
+    <modalias>usb:v1FE4p0096*</modalias>
+
+    <!-- Device: 1FE4:0097 -->
+    <!-- HandyTech [Basic Braille 80 Plus] -->
+    <modalias>usb:v1FE4p0097*</modalias>
+
+    <!-- Device: 1FE4:009A -->
+    <!-- HandyTech [Basic Braille 48 Plus] -->
+    <modalias>usb:v1FE4p009A*</modalias>
+
+    <!-- Device: 1FE4:009C -->
+    <!-- HandyTech [Basic Braille 84 Plus] -->
+    <modalias>usb:v1FE4p009C*</modalias>
+
     <!-- Device: 1FE4:00A4 -->
     <!-- HandyTech [Activator] -->
     <modalias>usb:v1FE4p00A4*</modalias>
