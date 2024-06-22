@@ -18,7 +18,7 @@
 
 DRIVER_CODE = ht
 DRIVER_NAME = HandyTech
-DRIVER_USAGE = Modular 20/40/80, Modular Evolution 64/88, Modular Connect 88, Active Braille, Active Braille S, Active Star 40, Actilino, Activator, Basic Braille 16/20/32/40/48/64/80, Basic Braille Plus 20/32/40/48/64/80/84, Braille Wave, Braillino, Easy Braille, Braille Star 40/80, Connect Braille 40, Bookworm
+DRIVER_USAGE = Modular 20/40/80, Modular Evolution 64/88, Modular Connect 88, Active Braille, Active Braille S, Active Star 40, Actilino, Activator, Activator Pro 64/80, Basic Braille 16/20/32/40/48/64/80, Basic Braille Plus 20/32/40/48/64/80/84, Braille Wave, Braillino, Easy Braille, Braille Star 40/80, Connect Braille 40, Bookworm
 DRIVER_VERSION = 0.6
 DRIVER_DEVELOPERS = Andreas Gross <andi.gross@gmx.de>, Dave Mielke <dave@mielke.cc>, Mario Lang <mlang@delysid.org>
 include $(SRC_TOP)braille.mk

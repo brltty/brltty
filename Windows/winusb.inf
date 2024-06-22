@@ -362,6 +362,12 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Device: 1FE4:00A4
 "winusb: HandyTech [Activator]"=USB_Install, USB\VID_1FE4&PID_00A4
 
+; Device: 1FE4:00A6
+"winusb: HandyTech [Activator Pro 68]"=USB_Install, USB\VID_1FE4&PID_00A6
+
+; Device: 1FE4:00A8
+"winusb: HandyTech [Activator Pro 84]"=USB_Install, USB\VID_1FE4&PID_00A8
+
 ; Device: 4242:0001
 "winusb: Pegasus [all models]"=USB_Install, USB\VID_4242&PID_0001
 
@@ -762,6 +768,12 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 1FE4:00A4
 "winusb: HandyTech [Activator]"=USB_Install, USB\VID_1FE4&PID_00A4
+
+; Device: 1FE4:00A6
+"winusb: HandyTech [Activator Pro 68]"=USB_Install, USB\VID_1FE4&PID_00A6
+
+; Device: 1FE4:00A8
+"winusb: HandyTech [Activator Pro 84]"=USB_Install, USB\VID_1FE4&PID_00A8
 
 ; Device: 4242:0001
 "winusb: Pegasus [all models]"=USB_Install, USB\VID_4242&PID_0001

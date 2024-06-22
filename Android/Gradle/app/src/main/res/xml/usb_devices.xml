@@ -467,6 +467,14 @@
   <!-- HandyTech [Activator] -->
   <usb-device vendor-id="8164" product-id="164" />
 
+  <!-- Device: 1FE4:00A6 -->
+  <!-- HandyTech [Activator Pro 68] -->
+  <usb-device vendor-id="8164" product-id="166" />
+
+  <!-- Device: 1FE4:00A8 -->
+  <!-- HandyTech [Activator Pro 84] -->
+  <usb-device vendor-id="8164" product-id="168" />
+
   <!-- Device: 4242:0001 -->
   <!-- Pegasus [all models] -->
   <usb-device vendor-id="16962" product-id="1" />

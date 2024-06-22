@@ -54,7 +54,9 @@ typedef enum {
   HT_MODEL_BasicBraillePlus80  = 0X97,
   HT_MODEL_BasicBraillePlus48  = 0X9A,
   HT_MODEL_BasicBraillePlus84  = 0X9C,
-  HT_MODEL_Activator           = 0XA4
+  HT_MODEL_Activator           = 0XA4,
+  HT_MODEL_ActivatorPro64      = 0XA6,
+  HT_MODEL_ActivatorPro80      = 0XA8,
 } HT_ModelIdentifier;
 
 /* Packet definition */
@@ -85,6 +87,7 @@ typedef enum {
   HT_EXTPKT_ReadingPosition       = 0X55,
   HT_EXTPKT_SetFirmness           = 0X60,
   HT_EXTPKT_GetFirmness           = 0X61,
+  HT_EXTPKT_USBNoReconnect        = 0XAE,
   HT_EXTPKT_GetProtocolProperties = 0XC1,
   HT_EXTPKT_GetFirmwareVersion    = 0XC2
 } HT_ExtendedPacketType;

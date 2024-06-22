@@ -502,6 +502,14 @@
     <!-- HandyTech [Activator] -->
     <modalias>usb:v1FE4p00A4*</modalias>
 
+    <!-- Device: 1FE4:00A6 -->
+    <!-- HandyTech [Activator Pro 68] -->
+    <modalias>usb:v1FE4p00A6*</modalias>
+
+    <!-- Device: 1FE4:00A8 -->
+    <!-- HandyTech [Activator Pro 84] -->
+    <modalias>usb:v1FE4p00A8*</modalias>
+
     <!-- Device: 4242:0001 -->
     <!-- Pegasus [all models] -->
     <modalias>usb:v4242p0001*</modalias>
