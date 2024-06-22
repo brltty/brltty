@@ -377,6 +377,12 @@ HKR,,Icon,,-20
 ; Device: 1FE4:00A4
 "LibUSB-1.0: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
 
+; Device: 1FE4:00A6
+"LibUSB-1.0: HandyTech [Activator Pro 68]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A6
+
+; Device: 1FE4:00A8
+"LibUSB-1.0: HandyTech [Activator Pro 84]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A8
+
 ; Device: 4242:0001
 "LibUSB-1.0: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
 
@@ -777,6 +783,12 @@ HKR,,Icon,,-20
 
 ; Device: 1FE4:00A4
 "LibUSB-1.0: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
+
+; Device: 1FE4:00A6
+"LibUSB-1.0: HandyTech [Activator Pro 68]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A6
+
+; Device: 1FE4:00A8
+"LibUSB-1.0: HandyTech [Activator Pro 84]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A8
 
 ; Device: 4242:0001
 "LibUSB-1.0: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001

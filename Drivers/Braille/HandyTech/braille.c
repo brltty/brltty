@@ -550,6 +550,32 @@ static const ModelEntry modelTable[] = {
     .hasTime = 1
   },
 
+  { .identifier = HT_MODEL_ActivatorPro64,
+    .name = "Activator Pro 64",
+    .textCells = 64,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1
+  },
+
+  { .identifier = HT_MODEL_ActivatorPro80,
+    .name = "Activator Pro 80",
+    .textCells = 80,
+    .statusCells = 0,
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .interpretByte = interpretByte_key,
+    .writeCells = writeCells_Evolution,
+    .setBrailleFirmness = setBrailleFirmness,
+    .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
+    .hasATC = 1,
+    .hasTime = 1
+  },
+
   { .identifier = HT_MODEL_ActiveStar40,
     .name = "Active Star 40",
     .textCells = 40,
@@ -1404,6 +1430,20 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 
     { /* Activator */
       .vendor=0X1FE4, .product=0X00A4,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Activator Pro 64 */
+      .vendor=0X1FE4, .product=0X00A6,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&usbOperations3
+    },
+
+    { /* Activator Pro 80 */
+      .vendor=0X1FE4, .product=0X00A8,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&usbOperations3
