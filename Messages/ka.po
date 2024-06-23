@@ -1,0 +1,4388 @@
+# Georgian translation for brltty.
+# Copyright (C) 2024 The BRLTTY Developers
+# This file is distributed under the same license as the brltty package.
+# Temuri Doghonadze <temuri.doghonadze@gmail.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: brltty 6.6\n"
+"Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
+"POT-Creation-Date: 2024-06-21 06:20+0200\n"
+"PO-Revision-Date: 2024-06-23 06:10+0200\n"
+"Last-Translator: Temuri Doghonadze <temuri.doghonadze@gmail.com>\n"
+"Language-Team: Georgian <(nothing)>\n"
+"Language: ka\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.3.2\n"
+
+#: Programs/brltty.c:209
+#, c-format
+msgid "\"%s\" started as \"%s\"\n"
+msgstr "\"%s\" გაეშვა, როგორც \"%s\"\n"
+
+#. xgettext: This phrase describes the colour of a character on the screen.
+#. xgettext: %1$s is the (already translated) foreground colour.
+#. xgettext: %2$s is the (already translated) background colour.
+#: Programs/cmd_utils.c:185
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%1$s - %2$s"
+
+#. xgettext: This is how to say when the time is exactly on (i.e. zero minutes after) an hour.
+#. xgettext: (%u represents the number of hours)
+#: Programs/cmd_miscellaneous.c:89
+#, c-format
+msgid "%u o'clock"
+msgid_plural "%u o'clock"
+msgstr[0] "%u საათი"
+msgstr[1] "%u საათი"
+
+#. xgettext: This is a number (%u) of seconds (time units).
+#: Programs/cmd_miscellaneous.c:107
+#, c-format
+msgid "%u second"
+msgid_plural "%u seconds"
+msgstr[0] "%u წამი"
+msgstr[1] "%u წამი"
+
+#: Programs/menu_prefs.c:543 Programs/menu_prefs.c:544
+#: Programs/menu_prefs.c:546 Programs/menu_prefs.c:547
+#: Programs/menu_prefs.c:550 Programs/menu_prefs.c:551
+#: Programs/menu_prefs.c:552 Programs/menu_prefs.c:554
+#: Programs/menu_prefs.c:555 Programs/menu_prefs.c:561
+msgid "1 cell"
+msgstr "1 უჯრედი"
+
+#: Programs/menu_prefs.c:902
+msgid "1 second"
+msgstr "1 წამი"
+
+#: Programs/menu_prefs.c:964
+msgid "10 seconds"
+msgstr "10 წამი"
+
+#: Programs/menu_prefs.c:1291
+msgid "12 Hour"
+msgstr "12 საათი"
+
+#: Programs/menu_prefs.c:542 Programs/menu_prefs.c:545
+#: Programs/menu_prefs.c:548 Programs/menu_prefs.c:549
+#: Programs/menu_prefs.c:553
+msgid "2 cells"
+msgstr "2 უჯრედი"
+
+#: Programs/menu_prefs.c:903
+msgid "2 seconds"
+msgstr "2 წამი"
+
+#: Programs/menu_prefs.c:965
+msgid "20 seconds"
+msgstr "20 წამი"
+
+#: Programs/menu_prefs.c:1290
+msgid "24 Hour"
+msgstr "24 საათი"
+
+#: Programs/menu_prefs.c:900
+msgid "250 milliseconds"
+msgstr "250 მილიწამი"
+
+#: Programs/menu_prefs.c:557 Programs/menu_prefs.c:558
+#: Programs/menu_prefs.c:559 Programs/menu_prefs.c:560
+msgid "3 cells"
+msgstr "3 უჯრედი"
+
+#: Programs/menu_prefs.c:966
+msgid "40 seconds"
+msgstr "40 წამი"
+
+#: Programs/menu_prefs.c:963
+msgid "5 seconds"
+msgstr "5 წამი"
+
+#: Programs/menu_prefs.c:901
+msgid "500 milliseconds"
+msgstr "500 მილიწამი"
+
+#: Programs/menu_prefs.c:734
+msgid "6-dot"
+msgstr "6-წერტილი"
+
+#: Programs/brltty-ttb.c:169
+msgid "8-bit character set to use."
+msgstr "სიმბოლოების 8-ბიტიანი ნაკრების სახელი, გამოსაყენებლად."
+
+#: Programs/menu_prefs.c:733
+msgid "8-dot"
+msgstr "8-წერტილი"
+
+#: Programs/scr_menu.c:104
+msgid "<off>"
+msgstr "<გამორთ>"
+
+#. xgettext: This is the description of the PASSAT command.
+#: Programs/cmds.auto.h:1487
+msgid "AT (set 2) keyboard scan code"
+msgstr "AT (კომპლექტი 2) კლავიატურის სკანირების კოდი"
+
+#. xgettext: This is the name of MIDI musical instrument #22 (in the Organ group).
+#: Programs/midi.c:145
+msgid "Accordion"
+msgstr "აკორდეონი"
+
+#. Bass
+#. xgettext: This is the name of MIDI musical instrument #33 (in the Bass group).
+#: Programs/midi.c:180
+msgid "Acoustic Bass"
+msgstr "აკუსტიკური ბასი"
+
+#. Piano
+#. xgettext: This is the name of MIDI musical instrument #1 (in the Piano group).
+#: Programs/midi.c:80
+msgid "Acoustic Grand Piano"
+msgstr "აკუსტიკური დიდი ფორტეპიანო"
+
+#. Guitar
+#. xgettext: This is the name of MIDI musical instrument #25 (in the Guitar group).
+#: Programs/midi.c:155
+msgid "Acoustic Guitar (nylon)"
+msgstr "აკუსტიკური გიტარა (ნეილონი)"
+
+#. xgettext: This is the name of MIDI musical instrument #26 (in the Guitar group).
+#: Programs/midi.c:158
+msgid "Acoustic Guitar (steel)"
+msgstr "აკუსტიკური გიტარა (ფოლადი)"
+
+#: Programs/menu_prefs.c:1317
+msgid "After Time"
+msgstr "დროის შემდეგ"
+
+#. xgettext: This is the name of MIDI musical instrument #114 (in the Percussive group).
+#: Programs/midi.c:434
+msgid "Agogo"
+msgstr "აგეგო"
+
+#: Programs/menu_prefs.c:1505
+msgid "Alert"
+msgstr "გაფრთხილება"
+
+#: Programs/menu_prefs.c:1106
+msgid "Alert Dots"
+msgstr "გაფრთხილების წერტილები"
+
+#: Programs/menu_prefs.c:1111
+msgid "Alert Messages"
+msgstr "გაფრთხილების შეტყობინებები"
+
+#: Programs/menu_prefs.c:1051
+msgid "Alert Tunes"
+msgstr "გამაფრთხილებელი მელოდიები"
+
+#: Programs/menu_prefs.c:866 Programs/menu_prefs.c:1208
+msgid "All"
+msgstr "ყველა"
+
+#: Programs/menu_prefs.c:555
+msgid "Alphabetic Cursor Coordinates"
+msgstr "ალფაბეტური კურსორის კოორდინატები"
+
+#: Programs/menu_prefs.c:554
+msgid "Alphabetic Window Coordinates"
+msgstr "ალფაბეტური ფანჯრის კოორდინატები"
+
+#. xgettext: This is the name of MIDI musical instrument #66 (in the Reed group).
+#: Programs/midi.c:283
+msgid "Alto Saxophone"
+msgstr "ალტო საქსოფონე"
+
+#. xgettext: This is the name of MIDI musical instrument #127 (in the Sound Effects group).
+#: Programs/midi.c:474
+msgid "Applause"
+msgstr "ტაში"
+
+#: Programs/log.c:113
+msgid "Async Events"
+msgstr "ასინქრონული მოვლენები"
+
+#: Programs/menu_prefs.c:808
+msgid "Attributes Blink Period"
+msgstr "ატრიბუტის ციმციმის პერიოდი"
+
+#: Programs/menu_prefs.c:816
+msgid "Attributes Percent Visible"
+msgstr "ატრიბუტების პროცენტულობის ხილვადობა"
+
+#: Programs/menu_prefs.c:1420
+msgid "Attributes Table"
+msgstr "ატრიბუტები ცხრილი"
+
+#: Programs/xbrlapi.c:1194
+msgid ""
+"Augment an X session by supporting input typed on the braille device, "
+"showing the title of the focused window on the braille display, and "
+"switching braille focus to it."
+msgstr ""
+"გააუმჯობესეთ X-ის სესია ბრაილის მოწყობილობაზე შეყვანის მხარდაჭერით, ფოკუსის "
+"მქონე ფანჯრის სათაურის ბრაილის ეკრანზე ჩვენებით და ბრაილის ფოკუსის ზედ "
+"გადართვით."
+
+#: Programs/alert.c:174
+msgid "Autorelease"
+msgstr "ავტომატური განბლოკვა"
+
+#: Programs/menu_prefs.c:969
+msgid "Autorelease Time"
+msgstr "ავტომატური განბლოკვის დრო"
+
+#: Programs/menu_prefs.c:986
+msgid "Autorepeat Enabled"
+msgstr "ავტომატური გამეორება ჩართულია"
+
+#: Programs/menu_prefs.c:992
+msgid "Autorepeat Interval"
+msgstr "ავტომატური გამეორების ინტერვალი"
+
+#: Programs/menu_prefs.c:999
+msgid "Autorepeat Panning"
+msgstr "პანორამული ავტომატური გამეორება"
+
+#: Programs/menu_prefs.c:1133
+msgid "Autospeak"
+msgstr "ავტომატური საუბარი"
+
+#: Programs/menu_prefs.c:1130
+msgid "Autospeak Options"
+msgstr "ავტომატური საუბრის მორგება"
+
+#: Programs/config.c:2138
+msgid "BRLTTY stopped"
+msgstr "BRLTTY შეჩერებულია"
+
+#. xgettext: This is the name of MIDI musical instrument #110 (in the Ethnic group).
+#: Programs/midi.c:421
+msgid "Bag Pipe"
+msgstr "გუდასტვირი"
+
+#. xgettext: This is the name of MIDI musical instrument #106 (in the Ethnic group).
+#: Programs/midi.c:409
+msgid "Banjo"
+msgstr "ბანჯო"
+
+#. xgettext: This is the name of MIDI musical instrument #68 (in the Reed group).
+#: Programs/midi.c:289
+msgid "Baritone Saxophone"
+msgstr "ბარიტონ საქსოფონი"
+
+#. xgettext: This is the name of MIDI musical instrument group #5.
+#: Programs/midi.c:37
+msgid "Bass"
+msgstr "ბასი"
+
+#. xgettext: This is the name of MIDI musical instrument #71 (in the Reed group).
+#: Programs/midi.c:298
+msgid "Bassoon"
+msgstr "ბასუნი"
+
+#: Programs/menu_prefs.c:1058
+msgid "Beeper"
+msgstr "პეიჯერი"
+
+#: Programs/menu_prefs.c:1316
+msgid "Before Time"
+msgstr "დაწყებამდე"
+
+#. xgettext: This is the name of MIDI musical instrument #124 (in the Sound Effects group).
+#: Programs/midi.c:465
+msgid "Bird Tweet"
+msgstr "ჩიტის ჭიკჭიკი"
+
+#: Programs/menu_prefs.c:802
+msgid "Blinking Attributes"
+msgstr "ციმციმის ატრიბუტები"
+
+#: Programs/menu_prefs.c:824
+msgid "Blinking Capitals"
+msgstr "ციმციმა დიდი ასოები"
+
+#: Programs/menu_prefs.c:775
+msgid "Blinking Screen Cursor"
+msgstr "მოციმციმე კურსორი"
+
+#: Programs/menu_prefs.c:1262
+msgid "Blinking Speech Cursor"
+msgstr "საუბრის მოციმციმე კურსორი"
+
+#: Programs/menu_prefs.c:665 Programs/menu_prefs.c:1376
+msgid "Block"
+msgstr "ბლოკი"
+
+#. xgettext: This is the name of MIDI musical instrument #77 (in the Pipe group).
+#: Programs/midi.c:317
+msgid "Blown Bottle"
+msgstr "გასაბერი ბოთლი"
+
+#: Programs/log.c:143
+msgid "Bluetooth I/O"
+msgstr "ბლუთუზის I/O"
+
+#: Programs/config.c:1907
+msgid "Braille Device"
+msgstr "ბრაილის მოწყობილობა"
+
+#: Programs/log.c:155
+msgid "Braille Driver Events"
+msgstr "ბრაილის დრაივერის მოვლენები"
+
+#: Programs/menu_prefs.c:753
+msgid "Braille Firmness"
+msgstr "ბრაილის წერტილების სიმაგრე"
+
+#: Programs/log.c:77
+msgid "Braille Key Events"
+msgstr "ბრაილის ღილაკების მოვლენები"
+
+#: Programs/menu_prefs.c:699
+msgid "Braille Presentation"
+msgstr "ბრაილის პრეზენტაცია"
+
+#: Programs/menu_prefs.c:1403
+msgid "Braille Tables"
+msgstr "ბრაილის ცხრილები"
+
+#: Programs/menu_prefs.c:934
+msgid "Braille Typing"
+msgstr "ბრაილის აკრეფა"
+
+#: Programs/menu_prefs.c:707
+msgid "Braille Variant"
+msgstr "ბრაილის ვარიანტი"
+
+#: Programs/menu_prefs.c:887
+msgid "Braille Window Overlap"
+msgstr "ბრაილის ფანჯრის გადაფარვა"
+
+#: Programs/config.c:410
+#, c-format
+msgid "Braille driver code (%s, %s, or one of {%s})."
+msgstr "ბრაილის დრაივერის კოდი (%s, %s, ერთ-ერთი სიიდან {%s})."
+
+#: Programs/brltty-ktb.c:47
+msgid "Braille driver code."
+msgstr "ბრაილის დრაივერის კოდი."
+
+#. xgettext: This is the name of MIDI musical instrument group #8.
+#: Programs/midi.c:46
+msgid "Brass"
+msgstr "სასულე საკრავები"
+
+#. xgettext: This is the name of MIDI musical instrument #62 (in the Brass group).
+#: Programs/midi.c:270
+msgid "Brass Section"
+msgstr "სასულე საკრავები"
+
+#. xgettext: This is the name of MIDI musical instrument #122 (in the Sound Effects group).
+#: Programs/midi.c:459
+msgid "Breath Noise"
+msgstr "სუნთქვის ხმა"
+
+#. xgettext: This is the name of MIDI musical instrument #2 (in the Piano group).
+#: Programs/midi.c:83
+msgid "Bright Acoustic Piano"
+msgstr "აკუსტიკური დიდი ფორტეპიანო"
+
+#: Programs/xbrlapi.c:105
+msgid "BrlAPI authorization/authentication schemes"
+msgstr "BrlAPI -ის ავტორიზაციის/ავთენტიკაციის სქემები"
+
+#: Programs/xbrlapi.c:98
+msgid "BrlAPI host and/or port to connect to"
+msgstr "BrlAPI-ის ჰოსტი ან/და პორტი"
+
+#: Programs/menu_prefs.c:1438
+msgid "Build Information"
+msgstr "აგების ინფორმაცია"
+
+#: Programs/menu_prefs.c:726
+msgid "Capitalization Mode"
+msgstr "რეგისტრის რეჟიმი"
+
+#: Programs/menu_prefs.c:829
+msgid "Capitals Blink Period"
+msgstr "მაღალი რეგისტრის სიმბოლოების ციმციმის პერიოდი"
+
+#: Programs/menu_prefs.c:837
+msgid "Capitals Percent Visible"
+msgstr "მაღალი რეგისტრის მქონე პროცენტის ხილვადობა"
+
+#: Programs/menu_prefs.c:1528
+msgid "Category Log Level"
+msgstr "ჟურნალის კატეგორიის დონე"
+
+#. Chromatic Percussion
+#. xgettext: This is the name of MIDI musical instrument #9 (in the Chromatic Percussion group).
+#: Programs/midi.c:105
+msgid "Celesta"
+msgstr "ჩელესტა"
+
+#. xgettext: This is the name of MIDI musical instrument #43 (in the Strings group).
+#: Programs/midi.c:211
+msgid "Cello"
+msgstr "ჩელო"
+
+#: Programs/brltty-atb.c:49
+msgid "Check an attributes table."
+msgstr "ატრიბუტების ცხრილის შემოწმება."
+
+#: Programs/brltty-ttb.c:2513
+msgid ""
+"Check/edit a text (computer braille) table, or convert it from one format to "
+"another."
+msgstr ""
+"ტექსტის (კომპიუტერის ბრაილის) ცხრილის შემოწმება/ჩასწორება, ან ერთი "
+"ფორმატიდან მეორეში გადაყვანა."
+
+#: Programs/brltty-ctb.c:449
+msgid ""
+"Check/validate a contraction (literary braille) table, or translate text "
+"into contracted braille."
+msgstr ""
+
+#. xgettext: This is the name of MIDI musical instrument #53 (in the Ensemble group).
+#: Programs/midi.c:242
+msgid "Choir Aahs"
+msgstr "გუნდის ჩასუნთქვები"
+
+#. xgettext: This is the name of MIDI musical instrument group #2.
+#: Programs/midi.c:28
+msgid "Chromatic Percussion"
+msgstr "ქრომატიული პერკუსია"
+
+#. xgettext: This is the name of MIDI musical instrument #20 (in the Organ group).
+#: Programs/midi.c:139
+msgid "Church Organ"
+msgstr "საეკლესიო ორღანი"
+
+#. xgettext: This is the name of MIDI musical instrument #72 (in the Reed group).
+#: Programs/midi.c:301
+msgid "Clarinet"
+msgstr "კლარნეტი"
+
+#. xgettext: This is the name of MIDI musical instrument #8 (in the Piano group).
+#: Programs/midi.c:101
+msgid "Clavinet"
+msgstr "კლავინეტი"
+
+#: Programs/menu.c:891
+msgid "Close"
+msgstr "დახურვა"
+
+#: Programs/menu_prefs.c:1300
+msgid "Colon"
+msgstr "ორი წერტილი"
+
+#: Programs/brltty-tune.c:158
+msgid ""
+"Compose a tune with the tune builder and play it with the tone generator."
+msgstr ""
+
+#: Programs/menu_prefs.c:703
+msgid "Computer Braille"
+msgstr "კომპიუტერული ბრეილი"
+
+#: Programs/menu_prefs.c:737
+msgid "Computer Braille Cell Type"
+msgstr "კომპიუტერული ბრეილის უჯრედის ტიპი"
+
+#: Programs/menu_prefs.c:1462
+msgid "Configuration Directory"
+msgstr "კონფიგურაციის საქაღალდე"
+
+#: Programs/menu_prefs.c:1467
+msgid "Configuration File"
+msgstr "კონფიგურაციის ფაილი"
+
+#: Programs/alert.c:169
+msgid "Console Bell"
+msgstr "კონსოლის ზარი"
+
+#: Programs/menu_prefs.c:1037
+msgid "Console Bell Alert"
+msgstr "კონსოლის ზარის გაფრთხილება"
+
+#. xgettext: This is the name of MIDI musical instrument #44 (in the Strings group).
+#: Programs/midi.c:214
+msgid "Contrabass"
+msgstr "კონტრაბასი"
+
+#: Programs/menu_prefs.c:704
+msgid "Contracted Braille"
+msgstr "შემოკლებული ბრაილი"
+
+#: Programs/menu_prefs.c:1413
+msgid "Contraction Table"
+msgstr "შემოკლებების ცხრილი"
+
+#: Programs/brltty-ctb.c:73
+msgid "Contraction table."
+msgstr "შემოკლებების ცხრილი."
+
+#: Programs/brltty-ctb.c:87
+msgid "Contraction verification table."
+msgstr "შემოკლებების გადამოწმების ცხრილი."
+
+#: Programs/xbrlapi.c:817
+msgid "Could not get XKB major opcode\n"
+msgstr "XKB ძირითადი ოპკოდის მიღება შეუძლებელია\n"
+
+#: Programs/menu_prefs.c:1506
+msgid "Critical"
+msgstr "კრიტიკული"
+
+#: Programs/menu_prefs.c:546
+msgid "Cursor Column"
+msgstr "ვერტიკალური ეკრანის კურსორი"
+
+#: Programs/menu_prefs.c:545 Programs/menu_prefs.c:557
+msgid "Cursor Coordinates"
+msgstr "ეკრანის კურსორის კოორდინატები"
+
+#: Programs/log.c:95
+msgid "Cursor Routing"
+msgstr "კურსორული მართვა"
+
+#: Programs/menu_prefs.c:547
+msgid "Cursor Row"
+msgstr "ჰორიზონტალური ეკრანის კურსორი"
+
+#: Programs/log.c:89
+msgid "Cursor Tracking"
+msgstr "კურსორის თვალყურის დევნება"
+
+#: Programs/menu_prefs.c:906
+msgid "Cursor Tracking Delay"
+msgstr "კურსორის თვალყურის დევნების დაყოვნება"
+
+#: Programs/menu_prefs.c:548 Programs/menu_prefs.c:559
+msgid "Cursor and Window Column"
+msgstr "კურსორი და ფანჯრის სვეტი"
+
+#: Programs/menu_prefs.c:549 Programs/menu_prefs.c:560
+msgid "Cursor and Window Row"
+msgstr "კურსორი და ფანჯრის მწკრივი"
+
+#: Programs/menu_prefs.c:1338
+msgid "Dash"
+msgstr "პანელი"
+
+#: Programs/menu_prefs.c:1331
+msgid "Date Format"
+msgstr "თარიღის ფორმატი"
+
+#: Programs/menu_prefs.c:1320
+msgid "Date Position"
+msgstr "მონაცემების მდებარეობა"
+
+#: Programs/menu_prefs.c:1343
+msgid "Date Separator"
+msgstr "მონაცემების გამყოფი"
+
+#: Programs/menu_prefs.c:1328
+msgid "Day Month Year"
+msgstr "დღე თვე წელი"
+
+#: Programs/menu_prefs.c:1511
+msgid "Debug"
+msgstr "პროგრამის შეცდომის პოვნა"
+
+#: Programs/config.c:431
+msgid "Device for accessing braille display."
+msgstr "მოწყობილობა ბრეილის ეკრანამდე წვდომისთვის."
+
+#: Programs/config.c:592
+msgid "Disable the application programming interface."
+msgstr "აპლიკაციის პროგრამირების ინტერფეისის გათიშვა."
+
+#. xgettext: This is the name of MIDI musical instrument #31 (in the Guitar group).
+#: Programs/midi.c:173
+msgid "Distortion Guitar"
+msgstr "დისტორშენიანი გიტარა"
+
+#: Programs/config.c:506
+msgid "Do not autospeak when braille is not being used."
+msgstr "ავტომატური წარმოთქმის გამორთვა, როცა ბრაილი არ გამოიყენება."
+
+#: Programs/xbrlapi.c:118
+msgid "Do not write any text to the braille device"
+msgstr "არ დაწეროთ ტექსტი ბრაილის მოწყობილობაზე"
+
+#: Programs/brltty-trtxt.c:70
+msgid "Don't fall back to the Unicode base character."
+msgstr "არ დაბრუნდეთ უნიკოდის საბაზისო სიმბოლოზე."
+
+#: Programs/config.c:645
+msgid ""
+"Don't switch to an unprivileged user or relinquish any privileges (group "
+"memberships, capabilities, etc)."
+msgstr ""
+
+#: Programs/alert.c:58
+msgid "Done"
+msgstr "დასრულდა"
+
+#: Programs/menu_prefs.c:1301 Programs/menu_prefs.c:1340
+msgid "Dot"
+msgstr "წერტილი"
+
+#: Programs/menu_prefs.c:944
+msgid "Dots via Unicode Braille"
+msgstr "წერტილები უნიკოდის ბრაილით"
+
+#. Organ
+#. xgettext: This is the name of MIDI musical instrument #17 (in the Organ group).
+#: Programs/midi.c:130
+msgid "Drawbar Organ"
+msgstr "ორღანი"
+
+#: Programs/menu_prefs.c:1487
+msgid "Drivers Directory"
+msgstr "დრაივერების საქაღლდე"
+
+#. xgettext: This is the name of MIDI musical instrument #16 (in the Chromatic Percussion group).
+#: Programs/midi.c:126
+msgid "Dulcimer"
+msgstr "ციმბალი"
+
+#: Programs/menu_prefs.c:881
+msgid "Eager Sliding Braille Window"
+msgstr "ბრაილის ფანჯრის სწრაფი სრიალი"
+
+#: Programs/brltty-hid.c:201
+msgid "Echo (in hexadecimal) input received from the device."
+msgstr "მოწყობილობიდან მიღებული შეყვანის ექო (თექვსმეტობითი რიცხვის სახით)."
+
+#: Programs/brltty-ttb.c:148
+msgid "Edit table."
+msgstr "ცხრილის ჩასწორება."
+
+#. xgettext: This is the name of MIDI musical instrument #34 (in the Bass group).
+#: Programs/midi.c:183
+msgid "Electric Bass (finger)"
+msgstr "ელექტრობასი (თითი)"
+
+#. xgettext: This is the name of MIDI musical instrument #35 (in the Bass group).
+#: Programs/midi.c:186
+msgid "Electric Bass (pick)"
+msgstr "ელექტრო ბასი (ოდნავ)"
+
+#. xgettext: This is the name of MIDI musical instrument #3 (in the Piano group).
+#: Programs/midi.c:86
+msgid "Electric Grand Piano"
+msgstr "ელექტროროიალი"
+
+#. xgettext: This is the name of MIDI musical instrument #28 (in the Guitar group).
+#: Programs/midi.c:164
+msgid "Electric Guitar (clean)"
+msgstr "ელექტროგიტარა (წმინდა)"
+
+#. xgettext: This is the name of MIDI musical instrument #27 (in the Guitar group).
+#: Programs/midi.c:161
+msgid "Electric Guitar (jazz)"
+msgstr "ელექტროგიტარა(ჯაზი)"
+
+#. xgettext: This is the name of MIDI musical instrument #29 (in the Guitar group).
+#: Programs/midi.c:167
+msgid "Electric Guitar (muted)"
+msgstr "ელექტროგიტარა(დადუმებული)"
+
+#. xgettext: This is the name of MIDI musical instrument #5 (in the Piano group).
+#: Programs/midi.c:92
+msgid "Electric Piano 1"
+msgstr "ელექტრო პიანინო 1"
+
+#. xgettext: This is the name of MIDI musical instrument #6 (in the Piano group).
+#: Programs/midi.c:95
+msgid "Electric Piano 2"
+msgstr "ელექტრო პიანინო 2"
+
+#: Programs/menu_prefs.c:1504
+msgid "Emergency"
+msgstr "სასწრაფო"
+
+#: Programs/menu_prefs.c:541
+msgid "End"
+msgstr "დასასრული"
+
+#: Programs/menu_prefs.c:867
+msgid "End of Line"
+msgstr "ხაზის დასასრული"
+
+#. xgettext: This is the name of MIDI musical instrument #70 (in the Reed group).
+#: Programs/midi.c:295
+msgid "English Horn"
+msgstr "ინგლისური ქარახსა"
+
+#: Programs/menu_prefs.c:1243
+msgid "Enqueue"
+msgstr "რიგში ჩაყენება"
+
+#. xgettext: This is the name of MIDI musical instrument group #7.
+#: Programs/midi.c:43
+msgid "Ensemble"
+msgstr "ანსამბლი"
+
+#: Programs/menu_prefs.c:1507
+msgid "Error"
+msgstr "შეცდომა"
+
+#. xgettext: This is the name of MIDI musical instrument group #14.
+#: Programs/midi.c:68
+msgid "Ethnic Instruments"
+msgstr "ეთნიკური ინსტრუმენტები"
+
+#: Programs/menu_prefs.c:1034
+msgid "Event Alerts"
+msgstr "მოვლენის განგაშები"
+
+#: Programs/menu_prefs.c:714
+msgid "Expand Current Word"
+msgstr "მიმდინარე სიტყვის გაფართოება"
+
+#: Programs/config.c:584
+msgid "Explicit preference settings."
+msgstr "დამატებითი პარამეტრები."
+
+#: Programs/menu_prefs.c:1061
+msgid "FM"
+msgstr "FM"
+
+#: Programs/menu_prefs.c:1099
+msgid "FM Volume"
+msgstr "ფმ-ის ხმა"
+
+#. Synth FM
+#. xgettext: This is the name of MIDI musical instrument #97 (in the Synth FM group).
+#: Programs/midi.c:380
+msgid "FX 1 (rain)"
+msgstr "FX 1 (წვიმა)"
+
+#. xgettext: This is the name of MIDI musical instrument #98 (in the Synth FM group).
+#: Programs/midi.c:383
+msgid "FX 2 (soundtrack)"
+msgstr "FX 2 (საუნდტრეკი)"
+
+#. xgettext: This is the name of MIDI musical instrument #99 (in the Synth FM group).
+#: Programs/midi.c:386
+msgid "FX 3 (crystal)"
+msgstr "FX 3 (კრისტალი)"
+
+#. xgettext: This is the name of MIDI musical instrument #100 (in the Synth FM group).
+#: Programs/midi.c:389
+msgid "FX 4 (atmosphere)"
+msgstr "FX 4 (ატმოსფერო)"
+
+#. xgettext: This is the name of MIDI musical instrument #101 (in the Synth FM group).
+#: Programs/midi.c:392
+msgid "FX 5 (brightness)"
+msgstr "FX 5 (სიკაშკაშე)"
+
+#. xgettext: This is the name of MIDI musical instrument #102 (in the Synth FM group).
+#: Programs/midi.c:395
+msgid "FX 6 (goblins)"
+msgstr "FX 6 (გობლინები)"
+
+#. xgettext: This is the name of MIDI musical instrument #103 (in the Synth FM group).
+#: Programs/midi.c:398
+msgid "FX 7 (echoes)"
+msgstr "FX 7 (ექოები)"
+
+#. xgettext: This is the name of MIDI musical instrument #104 (in the Synth FM group).
+#. xgettext: (sci-fi is a common short form for science fiction)
+#: Programs/midi.c:402
+msgid "FX 8 (sci-fi)"
+msgstr "FX 8 (სამეცნიერო-ფანტასტიკა)"
+
+#. xgettext: This is the name of MIDI musical instrument #111 (in the Ethnic group).
+#: Programs/midi.c:424
+msgid "Fiddle"
+msgstr "ვიოლინო"
+
+#: Programs/brltty-hid.c:76
+msgid "Filter for a Bluetooth device."
+msgstr "ბლუთუზის მოწყობილობების ფილტრი."
+
+#: Programs/brltty-hid.c:70
+msgid "Filter for a USB device (the default if not ambiguous)."
+msgstr "USB მოწყობილობის ფილტრი (ნაგულისხმევი, თუ გაურკვეველი არაა)."
+
+#: Programs/brltty-hid.c:1065
+msgid ""
+"Find HID devices, list report descriptors, read/write reports/features, or "
+"monitor input from a HID device."
+msgstr ""
+
+#. xgettext: This is the name of MIDI musical instrument #74 (in the Pipe group).
+#: Programs/midi.c:308
+msgid "Flute"
+msgstr "ფლეიტა"
+
+#: Programs/brltty-ctb.c:65
+msgid "Force immediate output."
+msgstr "დაუყოვნებილი გამოტანის ჩართვა."
+
+#: Programs/brltty-ttb.c:155
+msgid "Format of input file."
+msgstr "შეყვანის ფაილის ფორმატი."
+
+#: Programs/brltty-ttb.c:162
+msgid "Format of output file."
+msgstr "გამოტანის ფაილის ფორმატი."
+
+#. xgettext: This is the name of MIDI musical instrument #61 (in the Brass group).
+#: Programs/midi.c:267
+msgid "French Horn"
+msgstr "ფრანგული საყვირი"
+
+#. xgettext: This is the name of MIDI musical instrument #36 (in the Bass group).
+#: Programs/midi.c:189
+msgid "Fretless Bass"
+msgstr "უფეხო ბასი"
+
+#: Programs/alert.c:103
+msgid "Frozen"
+msgstr "გაყინული"
+
+#: Programs/menu_prefs.c:556
+msgid "Generic"
+msgstr "ზოგადი"
+
+#. xgettext: This is the name of MIDI musical instrument #10 (in the Chromatic Percussion group).
+#: Programs/midi.c:108
+msgid "Glockenspiel"
+msgstr "გლოკენშპილი"
+
+#. xgettext: This is the name of MIDI musical instrument group #4.
+#: Programs/midi.c:34
+msgid "Guitar"
+msgstr "გიტარა"
+
+#. Sound Effects
+#. xgettext: This is the name of MIDI musical instrument #121 (in the Sound Effects group).
+#: Programs/midi.c:456
+msgid "Guitar Fret Noise"
+msgstr "გიტარის ფეხის ხმაური"
+
+#. xgettext: This is the name of MIDI musical instrument #32 (in the Guitar group).
+#: Programs/midi.c:176
+msgid "Guitar Harmonics"
+msgstr "გიტარის ჰარმონიკები"
+
+#. xgettext: This is the name of MIDI musical instrument #128 (in the Sound Effects group).
+#: Programs/midi.c:477
+msgid "Gunshot"
+msgstr "თოფის გასროლა"
+
+#: Programs/config.c:558
+msgid "Handle keyboard key events when using a Linux tty in graphics mode."
+msgstr ""
+
+#. xgettext: This is the name of MIDI musical instrument #23 (in the Organ group).
+#: Programs/midi.c:148
+msgid "Harmonica"
+msgstr "ჰარმონიკა"
+
+#. xgettext: This is the name of MIDI musical instrument #7 (in the Piano group).
+#: Programs/midi.c:98
+msgid "Harpsichord"
+msgstr "კლავესინი"
+
+#. xgettext: This is the name of MIDI musical instrument #126 (in the Sound Effects group).
+#: Programs/midi.c:471
+msgid "Helicopter"
+msgstr "ვერტმფრენი"
+
+#: Programs/scr_help.c:215
+msgid "Help Screen"
+msgstr "დახმარების ეკრანი"
+
+#: Programs/menu_prefs.c:668
+msgid "Hide"
+msgstr "დამალვა"
+
+#: Programs/menu_prefs.c:749 Programs/menu_prefs.c:1015
+msgid "High"
+msgstr "მაღალი"
+
+#: Programs/menu_prefs.c:923
+msgid "Highlight Braille Window Location"
+msgstr "ბრეილის ფანჯრის მდებარეობის გამოკვეთა"
+
+#. xgettext: This is the name of MIDI musical instrument #4 (in the Piano group).
+#: Programs/midi.c:89
+msgid "Honkytonk Piano"
+msgstr "ჰონკიტონკი პიანინო"
+
+#: Programs/log.c:149
+msgid "Human Interface I/O"
+msgstr "ადამიანთან ურთიერთობის ინტერფეისის შეყვ/გამოტ"
+
+#: Programs/menu_prefs.c:1242
+msgid "Immediate"
+msgstr "უეცარი"
+
+#: Programs/xbrlapi.c:813
+msgid "Incompatible XKB library\n"
+msgstr "შეუთავსებელი XKB ბიბლიოთეკა\n"
+
+#: Programs/xbrlapi.c:815
+msgid "Incompatible XKB server support\n"
+msgstr "შეუთავსებელი XKB სერვერის მხარდაჭერა\n"
+
+#: Programs/menu_prefs.c:1510
+msgid "Information"
+msgstr "ინფორმაცია"
+
+#: Programs/menu_prefs.c:958
+msgid "Input Options"
+msgstr "შეყვანის მორგება"
+
+#: Programs/log.c:65
+msgid "Input Packets"
+msgstr "შემოსული პაკეტები"
+
+#: Programs/config.c:774
+#, c-format
+msgid "Install the %s service, and then exit."
+msgstr "%s სერვისის დაყენება და გასვლა."
+
+#: Programs/menu_prefs.c:1514
+msgid "Internal Parameters"
+msgstr "შიდა პარამეტრები"
+
+#: Drivers/Screen/Android/screen.c:197
+msgid "Java class not found"
+msgstr "Java-ის კლასი არ არსებობს"
+
+#: Drivers/Screen/Android/screen.c:181
+msgid "Java exception occurred"
+msgstr "Java-ის გამონაკლისი"
+
+#: Drivers/Screen/Android/screen.c:194
+msgid "Java method not found"
+msgstr "Java-ის მეთოდი არ არსებობს"
+
+#. xgettext: This is the name of MIDI musical instrument #109 (in the Ethnic group).
+#: Programs/midi.c:418
+msgid "Kalimba"
+msgstr "კალიმბა"
+
+#: Programs/config.c:1833
+msgid "Key Bindings"
+msgstr "კლავიატურის ბმები"
+
+#: Programs/config.c:1275
+msgid "Key Help"
+msgstr "ღილაკის დახმარება"
+
+#: Programs/config.c:1838 Programs/ktb_list.c:737
+msgid "Key Table"
+msgstr "ღილაკების ცხრილი"
+
+#: Programs/menu_prefs.c:937
+msgid "Keyboard Enabled"
+msgstr "კლავიატურა ჩართულია"
+
+#: Programs/log.c:83
+msgid "Keyboard Key Events"
+msgstr "კლავიატურის ღილაკის მოვლენები"
+
+#: Programs/menu_prefs.c:1044
+msgid "Keyboard LED Alerts"
+msgstr "კლავიატურის LED გაფრთხილებები"
+
+#: Programs/menu_prefs.c:1026
+msgid "Keyboard Table"
+msgstr "კლავიატურის ცხრილი"
+
+#. xgettext: This is the name of MIDI musical instrument #108 (in the Ethnic group).
+#: Programs/midi.c:415
+msgid "Koto"
+msgstr "კოტო"
+
+#: Programs/config.c:3223
+msgid "Language"
+msgstr "ენა"
+
+#. Synth Lead
+#. xgettext: This is the name of MIDI musical instrument #81 (in the Synth Lead group).
+#: Programs/midi.c:330
+msgid "Lead 1 (square)"
+msgstr "ტალღა 1 (კვადრატი)"
+
+#. xgettext: This is the name of MIDI musical instrument #82 (in the Synth Lead group).
+#: Programs/midi.c:333
+msgid "Lead 2 (sawtooth)"
+msgstr "ტალღა 2 (დაკბილული)"
+
+#. xgettext: This is the name of MIDI musical instrument #83 (in the Synth Lead group).
+#: Programs/midi.c:336
+msgid "Lead 3 (calliope)"
+msgstr "ტალღა 3 (კალიოპე)"
+
+#. xgettext: This is the name of MIDI musical instrument #84 (in the Synth Lead group).
+#: Programs/midi.c:339
+msgid "Lead 4 (chiff)"
+msgstr "ტალღა 4 (ძირითადი)"
+
+#. xgettext: This is the name of MIDI musical instrument #85 (in the Synth Lead group).
+#: Programs/midi.c:342
+msgid "Lead 5 (charang)"
+msgstr "ტალღა 5 (ჩარანგი)"
+
+#. xgettext: This is the name of MIDI musical instrument #86 (in the Synth Lead group).
+#: Programs/midi.c:345
+msgid "Lead 6 (voice)"
+msgstr "ტალღა 6 (ხმა)"
+
+#. xgettext: This is the name of MIDI musical instrument #87 (in the Synth Lead group).
+#: Programs/midi.c:348
+msgid "Lead 7 (fifths)"
+msgstr "ტალღა 7 (მეხუთედები)"
+
+#. xgettext: This is the name of MIDI musical instrument #88 (in the Synth Lead group).
+#: Programs/midi.c:351
+msgid "Lead 8 (bass + lead)"
+msgstr "ტალღა 8 (ბასი + წამყვანი)"
+
+#: Programs/learn.c:101
+msgid "Learn Mode"
+msgstr "სწავლის რეჟიმი"
+
+#: Programs/menu_prefs.c:1355
+msgid "Left"
+msgstr "მარცხენა"
+
+#: Programs/brltty-hid.c:167
+msgid "List each report's identifier and sizes."
+msgstr "თითოეული ანგარიშის იდენტიფიკატორისა და ზომის სია."
+
+#: Programs/brltty-ktb.c:59
+msgid "List key names."
+msgstr "გასაღების სახელების ჩამონათვალი."
+
+#: Programs/brltty-ktb.c:65
+msgid "List key table in help screen format."
+msgstr "გასაღების სახელების ცხრილი დახმარების ეკრანის ფორმატში."
+
+#: Programs/brltty-ktb.c:71
+msgid "List key table in reStructuredText format."
+msgstr "ღილაკების ცხრილი reStructuredText ფორმატში."
+
+#: Programs/brltty-hid.c:161
+msgid "List the HID report descriptor's items."
+msgstr "HID-ის ანგარიშის დესკრიპტორის ჩანაწერების სია."
+
+#: Programs/brltty-cldr.c:237
+msgid ""
+"List the characters defined within a CLDR (Common Locale Data Repository "
+"Project) annotations file."
+msgstr ""
+
+#: Programs/brltty-lsinc.c:95
+msgid "List the paths to a data file and those which it recursively includes."
+msgstr ""
+"ბილიკების სია მონაცემების ფაილამდე და მათამდე, რომლებსაც ეს მონაცემები "
+"შეიცავს."
+
+#: Programs/menu_prefs.c:1497
+msgid "Locale Directory"
+msgstr "ლოკალების საქაღალდე"
+
+#: Programs/menu_prefs.c:1533
+msgid "Log Categories"
+msgstr "ჟურნალის კატეგორიები"
+
+#: Programs/menu_prefs.c:1594
+msgid "Log Messages"
+msgstr "ჟურნალის შეტყობინებები"
+
+#: Programs/config.c:384
+msgid "Log the versions of the core, API, and built-in drivers, and then exit."
+msgstr ""
+"ბირთვის, API-ის და ჩაშენებული დრაივერების ვერსიის ჟურნალში ჩაწერა და გასვლა."
+
+#: Programs/config.c:632
+msgid "Log to standard error rather than to the system log."
+msgstr "ჟურნალის ჩაწერა სტანდარტულ შეცდომაზე სისტემური ჟურნალის მაგიერ."
+
+#: Programs/config.c:617
+#, c-format
+msgid ""
+"Logging level (%s or one of {%s}) and/or log categories to enable (any "
+"combination of {%s}, each optionally prefixed by %s to disable)."
+msgstr ""
+
+#: Programs/menu_prefs.c:980
+msgid "Long Press Time"
+msgstr "გრძელი დაწოლის დრო"
+
+#: Programs/menu_prefs.c:747 Programs/menu_prefs.c:1013
+msgid "Low"
+msgstr "დაბალი"
+
+#: Programs/menu_prefs.c:666
+msgid "Lower Left Dot"
+msgstr "ქვედა მარცხენა წერტილი"
+
+#: Programs/menu_prefs.c:667
+msgid "Lower Right Dot"
+msgstr "ქვედა მარჯვენა წერტილი"
+
+#: Programs/menu_prefs.c:1060
+msgid "MIDI"
+msgstr "MIDI"
+
+#: Programs/config.c:702
+msgid "MIDI (Musical Instrument Digital Interface) device specifier."
+msgstr "MIDI (Musical Instrument Digital Interface) მოწყობილობის მიმთითებელი."
+
+#: Programs/menu_prefs.c:1090
+msgid "MIDI Instrument"
+msgstr "MIDI ინსტრუმენტი"
+
+#: Programs/menu_prefs.c:1080
+msgid "MIDI Volume"
+msgstr "MIDI-ის ხმა"
+
+#: Programs/menu_prefs.c:1457
+msgid "Mailing List"
+msgstr "ელ-ფოსტის სიები"
+
+#: Programs/brltty-clip.c:154
+msgid "Manage brltty's clipboard from the command line."
+msgstr "მართეთ brltty-ის ბუფერი ბრძანების სტრიქონიდან."
+
+#. xgettext: This is the name of MIDI musical instrument #13 (in the Chromatic Percussion group).
+#: Programs/midi.c:117
+msgid "Marimba"
+msgstr "მარიმბა"
+
+#: Programs/brltty-hid.c:118
+msgid ""
+"Match the full device address (Bluetooth only - all six two-digit, "
+"hexadecimal octets separated by a colon [:])."
+msgstr ""
+
+#: Programs/brltty-hid.c:90
+msgid "Match the product identifier (four hexadecimal digits)."
+msgstr "დამთხვევა პროდუქტის იდენტიფიკატორით (ოთხი თექვსმეტობითი ციფრი)."
+
+#: Programs/brltty-hid.c:125
+msgid "Match the start of the device name (Bluetooth only)."
+msgstr "დამთხვევა მოწყობილობის სახელის დასაწყისით (მხოლოდ ბლუთუზი)."
+
+#: Programs/brltty-hid.c:97
+msgid "Match the start of the manufacturer name (USB only)."
+msgstr "დამთხვევა მწარმოებლის სახელის დასაწყისით (მხოლოდ USB)."
+
+#: Programs/brltty-hid.c:104
+msgid "Match the start of the product description (USB only)."
+msgstr "დამთხვევა პროდუქტის აღწერის დასაწყისით (მხოლოდ USB)."
+
+#: Programs/brltty-hid.c:111
+msgid "Match the start of the serial number (USB only)."
+msgstr "დამთხვევა სერიული ნომრის დასაწყისით (მხოლოდ USB)."
+
+#: Programs/brltty-hid.c:83
+msgid "Match the vendor identifier (four hexadecimal digits)."
+msgstr "დამთხვევა მომწოდებლის იდენტიფიკატორით (ოთხი თექვსმეტობითი ციფრი)."
+
+#: Programs/menu_prefs.c:750 Programs/menu_prefs.c:1016
+msgid "Maximum"
+msgstr "მაქსიმუმი"
+
+#: Programs/brltty-ctb.c:53
+msgid "Maximum length of an output line."
+msgstr "გამოტანის ხაზის მაქსიმალური სიგრძე."
+
+#: Programs/menu_prefs.c:748 Programs/menu_prefs.c:1014
+msgid "Medium"
+msgstr "საშუალო"
+
+#. xgettext: This is the name of MIDI musical instrument #118 (in the Percussive group).
+#: Programs/midi.c:446
+msgid "Melodic Tom"
+msgstr "მელოდიური ტომი"
+
+#: Programs/menu_prefs.c:680
+msgid "Menu Options"
+msgstr "მენიუს მორგება"
+
+#: Programs/config.c:662
+msgid "Message hold timeout (in 10ms units)."
+msgstr "შეტყობინების დაყოვნების მოლოდინის ვადა (10 მწმ-იან ერთეულებში)."
+
+#: Programs/menu_prefs.c:746 Programs/menu_prefs.c:1012
+msgid "Minimum"
+msgstr "მინიმუმი"
+
+#: Programs/config.c:513
+#, c-format
+msgid "Minimum screen content quality to autospeak (one of {%s})."
+msgstr ""
+"მინიმალური ეკრანის შემცველობის ხარისხი ავტოწარმოთქმისთვის (ერთ-ერთი {%s}-"
+"დან)."
+
+#: Programs/menu_prefs.c:1327
+msgid "Month Day Year"
+msgstr "თვე დღე წელი"
+
+#. xgettext: This is the name of MIDI musical instrument #11 (in the Chromatic Percussion group).
+#: Programs/midi.c:111
+msgid "Music Box"
+msgstr "მუსიკალური ყუთი"
+
+#: Programs/menu_prefs.c:1060
+msgid "Musical Instrument Digital Interface"
+msgstr "მუსიკალური მოწყობილობების ციფრული ინტერფეისი"
+
+#. xgettext: This is the name of MIDI musical instrument #60 (in the Brass group).
+#: Programs/midi.c:264
+msgid "Muted Trumpet"
+msgstr "Muted Trumpet"
+
+#: Programs/config.c:567
+msgid "Name of or path to GUI keyboard table."
+msgstr "სახელი ან ბილიკი ინტერფეისის კლავიატურის ცხრილამდე."
+
+#: Programs/config.c:471
+msgid "Name of or path to attributes table."
+msgstr "სახელი ან ბილიკი ატრიბუტების ცხრილამდე."
+
+#: Programs/config.c:463
+msgid "Name of or path to contraction table."
+msgstr "სახელი ან ბილიკი შემოკლებების ცხრილამდე."
+
+#: Programs/config.c:576
+msgid "Name of or path to default preferences file."
+msgstr "სახელი ან ბილიკი ნაგულისხმევი პარამეტრების ფაილამდე."
+
+#: Programs/config.c:543
+msgid "Name of or path to keyboard table."
+msgstr "სახელი ან ბილიკი კლავიატურის ცხრილამდე."
+
+#: Programs/config.c:499
+msgid "Name of or path to speech input object."
+msgstr "სახელი ან ბილიკი საუბრის შეყვანის ობიექტთან."
+
+#: Programs/config.c:453
+#, c-format
+msgid "Name of or path to text table (or %s)."
+msgstr "სახელი ან ბილიკი ტექსტის ბილიკამდე (ან %s)."
+
+#: Programs/menu_prefs.c:846
+msgid "Navigation Options"
+msgstr "ნავიგაციის პარამეტრები"
+
+#: Programs/menu.c:523
+msgid "No"
+msgstr "არა"
+
+#: Programs/menu_prefs.c:721
+msgid "No Capitalization"
+msgstr "კაპიტალიზაციის გარეშე"
+
+#: Programs/menu_prefs.c:899 Programs/menu_prefs.c:1206
+#: Programs/menu_prefs.c:1219 Programs/menu_prefs.c:1232
+#: Programs/menu_prefs.c:1315 Programs/menu_prefs.c:1354
+#: Programs/menu_prefs.c:1374
+msgid "None"
+msgstr "არაფერი"
+
+#: Programs/menu_prefs.c:1509
+msgid "Notice"
+msgstr "გაფრთხილება"
+
+#. xgettext: This is the name of MIDI musical instrument #69 (in the Reed group).
+#: Programs/midi.c:292
+msgid "Oboe"
+msgstr "ობო"
+
+#. xgettext: This is the name of MIDI musical instrument #80 (in the Pipe group).
+#: Programs/midi.c:326
+msgid "Ocarina"
+msgstr "ოკარინა"
+
+#: Programs/menu_prefs.c:962
+msgid "Off"
+msgstr "გამორთულია"
+
+#: Programs/config.c:1926
+msgid "Old Preferences File"
+msgstr "ძველი პარამეტრების ფაილი"
+
+#: Programs/menu_prefs.c:975
+msgid "On First Release"
+msgstr "პირველ რელიზზე"
+
+#: Programs/cmdline.c:281
+msgid "Options"
+msgstr "მორგება"
+
+#. xgettext: This is the name of MIDI musical instrument #56 (in the Ensemble group).
+#: Programs/midi.c:251
+msgid "Orchestra Hit"
+msgstr "ორკესტრული აქცენტი"
+
+#. xgettext: This is the name of MIDI musical instrument #47 (in the Strings group).
+#: Programs/midi.c:223
+msgid "Orchestral Harp"
+msgstr "ორკესტრის არფა"
+
+#. xgettext: This is the name of MIDI musical instrument group #3.
+#: Programs/midi.c:31
+msgid "Organ"
+msgstr "ორგანო"
+
+#: Programs/log.c:71
+msgid "Output Packets"
+msgstr "გამოტანილი პაკეტები"
+
+#. xgettext: This is the name of MIDI musical instrument #30 (in the Guitar group).
+#: Programs/midi.c:170
+msgid "Overdriven Guitar"
+msgstr "გადატვირთული გიტარა"
+
+#: Drivers/Braille/Iris/braille.c:1548
+msgid "PC mode"
+msgstr "PC-ის რეჟიმი"
+
+#: Programs/menu_prefs.c:1059
+msgid "PCM"
+msgstr "PCM"
+
+#: Programs/config.c:692
+msgid "PCM (soundcard digital audio) device specifier."
+msgstr "PCM (ხმოვანი ბარათის ციფრული აუდიო) მოწყობილობის მიმთითებელი."
+
+#: Programs/menu_prefs.c:1072
+msgid "PCM Volume"
+msgstr "PCM ხმა"
+
+#. xgettext: This is the description of the PASSPS2 command.
+#: Programs/cmds.auto.h:1503
+msgid "PS/2 (set 3) keyboard scan code"
+msgstr ""
+
+#: Programs/menu_prefs.c:1447
+msgid "Package Revision"
+msgstr "პაკეტის რევიზია"
+
+#: Programs/menu_prefs.c:1442
+msgid "Package Version"
+msgstr "პაკეტის ვერსია"
+
+#. Synth Pad
+#. xgettext: This is the name of MIDI musical instrument #89 (in the Synth Pad group).
+#: Programs/midi.c:355
+msgid "Pad 1 (new age)"
+msgstr "საფარი 1 (ნიუ ეიჯი)"
+
+#. xgettext: This is the name of MIDI musical instrument #90 (in the Synth Pad group).
+#: Programs/midi.c:358
+msgid "Pad 2 (warm)"
+msgstr "საფარი 2 (თბილი)"
+
+#. xgettext: This is the name of MIDI musical instrument #91 (in the Synth Pad group).
+#: Programs/midi.c:361
+msgid "Pad 3 (polysynth)"
+msgstr "საფარი 3 (მრავალტემბრიანი ყრუ ხმა)"
+
+#. xgettext: This is the name of MIDI musical instrument #92 (in the Synth Pad group).
+#: Programs/midi.c:364
+msgid "Pad 4 (choir)"
+msgstr "საფარი 4 (ქორო)"
+
+#. xgettext: This is the name of MIDI musical instrument #93 (in the Synth Pad group).
+#: Programs/midi.c:367
+msgid "Pad 5 (bowed)"
+msgstr ""
+
+#. xgettext: This is the name of MIDI musical instrument #94 (in the Synth Pad group).
+#: Programs/midi.c:370
+msgid "Pad 6 (metallic)"
+msgstr "საფარი 3 (ლითონური)"
+
+#. xgettext: This is the name of MIDI musical instrument #95 (in the Synth Pad group).
+#: Programs/midi.c:373
+msgid "Pad 7 (halo)"
+msgstr ""
+
+#. xgettext: This is the name of MIDI musical instrument #96 (in the Synth Pad group).
+#: Programs/midi.c:376
+msgid "Pad 8 (sweep)"
+msgstr ""
+
+#. xgettext: This is the name of MIDI musical instrument #76 (in the Pipe group).
+#: Programs/midi.c:314
+msgid "Pan Flute"
+msgstr "პანის ფლეიტა"
+
+#: Programs/config.c:601
+msgid "Parameters for the application programming interface."
+msgstr "პარამეტრები აპლიკაციის პროგრამირების ინტერფეისისთვის."
+
+#: Programs/config.c:421
+msgid "Parameters for the braille driver."
+msgstr "პარამეტრები ბრაილის დრაივერისთვის."
+
+#: Programs/config.c:654
+msgid "Parameters for the privilege establishment stage."
+msgstr "პარამეტრები პრივილეგიების განსაზღვრის საფეხურისთვის."
+
+#: Programs/config.c:534
+msgid "Parameters for the screen driver."
+msgstr "პარამეტრები ეკრანის დრაივერისთვის."
+
+#: Programs/config.c:491
+msgid "Parameters for the speech driver."
+msgstr "პარამეტრები წარმოთქმის დრაივერისთვის."
+
+#: Programs/config.c:400
+msgid "Path to default settings file."
+msgstr "ბილიკი ნაგულისხმევ პარამეტრების ფაილამდე."
+
+#: Programs/config.c:723
+msgid "Path to directory containing drivers."
+msgstr "ბილიკი დრაივერების შემცველ საქაღალდემდე."
+
+#: Programs/brltest.c:65 Programs/brltty-atb.c:35 Programs/brltty-ctb.c:96
+#: Programs/brltty-ktb.c:80 Programs/config.c:713
+msgid "Path to directory containing tables."
+msgstr "ბილიკი ცხრილების შემცველ საქაღალდემდე."
+
+#: Programs/brltty-ttb.c:186
+msgid "Path to directory containing text tables."
+msgstr "ბილიკი ტექსტური ცხრილების შემცველ საქაღალდემდე."
+
+#: Programs/brltty-ktb.c:89
+msgid "Path to directory for loading drivers."
+msgstr "ბილიკი ჩასატვირთი დრაივერების საქაღალდემდე."
+
+#: Programs/brltty-trtxt.c:79
+msgid "Path to directory for text tables."
+msgstr "ბილიკი ტექსტური ცხრილების საქაღალდემდე."
+
+#: Programs/brltest.c:83 Programs/config.c:743
+msgid "Path to directory which can be written to."
+msgstr "ბილიკი საქაღალდემდე, სადაც ჩაწერა შეიძლება."
+
+#: Programs/config.c:733
+msgid "Path to directory which contains files that can be updated."
+msgstr "ბილიკი საქაღალდემდე, რომელიც განსაახლებელ ფაილებს შეიცავს."
+
+#: Programs/config.c:752
+msgid "Path to directory which contains message localizations."
+msgstr "ბილიკი საქაღალდემდე, რომელიც შეტყობინებების თარგმანებს შეიცავს."
+
+#: Programs/brltty-trtxt.c:50
+msgid "Path to input text table."
+msgstr "ბილიკი შესაყვან ტექსტურ ცხრილამდე."
+
+#: Programs/config.c:626
+msgid "Path to log file."
+msgstr "ბილიკი ჟურნალის ფაილამდე."
+
+#: Programs/brltty-trtxt.c:58
+msgid "Path to output text table."
+msgstr "ბილიკი გამოსატან ტექსტურ ცხრილამდე."
+
+#: Programs/config.c:761
+msgid "Path to process identifier file."
+msgstr "ბილიკი პროცესის იდენტიფიკატორის ფაილამდე."
+
+#: Programs/config.c:683
+msgid "Patterns that match command prompts."
+msgstr "ნიმუშები მინიშნებებისთვის."
+
+#. xgettext: This is the name of MIDI musical instrument group #15.
+#: Programs/midi.c:71
+msgid "Percussive Instruments"
+msgstr "პერკუსიის ინსტრუმენტები"
+
+#. xgettext: This is the name of MIDI musical instrument #18 (in the Organ group).
+#: Programs/midi.c:133
+msgid "Percussive Organ"
+msgstr "პერკუსიული ორღანი"
+
+#. xgettext: This is the name of MIDI musical instrument group #1.
+#: Programs/midi.c:25
+msgid "Piano"
+msgstr "პიანინო"
+
+#. Pipe
+#. xgettext: This is the name of MIDI musical instrument #73 (in the Pipe group).
+#: Programs/midi.c:305
+msgid "Piccolo"
+msgstr "პატარა ფლეიტა"
+
+#. xgettext: This is the name of MIDI musical instrument group #10.
+#: Programs/midi.c:52
+msgid "Pipe"
+msgstr "ფაიფი"
+
+#. xgettext: This is the name of MIDI musical instrument #46 (in the Strings group).
+#: Programs/midi.c:220
+msgid "Pizzicato Strings"
+msgstr "სიმებიანი პიციკატო"
+
+#: Drivers/Braille/Baum/braille.c:1159
+msgid "Powerdown"
+msgstr "გამორთვა"
+
+#: Programs/menu_prefs.c:1477
+msgid "Preferences File"
+msgstr "პარამეტრების ფაილი"
+
+#: Programs/scr_menu.c:271
+msgid "Preferences Menu"
+msgstr "მორგების მენიუ"
+
+#: Programs/menu_prefs.c:1428
+msgid "Profiles"
+msgstr "პროფილები"
+
+#: Programs/config.c:551
+msgid "Properties of eligible keyboards."
+msgstr "გამოყენებისთვის დაშვებული კლავიატურის თვისებები."
+
+#: Programs/menu_prefs.c:952
+msgid "Quick Space"
+msgstr "სწრაფი ჰარე"
+
+#: Programs/menu_prefs.c:1223
+msgid "Raise Pitch"
+msgstr "ტონის აწევა"
+
+#: Programs/brltty-hid.c:181
+msgid "Read (get) a feature report (two hexadecimal digits)."
+msgstr ""
+
+#: Programs/brltty-hid.c:174
+msgid "Read (get) an input report (two hexadecimal digits)."
+msgstr ""
+
+#: Programs/config.c:390
+msgid "Recognize environment variables."
+msgstr "გარემოს ცვლადების აღქმა."
+
+#. xgettext: This is the name of MIDI musical instrument #75 (in the Pipe group).
+#: Programs/midi.c:311
+msgid "Recorder"
+msgstr "ჩამწერი"
+
+#. xgettext: This is the name of MIDI musical instrument group #9.
+#: Programs/midi.c:49
+msgid "Reed"
+msgstr "სალამური"
+
+#. xgettext: This is the name of MIDI musical instrument #21 (in the Organ group).
+#: Programs/midi.c:142
+msgid "Reed Organ"
+msgstr "კლავიშებიანი ორღანი"
+
+#: Programs/brltty-ctb.c:59
+msgid "Reformat input."
+msgstr "შეყვანის თავიდან დაფორმატება."
+
+#: Programs/config.c:443
+msgid "Release braille device when screen or window is unreadable."
+msgstr "ბრაილის მოწყობილობის გაშვება, თუ ეკრან ან ფანჯარა წაკითხვადი არაა."
+
+#: Programs/xbrlapi.c:130
+msgid "Remain a foreground process"
+msgstr "დარჩენა წინა პლანის პროცესად"
+
+#: Programs/config.c:638
+msgid "Remain a foreground process."
+msgstr "დარჩენა ფონურ პროცესად."
+
+#: Programs/brltty-trtxt.c:64
+msgid "Remove dots seven and eight."
+msgstr "შვიდი და რვა წერტილების მოცილება."
+
+#: Programs/config.c:781
+#, c-format
+msgid "Remove the %s service, and then exit."
+msgstr "%s სერვისის წაშლა და გასვლა."
+
+#: Programs/brltty-ktb.c:53
+msgid "Report problems with the key table."
+msgstr "ღილაკების ცხრილის პრობლემების შეტყობინება."
+
+#: Programs/brltty-ttb.c:176
+msgid ""
+"Report the characters within the current screen font that aren't defined "
+"within the text table."
+msgstr ""
+
+#: Programs/menu_prefs.c:868
+msgid "Rest of Line"
+msgstr "სტრიქონის დარჩენილი ნაწილი"
+
+#: Programs/menu_prefs.c:1576
+msgid "Restart Braille Driver"
+msgstr "ბრაილის დრაივერის გადატვირთვა"
+
+#: Programs/menu_prefs.c:1588
+msgid "Restart Screen Driver"
+msgstr "ეკრანის დრაივერის გადატვირთვა"
+
+#: Programs/menu_prefs.c:1582
+msgid "Restart Speech Driver"
+msgstr "წარმოთქმის დრაივერის გადატვირთვა"
+
+#. xgettext: This is the name of MIDI musical instrument #120 (in the Percussive group).
+#: Programs/midi.c:452
+msgid "Reverse Cymbal"
+msgstr "რევერსული თეფში"
+
+#: Programs/menu_prefs.c:1356
+msgid "Right"
+msgstr "მარჯვენა"
+
+#. xgettext: This is the name of MIDI musical instrument #19 (in the Organ group).
+#: Programs/midi.c:136
+msgid "Rock Organ"
+msgstr "როკის ორღანი"
+
+#: Programs/brltty-pty.c:389
+msgid ""
+"Run a shell or terminal manager within a pty (virtual terminal) and export "
+"its screen via a shared memory segment so that brltty can read it via its "
+"Terminal Emulator screen driver."
+msgstr ""
+
+#: Programs/menu_prefs.c:675
+msgid "Save on Exit"
+msgstr "შენახვა გასვლისას"
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/menu_prefs.c:1222
+msgid "Say Cap"
+msgstr "დიდი ასოს თქმა"
+
+#: Programs/menu_prefs.c:1246
+msgid "Say Line Mode"
+msgstr "ხაზის რეჟიმის თქმა"
+
+#: Programs/menu_prefs.c:1233
+msgid "Say Space"
+msgstr "გამოტოვების ტქმა"
+
+#: Programs/menu_prefs.c:781
+msgid "Screen Cursor Blink Period"
+msgstr "ეკრანის კურსორის ციმციმის პერიოდი"
+
+#: Programs/menu_prefs.c:789
+msgid "Screen Cursor Percent Visible"
+msgstr "ეკრანის კურსორის ხილული პროცენტი"
+
+#: Programs/menu_prefs.c:769
+msgid "Screen Cursor Style"
+msgstr "ეკრანის კურსორის სტილი"
+
+#: Programs/log.c:167
+msgid "Screen Driver Events"
+msgstr "ეკრანის დრაივერის მოვლენები"
+
+#: Programs/menu_prefs.c:550
+msgid "Screen Number"
+msgstr "ეკრანის ნომერი"
+
+#: Programs/config.c:524
+#, c-format
+msgid "Screen driver code (%s, %s, or one of {%s})."
+msgstr "ეკრანის დრაივერის კოდი (%s, %s, ერთ-ერთი სიიდან {%s})."
+
+#: Programs/config.c:877
+msgid "Screen reader for those who use a braille device."
+msgstr "ეკრანის წამკითხველი მათთვის, ვინც ბრაილის მოწყობილობებს იყენებს."
+
+#: Programs/menu_prefs.c:893
+msgid "Scroll-aware Cursor Navigation"
+msgstr "ნავიგაცია კურსორით, ჩოჩიის გათვალისწინებით"
+
+#. xgettext: This is the name of MIDI musical instrument #123 (in the Sound Effects group).
+#: Programs/midi.c:462
+msgid "Seashore"
+msgstr "ზღვის სანაპირო"
+
+#: Programs/log.c:131
+msgid "Serial I/O"
+msgstr "სერიული I/O"
+
+#: Programs/log.c:119
+msgid "Server Events"
+msgstr "სერვერის მოვლენები"
+
+#. xgettext: This is the name of MIDI musical instrument #78 (in the Pipe group).
+#: Programs/midi.c:320
+msgid "Shakuhachi"
+msgstr "იაპონური ბამბუკის ფლეიტა"
+
+#. xgettext: This is the name of MIDI musical instrument #107 (in the Ethnic group).
+#: Programs/midi.c:412
+msgid "Shamisen"
+msgstr "სიამისენი"
+
+#. xgettext: This is the name of MIDI musical instrument #112 (in the Ethnic group).
+#: Programs/midi.c:427
+msgid "Shanai"
+msgstr "სანაი"
+
+#: Programs/menu_prefs.c:688
+msgid "Show Advanced Submenus"
+msgstr "დამატებითი ქვემენიუების ჩვენება"
+
+#: Programs/menu_prefs.c:693
+msgid "Show All Items"
+msgstr "ყველა ელემენტის ჩვენება"
+
+#: Programs/menu_prefs.c:797
+msgid "Show Attributes"
+msgstr "ატრიბუტების ჩვენება"
+
+#: Programs/menu_prefs.c:764
+msgid "Show Screen Cursor"
+msgstr "ეკრანის კურსორის ჩვენება"
+
+#: Programs/menu_prefs.c:1309
+msgid "Show Seconds"
+msgstr "წამების ჩვენება"
+
+#: Programs/menu_prefs.c:1251
+msgid "Show Speech Cursor"
+msgstr "საუბრის კურსორის ჩვენება"
+
+#: Programs/menu_prefs.c:683
+msgid "Show Submenu Sizes"
+msgstr "ქვემენიუების ზომის ჩვენება"
+
+#: Programs/brltty-hid.c:137
+msgid ""
+"Show the device address (USB serial number, Bluetooth device address, etc)."
+msgstr ""
+"მოწყობილობის მისამართის (USB სერიული ნომრის, ბლუთუზის მოწყობილობის "
+"მისამართის და ა.შ.) ჩვენება."
+
+#: Programs/brltty-hid.c:143
+msgid ""
+"Show the device name (USB manufacturer and/or product strings, Bluetooth "
+"device name, etc)."
+msgstr ""
+"მოწყობილობის სახელის (USB მწარმოებლის ან/და პროდუქტის სტრიქონების, ბლუთუზის "
+"მოწყობილობის სახელის და ა.შ.) ჩვენება."
+
+#: Programs/brltty-hid.c:155
+msgid "Show the host device (usually its absolute path)."
+msgstr "ჰოსტის მოწყობილობის (ჩვეულებრივ, მისი აბსოლუტური ბილიკის) ჩვენება."
+
+#: Programs/brltty-hid.c:149
+msgid ""
+"Show the host path (USB topology, Bluetooth host controller address, etc)."
+msgstr ""
+"ჰოსტის ბილიკის (USB ტოპოლოგიის, ბლუთუზის ჰოსტის კონტროლერის მისამართის და ა."
+"შ.) ჩვენება."
+
+#: Programs/brltty-hid.c:131
+msgid "Show the vendor and product identifiers."
+msgstr "მომწოდებლისა და პროდუქტის იდენტიფიკატორების ჩვენება."
+
+#: Headers/cmdline_types.h:72
+msgid "Show this usage summary, and then exit."
+msgstr "ამ გამოყენების მიმოხილვის ჩვენება და გასვლა."
+
+#. Ethnic Instruments
+#. xgettext: This is the name of MIDI musical instrument #105 (in the Ethnic group).
+#: Programs/midi.c:406
+msgid "Sitar"
+msgstr "სიგარი"
+
+#: Programs/menu_prefs.c:860
+msgid "Skip Blank Braille Windows"
+msgstr "ცარიელი ბრაილის ფანჯრების გამოტოვება"
+
+#: Programs/menu_prefs.c:854
+msgid "Skip Identical Lines"
+msgstr "იდენტური ხაზების გამოტოვება"
+
+#: Programs/menu_prefs.c:871
+msgid "Skip Which Blank Braille Windows"
+msgstr "რომელი ცარიელი ბრაილის ფანჯრები გამოვტოვო"
+
+#. xgettext: This is the name of MIDI musical instrument #37 (in the Bass group).
+#: Programs/midi.c:192
+msgid "Slap Bass 1"
+msgstr "ბასის სლეპი 1"
+
+#. xgettext: This is the name of MIDI musical instrument #38 (in the Bass group).
+#: Programs/midi.c:195
+msgid "Slap Bass 2"
+msgstr "ბასის სლეპი 2"
+
+#: Programs/menu_prefs.c:1339
+msgid "Slash"
+msgstr "დახრილი ხაზი"
+
+#: Programs/menu_prefs.c:876
+msgid "Sliding Braille Window"
+msgstr "სრიალა ბრაილის ფანჯარა"
+
+#: Programs/menu_prefs.c:1207
+msgid "Some"
+msgstr "ზოგიერთი"
+
+#. Reed
+#. xgettext: This is the name of MIDI musical instrument #65 (in the Reed group).
+#: Programs/midi.c:280
+msgid "Soprano Saxophone"
+msgstr "სოპრანო საქსოფონი"
+
+#. xgettext: This is the name of MIDI musical instrument group #16.
+#: Programs/midi.c:74
+msgid "Sound Effects"
+msgstr "ხმის ეფექტები"
+
+#: Programs/menu_prefs.c:561 Programs/menu_prefs.c:1375
+msgid "Space"
+msgstr "ჰარე"
+
+#: Programs/menu_prefs.c:1168
+msgid "Speak Completed Words"
+msgstr "დასრულებული სიტყვების თქმა"
+
+#: Programs/menu_prefs.c:1156
+msgid "Speak Deleted Characters"
+msgstr "წაშლილი სიმბოლოების თქმა"
+
+#: Programs/menu_prefs.c:1150
+msgid "Speak Inserted Characters"
+msgstr "ჩასმული სიმბოლოების თქმა"
+
+#: Programs/menu_prefs.c:1117
+msgid "Speak Key Context"
+msgstr "გასაღების შემცველობის წარმოთქმა"
+
+#: Programs/menu_prefs.c:1174
+msgid "Speak Line Indent"
+msgstr "ხაზის შეწევის თქმა"
+
+#: Programs/menu_prefs.c:1122
+msgid "Speak Modifier Key"
+msgstr "მოდიფიკატორ ღილაკის წარმოთქმა"
+
+#: Programs/menu_prefs.c:1162
+msgid "Speak Replaced Characters"
+msgstr "ჩანაცვლებული ასოების თქმა"
+
+#: Programs/menu_prefs.c:1144
+msgid "Speak Selected Character"
+msgstr "მონიშნული სიმბოლოს გამოთქმა"
+
+#: Programs/menu_prefs.c:1138
+msgid "Speak Selected Line"
+msgstr "მონიშნული ხაზის თქმა"
+
+#: Programs/menu_prefs.c:1268
+msgid "Speech Cursor Blink Period"
+msgstr "საუბრის კურსორის ციმციმის პერიოდი"
+
+#: Programs/menu_prefs.c:1276
+msgid "Speech Cursor Percent Visible"
+msgstr "საუბრის კურსორის ხილული პროცენტი"
+
+#: Programs/menu_prefs.c:1256
+msgid "Speech Cursor Style"
+msgstr "საუბრის კურსორის სტილი"
+
+#: Programs/log.c:161
+msgid "Speech Driver Events"
+msgstr "საუბრის დრაივერის მოვლენები"
+
+#: Programs/log.c:107
+msgid "Speech Events"
+msgstr "საუბრის მოვლენები"
+
+#: Programs/menu_prefs.c:1181
+msgid "Speech Options"
+msgstr "საუბრის მორგება"
+
+#: Programs/menu_prefs.c:1198
+msgid "Speech Pitch"
+msgstr "საუბრის ტონი"
+
+#: Programs/menu_prefs.c:1211
+msgid "Speech Punctuation"
+msgstr "წარმოთქმისას პუნქტუაციის მაჩვენებელი"
+
+#: Programs/menu_prefs.c:1191
+msgid "Speech Rate"
+msgstr "წარმოთქმის სიჩქარე"
+
+#: Programs/menu_prefs.c:1226
+msgid "Speech Uppercase Indicator"
+msgstr "საუბრისას დიდი ასოების მაჩვენებელი"
+
+#: Programs/menu_prefs.c:1184
+msgid "Speech Volume"
+msgstr "საუბრის ხმის სიმძლავრე"
+
+#: Programs/menu_prefs.c:1236
+msgid "Speech Whitespace Indicator"
+msgstr "საუბარში გამოტოვების მაჩვენებელი"
+
+#: Programs/config.c:481
+#, c-format
+msgid "Speech driver code (%s, %s, or one of {%s})."
+msgstr "წარმოთქმის დრაივერის კოდი (%s, %s, ერთ-ერთი სიიდან {%s})."
+
+#: Programs/menu_prefs.c:1523
+msgid "Standard Error Log Level"
+msgstr "სტანდარტული შეცდომის ჟურნალის დონე"
+
+#: Programs/menu_prefs.c:928
+msgid "Start Selection with Routing Key"
+msgstr "მონიშვნის დაწყება მარშრუტიზაციის ღილაკით"
+
+#: Programs/menu_prefs.c:551
+msgid "State Dots"
+msgstr "წერტილების დამაგრება"
+
+#: Programs/menu_prefs.c:552
+msgid "State Letter"
+msgstr "ასოს დამაგრება"
+
+#: Programs/menu_prefs.c:1350
+msgid "Status Cells"
+msgstr "სტატუსის უჯრედები"
+
+#: Programs/menu_prefs.c:1366
+msgid "Status Count"
+msgstr "სტატუსის მთვლელი"
+
+#: Programs/menu_prefs.c:565
+msgid "Status Field"
+msgstr "სტატუსის ველი"
+
+#: Programs/menu_prefs.c:1359
+msgid "Status Position"
+msgstr "სტატუსის მდებარეობა"
+
+#: Programs/menu_prefs.c:1381
+msgid "Status Separator"
+msgstr "სტატუსის გამყოფი"
+
+#: Programs/menu_prefs.c:1377
+msgid "Status Side"
+msgstr "სტატუსის ზღვარი"
+
+#. xgettext: This is the name of MIDI musical instrument #115 (in the Percussive group).
+#: Programs/midi.c:437
+msgid "Steel Drums"
+msgstr "ლითონის დოლები"
+
+#: Programs/config.c:767
+#, c-format
+msgid "Stop an existing instance of %s, and then exit."
+msgstr "%s-ის არსებული გაშვებული ასლის გაჩერება და გასვლა."
+
+#. Ensemble
+#. xgettext: This is the name of MIDI musical instrument #49 (in the Ensemble group).
+#: Programs/midi.c:230
+msgid "String Ensemble 1"
+msgstr "სიმებიანი ინსტრუმენტების ანსამბლი 1"
+
+#. xgettext: This is the name of MIDI musical instrument #50 (in the Ensemble group).
+#: Programs/midi.c:233
+msgid "String Ensemble 2"
+msgstr "სიმებიანი ინსტრუმენტების ანსამბლი 2"
+
+#. xgettext: This is the name of MIDI musical instrument group #6.
+#: Programs/midi.c:40
+msgid "Strings"
+msgstr "სტრიქონები"
+
+#: Programs/menu_prefs.c:723
+msgid "Superimpose Dot 7"
+msgstr "წერტილი 7-ის ზემოდან დადება"
+
+#: Programs/config.c:609
+msgid "Suppress start-up messages."
+msgstr "გაშვების შეტყობინებების მოცილება."
+
+#: Programs/cmdline.c:243
+msgid "Syntax"
+msgstr "სინტაქსი"
+
+#. xgettext: This is the name of MIDI musical instrument #39 (in the Bass group).
+#: Programs/midi.c:198
+msgid "Synth Bass 1"
+msgstr "სინთეზატორის ბასი 1"
+
+#. xgettext: This is the name of MIDI musical instrument #40 (in the Bass group).
+#: Programs/midi.c:201
+msgid "Synth Bass 2"
+msgstr "სინთეზატორის ბასი 2"
+
+#. xgettext: This is the name of MIDI musical instrument #119 (in the Percussive group).
+#: Programs/midi.c:449
+msgid "Synth Drum"
+msgstr "სინთ. დოლი"
+
+#. xgettext: This is the name of MIDI musical instrument group #13.
+#. xgettext: (synth is a common short form for synthesizer)
+#. xgettext: (FM is the acronym for Frequency Modulation)
+#: Programs/midi.c:65
+msgid "Synth FM"
+msgstr "სინთ. FM"
+
+#. xgettext: This is the name of MIDI musical instrument group #11.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:56
+msgid "Synth Lead"
+msgstr "სინთეზირებული ხმა"
+
+#. xgettext: This is the name of MIDI musical instrument group #12.
+#. xgettext: (synth is a common short form for synthesizer)
+#: Programs/midi.c:60
+msgid "Synth Pad"
+msgstr "სინთ. საფარი"
+
+#. xgettext: This is the name of MIDI musical instrument #55 (in the Ensemble group).
+#: Programs/midi.c:248
+msgid "Synth Voice"
+msgstr "სინთეზირებული ხმა"
+
+#. xgettext: This is the name of MIDI musical instrument #63 (in the Brass group).
+#: Programs/midi.c:273
+msgid "SynthBrass 1"
+msgstr "SynthBrass 1"
+
+#. xgettext: This is the name of MIDI musical instrument #64 (in the Brass group).
+#: Programs/midi.c:276
+msgid "SynthBrass 2"
+msgstr "SynthBrass 2"
+
+#. xgettext: This is the name of MIDI musical instrument #51 (in the Ensemble group).
+#: Programs/midi.c:236
+msgid "SynthStrings 1"
+msgstr "SynthStrings 1"
+
+#. xgettext: This is the name of MIDI musical instrument #52 (in the Ensemble group).
+#: Programs/midi.c:239
+msgid "SynthStrings 2"
+msgstr "SynthStrings 2"
+
+#: Programs/menu_prefs.c:1518
+msgid "System Log Level"
+msgstr "სისტემური ჟურნალის დონე"
+
+#: Programs/menu_prefs.c:1492
+msgid "Tables Directory"
+msgstr "ცხრილების კატალოგი"
+
+#. xgettext: This is the name of MIDI musical instrument #117 (in the Percussive group).
+#: Programs/midi.c:443
+msgid "Taiko Drum"
+msgstr "დოლი ტაიკო"
+
+#. xgettext: This is the name of MIDI musical instrument #24 (in the Organ group).
+#: Programs/midi.c:151
+msgid "Tango Accordion"
+msgstr "ტანგო აკორდეონი"
+
+#. xgettext: This is the name of MIDI musical instrument #125 (in the Sound Effects group).
+#: Programs/midi.c:468
+msgid "Telephone Ring"
+msgstr "ტელეფონის ზარი"
+
+#. xgettext: This is the name of MIDI musical instrument #67 (in the Reed group).
+#: Programs/midi.c:286
+msgid "Tenor Saxophone"
+msgstr "ტენორ საქსოფონი"
+
+#: Programs/apitest.c:482
+msgid "Test BrlAPI functions."
+msgstr "BrlAPI-ის ფუნქციების შემოწმება."
+
+#: Programs/brltest.c:100
+msgid "Test a braille driver."
+msgstr "ბრაილის დრაივერის შემოწმება."
+
+#: Programs/scrtest.c:137
+msgid "Test a screen driver."
+msgstr "ეკრანის დრაივერის შემოწმება."
+
+#: Programs/spktest.c:115
+msgid "Test a speech driver."
+msgstr "საუბრის დრაივერის შემოწმება."
+
+#: Programs/msgtest.c:251
+msgid "Test message localization using the message catalog reader."
+msgstr ""
+"შეტყობინების ლოკალიზაციის შემოწმება შეტყობინების კატალოგის წამკითხველი "
+"საშუალებით."
+
+#: Programs/crctest.c:121
+msgid "Test supported CRC (Cyclic Redundancy Check) checksum algorithms."
+msgstr ""
+"მხარდაჭერილი CRC (ციკლური დამატებითი შემოწმება) საკონტროლო ჯამის "
+"ალგორითმების შემოწმება."
+
+#: Programs/menu_prefs.c:761
+msgid "Text Indicators"
+msgstr "ტექსტის მაჩვენებლები"
+
+#: Programs/menu_prefs.c:1378
+msgid "Text Side"
+msgstr "ტექსტის მხარე"
+
+#: Programs/menu_prefs.c:1406
+msgid "Text Table"
+msgstr "ტექსტი: ცხრილი"
+
+#: Programs/brltty-ctb.c:80
+msgid "Text table."
+msgstr "ტექსტური ცხრილი."
+
+#: Programs/brltty-cldr.c:42
+msgid "The format of each output line."
+msgstr "თითოეული გამოტანილი ხაზის ფორმატი."
+
+#: Programs/brltty-hid.c:208
+msgid "The input timeout (in seconds)."
+msgstr "შეყვანის მოლოდინის ვადა (წამებში)."
+
+#: Programs/config.c:669
+msgid ""
+"The text to be shown when the braille driver starts and to be spoken when "
+"the speech driver starts."
+msgstr ""
+"ტექსტი, რომელიც ნაჩვენები იქნება, როცა ბრაილის დრაივერი გაეშვება და "
+"წარმოითქმება, როცა საუბრის დრაივერი გაეშვება."
+
+#: Programs/config.c:676
+msgid "The text to be shown when the braille driver stops."
+msgstr "ტექსტი, რომელიც ნაჩვენებია, როცა ბრაილის დრაივერი გაჩერდება."
+
+#: Programs/menu_prefs.c:553
+msgid "Time"
+msgstr "დრო"
+
+#: Programs/menu_prefs.c:1294
+msgid "Time Format"
+msgstr "დროის ფორმატი"
+
+#: Programs/menu_prefs.c:1286
+msgid "Time Presentation"
+msgstr "დროის წარმოდგენა"
+
+#: Programs/menu_prefs.c:1304
+msgid "Time Separator"
+msgstr "დროის გამყოფი"
+
+#. xgettext: This is the name of MIDI musical instrument #48 (in the Strings group).
+#: Programs/midi.c:226
+msgid "Timpani"
+msgstr "ტიმპანი"
+
+#. Percussive Instruments
+#. xgettext: This is the name of MIDI musical instrument #113 (in the Percussive group).
+#: Programs/midi.c:431
+msgid "Tinkle Bell"
+msgstr "წკარუნა ზარი"
+
+#: Programs/menu_prefs.c:1572
+msgid "Tools"
+msgstr "ხელსაწყოები"
+
+#: Programs/menu_prefs.c:1005
+msgid "Touch Navigation"
+msgstr "შეხებით მართვა"
+
+#: Programs/menu_prefs.c:1019
+msgid "Touch Sensitivity"
+msgstr "შეხების მგრძნობიარობა"
+
+#: Programs/menu_prefs.c:917
+msgid "Track Screen Pointer"
+msgstr "ეკრანის კურსორის დევნა"
+
+#: Programs/menu_prefs.c:911
+msgid "Track Screen Scroll"
+msgstr "ეკრანის ჩოჩიის დევნა"
+
+#: Programs/brltty-trtxt.c:239
+msgid "Translate one binary braille representation to another."
+msgstr "ერთი ბინარული ბრაილის წარმოდგენის მეორეში თარგმნა."
+
+#: Programs/brltty-morse.c:136
+msgid "Translate text into Morse Code tones."
+msgstr "ტექსტი თარგმნა მორზეს კოდების ტონებში."
+
+#: Programs/menu_prefs.c:943
+msgid "Translated via Text Table"
+msgstr "თარგმნა ტექსტური ცხრილის გავლით"
+
+#. xgettext: This is the name of MIDI musical instrument #45 (in the Strings group).
+#: Programs/midi.c:217
+msgid "Tremolo Strings"
+msgstr "სიმებიანი ტრემოლო"
+
+#. xgettext: This is the name of MIDI musical instrument #58 (in the Brass group).
+#: Programs/midi.c:258
+msgid "Trombone"
+msgstr "ტრომბონი"
+
+#. Brass
+#. xgettext: This is the name of MIDI musical instrument #57 (in the Brass group).
+#: Programs/midi.c:255
+msgid "Trumpet"
+msgstr "ბუკი"
+
+#. xgettext: This is the name of MIDI musical instrument #59 (in the Brass group).
+#: Programs/midi.c:261
+msgid "Tuba"
+msgstr "ტუბა"
+
+#. xgettext: This is the name of MIDI musical instrument #15 (in the Chromatic Percussion group).
+#: Programs/midi.c:123
+msgid "Tubular Bells"
+msgstr "Tubular Bells"
+
+#: Programs/menu_prefs.c:1064
+msgid "Tune Device"
+msgstr "მოწყობილობის მორგება"
+
+#: Programs/menu_prefs.c:947
+msgid "Typing Mode"
+msgstr "აკრეფის რეჟიმი"
+
+#: Programs/log.c:137
+msgid "USB I/O"
+msgstr "USB I/O"
+
+#: Programs/menu_prefs.c:664
+msgid "Underline"
+msgstr "ხაზგასმული"
+
+#: Programs/alert.c:108
+msgid "Unfrozen"
+msgstr "გამდნარი"
+
+#: Programs/menu_prefs.c:1472
+msgid "Updatable Directory"
+msgstr "განახლებადი საქაღალდე"
+
+#: Programs/log.c:101
+msgid "Update Events"
+msgstr "მოვლენების განახლება"
+
+#: Programs/menu_prefs.c:722
+msgid "Use Capital Sign"
+msgstr "დიდასოანი ნიშნის გამოყენება"
+
+#. xgettext: This is the name of MIDI musical instrument #12 (in the Chromatic Percussion group).
+#: Programs/midi.c:114
+msgid "Vibraphone"
+msgstr "ვიბრაფონი"
+
+#. xgettext: This is the name of MIDI musical instrument #42 (in the Strings group).
+#: Programs/midi.c:208
+msgid "Viola"
+msgstr "ვიოლა"
+
+#. Strings
+#. xgettext: This is the name of MIDI musical instrument #41 (in the Strings group).
+#: Programs/midi.c:205
+msgid "Violin"
+msgstr "ვიოლინო"
+
+#. xgettext: This is the name of MIDI musical instrument #54 (in the Ensemble group).
+#: Programs/midi.c:245
+msgid "Voice Oohs"
+msgstr "ხმოვანი ო"
+
+#: Programs/menu_prefs.c:1508
+msgid "Warning"
+msgstr "გაფრთხილება"
+
+#: Programs/menu_prefs.c:1452
+msgid "Web Site"
+msgstr "ვებგვერდი"
+
+#. xgettext: This is the name of MIDI musical instrument #79 (in the Pipe group).
+#: Programs/midi.c:323
+msgid "Whistle"
+msgstr "სტვენა"
+
+#: Programs/menu_prefs.c:543
+msgid "Window Column"
+msgstr "ფანჯრის სვეტი"
+
+#: Programs/menu_prefs.c:542 Programs/menu_prefs.c:558
+msgid "Window Coordinates"
+msgstr "ფანჯრის კოორდინატები"
+
+#: Programs/menu_prefs.c:544
+msgid "Window Row"
+msgstr "ფანჯრის მწკრივი"
+
+#. xgettext: This is the name of MIDI musical instrument #116 (in the Percussive group).
+#: Programs/midi.c:440
+msgid "Woodblock"
+msgstr "გრავიურა"
+
+#: Programs/menu_prefs.c:849
+msgid "Word Wrap"
+msgstr "სიტყვების გადატანა"
+
+#: Programs/menu_prefs.c:1482
+msgid "Writable Directory"
+msgstr "ჩაწერადი საქაღალდე"
+
+#: Programs/brltty-hid.c:195
+msgid "Write (set) a feature report (see below)."
+msgstr ""
+
+#: Programs/brltty-hid.c:188
+msgid "Write (set) an output report (see below)."
+msgstr ""
+
+#: Programs/brltty-lscmds.c:254
+msgid "Write a brltty command reference in reStructuredText."
+msgstr ""
+
+#: Programs/xbrlapi.c:124
+msgid "Write debugging output to stdout"
+msgstr "გამართვის ინფორმაციის ჩაწერა stdout-ზე"
+
+#: Programs/tbl2hex.c:215
+msgid "Write the hexadecimal array representation of a compiled table."
+msgstr ""
+
+#: Programs/config.c:788
+msgid "Write the start-up logs, and then exit."
+msgstr "გაშვების ჟურნალის დაწერა და გასვლა."
+
+#: Programs/xbrlapi.c:112
+msgid "X display to connect to"
+msgstr "X-ის სესია მისაერთებლად"
+
+#: Programs/pgmprivs_linux.c:1951
+msgid "XDG runtime directory access problem"
+msgstr "XDG გაშვების საქაღალდის წვდომის პრობლემა"
+
+#: Programs/pgmprivs_linux.c:1933
+msgid "XDG runtime directory created"
+msgstr "XDG გაშვების საქაღალდე შეიქმნა"
+
+#: Programs/pgmprivs_linux.c:1928
+msgid "XDG runtime directory exists"
+msgstr "XDG გაშვების საქაღალდე არსებობს"
+
+#: Programs/xbrlapi.c:960
+msgid "XFree(wm_command) for change"
+msgstr "XFree(wm_command) შესაცვლელად"
+
+#: Programs/xbrlapi.c:941
+msgid "XFree(wm_name) for change"
+msgstr "XFree(wm_name) შესაცვლელად"
+
+#. xgettext: This is the description of the PASSXT command.
+#: Programs/cmds.auto.h:1495
+msgid "XT (set 1) keyboard scan code"
+msgstr "XT (კომპლექტი 1) კლავიატურის სკანირების კოდი"
+
+#. xgettext: This is the name of MIDI musical instrument #14 (in the Chromatic Percussion group).
+#: Programs/midi.c:120
+msgid "Xylophone"
+msgstr "ქსილოფონი"
+
+#: Programs/menu_prefs.c:1326
+msgid "Year Month Day"
+msgstr "წელი თვე დღე"
+
+#: Programs/menu.c:524
+msgid "Yes"
+msgstr "დიახ"
+
+#: Programs/xbrlapi.c:96
+msgid "[host][:port]"
+msgstr "[ჰოსტი][:პორტი]"
+
+#: Programs/menu_prefs.c:665
+msgid "all dots"
+msgstr "ყველა წერტილი"
+
+#: Programs/cmd_miscellaneous.c:104
+msgid "and"
+msgstr "და"
+
+#. xgettext: This is the description of the CLIP_APPEND command.
+#: Programs/cmds.auto.h:1353
+msgid "append characters to clipboard"
+msgstr "სიმბოლოების ბუფერის ბოლოში მიწერა"
+
+#. xgettext: This is the description of the CLIP_ADD command.
+#: Programs/cmds.auto.h:1230
+msgid "append to clipboard from character"
+msgstr "სიმბოლოს ბუფერის ბოლოში მიწერა"
+
+#: Programs/cmd.c:291
+msgid "at cursor"
+msgstr "კურსორთან"
+
+#. xgettext: This is the description of the KEY_BACKSPACE command.
+#: Programs/cmds.auto.h:1559
+msgid "backspace key"
+msgstr "ღილაკის Backspace"
+
+#: Drivers/Braille/Baum/braille.c:1150 Drivers/Braille/TSI/braille.c:869
+msgid "battery low"
+msgstr "ელემენტის მუხტი დაბალია"
+
+#. xgettext: This is the description of the SELECTVT command.
+#: Programs/cmds.auto.h:1453
+msgid "bind to specific virtual terminal"
+msgstr "მიბმა მითითებულ ვირტუალურ ტერმინალზე"
+
+#. xgettext: This is the description of the SELECTVT_NEXT command.
+#: Programs/cmds.auto.h:957
+msgid "bind to the next virtual terminal"
+msgstr "მიბმა შემდეგ ვირტუალურ ტერმინალზე"
+
+#. xgettext: This is the description of the SELECTVT_PREV command.
+#: Programs/cmds.auto.h:950
+msgid "bind to the previous virtual terminal"
+msgstr "მიბმა წინა ვირტუალურ ტერმინალზე"
+
+#.
+#: Programs/cmd_utils.c:160
+msgid "black"
+msgstr "შავი"
+
+#: Programs/core.c:1157
+msgid "blank line"
+msgstr "ცარიელი ხაზი"
+
+#: Programs/cmd_utils.c:189
+msgid "blinking"
+msgstr "ციმციმი"
+
+#. B
+#: Programs/cmd_utils.c:161
+msgid "blue"
+msgstr "ლურჯი"
+
+#: Programs/config.c:3104
+#, c-format
+msgid "braille device not specified"
+msgstr "ბრაილის მოწყობილობა მითითებული არაა"
+
+#. xgettext: This is the description of the OFFLINE command.
+#: Programs/cmds.auto.h:621
+msgid "braille display temporarily unavailable"
+msgstr "ბრაილის ეკრანი დროებით ხელმისაწვდომი არაა"
+
+#: Programs/config.c:1942
+msgid "braille driver not loadable"
+msgstr "ბრაილის დრაივერი ჩატვირთვადი არაა"
+
+#: Programs/config.c:2203
+msgid "braille driver restarting"
+msgstr "მიმდინარეობს ბრაილის დრაივერის თავიდან გაშვება"
+
+#: Programs/cmd_miscellaneous.c:163
+msgid "braille driver stopped"
+msgstr "ბრაილის დრაივერის გაჩერებულია"
+
+#: Drivers/Screen/Android/screen.c:189
+msgid "braille released"
+msgstr "ბრაილი გაშვებულია"
+
+#. xgettext: This is the description of the ROUTE command.
+#: Programs/cmds.auto.h:1214
+msgid "bring screen cursor to character"
+msgstr "ეკრანის კურსორის მიტანა სიმბოლოსთან"
+
+#. xgettext: This is the description of the CSRJMP_VERT command.
+#: Programs/cmds.auto.h:593
+msgid "bring screen cursor to current line"
+msgstr "ეკრანის კურსორის მიტანა მიმდინარე ხაზთან"
+
+#. xgettext: This is the description of the ROUTE_LINE command.
+#: Programs/cmds.auto.h:1411
+msgid "bring screen cursor to line"
+msgstr "ეკრანის კურსორის მიტანა ხაზთან"
+
+#. xgettext: This is the description of the ROUTE_CURR_LOCN command.
+#: Programs/cmds.auto.h:835
+msgid "bring screen cursor to speech cursor"
+msgstr "ეკრანის კურსორის მიტანა წარმოთქმის კურსორთან"
+
+#. xgettext: This is the description of the ROUTE_SPEECH command.
+#: Programs/cmds.auto.h:1445
+msgid "bring speech cursor to character"
+msgstr "საუბრის კურსორის მიტანა სიმბოლოსთან"
+
+#. RG
+#: Programs/cmd_utils.c:166
+msgid "brown"
+msgstr "ყავისფერი"
+
+#: Programs/brltty-hid.c:186 Programs/brltty-hid.c:193
+msgid "bytes"
+msgstr "ბაიტი"
+
+#: Drivers/Screen/Linux/screen.c:1486
+msgid "can't get console state"
+msgstr "კონსოლის მდგომარეობის მიღება შეუძლებელია"
+
+#: Drivers/Screen/Linux/screen.c:1564
+msgid "can't open console"
+msgstr "კონსოლის გახსნა შეუძლებელია"
+
+#: Drivers/Screen/Linux/screen.c:1610
+msgid "can't read screen content"
+msgstr "ეკრანის შემცველობი წაკითხვა შეუძლებელია"
+
+#: Drivers/Screen/Linux/screen.c:1655
+msgid "can't read screen header"
+msgstr "ეკრანის სათაურის წაკითხვა შეუძლებელია"
+
+#: Programs/ctb_translate.c:406
+msgid "cannot access internal contraction table"
+msgstr "შიდა შემოკლებების ცხრილთან წვდომა შეუძლებელია"
+
+#: Programs/atb_translate.c:70
+msgid "cannot compile attributes table"
+msgstr "ატრიბუტების ცხრილის აგება შეუძლებელია"
+
+#: Programs/ctb_translate.c:400
+msgid "cannot compile contraction table"
+msgstr "შემოკლებების ცხრილის კომპილაცია შეუძლებელია"
+
+#: Programs/config.c:1844
+msgid "cannot compile key table"
+msgstr "ღილაკების ცხრილის აგება შეუძლებელია"
+
+#: Programs/ttb_translate.c:275
+msgid "cannot compile text table"
+msgstr "ტექსტური ცხრილის აგება შეუძლებელია"
+
+#. This is the first attempt to connect to BRLTTY, and it failed.
+#. * Return the error immediately to the user, to provide feedback to users
+#. * running xbrlapi by hand, but not fill logs, eat battery, spam
+#. * 127.0.0.1 with reconnection attempts.
+#.
+#: Programs/xbrlapi.c:230
+#, c-format
+msgid "cannot connect to braille devices daemon brltty at %s\n"
+msgstr "ვერ მივუერთდი ბრაილის მოწყობილობი დემონს brltty მისამართზე %s\n"
+
+#: Programs/xbrlapi.c:802
+#, c-format
+msgid "cannot connect to display %s\n"
+msgstr "ეკრანთან (%s) მიერთების შეცდომა\n"
+
+#: Programs/file.c:433
+msgid "cannot create directory"
+msgstr "საქაღალდის შექმნის შეცდომა"
+
+#: Programs/program.c:151
+#, c-format
+msgid "cannot determine program directory"
+msgstr "პროგრამის საქაღალდის დადგენა შეუძლებელია"
+
+#: Programs/config.c:3062 Programs/menu.c:618
+msgid "cannot determine working directory"
+msgstr "სამუშაო საქაღალდის დადგენა შეუძლებელია"
+
+#: Programs/system_windows.c:61
+msgid "cannot find procedure"
+msgstr "პროცედურა ვერ ვიპოვე"
+
+#: Programs/program.c:165
+msgid "cannot fix install path"
+msgstr "დაყენების ბილიკის შესწორება შეუძლებელია"
+
+#: Programs/xbrlapi.c:285
+msgid "cannot get tty\n"
+msgstr "tty-ის მიღების შეცდომა\n"
+
+#: Programs/xbrlapi.c:291
+#, c-format
+msgid "cannot get tty %d\n"
+msgstr "tty %d-ის მიღების შეცდომა\n"
+
+#: Programs/file.c:572
+msgid "cannot get working directory"
+msgstr "სამუშაო საქაღალდის მიღების შეცდომა"
+
+#: Programs/xbrlapi.c:853
+#, c-format
+msgid "cannot grab windows on screen %d\n"
+msgstr "ვერ დავითრიე ფანჯარა ეკრანზე %d\n"
+
+#: Programs/xbrlapi.c:298
+msgid "cannot ignore keys\n"
+msgstr "ღილაკების გამოტოვება შეუძლებელია\n"
+
+#: Programs/atb_translate.c:90
+msgid "cannot load attributes table"
+msgstr "ატრიბუტების ცხრილის ჩატვირთვა შეუძლებელია"
+
+#: Programs/ctb_translate.c:420
+msgid "cannot load contraction table"
+msgstr "შემოკლებების ცხრილის ჩატვირთვა შეუძლებელია"
+
+#: Programs/system_windows.c:54
+msgid "cannot load library"
+msgstr "ბიბლიოთეკის ჩატვირთვა შეუძლებელია"
+
+#: Programs/ttb_translate.c:295
+msgid "cannot load text table"
+msgstr "ტექსტური ცხრილის ჩატვირთვა შეუძლებელია"
+
+#: Programs/file.c:422
+msgid "cannot make world writable"
+msgstr "ყველასთვის ჩაწერადად გადაკეთება შეუძლებელია"
+
+#: Programs/config.c:1277
+msgid "cannot open key help"
+msgstr "ღილაკების დახმარების გახსნა შეუძლებელია"
+
+#: Programs/program.c:289
+msgid "cannot open process identifier file"
+msgstr "პროცესის იდენტიფიკატორი ფაილის დამუშავება შეუძლებელია"
+
+#: Programs/menu.c:616
+msgid "cannot open working directory"
+msgstr "სამუშაო საქაღალდის გახსნა შეუძლებელია"
+
+#: Programs/prefs.c:363
+msgid "cannot read preferences file"
+msgstr "პარამეტრების ფაილის წაკითხვის შეცდომა"
+
+#: Programs/xbrlapi.c:363
+#, c-format
+msgid "cannot set focus to %#010x\n"
+msgstr "ფოკუსის %#010x-ზე დაყენება შეუძლებელია\n"
+
+#: Programs/file.c:586 Programs/menu.c:605
+msgid "cannot set working directory"
+msgstr "სამუშაო საქაღალდის დაყენება შეუძლებელია"
+
+#: Programs/prefs.c:576
+msgid "cannot write to preferences file"
+msgstr "პარამეტრების ფაილში ჩაწერა შეუძლებელია"
+
+#. "cap" here, used during speech output, is short for "capital".
+#. It is spoken just before an uppercase letter, e.g. "cap A".
+#: Programs/core.c:1086
+msgid "cap"
+msgstr "კეპი"
+
+#: Programs/menu_prefs.c:888 Programs/menu_prefs.c:1367
+msgid "cells"
+msgstr "უჯრედები"
+
+#: Programs/cmd_preferences.c:95
+msgid "changes discarded"
+msgstr "ცვლილებები მოცილებულია"
+
+#: Programs/brltty-ktb.c:290
+msgid ""
+"check a key table, list the key naems it can use, or write the key bindings "
+"it defines in useful formats."
+msgstr ""
+
+#. xgettext: This is the description of the UNSTICK command.
+#: Programs/cmds.auto.h:887
+msgid "clear all sticky input modifiers"
+msgstr "ყველა წებოვანი შეყვანის მოდიფიკატორის გასუფთავება"
+
+#. xgettext: This is the description of the TXTSEL_CLEAR command.
+#: Programs/cmds.auto.h:1019
+msgid "clear the text selection"
+msgstr "მონიშნული ტექსტის გასუფთავება"
+
+#: Programs/cmd_speech.c:501
+msgid "column"
+msgstr "სვეტი"
+
+#: Programs/brltty-pty.c:240
+msgid "command not found"
+msgstr "ბრძანება ვერ ვიპოვე"
+
+#. configuration menu
+#: Drivers/Braille/BrailleLite/braille.c:607
+msgid "config"
+msgstr "კონფიგურაცია"
+
+#: Programs/cmdline.c:944
+msgid "configuration directive specified more than once"
+msgstr "კონფიგურაციის დირექტივა ერთზე მეტჯერაა მითითებული"
+
+#: Drivers/Screen/Linux/screen.c:1562
+msgid "console not in use"
+msgstr "კონსოლი არ გამოიყენება"
+
+#: Programs/menu_prefs.c:1058
+msgid "console tone generator"
+msgstr "კონსოლის ტონის გენერატორი"
+
+#. xgettext: This is the description of the CLIP_COPY command.
+#: Programs/cmds.auto.h:1345
+msgid "copy characters to clipboard"
+msgstr "სიმბოლოების ბუფერში კოპირება"
+
+#. xgettext: This is the description of the HOST_COPY command.
+#: Programs/cmds.auto.h:1033
+msgid "copy selected text to host clipboard"
+msgstr "მონიშნული ტექსტის დაკოპირება ჰოსტის ბუფერში"
+
+#: Programs/config.c:660
+msgid "csecs"
+msgstr "csecs"
+
+#. xgettext: This is the description of the TOUCH_AT command.
+#: Programs/cmds.auto.h:1519
+msgid "current reading location"
+msgstr "მიმდინარე კითხვის მდებარეობა"
+
+#. xgettext: This is the description of the KEY_CURSOR_DOWN command.
+#: Programs/cmds.auto.h:1599
+msgid "cursor-down key"
+msgstr "ღილაკი კურსორი-ქვემოთ"
+
+#. xgettext: This is the description of the KEY_CURSOR_LEFT command.
+#: Programs/cmds.auto.h:1575
+msgid "cursor-left key"
+msgstr "ღილაკი კურსორი-მარცხნივ"
+
+#. xgettext: This is the description of the KEY_CURSOR_RIGHT command.
+#: Programs/cmds.auto.h:1583
+msgid "cursor-right key"
+msgstr "ღილაკი კურსორი-მარჯვნივ"
+
+#. xgettext: This is the description of the KEY_CURSOR_UP command.
+#: Programs/cmds.auto.h:1591
+msgid "cursor-up key"
+msgstr "ღილაკი კურსორი-მაღლა"
+
+#. xgettext: This is the description of the HOST_CUT command.
+#: Programs/cmds.auto.h:1040
+msgid "cut selected text to host clipboard"
+msgstr "მონიშნული ტექსტის ამოჭრა ჰოსტის ბუფერში"
+
+#. GB
+#: Programs/cmd_utils.c:163
+msgid "cyan"
+msgstr "ცისფერი"
+
+#. xgettext: This is the description of the ALTGR command.
+#: Programs/cmds.auto.h:894
+msgid "cycle the AltGr (Right Alt) sticky input modifier (next, on, off)"
+msgstr ""
+
+#. xgettext: This is the description of the CONTROL command.
+#: Programs/cmds.auto.h:642
+msgid "cycle the Control sticky input modifier (next, on, off)"
+msgstr ""
+
+#. xgettext: This is the description of the GUI command.
+#: Programs/cmds.auto.h:901
+msgid "cycle the GUI (Windows) sticky input modifier (next, on, off)"
+msgstr ""
+
+#. xgettext: This is the description of the META command.
+#: Programs/cmds.auto.h:649
+msgid "cycle the Meta (Left Alt) sticky input modifier (next, on, off)"
+msgstr ""
+
+#. xgettext: This is the description of the SHIFT command.
+#: Programs/cmds.auto.h:628
+msgid "cycle the Shift sticky input modifier (next, on, off)"
+msgstr ""
+
+#. xgettext: This is the description of the UPPER command.
+#: Programs/cmds.auto.h:635
+msgid "cycle the Upper sticky input modifier (next, on, off)"
+msgstr ""
+
+#. L
+#: Programs/cmd_utils.c:168
+msgid "dark grey"
+msgstr "მუქი ნაცრისფერი"
+
+#. xgettext: This is the description of the SAY_LOWER command.
+#: Programs/cmds.auto.h:1168
+msgid "decrease speaking pitch"
+msgstr "საუბის დრონის დაწევა"
+
+#. xgettext: This is the description of the SAY_SLOWER command.
+#: Programs/cmds.auto.h:550
+msgid "decrease speaking rate"
+msgstr "საუბრის სიჩქარის დაწევა"
+
+#. xgettext: This is the description of the SAY_SOFTER command.
+#: Programs/cmds.auto.h:564
+msgid "decrease speaking volume"
+msgstr "საუბრის ხმის დაწევა"
+
+#. xgettext: This is the description of the KEY_DELETE command.
+#: Programs/cmds.auto.h:1647
+msgid "delete key"
+msgstr "ღილაკი Delete"
+
+#. xgettext: This is the description of the DESCCHAR command.
+#: Programs/cmds.auto.h:1282
+msgid "describe character"
+msgstr "სიმბოლოს აღწერა"
+
+#. xgettext: This is the description of the DESC_CURR_CHAR command.
+#: Programs/cmds.auto.h:820
+msgid "describe current character"
+msgstr "მიმდინარე სიმბოლოს აღწერა"
+
+#: Programs/config.c:690 Programs/config.c:700
+msgid "device"
+msgstr "მოწყობილობა"
+
+#: Programs/brltest.c:61 Programs/brltest.c:79 Programs/brltty-atb.c:31
+#: Programs/brltty-ctb.c:92 Programs/brltty-ktb.c:76 Programs/brltty-ktb.c:85
+#: Programs/brltty-trtxt.c:75 Programs/config.c:709 Programs/config.c:719
+#: Programs/config.c:729 Programs/config.c:739 Programs/config.c:748
+msgid "directory"
+msgstr "საქაღალდე"
+
+#: Programs/xbrlapi.c:110
+msgid "display"
+msgstr "ჩვენება"
+
+#. xgettext: This is the description of the NOOP command.
+#: Programs/cmds.auto.h:5
+msgid "do nothing"
+msgstr "არაფრის გაკეთება"
+
+#: Programs/learn.c:108
+msgid "done"
+msgstr "შესრულებულია"
+
+#: Programs/menu_prefs.c:666
+msgid "dot 7"
+msgstr "წერტილი 7"
+
+#: Programs/menu_prefs.c:667
+msgid "dot 8"
+msgstr "წერტილი 8"
+
+#: Programs/menu_prefs.c:664
+msgid "dots 7 and 8"
+msgstr "წერტილები 7 და 8"
+
+#: Programs/brltty-ktb.c:45
+msgid "driver"
+msgstr "დრაივერი"
+
+#: Drivers/Braille/Baum/braille.c:1147
+msgid "driver request"
+msgstr "დრაივერის გამოთხოვა"
+
+#: Programs/config.c:407 Programs/config.c:478 Programs/config.c:521
+msgid "driver,..."
+msgstr "დრაივერი,..."
+
+#. xgettext: This is the description of the KEY_END command.
+#: Programs/cmds.auto.h:1631
+msgid "end key"
+msgstr "ღილაკი End"
+
+#. xgettext: This is the description of the KEY_ENTER command.
+#: Programs/cmds.auto.h:1543
+msgid "enter key"
+msgstr "ღილაკი Enter"
+
+#. xgettext: This is the description of the LEARN command.
+#: Programs/cmds.auto.h:436
+msgid "enter/leave command learn mode"
+msgstr "ბრძანებების სწავლის რეჟიმში შესვლა/გასვლა"
+
+#. xgettext: This is the description of the HELP command.
+#: Programs/cmds.auto.h:422
+msgid "enter/leave help display"
+msgstr "დახმარების ჩვენების ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the PREFMENU command.
+#: Programs/cmds.auto.h:443
+msgid "enter/leave preferences menu"
+msgstr "მორგების მენიუში შესვლა/გასვლა"
+
+#. xgettext: This is the description of the INFO command.
+#: Programs/cmds.auto.h:429
+msgid "enter/leave status display"
+msgstr "სტატუსის ჩვენების ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the KEY_ESCAPE command.
+#: Programs/cmds.auto.h:1567
+msgid "escape key"
+msgstr "ღილაკი Escape"
+
+#: Drivers/Braille/Iris/braille.c:1497
+msgid "eurobraille"
+msgstr "ევრობრაილი"
+
+#. xgettext: This is the term used when the time is exactly on (i.e. zero seconds after) a minute.
+#: Programs/cmd_miscellaneous.c:102
+msgid "exactly"
+msgstr "ზუსტად"
+
+#: Programs/config.c:894
+msgid "excess argument"
+msgstr "ზედმეტი არგუმენტი"
+
+#. xgettext: This is the description of the MACRO command.
+#: Programs/cmds.auto.h:1527
+msgid "execute command macro"
+msgstr "ბრძანების მაკროს შესრულება"
+
+#. parent
+#: Programs/brltty.c:219
+#, c-format
+msgid "executing \"%s\" (from \"%s\")\n"
+msgstr "\"%s\"-ის შესრულება (\"%s\"-დან)\n"
+
+#: Programs/pgmprivs_linux.c:2047
+msgid "executing as the invoking user"
+msgstr "შესრულება ჩამწოდებელი მომხმარებლით"
+
+#. execv() shouldn't return
+#: Programs/brltty.c:226
+#, c-format
+msgid "execution of \"%s\" failed: %s\n"
+msgstr "\"%s\"-ის შესრულება ჩავარდა: %s\n"
+
+#: Programs/xbrlapi.c:860
+msgid "failed to get first focus\n"
+msgstr "პირველი ფოკუსის მიღება ჩავარდა\n"
+
+#: Programs/brltty-trtxt.c:47 Programs/brltty-trtxt.c:55 Programs/config.c:396
+#: Programs/config.c:450 Programs/config.c:460 Programs/config.c:469
+#: Programs/config.c:497 Programs/config.c:540 Programs/config.c:564
+#: Programs/config.c:573 Programs/config.c:624 Programs/config.c:758
+#: Programs/xbrlapi.c:135 Programs/xbrlapi.c:142
+msgid "file"
+msgstr "ფაილი"
+
+#: Programs/cmdline.c:1130
+#, c-format
+msgid "file '%s' processing error."
+msgstr "ფაილის '%s' დამუშავების შეცდომა."
+
+#: Drivers/Screen/FileViewer/screen.c:176
+msgid "file not specified"
+msgstr "ფაილი მითითებული არაა"
+
+#: Programs/xbrlapi.c:137
+msgid "file to write the name of the focused command to"
+msgstr "ფაილი ფოკუსის მქონე ბრძანების სახელის ჩასაწერად"
+
+#: Programs/xbrlapi.c:144
+msgid "file to write the name of the focused window to"
+msgstr "ფაილი ფოკუსის მქონე ფანჯრის სახელის ჩასაწერად"
+
+#. failed
+#: Programs/brltty.c:214
+#, c-format
+msgid "fork of \"%s\" failed: %s\n"
+msgstr "\"%s\"-სთვის შემოსავლელი ბილიკის შექმნა ჩავარდა: %s\n"
+
+#. xgettext: This is the description of the KEY_FUNCTION command.
+#: Programs/cmds.auto.h:1656
+msgid "function key"
+msgstr "ღილაკი Function"
+
+#: Programs/log.c:125
+msgid "generic I/O"
+msgstr "ძირითადი შეყვ/გამოტ"
+
+#. xgettext: This is the description of the BACK command.
+#: Programs/cmds.auto.h:271
+msgid "go back after cursor tracking"
+msgstr "უკან დაბრუნება კურსორის დევნების ადგილას"
+
+#. xgettext: This is the description of the GUI_BACK command.
+#: Programs/cmds.auto.h:1077
+msgid "go back to the previous screen"
+msgstr "დაბრუნება წინა ეკრანზე"
+
+#. xgettext: This is the description of the FWINLT command.
+#: Programs/cmds.auto.h:210
+msgid "go backward one braille window"
+msgstr "გადასვლა უკან ერთი ბრაილის ფანჯრით"
+
+#. xgettext: This is the description of the FWINLTSKIP command.
+#: Programs/cmds.auto.h:228
+msgid "go backward skipping blank braille windows"
+msgstr "გადასვლა უკან ცარიელი ბრალის ფანჯრების გამოტოვებით"
+
+#. xgettext: This is the description of the PRNBWIN command.
+#: Programs/cmds.auto.h:966
+msgid "go backward to nearest non-blank braille window"
+msgstr "გადასვლა უკან უახლოეს არაცარიელ ბრაილის ფანჯარაზე"
+
+#. xgettext: This is the description of the LNDN command.
+#: Programs/cmds.auto.h:23
+msgid "go down one line"
+msgstr "ერთი ხაზით დაბლა ჩასვლა"
+
+#. xgettext: This is the description of the WINDN command.
+#: Programs/cmds.auto.h:41
+msgid "go down several lines"
+msgstr "რამდენიმე ხაზით დაბლა ჩასვლა"
+
+#. xgettext: This is the description of the NXPGRPH command.
+#: Programs/cmds.auto.h:133
+msgid "go down to first line of next paragraph"
+msgstr "გადასვლა დაბლა, შემდეგი აბზაცის პირველ ხაზზე"
+
+#. xgettext: This is the description of the MENU_LAST_ITEM command.
+#: Programs/cmds.auto.h:475
+msgid "go down to last item"
+msgstr "ბოლო ელემენტამდე ჩასვლა"
+
+#. xgettext: This is the description of the NXDIFCHAR command.
+#: Programs/cmds.auto.h:1337
+msgid "go down to nearest line with different character"
+msgstr "გადასვლა დაბლა, უახლოეს ხაზზე განსხვავებული სიმბოლოთი"
+
+#. xgettext: This is the description of the NXDIFLN command.
+#: Programs/cmds.auto.h:59
+msgid "go down to nearest line with different content"
+msgstr "გადასვლა დაბლა, უახლოეს ხაზზე განსხვავებული შემცველობით"
+
+#. xgettext: This is the description of the ATTRDN command.
+#: Programs/cmds.auto.h:77
+msgid "go down to nearest line with different highlighting"
+msgstr "გადასვლა დაბლა, უახლოეს ხაზზე განსხვავებული გამოკვეთით"
+
+#. xgettext: This is the description of the NXINDENT command.
+#: Programs/cmds.auto.h:1274
+msgid "go down to nearest line with less indent than character"
+msgstr "გადასვლა დაბლა, უახლოეს ხაზზე, რომელიც სიმბოლოს ნაკლებადაა შეწეული"
+
+#. xgettext: This is the description of the NXPROMPT command.
+#: Programs/cmds.auto.h:151
+msgid "go down to next command prompt"
+msgstr "გადასვლა დაბლა, შემდეგ ბრძანების სტრიქონზე"
+
+#. xgettext: This is the description of the MENU_NEXT_ITEM command.
+#: Programs/cmds.auto.h:493
+msgid "go down to next item"
+msgstr "შემდეგ ჩანაწერზე ჩასვლა"
+
+#. xgettext: This is the description of the FWINRT command.
+#: Programs/cmds.auto.h:219
+msgid "go forward one braille window"
+msgstr "ერთი ბრეილის ფანჯრით წინ გადასვლა"
+
+#. xgettext: This is the description of the FWINRTSKIP command.
+#: Programs/cmds.auto.h:237
+msgid "go forward skipping blank braille windows"
+msgstr "გადასვლა წინ, ცარიელი ბრაილის ფანჯრების გამოტოვებით"
+
+#. xgettext: This is the description of the NXNBWIN command.
+#: Programs/cmds.auto.h:975
+msgid "go forward to nearest non-blank braille window"
+msgstr "გადასვლა წინ, უახლოეს არაცარიელ ბრაილის ფანჯარაზე"
+
+#. xgettext: This is the description of the HWINLT command.
+#: Programs/cmds.auto.h:192
+msgid "go left half a braille window"
+msgstr "გადასვლა მარცხნივ ნახევარი ბრაილის ფანჯრით"
+
+#. xgettext: This is the description of the CHRLT command.
+#: Programs/cmds.auto.h:174
+msgid "go left one character"
+msgstr "ერთი სიმბოლოთი მარცხნივ გადასვლა"
+
+#. xgettext: This is the description of the HWINRT command.
+#: Programs/cmds.auto.h:201
+msgid "go right half a braille window"
+msgstr "გადასვლა მარჯვნივ ნახევარი ბრაილის ფანჯრით"
+
+#. xgettext: This is the description of the CHRRT command.
+#: Programs/cmds.auto.h:183
+msgid "go right one character"
+msgstr "ერთი სიმბოლოთი მარჯვნივ გადასვლა"
+
+#. xgettext: This is the description of the SPEAK_FRST_CHAR command.
+#: Programs/cmds.auto.h:789
+msgid "go to and speak first non-blank character on line"
+msgstr "გადასვლა და ხაზზე პირველი არაცარიელი სიმბოლოს წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_FRST_LINE command.
+#: Programs/cmds.auto.h:805
+msgid "go to and speak first non-blank line on screen"
+msgstr "გადასვლა და ეკრანზე პირველი არაცარიელი ხაზის წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_LAST_CHAR command.
+#: Programs/cmds.auto.h:797
+msgid "go to and speak last non-blank character on line"
+msgstr "გადასვლა და ხაზზე ბოლო არაცარიელი სიმბოლოს წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_LAST_LINE command.
+#: Programs/cmds.auto.h:813
+msgid "go to and speak last non-blank line on screen"
+msgstr "გადასვლა და ეკრანზე ბოლო არაცარიელი ხაზის წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_NEXT_CHAR command.
+#: Programs/cmds.auto.h:735
+msgid "go to and speak next character"
+msgstr "შემდეგ სიმბოლოზე გადასვლა და მისი წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_NEXT_LINE command.
+#: Programs/cmds.auto.h:781
+msgid "go to and speak next line"
+msgstr "შემდეგ ხაზზე გადასვლა და მისი წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_NEXT_WORD command.
+#: Programs/cmds.auto.h:758
+msgid "go to and speak next word"
+msgstr "შემდეგ სიტყვაზე გადასვლა და მისი წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_PREV_CHAR command.
+#: Programs/cmds.auto.h:727
+msgid "go to and speak previous character"
+msgstr "წინა სიმბოლოზე გადასვლა და მისი წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_PREV_LINE command.
+#: Programs/cmds.auto.h:773
+msgid "go to and speak previous line"
+msgstr "წინა ხაზზე გადასვლა და მისი წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_PREV_WORD command.
+#: Programs/cmds.auto.h:750
+msgid "go to and speak previous word"
+msgstr "წინა სიტყვაზე გადასვლა და მისი წარმოთქმა"
+
+#. xgettext: This is the description of the BOT_LEFT command.
+#: Programs/cmds.auto.h:115
+msgid "go to beginning of bottom line"
+msgstr "გადასვლა ყველაზე ქვედა ხაზის დასაწყისზე"
+
+#. xgettext: This is the description of the LNBEG command.
+#: Programs/cmds.auto.h:246
+msgid "go to beginning of line"
+msgstr "ხაზის დასაწყისში გადასვლა"
+
+#. xgettext: This is the description of the TOP_LEFT command.
+#: Programs/cmds.auto.h:105
+msgid "go to beginning of top line"
+msgstr "გადასვლა ყველაზე ზედა ხაზის დასაწყისში"
+
+#. xgettext: This is the description of the BOT command.
+#: Programs/cmds.auto.h:95
+msgid "go to bottom line"
+msgstr "ბოლო ხაზზე გადასვლა"
+
+#. xgettext: This is the description of the SPKHOME command.
+#: Programs/cmds.auto.h:522
+msgid "go to current speaking position"
+msgstr "გადასვლა ამჟამად წარმოთქმად მდებარეობაზე"
+
+#. xgettext: This is the description of the LNEND command.
+#: Programs/cmds.auto.h:255
+msgid "go to end of line"
+msgstr "ხაზის ბოლოში გადასვლა"
+
+#. xgettext: This is the description of the MENU_PREV_LEVEL command.
+#: Programs/cmds.auto.h:664
+msgid "go to previous menu level"
+msgstr "მენიუს წინა დონეზე გადასვლა"
+
+#. xgettext: This is the description of the GOTOMARK command.
+#: Programs/cmds.auto.h:1307
+msgid "go to remembered braille window position"
+msgstr "გადასვლა დამახსოვრებულ ბრაილის ფანჯრის მდებარეობაზე"
+
+#. xgettext: This is the description of the HOME command.
+#: Programs/cmds.auto.h:263
+msgid "go to screen cursor"
+msgstr "ეკრანის კურსორთან გადასვლა"
+
+#. xgettext: This is the description of the RETURN command.
+#: Programs/cmds.auto.h:279
+msgid "go to screen cursor or go back after cursor tracking"
+msgstr "ეკრანის კურსორზე გადასვლა ან დაბრუნება კურსორის დევნების შემდეგ"
+
+#. xgettext: This is the description of the GOTOLINE command.
+#: Programs/cmds.auto.h:1317
+msgid "go to selected line"
+msgstr "არჩეულ ხაზზე გადასვლა"
+
+#. xgettext: This is the description of the GUI_HOME command.
+#: Programs/cmds.auto.h:1069
+msgid "go to the home screen"
+msgstr "საწყის ეკრანზე გადასვლა"
+
+#. xgettext: This is the description of the TOP command.
+#: Programs/cmds.auto.h:86
+msgid "go to top line"
+msgstr "სულ ზედა ხაზზე გადასვლა"
+
+#. xgettext: This is the description of the LNUP command.
+#: Programs/cmds.auto.h:14
+msgid "go up one line"
+msgstr "ერთი ხაზით მაღლა ასვლა"
+
+#. xgettext: This is the description of the WINUP command.
+#: Programs/cmds.auto.h:32
+msgid "go up several lines"
+msgstr "რამდენიმე ხაზით მაღლა ასვლა"
+
+#. xgettext: This is the description of the MENU_FIRST_ITEM command.
+#: Programs/cmds.auto.h:466
+msgid "go up to first item"
+msgstr "პირველ ჩანაწერზე ასვლა"
+
+#. xgettext: This is the description of the PRPGRPH command.
+#: Programs/cmds.auto.h:124
+msgid "go up to first line of paragraph"
+msgstr "პარაგრაფის პირველ ხაზზე გადასვლა"
+
+#. xgettext: This is the description of the PRDIFCHAR command.
+#: Programs/cmds.auto.h:1327
+msgid "go up to nearest line with different character"
+msgstr "გადასვლა სხვა სიმბოლოს მქონე უახლოეს ხაზზე"
+
+#. xgettext: This is the description of the PRDIFLN command.
+#: Programs/cmds.auto.h:50
+msgid "go up to nearest line with different content"
+msgstr "გადასვლა სხვა შემცველობის მქონე უახლოეს ხაზზე"
+
+#. xgettext: This is the description of the ATTRUP command.
+#: Programs/cmds.auto.h:68
+msgid "go up to nearest line with different highlighting"
+msgstr "გადასვლა სხვა გამოკვეთის მქონე უახლოეს ხაზზე"
+
+#. xgettext: This is the description of the PRINDENT command.
+#: Programs/cmds.auto.h:1264
+msgid "go up to nearest line with less indent than character"
+msgstr "გადასვლა უახლოეს ხაზზე, რომელსაც აქვს ნაკლები შეწევა, ვიდრე სიმბოლოს"
+
+#. xgettext: This is the description of the PRPROMPT command.
+#: Programs/cmds.auto.h:142
+msgid "go up to previous command prompt"
+msgstr "წინა მინიშნებაზე გადასვლა"
+
+#. xgettext: This is the description of the MENU_PREV_ITEM command.
+#: Programs/cmds.auto.h:484
+msgid "go up to previous item"
+msgstr "წინა ელემენტზე გადასვლა"
+
+#. G
+#: Programs/cmd_utils.c:162
+msgid "green"
+msgstr "მწვანე"
+
+#: Programs/pgmprivs_linux.c:2169
+msgid "group permissions added"
+msgstr "ჯგუფის წვდომები დამატებულია"
+
+#: Programs/cmd_miscellaneous.c:213
+msgid "help not available"
+msgstr "დახმარება მიუწვდომელია"
+
+#: Programs/scr_help.c:229
+msgid "help screen not readable"
+msgstr "დახმარების ეკრანი წაკითხვადი არაა"
+
+#. xgettext: This is the description of the KEY_HOME command.
+#: Programs/cmds.auto.h:1623
+msgid "home key"
+msgstr "ღილაკი Home"
+
+#: Programs/brltty-hid.c:81 Programs/brltty-hid.c:88 Programs/brltty-hid.c:172
+#: Programs/brltty-hid.c:179
+msgid "identifier"
+msgstr "იდენტიფიკატორი"
+
+#: Programs/config.c:428
+msgid "identifier,..."
+msgstr "იდენტიფიკატორი,..."
+
+#: Drivers/Braille/Baum/braille.c:1149
+msgid "idle timeout"
+msgstr "უქმობის ვადა"
+
+#. xgettext: This is the description of the SAY_HIGHER command.
+#: Programs/cmds.auto.h:1175
+msgid "increase speaking pitch"
+msgstr "საუბრის ტონის აწევა"
+
+#. xgettext: This is the description of the SAY_FASTER command.
+#: Programs/cmds.auto.h:557
+msgid "increase speaking rate"
+msgstr "საუბრის სიჩქარის აწევა"
+
+#. xgettext: This is the description of the SAY_LOUDER command.
+#: Programs/cmds.auto.h:571
+msgid "increase speaking volume"
+msgstr "საუბრის ხმის აწევა"
+
+#: Programs/core.c:1160
+msgid "indent"
+msgstr "შეწევა"
+
+#. xgettext: This is the description of the PASTE_HISTORY command.
+#: Programs/cmds.auto.h:1361
+msgid "insert clipboard history entry after screen cursor"
+msgstr "ბუფერის ისტორიის ჩანაწერის ჩასმა ეკრანის კურსორის შემდეგ"
+
+#. xgettext: This is the description of the PASTE command.
+#: Programs/cmds.auto.h:600
+msgid "insert clipboard text after screen cursor"
+msgstr "ბუფერის ტექსტის ჩასმა ეკრანის კურსორის შემდეგ"
+
+#. xgettext: This is the description of the HOST_PASTE command.
+#: Programs/cmds.auto.h:1047
+msgid "insert host clipboard text after screen cursor"
+msgstr "ჰოსტის ბუფერის ტექტის ჩასმა ეკრანის კურსორის შემდეგ"
+
+#. xgettext: This is the description of the KEY_INSERT command.
+#: Programs/cmds.auto.h:1639
+msgid "insert key"
+msgstr "ღილაკი insert"
+
+#: Programs/program.c:173
+msgid "install path not absolute"
+msgstr "დაყენების ბილიკი აბსოლუტური არაა"
+
+#: Programs/brltty-hid.c:206
+msgid "integer"
+msgstr "მთელი რიცხვი"
+
+#: Programs/cmdline.c:104
+msgid "invalid counter setting"
+msgstr "მთვლელის არასწორი მნიშვნელობა"
+
+#: Programs/datafile.c:318
+msgid "invalid escape sequence"
+msgstr "გადატანის არასწორი მიმდევრობა"
+
+#: Programs/cmdline.c:113
+msgid "invalid flag setting"
+msgstr "ალმის არასწორი მნიშვნელობა"
+
+#: Programs/config.c:2980
+msgid "invalid message hold timeout"
+msgstr "შეტყობინების დაყოვნების არასწორი ვადა"
+
+#: Programs/cmdline.c:667
+msgid "invalid operand"
+msgstr "არასწორი ოპერანდი"
+
+#: Drivers/Braille/BrailleLite/braille.c:590
+#: Drivers/Braille/BrailleLite/braille.c:668
+msgid "keyboard emu off"
+msgstr "კლავიატურის ემულაცია გამორთ"
+
+#: Drivers/Braille/BrailleLite/braille.c:589
+msgid "keyboard emu on"
+msgstr "კლავიატურის ემულაცია ჩართ"
+
+#. L  B
+#: Programs/cmd_utils.c:169
+msgid "light blue"
+msgstr "ღია ლურჯი"
+
+#. L GB
+#: Programs/cmd_utils.c:171
+msgid "light cyan"
+msgstr "ღია ცისფერი"
+
+#. L G
+#: Programs/cmd_utils.c:170
+msgid "light green"
+msgstr "ღია მწვანე"
+
+#. RGB
+#: Programs/cmd_utils.c:167
+msgid "light grey"
+msgstr "ღია ნაცრისფერი"
+
+#. LR B
+#: Programs/cmd_utils.c:173
+msgid "light magenta"
+msgstr "ღია ალისფერი"
+
+#. LR
+#: Programs/cmd_utils.c:172
+msgid "light red"
+msgstr "ღია წითელი"
+
+#: Programs/cmd_speech.c:500
+msgid "line"
+msgstr "ხაზი"
+
+#. xgettext: This is the description of the COPY_LINE command.
+#: Programs/cmds.auto.h:1246
+msgid "linear copy to character"
+msgstr "ხაზოვანი კოპირება კოდირებაში"
+
+#: Programs/brltty-pty.c:112
+msgid "log escape sequences and special characters received from the pty slave"
+msgstr ""
+
+#: Programs/brltty-pty.c:100
+msgid "log input written to the pty slave"
+msgstr ""
+
+#: Programs/brltty-pty.c:106
+msgid ""
+"log output received from the pty slave that isn't an escape sequence or a "
+"special character"
+msgstr ""
+
+#: Programs/brltty-pty.c:118
+msgid "log unexpected input/output"
+msgstr "მოულოდნელი შეყვანის/გამოტანის ჟურნალში ჩაწერა"
+
+#: Programs/config.c:615
+msgid "lvl|cat,..."
+msgstr "lvl|cat,..."
+
+#. R B
+#: Programs/cmd_utils.c:165
+msgid "magenta"
+msgstr "ალისფერი"
+
+#: Programs/cmdline.c:662
+msgid "missing operand"
+msgstr "აკლია ოპერანდი"
+
+#: Programs/parse.c:533
+msgid "missing parameter name"
+msgstr "აკლია პარამეტრის სახელი"
+
+#: Programs/parse.c:519
+msgid "missing parameter qualifier"
+msgstr "აკლია პარამეტრის სპეციფიკატორი"
+
+#: Programs/parse.c:495
+msgid "missing parameter value"
+msgstr "აკლია პარამეტრის მნიშვნელობა"
+
+#. xgettext: This is the description of the GUI_ITEM_FRST command.
+#: Programs/cmds.auto.h:1140
+msgid "move to the first item in the screen area"
+msgstr "გადასვლა ეკრანის ალაგის პირველ ელემენტზე"
+
+#. xgettext: This is the description of the GUI_ITEM_LAST command.
+#: Programs/cmds.auto.h:1161
+msgid "move to the last item in the screen area"
+msgstr "გადასვლა ეკრანის ალაგის ბოლო ელემენტზე"
+
+#. xgettext: This is the description of the GUI_ITEM_NEXT command.
+#: Programs/cmds.auto.h:1154
+msgid "move to the next item in the screen area"
+msgstr "გადასვლა ეკრანის ალაგის შემდეგ ელემენტზე"
+
+#. xgettext: This is the description of the GUI_ITEM_PREV command.
+#: Programs/cmds.auto.h:1147
+msgid "move to the previous item in the screen area"
+msgstr "გადასვლა ეკრანის ალაგის წინა ელემენტზე"
+
+#: Programs/msgtest.c:57
+msgid "name"
+msgstr "სახელი"
+
+#: Programs/config.c:418 Programs/config.c:488 Programs/config.c:531
+#: Programs/config.c:549 Programs/config.c:582 Programs/config.c:598
+#: Programs/config.c:651
+msgid "name=value,..."
+msgstr "სახელი=მნიშვნელობა,..."
+
+#: Drivers/Braille/Iris/braille.c:1513
+msgid "native"
+msgstr "საკუთარი"
+
+#: Programs/menu_prefs.c:668
+msgid "no dots"
+msgstr "წერტილების გარეშე"
+
+#: Programs/config.c:1286
+msgid "no key bindings"
+msgstr "მალსახმობი ღილაკების გარეშე"
+
+#: Programs/scr_driver.c:39
+msgid "no screen"
+msgstr "ეკრანის გარეშე"
+
+#: Drivers/Screen/TerminalEmulator/em_screen.c:137
+msgid "no screen cache"
+msgstr "ეკრანის კეშის გარეშე"
+
+#: Drivers/Screen/TerminalEmulator/em_screen.c:398
+msgid "no screen emulator"
+msgstr "ეკრანის ემულატორის გარეშე"
+
+#: Programs/cmd_preferences.c:47
+msgid "not saved"
+msgstr "შენახული არაა"
+
+#: Programs/pgmprivs_linux.c:2020
+msgid "not switching to an unprivileged user"
+msgstr "არ გადავერთვები უპრივილეგიო მომხმარებელზე"
+
+#: Programs/brltty-hid.c:116
+msgid "octets"
+msgstr "ოქტეტები"
+
+#. xgettext: This is the description of the GUI_APP_ALERTS command.
+#: Programs/cmds.auto.h:1112
+msgid "open the application alerts window"
+msgstr "აპლიკაციის განგაშების ფანჯრის გახსნა"
+
+#. xgettext: This is the description of the GUI_APP_LIST command.
+#: Programs/cmds.auto.h:1098
+msgid "open the application list window"
+msgstr "აპლიკაციის სიის ფანჯრის გახსნა"
+
+#. xgettext: This is the description of the GUI_APP_MENU command.
+#: Programs/cmds.auto.h:1105
+msgid "open the application-specific menu"
+msgstr "აპლიკაციის-საკუთარი მენიუს გახსნა"
+
+#. xgettext: This is the description of the GUI_BRL_ACTIONS command.
+#: Programs/cmds.auto.h:1061
+msgid "open the braille actions window"
+msgstr "ბრაილის ქმედებების ფანჯრის გახსნა"
+
+#. xgettext: This is the description of the GUI_DEV_OPTIONS command.
+#: Programs/cmds.auto.h:1091
+msgid "open the device options window"
+msgstr "მოწყობილობის თვისებების ფანჯრის გახსნა"
+
+#. xgettext: This is the description of the GUI_DEV_SETTINGS command.
+#: Programs/cmds.auto.h:1084
+msgid "open the device settings window"
+msgstr "მოწყობილობის მორგების ფანჯრის გახსნა"
+
+#: Programs/cmdline.c:246
+msgid "option"
+msgstr "მდებარეობა"
+
+#: Programs/pgmprivs_linux.c:2154
+msgid "ownership claimed"
+msgstr "ფლობის მოთხოვნა"
+
+#. xgettext: This is the description of the KEY_PAGE_DOWN command.
+#: Programs/cmds.auto.h:1615
+msgid "page-down key"
+msgstr "ღილაკი PageDwn"
+
+#. xgettext: This is the description of the KEY_PAGE_UP command.
+#: Programs/cmds.auto.h:1607
+msgid "page-up key"
+msgstr "ღილაკი PageUp"
+
+#: Programs/msgtest.c:42
+msgid "path"
+msgstr "ბილიკი"
+
+#: Programs/config.c:2953
+msgid "pid file not specified"
+msgstr "pid ფაილი მითითებული არაა"
+
+#: Programs/program.c:335
+msgid "pid file open error"
+msgstr "pid ფაილის გახსნის შეცდომა"
+
+#: Programs/spk.c:263
+msgid "pitch"
+msgstr "ხმის სიმაღლე"
+
+#. xgettext: This is the description of the SETLEFT command.
+#: Programs/cmds.auto.h:1290
+msgid "place left end of braille window at character"
+msgstr "ბრაილის ფანჯრის მარცხენა დასასრულის ჩასმა სიმბოლოსთან"
+
+#: Drivers/Braille/Baum/braille.c:1148
+msgid "power switch"
+msgstr "კვების ჩამრთველი"
+
+#: Programs/config.c:511
+msgid "quality"
+msgstr "ხარისხი"
+
+#: Programs/spk.c:237
+msgid "rate"
+msgstr "სიხშირე"
+
+#. xgettext: This is the description of the COPY_RECT command.
+#: Programs/cmds.auto.h:1238
+msgid "rectangular copy to character"
+msgstr "სიმბოლოს გადაქცევა ოთხკუთხედად"
+
+#. R
+#: Programs/cmd_utils.c:164
+msgid "red"
+msgstr "წითელი"
+
+#. xgettext: This is the description of the REFRESH command.
+#: Programs/cmds.auto.h:1005
+msgid "refresh braille display"
+msgstr "ბრაილის ეკრანის განახლება"
+
+#. xgettext: This is the description of the REFRESH_LINE command.
+#: Programs/cmds.auto.h:1420
+msgid "refresh braille line"
+msgstr "ბრაილის ხაზის განახლება"
+
+#: Programs/config.c:681
+msgid "regexp,..."
+msgstr "რეგულარული გამოსახულება,..."
+
+#: Programs/config.c:2207
+#, c-format
+msgid "reinitializing braille driver"
+msgstr "ბრაილის დრაივერის ინიციალიზაცია თავიდან"
+
+#: Programs/config.c:2725
+#, c-format
+msgid "reinitializing screen driver"
+msgstr "ეკრანის დრაივერის ინიციალიზაცია თავიდან"
+
+#: Programs/config.c:2522
+#, c-format
+msgid "reinitializing speech driver"
+msgstr "წარმოთქმის დრაივერის ინიციალიზაცია თავიდან"
+
+#. xgettext: This is the description of the SETMARK command.
+#: Programs/cmds.auto.h:1298
+msgid "remember current braille window position"
+msgstr "მიმდინარე ბრაილის ფანჯრის მდებარეობის დამახსოვრება"
+
+#. xgettext: This is the description of the ALERT command.
+#: Programs/cmds.auto.h:1461
+msgid "render an alert"
+msgstr "განგაშის გამოტანა"
+
+#: Drivers/Braille/BrailleLite/braille.c:601
+#: Drivers/Braille/BrailleLite/braille.c:780
+#: Drivers/Braille/BrailleLite/braille.c:782
+#: Drivers/Braille/BrailleLite/braille.c:791
+msgid "repeat count"
+msgstr "გამეორების რაოდენობა"
+
+#. xgettext: This is the description of the PREFRESET command.
+#: Programs/cmds.auto.h:1205
+msgid "reset preferences to defaults"
+msgstr "პარამეტრების ჩამოყრა"
+
+#. xgettext: This is the description of the RESTARTBRL command.
+#: Programs/cmds.auto.h:607
+msgid "restart braille driver"
+msgstr "ბრაილის დრაივერის გადატვირთვა"
+
+#. xgettext: This is the description of the RESTARTSPEECH command.
+#: Programs/cmds.auto.h:614
+msgid "restart speech driver"
+msgstr "წარმოთქმის დრაივერის გადატვირთვა"
+
+#. xgettext: This is the description of the CLIP_RESTORE command.
+#: Programs/cmds.auto.h:864
+msgid "restore clipboard from disk"
+msgstr "ბუფერის დისკიდან აღდგენა"
+
+#. xgettext: This is the description of the PREFLOAD command.
+#: Programs/cmds.auto.h:457
+msgid "restore preferences from disk"
+msgstr "პარამეტრების აღდგენა დისკიდან"
+
+#. xgettext: This is the description of the GUI_AREA_ACTV command.
+#: Programs/cmds.auto.h:1119
+msgid "return to the active screen area"
+msgstr "აბრუნება აქტიური ეკრანის ალაგზე"
+
+#. xgettext: This is the description of the HOSTCMD command.
+#: Programs/cmds.auto.h:1535
+msgid "run host command"
+msgstr "ჰოსტის ბრძანების გაშვება"
+
+#. xgettext: This is the description of the CLIP_SAVE command.
+#: Programs/cmds.auto.h:857
+msgid "save clipboard to disk"
+msgstr "ბუფერის შენახვა დისკზე"
+
+#. xgettext: This is the description of the PREFSAVE command.
+#: Programs/cmds.auto.h:450
+msgid "save preferences to disk"
+msgstr "პარამეტრების შენახვა დისკზე"
+
+#: Programs/xbrlapi.c:103
+msgid "scheme+..."
+msgstr "სქემა+..."
+
+#: Programs/config.c:2601
+msgid "screen driver not loadable"
+msgstr "ეკრანის დრაივერის ჩატვირთვადი არაა"
+
+#: Programs/config.c:2722
+msgid "screen driver restarting"
+msgstr "ეკრანის დრაივერის გადატვირთვა"
+
+#: Programs/cmd_miscellaneous.c:171
+msgid "screen driver stopped"
+msgstr "ეკრანის დრაივერის გაჩერებულია"
+
+#: Drivers/Screen/Android/screen.c:184
+msgid "screen locked"
+msgstr "ეკრანი დაბლოკილია"
+
+#: Drivers/Screen/TerminalEmulator/em_screen.c:141
+msgid "screen not accessible"
+msgstr "ეკრანი წვდომადი არაა"
+
+#: Drivers/Screen/TerminalEmulator/em_screen.c:395
+msgid "screen not attached"
+msgstr "ეკრანი მიმაგრებული არაა"
+
+#: Drivers/Screen/TerminalEmulator/em_screen.c:384
+msgid "screen not available"
+msgstr "ეკრანი ხელმისაწვდომი არაა"
+
+#: Drivers/Screen/Linux/screen.c:1585
+msgid "screen not in text mode"
+msgstr "ეკრანი ტექსტურ რეჟიმში არაა"
+
+#. xgettext: This is the description of the PRSEARCH command.
+#: Programs/cmds.auto.h:158
+msgid "search backward for clipboard text"
+msgstr "ბუფერში არსებული ტექსტის უკან ძებნა"
+
+#. xgettext: This is the description of the NXSEARCH command.
+#: Programs/cmds.auto.h:165
+msgid "search forward for clipboard text"
+msgstr "ბუფერში არსებული ტექსტის წინ ძებნა"
+
+#: Programs/menu.c:469
+msgid "seconds"
+msgstr "წამი"
+
+#. xgettext: This is the description of the TXTSEL_ALL command.
+#: Programs/cmds.auto.h:1026
+msgid "select all of the text"
+msgstr "ყველა ტექსტის მონიშვნა"
+
+#. xgettext: This is the description of the MENU_NEXT_SETTING command.
+#: Programs/cmds.auto.h:507
+msgid "select next choice"
+msgstr "შემდეგი არჩევნის მონიშვნა"
+
+#. xgettext: This is the description of the MENU_PREV_SETTING command.
+#: Programs/cmds.auto.h:500
+msgid "select previous choice"
+msgstr "წინა არჩევნის მონიშვნა"
+
+#. xgettext: This is the description of the TUNES command.
+#: Programs/cmds.auto.h:399
+msgid "set alert tunes on/off"
+msgstr "გამაფრთხილებელი მელოდიების ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the ATTRBLINK command.
+#: Programs/cmds.auto.h:383
+msgid "set attribute blinking on/off"
+msgstr "ციმციმის ატრიბუტის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the ATTRVIS command.
+#: Programs/cmds.auto.h:375
+msgid "set attribute underlining on/off"
+msgstr "ხაზგასმის ატრიბუტის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the SET_ATTRIBUTES_TABLE command.
+#: Programs/cmds.auto.h:1377
+msgid "set attributes table"
+msgstr "ატრიბუტები ცხრილის მორგება"
+
+#. xgettext: This is the description of the AUTOREPEAT command.
+#: Programs/cmds.auto.h:407
+msgid "set autorepeat on/off"
+msgstr "ავტოგამეორების ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the ASPK_CMP_WORDS command.
+#: Programs/cmds.auto.h:712
+msgid "set autospeak completed words on/off"
+msgstr "შეყვანილი დასრულებული სიტყვების ავტოწარმოთქმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the ASPK_DEL_CHARS command.
+#: Programs/cmds.auto.h:696
+msgid "set autospeak deleted characters on/off"
+msgstr "წაშლილი სიმბოლოების ავტოწარმოთქმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the ASPK_INDENT command.
+#: Programs/cmds.auto.h:998
+msgid "set autospeak indent of current line on/off"
+msgstr "მიმდინარე ხაზის შეწევის ავტოწარმოთქმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the ASPK_INS_CHARS command.
+#: Programs/cmds.auto.h:688
+msgid "set autospeak inserted characters on/off"
+msgstr "ჩასმული სიმბოლოების ავტოწარმოთქმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the AUTOSPEAK command.
+#: Programs/cmds.auto.h:415
+msgid "set autospeak on/off"
+msgstr "ავტოწარმოთქმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the ASPK_REP_CHARS command.
+#: Programs/cmds.auto.h:704
+msgid "set autospeak replaced characters on/off"
+msgstr "ჩანაცვლებული სიმბოლოების ავტოწარმოთქმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the ASPK_SEL_CHAR command.
+#: Programs/cmds.auto.h:680
+msgid "set autospeak selected character on/off"
+msgstr "მონიშნული სიმბოლოების ავტოწარმოთქმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the ASPK_SEL_LINE command.
+#: Programs/cmds.auto.h:672
+msgid "set autospeak selected line on/off"
+msgstr "მონიშნული ხაზის ავტოწარმოთქმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the BRLKBD command.
+#: Programs/cmds.auto.h:880
+msgid "set braille keyboard enabled/disabled"
+msgstr "ბრაილის კლავიატურის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the BRLUCDOTS command.
+#: Programs/cmds.auto.h:872
+msgid "set braille typing mode dots/text"
+msgstr "ბრაილის აკრეფის რეჟიმის დაყენება წერტილებზე/ტექსტზე"
+
+#. xgettext: This is the description of the CAPBLINK command.
+#: Programs/cmds.auto.h:391
+msgid "set capital letter blinking on/off"
+msgstr "დიდი ასოების ციმციმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the CONTRACTED command.
+#: Programs/cmds.auto.h:1190
+msgid "set contracted/computer braille"
+msgstr "შემოკლებული/კომპიუტერის ბრაილის დაყენება"
+
+#. xgettext: This is the description of the SET_CONTRACTION_TABLE command.
+#: Programs/cmds.auto.h:1385
+msgid "set contraction table"
+msgstr "შემოკლებების ცხრილის დაყენება"
+
+#. xgettext: This is the description of the DISPMD command.
+#: Programs/cmds.auto.h:295
+msgid "set display mode attributes/text"
+msgstr "ჩვენების რეჟიმის ატრიბუტების/ტექსტის დაყენება"
+
+#. xgettext: This is the description of the CSRHIDE command.
+#: Programs/cmds.auto.h:343
+msgid "set hidden screen cursor on/off"
+msgstr "დამალული ეკრანის კურსორის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the SET_KEYBOARD_TABLE command.
+#: Programs/cmds.auto.h:1393
+msgid "set keyboard table"
+msgstr "კლავიატურის ცხრილის დაყენება"
+
+#. xgettext: This is the description of the SET_LANGUAGE_PROFILE command.
+#: Programs/cmds.auto.h:1401
+msgid "set language profile"
+msgstr "ენის პროფილის დაყენება"
+
+#. xgettext: This is the description of the CSRBLINK command.
+#: Programs/cmds.auto.h:367
+msgid "set screen cursor blinking on/off"
+msgstr "ეკრანის კურსორის ციმციმის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the CSRSIZE command.
+#: Programs/cmds.auto.h:359
+msgid "set screen cursor style block/underline"
+msgstr "ეკრანის კურსორის სტილის ბლოკსა და ქვედატირეს შორის გადართვა"
+
+#. xgettext: This is the description of the CSRVIS command.
+#: Programs/cmds.auto.h:335
+msgid "set screen cursor visibility on/off"
+msgstr "ეკრანის კურსორის ხილვადობის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the FREEZE command.
+#: Programs/cmds.auto.h:287
+msgid "set screen image frozen/unfrozen"
+msgstr "ეკრანის გამოსახულების გაყინვა/არაგაყინვის გადართვა"
+
+#. xgettext: This is the description of the COMPBRL6 command.
+#: Programs/cmds.auto.h:1198
+msgid "set six/eight dot computer braille"
+msgstr "ექვსი/რვა წერტილის კომპიუტერის ბრაილის დაყენება"
+
+#. xgettext: This is the description of the SKPBLNKWINS command.
+#: Programs/cmds.auto.h:327
+msgid "set skipping of blank braille windows on/off"
+msgstr "ცარიელი ბრაილის ფანჯრების გამოტოვების ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the SKPIDLNS command.
+#: Programs/cmds.auto.h:319
+msgid "set skipping of lines with identical content on/off"
+msgstr "იგივე შემცველობის მქონე ხაზების გამოტოვების ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the SLIDEWIN command.
+#: Programs/cmds.auto.h:311
+msgid "set sliding braille window on/off"
+msgstr "სრიალა ბრაილის ფანჯრის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the SHOW_CURR_LOCN command.
+#: Programs/cmds.auto.h:850
+msgid "set speech cursor visibility on/off"
+msgstr "საუბრის კურსორის ხილვადობის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the TXTSEL_SET command.
+#: Programs/cmds.auto.h:1436
+msgid "set text selection"
+msgstr "ტექსტის მონიშვნის დაყენება"
+
+#. xgettext: This is the description of the SIXDOTS command.
+#: Programs/cmds.auto.h:303
+msgid "set text style 6-dot/8-dot"
+msgstr "ტექსტის სტილის დაყენება 6-წერტილზე/8-წერტილზე"
+
+#. xgettext: This is the description of the SET_TEXT_TABLE command.
+#: Programs/cmds.auto.h:1369
+msgid "set text table"
+msgstr "ტექსტის ცხრილის დაყენება"
+
+#. xgettext: This is the description of the TOUCH_NAV command.
+#: Programs/cmds.auto.h:983
+msgid "set touch navigation on/off"
+msgstr "შეხებით ნავიგაციის ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the CSRTRK command.
+#: Programs/cmds.auto.h:351
+msgid "set track screen cursor on/off"
+msgstr "ეკრანის კურსორის დევნების ჩართვა/გამორთვა"
+
+#. xgettext: This is the description of the TIME command.
+#: Programs/cmds.auto.h:656
+msgid "show current date and time"
+msgstr "მიმდინარე დროისა და თარიღის ჩვენება"
+
+#: Programs/brltty-pty.c:66
+msgid "show the absolute path to the pty slave"
+msgstr "აბსოლუტური ბილიკის ჩვენება pty slave-სთვის"
+
+#. xgettext: This is the description of the GUI_TITLE command.
+#: Programs/cmds.auto.h:1054
+msgid "show the window title"
+msgstr "ფანჯრის სათაურის ჩვენება"
+
+#. xgettext: This is the description of the INDICATORS command.
+#: Programs/cmds.auto.h:1012
+msgid "show various device status indicators"
+msgstr "მოწყობილობის მდგომარეობის მაჩვენებლების ჩვენება"
+
+#: Programs/menu_prefs.c:1059
+msgid "soundcard digital audio"
+msgstr "ხმოვანი ბარათის ციფრული ხმა"
+
+#: Programs/menu_prefs.c:1061
+msgid "soundcard synthesizer"
+msgstr "ხმოვანი ბარათის სინთეზატორი"
+
+#: Programs/cmd.c:278 Programs/core.c:1066
+msgid "space"
+msgstr "ჰარე"
+
+#. xgettext: This is the description of the SPEAK_CURR_CHAR command.
+#: Programs/cmds.auto.h:719
+msgid "speak current character"
+msgstr "მიმდინარე სიმბოლოს წარმოთქმა"
+
+#. xgettext: This is the description of the SAY_LINE command.
+#. xgettext: This is the description of the SPEAK_CURR_LINE command.
+#: Programs/cmds.auto.h:529 Programs/cmds.auto.h:765
+msgid "speak current line"
+msgstr "მიმდინარე ხაზის წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_CURR_WORD command.
+#: Programs/cmds.auto.h:742
+msgid "speak current word"
+msgstr "მიმდინარე სიტყვის წარმოთქმა"
+
+#. xgettext: This is the description of the SAY_BELOW command.
+#: Programs/cmds.auto.h:543
+msgid "speak from current line through bottom of screen"
+msgstr "წარმოთქმა მიმდინარე ხაზიდან ეკრანის ბოლომდე"
+
+#. xgettext: This is the description of the SAY_ALL command.
+#: Programs/cmds.auto.h:1182
+msgid "speak from top of screen through bottom of screen"
+msgstr "წარმოთქმა ეკრანის თავიდან ეკრანის ბოლომდე"
+
+#. xgettext: This is the description of the SAY_ABOVE command.
+#: Programs/cmds.auto.h:536
+msgid "speak from top of screen through current line"
+msgstr "წარმოთქმა ეკრანის თავიდან მიმდინარე ხაზამდე"
+
+#. xgettext: This is the description of the SPEAK_INDENT command.
+#: Programs/cmds.auto.h:990
+msgid "speak indent of current line"
+msgstr "მიმდინარე ხაზის შეწევის წარმოთქმა"
+
+#. xgettext: This is the description of the SPEAK_CURR_LOCN command.
+#: Programs/cmds.auto.h:842
+msgid "speak speech cursor location"
+msgstr "საუბრის კურსორის მდებარეობის წარმოთქმა"
+
+#: Programs/msgtest.c:50
+msgid "specifier"
+msgstr "სპეციფიკატორი"
+
+#: Programs/config.c:2370
+msgid "speech driver not loadable"
+msgstr "წარმოთქმის დრაივერი ჩატვირთვადი არაა"
+
+#: Programs/config.c:2519
+msgid "speech driver restarting"
+msgstr "მიმდინარეობს წარმოთქმის დრაივერის თავიდან ჩატვირთვა"
+
+#: Programs/cmd_speech.c:104
+msgid "speech driver stopped"
+msgstr "საუბრის დრაივერი გაჩერებულია"
+
+#. xgettext: This is the description of the SPELL_CURR_WORD command.
+#: Programs/cmds.auto.h:827
+msgid "spell current word"
+msgstr "მიმდინარე სიტყვის წარმოთქმა ასო-ასო"
+
+#: Programs/brltty-pty.c:403
+msgid "standard input isn't a terminal"
+msgstr "სტანდარტული შეყვანა ტერმინალი არაა"
+
+#: Programs/brltty-pty.c:408
+msgid "standard output isn't a terminal"
+msgstr "სტანდარტული გამოტანა ტერმინალი არაა"
+
+#. xgettext: This is the description of the CLIP_NEW command.
+#: Programs/cmds.auto.h:1222
+msgid "start new clipboard at character"
+msgstr "ახალი ბუფერის დაწყება სიმბოლოსთან"
+
+#. xgettext: This is the description of the TXTSEL_START command.
+#: Programs/cmds.auto.h:1428
+msgid "start text selection"
+msgstr "ტექსტის მონიშვნის დაწყება"
+
+#. xgettext: This is the description of the BRL_START command.
+#: Programs/cmds.auto.h:915
+msgid "start the braille driver"
+msgstr "ბრალის დრაივერის გაშვება"
+
+#. xgettext: This is the description of the SCR_START command.
+#: Programs/cmds.auto.h:943
+msgid "start the screen driver"
+msgstr "ეკრანის დრაივერის გაშვება"
+
+#. xgettext: This is the description of the SPK_START command.
+#: Programs/cmds.auto.h:929
+msgid "start the speech driver"
+msgstr "საუბრის დრაივერის გაშვება"
+
+#. xgettext: This is the description of the MUTE command.
+#: Programs/cmds.auto.h:514
+msgid "stop speaking"
+msgstr "ლაპარაკის გაჩერება"
+
+#. xgettext: This is the description of the BRL_STOP command.
+#: Programs/cmds.auto.h:908
+msgid "stop the braille driver"
+msgstr "ბრაილის დრაივერის გაჩერება"
+
+#. xgettext: This is the description of the SCR_STOP command.
+#: Programs/cmds.auto.h:936
+msgid "stop the screen driver"
+msgstr "ეკრანის დრაივერის გაჩერება"
+
+#. xgettext: This is the description of the SPK_STOP command.
+#: Programs/cmds.auto.h:922
+msgid "stop the speech driver"
+msgstr "საუბრის დრაივერის გაჩერება"
+
+#: Programs/xbrlapi.c:804
+msgid "strange old error handler\n"
+msgstr "ძველი შეცდომების გასწორების ოსტატი\n"
+
+#: Programs/brltty-cldr.c:39 Programs/brltty-hid.c:95 Programs/brltty-hid.c:102
+#: Programs/brltty-hid.c:109 Programs/brltty-hid.c:123
+msgid "string"
+msgstr "პწკარი"
+
+#. xgettext: This is the description of the CONTEXT command.
+#: Programs/cmds.auto.h:1511
+msgid "switch to command context"
+msgstr "გადართვა ბრძანების სტრიქონზე"
+
+#. xgettext: This is the description of the SWITCHVT command.
+#: Programs/cmds.auto.h:1254
+msgid "switch to specific virtual terminal"
+msgstr "გადართვა მითითებულ ვირტუალურ ტერმინალზე"
+
+#. xgettext: This is the description of the GUI_AREA_NEXT command.
+#: Programs/cmds.auto.h:1133
+msgid "switch to the next screen area"
+msgstr "გადართვა შემდეგ ეკრანის ალაგზე"
+
+#. xgettext: This is the description of the SWITCHVT_NEXT command.
+#: Programs/cmds.auto.h:585
+msgid "switch to the next virtual terminal"
+msgstr "გადართვა შემდეგ ვირტუალურ ტერმინალზე"
+
+#. xgettext: This is the description of the GUI_AREA_PREV command.
+#: Programs/cmds.auto.h:1126
+msgid "switch to the previous screen area"
+msgstr "გადართვა წინა ეკრანის ალაგზე"
+
+#. xgettext: This is the description of the SWITCHVT_PREV command.
+#: Programs/cmds.auto.h:578
+msgid "switch to the previous virtual terminal"
+msgstr "გადართვა წინა ვირტუალურ ტერმინალზე"
+
+#: Programs/pgmprivs_linux.c:1996
+msgid "switched to unprivileged user"
+msgstr "გადავერთე უპრივილეგიო მომხმარებელზე"
+
+#. xgettext: This is the description of the KEY_TAB command.
+#: Programs/cmds.auto.h:1551
+msgid "tab key"
+msgstr "ღილაკი Tab"
+
+#: Programs/config.c:667 Programs/config.c:674
+msgid "text"
+msgstr "ტექსტი"
+
+#: Programs/brltty-pty.c:87
+msgid "the directory to change to"
+msgstr "საქაღალდე გადასასვლელად"
+
+#: Programs/brltty-pty.c:94
+msgid "the home directory to use"
+msgstr "საწყისი საქაღალდე გამოსაყენებლად"
+
+#: Programs/msgtest.c:45
+msgid "the locale directory containing the translations"
+msgstr "თარგმანების შემცველი ლოკალების საქაღალდე"
+
+#: Programs/msgtest.c:52
+msgid "the locale in which to look up a translation"
+msgstr "ლოკალი, რომელშიც თარგმანი უნდა მოვძებნო"
+
+#: Programs/msgtest.c:59
+msgid "the name of the domain containing the translations"
+msgstr "დომენის სახელი, რომელიც თარგმანებს შეიცავს"
+
+#: Programs/brltty-pty.c:80
+msgid "the name or number of the group to run as"
+msgstr "სახელი ან ნომერი ჯგუფისა, რომლითაც გავეშვები"
+
+#: Programs/brltty-pty.c:73
+msgid "the name or number of the user to run as"
+msgstr "სახელი ან ნომერი მომხმარებლისა, რომლითაც გავეშვები"
+
+#. xgettext: This is the description of the PASSDOTS command.
+#: Programs/cmds.auto.h:1479
+msgid "type braille dots"
+msgstr "ბრაილის წერტილების შეყვანა"
+
+#. xgettext: This is the description of the PASSCHAR command.
+#: Programs/cmds.auto.h:1470
+msgid "type unicode character"
+msgstr "უნიკოდის სიმბოლოს შეყვანა"
+
+#: Programs/xbrlapi.c:1153
+msgid "unexpected block type"
+msgstr "მოულოდნელი ბლოკის ტიპი"
+
+#: Programs/xbrlapi.c:1043
+msgid "unexpected cmd"
+msgstr "მოულოდნელი ბრძანება"
+
+#: Programs/cmd_queue.c:158
+msgid "unhandled command"
+msgstr "დაუმუშავებელი ბრძანება"
+
+#: Programs/cmd.c:199
+msgid "unknown command"
+msgstr "უცნობი ბრძანება"
+
+#: Programs/cmdline.c:960
+msgid "unknown configuration directive"
+msgstr "უცნობი კონფიგურაციის დირექტივა"
+
+#: Programs/config.c:806
+msgid "unknown log level or category"
+msgstr "უცნობი ჟურნალის დონე ან კატეგორია"
+
+#: Programs/cmdline.c:657
+msgid "unknown option"
+msgstr "უცნობი პარამეტრი"
+
+#: Programs/config.c:332
+msgid "unknown screen content quality"
+msgstr "უცნობი ეკრანის შემცველობის ხარისხი"
+
+#: Programs/parse.c:562
+msgid "unsupported parameter"
+msgstr "მხარდაუჭერელი პარამეტრი"
+
+#: Programs/spk.c:211
+msgid "volume"
+msgstr "ხმის დონე"
+
+#. LRGB
+#: Programs/cmd_utils.c:175
+msgid "white"
+msgstr "თეთრი"
+
+#: Programs/pgmprivs_linux.c:1856
+msgid "working directory changed"
+msgstr "სამუშაო საქაღალდე შეიცვალა"
+
+#: Programs/brltty-pty.c:60
+msgid "write driver directives to standard error"
+msgstr "დრაივერის დირექტივების ჩაწერა სტანდარტულ შეცდომაზე"
+
+#: Programs/msgtest.c:65
+msgid "write the translations using UTF-8"
+msgstr "თარგმანების წერა UTF-8-ით"
+
+#: Programs/xbrlapi.c:1090
+#, c-format
+msgid ""
+"xbrlapi: Couldn't find a keycode to remap for simulating unbound keysym "
+"%08X\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:1077
+#, c-format
+msgid ""
+"xbrlapi: Couldn't find modifiers to apply to %d for getting keysym %08X\n"
+msgstr ""
+
+#: Programs/xbrlapi.c:1053
+#, c-format
+msgid "xbrlapi: Couldn't translate keysym %08X to keycode.\n"
+msgstr "xbrlapi: ღილაკის სიმბოლო %08X ღილაკის კოდში ვერ ვთარგმნე.\n"
+
+#: Programs/xbrlapi.c:604
+#, c-format
+msgid "xbrlapi: X Error %d, %s on display %s\n"
+msgstr "xbrlapi: X-ის შეცდომა %d, %s ეკრანზე %s\n"
+
+#: Programs/xbrlapi.c:646
+#, c-format
+msgid "xbrlapi: bad format for VT number\n"
+msgstr "xbrlapi: არასწორი ფორმატი VT-ის ნომრისთვის\n"
+
+#: Programs/xbrlapi.c:649
+#, c-format
+msgid "xbrlapi: bad type for VT number\n"
+msgstr "xbrlapi: არასწორი ტიპი VT-ის ნომრისთვის\n"
+
+#: Programs/xbrlapi.c:628
+#, c-format
+msgid "xbrlapi: cannot get root window XFree86_VT property\n"
+msgstr "xbrlapi: ვერ დავაყენე ძირითადი ფანჯრის თვისება XFree86_VT\n"
+
+#: Programs/xbrlapi.c:342
+#, c-format
+msgid "xbrlapi: cannot write window name %s\n"
+msgstr "xbrlapi: ვერ დავწერე ფანჯრის სახელი %s\n"
+
+#: Programs/xbrlapi.c:916
+#, c-format
+msgid "xbrlapi: didn't grab parent of %#010lx\n"
+msgstr "xbrlapi: %#010lx-ის მშობელი არ დამითრევია\n"
+
+#: Programs/xbrlapi.c:937 Programs/xbrlapi.c:956
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx\n"
+msgstr "xbrlapi: ფანჯარა %#010lx არ დამითრევია\n"
+
+#: Programs/xbrlapi.c:720
+#, c-format
+msgid "xbrlapi: didn't grab window %#010lx but got focus\n"
+msgstr "xbrlapi: ფანჯარა %#010lx არ დამითრევია, მაგრამ ფოკუსი მაქვს\n"
+
+#: Programs/xbrlapi.c:637
+#, c-format
+msgid "xbrlapi: more than one item for VT number\n"
+msgstr "xbrlapi: ერთზე მეტი ელემენტი VT ნომრისთვის\n"
+
+#: Programs/xbrlapi.c:622
+#, c-format
+msgid "xbrlapi: no XFree86_VT atom\n"
+msgstr "xbrlapi: XFree86_VT atom-ის გარეშე\n"
+
+#: Programs/xbrlapi.c:633
+#, c-format
+msgid "xbrlapi: no items for VT number\n"
+msgstr ""
+"xbrlapi: VT-ის ნომრისთვის ელემენტები არ არსებობს\n"
+"\n"
+
+#: Programs/xbrlapi.c:605
+#, c-format
+msgid "xbrlapi: resource %#010lx, req %u:%u\n"
+msgstr "xbrlapi: რესურსი %#010lx, req %u:%u\n"
+
+#. Server refused our Xkb remapping request, probably the buggy version 21, ignore error
+#: Programs/xbrlapi.c:598
+#, c-format
+msgid "xbrlapi: server refused our mapping request, could not synthesize key\n"
+msgstr ""
+"xbrlapi: სერვერმა ჩვენი ასახვის მოთხოვნა უარჰყო. ღილაკის სინთეზი "
+"შეუძლებელია\n"
+
+#. "shouldn't happen" events
+#: Programs/xbrlapi.c:990
+#, c-format
+msgid "xbrlapi: unhandled event type: %d\n"
+msgstr "xbrlapi: დაუმუშავებელი მოვლენის ტიპი: %d\n"
+
+#: Programs/xbrlapi.c:965
+#, c-format
+msgid "xbrlapi: window %#010lx changed to NULL command\n"
+msgstr "xbrlapi: ფანჯარა %#010lx შეიცვალა ბრძანებაზე NULL\n"
+
+#: Programs/xbrlapi.c:949
+#, c-format
+msgid "xbrlapi: window %#010lx changed to NULL name\n"
+msgstr ""
+"xbrlapi: ფანჯარა %#010lx შეიცვალა სახელზე NULL\n"
+"\n"
+
+#. LRG
+#: Programs/cmd_utils.c:174
+msgid "yellow"
+msgstr "ყვითელი"
