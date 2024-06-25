@@ -1568,7 +1568,7 @@ writeCells_statusAndText (BrailleDisplay *brl) {
 
   *byte++ = HT_PKT_Braille;
   byte = mempcpy(byte, brl->data->rawStatus, brl->data->model->statusCells);
-  byte = mempcpy(byte, brl->data->rawData, brl->data->model->textCells);
+  byte = mempcpy(byte, brl->data->rawData, brl->textColumns);
 
   return writeBrailleMessage(brl, NULL, HT_PKT_Braille, buffer, byte-buffer);
 }
@@ -1578,7 +1578,7 @@ writeCells_Bookworm (BrailleDisplay *brl) {
   unsigned char buffer[1 + brl->data->model->statusCells + brl->data->model->textCells + 1];
 
   buffer[0] = 0X01;
-  memcpy(buffer+1, brl->data->rawData, brl->data->model->textCells);
+  memcpy(buffer+1, brl->data->rawData, brl->textColumns);
   buffer[sizeof(buffer)-1] = ASCII_SYN;
   return writeBrailleMessage(brl, NULL, 0X01, buffer, sizeof(buffer));
 }
@@ -1586,7 +1586,7 @@ writeCells_Bookworm (BrailleDisplay *brl) {
 static int
 writeCells_Evolution (BrailleDisplay *brl) {
   return writeExtendedPacket(brl, HT_EXTPKT_Braille,
-                             brl->data->rawData, brl->data->model->textCells);
+                             brl->data->rawData, brl->textColumns);
 }
 
 static int
@@ -1601,7 +1601,7 @@ updateCells (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  const size_t cellCount = brl->data->model->textCells;
+  const size_t cellCount = brl->textColumns;
 
   if (cellsHaveChanged(brl->data->prevData, brl->buffer, cellCount, NULL, NULL, NULL)) {
     translateOutputCells(brl->data->rawData, brl->data->prevData, cellCount);
@@ -1629,7 +1629,7 @@ interpretByte_key (BrailleDisplay *brl, unsigned char byte) {
   if (release) byte ^= HT_KEY_RELEASE;
 
   if ((byte >= HT_KEY_ROUTING) &&
-      (byte < (HT_KEY_ROUTING + brl->data->model->textCells))) {
+      (byte < (HT_KEY_ROUTING + brl->textColumns))) {
     return enqueueKeyEvent(brl, HT_GRP_RoutingKeys, byte - HT_KEY_ROUTING, !release);
   }
 
@@ -1738,6 +1738,18 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                 const unsigned char *bytes = &packet.fields.data.extended.data.bytes[0];
 
                 switch (packet.fields.data.extended.type) {
+                  case HT_EXTPKT_GetProtocolProperties: {
+                    const unsigned char cellCount = packet.fields.data.extended.data.protocolProperties.cellCount;
+
+                    if (cellCount != brl->textColumns) {
+                      logMessage(LOG_INFO, "text columns changed from %u to %u", brl->textColumns, cellCount);
+                      brl->textColumns = cellCount;
+                      brl->resizeRequired = 1;
+                    }
+
+                    continue;
+                  }
+
                   case HT_EXTPKT_Confirmation:
                     switch (bytes[0]) {
                       case HT_PKT_NAK:
@@ -1783,7 +1795,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                     unsigned int highestPressure = 0;
 
                     if (bytes[0]) {
-                      const unsigned int cellCount = brl->data->model->textCells + brl->data->model->statusCells;
+                      const unsigned int cellCount = brl->textColumns + brl->data->model->statusCells;
                       unsigned int cellIndex = bytes[0] - 1;
                       unsigned int dataIndex;
 
@@ -1818,7 +1830,7 @@ brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
                   }
 
                   case HT_EXTPKT_ReadingPosition: {
-                    const unsigned int cellCount = brl->data->model->textCells + brl->data->model->statusCells;
+                    const unsigned int cellCount = brl->textColumns + brl->data->model->statusCells;
                     unsigned int readingPosition = bytes[0];
 
                     if ((readingPosition == 0XFF) || (readingPosition >= cellCount)) {
