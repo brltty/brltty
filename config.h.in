@@ -316,6 +316,9 @@ extern "C" {
 /* Define this if the header file syslog.h exists. */
 #undef HAVE_SYSLOG_H
 
+/* Define this if the header file termios.h exists. */
+#undef HAVE_TERMIOS_H
+
 /* Define this if the header file wchar.h exists. */
 #undef HAVE_WCHAR_H
 

@@ -40,6 +40,10 @@
 #include <sys/file.h>
 #endif /* HAVE_SYS_FILE_H */
 
+#ifdef HAVE_TERMIOS_H
+#include <termios.h>
+#endif /* HAVE_TERMIOS_H */
+
 #include "parameters.h"
 #include "log.h"
 #include "strfmt.h"

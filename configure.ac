@@ -939,7 +939,7 @@ AC_CHECK_HEADERS([linux/seccomp.h linux/filter.h linux/audit.h])
 AC_CHECK_HEADERS([signal.h sys/signalfd.h])
 AC_CHECK_FUNCS([sigaction])
 
-AC_CHECK_HEADERS([alloca.h getopt.h regex.h])
+AC_CHECK_HEADERS([alloca.h getopt.h regex.h termios.h])
 AC_CHECK_HEADERS([syslog.h])
 AC_CHECK_HEADERS([sys/file.h sys/socket.h])
 AC_CHECK_HEADERS([pwd.h grp.h])
