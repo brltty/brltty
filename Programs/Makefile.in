@@ -766,7 +766,7 @@ cldr.$O:
 ###############################################################################
 
 rgx.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/rgx.c
+	$(CC) $(LIBCFLAGS) $(RGX_INCLUDES) -c $(SRC_DIR)/rgx.c
 
 $(RGX_OBJECT).$O:
 	$(CC) $(LIBCFLAGS) $(RGX_INCLUDES) -c $(SRC_DIR)/$(RGX_OBJECT).c
