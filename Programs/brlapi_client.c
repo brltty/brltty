@@ -38,6 +38,10 @@
 #include <limits.h>
 #include <unistd.h>
 
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif /* HAVE_ALLOCA_H */
+
 #ifndef __MINGW32__
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
