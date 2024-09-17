@@ -27,6 +27,7 @@
 #include <sys/usb/clients/ugen/usb_ugen.h>
 
 #include "log.h"
+#include "bitfield.h"
 #include "io_usb.h"
 #include "usb_internal.h"
 
