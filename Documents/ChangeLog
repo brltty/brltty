@@ -1,6 +1,56 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+October 15, 2024:
+ - BRLTTY 6.7 released:
+   General changes:
+      The -g [--gui-keyboard=] command line option has been added.
+      The -G (--gui-keyboard-table) command line option has been added.
+      The Speak Empty Line preference (default is yes) has been added.
+      The ASPK_EMP_LINE toggle command has been added.
+   BrailleMemo braille driver changes:
+      The KGS Next Touch models are now supported.
+   FreedomScientific braille driver changes:
+      Bluetooth service discovery is now used to find the serial channel.
+   HandyTech braille driver changes:
+      The Activator Pro models are now supported.
+      USB support for the Basic Braille Plus models has been enabled.
+   HIMS braille driver changes:
+      The eMotion is now supported.
+      USB detection of the BrailleSense 6 has been fixed.
+   Linux screen driver changes:
+      Keyboard input when in graphical mode is now supported.
+      Modifying a character with the Left Alt key is now supported.
+      The CapsLock key is now supported as a modifier (for Orca's laptop mode).
+      Shifted keys have been added to the XT key entry table.
+   AtSpi screen driver changes:
+      The Enter key is now mapped to the Return key rather than to Keypad Enter.
+   FileViewer screen driver changes:
+      The show=yes,no parameter has been added.
+      Typing any character now beeps as that's invalid on a read-only screen.
+      Home/End now go to the start/end of the current line.
+      Home/End with the Control modifier now go to the start/end of the file.
+   Speech FIFO changes:
+      A single write may now contain several packets.
+      Packet options for each of the autospeak echo settings have been added.
+      A packet option allowing a tune to be written has been added.
+   BrlAPI changes:
+      The version is now 0.8.6 (it was 0.8.5).
+      Setting a subparameter value has been fixed.
+      The BRLAPI_PARAM_DRIVER_PROPERTY_VALUE parameter has been added.
+      The WM_COMMAND window manager property is now monitored for changes.
+      The --write-window and --write-command options have been added to xbrlapi.
+   Key table changes:
+      The assignGlobal directive has been added.
+   Windows changes:
+      The winsetup script now supports the python-location symbolic link.
+   Android changes:
+      The release version is no longer allowed to upgrade itself.
+      Translations for the Ukrainian language have been added.
+   Language changes:
+      The German contraction table has been updated.
+      A message catalog for the Georgian language has been added.
+
 July 22, 2023:
  - BRLTTY 6.6 released:
    General changes:
