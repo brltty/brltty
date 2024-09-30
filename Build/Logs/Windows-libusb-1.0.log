@@ -27,20 +27,20 @@ c:\Program Files (x86)\Python311-32\include/cpython/pytime.h:190:12: warning: 's
   190 |     struct timeval *tv,
       |            ^~~~~~~
 brlapi.auto.c: In function '__Pyx_ImportType_3_0_4':
-brlapi.auto.c:33183:13: warning: unknown conversion type character 'z' in format [-Wformat=]
-33183 |             "%s.%s size changed, may indicate binary incompatibility. "
+brlapi.auto.c:33203:13: warning: unknown conversion type character 'z' in format [-Wformat=]
+33203 |             "%s.%s size changed, may indicate binary incompatibility. "
       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-brlapi.auto.c:33184:24: note: format string is defined here
-33184 |             "Expected %zd from C header, got %zd from PyObject",
+brlapi.auto.c:33204:24: note: format string is defined here
+33204 |             "Expected %zd from C header, got %zd from PyObject",
       |                        ^
-brlapi.auto.c:33183:13: warning: unknown conversion type character 'z' in format [-Wformat=]
-33183 |             "%s.%s size changed, may indicate binary incompatibility. "
+brlapi.auto.c:33203:13: warning: unknown conversion type character 'z' in format [-Wformat=]
+33203 |             "%s.%s size changed, may indicate binary incompatibility. "
       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-brlapi.auto.c:33184:47: note: format string is defined here
-33184 |             "Expected %zd from C header, got %zd from PyObject",
+brlapi.auto.c:33204:47: note: format string is defined here
+33204 |             "Expected %zd from C header, got %zd from PyObject",
       |                                               ^
-brlapi.auto.c:33183:13: warning: too many arguments for format [-Wformat-extra-args]
-33183 |             "%s.%s size changed, may indicate binary incompatibility. "
+brlapi.auto.c:33203:13: warning: too many arguments for format [-Wformat-extra-args]
+33203 |             "%s.%s size changed, may indicate binary incompatibility. "
       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 mkwin: building documents
 linuxdoc is not installed - document will not be made
