@@ -1520,7 +1520,7 @@ Keyboard Input
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 * Character: upper, escaped
 * Braille: dot1, dot2, dot3, dot4, dot5, dot6, dot7, dot8, space
 
@@ -1531,7 +1531,7 @@ The following modifiers may be specified:
 The following modifiers may be specified:
 
 * a single character
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 * Character: upper, escaped
 
 .. _KEY_BACKSPACE:
@@ -1540,7 +1540,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_ENTER:
 
@@ -1548,7 +1548,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_TAB:
 
@@ -1556,7 +1556,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_CURSOR_LEFT:
 
@@ -1564,7 +1564,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_CURSOR_RIGHT:
 
@@ -1572,7 +1572,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_CURSOR_UP:
 
@@ -1580,7 +1580,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_CURSOR_DOWN:
 
@@ -1588,7 +1588,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_PAGE_UP:
 
@@ -1596,7 +1596,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_PAGE_DOWN:
 
@@ -1604,7 +1604,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_HOME:
 
@@ -1612,7 +1612,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_END:
 
@@ -1620,7 +1620,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_INSERT:
 
@@ -1628,7 +1628,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_DELETE:
 
@@ -1636,7 +1636,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _UNSTICK:
 
@@ -1672,7 +1672,7 @@ The following modifiers may be specified:
 
 The following modifiers may be specified:
 
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _KEY_FUNCTION:
 
@@ -1681,7 +1681,7 @@ The following modifiers may be specified:
 The following modifiers may be specified:
 
 * an offset
-* Input: shift, control, meta, altgr, gui
+* Input: shift, control, meta, altgr, gui, capslock
 
 .. _SWITCHVT:
 
