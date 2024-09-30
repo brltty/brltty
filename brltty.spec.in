@@ -720,8 +720,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n ocaml-brlapi
 @OCAMLLIB@/brlapi
 
-%files -n python-brlapi
-@PYTHON_SITE_PKG@/[bB]rlapi[-.]*
+%files -n python-brlapi -f Bindings/Python/installed-files
 
 %files -n tcl-brlapi
 @TCL_DIR@/brlapi-@api_release@/libbrlapi_tcl.so
