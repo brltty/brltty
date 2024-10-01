@@ -39,9 +39,10 @@ typedef enum {
 #define SCRPARMS "file", "show"
 #include "scr_driver.h"
 
-#include <ncurses.h>
 #include <term.h>
 #include <stdio.h>
+
+#include "get_curses.h"
 
 static unsigned int showOnTerminal = 0;
 
@@ -201,6 +202,7 @@ toScreenColumn (int offset) {
   return offset % screenWidth;
 }
 
+#ifdef GOT_CURSES
 static int terminalInitialized = 0;
 
 static void
@@ -333,6 +335,7 @@ endTerminal (void) {
   writeTerminalCapability0("rmcup");
   reset_shell_mode();
 }
+#endif /* GOT_CURSES */
 
 static int
 construct_FileViewerScreen (void) {
@@ -347,8 +350,10 @@ construct_FileViewerScreen (void) {
   cursorOffset = 0;
 
   if (showOnTerminal) {
+    #ifdef GOT_CURSES
     terminalInitialized = beginTerminal();
     refreshTerminalScreen(-1);
+    #endif /* GOT_CURSES */
   }
 
   brlttyEnableInterrupt();
@@ -358,7 +363,10 @@ construct_FileViewerScreen (void) {
 static void
 destruct_FileViewerScreen (void) {
   brlttyDisableInterrupt();
+
+  #ifdef GOT_CURSES
   if (terminalInitialized) endTerminal();
+  #endif /* GOT_CURSES */
 
   if (lineDescriptors) {
     free(lineDescriptors);
@@ -419,7 +427,10 @@ placeCursor (int newOffset) {
 
   if (newOffset != oldOffset) {
     cursorOffset = newOffset;
+
+    #ifdef GOT_CURSES
     refreshTerminalScreen(oldOffset);
+    #endif /* GOT_CURSES */
   }
 }
 
