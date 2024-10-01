@@ -223,6 +223,10 @@ handleToggleCommands (int command, void *data) {
       togglePreferenceSetting(&prefs.autospeakSelectedLine, command);
       break;
 
+    case BRL_CMD_ASPK_EMP_LINE:
+      togglePreferenceSetting(&prefs.autospeakEmptyLine, command);
+      break;
+
     case BRL_CMD_ASPK_SEL_CHAR:
       togglePreferenceSetting(&prefs.autospeakSelectedCharacter, command);
       break;

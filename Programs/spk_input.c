@@ -58,6 +58,10 @@ NAMED_PIPE_INPUT_CALLBACK(handleSpeechInput) {
           options |= SAY_OPT_MUTE_FIRST;
           break;
 
+        case 'b':
+          if (!prefs.autospeakEmptyLine) dontSpeak = 1;
+          break;
+
         case 'c':
           if (from < bufferEnd) colour = *from++;
           break;

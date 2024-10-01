@@ -1016,6 +1016,10 @@ autospeak (AutospeakMode mode) {
       if ((characters == newCharacters) && (count > 1)) {
         if (isAllSpaceCharacters(newCharacters, newWidth)) {
           count = 0;
+
+          if (prefs.autospeakEmptyLine) {
+            sayString(&spk, gettext("blank"), SAY_OPT_MUTE_FIRST);
+          }
         }
       }
 

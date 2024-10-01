@@ -181,6 +181,7 @@ static const CommandListEntry commandList_say[] = {
   { .code = BRL_CMD_SAY_HIGHER },
   { .code = BRL_CMD_AUTOSPEAK },
   { .code = BRL_CMD_ASPK_SEL_LINE },
+  { .code = BRL_CMD_ASPK_EMP_LINE },
   { .code = BRL_CMD_ASPK_SEL_CHAR },
   { .code = BRL_CMD_ASPK_INS_CHARS },
   { .code = BRL_CMD_ASPK_DEL_CHARS },

@@ -587,6 +587,12 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.autospeakSelectedLine
   },
 
+  { .name = "autospeak-empty-line",
+    .defaultValue = DEFAULT_AUTOSPEAK_EMPTY_LINE,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.autospeakEmptyLine
+  },
+
   { .name = "autospeak-selected-character",
     .defaultValue = DEFAULT_AUTOSPEAK_SELECTED_CHARACTER,
     .settingNames = &preferenceStringTable_boolean,

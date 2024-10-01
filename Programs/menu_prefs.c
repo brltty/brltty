@@ -1141,6 +1141,12 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Speak Empty Line"));
+      ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeakEmptyLine, &itemName));
+      TEST(Autospeak);
+    }
+
+    {
       NAME(strtext("Speak Selected Character"));
       ITEM(newBooleanMenuItem(autospeakSubmenu, &prefs.autospeakSelectedCharacter, &itemName));
       TEST(Autospeak);
