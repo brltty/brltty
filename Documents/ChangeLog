@@ -6,6 +6,8 @@ October 8, 2024:
    General changes:
       The -g [--gui-keyboard=] command line option has been added.
       The -G (--gui-keyboard-table) command line option has been added.
+      The Speak Empty Line preference (default is yes) has been added.
+      The ASPK_EMP_LINE toggle command has been added.
    FreedomScientific braille driver changes:
       Bluetooth service discovery is now used to find the serial channel.
    HandyTech braille driver changes:
