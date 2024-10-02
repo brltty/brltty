@@ -365,8 +365,9 @@ typedef struct {
   unsigned char textCells;
   unsigned char statusCells;
 
-  unsigned hasATC:1; /* Active Tactile Control */
-  unsigned hasTime:1;
+  unsigned char hasATC:1; /* Active Tactile Control */
+  unsigned char hasTime:1;
+  unsigned char canChangeSize:1;
 } ModelEntry;
 
 static const ModelEntry modelTable[] = {
@@ -547,7 +548,8 @@ static const ModelEntry modelTable[] = {
     .setBrailleFirmness = setBrailleFirmness,
     .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
     .hasATC = 1,
-    .hasTime = 1
+    .hasTime = 1,
+    .canChangeSize = 1
   },
 
   { .identifier = HT_MODEL_ActivatorPro64,
@@ -560,7 +562,8 @@ static const ModelEntry modelTable[] = {
     .setBrailleFirmness = setBrailleFirmness,
     .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
     .hasATC = 1,
-    .hasTime = 1
+    .hasTime = 1,
+    .canChangeSize = 1
   },
 
   { .identifier = HT_MODEL_ActivatorPro80,
@@ -573,7 +576,8 @@ static const ModelEntry modelTable[] = {
     .setBrailleFirmness = setBrailleFirmness,
     .setTouchSensitivity = setTouchSensitivity_ActiveBraille,
     .hasATC = 1,
-    .hasTime = 1
+    .hasTime = 1,
+    .canChangeSize = 1
   },
 
   { .identifier = HT_MODEL_ActiveStar40,
@@ -1049,11 +1053,27 @@ brl_reset (BrailleDisplay *brl) {
 }
 
 static int
+writeExtendedPacket (
+  BrailleDisplay *brl, HT_ExtendedPacketType type,
+  const unsigned char *data, unsigned char size
+) {
+  HT_Packet packet;
+  packet.fields.type = HT_PKT_Extended;
+  packet.fields.data.extended.model = brl->data->model->identifier;
+  packet.fields.data.extended.length = size + 1; /* type byte is included */
+  packet.fields.data.extended.type = type;
+  if (data) memcpy(packet.fields.data.extended.data.bytes, data, size);
+  packet.fields.data.extended.data.bytes[size] = ASCII_SYN;
+  size += 5; /* EXT, ID, LEN, TYPE, ..., SYN */
+  return writeBrailleMessage(brl, NULL, type, &packet, size);
+}
+
+static int
 identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   for (
     brl->data->model = modelTable;
     brl->data->model->name && (brl->data->model->identifier != identifier);
-    brl->data->model++
+    brl->data->model += 1
   );
 
   if (!brl->data->model->name) {
@@ -1090,15 +1110,21 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
     }
   }
 
-  logMessage(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
-             brl->data->model->name,
-             brl->data->model->textCells, (brl->data->model->textCells == 1)? "cell": "cells",
-             brl->data->model->statusCells, (brl->data->model->statusCells == 1)? "cell": "cells");
+  logMessage(LOG_INFO,
+    "Detected %s: %d data %s, %d status %s",
+    brl->data->model->name,
+    brl->data->model->textCells, (brl->data->model->textCells == 1)? "cell": "cells",
+    brl->data->model->statusCells, (brl->data->model->statusCells == 1)? "cell": "cells"
+  );
 
   brl->textColumns = brl->data->model->textCells;                       /* initialise size of display */
   brl->textRows = 1;
   brl->statusColumns = brl->data->model->statusCells;
   brl->statusRows = 1;
+
+  if (brl->data->model->canChangeSize) {
+    writeExtendedPacket(brl, HT_EXTPKT_GetProtocolProperties, NULL, 0);
+  }
 
   setBrailleKeyTable(brl, brl->data->model->keyTableDefinition);
   brl->setBrailleFirmness = brl->data->model->setBrailleFirmness;
@@ -1113,22 +1139,6 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   setState(brl, BDS_READY);
 
   return 1;
-}
-
-static int
-writeExtendedPacket (
-  BrailleDisplay *brl, HT_ExtendedPacketType type,
-  const unsigned char *data, unsigned char size
-) {
-  HT_Packet packet;
-  packet.fields.type = HT_PKT_Extended;
-  packet.fields.data.extended.model = brl->data->model->identifier;
-  packet.fields.data.extended.length = size + 1; /* type byte is included */
-  packet.fields.data.extended.type = type;
-  if (data) memcpy(packet.fields.data.extended.data.bytes, data, size);
-  packet.fields.data.extended.data.bytes[size] = ASCII_SYN;
-  size += 5; /* EXT, ID, LEN, TYPE, ..., SYN */
-  return writeBrailleMessage(brl, NULL, type, &packet, size);
 }
 
 static int
