@@ -19,8 +19,6 @@
 /* EcoBraille/braille.c - Braille display library for ECO Braille series
  * Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>
  * See the GNU Lesser General Public license for details in the LICENSE-LGPL file
- *
- * For debuging define DEBUG variable
  */
 
 /* Changes:
@@ -79,10 +77,6 @@ static unsigned char *rawdata;		/* translated data to send to Braille */
 static unsigned char Status[MAX_STCELLS]; /* to hold status */
 static const BRLPARAMS *model;		/* points to terminal model config struct */
 static int BrailleSize=0;		/* Braille size of braille line */
-
-#ifdef DEBUG
-int brl_log;
-#endif /* DEBUG */
 
 /* Communication codes */
 static char BRL_ID[] = "\x10\x02\xF1";
@@ -161,16 +155,6 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   /* Open the Braille display device */
   if (!(serialDevice = serialOpenDevice(device))) goto failure;
   
-#ifdef DEBUG
-  lockUmask();
-  brl_log = open("/tmp/brllog", O_CREAT | O_WRONLY);
-  unlockUmask();
-
-  if(brl_log < 0){
-    goto failure;
-  }
-#endif /* DEBUG */
-
   /* autodetecting ECO model */
   do{
       /* DTR back on */
@@ -247,10 +231,6 @@ static void brl_destruct(BrailleDisplay *brl)
 {
   free(rawdata);
   serialCloseDevice(serialDevice);
-
-#ifdef DEBUG  
-  close(brl_log);
-#endif /* DEBUG */
 }
 
 
@@ -289,19 +269,8 @@ static int brl_readCommand(BrailleDisplay *brl, KeyTableCommandContext context)
   unsigned char *pBuff;
   unsigned char buff[18 + 1];
   
-#ifdef DEBUG
-  char tmp[80];
-#endif /* DEBUG */
-
   /* Read info from Braille Line */
   if((bytes = serialReadData(serialDevice, buff, 18, 0, 0)) >= 9){
-
-#ifdef DEBUG
-     sprintf(tmp, "Type %d, Bytes read: %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x %.2x\n",
-        type, buff[0], buff[1], buff[2], buff[3], buff[4], buff[5], buff[6], buff[7], buff[8], buff[9]);
-     write(brl_log, tmp, strlen(tmp)); 
-#endif /* DEBUG */
-  
      /* Is a Key? */
      if((pBuff=(unsigned char *)strstr((char *)buff, BRL_KEY))){  
     
