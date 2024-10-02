@@ -142,11 +142,18 @@ always angeht 235-1245-2356-2345
 always aufgehen 2-16-1245-2356-14
 always aufgehst 2-16-1245-2356-23456
 always aufgeht 2-16-1245-2356-2345
+always einandergehe 2-1246-1245-2356-15
 always einandergehen 2-1246-1245-2356-14
 always einandergehst 2-1246-1245-2356-23456
 always einandergeht 2-1246-1245-2356-2345
+always einandergehefte 2-1246-12346-125-15-124-236
+always einandergehetz 2-1246-12346-125-15-2345-1356
 always eingehen 1246-1245-2356-14
+always fremdgeher 124-1235-12356-145-1245-2356-12456
+always kinogeher 13-35-135-1245-2356-12456
+always rutengeher 1235-136-2345-14-1245-2356-12456
 always tiefgehen 2345-346-124-1245-2356-14
+always tourengeher 2345-135-136-1235-14-1245-2356-12456
 always umgehen 136-134-1245-2356-14
 always umgehst 136-134-1245-2356-23456
 always umgeht 136-134-1245-2356-2345
@@ -215,7 +222,7 @@ midendword mm 1346
 always wurm = wurmmittel shouldn't use the mm-contraction
 begmidword or 26
 
-always schance 234-1456-235-6-14
+always schance 234-1456-235-6-14-15
 always schancen 234-1456-235-6-14-14
 always schaos 234-1456-1-135-234
 always schip 234-1456-24-1234
@@ -380,7 +387,6 @@ endword bes 12-123456 shouldn't use the be-contraction
 always begeh 23-1245-2356 shouldn't use the ge-contraction
 always getriebegehäus 12346-2345-1235-346-23-12346-125-34-234 shouldn't use the eh-contraction
 always getriebegehaeus 12346-2345-1235-346-23-12346-125-34-234 shouldn't use the eh-contraction
-always umgeht 136-134-1245-2356-2345 shouldn't use the ge-contraction
 always geig 1245-146-1245 should use the ei-contraction
 always geisel 1245-146-234-13456 shouldn't use the ge-contraction
 always geist 1245-146-23456
@@ -495,6 +501,8 @@ sufword balsam 12-25-234-1-134
 sufword besam 23-234-1-134
 sufword bisam =
 always bischofsamt 12-24-156-135-124-234-1-134-2345 shouldn't use the sam-contraction
+always beisammen 2-146-234-1-1346-14
+
 
 midendword schaft 156
 
@@ -503,10 +511,14 @@ always dschungel 145-156-256-1245-13456 shouldn't use the ung-contraction
 always geklungen 12346-13-123-256-1245-14
 always gelungen 12346-123-256-1245-14
 always gesungen 12346-234-256-1245-14
+before g always bezwun 23-1356-2456-256
+before g always erzwun 12456-1356-2456-256
+before g always gezwun 12346-1356-2456-256
 prfword lunge 123-256-12346
 midendword terung 2345-12456-136
 before cst midword ungs 136-234 Bindungscharakter, Regierungschef
 always ungenau 256-12346-1345-16
+always ungeheuer 256-12346-125-126-12456
 always schwung 156-2456-256-1245 shouldn't use the ung-contraction
 always sprung 234-1234-1235-256-1245 shouldn't use the ung-contraction
 
@@ -1120,6 +1132,7 @@ contraction tw
 always fahr 2-1235
 always fahrts 2-1235-2345-234 shouldn't use the ss-contraction
 always fahrtstell 2-1235-2345-2-13456
+always fahrtstreck 2-1235-2345-23456-1235-15-46
 always fahrtsstell 2-1235-2345-234-2-13456
 always fähr 5-1235
 always faehr 5-1235
