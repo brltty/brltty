@@ -16,13 +16,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-DRIVER_CODE = hm
-DRIVER_NAME = HIMS
-DRIVER_USAGE = Braille Sense, SyncBraille, Braille Edge, Smart Beetle, QBrailleXL, eMotion
-DRIVER_VERSION = 
-DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
-include $(SRC_TOP)braille.mk
+title HIMS eMotion
 
-braille.$O:
-	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
+include common.kti
+include scroll.kti
+include f14.kti
+
+assign metaModifier ALT
+assign controlModifier CONTROL
+include braille.kti
 

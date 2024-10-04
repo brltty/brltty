@@ -92,6 +92,9 @@ HKR,,Icon,,-20
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge and QBrailleXL]"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
+; Device: 045E:940A
+"LibUSB-1.0: HIMS [eMotion (HID)]"=LIBUSB_DEV, USB\VID_045E&PID_940A
+
 ; Device: 0483:A1D3
 "LibUSB-1.0: Baum [Orbit Reader 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
 
@@ -256,6 +259,12 @@ HKR,,Icon,,-20
 
 ; Device: 16C0:05E1
 "LibUSB-1.0: Canute [all models]"=LIBUSB_DEV, USB\VID_16C0&PID_05E1
+
+; Device: 1A86:55D3
+; Generic Identifier
+; Vendor: QinHeng Electronics
+; Product: USB Single Serial
+"LibUSB-1.0: HIMS [eMotion (legacy)]"=LIBUSB_DEV, USB\VID_1A86&PID_55D3
 
 ; Device: 1A86:7523
 ; Generic Identifier
@@ -499,6 +508,9 @@ HKR,,Icon,,-20
 ; Device: 045E:930B
 "LibUSB-1.0: HIMS [Braille Edge and QBrailleXL]"=LIBUSB_DEV, USB\VID_045E&PID_930B
 
+; Device: 045E:940A
+"LibUSB-1.0: HIMS [eMotion (HID)]"=LIBUSB_DEV, USB\VID_045E&PID_940A
+
 ; Device: 0483:A1D3
 "LibUSB-1.0: Baum [Orbit Reader 20 (20 cells)]"=LIBUSB_DEV, USB\VID_0483&PID_A1D3
 
@@ -663,6 +675,12 @@ HKR,,Icon,,-20
 
 ; Device: 16C0:05E1
 "LibUSB-1.0: Canute [all models]"=LIBUSB_DEV, USB\VID_16C0&PID_05E1
+
+; Device: 1A86:55D3
+; Generic Identifier
+; Vendor: QinHeng Electronics
+; Product: USB Single Serial
+"LibUSB-1.0: HIMS [eMotion (legacy)]"=LIBUSB_DEV, USB\VID_1A86&PID_55D3
 
 ; Device: 1A86:7523
 ; Generic Identifier

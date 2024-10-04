@@ -170,6 +170,12 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
     .operations = &usbSerialOperations_CDC_ACM
   },
 
+  { /* HIMS eMotion (legacy) */
+    .vendor=0X1A86, .product=0X55D3,
+    .generic = 1,
+    .operations = &usbSerialOperations_CDC_ACM
+  },
+
   { /* NLS eReader Zoomax */
     .vendor=0X1A86, .product=0X7523,
     .generic = 1,

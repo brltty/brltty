@@ -77,6 +77,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Device: 045E:930B
 "winusb: HIMS [Braille Edge and QBrailleXL]"=USB_Install, USB\VID_045E&PID_930B
 
+; Device: 045E:940A
+"winusb: HIMS [eMotion (HID)]"=USB_Install, USB\VID_045E&PID_940A
+
 ; Device: 0483:A1D3
 "winusb: Baum [Orbit Reader 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
 
@@ -241,6 +244,12 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 16C0:05E1
 "winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
+
+; Device: 1A86:55D3
+; Generic Identifier
+; Vendor: QinHeng Electronics
+; Product: USB Single Serial
+"winusb: HIMS [eMotion (legacy)]"=USB_Install, USB\VID_1A86&PID_55D3
 
 ; Device: 1A86:7523
 ; Generic Identifier
@@ -484,6 +493,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Device: 045E:930B
 "winusb: HIMS [Braille Edge and QBrailleXL]"=USB_Install, USB\VID_045E&PID_930B
 
+; Device: 045E:940A
+"winusb: HIMS [eMotion (HID)]"=USB_Install, USB\VID_045E&PID_940A
+
 ; Device: 0483:A1D3
 "winusb: Baum [Orbit Reader 20 (20 cells)]"=USB_Install, USB\VID_0483&PID_A1D3
 
@@ -648,6 +660,12 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 16C0:05E1
 "winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
+
+; Device: 1A86:55D3
+; Generic Identifier
+; Vendor: QinHeng Electronics
+; Product: USB Single Serial
+"winusb: HIMS [eMotion (legacy)]"=USB_Install, USB\VID_1A86&PID_55D3
 
 ; Device: 1A86:7523
 ; Generic Identifier

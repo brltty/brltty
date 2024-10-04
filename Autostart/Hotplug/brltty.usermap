@@ -96,6 +96,10 @@ brltty 0x0003 0x045e 0x930a
 # HIMS [Braille Edge and QBrailleXL]
 brltty 0x0003 0x045e 0x930b
 
+# Device: 045E:940A
+# HIMS [eMotion (HID)]
+brltty 0x0003 0x045e 0x940a
+
 # Device: 0483:A1D3
 # Baum [Orbit Reader 20 (20 cells)]
 brltty 0x0003 0x0483 0xa1d3
@@ -316,6 +320,13 @@ brltty 0x0003 0x1209 0xabc0
 # Device: 16C0:05E1
 # Canute [all models]
 brltty 0x0003 0x16c0 0x05e1
+
+# Device: 1A86:55D3
+# Generic Identifier
+# Vendor: QinHeng Electronics
+# Product: USB Single Serial
+# HIMS [eMotion (legacy)]
+brltty 0x0003 0x1a86 0x55d3
 
 # Device: 1A86:7523
 # Generic Identifier

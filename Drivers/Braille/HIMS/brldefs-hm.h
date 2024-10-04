@@ -75,7 +75,15 @@ typedef enum {
   HM_KEY_RightPadUp    = 28,
   HM_KEY_RightPadDown  = 29,
   HM_KEY_RightPadLeft  = 30,
-  HM_KEY_RightPadRight = 31
+  HM_KEY_RightPadRight = 31,
+
+  /* eMotion keys */
+  HM_KEY_EM_Control     = 11,
+  HM_KEY_EM_Alt         = 12,
+  HM_KEY_EM_F1          = 22,
+  HM_KEY_EM_F2          = 23,
+  HM_KEY_EM_F3          =  9,
+  HM_KEY_EM_F4          = 10,
 } HM_NavigationKey;
 
 typedef enum {

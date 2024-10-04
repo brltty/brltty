@@ -706,6 +706,11 @@ set genericDevices [makeGenericDeviceTable {
       "CP210x UART Bridge"
    }
 
+   {  0X1A86 0X55D3
+      "QinHeng Electronics"
+      "USB Single Serial"
+   }
+
    {  0X1A86 0X7523
       "Jiangsu QinHeng, Ltd."
       "CH341 USB Bridge Controller"

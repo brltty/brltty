@@ -81,6 +81,10 @@
   <!-- HIMS [Braille Edge and QBrailleXL] -->
   <usb-device vendor-id="1118" product-id="37643" />
 
+  <!-- Device: 045E:940A -->
+  <!-- HIMS [eMotion (HID)] -->
+  <usb-device vendor-id="1118" product-id="37898" />
+
   <!-- Device: 0483:A1D3 -->
   <!-- Baum [Orbit Reader 20 (20 cells)] -->
   <usb-device vendor-id="1155" product-id="41427" />
@@ -301,6 +305,13 @@
   <!-- Device: 16C0:05E1 -->
   <!-- Canute [all models] -->
   <usb-device vendor-id="5824" product-id="1505" />
+
+  <!-- Device: 1A86:55D3 -->
+  <!-- Generic Identifier -->
+  <!-- Vendor: QinHeng Electronics -->
+  <!-- Product: USB Single Serial -->
+  <!-- HIMS [eMotion (legacy)] -->
+  <usb-device vendor-id="6790" product-id="21971" />
 
   <!-- Device: 1A86:7523 -->
   <!-- Generic Identifier -->

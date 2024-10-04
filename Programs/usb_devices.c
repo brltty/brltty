@@ -105,6 +105,10 @@ USB_DEVICE_ENTRY(0X045E, 0X930A, "hm"),
 // HIMS [Braille Edge and QBrailleXL]
 USB_DEVICE_ENTRY(0X045E, 0X930B, "hm"),
 
+// Device: 045E:940A
+// HIMS [eMotion (HID)]
+USB_DEVICE_ENTRY(0X045E, 0X940A, "hm"),
+
 // Device: 0483:A1D3
 // Baum [Orbit Reader 20 (20 cells)]
 USB_DEVICE_ENTRY(0X0483, 0XA1D3, "bm"),
@@ -325,6 +329,13 @@ USB_DEVICE_ENTRY(0X1209, 0XABC0, "ic"),
 // Device: 16C0:05E1
 // Canute [all models]
 USB_DEVICE_ENTRY(0X16C0, 0X05E1, "cn"),
+
+// Device: 1A86:55D3
+// Generic Identifier
+// Vendor: QinHeng Electronics
+// Product: USB Single Serial
+// HIMS [eMotion (legacy)]
+USB_DEVICE_ENTRY(0X1A86, 0X55D3, "hm"),
 
 // Device: 1A86:7523
 // Generic Identifier
