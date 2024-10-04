@@ -20,4 +20,9 @@ title HIMS eMotion
 
 include common.kti
 include scroll.kti
+include f14.kti
+
+assign metaModifier ALT
+assign controlModifier CONTROL
+include braille.kti
 
