@@ -301,6 +301,10 @@
   <!-- Canute [all models] -->
   <usb-device vendor-id="5824" product-id="1505" />
 
+  <!-- Device: 1A86:55D3 -->
+  <!-- HIMS [eMotion (legacy)] -->
+  <usb-device vendor-id="6790" product-id="21971" />
+
   <!-- Device: 1A86:7523 -->
   <!-- Generic Identifier -->
   <!-- Vendor: Jiangsu QinHeng, Ltd. -->

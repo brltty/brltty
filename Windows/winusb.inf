@@ -242,6 +242,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Device: 16C0:05E1
 "winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
 
+; Device: 1A86:55D3
+"winusb: HIMS [eMotion (legacy)]"=USB_Install, USB\VID_1A86&PID_55D3
+
 ; Device: 1A86:7523
 ; Generic Identifier
 ; Vendor: Jiangsu QinHeng, Ltd.
@@ -642,6 +645,9 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 16C0:05E1
 "winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
+
+; Device: 1A86:55D3
+"winusb: HIMS [eMotion (legacy)]"=USB_Install, USB\VID_1A86&PID_55D3
 
 ; Device: 1A86:7523
 ; Generic Identifier

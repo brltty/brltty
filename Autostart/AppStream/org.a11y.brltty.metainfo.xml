@@ -336,6 +336,10 @@
     <!-- Canute [all models] -->
     <modalias>usb:v16C0p05E1*</modalias>
 
+    <!-- Device: 1A86:55D3 -->
+    <!-- HIMS [eMotion (legacy)] -->
+    <modalias>usb:v1A86p55D3*</modalias>
+
     <!-- Device: 1A86:7523 -->
     <!-- Generic Identifier -->
     <!-- Vendor: Jiangsu QinHeng, Ltd. -->

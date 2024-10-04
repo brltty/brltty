@@ -150,12 +150,20 @@ BEGIN_KEY_NAME_TABLES(beetle)
   KEY_NAME_TABLE(beetle),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(emotion)
+  KEY_NAME_TABLE(common),
+  KEY_NAME_TABLE(braille),
+  KEY_NAME_TABLE(f14),
+  KEY_NAME_TABLE(BS_scroll),
+END_KEY_NAME_TABLES
+
 DEFINE_KEY_TABLE(pan)
 DEFINE_KEY_TABLE(scroll)
 DEFINE_KEY_TABLE(qwerty)
 DEFINE_KEY_TABLE(edge)
 DEFINE_KEY_TABLE(sync)
 DEFINE_KEY_TABLE(beetle)
+DEFINE_KEY_TABLE(emotion)
 
 BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(pan),
@@ -164,6 +172,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(edge),
   &KEY_TABLE_DEFINITION(sync),
   &KEY_TABLE_DEFINITION(beetle),
+  &KEY_TABLE_DEFINITION(emotion),
 END_KEY_TABLE_LIST
 
 typedef enum {
@@ -465,7 +474,7 @@ writePacket (
 
 
 static int
-getBrailleSenseDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
+getDefaultCellCount_BrailleSense (BrailleDisplay *brl, unsigned int *count) {
   *count = 32;
   return 1;
 }
@@ -474,7 +483,7 @@ static const ProtocolEntry brailleSenseProtocol = {
   .modelName = "Braille Sense",
   .keyTable = &KEY_TABLE_DEFINITION(pan),
   .testIdentities = testBrailleSenseIdentities,
-  .getDefaultCellCount = getBrailleSenseDefaultCellCount
+  .getDefaultCellCount = getDefaultCellCount_BrailleSense
 };
 
 static const ProtocolEntry brailleSense6Protocol = {
@@ -482,24 +491,24 @@ static const ProtocolEntry brailleSense6Protocol = {
   .resourceNamePrefix = "H632B",
   .keyTable = &KEY_TABLE_DEFINITION(scroll),
   .testIdentities = testBrailleSense6Identities,
-  .getDefaultCellCount = getBrailleSenseDefaultCellCount
+  .getDefaultCellCount = getDefaultCellCount_BrailleSense
 };
 
 
 static int
-getSyncBrailleDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
+getDefaultCellCount_SyncBraille (BrailleDisplay *brl, unsigned int *count) {
   return 0;
 }
 
 static const ProtocolEntry syncBrailleProtocol = {
   .modelName = "SyncBraille",
   .keyTable = &KEY_TABLE_DEFINITION(sync),
-  .getDefaultCellCount = getSyncBrailleDefaultCellCount
+  .getDefaultCellCount = getDefaultCellCount_SyncBraille
 };
 
 
 static int
-getBrailleEdgeDefaultCellCount (BrailleDisplay *brl, unsigned int *count) {
+getDefaultCellCount_BrailleEdge (BrailleDisplay *brl, unsigned int *count) {
   *count = 40;
   return 1;
 }
@@ -509,7 +518,20 @@ static const ProtocolEntry brailleEdgeProtocol = {
   .resourceNamePrefix = "BrailleEDGE",
   .keyTable = &KEY_TABLE_DEFINITION(edge),
   .testIdentities = testBrailleEdgeIdentities,
-  .getDefaultCellCount = getBrailleEdgeDefaultCellCount
+  .getDefaultCellCount = getDefaultCellCount_BrailleEdge
+};
+
+
+static int
+getDefaultCellCount_eMotion (BrailleDisplay *brl, unsigned int *count) {
+  *count = 40;
+  return 1;
+}
+
+static const ProtocolEntry eMotionProtocol = {
+  .modelName = "eMotion",
+  .keyTable = &KEY_TABLE_DEFINITION(emotion),
+  .getDefaultCellCount = getDefaultCellCount_eMotion
 };
 
 
@@ -649,6 +671,15 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
       .data=&brailleEdgeProtocol
+    },
+
+    { /* eMotion (legacy) */
+      .vendor=0X1A86, .product=0X55D3,
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=2,
+      .serial = &serialParameters,
+      .disableAutosuspend=1,
+      .data=&eMotionProtocol
     },
   END_USB_CHANNEL_DEFINITIONS
 

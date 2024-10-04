@@ -325,6 +325,10 @@ USB_DEVICE_ENTRY(0X1209, 0XABC0, "ic"),
 // Canute [all models]
 USB_DEVICE_ENTRY(0X16C0, 0X05E1, "cn"),
 
+// Device: 1A86:55D3
+// HIMS [eMotion (legacy)]
+USB_DEVICE_ENTRY(0X1A86, 0X55D3, "hm"),
+
 // Device: 1A86:7523
 // Generic Identifier
 // Vendor: Jiangsu QinHeng, Ltd.
