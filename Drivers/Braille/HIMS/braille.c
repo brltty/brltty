@@ -631,6 +631,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .verifyInterface=1,
+      .resetDevice=1,
       .disableAutosuspend=1,
       .data=&brailleSense6Protocol
     },
