@@ -172,6 +172,7 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
 
   { /* HIMS eMotion (legacy) */
     .vendor=0X1A86, .product=0X55D3,
+    .generic = 1,
     .operations = &usbSerialOperations_CDC_ACM
   },
 

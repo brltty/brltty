@@ -243,6 +243,8 @@ DriverVer = %DriverDate%,%DriverVersion%
 "winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
 
 ; Device: 1A86:55D3
+; Generic Identifier
+; Product: USB Single Serial
 "winusb: HIMS [eMotion (legacy)]"=USB_Install, USB\VID_1A86&PID_55D3
 
 ; Device: 1A86:7523
@@ -647,6 +649,8 @@ DriverVer = %DriverDate%,%DriverVersion%
 "winusb: Canute [all models]"=USB_Install, USB\VID_16C0&PID_05E1
 
 ; Device: 1A86:55D3
+; Generic Identifier
+; Product: USB Single Serial
 "winusb: HIMS [eMotion (legacy)]"=USB_Install, USB\VID_1A86&PID_55D3
 
 ; Device: 1A86:7523

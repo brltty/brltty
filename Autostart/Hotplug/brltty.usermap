@@ -317,6 +317,8 @@ brltty 0x0003 0x1209 0xabc0
 brltty 0x0003 0x16c0 0x05e1
 
 # Device: 1A86:55D3
+# Generic Identifier
+# Product: USB Single Serial
 # HIMS [eMotion (legacy)]
 brltty 0x0003 0x1a86 0x55d3
 

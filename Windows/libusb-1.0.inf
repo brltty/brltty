@@ -258,6 +258,8 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Canute [all models]"=LIBUSB_DEV, USB\VID_16C0&PID_05E1
 
 ; Device: 1A86:55D3
+; Generic Identifier
+; Product: USB Single Serial
 "LibUSB-1.0: HIMS [eMotion (legacy)]"=LIBUSB_DEV, USB\VID_1A86&PID_55D3
 
 ; Device: 1A86:7523
@@ -662,6 +664,8 @@ HKR,,Icon,,-20
 "LibUSB-1.0: Canute [all models]"=LIBUSB_DEV, USB\VID_16C0&PID_05E1
 
 ; Device: 1A86:55D3
+; Generic Identifier
+; Product: USB Single Serial
 "LibUSB-1.0: HIMS [eMotion (legacy)]"=LIBUSB_DEV, USB\VID_1A86&PID_55D3
 
 ; Device: 1A86:7523

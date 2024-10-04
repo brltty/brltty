@@ -337,6 +337,8 @@
     <modalias>usb:v16C0p05E1*</modalias>
 
     <!-- Device: 1A86:55D3 -->
+    <!-- Generic Identifier -->
+    <!-- Product: USB Single Serial -->
     <!-- HIMS [eMotion (legacy)] -->
     <modalias>usb:v1A86p55D3*</modalias>
 
