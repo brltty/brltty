@@ -2,97 +2,97 @@
 
 <resources>
   <string name="app_description">BRLTTY підтримує брайлівські пристрої.</string>
-  <string name="</string>
+
   <string name="usbMonitor_label">Монітор, підключений до USB пристрою</string>
-  <string name="</string>
+
   <string name="about_label_activity">Про додаток</string>
   <string name="about_label_copyright">Авторське право</string>
   <string name="about_label_buildTime">Час створення</string>
   <string name="about_label_sourceRevision">Версія вихідного коду</string>
   <string name="about_label_privacyPolicy">Політика конфіденційності</string>
-  <string name="</string>
+
   <string name="inputService_name">Служба вводу BRLTTY</string>
   <string name="inputService_type">Клавіатури на пристроях Брайля</string>
   <string name="inputService_not_enabled">служба вводу не увімкнена</string>
   <string name="inputService_not_selected">служба вводу не вибрана</string>
   <string name="inputService_not_started">служба вводу не запущена</string>
   <string name="inputService_not_connected">служба вводу не підключена</string>
-  <string name="</string>
+
   <string name="updateApplication_problem_failed">додаток не оновлено</string>
-  <string name="</string>
+
   <string name="packageInstaller_problem_failed">Додаток не встановлено</string>
   <string name="packageInstaller_problem_same">та ж версія додатка</string>
   <string name="packageInstaller_problem_downgrade">понижувати версію додатка заборонено</string>
-  <string name="</string>
+
   <string name="fileDownloader_title">Завантажувач файлів BRLTTY</string>
   <string name="fileDownloader_problem_failed">файл не завантажено</string>
   <string name="fileDownloader_state_connecting">підключення</string>
   <string name="fileDownloader_state_downloading">завантаження</string>
-  <string name="</string>
+
   <string name="setting_state_off">Вимкнено</string>
   <string name="checkbox_state_unchecked">Ні</string>
   <string name="checkbox_state_checked">Так</string>
-  <string name="</string>
+
   <string name="braille_channel_name">Стан пристрою Брайля</string>
   <string name="braille_hint_tap">натисніть для виконання дії</string>
-  <string name="braille_state_released">Роз'єднано</string>
+  <string name="braille_state_released">Роз\'єднано</string>
   <string name="braille_state_waiting">Очікування</string>
   <string name="braille_state_connected">Підключено</string>
-  <string name="</string>
+
   <string name="GLOBAL_BUTTON_NOTIFICATIONS">Сповіщення</string>
   <string name="GLOBAL_BUTTON_QUICK_SETTINGS">Швидкі налаштування</string>
   <string name="GLOBAL_BUTTON_BACK">Назад</string>
   <string name="GLOBAL_BUTTON_HOME">додому</string>
   <string name="GLOBAL_BUTTON_RECENT_APPS">Останні програми</string>
   <string name="GLOBAL_BUTTON_OVERVIEW">Огляд</string>
-  <string name="</string>
+
   <string name="GLOBAL_BUTTON_SWITCH_INPUT_METHOD">Перемкнути метод вводу</string>
   <string name="GLOBAL_BUTTON_VIEW_USER_GUIDE">Переглянути посібник користувача</string>
   <string name="GLOBAL_BUTTON_BROWSE_WEB_SITE">Відвідати веб-сайт</string>
   <string name="GLOBAL_BUTTON_BROWSE_COMMUNITY_MESSAGES">Відвідати спільноту додатка</string>
   <string name="GLOBAL_BUTTON_POST_COMMUNITY_MESSAGE">Написати до спільноти додатка</string>
   <string name="GLOBAL_BUTTON_MANAGE_COMMUNITY_MEMBERSHIP">Керувати членством у спільноті</string>
-  <string name="</string>
+
   <string name="GLOBAL_BUTTON_UPDATE_APPLICATION">Оновити додаток</string>
   <string name="GLOBAL_CHECKBOX_DEVELOPER_BUILD">Збірка розробника</string>
   <string name="GLOBAL_CHECKBOX_ALLOW_DOWNGRADE">Дозволити понизити версію додатка</string>
-  <string name="</string>
+
   <string name="CHOOSER_TITLE_ACCESSIBILITY_ACTIONS">Дії щодо доступності</string>
-  <string name="</string>
+
   <string name="SETTINGS_SCREEN_MAIN">Налаштування BRLTTY</string>
   <string name="SETTINGS_SCREEN_GENERAL">Загальні налаштування</string>
   <string name="SETTINGS_SCREEN_MESSAGE">Налаштування сповіщень</string>
   <string name="SETTINGS_SCREEN_DEVICES">Керування пристроями</string>
   <string name="SETTINGS_SCREEN_ADVANCED">Розширені налаштування</string>
-  <string name="</string>
-  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Від'єднання пристрою Брайля</string>
+
+  <string name="SETTINGS_CHECKBOX_RELEASE_BRAILLE_DEVICE">Від\'єднання пристрою Брайля</string>
   <string name="SETTINGS_BUTTON_NAVIGATION_MODE">Режим навігації</string>
   <string name="SETTINGS_BUTTON_SPEECH_SUPPORT">Підтримка мовлення</string>
-  <string name="</string>
+
   <string name="SETTINGS_BUTTON_TEXT_TABLE">Текстова таблиця</string>
   <string name="SETTINGS_BUTTON_ATTRIBUTES_TABLE">Таблиця атрибутів</string>
   <string name="SETTINGS_BUTTON_CONTRACTION_TABLE">Таблиця скорочень</string>
   <string name="SETTINGS_BUTTON_KEYBOARD_TABLE">Клавіатурна таблиця</string>
-  <string name="</string>
+
   <string name="SETTINGS_CHECKBOX_SHOW_ALERTS">Показувати попередження</string>
   <string name="SETTINGS_CHECKBOX_SHOW_ANNOUNCEMENTS">Показувати сповіщення</string>
   <string name="SETTINGS_CHECKBOX_SHOW_NOTIFICATIONS">Показувати повідомлення</string>
-  <string name="</string>
+
   <string name="SETTINGS_BUTTON_LOG_LEVEL">Рівень запису вжурнал</string>
   <string name="SETTINGS_BUTTON_LOG_CATEGORIES">Категорії записів в журналі</string>
   <string name="SETTINGS_CHECKBOX_LOG_ACCESSIBILITY_EVENTS">Журнал подій доступності</string>
   <string name="SETTINGS_CHECKBOX_LOG_RENDERED_SCREEN">Журнал відображення екрану</string>
   <string name="SETTINGS_CHECKBOX_LOG_KEYBOARD_EVENTS">Журнал подій клавіатури</string>
   <string name="SETTINGS_CHECKBOX_LOG_UNHANDLED_EVENTS">Журнал необроблених подій</string>
-  <string name="</string>
+
   <string name="DEVICES_BUTTON_SELECTED">Вибраний пристрій</string>
   <string name="DEVICES_BUTTON_ADD">Додати пристрій</string>
   <string name="DEVICES_BUTTON_REMOVE">Видалити пристрій</string>
-  <string name="</string>
+
   <string name="SELECTED_DEVICE_NONE">немає пристроїв</string>
   <string name="SELECTED_DEVICE_UNSELECTED">пристрій не вибрано</string>
-  <string name="</string>
-  <string name="ADD_DEVICE_NAME">Ім'я пристрою</string>
+
+  <string name="ADD_DEVICE_NAME">Ім\'я пристрою</string>
   <string name="ADD_DEVICE_METHOD">Спосіб підключення</string>
   <string name="ADD_DEVICE_SELECT">Виберіть Пристрій</string>
   <string name="ADD_DEVICE_DRIVER">Брайлівський драйвер</string>
@@ -103,20 +103,20 @@
   <string name="ADD_DEVICE_NO_DEVICES">немає пристроїв</string>
   <string name="ADD_DEVICE_DUPLICATE_NAME">назва пристрою вже використовується</string>
   <string name="ADD_DEVICE_NO_PERMISSION">не  дозволено доступ до пристрою</string>
-  <string name="</string>
+
   <string name="REMOVE_DEVICE_PROMPT">Ви справді хочете видалити пристрій?</string>
-  <string name="</string>
+
   <string name="SET_SELECTION_NONE">нічого не вибрано</string>
-  <string name="</string>
+
   <string name="NAVIGATION_MODE_LABEL_List">Вертикальний список</string>
   <string name="NAVIGATION_MODE_LABEL_Grid">Двомірна сітка</string>
-  <string name="</string>
+
   <string name="SPEECH_SUPPORT_LABEL_native">Нативна</string>
-  <string name="</string>
+
   <string name="COMMUNICATION_METHOD_LABEL_Bluetooth">Bluetooth</string>
   <string name="COMMUNICATION_METHOD_LABEL_Usb">USB</string>
   <string name="COMMUNICATION_METHOD_LABEL_Serial">Послідовний порт</string>
-  <string name="</string>
+
   <string name="LOG_LEVEL_LABEL_debug">Налагодження</string>
   <string name="LOG_LEVEL_LABEL_information">Інформація</string>
   <string name="LOG_LEVEL_LABEL_notice">Повідомлення</string>
@@ -125,7 +125,7 @@
   <string name="LOG_LEVEL_LABEL_critical">Критичний</string>
   <string name="LOG_LEVEL_LABEL_alert">Попередження</string>
   <string name="LOG_LEVEL_LABEL_emergency">Аварійна ситуація</string>
-  <string name="</string>
+
   <string name="LOG_CATEGORY_LABEL_inpkts">Вхідні пакети</string>
   <string name="LOG_CATEGORY_LABEL_outpkts">Вихідні пакети</string>
   <string name="LOG_CATEGORY_LABEL_brlkeys">Ключові події пристрою Брайля</string>
@@ -144,9 +144,9 @@
   <string name="LOG_CATEGORY_LABEL_brldrv">Події драйвера Брайля</string>
   <string name="LOG_CATEGORY_LABEL_spkdrv">Події драйвера мови</string>
   <string name="LOG_CATEGORY_LABEL_scrdrv">Події Драйвера програми екранного доступу</string>
-  <string name="</string>
+
   <string name="BRAILLE_DRIVER_LABEL_auto">автовизначення</string>
-  <string name="</string>
+
   <string name="TEXT_TABLE_LABEL_auto">автовибір на основі системної</string>
   <string name="TEXT_TABLE_LABEL_ar">арабська (загальна)</string>
   <string name="TEXT_TABLE_LABEL_as">асамська</string>
@@ -177,7 +177,7 @@
   <string name="TEXT_TABLE_LABEL_fr">французька</string>
   <string name="TEXT_TABLE_LABEL_fr_2007">французька (уніфікована 2007)</string>
   <string name="TEXT_TABLE_LABEL_fr_CA">французька (Канада)</string>
-  <string name="TEXT_TABLE_LABEL_fr_cbifs">Французька (французький стандартний комп'ютерний код Брайля)</string>
+  <string name="TEXT_TABLE_LABEL_fr_cbifs">Французька (французький стандартний комп\'ютерний код Брайля)</string>
   <string name="TEXT_TABLE_LABEL_fr_FR">французька (Франція)</string>
   <string name="TEXT_TABLE_LABEL_fr_vs">Французька (VisioBraille)</string>
   <string name="TEXT_TABLE_LABEL_ga">ірландська</string>
@@ -235,12 +235,12 @@
   <string name="TEXT_TABLE_LABEL_te">Телугу</string>
   <string name="TEXT_TABLE_LABEL_tr">турецька</string>
   <string name="TEXT_TABLE_LABEL_uk">українська</string>
-  <string name="TEXT_TABLE_LABEL_vi">в'єтнамська</string>
-  <string name="</string>
+  <string name="TEXT_TABLE_LABEL_vi">в\'єтнамська</string>
+
   <string name="ATTRIBUTES_TABLE_LABEL_invleft_right">інверсний колір переднього плану в лівій колонці та колір фону в правій колонці</string>
   <string name="ATTRIBUTES_TABLE_LABEL_left_right">колір переднього плану в лівій колонці та колір фону в правій колонці</string>
   <string name="ATTRIBUTES_TABLE_LABEL_upper_lower">колір переднього плану у верхньому квадраті та колір фону у нижньому квадраті</string>
-  <string name="</string>
+
   <string name="CONTRACTION_TABLE_LABEL_auto">автовибір на основі системної</string>
   <string name="CONTRACTION_TABLE_LABEL_af">африкаанс (скорочена)</string>
   <string name="CONTRACTION_TABLE_LABEL_am">Амхарська (нескорочена)</string>
@@ -279,10 +279,10 @@
   <string name="CONTRACTION_TABLE_LABEL_th">Тайська (скорочена)</string>
   <string name="CONTRACTION_TABLE_LABEL_zh_TW">Китайська (Тайвань, нескорочена)</string>
   <string name="CONTRACTION_TABLE_LABEL_zu">Зулу (скорочена)</string>
-  <string name="</string>
-  <string name="KEYBOARD_TABLE_LABEL_braille">прив'язки для брайлівських клавіатур</string>
-  <string name="KEYBOARD_TABLE_LABEL_desktop">прив'язки для повних клавіатур</string>
-  <string name="KEYBOARD_TABLE_LABEL_keypad">прив'язки для кнопкової панелі навігації</string>
-  <string name="KEYBOARD_TABLE_LABEL_laptop">прив'язки для клавіатур з відсутнім додатковим блоком</string>
-  <string name="KEYBOARD_TABLE_LABEL_sun_type6">прив'язки для клавіатури Sun Type 6</string>
+
+  <string name="KEYBOARD_TABLE_LABEL_braille">прив\'язки для брайлівських клавіатур</string>
+  <string name="KEYBOARD_TABLE_LABEL_desktop">прив\'язки для повних клавіатур</string>
+  <string name="KEYBOARD_TABLE_LABEL_keypad">прив\'язки для кнопкової панелі навігації</string>
+  <string name="KEYBOARD_TABLE_LABEL_laptop">прив\'язки для клавіатур з відсутнім додатковим блоком</string>
+  <string name="KEYBOARD_TABLE_LABEL_sun_type6">прив\'язки для клавіатури Sun Type 6</string>
 </resources>
