@@ -185,7 +185,7 @@ else
 fi
 
 toolsDirectory="${properties[TOOLCHAIN]}/bin"
-export PATH="${PATH}:${toolsDirectory}"
+export PATH="${toolsDirectory}:${PATH}"
 findTool CC gcc
 findTool LD ld
 findTool STRIP strip
