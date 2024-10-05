@@ -9,11 +9,11 @@ A test program to verify that the Maven dependency on BrlAPI is working.
 apply from: rootProject.file("brlapi-android.gradle")
 
 android {
-  compileSdkVersion "android-33"
+  compileSdkVersion "android-34"
   buildToolsVersion "29.0.3"
 
   defaultConfig {
-    targetSdkVersion 33
+    targetSdkVersion 34
     minSdkVersion 26
   }
 }

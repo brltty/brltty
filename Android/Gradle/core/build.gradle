@@ -9,11 +9,11 @@ description = """
 apply from: "brltty.gradle"
 
 android {
-  compileSdkVersion "android-33"
+  compileSdkVersion "android-34"
   buildToolsVersion "29.0.3"
 
   defaultConfig {
-    targetSdkVersion 33
+    targetSdkVersion 34
     minSdkVersion 16
   }
 }
