@@ -256,6 +256,7 @@ typedef struct {
   const KeyTableDefinition *keyTable;
   const KeyTableDefinition * (*testIdentities) (BrailleDisplay *brl);
   int (*getDefaultCellCount) (BrailleDisplay *brl, unsigned int *count);
+  unsigned char isHID:1;
 } ProtocolEntry;
 
 struct BrailleDataStruct {
@@ -539,7 +540,14 @@ getDefaultCellCount_eMotion (BrailleDisplay *brl, unsigned int *count) {
 }
 
 static const ProtocolEntry eMotionProtocol = {
-  .modelName = "eMotion",
+  .modelName = "eMotion (legacy)",
+  .keyTable = &KEY_TABLE_DEFINITION(emotion),
+  .getDefaultCellCount = getDefaultCellCount_eMotion
+};
+
+static const ProtocolEntry eMotionHIDProtocol = {
+  .modelName = "eMotion (HID)",
+  .isHID = 1,
   .keyTable = &KEY_TABLE_DEFINITION(emotion),
   .getDefaultCellCount = getDefaultCellCount_eMotion
 };
@@ -558,9 +566,13 @@ static int
 writeCells (BrailleDisplay *brl) {
   const size_t count = MIN(brl->textColumns*brl->textRows, MAXIMUM_CELL_COUNT);
   unsigned char cells[count];
-
   translateOutputCells(cells, brl->data->previousCells, count);
-  return writePacket(brl, 0XFC, 0X01, cells, count, NULL, 0);
+
+  if (brl->data->protocol->isHID) {
+    return gioWriteData(brl->gioEndpoint, cells, count) != -1;
+  } else {
+    return writePacket(brl, 0XFC, 0X01, cells, count, NULL, 0);
+  }
 }
 
 static int
@@ -692,6 +704,14 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .disableAutosuspend=1,
       .data=&eMotionProtocol
     },
+
+    { /* eMotion (HID) */
+      .vendor=0X045E, .product=0X940A,
+      .configuration=1, .interface=2, .alternative=0,
+      .inputEndpoint=4, .outputEndpoint=3,
+      .disableAutosuspend=1,
+      .data=&eMotionHIDProtocol
+    },
   END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
@@ -793,35 +813,51 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  InputPacket packet;
-  int length;
+  if (brl->data->protocol->isHID) {
+    while (1) {
+      unsigned char buffer[22];
+      ssize_t length = gioReadData(brl->gioEndpoint, buffer, sizeof(buffer), 1);
+      if (!length) return EOF;
 
-  while ((length = readPacket(brl, &packet))) {
-    switch (packet.data.type) {
-      case IPT_CURSOR: {
-        unsigned char key = packet.data.data;
-
-        enqueueKey(brl, HM_GRP_RoutingKeys, key);
-        continue;
-      }
-
-      case IPT_KEYS: {
-        KeyNumberSet bits = (packet.data.reserved[0] << 0X00)
-                          | (packet.data.reserved[1] << 0X08)
-                          | (packet.data.reserved[2] << 0X10)
-                          | (packet.data.reserved[3] << 0X18);
-
-        enqueueKeys(brl, bits, HM_GRP_NavigationKeys, 0);
-        continue;
-      }
-
-      default:
+      if (length == -1) {
+        if (errno == EAGAIN) return EOF;
         break;
+      }
+
+      logUnexpectedPacket(buffer, length);
+    }
+  } else {
+    InputPacket packet;
+    int length;
+
+    while ((length = readPacket(brl, &packet))) {
+      switch (packet.data.type) {
+        case IPT_CURSOR: {
+          unsigned char key = packet.data.data;
+
+          enqueueKey(brl, HM_GRP_RoutingKeys, key);
+          continue;
+        }
+
+        case IPT_KEYS: {
+          KeyNumberSet bits = (packet.data.reserved[0] << 0X00)
+                            | (packet.data.reserved[1] << 0X08)
+                            | (packet.data.reserved[2] << 0X10)
+                            | (packet.data.reserved[3] << 0X18);
+
+          enqueueKeys(brl, bits, HM_GRP_NavigationKeys, 0);
+          continue;
+        }
+
+        default:
+          break;
+      }
+
+      logUnexpectedPacket(&packet, length);
     }
 
-    logUnexpectedPacket(&packet, length);
+    if (errno == EAGAIN) return EOF;
   }
-  if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
 
-  return EOF;
+  return BRL_CMD_RESTARTBRL;
 }

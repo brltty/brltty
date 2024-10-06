@@ -105,6 +105,10 @@ USB_DEVICE_ENTRY(0X045E, 0X930A, "hm"),
 // HIMS [Braille Edge and QBrailleXL]
 USB_DEVICE_ENTRY(0X045E, 0X930B, "hm"),
 
+// Device: 045E:940A
+// HIMS [eMotion (HID)]
+USB_DEVICE_ENTRY(0X045E, 0X940A, "hm"),
+
 // Device: 0483:A1D3
 // Baum [Orbit Reader 20 (20 cells)]
 USB_DEVICE_ENTRY(0X0483, 0XA1D3, "bm"),
