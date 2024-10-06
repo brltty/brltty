@@ -491,7 +491,7 @@ writePacket (
 
 
 static int
-requestCellCount_serial (BrailleDisplay *brl) {
+writeCellCountRequest_serial (BrailleDisplay *brl) {
   static const unsigned char data[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -501,7 +501,7 @@ requestCellCount_serial (BrailleDisplay *brl) {
 }
 
 static BrailleResponseResult
-verifyCellCountResponse_serial (BrailleDisplay *brl, const void *packet, size_t size) {
+isCellCountResponse_serial (BrailleDisplay *brl, const void *packet, size_t size) {
   const InputPacket *response = packet;
 
   return (response->data.type == IPT_CELLS)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
@@ -512,9 +512,9 @@ getCellCount_serial (BrailleDisplay *brl, unsigned int *count) {
   InputPacket response;
 
   int probed = probeBrailleDisplay(
-    brl, 2, NULL, 1000, requestCellCount_serial,
+    brl, 2, NULL, 1000, writeCellCountRequest_serial,
     readBytes, &response, sizeof(response.bytes),
-    verifyCellCountResponse_serial
+    isCellCountResponse_serial
   );
 
   if (!probed) return 0;
