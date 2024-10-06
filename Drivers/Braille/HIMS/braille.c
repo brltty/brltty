@@ -535,102 +535,160 @@ static const InputOutputOperations serialOperations = {
 
 
 typedef struct {
-  unsigned char byte;
-  unsigned char bit;
+  unsigned char mask;
   KeyValue key;
-} HidKeyDefinition;
+} HidInputBit;
 
-static const HidKeyDefinition hidKeyTable[] = {
-  {0, 0, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot1}},
-  {0, 1, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot2}},
-  {0, 2, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot3}},
-  {0, 3, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot4}},
-  {0, 4, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot5}},
-  {0, 5, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot6}},
-  {0, 6, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot7}},
-  {0, 7, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot8}},
+typedef struct {
+  unsigned char offset;
+  HidInputBit bits[8];
+} HidInputByte;
 
-  {1, 0, .key={.group=HM_GRP_RoutingKeys, .number= 0}},
-  {1, 1, .key={.group=HM_GRP_RoutingKeys, .number= 1}},
-  {1, 2, .key={.group=HM_GRP_RoutingKeys, .number= 2}},
-  {1, 3, .key={.group=HM_GRP_RoutingKeys, .number= 3}},
-  {1, 4, .key={.group=HM_GRP_RoutingKeys, .number= 4}},
-  {1, 5, .key={.group=HM_GRP_RoutingKeys, .number= 5}},
-  {1, 6, .key={.group=HM_GRP_RoutingKeys, .number= 6}},
-  {1, 7, .key={.group=HM_GRP_RoutingKeys, .number= 7}},
+static const HidInputByte hidInputBytes[11] = {
+  { .offset = 0,
+    .bits = {
+      {.mask=0X01, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot1}},
+      {.mask=0X02, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot2}},
+      {.mask=0X04, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot3}},
+      {.mask=0X08, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot4}},
+      {.mask=0X10, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot5}},
+      {.mask=0X20, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot6}},
+      {.mask=0X40, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot7}},
+      {.mask=0X80, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot8}},
+    }
+  },
 
-  {2, 0, .key={.group=HM_GRP_RoutingKeys, .number= 8}},
-  {2, 1, .key={.group=HM_GRP_RoutingKeys, .number= 9}},
-  {2, 2, .key={.group=HM_GRP_RoutingKeys, .number=10}},
-  {2, 3, .key={.group=HM_GRP_RoutingKeys, .number=11}},
-  {2, 4, .key={.group=HM_GRP_RoutingKeys, .number=12}},
-  {2, 5, .key={.group=HM_GRP_RoutingKeys, .number=13}},
-  {2, 6, .key={.group=HM_GRP_RoutingKeys, .number=14}},
-  {2, 7, .key={.group=HM_GRP_RoutingKeys, .number=15}},
+  { .offset = 1,
+    .bits = {
+      {.mask=0X01, .key={.group=HM_GRP_RoutingKeys, .number= 0}},
+      {.mask=0X02, .key={.group=HM_GRP_RoutingKeys, .number= 1}},
+      {.mask=0X04, .key={.group=HM_GRP_RoutingKeys, .number= 2}},
+      {.mask=0X08, .key={.group=HM_GRP_RoutingKeys, .number= 3}},
+      {.mask=0X10, .key={.group=HM_GRP_RoutingKeys, .number= 4}},
+      {.mask=0X20, .key={.group=HM_GRP_RoutingKeys, .number= 5}},
+      {.mask=0X40, .key={.group=HM_GRP_RoutingKeys, .number= 6}},
+      {.mask=0X80, .key={.group=HM_GRP_RoutingKeys, .number= 7}},
+    }
+  },
 
-  {3, 0, .key={.group=HM_GRP_RoutingKeys, .number=16}},
-  {3, 1, .key={.group=HM_GRP_RoutingKeys, .number=17}},
-  {3, 2, .key={.group=HM_GRP_RoutingKeys, .number=18}},
-  {3, 3, .key={.group=HM_GRP_RoutingKeys, .number=19}},
-  {3, 4, .key={.group=HM_GRP_RoutingKeys, .number=20}},
-  {3, 5, .key={.group=HM_GRP_RoutingKeys, .number=21}},
-  {3, 6, .key={.group=HM_GRP_RoutingKeys, .number=22}},
-  {3, 7, .key={.group=HM_GRP_RoutingKeys, .number=23}},
+  { .offset = 2,
+    .bits = {
+      {.mask=0X01, .key={.group=HM_GRP_RoutingKeys, .number= 8}},
+      {.mask=0X02, .key={.group=HM_GRP_RoutingKeys, .number= 9}},
+      {.mask=0X04, .key={.group=HM_GRP_RoutingKeys, .number=10}},
+      {.mask=0X08, .key={.group=HM_GRP_RoutingKeys, .number=11}},
+      {.mask=0X10, .key={.group=HM_GRP_RoutingKeys, .number=12}},
+      {.mask=0X20, .key={.group=HM_GRP_RoutingKeys, .number=13}},
+      {.mask=0X40, .key={.group=HM_GRP_RoutingKeys, .number=14}},
+      {.mask=0X80, .key={.group=HM_GRP_RoutingKeys, .number=15}},
+    }
+  },
 
-  {4, 0, .key={.group=HM_GRP_RoutingKeys, .number=24}},
-  {4, 1, .key={.group=HM_GRP_RoutingKeys, .number=25}},
-  {4, 2, .key={.group=HM_GRP_RoutingKeys, .number=26}},
-  {4, 3, .key={.group=HM_GRP_RoutingKeys, .number=27}},
-  {4, 4, .key={.group=HM_GRP_RoutingKeys, .number=28}},
-  {4, 5, .key={.group=HM_GRP_RoutingKeys, .number=29}},
-  {4, 6, .key={.group=HM_GRP_RoutingKeys, .number=30}},
-  {4, 7, .key={.group=HM_GRP_RoutingKeys, .number=31}},
+  { .offset = 3,
+    .bits = {
+      {.mask=0X01, .key={.group=HM_GRP_RoutingKeys, .number=16}},
+      {.mask=0X02, .key={.group=HM_GRP_RoutingKeys, .number=17}},
+      {.mask=0X04, .key={.group=HM_GRP_RoutingKeys, .number=18}},
+      {.mask=0X08, .key={.group=HM_GRP_RoutingKeys, .number=19}},
+      {.mask=0X10, .key={.group=HM_GRP_RoutingKeys, .number=20}},
+      {.mask=0X20, .key={.group=HM_GRP_RoutingKeys, .number=21}},
+      {.mask=0X40, .key={.group=HM_GRP_RoutingKeys, .number=22}},
+      {.mask=0X80, .key={.group=HM_GRP_RoutingKeys, .number=23}},
+    }
+  },
 
-  {5, 0, .key={.group=HM_GRP_RoutingKeys, .number=32}},
-  {5, 1, .key={.group=HM_GRP_RoutingKeys, .number=33}},
-  {5, 2, .key={.group=HM_GRP_RoutingKeys, .number=34}},
-  {5, 3, .key={.group=HM_GRP_RoutingKeys, .number=35}},
-  {5, 4, .key={.group=HM_GRP_RoutingKeys, .number=36}},
-  {5, 5, .key={.group=HM_GRP_RoutingKeys, .number=37}},
-  {5, 6, .key={.group=HM_GRP_RoutingKeys, .number=38}},
-  {5, 7, .key={.group=HM_GRP_RoutingKeys, .number=39}},
+  { .offset = 4,
+    .bits = {
+      {.mask=0X01, .key={.group=HM_GRP_RoutingKeys, .number=24}},
+      {.mask=0X02, .key={.group=HM_GRP_RoutingKeys, .number=25}},
+      {.mask=0X04, .key={.group=HM_GRP_RoutingKeys, .number=26}},
+      {.mask=0X08, .key={.group=HM_GRP_RoutingKeys, .number=27}},
+      {.mask=0X10, .key={.group=HM_GRP_RoutingKeys, .number=28}},
+      {.mask=0X20, .key={.group=HM_GRP_RoutingKeys, .number=29}},
+      {.mask=0X40, .key={.group=HM_GRP_RoutingKeys, .number=30}},
+      {.mask=0X80, .key={.group=HM_GRP_RoutingKeys, .number=31}},
+    }
+  },
 
-  {7, 0, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F1}},
-  {7, 2, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F2}},
-  {7, 3, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_LeftScrollUp}},
-  {7, 4, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F3}},
-  {7, 6, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F4}},
-  {7, 7, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_LeftScrollDown}},
+  { .offset = 5,
+    .bits = {
+      {.mask=0X01, .key={.group=HM_GRP_RoutingKeys, .number=32}},
+      {.mask=0X02, .key={.group=HM_GRP_RoutingKeys, .number=33}},
+      {.mask=0X04, .key={.group=HM_GRP_RoutingKeys, .number=34}},
+      {.mask=0X08, .key={.group=HM_GRP_RoutingKeys, .number=35}},
+      {.mask=0X10, .key={.group=HM_GRP_RoutingKeys, .number=36}},
+      {.mask=0X20, .key={.group=HM_GRP_RoutingKeys, .number=37}},
+      {.mask=0X40, .key={.group=HM_GRP_RoutingKeys, .number=38}},
+      {.mask=0X80, .key={.group=HM_GRP_RoutingKeys, .number=39}},
+    }
+  },
 
-  {8, 0, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_Control}},
-  {8, 1, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_Alt}},
+  { .offset = 7,
+    .bits = {
+      {.mask=0X01, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F1}},
+      {.mask=0X04, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F2}},
+      {.mask=0X08, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_LeftScrollUp}},
+      {.mask=0X10, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F3}},
+      {.mask=0X40, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F4}},
+      {.mask=0X80, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_LeftScrollDown}},
+    }
+  },
 
-  {10, 0, .key={.group=HM_GRP_NavigationKeys, HM_KEY_Space}},
-}; static const unsigned int hidKeyCount = ARRAY_COUNT(hidKeyTable);
+  { .offset = 8,
+    .bits = {
+      {.mask=0X01, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_Control}},
+      {.mask=0X02, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_Alt}},
+    }
+  },
+
+  { .offset = 10,
+    .bits = {
+      {.mask=0X01, .key={.group=HM_GRP_NavigationKeys, HM_KEY_Space}},
+    }
+  },
+};
 
 static int
 readCommands_HID (BrailleDisplay *brl) {
   while (1) {
-    unsigned char report[22];
-    ssize_t length = gioReadData(brl->gioEndpoint, report, sizeof(report), 1);
+    const size_t size = 22;
+    unsigned char report[size];
+
+    const ssize_t length = gioReadData(brl->gioEndpoint, report, size, 1);
     if (!length) return EOF;
     if (length == -1) return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
     logInputPacket(report, length);
 
-    KeyValue pressedKeyStack[hidKeyCount];
+    if (length < size) {
+      memset(&report[length], 0, (size - length));
+    }
+
+    KeyValue pressedKeyStack[size * 8];
     unsigned char pressedKeyCount = 0;
 
     {
-      const HidKeyDefinition *hkd = hidKeyTable;
-      const HidKeyDefinition *const hkdEnd = hkd + hidKeyCount;
+      const HidInputByte *byte = hidInputBytes;
+      const HidInputByte *byteEnd = byte + ARRAY_COUNT(hidInputBytes);
 
-      while (hkd < hkdEnd) {
-        if (report[hkd->byte] & (1 << hkd->bit)) {
-          enqueueKeyEvent(brl, hkd->key.group, hkd->key.number, 1);
-          pressedKeyStack[pressedKeyCount++] = hkd->key;
+      while (byte < byteEnd) {
+        unsigned char *bits = report + byte->offset;
+
+        if (*bits) {
+          const HidInputBit *bit = byte->bits;
+          const HidInputBit *bitEnd = bit + ARRAY_COUNT(byte->bits);
+
+          while (bit < bitEnd) {
+            if (*bits & bit->mask) {
+              enqueueKeyEvent(brl, bit->key.group, bit->key.number, 1);
+              pressedKeyStack[pressedKeyCount++] = bit->key;
+              if (!(*bits &= ~bit->mask)) break;
+            }
+
+            bit += 1;
+          }
         }
 
-        hkd += 1;
+        byte += 1;
       }
     }
 
