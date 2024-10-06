@@ -563,7 +563,7 @@ getDefaultCellCount_BrailleSense (BrailleDisplay *brl, unsigned int *count) {
   return 1;
 }
 
-static const ProtocolEntry brailleSenseProtocol = {
+static const ProtocolEntry protocol_BrailleSense = {
   .modelName = "Braille Sense",
   .keyTable = &KEY_TABLE_DEFINITION(pan),
   .testIdentities = testBrailleSenseIdentities,
@@ -571,7 +571,7 @@ static const ProtocolEntry brailleSenseProtocol = {
   .io = &serialOperations
 };
 
-static const ProtocolEntry brailleSense6Protocol = {
+static const ProtocolEntry protocol_BrailleSense6 = {
   .modelName = "BrailleSense 6",
   .resourceNamePrefix = "H632B",
   .keyTable = &KEY_TABLE_DEFINITION(scroll),
@@ -586,7 +586,7 @@ getDefaultCellCount_SyncBraille (BrailleDisplay *brl, unsigned int *count) {
   return 0;
 }
 
-static const ProtocolEntry syncBrailleProtocol = {
+static const ProtocolEntry protocol_SyncBraille = {
   .modelName = "SyncBraille",
   .keyTable = &KEY_TABLE_DEFINITION(sync),
   .getDefaultCellCount = getDefaultCellCount_SyncBraille,
@@ -600,7 +600,7 @@ getDefaultCellCount_BrailleEdge (BrailleDisplay *brl, unsigned int *count) {
   return 1;
 }
 
-static const ProtocolEntry brailleEdgeProtocol = {
+static const ProtocolEntry protocol_BrailleEdge = {
   .modelName = "Braille Edge",
   .resourceNamePrefix = "BrailleEDGE",
   .keyTable = &KEY_TABLE_DEFINITION(edge),
@@ -616,14 +616,14 @@ getDefaultCellCount_eMotion (BrailleDisplay *brl, unsigned int *count) {
   return 1;
 }
 
-static const ProtocolEntry eMotionProtocol = {
+static const ProtocolEntry protocol_eMotion = {
   .modelName = "eMotion (legacy)",
   .keyTable = &KEY_TABLE_DEFINITION(emotion),
   .getDefaultCellCount = getDefaultCellCount_eMotion,
   .io = &serialOperations
 };
 
-static const ProtocolEntry eMotionHIDProtocol = {
+static const ProtocolEntry protocol_eMotionHID = {
   .modelName = "eMotion (HID)",
   .keyTable = &KEY_TABLE_DEFINITION(emotion),
   .getDefaultCellCount = getDefaultCellCount_eMotion,
@@ -632,10 +632,10 @@ static const ProtocolEntry eMotionHIDProtocol = {
 
 
 static const ProtocolEntry *protocolTable[] = {
-  &brailleSenseProtocol,
-  &syncBrailleProtocol,
-  &brailleEdgeProtocol,
-  &brailleSense6Protocol,
+  &protocol_BrailleSense,
+  &protocol_SyncBraille,
+  &protocol_BrailleEdge,
+  &protocol_BrailleSense6,
   NULL
 };
 
@@ -720,7 +720,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
-      .data=&brailleSenseProtocol
+      .data=&protocol_BrailleSense
     },
 
     { /* Braille Sense (USB 2.0) */
@@ -730,7 +730,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=2,
       .verifyInterface=1,
       .disableAutosuspend=1,
-      .data=&brailleSenseProtocol
+      .data=&protocol_BrailleSense
     },
 
     { /* Braille Sense U2 (USB 2.0) */
@@ -740,7 +740,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=2,
       .verifyInterface=1,
       .disableAutosuspend=1,
-      .data=&brailleSenseProtocol
+      .data=&protocol_BrailleSense
     },
 
     { /* BrailleSense 6 (USB 2.1) */
@@ -751,7 +751,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .verifyInterface=1,
       .resetDevice=1,
       .disableAutosuspend=1,
-      .data=&brailleSense6Protocol
+      .data=&protocol_BrailleSense6
     },
 
     { /* Sync Braille */
@@ -759,7 +759,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .manufacturers = usbManufacturers_0403_6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .data=&syncBrailleProtocol
+      .data=&protocol_SyncBraille
     },
 
     { /* Braille Edge and QBrailleXL */
@@ -767,7 +767,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1,
-      .data=&brailleEdgeProtocol
+      .data=&protocol_BrailleEdge
     },
 
     { /* eMotion (legacy) */
@@ -776,7 +776,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=2, .outputEndpoint=2,
       .serial = &serialParameters,
       .disableAutosuspend=1,
-      .data=&eMotionProtocol
+      .data=&protocol_eMotion
     },
 
     { /* eMotion (HID) */
@@ -784,7 +784,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .configuration=1, .interface=2, .alternative=0,
       .inputEndpoint=4, .outputEndpoint=3,
       .disableAutosuspend=1,
-      .data=&eMotionHIDProtocol
+      .data=&protocol_eMotionHID
     },
   END_USB_CHANNEL_DEFINITIONS
 
@@ -792,7 +792,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
-  descriptor.serial.options.applicationData = &brailleSenseProtocol;
+  descriptor.serial.options.applicationData = &protocol_BrailleSense;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
 
@@ -814,7 +814,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (connectResource(brl, device)) {
       if (!(brl->data->protocol = gioGetApplicationData(brl->gioEndpoint))) {
         char *name = gioGetResourceName(brl->gioEndpoint);
-        brl->data->protocol = &brailleSenseProtocol;
+        brl->data->protocol = &protocol_BrailleSense;
 
         if (name) {
           const ProtocolEntry *const *protocolAddress = protocolTable;
