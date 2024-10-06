@@ -251,12 +251,17 @@ static const IdentityEntry edgeIdentity = {
 };
 
 typedef struct {
+  int (*readCommands) (BrailleDisplay *brl);
+  int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, size_t count);
+} InputOutputOperations;
+
+typedef struct {
   const char *modelName;
   const char *resourceNamePrefix;
   const KeyTableDefinition *keyTable;
   const KeyTableDefinition * (*testIdentities) (BrailleDisplay *brl);
   int (*getDefaultCellCount) (BrailleDisplay *brl, unsigned int *count);
-  unsigned char isHID:1;
+  const InputOutputOperations *io;
 } ProtocolEntry;
 
 struct BrailleDataStruct {
@@ -485,6 +490,74 @@ writePacket (
 
 
 static int
+readCommands_serial (BrailleDisplay *brl) {
+  InputPacket packet;
+  int length;
+
+  while ((length = readPacket(brl, &packet))) {
+    switch (packet.data.type) {
+      case IPT_CURSOR: {
+        unsigned char key = packet.data.data;
+
+        enqueueKey(brl, HM_GRP_RoutingKeys, key);
+        continue;
+      }
+
+      case IPT_KEYS: {
+        KeyNumberSet bits = (packet.data.reserved[0] << 0X00)
+                          | (packet.data.reserved[1] << 0X08)
+                          | (packet.data.reserved[2] << 0X10)
+                          | (packet.data.reserved[3] << 0X18);
+
+        enqueueKeys(brl, bits, HM_GRP_NavigationKeys, 0);
+        continue;
+      }
+
+      default:
+        break;
+    }
+
+    logUnexpectedPacket(&packet, length);
+  }
+
+  return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
+}
+
+static int
+writeCells_serial (BrailleDisplay *brl, const unsigned char *cells, size_t count) {
+  return writePacket(brl, 0XFC, 0X01, cells, count, NULL, 0);
+}
+
+static const InputOutputOperations serialOperations = {
+  .readCommands = readCommands_serial,
+  .writeCells = writeCells_serial,
+};
+
+
+static int
+readCommands_HID (BrailleDisplay *brl) {
+  while (1) {
+    unsigned char buffer[22];
+    ssize_t length = gioReadData(brl->gioEndpoint, buffer, sizeof(buffer), 1);
+    if (!length) return EOF;
+    if (length == -1) return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
+
+    logInputPacket(buffer, length);
+  }
+}
+
+static int
+writeCells_HID (BrailleDisplay *brl, const unsigned char *cells, size_t count) {
+  return writeBytes(brl, cells, count);
+}
+
+static const InputOutputOperations hidOperations = {
+  .readCommands = readCommands_HID,
+  .writeCells = writeCells_HID,
+};
+
+
+static int
 getDefaultCellCount_BrailleSense (BrailleDisplay *brl, unsigned int *count) {
   *count = 32;
   return 1;
@@ -494,7 +567,8 @@ static const ProtocolEntry brailleSenseProtocol = {
   .modelName = "Braille Sense",
   .keyTable = &KEY_TABLE_DEFINITION(pan),
   .testIdentities = testBrailleSenseIdentities,
-  .getDefaultCellCount = getDefaultCellCount_BrailleSense
+  .getDefaultCellCount = getDefaultCellCount_BrailleSense,
+  .io = &serialOperations
 };
 
 static const ProtocolEntry brailleSense6Protocol = {
@@ -502,7 +576,8 @@ static const ProtocolEntry brailleSense6Protocol = {
   .resourceNamePrefix = "H632B",
   .keyTable = &KEY_TABLE_DEFINITION(scroll),
   .testIdentities = testBrailleSense6Identities,
-  .getDefaultCellCount = getDefaultCellCount_BrailleSense
+  .getDefaultCellCount = getDefaultCellCount_BrailleSense,
+  .io = &serialOperations
 };
 
 
@@ -514,7 +589,8 @@ getDefaultCellCount_SyncBraille (BrailleDisplay *brl, unsigned int *count) {
 static const ProtocolEntry syncBrailleProtocol = {
   .modelName = "SyncBraille",
   .keyTable = &KEY_TABLE_DEFINITION(sync),
-  .getDefaultCellCount = getDefaultCellCount_SyncBraille
+  .getDefaultCellCount = getDefaultCellCount_SyncBraille,
+  .io = &serialOperations
 };
 
 
@@ -529,7 +605,8 @@ static const ProtocolEntry brailleEdgeProtocol = {
   .resourceNamePrefix = "BrailleEDGE",
   .keyTable = &KEY_TABLE_DEFINITION(edge),
   .testIdentities = testBrailleEdgeIdentities,
-  .getDefaultCellCount = getDefaultCellCount_BrailleEdge
+  .getDefaultCellCount = getDefaultCellCount_BrailleEdge,
+  .io = &serialOperations
 };
 
 
@@ -542,14 +619,15 @@ getDefaultCellCount_eMotion (BrailleDisplay *brl, unsigned int *count) {
 static const ProtocolEntry eMotionProtocol = {
   .modelName = "eMotion (legacy)",
   .keyTable = &KEY_TABLE_DEFINITION(emotion),
-  .getDefaultCellCount = getDefaultCellCount_eMotion
+  .getDefaultCellCount = getDefaultCellCount_eMotion,
+  .io = &serialOperations
 };
 
 static const ProtocolEntry eMotionHIDProtocol = {
   .modelName = "eMotion (HID)",
-  .isHID = 1,
   .keyTable = &KEY_TABLE_DEFINITION(emotion),
-  .getDefaultCellCount = getDefaultCellCount_eMotion
+  .getDefaultCellCount = getDefaultCellCount_eMotion,
+  .io = &hidOperations
 };
 
 
@@ -568,11 +646,7 @@ writeCells (BrailleDisplay *brl) {
   unsigned char cells[count];
   translateOutputCells(cells, brl->data->previousCells, count);
 
-  if (brl->data->protocol->isHID) {
-    return gioWriteData(brl->gioEndpoint, cells, count) != -1;
-  } else {
-    return writePacket(brl, 0XFC, 0X01, cells, count, NULL, 0);
-  }
+  return brl->data->protocol->io->writeCells(brl, cells, count);
 }
 
 static int
@@ -813,51 +887,5 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, KeyTableCommandContext context) {
-  if (brl->data->protocol->isHID) {
-    while (1) {
-      unsigned char buffer[22];
-      ssize_t length = gioReadData(brl->gioEndpoint, buffer, sizeof(buffer), 1);
-      if (!length) return EOF;
-
-      if (length == -1) {
-        if (errno == EAGAIN) return EOF;
-        break;
-      }
-
-      logUnexpectedPacket(buffer, length);
-    }
-  } else {
-    InputPacket packet;
-    int length;
-
-    while ((length = readPacket(brl, &packet))) {
-      switch (packet.data.type) {
-        case IPT_CURSOR: {
-          unsigned char key = packet.data.data;
-
-          enqueueKey(brl, HM_GRP_RoutingKeys, key);
-          continue;
-        }
-
-        case IPT_KEYS: {
-          KeyNumberSet bits = (packet.data.reserved[0] << 0X00)
-                            | (packet.data.reserved[1] << 0X08)
-                            | (packet.data.reserved[2] << 0X10)
-                            | (packet.data.reserved[3] << 0X18);
-
-          enqueueKeys(brl, bits, HM_GRP_NavigationKeys, 0);
-          continue;
-        }
-
-        default:
-          break;
-      }
-
-      logUnexpectedPacket(&packet, length);
-    }
-
-    if (errno == EAGAIN) return EOF;
-  }
-
-  return BRL_CMD_RESTARTBRL;
+  return brl->data->protocol->io->readCommands(brl);
 }
