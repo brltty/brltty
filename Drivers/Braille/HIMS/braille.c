@@ -389,7 +389,7 @@ testIdentities (BrailleDisplay *brl, const IdentityEntry *const *identities) {
 }
 
 static const KeyTableDefinition *
-testBrailleSenseIdentities (BrailleDisplay *brl) {
+testIdentities_BrailleSense (BrailleDisplay *brl) {
   static const IdentityEntry *const identities[] = {
     &qwerty2Identity,
     &qwerty1Identity,
@@ -403,7 +403,7 @@ testBrailleSenseIdentities (BrailleDisplay *brl) {
 }
 
 static const KeyTableDefinition *
-testBrailleSense6Identities (BrailleDisplay *brl) {
+testIdentities_BrailleSense6 (BrailleDisplay *brl) {
   static const IdentityEntry *const identities[] = {
     &assumeScrollIdentity,
     NULL
@@ -413,7 +413,7 @@ testBrailleSense6Identities (BrailleDisplay *brl) {
 }
 
 static const KeyTableDefinition *
-testBrailleEdgeIdentities (BrailleDisplay *brl) {
+testIdentities_BrailleEdge (BrailleDisplay *brl) {
   static const IdentityEntry *const identities[] = {
     &edgeIdentity,
     NULL
@@ -761,7 +761,7 @@ getDefaultCellCount_BrailleSense (BrailleDisplay *brl, unsigned int *count) {
 static const ProtocolEntry protocol_BrailleSense = {
   .modelName = "Braille Sense",
   .keyTable = &KEY_TABLE_DEFINITION(pan),
-  .testIdentities = testBrailleSenseIdentities,
+  .testIdentities = testIdentities_BrailleSense,
   .getDefaultCellCount = getDefaultCellCount_BrailleSense,
   .io = &serialOperations
 };
@@ -770,7 +770,7 @@ static const ProtocolEntry protocol_BrailleSense6 = {
   .modelName = "BrailleSense 6",
   .resourceNamePrefix = "H632B",
   .keyTable = &KEY_TABLE_DEFINITION(scroll),
-  .testIdentities = testBrailleSense6Identities,
+  .testIdentities = testIdentities_BrailleSense6,
   .getDefaultCellCount = getDefaultCellCount_BrailleSense,
   .io = &serialOperations
 };
@@ -799,7 +799,7 @@ static const ProtocolEntry protocol_BrailleEdge = {
   .modelName = "Braille Edge",
   .resourceNamePrefix = "BrailleEDGE",
   .keyTable = &KEY_TABLE_DEFINITION(edge),
-  .testIdentities = testBrailleEdgeIdentities,
+  .testIdentities = testIdentities_BrailleEdge,
   .getDefaultCellCount = getDefaultCellCount_BrailleEdge,
   .io = &serialOperations
 };
