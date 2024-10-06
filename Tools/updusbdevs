@@ -707,7 +707,7 @@ set genericDevices [makeGenericDeviceTable {
    }
 
    {  0X1A86 0X55D3
-      ""
+      "QinHeng Electronics"
       "USB Single Serial"
    }
 

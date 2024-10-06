@@ -337,6 +337,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 
 ; Device: 1A86:55D3
 ; Generic Identifier
+; Vendor: QinHeng Electronics
 ; Product: USB Single Serial
 "LibUSB-Win32: HIMS [eMotion (legacy)]"=LIBUSB_DEV, USB\VID_1A86&PID_55D3
 
@@ -746,6 +747,7 @@ ServiceBinary  = %12%\libusb0_x64.sys
 
 ; Device: 1A86:55D3
 ; Generic Identifier
+; Vendor: QinHeng Electronics
 ; Product: USB Single Serial
 "LibUSB-Win32: HIMS [eMotion (legacy)]"=LIBUSB_DEV, USB\VID_1A86&PID_55D3
 

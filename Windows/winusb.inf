@@ -247,6 +247,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 1A86:55D3
 ; Generic Identifier
+; Vendor: QinHeng Electronics
 ; Product: USB Single Serial
 "winusb: HIMS [eMotion (legacy)]"=USB_Install, USB\VID_1A86&PID_55D3
 
@@ -656,6 +657,7 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 1A86:55D3
 ; Generic Identifier
+; Vendor: QinHeng Electronics
 ; Product: USB Single Serial
 "winusb: HIMS [eMotion (legacy)]"=USB_Install, USB\VID_1A86&PID_55D3
 

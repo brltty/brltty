@@ -262,6 +262,7 @@ HKR,,Icon,,-20
 
 ; Device: 1A86:55D3
 ; Generic Identifier
+; Vendor: QinHeng Electronics
 ; Product: USB Single Serial
 "LibUSB-1.0: HIMS [eMotion (legacy)]"=LIBUSB_DEV, USB\VID_1A86&PID_55D3
 
@@ -671,6 +672,7 @@ HKR,,Icon,,-20
 
 ; Device: 1A86:55D3
 ; Generic Identifier
+; Vendor: QinHeng Electronics
 ; Product: USB Single Serial
 "LibUSB-1.0: HIMS [eMotion (legacy)]"=LIBUSB_DEV, USB\VID_1A86&PID_55D3
 

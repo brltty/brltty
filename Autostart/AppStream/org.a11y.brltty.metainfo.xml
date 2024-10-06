@@ -342,6 +342,7 @@
 
     <!-- Device: 1A86:55D3 -->
     <!-- Generic Identifier -->
+    <!-- Vendor: QinHeng Electronics -->
     <!-- Product: USB Single Serial -->
     <!-- HIMS [eMotion (legacy)] -->
     <modalias>usb:v1A86p55D3*</modalias>

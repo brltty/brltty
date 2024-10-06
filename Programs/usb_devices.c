@@ -331,6 +331,7 @@ USB_DEVICE_ENTRY(0X16C0, 0X05E1, "cn"),
 
 // Device: 1A86:55D3
 // Generic Identifier
+// Vendor: QinHeng Electronics
 // Product: USB Single Serial
 // HIMS [eMotion (legacy)]
 USB_DEVICE_ENTRY(0X1A86, 0X55D3, "hm"),
