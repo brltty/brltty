@@ -92,8 +92,8 @@ BEGIN_KEY_NAME_TABLE(rp)
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(emotion)
-  KEY_NAME_ENTRY(HM_KEY_EM_CONTROL, "Control"),
-  KEY_NAME_ENTRY(HM_KEY_EM_ALT, "Alt"),
+  KEY_NAME_ENTRY(HM_KEY_EM_Control, "Control"),
+  KEY_NAME_ENTRY(HM_KEY_EM_Alt, "Alt"),
 
   KEY_NAME_ENTRY(HM_KEY_EM_F1, "F1"),
   KEY_NAME_ENTRY(HM_KEY_EM_F2, "F2"),
@@ -534,15 +534,110 @@ static const InputOutputOperations serialOperations = {
 };
 
 
+typedef struct {
+  unsigned char byte;
+  unsigned char bit;
+  KeyValue key;
+} HidKeyDefinition;
+
+static const HidKeyDefinition hidKeyTable[] = {
+  {0, 0, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot1}},
+  {0, 1, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot2}},
+  {0, 2, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot3}},
+  {0, 3, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot4}},
+  {0, 4, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot5}},
+  {0, 5, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot6}},
+  {0, 6, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot7}},
+  {0, 7, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_Dot8}},
+
+  {1, 0, .key={.group=HM_GRP_RoutingKeys, .number= 0}},
+  {1, 1, .key={.group=HM_GRP_RoutingKeys, .number= 1}},
+  {1, 2, .key={.group=HM_GRP_RoutingKeys, .number= 2}},
+  {1, 3, .key={.group=HM_GRP_RoutingKeys, .number= 3}},
+  {1, 4, .key={.group=HM_GRP_RoutingKeys, .number= 4}},
+  {1, 5, .key={.group=HM_GRP_RoutingKeys, .number= 5}},
+  {1, 6, .key={.group=HM_GRP_RoutingKeys, .number= 6}},
+  {1, 7, .key={.group=HM_GRP_RoutingKeys, .number= 7}},
+
+  {2, 0, .key={.group=HM_GRP_RoutingKeys, .number= 8}},
+  {2, 1, .key={.group=HM_GRP_RoutingKeys, .number= 9}},
+  {2, 2, .key={.group=HM_GRP_RoutingKeys, .number=10}},
+  {2, 3, .key={.group=HM_GRP_RoutingKeys, .number=11}},
+  {2, 4, .key={.group=HM_GRP_RoutingKeys, .number=12}},
+  {2, 5, .key={.group=HM_GRP_RoutingKeys, .number=13}},
+  {2, 6, .key={.group=HM_GRP_RoutingKeys, .number=14}},
+  {2, 7, .key={.group=HM_GRP_RoutingKeys, .number=15}},
+
+  {3, 0, .key={.group=HM_GRP_RoutingKeys, .number=16}},
+  {3, 1, .key={.group=HM_GRP_RoutingKeys, .number=17}},
+  {3, 2, .key={.group=HM_GRP_RoutingKeys, .number=18}},
+  {3, 3, .key={.group=HM_GRP_RoutingKeys, .number=19}},
+  {3, 4, .key={.group=HM_GRP_RoutingKeys, .number=20}},
+  {3, 5, .key={.group=HM_GRP_RoutingKeys, .number=21}},
+  {3, 6, .key={.group=HM_GRP_RoutingKeys, .number=22}},
+  {3, 7, .key={.group=HM_GRP_RoutingKeys, .number=23}},
+
+  {4, 0, .key={.group=HM_GRP_RoutingKeys, .number=24}},
+  {4, 1, .key={.group=HM_GRP_RoutingKeys, .number=25}},
+  {4, 2, .key={.group=HM_GRP_RoutingKeys, .number=26}},
+  {4, 3, .key={.group=HM_GRP_RoutingKeys, .number=27}},
+  {4, 4, .key={.group=HM_GRP_RoutingKeys, .number=28}},
+  {4, 5, .key={.group=HM_GRP_RoutingKeys, .number=29}},
+  {4, 6, .key={.group=HM_GRP_RoutingKeys, .number=30}},
+  {4, 7, .key={.group=HM_GRP_RoutingKeys, .number=31}},
+
+  {5, 0, .key={.group=HM_GRP_RoutingKeys, .number=32}},
+  {5, 1, .key={.group=HM_GRP_RoutingKeys, .number=33}},
+  {5, 2, .key={.group=HM_GRP_RoutingKeys, .number=34}},
+  {5, 3, .key={.group=HM_GRP_RoutingKeys, .number=35}},
+  {5, 4, .key={.group=HM_GRP_RoutingKeys, .number=36}},
+  {5, 5, .key={.group=HM_GRP_RoutingKeys, .number=37}},
+  {5, 6, .key={.group=HM_GRP_RoutingKeys, .number=38}},
+  {5, 7, .key={.group=HM_GRP_RoutingKeys, .number=39}},
+
+  {7, 0, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F1}},
+  {7, 2, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F2}},
+  {7, 3, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_LeftScrollUp}},
+  {7, 4, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F3}},
+  {7, 6, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F4}},
+  {7, 7, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_LeftScrollDown}},
+
+  {8, 0, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_Control}},
+  {8, 1, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_Alt}},
+
+  {10, 0, .key={.group=HM_GRP_NavigationKeys, HM_KEY_Space}},
+}; static const unsigned int hidKeyCount = ARRAY_COUNT(hidKeyTable);
+
 static int
 readCommands_HID (BrailleDisplay *brl) {
   while (1) {
-    unsigned char buffer[22];
-    ssize_t length = gioReadData(brl->gioEndpoint, buffer, sizeof(buffer), 1);
+    unsigned char report[22];
+    ssize_t length = gioReadData(brl->gioEndpoint, report, sizeof(report), 1);
     if (!length) return EOF;
     if (length == -1) return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
+    logInputPacket(report, length);
 
-    logInputPacket(buffer, length);
+    KeyValue pressedKeyStack[hidKeyCount];
+    unsigned char pressedKeyCount = 0;
+
+    {
+      const HidKeyDefinition *hkd = hidKeyTable;
+      const HidKeyDefinition *const hkdEnd = hkd + hidKeyCount;
+
+      while (hkd < hkdEnd) {
+        if (report[hkd->byte] & (1 << hkd->bit)) {
+          enqueueKeyEvent(brl, hkd->key.group, hkd->key.number, 1);
+          pressedKeyStack[pressedKeyCount++] = hkd->key;
+        }
+
+        hkd += 1;
+      }
+    }
+
+    while (pressedKeyCount) {
+      KeyValue key = pressedKeyStack[--pressedKeyCount];
+      enqueueKeyEvent(brl, key.group, key.number, 0);
+    }
   }
 }
 
