@@ -251,6 +251,7 @@ static const IdentityEntry edgeIdentity = {
 };
 
 typedef struct {
+  int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
   int (*readCommands) (BrailleDisplay *brl);
   int (*writeCells) (BrailleDisplay *brl, const unsigned char *cells, size_t count);
 } InputOutputOperations;
@@ -490,6 +491,38 @@ writePacket (
 
 
 static int
+requestCellCount_serial (BrailleDisplay *brl) {
+  static const unsigned char data[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  };
+
+  return writePacket(brl, 0XFB, 0X01, data, sizeof(data), NULL, 0);
+}
+
+static BrailleResponseResult
+verifyCellCountResponse_serial (BrailleDisplay *brl, const void *packet, size_t size) {
+  const InputPacket *response = packet;
+
+  return (response->data.type == IPT_CELLS)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
+}
+
+static int
+getCellCount_serial (BrailleDisplay *brl, unsigned int *count) {
+  InputPacket response;
+
+  int probed = probeBrailleDisplay(
+    brl, 2, NULL, 1000, requestCellCount_serial,
+    readBytes, &response, sizeof(response.bytes),
+    verifyCellCountResponse_serial
+  );
+
+  if (!probed) return 0;
+  *count = response.data.data;
+  return 1;
+}
+
+static int
 readCommands_serial (BrailleDisplay *brl) {
   InputPacket packet;
   int length;
@@ -529,10 +562,16 @@ writeCells_serial (BrailleDisplay *brl, const unsigned char *cells, size_t count
 }
 
 static const InputOutputOperations serialOperations = {
+  .getCellCount = getCellCount_serial,
   .readCommands = readCommands_serial,
   .writeCells = writeCells_serial,
 };
 
+
+static int
+getCellCount_HID (BrailleDisplay *brl, unsigned int *count) {
+  return 0;
+}
 
 typedef struct {
   unsigned char mask;
@@ -678,6 +717,8 @@ readCommands_HID (BrailleDisplay *brl) {
           const HidInputBit *bitEnd = bit + ARRAY_COUNT(byte->bits);
 
           while (bit < bitEnd) {
+            if (!bit->mask) break;
+
             if (*bits & bit->mask) {
               enqueueKeyEvent(brl, bit->key.group, bit->key.number, 1);
               pressedKeyStack[pressedKeyCount++] = bit->key;
@@ -705,6 +746,7 @@ writeCells_HID (BrailleDisplay *brl, const unsigned char *cells, size_t count) {
 }
 
 static const InputOutputOperations hidOperations = {
+  .getCellCount = getCellCount_HID,
   .readCommands = readCommands_HID,
   .writeCells = writeCells_HID,
 };
@@ -809,35 +851,17 @@ clearCells (BrailleDisplay *brl) {
 }
 
 static int
-writeCellCountRequest (BrailleDisplay *brl) {
-  static const unsigned char data[] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-  };
-
-  return writePacket(brl, 0XFB, 0X01, data, sizeof(data), NULL, 0);
-}
-
-static BrailleResponseResult
-isCellCountResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  const InputPacket *response = packet;
-
-  return (response->data.type == IPT_CELLS)? BRL_RSP_DONE: BRL_RSP_UNEXPECTED;
-}
-
-static int
 getCellCount (BrailleDisplay *brl, unsigned int *count) {
-  InputPacket response;
-
-  if (probeBrailleDisplay(brl, 2, NULL, 1000,
-                          writeCellCountRequest,
-                          readBytes, &response, sizeof(response.bytes),
-                          isCellCountResponse)) {
-    *count = response.data.data;
-    return 1;
+  if (brl->data->protocol->io->getCellCount(brl, count)) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "explicit cell count: %u", *count);
+  } else if (brl->data->protocol->getDefaultCellCount(brl, count)) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "default cell count: %u", *count);
+  } else {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "unknown cell count");
+    return 0;
   }
 
-  return brl->data->protocol->getDefaultCellCount(brl, count);
+  return 1;
 }
 
 static void
