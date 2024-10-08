@@ -728,11 +728,13 @@ readCommands_HID (BrailleDisplay *brl) {
 
             if (newBit) {
               enqueueKeyEvent(brl, key.group, key.number, 1);
-              if ((*oldByte |= newBit) == *newByte) break;
+              *oldByte |= newBit;
             } else {
               enqueueKeyEvent(brl, key.group, key.number, 0);
-              if ((*oldByte &= ~oldBit) == *newByte) break;
+              *oldByte &= ~oldBit;
             }
+
+            if (*oldByte == *newByte) break;
           }
 
           bit += 1;
