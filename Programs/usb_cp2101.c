@@ -65,13 +65,13 @@ usbSetSimpleProperty_CP2101 (UsbDevice *device, uint8_t request, uint16_t value)
 static int
 usbVerifyBaudRate_CP2101 (UsbDevice *device, USB_CP2101_BaudRate expected) {
   USB_CP2101_BaudRate actual;
-  ssize_t result;
+  size_t result;
 
   logMessage(LOG_CATEGORY(SERIAL_IO), "verifying CP2101 baud rate");
   result = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetBaudRate,
                                  &actual, sizeof(actual));
 
-  if (result == -1) {
+  if (!result) {
     logMessage(LOG_WARNING, "unable to get CP2101 baud rate: %s", strerror(errno));
   } else if (result != sizeof(actual)) {
     logMessage(LOG_WARNING, "unexpected CP2101 baud rate size: %d", (int)result);
@@ -90,13 +90,14 @@ usbVerifyBaudRate_CP2101 (UsbDevice *device, USB_CP2101_BaudRate expected) {
 static int
 usbVerifyBaudDivisor_CP2101 (UsbDevice *device, USB_CP2101_BaudDivisor expected) {
   USB_CP2101_BaudDivisor actual;
-  ssize_t result;
+  size_t result;
 
   logMessage(LOG_CATEGORY(SERIAL_IO), "verifying CP2101 baud divisor");
   result = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetBaudDivisor,
                                  &actual, sizeof(actual));
 
-  if (result == -1) {
+  if (!result) {
+    if (errno == EPIPE) return 1;
     logMessage(LOG_WARNING, "unable to get CP2101 baud divisor: %s", strerror(errno));
   } else if (result != sizeof(actual)) {
     logMessage(LOG_WARNING, "unexpected CP2101 baud divisor size: %d", (int)result);
@@ -183,13 +184,13 @@ usbSetRtsState_CP2101 (UsbDevice *device, int state) {
 static int
 usbVerifyFlowControl_CP2101 (UsbDevice *device, const USB_CP2101_FlowControl *expected, size_t size) {
   USB_CP2101_FlowControl actual;
-  ssize_t result;
+  size_t result;
 
   logMessage(LOG_CATEGORY(SERIAL_IO), "verifying CP2101 flow control");
   result = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetFlowControl,
                                  &actual, sizeof(actual));
 
-  if (result == -1) {
+  if (!result) {
     logMessage(LOG_WARNING, "unable to get CP2101 flow control: %s", strerror(errno));
   } else if (result != size) {
     logMessage(LOG_WARNING, "unexpected CP2101 flow control size: %d", (int)result);
@@ -284,13 +285,13 @@ usbSetFlowControl_CP2101 (UsbDevice *device, SerialFlowControl flow) {
 static int
 usbVerifyLineControl_CP2101 (UsbDevice *device, USB_CP2101_LineControl expected) {
   USB_CP2101_LineControl actual;
-  ssize_t result;
+  size_t result;
 
   logMessage(LOG_CATEGORY(SERIAL_IO), "verifying CP2101 line control");
   result = usbGetProperty_CP2101(device, USB_CP2101_CTL_GetLineControl,
                                  &actual, sizeof(actual));
 
-  if (result == -1) {
+  if (!result) {
     logMessage(LOG_WARNING, "unable to get CP2101 line control: %s", strerror(errno));
   } else if (result != sizeof(actual)) {
     logMessage(LOG_WARNING, "unexpected CP2101 line control size: %d", (int)result);
