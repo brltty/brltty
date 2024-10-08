@@ -268,6 +268,10 @@ typedef struct {
 struct BrailleDataStruct {
   const ProtocolEntry *protocol;
   unsigned char previousCells[MAXIMUM_CELL_COUNT];
+
+  struct {
+    unsigned char pressedKeys[11];
+  } hid;
 };
 
 static BraillePacketVerifierResult
@@ -690,52 +694,52 @@ static const HidInputByte hidInputBytes[11] = {
 static int
 readCommands_HID (BrailleDisplay *brl) {
   while (1) {
-    const size_t size = 22;
-    unsigned char report[size];
+    const size_t reportSize = sizeof(brl->data->hid.pressedKeys);
+    unsigned char *oldReport = brl->data->hid.pressedKeys;
+    unsigned char newReport[reportSize];
 
-    const ssize_t length = gioReadData(brl->gioEndpoint, report, size, 1);
+    const ssize_t length = gioReadData(brl->gioEndpoint, newReport, reportSize, 1);
     if (!length) return EOF;
     if (length == -1) return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
-    logInputPacket(report, length);
+    logInputPacket(newReport, length);
 
-    if (length < size) {
-      memset(&report[length], 0, (size - length));
+    if (length < reportSize) {
+      memset(&newReport[length], 0, (reportSize - length));
     }
 
-    KeyValue pressedKeyStack[size * 8];
-    unsigned char pressedKeyCount = 0;
+    const HidInputByte *byte = hidInputBytes;
+    const HidInputByte *byteEnd = byte + ARRAY_COUNT(hidInputBytes);
 
-    {
-      const HidInputByte *byte = hidInputBytes;
-      const HidInputByte *byteEnd = byte + ARRAY_COUNT(hidInputBytes);
+    while (byte < byteEnd) {
+      unsigned char *newByte = newReport + byte->offset;
+      unsigned char *oldByte = oldReport + byte->offset;
 
-      while (byte < byteEnd) {
-        unsigned char *bits = report + byte->offset;
+      if (*newByte != *oldByte) {
+        const HidInputBit *bit = byte->bits;
+        const HidInputBit *bitEnd = bit + ARRAY_COUNT(byte->bits);
 
-        if (*bits) {
-          const HidInputBit *bit = byte->bits;
-          const HidInputBit *bitEnd = bit + ARRAY_COUNT(byte->bits);
+        while (bit < bitEnd) {
+          if (!bit->mask) break;
+          unsigned char newBit = *newByte & bit->mask;
+          unsigned char oldBit = *oldByte & bit->mask;
 
-          while (bit < bitEnd) {
-            if (!bit->mask) break;
+          if (newBit != oldBit) {
+            KeyValue key = bit->key;
 
-            if (*bits & bit->mask) {
-              enqueueKeyEvent(brl, bit->key.group, bit->key.number, 1);
-              pressedKeyStack[pressedKeyCount++] = bit->key;
-              if (!(*bits &= ~bit->mask)) break;
+            if (newBit) {
+              enqueueKeyEvent(brl, key.group, key.number, 1);
+              if ((*oldByte |= newBit) == *newByte) break;
+            } else {
+              enqueueKeyEvent(brl, key.group, key.number, 0);
+              if ((*oldByte &= ~oldBit) == *newByte) break;
             }
-
-            bit += 1;
           }
+
+          bit += 1;
         }
-
-        byte += 1;
       }
-    }
 
-    while (pressedKeyCount) {
-      KeyValue key = pressedKeyStack[--pressedKeyCount];
-      enqueueKeyEvent(brl, key.group, key.number, 0);
+      byte += 1;
     }
   }
 }
