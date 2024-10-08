@@ -670,10 +670,10 @@ static const HidInputByte hidInputBytes[11] = {
     .bits = {
       {.mask=0X01, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F1}},
       {.mask=0X04, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F2}},
-      {.mask=0X08, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_LeftScrollUp}},
+      {.mask=0X08, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_RightScrollUp}},
       {.mask=0X10, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F3}},
       {.mask=0X40, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_EM_F4}},
-      {.mask=0X80, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_LeftScrollDown}},
+      {.mask=0X80, .key={.group=HM_GRP_NavigationKeys, .number=HM_KEY_BE_RightScrollDown}},
     }
   },
 
