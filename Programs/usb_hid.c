@@ -63,8 +63,8 @@ usbHidGetItems (
         ssize_t result = usbControlRead(
           device, UsbControlRecipient_Interface, UsbControlType_Standard,
           UsbStandardRequest_GetDescriptor,
-          (descriptor->bDescriptorType << 8) | interface,
-          number, items->bytes, length, timeout
+          (descriptor->bDescriptorType << 8) | number,
+          interface, items->bytes, length, timeout
         );
 
         if (result != -1) {
