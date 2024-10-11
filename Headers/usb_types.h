@@ -191,7 +191,7 @@ typedef struct {
 } PACKED UsbConfigurationDescriptor;
 
 typedef struct {
-  uint8_t bLength;         /* Descriptor size in bytes (2 + numchars/2). */
+  uint8_t bLength;         /* Descriptor size in bytes (2 + numchars*2). */
   uint8_t bDescriptorType; /* Descriptor type (3 == string). */
   uint16_t wData[127];     /* 16-bit characters. */
 } PACKED UsbStringDescriptor;
@@ -225,7 +225,7 @@ typedef struct {
 } PACKED UsbClassDescriptor;
 
 typedef struct {
-  uint8_t bLength;          /* Descriptor size in bytes (6). */
+  uint8_t bLength;          /* Descriptor size in bytes (6 + numdescs*3). */
   uint8_t bDescriptorType;  /* Descriptor type (33 == HID). */
   uint16_t bcdHID;
   uint8_t bCountryCode;
