@@ -87,7 +87,7 @@ typedef enum {
   HT_EXTPKT_ReadingPosition       = 0X55,
   HT_EXTPKT_SetFirmness           = 0X60,
   HT_EXTPKT_GetFirmness           = 0X61,
-  HT_EXTPKT_USBNoReconnect        = 0XAE,
+  HT_EXTPKT_NoReconnect           = 0XAE,
   HT_EXTPKT_GetProtocolProperties = 0XC1,
   HT_EXTPKT_GetFirmwareVersion    = 0XC2
 } HT_ExtendedPacketType;

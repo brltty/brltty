@@ -1123,7 +1123,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   brl->statusRows = 1;
 
   if (brl->data->model->canChangeSize) {
-    writeExtendedPacket(brl, HT_EXTPKT_USBNoReconnect, NULL, 0);
+    writeExtendedPacket(brl, HT_EXTPKT_NoReconnect, NULL, 0);
     writeExtendedPacket(brl, HT_EXTPKT_GetProtocolProperties, NULL, 0);
   }
 
