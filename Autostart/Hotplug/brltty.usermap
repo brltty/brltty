@@ -494,11 +494,11 @@ brltty 0x0003 0x1fe4 0x009c
 brltty 0x0003 0x1fe4 0x00a4
 
 # Device: 1FE4:00A6
-# HandyTech [Activator Pro 68]
+# HandyTech [Activator Pro 64]
 brltty 0x0003 0x1fe4 0x00a6
 
 # Device: 1FE4:00A8
-# HandyTech [Activator Pro 84]
+# HandyTech [Activator Pro 80]
 brltty 0x0003 0x1fe4 0x00a8
 
 # Device: 4242:0001

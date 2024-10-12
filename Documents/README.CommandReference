@@ -11,6 +11,7 @@ Alphabetical Command Index
 * `ALTGR`_
 * `ASPK_CMP_WORDS`_
 * `ASPK_DEL_CHARS`_
+* `ASPK_EMP_LINE`_
 * `ASPK_INDENT`_
 * `ASPK_INS_CHARS`_
 * `ASPK_REP_CHARS`_
@@ -1208,6 +1209,7 @@ Speech Functions
 * `SAY_HIGHER`_
 * `AUTOSPEAK`_
 * `ASPK_SEL_LINE`_
+* `ASPK_EMP_LINE`_
 * `ASPK_SEL_CHAR`_
 * `ASPK_INS_CHARS`_
 * `ASPK_DEL_CHARS`_
@@ -1278,6 +1280,14 @@ The following modifiers may be specified:
 .. _ASPK_SEL_LINE:
 
 **ASPK_SEL_LINE** - Set autospeak selected line on/off.
+
+The following modifiers may be specified:
+
+* Toggle: on, off
+
+.. _ASPK_EMP_LINE:
+
+**ASPK_EMP_LINE** - Set autospeak empty line on/off.
 
 The following modifiers may be specified:
 

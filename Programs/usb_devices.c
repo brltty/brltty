@@ -503,11 +503,11 @@ USB_DEVICE_ENTRY(0X1FE4, 0X009C, "ht"),
 USB_DEVICE_ENTRY(0X1FE4, 0X00A4, "ht"),
 
 // Device: 1FE4:00A6
-// HandyTech [Activator Pro 68]
+// HandyTech [Activator Pro 64]
 USB_DEVICE_ENTRY(0X1FE4, 0X00A6, "ht"),
 
 // Device: 1FE4:00A8
-// HandyTech [Activator Pro 84]
+// HandyTech [Activator Pro 80]
 USB_DEVICE_ENTRY(0X1FE4, 0X00A8, "ht"),
 
 // Device: 4242:0001

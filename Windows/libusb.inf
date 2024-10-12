@@ -462,10 +462,10 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
 
 ; Device: 1FE4:00A6
-"LibUSB-Win32: HandyTech [Activator Pro 68]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A6
+"LibUSB-Win32: HandyTech [Activator Pro 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A6
 
 ; Device: 1FE4:00A8
-"LibUSB-Win32: HandyTech [Activator Pro 84]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A8
+"LibUSB-Win32: HandyTech [Activator Pro 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A8
 
 ; Device: 4242:0001
 "LibUSB-Win32: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
@@ -878,10 +878,10 @@ ServiceBinary  = %12%\libusb0_x64.sys
 "LibUSB-Win32: HandyTech [Activator]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A4
 
 ; Device: 1FE4:00A6
-"LibUSB-Win32: HandyTech [Activator Pro 68]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A6
+"LibUSB-Win32: HandyTech [Activator Pro 64]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A6
 
 ; Device: 1FE4:00A8
-"LibUSB-Win32: HandyTech [Activator Pro 84]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A8
+"LibUSB-Win32: HandyTech [Activator Pro 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A8
 
 ; Device: 4242:0001
 "LibUSB-Win32: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
