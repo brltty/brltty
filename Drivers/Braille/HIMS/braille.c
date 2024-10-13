@@ -270,6 +270,7 @@ struct BrailleDataStruct {
   unsigned char previousCells[MAXIMUM_CELL_COUNT];
 
   struct {
+    HidReportSize reportSize;
     unsigned char pressedKeys[11];
   } hid;
 };
@@ -574,11 +575,13 @@ static const InputOutputOperations serialOperations = {
 
 static int
 getCellCount_HID (BrailleDisplay *brl, unsigned int *count) {
-  HidReportSize size;
-  if (!gioGetHidReportSize(brl->gioEndpoint, 0, &size)) return 0;
-  if (!size.output) return 0;
+  HidReportSize *reportSize = &brl->data->hid.reportSize;
+  if (!gioGetHidReportSize(brl->gioEndpoint, 0, reportSize)) return 0;
 
-  *count = size.output;
+  size_t cellCount = reportSize->output;
+  if (!cellCount) return 0;
+
+  *count = cellCount;
   return 1;
 }
 
