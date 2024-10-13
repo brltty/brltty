@@ -304,7 +304,7 @@ always benefiz 12-14-15-124-24-1356
 always berater 23-1235-1-2345-12456 shouldn't use the te-contraction
 always beschwerd 23-156-2456-12456-145 shouldn't use the werd-contraction
 before hilmnrsu always beschwerde 23-156-2456-12456-145-15 shouldn't use the werd-contraction
-endword beschwerden 23-156-2456-12456-145-14 shouldn't use the werd-contraction
+prfword beschwerden 23-156-2456-12456-145-14 shouldn't use the werd-contraction
 endword betrieben 23-2345-1235-346-12-14
 always bindehaut 12-35-145-15-125-16-2345 shouldn't use the eh-contraction
 always bindehäu 12-35-145-15-125-34 shouldn't use the eh-contraction
