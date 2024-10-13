@@ -271,7 +271,7 @@ struct BrailleDataStruct {
 
   struct {
     HidReportSize reportSize;
-    unsigned char pressedKeys[11];
+    unsigned char pressedKeys[0X20];
   } hid;
 };
 
@@ -702,7 +702,7 @@ static const HidInputByte hidInputBytes[11] = {
 static int
 readCommands_HID (BrailleDisplay *brl) {
   while (1) {
-    const size_t reportSize = sizeof(brl->data->hid.pressedKeys);
+    const size_t reportSize = brl->data->hid.reportSize.input;
     unsigned char *oldReport = brl->data->hid.pressedKeys;
     unsigned char newReport[reportSize];
 
