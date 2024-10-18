@@ -199,6 +199,20 @@ handleSpeechCommands (int command, void *data) {
       }
       break;
 
+    case BRL_CMD_SPK_PUNCT_LEVEL:
+      if (canSetSpeechPunctuation(&spk)) {
+        unsigned char newLevel = prefs.speechPunctuation + 1;
+        if (newLevel > SPK_PUNCTUATION_ALL) newLevel = 0;
+
+        if (setSpeechPunctuation(&spk, newLevel, 1)) {
+          prefs.speechPunctuation = newLevel;
+          break;
+        }
+      }
+
+      alert(ALERT_COMMAND_REJECTED);
+      break;
+
     case BRL_CMD_SPEAK_CURR_CHAR:
       speakCurrentCharacter();
       break;

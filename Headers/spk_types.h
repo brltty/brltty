@@ -43,6 +43,7 @@ typedef enum {
 typedef enum {
   SPK_PUNCTUATION_NONE,
   SPK_PUNCTUATION_SOME,
+  SPK_PUNCTUATION_MOST,
   SPK_PUNCTUATION_ALL
 } SpeechPunctuation;
 

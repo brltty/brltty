@@ -1208,11 +1208,11 @@ makePreferencesMenu (void) {
     }
 
     {
-      static const MenuString strings[] = {
-        [SPK_PUNCTUATION_NONE] = {.label=strtext("None")},
-        [SPK_PUNCTUATION_SOME] = {.label=strtext("Some")},
-        [SPK_PUNCTUATION_ALL] = {.label=strtext("All")},
-      };
+      static MenuString strings[SPK_PUNCTUATION_ALL + 1];
+      strings[SPK_PUNCTUATION_NONE].label = getSpeechPunctuation(SPK_PUNCTUATION_NONE);
+      strings[SPK_PUNCTUATION_SOME].label = getSpeechPunctuation(SPK_PUNCTUATION_SOME);
+      strings[SPK_PUNCTUATION_MOST].label = getSpeechPunctuation(SPK_PUNCTUATION_MOST);
+      strings[SPK_PUNCTUATION_ALL].label = getSpeechPunctuation(SPK_PUNCTUATION_ALL);
 
       NAME(strtext("Speech Punctuation"));
       ITEM(newEnumeratedMenuItem(speechSubmenu, &prefs.speechPunctuation, &itemName, strings));

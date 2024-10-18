@@ -50,6 +50,7 @@ static int sendSettings (SpeechSynthesizer *spk);
 static unsigned char volumePercentage;
 static float rateMultiplier;
 static float pitchMultiplier;
+static unsigned char punctuationLevel;
 
 static uint16_t totalCharacterCount;
 #define TRACK_DATA_SIZE 2
@@ -210,7 +211,7 @@ sendVolumePercentage (SpeechSynthesizer *spk) {
 
 static int
 sendRateMultiplier (SpeechSynthesizer *spk) {
-  return sendMultplierSetting(spk, 3, (1.0f / rateMultiplier));
+  return sendMultplierSetting(spk, 3, (1.0 / rateMultiplier));
 }
 
 static int
@@ -219,10 +220,31 @@ sendPitchMultiplier (SpeechSynthesizer *spk) {
 }
 
 static int
+sendPunctuationLevel (SpeechSynthesizer *spk) {
+  return sendByteSetting(spk, 6, punctuationLevel);
+}
+
+static int
 sendSettings (SpeechSynthesizer *spk) {
-  if (!sendVolumePercentage(spk)) return 0;
-  if (!sendRateMultiplier(spk)) return 0;
-  if (!sendPitchMultiplier(spk)) return 0;
+  typedef int SendSettingHandler (SpeechSynthesizer *spk);
+
+  static SendSettingHandler *const handlers[] = {
+    sendVolumePercentage,
+    sendRateMultiplier,
+    sendPitchMultiplier,
+    sendPunctuationLevel,
+    NULL
+  };
+
+  {
+    SendSettingHandler *const *handler = handlers;
+
+    while (*handler) {
+      if (!(*handler)(spk)) return 0;
+      handler += 1;
+    }
+  }
+
   return 1;
 }
 
@@ -266,6 +288,19 @@ spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
 }
 
 static void
+spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
+  punctuationLevel = setting;
+
+  logMessage(
+    LOG_CATEGORY(SPEECH_DRIVER),
+    "set punctuation to %u",
+    setting
+  );
+
+  sendPunctuationLevel(spk);
+}
+
+static void
 spk_mute (SpeechSynthesizer *spk) {
   logMessage(LOG_CATEGORY(SPEECH_DRIVER), "mute");
 
@@ -298,10 +333,12 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
   spk->setVolume = spk_setVolume;
   spk->setRate = spk_setRate;
   spk->setPitch = spk_setPitch;
+  spk->setPunctuation = spk_setPunctuation;
 
   volumePercentage = 100;
-  rateMultiplier = 1.0f;
-  pitchMultiplier = 1.0f;
+  rateMultiplier = 1.0;
+  pitchMultiplier = 1.0;
+  punctuationLevel = 0;
 
   socketPath = parameters[PARM_SOCKET_PATH];
   if (!socketPath || !*socketPath) socketPath = XS_DEFAULT_SOCKET_PATH;

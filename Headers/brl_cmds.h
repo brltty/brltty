@@ -270,6 +270,7 @@ typedef enum {
 
   BRL_CMD_PREFRESET /* reset preferences to defaults */,
   BRL_CMD_ASPK_EMP_LINE /* set autospeak empty line on/off */,
+  BRL_CMD_SPK_PUNCT_LEVEL /* cycle speech punctuation level */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;

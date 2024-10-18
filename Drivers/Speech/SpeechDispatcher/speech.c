@@ -45,7 +45,7 @@ static const char *voiceName;
 static signed int relativeVolume;
 static signed int relativeRate;
 static signed int relativePitch;
-static SPDPunctuation punctuationVerbosity;
+static SPDPunctuation punctuationLevel;
 
 static void
 clearSettings (void) {
@@ -56,7 +56,7 @@ clearSettings (void) {
   relativeVolume = 0;
   relativeRate = 0;
   relativePitch = 0;
-  punctuationVerbosity = -1;
+  punctuationLevel = -1;
 }
 
 static void
@@ -135,16 +135,19 @@ spk_setPitch (SpeechSynthesizer *spk, unsigned char setting) {
 
 static void
 setPunctuation (const void *data) {
-  if (punctuationVerbosity != -1) spd_set_punctuation(connectionHandle, punctuationVerbosity);
+  if (punctuationLevel != -1) spd_set_punctuation(connectionHandle, punctuationLevel);
 }
 
 static void
 spk_setPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
-  punctuationVerbosity = (setting <= SPK_PUNCTUATION_NONE)? SPD_PUNCT_NONE: 
-                         (setting >= SPK_PUNCTUATION_ALL)? SPD_PUNCT_ALL: 
-                         SPD_PUNCT_SOME;
+  punctuationLevel = (setting <= SPK_PUNCTUATION_NONE)? SPD_PUNCT_NONE: 
+                     (setting >= SPK_PUNCTUATION_ALL)? SPD_PUNCT_ALL: 
+                     (setting == SPK_PUNCTUATION_SOME)? SPD_PUNCT_SOME:
+                     (setting == SPK_PUNCTUATION_MOST)? SPD_PUNCT_MOST:
+                     -1;
+
   speechdAction(setPunctuation, NULL);
-  logMessage(LOG_DEBUG, "set punctuation: %u -> %d", setting, punctuationVerbosity);
+  logMessage(LOG_DEBUG, "set punctuation: %u -> %d", setting, punctuationLevel);
 }
 
 static void

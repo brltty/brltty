@@ -103,12 +103,14 @@ static void
 spk_setPunctuation(SpeechSynthesizer *spk, SpeechPunctuation setting)
 {
 	espeak_PUNCT_TYPE punct;
+
 	if (setting <= SPK_PUNCTUATION_NONE)
 		punct = espeakPUNCT_NONE;
-	else if (setting >= SPK_PUNCTUATION_ALL)
-		punct = espeakPUNCT_ALL;
-	else
+	else if (setting == SPK_PUNCTUATION_SOME)
 		punct = espeakPUNCT_SOME;
+	else
+		punct = espeakPUNCT_ALL;
+
 	espeak_SetParameter(espeakPUNCTUATION, punct, 0);
 }
 

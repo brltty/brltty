@@ -208,7 +208,7 @@ setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
 
   if (say) {
     sayIntegerSetting(
-      spk, gettext("volume"),
+      spk, gettext("Volume"),
       toNormalizedSpeechVolume(setting)
     );
   }
@@ -234,7 +234,7 @@ setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
 
   if (say) {
     sayIntegerSetting(
-      spk, gettext("rate"),
+      spk, gettext("Rate"),
       toNormalizedSpeechRate(setting)
     );
   }
@@ -260,7 +260,7 @@ setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
 
   if (say) {
     sayIntegerSetting(
-      spk, gettext("pitch"),
+      spk, gettext("Pitch"),
       toNormalizedSpeechPitch(setting)
     );
   }
@@ -273,10 +273,33 @@ canSetSpeechPunctuation (SpeechSynthesizer *spk) {
   return spk->setPunctuation != NULL;
 }
 
+const char *
+getSpeechPunctuation (unsigned char level) {
+  static const char *levels[] = {
+    [SPK_PUNCTUATION_NONE] = strtext("None"),
+    [SPK_PUNCTUATION_SOME] = strtext("Some"),
+    [SPK_PUNCTUATION_MOST] = strtext("Most"),
+    [SPK_PUNCTUATION_ALL] = strtext("All"),
+  };
+
+  int maximum = ARRAY_COUNT(levels) - 1;
+  level = MAX(level, 0);
+  level = MIN(level, maximum);
+  return gettext(levels[level]);
+}
+
 int
 setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say) {
   if (!canSetSpeechPunctuation(spk)) return 0;
   logMessage(LOG_CATEGORY(SPEECH_EVENTS), "set punctuation: %d", setting);
   speechRequest_setPunctuation(spk->driver.thread, setting);
+
+  if (say) {
+    sayStringSetting(
+      spk, gettext("Punctuation"),
+      getSpeechPunctuation(setting)
+    );
+  }
+
   return 1;
 }

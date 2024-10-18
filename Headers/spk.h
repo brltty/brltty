@@ -68,6 +68,7 @@ extern int toNormalizedSpeechPitch (unsigned char pitch);
 
 extern int canSetSpeechPunctuation (SpeechSynthesizer *spk);
 extern int setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say);
+extern const char *getSpeechPunctuation (unsigned char level);
 
 extern int haveSpeechDriver (const char *code);
 extern const char *getDefaultSpeechDriver (void);
