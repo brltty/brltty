@@ -118,7 +118,7 @@ PREFERENCE_STRING_TABLE(tuneDevice,
 PREFERENCE_STRING_TABLE(speechPunctuation,
   [SPK_PUNCTUATION_NONE] = "none",
   [SPK_PUNCTUATION_SOME] = "some",
-  [SPK_PUNCTUATION_SOME] = "most",
+  [SPK_PUNCTUATION_MOST] = "most",
   [SPK_PUNCTUATION_ALL] = "all",
 )
 
