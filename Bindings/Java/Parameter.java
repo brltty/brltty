@@ -54,6 +54,10 @@ public abstract class Parameter extends ParameterComponent {
   public abstract int getParameter ();
   public abstract boolean isGlobal ();
 
+  public boolean hasSubparam () {
+    return false;
+  }
+
   public boolean isHidable () {
     return false;
   }

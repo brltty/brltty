@@ -31,6 +31,11 @@ public class DriverKeycodeSummaryParameter extends GlobalParameter {
   }
 
   @Override
+  public boolean hasSubparam () {
+    return true;
+  }
+
+  @Override
   public final String get (long code) {
     return asString(getValue(code));
   }

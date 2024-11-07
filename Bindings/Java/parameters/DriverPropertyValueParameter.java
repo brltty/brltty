@@ -31,7 +31,7 @@ public class DriverPropertyValueParameter extends GlobalParameter implements Par
   }
 
   @Override
-  public boolean isHidable () {
+  public boolean hasSubparam () {
     return true;
   }
 
