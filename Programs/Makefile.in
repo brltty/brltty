@@ -1183,7 +1183,7 @@ install-tools: all-tools install-program-directories
 XBRLAPI_X11_AUTOSTART_FILE = 90xbrlapi
 XBRLAPI_GDM_AUTOSTART_FILE = xbrlapi.desktop
 
-install-xbrlapi: xbrlapi$X install-program-directory install-x11-autostart-directory install-gdm-autostart-directory
+install-xbrlapi: xbrlapi$X install-program-directory install-man1-directory install-x11-autostart-directory install-gdm-autostart-directory
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/xbrlapi.1 $(INSTALL_MAN1_DIRECTORY)
 	$(INSTALL_DATA) $(BLD_TOP)Autostart/X11/$(XBRLAPI_X11_AUTOSTART_FILE) $(INSTALL_X11_AUTOSTART_DIRECTORY)
@@ -1280,7 +1280,7 @@ install-api-key:
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
 	then $(SRC_TOP)brltty-genkey -f $$file; fi
 
-install-api-commands: all-brltty-clip
+install-api-commands: all-brltty-clip install-program-directory
 	$(INSTALL_PROGRAM) brltty-clip$X $(INSTALL_PROGRAM_DIRECTORY) 
 
 ###############################################################################
