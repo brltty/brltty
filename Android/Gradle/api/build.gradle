@@ -14,6 +14,8 @@ dependencies {
 }
 
 android {
+  namespace "org.a11y.brlapi"
+
   compileSdkVersion "android-34"
   buildToolsVersion "29.0.3"
 
@@ -27,7 +29,7 @@ afterEvaluate {
   publishing {
     publications {
       release(MavenPublication) {
-        from components.release
+        from components.findByName("release")
         groupId = "org.a11y.brltty"
         artifactId = "brlapi-android"
         version = brltty.config.apiRelease

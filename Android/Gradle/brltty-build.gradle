@@ -113,6 +113,7 @@ Task newAddLibrariesTask (Map properties) {
     description "Add the ${properties.componentName}'s ${properties.ABI} libraries to the build."
     dependsOn properties.makeComponentsTask
     into getABIPath(properties)
+    into ":${properties.componentName}:mergeDebugJniLibFolders"
 
     properties.librarySubdirectories.each { subdirectory ->
       from properties.abiDirectory + File.separator + subdirectory

@@ -9,6 +9,8 @@ description = """
 apply from: "brltty.gradle"
 
 android {
+  namespace "org.a11y.brltty.core"
+
   compileSdkVersion "android-34"
   buildToolsVersion "29.0.3"
 

@@ -9,6 +9,8 @@ A test program to verify that the Maven dependency on BrlAPI is working.
 apply from: rootProject.file("brlapi-android.gradle")
 
 android {
+  namespace "org.a11y.brlapi.android"
+
   compileSdkVersion "android-34"
   buildToolsVersion "29.0.3"
 
