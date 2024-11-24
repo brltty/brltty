@@ -25,7 +25,7 @@ Map getABI (Map properties) {
 }
 
 Task newTask (Project project, String name, Class<DefaultTask> type=DefaultTask, Closure closure) {
-  Task task = project.tasks.register(name, type, closure).get()
+  def task = project.tasks.register(name, type, closure).get()
 
   task.configure {
     group "build"
@@ -93,7 +93,7 @@ Task newMakeComponentsTask (Map properties) {
 }
 
 Task newAddJarsTask (Map properties) {
-  return newTask(properties, "brlttyAddJars", Copy) {
+  def task = newTask(properties, "brlttyAddJars", Copy) {
     description "Add the ${properties.componentName}'s ${properties.ABI} jars to the build."
     dependsOn properties.makeComponentsTask
     into getJarsPath(properties)
@@ -106,14 +106,17 @@ Task newAddJarsTask (Map properties) {
       include "${jar}.jar"
     }
   }
+
+  brltty.addTaskDependency(task, "mergeDebugJavaResource")
+  brltty.addTaskDependency(task, "copyDebugJniLibsProjectAndLocalJars")
+  return task
 }
 
 Task newAddLibrariesTask (Map properties) {
-  return newTask(properties, "brlttyAddLibraries", Copy) {
+  def task = newTask(properties, "brlttyAddLibraries", Copy) {
     description "Add the ${properties.componentName}'s ${properties.ABI} libraries to the build."
     dependsOn properties.makeComponentsTask
     into getABIPath(properties)
-    into ":${properties.componentName}:mergeDebugJniLibFolders"
 
     properties.librarySubdirectories.each { subdirectory ->
       from properties.abiDirectory + File.separator + subdirectory
@@ -121,6 +124,19 @@ Task newAddLibrariesTask (Map properties) {
 
     properties.libraries.each { library ->
       include "lib${library}.so"
+    }
+  }
+
+  brltty.addTaskDependency(task, "mergeDebugJniLibFolders")
+  return task
+}
+
+brltty.addTaskDependency = { Task dependentTask, String dependingName ->
+  gradle.projectsEvaluated {
+    def dependingTask = dependentTask.project.tasks.findByName(dependingName)
+
+    if (dependingTask != null) {
+      dependingTask.dependsOn dependentTask
     }
   }
 }

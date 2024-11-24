@@ -8,7 +8,6 @@ task brlttyAddTables (type: Copy) {
 
   from brltty.native.tablesDirectory
   into tablesDirectory
-  into ":${project.name}:mergeDebugAssets"
   include 'Text/**/*.tt?'
   include 'Contraction/**/*.ct?'
   include 'Attributes/**/*.at?'
@@ -82,3 +81,4 @@ brltty.addAssembleTask project, brlttyAddMessages
 brltty.addAssembleTask project, brlttyAddTables
 clean.dependsOn brlttyRemoveMessages
 clean.dependsOn brlttyRemoveTables
+brltty.addTaskDependency(brlttyAddTables, "mergeDebugAssets")
