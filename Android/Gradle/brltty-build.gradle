@@ -109,6 +109,7 @@ Task newAddJarsTask (Map properties) {
 
   brltty.addTaskDependency(task, "mergeDebugJavaResource")
   brltty.addTaskDependency(task, "copyDebugJniLibsProjectAndLocalJars")
+
   return task
 }
 
@@ -128,15 +129,17 @@ Task newAddLibrariesTask (Map properties) {
   }
 
   brltty.addTaskDependency(task, "mergeDebugJniLibFolders")
+  brltty.addTaskDependency(task, "mergeReleaseJniLibFolders")
+
   return task
 }
 
-brltty.addTaskDependency = { Task dependentTask, String dependingName ->
+brltty.addTaskDependency = { Task producerTask, String consumerName ->
   gradle.projectsEvaluated {
-    def dependingTask = dependentTask.project.tasks.findByName(dependingName)
+    def consumerTask = producerTask.project.tasks.findByName(consumerName)
 
-    if (dependingTask != null) {
-      dependingTask.dependsOn dependentTask
+    if (consumerTask != null) {
+      consumerTask.dependsOn producerTask
     }
   }
 }
