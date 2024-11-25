@@ -19,7 +19,7 @@ promote-to-production:
 	$(GRADLE_PROMOTE_COMMAND) --from-track beta --promote-track production --release-status completed
 
 download-listing:
-	$(GRADLE_WRAPPER_COMMAND) bootstrap
+	$(GRADLE_WRAPPER_COMMAND) bootstrapListing
 
 publish-listing:
 	$(GRADLE_WRAPPER_COMMAND) publishListing
