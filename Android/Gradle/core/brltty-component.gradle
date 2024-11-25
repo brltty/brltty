@@ -1,4 +1,4 @@
-brltty.makeComponent(
+brltty.buildComponent(
   [ componentName: "core",
     project: project,
     makeSubdirectory: brltty.native.coreSubdirectory,

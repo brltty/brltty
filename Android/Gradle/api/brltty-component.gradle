@@ -1,4 +1,4 @@
-brltty.makeComponent(
+brltty.buildComponent(
   [ componentName: "api",
     project: project,
     makeSubdirectory: brltty.native.javaSubdirectory,

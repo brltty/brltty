@@ -225,7 +225,7 @@ brltty.addAssembleTask = { Project project, Task assembleTask ->
   }
 }
 
-brltty.makeComponent = { Map properties ->
+brltty.buildComponent = { Map properties ->
   addTasks(properties)
   brltty.addAssembleTask(properties.project, properties.assembleTask)
   clean.dependsOn properties.cleanTask
