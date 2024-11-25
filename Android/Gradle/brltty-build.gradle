@@ -24,6 +24,16 @@ Map getABI (Map properties) {
   return getABI(properties.ABI)
 }
 
+brltty.addConsumerTask = { Task producerTask, String consumerName ->
+  gradle.projectsEvaluated {
+    def consumerTask = producerTask.project.tasks.findByName(consumerName)
+
+    if (consumerTask != null) {
+      consumerTask.mustRunAfter producerTask
+    }
+  }
+}
+
 Task newTask (Project project, String name, Class<DefaultTask> type=DefaultTask, Closure closure) {
   def task = project.tasks.register(name, type, closure).get()
 
@@ -107,8 +117,8 @@ Task newAddJarsTask (Map properties) {
     }
   }
 
-  brltty.addTaskDependency(task, "mergeDebugJavaResource")
-  brltty.addTaskDependency(task, "copyDebugJniLibsProjectAndLocalJars")
+  brltty.addConsumerTask(task, "mergeDebugJavaResource")
+  brltty.addConsumerTask(task, "copyDebugJniLibsProjectAndLocalJars")
 
   return task
 }
@@ -128,20 +138,10 @@ Task newAddLibrariesTask (Map properties) {
     }
   }
 
-  brltty.addTaskDependency(task, "mergeDebugJniLibFolders")
-  brltty.addTaskDependency(task, "mergeReleaseJniLibFolders")
+  brltty.addConsumerTask(task, "mergeDebugJniLibFolders")
+  brltty.addConsumerTask(task, "mergeReleaseJniLibFolders")
 
   return task
-}
-
-brltty.addTaskDependency = { Task producerTask, String consumerName ->
-  gradle.projectsEvaluated {
-    def consumerTask = producerTask.project.tasks.findByName(consumerName)
-
-    if (consumerTask != null) {
-      consumerTask.dependsOn producerTask
-    }
-  }
 }
 
 Task newMakeCleanTask (Map properties) {
@@ -225,7 +225,7 @@ brltty.addAssembleTask = { Project project, Task assembleTask ->
   }
 }
 
-brltty.addTasks = { Map properties ->
+brltty.makeComponent = { Map properties ->
   addTasks(properties)
   brltty.addAssembleTask(properties.project, properties.assembleTask)
   clean.dependsOn properties.cleanTask

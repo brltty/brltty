@@ -6,7 +6,7 @@ description = """
 "${project.name}" is a Java wrapper for the native "${rootProject.name}" code.
 """
 
-apply from: "brltty.gradle"
+apply from: "brltty-make.gradle"
 
 android {
   namespace "org.a11y.brltty.core"

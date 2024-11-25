@@ -1,0 +1,30 @@
+brltty.makeComponent(
+  [ componentName: "core",
+    project: project,
+    makeSubdirectory: brltty.native.coreSubdirectory,
+
+    makeTargets: [
+      brltty.native.coreLibrary,
+      brltty.native.coreWrapper,
+      brltty.native.coreBindings,
+
+      "braille-drivers",
+      "speech-drivers",
+      "screen-drivers",
+    ],
+
+    libraries: [
+      "brltty_core",
+      "brltty_jni",
+
+      "brlttyb??",
+      "brlttys??",
+      "brlttyx??"
+    ],
+
+    librarySubdirectories: [
+      brltty.native.coreSubdirectory,
+      brltty.native.driversSubdirectory
+    ],
+  ]
+)

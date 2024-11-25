@@ -7,7 +7,7 @@ description = """
 "${project.name}" provides the Java client bindings for "${rootProject.name}" code.
 """
 
-apply from: "brltty.gradle"
+apply from: "brltty-make.gradle"
 
 dependencies {
   api files("src/main/libs/brlapi.jar")
