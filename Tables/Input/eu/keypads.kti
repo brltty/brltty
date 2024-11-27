@@ -1,0 +1,91 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2024 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://brltty.app/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+note The keypads are the four small keys (Left, Right, Up, Down) to the left and right of the braille display.
+note Some keys have been reserved for internal use:
+note + LeftKeypadUp: go to the internal menu
+
+bind LeftKeypadLeft FWINLTSKIP:HELP
+bind LeftKeypadRight FWINRTSKIP:PREFMENU
+bind LeftKeypadUp NOOP # go to the internal menu
+bind LeftKeypadDown CSRTRK:INFO
+
+bind RightKeypadLeft FWINLT:LNBEG
+bind RightKeypadRight FWINRT:LNEND
+bind RightKeypadUp LNUP:TOP
+bind RightKeypadDown LNDN:BOT
+
+bind LeftKeypadLeft+LeftKeypadUp CHRLT
+bind LeftKeypadRight+LeftKeypadUp CHRRT
+
+bind LeftKeypadLeft+LeftKeypadDown HWINLT
+bind LeftKeypadRight+LeftKeypadDown HWINRT
+
+bind LeftKeypadLeft+LeftKeypadRight BACK
+bind LeftKeypadDown+LeftKeypadUp CSRJMP_VERT
+
+bind RightKeypadLeft+RightKeypadUp TOP_LEFT
+bind RightKeypadLeft+RightKeypadDown BOT_LEFT
+
+bind RightKeypadRight+RightKeypadUp PRSEARCH
+bind RightKeypadRight+RightKeypadDown NXSEARCH
+
+bind RightKeypadLeft+RightKeypadRight HOME
+bind RightKeypadUp+RightKeypadDown PASTE:PASTE_ALTMODE
+
+bind LeftKeypadLeft+RightKeypadLeft PRPROMPT
+bind LeftKeypadLeft+RightKeypadRight PRPGRPH
+bind LeftKeypadLeft+RightKeypadUp PRDIFLN
+bind LeftKeypadLeft+RightKeypadDown ATTRUP
+
+bind LeftKeypadRight+RightKeypadLeft NXPROMPT
+bind LeftKeypadRight+RightKeypadRight NXPGRPH
+bind LeftKeypadRight+RightKeypadUp NXDIFLN
+bind LeftKeypadRight+RightKeypadDown ATTRDN
+
+bind LeftKeypadDown+RightKeypadLeft CSRVIS
+bind LeftKeypadDown+RightKeypadRight ATTRVIS
+bind LeftKeypadDown+RightKeypadUp SIXDOTS+on
+bind LeftKeypadDown+RightKeypadDown SIXDOTS+off
+
+bind LeftKeypadLeft+RoutingKey1 SETLEFT
+bind LeftKeypadRight+RoutingKey1 DESCCHAR
+bind LeftKeypadDown+RoutingKey1 SWITCHVT
+bind LeftKeypadDown+LeftKeypadLeft+RoutingKey1 SETMARK
+bind LeftKeypadDown+LeftKeypadRight+RoutingKey1 GOTOMARK
+
+bind RightKeypadLeft+RoutingKey1 CLIP_NEW
+bind RightKeypadUp+RoutingKey1 CLIP_ADD
+bind RightKeypadRight+RoutingKey1 COPY_LINE
+bind RightKeypadDown+RoutingKey1 COPY_RECT
+
+bind RightKeypadLeft+RightKeypadUp+RoutingKey1 PRINDENT
+bind RightKeypadLeft+RightKeypadDown+RoutingKey1 NXINDENT
+
+bind RightKeypadRight+RightKeypadUp+RoutingKey1 PRDIFCHAR
+bind RightKeypadRight+RightKeypadDown+RoutingKey1 NXDIFCHAR
+
+context menu
+bind RightKeypadUp MENU_PREV_ITEM:MENU_FIRST_ITEM
+bind RightKeypadDown MENU_NEXT_ITEM:MENU_LAST_ITEM
+bind RightKeypadLeft MENU_PREV_SETTING
+bind RightKeypadRight MENU_NEXT_SETTING
+bind RightKeypadUp+RightKeypadLeft MENU_PREV_LEVEL
+bind RightKeypadUp+RightKeypadRight PREFMENU
+bind RightKeypadDown+RightKeypadLeft PREFLOAD
+bind RightKeypadDown+RightKeypadRight PREFSAVE

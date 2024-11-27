@@ -49,6 +49,17 @@ BEGIN_KEY_NAME_TABLE(linear)
   COMMAND_KEY_ENTRY(L8, "L8"),
 END_KEY_NAME_TABLE
 
+BEGIN_KEY_NAME_TABLE(navctl)
+  COMMAND_KEY_ENTRY(L1, "Backward"),
+  COMMAND_KEY_ENTRY(L2, "C1"),
+  COMMAND_KEY_ENTRY(L3, "C2"),
+  COMMAND_KEY_ENTRY(L4, "C3"),
+  COMMAND_KEY_ENTRY(L5, "C4"),
+  COMMAND_KEY_ENTRY(L6, "C5"),
+  COMMAND_KEY_ENTRY(L7, "C6"),
+  COMMAND_KEY_ENTRY(L8, "Forward"),
+END_KEY_NAME_TABLE
+
 BEGIN_KEY_NAME_TABLE(arrow)
   COMMAND_KEY_ENTRY(Left, "Left"),
   COMMAND_KEY_ENTRY(Right, "Right"),
@@ -86,20 +97,30 @@ BEGIN_KEY_NAME_TABLE(switch6)
   COMMAND_KEY_ENTRY(Switch6Right, "Switch6Right"),
 END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(joystick1)
+BEGIN_KEY_NAME_TABLE(joysticks)
   COMMAND_KEY_ENTRY(LeftJoystickLeft, "LeftJoystickLeft"),
   COMMAND_KEY_ENTRY(LeftJoystickRight, "LeftJoystickRight"),
   COMMAND_KEY_ENTRY(LeftJoystickUp, "LeftJoystickUp"),
   COMMAND_KEY_ENTRY(LeftJoystickDown, "LeftJoystickDown"),
   COMMAND_KEY_ENTRY(LeftJoystickPress, "LeftJoystickPress"),
-END_KEY_NAME_TABLE
 
-BEGIN_KEY_NAME_TABLE(joystick2)
   COMMAND_KEY_ENTRY(RightJoystickLeft, "RightJoystickLeft"),
   COMMAND_KEY_ENTRY(RightJoystickRight, "RightJoystickRight"),
   COMMAND_KEY_ENTRY(RightJoystickUp, "RightJoystickUp"),
   COMMAND_KEY_ENTRY(RightJoystickDown, "RightJoystickDown"),
   COMMAND_KEY_ENTRY(RightJoystickPress, "RightJoystickPress"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(keypads)
+  COMMAND_KEY_ENTRY(LeftJoystickLeft, "LeftKeypadLeft"),
+  COMMAND_KEY_ENTRY(LeftJoystickRight, "LeftKeypadRight"),
+  COMMAND_KEY_ENTRY(LeftJoystickUp, "LeftKeypadUp"),
+  COMMAND_KEY_ENTRY(LeftJoystickDown, "LeftKeypadDown"),
+
+  COMMAND_KEY_ENTRY(RightJoystickLeft, "RightKeypadLeft"),
+  COMMAND_KEY_ENTRY(RightJoystickRight, "RightKeypadRight"),
+  COMMAND_KEY_ENTRY(RightJoystickUp, "RightKeypadUp"),
+  COMMAND_KEY_ENTRY(RightJoystickDown, "RightKeypadDown"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLE(keyboard)
@@ -130,8 +151,7 @@ END_KEY_NAME_TABLES
 BEGIN_KEY_NAME_TABLES(esys_small)
   KEY_NAME_TABLE(switch1),
   KEY_NAME_TABLE(switch2),
-  KEY_NAME_TABLE(joystick1),
-  KEY_NAME_TABLE(joystick2),
+  KEY_NAME_TABLE(joysticks),
   KEY_NAME_TABLE(keyboard),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
@@ -141,8 +161,7 @@ BEGIN_KEY_NAME_TABLES(esys_medium)
   KEY_NAME_TABLE(switch2),
   KEY_NAME_TABLE(switch3),
   KEY_NAME_TABLE(switch4),
-  KEY_NAME_TABLE(joystick1),
-  KEY_NAME_TABLE(joystick2),
+  KEY_NAME_TABLE(joysticks),
   KEY_NAME_TABLE(keyboard),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
@@ -154,16 +173,27 @@ BEGIN_KEY_NAME_TABLES(esys_large)
   KEY_NAME_TABLE(switch4),
   KEY_NAME_TABLE(switch5),
   KEY_NAME_TABLE(switch6),
-  KEY_NAME_TABLE(joystick1),
-  KEY_NAME_TABLE(joystick2),
+  KEY_NAME_TABLE(joysticks),
   KEY_NAME_TABLE(keyboard),
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 BEGIN_KEY_NAME_TABLES(esytime)
-  KEY_NAME_TABLE(joystick1),
-  KEY_NAME_TABLE(joystick2),
+  KEY_NAME_TABLE(joysticks),
   KEY_NAME_TABLE(linear),
+  KEY_NAME_TABLE(keyboard),   // For braille keyboard when not in usb-hid mode.
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(bnote)
+  KEY_NAME_TABLE(keypads),
+  KEY_NAME_TABLE(keyboard),   // For braille keyboard when not in usb-hid mode.
+  KEY_NAME_TABLE(routing),
+END_KEY_NAME_TABLES
+
+BEGIN_KEY_NAME_TABLES(bbook)
+  KEY_NAME_TABLE(joysticks),
+  KEY_NAME_TABLE(navctl),
   KEY_NAME_TABLE(keyboard),   // For braille keyboard when not in usb-hid mode.
   KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
@@ -173,6 +203,8 @@ PUBLIC_KEY_TABLE(esys_small)
 PUBLIC_KEY_TABLE(esys_medium)
 PUBLIC_KEY_TABLE(esys_large)
 PUBLIC_KEY_TABLE(esytime)
+PUBLIC_KEY_TABLE(bnote)
+PUBLIC_KEY_TABLE(bbook)
 
 typedef struct {
   const char *modelName;
@@ -327,6 +359,34 @@ static const ModelEntry modelTable[] = {
     .keyTable = &KEY_TABLE_DEFINITION(esytime)
   },
 
+  { .modelIdentifier = EU_BNOTE,
+    .modelName = "B.Note",
+    .cellCount = 40,
+    .hasBrailleKeyboard = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(bnote)
+  },
+
+  { .modelIdentifier = EU_BNOTE2,
+    .modelName = "B.Note 2",
+    .cellCount = 20,
+    .hasBrailleKeyboard = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(bnote)
+  },
+
+  { .modelIdentifier = EU_BBOOK,
+    .modelName = "B.Book",
+    .cellCount = 32,
+    .hasBrailleKeyboard = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(bbook)
+  },
+
+  { .modelIdentifier = EU_BBOOK2,
+    .modelName = "B.Book 2",
+    .cellCount = 32,
+    .hasBrailleKeyboard = 1,
+    .keyTable = &KEY_TABLE_DEFINITION(bbook)
+  },
+
   { .modelName = NULL }
 };
 
@@ -470,18 +530,31 @@ getModelEntry (unsigned char identifier) {
 
 static int
 handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
-  int logLevel = LOG_INFO;
-  const char *infoDescription;
-  enum {Unknown, End, String, Dec8, Dec16, Hex32} infoType;
+  int logLevel = LOG_CATEGORY(BRAILLE_DRIVER);
+  const char *logLabel = "EsysIris";
+
+  const char *infoLabel = NULL;
+  enum {Unknown, End, String, Dec8, Dec16, Hex32, Clock} infoType = Unknown;
 
   switch(packet[0]) {
-    case LP_SYSTEM_SHORTNAME: 
+    case LP_SYSTEM_NAME: 
       infoType = String;
-      infoDescription = "Short Name";
+      infoLabel = "Long Name";
       break;
 
-    case LP_SYSTEM_IDENTITY: 
-      infoType = End;
+    case LP_SYSTEM_SHORTNAME: 
+      infoType = String;
+      infoLabel = "Short Name";
+      break;
+
+    case LP_SYSTEM_SERIAL: 
+      infoType = String;
+      infoLabel = "Serial Number";
+      break;
+
+    case LP_SYSTEM_LANGUAGE: 
+      infoType = String;
+      infoLabel = "Language Code";
       break;
 
     case LP_SYSTEM_DISPLAY_LENGTH: 
@@ -489,52 +562,7 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       brl->textColumns = packet[1];
 
       infoType = Dec8;
-      infoDescription = "Cell Count";
-      break;
-
-    case LP_SYSTEM_LANGUAGE: 
-      infoType = String;
-      infoDescription = "Country Code";
-      break;
-
-    case LP_SYSTEM_FRAME_LENGTH: 
-      maximumFrameLength = (packet[1] << 8)
-                         | (packet[2] << 0)
-                         ;
-
-      infoType = Dec16;
-      infoDescription = "Maximum Frame Length";
-      break;
-
-    case LP_SYSTEM_NAME: 
-      infoType = String;
-      infoDescription = "Long Name";
-      break;
-
-    case LP_SYSTEM_OPTION: 
-      deviceOptions = (packet[1] << 24)
-                    | (packet[2] << 16)
-                    | (packet[3] <<  8)
-                    | (packet[4] <<  0)
-                    ;
-
-      infoType = Hex32;
-      infoDescription = "Device Options";
-      break;
-
-    case LP_SYSTEM_PROTOCOL: 
-      protocolVersion = ((packet[1] - '0') << 16)
-                      | ((packet[3] - '0') <<  8)
-                      | ((packet[4] - '0') <<  0)
-                      ;
-
-      infoType = String;
-      infoDescription = "Protocol Version";
-      break;
-
-    case LP_SYSTEM_SERIAL: 
-      infoType = String;
-      infoDescription = "Serial Number";
+      infoLabel = "Cell Count";
       break;
 
     case LP_SYSTEM_TYPE:
@@ -547,7 +575,23 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
       }
 
       infoType = Dec8;
-      infoDescription = "Model Identifier";
+      infoLabel = "Model Identifier";
+      break;
+
+    case LP_SYSTEM_SUBTYPE: 
+      infoType = Dec8;
+      infoLabel = "Model Type";
+      break;
+
+    case LP_SYSTEM_OPTION: 
+      deviceOptions = (packet[1] << 24)
+                    | (packet[2] << 16)
+                    | (packet[3] <<  8)
+                    | (packet[4] <<  0)
+                    ;
+
+      infoType = Hex32;
+      infoLabel = "Device Options";
       break;
 
     case LP_SYSTEM_SOFTWARE: 
@@ -557,7 +601,40 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
                       ;
 
       infoType = String;
-      infoDescription = "Firmware Version";
+      infoLabel = "Firmware Version";
+      break;
+
+    case LP_SYSTEM_PROTOCOL: 
+      protocolVersion = ((packet[1] - '0') << 16)
+                      | ((packet[3] - '0') <<  8)
+                      | ((packet[4] - '0') <<  0)
+                      ;
+
+      infoType = String;
+      infoLabel = "Protocol Version";
+      break;
+
+    case LP_SYSTEM_FRAME_LENGTH: 
+      maximumFrameLength = (packet[1] << 8)
+                         | (packet[2] << 0)
+                         ;
+
+      infoType = Dec16;
+      infoLabel = "Maximum Frame Length";
+      break;
+
+    case LP_SYSTEM_DATE_AND_TIME: 
+      infoType = Clock;
+      infoLabel = "Clock";
+      break;
+
+    case LP_SYSTEM_BATTERY: 
+      infoType = String;
+      infoLabel = "Battery State";
+      break;
+
+    case LP_SYSTEM_IDENTITY: 
+      infoType = End;
       break;
 
     default:
@@ -567,32 +644,48 @@ handleSystemInformation (BrailleDisplay *brl, unsigned char *packet) {
 
   switch (infoType) {
     case Unknown:
-      logMessage(LOG_WARNING, "unknown Esysiris system information subcode: 0X%02X", packet[0]);
+      logMessage(LOG_WARNING, "unknown %s system information subcode: 0X%02X", logLabel, packet[0]);
       break;
 
     case End:
-      logMessage(LOG_DEBUG, "end of Esysiris system information");
+      logMessage(logLevel, "%s End of System Information", logLabel);
       return 1;
 
-    case String:
-      logMessage(logLevel, "Esysiris %s: %s", infoDescription, &packet[1]);
+    case String: {
+      const unsigned char *string = &packet[1];
+      const unsigned char *end = string;
+
+      while (*end) {;
+        if (*end == ASCII_ETX) break;
+        end += 1;
+      }
+
+      logMessage(logLevel, "%s %s: %.*s", logLabel, infoLabel, (int)(end - string), string);
       break;
+    }
 
     case Dec8:
-      logMessage(logLevel, "Esysiris %s: %u", infoDescription, packet[1]);
+      logMessage(logLevel, "%s %s: %u", logLabel, infoLabel, packet[1]);
       break;
 
     case Dec16:
-      logMessage(logLevel, "Esysiris %s: %u", infoDescription, (packet[1] << 8) | packet[2]);
+      logMessage(logLevel, "%s %s: %u", logLabel, infoLabel, (packet[1] << 8) | packet[2]);
       break;
 
     case Hex32:
-      logMessage(logLevel, "Esysiris %s: 0X%02X%02X%02X%02X",
-                 infoDescription, packet[1], packet[2], packet[3], packet[4]);
+      logMessage(logLevel, "%s %s: 0X%02X%02X%02X%02X",
+                 logLabel, infoLabel, packet[1], packet[2], packet[3], packet[4]);
+      break;
+
+    case Clock:
+      logMessage(logLevel, "%s %s: %04u-%02u-%02uT%02u:%02u:%02u",
+                 logLabel, infoLabel,
+                 packet[1]+1792, packet[2], packet[3]+1,
+                 packet[4], packet[5], packet[6]);
       break;
 
     default:
-      logMessage(LOG_WARNING, "unimplemented Esysiris system information subcode type: 0X%02X", infoType);
+      logMessage(LOG_WARNING, "unimplemented %s system information subcode type: 0X%02X", logLabel, infoType);
       break;
   }
 
@@ -751,6 +844,24 @@ handleKeyEvent (BrailleDisplay *brl, unsigned char *packet) {
       return 1;
     }
 
+    case LP_KEY_USB_HID_MODE: {
+      const char *mode = NULL;
+
+      switch (packet[1]) {
+        case '0':
+          mode = "protocol";
+          break;
+
+        case '1':
+          mode = "HID";
+          break;
+      }
+
+      if (!mode) break;
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER), "keyboard mode: %s", mode);
+      return 1;
+    }
+
     case LP_KEY_PC: {
       int command = makeKeyboardCommand(brl, packet);
 
@@ -825,7 +936,7 @@ initializeDevice (BrailleDisplay *brl) {
       if (writePacket(brl, packet, sizeof(packet)) == -1) return 0;
     }
 
-    while (io->awaitInput(brl, 500)) {
+    while (io->awaitInput(brl, 1000)) {
       if (readCommand(brl, KTB_CTX_DEFAULT) == BRL_CMD_RESTARTBRL) return 0;
 
       if (haveSystemInformation) {

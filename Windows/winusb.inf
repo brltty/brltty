@@ -377,6 +377,18 @@ DriverVer = %DriverDate%,%DriverVersion%
 ; Device: 1FE4:00A8
 "winusb: HandyTech [Activator Pro 80]"=USB_Install, USB\VID_1FE4&PID_00A8
 
+; Device: 28AC:0012
+"winusb: EuroBraille [b.note]"=USB_Install, USB\VID_28AC&PID_0012
+
+; Device: 28AC:0013
+"winusb: EuroBraille [b.note 2]"=USB_Install, USB\VID_28AC&PID_0013
+
+; Device: 28AC:0020
+"winusb: EuroBraille [b.book (internal)]"=USB_Install, USB\VID_28AC&PID_0020
+
+; Device: 28AC:0021
+"winusb: EuroBraille [b.book (external)]"=USB_Install, USB\VID_28AC&PID_0021
+
 ; Device: 4242:0001
 "winusb: Pegasus [all models]"=USB_Install, USB\VID_4242&PID_0001
 
@@ -792,6 +804,18 @@ DriverVer = %DriverDate%,%DriverVersion%
 
 ; Device: 1FE4:00A8
 "winusb: HandyTech [Activator Pro 80]"=USB_Install, USB\VID_1FE4&PID_00A8
+
+; Device: 28AC:0012
+"winusb: EuroBraille [b.note]"=USB_Install, USB\VID_28AC&PID_0012
+
+; Device: 28AC:0013
+"winusb: EuroBraille [b.note 2]"=USB_Install, USB\VID_28AC&PID_0013
+
+; Device: 28AC:0020
+"winusb: EuroBraille [b.book (internal)]"=USB_Install, USB\VID_28AC&PID_0020
+
+; Device: 28AC:0021
+"winusb: EuroBraille [b.book (external)]"=USB_Install, USB\VID_28AC&PID_0021
 
 ; Device: 4242:0001
 "winusb: Pegasus [all models]"=USB_Install, USB\VID_4242&PID_0001

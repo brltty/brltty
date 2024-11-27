@@ -181,6 +181,26 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
     .generic = 1,
     .operations = &usbSerialOperations_CH341
   },
+
+  { /* EuroBraille b.note */
+    .vendor=0X28AC, .product=0X0012,
+    .operations = &usbSerialOperations_CDC_ACM
+  },
+
+  { /* EuroBraille b.note 2 */
+    .vendor=0X28AC, .product=0X0013,
+    .operations = &usbSerialOperations_CDC_ACM
+  },
+
+  { /* EuroBraille b.book (internal) */
+    .vendor=0X28AC, .product=0X0020,
+    .operations = &usbSerialOperations_CDC_ACM
+  },
+
+  { /* EuroBraille b.book (external) */
+    .vendor=0X28AC, .product=0X0021,
+    .operations = &usbSerialOperations_CDC_ACM
+  },
 };
 
 const size_t usbSerialAdapterCount = ARRAY_COUNT(usbSerialAdapterTable);

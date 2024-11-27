@@ -51,6 +51,8 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(esys_medium),
   &KEY_TABLE_DEFINITION(esys_large),
   &KEY_TABLE_DEFINITION(esytime),
+  &KEY_TABLE_DEFINITION(bnote),
+  &KEY_TABLE_DEFINITION(bbook),
 END_KEY_TABLE_LIST
 
 const InputOutputOperations *io = NULL;
@@ -101,20 +103,23 @@ writeData_USB (BrailleDisplay *brl, const void *data, size_t length) {
   return length;
 }
 
-static const InputOutputOperations serialOperations = {
+static const InputOutputOperations serialOperations_clio = {
+  .name = "Clio",
   .awaitInput = awaitInput_generic,
   .readByte = readByte_generic,
   .writeData = writeData_generic
 };
 
-static const InputOutputOperations usbOperations = {
+static const InputOutputOperations usbOperations_esys = {
+  .name = "EsysIris (USB)",
   .protocol = &esysirisProtocolOperations,
   .awaitInput = awaitInput_generic,
   .readByte = readByte_generic,
   .writeData = writeData_USB
 };
 
-static const InputOutputOperations bluetoothOperations = {
+static const InputOutputOperations serialOperations_esys = {
+  .name = "EsysIris (serial)",
   .protocol = &esysirisProtocolOperations,
   .awaitInput = awaitInput_generic,
   .readByte = readByte_generic,
@@ -257,22 +262,65 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .inputEndpoint=1, .outputEndpoint=0,
       .disableEndpointReset = 1
     },
+
+    { /* b.note */
+      .vendor=0X28AC, .product=0X0012,
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&serialOperations_esys,
+      .serial=&serialParameters,
+      .resetDevice=1,
+    },
+
+    { /* b.note 2 */
+      .vendor=0X28AC, .product=0X0013,
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&serialOperations_esys,
+      .serial=&serialParameters,
+      .resetDevice=1,
+    },
+
+    { /* b.book (internal) */
+      .vendor=0X28AC, .product=0X0020,
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&serialOperations_esys,
+      .serial=&serialParameters,
+      .resetDevice=1,
+    },
+
+    { /* b.book (external) */
+      .vendor=0X28AC, .product=0X0021,
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&serialOperations_esys,
+      .serial=&serialParameters,
+      .resetDevice=1,
+    },
   END_USB_CHANNEL_DEFINITIONS
 
   GioDescriptor descriptor;
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
-  descriptor.serial.options.applicationData = &serialOperations;
+  descriptor.serial.options.applicationData = &serialOperations_clio;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
-  descriptor.usb.options.applicationData = &usbOperations;
+  descriptor.usb.options.applicationData = &usbOperations_esys;
+  descriptor.usb.options.readyDelay = 500;
 
   descriptor.bluetooth.channelNumber = 1;
-  descriptor.bluetooth.options.applicationData = &bluetoothOperations;
+  descriptor.bluetooth.options.applicationData = &serialOperations_esys;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     io = gioGetApplicationData(brl->gioEndpoint);
+
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
+      "input/output operations: %s",
+      io->name
+    );
+
     return 1;
   }
 
@@ -324,12 +372,23 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (connectResource(brl, device)) {
     if (protocol) {
       if (!io->protocol || (io->protocol == protocol)) {
+        logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
+          "device protocol: %s",
+          protocol->protocolName
+        );
+
         if (protocol->initializeDevice(brl)) return 1;
       } else {
         logMessage(LOG_ERR, "protocol not supported by device: %s", protocol->protocolName);
       }
     } else if (io->protocol) {
       protocol = io->protocol;
+
+      logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
+        "I/O protocol: %s",
+        protocol->protocolName
+      );
+
       if (protocol->initializeDevice(brl)) return 1;
     } else {
       static const ProtocolOperations *const protocols[] = {
@@ -341,7 +400,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       while (*p) {
         const ProtocolOperations *protocol = *p++;
 
-        logMessage(LOG_NOTICE, "trying protocol: %s", protocol->protocolName);
+        logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
+          "trying protocol: %s",
+          protocol->protocolName
+        );
+
         if (protocol->initializeDevice(brl)) return 1;
 	asyncWait(700);
       }

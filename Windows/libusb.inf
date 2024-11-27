@@ -467,6 +467,18 @@ ServiceBinary  = %12%\libusb0_x64.sys
 ; Device: 1FE4:00A8
 "LibUSB-Win32: HandyTech [Activator Pro 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A8
 
+; Device: 28AC:0012
+"LibUSB-Win32: EuroBraille [b.note]"=LIBUSB_DEV, USB\VID_28AC&PID_0012
+
+; Device: 28AC:0013
+"LibUSB-Win32: EuroBraille [b.note 2]"=LIBUSB_DEV, USB\VID_28AC&PID_0013
+
+; Device: 28AC:0020
+"LibUSB-Win32: EuroBraille [b.book (internal)]"=LIBUSB_DEV, USB\VID_28AC&PID_0020
+
+; Device: 28AC:0021
+"LibUSB-Win32: EuroBraille [b.book (external)]"=LIBUSB_DEV, USB\VID_28AC&PID_0021
+
 ; Device: 4242:0001
 "LibUSB-Win32: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
 
@@ -882,6 +894,18 @@ ServiceBinary  = %12%\libusb0_x64.sys
 
 ; Device: 1FE4:00A8
 "LibUSB-Win32: HandyTech [Activator Pro 80]"=LIBUSB_DEV, USB\VID_1FE4&PID_00A8
+
+; Device: 28AC:0012
+"LibUSB-Win32: EuroBraille [b.note]"=LIBUSB_DEV, USB\VID_28AC&PID_0012
+
+; Device: 28AC:0013
+"LibUSB-Win32: EuroBraille [b.note 2]"=LIBUSB_DEV, USB\VID_28AC&PID_0013
+
+; Device: 28AC:0020
+"LibUSB-Win32: EuroBraille [b.book (internal)]"=LIBUSB_DEV, USB\VID_28AC&PID_0020
+
+; Device: 28AC:0021
+"LibUSB-Win32: EuroBraille [b.book (external)]"=LIBUSB_DEV, USB\VID_28AC&PID_0021
 
 ; Device: 4242:0001
 "LibUSB-Win32: Pegasus [all models]"=LIBUSB_DEV, USB\VID_4242&PID_0001
