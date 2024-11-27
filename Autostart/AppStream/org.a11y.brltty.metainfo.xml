@@ -521,6 +521,10 @@
     <!-- HandyTech [Activator Pro 80] -->
     <modalias>usb:v1FE4p00A8*</modalias>
 
+    <!-- Device: 28AC:0012 -->
+    <!-- EuroBraille [B. Note] -->
+    <modalias>usb:v28ACp0012*</modalias>
+
     <!-- Device: 4242:0001 -->
     <!-- Pegasus [all models] -->
     <modalias>usb:v4242p0001*</modalias>

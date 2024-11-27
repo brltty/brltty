@@ -501,6 +501,10 @@ brltty 0x0003 0x1fe4 0x00a6
 # HandyTech [Activator Pro 80]
 brltty 0x0003 0x1fe4 0x00a8
 
+# Device: 28AC:0012
+# EuroBraille [B. Note]
+brltty 0x0003 0x28ac 0x0012
+
 # Device: 4242:0001
 # Pegasus [all models]
 brltty 0x0003 0x4242 0x0001

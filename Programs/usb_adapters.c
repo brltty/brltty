@@ -181,6 +181,11 @@ const UsbSerialAdapter usbSerialAdapterTable[] = {
     .generic = 1,
     .operations = &usbSerialOperations_CH341
   },
+
+  { /* EuroBraille B. Note */
+    .vendor=0X28AC, .product=0X0012,
+    .operations = &usbSerialOperations_CDC_ACM
+  },
 };
 
 const size_t usbSerialAdapterCount = ARRAY_COUNT(usbSerialAdapterTable);

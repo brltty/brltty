@@ -510,6 +510,10 @@ USB_DEVICE_ENTRY(0X1FE4, 0X00A6, "ht"),
 // HandyTech [Activator Pro 80]
 USB_DEVICE_ENTRY(0X1FE4, 0X00A8, "ht"),
 
+// Device: 28AC:0012
+// EuroBraille [B. Note]
+USB_DEVICE_ENTRY(0X28AC, 0X0012, "eu"),
+
 // Device: 4242:0001
 // Pegasus [all models]
 USB_DEVICE_ENTRY(0X4242, 0X0001, "pg"),
