@@ -18,7 +18,7 @@
 
 /* Voyager/braille.c - Braille display driver for Tieman Voyager displays.
  *
- * Written by Stéphane Doyon  <s.doyon@videotron.ca>
+ * Written by StÃ©phane Doyon  <s.doyon@videotron.ca>
  *
  * It is being tested on Voyager 44, should also support Voyager 70.
  * It is designed to be compiled in BRLTTY version 4.1.

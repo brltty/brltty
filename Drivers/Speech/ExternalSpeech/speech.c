@@ -18,7 +18,7 @@
 
 /* ExternalSpeech/speech.c - Speech library (driver)
  * For external programs, using my own protocol. Features indexing.
- * Stéphane Doyon <s.doyon@videotron.ca>
+ * StÃ©phane Doyon <s.doyon@videotron.ca>
  */
 
 #include "prologue.h"

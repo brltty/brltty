@@ -18,7 +18,7 @@
 
 /* TSI/braille.c - Braille display driver for TSI displays
  *
- * Written by Stéphane Doyon (s.doyon@videotron.ca)
+ * Written by StÃ©phane Doyon (s.doyon@videotron.ca)
  *
  * It attempts full support for Navigator 20/40/80 and Powerbraille 40/65/80.
  * It is designed to be compiled into BRLTTY version 3.5.

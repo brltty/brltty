@@ -18,7 +18,7 @@
 
 /* TSI/braille.h - Configuration file for the TSI braille
  *                 display driver (brl.c)
- * Written by Stéphane Doyon (s.doyon@videotron.ca)
+ * Written by StÃ©phane Doyon (s.doyon@videotron.ca)
  *
  * This file is intended for version 2.2beta3 of the driver.
  */
