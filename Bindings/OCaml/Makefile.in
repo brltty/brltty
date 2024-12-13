@@ -21,6 +21,7 @@ include $(SRC_TOP)bindings.mk
 OCAML_OK = @OCAML_OK@
 OCAMLC = @OCAMLC@
 OCAMLOPT = @OCAMLOPT@
+OCAMLFLAGS = -I +unix
 OCAMLMKLIB = @OCAMLMKLIB@
 OCAMLMKLIB_FLAGS = -dllib dll$(API_NAME)_stubs.so -cclib -l$(API_NAME)_stubs -cclib -l$(API_NAME)
 OCAMLMKLIBOPT_FLAGS = -cclib -l$(API_NAME)_stubs -cclib -l$(API_NAME)
@@ -64,13 +65,13 @@ $(OCAML_NCLIB): $(OCAML_CLIBS) brlapi.cmx
 	$(OCAMLMKLIB) -ldopt "$(LDFLAGS)" $(OCAMLMKLIBOPT_FLAGS) -o $(OCAML_LIB) brlapi.cmx
 
 brlapi.cmi: brlapi.mli
-	$(OCAMLC) -cc $(CC) -ccopt "$(LIBCFLAGS)" -o $@ -c brlapi.mli
+	$(OCAMLC) $(OCAMLFLAGS) -cc $(CC) -ccopt "$(LIBCFLAGS)" -o $@ -c brlapi.mli
 
 brlapi.cmo: brlapi.ml brlapi.cmi
-	$(OCAMLC) -cc $(CC) -ccopt "$(LIBCFLAGS)" -o $@ -c brlapi.ml
+	$(OCAMLC) $(OCAMLFLAGS) -cc $(CC) -ccopt "$(LIBCFLAGS)" -o $@ -c brlapi.ml
 
 brlapi.cmx: brlapi.ml brlapi.cmi
-	$(OCAMLOPT) -cc $(CC) -ccopt "$(LIBCFLAGS)" -o $@ -c brlapi.cmx brlapi.ml
+	$(OCAMLOPT) $(OCAMLFLAGS) -cc $(CC) -ccopt "$(LIBCFLAGS)" -o $@ -c brlapi.cmx brlapi.ml
 
 brlapi_stubs.$O: $(SRC_DIR)/brlapi_stubs.c
 	$(OCAMLC) -cc $(CC) -ccopt "$(LIBCFLAGS)" -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
@@ -82,7 +83,7 @@ brlapi.ml: $(SRC_DIR)/main.ml constants.ml
 	cat $(SRC_DIR)/main.ml constants.ml > $@
 
 constants.mli: constants.ml
-	$(OCAMLC) -o /dev/null -c -i constants.ml > $@
+	$(OCAMLC) $(OCAMLFLAGS) -o /dev/null -c -i constants.ml > $@
 
 constants.ml: $(CONSTANTS_DEPENDENCIES)
 	$(AWK) $(CONSTANTS_ARGUMENTS) >$@
