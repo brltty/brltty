@@ -806,8 +806,8 @@ BRLTTY_ARG_ENABLE(
    [],
 [dnl
   AC_CACHE_CHECK([for LLVM fuzzer], [brltty_cv_llvm_fuzzer], [dnl
-    HOST_CPU="`$CC -print-multiarch | sed -e 's/-.*//'`"
-    fuzzer_libs="`$CC -print-runtime-dir`/libclang_rt.fuzzer_no_main-$HOST_CPU.a -lstdc++ -lm"
+    HOST_CPU="`$CC -print-target-triple | sed -e 's/-.*//'`"
+    fuzzer_libs="`$CC -print-file-name=libclang_rt.fuzzer_no_main-$HOST_CPU.a` -lstdc++ -lm"
     CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link -fsanitize=address,undefined -fstack-protector-strong"
     LIBS="$LIBS -fsanitize=address,undefined -lubsan"
     OLD_LIBS="$LIBS"
