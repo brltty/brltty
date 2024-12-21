@@ -101,20 +101,20 @@ writeData_USB (BrailleDisplay *brl, const void *data, size_t length) {
   return length;
 }
 
-static const InputOutputOperations serialOperations = {
+static const InputOutputOperations serialOperations_clio = {
   .awaitInput = awaitInput_generic,
   .readByte = readByte_generic,
   .writeData = writeData_generic
 };
 
-static const InputOutputOperations usbOperations = {
+static const InputOutputOperations usbOperations_esys = {
   .protocol = &esysirisProtocolOperations,
   .awaitInput = awaitInput_generic,
   .readByte = readByte_generic,
   .writeData = writeData_USB
 };
 
-static const InputOutputOperations bluetoothOperations = {
+static const InputOutputOperations serialOperations_esys = {
   .protocol = &esysirisProtocolOperations,
   .awaitInput = awaitInput_generic,
   .readByte = readByte_generic,
@@ -262,6 +262,7 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .vendor=0X28AC, .product=0X0012,
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
+      .data=&serialOperations_esys,
     },
   END_USB_CHANNEL_DEFINITIONS
 
@@ -269,13 +270,13 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
   gioInitializeDescriptor(&descriptor);
 
   descriptor.serial.parameters = &serialParameters;
-  descriptor.serial.options.applicationData = &serialOperations;
+  descriptor.serial.options.applicationData = &serialOperations_clio;
 
   descriptor.usb.channelDefinitions = usbChannelDefinitions;
-  descriptor.usb.options.applicationData = &usbOperations;
+  descriptor.usb.options.applicationData = &usbOperations_esys;
 
   descriptor.bluetooth.channelNumber = 1;
-  descriptor.bluetooth.options.applicationData = &bluetoothOperations;
+  descriptor.bluetooth.options.applicationData = &serialOperations_esys;
 
   if (connectBrailleResource(brl, identifier, &descriptor, NULL)) {
     io = gioGetApplicationData(brl->gioEndpoint);
