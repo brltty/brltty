@@ -27,24 +27,26 @@ extern "C" {
 
 /* Descriptor types. */
 typedef enum {
-  UsbDescriptorType_Device        = 0X01,
-  UsbDescriptorType_Configuration = 0X02,
-  UsbDescriptorType_String        = 0X03,
-  UsbDescriptorType_Interface     = 0X04,
-  UsbDescriptorType_Endpoint      = 0X05,
-  UsbDescriptorType_HID           = 0X21,
-  UsbDescriptorType_Report        = 0X22
+  UsbDescriptorType_Device               = 0X01,
+  UsbDescriptorType_Configuration        = 0X02,
+  UsbDescriptorType_String               = 0X03,
+  UsbDescriptorType_Interface            = 0X04,
+  UsbDescriptorType_Endpoint             = 0X05,
+  UsbDescriptorType_InterfaceAssociation = 0X0B,
+  UsbDescriptorType_HID                  = 0X21,
+  UsbDescriptorType_Report               = 0X22
 } UsbDescriptorType;
 
 /* Descriptor sizes. */
 typedef enum {
-  UsbDescriptorSize_Device        = 18,
-  UsbDescriptorSize_Configuration =  9,
-  UsbDescriptorSize_String        =  2,
-  UsbDescriptorSize_Interface     =  9,
-  UsbDescriptorSize_Endpoint      =  7,
-  UsbDescriptorSize_HID           =  6,
-  UsbDescriptorSize_Class         =  3
+  UsbDescriptorSize_Device               = 18,
+  UsbDescriptorSize_Configuration        =  9,
+  UsbDescriptorSize_String               =  2,
+  UsbDescriptorSize_Interface            =  9,
+  UsbDescriptorSize_Endpoint             =  7,
+  UsbDescriptorSize_InterfaceAssociation =  8,
+  UsbDescriptorSize_HID                  =  6,
+  UsbDescriptorSize_Class                =  3
 } UsbDescriptorSize;
 
 typedef enum {
@@ -220,6 +222,17 @@ typedef struct {
 } PACKED UsbEndpointDescriptor;
 
 typedef struct {
+  uint8_t bDescriptorLength; /* Descriptor size in bytes (8). */
+  uint8_t bDescriptorType;   /* Descriptor type (11 == interface association). */
+  uint8_t bFirstInterface;   /* Number of first interface associated with this function. */
+  uint8_t bInterfaceCount;   /* Number of contiguous interfaces associated with this function. */
+  uint8_t bFunctionClass;    /* Function class. */
+  uint8_t bFunctionSubClass; /* Function subclass. */
+  uint8_t bFunctionProtocol; /* Function protocol. */
+  uint8_t iFunction;         /* String index for function description. */
+} PACKED UsbInterfaceAssociationDescriptor;
+
+typedef struct {
   uint8_t bDescriptorType;
   uint16_t wDescriptorLength;
 } PACKED UsbClassDescriptor;
@@ -240,7 +253,9 @@ typedef union {
   UsbStringDescriptor string;
   UsbInterfaceDescriptor interface;
   UsbEndpointDescriptor endpoint;
+  UsbInterfaceAssociationDescriptor interfaceAssociation;
   UsbHidDescriptor hid;
+  UsbClassDescriptor class;
   unsigned char bytes[0XFF];
 } UsbDescriptor;
 
