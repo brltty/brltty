@@ -526,7 +526,10 @@ always gorgonzola 1245-26-1245-135-1345-1356-135-123-1
 sufword gottes 1245-135-2345-2345-123456
 always gottesdienst 1245-135-2345-2345-123456-145-346-1345-23456
 always grippeimpf = shouldn't use the ei-contraction
-always glastrepp = shouldn't use the st-contraction
+before cost always glas =
+always plexiglas 1234-123-15-6-1346-24-1245-123-1-234 shouldn't use the ig-contraction
+always schwinglasch 156-2456-35-1245-123-1-156
+prfword glast 1245-123-1-23456
 before cost always abgas =
 before cost always bonus =
 word bonusse 12-135-1345-136-2346-15
@@ -636,6 +639,7 @@ always palisander 1234-25-24-234-235-145-12456
 always salamander 234-25-1-134-235-145-12456
 
 always kriteri 13-1235-24-2345-12456-24 shouldn't use the te-contraction
+prfword kurie =
 prfword kurzeit 13-136-1235-1356-146-2345
 prfword kurzeiten 13-136-1235-1356-146-2345-14
 always kurzentren 13-136-1235-1356-14-2345-1235-14
@@ -910,6 +914,7 @@ prfword kriegst 13-1235-346-1245-23456
 
 
 always rechteinhaber 1235-2345-15-35-2-125-12456 shouldn't use the ein-contraction
+always reichstag 1235-146-1456-234-2345-1-1245 shouldn't use the st-contraction
 before e always reise 1235-146-234-15
 always relief 1235-13456-24-15-124 shouldn't use the ie-contraction
 sufword renten 1235-14-2345-14 shouldn't use the te-contraction
@@ -1077,6 +1082,8 @@ prfword wärmerem 2456-345-1235-134-12456-12356
 prfword wärmeren 2456-345-1235-134-12456-14
 prfword wärmerer 2456-345-1235-134-12456-23456
 prfword wärmeres 2456-345-1235-134-12456-123456
+prfword wärmern 2456-345-1235-134-12456-1345
+prfword wärmers 2456-345-1235-134-12456-234
 always wärmend 2456-345-1235-134-14-145
 always wärmens 2456-345-1235-134-14-234
 
@@ -1085,6 +1092,8 @@ always wiese 2456-346-234-15 shouldn't use the wie-contraction
 always wiesen 2456-346-234-14 shouldn't use the wie-contraction
 before cost always wirtschafts 2456-156-234
 before cost always wissenschafts 2456-2346-14-156-234
+before l always wurzel 2456-136-1235-1356-13456
+
 before lnr always yoga =
 always ziegel 1356-346-1245-13456 shouldn't use the ge-contraction
 sufword ziel 1356-346-123

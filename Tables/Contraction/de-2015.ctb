@@ -124,6 +124,7 @@ always dereferenzier 145-15-1235-15-124-12456-14-1356-346-1235 shouldn't use the
 always deregulier 145-15-1235-15-1245-136-123-346-1235 shouldn't use the er-contraction
 always es 123456
 always ge 12346
+sufword gerst 1245-12456-23456
 prfword gehe 1245-2356-15
 prfword gehen 1245-2356-14
 prfword gehend 1245-2356-14-145
@@ -497,6 +498,46 @@ always männisch 134-345-1345-1345-24-156
 always nisier 1345-24-234-346-1235 technisierung shouldn't use -nis
 
 midendword sam 2346
+sufword sesam 234-123456-1-134 shouldn't use the sam-contraction
+always ahornamen 1-125-26-1345-234-1-134-14
+always ampfersamen 1-134-1234-124-12456-234-1-134-14
+always anissamen 235-24-234-234-1-134-14
+always bärlappsamen 12-345-1235-123-1-1234-1234-234-1-134-14
+always bananensamen 12-235-235-14-234-1-134-14
+always baumsamen 12-16-134-234-1-134-14
+always baumwollsamen 12-16-134-2-135-234-1-134-14
+always birkensamen 12-24-1235-13-14-234-1-134-14
+always bohnensamen 12-135-125-1345-14-234-1-134-14
+always cannabissamen 6-14-235-134-1-12-24-234-234-1-134-14 shouldn't use the bis-, ss- and sam-contractions
+always chiasamen 1456-24-1-234-1-134-14
+always chilisamen 1456-24-123-24-234-1-134-14
+always dattelsamen 145-1-2345-2345-13456-234-1-134-14
+always erbsensamen 12456-12-234-14-234-1-134-14
+always fenchelsamen 124-14-1456-13456-234-1-134-14
+always fichtensamen 124-3456-2345-14-234-1-134-14
+always gartensamen 1245-356-2345-14-234-1-134-14
+always gemüsesamen 12346-134-1256-234-15-234-1-134-14
+always getreidesamen 12346-2345-1235-146-145-15-234-1-134-14
+always grassamen 1245-1235-1-234-234-1-134-14
+always gurkensamen 1245-136-1235-13-14-234-1-134-14
+always hanfsamen 125-235-124-234-1-134-14
+always kakaosamen 13-1-13-1-135-234-1-134-14
+always karottensamen 13-356-135-2345-2345-14-234-1-134-14
+always kiefernsamen 13-346-124-12456-1345-234-1-134-14
+always kleesamen 13-123-15-15-234-1-134-14
+always kornsamen 13-26-1345-234-1-134-14
+always kümmelsamen 13-1256-1346-13456-234-1-134-14
+always kürbissamen 13-1256-1235-12-24-234-234-1-134-14
+always leinsamen 123-1246-234-1-134-14
+always linsensamen 123-35-234-14-234-1-134-14
+always mohnsamen 134-135-125-1345-234-1-134-14
+always möhrensamen 134-246-125-1235-14-234-1-134-14
+always pflanzensamen 1234-124-123-235-1356-14-234-1-134-14
+always senfsamen 234-14-124-234-1-134-14
+always tomatensamen 234-135-134-1-2345-14-234-1-134-14
+always weidensamen 2456-146-145-14-234-1-134-14
+# XXX
+prfword samens 234-1-134-14-234
 sufword balsam 12-25-234-1-134
 sufword besam 23-234-1-134
 sufword bisam =
@@ -770,6 +811,7 @@ always soper 234-135-1234-12456
 endword son =
 always cursor = shouldn't use the so-contraction
 begword		absol		=
+always		absolu		=
 begword		absorb		1-12-234-26-12
 begword		absorp		1-12-234-26-1234
 always		adsorbier	1-145-234-26-12-346-1235
@@ -786,9 +828,9 @@ begmidword	sensor		234-14-234-26
 endword		sensor		234-14-234-135-1235
 endword		sensor		234-14-234-135-1235
 always		sobjek		=
-always		sockel		234-135-46-13456
+always		sock		234-135-46
 word		soda		=
-always		soffizier	234-135-124-124-24-1356-346-1235
+always		soff		=
 always		soft		=
 always		sohl		=
 always		sohn		=
@@ -866,6 +908,7 @@ always stundung 23456-256-145-136
 always sstundung 234-23456-256-145-136
 
 always umrund 136-134-1235-256-145
+always unduld 256-145-136-123-145
 always undurch 256-2-1456
 always wund 2456-256-145 shouldn't use the und-contraction
 
@@ -946,6 +989,7 @@ always allegor 1-12345-15-1245-26 Allegorie shouldn't use the ae-contraction
 always allein 1-1246
 word allem 1-12356
 always allen 1-14
+sufword ballen 12-1-12345-14
 always aller 1-12456
 always basketball 12-1-234-13-15-2345-12-1-12345
 always faustball 124-16-23456-12-1-12345
@@ -1213,8 +1257,13 @@ always grund 1245-145
 contraction gd
 always gründ 5-1245-145
 always gründonners 1245-1235-1256-1345-145-135-1345-1345-12456-234 gründonnerstag shouldn't use the gründ-contraction
+
 always hab 2-125
+always frühab =
+always frühabsolut = shouldn't use the so-contraction
 always habilit =
+always habitus =
+
 always haft 125-124
 contraction hf
 always häft 5-125-124
@@ -1247,6 +1296,8 @@ always soberteil 234-135-12-12456-2345-146-123
 always häupt 5-125-1234
 always herr 1235-1235
 contraction rr
+always herruf 125-12456-1235-136-124
+always sherry 234-125-12456-125-6-13456
 
 always hier 125-1235
 contraction hr
@@ -1350,7 +1401,6 @@ always laess 5-123
 sufword blass 12-123-1-2346
 sufword blasst 12-123-1-234-23456
 always class = shouldn't use the lass-contraction
-before s always glas =
 sufword klass 13-123-1-2346 shouldn't use the lass-contraction
 always lassist 123-1-2346-24-23456
 always laich 123-1-24-1456 shouldn't use the ich-contraction
@@ -1597,7 +1647,6 @@ before st always setzes 2-15-123456
 always esetz 15-2-15
 always ssetz 234-2-15
 
-sufword sesam 234-123456-1-134 shouldn't use the sam-contraction
 word sind 234-145
 contraction sd
 always gesinde 12346-234-35-145-15
@@ -1827,14 +1876,14 @@ begword anlagen 235-123-1-1245-14
 always anlauf 235-123-16-124 shouldn't use the auf-contraction
 before m always anleihe 235-123-146-125-15 Anleihemarkt shouldn't use the em-contraction
 before m always film =
-class egn egn
-before egn begword anti 235-2345-24
-before egn begword mini 134-35-24
-before egn begword multi =
-before egn begword poli =
-before egn begword quasi =
-before egn begword semi 234-12356-24
-always antichrist 235-2345-24-1456-1235-24-23456 shouldn't use the ich-contraction
+class cegn cegn
+before cegn begword anti 235-2345-24
+before cegn always alkali 25-13-25-24
+before cegn begword mini 134-35-24
+before cegn begword multi =
+before cegn begword poli =
+before cegn begword quasi =
+before cegn begword semi 234-12356-24
 always anästh 235-345-234-2345-125 Anästhesie
 begword armee 356-134-15-15
 word armeen 356-134-15-14
