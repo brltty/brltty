@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: brltty 6.5\n"
 "Report-Msgid-Bugs-To: BRLTTY@brltty.app\n"
-"POT-Creation-Date: 2024-10-11 19:57+0200\n"
+"POT-Creation-Date: 2025-01-14 17:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -191,7 +191,7 @@ msgid "Alert Tunes"
 msgstr ""
 
 #: Programs/menu_prefs.c:866
-#: Programs/menu_prefs.c:1214
+#: Programs/spk.c:282
 msgid "All"
 msgstr ""
 
@@ -1232,6 +1232,10 @@ msgstr ""
 msgid "Month Day Year"
 msgstr ""
 
+#: Programs/spk.c:281
+msgid "Most"
+msgstr ""
+
 #. xgettext: This is the name of MIDI musical instrument #11 (in the Chromatic Percussion group).
 #: Programs/midi.c:111
 msgid "Music Box"
@@ -1288,12 +1292,12 @@ msgid "No Capitalization"
 msgstr ""
 
 #: Programs/menu_prefs.c:899
-#: Programs/menu_prefs.c:1212
 #: Programs/menu_prefs.c:1225
 #: Programs/menu_prefs.c:1238
 #: Programs/menu_prefs.c:1321
 #: Programs/menu_prefs.c:1360
 #: Programs/menu_prefs.c:1380
+#: Programs/spk.c:279
 msgid "None"
 msgstr ""
 
@@ -1533,6 +1537,10 @@ msgstr ""
 msgid "Pipe"
 msgstr ""
 
+#: Programs/spk.c:263
+msgid "Pitch"
+msgstr ""
+
 #. xgettext: This is the name of MIDI musical instrument #46 (in the Strings group).
 #: Programs/midi.c:220
 msgid "Pizzicato Strings"
@@ -1558,12 +1566,20 @@ msgstr ""
 msgid "Properties of eligible keyboards."
 msgstr ""
 
+#: Programs/spk.c:299
+msgid "Punctuation"
+msgstr ""
+
 #: Programs/menu_prefs.c:952
 msgid "Quick Space"
 msgstr ""
 
 #: Programs/menu_prefs.c:1229
 msgid "Raise Pitch"
+msgstr ""
+
+#: Programs/spk.c:237
+msgid "Rate"
 msgstr ""
 
 #: Programs/brltty-hid.c:181
@@ -1827,7 +1843,7 @@ msgstr ""
 msgid "Sliding Braille Window"
 msgstr ""
 
-#: Programs/menu_prefs.c:1213
+#: Programs/spk.c:280
 msgid "Some"
 msgstr ""
 
@@ -2299,6 +2315,10 @@ msgstr ""
 msgid "Voice Oohs"
 msgstr ""
 
+#: Programs/spk.c:211
+msgid "Volume"
+msgstr ""
+
 #: Programs/menu_prefs.c:1514
 msgid "Warning"
 msgstr ""
@@ -2712,7 +2732,7 @@ msgstr ""
 msgid "clear the text selection"
 msgstr ""
 
-#: Programs/cmd_speech.c:501
+#: Programs/cmd_speech.c:515
 msgid "column"
 msgstr ""
 
@@ -3450,7 +3470,7 @@ msgstr ""
 msgid "light red"
 msgstr ""
 
-#: Programs/cmd_speech.c:500
+#: Programs/cmd_speech.c:514
 msgid "line"
 msgstr ""
 
@@ -3630,10 +3650,6 @@ msgstr ""
 msgid "pid file open error"
 msgstr ""
 
-#: Programs/spk.c:263
-msgid "pitch"
-msgstr ""
-
 #. xgettext: This is the description of the SETLEFT command.
 #: Programs/cmds.auto.h:1290
 msgid "place left end of braille window at character"
@@ -3645,10 +3661,6 @@ msgstr ""
 
 #: Programs/config.c:511
 msgid "quality"
-msgstr ""
-
-#: Programs/spk.c:237
-msgid "rate"
 msgstr ""
 
 #. xgettext: This is the description of the COPY_RECT command.
@@ -4273,10 +4285,6 @@ msgstr ""
 
 #: Programs/parse.c:562
 msgid "unsupported parameter"
-msgstr ""
-
-#: Programs/spk.c:211
-msgid "volume"
 msgstr ""
 
 #. LRGB
