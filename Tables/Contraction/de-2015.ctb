@@ -24,7 +24,6 @@ include de-g1.ctb
 class b b
 class e e
 class f f
-class g g
 class h h
 class i i
 class m m
@@ -122,7 +121,10 @@ always denunz 145-15-1345-256-1356 shouldn't use the en-contraction
 always er 12456
 always dereferenzier 145-15-1235-15-124-12456-14-1356-346-1235 shouldn't use the er-contraction
 always deregulier 145-15-1235-15-1245-136-123-346-1235 shouldn't use the er-contraction
+
 always es 123456
+always esammlung 15-234-1-1346-123-136
+
 always ge 12346
 sufword gerst 1245-12456-23456
 prfword gehe 1245-2356-15
@@ -498,8 +500,20 @@ always männisch 134-345-1345-1345-24-156
 always nisier 1345-24-234-346-1235 technisierung shouldn't use -nis
 
 midendword sam 2346
+midendword sambition =
+midendword samplitud =
+sufword ansam 235-234-1-134
+sufword ansamm 235-234-1-1346
+always besamung 23-234-1-134-136
+begword gesam 12346-234-1-134 shouldn't use the sam-contraction
+begword gesamm 12346-234-1-1346 shouldn't use the sam-contraction
+midendword samariter 234-1-134-356-24-2345-12456
+midendword sammel 234-1-1346-13456 shouldn't use the sam-contraction
+always samml 234-1-1346-123 shouldn't use the sam-contraction
 sufword sesam 234-123456-1-134 shouldn't use the sam-contraction
-always ahornamen 1-125-26-1345-234-1-134-14
+always disambiguier 145-24-234-1-134-12-45-136-346-1235 shouldn't use the sam-contraction
+sufword einsamig 1246-234-1-134-45
+always ahornsamen 1-125-26-1345-234-1-134-14
 always ampfersamen 1-134-1234-124-12456-234-1-134-14
 always anissamen 235-24-234-234-1-134-14
 always bärlappsamen 12-345-1235-123-1-1234-1234-234-1-134-14
@@ -508,7 +522,7 @@ always baumsamen 12-16-134-234-1-134-14
 always baumwollsamen 12-16-134-2-135-234-1-134-14
 always birkensamen 12-24-1235-13-14-234-1-134-14
 always bohnensamen 12-135-125-1345-14-234-1-134-14
-always cannabissamen 6-14-235-134-1-12-24-234-234-1-134-14 shouldn't use the bis-, ss- and sam-contractions
+always cannabissamen 6-14-235-1345-1-12-24-234-234-1-134-14 shouldn't use the bis-, ss- and sam-contractions
 always chiasamen 1456-24-1-234-1-134-14
 always chilisamen 1456-24-123-24-234-1-134-14
 always dattelsamen 145-1-2345-2345-13456-234-1-134-14
@@ -538,11 +552,12 @@ always tomatensamen 234-135-134-1-2345-14-234-1-134-14
 always weidensamen 2456-146-145-14-234-1-134-14
 # XXX
 prfword samens 234-1-134-14-234
-sufword balsam 12-25-234-1-134
+always balsam 12-25-234-1-134
 sufword besam 23-234-1-134
+sufword besamm 23-234-1-1346
 sufword bisam =
 always bischofsamt 12-24-156-135-124-234-1-134-2345 shouldn't use the sam-contraction
-always beisammen 2-146-234-1-1346-14
+always beisammen 2-12-234-1-1346-14
 
 
 midendword schaft 156
@@ -593,7 +608,6 @@ sufword erheiter 12456-125-146-2345-12456 shouldn't use the heit-contraction
 prfword formal 124-26-134-1-123 shouldn't use the mal-contraction
 begword formal 124-26-134-25 shouldn't use the mal-contraction
 word firnis = shouldn't use the nis-contraction
-begword gesam 12346-234-1-134 shouldn't use the sam-contraction
 always herrschaft 1235-1235-156-1-124-2345 can not use the shaft-contraction
 always hoheit 125-135-125-146-2345 shouldn't use the heit-contraction
 always kuhdung 13-136-125-145-256-1245 shouldn't use the ung-contraction
@@ -698,6 +712,9 @@ prfword laufes 123-16-124-123456
 prfword laufs 123-16-124-234
 prfword laufst 123-16-124-23456
 prfword lauft 123-16-124-2345
+always kunstlauf 13-256-23456-123-16-124
+always lebenslauf 123-12-14-234-123-16-124
+always notlauf 1345-135-2345-123-16-124
 always gelaufen 12346-123-16-124-14
 always schlauf 156-123-16-124 shouldn't use the auf-contraction
 always abfragerate 1-12-124-1235-1-12346-1235-1-236 shouldn't use the er-contraction
@@ -744,8 +761,7 @@ always außerdem 16-6-2346-12456-2-12356
 always demask = demaskiert shouldn't use the dem-contraction
 always demilit = shouldn't use the dem-contraction
 always demonstr 145-12356-135-1345-23456-1235 shouldn't use the dem-contraction
-word demo 145-12356-135 shouldn't use the dem-contraction
-word demos 145-12356-135-234 shouldn't use the dem-contraction
+sufword demo 145-12356-135 shouldn't use the dem-contraction
 always epidem 15-1234-24-145-12356
 
 
@@ -778,9 +794,14 @@ always fürsorgewesen 2-124-234-26-12346-2456-123456-14 shouldn't use the gewese
 
 word immer 1346
 always immer 2-1346
+always abstimm 1-12-23456-24-1346
 always immersion 24-1346-12456-234-24-135-1345 shouldn't use the immer-contraction
 always immersiv 24-1346-12456-234-24-1236
 always flimmer 124-123-24-1346-12456
+always glimmer 1245-123-24-1346-12456
+always schimmer 156-24-1346-12456
+always schlimmer 156-123-24-1346-12456
+always trimmer 2345-1235-24-1346-12456
 always wimmer 2456-24-1346-12456 shouldn't use the immer-contraction
 always zimmer 1356-24-1346-12456 shouldn't use the immer-contraction
 
@@ -869,6 +890,7 @@ always überlauf 2-1256-123-16-124
 word und 136
 always und 2-136
 sufword bund 12-256-145
+sufword bundes 12-256-145-123456
 always diffundier 245-24-124-124-256-145-346-1235
 before t always fundamen 124-256-145-1-134-14
 before t always aufundamen 16-124-256-145-1-134-14
@@ -882,6 +904,7 @@ prfword fundener 124-256-145-14-12456
 prfword fundenes 124-256-145-14-123456
 prfword fundes 124-256-145-123456
 prfword funds 124-256-145-234
+prfword fundus 124-256-145-136-234
 sufword gesund 12346-234-256-145
 sufword hund 125-256-145 shouldn't use the und-contraction
 before hilmnrsu sufword hunde 125-256-145-15 shouldn't use the und-contraction
@@ -943,6 +966,8 @@ always zwiebel 1356-2456-346-12-13456 shouldn't use the wie-contraction
 
 word zu 1356
 always zu 2-1356
+sufword azur =
+sufword mazurk =
 always zugentlast 1356-136-1245-14-2345-123-1-23456 shouldn't use the zu- nor ge-contraction
 word indem 35-2-12356
 word trotzdem 2345-1356-2-12356
@@ -989,6 +1014,8 @@ always allegor 1-12345-15-1245-26 Allegorie shouldn't use the ae-contraction
 always allein 1-1246
 word allem 1-12356
 always allen 1-14
+always korallen 13-26-1-12345-14
+always kristall 13-1235-24-23456-1-12345 shouldn't use any of the allen-contraction
 sufword ballen 12-1-12345-14
 always aller 1-12456
 always basketball 12-1-234-13-15-2345-12-1-12345
@@ -1009,7 +1036,7 @@ always alleskönn 1-123456-2-13
 always alleswiss 1-123456-2456-2346
 
 
-always allesamt 1-12345-15-234-1-134-2345 shouldn't use the es-contraction
+always allesamt 1-15-234-1-134-2345 shouldn't use the es-contraction
 before t always alphabe 25-1234-125-1-23 shouldn't use the hab-contraction
 word also 1-135
 always ander 2-12456
@@ -1021,6 +1048,8 @@ always bänder 12-345-1345-145-12456 shouldn't use the änder-contraction
 always aender 5-12456
 always arbeit 356-12
 always arbeits 356-12-234
+always arbeitsam 356-12-2346
+always arbeitsamt 356-12-234-1-134-2345
 always arben 356-12-14
 
 always kauf 13-16-124
@@ -1333,6 +1362,7 @@ word jedoch 245-1456
 sufword jetzig 245-45
 always johannisberg 245-135-125-235-1345-24-234-12-12456-1245 shouldn't use the nis-contraction
 always jung 245-256-1245 shouldn't use the ung-contraction
+prfword junge 245-256-12346 shouldn't use the ung-contraction
 
 word kannst 13-23456
 always kapital 13-1234
@@ -1433,6 +1463,9 @@ always mmaschin 134-134-156
 always nähmaschin 1345-345-125-134-156
 always zugmaschin 1356-136-1245-134-156
 
+always histori 125-24-23456-26-24 shouldn't use the ie-contraction
+always materi 134-1-2345-12456-24 materie shouldn't use the te- nor the ie-contraction
+
 always material 134-123
 contraction ml
 always dematerial 145-15-134-123
@@ -1440,6 +1473,8 @@ always ematerial 15-134-123
 always mmaterial 134-134-123
 
 always materiell 134-12345
+always mmateriell 134-134-12345
+
 word mir 134-1235
 always mittel 134-2345
 contraction mt
@@ -1470,6 +1505,11 @@ always enahm 15-1345-134
 
 always natur 1345-2345
 contraction nt
+always denatur 145-15-1345-2345
+always renatur 1235-15-1345-2345
+always signatur 234-45-1345-1-2345-136-1235
+always ssignatur 234-234-45-1345-1-2345-136-1235
+
 always natürlich 1345-456
 always neben 1345-12
 contraction nb
@@ -1678,6 +1718,8 @@ always stand 2-23456
 
 always ständ 5-23456
 always staend 5-23456
+always dienständer 145-346-1345-23456-5-12456
+
 always stell 2-13456
 always sstell 234-2-13456 shouldn't use the ss-contraction
 word stets 23456-234
@@ -1764,7 +1806,10 @@ before konsonant begword zweit 1356-2456-146-2345 shouldn't use the weit-contrac
 always wenig 2456-45
 sufword wenn 2456-1345
 contraction wn
+
 always werd 2-2456
+always schwerdonners 156-2456-12456-145-135-1345-1345-12456-234
+
 always wesentlich 2456-456
 always wiegend 2456-346-1245-14-145 shouldn't use the wie-contraction
 always wieder 346-145
@@ -1837,10 +1882,6 @@ always afrikarefer 1-124-1235-24-13-1-1235-15-124-12456 shouldn't use the ar-con
 sufword agent 1-1245-14-2345 shouldn't use the ge-contraction
 always akadem 1-13-1-145-12356 shouldn't use the dem-contraction
 sufword akten 1-13-2345-14 shouldn't use the te-contraction
-always akteur 1-13-2345-126-1235 shouldn't use the te-contraction
-always ingenieur 35-1245-14-24-126-1235
-always interieur 35-2345-12456-24-126-1235
-always porteur 1234-26-2345-126-1235
 always alarm 25-356-134 Alarmmeldung shouldn't use the mm-contraction
 always albern 25-12-12456-1345 shouldn't use the be-contraction
 always albert 25-12-12456-2345 shouldn't use the be-contraction
@@ -1879,6 +1920,7 @@ before m always film =
 class cegn cegn
 before cegn begword anti 235-2345-24
 before cegn always alkali 25-13-25-24
+before cegn always milli 134-24-12345-24
 before cegn begword mini 134-35-24
 before cegn begword multi =
 before cegn begword poli =
@@ -1904,8 +1946,14 @@ always beutel 12-126-2345-13456 should use the eu-contraction
 always bssy 12-234-234-6-13456 shouldn't use the ss-contraction
 always bundes 12-256-145-123456 shouldn't use the und-contraction
 prfword chemikalie 1456-12356-24-13-25-24-15
-always donnerstag 145-135-1345-1345-12456-234-2345-1-1245 shouldn't use the st-contraction
-before g always samstag =
+
+always geheimdienst 12346-125-146-134-145-346-1345-23456 shouldn't overlap with dienstag
+before g always donnersta 145-135-1345-1345-12456-234-2345-1 shouldn't use the st-contraction
+before g always donnerstä 145-135-1345-1345-12456-234-2345-345 shouldn't use the st-contraction
+before g always samsta =
+before g always samstä =
+before g always ssamsta =
+before g always ssamstä =
 endword stag = shouldn't use the st-contraction
 endword stage 234-2345-1-12346
 endword stages 234-2345-1-1245-123456
@@ -2024,8 +2072,6 @@ always radieschen 1235-1-145-346-234-1456-14 shouldn't use the sch-contraction
 always röschen 1235-246-234-1456-14 should use the ch-contraction
 
 begword rosaro = shouldn't use the ar-contraction
-midendword sammel 234-1-1346-13456 shouldn't use the sam-contraction
-midendword samml 234-1-1346-123 shouldn't use the sam-contraction
 endword schef 234-1456-15-124
 endword schefin 234-1456-15-124-35
 endword schefins 234-1456-15-124-35-234

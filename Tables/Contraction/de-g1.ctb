@@ -22,6 +22,7 @@
 include de-g0.ctb
 
 class cst cst
+class g g
 class s s
 class t t
 
@@ -64,8 +65,14 @@ always andalusier = shouldn't use the ie-contraction
 always asthma = shouldn't use the st-contraction
 before t always bundes = shouldn't use the st-contraction
 prfword chemikalie 1456-15-134-24-13-1-123-24-15 shouldn't use the ie-contraction
-always dienstag 145-346-1345-234-2345-1-1245 shouldn't use the st-contraction
-always donnerstag = shouldn't use the st-contraction
+
+before g always diensta 145-346-1345-234-2345-1 shouldn't use the st-contraction
+before g always dienstä 145-346-1345-234-2345-345 shouldn't use the st-contraction
+before g always donnersta = shouldn't use the st-contraction
+before g always donnerstä = shouldn't use the st-contraction
+before g always samsta = shouldn't use the st-contraction
+before g always samstä = shouldn't use the st-contraction
+
 always eschatolog 15-234-1456-1-2345-135-123-135-1245 shouldn't use the sch-contraction
 always esther = shouldn't use the st-contraction
 prfword folie = shouldn't use the ie-contraction
@@ -81,7 +88,6 @@ always propriet = proprietär shouldn't use the ie-contraction
 always döschen 145-246-234-1456-15-1345
 always höschen 125-246-234-1456-15-1345 should use the ch-contraction
 word röschen 1235-246-234-1456-15-1345 should use the ch-contraction
-always samstag = shouldn't use the st-contraction
 word wisst = shouldn't use the st-contraction
 always vietnam = shouldn't use the ie-contraction
 
