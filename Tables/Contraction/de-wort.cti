@@ -624,7 +624,7 @@ always klassen 13-123-1-2346-14
 always klassifi 13-123-1-2346-24-124-24 shouldn't use the lass-contraction
 always klassisch 13-123-1-2346-24-156 shouldn't use the lass-contraction
 sufword klebe 13-123-15-23 shouldn't use the leb-contraction
-endword klebe 13-123-15-23 shouldn't use the leb-contraction
+endword klebe = shouldn't use the leb-contraction
 endword kleber 13-123-15-12-12456 shouldn't use the leb-contraction
 endword klebern 13-123-15-12-12456-1345 shouldn't use the leb-contraction
 endword klebers 13-123-15-12-12456-234 shouldn't use the leb-contraction
@@ -710,8 +710,6 @@ always mmaßnahm 134-134-1-6-2346-1345-134
 
 always matura =
 always maturant 134-1-2345-136-1235-235-2345
-
-sufword materi 134-1-2345-12456 shouldn't use the te-contraction
 
 before i always emechan 15-134-15-1456-235
 before i always mmechan 134-134-15-1456-235
@@ -803,6 +801,8 @@ prfword beeten 12-15-15-2345-14
 prfword beets 12-15-15-2345-234
 
 begword mengen 134-14-1245-14 shouldn't use the ge-contraction
+
+sufword mensa 134-14-234-1 mensagebäude, mensaleitung, mensamitglied
 
 always merkmal 134-12456-13-134
 
@@ -1040,6 +1040,31 @@ always tabasco =
 always stabell 234-2345-1-23-12345
 always teacher 2345-15-1-1456-12456
 always teaching 2345-15-1-1456-35-1245
+
+always stechnolog 234-236-1456-1345-135-123-135-1245
+always stelefon 234-2345-13456-15-124-135-1345
+always stelephon 234-2345-13456-15-1234-125-135-1345
+always stelegraf 234-2345-13456-15-1245-1235-1-124
+always stelegraph 234-1245-13456-15-1245-1235-1-1234-125
+always stelegramm 234-2345-13456-15-1245-1235-1-1346
+always stilgung 234-2345-24-123-1245-136
+prfword stod =
+prfword stode =
+always stoleranz 234-2345-135-123-12456-235-1356
+always strainer 234-2345-1235-1-24-1345-12456
+always straining 234-2345-1235-1-24-1345-35-1245
+always stransakt 234-2345-1235-235-234-1-13-2345
+always stransform 234-2345-1235-235-234-124-26-134
+always sturnier 234-2345-136-1235-1345-346-1235
+prfword stests 234-236-23456-234
+prfword styp =
+prfword stypen 234-2345-6-13456-1234-14
+prfword styps =
+always stypisch 234-2345-6-13456-1234-24-156
+prfword stypus =
+
+
+
 prfword tee =
 prfword tees =
 
@@ -1051,8 +1076,15 @@ always steilheit 23456-146-123-125
 before hilmnrsu always teilnahme 2345-146-123-1345-134-15
 prfword teilnahmen 2345-146-123-1345-134-14
 always steilnehm 234-2345-146-123-1345-125
+
 always telefon 2345-13456-15-124-135-1345
-always stelefon 234-2345-13456-15-124-135-1345
+always telephon 2345-13456-15-1234-125-135-1345
+always telegraf 2345-13456-15-1245-1235-1-124
+always telegraph 2345-13456-15-1245-1235-1-1234-125
+always telegramm 2345-13456-15-1245-1235-1-1346
+always telematik 2345-13456-12356-1-2345-24-13
+always telemetr 2345-13456-12356-15-2345-1235
+always telekomm 2345-13456-15-13-1346
 always teleskop 2345-13456-123456-13-135-1234
 always temperatur 2345-12356-1234-12456-1-2345-136-1235 prefer em-contraction over te-contraction
 always stemperatur 234-2345-12356-1234-12456-1-2345-136-1235 prefer em-contraction over te-contraction
@@ -1064,6 +1096,7 @@ always stermin 234-2345-12456-134-35
 always stochter 234-2345-135-1456-2345-12456
 always stöchter 234-2345-246-1456-2345-12456
 always strubel 234-2345-1235-136-12-13456 shouldnt use the st- nor the be-contraction
+always tempel 2345-12356-1234-13456 shouldn't use the te-contraction
 word tempore 2345-12356-1234-26-15
 always stendenz 234-2345-14-145-14-1356
 prfword teuer 2345-126-12456 shouldn't use the te-contraction
@@ -1201,5 +1234,13 @@ always shampoo =
 always tattoo =
 always daewoo =
 always zoo =
+
+sufword teer =
+sufword geteer 12346-2345-15-15-1235
+prfword teer =
+prfword teeren 2345-15-15-1235-14
+prfword teers =
+always teergeschmack 2345-15-15-1235-12346-156-134-1-46
+
 always zücht 1356-1256-1456-2345
 
