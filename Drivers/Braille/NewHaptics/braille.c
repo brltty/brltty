@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "log.h"
+#include "strfmt.h"
 
 #include "brl_driver.h"
 #include "brldefs-nh.h"
@@ -32,10 +33,24 @@
 #define MAXIMUM_TEXT_CELLS 0XFF
 
 BEGIN_KEY_NAME_TABLE(navigation)
+  KEY_NAME_ENTRY(NH_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(NH_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(NH_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(NH_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(NH_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(NH_KEY_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(NH_KEY_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(NH_KEY_Dot8, "Dot8"),
+  KEY_NAME_ENTRY(NH_KEY_Space, "Space"),
+END_KEY_NAME_TABLE
+
+BEGIN_KEY_NAME_TABLE(routing)
+  KEY_GROUP_ENTRY(NH_GRP_RoutingKeys, "RoutingKey"),
 END_KEY_NAME_TABLE
 
 BEGIN_KEY_NAME_TABLES(all)
   KEY_NAME_TABLE(navigation),
+  KEY_NAME_TABLE(routing),
 END_KEY_NAME_TABLES
 
 DEFINE_KEY_TABLE(all)
@@ -52,18 +67,8 @@ struct BrailleDataStruct {
 };
 
 static int
-writeBytes (BrailleDisplay *brl, const unsigned char *bytes, size_t count) {
+writeBytes (BrailleDisplay *brl, const char *bytes, size_t count) {
   return writeBraillePacket(brl, NULL, bytes, count);
-}
-
-static int
-writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t size) {
-  unsigned char bytes[size];
-  unsigned char *byte = bytes;
-
-  byte = mempcpy(byte, packet, size);
-
-  return writeBytes(brl, bytes, byte-bytes);
 }
 
 static BraillePacketVerifierResult
@@ -118,37 +123,16 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
 }
 
 static int
-writeIdentifyRequest (BrailleDisplay *brl) {
-  static const unsigned char packet[] = {0};
-  return writePacket(brl, packet, sizeof(packet));
-}
-
-static BrailleResponseResult
-isIdentityResponse (BrailleDisplay *brl, const void *packet, size_t size) {
-  return BRL_RSP_UNEXPECTED;
-}
-
-static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if ((brl->data = malloc(sizeof(*brl->data)))) {
     memset(brl->data, 0, sizeof(*brl->data));
 
     if (connectResource(brl, device)) {
-      unsigned char response[MAXIMUM_RESPONSE_SIZE];
-
-      int probed = probeBrailleDisplay(
-        brl, PROBE_RETRY_LIMIT, NULL, PROBE_INPUT_TIMEOUT,
-        writeIdentifyRequest,
-        readPacket, &response, sizeof(response),
-        isIdentityResponse
-      );
-
-      if (probed) {
+      if (1) {
         setBrailleKeyTable(brl, &KEY_TABLE_DEFINITION(all));
-
         makeOutputTable(dotsTable_ISO11548_1);
-      //MAKE_OUTPUT_TABLE(0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80);
 
+        brl->textColumns = 80;
         brl->data->text.rewrite = 1;
         return 1;
       }
@@ -172,11 +156,27 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, brl->textColumns,
-                       NULL, NULL, &brl->data->text.rewrite)) {
-    unsigned char cells[brl->textColumns];
+  unsigned int cellCount = brl->textColumns * brl->textRows;
 
-    translateOutputCells(cells, brl->data->text.cells, brl->textColumns);
+  if (cellsHaveChanged(brl->data->text.cells, brl->buffer, cellCount,
+                       NULL, NULL, &brl->data->text.rewrite)) {
+    unsigned char cells[cellCount];
+    translateOutputCells(cells, brl->data->text.cells, cellCount);
+
+    {
+      char packet[4 + (4 * cellCount) + 4 + 1];
+      STR_BEGIN(packet, sizeof(packet));
+      STR_PRINTF("INT ");
+
+      for (unsigned int cellIndex=0; cellIndex<cellCount; cellIndex+=1) {
+        STR_PRINTF("%u ", cells[cellIndex]);
+      }
+
+      STR_PRINTF("END ");
+      if (!writeBytes(brl, packet, STR_LENGTH)) return 0;
+
+      STR_END;
+    }
   }
 
   return 1;
