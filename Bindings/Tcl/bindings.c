@@ -19,12 +19,19 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "brl_dots.h"
+
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION
 #include "brlapi.h"
 
 #include <tcl.h>
-#include "brl_dots.h"
+
+#ifndef TCL_SIZE_MAX
+typedef int Tcl_Size;
+#define TCL_SIZE_MAX ((int)(((unsigned int)-1)>>1))
+#define TCL_SIZE_MODIFIER ""
+#endif /* TCL_SIZE_MAX */
 
 #define allocateMemory(size) ((void *)ckalloc((size)))
 #define deallocateMemory(address) ckfree((void *)(address))
@@ -74,15 +81,11 @@ setStringResult (Tcl_Interp *interp, const char *string, int length) {
   Tcl_SetStringObj(Tcl_GetObjResult(interp), string, length);
 }
 
-static void
-setStringsResult (Tcl_Interp *interp, ...) {
-  Tcl_ResetResult(interp);
-
-  va_list arguments;
-  va_start(arguments, interp);
-  Tcl_AppendStringsToObjVA(Tcl_GetObjResult(interp), arguments);
-  va_end(arguments);
-}
+#define setStringsResult(interp, ...) \
+  do { \
+    Tcl_ResetResult(interp); \
+    Tcl_AppendStringsToObj(Tcl_GetObjResult(interp), __VA_ARGS__); \
+  } while (0)
 
 static void
 setByteArrayResult (Tcl_Interp *interp, const unsigned char *bytes, int count) {
@@ -428,7 +431,7 @@ FUNCTION_HANDLER(session, enterTtyModeWithPath) {
   END_OPTIONS(2, 0, 0, "")
 
   Tcl_Obj **elements;
-  int count;
+  Tcl_Size count;
 
   if (options.path) {
     TEST_TCL_OK(Tcl_ListObjGetElements(interp, options.path, &count, &elements));
@@ -650,7 +653,7 @@ FUNCTION_HANDLER(session, parameter) {
 
       default: {
         Tcl_Obj **elements;
-        int count;
+        Tcl_Size count;
         TEST_TCL_OK(Tcl_ListObjGetElements(interp, value, &count, &elements));
 
         if (count) {
@@ -835,7 +838,7 @@ FUNCTION_HANDLER(session, readKey) {
   BrlapiSession *session = data;
   TEST_FUNCTION_ARGUMENTS(1, 0, "<wait>");
 
-  int length;
+  Tcl_Size length;
   const char *operand = Tcl_GetStringFromObj(objv[2], &length);
   if (!operand) return TCL_ERROR;
 
@@ -854,7 +857,7 @@ FUNCTION_HANDLER(session, readKeyWithTimeout) {
   BrlapiSession *session = data;
   TEST_FUNCTION_ARGUMENTS(1, 0, "{infinite | <seconds>}");
 
-  int length;
+  Tcl_Size length;
   const char *operand = Tcl_GetStringFromObj(objv[2], &length);
   if (!operand) return TCL_ERROR;
   int timeout;
@@ -908,7 +911,7 @@ FUNCTION_HANDLER(session, sendRaw) {
   BrlapiSession *session = data;
   TEST_FUNCTION_ARGUMENTS(1, 0, "<packet>");
 
-  int count;
+  Tcl_Size count;
   const unsigned char *bytes = Tcl_GetByteArrayFromObj(objv[2], &count);
 
   TEST_BRLAPI_OK(brlapi__sendRaw(session->handle, bytes, count));
@@ -943,8 +946,8 @@ typedef struct {
   Tcl_Obj *textObject;
   int textLength;
 
-  int andLength;
-  int orLength;
+  Tcl_Size andLength;
+  Tcl_Size orLength;
 
   unsigned numericCursor:1;
   unsigned numericDisplay:1;
@@ -1240,7 +1243,7 @@ FUNCTION_HANDLER(session, writeDots) {
   TEST_TCL_OK(getCellCount(interp, session, &size));
 
   unsigned char buffer[size];
-  int count;
+  Tcl_Size count;
   const unsigned char *cells = Tcl_GetByteArrayFromObj(objv[2], &count);
 
   if (count < size) {
@@ -1293,7 +1296,7 @@ changeKeys (
     }
 
     Tcl_Obj **codeElements;
-    int codeCount;
+    Tcl_Size codeCount;
     TEST_TCL_OK(Tcl_ListObjGetElements(interp, codeList, &codeCount, &codeElements));
 
     if (codeCount) {
@@ -1335,7 +1338,7 @@ changeKeyRanges (
   TEST_FUNCTION_ARGUMENTS(1, 0, "<keyRangeList>");
 
   Tcl_Obj **rangeElements;
-  int rangeCount;
+  Tcl_Size rangeCount;
   TEST_TCL_OK(Tcl_ListObjGetElements(interp, objv[2], &rangeCount, &rangeElements));
 
   if (rangeCount) {
@@ -1344,7 +1347,7 @@ changeKeyRanges (
     for (int rangeIndex=0; rangeIndex<rangeCount; rangeIndex+=1) {
       brlapi_range_t *range = &ranges[rangeIndex];
       Tcl_Obj **codeElements;
-      int codeCount;
+      Tcl_Size codeCount;
       TEST_TCL_OK(Tcl_ListObjGetElements(interp, rangeElements[rangeIndex], &codeCount, &codeElements));
 
       if (codeCount != 2) {
@@ -1532,7 +1535,7 @@ FUNCTION_HANDLER(general, makeDots) {
   TEST_FUNCTION_ARGUMENTS(1, 0, "<dotNumbersList>");
 
   Tcl_Obj **elements;
-  int elementCount;
+  Tcl_Size elementCount;
   TEST_TCL_OK(Tcl_ListObjGetElements(interp, objv[2], &elementCount, &elements));
 
   if (elementCount) {
@@ -1543,7 +1546,7 @@ FUNCTION_HANDLER(general, makeDots) {
       BrlDots *cell = &cells[elementIndex];
       *cell = 0;
 
-      int numberCount;
+      Tcl_Size numberCount;
       const char *numbers = Tcl_GetStringFromObj(element, &numberCount);
       if (!numbers) return TCL_ERROR;
 
