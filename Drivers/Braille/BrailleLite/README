@@ -4,7 +4,7 @@ This is a beta driver for the Blazie Engineering Braille Lite.
 written by Nikhil Nair,
 with additions from Nicolas Pitre <nico@fluxnic.net>
 and Pete De Vasto,
-further modifications by Stéphane Doyon <s.doyon@videotron.ca>,
+further modifications by StÃ©phane Doyon <s.doyon@videotron.ca>,
     starting August 2001.
 
 Both BrailleLite 18 and 40 should work, and there is now code that should
@@ -27,44 +27,44 @@ when the unit is in its internal notetaker mode.
 See help.src for a description of the key bindings.
 
 History:
-Stéphane Doyon, April 2002, version 0.5.10:
+StÃ©phane Doyon, April 2002, version 0.5.10:
 -Act as if kbemu was off in any context other than CMDS_SCREEN (in
     particular typing a key won't throw you out of preferences menu
     anymore).
-Stéphane Doyon, March 2002, version 0.5.9:
+StÃ©phane Doyon, March 2002, version 0.5.9:
 -Added "kbemu" driver parameter, so can start with kbemu already active.
-Stéphane Doyon, February 2002, version 0.5.8:
+StÃ©phane Doyon, February 2002, version 0.5.8:
 -Added CMD_LEARN, CMD_NXPROMPT/CMD_PRPROMPT and CMD_SIXDOTS. Several
     VAL_PASSKEY effects were done through special cases: moved them
     back into cmdtrans. Identified special/reserved and free bindings.
     Cleaned out some #if 0s.
-Stéphane Doyon, January 2002, version 0.5.7:
+StÃ©phane Doyon, January 2002, version 0.5.7:
 -Added bindings for CR_CUTAPPEND and CR_CUTLINE. Replaced CMD_CUT_BEG,
     CMD_CUT_END and CMD_CSRJMP by CR_ equivalents. Added CR_SETMARK and
     CR_GOTOMARK. These are a bit nasty: they reuse existing command dot
     patterns from within o-chord. Well practically all the patterns are
     taken!
-Stéphane Doyon, January 2002, version 0.5.6:
+StÃ©phane Doyon, January 2002, version 0.5.6:
 -Fixed dot combinations with dots 7-8 on BL40 (for typing caps and ctrl).
-Stéphane Doyon, December 2001, version 0.5.5:
+StÃ©phane Doyon, December 2001, version 0.5.5:
 -META is back. Now use VPC modifiers on VALPASSCHAR when TEXTTRANS
     not defined. Fixed uppercase that always locked active. Sub-commands
     of 35-chord no longer need to be chorded.
-Stéphane Doyon, November 2001, version 0.5.4:
+StÃ©phane Doyon, November 2001, version 0.5.4:
 -Now using new generic VAL_PASS* mechanism for typing in keys, rather
     than having the driver itself insert stuff into the console. We
     no longer have the META function though, but we have ESCAPE.
-Stéphane Doyon and Dave Mielke, September 2001, version 0.5.3:
+StÃ©phane Doyon and Dave Mielke, September 2001, version 0.5.3:
 -closebrl: don't clear display, use TCSADRAIN.
 -Slight API and name changes for BRLTTY 3.0. Commands can no longer be
     assumed to be chars, changed type of cmdtrans.
 -Fixed binding for switching virtual terminal with o-chord... it was wrong.
-Stéphane Doyon, September 2001, version 0.5.2:
+StÃ©phane Doyon, September 2001, version 0.5.2:
 -Added baudrate parameter. Fixed up initialization, in particular a bug
     with use of qbase buffer unitialized.
-Stéphane Doyon, September 2001, version 0.5.1:
+StÃ©phane Doyon, September 2001, version 0.5.1:
 -Added bindings for CMD_BACK and CR_MSGATTRIB.
-Stéphane Doyon, August 2001
+StÃ©phane Doyon, August 2001
 -Added a version number, as many people have been playing with this
    driver. Arbitrarily started at 0.5.
 -Made the help more compact, and remove the duplication of the key

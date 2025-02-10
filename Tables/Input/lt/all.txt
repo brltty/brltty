@@ -1,14 +1,14 @@
 Help: LogText (Danish)
 
 Specielle kommandoer til brltty startes med dot 37,
-efterfulgt af nedenstående koder.
+efterfulgt af nedenstÃ¥ende koder.
 Fx. 37 12357 for genstart af brltty.
 
-124: f Frys skærm
-1247: F Optø skærm
+124: f Frys skÃ¦rm
+1247: F OptÃ¸ skÃ¦rm
 
 368: - Forrige virtuelle konsol
-2358: + Næste virtuelle konsol
+2358: + NÃ¦ste virtuelle konsol
 18: 1 1. virtuelle konsol
 128: 2 2. virtuelle konsol
 148: 3 3. virtuelle konsol
@@ -19,15 +19,15 @@ Fx. 37 12357 for genstart af brltty.
 Download data fra computer til LogText:
 1: Tast dot 37 og derefter et stort D (dot 1457)
 2: Skriv stien til filen der skal downloades og tast enter
-3: Tast Ctrl+5 på LogTexten og tast på enter 2 gange
+3: Tast Ctrl+5 pÃ¥ LogTexten og tast pÃ¥ enter 2 gange
 
 247: I Information om brltty
 12357: R Genstart brltty
 1457: D Download menu
 
-12347: P Opsætning
-2347: S Gem opsætning
-1237: L Hent opsætning
+12347: P OpsÃ¦tning
+2347: S Gem opsÃ¦tning
+1237: L Hent opsÃ¦tning
 
 136: u Side op (page up)
 145: d Side ned (page down)

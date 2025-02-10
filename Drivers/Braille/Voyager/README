@@ -2,7 +2,7 @@ BRLTTY Driver for the Tieman Voyager Braille Display
 This is the user-space-only version of the driver.
 Version 0.10 (March 2004)
 
-Copyright 2004 by Stéphane Doyon  <s.doyon@videotron.ca>
+Copyright 2004 by StÃ©phane Doyon  <s.doyon@videotron.ca>
 
 This is a partial rewrite of the driver which functions entirely from
 user-space (whereas the previous driver depended on a kernel driver for
@@ -25,7 +25,7 @@ projects and are so supportive.
 Thanks to Andor Demarteau <ademarte@students.cs.uu.nl> who got this whole
 project started and beta-tested all our early buggy attempts.
 
-Thanks to Stéphane Dalton who wrote the initial version of the old kernel
+Thanks to StÃ©phane Dalton who wrote the initial version of the old kernel
 driver. Without his initiative this project would not have been a success.
 
 This rewrite of the driver should allow more flexibility, but is as of yet

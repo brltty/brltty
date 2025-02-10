@@ -1,9 +1,9 @@
 Help: VisioBraille
 
 Les touches du clavier auxiliaire s'utilisent comme sous DOS/Windows.
-Les opérations de changement de mode d'affichage (6-8 points), de simulation de
-touches... se font également comme sous DOS/Windows.
+Les opÃ©rations de changement de mode d'affichage (6-8 points), de simulation de
+touches... se font Ã©galement comme sous DOS/Windows.
 En outre, quelques commandes ~~ suivi d'une lettre sont disponibles,
-reportez-vous au fichier README du répertoire VisioBraille pour en savoir
+reportez-vous au fichier README du rÃ©pertoire VisioBraille pour en savoir
 plus.
  

@@ -1,7 +1,7 @@
 This directory contains the BRLTTY driver for the LogText, which is
 manufactured by Tactilog of Denmark. It was implemented, and is being
 maintained, by Dave Mielke <dave@mielke.cc>. Thanks to Hans Schou
-<chlor@schou.dk> for his help and advice, and to Thomas Sørensen
+<chlor@schou.dk> for his help and advice, and to Thomas SÃ¸rensen
 <thomassoerens@wanadoo.dk> for testing. As a component of BRLTTY, this driver
 is released under the terms of the GNU Public License.
 
