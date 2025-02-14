@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <sys/wait.h>
+#include <sys/ioctl.h>
 
 #include "log.h"
 #include "cmdline.h"
@@ -155,7 +156,7 @@ setEnvironmentInteger (const char *variable, int integer) {
 }
 
 static int
-setEnvironmentVariables (void) {
+setEnvironmentVariables (size_t *columns, size_t *lines) {
   if (!setEnvironmentString("TERM_PROGRAM", programName)) return 0;
   if (!setEnvironmentString("TERM_PROGRAM_VERSION", PACKAGE_VERSION)) return 0;
 
@@ -177,16 +178,24 @@ setEnvironmentVariables (void) {
     }
   }
 
-  {
-    size_t width, height;
-
-    if (getConsoleSize(&width, &height)) {
-      if (!setEnvironmentInteger("COLUMNS", width)) return 0;
-      if (!setEnvironmentInteger("LINES", height)) return 0;
-    }
+  if (getConsoleSize(columns, lines)) {
+    if (!setEnvironmentInteger("COLUMNS", *columns)) return 0;
+    if (!setEnvironmentInteger("LINES", *lines)) return 0;
   }
 
   return setEnvironmentString("TERM", ptyGetTerminalType());
+}
+
+static int
+setWindowSize (int fd, size_t columns, size_t lines) {
+  struct winsize size = {
+    .ws_col = columns,
+    .ws_row = lines,
+  };
+
+  if (ioctl(fd, TIOCSWINSZ, &size) != -1) return 1;
+  logSystemError("ioctl[TIOCSWINSZ]");
+  return 0;
 }
 
 static int
@@ -194,25 +203,30 @@ prepareChild (PtyObject *pty) {
   setsid();
   ptyCloseMaster(pty);
 
-  if (setEnvironmentVariables()) {
+  size_t columns, lines;
+  if (setEnvironmentVariables(&columns, &lines)) {
     int tty;
     if (!ptyOpenSlave(pty, &tty)) return 0;
-    int keep = 0;
+    setWindowSize(tty, columns, lines);
 
-    for (int fd=0; fd<=2; fd+=1) {
-      if (fd == tty) {
-        keep = 1;
-      } else {
-        int result = dup2(tty, fd);
+    {
+      int keep = 0;
 
-        if (result == -1) {
-          logSystemError("dup2");
-          return 0;
+      for (int fd=0; fd<=2; fd+=1) {
+        if (fd == tty) {
+          keep = 1;
+        } else {
+          int result = dup2(tty, fd);
+
+          if (result == -1) {
+            logSystemError("dup2");
+            return 0;
+          }
         }
       }
-    }
 
-    if (!keep) close(tty);
+      if (!keep) close(tty);
+    }
   }
 
   return 1;
