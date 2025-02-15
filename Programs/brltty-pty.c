@@ -293,6 +293,7 @@ windowSizeMonitor (int signalNumber) {
 
   if (getConsoleSize(&columns, &lines)) {
     setWindowSize(ptyGetMaster(ptyObject), columns, lines);
+    ptyResizeTerminal(lines, columns);
   }
 }
 

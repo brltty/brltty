@@ -99,6 +99,11 @@ ptyEndTerminal (void) {
   ptyEndScreen();
 }
 
+void
+ptyResizeTerminal (unsigned int lines, unsigned int columns) {
+  ptyResizeScreen(lines, columns);
+}
+
 static void
 soundAlert (void) {
   beep();

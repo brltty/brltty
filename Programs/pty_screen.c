@@ -309,6 +309,13 @@ ptyEndScreen (void) {
 }
 
 void
+ptyResizeScreen (unsigned int lines, unsigned int columns) {
+  if (is_term_resized(lines, columns)) {
+    resize_term(lines, columns);
+  }
+}
+
+void
 ptyRefreshScreen (void) {
   sendTerminalMessage(TERM_MSG_SEGMENT_UPDATED, NULL, 0);
   refresh();

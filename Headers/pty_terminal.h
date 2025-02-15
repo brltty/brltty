@@ -29,6 +29,7 @@ extern const char *ptyGetTerminalType (void);
 
 extern int ptyBeginTerminal (PtyObject *pty, int driverDirectives);
 extern void ptyEndTerminal (void);
+extern void ptyResizeTerminal (unsigned int lines, unsigned int columns);
 
 extern int ptyProcessTerminalInput (PtyObject *pty);
 extern int ptyProcessTerminalOutput (const unsigned char *bytes, size_t count);
