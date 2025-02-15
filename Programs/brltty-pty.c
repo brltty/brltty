@@ -140,6 +140,18 @@ writeDriverDirective (const char *format, ...) {
 }
 
 static int
+setWindowSize (int tty, size_t columns, size_t lines) {
+  struct winsize size = {
+    .ws_col = columns,
+    .ws_row = lines,
+  };
+
+  if (ioctl(tty, TIOCSWINSZ, &size) != -1) return 1;
+  logSystemError("ioctl[TIOCSWINSZ]");
+  return 0;
+}
+
+static int
 setEnvironmentString (const char *variable, const char *string) {
   int result = setenv(variable, string, 1);
   if (result != -1) return 1;
@@ -181,32 +193,25 @@ setEnvironmentVariables (size_t *columns, size_t *lines) {
   if (getConsoleSize(columns, lines)) {
     if (!setEnvironmentInteger("COLUMNS", *columns)) return 0;
     if (!setEnvironmentInteger("LINES", *lines)) return 0;
+  } else {
+    *columns = 0;
+    *lines = 0;
   }
 
   return setEnvironmentString("TERM", ptyGetTerminalType());
 }
 
-static int
-setWindowSize (int fd, size_t columns, size_t lines) {
-  struct winsize size = {
-    .ws_col = columns,
-    .ws_row = lines,
-  };
-
-  if (ioctl(fd, TIOCSWINSZ, &size) != -1) return 1;
-  logSystemError("ioctl[TIOCSWINSZ]");
-  return 0;
-}
+static PtyObject *ptyObject = NULL;
 
 static int
-prepareChild (PtyObject *pty) {
+prepareChild (void) {
   setsid();
-  ptyCloseMaster(pty);
+  ptyCloseMaster(ptyObject);
 
   size_t columns, lines;
   if (setEnvironmentVariables(&columns, &lines)) {
     int tty;
-    if (!ptyOpenSlave(pty, &tty)) return 0;
+    if (!ptyOpenSlave(ptyObject, &tty)) return 0;
     setWindowSize(tty, columns, lines);
 
     {
@@ -233,7 +238,7 @@ prepareChild (PtyObject *pty) {
 }
 
 static int
-runChild (PtyObject *pty, char **command) {
+runChild (char **command) {
   char *defaultCommand[2];
 
   if (!(command && *command)) {
@@ -242,10 +247,11 @@ runChild (PtyObject *pty, char **command) {
 
     defaultCommand[0] = shell;
     defaultCommand[1] = NULL;
+
     command = defaultCommand;
   }
 
-  if (prepareChild(pty)) {
+  if (prepareChild()) {
     int result = execvp(*command, command);
 
     if (result == -1) {
@@ -282,6 +288,15 @@ parentQuitMonitor (int signalNumber) {
 }
 
 static void
+windowSizeMonitor (int signalNumber) {
+  size_t columns, lines;
+
+  if (getConsoleSize(&columns, &lines)) {
+    setWindowSize(ptyGetMaster(ptyObject), columns, lines);
+  }
+}
+
+static void
 childTerminationMonitor (int signalNumber) {
   childHasTerminated = 1;
 }
@@ -291,13 +306,13 @@ installSignalHandlers (void) {
   if (!asyncHandleSignal(SIGTERM, parentQuitMonitor, NULL)) return 0;
   if (!asyncHandleSignal(SIGINT, parentQuitMonitor, NULL)) return 0;
   if (!asyncHandleSignal(SIGQUIT, parentQuitMonitor, NULL)) return 0;
+  if (!asyncHandleSignal(SIGWINCH, windowSizeMonitor, NULL)) return 0;
   return asyncHandleSignal(SIGCHLD, childTerminationMonitor, NULL);
 }
 
 static
 ASYNC_MONITOR_CALLBACK(standardInputMonitor) {
-  PtyObject *pty = parameters->data;
-  if (ptyProcessTerminalInput(pty)) return 1;
+  if (ptyProcessTerminalInput(ptyObject)) return 1;
 
   parentIsQuitting = 1;
   return 0;
@@ -351,7 +366,7 @@ reapExitStatus (pid_t pid) {
 }
 
 static int
-runParent (PtyObject *pty, pid_t child) {
+runParent (pid_t child) {
   int exitStatus = PROG_EXIT_FATAL;
   AsyncHandle ptyInputHandle;
 
@@ -359,19 +374,19 @@ runParent (PtyObject *pty, pid_t child) {
   childHasTerminated = 0;
   slaveHasBeenClosed = 0;
 
-  if (asyncReadFile(&ptyInputHandle, ptyGetMaster(pty), 1, ptyInputHandler, NULL)) {
+  if (asyncReadFile(&ptyInputHandle, ptyGetMaster(ptyObject), 1, ptyInputHandler, NULL)) {
     AsyncHandle standardInputHandle;
 
-    if (asyncMonitorFileInput(&standardInputHandle, STDIN_FILENO, standardInputMonitor, pty)) {
+    if (asyncMonitorFileInput(&standardInputHandle, STDIN_FILENO, standardInputMonitor, NULL)) {
       if (installSignalHandlers()) {
         if (!isatty(2)) {
           unsigned char level = LOG_NOTICE;
           ptySetTerminalLogLevel(level);
-          ptySetLogLevel(pty, level);
+          ptySetLogLevel(ptyObject, level);
         }
 
-        if (ptyBeginTerminal(pty, opt_driverDirectives)) {
-          writeDriverDirective("path %s", ptyGetPath(pty));
+        if (ptyBeginTerminal(ptyObject, opt_driverDirectives)) {
+          writeDriverDirective("path %s", ptyGetPath(ptyObject));
 
           asyncAwaitCondition(INT_MAX, parentTerminationTester, NULL);
           if (!parentIsQuitting) exitStatus = reapExitStatus(child);
@@ -392,7 +407,6 @@ runParent (PtyObject *pty, pid_t child) {
 int
 main (int argc, char *argv[]) {
   int exitStatus = PROG_EXIT_FATAL;
-  PtyObject *pty;
 
   {
     const CommandLineDescriptor descriptor = {
@@ -469,9 +483,9 @@ main (int argc, char *argv[]) {
     }
   }
 
-  if ((pty = ptyNewObject())) {
-    ptySetLogInput(pty, opt_logInput);
-    const char *ttyPath = ptyGetPath(pty);
+  if ((ptyObject = ptyNewObject())) {
+    ptySetLogInput(ptyObject, opt_logInput);
+    const char *ttyPath = ptyGetPath(ptyObject);
 
     if (opt_showPath) {
       FILE *stream = stderr;
@@ -486,14 +500,15 @@ main (int argc, char *argv[]) {
         break;
 
       case 0:
-        _exit(runChild(pty, argv));
+        _exit(runChild(argv));
 
       default:
-        exitStatus = runParent(pty, child);
+        exitStatus = runParent(child);
         break;
     }
 
-    ptyDestroyObject(pty);
+    ptyDestroyObject(ptyObject);
+    ptyObject = NULL;
   }
 
   return exitStatus;
