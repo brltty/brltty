@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
@@ -38,7 +38,7 @@ readonly defaultLoginShell="/sbin/nologin"
 showProgramUsageNotes() {
 cat <<END_OF_PROGRAM_USAGE_NOTES
 When creating a new user, these options have the following defaults:
-  -d  ${defaultHomeDirectory:-the home directory isn't defined}
+  -d  ${defaultHomeDirectory:-the home directory is not defined}
   -g  a new group with the same name as the user
   -i  ${defaultUserInformation}
   -l  ${defaultLoginShell}
