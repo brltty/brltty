@@ -86,10 +86,16 @@ always anzeigenummer 235-1356-146-12346-1345-136-1346-12456
 always anzeigeröhr 235-1356-146-12346-1235-246-125-1235
 
 
-always appartement 1-1234-1234-356-236-134-14-2345
 always abonnement 1-12-135-1345-1345-15-134-14-2345
+always agreement 1-1245-1235-15-15-134-14-2345
+always amüsement 1-134-1256-234-15-134-14-2345
+always appartement 1-1234-1234-356-236-134-14-2345
 always bombardement 12-135-134-12-356-145-15-134-14-2345
+always implement 24-134-1234-123-15-134-14-2345
+always inkrement 35-13-1235-15-134-14-2345
+before t always komplemen 13-135-134-1234-123-15-134-14
 always konnossement 13-135-1345-1345-135-2346-15-134-14-2345
+before t always reglemen 1235-15-1245-123-15-134-14
 before t always temperamen 2345-12356-1234-12456-1-134-14
 
 always arbeitgeber 356-12-12346-12-12456 shouldn't use the be-contraction
@@ -314,6 +320,12 @@ always beschwerd 23-156-2456-12456-145 shouldn't use the werd-contraction
 before hilmnrsu always beschwerde 23-156-2456-12456-145-15 shouldn't use the werd-contraction
 prfword beschwerden 23-156-2456-12456-145-14 shouldn't use the werd-contraction
 endword betrieben 23-2345-1235-346-12-14
+always binär =
+word binational 12-24-1345-5-1345-1-123
+begword binational 12-24-1345-5-1345-25
+word binomial 12-24-1345-135-134-24-1-123
+begword binomial 12-24-1345-135-134-24-25
+always binomisch 12-24-1345-135-134-24-156
 always bindehaut 12-35-145-15-125-16-2345 shouldn't use the eh-contraction
 always bindehäu 12-35-145-15-125-34 shouldn't use the eh-contraction
 always bindemittel 12-35-145-15-134-2345 shouldn't use the dem-contraction
@@ -426,15 +438,23 @@ always sspediteur 234-234-1234-15-145-24-2345-126-1235
 always stuckateur 23456-136-46-1-2345-126-1235
 
 always dehydr =
+always deifizier 145-15-24-124-24-1356-346-1235
 begmidword deindustrial 145-15-35-145-136-23456-1235-24-25
 always deinstall 145-15-35-23456-1-12345
+always deinstitutionalis 145-15-35-23456-24-2345-136-2345-24-135-1345-25-24-234
+always deismus 145-15-5-24
+always deistisch 145-15-5-156
 always delokalis 145-15-123-135-13-25-24-234
+before g always demago 145-12356-1-1245-135
+word demand 145-12356-235-145
 always demarkation 145-15-134-356-13-5-1345
 always demarkier 145-15-134-356-13-346-1235
+always dementier 145-12356-14-2345-346-1235
 always demenz 145-12356-14-1356
-always demineralisier 145-15-134-35-12456-25-24-234-346-1235
+always demineralis 145-15-134-35-12456-25-24-234
 always demograph 145-12356-135-1245-1235-1-1234-125
-always demontage 145-15-134-135-1345-2345-1-12346 shoudln't use the dem-contraction
+before g always demonta 145-15-134-135-1345-2345-1 shoudln't use the dem-contraction
+always demontier 145-15-134-135-1345-2345-346-1235
 always demoralis 145-15-134-26-25-24-234
 begword demotiv =
 always demystifizier 145-15-134-6-13456-23456-24-124-24-1356-346-1235
@@ -1040,6 +1060,7 @@ before hilmnrsu always see =
 always seelen 234-15-15-123-14
 always serie 234-12456-24-15 shouldn't use the ie-contraction
 always serien 234-12456-24-14 shouldn't use the ie-contraction
+always inserier 35-234-12456-346-1235
 before e always sohl = shouldn't use the so-contraction
 sufword solar 234-135-123-356
 begmidword solidar 234-135-123-24-145-356 shouldn't use the so-contraction
@@ -1090,27 +1111,39 @@ always stelephon 234-2345-13456-15-1234-125-135-1345
 always stelegraf 234-2345-13456-15-1245-1235-1-124
 always stelegraph 234-1245-13456-15-1245-1235-1-1234-125
 always stelegramm 234-2345-13456-15-1245-1235-1-1346
+always stäuschung 234-2345-34-156-136
+always stheater 234-2345-125-15-1-2345-12456
+always sthema 234-2345-125-12356-1
+always sthemen 234-2345-125-12356-14
 always stheolog 234-2345-125-15-135-123-135-1245
+always stheoreti 234-2345-125-15-26-15-2345-24
 always stheorie 234-2345-125-15-26-346
 always stheorien 234-2345-125-15-26-24-14
+before t always stherapeu 234-2345-125-12456-1-1234-126
 always stilgung 234-2345-24-123-1245-136
 prfword stod =
 prfword stode =
 always stoleranz 234-2345-135-123-12456-235-1356
+always stourismus 234-2345-135-136-1235-5-24
+always stourist 234-2345-135-136-1235-24-23456
 always strainer 234-2345-1235-1-24-1345-12456
 always straining 234-2345-1235-1-24-1345-35-1245
 always strächtig 234-2345-1235-345-1456-2345-45
 always stransakt 234-2345-1235-235-234-1-13-2345
+always stransfer 234-2345-1235-235-234-124-12456
 always stransform 234-2345-1235-235-234-124-26-134
 endword stransistor 234-2345-1235-235-234-24-23456-135-1235
 midword stransistor 234-2345-1235-235-234-24-23456-26
+always stranszenden 234-2345-1235-235-234-1356-14-145-14
 always strennung 234-2345-1235-14-1345-136
 always strocknung 234-2345-1235-135-46-1345-136
+always strümmer 234-2345-1235-1256-1346-12456
 prfword stuch 234-2345-136-1456
 prfword stuches 234-2345-136-1456-123456
 prfword stuchs 234-2345-136-1456-234
 prfword stücher 234-2345-1256-1456-12456
 prfword stüchern 234-2345-1256-1456-12456-1345
+always stüchtig 234-2345-1256-1456-2345-45
 always sturnier 234-2345-136-1235-1345-346-1235
 prfword stests 234-236-23456-234
 prfword styp =
@@ -1175,6 +1208,10 @@ midendword ungsobjek 136-234-135-12-245-15-13 shouldn't use the so-contraction
 always überbrück 2-1256-12-1235-1256-46
 sufword vasallen 1236-1-234-1-12345-14 shouldn't use the allen-contraction
 always vegetarier 1236-15-12346-2345-356-24-12456
+midendword vergeud 1236-12456-1245-126-145
+begword vergeud 36-1245-126-145
+midendword verteuer 1236-12456-2345-126-12456
+begword verteuer 36-2345-126-12456
 begword verwalter 36-2456-25-2345-12456 shouldn't use the te-contraction
 midendword verwalter 1236-12456-2456-25-2345-12456 shouldn't use the te-contraction
 before hilmnrsu always vize =
