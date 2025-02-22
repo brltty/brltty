@@ -66,6 +66,7 @@ addGroups() {
       [ -n "${group}" ] || continue
 
       [ "${group#*/}" = "${group}" ] || {
+         [ -e "${group}" ] || continue
          group="$(stat -c "%G" "${group}")" || :
          [ -n "${group}" ] || continue
       }
