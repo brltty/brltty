@@ -120,7 +120,18 @@ else
    [ -n "${homeDirectory}" ] || homeDirectory="${defaultHomeDirectory}"
    [ -n "${loginShell}" ] || loginShell="${defaultLoginShell}"
 
-   if [ -n "${homeDirectory}" ]
+   if [ -z "${homeDirectory}" ]
+   then
+      createHomeDirectory=false
+   elif [ -e "${homeDirectory}" ]
+   then
+      [ -d "${homeDirectory}" ] || semanticError "not a directory: ${homeDirectory}"
+      createHomeDirectory=false
+   else
+      createHomeDirectory=true
+   fi
+
+   if "${createHomeDirectory}"
    then
       command+=(--create-home)
    else
