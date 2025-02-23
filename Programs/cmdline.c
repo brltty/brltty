@@ -1141,6 +1141,23 @@ processConfigurationFile (
   }
 }
 
+static void
+toAbsolutePaths (OptionProcessingInformation *info) {
+  char *parent = getWorkingDirectory();
+
+  if (parent) {
+    for (unsigned int optionIndex=0; optionIndex<info->options->count; optionIndex+=1) {
+      const CommandLineOption *option = &info->options->table[optionIndex];
+
+      if (option->internal.adjust == toAbsoluteInstallPath) {
+        toContainedPath(option->setting.string, parent);
+      }
+    }
+
+    free(parent);
+  }
+}
+
 void
 resetOptions (const CommandLineOptions *options) {
   for (unsigned int index=0; index<options->count; index+=1) {
@@ -1200,6 +1217,8 @@ processOptions (const CommandLineDescriptor *descriptor, int *argumentCount, cha
 
   if (info.exitImmediately) return PROG_EXIT_FORCE;
   if (info.syntaxError) return PROG_EXIT_SYNTAX;
+
+  toAbsolutePaths(&info);
   return PROG_EXIT_SUCCESS;
 }
 

@@ -158,28 +158,10 @@ getProgramDirectory (void) {
 }
 
 int
-fixInstallPath (char **path) {
+toAbsoluteInstallPath (char **path) {
   const char *programDirectory = getProgramDirectory();
   if (!programDirectory) programDirectory = CURRENT_DIRECTORY_NAME;
-
-  const char *problem = strtext("cannot fix install path");
-  char *newPath = makePath(programDirectory, *path);
-
-  if (newPath) {
-    if (changeStringSetting(path, newPath)) {
-      if (isAbsolutePath(*path)) {
-        problem = NULL;
-      } else {
-        problem = strtext("install path not absolute");
-      }
-    }
-
-    free(newPath);
-  }
-
-  if (!problem) return 1;
-  logMessage(LOG_WARNING, "%s: %s", gettext(problem), *path);
-  return 0;
+  return toContainedPath(path, programDirectory);
 }
 
 char *
@@ -195,7 +177,7 @@ makeCommandPath (const char *name) {
   char *directory = NULL;
 
   if (changeStringSetting(&directory, COMMANDS_DIRECTORY)) {
-    if (fixInstallPath(&directory)) {
+    if (toAbsoluteInstallPath(&directory)) {
       path = makePath(directory, name);
     }
   }

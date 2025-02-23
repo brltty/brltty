@@ -211,6 +211,19 @@ makePath (const char *directory, const char *file) {
 }
 
 int
+toContainedPath (char **path, const char *parent) {
+  int ok = 0;
+  char *newPath = makePath(parent, *path);
+
+  if (newPath) {
+    if (changeStringSetting(path, newPath)) ok = 1;
+    free(newPath);
+  }
+
+  return ok;
+}
+
+int
 hasFileExtension (const char *path, const char *extension) {
   const char *tail = locatePathExtension(path);
 

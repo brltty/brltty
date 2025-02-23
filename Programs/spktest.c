@@ -74,7 +74,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
     .internal.setting = DRIVERS_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = "Path to directory for loading drivers."
   },
 END_OPTION_TABLE(programOptions)

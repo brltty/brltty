@@ -61,7 +61,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory containing tables.")
   },
 
@@ -70,7 +70,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "directory",
     .setting.string = &opt_driversDirectory,
     .internal.setting = DRIVERS_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = "Path to directory for loading drivers."
   },
 
@@ -79,7 +79,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_writableDirectory,
     .internal.setting = WRITABLE_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory which can be written to.")
   },
 END_OPTION_TABLE(programOptions)

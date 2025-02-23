@@ -41,7 +41,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .letter = 'd',
     .argument = strtext("path"),
     .setting.string = &opt_localeDirectory,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("the locale directory containing the translations")
   },
 

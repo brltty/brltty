@@ -396,7 +396,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("file"),
     .setting.string = &opt_configurationFile,
     .internal.setting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to default settings file.")
   },
 
@@ -709,7 +709,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory containing tables.")
   },
 
@@ -719,7 +719,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_driversDirectory,
     .internal.setting = DRIVERS_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory containing drivers.")
   },
 
@@ -729,7 +729,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_updatableDirectory,
     .internal.setting = UPDATABLE_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory which contains files that can be updated.")
   },
 
@@ -739,7 +739,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_writableDirectory,
     .internal.setting = WRITABLE_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory which can be written to.")
   },
 
@@ -748,7 +748,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_localeDirectory,
     .internal.setting = LOCALE_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory which contains message localizations.")
   },
 
@@ -757,7 +757,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_pidFile,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to process identifier file.")
   },
 

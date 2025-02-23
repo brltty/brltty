@@ -182,7 +182,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "directory",
     .setting.string = &opt_tablesDirectory,
     .internal.setting = TABLES_DIRECTORY,
-    .internal.adjust = fixInstallPath,
+    .internal.adjust = toAbsoluteInstallPath,
     .description = strtext("Path to directory containing text tables.")
   },
 END_OPTION_TABLE(programOptions)

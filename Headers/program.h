@@ -49,7 +49,7 @@ extern void onProgramExit (const char *name, ProgramExitHandler *handler, void *
 extern void registerProgramMemory (const char *name, void *pointer);
 
 extern const char *getProgramDirectory (void);
-extern int fixInstallPath (char **path);
+extern int toAbsoluteInstallPath (char **path);
 extern char *makeProgramPath (const char *name);
 extern char *makeCommandPath (const char *name);
 
