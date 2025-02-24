@@ -24,6 +24,7 @@
 
 #include "program.h"
 #include "cmdline.h"
+#include "options.h"
 #include "prefs.h"
 #include "log.h"
 #include "file.h"
@@ -35,9 +36,9 @@
 #include "ttb.h"
 #include "ctb.h"
 
-static char *opt_tablesDirectory;
-static char *opt_contractionTable;
-static char *opt_textTable;
+char *opt_tablesDirectory;
+char *opt_contractionTable;
+char *opt_textTable;
 static char *opt_verificationTable;
 
 static char *opt_outputWidth;

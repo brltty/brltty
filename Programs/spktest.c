@@ -28,6 +28,7 @@
 
 #include "program.h"
 #include "cmdline.h"
+#include "options.h"
 #include "log.h"
 #include "spk.h"
 #include "file.h"
@@ -37,8 +38,8 @@
 static char *opt_textString;
 static char *opt_speechVolume;
 static char *opt_speechRate;
-static char *opt_pcmDevice;
-static char *opt_driversDirectory;
+char *opt_pcmDevice;
+char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "text-string",

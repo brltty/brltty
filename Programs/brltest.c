@@ -25,6 +25,7 @@
 
 #include "program.h"
 #include "cmdline.h"
+#include "options.h"
 #include "parameters.h"
 #include "log.h"
 #include "parse.h"
@@ -42,9 +43,9 @@
 
 BrailleDisplay brl;
 
-static char *opt_brailleDevice;
+char *opt_brailleDevice;
 char *opt_driversDirectory;
-static char *opt_tablesDirectory;
+char *opt_tablesDirectory;
 static char *opt_writableDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)

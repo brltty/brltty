@@ -27,6 +27,7 @@
 #include "strfmt.h"
 #include "program.h"
 #include "cmdline.h"
+#include "options.h"
 #include "file.h"
 #include "get_select.h"
 #include "brl_dots.h"
@@ -134,7 +135,7 @@ showUndefinedCharacters (TextTableData *ttd) {
 static char *opt_charset;
 static char *opt_inputFormat;
 static char *opt_outputFormat;
-static char *opt_tablesDirectory;
+char *opt_tablesDirectory;
 static int opt_edit;
 
 #ifdef HAVE_UNDEFINED_CHARACTERS_SUPPORT

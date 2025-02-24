@@ -20,10 +20,11 @@
 
 #include "program.h"
 #include "cmdline.h"
+#include "options.h"
 #include "log.h"
 #include "atb.h"
 
-static char *opt_tablesDirectory;
+char *opt_tablesDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "tables-directory",

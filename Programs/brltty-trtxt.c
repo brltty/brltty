@@ -24,6 +24,7 @@
 
 #include "program.h"
 #include "cmdline.h"
+#include "options.h"
 #include "log.h"
 #include "file.h"
 #include "unicode.h"
@@ -31,7 +32,7 @@
 #include "brl_dots.h"
 #include "ttb.h"
 
-static char *opt_tablesDirectory;
+char *opt_tablesDirectory;
 static char *opt_inputTable;
 static char *opt_outputTable;
 

@@ -25,6 +25,7 @@
 
 #include "program.h"
 #include "cmdline.h"
+#include "options.h"
 #include "log.h"
 #include "parse.h"
 #include "scr.h"
@@ -34,7 +35,7 @@ static char *opt_boxWidth;
 static char *opt_boxTop;
 static char *opt_boxHeight;
 static char *opt_screenDriver;
-static char *opt_driversDirectory;
+char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "screen-driver",
