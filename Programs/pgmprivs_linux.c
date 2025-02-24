@@ -342,6 +342,7 @@ processRequiredGroups (GroupsProcessor *processGroups, int logProblems, void *da
         const char *path = rge->path;
 
         if (path) {
+          logMessage(LOG_DEBUG, "checking group owner of path: %s", path);
           struct stat status;
 
           if (stat(path, &status) != -1) {
@@ -571,6 +572,7 @@ static const RequiredCapabilityEntry requiredCapabilityTable[] = {
 
 static void
 setRequiredCapabilities (int stayPrivileged) {
+  logCurrentCapabilities("temporary");
   cap_t newCaps, oldCaps;
 
   if (amPrivilegedUser()) {
@@ -2235,7 +2237,7 @@ getPrivilegeParametersPlatform (void) {
 
 void
 establishProgramPrivileges (char **parameters, int stayPrivileged) {
-  logCurrentCapabilities("at start");
+  logCurrentCapabilities("initial");
 
   setCommandSearchPath(parameters[PARM_PATH]);
   setDefaultShell(parameters[PARM_SHELL]);
@@ -2279,7 +2281,7 @@ establishProgramPrivileges (char **parameters, int stayPrivileged) {
   }
 
   establishPrivileges(stayPrivileged);
-  logCurrentCapabilities("after relinquish");
+  logCurrentCapabilities("permanent");
 
 #ifdef SECCOMP_MODE_FILTER
   scfInstallFilter(parameters[PARM_SCFMODE]);
