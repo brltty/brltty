@@ -723,6 +723,16 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to directory containing drivers.")
   },
 
+  { .word = "helpers-directory",
+    .letter = 'H',
+    .flags = OPT_Config | OPT_EnvVar,
+    .argument = strtext("directory"),
+    .setting.string = &opt_helpersDirectory,
+    .internal.setting = HELPERS_DIRECTORY,
+    .internal.adjust = toAbsoluteInstallPath,
+    .description = strtext("Path to directory containing helper commands.")
+  },
+
   { .word = "updatable-directory",
     .letter = 'U',
     .flags = OPT_Config | OPT_EnvVar,
@@ -3066,6 +3076,7 @@ brlttyStart (void) {
   logProperty(opt_configurationFile, "configurationFile", "Configuration File");
   logProperty(opt_tablesDirectory, "tablesDirectory", "Tables Directory");
   logProperty(opt_driversDirectory, "driversDirectory", "Drivers Directory");
+  logProperty(opt_helpersDirectory, "helpersDirectory", "Helpers Directory");
   logProperty(opt_writableDirectory, "writableDirectory", "Writable Directory");
   logProperty(opt_updatableDirectory, "updatableDirectory", "Updatable Directory");
   logProperty(opt_preferencesFile, "preferencesFile", "Preferences File");

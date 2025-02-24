@@ -89,7 +89,7 @@ INSTALL_ROOT = @install_root@
 EXECUTE_ROOT = @execute_root@
 
 PROGRAM_DIRECTORY = @program_directory@
-COMMANDS_DIRECTORY = @commands_directory@
+HELPERS_DIRECTORY = @helpers_directory@
 DRIVERS_DIRECTORY = @drivers_directory@
 UPDATABLE_DIRECTORY = @updatable_directory@
 WRITABLE_DIRECTORY = @writable_directory@

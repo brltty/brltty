@@ -43,7 +43,7 @@ writable_directory=@writable_directory@
 
 execute_root=@execute_root@
 program_directory=${execute_root}@program_directory@
-commands_directory=${execute_root}@commands_directory@
+helpers_directory=${execute_root}@helpers_directory@
 drivers_directory=${execute_root}@drivers_directory@
 tables_directory=${execute_root}@tables_directory@
 include_directory=${execute_root}@include_directory@

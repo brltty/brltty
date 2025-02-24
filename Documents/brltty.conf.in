@@ -618,6 +618,12 @@
 # (can be overridden with the --drivers-directory= [-D] option)
 #drivers-directory @DRIVERS_DIRECTORY@
 
+# The helpers-directory directive specifies the absolute path to the
+# directory which contains the helper commands. If not
+# specified, @HELPERS_DIRECTORY@ will be used.
+# (can be overridden with the --helpers-directory= [-H] option)
+#helpers-directory @HELPERS_DIRECTORY@
+
 # The tables-directory directive specifies the absolute path to the directory
 # which contains the text, contraction, attributes, keyboard, and input tables.
 # If not specified, "@TABLES_DIRECTORY@" will be used.

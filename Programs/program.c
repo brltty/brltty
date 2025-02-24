@@ -171,21 +171,6 @@ makeProgramPath (const char *name) {
    return makePath(directory, name);
 }
 
-char *
-makeCommandPath (const char *name) {
-  char *path = NULL;
-  char *directory = NULL;
-
-  if (changeStringSetting(&directory, COMMANDS_DIRECTORY)) {
-    if (toAbsoluteInstallPath(&directory)) {
-      path = makePath(directory, name);
-    }
-  }
-
-  if (directory) free(directory);
-  return path;
-}
-
 int
 createPidFile (const char *path, ProcessIdentifier pid) {
 #if defined(GRUB_RUNTIME)

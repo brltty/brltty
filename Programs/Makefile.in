@@ -1166,8 +1166,8 @@ install-commands: all-commands install-program-directories $(INSTALL_BRLTTY_PTY)
 	$(INSTALL_PROGRAM) brltty-lscmds$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty-hid$X $(INSTALL_PROGRAM_DIRECTORY) 
 
-install-brltty-pty: install-commands-directory
-	$(INSTALL_PROGRAM) brltty-pty$X $(INSTALL_COMMANDS_DIRECTORY) 
+install-brltty-pty: install-helpers-directory
+	$(INSTALL_PROGRAM) brltty-pty$X $(INSTALL_HELPERS_DIRECTORY) 
 
 install-tools: all-tools install-program-directories
 	$(INSTALL_PROGRAM) brltty-cldr$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -1290,7 +1290,7 @@ uninstall:: uninstall-programs uninstall-tables uninstall-drivers uninstall-mess
 uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-*
-	-rm -f $(INSTALL_COMMANDS_DIRECTORY)/brltty-*
+	-rm -f $(INSTALL_HELPERS_DIRECTORY)/brltty-*
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
 	-rm -f $(INSTALL_X11_AUTOSTART_DIRECTORY)/$(XBRLAPI_X11_AUTOSTART_FILE)
 	-rm -f $(INSTALL_GDM_AUTOSTART_DIRECTORY)/$(XBRLAPI_GDM_AUTOSTART_FILE)

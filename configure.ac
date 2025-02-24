@@ -142,9 +142,9 @@ BRLTTY_ARG_REQUIRED(
 )
 
 BRLTTY_ARG_REQUIRED(
-   [commands-directory], [DIRECTORY],
+   [helpers-directory], [DIRECTORY],
    [path to directory containing helper commands],
-   [commands_directory], ["${libexecdir}/${PACKAGE_TARNAME}"]
+   [helpers_directory], ["${libexecdir}/${PACKAGE_TARNAME}"]
 )
 
 BRLTTY_ARG_REQUIRED(
@@ -1992,7 +1992,7 @@ BRLTTY_DEFINE_DIRECTORY([TABLES_DIRECTORY], [${execute_root}${tables_directory}]
 BRLTTY_DEFINE_DIRECTORY([DRIVERS_DIRECTORY], [${execute_root}${drivers_directory}],
                         [Define this to be a string containing the path to the drivers directory.])
 
-BRLTTY_DEFINE_DIRECTORY([COMMANDS_DIRECTORY], [${execute_root}${commands_directory}],
+BRLTTY_DEFINE_DIRECTORY([HELPERS_DIRECTORY], [${execute_root}${helpers_directory}],
                         [Define this to be a string containing the path to the helper commands directory.])
 
 BRLTTY_PUBLIC_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],

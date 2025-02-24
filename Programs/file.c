@@ -223,6 +223,22 @@ toContainedPath (char **path, const char *parent) {
   return ok;
 }
 
+char *opt_helpersDirectory;
+char *
+makeCommandPath (const char *name) {
+  char *path = NULL;
+  char *directory = NULL;
+
+  if (changeStringSetting(&directory, opt_helpersDirectory)) {
+    if (toAbsoluteInstallPath(&directory)) {
+      path = makePath(directory, name);
+    }
+  }
+
+  if (directory) free(directory);
+  return path;
+}
+
 int
 hasFileExtension (const char *path, const char *extension) {
   const char *tail = locatePathExtension(path);

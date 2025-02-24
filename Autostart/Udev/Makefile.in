@@ -44,8 +44,8 @@ usb-generic:
 	cp $(UDEV_NAME_USB_TEMPLATE) $(UDEV_NAME_USB_GENERIC)
 	$(UPDUSBDEVS) -onlygeneric udev:$(UDEV_NAME_USB_GENERIC)
 
-install-wrapper: install-commands-directory
-	$(INSTALL_SCRIPT) $(SRC_DIR)/udev-wrapper $(INSTALL_COMMANDS_DIRECTORY)
+install-wrapper: install-helpers-directory
+	$(INSTALL_SCRIPT) $(SRC_DIR)/udev-wrapper $(INSTALL_HELPERS_DIRECTORY)
 
 install-rules-directory:
 	$(INSTALL_DIRECTORY) $(UDEV_RULES_DIRECTORY)
@@ -71,7 +71,7 @@ install: install-wrapper install-rules
 uninstall:
 	-rm -f $(UDEV_RULES_DIRECTORY)/?*-$(PACKAGE_TARNAME).$(UDEV_RULES_EXTENSION)
 	-rm -f $(UDEV_RULES_DIRECTORY)/?*-$(PACKAGE_TARNAME)-*.$(UDEV_RULES_EXTENSION)
-	-rm -f $(INSTALL_COMMANDS_DIRECTORY)/udev-*
+	-rm -f $(INSTALL_HELPERS_DIRECTORY)/udev-*
 
 clean::
 	-rm -f $(UDEV_NAME_USB_CUSTOMIZED)

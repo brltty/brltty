@@ -539,7 +539,7 @@ extern "C" {
 #undef PREFERENCES_FILE
 
 /* Define this to be a string containing the path to the helper commands directory. */
-#undef COMMANDS_DIRECTORY
+#undef HELPERS_DIRECTORY
 
 /* Define this to be a string containing the path to the drivers directory. */
 #undef DRIVERS_DIRECTORY
