@@ -223,9 +223,9 @@ toContainedPath (char **path, const char *parent) {
   return ok;
 }
 
-char *opt_helpersDirectory;
+char *opt_helpersDirectory = HELPERS_DIRECTORY;
 char *
-makeCommandPath (const char *name) {
+makeHelperPath (const char *name) {
   char *path = NULL;
   char *directory = NULL;
 

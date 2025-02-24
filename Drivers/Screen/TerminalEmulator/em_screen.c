@@ -280,7 +280,7 @@ makeDefaultEmulatorPath (void) {
 
   static PathMaker *pathMakers[] = {
     makeProgramPath,
-    makeCommandPath,
+    makeHelperPath,
   };
 
   PathMaker **pathMaker = pathMakers;

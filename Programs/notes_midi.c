@@ -25,8 +25,9 @@
 #include "log.h"
 #include "midi.h"
 #include "notes.h"
+#include "options.h"
 
-char *opt_midiDevice;
+char *opt_midiDevice = "";
 
 struct NoteDeviceStruct {
   MidiDevice *midi;

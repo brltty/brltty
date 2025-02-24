@@ -22,6 +22,7 @@
 
 #include "log.h"
 #include "cmdline.h"
+#include "options.h"
 #include "prefs.h"
 #include "parse.h"
 #include "tune_utils.h"

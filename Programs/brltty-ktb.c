@@ -23,6 +23,7 @@
 
 #include "program.h"
 #include "cmdline.h"
+#include "options.h"
 #include "log.h"
 #include "file.h"
 #include "parse.h"
@@ -36,7 +37,7 @@ static int opt_audit;
 static int opt_listKeyNames;
 static int opt_listHelpScreen;
 static int opt_listRestructuredText;
-static char *opt_tablesDirectory;
+char *opt_tablesDirectory;
 char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)

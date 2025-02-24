@@ -24,7 +24,7 @@
 #include "ezusb.h"
 #include "ihex.h"
 #include "timing.h"
-#include "core.h"
+#include "options.h"
 
 #define EZUSB_REQUEST_TIMEOUT 1000
 #define EZUSB_CPUCS_DELAY 10

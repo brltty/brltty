@@ -44,6 +44,7 @@
 #include "blink.h"
 #include "routing.h"
 #include "api_control.h"
+#include "options.h"
 #include "core.h"
 
 static void

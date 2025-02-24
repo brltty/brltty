@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "cmdline.h"
+#include "options.h"
 #include "prefs.h"
 #include "tune_utils.h"
 #include "tune_builder.h"

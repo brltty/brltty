@@ -78,7 +78,6 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 #include "embed.h"
 #include "clipboard.h"
 #include "ttb.h"
-#include "core.h"
 #include "api_server.h"
 #include "report.h"
 #include "log.h"
@@ -95,6 +94,8 @@ Samuel Thibault <samuel.thibault@ens-lyon.org>"
 #include "async_signal.h"
 #include "thread.h"
 #include "blink.h"
+#include "options.h"
+#include "core.h"
 
 #ifdef __MINGW32__
 #define LogSocketError(msg) logWindowsSocketError(msg)

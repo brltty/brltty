@@ -58,9 +58,6 @@ extern const NoteMethods pcmNoteMethods;
 extern const NoteMethods midiNoteMethods;
 extern const NoteMethods fmNoteMethods;
 
-extern char *opt_pcmDevice;
-extern char *opt_midiDevice;
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

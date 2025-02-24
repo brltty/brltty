@@ -36,13 +36,14 @@
 #include "brl.h"
 #include "spk.h"
 #include "ttb.h"
-#include "atb.h"
 #include "ctb.h"
+#include "atb.h"
 #include "ktb.h"
 #include "tune.h"
 #include "bell.h"
 #include "leds.h"
 #include "midi.h"
+#include "options.h"
 #include "core.h"
 
 #define PREFS_MENU_ITEM_VARIABLE(name) prefsMenuItemVariable_##name

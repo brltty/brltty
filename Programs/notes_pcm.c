@@ -25,8 +25,9 @@
 #include "log.h"
 #include "pcm.h"
 #include "notes.h"
+#include "options.h"
 
-char *opt_pcmDevice;
+char *opt_pcmDevice = "";
 
 struct NoteDeviceStruct {
   PcmDevice *pcm;
