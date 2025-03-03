@@ -426,10 +426,17 @@ usbReapURB (UsbDevice *device, int wait) {
         if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
           UsbEndpointExtension *eptx = endpoint->extension;
 
+          switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+            case UsbEndpointDirection_Input:
+              deleteItem(endpoint->direction.input.pending.requests, urb);
+              break;
+          }
+
           if (enqueueItem(eptx->completedRequests, urb)) return endpoint;
           logSystemError("USB completed request enqueue");
-          free(urb);
         }
+
+        free(urb);
       } else {
         errno = EAGAIN;
       }
@@ -955,8 +962,6 @@ usbReadDeviceDescriptor (UsbDevice *device) {
 
 static int
 usbHandleInputURB (UsbEndpoint *endpoint, struct usbdevfs_urb *urb) {
-  deleteItem(endpoint->direction.input.pending.requests, urb);
-
   if (urb->actual_length < 0) {
     usbLogInputProblem(endpoint, "data not available");
     return 0;
