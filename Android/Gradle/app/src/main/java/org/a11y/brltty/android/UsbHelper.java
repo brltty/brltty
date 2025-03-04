@@ -71,7 +71,12 @@ public class UsbHelper {
 
     {
       IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-      usbContext.registerReceiver(permissionReceiver, filter);
+
+      if (APITests.haveUpsideDownCake) {
+        usbContext.registerReceiver(permissionReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+      } else {
+        usbContext.registerReceiver(permissionReceiver, filter);
+      }
     }
 
     permissionIntent = PendingIntent.getBroadcast(
