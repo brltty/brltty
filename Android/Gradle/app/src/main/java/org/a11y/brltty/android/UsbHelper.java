@@ -59,6 +59,7 @@ public class UsbHelper {
 
             if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
               Log.i(LOG_TAG, "permission granted for USB device: " + device);
+              BrailleNotification.create();
             } else {
               Log.w(LOG_TAG, "permission denied for USB device: " + device);
             }

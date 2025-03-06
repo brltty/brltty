@@ -21,6 +21,7 @@ import org.a11y.brltty.android.*;
 import org.a11y.brltty.android.settings.SettingsActivity;
 
 import android.os.Bundle;
+import android.content.pm.PackageManager;
 
 import android.view.View;
 import android.widget.Button;
@@ -31,12 +32,31 @@ import android.net.Uri;
 import java.io.File;
 
 public class ActionsActivity extends InternalActivity {
+  private final static int BLUETOOTH_PERMISSIONS_REQUEST_CODE = 0;
+
+  @Override
+  public void onRequestPermissionsResult (int code, String[] permissions, int[] results) {
+    if (code == BLUETOOTH_PERMISSIONS_REQUEST_CODE) {
+      for (int i=0; i<results.length; i+=1) {
+        if (results[i] == PackageManager.PERMISSION_GRANTED) {
+          BrailleNotification.create();
+          break;
+        }
+      }
+
+      return;
+    }
+  }
+
   public void switchInputMethod (View view) {
     InputService.switchInputMethod();
   }
 
   public void allowBluetoothConnections (View view) {
-    requestPermissions(BluetoothConnection.requiredPermissions, 0);
+    requestPermissions(
+      BluetoothConnection.requiredPermissions,
+      BLUETOOTH_PERMISSIONS_REQUEST_CODE
+    );
   }
 
   public void launchSettingsActivity (View view) {

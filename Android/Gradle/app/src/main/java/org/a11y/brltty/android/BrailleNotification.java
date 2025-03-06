@@ -20,6 +20,8 @@ package org.a11y.brltty.android;
 import org.a11y.brltty.android.activities.ActionsActivity;
 import org.a11y.brltty.android.settings.DeviceManager;
 
+import android.util.Log;
+
 import android.content.Context;
 import android.content.Intent;
 import android.app.PendingIntent;
@@ -30,12 +32,15 @@ import android.app.NotificationManager;
 import android.app.NotificationChannel;
 
 public abstract class BrailleNotification {
+  private final static String LOG_TAG = BrailleNotification.class.getName();
+
   private BrailleNotification () {
   }
 
   private final static Integer NOTIFICATION_IDENTIFIER = 1;
   private final static String NOTIFICATION_CHANNEL = "braille";
 
+  private static boolean isCreated = false;
   private static Context applicationContext = null;
   private static NotificationManager notificationManager = null;
   private static Notification.Builder notificationBuilder = null;
@@ -76,49 +81,48 @@ public abstract class BrailleNotification {
     return notificationManager;
   }
 
-  private static boolean isActive () {
-    return notificationBuilder != null;
-  }
-
   private static void makeBuilder () {
-    Context context = getContext();
+    if (notificationBuilder == null) {
+      Context context = getContext();
+      Notification.Builder builder;
 
-    if (APITests.haveOreo) {
-      NotificationManager nm = getManager();
-      NotificationChannel channel = nm.getNotificationChannel(NOTIFICATION_CHANNEL);
+      if (APITests.haveOreo) {
+        NotificationManager nm = getManager();
+        NotificationChannel channel = nm.getNotificationChannel(NOTIFICATION_CHANNEL);
 
-      if (channel == null) {
-        channel = new NotificationChannel(
-          NOTIFICATION_CHANNEL,
-          getString(R.string.braille_channel_name),
-          NotificationManager.IMPORTANCE_LOW
-        );
+        if (channel == null) {
+          channel = new NotificationChannel(
+            NOTIFICATION_CHANNEL,
+            getString(R.string.braille_channel_name),
+            NotificationManager.IMPORTANCE_LOW
+          );
 
-        nm.createNotificationChannel(channel);
+          nm.createNotificationChannel(channel);
+        }
+
+        builder = new Notification.Builder(context, NOTIFICATION_CHANNEL);
+      } else {
+        builder = new Notification.Builder(context)
+                                  .setPriority(Notification.PRIORITY_LOW)
+                                  ;
       }
 
-      notificationBuilder = new Notification.Builder(context, NOTIFICATION_CHANNEL);
-    } else {
-      notificationBuilder = new Notification.Builder(context)
-        .setPriority(Notification.PRIORITY_LOW)
-        ;
-    }
+      builder.setOngoing(true)
+             .setOnlyAlertOnce(true)
+             .setSmallIcon(R.drawable.braille_notification)
+             .setSubText(getString(R.string.braille_hint_tap))
+             .setContentIntent(newPendingIntent(ActionsActivity.class))
+             ;
 
-    notificationBuilder
-      .setOngoing(true)
-      .setOnlyAlertOnce(true)
+      if (APITests.haveJellyBeanMR1) {
+        builder.setShowWhen(false);
+      }
 
-      .setSmallIcon(R.drawable.braille_notification)
-      .setSubText(getString(R.string.braille_hint_tap))
-      .setContentIntent(newPendingIntent(ActionsActivity.class))
-      ;
+      if (APITests.haveLollipop) {
+        builder.setCategory(Notification.CATEGORY_SERVICE);
+      }
 
-    if (APITests.haveJellyBeanMR1) {
-      notificationBuilder.setShowWhen(false);
-    }
-
-    if (APITests.haveLollipop) {
-      notificationBuilder.setCategory(Notification.CATEGORY_SERVICE);
+      notificationBuilder = builder;
     }
   }
 
@@ -146,7 +150,7 @@ public abstract class BrailleNotification {
 
   public static void updateState () {
     synchronized (NOTIFICATION_IDENTIFIER) {
-      if (isActive()) {
+      if (isCreated) {
         setState();
         updateNotification();
       }
@@ -161,7 +165,7 @@ public abstract class BrailleNotification {
 
   public static void updateDevice (String device) {
     synchronized (NOTIFICATION_IDENTIFIER) {
-      if (isActive()) {
+      if (isCreated) {
         setDevice(device);
         updateNotification();
       }
@@ -170,27 +174,30 @@ public abstract class BrailleNotification {
 
   public static void create () {
     synchronized (NOTIFICATION_IDENTIFIER) {
-      if (isActive()) {
-        throw new IllegalStateException("already active");
+      if (!isCreated) {
+        makeBuilder();
+
+        setState();
+        setDevice(DeviceManager.getSelectedDevice());
+
+        try {
+          BrailleService.getBrailleService()
+                        .startForeground(NOTIFICATION_IDENTIFIER, buildNotification());
+
+          isCreated = true;
+        } catch (SecurityException exception) {
+          Log.w(LOG_TAG, ("can't become foreground service: " + exception.getMessage()));
+        }
       }
-
-      makeBuilder();
-      setState();
-      setDevice(DeviceManager.getSelectedDevice());
-
-      BrailleService.getBrailleService()
-                    .startForeground(NOTIFICATION_IDENTIFIER, buildNotification());
     }
   }
 
   public static void destroy () {
     synchronized (NOTIFICATION_IDENTIFIER) {
-      if (!isActive()) {
-        throw new IllegalStateException("not active");
+      if (isCreated) {
+        getManager().cancel(NOTIFICATION_IDENTIFIER);
+        isCreated = false;
       }
-
-      notificationBuilder = null;
-      getManager().cancel(NOTIFICATION_IDENTIFIER);
     }
   }
 }
