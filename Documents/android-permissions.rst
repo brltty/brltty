@@ -5,7 +5,10 @@
   * For Android to accept input via BRLTTY from your braille device's keyboard.
 
 ``FOREGROUND_SERVICE``
-  * For creating a foreground notification.
+  * To prevent Android from pausing, killing, etc BRLTTY if there's a resource shortage.
+
+``FOREGROUND_SERVICE_CONNECTED_DEVICE``
+  * The reason that BRLTTY needs to run as a foreground service.
 
 ``WAKE_LOCK``
   * For resetting the Android device's lock timer

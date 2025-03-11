@@ -79,7 +79,7 @@
 
       <property
         android:name="android.app.PROPERTY_CONNECTED_DEVICE_FGS_SUBTYPE"
-        android:value="This is an accessibility service that connects to a blind user's braille device so that he can read what's on the screen. It needs to be a foreground service because it must never be paused, killed, etc as that would then make it impossible for him to continue to interact with his device via braille. This service supports both Bluetooth and USB braille device connections."
+        android:value="This is an accessibility service that connects to a blind user's braille device so that he can read what's on the screen. It needs to be a foreground service because it must never be paused, killed, etc as that would then make it no longer possible for him to continue to interact with his device via braille. This service supports both Bluetooth and USB braille device connections."
        />
 
       <intent-filter>
