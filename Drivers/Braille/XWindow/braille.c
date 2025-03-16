@@ -750,7 +750,15 @@ static int generateToplevel(void)
 #elif defined(USE_XM)
 	"popup()"
 #endif /* USE_ */
-	"\n";
+	"\n"
+	"Mod2<Btn3Down>: "
+#if defined(USE_XAW)
+	"XawPositionSimpleMenu(menu) MenuPopup(menu)"
+#elif defined(USE_XM)
+	"popup()"
+#endif /* USE_ */
+	"\n"
+	;
   Widget tmp_vbox;
   char *disp;
 #ifdef USE_XAW
