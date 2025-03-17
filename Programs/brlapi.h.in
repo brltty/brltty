@@ -1154,7 +1154,12 @@ int BRLAPI_STDCALL brlapi__setParameter(brlapi_handle_t *handle, brlapi_param_t 
  * \param len is the size of the data.
  *
  * This callback only gets called when the application calls some brlapi_
- * function (i.e. BrlAPI gets direct control of the execution).
+ * function (i.e. BrlAPI gets direct control of the execution), BrlAPI itself
+ * does not start a separate thread or such.
+ *
+ * If an application wants to see such event trigger a callback getting called
+ * e.g. in another thread, it can use brlapi_pause() to give BrlAPI an
+ * opportunity to receive messages and call the callbacks.
  */
 typedef void (*brlapi_paramCallback_t)(brlapi_param_t parameter, brlapi_param_subparam_t subparam, brlapi_param_flags_t flags, void *priv, const void *data, size_t len);
 
