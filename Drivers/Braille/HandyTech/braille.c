@@ -270,6 +270,13 @@ BEGIN_KEY_NAME_TABLES(ac4)
   KEY_NAME_TABLE(joystick),
 END_KEY_NAME_TABLES
 
+BEGIN_KEY_NAME_TABLES(acp)
+  KEY_NAME_TABLE(routing),
+  KEY_NAME_TABLE(dots),
+  KEY_NAME_TABLE(navigation),
+  KEY_NAME_TABLE(brailleStar),
+END_KEY_NAME_TABLES
+
 typedef enum {
   HT_BWK_Backward = 0X01,
   HT_BWK_Forward = 0X08,
@@ -307,6 +314,7 @@ DEFINE_KEY_TABLE(bb)
 DEFINE_KEY_TABLE(bbp)
 DEFINE_KEY_TABLE(alo)
 DEFINE_KEY_TABLE(ac4)
+DEFINE_KEY_TABLE(acp)
 DEFINE_KEY_TABLE(bkwm)
 
 BEGIN_KEY_TABLE_LIST
@@ -327,6 +335,7 @@ BEGIN_KEY_TABLE_LIST
   &KEY_TABLE_DEFINITION(bbp),
   &KEY_TABLE_DEFINITION(alo),
   &KEY_TABLE_DEFINITION(ac4),
+  &KEY_TABLE_DEFINITION(acp),
   &KEY_TABLE_DEFINITION(bkwm),
 END_KEY_TABLE_LIST
 
@@ -556,7 +565,7 @@ static const ModelEntry modelTable[] = {
     .name = "Activator Pro 64",
     .textCells = 64,
     .statusCells = 0,
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(acp),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
     .setBrailleFirmness = setBrailleFirmness,
@@ -570,7 +579,7 @@ static const ModelEntry modelTable[] = {
     .name = "Activator Pro 80",
     .textCells = 80,
     .statusCells = 0,
-    .keyTableDefinition = &KEY_TABLE_DEFINITION(ac4),
+    .keyTableDefinition = &KEY_TABLE_DEFINITION(acp),
     .interpretByte = interpretByte_key,
     .writeCells = writeCells_Evolution,
     .setBrailleFirmness = setBrailleFirmness,
