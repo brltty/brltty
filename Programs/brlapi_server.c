@@ -183,6 +183,7 @@ extern char *opt_brailleParameters;
 extern char *cfg_brailleParameters;
 
 typedef struct {
+  unsigned int size;
   unsigned int cursor;
   wchar_t *text;
   unsigned char *andAttr;
@@ -580,13 +581,15 @@ typedef struct { /* packet handlers */
 /* Returns to report success, -1 on errors */
 static int allocBrailleWindow(BrailleWindow *brailleWindow)
 {
-  if (!(brailleWindow->text = malloc(displaySize*sizeof(wchar_t)))) goto out;
-  if (!(brailleWindow->andAttr = malloc(displaySize))) goto outText;
-  if (!(brailleWindow->orAttr = malloc(displaySize))) goto outAnd;
+  unsigned int size = displaySize;
+  brailleWindow->size = size;
+  if (!(brailleWindow->text = malloc(size*sizeof(wchar_t)))) goto out;
+  if (!(brailleWindow->andAttr = malloc(size))) goto outText;
+  if (!(brailleWindow->orAttr = malloc(size))) goto outAnd;
 
-  wmemset(brailleWindow->text, WC_C(' '), displaySize);
-  memset(brailleWindow->andAttr, 0xFF, displaySize);
-  memset(brailleWindow->orAttr, 0x00, displaySize);
+  wmemset(brailleWindow->text, WC_C(' '), size);
+  memset(brailleWindow->andAttr, 0xFF, size);
+  memset(brailleWindow->orAttr, 0x00, size);
   brailleWindow->cursor = 0;
   return 0;
 
@@ -595,6 +598,43 @@ outAnd:
 
 outText:
   free(brailleWindow->text);
+
+out:
+  return -1;
+}
+
+/* Function : reAllocBrailleWindow */
+/* Resizes the members of a BrailleWindow structure according to a new size */
+/* Returns to report success, -1 on errors */
+static int reallocBrailleWindow(BrailleWindow *brailleWindow, unsigned size)
+{
+  wchar_t *newText;
+  unsigned char *newAndAttr;
+  unsigned char *newOrAttr;
+  unsigned int oldsize = brailleWindow->size;
+
+  if (!(newText = realloc(brailleWindow->text, size*sizeof(wchar_t)))) goto out;
+  if (!(newAndAttr = realloc(brailleWindow->andAttr, size))) goto outText;
+  if (!(newOrAttr = realloc(brailleWindow->orAttr, size))) goto outAnd;
+
+  brailleWindow->size = size;
+  brailleWindow->text = newText;
+  brailleWindow->andAttr = newAndAttr;
+  brailleWindow->orAttr = newOrAttr;
+
+  if (size > oldsize) {
+    wmemset(newText + oldsize, WC_C(' '), size - oldsize);
+    memset(newAndAttr + oldsize, 0xFF, size - oldsize);
+    memset(newOrAttr + oldsize, 0x00, size - oldsize);
+  }
+
+  return 0;
+
+outAnd:
+  free(newAndAttr);
+
+outText:
+  free(newText);
 
 out:
   return -1;
@@ -630,13 +670,32 @@ static void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 {
   int i;
   unsigned char c;
-  for (i=0; i<displaySize; i++) {
+  unsigned int size = MIN(brailleWindow->size, displaySize);
+  for (i=0; i<size; i++) {
     c = convertCharacterToDots(textTable, brailleWindow->text[i]);
     buf[i] = (c & brailleWindow->andAttr[i]) | brailleWindow->orAttr[i];
   }
+  for (i=size; i<displaySize; i++) {
+    buf[i] = 0;
+  }
 
-  if (brailleWindow->cursor) {
+  if (brailleWindow->cursor && brailleWindow->cursor < displaySize) {
     buf[brailleWindow->cursor-1] |= cursorOverlay;
+  }
+}
+
+/* Function: getText */
+/* Returns the braille text corresponding to a BrailleWindow structure */
+/* No allocation of buf is performed */
+static void getText(const BrailleWindow *brailleWindow, wchar_t *buf)
+{
+  int i;
+  unsigned int size = MIN(brailleWindow->size, displaySize);
+  for (i=0; i<size; i++) {
+    buf[i] = brailleWindow->text[i];
+  }
+  for (i=size; i<displaySize; i++) {
+    buf[i] = WC_C(' ');
   }
 }
 
@@ -1084,6 +1143,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   int remaining = size;
   char *charset = NULL;
   unsigned int charsetLen = 0;
+  unsigned int connSize;
   CHECKEXC(remaining>=sizeof(wa->flags), BRLAPI_ERROR_INVALID_PACKET, "packet too small for flags");
   CHECKEXC(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKEXC(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
@@ -1094,6 +1154,13 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   }
   remaining -= sizeof(wa->flags); /* flags */
   CHECKEXC((wa->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLAPI_ERROR_OPNOTSUPP, "display number not yet supported");
+  connSize = c->brailleWindow.size;
+  if (connSize < displaySize) { /* Display got bigger, allocate room for this */
+    connSize = displaySize;
+    lockMutex(&c->brailleWindowMutex);
+    reallocBrailleWindow(&c->brailleWindow, connSize);
+    unlockMutex(&c->brailleWindowMutex);
+  }
   if (wa->flags & BRLAPI_WF_REGION) {
     int regionSize;
     CHECKEXC(remaining>2*sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for region");
@@ -1111,23 +1178,23 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     }
 
     CHECKEXC(
-      (rbeg >= 1) && (rbeg <= displaySize),
+      (rbeg >= 1) && (rbeg <= connSize),
       BRLAPI_ERROR_INVALID_PARAMETER, "invalid region start"
     );
 
     CHECKEXC(
-      (rsiz >= 1) && (rsiz <= displaySize),
+      (rsiz >= 1) && (rsiz <= connSize),
       BRLAPI_ERROR_INVALID_PARAMETER, "invalid region size"
     );
 
     CHECKEXC(
-      (rbeg + rsiz - 1 <= displaySize),
+      (rbeg + rsiz - 1 <= connSize),
       BRLAPI_ERROR_INVALID_PARAMETER, "invalid region"
     );
   } else {
     logMessage(LOG_CATEGORY(SERVER_EVENTS), "warning: fd %"PRIfd" uses deprecated regionBegin=0 and regionSize = 0",c->fd);
     rbeg = 1;
-    rsiz = displaySize;
+    rsiz = connSize;
     fill = true;
   }
   if (wa->flags & BRLAPI_WF_TEXT) {
@@ -1154,7 +1221,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     memcpy(&u32, p, sizeof(uint32_t));
     cursor = ntohl(u32);
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* cursor */
-    CHECKEXC(cursor<=displaySize, BRLAPI_ERROR_INVALID_PACKET, "wrong cursor");
+    CHECKEXC(cursor<=connSize, BRLAPI_ERROR_INVALID_PACKET, "wrong cursor");
   }
   if (wa->flags & BRLAPI_WF_CHARSET) {
     CHECKEXC(wa->flags & BRLAPI_WF_TEXT, BRLAPI_ERROR_INVALID_PACKET, "charset requires text");
@@ -1167,7 +1234,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
   CHECKEXC(remaining==0, BRLAPI_ERROR_INVALID_PACKET, "packet too big");
   /* Here the whole packet has been checked */
 
-  unsigned int rsiz_filled = fill ? displaySize - rbeg + 1 : rsiz;
+  unsigned int rsiz_filled = fill ? connSize - rbeg + 1 : rsiz;
 
   if (text) {
     int isUTF8 = 0;
@@ -1265,8 +1332,8 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       }
       logConversionResult(c, rsiz, textLen);
       len -= sout / sizeof(wchar_t);
-      if (len > displaySize - rbeg + 1)
-	len = displaySize - rbeg + 1;
+      if (len > connSize - rbeg + 1)
+	len = connSize - rbeg + 1;
 
       lockMutex(&c->brailleWindowMutex);
       wmemcpy(c->brailleWindow.text+rbeg-1, textBuf, len);
@@ -1291,7 +1358,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
       end = rbeg-1 + len;
     }
     if (fill)
-      wmemset(c->brailleWindow.text+end, L' ', displaySize - end);
+      wmemset(c->brailleWindow.text+end, L' ', connSize - end);
 
     // Forget the charset in case it's pointing to a local buffer.
     // This occurs when getCharset() is saved and alloca() isn't available.
@@ -4438,11 +4505,13 @@ int api_flushOutput(BrailleDisplay *brl) {
     }
 
     if (c != displayed_last || c->brlbufstate==TODISPLAY || update) {
-      unsigned char *oldbuf = disp->buffer, buf[displaySize];
-      disp->buffer = buf;
-      getDots(&c->brailleWindow, buf);
+      unsigned char *oldbuf = disp->buffer, dots[displaySize];
+      wchar_t text[displaySize];
+      disp->buffer = dots;
+      getDots(&c->brailleWindow, dots);
+      getText(&c->brailleWindow, text);
       brl->cursor = c->brailleWindow.cursor-1;
-      if (!trueBraille->writeWindow(brl, c->brailleWindow.text)) ok = 0;
+      if (!trueBraille->writeWindow(brl, text)) ok = 0;
       /* FIXME: the client should have gotten the notification when the write
        * was received, rather than only when it eventually gets displayed
        * (possibly only because of focus change) */
