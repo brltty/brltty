@@ -7,9 +7,6 @@
 ``FOREGROUND_SERVICE``
   * To prevent Android from pausing, killing, etc BRLTTY if there's a resource shortage.
 
-``FOREGROUND_SERVICE_CONNECTED_DEVICE``
-  * The reason that BRLTTY needs to run as a foreground service.
-
 ``WAKE_LOCK``
   * For resetting the Android device's lock timer
     each time you interact with a control on your braille device.
