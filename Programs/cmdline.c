@@ -1150,7 +1150,9 @@ toAbsolutePaths (OptionProcessingInformation *info) {
       const CommandLineOption *option = &info->options->table[optionIndex];
 
       if (option->internal.adjust == toAbsoluteInstallPath) {
-        toContainedPath(option->setting.string, parent);
+        if (**option->setting.string) {
+          toContainedPath(option->setting.string, parent);
+        }
       }
     }
 
