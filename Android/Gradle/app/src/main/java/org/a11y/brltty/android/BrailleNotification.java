@@ -25,7 +25,9 @@ import android.util.Log;
 import android.content.Context;
 import android.content.Intent;
 import android.app.PendingIntent;
+
 import android.app.Activity;
+import android.app.MissingForegroundServiceTypeException;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -185,6 +187,9 @@ public abstract class BrailleNotification {
                         .startForeground(NOTIFICATION_IDENTIFIER, buildNotification());
 
           isCreated = true;
+          Log.i(LOG_TAG, "has become foreground service");
+        } catch (MissingForegroundServiceTypeException exception) {
+          Log.w(LOG_TAG, ("foreground service type not specified: " + exception.getMessage()));
         } catch (SecurityException exception) {
           Log.w(LOG_TAG, ("can't become foreground service: " + exception.getMessage()));
         }
