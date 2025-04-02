@@ -1614,14 +1614,10 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(loggingSubmenu, rootMenu, strtext("Logging"));
+    SUBMENU(logSettingsSubmenu, rootMenu, strtext("Log Settings"));
+    setAdvancedSubmenu(logSettingsSubmenu);
 
-    {
-      NAME(strtext("Log Messages"));
-      logMessagesMenu = newSubmenuMenuItem(loggingSubmenu, &itemName);
-    }
-
-    static const MenuString logLevels[] = {
+    static const MenuString logLevelNames[] = {
       [LOG_EMERG] = {.label=strtext("Emergency")},
       [LOG_ALERT] = {.label=strtext("Alert")},
       [LOG_CRIT] = {.label=strtext("Critical")},
@@ -1634,24 +1630,21 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("System Log Level"));
-      ITEM(newEnumeratedMenuItem(loggingSubmenu, &systemLogLevel, &itemName, logLevels));
-      TEST(AdvancedSubmenu);
+      ITEM(newEnumeratedMenuItem(logSettingsSubmenu, &systemLogLevel, &itemName, logLevelNames));
     }
 
     {
       NAME(strtext("Standard Error Log Level"));
-      ITEM(newEnumeratedMenuItem(loggingSubmenu, &stderrLogLevel, &itemName, logLevels));
-      TEST(AdvancedSubmenu);
+      ITEM(newEnumeratedMenuItem(logSettingsSubmenu, &stderrLogLevel, &itemName, logLevelNames));
     }
 
     {
       NAME(strtext("Category Log Level"));
-      ITEM(newEnumeratedMenuItem(loggingSubmenu, &categoryLogLevel, &itemName, logLevels));
-      TEST(AdvancedSubmenu);
+      ITEM(newEnumeratedMenuItem(logSettingsSubmenu, &categoryLogLevel, &itemName, logLevelNames));
     }
 
     {
-      SUBMENU(logCategoriesSubmenu, loggingSubmenu, strtext("Log Categories"));
+      SUBMENU(logCategoriesSubmenu, logSettingsSubmenu, strtext("Log Categories"));
       setAdvancedSubmenu(logCategoriesSubmenu);
 
       {
@@ -1687,6 +1680,11 @@ makePreferencesMenu (void) {
         }
       }
     }
+  }
+
+  {
+    NAME(strtext("Log Messages"));
+    logMessagesMenu = newSubmenuMenuItem(rootMenu, &itemName);
   }
 
   return rootMenu;
