@@ -1442,6 +1442,28 @@ makePreferencesMenu (void) {
   }
 
   {
+    SUBMENU(toolsSubmenu, rootMenu, strtext("Tools"));
+    setAdvancedSubmenu(toolsSubmenu);
+
+    {
+      NAME(strtext("Restart Braille Driver"));
+      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartBrailleDriver));
+    }
+
+  #ifdef ENABLE_SPEECH_SUPPORT
+    {
+      NAME(strtext("Restart Speech Driver"));
+      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartSpeechDriver));
+    }
+  #endif /* ENABLE_SPEECH_SUPPORT */
+
+    {
+      NAME(strtext("Restart Screen Driver"));
+      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartScreenDriver));
+    }
+  }
+
+  {
     SUBMENU(buildSubmenu, rootMenu, strtext("Build Information"));
     setAdvancedSubmenu(buildSubmenu);
 
@@ -1603,26 +1625,31 @@ makePreferencesMenu (void) {
       [LOG_DEBUG] = {.label=strtext("Debug")},
     };
 
-    SUBMENU(internalSubmenu, rootMenu, strtext("Internal Parameters"));
-    setAdvancedSubmenu(internalSubmenu);
+    SUBMENU(loggingSubmenu, rootMenu, strtext("Logging"));
+    setAdvancedSubmenu(loggingSubmenu);
+
+    {
+      NAME(strtext("Log Messages"));
+      logMessagesMenu = newSubmenuMenuItem(loggingSubmenu, &itemName);
+    }
 
     {
       NAME(strtext("System Log Level"));
-      ITEM(newEnumeratedMenuItem(internalSubmenu, &systemLogLevel, &itemName, logLevels));
+      ITEM(newEnumeratedMenuItem(loggingSubmenu, &systemLogLevel, &itemName, logLevels));
     }
 
     {
       NAME(strtext("Standard Error Log Level"));
-      ITEM(newEnumeratedMenuItem(internalSubmenu, &stderrLogLevel, &itemName, logLevels));
+      ITEM(newEnumeratedMenuItem(loggingSubmenu, &stderrLogLevel, &itemName, logLevels));
     }
 
     {
       NAME(strtext("Category Log Level"));
-      ITEM(newEnumeratedMenuItem(internalSubmenu, &categoryLogLevel, &itemName, logLevels));
+      ITEM(newEnumeratedMenuItem(loggingSubmenu, &categoryLogLevel, &itemName, logLevels));
     }
 
     {
-      SUBMENU(logCategoriesSubmenu, internalSubmenu, strtext("Log Categories"));
+      SUBMENU(logCategoriesSubmenu, loggingSubmenu, strtext("Log Categories"));
       setAdvancedSubmenu(logCategoriesSubmenu);
 
       {
@@ -1658,33 +1685,6 @@ makePreferencesMenu (void) {
         }
       }
     }
-  }
-
-  {
-    SUBMENU(toolsSubmenu, rootMenu, strtext("Tools"));
-    setAdvancedSubmenu(toolsSubmenu);
-
-    {
-      NAME(strtext("Restart Braille Driver"));
-      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartBrailleDriver));
-    }
-
-  #ifdef ENABLE_SPEECH_SUPPORT
-    {
-      NAME(strtext("Restart Speech Driver"));
-      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartSpeechDriver));
-    }
-  #endif /* ENABLE_SPEECH_SUPPORT */
-
-    {
-      NAME(strtext("Restart Screen Driver"));
-      ITEM(newToolMenuItem(toolsSubmenu, &itemName, restartScreenDriver));
-    }
-  }
-
-  {
-    NAME(strtext("Log Messages"));
-    logMessagesMenu = newSubmenuMenuItem(rootMenu, &itemName);
   }
 
   return rootMenu;
