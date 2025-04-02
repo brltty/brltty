@@ -123,6 +123,7 @@ struct MenuItemStruct {
 
   union {
     const char *text;
+    char *const *option;
     const MenuString *strings;
     FileData *files;
     SubmenuData *submenu;
@@ -371,6 +372,27 @@ newTextMenuItem (Menu *menu, const MenuString *name, const char *text) {
   if (item) {
     item->methods = &menuItemMethods_text;
     item->data.text = text;
+  }
+
+  return item;
+}
+
+static const char *
+getValue_option (const MenuItem *item) {
+  return *item->data.option;
+}
+
+static const MenuItemMethods menuItemMethods_option = {
+  .getValue = getValue_option
+};
+
+MenuItem *
+newOptionMenuItem (Menu *menu, const MenuString *name, char *const *option) {
+  MenuItem *item = newMenuItem(menu, NULL, name);
+
+  if (item) {
+    item->methods = &menuItemMethods_option;
+    item->data.option = option;
   }
 
   return item;

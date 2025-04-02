@@ -1476,6 +1476,21 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Locale Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, LOCALE_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Helpers Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, HELPERS_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Writable Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, WRITABLE_DIRECTORY));
+    }
+
+    {
       NAME(strtext("Updatable Directory"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, UPDATABLE_DIRECTORY));
     }
@@ -1486,23 +1501,93 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Writable Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, WRITABLE_DIRECTORY));
+      NAME(strtext("Tables Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, TABLES_DIRECTORY));
     }
 
     {
       NAME(strtext("Drivers Directory"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, DRIVERS_DIRECTORY));
     }
+  }
+
+  {
+    SUBMENU(optionsSubmenu, rootMenu, strtext("Program Options"));
+    setAdvancedSubmenu(optionsSubmenu);
 
     {
-      NAME(strtext("Tables Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, TABLES_DIRECTORY));
+      NAME(strtext("Configuration File"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_configurationFile));
     }
 
     {
       NAME(strtext("Locale Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, LOCALE_DIRECTORY));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_localeDirectory));
+    }
+
+    {
+      NAME(strtext("Helpers Directory"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_helpersDirectory));
+    }
+
+    {
+      NAME(strtext("Writable Directory"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_writableDirectory));
+    }
+
+    {
+      NAME(strtext("Updatable Directory"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_updatableDirectory));
+    }
+
+    {
+      NAME(strtext("Preferences File"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_preferencesFile));
+    }
+
+    {
+      NAME(strtext("Tables Directory"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_tablesDirectory));
+    }
+
+    {
+      NAME(strtext("Text Table"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_textTable));
+    }
+
+    {
+      NAME(strtext("Contraction Table"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_contractionTable));
+    }
+
+    {
+      NAME(strtext("Attributes Table"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_attributesTable));
+    }
+
+    {
+      NAME(strtext("Keyboard Table"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_keyboardTable));
+    }
+
+    {
+      NAME(strtext("Drivers Directory"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_driversDirectory));
+    }
+
+    {
+      NAME(strtext("Braille Driver"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_brailleDriver));
+    }
+
+    {
+      NAME(strtext("Speech Driver"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_speechDriver));
+    }
+
+    {
+      NAME(strtext("Screen Driver"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_screenDriver));
     }
   }
 

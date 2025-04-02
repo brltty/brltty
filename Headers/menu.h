@@ -35,6 +35,7 @@ extern Menu *newMenu (void);
 extern void destroyMenu (Menu *menu);
 
 extern MenuItem *newTextMenuItem (Menu *menu, const MenuString *name, const char *text);
+extern MenuItem *newOptionMenuItem (Menu *menu, const MenuString *name, char *const *option);
 
 typedef void NumericMenuItemFormatter (
   Menu *menu, unsigned char value,

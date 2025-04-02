@@ -228,7 +228,7 @@ static const char *const optionStrings_RemoveService[] = {
 
 static char *opt_startMessage;
 static char *opt_stopMessage;
-static char *opt_localeDirectory;
+char *opt_localeDirectory;
 
 static int opt_version;
 static int opt_verify;
@@ -253,10 +253,10 @@ static int opt_stayPrivileged;
 static char *opt_privilegeParameters;
 
 static char *opt_pidFile;
-static char *opt_configurationFile;
+char *opt_configurationFile;
 
-static char *opt_updatableDirectory;
-static char *opt_writableDirectory;
+char *opt_updatableDirectory;
+char *opt_writableDirectory;
 char *opt_driversDirectory;
 
 char *opt_brailleDevice;
@@ -264,7 +264,7 @@ static char **brailleDevices = NULL;
 static const char *brailleDevice = NULL;
 int opt_releaseDevice;
 
-static char *opt_brailleDriver;
+char *opt_brailleDriver;
 static char **brailleDrivers = NULL;
 static const BrailleDriver *brailleDriver = NULL;
 static void *brailleObject = NULL;
@@ -274,7 +274,7 @@ static char *opt_brailleParameters;
 static char *brailleParameters = NULL;
 static char **brailleDriverParameters = NULL;
 
-static char *opt_preferencesFile;
+char *opt_preferencesFile;
 static char *opt_overridePreferences;
 
 static char *oldPreferencesFile = NULL;
@@ -303,7 +303,7 @@ static char **apiParameters = NULL;
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
-static char *opt_speechDriver;
+char *opt_speechDriver;
 static char **speechDrivers = NULL;
 static const SpeechDriver *speechDriver = NULL;
 static void *speechObject = NULL;
@@ -342,7 +342,7 @@ setAutospeakThreshold (void) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-static char *opt_screenDriver;
+char *opt_screenDriver;
 static char **screenDrivers = NULL;
 static const ScreenDriver *screenDriver = NULL;
 static void *screenObject = NULL;
