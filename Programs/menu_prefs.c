@@ -1488,38 +1488,18 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Configuration Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, CONFIGURATION_DIRECTORY));
-    }
-
-    {
       NAME(strtext("Configuration File"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, CONFIGURATION_FILE));
     }
 
     {
-      NAME(strtext("Locale Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, LOCALE_DIRECTORY));
-    }
-
-    {
-      NAME(strtext("Helpers Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, HELPERS_DIRECTORY));
-    }
-
-    {
-      NAME(strtext("Writable Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, WRITABLE_DIRECTORY));
-    }
-
-    {
-      NAME(strtext("Updatable Directory"));
-      ITEM(newTextMenuItem(buildSubmenu, &itemName, UPDATABLE_DIRECTORY));
-    }
-
-    {
       NAME(strtext("Preferences File"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, PREFERENCES_FILE));
+    }
+
+    {
+      NAME(strtext("Configuration Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, CONFIGURATION_DIRECTORY));
     }
 
     {
@@ -1530,6 +1510,26 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Drivers Directory"));
       ITEM(newTextMenuItem(buildSubmenu, &itemName, DRIVERS_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Helpers Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, HELPERS_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Updatable Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, UPDATABLE_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Writable Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, WRITABLE_DIRECTORY));
+    }
+
+    {
+      NAME(strtext("Locale Directory"));
+      ITEM(newTextMenuItem(buildSubmenu, &itemName, LOCALE_DIRECTORY));
     }
   }
 
@@ -1563,28 +1563,18 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Log File"));
-      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_logFile));
-    }
-
-    {
-      NAME(strtext("Log Level"));
-      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_logLevel));
-    }
-
-    {
-      NAME(strtext("Log to Standard Error"));
-      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_logToStandardError));
-    }
-
-    {
-      NAME(strtext("Locale Directory"));
-      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_localeDirectory));
-    }
-
-    {
       NAME(strtext("Tables Directory"));
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_tablesDirectory));
+    }
+
+    {
+      NAME(strtext("Drivers Directory"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_driversDirectory));
+    }
+
+    {
+      NAME(strtext("Helpers Directory"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_helpersDirectory));
     }
 
     {
@@ -1598,13 +1588,8 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Drivers Directory"));
-      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_driversDirectory));
-    }
-
-    {
-      NAME(strtext("Helpers Directory"));
-      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_helpersDirectory));
+      NAME(strtext("Locale Directory"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_localeDirectory));
     }
 
     {
@@ -1630,6 +1615,16 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Keyboard Properties"));
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_keyboardProperties));
+    }
+
+    {
+      NAME(strtext("GUI Keyboard Enabled"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_guiKeyboardEnabled));
+    }
+
+    {
+      NAME(strtext("GUI Keyboard Table"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_guiKeyboardTable));
     }
 
     {
@@ -1699,13 +1694,23 @@ makePreferencesMenu (void) {
 #endif /* HAVE_MIDI_SUPPORT */
 
     {
-      NAME(strtext("No Daemon"));
-      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_noDaemon));
+      NAME(strtext("Log File"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_logFile));
+    }
+
+    {
+      NAME(strtext("Log to Standard Error"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_logToStandardError));
     }
 
     {
       NAME(strtext("PID File"));
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_pidFile));
+    }
+
+    {
+      NAME(strtext("No Daemon"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_noDaemon));
     }
 
     {
@@ -1726,6 +1731,11 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Stop Message"));
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_stopMessage));
+    }
+
+    {
+      NAME(strtext("Prompt Patterns"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_promptPatterns));
     }
 
 #ifdef ENABLE_API

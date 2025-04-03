@@ -30,22 +30,21 @@ extern int opt_bootParameters;
 extern char *opt_preferencesFile;
 extern char *opt_overridePreferences;
 
-extern char *opt_logFile;
-extern char *opt_logLevel;
-extern int opt_logToStandardError;
-
-extern char *opt_localeDirectory;
 extern char *opt_tablesDirectory;
-extern char *opt_updatableDirectory;
-extern char *opt_writableDirectory;
 extern char *opt_driversDirectory;
 extern char *opt_helpersDirectory;
+extern char *opt_updatableDirectory;
+extern char *opt_writableDirectory;
+extern char *opt_localeDirectory;
 
 extern char *opt_textTable;
 extern char *opt_contractionTable;
 extern char *opt_attributesTable;
 extern char *opt_keyboardTable;
 extern char *opt_keyboardProperties;
+
+extern int opt_guiKeyboardEnabled;
+extern char *opt_guiKeyboardTable;
 
 extern char *opt_brailleDriver;
 extern char *opt_brailleParameters;
@@ -63,14 +62,18 @@ extern char *opt_screenParameters;
 extern char *opt_pcmDevice;
 extern char *opt_midiDevice;
 
-extern int opt_noDaemon;
+extern char *opt_logFile;
+extern int opt_logToStandardError;
+
 extern char *opt_pidFile;
+extern int opt_noDaemon;
 
 extern char *opt_privilegeParameters;
 extern int opt_stayPrivileged;
 
 extern char *opt_startMessage;
 extern char *opt_stopMessage;
+extern char *opt_promptPatterns;
 
 extern int opt_noApi;
 extern char *opt_apiParameters;

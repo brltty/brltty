@@ -235,10 +235,10 @@ static int opt_verify;
 static int opt_quiet;
 int opt_noDaemon;
 int opt_logToStandardError;
-char *opt_logLevel;
+static char *opt_logLevel;
 char *opt_logFile;
-int opt_bootParameters = 1;
 int opt_environmentVariables;
+int opt_bootParameters = 1;
 static char *opt_messageTime;
 
 static int opt_cancelExecution;
@@ -247,7 +247,7 @@ static const char *const optionStrings_CancelExecution[] = {
   NULL
 };
 
-static char *opt_promptPatterns;
+char *opt_promptPatterns;
 
 int opt_stayPrivileged;
 char *opt_privilegeParameters;
@@ -292,13 +292,13 @@ static KeyboardMonitorObject *keyboardMonitor = NULL;
 char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
 
-static int opt_guiKeyboardEnabled;
-static char *opt_guiKeyboardTable;
+int opt_guiKeyboardEnabled;
+char *opt_guiKeyboardTable;
 static KeyTable *guiKeyboardTable = NULL;
 
 #ifdef ENABLE_API
 int opt_noApi;
-char *opt_apiParameters = NULL;
+char *opt_apiParameters;
 static char **apiParameters = NULL;
 #endif /* ENABLE_API */
 
@@ -492,19 +492,19 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Parameters for the speech driver.")
   },
 
+  { .word = "quiet-if-no-braille",
+    .letter = 'Q',
+    .flags = OPT_Config | OPT_EnvVar,
+    .setting.flag = &opt_quietIfNoBraille,
+    .description = strtext("Do not autospeak when braille is not being used.")
+  },
+
   { .word = "speech-input",
     .letter = 'i',
     .flags = OPT_Config | OPT_EnvVar,
     .argument = strtext("file"),
     .setting.string = &opt_speechInput,
     .description = strtext("Name of or path to speech input object.")
-  },
-
-  { .word = "quiet-if-no-braille",
-    .letter = 'Q',
-    .flags = OPT_Config | OPT_EnvVar,
-    .setting.flag = &opt_quietIfNoBraille,
-    .description = strtext("Do not autospeak when braille is not being used.")
   },
 
   { .word = "autospeak-threshold",
