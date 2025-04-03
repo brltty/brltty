@@ -32,7 +32,7 @@
 #include "ktb_keyboard.h"
 #include "brl.h"
 
-static char *opt_brailleDriver;
+char *opt_brailleDriver;
 static int opt_audit;
 static int opt_listKeyNames;
 static int opt_listHelpScreen;

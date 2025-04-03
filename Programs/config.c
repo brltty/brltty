@@ -226,8 +226,8 @@ static const char *const optionStrings_RemoveService[] = {
   NULL
 };
 
-static char *opt_startMessage;
-static char *opt_stopMessage;
+char *opt_startMessage;
+char *opt_stopMessage;
 char *opt_localeDirectory;
 
 static int opt_version;
@@ -235,7 +235,7 @@ static int opt_verify;
 static int opt_quiet;
 static int opt_noDaemon;
 static int opt_standardError;
-static char *opt_logLevel;
+char *opt_logLevel;
 char *opt_logFile;
 static int opt_bootParameters = 1;
 static int opt_environmentVariables;

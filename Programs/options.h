@@ -24,8 +24,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern char *opt_configurationFile;
-extern char *opt_logFile;
 extern char *opt_pidFile;
+extern char *opt_logFile;
+extern char *opt_logLevel;
 
 extern char *opt_localeDirectory;
 extern char *opt_helpersDirectory;
@@ -56,6 +57,9 @@ extern char *opt_screenParameters;
 
 extern char *opt_pcmDevice;
 extern char *opt_midiDevice;
+
+extern char *opt_startMessage;
+extern char *opt_stopMessage;
 
 extern char *opt_privilegeParameters;
 extern char *opt_apiParameters;

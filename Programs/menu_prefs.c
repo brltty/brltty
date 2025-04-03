@@ -1543,13 +1543,18 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("PID File"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_pidFile));
+    }
+
+    {
       NAME(strtext("Log File"));
       ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_logFile));
     }
 
     {
-      NAME(strtext("PID File"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_pidFile));
+      NAME(strtext("Log Level"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_logLevel));
     }
 
     {
@@ -1672,6 +1677,16 @@ makePreferencesMenu (void) {
       ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_midiDevice));
     }
 #endif /* HAVE_MIDI_SUPPORT */
+
+    {
+      NAME(strtext("Start Message"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_startMessage));
+    }
+
+    {
+      NAME(strtext("Stop Message"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_stopMessage));
+    }
 
     {
       NAME(strtext("Privilege Parameters"));

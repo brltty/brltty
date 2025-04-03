@@ -34,7 +34,7 @@ static char *opt_boxLeft;
 static char *opt_boxWidth;
 static char *opt_boxTop;
 static char *opt_boxHeight;
-static char *opt_screenDriver;
+char *opt_screenDriver;
 char *opt_driversDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)

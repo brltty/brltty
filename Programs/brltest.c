@@ -46,7 +46,7 @@ BrailleDisplay brl;
 char *opt_brailleDevice;
 char *opt_driversDirectory;
 char *opt_tablesDirectory;
-static char *opt_writableDirectory;
+char *opt_writableDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "device",
