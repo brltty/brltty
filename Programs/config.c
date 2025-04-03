@@ -237,8 +237,8 @@ static int opt_noDaemon;
 static int opt_standardError;
 char *opt_logLevel;
 char *opt_logFile;
-static int opt_bootParameters = 1;
-static int opt_environmentVariables;
+int opt_bootParameters = 1;
+int opt_environmentVariables;
 static char *opt_messageTime;
 
 static int opt_cancelExecution;

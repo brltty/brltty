@@ -51,6 +51,11 @@
 #include "file.h"
 
 typedef struct {
+  const char *unit;
+  NumericMenuItemFormatter *formatter;
+} NumericData;
+
+typedef struct {
   char *directory;
   const char *extension;
   const char *pattern;
@@ -70,6 +75,10 @@ typedef struct {
   unsigned char setting;
   char *pathsArea[3];
 } FileData;
+
+typedef struct {
+  MenuToolFunction *function;
+} ToolData;
 
 typedef struct {
   Menu *menu;
@@ -122,20 +131,14 @@ struct MenuItemStruct {
   unsigned char step;                  /* present only multiples of this value */
 
   union {
-    const char *text;
-    char *const *option;
+    NumericData numeric;
     const MenuString *strings;
     FileData *files;
+    ToolData tool;
+    const char *text;
+    char *const *stringOption;
+    int *flagOption;
     SubmenuData *submenu;
-
-    struct {
-      const char *unit;
-      NumericMenuItemFormatter *formatter;
-    } numeric;
-
-    struct {
-      MenuToolFunction *function;
-    } tool;
   } data;
 };
 
@@ -357,50 +360,6 @@ setMenuItemChanged (MenuItem *item, MenuItemChanged *handler) {
 }
 
 static const char *
-getValue_text (const MenuItem *item) {
-  return item->data.text;
-}
-
-static const MenuItemMethods menuItemMethods_text = {
-  .getValue = getValue_text
-};
-
-MenuItem *
-newTextMenuItem (Menu *menu, const MenuString *name, const char *text) {
-  MenuItem *item = newMenuItem(menu, NULL, name);
-
-  if (item) {
-    item->methods = &menuItemMethods_text;
-    item->data.text = text;
-  }
-
-  return item;
-}
-
-static const char *
-getValue_option (const MenuItem *item) {
-  const char *value = *item->data.option;
-  if (!*value) value = gettext("not set");
-  return value;
-}
-
-static const MenuItemMethods menuItemMethods_option = {
-  .getValue = getValue_option
-};
-
-MenuItem *
-newOptionMenuItem (Menu *menu, const MenuString *name, char *const *option) {
-  MenuItem *item = newMenuItem(menu, NULL, name);
-
-  if (item) {
-    item->methods = &menuItemMethods_option;
-    item->data.option = option;
-  }
-
-  return item;
-}
-
-static const char *
 getValue_numeric (const MenuItem *item) {
   Menu *menu = item->menu;
 
@@ -541,14 +500,14 @@ newStringsMenuItem (
   return item;
 }
 
+static const MenuString booleanStrings[] = {
+  {.label=strtext("No")},
+  {.label=strtext("Yes")}
+};
+
 MenuItem *
 newBooleanMenuItem (Menu *menu, unsigned char *setting, const MenuString *name) {
-  static const MenuString strings[] = {
-    {.label=strtext("No")},
-    {.label=strtext("Yes")}
-  };
-
-  return newEnumeratedMenuItem(menu, setting, name, strings);
+  return newEnumeratedMenuItem(menu, setting, name, booleanStrings);
 }
 
 static int
@@ -825,6 +784,75 @@ newToolMenuItem (Menu *menu, const MenuString *name, MenuToolFunction *function)
   if (item) {
     item->methods = &menuItemMethods_tool;
     item->data.tool.function = function;
+  }
+
+  return item;
+}
+
+static const char *
+getValue_text (const MenuItem *item) {
+  return item->data.text;
+}
+
+static const MenuItemMethods menuItemMethods_text = {
+  .getValue = getValue_text
+};
+
+MenuItem *
+newTextMenuItem (Menu *menu, const MenuString *name, const char *text) {
+  MenuItem *item = newMenuItem(menu, NULL, name);
+
+  if (item) {
+    item->methods = &menuItemMethods_text;
+    item->data.text = text;
+  }
+
+  return item;
+}
+
+static const char *
+getValue_stringOption (const MenuItem *item) {
+  const char *value = *item->data.stringOption;
+  if (!*value) value = gettext("not set");
+  return value;
+}
+
+static const MenuItemMethods menuItemMethods_stringOption = {
+  .getValue = getValue_stringOption
+};
+
+MenuItem *
+newStringOptionMenuItem (Menu *menu, const MenuString *name, char *const *option) {
+  MenuItem *item = newMenuItem(menu, NULL, name);
+
+  if (item) {
+    item->methods = &menuItemMethods_stringOption;
+    item->data.stringOption = option;
+  }
+
+  return item;
+}
+
+static const char *
+getValue_flagOption (const MenuItem *item) {
+  return gettext(
+           *item->data.flagOption?
+           booleanStrings[1].label:
+           booleanStrings[0].label
+         );
+}
+
+static const MenuItemMethods menuItemMethods_flagOption = {
+  .getValue = getValue_flagOption
+};
+
+MenuItem *
+newFlagOptionMenuItem (Menu *menu, const MenuString *name, int *option) {
+  MenuItem *item = newMenuItem(menu, NULL, name);
+
+  if (item) {
+    item->methods = &menuItemMethods_flagOption;
+    item->data.flagOption = option;
   }
 
   return item;

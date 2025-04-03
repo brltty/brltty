@@ -1539,164 +1539,186 @@ makePreferencesMenu (void) {
 
     {
       NAME(strtext("Configuration File"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_configurationFile));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_configurationFile));
     }
 
     {
-      NAME(strtext("PID File"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_pidFile));
+      NAME(strtext("Environment Variables"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_environmentVariables));
     }
 
     {
-      NAME(strtext("Log File"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_logFile));
-    }
-
-    {
-      NAME(strtext("Log Level"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_logLevel));
-    }
-
-    {
-      NAME(strtext("Locale Directory"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_localeDirectory));
-    }
-
-    {
-      NAME(strtext("Helpers Directory"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_helpersDirectory));
-    }
-
-    {
-      NAME(strtext("Writable Directory"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_writableDirectory));
-    }
-
-    {
-      NAME(strtext("Updatable Directory"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_updatableDirectory));
+      NAME(strtext("Boot Parameters"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_bootParameters));
     }
 
     {
       NAME(strtext("Preferences File"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_preferencesFile));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_preferencesFile));
     }
 
     {
       NAME(strtext("Override Preferences"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_overridePreferences));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_overridePreferences));
+    }
+
+    {
+      NAME(strtext("PID File"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_pidFile));
+    }
+
+    {
+      NAME(strtext("Log File"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_logFile));
+    }
+
+    {
+      NAME(strtext("Log Level"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_logLevel));
+    }
+
+    {
+      NAME(strtext("Locale Directory"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_localeDirectory));
     }
 
     {
       NAME(strtext("Tables Directory"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_tablesDirectory));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_tablesDirectory));
     }
 
     {
-      NAME(strtext("Text Table"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_textTable));
+      NAME(strtext("Updatable Directory"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_updatableDirectory));
     }
 
     {
-      NAME(strtext("Contraction Table"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_contractionTable));
-    }
-
-    {
-      NAME(strtext("Attributes Table"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_attributesTable));
-    }
-
-    {
-      NAME(strtext("Keyboard Table"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_keyboardTable));
-    }
-
-    {
-      NAME(strtext("Keyboard Properties"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_keyboardProperties));
+      NAME(strtext("Writable Directory"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_writableDirectory));
     }
 
     {
       NAME(strtext("Drivers Directory"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_driversDirectory));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_driversDirectory));
+    }
+
+    {
+      NAME(strtext("Helpers Directory"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_helpersDirectory));
+    }
+
+    {
+      NAME(strtext("Text Table"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_textTable));
+    }
+
+    {
+      NAME(strtext("Contraction Table"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_contractionTable));
+    }
+
+    {
+      NAME(strtext("Attributes Table"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_attributesTable));
+    }
+
+    {
+      NAME(strtext("Keyboard Table"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_keyboardTable));
+    }
+
+    {
+      NAME(strtext("Keyboard Properties"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_keyboardProperties));
     }
 
     {
       NAME(strtext("Braille Driver"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_brailleDriver));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_brailleDriver));
     }
 
     {
       NAME(strtext("Braille Parameters"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_brailleParameters));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_brailleParameters));
     }
 
     {
       NAME(strtext("Braille Device"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_brailleDevice));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_brailleDevice));
+    }
+
+    {
+      NAME(strtext("Release Device"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_releaseDevice));
     }
 
 #ifdef ENABLE_SPEECH_SUPPORT
     {
       NAME(strtext("Speech Driver"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_speechDriver));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_speechDriver));
     }
 
     {
       NAME(strtext("Speech Parameters"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_speechParameters));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_speechParameters));
+    }
+
+    {
+      NAME(strtext("Quiet If No Braille"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_quietIfNoBraille));
     }
 
     {
       NAME(strtext("Speech Input"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_speechInput));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_speechInput));
     }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     {
       NAME(strtext("Screen Driver"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_screenDriver));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_screenDriver));
     }
 
     {
       NAME(strtext("Screen Parameters"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_screenParameters));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_screenParameters));
     }
 
 #ifdef HAVE_PCM_SUPPORT
     {
       NAME(strtext("PCM Device"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_pcmDevice));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_pcmDevice));
     }
 #endif /* HAVE_PCM_SUPPORT */
 
 #ifdef HAVE_MIDI_SUPPORT
     {
       NAME(strtext("MIDI Device"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_midiDevice));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_midiDevice));
     }
 #endif /* HAVE_MIDI_SUPPORT */
 
     {
+      NAME(strtext("Privilege Parameters"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_privilegeParameters));
+    }
+
+    {
       NAME(strtext("Start Message"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_startMessage));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_startMessage));
     }
 
     {
       NAME(strtext("Stop Message"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_stopMessage));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_stopMessage));
     }
 
-    {
-      NAME(strtext("Privilege Parameters"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_privilegeParameters));
-    }
-
+#ifdef ENABLE_API
     {
       NAME(strtext("API Parameters"));
-      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_apiParameters));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_apiParameters));
     }
+#endif /* ENABLE_API */
   }
 
   {

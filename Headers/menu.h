@@ -34,9 +34,6 @@ typedef struct {
 extern Menu *newMenu (void);
 extern void destroyMenu (Menu *menu);
 
-extern MenuItem *newTextMenuItem (Menu *menu, const MenuString *name, const char *text);
-extern MenuItem *newOptionMenuItem (Menu *menu, const MenuString *name, char *const *option);
-
 typedef void NumericMenuItemFormatter (
   Menu *menu, unsigned char value,
   char *buffer, size_t size
@@ -75,9 +72,10 @@ extern MenuItem *newFilesMenuItem (
 typedef void MenuToolFunction (void);
 extern MenuItem *newToolMenuItem (Menu *menu, const MenuString *name, MenuToolFunction *function);
 
-extern Menu *newSubmenuMenuItem (
-  Menu *menu, const MenuString *name
-);
+extern MenuItem *newTextMenuItem (Menu *menu, const MenuString *name, const char *text);
+extern MenuItem *newStringOptionMenuItem (Menu *menu, const MenuString *name, char *const *option);
+extern MenuItem *newFlagOptionMenuItem (Menu *menu, const MenuString *name, int *option);
+extern Menu *newSubmenuMenuItem (Menu *menu, const MenuString *name);
 
 typedef int MenuItemTester (void);
 extern void setMenuItemTester (MenuItem *item, MenuItemTester *handler);
