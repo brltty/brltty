@@ -1543,6 +1543,16 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Log File"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_logFile));
+    }
+
+    {
+      NAME(strtext("PID File"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_pidFile));
+    }
+
+    {
       NAME(strtext("Locale Directory"));
       ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_localeDirectory));
     }
@@ -1565,6 +1575,11 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Preferences File"));
       ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_preferencesFile));
+    }
+
+    {
+      NAME(strtext("Override Preferences"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_overridePreferences));
     }
 
     {
@@ -1593,6 +1608,11 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Keyboard Properties"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_keyboardProperties));
+    }
+
+    {
       NAME(strtext("Drivers Directory"));
       ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_driversDirectory));
     }
@@ -1603,13 +1623,64 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Braille Parameters"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_brailleParameters));
+    }
+
+    {
+      NAME(strtext("Braille Device"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_brailleDevice));
+    }
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    {
       NAME(strtext("Speech Driver"));
       ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_speechDriver));
     }
 
     {
+      NAME(strtext("Speech Parameters"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_speechParameters));
+    }
+
+    {
+      NAME(strtext("Speech Input"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_speechInput));
+    }
+#endif /* ENABLE_SPEECH_SUPPORT */
+
+    {
       NAME(strtext("Screen Driver"));
       ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_screenDriver));
+    }
+
+    {
+      NAME(strtext("Screen Parameters"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_screenParameters));
+    }
+
+#ifdef HAVE_PCM_SUPPORT
+    {
+      NAME(strtext("PCM Device"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_pcmDevice));
+    }
+#endif /* HAVE_PCM_SUPPORT */
+
+#ifdef HAVE_MIDI_SUPPORT
+    {
+      NAME(strtext("MIDI Device"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_midiDevice));
+    }
+#endif /* HAVE_MIDI_SUPPORT */
+
+    {
+      NAME(strtext("Privilege Parameters"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_privilegeParameters));
+    }
+
+    {
+      NAME(strtext("API Parameters"));
+      ITEM(newOptionMenuItem(optionsSubmenu, &itemName, &opt_apiParameters));
     }
   }
 

@@ -24,6 +24,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern char *opt_configurationFile;
+extern char *opt_logFile;
+extern char *opt_pidFile;
 
 extern char *opt_localeDirectory;
 extern char *opt_helpersDirectory;
@@ -31,24 +33,32 @@ extern char *opt_writableDirectory;
 
 extern char *opt_updatableDirectory;
 extern char *opt_preferencesFile;
+extern char *opt_overridePreferences;
 
 extern char *opt_tablesDirectory;
 extern char *opt_textTable;
 extern char *opt_contractionTable;
 extern char *opt_attributesTable;
 extern char *opt_keyboardTable;
+extern char *opt_keyboardProperties;
 
 extern char *opt_driversDirectory;
 extern char *opt_brailleDriver;
-extern char *opt_speechDriver;
-extern char *opt_screenDriver;
-
+extern char *opt_brailleParameters;
 extern char *opt_brailleDevice;
 extern int opt_releaseDevice;
+extern char *opt_speechDriver;
+extern char *opt_speechParameters;
 extern int opt_quietIfNoBraille;
+extern char *opt_speechInput;
+extern char *opt_screenDriver;
+extern char *opt_screenParameters;
 
 extern char *opt_pcmDevice;
 extern char *opt_midiDevice;
+
+extern char *opt_privilegeParameters;
+extern char *opt_apiParameters;
 
 #ifdef __cplusplus
 }

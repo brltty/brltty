@@ -236,7 +236,7 @@ static int opt_quiet;
 static int opt_noDaemon;
 static int opt_standardError;
 static char *opt_logLevel;
-static char *opt_logFile;
+char *opt_logFile;
 static int opt_bootParameters = 1;
 static int opt_environmentVariables;
 static char *opt_messageTime;
@@ -250,9 +250,9 @@ static const char *const optionStrings_CancelExecution[] = {
 static char *opt_promptPatterns;
 
 static int opt_stayPrivileged;
-static char *opt_privilegeParameters;
+char *opt_privilegeParameters;
 
-static char *opt_pidFile;
+char *opt_pidFile;
 char *opt_configurationFile;
 
 char *opt_updatableDirectory;
@@ -270,12 +270,12 @@ static const BrailleDriver *brailleDriver = NULL;
 static void *brailleObject = NULL;
 static int brailleDriverConstructed;
 
-static char *opt_brailleParameters;
+char *opt_brailleParameters;
 static char *brailleParameters = NULL;
 static char **brailleDriverParameters = NULL;
 
 char *opt_preferencesFile;
-static char *opt_overridePreferences;
+char *opt_overridePreferences;
 
 static char *oldPreferencesFile = NULL;
 static int oldPreferencesEnabled = 1;
@@ -289,7 +289,7 @@ char *opt_keyboardTable;
 KeyTable *keyboardTable = NULL;
 static KeyboardMonitorObject *keyboardMonitor = NULL;
 
-static char *opt_keyboardProperties;
+char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
 
 static int opt_guiKeyboardEnabled;
@@ -298,7 +298,7 @@ static KeyTable *guiKeyboardTable = NULL;
 
 #ifdef ENABLE_API
 static int opt_noApi;
-static char *opt_apiParameters = NULL;
+char *opt_apiParameters = NULL;
 static char **apiParameters = NULL;
 #endif /* ENABLE_API */
 
@@ -308,11 +308,11 @@ static char **speechDrivers = NULL;
 static const SpeechDriver *speechDriver = NULL;
 static void *speechObject = NULL;
 
-static char *opt_speechParameters;
+char *opt_speechParameters;
 static char *speechParameters = NULL;
 static char **speechDriverParameters = NULL;
 
-static char *opt_speechInput;
+char *opt_speechInput;
 static SpeechInputObject *speechInputObject;
 
 int opt_quietIfNoBraille;
@@ -346,7 +346,7 @@ char *opt_screenDriver;
 static char **screenDrivers = NULL;
 static const ScreenDriver *screenDriver = NULL;
 static void *screenObject = NULL;
-static char *opt_screenParameters;
+char *opt_screenParameters;
 static char *screenParameters = NULL;
 static char **screenDriverParameters = NULL;
 

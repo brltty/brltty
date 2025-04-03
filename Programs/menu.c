@@ -379,7 +379,9 @@ newTextMenuItem (Menu *menu, const MenuString *name, const char *text) {
 
 static const char *
 getValue_option (const MenuItem *item) {
-  return *item->data.option;
+  const char *value = *item->data.option;
+  if (!*value) value = gettext("not set");
+  return value;
 }
 
 static const MenuItemMethods menuItemMethods_option = {
