@@ -5,6 +5,8 @@ The reference C API documentation is available online http://brltty.app/doc/BrlA
 
 This documentation is only a python helper, you should also read C manual pages.
 
+A general introduction guide is available online https://brltty.app/doc/Manual-BrlAPI/English/BrlAPI.html
+
 Example : 
 import brlapi
 import errno
