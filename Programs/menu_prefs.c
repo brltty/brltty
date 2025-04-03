@@ -1563,11 +1563,6 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("PID File"));
-      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_pidFile));
-    }
-
-    {
       NAME(strtext("Log File"));
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_logFile));
     }
@@ -1575,6 +1570,11 @@ makePreferencesMenu (void) {
     {
       NAME(strtext("Log Level"));
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_logLevel));
+    }
+
+    {
+      NAME(strtext("Log to Standard Error"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_logToStandardError));
     }
 
     {
@@ -1699,8 +1699,23 @@ makePreferencesMenu (void) {
 #endif /* HAVE_MIDI_SUPPORT */
 
     {
+      NAME(strtext("No Daemon"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_noDaemon));
+    }
+
+    {
+      NAME(strtext("PID File"));
+      ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_pidFile));
+    }
+
+    {
       NAME(strtext("Privilege Parameters"));
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_privilegeParameters));
+    }
+
+    {
+      NAME(strtext("Stay Privileged"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_stayPrivileged));
     }
 
     {
@@ -1714,6 +1729,11 @@ makePreferencesMenu (void) {
     }
 
 #ifdef ENABLE_API
+    {
+      NAME(strtext("No API"));
+      ITEM(newFlagOptionMenuItem(optionsSubmenu, &itemName, &opt_noApi));
+    }
+
     {
       NAME(strtext("API Parameters"));
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_apiParameters));

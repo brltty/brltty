@@ -233,8 +233,8 @@ char *opt_localeDirectory;
 static int opt_version;
 static int opt_verify;
 static int opt_quiet;
-static int opt_noDaemon;
-static int opt_standardError;
+int opt_noDaemon;
+int opt_logToStandardError;
 char *opt_logLevel;
 char *opt_logFile;
 int opt_bootParameters = 1;
@@ -249,7 +249,7 @@ static const char *const optionStrings_CancelExecution[] = {
 
 static char *opt_promptPatterns;
 
-static int opt_stayPrivileged;
+int opt_stayPrivileged;
 char *opt_privilegeParameters;
 
 char *opt_pidFile;
@@ -297,7 +297,7 @@ static char *opt_guiKeyboardTable;
 static KeyTable *guiKeyboardTable = NULL;
 
 #ifdef ENABLE_API
-static int opt_noApi;
+int opt_noApi;
 char *opt_apiParameters = NULL;
 static char **apiParameters = NULL;
 #endif /* ENABLE_API */
@@ -629,7 +629,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .word = "standard-error",
     .letter = 'e',
-    .setting.flag = &opt_standardError,
+    .setting.flag = &opt_logToStandardError,
     .description = strtext("Log to standard error rather than to the system log.")
   },
 
@@ -848,7 +848,7 @@ setLogLevels (void) {
   {
     unsigned char level;
 
-    if (opt_standardError) {
+    if (opt_logToStandardError) {
       level = systemLogLevel;
     } else {
       level = LOG_NOTICE;
@@ -3028,7 +3028,7 @@ brlttyStart (void) {
 
     detachStandardInput();
     detachStandardOutput();
-    if (!opt_standardError) detachStandardError();
+    if (!opt_logToStandardError) detachStandardError();
 
 #ifdef __MINGW32__
     {
@@ -3042,7 +3042,7 @@ brlttyStart (void) {
         SetStdHandle(STD_INPUT_HANDLE, h);
         SetStdHandle(STD_OUTPUT_HANDLE, h);
 
-        if (!opt_standardError) {
+        if (!opt_logToStandardError) {
           SetStdHandle(STD_ERROR_HANDLE, h);
         }
       }
