@@ -313,9 +313,9 @@ or reading braille keys any more, it has to leave the tty, so
 that either <em/brltty/ can continue its job, or another client can
 take control of it.
 
-<sect3>Parameter handling
+<sect3>Parameter handling.
 
-The server exposes some parameters to the client. Some parameters are global to
+<p>The server exposes some parameters to the client. Some parameters are global to
 all clients (e.g. the braille display size), while others are local per client
 (e.g. retaindots, i.e. whether to send Perkins presses as dot patterns or as
 letters). Some parameters are read-only (e.g. the braille display size), while
