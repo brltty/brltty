@@ -17,6 +17,13 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+/** \mainpage BrlAPI API reference manual
+ * This documentation provides all the API details of BrlAPI.
+ *
+ * A general introduction guide is available online on
+ * https://brltty.app/doc/Manual-BrlAPI/English/BrlAPI.html
+ */
+
 /** \file
  * \brief Types, defines and functions prototypes for \e BrlAPI's library
  */
