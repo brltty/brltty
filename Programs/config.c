@@ -909,6 +909,8 @@ brlttyPrepare (int argc, char *argv[]) {
   setUpdatableDirectory(opt_updatableDirectory);
   setWritableDirectory(opt_writableDirectory);
 
+  toContainedPath(&opt_preferencesFile, getUpdatableDirectory());
+
   setLogLevels();
   onProgramExit("log", exitLog, NULL);
 
