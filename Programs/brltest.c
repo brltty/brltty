@@ -46,7 +46,6 @@ BrailleDisplay brl;
 char *opt_brailleDevice;
 char *opt_driversDirectory;
 char *opt_tablesDirectory;
-char *opt_writableDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .word = "device",
@@ -105,8 +104,6 @@ main (int argc, char *argv[]) {
 
     PROCESS_OPTIONS(descriptor, argc, argv);
   }
-
-  setWritableDirectory(opt_writableDirectory);
 
   if (argc) {
     driver = *argv++, --argc;
