@@ -211,9 +211,9 @@ makePath (const char *directory, const char *file) {
 }
 
 int
-toContainedPath (char **path, const char *parent) {
+anchorRelativePath (char **path, const char *anchor) {
   int ok = 0;
-  char *newPath = makePath(parent, *path);
+  char *newPath = makePath(anchor, *path);
 
   if (newPath) {
     if (changeStringSetting(path, newPath)) ok = 1;

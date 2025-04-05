@@ -1151,7 +1151,7 @@ toAbsolutePaths (OptionProcessingInformation *info) {
 
       if (option->internal.adjust == toAbsoluteInstallPath) {
         if (**option->setting.string) {
-          toContainedPath(option->setting.string, parent);
+          anchorRelativePath(option->setting.string, parent);
         }
       }
     }

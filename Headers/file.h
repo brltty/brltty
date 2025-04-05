@@ -41,7 +41,7 @@ extern int isExplicitPath (const char *path);
 
 extern char *joinPath (const char *const *components, unsigned int count);
 extern char *makePath (const char *directory, const char *file);
-extern int toContainedPath (char **path, const char *parent);
+extern int anchorRelativePath (char **path, const char *anchor);
 extern char *makeHelperPath (const char *name);
 
 extern int hasFileExtension (const char *path, const char *extension);

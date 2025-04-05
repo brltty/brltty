@@ -161,7 +161,7 @@ int
 toAbsoluteInstallPath (char **path) {
   const char *programDirectory = getProgramDirectory();
   if (!programDirectory) programDirectory = CURRENT_DIRECTORY_NAME;
-  return toContainedPath(path, programDirectory);
+  return anchorRelativePath(path, programDirectory);
 }
 
 char *
