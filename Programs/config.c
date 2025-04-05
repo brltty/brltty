@@ -255,8 +255,6 @@ char *opt_privilegeParameters;
 char *opt_pidFile;
 char *opt_configurationFile;
 
-char *opt_updatableDirectory;
-char *opt_writableDirectory;
 char *opt_driversDirectory;
 
 char *opt_brailleDevice;
@@ -906,9 +904,6 @@ brlttyPrepare (int argc, char *argv[]) {
   }
 
   setMessagesDirectory(opt_localeDirectory);
-  setUpdatableDirectory(opt_updatableDirectory);
-  setWritableDirectory(opt_writableDirectory);
-
   anchorRelativePath(&opt_preferencesFile, getUpdatableDirectory());
 
   setLogLevels();

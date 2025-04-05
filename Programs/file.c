@@ -45,6 +45,7 @@
 #endif /* HAVE_TERMIOS_H */
 
 #include "parameters.h"
+#include "options.h"
 #include "log.h"
 #include "strfmt.h"
 #include "file.h"
@@ -224,6 +225,7 @@ anchorRelativePath (char **path, const char *anchor) {
 }
 
 char *opt_helpersDirectory = HELPERS_DIRECTORY;
+
 char *
 makeHelperPath (const char *name) {
   char *path = NULL;
@@ -513,13 +515,8 @@ ensurePathDirectory (const char *path) {
   }
 }
 
-static void
-setDirectory (const char **variable, const char *directory) {
-  *variable = directory;
-}
-
 static const char *
-getDirectory (const char *const *variable) {
+getDirectory (char *const *variable) {
   if (*variable && **variable) {
     if (ensureDirectory(*variable, 0)) {
       return *variable;
@@ -530,44 +527,34 @@ getDirectory (const char *const *variable) {
 }
 
 static char *
-makeDirectoryPath (const char *const *variable, const char *file) {
+makeDirectoryPath (char *const *variable, const char *file) {
   const char *directory = getDirectory(variable);
   if (directory) return makePath(directory, file);
   return NULL;
 }
 
-static const char *updatableDirectory = NULL;
-
-void
-setUpdatableDirectory (const char *directory) {
-  setDirectory(&updatableDirectory, directory);
-}
+char *opt_updatableDirectory = UPDATABLE_DIRECTORY;
 
 const char *
 getUpdatableDirectory (void) {
-  return getDirectory(&updatableDirectory);
+  return getDirectory(&opt_updatableDirectory);
 }
 
 char *
 makeUpdatablePath (const char *file) {
-  return makeDirectoryPath(&updatableDirectory, file);
+  return makeDirectoryPath(&opt_updatableDirectory, file);
 }
 
-static const char *writableDirectory = NULL;
-
-void
-setWritableDirectory (const char *directory) {
-  setDirectory(&writableDirectory, directory);
-}
+char *opt_writableDirectory = WRITABLE_DIRECTORY;
 
 const char *
 getWritableDirectory (void) {
-  return getDirectory(&writableDirectory);
+  return getDirectory(&opt_writableDirectory);
 }
 
 char *
 makeWritablePath (const char *file) {
-  return makeDirectoryPath(&writableDirectory, file);
+  return makeDirectoryPath(&opt_writableDirectory, file);
 }
 
 char *

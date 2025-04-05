@@ -61,11 +61,9 @@ extern int createDirectory (const char *path, int worldWritable);
 extern int ensureDirectory (const char *path, int worldWritable);
 extern int ensurePathDirectory (const char *path);
 
-extern void setUpdatableDirectory (const char *directory);
 extern const char *getUpdatableDirectory (void);
 extern char *makeUpdatablePath (const char *file);
 
-extern void setWritableDirectory (const char *directory);
 extern const char *getWritableDirectory (void);
 extern char *makeWritablePath (const char *file);
 
