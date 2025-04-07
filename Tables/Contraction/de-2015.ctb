@@ -22,7 +22,6 @@
 include de-g1.ctb
 
 class b b
-class e e
 class f f
 class h h
 class i i
@@ -326,6 +325,7 @@ always eschließ 15-156-2346
 always eschreib 15-156-12
 always eschrift 15-156-2345
 always eschwierig 15-156-45
+always esendung 15-234-14-145-136
 always ess 15-2346
 always est 15-23456
 
@@ -509,6 +509,7 @@ begword verballhorn 1236-12456-12-1-12345-125-26-1345
 before st begword verbeul 36-12-126-123
 sufword verifikation 1236-12456-24-124-24-13-5-1345
 sufword verifizier 1236-12456-24-124-24-1356-346-1235
+sufword version 1236-12456-234-24-135-1345
 
 #begword auspiz 16-234-1234-24-1356 shouldn't use the aus-contraction
 word ente 14-236 shouldn't use the ent-contraction
@@ -799,24 +800,43 @@ prfword laufes 123-16-124-123456
 prfword laufs 123-16-124-234
 prfword laufst 123-16-124-23456
 prfword lauft 123-16-124-2345
+always lauffläch 123-16-124-124-123-345-1456
+always laufkäfer 123-16-124-13-345-124-12456
+always laufzahl 123-16-124-1356-123
+always laufzeit 123-16-124-1356-2345
+always ablauf 1-12-123-16-124 shouldn't use the auf-contraction
+always apfellauf 1-1234-124-13456-123-16-124
+always bandlauf 12-235-145-123-16-124
+always bachlauf 12-56-123-16-124
+always bahnlauf 12-1-125-1345-123-16-124
+always berglauf 12-12456-1245-123-16-124
 always bildlauf 12-24-123-145-123-16-124
+always drucklauf 145-46-123-16-124
 always einlauf 1246-123-16-124
+always einzellauf 1246-1356-13456-123-16-124
+sufword entlauf 2346-123-16-124
+always erstlauf 12456-23456-123-16-124
+always feuerlauf 124-126-12456-123-16-124
 always flusslauf 124-123-136-2346-123-16-124
 always gleichlauf 1245-1456-123-16-124
 always handlauf 125-145-123-16-124
 always kunstlauf 13-256-23456-123-16-124
 always lebenslauf 123-12-14-234-123-16-124
+always leerlauf 123-15-15-1235-123-16-124
 always leichtlauf 123-1456-123-16-124
 always mehrlauf 2-2356-123-16-124
 always notlauf 1345-135-2345-123-16-124
+always schenlllauf 156-1345-15-12356-123-16-124
 always suchlauf 234-136-1456-123-16-124
 always unterlauf 2-256-123-16-124
+always volkslauf 1236-13-234-123-16-124
 always gelaufen 12346-123-16-124-14
 always schlauf 156-123-16-124 shouldn't use the auf-contraction
+always ausrauf 16-234-1235-16-124
 prfword taufe 2345-16-124-15
 prfword taufen 2345-16-124-14
 before t always auforma 16-124-26-134-1
-always aufrequenz 16-124-1235-15-6-12345-14-1356
+always aufrequenz 16-124-1235-15-6-12345-136-14-1356
 
 
 always abfragerate 1-12-124-1235-1-12346-1235-1-236 shouldn't use the er-contraction
@@ -835,7 +855,6 @@ always aufertig 16-124-45
 always aufolg 16-124-1245
 always auführ 16-124-125
 always eislauf 146-234-123-16-124
-always laufzahl 123-16-124-1356-123
 
 
 word bei 12
@@ -930,6 +949,9 @@ always mit 2-2345
 always mittl =
 always mittwoch 134-24-2345-2345-2456-135-1456
 always primitiv =
+before t always imita =
+always imitation 24-134-24-2345-5-1345
+always imitativ 24-134-24-2345-5-1236
 before g always mitta 134-24-2345-2345-1
 always mittägig 134-24-2345-2345-345-1245-45
 always mittäglich 134-24-2345-2345-345-1245-456
@@ -1006,6 +1028,7 @@ always		souvenir	234-135-136-1236-14-24-1235
 always		souverän	234-135-136-1236-12456-345-1345
 always		sowjet		=
 always		sozio		=
+always		sponsor		=
 midword ungsopt 136-234-135-1234-2345 Abendgestaltungsoption shouldn't use the so-contraction
 prfword sensor 234-14-234-135-1235
 prfword sensoren 234-14-234-26-14
@@ -1506,7 +1529,7 @@ always aufreund 16-124-145
 
 always führ 124-125
 contraction fh
-always fürcht 124-1256-1235-1456-2345 shouldn't use the für-contraction
+before t always fürch 124-1256-1235-1456 shouldn't use the für-contraction
 
 always ganz 1245-1356
 contraction gz
@@ -1773,6 +1796,7 @@ before e always bosni =
 before e always brasili =
 before e always flexitari 124-123-15-6-1346-24-2345-356-24
 before e always georgi 1245-15-26-1245-24
+before e always gerani 1245-12456-235-24
 before e always gradi =
 before e always histori 125-24-23456-26-24
 always hygiene 125-6-13456-1245-24-14-15
@@ -2092,7 +2116,9 @@ always staend 5-23456
 always dienständer 145-346-1345-23456-5-12456
 
 always stell 2-13456
+before l sufword bastel 12-1-23456-13456
 always sstell 234-2-13456 shouldn't use the ss-contraction
+
 word stets 23456-234
 always strahier 23456-1235-1-125-346-1235 abstrahieren
 
@@ -2161,8 +2187,11 @@ always während 345-145
 contraction äd
 always waehrend 345-145
 sufword warm 2456-356-134 shouldn't use the war-contraction
+
 always weg 2456-1245
 contraction wg
+always norwegen 1345-26-2456-15-1245-14
+always norweger 1345-26-2456-15-1245-12456
 
 always weis 2-146 Anweisung
 always weispiel 2456-146-2-346
@@ -2244,7 +2273,6 @@ always ausgaben 16-234-1245-1-12-14 shouldn't use the be-contraction
 sufword ablageraum 1-12-123-1-12346-1235-16-134
 always ablageräum 1-12-123-1-12346-1235-34-134
 always ablageraeum 1-12-123-1-12346-1235-34-134
-always ablauf 1-12-123-16-124 shouldn't use the auf-contraction
 always ablösesumm 1-12-123-246-234-15-234-136-1346 shouldn't use the es-contraction
 always abloesesumm 1-12-123-246-234-15-234-136-1346 shouldn't use the es-contraction
 always abnormität 1-12-1345-26-134-5-345 shouldn't use the mit-contraction

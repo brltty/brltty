@@ -22,6 +22,7 @@
 include de-g0.ctb
 
 class cst cst
+class e e
 class g g
 class s s
 class t t
@@ -79,7 +80,7 @@ prfword folie = shouldn't use the ie-contraction
 sufword hoer 125-246-1235 should use the oe-symbol
 always interview = shouldn't use the ie-contraction
 always koffein = shouldn't use the ei-contraction
-always lilie = shouldn't use the ie-contraction
+before e always lili = shouldn't use the ie-contraction
 prfword linie 123-24-1345-24-15 shouldn't use the ie-contraction
 always medien = shouldn't use the ie-contraction
 always museum = shouldn't use the eu-contraction
