@@ -709,6 +709,7 @@ always auslauf 16-234-123-16-124
 always laufbahn 123-16-124-12-1-125-1345
 always laufband 123-16-124-12-235-145
 always laufbänd 123-16-124-12-345-1345-145
+always laufgitter 123-16-124-1245-24-2345-2345-12456
 always laufrad 123-16-124-1235-1-145
 always laufräd 123-16-124-1235-345-145
 always laufstall 123-16-124-23456-1-12345
@@ -981,7 +982,7 @@ always reichstag 1235-146-1456-234-2345-1-1245 shouldn't use the st-contraction
 before e always reise 1235-146-234-15
 always relief 1235-13456-24-15-124 shouldn't use the ie-contraction
 sufword renten 1235-14-2345-14 shouldn't use the te-contraction
-always requiem 1235-15-6-12345-24-12356
+always requiem 1235-15-6-12345-136-24-12356
 
 before hilmnrsu always reserve 1235-123456-12456-1236-15
 prfword reserven 1235-123456-12456-1236-14
@@ -1315,6 +1316,7 @@ always wunderbeer 2456-256-145-12456-12-15-15-1235
 always zwergerdbeer 1356-2456-12456-1245-12456-145-12-15-15-1235
 always zwieselbeer 1356-2456-346-234-13456-12-15-15-1235
 always frisbee 124-1235-24-234-12-15-15
+before e always galeer 1245-25-15-15-1235
 always haar =
 always heer =
 always leer =
@@ -1325,6 +1327,7 @@ always dragee =
 always bungee 12-256-1245-15-15
 always dorothee 145-26-135-2345-125-15-15
 always cheese 1456-15-15-234-15
+always paneel 1234-235-15-15-123
 always pappmaschee 1234-1-1234-1234-134-1-156-15-15
 always klischee 13-123-24-156-15-15
 always yankee 6-13456-235-13-15-15
@@ -1402,10 +1405,16 @@ always käsereifung 13-345-234-15-1235-146-124-136
 prfword käsen 13-345-234-14
 prfword käses 13-345-234-123456
 
-always plateau =
+always niveau 1345-24-1236-15-16
+always plateau 1234-123-1-2345-15-16
 
+always busschaffner 12-136-234-156-1-124-124-1345-12456
+before t always busschnit 12-136-234-156-1345-24-2345
 prfword bussektor =
 always bussektor 12-136-234-234-15-13-2345-26
+always bussteuer 12-136-234-23456-126-12456
+always busstreck 12-136-234-23456-1235-15-46
+always bussystem 12-136-234-234-6-13456-23456-12356
 
 always reisehafen 1235-146-234-15-125-1-124-14
 always reisehäfen 1235-146-234-15-125-345-124-14
@@ -1466,9 +1475,43 @@ sufword leserorientier 123-123456-12456-26-24-14-2345-346-1235
 before e sufword leserumfra 123-123456-12456-136-134-124-1235-1
 before konsonant begword leser 123-123456-12456
 
+before hilmnrsu begword reise 1235-146-234-15
+word reisen 1235-146-234-14
+sufword reisend 1235-146-234-14-145
+word reisens 1235-146-234-14-234
+before t sufword reisern 1235-146-234-12456-1345
+word reises 1235-146-234-123456
+before cost sufword reis 1235-146-234
+
 always avantgarde 1-1236-235-2345-1245-356-145-15
 always firmware 124-24-1235-134-2456-356-15
 always hardcore 125-356-145-6-14-26-15
 always hardware 125-356-145-2456-356-15
 always lactose =
+always renaissance 1235-14-1-24-2346-235-6-14-15
 always software 234-135-124-2345-2456-356-15
+
+before cost always kreis 13-1235-146-234
+before cost always praxis =
+before cost always preis 1234-1235-146-234
+
+always reimplant 1235-15-24-134-1234-123-235-2345
+always reimplement 1235-15-24-134-1234-123-15-134-14-2345
+before t always reimpor 1235-15-24-134-1234-26
+always reindustrialis 1235-15-35-145-136-23456-1235-24-25-24-234
+always reinfizier 1235-15-35-124-24-1356-346-1235
+always reinitialis 1235-15-35-24-2345-24-25-24-234
+always reinkarn 1235-15-35-13-356-1345
+always reinstall 1235-15-35-23456-1-12345
+always reinszenier 1235-15-35-234-1356-14-346-1235
+always reintegr 1235-15-35-236-1245-1235
+always reinterpret 1235-15-35-2345-12456-1234-1235-15-2345
+always remineralis 1235-15-134-35-12456-25-24-234
+always reunion 1235-15-256-24-135-1345
+always reuelos 1235-126-15-123-135-234
+
+always abgeordneten 1-12-12346-26-145-1345-15-2345-14
+always abiturienten 1-12-24-2345-136-1235-24-14-2345-14
+always abonnenten 1-12-135-1345-1345-14-2345-14
+always adressaten 1-145-1235-15-2346-1-2345-14
+always studenten 23456-136-145-14-2345-14

@@ -120,9 +120,14 @@ always el 13456
 begmidword elineal 15-123-35-15-25
 endword elineal 15-123-35-15-1-123
 always eleist 15-123-146-23456
+
 always em 12356
 always emach 15-134-56
 before e always emachs 12356-56-234 Systemachse
+always emagazin 15-134-1-1245-1-1356-35
+always emanagement 15-134-235-1-12346-134-14-2345
+always emedizin 15-134-15-145-24-1356-35
+
 always en 14
 always denunz 145-15-1345-256-1356 shouldn't use the en-contraction
 always er 12456
@@ -826,12 +831,13 @@ always leerlauf 123-15-15-1235-123-16-124
 always leichtlauf 123-1456-123-16-124
 always mehrlauf 2-2356-123-16-124
 always notlauf 1345-135-2345-123-16-124
-always schenlllauf 156-1345-15-12356-123-16-124
+always schnelllauf 156-1345-15-12345-123-16-124
 always suchlauf 234-136-1456-123-16-124
 always unterlauf 2-256-123-16-124
 always volkslauf 1236-13-234-123-16-124
 always gelaufen 12346-123-16-124-14
 always schlauf 156-123-16-124 shouldn't use the auf-contraction
+always schnauf 156-1345-16-124 shouldn't use the auf-contraction
 always ausrauf 16-234-1235-16-124
 prfword taufe 2345-16-124-15
 prfword taufen 2345-16-124-14
@@ -879,11 +885,17 @@ before t always gebeiz 12346-12-146-1356
 always kreuzbein 13-1235-126-1356-12-1246
 always schienbein 156-346-1345-12-1246
 always schlüsselbein 156-123-1256-2346-13456-12-1246 shouldn't use the bei-contraction
+always reibeisen 1235-146-12-146-234-14
 
 word dem 12356
 always dem 2-12356
 endword dem 145-12356 shouldn't use the dem-contraction
+always sendemast 234-14-145-15-134-1-23456
 always außerdem 16-6-2346-12456-2-12356
+word indem 35-2-12356
+word seitdem 234-146-2345-2-12356
+word trotzdem 2345-1356-2-12356
+word zudem 2-1356-2-12356
 always demask = demaskiert shouldn't use the dem-contraction
 always dembleme 145-12356-12-123-12356-15
 always dempfänger 145-12356-1234-124-345-1345-1245-12456
@@ -894,6 +906,7 @@ prfword demo 145-12356-135
 prfword demos 145-12356-135-234
 always epidem 15-1234-24-145-12356
 always ödem 246-145-12356
+always remmidemmi 1235-15-1346-24-145-15-1346-24
 always sendemast 234-14-145-15-134-1-23456
 
 
@@ -992,6 +1005,7 @@ endword		sensor		234-14-234-135-1235
 endword		sensor		234-14-234-135-1235
 always		sobjek		=
 always		sobmann		234-135-12-134-235-1345
+always		sobst		234-135-12-23456
 always		sock		234-135-46
 word		soda		=
 prfword		sofa		=
@@ -1006,6 +1020,7 @@ always		soldat		=
 sufword		solo		=
 endword		solo		=
 endword		solos		=
+always		sombuds		=
 always		sommelier	234-135-1346-13456-24-12456
 always		sommer		234-135-1346-12456
 before konsonant always	son =
@@ -1090,6 +1105,7 @@ always jagdhund 245-1-1245-145-125-256-145 shouldn't use the und-contraction
 always kampfhund 13-1-134-1234-124-125-256-145 shouldn't use the und-contraction
 always militärhund 134-24-123-24-2345-345-1235-125-256-145
 always polizeihund 1234-135-123-24-1356-146-125-256-145 shouldn't use the und-contraction
+always rettungshund 1235-15-2345-2345-136-234-125-256-145
 always schweinehund 156-2456-1246-15-125-256-145
 always windhund 2456-35-145-125-256-145
 prfword hund 125-256-145 shouldn't use the und-contraction
@@ -1105,6 +1121,7 @@ always rundfahrt 1235-256-145-2-1235-2345
 always rundfunk 1235-256-145-124-256-13 shouldn't use the und-contraction
 always rundgang 1235-256-145-1245-235-1245
 always rundgäng 1235-256-145-1245-345-1345-1245
+always kreisrund 13-1235-146-234-1235-256-145
 always schlund 156-123-256-145
 sufword schrund 156-1235-256-145
 
@@ -1147,6 +1164,12 @@ always eunter 15-2-256
 sufword kunter 13-256-2345-12456 shouldn't use the unter-contraction
 sufword kunterbunter 13-256-2345-12456-12-256-2345-12456
 sufword munter 134-256-2345-12456 shouldn't use the unter-contraction
+always aufmunter 2-16-134-256-2345-12456
+always aufgemunter 2-16-12346-134-256-2345-12456
+always aufzumunter 2-16-2-1356-134-256-2345-12456
+always ermunter 12456-134-256-2345-12456
+always putzmunter 1234-136-2345-1356-134-256-2345-12456
+
 always virus =
 
 word voll 12345
@@ -1187,6 +1210,7 @@ sufword anzuglied 235-2-1356-1245-123-346-145
 sufword anzuglotz 235-2-1356-1245-123-135-2345-1356
 
 always zugegen 2-1356-2-1245
+always zugehör 2-1356-12346-125-246-1235
 always zugleich 2-1356-1245-1456
 always zugrenzen 2-1356-1245-1235-14-1356-14
 always zugriff 2-1356-1245-1235-24-124-124
@@ -1238,9 +1262,6 @@ prfword zupftet 1356-136-1234-124-236-2345
 
 
 
-word indem 35-2-12356
-word trotzdem 2345-1356-2-12356
-word zudem 2-1356-2-12356
 always zucht 1356-136-1456-2345 shouldn't use the zu-contraction
 always zuck 1356-136-46 shouldn't use the zu-contraction
 before g always zug =
@@ -1294,16 +1315,48 @@ always schnall 156-1345-1-12345
 always korallen 13-26-1-12345-14
 always kristall 13-1235-24-23456-1-12345 shouldn't use any of the allen-contraction
 sufword ballen 12-1-12345-14
+
 always aller 1-12456
+always abgeballer 1-12-12346-12-1-12345-12456
+always abzuballer 1-12-2-1356-12-1-12345-12456
+always aufballer 2-16-12-1-12345-12456
+always aufgeballer 2-16-12346-12-1-12345-12456
+always aufzuballer 2-16-2-1356-12-1-12345-12456
+always ballerina 12-1-12345-12456-35-1
+always ballerspiel 12-1-12345-12456-2-346
 always basketball 12-1-234-13-15-2345-12-1-12345
 always faustball 124-16-23456-12-1-12345
+always football 124-135-135-2345-12-1-12345
 always fußball 124-136-6-2346-12-1-12345
+sufword geballer 12346-12-1-12345-12456
 always handball 125-145-12-1-12345
+always herumballer 125-12456-136-134-12-1-12345-12456
+always losballer 123-135-234-12-1-12345-12456
+always losgeballer 123-135-234-12346-12-1-12345-12456
+always loszuballer 123-135-234-2-1356-12-1-12345-12456
 always metall 134-15-2345-1-12345
+always radball 1235-1-145-12-1-12345
+always reinballer 1235-1246-12-1-12345-12456
+always reingeballer 1235-1246-12346-12-1-12345-12456
+always reinzuballer 1235-1246-2-1356-12-1-12345-12456
+always rumballer 1235-136-134-12-1-12345-12456
+always rumzuballer 1235-136-134-2-1356-12-1-12345-12456
 always schneeball 156-1345-15-15-12-1-12345
 always volleyball 1236-135-12345-15-6-13456-12-1-12345
 always wasserball 2456-1-2346-12456-12-1-12345
-always allerg 1-12345-12456-1245 Allergiker
+always zerballer 1356-12456-12-1-12345-12456
+always zuballer 2-1356-12-1-12345-12456
+always zugeballer 2-1356-12346-12-1-12345-12456
+always zuzuballer 2-1356-2-1356-12-1-12345-12456
+
+always allergen 1-12345-12456-1245-14
+always allergenauest 1-12456-12346-1345-16-15-23456
+always allergie 1-12345-12456-1245-346
+prfword allergien 1-12345-12456-1245-24-14
+always allergik 1-12345-12456-1245-24-13
+always allergisch 1-12345-12456-1245-24-156
+always allergoderm 1-12345-12456-1245-135-145-12456-134
+before g always allergolo 1-12345-12456-1245-135-123-135
 
 word alles 1-123456
 always allesbesser 1-123456-234-234
@@ -1533,6 +1586,7 @@ before t always fürch 124-1256-1235-1456 shouldn't use the für-contraction
 
 always ganz 1245-1356
 contraction gz
+before g always analoganzei 235-25-135-1245-235-1356-146
 always gänz 5-1245-1356
 always gaenz 5-1245-1356
 always garnison 1245-356-1345-24-234-135-1345 shouldn't use the nis-contraction
@@ -1821,6 +1875,7 @@ before e always polynesi 1234-135-123-6-13456-1345-123456-24
 before e always skandinavi 234-13-235-145-35-1-1236-24
 before e always somali 234-135-134-25-24
 before e always spani 234-1234-235-24
+before e always terri 2345-12456-1235-24
 before e always tragödi =
 before e always trinitari 2345-1235-35-24-2345-356-24
 before e always tunesi 2345-256-123456-24
@@ -1888,7 +1943,24 @@ endword nische 1345-24-156-15 shouldn't use the nis-contraction
 endword nischem 1345-24-156-12356 shouldn't use the nis-contraction
 endword nischen 1345-24-156-14 shouldn't use the nis-contraction
 endword nischer 1345-24-156-12456 shouldn't use the nis-contraction
+endword nischere 1345-24-156-12456-15 shouldn't use the nis-contraction
+endword nischerem 1345-24-156-12456-12356 shouldn't use the nis-contraction
+endword nischeren 1345-24-156-12456-14 shouldn't use the nis-contraction
+endword nischerer 1345-24-156-12456-12456 shouldn't use the nis-contraction
+endword nischeres 1345-24-156-12456-123456 shouldn't use the nis-contraction
 endword nisches 1345-24-156-123456 shouldn't use the nis-contraction
+endword nischs 1345-24-156-234 shouldn't use the nis-contraction
+endword nischste 1345-24-156-23456-15 shouldn't use the nis-contraction
+endword nischstem 1345-24-156-23456-12356 shouldn't use the nis-contraction
+endword nischsten 1345-24-156-23456-14 shouldn't use the nis-contraction
+endword nischster 1345-24-156-23456-12456 shouldn't use the nis-contraction
+endword nischstes 1345-24-156-23456-123456 shouldn't use the nis-contraction
+endword nischt 1345-24-156-2345 shouldn't use the nis-contraction
+endword nischte 1345-24-156-236 shouldn't use the nis-contraction
+endword nischtem 1345-24-156-2345-12356 shouldn't use the nis-contraction
+endword nischten 1345-24-156-2345-14 shouldn't use the nis-contraction
+endword nischter 1345-24-156-2345-12456 shouldn't use the nis-contraction
+endword nischtes 1345-24-156-2345-123456 shouldn't use the nis-contraction
 endword nist 1345-24-23456
 endword nisten 1345-24-23456-14
 endword nistin 1345-24-23456-35
@@ -2118,6 +2190,11 @@ always dienständer 145-346-1345-23456-5-12456
 always stell 2-13456
 before l sufword bastel 12-1-23456-13456
 always sstell 234-2-13456 shouldn't use the ss-contraction
+prfword kastell 13-1-23456-15-12345
+prfword kastelle 13-1-23456-15-12345-15
+prfword kastellen 13-1-23456-15-12345-14
+prfword kastells 13-1-23456-15-12345-234
+
 
 word stets 23456-234
 always strahier 23456-1235-1-125-346-1235 abstrahieren
@@ -2252,9 +2329,23 @@ word zum 1356-134
 word zunächst 1356-1345
 word zunaechst 1356-1345
 word zur 1356-1235
+sufword zurkenntnis 1356-1235-13-14-1345-2345-1346
 sufword zurschau 1356-1235-156-16
+word zurzeit 1356-1235-1356-2345
 sufword zurück 1356-46
 sufword zurueck 1356-46
+sufword zurückge 1356-46-12346
+word zurückgehe 1356-46-1245-2356-15
+sufword zurückgehen 1356-46-1245-2356-14
+word zurückgehst 1356-46-1245-2356-23456
+word zurückgeht 1356-46-1245-2356-2345
+sufword zurückgelaufen 1356-46-12346-123-16-124-14
+sufword zurückgelegen 1356-46-1245-1245
+before s sufword zurückverwie 1356-46-1236-12456-2456-346
+before s sufword zurückwie 1356-46-2456-346
+sufword zurückzu 1356-46-2-1356
+sufword zurückzuck 1356-46-1356-136-46
+
 always zusammen 1356-234
 always zwischen 1356-2456
 contraction zw
