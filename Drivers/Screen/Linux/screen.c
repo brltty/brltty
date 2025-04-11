@@ -1137,7 +1137,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
       if (unicode) {
         wc = *unicode++;
 
-        if ((blanks > 0) && (wc == WC_C(' '))) {
+        if ((blanks > 0) && iswspace(wc)) {
           blanks -= 1;
           wc = WEOF;
         } else if (widecharPadding) {
