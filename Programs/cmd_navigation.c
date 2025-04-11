@@ -169,7 +169,7 @@ testIndent (int column, int row, void *data UNUSED) {
 
   while (column >= 0) {
     wchar_t text = characters[column].text;
-    if (text != WC_C(' ')) return 1;
+    if (!iswspace(text)) return 1;
     column -= 1;
   }
 
@@ -264,8 +264,7 @@ toPreviousNonblankWindow (void) {
 
     for (charIndex=charCount-1; charIndex>=0; charIndex-=1) {
       wchar_t text = characters[charIndex].text;
-
-      if (text != WC_C(' ')) break;
+      if (!iswspace(text)) break;
     }
 
     if (showScreenCursor() &&
@@ -310,8 +309,7 @@ toNextNonblankWindow (void) {
 
     for (charIndex=0; charIndex<charCount; charIndex+=1) {
       wchar_t text = characters[charIndex].text;
-
-      if (text != WC_C(' ')) break;
+      if (!iswspace(text)) break;
     }
 
     if (showScreenCursor() &&
@@ -484,7 +482,7 @@ handleNavigationCommands (int command, void *data) {
           int column = 0;
 
           while (column < length) {
-            if (characters[column].text == WC_C(' ')) break;
+            if (iswspace(characters[column].text)) break;
             column += 1;
           }
 
@@ -577,8 +575,7 @@ handleNavigationCommands (int command, void *data) {
 
               for (charIndex=0; charIndex<charCount; charIndex+=1) {
                 wchar_t text = characters[charIndex].text;
-
-                if (text != WC_C(' ')) break;
+                if (!iswspace(text)) break;
               }
 
               if (charIndex == charCount) goto wrapUp;
@@ -651,8 +648,7 @@ handleNavigationCommands (int command, void *data) {
 
               for (charIndex=0; charIndex<charCount; charIndex+=1) {
                 wchar_t text = characters[charIndex].text;
-
-                if (text != WC_C(' ')) break;
+                if (!iswspace(text)) break;
               }
 
               if (charIndex == charCount) goto wrapDown;
