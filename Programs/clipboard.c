@@ -23,6 +23,7 @@
 
 #include "log.h"
 #include "clipboard.h"
+#include "unicode.h"
 #include "utf8.h"
 #include "queue.h"
 #include "lock.h"
@@ -153,8 +154,20 @@ appendClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t 
     cpb->buffer.size = newSize;
   }
 
-  wmemcpy(&cpb->buffer.characters[cpb->buffer.length], characters, length);
-  cpb->buffer.length += length;
+  {
+    const wchar_t *from = characters;
+    const wchar_t *fromEnd = from + length;
+    wchar_t *to = &cpb->buffer.characters[cpb->buffer.length];
+
+    while (from < fromEnd) {
+      wchar_t character = *from++;
+      if (character == UNICODE_ZERO_WIDTH_SPACE) continue;
+      *to++ = character;
+    }
+
+    cpb->buffer.length = to - cpb->buffer.characters;
+  }
+
   return 1;
 }
 

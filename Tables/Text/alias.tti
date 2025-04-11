@@ -33,6 +33,7 @@ alias	\u2007	\s	# figure space
 alias	\u2008	\s	# punctuation space
 alias	\u2009	\s	# thin space
 alias	\u200A	\s	# hair space
+alias	\u200B	\s	# zero width space
 alias	\u202F	\s	# narrow no-break space
 alias	\u205F	\s	# medium mathematical space
 
