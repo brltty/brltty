@@ -262,8 +262,11 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
 
 static int
 pasteCharacters (const wchar_t *characters, size_t count) {
-  for (unsigned int i=0; i<count; i+=1) {
-    if (!insertScreenKey(characters[i])) return 0;
+  const wchar_t *character = characters;
+  const wchar_t *end = character + count;
+
+  while (character < end) {
+    if (!insertScreenKey(*character++)) return 0;
   }
 
   return 1;
@@ -275,7 +278,6 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
   if (isRouting()) return 0;
 
   int pasted = 0;
-  int bracketed = 0;
   lockMainClipboard();
 
   const wchar_t *characters;
@@ -295,16 +297,28 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
     }
 
     if (length > 0) {
-      if (bracketed) {
-        static const wchar_t sequence[] = {ASCII_ESC, '[', '2', '0', '0', '~'};
-        if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) goto PASTE_FAILED;
+      if (prefs.bracketedPaste) {
+        static const wchar_t sequence[] = {
+          ASCII_ESC, WC_C('['), WC_C('2'), WC_C('0'), WC_C('0'), WC_C('~')
+        };
+
+        if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) {
+          goto PASTE_FAILED;
+        }
       }
 
-      if (!pasteCharacters(characters, length)) goto PASTE_FAILED;
+      if (!pasteCharacters(characters, length)) {
+        goto PASTE_FAILED;
+      }
 
-      if (bracketed) {
-        static const wchar_t sequence[] = {ASCII_ESC, '[', '2', '0', '1', '~'};
-        if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) goto PASTE_FAILED;
+      if (prefs.bracketedPaste) {
+        static const wchar_t sequence[] = {
+          ASCII_ESC, WC_C('['), WC_C('2'), WC_C('0'), WC_C('1'), WC_C('~')
+        };
+
+        if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) {
+          goto PASTE_FAILED;
+        }
       }
     }
 
