@@ -34,6 +34,7 @@
 #include "file.h"
 #include "datafile.h"
 #include "utf8.h"
+#include "ascii.h"
 #include "core.h"
 
 typedef struct {
@@ -261,18 +262,8 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
 
 static int
 pasteCharacters (const wchar_t *characters, size_t count) {
-  if (!characters) return 0;
-  if (!count) return 0;
-
-  if (!isMainScreen()) return 0;
-  if (isRouting()) return 0;
-
-  {
-    unsigned int i;
-
-    for (i=0; i<count; i+=1) {
-      if (!insertScreenKey(characters[i])) return 0;
-    }
+  for (unsigned int i=0; i<count; i+=1) {
+    if (!insertScreenKey(characters[i])) return 0;
   }
 
   return 1;
@@ -280,27 +271,48 @@ pasteCharacters (const wchar_t *characters, size_t count) {
 
 static int
 cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
-  int pasted;
+  if (!isMainScreen()) return 0;
+  if (isRouting()) return 0;
 
+  int pasted = 0;
+  int bracketed = 0;
   lockMainClipboard();
-    const wchar_t *characters;
-    size_t length;
 
-    if (index) {
-      characters = getClipboardHistory(ccd->clipboard, index-1, &length);
-    } else {
-      characters = getClipboardContent(ccd->clipboard, &length);
-    }
+  const wchar_t *characters;
+  size_t length;
 
+  if (index) {
+    characters = getClipboardHistory(ccd->clipboard, index-1, &length);
+  } else {
+    characters = getClipboardContent(ccd->clipboard, &length);
+  }
+
+  if (characters) {
     while (length > 0) {
       size_t last = length - 1;
-      if (characters[last] != WC_C(' ')) break;
+      if (!iswspace(characters[last])) break;
       length = last;
     }
 
-    pasted = pasteCharacters(characters, length);
-  unlockMainClipboard();
+    if (length > 0) {
+      if (bracketed) {
+        static const wchar_t sequence[] = {ASCII_ESC, '[', '2', '0', '0', '~'};
+        if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) goto PASTE_FAILED;
+      }
 
+      if (!pasteCharacters(characters, length)) goto PASTE_FAILED;
+
+      if (bracketed) {
+        static const wchar_t sequence[] = {ASCII_ESC, '[', '2', '0', '1', '~'};
+        if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) goto PASTE_FAILED;
+      }
+    }
+
+    pasted = 1;
+  }
+
+PASTE_FAILED:
+  unlockMainClipboard();
   return pasted;
 }
 
