@@ -405,6 +405,12 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.startSelectionWithRoutingKey
   },
 
+  { .name = "bracketed-paste-enabled",
+    .defaultValue = DEFAULT_BRACKETED_PASTE_ENABLED,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.bracketedPasteEnabled
+  },
+
   { .name = "autorelease-time",
     .defaultValue = DEFAULT_AUTORELEASE_TIME,
     .settingNames = &preferenceStringTable_autoreleaseTime,

@@ -24,6 +24,7 @@
 
 #include "log.h"
 #include "alert.h"
+#include "message.h"
 #include "cmd_queue.h"
 #include "cmd_utils.h"
 #include "cmd_clipboard.h"
@@ -298,6 +299,11 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index, int bracketed) {
 
     if (length > 0) {
       if (bracketed) {
+        if (!prefs.bracketedPasteEnabled) {
+          message(NULL, gettext("bracketed paste not enabled"), 0);
+          goto PASTE_FAILED;
+        }
+
         static const wchar_t sequence[] = {
           ASCII_ESC, WC_C('['), WC_C('2'), WC_C('0'), WC_C('0'), WC_C('~')
         };
@@ -319,6 +325,8 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index, int bracketed) {
         if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) {
           goto PASTE_FAILED;
         }
+
+        alert(ALERT_COMMAND_DONE);
       }
     }
 
