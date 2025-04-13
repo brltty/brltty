@@ -48,4 +48,4 @@ assign toggleCommand ATTRVIS
 include ../toggle.kti
 
 bind !Status.12 TIME
-bind !Status.13 PASTE
+bind Status.13 PASTE:PASTE_BRACKETED

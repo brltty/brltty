@@ -70,7 +70,7 @@ bind KPMinus+!KP3 DESCCHAR
 bind KPMinus+!KPDivide RESTARTBRL
 bind KPMinus+!KPMultiply RESTARTSPEECH
 
-bind KPMultiply+!KP5 PASTE
+bind KPMultiply+KP5 PASTE:PASTE_BRACKETED
 bind KPMultiply+!KP7 CLIP_NEW
 bind KPMultiply+!KP1 CLIP_ADD
 bind KPMultiply+!KP9 COPY_LINE

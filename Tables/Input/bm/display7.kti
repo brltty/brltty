@@ -62,5 +62,5 @@ bind Display3+Display6 PREFLOAD
 bind Display4+Display7 PREFSAVE
 
 bind Display5+Display3+Display6 CSRJMP_VERT
-bind Display5+Display4+Display7 PASTE
+bind Display5+Display4+Display7 PASTE:PASTE_BRACKETED
 

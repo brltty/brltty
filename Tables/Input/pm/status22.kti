@@ -73,4 +73,4 @@ assign toggleCommand BRLUCDOTS
 include ../toggle.kti
 
 bind !Status.21 TIME
-bind !Status.22 PASTE
+bind Status.22 PASTE:PASTE_BRACKETED

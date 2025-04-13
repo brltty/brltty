@@ -27,7 +27,7 @@ bind RoutingKey+!RoutingKey CLIP_COPY
 bind Left+RoutingKey PRINDENT
 bind Right+RoutingKey NXINDENT
 
-bind Left+Right PASTE
+bind Left+Right PASTE:PASTE_BRACKETED
 
 bind B1+Left LNBEG
 bind B1+Right LNEND

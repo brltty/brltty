@@ -121,7 +121,7 @@ assign toggleCommand SLIDEWIN
 include toggle.kti
 endVariables
 
-bind \{chord}\{x} PASTE
+bind \{chord}\{x} PASTE:PASTE_BRACKETED
 bind \{chord}\{x}+\{toggleOff} CLIP_RESTORE
 bind \{chord}\{x}+\{toggleOn} CLIP_SAVE
 
