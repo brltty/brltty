@@ -273,7 +273,7 @@ pasteCharacters (const wchar_t *characters, size_t count) {
 }
 
 static int
-cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
+cpbPaste (ClipboardCommandData *ccd, unsigned int index, int bracketed) {
   if (!isMainScreen()) return 0;
   if (isRouting()) return 0;
 
@@ -297,7 +297,7 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
     }
 
     if (length > 0) {
-      if (prefs.bracketedPaste) {
+      if (bracketed) {
         static const wchar_t sequence[] = {
           ASCII_ESC, WC_C('['), WC_C('2'), WC_C('0'), WC_C('0'), WC_C('~')
         };
@@ -311,7 +311,7 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index) {
         goto PASTE_FAILED;
       }
 
-      if (prefs.bracketedPaste) {
+      if (bracketed) {
         static const wchar_t sequence[] = {
           ASCII_ESC, WC_C('['), WC_C('2'), WC_C('0'), WC_C('1'), WC_C('~')
         };
@@ -482,9 +482,21 @@ handleClipboardCommands (int command, void *data) {
   ClipboardCommandData *ccd = data;
 
   switch (command & BRL_MSK_CMD) {
+    {
+      int bracketed;
+
     case BRL_CMD_PASTE:
-      if (!cpbPaste(ccd, 0)) alert(ALERT_COMMAND_REJECTED);
+      bracketed = 0;
+      goto doPaste;
+
+    case BRL_CMD_PASTE_BRACKETED:
+      bracketed = 1;
+      goto doPaste;
+
+    doPaste:
+      if (!cpbPaste(ccd, 0, bracketed)) alert(ALERT_COMMAND_REJECTED);
       break;
+    }
 
     case BRL_CMD_CLIP_SAVE:
       alert(cpbSave(ccd)? ALERT_COMMAND_DONE: ALERT_COMMAND_REJECTED);
@@ -651,9 +663,21 @@ handleClipboardCommands (int command, void *data) {
           break;
         }
 
+        {
+          int bracketed;
+
         case BRL_CMD_BLK(PASTE_HISTORY):
-          if (!cpbPaste(ccd, arg)) alert(ALERT_COMMAND_REJECTED);
+          bracketed = 0;
+          goto doPasteHistory;
+
+        case BRL_CMD_BLK(PASTE_HISTORY_BRACKETED):
+          bracketed = 1;
+          goto doPasteHistory;
+
+        doPasteHistory:
+          if (!cpbPaste(ccd, arg, bracketed)) alert(ALERT_COMMAND_REJECTED);
           break;
+        }
 
         default:
           return 0;

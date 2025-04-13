@@ -959,11 +959,6 @@ makePreferencesMenu (void) {
     SUBMENU(inputSubmenu, rootMenu, strtext("Input Options"));
 
     {
-      NAME(strtext("Bracketed Paste"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.bracketedPaste, &itemName));
-    }
-
-    {
       static const MenuString strings[] = {
         [atOff] = {.label=strtext("Off")},
         [at5s] = {.label=strtext("5 seconds")},
