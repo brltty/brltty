@@ -1534,7 +1534,7 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(optionsSubmenu, rootMenu, strtext("Program Options"));
+    SUBMENU(optionsSubmenu, rootMenu, strtext("Command Options"));
     setAdvancedSubmenu(optionsSubmenu);
 
     {
