@@ -214,9 +214,9 @@ typedef struct {
   unsigned char speakKeyContext;
   unsigned char speakModifierKey;
 
-  unsigned char bracketedPasteEnabled;
   unsigned char autoreleaseTime;
   unsigned char onFirstRelease;
+  unsigned char bracketedPasteEnabled;
   unsigned char touchNavigation;
 
   unsigned char scrollAwareCursorNavigation;

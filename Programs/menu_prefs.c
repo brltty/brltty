@@ -959,11 +959,6 @@ makePreferencesMenu (void) {
     SUBMENU(inputSubmenu, rootMenu, strtext("Input Options"));
 
     {
-      NAME(strtext("Bracketed Paste Enabled"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.bracketedPasteEnabled, &itemName));
-    }
-
-    {
       static const MenuString strings[] = {
         [atOff] = {.label=strtext("Off")},
         [at5s] = {.label=strtext("5 seconds")},
@@ -1005,6 +1000,11 @@ makePreferencesMenu (void) {
       NAME(strtext("Autorepeat Panning"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.autorepeatPanning, &itemName));
       TEST(AutorepeatEnabled);
+    }
+
+    {
+      NAME(strtext("Bracketed Paste Enabled"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.bracketedPasteEnabled, &itemName));
     }
 
     {
