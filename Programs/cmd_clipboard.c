@@ -325,8 +325,6 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index, int bracketed) {
         if (!pasteCharacters(sequence, ARRAY_COUNT(sequence))) {
           goto PASTE_FAILED;
         }
-
-        alert(ALERT_COMMAND_DONE);
       }
     }
 
