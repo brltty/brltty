@@ -72,74 +72,74 @@ char	\x3D	123456	# equals sign
 char	\x3E	3458	# greater-than sign
 char	\x3F	268	# question mark
 char	\x40	47	# commercial at
-char	\u20AA	1468	# new sheqel sign
-char	\u20AC	158	# euro sign
 char	\x5B	2467	# left square bracket
 char	\x5C	12568	# reverse solidus
 char	\x5D	124567	# right square bracket
 char	\x5E	457	# circumflex accent
-char	\x7C	1256	# vertical line
 char	\x5F	4567	# low line
 char	\x60	4	# grave accent
+char	\x7C	1256	# vertical line
+char	\u20AA	1468	# new sheqel sign
+char	\u20AC	158	# euro sign
 
 # Hebrew letters
-char	\u05d0	1	# hebrew letter alef
-char	\u05d1	1236	# hebrew letter bet
-char	\u05d2	1245	# hebrew letter gimel
-char	\u05d3	145	# hebrew letter dalet
-char	\u05d4	125	# hebrew letter he
-char	\u05d5	2456	# hebrew letter vav
-char	\u05d6	1356	# hebrew letter zayin
-char	\u05d7	1346	# hebrew letter het
-char	\u05d8	2345	# hebrew letter tet
-char	\u05d9	245	# hebrew letter yod
-char	\u05da	168	# hebrew letter final kaf
-char	\u05db	16	# hebrew letter kaf
-char	\u05dc	123	# hebrew letter lamed
-char	\u05dd	1348	# hebrew letter final mem
-char	\u05de	134	# hebrew letter mem
-char	\u05df	13458	# hebrew letter final nun
-char	\u05e0	1345	# hebrew letter nun
-char	\u05e1	234	# hebrew letter samekh
-char	\u05e2	1246	# hebrew letter ayin
-char	\u05e3	1248	# hebrew letter final pe
-char	\u05e4	124	# hebrew letter pe
-char	\u05e5	23468	# hebrew letter final tsadi
-char	\u05e6	2346	# hebrew letter tsadi
-char	\u05e7	12345	# hebrew letter qof
-char	\u05e8	1235	# hebrew letter resh
-char	\u05e9	146	# hebrew letter shin
-char	\u05ea	1456	# hebrew letter tav
+char	\u05D0	1	# hebrew letter alef
+char	\u05D1	1236	# hebrew letter bet
+char	\u05D2	1245	# hebrew letter gimel
+char	\u05D3	145	# hebrew letter dalet
+char	\u05D4	125	# hebrew letter he
+char	\u05D5	2456	# hebrew letter vav
+char	\u05D6	1356	# hebrew letter zayin
+char	\u05D7	1346	# hebrew letter het
+char	\u05D8	2345	# hebrew letter tet
+char	\u05D9	245	# hebrew letter yod
+char	\u05DA	168	# hebrew letter final kaf
+char	\u05DB	16	# hebrew letter kaf
+char	\u05DC	123	# hebrew letter lamed
+char	\u05DD	1348	# hebrew letter final mem
+char	\u05DE	134	# hebrew letter mem
+char	\u05DF	13458	# hebrew letter final nun
+char	\u05E0	1345	# hebrew letter nun
+char	\u05E1	234	# hebrew letter samekh
+char	\u05E2	1246	# hebrew letter ayin
+char	\u05E3	1248	# hebrew letter final pe
+char	\u05E4	124	# hebrew letter pe
+char	\u05E5	23468	# hebrew letter final tsadi
+char	\u05E6	2346	# hebrew letter tsadi
+char	\u05E7	12345	# hebrew letter qof
+char	\u05E8	1235	# hebrew letter resh
+char	\u05E9	146	# hebrew letter shin
+char	\u05EA	1456	# hebrew letter tav
 
 # Hebrew symbols
-char	\u05b0	3	# hebrew point sheva
-char	\u05b1	26	# hebrew point hataf segol
-char	\u05b2	25	# hebrew point hataf patah
-char	\u05b3	345	# hebrew point hataf qamats
-char	\u05b4	24	# hebrew point hiriq
-char	\u05b5	34	# hebrew point tsere
-char	\u05b6	15	# hebrew point segol
-char	\u05b7	14	# hebrew point patah
-char	\u05b8	126	# hebrew point qamats
-char	\u05b9	135	# hebrew point holam
-char	\u05ba	135	# hebrew point holam haser for vav
-char	\u05bb	346	# hebrew point qubuts
-char	\u05bc	135	# hebrew point dagesh or mapiq
-char	\u05c1	2348	# hebrew point shin dot
-char	\u05c2	1568	# hebrew point sin dot
-char	\u05c7	126	# hebrew point qamats qatan
+char	\u05B0	3	# hebrew point sheva
+char	\u05B1	26	# hebrew point hataf segol
+char	\u05B2	25	# hebrew point hataf patah
+char	\u05B3	345	# hebrew point hataf qamats
+char	\u05B4	24	# hebrew point hiriq
+char	\u05B5	34	# hebrew point tsere
+char	\u05B6	15	# hebrew point segol
+char	\u05B7	14	# hebrew point patah
+char	\u05B8	126	# hebrew point qamats
+char	\u05B9	135	# hebrew point holam
+char	\u05BA	135	# hebrew point holam haser for vav
+char	\u05BB	346	# hebrew point qubuts
+char	\u05BC	135	# hebrew point dagesh or mapiq
+char	\u05C1	2348	# hebrew point shin dot
+char	\u05C2	1568	# hebrew point sin dot
+char	\u05C7	126	# hebrew point qamats qatan
 
 # Hebrew accented letters
-char	\ufb1d	35	# hebrew letter yod with hiriq
-char	\ufb2a	146	# hebrew letter shin with shin dot
-char	\ufb2b	156	# hebrew letter shin with sin dot
-char	\ufb31	12	# hebrew letter bet with dagesh
-char	\ufb35	346	# hebrew letter vav with dagesh
-char	\ufb3a	13	# hebrew letter final kaf with dagesh
-char	\ufb3b	13	# hebrew letter kaf with dagesh
-char	\ufb43	1234	# hebrew letter final pe with dagesh
-char	\ufb44	1234	# hebrew letter pe with dagesh
-char	\ufb4a	1256	# hebrew letter tav with dagesh
+char	\uFB1D	35	# hebrew letter yod with hiriq
+char	\uFB2A	146	# hebrew letter shin with shin dot
+char	\uFB2B	156	# hebrew letter shin with sin dot
+char	\uFB31	12	# hebrew letter bet with dagesh
+char	\uFB35	346	# hebrew letter vav with dagesh
+char	\uFB3A	13	# hebrew letter final kaf with dagesh
+char	\uFB3B	13	# hebrew letter kaf with dagesh
+char	\uFB43	1234	# hebrew letter final pe with dagesh
+char	\uFB44	1234	# hebrew letter pe with dagesh
+char	\uFB4A	1256	# hebrew letter tav with dagesh
 
 # Russian uppercase letters
 glyph	\u0410	17	# cyrillic capital letter a
@@ -299,7 +299,7 @@ glyph	\xDC	2368	# latin capital letter u with diaeresis
 glyph	\xDD	3568	# latin capital letter y with acute
 glyph	\xDE	2357	# latin capital letter thorn
 
-#	Latin	lowercase	accented letters
+# Latin lowercase accented letters
 glyph	\xDF	34568	# latin small letter sharp s
 glyph	\xE0	123568	# latin small letter a with grave
 glyph	\xE1	168	# latin small letter a with acute
@@ -335,10 +335,9 @@ glyph	\xFF	134568	# latin small letter y with diaeresis
 
 # Latin symbols
 glyph	\x7B	2468	# left curly bracket
-glyph	\xB0	4568	# degree sign
-glyph	\x7C	1256	# vertical line
 glyph	\x7D	12456	# right curly bracket
 glyph	\x7E	45	# tilde
+glyph	\xB0	4568	# degree sign
 
 # Arabic letters
 glyph	\u0621	3	# arabic letter hamza
@@ -350,8 +349,8 @@ glyph	\u0626	13456	# arabic letter yeh with hamza above
 glyph	\u0627	1	# arabic letter alef
 glyph	\u0628	12	# arabic letter beh
 glyph	\u0629	16	# arabic letter teh marbuta
-glyph	\u062B	1456	# arabic letter theh
 glyph	\u062A	2345	# arabic letter teh
+glyph	\u062B	1456	# arabic letter theh
 glyph	\u062C	245	# arabic letter jeem
 glyph	\u062D	156	# arabic letter hah
 glyph	\u062E	1346	# arabic letter khah
@@ -377,25 +376,20 @@ glyph	\u0647	125	# arabic letter heh
 glyph	\u0648	2456	# arabic letter waw
 glyph	\u0649	135	# arabic letter alef maksura
 glyph	\u064A	24	# arabic letter yeh
-glyph	\u064E	2	# arabic fatha
-glyph	\u0650	15	# arabic kasra
 glyph	\u064B	23	# arabic fathatan
 glyph	\u064C	26	# arabic dammatan
 glyph	\u064D	35	# arabic kasratan
+glyph	\u064E	2	# arabic fatha
 glyph	\u064F	136	# arabic damma
+glyph	\u0650	15	# arabic kasra
 glyph	\u0651	6	# arabic shadda
 glyph	\u0652	25	# arabic sukun
 
 # Arabic additional forms
 glyph	\u067E	12	# arabic letter peh
 glyph	\u0686	245	# arabic letter tcheh
-glyph	\u06a4	124	# arabic letter veh
-glyph	\u06af	13	# arabic letter gaf
 glyph	\u0698	1356	# arabic letter jeh
-glyph	\u067E	12	# arabic letter peh
-glyph	\u0686	245	# arabic letter tcheh
-glyph	\u06a4	124	# arabic letter veh
-glyph	\u06af	13	# arabic letter gaf
-glyph	\u0698	1356	# arabic letter jeh
+glyph	\u06A4	124	# arabic letter veh
+glyph	\u06AF	13	# arabic letter gaf
 
 include common.tti
