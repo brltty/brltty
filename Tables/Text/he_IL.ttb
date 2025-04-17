@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Hebrew
+# BRLTTY Text Table - Hebrew (Israel)
 #
 # This table is the official Hebrew computer Braille table for Israel,
 # based on the official standard that was approved by the Central
@@ -38,49 +38,49 @@
 # and <http://liblouis.io/braille-specs/hebrew>.
 
 # digits
-char	\u0030	356	# digit zero
-char	\u0031	2	# digit one
-char	\u0032	23	# digit two
-char	\u0033	25	# digit three
-char	\u0034	256	# digit four
-char	\u0035	26	# digit five
-char	\u0036	235	# digit six
-char	\u0037	2356	# digit seven
-char	\u0038	236	# digit eight
-char	\u0039	35	# digit nine
+char	\x30	356	# digit zero
+char	\x31	2	# digit one
+char	\x32	23	# digit two
+char	\x33	25	# digit three
+char	\x34	256	# digit four
+char	\x35	26	# digit five
+char	\x36	235	# digit six
+char	\x37	2356	# digit seven
+char	\x38	236	# digit eight
+char	\x39	35	# digit nine
 
 # punctuation
-char	\u0021	2358	# exclamation mark
-char	\u0022	5	# quotation mark
-char	\u0023	3456	# number sign
-char	\u0024	12468	# dollar sign
-char	\u0025	1467	# percent sign
-char	\u0026	123468	# ampersand
-char	\u0027	3	# apostrophe
-char	\u0028	123568	# left parenthesis
-char	\u0029	234568	# right parenthesis
-char	\u002A	167	# asterisk
-char	\u002B	346	# plus sign
-char	\u002C	6	# comma
-char	\u002D	36	# hyphen-minus
-char	\u002E	46	# full stop
-char	\u002F	34	# solidus
-char	\u003A	1568	# colon
-char	\u003B	56	# semicolon
-char	\u003C	1268	# less-than sign
-char	\u003D	123456	# equals sign
-char	\u003E	3458	# greater-than sign
-char	\u003F	268	# question mark
-char	\u0040	47	# commercial at
+char	\x21	2358	# exclamation mark
+char	\x22	5	# quotation mark
+char	\x23	3456	# number sign
+char	\x24	12468	# dollar sign
+char	\x25	1467	# percent sign
+char	\x26	123468	# ampersand
+char	\x27	3	# apostrophe
+char	\x28	123568	# left parenthesis
+char	\x29	234568	# right parenthesis
+char	\x2A	167	# asterisk
+char	\x2B	346	# plus sign
+char	\x2C	6	# comma
+char	\x2D	36	# hyphen-minus
+char	\x2E	46	# full stop
+char	\x2F	34	# solidus
+char	\x3A	1568	# colon
+char	\x3B	56	# semicolon
+char	\x3C	1268	# less-than sign
+char	\x3D	123456	# equals sign
+char	\x3E	3458	# greater-than sign
+char	\x3F	268	# question mark
+char	\x40	47	# commercial at
 char	\u20AA	1468	# new sheqel sign
 char	\u20AC	158	# euro sign
-char	\u005B	2467	# left square bracket
-char	\u005C	12568	# reverse solidus
-char	\u005D	124567	# right square bracket
-char	\u005E	457	# circumflex accent
-char	\u007C	1256	# vertical line
-char	\u005F	4567	# low line
-char	\u0060	4	# grave accent
+char	\x5B	2467	# left square bracket
+char	\x5C	12568	# reverse solidus
+char	\x5D	124567	# right square bracket
+char	\x5E	457	# circumflex accent
+char	\x7C	1256	# vertical line
+char	\x5F	4567	# low line
+char	\x60	4	# grave accent
 
 # Hebrew letters
 char	\u05d0	1	# hebrew letter alef
@@ -110,6 +110,36 @@ char	\u05e7	12345	# hebrew letter qof
 char	\u05e8	1235	# hebrew letter resh
 char	\u05e9	146	# hebrew letter shin
 char	\u05ea	1456	# hebrew letter tav
+
+# Hebrew symbols
+char	\u05b0	3	# hebrew point sheva
+char	\u05b1	26	# hebrew point hataf segol
+char	\u05b2	25	# hebrew point hataf patah
+char	\u05b3	345	# hebrew point hataf qamats
+char	\u05b4	24	# hebrew point hiriq
+char	\u05b5	34	# hebrew point tsere
+char	\u05b6	15	# hebrew point segol
+char	\u05b7	14	# hebrew point patah
+char	\u05b8	126	# hebrew point qamats
+char	\u05b9	135	# hebrew point holam
+char	\u05ba	135	# hebrew point holam haser for vav
+char	\u05bb	346	# hebrew point qubuts
+char	\u05bc	135	# hebrew point dagesh or mapiq
+char	\u05c1	2348	# hebrew point shin dot
+char	\u05c2	1568	# hebrew point sin dot
+char	\u05c7	126	# hebrew point qamats qatan
+
+# Hebrew accented letters
+char	\ufb1d	35	# hebrew letter yod with hiriq
+char	\ufb2a	146	# hebrew letter shin with shin dot
+char	\ufb2b	156	# hebrew letter shin with sin dot
+char	\ufb31	12	# hebrew letter bet with dagesh
+char	\ufb35	346	# hebrew letter vav with dagesh
+char	\ufb3a	13	# hebrew letter final kaf with dagesh
+char	\ufb3b	13	# hebrew letter kaf with dagesh
+char	\ufb43	1234	# hebrew letter final pe with dagesh
+char	\ufb44	1234	# hebrew letter pe with dagesh
+char	\ufb4a	1256	# hebrew letter tav with dagesh
 
 # Russian uppercase letters
 glyph	\u0410	17	# cyrillic capital letter a
@@ -182,163 +212,133 @@ glyph	\u044F	1246	# cyrillic small letter ya
 glyph	\u0451	16	# cyrillic small letter io
 
 # Latin uppercase letters
-glyph	\u0041	17	# latin capital letter a
-glyph	\u0042	127	# latin capital letter b
-glyph	\u0043	147	# latin capital letter c
-glyph	\u0044	1457	# latin capital letter d
-glyph	\u0045	157	# latin capital letter e
-glyph	\u0046	1247	# latin capital letter f
-glyph	\u0047	12457	# latin capital letter g
-glyph	\u0048	1257	# latin capital letter h
-glyph	\u0049	247	# latin capital letter i
-glyph	\u004A	2457	# latin capital letter j
-glyph	\u004B	137	# latin capital letter k
-glyph	\u004C	1237	# latin capital letter l
-glyph	\u004D	1347	# latin capital letter m
-glyph	\u004E	13457	# latin capital letter n
-glyph	\u004F	1357	# latin capital letter o
-glyph	\u0050	12347	# latin capital letter p
-glyph	\u0051	123457	# latin capital letter q
-glyph	\u0052	12357	# latin capital letter r
-glyph	\u0053	2347	# latin capital letter s
-glyph	\u0054	23457	# latin capital letter t
-glyph	\u0055	1367	# latin capital letter u
-glyph	\u0056	12367	# latin capital letter v
-glyph	\u0057	24567	# latin capital letter w
-glyph	\u0058	13467	# latin capital letter x
-glyph	\u0059	134567	# latin capital letter y
-glyph	\u005A	13567	# latin capital letter z
+glyph	\x41	17	# latin capital letter a
+glyph	\x42	127	# latin capital letter b
+glyph	\x43	147	# latin capital letter c
+glyph	\x44	1457	# latin capital letter d
+glyph	\x45	157	# latin capital letter e
+glyph	\x46	1247	# latin capital letter f
+glyph	\x47	12457	# latin capital letter g
+glyph	\x48	1257	# latin capital letter h
+glyph	\x49	247	# latin capital letter i
+glyph	\x4A	2457	# latin capital letter j
+glyph	\x4B	137	# latin capital letter k
+glyph	\x4C	1237	# latin capital letter l
+glyph	\x4D	1347	# latin capital letter m
+glyph	\x4E	13457	# latin capital letter n
+glyph	\x4F	1357	# latin capital letter o
+glyph	\x50	12347	# latin capital letter p
+glyph	\x51	123457	# latin capital letter q
+glyph	\x52	12357	# latin capital letter r
+glyph	\x53	2347	# latin capital letter s
+glyph	\x54	23457	# latin capital letter t
+glyph	\x55	1367	# latin capital letter u
+glyph	\x56	12367	# latin capital letter v
+glyph	\x57	24567	# latin capital letter w
+glyph	\x58	13467	# latin capital letter x
+glyph	\x59	134567	# latin capital letter y
+glyph	\x5A	13567	# latin capital letter z
 
 # Latin lowercase letters
-glyph	\u0061	1	# latin small letter a
-glyph	\u0062	12	# latin small letter b
-glyph	\u0063	14	# latin small letter c
-glyph	\u0064	145	# latin small letter d
-glyph	\u0065	15	# latin small letter e
-glyph	\u0066	124	# latin small letter f
-glyph	\u0067	1245	# latin small letter g
-glyph	\u0068	125	# latin small letter h
-glyph	\u0069	24	# latin small letter i
-glyph	\u006A	245	# latin small letter j
-glyph	\u006B	13	# latin small letter k
-glyph	\u006C	123	# latin small letter l
-glyph	\u006D	134	# latin small letter m
-glyph	\u006E	1345	# latin small letter n
-glyph	\u006F	135	# latin small letter o
-glyph	\u0070	1234	# latin small letter p
-glyph	\u0071	12345	# latin small letter q
-glyph	\u0072	1235	# latin small letter r
-glyph	\u0073	234	# latin small letter s
-glyph	\u0074	2345	# latin small letter t
-glyph	\u0075	136	# latin small letter u
-glyph	\u0076	1236	# latin small letter v
-glyph	\u0077	2456	# latin small letter w
-glyph	\u0078	1346	# latin small letter x
-glyph	\u0079	13456	# latin small letter y
-glyph	\u007A	1356	# latin small letter z
+glyph	\x61	1	# latin small letter a
+glyph	\x62	12	# latin small letter b
+glyph	\x63	14	# latin small letter c
+glyph	\x64	145	# latin small letter d
+glyph	\x65	15	# latin small letter e
+glyph	\x66	124	# latin small letter f
+glyph	\x67	1245	# latin small letter g
+glyph	\x68	125	# latin small letter h
+glyph	\x69	24	# latin small letter i
+glyph	\x6A	245	# latin small letter j
+glyph	\x6B	13	# latin small letter k
+glyph	\x6C	123	# latin small letter l
+glyph	\x6D	134	# latin small letter m
+glyph	\x6E	1345	# latin small letter n
+glyph	\x6F	135	# latin small letter o
+glyph	\x70	1234	# latin small letter p
+glyph	\x71	12345	# latin small letter q
+glyph	\x72	1235	# latin small letter r
+glyph	\x73	234	# latin small letter s
+glyph	\x74	2345	# latin small letter t
+glyph	\x75	136	# latin small letter u
+glyph	\x76	1236	# latin small letter v
+glyph	\x77	2456	# latin small letter w
+glyph	\x78	1346	# latin small letter x
+glyph	\x79	13456	# latin small letter y
+glyph	\x7A	1356	# latin small letter z
 
 # Latin uppercase accented letters
-glyph	\u00C0	23678	# latin capital letter a with grave
-glyph	\u00C1	28	# latin capital letter a with acute
-glyph	\u00C2	167	# latin capital letter a with circumflex
-glyph	\u00C3	3467	# latin capital letter a with tilde
-glyph	\u00C4	567	# latin capital letter a with diaeresis
-glyph	\u00C5	34567	# latin capital letter a with ring above
-glyph	\u00C6	47	# latin capital letter ae
-glyph	\u00C7	123467	# latin capital letter c with cedilla
-glyph	\u00C8	3578	# latin capital letter e with grave
-glyph	\u00C9	1234567	# latin capital letter e with acute
-glyph	\u00CA	1267	# latin capital letter e with circumflex
-glyph	\u00CB	2358	# latin capital letter e with diaeresis
-glyph	\u00CC	57	# latin capital letter i with grave
-glyph	\u00CD	258	# latin capital letter i with acute
-glyph	\u00CE	1467	# latin capital letter i with circumflex
-glyph	\u00CF	23568	# latin capital letter i with diaeresis
-glyph	\u00D0	3567	# latin capital letter eth
-glyph	\u00D1	2567	# latin capital letter n with tilde
-glyph	\u00D2	578	# latin capital letter o with grave
-glyph	\u00D3	2568	# latin capital letter o with acute
-glyph	\u00D4	14567	# latin capital letter o with circumflex
-glyph	\u00D5	267	# latin capital letter o with tilde
-glyph	\u00D6	358	# latin capital letter o with diaeresis
-glyph	\u00D8	2467	# latin capital letter o with stroke
-glyph	\u00D9	35678	# latin capital letter u with grave
-glyph	\u00DA	268	# latin capital letter u with acute
-glyph	\u00DB	1567	# latin capital letter u with circumflex
-glyph	\u00DC	2368	# latin capital letter u with diaeresis
-glyph	\u00DD	3568	# latin capital letter y with acute
-glyph	\u00DE	2357	# latin capital letter thorn
+glyph	\xC0	23678	# latin capital letter a with grave
+glyph	\xC1	28	# latin capital letter a with acute
+glyph	\xC2	167	# latin capital letter a with circumflex
+glyph	\xC3	3467	# latin capital letter a with tilde
+glyph	\xC4	567	# latin capital letter a with diaeresis
+glyph	\xC5	34567	# latin capital letter a with ring above
+glyph	\xC6	47	# latin capital letter ae
+glyph	\xC7	123467	# latin capital letter c with cedilla
+glyph	\xC8	3578	# latin capital letter e with grave
+glyph	\xC9	1234567	# latin capital letter e with acute
+glyph	\xCA	1267	# latin capital letter e with circumflex
+glyph	\xCB	2358	# latin capital letter e with diaeresis
+glyph	\xCC	57	# latin capital letter i with grave
+glyph	\xCD	258	# latin capital letter i with acute
+glyph	\xCE	1467	# latin capital letter i with circumflex
+glyph	\xCF	23568	# latin capital letter i with diaeresis
+glyph	\xD0	3567	# latin capital letter eth
+glyph	\xD1	2567	# latin capital letter n with tilde
+glyph	\xD2	578	# latin capital letter o with grave
+glyph	\xD3	2568	# latin capital letter o with acute
+glyph	\xD4	14567	# latin capital letter o with circumflex
+glyph	\xD5	267	# latin capital letter o with tilde
+glyph	\xD6	358	# latin capital letter o with diaeresis
+glyph	\xD8	2467	# latin capital letter o with stroke
+glyph	\xD9	35678	# latin capital letter u with grave
+glyph	\xDA	268	# latin capital letter u with acute
+glyph	\xDB	1567	# latin capital letter u with circumflex
+glyph	\xDC	2368	# latin capital letter u with diaeresis
+glyph	\xDD	3568	# latin capital letter y with acute
+glyph	\xDE	2357	# latin capital letter thorn
 
 #	Latin	lowercase	accented letters
-glyph	\u00DF	34568	# latin small letter sharp s
-glyph	\u00E0	123568	# latin small letter a with grave
-glyph	\u00E1	168	# latin small letter a with acute
-glyph	\u00E2	1678	# latin small letter a with circumflex
-glyph	\u00E3	34678	# latin small letter a with tilde
-glyph	\u00E4	3458	# latin small letter a with diaeresis
-glyph	\u00E5	345678	# latin small letter a with ring above
-glyph	\u00E6	478	# latin small letter ae
-glyph	\u00E7	1234678	# latin small letter c with cedilla
-glyph	\u00E8	23468	# latin small letter e with grave
-glyph	\u00E9	1234568	# latin small letter e with acute
-glyph	\u00EA	12678	# latin small letter e with circumflex
-glyph	\u00EB	12468	# latin small letter e with diaeresis
-glyph	\u00EC	348	# latin small letter i with grave
-glyph	\u00ED	1468	# latin small letter i with acute
-glyph	\u00EE	14678	# latin small letter i with circumflex
-glyph	\u00EF	124568	# latin small letter i with diaeresis
-glyph	\u00F0	23458	# latin small letter eth
-glyph	\u00F1	13458	# latin small letter n with tilde
-glyph	\u00F2	3468	# latin small letter o with grave
-glyph	\u00F3	14568	# latin small letter o with acute
-glyph	\u00F4	145678	# latin small letter o with circumflex
-glyph	\u00F5	1358	# latin small letter o with tilde
-glyph	\u00F6	2468	# latin small letter o with diaeresis
-glyph	\u00F8	24678	# latin small letter o with stroke
-glyph	\u00F9	234568	# latin small letter u with grave
-glyph	\u00FA	1568	# latin small letter u with acute
-glyph	\u00FB	15678	# latin small letter u with circumflex
-glyph	\u00FC	12568	# latin small letter u with diaeresis
-glyph	\u00FD	24568	# latin small letter y with acute
-glyph	\u00FE	12348	# latin small letter thorn
-glyph	\u00FF	134568	# latin small letter y with diaeresis
+glyph	\xDF	34568	# latin small letter sharp s
+glyph	\xE0	123568	# latin small letter a with grave
+glyph	\xE1	168	# latin small letter a with acute
+glyph	\xE2	1678	# latin small letter a with circumflex
+glyph	\xE3	34678	# latin small letter a with tilde
+glyph	\xE4	3458	# latin small letter a with diaeresis
+glyph	\xE5	345678	# latin small letter a with ring above
+glyph	\xE6	478	# latin small letter ae
+glyph	\xE7	1234678	# latin small letter c with cedilla
+glyph	\xE8	23468	# latin small letter e with grave
+glyph	\xE9	1234568	# latin small letter e with acute
+glyph	\xEA	12678	# latin small letter e with circumflex
+glyph	\xEB	12468	# latin small letter e with diaeresis
+glyph	\xEC	348	# latin small letter i with grave
+glyph	\xED	1468	# latin small letter i with acute
+glyph	\xEE	14678	# latin small letter i with circumflex
+glyph	\xEF	124568	# latin small letter i with diaeresis
+glyph	\xF0	23458	# latin small letter eth
+glyph	\xF1	13458	# latin small letter n with tilde
+glyph	\xF2	3468	# latin small letter o with grave
+glyph	\xF3	14568	# latin small letter o with acute
+glyph	\xF4	145678	# latin small letter o with circumflex
+glyph	\xF5	1358	# latin small letter o with tilde
+glyph	\xF6	2468	# latin small letter o with diaeresis
+glyph	\xF8	24678	# latin small letter o with stroke
+glyph	\xF9	234568	# latin small letter u with grave
+glyph	\xFA	1568	# latin small letter u with acute
+glyph	\xFB	15678	# latin small letter u with circumflex
+glyph	\xFC	12568	# latin small letter u with diaeresis
+glyph	\xFD	24568	# latin small letter y with acute
+glyph	\xFE	12348	# latin small letter thorn
+glyph	\xFF	134568	# latin small letter y with diaeresis
 
 # Latin symbols
-glyph	\u007B	2468	# left curly bracket
-glyph	\u00B0	4568	# degree sign
-glyph	\u007C	1256	# vertical line
-glyph	\u007D	12456	# right curly bracket
-glyph	\u007E	45	# tilde
-
-# Hebrew symbols
-char	\u05b0	3	# hebrew point sheva
-char	\u05b1	26	# hebrew point hataf segol
-char	\u05b2	25	# hebrew point hataf patah
-char	\u05b3	345	# hebrew point hataf qamats
-char	\u05b4	24	# hebrew point hiriq
-char	\u05b5	34	# hebrew point tsere
-char	\u05b6	15	# hebrew point segol
-char	\u05b7	14	# hebrew point patah
-char	\u05b8	126	# hebrew point qamats
-char	\u05b9	135	# hebrew point holam
-char	\u05ba	135	# hebrew point holam haser for vav
-char	\u05bb	346	# hebrew point qubuts
-char	\u05bc	135	# hebrew point dagesh or mapiq
-char	\u05c1	2348	# hebrew point shin dot
-char	\u05c2	1568	# hebrew point sin dot
-char	\u05c7	126	# hebrew point qamats qatan
-
-# Hebrew accented letters
-char	\ufb1d	35	# hebrew letter yod with hiriq
-char	\ufb2a	146	# hebrew letter shin with shin dot
-char	\ufb2b	156	# hebrew letter shin with sin dot
-char	\ufb31	12	# hebrew letter bet with dagesh
-char	\ufb35	346	# hebrew letter vav with dagesh
-char	\ufb3a	13	# hebrew letter final kaf with dagesh
-char	\ufb3b	13	# hebrew letter kaf with dagesh
-char	\ufb43	1234	# hebrew letter final pe with dagesh
-char	\ufb44	1234	# hebrew letter pe with dagesh
-char	\ufb4a	1256	# hebrew letter tav with dagesh
+glyph	\x7B	2468	# left curly bracket
+glyph	\xB0	4568	# degree sign
+glyph	\x7C	1256	# vertical line
+glyph	\x7D	12456	# right curly bracket
+glyph	\x7E	45	# tilde
 
 # Arabic letters
 glyph	\u0621	3	# arabic letter hamza
