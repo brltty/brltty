@@ -112,34 +112,34 @@ char	\u05E9	146	# hebrew letter shin
 char	\u05EA	1456	# hebrew letter tav
 
 # Hebrew symbols
-char	\u05B0	3	# hebrew point sheva
-char	\u05B1	26	# hebrew point hataf segol
-char	\u05B2	25	# hebrew point hataf patah
+glyph	\u05B0	3	# hebrew point sheva
+glyph	\u05B1	26	# hebrew point hataf segol
+glyph	\u05B2	25	# hebrew point hataf patah
 char	\u05B3	345	# hebrew point hataf qamats
 char	\u05B4	24	# hebrew point hiriq
-char	\u05B5	34	# hebrew point tsere
+glyph	\u05B5	34	# hebrew point tsere
 char	\u05B6	15	# hebrew point segol
 char	\u05B7	14	# hebrew point patah
-char	\u05B8	126	# hebrew point qamats
-char	\u05B9	135	# hebrew point holam
-char	\u05BA	135	# hebrew point holam haser for vav
-char	\u05BB	346	# hebrew point qubuts
-char	\u05BC	135	# hebrew point dagesh or mapiq
+glyph	\u05B8	126	# hebrew point qamats
+glyph	\u05B9	135	# hebrew point holam
+glyph	\u05BA	135	# hebrew point holam haser for vav
+glyph	\u05BB	346	# hebrew point qubuts
+char	\u05BC	5	# hebrew point dagesh or mapiq
 char	\u05C1	2348	# hebrew point shin dot
-char	\u05C2	1568	# hebrew point sin dot
-char	\u05C7	126	# hebrew point qamats qatan
+glyph	\u05C2	1568	# hebrew point sin dot
+glyph	\u05C7	126	# hebrew point qamats qatan
 
 # Hebrew accented letters
-char	\uFB1D	35	# hebrew letter yod with hiriq
-char	\uFB2A	146	# hebrew letter shin with shin dot
+glyph	\uFB1D	35	# hebrew letter yod with hiriq
+glyph	\uFB2A	146	# hebrew letter shin with shin dot
 char	\uFB2B	156	# hebrew letter shin with sin dot
 char	\uFB31	12	# hebrew letter bet with dagesh
-char	\uFB35	346	# hebrew letter vav with dagesh
-char	\uFB3A	13	# hebrew letter final kaf with dagesh
-char	\uFB3B	13	# hebrew letter kaf with dagesh
-char	\uFB43	1234	# hebrew letter final pe with dagesh
-char	\uFB44	1234	# hebrew letter pe with dagesh
-char	\uFB4A	1256	# hebrew letter tav with dagesh
+glyph	\uFB35	346	# hebrew letter vav with dagesh
+glyph	\uFB3A	13	# hebrew letter final kaf with dagesh
+glyph	\uFB3B	13	# hebrew letter kaf with dagesh
+glyph	\uFB43	1234	# hebrew letter final pe with dagesh
+glyph	\uFB44	1234	# hebrew letter pe with dagesh
+glyph	\uFB4A	1256	# hebrew letter tav with dagesh
 
 # Russian uppercase letters
 glyph	\u0410	17	# cyrillic capital letter a
