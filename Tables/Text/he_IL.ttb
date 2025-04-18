@@ -124,7 +124,7 @@ glyph	\u05B8	126	# hebrew point qamats
 glyph	\u05B9	135	# hebrew point holam
 glyph	\u05BA	135	# hebrew point holam haser for vav
 glyph	\u05BB	346	# hebrew point qubuts
-char	\u05BC	5	# hebrew point dagesh or mapiq
+glyph	\u05BC	5	# hebrew point dagesh or mapiq
 char	\u05C1	2348	# hebrew point shin dot
 glyph	\u05C2	1568	# hebrew point sin dot
 glyph	\u05C7	126	# hebrew point qamats qatan
