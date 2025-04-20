@@ -386,10 +386,10 @@ glyph	\u0651	6	# arabic shadda
 glyph	\u0652	25	# arabic sukun
 
 # Arabic additional forms
-glyph	\u067E	12	# arabic letter peh
-glyph	\u0686	245	# arabic letter tcheh
+glyph	\u067E	1234	# arabic letter peh
+glyph	\u0686	14	# arabic letter tcheh
 glyph	\u0698	1356	# arabic letter jeh
-glyph	\u06A4	124	# arabic letter veh
-glyph	\u06AF	13	# arabic letter gaf
+glyph	\u06A4	1236	# arabic letter veh
+glyph	\u06AF	1245	# arabic letter gaf
 
 include common.tti
