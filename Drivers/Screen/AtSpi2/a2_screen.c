@@ -71,6 +71,7 @@
 #include "async_io.h"
 #include "async_alarm.h"
 #include "async_event.h"
+#include "unicode.h"
 
 typedef enum {
   PARM_RELEASE,
@@ -98,7 +99,8 @@ static ScreenContentQuality curQuality;
 static long curNumRows, curNumCols;
 static wchar_t **curRows;
 static long *curRowLengths;
-static long curCaret,curPosX,curPosY;
+static long curCaret; /* In unicode codepoints */
+static long curPosX,curPosY; /* In screen offset */
 
 static DBusConnection *bus = NULL;
 
@@ -371,9 +373,9 @@ send_with_reply_and_block(DBusConnection *bus, DBusMessage *msg, int timeout_ms,
   return reply;
 }
 
-static void findPosition(long position, long *px, long *py) {
-  long offset=0, newoffset, x, y;
-  /* XXX: I don't know what they do with necessary combining accents */
+/* px, py are counting unicode codepoints, psx is counting screen coordinate */
+static void findPosition(long position, long *px, long *py, long *psx) {
+  long offset=0, newoffset, x, y, sx;
   for (y=0; y<curNumRows; y++) {
     if ((newoffset = offset + curRowLengths[y]) > position)
       break;
@@ -392,29 +394,62 @@ static void findPosition(long position, long *px, long *py) {
     }
   } else
     x = position-offset;
-  *px = x;
+
+  /* Process text of the line until the wanted position */
+  for (offset=0, sx=0; offset<x && offset<curRowLengths[y]; offset++) {
+    wchar_t wc = curRows[y][offset];
+
+    if (wc == '\n') continue; /* EOL, ignore */
+
+    if (wc == '\t') {
+      /* Switch to next tab */
+      sx = (sx+1+7)&~7;
+      continue;
+    }
+
+    if (getCharacterWidth(wc) != 0) sx++;
+  }
+
+  if (px) *px = x;
   *py = y;
+  if (psx) *psx = sx;
 }
 
+/* Convert from screen coordinates to unicode codepoints offset */
 static long findCoordinates(long xx, long yy) {
-  long offset=0, y;
-  /* XXX: I don't know what they do with necessary combining accents */
+  long offset=0, x, y, sx;
   if (yy >= curNumRows) {
     return -1;
   }
   for (y=0; y<yy; y++) {
     offset += curRowLengths[y];
   }
-  if (xx >= curRowLengths[y])
-    xx = curRowLengths[y]-1;
-  return offset + xx;
+
+  /* Process text of the line until the wanted position */
+  for (x=0, sx=0; sx<xx && x<curRowLengths[y]; x++) {
+    wchar_t wc = curRows[y][x];
+
+    if (wc == '\n') continue; /* EOL, ignore */
+
+    if (wc == '\t') {
+      /* Switch to next tab */
+      sx = (sx+1+7)&~7;
+      continue;
+    }
+
+    if (getCharacterWidth(wc) != 0) sx++;
+  }
+
+  if (x >= curRowLengths[y])
+    x = curRowLengths[y]-1;
+  return offset+x;
 }
 
 static void caretPosition(long caret) {
   if (caret < 0) {
     caret = 0;
   }
-  findPosition(caret,&curPosX,&curPosY);
+  findPosition(caret,NULL,&curPosY,&curPosX);
   curCaret = caret;
 }
 
@@ -1018,7 +1053,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     if (toDelete <= 0) {
       return;
     }
-    findPosition(detail1,&x,&y);
+    findPosition(detail1,&x,&y,NULL);
     if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_STRING) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
@@ -1078,7 +1113,7 @@ static void AtSpi2HandleEvent(const char *interface, DBusMessage *message)
     if (!curSender || strcmp(sender, curSender) || strcmp(path, curPath)) return;
     logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                "insert %d from %d",detail2,detail1);
-    findPosition(detail1,&x,&y);
+    findPosition(detail1,&x,&y,NULL);
     if (dbus_message_iter_get_arg_type(&iter_variant) != DBUS_TYPE_STRING) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "ergl, not string but '%c'", dbus_message_iter_get_arg_type(&iter_variant));
@@ -1652,11 +1687,34 @@ readCharacters_AtSpi2Screen (const ScreenBox *box, ScreenCharacter *buffer) {
   if (!validateScreenBox(box, cols, curNumRows)) return 0;
 
   for (unsigned int y=0; y<box->height; y+=1) {
-    if (curRowLengths[box->top+y]) {
-      for (unsigned int x=0; x<box->width; x+=1) {
-        if (box->left+x < curRowLengths[box->top+y] - (curRows[box->top+y][curRowLengths[box->top+y]-1]==WC_C('\n'))) {
-          buffer[y*box->width+x].text = curRows[box->top+y][box->left+x];
+    unsigned length = curRowLengths[box->top+y];
+    unsigned offset; /* Position in unicode codepoints */
+    unsigned sx; /* Position in screen offset */
+    unsigned right = box->left+box->width;
+
+    if (length && curRows[box->top+y][length-1] == WC_C('\n'))
+        /* Do not show trailing \n */
+        length--;
+
+    /* Process text of the line while peeking characters */
+    for (offset=0, sx=0; offset < length && sx<right; offset+=1) {
+      wchar_t wc = curRows[box->top+y][offset];
+
+      if (wc == '\t') {
+        /* Complete with spaces up to next tab */
+        unsigned nexttab = (sx+1+7)&~7;
+        for ( ; sx<nexttab; sx+=1) {
+          if (sx >= box->left && sx<right)
+            buffer[y*box->width+sx-box->left].text = WC_C(' ');
         }
+        continue;
+      }
+
+      /* XXX: Ignoring combining characters */
+      if (getCharacterWidth(wc) != 0) {
+        if (sx >= box->left && sx<right)
+          buffer[y*box->width+sx-box->left].text = wc;
+        sx+=1;
       }
     }
   }
