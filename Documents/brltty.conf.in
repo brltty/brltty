@@ -739,7 +739,7 @@
 
 # AtSpi2 Screen Driver Parameters
 #screen-parameters a2:Release=yes # [yes,no]
-#screen-parameters a2:Type=default # [default,all,{terminal,text}+...]
+#screen-parameters a2:type=default # [default,all,{terminal,text}+...]
 
 # File Viewer Screen Driver Parameters
 #screen-parameters fv:File=path #
