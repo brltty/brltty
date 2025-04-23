@@ -384,12 +384,17 @@ glyph	\u064F	136	# arabic damma
 glyph	\u0650	15	# arabic kasra
 glyph	\u0651	6	# arabic shadda
 glyph	\u0652	25	# arabic sukun
-
-# Arabic additional forms
 glyph	\u067E	1234	# arabic letter peh
 glyph	\u0686	14	# arabic letter tcheh
-glyph	\u0698	1356	# arabic letter jeh
-glyph	\u06A4	1236	# arabic letter veh
+glyph	\u0698	13568	# arabic letter jeh
+glyph	\u06A4	12368	# arabic letter veh
 glyph	\u06AF	1245	# arabic letter gaf
+glyph	\uFEFC	1236	# arabic ligature lam with alef final form
+
+# Arabic punctuation
+glyph	\u060C	57	# arabic comma
+glyph	\u061B	567	# arabic semicolon
+glyph	\u061F	236	# arabic question mark
+glyph	\u06D4	256	# arabic full stop
 
 include common.tti
