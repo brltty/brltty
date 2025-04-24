@@ -127,11 +127,16 @@ static void brl_destruct(BrailleDisplay *brl)
 
 static int
 setClientPriority (BrailleDisplay *brl) {
-  unsigned char worst = ARRAY_COUNT(qualityPriorities) - 1;
-  unsigned char quality = MIN(brl->quality, worst);
+  unsigned char best = ARRAY_COUNT(qualityPriorities) - 1;
+  unsigned char quality = MIN(brl->quality, best);
   brlapi_param_clientPriority_t priority = qualityPriorities[quality];
 
   if (priority != currentPriority) {
+    logMessage(LOG_CATEGORY(BRAILLE_DRIVER),
+      "changing client priority: %u",
+      priority
+    );
+
     int result = brlapi_setParameter(
       BRLAPI_PARAM_CLIENT_PRIORITY, 0,
       BRLAPI_PARAMF_LOCAL, &priority, sizeof(priority)
