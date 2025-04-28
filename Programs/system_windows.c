@@ -184,9 +184,17 @@ setLocale (void) {
     }
   }
 
-  char *locale = getWindowsLocaleName();
-  setMessagesLocale(locale);
-  if (locale) free(locale);
+#if defined(__MINGW32__)
+  {
+    char *locale = getWindowsLocaleName();
+
+    if (locale) {
+      setMessagesLocale(locale);
+      free(locale);
+      return NULL;
+    }
+  }
+#endif /* defined(__MINGW32__) */
 }
 
 void
