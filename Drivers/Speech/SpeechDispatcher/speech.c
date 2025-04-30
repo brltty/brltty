@@ -37,6 +37,7 @@ typedef enum {
 #include <libspeechd.h>
 
 static SPDConnection *connectionHandle = NULL;
+static int autospawn = 1;
 static const char *moduleName;
 static const char *languageName;
 static SPDVoiceType voiceType;
@@ -157,8 +158,10 @@ cancelSpeech (const void *data) {
 static int
 openConnection (void) {
   if (!connectionHandle) {
-    if (!(connectionHandle = spd_open("brltty", "main", NULL, SPD_MODE_THREADED))) {
-      logMessage(LOG_ERR, "speech dispatcher open failure");
+    char **error_message;
+    if (!(connectionHandle = spd_open2("brltty", "main", NULL, SPD_MODE_THREADED, NULL, autospawn, error_message))) {
+      logMessage(LOG_ERR, "speech dispatcher open failure: %s",*error_message);
+      free(*error_message);
       return 0;
     }
 
