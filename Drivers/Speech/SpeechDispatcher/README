@@ -18,7 +18,6 @@ search paths for their internal dependencies.
 This driver recognizes the following parameters:
 
    Parameter Settings
-   port      1-65535
    module    name (flite, festival, epos-generic, dtk-generic, ...)
    language  two-letter language code
    voice     type (male1, female1, male2, female2, male3, female3,

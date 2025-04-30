@@ -25,13 +25,12 @@
 #include "parse.h"
 
 typedef enum {
-  PARM_PORT,
   PARM_MODULE,
   PARM_LANGUAGE,
   PARM_VOICE,
   PARM_NAME
 } DriverParameter;
-#define SPKPARMS "port", "module", "language", "voice", "name"
+#define SPKPARMS "module", "language", "voice", "name"
 
 #include "spk_driver.h"
 
@@ -191,20 +190,6 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
   spk->setPunctuation = spk_setPunctuation;
 
   clearSettings();
-
-  if (parameters[PARM_PORT] && *parameters[PARM_PORT]) {
-    static const int minimumPort = 0X1;
-    static const int maximumPort = 0XFFFF;
-    int port = 0;
-
-    if (validateInteger(&port, parameters[PARM_PORT], &minimumPort, &maximumPort)) {
-      char number[0X10];
-      snprintf(number, sizeof(number), "%d", port);
-      setenv("SPEECHD_PORT", number, 1);
-    } else {
-      logMessage(LOG_WARNING, "%s: %s", "invalid port number", parameters[PARM_PORT]);
-    }
-  }
 
   if (parameters[PARM_MODULE] && *parameters[PARM_MODULE]) {
     moduleName = parameters[PARM_MODULE];
