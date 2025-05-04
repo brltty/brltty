@@ -25,19 +25,20 @@
 #include "parse.h"
 
 typedef enum {
+  PARM_AUTOSPAWN,
   PARM_MODULE,
   PARM_LANGUAGE,
   PARM_VOICE,
   PARM_NAME
 } DriverParameter;
-#define SPKPARMS "module", "language", "voice", "name"
+#define SPKPARMS "autospawn", "module", "language", "voice", "name"
 
 #include "spk_driver.h"
 
 #include <libspeechd.h>
 
 static SPDConnection *connectionHandle = NULL;
-static int autospawn = 1;
+static unsigned int autospawn;
 static const char *moduleName;
 static const char *languageName;
 static SPDVoiceType voiceType;
@@ -49,6 +50,7 @@ static SPDPunctuation punctuationLevel;
 
 static void
 clearSettings (void) {
+  autospawn = 1;
   moduleName = NULL;
   languageName = NULL;
   voiceType = -1;
@@ -158,7 +160,7 @@ cancelSpeech (const void *data) {
 static int
 openConnection (void) {
   if (!connectionHandle) {
-    char **error_message;
+    char **error_message = NULL;
     if (!(connectionHandle = spd_open2("brltty", "main", NULL, SPD_MODE_THREADED, NULL, autospawn, error_message))) {
       logMessage(LOG_ERR, "speech dispatcher open failure: %s",*error_message);
       free(*error_message);
@@ -193,6 +195,14 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
   spk->setPunctuation = spk_setPunctuation;
 
   clearSettings();
+
+  if (parameters[PARM_AUTOSPAWN] && *parameters[PARM_AUTOSPAWN]) {
+    if (!validateYesNo(&autospawn, parameters[PARM_AUTOSPAWN])) {
+      logMessage(LOG_WARNING, "%s: %s",
+        "invalid value for the autospawn parameter",
+        parameters[PARM_AUTOSPAWN]);
+    }
+  }
 
   if (parameters[PARM_MODULE] && *parameters[PARM_MODULE]) {
     moduleName = parameters[PARM_MODULE];
