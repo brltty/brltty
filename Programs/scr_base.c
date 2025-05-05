@@ -149,12 +149,18 @@ refresh_BaseScreen (void) {
 
 static void
 describe_BaseScreen (ScreenDescription *description) {
-  description->quality = SCQ_NONE;
+  description->number = currentVirtualTerminal_BaseScreen();
+  description->unreadable = NULL;
+  description->quality = SCQ_GOOD;
+
   description->rows = 1;
   description->cols = strlen(text_BaseScreen);
+
   description->posx = 0;
   description->posy = 0;
-  description->number = currentVirtualTerminal_BaseScreen();
+
+  description->hasCursor = 1;
+  description->hasSelection = 0;
 }
 
 static int
@@ -244,16 +250,6 @@ initializeBaseScreen (BaseScreen *base) {
 
 void
 describeBaseScreen (BaseScreen *base, ScreenDescription *description) {
-  description->unreadable = NULL;
-  description->quality = SCQ_GOOD;
-
-  description->number = 0;
-  description->cols = description->rows = 1;
-  description->posx = description->posy = 0;
-
-  description->hasCursor = 1;
-  description->hasSelection = 0;
-
   base->describe(description);
 
   if (description->unreadable) {

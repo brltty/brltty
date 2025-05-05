@@ -1099,7 +1099,7 @@ doUpdate (void) {
     logMessage(LOG_CATEGORY(UPDATE_EVENTS), "screen unreadable: %s", scr.unreadable);
   } else {
     logMessage(LOG_CATEGORY(UPDATE_EVENTS),
-      "screen: #%d %dx%d [%d,%d] quality:%u",
+      "screen: #%d %dx%d [%d,%d] scq:%u",
       scr.number, scr.cols, scr.rows, scr.posx, scr.posy, scr.quality
     );
   }

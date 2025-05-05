@@ -81,16 +81,14 @@ describe_NoScreen (ScreenDescription *description) {
     screenMessage = message;
   }
 
-  if (screenMessage)
-    description->quality = SCQ_LOW;
-  else
-    description->quality = SCQ_NONE;
+  description->number = currentVirtualTerminal_NoScreen();
+  description->quality = screenMessage? SCQ_LOW: SCQ_NONE;
 
   description->rows = 1;
   description->cols = strlen(screenMessage);
+
   description->posx = 0;
   description->posy = 0;
-  description->number = currentVirtualTerminal_NoScreen();
 }
 
 static int
