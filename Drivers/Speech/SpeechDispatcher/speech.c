@@ -25,13 +25,14 @@
 #include "parse.h"
 
 typedef enum {
+  PARM_ADDRESS,
   PARM_AUTOSPAWN,
   PARM_MODULE,
   PARM_LANGUAGE,
   PARM_VOICE,
   PARM_NAME
 } DriverParameter;
-#define SPKPARMS "autospawn", "module", "language", "voice", "name"
+#define SPKPARMS "address", "autospawn", "module", "language", "voice", "name"
 
 #include "spk_driver.h"
 
@@ -195,6 +196,10 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
   spk->setPunctuation = spk_setPunctuation;
 
   clearSettings();
+
+  if (parameters[PARM_ADDRESS] && *parameters[PARM_ADDRESS]) {
+    setenv("SPEECHD_ADDRESS", parameters[PARM_ADDRESS], 0);
+  }
 
   if (parameters[PARM_AUTOSPAWN] && *parameters[PARM_AUTOSPAWN]) {
     if (!validateYesNo(&autospawn, parameters[PARM_AUTOSPAWN])) {

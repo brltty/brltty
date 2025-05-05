@@ -429,6 +429,7 @@
 #speech-parameters mp:Pitch=0 # [-10-10]
 
 # SpeechDispatcher Speech Driver Parameters
+#speech-parameters sd:Address= # [address of speech-dispatcher's server]
 #speech-parameters sd:Autospawn= # [yes,no]
 #speech-parameters sd:Language= # [two-letter language code]
 #speech-parameters sd:Module= # [flite,festival,epos-generic,dtk-generic,...]
