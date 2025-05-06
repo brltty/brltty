@@ -61,7 +61,7 @@ stopFreezeReminderAlarm (void) {
 
 static int
 construct_FrozenScreen (BaseScreen *source) {
-  describeBaseScreen(source, &screenDescription);
+  getScreenDescription(&screenDescription, source);
 
   if ((screenCharacters = calloc(screenDescription.rows*screenDescription.cols, sizeof(*screenCharacters)))) {
     const ScreenBox box = {
