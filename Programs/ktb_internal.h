@@ -162,6 +162,7 @@ struct KeyTableStruct {
 
   struct {
     int command;
+    unsigned char force:1;
   } release;
 
   struct {

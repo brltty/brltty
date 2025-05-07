@@ -684,6 +684,7 @@ processKeyEvent (
 
         resetLongPressData(table);
         table->release.command = BRL_CMD_NOOP;
+        table->release.force = 0;
 
         if (binding) {
           addCommandArguments(table, &command, binding->primaryCommand.entry, binding);
@@ -692,35 +693,35 @@ processKeyEvent (
           addCommandArguments(table, &secondaryCommand, binding->secondaryCommand.entry, binding);
         }
 
-        if (context == KTB_CTX_WAITING) {
-          table->release.command = BRL_CMD_NOOP;
-        } else {
-          if (secondaryCommand == BRL_CMD_NOOP) {
-            if (isRepeatableCommand(command)) {
-              secondaryCommand = command;
-            }
-          }
-
-          if (isImmediate) {
-            table->release.command = BRL_CMD_NOOP;
-          } else {
-            table->release.command = command;
-            command = BRL_CMD_NOOP;
-          }
-
-          if (secondaryCommand != BRL_CMD_NOOP) {
-            table->longPress.command = secondaryCommand;
-            table->longPress.repeat = isRepeatableCommand(secondaryCommand);
-
-            table->longPress.keyAction = "long";
-            table->longPress.keyContext = context;
-            table->longPress.keyValue = keyValue;
-
-            setLongPressAlarm(table, prefs.longPressTime);
+        if (secondaryCommand == BRL_CMD_NOOP) {
+          if (isRepeatableCommand(command)) {
+            secondaryCommand = command;
           }
         }
 
-        processCommand(table, command);
+        if (isImmediate) {
+          table->release.command = BRL_CMD_NOOP;
+        } else {
+          table->release.command = command;
+          command = BRL_CMD_NOOP;
+        }
+
+        if (secondaryCommand != BRL_CMD_NOOP) {
+          table->longPress.command = secondaryCommand;
+          table->longPress.repeat = isRepeatableCommand(secondaryCommand);
+
+          table->longPress.keyAction = "long";
+          table->longPress.keyContext = context;
+          table->longPress.keyValue = keyValue;
+
+          setLongPressAlarm(table, prefs.longPressTime);
+        }
+
+        if (command != BRL_CMD_NOOP) {
+          processCommand(table, command);
+        } else if (context == KTB_CTX_WAITING) {
+          table->release.force = 1;
+        }
       }
     } else {
       resetLongPressData(table);
@@ -728,9 +729,10 @@ processKeyEvent (
       if (prefs.onFirstRelease || (table->pressedKeys.count == 0)) {
         int *cmd = &table->release.command;
 
-        if (*cmd != BRL_CMD_NOOP) {
+        if ((*cmd != BRL_CMD_NOOP) || table->release.force) {
           processCommand(table, (command = *cmd));
           *cmd = BRL_CMD_NOOP;
+          table->release.force = 0;
         }
       }
     }
