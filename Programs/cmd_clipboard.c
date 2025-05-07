@@ -595,20 +595,20 @@ handleClipboardCommands (int command, void *data) {
 
       switch (command & BRL_MSK_BLK) {
         {
-          int clear;
+          int append;
           int column, row;
 
         case BRL_CMD_BLK(CLIP_NEW):
-          clear = 1;
+          append = 0;
           goto doClipBegin;
 
         case BRL_CMD_BLK(CLIP_ADD):
-          clear = 0;
+          append = 1;
           goto doClipBegin;
 
         doClipBegin:
           if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
-            if (clear) clearClipboardContent(ccd->clipboard);
+            if (!append) clearClipboardContent(ccd->clipboard);
             cpbBeginOperation(ccd, column, row);
           } else {
             alert(ALERT_COMMAND_REJECTED);
@@ -640,17 +640,17 @@ handleClipboardCommands (int command, void *data) {
         }
 
         {
-          int clear;
+          int append;
 
         case BRL_CMD_BLK(CLIP_COPY):
-          clear = 1;
-          goto doCopy;
+          append = 0;
+          goto doClipCopy;
 
         case BRL_CMD_BLK(CLIP_APPEND):
-          clear = 0;
-          goto doCopy;
+          append = 1;
+          goto doClipCopy;
 
-        doCopy:
+        doClipCopy:
           if (ext > arg) {
             int column1, row1;
 
@@ -658,7 +658,7 @@ handleClipboardCommands (int command, void *data) {
               int column2, row2;
 
               if (getCharacterCoordinates(ext, &row2, NULL, &column2, 1)) {
-                if (clear) clearClipboardContent(ccd->clipboard);
+                if (!append) clearClipboardContent(ccd->clipboard);
                 cpbBeginOperation(ccd, column1, row1);
                 if (cpbLinearCopy(ccd, column2, row2)) break;
               }
