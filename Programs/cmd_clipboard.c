@@ -133,6 +133,9 @@ cpbBeginOperation (ClipboardCommandData *ccd, int column, int row) {
 
 static int
 cpbRectangularCopy (ClipboardCommandData *ccd, int column, int row) {
+  if (row < ccd->begin.row) return 0;
+  if (column < ccd->begin.column) return 0;
+
   int copied = 0;
   size_t length;
   wchar_t *buffer = cpbReadScreen(ccd, &length, ccd->begin.column, ccd->begin.row, column, row);
@@ -180,6 +183,9 @@ cpbRectangularCopy (ClipboardCommandData *ccd, int column, int row) {
 
 static int
 cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
+  if (row < ccd->begin.row) return 0;
+  if ((row == ccd->begin.row) && (column < ccd->begin.column)) return 0;
+
   int copied = 0;
   ScreenDescription screen;
   describeScreen(&screen);
@@ -610,19 +616,21 @@ handleClipboardCommands (int command, void *data) {
           if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
             if (!append) clearClipboardContent(ccd->clipboard);
             cpbBeginOperation(ccd, column, row);
-          } else {
-            alert(ALERT_COMMAND_REJECTED);
+            break;
           }
 
+          alert(ALERT_COMMAND_REJECTED);
           break;
         }
 
         case BRL_CMD_BLK(COPY_RECT): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &row, NULL, &column, 1))
-            if (cpbRectangularCopy(ccd, column, row))
+          if (getCharacterCoordinates(arg, &row, NULL, &column, 1)) {
+            if (cpbRectangularCopy(ccd, column, row)) {
               break;
+            }
+          }
 
           alert(ALERT_COMMAND_REJECTED);
           break;
@@ -631,9 +639,11 @@ handleClipboardCommands (int command, void *data) {
         case BRL_CMD_BLK(COPY_LINE): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &row, NULL, &column, 1))
-            if (cpbLinearCopy(ccd, column, row))
+          if (getCharacterCoordinates(arg, &row, NULL, &column, 1)) {
+            if (cpbLinearCopy(ccd, column, row)) {
               break;
+            }
+          }
 
           alert(ALERT_COMMAND_REJECTED);
           break;
