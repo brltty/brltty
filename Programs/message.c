@@ -133,7 +133,7 @@ handleMessageCommands (int command, void *data) {
         mgd->segments.current -= 1;
         mgd->endWait = 1;
       } else {
-        alert(ALERT_COMMAND_REJECTED);
+        alert(ALERT_BOUNCE);
       }
 
       mgd->hold = 1;
