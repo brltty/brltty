@@ -487,6 +487,8 @@ ASYNC_ALARM_CALLBACK(handleLongPressAlarm) {
   }
 
   table->release.command = BRL_CMD_NOOP;
+  table->release.force = 0;
+
   processCommand(table, command);
 }
 
