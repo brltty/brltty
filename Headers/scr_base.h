@@ -62,7 +62,7 @@ typedef struct {
 } BaseScreen;
 
 extern void initializeBaseScreen (BaseScreen *);
-extern void getScreenDescription (ScreenDescription *, BaseScreen *);
+extern void describeScreenObject (ScreenDescription *description, BaseScreen *screen);
 
 extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
 extern void setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message);

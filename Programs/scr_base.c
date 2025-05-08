@@ -243,7 +243,7 @@ initializeBaseScreen (BaseScreen *base) {
 }
 
 void
-getScreenDescription (ScreenDescription *description, BaseScreen *base) {
+describeScreenObject (ScreenDescription *description, BaseScreen *screen) {
   description->number = 0;
   description->hasCursor = 1;
   description->hasSelection = 0;
@@ -254,7 +254,7 @@ getScreenDescription (ScreenDescription *description, BaseScreen *base) {
   description->cols = description->rows = 1;
   description->posx = description->posy = 0;
 
-  base->describe(description);
+  screen->describe(description);
 
   if (description->unreadable) {
     description->hasCursor = 0;
