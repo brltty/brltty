@@ -91,6 +91,7 @@ cpbEndOperation (
   ClipboardCommandData *ccd, int insertCR,
   const wchar_t *characters, size_t length
 ) {
+  lockMainClipboard();
   int updated = 0;
 
   if (ccd->begin.append) {
@@ -122,15 +123,16 @@ cpbEndOperation (
     return 0;
   }
 
-  int added = appendClipboardContent(ccd->clipboard, characters, length);
+  int copied = appendClipboardContent(ccd->clipboard, characters, length);
+  unlockMainClipboard();
 
-  if (added) {
+  if (copied) {
     updated = 1;
     alert(ALERT_CLIPBOARD_END);
   }
 
   if (updated) onMainClipboardUpdated();
-  return added;
+  return copied;
 }
 
 static void
@@ -184,10 +186,7 @@ cpbRectangularCopy (ClipboardCommandData *ccd, int column, int row) {
       length = to - buffer;
     }
 
-    lockMainClipboard();
     if (cpbEndOperation(ccd, 1, buffer, length)) copied = 1;
-    unlockMainClipboard();
-
     free(buffer);
   }
 
@@ -272,10 +271,7 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
         length = to - buffer;
       }
 
-      lockMainClipboard();
       if (cpbEndOperation(ccd, 0, buffer, length)) copied = 1;
-      unlockMainClipboard();
-
       free(buffer);
     }
   }
