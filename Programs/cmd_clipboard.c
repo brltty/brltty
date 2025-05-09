@@ -44,7 +44,7 @@ typedef struct {
   struct {
     int column;
     int row;
-    int offset;
+    int append;
   } begin;
 } ClipboardCommandData;
 
@@ -54,20 +54,16 @@ cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fr
   int columns = toColumn - fromColumn + 1;
   int rows = toRow - fromRow + 1;
 
-  if ((columns >= 1) && (rows >= 1) && (ccd->begin.offset >= 0)) {
+  if ((columns >= 1) && (rows >= 1)) {
     wchar_t fromBuffer[rows * columns];
 
     if (readScreenText(fromColumn, fromRow, columns, rows, fromBuffer)) {
       wchar_t toBuffer[rows * (columns + 1)];
       wchar_t *toAddress = toBuffer;
-
       const wchar_t *fromAddress = fromBuffer;
-      int row;
 
-      for (row=fromRow; row<=toRow; row+=1) {
-        int column;
-
-        for (column=fromColumn; column<=toColumn; column+=1) {
+      for (int row=fromRow; row<=toRow; row+=1) {
+        for (int column=fromColumn; column<=toColumn; column+=1) {
           wchar_t character = *fromAddress++;
           if (iswcntrl(character) || iswspace(character)) character = WC_C(' ');
           *toAddress++ = character;
@@ -91,43 +87,57 @@ cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fr
 }
 
 static int
-cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length,
-                 int insertCR) {
-  lockMainClipboard();
-    if (insertCR && ccd->begin.offset >= 1) {
+cpbEndOperation (
+  ClipboardCommandData *ccd, int insertCR,
+  const wchar_t *characters, size_t length
+) {
+  int updated = 0;
+
+  if (ccd->begin.append) {
+    if (insertCR) {
       size_t length;
-      const wchar_t *characters = getClipboardContent(ccd->clipboard, &length);
-      if (length > ccd->begin.offset) length = ccd->begin.offset;
+      const wchar_t *content = getClipboardContent(ccd->clipboard, &length);
+
       while (length > 0) {
         size_t last = length - 1;
-        if (characters[last] == WC_C('\r')) insertCR = 0;
-        if (characters[last] != WC_C(' ')) break;
+        wchar_t character = content[last];
+
+        if (character == WC_C('\r')) insertCR = 0;
+        if (character != WC_C(' ')) break;
+
         length = last;
       }
-      ccd->begin.offset = length;
+
+      if (length > 0) {;
+        if (!appendClipboardContent(ccd->clipboard, &(wchar_t){WC_C('\r')}, 1)) {
+          return 0;
+        }
+
+        updated = 1;
+      }
     }
-    if (ccd->begin.offset <= 0) insertCR = 0;
+  } else if (clearClipboardContent(ccd->clipboard)) {
+    updated = 1;
+  } else {
+    return 0;
+  }
 
-    int truncated = truncateClipboardContent(ccd->clipboard, ccd->begin.offset);
-    if (insertCR) appendClipboardContent(ccd->clipboard, &(wchar_t){WC_C('\r')}, 1);
-    int appended = appendClipboardContent(ccd->clipboard, characters, length);
-  unlockMainClipboard();
+  int added = appendClipboardContent(ccd->clipboard, characters, length);
 
-  if (truncated || appended) onMainClipboardUpdated();
-  if (!appended) return 0;
-  alert(ALERT_CLIPBOARD_END);
-  return 1;
+  if (added) {
+    updated = 1;
+    alert(ALERT_CLIPBOARD_END);
+  }
+
+  if (updated) onMainClipboardUpdated();
+  return added;
 }
 
 static void
-cpbBeginOperation (ClipboardCommandData *ccd, int column, int row) {
+cpbBeginOperation (ClipboardCommandData *ccd, int column, int row, int append) {
   ccd->begin.column = column;
   ccd->begin.row = row;
-
-  lockMainClipboard();
-    ccd->begin.offset = getClipboardContentLength(ccd->clipboard);
-  unlockMainClipboard();
-
+  ccd->begin.append = append;
   alert(ALERT_CLIPBOARD_BEGIN);
 }
 
@@ -174,7 +184,10 @@ cpbRectangularCopy (ClipboardCommandData *ccd, int column, int row) {
       length = to - buffer;
     }
 
-    if (cpbEndOperation(ccd, buffer, length, 1)) copied = 1;
+    lockMainClipboard();
+    if (cpbEndOperation(ccd, 1, buffer, length)) copied = 1;
+    unlockMainClipboard();
+
     free(buffer);
   }
 
@@ -259,7 +272,10 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
         length = to - buffer;
       }
 
-      if (cpbEndOperation(ccd, buffer, length, 0)) copied = 1;
+      lockMainClipboard();
+      if (cpbEndOperation(ccd, 0, buffer, length)) copied = 1;
+      unlockMainClipboard();
+
       free(buffer);
     }
   }
@@ -614,8 +630,7 @@ handleClipboardCommands (int command, void *data) {
 
         doClipBegin:
           if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
-            if (!append) clearClipboardContent(ccd->clipboard);
-            cpbBeginOperation(ccd, column, row);
+            cpbBeginOperation(ccd, column, row, append);
             break;
           }
 
@@ -668,8 +683,7 @@ handleClipboardCommands (int command, void *data) {
               int column2, row2;
 
               if (getCharacterCoordinates(arg2, &row2, NULL, &column2, 1)) {
-                if (!append) clearClipboardContent(ccd->clipboard);
-                cpbBeginOperation(ccd, column1, row1);
+                cpbBeginOperation(ccd, column1, row1, append);
                 if (cpbLinearCopy(ccd, column2, row2)) break;
               }
             }
@@ -722,7 +736,7 @@ addClipboardCommands (void) {
 
     ccd->begin.column = 0;
     ccd->begin.row = 0;
-    ccd->begin.offset = -1;
+    ccd->begin.append = 0;
 
     if (pushCommandHandler("clipboard", KTB_CTX_DEFAULT,
                            handleClipboardCommands, destroyClipboardCommandData, ccd)) {
