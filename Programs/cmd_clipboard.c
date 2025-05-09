@@ -596,8 +596,8 @@ handleClipboardCommands (int command, void *data) {
     }
 
     default: {
-      int arg = command & BRL_MSK_ARG;
-      int ext = BRL_CODE_GET(EXT, command);
+      int arg1 = BRL_CODE_GET(ARG, command);
+      int arg2 = BRL_CODE_GET(EXT, command);
 
       switch (command & BRL_MSK_BLK) {
         {
@@ -613,7 +613,7 @@ handleClipboardCommands (int command, void *data) {
           goto doClipBegin;
 
         doClipBegin:
-          if (getCharacterCoordinates(arg, &row, &column, NULL, 0)) {
+          if (getCharacterCoordinates(arg1, &row, &column, NULL, 0)) {
             if (!append) clearClipboardContent(ccd->clipboard);
             cpbBeginOperation(ccd, column, row);
             break;
@@ -626,7 +626,7 @@ handleClipboardCommands (int command, void *data) {
         case BRL_CMD_BLK(COPY_RECT): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &row, NULL, &column, 1)) {
+          if (getCharacterCoordinates(arg1, &row, NULL, &column, 1)) {
             if (cpbRectangularCopy(ccd, column, row)) {
               break;
             }
@@ -639,7 +639,7 @@ handleClipboardCommands (int command, void *data) {
         case BRL_CMD_BLK(COPY_LINE): {
           int column, row;
 
-          if (getCharacterCoordinates(arg, &row, NULL, &column, 1)) {
+          if (getCharacterCoordinates(arg1, &row, NULL, &column, 1)) {
             if (cpbLinearCopy(ccd, column, row)) {
               break;
             }
@@ -661,13 +661,13 @@ handleClipboardCommands (int command, void *data) {
           goto doClipCopy;
 
         doClipCopy:
-          if (ext > arg) {
+          if (arg2 > arg1) {
             int column1, row1;
 
-            if (getCharacterCoordinates(arg, &row1, &column1, NULL, 0)) {
+            if (getCharacterCoordinates(arg1, &row1, &column1, NULL, 0)) {
               int column2, row2;
 
-              if (getCharacterCoordinates(ext, &row2, NULL, &column2, 1)) {
+              if (getCharacterCoordinates(arg2, &row2, NULL, &column2, 1)) {
                 if (!append) clearClipboardContent(ccd->clipboard);
                 cpbBeginOperation(ccd, column1, row1);
                 if (cpbLinearCopy(ccd, column2, row2)) break;
@@ -691,7 +691,7 @@ handleClipboardCommands (int command, void *data) {
           goto doPasteHistory;
 
         doPasteHistory:
-          if (!cpbPaste(ccd, arg, bracketed)) alert(ALERT_COMMAND_REJECTED);
+          if (!cpbPaste(ccd, arg1, bracketed)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
 

@@ -84,7 +84,7 @@ ASYNC_CONDITION_TESTER(testEndMessageWait) {
 }
 
 static const wchar_t *
-toTextCharacter (int arg, int relaxed, MessageData *mgd) {
+toMessageCharacter (int arg, int relaxed, MessageData *mgd) {
   if (arg < 0) return NULL;
   int column = arg % brl.textColumns;
   int row = arg / brl.textColumns;
@@ -174,10 +174,10 @@ handleMessageCommands (int command, void *data) {
           goto doClipCopy;
 
         doClipCopy:
-          const wchar_t *first = toTextCharacter(arg1, 0, mgd);
+          const wchar_t *first = toMessageCharacter(arg1, 0, mgd);
 
           if (first) {
-            const wchar_t *last = toTextCharacter(arg2, 1, mgd);
+            const wchar_t *last = toMessageCharacter(arg2, 1, mgd);
 
             if (last) {
               size_t count = last - first + 1;
@@ -208,7 +208,7 @@ handleMessageCommands (int command, void *data) {
           goto doClipBegin;
 
         doClipBegin:
-          const wchar_t *first = toTextCharacter(arg1, 0, mgd);
+          const wchar_t *first = toMessageCharacter(arg1, 0, mgd);
 
           if (first) {
             alert(ALERT_CLIPBOARD_BEGIN);
@@ -231,7 +231,7 @@ handleMessageCommands (int command, void *data) {
           int append = mgd->clipboard.append;
 
           if (first) {
-            const wchar_t *last = toTextCharacter(arg1, 1, mgd);
+            const wchar_t *last = toMessageCharacter(arg1, 1, mgd);
 
             if (last) {
               if (last > first) {
