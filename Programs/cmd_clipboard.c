@@ -91,8 +91,9 @@ cpbEndOperation (
   ClipboardCommandData *ccd, int insertCR,
   const wchar_t *characters, size_t length
 ) {
+  int copied = 0;
+  int notify = 0;
   lockMainClipboard();
-  int updated = 0;
 
   if (ccd->begin.append) {
     if (insertCR) {
@@ -109,29 +110,29 @@ cpbEndOperation (
         length = last;
       }
 
-      if (length > 0) {;
+      if (length > 0) {
         if (!appendClipboardContent(ccd->clipboard, &(wchar_t){WC_C('\r')}, 1)) {
-          return 0;
+          goto UNLOCK_CLIPBOARD;
         }
 
-        updated = 1;
+        notify = 1;
       }
     }
   } else if (clearClipboardContent(ccd->clipboard)) {
-    updated = 1;
+    notify = 1;
   } else {
-    return 0;
+    goto UNLOCK_CLIPBOARD;
   }
 
-  int copied = appendClipboardContent(ccd->clipboard, characters, length);
+  if (appendClipboardContent(ccd->clipboard, characters, length)) {
+    notify = 1;
+    copied = 1;
+  }
+
+UNLOCK_CLIPBOARD:
   unlockMainClipboard();
-
-  if (copied) {
-    updated = 1;
-    alert(ALERT_CLIPBOARD_END);
-  }
-
-  if (updated) onMainClipboardUpdated();
+  if (copied) alert(ALERT_CLIPBOARD_END);
+  if (notify) onMainClipboardUpdated();
   return copied;
 }
 
