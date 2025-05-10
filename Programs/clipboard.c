@@ -186,9 +186,8 @@ appendClipboardContentUTF8 (ClipboardObject *cpb, const char *text) {
 
 int
 setClipboardContentUTF8 (ClipboardObject *cpb, const char *text) {
-  int truncated = truncateClipboardContent(cpb, 0);
-  int appended = appendClipboardContentUTF8(cpb, text);
-  return truncated || appended;
+  if (!clearClipboardContent(cpb)) return 0;
+  return appendClipboardContentUTF8(cpb, text);
 }
 
 static void
