@@ -120,7 +120,7 @@ getClipboardContentLength (ClipboardObject *cpb) {
 
 int
 truncateClipboardContent (ClipboardObject *cpb, size_t length) {
-  if (length >= cpb->buffer.length) return 0;
+  if (length > cpb->buffer.length) return 0;
   cpb->buffer.length = length;
   return 1;
 }
@@ -131,8 +131,7 @@ clearClipboardContent (ClipboardObject *cpb) {
   const wchar_t *characters = getClipboardContent(cpb, &length);
 
   if (!addClipboardHistory(cpb, characters, length)) return 0;
-  truncateClipboardContent(cpb, 0);
-  return 1;
+  return truncateClipboardContent(cpb, 0);
 }
 
 int
@@ -173,9 +172,8 @@ appendClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t 
 
 int
 setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length) {
-  int truncated = truncateClipboardContent(cpb, 0);
-  int appended = appendClipboardContent(cpb, characters, length);
-  return truncated || appended;
+  if (!clearClipboardContent(cpb)) return 0;
+  return appendClipboardContent(cpb, characters, length);
 }
 
 int

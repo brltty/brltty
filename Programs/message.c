@@ -116,6 +116,7 @@ copyToClipboard (ClipboardObject *clipboard, const wchar_t *characters, size_t c
   }
 
   unlockMainClipboard();
+  if (copied) onMainClipboardUpdated();
   return copied;
 }
 
