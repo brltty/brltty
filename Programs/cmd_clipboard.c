@@ -100,22 +100,37 @@ cpbEndOperation (
       size_t length;
       const wchar_t *content = getClipboardContent(ccd->clipboard, &length);
 
-      while (length > 0) {
-        size_t last = length - 1;
-        wchar_t character = content[last];
+      if (content) {
+        int truncate = 0;
 
-        if (character == WC_C('\r')) insertCR = 0;
-        if (character != WC_C(' ')) break;
+        while (length > 0) {
+          size_t last = length - 1;
+          wchar_t character = content[last];
 
-        length = last;
-      }
+          if (character == WC_C('\r')) insertCR = 0;
+          if (character != WC_C(' ')) break;
 
-      if (length > 0) {
-        if (!appendClipboardContent(ccd->clipboard, &(wchar_t){WC_C('\r')}, 1)) {
-          goto UNLOCK_CLIPBOARD;
+          truncate = 1;
+          length = last;
         }
 
-        notify = 1;
+        if (truncate) {
+          if (!truncateClipboardContent(ccd->clipboard, length)) {
+            goto UNLOCK_CLIPBOARD;
+          }
+
+          notify = 1;
+        }
+
+        if (insertCR) {
+          static const wchar_t cr = WC_C('\r');
+
+          if (!appendClipboardContent(ccd->clipboard, &cr, 1)) {
+            goto UNLOCK_CLIPBOARD;
+          }
+
+          notify = 1;
+        }
       }
     }
   } else if (clearClipboardContent(ccd->clipboard)) {
