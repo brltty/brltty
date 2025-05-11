@@ -58,7 +58,6 @@ typedef struct {
 
 typedef struct {
   const MessageParameters *parameters;
-  const wchar_t *characters;
 
   int timeout;
   unsigned char endWait:1;
@@ -278,22 +277,20 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
   if (canBraille()) {
     MessageData mgd = {
+      .parameters = mgp,
       .hold = 0,
       .touch = 0,
 
       .clipboard = {
         .main = getMainClipboard(),
-        .start = 0,
+        .start = NULL,
         .append = 0,
       },
-
-      .parameters = mgp
     };
 
     const size_t characterCount = countUtf8Characters(mgp->text);
     wchar_t characters[characterCount + 1];
     makeWcharsFromUtf8(mgp->text, characters, ARRAY_COUNT(characters));
-    mgd.characters = characters;
 
     const size_t brailleSize = textCount * brl.textRows;
     wchar_t brailleBuffer[brailleSize];
@@ -323,6 +320,8 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
       mgd.segments.last = segment - 1;
     }
+
+    mgd.clipboard.start = mgd.segments.first->start;
 
     int apiWasLinked = api.isServerLinked();
     if (apiWasLinked) api.unlinkServer();

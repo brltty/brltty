@@ -122,7 +122,7 @@ cpbEndOperation (
           notify = 1;
         }
 
-        if (insertCR) {
+        if (insertCR && (length > 0)) {
           static const wchar_t cr = WC_C('\r');
 
           if (!appendClipboardContent(ccd->clipboard, &cr, 1)) {
