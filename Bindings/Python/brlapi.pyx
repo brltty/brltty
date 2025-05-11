@@ -542,7 +542,9 @@ cdef class Connection:
 
 		* tty : If tty >= 0, application takes control of the specified tty
 			If tty == TTY_DEFAULT, the library first tries to get the tty number from the WINDOWID environment variable (form xterm case), then the CONTROLVT variable, and at last reads /proc/self/stat (on linux)
-		* driver : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected."""
+		* driver : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected.
+
+		If the application does not want to take control of a particular tty, but keep control on all ttys, brlapi_enterTtyModeWithPath should be called instead with path equal to []. This is usually what a screen reader wants to use."""
 		cdef int retval
 		cdef int c_tty
 		cdef char *c_driver

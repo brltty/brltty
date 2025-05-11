@@ -445,6 +445,11 @@ int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int 
  * Once brlapi_enterTtyMode() is called, brlapi_leaveTtyMode() has to be called
  * before calling brlapi_enterTtyMode() again.
  *
+ * If the application does not want to take control of a particular tty, but
+ * keep control on all ttys, brlapi_enterTtyModeWithPath should be called
+ * instead with nttys equal to 0. This is usually what a screen reader wants to
+ * use.
+ *
  * TODO: document which functions work in TTY mode only.
  *
  * \sa brlapi_leaveTtyMode() brlapi_readKey()
