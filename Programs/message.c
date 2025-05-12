@@ -104,19 +104,14 @@ toMessageCharacter (int arg, int relaxed, MessageData *mgd) {
 }
 
 static int
-copyToClipboard (ClipboardObject *clipboard, const wchar_t *characters, size_t count, int append) {
+copyToClipboard (ClipboardObject *clipboard, const wchar_t *characters, size_t count, int append, int insertCR) {
   lockMainClipboard();
-  int copied;
-
-  if (append) {
-    copied = appendClipboardContent(clipboard, characters, count);
-  } else {
-    copied = setClipboardContent(clipboard, characters, count);
-  }
-
+  int copied = copyClipboardContent(clipboard, characters, count, append, insertCR);
   unlockMainClipboard();
-  if (copied) onMainClipboardUpdated();
-  return copied;
+
+  if (!copied) return 0;
+  onMainClipboardUpdated();
+  return 1;
 }
 
 static int
@@ -182,7 +177,7 @@ handleMessageCommands (int command, void *data) {
             if (last) {
               size_t count = last - first + 1;
 
-              if (copyToClipboard(mgd->clipboard.main, first, count, append)) {
+              if (copyToClipboard(mgd->clipboard.main, first, count, append, 0)) {
                 alert(ALERT_CLIPBOARD_BEGIN);
                 alert(ALERT_CLIPBOARD_END);
 
@@ -225,8 +220,17 @@ handleMessageCommands (int command, void *data) {
         }
 
         {
-        case BRL_CMD_BLK(COPY_LINE):
+          int insertCR;
+
         case BRL_CMD_BLK(COPY_RECT):
+          insertCR = 1;
+          goto doClipEnd;
+
+        case BRL_CMD_BLK(COPY_LINE):
+          insertCR = 0;
+          goto doClipEnd;
+
+        doClipEnd:
           const wchar_t *first = mgd->clipboard.start;
           int append = mgd->clipboard.append;
 
@@ -237,7 +241,7 @@ handleMessageCommands (int command, void *data) {
               if (last > first) {
                 size_t count = last - first + 1;
 
-                if (copyToClipboard(mgd->clipboard.main, first, count, append)) {
+                if (copyToClipboard(mgd->clipboard.main, first, count, append, insertCR)) {
                   alert(ALERT_CLIPBOARD_END);
 
                   mgd->hold = 1;

@@ -87,68 +87,15 @@ cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fr
 }
 
 static int
-cpbEndOperation (
-  ClipboardCommandData *ccd, int insertCR,
-  const wchar_t *characters, size_t length
-) {
-  int copied = 0;
-  int notify = 0;
+cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length, int insertCR) {
   lockMainClipboard();
-
-  if (ccd->begin.append) {
-    if (insertCR) {
-      size_t length;
-      const wchar_t *content = getClipboardContent(ccd->clipboard, &length);
-
-      if (content) {
-        int truncate = 0;
-
-        while (length > 0) {
-          size_t last = length - 1;
-          wchar_t character = content[last];
-
-          if (character == WC_C('\r')) insertCR = 0;
-          if (character != WC_C(' ')) break;
-
-          truncate = 1;
-          length = last;
-        }
-
-        if (truncate) {
-          if (!truncateClipboardContent(ccd->clipboard, length)) {
-            goto UNLOCK_CLIPBOARD;
-          }
-
-          notify = 1;
-        }
-
-        if (insertCR && (length > 0)) {
-          static const wchar_t cr = WC_C('\r');
-
-          if (!appendClipboardContent(ccd->clipboard, &cr, 1)) {
-            goto UNLOCK_CLIPBOARD;
-          }
-
-          notify = 1;
-        }
-      }
-    }
-  } else if (clearClipboardContent(ccd->clipboard)) {
-    notify = 1;
-  } else {
-    goto UNLOCK_CLIPBOARD;
-  }
-
-  if (appendClipboardContent(ccd->clipboard, characters, length)) {
-    notify = 1;
-    copied = 1;
-  }
-
-UNLOCK_CLIPBOARD:
+  int copied = copyClipboardContent(ccd->clipboard, characters, length, ccd->begin.append, insertCR);
   unlockMainClipboard();
-  if (copied) alert(ALERT_CLIPBOARD_END);
-  if (notify) onMainClipboardUpdated();
-  return copied;
+
+  if (!copied) return 0;
+  alert(ALERT_CLIPBOARD_END);
+  onMainClipboardUpdated();
+  return 1;
 }
 
 static void
@@ -202,7 +149,7 @@ cpbRectangularCopy (ClipboardCommandData *ccd, int column, int row) {
       length = to - buffer;
     }
 
-    if (cpbEndOperation(ccd, 1, buffer, length)) copied = 1;
+    if (cpbEndOperation(ccd, buffer, length, 1)) copied = 1;
     free(buffer);
   }
 
@@ -287,7 +234,7 @@ cpbLinearCopy (ClipboardCommandData *ccd, int column, int row) {
         length = to - buffer;
       }
 
-      if (cpbEndOperation(ccd, 0, buffer, length)) copied = 1;
+      if (cpbEndOperation(ccd, buffer, length, 0)) copied = 1;
       free(buffer);
     }
   }

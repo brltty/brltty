@@ -177,6 +177,46 @@ setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t len
 }
 
 int
+copyClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length, int append, int insertCR) {
+  if (append) {
+    if (insertCR) {
+      size_t length;
+      const wchar_t *content = getClipboardContent(cpb, &length);
+
+      if (content) {
+        int truncate = 0;
+
+        while (length > 0) {
+          size_t last = length - 1;
+          wchar_t character = content[last];
+
+          if (character == WC_C('\r')) insertCR = 0;
+          if (character != WC_C(' ')) break;
+
+          truncate = 1;
+          length = last;
+        }
+
+        if (truncate) {
+          if (!truncateClipboardContent(cpb, length)) {
+            return 0;
+          }
+        }
+
+        if (insertCR && (length > 0)) {
+          static const wchar_t cr = WC_C('\r');
+          if (!appendClipboardContent(cpb, &cr, 1)) return 0;
+        }
+      }
+    }
+  } else if (!clearClipboardContent(cpb)) {
+    return 0;
+  }
+
+  return appendClipboardContent(cpb, characters, length);
+}
+
+int
 appendClipboardContentUTF8 (ClipboardObject *cpb, const char *text) {
   size_t length = strlen(text);
   wchar_t characters[length + 1];
