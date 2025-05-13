@@ -73,7 +73,7 @@ typedef struct {
   struct {
     ClipboardObject *main;
     const wchar_t *start;
-    int append;
+    size_t offset;
   } clipboard;
 } MessageData;
 
@@ -103,13 +103,21 @@ toMessageCharacter (int arg, int relaxed, MessageData *mgd) {
   return segment->start + offset;
 }
 
+static void
+beginClipboardCopy (const wchar_t *start, int append, MessageData *mgd) {
+  mgd->clipboard.start = start;
+  mgd->clipboard.offset = append? getClipboardContentLength(mgd->clipboard.main): 0;
+  alert(ALERT_CLIPBOARD_BEGIN);
+}
+
 static int
-copyToClipboard (ClipboardObject *clipboard, const wchar_t *characters, size_t count, int append, int insertCR) {
+endClipboardCopy (ClipboardObject *clipboard, const wchar_t *characters, size_t length, int insertCR, MessageData *mgd) {
   lockMainClipboard();
-  int copied = copyClipboardContent(clipboard, characters, count, append, insertCR);
+  int copied = copyClipboardContent(clipboard, characters, length, mgd->clipboard.offset, insertCR);
   unlockMainClipboard();
 
   if (!copied) return 0;
+  alert(ALERT_CLIPBOARD_END);
   onMainClipboardUpdated();
   return 1;
 }
@@ -175,12 +183,10 @@ handleMessageCommands (int command, void *data) {
             const wchar_t *last = toMessageCharacter(arg2, 1, mgd);
 
             if (last) {
+              beginClipboardCopy(first, append, mgd);
               size_t count = last - first + 1;
 
-              if (copyToClipboard(mgd->clipboard.main, first, count, append, 0)) {
-                alert(ALERT_CLIPBOARD_BEGIN);
-                alert(ALERT_CLIPBOARD_END);
-
+              if (endClipboardCopy(mgd->clipboard.main, first, count, 0, mgd)) {
                 mgd->hold = 1;
                 return 1;
               }
@@ -206,11 +212,7 @@ handleMessageCommands (int command, void *data) {
           const wchar_t *first = toMessageCharacter(arg1, 0, mgd);
 
           if (first) {
-            alert(ALERT_CLIPBOARD_BEGIN);
-
-            mgd->clipboard.start = first;
-            mgd->clipboard.append = append;
-
+            beginClipboardCopy(first, append, mgd);
             mgd->hold = 1;
             return 1;
           }
@@ -232,7 +234,6 @@ handleMessageCommands (int command, void *data) {
 
         doClipEnd:
           const wchar_t *first = mgd->clipboard.start;
-          int append = mgd->clipboard.append;
 
           if (first) {
             const wchar_t *last = toMessageCharacter(arg1, 1, mgd);
@@ -241,9 +242,7 @@ handleMessageCommands (int command, void *data) {
               if (last > first) {
                 size_t count = last - first + 1;
 
-                if (copyToClipboard(mgd->clipboard.main, first, count, append, insertCR)) {
-                  alert(ALERT_CLIPBOARD_END);
-
+                if (endClipboardCopy(mgd->clipboard.main, first, count, insertCR, mgd)) {
                   mgd->hold = 1;
                   return 1;
                 }
@@ -288,7 +287,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       .clipboard = {
         .main = getMainClipboard(),
         .start = NULL,
-        .append = 0,
+        .offset = 0,
       },
     };
 

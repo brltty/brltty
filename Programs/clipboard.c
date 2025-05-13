@@ -177,8 +177,13 @@ setClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t len
 }
 
 int
-copyClipboardContent (ClipboardObject *cpb, const wchar_t *characters, size_t length, int append, int insertCR) {
-  if (append) {
+copyClipboardContent (
+  ClipboardObject *cpb, const wchar_t *characters, size_t length,
+  size_t offset, int insertCR
+) {
+  if (offset > 0) {
+    if (!truncateClipboardContent(cpb, offset)) return 0;
+
     if (insertCR) {
       size_t length;
       const wchar_t *content = getClipboardContent(cpb, &length);

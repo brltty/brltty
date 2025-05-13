@@ -44,7 +44,7 @@ typedef struct {
   struct {
     int column;
     int row;
-    int append;
+    size_t offset;
   } begin;
 } ClipboardCommandData;
 
@@ -86,24 +86,24 @@ cpbReadScreen (ClipboardCommandData *ccd, size_t *length, int fromColumn, int fr
   return newBuffer;
 }
 
+static void
+cpbBeginOperation (ClipboardCommandData *ccd, int column, int row, int append) {
+  ccd->begin.column = column;
+  ccd->begin.row = row;
+  ccd->begin.offset = append? getClipboardContentLength(ccd->clipboard): 0;
+  alert(ALERT_CLIPBOARD_BEGIN);
+}
+
 static int
 cpbEndOperation (ClipboardCommandData *ccd, const wchar_t *characters, size_t length, int insertCR) {
   lockMainClipboard();
-  int copied = copyClipboardContent(ccd->clipboard, characters, length, ccd->begin.append, insertCR);
+  int copied = copyClipboardContent(ccd->clipboard, characters, length, ccd->begin.offset, insertCR);
   unlockMainClipboard();
 
   if (!copied) return 0;
   alert(ALERT_CLIPBOARD_END);
   onMainClipboardUpdated();
   return 1;
-}
-
-static void
-cpbBeginOperation (ClipboardCommandData *ccd, int column, int row, int append) {
-  ccd->begin.column = column;
-  ccd->begin.row = row;
-  ccd->begin.append = append;
-  alert(ALERT_CLIPBOARD_BEGIN);
 }
 
 static int
@@ -695,7 +695,7 @@ addClipboardCommands (void) {
 
     ccd->begin.column = 0;
     ccd->begin.row = 0;
-    ccd->begin.append = 0;
+    ccd->begin.offset = 0;
 
     if (pushCommandHandler("clipboard", KTB_CTX_DEFAULT,
                            handleClipboardCommands, destroyClipboardCommandData, ccd)) {
