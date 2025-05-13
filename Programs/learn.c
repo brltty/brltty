@@ -39,6 +39,7 @@ typedef enum {
 
 typedef struct {
   const char *mode;
+  const char *prompt;
   LearnModeState state;
 } LearnModeData;
 
@@ -81,16 +82,18 @@ handleLearnModeCommands (int command, void *data) {
                     (CDO_IncludeName | CDO_IncludeOperand));
 
     logMessage(LOG_DEBUG, "learn: %s", buffer);
-    if (!message(lmd->mode, buffer, MSG_SYNC|MSG_NODELAY)) lmd->state = LMS_ERROR;
+    if (!message(lmd->mode, buffer, MSG_SYNC)) lmd->state = LMS_ERROR;
   }
 
+  message(lmd->mode, lmd->prompt, MSG_SYNC|MSG_NODELAY);
   return 1;
 }
 
 int
 learnMode (int timeout) {
   LearnModeData lmd = {
-    .mode = "lrn"
+    .mode = "lrn",
+    .prompt = gettext("Learn Mode"),
   };
 
   pushCommandEnvironment("learnMode", NULL, NULL);
@@ -98,7 +101,7 @@ learnMode (int timeout) {
                      handleLearnModeCommands, NULL, &lmd);
 
   if (setStatusText(&brl, lmd.mode)) {
-    if (message(lmd.mode, gettext("Learn Mode"), MSG_SYNC|MSG_NODELAY)) {
+    if (message(lmd.mode, lmd.prompt, MSG_SYNC|MSG_NODELAY)) {
       do {
         lmd.state = LMS_TIMEOUT;
         if (!asyncAwaitCondition(timeout, testEndLearnWait, &lmd)) break;
