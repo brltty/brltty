@@ -1659,9 +1659,17 @@ savePreferences (void) {
   char *path = makePreferencesFilePath(opt_preferencesFile);
 
   if (path) {
-    if (savePreferencesFile(path)) {
-      ok = 1;
-      oldPreferencesEnabled = 0;
+    static const char suffix[] = ".new";
+    char newPath[strlen(path) + strlen(suffix) + 1];
+    snprintf(newPath, sizeof(newPath), "%s%s", path, suffix);
+
+    if (savePreferencesFile(newPath)) {
+      if (rename(newPath, path) != -1) {
+        ok = 1;
+        oldPreferencesEnabled = 0;
+      } else {
+        logSystemError("rename");
+      }
     }
 
     free(path);
