@@ -1665,6 +1665,11 @@ savePreferences (void) {
 
     if (savePreferencesFile(newPath)) {
       if (rename(newPath, path) != -1) {
+        logMessage(LOG_DEBUG,
+          "new preferences file renamed: %s -> %s",
+          newPath, path
+        );
+
         ok = 1;
         oldPreferencesEnabled = 0;
       } else {

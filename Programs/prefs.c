@@ -560,7 +560,9 @@ putHeader (FILE *file) {
 int
 savePreferencesFile (const char *path) {
   int ok = 0;
-  FILE *file = openDataFile(path, "w", 0);
+
+  logMessage(LOG_DEBUG, "saving preferences: %s", path);
+  FILE *file = fopen(path, "w");
 
   if (file) {
     if (putHeader(file)) {
