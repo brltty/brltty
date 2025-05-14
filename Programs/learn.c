@@ -43,10 +43,16 @@ typedef struct {
   LearnModeState state;
 } LearnModeData;
 
-ASYNC_CONDITION_TESTER(testEndLearnWait) {
-  LearnModeData *lmd = data;
+static int
+showText (const char *text, int wait, LearnModeData *lmd) {
+  MessageOptions options = MSG_SYNC;
+  if (!wait) options |= MSG_NODELAY;
+  return message(lmd->mode, text, options);
+}
 
-  return lmd->state != LMS_TIMEOUT;
+static int
+showPrompt (LearnModeData *lmd) {
+  return showText(lmd->prompt, 0, lmd);
 }
 
 static int
@@ -76,17 +82,25 @@ handleLearnModeCommands (int command, void *data) {
   }
 
   {
-    char buffer[0X100];
+    char description[0X100];
 
-    describeCommand(buffer, sizeof(buffer), command,
-                    (CDO_IncludeName | CDO_IncludeOperand));
+    describeCommand(
+      description, sizeof(description), command,
+      (CDO_IncludeName | CDO_IncludeOperand)
+    );
 
-    logMessage(LOG_DEBUG, "learn: %s", buffer);
-    if (!message(lmd->mode, buffer, MSG_SYNC)) lmd->state = LMS_ERROR;
+    logMessage(LOG_DEBUG, "learn: %s", description);
+    if (!showText(description, 1, lmd)) lmd->state = LMS_ERROR;
   }
 
-  message(lmd->mode, lmd->prompt, MSG_SYNC|MSG_NODELAY);
+  if (!showPrompt(lmd)) lmd->state = LMS_ERROR;
   return 1;
+}
+
+ASYNC_CONDITION_TESTER(testEndLearnWait) {
+  LearnModeData *lmd = data;
+
+  return lmd->state != LMS_TIMEOUT;
 }
 
 int
@@ -101,14 +115,14 @@ learnMode (int timeout) {
                      handleLearnModeCommands, NULL, &lmd);
 
   if (setStatusText(&brl, lmd.mode)) {
-    if (message(lmd.mode, lmd.prompt, MSG_SYNC|MSG_NODELAY)) {
+    if (showPrompt(&lmd)) {
       do {
         lmd.state = LMS_TIMEOUT;
         if (!asyncAwaitCondition(timeout, testEndLearnWait, &lmd)) break;
       } while (lmd.state == LMS_CONTINUE);
 
       if (lmd.state == LMS_TIMEOUT) {
-        if (!message(lmd.mode, gettext("done"), MSG_SYNC)) {
+        if (!showText(gettext("done"), 1, &lmd)) {
           lmd.state = LMS_ERROR;
         }
       }
