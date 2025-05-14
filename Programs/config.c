@@ -1664,12 +1664,12 @@ savePreferences (void) {
     snprintf(newPath, sizeof(newPath), "%s%s", path, suffix);
 
     if (savePreferencesFile(newPath)) {
-      if (rename(newPath, path) != -1) {
-        logMessage(LOG_DEBUG,
-          "new preferences file renamed: %s -> %s",
-          newPath, path
-        );
+      logMessage(LOG_DEBUG,
+        "renaming new preferences file: %s -> %s",
+        newPath, path
+      );
 
+      if (rename(newPath, path) != -1) {
         ok = 1;
         oldPreferencesEnabled = 0;
       } else {
