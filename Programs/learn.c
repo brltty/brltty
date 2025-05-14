@@ -23,7 +23,11 @@
 #include "log.h"
 #include "learn.h"
 #include "message.h"
+#include "async_handle.h"
 #include "async_wait.h"
+#include "async_alarm.h"
+#include "timing.h"
+#include "stdio.h"
 #include "cmd.h"
 #include "cmd_queue.h"
 #include "brl.h"
@@ -39,25 +43,71 @@ typedef enum {
 
 typedef struct {
   const char *mode;
-  const char *prompt;
   LearnModeState state;
+
+  struct {
+    const char *text;
+    MessageOptions options;
+    AsyncHandle alarm;
+
+    struct {
+      int initial;
+      int left;
+    } seconds;
+  } prompt;
 } LearnModeData;
 
 static int
-showText (const char *text, int wait, LearnModeData *lmd) {
-  MessageOptions options = MSG_SYNC;
-  if (!wait) options |= MSG_NODELAY;
-  return message(lmd->mode, text, options);
+showText (const char *text, MessageOptions options, LearnModeData *lmd) {
+  return message(lmd->mode, text, (options | MSG_SYNC));
+}
+
+ASYNC_ALARM_CALLBACK(updateLearnModePrompt) {
+  LearnModeData *lmd = parameters->data;
+  MessageOptions *messageOptions = &lmd->prompt.options;
+  int *secondsLeft = &lmd->prompt.seconds.left;
+
+  {
+    char prompt[0X100];
+    snprintf(prompt, sizeof(prompt), "%s - %d", lmd->prompt.text, *secondsLeft);
+    showText(prompt, *messageOptions, lmd);
+  }
+
+  *messageOptions |= MSG_SILENT;
+  *secondsLeft -= 1;
+}
+
+static void
+endPrompt (LearnModeData *lmd) {
+  AsyncHandle *alarm = &lmd->prompt.alarm;
+
+  if (*alarm) {
+    asyncCancelRequest(*alarm);
+    *alarm = NULL;
+  }
 }
 
 static int
-showPrompt (LearnModeData *lmd) {
-  return showText(lmd->prompt, 0, lmd);
+beginPrompt (LearnModeData *lmd) {
+  endPrompt(lmd);
+  AsyncHandle *alarm = &lmd->prompt.alarm;
+
+  lmd->prompt.options = MSG_NODELAY;
+  lmd->prompt.seconds.left = lmd->prompt.seconds.initial;
+
+  if (asyncNewRelativeAlarm(alarm, 0, updateLearnModePrompt, lmd)) {
+    if (asyncResetAlarmInterval(*alarm, MSECS_PER_SEC)) {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 static int
 handleLearnModeCommands (int command, void *data) {
   LearnModeData *lmd = data;
+  endPrompt(lmd);
 
   logMessage(LOG_DEBUG, "learn: command=%06X", command);
   lmd->state = LMS_CONTINUE;
@@ -70,7 +120,7 @@ handleLearnModeCommands (int command, void *data) {
     case BRL_CMD_NOOP:
       return 1;
 
-    default:
+    default: {
       switch (command & BRL_MSK_BLK) {
         case BRL_CMD_BLK(TOUCH_AT):
           return 1;
@@ -78,7 +128,9 @@ handleLearnModeCommands (int command, void *data) {
         default:
           break;
       }
+
       break;
+    }
   }
 
   {
@@ -90,10 +142,10 @@ handleLearnModeCommands (int command, void *data) {
     );
 
     logMessage(LOG_DEBUG, "learn: %s", description);
-    if (!showText(description, 1, lmd)) lmd->state = LMS_ERROR;
+    if (!showText(description, 0, lmd)) lmd->state = LMS_ERROR;
   }
 
-  if (!showPrompt(lmd)) lmd->state = LMS_ERROR;
+  if (!beginPrompt(lmd)) lmd->state = LMS_ERROR;
   return 1;
 }
 
@@ -107,7 +159,12 @@ int
 learnMode (int timeout) {
   LearnModeData lmd = {
     .mode = "lrn",
-    .prompt = gettext("Learn Mode"),
+
+    .prompt = {
+      .text = gettext("Learn Mode"),
+      .alarm = NULL,
+      .seconds.initial = timeout / MSECS_PER_SEC,
+    },
   };
 
   pushCommandEnvironment("learnMode", NULL, NULL);
@@ -115,14 +172,16 @@ learnMode (int timeout) {
                      handleLearnModeCommands, NULL, &lmd);
 
   if (setStatusText(&brl, lmd.mode)) {
-    if (showPrompt(&lmd)) {
+    if (beginPrompt(&lmd)) {
       do {
         lmd.state = LMS_TIMEOUT;
         if (!asyncAwaitCondition(timeout, testEndLearnWait, &lmd)) break;
       } while (lmd.state == LMS_CONTINUE);
 
+      endPrompt(&lmd);
+
       if (lmd.state == LMS_TIMEOUT) {
-        if (!showText(gettext("done"), 1, &lmd)) {
+        if (!showText(gettext("done"), 0, &lmd)) {
           lmd.state = LMS_ERROR;
         }
       }
