@@ -97,7 +97,7 @@ beginPrompt (LearnModeData *lmd) {
       return 1;
     }
 
-    asyncDiscardHandle(*alarm);
+    asyncCancelRequest(*alarm);
     *alarm = NULL;
   }
 
