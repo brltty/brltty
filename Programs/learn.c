@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "log.h"
@@ -26,8 +27,7 @@
 #include "async_handle.h"
 #include "async_wait.h"
 #include "async_alarm.h"
-#include "timing.h"
-#include "stdio.h"
+#include "timing_types.h"
 #include "cmd.h"
 #include "cmd_queue.h"
 #include "brl.h"
