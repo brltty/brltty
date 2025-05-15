@@ -267,16 +267,25 @@ handleMessageCommands (int command, void *data) {
   return 1;
 }
 
-ASYNC_TASK_CALLBACK(presentMessage) {
-  MessageParameters *mgp = data;
-
+int
+sayMessage (const char *text) {
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (!(mgp->options & MSG_SILENT)) {
-    if (isAutospeakActive()) {
-      sayString(&spk, mgp->text, SAY_OPT_MUTE_FIRST);
+  if (isAutospeakActive()) {
+    if (!sayString(&spk, text, SAY_OPT_MUTE_FIRST)) {
+      return 0;
     }
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+  return 1;
+}
+
+ASYNC_TASK_CALLBACK(presentMessage) {
+  MessageParameters *mgp = data;
+
+  if (!(mgp->options & MSG_SILENT)) {
+    sayMessage(mgp->text);
+  }
 
   if (canBraille()) {
     MessageData mgd = {

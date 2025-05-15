@@ -47,7 +47,6 @@ typedef struct {
 
   struct {
     const char *text;
-    MessageOptions options;
     AsyncHandle alarm;
 
     struct {
@@ -64,16 +63,14 @@ showText (const char *text, MessageOptions options, LearnModeData *lmd) {
 
 ASYNC_ALARM_CALLBACK(updateLearnModePrompt) {
   LearnModeData *lmd = parameters->data;
-  MessageOptions *messageOptions = &lmd->prompt.options;
   int *secondsLeft = &lmd->prompt.seconds.left;
 
   {
     char prompt[0X100];
     snprintf(prompt, sizeof(prompt), "%s - %d", lmd->prompt.text, *secondsLeft);
-    showText(prompt, *messageOptions, lmd);
+    showText(prompt, (MSG_NODELAY | MSG_SILENT), lmd);
   }
 
-  *messageOptions |= MSG_SILENT;
   *secondsLeft -= 1;
 }
 
@@ -92,13 +89,16 @@ beginPrompt (LearnModeData *lmd) {
   endPrompt(lmd);
   AsyncHandle *alarm = &lmd->prompt.alarm;
 
-  lmd->prompt.options = MSG_NODELAY;
   lmd->prompt.seconds.left = lmd->prompt.seconds.initial;
 
   if (asyncNewRelativeAlarm(alarm, 0, updateLearnModePrompt, lmd)) {
     if (asyncResetAlarmInterval(*alarm, MSECS_PER_SEC)) {
+      sayMessage(lmd->prompt.text);
       return 1;
     }
+
+    asyncDiscardHandle(*alarm);
+    *alarm = NULL;
   }
 
   return 0;

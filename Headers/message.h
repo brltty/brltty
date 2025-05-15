@@ -31,6 +31,7 @@ typedef enum {
 } MessageOptions;
 
 extern int message (const char *mode, const char *text, MessageOptions options);
+extern int sayMessage (const char *text);
 
 extern int messageHoldTimeout;
 
