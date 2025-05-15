@@ -287,6 +287,11 @@ message (const char *mode, const char *text, MessageOptions options) {
   return 1;
 }
 
+int
+sayMessage (const char *text) {
+  return 1;
+}
+
 #include "scr.h"
 
 KeyTableCommandContext
