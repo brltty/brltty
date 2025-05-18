@@ -660,19 +660,31 @@ static int inTextMode;
 static TimePeriod mappingRecalculationTimer;
 
 typedef struct {
-  unsigned char rows;
-  unsigned char columns;
+  short columns;
+  short rows;
 } ScreenSize;
 
 typedef struct {
-  unsigned char column;
-  unsigned char row;
+  short column;
+  short row;
 } ScreenLocation;
 
 typedef struct {
   ScreenSize size;
   ScreenLocation location;
 } ScreenHeader;
+
+typedef struct {
+  struct {
+    unsigned char rows;
+    unsigned char columns;
+  } size;
+
+  struct {
+    unsigned char column;
+    unsigned char row;
+  } location;
+} VcsaHeader;
 
 #ifdef HAVE_SYS_POLL_H
 #include <poll.h>
@@ -760,12 +772,70 @@ setCurrentScreen (unsigned char vt) {
 }
 
 static size_t
-readScreenDevice (off_t offset, void *buffer, size_t size) {
+readScreenDirect (off_t offset, void *buffer, size_t size) {
   const ssize_t count = pread(screenDescriptor, buffer, size, offset);
   if (count != -1) return count;
 
   logSystemError("screen read");
   return 0;
+}
+
+static size_t
+readScreenDevice (off_t offset, void *buffer, size_t size) {
+  size_t result = 0;
+  size_t headerSize = sizeof(ScreenHeader);
+
+  if (offset < headerSize) {
+    VcsaHeader vcsa;
+
+    {
+      size_t count = readScreenDirect(0, &vcsa, sizeof(vcsa));
+      if (!count) goto done;
+    }
+
+    ScreenHeader header = {
+      .size = {
+        .columns = vcsa.size.columns,
+        .rows = vcsa.size.rows,
+      },
+
+      .location = {
+        .column = vcsa.location.column,
+        .row = vcsa.location.row,
+      },
+    };
+
+    {
+      struct winsize winSize;
+
+      if (controlCurrentConsole(TIOCGWINSZ, &winSize) != -1) {
+        header.size.columns = winSize.ws_col;
+        header.size.rows = winSize.ws_row;
+      } else {
+        logSystemError("ioctl[TIOCGWINSZ]");
+      }
+    }
+
+    {
+      const void *from = &header + offset;
+      size_t count = headerSize - offset;
+      if (size < count) count = size;
+      result += count;
+
+      buffer = mempcpy(buffer, from, count);
+      if (!(size -= count)) goto done;
+      offset = headerSize;
+    }
+  }
+
+  offset -= headerSize;
+  offset += sizeof(VcsaHeader);
+  size_t count = readScreenDirect(offset, buffer, size);
+  if (!count) goto done;
+  result += count;
+
+done:
+  return result;
 }
 
 static unsigned char *screenCacheBuffer;
@@ -804,11 +874,6 @@ readScreenHeader (ScreenHeader *header) {
 }
 
 static int
-readScreenSize (ScreenSize *size) {
-  return readScreenData(0, size, sizeof(*size));
-}
-
-static int
 readScreenContent (off_t offset, uint16_t *buffer, size_t count) {
   count *= sizeof(*buffer);
   offset *= sizeof(*buffer);
@@ -832,7 +897,11 @@ refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
       if (!count) return 0;
 
       if (count < size) {
-        logBytes(LOG_ERR, "truncated screen header", &header, count);
+        logBytes(LOG_ERR,
+          "truncated screen header: %"PRIsize " < %"PRIsize,
+          &header, count, count, size
+        );
+
         return 0;
       }
     }
@@ -1041,10 +1110,12 @@ determineAttributesMasks (void) {
     }
 
     {
-      ScreenSize size;
+      ScreenHeader header;
 
-      if (readScreenSize(&size)) {
-        const size_t count = size.columns * size.rows;
+      if (readScreenHeader(&header)) {
+        const ScreenSize *size = &header.size;
+
+        const size_t count = size->columns * size->rows;
         unsigned short buffer[count];
 
         if (readScreenContent(0, buffer, ARRAY_COUNT(buffer))) {
@@ -1682,18 +1753,20 @@ describe_LinuxScreen (ScreenDescription *description) {
 
 static int
 readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
-  ScreenSize size;
+  ScreenHeader header;
 
-  if (readScreenSize(&size)) {
-    if (validateScreenBox(box, size.columns, size.rows)) {
+  if (readScreenHeader(&header)) {
+    const ScreenSize *size = &header.size;
+
+    if (validateScreenBox(box, size->columns, size->rows)) {
       if (problemText) {
         setScreenMessage(box, buffer, problemText);
         return 1;
       }
 
       for (unsigned int row=0; row<box->height; row+=1) {
-        ScreenCharacter characters[size.columns];
-        if (!readScreenRow(box->top+row, size.columns, characters, NULL)) return 0;
+        ScreenCharacter characters[size->columns];
+        if (!readScreenRow(box->top+row, size->columns, characters, NULL)) return 0;
 
         memcpy(buffer, &characters[box->left],
                (box->width * sizeof(characters[0])));
