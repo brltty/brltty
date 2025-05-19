@@ -783,14 +783,14 @@ readScreenDirect (off_t offset, void *buffer, size_t size) {
 static size_t
 readScreenDevice (off_t offset, void *buffer, size_t size) {
   size_t result = 0;
-  size_t headerSize = sizeof(ScreenHeader);
+  const size_t headerSize = sizeof(ScreenHeader);
 
   if (offset < headerSize) {
     VcsaHeader vcsa;
 
     {
       size_t vcsaSize = sizeof(vcsa);
-      size_t count = readScreenDirect(0, &vcsa, vcsaSize);
+      const size_t count = readScreenDirect(0, &vcsa, vcsaSize);
       if (!count) goto done;
 
       if (count < vcsaSize) {
@@ -1689,22 +1689,26 @@ static int
 refresh_LinuxScreen (void) {
   if (screenUpdated) {
     while (1) {
-      int consoleNumber = getConsoleNumber();
       problemText = NULL;
+
+      int consoleNumber = getConsoleNumber();
+      int consoleChanged = consoleNumber != currentConsoleNumber;
+
+      if (consoleChanged) {
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+          "console number changed: %u -> %u",
+          currentConsoleNumber, consoleNumber
+        );
+
+        currentConsoleNumber = consoleNumber;
+      }
 
       if (!refreshCache()) {
         problemText = gettext("can't read screen content");
         goto done;
       }
 
-      if (consoleNumber == currentConsoleNumber) break;
-
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-        "console number changed: %u -> %u",
-        currentConsoleNumber, consoleNumber
-      );
-
-      currentConsoleNumber = consoleNumber;
+      if (!consoleChanged) break;
     }
 
     inTextMode = testTextMode();
