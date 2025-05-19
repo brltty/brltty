@@ -660,13 +660,13 @@ static int inTextMode;
 static TimePeriod mappingRecalculationTimer;
 
 typedef struct {
-  short columns;
-  short rows;
+  unsigned short int columns;
+  unsigned short int rows;
 } ScreenSize;
 
 typedef struct {
-  short column;
-  short row;
+  unsigned short int column;
+  unsigned short int row;
 } ScreenLocation;
 
 typedef struct {
@@ -676,13 +676,13 @@ typedef struct {
 
 typedef struct {
   struct {
-    unsigned char rows;
-    unsigned char columns;
+    uint8_t rows;
+    uint8_t columns;
   } size;
 
   struct {
-    unsigned char column;
-    unsigned char row;
+    uint8_t column;
+    uint8_t row;
   } location;
 } VcsaHeader;
 
@@ -789,8 +789,18 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
     VcsaHeader vcsa;
 
     {
-      size_t count = readScreenDirect(0, &vcsa, sizeof(vcsa));
+      size_t vcsaSize = sizeof(vcsa);
+      size_t count = readScreenDirect(0, &vcsa, vcsaSize);
       if (!count) goto done;
+
+      if (count < vcsaSize) {
+        logBytes(LOG_ERR,
+          "truncated vcsa header: %"PRIsize " < %"PRIsize,
+          &vcsa, count, count, vcsaSize
+        );
+
+        goto done;
+      }
     }
 
     ScreenHeader header = {
@@ -805,7 +815,7 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
       },
     };
 
-    {
+    if ((header.size.columns == UINT8_MAX) || (header.size.rows == UINT8_MAX)) {
       struct winsize winSize;
 
       if (controlCurrentConsole(TIOCGWINSZ, &winSize) != -1) {
@@ -816,13 +826,17 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
       }
     }
 
+    if ((header.location.column == UINT8_MAX) || (header.location.row == UINT8_MAX)) {
+    }
+
     {
       const void *from = &header + offset;
       size_t count = headerSize - offset;
       if (size < count) count = size;
-      result += count;
 
       buffer = mempcpy(buffer, from, count);
+      result += count;
+
       if (!(size -= count)) goto done;
       offset = headerSize;
     }
@@ -1675,6 +1689,7 @@ static int
 refresh_LinuxScreen (void) {
   if (screenUpdated) {
     while (1) {
+      int consoleNumber = getConsoleNumber();
       problemText = NULL;
 
       if (!refreshCache()) {
@@ -1682,16 +1697,14 @@ refresh_LinuxScreen (void) {
         goto done;
       }
 
-      {
-        int consoleNumber = getConsoleNumber();
-        if (consoleNumber == currentConsoleNumber) break;
+      if (consoleNumber == currentConsoleNumber) break;
 
-        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                   "console number changed: %u -> %u",
-                   currentConsoleNumber, consoleNumber);
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+        "console number changed: %u -> %u",
+        currentConsoleNumber, consoleNumber
+      );
 
-        currentConsoleNumber = consoleNumber;
-      }
+      currentConsoleNumber = consoleNumber;
     }
 
     inTextMode = testTextMode();
