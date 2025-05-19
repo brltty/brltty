@@ -361,16 +361,20 @@ setConsoleName (void) {
 }
 
 static void
-closeConsole (int *fd) {
+closeConsole (int *fd, const char *type) {
   if (*fd != -1) {
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER), "closing console: fd=%d", *fd);
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+      "closing %s console: fd=%d",
+      type, *fd
+    );
+
     if (close(*fd) == -1) logSystemError("close[console]");
     *fd = -1;
   }
 }
 
 static int
-openConsole (int *fd, int vt) {
+openConsole (int *fd, int vt, const char *type) {
   int opened = 0;
   char *name = vtName(consoleName, vt);
 
@@ -379,9 +383,11 @@ openConsole (int *fd, int vt) {
 
     if (console != -1) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                 "console opened: %s: fd=%d", name, console);
+        "%s console opened: %s: fd=%d",
+        type, name, console
+      );
 
-      closeConsole(fd);
+      closeConsole(fd, type);
       *fd = console;
       opened = 1;
     }
@@ -393,7 +399,7 @@ openConsole (int *fd, int vt) {
 }
 
 static int
-controlConsole (int *fd, int vt, int operation, void *argument) {
+controlConsole (int *fd, int vt, const char *type, int operation, void *argument) {
   int result = ioctl(*fd, operation, argument);
 
   if (result == -1) {
@@ -402,7 +408,7 @@ controlConsole (int *fd, int vt, int operation, void *argument) {
                  "console control error %d: fd=%d vt=%d op=0X%04X: %s",
                  errno, *fd, vt, operation, strerror(errno));
 
-      if (openConsole(fd, vt)) {
+      if (openConsole(fd, vt, type)) {
         result = ioctl(*fd, operation, argument);
       }
     }
@@ -411,22 +417,23 @@ controlConsole (int *fd, int vt, int operation, void *argument) {
   return result;
 }
 
-static int consoleDescriptor;
+static const char currentConsoleType[] = "current";
+static int currentConsoleDescriptor;
 
 static void
 closeCurrentConsole (void) {
-  closeConsole(&consoleDescriptor);
+  closeConsole(&currentConsoleDescriptor, currentConsoleType);
 }
 
 static int
 openCurrentConsole (void) {
-  return openConsole(&consoleDescriptor, virtualTerminalNumber);
+  return openConsole(&currentConsoleDescriptor, virtualTerminalNumber, currentConsoleType);
 }
 
 static int
 controlCurrentConsole (int operation, void *argument) {
-  if (consoleDescriptor != -1) {
-    return controlConsole(&consoleDescriptor, virtualTerminalNumber, operation, argument);
+  if (currentConsoleDescriptor != -1) {
+    return controlConsole(&currentConsoleDescriptor, virtualTerminalNumber, currentConsoleType, operation, argument);
   }
 
   switch (operation) {
@@ -471,23 +478,25 @@ controlCurrentConsole (int operation, void *argument) {
   return -1;
 }
 
+static const char mainConsoleType[] = "main";
+static int mainConsoleDescriptor;
+
 static const int NO_CONSOLE = 0;
 static const int MAIN_CONSOLE = 0;
-static int mainConsoleDescriptor;
 
 static void
 closeMainConsole (void) {
-  closeConsole(&mainConsoleDescriptor);
+  closeConsole(&mainConsoleDescriptor, mainConsoleType);
 }
 
 static int
 openMainConsole (void) {
-  return openConsole(&mainConsoleDescriptor, MAIN_CONSOLE);
+  return openConsole(&mainConsoleDescriptor, MAIN_CONSOLE, mainConsoleType);
 }
 
 static int
 controlMainConsole (int operation, void *argument) {
-  return controlConsole(&mainConsoleDescriptor, MAIN_CONSOLE, operation, argument);
+  return controlConsole(&mainConsoleDescriptor, MAIN_CONSOLE, mainConsoleType, operation, argument);
 }
 
 static const char *unicodeName = NULL;
@@ -1459,7 +1468,7 @@ static int
 construct_LinuxScreen (void) {
   mainConsoleDescriptor = -1;
   screenDescriptor = -1;
-  consoleDescriptor = -1;
+  currentConsoleDescriptor = -1;
   unicodeDescriptor = -1;
 
   screenUpdated = 0;
@@ -1642,7 +1651,7 @@ getConsoleNumber (void) {
     closeCurrentConsole();
   }
 
-  if (consoleDescriptor == -1) {
+  if (currentConsoleDescriptor == -1) {
     if (!canOpenCurrentConsole()) {
       problemText = gettext("console not in use");
     } else if (!openCurrentConsole()) {
