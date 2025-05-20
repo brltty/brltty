@@ -1059,10 +1059,15 @@ setVgaCharacterCount (int force) {
                      cfo.width, cfo.height, cfo.charcount);
           vgaCharacterCount = cfo.charcount;
         } else {
-          if (errno == ENOSYS) isNotImplemented = 1;
+          int logLevel = LOG_WARNING;
+
+          if (errno == ENOSYS) {
+            isNotImplemented = 1;
+            logLevel = LOG_CATEGORY(SCREEN_DRIVER);
+          }
 
           if (errno != EINVAL) {
-            logMessage(LOG_WARNING, "ioctl[KDFONTOP[GET]]: %s", strerror(errno));
+            logMessage(logLevel, "ioctl[KDFONTOP(GET)]: %s", strerror(errno));
           }
         }
       }
