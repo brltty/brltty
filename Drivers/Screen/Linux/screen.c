@@ -56,13 +56,14 @@ typedef enum {
   PARM_CHARSET,
   PARM_FALLBACK_TEXT,
   PARM_HIGH_FONT_BIT,
+  PARM_LARGE_SCREEN_BUG,
   PARM_LOG_SCREEN_FONT_MAP,
   PARM_RPI_SPACES_BUG,
   PARM_UNICODE,
   PARM_VIRTUAL_TERMINAL_NUMBER,
   PARM_WIDECHAR_PADDING,
 } ScreenParameters;
-#define SCRPARMS "charset", "fallbacktext", "hfb", "logsfm", "rpispacesbug", "unicode", "vt", "widecharpadding"
+#define SCRPARMS "charset", "fallbacktext", "hfb", "largescreenbug", "logsfm", "rpispacesbug", "unicode", "vt", "widecharpadding"
 
 #include "scr_driver.h"
 #include "screen.h"
@@ -70,6 +71,7 @@ typedef enum {
 static const char *problemText;
 static const char *fallbackText;
 
+static unsigned int largeScreenBug;
 static unsigned int logScreenFontMap;
 static unsigned int rpiSpacesBug;
 static unsigned int unicodeEnabled;
@@ -824,7 +826,7 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
       },
     };
 
-    if ((header.size.columns == UINT8_MAX) || (header.size.rows == UINT8_MAX)) {
+    if ((header.size.columns == UINT8_MAX) || (header.size.rows == UINT8_MAX) || largeScreenBug) {
       struct winsize winSize;
 
       if (controlCurrentConsole(TIOCGWINSZ, &winSize) != -1) {
@@ -1395,6 +1397,17 @@ processParameters_LinuxScreen (char **parameters) {
       } else if (choice) {
         static const unsigned short bits[] = {0X0800, 0X0100};
         highFontBit = bits[choice-1];
+      }
+    }
+  }
+
+  largeScreenBug = 0;
+  {
+    const char *parameter = parameters[PARM_LARGE_SCREEN_BUG];
+
+    if (parameter && *parameter) {
+      if (!validateYesNo(&largeScreenBug, parameter)) {
+        logMessage(LOG_WARNING, "%s: %s", "invalid large screen bug setting", parameter);
       }
     }
   }
