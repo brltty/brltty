@@ -23,6 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern int getKernelRelease (int *major, int *minor, int *patch);
+
 typedef struct {
   const char *path;
   void *data;
