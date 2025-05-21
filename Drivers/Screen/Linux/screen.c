@@ -683,6 +683,7 @@ typedef struct {
 typedef struct {
   ScreenSize size;
   ScreenLocation location;
+  unsigned char hideCursor:1;
 } ScreenHeader;
 
 typedef struct {
@@ -838,6 +839,7 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
     }
 
     if ((header.location.column == UINT8_MAX) || (header.location.row == UINT8_MAX)) {
+      header.hideCursor = 1;
     }
 
     {
@@ -1762,6 +1764,7 @@ getScreenDescription (ScreenDescription *description) {
 
     description->posx = header.location.column;
     description->posy = header.location.row;
+    if (header.hideCursor) description->hasCursor = 0;
 
     adjustCursorColumn(&description->posx, description->posy, description->cols);
     return 1;
