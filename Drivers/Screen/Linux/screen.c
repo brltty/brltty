@@ -35,6 +35,17 @@
 #define VT_GETHIFONTMASK 0X560D
 #endif /* VT_GETHIFONTMASK */
 
+#ifndef VT_GETCONSIZECSRPOS
+#define VT_GETCONSIZECSRPOS    _IOR('V', 0x10, struct vt_consizecsrpos)
+
+struct vt_consizecsrpos {
+  __u16 con_rows;
+  __u16 con_cols;
+  __u16 csr_row;
+  __u16 csr_col;
+};
+#endif /* VT_GETCONSIZECSRPOS */
+
 #include "log.h"
 #include "report.h"
 #include "message.h"
@@ -798,48 +809,62 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
   const size_t headerSize = sizeof(ScreenHeader);
 
   if (offset < headerSize) {
-    VcsaHeader vcsa;
+    static unsigned char useVcsa = 0;
 
-    {
-      size_t vcsaSize = sizeof(vcsa);
-      const size_t count = readScreenDirect(0, &vcsa, vcsaSize);
-      if (!count) goto done;
+    ScreenHeader header;
+    memset(&header, 0, sizeof(header));
 
-      if (count < vcsaSize) {
-        logBytes(LOG_ERR,
-          "truncated vcsa header: %"PRIsize " < %"PRIsize,
-          &vcsa, count, count, vcsaSize
-        );
+    if (!useVcsa) {
+      struct vt_consizecsrpos info;
 
-        goto done;
-      }
-    }
-
-    ScreenHeader header = {
-      .size = {
-        .columns = vcsa.size.columns,
-        .rows = vcsa.size.rows,
-      },
-
-      .location = {
-        .column = vcsa.location.column,
-        .row = vcsa.location.row,
-      },
-    };
-
-    if ((header.size.columns == UINT8_MAX) || (header.size.rows == UINT8_MAX) || largeScreenBug) {
-      struct winsize winSize;
-
-      if (controlCurrentConsole(TIOCGWINSZ, &winSize) != -1) {
-        header.size.columns = winSize.ws_col;
-        header.size.rows = winSize.ws_row;
+      if (controlCurrentConsole(VT_GETCONSIZECSRPOS, &info) != -1) {
+        header.size.columns = info.con_cols;
+        header.size.rows = info.con_rows;
+        header.location.column = info.csr_col;
+        header.location.row = info.csr_row;
       } else {
-        logSystemError("ioctl[TIOCGWINSZ]");
+        logSystemError("ioctl[VT_GETCONSIZECSRPOS]");
+        useVcsa = 1;
       }
     }
 
-    if ((header.location.column == UINT8_MAX) || (header.location.row == UINT8_MAX)) {
-      header.hideCursor = 1;
+    if (useVcsa) {
+      VcsaHeader vcsa;
+
+      {
+        size_t vcsaSize = sizeof(vcsa);
+        const size_t count = readScreenDirect(0, &vcsa, vcsaSize);
+        if (!count) goto done;
+
+        if (count < vcsaSize) {
+          logBytes(LOG_ERR,
+            "truncated vcsa header: %"PRIsize " < %"PRIsize,
+            &vcsa, count, count, vcsaSize
+          );
+
+          goto done;
+        }
+      }
+
+      header.size.columns = vcsa.size.columns;
+      header.size.rows = vcsa.size.rows;
+      header.location.column = vcsa.location.column;
+      header.location.row = vcsa.location.row;
+
+      if ((header.size.columns == UINT8_MAX) || (header.size.rows == UINT8_MAX) || largeScreenBug) {
+        struct winsize winSize;
+
+        if (controlCurrentConsole(TIOCGWINSZ, &winSize) != -1) {
+          header.size.columns = winSize.ws_col;
+          header.size.rows = winSize.ws_row;
+        } else {
+          logSystemError("ioctl[TIOCGWINSZ]");
+        }
+      }
+
+      if ((header.location.column == UINT8_MAX) || (header.location.row == UINT8_MAX)) {
+        header.hideCursor = 1;
+      }
     }
 
     {
