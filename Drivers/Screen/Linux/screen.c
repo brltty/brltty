@@ -697,18 +697,6 @@ typedef struct {
   unsigned char hideCursor:1;
 } ScreenHeader;
 
-typedef struct {
-  struct {
-    uint8_t rows;
-    uint8_t columns;
-  } size;
-
-  struct {
-    uint8_t column;
-    uint8_t row;
-  } location;
-} VcsaHeader;
-
 #ifdef HAVE_SYS_POLL_H
 #include <poll.h>
 
@@ -803,6 +791,78 @@ readScreenDirect (off_t offset, void *buffer, size_t size) {
   return 0;
 }
 
+typedef struct {
+  struct {
+    uint8_t rows;
+    uint8_t columns;
+  } size;
+
+  struct {
+    uint8_t column;
+    uint8_t row;
+  } location;
+} VcsaHeader;
+
+static int
+vcsaHasClamping (void) {
+  int major, minor;
+  if (!getKernelRelease(&major, &minor, NULL)) return 0;
+
+  if (major < 5) return 0;
+  if (major > 5) return 1;
+  return minor >= 1;
+}
+
+static int
+vcsaReadHeader (ScreenHeader *header) {
+  VcsaHeader vcsa;
+
+  {
+    size_t vcsaSize = sizeof(vcsa);
+    const size_t count = readScreenDirect(0, &vcsa, vcsaSize);
+    if (!count) return 0;
+
+    if (count < vcsaSize) {
+      logBytes(LOG_ERR,
+        "truncated vcsa header: %"PRIsize " < %"PRIsize,
+        &vcsa, count, count, vcsaSize
+      );
+
+      return 0;
+    }
+  }
+
+  header->size.columns = vcsa.size.columns;
+  header->size.rows = vcsa.size.rows;
+  header->location.column = vcsa.location.column;
+  header->location.row = vcsa.location.row;
+
+  if ((header->size.columns == UINT8_MAX) || (header->size.rows == UINT8_MAX) || largeScreenBug) {
+    struct winsize winSize;
+
+    if (controlCurrentConsole(TIOCGWINSZ, &winSize) != -1) {
+      header->size.columns = winSize.ws_col;
+      header->size.rows = winSize.ws_row;
+    } else {
+      logSystemError("ioctl[TIOCGWINSZ]");
+    }
+  }
+
+  if (largeScreenBug) {
+    if (header->location.column >= header->size.columns) {
+      header->location.column = header->size.columns - 1;
+    }
+
+    if (header->location.row >= header->size.rows) {
+      header->location.row = header->size.rows - 1;
+    }
+  } else if ((header->location.column == UINT8_MAX) || (header->location.row == UINT8_MAX)) {
+    header->hideCursor = 1;
+  }
+
+  return 1;
+}
+
 static size_t
 readScreenDevice (off_t offset, void *buffer, size_t size) {
   size_t result = 0;
@@ -829,41 +889,8 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
     }
 
     if (useVcsa) {
-      VcsaHeader vcsa;
-
-      {
-        size_t vcsaSize = sizeof(vcsa);
-        const size_t count = readScreenDirect(0, &vcsa, vcsaSize);
-        if (!count) goto done;
-
-        if (count < vcsaSize) {
-          logBytes(LOG_ERR,
-            "truncated vcsa header: %"PRIsize " < %"PRIsize,
-            &vcsa, count, count, vcsaSize
-          );
-
-          goto done;
-        }
-      }
-
-      header.size.columns = vcsa.size.columns;
-      header.size.rows = vcsa.size.rows;
-      header.location.column = vcsa.location.column;
-      header.location.row = vcsa.location.row;
-
-      if ((header.size.columns == UINT8_MAX) || (header.size.rows == UINT8_MAX) || largeScreenBug) {
-        struct winsize winSize;
-
-        if (controlCurrentConsole(TIOCGWINSZ, &winSize) != -1) {
-          header.size.columns = winSize.ws_col;
-          header.size.rows = winSize.ws_row;
-        } else {
-          logSystemError("ioctl[TIOCGWINSZ]");
-        }
-      }
-
-      if ((header.location.column == UINT8_MAX) || (header.location.row == UINT8_MAX)) {
-        header.hideCursor = 1;
+      if (!vcsaReadHeader(&header)) {
+        goto done;
       }
     }
 
@@ -1428,7 +1455,7 @@ processParameters_LinuxScreen (char **parameters) {
     }
   }
 
-  largeScreenBug = 0;
+  largeScreenBug = !vcsaHasClamping();
   {
     const char *parameter = parameters[PARM_LARGE_SCREEN_BUG];
 
