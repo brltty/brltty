@@ -491,7 +491,8 @@ controlCurrentConsole (int operation, void *argument) {
       break;
   }
 
-  errno = EAGAIN;
+  logMessage(LOG_WARNING, "current console not open");
+  errno = EBADF;
   return -1;
 }
 
