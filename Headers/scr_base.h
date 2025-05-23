@@ -42,6 +42,7 @@ typedef struct {
 
   int (*readCharacters) (const ScreenBox *box, ScreenCharacter *buffer);
   int (*insertKey) (ScreenKey key);
+  int (*canBracketPaste) (void);
   int (*routeCursor) (int column, int row, int screen);
 
   int (*highlightRegion) (int left, int right, int top, int bottom);

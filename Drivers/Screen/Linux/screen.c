@@ -46,6 +46,10 @@ struct vt_consizecsrpos {
 };
 #endif /* VT_GETCONSIZECSRPOS */
 
+#ifndef TIOCL_GETBRACKETEDPASTE
+#define TIOCL_GETBRACKETEDPASTE 18
+#endif /* TIOCL_GETBRACKETEDPASTE */
+
 #include "log.h"
 #include "report.h"
 #include "message.h"
@@ -2507,6 +2511,21 @@ insertKey_LinuxScreen (ScreenKey key) {
   return ok;
 }
 
+static int
+canBracketPaste_LinuxScreen (void) {
+  unsigned char subcode = TIOCL_GETBRACKETEDPASTE;
+  int result = controlCurrentConsole(TIOCLINUX, &subcode);
+  if (result == 1) return 1;
+
+  if (result == -1) {
+    if (errno != EINVAL) {
+      logSystemError("ioctl[TIOCLINUX(TIOCL_GETBRACKETEDPASTE)]");
+    }
+  }
+
+  return 0;
+}
+
 typedef struct {
   char subcode;
   struct tiocl_selection selection;
@@ -2715,6 +2734,7 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_LinuxScreen;
   main->base.readCharacters = readCharacters_LinuxScreen;
   main->base.insertKey = insertKey_LinuxScreen;
+  main->base.canBracketPaste = canBracketPaste_LinuxScreen;
   main->base.highlightRegion = highlightRegion_LinuxScreen;
   main->base.unhighlightRegion = unhighlightRegion_LinuxScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_LinuxScreen;

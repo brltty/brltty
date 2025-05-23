@@ -158,6 +158,11 @@ insertScreenKey (ScreenKey key) {
 }
 
 int
+canBracketScreenPaste (void) {
+  return currentScreen->canBracketPaste();
+}
+
+int
 routeScreenCursor (int column, int row, int screen) {
   return currentScreen->routeCursor(column, row, screen);
 }

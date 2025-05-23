@@ -172,6 +172,11 @@ insertKey_BaseScreen (ScreenKey key) {
 }
 
 static int
+canBracketPaste_BaseScreen (void) {
+  return 0;
+}
+
+static int
 routeCursor_BaseScreen (int column, int row, int screen) {
   return 0;
 }
@@ -223,6 +228,7 @@ initializeBaseScreen (BaseScreen *base) {
 
   base->readCharacters = readCharacters_BaseScreen;
   base->insertKey = insertKey_BaseScreen;
+  base->canBracketPaste = canBracketPaste_BaseScreen;
   base->routeCursor = routeCursor_BaseScreen;
 
   base->highlightRegion = highlightRegion_BaseScreen;
