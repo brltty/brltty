@@ -177,18 +177,20 @@ handleMessageCommands (int command, void *data) {
           goto doClipCopy;
 
         doClipCopy:
-          const wchar_t *first = toMessageCharacter(arg1, 0, mgd);
+          {
+            const wchar_t *first = toMessageCharacter(arg1, 0, mgd);
 
-          if (first) {
-            const wchar_t *last = toMessageCharacter(arg2, 1, mgd);
+            if (first) {
+              const wchar_t *last = toMessageCharacter(arg2, 1, mgd);
 
-            if (last) {
-              beginClipboardCopy(first, append, mgd);
-              size_t count = last - first + 1;
+              if (last) {
+                beginClipboardCopy(first, append, mgd);
+                size_t count = last - first + 1;
 
-              if (endClipboardCopy(mgd->clipboard.main, first, count, 0, mgd)) {
-                mgd->hold = 1;
-                return 1;
+                if (endClipboardCopy(mgd->clipboard.main, first, count, 0, mgd)) {
+                  mgd->hold = 1;
+                  return 1;
+                }
               }
             }
           }
@@ -209,12 +211,14 @@ handleMessageCommands (int command, void *data) {
           goto doClipBegin;
 
         doClipBegin:
-          const wchar_t *first = toMessageCharacter(arg1, 0, mgd);
+          {
+            const wchar_t *first = toMessageCharacter(arg1, 0, mgd);
 
-          if (first) {
-            beginClipboardCopy(first, append, mgd);
-            mgd->hold = 1;
-            return 1;
+            if (first) {
+              beginClipboardCopy(first, append, mgd);
+              mgd->hold = 1;
+              return 1;
+            }
           }
 
           alert(ALERT_COMMAND_REJECTED);
@@ -233,18 +237,20 @@ handleMessageCommands (int command, void *data) {
           goto doClipEnd;
 
         doClipEnd:
-          const wchar_t *first = mgd->clipboard.start;
+          {
+            const wchar_t *first = mgd->clipboard.start;
 
-          if (first) {
-            const wchar_t *last = toMessageCharacter(arg1, 1, mgd);
+            if (first) {
+              const wchar_t *last = toMessageCharacter(arg1, 1, mgd);
 
-            if (last) {
-              if (last > first) {
-                size_t count = last - first + 1;
+              if (last) {
+                if (last > first) {
+                  size_t count = last - first + 1;
 
-                if (endClipboardCopy(mgd->clipboard.main, first, count, insertCR, mgd)) {
-                  mgd->hold = 1;
-                  return 1;
+                  if (endClipboardCopy(mgd->clipboard.main, first, count, insertCR, mgd)) {
+                    mgd->hold = 1;
+                    return 1;
+                  }
                 }
               }
             }
