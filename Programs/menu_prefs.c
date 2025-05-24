@@ -1603,11 +1603,10 @@ makePreferencesMenu (void) {
 
       if (directories) {
         const char *const *directory = directories;
+        NAME(strtext("Override Directory"));
 
         while (*directory) {
-          NAME(strtext("Override Directory"));
           ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, (char *const *)directory));
-
           directory += 1;
         }
       }
