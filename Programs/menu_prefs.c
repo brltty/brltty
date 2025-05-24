@@ -29,6 +29,7 @@
 #include "menu.h"
 #include "menu_prefs.h"
 #include "prefs.h"
+#include "file.h"
 #include "profile.h"
 #include "status_types.h"
 #include "blink.h"
@@ -1597,6 +1598,21 @@ makePreferencesMenu (void) {
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_localeDirectory));
     }
 
+    {
+      const char *const *directories = getAllOverrideDirectories();
+
+      if (directories) {
+        const char *const *directory = directories;
+
+        while (*directory) {
+          NAME(strtext("Override Directory"));
+          ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, (char *const *)directory));
+
+          directory += 1;
+        }
+      }
+    }
+     
     {
       NAME(strtext("Text Table"));
       ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, &opt_textTable));
