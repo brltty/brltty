@@ -85,14 +85,15 @@ typedef enum {
 
 static void
 logKernelLimitation (unsigned char *alreadyLogged, int major, int minor, const char *message) {
-  if (!*alreadyLogged) {
-    logMessage(LOG_WARNING,
-      "pre-%d.%d kernel limitation: %s",
-      major, minor, message
-    );
-
+  if (alreadyLogged) {
+    if (*alreadyLogged) return;
     *alreadyLogged = 1;
   }
+
+  logMessage(LOG_WARNING,
+    "pre-%d.%d kernel limitation: %s",
+    major, minor, message
+  );
 }
 
 static const char *problemText;
