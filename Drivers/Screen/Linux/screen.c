@@ -83,6 +83,18 @@ typedef enum {
 #include "scr_driver.h"
 #include "screen.h"
 
+static void
+logKernelLimitation (unsigned char *alreadyLogged, int major, int minor, const char *message) {
+  if (!*alreadyLogged) {
+    logMessage(LOG_WARNING,
+      "pre-%d.%d kernel limitation: %s",
+      major, minor, message
+    );
+
+    *alreadyLogged = 1;
+  }
+}
+
 static const char *problemText;
 static const char *fallbackText;
 
@@ -863,6 +875,15 @@ vcsaReadHeader (ScreenHeader *header) {
     }
   } else if ((header->location.column == UINT8_MAX) || (header->location.row == UINT8_MAX)) {
     header->hideCursor = 1;
+
+    {
+      static unsigned char alreadyLogged = 0;
+
+      logKernelLimitation(
+        &alreadyLogged, 6, 16,
+        "screen cursor not rendered when beyond column and/or row 255"
+      );
+    }
   }
 
   return 1;
@@ -2516,10 +2537,17 @@ static int
 canBracketPaste_LinuxScreen (void) {
   unsigned char subcode = TIOCL_GETBRACKETEDPASTE;
   int result = controlCurrentConsole(TIOCLINUX, &subcode);
-  if (result == 1) return 1;
+  if (result > 0) return 1;
 
   if (result == -1) {
-    if (errno != EINVAL) {
+    if (errno == EINVAL) {
+      static unsigned char alreadyLogged = 0;
+
+      logKernelLimitation(
+        &alreadyLogged, 6, 16,
+        "cannot determine current console bracketed paste state"
+      );
+    } else {
       logSystemError("ioctl[TIOCLINUX(TIOCL_GETBRACKETEDPASTE)]");
     }
   }
