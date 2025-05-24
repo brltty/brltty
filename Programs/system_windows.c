@@ -191,7 +191,7 @@ setLocale (void) {
     if (locale) {
       setMessagesLocale(locale);
       free(locale);
-      return NULL;
+      return;
     }
   }
 #endif /* defined(__MINGW32__) */
