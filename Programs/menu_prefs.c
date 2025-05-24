@@ -1606,7 +1606,7 @@ makePreferencesMenu (void) {
         NAME(strtext("Override Directory"));
 
         while (*directory) {
-          ITEM(newStringOptionMenuItem(optionsSubmenu, &itemName, (char *const *)directory));
+          ITEM(newTextMenuItem(optionsSubmenu, &itemName, *directory));
           directory += 1;
         }
       }
