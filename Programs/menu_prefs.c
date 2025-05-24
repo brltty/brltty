@@ -679,21 +679,21 @@ makePreferencesMenu (void) {
   }
 
   {
-    SUBMENU(optionsSubmenu, rootMenu, strtext("Menu Options"));
+    SUBMENU(menuSubmenu, rootMenu, strtext("Menu Options"));
 
     {
       NAME(strtext("Show Submenu Sizes"));
-      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showSubmenuSizes, &itemName));
+      ITEM(newBooleanMenuItem(menuSubmenu, &prefs.showSubmenuSizes, &itemName));
     }
 
     {
       NAME(strtext("Show Advanced Submenus"));
-      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showAdvancedSubmenus, &itemName));
+      ITEM(newBooleanMenuItem(menuSubmenu, &prefs.showAdvancedSubmenus, &itemName));
     }
 
     {
       NAME(strtext("Show All Items"));
-      ITEM(newBooleanMenuItem(optionsSubmenu, &prefs.showAllItems, &itemName));
+      ITEM(newBooleanMenuItem(menuSubmenu, &prefs.showAllItems, &itemName));
     }
   }
 
