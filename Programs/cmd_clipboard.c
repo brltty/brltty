@@ -258,6 +258,7 @@ static int
 cpbPaste (ClipboardCommandData *ccd, unsigned int index, int bracketed) {
   if (!isMainScreen()) return 0;
   if (isRouting()) return 0;
+  if (canBracketScreenPaste()) bracketed = !bracketed;
 
   int pasted = 0;
   lockMainClipboard();
