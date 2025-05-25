@@ -97,199 +97,7 @@ has also been incorporated.
 Install this package if you use a refreshable braille display.
 
 
-%package -n brltty-braille-brlapi
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-AutoProv: no
-AutoReq: yes
-
-Summary: BrlAPI braille driver for BRLTTY.
-%description -n brltty-braille-brlapi
-This package provides the BrlAPI braille driver for BRLTTY.
-
-Install this package if you need to communicate with
-another instance of BRLTTY which is actually in control
-of the braille device.
-
-
-%package -n brltty-braille-xwindow
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-Requires: libX11
-
-BuildRequires: xorg-x11-proto-devel
-BuildRequires: libX11-devel
-BuildRequires: libXt-devel
-BuildRequires: Xaw3d-devel
-
-AutoProv: no
-AutoReq: yes
-
-Summary: XWindow braille driver for BRLTTY.
-%description -n brltty-braille-xwindow
-This package provides the XWindow braille driver for BRLTTY.
-This driver presents a virtual braille device within a graphical
-user interface. It is primarily intended for sighted developers
-who don't have access to a real braille device but still wish to
-assess the accessibility of their applications.
-
-Install this package if you would like to see how usable an
-application would be by a blind person using a braille device.
-
-
-%package -n brltty-speech-espeak
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-Requires: espeak
-
-BuildRequires: espeak-devel
-
-AutoProv: no
-AutoReq: yes
-
-Summary: eSpeak speech driver for BRLTTY.
-%description -n brltty-speech-espeak
-This package provides the eSpeak speech driver for BRLTTY.
-
-Install this package if you would like to be able to use the
-eSpeak text-to-speech engine.
-
-
-%package -n brltty-speech-espeak-ng
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-Requires: espeak-ng
-
-BuildRequires: espeak-ng-devel
-
-AutoProv: no
-AutoReq: yes
-
-Summary: eSpeak-NG speech driver for BRLTTY.
-%description -n brltty-speech-espeak-ng
-This package provides the eSpeak-NG speech driver for BRLTTY.
-
-Install this package if you would like to be able to use the
-eSpeak-NG text-to-speech engine.
-
-
-%package -n brltty-speech-festival
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-Requires: festival
-
-AutoProv: no
-AutoReq: yes
-
-Summary: Festival speech driver for BRLTTY.
-%description -n brltty-speech-festival
-This package provides the Festival speech driver for BRLTTY.
-
-Install this package if you would like to be able to use the
-Festival text-to-speech engine.
-
-
-%package -n brltty-speech-flite
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-Requires: flite
-
-BuildRequires: flite-devel
-
-AutoProv: no
-AutoReq: yes
-
-Summary: Festival Lite speech driver for BRLTTY.
-%description -n brltty-speech-flite
-This package provides the Festival Lite speech driver for BRLTTY.
-
-Install this package if you would like to be able to use the
-Festival Lite text-to-speech engine.
-
-
-%package -n brltty-speech-speechd
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-Requires: speech-dispatcher
-
-BuildRequires: speech-dispatcher-devel
-
-AutoProv: no
-AutoReq: yes
-
-Summary: Speech Dispatcher speech driver for BRLTTY.
-%description -n brltty-speech-speechd
-This package provides the Speech Dispatcher speech driver for BRLTTY.
-
-Install this package if you would like to be able to use the
-Speech Dispatcher text-to-speech server.
-
-
-%package -n brltty-screen-atspi2
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-Requires: dbus-libs
-
-BuildRequires: at-spi2-core-devel
-BuildRequires: xorg-x11-proto-devel
-BuildRequires: dbus-devel
-
-AutoProv: no
-AutoReq: yes
-
-Summary: AT-SPI2 screen driver for BRLTTY.
-%description -n brltty-screen-atspi2
-This package provides the AT-SPI2 screen driver for BRLTTY.
-
-Install this package if you would like to be able to
-access graphical applications via the D-Bus port of
-the Assistive Technology Service Provider Interface.
-
-
-%package -n brltty-screen-screen
-Version: @PACKAGE_VERSION@
-Release: 1
-Group: System Environment/Daemons
-License: LGPL
-
-AutoProv: no
-AutoReq: yes
-Requires: screen
-
-Summary: Screen screen driver for BRLTTY.
-%description -n brltty-screen-screen
-This package provides the Screen screen driver for BRLTTY.
-
-Install this package if you would like to be able to
-directly access session windows maintained by the
-screen program.
-
-
-%package -n brltty-utils
+%package utils
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: Development/Tools
@@ -307,11 +115,11 @@ AutoProv: no
 AutoReq: yes
 
 Summary: Commands for maintaining BRLTTY data files.
-%description -n brltty-utils
+%description utils
 This package provides a set of commands for maintaining BRLTTY's datafiles.
 
 
-%package -n brltty-devel
+%package devel
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: Development/Tools
@@ -321,7 +129,7 @@ AutoProv: no
 AutoReq: yes
 
 Summary: Headers for BRLTTY.
-%description -n brltty-devel
+%description devel
 This package provides many of the header files for BRLTTY's core, as well as
 header files which define the packets and keys for several braille devices.
 
@@ -331,78 +139,196 @@ needs to interpret and/or create raw braille device packets, or which needs to
 interpret key codes as delivered by BrlAPI's raw mode.
 
 
-%package -n brltty-systemd
+%package braille-brlapi
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
 License: LGPL
-BuildArch: noarch
 
 AutoProv: no
 AutoReq: yes
-Requires: systemd
 
-Summary: Systemd units and wrappers for BRLTTY.
-%description -n brltty-systemd
-This package provides the units and wrapper for managing BRLTTY via Systemd.
+Summary: BrlAPI braille driver for BRLTTY.
+%description braille-brlapi
+This package provides the BrlAPI braille driver for BRLTTY.
 
-Install this package if you'd like to manage BRLTTY processes via Systemd.
+Install this package if you need to communicate with
+another instance of BRLTTY which is actually in control
+of the braille device.
 
 
-%package -n brltty-udev
+%package braille-xwindow
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
 License: LGPL
-BuildArch: noarch
+
+Requires: libX11
+
+BuildRequires: xorg-x11-proto-devel
+BuildRequires: libX11-devel
+BuildRequires: libXt-devel
+BuildRequires: Xaw3d-devel
 
 AutoProv: no
 AutoReq: yes
-Requires: systemd-udev
 
-Summary: BRLTTY Udev rules.
-%description -n brltty-udev
-This package provides the rules and the wrapper for managing BRLTTY via Udev.
+Summary: XWindow braille driver for BRLTTY.
+%description braille-xwindow
+This package provides the XWindow braille driver for BRLTTY.
+This driver presents a virtual braille device within a graphical
+user interface. It is primarily intended for sighted developers
+who don't have access to a real braille device but still wish to
+assess the accessibility of their applications.
 
-Install this package if you'd like to manage BRLTTY processes via Udev.
-It doesn't include the rules for braille devices that use generic USB to serial adapters.
+Install this package if you would like to see how usable an
+application would be by a blind person using a braille device.
 
 
-%package -n brltty-udev-generic
+%package speech-espeak
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
 License: LGPL
-BuildArch: noarch
+
+Requires: espeak
+
+BuildRequires: espeak-devel
 
 AutoProv: no
 AutoReq: yes
-Requires: systemd-udev
 
-Summary: BRLTTY Udev rules for braille devices that use a generic USB to serial adapter.
-%description -n brltty-udev-generic
-This package provides additional rules for managing BRLTTY via Udev.
+Summary: eSpeak speech driver for BRLTTY.
+%description speech-espeak
+This package provides the eSpeak speech driver for BRLTTY.
 
-Install this package in order to support braille devices that use a generic USB to serial adapter.
+Install this package if you would like to be able to use the
+eSpeak text-to-speech engine.
 
 
-%package -n brltty-dracut
+%package speech-espeak-ng
 Version: @PACKAGE_VERSION@
 Release: 1
 Group: System Environment/Daemons
 License: LGPL
-BuildArch: noarch
+
+Requires: espeak-ng
+
+BuildRequires: espeak-ng-devel
 
 AutoProv: no
 AutoReq: yes
-Requires: dracut
-Requires: brltty-utils
 
-Summary: Dracut module for BRLTTY.
-%description -n brltty-dracut
-This package provides the module for adding BRLTTY to an initial ramdisk image.
+Summary: eSpeak-NG speech driver for BRLTTY.
+%description speech-espeak-ng
+This package provides the eSpeak-NG speech driver for BRLTTY.
 
-Install this package if you'd like to have braille accessibility BRLTTY processes via Udev.
+Install this package if you would like to be able to use the
+eSpeak-NG text-to-speech engine.
+
+
+%package speech-festival
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+
+Requires: festival
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Festival speech driver for BRLTTY.
+%description speech-festival
+This package provides the Festival speech driver for BRLTTY.
+
+Install this package if you would like to be able to use the
+Festival text-to-speech engine.
+
+
+%package speech-flite
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+
+Requires: flite
+
+BuildRequires: flite-devel
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Festival Lite speech driver for BRLTTY.
+%description speech-flite
+This package provides the Festival Lite speech driver for BRLTTY.
+
+Install this package if you would like to be able to use the
+Festival Lite text-to-speech engine.
+
+
+%package speech-speechd
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+
+Requires: speech-dispatcher
+
+BuildRequires: speech-dispatcher-devel
+
+AutoProv: no
+AutoReq: yes
+
+Summary: Speech Dispatcher speech driver for BRLTTY.
+%description speech-speechd
+This package provides the Speech Dispatcher speech driver for BRLTTY.
+
+Install this package if you would like to be able to use the
+Speech Dispatcher text-to-speech server.
+
+
+%package screen-atspi2
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+
+Requires: dbus-libs
+
+BuildRequires: at-spi2-core-devel
+BuildRequires: xorg-x11-proto-devel
+BuildRequires: dbus-devel
+
+AutoProv: no
+AutoReq: yes
+
+Summary: AT-SPI2 screen driver for BRLTTY.
+%description screen-atspi2
+This package provides the AT-SPI2 screen driver for BRLTTY.
+
+Install this package if you would like to be able to
+access graphical applications via the D-Bus port of
+the Assistive Technology Service Provider Interface.
+
+
+%package screen-screen
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+
+AutoProv: no
+AutoReq: yes
+Requires: screen
+
+Summary: Screen screen driver for BRLTTY.
+%description screen-screen
+This package provides the Screen screen driver for BRLTTY.
+
+Install this package if you would like to be able to
+directly access session windows maintained by the
+screen program.
 
 
 %package -n brlapi
@@ -572,6 +498,80 @@ Install this package if you have a Tcl application
 which directly accesses a refreshable braille display.
 
 
+%package systemd
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+BuildArch: noarch
+
+AutoProv: no
+AutoReq: yes
+Requires: systemd
+
+Summary: Systemd units and wrappers for BRLTTY.
+%description systemd
+This package provides the units and wrapper for managing BRLTTY via Systemd.
+
+Install this package if you'd like to manage BRLTTY processes via Systemd.
+
+
+%package udev
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+BuildArch: noarch
+
+AutoProv: no
+AutoReq: yes
+Requires: systemd-udev
+
+Summary: BRLTTY Udev rules.
+%description udev
+This package provides the rules and the wrapper for managing BRLTTY via Udev.
+
+Install this package if you'd like to manage BRLTTY processes via Udev.
+It doesn't include the rules for braille devices that use generic USB to serial adapters.
+
+
+%package udev-generic
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+BuildArch: noarch
+
+AutoProv: no
+AutoReq: yes
+Requires: systemd-udev
+
+Summary: BRLTTY Udev rules for braille devices that use a generic USB to serial adapter.
+%description udev-generic
+This package provides additional rules for managing BRLTTY via Udev.
+
+Install this package in order to support braille devices that use a generic USB to serial adapter.
+
+
+%package dracut
+Version: @PACKAGE_VERSION@
+Release: 1
+Group: System Environment/Daemons
+License: LGPL
+BuildArch: noarch
+
+AutoProv: no
+AutoReq: yes
+Requires: dracut
+Requires: brltty-utils
+
+Summary: Dracut module for BRLTTY.
+%description dracut
+This package provides the module for adding BRLTTY to an initial ramdisk image.
+
+Install this package if you'd like to have braille accessibility BRLTTY processes via Udev.
+
+
 %prep
 # %setup -n %{name}-%{version}
 %setup -n @PACKAGE_TARNAME@-@PACKAGE_VERSION@
@@ -633,57 +633,38 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc %{_docdir}/*/Manual-BRLTTY
 %config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty.conf
 
-%files -n brltty-braille-brlapi
-%{_pkglibdir}/libbrlttybba.so
-
-%files -n brltty-braille-xwindow
-%{_pkglibdir}/libbrlttybxw.so
-
-%files -n brltty-speech-espeak
-%{_pkglibdir}/libbrlttyses.so
-
-%files -n brltty-speech-espeak-ng
-%{_pkglibdir}/libbrlttysen.so
-
-%files -n brltty-speech-festival
-%{_pkglibdir}/libbrlttysfv.so
-
-%files -n brltty-speech-flite
-%{_pkglibdir}/libbrlttysfl.so
-
-%files -n brltty-speech-speechd
-%{_pkglibdir}/libbrlttyssd.so
-
-%files -n brltty-screen-atspi2
-%{_pkglibdir}/libbrlttyxa2.so
-
-%files -n brltty-screen-screen
-%{_pkglibdir}/libbrlttyxsc.so
-
-%files -n brltty-utils
+%files utils
 %{_bindir}/brltty-*
 
-%files -n brltty-devel
+%files devel
 %{_includedir}/brltty
 
-%files -n brltty-systemd
-%{_unitdir}/*
-%{_sysusersdir}/*
-%{_tmpfilesdir}/*
-%{_pkglibexecdir}/systemd-*
+%files braille-brlapi
+%{_pkglibdir}/libbrlttybba.so
 
-%files -n brltty-udev
-%{_udevrulesdir}/*
-%exclude %{_udevrulesdir}/*-generic*
-%{_pkglibexecdir}/udev-*
+%files braille-xwindow
+%{_pkglibdir}/libbrlttybxw.so
 
-%files -n brltty-udev-generic
-%{_udevrulesdir}/*-generic*
+%files speech-espeak
+%{_pkglibdir}/libbrlttyses.so
 
-%files -n brltty-dracut
-/usr/lib/dracut/modules.d/99brltty
-%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/Initramfs/dracut.conf
-%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/Initramfs/cmdline
+%files speech-espeak-ng
+%{_pkglibdir}/libbrlttysen.so
+
+%files speech-festival
+%{_pkglibdir}/libbrlttysfv.so
+
+%files speech-flite
+%{_pkglibdir}/libbrlttysfl.so
+
+%files speech-speechd
+%{_pkglibdir}/libbrlttyssd.so
+
+%files screen-atspi2
+%{_pkglibdir}/libbrlttyxa2.so
+
+%files screen-screen
+%{_pkglibdir}/libbrlttyxsc.so
 
 %files -n brlapi
 %defattr(-,root,root)
@@ -725,6 +706,25 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n tcl-brlapi
 @TCL_DIR@/brlapi-@api_release@/libbrlapi_tcl.so
 @TCL_DIR@/brlapi-@api_release@/pkgIndex.tcl
+
+%files systemd
+%{_unitdir}/*
+%{_sysusersdir}/*
+%{_tmpfilesdir}/*
+%{_pkglibexecdir}/systemd-*
+
+%files udev
+%{_udevrulesdir}/*
+%exclude %{_udevrulesdir}/*-generic*
+%{_pkglibexecdir}/udev-*
+
+%files udev-generic
+%{_udevrulesdir}/*-generic*
+
+%files dracut
+/usr/lib/dracut/modules.d/99brltty
+%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/Initramfs/dracut.conf
+%config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty/Initramfs/cmdline
 
 
 %changelog
