@@ -903,15 +903,16 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
 
     if (!useVcsa) {
       struct vt_consizecsrpos info;
+      int result = controlCurrentConsole(VT_GETCONSIZECSRPOS, &info);
 
-      if (controlCurrentConsole(VT_GETCONSIZECSRPOS, &info) != -1) {
+      if (result != -1) {
         header.size.columns = info.con_cols;
         header.size.rows = info.con_rows;
         header.location.column = info.csr_col;
         header.location.row = info.csr_row;
       } else {
+        if (errno == ENOTTY) useVcsa = 1;
         logSystemError("ioctl[VT_GETCONSIZECSRPOS]");
-        useVcsa = 1;
       }
     }
 
@@ -1605,6 +1606,8 @@ construct_LinuxScreen (void) {
           brailleDeviceOfflineListener = registerReportListener(REPORT_BRAILLE_DEVICE_OFFLINE, lxBrailleDeviceOfflineListener, NULL);
           return 1;
         }
+      } else {
+        logSystemError("main console open");
       }
     }
   }
@@ -1754,6 +1757,7 @@ getConsoleNumber (void) {
     if (!canOpenCurrentConsole()) {
       problemText = gettext("console not in use");
     } else if (!openCurrentConsole()) {
+      logSystemError("current console open");
       problemText = gettext("can't open console");
     }
 
