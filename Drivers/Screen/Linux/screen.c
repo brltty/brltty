@@ -539,7 +539,7 @@ setUnicodeName (void) {
 }
 
 static void
-closeUnicode (int *fd) {
+closeUnicodeDevice (int *fd) {
   if (*fd != -1) {
     logMessage(LOG_CATEGORY(SCREEN_DRIVER), "closing unicode: fd=%d", *fd);
     if (close(*fd) == -1) logSystemError("close[unicode]");
@@ -548,7 +548,7 @@ closeUnicode (int *fd) {
 }
 
 static int
-openUnicode (int *fd, int vt) {
+openUnicodeDevice (int *fd, int vt) {
   if (!unicodeName) return 0;
   if (*fd != -1) return 1;
 
@@ -560,9 +560,9 @@ openUnicode (int *fd, int vt) {
 
     if (unicode != -1) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-                 "unicode opened: %s: fd=%d", name, unicode);
+                 "unicode device opened: %s: fd=%d", name, unicode);
 
-      closeUnicode(fd);
+      closeUnicodeDevice(fd);
       *fd = unicode;
       opened = 1;
     } else {
@@ -578,19 +578,19 @@ openUnicode (int *fd, int vt) {
 static int unicodeDescriptor;
 
 static void
-closeCurrentUnicode (void) {
-  closeUnicode(&unicodeDescriptor);
+closeCurrentUnicodeDevice (void) {
+  closeUnicodeDevice(&unicodeDescriptor);
 }
 
 static int
-openCurrentUnicode (void) {
+openCurrentUnicodeDevice (void) {
   if (!unicodeEnabled) return 0;
-  return openUnicode(&unicodeDescriptor, virtualTerminalNumber);
+  return openUnicodeDevice(&unicodeDescriptor, virtualTerminalNumber);
 }
 
 static size_t
 readUnicodeDevice (off_t offset, void *buffer, size_t size) {
-  if (openCurrentUnicode()) {
+  if (openCurrentUnicodeDevice()) {
     const ssize_t count = pread(unicodeDescriptor, buffer, size, offset);
 
     if (count != -1) {
@@ -617,7 +617,7 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
       return count;
     }
 
-    if (errno != ENODATA) logSystemError("unicode read");
+    if (errno != ENODATA) logSystemError("unicode device read");
   }
 
   return 0;
@@ -785,7 +785,7 @@ setCurrentScreen (unsigned char vt) {
   if (!openScreenDevice(&screen, vt)) return 0;
 
   closeCurrentConsole();
-  closeCurrentUnicode();
+  closeCurrentUnicodeDevice();
   closeCurrentScreen();
   screenDescriptor = screen;
   virtualTerminalNumber = vt;
@@ -896,22 +896,24 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
   const size_t headerSize = sizeof(ScreenHeader);
 
   if (offset < headerSize) {
-    static unsigned char useVcsa = 0;
+    static unsigned char useGetConSizeCsrPos = 1;
+    unsigned char useVcsa = 1;
 
     ScreenHeader header;
     memset(&header, 0, sizeof(header));
 
-    if (!useVcsa) {
+    if (useGetConSizeCsrPos) {
       struct vt_consizecsrpos info;
       int result = controlCurrentConsole(VT_GETCONSIZECSRPOS, &info);
 
       if (result != -1) {
+        useVcsa = 0;
         header.size.columns = info.con_cols;
         header.size.rows = info.con_rows;
         header.location.column = info.csr_col;
         header.location.row = info.csr_row;
       } else {
-        if (errno == ENOTTY) useVcsa = 1;
+        if (errno == ENOTTY) useGetConSizeCsrPos = 0;
         logSystemError("ioctl[VT_GETCONSIZECSRPOS]");
       }
     }
