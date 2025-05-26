@@ -1478,7 +1478,7 @@ typedef struct {
 
   struct {
     AsyncEvent *event;
-    unsigned finished:1;
+    unsigned char finished:1;
   } wait;
 } CoreTaskData;
 

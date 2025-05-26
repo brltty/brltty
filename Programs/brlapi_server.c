@@ -427,7 +427,7 @@ static int resumeBrailleDriver(BrailleDisplay *brl) {
 }
 
 typedef struct {
-  unsigned resumed:1;
+  unsigned char resumed:1;
 } CoreTaskData_resumeBrailleDriver;
 
 CORE_TASK_CALLBACK(apiCoreTask_resumeBrailleDriver) {
@@ -488,7 +488,7 @@ static int flushBrailleOutput(BrailleDisplay *brl) {
 }
 
 typedef struct {
-  unsigned flushed:1;
+  unsigned char flushed:1;
 } CoreTaskData_flushBrailleOutput;
 
 CORE_TASK_CALLBACK(apiCoreTask_flushBrailleOutput) {
@@ -2130,6 +2130,17 @@ PARAM_READER(driverPropertyValue)
   return NULL;
 }
 
+typedef struct {
+  const uint64_t property;
+  const uint64_t value;
+  unsigned char set:1;
+} CoreTaskData_setDriverProperty;
+
+CORE_TASK_CALLBACK(apiCoreTask_setDriverProperty) {
+  CoreTaskData_setDriverProperty *sdp = data;
+  sdp->set = brl.setDriverProperty(&brl, sdp->property, sdp->value);
+}
+
 PARAM_WRITER(driverPropertyValue)
 {
   if (!brl.setDriverProperty) return "no settable driver properties";
@@ -2142,7 +2153,14 @@ PARAM_WRITER(driverPropertyValue)
     c->fd, subparam, *propertyValue
   );
 
-  if (!brl.setDriverProperty(&brl, subparam, *propertyValue)) return "cannot set driver property";
+  CoreTaskData_setDriverProperty sdp = {
+    .property = subparam,
+    .value = *propertyValue,
+    .set = 0
+  };
+
+  runCoreTask(apiCoreTask_setDriverProperty, &sdp, 1);
+  if (!sdp.set) return "cannot set driver property";
   return NULL;
 }
 
