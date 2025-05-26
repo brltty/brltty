@@ -90,7 +90,6 @@ extern "C" {
 #define DEFAULT_AUTOREPEAT_ENABLED 1		/* 1 for on, 0 for off */
 #define DEFAULT_AUTOREPEAT_INTERVAL 10	/* hundredths of a second */
 #define DEFAULT_AUTOREPEAT_PANNING 0	/* 1 for on, 0 for off */
-#define DEFAULT_BRACKETED_PASTE_ENABLED 0
 #define DEFAULT_TOUCH_NAVIGATION 0
 #define DEFAULT_TOUCH_SENSITIVITY BRL_SENSITIVITY_MEDIUM
 

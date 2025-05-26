@@ -1004,11 +1004,6 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Bracketed Paste Enabled"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.bracketedPasteEnabled, &itemName));
-    }
-
-    {
       NAME(strtext("Touch Navigation"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.touchNavigation, &itemName));
       TEST(TouchSensitivity);

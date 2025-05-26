@@ -281,11 +281,6 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index, int bracketed) {
 
     if (length > 0) {
       if (bracketed) {
-        if (!prefs.bracketedPasteEnabled) {
-          message(NULL, gettext("bracketed paste not enabled"), 0);
-          goto PASTE_FAILED;
-        }
-
         static const wchar_t sequence[] = {
           ASCII_ESC, WC_C('['), WC_C('2'), WC_C('0'), WC_C('0'), WC_C('~')
         };

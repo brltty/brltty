@@ -439,12 +439,6 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.autorepeatPanning
   },
 
-  { .name = "bracketed-paste-enabled",
-    .defaultValue = DEFAULT_BRACKETED_PASTE_ENABLED,
-    .settingNames = &preferenceStringTable_boolean,
-    .setting = &prefs.bracketedPasteEnabled
-  },
-
   { .name = "touch-navigation",
     .defaultValue = DEFAULT_TOUCH_NAVIGATION,
     .settingNames = &preferenceStringTable_boolean,

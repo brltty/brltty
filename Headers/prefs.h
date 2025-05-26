@@ -216,7 +216,6 @@ typedef struct {
 
   unsigned char autoreleaseTime;
   unsigned char onFirstRelease;
-  unsigned char bracketedPasteEnabled;
   unsigned char touchNavigation;
 
   unsigned char scrollAwareCursorNavigation;
