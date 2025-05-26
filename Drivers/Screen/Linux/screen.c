@@ -450,6 +450,11 @@ controlConsole (int *fd, int vt, const char *type, int operation, void *argument
 static const char currentConsoleType[] = "current";
 static int currentConsoleDescriptor;
 
+static inline int
+isCurrentConsoleOpen (void) {
+  return currentConsoleDescriptor != -1;
+}
+
 static void
 closeCurrentConsole (void) {
   closeConsole(&currentConsoleDescriptor, currentConsoleType);
@@ -462,7 +467,7 @@ openCurrentConsole (void) {
 
 static int
 controlCurrentConsole (int operation, void *argument) {
-  if (currentConsoleDescriptor != -1) {
+  if (isCurrentConsoleOpen()) {
     return controlConsole(&currentConsoleDescriptor, virtualTerminalNumber, currentConsoleType, operation, argument);
   }
 
@@ -505,7 +510,7 @@ controlCurrentConsole (int operation, void *argument) {
   }
 
   logMessage(LOG_WARNING, "current console not open");
-  errno = EBADF;
+  errno = EAGAIN;
   return -1;
 }
 
@@ -902,7 +907,7 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
     ScreenHeader header;
     memset(&header, 0, sizeof(header));
 
-    if (useGetConSizeCsrPos) {
+    if (useGetConSizeCsrPos && isCurrentConsoleOpen()) {
       struct vt_consizecsrpos info;
 
       if (controlCurrentConsole(VT_GETCONSIZECSRPOS, &info) != -1) {
@@ -1754,7 +1759,7 @@ getConsoleNumber (void) {
     closeCurrentConsole();
   }
 
-  if (currentConsoleDescriptor == -1) {
+  if (!isCurrentConsoleOpen()) {
     if (!canOpenCurrentConsole()) {
       problemText = gettext("console not in use");
     } else if (!openCurrentConsole()) {
