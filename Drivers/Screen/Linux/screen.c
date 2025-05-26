@@ -530,12 +530,12 @@ controlMainConsole (int operation, void *argument) {
   return controlConsole(&mainConsoleDescriptor, MAIN_CONSOLE, mainConsoleType, operation, argument);
 }
 
-static const char *unicodeName = NULL;
+static const char *unicodeDeviceName = NULL;
 
 static int
-setUnicodeName (void) {
+setUnicodeDeviceName (void) {
   static const char *const names[] = {"vcsu", "vcsu0", NULL};
-  return setDeviceName(&unicodeName, names, 1, "unicode");
+  return setDeviceName(&unicodeDeviceName, names, 1, "unicode");
 }
 
 static void
@@ -549,11 +549,11 @@ closeUnicodeDevice (int *fd) {
 
 static int
 openUnicodeDevice (int *fd, int vt) {
-  if (!unicodeName) return 0;
+  if (!unicodeDeviceName) return 0;
   if (*fd != -1) return 1;
 
   int opened = 0;
-  char *name = vtName(unicodeName, vt);
+  char *name = vtName(unicodeDeviceName, vt);
 
   if (name) {
     int unicode = openCharacterDevice(name, O_RDWR, VCS_MAJOR, 0X40|vt);
@@ -566,7 +566,7 @@ openUnicodeDevice (int *fd, int vt) {
       *fd = unicode;
       opened = 1;
     } else {
-      unicodeName = NULL;
+      unicodeDeviceName = NULL;
     }
 
     free(name);
@@ -904,9 +904,8 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
 
     if (useGetConSizeCsrPos) {
       struct vt_consizecsrpos info;
-      int result = controlCurrentConsole(VT_GETCONSIZECSRPOS, &info);
 
-      if (result != -1) {
+      if (controlCurrentConsole(VT_GETCONSIZECSRPOS, &info) != -1) {
         useVcsa = 0;
         header.size.columns = info.con_cols;
         header.size.rows = info.con_rows;
@@ -1597,7 +1596,7 @@ construct_LinuxScreen (void) {
   if (setScreenName()) {
     if (setConsoleName()) {
       if (unicodeEnabled) {
-        if (!setUnicodeName()) {
+        if (!setUnicodeDeviceName()) {
           unicodeEnabled = 0;
         }
       }
