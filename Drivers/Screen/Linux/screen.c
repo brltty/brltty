@@ -860,14 +860,16 @@ vcsaReadHeader (ScreenHeader *header) {
   header->cursor.column = vcsa.cursor.column;
   header->cursor.row = vcsa.cursor.row;
 
-  if ((header->size.columns == UINT8_MAX) || (header->size.rows == UINT8_MAX) || largeScreenBug) {
-    struct winsize winSize;
+  if (isCurrentConsoleOpen()) {
+    if ((header->size.columns == UINT8_MAX) || (header->size.rows == UINT8_MAX) || largeScreenBug) {
+      struct winsize winSize;
 
-    if (controlCurrentConsole(TIOCGWINSZ, &winSize) != -1) {
-      header->size.columns = winSize.ws_col;
-      header->size.rows = winSize.ws_row;
-    } else {
-      logSystemError("ioctl[TIOCGWINSZ]");
+      if (controlCurrentConsole(TIOCGWINSZ, &winSize) != -1) {
+        header->size.columns = winSize.ws_col;
+        header->size.rows = winSize.ws_row;
+      } else {
+        logSystemError("ioctl[TIOCGWINSZ]");
+      }
     }
   }
 
