@@ -245,4 +245,18 @@ char \u2229	(1   5678)	# ⣱ ∩ [interseção | INTERSECTION]
 char \u222A	(  345 78)	# ⣜ ∪ [união | UNION]
 char \u2260	( 23 567 )	# ⡶ ≠ [diferente | NOT EQUAL TO]
 
+# Accented letters of Esperanto
+char \u0108	(1  4 67 )	# ⡩ Ĉ [c circunflexo maiúsculo | LATIN CAPITAL LETTER C WITH CIRCUMFLEX]
+char \u0109	(1  4 6  )	# ⠩ ĉ [c circunflexo minúsculo | LATIN SMALL LETTER C WITH CIRCUMFLEX]
+char \u011C	(12 4567 )	# ⡻ Ĝ [g circunflexo maiúsculo | LATIN CAPITAL LETTER G WITH CIRCUMFLEX]
+char \u011D	(12 456  )	# ⠻ ĝ [g circunflexo minúsculo | LATIN SMALL LETTER G WITH CIRCUMFLEX]
+char \u0124	(12  567 )	# ⡳ Ĥ [h circunflexo maiúsculo | LATIN CAPITAL LETTER H WITH CIRCUMFLEX]
+char \u0125	(12  56  )	# ⠳ ĥ [h circunflexo minúsculo | LATIN SMALL LETTER H WITH CIRCUMFLEX]
+char \u0134	( 2 4567 )	# ⡺ Ĵ [j circunflexo maiúsculo | LATIN CAPITAL LETTER J WITH CIRCUMFLEX]
+char \u0135	( 2 456  )	# ⠺ ĵ [j circunflexo minúsculo | LATIN SMALL LETTER J WITH CIRCUMFLEX]
+char \u015C	( 234 67 )	# ⡮ Ŝ [s circunflexo maiúsculo | LATIN CAPITAL LETTER S WITH CIRCUMFLEX]
+char \u015D	( 234 6  )	# ⠮ ŝ [s circunflexo minúsculo | LATIN SMALL LETTER S WITH CIRCUMFLEX]
+char \u016C	(  34 67 )	# ⡬ Ŭ [u breve maiúsculo | LATIN CAPITAL LETTER U WITH BREVE]
+char \u016D	(  34 6  )	# ⠬ ŭ [u breve minúsculo | LATIN SMALL LETTER U WITH BREVE]
+
 include common.tti
