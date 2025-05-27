@@ -999,6 +999,14 @@ toScreenBufferSize (const ScreenSize *screenSize) {
   return (screenSize->columns * screenSize->rows * 2) + sizeof(ScreenHeader);
 }
 
+static void
+logTruncatedScreenHeader (const ScreenHeader *header, size_t count) {
+  logBytes(LOG_ERR,
+    "truncated screen header: %"PRIsize " < %"PRIsize,
+    header, count, count, sizeof(*header)
+  );
+}
+
 static size_t
 refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
   if (!*bufferAddress) {
@@ -1010,11 +1018,7 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
       if (!count) return 0;
 
       if (count < headerSize) {
-        logBytes(LOG_ERR,
-          "truncated screen header: %"PRIsize " < %"PRIsize,
-          &header, count, count, headerSize
-        );
-
+        logTruncatedScreenHeader(&header, count);
         return 0;
       }
     }
@@ -1041,11 +1045,7 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
     const size_t headerSize = sizeof(*header);
 
     if (actualSize < headerSize) {
-      logBytes(LOG_ERR,
-        "truncated screen header: %"PRIsize " < %"PRIsize,
-        header, actualSize, actualSize, headerSize
-      );
-
+      logTruncatedScreenHeader(header, actualSize);
       return 0;
     }
 
