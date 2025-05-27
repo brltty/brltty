@@ -716,7 +716,7 @@ typedef struct {
 
 typedef struct {
   ScreenSize size;
-  ScreenLocation location;
+  ScreenLocation cursor;
   unsigned char hideCursor:1;
 } ScreenHeader;
 
@@ -814,18 +814,6 @@ readScreenDirect (off_t offset, void *buffer, size_t size) {
   return 0;
 }
 
-typedef struct {
-  struct {
-    uint8_t rows;
-    uint8_t columns;
-  } size;
-
-  struct {
-    uint8_t column;
-    uint8_t row;
-  } location;
-} VcsaHeader;
-
 static int
 vcsaHasClamping (void) {
   int major, minor;
@@ -835,6 +823,18 @@ vcsaHasClamping (void) {
   if (major > 5) return 1;
   return minor >= 1;
 }
+
+typedef struct {
+  struct {
+    uint8_t rows;
+    uint8_t columns;
+  } size;
+
+  struct {
+    uint8_t column;
+    uint8_t row;
+  } cursor;
+} VcsaHeader;
 
 static int
 vcsaReadHeader (ScreenHeader *header) {
@@ -857,8 +857,8 @@ vcsaReadHeader (ScreenHeader *header) {
 
   header->size.columns = vcsa.size.columns;
   header->size.rows = vcsa.size.rows;
-  header->location.column = vcsa.location.column;
-  header->location.row = vcsa.location.row;
+  header->cursor.column = vcsa.cursor.column;
+  header->cursor.row = vcsa.cursor.row;
 
   if ((header->size.columns == UINT8_MAX) || (header->size.rows == UINT8_MAX) || largeScreenBug) {
     struct winsize winSize;
@@ -872,14 +872,14 @@ vcsaReadHeader (ScreenHeader *header) {
   }
 
   if (largeScreenBug) {
-    if (header->location.column >= header->size.columns) {
-      header->location.column = header->size.columns - 1;
+    if (header->cursor.column >= header->size.columns) {
+      header->cursor.column = header->size.columns - 1;
     }
 
-    if (header->location.row >= header->size.rows) {
-      header->location.row = header->size.rows - 1;
+    if (header->cursor.row >= header->size.rows) {
+      header->cursor.row = header->size.rows - 1;
     }
-  } else if ((header->location.column == UINT8_MAX) || (header->location.row == UINT8_MAX)) {
+  } else if ((header->cursor.column == UINT8_MAX) || (header->cursor.row == UINT8_MAX)) {
     header->hideCursor = 1;
 
     {
@@ -914,8 +914,8 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
         useVcsa = 0;
         header.size.columns = info.con_cols;
         header.size.rows = info.con_rows;
-        header.location.column = info.csr_col;
-        header.location.row = info.csr_row;
+        header.cursor.column = info.csr_col;
+        header.cursor.row = info.csr_row;
       } else {
         if (errno == ENOTTY) useGetConSizeCsrPos = 0;
         logSystemError("ioctl[VT_GETCONSIZECSRPOS]");
@@ -995,24 +995,24 @@ readScreenContent (off_t offset, uint16_t *buffer, size_t count) {
 }
 
 static size_t
-getScreenBufferSize (const ScreenSize *screenSize) {
+toScreenBufferSize (const ScreenSize *screenSize) {
   return (screenSize->columns * screenSize->rows * 2) + sizeof(ScreenHeader);
 }
 
 static size_t
-refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
-  if (!*screenBuffer) {
+refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
+  if (!*bufferAddress) {
     ScreenHeader header;
+    const size_t headerSize = sizeof(header);
 
     {
-      size_t size = sizeof(header);
-      size_t count = readScreenDevice(0, &header, size);
+      size_t count = readScreenDevice(0, &header, headerSize);
       if (!count) return 0;
 
-      if (count < size) {
+      if (count < headerSize) {
         logBytes(LOG_ERR,
           "truncated screen header: %"PRIsize " < %"PRIsize,
-          &header, count, count, size
+          &header, count, count, headerSize
         );
 
         return 0;
@@ -1020,7 +1020,7 @@ refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
     }
 
     {
-      size_t size = getScreenBufferSize(&header.size);
+      size_t size = toScreenBufferSize(&header.size);
       unsigned char *buffer = malloc(size);
 
       if (!buffer) {
@@ -1028,36 +1028,44 @@ refreshScreenBuffer (unsigned char **screenBuffer, size_t *screenSize) {
         return 0;
       }
 
-      *screenBuffer = buffer;
-      *screenSize = size;
+      *bufferAddress = buffer;
+      *bufferSize = size;
     }
   }
 
   while (1) {
-    size_t count = readScreenDevice(0, *screenBuffer, *screenSize);
-    if (!count) return 0;
+    size_t actualSize = readScreenDevice(0, *bufferAddress, *bufferSize);
+    if (!actualSize) return 0;
 
-    if (count < sizeof(ScreenHeader)) {
-      logBytes(LOG_ERR, "truncated screen header", *screenBuffer, count);
+    ScreenHeader *header = (void *)*bufferAddress;
+    const size_t headerSize = sizeof(*header);
+
+    if (actualSize < headerSize) {
+      logBytes(LOG_ERR,
+        "truncated screen header: %"PRIsize " < %"PRIsize,
+        header, actualSize, actualSize, headerSize
+      );
+
       return 0;
     }
 
     {
-      ScreenHeader *header = (void *)*screenBuffer;
-      size_t size = getScreenBufferSize(&header->size);
-      if (count >= size) return header->size.columns * header->size.rows;
+      size_t requiredSize = toScreenBufferSize(&header->size);
+      if (actualSize >= requiredSize) return header->size.columns * header->size.rows;
 
-      {
-        unsigned char *buffer = realloc(*screenBuffer, size);
+      if (requiredSize > *bufferSize) {
+        unsigned char *buffer = realloc(*bufferAddress, requiredSize);
 
         if (!buffer) {
           logMallocError();
           return 0;
         }
 
-        *screenBuffer = buffer;
-        *screenSize = size;
+        *bufferAddress = buffer;
+        *bufferSize = requiredSize;
       }
+
+      if (!openCurrentConsole()) return 0;
     }
   }
 }
@@ -1698,7 +1706,7 @@ isUnusedConsole (int vt) {
   if (refreshScreenBuffer(&buffer, &size)) {
     const ScreenHeader *header = (void *)buffer;
     const uint16_t *from = (void *)(buffer + sizeof(*header));
-    const uint16_t *to = (void *)(buffer + getScreenBufferSize(&header->size));
+    const uint16_t *to = (void *)(buffer + toScreenBufferSize(&header->size));
 
     if (from < to) {
       const uint16_t vga = *from++;
@@ -1851,8 +1859,8 @@ getScreenDescription (ScreenDescription *description) {
     description->cols = header.size.columns;
     description->rows = header.size.rows;
 
-    description->posx = header.location.column;
-    description->posy = header.location.row;
+    description->posx = header.cursor.column;
+    description->posy = header.cursor.row;
     if (header.hideCursor) description->hasCursor = 0;
 
     adjustCursorColumn(&description->posx, description->posy, description->cols);
