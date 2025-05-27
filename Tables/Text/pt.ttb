@@ -17,6 +17,24 @@
 ###############################################################################
 
 # BRLTTY Text Table - Portuguese
+#
+# Tiago Melo Casal <tcasal@intervox.nce.ufrj.br>, 2025.
+#
+# This table is mainly based on the official Portuguese 8-dot computer
+# braille code; defines accented letters, punctuation marks, currency
+# signs, Greek letters, and other characters.
+#
+# For the omissions in the official documentation, they were solved
+# using approximate character definitions of this table itself and
+# resources from other tables so that such gaps would not be left
+# uncovered.
+#
+# Official Braille Code reference:
+# "Grafia Braille para Informática" [Braille Writing for Computing (in
+# Portuguese)], 2005, by "Comissão Brasileira do Braille e Comissão de
+# Braille de Portugal" [both Brazilian Braille Commission and Braille
+# Commission of Portugal].
+# https://www.gov.br/mec/pt-br/media/publicacoes/semesp/grafiainfo.pdf
 
 # the standard representations for the letters of the Latin alphabet
 include ltr-latin.tti
