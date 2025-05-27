@@ -259,4 +259,20 @@ char \u015D	( 234 6  )	# ⠮ ŝ [s circunflexo minúsculo | LATIN SMALL LETTER S
 char \u016C	(  34 67 )	# ⡬ Ŭ [u breve maiúsculo | LATIN CAPITAL LETTER U WITH BREVE]
 char \u016D	(  34 6  )	# ⠬ ŭ [u breve minúsculo | LATIN SMALL LETTER U WITH BREVE]
 
+# Other characters that the official braille code documentation does not defined
+char \u2022	(  3 5   )	# ⠔ • [bolinha | BULLET]
+char \u2026	(  3   7 )	# ⠄ … [reticências | HORIZONTAL ELLIPSIS]
+char \u2044	( 2  56  )	# ⠲ ⁄ [barra de fração | FRACTION SLASH]
+char \u2122	( 2345  8)	# ⢞ ™ [marca registrada | TRADE MARK SIGN]
+char \u2215	( 2  56  )	# ⠲ ∕ [barra de divisão | DIVISION SLASH]
+
+# Other bullets
+char \u25A0	(  3 5   )	# ⠔ ■ [quadrado preto | BLACK SQUARE]
+char \u25A1	(  3 5   )	# ⠔ □ [quadrado branco | WHITE SQUARE]
+char \u25AA	(  3 5   )	# ⠔ ▪ [quadradinho preto | BLACK SMALL SQUARE]
+char \u25CB	(  3 5   )	# ⠔ ○ [círculo branco | WHITE CIRCLE]
+char \u25CF (  3 5   )	# ⠔ ● [círculo | BLACK CIRCLE]
+char \u25E6	(  3 5   )	# ⠔ ◦ [bolinha branca | WHITE BULLET]
+char \u25FE	(  3 5   )	# ⠔ ◾ [quadradinho médio preto | BLACK MEDIUM SMALL SQUARE]
+
 include common.tti
