@@ -237,4 +237,12 @@ char \u03BE	(1 34 678)	# ⣭ ξ [xi minúsculo | GREEK SMALL LETTER XI]
 char \u0396	(1 3 567 )	# ⡵ Ζ [zeta maiúsculo | GREEK CAPITAL LETTER ZETA]
 char \u03B6	(1 3 5678)	# ⣵ ζ [zeta minúsculo | GREEK SMALL LETTER ZETA]
 
+# More symbols
+char \u20AC	(1   5 78)	# ⣑ € [euro | EURO SIGN]
+char \u2227	(1     7 )	# ⡁ ∧ ["e" lógico ou conjunção | LOGICAL AND]
+char \u2228	( 2    7 )	# ⡂ ∨ ["ou" lógico ou disjunção | LOGICAL OR]
+char \u2229	(1   5678)	# ⣱ ∩ [interseção | INTERSECTION]
+char \u222A	(  345 78)	# ⣜ ∪ [união | UNION]
+char \u2260	( 23 567 )	# ⡶ ≠ [diferente | NOT EQUAL TO]
+
 include common.tti
