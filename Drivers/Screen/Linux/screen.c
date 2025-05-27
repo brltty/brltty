@@ -1027,7 +1027,13 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
 
     {
       size_t size = toScreenBufferSize(&header.size);
-      unsigned char *buffer = malloc(size);
+
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+        "allocating screen buffer: %"PRIsize,
+        size
+      );
+
+      void *buffer = malloc(size);
 
       if (!buffer) {
         logMallocError();
@@ -1039,24 +1045,35 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
     }
   }
 
+  unsigned int loopCounter = 10;
   while (1) {
-    size_t actualSize = readScreenDevice(0, *bufferAddress, *bufferSize);
-    if (!actualSize) return 0;
+    size_t bytesRead = readScreenDevice(0, *bufferAddress, *bufferSize);
+    if (!bytesRead) return 0;
 
     ScreenHeader *header = (void *)*bufferAddress;
     const size_t headerSize = sizeof(*header);
 
-    if (actualSize < headerSize) {
-      logTruncatedScreenHeader(header, actualSize);
+    if (bytesRead < headerSize) {
+      logTruncatedScreenHeader(header, bytesRead);
       return 0;
     }
 
     {
       size_t requiredSize = toScreenBufferSize(&header->size);
-      if (actualSize >= requiredSize) return header->size.columns * header->size.rows;
+      if (bytesRead >= requiredSize) return header->size.columns * header->size.rows;
+
+      if (!--loopCounter) {
+        logMessage(LOG_WARNING, "too many attempts to read the screen");
+        return 0;
+      }
 
       if (requiredSize > *bufferSize) {
-        unsigned char *buffer = realloc(*bufferAddress, requiredSize);
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+          "extending screen buffer: %"PRIsize " -> %"PRIsize,
+          *bufferSize, requiredSize
+        );
+
+        void *buffer = realloc(*bufferAddress, requiredSize);
 
         if (!buffer) {
           logMallocError();
@@ -1067,7 +1084,10 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
         *bufferSize = requiredSize;
       }
 
-      if (!openCurrentConsole()) return 0;
+      if (isCurrentConsoleOpen()) {
+        logMessage(LOG_CATEGORY(SCREEN_DRIVER), "reopening current console");
+        if (!openCurrentConsole()) return 0;
+      }
     }
   }
 }
