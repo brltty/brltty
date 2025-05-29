@@ -1757,9 +1757,12 @@ isUnusedConsole (int vt) {
     switch (errno) {
       default:
         logMessage(LOG_WARNING, "can't open screen %d: %s", vt, strerror(errno));
+        break;
+
       case ENOENT: // device name not defined
       case EPERM: // can't define device within nodev directory
       case ENXIO: // device not defined within kernel
+        isUnused = 1;
         break;
     }
   }
