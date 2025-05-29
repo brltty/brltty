@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/sysmacros.h>
 #include <linux/tty.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
@@ -45,6 +46,10 @@ struct vt_consizecsrpos {
   __u16 csr_col;
 };
 #endif /* VT_GETCONSIZECSRPOS */
+
+#ifndef TIOCL_GETFGCONSOLE
+#define TIOCL_GETFGCONSOLE 16
+#endif /* TIOCL_GETFGCONSOLE */
 
 #ifndef TIOCL_GETBRACKETEDPASTE
 #define TIOCL_GETBRACKETEDPASTE 18
@@ -447,22 +452,66 @@ controlConsole (int *fd, int vt, const char *type, int operation, void *argument
   return result;
 }
 
+static const char mainConsoleType[] = "main";
+static int mainConsoleDescriptor;
+
+static const int NO_CONSOLE = 0;
+static const int MAIN_CONSOLE = 0;
+
+static void
+closeMainConsole (void) {
+  closeConsole(&mainConsoleDescriptor, mainConsoleType);
+}
+
+static int
+openMainConsole (void) {
+  return openConsole(&mainConsoleDescriptor, MAIN_CONSOLE, mainConsoleType);
+}
+
+static int
+controlMainConsole (int operation, void *argument) {
+  return controlConsole(&mainConsoleDescriptor, MAIN_CONSOLE, mainConsoleType, operation, argument);
+}
+
+static int
+getConsoleState (struct vt_stat *state) {
+  if (controlMainConsole(VT_GETSTATE, state) != -1) return 1;
+  logSystemError("ioctl[VT_GETSTATE]");
+  problemText = gettext("can't get console state");
+  return 0;
+}
+
+static int
+getForegroundConsoleNumber (int *vt) {
+  {
+    unsigned char subcode = TIOCL_GETFGCONSOLE;
+    int result = controlMainConsole(TIOCLINUX, &subcode);
+
+    if (result != -1) {
+      *vt = result + 1;
+      return 1;
+    }
+  }
+
+  {
+    struct vt_stat state;
+
+    if (getConsoleState(&state)) {
+      *vt = state.v_active;
+      return 1;
+    }
+  }
+
+  problemText = gettext("can't get foreground console number");
+  return 0;
+}
+
 static const char currentConsoleType[] = "current";
 static int currentConsoleDescriptor;
 
 static inline int
 isCurrentConsoleOpen (void) {
   return currentConsoleDescriptor != -1;
-}
-
-static void
-closeCurrentConsole (void) {
-  closeConsole(&currentConsoleDescriptor, currentConsoleType);
-}
-
-static int
-openCurrentConsole (void) {
-  return openConsole(&currentConsoleDescriptor, virtualTerminalNumber, currentConsoleType);
 }
 
 static int
@@ -514,25 +563,37 @@ controlCurrentConsole (int operation, void *argument) {
   return -1;
 }
 
-static const char mainConsoleType[] = "main";
-static int mainConsoleDescriptor;
-
-static const int NO_CONSOLE = 0;
-static const int MAIN_CONSOLE = 0;
-
 static void
-closeMainConsole (void) {
-  closeConsole(&mainConsoleDescriptor, mainConsoleType);
+closeCurrentConsole (void) {
+  closeConsole(&currentConsoleDescriptor, currentConsoleType);
 }
 
 static int
-openMainConsole (void) {
-  return openConsole(&mainConsoleDescriptor, MAIN_CONSOLE, mainConsoleType);
-}
+openCurrentConsole (int vt) {
+  unsigned int attemptsLeft = 10;
 
-static int
-controlMainConsole (int operation, void *argument) {
-  return controlConsole(&mainConsoleDescriptor, MAIN_CONSOLE, mainConsoleType, operation, argument);
+  while (1) {
+    if (!openConsole(&currentConsoleDescriptor, virtualTerminalNumber, currentConsoleType)) return 0;
+    if (virtualTerminalNumber) return 1;
+
+    {
+      unsigned int device;
+
+      if (controlCurrentConsole(TIOCGDEV, &device) != -1) {
+        unsigned int number = minor(device) & 0X3F;
+
+        if (number == vt) {
+          return 1;
+        }
+      }
+    }
+
+    if (!--attemptsLeft) {
+      logMessage(LOG_WARNING, "too many attempts to open foreground console");
+      errno = ELOOP;
+      return 0;
+    }
+  }
 }
 
 static const char *unicodeDeviceName = NULL;
@@ -996,7 +1057,7 @@ readScreenContent (off_t offset, uint16_t *buffer, size_t count) {
   return readScreenData(offset, buffer, count);
 }
 
-static size_t
+static inline size_t
 toScreenBufferSize (const ScreenSize *screenSize) {
   return (screenSize->columns * screenSize->rows * 2) + sizeof(ScreenHeader);
 }
@@ -1045,7 +1106,6 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
     }
   }
 
-  unsigned int attemptsLeft = 10;
   while (1) {
     size_t bytesRead = readScreenDevice(0, *bufferAddress, *bufferSize);
     if (!bytesRead) return 0;
@@ -1058,37 +1118,24 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
       return 0;
     }
 
-    {
-      size_t requiredSize = toScreenBufferSize(&header->size);
-      if (bytesRead >= requiredSize) return header->size.columns * header->size.rows;
+    size_t requiredSize = toScreenBufferSize(&header->size);
+    if (bytesRead >= requiredSize) return header->size.columns * header->size.rows;
+    if (requiredSize <= *bufferSize) return 0;
 
-      if (!--attemptsLeft) {
-        logMessage(LOG_WARNING, "too many attempts to read the screen");
-        return 0;
-      }
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+      "extending screen buffer: %"PRIsize " -> %"PRIsize,
+      *bufferSize, requiredSize
+    );
 
-      if (requiredSize > *bufferSize) {
-        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-          "extending screen buffer: %"PRIsize " -> %"PRIsize,
-          *bufferSize, requiredSize
-        );
+    void *buffer = realloc(*bufferAddress, requiredSize);
 
-        void *buffer = realloc(*bufferAddress, requiredSize);
-
-        if (!buffer) {
-          logMallocError();
-          return 0;
-        }
-
-        *bufferAddress = buffer;
-        *bufferSize = requiredSize;
-      }
-
-      if (isCurrentConsoleOpen()) {
-        logMessage(LOG_CATEGORY(SCREEN_DRIVER), "reopening current console");
-        if (!openCurrentConsole()) return 0;
-      }
+    if (!buffer) {
+      logMallocError();
+      return 0;
     }
+
+    *bufferAddress = buffer;
+    *bufferSize = requiredSize;
   }
 }
 
@@ -1712,14 +1759,6 @@ poll_LinuxScreen (void) {
 }
 
 static int
-getConsoleState (struct vt_stat *state) {
-  if (controlMainConsole(VT_GETSTATE, state) != -1) return 1;
-  logSystemError("ioctl[VT_GETSTATE]");
-  problemText = gettext("can't get console state");
-  return 0;
-}
-
-static int
 isUnusedConsole (int vt) {
   int isUnused = 0;
   int fd;
@@ -1730,7 +1769,7 @@ isUnusedConsole (int vt) {
     uint16_t firstCharacter;
 
     while (1) {
-      uint16_t buffer[0X1000];
+      uint16_t buffer[0X800];
       size_t bytesRead = pread(fd, buffer, sizeof(buffer), offset);
 
       if (!bytesRead) {
@@ -1771,18 +1810,15 @@ isUnusedConsole (int vt) {
 }
 
 static int
-canOpenCurrentConsole (void) {
+canOpenConsole (int vt) {
   static uint64_t openableConsoles = 0;
-
-  struct vt_stat state;
-  if (!getConsoleState(&state)) return 0;
-
-  int vt = virtualTerminalNumber;
-  if (!vt) vt = state.v_active;
   uint64_t bit = UINT64_C(1) << vt;
 
   if (bit && !(openableConsoles & bit)) {
     if (vt != MAIN_CONSOLE) {
+      struct vt_stat state;
+      if (!getConsoleState(&state)) return 0;
+
       if (!(state.v_state & bit)) {
         if (isUnusedConsole(vt)) {
           return 0;
@@ -1798,32 +1834,32 @@ canOpenCurrentConsole (void) {
 
 static int
 getConsoleNumber (void) {
-  int console;
+  int vt;
 
   if (virtualTerminalNumber) {
-    console = virtualTerminalNumber;
-  } else {
-    struct vt_stat state;
-    if (!getConsoleState(&state)) return NO_CONSOLE;
-    console = state.v_active;
+    vt = virtualTerminalNumber;
+  } else if (!getForegroundConsoleNumber(&vt)) {
+    vt = NO_CONSOLE;
   }
 
-  if (console != currentConsoleNumber) {
+  if (vt != currentConsoleNumber) {
     closeCurrentConsole();
   }
 
-  if (!isCurrentConsoleOpen()) {
-    if (!canOpenCurrentConsole()) {
-      problemText = gettext("console not in use");
-    } else if (!openCurrentConsole()) {
-      logSystemError("current console open");
-      problemText = gettext("can't open console");
-    }
+  if (vt != NO_CONSOLE) {
+    if (!isCurrentConsoleOpen()) {
+      if (!canOpenConsole(vt)) {
+        problemText = gettext("console not in use");
+      } else if (!openCurrentConsole(vt)) {
+        logSystemError("current console open");
+        problemText = gettext("can't open console");
+      }
 
-    setTranslationTable(1);
+      setTranslationTable(1);
+    }
   }
 
-  return console;
+  return vt;
 }
 
 static int
@@ -1862,16 +1898,16 @@ refresh_LinuxScreen (void) {
     while (1) {
       problemText = NULL;
 
-      int consoleNumber = getConsoleNumber();
-      int consoleChanged = consoleNumber != currentConsoleNumber;
+      int newConsoleNumber = getConsoleNumber();
+      int consoleChanged = newConsoleNumber != currentConsoleNumber;
 
       if (consoleChanged) {
         logMessage(LOG_CATEGORY(SCREEN_DRIVER),
           "console number changed: %u -> %u",
-          currentConsoleNumber, consoleNumber
+          currentConsoleNumber, newConsoleNumber
         );
 
-        currentConsoleNumber = consoleNumber;
+        currentConsoleNumber = newConsoleNumber;
       }
 
       if (!refreshCache()) {
