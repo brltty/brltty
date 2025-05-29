@@ -1045,7 +1045,7 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
     }
   }
 
-  unsigned int loopCounter = 10;
+  unsigned int attemptsLeft = 10;
   while (1) {
     size_t bytesRead = readScreenDevice(0, *bufferAddress, *bufferSize);
     if (!bytesRead) return 0;
@@ -1062,7 +1062,7 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
       size_t requiredSize = toScreenBufferSize(&header->size);
       if (bytesRead >= requiredSize) return header->size.columns * header->size.rows;
 
-      if (!--loopCounter) {
+      if (!--attemptsLeft) {
         logMessage(LOG_WARNING, "too many attempts to read the screen");
         return 0;
       }
@@ -1721,47 +1721,67 @@ getConsoleState (struct vt_stat *state) {
 
 static int
 isUnusedConsole (int vt) {
-  int isUnused = 1;
-  unsigned char *buffer = NULL;
-  size_t size = 0;
+  int isUnused = 0;
+  int fd;
 
-  if (refreshScreenBuffer(&buffer, &size)) {
-    const ScreenHeader *header = (void *)buffer;
-    const uint16_t *from = (void *)(buffer + sizeof(*header));
-    const uint16_t *to = (void *)(buffer + toScreenBufferSize(&header->size));
+  if (openScreenDevice(&fd, vt)) {
+    const off_t start = sizeof(VcsaHeader);
+    off_t offset = start;
+    uint16_t firstCharacter;
 
-    if (from < to) {
-      const uint16_t vga = *from++;
+    while (1) {
+      uint16_t buffer[0X1000];
+      size_t bytesRead = pread(fd, buffer, sizeof(buffer), offset);
+
+      if (!bytesRead) {
+        isUnused = 1;
+        goto done;
+      }
+
+      const uint16_t *from = buffer;
+      const uint16_t *to = from + (bytesRead / sizeof(buffer[0]));
+      if (offset == start) firstCharacter = *from++;
 
       while (from < to) {
-        if (*from++ != vga) {
-          isUnused = 0;
-          break;
-        }
+        if (*from != firstCharacter) goto done;
+        from += 1;
       }
+
+      offset += bytesRead;
+    }
+
+  done:
+    close(fd);
+    fd = -1;
+  } else {
+    switch (errno) {
+      default:
+        logMessage(LOG_WARNING, "can't open screen %d: %s", vt, strerror(errno));
+      case ENOENT: // device name not defined
+      case EPERM: // can't define device within nodev directory
+      case ENXIO: // device not defined within kernel
+        break;
     }
   }
 
-  if (buffer) free(buffer);
   return isUnused;
 }
 
 static int
 canOpenCurrentConsole (void) {
-  typedef uint16_t OpenableConsoles;
-  static OpenableConsoles openableConsoles = 0;
+  static uint64_t openableConsoles = 0;
 
   struct vt_stat state;
   if (!getConsoleState(&state)) return 0;
 
-  int console = virtualTerminalNumber;
-  if (!console) console = state.v_active;
-  OpenableConsoles bit = 1 << console;
+  int vt = virtualTerminalNumber;
+  if (!vt) vt = state.v_active;
+  uint64_t bit = UINT64_C(1) << vt;
 
   if (bit && !(openableConsoles & bit)) {
-    if (console != MAIN_CONSOLE) {
+    if (vt != MAIN_CONSOLE) {
       if (!(state.v_state & bit)) {
-        if (isUnusedConsole(console)) {
+        if (isUnusedConsole(vt)) {
           return 0;
         }
       }
