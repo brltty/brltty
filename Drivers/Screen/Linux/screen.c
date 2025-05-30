@@ -490,6 +490,8 @@ getForegroundConsoleNumber (int *vt) {
     if (result != -1) {
       *vt = result + 1;
       return 1;
+    } else if (errno != EINVAL) {
+      logSystemError("ioctl[TIOCLINUX(TIOCL_GETFGCONSOLE)]");
     }
   }
 
@@ -580,11 +582,29 @@ openCurrentConsole (int vt) {
       unsigned int device;
 
       if (controlCurrentConsole(TIOCGDEV, &device) != -1) {
-        unsigned int number = minor(device) & 0X3F;
+        {
+          static const unsigned int expected = TTY_MAJOR;
+          unsigned int actual = major(device);
 
-        if (number == vt) {
-          return 1;
+          if (actual != expected) {
+            logMessage(LOG_WARNING,
+              "unexpected foreground tty device class (expected %u, got %u)",
+              expected, actual
+            );
+
+            return 0;
+          }
         }
+
+        unsigned int ttyNumber = minor(device) & 0X3F;
+        if (ttyNumber == vt) return 1;
+
+        logMessage(LOG_WARNING,
+          "incorrect foreground tty number (expecting %u, got %u) - retrying",
+          vt, ttyNumber
+        );
+      } else {
+        logSystemError("ioctl[TIOCGDEV]");
       }
     }
 
