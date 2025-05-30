@@ -648,7 +648,6 @@ openUnicodeDevice (int *fd, int vt) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
                  "unicode device opened: %s: fd=%d", name, unicode);
 
-      closeUnicodeDevice(fd);
       *fd = unicode;
       opened = 1;
     } else {
@@ -748,16 +747,22 @@ readUnicodeContent (off_t offset, uint32_t *buffer, size_t count) {
 }
 
 static int
-refreshUnicodeCache (size_t size) {
-  size *= 4;
+refreshUnicodeCache (unsigned int characters) {
+  size_t newSize = characters * 4;
 
-  if (size > unicodeCacheSize) {
+  if (newSize > unicodeCacheSize) {
     const unsigned int bits = 10;
     const unsigned int mask = (1 << bits) - 1;
 
-    size |= mask;
-    size += 1;
-    unsigned char *buffer = malloc(size);
+    newSize |= mask;
+    newSize += 1;
+
+    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+      "extending unicode buffer: %"PRIsize " -> %"PRIsize,
+      unicodeCacheSize, newSize
+    );
+
+    void *buffer = malloc(newSize);
 
     if (!buffer) {
       logMallocError();
@@ -766,7 +771,7 @@ refreshUnicodeCache (size_t size) {
 
     if (unicodeCacheBuffer) free(unicodeCacheBuffer);
     unicodeCacheBuffer = buffer;
-    unicodeCacheSize = size;
+    unicodeCacheSize = newSize;
   }
 
   unicodeCacheUsed = readUnicodeDevice(0, unicodeCacheBuffer, unicodeCacheSize);
@@ -1090,7 +1095,7 @@ logTruncatedScreenHeader (const ScreenHeader *header, size_t count) {
   );
 }
 
-static size_t
+static unsigned int
 refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
   if (!*bufferAddress) {
     ScreenHeader header;
@@ -1900,11 +1905,11 @@ testTextMode (void) {
 
 static int
 refreshCache (void) {
-  size_t size = refreshScreenBuffer(&screenCacheBuffer, &screenCacheSize);
-  if (!size) return 0;
+  unsigned int characters = refreshScreenBuffer(&screenCacheBuffer, &screenCacheSize);
+  if (!characters) return 0;
 
   if (unicodeEnabled) {
-    if (!refreshUnicodeCache(size)) {
+    if (!refreshUnicodeCache(characters)) {
       return 0;
     }
   }
