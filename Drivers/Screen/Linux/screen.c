@@ -1929,13 +1929,12 @@ refreshCache (void) {
 static int
 refresh_LinuxScreen (void) {
   if (screenUpdated) {
-    while (1) {
-      problemText = NULL;
+    problemText = NULL;
 
+    {
       int newConsoleNumber = getConsoleNumber();
-      int consoleChanged = newConsoleNumber != currentConsoleNumber;
 
-      if (consoleChanged) {
+      if (newConsoleNumber != currentConsoleNumber) {
         logMessage(LOG_CATEGORY(SCREEN_DRIVER),
           "console number changed: %d -> %d",
           currentConsoleNumber, newConsoleNumber
@@ -1943,19 +1942,15 @@ refresh_LinuxScreen (void) {
 
         currentConsoleNumber = newConsoleNumber;
       }
-
-      if (!refreshCache()) {
-        problemText = gettext("can't read screen content");
-        goto done;
-      }
-
-      if (!consoleChanged) break;
     }
 
-    inTextMode = testTextMode();
-    screenUpdated = 0;
+    if (refreshCache()) {
+      inTextMode = testTextMode();
+      screenUpdated = 0;
+    } else {
+      problemText = gettext("can't read screen content");
+    }
 
-  done:
     if (problemText) {
       if (*fallbackText) {
         problemText = gettext(fallbackText);
