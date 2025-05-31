@@ -656,6 +656,7 @@ openUnicodeDevice (int *fd, int vt) {
       *fd = unicode;
       opened = 1;
     } else {
+      logSystemError ("unicode device open");
       unicodeDeviceName = NULL;
     }
 
@@ -878,7 +879,11 @@ closeCurrentScreen (void) {
 static int
 setCurrentScreen (int vt) {
   int screen;
-  if (!openScreenDevice(&screen, vt)) return 0;
+
+  if (!openScreenDevice(&screen, vt)) {
+    logSystemError ("screen open");
+    return 0;
+  }
 
   closeCurrentConsole();
   closeCurrentUnicodeDevice();
