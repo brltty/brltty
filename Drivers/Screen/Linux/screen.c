@@ -571,49 +571,54 @@ closeCurrentConsole (void) {
 }
 
 static int
-openCurrentConsole (int vt) {
-  unsigned int attemptsLeft = 10;
-
-  while (1) {
-    if (!openConsole(&currentConsoleDescriptor, virtualTerminalNumber, currentConsoleType)) return 0;
+openCurrentConsole (int *vt) {
+  if (openConsole(&currentConsoleDescriptor, virtualTerminalNumber, currentConsoleType)) {
     if (virtualTerminalNumber) return 1;
+    unsigned int device;
 
-    {
-      unsigned int device;
+    if (controlCurrentConsole(TIOCGDEV, &device) != -1) {
+      {
+        const unsigned int expected = TTY_MAJOR;
+        unsigned int actual = major(device);
 
-      if (controlCurrentConsole(TIOCGDEV, &device) != -1) {
-        {
-          static const unsigned int expected = TTY_MAJOR;
-          unsigned int actual = major(device);
+        if (actual != expected) {
+          logMessage(LOG_WARNING,
+            "unexpected foreground tty device class (expected %u, got %u)",
+            expected, actual
+          );
 
-          if (actual != expected) {
-            logMessage(LOG_WARNING,
-              "unexpected foreground tty device class (expected %u, got %u)",
-              expected, actual
-            );
-
-            return 0;
-          }
+          return 0;
         }
-
-        unsigned int ttyNumber = minor(device) & 0X3F;
-        if (ttyNumber == vt) return 1;
-
-        logMessage(LOG_WARNING,
-          "incorrect foreground tty number (expecting %u, got %u) - retrying",
-          vt, ttyNumber
-        );
-      } else {
-        logSystemError("ioctl[TIOCGDEV]");
       }
-    }
 
-    if (!--attemptsLeft) {
-      logMessage(LOG_WARNING, "too many attempts to open foreground console");
-      errno = ELOOP;
-      return 0;
+      unsigned int ttyNumber = minor(device);
+      const unsigned int ttyNumberMask = 0X3F;
+
+      if ((ttyNumber & ttyNumberMask) != ttyNumber) {
+        logMessage(LOG_WARNING,
+          "unexpected foreground tty device group (expected %d, got %u)",
+          *vt, ttyNumber
+        );
+
+        return 0;
+      }
+
+      if (ttyNumber != *vt) {
+        logMessage(LOG_WARNING,
+          "unexpected foreground tty number (expecting %d, got %u) - assuming switch",
+          *vt, ttyNumber
+        );
+
+        *vt = ttyNumber;
+      }
+
+      return 1;
+    } else {
+      logSystemError("ioctl[TIOCGDEV]");
     }
   }
+
+  return 0;
 }
 
 static const char *unicodeDeviceName = NULL;
@@ -1875,7 +1880,7 @@ getConsoleNumber (void) {
     if (!isCurrentConsoleOpen()) {
       if (!canOpenConsole(vt)) {
         problemText = gettext("console not in use");
-      } else if (!openCurrentConsole(vt)) {
+      } else if (!openCurrentConsole(&vt)) {
         logSystemError("current console open");
         problemText = gettext("can't open console");
       }
@@ -1928,7 +1933,7 @@ refresh_LinuxScreen (void) {
 
       if (consoleChanged) {
         logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-          "console number changed: %u -> %u",
+          "console number changed: %d -> %d",
           currentConsoleNumber, newConsoleNumber
         );
 
