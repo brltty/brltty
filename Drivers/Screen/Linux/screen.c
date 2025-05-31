@@ -108,7 +108,7 @@ static unsigned int largeScreenBug;
 static unsigned int logScreenFontMap;
 static unsigned int rpiSpacesBug;
 static unsigned int unicodeEnabled;
-static int virtualTerminalNumber;
+static int selectedVirtualTerminal;
 static unsigned int widecharPadding;
 
 #define UNICODE_ROW_DIRECT 0XF000
@@ -368,7 +368,7 @@ setDeviceName (const char **name, const char *const *names, int strict, const ch
 }
 
 static char *
-vtName (const char *name, unsigned char vt) {
+vtName (const char *name, int vt) {
   char *string;
 
   if (vt) {
@@ -376,7 +376,7 @@ vtName (const char *name, unsigned char vt) {
     if (name[length-1] == '0') length -= 1;
 
     char buffer[length+4];
-    snprintf(buffer, sizeof(buffer), "%.*s%u", length, name, vt);
+    snprintf(buffer, sizeof(buffer), "%.*s%d", length, name, vt);
 
     string = strdup(buffer);
   } else {
@@ -519,7 +519,7 @@ isCurrentConsoleOpen (void) {
 static int
 controlCurrentConsole (int operation, void *argument) {
   if (isCurrentConsoleOpen()) {
-    return controlConsole(&currentConsoleDescriptor, virtualTerminalNumber, currentConsoleType, operation, argument);
+    return controlConsole(&currentConsoleDescriptor, selectedVirtualTerminal, currentConsoleType, operation, argument);
   }
 
   switch (operation) {
@@ -572,8 +572,8 @@ closeCurrentConsole (void) {
 
 static int
 openCurrentConsole (int *vt) {
-  if (openConsole(&currentConsoleDescriptor, virtualTerminalNumber, currentConsoleType)) {
-    if (virtualTerminalNumber) return 1;
+  if (openConsole(&currentConsoleDescriptor, selectedVirtualTerminal, currentConsoleType)) {
+    if (selectedVirtualTerminal) return 1;
     unsigned int device;
 
     if (controlCurrentConsole(TIOCGDEV, &device) != -1) {
@@ -583,7 +583,7 @@ openCurrentConsole (int *vt) {
 
         if (actual != expected) {
           logMessage(LOG_WARNING,
-            "unexpected foreground tty device class (expected %u, got %u)",
+            "unexpected foreground tty device type (expected %u, got %u)",
             expected, actual
           );
 
@@ -605,7 +605,7 @@ openCurrentConsole (int *vt) {
 
       if (ttyNumber != *vt) {
         logMessage(LOG_WARNING,
-          "unexpected foreground tty number (expecting %d, got %u) - assuming switch",
+          "unexpected foreground tty number (expecting %d, got %u) - assuming VT switch",
           *vt, ttyNumber
         );
 
@@ -675,7 +675,7 @@ closeCurrentUnicodeDevice (void) {
 static int
 openCurrentUnicodeDevice (void) {
   if (!unicodeEnabled) return 0;
-  return openUnicodeDevice(&unicodeDescriptor, virtualTerminalNumber);
+  return openUnicodeDevice(&unicodeDescriptor, selectedVirtualTerminal);
 }
 
 static size_t
@@ -876,15 +876,16 @@ closeCurrentScreen (void) {
 }
 
 static int
-setCurrentScreen (unsigned char vt) {
+setCurrentScreen (int vt) {
   int screen;
   if (!openScreenDevice(&screen, vt)) return 0;
 
   closeCurrentConsole();
   closeCurrentUnicodeDevice();
   closeCurrentScreen();
+
   screenDescriptor = screen;
-  virtualTerminalNumber = vt;
+  selectedVirtualTerminal = vt;
 
   isMonitorable = canMonitorScreen();
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -1640,7 +1641,7 @@ processParameters_LinuxScreen (char **parameters) {
     }
   }
 
-  virtualTerminalNumber = 0;
+  selectedVirtualTerminal = 0;
   {
     const char *parameter = parameters[PARM_VIRTUAL_TERMINAL_NUMBER];
 
@@ -1648,7 +1649,7 @@ processParameters_LinuxScreen (char **parameters) {
       static const int minimum = 0;
       static const int maximum = MAX_NR_CONSOLES;
 
-      if (!validateInteger(&virtualTerminalNumber, parameter, &minimum, &maximum)) {
+      if (!validateInteger(&selectedVirtualTerminal, parameter, &minimum, &maximum)) {
         logMessage(LOG_WARNING, "%s: %s", "invalid virtual terminal number", parameter);
       }
     }
@@ -1714,7 +1715,7 @@ construct_LinuxScreen (void) {
       }
 
       if (openMainConsole()) {
-        if (setCurrentScreen(virtualTerminalNumber)) {
+        if (setCurrentScreen(selectedVirtualTerminal)) {
           openKeyboard();
           brailleDeviceOfflineListener = registerReportListener(REPORT_BRAILLE_DEVICE_OFFLINE, lxBrailleDeviceOfflineListener, NULL);
           return 1;
@@ -1866,8 +1867,8 @@ static int
 getConsoleNumber (void) {
   int vt;
 
-  if (virtualTerminalNumber) {
-    vt = virtualTerminalNumber;
+  if (selectedVirtualTerminal) {
+    vt = selectedVirtualTerminal;
   } else if (!getForegroundConsoleNumber(&vt)) {
     vt = NO_CONSOLE;
   }
@@ -2732,7 +2733,7 @@ unhighlightRegion_LinuxScreen (void) {
 }
 
 static int
-validateVt (int vt) {
+validateVirtualTerminalNumber (int vt) {
   if ((vt >= 1) && (vt <= MAX_NR_CONSOLES)) return 1;
   logMessage(LOG_WARNING, "virtual terminal out of range: %d", vt);
   return 0;
@@ -2740,14 +2741,14 @@ validateVt (int vt) {
 
 static int
 selectVirtualTerminal_LinuxScreen (int vt) {
-  if (vt == virtualTerminalNumber) return 1;
-  if (vt && !validateVt(vt)) return 0;
+  if (vt == selectedVirtualTerminal) return 1;
+  if (vt && !validateVirtualTerminalNumber(vt)) return 0;
   return setCurrentScreen(vt);
 }
 
 static int
 switchVirtualTerminal_LinuxScreen (int vt) {
-  if (validateVt(vt)) {
+  if (validateVirtualTerminalNumber(vt)) {
     if (selectVirtualTerminal_LinuxScreen(0)) {
       if (controlMainConsole(VT_ACTIVATE, (void *)(intptr_t)vt) != -1) {
         logMessage(LOG_CATEGORY(SCREEN_DRIVER),
