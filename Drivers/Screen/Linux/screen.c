@@ -754,7 +754,7 @@ readUnicodeContent (off_t offset, uint32_t *buffer, size_t count) {
 
 static int
 refreshUnicodeCache (unsigned int characters) {
-  size_t newSize = characters * 4;
+  size_t newSize = characters * sizeof(uint32_t);
 
   if (newSize > unicodeCacheSize) {
     const unsigned int bits = 10;
@@ -1955,13 +1955,15 @@ refresh_LinuxScreen (void) {
         }
       }
 
-      if (refreshCache()) {
+      if (currentConsoleNumber == NO_CONSOLE) {
+        problemText = gettext("no foreground console");
+      } else if (refreshCache()) {
         inTextMode = testTextMode();
         screenUpdated = 0;
         continue;
+      } else {
+        problemText = gettext("can't read screen content");
       }
-
-      problemText = gettext("can't read screen content");
     } while (0);
 
     if (problemText) {
