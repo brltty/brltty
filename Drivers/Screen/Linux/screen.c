@@ -1931,25 +1931,38 @@ refresh_LinuxScreen (void) {
   if (screenUpdated) {
     problemText = NULL;
 
-    {
-      int newConsoleNumber = getConsoleNumber();
+    do {
+      {
+        int newConsoleNumber = getConsoleNumber();
 
-      if (newConsoleNumber != currentConsoleNumber) {
-        logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-          "console number changed: %d -> %d",
-          currentConsoleNumber, newConsoleNumber
-        );
+        if (newConsoleNumber != currentConsoleNumber) {
+          if (!screenUpdated) {
+            screenUpdated = 1;
 
-        currentConsoleNumber = newConsoleNumber;
+            logMessage(LOG_WARNING,
+              "console changed during refresh - retrying"
+            );
+          }
+
+          logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+            "console number changed: %d -> %d",
+            currentConsoleNumber, newConsoleNumber
+          );
+
+          currentConsoleNumber = newConsoleNumber;
+        } else if (!screenUpdated) {
+          break;
+        }
       }
-    }
 
-    if (refreshCache()) {
-      inTextMode = testTextMode();
-      screenUpdated = 0;
-    } else {
+      if (refreshCache()) {
+        inTextMode = testTextMode();
+        screenUpdated = 0;
+        continue;
+      }
+
       problemText = gettext("can't read screen content");
-    }
+    } while (0);
 
     if (problemText) {
       if (*fallbackText) {
