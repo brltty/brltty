@@ -490,7 +490,7 @@ getForegroundConsoleNumber (int *vt) {
     if (result != -1) {
       *vt = result + 1;
       return 1;
-    } else if (errno != EINVAL) {
+    } else {
       logSystemError("ioctl[TIOCLINUX(TIOCL_GETFGCONSOLE)]");
     }
   }
