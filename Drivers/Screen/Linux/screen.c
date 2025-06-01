@@ -735,24 +735,24 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
   return 0;
 }
 
-static const char unicodeCacheType[] = "unicode";
 static unsigned char *unicodeCacheBuffer;
 static size_t unicodeCacheSize;
 static size_t unicodeCacheUsed;
 
 static size_t
 readUnicodeCache (off_t offset, void *buffer, size_t size) {
-  return readCache(offset, buffer, size, unicodeCacheBuffer, unicodeCacheUsed, unicodeCacheType);
+  return readCache(offset, buffer, size, unicodeCacheBuffer, unicodeCacheUsed, "unicode");
 }
 
 static int
 readUnicodeData (off_t offset, void *buffer, size_t size) {
-  size_t count = (unicodeCacheBuffer? readUnicodeCache: readUnicodeDevice)(offset, buffer, size);
+  size_t count = (unicodeCacheUsed? readUnicodeCache: readUnicodeDevice)(offset, buffer, size);
   if (count == size) return 1;
 
   logMessage(LOG_ERR,
-             "truncated unicode data: expected %"PRIsize " bytes but only read %"PRIsize,
-             size, count);
+    "truncated unicode data: expected %"PRIsize " bytes but only read %"PRIsize,
+    size, count
+  );
 
   return 0;
 }
@@ -914,7 +914,7 @@ setCurrentScreen (int vt) {
 }
 
 static size_t
-readScreenDirect (off_t offset, void *buffer, size_t size) {
+vcsaReadDevice (off_t offset, void *buffer, size_t size) {
   const ssize_t count = pread(screenDescriptor, buffer, size, offset);
   if (count != -1) return count;
 
@@ -950,7 +950,7 @@ vcsaReadHeader (ScreenHeader *header) {
 
   {
     size_t vcsaSize = sizeof(vcsa);
-    const size_t count = readScreenDirect(0, &vcsa, vcsaSize);
+    const size_t count = vcsaReadDevice(0, &vcsa, vcsaSize);
     if (!count) return 0;
 
     if (count < vcsaSize) {
@@ -1053,7 +1053,8 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
 
   offset -= headerSize;
   offset += sizeof(VcsaHeader);
-  size_t count = readScreenDirect(offset, buffer, size);
+
+  size_t count = vcsaReadDevice(offset, buffer, size);
   if (!count) goto done;
   result += count;
 
@@ -1061,14 +1062,13 @@ done:
   return result;
 }
 
-static const char screenCacheType[] = "screen";
 static unsigned char *screenCacheBuffer;
 static size_t screenCacheSize;
 static size_t screenCacheUsed;
 
 static size_t
 readScreenCache (off_t offset, void *buffer, size_t size) {
-  return readCache(offset, buffer, size, screenCacheBuffer, screenCacheUsed, screenCacheType);
+  return readCache(offset, buffer, size, screenCacheBuffer, screenCacheUsed, "screen");
 }
 
 static int
@@ -1943,7 +1943,9 @@ refreshCache (void) {
     if (unicodeEnabled) {
       if (!refreshUnicodeCache(characters)) {
         if (--unicodeRefreshCounter) continue;
-        logMessage(LOG_WARNING, "too many unicode refreshes");
+
+        logMessage(LOG_WARNING, "too many unicode cache refresh attempts");
+        unicodeCacheUsed = 0;
         return 0;
       }
     }
