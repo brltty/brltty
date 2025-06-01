@@ -362,6 +362,27 @@ convertCharacter (const wchar_t *character) {
   return WEOF;
 }
 
+static size_t
+readCache (
+  off_t offset, void *buffer, size_t size,
+  const unsigned char *cache, size_t used, const char *type
+) {
+  if (offset > used) {
+    logMessage(LOG_ERR,
+      "invalid %s cache offset: %"PRIsize " > %"PRIsize,
+      type, offset, used
+    );
+  } else {
+    size_t left = used - offset;
+    if (size > left) size = left;
+
+    memcpy(buffer, &cache[offset], size);
+    return size;
+  }
+
+  return 0;
+}
+
 static int
 setDeviceName (const char **name, const char *const *names, int strict, const char *description) {
   return (*name = resolveDeviceName(names, strict, description)) != NULL;
@@ -714,26 +735,14 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
   return 0;
 }
 
+static const char unicodeCacheType[] = "unicode";
 static unsigned char *unicodeCacheBuffer;
 static size_t unicodeCacheSize;
 static size_t unicodeCacheUsed;
 
 static size_t
 readUnicodeCache (off_t offset, void *buffer, size_t size) {
-  if (offset > unicodeCacheUsed) {
-    logMessage(LOG_ERR,
-      "invalid unicode cache offset: %"PRIsize " > %"PRIsize,
-      offset, unicodeCacheUsed
-    );
-  } else {
-    size_t left = unicodeCacheUsed - offset;
-    if (size > left) size = left;
-
-    memcpy(buffer, &unicodeCacheBuffer[offset], size);
-    return size;
-  }
-
-  return 0;
+  return readCache(offset, buffer, size, unicodeCacheBuffer, unicodeCacheUsed, unicodeCacheType);
 }
 
 static int
@@ -1052,26 +1061,14 @@ done:
   return result;
 }
 
+static const char screenCacheType[] = "screen";
 static unsigned char *screenCacheBuffer;
 static size_t screenCacheSize;
 static size_t screenCacheUsed;
 
 static size_t
 readScreenCache (off_t offset, void *buffer, size_t size) {
-  if (offset > screenCacheUsed) {
-    logMessage(LOG_ERR,
-      "invalid screen cache offset: %"PRIsize " > %"PRIsize,
-      offset, screenCacheUsed
-    );
-  } else {
-    size_t left = screenCacheUsed - offset;
-    if (size > left) size = left;
-
-    memcpy(buffer, &screenCacheBuffer[offset], size);
-    return size;
-  }
-
-  return 0;
+  return readCache(offset, buffer, size, screenCacheBuffer, screenCacheUsed, screenCacheType);
 }
 
 static int
