@@ -739,7 +739,7 @@ readUnicodeData (off_t offset, void *buffer, size_t size) {
   if (count == size) return 1;
 
   logMessage(LOG_ERR,
-             "truncated unicode data: expected %zu bytes but read %zu",
+             "truncated unicode data: expected %"PRIsize " bytes but only read %"PRIsize,
              size, count);
 
   return 0;
@@ -1072,7 +1072,7 @@ readScreenData (off_t offset, void *buffer, size_t size) {
   if (count == size) return 1;
 
   logMessage(LOG_ERR,
-             "truncated screen data: expected %zu bytes but read %zu",
+             "truncated screen data: expected %"PRIsize " bytes but only read %"PRIsize,
              size, count);
 
   return 0;
@@ -1111,17 +1111,17 @@ refreshScreenCache (void) {
     const size_t headerSize = sizeof(header);
 
     {
-      size_t count = readScreenDevice(0, &header, headerSize);
-      if (!count) return 0;
+      size_t bytesRead = readScreenDevice(0, &header, headerSize);
+      if (!bytesRead) return 0;
 
-      if (count < headerSize) {
-        logTruncatedScreenHeader(&header, count);
+      if (bytesRead < headerSize) {
+        logTruncatedScreenHeader(&header, bytesRead);
         return 0;
       }
     }
 
     {
-      size_t size = toScreenBufferSize(&header.size);
+      const size_t size = toScreenBufferSize(&header.size);
 
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
         "allocating screen buffer: %"PRIsize,
@@ -1140,6 +1140,7 @@ refreshScreenCache (void) {
     }
   }
 
+  unsigned int shortReadCounter = 10;
   while (1) {
     size_t bytesRead = readScreenDevice(0, screenCacheBuffer, screenCacheSize);
     if (!bytesRead) return 0;
@@ -1152,29 +1153,35 @@ refreshScreenCache (void) {
       return 0;
     }
 
-    size_t requiredSize = toScreenBufferSize(&header->size);
-    if (bytesRead >= requiredSize) return header->size.columns * header->size.rows;
+    const size_t expectedSize = toScreenBufferSize(&header->size);
+    if (bytesRead >= expectedSize) return header->size.columns * header->size.rows;
 
-    if (requiredSize > screenCacheSize) {
+    if (expectedSize > screenCacheSize) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
         "extending screen buffer: %"PRIsize " -> %"PRIsize,
-        screenCacheSize, requiredSize
+        screenCacheSize, expectedSize
       );
 
-      void *buffer = realloc(screenCacheBuffer, requiredSize);
+      void *buffer = malloc(expectedSize);
 
       if (!buffer) {
         logMallocError();
         return 0;
       }
 
+      if (screenCacheBuffer) free(screenCacheBuffer);
       screenCacheBuffer = buffer;
-      screenCacheSize = requiredSize;
+      screenCacheSize = expectedSize;
     } else {
       logMessage(LOG_WARNING,
-        "short screen read: expected %zu bytes but read %zu",
-        requiredSize, bytesRead
+        "short screen read: expected %"PRIsize " bytes but only read %"PRIsize,
+        expectedSize, bytesRead
       );
+
+      if (!--shortReadCounter) {
+        logMessage(LOG_WARNING, "too many short screen reads");
+        return 0;
+      }
     }
   }
 }
