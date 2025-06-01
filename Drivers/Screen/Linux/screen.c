@@ -1105,8 +1105,8 @@ logTruncatedScreenHeader (const ScreenHeader *header, size_t count) {
 }
 
 static unsigned int
-refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
-  if (!*bufferAddress) {
+refreshScreenCache (void) {
+  if (!screenCacheBuffer) {
     ScreenHeader header;
     const size_t headerSize = sizeof(header);
 
@@ -1135,16 +1135,16 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
         return 0;
       }
 
-      *bufferAddress = buffer;
-      *bufferSize = size;
+      screenCacheBuffer = buffer;
+      screenCacheSize = size;
     }
   }
 
   while (1) {
-    size_t bytesRead = readScreenDevice(0, *bufferAddress, *bufferSize);
+    size_t bytesRead = readScreenDevice(0, screenCacheBuffer, screenCacheSize);
     if (!bytesRead) return 0;
 
-    ScreenHeader *header = (void *)*bufferAddress;
+    ScreenHeader *header = (void *)screenCacheBuffer;
     const size_t headerSize = sizeof(*header);
 
     if (bytesRead < headerSize) {
@@ -1155,21 +1155,21 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
     size_t requiredSize = toScreenBufferSize(&header->size);
     if (bytesRead >= requiredSize) return header->size.columns * header->size.rows;
 
-    if (requiredSize > *bufferSize) {
+    if (requiredSize > screenCacheSize) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
         "extending screen buffer: %"PRIsize " -> %"PRIsize,
-        *bufferSize, requiredSize
+        screenCacheSize, requiredSize
       );
 
-      void *buffer = realloc(*bufferAddress, requiredSize);
+      void *buffer = realloc(screenCacheBuffer, requiredSize);
 
       if (!buffer) {
         logMallocError();
         return 0;
       }
 
-      *bufferAddress = buffer;
-      *bufferSize = requiredSize;
+      screenCacheBuffer = buffer;
+      screenCacheSize = requiredSize;
     } else {
       logMessage(LOG_WARNING,
         "short screen read: expected %zu bytes but read %zu",
@@ -1920,7 +1920,7 @@ testTextMode (void) {
 
 static int
 refreshCache (void) {
-  unsigned int characters = refreshScreenBuffer(&screenCacheBuffer, &screenCacheSize);
+  unsigned int characters = refreshScreenCache();
   if (!characters) return 0;
 
   if (unicodeEnabled) {
