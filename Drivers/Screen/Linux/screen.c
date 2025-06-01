@@ -754,21 +754,15 @@ readUnicodeContent (off_t offset, uint32_t *buffer, size_t count) {
 
 static int
 refreshUnicodeCache (unsigned int characters) {
-  size_t newSize = characters * sizeof(uint32_t);
+  const size_t expectedSize = characters * sizeof(uint32_t);
 
-  if (newSize > unicodeCacheSize) {
-    const unsigned int bits = 10;
-    const unsigned int mask = (1 << bits) - 1;
-
-    newSize |= mask;
-    newSize += 1;
-
+  if (expectedSize > unicodeCacheSize) {
     logMessage(LOG_CATEGORY(SCREEN_DRIVER),
       "extending unicode buffer: %"PRIsize " -> %"PRIsize,
-      unicodeCacheSize, newSize
+      unicodeCacheSize, expectedSize
     );
 
-    void *buffer = malloc(newSize);
+    void *buffer = malloc(expectedSize);
 
     if (!buffer) {
       logMallocError();
@@ -777,11 +771,18 @@ refreshUnicodeCache (unsigned int characters) {
 
     if (unicodeCacheBuffer) free(unicodeCacheBuffer);
     unicodeCacheBuffer = buffer;
-    unicodeCacheSize = newSize;
+    unicodeCacheSize = expectedSize;
   }
 
   unicodeCacheUsed = readUnicodeDevice(0, unicodeCacheBuffer, unicodeCacheSize);
-  return 1;
+  if (unicodeCacheUsed >= expectedSize) return 1;
+
+  logMessage(LOG_WARNING,
+    "short unicode device read: expected %"PRIsize " bytes but only read %"PRIsize,
+    expectedSize, unicodeCacheUsed
+  );
+
+  return 0;
 }
 
 static const char *screenName = NULL;
@@ -1927,16 +1928,22 @@ testTextMode (void) {
 
 static int
 refreshCache (void) {
-  unsigned int characters = refreshScreenCache();
-  if (!characters) return 0;
+  unsigned int unicodeRefreshCounter = 10;
 
-  if (unicodeEnabled) {
-    if (!refreshUnicodeCache(characters)) {
-      return 0;
+  while (1) {
+    unsigned int characters = refreshScreenCache();
+    if (!characters) return 0;
+
+    if (unicodeEnabled) {
+      if (!refreshUnicodeCache(characters)) {
+        if (--unicodeRefreshCounter) continue;
+        logMessage(LOG_WARNING, "too many unicode device reads");
+        return 0;
+      }
     }
-  }
 
-  return 1;
+    return 1;
+  }
 }
 
 static int
