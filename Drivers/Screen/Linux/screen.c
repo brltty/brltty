@@ -1073,7 +1073,7 @@ readScreenCache (off_t offset, void *buffer, size_t size) {
 
 static int
 readScreenData (off_t offset, void *buffer, size_t size) {
-  size_t count = (screenCacheBuffer? readScreenCache: readScreenDevice)(offset, buffer, size);
+  size_t count = (screenCacheUsed? readScreenCache: readScreenDevice)(offset, buffer, size);
   if (count == size) return 1;
 
   logMessage(LOG_ERR,
@@ -1938,7 +1938,11 @@ refreshCache (void) {
 
   while (1) {
     unsigned int characters = refreshScreenCache();
-    if (!characters) return 0;
+
+    if (!characters) {
+      screenCacheUsed = 0;
+      return 0;
+    }
 
     if (unicodeEnabled) {
       if (!refreshUnicodeCache(characters)) {
