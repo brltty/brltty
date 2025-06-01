@@ -1154,22 +1154,28 @@ refreshScreenBuffer (unsigned char **bufferAddress, size_t *bufferSize) {
 
     size_t requiredSize = toScreenBufferSize(&header->size);
     if (bytesRead >= requiredSize) return header->size.columns * header->size.rows;
-    if (requiredSize <= *bufferSize) return 0;
 
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-      "extending screen buffer: %"PRIsize " -> %"PRIsize,
-      *bufferSize, requiredSize
-    );
+    if (requiredSize > *bufferSize) {
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+        "extending screen buffer: %"PRIsize " -> %"PRIsize,
+        *bufferSize, requiredSize
+      );
 
-    void *buffer = realloc(*bufferAddress, requiredSize);
+      void *buffer = realloc(*bufferAddress, requiredSize);
 
-    if (!buffer) {
-      logMallocError();
-      return 0;
+      if (!buffer) {
+        logMallocError();
+        return 0;
+      }
+
+      *bufferAddress = buffer;
+      *bufferSize = requiredSize;
+    } else {
+      logMessage(LOG_WARNING,
+        "short screen read: expected %zu bytes but read %zu",
+        requiredSize, bytesRead
+      );
     }
-
-    *bufferAddress = buffer;
-    *bufferSize = requiredSize;
   }
 }
 
@@ -1931,7 +1937,7 @@ refresh_LinuxScreen (void) {
   if (screenUpdated) {
     problemText = NULL;
 
-    do {
+    while (1) {
       {
         int newConsoleNumber = getConsoleNumber();
 
@@ -1964,7 +1970,9 @@ refresh_LinuxScreen (void) {
       } else {
         problemText = gettext("can't read screen content");
       }
-    } while (0);
+
+      break;
+    }
 
     if (problemText) {
       if (*fallbackText) {
