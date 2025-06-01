@@ -720,14 +720,17 @@ static size_t unicodeCacheUsed;
 
 static size_t
 readUnicodeCache (off_t offset, void *buffer, size_t size) {
-  if (offset <= unicodeCacheUsed) {
+  if (offset > unicodeCacheUsed) {
+    logMessage(LOG_ERR,
+      "invalid unicode cache offset: %"PRIsize " > %"PRIsize,
+      offset, unicodeCacheUsed
+    );
+  } else {
     size_t left = unicodeCacheUsed - offset;
     if (size > left) size = left;
 
     memcpy(buffer, &unicodeCacheBuffer[offset], size);
     return size;
-  } else {
-    logMessage(LOG_ERR, "invalid unicode cache offset: %u", (unsigned int)offset);
   }
 
   return 0;
@@ -778,7 +781,7 @@ refreshUnicodeCache (unsigned int characters) {
   if (unicodeCacheUsed >= expectedSize) return 1;
 
   logMessage(LOG_WARNING,
-    "short unicode device read: expected %"PRIsize " bytes but only read %"PRIsize,
+    "short unicode read: expected %"PRIsize " bytes but only read %"PRIsize,
     expectedSize, unicodeCacheUsed
   );
 
@@ -1051,17 +1054,21 @@ done:
 
 static unsigned char *screenCacheBuffer;
 static size_t screenCacheSize;
+static size_t screenCacheUsed;
 
 static size_t
 readScreenCache (off_t offset, void *buffer, size_t size) {
-  if (offset <= screenCacheSize) {
-    size_t left = screenCacheSize - offset;
-
+  if (offset > screenCacheUsed) {
+    logMessage(LOG_ERR,
+      "invalid screen cache offset: %"PRIsize " > %"PRIsize,
+      offset, screenCacheUsed
+    );
+  } else {
+    size_t left = screenCacheUsed - offset;
     if (size > left) size = left;
+
     memcpy(buffer, &screenCacheBuffer[offset], size);
     return size;
-  } else {
-    logMessage(LOG_ERR, "invalid screen cache offset: %u", (unsigned int)offset);
   }
 
   return 0;
@@ -1143,19 +1150,19 @@ refreshScreenCache (void) {
 
   unsigned int shortReadCounter = 10;
   while (1) {
-    size_t bytesRead = readScreenDevice(0, screenCacheBuffer, screenCacheSize);
-    if (!bytesRead) return 0;
+    screenCacheUsed = readScreenDevice(0, screenCacheBuffer, screenCacheSize);
+    if (!screenCacheUsed) return 0;
 
     ScreenHeader *header = (void *)screenCacheBuffer;
     const size_t headerSize = sizeof(*header);
 
-    if (bytesRead < headerSize) {
-      logTruncatedScreenHeader(header, bytesRead);
+    if (screenCacheUsed < headerSize) {
+      logTruncatedScreenHeader(header, screenCacheUsed);
       return 0;
     }
 
     const size_t expectedSize = toScreenBufferSize(&header->size);
-    if (bytesRead >= expectedSize) return header->size.columns * header->size.rows;
+    if (screenCacheUsed >= expectedSize) return header->size.columns * header->size.rows;
 
     if (expectedSize > screenCacheSize) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -1176,7 +1183,7 @@ refreshScreenCache (void) {
     } else {
       logMessage(LOG_WARNING,
         "short screen read: expected %"PRIsize " bytes but only read %"PRIsize,
-        expectedSize, bytesRead
+        expectedSize, screenCacheUsed
       );
 
       if (!--shortReadCounter) {
@@ -1698,13 +1705,14 @@ REPORT_LISTENER(lxBrailleDeviceOfflineListener) {
 static int
 construct_LinuxScreen (void) {
   mainConsoleDescriptor = -1;
-  screenDescriptor = -1;
   currentConsoleDescriptor = -1;
+  screenDescriptor = -1;
   unicodeDescriptor = -1;
 
   screenUpdated = 0;
   screenCacheBuffer = NULL;
   screenCacheSize = 0;
+  screenCacheUsed = 0;
 
   unicodeCacheBuffer = NULL;
   unicodeCacheSize = 0;
@@ -1774,6 +1782,7 @@ destruct_LinuxScreen (void) {
     screenCacheBuffer = NULL;
   }
   screenCacheSize = 0;
+  screenCacheUsed = 0;
 
   if (unicodeCacheBuffer) {
     free(unicodeCacheBuffer);
@@ -1937,7 +1946,7 @@ refreshCache (void) {
     if (unicodeEnabled) {
       if (!refreshUnicodeCache(characters)) {
         if (--unicodeRefreshCounter) continue;
-        logMessage(LOG_WARNING, "too many unicode device reads");
+        logMessage(LOG_WARNING, "too many unicode refreshes");
         return 0;
       }
     }
@@ -1960,12 +1969,12 @@ refresh_LinuxScreen (void) {
             screenUpdated = 1;
 
             logMessage(LOG_WARNING,
-              "console changed during refresh - retrying"
+              "foreground console changed during cache refresh - retrying"
             );
           }
 
           logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-            "console number changed: %d -> %d",
+            "foreground console number changed: %d -> %d",
             currentConsoleNumber, newConsoleNumber
           );
 
@@ -1982,6 +1991,7 @@ refresh_LinuxScreen (void) {
         screenUpdated = 0;
         continue;
       } else {
+        logMessage(LOG_ERR, "cache refresh failed");
         problemText = gettext("can't read screen content");
       }
 
