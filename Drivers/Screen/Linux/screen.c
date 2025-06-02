@@ -363,18 +363,18 @@ convertCharacter (const wchar_t *character) {
 }
 
 static void
-logUnexpectedSize (size_t expected, size_t actual, const char *type) {
-  logMessage(LOG_WARNING,
-    "%s %s read: expected %"PRIsize " bytes but read %"PRIsize,
-    (actual < expected)? "short": "long",
+logTruncatedData (size_t expected, size_t actual, const char *type) {
+  logMessage(LOG_ERR,
+    "truncated %s data: expected %"PRIsize " bytes but only read %"PRIsize,
     type, expected, actual
   );
 }
 
 static void
-logTruncatedData (size_t expected, size_t actual, const char *type) {
-  logMessage(LOG_ERR,
-    "truncated %s data: expected %"PRIsize " bytes but only read %"PRIsize,
+logUnexpectedSize (size_t expected, size_t actual, const char *type) {
+  logMessage(LOG_WARNING,
+    "%s %s read: expected %"PRIsize " bytes but read %"PRIsize,
+    (actual < expected)? "short": "long",
     type, expected, actual
   );
 }
@@ -1963,6 +1963,7 @@ static int
 refresh_LinuxScreen (void) {
   if (screenUpdated) {
     problemText = NULL;
+    unsigned int consoleChangeCounter = 10;
 
     while (1) {
       {
@@ -1975,6 +1976,11 @@ refresh_LinuxScreen (void) {
             logMessage(LOG_WARNING,
               "foreground console changed during cache refresh - retrying"
             );
+          }
+
+          if (!--consoleChangeCounter) {
+            logMessage(LOG_WARNING, "too many foreground console number changes");
+            break;
           }
 
           logMessage(LOG_CATEGORY(SCREEN_DRIVER),
