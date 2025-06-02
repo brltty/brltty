@@ -1161,38 +1161,32 @@ refreshScreenCache (unsigned int *characters) {
     }
   }
 
-  unsigned int unexpectedSizeCounter = 10;
+  unsigned int bufferExtensionCounter = 10;
   while (1) {
     screenCacheUsed = readScreenDevice(0, screenCacheBuffer, screenCacheSize);
     if (!screenCacheUsed) return 0;
-
     ScreenHeader *header = screenCacheBuffer;
-    const size_t headerSize = sizeof(*header);
 
-    if (screenCacheUsed < headerSize) {
+    if (screenCacheUsed < sizeof(*header)) {
       logTruncatedScreenHeader(header, screenCacheUsed);
-      return 0;
-    }
-
-    const size_t expectedSize = toScreenBufferSize(&header->size);
-
-    if (screenCacheUsed == expectedSize) {
-      *characters = header->size.columns * header->size.rows;
-      return 1;
-    }
-
-    if (expectedSize > screenCacheSize) {
-      if (!extendCacheBuffer(&screenCacheBuffer, &screenCacheSize, expectedSize, screenDeviceType)) {
-        return 0;
-      }
     } else {
-      logUnexpectedSize(expectedSize, screenCacheUsed, screenDeviceType);
+      const size_t expectedSize = toScreenBufferSize(&header->size);
 
-      if (!--unexpectedSizeCounter) {
-        logMessage(LOG_WARNING, "too many unexpected size screen reads");
-        return 0;
+      if (screenCacheUsed == expectedSize) {
+        *characters = header->size.columns * header->size.rows;
+        return 1;
+      }
+
+      if (expectedSize <= screenCacheSize) {
+        logUnexpectedSize(expectedSize, screenCacheUsed, screenDeviceType);
+      } else if (!--bufferExtensionCounter) {
+        logMessage(LOG_WARNING, "too many screen buffer extensions");
+      } else if (extendCacheBuffer(&screenCacheBuffer, &screenCacheSize, expectedSize, screenDeviceType)) {
+        continue;
       }
     }
+
+    return 0;
   }
 }
 
@@ -1939,31 +1933,25 @@ testTextMode (void) {
 
 static int
 refreshCache (void) {
-  unsigned int unicodeRefreshCounter = 10;
+  unsigned int characters;
 
-  while (1) {
-    unsigned int characters;
-
-    if (refreshScreenCache(&characters)) {
-      if (!unicodeEnabled) return 1;
-      if (refreshUnicodeCache(characters)) return 1;
-
-      if (--unicodeRefreshCounter) continue;
-      logMessage(LOG_WARNING, "too many unicode cache refresh attempts");
-    } else {
-      screenCacheUsed = 0;
-    }
-
-    unicodeCacheUsed = 0;
-    return 0;
+  if (!refreshScreenCache(&characters)) {
+    screenCacheUsed = 0;
+  } else if (!unicodeEnabled) {
+    return 1;
+  } else if (refreshUnicodeCache(characters)) {
+    return 1;
   }
+
+  unicodeCacheUsed = 0;
+  return 0;
 }
 
 static int
 refresh_LinuxScreen (void) {
   if (screenUpdated) {
     problemText = NULL;
-    unsigned int consoleChangeCounter = 10;
+    unsigned int cacheRefreshCounter = 10;
 
     while (1) {
       {
@@ -1976,11 +1964,6 @@ refresh_LinuxScreen (void) {
             logMessage(LOG_WARNING,
               "foreground console changed during cache refresh - retrying"
             );
-          }
-
-          if (!--consoleChangeCounter) {
-            logMessage(LOG_WARNING, "too many foreground console number changes");
-            break;
           }
 
           logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -2000,9 +1983,11 @@ refresh_LinuxScreen (void) {
         inTextMode = testTextMode();
         screenUpdated = 0;
         continue;
-      } else {
-        logMessage(LOG_ERR, "cache refresh failed");
+      } else if (!--cacheRefreshCounter) {
+        logMessage(LOG_WARNING, "too many cache refresh attempts");
         problemText = gettext("can't read screen content");
+      } else {
+        continue;
       }
 
       break;
