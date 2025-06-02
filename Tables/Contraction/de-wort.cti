@@ -535,6 +535,7 @@ always gefangenen 12346-124-235-1245-14-14
 sufword gehäuse 12346-125-34-234-15
 prfword gehäusen 12346-125-34-234-14
 prfword gehäuses 12346-125-34-234-123456
+before cost always geistes 1245-146-23456-123456
 always geruch 12346-1235-136-1456 shouldn't use the er-contraction
 always gerüst 12346-1235-1256-23456 shouldn't use the er-contraction
 always gesund 12346-234-256-145
@@ -606,6 +607,11 @@ always gürtel 1245-1256-1235-2345-13456 shouldn't use the te-contraction
 always guertel 1245-1256-1235-2345-13456 shouldn't use the te-contraction
 before t always habich 125-1-12-3456
 prfword haie =
+prfword hain =
+prfword haine =
+prfword hainen 125-1-24-1345-14
+prfword haines 125-1-24-1345-123456
+prfword hains =
 always häresie 125-345-1235-15-234-346 shouldn't use the es-contraction
 always haeresie 125-345-1235-15-234-346 shouldn't use the es-contraction
 sufword hallen 125-1-12345-14 shouldn't use the allen-contraction
@@ -1427,6 +1433,7 @@ word autorennens 16-2345-135-1235-14-1345-14-234
 always autorennfahr 16-2345-135-1235-14-1345-2-1235
 always reisespezialist 1235-146-234-15-234-1234-15-1356-24-25-24-23456
 before hilmnrsu always service 234-12456-1236-24-6-14-15
+prfword services 234-12456-1236-24-6-14-123456
 before t always reiserou 1235-146-234-15-1235-135-136
 before t always reisemona 1235-146-234-15-134-135-1345-1
 always reisesaison 1235-146-234-15-234-1-24-234-135-1345 shouldn't use the es-contraction
