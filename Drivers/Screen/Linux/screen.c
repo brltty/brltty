@@ -1125,8 +1125,8 @@ logTruncatedScreenHeader (const ScreenHeader *header, size_t count) {
   );
 }
 
-static unsigned int
-refreshScreenCache (void) {
+static int
+refreshScreenCache (unsigned int *characters) {
   if (!screenCacheBuffer) {
     ScreenHeader header;
     const size_t headerSize = sizeof(header);
@@ -1175,7 +1175,11 @@ refreshScreenCache (void) {
     }
 
     const size_t expectedSize = toScreenBufferSize(&header->size);
-    if (screenCacheUsed == expectedSize) return header->size.columns * header->size.rows;
+
+    if (screenCacheUsed == expectedSize) {
+      *characters = header->size.columns * header->size.rows;
+      return 1;
+    }
 
     if (expectedSize > screenCacheSize) {
       if (!extendCacheBuffer(&screenCacheBuffer, &screenCacheSize, expectedSize, screenDeviceType)) {
@@ -1938,9 +1942,9 @@ refreshCache (void) {
   unsigned int unicodeRefreshCounter = 10;
 
   while (1) {
-    unsigned int characters = refreshScreenCache();
+    unsigned int characters;
 
-    if (!characters) {
+    if (!refreshScreenCache(&characters)) {
       screenCacheUsed = 0;
       return 0;
     }
