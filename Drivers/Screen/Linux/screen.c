@@ -787,10 +787,11 @@ refreshUnicodeCache (unsigned int characters) {
   }
 
   unicodeCacheUsed = readUnicodeDevice(0, unicodeCacheBuffer, unicodeCacheSize);
-  if (unicodeCacheUsed >= expectedSize) return 1;
+  if (unicodeCacheUsed == expectedSize) return 1;
 
   logMessage(LOG_WARNING,
-    "short unicode read: expected %"PRIsize " bytes but only read %"PRIsize,
+    "%s unicode read: expected %"PRIsize " bytes but read %"PRIsize,
+    (unicodeCacheUsed < expectedSize)? "short": "long",
     expectedSize, unicodeCacheUsed
   );
 
@@ -1145,7 +1146,7 @@ refreshScreenCache (void) {
     }
   }
 
-  unsigned int shortReadCounter = 10;
+  unsigned int unexpectedSizeCounter = 10;
   while (1) {
     screenCacheUsed = readScreenDevice(0, screenCacheBuffer, screenCacheSize);
     if (!screenCacheUsed) return 0;
@@ -1159,7 +1160,7 @@ refreshScreenCache (void) {
     }
 
     const size_t expectedSize = toScreenBufferSize(&header->size);
-    if (screenCacheUsed >= expectedSize) return header->size.columns * header->size.rows;
+    if (screenCacheUsed == expectedSize) return header->size.columns * header->size.rows;
 
     if (expectedSize > screenCacheSize) {
       logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -1179,12 +1180,13 @@ refreshScreenCache (void) {
       screenCacheSize = expectedSize;
     } else {
       logMessage(LOG_WARNING,
-        "short screen read: expected %"PRIsize " bytes but only read %"PRIsize,
+        "%s screen read: expected %"PRIsize " bytes but read %"PRIsize,
+        (screenCacheUsed < expectedSize)? "short": "long",
         expectedSize, screenCacheUsed
       );
 
-      if (!--shortReadCounter) {
-        logMessage(LOG_WARNING, "too many short screen reads");
+      if (!--unexpectedSizeCounter) {
+        logMessage(LOG_WARNING, "too many screen reads with an unexpected size");
         return 0;
       }
     }
