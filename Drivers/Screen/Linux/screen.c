@@ -362,6 +362,15 @@ convertCharacter (const wchar_t *character) {
   return WEOF;
 }
 
+static void
+logUnexpectedSize (size_t expected, size_t actual, const char *type) {
+  logMessage(LOG_WARNING,
+    "%s %s read: expected %"PRIsize " bytes but read %"PRIsize,
+    (actual < expected)? "short": "long",
+    type, expected, actual
+  );
+}
+
 static size_t
 readCache (
   off_t offset, void *buffer, size_t size,
@@ -384,8 +393,8 @@ readCache (
 }
 
 static int
-setDeviceName (const char **name, const char *const *names, int strict, const char *description) {
-  return (*name = resolveDeviceName(names, strict, description)) != NULL;
+setDeviceName (const char **name, const char *const *names, int strict, const char *type) {
+  return (*name = resolveDeviceName(names, strict, type)) != NULL;
 }
 
 static char *
@@ -642,12 +651,14 @@ openCurrentConsole (int *vt) {
   return 0;
 }
 
+static const char unicodeDeviceType[] = "unicode";
 static const char *unicodeDeviceName = NULL;
+static int unicodeDescriptor;
 
 static int
 setUnicodeDeviceName (void) {
   static const char *const names[] = {"vcsu", "vcsu0", NULL};
-  return setDeviceName(&unicodeDeviceName, names, 1, "unicode");
+  return setDeviceName(&unicodeDeviceName, names, 1, unicodeDeviceType);
 }
 
 static void
@@ -686,8 +697,6 @@ openUnicodeDevice (int *fd, int vt) {
 
   return opened;
 }
-
-static int unicodeDescriptor;
 
 static void
 closeCurrentUnicodeDevice (void) {
@@ -735,13 +744,13 @@ readUnicodeDevice (off_t offset, void *buffer, size_t size) {
   return 0;
 }
 
-static unsigned char *unicodeCacheBuffer;
+static void *unicodeCacheBuffer;
 static size_t unicodeCacheSize;
 static size_t unicodeCacheUsed;
 
 static size_t
 readUnicodeCache (off_t offset, void *buffer, size_t size) {
-  return readCache(offset, buffer, size, unicodeCacheBuffer, unicodeCacheUsed, "unicode");
+  return readCache(offset, buffer, size, unicodeCacheBuffer, unicodeCacheUsed, unicodeDeviceType);
 }
 
 static int
@@ -789,15 +798,11 @@ refreshUnicodeCache (unsigned int characters) {
   unicodeCacheUsed = readUnicodeDevice(0, unicodeCacheBuffer, unicodeCacheSize);
   if (unicodeCacheUsed == expectedSize) return 1;
 
-  logMessage(LOG_WARNING,
-    "%s unicode read: expected %"PRIsize " bytes but read %"PRIsize,
-    (unicodeCacheUsed < expectedSize)? "short": "long",
-    expectedSize, unicodeCacheUsed
-  );
-
+  logUnexpectedSize(expectedSize, unicodeCacheUsed, unicodeDeviceType);
   return 0;
 }
 
+static const char screenDeviceType[] = "screen";
 static const char *screenName = NULL;
 static int screenDescriptor;
 
@@ -849,7 +854,7 @@ canMonitorScreen (void) {
 static int
 setScreenName (void) {
   static const char *const names[] = {"vcsa", "vcsa0", "vcc/a", NULL};
-  return setDeviceName(&screenName, names, 0, "screen");
+  return setDeviceName(&screenName, names, 0, screenDeviceType);
 }
 
 static int
@@ -1063,13 +1068,13 @@ done:
   return result;
 }
 
-static unsigned char *screenCacheBuffer;
+static void *screenCacheBuffer;
 static size_t screenCacheSize;
 static size_t screenCacheUsed;
 
 static size_t
 readScreenCache (off_t offset, void *buffer, size_t size) {
-  return readCache(offset, buffer, size, screenCacheBuffer, screenCacheUsed, "screen");
+  return readCache(offset, buffer, size, screenCacheBuffer, screenCacheUsed, screenDeviceType);
 }
 
 static int
@@ -1151,7 +1156,7 @@ refreshScreenCache (void) {
     screenCacheUsed = readScreenDevice(0, screenCacheBuffer, screenCacheSize);
     if (!screenCacheUsed) return 0;
 
-    ScreenHeader *header = (void *)screenCacheBuffer;
+    ScreenHeader *header = screenCacheBuffer;
     const size_t headerSize = sizeof(*header);
 
     if (screenCacheUsed < headerSize) {
@@ -1179,11 +1184,7 @@ refreshScreenCache (void) {
       screenCacheBuffer = buffer;
       screenCacheSize = expectedSize;
     } else {
-      logMessage(LOG_WARNING,
-        "%s screen read: expected %"PRIsize " bytes but read %"PRIsize,
-        (screenCacheUsed < expectedSize)? "short": "long",
-        expectedSize, screenCacheUsed
-      );
+      logUnexpectedSize(expectedSize, screenCacheUsed, screenDeviceType);
 
       if (!--unexpectedSizeCounter) {
         logMessage(LOG_WARNING, "too many screen reads with an unexpected size");
