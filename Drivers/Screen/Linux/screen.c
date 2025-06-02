@@ -371,8 +371,16 @@ logUnexpectedSize (size_t expected, size_t actual, const char *type) {
   );
 }
 
+static void
+logTruncatedData (size_t expected, size_t actual, const char *type) {
+  logMessage(LOG_ERR,
+    "truncated %s data: expected %"PRIsize " bytes but only read %"PRIsize,
+    type, expected, actual
+  );
+}
+
 static int
-extendBuffer (void **buffer, size_t *size, size_t newSize, const char *type) {
+extendCacheBuffer (void **buffer, size_t *size, size_t newSize, const char *type) {
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
     "extending %s buffer: %"PRIsize " -> %"PRIsize,
     type, *size, newSize
@@ -779,11 +787,7 @@ readUnicodeData (off_t offset, void *buffer, size_t size) {
   size_t count = (unicodeCacheUsed? readUnicodeCache: readUnicodeDevice)(offset, buffer, size);
   if (count == size) return 1;
 
-  logMessage(LOG_ERR,
-    "truncated unicode data: expected %"PRIsize " bytes but only read %"PRIsize,
-    size, count
-  );
-
+  logTruncatedData(size, count, unicodeDeviceType);
   return 0;
 }
 
@@ -799,7 +803,7 @@ refreshUnicodeCache (unsigned int characters) {
   const size_t expectedSize = characters * sizeof(uint32_t);
 
   if (expectedSize > unicodeCacheSize) {
-    if (!extendBuffer(&unicodeCacheBuffer, &unicodeCacheSize, expectedSize, unicodeDeviceType)) {
+    if (!extendCacheBuffer(&unicodeCacheBuffer, &unicodeCacheSize, expectedSize, unicodeDeviceType)) {
       return 0;
     }
   }
@@ -1091,10 +1095,7 @@ readScreenData (off_t offset, void *buffer, size_t size) {
   size_t count = (screenCacheUsed? readScreenCache: readScreenDevice)(offset, buffer, size);
   if (count == size) return 1;
 
-  logMessage(LOG_ERR,
-             "truncated screen data: expected %"PRIsize " bytes but only read %"PRIsize,
-             size, count);
-
+  logTruncatedData(size, count, screenDeviceType);
   return 0;
 }
 
@@ -1177,7 +1178,7 @@ refreshScreenCache (void) {
     if (screenCacheUsed == expectedSize) return header->size.columns * header->size.rows;
 
     if (expectedSize > screenCacheSize) {
-      if (!extendBuffer(&screenCacheBuffer, &screenCacheSize, expectedSize, screenDeviceType)) {
+      if (!extendCacheBuffer(&screenCacheBuffer, &screenCacheSize, expectedSize, screenDeviceType)) {
         return 0;
       }
     } else {
