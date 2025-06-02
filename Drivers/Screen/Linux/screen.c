@@ -1189,7 +1189,7 @@ refreshScreenCache (unsigned int *characters) {
       logUnexpectedSize(expectedSize, screenCacheUsed, screenDeviceType);
 
       if (!--unexpectedSizeCounter) {
-        logMessage(LOG_WARNING, "too many screen reads with an unexpected size");
+        logMessage(LOG_WARNING, "too many unexpected size screen reads");
         return 0;
       }
     }
@@ -1944,22 +1944,18 @@ refreshCache (void) {
   while (1) {
     unsigned int characters;
 
-    if (!refreshScreenCache(&characters)) {
+    if (refreshScreenCache(&characters)) {
+      if (!unicodeEnabled) return 1;
+      if (refreshUnicodeCache(characters)) return 1;
+
+      if (--unicodeRefreshCounter) continue;
+      logMessage(LOG_WARNING, "too many unicode cache refresh attempts");
+    } else {
       screenCacheUsed = 0;
-      return 0;
     }
 
-    if (unicodeEnabled) {
-      if (!refreshUnicodeCache(characters)) {
-        if (--unicodeRefreshCounter) continue;
-
-        logMessage(LOG_WARNING, "too many unicode cache refresh attempts");
-        unicodeCacheUsed = 0;
-        return 0;
-      }
-    }
-
-    return 1;
+    unicodeCacheUsed = 0;
+    return 0;
   }
 }
 
