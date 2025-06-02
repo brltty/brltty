@@ -371,6 +371,27 @@ logUnexpectedSize (size_t expected, size_t actual, const char *type) {
   );
 }
 
+static int
+extendBuffer (void **buffer, size_t *size, size_t newSize, const char *type) {
+  logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+    "extending %s buffer: %"PRIsize " -> %"PRIsize,
+    type, *size, newSize
+  );
+
+  void *newBuffer = malloc(newSize);
+
+  if (!newBuffer) {
+    logMallocError();
+    return 0;
+  }
+
+  if (*buffer) free(*buffer);
+  *buffer = newBuffer;
+  *size = newSize;
+
+  return 1;
+}
+
 static size_t
 readCache (
   off_t offset, void *buffer, size_t size,
@@ -778,21 +799,9 @@ refreshUnicodeCache (unsigned int characters) {
   const size_t expectedSize = characters * sizeof(uint32_t);
 
   if (expectedSize > unicodeCacheSize) {
-    logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-      "extending unicode buffer: %"PRIsize " -> %"PRIsize,
-      unicodeCacheSize, expectedSize
-    );
-
-    void *buffer = malloc(expectedSize);
-
-    if (!buffer) {
-      logMallocError();
+    if (!extendBuffer(&unicodeCacheBuffer, &unicodeCacheSize, expectedSize, unicodeDeviceType)) {
       return 0;
     }
-
-    if (unicodeCacheBuffer) free(unicodeCacheBuffer);
-    unicodeCacheBuffer = buffer;
-    unicodeCacheSize = expectedSize;
   }
 
   unicodeCacheUsed = readUnicodeDevice(0, unicodeCacheBuffer, unicodeCacheSize);
@@ -1168,21 +1177,9 @@ refreshScreenCache (void) {
     if (screenCacheUsed == expectedSize) return header->size.columns * header->size.rows;
 
     if (expectedSize > screenCacheSize) {
-      logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-        "extending screen buffer: %"PRIsize " -> %"PRIsize,
-        screenCacheSize, expectedSize
-      );
-
-      void *buffer = malloc(expectedSize);
-
-      if (!buffer) {
-        logMallocError();
+      if (!extendBuffer(&screenCacheBuffer, &screenCacheSize, expectedSize, screenDeviceType)) {
         return 0;
       }
-
-      if (screenCacheBuffer) free(screenCacheBuffer);
-      screenCacheBuffer = buffer;
-      screenCacheSize = expectedSize;
     } else {
       logUnexpectedSize(expectedSize, screenCacheUsed, screenDeviceType);
 
