@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+console="$(fgconsole)"
+
+index=0
+while ((++index <= 1000))
+do
+   vt=0
+   while ((++vt <= 6))
+   do
+      /usr/bin/chvt $vt
+      sleep 0.001
+   done
+done
+
+chvt "${console}"
+exit 0
