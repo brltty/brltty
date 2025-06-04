@@ -730,7 +730,6 @@ static void restartTerm(const char *sender, const char *path) {
 /* Switched to a new object, check whether we want to read it, and if so, restart with it */
 static void tryRestartTerm(const char *sender, const char *path) {
   if (curPath) finiTerm();
-  restartTerm(sender, path);
 
   curRole = getRole(sender, path);
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
@@ -750,6 +749,9 @@ static void tryRestartTerm(const char *sender, const char *path) {
   }
 
   if (requested) curQuality = SCQ_GOOD;     
+
+  if (curQuality != SCQ_NONE)
+    restartTerm(sender, path);
 }
 
 /* Get the state of an object */
@@ -1881,6 +1883,9 @@ setSelection_AtSpi2Screen (int beginOffset, int endOffset) {
   dbus_int32_t num = 0;
   dbus_int32_t begin = beginOffset;
   dbus_int32_t end = endOffset;
+
+  if (!curSender)
+    return 0;
 
   msg = new_method_call(curSender, curPath, SPI2_DBUS_INTERFACE_TEXT, "SetSelection");
   if (!msg)
