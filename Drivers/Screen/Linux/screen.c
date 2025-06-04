@@ -636,6 +636,8 @@ openCurrentConsole (int *vt) {
     unsigned int device;
 
     if (controlCurrentConsole(TIOCGDEV, &device) != -1) {
+      unsigned int ttyNumber = minor(device);
+
       {
         const unsigned int expected = TTY_MAJOR;
         unsigned int actual = major(device);
@@ -650,16 +652,17 @@ openCurrentConsole (int *vt) {
         }
       }
 
-      unsigned int ttyNumber = minor(device);
-      const unsigned int ttyNumberMask = 0X3F;
+      {
+        const unsigned int ttyNumberMask = 0X3F;
 
-      if ((ttyNumber & ttyNumberMask) != ttyNumber) {
-        logMessage(LOG_WARNING,
-          "unexpected foreground tty device group (expected %d, got %u)",
-          *vt, ttyNumber
-        );
+        if ((ttyNumber & ttyNumberMask) != ttyNumber) {
+          logMessage(LOG_WARNING,
+            "unexpected foreground tty device group (expected %d, got %u)",
+            *vt, ttyNumber
+          );
 
-        return 0;
+          return 0;
+        }
       }
 
       if (ttyNumber != *vt) {
@@ -1165,7 +1168,7 @@ refreshScreenCache (unsigned int *characters) {
   while (1) {
     screenCacheUsed = readScreenDevice(0, screenCacheBuffer, screenCacheSize);
     if (!screenCacheUsed) return 0;
-    ScreenHeader *header = screenCacheBuffer;
+    const ScreenHeader *header = screenCacheBuffer;
 
     if (screenCacheUsed < sizeof(*header)) {
       logTruncatedScreenHeader(header, screenCacheUsed);
@@ -1950,43 +1953,48 @@ refreshCache (void) {
 static int
 refresh_LinuxScreen (void) {
   if (screenUpdated) {
+    typedef enum {
+      REFRESH_NEEDED,
+      REFRESH_FAILED,
+      REFRESH_DONE
+    } RefreshState;
+
+    RefreshState refreshState = REFRESH_NEEDED;
     problemText = NULL;
-    unsigned int cacheRefreshCounter = 10;
 
     while (1) {
       {
         int newConsoleNumber = getConsoleNumber();
 
         if (newConsoleNumber != currentConsoleNumber) {
-          if (!screenUpdated) {
-            screenUpdated = 1;
+          logMessage(LOG_CATEGORY(SCREEN_DRIVER),
+            "foreground console number changed: %d -> %d",
+            currentConsoleNumber, newConsoleNumber
+          );
+
+          if (refreshState != REFRESH_NEEDED) {
+            refreshState = REFRESH_NEEDED;
+            problemText = NULL;
 
             logMessage(LOG_WARNING,
               "foreground console changed during cache refresh - retrying"
             );
           }
 
-          logMessage(LOG_CATEGORY(SCREEN_DRIVER),
-            "foreground console number changed: %d -> %d",
-            currentConsoleNumber, newConsoleNumber
-          );
-
           currentConsoleNumber = newConsoleNumber;
-        } else if (!screenUpdated) {
-          break;
         }
       }
 
       if (currentConsoleNumber == NO_CONSOLE) {
         problemText = gettext("no foreground console");
-      } else if (refreshCache()) {
+      } else if (refreshState == REFRESH_DONE) {
         inTextMode = testTextMode();
         screenUpdated = 0;
-        continue;
-      } else if (!--cacheRefreshCounter) {
-        logMessage(LOG_WARNING, "too many cache refresh attempts");
+      } else if (refreshState == REFRESH_FAILED) {
+        logMessage(LOG_WARNING, "cache refresh failed");
         problemText = gettext("can't read screen content");
       } else {
+        refreshState = refreshCache()? REFRESH_DONE: REFRESH_FAILED;
         continue;
       }
 
