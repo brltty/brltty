@@ -1887,6 +1887,23 @@ canOpenConsole (int vt) {
 }
 
 static int
+testTextMode (void) {
+  int mode;
+
+  if (controlCurrentConsole(KDGETMODE, &mode) == -1) {
+    logSystemError("ioctl[KDGETMODE]");
+  } else if (mode == KD_TEXT) {
+    if (afterTimePeriod(&mappingRecalculationTimer, NULL)) {
+      setTranslationTable(0);
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
 getConsoleNumber (void) {
   int vt;
 
@@ -1900,41 +1917,30 @@ getConsoleNumber (void) {
     closeCurrentConsole();
   }
 
+  inTextMode = 1;
+
   if (vt != NO_CONSOLE) {
-    if (!isCurrentConsoleOpen()) {
+    if (isCurrentConsoleOpen()) {
+      inTextMode = testTextMode();
+    } else {
       if (!canOpenConsole(vt)) {
         problemText = gettext("console not in use");
       } else if (!openCurrentConsole(&vt)) {
         logSystemError("current console open");
         problemText = gettext("can't open console");
+      } else {
+        inTextMode = testTextMode();
       }
 
       setTranslationTable(1);
     }
   }
 
-  return vt;
-}
-
-static int
-testTextMode (void) {
-  if (!problemText) {
-    int mode;
-
-    if (controlCurrentConsole(KDGETMODE, &mode) == -1) {
-      logSystemError("ioctl[KDGETMODE]");
-    } else if (mode == KD_TEXT) {
-      if (afterTimePeriod(&mappingRecalculationTimer, NULL)) {
-        setTranslationTable(0);
-      }
-
-      return 1;
-    }
-
+  if (!inTextMode) {
     problemText = gettext("screen not in text mode");
   }
 
-  return 0;
+  return vt;
 }
 
 static int
@@ -1992,7 +1998,6 @@ refresh_LinuxScreen (void) {
         problemText = gettext("no foreground console");
       } else if (refreshState == REFRESH_DONE) {
         screenUpdated = 0;
-        inTextMode = testTextMode();
       } else if (refreshState == REFRESH_FAILED) {
         logMessage(LOG_WARNING, "cache refresh failed");
         problemText = gettext("can't read screen content");
@@ -2037,10 +2042,9 @@ getScreenDescription (ScreenDescription *description) {
 
 static void
 describe_LinuxScreen (ScreenDescription *description) {
-  if (!screenCacheBuffer) {
+  if (!screenCacheUsed) {
     problemText = NULL;
     currentConsoleNumber = getConsoleNumber();
-    inTextMode = testTextMode();
   }
 
   if ((description->number = currentConsoleNumber)) {
