@@ -536,7 +536,6 @@ static int
 getConsoleState (struct vt_stat *state) {
   if (controlMainConsole(VT_GETSTATE, state) != -1) return 1;
   logSystemError("ioctl[VT_GETSTATE]");
-  problemText = gettext("can't get console state");
   return 0;
 }
 
@@ -563,7 +562,6 @@ getForegroundConsoleNumber (int *vt) {
     }
   }
 
-  problemText = gettext("can't get foreground console number");
   return 0;
 }
 
@@ -1920,17 +1918,22 @@ getConsoleNumber (void) {
 
 static int
 testTextMode (void) {
-  if (problemText) return 0;
-  int mode;
+  if (!problemText) {
+    int mode;
 
-  if (controlCurrentConsole(KDGETMODE, &mode) == -1) {
-    logSystemError("ioctl[KDGETMODE]");
-  } else if (mode == KD_TEXT) {
-    if (afterTimePeriod(&mappingRecalculationTimer, NULL)) setTranslationTable(0);
-    return 1;
+    if (controlCurrentConsole(KDGETMODE, &mode) == -1) {
+      logSystemError("ioctl[KDGETMODE]");
+    } else if (mode == KD_TEXT) {
+      if (afterTimePeriod(&mappingRecalculationTimer, NULL)) {
+        setTranslationTable(0);
+      }
+
+      return 1;
+    }
+
+    problemText = gettext("screen not in text mode");
   }
 
-  problemText = gettext("screen not in text mode");
   return 0;
 }
 
@@ -1960,9 +1963,10 @@ refresh_LinuxScreen (void) {
     } RefreshState;
 
     RefreshState refreshState = REFRESH_NEEDED;
-    problemText = NULL;
 
     while (1) {
+      problemText = NULL;
+
       {
         int newConsoleNumber = getConsoleNumber();
 
@@ -1974,7 +1978,6 @@ refresh_LinuxScreen (void) {
 
           if (refreshState != REFRESH_NEEDED) {
             refreshState = REFRESH_NEEDED;
-            problemText = NULL;
 
             logMessage(LOG_WARNING,
               "foreground console changed during cache refresh - retrying"
@@ -1988,12 +1991,13 @@ refresh_LinuxScreen (void) {
       if (currentConsoleNumber == NO_CONSOLE) {
         problemText = gettext("no foreground console");
       } else if (refreshState == REFRESH_DONE) {
-        inTextMode = testTextMode();
         screenUpdated = 0;
+        inTextMode = testTextMode();
       } else if (refreshState == REFRESH_FAILED) {
         logMessage(LOG_WARNING, "cache refresh failed");
         problemText = gettext("can't read screen content");
       } else {
+        // refreshState == REFRESH_NEEDED
         refreshState = refreshCache()? REFRESH_DONE: REFRESH_FAILED;
         continue;
       }
