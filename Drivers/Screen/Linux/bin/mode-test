@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+say() {
+   espeak-ng "${*}" &
+}
+
+run() {
+   say "$((++counter))"
+   echo "${*}"
+   "${@}"
+   sleep 5
+}
+
+console="$(fgconsole)"
+counter=0
+
+run chvt 1
+run systemctl start gdm
+run systemctl stop gdm
+run systemctl start getty@tty1
+
+say "done"
+chvt "${console}"
+exit 0
