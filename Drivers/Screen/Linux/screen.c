@@ -2021,23 +2021,19 @@ refresh_LinuxScreen (void) {
 }
 
 static int
-getScreenDescription (ScreenDescription *description) {
+getScreenProperties (ScreenDescription *description) {
   ScreenHeader header;
+  if (!readScreenHeader(&header)) return 0;
 
-  if (readScreenHeader(&header)) {
-    description->cols = header.size.columns;
-    description->rows = header.size.rows;
+  description->cols = header.size.columns;
+  description->rows = header.size.rows;
 
-    description->posx = header.cursor.column;
-    description->posy = header.cursor.row;
-    if (header.hideCursor) description->hasCursor = 0;
+  description->posx = header.cursor.column;
+  description->posy = header.cursor.row;
+  if (header.hideCursor) description->hasCursor = 0;
 
-    adjustCursorColumn(&description->posx, description->posy, description->cols);
-    return 1;
-  }
-
-  problemText = gettext("can't read screen header");
-  return 0;
+  adjustCursorColumn(&description->posx, description->posy, description->cols);
+  return 1;
 }
 
 static void
@@ -2047,9 +2043,10 @@ describe_LinuxScreen (ScreenDescription *description) {
     currentConsoleNumber = getConsoleNumber();
   }
 
-  if ((description->number = currentConsoleNumber)) {
+  if ((description->number = currentConsoleNumber) != NO_CONSOLE) {
     if (inTextMode) {
-      if (getScreenDescription(description)) {
+      if (!getScreenProperties(description)) {
+        problemText = gettext("can't get screen properties");
       }
     }
   }
