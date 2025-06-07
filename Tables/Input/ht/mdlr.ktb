@@ -26,7 +26,7 @@ bind Right+RoutingKey NXINDENT
 
 bind Left FWINLT
 bind Right FWINRT
-bind Left+Right PASTE:PASTE_ALTERNATE
+bind Left+Right PASTE:PASTE_ALTMODE
 
 bind B1+Left LNBEG
 bind B1+Right LNEND

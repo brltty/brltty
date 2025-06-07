@@ -255,11 +255,11 @@ pasteCharacters (const wchar_t *characters, size_t count) {
 }
 
 static int
-cpbPaste (ClipboardCommandData *ccd, unsigned int index, int alternate) {
+cpbPaste (ClipboardCommandData *ccd, unsigned int index, int useAlternateMode) {
   if (!isMainScreen()) return 0;
   if (isRouting()) return 0;
 
-  if (!prefs.alternatePasteModeEnabled) alternate = 0;
+  if (!prefs.alternatePasteModeEnabled) useAlternateMode = 0;
   int bracketed;
 
   {
@@ -267,11 +267,11 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index, int alternate) {
 
     switch (mode) {
       case SPM_UNKNOWN:
-        bracketed = alternate;
+        bracketed = useAlternateMode;
         break;
 
       case SPM_BRACKETED:
-        bracketed = !alternate;
+        bracketed = !useAlternateMode;
         break;
 
       default:
@@ -489,18 +489,18 @@ handleClipboardCommands (int command, void *data) {
 
   switch (command & BRL_MSK_CMD) {
     {
-      int alternate;
+      int useAlternateMode;
 
     case BRL_CMD_PASTE:
-      alternate = 0;
+      useAlternateMode = 0;
       goto doPaste;
 
-    case BRL_CMD_PASTE_ALTERNATE:
-      alternate = 1;
+    case BRL_CMD_PASTE_ALTMODE:
+      useAlternateMode = 1;
       goto doPaste;
 
     doPaste:
-      if (!cpbPaste(ccd, 0, alternate)) alert(ALERT_COMMAND_REJECTED);
+      if (!cpbPaste(ccd, 0, useAlternateMode)) alert(ALERT_COMMAND_REJECTED);
       break;
     }
 
@@ -672,18 +672,18 @@ handleClipboardCommands (int command, void *data) {
         }
 
         {
-          int alternate;
+          int useAlternateMode;
 
         case BRL_CMD_BLK(PASTE_HISTORY):
-          alternate = 0;
+          useAlternateMode = 0;
           goto doPasteHistory;
 
-        case BRL_CMD_BLK(PASTE_HISTORY_ALTERNATE):
-          alternate = 1;
+        case BRL_CMD_BLK(PASTE_HISTORY_ALTMODE):
+          useAlternateMode = 1;
           goto doPasteHistory;
 
         doPasteHistory:
-          if (!cpbPaste(ccd, arg1, alternate)) alert(ALERT_COMMAND_REJECTED);
+          if (!cpbPaste(ccd, arg1, useAlternateMode)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
 

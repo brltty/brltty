@@ -33,7 +33,7 @@ bind SmartpadLeft KEY_CURSOR_LEFT
 bind SmartpadRight KEY_CURSOR_RIGHT
 bind SmartpadUp KEY_CURSOR_UP
 bind SmartpadDown KEY_CURSOR_DOWN
-bind SmartpadEnter PASTE:PASTE_ALTERNATE
+bind SmartpadEnter PASTE:PASTE_ALTMODE
 
 bind SmartpadF2 TIME
 

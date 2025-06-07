@@ -55,7 +55,7 @@ bind Home+Cursor+!RoutingKey1 SETLEFT
 
 bind Prog+!RoutingKey1 CLIP_NEW
 bind Home+!RoutingKey1 COPY_RECT
-bind Prog+Home+Down PASTE:PASTE_ALTERNATE
+bind Prog+Home+Down PASTE:PASTE_ALTMODE
 
 bind Prog HELP
 bind Prog+Home DISPMD

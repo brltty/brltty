@@ -54,7 +54,7 @@ bind Thumb2+RoutingKey CLIP_ADD
 bind Thumb3+RoutingKey COPY_LINE
 bind Thumb4+RoutingKey COPY_RECT
 bind RoutingKey+!RoutingKey CLIP_COPY
-bind Thumb2+Thumb3 PASTE:PASTE_ALTERNATE
+bind Thumb2+Thumb3 PASTE:PASTE_ALTMODE
 
 bind Thumb1+Up ATTRUP
 bind Thumb1+Down ATTRDN

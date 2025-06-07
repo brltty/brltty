@@ -68,4 +68,4 @@ assign toggleCommand AUTOREPEAT
 include ../toggle.kti
 
 bind Status.19 TIME
-bind Status.20 PASTE:PASTE_ALTERNATE
+bind Status.20 PASTE:PASTE_ALTMODE

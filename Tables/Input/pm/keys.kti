@@ -41,7 +41,7 @@ bind LeftKeyFront HOME
 bind LeftKeyRear+BarLeft1 DISPMD
 bind LeftKeyRear+BarRight1 CSRTRK
 bind LeftKeyRear+BarUp1 SIXDOTS
-bind LeftKeyRear+BarDown1 PASTE:PASTE_ALTERNATE
+bind LeftKeyRear+BarDown1 PASTE:PASTE_ALTMODE
 
 bind LeftKeyRear+BarLeft2 ATTRVIS
 bind LeftKeyRear+BarRight2 CSRVIS

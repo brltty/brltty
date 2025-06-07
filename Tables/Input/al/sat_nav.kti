@@ -37,7 +37,7 @@ bind NavPadLeft PREFMENU
 bind NavPadRight INFO
 bind NavPadF1+NavPadLeft FREEZE
 bind NavPadF1+NavPadRight SIXDOTS
-bind NavPadF2+NavPadLeft PASTE:PASTE_ALTERNATE
+bind NavPadF2+NavPadLeft PASTE:PASTE_ALTMODE
 bind NavPadF2+NavPadRight CSRJMP_VERT
 
 bind NavPadUp PRPROMPT

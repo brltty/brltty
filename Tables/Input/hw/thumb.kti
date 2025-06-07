@@ -45,7 +45,7 @@ bind ThumbPrevious+RoutingKey CLIP_NEW
 bind ThumbLeft+RoutingKey CLIP_ADD
 bind \{right}+RoutingKey COPY_LINE
 bind \{next}+RoutingKey COPY_RECT
-bind ThumbPrevious+ThumbNext PASTE:PASTE_ALTERNATE
+bind ThumbPrevious+ThumbNext PASTE:PASTE_ALTMODE
 
 
 #################

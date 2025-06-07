@@ -52,7 +52,7 @@ bind Attribute+!RoutingKey1 COPY_RECT
 bind Cursor+!RoutingKey1 PRINDENT
 bind Braille+!RoutingKey1 NXINDENT
 
-bind Function+Attribute PASTE:PASTE_ALTERNATE
+bind Function+Attribute PASTE:PASTE_ALTMODE
 
 include routing.kti
 

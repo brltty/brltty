@@ -21,7 +21,7 @@ bind Right\{navKeyType}Press LNEND
 
 bind LeftSelector BACK:TOP_LEFT
 bind RightSelector HOME:BOT_LEFT
-bind LeftSelector+RightSelector PASTE:PASTE_ALTERNATE
+bind LeftSelector+RightSelector PASTE:PASTE_ALTMODE
 
 bind PanLeft FWINLT
 bind PanRight FWINRT

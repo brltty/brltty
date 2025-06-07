@@ -97,7 +97,7 @@ bind Select+S4 SIXDOTS
 bind BL+S3 DISPMD
 bind BL+S4 FREEZE
 
-bind Left+Right PASTE:PASTE_ALTERNATE
+bind Left+Right PASTE:PASTE_ALTMODE
 bind S2+S3 CSRJMP_VERT
 
 include display6.kti

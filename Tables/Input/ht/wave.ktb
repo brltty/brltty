@@ -27,7 +27,7 @@ bind RoutingKey+!RoutingKey CLIP_COPY
 bind Left+RoutingKey PRINDENT
 bind Right+RoutingKey NXINDENT
 
-bind Left+Right PASTE:PASTE_ALTERNATE
+bind Left+Right PASTE:PASTE_ALTMODE
 
 include dots.kti
 

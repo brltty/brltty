@@ -271,7 +271,7 @@ typedef enum {
   BRL_CMD_PREFRESET /* reset preferences to defaults */,
   BRL_CMD_ASPK_EMP_LINE /* set autospeak empty line on/off */,
   BRL_CMD_SPK_PUNCT_LEVEL /* cycle speech punctuation level */,
-  BRL_CMD_PASTE_ALTERNATE /* insert bracketed clipboard text after screen cursor */,
+  BRL_CMD_PASTE_ALTMODE /* insert bracketed clipboard text after screen cursor */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
@@ -310,7 +310,7 @@ typedef enum {
   BRL_BLK_TXTSEL_START /* start text selection */,
   BRL_BLK_TXTSEL_SET /* set text selection */,
   BRL_BLK_ROUTE_SPEECH /* bring speech cursor to character */,
-  BRL_BLK_PASTE_HISTORY_ALTERNATE /* insert bracketed clipboard history entry after screen cursor */,
+  BRL_BLK_PASTE_HISTORY_ALTMODE /* insert bracketed clipboard history entry after screen cursor */,
   BRL_BLK_SELECTVT /* bind to specific virtual terminal */,
   BRL_BLK_ALERT /* render an alert */,
   BRL_BLK_PASSKEY /* (emulate special key) */,

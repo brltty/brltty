@@ -76,7 +76,7 @@ bind CapsLock+!X CLIP_NEW
 bind CapsLock+ShiftLeft+!X CLIP_ADD
 bind CapsLock+!C COPY_RECT
 bind CapsLock+ShiftLeft+!C COPY_LINE
-bind CapsLock+V PASTE:PASTE_ALTERNATE
+bind CapsLock+V PASTE:PASTE_ALTMODE
 
 # speech
 bind ControlLeft MUTE
