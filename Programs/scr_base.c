@@ -171,9 +171,9 @@ insertKey_BaseScreen (ScreenKey key) {
   return 0;
 }
 
-static int
-canBracketPaste_BaseScreen (void) {
-  return 0;
+static ScreenPasteMode
+getPasteMode_BaseScreen (void) {
+  return SPM_UNKNOWN;
 }
 
 static int
@@ -228,7 +228,7 @@ initializeBaseScreen (BaseScreen *base) {
 
   base->readCharacters = readCharacters_BaseScreen;
   base->insertKey = insertKey_BaseScreen;
-  base->canBracketPaste = canBracketPaste_BaseScreen;
+  base->getPasteMode = getPasteMode_BaseScreen;
   base->routeCursor = routeCursor_BaseScreen;
 
   base->highlightRegion = highlightRegion_BaseScreen;

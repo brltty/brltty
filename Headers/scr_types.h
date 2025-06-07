@@ -158,6 +158,12 @@ isSpecialKey (ScreenKey key) {
 /* must be less than 0 */
 #define SCR_NO_VT -1
 
+typedef enum {
+  SPM_UNKNOWN,
+  SPM_PLAIN,
+  SPM_BRACKETED,
+} ScreenPasteMode;
+
 typedef struct ScreenDriverStruct ScreenDriver;
 
 #ifdef __cplusplus

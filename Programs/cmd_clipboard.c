@@ -260,8 +260,28 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index, int alternate) {
   if (isRouting()) return 0;
 
   if (!prefs.alternatePasteEnabled) alternate = 0;
-  int bracketed = canBracketScreenPaste();
-  if (alternate) bracketed = !bracketed;
+  int bracketed;
+
+  {
+    ScreenPasteMode mode = getScreenPasteMode();
+
+    switch (mode) {
+      case SPM_UNKNOWN:
+        bracketed = alternate;
+        break;
+
+      case SPM_BRACKETED:
+        bracketed = !alternate;
+        break;
+
+      default:
+        logMessage(LOG_WARNING, "unexpected screen paste mode: %d", mode);
+        /* fall through */
+      case SPM_PLAIN:
+        bracketed = 0;
+        break;
+    }
+  }
 
   int pasted = 0;
   lockMainClipboard();

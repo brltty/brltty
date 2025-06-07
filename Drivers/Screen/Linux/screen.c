@@ -2717,11 +2717,13 @@ insertKey_LinuxScreen (ScreenKey key) {
   return ok;
 }
 
-static int
-canBracketPaste_LinuxScreen (void) {
+static ScreenPasteMode
+getPasteMode_LinuxScreen (void) {
   unsigned char subcode = TIOCL_GETBRACKETEDPASTE;
   int result = controlCurrentConsole(TIOCLINUX, &subcode);
-  if (result > 0) return 1;
+
+  if (result > 0) return SPM_BRACKETED;
+  if (result == 0) return SPM_PLAIN;
 
   if (result == -1) {
     if (errno == EINVAL) {
@@ -2736,7 +2738,7 @@ canBracketPaste_LinuxScreen (void) {
     }
   }
 
-  return 0;
+  return SPM_UNKNOWN;
 }
 
 typedef struct {
@@ -2947,7 +2949,7 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_LinuxScreen;
   main->base.readCharacters = readCharacters_LinuxScreen;
   main->base.insertKey = insertKey_LinuxScreen;
-  main->base.canBracketPaste = canBracketPaste_LinuxScreen;
+  main->base.getPasteMode = getPasteMode_LinuxScreen;
   main->base.highlightRegion = highlightRegion_LinuxScreen;
   main->base.unhighlightRegion = unhighlightRegion_LinuxScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_LinuxScreen;

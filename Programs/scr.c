@@ -157,9 +157,9 @@ insertScreenKey (ScreenKey key) {
   return currentScreen->insertKey(key);
 }
 
-int
-canBracketScreenPaste (void) {
-  return currentScreen->canBracketPaste();
+ScreenPasteMode
+getScreenPasteMode (void) {
+  return currentScreen->getPasteMode();
 }
 
 int
