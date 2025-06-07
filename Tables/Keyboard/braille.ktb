@@ -37,7 +37,7 @@ bind RoutingKey ROUTE
 bind Backward+RoutingKey SETLEFT
 bind Forward+RoutingKey DESCCHAR
 
-bind Backward+Forward PASTE:PASTE_BRACKETED
+bind Backward+Forward PASTE:PASTE_ALTERNATE
 bind RoutingKey+!RoutingKey CLIP_COPY
 bind ArrowLeft+RoutingKey CLIP_NEW
 bind ArrowUp+RoutingKey CLIP_ADD

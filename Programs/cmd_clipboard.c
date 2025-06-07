@@ -255,10 +255,12 @@ pasteCharacters (const wchar_t *characters, size_t count) {
 }
 
 static int
-cpbPaste (ClipboardCommandData *ccd, unsigned int index, int bracketed) {
+cpbPaste (ClipboardCommandData *ccd, unsigned int index, int alternate) {
   if (!isMainScreen()) return 0;
   if (isRouting()) return 0;
-  if (canBracketScreenPaste()) bracketed = 1;
+
+  int bracketed = canBracketScreenPaste();
+  if (alternate) bracketed = !bracketed;
 
   int pasted = 0;
   lockMainClipboard();
@@ -466,18 +468,18 @@ handleClipboardCommands (int command, void *data) {
 
   switch (command & BRL_MSK_CMD) {
     {
-      int bracketed;
+      int alternate;
 
     case BRL_CMD_PASTE:
-      bracketed = 0;
+      alternate = 0;
       goto doPaste;
 
-    case BRL_CMD_PASTE_BRACKETED:
-      bracketed = 1;
+    case BRL_CMD_PASTE_ALTERNATE:
+      alternate = 1;
       goto doPaste;
 
     doPaste:
-      if (!cpbPaste(ccd, 0, bracketed)) alert(ALERT_COMMAND_REJECTED);
+      if (!cpbPaste(ccd, 0, alternate)) alert(ALERT_COMMAND_REJECTED);
       break;
     }
 
@@ -649,18 +651,18 @@ handleClipboardCommands (int command, void *data) {
         }
 
         {
-          int bracketed;
+          int alternate;
 
         case BRL_CMD_BLK(PASTE_HISTORY):
-          bracketed = 0;
+          alternate = 0;
           goto doPasteHistory;
 
-        case BRL_CMD_BLK(PASTE_HISTORY_BRACKETED):
-          bracketed = 1;
+        case BRL_CMD_BLK(PASTE_HISTORY_ALTERNATE):
+          alternate = 1;
           goto doPasteHistory;
 
         doPasteHistory:
-          if (!cpbPaste(ccd, arg1, bracketed)) alert(ALERT_COMMAND_REJECTED);
+          if (!cpbPaste(ccd, arg1, alternate)) alert(ALERT_COMMAND_REJECTED);
           break;
         }
 

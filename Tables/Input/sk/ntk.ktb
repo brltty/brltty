@@ -74,7 +74,7 @@ bind RightJoystickRight+RoutingKey NXDIFCHAR
 bind LeftJoystickPress+RoutingKey SETMARK
 bind RightJoystickPress+RoutingKey GOTOMARK
 
-bind LeftJoystickPress+RightJoystickPress PASTE:PASTE_BRACKETED
+bind LeftJoystickPress+RightJoystickPress PASTE:PASTE_ALTERNATE
 bind RoutingKey+RoutingKey CLIP_COPY
 bind LeftJoystickUp+RoutingKey+RoutingKey CLIP_APPEND
 bind LeftJoystickLeft+RoutingKey CLIP_NEW

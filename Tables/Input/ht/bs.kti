@@ -26,7 +26,7 @@ bind SpaceRight+RoutingKey NXINDENT
 
 bind SpaceLeft FWINLT
 bind SpaceRight FWINRT
-bind SpaceLeft+SpaceRight PASTE:PASTE_BRACKETED
+bind SpaceLeft+SpaceRight PASTE:PASTE_ALTERNATE
 
 bind B1+SpaceLeft LNBEG
 bind B1+SpaceRight LNEND
