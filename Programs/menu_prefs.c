@@ -1004,8 +1004,8 @@ makePreferencesMenu (void) {
     }
 
     {
-      NAME(strtext("Alternate Paste Enabled"));
-      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.alternatePasteEnabled, &itemName));
+      NAME(strtext("Alternate Paste Mode Enabled"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.alternatePasteModeEnabled, &itemName));
     }
 
     {

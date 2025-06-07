@@ -259,7 +259,7 @@ cpbPaste (ClipboardCommandData *ccd, unsigned int index, int alternate) {
   if (!isMainScreen()) return 0;
   if (isRouting()) return 0;
 
-  if (!prefs.alternatePasteEnabled) alternate = 0;
+  if (!prefs.alternatePasteModeEnabled) alternate = 0;
   int bracketed;
 
   {
