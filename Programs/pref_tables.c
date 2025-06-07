@@ -439,6 +439,12 @@ const PreferenceDefinition preferenceDefinitionTable[] = {
     .setting = &prefs.autorepeatPanning
   },
 
+  { .name = "alternate-paste-enabled",
+    .defaultValue = DEFAULT_ALTERNATE_PASTE_ENABLED,
+    .settingNames = &preferenceStringTable_boolean,
+    .setting = &prefs.alternatePasteEnabled
+  },
+
   { .name = "touch-navigation",
     .defaultValue = DEFAULT_TOUCH_NAVIGATION,
     .settingNames = &preferenceStringTable_boolean,

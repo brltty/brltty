@@ -1004,6 +1004,11 @@ makePreferencesMenu (void) {
     }
 
     {
+      NAME(strtext("Alternate Paste Enabled"));
+      ITEM(newBooleanMenuItem(inputSubmenu, &prefs.alternatePasteEnabled, &itemName));
+    }
+
+    {
       NAME(strtext("Touch Navigation"));
       ITEM(newBooleanMenuItem(inputSubmenu, &prefs.touchNavigation, &itemName));
       TEST(TouchSensitivity);
