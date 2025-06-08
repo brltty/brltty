@@ -29,11 +29,13 @@
 #include "async_wait.h"
 #include "async_task.h"
 #include "utf8.h"
+#include "unicode.h"
 #include "brl_utils.h"
 #include "brl_cmds.h"
 #include "clipboard.h"
 #include "spk.h"
 #include "ktb_types.h"
+#include "ctb.h"
 #include "update.h"
 #include "cmd_queue.h"
 #include "api_control.h"
@@ -287,7 +289,7 @@ sayMessage (const char *text) {
 }
 
 static const MessageSegment *
-makeSegments (MessageSegment *segment, const wchar_t *characters, size_t characterCount) {
+makeSegments (MessageSegment *segment, const wchar_t *characters, size_t characterCount, int wordWrap) {
   const size_t windowLength = textCount * brl.textRows;
 
   const wchar_t *character = characters;
@@ -306,7 +308,7 @@ makeSegments (MessageSegment *segment, const wchar_t *characters, size_t charact
     } else {
       segment->length = windowLength;
 
-      if (prefs.wordWrap) {
+      if (wordWrap) {
         const wchar_t *segmentEnd = segment->start + segment->length;
 
         if (!iswspace(*segmentEnd)) {
@@ -326,6 +328,57 @@ makeSegments (MessageSegment *segment, const wchar_t *characters, size_t charact
   }
 
   return segment - 1;
+}
+
+static wchar_t *
+makeBraille (size_t *length, const wchar_t *text, size_t textSize) {
+  wchar_t *characters = NULL;
+  if (length) *length = 0;
+
+  int outputSize = textSize * 3;
+  unsigned char *cells = NULL;
+
+  while (1) {
+    if (!(cells = malloc(outputSize))) {
+      logMallocError();
+      break;
+    }
+
+    int inputCount = textSize;
+    int outputCount = outputSize;
+
+    contractText(
+      contractionTable, NULL,
+      text, &inputCount,
+      cells, &outputCount,
+      NULL, CTB_NO_CURSOR
+    );
+
+    if (inputCount == textSize) {
+      if ((characters = allocateCharacters(outputCount + 1))) {
+        const unsigned char *cell = cells;
+        const unsigned char *end = cell + outputCount;
+        wchar_t *character = characters;
+
+        while (cell < end) {
+          unsigned char dots = *cell++;
+          *character++ = dots? (dots | UNICODE_BRAILLE_ROW): WC_C(' ');
+        }
+
+        *character = 0;
+        if (length) *length = character - characters;
+      }
+
+      break;
+    }
+
+    free(cells);
+    cells = NULL;
+    outputSize <<= 1;
+  }
+
+  if (cells) free(cells);
+  return characters;
 }
 
 ASYNC_TASK_CALLBACK(presentMessage) {
@@ -348,13 +401,30 @@ ASYNC_TASK_CALLBACK(presentMessage) {
       },
     };
 
-    const size_t characterCount = countUtf8Characters(mgp->text);
-    wchar_t characters[characterCount + 1];
-    makeWcharsFromUtf8(mgp->text, characters, ARRAY_COUNT(characters));
+    const size_t textLength = countUtf8Characters(mgp->text);
+    wchar_t text[textLength + 1];
+    makeWcharsFromUtf8(mgp->text, text, ARRAY_COUNT(text));
+
+    const wchar_t *characters;
+    size_t characterCount;
+    int wordWrap;
+
+    size_t brailleLength;
+    wchar_t *braille = isContracting()? makeBraille(&brailleLength, text, textLength): NULL;
+
+    if (braille) {
+      characters = braille;
+      characterCount = brailleLength;
+      wordWrap = 1;
+    } else {
+      characters = text;
+      characterCount = textLength;
+      wordWrap = prefs.wordWrap;
+    }
 
     MessageSegment messageSegments[characterCount];
     mgd.segments.current = mgd.segments.first = messageSegments;
-    mgd.segments.last = makeSegments(messageSegments, characters, characterCount);
+    mgd.segments.last = makeSegments(messageSegments, characters, characterCount, wordWrap);
     mgd.clipboard.start = mgd.segments.first->start;
 
     int apiWasLinked = api.isServerLinked();
@@ -402,6 +472,7 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     }
 
   DONE:
+    if (braille) free(braille);
     popCommandEnvironment();
     resumeUpdates(1);
     if (apiWasLinked) api.linkServer();
