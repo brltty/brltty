@@ -165,7 +165,7 @@ typedef enum {
   
   /* miscellaneous */
   BRL_CMD_CSRJMP_VERT /* bring screen cursor to current line */,
-  BRL_CMD_PASTE /* insert clipboard text after screen cursor */,
+  BRL_CMD_PASTE /* insert the clipboard content before the screen cursor */,
   BRL_CMD_RESTARTBRL /* restart braille driver */,
   BRL_CMD_RESTARTSPEECH /* restart speech driver */,
 
@@ -240,7 +240,7 @@ typedef enum {
   BRL_CMD_TXTSEL_ALL /* select all of the text */,
   BRL_CMD_HOST_COPY /* copy selected text to host clipboard */,
   BRL_CMD_HOST_CUT /* cut selected text to host clipboard */,
-  BRL_CMD_HOST_PASTE /* insert host clipboard text after screen cursor */,
+  BRL_CMD_HOST_PASTE /* insert the host clipboard text before the screen cursor */,
 
   BRL_CMD_GUI_TITLE /* show the window title */,
   BRL_CMD_GUI_BRL_ACTIONS /* open the braille actions window */,
@@ -271,7 +271,7 @@ typedef enum {
   BRL_CMD_PREFRESET /* reset preferences to defaults */,
   BRL_CMD_ASPK_EMP_LINE /* set autospeak empty line on/off */,
   BRL_CMD_SPK_PUNCT_LEVEL /* cycle speech punctuation level */,
-  BRL_CMD_PASTE_ALTMODE /* use alternate paste mode to insert clipboard text after screen cursor */,
+  BRL_CMD_PASTE_ALTMODE /* insert the clipboard content before the screen cursor using the alternate paste mode */,
 
   BRL_basicCommandCount /* must be last */
 } BRL_BasicCommand;
@@ -299,7 +299,7 @@ typedef enum {
   BRL_BLK_NXDIFCHAR /* go down to nearest line with different character */,
   BRL_BLK_CLIP_COPY /* copy characters to clipboard */,
   BRL_BLK_CLIP_APPEND /* append characters to clipboard */,
-  BRL_BLK_PASTE_HISTORY /* insert clipboard history entry after screen cursor */,
+  BRL_BLK_PASTE_HISTORY /* insert a clipboard history entry before the screen cursor */,
   BRL_BLK_SET_TEXT_TABLE /* set text table */,
   BRL_BLK_SET_ATTRIBUTES_TABLE /* set attributes table */,
   BRL_BLK_SET_CONTRACTION_TABLE /* set contraction table */,
@@ -310,7 +310,7 @@ typedef enum {
   BRL_BLK_TXTSEL_START /* start text selection */,
   BRL_BLK_TXTSEL_SET /* set text selection */,
   BRL_BLK_ROUTE_SPEECH /* bring speech cursor to character */,
-  BRL_BLK_PASTE_HISTORY_ALTMODE /* use alternate paste mode to insert clipboard history entry after screen cursor */,
+  BRL_BLK_PASTE_HISTORY_ALTMODE /* insert a clipboard history entry before the screen cursor using the alternate paste mode */,
   BRL_BLK_SELECTVT /* bind to specific virtual terminal */,
   BRL_BLK_ALERT /* render an alert */,
   BRL_BLK_PASSKEY /* (emulate special key) */,
