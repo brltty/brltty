@@ -286,6 +286,48 @@ sayMessage (const char *text) {
   return 1;
 }
 
+static const MessageSegment *
+makeSegments (MessageSegment *segment, const wchar_t *characters, size_t characterCount) {
+  const size_t windowLength = textCount * brl.textRows;
+
+  const wchar_t *character = characters;
+  const wchar_t *const charactersEnd = character + characterCount;
+
+  while (*character) {
+    /* strip leading spaces */
+    while ((character < charactersEnd) && iswspace(*character)) character += 1;
+
+    const size_t charactersLeft = charactersEnd - character;
+    if (!charactersLeft) break;
+    segment->start = character;
+
+    if (charactersLeft <= windowLength) {
+      segment->length = charactersLeft;
+    } else {
+      segment->length = windowLength;
+
+      if (prefs.wordWrap) {
+        const wchar_t *segmentEnd = segment->start + segment->length;
+
+        if (!iswspace(*segmentEnd)) {
+          while (--segmentEnd >= segment->start) {
+            if (iswspace(*segmentEnd)) break;
+          }
+
+          if (segmentEnd > segment->start) {
+            segment->length = segmentEnd - segment->start + 1;
+          }
+        }
+      }
+    }
+
+    character += segment->length;
+    segment += 1;
+  }
+
+  return segment - 1;
+}
+
 ASYNC_TASK_CALLBACK(presentMessage) {
   MessageParameters *mgp = data;
 
@@ -310,35 +352,9 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     wchar_t characters[characterCount + 1];
     makeWcharsFromUtf8(mgp->text, characters, ARRAY_COUNT(characters));
 
-    const size_t brailleSize = textCount * brl.textRows;
-    wchar_t brailleBuffer[brailleSize];
-
     MessageSegment messageSegments[characterCount];
-
-    {
-      const wchar_t *character = characters;
-      const wchar_t *const end = character + characterCount;
-
-      MessageSegment *segment = messageSegments;
-      mgd.segments.current = mgd.segments.first = segment;
-
-      while (*character) {
-        /* strip leading spaces */
-        while ((character < end) && iswspace(*character)) character += 1;
-
-        const size_t charactersLeft = end - character;
-        if (!charactersLeft) break;
-
-        segment->start = character;
-        segment->length = MIN(charactersLeft, brailleSize);
-
-        character += segment->length;
-        segment += 1;
-      }
-
-      mgd.segments.last = segment - 1;
-    }
-
+    mgd.segments.current = mgd.segments.first = messageSegments;
+    mgd.segments.last = makeSegments(messageSegments, characters, characterCount);
     mgd.clipboard.start = mgd.segments.first->start;
 
     int apiWasLinked = api.isServerLinked();
@@ -351,13 +367,10 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
     while (1) {
       const MessageSegment *segment = mgd.segments.current;
-      size_t cellCount = segment->length;
       int isLastSegment = segment == mgd.segments.last;
-
-      wmemcpy(brailleBuffer, segment->start, cellCount);
       brl.cursor = BRL_NO_CURSOR;
 
-      if (!writeBrailleCharacters(mgp->mode, brailleBuffer, cellCount)) {
+      if (!writeBrailleCharacters(mgp->mode, segment->start, segment->length)) {
         mgp->presented = 0;
         break;
       }
