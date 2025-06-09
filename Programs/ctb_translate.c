@@ -388,7 +388,7 @@ contractText (
 
 int *
 makeInverseOffsetMap (const int *fromOffsets, int fromCount) {
-  int toCount = fromOffsets[fromCount] - 1;
+  int toCount = fromOffsets[fromCount];
 
   int *toOffsets;
   size_t toSize = (toCount + 1) * sizeof(*toOffsets);
