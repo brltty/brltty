@@ -77,6 +77,12 @@ typedef struct {
     const wchar_t *start;
     size_t offset;
   } clipboard;
+
+  struct {
+    const wchar_t *message;
+    const wchar_t *characters;
+    const int *offsetMap;
+  } paste;
 } MessageData;
 
 ASYNC_CONDITION_TESTER(testEndMessageWait) {
@@ -85,7 +91,7 @@ ASYNC_CONDITION_TESTER(testEndMessageWait) {
 }
 
 static const wchar_t *
-toMessageCharacter (int arg, int relaxed, MessageData *mgd) {
+toMessageCharacter (int arg, int end, MessageData *mgd) {
   if (arg < 0) return NULL;
   int column = arg % brl.textColumns;
   int row = arg / brl.textColumns;
@@ -98,11 +104,29 @@ toMessageCharacter (int arg, int relaxed, MessageData *mgd) {
   size_t offset = (row * textCount) + column;
 
   if (offset >= segment->length) {
-    if (!relaxed) return NULL;
+    if (!end) return NULL;
     offset = segment->length - 1;
   }
 
-  return segment->start + offset;
+  const wchar_t *character = segment->start + offset;
+  offset = character - mgd->paste.characters;
+
+  if (mgd->paste.characters != mgd->paste.message) {
+    const int *offsetMap = mgd->paste.offsetMap;
+
+    if (offsetMap) {
+      if (end) {
+        while (offsetMap[++offset] == CTB_NO_OFFSET);
+      } else {
+        while (offsetMap[offset] == CTB_NO_OFFSET) offset -= 1;
+      }
+
+      offset = offsetMap[offset];
+      if (end) offset -= 1;
+    }
+  }
+
+  return mgd->paste.message + offset;
 }
 
 static void
@@ -331,11 +355,11 @@ makeSegments (MessageSegment *segment, const wchar_t *characters, size_t charact
 }
 
 static wchar_t *
-makeBraille (const wchar_t *text, size_t textLength, size_t *length, int **offsets) {
+makeBraille (const wchar_t *text, size_t textLength, size_t *length, int **offsetMap) {
   wchar_t *characters = NULL;
 
   *length = 0;
-  *offsets = NULL;
+  *offsetMap = NULL;
 
   int cellsSize = MAX(0X10, textLength) * 2;
   int cellsLimit = textLength * 10;
@@ -361,17 +385,17 @@ makeBraille (const wchar_t *text, size_t textLength, size_t *length, int **offse
       cellOffsets[textCount] = cellCount;
 
       int *textOffsets;
-      int textOffsetsSize = (cellCount + 1) * sizeof(*textOffsets);
+      size_t textOffsetsSize = (cellCount + 1) * sizeof(*textOffsets);
 
       if ((textOffsets = malloc(textOffsetsSize))) {
         int textOffset = 0;
         int cellOffset = 0;
 
         while (textOffset <= textCount) {
-          int offset = cellOffsets[textOffset];
+          int nextCellOffset = cellOffsets[textOffset];
 
-          if (offset != CTB_NO_OFFSET) {
-            while (cellOffset < offset) {
+          if (nextCellOffset != CTB_NO_OFFSET) {
+            while (cellOffset < nextCellOffset) {
               textOffsets[cellOffset++] = CTB_NO_OFFSET;
             }
 
@@ -397,7 +421,7 @@ makeBraille (const wchar_t *text, size_t textLength, size_t *length, int **offse
 
         *character = 0;
         *length = character - characters;
-        *offsets = textOffsets;
+        *offsetMap = textOffsets;
       } else {
         free(textOffsets);
       }
@@ -433,19 +457,26 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     wchar_t text[textLength + 1];
     makeWcharsFromUtf8(mgp->text, text, ARRAY_COUNT(text));
 
+    mgd.paste.message = text;
+    mgd.paste.characters = text;
+    mgd.paste.offsetMap = NULL;
+
     wchar_t *characters = text;
     size_t characterCount = textLength;
     int wordWrap = prefs.wordWrap;
 
     if (isContracting()) {
       size_t brailleLength;
-      int *textOffsets;
-      wchar_t *braille = makeBraille(text, textLength, &brailleLength, &textOffsets);
+      int *offsetMap;
+      wchar_t *braille = makeBraille(text, textLength, &brailleLength, &offsetMap);
 
       if (braille) {
         characters = braille;
         characterCount = brailleLength;
         wordWrap = 1;
+
+        mgd.paste.characters = braille;
+        mgd.paste.offsetMap = offsetMap;
       }
     }
 
