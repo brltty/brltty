@@ -81,8 +81,8 @@ typedef struct {
   struct {
     const wchar_t *message;
     const wchar_t *characters;
-    const int *offsetMap;
-  } paste;
+    int *toMessageOffset;
+  } braille;
 } MessageData;
 
 ASYNC_CONDITION_TESTER(testEndMessageWait) {
@@ -109,24 +109,26 @@ toMessageCharacter (int arg, int end, MessageData *mgd) {
   }
 
   const wchar_t *character = segment->start + offset;
-  offset = character - mgd->paste.characters;
+  offset = character - mgd->braille.characters;
 
-  if (mgd->paste.characters != mgd->paste.message) {
-    const int *offsetMap = mgd->paste.offsetMap;
+  if (mgd->braille.characters != mgd->braille.message) {
+    const int *toMessageOffset = mgd->braille.toMessageOffset;
 
-    if (offsetMap) {
+    if (toMessageOffset) {
       if (end) {
-        while (offsetMap[++offset] == CTB_NO_OFFSET);
+        while (toMessageOffset[++offset] == CTB_NO_OFFSET);
+        // we're now at the start of the next contraction
       } else {
-        while (offsetMap[offset] == CTB_NO_OFFSET) offset -= 1;
+        while (toMessageOffset[offset] == CTB_NO_OFFSET) offset -= 1;
+        // we're now at the start of the current contraction
       }
 
-      offset = offsetMap[offset];
+      offset = toMessageOffset[offset];
       if (end) offset -= 1;
     }
   }
 
-  return mgd->paste.message + offset;
+  return mgd->braille.message + offset;
 }
 
 static void
@@ -355,10 +357,10 @@ makeSegments (MessageSegment *segment, const wchar_t *characters, size_t charact
 }
 
 static wchar_t *
-makeBraille (const wchar_t *text, size_t textLength, size_t *length, int **offsetMap) {
-  wchar_t *characters = NULL;
+makeBraille (const wchar_t *text, size_t textLength, size_t *brailleLength, int **offsetMap) {
+  wchar_t *braille = NULL;
 
-  *length = 0;
+  *brailleLength = 0;
   *offsetMap = NULL;
 
   int cellsSize = MAX(0X10, textLength) * 2;
@@ -366,7 +368,7 @@ makeBraille (const wchar_t *text, size_t textLength, size_t *length, int **offse
 
   do {
     unsigned char cells[cellsSize];
-    int cellOffsets[textLength + 1];
+    int toCellOffset[textLength + 1];
 
     int textCount = textLength;
     int cellCount = cellsSize;
@@ -375,44 +377,48 @@ makeBraille (const wchar_t *text, size_t textLength, size_t *length, int **offse
       contractionTable, NULL,
       text, &textCount,
       cells, &cellCount,
-      cellOffsets, CTB_NO_CURSOR
+      toCellOffset, CTB_NO_CURSOR
     );
 
     // this sholdn't happen
     if (textCount > textLength) break;
 
     if (textCount == textLength) {
-      cellOffsets[textCount] = cellCount;
+      toCellOffset[textCount] = cellCount;
 
-      int *textOffsets;
-      size_t textOffsetsSize = (cellCount + 1) * sizeof(*textOffsets);
+      int *toTextOffset;
+      {
+        size_t size = (cellCount + 1) * sizeof(*toTextOffset);
 
-      if ((textOffsets = malloc(textOffsetsSize))) {
+        if (!(toTextOffset = malloc(size))) {
+          logMallocError();
+          break;
+        }
+      }
+
+      {
         int textOffset = 0;
         int cellOffset = 0;
 
         while (textOffset <= textCount) {
-          int nextCellOffset = cellOffsets[textOffset];
+          int nextCellOffset = toCellOffset[textOffset];
 
           if (nextCellOffset != CTB_NO_OFFSET) {
             while (cellOffset < nextCellOffset) {
-              textOffsets[cellOffset++] = CTB_NO_OFFSET;
+              toTextOffset[cellOffset++] = CTB_NO_OFFSET;
             }
 
-            textOffsets[cellOffset++] = textOffset;
+            toTextOffset[cellOffset++] = textOffset;
           }
 
           textOffset += 1;
         }
-      } else {
-        logMallocError();
-        break;
       }
 
-      if ((characters = allocateCharacters(cellCount + 1))) {
+      if ((braille = allocateCharacters(cellCount + 1))) {
         const unsigned char *cell = cells;
         const unsigned char *end = cell + cellCount;
-        wchar_t *character = characters;
+        wchar_t *character = braille;
 
         while (cell < end) {
           unsigned char dots = *cell++;
@@ -420,17 +426,17 @@ makeBraille (const wchar_t *text, size_t textLength, size_t *length, int **offse
         }
 
         *character = 0;
-        *length = character - characters;
-        *offsetMap = textOffsets;
+        *brailleLength = character - braille;
+        *offsetMap = toTextOffset;
       } else {
-        free(textOffsets);
+        free(toTextOffset);
       }
 
       break;
     }
   } while ((cellsSize <<= 1) <= cellsLimit);
 
-  return characters;
+  return braille;
 }
 
 ASYNC_TASK_CALLBACK(presentMessage) {
@@ -457,9 +463,9 @@ ASYNC_TASK_CALLBACK(presentMessage) {
     wchar_t text[textLength + 1];
     makeWcharsFromUtf8(mgp->text, text, ARRAY_COUNT(text));
 
-    mgd.paste.message = text;
-    mgd.paste.characters = text;
-    mgd.paste.offsetMap = NULL;
+    mgd.braille.message = text;
+    mgd.braille.characters = text;
+    mgd.braille.toMessageOffset = NULL;
 
     wchar_t *characters = text;
     size_t characterCount = textLength;
@@ -475,8 +481,8 @@ ASYNC_TASK_CALLBACK(presentMessage) {
         characterCount = brailleLength;
         wordWrap = 1;
 
-        mgd.paste.characters = braille;
-        mgd.paste.offsetMap = offsetMap;
+        mgd.braille.characters = braille;
+        mgd.braille.toMessageOffset = offsetMap;
       }
     }
 
@@ -531,6 +537,8 @@ ASYNC_TASK_CALLBACK(presentMessage) {
 
   DONE:
     if (characters != text) free(characters);
+    if (mgd.braille.toMessageOffset) free(mgd.braille.toMessageOffset);
+
     popCommandEnvironment();
     resumeUpdates(1);
     if (apiWasLinked) api.linkServer();
