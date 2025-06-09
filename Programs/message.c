@@ -386,34 +386,8 @@ makeBraille (const wchar_t *text, size_t textLength, size_t *brailleLength, int 
     if (textCount == textLength) {
       toCellOffset[textCount] = cellCount;
 
-      int *toTextOffset;
-      {
-        size_t size = (cellCount + 1) * sizeof(*toTextOffset);
-
-        if (!(toTextOffset = malloc(size))) {
-          logMallocError();
-          break;
-        }
-      }
-
-      {
-        int textOffset = 0;
-        int cellOffset = 0;
-
-        while (textOffset <= textCount) {
-          int nextCellOffset = toCellOffset[textOffset];
-
-          if (nextCellOffset != CTB_NO_OFFSET) {
-            while (cellOffset < nextCellOffset) {
-              toTextOffset[cellOffset++] = CTB_NO_OFFSET;
-            }
-
-            toTextOffset[cellOffset++] = textOffset;
-          }
-
-          textOffset += 1;
-        }
-      }
+      int *toTextOffset = makeInverseOffsetMap(toCellOffset, textLength);
+      if (!toTextOffset) break;
 
       if ((braille = allocateCharacters(cellCount + 1))) {
         const unsigned char *cell = cells;

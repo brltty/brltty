@@ -386,6 +386,38 @@ contractText (
   *outputLength = getOutputConsumed(&bcd);
 }
 
+int *
+makeInverseOffsetMap (const int *fromOffsets, int fromCount) {
+  int toCount = fromOffsets[fromCount] - 1;
+
+  int *toOffsets;
+  size_t toSize = (toCount + 1) * sizeof(*toOffsets);
+  toOffsets = malloc(toSize);
+
+  if (toOffsets) {
+    int fromOffset = 0;
+    int toOffset = 0;
+
+    while (fromOffset <= fromCount) {
+      int nextToOffset = fromOffsets[fromOffset];
+
+      if (nextToOffset != CTB_NO_OFFSET) {
+        while (toOffset < nextToOffset) {
+          toOffsets[toOffset++] = CTB_NO_OFFSET;
+        }
+
+        toOffsets[toOffset++] = fromOffset;
+      }
+
+      fromOffset += 1;
+    }
+  } else {
+    logMallocError();
+  }
+
+  return toOffsets;
+}
+
 int
 replaceContractionTable (const char *directory, const char *name) {
   ContractionTable *newTable = NULL;

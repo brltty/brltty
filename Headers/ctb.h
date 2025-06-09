@@ -51,6 +51,8 @@ extern void contractText (
   int cursorOffset /* Position of coursor in source */
 );
 
+extern int *makeInverseOffsetMap (const int *fromOffsets, int fromCount);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
