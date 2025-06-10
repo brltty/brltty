@@ -1,6 +1,73 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+July 5, 2025:
+ - BRLTTY 6.8 released:
+   General changes:
+      The --helpers-directory (-H) command line option has been added.
+      The Learn Mode prompt now includes the number of seconds before it times out.
+   Speech changes:
+      The "most" punctuation level has been added (in between "some", and "all").
+      The SPK_PUNCT_LEVEL command has been added (cycles through all four levels).
+   Message changes:
+      Message content can now be copied to the clipboard.
+      Messages are now rendered in contracted braille when that's being used.
+      Messages now honour the Word Wrap setting (when using computer braille).
+   Pasting clipboard content:
+      The PASTE_ALTMODE and PASTE_HISTORY_ALTMODE commands have been added.
+      PASTE_ALTMODE has been bound to a long-press of the key combination for PASTE.
+   Preferences Menu changes:
+      The preferences file can no longer be lost during a reboot or shutdown.
+      Alternate Paste Mode Enabled has been added to the Input Options submenu.
+      The Command Options (advanced) submenu has been added.
+   BrlAPI braille driver changes:
+      The correct BrlAPI client priority is now being set.
+   DotPad braille driver changes:
+      These driver properties have been defined (prefix is DP_PROP_):
+         DISPLAY: can be set to TEXT or GRAPHIC (prefix is DP_DISPLAY_)
+         STATUS_CELLS: can be set to 0 (no) or 1 (status cells in text area)
+         HORIZONTAL_SPACING: number of dot columns between cells (default is 1)
+         VERTICAL_SPACING: number of dot rows between lines (default is 2)
+      These can be changed at run-time via BRLAPI_PARAM_DRIVER_PROPERTY_VALUE.
+      The driver's README contains this list along with examples.
+   HandyTech braille driver changes:
+      Input mode on an Activator Pro model can now be toggled with Space + dots 7-8.
+   ExternalSpeech speech driver changes:
+      The Address= parameter has been added.
+      The Autospawn= parameter has been added.
+      The Port= parameter has been removed (use Address= instead).
+      The current settings are now sent to the server on each connect or reconnect.
+   Linux screen driver changes:
+      Automatically detect if a paste should be bracketed (starting with kernel 6.16).
+      A screen with more than 255 columns and/or lines is now rendered properly
+      (although, if the kernel is earlier than 6.16, the cursor isn't shown when
+      its position is beyond column and/or line 255).
+      The LargeScreenBug= parameter (defaults to No) has been added
+      (might be needed if the kernel is earlier than 5.1).
+      The handling of foreground console switching has been improved.
+   AtSpi2 screen driver changes:
+      Widgets which don't have a text interface are now ignored.
+      The handling of double-width and zero-width characters has been improved.
+   BrlAPI changes:
+      The version is now 0.8.7 (it was 0.8.6).
+      Driver properties are now changed on the core's (not the client's) thread.
+      The handling of braille display size changes has been improved.
+   Text table changes:
+      The he_IL (Hebrew, Israel) table has been added - it can be used to read
+         Hebrew, Arabic, Russian, English, and some western european languages.
+      The he (Hebrew, generic) table is now an alias for the (new) he_IL table.
+      The older he (Hebrew, generic) table is still (for now) available as he-old.
+      The pt (Portuguese) table has been improved.
+      Support for Esperanto and Greek has been added to the pt (Portuguese) table.
+   Contraction table changes:
+      The de-2015 (German) table has been improved.
+      The de-1998 (German) table is deprecated and will be removed soon.
+   TCL build changes:
+      The TCL-8.6.15 change to the format of TCL_PACKAGE_PATH is now supported.
+      Building against TCL-9.0 is now supported.
+   Android build changes:
+      The crash on startup when using Android 14 (or later) has been fixed.
+
 October 15, 2024:
  - BRLTTY 6.7 released:
    General changes:
