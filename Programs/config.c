@@ -123,7 +123,8 @@ logProperty (const char *value, const char *variable, const char *label) {
 
 static const char optionOperand_none[] = "no";
 static const char optionOperand_autodetect[] = "auto";
-static const char optionOperand_off[] = "off";
+static const char optionOperand_off[] = "";
+static const char optionValue_off[] = "off";
 
 static const char *const *const fallbackBrailleDrivers =
   NULL_TERMINATED_STRING_ARRAY(
@@ -1317,9 +1318,6 @@ int
 changeKeyboardTable (const char *name) {
   KeyTable *table = NULL;
 
-  if (!*name) name = "";
-  if (strcmp(name, optionOperand_off) == 0) name = "";
-
   if (*name) {
     char *path = makeKeyboardTablePath(opt_tablesDirectory, name);
 
@@ -1353,8 +1351,15 @@ changeKeyboardTable (const char *name) {
     makeKeyboardHelpPage();
   }
 
-  if (!*name) name = optionOperand_off;
-  logMessage(LOG_DEBUG, "keyboard table changed: %s -> %s", opt_keyboardTable, name);
+  {
+    const char *oldName = opt_keyboardTable;
+    const char *newName = name;
+
+    if (!*oldName) oldName = optionValue_off;
+    if (!*newName) newName = optionValue_off;
+
+    logMessage(LOG_DEBUG, "keyboard table changed: %s -> %s", oldName, newName);
+  }
 
   changeStringSetting(&opt_keyboardTable, name);
   return 1;
@@ -1379,9 +1384,6 @@ exitGuiKeyboardTable (void *data) {
 int
 changeGuiKeyboardTable (const char *name) {
   KeyTable *table = NULL;
-
-  if (!*name) name = "";
-  if (strcmp(name, optionOperand_off) == 0) name = "";
 
   if (*name) {
     char *path = makeKeyboardTablePath(opt_tablesDirectory, name);
@@ -1410,8 +1412,16 @@ changeGuiKeyboardTable (const char *name) {
     guiKeyboardTable = table;
   }
 
-  if (!*name) name = optionOperand_off;
-  logMessage(LOG_DEBUG, "GUI keyboard table changed: %s -> %s", opt_guiKeyboardTable, name);
+  {
+    const char *oldName = opt_guiKeyboardTable;
+    const char *newName = name;
+
+    if (!*oldName) oldName = optionValue_off;
+    if (!*newName) newName = optionValue_off;
+
+    logMessage(LOG_DEBUG, "GUI keyboard table changed: %s -> %s", oldName, newName);
+  }
+
   changeStringSetting(&opt_guiKeyboardTable, name);
   return 1;
 }
