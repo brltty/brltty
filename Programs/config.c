@@ -110,12 +110,29 @@ logProgramBanner (void) {
   }
 }
 
+static const char optionValue_off[] = "off";
+
+static void
+onSettingChange (char **setting, const char *newValue, const char *label) {
+  const char *oldValue = *setting;
+
+  if (!*oldValue) oldValue = optionValue_off;
+  if (!*newValue) newValue = optionValue_off;
+
+  logMessage(LOG_DEBUG,
+    "%s changed: %s -> %s",
+    label, oldValue, newValue
+  );
+
+  changeStringSetting(setting, newValue);
+}
+
 static void
 logProperty (const char *value, const char *variable, const char *label) {
   if (value && *value) {
     if (variable) setGlobalVariable(variable, value);
   } else {
-    value = "none";
+    value = optionValue_off;
   }
 
   logMessage(LOG_INFO, "%s: %s", label, value);
@@ -124,7 +141,6 @@ logProperty (const char *value, const char *variable, const char *label) {
 static const char optionOperand_none[] = "no";
 static const char optionOperand_autodetect[] = "auto";
 static const char optionOperand_off[] = "";
-static const char optionValue_off[] = "off";
 
 static const char *const *const fallbackBrailleDrivers =
   NULL_TERMINATED_STRING_ARRAY(
@@ -1351,17 +1367,7 @@ changeKeyboardTable (const char *name) {
     makeKeyboardHelpPage();
   }
 
-  {
-    const char *oldName = opt_keyboardTable;
-    const char *newName = name;
-
-    if (!*oldName) oldName = optionValue_off;
-    if (!*newName) newName = optionValue_off;
-
-    logMessage(LOG_DEBUG, "keyboard table changed: %s -> %s", oldName, newName);
-  }
-
-  changeStringSetting(&opt_keyboardTable, name);
+  onSettingChange(&opt_keyboardTable, name, "keyboard table");
   return 1;
 }
 
@@ -1412,17 +1418,7 @@ changeGuiKeyboardTable (const char *name) {
     guiKeyboardTable = table;
   }
 
-  {
-    const char *oldName = opt_guiKeyboardTable;
-    const char *newName = name;
-
-    if (!*oldName) oldName = optionValue_off;
-    if (!*newName) newName = optionValue_off;
-
-    logMessage(LOG_DEBUG, "GUI keyboard table changed: %s -> %s", oldName, newName);
-  }
-
-  changeStringSetting(&opt_guiKeyboardTable, name);
+  onSettingChange(&opt_guiKeyboardTable, name, "GUI keyboard table");
   return 1;
 }
 
