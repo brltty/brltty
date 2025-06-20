@@ -21,15 +21,15 @@
 
 include de-g1.ctb
 
-class e e
-class g g
 class h h
+class i i
 class m m
 class n n
 class r r
 class hilmnrsu hilmnrsu
 class l l
 class lnr lnr
+class cost cost
 class st st
 class konsonant bcdfghjklmnpqrstvwxyz
 
