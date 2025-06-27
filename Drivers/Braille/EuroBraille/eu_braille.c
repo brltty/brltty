@@ -285,10 +285,10 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       GioTypeIdentifier type = gioGetResourceType(brl->gioEndpoint);
 
       if (type == GIO_TYPE_USB) {
-        const UsbChannelDefinition *usbChannel = gioGetResourceObject(brl->gioEndpoint);
+        const UsbChannel *usbChannel = gioGetResourceObject(brl->gioEndpoint);
 
         if (usbChannel) {
-          const void *usbData = usbChannel->data;
+          const void *usbData = usbChannel->definition->data;
           if (usbData) io = usbData;
         }
       }
