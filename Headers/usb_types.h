@@ -288,6 +288,11 @@ typedef struct UsbChooseChannelDataStruct UsbChooseChannelData;
 typedef int UsbDeviceChooser (UsbDevice *device, UsbChooseChannelData *data);
 
 typedef struct {
+  const UsbChannelDefinition *definition;
+  UsbDevice *device;
+} UsbChannel;
+
+typedef struct {
   void *const buffer;
   const size_t size;
 

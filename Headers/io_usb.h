@@ -229,11 +229,6 @@ extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter *filter);
 extern const UsbSerialOperations *usbGetSerialOperations (UsbDevice *device);
 extern int usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters);
 
-typedef struct {
-  const UsbChannelDefinition *definition;
-  UsbDevice *device;
-} UsbChannel;
-
 extern UsbChannel *usbOpenChannel (const UsbChannelDefinition *definitions, const char *identifier);
 extern void usbCloseChannel (UsbChannel *channel);
 extern const char *usbMakeChannelIdentifier (UsbChannel *channel, char *buffer, size_t size);
