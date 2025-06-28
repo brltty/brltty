@@ -536,6 +536,30 @@ usbNextDescriptor (
   return 1;
 }
 
+const UsbInterfaceAssociationDescriptor *
+usbInterfaceAssociationDescriptor (
+  UsbDevice *device,
+  unsigned char interface
+) {
+  const UsbDescriptor *descriptor = NULL;
+
+  while (usbNextDescriptor(device, &descriptor)) {
+    const UsbInterfaceAssociationDescriptor *iad = &descriptor->interfaceAssociation;
+
+    if (iad->bDescriptorType == UsbDescriptorType_InterfaceAssociation) {
+      if (interface >= iad->bFirstInterface) {
+        if (interface < (iad->bFirstInterface + iad->bInterfaceCount)) {
+          return iad;
+        }
+      }
+    }
+  }
+
+  logMessage(LOG_WARNING, "USB: interface aassociation descriptor not found: %d", interface);
+  errno = ENOENT;
+  return NULL;
+}
+
 const UsbInterfaceDescriptor *
 usbInterfaceDescriptor (
   UsbDevice *device,

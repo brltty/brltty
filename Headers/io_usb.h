@@ -43,6 +43,10 @@ extern int usbNextDescriptor (
 extern const UsbConfigurationDescriptor *usbConfigurationDescriptor (
   UsbDevice *device
 );
+extern const UsbInterfaceAssociationDescriptor *usbInterfaceAssociationDescriptor (
+  UsbDevice *device,
+  unsigned char interface
+);
 extern const UsbInterfaceDescriptor *usbInterfaceDescriptor (
   UsbDevice *device,
   unsigned char interface,
