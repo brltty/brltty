@@ -40,18 +40,32 @@ extern int usbNextDescriptor (
   UsbDevice *device,
   const UsbDescriptor **descriptor
 );
+
 extern const UsbConfigurationDescriptor *usbConfigurationDescriptor (
   UsbDevice *device
 );
+
+extern const UsbInterfaceAssociationDescriptor *usbInterfaceAssociationDescriptor (
+  UsbDevice *device,
+  unsigned char interface
+);
+
+extern int usbIsAssociatedInterface (
+  const UsbInterfaceAssociationDescriptor *iad,
+  unsigned char interface
+);
+
 extern const UsbInterfaceDescriptor *usbInterfaceDescriptor (
   UsbDevice *device,
   unsigned char interface,
   unsigned char alternative
 );
+
 extern unsigned int usbAlternativeCount (
   UsbDevice *device,
   unsigned char interface
 );
+
 extern const UsbEndpointDescriptor *usbEndpointDescriptor (
   UsbDevice *device,
   unsigned char endpointAddress

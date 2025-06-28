@@ -230,12 +230,21 @@ usbSetFlowControl_CDC_ACM (UsbDevice *device, SerialFlowControl flow) {
 
 static const UsbInterfaceDescriptor *
 usbFindCommunicationInterface (UsbDevice *device) {
+  const UsbInterfaceAssociationDescriptor *iad = usbInterfaceAssociationDescriptor(device, device->interface->bInterfaceNumber);
   const UsbDescriptor *descriptor = NULL;
 
   while (usbNextDescriptor(device, &descriptor)) {
     if (descriptor->header.bDescriptorType == UsbDescriptorType_Interface) {
-      if (descriptor->interface.bInterfaceClass == 0X02) {
-        return &descriptor->interface;
+      const UsbInterfaceDescriptor *interface = &descriptor->interface;
+
+      if (interface->bInterfaceClass == 0X02) {
+        if (iad) {
+          if (!usbIsAssociatedInterface(iad, interface->bInterfaceNumber)) {
+            continue;
+          }
+        }
+
+        return interface;
       }
     }
   }

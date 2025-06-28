@@ -431,9 +431,7 @@ usbDeallocateConfigurationDescriptor (UsbDevice *device) {
 }
 
 const UsbConfigurationDescriptor *
-usbConfigurationDescriptor (
-  UsbDevice *device
-) {
+usbConfigurationDescriptor (UsbDevice *device) {
   if (!device->configuration) {
     unsigned char current;
 
@@ -534,6 +532,39 @@ usbNextDescriptor (
   }
 
   return 1;
+}
+
+int
+usbIsAssociatedInterface (const UsbInterfaceAssociationDescriptor *iad, unsigned char interface) {
+  return (interface >= iad->bFirstInterface)
+      && (interface < (iad->bFirstInterface + iad->bInterfaceCount))
+      ;
+}
+
+const UsbInterfaceAssociationDescriptor *
+usbInterfaceAssociationDescriptor (
+  UsbDevice *device,
+  unsigned char interface
+) {
+  const UsbDescriptor *descriptor = NULL;
+
+  while (usbNextDescriptor(device, &descriptor)) {
+    const UsbInterfaceAssociationDescriptor *iad = &descriptor->interfaceAssociation;
+
+    if (iad->bDescriptorType == UsbDescriptorType_InterfaceAssociation) {
+      if (usbIsAssociatedInterface(iad, interface)) {
+        return iad;
+      }
+    }
+  }
+
+  logMessage(LOG_CATEGORY(USB_IO),
+    "interface association descriptor not found: %d",
+    interface
+  );
+
+  errno = ENOENT;
+  return NULL;
 }
 
 const UsbInterfaceDescriptor *
