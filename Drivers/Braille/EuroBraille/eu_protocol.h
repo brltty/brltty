@@ -51,6 +51,7 @@ typedef struct {
 } ProtocolOperations;
 
 typedef struct {
+  const char *name;
   const ProtocolOperations *protocol;
   int (*awaitInput) (BrailleDisplay *brl, int timeout);
   int (*readByte) (BrailleDisplay *brl, unsigned char *byte, int wait);
