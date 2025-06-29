@@ -487,8 +487,20 @@
   <usb-device vendor-id="8164" product-id="168" />
 
   <!-- Device: 28AC:0012 -->
-  <!-- EuroBraille [B. Note] -->
+  <!-- EuroBraille [b.note] -->
   <usb-device vendor-id="10412" product-id="18" />
+
+  <!-- Device: 28AC:0013 -->
+  <!-- EuroBraille [b.note 2] -->
+  <usb-device vendor-id="10412" product-id="19" />
+
+  <!-- Device: 28AC:0020 -->
+  <!-- EuroBraille [b.book (internal)] -->
+  <usb-device vendor-id="10412" product-id="32" />
+
+  <!-- Device: 28AC:0021 -->
+  <!-- EuroBraille [b.book (external)] -->
+  <usb-device vendor-id="10412" product-id="33" />
 
   <!-- Device: 4242:0001 -->
   <!-- Pegasus [all models] -->

@@ -261,8 +261,29 @@ connectResource (BrailleDisplay *brl, const char *identifier) {
       .disableEndpointReset = 1
     },
 
-    { /* B. Note */
+    { /* b.note */
       .vendor=0X28AC, .product=0X0012,
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&serialOperations_esys,
+    },
+
+    { /* b.note 2 */
+      .vendor=0X28AC, .product=0X0013,
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&serialOperations_esys,
+    },
+
+    { /* b.book (internal) */
+      .vendor=0X28AC, .product=0X0020,
+      .configuration=1, .interface=1, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .data=&serialOperations_esys,
+    },
+
+    { /* b.book (external) */
+      .vendor=0X28AC, .product=0X0021,
       .configuration=1, .interface=1, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .data=&serialOperations_esys,
