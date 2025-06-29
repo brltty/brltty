@@ -431,9 +431,7 @@ usbDeallocateConfigurationDescriptor (UsbDevice *device) {
 }
 
 const UsbConfigurationDescriptor *
-usbConfigurationDescriptor (
-  UsbDevice *device
-) {
+usbConfigurationDescriptor (UsbDevice *device) {
   if (!device->configuration) {
     unsigned char current;
 
@@ -536,6 +534,13 @@ usbNextDescriptor (
   return 1;
 }
 
+int
+usbIsAssociatedInterface (const UsbInterfaceAssociationDescriptor *iad, unsigned char interface) {
+  return (interface >= iad->bFirstInterface)
+      && (interface < (iad->bFirstInterface + iad->bInterfaceCount))
+      ;
+}
+
 const UsbInterfaceAssociationDescriptor *
 usbInterfaceAssociationDescriptor (
   UsbDevice *device,
@@ -547,10 +552,8 @@ usbInterfaceAssociationDescriptor (
     const UsbInterfaceAssociationDescriptor *iad = &descriptor->interfaceAssociation;
 
     if (iad->bDescriptorType == UsbDescriptorType_InterfaceAssociation) {
-      if (interface >= iad->bFirstInterface) {
-        if (interface < (iad->bFirstInterface + iad->bInterfaceCount)) {
-          return iad;
-        }
+      if (usbIsAssociatedInterface(iad, interface)) {
+        return iad;
       }
     }
   }

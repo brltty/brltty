@@ -239,10 +239,9 @@ usbFindCommunicationInterface (UsbDevice *device) {
 
       if (interface->bInterfaceClass == 0X02) {
         if (iad) {
-          unsigned char number = interface->bInterfaceNumber;
-
-          if (number < iad->bFirstInterface) continue;
-          if (number >= (iad->bFirstInterface + iad->bInterfaceCount)) continue;
+          if (!usbIsAssociatedInterface(iad, interface->bInterfaceNumber)) {
+            continue;
+          }
         }
 
         return interface;
