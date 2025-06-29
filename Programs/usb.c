@@ -555,7 +555,11 @@ usbInterfaceAssociationDescriptor (
     }
   }
 
-  logMessage(LOG_WARNING, "USB: interface aassociation descriptor not found: %d", interface);
+  logMessage(LOG_CATEGORY(USB_IO),
+    "interface association descriptor not found: %d",
+    interface
+  );
+
   errno = ENOENT;
   return NULL;
 }
