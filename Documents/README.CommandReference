@@ -133,7 +133,9 @@ Alphabetical Command Index
 * `PASSPS2`_
 * `PASSXT`_
 * `PASTE`_
+* `PASTE_ALTMODE`_
 * `PASTE_HISTORY`_
+* `PASTE_HISTORY_ALTMODE`_
 * `PRDIFCHAR`_
 * `PRDIFLN`_
 * `PREFLOAD`_
@@ -199,6 +201,7 @@ Alphabetical Command Index
 * `SPEAK_PREV_WORD`_
 * `SPELL_CURR_WORD`_
 * `SPKHOME`_
+* `SPK_PUNCT_LEVEL`_
 * `SPK_START`_
 * `SPK_STOP`_
 * `SWITCHVT`_
@@ -791,7 +794,9 @@ Clipboard Functions
 * `CLIP_COPY`_
 * `CLIP_APPEND`_
 * `PASTE`_
+* `PASTE_ALTMODE`_
 * `PASTE_HISTORY`_
+* `PASTE_HISTORY_ALTMODE`_
 * `PRSEARCH`_
 * `NXSEARCH`_
 * `CLIP_SAVE`_
@@ -839,11 +844,23 @@ The following modifiers may be specified:
 
 .. _PASTE:
 
-**PASTE** - Insert clipboard text after screen cursor.
+**PASTE** - Insert the clipboard content before the screen cursor.
+
+.. _PASTE_ALTMODE:
+
+**PASTE_ALTMODE** - Insert the clipboard content before the screen cursor using the alternate paste mode.
 
 .. _PASTE_HISTORY:
 
-**PASTE_HISTORY** - Insert clipboard history entry after screen cursor.
+**PASTE_HISTORY** - Insert a clipboard history entry before the screen cursor.
+
+The following modifiers may be specified:
+
+* an offset
+
+.. _PASTE_HISTORY_ALTMODE:
+
+**PASTE_HISTORY_ALTMODE** - Insert a clipboard history entry before the screen cursor using the alternate paste mode.
 
 The following modifiers may be specified:
 
@@ -910,7 +927,7 @@ The following modifiers may be specified:
 
 .. _HOST_PASTE:
 
-**HOST_PASTE** - Insert host clipboard text after screen cursor.
+**HOST_PASTE** - Insert the host clipboard text before the screen cursor.
 
 Configuration Functions
 =======================
@@ -1207,6 +1224,7 @@ Speech Functions
 * `SAY_FASTER`_
 * `SAY_LOWER`_
 * `SAY_HIGHER`_
+* `SPK_PUNCT_LEVEL`_
 * `AUTOSPEAK`_
 * `ASPK_SEL_LINE`_
 * `ASPK_EMP_LINE`_
@@ -1268,6 +1286,10 @@ The following modifiers may be specified:
 .. _SAY_HIGHER:
 
 **SAY_HIGHER** - Increase speaking pitch.
+
+.. _SPK_PUNCT_LEVEL:
+
+**SPK_PUNCT_LEVEL** - Cycle speech punctuation level.
 
 .. _AUTOSPEAK:
 
