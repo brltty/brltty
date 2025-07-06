@@ -17,7 +17,7 @@
 ###############################################################################
 
 # BRLTTY Contraction Table - German (uncontracted)
-# Created by Mario Lang <mlang@delysid.org>.
+# Created by Mario Lang <mlang@tugraz.at>.
 
 numsign 3456  number sign, just one operand
 letsign 6

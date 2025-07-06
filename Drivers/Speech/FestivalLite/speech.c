@@ -18,7 +18,6 @@
 
 /* FestivalLite/speech.c - Speech library
  * For the Festival Lite text to speech package
- * Maintained by Mario Lang <mlang@delysid.org>
  */
 
 #include "prologue.h"

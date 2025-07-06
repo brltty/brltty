@@ -192,7 +192,7 @@ dia a dia, no web site BRLTTY [http://mielke.cc/brltty]. Composto por:
         http://delysid.org/
 
      Email
-        <mlang@delysid.org>
+        <mlang@tugraz.at>
 
   ·  Nicolas Pitre
 

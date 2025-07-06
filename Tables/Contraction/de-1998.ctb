@@ -17,7 +17,7 @@
 ###############################################################################
 
 # BRLTTY Contraction Table - German (contracted - 1998 standard)
-# Created by Mario Lang <mlang@delysid.org>.
+# Created by Mario Lang <mlang@tugraz.at>.
 
 include de-g1.ctb
 

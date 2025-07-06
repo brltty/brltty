@@ -17,7 +17,7 @@
 ###############################################################################
 
 # BRLTTY Contraction Table - German (basic contractions)
-# Created by Mario Lang <mlang@delysid.org>.
+# Created by Mario Lang <mlang@tugraz.at>.
 
 include de-g0.ctb
 

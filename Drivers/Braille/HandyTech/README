@@ -9,7 +9,7 @@ has since been extended, and is being maintained, by Dave Mielke
 help with the design and testing of the Braille Star component. Thanks to Jill
 Clark <jill@handytech.com> of Handy Tech Elektronik for having graciously lent
 us a Bookworm so that its component could be tested. Thanks to Mario Lang 
-<mlang@delysid.org> for his help with the development of USB and bluetooth 
+<mlang@tugraz.at> for his help with the development of USB and bluetooth 
 support.
 
 A HandyTech display can be used via its serial, USB, or bluetooth interface. If

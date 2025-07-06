@@ -1,7 +1,6 @@
 This directory contains the BRLTTY speech driver for the Festival Lite text to
 speech engine from the CMU Speech Center [http://www.speech.cs.cmu.edu/flite/]
-of Carnegie Mellon University [http://www.cmu.edu]. It was implemented, and is
-being maintained, by Mario Lang <mlang@delysid.org>.
+of Carnegie Mellon University [http://www.cmu.edu].
 
 BRLTTY's configure script automatically includes this driver if Festival Lite
 has been installed. The default is to check the directories /usr, /usr/local,

@@ -3467,7 +3467,7 @@ October 30, 2002:
    Support 512-character fonts. (dm) + Tapio Kelloniemi
    Fix colour array for CR_DESCCHAR. Tapio Kelloniemi
    Experimental gpm (mouse) support. (dm)
-   HandyTech driver improvements. (dm) + Mario Lang <mlang@delysid.org>
+   HandyTech driver improvements. (dm) + Mario Lang <mlang@tugraz.at>
       Merge Bookworm's status maintenance into main read loop.
       Paste changed from B4+B5 to UP+DN (now accessible from input mode).
       Control and meta modifiers added to input mode.
@@ -3490,7 +3490,7 @@ October 30, 2002:
    Driver loading no longer relies on static data. (dm)
    Use cp rather than mv in mkbd so as to not alter the file table layout. (dm)
    Debian botdisk notes. Boris Daix <Boris.Daix@insa-lyon.fr>
-   Changes to support gcc 3. (dm) + Mark Mielke <mark@mielke.cc> + Mario Lang <mlang@delysid.org>
+   Changes to support gcc 3. (dm) + Mark Mielke <mark@mielke.cc> + Mario Lang <mlang@tugraz.at>
       Use -lsupc++ when linking with gcc3.
       Use the C++ linker if the C linker can't do the job
          (brltty,brltest,scrtest gain a run-time dependency on libstdc++).

@@ -21,7 +21,7 @@ This software is maintained by: Dave Mielke <dave@mielke.cc>
 The members of The BRLTTY Team are:
 
    Dave Mielke <dave@mielke.cc>
-   Mario Lang <mlang@delysid.org>
+   Mario Lang <mlang@tugraz.at>
    Nicolas Pitre <nico@fluxnic.net>
    Stéphane Doyon <s.doyon@videotron.ca>
 
