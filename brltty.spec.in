@@ -759,10 +759,11 @@ DotPad braille driver changes:
 HandyTech braille driver changes:
    Input mode on an Activator Pro model can now be toggled with Space + dots 7-8.
 ExternalSpeech speech driver changes:
+   The current settings are now sent to the server on each connect or reconnect.
+SpeechDispatcher speech driver changes:
    The Address= parameter has been added.
    The Autospawn= parameter has been added.
    The Port= parameter has been removed (use Address= instead).
-   The current settings are now sent to the server on each connect or reconnect.
 Linux screen driver changes:
    Automatically detect if a paste should be bracketed (starting with kernel 6.16).
    A screen with more than 255 columns and/or lines is now rendered properly
