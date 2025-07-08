@@ -2,18 +2,18 @@
 <table loc="h">
   <tabular ca="lrl">
     <hline>Piano
-      |0|Piano à queue accoustique@
+      |0|Piano Ã  queue accoustique@
       |1|Piano accoustique brillant@
-      |2|Piano à queue électrique@
+      |2|Piano Ã  queue Ã©lectrique@
       |3|Piano bastringue@
       |4|Piano 1@
-      |5|Piano électrique 2@
+      |5|Piano Ã©lectrique 2@
       |6|clavecin@
       |7|Claviers@
     <hline>Percussions chromatiques
-      |8|Célesta@
+      |8|CÃ©lesta@
       |9|Glockenspiel@
-      |10|Boîte à rythme@
+      |10|BoÃ®te Ã  rythme@
       |11|Vibraphone@
       |12|Marimba@
       |13|Xylophone@
@@ -23,23 +23,23 @@
       |16|Orgue de barbarie@
       |17|Orgue percussive@
       |18|Orgue rock@
-      |19|Orgue d'église@
+      |19|Orgue d'Ã©glise@
       |20|Orgue de hanche@
-      |21|Accordéon@
+      |21|AccordÃ©on@
       |22|Harmonica@
-      |23|Accordéon de tango@
+      |23|AccordÃ©on de tango@
     <hline>Guitare
       |24|Guitare accoustique Nylon@
-      |25|Guitare accoustique métal@
-      |26|Guitare électrique Jazz@
-      |27|Guitare électrique propre@
-      |28|Guitare électrique bouchée@
+      |25|Guitare accoustique mÃ©tal@
+      |26|Guitare Ã©lectrique Jazz@
+      |27|Guitare Ã©lectrique propre@
+      |28|Guitare Ã©lectrique bouchÃ©e@
       |29|Guitare overdriven@
       |30|Distortion Guitar@
       |31|Harmoniques de guitare@
     <hline>Basse
       |32|Basse accoustique@
-      |33|Basse électrique au doigt@
+      |33|Basse Ã©lectrique au doigt@
       |34|Pick Electric Bass@
       |35|Fretless Bass@
       |36|Slap Bass 1@
@@ -62,17 +62,17 @@
       |51|Synth Strings 2@
       |52|Aahs choeur@
       |53|Oohs voix@
-      |54|Voice synthétique@
+      |54|Voice synthÃ©tique@
       |55|Orchestra Hit@
     <hline>Cuivre
       |56|Trompette@
       |57|Trombonne@
       |58|Tuba@
-      |59|Trompette bouchée@
-      |60|Cor français@
+      |59|Trompette bouchÃ©e@
+      |60|Cor franÃ§ais@
       |61|Section cuivre@
-      |62|Cuivre synthétique 1@
-      |63|Cuivre synthétique 2@
+      |62|Cuivre synthÃ©tique 1@
+      |63|Cuivre synthÃ©tique 2@
     <hline>Anche
       |64|Saxophone soprano@
       |65|Saxophone Alto@
@@ -84,9 +84,9 @@
       |71|Clarinette@
     <hline>Tuyau
       |72|Piccolo@
-      |73|Flûte@
-      |74|Flûte à bec@
-      |75|Flûte de pan@
+      |73|FlÃ»te@
+      |74|FlÃ»te Ã  bec@
+      |75|FlÃ»te de pan@
       |76|Blown Bottle@
       |77|Shakuhachi@
       |78|Sifflet@
@@ -98,25 +98,25 @@
       |83|Lead 4 (chiff)@
       |84|Lead 5 (charang)@
       |85|Lead 6 (voix)@
-      |86|Lead 7 (cinquièmes)@
+      |86|Lead 7 (cinquiÃ¨mes)@
       |87|Lead 8 (basse + lead)@
     <hline>Synth Pad
-      |88|Pad 1 (nOuvel âge)@
+      |88|Pad 1 (nOuvel Ã¢ge)@
       |89|Pad 2 (chaud)@
       |90|Pad 3 (polysynth)@
       |91|Pad 4 (choeur)@
       |92|Pad 5 (bowed)@
-      |93|Pad 6 (métalique)@
+      |93|Pad 6 (mÃ©talique)@
       |94|Pad 7 (halo)@
       |95|Pad 8 (sweep)@
     <hline>Synth FM
       |96|FX 1 (pluie)@
       |97|FX 2 (soundtrack)@
       |98|FX 3 (cristal)@
-      |99|FX 4 (atmosphère)@
+      |99|FX 4 (atmosphÃ¨re)@
       |100|FX 5 (brightness)@
       |101|FX 6 (goblins)@
-      |102|FX 7 (échos)@
+      |102|FX 7 (Ã©chos)@
       |103|FX 8 (science-fiction)@
     <hline>Ethnic
       |104|Sitar@
@@ -141,8 +141,8 @@
       |121|Bruit de souffle@
       |122|Bord de mer@
       |123|Bruit d'oiseau@
-      |124|Sonnerie de télphone@
-      |125|Helicoptère@
+      |124|Sonnerie de tÃ©lphone@
+      |125|HelicoptÃ¨re@
       |126|Applaudissements@
       |127|Gunshot@
   </tabular>

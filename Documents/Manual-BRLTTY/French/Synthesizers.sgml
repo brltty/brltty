@@ -1,8 +1,8 @@
-<sect>Synthèses vocales supportées<label id="synthesizers"><p>
-BRLTTY supporte les synthèses vocales suivantes:
+<sect>SynthÃ¨ses vocales supportÃ©es<label id="synthesizers"><p>
+BRLTTY supporte les synthÃ¨ses vocales suivantes:
 <table loc="h">
   <tabular ca="ll">
-    Nom|Modèle@<hline>
+    Nom|ModÃ¨le@<hline>
     &SpeechDrivers
   </tabular>
 </table>

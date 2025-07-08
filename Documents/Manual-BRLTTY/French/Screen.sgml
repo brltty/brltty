@@ -1,23 +1,23 @@
-<sect>Pilotes d'écran supportés <label id="screen"><p>
-BRLTTY supporte les pilotes d'écran suivants:
+<sect>Pilotes d'Ã©cran supportÃ©s <label id="screen"><p>
+BRLTTY supporte les pilotes d'Ã©cran suivants:
 <descrip>
   <tag/as/
     AT-SPI
   <tag/hd/
-    Ce pilote fournit un accès direct à l'écran d'une console Hurd.
-    Il n'est  sélectionnable et par défaut oque sur les systèmes Hurd.
+    Ce pilote fournit un accÃ¨s direct Ã  l'Ã©cran d'une console Hurd.
+    Il n'est  sÃ©lectionnable et par dÃ©faut oque sur les systÃ¨mes Hurd.
   <tag/lx/
-    Ce pilote fournit un accès direct à l'écran d'une console Linux
-    Il n'est  sélectionnable et par défaut oque sur les systèmes Linux.
+    Ce pilote fournit un accÃ¨s direct Ã  l'Ã©cran d'une console Linux
+    Il n'est  sÃ©lectionnable et par dÃ©faut oque sur les systÃ¨mes Linux.
   <tag/sc/
-    Ce pilote fournit un accès direct au programme <tt/screen/.
-    Vous pouvez le sélectionner sur tous les systèmes, et il l'est par défaut
-    si aucun pilote d'écran d'origine n'est disponible. Vous devez appliquer le
-    correctif de <tt/screen/ que nous fournissons (voir le sous-répertoire
-    <tt/Patches/ ). Du fait que screen doit être exécuté simultanément,
-    l'utilisation de ce pilote rend BRLTTY opérationnel uniquement après que
-    l'utilisateur s'est identifié.
+    Ce pilote fournit un accÃ¨s direct au programme <tt/screen/.
+    Vous pouvez le sÃ©lectionner sur tous les systÃ¨mes, et il l'est par dÃ©faut
+    si aucun pilote d'Ã©cran d'origine n'est disponible. Vous devez appliquer le
+    correctif de <tt/screen/ que nous fournissons (voir le sous-rÃ©pertoire
+    <tt/Patches/ ). Du fait que screen doit Ãªtre exÃ©cutÃ© simultanÃ©ment,
+    l'utilisation de ce pilote rend BRLTTY opÃ©rationnel uniquement aprÃ¨s que
+    l'utilisateur s'est identifiÃ©.
   <tag/wn/
-    Ce pilote fournit un accès direct à l'écran d'une console Windows.
-    Il n'est  sélectionnable et par défaut que sur les systèmes Windows/Cygwin.
+    Ce pilote fournit un accÃ¨s direct Ã  l'Ã©cran d'une console Windows.
+    Il n'est  sÃ©lectionnable et par dÃ©faut que sur les systÃ¨mes Windows/Cygwin.
 </descrip>

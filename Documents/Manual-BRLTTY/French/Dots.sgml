@@ -1,9 +1,9 @@
 <sect>Convention standard du nombre de points brailles<label id="dots"><p>
-Une cellule braille standard consiste en six points répartis en trois lignes
+Une cellule braille standard consiste en six points rÃ©partis en trois lignes
 et deux colonnes.
-Chaque point peut être identifié par son numéro, comme suit:
+Chaque point peut Ãªtre identifiÃ© par son numÃ©ro, comme suit:
 <descrip>
-  <tag>1</tag>En haut à gauche (ligne 1, colonne 1).
+  <tag>1</tag>En haut Ã  gauche (ligne 1, colonne 1).
   <tag>2</tag>Milieu gauche (ligne 2, colonne 1).
   <tag>3</tag>Bas gauche (ligne 3, colonne 1).
   <tag>4</tag>En haut droite (ligne 1, colonne 2).
@@ -11,13 +11,13 @@ Chaque point peut être identifié par son numéro, comme suit:
   <tag>6</tag>Bas droite (ligne 3, colonne 2).
 </descrip>
 
-Le braille informatique a introduit une quatrième rangée en bas.
+Le braille informatique a introduit une quatriÃ¨me rangÃ©e en bas.
 <descrip>
   <tag>7</tag>Dessous gauche (ligne 4, colonne 1).
   <tag>8</tag>Dessous droite (ligne 4, colonne 2).
 </descrip>
 
-Peut-être qu'une image rendra cette convention numérique plus facile à
+Peut-Ãªtre qu'une image rendra cette convention numÃ©rique plus facile Ã 
 comprendre.
 <tscreen><verb>
 1 o o 4
