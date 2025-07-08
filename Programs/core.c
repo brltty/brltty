@@ -431,17 +431,20 @@ int
 writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length) {
   wchar_t textBuffer[brl.textColumns * brl.textRows];
 
-  fillTextRegion(textBuffer, brl.buffer,
-                 textStart, textCount, brl.textColumns, brl.textRows,
-                 characters, length);
+  fillTextRegion(
+    textBuffer, brl.buffer, textStart, textCount,
+    brl.textColumns, brl.textRows, characters, length
+  );
 
   {
     size_t modeLength = mode? countUtf8Characters(mode): 0;
     wchar_t modeCharacters[modeLength + 1];
     makeWcharsFromUtf8(mode, modeCharacters, ARRAY_COUNT(modeCharacters));
-    fillTextRegion(textBuffer, brl.buffer,
-                   statusStart, statusCount, brl.textColumns, brl.textRows,
-                   modeCharacters, modeLength);
+
+    fillTextRegion(
+      textBuffer, brl.buffer, statusStart, statusCount,
+      brl.textColumns, brl.textRows, modeCharacters, modeLength
+    );
   }
 
   fillStatusSeparator(textBuffer, brl.buffer);
