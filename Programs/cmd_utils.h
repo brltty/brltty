@@ -27,7 +27,7 @@ extern "C" {
 
 extern void alertLineSkipped (unsigned int *count);
 
-extern int isTextOffset (int arg, int *first, int *last, int relaxed);
+extern int isTextOffset (int arg, int *row, int *first, int *last, int relaxed);
 
 extern int getCharacterCoordinates (int arg, int *row, int *first, int *last, int relaxed);
 

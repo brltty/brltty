@@ -47,7 +47,7 @@ alertLineSkipped (unsigned int *count) {
 }
 
 int
-isTextOffset (int arg, int *first, int *last, int relaxed) {
+isTextOffset (int arg, int *row, int *first, int *last, int relaxed) {
   int y = arg / brl.textColumns;
   if (y >= brl.textRows) return 0;
   if ((ses->winy + y) >= scr.rows) return 0;
@@ -105,6 +105,7 @@ isTextOffset (int arg, int *first, int *last, int relaxed) {
     if (last) *last = x;
   }
 
+  if (row) *row = y;
   return 1;
 }
 
@@ -112,12 +113,12 @@ int
 getCharacterCoordinates (int arg, int *row, int *first, int *last, int relaxed) {
   if (arg == BRL_MSK_ARG) {
     if (!SCR_CURSOR_OK()) return 0;
-    *row = scr.posy;
+    if (row) *row = scr.posy;
     if (first) *first = scr.posx;
     if (last) *last = scr.posx;
   } else {
-    if (!isTextOffset(arg, first, last, relaxed)) return 0;
-    if (row) *row = ses->winy;
+    if (!isTextOffset(arg, row, first, last, relaxed)) return 0;
+    if (row) *row += ses->winy;
     if (first) *first += ses->winx;
     if (last) *last += ses->winx;
   }

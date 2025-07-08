@@ -141,7 +141,7 @@ handleTouchCommands (int command, void *data) {
         handleTouchOff(data);
       } else {
         int at;
-        if (isTextOffset(arg, &at, NULL, 0)) handleTouchAt(at, data);
+        if (isTextOffset(arg, NULL, &at, NULL, 0)) handleTouchAt(at, data);
       }
 
       break;
