@@ -416,8 +416,7 @@ fillStatusSeparator (wchar_t *text, unsigned char *dots) {
     }
 
     {
-      unsigned int row;
-      for (row=0; row<brl.textRows; row+=1) {
+      for (unsigned int row=0; row<brl.textRows; row+=1) {
         *text = textSeparator;
         text += brl.textColumns;
 

@@ -1447,8 +1447,9 @@ brailleWindowReconfigured (unsigned int rows, unsigned int columns) {
 
     if (brl.textColumns > reserved) {
       unsigned int statusWidth = prefs.statusCount;
-
       if (!statusWidth) statusWidth = getStatusFieldsLength(prefs.statusFields);
+      statusWidth += brl.textRows - 1;
+      statusWidth /= brl.textRows;
       statusWidth = MIN(statusWidth, brl.textColumns-reserved);
 
       if (statusWidth > 0) {

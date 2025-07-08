@@ -1273,9 +1273,11 @@ doUpdate (void) {
           unsigned char cells[length];
           memset(cells, 0, length);
           renderStatusFields(fields, cells);
-          fillDotsRegion(textBuffer, brl.buffer,
-                         statusStart, statusCount, brl.textColumns, brl.textRows,
-                         cells, length);
+
+          fillDotsRegion(
+            textBuffer, brl.buffer, statusStart, statusCount,
+            brl.textColumns, brl.textRows, cells, length
+          );
         }
 
         fillStatusSeparator(textBuffer, brl.buffer);
