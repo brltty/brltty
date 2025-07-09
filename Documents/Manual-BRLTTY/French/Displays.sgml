@@ -1,8 +1,8 @@
-<sect>Afficheurs braille supportés<label id="displays"><p>
+<sect>Afficheurs braille supportÃ©s<label id="displays"><p>
 BRLTTY supporte les afficheurs braille suivants:
 <table loc="h">
   <tabular ca="ll">
-    Nom|Modèles@<hline>
+    Nom|ModÃ¨les@<hline>
     &BrailleDrivers
   </tabular>
 </table>
