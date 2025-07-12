@@ -94,6 +94,7 @@ static unsigned char typeFlags[TYPE_COUNT];
 static char *curSender;
 static char *curPath;
 static char *curRole;
+static char *curName; /* If not a text widget, at least record some name */
 static ScreenContentQuality curQuality;
 
 static long curNumRows, curNumCols;
@@ -463,6 +464,8 @@ static void finiTerm(void) {
   curPath = NULL;
   free(curRole);
   curRole = NULL;
+  free(curName);
+  curName = NULL;
   curPosX = curPosY = 0;
   if (curRows) {
     for (i=0;i<curNumRows;i++)
@@ -729,13 +732,17 @@ static void restartTerm(const char *sender, const char *path) {
 
 /* Switched to a new object, check whether we want to read it, and if so, restart with it */
 static void tryRestartTerm(const char *sender, const char *path) {
+  if (curName) {
+    free(curName);
+    curName = NULL;
+  }
   if (curPath) finiTerm();
 
   curRole = getRole(sender, path);
   logMessage(LOG_CATEGORY(SCREEN_DRIVER),
              "state changed focus to role %s", curRole);
 
-  curQuality = getHasTextInterface(sender, path)? SCQ_POOR: SCQ_NONE;
+  curQuality = getHasTextInterface(sender, path)? SCQ_POOR: SCQ_LOW;
   unsigned char requested = typeFlags[TYPE_ALL];
 
   if (!requested) {
@@ -750,8 +757,27 @@ static void tryRestartTerm(const char *sender, const char *path) {
 
   if (requested) curQuality = SCQ_GOOD;     
 
-  if (curQuality != SCQ_NONE)
+  if (curQuality != SCQ_LOW) {
     restartTerm(sender, path);
+  } else {
+    curName = getName(sender, path);
+    if (curName && !curName[0]) {
+      free(curName);
+      curName = NULL;
+    }
+    if (curName)
+      logMessage(LOG_CATEGORY(SCREEN_DRIVER), "got name %s", curName);
+    else {
+      curName = getRole(sender, path);
+      if (curName)
+	logMessage(LOG_CATEGORY(SCREEN_DRIVER), "got role %s", curName);
+      else {
+	logMessage(LOG_CATEGORY(SCREEN_DRIVER), "did not get name or role");
+	curName = strdup("unknown widget");
+	curQuality = SCQ_NONE;
+      }
+    }
+  }
 }
 
 /* Get the state of an object */
@@ -1632,7 +1658,7 @@ destruct_AtSpi2Screen (void) {
 
 static int
 currentVirtualTerminal_AtSpi2Screen (void) {
-  return (curPath || !releaseScreen)? 0: SCR_NO_VT;
+  return (curPath || curName || !releaseScreen)? 0: SCR_NO_VT;
 }
 
 static const char msgNotAtSpi [] = "not an AT-SPI2 text widget";
@@ -1661,6 +1687,12 @@ describe_AtSpi2Screen (ScreenDescription *description) {
     description->posx = curPosX;
     description->posy = curPosY;
     description->quality = curQuality;
+  } else if (curName) {
+    description->rows = 1;
+    description->cols = strlen(curName) + 2;
+    description->posx = 0;
+    description->posy = 0;
+    description->quality = curQuality;
   } else {
     const char *message = msgNotAtSpi;
     if (releaseScreen) description->unreadable = message;
@@ -1680,7 +1712,13 @@ readCharacters_AtSpi2Screen (const ScreenBox *box, ScreenCharacter *buffer) {
   clearScreenCharacters(buffer, (box->height * box->width));
 
   if (!curPath) {
-    setScreenMessage(box, buffer, msgNotAtSpi);
+    if (curName) {
+      char msg[strlen(curName)+3];
+      snprintf(msg, sizeof(msg), "[%s]", curName);
+      setScreenMessage(box, buffer, msg);
+    }
+    else
+      setScreenMessage(box, buffer, msgNotAtSpi);
     return 1;
   }
 
