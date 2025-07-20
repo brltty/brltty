@@ -1052,6 +1052,8 @@ static void doLeaveTty(Connection *c)
   unlockMutex(&apiConnectionsMutex);
   freeKeyrangeList(&c->acceptedKeys);
   freeBrailleWindow(&c->brailleWindow);
+  /* We may have to uncover some output below */
+  flushOutput();
 }
 
 static int handleLeaveTtyMode(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
