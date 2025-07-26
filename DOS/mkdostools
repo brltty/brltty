@@ -152,10 +152,10 @@ function logArrayElements {
 
    message="${name} properties:"
 
-   eval local 'indeces="${!'"${array}"'[*]}"'
+   eval local 'indices="${!'"${array}"'[*]}"'
    local index
 
-   for index in ${indeces}
+   for index in ${indices}
    do
       local variable="${array}[${index}]"
       message+=" ${index}=${!variable}"

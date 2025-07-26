@@ -60,7 +60,7 @@ static struct TermInfo {
 
 /* Function : brl_writePacket */ 
 /* Sends a packet of size bytes, stored at address p to the braille terminal */
-/* Returns 0 if everything is right, -1 if an error occured while sending */
+/* Returns 0 if everything is right, -1 if an error occurred while sending */
 static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
 {
   const unsigned char *p = packet;
@@ -99,7 +99,7 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t s
 
 /* Function : brl_readPacket */
 /* Reads a packet of at most size bytes from the braille terminal */
-/* and puts it at the specified adress */
+/* and puts it at the specified address */
 /* Packets are read into a local buffer until completed and valid */
 /* and are then copied to the buffer pointed by p. In this case, */
 /* The size of the packet is returned */

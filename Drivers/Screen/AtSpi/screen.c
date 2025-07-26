@@ -59,7 +59,7 @@ static pthread_mutex_t updateMutex = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_t SPI_main_thread;
 
-/* having our own implementation is much more independant on locales */
+/* having our own implementation is much more independent on locales */
 
 typedef struct {
   int remaining;

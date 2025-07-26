@@ -438,7 +438,7 @@ insertKey_WindowsScreen (ScreenKey key) {
       case SCR_KEY_FUNCTION + 21: vk = VK_F22;    break;
       case SCR_KEY_FUNCTION + 22: vk = VK_F23;    break;
       case SCR_KEY_FUNCTION + 23: vk = VK_F24;    break;
-      default: logMessage(LOG_WARNING, "Key %4.4X not suported.", key);
+      default: logMessage(LOG_WARNING, "Key %4.4X not supported.", key);
                return 0;
     }
   } else {

@@ -55,7 +55,7 @@
  * Version 2.3: Reset serial port attributes at each detection attempt in
  *   initbrl. This should help BRLTTY recover if another application (such
  *   as kudzu) scrambles the serial port while BRLTTY is running.
- * Unnumbered version: Fixes for dynmically loading drivers (declare all
+ * Unnumbered version: Fixes for dynamically loading drivers (declare all
  *   non-exported functions and variables static).
  * Version 2.2beta3: Option to disable CTS checking. Apparently, Vario
  *   does not raise CTS when connected.
@@ -67,7 +67,7 @@
  *   Additional routing keys for navigator. Cut&paste binding that combines
  *   routing key and normal key.
  * Version 2.0: Tested with Nav40 PB40 PB80. Support for functions added
- *   in BRLTTY 2.0: added key bindings for new fonctions (attributes and
+ *   in BRLTTY 2.0: added key bindings for new functions (attributes and
  *   routing). Support for PB at 19200baud. Live detection of display, checks
  *   both at 9600 and 19200baud. RS232 wire monitoring. Ping when idle to 
  *   detect when display turned off and issue a CMD_RESTARTBRL.
@@ -791,7 +791,7 @@ writeCells (BrailleDisplay *brl, unsigned int from, unsigned int to) {
     *byte++ = translateOutputCell(brl->data->cells[from + i]);
   }
 
-  /* Some displays apparently don't like rapid updating. Most or all apprently
+  /* Some displays apparently don't like rapid updating. Most or all apparently
    * don't do flow control. If we update the display too often and too fast,
    * then the packets queue up in the send queue, the info displayed is not up
    * to date, and the info displayed continues to change after we stop
