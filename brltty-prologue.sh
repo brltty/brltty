@@ -816,11 +816,11 @@ handleInitialHelpOption() {
    fi
 }
 
-####################################################################
-# The following functions are stubs that may be copied into the    #
-# main script and augmented. They need to be defined after this    #
-# prologue is embeded and before the program arguments are parsed. #
-####################################################################
+#####################################################################
+# The following functions are stubs that may be copied into the     #
+# main script and augmented. They need to be defined after this     #
+# prologue is embedded and before the program arguments are parsed. #
+#####################################################################
 
 showProgramUsagePurpose() {
 cat <<END_OF_PROGRAM_USAGE_PURPOSE

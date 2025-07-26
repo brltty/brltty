@@ -113,7 +113,7 @@ static XSelData xselData;
 static char *clipboardContent;
 #endif /* HAVE_PKG_X11 */
 
-/* having our own implementation is much more independant on locales */
+/* having our own implementation is much more independent on locales */
 
 typedef struct {
   int remaining;

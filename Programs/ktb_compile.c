@@ -1327,7 +1327,7 @@ static DATA_OPERANDS_PROCESSOR(processIsolatedOperands) {
     if (!ctx->isIsolated) {
       ctx->isIsolated = 1;
     } else {
-      reportDataError(file, "context already solated: %"PRIws, ctx->name);
+      reportDataError(file, "context already isolated: %"PRIws, ctx->name);
     }
   }
 

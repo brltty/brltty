@@ -186,7 +186,7 @@ int		brl_close(void)
 
 /*
 ** Displays a message to the braille terminal
-** The cursor can be positionned with the second argument
+** The cursor can be positioned with the second argument
 */
 int		brl_message(char *str, unsigned char cursorpos)
 {

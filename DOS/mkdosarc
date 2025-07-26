@@ -106,7 +106,7 @@ needTemporaryDirectory
 buildDirectory="${temporaryDirectory}/build"
 mkdir -p "${buildDirectory}"
 
-installDirectory="${temporaryDirectory}/intall/${installDirectory}"
+installDirectory="${temporaryDirectory}/install/${installDirectory}"
 mkdir -p "${installDirectory}"
 documentSubdirectory="doc"
 manualSubdirectory="${documentSubdirectory}/Manual"

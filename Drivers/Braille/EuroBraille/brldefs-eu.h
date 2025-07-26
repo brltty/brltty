@@ -20,7 +20,7 @@
 #define BRLTTY_INCLUDED_EU_BRLDEFS
 
 #define EU_NAK_PAR 0X01		/* parity error */
-#define EU_NAK_NUM 0X02		/* frame numver error */
+#define EU_NAK_NUM 0X02		/* frame number error */
 #define EU_NAK_LNG 0X03		/* length error */
 #define EU_NAK_COM 0X04		/* command error */
 #define EU_NAK_DON 0X05		/* data error */

@@ -361,7 +361,7 @@ insertMapped (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
         sequence = WS_C("\x1b[34~");
         break;
       default:
-        logMessage(LOG_WARNING, "Key %04X not suported in ANSI mode.", key);
+        logMessage(LOG_WARNING, "Key %04X not supported in ANSI mode.", key);
         return 0;
     }
     end = sequence + wcslen(sequence);

@@ -56,9 +56,9 @@
  *		  stuff to link.  Now brl.o is a partial link of brlmain.o 
  *		  and the above library.
  *    jun 21, 1998:
- *		- replaced CMD_WINUP/DN with CMD_ATTRUP/DN wich seems
+ *		- replaced CMD_WINUP/DN with CMD_ATTRUP/DN which seems
  *		  to be a more useful binding.  Modified help files 
- *		  acordingly.
+ *		  accordingly.
  *    apr 23, 1998:
  *		- I finally had the chance to test with an ABT380... and
  *		  corrected the ABT380 model ID for autodetection.
@@ -76,12 +76,12 @@
  *              - added small hack for automatic rewrite of display when
  *                the terminal is turned off and back on, replugged, etc.
  *      feb 15, 1996:
- *              - Modified writebrl() for lower bandwith
+ *              - Modified writebrl() for lower bandwidth
  *              - Joined the forced ReWrite function to the CURSOR key
  *      jan 31, 1996:
  *              - moved user configurable parameters into brlconf.h
  *              - added identbrl()
- *              - added overide parameter for serial device
+ *              - added override parameter for serial device
  *              - added keybindings for BRLTTY preferences menu
  *      jan 23, 1996:
  *              - modifications to be compatible with the BRLTTY braille
@@ -1368,10 +1368,10 @@ interpretKeyEvent2 (BrailleDisplay *brl, unsigned char group, unsigned char key)
       /* 
        * The 6xx series don't have a second row of routing keys but
        * emulate them (in order to aid compatibility with the 5xx series)
-       * using an annoying press delay.  It is adviseable to turn this
+       * using an annoying press delay.  It is advisable to turn this
        * functionality off in the device's menu, but, in case it's left
        * on, we just interpret these keys as primary routing keys by
-       * default, unless overriden by a driver parameter.
+       * default, unless overridden by a driver parameter.
        */
       if (!brl->data->protocol.bc.secondaryRoutingKeyEmulation) secondary = 0;
 
